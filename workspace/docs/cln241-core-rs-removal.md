@@ -6,7 +6,7 @@ unchanged (see Verification).
 
 ## Restore
 
-The whole tree is preserved on the local branch `core-rs-archive` (`26ce8d051`, 194 commits, tree
+The whole tree is preserved on the local branch `core-rs-archive` (`4b2a07d67`, 194 commits, tree
 `f35070e69` == `master:workspace/core-rs` before this step). To get it back:
 
 ```sh
@@ -38,7 +38,7 @@ Untouched on purpose: historical docs (`docs/archive/`, the per-step notes, `PAP
 All 18 compared the TS engine against the wasm build on identical inputs (the TS result was the expected value), so once
 the wasm is gone the comparison half has nothing to compare. Each file's TS-only half was checked first. Where it mirrors an
 existing TS test, the mirror is named; where it held a literal pin with no TS-only twin, the pin was kept in
-`tests/tsEngineRetainedPins.test.ts` (new, 11 tests, committed before the removal as `fc90e5012`).
+`tests/tsEngineRetainedPins.test.ts` (new, 11 tests, committed before the removal as `4f372ad53`).
 
 | File | Fate | TS-only coverage that remains |
 |---|---|---|

@@ -1,5 +1,5 @@
 
-### Scene ON: start Δ / anchor-end Δ, base 42695ae16 -> final
+### Scene ON: start Δ / anchor-end Δ, base 8bfd14a00 -> final
 
 | row | start Δ before | start Δ after | anchor-end Δ before | anchor-end Δ after |
 |---|---|---|---|---|
@@ -18,7 +18,7 @@
 | off108-dynamic-punch-ply-machamp-snorlax on | 0 | 0 | 1 | 1 |
 | off108-dynamic-punch-opp-machamp-snorlax on | 0 | 0 | 0 | 0 |
 
-### Scene OFF: start Δ / anchor-end Δ, base 42695ae16 -> final
+### Scene OFF: start Δ / anchor-end Δ, base 8bfd14a00 -> final
 
 | row | start Δ before | start Δ after | anchor-end Δ before | anchor-end Δ after |
 |---|---|---|---|---|

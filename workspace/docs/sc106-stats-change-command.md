@@ -1,6 +1,6 @@
 # sc106 (S10A, ISSUES #166 slice c): the `stats-change` presentation command + its duration, both scenes
 
-Base: master `52c181d54` (production src `14d1be159`). The design pack is `docs/stat101-stats-change-design.md` (section 4, slice c). The
+Base: master `bddc3d69c` (production src `14d1be159`). The design pack is `docs/stat101-stats-change-design.md` (section 4, slice c). The
 reducer is `docs/stat102-stats-change-reducer.md`. This slice adds the command and its DURATION only. It draws no pixels: the renderer is
 slice (d).
 
@@ -62,7 +62,7 @@ needs a new seed or a driver change that decouples the random player from presen
 
 ```
 npx vitest run tests/sc106StatsChangeCommand.test.ts                          # 11 tests (~30 s)
-sh tools/integration/sc106Run.sh <fresh-out-dir-inside-the-repo>               # archives 52c181d54 + HEAD, routes, soak logs,
+sh tools/integration/sc106Run.sh <fresh-out-dir-inside-the-repo>               # archives bddc3d69c + HEAD, routes, soak logs,
                                                                                 # census 0..999 x2, delta, receipt == committed -> ALL SAME
 node --experimental-strip-types --no-warnings tools/integration/sc106RouteScan.ts --seeds=0..0 --route=2,2,2,2,2,2,2,2 --scene=on --out=f.json
 node --experimental-strip-types --no-warnings tools/integration/sc106LiveShareCensus.ts --seeds=0..99 --index-from=0 --out=r0.json --commands=r0.jsonl --stats=s0.jsonl
@@ -70,7 +70,7 @@ python3 tools/integration/sc106CensusDelta.py <base-dir> <final-dir> tools/integ
 python3 tools/integration/sc106Pins.py <patched-npm-test.log> "<tree>" tools/integration/fixtures/sc106/pins.json
 ```
 
-## 5. Gates (final code: production == `563eebd0a`, tests / tools / docs through this commit)
+## 5. Gates (final code: production == `dfb0fe5c5`, tests / tools / docs through this commit)
 
 - Targeted (serialized, 4 workers): sc106StatsChangeCommand, battleTurnPortability, liveSpriteOrderHost, animationBoundaryRatchet,
   battleResolutionPresentation, statsChangeReducer, factoryAnimationInventory, playableAnimationIntegration, substituteFadePresentation:
@@ -79,7 +79,7 @@ python3 tools/integration/sc106Pins.py <patched-npm-test.log> "<tree>" tools/int
 - Full suite, two foreground shards (4 workers): shard 1 **814 files / 6,992 tests passed**. Shard 2 **813 files passed, 1 failed:
   6,402 tests passed, 4 failed** = the 4 reported `randomRoundSoak` pins (section 3), nothing else.
 - `npm run build`: green.
-- `npm run compare:differential -- fight-submenu battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base 52c181d54`:
+- `npm run compare:differential -- fight-submenu battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base bddc3d69c`:
   **PASS, 624 / 624 captures byte-identical** (both canonical railroad traces and the app-only presentation-rng trace; no capture moved).
-- `sh tools/integration/sc106Run.sh <fresh>`: **ALL SAME** (receipt reproduced from fresh archives of 52c181d54 and HEAD, census included).
+- `sh tools/integration/sc106Run.sh <fresh>`: **ALL SAME** (receipt reproduced from fresh archives of bddc3d69c and HEAD, census included).
 - Patched-copy enumeration (`fixtures/sc106/pins.json`): 1,625 files / 13,392 tests passed, 6 failed (2 moved, 4 reported).

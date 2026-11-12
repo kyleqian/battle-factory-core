@@ -3,7 +3,7 @@
 Evidence/design only; **new files only**, no tracked file edited, no production code. Method copied from `docs/next-adapters-prep7.md` / `docs/order-consumer-prep.md` (production-helper pins against the accepted values, activation probes,
 slot/order audits, generated-rental routes, drafted fixtures, order-seed validation) for the ten moves `docs/allocator-plan-v2-evidence.md` §4 marked READY-WITH-V2: SWIFT (129), TRICK (271), THUNDERBOLT (85), FRUSTRATION (218),
 HORN_DRILL (32), SEISMIC_TOSS (69), AURORA_BEAM (62), STOCKPILE (254), UPROAR (253), ZAP_CANNON (192).
-All emulator frames are ROM frames from **direct, independent mGBA runs** (Scene ON, fresh process per scenario; no shared oracle service was contacted). Production line numbers are at this branch's base `d97eed5db`
+All emulator frames are ROM frames from **direct, independent mGBA runs** (Scene ON, fresh process per scenario; no shared oracle service was contacted). Production line numbers are at this branch's base `aebbebbda`
 (a sibling lane is editing `liveMoveAnimation.ts` / `battleScene.ts`; re-grep before editing). Not run: `npm test` / build (no production file, test or `src/` type changed; `tools/` is outside `tsconfig`). Drafted fixtures are unverified until an adapter exists.
 
 ## 0. Verdicts

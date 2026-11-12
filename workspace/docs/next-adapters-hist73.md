@@ -1,6 +1,6 @@
 # S10A hist73 — the two largest HISTORY stops: allocator history (37 bodies) and the hidden battler's faint / reshow
 
-Evidence only (main-lane worker, new files only). Master `ff4baec48` (production src tree `5cd1b684`; plans69 + fold71 and dive70
+Evidence only (main-lane worker, new files only). Master `a7904fcc0` (production src tree `5cd1b684`; plans69 + fold71 and dive70
 merged). Every production change is a TEMPORARY patch (`tools/integration/fixtures/hist73/*.diff`) applied only to `git archive`
 copies under the scratch dir; the checkout's tracked files never changed. Direct mGBA processes only (no shared HTTP oracle).
 Censuses are seeds 0..999 run as 10 `--index-from` shards (battle i = global index, streak `(i * 11) % 49`: the shards concatenate
@@ -10,7 +10,7 @@ to exactly one `--seeds=0..999` run).
 
 | | live by count | live by frames | allocator-unknown | gain |
 |---|---|---|---|---|
-| master `ff4baec48` | 25,680 / 27,518 = **93.32 %** | 3,848,230 / 3,952,274 = **97.37 %** | 180 cmds / 18,232 frames | |
+| master `a7904fcc0` | 25,680 / 27,518 = **93.32 %** | 3,848,230 / 3,952,274 = **97.37 %** | 180 cmds / 18,232 frames | |
 | + PART A patch (37 bodies allocator net-zero) | 25,799 = **93.75 %** | 3,860,480 = **97.68 %** | 61 / 5,982 | **+119 / +12,250** |
 | + PART B patch (hidden battler faint / reshow) | 25,713 = **93.44 %** | 3,853,084 = **97.49 %** | 177 / 18,004 | **+33 / +4,854** |
 | + A + B (both diffs) | 25,834 = **93.88 %** | 3,865,486 = **97.80 %** | 56 / 5,602 | **+154 / +17,256** |
@@ -23,7 +23,7 @@ digests (merged `11b30db7a344…`) and the KEY digest identical; **0 live → fa
 nothing to the Part A prediction: its 2 chains also hold an order-host reseed unit.
 
 The supervisor's input report (master src `afcf8175`, before plans69 / fold71 / dive70) is committed as
-`census-input-seeds0-999-afcf8175.json` + `.jsonl.gz`; on `ff4baec48` the allocator bucket is 180 / 18,232 (was 183 / 18,554) and the
+`census-input-seeds0-999-afcf8175.json` + `.jsonl.gz`; on `a7904fcc0` the allocator bucket is 180 / 18,232 (was 183 / 18,554) and the
 two hidden-battler order stops are unchanged (26 / 4,010 and 4 / 616).
 
 ### PART A per-unit table (allocator history)
@@ -104,7 +104,7 @@ Other paths (a move hitting the semi-invulnerable battler, Perish Song, weather,
 `partB-cases.json` (`hist73PartBCases.py`) lists both stops' kernel event paths from the charge body on and the 30 declined bodies
 with their status after the Part B patch (all 30 live).
 
-Predictions were committed BEFORE any Part B probe (`partB-predictions.md`, commit `7fc8f5104`). ROM probes
+Predictions were committed BEFORE any Part B probe (`partB-predictions.md`, commit `bae48a32c`). ROM probes
 (`hist73HiddenProbe.py` → `hist73EventProbe.py`, every frame's 64-byte `sSpriteOrder`, inUse mask, per-slot keys, battler-sprite
 invisible bits, STATUS3_SEMI_INVULNERABLE bits; 10 scenarios × 2 fresh runs, **all A == B**) staged with real moves only
 (lab seed pinned):
@@ -187,7 +187,7 @@ after, applies the two `.diff`s only to `git archive` copies inside the out dir,
 
 Verified in this session: a full `hist73Run.sh` pass (fresh dir, ~17 min) reproduced every census / chain / key-check / probe
 receipt byte-for-byte except `hidden-battler-audit.json`, whose raw-run hashes then still embedded the out-dir path (fixed in
-`a80ab31d3`; the fixed extractor on that pass's raw runs gives the committed file); a second fresh `SKIP_CENSUS=1` pass on the final
+`3d0d963ce`; the fixed extractor on that pass's raw runs gives the committed file); a second fresh `SKIP_CENSUS=1` pass on the final
 code reproduced `net-zero-audit.json` and `hidden-battler-audit.json` byte-for-byte. The checkout's `src/` stayed unchanged
 throughout.
 

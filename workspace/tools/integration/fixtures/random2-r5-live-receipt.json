@@ -2,7 +2,7 @@
  "schema": "random2-r5-live-receipt/v1",
  "lane": "integration S10A (Mud-Slap + Sand-Attack faithful-random, Dig exact)",
  "testedCode": {
-  "commit": "38e35f66ef14a84dbc359f1d66bfb3724e285fb6",
+  "commit": "4f87ff192ebfa7bdc15914aa4e5b9bbd76f2e64a",
   "srcTree": "6f596c07d83632b0c068bc0ad4ced07bf6a3a47a"
  },
  "policy": "presentation-rng.v1.frame-step.no-lag.battle-stride-2^20",

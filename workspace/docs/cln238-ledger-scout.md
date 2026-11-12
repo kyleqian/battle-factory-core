@@ -1,6 +1,6 @@
 # Cleanup step 2 scout — root ledgers (read-only, 2026-11-02, Sonnet worker; supervisor-saved, unverified)
 
-Input to the cleanup step 2 brief. As read on master `e77088d0b`; re-check before moving anything.
+Input to the cleanup step 2 brief. As read on master `286bf0891`; re-check before moving anything.
 
 Everything below comes from grep and read only, with no edits. The worktree is clean (`git status` is empty).
 

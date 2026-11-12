@@ -1,6 +1,6 @@
 # prep40 — live adapters whose ATTACKER is shown as the Substitute doll (swap-framed bodies; evidence only)
 
-Side lane, new files only. Master 8834a5f9e (production src tree ab030259). Probes were direct mGBA only (no shared oracle):
+Side lane, new files only. Master 6903b5209 (production src tree ab030259). Probes were direct mGBA only (no shared oracle):
 - 75 staged scenarios, each run twice from fresh processes, in two complete passes.
 - Every probe JSON is byte-identical: r1 == r2 within each pass, and pass 1 == pass 2.
 - Every check receipt (4 modes x 75 scenarios = 300) and both summaries are byte-identical across the two passes

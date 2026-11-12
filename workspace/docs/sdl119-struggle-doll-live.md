@@ -11,7 +11,7 @@
   every row (+ k+1, k+2). `derive.txt`, `rung2-windows-patched.txt`, `rung2-attdoll.txt` byte-identical to `fixtures/stf115/`;
   receipt `tools/integration/fixtures/sdl119-live-receipt.json`. The lends file differs from stf115's only in the 5 defender-doll
   lines (now `live:true`); reference `fixtures/sdl119/lends.jsonl`.
-- **Census 0..999**, base `76c33f4bc` vs final (src `377ed0c48`), `ret88Census.sh shards` x 2 + `land82CensusCheck.py` +
+- **Census 0..999**, base `1cb9e6de2` vs final (src `377ed0c48`), `ret88Census.sh shards` x 2 + `land82CensusCheck.py` +
   `stg107CensusSummary.py`: live by count 98.80 % -> **98.95 %** (27,097 -> 27,140), by frames 99.27 % -> **99.31 %** (supervisor correction: 99.44 % divided by the base arm's frame total; see docs/live-share-census.md); Struggle
   declines 149 -> **106** (+43: 36 opponent / 7 player; `attacker doll` 24 and `defender doll` 19 -> 0), 0 non-Struggle status changes,
   command keys identical outside the stalled tails, `battleDigestExcludingFrames` identical, played / terminal / stalled 1000 / 997 /
@@ -35,6 +35,6 @@
 
 ```
 sh tools/integration/sdl119Run.sh .integration/validation/<fresh>      # ~7 min; `same` lines vs fixtures
-sh tools/integration/ret88Census.sh shards <dir-base> 76c33f4bc; sh tools/integration/ret88Census.sh shards <dir-final> <final>
+sh tools/integration/ret88Census.sh shards <dir-base> 1cb9e6de2; sh tools/integration/ret88Census.sh shards <dir-final> <final>
 python3 tools/integration/stg107CensusSummary.py <dir-base> <dir-final> out.json; python3 tools/integration/land82CensusCheck.py …
 ```

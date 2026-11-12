@@ -5,7 +5,7 @@
 | Field | Value |
 | --- | --- |
 | Date | 2026-08-25 |
-| HEAD | `2a84050ea225317c3efbd430e1d848d1596eeb3c` |
+| HEAD | `a2e72119bb91c9a4deac6f3dcdd453484cf20f3e` |
 | Tree hash | `86d7b62b26d3e71275477335da5d5dff5ad8d78b` |
 | Lane | side worktree, `worker/side-20260825-152515` |
 | Oracle profile | `battle-scene-off` (not queried — this step is docs-only, no trace was run) |

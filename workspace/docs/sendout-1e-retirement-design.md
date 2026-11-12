@@ -1,6 +1,6 @@
 # §1e patch-site retirement + hand-fit retirement ladder (ISSUES #71 remainder)
 
-Status: docs-only design + live census, taken at `8863ecbc` (2026-08-17)
+Status: docs-only design + live census, taken at `eba3e73f` (2026-08-17)
 against `src/engine/battleScene.ts` at **45,758 LOC** (up from the
 2026-08-03 scout's ~34k). No `src/`/`tests/` edit in this step; every count
 below was re-derived live with `grep -n`/a direct `npx tsx` import, not
@@ -444,7 +444,7 @@ preserved" checklist.
 
 ## 7. Accuracy notes
 
-- Base sha `8863ecbc`. `battleScene.ts` line numbers are the single largest
+- Base sha `eba3e73f`. `battleScene.ts` line numbers are the single largest
   drift risk (as in every prior doc touching this file) — re-grep by
   symbol/move name, not line number, before starting any rung.
 - The per-rung Tier-1 test filename lists in §5 were spot-checked for

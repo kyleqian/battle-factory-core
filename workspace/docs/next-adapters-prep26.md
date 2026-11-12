@@ -1,6 +1,6 @@
 # Next adapters prep 26: source-derived provider prototypes for MOVE_ICE_BALL (301) and MOVE_REVENGE (279); MOVE_SUPERPOWER (276) not reached (S10A, side lane)
 
-Evidence + prototypes; **new files only** (no tracked file edited; no `src/`, adapter, `PROGRESS.md` / `ISSUES.md` / ledger change). Method = `docs/next-adapters-prep24.md` (full per-age input model checked field by field, then fed to the **unchanged** renderer) with the prep20 OAM assembler shape. Every emulator number is a ROM frame: the accepted corpora (`tools/compare/fixtures/ice-ball/`, `tools/compare/evidence/revenge-*`) or an **independent direct mGBA run** (shared HTTP oracles never contacted). Every relied-on alternate probe ran **twice from fresh processes, byte-identical (`cmp`)**; the checkers ran twice and their 12 receipts compared (`cmp`, all identical). Base `e47c0cd7c`.
+Evidence + prototypes; **new files only** (no tracked file edited; no `src/`, adapter, `PROGRESS.md` / `ISSUES.md` / ledger change). Method = `docs/next-adapters-prep24.md` (full per-age input model checked field by field, then fed to the **unchanged** renderer) with the prep20 OAM assembler shape. Every emulator number is a ROM frame: the accepted corpora (`tools/compare/fixtures/ice-ball/`, `tools/compare/evidence/revenge-*`) or an **independent direct mGBA run** (shared HTTP oracles never contacted). Every relied-on alternate probe ran **twice from fresh processes, byte-identical (`cmp`)**; the checkers ran twice and their 12 receipts compared (`cmp`, all identical). Base `bdb27f06f`.
 
 ## 0. Results
 

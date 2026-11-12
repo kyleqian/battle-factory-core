@@ -1,7 +1,7 @@
 # stp128 (S10A, ISSUES #168 renderer prep for SA6 / SA7 / SA8): CURSED, NIGHTMARE, CONFUSION, FRZ — dense ROM windows, unwired reducers, 0 px comparator
 
 Evidence + an UNWIRED pure reducer only. **New files only**; no existing tracked file is edited and no production module imports the new
-`src/animation/statusConditionAnimations.ts`. Base: FIXED master `cfe4e26ca` (production src `b4befa039`). Evidence is direct mGBA only
+`src/animation/statusConditionAnimations.ts`. Base: FIXED master `9a184dfa6` (production src `b4befa039`). Evidence is direct mGBA only
 (Scene ON, `factory.json` bootstrap, explicit lab seeds), never the shared HTTP oracles. Every probe job runs twice in fresh processes.
 Design inputs: docs/sta123-status-animations-design.md (§1 rows, §2a components, §5 SA6..SA8) and docs/status-animation-sprite-audit.md.
 The shape copies stat102 (reducer + dense comparator) -> scd112 (the production landing).
@@ -196,7 +196,7 @@ Fixtures (`tools/integration/fixtures/stp128/`): `scenarios/` (14), `scenario-in
 
 Perturbation recipe: copy the module aside, change one constant (section 1 table), run the test (it fails), restore the copy.
 
-## 5. Gates (on `203cc868b`)
+## 5. Gates (on `54a4747d7`)
 
 | gate | result |
 |---|---|
@@ -206,6 +206,6 @@ Perturbation recipe: copy the module aside, change one constant (section 1 table
 | `npm run test:smoke` | 448 / 448 |
 | full `npm test`, two shards (`npm test -- --shard=1/2`, then `--shard=2/2`) | **1,640 files / 13,569 tests passed** (44 / 223 skipped), 0 failed |
 | `npm run build` | green |
-| `git diff --check cfe4e26ca HEAD` | clean |
+| `git diff --check 9a184dfa6 HEAD` | clean |
 
 29 files changed, all added; no tracked file is modified.

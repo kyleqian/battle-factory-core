@@ -1,8 +1,8 @@
 # Soak depth measurement — 2026-08-19 (Milestone M-A steps 2+3)
 
 Re-measures play depth over previously-swept, known-green seed ranges using
-the real max-depth instrument landed in M-A step 1 (`4570aa11` driver +
-`ecb2e5de` CLI, PROGRESS 1354). Measurement only — no `src/`, `tools/soak/`,
+the real max-depth instrument landed in M-A step 1 (`f6f3cc57` driver +
+`2b966ab9` CLI, PROGRESS 1354). Measurement only — no `src/`, `tools/soak/`,
 or `tests/` changes in this session.
 
 Depth convention (from PROGRESS 1354): during battle N of a carry-C round,

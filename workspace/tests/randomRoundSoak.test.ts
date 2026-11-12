@@ -405,15 +405,15 @@ describe("random round soak driver (green milestone pin)", () => {
       // pfr192 (the player faint-replacement send-in clock keyed on species / name length / nature / scene): frames 37_738 -> 37_536,
       // renderCalls 2_694 -> 2_688; same battle 7, turn 3, end state and diagnostics.
       // lsd194 (docs/lsd194-print-floor-and-drain.md section 8), measured on three archived trees with tools/integration/lsd194SoakPins.ts:
-      // the floor drop (5a11553e1, WAITMESSAGE_LONG_TIMING 24 -> 0: short prints are L + 64) frames 37_536 -> 37_456, renderCalls 2_688 -> 2_675;
-      // the Leech Seed drain rows (9d04fca52: the held lead + the bar+2 rule replacing the 28-row hp floors) frames 37_456 -> 37_478, renderCalls 2_675 -> 2_681;
+      // the floor drop (b3031fe6c, WAITMESSAGE_LONG_TIMING 24 -> 0: short prints are L + 64) frames 37_536 -> 37_456, renderCalls 2_688 -> 2_675;
+      // the Leech Seed drain rows (5f4744a67: the held lead + the bar+2 rule replacing the 28-row hp floors) frames 37_456 -> 37_478, renderCalls 2_675 -> 2_681;
       // same battle 7, turn 3, end state and diagnostics.
-      // lsd196 (b0032b17a: a stat between two prints presents its ROM rows) frames 37_478 -> 37_467, renderCalls 2_681 -> 2_674 (fewer
+      // lsd196 (dba78b960: a stat between two prints presents its ROM rows) frames 37_478 -> 37_467, renderCalls 2_681 -> 2_674 (fewer
       // frames although stat rows only grow: the jittered press cooldown draws shift with presentation length); rst197 (Rest pause) moves
-      // neither; measured with lsd194SoakPins.ts on 66e89d36e / b0032b17a / a3c34152d / 8bee336e6. Same battle 7, turn 3, end state.
+      // neither; measured with lsd194SoakPins.ts on 028e909a4 / dba78b960 / 6310217a3 / 5e9e7ab6c. Same battle 7, turn 3, end state.
       // rep203 (docs/fnt201-faint-timing.md): fnt201 (the faint script lead: playfaintcry + pause, the player slide, the pre-cry rows) frames
       // 37_467 -> 39_117, renderCalls 2_674 -> 2_782; hpb202 (the Q24.8 bar port, maxHp < 48) adds 0 here (measured with lsd194SoakPins.ts on
-      // a6f9cbdb1 / 420b14c21 / the union c7d8eab9a: 39_117 / 2_782 on both fnt201-only and the union). Same battle 7, turn 3, end state.
+      // 5021eb05e / 00bc66214 / the union e7f6d136d: 39_117 / 2_782 on both fnt201-only and the union). Same battle 7, turn 3, end state.
       // obr251 (docs/obr251-opponent-party-summary.md; the draw hold on each opponent faint replacement): frames only + render calls,
       // 39_117 -> 40_796, renderCalls 2_782 -> 2_891; same battle 7, turn 3, end state, outcome (re-pinned by cln242 from the failing
       // full-suite shard; frame-only delta).
@@ -522,7 +522,7 @@ describe("random round soak driver (green milestone pin)", () => {
     // whole round plays out to a genuine finish.
     //
     // soak111 (docs/soak111-decoupled-cooldown.md) moved the pin to seed 226:
-    // seed 27's random game had already drifted off Baton Pass (on 52c181d54
+    // seed 27's random game had already drifted off Baton Pass (on bddc3d69c
     // it commits Baton Pass zero times and is in postwin at frame 30798, so
     // its frame bound alone no longer exercised the halt), sc106's
     // stats-change frames re-rolled it again, and soak111's decoupled
@@ -565,7 +565,7 @@ describe("random round soak driver (green milestone pin)", () => {
     // vis243a (the voluntary player send-in now waits for the species' back animation / cry instead of a fixed 91 + 11 -- the soak's
     // presentation clock, so the exploring policy's press timings land on different phases): seed 19 no longer commits Baton Pass in its
     // first round (it now plays 50860 frames / battle 3 / turn 12 with zero Baton Pass commits). Re-scanned full-policy seeds 0..127
-    // (the removed soak111BatonPassSearch.ts, restored from 4f6fa87e4^ as scratch, 80,000 frames, same options as this pin): the first
+    // (the removed soak111BatonPassSearch.ts, restored from 54c5686f0^ as scratch, 80,000 frames, same options as this pin): the first
     // hits are 28, 30, 32, 57, 63, 64, 118 and 127, all halting in the post-decision grace window like 19 did. Seed 30 is the pin
     // (the lowest hit that, like 19, ends in battle 2 as a genuine loss; Baton Pass commits 3, halt frame 59170 in battleIndex 0 of the chained round).
     //
@@ -852,12 +852,12 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
     // alone had already moved them to 14186 / 24 and 12272 / 23). olnd113
     // (ISSUES #167, the Scene OFF pause / miss hold) moved the frames only:
     // 16321 -> 17591, 25321 -> 27061; decision and canonical logs identical
-    // to bce86a4b0's (soak111Decoupling.ts), same battle / turn. scf117 (the
+    // to 8cc0c3a34's (soak111Decoupling.ts), same battle / turn. scf117 (the
     // post-stats-change hold): frames only, seed 1 27061 -> 27052; decision and
-    // canonical logs identical to 681da5c10's for both seeds. off121 (the
+    // canonical logs identical to c1ddccc74's for both seeds. off121 (the
     // Scene OFF `status` command ends at the next print): frames only,
     // 17591 -> 17557 and 27052 -> 26869; decision and canonical logs
-    // identical to 9d23a17c4's for both seeds. offs152 (the Scene OFF opponent
+    // identical to 61e1128ab's for both seeds. offs152 (the Scene OFF opponent
     // send-in tail + forced switch-out): frames only, 17557 -> 17423 and
     // 26869 -> 26878 (a cry-bound send-in outlasts the old 102); same battle /
     // turn / end state.
@@ -866,7 +866,7 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // msg175: 17242 -> 17232 (shorter used prints); trn178 (the Scene OFF action-transition pause): 17232 -> 17493; same battle / turn / end state.
       // pfr192 (the keyed player faint-replacement send-in clock): 17493 -> 17175; same battle / turn / end state.
       // lsd194 (docs/lsd194-print-floor-and-drain.md section 8): the floor drop alone (no Leech Seed in this trajectory): 17175 -> 17125; same battle / turn / end state.
-      // rep203: fnt201 (the faint script lead) 17125 -> 17485; hpb202 adds 0 (lsd194SoakPins.ts on a6f9cbdb1 / 420b14c21 / c7d8eab9a); same battle / turn / end state.
+      // rep203: fnt201 (the faint script lead) 17125 -> 17485; hpb202 adds 0 (lsd194SoakPins.ts on 5021eb05e / 00bc66214 / e7f6d136d); same battle / turn / end state.
       // fsw235 (the forced party menu's ROM cursor model + the policies' random party-menu walks): the exploring policy's
       // decision ticks in the forced menu (and their "A on the fainted slot" rolls) are no longer one DOWN apart, so its
       // random game is a new trajectory: 17485 / turn 30 -> 14107 / turn 23 (the wander rolls themselves come from the
@@ -886,7 +886,7 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // (re-pinned by cln242 from the failing full-suite shard).
       // flw252 (the party menu ignores input until its open fade settles; refusal messages wait for their printer): the exploring
       // policy's party-menu walks / message dismisses now spend different presses, so a new trajectory as at fsw235:
-      // 39466 / battle 2 turn 25 / depth 1 -> 18446 / battle 1 turn 23 / depth 0; roundLost. Pre-flw252 tree (cd9e82b25^) still gives 39466.
+      // 39466 / battle 2 turn 25 / depth 1 -> 18446 / battle 1 turn 23 / depth 0; roundLost. Pre-flw252 tree (e28adda1a^) still gives 39466.
       // lbra: frames only, 18446 -> 18523; the snapshot is now taken when the walkable Lobby opens (the loss's record answer plays the ROM farewell first, +77 frames) instead of at the old chain; same battle / turn / end state.
       frames: 18523,
       outcome: "OK",
@@ -900,7 +900,7 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // pfr192 (the keyed player faint-replacement send-in clock): 27058 -> 26866; same battle / turn / end state.
       // lsd194: the floor drop alone: 26866 -> 26804; same battle / turn / end state.
       // lsd196 (second-stat rows): 26804 -> 26817; rst197 does not move it (lsd194SoakPins.ts); same battle / turn / end state.
-      // rep203: fnt201 (the faint script lead) 26817 -> 27295; hpb202 adds 0 (lsd194SoakPins.ts on a6f9cbdb1 / 420b14c21 / c7d8eab9a); same battle / turn / end state.
+      // rep203: fnt201 (the faint script lead) 26817 -> 27295; hpb202 adds 0 (lsd194SoakPins.ts on 5021eb05e / 00bc66214 / e7f6d136d); same battle / turn / end state.
       // fsw235: a new trajectory for the exploring policy (see seed 0): 27295 / battle 2 turn 9 -> 25899 / battle 2 turn 6,
       // then 25899 / battle 2 turn 6 -> 38842 / battle 2 turn 33 with the voluntary menu's already-in-battle refusal.
       // pmo239: a new exploring trajectory (see seed 0): 38842 / battle 2 turn 33 -> 17862 / battle 1 turn 31.
@@ -933,16 +933,16 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
     // now come from their own seeded stream (8499 -> 8683 here, 8550 -> 8670
     // for seed 1; sc106 alone had moved them to 8625 / 8661). Same turn 16.
     // olnd113 (ISSUES #167, the Scene OFF pause / miss hold): frames only,
-    // 8683 -> 9143 and 8670 -> 9205; decision logs identical to bce86a4b0's.
+    // 8683 -> 9143 and 8670 -> 9205; decision logs identical to 8cc0c3a34's.
     // scf117 (the post-stats-change hold): frames only, seed 0 9143 -> 9145;
-    // decision and canonical logs identical to 681da5c10's for both seeds.
+    // decision and canonical logs identical to c1ddccc74's for both seeds.
     // off121 (the Scene OFF `status` command): frames only, 9145 -> 9130 and
-    // 9205 -> 9033; decision and canonical logs identical to 9d23a17c4's.
+    // 9205 -> 9033; decision and canonical logs identical to 61e1128ab's.
     expect(runSeed(0, options)).toMatchObject({
       // msg175: 9130 -> 9128 (shorter used prints); trn178 (the Scene OFF action-transition pause): 9128 -> 9154; same battle / turn / end state.
       // pfr192 (the keyed player faint-replacement send-in clock): 9154 -> 8928; same battle / turn / end state.
       // lsd194 (docs/lsd194-print-floor-and-drain.md section 8): the floor drop alone: 8928 -> 8895; same battle / turn / end state.
-      // rep203: fnt201 (the faint script lead) 8895 -> 9140; hpb202 adds 0 (lsd194SoakPins.ts on a6f9cbdb1 / 420b14c21 / c7d8eab9a); same battle / turn / end state.
+      // rep203: fnt201 (the faint script lead) 8895 -> 9140; hpb202 adds 0 (lsd194SoakPins.ts on 5021eb05e / 00bc66214 / e7f6d136d); same battle / turn / end state.
       // fsw235 (the forced party menu opens on slot 0, so a slot-0 replacement needs no DOWN and a slot-2 one needs two): frames
       // only, 9140 -> 9134; decision notes identical apart from the menu presses; same battle / turn / end state.
       // lbra: frames only, 9134 -> 9185; the snapshot is now taken when the walkable Lobby opens (the loss's record answer plays the ROM farewell first, +51 frames) instead of at the old chain; same battle / turn / end state.
@@ -966,7 +966,7 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // msg175: 9033 -> 8946 (shorter used prints); trn178 (the Scene OFF action-transition pause): 8946 -> 9232; same battle / turn / end state.
       // pfr192 (the keyed player faint-replacement send-in clock): 9232 -> 8979; same battle / turn / end state.
       // lsd194: the floor drop alone: 8979 -> 8920; same battle / turn / end state.
-      // rep203: fnt201 (the faint script lead) 8920 -> 9190; hpb202 adds 0 (lsd194SoakPins.ts on a6f9cbdb1 / 420b14c21 / c7d8eab9a); same battle / turn / end state.
+      // rep203: fnt201 (the faint script lead) 8920 -> 9190; hpb202 adds 0 (lsd194SoakPins.ts on 5021eb05e / 00bc66214 / e7f6d136d); same battle / turn / end state.
       // fsw235: frames only (the menu presses), 9190 -> 9186; same battle / turn / end state.
       // lbra: frames only, 9186 -> 9233; the snapshot is now taken when the walkable Lobby opens (the loss's record answer plays the ROM farewell first, +47 frames) instead of at the old chain; same battle / turn / end state.
       frames: 9233,
@@ -1262,7 +1262,7 @@ describe("ISSUES #125 lever 2: forced-Struggle (all four slots at 0 PP) widens t
   });
 });
 
-describe("ISSUES #125 lever 2 regression (54ad24a7): forced-Struggle switch must agree with the party screen's own trap gate", () => {
+describe("ISSUES #125 lever 2 regression (394f22df): forced-Struggle switch must agree with the party screen's own trap gate", () => {
   // Mirrors `isVoluntarySwitchTrapped`
   // (src/engine/factoryBattleScriptFullTurnDecision.ts:2085-2114), the check
   // `legalCommandDecisions` runs unconditionally -- forced Struggle or not --
@@ -1408,7 +1408,7 @@ describe("ISSUES #125 lever 2 regression (54ad24a7): forced-Struggle switch must
 });
 
 describe("ISSUES #104 (driver): continuous-play outcome semantics retuned -- OK = frame budget reached while progressing, HANG = no progress for stallFrames", () => {
-  // The engine half (fd30ee13) made the terminal record prompt's YES and
+  // The engine half (4ca688b7) made the terminal record prompt's YES and
   // B-cancel answers continue exactly like NO, so a decided round now
   // ALWAYS re-chains into a fresh draft almost immediately -- the old
   // per-round grace timer's own expiry-HANG branch (PROGRESS ~1367's

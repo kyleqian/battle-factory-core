@@ -1,7 +1,7 @@
 # aud137 — live audit 28 (S10A integration lane, 2026-10-12): tonight's Scene ON status-condition animations, timing and pixels
 
-Base: the FIXED `dcf042dc7` (production src `f197670fd`). Evidence only, new files only, **no patch**. Every production read ran in a git-archive
-copy of `dcf042dc7`. Direct mGBA only, with an explicit lab seed in every scenario. Every probe ran twice in fresh processes, and r1 == r2
+Base: the FIXED `61d26be5a` (production src `f197670fd`). Evidence only, new files only, **no patch**. Every production read ran in a git-archive
+copy of `61d26be5a`. Direct mGBA only, with an explicit lab seed in every scenario. Every probe ran twice in fresh processes, and r1 == r2
 byte for byte: 44 / 44 pixel probes, 54 / 54 timing probes, 4 / 4 next-body probes. The comparator ran twice, and r1 == r2.
 
 Runner: `sh tools/integration/aud137Run.sh <fresh-out-dir-inside-the-repo>` (~10 min). It reproduces every committed receipt and ends
@@ -150,8 +150,8 @@ New files only:
 
 Gates on the evidence tree (production files untouched, `git status` clean apart from scratch):
 - **`sh tools/integration/aud137Run.sh <fresh>`: `aud137Run: ALL SAME`, twice.**
-  - On `7f418e99d`: the 121-window state before the player-side FRZ seeds.
-  - On `cf4b36d2e`: this receipt set. Every committed receipt was reproduced in an archive copy of `dcf042dc7` (production src
+  - On `6cc0df2b1`: the 121-window state before the player-side FRZ seeds.
+  - On `11b9c0756`: this receipt set. Every committed receipt was reproduced in an archive copy of `61d26be5a` (production src
     `f197670fd`): pixel probes 88 / 88, timing probes 108 / 108, next-body probes r1 == r2 4 / 4, comparator r1 == r2.
 - `npm run typecheck`: green (after the last TypeScript change).
 - The targeted vitest run passed **7 files / 105 tests**: animationBoundaryRatchet, factoryAnimationInventory, sae135 / sad133 / sar131

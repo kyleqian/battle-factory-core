@@ -1,6 +1,6 @@
 # S10A scan93: scanline-buffer history for later Extrasensory 326 / Memento 262 bodies (side lane, evidence only)
 
-Base: master `66e4ad7a4` (production src `a9290e8d`). This lane adds new files only. The production change is a **temporary patch**,
+Base: master `a444b39ef` (production src `a9290e8d`). This lane adds new files only. The production change is a **temporary patch**,
 applied only to git-archive copies under `.integration/validation/`. Every ROM number comes from independent direct-mGBA
 `prep48Probe.py` processes (Scene ON), never the shared HTTP oracles. Every scenario carries an explicit lab `"seed"` (ISSUES #154).
 Each one ran twice fresh in one batch: r1 == r2 byte-identical, 22/22. Every window then ran through the PATCHED production renderer
@@ -112,7 +112,7 @@ covered by `xs-pla-espeon-crobat-xs` and `mem-*-psywave` / `mem-*-xs`.
 
 | | live by count | live frames | gains | live → fallback | command KEY digest | battleDigestExcludingFrames (10 shards) | battleDigest |
 |---|---|---|---|---|---|---|---|
-| base `66e4ad7a4` | 26,144 / 27,516 = 95.01 % | 3,896,776 / 3,952,109 = 98.60 % | | | `907bc059…` | | `b2f924fd…` |
+| base `a444b39ef` | 26,144 / 27,516 = 95.01 % | 3,896,776 / 3,952,109 = 98.60 % | | | `907bc059…` | | `b2f924fd…` |
 | **A** | 26,148 = 95.03 % | 3,897,489 = 98.62 % | **+4 / +713 (262:player 4)** | **0** | identical | identical | identical (0 pairing mismatches) |
 | B | 26,160 = 95.07 % | 3,899,433 / 3,952,132 = 98.67 % | +16 / +2,657 (262:player 4, 326:player 12) | **0** | identical | identical | differs: 23 player-later Extrasensory bodies are 162 rows under the B lag policy (presentation timing only) |
 

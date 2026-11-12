@@ -2,14 +2,14 @@
 
 **2026-08-18, bounded SIDE worker.** Reconciles the unmerged sibling
 `worker/side-20260817-235437`'s §10 findings (traced on a tree WITHOUT
-rungs 1-2) against CURRENT MASTER (rungs 1-2 landed: `f7a95123` the
-turn-6 3-tick reopen-press freeze, `87d82b2a` window B's `+67`
+rungs 1-2) against CURRENT MASTER (rungs 1-2 landed: `cb7f7e50` the
+turn-6 3-tick reopen-press freeze, `63ed4746` window B's `+67`
 raw-sine-index offset + `t-1` display-basis, both scoped to the
 `[7305,7317]` dispatch only). **Verdict: the naive extension of rung 2's
 correction into `[7318,7350]` is NOT safe to land** — live-verified,
 not modeled. No `src/` edits are committed; `git diff -- src/` is empty.
 
-**Head analyzed:** `43293072` (this branch's parent, current master tip
+**Head analyzed:** `7f2d3ba1` (this branch's parent, current master tip
 at step start). No mid-step master commits landed during this session
 (single-threaded analysis, no rebase needed). A parallel window-A rung 3
 is a disjoint span (window A's own `+116` constant, `[5927,5931]`-adjacent)
@@ -214,7 +214,7 @@ the actual run.)
 
 ## 6. Addendum (2026-08-18, bounded MAIN worker): supervisor overturn of §2/§3's rejection — the `[7318,7347]` correction LANDS
 
-A supervisor decision (2026-08-18, evidence gathered at commit `e22e278b`)
+A supervisor decision (2026-08-18, evidence gathered at commit `003f014b`)
 overturned this doc's §2/§3 verdict. The rejection's own premise — an
 untracked "phase-history" input (prior menu open/close cycles) explaining
 why `turn6-menu.json` and `turn6-reopen-off.json` diverge despite

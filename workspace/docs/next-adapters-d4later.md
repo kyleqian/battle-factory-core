@@ -1,6 +1,6 @@
 # S10A d4later — first vs later body D4 phase (Sheer Cold / Extrasensory opponent), Sky Attack strike length
 
-Base: master `4bd9f68d4` (production src tree `503eb721`). Evidence banked by later58 (docs/next-adapters-later58.md). All counters
+Base: master `2ac607535` (production src tree `503eb721`). Evidence banked by later58 (docs/next-adapters-later58.md). All counters
 come from independent direct-mGBA `speciesAudit2Counters.py` processes (Scene ON), never from the shared HTTP oracles. Every scenario
 carries an explicit lab `"seed"` (ISSUES #154) and ran twice fresh in one batch.
 

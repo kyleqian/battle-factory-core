@@ -1,6 +1,6 @@
 # S10A prep49 — the sprite-ORDER host stops "return to ball", "next-mon summary while the opponent battler is tracked", "reshow without the opponent battler"
 
-Evidence only (side lane, new files only). Census baseline: master `239618051` (production src tree `f7cf9a74`), seeds 0..299, the
+Evidence only (side lane, new files only). Census baseline: master `edbb2d8a1` (production src tree `f7cf9a74`), seeds 0..299, the
 ordinary census driver. The temporary production patch is kept as `.diff` and was reverted before every commit.
 
 ## Results

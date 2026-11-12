@@ -3,7 +3,7 @@
 This step adds evidence and an UNWIRED pure reducer. **It adds new files only**: no existing tracked file is edited, and no production
 module imports the new `src/animation/focusPunchSetUp.ts` (pinned by the test).
 
-- **Base**: master `d019cd6b4`.
+- **Base**: master `1c801184b`.
 - **Evidence**: direct mGBA only (Scene ON, the `factory.json` bootstrap, the lab seed of rcp143's R4 card). Every probe job is run
   twice in fresh processes.
 - **Out of scope**: the kernel pre-pass (ISSUES #139, main lane), any production wiring, and the Scene OFF presentation.

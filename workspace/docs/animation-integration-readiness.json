@@ -1,7 +1,7 @@
 {
   "schema": "pokebench-animation-integration-readiness-v1",
-  "pinnedBaseline": "689d475cd",
-  "auditedTree": "3633c30062745c3a31b459043bb6e02a4371bbc8",
+  "pinnedBaseline": "cbf8d2f65",
+  "auditedTree": "ce674160ebae2bed58dbc34363d247f0f60a1477",
   "scope": {
     "exactAcceptedFactoryMoves": 267,
     "unacceptedFactoryMoves": 10,

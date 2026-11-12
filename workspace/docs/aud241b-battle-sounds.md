@@ -82,8 +82,8 @@ pinned in the test, but the engine's Rhydon / Golbat window is not built, so "th
 
 ## Verification
 
-- Tested code: commit `388e0084b099e32587a445016f22e715d48fca32`, tree `1d3a69522c55554230f3814f4381f26f182e8849` (base `ccdfe68d3`;
-  emitters `089263751`, fixtures and test `388e0084b`). This doc is committed after it and changes no code.
+- Tested code: commit `25fa66a06d63146ed3b998ebf56c2f5bcaa606c1`, tree `1d3a69522c55554230f3814f4381f26f182e8849` (base `e1da175dc`;
+  emitters `192e2ee5d`, fixtures and test `25fa66a06`). This doc is committed after it and changes no code.
 - `npm run typecheck`: 0 (240 s).
 - One vitest run, 22 files, 887 tests: the 8 `test:smoke` files plus `aud240a`-`aud240d`, `aud241a`, `aud241b` (20 tests), `audioAnimSoundPan`,
   `audioHeadlessBoundary`, `audioProbeFixtures`, `audioSinkNeutral`, `audioSinkPlumbing`, `factoryRoundBattleOrchestrator`,
@@ -91,7 +91,7 @@ pinned in the test, but the engine's Rhydon / Golbat window is not built, so "th
   (`battleResolutionPresentation`, `factoryBattleStartIntroAckAlignment`, `factoryVoluntarySwitchSeam`, `fightMenuChromeGroundTruth`,
   `midBattleSwitchBallFade`, `partyMenuContentAssets`, `partyMonIconAnim`). All pass.
 - `npm run build`: 0. `npm run build:lib`: 0.
-- `npm run compare:differential` vs `ccdfe68d3`, two chunks: **28 traces, 7,175 / 7,175 captures byte-identical** (chunk 1, 9 traces,
+- `npm run compare:differential` vs `e1da175dc`, two chunks: **28 traces, 7,175 / 7,175 captures byte-identical** (chunk 1, 9 traces,
   2,377: `turn13-dragonbreath-faint`, `turn5-faint`, `turn13-switchin`, `turn5-switchin`, `battle2-intro-dense`,
   `factory-arbitrary-intro-yoshi-off`, `battle1-postwin-next-prompt`, `fight-submenu`, `presentation-rng-playable-live-bodies-seeded-on`;
   chunk 2, 19 traces, 4,798: `turn15-party-select{,-delayed}`, `factory-brain-silver-walkup-swapask-no-off`,

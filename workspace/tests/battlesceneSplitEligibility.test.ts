@@ -101,7 +101,7 @@ describe("battleScene.ts split eligibility (decision (a))", () => {
   });
 
   it("the function-kind eligible pool is empty (batch 9 moved the last one)", () => {
-    // Batch 8 (75b73fab) moved 47 of the 50 the scanner listed, down from
+    // Batch 8 (a2a57e91) moved 47 of the 50 the scanner listed, down from
     // batch 7's 100, leaving 1 (playerHealthboxHpOverlayForHp). Batch 9
     // moved that one too, so the pool is now genuinely empty -- every
     // remaining CANONICAL function-kind symbol is hazard-blocked. If a

@@ -1,6 +1,6 @@
 {
   "schema": "known-entry-sprite-allocator-provider-verification/v1",
-  "testedCommit": "611f9f48799c566f6ac2d9ad55de09e174da1ad9",
+  "testedCommit": "66892c00a85f6d6b10ae9aafd5cfc0a6abfe381b",
   "testedTree": "30c7decd9aec0529fac4264d80b55f3416346204",
   "probeSha256": "0b4ce615c54d72bba3d3c5da5d441aee9c0a9eb3442faee11826446ae7461cd5",
   "verifierSha256": "be2bc79b131ace9ee89d4ed73b661442c555fcfce06ed386fbc4827689e0cf0b",

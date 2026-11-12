@@ -99,6 +99,6 @@ those files; they are #55 territory and out of scope for this lane.
   it as a launch precondition.
 - No orphan rust worker worktrees or branches; `RUST_DEFERRED.md` has no
   open entries; rust-main is fully folded into master.
-- Launcher fold-gate hardening landed (`cfd80cb7`): main-supervisor folds
+- Launcher fold-gate hardening landed (`aabaff6f`): main-supervisor folds
   of rust-main now explicitly rebuild the wasm artifact and rerun parity
   in `POKEBENCH_ENGINE=wasm` mode.

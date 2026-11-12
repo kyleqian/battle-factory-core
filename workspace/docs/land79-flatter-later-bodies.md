@@ -1,12 +1,12 @@
 # land79: Flatter 260 live at later bodies with a known allocator history
 
-Landing of the flat77 patch (docs/next-adapters-flat77.md) on master `c6f60846e` (production src `cdae97b8`, cf78 merged). The patch applied with
+Landing of the flat77 patch (docs/next-adapters-flat77.md) on master `4f5ad0a03` (production src `cdae97b8`, cf78 merged). The patch applied with
 `patch -p1` (offset only); the three hunks are unchanged: `liveMoveAnimation.ts` case 260 gate, `liveMoveSpriteAllocator.ts`
 `LIVE_SPRITE_ALLOCATOR_HISTORY_CLAIM_MOVE_IDS` = {260}, `liveOamMoves.ts` later-body register base (S0, WIN0 0 / 0 on row 0).
 
 ## Results
 
-- **Census seeds 0..999, base `c6f60846e` vs final, one process each: +17 commands / +3,723 frames**, exactly flat77's prediction.
+- **Census seeds 0..999, base `4f5ad0a03` vs final, one process each: +17 commands / +3,723 frames**, exactly flat77's prediction.
   - 0 live -> fallback regressions; command count, KEY sequence, frames per command identical; `battleDigest` `cc9e7604ea64a303` and
     `battleDigestExcludingFrames` `48b2d42bacd93479` identical.
   - Live share by count 94.17 % -> 94.24 %, by frames 97.94 % -> 98.03 %. `faithfulRandomHistory` 1,064 -> 1,067 commands.

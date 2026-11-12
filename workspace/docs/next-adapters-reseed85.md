@@ -1,16 +1,16 @@
 # S10A reseed85 — the post-KO send-out allocator reseed after a words-order unit (banked for landing)
 
-Evidence only (main-lane worker, new files only). FIXED base: master `aeaa33dff` (production src tree `9f3b877d`). The production change is
+Evidence only (main-lane worker, new files only). FIXED base: master `005101dfc` (production src tree `9f3b877d`). The production change is
 a TEMPORARY patch (`tools/integration/fixtures/reseed85/reseed85-temp-src.diff`, `src/engine/liveSpriteOrderHost.ts` only) applied only to
-`git archive aeaa33dff` copies under the scratch dir; the checkout's tracked files never changed. Direct mGBA processes only (no shared HTTP
+`git archive 005101dfc` copies under the scratch dir; the checkout's tracked files never changed. Direct mGBA processes only (no shared HTTP
 oracle). Censuses are seeds 0..999 as 10 `--index-from` shards (hist73's instruments, unchanged). Predictions were committed before any probe
-or patched census (`fixtures/reseed85/predictions.md`, commit `4f4828f3b`).
+or patched census (`fixtures/reseed85/predictions.md`, commit `fdd28d635`).
 
 ## 1. Results
 
 | | live by count | live by frames | allocator-unknown |
 |---|---|---|---|
-| base `aeaa33dff` | 25,886 / 27,516 = **94.08 %** | 3,867,171 / 3,968,405 = **97.45 %** | 52 cmds / 5,145 frames |
+| base `005101dfc` | 25,886 / 27,516 = **94.08 %** | 3,867,171 / 3,968,405 = **97.45 %** | 52 cmds / 5,145 frames |
 | + reseed85 temp patch | 25,933 = **94.25 %** | 3,872,005 = **97.57 %** | 6 / 530 |
 | gain | **+47** | **+4,834** | -46 / -4,615 |
 
@@ -51,7 +51,7 @@ Prediction P3 was +49 / +4,855: 3 commands / 240 frames of the words groups stay
 | Struggle 165 (not a live adapter) | 1 / 79 | 1 / 79 | out of scope |
 | **total allocator-unknown** | **52 / 5,145** | **6 / 530** | |
 
-hist73 measured this residual at 55 / 5,523 on `ff4baec48` + its Part A; on the base it is 51 / 5,066 (every declined consumer a PLANS allocator
+hist73 measured this residual at 55 / 5,523 on `a7904fcc0` + its Part A; on the base it is 51 / 5,066 (every declined consumer a PLANS allocator
 consumer: Protect 182, Light Screen 113, Reflect 115, Magic Coat 277, Barrier 112).
 
 ## 2. Mechanism (source)
@@ -119,8 +119,8 @@ copies, as are the controls, so the patch changes neither.
 
 ## 5. FOLD INSTRUCTIONS
 
-1. **Patch:** `patch -p1 < tools/integration/fixtures/reseed85/reseed85-temp-src.diff` from `workspace/`. Checked: it applies to `aeaa33dff`,
-   and also cleanly to master `c25af4253` (land86 merged during this session; `git apply --check` and `patch --dry-run` show no offsets or
+1. **Patch:** `patch -p1 < tools/integration/fixtures/reseed85/reseed85-temp-src.diff` from `workspace/`. Checked: it applies to `005101dfc`,
+   and also cleanly to master `f0b7bce06` (land86 merged during this session; `git apply --check` and `patch --dry-run` show no offsets or
    fuzz). land86 makes Flatter 260 a words unit. 260 is allocator-net-zero (hist73 receipt), so the shadow covers Flatter markers too.
    **Re-measure the census on the fold's base:** Flatter-marker reseeds may add gains not counted below.
    It adds `LiveSpriteOrderHost.deferredOccupancy` (set when a words marker starts: `shadowStart` of the pre-event tracker, or the replayed
@@ -145,7 +145,7 @@ copies, as are the controls, so the patch changes neither.
    - Policy pin: `WORDS_ORDER_UNIT_MOVE_IDS` ⊆ `LIVE_SPRITE_ALLOCATOR_NET_ZERO_MOVE_IDS` and RAIN_CONTINUES ∈
      `LIVE_SPRITE_ALLOCATOR_NET_ZERO_GENERAL_ANIMATIONS` (the shadow's license). A new words unit must be allocator-audited first.
    - Receipt pins: `occupancy-audit.json` `summary.pairsSame == 4`, `allRoleIsomorphic`, `allAligned`; `windows.json` `summary.pass`.
-4. **Census expectation** (seeds 0..999, hist73's driver, relative to a base whose words-unit reseed groups equal `aeaa33dff`'s):
+4. **Census expectation** (seeds 0..999, hist73's driver, relative to a base whose words-unit reseed groups equal `005101dfc`'s):
    **+47 commands / +4,834 frames**, 0 regressions, KEY sequence + battle digests (with and excluding frames) identical. Allocator-unknown
    52 / 5,145 -> 6 / 530.
 5. **ON / OFF parity:** the order host and the allocator host exist only in Scene ON (`battleScene === "on"`). The patch changes no kernel,
@@ -171,7 +171,7 @@ plans; Return power level 0 plan) have plans. The shadow then replays them uncha
 sh tools/integration/reseed85Run.sh <fresh-out-dir>                     # probes (13 x 2 x 2) + fixtures + windows (base + patched); ~6 min
 RESEED85_CENSUS=1 sh tools/integration/reseed85Run.sh <fresh-out-dir>   # + the 4 seeds-0..999 censuses (live-share + allocator, base / patched)
 ```
-The runner refuses a non-empty out dir, checks `git status --short src` is clean, builds `git archive aeaa33dff` copies inside the out dir
+The runner refuses a non-empty out dir, checks `git status --short src` is clean, builds `git archive 005101dfc` copies inside the out dir
 (+ this checkout's reseed85 tools / scenarios, `node_modules` / `reference` symlinks), applies the `.diff` only to the patched copy, deletes the
 raw RGB dumps, and prints `same` / `DIFF` for every receipt vs `tools/integration/fixtures/reseed85/`.
 

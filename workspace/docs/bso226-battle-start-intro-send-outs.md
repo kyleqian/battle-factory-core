@@ -107,7 +107,7 @@ node --experimental-strip-types --no-warnings tools/integration/bso226Run.ts <pa
 
 ## Gates
 
-Tested code commit `ebe23c6bbad238d8e78a43023f9718e36b00a2bb` (tree `6f2d9108cb7b98688b7307e94fb24bc23f9c65ef`); later commits are documentation only. Evidence:
+Tested code commit `02849247b865bb5cc40d96fd5e7c83d09ec779eb` (tree `6f2d9108cb7b98688b7307e94fb24bc23f9c65ef`); later commits are documentation only. Evidence:
 `.integration/validation/sv-20261029/bso226-evidence/`.
 
 - `npm run typecheck`: exit 0 (4 min).

@@ -1,6 +1,6 @@
 # rst139 — ordinary Scene ON rows draw the tracked idle rest (S10A presentation fidelity)
 
-Side lane, new files only, base 49654eefb (production src ee7dc6b55). Banked patch, not landed.
+Side lane, new files only, base f2561e442 (production src ee7dc6b55). Banked patch, not landed.
 
 ## Results
 
@@ -13,7 +13,7 @@ Side lane, new files only, base 49654eefb (production src ee7dc6b55). Banked pat
 | Banked patch `fixtures/rst139/rst139-rest.diff` (5 src files) | ROM windows **22,746 / 22,746 rows 0 px** | `production-compare-patched.json` |
 | Routes (9 ONIX census battles, every frame drawn as core.ts draws it, base vs patched) | a frame changes **iff** it is an at-stake row (ordinary / menu / handoff, tracked idle, rest != 0, visible): **4,349 frames == the exposure's idle count**, 0 unexpected, 0 missed, identical row sequences | `routes-delta.json` |
 | Census 0..999 (sad133Census.sh, patched vs base) | **0 command / frame / status changes**, 10 / 10 shards' jsonl byte-identical (27,368 commands, 4,154,509 frames; pixels only) | `census-delta.json` |
-| Canonical differential (patched copy, `--base` = its unpatched commit, src == 49654eefb) | fight-submenu 235 / 235, battle1-postwin-next-prompt 216 / 216, presentation-rng-playable-live-bodies-seeded-on 173 / 173: **624 / 624 byte-identical** (no canonical trace has a tracked-idle ONIX / RATTATA) | this doc |
+| Canonical differential (patched copy, `--base` = its unpatched commit, src == f2561e442) | fight-submenu 235 / 235, battle1-postwin-next-prompt 216 / 216, presentation-rng-playable-live-bodies-seeded-on 173 / 173: **624 / 624 byte-identical** (no canonical trace has a tracked-idle ONIX / RATTATA) | this doc |
 | Typecheck / suite of the patched copy | typecheck green; full suite 1 failed (boundary ratchet, fixed in the committed diff) / 13,673 passed | this doc |
 
 Not claimed: `unknown` rows keep today's x2 0 (12,477 ONIX frames; ROM truth there is whatever the unmodelled event left). Faint rows

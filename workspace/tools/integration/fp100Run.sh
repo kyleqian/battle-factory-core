@@ -13,7 +13,7 @@
 # usage: sh tools/integration/fp100Run.sh <fresh-out-dir> [--census | --census-only]
 set -e
 OUT=${1:?usage: fp100Run.sh <fresh-out-dir> [--census | --census-only]}; [ ! -e "$OUT" ] || { echo "$OUT exists (need a fresh dir)"; exit 2; }
-BASE=406bfc999; WS=$PWD; FX=$WS/tools/integration/fixtures
+BASE=f4dbfe1f4; WS=$PWD; FX=$WS/tools/integration/fixtures
 mkdir -p "$OUT"; OUT=$(cd "$OUT" && pwd); PR=$OUT/probes; REC=$OUT/rec; mkdir -p "$PR" "$REC" "$OUT/scenarios"
 export PYTHONPATH=${POKEBENCH_VENDOR_DIR:-../../vendor}/libmgba-py; PY=${POKEBENCH_VENDOR_DIR:-../../vendor}/mgba-venv/bin/python
 echo "code $(git rev-parse HEAD) src $(git rev-parse HEAD:workspace/src) dirty-src $(git status --short src | wc -l | tr -d ' ')"

@@ -112,7 +112,7 @@ y2 already 0); (b) is right in kind (ShakeMon's creation write) and (c) is not a
   as before): player seeds 446 / 446 exact, opponent seeds 437 / 437 exact (animation span 218 / 218 both, box / opp / ply / other all 0). Run against r1 and r2: the
   output JSONs are byte-identical (`p` `ab0f8d967f6cb15d`, `o` `d0b9f4b377d07076`). Receipts `fixtures/lsd199/dense/{p,o}-on-r1.json`.
 - Ordinary Absorb: `tools/integration/lsd199AbsorbRenderIdentity.ts` renders the live MOVE_ABSORB adapter at every age -2..196, both orientations, LOMBRE and VENUSAUR
-  attackers; base `556d1057d` and lsd199 give identical digests (`all` `47219a5f2ca88264`, `fixtures/lsd199/ordinary-absorb-render-identity.txt`), so the prep9
+  attackers; base `c11820333` and lsd199 give identical digests (`all` `47219a5f2ca88264`, `fixtures/lsd199/ordinary-absorb-render-identity.txt`), so the prep9
   dense zero-residual proof still describes the ordinary body unchanged. A new ordinary dense window from the activation edge was not run (pixels provably unchanged).
 - Tests (each alone, `timeout 300`, `POKEBENCH_VITEST_MAX_WORKERS=1`, green): lsd199DrainShakeCreation (10, new), lsd198LeechSeedDrainAnimation (15; the receipt block is now
   titled as the pre-fix receipt), lsd194PrintFloorAndDrain (12), battleResolutionPresentation (39), animation/animationBoundaryRatchet (3), animation/absorb (7),
@@ -124,14 +124,14 @@ y2 already 0); (b) is right in kind (ShakeMon's creation write) and (c) is not a
 
 ## Final-code gates (supervisor, 2026-10-23, CAX31)
 
-Tested union `d779565e1` (lsd198 + lsd199 + a `findLast` -> reverse/find typecheck fix `4eb686dc9` + master `a4fbda815`). Logs:
+Tested union `c8e839e9b` (lsd198 + lsd199 + a `findLast` -> reverse/find typecheck fix `7e492be67` + master `f391db341`). Logs:
 `.integration/validation/sv-20261022/lsd199/` (ignored).
 
 - Supervisor reran `OUT=<fresh> bash tools/integration/lsd198Probes.sh` on the lsd199 tip: fresh ROM r1 == r2, dense player 446 / 446 rows
   exact (animation span 218 / 218), opponent 437 / 437 (218 / 218); dense r1 == r2.
-- `npm run typecheck`: 0 (after `4eb686dc9`; the project lib is ES2022).
-- Census 0..999 both scenes, master `a4fbda815` vs `d779565e1` (`rst197CensusDelta.py`): 1000 / 1000 battles identical per scene
+- `npm run typecheck`: 0 (after `7e492be67`; the project lib is ES2022).
+- Census 0..999 both scenes, master `f391db341` vs `c8e839e9b` (`rst197CensusDelta.py`): 1000 / 1000 battles identical per scene
   (render-only change; the `animated` flag is not a census field).
-- Differential (fight-submenu, battle1-postwin-next-prompt, presentation-rng-playable-live-bodies-seeded-on, base `a4fbda815`): 641 / 641.
+- Differential (fight-submenu, battle1-postwin-next-prompt, presentation-rng-playable-live-bodies-seeded-on, base `f391db341`): 641 / 641.
 - Full suite: 1,686 files / 13,983 tests passed, 0 failed; one vitest worker exited unexpectedly (memory pressure, a concurrent worker),
   leaving `tests/animation/livePhysical2aMoveAdapters.test.ts` unreported: rerun alone 9 / 9. Build 0.

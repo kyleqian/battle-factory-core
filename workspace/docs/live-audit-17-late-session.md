@@ -3,7 +3,7 @@
 Method = audit 16's (docs/live-audit-16-session-chains.md): battle-lab scenarios with an explicit lab seed (305420349, ISSUES #154), one
 probe to derive the consumer fixtures, then `audit17Check.ts` per scenario replays the history through the production hosts as the
 orchestrator does today (order host + geometry plans, allocator) and renders `liveAdapterFramebuffer.ts`'s `liveView` with the CHAIN lend
-and the ENTRY lend (body alone), against **two more fresh direct-mGBA probe processes** (r1 == r2 per-row digests). Master `f49522289`
+and the ENTRY lend (body alone), against **two more fresh direct-mGBA probe processes** (r1 == r2 per-row digests). Master `6e533d4b6`
 (src `d7f24b03`). No shared oracle was touched. Evidence: `tools/integration/fixtures/audit-17/`.
 
 **Totals.** 104 consumer windows (88 fly63 + 16 dt60), all live, all with the order lend KNOWN, every window r1 == r2 (chain and
@@ -57,7 +57,7 @@ windows / windows.
 | none (control) | Thunderbolt 2/2, 2/2; Ice Beam 2/2, 2/2; Heal Bell 2/2, 2/2; Double Team 2/2, 2/2; Sky Uppercut 0/1 (+1 phase), 1/1 |
 | dt60 grid (Double Team, Counter opposite) | below |
 
-### dt60 prediction (committed `cadd8e1fd` before any probe) vs measurement
+### dt60 prediction (committed `c8927bf8d` before any probe) vs measurement
 
 `audit17Dt60Predict.ts` ran production's `liveDoubleTeamAttackerStepCounter` (the generated `dt60-mon-anim-data3.json`) over all
 117 Factory Double Team side / species / nature rows (96 outside dt60's grid) and picked 2 per class per side; `dt60Probe.py` read the

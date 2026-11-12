@@ -4,7 +4,7 @@ ANALYSIS ONLY — `git diff -- src/` is empty throughout this session (side-lane
 contract, no production edits). Fresh `npm run compare` runs, RAM probes, and
 direct pixel sampling of the saved diff/oracle/app PNGs, this session.
 
-## 0. Baselines (fresh, this session, at `38134745`+later-merged-parent)
+## 0. Baselines (fresh, this session, at `92b6f729`+later-merged-parent)
 
 ```
 npm run compare -- turn5-resolve-off-a --summary   -> 44/196
@@ -1073,7 +1073,7 @@ reconfirmed fresh at session start and again after: `turn5-resolve-off-a`
 58/196 (unchanged), `turn6-rockslide-a` 255/255, `turn5-resolve-off-b`
 196/196, `turn5-resolve-off-c` 195/196, `turn5-resolve-off-d` 194/196,
 `turn5-reset-off` 256/256, `turn5-action-off` 32/32 - all bit-for-bit the
-same as the 758107d9 baselines this step's brief named.
+same as the ade5afbd baselines this step's brief named.
 
 ### 14.1 BG0 and BG2 are provably, byte-identically TRANSPARENT across the
 entire flagged region, in both turns - the BG2CNT priority-field difference
@@ -1214,7 +1214,7 @@ struct reconstruction needed) plus a direct BG3 tilemap/tile-pixel dump
 reusing `dump-turn5-resolve-offa-bg02-vram-census.py`'s own `record_layer`
 scroll-wraparound-correct method, generalized to BG3's own registers
 (`BG3CNT`/`BG3HOFS`/`BG3VOFS`). Baseline reconfirmed fresh, unchanged from
-8127921e: `turn5-resolve-off-a` 58/196, `turn6-rockslide-a` 255/255,
+64a13b1d: `turn5-resolve-off-a` 58/196, `turn6-rockslide-a` 255/255,
 `turn5-resolve-off-b` 196/196, `turn5-resolve-off-c` 195/196,
 `turn5-resolve-off-d` 194/196, `turn5-reset-off` 256/256, `turn5-action-off`
 32/32.
@@ -1475,7 +1475,7 @@ the doc should say so explicitly and escalate to the HBlank/scanline-split
 hypothesis, which needs a new instrument this probe family cannot yet
 provide.
 
-## 16. Landed addendum (2026-08-18, post-wind-down bonus round, bounded MAIN worker, commit `e07e1813`): §15.3's fix landed, closing exactly the shake sub-window it predicted
+## 16. Landed addendum (2026-08-18, post-wind-down bonus round, bounded MAIN worker, commit `9eda4b5e`): §15.3's fix landed, closing exactly the shake sub-window it predicted
 
 **Fix landed as specified, unconditional (no runtime branch).**
 `drawTurn5RockSlideAttack` (`src/engine/battleScene.ts:10898-10900`) no
@@ -2468,7 +2468,7 @@ red-verified via `git stash -- src/engine/battleScene.ts` before
 finalizing (both new Tier-1 pin blocks fail at exactly their predicted
 pre-fix values with the stash applied, pass once popped).
 
-**Fix 1 (§20.1, commit `58eafbd8`):** `rockSlideOpponentHp(t + 2, ...)` at
+**Fix 1 (§20.1, commit `57ca167d`):** `rockSlideOpponentHp(t + 2, ...)` at
 `drawTurn5RockSlideAttack`'s own call site (`battleScene.ts:11008` at the
 time of landing - shifted from §20's own citation of `10986` by intervening
 unrelated edits earlier in the file; confirmed via
@@ -2483,7 +2483,7 @@ full-frame `(52,33)` confirming `drawTurn5RockSlideAttack`'s own output
 transitions between render tick 6282 and 6283 (matching real hardware's
 RAM-6282/pixel-6283 boundary) and holds through 6284.
 
-**Fix 2 (§20.2, commit `adf15be1`):** `if (t - 1 >= cursorStart)` at
+**Fix 2 (§20.2, commit `f059a0c4`):** `if (t - 1 >= cursorStart)` at
 `drawTurn5RockSlideWindow`'s cursor first-appearance gate
 (`battleScene.ts:15089` at landing time, immediately below the
 `cursorStart` assignment - `turn5FaintDismissCursorTick`, `cursorState`,

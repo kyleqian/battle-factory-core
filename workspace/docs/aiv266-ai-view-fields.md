@@ -51,7 +51,7 @@ Seeds 22, 30, 39 are not view fields (ISSUES #204 residuals).
 
 ## 3. Census delta 0..999, both scenes
 
-Baseline arms `.integration/validation/sv-20261109/dmg264/census/{on,off}-9dddc1aa2` (src identical to `32c671d17`); fixed arms `.integration/evidence/aiv266/census/{on,off}-40447d9de`
+Baseline arms `.integration/validation/sv-20261109/dmg264/census/{on,off}-9dddc1aa2` (src identical to `c4ba5f1e9`); fixed arms `.integration/evidence/aiv266/census/{on,off}-40447d9de`
 (`LSD194_CENSUS_JOBS=4 LSD194_SPLIT=4 tools/integration/lsd194Census.sh`). `tools/integration/aiv266Instrument.py` patches an extracted UNFIXED tree (observation only,
 still decides on the old view): at every scored AI decision (mask != 0) it also builds the fixed view and runs the same scored chooser on it with the same RNG, logging the fields
 whose new value differs from the old default and whether scores / pick / RNG differ. `tools/integration/aiv266Classify.py` compares the arms (`classify/report.txt`).

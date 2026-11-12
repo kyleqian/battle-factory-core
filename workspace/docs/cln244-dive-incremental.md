@@ -16,7 +16,7 @@ throws on every call for an invalid seed (nothing is cached on throw). Each call
 `diveAtAgeRaw` is untouched.
 
 Tests: `tests/cln244DiveIncremental.test.ts` compares `diveAtAge` (whole state, `toEqual`) against a verbatim copy of the old code
-(`tests/helpers/cln244DiveReference.ts`, HEAD `460cd3548`) for 40 random configs (both bodies and sides, optional anchor split, slot-reuse
+(`tests/helpers/cln244DiveReference.ts`, HEAD `1d8203125`) for 40 random configs (both bodies and sides, optional anchor split, slot-reuse
 pools) over every age from -3 to last+8 in random order plus repeats (more than 3,000 comparisons), keying by fresh clones, fresh-array
 copies, invalid-seed throws, and more than 32 distinct configs (eviction).
 
@@ -44,11 +44,11 @@ Slowest files now: `summaryAllFactorySpecies` 133.6 s, `substituteDollDefenderLi
 
 - `npm run typecheck`, `npm run build`, `npm run build:lib`: 0. `test:gate`: 362 files, 2,835 tests, 97.7 s.
 - ENGINE_BUILD `eb-52789eb6d9c84998` before and after (dive.ts is not in the headless rollup graph; nothing moved).
-- `compare:differential` (`--base 460cd3548`): `flw252-party-fade-on` 340/340, `frf250a-run-no-on` 181/181, `obr251-opponent-faint-on` 306/306
+- `compare:differential` (`--base 1d8203125`): `flw252-party-fade-on` 340/340, `frf250a-run-no-on` 181/181, `obr251-opponent-faint-on` 306/306
   byte-identical (827 captures). **No committed compare trace mentions Dive** (`tools/compare/traces*` has none, and `appTrace.ts` has no
   Dive stage), so the Dive pixel proof is the existing ROM-vector tests (`liveDiveAttackAdapter` 15 windows x 93 rows RGB888 sha256 vs the
   ROM, `liveDiveSetupAdapter` 9 windows x 2, `diveFramebufferCheckpoint`), all green, plus the reference test above.
-- Census (`LSD194_SHARDS=0 LSD194_SPLIT=4`, HEAD arms, delta against the aud243a `858ea0343` baseline r0): Scene ON 100/100 battles identical
+- Census (`LSD194_SHARDS=0 LSD194_SPLIT=4`, HEAD arms, delta against the aud243a `28394735e` baseline r0): Scene ON 100/100 battles identical
   (30,997 commands), Scene OFF 100/100 (30,340 commands), bad 0.
 
 ## Not done: the optional second reducer

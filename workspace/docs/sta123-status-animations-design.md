@@ -1,7 +1,7 @@
 # sta123 (S10A prep pack): the Scene ON status-condition animations (B_ANIM_STATUS_*) — ROM rows, source table, consumer map, slice plan
 
 Evidence only. **No production change**, no existing file edited (new files: this doc, `tools/integration/sta123{Stage,Rom}.py`,
-`sta123Exposure.ts`, `sta123ExposureSummary.py`, `sta123Run.sh`, `tools/integration/fixtures/sta123/`). FIXED base master `2d70bafd9`
+`sta123Exposure.ts`, `sta123ExposureSummary.py`, `sta123Run.sh`, `tools/integration/fixtures/sta123/`). FIXED base master `99462e31d`
 (production src `14e1274cc`). Note: off121's Scene OFF `status` rule (merge `5c0e3564f`) is **not** an ancestor of this base; it is
 quoted below, not assumed. Direct mGBA only (`tools/integration/idle94Probe.py`, the base's own probe), explicit lab seeds, every probe job
 twice in fresh processes: **36 / 36 outputs r1 == r2** (18 scenarios x ON / OFF), ROM receipt r1 == r2. Shape copied from
@@ -99,7 +99,7 @@ priority order is `spriteOrderStatusAnimationName` (`spriteOrderEventTransform.t
 Census sides: player 3,915 / opponent 4,165 (`exposure.json` `byAnimationAndSide`). Path = the message right after the receipt when it is
 that animation's own infliction message, else the message right before it; all 8,080 classify (0 unclassified).
 
-## 3. Production consumer map (base 2d70bafd9)
+## 3. Production consumer map (base 99462e31d)
 
 | layer | file:line | today | needed |
 |---|---|---|---|
@@ -191,7 +191,7 @@ Thunder Wave, Spore, Confuse Ray, Ghost Curse, Attract (female Onix); legal mech
 
 ## 8. Gates (this pack: new files only, production untouched)
 
-- `sh tools/integration/sta123Run.sh .integration/validation/sta123-run1 --census` (archive copy of 42f68b371): **ALL SAME** — scenarios 18 /
+- `sh tools/integration/sta123Run.sh .integration/validation/sta123-run1 --census` (archive copy of 3777b618a): **ALL SAME** — scenarios 18 /
   index SAME, probes 36 / 36 r1 == r2, 72 / 72 == committed sha256, rom-r1 SAME, rom r2 == r1, exposure.json SAME.
 - `npm test` (full, one run): **1,638 files / 13,519 tests passed** (44 / 223 skipped), 0 failed (785 s). `npm run build`: green.
 - `git diff --check`: clean.

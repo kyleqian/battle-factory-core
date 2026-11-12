@@ -49,7 +49,7 @@ describe("cf78: the slot's Castform form (presentation-only gBattleMonForms)", (
     expect(withLiveCastformForms(view.field, LIVE_CASTFORM_FORMS_NORMAL)).toBe(view.field);
   });
 
-  // audit 19's 48 cast-* windows (44 live with 998..2,312 px per row in Castform's box on c68111480, 4 Shock Wave fallbacks).
+  // audit 19's 48 cast-* windows (44 live with 998..2,312 px per row in Castform's box on 9115d5ec3, 4 Shock Wave fallbacks).
   const cast = readdirSync(FIXTURES).filter((name) => /^cast-(rain|sun)-.*-c\d+\.json$/.test(name)).sort();
   it("audit 19: 48 Castform windows, every one in a weather form at its body", () => {
     expect(cast).toHaveLength(48);
@@ -99,7 +99,7 @@ describe("cf78: census route 950 through the production orchestrator, Scene ON /
     // apx219: + the ice-form Water Pulse 352 after an unknown order history (census seed 950), drawn approximately (known-entry order).
     // apx221: every other Castform body is drawn approximately with the displayed form's art (castform-form), 19 of 19.
     expect(r.castformLiveBodiesOn).toBe(20); // abl261: 19 -> 20 of 21 (the other Castform body keeps declining; reported in docs/abl261-ability-damage.md)
-    // Every other body keeps its decision: the 9 live on c68111480 (census battle 950, docs/cf78-castform-needle-arm.md).
+    // Every other body keeps its decision: the 9 live on 9115d5ec3 (census battle 950, docs/cf78-castform-needle-arm.md).
     expect(r.liveBodiesOn - r.castformLiveBodiesOn).toBe(22); // abl261: 9 -> 22 (the changed battle is longer, same decisions)
     // The form at every one of them: hail (3), on the player's slot (SEALEO's Hail from turn 6).
     expect(new Set(r.bodies.flatMap((b) => b.castformForm[0] !== 0 || b.castformForm[1] !== 0 ? [b.castformForm.join(",")] : [])))

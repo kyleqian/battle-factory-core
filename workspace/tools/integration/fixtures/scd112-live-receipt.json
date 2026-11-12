@@ -1,6 +1,6 @@
 {
  "schema": "scd112-live-receipt/v1",
- "base": "1cfac3f7f",
+ "base": "0962e7b38",
  "frameMapping": "stats-change command age a == statsChangeRow rel a + 1",
  "deltaCheck": {
   "spans": {

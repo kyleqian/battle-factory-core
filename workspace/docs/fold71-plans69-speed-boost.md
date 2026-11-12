@@ -2,7 +2,7 @@
 
 ## Results
 
-- **Census 0..999** (base `eb1da8d90` vs final; `liveShareCensus.ts`, three ranges, `prep43CensusDelta.py`; receipt
+- **Census 0..999** (base `2c77c9c61` vs final; `liveShareCensus.ts`, three ranges, `prep43CensusDelta.py`; receipt
   `tools/integration/fixtures/fold71-live-receipt.json`): **+43 commands / +5,594 live frames**, 0 live -> fallback regressions,
   0 pairing mismatches, identical battle digest and identical command key sequence (battle, kind, moveId, side, attacker, target) in every range.
 
@@ -25,7 +25,7 @@
 
 ## Changes
 
-1. Step 1 (`17767f6c0`): `plans69/temp-patch.diff` re-applied by hand onto master (the table, host and test hunks had drifted past prep61 / prep64):
+1. Step 1 (`9d33e860d`): `plans69/temp-patch.diff` re-applied by hand onto master (the table, host and test hunks had drifted past prep61 / prep64):
    `plans69/plan-rows.json` appended in the generator and the table regenerated (bodies 543 -> 550, plans 221 -> 222), key `20222` for Magnitude
    when `power > 99` in `liveSpriteOrderHost.ts` `orderEventOf`; the same key in the three tooling mirrors (replays derive the branch from the
    body's allocation count, the route scan from the request); pins in `tests/spriteOrderEventTransform.test.ts`; new `tests/spriteOrderPlans69.test.ts`.

@@ -17,7 +17,7 @@ unchanged **DECLINE**, and two classes that are not claims.
 | fury99 | Fury Cutter 210 counters 2..5 at later bodies | 14 live at counters 2..5 (+ 3 at counter 1) | **16 / 16 live windows 0 px** after the level ablation; 1 DECLINE (unchanged counter-1 rest rule) |
 
 Method:
-- Base: the FIXED master `32eb03d65` (tonight's folds merged; src tree `47b5b0c8`), as a git-archive copy inside the scratch dir.
+- Base: the FIXED master `853642606` (tonight's folds merged; src tree `47b5b0c8`), as a git-archive copy inside the scratch dir.
   Production src is unpatched.
 - Direct mGBA only. A lab seed is pinned in every scenario (ISSUES #154): `305420351` for the chain labs, `305419897` for the doll labs.
 - **Every window is the production ACCEPTED window** (`audit23Align.py`, audit21Align / audit22Align's method):
@@ -159,7 +159,7 @@ Method:
 
 ```
 sh tools/integration/audit23Run.sh <fresh-receipt-dir> <fresh-scratch-dir>
-# -> stages, probes, derives, aligns, checks inside a git-archive copy of 32eb03d65 under <fresh-scratch-dir>/tree/workspace (relative
+# -> stages, probes, derives, aligns, checks inside a git-archive copy of 853642606 under <fresh-scratch-dir>/tree/workspace (relative
 #    output root a23/), then compares every receipt / fixture / scenario byte-for-byte with tools/integration/fixtures/audit-23/
 #    ("receipts: N same, M DIFF"; per file in <fresh-scratch-dir>/compare.txt). Both dirs INSIDE the repo; nothing is deleted.
 python3 tools/integration/audit22Summary.py tools/integration/fixtures/audit-23/m/check      # any m/ check dir
@@ -172,20 +172,20 @@ comparison is read.
 
 ## 5. Gates
 
-- **Run B** (`audit23Run.sh` into fresh dirs, after run A' was committed as `77c3ff771`): **142 same, 0 DIFF**. That covers every check
+- **Run B** (`audit23Run.sh` into fresh dirs, after run A' was committed as `f397f23ae`): **142 same, 0 DIFF**. That covers every check
   JSON, summary, derive log, GrassWhistle restore rows, doll receipt / personality / Psych Up fixture and scenario.
   - All window checks have r1 == r2, and the doll probes are 16 / 16 r1 == r2 in both runs.
   - No ROM drift (ISSUES #154). Every exploratory receipt (before the runner) agrees with run A' on the same windows.
   - Run A (the first runner invocation) died with a shell syntax error: the runner file was edited while `sh` was still reading it. It
     left no receipts; A' / B are clean runs of the committed runner.
-- `npm test`, in a git-archive copy of `26e7e4086` (this audit's tools; the receipts / doc commits change no code) inside the scratch dir,
+- `npm test`, in a git-archive copy of `17d20b641` (this audit's tools; the receipts / doc commits change no code) inside the scratch dir,
   three foreground `--shard` runs: **1,624 files / 13,343 tests passed** (44 / 223 skipped).
   - The copy needs a git history: `tests/appDifferential.test.ts` resolves `HEAD` / `HEAD^`. With only `git init`, it failed 2 guard
     tests ("fatal: Needed a single revision"); after two scratch commits in the copy, it passes (shard 2 rerun in full).
   - `npm run build` in the same copy: green (exit 0; only vite's usual chunk-size warning).
-  - Final-HEAD rerun, a fresh git-archive copy of `5b502c2f9` (tools + receipts + this doc) with the same two scratch commits: **1,624 files /
+  - Final-HEAD rerun, a fresh git-archive copy of `8917636f3` (tools + receipts + this doc) with the same two scratch commits: **1,624 files /
     13,343 tests passed** (44 / 223 skipped) in three foreground shards; `npm run build` exit 0.
-- `git diff --check 32eb03d65` is clean. `tools/integration/fixtures/audit-23/.gitattributes` (plans69's `*.diff -whitespace`) also keeps
+- `git diff --check 853642606` is clean. `tools/integration/fixtures/audit-23/.gitattributes` (plans69's `*.diff -whitespace`) also keeps
   `d/dt-plain-shift*.txt -whitespace`: ctl95ControlCheck.ts prints `bad ` with a trailing space, and the receipt stays byte-for-byte. There is no
   `.diff` (no temp patch).
 - `git status --short` listed only this audit's new files at every commit; paths were staged explicitly. No existing tracked file was

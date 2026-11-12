@@ -1,7 +1,7 @@
 # `winning` deep sweep, 0:240 — 2026-08-20, new soak semantics (M-B step 3 re-run)
 
 Re-measures `winning`-policy play depth at scale on the post-#104/#105 tree
-(master `f7ccbc5b`), under the **new** OK/HANG semantics from `f931241a`:
+(master `ef9723c9`), under the **new** OK/HANG semantics from `7621f810`:
 **OK** = the seed's frame budget (1,000,000f) is reached while still
 progressing (`endState: "budget"`), or `--max-rounds` is hit; **HANG** = 30,000
 frames with zero progress. This supersedes every earlier `winning` depth

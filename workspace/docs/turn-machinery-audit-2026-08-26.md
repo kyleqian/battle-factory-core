@@ -7,7 +7,7 @@ Everything that runs BEFORE a move's battle script executes.
 
 | field | value |
 | --- | --- |
-| Tree hash (HEAD at audit time) | `6cb2920f054486ec433d70292753bbf93b062237` (commit `c847e462`) |
+| Tree hash (HEAD at audit time) | `6cb2920f054486ec433d70292753bbf93b062237` (commit `d9aefaae`) |
 | Date | 2026-08-26, worker start `Wed Aug 26 01:41:30 PDT 2026` |
 | Lane / oracle | side worktree `worker/side-20260826-014123`, Battle Scene OFF (`http://127.0.0.1:8014`). Static audit — the oracle was **not** run. |
 | Scope | Level-50 Factory **singles**, both sides. §1 `TryDoEventsBeforeFirstTurn` (battle start after the intro). §2 `HandleTurnActionSelectionState` — every `gBattleCommunication[]` state and every singles-reachable `B_ACTION_*` case, both controllers. §3 `SetActionsAndBattlersTurnOrder` + `GetWhoStrikesFirst`. §4 `HandleAction_UseMove`'s prologue up to the `gBattleScriptsForMoveEffects[effect]` handoff (+ `HandleAction_Switch`/`_UseItem`/`_Run` reachability). §5 the action-finished seams. Docs-only step — no engine/test/tool/data edits. |

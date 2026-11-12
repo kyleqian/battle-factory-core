@@ -2,11 +2,11 @@
 
 > **STATUS 2026-08-19 (planning session): §4 steps 1-4 are ALL LANDED.
 > This program is COMPLETE as scoped.** Verified live, not inferred:
-> step 1 = `96e1dd4b` (`tests/factoryRoundChaining.test.ts` case "(b)",
+> step 1 = `bceaf1d1` (`tests/factoryRoundChaining.test.ts` case "(b)",
 > four hops, silver Brain at hop 3); step 2 =
-> `factoryRentalGeneration.ts:229-239`; step 3 = `6366ee33` + sweeps
-> `6d92ddf1` (`vanilla` 0:60, `full` 0:180, `winning` 0:180, all green);
-> step 4 = satisfied by harness `3e29880b`, already noted inline below.
+> `factoryRentalGeneration.ts:229-239`; step 3 = `772ca3e0` + sweeps
+> `7da11036` (`vanilla` 0:60, `full` 0:180, `winning` 0:180, all green);
+> step 4 = satisfied by harness `4dac4a35`, already noted inline below.
 > Do not re-dispatch §4 as open work — a 2026-08-19 session reported this
 > program to the user as "queued since 08-15, never picked up" purely from
 > a stale ROADMAP queue line, without checking the tree.
@@ -349,7 +349,7 @@ surfaces (file it in ISSUES.md/report it, per the "soak driver never
 fixes engine behavior" convention — this step is coverage, not fixing).
 
 **Step 4 — SATISFIED BY LANDED INFRASTRUCTURE (2026-08-16 supervisor
-note): no memo needed.** Top-layer harness commit `3e29880b`
+note): no memo needed.** Top-layer harness commit `4dac4a35`
 (2026-08-15) implemented exactly what this step would have designed:
 `factoryBrain` + `walkup: true` staging redirects the parked field
 script to the ROM's own post-win fragment (so `VAR_0x8006 = 1` and the

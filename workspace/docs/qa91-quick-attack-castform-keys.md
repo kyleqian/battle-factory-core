@@ -69,7 +69,7 @@ reducer's new input has no other route to the view. No other `src/` file outside
 
 ### 1.3 Opponent-side Quick Attack (new controls, `qa91Stage.py`, same recipe and seed)
 
-Before = `27b43d26d`, whose src `e7a4775e` is base `5af9bdb51`'s src. Final = this tree. Both sides use the same probes, and the per-row
+Before = `f8889dc5b`, whose src `e7a4775e` is base `3033719c6`'s src. Final = this tree. Both sides use the same probes, and the per-row
 digests are equal on all 12 windows.
 
 | Pair (opponent -> player) | windows | before = final CHAIN / ENTRY |
@@ -103,7 +103,7 @@ orientation.
 | ctl (normal form) Ember / Flamethrower / Scary Face | 17 | live, 0 px (unchanged) |
 | `196:by:2` / `196:at:2` rain Icy Wind | 8 | **declined**: `measured residual ...: (TIMING-PHASE: lag ages [241, 242] vs [261], also without Castform; live audit 21)` |
 
-### 1.6 Census seeds 0..999 (base `5af9bdb51` vs final src `23934074`; 10 `--index-from` shards each)
+### 1.6 Census seeds 0..999 (base `3033719c6` vs final src `23934074`; 10 `--index-from` shards each)
 
 The census ran `flat84Census.sh`: `hist73Merge.py`, `prep43CensusDelta.py`, `flat84CensusCheck.py`. Receipt: `fixtures/qa91/census-check.txt`.
 
@@ -128,7 +128,7 @@ The deltas:
 - `npm run test:smoke`: 8 files, 448 tests, green.
 - Full suite, two shards: **1,617 files passed** (809 + 808, 44 skipped), **13,278 tests passed** (6,934 + 6,344).
 - `npm run build`: green.
-- `compare:differential fight-submenu battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base 5af9bdb51`:
+- `compare:differential fight-submenu battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base 3033719c6`:
   **PASS, 624 captures byte-identical.**
 - `git diff --check`: clean.
 
@@ -146,7 +146,7 @@ residual reason.
 
 ```sh
 sh tools/integration/qa91Run.sh <fresh-receipt-dir> <fresh-scratch-dir>   # x2 RAM, QA / Castform / opponent checks, == committed
-C=<scratch>; git archive 5af9bdb51 | tar -x -C $C/base; git archive HEAD | tar -x -C $C/final   # + node_modules symlinks
+C=<scratch>; git archive 3033719c6 | tar -x -C $C/base; git archive HEAD | tar -x -C $C/final   # + node_modules symlinks
 FLAT84_CENSUS_JOBS=10 sh tools/integration/flat84Census.sh $C/base $C/final $C/out            # census-check.txt
 npm run compare:quick-attack-portable; npm run compare:quick-attack-opposite; npm run compare:quick-attack-opposite-controller
 ```

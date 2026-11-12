@@ -1,20 +1,20 @@
 # S10A plans51 — the next tail of sprite-order host stops: EXACT / KEYED / GEOMETRY-KEYED order plans
 
 Side lane, evidence + production in one step, using the prep43 / prep45 / gdgeo / plans48 method.
-- Base: master `ccc4774c4` (src tree `dde58985`).
-- Tested code: `584b69147` (src tree `51b9db0b`). Later commits touch docs, tests, tools and fixtures only.
+- Base: master `92ef1f6f9` (src tree `dde58985`).
+- Tested code: `f4c355dd4` (src tree `51b9db0b`). Later commits touch docs, tests, tools and fixtures only.
 - Receipt: `tools/integration/fixtures/plans51-live-receipt.json`. Fixtures: `tools/integration/fixtures/plans51/`.
 
 ## Results
 
-**Census, seeds 0..299** (`liveShareCensus.ts`, paired by `prep43CensusDelta.py`), base `ccc4774c4` against the tested code.
+**Census, seeds 0..299** (`liveShareCensus.ts`, paired by `prep43CensusDelta.py`), base `92ef1f6f9` against the tested code.
 - 7970 commands, 0 pairing mismatches, identical command sequence.
 - Battle digest identical: `069618f1…afe0`.
 - **0 live → fallback regressions.**
 
 | | live by count | live by frames |
 |---|---|---|
-| `ccc4774c4` | 7385 / 7970 = **92.66 %** | 1099550 = **94.12 %** |
+| `92ef1f6f9` | 7385 / 7970 = **92.66 %** | 1099550 = **94.12 %** |
 | plans51 | **7390 = 92.72 % (+5)** | **1100612 = 94.21 % (+1062)** |
 
 Gains by first stop:
@@ -117,7 +117,7 @@ FOCUS_BAND staging (the plans48 sweep never reached it):
 - **Ice Ball 301**, **Mud-Slap 189**: deferred-lend / words units (consumer gates, out of scope).
 - Hyper Beam 63, Magnitude 222, Flatter 260, CASTFORM_CHANGE: not in this census's chains (0 frames on seeds 0..299).
 
-## Ranking (base `ccc4774c4`, seeds 0..299)
+## Ranking (base `92ef1f6f9`, seeds 0..299)
 
 `prep45OrderCensus.ts` + `prep45Chains.py` (`fixtures/plans51/chains-before-seeds0-299.json`): 176 order-lend-unknown declines /
 25305 frames.

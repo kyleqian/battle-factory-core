@@ -1,7 +1,7 @@
 # stl109 (S10A side lane, 2026-10-11): Struggle 165 live — the banked stg107 adapter landed, with the accounting extension
 
 Scope: `docs/struggle-integration-scope.md` (the user's decision), evidence `docs/stg107-struggle.md` (§3.6 is this step's checklist).
-Base master `5c050b765` (production src `14d1be159`); final production src `5007ac57dabc36085cb61aeaa8f18ff534515dc2`.
+Base master `80bb333bd` (production src `14d1be159`); final production src `5007ac57dabc36085cb61aeaa8f18ff534515dc2`.
 
 ## Results
 
@@ -14,7 +14,7 @@ Base master `5c050b765` (production src `14d1be159`); final production src `5007
   `same timing-off.jsonl`, `same patched-windows-summary.txt` against `fixtures/stg107/`. **No column moves**: 19 Struggle windows, 15 live
   0 px on all 112 rows (chain + entry lends), r1 == r2 on 19 / 19; the 4 declines are the same named gates (doll defender cell, 3 ONIX
   later-body rest gate). Receipt `tools/integration/fixtures/stl109-live-receipt.json`.
-- **Census 0..999** (both arms `ret88Census.sh shards`, base `5c050b765` vs the final tree): 95.38 % / 98.72 % -> **98.80 % / 99.27 %**
+- **Census 0..999** (both arms `ret88Census.sh shards`, base `80bb333bd` vs the final tree): 95.38 % / 98.72 % -> **98.80 % / 99.27 %**
   (27,515 -> 27,459 commands; 26,245 -> 27,129 live; 3,932,860 -> 4,031,868 live frames of 3,983,929 -> 4,061,368); Struggle 1,089 commands
   / 0 live -> 1,033 / **884** live (99,008 of 112,256 frames). **Equals stg107's patched arm field for field** (`stg107CensusSummary.py`
   `patched` and `base` objects, `nonStruggleStatusChanges: {}` all equal the committed `fixtures/stg107/census-summary.json`);
@@ -84,14 +84,14 @@ factoryAnimationInventory, fp100FocusPunchTiming, playableAnimationIntegration, 
 animationBoundaryRatchet) 8 files / 139 tests green; `npm run typecheck` clean; `npm run test:smoke` 8 files / 448 tests; full suite as two
 shards: shard 1 813 files passed + 1 failed (`fp100FocusPunchTiming` accounting pin, `implementedCount` 238 -> 239: the pin now subtracts
 `additionalRequiredBodies`; fixed and rerun green), shard 2 814 files / 6,412 tests passed; `npm run build` green;
-`npm run compare:differential -- fight-submenu battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base 5c050b765`:
+`npm run compare:differential -- fight-submenu battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base 80bb333bd`:
 PASS, 624 captures byte-identical across the 3 traces (the app-only trace 173 / 173).
 Non-timing failures: only the fp100 accounting pin above (an expected count pin, not a defect). No timing pin moved.
 
 ```
 sh tools/integration/stl109Run.sh .integration/validation/<fresh>                  # ROM receipts only
 STL109_PATCH=1 sh tools/integration/stl109Run.sh .integration/validation/<fresh>   # + the landed production through the live renderer (commit first; ~4 min)
-sh tools/integration/ret88Census.sh shards .integration/validation/<base> 5c050b765
+sh tools/integration/ret88Census.sh shards .integration/validation/<base> 80bb333bd
 sh tools/integration/ret88Census.sh shards .integration/validation/<final> HEAD
 python3 tools/integration/land82CensusCheck.py <base> <base>/merged.json <base>/merged.jsonl <final> <final>/merged.json <final>/merged.jsonl <out>/check.json
 python3 tools/integration/stg107CensusSummary.py <base> <final> <out>/summary.json

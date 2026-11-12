@@ -1,6 +1,6 @@
 # sgl138 (S10A timeline fidelity): sgs134's IsBattleSEPlaying gate LIVE — stats-change (both scenes), multi-hit 2nd+ hits (Scene ON)
 
-Production change: sgs134's banked patch (`tools/integration/fixtures/sgs134/sgs134-gate.diff`) landed on master `86298bae3` with
+Production change: sgs134's banked patch (`tools/integration/fixtures/sgs134/sgs134-gate.diff`) landed on master `8de3a0441` with
 `patch -p1` (applied cleanly; its +/- lines == the banked diff's, and `sgl138Run.sh` checks final src == base src + the diff). Only
 `battleResolutionPresentation.ts` / `battleResolutionPresentationRender.ts`, exactly the patch's regions. Rule: seg127's
 (`docs/seg127-status-se-gate.md`), fixed rows 44 (a hit's stat-change secondary, HandleBattleAnimation) / 62 (a multi-hit move's 2nd+
@@ -35,10 +35,10 @@ hit, HandleMoveAnimation) from sgs134 (`docs/sgs134-se-gate-other-requests.md`, 
 - **Revert experiment** (scratch copy, `sgs134RequestSeGate` forced to 0): the four seed tests fail (receipt mismatch); per anchor,
   gate == projection drops to 57 / 90 and **33 / 33 gated anchors land exactly `gate` rows early** (print / later hit and banner / body).
 
-## 2. Census 0..999, base `86298bae3` vs final (both scenes; sgs134's census tools, `sgl138Run.sh` step 3)
+## 2. Census 0..999, base `8de3a0441` vs final (both scenes; sgs134's census tools, `sgl138Run.sh` step 3)
 
 `fixtures/sgl138/census-delta.json` (sgs134CensusDelta.py on sgs134Production.ts `--all`, 40 processes): **ok: true**, and every gate
-field == sgs134's patched copy (`fixtures/sgs134/census-delta.json`, base `4f790c9d3` + the diff) — the frame totals too.
+field == sgs134's patched copy (`fixtures/sgs134/census-delta.json`, base `b9669e7d8` + the diff) — the frame totals too.
 
 | scene | battles same end / kernel digest / command types | gated commands | gate frames | message parity (±1) | problems | frames base -> final |
 |---|---|---|---|---|---|---|
@@ -50,7 +50,7 @@ button-dismissed messages ±1 frame after an odd cumulative shift (the census dr
 dismissal). Gameplay identical (same end, kernel-events digest and command-type sequence on every battle, both scenes), 0 command
 status / type changes.
 
-## 3. Pins (full suite on a patched archive copy of `0168312f5`, four shards; `fixtures/sgl138/pins.json`)
+## 3. Pins (full suite on a patched archive copy of `203a6cfd3`, four shards; `fixtures/sgl138/pins.json`)
 
 | file | pin | from -> to | why |
 |---|---|---|---|
@@ -62,7 +62,7 @@ Not a pin: `tests/appDifferential.test.ts` "reports a missing trace before creat
 
 ## 4. Gates (final code)
 
-Code tested: production src of `170802d15` (== 368e5b41c's src; later commits are tests / tools / fixtures / docs).
+Code tested: production src of `39f239cc8` (== a9e606e36's src; later commits are tests / tools / fixtures / docs).
 
 - Targeted (serialized, 4 workers): sgl138 + sgs134 + seg127 + sag130 + sa125 + sc106 + liveMultihitMoveAdapters +
   battleResolutionPresentation + animation/factoryAnimationInventory + playableAnimationIntegration: **10 files / 110 tests passed**.
@@ -73,12 +73,12 @@ Code tested: production src of `170802d15` (== 368e5b41c's src; later commits ar
 - `sgl138Run.sh` (run1, before the runner's `.orig` fix): receipt SAME, tests 15 / 15, census ok and == sgs134's patched copy; the src
   check (patch's `.orig` backup) re-run by hand after the fix: SAME.
 - `npm run soak -- --policy vanilla --seeds 0:20 --parallel 5` **20 / 20 OK**; `npm run soak -- --seeds 0:20 --parallel 5` **20 / 20 OK**.
-- `npm run compare:differential -- fight-submenu battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base 86298bae3`: **PASS, 624 / 624 captures byte-identical** (235 + 216 + 173; the app-only trace did not move).
+- `npm run compare:differential -- fight-submenu battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base 8de3a0441`: **PASS, 624 / 624 captures byte-identical** (235 + 216 + 173; the app-only trace did not move).
 
 ## 5. Reproduction (from workspace/)
 
 ```
-sh tools/integration/sgl138Run.sh <fresh-out-dir-inside-the-repo> [<base-rev, default 86298bae3>]   # ALL SAME expected (~10 min)
+sh tools/integration/sgl138Run.sh <fresh-out-dir-inside-the-repo> [<base-rev, default 8de3a0441>]   # ALL SAME expected (~10 min)
 node --experimental-strip-types --no-warnings tools/integration/sgl138Live.ts --out=<receipt.json>  # == fixtures/sgl138-live-receipt.json
 npm test -- tests/sgl138SeGateLive.test.ts
 ```

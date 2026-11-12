@@ -207,14 +207,14 @@ fsw235 and pmo239. This is not a gameplay change: with a fixed input script the 
 
 ## 9. Gates
 
-* **Census** (`tools/integration/lsd194Census.sh`, `LSD194_CENSUS_JOBS=2 LSD194_SPLIT=4`, seeds 0..999, both scenes, tested tree `dac9cd2fe`)
+* **Census** (`tools/integration/lsd194Census.sh`, `LSD194_CENSUS_JOBS=2 LSD194_SPLIT=4`, seeds 0..999, both scenes, tested tree `672aadfb5`)
   vs baseline `.integration/validation/sv-20261101/cln237-evidence/census/{on,off}-4f6fa87e4` through `rst197CensusDelta.py`:
   **0 bad battles in both scenes** (events digest and error equal and the command type sequence equal in all 1000 battles each). Moved: Scene ON
   929 / 1000 battles changed, 1,725 `switch-in` commands, +84,874 frames; Scene OFF 918 / 1000 battles, 1,638 `switch-in` commands, +49,739
   frames. Every changed command is a `switch-in` whose duration field (2) and total-frames field (18) rose from the old 91 (102) to the species
   window (never lower); no other command type moved. Five seeds per scene (367, 473, 603, 870, 945) also moved fields 5 / 6: the player's
   CASTFORM send-in now carries the forced path's healthbox slide 67 and visual delay 1. Gameplay outcomes (events digest) unchanged.
-* **`npm run compare:differential`** vs the parent `c06d8fc8a`: **PASS, all 211 standard traces, 38,532 / 38,532 captures byte-identical**
+* **`npm run compare:differential`** vs the parent `4557898c8`: **PASS, all 211 standard traces, 38,532 / 38,532 captures byte-identical**
   (the three acceptance traces alone: 641 / 641). No capture changed, so the standard traces do not exercise a clipped voluntary player
   send-in; the changed behaviour is evidenced by the dense ROM probes and the census, not by these traces.
 * `npm run typecheck`, `npm run test:smoke` (8 files, 448 tests), full `npm test`, `npm run build`: results recorded in section 10.

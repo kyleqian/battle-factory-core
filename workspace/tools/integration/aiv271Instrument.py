@@ -1,4 +1,4 @@
-"""aiv271 (docs/aiv271-ai-damage-terms.md): turn an extracted engine tree of the UNFIXED parent (git archive of 8cf0d8bba, the commit before the aiv271 wiring) into the observation-only classifier tree.
+"""aiv271 (docs/aiv271-ai-damage-terms.md): turn an extracted engine tree of the UNFIXED parent (git archive of 9558ad0a1, the commit before the aiv271 wiring) into the observation-only classifier tree.
   python3 tools/integration/aiv271Instrument.py <tree> <fixed-src-dir>
 The tree still decides with the OLD code. At every scored AI decision (mask != 0) the same request / RNG is also scored by the FIXED chooser over the FIXED live view (the view carrying damageTerms, built by the fixed
 factoryAiLiveDriver / factoryAiDecisionPolicy / factoryAiTryToFaint / damageCalc / battleScriptHitChainOpcode copied in as *Fixed.ts). Event "C": old result != fixed result (scores / pick / RNG / draws).

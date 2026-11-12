@@ -1,7 +1,7 @@
 # S10A plans69: the remaining sprite-order host stops (Conversion 2, Needle Arm, Magnitude, CASTFORM_CHANGE, Speed Boost; negatives)
 
 Side lane, **evidence only, new files only** (plans48 / plans51 / sw67 method).
-- Base: master `e58597082` (production src tree `c3ab72f5`). No tracked file was edited. The production change is two temp patches,
+- Base: master `5f8279de1` (production src tree `c3ab72f5`). No tracked file was edited. The production change is two temp patches,
   applied only while measuring and then reverted. The runner applies them only to `git archive` copies.
 - Fixtures: `tools/integration/fixtures/plans69/`.
 - Tools: `plans69Probe.py`, `plans69PowerProbe.py`, `plans69Extract.py`, `plans69Check.ts`, `plans69PlanRows.ts`, `plans69Run.sh`.
@@ -27,7 +27,7 @@ Side lane, **evidence only, new files only** (plans48 / plans51 / sw67 method).
 | body 310 Astonish player (897 / 5) | **RANDOM2** (droplet pair painter order) | 2 plans; varies with the seed at a fixed pair | — | negative (words-able) |
 | body 316 Odor Sleuth player (495 / 5) | **GEOMETRY** (target species) | 2 plans; seed-invariant; Golbat / Crobat targets vs 7 others | — | negative (geometry key) |
 
-**Census, `liveShareCensus.ts`, base `e58597082` vs base + `temp-patch.diff`, paired by `prep43CensusDelta.py`.**
+**Census, `liveShareCensus.ts`, base `5f8279de1` vs base + `temp-patch.diff`, paired by `prep43CensusDelta.py`.**
 - Every range: 0 pairing mismatches, **0 live → fallback regressions**, **identical command key sequence** (battle, kind, moveId, side,
   attacker, target), **identical battle digest**, 0 render throws.
 - **Seeds 0..299** (the required range): **+0**. The before and after reports are byte-identical. None of these stops occurs on
@@ -79,7 +79,7 @@ Source is pret `reference/pokeemerald`. A plan text is `decodeSpriteOrderPlan`'s
 - **Source.** `General_CastformChange` (`data/battle_anim_scripts.s:10305`) runs `AnimTask_IsMonInvisible`, then `monbg`, sounds,
   `AnimTask_TransformMon` and `clearmonbg`, or `AnimTask_CastformGfxDataChange` when the battler is invisible. It has no `createsprite`.
   The battler's own OBJ is re-tiled in place.
-- **Prediction.** `""`, committed in `c6f8a4822` (`predictions.json`) before any probe.
+- **Prediction.** `""`, committed in `7437f0335` (`predictions.json`) before any probe.
 - **ROM.** 8/8 instances: Castform 385 sets the weather itself (the Sunny Day / Rain Dance scenarios with the user replaced), against
   Onix 95 / Golbat 42, on both sides. The labelled unit is the first mv-0 unit after the weather body. The end-turn
   `*_CONTINUES` units come later and are labelled `general mv-0`.
@@ -89,7 +89,7 @@ Source is pret `reference/pokeemerald`. A plan text is `decodeSpriteOrderPlan`'s
   - `MagnitudeRegular`: two `AnimTask_HorizontalShake` tasks, no sprite.
   - `MagnitudeIntense`: `delay 10`, `complex_palette_blend`, `delay 16`, `complex_palette_blend`.
   - No Random2 and no geometry in either branch.
-- **Prediction** (`c6f8a4822`): `""` / `Cf;D0;Cf;D1`.
+- **Prediction** (`7437f0335`): `""` / `Cf;D0;Cf;D1`.
 - **ROM.** 44 instances on both sides: the regular / intense scenarios with 2 defenders, plus a lab-seed sweep (seeds 2..9, 3 turns).
   - `plans69PowerProbe.py` reads `gAnimMovePower` from RAM at each body start (A == B). Bodies are joined on the probe frame counter.
   - power ≤ 99 → `""` 36/36; power > 99 → `Cf;D0;Cf;D1` 8/8.
@@ -226,7 +226,7 @@ STATS_CHANGE payload argument 17).
 
 ```sh
 # from workspace/: probes (~1 min) + census 0..999 on base / patched / speed trees (~5 min) + chains + fold pins (~1 min)
-tools/integration/plans69Run.sh <fresh-out-dir> [--base e58597082] [--skip-probe] [--skip-census] [--skip-tests]
+tools/integration/plans69Run.sh <fresh-out-dir> [--base 5f8279de1] [--skip-probe] [--skip-census] [--skip-tests]
 ```
 
 It compares every artefact byte for byte with `fixtures/plans69/`.

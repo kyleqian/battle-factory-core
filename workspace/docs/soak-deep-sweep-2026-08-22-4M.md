@@ -1,6 +1,6 @@
 # `winning` depth probe at 4,000,000 frames — the 7 carry-28 seeds (2026-08-22, supervisor)
 
-Tree: master `df60c00a` (animation fold; engine identical to the 1370/1371 tree).
+Tree: master `cd59eeec` (animation fold; engine identical to the 1370/1371 tree).
 Command per seed: `node --experimental-strip-types tools/soak/randomRoundSoak.ts --seed N --policy winning --render-every 0 --max-frames 4000000`
 (4× the `winning` default of 1,000,000; PROGRESS 1371 "Next" item 3 asked whether the
 1M budget was truncating the challenge-4+ tier).
@@ -34,7 +34,7 @@ rounds later in the same runs are won far less often (seed 24's transcript: well
 Deeper-carry rates are unaffected (those rounds are all live-generated).
 
 **Determinism check.** Seed 63 at 1M frames ends `b3 t1 carry<=28` identically on (a) the 1370
-tree, (b) master with the in-flight string-fix edits, (c) a clean `df60c00a` worktree, and (d) the
+tree, (b) master with the in-flight string-fix edits, (c) a clean `cd59eeec` worktree, and (d) the
 same with `--verbose`; the 4M run's first 1M frames are the same trajectory. Transcript round tables
 that key on "6 swap offers" cannot distinguish a 7th-battle loss from a round win — use the driver's
 `maxCarriedWinStreak`, not a transcript count, for carry claims.

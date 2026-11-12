@@ -1,6 +1,6 @@
 # S10A later58 — later-body consumer gates (side lane, narrow production grant)
 
-Base: master `ad247cc0d` (production src tree `db20b3ec`). Method: docs/next-adapters-prep48.md (the prep48 / later48 recipe). Every ROM
+Base: master `99493737c` (production src tree `db20b3ec`). Method: docs/next-adapters-prep48.md (the prep48 / later48 recipe). Every ROM
 number is from independent direct-mGBA `prep48Probe.py` processes (Scene ON), never the shared HTTP oracles. Every scenario carries an
 explicit lab `"seed"` (ISSUES #154) and ran twice fresh in one batch: **166/166 r1 == r2**. Every window then ran through the production
 renderer (`liveAdapterFramebuffer.ts`) in two more fresh probe processes, with the digests agreeing.
@@ -29,7 +29,7 @@ plus the extra condition shown in the table. Receipt: `tools/integration/fixture
 
 | | live by count | live by frames |
 |---|---|---|
-| `ad247cc0d` | 7510 = 94.23 % | 1,114,736 / 1,168,201 = 95.42 % |
+| `99493737c` | 7510 = 94.23 % | 1,114,736 / 1,168,201 = 95.42 % |
 | final | **7542 = 94.63 % (+32)** | **1,118,749 = 95.77 % (+4,013)** |
 
 The later-body stop goes from 43 cmds / 5,685 frames to **11**. Seven are later-body declines that remain: Extrasensory player 5, Memento 2.
@@ -97,7 +97,7 @@ later body) would be a policy change. That is out of this grant, and the policie
     python3 tools/integration/later58Scenarios.py                                  # scenarios (byte-identical to the committed ones)
     OUT=/tmp/l58 JOBS=12 sh tools/integration/later58Probes.sh                      # 166 scenarios x2 fresh (~3 min)
     python3 tools/integration/later58Fixtures.py /tmp/l58/r1 /tmp/l58/live          # == fixtures/later58/live
-    # the final src has the gates; the fixtures/later58/later58-temp-src-*.diff are the patches the receipts were measured with (on ad247cc0d)
+    # the final src has the gates; the fixtures/later58/later58-temp-src-*.diff are the patches the receipts were measured with (on 99493737c)
     OUT=/tmp/l58 JOBS=12 sh tools/integration/later58Check.sh tools/integration/fixtures/later58/live /tmp/l58/check.json
     python3 tools/integration/later58Receipt.py /tmp/l58 /tmp/l58/receipt.json tools/integration/fixtures/later58/check-{signal-beam,mach-punch,sheer-cold,extrasensory,sky-attack,bonemerang,outrage,fury-cutter}.json
     POKEBENCH_LIVE_PROBE_SHARE=1 node --experimental-strip-types --no-warnings tools/integration/d4aTimingCheck.ts /tmp/d4.json tools/integration/fixtures/later58/live/mach-punch-*.json

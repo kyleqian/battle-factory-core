@@ -50,7 +50,7 @@ trace is 108 / 121 (2-8 px affine-edge residual on 13 frames). Anchor Summary tr
 ## #168 — remainder: FRZ frozen-turn timing phase (S10A; #168 otherwise DONE 2026-10-13)
 
 All nine B_ANIM_STATUS_* animations are timed and drawn (88 + 16 dense ROM windows 0 px; live audit 28 clean), and since inl144
-(2026-10-13, merged `d019cd6b4`) a status animation over an INVISIBLE battler draws its sprites while the battler stays hidden (inv142's
+(2026-10-13, merged `1c801184b`) a status animation over an INVISIBLE battler draws its sprites while the battler stays hidden (inv142's
 banked patch landed; inv142Run.sh ALL SAME). Open (D4 class, aud137): FRZ's frozen-turn active rows are 115 vs production's 116 on 4 / 10
 windows (the next message one frame late); cause named, not proven.
 
@@ -103,7 +103,7 @@ frame count to CB2_InitBattle); check whether the lab seed is applied before or 
 
 ## #153 — remainder: Substitute / Transform presentation shared by both scenes (Scene OFF body FIXED 2026-10-13, sub157)
 
-FIXED (`ca4ea3618` / `eec0aca08`): Scene OFF emits the Transform / Substitute move animation (`battle_script_commands.c:1748`).
+FIXED (`41dec7733` / `4ec6cf080`): Scene OFF emits the Transform / Substitute move animation (`battle_script_commands.c:1748`).
 OFF bodies read x2 {0,0} because there is no front animation in OFF (`pokemon.c:6805`). 5 / 5 dense OFF Substitute windows are
 0 px (`docs/sub157-scene-off-substitute.md`). Open, the same in both scenes (ROM OFF == ON):
 - **Substitute turn timing:** FIXED by sub183 (2026-10-15, docs/sub183-substitute-turn-timing.md): 4 script-lead rows, 2 post rows,
@@ -122,7 +122,7 @@ OFF bodies read x2 {0,0} because there is no front animation in OFF (`pokemon.c:
 
 ## #152 — Species audits 9-14 remainder: idle-rest attacker class, Extrasensory split rows, Confuse Ray CPU phase, TYRANITAR rows (S10A, 2026-10-07)
 
-Evidence `docs/live-species-audit-9.md`, receipts `tools/integration/fixtures/species-audit-9/`. FIXED in `a7402719b`
+Evidence `docs/live-species-audit-9.md`, receipts `tools/integration/fixtures/species-audit-9/`. FIXED in `1795d405a`
 (supervisor reran x2 fresh): Mach Punch opponent attacker with an idle rest (ONIX 86,089 -> 0 px, RATTATA 36,222 -> 0)
 and the Revenge idle-rest gate narrowed to targets (ONIX / RATTATA attackers 0 px). Open remainder:
 - **Mach Punch (183), opponent-side target with an idle rest:** one row (age 60) unexplained after the rest fix; the
@@ -130,24 +130,24 @@ and the Revenge idle-rest gate narrowed to targets (ONIX / RATTATA attackers 0 p
 - **Meteor Mash (309), player-side FLYGON target:** not a production defect — the derived audit fixture's pinned
   Random2 activation is 4 steps late (offset scan: 0 px only at -4, equal to the GOLBAT sibling's value); why the two
   FLYGON probes record 4 extra steps is unexplained. Corrected fixture `fixtures/s10a-part0/meteor-mash-flygon/`.
-- **Fixed in `138f79ad4` (audit 10):** the Extrasensory clone now carries the attacker's idle x2 rest (RATTATA 8,009 -> 0 px)
+- **Fixed in `e252f681b` (audit 10):** the Extrasensory clone now carries the attacker's idle x2 rest (RATTATA 8,009 -> 0 px)
   and the Spit Up idle-rest gate is narrowed to targets (ONIX / RATTATA attackers 0 px; `tests/animation/liveSpeciesAudit10Fixes.test.ts`).
 - **Extrasensory opponent-side targets FLYGON / GOLBAT / WAILORD:** 18,345 / 8,318 / 162 px on ages 43..117 in the
   policy phase; likely the documented scanline-split class (prep30 §1.4) but the split line was not measured.
-- **Dive (291) setup turn:** length / droplet draw age / row-68 rule FIXED in `08e1c9c4c` (12 audit-11 species 0 px,
+- **Dive (291) setup turn:** length / droplet draw age / row-68 rule FIXED in `77fbd6139` (12 audit-11 species 0 px,
   supervisor reran); TYRANITAR attacker keeps 9 px on ages 63..64 (unresolved; Sand Stream intro?).
-- **Fixed in `e25fa104c` (2026-10-08):** the Extreme Speed / Dive CLAMPERL CPU-phase cases are D4 policy entries (Extreme
+- **Fixed in `1f6057c54` (2026-10-08):** the Extreme Speed / Dive CLAMPERL CPU-phase cases are D4 policy entries (Extreme
   Speed, Crunch and Psychic reclassified to faithful timing).
 - **TYRANITAR rows (Dive 4-9 px, Ice Ball 16 / 63 px, Memento 2,537 px at age 140):** unresolved; lags match.
-- **Audit 12 (`docs/live-species-audit-12.md`):** FIXED: Substitute shiny gate (`46319b2d9`); NIDORAN F / M healthbox gender
+- **Audit 12 (`docs/live-species-audit-12.md`):** FIXED: Substitute shiny gate (`e3a68d289`); NIDORAN F / M healthbox gender
   symbol, Flatter elevated-opponent gate (#142 row-0 hook), Skill Swap idle-rest gate and its documented other-phase max
-  (`2ba4da4a3`). Open: TYRANITAR Flatter 2 / 96 px unresolved.
+  (`1dbc7b0ce`). Open: TYRANITAR Flatter 2 / 96 px unresolved.
 - **Doll-free controls from prep38 / dolldef (2026-10-08):** Shadow Ball (247) PERSIAN -> SLOWBRO player 304,556 px (rows 69..99 +
   the 156-row tail phase rows 137..152; also in the doll-free control, so a pre-existing Shadow Ball limit for that pair);
   Psychic opponent HAUNTER -> KADABRA 200 px on the pre-activation row (elevated attacker shadow); Quick Attack player
   (5,601 px inside the doll box) and Double-Edge player after an earlier Double-Edge (480 px) unresolved
   (`docs/next-adapters-prep38.md`, `tools/integration/fixtures/dolldef-live-receipt.json`).
-- **Audit 13 (`docs/live-species-audit-13.md`, 2026-10-08):** FIXED in `e25fa104c`: Ice Beam / Thunderbolt / Sludge (Bomb)
+- **Audit 13 (`docs/live-species-audit-13.md`, 2026-10-08):** FIXED in `1f6057c54`: Ice Beam / Thunderbolt / Sludge (Bomb)
   opponent idle-rest attacker, shiny swap decline, Crunch / Psychic D4; Ice Ball resting target was already declined. Open:
   ONIX attacker 1,091 px/row before its first move (Body Slam / Brick Break / Flamethrower / Attract, doll-free too); 15
   candidate renderers from the static attacker-rest scan (`a13fix-live-receipt.json`), unproven.
@@ -156,14 +156,14 @@ and the Revenge idle-rest gate narrowed to targets (ONIX / RATTATA attackers 0 p
   fade's claim is scoped outside that footprint (message-host question). Not measured: the ROM wait between that message
   and the fade, fades on a non-target (recoil), multi-hit or Baton Pass / switch fades, Scene OFF within the Substitute's
   own resolution (#153).
-- **Audit 14 (`docs/live-species-audit-14.md`, 2026-10-08):** FIXED in `2ba4da4a3`: fade row-0 shadow, Confuse Ray / Bite
-  idle-rest opponent attacker; the Confuse Ray CPU phase is a D4 policy entry since `7993b02fd` (d4tails). Open: Double-Edge row 33
+- **Audit 14 (`docs/live-species-audit-14.md`, 2026-10-08):** FIXED in `1dbc7b0ce`: fade row-0 shadow, Confuse Ray / Bite
+  idle-rest opponent attacker; the Confuse Ray CPU phase is a D4 policy entry since `60ae3a406` (d4tails). Open: Double-Edge row 33
   with an idle-rest opponent attacker (410 / 1,091 px), Attract GOLBAT one full-field row.
-- **Blizzard (59) opponent impact-start ages 194..206: FIXED in `bb0415c82` (lsbz).** The ARBOK -> CATERPIE static 133-px residual
+- **Blizzard (59) opponent impact-start ages 194..206: FIXED in `28f1f1ee4` (lsbz).** The ARBOK -> CATERPIE static 133-px residual
   was a FIXTURE artifact (audit 16): the geoice control fixture's `fieldProfile` says full HP, the ROM has CATERPIE 24/120 and ARBOK
   161/167 at activation; at the ROM's HP Blizzard / Swift / Thunderbolt are 0 px. Fix: take the HP from the ROM in
   `tools/integration/fixtures/geoice/controls/blizzard-opponent-arbok-caterpie.json` (fixture only).
-- **Light Screen (113) opponent row 59: FIXED in `bb0415c82` (lsbz)** — D4 entry with the dominant no-hold phase; the hold windows
+- **Light Screen (113) opponent row 59: FIXED in `28f1f1ee4` (lsbz)** — D4 entry with the dominant no-hold phase; the hold windows
   (SNORLAX / CHANSEY first body, EXEGGCUTE / ONIX after Tackle) are the documented other phase (row 59, 2,658 px). Open (audit 16): the
   PLAYER side also shows the hold phase (5 of 20 windows, 2,473 / 2,571 px on row 59) and a second buffered step at row 19 (after PRZ;
   after CONFUSION + a held-item animation on the opponent side, rows 19 + 59, 5,343 px); dominant direct on both sides (15/20, 10/14), so
@@ -172,7 +172,7 @@ and the Revenge idle-rest gate narrowed to targets (ONIX / RATTATA attackers 0 p
 
 ## #148 — Battler x2 history: unknown-history remainder (main bug FIXED 2026-10-06)
 
-- **Fixed:** `src/engine/liveBattlerX2History.ts` (merged `de0e887`-era master) tracks per battler
+- **Fixed:** `src/engine/liveBattlerX2History.ts` (merged `3922ac7`-era master) tracks per battler
   idle | zeroed | unknown from the measured per-move/role table (`docs/x2-history-148.md`), resets on
   send-in, and feeds `liveBattlerAnchors(...).frontIdleRest` + every renderer species-rest read.
   Flail bodies 2-5, Double Kick hit 2, Spike Cannon / Fury Swipes later hits, Flail after an ONIX
@@ -184,7 +184,7 @@ and the Revenge idle-rest gate narrowed to targets (ONIX / RATTATA attackers 0 p
 
 ## #147 — Elevated opponents in ordinary resolution frames: remainder (main bug FIXED 2026-10-05)
 
-- **Fixed (merge `b0818de83`):** ordinary resolution frames (both scene modes) draw elevated
+- **Fixed (merge `8949e7bbd`):** ordinary resolution frames (both scene modes) draw elevated
   opponents at the elevated origin with their shadow; post-body shadow hide table for live
   bodies whose script outlives the window (d > 0); faint sink from the elevated origin, shadow
   hidden at HP 0. Scene OFF GOLBAT / BUTTERFREE 0/935 -> 919/935; 203 committed traces unchanged.
@@ -221,7 +221,7 @@ and the Revenge idle-rest gate narrowed to targets (ONIX / RATTATA attackers 0 p
 
 - **Fixed today:** Leaf Blade (#144), Dragon Rage fire-spit aim, Aerial Ace settled x, Rock Throw
   idle x2, Smelling Salt y clamp, Light Screen / Future Sight end-of-body shadow return, Foresight
-  glass translation (merges of `5b7a1ff3b`, `48a1bd913`; audits `docs/live-species-audit{,-2}.md`).
+  glass translation (merges of `9e8db7fee`, `dfcd0861f`; audits `docs/live-species-audit{,-2}.md`).
 - **Rollout (205, live since 2026-10-05; `docs/rollout-curl-diagnosis.md`):** the hit-splat centre
   is hard-coded to ONIX's (`src/animation/rollout.ts:175-177`, y 42; BLISSEY 46) — a few px for 10
   ages against targets with a different pic y; the shake amplitude is keyed by counter
@@ -238,7 +238,7 @@ and the Revenge idle-rest gate narrowed to targets (ONIX / RATTATA attackers 0 p
 
 ## #143 — CASTFORM non-normal forms (weather) are not modelled (S10A; normal-form residual FIXED 2026-10-05)
 
-- **Fixed (`55d1ef1dd`):** the normal-form Y placement (player back delta 0 from
+- **Fixed (`6f6641fe7`):** the normal-form Y placement (player back delta 0 from
   `sCastformBackSpriteYCoords`, opponent elevation 13 from `sCastformElevations`;
   `docs/castform-art-diagnosis.md`); retained ROM runs now 237/237 exact both sides.
 - **Live claim (cf78, 2026-10-10; was ISSUES #162):** every live body declines while a CASTFORM is shown in a weather form
@@ -304,7 +304,7 @@ arrive, with a Tier-1 pin.
 
 ## #114 — `runFutureAttacksAfterFaints` fires a delayed hit inline and keeps looping where source returns per effect (doubles-era divergence)
 
-**Found 2026-08-22** (side worker, #102 end-turn cursor fix `a6deb814`). Source
+**Found 2026-08-22** (side worker, #102 end-turn cursor fix `6584bf9d`). Source
 `HandleWishPerishSongOnTurnEnd` (`battle_util.c:1785-1888`) `return TRUE`s after
 each Future Sight/Perish Song script and re-enters via `BattleTurnPassed`,
 so a second delayed KO in the same turn takes its own `HandleFaintedMonActions`
@@ -2779,7 +2779,7 @@ remain: the `MenuIdleFrameAsset`/`SendOutHealthboxContentAsset` type-only export
 widening, `drawTurn16PostSwitchField`'s `src/animation` import, the ONIX-Sitrus
 cluster plus its module-eval guard, and the two `let` caches.
 
-**2026-08-19 update (main worker session 10, `f15cb254`):** the graph had
+**2026-08-19 update (main worker session 10, `9ccc9cbc`):** the graph had
 genuinely opened up somewhat — batch 5 found 12 more movable symbols
 (CANONICAL 226 → 214, up from batch 5's 2026-08-08 zero, differential
 1241/1241 byte-identical) — but confirmed the ONIX-Sitrus cluster
@@ -2794,7 +2794,7 @@ via a failed `tsc -b` run. The two `let` caches remain blocked as described
 above. Neither obstacle is new in kind, just newly confirmed against the
 current tree.
 
-**2026-08-19 update (main worker session 12, `75b73fab`):** batch 8, 47
+**2026-08-19 update (main worker session 12, `a2a57e91`):** batch 8, 47
 more symbols (CANONICAL 123 → 76). Found a real gap in the eligibility
 scanner's let-cache hazard class: it only flagged moving the `let` itself,
 not a function elsewhere that assigns into a still-resident let-cache
@@ -2802,14 +2802,14 @@ not a function elsewhere that assigns into a still-resident let-cache
 scanner-ELIGIBLE, both excluded by hand after reading their bodies). Full
 detail: `PROGRESS.md` #1352,
 `docs/presentation-seam-retirement-ladder.md` Slice 2. **Gap CLOSED
-2026-08-19 (side worker, `e99c3511`):** new H3-let-write hazard class —
+2026-08-19 (side worker, `ca3d58b9`):** new H3-let-write hazard class —
 a function-kind candidate assigning (`=`, compound ops, `++`/`--`) to a
 stay-behind module-level `let` is now auto-blocked; method calls/reads on
 the binding don't trigger it, so `playerHealthboxHpOverlayForHp` (Map
 `.get()`/`.set()`) stays correctly ELIGIBLE and is the whole remaining
 function-kind pool (1 symbol).
 
-**2026-08-19 update (main worker session 11, `74f3c1c2`):** first batch
+**2026-08-19 update (main worker session 11, `ce8e3892`):** first batch
 under decision (a) — 41 `function`-kind canonical symbols moved (CANONICAL
 214 → 173, differential 1241/1241 byte-identical, full `npm test`
 10,114/10,114). Found a **second instance of hazard 1** beyond the
@@ -3504,7 +3504,7 @@ supervisor-verified live:
   - `turn5-confirm-off-b` **131/132** — tick 6184 = the same accepted
     PNG(T)=RAM(T-1) boundary class (same doc §4).
 - `loss-terminal-decline-continuation-off`'s old 155/155 bar is **OBSOLETE
-  by design** (continuous-play chaining, commit `b7ae30de`, user-approved
+  by design** (continuous-play chaining, commit `da5bc8b7`, user-approved
   2026-08-14): the post-edge farewell/Lobby span is unreachable under
   `generated-orchestrator`. Honest bar: pre-edge 4939-4988 = 50/50 (holds).
   A future byte-exact farewell window needs a NEW trace capped before frame

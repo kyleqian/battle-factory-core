@@ -70,8 +70,8 @@ Test re-pins / re-stages on the fixed tree (no engine change; no assertion weake
 
 | file | what | why |
 |---|---|---|
-| `gate6CoverageManifest` / `abilityItemParityCensus` (source-line repin + manifest regen) | e7c10bd1a | the fix moved the pinned source lines of `damageCalc.ts` / `battleScriptHitChainOpcode.ts` |
-| `wth236WeatherContinues` Rain / Sun census seeds | aba497135 (0 / 29 -> 20 / 35) | the originals are changed census seeds |
+| `gate6CoverageManifest` / `abilityItemParityCensus` (source-line repin + manifest regen) | 7384bd9a2 | the fix moved the pinned source lines of `damageCalc.ts` / `battleScriptHitChainOpcode.ts` |
+| `wth236WeatherContinues` Rain / Sun census seeds | 7a2e4f900 (0 / 29 -> 20 / 35) | the originals are changed census seeds |
 | `olnd113SceneOffPauses` two-turn charge (Razor Wind) | example census seed 201 -> **353** (`EXAMPLE_SEED_OVERRIDE`; off108's fixture is untouched) | seed 201 is changed by the fix and no longer reaches the charge. The assertion is a per-class source-timing claim (ROM scenario `off108-razor-wind-ply-primeape-snorlax`: N's command at G + 1 + 42, P = 42, no live animation), not seed history. A scan of seeds 0..499 (Scene OFF) finds the charge on 250, 265, 353, 375; seed 353 has three uses and all three start N on exactly 42 and keep the pause-command checks, so the claim is kept as is |
 | `sag130StatusSeGate` CONFUSION\|player carrier | 437 -> **856** (abl261 precedent) | 437 is changed by the fix and no longer matches seg127's exposure projection. 856 is the next projected carrier; the per-open-receipt animation / side / path / gate equality and all 12 required gated classes still hold (245 anchored, 16 gated, 143 gate frames). No coverage gap |
 

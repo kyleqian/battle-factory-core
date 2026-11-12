@@ -6,7 +6,7 @@ full history regardless.
 ---
 ## R97 — [supervised session, 2026-09-12 03:06 UTC–, unattended] **M94 PPREDUCE folded (second green fold this session)**
 
-- **State:** `rust-main` = R96 + `9bcbce5cf` M94 fast-forward + this
+- **State:** `rust-main` = R96 + `768f47323` M94 fast-forward + this
   ledger commit. Post-fold gates green. Tree clean, committed. Core-only;
   no ABI/adapter/TS/npm files touched. **109 of 215 TS opcode names
   ported.**
@@ -60,7 +60,7 @@ full history regardless.
 
 ## R96 — [supervised session, 2026-09-12 03:06 UTC–, unattended] **M93 machine-control family folded**
 
-- **State:** `rust-main` = R95 + `0af6724cc` M93 fast-forward + this
+- **State:** `rust-main` = R95 + `49f385d2c` M93 fast-forward + this
   ledger commit. Master merge no-op at orient; baseline re-verified
   **1,730/1,730** + artifact byte-identical to R95 (512,236 B,
   `a8d2e60b…`). Post-fold gates green. Tree clean, committed. Core-only;
@@ -110,8 +110,8 @@ full history regardless.
 ## R95 — [supervised session wind-down (final), 2026-09-11 15:04-~17:20 UTC, unattended] **M92 multihit family folded; session close (three green folds)**
 
 - **State:** `rust-main` = master (no-op merge at orient) + three verified
-  Sonnet worker folds this session — `d60845fbd` M90 copyarray,
-  `6e3dbc305` M91 array-family trio, `94ec3c6ab` M92 multihit
+  Sonnet worker folds this session — `4086c1ade` M90 copyarray,
+  `ab53025ec` M91 array-family trio, `11b885738` M92 multihit
   rule-command family — each followed by its ledger commit and a
   successful `backup-refs.sh` push. Tree clean, committed, green; no
   worker worktree or branch left behind. Core-only all session: no ABI,
@@ -166,7 +166,7 @@ full history regardless.
 
 ## R94 — [supervised session, 2026-09-11 15:04 UTC–, unattended] **M91 array-family trio folded (second green fold this session)**
 
-- **State:** `rust-main` = R93 + `6e3dbc305` M91 fast-forward + this
+- **State:** `rust-main` = R93 + `ab53025ec` M91 fast-forward + this
   ledger commit. Gates green post-fold. Tree clean, committed. Core-only;
   no ABI/adapter/TS/npm files touched. **97 of 215 TS opcode names
   ported.** M92 worker (multihit rule-command family, final leaf this
@@ -214,7 +214,7 @@ full history regardless.
 
 ## R93 — [supervised session, 2026-09-11 15:04 UTC–, unattended] **M90 COPYARRAY folded**
 
-- **State:** `rust-main` = R92 + `d60845fbd` M90 fast-forward + this
+- **State:** `rust-main` = R92 + `4086c1ade` M90 fast-forward + this
   ledger commit. Master merge no-op at orient; baseline re-verified
   **1,658/1,658** + artifact byte-identical to R92 (507,121 B,
   `222565a5…`). Post-fold gates green. Tree clean, committed. Core-only;
@@ -265,9 +265,9 @@ full history regardless.
 ## R92 — [supervised session wind-down (final), 2026-09-11 03:05-~05:15 UTC, unattended] **M89 ADDBYTE folded; session close (four green folds)**
 
 - **State:** `rust-main` = master + four verified Sonnet worker folds this
-  session — `4397eabfd` M86 accuracycheck bypass, `338b86785` M87
-  full-formula, `a02f4ef78` M88 absorb tail (ACCURACYCHECK complete),
-  `311c15284` M89 addbyte — each followed by its ledger commit and a
+  session — `7a855879b` M86 accuracycheck bypass, `fea92b4e2` M87
+  full-formula, `e7855454c` M88 absorb tail (ACCURACYCHECK complete),
+  `e86e8fb73` M89 addbyte — each followed by its ledger commit and a
   successful `backup-refs.sh` push. Tree clean, committed, green; no
   worker worktree or branch left behind. Core-only all session: no ABI,
   adapter, canonical TS, or npm file touched, so the main supervisor's
@@ -324,7 +324,7 @@ full history regardless.
 
 ## R91 — [supervised session, 2026-09-11 03:05 UTC–, unattended] **M88 ACCURACYCHECK part 3/3 (absorb/Flash-Fire tail) folded — opcode complete**
 
-- **State:** `rust-main` = R90 + `a02f4ef78` M88 fold (merge `ad11d5ec4`)
+- **State:** `rust-main` = R90 + `e7855454c` M88 fold (merge `384d4fa57`)
   + this ledger commit. Gates green post-fold. Tree clean, committed.
   Core-only; no ABI/adapter/TS/npm files touched. ACCURACYCHECK (0x1) is
   now COMPLETE — **92 of 215 TS opcode names ported.** M89 ADDBYTE worker
@@ -369,8 +369,8 @@ full history regardless.
 
 ## R90 — [supervised session, 2026-09-11 03:05 UTC–, unattended] **M87 ACCURACYCHECK part 2/3 (full-formula path) folded**
 
-- **State:** `rust-main` = R89 + `338b86785` M87 full-formula fold (merge
-  commit `10b0d3e2f`; not a fast-forward only because the R89 ledger
+- **State:** `rust-main` = R89 + `fea92b4e2` M87 full-formula fold (merge
+  commit `25a72888a`; not a fast-forward only because the R89 ledger
   commit intervened) + this ledger commit. Gates green post-fold. Tree
   clean, committed. Core-only; no ABI/adapter/TS/npm files touched. M88
   worker (part 3/3, absorb/Flash-Fire tail) ALREADY DISPATCHED off this
@@ -425,7 +425,7 @@ full history regardless.
 ## R89 — [supervised session, 2026-09-11 03:05 UTC–, unattended] **M86 ACCURACYCHECK part 1/3 (bypass paths) folded**
 
 - **State:** `rust-main` = master (no-op merge at orient; origin fetch
-  fails as usual, local master ref is current) + `4397eabfd` M86
+  fails as usual, local master ref is current) + `7a855879b` M86
   accuracycheck-bypass fast-forward + this ledger commit. Baseline at
   orient re-verified 1,596/1,596 + artifact byte-identical to R88. Tree
   clean, committed, green. Core-only session: no ABI, adapter, canonical
@@ -478,8 +478,8 @@ full history regardless.
 ## R88 — [supervised session wind-down (final), 2026-09-10 15:01–~17:45 UTC, unattended] **M85 semi-invulnerable trio + session close (four green folds)**
 
 - **State:** `rust-main` = master (no-op merge at orient) plus four verified
-  Sonnet worker fast-forwards this session — `7d3206705` M82 byte-algebra
-  trio, `4ecf69eb0` M83 tryKO, `3c0e8c0fe` M84 type-curse trio, `0072ffa5d`
+  Sonnet worker fast-forwards this session — `d88578fd3` M82 byte-algebra
+  trio, `65d0c40a6` M83 tryKO, `49ccfa4cc` M84 type-curse trio, `bc4936483`
   M85 semi-invulnerable trio — each followed by its ledger commit and a
   successful `backup-refs.sh` push. Tree clean, committed, green; no worker
   worktree or branch left behind. No ABI, adapter, canonical TS, or npm
@@ -534,8 +534,8 @@ full history regardless.
 
 ## R87 — [supervised session, 2026-09-10 15:01 UTC–, unattended] **M84 type-jump + curse trio folded (third green fold this session)**
 
-- **State:** `rust-main` = master (no-op merge at orient) + `7d3206705` M82
-  byte-algebra trio + `4ecf69eb0` M83 tryKO + `3c0e8c0fe` M84 type-curse
+- **State:** `rust-main` = master (no-op merge at orient) + `d88578fd3` M82
+  byte-algebra trio + `65d0c40a6` M83 tryKO + `49ccfa4cc` M84 type-curse
   trio, each a verified Sonnet worker fast-forward followed by its ledger
   commit and `backup-refs.sh` push. Tree clean, committed, green. No ABI,
   adapter, canonical TS, or npm file touched; the main supervisor's fold
@@ -587,8 +587,8 @@ full history regardless.
 
 ## R86 — [supervised session, 2026-09-10 15:01 UTC–, unattended] **M83 tryKO folded (second green fold this session)**
 
-- **State:** `rust-main` = master (no-op merge at orient) + `7d3206705` M82
-  byte-algebra trio + `4ecf69eb0` M83 tryKO, each a verified Sonnet worker
+- **State:** `rust-main` = master (no-op merge at orient) + `d88578fd3` M82
+  byte-algebra trio + `65d0c40a6` M83 tryKO, each a verified Sonnet worker
   fast-forward followed by its ledger commit and `backup-refs.sh` push.
   Tree clean, committed, green. No ABI, adapter, canonical TS, or npm file
   touched; the main supervisor's fold remains `core-rs/**` +
@@ -641,7 +641,7 @@ full history regardless.
 
 ## R85 — [supervised session, 2026-09-10 15:01 UTC–, unattended] **M82 byte-algebra trio folded (first green fold this session)**
 
-- **State:** `rust-main` = master (no-op merge at orient) + `7d3206705` M82
+- **State:** `rust-main` = master (no-op merge at orient) + `d88578fd3` M82
   byte-algebra trio (verified Sonnet worker fast-forward), ledger commit and
   `backup-refs.sh` push to follow this entry. Tree clean, committed, green.
   No ABI, adapter, canonical TS, or npm file touched; the main supervisor's
@@ -690,10 +690,10 @@ full history regardless.
 ## R84 — [supervised session wind-down (final), 2026-09-10 03:01–~06:00 UTC, unattended] **M81 jumpifstatus pair + session close (five green folds)**
 
 - **State:** `rust-main` = master (no-op merge at orient) plus five verified
-  Sonnet worker fast-forwards this session — `b3d9cb554` M77 critcalc,
-  `0bdd9dccd` M78 adjust-damage family, `5bb8fab60` M79 fixed-damage
-  cluster (supervisor-repair commit), `1fe7c7104` M80 side-status family,
-  `f016e17c0` M81 jumpifstatus/jumpifstatus2 — each followed by its ledger
+  Sonnet worker fast-forwards this session — `89ae3d1e8` M77 critcalc,
+  `13b496eac` M78 adjust-damage family, `c19b4effe` M79 fixed-damage
+  cluster (supervisor-repair commit), `0c6a54795` M80 side-status family,
+  `f17f8bc82` M81 jumpifstatus/jumpifstatus2 — each followed by its ledger
   commit and a successful `backup-refs.sh` push. Tree clean, committed,
   green; no worker worktree or branch left behind. No ABI, adapter,
   recovery module, canonical TS, or npm file was touched all session, so
@@ -747,9 +747,9 @@ full history regardless.
 ## R83 — [supervised session, 2026-09-10, unattended] **M80 side-status family folded (fourth green fold)**
 
 - **State:** `rust-main` = master (no-op merge at orient) plus four verified
-  Sonnet worker fast-forwards this session — `b3d9cb554` M77 critcalc,
-  `0bdd9dccd` M78 adjust-damage family, `5bb8fab60` M79 fixed-damage cluster
-  (supervisor-repair commit), `1fe7c7104` M80 side-status family — each
+  Sonnet worker fast-forwards this session — `89ae3d1e8` M77 critcalc,
+  `13b496eac` M78 adjust-damage family, `c19b4effe` M79 fixed-damage cluster
+  (supervisor-repair commit), `0c6a54795` M80 side-status family — each
   followed by its ledger commit and a successful `backup-refs.sh` push.
   Tree clean, committed, green; no worker worktree or branch left behind.
   No ABI, adapter, recovery module, canonical TS, or npm file was touched
@@ -804,8 +804,8 @@ full history regardless.
 
 ## R82 — [supervised session, 2026-09-10 03:01 UTC–, unattended] **M79 fixed-damage cluster folded (third green fold; supervisor-repair commit)**
 
-- **State:** `rust-main` = master + M77 `b3d9cb554` + M78 `0bdd9dccd` + M79
-  `5bb8fab60`, each verified and checkpointed (ledger commit +
+- **State:** `rust-main` = master + M77 `89ae3d1e8` + M78 `13b496eac` + M79
+  `c19b4effe`, each verified and checkpointed (ledger commit +
   `backup-refs.sh`). The fixed-damage cluster (0x9F dmgtolevel / 0xA0
   psywavedamageeffect / 0x94 damagetohalftargethp / 0xD8
   setdamagetohealthdifference) is native. No ABI, adapter, canonical TS, or
@@ -822,7 +822,7 @@ full history regardless.
   jump resolution — plus double regeneration (byte-identical, sha
   `e6d98b465e5546c8c0860c8c1a9fd36100f37bb5980e09df1575a3caef22290d`,
   466,885 B) and all four gates in the worktree, then committed it AS the
-  worker branch commit `5bb8fab60` (supervisor-repair provenance recorded
+  worker branch commit `c19b4effe` (supervisor-repair provenance recorded
   in the commit message). **23 behavior + 9 registration** cases; corpus
   sha256 `20f30d0f4b56a7f048a61544277c63388bf7f427818e127064dbdc7f528ffc2a`.
 - **Next:** possibly one more small leaf this session if the clock allows;
@@ -848,9 +848,9 @@ full history regardless.
 ## R78 — [supervised session wind-down, 2026-09-09 15:03–~17:30 UTC, unattended] **M75 `Cmd_damagecalc` leaf + session close (four green folds)**
 
 - **State:** `rust-main` = master (merge at orient was a no-op) plus four
-  verified Sonnet worker fast-forwards this session — `aa57ef2ba` M72 shared
-  base-damage helper, `99c5ec021` M73 stockpile family, `39f0cbca4` M74
-  jumpif compare family, `2a4170f88` M75 damagecalc — each followed by its
+  verified Sonnet worker fast-forwards this session — `04af3c26b` M72 shared
+  base-damage helper, `ed854dc2f` M73 stockpile family, `be0b4b1f7` M74
+  jumpif compare family, `09f222f49` M75 damagecalc — each followed by its
   ledger commit and a successful `backup-refs.sh` push. Tree clean,
   committed, green; no worker worktree or branch left behind. No ABI,
   adapter, recovery module, canonical TS, or npm file was touched all
@@ -900,7 +900,7 @@ full history regardless.
 
 ## R81 — [supervised session, 2026-09-10 03:01 UTC–, unattended] **M78 adjust-damage family folded (second green fold this session)**
 
-- **State:** `rust-main` = master + M77 `b3d9cb554` + M78 `0bdd9dccd`
+- **State:** `rust-main` = master + M77 `89ae3d1e8` + M78 `13b496eac`
   (both verified Sonnet fast-forwards, each with ledger commit +
   `backup-refs.sh` push). The adjust-damage family (0x07 adjustnormaldamage /
   0x08 adjustnormaldamage2 / 0x69 adjustsetdamage) is native: shared core
@@ -951,7 +951,7 @@ full history regardless.
 ## R80 — [supervised session, 2026-09-10 03:01 UTC–, unattended] **M77 `Cmd_critcalc` leaf folded — hit-chain trio complete, drawBattleScriptRng projection landed**
 
 - **State:** `rust-main` = master (no-op merge at orient; baseline 1,425 green
-  reconfirmed) plus verified Sonnet worker `b3d9cb554` (fast-forward). The
+  reconfirmed) plus verified Sonnet worker `89ae3d1e8` (fast-forward). The
   hit-chain damage trio is now fully native (damagecalc M75, typecalc M76,
   critcalc M77), and M77 is the FIRST RNG-drawing battle-script leaf — its
   projection decision is the precedent for accuracycheck/adjustnormaldamage/
@@ -1001,9 +1001,9 @@ full history regardless.
 ## R79 — [supervised session wind-down (final), 2026-09-09 15:03–~18:00 UTC, unattended] **M76 `Cmd_typecalc` leaf + session close (five green folds)**
 
 - **State:** `rust-main` = master (no-op merge at orient) plus five verified
-  Sonnet worker fast-forwards this session — `aa57ef2ba` M72 shared
-  base-damage helper, `99c5ec021` M73 stockpile family, `39f0cbca4` M74
-  jumpif compare family, `2a4170f88` M75 damagecalc, `e9e3649cd` M76
+  Sonnet worker fast-forwards this session — `04af3c26b` M72 shared
+  base-damage helper, `ed854dc2f` M73 stockpile family, `be0b4b1f7` M74
+  jumpif compare family, `09f222f49` M75 damagecalc, `bc220fef2` M76
   typecalc — each followed by its ledger commit and a successful
   `backup-refs.sh` push. Tree clean, committed, green; no worker worktree or
   branch left behind. No ABI, adapter, recovery module, canonical TS, or npm
@@ -1055,8 +1055,8 @@ full history regardless.
 
 ## R77 — [supervised session, 2026-09-09, unattended] **M74 jumpif compare family leaf + green checkpoint (barrier projection landed)**
 
-- **State:** `rust-main` = R76 checkpoint `b0c81a13f` plus the verified Sonnet
-  worker `39f0cbca4` (fast-forward). The 0x29/0x2A/0x2B
+- **State:** `rust-main` = R76 checkpoint `b53f6c4d5` plus the verified Sonnet
+  worker `be0b4b1f7` (fast-forward). The 0x29/0x2A/0x2B
   `Cmd_jumpifbyte`/`Cmd_jumpifhalfword`/`Cmd_jumpifword` family is native and
   wasm32-compilable, implementing R76's barrier-projection decision: the TS
   `unsupported-branch` halt crosses as a first-class
@@ -1109,8 +1109,8 @@ full history regardless.
 
 ## R76 — [supervised session, 2026-09-09, unattended] **M73 stockpile family leaf + green checkpoint (first shared-helper consumer)**
 
-- **State:** `rust-main` = R75 checkpoint `fb944f2eb` plus the verified Sonnet
-  worker `99c5ec021` (fast-forward). The `B_SCR_OP_STOCKPILE`/
+- **State:** `rust-main` = R75 checkpoint `9fae46362` plus the verified Sonnet
+  worker `ed854dc2f` (fast-forward). The `B_SCR_OP_STOCKPILE`/
   `B_SCR_OP_STOCKPILETOBASEDAMAGE`/`B_SCR_OP_STOCKPILETOHPHEAL`
   (0x85/0x86/0x87) family projection is native and wasm32-compilable — the
   first leaf that composes the M72 shared `battle_script_base_damage` helper
@@ -1160,8 +1160,8 @@ full history regardless.
 
 ## R75 — [supervised session, 2026-09-09, unattended] **M72 shared hit-chain base-damage helper + green checkpoint (first reusable non-opcode battle-script module)**
 
-- **State:** `rust-main` = R74 checkpoint `3975b5f48` (master merge at orient
-  was a no-op) plus the verified Sonnet worker `aa57ef2ba` (fast-forward).
+- **State:** `rust-main` = R74 checkpoint `2960a24c9` (master merge at orient
+  was a no-op) plus the verified Sonnet worker `04af3c26b` (fast-forward).
   `battle_script_base_damage.rs` is the native twin of
   `calculateBattleScriptBaseDamageForCurrentMove`
   (`battleScriptHitChainOpcode.ts:1507-1580`) — a pure rules-slice→damage
@@ -1211,9 +1211,9 @@ full history regardless.
 ## R74 — [supervised session wind-down, 2026-09-08 15:01–~17:55 UTC, unattended] **M71 `Cmd_tryswapitems` leaf + session close (five leaves folded)**
 
 - **State:** `rust-main` = master (merge at orient was a no-op) plus five
-  verified Sonnet worker fast-forwards this session — `94869f4fa`
-  tryrecycleitem, `2ac3156d0` removeitem, `1d34a6ee1` tryimprison,
-  `1e4cbf444` trysetfutureattack, `e39d11dc2` tryswapitems — each followed
+  verified Sonnet worker fast-forwards this session — `a3be5e0c3`
+  tryrecycleitem, `7b16ad646` removeitem, `59e4086ce` tryimprison,
+  `4aab1b732` trysetfutureattack, `346cd02d3` tryswapitems — each followed
   by its ledger commit and a successful `backup-refs.sh` push. Tree clean,
   committed, green; no worker worktree or branch left behind. No ABI,
   adapter, recovery module, canonical TS, or npm file was touched all
@@ -1267,8 +1267,8 @@ full history regardless.
 
 ## R73 — [supervised session, 2026-09-08, unattended] **M70 `Cmd_trysetfutureattack` leaf + green checkpoint (first damage-kernel-reusing leaf)**
 
-- **State:** `rust-main` = R72 checkpoint `80600ca21` plus the verified Sonnet
-  worker `1e4cbf444` (fast-forward). The `B_SCR_OP_TRYSETFUTUREATTACK`
+- **State:** `rust-main` = R72 checkpoint `2d87c7933` plus the verified Sonnet
+  worker `4aab1b732` (fast-forward). The `B_SCR_OP_TRYSETFUTUREATTACK`
   registration/handler projection — the lane's first battle-script leaf that
   calls the ported `damage_calc::calculate_base_damage` kernel and the
   gen_tables MOVES row — is native and wasm32-compilable; no ABI, adapter,
@@ -1315,8 +1315,8 @@ full history regardless.
 
 ## R72 — [supervised session, 2026-09-08, unattended] **M69 `Cmd_tryimprison` leaf + green checkpoint**
 
-- **State:** `rust-main` = R71 checkpoint `28e289027` plus the verified Sonnet
-  worker `1d34a6ee1` (fast-forward). The pure `B_SCR_OP_TRYIMPRISON`
+- **State:** `rust-main` = R71 checkpoint `2a5df14fd` plus the verified Sonnet
+  worker `59e4086ce` (fast-forward). The pure `B_SCR_OP_TRYIMPRISON`
   registration/handler projection — including the dedicated Pressure PP loop
   from `battle_util.c:767-797` — is native and wasm32-compilable; no ABI,
   adapter, recovery module, canonical TS, or npm file was touched. Session
@@ -1360,8 +1360,8 @@ full history regardless.
 
 ## R71 — [supervised session, 2026-09-08, unattended] **M68 `Cmd_removeitem` leaf + green checkpoint**
 
-- **State:** `rust-main` = R70 checkpoint `4345c70c3` plus the verified Sonnet
-  worker `2ac3156d0` (fast-forward). The `B_SCR_OP_REMOVEITEM`
+- **State:** `rust-main` = R70 checkpoint `338f45b8c` plus the verified Sonnet
+  worker `7b16ad646` (fast-forward). The `B_SCR_OP_REMOVEITEM`
   registration/handler projection (13 concrete starts, BS_SCRIPTING /
   BS_ATTACKER selector resolution, unsupported-branch halt) is native and
   wasm32-compilable; no ABI, adapter, recovery module, canonical TS, or npm
@@ -1407,9 +1407,9 @@ full history regardless.
 
 ## R70 — [supervised session, 2026-09-08, unattended] **M67 `Cmd_tryrecycleitem` leaf + green checkpoint**
 
-- **State:** `rust-main` = R69 checkpoint `c62ac5b39` (master merge at orient
+- **State:** `rust-main` = R69 checkpoint `16e899e0c` (master merge at orient
   was a no-op — already up to date) plus the verified Sonnet worker
-  `94869f4fa` (fast-forward). The pure `B_SCR_OP_TRYRECYCLEITEM`
+  `a3be5e0c3` (fast-forward). The pure `B_SCR_OP_TRYRECYCLEITEM`
   registration/handler projection is native and wasm32-compilable; no ABI,
   adapter, recovery module, canonical TS, or npm file was touched. Session
   still active; the `Cmd_removeitem` leaf (the usedHeldItems producer this
@@ -1452,10 +1452,10 @@ full history regardless.
 
 ## R69 — [supervised session wind-down, 2026-09-07 15:01–~18:10 UTC, unattended] **M66 `Cmd_trymemento` leaf + session close (five leaves folded)**
 
-- **State:** `rust-main` = master `3f76b234d` (already merged at orient) plus
-  five verified Sonnet worker fast-forwards this session — `5f534382c`
-  trywish, `966ca09ba` rolloutdamagecalculation, `dc692d9d5` trysetrest,
-  `9ece713e0` chargesport, `f33b967bf` trymemento — each followed by its
+- **State:** `rust-main` = master `d5f22d28d` (already merged at orient) plus
+  five verified Sonnet worker fast-forwards this session — `c7d5c9f30`
+  trywish, `21f40a4fa` rolloutdamagecalculation, `1a9e14af0` trysetrest,
+  `bfc7e79ee` chargesport, `b45263b12` trymemento — each followed by its
   ledger commit and a successful `backup-refs.sh` push. Tree clean,
   committed, green; no worker worktree or branch left behind. No ABI,
   adapter, recovery module, canonical TS, or npm file was touched all
@@ -1499,8 +1499,8 @@ full history regardless.
 
 ## R68 — [supervised session, 2026-09-07, unattended] **M65 `Cmd_setcharge`+`Cmd_settypebasedhalvers` leaf + green checkpoint**
 
-- **State:** `rust-main` = R67 checkpoint `7995c6be3` plus the verified Sonnet
-  worker `9ece713e0` (fast-forward). The paired `B_SCR_OP_SETCHARGE` +
+- **State:** `rust-main` = R67 checkpoint `490d78b38` plus the verified Sonnet
+  worker `bfc7e79ee` (fast-forward). The paired `B_SCR_OP_SETCHARGE` +
   `B_SCR_OP_SETTYPEBASEDHALVERS` registration/handler projection is native
   and wasm32-compilable; no ABI, adapter, recovery module, canonical TS, or
   npm file was touched. Session still active; one more leaf may follow
@@ -1537,8 +1537,8 @@ full history regardless.
 
 ## R67 — [supervised session, 2026-09-07, unattended] **M64 `Cmd_trysetrest` leaf + green checkpoint**
 
-- **State:** `rust-main` = R66 checkpoint `f46f234a8` plus the verified Sonnet
-  worker `dc692d9d5` (fast-forward). The pure `B_SCR_OP_TRYSETREST`
+- **State:** `rust-main` = R66 checkpoint `f23ad854d` plus the verified Sonnet
+  worker `1a9e14af0` (fast-forward). The pure `B_SCR_OP_TRYSETREST`
   registration/handler projection is native and wasm32-compilable; no ABI,
   adapter, recovery module, canonical TS, or npm file was touched. Session
   still active; the `Cmd_chargesport` family dispatching as the final leaf.
@@ -1576,8 +1576,8 @@ full history regardless.
 
 ## R66 — [supervised session, 2026-09-07, unattended] **M63 `Cmd_rolloutdamagecalculation` leaf + green checkpoint**
 
-- **State:** `rust-main` = R65 checkpoint `ec2c211b5` plus the verified Sonnet
-  worker `966ca09ba` (fast-forward). The pure
+- **State:** `rust-main` = R65 checkpoint `e6352ebcf` plus the verified Sonnet
+  worker `21f40a4fa` (fast-forward). The pure
   `B_SCR_OP_ROLLOUTDAMAGECALCULATION` registration/handler projection —
   including an in-module port of `CancelMultiTurnMoves`
   (`battle_util.c:877-888`) applied to the attacker cell on the no-effect
@@ -1618,8 +1618,8 @@ full history regardless.
 
 ## R65 — [supervised session, 2026-09-07, unattended] **M62 `Cmd_trywish` leaf + green checkpoint (kill-pattern fixed in practice)**
 
-- **State:** `rust-main` = R64 checkpoint `114dfd07d` plus the verified Sonnet
-  worker `5f534382c` (fast-forward). The pure `B_SCR_OP_TRYWISH`
+- **State:** `rust-main` = R64 checkpoint `cc07eedf8` plus the verified Sonnet
+  worker `c7d5c9f30` (fast-forward). The pure `B_SCR_OP_TRYWISH`
   registration/handler projection is native and wasm32-compilable; no ABI,
   adapter, recovery module, canonical TS, or npm file was touched. Session
   still active; `Cmd_rolloutdamagecalculation` dispatching next.
@@ -1659,10 +1659,10 @@ full history regardless.
 
 ## R64 — [supervised session wind-down, 2026-08-31 08:24–~11:20 UTC, unattended] **M61 `Cmd_tryswapabilities` leaf + session close (six leaves folded)**
 
-- **State:** `rust-main` = master `3f76b234d` plus six verified Sonnet worker
-  fast-forwards this session — `ee7acdbed` jumpifstatus3condition,
-  `62591d659` jumpifstat, `bd5177a27` getsecretpowereffect, `91b6bbab6`
-  trysetperishsong, `2c3db4311` tryinfatuating, `018b84cc2`
+- **State:** `rust-main` = master `d5f22d28d` plus six verified Sonnet worker
+  fast-forwards this session — `feba84911` jumpifstatus3condition,
+  `e7f7d7436` jumpifstat, `c51ca7a09` getsecretpowereffect, `e584b1b31`
+  trysetperishsong, `8a821fd97` tryinfatuating, `1e6a1b2d0`
   tryswapabilities — each followed by its ledger commit and a successful
   `backup-refs.sh` push. Tree clean, committed, green; no worker worktree or
   branch left behind. No ABI, adapter, recovery module, canonical TS, or npm
@@ -1704,8 +1704,8 @@ full history regardless.
 
 ## R63 — [supervised session, 2026-08-31, unattended] **M60 `Cmd_tryinfatuating` leaf + green checkpoint**
 
-- **State:** `rust-main` = R62 checkpoint `a87441049` plus the verified Sonnet
-  worker `2c3db4311` (fast-forward). The pure `B_SCR_OP_TRYINFATUATING`
+- **State:** `rust-main` = R62 checkpoint `d921ff0bb` plus the verified Sonnet
+  worker `8a821fd97` (fast-forward). The pure `B_SCR_OP_TRYINFATUATING`
   registration/handler projection is native and wasm32-compilable, reusing
   the existing `battle_script_gender` and `battle_script_ai_reveal` ports; no
   ABI, adapter, recovery module, canonical TS, or npm file was touched.
@@ -1740,8 +1740,8 @@ full history regardless.
 
 ## R62 — [supervised session, 2026-08-31, unattended] **M59 `Cmd_trysetperishsong` leaf + green checkpoint**
 
-- **State:** `rust-main` = R61 checkpoint `350b978a0` plus the verified Sonnet
-  worker `91b6bbab6` (fast-forward). The pure `B_SCR_OP_TRYSETPERISHSONG`
+- **State:** `rust-main` = R61 checkpoint `0a36f5569` plus the verified Sonnet
+  worker `e584b1b31` (fast-forward). The pure `B_SCR_OP_TRYSETPERISHSONG`
   registration/handler projection is native and wasm32-compilable; no ABI,
   adapter, recovery module, canonical TS, or npm file was touched. Session
   still active; `Cmd_tryinfatuating` dispatching as the final leaf.
@@ -1777,8 +1777,8 @@ full history regardless.
 
 ## R61 — [supervised session, 2026-08-31, unattended] **M58 `Cmd_getsecretpowereffect` leaf + green checkpoint**
 
-- **State:** `rust-main` = R60 checkpoint `135f4997e` plus the verified Sonnet
-  worker `bd5177a27` (fast-forward). The pure `B_SCR_OP_GETSECRETPOWEREFFECT`
+- **State:** `rust-main` = R60 checkpoint `92c74abef` plus the verified Sonnet
+  worker `c51ca7a09` (fast-forward). The pure `B_SCR_OP_GETSECRETPOWEREFFECT`
   registration/handler projection is native and wasm32-compilable; no ABI,
   adapter, recovery module, canonical TS, or npm file was touched. Session
   still active; `Cmd_trysetperishsong` dispatching next.
@@ -1811,8 +1811,8 @@ full history regardless.
 
 ## R60 — [supervised session, 2026-08-31, unattended] **M57 `Cmd_jumpifstat` leaf + green checkpoint**
 
-- **State:** `rust-main` = R59 checkpoint `8730a5470` plus the verified Sonnet
-  worker `62591d659` (fast-forward). The pure `B_SCR_OP_JUMPIFSTAT`
+- **State:** `rust-main` = R59 checkpoint `0661beb92` plus the verified Sonnet
+  worker `e7f7d7436` (fast-forward). The pure `B_SCR_OP_JUMPIFSTAT`
   registration/handler projection is native and wasm32-compilable; no ABI,
   adapter, recovery module, canonical TS, or npm file was touched. Session
   still active; `Cmd_getsecretpowereffect` dispatching next.
@@ -1842,8 +1842,8 @@ full history regardless.
 
 ## R59 — [supervised session, 2026-08-31 08:24– UTC, unattended] **M56 `Cmd_jumpifstatus3condition` leaf + green checkpoint**
 
-- **State:** `rust-main` = master `3f76b234d` (already merged at orient) plus
-  the verified Sonnet worker `ee7acdbed` (fast-forward). The pure
+- **State:** `rust-main` = master `d5f22d28d` (already merged at orient) plus
+  the verified Sonnet worker `feba84911` (fast-forward). The pure
   `B_SCR_OP_JUMPIFSTATUS3CONDITION` registration/handler projection is native
   and wasm32-compilable; no ABI, adapter, recovery module, canonical TS, or
   npm file was touched. Session still active; next leaf dispatching.
@@ -1879,8 +1879,8 @@ full history regardless.
 
 ## R58 — [supervised session, 2026-08-31 07:28–07:37 UTC] **Master sync + green baseline only (9-minute window)**
 
-- **State:** `rust-main` = merge of master `e4d7a01f0` (merge commit
-  `72d26538f`, clean, no conflicts). No worker was dispatched: the session
+- **State:** `rust-main` = merge of master `7ffc735d4` (merge commit
+  `03a83737a`, clean, no conflicts). No worker was dispatched: the session
   started 9 minutes before its hard deadline, below any worker cap.
 - **Did:** post-merge baseline — **1,068/1,068** native tests passed;
   `factory-wasm` release built for `wasm32-unknown-unknown`, artifact
@@ -1899,8 +1899,8 @@ full history regardless.
 
 ## R57 — [supervised session, 2026-08-31] **Master sync + green Rust baseline; status3 worker cap-safe rejection**
 
-- **State:** `rust-main` merged from `f58353f83` through current master
-  `ba16b8dde`; the persistent tree is clean and no worker commit was folded.
+- **State:** `rust-main` merged from `91167852e` through current master
+  `f8ce7a480`; the persistent tree is clean and no worker commit was folded.
   Native Rust and wasm32 release are green after the merge.
 - **Did:** ran the required post-merge baseline: **1,068/1,068** native tests
   passed and `factory-wasm` release built for `wasm32-unknown-unknown`.
@@ -1927,8 +1927,8 @@ full history regardless.
 
 ## R56 — [supervised session, 2026-08-25] **M55 Helping Hand leaf + final wind-down**
 
-- **State:** `rust-main` = session-start master `33592cba` plus five verified
-  increments through `Cmd_trysethelpinghand` worker `15b28803`. ORWORD,
+- **State:** `rust-main` = session-start master `c78b8d15` plus five verified
+  increments through `Cmd_trysethelpinghand` worker `ae9cf52f`. ORWORD,
   CheckViability tie-receipt retention, Encore, field-ability scan, and Helping
   Hand are committed and green; no ABI, adapter, recovery module, or canonical
   TypeScript file was widened.
@@ -1960,8 +1960,8 @@ full history regardless.
 
 ## R55 — [supervised session, 2026-08-25] **M54 Battle Script field-ability scan + green checkpoint**
 
-- **State:** `rust-main` = merged master `33592cba` plus the four verified
-  session increments through `Cmd_jumpifabilitypresent` worker `70b3417f`.
+- **State:** `rust-main` = merged master `c78b8d15` plus the four verified
+  session increments through `Cmd_jumpifabilitypresent` worker `239afa22`.
   The complete pure two-site registration/topology-scan/control projection is
   native and wasm32-compilable; no ABI, adapter, or recovery module was
   changed. The session remains active, committed, and green.
@@ -1992,8 +1992,8 @@ full history regardless.
 
 ## R54 — [supervised session, 2026-08-25] **M53 Battle Script Encore leaf + green checkpoint**
 
-- **State:** `rust-main` = merged master `33592cba` plus verified ORWORD,
-  CheckViability receipt, and `Cmd_trysetencore` workers through `431a40c7`.
+- **State:** `rust-main` = merged master `c78b8d15` plus verified ORWORD,
+  CheckViability receipt, and `Cmd_trysetencore` workers through `aeeb0a39`.
   The complete pure Encore registration/state/RNG/control projection is native
   and wasm32-compilable; no ABI or adapter surface was widened. The session
   remains active, committed, and green.
@@ -2028,8 +2028,8 @@ full history regardless.
 
 ## R53 — [supervised session, 2026-08-25] **M52 CheckViability tie-receipt repair + green checkpoint**
 
-- **State:** `rust-main` = merged master `33592cba`, verified ORWORD worker
-  `bb3c5ab7`, and verified CheckViability repair `de052e3c`. Rust now retains
+- **State:** `rust-main` = merged master `c78b8d15`, verified ORWORD worker
+  `1c28babb`, and verified CheckViability repair `71b22c94`. Rust now retains
   the SemiInvulnerable5 speed-tie draw before its TryEncourage draw, matching
   canonical TypeScript. The previously skipped forced-WASM parity case is
   active. The session remains active, committed, and green.
@@ -2057,8 +2057,8 @@ full history regardless.
 
 ## R52 — [supervised session, 2026-08-25] **M51 Battle Script ORWORD leaf + green checkpoint**
 
-- **State:** `rust-main` = merged master `33592cba` plus verified
-  `Cmd_orword` worker `bb3c5ab7`. The complete pure
+- **State:** `rust-main` = merged master `c78b8d15` plus verified
+  `Cmd_orword` worker `1c28babb`. The complete pure
   `battleScriptOrwordOpcode.ts` registration/state/control projection is
   native and wasm32-compilable; no ABI or adapter surface was widened. The
   session is active, committed, and green.
@@ -2091,8 +2091,8 @@ full history regardless.
 
 ## R51 — [supervised session, 2026-08-20] **M50 Battle Script Focus Punch no-damage gate + final wind-down**
 
-- **State:** `rust-main` = current master `0dd3f36c` plus verified
-  `Cmd_jumpifnodamage` worker `09a1bcc1`. The complete pure
+- **State:** `rust-main` = current master `4243b4b1` plus verified
+  `Cmd_jumpifnodamage` worker `c63353a9`. The complete pure
   `battleScriptJumpifnodamageOpcode.ts` registration/state/control projection
   is native and wasm32-compilable; no ABI or adapter surface was widened. The
   session ends committed and green.
@@ -2124,13 +2124,13 @@ full history regardless.
   green at **691 modules**. Final soaks are vanilla **20/20 OK** and full
   policy **60/60 OK**, both with zero crashes and zero hangs. Scope stayed
   inside `core-rs/**`; no unsupported barrier, Rust deferral, or papercut was
-  added. `animation-main` has one unfolded commit (`7f2ccb84`); its supervisor
+  added. `animation-main` has one unfolded commit (`287dde94`); its supervisor
   still owns that fold.
 
 ## R50 — [supervised session, 2026-08-15] **M49 Battle Script weather-scaled recovery leaf + final wind-down**
 
-- **State:** `rust-main` = current master `ab862ad1`, including verified
-  `Cmd_recoverbasedonsunlight` worker `34be47ca`. The complete pure
+- **State:** `rust-main` = current master `98fd153e`, including verified
+  `Cmd_recoverbasedonsunlight` worker `3e94a5a4`. The complete pure
   `battleScriptRecoverBasedOnSunlightOpcode.ts` registration/state/control
   projection is native and wasm32-compilable; no ABI or adapter surface was
   widened. The session ends committed and green.
@@ -2171,8 +2171,8 @@ full history regardless.
 
 ## R49 — [supervised session, 2026-08-15] **M48 Battle Script Low Kick weight-damage leaf**
 
-- **State:** `rust-main` = current master `5b9a12af` plus verified
-  `Cmd_weightdamagecalculation` worker `d51a4db2`. The complete pure
+- **State:** `rust-main` = current master `2804ca72` plus verified
+  `Cmd_weightdamagecalculation` worker `c99328a1`. The complete pure
   `battleScriptWeightDamageOpcode.ts` registration/catalog/scalar/state/control
   projection is native and wasm32-compilable; no ABI or adapter surface was
   widened. The session remains active and committed.
@@ -2212,8 +2212,8 @@ full history regardless.
 
 ## R48 — [supervised session, 2026-08-15] **M47 Battle Script Pain Split leaf + green checkpoint**
 
-- **State:** `rust-main` = current master `d23e6e3a` plus verified Pain Split
-  worker `4aa27ce8` and metadata-ratchet repair `d69b464d`. The complete pure
+- **State:** `rust-main` = current master `d6acd89e` plus verified Pain Split
+  worker `25683da5` and metadata-ratchet repair `df435e89`. The complete pure
   `battleScriptPainSplitOpcode.ts` registration/state/control projection is
   native and wasm32-compilable; no ABI or adapter surface was widened. The
   session reached a committed green checkpoint and then continued.
@@ -2252,7 +2252,7 @@ full history regardless.
 
 ## R47 — [supervised session, 2026-08-15] **M46 Battle Script half-health heal setup leaf**
 
-- **State:** verified `Cmd_tryhealhalfhealth` worker `341caa2b`; the complete
+- **State:** verified `Cmd_tryhealhalfhealth` worker `0b56bfd0`; the complete
   pure registration/state/control projection is native and wasm32-compilable.
 - **Did:** ported operand-before-role selection, attacker target rebinding,
   exact `-max(1, floor(maxHP / 2))` damage, full-HP failure, and failure-only
@@ -2268,8 +2268,8 @@ full history regardless.
 
 ## R46 — [supervised session, 2026-08-15] **M45 Battle Script Substitute state-construction leaf**
 
-- **State:** `rust-main` = current master `e106866a` plus R43-R45 and verified
-  `Cmd_setsubstitute` worker `1d0fb8bc`. The complete pure
+- **State:** `rust-main` = current master `54a60a52` plus R43-R45 and verified
+  `Cmd_setsubstitute` worker `fbe51e93`. The complete pure
   `battleScriptSetsubstituteOpcode.ts` registration/state/control projection is
   native and wasm32-compilable; no ABI or adapter surface was widened. The
   session remains active and committed.
@@ -2307,8 +2307,8 @@ full history regardless.
 
 ## R45 — [supervised session, 2026-08-14] **M44 Battle Script four-weather setter family**
 
-- **State:** `rust-main` = current master `3c913c8a` plus R43-R44 and verified
-  weather worker `d9d0c4ac`. The complete pure
+- **State:** `rust-main` = current master `c75b6dd1` plus R43-R44 and verified
+  weather worker `1c96d3df`. The complete pure
   `battleScriptSetWeatherOpcode.ts` four-opcode registration/state/control
   family is native and wasm32-compilable; no ABI or adapter surface was
   widened. The session remains active and committed.
@@ -2343,8 +2343,8 @@ full history regardless.
 
 ## R44 — [supervised session, 2026-08-14] **M43 Battle Script Fury Cutter counter/power leaf**
 
-- **State:** `rust-main` = current master `b4097e84` plus R43 and verified
-  `Cmd_furycuttercalc` worker `81f7817d`. The complete pure
+- **State:** `rust-main` = current master `a4ad65ad` plus R43 and verified
+  `Cmd_furycuttercalc` worker `257daae9`. The complete pure
   `battleScriptFuryCutterOpcode.ts` registration/state/control projection is
   native and wasm32-compilable; no ABI, adapter, or animation surface was
   widened. The session remains active and committed.
@@ -2378,8 +2378,8 @@ full history regardless.
 
 ## R43 — [supervised session, 2026-08-14] **M42 Battle Script Return/Frustration friendship-power leaf**
 
-- **State:** `rust-main` = current master `b4097e84` plus verified
-  `Cmd_friendshiptodamagecalculation` worker `9e69bb13`. The complete pure
+- **State:** `rust-main` = current master `a4ad65ad` plus verified
+  `Cmd_friendshiptodamagecalculation` worker `1dc46208`. The complete pure
   `battleScriptFriendshipToDamageOpcode.ts` registration/scalar/state/control
   projection is native and wasm32-compilable; no ABI or adapter surface was
   widened. The session remains active and committed.
@@ -2413,8 +2413,8 @@ full history regardless.
 
 ## R42 — [supervised session, 2026-08-14] **M41 Battle Script Flail/Reversal HP-power leaf + final wind-down**
 
-- **State:** `rust-main` = current master `e9b256c2` plus verified
-  `Cmd_remaininghptopower` worker `49e74474`. The complete pure
+- **State:** `rust-main` = current master `0d804653` plus verified
+  `Cmd_remaininghptopower` worker `f067faea`. The complete pure
   `battleScriptRemainingHpToPowerOpcode.ts` scalar/state/control projection is
   native and wasm32-compilable; no ABI or adapter surface was widened. The
   session ends committed and green.
@@ -2451,8 +2451,8 @@ full history regardless.
 
 ## R41 — [supervised session, 2026-08-14] **M40 Battle Script Torment status leaf + wind-down**
 
-- **State:** `rust-main` = current master `77cc08e1` plus verified
-  `Cmd_settorment` worker `b4d693e1`. The complete pure
+- **State:** `rust-main` = current master `685aa4cd` plus verified
+  `Cmd_settorment` worker `95d2290d`. The complete pure
   `battleScriptSettormentOpcode.ts` handler/state/control projection is native
   and wasm32-compilable; no ABI or adapter surface was widened. The session
   ends committed and green.
@@ -2487,8 +2487,8 @@ full history regardless.
 
 ## R40 — [supervised session, 2026-08-14] **M39 Battle Script Spikes setup leaf**
 
-- **State:** `rust-main` = current master `87038ec0` plus verified
-  `Cmd_trysetspikes` worker `e101e3c2`. The complete pure
+- **State:** `rust-main` = current master `9465868d` plus verified
+  `Cmd_trysetspikes` worker `e1a78ce4`. The complete pure
   `battleScriptTrysetspikesOpcode.ts` decision/state/control projection is
   native and wasm32-compilable; no ABI or adapter surface was widened.
 - **Did:** ported handler operand validation, ordered attacker resolution,
@@ -2524,8 +2524,8 @@ full history regardless.
 
 ## R39 — [supervised session, 2026-08-14] **M38 Battle Script attacker/target swap leaf**
 
-- **State:** `rust-main` = current master `da55e159` plus verified
-  `Cmd_swapattackerwithtarget` worker `3ace7c14`. The complete three-command
+- **State:** `rust-main` = current master `a4497fbd` plus verified
+  `Cmd_swapattackerwithtarget` worker `bbe43113`. The complete three-command
   pure projection of `battleScriptSnatchOpcode.ts` is now native and
   wasm32-compilable; no ABI or adapter surface was widened.
 - **Did:** ported ordered attacker-then-target resolution, exact role exchange,
@@ -2558,8 +2558,8 @@ full history regardless.
 
 ## R38 — [supervised session, 2026-08-14] **M37 Battle Script Snatch role-rebinding leaf**
 
-- **State:** `rust-main` = current master `edb54f4f` plus verified
-  `Cmd_snatchsetbattlers` worker `cc70dc78`. The complete pure selector-role
+- **State:** `rust-main` = current master `0a66b217` plus verified
+  `Cmd_snatchsetbattlers` worker `7cabfe00`. The complete pure selector-role
   and scripting-battler projection is native and wasm32-compilable. Only the
   final attacker/target swap sibling remains in this TS module; no ABI or
   adapter surface was widened.
@@ -2593,8 +2593,8 @@ full history regardless.
 
 ## R37 — [supervised session, 2026-08-14] **M36 Battle Script Snatch setup leaf**
 
-- **State:** `rust-main` = current master `770a40ee` plus verified Snatch
-  worker `93453150`. The pure `Cmd_trysetsnatch` decision/state/control
+- **State:** `rust-main` = current master `c42b6381` plus verified Snatch
+  worker `30c9aa84`. The pure `Cmd_trysetsnatch` decision/state/control
   projection is native and wasm32-compilable. The module's two role commands
   remain intentionally unported; no ABI or adapter surface was widened.
 - **Did:** ported exact attacker resolution, attacker-only PP
@@ -2625,8 +2625,8 @@ full history regardless.
 
 ## R36 — [supervised session, 2026-08-14] **M35 Battle Script Magic Coat setup leaf**
 
-- **State:** `rust-main` = current master `b47d45a7` plus verified Magic Coat
-  worker `4af4026c`. The complete pure
+- **State:** `rust-main` = current master `a9014e6f` plus verified Magic Coat
+  worker `8c141035`. The complete pure
   `battleScriptTrysetmagiccoatOpcode.ts` decision/state/control projection is
   native and wasm32-compilable. No ABI or adapter surface was widened.
 - **Did:** ported the source-ordered target=attacker and PP Pressure-exemption
@@ -2658,8 +2658,8 @@ full history regardless.
 
 ## R35 — [supervised session, 2026-08-14] **M34 Battle Script Destiny Bond hit-marker leaf + wind-down**
 
-- **State:** `rust-main` = current master `9b368bd8` plus the verified Destiny
-  Bond worker through `4f611578`. The complete pure
+- **State:** `rust-main` = current master `54283db0` plus the verified Destiny
+  Bond worker through `7912bb4a`. The complete pure
   `battleScriptTrysetdestinybondtohappenOpcode.ts` state/control projection and
   its shared helper are native and wasm32-compilable. No ABI or adapter surface
   was widened; the session ended committed and green.
@@ -2694,8 +2694,8 @@ full history regardless.
 
 ## R34 — [supervised session, 2026-08-14] **M33 Battle Script Role Play ability-copy leaf**
 
-- **State:** `rust-main` = current master `9b368bd8` plus the verified Role
-  Play worker through `f170adba`. The complete pure
+- **State:** `rust-main` = current master `54283db0` plus the verified Role
+  Play worker through `51de1de1`. The complete pure
   `battleScriptTrycopyabilityOpcode.ts` decision/state/control projection is
   native and wasm32-compilable. No ABI or adapter surface was widened.
 - **Did:** ported attacker-then-target role resolution with the canonical
@@ -2730,8 +2730,8 @@ full history regardless.
 
 ## R33 — [supervised session, 2026-08-14] **M32 Battle Script Pay Day payout leaf**
 
-- **State:** `rust-main` = current master `9b368bd8` plus the verified Pay Day
-  worker through `8aa5e68f`. The complete pure
+- **State:** `rust-main` = current master `54283db0` plus the verified Pay Day
+  worker through `e670e131`. The complete pure
   `battleScriptGivepaydaymoneyOpcode.ts` state/control projection is native
   and wasm32-compilable. No ABI or adapter surface was widened.
 - **Did:** ported the source-ordered suppression predicate for `BATTLE_TYPE_LINK`,
@@ -2765,8 +2765,8 @@ full history regardless.
 
 ## R32 — [supervised session, 2026-08-14] **M31 Battle Script Psych Up stat-stage copy leaf**
 
-- **State:** `rust-main` = current master `9b368bd8` plus the verified Psych Up
-  worker through merge `60da5305`. The complete pure
+- **State:** `rust-main` = current master `54283db0` plus the verified Psych Up
+  worker through merge `9b33ded1`. The complete pure
   `battleScriptCopyFoeStatsOpcode.ts` state/control projection is native and
   wasm32-compilable. No ABI or adapter surface was widened.
 - **Did:** ported exact attacker-then-target role resolution and the source
@@ -2803,8 +2803,8 @@ full history regardless.
 
 ## R31 — [supervised session, 2026-08-14] **M30 Battle Script Thrash-family post-lock confusion-byte leaf**
 
-- **State:** `rust-main` = current master `b1ddefa6` plus the verified
-  confuse-if-repeating-attack-ends worker through merge `be7add4c`. The
+- **State:** `rust-main` = current master `6e9396a4` plus the verified
+  confuse-if-repeating-attack-ends worker through merge `4fbbb86c`. The
   complete pure `battleScriptConfuseifrepeatingattackendsOpcode.ts`
   state/control projection is native and wasm32-compilable. No ABI or adapter
   surface was widened.
@@ -2839,8 +2839,8 @@ full history regardless.
 
 ## R30 — [supervised session, 2026-08-14] **M29 Battle Script Bide setup state leaf**
 
-- **State:** `rust-main` = current master `732e6339` plus the verified Bide
-  setup worker through `68601406`. The complete pure
+- **State:** `rust-main` = current master `7c0b7e35` plus the verified Bide
+  setup worker through `d183c5ed`. The complete pure
   `battleScriptSetbideOpcode.ts` state/control projection is native and
   wasm32-compilable. No ABI or adapter surface was widened.
 - **Did:** ported exact missing-attacker resolution and the source-ordered
@@ -2873,8 +2873,8 @@ full history regardless.
 
 ## R29 — [supervised session, 2026-08-14] **M28 Battle Script Fake Out first-turn decision leaf**
 
-- **State:** `rust-main` = current master `732e6339` plus the verified Fake Out
-  first-turn worker through merge `376d6de8`. The complete pure
+- **State:** `rust-main` = current master `7c0b7e35` plus the verified Fake Out
+  first-turn worker through merge `c229f469`. The complete pure
   `battleScriptJumpifnotfirstturnOpcode.ts` decision projection is native and
   wasm32-compilable. No ABI or adapter surface was widened.
 - **Did:** ported exact missing-attacker resolution and the source truth test
@@ -2905,8 +2905,8 @@ full history regardless.
 
 ## R28 — [supervised session, 2026-08-14] **M27 Battle Script Grudge decision/state leaf**
 
-- **State:** `rust-main` = current master `b0356695` plus the verified Grudge
-  worker through merge `0a10f766`. The complete pure
+- **State:** `rust-main` = current master `572fcef4` plus the verified Grudge
+  worker through merge `7bc96401`. The complete pure
   `battleScriptTrysetgrudgeOpcode.ts` decision/state projection is native and
   wasm32-compilable. No ABI or adapter surface was widened.
 - **Did:** ported exact missing-attacker resolution and the source Grudge-bit
@@ -2937,8 +2937,8 @@ full history regardless.
 
 ## R27 — [supervised session, 2026-08-14] **M26 Battle Script Revenge damage-receipt multiplier leaf**
 
-- **State:** `rust-main` = current master `aff0e782` plus the verified Revenge
-  worker through merge `672d1c0e` and current union merge `4edb9494`. The
+- **State:** `rust-main` = current master `992c986a` plus the verified Revenge
+  worker through merge `ba117e99` and current union merge `773df3e8`. The
   complete pure `battleScriptDoubleDamageIfDamagedOpcode.ts` decision/state
   projection is native and wasm32-compilable. No ABI or adapter surface was
   widened.
@@ -2969,8 +2969,8 @@ full history regardless.
 
 ## R26 — [supervised session, 2026-08-14] **M25 Battle Script Haze stat-stage normalization leaf**
 
-- **State:** `rust-main` = current master `f12a66e6` plus the verified Haze
-  worker through merge `85e5cf27`. The complete pure
+- **State:** `rust-main` = current master `3cd2a89c` plus the verified Haze
+  worker through merge `cfac113c`. The complete pure
   `battleScriptNormalisebuffsOpcode.ts` state projection is native and
   wasm32-compilable. No ABI or adapter surface was widened.
 - **Did:** ported the unconditional four-battler by eight-stage signed-s8
@@ -3001,8 +3001,8 @@ full history regardless.
 
 ## R25 — [supervised session, 2026-08-14] **M24 Battle Script Follow Me forced-target state leaf**
 
-- **State:** `rust-main` = current master `33e440dc` plus the verified Follow
-  Me worker through merge `e15bfadc`. The complete pure
+- **State:** `rust-main` = current master `46e75846` plus the verified Follow
+  Me worker through merge `6455280b`. The complete pure
   `battleScriptSetforcedtargetOpcode.ts` state projection is native and
   wasm32-compilable. No ABI or adapter surface was widened.
 - **Did:** ported exact missing-attacker ordering, attacker-record side
@@ -3034,8 +3034,8 @@ full history regardless.
 
 ## R24 — [supervised session, 2026-08-14] **M23 Battle Script Focus Energy decision/state leaf**
 
-- **State:** `rust-main` = current master `85fca820` plus the verified Focus
-  Energy worker through merge `cfbf6863`. The complete pure
+- **State:** `rust-main` = current master `a0d16569` plus the verified Focus
+  Energy worker through merge `f704baf8`. The complete pure
   `battleScriptSetfocusenergyOpcode.ts` decision/state projection is native
   and wasm32-compilable. No ABI or adapter surface was widened.
 - **Did:** ported exact missing-attacker ordering, the clear-state attacker-
@@ -3067,8 +3067,8 @@ full history regardless.
 
 ## R23 — [supervised session, 2026-08-14] **M22 Battle Script Defense Curl state leaf**
 
-- **State:** `rust-main` = current master `58a818fd` plus the verified Defense
-  Curl worker through merge `6f1b4f88`. The complete pure
+- **State:** `rust-main` = current master `53242305` plus the verified Defense
+  Curl worker through merge `02af4895`. The complete pure
   `battleScriptSetDefenseCurlBitOpcode.ts` state projection is native and
   wasm32-compilable. No ABI or adapter surface was widened.
 - **Did:** ported exact missing-attacker ordering and the unconditional,
@@ -3100,8 +3100,8 @@ full history regardless.
 
 ## R22 — [supervised session, 2026-08-14] **M21 Battle Script Foresight state leaf**
 
-- **State:** `rust-main` = current master `9deb3cae` plus the verified
-  Foresight worker through merge `84874b0c`. The complete pure
+- **State:** `rust-main` = current master `2706c9ee` plus the verified
+  Foresight worker through merge `26026770`. The complete pure
   `battleScriptSetforesightOpcode.ts` state projection is native and
   wasm32-compilable. No ABI or adapter surface was widened.
 - **Did:** ported exact missing-target ordering and the unconditional,
@@ -3134,11 +3134,11 @@ full history regardless.
 
 ## R21 — [supervised session, 2026-08-14] **M20 Battle Script Taunt decision/state leaf + clean wind-down**
 
-- **State:** `rust-main` started from master `438d06ba` and now contains the
-  verified R15-R21 sequence through `669b5606`. The complete pure
+- **State:** `rust-main` started from master `7e3d4b0c` and now contains the
+  verified R15-R21 sequence through `bf42a7f3`. The complete pure
   `battleScriptSettauntOpcode.ts` decision/state projection is native and
   wasm32-compilable. No ABI or adapter surface was widened. Master advanced
-  independently to `ad9152bb` during validation; its normal supervisor fold
+  independently to `44079106` during validation; its normal supervisor fold
   remains the union point.
 - **Did:** ported exact missing-target ordering, the unchanged nonzero-timer
   `FailJump`, and the zero-timer target-only write of `2` with `Advance`.
@@ -3147,7 +3147,7 @@ full history regardless.
   cases** across all four targets, every four-bit timer `0..15`, boundaries,
   target-only mutation, missing role, and repeated application; corpus sha256
   `8a33204cf0d64ca843cc542d079fea16ca33e2231e1a1f6da49f7aa4a6a0b426`.
-- **Next:** after the main supervisor folds `669b5606`, select the next
+- **Next:** after the main supervisor folds `bf42a7f3`, select the next
   conflict-free pure Battle Script leaf. M7c opponent generation remains
   deferred while Issue #55 is open. Keep opcode registration, generic
   BattleState reduction, presentation, and callback expansion out.
@@ -3169,8 +3169,8 @@ full history regardless.
 
 ## R20 — [supervised session, 2026-08-14] **M19 Battle Script Yawn decision/state leaf**
 
-- **State:** `rust-main` = current master `438d06ba` plus verified R15-R20
-  through `4d0fa001`. The complete pure `battleScriptSetyawnOpcode.ts`
+- **State:** `rust-main` = current master `7e3d4b0c` plus verified R15-R20
+  through `71daba18`. The complete pure `battleScriptSetyawnOpcode.ts`
   decision/state projection is native and wasm32-compilable; no ABI or
   adapter surface was widened.
 - **Did:** ported exact missing-target ordering, the source-ordered
@@ -3199,8 +3199,8 @@ full history regardless.
 
 ## R19 — [supervised session, 2026-08-14] **M18 Battle Script Minimize state leaf**
 
-- **State:** `rust-main` = current master `438d06ba` plus verified R15-R19
-  through `a921e290`. The complete pure
+- **State:** `rust-main` = current master `7e3d4b0c` plus verified R15-R19
+  through `ec318b74`. The complete pure
   `battleScriptSetminimizeOpcode.ts` state projection is native and
   wasm32-compilable; no ABI or adapter surface was widened.
 - **Did:** ported the exact `HITMARKER_OBEYS` gate ordering: a clear gate is a
@@ -3229,8 +3229,8 @@ full history regardless.
 
 ## R18 — [supervised session, 2026-08-14] **M17 Battle Script Destiny Bond state leaf**
 
-- **State:** `rust-main` = current master `438d06ba` plus verified R15-R18
-  through `d048dc24`. The complete pure
+- **State:** `rust-main` = current master `7e3d4b0c` plus verified R15-R18
+  through `c2cf8db8`. The complete pure
   `battleScriptSetdestinybondOpcode.ts` state projection is native and
   wasm32-compilable; no ABI or adapter surface was widened.
 - **Did:** ported the exact four-battler attacker-only transformation: require
@@ -3259,8 +3259,8 @@ full history regardless.
 
 ## R17 — [supervised session, 2026-08-14] **M16 Battle Script always-hit state leaf**
 
-- **State:** `rust-main` = current master `438d06ba` plus verified R15-R17
-  through `22b46762`. The complete pure
+- **State:** `rust-main` = current master `7e3d4b0c` plus verified R15-R17
+  through `7e7e6df1`. The complete pure
   `battleScriptSetalwayshitflagOpcode.ts` state projection is native and
   wasm32-compilable; no ABI or adapter surface was widened.
 - **Did:** ported the exact four-battler attacker/target transformation: clear
@@ -3290,8 +3290,8 @@ full history regardless.
 
 ## R16 — [supervised session, 2026-08-14] **M15 Battle Script negative-damage arithmetic**
 
-- **State:** `rust-main` = current master `438d06ba` plus verified R15 and R16
-  `f28a20e6`. The complete pure `battleScriptNegativedamageOpcode.ts`
+- **State:** `rust-main` = current master `7e3d4b0c` plus verified R15 and R16
+  `34fcd7ab`. The complete pure `battleScriptNegativedamageOpcode.ts`
   arithmetic surface is native and wasm32-compilable; no ABI or adapter
   surface was widened.
 - **Did:** ported signed-`i32` `-Math.floor(hpDealt / 2)` plus the exact
@@ -3318,8 +3318,8 @@ full history regardless.
 
 ## R15 — [supervised session, 2026-08-13] **M14 Battle Script battler-position resolver**
 
-- **State:** `rust-main` = current master `438d06ba` plus verified R15
-  `14003781`. The complete pure `battleScriptBattlerPositions.ts` resolver is
+- **State:** `rust-main` = current master `7e3d4b0c` plus verified R15
+  `c55a8099`. The complete pure `battleScriptBattlerPositions.ts` resolver is
   native and wasm32-compilable; no ABI or adapter surface was widened.
 - **Did:** ported the typed `2 | 4` battler-count domain, both canonical left
   positions, the raw `BS_ATTACKER -> opponent-left` byte collision, exact
@@ -3343,9 +3343,9 @@ full history regardless.
 
 ## R14 — [supervised session, 2026-08-13] **M13 Battle Script gender resolver**
 
-- **State:** `rust-main` = current master `b8b7986a` plus this ledger-only
-  wind-down, including verified M13 merge `a51fef82`, target-portability
-  repair `1108053b`, and the final v44 master union. The complete
+- **State:** `rust-main` = current master `9b4f4286` plus this ledger-only
+  wind-down, including verified M13 merge `36bb3828`, target-portability
+  repair `3ffef1dc`, and the final v44 master union. The complete
   pure `battleScriptGender.ts` lookup surface is native and wasm32-compilable;
   no ABI or adapter surface was widened.
 - **Did:** added an isolated generated **411-pair** species/gender-ratio table
@@ -3376,8 +3376,8 @@ full history regardless.
 
 ## R13 — [supervised session, 2026-08-13] **M12 Battle Script AI reveal leaf**
 
-- **State:** `rust-main` = current master `0a45638e` plus verified M12 through
-  merge head `8fb5aeb6`. The complete pure `battleScriptAiReveal.ts` surface is
+- **State:** `rust-main` = current master `df5135ed` plus verified M12 through
+  merge head `7662a433`. The complete pure `battleScriptAiReveal.ts` surface is
   native; no ABI or adapter surface was widened.
 - **Did:** ported immutable AI knowledge overlays for revealed abilities and
   held-item effects using two four-battler arrays and a bounded battler enum.
@@ -3398,8 +3398,8 @@ full history regardless.
 
 ## R12 — [supervised session, 2026-08-13] **M11 key-repeat core + WASM boundary**
 
-- **State:** `rust-main` = current master `17164d1d` plus verified M11 through
-  merge head `3d0e1bc1`. The complete pure `keyRepeat.ts` surface is native and
+- **State:** `rust-main` = current master `6ccc2141` plus verified M11 through
+  merge head `7b5fb5c3`. The complete pure `keyRepeat.ts` surface is native and
   forced-WASM reachable with no TypeScript fallback.
 - **Did:** ported the canonical ten-button mask, bounded shared counter,
   `INITIAL_KEY_REPEAT_STATE`, `readKeys`, and `hasButton`; added one checked
@@ -3421,8 +3421,8 @@ full history regardless.
 
 ## R11 — [supervised session, 2026-08-13] **M10c draft-selection WASM boundary**
 
-- **State:** `rust-main` = current master `d7250c24` plus verified M10c
-  `ae564d1e` (merge head `d608104f`). The complete 12-helper pure draft
+- **State:** `rust-main` = current master `8950c86b` plus verified M10c
+  `6d1f6267` (merge head `43460263`). The complete 12-helper pure draft
   selection surface is native and forced-WASM reachable with no TS fallback.
 - **Did:** added one checked additive ABI-v1 operation packet preserving UTF-8
   species/messages, six full rental sources, u32 boundaries, and optional
@@ -3442,8 +3442,8 @@ full history regardless.
 
 ## R10 — [supervised session, 2026-08-13] **M10b draft projections**
 
-- **State:** `rust-main` = current master `cc8e1d3f` plus verified M10b
-  `11410fba` (merge head `e4ab5621`). The complete presentation-free draft
+- **State:** `rust-main` = current master `7a0dba6e` plus verified M10b
+  `36469617` (merge head `96517f2b`). The complete presentation-free draft
   selection helper surface is native; no ABI or adapter was widened.
 - **Did:** ported `chosenMonSpecies` with rank-order emission, later-duplicate
   overwrite, sparse-rank skipping, and above-three non-emission; ported
@@ -3464,8 +3464,8 @@ full history regardless.
 
 ## R9 — [supervised session, 2026-08-13] **M10a draft-selection helper leaf**
 
-- **State:** `rust-main` = current master `af0688fb` plus verified M9 and
-  native-only M10a through `308a87c7`. Ten presentation-free draft-selection
+- **State:** `rust-main` = current master `b2a98a3e` plus verified M9 and
+  native-only M10a through `a15e75ee`. Ten presentation-free draft-selection
   helpers are native; no ABI or adapter surface was widened.
 - **Did:** ported select/deselect numbering and immutable-copy behavior,
   first-pick renumbering (including `findIndex === -1`), selection messages,
@@ -3487,8 +3487,8 @@ full history regardless.
 
 ## R8 — [supervised session, 2026-08-13] **M9d Factory swap WASM boundary**
 
-- **State:** `rust-main` = current master `af0688fb` plus verified M9c–M9d
-  through `d5c7cb8d` (merge head `cca0ac1e`). The complete pure Factory swap
+- **State:** `rust-main` = current master `b2a98a3e` plus verified M9c–M9d
+  through `8ac01891` (merge head `a8e7ee8d`). The complete pure Factory swap
   surface is native and reachable through forced WASM with no TypeScript
   fallback. `RUST_DEFERRED.md` has no open entries.
 - **Did:** added one versioned additive ABI-v1 operation packet for all eight
@@ -3514,8 +3514,8 @@ full history regardless.
 
 ## R7 — [supervised session, 2026-08-13] **M9c Factory swap input reducer**
 
-- **State:** `rust-main` = current master `6edeb188` plus verified M9c
-  `29470d38`. The complete pure `factorySwap.ts` state, mutation, cursor,
+- **State:** `rust-main` = current master `d40eb745` plus verified M9c
+  `556e307d`. The complete pure `factorySwap.ts` state, mutation, cursor,
   decision, and six-input reducer surface is now native. `RUST_DEFERRED.md`
   has no open entries.
 - **Did:** ported every `handleFactorySwapInput` readiness gate, picker/action
@@ -3540,8 +3540,8 @@ full history regardless.
 
 ## R6 — [supervised session, 2026-08-13] **M8d–M8j live planning + M9a–M9b Factory swap leaves**
 
-- **State:** `rust-main` = master `fafcf933` plus verified M8d–M9b through
-  `50a2466e`. The complete pure `createFactoryAiViewFromLiveRules` projection
+- **State:** `rust-main` = master `3121473f` plus verified M8d–M9b through
+  `b68307d1`. The complete pure `createFactoryAiViewFromLiveRules` projection
   and source-shaped mask-0/1/7 move chooser are native and WASM differential-
   green end-to-end; the live driver's private RNG replay/checkpoint leaf is
   native, and a single native projection drives every existing chooser.
@@ -3675,7 +3675,7 @@ full history regardless.
 
 ## R5 — [supervised session, 2026-08-12] **M5–M7 COMPLETE; M8 live-driver leaves advancing**
 
-- **State:** rust-main = master `ebd00cda`, which contains the verified M8a–M8c
+- **State:** rust-main = master `256c43e5`, which contains the verified M8a–M8c
   folds. Battle history is native and WASM differential-green end-to-end;
   live-view weather and stat-stage projections are native.
   Factory trainer selection and the seven-trainer schedule are now
@@ -3798,8 +3798,8 @@ full history regardless.
 
 ## R4 — [supervised session, 2026-08-11 night through 2026-08-12] **M5f-2 folded: the pure DecisionPolicy is native**
 
-- **State:** rust-main = master `27804f67` + verified Rust folds through
-  M5f-2b `d92cf1dd`/`acecf978`. The full pure DecisionPolicy (mask 0/1/7),
+- **State:** rust-main = master `bb43e44b` + verified Rust folds through
+  M5f-2b `5deb6ff9`/`34cead26`. The full pure DecisionPolicy (mask 0/1/7),
   mask selector, CheckBadMove, TryToFaint, and CheckViability are native;
   all boundary-bearing surfaces through CheckViability cross the WASM
   differential harness. Main-tree artifact is 253,842 bytes, sha256
@@ -3819,7 +3819,7 @@ full history regardless.
   and guessed ability exact. `CBM_HANDLED_EFFECTS_M5B1` = exactly the 32
   batch effects. Post-fold on rust-main: cargo 204/204, artifact rebuilt,
   smoke 375/375. Worker: sonnet, 23.6 min of a 90-min cap, 2 commits.
-- **M5b-2 DONE (fold `cc1b07e1`):** all 33 RNG-gated status/stat-DOWN
+- **M5b-2 DONE (fold `cf4520e8`):** all 33 RNG-gated status/stat-DOWN
   effects native (OHKO/Sleep/Roar/Paralyze/Confuse-Swagger-Flatter/
   Toxic-Poison/WillOWisp/LeechSeed/FakeOut, the 14-effect stat-DOWN
   shared-tail family, KnockOff+Trick, Attract full gender matrix,
@@ -3841,7 +3841,7 @@ full history regardless.
   Marowak 3-draw both-sites chain; Attract vs known-Oblivious −10/0-draw)
   — exact. Post-fold: artifact rebuilt, smoke 375/375. Worker: sonnet,
   30.0 min, 2 commits.
-- **M5b-3 DONE (fold `b139100e`) — CheckBadMove is 109/109 native.** All
+- **M5b-3 DONE (fold `57de92b1`) — CheckBadMove is 109/109 native.** All
   44 zero-RNG stat-UP/screens/singles effects;
   `unported_cbm_table_effects()` = `[]`; completeness probe flipped to
   the all-ported arm; `NotYetPorted` barrier stays (honesty analog of
@@ -3863,7 +3863,7 @@ full history regardless.
   21.4 min, 1 commit. Worker PAPERCUT worth adopting as lane practice:
   always verify move ids against moves.json before hand-typing them in
   directed cases — several first-pass guesses were wrong.
-- **M5c DONE (fold `570239fc`) — the Factory AI surface is behind the
+- **M5c DONE (fold `910a302e`) — the Factory AI surface is behind the
   differential harness.** 2 additive fw_ exports (ABI v1 unchanged):
   `fw_select_factory_ai_mask` (scalar args in; 28 B ok / 10 B error out,
   all 4 FactoryAiMaskError sites cross as codes) and
@@ -3890,7 +3890,7 @@ full history regardless.
   EVASION_UP_2, EVASION_DOWN_2, SPECIAL_DEFENSE_DOWN, SPECIAL_DEFENSE_UP,
   SPEED_UP (base variants; their _2 siblings do carry moves). Verified
   against moves.json.
-- **M5d batching scout folded (`abc54dfd`):**
+- **M5d batching scout folded (`b651742a`):**
   `docs/rust-m5d-checkviability-batching.md` — CheckViability (9516
   lines, 122 table effects, TS-side 598/598 complete) partitioned into
   **M5d-0 (preamble+shared infra) then M5d-1..5** (13/29/30/22/28
@@ -3914,7 +3914,7 @@ full history regardless.
   test **977 files / 9,527 passed / 1 pre-existing skip**, npm build
   green, soak **vanilla 20/20 OK** + **full 60/60 OK**. No orphan
   worker worktrees or branches; RUST_DEFERRED.md has no open entries.
-- **M5d-0 DONE (fold `19de08f6`):** `factory_ai_check_viability.rs` —
+- **M5d-0 DONE (fold `3ece0829`):** `factory_ai_check_viability.rs` —
   unified `FactoryAiCheckViabilityBattler` (42 fields, recounted =
   scout), `CheckViabilityDraw` 62 variants over a shared flat
   101-leaf `CvDrawKind` enum (worker recount: **136** distinct TS leaf
@@ -3938,7 +3938,7 @@ full history regardless.
   independently (fallback present→carried, absent→absent; table-effect
   sanity proves shell vectors can't cover them). Post-fold: artifact
   rebuilt, smoke 375/375. Worker: sonnet, 21.6 min, 1 commit.
-- **M5d-1 DONE (fold `dfc75027`):** 13 effects (Sleep, SpeedDown+_2,
+- **M5d-1 DONE (fold `4d9abe50`):** 13 effects (Sleep, SpeedDown+_2,
   SpeedDownFromChance→SpeedDown delegation ported as a call, Toxic+
   LeechSeed, Protect, Pursuit, HighCrit+BlazeKick+PoisonTail, AlwaysHit,
   VitalThrow — the last three are the module's CV-only handlers).
@@ -3955,7 +3955,7 @@ full history regardless.
   with funcResultAfter=0; Karate Chop vs Ghost immune 2-draw
   fallthrough) — exact. Post-fold: artifact rebuilt, smoke 375/375.
   Worker: sonnet, 29.0 min, 1 commit.
-- **M5d-2 DONE (fold `7a035650`):** 29 effects, all three shared-tail
+- **M5d-2 DONE (fold `9a849279`):** 29 effects, all three shared-tail
   clusters (run_cv_stat_down, run_cv_attack_style_stat_up,
   run_cv_side_screen_type_gate). unported = 80, pinned. 56 native
   tests + 208 vector rows (gen-cv-m5d2-vectors.mjs, byte-idempotent).
@@ -3972,7 +3972,7 @@ full history regardless.
   through the DefenseDown shared tail −2; Double Team toxic-pair 2-draw
   chain) — exact. Post-fold: artifact rebuilt, smoke 375/375. Worker:
   sonnet, 31.8 min, 2 commits.
-- **M5d-3 DONE (fold `1f74ba5c`):** 30 effects (weather trio with
+- **M5d-3 DONE (fold `d583e526`):** 30 effects (weather trio with
   SunnyDay/Hail sharing weather_setter_cv_score and RainDance's own
   diverging body kept separate; heal family; OHKO as an inline arm;
   SelfKO for Explosion+Memento; SemiInvulnerable 129-line handler;
@@ -3990,7 +3990,7 @@ full history regardless.
   re-derived independently (Fly tie-draw dropped-receipt; SunnyDay
   stale-fallback carry) — exact. Post-fold: artifact rebuilt, smoke
   375/375. Worker: sonnet, 38.6 min, 1 commit.
-- **M5d-4 DONE (fold `5d3f2f1c`):** 22 effects (BrickBreak, shared
+- **M5d-4 DONE (fold `116f1e74`):** 22 effects (BrickBreak, shared
   ChargeUpMove ×4, Overheat, Facade, Curse and PsychUp with their OWN
   independent bodies — the CBM reuse shortcuts verifiably don't
   transfer, MirrorCoat 91-line 7-roll handler, DragonDance, BatonPass,
@@ -4008,7 +4008,7 @@ full history regardless.
   rows re-derived independently (MirrorCoat low-hp 4-roll chain +3;
   Curse neutral-stage 3-roll +2) — exact. Post-fold: artifact rebuilt,
   smoke 375/375. Worker: sonnet, 29.4 min, 2 commits.
-- **M5d-5 DONE (fold `848988d8`) — CheckViability is 122/122 native;
+- **M5d-5 DONE (fold `8be982df`) — CheckViability is 122/122 native;
   the M5d program is COMPLETE.** All 28 remaining effects (Trick,
   Snatch 94-line closer, MirrorMove, Haze, the MudSport/WaterSport
   same-function pair proven identical through both arms,
@@ -4028,7 +4028,7 @@ full history regardless.
   rows re-derived independently (Haze both-blocks repeated-ordinal;
   SkillSwap known-Static 1-draw) — exact. Worker: sonnet, 33.9 min,
   3 commits.
-- **M5e DONE (folds `cd97dc59`/`739c4df0`) — CheckViability boundary,
+- **M5e DONE (folds `8786b4de`/`c662b8af`) — CheckViability boundary,
   adapter, and parity.** Additive ABI-v1 `fw_run_check_viability` uses a
   236-byte fixed input prefix plus UTF-8 `reasonPrefix`: two complete
   108-byte, 42-field battlers preserve every optional's presence. The
@@ -4042,7 +4042,7 @@ full history regardless.
   audit, cargo **662/662** + fmt/clippy + wasm, new suite **9/9 BOTH modes**,
   prior WASM union **757/757**, post-fold smoke **375/375**. Worker:
   gpt-5.6-terra/max, ~45 min, 2 commits.
-- **M5f-1 DONE (folds `eb8df0c4`/`5fdfca2c`) — TryToFaint native.**
+- **M5f-1 DONE (folds `c03a6876`/`305708c2`) — TryToFaint native.**
   Complete 275-line leaf port in `factory_ai_try_to_faint.rs`; it reuses
   the shared damage/type/RNG modules and exposes DecisionPolicy-ready
   battler/target/input/result structs. Six directed native tests + 93
@@ -4055,7 +4055,7 @@ full history regardless.
   receipt from TS, then reran cargo **670/670** + fmt/clippy + wasm. Post-fold
   artifact 253,573 bytes (`74b778ce…`), smoke **375/375**. Worker:
   gpt-5.6-terra/max, ~26 min, 2 commits; scope six `core-rs/**` files only.
-- **M5f-2a DONE (fold `2d15da47`) — mask-zero DecisionPolicy native.**
+- **M5f-2a DONE (fold `2b09c068`) — mask-zero DecisionPolicy native.**
   Added the pure typed setup, mask-zero chooser, and shared best-score/tie
   seam. It preserves all four unconditional setup draws, the unconditional
   fifth tie draw even for one legal move, 100/0 scores, legal target identity,
@@ -4067,7 +4067,7 @@ full history regardless.
   (`290b78f6…`); cargo **674/674** + fmt/clippy/wasm passed. After merging
   current master, artifact = 253,791 bytes (`034833c1…`) and smoke =
   **375/375**. Worker: gpt-5.6-terra/max, ~18 min, 1 commit.
-- **M5f-2b DONE (folds `d92cf1dd`/`acecf978`) — scored masks 1/7 native.**
+- **M5f-2b DONE (folds `5deb6ff9`/`34cead26`) — scored masks 1/7 native.**
   Added the pure typed scored chooser, reusing the landed setup/tie seam and
   all three leaf scorers. It preserves logic-ID-major whole-slot passes,
   optional decision-owned turn-start draw, authoritative legal targets,
@@ -4106,7 +4106,7 @@ full history regardless.
 ## R3 — [supervised session, 2026-08-11 eve] **M4 COMPLETE + M5 opened: battle-kernel family end-to-end; AI family scouted and groundwork folded**
 
 - **State:** rust-main = master (merged at orient, fast-forward) + the
-  verified M4a fold `30a6da2a`. **M4a DONE:** all 13 exported
+  verified M4a fold `71465dd2`. **M4a DONE:** all 13 exported
   functions/consts of `src/engine/damageCalc.ts` ported in source order to
   `core-rs/crates/factory-core/src/damage_calc.rs` (i32 arithmetic
   matching the C s32 widths, truncation order preserved, the pokemon.c:3371
@@ -4128,7 +4128,7 @@ full history regardless.
   orient: zero ISSUES.md hits for damageCalc/turnOrder/turnRng; main lane
   is in #55 m4a-audio territory (unrelated namespace), animation lane in
   reducer coverage. M4a worker (sonnet-5, 90-min cap) finished in ~50 min.
-- **M4b DONE (fold `45fa9e94`):** 12 new `fw_` exports (ABI v1 unchanged;
+- **M4b DONE (fold `d0039740`):** 12 new `fw_` exports (ABI v1 unchanged;
   fixed-width documented LE buffers: DamageCalcInput 117 B = 2×48 B
   battlers + 21 B top-level, AccuracyCalcInput 26 B, type-effectiveness
   8 B output); TYPE_EFFECTIVENESS_TABLE promoted out of the vector file
@@ -4147,7 +4147,7 @@ full history regardless.
   scripts byte-idempotent. Worker also ran full npm test green twice
   (958 files / 9,167 passed / 1 skip); supervisor's one full-suite run
   happens at wind-down per the standing cadence.
-- **M4c DONE (fold `63d38e65`):** `turn_order.rs` (effective_speed,
+- **M4c DONE (fold `ffd9cfbf`):** `turn_order.rs` (effective_speed,
   get_who_strikes_first, sort_battlers_by_turn_order; reuses damage_calc's
   STAT_STAGE_RATIOS; ids verified: SWIFT_SWIM=33, CHLOROPHYLL=34,
   MACHO_BRACE=24, QUICK_CLAW=26) + `turn_rng.rs` (7-step/12-call ledger
@@ -4160,7 +4160,7 @@ full history regardless.
   union **660/660 in wasm mode**, smoke 375/375; Quick Claw
   threshold-boundary pair + speed-tie parity re-derived from the TS
   module by hand.
-- **M5 scout folded (`91fcc87e`):** `docs/rust-m5-scout.md` — next family
+- **M5 scout folded (`1f2f36cb`):** `docs/rust-m5-scout.md` — next family
   is the **Factory AI move-scoring leaves** (maskSelection → CheckBadMove
   → boundary → CheckViability in effect-group batches → TryToFaint +
   DecisionPolicy). factorySwap (state fused with #55-adjacent ball-anim
@@ -4168,7 +4168,7 @@ full history regardless.
   exclusion), and draft-screen (no separable state core) all REJECTED
   with receipts. Supervisor re-verified: zero ISSUES/PROGRESS hits for
   factoryAi*, maskSelection imports only the policy JSON.
-- **M5a DONE (fold `be53c146`):** `factory_ai_mask.rs`
+- **M5a DONE (fold `1e0731b3`):** `factory_ai_mask.rs`
   (select_factory_ai_mask + receipt, branch id as #[repr(u8)]
   discriminant; policy JSON codegen-validated into gen_tables so the
   no-branch-matched failPolicy is provably unreachable → documented
@@ -4188,7 +4188,7 @@ full history regardless.
   pre-existing skip**, npm build green, soak **vanilla 20/20 OK** +
   **full 60/60 OK**. No orphan worker worktrees or branches;
   RUST_DEFERRED.md has no open entries.
-- **M5b batching scout folded (`f7a89ca7`):**
+- **M5b batching scout folded (`5142f3f8`):**
   `docs/rust-m5b-checkbadmove-batching.md` — the CheckBadMove port is now
   a mechanical four-step program: **M5b-0** (preamble + shared infra:
   nextGetAbilityDraw/checkAbilityAiTarget/typeMultiplierTenths +
@@ -4203,7 +4203,7 @@ full history regardless.
   direct-handler tests, CURSE→BulkUp / PSYCH_UP→Haze same-function
   pairs). Supervisor spot-verified handler/clamp line ranges and the
   109 = 32+33+44 partition.
-- **M5b-0 DONE (fold `6f4935c8`):**
+- **M5b-0 DONE (fold `b8a8eae0`):**
   `factory_ai_check_bad_move.rs` — 113 EFFECT_* consts verified
   line-by-line against battle_move_effects.h + 13 ABILITY_* consts
   (representation decision: abilities cross numerically, same id space
@@ -4239,7 +4239,7 @@ full history regardless.
   present but STALE (absent → skip; stale → 204 failures, seen live this
   session when the R2-era 62,344 B artifact met the M4 suites). Recipe:
   `./core-rs/build-wasm.sh` before any full suite in a supervisor tree —
-  exactly what launcher hardening `cfd80cb7` does for main-supervisor
+  exactly what launcher hardening `aabaff6f` does for main-supervisor
   folds. Artifact hash is reproducible per source state but shifts with
   any factory-core change (M5a moved it despite no fw_ change).
 - **Notes:** worker-reported TS quirks worth keeping: (1) Plus/Minus only
@@ -4303,7 +4303,7 @@ full history regardless.
     fixed IV (the documented retail-OOB non-portability boundary,
     factoryRentalGeneration.ts:184); the port mirrors the error and the
     matrix compares errors symmetrically.
-  - **M1 (fold fe40ab19):** fw_ ABI v1 surface (fw_abi_version/
+  - **M1 (fold da8d5aee):** fw_ ABI v1 surface (fw_abi_version/
     fw_rng_advance/fw_rng_output/fw_alloc/fw_free), `core-rs/build-wasm.sh`
     → `artifacts/wasm/factory_wasm.wasm` (gitignored), hand-written typed
     Node loader `core-rs/adapter/loadFactoryWasm.ts`, smoke

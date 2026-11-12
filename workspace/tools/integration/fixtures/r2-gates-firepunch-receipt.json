@@ -1,6 +1,6 @@
 {
  "schema": "r2-gates-firepunch-receipt/v1",
- "testedCommit": "6dc962856",
+ "testedCommit": "9b3993282",
  "srcTree": "b88557b1d3a74bc2e47ee31407e71d65a63abbcb",
  "renderer": "UNPATCHED production live renderer (tools/integration/liveAdapterFramebuffer.ts: direct mGBA, 2 fresh probe processes per fixture; windows = each scenario's own source activation, never matched to live output)",
  "firePunch": {

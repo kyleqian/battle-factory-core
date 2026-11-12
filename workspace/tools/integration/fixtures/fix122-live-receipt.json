@@ -1,11 +1,11 @@
 {
  "schema": "fix122-live-receipt/v1",
  "base": {
-  "commit": "d6444bd531e88750ace5e10c5d9842bd901851bb",
+  "commit": "ac2f2b7ee251c7695c659561a0193b7e01210474",
   "src": "530600bb16050031ea6f55d492147a1af497cc49"
  },
  "final": {
-  "commit": "20ce9ee3fe2fdfa57f09c904765303af9fdd2c8a",
+  "commit": "f35e9ac87875f269bf1cd119cc374f61c87fb216",
   "src": "649b374d986886ddb7faa39acaf0e6c17bfddece"
  },
  "defectA": {

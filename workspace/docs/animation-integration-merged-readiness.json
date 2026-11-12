@@ -1,6 +1,6 @@
 {
   "schema": "playable-animation-readiness-delta/v1",
-  "verifiedFactorySnapshot": "8fb2afbc1",
+  "verifiedFactorySnapshot": "34cd82f66",
   "extends": "animation-integration-readiness.json",
   "baselineAccepted": 267,
   "additionalAccepted": 9,

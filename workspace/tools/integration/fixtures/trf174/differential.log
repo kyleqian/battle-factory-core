@@ -1,8 +1,8 @@
 
 > pokeemerald-factory-run@0.1.0 compare:differential
-> node --experimental-strip-types tools/compare/app-differential.ts fight-submenu battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base 78e61e8c1
+> node --experimental-strip-types tools/compare/app-differential.ts fight-submenu battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base 0d6ec248e
 
-app-differential: HEAD 2d187f48 vs base 78e61e8c (3 traces)
+app-differential: HEAD f9c05176 vs base 0d6ec248 (3 traces)
 frame 1884: identical
 frame 1885: identical
 frame 1886: identical

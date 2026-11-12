@@ -1,7 +1,7 @@
 {
  "schema": "prep11-live-adapter-receipt/v1",
  "doc": "docs/next-adapters-prep11.md",
- "codeCommit": "58383f67ab6a2794f4a0f0e0e326e03f221de226",
+ "codeCommit": "c591615d9206749c7dd0a3d6d515c91944998343",
  "codeTree": "9c687e34de32598b712163dd13565e846021fbf8",
  "method": "tools/integration/liveFixtureBatch.sh: 4 parallel, 2 fresh direct-mGBA runs per fixture through verifyLiveAdapterFramebuffer (production live renderer); window = activation + accepted offset 0",
  "issue144": {

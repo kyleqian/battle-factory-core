@@ -1,7 +1,7 @@
 #!/bin/sh
 # rsl141 runner (docs/rsl141-ordinary-row-rest-live.md): re-proves rst139's ordinary-row idle rest FROM THE LANDED TREE. Run from
 # workspace/ (a checkout or a fresh git-archive copy inside the repo; its src must carry the landed rst139-rest.diff). The BASE tree is
-# <out>/base/workspace = this tree with fixtures/rst139/rst139-rest.diff reversed (patch -R; == the pre-landing src, 74cbec2b8's).
+# <out>/base/workspace = this tree with fixtures/rst139/rst139-rest.diff reversed (patch -R; == the pre-landing src, 361829128's).
 # Direct mGBA only (never the shared HTTP oracles). Nothing outside <out-dir> is written.
 #   sh tools/integration/rsl141Run.sh <fresh-out-dir-inside-the-repo> [all|rom|routes|census]   (rom ~3 min, routes ~2, census ~7)
 # rom:    rst139Probes.sh (8 scenarios x r1 / r2), r1 == r2 == fixtures/rst139/probe-sha256.json, rst139Rom.py == rom-receipt.json;

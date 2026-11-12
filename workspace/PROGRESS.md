@@ -7,7 +7,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ## 2026-11-12 — CAX31 daily run (supervisor, Opus 5.5): wind-down: aiv270 / aiv271 / fix274 / aud244a / lbr-a / pnm273 folded
 
-- **State:** master clean, no active workers, no worktrees. Final src == `78c2ef2bc` (pnm273) plus test-only `4f1026efb`; later commits docs only. ENGINE_BUILD
+- **State:** master clean, no active workers, no worktrees. Final src == `f55e68f8e` (pnm273) plus test-only `bbcc41497`; later commits docs only. ENGINE_BUILD
   `eb-9d34d28f1b19ef3d` -> `eb-952d7267a01bd728` (read from dist; moved by aiv270, aiv271, fix274, lbr-a, pnm273; tell the website). No push. No DEFERRED items.
   Evidence `.integration/validation/sv-20261111/` (gates in `gates/`); worker evidence `.integration/evidence/{aiv270,aiv271,dia272,fix274,aud244a,lbra,pnm273}`.
 - **Gameplay (user item 0d: first priority).** aiv270 (#204 A / B; supervisor wrote its doc after the 200-min cap), aiv271 (#204 C, AI damage sims use the real
@@ -19,11 +19,11 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Lobby (item 0b):** lbr-a: loss / forfeit / retire end in the walkable Lobby, forfeit skips the record question; soak / play:random walk to the attendant.
   Supervisor reran `lbra-loss-off` 2258 / 2258. Open: no Scene ON loss / retire lab; no app SE_SAVE on the loss / retire result script.
 - **Name (item 0c):** pnm273 `PLAYER_NAME` = "PLAYER"; compare harness keeps MEMORY; only name pixels move; census 0..49 digest-identical.
-- **Gates** (tree `78c2ef2bc`): full suite (3 workers, beside the soaks) **1 failed / 14,553 passed, 1,763 files + 44 skipped**: the only failure was
-  `bnd253SrcJsonShipped` (aud244a's manifest has no src importer yet); fixed in `4f1026efb` (pending-runtime-import list, shrink-only list untouched), file 4 / 4.
+- **Gates** (tree `f55e68f8e`): full suite (3 workers, beside the soaks) **1 failed / 14,553 passed, 1,763 files + 44 skipped**: the only failure was
+  `bnd253SrcJsonShipped` (aud244a's manifest has no src importer yet); fixed in `bbcc41497` (pending-runtime-import list, shrink-only list untouched), file 4 / 4.
   build / build:lib 0. Vanilla 0:20 OFF **20 / 20**, ON **20 / 20**; 0:60 default **60 / 60**, winning **60 / 60**, winning-swap **60 / 60** (all `budget`); varied-RNG first-round winning carry 0 / 14 / 28 **100 / 100** each,
   winning-swap carry 0 **100 / 100**; play:random 5 min / scene: ON 22 battles / 9 swaps, OFF 36 / 17, 0 page errors / console errors / overlays.
-- **ROM replay (item 0d wind-down):** the 40-seed permanent list on `78c2ef2bc`, Scene OFF: **24 / 40 match** to battle end; newly matching 22 30 39 42 50 53 57 (this run) and 75 88 110 155 158;
+- **ROM replay (item 0d wind-down):** the 40-seed permanent list on `f55e68f8e`, Scene OFF: **24 / 40 match** to battle end; newly matching 22 30 39 42 50 53 57 (this run) and 75 88 110 155 158;
   still diverging 60 + 15 seeds from 79 up (ISSUES #211). New ISSUES #212 lists the audit rows. Created `docs/replay-ledger.md` (`docs/replay-ledger.md`).
 - **Folded: dia275** (side lane, diagnosis only, 14 min; `docs/dia275-triage.md`): #211 seeds 109 / 107 / 79 share audit row A2 (switch-in scorer counts
   power-0 moves as super-effective; one-line fix, isolated check flips all three); 123 = A4 (pass-2 base damage 0); 95 / 114 = AI draw count (not located).

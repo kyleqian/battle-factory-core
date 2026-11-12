@@ -1,6 +1,6 @@
 # `--start-carry` first sweeps (2026-08-22, main worker)
 
-Tree: master `f04c6227` (this session's `--start-carry` option commit), render off. Command shape:
+Tree: master `c89e3087` (this session's `--start-carry` option commit), render off. Command shape:
 `node --experimental-strip-types tools/soak/randomRoundSoak.ts --policy P --start-carry N --seeds
 A:B --render-every 0`.
 
@@ -272,8 +272,8 @@ session's 28/35/42) remain unswept.
 
 ## Post-#118 re-sweeps (2026-08-22 night → 2026-08-23, supervisor)
 
-Tree: master `0cabb82b` (`#118` closed end to end — `5b51eac5` Rust, `0cb8aa26` lockstep TS +
-wasm, `47a8db42` wire format; `#120` rentsCount fix `64ad9f4e`). Same command shape as above,
+Tree: master `001b456c` (`#118` closed end to end — `5a367754` Rust, `e57bcc30` lockstep TS +
+wasm, `2726aaa9` wire format; `#120` rentsCount fix `99be536d`). Same command shape as above,
 run as single serial processes (~24 s/seed). The three #118 crash seeds from sweep (b) above
 (carry 42: seeds 2, 32, 49) all go clean; challengeNum-8 drafts are now generated for real
 (`deepest carry 56` in every sweep below; the former throw sat exactly there).

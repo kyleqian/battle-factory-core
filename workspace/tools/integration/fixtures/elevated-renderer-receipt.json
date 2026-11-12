@@ -2,13 +2,13 @@
  "schema": "elevated-renderer-receipt/v1",
  "issue": 147,
  "note": "ISSUES #147 ordinary resolution renderer fix (both Scene profiles): elevated opponent at origin.y - enemyMonElevation with its generated shadow while visible; faint sink from the elevated origin; shadow hidden on blink-invisible rows, at HP 0 (IsBattlerSpritePresent) and on the post-body hide rows (LIVE_MOVE_OPPONENT_SHADOW_POST_BODY_HIDE_ROWS, d = scriptEnd - E > 0). Production only; no gameplay/RNG/state change. Two fresh direct-mGBA runs per fixture, identical digests.",
- "base": "64d84ba36",
+ "base": "4254d9708",
  "productionCommits": [
-  "df9965d45 renderer + post-body hide table",
-  "b28586ea3 faint sink elevation + HP-0 shadow gate"
+  "e8b287d42 renderer + post-body hide table",
+  "ddc562a49 faint sink elevation + HP-0 shadow gate"
  ],
  "testedCode": {
-  "head": "749ada22bbe180e5167b40d66845020634771583",
+  "head": "b59465909946ea7a6fa083544e1f3c4cb591474d",
   "src": "3ce320a65034d4afd49bb3a61fa66fba170424e3"
  },
  "renderer": {
@@ -1101,7 +1101,7 @@
   "frames": "tools/integration/fixtures/elevated-renderer/faint-*-frames.txt"
  },
  "committedTraces": {
-  "appFrameSweep": "elevatedOffSweep.sh on 64d84ba36 files vs final code, 203 traces: elevatedOffDiff.mjs = {} (0 frames changed)",
+  "appFrameSweep": "elevatedOffSweep.sh on 4254d9708 files vs final code, 203 traces: elevatedOffDiff.mjs = {} (0 frames changed)",
   "compare": {
    "factory-arbitrary-intro-magneton-off": {
     "before": "703/751 (docs/elevated-renderer-off-check.md)",

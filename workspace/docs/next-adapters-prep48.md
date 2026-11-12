@@ -1,6 +1,6 @@
 # S10A prep48 — the later-body gates: Dig 91 (setup + unleash) and Return 216
 
-Evidence only (side lane, new files only). Census baseline: master `bef14a1ee` (production src tree `0ee75849`), seeds 0..299, the
+Evidence only (side lane, new files only). Census baseline: master `024efddfd` (production src tree `0ee75849`), seeds 0..299, the
 ordinary census driver. Temporary production patches are kept as `.diff` and were reverted before every commit.
 
 ## Results

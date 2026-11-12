@@ -1,5 +1,5 @@
 {
- "note": "snd233 Part B: Roar/Whirlwind opponent-attacker, player-side ball-throw path, Scene ON; residual px per region vs the ROM lab (bso225Compare.ts, bin/oracle --profile battle-scene-on lab). mon = player sprite/ball region x<120, 48<=y<112, send-in rows (elapsed e>=0). Before = HEAD 3b2ea5f1f, after = this commit.",
+ "note": "snd233 Part B: Roar/Whirlwind opponent-attacker, player-side ball-throw path, Scene ON; residual px per region vs the ROM lab (bso225Compare.ts, bin/oracle --profile battle-scene-on lab). mon = player sprite/ball region x<120, 48<=y<112, send-in rows (elapsed e>=0). Before = HEAD 2e7ce24a3, after = this commit.",
  "scenarios": {
   "skarmory": {
    "before": {

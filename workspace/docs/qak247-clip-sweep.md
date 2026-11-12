@@ -1,6 +1,6 @@
 # qak247: Quick Attack / Aerial Ace opponent-attacker clip sweep (evidence only)
 
-Worker report, 2026-11-04, branch `worker/integration-20261104-044203`, code base `f40d5cea6` (tree `f552b62ea`).
+Worker report, 2026-11-04, branch `worker/integration-20261104-044203`, code base `04c8ea71e` (tree `f552b62ea`).
 No `src/` change. Oracle: Battle Scene ON (:8012 profile; probes are independent direct-mGBA runs of the same ROM, as agi245 did).
 Follow-up to `docs/agi245-scout.md` section 3 ("Quick Attack and Aerial Ace ... worth doing as a follow-up").
 
@@ -218,7 +218,7 @@ Opponent attacker vs ONIX; "frames diff" is out of the 33-frame (Quick Attack) /
 
 ## Receipts (qak249)
 
-Test-only follow-up to the qak248 fix (`127def5d4`). Two hermetic Scene-ON ROM receipts, built the agi245 way from the committed staging scenarios under `tools/integration/fixtures/qak247/`:
+Test-only follow-up to the qak248 fix (`f5ab0f107`). Two hermetic Scene-ON ROM receipts, built the agi245 way from the committed staging scenarios under `tools/integration/fixtures/qak247/`:
 
 | fixture | window | frames | qak247 residual at the old 74 clip | now |
 |---|---|---|---|---|

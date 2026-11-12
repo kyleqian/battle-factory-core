@@ -1,5 +1,5 @@
 {
- "tree": "the iu120 fold 008c485a4 (production; tests at 3cad94b88, before any pin moved)",
+ "tree": "the iu120 fold df2671638 (production; tests at 4a921fdf7, before any pin moved)",
  "command": "npm test -- --maxWorkers=4 --shard=1/2 and --shard=2/2",
  "totals": [
   "Test Files  40 failed | 778 passed | 22 skipped (840)",
@@ -1120,37 +1120,37 @@
   },
   {
    "file": "tests/sc106StatsChangeCommand.test.ts",
-   "test": "ordinary routes: one per path, Scene ON (base frames pinned on 52c181d54) > status stat move, sharply (seed 0, slot 2: GRIMER Acid Armor, arg 40): command after the body, message +90",
+   "test": "ordinary routes: one per path, Scene ON (base frames pinned on bddc3d69c) > status stat move, sharply (seed 0, slot 2: GRIMER Acid Armor, arg 40): command after the body, message +90",
    "assertion": "AssertionError: expected { frame: 984, frames: 90 } to deeply equal { frame: 976, frames: 90 }",
    "kind": "anchor frame (a stats-change command's first frame: + P + T per earlier live body on the route; its own frames unchanged)"
   },
   {
    "file": "tests/sc106StatsChangeCommand.test.ts",
-   "test": "ordinary routes: one per path, Scene ON (base frames pinned on 52c181d54) > status stat move, non-sharp (seed 3, slot 3: Sand-Attack on Foe MARSHTOMP, arg 27): message +76",
+   "test": "ordinary routes: one per path, Scene ON (base frames pinned on bddc3d69c) > status stat move, non-sharp (seed 3, slot 3: Sand-Attack on Foe MARSHTOMP, arg 27): message +76",
    "assertion": "AssertionError: expected { frame: 644, frames: 76 } to deeply equal { frame: 641, frames: 76 }",
    "kind": "anchor frame (a stats-change command's first frame: + P + T per earlier live body on the route; its own frames unchanged)"
   },
   {
    "file": "tests/sc106StatsChangeCommand.test.ts",
-   "test": "ordinary routes: one per path, Scene ON (base frames pinned on 52c181d54) > secondary effect (seed 3, slot 1: Icy Wind's SPEED -1 on the player, arg 24): after the stat write, message +76",
+   "test": "ordinary routes: one per path, Scene ON (base frames pinned on bddc3d69c) > secondary effect (seed 3, slot 1: Icy Wind's SPEED -1 on the player, arg 24): after the stat write, message +76",
    "assertion": "AssertionError: expected { frame: 1394, frames: 76 } to deeply equal { frame: 1379, frames: 76 }",
    "kind": "anchor frame (a stats-change command's first frame: + P + T per earlier live body on the route; its own frames unchanged)"
   },
   {
    "file": "tests/sc106StatsChangeCommand.test.ts",
-   "test": "ordinary routes: one per path, Scene ON (base frames pinned on 52c181d54) > Intimidate (seed 6, slot 0: Foe GROWLITHE's Intimidate on DROWZE, arg 22): message +76",
+   "test": "ordinary routes: one per path, Scene ON (base frames pinned on bddc3d69c) > Intimidate (seed 6, slot 0: Foe GROWLITHE's Intimidate on DROWZE, arg 22): message +76",
    "assertion": "AssertionError: expected { frame: 2730, frames: 76 } to deeply equal { frame: 2704, frames: 76 }",
    "kind": "anchor frame (a stats-change command's first frame: + P + T per earlier live body on the route; its own frames unchanged)"
   },
   {
    "file": "tests/sc106StatsChangeCommand.test.ts",
-   "test": "ordinary routes: one per path, Scene ON (base frames pinned on 52c181d54) > playstatchangeanimation (seed 13, slot 3: Tickle, multiple down1 on the player, arg 57): before the first stat write +76",
+   "test": "ordinary routes: one per path, Scene ON (base frames pinned on bddc3d69c) > playstatchangeanimation (seed 13, slot 3: Tickle, multiple down1 on the player, arg 57): before the first stat write +76",
    "assertion": "AssertionError: expected { frame: 2022, frames: 76 } to deeply equal { frame: 2008, frames: 76 }",
    "kind": "anchor frame (a stats-change command's first frame: + P + T per earlier live body on the route; its own frames unchanged)"
   },
   {
    "file": "tests/sc106StatsChangeCommand.test.ts",
-   "test": "ordinary routes: one per path, Scene ON (base frames pinned on 52c181d54) > live Double Team (seed 10, slot 2: YANMA, arg 21): no command, its 230-row window owns the banner; the message is unmoved",
+   "test": "ordinary routes: one per path, Scene ON (base frames pinned on bddc3d69c) > live Double Team (seed 10, slot 2: YANMA, arg 21): no command, its 230-row window owns the banner; the message is unmoved",
    "assertion": "AssertionError: expected 4908 to be 4873 // Object.is equality",
    "kind": "count"
   },

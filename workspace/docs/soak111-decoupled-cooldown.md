@@ -13,7 +13,7 @@ patch (off108). Tools, fixtures and tests only; no `src/` change.
 - **Decoupling proof** (`tools/integration/fixtures/soak111/decoupling-receipt.json`, `sh tools/integration/soak111Run.sh <fresh>`
   prints **ALL SAME**). Setup: full policy, first round, seeds 0..15 and 27, run on this tree and on this tree + off108
   (`patch -p1` from the repo top). Result: **17 / 17 seeds have identical decision logs, canonical logs and gameplay** (outcome,
-  endState, battle, turn). Frames moved on all 17. The control (coupled base `cd84c00fe` with and without off108) gives
+  endState, battle, turn). Frames moved on all 17. The control (coupled base `356f2eefc` with and without off108) gives
   **0 / 17 identical** decision logs and 0 / 17 identical gameplay: that is the bug this step removes.
 - **Pins moved** (`tests/randomRoundSoak.test.ts`; nothing else moved), listed in section 3. The 4 pins that were red on sc106 are
   green again. The ISSUES #89 pin moved from seed 27 to the natural **seed 226**, and it now observes the halt directly.
@@ -44,7 +44,7 @@ How the logs are compared (`tools/integration/soak111Decoupling.ts`):
   confirm notes, and their collapsed logs and gameplay are identical.
 - The **canonical log** keeps every note, with mash runs collapsed to one line and terminal buttons shown as `terminal`.
 
-## 3. Pins moved (before = sc106 base `cd84c00fe` expectation, after = this tree)
+## 3. Pins moved (before = sc106 base `356f2eefc` expectation, after = this tree)
 
 | Pin | Before | After | Why |
 |---|---|---|---|
@@ -57,7 +57,7 @@ How the logs are compared (`tools/integration/soak111Decoupling.ts`):
 The ISSUES #99 "YES and NO across a fixed seed set" pin went red with the first, cooldown-only change. It is green again with the
 final driver, unchanged.
 
-Seed 27's history: on `52c181d54` (pre-sc106) seed 27 already committed Baton Pass **zero** times and was in postwin at frame
+Seed 27's history: on `bddc3d69c` (pre-sc106) seed 27 already committed Baton Pass **zero** times and was in postwin at frame
 30,798 (measured with `soak111BatonPassSearch.ts` on an archive). Its `frames > 30,798` bound was therefore only a halt-free
 assertion before sc106 existed. The test comment records this.
 
@@ -86,7 +86,7 @@ seam and injects nothing.
 Totals: 237 seeds, 15 hits. No seed threw and every run ended OK. The pin uses seed 226 because its halt lies before the reported
 first-round snapshot, so `stopAtFirstRoundDecision`'s endState is the round that went through the halt.
 
-## 5. Gates (code tested = `2959af3d9`; later commits are docs only)
+## 5. Gates (code tested = `bb0e8b4cd`; later commits are docs only)
 
 - `npx vitest run` over the 7 soak test files (randomRoundSoak, randomRoundSoakParallel, CombinedDraft, Coverage, CoverageDraft,
   CoverageFight, OracleStrength; 4 workers): **7 files / 109 tests passed**.

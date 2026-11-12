@@ -1,7 +1,7 @@
 #!/bin/sh
 # ice72 live-share census, seeds 0..999 in three parallel ranges (battle ids restart at 0 per range), base vs final, plus the base order
 # census and the chain predictor (prep45Chains.py --cleared "body 301 ICE_BALL"). Trees are git archive copies under the out dir.
-# usage (from workspace/): sh tools/integration/ice72Census.sh <fresh-out-dir> [<base commit, default ff4baec48>] [<final commit, default HEAD>]
+# usage (from workspace/): sh tools/integration/ice72Census.sh <fresh-out-dir> [<base commit, default a7904fcc0>] [<final commit, default HEAD>]
 set -e
 OUT=${1:?usage: ice72Census.sh <fresh-out-dir> [base] [final]}; BASE=${2:-ff4baec48}; FINAL=${3:-HEAD}
 [ ! -e "$OUT" ] || { echo "$OUT exists (need a fresh dir)" >&2; exit 2; }

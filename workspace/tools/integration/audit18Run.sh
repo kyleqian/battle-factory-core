@@ -7,7 +7,7 @@
 #    <receipt-dir>/check/, then summary.txt (audit18Summary.py) and verdicts.txt (audit18Verdicts.py: vs the no-unit controls);
 # 4. lag-frame counters for every window (audit18Lag.py: 2 fresh counter processes per scenario) -> lag.txt;
 # 5. the Dive lends vs the ROM free order (AUDIT18_LENDS_ONLY) -> lends.txt; ablations (Iron Defense offset 0, audit 17's missed-strike
-#    rule, audit 17's always-prompt turns, no hide) -> ablation/; battle 713 host census on this tree and on b50c4dabd (git archive into
+#    rule, audit 17's always-prompt turns, no hide) -> ablation/; battle 713 host census on this tree and on 82690e775 (git archive into
 #    the scratch dir) -> c713/;
 # 6. compares <receipt-dir> with the committed receipts (tools/integration/fixtures/audit-18/receipts/; audit18Compare.py): windows
 #    identical / ROM-drift (a fresh probe run disagreeing with its pair: ISSUES #154 class) / DIFFERS, text receipts byte for byte.
@@ -52,10 +52,10 @@ AUDIT18_NO_MISS_RULE=1 node --experimental-strip-types --no-warnings tools/integ
 AUDIT18_PROMPT_ALWAYS=1 node --experimental-strip-types --no-warnings tools/integration/audit18Check.ts $W/fixtures fly-snorlax-bulk-up-opp "$REC/ablation/check-fly-snorlax-bulk-up-opp-prompt-always.json" > /dev/null 2>&1
 AUDIT18_NO_HIDE=1 node --experimental-strip-types --no-warnings tools/integration/audit18Check.ts $W/fixtures dig-snorlax-safeguard-ply "$REC/ablation/check-dig-snorlax-safeguard-ply-no-hide.json" > /dev/null 2>&1
 python3 tools/integration/audit18Summary.py "$REC/ablation" > "$REC/ablation/summary.txt"
-# battle 713 (target 3): per-command host state on this tree and on b50c4dabd (git archive of src + tools/integration into the scratch dir)
+# battle 713 (target 3): per-command host state on this tree and on 82690e775 (git archive of src + tools/integration into the scratch dir)
 node --experimental-strip-types --no-warnings tools/integration/audit18Census713.ts --seeds=713..713 --out="$T/c713-master.json" --commands="$REC/c713/master.jsonl" > /dev/null 2>&1
 mkdir -p "$T/b50"
-git archive b50c4dabd src tools/integration package.json | tar -x -C "$T/b50"
+git archive 82690e775 src tools/integration package.json | tar -x -C "$T/b50"
 ln -s "$PWD/node_modules" "$T/b50/node_modules"; ln -s "$PWD/reference" "$T/b50/reference"
 python3 tools/integration/audit18CensusPatch.py "$T/b50/tools/integration/liveShareCensus.ts" "$T/b50/tools/integration/audit18Census713.ts"
 B=$(cd "$REC/c713" && pwd)

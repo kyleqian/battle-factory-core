@@ -1,7 +1,7 @@
 // Live audit 19: audit18Check.ts (the production hosts fed AS THE ORCHESTRATOR DOES: turns from the ROM's battleTurnCounter with
 // beginLiveSpriteOrderTurn(promptShown = !playerLocked), every body marked as the orchestrator marks it, the orchestrator's plan
 // callback with the displayed field + lent order, production's hide in view.visibility vs the ROM's invisible flags; CHAIN + ENTRY lends;
-// two FRESH direct-mGBA probe processes per scenario, r1 == r2 per-row digests) on master dc173666b (src e6f98bf9), extended to today's
+// two FRESH direct-mGBA probe processes per scenario, r1 == r2 per-row digests) on master ce51c7444 (src e6f98bf9), extended to today's
 // later folds:
 //  - EVERY history body with a production Random2 plan (Ice Ball 301, Mud-Slap 189, Rain Dance 240, Dive 291, Water Pulse 352, ...)
 //    records its words in a presentation host pinned at the RAM gRng2Value of its own activation (fixture pinnedRng2; prep65's method;

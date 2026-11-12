@@ -1,6 +1,6 @@
 # stat101 source table: General_StatsChange (B_ANIM_STATS_CHANGE)
 
-Base a36a956ac (production src e3c8092c). Source = reference/pokeemerald (pret). Every row cites the line that owns it.
+Base 93f14257b (production src e3c8092c). Source = reference/pokeemerald (pret). Every row cites the line that owns it.
 
 ## 1. Entry: who plays it, in which scene
 

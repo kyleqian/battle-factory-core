@@ -1,7 +1,7 @@
 {
  "schema": "chg161-receipt/v1",
- "base": "9483a2551",
- "head": "b048842dc",
+ "base": "0af818603",
+ "head": "46d8198d8",
  "rom": "off108 scenarios re-probed by tools/integration/chg161Run.sh (idle94Probe.py, direct mGBA, fresh process per job): 6 / 6 r1 == r2 == off108 receipts/probe-sha256.json",
  "anchors": [
   {
@@ -129,5 +129,5 @@
   },
   "bothScenes": "the same 252 battles changed; per-battle charge-turn counts equal (ON delta / -16 == OFF delta / -24)"
  },
- "differential": "PASS 641 / 641 captures byte-identical (fight-submenu, battle1-postwin-next-prompt, presentation-rng-playable-live-bodies-seeded-on) vs 9483a2551"
+ "differential": "PASS 641 / 641 captures byte-identical (fight-submenu, battle1-postwin-next-prompt, presentation-rng-playable-live-bodies-seeded-on) vs 0af818603"
 }

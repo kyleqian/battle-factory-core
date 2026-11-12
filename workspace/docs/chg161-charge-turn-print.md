@@ -1,6 +1,6 @@
 # chg161 (main/ts lane, ISSUES #167 (d)): the two-turn charge-turn EMPTYSTRING3 print, per scene
 
-Presentation timing only (no rules / RNG change). Base `9483a2551`; production change `b048842dc`, pins `8ac2edd8f`.
+Presentation timing only (no rules / RNG change). Base `0af818603`; production change `46d8198d8`, pins `c1e60173f`.
 
 ## 1. Results first
 
@@ -11,7 +11,7 @@ Presentation timing only (no rules / RNG change). Base `9483a2551`; production c
 | Production before (box = the 24-frame message floor) | charge glyph OFF **+24** (3 / 3), ON **+16 / +15 / +16** |
 | Production after (`tools/integration/chg161Anchors.ts`) | OFF box 1 + pause 41: **0 / 0 / 0**. ON box 8: **0 / -1 / 0** (Razor Wind: its live adapter is 48 frames, the ROM's waitanimation run 49) |
 | Census 0..999, both scenes (`sub157Census.sh`) | **the same 252 battles** changed frames in both scenes, **639 charge turns**: ON -16 each (-10,224), OFF -24 each (-15,336); every per-battle delta is a multiple, per-battle counts equal across scenes. ON: command keys identical, live 27,084 / 27,261 unchanged, `battleDigestExcludingFrames` identical outside stalled tails (shard 7: budget-stalled seed 796 now stops at next-command-handoff, same 312 turns). OFF: `battleDigestExcludingFrames` identical 10 / 10; commands 28,047 -> 28,048 = budget-stalled battle 881's tail |
-| `compare:differential` fight-submenu / battle1-postwin-next-prompt / presentation-rng-playable-live-bodies-seeded-on vs `9483a2551` | **PASS, 641 / 641 byte-identical** (no charge turn in those traces) |
+| `compare:differential` fight-submenu / battle1-postwin-next-prompt / presentation-rng-playable-live-bodies-seeded-on vs `0af818603` | **PASS, 641 / 641 byte-identical** (no charge turn in those traces) |
 
 Receipt: `tools/integration/fixtures/chg161/receipt.json`. Pins: `tests/chg161ChargeTurnPrint.test.ts`.
 
@@ -50,7 +50,7 @@ because the attack command presents its own rows.
 ```sh
 sh tools/integration/chg161Run.sh <fresh-dir>                                     # 6 / 6 SAME (r1 == r2 == off108)
 node --experimental-strip-types --no-warnings tools/integration/chg161Anchors.ts --rows
-sh tools/integration/sub157Census.sh <fresh> 9483a2551 on|off; sh tools/integration/sub157Census.sh <fresh> b048842dc on|off
-npm run compare:differential -- fight-submenu battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base 9483a2551
+sh tools/integration/sub157Census.sh <fresh> 0af818603 on|off; sh tools/integration/sub157Census.sh <fresh> 46d8198d8 on|off
+npm run compare:differential -- fight-submenu battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base 0af818603
 npx vitest run tests/chg161ChargeTurnPrint.test.ts tests/olnd113SceneOffPauses.test.ts
 ```

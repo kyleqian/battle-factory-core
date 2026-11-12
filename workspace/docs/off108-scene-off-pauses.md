@@ -1,6 +1,6 @@
 # off108 (S10A timeline fidelity, ISSUES #167, 2026-10-11): Scene OFF no-hit pauses and the miss / fail pause — anchors, a banked patch
 
-Base: master `52c181d54` (production src `14d1be159`). Evidence + BANKED PATCH, new files only. The production change is a TEMP PATCH
+Base: master `bddc3d69c` (production src `14d1be159`). Evidence + BANKED PATCH, new files only. The production change is a TEMP PATCH
 (`tools/integration/fixtures/off108/off108-scene-off-pauses.diff`, `battleResolutionPresentation.ts` +135 / -4). It was applied only to
 git-archive copies of the base under the gitignored scratch dir. Direct mGBA only (no shared oracle), explicit lab seed in every scenario,
 every probe job twice in fresh processes: **30 / 30 outputs r1 == r2** (15 scenarios x ON / OFF).
@@ -66,7 +66,7 @@ One file, `src/engine/battleResolutionPresentation.ts`:
 
 ## 4. Pins the patch moves
 
-Patched copy (`git archive 52c181d54` + the diff, its own git repo), `npm test`: **3 files / 6 tests failed, 1,624 files / 13,381 tests passed**
+Patched copy (`git archive bddc3d69c` + the diff, its own git repo), `npm test`: **3 files / 6 tests failed, 1,624 files / 13,381 tests passed**
 (44 / 223 skipped). One is the environment, not a pin: `tests/appDifferential.test.ts:131` needs `HEAD~` ("fatal: Needed a single revision" in a
 one-commit copy repo); with a second commit the file passes 10 / 10. **5 moved pins in 2 files** (`fixtures/off108/pins.json`):
 
@@ -106,8 +106,8 @@ one-commit copy repo); with a second commit the file passes 10 / 10. **5 moved p
 
 - `sh tools/integration/off108Run.sh <fresh>` (no census), fresh dir inside the repo, after the patch / table commits: **ALL SAME** (14:55 -> 14:59): scenarios 15 + index, probes 30 / 30 r1 == r2, 60 / 60 outputs == the committed sha256, rom-r1 SAME and r2 == r1, routes 10 / 10 == the committed sha256, classes.json / .tsv SAME, verify-off / verify-on SAME.
 - `sh tools/integration/off108Run.sh <fresh> --census` (14:59 -> 15:14, a second fresh dir): **ALL SAME**: everything above plus both censuses (ON liveShareCensus and OFF off108Route, seeds 0..999, ten shards per tree) -> census-delta.json byte-identical to the committed receipt.
-- Patched copy (git archive 52c181d54 + the diff, its own git repo): `npm run typecheck` green. `npm test`: §4.
-- `npm test` in a git-archive copy of `ae3e6a27d` (this step's commits on 52c181d54; its own two-commit git repo): **1,627 files / 13,387 tests
+- Patched copy (git archive bddc3d69c + the diff, its own git repo): `npm run typecheck` green. `npm test`: §4.
+- `npm test` in a git-archive copy of `ccd862dfe` (this step's commits on bddc3d69c; its own two-commit git repo): **1,627 files / 13,387 tests
   passed** (44 / 223 skipped), 0 failed. `npm run build` in the same copy: **green** (exit 0). Later commits add only pins.json, off108Pins.py and doc text.
 - `git diff --check` clean at every commit; only new off108 files, staged by explicit path.
 

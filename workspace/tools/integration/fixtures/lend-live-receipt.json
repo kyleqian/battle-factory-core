@@ -1,7 +1,7 @@
 {
  "schema": "lend-live-receipt/v1",
  "design": "docs/s10a-random2-order-lend-blocker.md design 1 (seam-resolved deferred lend)",
- "testedCommit": "f6f8c72ff5f05aa843755e0b45212e0247398287",
+ "testedCommit": "193f7e2cf773793a4abcdf12e1bf5d44fbd44dd6",
  "testedSrcTree": "70fd147416659dedc69be274508a560b61766a15",
  "dirtySrc": false,
  "commands": [

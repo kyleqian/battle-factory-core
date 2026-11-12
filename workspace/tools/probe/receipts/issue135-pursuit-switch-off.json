@@ -546,7 +546,7 @@
     }
   },
   "engineDivergence": {
-    "measuredAt": "pre-fix HEAD f3fcaca6 (stageVoluntarySwitchRules staged dmgMultiplier: 1)",
+    "measuredAt": "pre-fix HEAD d5c10101 (stageVoluntarySwitchRules staged dmgMultiplier: 1)",
     "harness": "tests/issue135PursuitSwitchReceipt.test.ts, same fixture, intercept seed 305419897 / control seed 6",
     "intercept": {
       "romDamage": 54,

@@ -1,6 +1,6 @@
 # Live adapter species audit 14 (S10A side lane, 2026-10-08): the widened subbed-ATTACKER swap cells and the Substitute fade
 
-This audit swaps species in the evidence scenarios of two features on master 3e57c8a50 (production src tree d15bc413):
+This audit swaps species in the evidence scenarios of two features on master 0f3671fc3 (production src tree d15bc413):
 - the subbed-ATTACKER swap cells widened tonight (`LIVE_SUBSTITUTE_SWAP_BODY_CELLS`, `LIVE_SUBSTITUTE_SWAP_BODY_FRAMING` in
   `src/engine/liveSubstituteSwap.ts`; attdoll evidence, prep40 scenarios);
 - the Substitute fade (`src/engine/liveSubstituteFade.ts`; fade-live evidence, prep37 / prep39 scenarios).
@@ -182,8 +182,8 @@ sh tools/integration/speciesAudit14FadeRun.sh /tmp/s14/fp /tmp/s14/fsc /tmp/s14/
   (`speciesAudit14SwapProbes.sh`).
 
 ## 5. Gates
-- `npm test` passed on 54bc5c3f8 + the totals doc commit (db17cc2d5): 1567 files passed / 44 skipped, 12,902 tests passed / 223 skipped,
+- `npm test` passed on eb5373d97 + the totals doc commit (0beacd784): 1567 files passed / 44 skipped, 12,902 tests passed / 223 skipped,
   543.6 s.
 - `npm run build` passed.
-- `git diff --check 3e57c8a50..HEAD` is clean, and the commit range adds new files only (`--diff-filter=AM` = A only).
+- `git diff --check 0f3671fc3..HEAD` is clean, and the commit range adds new files only (`--diff-filter=AM` = A only).
 - `git status src` was clean at every commit.

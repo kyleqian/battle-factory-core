@@ -1,14 +1,14 @@
 # stf115 (S10A main lane, 2026-10-11): the remaining Struggle 165 declines — order lends (rung 1), doll cells (rung 2)
 
-Base: FIXED master `7390bf8ca` (Struggle live since stl109). This step adds evidence and a banked patch, new files only. Every tree is a
-git-archive copy of `7390bf8ca`, plus `tools/integration/fixtures/stf115/stf115-struggle-doll.diff` for the patched copy. Direct mGBA only;
+Base: FIXED master `f4fd956f2` (Struggle live since stl109). This step adds evidence and a banked patch, new files only. Every tree is a
+git-archive copy of `f4fd956f2`, plus `tools/integration/fixtures/stf115/stf115-struggle-doll.diff` for the patched copy. Direct mGBA only;
 the lab seed is pinned (stg107Stage.SEED 305420349). Runner: `sh tools/integration/stf115Run.sh <fresh-out-dir>` (§4).
 
 ## Results
 
 | Rung | Census Struggle declines (0..999) | Windows (production renderer, two fresh probes, r1 == r2) | Verdict |
 |---|---|---|---|
-| base `7390bf8ca` | 149 = lend unknown 106 + attacker doll 24 + defender doll 19 | — | — |
+| base `f4fd956f2` | 149 = lend unknown 106 + attacker doll 24 + defender doll 19 | — | — |
 | **1** order after a Struggle | 149 -> **149** (a Struggle plan lifts 0) | CHAIN lend == ROM sSpriteOrder **66 / 66** (24 / 24 after a Struggle); **54 / 54 live 0 px** (19 / 19 after a Struggle) | the plan exists and is exact; the 106 come from other bodies (below) |
 | **2** doll cells (patched copy) | 149 -> **106** (all 43 doll declines lift; only the 106 lend declines remain) | defender doll **5 / 5** 0 px on every row; attacker doll (swap composite) **6 / 6** 0 px on every row + tail rows; no other window changes (59 / 59 live 0 px) | **BANKED** -> fold |
 
@@ -25,11 +25,11 @@ the lab seed is pinned (stg107Stage.SEED 305420349). Runner: `sh tools/integrati
     ROM free order on **66 / 66 windows**. **24 / 24** of them follow a Struggle body: both sides, after first and repeated Struggles,
     Taunt / Harden / Mean Look / Substitute before and after, KO and recoil-faint battles. Every Struggle body in these routes ends at
     `[3, 4, 21, 20, 5, …]` (`fixtures/stf115/rung1-lends.jsonl`, `rom` field).
-  - **Production render (unpatched `7390bf8ca`; aud110-aligned windows, audit21Check):** **54 / 54 live windows are 0 px on every row.**
+  - **Production render (unpatched `f4fd956f2`; aud110-aligned windows, audit21Check):** **54 / 54 live windows are 0 px on every row.**
     That includes **19 / 19 live windows after a Struggle**: repeated Struggle bodies, and Taunt / Harden / Substitute after a Struggle.
     r1 == r2 holds on 66 / 66. The 12 non-live windows are named gates: defender doll (Struggle 7 + Taunt 2) and stg107's ONIX later-body
     rest gate (3 PP-route bodies). Receipt `fixtures/stf115/rung1-windows-base.txt`.
-  - **Where the census's 106 `sprite-order lend unknown` Struggle declines come from.** Census 0..999 on `7390bf8ca`, receipt
+  - **Where the census's 106 `sprite-order lend unknown` Struggle declines come from.** Census 0..999 on `f4fd956f2`, receipt
     `fixtures/stf115/census-base-declines.json`; `stf115Declines.py` reads the order host's own invalid reason.
     - **101** are in ONE battle (705, CHANSEY vs WOBBUFFET). There, the player's **Metronome called Odor Sleuth 316** (command 16), a
       fallback body with **no order plan**: `316:player` / `316:opponent` are ABSENT from `sprite-order-body-plans-ext.json`. The host
@@ -51,7 +51,7 @@ the lab seed is pinned (stg107Stage.SEED 305420349). Runner: `sh tools/integrati
 
 ## 1. Rung 1 detail
 
-| Census 0..999 on `7390bf8ca` (stg107Census.sh) | value |
+| Census 0..999 on `f4fd956f2` (stg107Census.sh) | value |
 |---|---|
 | commands / live / live frames | 27,458 / 27,128 (98.80 %) / 4,031,756 of 4,061,256 (99.27 %) |
 | Struggle commands / live / fallback | 1,032 / 883 / 149 |
@@ -69,7 +69,7 @@ three complete legal members per side, no transient state:
 - `tsub`: Taunt route; the struggler is faster and knows Substitute x4. T1 raises its doll, then the slower target's Taunt lands, so the
   T2 / T4 / T6 Struggles come from a doll attacker. Two jobs: player Onix -> Jolteon, opponent Snorlax -> Onix.
 
-## 2. Rung 2 detail (patched copy = `7390bf8ca` + `stf115-struggle-doll.diff`)
+## 2. Rung 2 detail (patched copy = `f4fd956f2` + `stf115-struggle-doll.diff`)
 
 **Defender doll** (`fixtures/stf115/rung2-windows-patched.txt`, audit21Check, two fresh probes per scenario):
 
@@ -144,7 +144,7 @@ STF115_CENSUS=1 sh tools/integration/stf115Run.sh .integration/validation/<fresh
 ```
 
 The runner works as follows:
-1. It makes git-archive copies of `7390bf8ca` (base, and base + the diff).
+1. It makes git-archive copies of `f4fd956f2` (base, and base + the diff).
 2. It stages the 16 routes, runs two audit20Probes batches (lends r1 == r2), aligns the windows (aud110Align.py), and renders them with
    audit21Check in both copies.
 3. It runs prep40Probe.py x2 + attdollLiveCheck.ts for the attacker-doll routes.

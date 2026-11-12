@@ -50,7 +50,7 @@ After the fix the menu lag is **6 on all eight Scene ON windows**, the same cons
 
 ## 3. Harness
 
-cln237 deleted the bso226 tools; restored from `4f6fa87e4^` with additions:
+cln237 deleted the bso226 tools; restored from `54c5686f0^` with additions:
 
 * `tools/integration/bso226Run.ts`: `playerPersonalities` optional (for `--scan`), `--menulag=F0` (first-menu lag fit: the first app frame
   >= F0 whose lag-0 `rest` residual exceeds 500 px, best lag -5..60 over the next 30 frames), `--romlast=N` (last ROM frame for `--menulag`).
@@ -71,7 +71,7 @@ node --experimental-strip-types --no-warnings tools/integration/bso226Run.ts /tm
 
 ## 4. ROM proof (Scene ON oracle `battle-scene-on`, `factoryLegal` lab staging)
 
-"before" = parent `4b59eed6c`, **lag 0** (no `--lag`), same frames; "after" = this step with only the scene-independent menu lag
+"before" = parent `68c104875`, **lag 0** (no `--lag`), same frames; "after" = this step with only the scene-independent menu lag
 (`--lag=6@<menu frame>`). Px = differing pixels summed over app frames 0..end, regions as bso226 (opp x >= 120, y < 64; pm x < 120,
 48 <= y < 112; rest).
 
@@ -114,11 +114,11 @@ Scene OFF traces byte-identical (section 6).
 
 ## 6. Gates
 
-Tested code commit `d34e3b650` (tree `ab0720d59231427d98bc1cdb327cc41733d2cb58`). Evidence: `.integration/validation/sv-20261104/go246-evidence/`
+Tested code commit `397c73eda` (tree `ab0720d59231427d98bc1cdb327cc41733d2cb58`). Evidence: `.integration/validation/sv-20261104/go246-evidence/`
 (worktree-local).
 
 * `npm run typecheck`: exit 0.
-* `npm run compare:differential` vs parent `4b59eed6c`, the 211 standard traces in five chunks: **PASS, 38,532 / 38,532 captures
+* `npm run compare:differential` vs parent `68c104875`, the 211 standard traces in five chunks: **PASS, 38,532 / 38,532 captures
   byte-identical** (4,278 + 4,874 + 9,409 + 6,650 + 13,321). No capture changed: the committed intro traces' leads are cry-bound
   (canonical GROVYLE opponent hold 0, ONIX player hold 0: `presentation-rng-playable-live-bodies-on` / `-seeded-on` 190 / 190 each,
   `interactive-generated-intro-off` 715 / 715); no other trace runs a generated Scene ON intro.
@@ -129,7 +129,7 @@ Tested code commit `d34e3b650` (tree `ab0720d59231427d98bc1cdb327cc41733d2cb58`)
 
 ## 7. Census
 
-`tools/integration/lsd194Census.sh` (`LSD194_CENSUS_JOBS=3 LSD194_SPLIT=4`), seeds 0..999, both scenes, tree `d34e3b650`, vs the baseline
+`tools/integration/lsd194Census.sh` (`LSD194_CENSUS_JOBS=3 LSD194_SPLIT=4`), seeds 0..999, both scenes, tree `397c73eda`, vs the baseline
 `.integration/validation/sv-20261102/vis243a-evidence/census-final/{on,off}-dac9cd2fe` through `rst197CensusDelta.py`:
 
 | scene | battles | commands | identical battles | bad |
@@ -145,11 +145,11 @@ frames, max 147), player hold on **617** (sum 21,478, max 112), either on **918*
 
 ## 8. Gates summary
 
-Tested code commit `d34e3b650` (tree `ab0720d59231427d98bc1cdb327cc41733d2cb58`); later commits change tests / fixtures / docs only (the
+Tested code commit `397c73eda` (tree `ab0720d59231427d98bc1cdb327cc41733d2cb58`); later commits change tests / fixtures / docs only (the
 POLIWHIRL hold assertion and a `!` in the new test).
 
 * `npm run typecheck`: exit 0. `npm run build` (tsc -b + vite): exit 0 on the final tree.
-* `compare:differential` vs `4b59eed6c`: PASS, 211 traces, 38,532 / 38,532 byte-identical (section 6).
+* `compare:differential` vs `68c104875`: PASS, 211 traces, 38,532 / 38,532 byte-identical (section 6).
 * Census: 0 bad, 1,000 / 1,000 identical in both scenes (section 7).
 * Tests run (all pass): `go246IntroWait` (5), `bso226BattleStartIntroSendOuts`, `factoryBattleStartIntro`, `factoryBattleStartIntroAckAlignment`,
   `factoryRoundBattleOrchestrator`, `factoryRoundIntroGeneralization`, `plr162PlayerForcedSendIn`, `presentationRngSession`, `presentationRng`,

@@ -1,7 +1,7 @@
 # snd182: Scene ON forced PLAYER send-in ("X was dragged out!") in production
 
 ISSUES #146 open item 1 (`docs/snd179-scene-on-forced-player-send-in.md` is the evidence; `docs/plr162-player-forced-send-in.md` the Scene OFF half).
-Presentation only: no kernel event, no gameplay RNG, no damage / turn-order change. Base: master `253a9ff9e`.
+Presentation only: no kernel event, no gameplay RNG, no damage / turn-order change. Base: master `14bb5777c`.
 
 ## Result
 
@@ -11,7 +11,7 @@ Presentation only: no kernel event, no gameplay RNG, no damage / turn-order chan
 | 2. dense Scene ON ROM windows (6, twice fresh) | next-text frame == production duration in 6 / 6; healthbox + message px 0 (CASTFORM 2 px healthbox); remaining px is the mon region (no back animation in the live renderer, predates this change) |
 | 3. Tier-1 tests | `tests/snd182SceneOnForcedPlayerSendIn.test.ts`, `tests/plr162PlayerForcedSendIn.test.ts` (see below) |
 | 4. census 0..999, both scenes | kernel digests identical 1000 / 1000 both scenes; OFF byte-identical (1000 / 1000 battles, 316,756 commands); ON 980 / 1000 battles byte-identical, 20 battles change, 32 commands, all forced player send-ins, 0 unattributed |
-| 5. `compare:differential` (3 scenarios, base `253a9ff9e`) | PASS, 641 / 641 captures identical |
+| 5. `compare:differential` (3 scenarios, base `14bb5777c`) | PASS, 641 / 641 captures identical |
 | 6. re-pins | one test pin moved (sc106 Intimidate seed 6, +46); one ratchet list widened (see "Re-pins") |
 
 ## Mechanism
@@ -42,7 +42,7 @@ at 91 / 132 / 198 / 158 / 132 / 161: the difference is the duration value, not t
 ## Acceptance 1: first-glyph frame vs ROM (27 cases)
 
 `tools/integration/snd182Rows.ts` (receipt `fixtures/snd182/first-glyph-vs-rom.json`); frames from the send-in start, ROM = the snd179 `rom-rows-r1.json` and
-`rom-rows-attackers-r1.json` probes. Before = production at `253a9ff9e` (always 102 = 91 + 11), after = this change.
+`rom-rows-attackers-r1.json` probes. Before = production at `14bb5777c` (always 102 = 91 + 11), after = this change.
 
 | case | ROM | before (delta) | after (delta) |
 | --- | --- | --- | --- |
@@ -77,7 +77,7 @@ opponent half transplanted from the ROM, regions phb = player healthbox, mon, ms
 Healthbox and message regions are pixel-exact after the change (CASTFORM: 2 healthbox px, 1 px each at rows 76 and 84; present on base too, cause not investigated).
 The non-text residual is the mon region: the live renderer has no player back send-out animation (the renderer does not distinguish the scene for switch-in drawing; the
 player mon is the static back sprite), so while the ROM plays TORKOAL's / BULBASAUR's back animation the production sprite
-is static. It **predates this change**: base `253a9ff9e` already has the same mon-region residual over its own window (mon px base / final over the first ~103 rows:
+is static. It **predates this change**: base `14bb5777c` already has the same mon-region residual over its own window (mon px base / final over the first ~103 rows:
 PIDGEY 26828 / 26828, CASTFORM 43026 / 43026, METAPOD 21006 / 21604, TORKOAL 45088 / 46894, BULBASAUR n0 26272 / 26985, n10 28336 / 29187; the few-hundred-px
 extra in the final column is at the window tail where base had already started its message, not investigated further), and the totals grow with the window
 length because the longer window exposes more of the same missing animation rows. Out of scope here; the missing piece is a back send-out renderer.
@@ -94,7 +94,7 @@ Both ROM captures agree in each window (`compareR1EqualsR2`: true).
 
 ## Acceptance 4: census 0..999, both scenes
 
-`TRN178_CENSUS_JOBS=6`, `tools/integration/trn178Census.sh` on base `253a9ff9e` and on this branch; `snd182CensusDelta.py` (receipts
+`TRN178_CENSUS_JOBS=6`, `tools/integration/trn178Census.sh` on base `14bb5777c` and on this branch; `snd182CensusDelta.py` (receipts
 `census-delta-on.json`, `census-delta-off.json`).
 
 | scene | battles | kernel-event digest mismatches | commands base -> final | byte-identical battles | unattributed |
@@ -108,8 +108,8 @@ with slide 65 and delay -1; command sequence types unchanged; total +1136 frames
 
 ## Acceptance 5: differential
 
-`npm run compare:differential -- fight-submenu battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base 253a9ff9e`: PASS,
-641 / 641 captures identical, 3 traces (receipt `fixtures/snd182/differential.json`, run on `7edb91445`; no `src/` change since). None of the three scenarios
+`npm run compare:differential -- fight-submenu battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base 14bb5777c`: PASS,
+641 / 641 captures identical, 3 traces (receipt `fixtures/snd182/differential.json`, run on `787b9a591`; no `src/` change since). None of the three scenarios
 contains a forced player send-in, so no difference was expected and none attributed.
 
 ## Re-pins (acceptance 6)
@@ -140,7 +140,7 @@ Only moved frames, each attributed:
     node --experimental-strip-types --no-warnings tools/integration/snd182Compare.ts ...      # dense compare
     TRN178_CENSUS_JOBS=6 bash tools/integration/trn178Census.sh ...                          # census, both trees
     python3 tools/integration/snd182CensusDelta.py <base-dir> <final-dir> <out.json>
-    npm run compare:differential -- fight-submenu battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base 253a9ff9e
+    npm run compare:differential -- fight-submenu battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base 14bb5777c
 
 ## Gates
 

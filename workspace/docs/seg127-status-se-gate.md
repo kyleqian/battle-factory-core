@@ -3,9 +3,9 @@
 Evidence + a banked, UNWIRED pure rule. **No production change**, no existing file edited (new files: this doc,
 `tools/integration/seg127{SeLength.py,Probe.py,Stage.py,Sweep.sh,Rom.py,Exposure.ts,ExposureSummary.py,Run.sh}`,
 `tools/integration/fixtures/seg127/`, `src/engine/seg127StatusSeGate.ts` (imported by nothing but its test),
-`tests/seg127StatusSeGate.test.ts`). FIXED evidence base: master `cfe4e26ca` (production src `b4befa039`), git-archive copies only; direct
+`tests/seg127StatusSeGate.test.ts`). FIXED evidence base: master `9a184dfa6` (production src `b4befa039`), git-archive copies only; direct
 mGBA only, explicit lab seeds, every probe job twice in fresh processes (**32 / 32 r1 == r2**, ROM analysis r2 == r1). §0 (the source
-prediction) was committed (`71f0d040a`) before any probe ran and is kept verbatim at the end; every prediction held.
+prediction) was committed (`0230044dd`) before any probe ran and is kept verbatim at the end; every prediction held.
 
 ## 1. Results first
 
@@ -65,7 +65,7 @@ abilities source-verified by `seg127Stage.py` against `species_info.h`. Seeds: 3
 Thunderbolt (ply 305419907 / opp 305419901), the first sweep seed with the receipt (`seg127Sweep.sh`, 12 seeds per scenario; Sludge
 Bomb moved off Snorlax: Immunity). Not staged: a crit before a status animation (source: "A critical hit!" + waitmessage -> 0; census 22).
 
-### 1b. Census exposure 0..999 (`fixtures/seg127/exposure.json`; Scene ON production kernel of cfe4e26ca; 8,080 receipts, **0 unclassified**)
+### 1b. Census exposure 0..999 (`fixtures/seg127/exposure.json`; Scene ON production kernel of 9a184dfa6; 8,080 receipts, **0 unclassified**)
 
 | class | receipts (player / opponent) | effectiveness SE open (no print since) | closed by: not very eff. / super / crit / other print / no SE | projected gated receipts | **added gate frames** |
 |---|---|---|---|---|---|
@@ -103,7 +103,7 @@ fixedRows of their path (after sandstorm damage / after a plain hit); 2 census y
 ## 3. How SA2 wires it (exact recipe)
 
 1. Call site: `projectBattleResolutionCommands` (`src/engine/battleResolutionPresentation.ts:3490`), its event loop (`:3541`) — the
-   `status-animation` payload case that SA1 (sa125) adds next to the `set-battler-status-data` case (`:3828` on `cfe4e26ca`).
+   `status-animation` payload case that SA1 (sa125) adds next to the `set-battler-status-data` case (`:3828` on `9a184dfa6`).
 2. Inputs, all already in that loop's `events` (the segment's kernel events, `events[i].payload`): the `play-se` payloads (today skipped at
    `:714` / `:821`; kernel `battleScriptEvents.ts:144-147`, emitted by Cmd_effectivenesssound), the `message` payloads, the `hp-change`
    payloads (`from` / `to`), the `animation` `MOVE_ANIMATION` payload, and the `message` right after the receipt.
@@ -123,7 +123,7 @@ General_StatsChange command (sc106 / scf117) does not model it. Worth a sibling 
 ## 5. Reproduction (from workspace/)
 
 ```
-sh tools/integration/seg127Run.sh <fresh-out-dir-inside-the-repo> --census   # archive of cfe4e26ca + seg127 files of HEAD; ALL SAME expected
+sh tools/integration/seg127Run.sh <fresh-out-dir-inside-the-repo> --census   # archive of 9a184dfa6 + seg127 files of HEAD; ALL SAME expected
 python3 tools/integration/seg127SeLength.py se_effective se_super_effective se_not_effective
 python3 tools/integration/seg127Stage.py <dir>/scenarios
 python3 tools/run-mgba-probe.py <o.json> -- <mgba-venv python> tools/integration/seg127Probe.py <scenario> on <o.json> [--seed N]
@@ -136,13 +136,13 @@ npm test -- tests/seg127StatusSeGate.test.ts
 
 ## 6. Gates (this step: new files only, production untouched)
 
-- `sh tools/integration/seg127Run.sh .integration/validation/seg127-20261012/worker-scratch/run1 --census` (archive of `cfe4e26ca` + the
-  seg127 files of `177203bc0`): **ALL SAME** — scenarios 32 / index SAME, probes 32 / 32 r1 == r2, 64 / 64 == committed sha256, rom-r1
+- `sh tools/integration/seg127Run.sh .integration/validation/seg127-20261012/worker-scratch/run1 --census` (archive of `9a184dfa6` + the
+  seg127 files of `228a19fe1`): **ALL SAME** — scenarios 32 / index SAME, probes 32 / 32 r1 == r2, 64 / 64 == committed sha256, rom-r1
   SAME, rom r2 == r1, rule residuals 0, exposure.json SAME.
 - `npm test -- tests/seg127StatusSeGate.test.ts tests/animation/factoryAnimationInventory.test.ts`: 2 files / 16 tests passed;
   `npm run typecheck`: green; `npm run test:smoke`: 448 / 448 (first run caught the parity census flagging an `ABILITY_*`-spelled local
   constant in the new module: renamed `INFLICTED_BY_STRINGS`); `git diff --check`: clean; `git status`: no modified tracked file.
-- Full suite on `01e3749a3` (not required for new files only; run anyway): `npm test -- --shard=1/2` 820 files / 7,048 tests passed,
+- Full suite on `618d80b20` (not required for new files only; run anyway): `npm test -- --shard=1/2` 820 files / 7,048 tests passed,
   `--shard=2/2` 820 files / 6,492 tests passed = **1,640 files / 13,540 tests, 0 failed** (44 / 223 skipped; prior 1,639 / 13,532 + this
   test's 8); `npm run build`: green.
 

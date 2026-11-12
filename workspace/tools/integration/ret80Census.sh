@@ -1,6 +1,6 @@
 #!/bin/sh
 # ret80 acceptance census (docs/ret80-return-order.md): liveShareCensus.ts seeds 0..999, ONE process per arm -- base (default
-# b2ed6f8c2) vs final (default HEAD) -- each tree extracted with git archive into <out>/base and <out>/final (node_modules symlinked;
+# fffd6bd5d) vs final (default HEAD) -- each tree extracted with git archive into <out>/base and <out>/final (node_modules symlinked;
 # no tracked file is touched), then prep43CensusDelta.py and the command KEY sequence (battle, kind, moveId, side, attacker, target) +
 # battleDigestExcludingFrames comparison. usage (from workspace/): sh tools/integration/ret80Census.sh <fresh-out-dir> [base] [final]
 set -eu

@@ -2,7 +2,7 @@
  "schema": "return-live-adapter-receipt/v1",
  "scope": "S10A integration return-live: EXACT live MOVE_RETURN (216, strongest branch = friendship 255, the only branch the Factory reaches); RETURN renderer age-0 enemy shadow for an elevated opponent target; Will-O-Wisp later bodies; attacker-side idle-rest gate lift for Will-O-Wisp (first body) / Pursuit / Fury Cutter",
  "oracle": "dense windows: fresh direct-mGBA probe processes (tools/run-mgba-probe.py via liveAdapterFramebuffer.ts), Battle Scene ON, 2 fresh runs per window, each window from its own scenario activation frame; routes: generated Factory rentals, Scene ON vs OFF",
- "codeCommit": "332161c185b762aa97c760f325b960892354b411",
+ "codeCommit": "d48e786cd801edb6cc5026a60a5fd385791636b5",
  "srcTree": "7584e7a52c5a6cabcfebaca699877321d113cd2a",
  "claimBoundary": "Implemented = the ordinary queue renders Return's strongest body from production inputs only (anchors, known-entry allocator/scene constants, asset palettes, the lent order carried through the body, the return.ts PROGRAMS.strongest schedule). First-body scope; later bodies, shiny battlers decline to the scene-off view. Not whole-battle or arbitrary-history framebuffer exactness.",
  "return216": {

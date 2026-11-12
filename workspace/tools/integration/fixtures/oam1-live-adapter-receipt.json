@@ -2,7 +2,7 @@
  "schema": "oam1-live-adapter-receipt/v1",
  "scope": "S10A integration oam1: production hardware-OAM provider (src/engine/liveMoveOamAssembler.ts) + EXACT live adapters MOVE_WILL_O_WISP 261 (first body), MOVE_PURSUIT 228 (normal body, first body), MOVE_FURY_CUTTER 210 (counter-1 body = first body)",
  "oracle": "dense windows: fresh direct-mGBA probe processes (tools/probe/run-battle-lab-rgb.py via liveAdapterFramebuffer.ts), Battle Scene ON, 2 fresh runs per window; routes: generated Factory rentals, Scene ON vs OFF",
- "codeCommit": "24d3038f2707e9696483e7c0b11aae5e07255dc6",
+ "codeCommit": "2529d683e5ff46a2f4323a489a105499f45e6684",
  "srcTree": "89c9294dd425cd0e6fff769d1f05055388bfb856",
  "claimBoundary": "Implemented = the ordinary queue renders these bodies from production inputs only (anchors, known-entry allocator/scene constants, asset palettes, source programs, the lent order carried through the body). First-body scope; later bodies, Pursuit switch interception and Fury Cutter counters 2..5 decline to the scene-off view. Not whole-battle or arbitrary-history framebuffer exactness.",
  "g1": {

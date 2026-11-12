@@ -5,7 +5,7 @@
 User requested reusable animation machinery now, tested on unfinished non-Factory moves, and clarified execution belongs on hcloud. Existing Factory campaign remains independent.
 
 - Branch: codex/animation-runtime-hcloud.
-- Starting evidence: d7c8493bb, following initial spike32a72418e.
+- Starting evidence: ac3d4243e, following initial spike32a72418e.
 - Workspace: /srv/pokebench/pokeemerald-factory-core/workspace/.worktrees/animation-runtime/workspace.
 - First bounded implementation: full Splash/Mud Sport scripts, reusable task/sprite/resource machinery, new mud particle family, dense bilateral source/transfer evidence and rendering integration toward full pixel acceptance.
 - Dispatch: existing tools/run-subagent.sh, one animation-profile Sol/high worker (novel scheduling/OAM integration per repository routing),180-minute cap. Dedicated service pokebench-animation-runtime; no recurring timer and no changes to other services.
@@ -41,7 +41,7 @@ User requested reusable animation machinery now, tested on unfinished non-Factor
   are assertions; only initial state and the explicitly unported audio-host
   busy signal are inputs. Mutation test proves later particle data is not
   consumed as a trajectory.
-- Green scoped gates on implementation commit `b9ecb3bfa`: focused runtime/
+- Green scoped gates on implementation commit `689d13902`: focused runtime/
   control/sprite-order/compositor/boundary/inventory pack 7 files / 41 tests;
   smoke 8 files / 448 tests; `npm run typecheck`; `npm run animation:coverage`
   (unchanged 266/276 Level 50, 0/77 outside Factory);

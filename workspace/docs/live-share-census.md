@@ -2,9 +2,9 @@
 
 How often ordinary Battle Factory play (Scene ON) shows a **live adapter** for a move body vs the **scene-off fallback**, and
 which production gate made each fallback. Tooling + evidence only: `tools/integration/liveShareCensus.ts` (driver) and
-`tools/integration/liveShareCensusGates.ts` (classifier); no `src/` change, no oracle. Production tree as of master `4efff4321`.
+`tools/integration/liveShareCensusGates.ts` (classifier); no `src/` change, no oracle. Production tree as of master `827790f00`.
 
-## ordl126 landing (2026-10-12; base master `cfe4e26ca`, production src `b4befa039` + the generated Odor Sleuth 316 / False Swipe 206 plans)
+## ordl126 landing (2026-10-12; base master `9a184dfa6`, production src `b4befa039` + the generated Odor Sleuth 316 / False Swipe 206 plans)
 
 Seeds 0..999, 10 `--index-from` shards (`stg107Census.sh`, both arms, merged reports): **27,245 / 27,426 move-animation commands live (99.34 %),
 4,144,162 / 4,160,787 frames (99.60 %)** (base arm: 27,139 / 98.95 %, 4,132,330 / 99.32 %). +106 commands / +11,832 frames, all in battle 705
@@ -12,15 +12,15 @@ Seeds 0..999, 10 `--index-from` shards (`stg107Census.sh`, both arms, merged rep
 **19 / 3,658** commands / frames. Residual: Hyper Beam `63:player` 12 / 2,229, Astonish `310:player` 5 / 912, next-mon summary 2 / 517,
 later-body (Extrasensory 326 scanout split) 23 / 3,772. `docs/ordl126-order-plans-live.md`, `tools/integration/fixtures/ordl126-live-receipt.json`.
 
-## Final 2026-10-11 afternoon session (master `2131feda7`, production src `b4befa039`)
+## Final 2026-10-11 afternoon session (master `01811d964`, production src `b4befa039`)
 
 Seeds 0..999, 10 `--index-from` shards (`ret88Census.sh shards`, supervisor): **27,139 / 27,426 move-animation commands live (98.95 %),
-4,132,330 / 4,160,787 frames (99.32 %)**, 0 render throws (session start `52c181d54`: 95.38 % / 98.72 %). Struggle is included (live
+4,132,330 / 4,160,787 frames (99.32 %)**, 0 render throws (session start `bddc3d69c`: 95.38 % / 98.72 %). Struggle is included (live
 except 106 order-lend declines after Odor Sleuth / Hyper Beam hosts). The total frame count grew with today's timeline fixes (universal
 pre / post rows, shadow lead rows, Shadow Punch D4), not with fallback. General_StatsChange stays a separate line (below).
 `.integration/validation/final-2131feda7/census/merged.json`.
 
-## Previous (2026-10-11, sdl119 — Struggle on a Substitute doll live; base master `76c33f4bc`, production src `377ed0c48`)
+## Previous (2026-10-11, sdl119 — Struggle on a Substitute doll live; base master `1cb9e6de2`, production src `377ed0c48`)
 
 The stf115 doll cells landed (`docs/sdl119-struggle-doll-live.md`). Seeds 0..999, both arms by `ret88Census.sh shards`: live by count
 98.80 % -> **98.95 %** (27,097 -> 27,140 of 27,429 -> 27,427 commands), by frames 99.27 % -> **99.31 %** (supervisor correction: 99.44 % was land82CensusCheck.py's `liveFramePctAfter`, which divides the final live frames by the BASE arm's frame total; live Struggle bodies are longer than the fallback, so the final total grew — 4,035,044 / 4,063,168 = 99.31 %, == the merged report). Struggle: 1,003 / 854 live
@@ -28,7 +28,7 @@ The stf115 doll cells landed (`docs/sdl119-struggle-doll-live.md`). Seeds 0..999
 live (36 opponent / 7 player). 0 non-Struggle status changes, `battleDigestExcludingFrames` identical, stalled 3 in both arms.
 Receipts `tools/integration/fixtures/sdl119/census-{summary,check}.json`. Previous headline below.
 
-## General_StatsChange (2026-10-11, scf117; production src `d4988e08`, base master `681da5c10`) — a separate line
+## General_StatsChange (2026-10-11, scf117; production src `d4988e08`, base master `c1ddccc74`) — a separate line
 
 The stat-arrow banner (B_ANIM_STATS_CHANGE / Cmd_playstatchangeanimation) is a GENERAL animation presented by its own `stats-change`
 command (sc106 / scd112 / olnd113 / scf117), live in both scenes. It is NOT part of the move-animation share below (that census counts
@@ -37,16 +37,16 @@ move-animation / substitute-fade commands only). Seeds 0..999: **Scene ON 3,667 
 scf117's census delta (on its base, before sdl119): move-animation share unchanged (98.80 % / 99.27 %), 0 status changes, `battleDigestExcludingFrames` identical
 (`docs/scf117-stats-change-finish.md` §4, `tools/integration/fixtures/scf117-live-receipt.json`).
 
-## Previous (2026-10-11, stl109 — Struggle 165 live; production src `5007ac57`, base master `5c050b765`)
+## Previous (2026-10-11, stl109 — Struggle 165 live; production src `5007ac57`, base master `80bb333bd`)
 
 Struggle (the user-required forced move, `docs/struggle-integration-scope.md`) is part of the headline: it is ordinary play, so the
 all-command share below includes it. Seeds 0..999 as 10 `--index-from` shards merged with hist73Merge.py, both arms by
-`ret88Census.sh shards` (base `5c050b765`, final = the stl109 tree); receipt `tools/integration/fixtures/stl109-census-summary.json`
+`ret88Census.sh shards` (base `80bb333bd`, final = the stl109 tree); receipt `tools/integration/fixtures/stl109-census-summary.json`
 (+ `-check.txt`); identical to stg107's patched arm (`docs/stg107-struggle.md` §3.5).
 
 | arm | commands | live | **live by count** | **live by frames** | Struggle commands / live / live frames |
 |---|---:|---:|---:|---:|---|
-| base `5c050b765` (== the night report below) | 27515 | 26245 | **95.38 %** | **98.72 %** (3,932,860 of 3,983,929) | 1,089 / 0 / 0 of 34,817 |
+| base `80bb333bd` (== the night report below) | 27515 | 26245 | **95.38 %** | **98.72 %** (3,932,860 of 3,983,929) | 1,089 / 0 / 0 of 34,817 |
 | **stl109** | 27459 | 27129 | **98.80 %** | **99.27 %** (4,031,868 of 4,061,368) | 1,033 / **884** / 99,008 of 112,256 |
 
 0 non-Struggle status changes; land82CensusCheck: command keys identical outside the stalled tails, `battleDigestExcludingFrames`
@@ -55,7 +55,7 @@ tails of the three Struggle-only stalemates (seeds 434, 796, 881): a live Strugg
 so the 200,000-frame budget ends them 17 / 14 / 25 Struggle commands earlier. Struggle's 149 declines, each named: `sprite-order lend
 unknown` 106 (after a Struggle body: no plan entry), `attacker doll: swap body cell unproven` 24, `defender doll: unproven body cell` 19.
 
-## Previous (2026-10-11 night, production src `14d1be15`, master `4bf782115`; 0..299 and 50000.. on `dc6c756a`)
+## Previous (2026-10-11 night, production src `14d1be15`, master `758cd54cf`; 0..299 and 50000.. on `dc6c756a`)
 
 **Scope update, user-approved 2026-10-11:** Struggle is required S10A work even
 though it is not listed in rental moves. Use the all-command coverage as the
@@ -74,7 +74,7 @@ on 0..999, 0 live -> fallback, gameplay command keys identical (two Struggle sta
 land97's lead rows lengthened about 3,600 live bodies to the ROM's timing; ISSUES #166 (the missing stat-change animation) is outside this census
 (it counts move-animation commands only).
 
-## Previous (2026-10-10 day, production src `4c4fe4c7`, master `bf082c6e1`)
+## Previous (2026-10-10 day, production src `4c4fe4c7`, master `4265d81c8`)
 
 | seeds | commands | live | **live by count** | **live by frames** | faithful-random history (count / frames) |
 |---|---:|---:|---:|---:|---|
@@ -256,11 +256,11 @@ marker to any consumer. The render seam resolves it with that unit's surrogate p
   without them.
 - These commands remain in `live` / `liveFrames`. The bucket is a separate claim beside them, not a subtraction from the census.
 
-Seeds 0..299, master `553cef6b5` vs words46 (`tools/integration/fixtures/words46/census/`):
+Seeds 0..299, master `213918b23` vs words46 (`tools/integration/fixtures/words46/census/`):
 
 | | live by count | live by frames | faithful-random history |
 |---|---|---|---|
-| `553cef6b5` | 6884 / 7970 = 86.37 % | 1013245 / 1168273 = 86.73 % | (no flag) |
+| `213918b23` | 6884 / 7970 = 86.37 % | 1013245 / 1168273 = 86.73 % | (no flag) |
 | words46 | 7023 = 88.12 % (+139) | 1034572 = 88.56 % (+21,327) | 128 commands (1.61 %) / 21,283 frames (1.82 %) |
 
 - There are 0 live -> fallback regressions and 0 pairing mismatches, and the battle digest is identical.

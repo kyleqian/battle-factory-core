@@ -1,7 +1,7 @@
 # ont193 -- Scene ON script tails (ISSUES #167 ON -3..-6) and the Focus Punch pre-pass menu-SE wait (ISSUES #139 ON +2)
 
 Lane: Scene ON playable-animation integration; oracle battle-scene-on. Presentation-only: no gameplay, RNG, damage, turn-order or facility change.
-Base master `42695ae16`. Commits: `6cf7dab1c` (B), `423163476` (A), `da8c5d3ed` (re-pins + census tooling), then the test/doc commit that carries this file.
+Base master `8bfd14a00`. Commits: `f6900a0c8` (B), `20b91604d` (A), `b6a7f1eef` (re-pins + census tooling), then the test/doc commit that carries this file.
 Receipts: `tools/integration/fixtures/ont193/`. Tools: `ont193Census.{ts,sh}`, `ont193CensusDelta.py`, `ont193FocusPunchResiduals.ts`,
 `ont193FocusPunchWindow.ts`, `ont193RouteWindow.ts`, `ont193DenseWindows.py`. Test: `tests/ont193SceneOnTails.test.ts`.
 
@@ -26,7 +26,7 @@ E (empty box) -> tightening glyph = 125 + animWait. `IsBattleSEPlaying` gates th
 so animWait = 2 (`FOCUS_PUNCH_PRE_PASS_MENU_SE_LAUNCH_WAIT_FRAMES`) only on the first pre-pass of a turn whose player decision was a Fight-menu move;
 0 on a voluntary-switch turn and on later pre-passes. Scene OFF is unchanged. **The Bag/item path is not reachable in Factory (no Bag), so it is not modelled.**
 
-## 3. Acceptance 1 -- btl188Rows.ts and trn176Predict.ts --scene=on, base 42695ae16 -> final
+## 3. Acceptance 1 -- btl188Rows.ts and trn176Predict.ts --scene=on, base 8bfd14a00 -> final
 
 ROM-only anchors (`btl188-rows-{base,final}.txt`: formula `(n-a)+1+(release-bodyEnd)` = the "short" before the change, 0 after):
 
@@ -108,10 +108,10 @@ tail but 0 frames, 2464 commands across 24 moves (Double Team 104 x893, 240, 184
 
 ## 7. Acceptance 6 -- differential (`differential.txt`)
 
-`npm run compare:differential -- fight-submenu battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base 42695ae16`:
+`npm run compare:differential -- fight-submenu battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base 8bfd14a00`:
 fight-submenu 235/235, battle1-postwin-next-prompt 216/216, presentation-rng-playable-live-bodies-seeded-on 190/190 byte-identical (641 captures; PASS, no difference to attribute).
 
-## 8. Acceptance 7 -- re-pins (moved frames only; commit `da8c5d3ed` and `6cf7dab1c`)
+## 8. Acceptance 7 -- re-pins (moved frames only; commit `b6a7f1eef` and `f6900a0c8`)
 
 - sc106 seed 0 (Acid Armor): first anchor +3; route +3x3 (Acid Armor) +4 (move 219) -1 dismissal parity. Route totals are cumulative across the no-hit bodies.
 - sc106 seed 3 (Sand-Attack): anchors +6 x (i+1), the ROM-measured tail per crossed body.
@@ -134,9 +134,9 @@ fight-submenu 235/235, battle1-postwin-next-prompt 216/216, presentation-rng-pla
 
 ## 10. Verification
 
-Tested production tree: `git rev-parse HEAD:workspace/src` = `9e7ac718f43c51f87a2f933d189163077ba7c7cd` (code commit `423163476`; later commits touch tests, tools, fixtures and docs only). Test/receipt commit `fab170e51`.
+Tested production tree: `git rev-parse HEAD:workspace/src` = `9e7ac718f43c51f87a2f933d189163077ba7c7cd` (code commit `20b91604d`; later commits touch tests, tools, fixtures and docs only). Test/receipt commit `a9294203d`.
 - `npm run typecheck`: pass (after the tools-importing tests were added). `npm run test:smoke`: 8 files / 448 tests pass. `npm run build`: pass. `git diff --check`: clean.
 - Full suite as 10 foreground `vitest --shard=i/10` chunks (`--pool=forks --testTimeout=20000`, 2 workers), run while the re-pins below were still being made: shards 1-5, 7 and 9 had failures
-  (all attributed to the script tail / the 0-frame `scriptTailRows` metadata and re-pinned in `fab170e51`: iu120 helper tail rows, Wall, tmr136, battleTurnPortability, sub157, the sgl138 receipt's ON route totals); shards 6, 8, 10 were clean.
+  (all attributed to the script tail / the 0-frame `scriptTailRows` metadata and re-pinned in `a9294203d`: iu120 helper tail rows, Wall, tmr136, battleTurnPortability, sub157, the sgl138 receipt's ON route totals); shards 6, 8, 10 were clean.
 - Failing files re-run alone after the re-pins: liveGlow + battleTurnPortability (pass), the 13 shard 1-5 files (10 pass, 3 re-pinned and then pass: tmr136, Random2R5, Wall), sub157, sgl138 (pass).
 - NOT done: one single end-to-end green `npm test` over the final tree. A re-run of all 73 files that import `tests/helpers/iu120Rows.ts` timed out at 560 s with 43 files passed and 0 failed; the rest (apart from Wall and sgl138, which passed alone) were not re-run before the 170-minute cap.

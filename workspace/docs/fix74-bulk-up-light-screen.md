@@ -1,6 +1,6 @@
 # fix74 (S10A side lane, 2026-10-10): live audit 18's two live-claim findings — Bulk Up 339 across species, Light Screen 113 at a hidden opponent
 
-Base `1b59ee96e` (audit 18's branch at master `ff4baec48`). Production change: ONE line in `liveMoveHiddenTargetDeclines`
+Base `c8f0d2382` (audit 18's branch at master `a7904fcc0`). Production change: ONE line in `liveMoveHiddenTargetDeclines`
 (`src/engine/liveMoveAnimation.ts`); final `src` tree `23c773400`. Receipt: `tools/integration/fixtures/fix74-live-receipt.json`.
 Direct mGBA only (no shared oracle touched), explicit lab seed 305420349 in every scenario.
 
@@ -12,18 +12,18 @@ Direct mGBA only (no shared oracle touched), explicit lab seed 305420349 in ever
 | **Light Screen 113 by the PLAYER while the opponent is hidden** (audit 18 TIMING-PHASE: the ROM drops the age-68 / 69 lag frames, 148 px ages 69..81) | **Fails closed** like Sky Uppercut at a hidden target (hide66); keyed on the hidden opponent, not on which two-turn move (Fly / Bounce / Dig / Dive) hid it | `liveMoveHiddenTargetDeclines`: `moveId 113 && attacker 0 && opponent hidden` | audit 18's 12 Light Screen windows (`AUDIT18_LENDS_ONLY`): the 2 `dive-{snorlax,golem}-light-screen-ply-c0` live -> fallback, the other 10 (opponent side with the player hidden, controls, Shock Wave chains) unchanged live; `tests/fix74HiddenLightScreen.test.ts` (3 / 5 fail without the change) |
 | OPTIONAL: audit 18's OPEN row (Sandstorm 201 in the Fly hidden span, GOLEM hidden: 1 row at age 162) | **Not reproduced by the Factory Fly users.** GOLEM cannot use Fly in the Factory; with SKARMORY or SWELLOW as the hidden Fly user the window is exact | none | 4 / 4 windows (2 species x 2 sides) 168 / 168 rows 0 px, r1 == r2, hide agrees (`fixtures/fix74/sandstorm/receipts/`) |
 
-**Census (seeds 0..999, base `1b59ee96e` vs final; 5 parallel ranges of 200 per tree):** 26,717 commands. The command KEY sequence (battle,
+**Census (seeds 0..999, base `c8f0d2382` vs final; 5 parallel ranges of 200 per tree):** 26,717 commands. The command KEY sequence (battle,
 kind, moveId, side, attacker, target) is identical, `battleDigestExcludingFrames` is identical in every range, and **0 status / frame changes**
 (live 25,612 / 26,717 in both trees, live frames 3,821,357 both). No census route casts a player Light Screen while the opponent is hidden. Player
 Light Screen is 81 live / 19 fallback in BOTH trees, and Bulk Up is 22 / 22 live in both.
 **ON/OFF parity** (`hide66Parity.ts --moves=339`): seed 154 / streak 28 (HERACROSS, player Bulk Up x 3, 13 turns) and seed 211 / streak 23
 (SLAKING, opponent Bulk Up x 3, 30 turns). Battle RNG, rules context and boundary are equal at every turn boundary.
 
-**Gates (final code `d57c74158`, src `23c773400`, four Vitest workers):** targeted (every test file matching BULK_UP / LIGHT_SCREEN / hide66
+**Gates (final code `917c16404`, src `23c773400`, four Vitest workers):** targeted (every test file matching BULK_UP / LIGHT_SCREEN / hide66
 / 339 / 113, plus the inventory, playableAnimationIntegration and the two fix74 tests) 201 files / 3,257 tests passed (10 / 39 skipped);
 `npm run typecheck` green; `npm run test:smoke` 8 / 448; `npm test` shard 1/2 803 files / 6,892 tests, shard 2/2 803 files / 6,327 tests,
 0 failed (44 files / 223 tests skipped); `npm run build` green; `npm run compare:differential -- fight-submenu battle1-postwin-next-prompt
-presentation-rng-playable-live-bodies-seeded-on --base 1b59ee96e`: 624 / 624 captures byte-identical; `git diff --check` clean.
+presentation-rng-playable-live-bodies-seeded-on --base c8f0d2382`: 624 / 624 captures byte-identical; `git diff --check` clean.
 
 ## 2. Bulk Up 339: the source mechanism
 
@@ -46,7 +46,7 @@ presentation-rng-playable-live-bodies-seeded-on --base 1b59ee96e`: 624 / 624 cap
   first inactive frame, giving 104 rows. Audit 18's residual pattern fits a 4-frame phase lead exactly: the ramps 2..16 and 38..52 differ, plus
   the breath creation rows 53..62, while the 24-frame hold 17..37 and everything from 63 on match. Audit 18 tried `ageOffset` +-1 only.
 
-### Predictions (committed in `44e70ea99` before any species probe) vs probes
+### Predictions (committed in `8c1bec736` before any species probe) vs probes
 
 | Species | side | yOffset | H | predicted rows (window / activation) | predicted px | probed (2 targets each) |
 |---|---|---|---|---|---|---|

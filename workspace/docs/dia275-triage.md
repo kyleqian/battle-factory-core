@@ -1,7 +1,7 @@
 # dia275: first-row triage of the ISSUES #211 seeds with the smallest prefixes (diagnosis only; no `src/` or `tests/` change)
 
 Evidence (ignored): `.integration/evidence/dia275/<seed>-off.{req,setup,engine,frozen,tl,cmp,drive}.json` (+ `<seed>-off.events.json` for 95 / 114 / 123 = engine `--events=1`).
-Drives: `tools/audio/romDriveSeed.sh SEED off .integration/evidence/dia275`, scene OFF, tree `a0d4a6fe6`, three at a time (all six in 83 s wall). Tuple = `[frame, gCurrentMove, hp0, hp1, rng, lastMove0, lastMove1]`;
+Drives: `tools/audio/romDriveSeed.sh SEED off .integration/evidence/dia275`, scene OFF, tree `c7887c544`, three at a time (all six in 83 s wall). Tuple = `[frame, gCurrentMove, hp0, hp1, rng, lastMove0, lastMove1]`;
 draw counts below use the pokeemerald LCG (`rng' = rng*1103515245 + 24691 mod 2^32`) from the last matched row. Method precedent: `docs/dia272-leads.md`.
 The numbers reproduce `docs/replay-ledger.md` exactly (109 0/17, 114 1/13, 95 3/11, 107 3/11, 123 3/9, 79 4/13). Isolated checks marked "checked" were run on the unmodified `getMostSuitableMonToSwitchInto` from a throwaway script in `/tmp` (no tree change).
 

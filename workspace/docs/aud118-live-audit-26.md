@@ -2,7 +2,7 @@
 
 An independent audit of today's new live presentation against the ROM: Struggle 165 (stg107 / stl109 / sdl119), the `stats-change` banner
 in both scenes (sc106 / scd112), and the Scene OFF no-hit pauses and used-move holds (olnd113). It samples species, histories and routes
-beyond the landed proofs. The **FIXED base is master `396308f86`** (production src `377ed0c48`). Every production render or route runs in a
+beyond the landed proofs. The **FIXED base is master `72e79aa4b`** (production src `377ed0c48`). Every production render or route runs in a
 git-archive copy of that base (plus a banked patch where stated). Direct mGBA only, with explicit lab seeds (Struggle 305420349, stat / OFF
 305419897) and INTERNAL species ids. Every probe job ran twice in fresh processes (r1 == r2). Windows are aligned to production's accepted
 start (`aud110Align.py`), and every row goes through the production renderer (`audit21Check.ts` / `scd112ProductionCompare.ts`). No
@@ -42,7 +42,7 @@ window is aligned (`aud110Align.py`). The only anchor ARTIFACT is the stats-chan
   `LIVE_BATTLER_X2_MOVE_TABLE.target.keep`, plus a one-line comment. The flagged windows go to **0 px**. All other 39 summary lines are byte-identical
   base vs patched, including every 0 px window and every decline (`struggle-base.txt` / `struggle-patched.txt`). The attacker role
   needs nothing, because its fallback is already `keep`.
-- **Census exposure** (base 396308f86, `ret88Census.sh` seeds 0..999, `aud118Exposure.ts`): **0**. That census has 1,001 Struggle
+- **Census exposure** (base 72e79aa4b, `ret88Census.sh` seeds 0..999, `aud118Exposure.ts`): **0**. That census has 1,001 Struggle
   commands (895 live), and in none of them does the player struggle onto an opponent with a non-zero rest. The defect is still reachable in
   Factory: ONIX appears on both sides of that census (64 opponent-attacker commands). `exposure-base-396308f86.json`.
 
@@ -128,12 +128,12 @@ same off-hold.txt
 
 (The TOTAL line is the patched arm. Its non-0 counts are the 9 designed declines of rows 5 / 6. The base arm has TAUNT 13 / 17: DEFECT A.)
 
-Gates (archive copy of `f43e580a5`, the tools-only tip before the receipts / doc): `npm run test:smoke` 8 files / 448 tests passed. The
+Gates (archive copy of `c1c73b64e`, the tools-only tip before the receipts / doc): `npm run test:smoke` 8 files / 448 tests passed. The
 directory-scanning tests (`gate6CoverageManifest`, `aud56GeneralAnimationAllocator`, `land75WallRoutes`) 3 files / 32 passed.
 `npm run build` green. The full `npm test` was not run, because the brief forbids the full suite on the live checkout. No `src/` or `tests/`
-file changed, so the suite's inputs are 396308f86's. `git diff --check` clean.
+file changed, so the suite's inputs are 72e79aa4b's. `git diff --check` clean.
 
 **Master moved during the audit** (scf117 + shp116 merged; scf117 adds source-derived x2 tracker rows and the post-stats-change message
-alignment, which targets the known TIMING-PHASE rows 8 / 12). On the tip `3c4fdd598`, neither DEFECT is fixed by source: the x2 tracker
+alignment, which targets the known TIMING-PHASE rows 8 / 12). On the tip `da50f5d80`, neither DEFECT is fixed by source: the x2 tracker
 has no 165 row, and `sourcePauseUsedMoveHoldFrames` has no attackanimation case. Both banked patches pass `git apply --check` on that tip's
-`src/`. All measurements above are on the fixed base 396308f86. The tip was not re-probed.
+`src/`. All measurements above are on the fixed base 72e79aa4b. The tip was not re-probed.

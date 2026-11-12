@@ -1,7 +1,7 @@
 # ice72: Ice Ball 301 as a words-order unit for ANY consumer
 
-S10A history widening (integration lane). Base: master `ff4baec48` (src `5cd1b684`). Tested code: `784408e59` (src `9ec2aba1`;
-production change in `6ff2f7288`). Receipt: `tools/integration/fixtures/ice72-live-receipt.json`.
+S10A history widening (integration lane). Base: master `a7904fcc0` (src `5cd1b684`). Tested code: `738a868f0` (src `9ec2aba1`;
+production change in `a443a9e32`). Receipt: `tools/integration/fixtures/ice72-live-receipt.json`.
 
 ## Results
 
@@ -16,7 +16,7 @@ production change in `6ff2f7288`). Receipt: `tools/integration/fixtures/ice72-li
 | Chain predictor (`--cleared "body 301 ICE_BALL"`) | predicted +32 / +3,523; measured predicted & live **32 / 3,523**, predicted & not live **0**, not predicted & live 35 / 3,031 |
 | Scene ON / OFF parity (census battle 19, seed 19 streak 13) | RNG, rules and boundary equal at 63 action-menu boundaries; 23 Ice Ball / Mud-Slap / Water Pulse bodies on the route |
 | Presentation-seed replay | route seeds 152 and 1 (`liveIceBallAdapter.test.ts`): replay equal; two presentation seeds and Scene OFF keep gameplay / RNG / facility; seed 1 bodies 1..4 now live every age under both seeds |
-| Gates on `784408e59` | targeted 44 files / 286 tests; typecheck; smoke 448; full suite 1,605 files / 13,197 tests (two shards); build; differential 624 / 624 byte-identical; `git diff --check` |
+| Gates on `738a868f0` | targeted 44 files / 286 tests; typecheck; smoke 448; full suite 1,605 files / 13,197 tests (two shards); build; differential 624 / 624 byte-identical; `git diff --check` |
 
 Census per range (`liveShareCensus.ts`, three parallel ranges, `prep43CensusDelta.py`):
 
@@ -75,7 +75,7 @@ The check is `ice72Chain.ts`, which is `words57Chain.ts` with 301 a words body:
 - The production replay (`resolveSpriteOrderDeferredLend` with the production plans) runs past every unit.
 - Each consumer's lend is compared with the ROM activation order in the lend's labels.
 
-The predictions were written by the `ICE72_PREDICT` pass and committed in `5fa474be7`, before the comparison was reviewed. In the first
+The predictions were written by the `ICE72_PREDICT` pass and committed in `526517e1a`, before the comparison was reviewed. In the first
 run the check pass ran right after the predict pass, so its one-line summary was printed before that commit. The predictions are
 deterministic outputs of production code on the recorded words: the r2 rerun, on the wired code, gives byte-identical predictions.
 
@@ -104,7 +104,7 @@ reset by an earlier body declines too (fail closed).
   - `words57DeferredBattleUnits` (an Ice Ball marker replays battle units);
   - `words59DeferredBodySpecies` (Ice Ball records species);
   - `liveIceBallAdapter` (route seed 1 Delibird: bodies 3..4, after the opponent's KO + send-in, are now live every age).
-- Revert experiment (`fixtures/ice72/revert-experiment.txt`): the three production files at `9f71c4b89` (carry present, wiring absent)
+- Revert experiment (`fixtures/ice72/revert-experiment.txt`): the three production files at `9e76f5bf0` (carry present, wiring absent)
   fail 10 tests: 4 of the new ones and the 6 moved pins.
 
 ## Rerun
@@ -113,6 +113,6 @@ reset by an earlier body declines too (fail closed).
 # from workspace/
 sh tools/integration/ice72Run.sh <fresh-out-dir>        # ~1 min: probes r1 + r2, extract, predictions, chain check, byte compare with fixtures/ice72/
 OUT=<dir> sh tools/integration/lendIceBallWindows.sh     # 12 dense deferred-lend windows through the production renderer (direct mGBA)
-sh tools/integration/ice72Census.sh <fresh-out-dir> ff4baec48 784408e59   # ~11 min: census 0..999 base vs final + order census + chains
+sh tools/integration/ice72Census.sh <fresh-out-dir> a7904fcc0 738a868f0   # ~11 min: census 0..999 base vs final + order census + chains
 node --experimental-strip-types --no-warnings tools/integration/hide66Parity.ts --seed=19 --streak=13 --moves=301,189,352 --out=<file>
 ```

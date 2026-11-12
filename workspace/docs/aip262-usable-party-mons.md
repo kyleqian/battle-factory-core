@@ -79,7 +79,7 @@ Errors: two `frame budget` seeds in the baseline, one in the fixed arm, both sce
 
 ENGINE_BUILD `eb-43a8872b3b6234fe` -> `eb-16ee24851bfb26a3` (tell the website). `npm run typecheck`, `npm run build`, `npm run build:lib` 0.
 `npm run soak -- --policy vanilla --seeds 0:20 --parallel 4` (scene OFF): 20/20 OK. **Scene-ON soak (`--scene on`) NOT completed:** one run hit the 590 s timeout with no result and the 170-minute cap left no time to rerun it (abl261 ran it in ~10 min; rerun it split into 0:10 / 10:20).
-Full suite on the final tree (HEAD after the docs commit; src unchanged since `6cfcdf695`, only docs after the re-pins) in 6 vitest shards (`--shard=i/6`, same flags as `npm test`, sharded because `npm test` exceeds 10 min), all green: 2175 + 2162 + 3058 + 2722 + 2322 + 1994 = **14,433 passed**, 0 failed (197 skipped).
+Full suite on the final tree (HEAD after the docs commit; src unchanged since `7fb0eab25`, only docs after the re-pins) in 6 vitest shards (`--shard=i/6`, same flags as `npm test`, sharded because `npm test` exceeds 10 min), all green: 2175 + 2162 + 3058 + 2722 + 2322 + 1994 = **14,433 passed**, 0 failed (197 skipped).
 
 ## 7. Report-only findings (not fixed; ISSUES #204-#207)
 

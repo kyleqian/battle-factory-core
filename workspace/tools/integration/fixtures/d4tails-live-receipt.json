@@ -1129,9 +1129,9 @@
   "OUT=SCRATCH/crprobe SC=<dir: d4w-cr/scenarios/*.json + species-audit-14/swap-scenarios/s14swap-*confuse-ray*.json + fixtures/d4tails/confuse-ray-production/list.tsv> sh tools/integration/speciesAudit14SwapProbes.sh; sh tools/integration/speciesAudit14SwapRun.sh SCRATCH/crprobe <dir> SCRATCH/crrec 8",
   "python3 -I tools/integration/d4tailsReceipt.py SCRATCH/checkA SCRATCH/checkB $(git rev-parse HEAD:workspace/src)"
  ],
- "testedCommit": "3dd656ba68eba8d582b34f9a752aabdaa97fc4fc",
+ "testedCommit": "8a1b83e3b73ef4fb42f93aac5b06aa1c69b691f8",
  "gates": {
-  "testedCommit": "3dd656ba68eba8d582b34f9a752aabdaa97fc4fc",
+  "testedCommit": "8a1b83e3b73ef4fb42f93aac5b06aa1c69b691f8",
   "testedSrcTree": "b6c517910f838554d6f94bc6c597c4032148884c",
   "d4tailsTimingCheck": "28 fixtures x 2 invocations (one process per fixture, 2 fresh runs each): 0 violations; 23 policy-phase 0 px; digests identical across 3 invocations",
   "d4aRegressionAll": "232 timing fixtures (every receipt window with selectedPhase), one d4aTimingCheck process per fixture, P=14: nonzero-exit 0, violations 0 (176 policy phase, 56 other phase)",
@@ -1140,7 +1140,7 @@
   "smoke": "npm run test:smoke: 8 files / 448 tests passed",
   "fullSuite": "PATH=$PWD/tools/autonomy/bin:$PATH POKEBENCH_VITEST_MAX_WORKERS=4 npm test -- --maxWorkers=4: 1,581 files passed | 44 skipped; 13,016 tests passed | 223 skipped (468 s)",
   "build": "npm run build: exit 0 (876 modules)",
-  "differential": "npm run compare:differential -- fight-submenu battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base 3d409c3a9: PASS, 624 captures byte-identical",
-  "diffCheck": "git diff --check 3d409c3a9 HEAD: clean"
+  "differential": "npm run compare:differential -- fight-submenu battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base 272fa0b84: PASS, 624 captures byte-identical",
+  "diffCheck": "git diff --check 272fa0b84 HEAD: clean"
  }
 }

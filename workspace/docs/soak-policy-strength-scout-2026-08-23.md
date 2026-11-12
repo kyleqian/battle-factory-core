@@ -1,6 +1,6 @@
 # Design scout: "policy strength" as an M-B follow-on milestone (2026-08-23, side lane)
 
-Tree: `worker/side-20260823-001236` off master `3a8b58d7`, oracle `battle-scene-off`
+Tree: `worker/side-20260823-001236` off master `05cb1980`, oracle `battle-scene-off`
 (`http://127.0.0.1:8014`). Docs only — no engine, driver, or ledger edits.
 
 **Headline, and it overturns the brief's premise.** The wall is **not** "challenge 4/5"; it is
@@ -174,7 +174,7 @@ carry >= 28 in 18/480 (3.75%) and carry >= 35 in 0/480.
 rest on a wrong premise: `factoryRentsCount` is NOT "mons rented". Its only writer is
 `SetBattleFactoryData`'s `FACTORY_DATA_WIN_STREAK_SWAPS` case, gated on `sPerformedRentalSwap`
 (`battle_factory.c:259-265`; the flag is set per ACCEPTED swap at `:300`) — it counts
-swap-then-win events, as ISSUES #120 (fixed this session, `64ad9f4e`) re-derived. A naturally
+swap-then-win events, as ISSUES #120 (fixed this session, `99be536d`) re-derived. A naturally
 chained `winning` player, which declines every swap, has `rentsCount 0` at every depth, so
 `createStartCarryState`'s `rentsCount: 0` is exactly faithful for sweeps (a)/(b) and lever 1 is
 NOT a correctness fix for them. It is a fidelity gap only for swap-accepting policies
@@ -187,7 +187,7 @@ recommendation.
 ## Result (2026-08-23, main lane, worker step — lever 2 built and measured)
 
 `--policy oracle-strength` landed as an **opt-in** soak policy
-(`tools/soak/randomRoundSoakDriver.ts`, commits `3a49da5d` + `81a98b2f`):
+(`tools/soak/randomRoundSoakDriver.ts`, commits `3bbf33b0` + `ee46c9bb`):
 identical to `winning` in every respect (random 3-of-6 draft, swap offers
 declined, the same voluntary-switch heuristic, the same exploration/timing
 rolls) EXCEPT the fight-move choice, which is delegated to the engine's own
@@ -287,7 +287,7 @@ when unused), but it is **not** promoted to the gate set.
 ## Result — lever 4' (coverage-first draft), 2026-08-23, main lane, worker step
 
 `--policy winning-coverage` landed as an **opt-in** soak policy
-(`tools/soak/randomRoundSoakDriver.ts`, commit `b00f7e60`): identical to
+(`tools/soak/randomRoundSoakDriver.ts`, commit `1a0c3d09`): identical to
 `winning` in every respect (same fight/switch/swap-decline/continuation
 decisions, same exploration and timing rolls, same shared-RNG-stream draws —
 the constructor's draft shuffle is still *drawn* and then overwritten, and the
@@ -429,7 +429,7 @@ promoted to the gate set. `winning` / `winning-swap` / `full` / `vanilla` /
 **Two instrument bugs were found before the lever could be measured, and the
 second dissolves this doc's central premise.**
 
-**Finding 1 — `winning-coverage` never declined swaps (fixed `a8445d42`).**
+**Finding 1 — `winning-coverage` never declined swaps (fixed `38c81e8c`).**
 The swap-offer decline was a per-policy list written for `oracle-strength`;
 `winning-coverage` missed it and fell through to `full`'s 50/50 roll — seed 0
 accepted 64 offers and random-walked the swap screen (same trap class as
@@ -445,14 +445,14 @@ every seed: the first `winning-combined` carry-28 sweep returned **30
 byte-similar chronologies** (identical drafts, identical outcomes, frames
 within ~500). Every deterministic-draft `--start-carry` statistic to that
 point was effectively **n = 1**, and even the random-draft sweeps above all
-faced the SAME six boot offers. Landed instruments (`679d1744`): `--vary-rng`
+faced the SAME six boot offers. Landed instruments (`183e2647`): `--vary-rng`
 (advance the boot RNG cursor by the seed before generating the draft — the
 exact mechanism by which real players' cursors differ) and `--first-round`
 (CLI exposure of `stopAtFirstRoundDecision`, so rounds-won-at-boot reads
 directly from `endState` at ~1 s per losing seed instead of 24 s of
 budget-bound chaining).
 
-**Lever 4'' itself (`b00f7e60`-style opt-in, commit `83fa52af`):**
+**Lever 4'' itself (`1a0c3d09`-style opt-in, commit `9c2cbf65`):**
 `--policy winning-combined` = `winning-coverage` except the trio search,
 which maximises the same coverage-first lexicographic score only over trios
 whose summed base-stat total meets `combinedDraftBstFloor` — the MEAN

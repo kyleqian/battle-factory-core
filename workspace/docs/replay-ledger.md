@@ -12,8 +12,8 @@ Not drivable: 33, 82, 131 (Brain battles; the lab accepts `trainerId` 0..299 onl
 
 | run | commit | seeds | scene | matched / driven | new divergent seeds | notes |
 |---|---|---|---|---|---|---|
-| 2026-11-12 top layer (Mac) | `69241cf85` | 61..160 (new) | OFF | 78 / 98 (+2 Brain) | 75 79 87 88 89 90 94 95 107 109 110 114 119 123 137 138 152 155 158 159 | audit doc section 6 |
-| 2026-11-12 CAX31 wind-down | `78c2ef2bc` | permanent list (40) | OFF | 24 / 40 | none (no new seeds driven) | now match: 22 30 39 42 50 53 57 (fixed this run) and 75 88 110 155 158; still diverge: 60 79 87 89 90 94 95 107 109 114 119 123 137 138 152 159 |
+| 2026-11-12 top layer (Mac) | `389a7985a` | 61..160 (new) | OFF | 78 / 98 (+2 Brain) | 75 79 87 88 89 90 94 95 107 109 110 114 119 123 137 138 152 155 158 159 | audit doc section 6 |
+| 2026-11-12 CAX31 wind-down | `f55e68f8e` | permanent list (40) | OFF | 24 / 40 | none (no new seeds driven) | now match: 22 30 39 42 50 53 57 (fixed this run) and 75 88 110 155 158; still diverge: 60 79 87 89 90 94 95 107 109 114 119 123 137 138 152 159 |
 
 Per-seed rows of the latest run (`.integration/validation/sv-20261111/gates/replay/results.jsonl`), matched / engine states and drive stop for the
 divergent seeds: 60 36 / 82 party menu; 79 4 / 13 party menu; 87 44 / 74 party menu; 89 45 / 122 party menu; 90 66 / 73 outcome; 94 36 / 39 outcome;

@@ -1,6 +1,6 @@
 {
  "schema": "fix74-live-receipt/v1",
- "base": "1b59ee96e",
+ "base": "c8f0d2382",
  "bulkUp": {
   "verdict": "source-correct for every species (branch A, no production change): the audit 18 CHANSEY residual is the window framing (production age 0 = first grown frame, 4 rows after activation; audit 18 rendered age 0 at activation), the same ARTIFACT class as audit 18's Iron Defense ageOffset -1",
   "windows": [

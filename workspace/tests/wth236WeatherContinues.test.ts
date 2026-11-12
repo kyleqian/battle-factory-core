@@ -119,7 +119,7 @@ function playCensusBattle(seed: number, scene: "on" | "off"): Battle {
   return { digest: events.digest("hex").slice(0, 16), weather, weatherEvents, bodyEffect };
 }
 
-/** Census seeds that use each weather move, with their eventsDigest (lsd194Census arms; Rain / Sun seeds re-staged by dmg264 to seeds the fix leaves unchanged, e2e0b17b5 arms). */
+/** Census seeds that use each weather move, with their eventsDigest (lsd194Census arms; Rain / Sun seeds re-staged by dmg264 to seeds the fix leaves unchanged, cda886899 arms). */
 const SEEDS: Record<WeatherContinuesAnimation, { seed: number; on: string; off: string }> = {
   HAIL_CONTINUES: { seed: 14, on: "940a12ebdf69440f", off: "9186cf39048d76cd" },
   SANDSTORM_CONTINUES: { seed: 1, on: "f01c8443bef4947b", off: "4430a7aa8032928f" },

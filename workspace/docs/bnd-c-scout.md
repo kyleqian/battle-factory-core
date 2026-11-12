@@ -75,7 +75,7 @@ Before the provider is filled, nothing renders. The canvas stays blank, which is
 
 ## (4) Test and proof plan
 
-- **Before/after capture.** Record on the pre-change commit (`5f5268591`) `ENGINE_BUILD`, then `replayChallenge` digest, `frames`, `streak`, `ended` and `battles` for the fixed seeds and traces that `tests/factoryLibrary.test.ts` uses. Re-run on the new build, from `dist-lib/headless.js`. Expect identical digest and events, with only `ENGINE_BUILD` different.
+- **Before/after capture.** Record on the pre-change commit (`275da6fd8`) `ENGINE_BUILD`, then `replayChallenge` digest, `frames`, `streak`, `ended` and `battles` for the fixed seeds and traces that `tests/factoryLibrary.test.ts` uses. Re-run on the new build, from `dist-lib/headless.js`. Expect identical digest and events, with only `ENGINE_BUILD` different.
 - **Real headless guarantee.** A `node --input-type=module` run of the built `headless.js` that replays a trace with real battles. It must not throw "not installed", and `chunks-headless/` must have no `assets-sprites`.
 - **New test** `tests/bnd254cPixelProvider.test.ts` with these checks:
   - Getters throw before install and return the same object identity as the JSON after install.
@@ -83,7 +83,7 @@ Before the provider is filled, nothing renders. The canvas stays blank, which is
   - A transformed battler does not read pixels at construction time.
   - Static ratchet: `battleCommandFieldArt.ts` contains no sprite-JSON name.
 - **Existing suites:** `factoryLibrary`, `bnd254bPicGeometry`, `cast83CastformForms`, `battleMonPics*`, and `battleScene`. Then the full sharded `npm test`.
-- **Render differential.** `npm run compare:differential -- <traces> --base 5f5268591 --harness-from-head [--capture-range S:E]`. Use traces covering a doll, CASTFORM, a transform, an opponent front sprite with `frame2`, and the draft screen. This must be byte-identical.
+- **Render differential.** `npm run compare:differential -- <traces> --base 275da6fd8 --harness-from-head [--capture-range S:E]`. Use traces covering a doll, CASTFORM, a transform, an opponent front sprite with `frame2`, and the draft screen. This must be byte-identical.
 - **Plus** a `--render-every 1` sample, `npm run build`, `build:lib`, typecheck, and the Scene ON/OFF census (kernel digests must match the last baseline). The census is expected to be unaffected because no tick output changes.
 
 ## (5) Risks and worker brief outline

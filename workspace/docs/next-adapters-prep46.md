@@ -1,6 +1,6 @@
 # S10A prep46 — words-dependent sprite-order units and a seam-resolved deferred lend for ANY later consumer
 
-Evidence only (side lane, new files only). Baseline: master `04187aeb7` (production src tree `76bb0125`). A sibling integration worker is
+Evidence only (side lane, new files only). Baseline: master `6a7af5b47` (production src tree `76bb0125`). A sibling integration worker is
 landing a Giga Drain geometry plan; it is not in this baseline. The production change was measured with a TEMPORARY patch, kept as
 `tools/integration/fixtures/prep46/prep46-temp-src.diff` and reverted before every commit.
 
@@ -165,7 +165,7 @@ also contains RAIN_CONTINUES.
 
 | | live by count | live by frames |
 |---|---|---|
-| master `04187aeb7` | 6753 / 7970 = **84.73 %** | 981034 / 1168273 = **83.97 %** |
+| master `6a7af5b47` | 6753 / 7970 = **84.73 %** | 981034 / 1168273 = **83.97 %** |
 | patch (28 / 189 / 240) | **6788 = 85.17 % (+35)** | **985584 = 84.36 % (+4,550)** |
 
 New live commands by first unit (`census-delta-seeds0-299.json`):

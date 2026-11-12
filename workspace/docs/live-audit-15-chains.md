@@ -2,12 +2,12 @@
 
 This audit renders a consumer's complete dense window (activation through cleanup) after a UNIT whose history tonight's folds made lend a
 known order or allocator host. It compares each window row by row with fresh ROM frames. The folds are:
-- `3092cf05f`: allocator net-zero bodies;
-- `04187aeb7`: prep45 order plans (BRN, TURN_TRAP, Hydro Pump, Solar Beam by turn, ...);
-- `553cef6b5`: Icy Wind at any geometry;
-- `bef14a1ee`: the retained locked-action prompt cycle (Petal Dance / Dig / Solar Beam continuations).
+- `a556f6cdf`: allocator net-zero bodies;
+- `6a7af5b47`: prep45 order plans (BRN, TURN_TRAP, Hydro Pump, Solar Beam by turn, ...);
+- `213918b23`: Icy Wind at any geometry;
+- `024efddfd`: the retained locked-action prompt cycle (Petal Dance / Dig / Solar Beam continuations).
 
-Master is cf722638f (production src tree da34a188). Every run was direct mGBA only, and no shared oracle was touched. The only src edits
+Master is 5364b05c4 (production src tree da34a188). Every run was direct mGBA only, and no shared oracle was touched. The only src edits
 were two env-gated patches: each was applied in place, reverted, and kept as a `.diff`. `git status src` was clean at every commit. Evidence
 is in `tools/integration/fixtures/audit-15/`.
 
@@ -123,7 +123,7 @@ The 0-px windows hold:
 <td valign="top"><strong>DECLINE</strong></td></tr>
 <tr><td valign="top">Thunderbolt after <strong>Giga Drain</strong> (opponent attacker SNORLAX)</td>
 <td valign="top">0 px (237 / 237 rows x 3 windows, r1 == r2, <code>receipts/gd/</code>)</td>
-<td valign="top">In <code>receipts/main</code> the order host reports <code>no EXACT plan: body 202:opponent</code> and the adapter declines (3,845,762 px fallback). <code>postkoHostReplay.ts</code> passes <strong>no geometry-plan callback</strong>, which production's orchestrator supplies (<code>liveSpriteOrderBodyPlanAt</code>, <code>45a5832f7</code>). <code>liveMoveGeometrySpriteOrderPlanText(202, side, SNORLAX/CHANSEY)</code> is defined on both sides. <code>audit15GdCheck.ts</code> replays the same history with the callback: the order is KNOWN, Thunderbolt is live and exact, and Flamethrower (opponent side) is exact</td>
+<td valign="top">In <code>receipts/main</code> the order host reports <code>no EXACT plan: body 202:opponent</code> and the adapter declines (3,845,762 px fallback). <code>postkoHostReplay.ts</code> passes <strong>no geometry-plan callback</strong>, which production's orchestrator supplies (<code>liveSpriteOrderBodyPlanAt</code>, <code>73efbff63</code>). <code>liveMoveGeometrySpriteOrderPlanText(202, side, SNORLAX/CHANSEY)</code> is defined on both sides. <code>audit15GdCheck.ts</code> replays the same history with the callback: the order is KNOWN, Thunderbolt is live and exact, and Flamethrower (opponent side) is exact</td>
 <td valign="top"><strong>EXACT</strong> (lend-neutral consumer). <strong>Harness note:</strong> <code>replayPostKoTurnsThroughHost</code> lacks <code>bodyPlanAt</code></td></tr>
 <tr><td valign="top">Flamethrower / Thunderbolt / Reflect / Protect / Light Screen (player side) chains</td>
 <td valign="top">0 px</td>
@@ -139,18 +139,18 @@ The unit side is SNORLAX (faster, one move x4) and the consumer side is CHANSEY,
 
 | Unit (tonight's fold) | Consumer: side, cell |
 |---|---|
-| Petal Dance, retained continuation (`bef14a1ee`) | Blaze Kick ply 3/3 (discr 3), Heal Bell ply 3/3 (discr 3), Flamethrower ply 3/3, Thunderbolt ply 3/3 |
+| Petal Dance, retained continuation (`024efddfd`) | Blaze Kick ply 3/3 (discr 3), Heal Bell ply 3/3 (discr 3), Flamethrower ply 3/3, Thunderbolt ply 3/3 |
 | Dig unleash, retained continuation | Blaze Kick ply 1/1 (discr 1), Flamethrower ply 1/1, Thunderbolt ply 1/1 |
-| Solar Beam charge / unleash by turn (`04187aeb7`) | Blaze Kick ply 3/3 (discr 3), Heal Bell ply 3/3 (discr 3), Flamethrower 3/3, Thunderbolt 3/3 |
+| Solar Beam charge / unleash by turn (`6a7af5b47`) | Blaze Kick ply 3/3 (discr 3), Heal Bell ply 3/3 (discr 3), Flamethrower 3/3, Thunderbolt 3/3 |
 | Will-O-Wisp + Status_Burn (BRN) | Blaze Kick ply 3/3 (discr 3), Flamethrower ply 3/3 and opp 3/3, Thunderbolt ply 3/3; Light Screen opp **declined** |
 | Fire Spin + TURN_TRAP (Fire Spin) | Blaze Kick ply 3/3 (discr 2; c2 is after the TURN_TRAP), Flamethrower 3/3, Thunderbolt 3/3 |
 | Hydro Pump | Blaze Kick ply 3/3 (discr 3) and opp 3/3 (discr 2); Heal Bell ply 3/3 (discr 3) and opp 3/3 (discr 3); Flamethrower both sides 6/6; Light Screen opp 0/1 (PHASE) |
-| Icy Wind + stat (SNORLAX/CHANSEY) (`553cef6b5`) | Blaze Kick ply 3/3 (discr 1), Flamethrower ply 3/3 and opp 3/3 |
-| Ice Beam (net-zero, `3092cf05f`) | Blaze Kick ply 3/3, Heal Bell ply 3/3 (discr 3), Reflect ply 1/1 and opp 1/1, Light Screen opp 0/1 (PHASE), Protect ply 2/2 (Protect blocked Ice Beam: Protect after Protect) |
+| Icy Wind + stat (SNORLAX/CHANSEY) (`213918b23`) | Blaze Kick ply 3/3 (discr 1), Flamethrower ply 3/3 and opp 3/3 |
+| Ice Beam (net-zero, `a556f6cdf`) | Blaze Kick ply 3/3, Heal Bell ply 3/3 (discr 3), Reflect ply 1/1 and opp 1/1, Light Screen opp 0/1 (PHASE), Protect ply 2/2 (Protect blocked Ice Beam: Protect after Protect) |
 | Double Team + stat (net-zero) | Protect ply 2/2 and opp 2/2, Reflect opp 1/1, Light Screen ply 1/1, Thunderbolt ply 3/3; Light Screen opp 0/1 (PHASE), EXEGGCUTE/ONIX 0/1 (PHASE) |
 | Faint Attack (net-zero) | Light Screen ply 1/1; Light Screen opp 0/1 (PHASE), EXEGGCUTE/ONIX 0/1 (PHASE) |
 | Swift (net-zero) | Thunderbolt ply 3/3, Protect ply 2/2 (Protect after Protect); Light Screen opp 0/1 (PHASE), EXEGGCUTE/ONIX 0/1 (PHASE) |
-| Giga Drain (`45a5832f7`) | Flamethrower opp 3/3; Thunderbolt ply 3/3 **via `audit15GdCheck.ts`** (with the geometry callback; the grid script reads `main/`, where these 3 show "declined") |
+| Giga Drain (`73efbff63`) | Flamethrower opp 3/3; Thunderbolt ply 3/3 **via `audit15GdCheck.ts`** (with the geometry callback; the grid script reads `main/`, where these 3 show "declined") |
 | Tackle | Light Screen opp **declined** (both pairs) |
 | controls (first body; c1 / c2 = after the consumer's own earlier body) | Blaze Kick 5/5, Heal Bell 6/6, Flamethrower 6/6, Thunderbolt 3/3, Reflect 2/2, Light Screen ply 1/1, opp SNORLAX/CHANSEY 1/1, opp EXEGGCUTE/ONIX 0/1 (PHASE) |
 

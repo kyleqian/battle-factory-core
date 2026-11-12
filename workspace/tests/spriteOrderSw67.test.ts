@@ -106,7 +106,7 @@ describe("sw67: the geometry-keyed plan through the seam", () => {
 });
 
 describe("sw67: live after a Shock Wave, Scene ON/OFF parity", () => {
-  it("route 7/7 CASTFORM Shock Wave twice: both bodies live (the second fell back on b50c4dabd), gameplay identical ON / OFF", () => {
+  it("route 7/7 CASTFORM Shock Wave twice: both bodies live (the second fell back on 82690e775), gameplay identical ON / OFF", () => {
     const on = generatedCommandAnimationReplay(7, "on", [2, 2], 7, true, true);
     const off = generatedCommandAnimationReplay(7, "off", [2, 2], 7, true, true);
     const bodies = on.animations.filter((a) => a.moveId === 351 && a.attacker === 0);

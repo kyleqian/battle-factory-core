@@ -3,7 +3,7 @@
 Evidence/design only; **new files only**, no tracked file edited, no production code. Method copied from `docs/next-adapters-prep8.md` / `docs/allocator-plan-v2-evidence.md` for ABSORB (71), MEGA_DRAIN (72), GIGA_DRAIN (202),
 DREAM_EATER (138), SUNNY_DAY (241), which `docs/remaining-adapters-census.md` labelled **D-PAL** ("unfaded/faded/hardware snapshots are not supplied", census l.45, l.59).
 All emulator numbers are ROM frames from **direct, independent mGBA runs** (Scene ON, fresh process per scenario, 54 scenarios, each run twice; no shared oracle service was contacted).
-Production line numbers are at this branch's base `e82018fd9` (a sibling lane is editing `liveMoveAnimation.ts` / `battleScene.ts`: re-grep before editing). Not run: `npm test` / build / typecheck (no production file, test or `src/` type changed; only `tools/`, fixtures and this doc).
+Production line numbers are at this branch's base `d3d40e53b` (a sibling lane is editing `liveMoveAnimation.ts` / `battleScene.ts`: re-grep before editing). Not run: `npm test` / build / typecheck (no production file, test or `src/` type changed; only `tools/`, fixtures and this doc).
 Drafted fixtures are unverified until an adapter exists.
 
 ## 0. Verdicts
@@ -32,7 +32,7 @@ The ROM restores the tag table (53/53: tags at end+1 == tags at activation) but 
 
 ## 1. Palette measurements
 
-### 1.1 What each reducer consumes (file:line, base `e82018fd9`)
+### 1.1 What each reducer consumes (file:line, base `d3d40e53b`)
 
 | Move | Palette-like fields in the reducer | Consumer in the renderer | Needs from host |
 |---|---|---|---|
@@ -102,7 +102,7 @@ Window lengths differ by orientation for Dream Eater (266 / 267) like prep8's Sw
 Reducer `active` ends: Giga `age <= 228` (`GIGA_DRAIN_BODY_LAST_AGE`), Mega 216, Absorb 193 (+10 offset -> 203 relative to activation), Sunny `< 157`, DE blend/psychic last age 245 / 263-264. These line up with the window ends above (dense-evidence cross-check: 1,555/1,555 rows).
 ABSORB uncovered tail: script active until 418 vs window end 416 (cleanup frame 417 is a fixture-recorded row, not a window row); Giga/Mega/DE/Sunny have **no** uncovered tail.
 
-### 3.3 Renderer lifts under `liveField` (`battleScene.ts`, base `e82018fd9`)
+### 3.3 Renderer lifts under `liveField` (`battleScene.ts`, base `d3d40e53b`)
 
 | Move | Branch | What gates / hard-codes it |
 |---|---|---|

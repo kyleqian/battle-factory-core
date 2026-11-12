@@ -1,6 +1,6 @@
 # lsd194 -- the `waitmessage B_WAIT_TIME_LONG` print floor (msg189) and the Leech Seed turn-end drain (lsd186)
 
-Base `6b6d1d128`. Branch `worker/integration-20261017-013328`. Presentation only: no kernel event, RNG draw, HP value or turn order changes
+Base `1d22dddc7`. Branch `worker/integration-20261017-013328`. Presentation only: no kernel event, RNG draw, HP value or turn order changes
 (census section 7: kernel-event digests identical in every battle, both scenes).
 Receipts: `tools/integration/fixtures/lsd194/` (`rom/`, `drain/`, `dense/`, `scenarios/`, `rom-print-runs.json`, `print-production-vs-rom.json`,
 `drain-production-vs-rom.json`, `census-{on,off}.json`). Tools: `lsd194Probes.sh`, `lsd194PrintRuns.py`, `lsd194Production.ts`, `lsd194PrintCompare.ts`,
@@ -14,7 +14,7 @@ effectiveness-line cards of `docs/battle-message-hold-cadence-ground-truth.md` (
 "hold after typing = 64 + 13 / 64 + 2" is the 64 plus the *next* action's pre-print rows, not part of the print). Its sec. 5 `max(24, 21) = 24` bind-plan text
 is historical: `STAT_CHANGE_MESSAGE_TIMING` copied the 24 from `MESSAGE_TIMING` (a non-print message floor), which is a different mechanism.
 
-Change: `WAITMESSAGE_LONG_TIMING = {minimumFrames: 0, holdFrames: 64}` (commit `5a11553e1`). `MESSAGE_TIMING` (24 / 0), `RETURN_MON_TIMING` and
+Change: `WAITMESSAGE_LONG_TIMING = {minimumFrames: 0, holdFrames: 64}` (commit `b3031fe6c`). `MESSAGE_TIMING` (24 / 0), `RETURN_MON_TIMING` and
 `SWITCH_IN_MESSAGE_TIMING` are untouched (no ROM rows of their own; Tier-1 control in `lsd194PrintFloorAndDrain.test.ts`).
 
 ### 1.1 ROM rows (twice-fresh: r1 == r2 byte-identical rows and RGB for every receipt, `rom/r1-r2-identity.txt`)
@@ -128,8 +128,8 @@ frames of burn / Toxic ticks, not bar rows). Their hp commands therefore still c
 
 ## 4. Re-pins (frames moved by my change only; none of ont193's pins moved by the drain)
 
-Floor drop (`5a11553e1`): `tests/battleResolutionPresentation.test.ts` and `tests/battleTurnPortability.test.ts`, every moved pin attributed to its print's `24 - L` in the commit message.
-`tests/ont193SceneOnTails.test.ts` (`9d04fca52`): the trn176 anchor evaluator for Bulk Up moved by exactly the two stat prints' over-holds -- first print L = 22 (-2), second L = 23 (-1):
+Floor drop (`b3031fe6c`): `tests/battleResolutionPresentation.test.ts` and `tests/battleTurnPortability.test.ts`, every moved pin attributed to its print's `24 - L` in the commit message.
+`tests/ont193SceneOnTails.test.ts` (`5f4744a67`): the trn176 anchor evaluator for Bulk Up moved by exactly the two stat prints' over-holds -- first print L = 22 (-2), second L = 23 (-1):
 ON `anchorStartDelta` -1 -> -3 (-2), `anchorEndDelta` 0 -> -3 (-2, -1), `residual` 0 -> -3; OFF `anchorStartDelta` -1 -> -3, `anchorEndDelta` 0 -> -3; Sand-Attack / Protect / Detect unchanged.
 The earlier 0 / -1 hid a -3 offset located between the two stat prints (OFF, localised against `off108` ROM `rom-r1.json`): the ATTACK print (`BulkUpDoMoveAnim+40`) matches
 exactly (first glyph production row 141), then the ROM runs four single-row instructions (`BulkUpTryDef+0 / +6 / +12 / +23` = `setstatchanger`, `statbuffchange`, `jumpifbyte`, `printfromtable`)
@@ -161,7 +161,7 @@ before the DEFENSE print's wait run (`BulkUpTryDef+28`, first glyph one row late
 
 ## 7. Census, differential and gates
 
-### 7.1 Census 0..999, both scenes, base `6b6d1d128` vs final `3ded8b23f` (src/tools identical to `f088fa73e`)
+### 7.1 Census 0..999, both scenes, base `1d22dddc7` vs final `2dcbb64b9` (src/tools identical to `3c049122d`)
 
 `lsd194Census.sh` (6 jobs, 25-seed parts) + `lsd194CensusDelta.py`; receipts `tools/integration/fixtures/lsd194/census-{on,off}.json`. 1000 battles per scene.
 
@@ -185,17 +185,17 @@ before the DEFENSE print's wait run (`BulkUpTryDef+28`, first glyph one row late
 
 ### 7.2 Differential
 
-`npm run compare:differential -- fight-submenu battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base 6b6d1d128`: **PASS, 641 captures byte-identical across 3 traces**
+`npm run compare:differential -- fight-submenu battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base 1d22dddc7`: **PASS, 641 captures byte-identical across 3 traces**
 (235 + 216 + 190). No difference to attribute.
 
 ## 8. Re-pins found by the full suite (per-pin attribution) and the gates
 
 The full suite (`npm test`, `POKEBENCH_VITEST_MAX_WORKERS=2`, nohup + exit file) found frames-only pin movements in four files beyond ont193's (all kernel-digest-identical; battle / turn / end state unchanged).
-Every moved pin was attributed by measurement and re-pinned (`495a7d6f0`, `8b820a135`); the attribution tools are committed (`lsd194SoakPins.ts`, `lsd194ScAttribution.ts`).
+Every moved pin was attributed by measurement and re-pinned (`7c51b1614`, `130f0d025`); the attribution tools are committed (`lsd194SoakPins.ts`, `lsd194ScAttribution.ts`).
 
 | file / pin | before -> after | attribution |
 |---|---|---|
-| `randomRoundSoak` seven wins (seed 21) | frames 37,536 -> 37,478; renderCalls 2,688 -> 2,681 | floor drop 37,536 -> 37,456 (2,675), Leech Seed drain rows 37,456 -> 37,478 (2,681); measured on archived trees `6b6d1d128` / `5a11553e1` / final |
+| `randomRoundSoak` seven wins (seed 21) | frames 37,536 -> 37,478; renderCalls 2,688 -> 2,681 | floor drop 37,536 -> 37,456 (2,675), Leech Seed drain rows 37,456 -> 37,478 (2,681); measured on archived trees `1d22dddc7` / `b3031fe6c` / final |
 | `randomRoundSoak` "full" seed 0 / seed 1 | 17,175 -> 17,125; 26,866 -> 26,804 | floor drop only (identical on the floor-only tree) |
 | `randomRoundSoak` "vanilla" seed 0 / seed 1 | 8,928 -> 8,895; 8,979 -> 8,920 | floor drop only |
 | `sc106StatsChangeCommand` anchor seed 0 slot 2 | 983 -> 982 | -1: "dug a hole!" (L = 23) |
@@ -210,10 +210,10 @@ the off148 "exact on the ROM row" fit was only exact under the `min + hold` prox
 
 ### Gates
 
-- `npm run typecheck`: exit 0 on `3ded8b23f` (the final production / test source before the re-pins; the later commits changed only tests, tools and docs -- see the final message for the tested tree).
+- `npm run typecheck`: exit 0 on `2dcbb64b9` (the final production / test source before the re-pins; the later commits changed only tests, tools and docs -- see the final message for the tested tree).
 - `npm run build`: exit 0.
 - `npm run test:smoke`: 8 files, 448 tests pass.
-- `git diff --check 6b6d1d128..HEAD`: clean. `npm run animation:audit`: exact. `npm run animation:coverage`: runs (no ledger edited).
+- `git diff --check 1d22dddc7..HEAD`: clean. `npm run animation:audit`: exact. `npm run animation:coverage`: runs (no ledger edited).
 - Full `npm test`: see the final message -- the suite did not complete inside the 120-minute cap (one run was killed by memory pressure when `npm run build` ran concurrently with it, and was restarted alone at 02:51 UTC); the failing files it reported are listed and re-run above.
 
 ## 9. rst197: Rest's Scene OFF pause from the real print length (closes the section 8 residual)
@@ -239,11 +239,11 @@ New: the pause starts the frame after the icon, so **P = Δ(N) - Δ(icon) + 1 + 
 
 ## 10. Final-code gates (supervisor, 2026-10-23, CAX31)
 
-Tested code: `8bee336e6` (src tree `9f76866e2`; lsd194 + lsd196 + rst197 + the `BattleStatTiming` widening that fixed lsd196's
-typecheck error), test re-pin `b1797e9ed`. Logs: `.integration/validation/sv-20261022/rst197/` (ignored).
+Tested code: `5e9e7ab6c` (src tree `9f76866e2`; lsd194 + lsd196 + rst197 + the `BattleStatTiming` widening that fixed lsd196's
+typecheck error), test re-pin `a9ea9c923`. Logs: `.integration/validation/sv-20261022/rst197/` (ignored).
 
 - `npm run typecheck`: exit 0 (after widening `BattleStatTiming.minimumFrames` from the literal `2` to `number`).
-- Census 0..999 both scenes, `lsd194Census.sh` arms `3ded8b23f` (lsd194, attributed in section 7) vs `8bee336e6`; delta
+- Census 0..999 both scenes, `lsd194Census.sh` arms `2dcbb64b9` (lsd194, attributed in section 7) vs `5e9e7ab6c`; delta
   `tools/integration/rst197CensusDelta.py` (both trees carry the drain, so `lsd194CensusDelta.py` misaligns): digests and errors identical
   in 1000 / 1000 battles per scene, command type sequences identical, and every changed command is one of:
   - a `stat` between two `message`s, 961 per scene (identical counts ON / OFF): 2 -> 4 (Curse, AncientPower, Silver Wind), 2 -> 5 (Bulk Up,
@@ -251,10 +251,10 @@ typecheck error), test re-pin `b1797e9ed`. Logs: `.integration/validation/sv-202
     follow the same source rule (instruction-execution delta) without their own ROM row yet.
   - Scene OFF Rest's `move-animation` pause 37 -> 40, 451 bodies (rst197); none in Scene ON.
   Receipts `tools/integration/fixtures/rst197/census-delta-{on,off}.txt`.
-- `npm run compare:differential -- fight-submenu battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base 6b6d1d128`:
+- `npm run compare:differential -- fight-submenu battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base 1d22dddc7`:
   PASS, 641 / 641 captures byte-identical.
 - Full suite (2 workers, 2,809 s): 1,684 files / 13,965 tests passed, 2 failed, both `randomRoundSoak` frame pins, attributed with
-  `lsd194SoakPins.ts` on `66e89d36e` / `b0032b17a` / `a3c34152d` / `8bee336e6`: lsd196 moves seven-wins 37,478 -> 37,467 (renderCalls
+  `lsd194SoakPins.ts` on `028e909a4` / `dba78b960` / `6310217a3` / `5e9e7ab6c`: lsd196 moves seven-wins 37,478 -> 37,467 (renderCalls
   2,681 -> 2,674) and full seed 1 26,804 -> 26,817 (the jittered press cooldown draws follow the presentation length); rst197 moves neither;
-  battle / turn / end state unchanged. Re-pinned in `b1797e9ed`; `randomRoundSoak.test.ts` 64 / 64.
+  battle / turn / end state unchanged. Re-pinned in `a9ea9c923`; `randomRoundSoak.test.ts` 64 / 64.
 - `npm run build`: exit 0.

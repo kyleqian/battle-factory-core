@@ -1,12 +1,12 @@
 # land68 (S10A integration, 2026-10-10): Dive 291 as a Random2-words order unit + SUBSTITUTE_FADE's empty plan
 
-Base `f3efec8bf` (src `10884465`). Tested code: `d85460c06` (step 1, prep65) and `3ab463e5f` (step 2, prep64), src tree `afcf8175`.
+Base `024b846bb` (src `10884465`). Tested code: `4627e2e47` (step 1, prep65) and `a5372cf0f` (step 2, prep64), src tree `afcf8175`.
 Receipt: `tools/integration/fixtures/land68-live-receipt.json`. Only direct mGBA processes were used; the shared HTTP oracles were not
 touched.
 
 ## 1. Results first
 
-- **Census seeds 0..299** (`liveShareCensus.ts`, base f3efec8bf vs final): **+51 live commands / +9,091 live frames**.
+- **Census seeds 0..299** (`liveShareCensus.ts`, base 024b846bb vs final): **+51 live commands / +9,091 live frames**.
   - That is exactly the banked prep65 (+35 / +5,361) plus prep64 (+16 / +3,730). The base moved, but no chain moved, so there is no
     difference to explain.
   - Live share: 7,743 → **7,794** (97.15 % → **97.79 %**) by count, 1,148,525 → **1,157,616** (98.16 % → **98.94 %**) by frames.
@@ -90,9 +90,9 @@ touched.
   `liveSpriteOrderHost`, `aud56GeneralAnimationAllocator`, `substituteFadePresentation`, `battleScene`, `battleScriptSemiInvulnerableOpcode`,
   `liveBattlerX2History` and `liveMoveAnimationPalette`.
 - `npm run typecheck` 0 errors; `npm run test:smoke` 8 / 448; `npm run build` OK.
-- `compare:differential` (fight-submenu, battle1-postwin-next-prompt, presentation-rng-playable-live-bodies-seeded-on) vs `f3efec8bf`:
+- `compare:differential` (fight-submenu, battle1-postwin-next-prompt, presentation-rng-playable-live-bodies-seeded-on) vs `024b846bb`:
   **624 / 624 byte-identical**.
-- Full suite on `47c5b6177` (code == `3ab463e5f`), 4 workers, two foreground shards (`npm test -- --maxWorkers=4 --shard=1/2` and `2/2`):
+- Full suite on `62d1d9acf` (code == `a5372cf0f`), 4 workers, two foreground shards (`npm test -- --maxWorkers=4 --shard=1/2` and `2/2`):
   **1,602 files / 13,180 tests passed, 0 failed** (44 files / 223 tests skipped).
 - `git diff --check` clean.
 
@@ -114,7 +114,7 @@ node --experimental-strip-types --no-warnings tools/integration/prep65Check.ts <
 node --experimental-strip-types --no-warnings tools/integration/land68DiveVectors.ts <fresh>/probe <fresh>/units.json <fresh>/dive-vectors.json   # == fixtures/land68/dive-vectors.json
 # step 2 ROM check
 OUT=<fresh> REC=<fresh> SKIP_CENSUS=1 sh tools/integration/prep64Run.sh
-# census (base: git archive f3efec8bf workspace/src workspace/tools/integration ... into a scratch dir, node_modules symlinked)
+# census (base: git archive 024b846bb workspace/src workspace/tools/integration ... into a scratch dir, node_modules symlinked)
 node --experimental-strip-types --no-warnings tools/integration/liveShareCensus.ts --seeds=0..299 --out=a.json --commands=a.jsonl
 python3 tools/integration/prep43CensusDelta.py base.json base.jsonl a.json a.jsonl delta.json
 python3 tools/integration/hide66CensusDelta.py base.json base.jsonl a.json a.jsonl

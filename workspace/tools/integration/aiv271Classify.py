@@ -1,5 +1,5 @@
 """aiv271 (docs/aiv271-ai-damage-terms.md): classify the census delta of cause C (AI damage sims take the real CalculateBaseDamage terms).
-Run from the workspace root: `python3 tools/integration/aiv271Classify.py <fixed-short-sha> [baseline-census-dir] [baseline-short-sha]`. Inputs: baseline arms (<dir>/<scene>-<sha>/r[0-9].jsonl, default aiv270's final arms 01ad01f2a),
+Run from the workspace root: `python3 tools/integration/aiv271Classify.py <fixed-short-sha> [baseline-census-dir] [baseline-short-sha]`. Inputs: baseline arms (<dir>/<scene>-<sha>/r[0-9].jsonl, default aiv270's final arms 60282bba8),
 fixed arms (.integration/evidence/aiv271/census/<scene>-<sha>/r[0-9].jsonl), event logs + digests of the UNFIXED observation-only tree (.integration/evidence/aiv271/classify/parts; aiv271Instrument.py).
 Event "C": the old chooser and the fixed chooser over the fixed view (damageTerms) differ (scores / pick / RNG / draws) on a scored decision; "causes" lists the term groups whose neutralisation changes the fixed result.
 A changed seed is explained when it has a C event. Prints per scene: instrumented digests == baseline, changed vs explained, cause split, ON vs OFF sets."""
@@ -7,7 +7,7 @@ import glob, json, sys
 from collections import Counter
 sha = sys.argv[1]
 BASE = sys.argv[2] if len(sys.argv) > 2 else "/srv/pokebench/pokeemerald-factory-core/workspace/.integration/evidence/aiv270/census"
-BSHA = sys.argv[3] if len(sys.argv) > 3 else "01ad01f2a"
+BSHA = sys.argv[3] if len(sys.argv) > 3 else "60282bba8"
 EV = ".integration/evidence/aiv271"
 def load(paths):
     d = {}

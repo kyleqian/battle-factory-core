@@ -1,6 +1,6 @@
 {
   "schema": "playable-animation-integration/v1",
-  "exactAcceptanceBaseline": "689d475cd",
+  "exactAcceptanceBaseline": "cbf8d2f65",
   "inventory": "animation-integration-readiness.json",
   "implementedAdapters": [
     {
@@ -3551,7 +3551,7 @@
         "docs/next-adapters-prep34.md s2: the unchanged reducer src/animation/memento.ts fed liveMoveAnimation.ts liveMementoReducerConfig from the displayed field: x = sprite x, shadowTop = Y_PIC_OFFSET - height / 2 - 7 (picOffsetPoint; pic-coords height), shadowBottom = battle-position y + 31, bgX / bgY = 32 - (x + x2), 32 - (y + y2) (x2 = the tracked opponent idle rest), BG / rank / palette per side; activation scanline = FIRST_BODY_SCANLINE (liveOamMoves.ts; equal up to a display-neutral bank relabel), WIN0 240 / 161; duration = reduceMemento(config).length (175..179 rows); never a capture row",
         "gate: the battle's first animation body (spriteOrderInput.firstBody, the Extrasensory precedent); non-shiny. The self-KO and stat drops are gameplay-owned (read only); the displayed attacker HP is already 0 at the event (prep6 Self-Destruct path) and the HUD is live-owned (!liveField healthbox / message block)",
         "#142: row 0 for an elevated opponent target (WEEZING -> GOLBAT 0 px); the shared hook now follows SpriteCB_EnemyShadow's IsBattlerSpritePresent (opponent HP 0 = no shadow), so an elevated self-KO WEEZING attacker's shadow stays hidden (opponent windows 195 px on row 0 otherwise)",
-        "renderer: battleScene.ts MEMENTO branch with live-field gates and live battler art (+ the opponent front idle rest); staged / accepted outputs byte-identical (tools/integration/s10aStagedDigest.ts at dc0283345 == at the change)",
+        "renderer: battleScene.ts MEMENTO branch with live-field gates and live battler art (+ the opponent front idle rest); staged / accepted outputs byte-identical (tools/integration/s10aStagedDigest.ts at 876b8ad5a == at the change)",
         "dense full windows zero residual twice fresh through the production live renderer from each scenario's own activation, both orientations: accepted WEEZING -> ONIX P / O, prep34 WEEZING -> GOLEM P / O, elevated GOLBAT target P (5 windows, 888 / 888 rows; tools/integration/fixtures/s10a-live/memento-*.json); the later-body window after Psywave declines (s10a-live-declines/)",
         "ordinary route 259/28 WEEZING (slot 0): live every age (179), the user faints, forced replacement answered, next action prompt reached, Scene ON/OFF gameplay / RNG / facility parity; 127/28 (after the opponent's body) declines (tests/animation/liveExtremeSpeedMementoAdapters.test.ts)"
       ],
@@ -3628,7 +3628,7 @@
     "player back send-out and battle-start intro send-out visuals in Scene ON (ISSUES #146)",
     "Castform weather-form bodies (ISSUES #143) and the weather-continues battler (ISSUES #157)"
   ],
-  "foldedVerifiedSnapshot": "8fb2afbc1",
+  "foldedVerifiedSnapshot": "34cd82f66",
   "currentAcceptedFactoryMoves": 276,
   "additionalRequiredBodies": {
     "MOVE_STRUGGLE": {
@@ -3697,7 +3697,7 @@
       ],
       "command": "general-animation LEECH_SEED_DRAIN (animated) at the turn-end drain: 208 held rows (lsd194); Move_ABSORB's body through the live ABSORB adapter at command age - 21, seed owner = attacker, seeded = target, task-hosted ShakeMon creation row (lsd199); Scene OFF plays no animation",
       "evidence": "docs/lsd198-leech-seed-drain-animation.md: dense full-framebuffer vs fresh ROM, both orientations, twice fresh: 446 / 446 and 437 / 437 rows 0 px (animation span 218 / 218 each)",
-      "landed": "2026-10-23 (merged a6f9cbdb1)"
+      "landed": "2026-10-23 (merged 5021eb05e)"
     },
     "STATUS_ANIMATION": {
       "animation": "B_ANIM_STATUS_* (Cmd_statusanimation / status2animation / chosenstatusanimation -> InitAndLaunchChosenStatusAnimation)",
@@ -5530,7 +5530,7 @@
       "evidence": [
         "reclassified from scoped exact (a13fix, #151 precedent: the adapter gained a measured CPU-phase parameter); the existing exact fixture proofs stay valid in their proved scope",
         "scoped-exact liveEvidence: docs/next-adapters-prep34.md s1: the unchanged reducer src/animation/extremeSpeed.ts at reducer age 43 on the activation row (live age 0 = activation, animationAgeOffset 43, both sides, both species pairs), duration 321 rows; the attacker pic-coords yOffset is the A input of the stretch y2 (SceneOnExtremeSpeedConfig.attackerYOffset from the art view's coords.yOffset; absent = the accepted ARCANINE 6 / 2); hit-splat anchor = the target sprite centre; no Random2, lag or history input; never a capture row",
-        "scoped-exact liveEvidence: renderer: battleScene.ts EXTREME_SPEED branch with live-field gates, live battler art at the field sprite corners, healthboxes / message under !liveField; staged / accepted outputs byte-identical (tools/integration/s10aStagedDigest.ts at dc0283345 == at the change)",
+        "scoped-exact liveEvidence: renderer: battleScene.ts EXTREME_SPEED branch with live-field gates, live battler art at the field sprite corners, healthboxes / message under !liveField; staged / accepted outputs byte-identical (tools/integration/s10aStagedDigest.ts at 876b8ad5a == at the change)",
         "scoped-exact liveEvidence: dense full windows zero residual twice fresh through the production live renderer from each scenario's own activation, both orientations: accepted ARCANINE -> DUGTRIO P / O, prep34 SMEARGLE -> GOLEM P / O, elevated opponent target SMEARGLE -> GOLBAT P (#142 shadow row 0) (5 windows, 1605 / 1605 rows; tools/integration/fixtures/s10a-live/extreme-speed-*.json)",
         "scoped-exact liveEvidence: ordinary route 182/21 ARCANINE (slot 1): live every age (321), following prompt reached, Scene ON/OFF gameplay / RNG / facility parity (tests/animation/liveExtremeSpeedMementoAdapters.test.ts)",
         "sourceFieldEvidence: ../tools/integration/fixtures/em-live-receipt.json",
@@ -6682,13 +6682,13 @@
   },
   "unadaptedNotes": {},
   "verifiedPreview": {
-    "commit": "96aaaebbe8eddb238e2dc5de781b19d921c20d5f",
-    "build": "96aaaebbe 2026-10-09",
+    "commit": "dc4c31b53f1e2c3632d913960b337fa20f68891a",
+    "build": "dc4c31b53 2026-10-09",
     "url": "http://127.0.0.1:5191/",
     "implementedAdapters": 241,
     "faithfulRandomAdapters": 13,
     "faithfulTimingAdapters": 22,
-    "fullTest": "Supervisor 1,583 files / 13,039 tests passed on c99a40a0a (src dde58985 = the served src; later commits evidence / docs only)",
+    "fullTest": "Supervisor 1,583 files / 13,039 tests passed on c26e134bb (src dde58985 = the served src; later commits evidence / docs only)",
     "buildModules": 876,
     "browser": "Four canvas and saved PNG hashes on the canonical ordinary route; session export; ON -> OFF restart; no page errors",
     "receipt": "../tools/integration/fixtures/playable-preview-96aaaebbe-receipt.json",
@@ -6698,7 +6698,7 @@
 
   "productionProviders": {
     "spritePaletteHistory": {
-      "sourceCommit": "c8f2a79e9",
+      "sourceCommit": "6ac5699b2",
       "auditedMovePlans": 58,
       "claim": "Retained Shadow Punch scratch input across 58 audited move plans (57/79 adapters), and ordinary singles B-cancel from a known entry. Menu entry is unknown; cancellation alone consumes explicit entry provenance and source menu/return allocations. Actual status-animation, switches and unmodeled history remain invalidated; no arbitrary-history/framebuffer ownership claim.",
       "receipt": "../tools/integration/fixtures/live-palette-history-receipt.json",
@@ -6712,7 +6712,7 @@
         "../tools/integration/fixtures/party-cancel-supervisor-receipt.json"
       ],
       "ordinaryPartyCancel": {
-        "sourceCommit": "695e10751",
+        "sourceCommit": "bb8f6d315",
         "referenceRomSha256": "a9dec84dfe7f62ab2220bafaef7479da0929d066ece16a6885f6226db19085af",
         "receipt": "../tools/integration/fixtures/party-cancel-supervisor-receipt.json",
         "claim": "Known entry only; source return reserves0..3, healthbox/bar4..5, no wireless, retained icon row8 supplies following Shadow Punch scratch. Unknown entry and actual switch stay unknown; private0..3 and full menu/framebuffer timing unclaimed."
@@ -6770,7 +6770,7 @@
   },
   "validationCheckpoint": {
     "state": "passed",
-    "productionCodeCommit": "1a68bb532",
+    "productionCodeCommit": "a50dec3ee",
     "typecheck": "passed",
     "workerFullTest": "supervisor final 1495 files / 11996 tests passed; 44 files / 223 tests skipped",
     "buildModules": 847,

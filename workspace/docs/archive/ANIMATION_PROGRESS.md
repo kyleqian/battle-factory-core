@@ -1,6 +1,6 @@
 # Local consolidation update — 2026-10-02
 
-Factory checkpoint `8fb2afbc1` is merged into local master: **276/277 accepted**
+Factory checkpoint `34cd82f66` is merged into local master: **276/277 accepted**
 (275/276 Level 50 plus 1/1 Open-only). This acceptance inventory is unchanged.
 hcloud is deleted; the previous worker/source history and all evidence are
 archived locally. The current effort is playable integration: 65 adapters,
@@ -9,8 +9,8 @@ archived locally. The current effort is playable integration: 65 adapters,
 
 # Animation supervisor verification — MOVE_OUTRAGE exact merge (2026-09-23)
 
-- **State / merge:** Fast-forwarded verified worker commits `0828c75fd` through
-  `e73ef9458`; Open-only **MOVE_OUTRAGE is exact** and only its
+- **State / merge:** Fast-forwarded verified worker commits `0e77234de` through
+  `ca861a33f`; Open-only **MOVE_OUTRAGE is exact** and only its
   `outrage-flame-source-relative` track is fulfilled. Level 50 remains
   **275/276 exact** and Open-only is now **1/1 exact**. Helping Hand remains
   the sole blocked Factory move; no sibling, gameplay/RNG/facility,
@@ -32,8 +32,8 @@ archived locally. The current effort is playable integration: 65 adapters,
 
 # Animation worker exact promotion — MOVE_OUTRAGE (2026-09-23)
 
-- **State / tested tree:** Production promotion landed in `f902dc4b0` and the
-  final production/evidence tree tested below is `068eab7c4` on
+- **State / tested tree:** Production promotion landed in `4656db04d` and the
+  final production/evidence tree tested below is `487ed5b73` on
   `worker/animation-20260923-180321`. The only new coverage entry and
   fulfilled component track are Outrage-owned; `MOVE_HELPING_HAND` remains
   blocked, the 77 non-Factory moves remain out of scope, and no
@@ -64,14 +64,14 @@ archived locally. The current effort is playable integration: 65 adapters,
   tests**, with **44 files / 223 tests skipped**, in **2,164.86s**; and
   `npm run build` passes (**838 modules**, inherited chunk-size warning only).
   `git diff --check` passes. The narrow Overheat no-credit receipt refresh in
-  `068eab7c4` only updates its derived audit hashes after Outrage coverage
+  `487ed5b73` only updates its derived audit hashes after Outrage coverage
   promotion; Overheat receives no credit. Resume only for supervisor merge;
   the final ledger commit is documentation-only.
 
 # Animation supervisor verification — MOVE_OUTRAGE evidence merge (2026-09-23)
 
-- **State / merge:** Fast-forwarded verified worker commits `032f9f682` through
-  `21431b31c`, plus supervisor repair `024a4005b` correcting the sole carrier
+- **State / merge:** Fast-forwarded verified worker commits `5c6565410` through
+  `6c242feab`, plus supervisor repair `61c5029af` correcting the sole carrier
   count to Open-only. **MOVE_OUTRAGE remains unsupported** and no component
   track is fulfilled; Level 50 remains **275/276 exact** and Open-only remains
   **0/1 exact**. No production, move, sibling, gameplay/RNG/facility,

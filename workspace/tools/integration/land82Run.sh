@@ -1,6 +1,6 @@
 #!/bin/sh
 # doll81 reproduction (run from workspace/): Substitute-doll cells, evidence only (docs/next-adapters-doll81.md).
-#  1. git-archive copies of the FIXED base 1e2f48b8a (src cdae97b8) -> <out>/base, base + the temporary patch
+#  1. git-archive copies of the FIXED base e6c51fec4 (src cdae97b8) -> <out>/base, base + the temporary patch
 #     tools/integration/fixtures/doll81/doll81-cells.diff -> <out>/patched, and base + doll81-explore.diff (every candidate cell, the
 #     exploratory framing; it measures the residuals of the excluded cells) -> <out>/explore (never the live checkout; node_modules symlinked);
 #  2. fresh direct-mGBA probes of every doll81 scenario, twice (doll81Probes.sh; r1 == r2 gated) [PROBES=<dir> reuses a probe dir];
@@ -14,7 +14,7 @@
 # usage: sh tools/integration/land82Run.sh <fresh-out-dir> [--census]
 set -e
 OUT=${1:?usage: land82Run.sh <fresh-out-dir> [--census]}; [ ! -e "$OUT" ] || { echo "$OUT exists (need a fresh dir)"; exit 2; }
-BASE=b05d384ca; WS=$PWD; FX=$WS/tools/integration/fixtures/doll81
+BASE=f49b7d03f; WS=$PWD; FX=$WS/tools/integration/fixtures/doll81
 mkdir -p "$OUT"; OUT=$(cd "$OUT" && pwd)
 NODE="node --experimental-strip-types --no-warnings"
 for t in base patched explore; do

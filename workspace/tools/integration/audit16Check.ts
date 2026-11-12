@@ -1,6 +1,6 @@
 // Live audit 16: every consumer fixture of ONE scenario (audit16Fixtures.py) through the production hosts AS THE ORCHESTRATOR FEEDS THEM
 // TODAY, compared row by row with two FRESH direct-mGBA prep48Probe.py processes of that scenario (r1 == r2 per-row digests required).
-// The lend replay follows factoryRoundBattleOrchestrator.ts (master b986bb5b2): beginLiveSpriteOrderTurn per action prompt,
+// The lend replay follows factoryRoundBattleOrchestrator.ts (master 8f2a2974f): beginLiveSpriteOrderTurn per action prompt,
 // advanceLiveSpriteOrderHost before / after each event WITH the geometry-plan callback (liveSpriteOrderBodyPlanAt ->
 // liveMoveGeometrySpriteOrderPlanText at the displayed species), prepareLiveMoveSpriteAllocator per body, and the allocator invalidated
 // ONLY by a status animation outside LIVE_SPRITE_ALLOCATOR_NET_ZERO_STATUS_ANIMATIONS (alloc50 / alloc52) or a general animation that is not

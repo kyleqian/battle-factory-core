@@ -1,6 +1,6 @@
 # doll81 — Substitute-doll cell gates, banked for the next landing (evidence only)
 
-Main lane, new files only. FIXED base: master `1e2f48b8a`, production src tree `cdae97b8`. Every measurement ran on `git archive` copies
+Main lane, new files only. FIXED base: master `e6c51fec4`, production src tree `cdae97b8`. Every measurement ran on `git archive` copies
 of that commit. The production change is the temporary patch `tools/integration/fixtures/doll81/doll81-cells.diff`, applied only to a
 copy (`patch -p1`). Nothing ran on the live checkout.
 
@@ -52,7 +52,7 @@ stalled-battle caveat, is in §3.
 
 ## 1. FOLD INSTRUCTIONS
 
-Apply `tools/integration/fixtures/doll81/doll81-cells.diff` (`patch -p1` from workspace/; base `1e2f48b8a`). Master moved while this ran: land79 and ret80 were merged (`6105b8df1`, src `4c4fe4c7`). The patch
+Apply `tools/integration/fixtures/doll81/doll81-cells.diff` (`patch -p1` from workspace/; base `e6c51fec4`). Master moved while this ran: land79 and ret80 were merged (`f9a25c136`, src `4c4fe4c7`). The patch
 dry-runs cleanly there (`patch --dry-run -p1`), but every measurement above is on `cdae97b8` only. A fold onto newer code reruns
 `doll81Run.sh` on its own base (change `BASE=` in the runner).
 
@@ -113,7 +113,7 @@ whatever the target. Production declined only because `liveSubstituteSwapApplies
 
 ## 3. Census (seeds 0..999, one process each; base vs patched copy)
 
-Command: `liveShareCensus.ts --seeds=0..999`, one process per tree (base `1e2f48b8a` copy, and the copy patched with
+Command: `liveShareCensus.ts --seeds=0..999`, one process per tree (base `e6c51fec4` copy, and the copy patched with
 `doll81-cells.diff`). Checked with `doll81CensusCheck.py`, which wraps prep43CensusDelta.py. Receipts: `receipts/census-delta.json` and
 `receipts/census-check.txt`.
 

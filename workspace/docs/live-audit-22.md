@@ -4,7 +4,7 @@
 the clone phase and not the fixture's personality.
 - ret88's 5 windows measured 316,986 / 316,702 / 340,691 px (x 3).
 - `audit20Fixtures.py` writes no `ageOffset`. Production's accepted Double Team framing is **age 0 = ROM activation + 1**
-  (`dt60Fixtures.py:40` `AGE_OFFSET {104: -1}`; `liveMoveAnimation.ts:451-452` at 9df9b234a).
+  (`dt60Fixtures.py:40` `AGE_OFFSET {104: -1}`; `liveMoveAnimation.ts:451-452` at edc46c8c0).
 - Aligned, all 5 windows are **0 px**.
 - The census's newly live Double Team users (PONYTA player, BLISSEY opponent) were measured on both sides after a ReturnWeak. Raw: 12 / 12
   non-zero. Aligned: 12 / 12 0 px on the accepted rows.
@@ -17,7 +17,7 @@ Every other live claim audited is 0 px on its accepted rows:
 - land86 Flatter after a Flatter in the census routes' shape: 11 / 11.
 
 Method:
-- Base: the FIXED master `9df9b234a`, as a git-archive copy inside the scratch dir. Production src is unpatched.
+- Base: the FIXED master `edc46c8c0`, as a git-archive copy inside the scratch dir. Production src is unpatched.
 - Direct mGBA only. Lab seeds are pinned in every scenario (ISSUES #154).
 - The check is live audits 19-21's: the history is replayed through the production hosts as the orchestrator does, and the production live
   view (CHAIN lend = the claim; ENTRY = the no-history control) is rendered against two more fresh probe processes, with r1 == r2 per-row
@@ -125,7 +125,7 @@ that dir once the comparison is read; the runner never deletes anything itself.
 
 ```
 sh tools/integration/audit22Run.sh <fresh-receipt-dir> <fresh-scratch-dir>
-# -> stages, probes, derives, aligns, checks inside a git-archive copy of 9df9b234a under <fresh-scratch-dir>/tree/workspace (relative
+# -> stages, probes, derives, aligns, checks inside a git-archive copy of edc46c8c0 under <fresh-scratch-dir>/tree/workspace (relative
 #    output root a22/), then compares every receipt / fixture / scenario byte-for-byte with tools/integration/fixtures/audit-22/
 #    ("receipts: N same, M DIFF"; per file in <fresh-scratch-dir>/compare.txt).
 python3 tools/integration/audit22Summary.py tools/integration/fixtures/audit-22/a22/aligned        # any check dir
@@ -148,7 +148,7 @@ see section 5.
     - run A'' (+ CROBAT -> RATTATA): the 276 shared files the same;
     - run B'': 291 / 291.
   - Every exploratory pre-runner receipt also agrees.
-- `npm test` in a git-archive copy of HEAD `a46837da7` (master with this audit's files, inside the scratch dir; never the checkout):
+- `npm test` in a git-archive copy of HEAD `5489c6e65` (master with this audit's files, inside the scratch dir; never the checkout):
   **1,620 files / 13,297 tests passed** (44 / 223 skipped).
   - `npm run build` in the same copy: green (`tsc -b && vite build`, exit 0; only vite's usual chunk-size warning).
   - Only new tools / receipts / this doc changed (no src).

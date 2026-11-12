@@ -1,7 +1,7 @@
 # S10A flat84: Flatter 260 as a words-order unit (evidence + temp patch; banked for landing)
 
-Bounded main-lane worker, evidence only, new files only. Base: master `b05d384ca` (production src `4c4fe4c7`). Every measurement ran on
-git-archive copies of `b05d384ca` in the scratch dir: `base`, and `patched` = base + `tools/integration/fixtures/flat84/flat84-temp-src.diff`.
+Bounded main-lane worker, evidence only, new files only. Base: master `f49b7d03f` (production src `4c4fe4c7`). Every measurement ran on
+git-archive copies of `f49b7d03f` in the scratch dir: `base`, and `patched` = base + `tools/integration/fixtures/flat84/flat84-temp-src.diff`.
 The checkout's tracked files never changed. Direct mGBA only (Scene ON), never the shared HTTP oracles. Lab seeds are explicit (ISSUES
 #154): 305420349 for the flat84 scenarios, 305419897 (words57Probe `LAB_SEED`) for the KO chain job. Every probe ran twice fresh, with both
 runs in one batch. Receipts: `tools/integration/fixtures/flat84/`. Runner: `tools/integration/flat84Run.sh <fresh-out-dir>`.
@@ -56,7 +56,7 @@ runs in one batch. Receipts: `tools/integration/fixtures/flat84/`. Runner: `tool
   pass on the patched copy: **24 files, 199 tests, 0 failed** (`tests-patched-summary.txt`).
 
 - **Gates (this evidence step).**
-  - Every new check passes. `git diff --check b05d384ca HEAD` is clean; 135 files were added and no tracked file was modified.
+  - Every new check passes. `git diff --check f49b7d03f HEAD` is clean; 135 files were added and no tracked file was modified.
   - Smoke on the patched copy: 8 files / 448 tests.
   - FULL suite on the patched copy (`tests-patched-full-summary.txt`): 12,373 passed, 20 failed. All 20 are environmental to an archive copy,
     the same set flat77 recorded: 19 WASM parity tests need `artifacts/wasm/factory_wasm.wasm` ("Build it with: core-rs/build-wasm.sh"), and
@@ -111,7 +111,7 @@ runs in one batch. Receipts: `tools/integration/fixtures/flat84/`. Runner: `tool
 - **Species.** Battler sprites are live entries, and a stable sort never reorders two free entries, so the value does not depend on the
   species. The carry still reads the body's species for the adapter's inputs (anchors, palettes), as Ice Ball's does.
 
-## The temp patch (`flat84-temp-src.diff`, 3 files, +52 / -4; cut against `b05d384ca`, src `4c4fe4c7`)
+## The temp patch (`flat84-temp-src.diff`, 3 files, +52 / -4; cut against `f49b7d03f`, src `4c4fe4c7`)
 
 1. `wordsOrderUnits.ts`: `WORDS_ORDER_UNIT_MOVE_IDS` = `[28, 189, 240, 260, 291, 301]`. `DEFERRED_LEND_MOVE_IDS` follows, so a Flatter body
    arms the word-free deferred marker and ANY later consumer takes it (`lendLiveSpriteOrder`).
@@ -133,7 +133,7 @@ sequence and battle digests are identical, and so is ON / OFF parity.
 ## FOLD INSTRUCTIONS (next round)
 
 1. **The patch.**
-   - First check that `git diff b05d384ca -- src/engine/wordsOrderUnits.ts src/engine/liveSpriteOrderHost.ts src/engine/liveMoveAnimation.ts`
+   - First check that `git diff f49b7d03f -- src/engine/wordsOrderUnits.ts src/engine/liveSpriteOrderHost.ts src/engine/liveMoveAnimation.ts`
      is empty. If not, re-cut the three hunks by hand: they are small and self-contained.
    - Then `git apply tools/integration/fixtures/flat84/flat84-temp-src.diff`.
 2. **The pins: none move.** The 24 related files pass on the patched copy (199 tests).
@@ -146,7 +146,7 @@ sequence and battle digests are identical, and so is ON / OFF parity.
    - a Flatter marker records `bodySpecies`; a species-free 260 marker declines (null lend);
    - a Mega Drain / Water Pulse consumer after a Flatter marker gets the resolved lend. Use `fixtures/flat84/fixtures/c-mega-drain-opp-c1.json`
      with its `lends-patched.txt` row (`same: true`), or the KO chain vectors `ko-chain/lend-vectors.json`.
-4. **Census expectation** (seeds 0..999 relative to a base whose Flatter / 260-stop rows equal `b05d384ca`'s): **+44 commands / +6,401
+4. **Census expectation** (seeds 0..999 relative to a base whose Flatter / 260-stop rows equal `f49b7d03f`'s): **+44 commands / +6,401
    frames**, 0 regressions, key sequence + both digests identical. `census/census-check.txt` lists the gains by move and by BEFORE decline.
 5. **Parity routes:** `flat77Parity.ts --seed=735 --streak=0` and `--seed=936 --streak=6` (== `parity-*.json`).
 6. **Gates:** smoke, full `npm test`, `npm run build`, typecheck, the differential, the census, parity.
@@ -156,11 +156,11 @@ sequence and battle digests are identical, and so is ON / OFF parity.
 
 ## Protocol notes (what was committed when)
 
-- **Batch 1.** The plan and predictions (`predict-plan.txt`, `predict-lends.txt`, `predictions.md`) were committed in `37e176b89`, before any
+- **Batch 1.** The plan and predictions (`predict-plan.txt`, `predict-lends.txt`, `predictions.md`) were committed in `983c99d1d`, before any
   comparison. `flat84Plan.ts`'s predict mode never reads `endOrder`. The lend predictions are the production columns of the LENDS_ONLY pass,
   extracted and committed before its `same` / `rom` columns were read.
-- **Batch 2** (`ko-water-pulse-*`) was staged after batch 1's comparison. Its predictions were committed in `381b3d2eb` before its comparison.
-- **KO chain.** `ko-chain/predictions-v1.json` (`2f2a4e85c`) came from the ice72 walker before one tool fix. That walker mapped every
+- **Batch 2** (`ko-water-pulse-*`) was staged after batch 1's comparison. Its predictions were committed in `325b04422` before its comparison.
+- **KO chain.** `ko-chain/predictions-v1.json` (`9e069b030`) came from the ice72 walker before one tool fix. That walker mapped every
   unlabelled body to the accuracy −1 stat animation, so Flatter's Status_Confusion bodies (`Cfffff;D1,2,0,3,4`) were mis-modelled, and its
   first check showed 3 consumer mismatches.
   - The fix maps those bodies to the production `status-animation CONFUSION` unit (`flat84KoChain.ts`). It is a tool fix, not production.

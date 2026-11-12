@@ -1,6 +1,6 @@
 # Live audit 19 (S10A side lane, 2026-10-10): the live claims of today's later folds (fold71, ice72, dive70) and ISSUES #160
 
-Method = live audits 16 / 17 / 18 (`audit18Check.ts` header), on master `dc173666b` (src tree `e6f98bf9`), unpatched:
+Method = live audits 16 / 17 / 18 (`audit18Check.ts` header), on master `ce51c7444` (src tree `e6f98bf9`), unpatched:
 - battle-lab scenarios with an explicit lab seed (ISSUES #154);
 - one probe derives the consumer fixtures;
 - a check replays the history through the production hosts as the orchestrator does: the order host with the geometry-plan callback
@@ -108,19 +108,19 @@ By the unit immediately before the consumer (`receipts/coverage.txt`):
 
 ### Run A
 
-`audit19Run.sh` at `0ee9bae04`, 13:44..14:02. It produced the receipts first committed in `0ee9bae04`.
+`audit19Run.sh` at `b6832a9b7`, 13:44..14:02. It produced the receipts first committed in `b6832a9b7`.
 
 ### Run B: a second full run of the same runner and checker
 
 Fresh receipt and scratch dirs, a separate batch started at 13:55 while A was in its check stage (ISSUES #154).
 - It re-staged the scenarios (== committed) and re-probed every scenario. **Its derived fixtures == the committed ones** and `derive.txt`
   is byte-identical: frames, `gRng2Value`, powers, counters and turns all reproduce.
-- `audit19Compare.py` against run A's receipts as committed in `0ee9bae04`: **identical = 599, ROM-drift = 0, DIFFERS = 0 windows. All
+- `audit19Compare.py` against run A's receipts as committed in `b6832a9b7`: **identical = 599, ROM-drift = 0, DIFFERS = 0 windows. All
   122 check receipts and all 17 other receipt files are byte-identical** (summary, verdicts, coverage, lends, derive, derive-vs-committed,
   wp160 / ×4, ablation / ×7 including its summary).
 - Unlike audit 18 (15 ROM-drift windows), no window drifted across these batches.
 
-### The one later checker change: `416763b3a`
+### The one later checker change: `58fe4b2fe`
 
 A Dive setup consumer now gets its production splash-birth context.
 - It changes exactly the receipts of the 4 `dive-clamperl-*-opp` scenarios: the 4 setup windows 11,282 / 10,567 / 11,282 / 11,123 px

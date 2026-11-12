@@ -2,7 +2,7 @@
 
 # obr248 report: opponent faint-replacement ball bar (read-only scout)
 
-I made no edits and no commits, and `git status` is clean at `bc74a02d3`. I ran no tests and no census. Scratch files are in `/tmp/obr248`, outside the repo. Frames are 1-based, and "A" is frame 501, the press that dismisses "Foe RATTATA fainted!".
+I made no edits and no commits, and `git status` is clean at `50878ad84`. I ran no tests and no census. Scratch files are in `/tmp/obr248`, outside the repo. Frames are 1-based, and "A" is frame 501, the press that dismisses "Foe RATTATA fainted!".
 
 The ROM is BLACK BELT SHIZUKA against our staged LADY ZOE. The two trainer names differ in length, which affects the print length (see rows 7 and 8). The scenarios are `tools/battle-lab/aud241b-opponent-faint-{on,off}.json` for the ROM and `tools/compare/appTrace.ts:1004` and `:1779-1780` for ours.
 
@@ -85,7 +85,7 @@ All figures are the same in both scenes unless noted. A pixel counts if any chan
 
 1. **Hold.** Give the opponent draw a timing, `{minimumFrames: 100}` from command start to the first glyph. This is one new constant in `battleResolutionPresentation.ts`. Calibrate at implementation by measuring first glyph = C+100, since the command-to-command handoff may cost a frame.
 2. **Hide command.** It stays 1 frame, because the ROM script continues while the fade runs. The view must carry the bar for 16 more frames after the hide completes. That is a new age or fade state at `battleResolutionPresentationRender.ts:2121` and `:2340`.
-3. **Drawing.** `drawTypedPartyStatusSummary` needs three changes, and per the ratchet in `bc74a02d3` they go in a new module, not `battleScene.ts`:
+3. **Drawing.** `drawTypedPartyStatusSummary` needs three changes, and per the ratchet in `50878ad84` they go in a new module, not `battleScene.ts`:
    - Slide x by `OPP_BAR_X2[age]` over 20 frames. The balls ride on the bar's x.
    - Order the balls with `states[5-index]`.
    - Apply a 16-step blend, 200.8 to 251.0 in brightness, over 664 to 679.
@@ -111,7 +111,7 @@ All figures are the same in both scenes unless noted. A pixel counts if any chan
 ## (5) Shared code with the player-side intro tray
 
 - **Shared tables.** `battleStartSounds.ts` imports `OPP_ICON_X2`, `PLAYER_ICON_X2` and the `*_CREATE_TICK` constants from `battleScene.ts` (lines 6-8; used at `:58` and `:63`). `OPP_BAR_X2` and `OPP_ICON_X2` live at `battleScene.ts:3687` and `:3705`.
-- **Read-only reuse.** The fix should only read these tables. It must not change them or `ballTraySoundTicks`, so the aud241a pins stay put. Keep new code out of `battleScene.ts`, as the split-eligibility ratchet in `bc74a02d3` requires.
+- **Read-only reuse.** The fix should only read these tables. It must not change them or `ballTraySoundTicks`, so the aud241a pins stay put. Keep new code out of `battleScene.ts`, as the split-eligibility ratchet in `50878ad84` requires.
 - **Intro versus replacement.** Intro balls have per-ball delays and `_Exit` slides, and play BALL and EXIT SEs. The replacement uses `OnSwitchout`, has no per-ball stagger and plays only `SE_BALL_TRAY_ENTER`. Reusing the intro tables per ball would be wrong here.
 - **SE constants.** `screenSounds.ts:189-191` defines 114, 115 and 116.
 

@@ -1,6 +1,6 @@
 # doll90 — Substitute-doll residual cells, batch 2
 
-Integration lane, base master `d46cdfff1` (production src `8150be72`). Final production code `c89c27a0d` (src tree `d3e66c8b`).
+Integration lane, base master `28c610da8` (production src `8150be72`). Final production code `3066bc4dd` (src tree `d3e66c8b`).
 Presentation only: no gameplay, RNG, damage, turn order or facility state changed.
 
 ## Results first
@@ -20,7 +20,7 @@ Presentation only: no gameplay, RNG, damage, turn order or facility state change
 
 Struggle is out of scope.
 
-**Census (seeds 0..999, base `d46cdfff1` vs final `c89c27a0d`; 10 `--index-from` shards each, `hist73Merge.py` + `land82CensusCheck.py`):**
+**Census (seeds 0..999, base `28c610da8` vs final `3066bc4dd`; 10 `--index-from` shards each, `hist73Merge.py` + `land82CensusCheck.py`):**
 - live **25,962 -> 25,999 commands (+37)**, live frames **3,880,093 -> 3,888,853 (+8,760)**;
 - gained cells: 104 opponent 15 / 3,600 frames, 104 player 8 / 1,952, 244 player 9 / 1,611, 47 opponent 5 / 1,597;
 - **0 live -> fallback**;
@@ -28,7 +28,7 @@ Struggle is out of scope.
 - stalls 434 / 796 / 881 in both runs, no truncated tail this time;
 - Substitute-doll declines 178 / 5,696 frames -> 141 / 4,512.
 
-The census on `d3cc27427` (before the seam-only move of `liveSingBodyRows`) is byte-identical.
+The census on `a6dbe3bb4` (before the seam-only move of `liveSingBodyRows`) is byte-identical.
 
 **Scene ON / OFF parity** (`land82Parity.ts`):
 - **Seed 497, 40 turns** (Psych Up player + Double Team opponent requested): boundaries (scene hit-marker masked), RNG cursor, outcome, facility and prompt are all equal.
@@ -85,7 +85,7 @@ The census on `d3cc27427` (before the seam-only move of `liveSingBodyRows`) is b
   - Double Team: shift 0; rows 158; self set `{241}`.
   - Sing: tail 96; geometry off; sides player-only.
 
-## Gates (final code `c89c27a0d`)
+## Gates (final code `3066bc4dd`)
 
 - Targeted, 19 files (every doll / swap test + `factoryAnimationInventory` + `playableAnimationIntegration` + dt60): 181 passed.
   - The boundary ratchet failed on `liveSubstituteSwap.ts -> ../animation/sing.ts`.
@@ -94,7 +94,7 @@ The census on `d3cc27427` (before the seam-only move of `liveSingBodyRows`) is b
 - `npm run test:smoke` 448 / 448.
 - Full suite as two shards: 6,926 + 6,361 passed, 0 failed (119 + 104 skipped).
 - `npm run build` exit 0.
-- `compare:differential` vs `d46cdfff1`: PASS, 624 / 624 captures byte-identical.
+- `compare:differential` vs `28c610da8`: PASS, 624 / 624 captures byte-identical.
 
 ## Reproduce
 
@@ -105,7 +105,7 @@ node --experimental-strip-types --no-warnings tools/integration/land82Parity.ts 
 node --experimental-strip-types --no-warnings tools/integration/land82Parity.ts 506 30 47:opponent
 ```
 
-Runner verified in a fresh dir on the final src tree `d3e66c8b` (commit `65f1de763`): 12 + 8 scenarios r1 == r2, `same summary.tsv`.
+Runner verified in a fresh dir on the final src tree `d3e66c8b` (commit `2ef5e99f9`): 12 + 8 scenarios r1 == r2, `same summary.tsv`.
 
 Receipts: `tools/integration/fixtures/doll90-live-receipt.json`, `tools/integration/fixtures/doll90/receipts/`. The doll-free control and
 prediction scenarios are in `tools/integration/fixtures/doll90/scenarios/`.

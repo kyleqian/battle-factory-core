@@ -52,7 +52,7 @@ Seed 6 was run twice (16/16 both). The aligned set still matches fully.
 ## 4. Census delta 0..999, both scenes
 
 Baseline arms `sv-20261108/sub260/census/{on,off}-9b4332163`; fixed arms `.integration/evidence/abl261/census/{on,off}-6dce29c5d`.
-Attribution: `tools/integration/abl261Instrument.py` patches an extracted UNFIXED tree (commit `e67db450a`; observation only, still returns the old result) so that every calc
+Attribution: `tools/integration/abl261Instrument.py` patches an extracted UNFIXED tree (commit `5c370ef1d`; observation only, still returns the old result) so that every calc
 where the full map / hp-aware weather rule would differ is logged per seed (sites: base damage, confusion self-hit, three weather checks);
 `tools/integration/abl261Classify.py` compares the arms (report: `classify/report.txt`).
 
@@ -74,7 +74,7 @@ Errors: the same two `frame budget` seeds (434, 796) in both arms; seed 881 (fra
 
 ## 5. Re-pins (every one tied to an ability now applying)
 
-The scene-parity pin passes on the unfixed parent `e67db450a`; for it and the two orchestrator seeds, restricting `abilityNameOrNull` to the old ids 8 / 14 / 55 / 62 on the fixed tree
+The scene-parity pin passes on the unfixed parent `5c370ef1d`; for it and the two orchestrator seeds, restricting `abilityNameOrNull` to the old ids 8 / 14 / 55 / 62 on the fixed tree
 reproduces the old value. cf78 (battle 950) and sag130 (seeds) are tied through the census: those seeds are in the changed set and flagged by the instrumented tree.
 
 - `tests/playableAnimationLifecycle.test.ts` `verifySceneModeParity()` 467 -> 466 (40 generated Scene ON matchups; damage calc abilities).

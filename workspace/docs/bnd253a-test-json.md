@@ -6,7 +6,7 @@ changed in the same commit. No emitted module changed.
 
 ## Before / after
 
-| | Before (`ae4ba307a`) | After |
+| | Before (`7d382d766`) | After |
 |---|---|---|
 | `ENGINE_BUILD` (`tools/build/engineBuildCheck.ts`) | `eb-22fc0e2bc29aaff3` | `eb-22fc0e2bc29aaff3` |
 | `dist-lib/` after `npm run build:lib` (14 files: `index.js`, `headless.js`, both chunk dirs, `.d.ts`) | 62,844,112 B | 62,844,112 B, every file's sha256 identical |
@@ -37,7 +37,7 @@ Largest first; all listed sizes are the pre-move bytes.
 | `battle1-switchin-ball-particle-detail-probe.json` | 1,655,546 | `battleScene.test.ts` |
 | 91 more | 12.5 MB | `battle1-*` / `battle2-*` / `turnN-*` RAM dumps and probes, `audio-sound-sources`, `factory-ai-script-catalog`, `battle-script-command-handlers`, `battle-script-move-end-{facts,delegates}`, `printfromtable-family-audit`, `dragonrage-*` probes, `ember-sprite-probe*`, small asset sidecars (`sendout-healthbox-opponent`, `trainer-pic-*`, `sky-uppercut`, `helping-hand-tag-hand`, ...) |
 
-The full list is `git show --stat --format= 898038873 -M` (every row is a rename into `tests/fixtures/data/`).
+The full list is `git show --stat --format= 06e43b574 -M` (every row is a rename into `tests/fixtures/data/`).
 
 Orphans (no test, tool or extractor reference outside docs by basename): 35 of the 97. **None deleted**: all were moved, so
 nothing a probe or a future reader could want is lost. If a later step prunes them, `git log --diff-filter=D` on

@@ -3,9 +3,9 @@
 The milestone's final acceptance artefact: `winning`-policy soak, seeds
 0:480 (double the 0:240 range that first reached the carry ≥ 21 bar), on
 the completed M-B tree — every folded lever present (step 2a type-aware
-fight-move choice, swap-decline `781c8827`, ISSUES #99/#100/#101/#103
+fight-move choice, swap-decline `3064e24e`, ISSUES #99/#100/#101/#103
 fixes) and both #101/#103 verified fixed, #102 verified not currently
-reproducible. Master HEAD at the start of this session: `a97d3b19`.
+reproducible. Master HEAD at the start of this session: `2e656f84`.
 Measurement + triage only.
 
 All raw per-seed lines for every chunk are in
@@ -161,9 +161,9 @@ The three previously-crashing seeds are all in-range (0:480) and clean:
 
 | seed | prior issue | this sweep | notes |
 |---|---|---|---|
-| 90 | #101 (Lock-On missing `messageLines` case) | OK, `roundLost carry<=0 depth<=3` | fixed in `1403f462`'s sibling commit `ed66e000`; RNG trajectory shifted post-fix, now a short shallow loss, no crash |
+| 90 | #101 (Lock-On missing `messageLines` case) | OK, `roundLost carry<=0 depth<=3` | fixed in `c4f3c74d`'s sibling commit `f9f13a9b`; RNG trajectory shifted post-fix, now a short shallow loss, no crash |
 | 154 | #102 (`switchhandleorder` no decided `monToSwitchIntoId`) | OK, `roundLost carry<=0 depth<=5` | still not reproducing on HEAD, consistent with PROGRESS 1364's diagnosis-only finding; #102 stays open (diagnostic remainder, no live repro) |
-| 36 | #103 (`AI_CV_DefenseUp`/`SpDefUp` indexed `gBattleMoves[0xFFFF]`) | OK, `roundComplete carry<=14 depth<=20` | fixed in `1403f462`; now runs deep and clean |
+| 36 | #103 (`AI_CV_DefenseUp`/`SpDefUp` indexed `gBattleMoves[0xFFFF]`) | OK, `roundComplete carry<=14 depth<=20` | fixed in `c4f3c74d`; now runs deep and clean |
 
 ## Triage
 

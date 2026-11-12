@@ -1,6 +1,6 @@
 # reseed85 predictions (committed BEFORE any ROM probe or patched census)
 
-Base: master `aeaa33dff` (production src `9f3b877d`), measured on a git-archive copy with hist73's instruments
+Base: master `005101dfc` (production src `9f3b877d`), measured on a git-archive copy with hist73's instruments
 (`hist73AllocatorCensus.ts` 10 `--index-from` shards -> `hist73Merge.py` -> `hist73Chains.py` / `hist73ReseedBlockers.py`).
 
 ## Residual on the base (seeds 0..999)

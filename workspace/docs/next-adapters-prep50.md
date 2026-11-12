@@ -3,7 +3,7 @@
 Evidence only (side lane, new files only). The question: on today's production, which units leave the production allocator host
 unknown? Can the status animations (SLP, CONFUSION, PSN, PRZ, BRN) stop invalidating it? Does tonight's order-host work let
 the post-KO send-out reseed the host in the census's cases? Measured with a TEMPORARY production patch (kept as `.diff`,
-reverted before every commit). Master `3fbe30cf7` (production src tree `f1f2de08`).
+reverted before every commit). Master `eb3ae0163` (production src tree `f1f2de08`).
 
 ## Results
 
@@ -13,7 +13,7 @@ sequence is identical: 0 pairing mismatches and an identical battle digest (`069
 
 | src | live by count | live by frames | allocator-unknown declines |
 |---|---|---|---|
-| master `3fbe30cf7` | 7333 / 7970 = **92.01 %** | 1090865 / 1168196 = **93.38 %** | 147 cmds / 15787 frames |
+| master `eb3ae0163` | 7333 / 7970 = **92.01 %** | 1090865 / 1168196 = **93.38 %** | 147 cmds / 15787 frames |
 | + status patch (`prep50-temp-src.diff`) | **7388 = 92.70 % (+55)** | **1097167 = 93.92 % (+6302)** | 92 / 9485 (−40 % of the allocator frames) |
 
 The chain predictor (`prep50Chains.py --cleared-status SLP,CONFUSION,PSN,PRZ,BRN`, "live iff chain ⊆ cleared set") predicts

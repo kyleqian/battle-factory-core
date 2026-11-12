@@ -27,7 +27,7 @@ was this same defect, not a Memento-specific one.
   print's first glyph), `toGlyph` = next message start minus sink start. A 1-HP bar has no converging source program in
   `battleHealthBar`; `lsd194Production({lenientHp})` keeps that command's minimum (the comparison does not depend on it).
 
-## Table (rows ROM / production / residual; before = HEAD `c6f28b9fe`, after = this change)
+## Table (rows ROM / production / residual; before = HEAD `02feca8db`, after = this change)
 
 `toSink` = anchor -> dofaintanimation busy row. `toGlyph` = sink -> "X fainted!" first glyph. Full output:
 `fixtures/fnt201/production-vs-rom-before.txt` and `-after.txt`.
@@ -103,9 +103,9 @@ supervisor's full suite / build / typecheck is still required for this commit.
 Open: 1-HP healthbars (Shedinja) still have no converging `battleHealthBar` program (`source program did not converge 1->0/1`); unrelated to the
 rule above and outside the Factory rental set, left unchanged (the tool's `lenientHp` option only keeps the timeline comparable).
 
-## rep203 re-pins (union c7d8eab9a = master a6f9cbdb1 + fnt201 420b14c21 + hpb202)
+## rep203 re-pins (union e7f6d136d = master 5021eb05e + fnt201 00bc66214 + hpb202)
 
-Every pin below was re-measured on the master, fnt201-only (`git archive 420b14c21`) and union trees; hpb202 contributed 0 to every one of them
+Every pin below was re-measured on the master, fnt201-only (`git archive 00bc66214`) and union trees; hpb202 contributed 0 to every one of them
 (fnt201-only and union numbers are identical). Battle / turn / end state unchanged in every soak pin. No surprise pin: all movement is the faint lead.
 
 - `randomRoundSoak.test.ts` (`tools/integration/lsd194SoakPins.ts`): seven-wins seed 21 37,467 -> 39,117 (renderCalls 2,674 -> 2,782); full seed 0
@@ -125,18 +125,18 @@ Each file passes alone (`POKEBENCH_VITEST_MAX_WORKERS=2`), plus `fnt201FaintTimi
 
 ## Final-code gates (supervisor, 2026-10-23, CAX31)
 
-Tested `f96e8e805` (src tree `d8fda5802` = union `c7d8eab9a` of master `a6f9cbdb1` + fnt201 + hpb202; typecheck fix `420b14c21`; re-pins
+Tested `0231f622e` (src tree `d8fda5802` = union `e7f6d136d` of master `5021eb05e` + fnt201 + hpb202; typecheck fix `00bc66214`; re-pins
 rep203). Logs `.integration/validation/sv-20261022/{fnt201,union}/` (ignored).
 
 - Supervisor fresh ROM probes (fnt201 ko-foe OFF, ko-player ON): rows identical to `fixtures/fnt201/rom-rows.json`, r1 == r2.
   hpb202 Shedinja KO (opponent OFF, player ON): fresh r1 == r2, `hpb202BarCompare.ts` residual 0, receipts byte-identical.
-- Typecheck 0 (after narrowing the pre-cry anchor, `420b14c21`).
-- Census 0..999 both scenes, master `a6f9cbdb1` vs `c7d8eab9a`, hpb202's fixed harness in both arms (`rst197CensusDelta.py`):
+- Typecheck 0 (after narrowing the pre-cry anchor, `00bc66214`).
+- Census 0..999 both scenes, master `5021eb05e` vs `e7f6d136d`, hpb202's fixed harness in both arms (`rst197CensusDelta.py`):
   digests / errors identical in 1000 / 1000 (OFF seed 881 = the known 200k frame-budget stall in both arms, cut at a different
   command); 997 complete + 3 budget per arm (the 82 former "invalid HP program" harness throws are gone). Changed commands: faint
   (ON 4,327, OFF 4,323; +62 .. +76 = 66 + pre-cry rows - the player-slide correction; one +135: an Explosion that broke a Substitute,
   pre-cry rows include the "SUBSTITUTE faded" print's wait, unmeasured) and the Scene ON `cleareffectsonfaint` status 32 -> 1 (4,327).
-- Differential (3 traces, base `a6f9cbdb1`): 641 / 641.
-- Full suite on `f96e8e805`: 1,690 files / 14,051 tests passed, 0 failed. Build 0.
+- Differential (3 traces, base `5021eb05e`): 641 / 641.
+- Full suite on `0231f622e`: 1,690 files / 14,051 tests passed, 0 failed. Build 0.
 - Soak gates on src `d8fda5802`: vanilla 0:20 20 / 20 OK (all budget); varied-RNG first-round winning carry 0 / 14 / 28 and
   winning-swap carry 0: 100 / 100 OK each (0 crash, 0 hang).

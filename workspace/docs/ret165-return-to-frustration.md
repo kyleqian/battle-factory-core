@@ -50,7 +50,7 @@ friendship 0.
 
 No other test moved (full suite below).
 
-Census 0..999 (`ret88Census.sh shards`, `.integration/validation/ret165-20261013/census/merged.json`) vs the final census on `63f6850b2`:
+Census 0..999 (`ret88Census.sh shards`, `.integration/validation/ret165-20261013/census/merged.json`) vs the final census on `159c9e694`:
 
 | | commands | live | by count | frames | live frames | by frames | Return 216 | Frustration 218 |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|

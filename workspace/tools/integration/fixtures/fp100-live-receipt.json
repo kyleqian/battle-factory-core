@@ -2,11 +2,11 @@
  "schema": "fp100-live-receipt/v1",
  "scope": "Focus Punch 264 age-131 restore lag: D4 faithful timing (liveMoveTimingPolicy.ts 264, dominant measured phase = lag on both sides). Presentation only. A live adapter is not whole-playable arbitrary-history exactness.",
  "base": {
-  "commit": "406bfc999",
+  "commit": "f4dbfe1f4",
   "srcTree": "e3c8092c6b9e55fe1146d65769958112511fb0b4"
  },
- "productionCommit": "6bd25b1f0",
- "testedCommit": "7eff6d899bfb5bd48e1d35f21e9acb6f6aa54d58",
+ "productionCommit": "6dd84e99b",
+ "testedCommit": "d2e2939f56b0e537f2ed216532c2143b018a91ff",
  "testedSrcTree": "aaf3d2157af018e1b976bf59b2b328fc8ca1ff00",
  "policy": {
   "age": 131,
@@ -825,8 +825,8 @@
  "census": {
   "seeds": "0..999",
   "shards": 10,
-  "base": "406bfc999",
-  "final": "6bd25b1f0",
+  "base": "f4dbfe1f4",
+  "final": "6dd84e99b",
   "liveCommands": [
    26209,
    26209
@@ -914,7 +914,7 @@
   "R4 per-side duration 155/154": 2
  },
  "gates": {
-  "testedCommit": "7eff6d899",
+  "testedCommit": "d2e2939f5",
   "testedSrcTree": "aaf3d2157af018e1b976bf59b2b328fc8ca1ff00",
   "targeted": "64 files / 2,162 tests passed (grep 264 / Focus Punch / focusPunch / liveMoveTimingPolicy / faithfulTiming + inventory + playableAnimationIntegration + liveStatusImplementedCount + liveBasicMoveAdapters + ctl95DollFreeControls + substituteSwapAttdollCells)",
   "typecheck": "exit 0",
@@ -924,7 +924,7 @@
    "shard 2/2: 812 files passed / 22 skipped, 6,380 tests passed / 104 skipped, 0 failed"
   ],
   "build": "exit 0",
-  "differential": "compare:differential fight-submenu battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base 406bfc999: PASS, 624 / 624 captures byte-identical",
+  "differential": "compare:differential fight-submenu battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base f4dbfe1f4: PASS, 624 / 624 captures byte-identical",
   "diffCheck": "clean",
   "runner": "fp100Run.sh run twice into fresh dirs on src aaf3d215: same scenarios, 13 / 13 r1 == r2, same phase.tsv"
  }

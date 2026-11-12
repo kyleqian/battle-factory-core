@@ -1,6 +1,6 @@
 # Next adapters prep 22: Fire Punch body-only + Random2 / input re-probe of Signal Beam, Lovely Kiss, Sheer Cold, Spikes, Octazooka, Skill Swap, Shock Wave (S10A, side lane)
 
-Evidence/design only; **new files only** (no tracked file edited, no `src/`, adapter, `PROGRESS.md`/`ISSUES.md` change; no temporary `src/` patch was needed, see §A.4). Every emulator number is a ROM frame from a **direct, independent mGBA run** (Scene ON lab scenarios `tools/battle-lab/prep22-*.json` and the staged Fire Punch route `tools/probe/stage-fire-punch-portable-on.py`; the shared HTTP oracles were never contacted). Every relied-on probe ran **twice from fresh processes** and is identical: state probes `28 scenarios x 2` full-JSON equal (`r1 == r2`), Random2 attribution probes `42 x 2` equal in every field except `finalStateSha1` (as in prep12/14/18), Fire Punch lab probes `6 x 2` equal, Fire Punch RGB dumps `2 x 2` byte-identical (`diff -rq`). Production line numbers at base `0ad51bd12`.
+Evidence/design only; **new files only** (no tracked file edited, no `src/`, adapter, `PROGRESS.md`/`ISSUES.md` change; no temporary `src/` patch was needed, see §A.4). Every emulator number is a ROM frame from a **direct, independent mGBA run** (Scene ON lab scenarios `tools/battle-lab/prep22-*.json` and the staged Fire Punch route `tools/probe/stage-fire-punch-portable-on.py`; the shared HTTP oracles were never contacted). Every relied-on probe ran **twice from fresh processes** and is identical: state probes `28 scenarios x 2` full-JSON equal (`r1 == r2`), Random2 attribution probes `42 x 2` equal in every field except `finalStateSha1` (as in prep12/14/18), Fire Punch lab probes `6 x 2` equal, Fire Punch RGB dumps `2 x 2` byte-identical (`diff -rq`). Production line numbers at base `e0c3af79c`.
 
 ## 0. Results
 
@@ -71,7 +71,7 @@ Spawn signature (relative frame, slot, birth/free, template) of the 26 sprite ev
 
 So: the burn profile does not change a single body pixel, the body needs no HP/burn/faint input, and `sceneOnFirePunchView` (`sceneOnPresentation.ts:12586-12625`) yields `burnFlames = []` for every body row: `firePunchBurnFlames` is gated on `resolution.secondaryRollSucceeded` (`:12612`, first age 247 on `state.age`, not `animationAge`) and the residual flames start at `state.age` 489. **No src suppression patch was needed, hence none is kept.** The opponent body is now ROM-proven exact (prep10 had only "no accepted evidence"; its `animationAgeOffset 123` and the "19 off" remark are explained: the fixture window starts after the body; the live adapter's offset is **27 for both orientations**).
 
-### A.5 Adapter inputs and recipe (file:line at base `0ad51bd12`)
+### A.5 Adapter inputs and recipe (file:line at base `e0c3af79c`)
 
 | Item | Value / source |
 |---|---|

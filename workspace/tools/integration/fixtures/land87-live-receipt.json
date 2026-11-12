@@ -1,6 +1,6 @@
 {
  "schema": "land87-live-receipt/v1",
- "base": "c25af4253",
+ "base": "f0b7bce06",
  "productionSrcBase": "d87bed5f",
  "patch": "tools/integration/fixtures/reseed85/reseed85-temp-src.diff (patch -p1; one file, all hunks landed)",
  "flatterPolicy": "260 is in LIVE_SPRITE_ALLOCATOR_NET_ZERO_MOVE_IDS (hist73 audit group); WORDS_ORDER_UNIT_MOVE_IDS subset pinned by the test",
@@ -126,7 +126,7 @@
   "regressions": 0,
   "keySequenceIdentical": true,
   "battleDigest": "5cc95d1eace6",
-  "note": "vs reseed85 +47 / +4,834 on aeaa33dff: land86 Flatter words unit lets 3 more Magic Coat allocator consumers and 8 more Flatter windows (1,971 frames vs 219) reach the shadow; the other 46 allocator-unknown commands are reseed85's"
+  "note": "vs reseed85 +47 / +4,834 on 005101dfc: land86 Flatter words unit lets 3 more Magic Coat allocator consumers and 8 more Flatter windows (1,971 frames vs 219) reach the shadow; the other 46 allocator-unknown commands are reseed85's"
  },
  "parity": {
   "11": "identical to reseed85 parity-11.json",

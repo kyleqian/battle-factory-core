@@ -2,7 +2,7 @@
  "schema": "roar-live-receipt/v1",
  "claim": "MOVE_ROAR / MOVE_WHIRLWIND live in Scene ON with an exact forced-switch removal (no recall animation; target and healthbox hidden from framebuffer E+5, send-in from E+11); the send-in tail is the open ISSUES #146 gap",
  "testedCode": {
-  "commit": "3377ba750e7cec5d9a19a8ad721fb9e82c9685e0",
+  "commit": "41a58c9b100b39ad76b36ec443f5d4d7d0d61de0",
   "srcTree": "359675075f40afd19aa232364107e1f2eb14361d",
   "note": "batch2 (dense + continuation) ran on exactly testedCode. batch1 dense ran on the same adapter/renderer code before the forced hold constant moved 3 -> 4 (dense body rows do not read it); batch1 continuation ran on the final constants. Digests are identical across batches."
  },

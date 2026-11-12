@@ -1,4 +1,4 @@
-// Regenerates tools/integration/fixtures/seg127/exposure.json (with seg127ExposureSummary.py); read by tests/seg127StatusSeGate, sag130StatusSeGate, sgs134SeGateOtherRequests, inv142StatusAnimationInvisible (restored by seg268 from 4f6fa87e4^).
+// Regenerates tools/integration/fixtures/seg127/exposure.json (with seg127ExposureSummary.py); read by tests/seg127StatusSeGate, sag130StatusSeGate, sgs134SeGateOtherRequests, inv142StatusAnimationInvisible (restored by seg268 from 54c5686f0^).
 // seg127 (S10A / ISSUES #168 SA2 prep, docs/seg127-status-se-gate.md): census exposure of the Scene ON status animations BY WHAT
 // PRECEDES THEM in the same resolution segment (the IsBattleSEPlaying gate's input): sta123Exposure.ts's battle loop unchanged (same
 // orchestrator config, inputs, least-used legal slot policy; battle i uses seed i and streak i * 11 % 49), plus per receipt the compact

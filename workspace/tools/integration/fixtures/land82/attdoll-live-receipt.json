@@ -1,6 +1,6 @@
 {
  "schema": "land82-attdoll-live-receipt/v1",
- "base": "b05d384ca",
+ "base": "f49b7d03f",
  "productionSrcTree": "4c4fe4c715bc405364fddc8c7ef511fa420590b4",
  "patchSha256_16": "973c77fd4ff4852a",
  "method": "tools/integration/land82Run.sh: fresh direct-mGBA, 60 scenarios twice (r1 == r2 byte-identical), patched copy of base; summary.tsv/summary-explore.tsv identical to doll81 receipts",

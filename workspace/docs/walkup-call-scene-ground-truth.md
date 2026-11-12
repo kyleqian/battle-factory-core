@@ -1,7 +1,7 @@
 # Silver walk-up call-scene + ask-ready menu — dense ground truth
 
 Side-lane evidence deliverable, banked via the harness's new `factoryBrain` +
-`walkup: true` battle-lab staging (top-layer commit `3e29880b`; see
+`walkup: true` battle-lab staging (top-layer commit `4dac4a35`; see
 `../oracle/BATTLE_LAB.md` "Frontier-Brain walk-up staging"). That staging
 closes the gap `docs/noland-silver-walkup-presentation-map.md` §0 found: the
 call-scene and `AskReadyForHead`/`AskSwapBeforeHead` prompts are now

@@ -1,6 +1,6 @@
 # Bundle hygiene scout (read-only, 2026-11-02, Sonnet worker; supervisor-saved, unverified)
 
-Input to the bundle-hygiene briefs. As read on master `84235f563`; re-check before moving anything.
+Input to the bundle-hygiene briefs. As read on master `7a9fb9d6f`; re-check before moving anything.
 
 Worktree is clean (the analyzers wrote only to `/tmp`; I did not run `build:lib`, tests or the oracle).
 

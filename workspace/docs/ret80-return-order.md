@@ -10,7 +10,7 @@ Return. Plan 117 is ReturnMedium's (friendship 61..91), but the Factory sends fr
 - **Rung 2 (the Strongest plan).** ReturnStrongest is keyed as **30216**, with its ROM plan as production plan 222 (31 creates). The
   key works the way Magnitude's 20222 does. Weak and Strong still invalidate: they are measured on only one pair each, so they get no row.
 
-| Check | Before (b2ed6f8c2) | After (ret80) |
+| Check | Before (fffd6bd5d) | After (ret80) |
 |---|---|---|
 | Audit 20 windows with a Return 216 earlier in the history: lend == ROM (π) | **0 / 15** (8 Part B + 7 controls) | **15 / 15** |
 | Audit 20 windows without a Return earlier | 38 / 44 | 38 / 44 (unchanged; the 6 are audit 20's ARBOK entry rows) |
@@ -23,7 +23,7 @@ Return. Plan 117 is ReturnMedium's (friendship 61..91), but the Factory sends fr
 only the first free slots, and those match: base `[4, 3, 21, 20, 5, ...]` vs ROM `[4, 3, 5, 7, 21, 20, ...]`. So the earlier claims
 were not drawn wrong. A consumer that reaches deeper into the free list would have been drawn wrong.
 
-**Census.** Live-share 0..999, base b2ed6f8c2 vs final, one process each:
+**Census.** Live-share 0..999, base fffd6bd5d vs final, one process each:
 - **123 live → fallback, 0 fallback → live** (30 battles);
 - live share by count 94.17 → 93.73 %, by frames 97.94 → 97.28 %;
 - command key sequence, `battleDigestExcludingFrames` and `battleDigest` are identical; 0 render throws.
@@ -89,7 +89,7 @@ MOVE_RETURN into MOVE_FRUSTRATION:
   - or the player leads with that Shelgon against a Snorlax 143 with 4× the consumer.
 - The `pb-` prefix makes `audit20Fixtures.py` window every body.
 - The rest is audit 20's pipeline: probes, fixtures, rekey, then `audit20Check.ts` (lends, plus the dense render with 2 fresh probes
-  per scenario). It runs in this tree and in a git-archive tree of b2ed6f8c2: `summary.txt` / `summary-base.txt`,
+  per scenario). It runs in this tree and in a git-archive tree of fffd6bd5d: `summary.txt` / `summary-base.txt`,
   `lends*.txt`. A fresh runner pass gave the same lends and summary as the first manual pass.
 
 ## 4. Census
@@ -122,8 +122,8 @@ node --experimental-strip-types tools/integration/ret80Check.ts <fresh>/units.js
 node --experimental-strip-types tools/integration/ret80PlanRows.ts <fresh>/check.json <fresh>/plan-rows.json  # == plan-rows.json
 node --experimental-strip-types tools/integration/spriteOrderProductionTable.ts   # regenerates src/engine/spriteOrderProductionPlans.ts
 sh tools/integration/ret80Lends.sh <fresh>                 # audit 20's 15 windows, before / after
-sh tools/integration/ret80Consumers.sh <fresh> b2ed6f8c2   # consumers after Return, this tree + base
-sh tools/integration/ret80Census.sh <fresh> b2ed6f8c2      # census base vs HEAD (~18 min)
+sh tools/integration/ret80Consumers.sh <fresh> fffd6bd5d   # consumers after Return, this tree + base
+sh tools/integration/ret80Census.sh <fresh> fffd6bd5d      # census base vs HEAD (~18 min)
 ```
 
 ## 6. Follow-ups (not done)

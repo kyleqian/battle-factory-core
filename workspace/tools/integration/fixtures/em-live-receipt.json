@@ -1,13 +1,13 @@
 {
  "schema": "em-live-receipt/v1",
- "testedCommit": "c864b0a03b20716033b75ee0e58de9a7dccd7562",
+ "testedCommit": "b77fc57b798346f88f73e34b75022c2c6c8aa218",
  "testedSrcTree": "51b5f3b601dc8a7fe9642a4bf953d5d601bb7250",
  "dirty": false,
  "commands": [
   "JOBS=16 sh tools/integration/prep22Probes.sh PROBEDIR 2 <the scenarios named by each fixture>",
   "python3 tools/integration/s10aEsMementoFixtures.py PROBEDIR",
   "node --experimental-strip-types --no-warnings tools/integration/d4aTimingCheck.ts OUT.json tools/integration/fixtures/s10a-live/<extreme-speed|memento>-*.json (two independent invocations A / B)",
-  "npx vite-node tools/integration/s10aStagedDigest.ts (at dc0283345 and at the change)"
+  "npx vite-node tools/integration/s10aStagedDigest.ts (at 876b8ad5a and at the change)"
  ],
  "windows": [
   {

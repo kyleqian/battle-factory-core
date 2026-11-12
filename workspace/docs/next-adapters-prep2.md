@@ -10,7 +10,7 @@ Not run: any harness, `npm test`, build, typecheck (fixtures are unverified unti
 
 ## 0. The recipe and the common findings
 
-**Recipe** (`cf212c63a`, `d935baca4`): for each move add (1) a `liveMoveAnimationDuration` case (`src/engine/liveMoveAnimation.ts:160+`),
+**Recipe** (`ec1ced427`, `1ad102b5f`): for each move add (1) a `liveMoveAnimationDuration` case (`src/engine/liveMoveAnimation.ts:160+`),
 (2) a config case beside the others (~`:355-470`), (3) `(liveField || view.X.species === "…")` on every species gate in the renderer's
 branch, `liveSceneOnBattlerArt(view.attacker|target)` for the hard-coded art, `speciesFrontIdleRestOffsetOrZero(species)` for the hard-coded idle
 (`1`/`0` constants), and `if (!liveField)` around the move's own hard-coded `drawSendOutHealthbox`/message block, (4) a

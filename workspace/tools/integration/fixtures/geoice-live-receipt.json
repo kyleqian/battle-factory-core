@@ -2,11 +2,11 @@
  "schema": "geoice-live-receipt/v1",
  "doc": "docs/icy-wind-blizzard-geometry.md",
  "base": {
-  "commit": "5e0b86a42",
+  "commit": "7da7bbfa3",
   "srcTree": "21729666af991f7e4927db54da027b6f643b20aa"
  },
  "code": {
-  "commit": "f6cd1dc10",
+  "commit": "068b59e9d",
   "srcTree": "df4b263e43934fd4fb732d178e9826df13ebe233"
  },
  "evidenceDir": ".integration/validation/geoice-live-final",
@@ -1906,14 +1906,14 @@
   "digestsEqualPrep2Receipt": true
  },
  "gates": {
-  "testedCommit": "ca3cd5af9",
+  "testedCommit": "2e9adbe48",
   "srcTree": "df4b263e43934fd4fb732d178e9826df13ebe233",
   "targeted": "23 files / 228 tests (1 pin moved: livePrep2MoveAdapters PORYGON -> TOGETIC now live; rerun alone 13/13)",
   "typecheck": "clean",
   "smoke": "8 files / 448 tests",
   "fullSuite": "1576 files passed (44 skipped) / 12981 tests passed (223 skipped), 4 workers",
   "build": "875 modules, built",
-  "differential": "PASS 624/624 byte-identical vs 5e0b86a42 (fight-submenu, battle1-postwin-next-prompt, presentation-rng-playable-live-bodies-seeded-on)",
+  "differential": "PASS 624/624 byte-identical vs 7da7bbfa3 (fight-submenu, battle1-postwin-next-prompt, presentation-rng-playable-live-bodies-seeded-on)",
   "diffCheck": "clean"
  }
 }

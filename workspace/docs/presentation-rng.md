@@ -182,7 +182,7 @@ command is a **faithful-random** claim, even when its adapter is scoped exact:
   - repaint purity
   - export, replay and legacy-default round-trip
   - the recorder field, ROM stripping, and `appTrace` honouring the field
-- `compare:differential --base e45e9c361` passes, byte-identical, on:
+- `compare:differential --base c1fe6ced1` passes, byte-identical, on:
   - `fight-submenu`
   - `turn15-sendout-rung5`
   - `battle1-postwin-next-prompt`

@@ -1,7 +1,7 @@
 # dt60: Double Team (104) clone phase — ISSUES #158
 
-**Branch (A): fixed from source.** Master 3d3b1459a (src 1af9db01) -> code commit `87960b450` (src tree `f50b5b3d`), test-fixture
-follow-up `38f3373e0` (tests only).
+**Branch (A): fixed from source.** Master df6e26a7e (src 1af9db01) -> code commit `966878ca8` (src tree `f50b5b3d`), test-fixture
+follow-up `1146ea844` (tests only).
 
 ## 0. Results
 
@@ -27,7 +27,7 @@ follow-up `38f3373e0` (tests only).
   wrong activation framing control, 300,881 px, unchanged) and **ARBOK i152 49,405 px = the clone tie order, not the phase** (§4).
   Before the fix (`receipts/base/`, master code): CHANSEY 188,618 / 236,200 (audit 16), GARDEVOIR 298,099 / 296,987, SCYTHER ply 293,520 /
   291,824, SHUCKLE ply 163,754 / 163,566; every zero-class window already 0.
-- **Census seeds 0..299 (3d3b1459a vs final):** live 7617 -> 7617 commands, 1,130,929 -> 1,130,929 live frames (**delta 0 / 0**), 0
+- **Census seeds 0..299 (df6e26a7e vs final):** live 7617 -> 7617 commands, 1,130,929 -> 1,130,929 live frames (**delta 0 / 0**), 0
   regressions, 0 pairing mismatches, command key sequence identical, **battle digest identical** (`79313389…`); the command digest differs
   only by decline `gate` line numbers (records identical after stripping them). 214 live Double Team commands: 128 render the 0 phase
   (unchanged pixels), **86 now render the one-call-ahead phase** (opp 30: MURKROW / CHANSEY / GARDEVOIR / VENUSAUR / BLISSEY / ELECTRODE /
@@ -35,7 +35,7 @@ follow-up `38f3373e0` (tests only).
 - **Scene ON/OFF parity:** census battle 33 (seed 33, streak 20; two live CHANSEY opponent Double Teams in the ahead phase):
   `words57Parity.ts 33` -> Scene OFF logical identical, presentation seed B logical identical, 17 decision snapshots
   (`parity-battle33-double-team.json`; exit 1 is only words57's own faithful-random-consumer criterion: none in this battle).
-- **Prediction vs grid (§3, committed in `7d262045a` before the grid):** P1 (zero class 0 px) 7 / 7 species; P2 (one-call-ahead profile
+- **Prediction vs grid (§3, committed in `f788be882` before the grid):** P1 (zero class 0 px) 7 / 7 species; P2 (one-call-ahead profile
   -> 0 px) 5 / 5 measured `d >= 1` species; P3 (ARBOK = tie order) confirmed (swap34 -> 0 px); P4 zero class all measured 0 and every
   measured non-zero is a "writes" animation, but **CLEFABLE (BOUNCE_ROTATE_TO_SIDES_SMALL_SLOW, "writes") measured 0, not non-zero as
   P4 said** — the static class is only a sufficient condition for 0; the executed `finalData3` (0) is what production uses.

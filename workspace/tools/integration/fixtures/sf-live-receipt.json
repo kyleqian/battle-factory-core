@@ -1,6 +1,6 @@
 {
  "schema": "sf-live-receipt/v1",
- "testedCommit": "d60540c20792901e8fe473e038612d4fdc69412a",
+ "testedCommit": "f52e1c6f16f537ee15ca5b6d3f8ea2bd80845a99",
  "testedSrcTree": "452c09b493e8abb4cb8fa0318f051c7abaa7484d",
  "dirty": false,
  "policyVersion": "live-move-timing.v1.dominant-measured-phase.tie-no-optional-event",

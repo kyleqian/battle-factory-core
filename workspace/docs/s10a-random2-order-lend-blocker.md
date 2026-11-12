@@ -1,6 +1,6 @@
 # S10A blocker: post-body sprite-order lend for multi-body Random2 moves (Ice Ball 301, Dive 291)
 
-S10A integration worker, 2026-10-07, base `a7402719b` (src `58b592bc`). Evidence only: no `src/` change and no live claim.
+S10A integration worker, 2026-10-07, base `1795d405a` (src `58b592bc`). Evidence only: no `src/` change and no live claim.
 Receipt: `tools/integration/fixtures/s10a-live/blockers/order-lend-blocker.json`, written by
 `tools/integration/s10aOrderLendBlocker.ts`. It reproduced three times byte-identical: twice on the prep26 alternate outputs, then once
 on fresh direct-mGBA `prep26Probes.sh iceball` outputs. Those fresh outputs are byte-identical to the prep26 ones.
@@ -92,7 +92,7 @@ cmp OUT2.json tools/integration/fixtures/s10a-live/blockers/lend-chain-check.jso
 
 ## Resolution (Ice Ball): design 1 implemented
 
-S10A integration worker, 2026-10-08, base `f1b672ca1`. Ice Ball counters 1..4 now render live from the seam-resolved deferred lend; Dive's attack
+S10A integration worker, 2026-10-08, base `e50d115f8`. Ice Ball counters 1..4 now render live from the seam-resolved deferred lend; Dive's attack
 body still declines (not started; the remaining work is listed below).
 
 - **Logical side (word-free).** `markLiveSpriteOrderDeferredBody` (`src/engine/liveSpriteOrderHost.ts`) runs in the orchestrator right after

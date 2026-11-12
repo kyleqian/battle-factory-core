@@ -1,6 +1,6 @@
 # Icy Wind / Blizzard at arbitrary species geometry (S10A geoice, 2026-10-09)
 
-Receipt: `tools/integration/fixtures/geoice-live-receipt.json` (base `5e0b86a42` src `21729666`, code `f6cd1dc10` src `df4b263e`).
+Receipt: `tools/integration/fixtures/geoice-live-receipt.json` (base `7da7bbfa3` src `21729666`, code `068b59e9d` src `df4b263e`).
 Tests: `tests/icyWindBlizzardGeometry.test.ts`.
 
 ## Question and answer

@@ -1,7 +1,7 @@
 # aud129 — live audit 27 (S10A main lane, 2026-10-12): ord124's Golbat Mega Punch flag, and elevated parties widened
 
-Base: the FIXED master `1352d2130` (production src `0d315f39b`). Evidence only, new files only, no patch. Every render ran in a git-archive copy
-of `1352d2130`. Direct mGBA only, with the lab seed pinned in every scenario. Two fresh probe batches gave `derive` / `lends` r1 == r2. Inside
+Base: the FIXED master `a4ab64cb9` (production src `0d315f39b`). Evidence only, new files only, no patch. Every render ran in a git-archive copy
+of `a4ab64cb9`. Direct mGBA only, with the lab seed pinned in every scenario. Two fresh probe batches gave `derive` / `lends` r1 == r2. Inside
 `audit21Check.ts`, two more fresh probes ran per scenario: per-row digests r1 == r2 on **105 / 105** windows. The whole runner ran twice into
 fresh dirs, and every receipt was `same`.
 

@@ -342,7 +342,7 @@ on both sides. Remaining unresolved ops in the table: 357 `unmodelled-lifetime` 
 
 ### 7.4 Acceptance receipt (aud242c)
 
-Tested code: commit `b134ef8af9c1264b7309710848210432a5c7926b`, tree `68e51f33d45e81b552eb775e85294573a6fb09c4` (the later commit only adds this section).
+Tested code: commit `6b71150f04028b2cf94140c6cb75b30afb565693`, tree `68e51f33d45e81b552eb775e85294573a6fb09c4` (the later commit only adds this section).
 Per `ANIMATION_VERIFICATION.md` production code changed (`src/engine/moveAnimSounds.ts`, `src/data/gen/anim-sound-timing.json`); the brief for this step excluded the full
 `npm test`, so the scoped set ran instead:
 
@@ -351,7 +351,7 @@ Per `ANIMATION_VERIFICATION.md` production code changed (`src/engine/moveAnimSou
 - Every test importing a changed module (18 files incl. `aud242a/b/c`, `audioProbeFixtures`, `audioSinkNeutral`, `audioHeadlessBoundary`, `audioSinkPlumbing`,
   `audioAnimSoundPan`, `aud240*`, `aud241*`, `obr251OpponentPartySummary`, `frf250a/b`): 738 passed, 18 skipped (the skips are the probe-fixture tests that
   need a live oracle).
-- `npm run compare:differential` vs the step's parent `11a497622`, 22 traces (8 Scene ON move-animation traces: `turn13-dragonbreath-faint`,
+- `npm run compare:differential` vs the step's parent `9bda7b916`, 22 traces (8 Scene ON move-animation traces: `turn13-dragonbreath-faint`,
   `turn2-dragonbreath-projectiles`, `battle2-turn1-rockslide`, `turn13-sandattack`, `turn14-fly-miss`, `turn15-fly-strike`, `presentation-rng-playable-live-bodies{,-seeded}-on`;
   14 menu / battle-flow traces): **4,181 / 4,181 captures byte-identical** (1,432 + 2,749).
 
@@ -415,7 +415,7 @@ is accounted for.
 
 | step | Level-50 emitted / gated (276 moves) | all moves resolved / unresolved | variants / ops |
 |---|---|---|---|
-| fb2d3ae88 (before) | 550 / 284 | 739 / 373 | 295 / 726 |
+| 8fd959d32 (before) | 550 / 284 | 739 / 373 | 295 / 726 |
 | instant-task table | 563 | 752 | |
 | BlendBattleAnimPal / Exclude / BlendParticle | 583 | 774 | 312 / 765 |
 | complex_palette_blend + metallic_shine | **592 / 242** | **783 / 329** | **314 / 776** |
@@ -505,7 +505,7 @@ The largest remaining blockers are the hyper beam orb (52), Hydro Pump orb (44),
 - `npm run extract:anim-sound-timing` regenerates the committed table byte-identically (`cmp` of the committed file against the regenerated one: identical).
 - `npm run typecheck`, `npm run build`, `npm run build:lib`: each exit 0 (separate commands).
 - `npm run test:gate`: 362 files, 2,835 tests passed. aud24* + audio* + frf250* + obr251* in one vitest call: 21 files, 896 passed, 18 skipped (probe tests that need a live oracle).
-- `npm run compare:differential` over the 15 aud242e Scene ON move traces (97 captures each, frames 60..821 step 8; every one has changed table rows) against `3ecd1a6b9` plus the
+- `npm run compare:differential` over the 15 aud242e Scene ON move traces (97 captures each, frames 60..821 step 8; every one has changed table rows) against `494e7a213` plus the
   aud242e stage definitions only (so the base can build the new stages): **1,455 / 1,455 captures byte-identical, 0 pixel diffs**.
 
 ## 10. aud242f: BowMon / HornHit, Ice Beam / Ice Punch crystals, fist sprite, mon scale / grow tasks (Scene ON)
@@ -550,7 +550,7 @@ and the model now emits them at the same +2 as the rest of the window, so the `r
 
 ### 10.4 Counts (turn 0, player attacker)
 
-| | before (`d20fdd641`) | after |
+| | before (`15f3bab4d`) | after |
 |---|---|---|
 | all moves: ops resolved / unresolved | 833 / 279 | 868 / 244 |
 | L50 (276 moves): emitted / gated | 640 / 194 | 674 / 160 |
@@ -601,7 +601,7 @@ them (ours 236 / 255, ROM minus ours 3 = the +2 class plus the named +1) so the 
 
 ### 11.3 Counts (turn 0, player attacker)
 
-| | before (`fe84c07e4`) | after |
+| | before (`09ea8b3a7`) | after |
 |---|---|---|
 | all moves: ops resolved / unresolved | 868 / 244 | 894 / 218 |
 | L50 (276 moves): emitted / gated | 674 / 160 | 692 / 142 |
@@ -614,10 +614,10 @@ them (ours 236 / 255, ROM minus ours 3 = the +2 class plus the named +1) so the 
 
 ### 11.5 Acceptance receipt (aud242g)
 
-Tested code commit `36fa6328e` (tree `HEAD^{tree}` at that commit; the later commits of this slice touch only docs).
+Tested code commit `470c0b94e` (tree `HEAD^{tree}` at that commit; the later commits of this slice touch only docs).
 
 - `npm run extract:anim-sound-timing` run twice: byte-identical (sha256 `6cd5bdd2...1039f35`), equal to the committed table.
 - `npm run typecheck`, `npm run build`, `npm run build:lib`: each exit 0. `npm run test:gate`: 362 files, 2,835 tests passed. `tests/aud24*.test.ts` + `tests/audio*.test.ts` (incl. audioSinkNeutral): 20 files, 935 passed, 18 skipped (live-oracle probe tests).
-- `npm run compare:differential` (`--harness-from-head`, base `fe84c07e4`) over 10 Scene ON move traces (aud242g Dream Eater / Tri Attack / Bubblebeam, aud242e Thunderbolt, aud242f Psychic / Swagger / Ice Beam / Growth / Luster Purge / Curse; frames 60..821 step 8, Dream Eater 60..1519): **1,047 / 1,047 captures byte-identical**.
-- ENGINE_BUILD (headless graph; the table is in it): `eb-01603ce9f24e6eec` (`fe84c07e4`) -> `eb-52789eb6d9c84998`.
+- `npm run compare:differential` (`--harness-from-head`, base `09ea8b3a7`) over 10 Scene ON move traces (aud242g Dream Eater / Tri Attack / Bubblebeam, aud242e Thunderbolt, aud242f Psychic / Swagger / Ice Beam / Growth / Luster Purge / Curse; frames 60..821 step 8, Dream Eater 60..1519): **1,047 / 1,047 captures byte-identical**.
+- ENGINE_BUILD (headless graph; the table is in it): `eb-01603ce9f24e6eec` (`09ea8b3a7`) -> `eb-52789eb6d9c84998`.
 - Census (`LSD194_SHARDS=0`, seeds 0..99 Scene ON, `soundCensusDelta.py --t1`) vs the aud243a arm `on-858ea0343` shard r0: exact 24,430 -> 24,616 (+186), missing-other 237 -> 51 (the 186 `inside the command` rows are gone: Bubble Beam 78, Thunderbolt 56, Dream Eater 27, Curse 22, Tri Attack 3), missing-gated 1,052 -> 1,052 (unchanged), missing-cry-task 16, extra 0, unclassified 0.

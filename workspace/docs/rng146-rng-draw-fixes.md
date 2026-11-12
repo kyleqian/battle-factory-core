@@ -8,9 +8,9 @@ index 4, R3 at turn 4 index 2; the control PASSed.
 
 | fix | site | change | receipt | state |
 |---|---|---|---|---|
-| F1 #141a | `battleScriptHitChainOpcode.ts` `applyThrashMoveEffect` | not-yet-locked arm jumps to its own pc (`:2851-2862` breaks without moving the cursor), so `seteffectwithchance` re-runs with the byte 0 and wastes one roll | R1 PASS (8/10/12 draws, HP `[150,168] [141,153] [132,140]`, turn-2 dmg[20000]) | `0f9b5301e`, reverted in `52340a10e`, **re-landed by thr153** (cherry-pick + 8 re-pins; § thr153 below) |
-| F2 #141b | same file, STEAL_ITEM Sticky Hold arm | `"call"` -> `"call-current"` (`BattleScriptPushCursor`, `battle_util.c:966-969`) | R2 PASS (10/10/10, HP `[139,141] [126,104] [114,70]`) | `8726675ec` landed |
-| F3 #140 | `battleScriptRulesContext.ts` + `factoryBattleScriptFullTurnDecision.ts` | new rules-context cell `chosenMoveByBattler` (u16[4], gChosenMoveByBattler), threaded beside `chosenActionByBattler` (so every snapshot, rules-context copy and the Scene ON/OFF parity compare carry it): banked in the turn's initial state from the selection-time context (slot move `:4399`, Encore move `:4194`, MOVE_NONE for status-locked / no-usable-move / switching battlers), reset at BattleTurnPassed (`:4001-4005`). `runMoveAction` resolves `:130-134` at the battler's OWN action, after the noValidMoves / locked / Encore arms: if `moves[chosenMovePos] !== chosenMoveByBattler` it runs that slot's move and pays `GetMoveTarget` | R3 PASS (t4 GetMoveTarget[35099], t8 ×2); R3 control (Ditto Transform) still PASS | `e8843465a` landed |
+| F1 #141a | `battleScriptHitChainOpcode.ts` `applyThrashMoveEffect` | not-yet-locked arm jumps to its own pc (`:2851-2862` breaks without moving the cursor), so `seteffectwithchance` re-runs with the byte 0 and wastes one roll | R1 PASS (8/10/12 draws, HP `[150,168] [141,153] [132,140]`, turn-2 dmg[20000]) | `c920b3837`, reverted in `1ac657200`, **re-landed by thr153** (cherry-pick + 8 re-pins; § thr153 below) |
+| F2 #141b | same file, STEAL_ITEM Sticky Hold arm | `"call"` -> `"call-current"` (`BattleScriptPushCursor`, `battle_util.c:966-969`) | R2 PASS (10/10/10, HP `[139,141] [126,104] [114,70]`) | `1f47e9a91` landed |
+| F3 #140 | `battleScriptRulesContext.ts` + `factoryBattleScriptFullTurnDecision.ts` | new rules-context cell `chosenMoveByBattler` (u16[4], gChosenMoveByBattler), threaded beside `chosenActionByBattler` (so every snapshot, rules-context copy and the Scene ON/OFF parity compare carry it): banked in the turn's initial state from the selection-time context (slot move `:4399`, Encore move `:4194`, MOVE_NONE for status-locked / no-usable-move / switching battlers), reset at BattleTurnPassed (`:4001-4005`). `runMoveAction` resolves `:130-134` at the battler's OWN action, after the noValidMoves / locked / Encore arms: if `moves[chosenMovePos] !== chosenMoveByBattler` it runs that slot's move and pays `GetMoveTarget` | R3 PASS (t4 GetMoveTarget[35099], t8 ×2); R3 control (Ditto Transform) still PASS | `3325f0b92` landed |
 
 Tier-1 pins: `tests/battleScriptFamilyBCluster4Opcode.test.ts` (Covet vs Sticky Hold: two back-to-back chance rolls; it
 fails without F2; plus a no-item control), `tests/rng146RngDrawFixes.test.ts` (replays R2 / R3 / R3 control through the live
@@ -41,13 +41,13 @@ Every moved test contains a Thrash-family lock-in (Petal Dance, move 80, both si
 Five of these need new-seed scans, so F1 was reverted and #141 trimmed to this remainder (ISSUES #141 lists the
 re-land recipe). F2 and F3 moved **no** test.
 
-**Census 0..999** (`ret88Census.sh shards`; baseline = ret165's after-census on `98f4f8a05`: 27,256 commands, 27,075 live):
+**Census 0..999** (`ret88Census.sh shards`; baseline = ret165's after-census on `8b21f7f8e`: 27,256 commands, 27,075 live):
 
 | tree | commands | live | by count | frames (live) | by frames | changed battles |
 |---|---:|---:|---:|---:|---:|---|
 | ret165 baseline | 27,256 | 27,075 | 99.34 % | 4,155,309 (4,138,675) | 99.60 % | — |
-| F1+F2+F3 (`e8843465a`) | 27,196 | 27,016 | 99.34 % | 4,151,788 (4,135,135) | 99.60 % | 47: 45 F1 + 2 F3 |
-| **landed F2+F3 (`52340a10e`)** | **27,271** | **27,090** | **99.34 %** | **4,158,655 (4,142,021)** | **99.60 %** | **2: both F3** |
+| F1+F2+F3 (`3325f0b92`) | 27,196 | 27,016 | 99.34 % | 4,151,788 (4,135,135) | 99.60 % | 47: 45 F1 + 2 F3 |
+| **landed F2+F3 (`1ac657200`)** | **27,271** | **27,090** | **99.34 %** | **4,158,655 (4,142,021)** | **99.60 %** | **2: both F3** |
 
 Per-battle attribution of the 47: each changed seed was re-run alone under each fix alone. 45 are reproduced exactly by F1
 alone and unchanged by F2 or F3 alone. Each first diverges at or right after a Petal Dance / Thrash / Outrage lock-in.
@@ -80,7 +80,7 @@ F1 alone reproduces `b4 t0` (11 Petal Dance lock-ins by battler 0), and under F2
   turn-start context.
 - Scratch: `.integration/validation/rng146/` (suite shard logs, toggle runs, both censuses, census diffs, soak logs).
 
-## thr153 — #141a re-landed (F1 cherry-picked onto master `877580fde` + the 8 re-pins)
+## thr153 — #141a re-landed (F1 cherry-picked onto master `84335c25a` + the 8 re-pins)
 
 The only engine diff against master is F1's `jump` to the current pc. The R1 / R2 / R3 / R3-control verifiers all PASS. The R1 pin
 in `tests/rng146RngDrawFixes.test.ts` is flipped to PASS, and the wasted roll is pinned. Attribution uses a scratch
@@ -99,7 +99,7 @@ tree exactly the 8 rng146 tests fail. With F1 off, the old values come back.
 
 The five re-scanned seeds (250, 49, 41, 808, 1) pass with F1 on and off.
 
-**Census 0..999** (baseline re-run on master `877580fde`: 27,271 / 27,090, identical to the landed F2+F3 row above): F1 tree
+**Census 0..999** (baseline re-run on master `84335c25a`: 27,271 / 27,090, identical to the landed F2+F3 row above): F1 tree
 **27,196 commands / 27,016 live (99.34 %), frames 4,151,788 (4,135,135) 99.60 %**. 46 battles changed, the 45 above + **811**.
 Battle 811 was F3's phazing battle; F3 is now in the baseline, and 811 diverges at cmd 29, right after a Petal Dance at cmd 27.
 Every changed battle has a Petal Dance / Thrash / Outrage lock-in at or right before its first divergence. 0 are unattributed.

@@ -1,6 +1,6 @@
 # S10A aud56 — general / hit / stat animations vs the live sprite ALLOCATOR (ISSUES #156)
 
-Side lane, evidence and production in one step. Master `a860ded6a` (production src tree `93d0f033`). Production grant:
+Side lane, evidence and production in one step. Master `2fb7ccc62` (production src tree `93d0f033`). Production grant:
 `prepareResolutionPalette` (`src/engine/factoryRoundBattleOrchestrator.ts`) and `src/engine/liveMoveSpriteAllocator.ts`.
 
 ## Results
@@ -17,7 +17,7 @@ other than MOVE_ANIMATION invalidates the sprite allocator host unless its unit 
   WEATHER_VAR with an argument other than 12 / 13, SCENE_OFF_ATTACK_PAUSE, and any id the kernel adds later.
 - Unchanged: the palette host and status animations (prep50 / prep52 set).
 
-**Census seeds 0..299 (`liveShareCensus.ts`, a860ded6a vs this branch): identical.**
+**Census seeds 0..299 (`liveShareCensus.ts`, 2fb7ccc62 vs this branch): identical.**
 - The command-record jsonl is byte-identical (sha256 `1bb87f8b…`).
 - Live 7510 / 7970 = **94.23 %** by count and 1114736 / 1168201 = **95.42 %** by frames, both before and after.
 - Delta **0 commands / 0 frames**, 0 live → fallback, 0 pairing mismatches.
@@ -34,7 +34,7 @@ Receipts:
 - `tools/integration/fixtures/aud56-net-zero-audit.json`: every instance, every scenario with its seed, raw sha256.
 - `tools/integration/fixtures/aud56-exposure-before-seeds0-299.json`.
 
-### (1) Enumeration and exposure (`aud56ExposureCensus.ts`, seeds 0..299 on a860ded6a)
+### (1) Enumeration and exposure (`aud56ExposureCensus.ts`, seeds 0..299 on 2fb7ccc62)
 
 **Kernel ids.** The kernel emits these `animation` event ids (every `animationId: "…"` literal under `src/engine`):
 - MOVE_ANIMATION (move bodies: the move seam)

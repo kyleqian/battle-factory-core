@@ -1,6 +1,6 @@
 # st76 (S10A main lane, 2026-10-10): Dive 291 and Meteor Mash 309 play live with a displayed status
 
-Base `76125b755` (src `e6f98bf9`). The only production change is in `src/engine/liveMoveAnimation.ts`: cases 291 and 309 lose their
+Base `1462c4b87` (src `e6f98bf9`). The only production change is in `src/engine/liveMoveAnimation.ts`: cases 291 and 309 lose their
 "battler has a status condition" gates. Receipt: `tools/integration/fixtures/st76-live-receipt.json`. Windows and ROM row hashes:
 `tools/integration/fixtures/st76-windows.json`. Only direct mGBA processes were used. The shared HTTP oracles were not touched. Every
 scenario pins lab seed 305420547 (+ k for the sweeps).
@@ -61,7 +61,7 @@ Toxic missed) and 0 / 29 BRN opponent-attacker windows.
 
 ### Census, parity
 
-**Census seeds 0..999** (base `76125b755` vs final):
+**Census seeds 0..999** (base `1462c4b87` vs final):
 
 - 27,518 commands.
 - The command KEY sequence (battle, kind, moveId, side, attacker, target) is identical.
@@ -87,7 +87,7 @@ equal at every turn boundary on both.
 
 Receipts: `fixtures/st76-parity-seed{428,518}.json`.
 
-**Gates** (final code, tested at `f4b3859af`, src tree in the receipt; four Vitest workers), 0 failed throughout:
+**Gates** (final code, tested at `76c1e77a2`, src tree in the receipt; four Vitest workers), 0 failed throughout:
 
 - Targeted: 144 files (every test matching 291 / 309 / DIVE / METEOR_MASH, plus st76, the inventory and playableAnimationIntegration):
   136 passed / 8 skipped, 2,290 tests passed / 45 skipped.
@@ -97,7 +97,7 @@ Receipts: `fixtures/st76-parity-seed{428,518}.json`.
 - `npm test` shard 2/2: 804 files passed / 22 skipped, 6,329 tests passed / 104 skipped.
 - `npm run build`: green.
 - `npm run compare:differential -- fight-submenu battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base
-  76125b755`: 624 / 624 captures byte-identical.
+  1462c4b87`: 624 / 624 captures byte-identical.
 - `git diff --check`: clean.
 
 ## 2. What landed

@@ -2,18 +2,18 @@
  "schema": "a13fix-live-receipt/v1",
  "step": "S10A integration: species-audit-13 defects + new CPU-phase cases under D4 (docs/live-species-audit-13.md, ISSUES #152)",
  "base": {
-  "commit": "c826d5b40",
+  "commit": "973022e68",
   "srcTree": "d15bc413"
  },
  "testedCode": {
-  "commit": "f0dc34aa0",
+  "commit": "e27e756f0",
   "srcTree": "9a1e8a70",
-  "note": "src unchanged since ef8458b45 (the two later commits are test / evidence only)"
+  "note": "src unchanged since 1d3ec1976 (the two later commits are test / evidence only)"
  },
  "oracle": "direct mGBA probes only (no shared HTTP oracle staging); every probe twice from fresh processes, r1 == r2",
  "rungs": {
   "a_opponentAttackerRest": {
-   "commit": "29157c51a",
+   "commit": "f8b7ec419",
    "change": "battleScene.ts ICE_BEAM drawAttacker / THUNDERBOLT attacker item / SLUDGE(_BOMB) drawGrimer: + sceneOnBattlerFrontIdleRest(view.attacker) for a live opponent attacker (liveField; the doll / #148 tracked override resolved by liveIdleRest)",
    "windows": "16 fresh scenarios (derived windows byte-identical to species-audit-13/derived*)",
    "result": {
@@ -50,7 +50,7 @@
    }
   },
   "b_swapShinyDecline": {
-   "commit": "35b970521",
+   "commit": "98ae1e901",
    "change": "liveSubstituteSwap.ts liveSubstituteSwapApplies: && neither battler liveBattlerIsShiny (as the other S10A shiny gates) -> the whole command falls back",
    "windows": "12 fresh STEELIX swap scenarios (speciesAudit13SwapProbes.sh, r1 == r2)",
    "result": {
@@ -61,7 +61,7 @@
    "test": "tests/substituteSwapPresentation.test.ts 'a SHINY battler declines the swaps' (fails without the gate)"
   },
   "c_iceBallRestingTarget": {
-   "commit": "4e6a802c6",
+   "commit": "7d1fa5a71",
    "change": "none in production: liveIceBallInputs.ts:147 already declines a non-zero tracked target rest; the audit's 30k-79k px rows are the decline's fallback field (presentation null), not an engaged adapter",
    "test": "liveSpeciesAudit13Fixes.test.ts: ONIX / RATTATA b2 / b3 decline (fails when the target half of the gate is removed); rest-0 targets live",
    "counterLabel": {
@@ -72,7 +72,7 @@
    }
   },
   "d_d4Policy": {
-   "commit": "ef8458b45",
+   "commit": "1d3ec1976",
    "policyVersion": "live-move-timing.v1.dominant-measured-phase.tie-no-optional-event",
    "entries": {
     "242 CRUNCH": {
@@ -137,16 +137,16 @@
   "substSwap": "substSwapRun.sh fresh: probes r1 == r2 (13), 21 windows x2 residual 0; GOLEM player swap rows 0, body == control; negatives fail: unchanged",
   "attdoll": "attdollRun.sh fresh (59 scenarios r1 == r2): 84 windows / 21,821 rows / 81 exact; claimed / declined / tail identical to tools/integration/fixtures/attdoll-live-receipt.json (a13fix-live/attdoll-rerun-receipt.json)",
   "lend": "lendIceBallWindows.sh: 12 fixtures, 0 violations; 11 policy windows 0 px, player SPHEAL b4 (lag 38, other phase) 55,632 px ages 38..74 documented: unchanged",
-  "d4aRegression": "d4aRegressionAll.sh: 161 timing fixtures, nonzero-exit 0 (at ef8458b45, src 9a1e8a70)",
+  "d4aRegression": "d4aRegressionAll.sh: 161 timing fixtures, nonzero-exit 0 (at 1d3ec1976, src 9a1e8a70)",
   "intendedDeclines": "shiny subbed-attacker swaps (rung b) only"
  },
  "gates": {
   "targeted": "27 files 413 tests then 3 updated adapter files 40/40, liveSpriteAllocator 16/16",
   "typecheck": "pass",
   "smoke": "8 files / 448 tests",
-  "fullSuite": "f0dc34aa0: 1568 files passed / 44 skipped, 12,920 tests passed / 223 skipped, 456 s (four workers); an earlier run at df6e2be94 failed only tests/liveSpriteAllocator.test.ts (the live set read implementedAdapters only), fixed test-only in f0dc34aa0",
+  "fullSuite": "e27e756f0: 1568 files passed / 44 skipped, 12,920 tests passed / 223 skipped, 456 s (four workers); an earlier run at 5dc4b8673 failed only tests/liveSpriteAllocator.test.ts (the live set read implementedAdapters only), fixed test-only in e27e756f0",
   "build": "874 modules",
-  "differential": "fight-submenu battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base c826d5b40: 624 captures byte-identical",
-  "diffCheck": "git diff --check c826d5b40..HEAD clean"
+  "differential": "fight-submenu battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base 973022e68: 624 captures byte-identical",
+  "diffCheck": "git diff --check 973022e68..HEAD clean"
  }
 }

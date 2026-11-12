@@ -1,6 +1,6 @@
 {
  "schema": "sgs134-patched-targeted/v1",
- "base": "4f790c9d3 + fixtures/sgs134/sgs134-gate.diff",
+ "base": "b9669e7d8 + fixtures/sgs134/sgs134-gate.diff",
  "selection": "tests/*.test.ts matching stats-change|statsChange|MultiHit|multiHit|multi-hit|seGate|move-animation + randomRoundSoak + iu120",
  "files": [
   "tests/alloc50StatusAllocator.test.ts",

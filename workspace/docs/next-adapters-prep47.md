@@ -1,6 +1,6 @@
 # S10A prep47 — orchestrator-side order-host stops: retained locked-action continuation, battle-start entry seeds, opponent return to ball
 
-Evidence only (side lane, new files only). Census baseline: master `e5c6a32ec` (production src tree `21729666`), seeds 0..299, the
+Evidence only (side lane, new files only). Census baseline: master `2a5c0e2f9` (production src tree `21729666`), seeds 0..299, the
 ordinary census driver. Temporary production patches are kept as `.diff` and were reverted before every commit.
 
 ## Results

@@ -1,6 +1,6 @@
 # inv142 (S10A, ISSUES #168 follow-up): a Scene ON status animation whose battler's sprite is INVISIBLE
 
-Base: FIXED `6f75ffbb3` (production src `81aae6038`). **New files only**: no tracked file is modified; the production change is banked as
+Base: FIXED `6d4417811` (production src `81aae6038`). **New files only**: no tracked file is modified; the production change is banked as
 `tools/integration/fixtures/inv142/inv142-invisible.diff` and proved on git-archive copies only. **Pixels only**: no command, frame, kernel,
 RNG, damage, turn-order or facility change (census identical, below).
 
@@ -51,11 +51,11 @@ still hidden by the charge turn.
   `controls.json`, `routes-delta.json`, `census-delta.json`, `receipt.json`, `inv142-invisible.diff`.
 - `tests/inv142StatusAnimationInvisible.test.ts` (6 tests).
 
-## 4. Gates (code commit `607fa17c7`; production src unchanged `81aae6038`)
+## 4. Gates (code commit `4dbc67b8e`; production src unchanged `81aae6038`)
 
 - `npm test -- tests/inv142StatusAnimationInvisible.test.ts`: **6 / 6**. `npm run typecheck`: green. `npm run test:smoke`: **448 / 448**.
-  `git diff --check 6f75ffbb3 HEAD`: clean. `git status`: no modified tracked file.
-- `sh tools/integration/inv142Run.sh <out>` from a **fresh git-archive copy of `607fa17c7`** (4 m 09 s): **ALL SAME**. That covers
+  `git diff --check 6d4417811 HEAD`: clean. `git status`: no modified tracked file.
+- `sh tools/integration/inv142Run.sh <out>` from a **fresh git-archive copy of `4dbc67b8e`** (4 m 09 s): **ALL SAME**. That covers
   scenarios 5 / 5, exposure, probes r1 == r2 4 / 4, probe-sha256, rom-r1, rom r2 == r1, production-today, production-patched, controls,
   routes-delta and the receipt. The census leg (`--census`) was run directly with the runner's same commands (section 1). The fresh-copy
   run used the default mode without `--census`.

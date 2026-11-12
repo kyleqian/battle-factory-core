@@ -2,7 +2,7 @@
 
 Presentation only. Kernel events, damage, RNG, AI, turn order and facility state are unchanged: census kernel-event digests identical for
 all 1,000 battles in both scenes. Rule and ROM evidence: `docs/trn176-action-transition.md`; Scene OFF half: `docs/trn178-action-transition-live.md`.
-Base `5cf23a253` (src tree below); production commit `9b08b6c47`. Everything after it is tests, tools, fixtures and this doc (see Identities).
+Base `0fdbb6128` (src tree below); production commit `366aa5f65`. Everything after it is tests, tools, fixtures and this doc (see Identities).
 
 ## What changed
 
@@ -32,8 +32,8 @@ for ON (a plain `move-animation` is treated as a body there):
 | 2 | Dense Scene ON ROM windows through production (`trn181RomFrames.py`, `trn181DenseCompare.ts`; `fixtures/trn181/{rom,dense}/`) | Bulk Up, Scratch: the pause rows 0 px (next section); Toxic reported with its pre-existing opponent x2 mismatch |
 | 3 | Tier-1 `tests/trn181ActionTransitionOn.test.ts` (4) + `tests/trn178ActionTransition.test.ts` (6) | ON pauses Bulk Up 12, Scratch 13, Rest 15, Toxic 16 (and Sand-Attack / Protect 12, Double-Edge 14); OFF unchanged; controls (Toxic icon anchor, Wish ON/OFF rows, Thunder Wave: no pause); ON residuals −4 / −6 / −3 / −3 / 0 |
 | 4 | Census 0..999 both scenes (below) | digests identical 1000/1000 both scenes; OFF 316,756 commands byte-identical, 0 pauses inserted; ON 0 unattributed |
-| 5 | `compare:differential` fight-submenu / battle1-postwin-next-prompt / presentation-rng-playable-live-bodies-seeded-on `--base 5cf23a253` | 235/235 and 216/216 byte-identical; seeded-on 46/190 identical, 144 differ, all attributed (below) |
-| 6 | Re-pins | Scene ON only, per-pin attribution in commit `e52b80ce0`; ablation passes (below) |
+| 5 | `compare:differential` fight-submenu / battle1-postwin-next-prompt / presentation-rng-playable-live-bodies-seeded-on `--base 0fdbb6128` | 235/235 and 216/216 byte-identical; seeded-on 46/190 identical, 144 differ, all attributed (below) |
+| 6 | Re-pins | Scene ON only, per-pin attribution in commit `4ba17ca5b`; ablation passes (below) |
 | 7 | Gates | Identities and results at the end |
 
 ### 1. ON receipt table (residual = production first used glyph − ROM edge; transition in parentheses)
@@ -107,7 +107,7 @@ captures are at or after frame 2019. Ablation: with the ON branch forced off, al
 
 ### 6. Re-pins and ablation
 
-Re-pinned (commit `e52b80ce0`, per-pin attribution in its message; Scene OFF pins unchanged):
+Re-pinned (commit `4ba17ca5b`, per-pin attribution in its message; Scene OFF pins unchanged):
 - chg161ChargeTurnPrint: ON foe used-glyph residual [-10..-14] -> [4, -1, 0] (Dig 14 / Razor Wind 13 / Solar Beam 13; the existing anchor-end errors).
 - sub157SceneOffSubstitute: OFF and ON both carry the pause; ON's has the marker; streams equal apart from it, pause timings equal.
 - substituteDollFieldState: doll cleared at command 1:10 (was 1:9): one pause command ahead of the fade message.
@@ -134,8 +134,8 @@ the 15 affected test files pass (149 / 149), i.e. every re-pin is the pause and 
 node --experimental-strip-types --no-warnings tools/integration/trn176Predict.ts --scene=on
 node --experimental-strip-types --no-warnings tools/integration/trn181Receipt.ts <base-tree>          # == fixtures/trn181/receipt.txt
 npx vitest run tests/trn181ActionTransitionOn.test.ts tests/trn178ActionTransition.test.ts
-TRN178_CENSUS_JOBS=5 sh tools/integration/trn181Census.sh <fresh-dir> 5cf23a253:off 9b08b6c47:off 5cf23a253:on 9b08b6c47:on
+TRN178_CENSUS_JOBS=5 sh tools/integration/trn181Census.sh <fresh-dir> 0fdbb6128:off 366aa5f65:off 0fdbb6128:on 366aa5f65:on
 python3 tools/integration/trn181CensusDelta.py <dir>/on-5cf23a253 <dir>/on-9b08b6c47 out.json         # exit 0; OFF: same with off-* (also requires 0 changes)
-npm run compare:differential -- fight-submenu battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base 5cf23a253
+npm run compare:differential -- fight-submenu battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base 0fdbb6128
 node --experimental-strip-types --no-warnings tools/integration/trn181PinShift.ts <seed> <slot>        # the pauses before each sc106 pin
 ```

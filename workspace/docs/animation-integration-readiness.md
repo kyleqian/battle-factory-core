@@ -1,10 +1,10 @@
-# Animation integration readiness — pinned baseline 689d475cd
+# Animation integration readiness — pinned baseline cbf8d2f65
 
 ## Verdict
 
 All **267 accepted Level-50 Factory moves are exact animation acceptances and 0/267 are currently ready for ordinary playable battles**. The common live route never constructs a typed Scene-ON request, does not own completion/cleanup, and has no host provider for the accepted config union. In addition, **196** render branches reject arbitrary current species in favor of staged fixture pairs; **71** are identity-generic within the current typed art union. This is readiness accounting only: it changes no per-move acceptance.
 
-Source basis: `ANIMATION_COVERAGE.json`, `src/animation/sceneOnPresentation.ts`, `src/engine/battleScene.ts`, accepted reducer modules/evidence links, `src/data/gen/moves.json`, and `src/data/gen/factory-animation-inventory.json` on audited tree `3633c30062745c3a31b459043bb6e02a4371bbc8`. Its production source is identical to pinned animation baseline `689d475cd`; the intervening commit adds integration-lane docs only. The machine-readable inventory records every config field and source line. No oracle or runtime suite was used.
+Source basis: `ANIMATION_COVERAGE.json`, `src/animation/sceneOnPresentation.ts`, `src/engine/battleScene.ts`, accepted reducer modules/evidence links, `src/data/gen/moves.json`, and `src/data/gen/factory-animation-inventory.json` on audited tree `ce674160ebae2bed58dbc34363d247f0f60a1477`. Its production source is identical to pinned animation baseline `cbf8d2f65`; the intervening commit adds integration-lane docs only. The machine-readable inventory records every config field and source line. No oracle or runtime suite was used.
 
 ## Common gaps and adapter order
 

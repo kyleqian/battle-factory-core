@@ -1,7 +1,7 @@
 {
  "schema": "voluntary-lend-receipt/v1",
  "scope": "S10A presentation-only: sprite-order lend + allocator re-seed after a cancelled voluntary party menu (reshowBoth) and after a voluntary switch (reshowBoth -> recall -> switch-in), docs/voluntary-switch-lend-audit.md \u00a74. Gameplay, RNG, damage, turn order and facility state untouched (ON/OFF parity on routes; RNG/boundaries equal master). Opponent AI switches, Pursuit on a switch-out and Baton Pass stay invalidating. Not whole-playable arbitrary-history exactness.",
- "productionCodeCommit": "daa3d59d9",
+ "productionCodeCommit": "75ba28acb",
  "srcTree": "d4bccd5816c25da769bf4fe15a66f2b16a3f8d37",
  "mapping": {
   "B_SCR_OP_RETURNATKTOBALL, battler 0, invisible, no earlier MOVE_ANIMATION in the segment": "switch-out (recall(player slot), roles kept) -- the player's voluntary switch: battleResolutionPresentation.ts withSynthesizedSwitchRecallEvents (dispatcher synthesized-voluntary-switch, sourceLabel BattleScript_ActionSwitch); recorded in all 8 voluntary-switch drafts' precedingTurns as provenanceOpcodeName B_SCR_OP_RETURNATKTOBALL; ROM: 18/18 post-recall edges exact (\u00a72.3)",
@@ -625,7 +625,7 @@
   "postKo": "13/13 default POSTKO_DENSE_FIXTURES digests re-rendered equal; the other post-KO consumer receipts are pinned by tests/postkoLend.test.ts (passed), not re-rendered"
  },
  "gates": {
-  "testedCode": "daa3d59d9 (production) + 75cef8811 (tests/tooling), srcTree d4bccd5816c25da769bf4fe15a66f2b16a3f8d37",
+  "testedCode": "75ba28acb (production) + ca8319841 (tests/tooling), srcTree d4bccd5816c25da769bf4fe15a66f2b16a3f8d37",
   "focused": "15 files / 142 tests passed (sprite-order set + liveOrderConsumerMoveAdapters + liveRoarWhirlwindMoveAdapters + liveSpriteAllocator + playableAnimationIntegration + voluntaryLend), --maxWorkers=4",
   "typecheck": "passed",
   "smoke": "8 files / 448 tests passed",

@@ -1,9 +1,9 @@
 #!/bin/sh
 # idle94 runner (docs/next-adapters-idle94.md). Run from workspace/; direct mGBA only (never the shared HTTP oracles); the production
-# change is applied ONLY to a git-archive copy of the fixed base 64f0ae997 inside the FRESH <out-dir> (refused if non-empty; must be
+# change is applied ONLY to a git-archive copy of the fixed base 16d0b355b inside the FRESH <out-dir> (refused if non-empty; must be
 # inside the repo so the copies find ../oracle). Nothing outside <out-dir> is written or removed.
 #   sh tools/integration/land97Run.sh <fresh-out-dir> [--census]
-# 1. archive copies: <out>/base (64f0ae997) and <out>/patched (+ fixtures/idle94/idle94-lead-rows.diff); the idle94 tools and fixtures
+# 1. archive copies: <out>/base (16d0b355b) and <out>/patched (+ fixtures/idle94/idle94-lead-rows.diff); the idle94 tools and fixtures
 #    from this checkout are copied into both;
 # 2. re-stage the 20 scenarios + the 98 lead-scan scenarios (must equal the committed ones);
 # 3. the lead / trail table without census columns (lead / trail columns must equal the committed table.tsv);
@@ -28,7 +28,7 @@ check() { if cmp -s "$1" "$2"; then echo "SAME $3"; else echo "DIFF $3"; fail=1;
 
 for t in base patched; do
   mkdir -p "$OUT/$t"
-  git -C .. archive 64f0ae997 workspace | tar -x -C "$OUT/$t"
+  git -C .. archive 16d0b355b workspace | tar -x -C "$OUT/$t"
   ln -s "$W/node_modules" "$OUT/$t/workspace/node_modules"
   ln -s "$W/reference" "$OUT/$t/workspace/reference"
   cp tools/integration/idle94*.py tools/integration/idle94*.ts "$OUT/$t/workspace/tools/integration/"

@@ -1,6 +1,6 @@
 # fp100 — Focus Punch 264: the age-131 restore lag as a D4 faithful-timing entry
 
-Integration lane, base master `406bfc999` (production src `e3c8092c`). Production code commit `6bd25b1f0` (src tree `aaf3d215`).
+Integration lane, base master `f4dbfe1f4` (production src `e3c8092c`). Production code commit `6dd84e99b` (src tree `aaf3d215`).
 Presentation only: no gameplay, RNG, damage, turn order or facility state changed. Shipped under the user's standing D4 approval
 (ROADMAP S10A; ANIMATION_VERIFICATION.md "CPU-load timing integration — user-approved D4"; docs/faithful-timing.md). It follows the
 Light Screen 113 precedent (lsbz) and the Faint Attack 185 restorebg-lag precedent (fa185).
@@ -11,7 +11,7 @@ Light Screen 113 precedent (lsbz) and the Faint Attack 185 restorebg-lag precede
 - Fresh direct mGBA, `ctl95Probe.py`. Explicit lab seeds 305419897 / 38177486. Twice fresh, r1 == r2 on 13 / 13 scenarios.
 - 29 doll-free bodies, 8 species pairs, first and later bodies.
 - "event" means a lag at age 131: `gRng2Value` repeats between body rows 130 and 131, and the ROM body is 154 active rows. Without it the body is 153.
-- px = production's render through `ctl95ControlCheck.ts`, every row, both runs. Base `406bfc999` -> final `6bd25b1f0`.
+- px = production's render through `ctl95ControlCheck.ts`, every row, both runs. Base `f4dbfe1f4` -> final `6dd84e99b`.
 
 | lab (scenario) | side | pair | bodies: phase | base px per window | final px per window |
 |---|---|---|---|---|---|
@@ -56,7 +56,7 @@ Light Screen 113 precedent (lsbz) and the Faint Attack 185 restorebg-lag precede
   - the player fixture is the policy phase, 155 / 155 rows at 0 px;
   - the opponent fixture (153) is now the documented other phase.
 
-**Census** (seeds 0..999, base `406bfc999` vs final `6bd25b1f0`; 10 `--index-from` shards each, `hist73Merge.py`, `land82CensusCheck.py`, `ctl95CensusPair.py`, `fp100CensusFocus.py`; `receipts/census-*.txt`):
+**Census** (seeds 0..999, base `f4dbfe1f4` vs final `6dd84e99b`; 10 `--index-from` shards each, `hist73Merge.py`, `land82CensusCheck.py`, `ctl95CensusPair.py`, `fp100CensusFocus.py`; `receipts/census-*.txt`):
 - live **26,209 -> 26,209 commands**; live frames **3,913,028 -> 3,913,047 (+19)**;
 - Focus Punch: opponent live **19 commands 154 -> 155 frames**; player live 8 commands 155 -> 155 (already the lag phase);
 - Focus Punch fallbacks unchanged: opponent 9 attacker-doll + 2 defender-doll, player 1 attacker-doll, 32 frames each;
@@ -119,7 +119,7 @@ Light Screen 113 precedent (lsbz) and the Faint Attack 185 restorebg-lag precede
 
 ## Gates (final code)
 
-Tested code `7eff6d899` (production `6bd25b1f0`, src tree `aaf3d215`). The receipt / doc commit after it changes no code. All gates ran serialized, with no census running.
+Tested code `d2e2939f5` (production `6dd84e99b`, src tree `aaf3d215`). The receipt / doc commit after it changes no code. All gates ran serialized, with no census running.
 
 - **Targeted**: 64 files, 2,162 tests passed. The brief's grep (264 / Focus Punch / focusPunch / liveMoveTimingPolicy / faithfulTiming) plus `factoryAnimationInventory`, `playableAnimationIntegration`, `liveStatusImplementedCount`, `liveBasicMoveAdapters`, `ctl95DollFreeControls`, `substituteSwapAttdollCells`.
 - `npm run typecheck`: exit 0.
@@ -128,7 +128,7 @@ Tested code `7eff6d899` (production `6bd25b1f0`, src tree `aaf3d215`). The recei
   - shard 1: 812 files, 6,970 passed / 119 skipped;
   - shard 2: 812 files, 6,380 passed / 104 skipped.
 - `npm run build`: exit 0.
-- `compare:differential fight-submenu battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base 406bfc999`: **PASS, 624 / 624 captures byte-identical**.
+- `compare:differential fight-submenu battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base f4dbfe1f4`: **PASS, 624 / 624 captures byte-identical**.
 - `git diff --check`: clean.
 - **Runner** `fp100Run.sh`, run twice into fresh dirs on src `aaf3d215`. Each run: same scenarios, 13 / 13 r1 == r2, **same phase.tsv**, the accepted fixtures as above.
 

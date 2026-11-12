@@ -2,11 +2,11 @@
 
 ## 2026-09-23 — verified Factory union, 13 adapters, live-field checks
 
-- State: supervisor-verified Factory snapshot `88cd3bc80` merged one-way as
-  `6fc072ea9`: 273 Level-50 moves accepted. Six new moves require graphics
+- State: supervisor-verified Factory snapshot `af235c45b` merged one-way as
+  `7f632d071`: 273 Level-50 moves accepted. Six new moves require graphics
   host providers; readiness delta is separate from the pinned 267-move audit.
-- Did: folded basic worker `72dfabc0a`, `4cb26ca8d`, `64f04165f` as
-  `565415efd`, `7b68822c2`, `ddffcb1af`: eight additional live adapters.
+- Did: folded basic worker `359083aaf`, `bc0608afa`, `34af931e2` as
+  `382baa56d`, `29060f773`, `34ea811c2`: eight additional live adapters.
   Independent live-field comparisons found/fixed missing front elevation.
   Existing Scene OFF renderers apply it already; the new helper shares that
   source rule without changing their raw art origins.
@@ -38,7 +38,7 @@
   suite passed **3 files / 46 tests**; 40 generated seeds / **470 decisions**
   preserve rules and RNG between modes. See `.integration/lifecycle-tests.log`.
 - Next: fold the bounded basic adapter batch after review and its checks,
-  one-way merge supervisor-verified Factory snapshot `88cd3bc80`, validate the
+  one-way merge supervisor-verified Factory snapshot `af235c45b`, validate the
   actual union, and build the isolated stamped preview. Continue remaining
   reusable adapter/host work after that checkpoint.
 - Precise gap: Shadow Punch's source trace blends a stale allocated unfaded
@@ -70,7 +70,7 @@
   cleanly. Added opponent-orientation test awaits next focused run. The queued typecheck was later replaced by a completed green run;
   see the newer checkpoint. Full suite/build still required on final code.
   Logs/artifacts are isolated under .integration/ (gitignored).
-- Inventory: bounded worker 0c0ff43f8 folded as ac5f7be68, documenting every one
+- Inventory: bounded worker 8c139064b folded as 1fda6a754, documenting every one
   of the pinned baseline's 267 exact Factory moves, 196 fixture-bound renderer
   branches, and reusable host categories. This is a baseline audit, not a
   claim that all those moves are live.
@@ -100,13 +100,13 @@
   in an isolated bounded worker while parent owns persistent source hosts.
   24 implemented does not mean 24 arbitrary-history/whole-battle exact.
 
-## 2026-09-23 — verified playable checkpoint 82544f434
+## 2026-09-23 — verified playable checkpoint a14c9d474
 
 - Full union passes: **1,452 files / 11,586 tests**, 44 files / 223 tests
   skipped; production build **835 modules**. Actual tested/built commit:
-  82544f434a081d5b63f5ff944eca21610454239b, clean tree.
+  a14c9d474da146926959a60141999cc66810ed3f, clean tree.
 - Isolated immutable preview: http://127.0.0.1:5190/ (local SSH forward to
-  hcloud 8190), build stamp 82544f434 2026-09-23. Manifest at /build.json and
+  hcloud 8190), build stamp a14c9d474 2026-09-23. Manifest at /build.json and
   ordinary input trace at /replay.json. Own service:
   pokebench-integration-preview-82544f434.service. Factory services untouched.
 - Browser verification passes: three mid-body frames plus command prompt;
@@ -115,7 +115,7 @@
   no page errors. Browser clock now pauses before load so screenshots retain
   the verified frame. Receipt is tools/integration/fixtures/playable-preview-82544f434-receipt.json.
 - Continue: 24 live adapters, zero whole-battle/arbitrary-history exact claims.
-  Status/psychic worker runs from 82544f434. Parent palette-host implementation
+  Status/psychic worker runs from a14c9d474. Parent palette-host implementation
   lives on codex/animation-palette-host in .worktrees/live-palette-host.
   Source startup was checked through ordinary draft input, and the source
   Shadow Punch/Smokescreen/Shadow Punch sequence confirms persistent stale
@@ -125,7 +125,7 @@
 
 - State: physical batch and live Howl folded; source palette plans now cover
   all 49 adapters plus palette-only Fury Cutter. Imported supervisor-verified
-  Factory 33bc8bbed one-way (Curse accepted; Ice Ball evidence only): 274 exact
+  Factory 50e2ff576 one-way (Curse accepted; Ice Ball evidence only): 274 exact
   Factory moves remains separate from zero whole-playable exact claims.
 - Source: physical 2,608 rows/run including alternate Wobbuffet, twice fresh,
   zero residuals; parent independently repeats 660 rows/run for Hi Jump Kick,
@@ -138,8 +138,8 @@
   cleanup and unchanged unfaded scratch. Complete-body Shadow diagnosis stays
   partial: restore timing diverges at age 83 under changed history; no
   empirical offset or capture input was added.
-- Verified preview: http://127.0.0.1:5191/ at cf3e5009e, 36 adapters.
-  Full fa1404db5 passes 1,455 files / 11,610 tests; type-only replay request
+- Verified preview: http://127.0.0.1:5191/ at 1bfc7f037, 36 adapters.
+  Full 564b979b4 passes 1,455 files / 11,610 tests; type-only replay request
   annotation repair passes 19 affected tests, build 838 modules. Production
   source is unchanged between those two commits. Browser four canvas/PNG
   hashes, export, mode switch and no-error checks pass. Receipt:
@@ -148,15 +148,15 @@
   suite/build on this combined 49-adapter production tree. Prior child gate
   queues were stopped while waiting to consolidate checks here. Isolated
   support worker side-20260923-144936 owns sixteen more bodies; separate
-  Sol/high Shadow fade worker starts from verified cf3e5009e plus diagnostic
-  bc550ae26. Continue supervising and folding; preview is only a checkpoint.
+  Sol/high Shadow fade worker starts from verified 1bfc7f037 plus diagnostic
+  b056de351. Continue supervising and folding; preview is only a checkpoint.
 
 
 ## 2026-09-23 — 36 adapters and persistent palette input, union gates running
 
 - State: status batch folded as a77f93644/bedf905cf; palette provider folded
-  as dec7ced85. Twelve status/psychic adapters join the earlier 24. The
-  immutable preview remains at verified 82544f434 (24 adapters).
+  as 134d903be. Twelve status/psychic adapters join the earlier 24. The
+  immutable preview remains at verified a14c9d474 (24 adapters).
 - Status evidence: 24 complete source windows, 4,322 frames per fresh run,
   twice with zero residuals through the production live renderer. Repeated
   generated-input Confusion covers current Drowzee/Luvdisc. Independent Gengar/Machamp Night Shade
@@ -172,16 +172,16 @@
   not complete graphics-memory or arbitrary-history exactness.
 - Next: run full test/build gates on this committed union, then continue
   adapters/providers. Physical batch worker animation-20260923-134749 runs
-  from verified 82544f434, isolated from parent and Factory. Never stop at
+  from verified a14c9d474, isolated from parent and Factory. Never stop at
   the first preview; no whole-playable exact credit has been added.
 
 ## 2026-10-02 — local consolidation complete; hcloud deleted; 65-adapter preview verified
 
-- State: local `master` contains Factory `8fb2afbc1` (276/277 accepted), the 65-adapter integration checkpoint, Rust `5691a4ef4`, the experimental native runtime and local audit research. Production checkpoint `b4befb4f7`; later migration receipts/docs do not alter production. All 407 remote refs and interrupted physical2 edits are recoverable locally. Only the primary checkout remains.
+- State: local `master` contains Factory `34cd82f66` (276/277 accepted), the 65-adapter integration checkpoint, Rust `83ef3adc1`, the experimental native runtime and local audit research. Production checkpoint `e433b295d`; later migration receipts/docs do not alter production. All 407 remote refs and interrupted physical2 edits are recoverable locally. Only the primary checkout remains.
 - Did: preserved the complete 13.2 GB server archive (SHA-256 and zstd/content checks passed), all old local worktrees, and 4,625 searchable Codex/Claude transcripts. Deleted server 164080634, both primary IPs and dedicated firewall; post-delete account inventories are empty. Recovery root: `../hcloud-archive-20261002`; startup: `LOCAL_SETUP.md`.
 - Local continuation: party-menu entry now invalidates the bounded palette-history claim even when cancelling before any move. Regression reproduced before the fix; ordinary-input before/after-first-move tests pass in both scene modes without changing battle state or AI history. Fixed two source audits choosing the wrong duplicate Cmd_end symbol on Linux; forward/reversed symbol orders now agree and receipt chains pin the actual animation runtime body.
 - Gates: typecheck/build (844 modules), full suite **1,477 files / 11,708 tests passed**, 44 files / 223 tests skipped; rebuilt WASM and **1,832 Rust tests passed**. Both local oracle profiles respond; anchor matches 1/1 after server deletion. Local fresh Rest windows pass both directions twice, 220 rows/run, zero pixels. Earlier support source proof remains 1,898 rows/run twice. Shadow Punch's partial-history residuals remain unchanged and explicitly unclaimed.
-- Preview: <http://127.0.0.1:5191/> at **b4befb4f7**, 65 adapters. Post-deletion browser validation passes all four canvas/PNG hashes, session export, ON/OFF restart and no-error checks; receipt `tools/integration/fixtures/playable-preview-b4befb4f7-receipt.json`.
+- Preview: <http://127.0.0.1:5191/> at **e433b295d**, 65 adapters. Post-deletion browser validation passes all four canvas/PNG hashes, session export, ON/OFF restart and no-error checks; receipt `tools/integration/fixtures/playable-preview-b4befb4f7-receipt.json`.
 - Next: review `codex/recovered-physical2-20261002` (unfinished tracked snapshot, not accepted), then continue the remaining **211 accepted moves' live adapters/providers locally**. Complete party-return/switch palette ownership and arbitrary-history rendering; no whole-playable exactness credit. Helping Hand alone remains blocked on legal doubles staging.
 
 ## 2026-10-02 — local integration supervisor configured on Sol 6.1
@@ -189,7 +189,7 @@
 - State: `run-supervisor.sh --lane integration` now supervises primary local
   master using `gpt-6.1-sol/high`. Temporary integration workers use the ON
   oracle and retain the existing Terra/Luna/Sol model routing. No production
-  code changed; the 65-adapter production receipt at `b4befb4f7` remains valid.
+  code changed; the 65-adapter production receipt at `e433b295d` remains valid.
 - Did: added a dedicated integration supervisor guide and worker contract,
   removed obsolete cloud execution directions from the active brief, and
   documented local startup, verification, cleanup and log retention.
@@ -208,10 +208,10 @@
 
 ## 2026-10-02 — physical2a accepted locally; 69 live adapters
 
-- State: worker `f4a847729` clean-folded to master: Body Slam, Take Down,
+- State: worker `2d3e8d4b9` clean-folded to master: Body Slam, Take Down,
   Double-Edge and Submission. Factory remains 276/277; 207 accepted bodies
   need adapters. No gameplay/RNG code or acceptance ledger changed.
-- Baseline/recovery: reused unchanged `b4befb4f7` production receipt after
+- Baseline/recovery: reused unchanged `e433b295d` production receipt after
   70 launcher/boundary/inventory tests, coverage/audit and 470-decision ON/OFF
   control. Reviewed recovered snapshot; avoided registry omissions, stale
   adapter replacement and hard-coded Thunder Punch status. Ten recovered
@@ -226,7 +226,7 @@
   same-code worker full pair reused. Evidence/logs retained in primary
   `.integration/validation/worker-integration-20261002-171137` and `.codex-logs/`;
   independent receipt: `tools/integration/fixtures/physical2a-supervisor-receipt.json`.
-- Preview: <http://127.0.0.1:5191/> served `6569b50bd`, **69 adapters**; four
+- Preview: <http://127.0.0.1:5191/> served `06b77b779`, **69 adapters**; four
   canvas/PNG hashes, session export, ON -> OFF -> ON restart, no console/page
   errors. Receipt: `tools/integration/fixtures/playable-preview-6569b50bd-receipt.json`.
   Accepted temporary worktree removed; worker ref and all needed evidence retained.
@@ -235,7 +235,7 @@
 
 ## 2026-10-02 — physical2b accepted locally; 74 live adapters
 
-- State: clean-folded `612520093`: Thunder Punch, Pin Missile, Razor Leaf,
+- State: clean-folded `9520147ba`: Thunder Punch, Pin Missile, Razor Leaf,
   Factory-indoor Secret Power and Needle Arm. Factory remains 276/277;
   202 accepted bodies need adapters. No rules/RNG/damage/progression changes.
 - Proof: independently repeated **1,092 rows/run**, ten complete windows,
@@ -251,7 +251,7 @@
   same-code full pair reused. Independent receipt:
   `tools/integration/fixtures/physical2b-supervisor-receipt.json`; raw passes,
   failures and worker evidence retained in primary `.integration/validation/`.
-- Preview: <http://127.0.0.1:5191/> served `4b0d82b7e`, **74 adapters**; eight
+- Preview: <http://127.0.0.1:5191/> served `1cf32d3c2`, **74 adapters**; eight
   canvas/PNG hashes (including Razor Leaf ages 0/69/138), session export,
   ON -> OFF -> ON restart and no console/page errors pass. Receipt:
   `tools/integration/fixtures/playable-preview-4b0d82b7e-receipt.json`. Accepted
@@ -262,7 +262,7 @@
 
 ## 2026-10-02 — physical2c accepted locally; 78 live adapters
 
-- State: clean-folded production `cf212c63a` plus test-only follow-ups:
+- State: clean-folded production `ec1ced427` plus test-only follow-ups:
   Guillotine, Counter, Super Fang and Covet. Factory stays 276/277;
   198 accepted bodies need adapters. Gameplay/RNG/damage/progression intact.
 - Proof: independently repeated **1,133 rows/run**, eight complete bilateral
@@ -279,7 +279,7 @@
 - Withheld: Drill Peck player-back remains **108,889 pixels/run**, 91 rows,
   despite source-correct Fearow max HP 140; opponent-front is exact. Resume with
   source affine OBJ center/retained pose proof and alternate back geometry.
-- Preview: <http://127.0.0.1:5191/> serves `2a0465df9`, **78 adapters**; eight
+- Preview: <http://127.0.0.1:5191/> serves `3306b8ac1`, **78 adapters**; eight
   canvas/PNG hashes, session export, ON -> OFF -> ON and no browser/console
   errors pass. Receipt: `playable-preview-2a0465df9-receipt.json`. Whole-playable
   exact stays zero; palette covers 49/78 with party/switch/history limits.
@@ -288,7 +288,7 @@
 
 ## 2026-10-02 — Drill Peck accepted locally; 79 live adapters
 
-- State: source repair `4488f34e2` clean-folded; all fourteen recovered
+- State: source repair `b5330f54c` clean-folded; all fourteen recovered
   physical2 bodies now have verified adapters. Factory remains 276/277;
   197 accepted bodies need adapters. Gameplay, RNG and progression intact.
 - Proof: independently repeated **273 rows/run**, bilateral Fearow plus
@@ -303,7 +303,7 @@
   pass; same-code full pair reused. Independent receipt:
   `tools/integration/fixtures/physical2d-drill-supervisor-receipt.json`;
   primary validation retains all fresh source runs and worker gate logs.
-- Preview: <http://127.0.0.1:5191/> serves `da75f10e6`, **79 adapters**; eight
+- Preview: <http://127.0.0.1:5191/> serves `0a407d411`, **79 adapters**; eight
   canvas/PNG hashes, session export, ON -> OFF -> ON, no console/page errors
   pass (`playable-preview-da75f10e6-receipt.json`). Whole-playable exact stays
   zero; palette stays 49/79 (50 plans), with party/switch/history limits.
@@ -314,7 +314,7 @@
 
 ## 2026-10-02 — eight palette plans accepted; 57/79 live ownership
 
-- State: clean-folded `c8f2a79e9` production plus scoped test/tool follow-ups.
+- State: clean-folded `6ac5699b2` production plus scoped test/tool follow-ups.
   Pin Missile, Drill Peck, Growth, Razor Leaf, Haze, Acid Armor, Needle Arm,
   Metal Sound bring plans to 58, live coverage 57/79. Adapters stay 79;
   Factory stays 276/277; 197 bodies still need adapters. No gameplay changes.
@@ -330,7 +330,7 @@
   Same-code full pair reused. Independent receipt:
   `tools/integration/fixtures/live-palette-batch-supervisor-receipt.json`;
   all source pass/failure/gate evidence retained in primary validation.
-- Preview: <http://127.0.0.1:5191/> serves `f3531d7b3`: eight canvas/PNG
+- Preview: <http://127.0.0.1:5191/> serves `90dbbe2bf`: eight canvas/PNG
   hashes, export, ON -> OFF -> ON and no browser/console errors pass.
   Receipt `playable-preview-f3531d7b3-receipt.json`. Accepted worktree removed;
   worker ref/logs and all needed raw evidence retained.
@@ -340,7 +340,7 @@
 
 ## 2026-10-02 — actual status graphics invalidate retained palette history
 
-- State: clean-folded `d1bbca89c`; adapters 79, plans 58 (57/79 live),
+- State: clean-folded `83440b21e`; adapters 79, plans 58 (57/79 live),
   Factory 276/277 and 197 awaiting integration unchanged. A presentation-only
   cursor consumes unprojected status-animation receipts between commands and
   at segment tails. Current-body input stays immutable; no gameplay changes.
@@ -356,7 +356,7 @@
   smoke and typecheck pass. Same-production full pair reused. Receipt
   `tools/integration/fixtures/status-palette-supervisor-receipt.json`; all
   source/gate/log evidence copied into primary validation.
-- Preview: <http://127.0.0.1:5191/> serves `fe47c9afb`: eight canvas/PNG
+- Preview: <http://127.0.0.1:5191/> serves `d6dc193ca`: eight canvas/PNG
   hashes, exports, ON -> OFF -> ON and no browser/console errors pass.
   Receipt `playable-preview-fe47c9afb-receipt.json`. Accepted worktree removed;
   worker ref/logs and all needed raw evidence retained.
@@ -366,7 +366,7 @@
 
 ## 2026-10-02 — ordinary party/B-cancel palette ownership restored
 
-- State: clean-folded `695e10751`. Known entry retained as explicit pending
+- State: clean-folded `bb8f6d315`. Known entry retained as explicit pending
   provenance; menu stays unknown; B-cancel applies source load/free/return
   sequence. Unknown entry and actual switches stay unknown. Adapters79,
   plans58 (57/79 live), Factory276/277 and 197 awaiting integration unchanged.
@@ -383,7 +383,7 @@
   worker/source/gate/log evidence retained in primary validation.
 - Limits: private rows0..3, menu timing/framebuffer, summaries, forced switch,
   substitute/transform and unknown-history recovery unclaimed; whole exact0.
-- Preview: <http://127.0.0.1:5191/> serves `ae925089c`: eleven canvas/PNG
+- Preview: <http://127.0.0.1:5191/> serves `999c5d112`: eleven canvas/PNG
   hashes (party cancellation bodies plus Razor Leaf), six draft logical
   boundaries, export, ON -> OFF -> ON and no browser/console errors pass.
   Receipt `playable-preview-ae925089c-receipt.json`. Worktree retired after
@@ -393,9 +393,9 @@
 
 ## 2026-10-02 — Light Screen candidate withheld after independent seam review
 
-- State: master remains green accepted production `695e10751`; adapters79,
+- State: master remains green accepted production `bb8f6d315`; adapters79,
   plans58 (57/79 live), Factory276/277, remaining197, whole exact0. Candidate
-  `d12db7f0b` stays on `worker/integration-20261002-221128`, unmerged.
+  `db1d4f37d` stays on `worker/integration-20261002-221128`, unmerged.
 - Proof: supervisor repeats player115/opponent119 and Slowpoke wall75 rows,
   twice fresh: 618 exact rows, zero pixels. Six ordinary seeds render690 ages,
   success then already-active failure, next prompt, eighteen ON/OFF full
@@ -410,6 +410,6 @@
   `tools/integration/fixtures/light-screen-supervisor-review.json` records
   independent evidence and precise limits. No adapter credit or Factory changes.
 - Worker full11755/build844 passed on candidate; independent final full pair
-  passed on accepted master. Preview `ae925089c` remains verified. Preserve
+  passed on accepted master. Preview `999c5d112` remains verified. Preserve
   candidate ref/logs/raw evidence; continue bounded status source checkpoint.
   No material user decision deferred.

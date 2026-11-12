@@ -1,20 +1,20 @@
 # S10A plans54 — presentation inputs for the order host: Fury Cutter, Hail / HAIL_CONTINUES, Blizzard, Water Spout; Eruption fail-closed
 
 Side lane, evidence + production in one step, using the prep45 / gdgeo / plans48 / plans51 method.
-- Base: master `54cc50272` (src tree `503eb721`).
-- Tested code: `3b68497b8` (src tree `4be4f535`). Later commits touch docs, tests, tools and fixtures only.
+- Base: master `ac8060192` (src tree `503eb721`).
+- Tested code: `8d2b6e12a` (src tree `4be4f535`). Later commits touch docs, tests, tools and fixtures only.
 - Receipt: `tools/integration/fixtures/plans54-live-receipt.json`. Fixtures: `tools/integration/fixtures/plans54/`.
 
 ## Results
 
-**Census, seeds 0..299** (`liveShareCensus.ts`, paired by `prep43CensusDelta.py`), base `54cc50272` against the tested code.
+**Census, seeds 0..299** (`liveShareCensus.ts`, paired by `prep43CensusDelta.py`), base `ac8060192` against the tested code.
 - 7970 commands, 0 pairing mismatches, identical command sequence.
 - Battle digest identical: `0fd00eae…9137`.
 - **0 live → fallback regressions.**
 
 | | live by count | live by frames |
 |---|---|---|
-| `54cc50272` | 7617 / 7970 = **95.57 %** | 1130925 = **96.81 %** |
+| `ac8060192` | 7617 / 7970 = **95.57 %** | 1130925 = **96.81 %** |
 | plans54 | **7710 = 96.74 % (+93)** | **1144352 = 97.96 % (+13427)** |
 
 Gains by first stop (the before-decline detail):
@@ -38,7 +38,7 @@ Chain predictor (`prep45Chains.py --cleared` the six units `--after`):
   is later bodies of chains the instrument attributes elsewhere: Fury Cutter → Fury Cutter, and case-local / allocator-history declines
   whose case reads the order lend.
 
-**Ranking (re-run on `54cc50272`, `fixtures/plans54/chains-before-seeds0-299.json`).** It is identical to plans51's: 169 order-lend-unknown
+**Ranking (re-run on `ac8060192`, `fixtures/plans54/chains-before-seeds0-299.json`).** It is identical to plans51's: 169 order-lend-unknown
 declines / 23963 frames. The in-scope greedy order was Water Spout 1112, then HAIL_CONTINUES 1017 → Hail 3642 → Blizzard 1826, then Fury
 Cutter 821 (Eruption 51).
 
@@ -49,10 +49,10 @@ against the production text.
 | unit | key / plan source | ROM instances exact | frames | predicted before probe |
 |---|---|---|---|---|
 | Fury Cutter 210 | **payload `furyCutterCounter`**: 210 / 10210 / 20210 / 30210 (counter 1 / 2 / 3 / 4+). `Cf;D0` / `Cff;D1;D0` | **25 / 25**: counters 1..5 on both sides, GROVYLE / SCYTHER per side | 71 | yes, from source (slice ~25 callbacks; blend ~10 / ~18): 25 / 25 |
-| Hail 258 | geometry (both battlers): `hailSpriteOrderPlan.ts` over hail.ts's timeline + a SortSprites replay | **8 / 8**: 4 (player, opponent) pairs × both attacker sides | 286 | **8 / 8** (`hail-predictions.json`, committed `559c85a64`) |
+| Hail 258 | geometry (both battlers): `hailSpriteOrderPlan.ts` over hail.ts's timeline + a SortSprites replay | **8 / 8**: 4 (player, opponent) pairs × both attacker sides | 286 | **8 / 8** (`hail-predictions.json`, committed `2aec503e4`) |
 | HAIL_CONTINUES | the same plan, **seam: species at a general-animation event** | **16 / 16**: 2 end turns × 8 jobs | 572 | **16 / 16** |
-| Blizzard 59 | geometry (attacker, target): `blizzardSpriteOrderPlan.ts` over blizzard.ts's allocator replay | **11 / 11**: 4 pairs per side (7 player, 4 opponent) | 698 | **11 / 11** (`bcc24a497`, `3fa4d5282`) |
-| Water Spout 323 | **seam: attacker HP (displayed field) + the lent order**: `waterSpoutSpriteOrderPlan.ts` over waterSpout.ts's timeline | **23 / 23**: NOSEPASS tiers 0..3 on both sides; MAGIKARP tiers 0..3 opponent, 2..3 player | 989 | 4 / 4 known-entry first bodies (`5e0add3f7`, `aa22833d6`); later bodies use the same committed function at the ROM's own start order |
+| Blizzard 59 | geometry (attacker, target): `blizzardSpriteOrderPlan.ts` over blizzard.ts's allocator replay | **11 / 11**: 4 pairs per side (7 player, 4 opponent) | 698 | **11 / 11** (`6c66b07c6`, `68a6bcc21`) |
+| Water Spout 323 | **seam: attacker HP (displayed field) + the lent order**: `waterSpoutSpriteOrderPlan.ts` over waterSpout.ts's timeline | **23 / 23**: NOSEPASS tiers 0..3 on both sides; MAGIKARP tiers 0..3 opponent, 2..3 player | 989 | 4 / 4 known-entry first bodies (`0214dc494`, `c9b100f64`); later bodies use the same committed function at the ROM's own start order |
 | Eruption 284 | **fail-closed** by attacker species (`eruptionSpriteOrderPlan.ts`, ROM receipts only) | **12 / 12**: plans51 `er-*` + CAMERUPT 340 both sides | 304 | — (ROM receipts, no model) |
 
 Fits before the predictions: the existing ROM corpus instances (`sprite-order-body-plans-ext.json`) equal each model. That covers Hail

@@ -1,6 +1,6 @@
 # S10A fury99 — Fury Cutter 210 at counter 2..5 (later bodies)
 
-Base: master `46d64a860` (production src `2e5b1d7c`). Side lane, narrow production grant (the Fury Cutter adapter / inputs / case 210).
+Base: master `b6030846b` (production src `2e5b1d7c`). Side lane, narrow production grant (the Fury Cutter adapter / inputs / case 210).
 Every ROM number comes from independent direct-mGBA `fury99Probe.py` processes (Scene ON), never the shared HTTP oracles. Every
 scenario pins an explicit lab `"seed"` and ran twice fresh in one batch (ISSUES #154): **10 / 10 r1 == r2** (byte-identical probe JSON,
 including per-frame RGB sha256 and palette RAM). Every window then ran through the production renderer (`liveAdapterFramebuffer.ts`
@@ -40,7 +40,7 @@ later58's power rule applies (10 / 15 = counter 1). Non-shiny. Rests:
 - **counter 2+**: a species rest counts only while the x2 tracker does not have it zeroed. The user's earlier Fury Cutter body is a
   damaging body whose target role is `zeroed`, and its ShakeMon ends the target at x2 = 0 (ROM: ONIX 1 → 0).
 
-**Census** (seeds 0..999, `46d64a860` vs final, 10 `--index-from` shards each; `hist73Merge.py`, `prep43CensusDelta.py`,
+**Census** (seeds 0..999, `b6030846b` vs final, 10 `--index-from` shards each; `hist73Merge.py`, `prep43CensusDelta.py`,
 `fury99CensusCheck.py`; `fixtures/fury99/census/`): **all identity gates PASS**:
 - the same 27,516 commands;
 - the same command KEY sequence (`commandKeyDigest 907bc05914b3aebf`) and the same frames per command;
@@ -50,7 +50,7 @@ later58's power rule applies (10 / 15 = counter 1). Non-shiny. Rests:
 **Gains: +36 commands / +1,548 live frames, all Fury Cutter 210**, all from the case-local gate. Live share goes from 26,185 = 95.16 %
 (by frames 98.65 %) to **26,221 = 95.29 % (98.69 %)**. Fury Cutter goes from 46 / 84 live to **82 / 84**. The remaining 2 are both
 census battle 851, ANORITH → opponent ONIX. Each is ANORITH's first Fury Cutter after its own Metal Claw, i.e. counter 1, declined by the
-unchanged species-rest rule. The census ran on `b35188f28` (src `86e49e12`, see `revs.txt`), the final src.
+unchanged species-rest rule. The census ran on `59f990bdd` (src `86e49e12`, see `revs.txt`), the final src.
 
 **Scene ON/OFF parity** (`fury99Parity.ts`, land75Parity's controller; final code; `fixtures/fury99/parity/`):
 
@@ -93,7 +93,7 @@ RAM shows this, and the model copies from the blended OBJ bank. Every other pred
 | full suite, shard 1/2 | 812 files passed, 22 skipped; 6957 tests passed, 119 skipped |
 | full suite, shard 2/2 | 811 files passed, 22 skipped; 6366 tests passed, 104 skipped |
 | `npm run build` | green |
-| `compare:differential` (fight-submenu, battle1-postwin-next-prompt, presentation-rng-playable-live-bodies-seeded-on, `--base 46d64a860`) | PASS, 624 / 624 captures byte-identical |
+| `compare:differential` (fight-submenu, battle1-postwin-next-prompt, presentation-rng-playable-live-bodies-seeded-on, `--base b6030846b`) | PASS, 624 / 624 captures byte-identical |
 | `git diff --check` | clean |
 
 ## Not lifted
@@ -121,10 +121,10 @@ RAM shows this, and the model copies from the blended OBJ bank. Every other pred
 
     export PYTHONPATH=../../vendor/libmgba-py
     sh tools/integration/fury99Run.sh .integration/validation/fury99-rerun            # scenarios .. receipt + test, each SAME / DIFF
-    sh tools/integration/fury99Run.sh .integration/validation/fury99-rerun2 --census  # + census 0..999 (base 46d64a860 vs HEAD)
+    sh tools/integration/fury99Run.sh .integration/validation/fury99-rerun2 --census  # + census 0..999 (base b6030846b vs HEAD)
     node --experimental-strip-types --no-warnings tools/integration/fury99Parity.ts --seed=45 --streak=5
 
-## Predictions from source (before probes; committed `0cac82440`)
+## Predictions from source (before probes; committed `32b2b4fbd`)
 
 
 Source: `data/battle_anim_scripts.s` Move_FURY_CUTTER, `battle_anim_effects_2.c` AnimTask_IsFuryCutterHitRight /

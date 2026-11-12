@@ -1,11 +1,11 @@
 {
  "schema": "tmr136-live-receipt/v1",
  "base": {
-  "commit": "439575012",
+  "commit": "5c170e32f",
   "src": "58fa6ec74"
  },
  "testedCode": {
-  "commit": "ee9a55430fe2acbad42b180dacae50fd6962ae36",
+  "commit": "af0fa717e179ab1b9e5026b30597d8c65d8ef5ff",
   "src": "efd12bbb0af9e8b8ad20f26b4c8fdc98d90fba41",
   "note": "final production code; later commits are docs / runner / receipt only"
  },
@@ -221,12 +221,12 @@
   "targeted": "DT test set (60 files) + Smokescreen / accounting / x2 / policy set (95 files) green after the pin moves; tmr136TimingRemainders 9 / 9",
   "typecheck": "passed",
   "smoke": "448 / 448",
-  "fullSuite": "4 shards x 4 workers on ee9a55430: 413+411+410+414 = 1,648 files passed (44 skipped), 2,978+4,173+3,260+3,256 = 13,667 tests passed (223 skipped), 0 failed",
+  "fullSuite": "4 shards x 4 workers on af0fa717e: 413+411+410+414 = 1,648 files passed (44 skipped), 2,978+4,173+3,260+3,256 = 13,667 tests passed (223 skipped), 0 failed",
   "build": "passed (887 modules)",
-  "differential": "--base 439575012: fight-submenu 235 / 235 and battle1-postwin-next-prompt 216 / 216 byte-identical (canonical); presentation-rng-playable-live-bodies-seeded-on 172 / 173 (frame 3622, 673 px); vs 506abb5e1 (A only) 173 / 173 -> the moved capture is the DT change (A), (B) moves none",
+  "differential": "--base 5c170e32f: fight-submenu 235 / 235 and battle1-postwin-next-prompt 216 / 216 byte-identical (canonical); presentation-rng-playable-live-bodies-seeded-on 172 / 173 (frame 3622, 673 px); vs d83d10655 (A only) 173 / 173 -> the moved capture is the DT change (A), (B) moves none",
   "census": "NOT RUN (time cap): sar131Census.sh base vs final 0..999 is the open acceptance item",
   "diffCheck": "git diff --check clean",
-  "runner": "tmr136Run.sh from a fresh git-archive copy of d91a131e0 (.integration/validation): probes r1 == r2 6 / 6; same x 6 dt-tail, same smoke-derive.txt / smoke-final.json / smoke-revert.json (ALL SAME)"
+  "runner": "tmr136Run.sh from a fresh git-archive copy of a4cc57772 (.integration/validation): probes r1 == r2 6 / 6; same x 6 dt-tail, same smoke-derive.txt / smoke-final.json / smoke-revert.json (ALL SAME)"
  },
  "runner": "sh tools/integration/tmr136Run.sh <fresh-out-dir>"
 }
