@@ -191,3 +191,22 @@ Older lists re-driven on `8481a3e20`: regression 2 6 8 11 13 17 20 22 26 27 28 3
 
 Totals on `8481a3e20`, seeds 1..1160 plus 224 / 552 / 177 history: **139 open seeds** (20 older + 119), **40 regression seeds** (14 + 6 + 20), 24 Brain seeds not drivable, highest seed driven 1160.
 The sorter is a scratch script (first unmatched engine row -> the `--events=1` turn at that frame -> message / move / state signatures); rebuild it as a tool with replay upgrade 1.
+
+## 8. Open list re-driven on `5750e868c` (the box's 2026-11-12 wind-down engine: aiv271 + fix274)
+
+All 139 open seeds and all 40 regression seeds were re-driven on the Mac. **24 open seeds now match, 115 stay open; the regression list is 40 / 40.**
+
+| signature (section 7) | seeds on `8481a3e20` | still open on `5750e868c` |
+|---|---|---|
+| the ROM sends in a different opponent after a faint | 21 | 21: 165 183 284 332 343 491 566 573 675 715 830 839 857 867 899 900 904 907 926 986 1017 |
+| Struggle with the recoil message | 17 | 17: 225 265 345 417 492 529 542 577 737 804 862 897 973 1095 1112 1125 1157 |
+| Struggle, no recoil message | 7 | 7: 292 444 702 705 796 813 929 |
+| Encore: the ROM opens the action menu | 10 | 10: 161 193 203 228 522 553 631 758 992 1021 |
+| infatuation | 8 | 5: 265 444 492 547 566 |
+| recoil on a move with no recoil (#209) | 7 | 0: - |
+| confusion self-hit | 5 | 5: 218 457 616 838 986 |
+| no named signature, or older open seed | - | 55: 60 79 87 89 90 94 95 107 109 114 119 123 137 138 152 159 236 342 392 426 454 475 483 484 499 525 576 614 643 651 707 769 783 799 848 881 898 905 906 912 918 959 965 968 996 1005 1014 1030 1032 1066 1072 1081 1083 1117 1153 |
+
+The recoil-on-a-non-recoil-move signature went 7 -> 0 with fix274's #209 fix, so that signature named its cause correctly. The other signatures are still leads.
+Newly matching (now on the regression list): 42 50 53 158 198 202 260 279 298 366 440 459 521 530 543 564 591 613 665 872 971 999 1031 1134.
+Lists on `5750e868c`: **open 115**, **regression 64**, Brain not drivable 24, highest seed driven 1160.

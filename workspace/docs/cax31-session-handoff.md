@@ -209,12 +209,12 @@ remainder), B1, B2. A1 is mostly covered by aiv271 (status1 / pinch / weather / 
    - **First batch (top layer, Mac, tree `69241cf85`, seeds 61..160 OFF; audit doc section 6):** 78 full match, **20 diverge**,
      2 not drivable (Brain). 279 s wall at 8 lanes on the Mac.
    - **Second batch (top layer, Mac, seeds 161..1160 OFF; audit doc section 7):** 840 full match, **139 diverge**, 21 Brain.
-     34 min wall at 12 lanes. Re-driven on `8481a3e20` (with your aiv271): 20 of the 139 now match, **119 still diverge**.
-     They are sorted by signature in section 7; six signatures cover 69 of the 119.
+     34 min wall at 12 lanes. Re-driven on `5750e868c` (with your aiv271 and fix274): **115 seeds are open in total**
+     (audit doc section 8). They are sorted by signature in sections 7 / 8.
    - **Division of labour (Kyle, 2026-11-12: "keep the nightly job lean; harvest in bulk on the Mac"):** bulk discovery is the
      Mac top layer's job (1,000 new seeds in about 34 minutes there), and it re-drives the open list after fixes land and
      updates the lists in the audit doc. The box's nightly job stays small (below). The box does not need to hunt for new
-     mismatches: there are 139 open seeds waiting.
+     mismatches: there are 115 open seeds waiting.
    - **Claim rule (now):** report gameplay status only from replay results: seeds driven, matched, consecutive clean, and what
      the replay cannot reach yet (audit doc section 5). Do not call battle logic complete or parity-verified from soak, census,
      pins, "engine-referenced" or message-count coverage.
@@ -229,11 +229,12 @@ remainder), B1, B2. A1 is mostly covered by aiv271 (status1 / pinch / weather / 
      3. **Wind-down:** the permanent list on the final tree, only if an engine gameplay change landed in the run.
      - Audio, presentation and cleanup steps never run the replay. No existing gate is removed: the soaks still cover deep
        rounds and swaps, which the replay does not reach yet.
-   - **Two lists (state on `8481a3e20`; "the permanent list" in this item means the regression list):**
-     - **Regression list** = seeds that diverged once and match now; they must keep matching (40): 2 6 8 11 13 17 20 22 26 27
-       28 30 31 32 39 57 75 88 110 155 190 235 248 311 435 555 596 619 650 698 761 770 841 846 894 1001 1011 1028 1103 1118.
-     - **Open list** = seeds that still diverge (139): 42 50 53 60 79 87 89 90 94 95 107 109 114 119 123 137 138 152 158 159
-       and the 119 in audit doc section 7. A seed moves from open to regression when a fix makes it match to battle end.
+   - **Two lists (state on `5750e868c`, your 2026-11-12 wind-down engine, re-driven on the Mac; "the permanent list" in this
+     item means the regression list):**
+     - **Regression list** = seeds that diverged once and match now; they must keep matching (64):
+       2 6 8 11 13 17 20 22 26 27 28 30 31 32 39 42 50 53 57 75 88 110 155 158 190 198 202 235 248 260 279 298 311 366 435 440 459 521 530 543 555 564 591 596 613 619 650 665 698 761 770 841 846 872 894 971 999 1001 1011 1028 1031 1103 1118 1134.
+     - **Open list** = seeds that still diverge (115): 60 79 87 89 90 94 95 107 109 114 119 123 137 138 152 159 and the 99 listed as still open in
+       audit doc section 8. A seed moves from open to regression when a fix makes it match to battle end.
      - A new divergence joins the open list with its seed, scene and first diverging row. One ISSUES entry per CAUSE, not per seed.
      - Not drivable until replay upgrade 3: 24 Brain seeds (33, 82, 131 and 21 in section 7's batch).
    - **Ledger:** create and keep `docs/replay-ledger.md`: per run the commit, seed range, matched / driven, new divergent seeds,
@@ -247,9 +248,10 @@ remainder), B1, B2. A1 is mostly covered by aiv271 (status1 / pinch / weather / 
         a diagnosis step on 2 or 3 of its seeds (dia263 / dia269 shape), then fix, then re-drive the whole group:
         (a) the ROM sends in a different opponent after a faint, 21 seeds (leads A2 / A3 / A4; your #204 remainder
         "switch-into scorer stub"); (b) Struggle, 24 seeds (new, not diagnosed); (c) Encore: the ROM opens the action menu,
-        10 seeds (lead B2; this also lets the replay continue past any Encore); (d) recoil on a move with no recoil, 7 seeds
-        (#209); (e) infatuation, 8 seeds (new); (f) confusion self-hit, 5 seeds (lead B6, seed 218 shows ROM 31 vs engine 16);
-     2. #210 and the older open seeds (42 50 53 60 and 79..159), then section 7's unsigned rest (50 seeds);
+        10 seeds (lead B2; this also lets the replay continue past any Encore); (d) confusion self-hit, 5 seeds (lead B6, seed
+        218 shows ROM 31 vs engine 16); (e) infatuation, 5 seeds left (new). The recoil-on-a-non-recoil-move group is DONE:
+        fix274 cleared all 7;
+     2. the older open seeds (60 and 79..159; your dia272 Struggle lead on seed 60 may be group (b)), then the unsigned rest;
      3. the audit doc's section 2 rows that the replay cannot show yet, by reach: the rest of A1 (aiv271 fixed the #204 C
         part; check burn / pinch `maxHp` / Guts / weather / Flash Fire against it), A5-A7, B1 (Toxic counter), B3-B8.
      - Every audit row is source-read only. Confirm it on the ROM with the fix (a seed, or a Mechanic Lab `overrides.parties`
