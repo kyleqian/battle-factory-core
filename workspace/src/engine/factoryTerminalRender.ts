@@ -537,11 +537,18 @@ function drawDeclineFarewell(
   const boxClearAge = factoryTerminalDeclineBoxClearAge(state)!;
   const textFirstAge = factoryTerminalDeclineTextFirstAge(state)!;
   const lines = state.profile.declineFarewell;
-  if (state.age < menuClearAge) {
+  if (state.recordDisabled) {
+    if (state.age < boxClearAge) {
+      if (!isFactoryTerminalRoundWon(state)) {
+        const wait = state.profile.pages[2];
+        drawPageText(fb, wait, wait[0].length + wait[1].length);
+      }
+      return;
+    }
+  } else if (state.age < menuClearAge) {
     drawRecordPrompt(fb, state);
     return;
-  }
-  if (state.age < boxClearAge) {
+  } else if (state.age < boxClearAge) {
     drawRecordPrompt(fb, state, true);
     return;
   }

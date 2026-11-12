@@ -722,7 +722,7 @@ import {
 } from "./screenSounds.ts";
 import { emitBattleStartBgm } from "./battleStartSounds.ts";
 import { emitTickSounds } from "./tickSounds.ts";
-import { advanceForfeitTerminalAge, forfeitFrozenSceneView } from "./battleForfeit.ts";
+import { advanceForfeitTerminalAge, disableForfeitRecordQuestion, forfeitFrozenSceneView } from "./battleForfeit.ts";
 import { soundCollecting } from "../audio/soundEvents.ts";
 
 /**
@@ -1191,7 +1191,9 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
               forfeitFrozenSceneView(preAdvanceCommand),
             ),
             factoryTerminal: factoryTerminal === null && forfeitTerminalCommand !== null
-              ? advanceForfeitTerminalAge(createFactoryTerminalPresentation(forfeitTerminalCommand))
+              ? advanceForfeitTerminalAge(
+                  disableForfeitRecordQuestion(createFactoryTerminalPresentation(forfeitTerminalCommand)),
+                )
               : factoryTerminal,
           }
         : {}),
@@ -1267,21 +1269,19 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
     // timeline). From that box-gone age the app hands input/rendering to the
     // walkable-lobby overworld (factoryLobbyFreeRoam.ts); until then the
     // terminal presentation still owns the screen.
-    // Continuous-play chaining (queue item 2, ROADMAP "User decisions
-    // 2026-08-14" #2): the terminal record menu's accepted answer
-    // (recordChoice newly non-null this tick -- YES, NO, or B-cancel all
-    // reach the same EndRecordBattle continuation, ISSUES #104) re-enters a
-    // fresh GENERATED draft screen directly, carrying win streak/symbols/BP/
-    // rents forward, instead of continuing into the decline-farewell ->
-    // free-roam Lobby chain below. Supervisor design decision: no new
-    // lobby-dialogue surfaces for this step; faithful attendant re-entry
-    // chrome layers on later. Scoped to the production generated-orchestrator
-    // route, whose roundOutcome carries the real BP/symbol award this carry
-    // needs.
+    // 7-win chaining (queue item 2, ROADMAP "User decisions 2026-08-14" #2):
+    // the WIN terminal's accepted record answer re-enters a fresh GENERATED
+    // draft screen directly (lbr-d will replace this with the ROM's Lobby
+    // return). A LOSS / FORFEIT / RETIRE no longer chains (lbra, user decision
+    // 2026-11-12): it plays out the ROM's Lobby result script below and hands
+    // over the walkable Lobby, where A at the attendant starts the next
+    // challenge. Scoped to the production generated-orchestrator route, whose
+    // roundOutcome carries the real BP/symbol award the carry needs.
     if (
       state.appRoute === "generated-orchestrator" &&
       factoryRoundBattleOrchestrator !== null &&
       factoryRoundBattleOrchestrator.roundOutcome !== null &&
+      isFactoryTerminalRoundWon(factoryTerminal) &&
       (state.factoryTerminal?.recordChoice ?? null) === null &&
       factoryTerminal.recordChoice !== null
     ) {
@@ -1304,8 +1304,25 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
       freeRoamBoxGoneAge !== null && factoryTerminal.age >= freeRoamBoxGoneAge
         ? state.lobbyFreeRoam ?? createFactoryLobbyFreeRoamState()
         : state.lobbyFreeRoam;
+    // LostChallenge (Lobby scripts.inc:65-75) clears the win-streak-active flag: the lost
+    // challenge's symbols / BP stay, the streak and rents are zero when the Lobby opens.
+    const lossCarry =
+      state.lobbyFreeRoam === null &&
+      lobbyFreeRoam !== null &&
+      state.appRoute === "generated-orchestrator" &&
+      factoryRoundBattleOrchestrator !== null &&
+      factoryRoundBattleOrchestrator.roundOutcome !== null &&
+      !isFactoryTerminalRoundWon(factoryTerminal)
+        ? advanceFactoryCarry(
+            state.factoryCarry,
+            false,
+            factoryRoundBattleOrchestrator.roundOutcome,
+            factoryRoundBattleOrchestrator.facilityState.rentsCount,
+          )
+        : state.factoryCarry;
     return {
       ...state,
+      factoryCarry: lossCarry,
       frame: state.frame + 1,
       keyRepeat,
       // The shared return-to-field span (docs/post-terminal-return-to-lobby-

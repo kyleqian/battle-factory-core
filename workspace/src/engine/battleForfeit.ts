@@ -67,3 +67,10 @@ export function forfeitFrozenSceneView(
 export function advanceForfeitTerminalAge<T extends Readonly<{ age: number }>>(terminal: T): T {
   return Object.freeze({ ...terminal, age: terminal.age + 1 });
 }
+
+/** A forfeit sets `disableRecordBattle` (battle_main.c:5062): the Lobby never asks the record question. */
+export function disableForfeitRecordQuestion<T extends Readonly<{ recordDisabled: boolean }>>(
+  terminal: T,
+): T {
+  return Object.freeze({ ...terminal, recordDisabled: true });
+}

@@ -64,6 +64,12 @@ export interface FactoryTerminalRecordProfile {
   readonly recordSavedTextFirstDelay: number;
   readonly recordSavedInputDelay: number;
   readonly recordSavedMessage: readonly [string, string];
+  /**
+   * lbra: with the record question skipped (forfeit), the farewell `msgbox` follows the SE_SAVE wait
+   * directly. This is the virtual decline edge (the farewell's box-clear is edge + `declineTextClearDelay`)
+   * measured from the party-restore age; the record-question flow's prompt is `recordPromptDelayFromRestore`.
+   */
+  readonly recordDisabledFarewellEdgeFromRestore: number;
 }
 
 export interface FactoryTerminalLossProfile extends FactoryTerminalRecordProfile {
@@ -207,6 +213,7 @@ export const FACTORY_LOSS_TERMINAL_PROFILE: FactoryTerminalLossProfile =
       "MEMORY’s battle was recorded",
       "on the FRONTIER PASS.",
     ] as const),
+    recordDisabledFarewellEdgeFromRestore: 166,
     pages: Object.freeze([
       Object.freeze(["Thank you for participating!", ""] as const),
       Object.freeze([
@@ -270,6 +277,7 @@ export const FACTORY_ROUND_WON_TERMINAL_PROFILE: FactoryTerminalRoundWonProfile 
       "MEMORY’s battle was recorded",
       "on the FRONTIER PASS.",
     ] as const),
+    recordDisabledFarewellEdgeFromRestore: 166,
     congratulations: Object.freeze([
       "Congratulations! You’ve won seven",
       "straight Battle Swap matches!",
@@ -341,6 +349,12 @@ export interface FactoryTerminalLossPresentationState {
    * this same tick, so the shared farewell mechanics run from there).
    */
   readonly recordSavedDismissAge: number | null;
+  /**
+   * lbra: a forfeit sets `frontier.disableRecordBattle` (battle_main.c:5062), so Lobby:77-78
+   * (`BattleFrontier_EventScript_GetCantRecordBattle` TRUE) jumps straight to EndRecordBattle:
+   * the record question is never asked and `recordChoice` stays null.
+   */
+  readonly recordDisabled: boolean;
 }
 
 export interface FactoryTerminalRoundWonPresentationState {
@@ -380,6 +394,7 @@ export interface FactoryTerminalRoundWonPresentationState {
    * this same tick, so the shared farewell mechanics run from there).
    */
   readonly recordSavedDismissAge: number | null;
+  readonly recordDisabled: boolean;
 }
 
 export type FactoryTerminalPresentationState =
@@ -415,6 +430,7 @@ export function createFactoryTerminalLossPresentation(
     declineFarewellReleaseAge: null,
     declineDismissAge: null,
     recordSavedDismissAge: null,
+    recordDisabled: false,
   };
 }
 
@@ -449,6 +465,7 @@ export function createFactoryTerminalRoundWonPresentation(
     declineFarewellReleaseAge: null,
     declineDismissAge: null,
     recordSavedDismissAge: null,
+    recordDisabled: false,
   };
 }
 
@@ -772,7 +789,15 @@ function advanceFactoryTerminalRecordPrompt<
   let declineDismissAge = state.declineDismissAge;
   let recordSavedDismissAge = state.recordSavedDismissAge;
   const atNextAge = { ...state, age };
+  if (state.recordDisabled && declineFarewellReleaseAge === null) {
+    const restoreAge = factoryTerminalRestoreAge(atNextAge);
+    if (restoreAge !== null) {
+      const edge = restoreAge + state.profile.recordDisabledFarewellEdgeFromRestore;
+      if (age >= edge) declineFarewellReleaseAge = edge;
+    }
+  }
   if (
+    !state.recordDisabled &&
     recordPromptReleaseAge === null &&
     factoryTerminalRecordPromptInputReady(atNextAge) &&
     (input.pressedA || input.pressedB)
