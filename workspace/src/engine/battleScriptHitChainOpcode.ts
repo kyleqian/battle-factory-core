@@ -235,6 +235,8 @@ const HITMARKER_IGNORE_SUBSTITUTE = 1 << 8;
 /** include/constants/moves.h MOVE_PAIN_SPLIT. */
 const MOVE_PAIN_SPLIT_ID = 220;
 const HITMARKER_PASSIVE_HP_UPDATE = 1 << 20;
+/** include/battle.h:455 F_DYNAMIC_TYPE_IGNORE_PHYSICALITY. */
+const F_DYNAMIC_TYPE_IGNORE_PHYSICALITY = 1 << 6;
 /** include/constants/battle.h:183,199,201 -- tryfaintmon's own hitMarker bits. */
 const HITMARKER_DESTINYBOND = 1 << 6;
 const HITMARKER_PLAYER_FAINTED = 1 << 22;
@@ -2589,7 +2591,14 @@ function createDatahpupdateOpcodeHandler(
     const noPassiveUpdate = (hitMarker & HITMARKER_PASSIVE_HP_UPDATE) === 0;
     let battlerChanges: Partial<BattleScriptRulesBattlerState> = { hp: nextHp };
     if (noPassiveUpdate) {
-      const moveType = resolveMoveTypeName(rulesContext, rulesContext.currentMove);
+      // battle_script_commands.c:1855-1860: the Counter / Mirror Coat record does NOT use GET_MOVE_TYPE. A dynamic type
+      // that carries F_DYNAMIC_TYPE_IGNORE_PHYSICALITY (Cmd_hiddenpowercalc, :8912 -- Hidden Power only) is ignored here
+      // and the move's table type (Normal) decides: Hidden Power of any type is recorded as a physical hit, so Counter
+      // answers it and Mirror Coat never does. Weather Ball's dynamic type has no such flag and still counts
+      // (docs/parity-mac/hidden-power-damage-record.md, audit lead B8).
+      const moveType = (rulesContext.dynamicMoveType & F_DYNAMIC_TYPE_IGNORE_PHYSICALITY) !== 0
+        ? resolveMoveTypeName(Object.freeze({ ...rulesContext, dynamicMoveType: 0 }), rulesContext.currentMove)
+        : resolveMoveTypeName(rulesContext, rulesContext.currentMove);
       const physical = isTypePhysical(moveType);
       const retaliationBattlerId = isTargetOperand
         ? requireBattlerRole(rulesContext, "attacker")

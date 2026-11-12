@@ -320,6 +320,21 @@ describe("ranked Batch 1 committed scripts", () => {
     expect(Object.isFrozen(state.rulesContext.battlers[0].ivs)).toBe(true);
   });
 
+  it("Hidden Power of a special type is recorded as a PHYSICAL hit for Counter / Mirror Coat (battle_script_commands.c:1855-1860)", () => {
+    // docs/parity-mac/hidden-power-damage-record.md (audit lead B8). All-odd IVs give Hidden Power Dark (17, a special
+    // type): the factory's UNOWN. datahpupdate ignores a dynamic type flagged F_DYNAMIC_TYPE_IGNORE_PHYSICALITY and uses
+    // the table type Normal. Unfixed: specialDmg held the damage and physicalDmg stayed 0 (Mirror Coat worked, Counter failed).
+    const ivs = { hp: 31, attack: 31, defense: 31, speed: 31, spAttack: 31, spDefense: 31 };
+    expect(hiddenPowerFromIvs(ivs).type).toBe(17);
+    const state = run("BattleScript_EffectHiddenPower", rules(237, { ivs }), 7);
+    expect(state.haltReason).toMatchObject({ kind: "terminal", opcodeName: "B_SCR_OP_END" });
+    const target = state.rulesContext.battlers[1];
+    const dealt = state.rulesContext.hpDealt;
+    expect(dealt).toBeGreaterThan(0);
+    expect([target.specialStatus.physicalDmg ?? 0, target.specialStatus.specialDmg ?? 0]).toEqual([dealt, 0]);
+    expect([target.protectPhysicalDmg ?? 0, target.protectSpecialDmg ?? 0]).toEqual([dealt, 0]);
+  });
+
   it("canonically replays every Batch 1 effect byte-for-byte from the same seed", () => {
     for (const [entry, context] of [
       ["BattleScript_EffectEruption", rules(284)],
