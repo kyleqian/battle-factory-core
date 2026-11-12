@@ -647,17 +647,23 @@ function runPushCursorAndCallbackTickScript(
   return Object.freeze({ kind: "fired", state: resumed });
 }
 
-/** `status1 += STATUS1_TOXIC_TURN(1)` capped at TURN(15) (battle_util.c:1542-1543), plus the party status1 mirror `datahpupdate`'s own sync already establishes for HP. */
+/**
+ * `status1 += STATUS1_TOXIC_TURN(1)` capped at TURN(15) (battle_util.c:1542-1543).
+ * C bumps `gBattleMons[gActiveBattler].status1` ONLY: no
+ * `BtlController_EmitSetMonData(REQUEST_STATUS_BATTLE)` follows, so the party
+ * record keeps the status word of the last real sync (STATUS1_TOXIC_POISON
+ * with counter 0 from `SetMoveEffect`, battle_script_commands.c:2488). A
+ * badly poisoned mon that leaves the field and returns reloads that word
+ * (`battle_main.c` SwitchInClearSetData + the REQUEST_ALL_BATTLE copy) and
+ * its damage restarts at 1/16. Do NOT mirror the bump into the party
+ * (docs/parity-mac/toxic-counter-switch.md; ROM seed 165: 8 damage, not 24).
+ */
 function bumpToxicCounter(rulesContext: BattleScriptRulesContext, battler: BattleScriptBattlerId): BattleScriptRulesContext {
   const b = rulesContext.battlers[battler];
   const atCap = (b.status1 & STATUS1_TOXIC_COUNTER) === STATUS1_TOXIC_TURN_15;
   const nextStatus1 = atCap ? b.status1 : ((b.status1 + STATUS1_TOXIC_TURN_1) >>> 0);
   if (nextStatus1 === b.status1) return rulesContext;
-  const withStatus = withBattler(rulesContext, battler, { status1: nextStatus1 });
-  return Object.freeze({
-    ...withStatus,
-    party: withBattleScriptPartyMemberStatus1(withStatus.party, b.side, b.partyIndex, nextStatus1),
-  });
+  return withBattler(rulesContext, battler, { status1: nextStatus1 });
 }
 
 function floorDivAtLeastOne(value: number, divisor: number): number {

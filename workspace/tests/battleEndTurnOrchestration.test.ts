@@ -661,6 +661,30 @@ describe("runBattleEndTurnOrchestration (BattleTurnPassed equivalent)", () => {
     expect(turn2.state.rulesContext.battlers[1]!.hp).toBe(814); // 938 - 62*2 = 814
   });
 
+  it("Toxic's counter bump stays on the battler: the party record keeps counter 0 (battle_util.c:1542-1543 has no SetMonData), so a switch-out restarts at 1/16", () => {
+    const opponent = sixSlots(0, 0, 1000);
+    opponent[2] = { ...opponent[2]!, status1: STATUS1_TOXIC_POISON };
+    const rc = context({
+      battlers: [
+        battler({ side: 0 }),
+        battler({ side: 1, hp: 1000, maxHP: 1000, status1: STATUS1_TOXIC_POISON, partyIndex: 2 }),
+        battler({ side: 0 }),
+        battler({ side: 1 }),
+      ],
+      party: { player: sixSlots(100), opponent },
+    });
+    const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(1));
+    const turn1 = runBattleEndTurnOrchestration(program, handlers, scratchState(rc, 1));
+    if (turn1.kind !== "next-turn") throw new Error("expected next-turn");
+    const turn2 = runBattleEndTurnOrchestration(program, handlers, turn1.state);
+    if (turn2.kind !== "next-turn") throw new Error("expected next-turn");
+    // gBattleMons carries the counter (2 after two ticks) ...
+    expect(turn2.state.rulesContext.battlers[1]!.status1).toBe(STATUS1_TOXIC_POISON | (2 << 8));
+    // ... gEnemyParty does not: it is the word a later switch-in reloads. HP is still synced by datahpupdate.
+    expect(turn2.state.rulesContext.party.opponent[2]!.status1).toBe(STATUS1_TOXIC_POISON);
+    expect(turn2.state.rulesContext.party.opponent[2]!.hp).toBe(814);
+  });
+
   it("(c) Ingrain heal ticks floor(maxHP/16) capped at maxHP -- doc's live 159 -> 161 ledger (docs/ingrain-leechseed-wrap-ground-truth.md §2a), zero RNG", () => {
     const rc = context({
       battlers: [
