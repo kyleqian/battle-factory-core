@@ -14,6 +14,12 @@ const UNSHIPPED_ALLOWLIST: readonly string[] = [
   "src/data/gen/factory-animation-inventory.json",
 ];
 
+/**
+ * Runtime data committed ahead of its importer (not part of the shrink-only list): aud244a's sound-asset manifest is
+ * loaded by the aud245 WebAudio player (dynamic import, handoff item 0). Delete the entry when aud245 imports it.
+ */
+const PENDING_RUNTIME_IMPORT: readonly string[] = ["src/assets/gen/audio/manifest.json"];
+
 function walk(dir: string, suffix: string, out: string[] = []): string[] {
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
     const path = join(dir, entry.name);
@@ -46,7 +52,7 @@ describe("bnd253a: src/ JSON is shipped JSON", () => {
   const referencedBasenames = new Set([...referenced.keys()].map((path) => path.split("/").pop()!));
 
   it("every JSON under src/ is named by a src module, or is on the shrink-only unshipped list", () => {
-    const orphans = onDisk.filter((path) => !referenced.has(path) && !referencedBasenames.has(path.split("/").pop()!) && !UNSHIPPED_ALLOWLIST.includes(path));
+    const orphans = onDisk.filter((path) => !referenced.has(path) && !referencedBasenames.has(path.split("/").pop()!) && !UNSHIPPED_ALLOWLIST.includes(path) && !PENDING_RUNTIME_IMPORT.includes(path));
     expect(orphans, "move test/tool-only JSON to tests/fixtures/data/ instead of src/").toEqual([]);
   });
 
@@ -56,6 +62,13 @@ describe("bnd253a: src/ JSON is shipped JSON", () => {
       expect(referenced.has(path), `${path} is now imported by src: delete it from UNSHIPPED_ALLOWLIST`).toBe(false);
     }
     expect(UNSHIPPED_ALLOWLIST.length).toBeLessThanOrEqual(2);
+  });
+
+  it("each pending runtime import exists and has no src importer yet", () => {
+    for (const path of PENDING_RUNTIME_IMPORT) {
+      expect(onDisk, `${path} is gone: delete it from PENDING_RUNTIME_IMPORT`).toContain(path);
+      expect(referenced.has(path), `${path} is now imported by src: delete it from PENDING_RUNTIME_IMPORT`).toBe(false);
+    }
   });
 
   it("no src module reaches into tests/ for data", () => {
