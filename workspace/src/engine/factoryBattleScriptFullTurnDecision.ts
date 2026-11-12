@@ -2791,6 +2791,9 @@ function runEndTurnTail(
     rulesContext: Object.freeze({
       ...endTurn.state.rulesContext,
       randomTurnNumber,
+      // battle_main.c:3995-3999: gBattleResults.battleTurnCounter++ (u8, stops at 0xFF). The AI's get_turn_count reads it
+      // (docs/parity-mac/ai-turn-counter.md, audit lead A5).
+      battleTurnCounter: Math.min(0xff, endTurn.state.rulesContext.battleTurnCounter + 1),
       // BattleTurnPassed's closing loop (battle_main.c:4001-4005).
       chosenMoveByBattler: Object.freeze([0, 0, 0, 0] as const),
     }),

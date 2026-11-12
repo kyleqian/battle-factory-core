@@ -532,6 +532,18 @@ describe("live Factory AI rules adapter (Gate-5 rung 6)", () => {
     });
   });
 
+  it("the AI's turn count is the rules context's battleTurnCounter (get_turn_count, battle_ai_script_commands.c:1111)", () => {
+    // docs/parity-mac/ai-turn-counter.md (audit lead A5). The live caller passes no `battleTurnCount`; the view used to
+    // default to 0 for the whole battle, so AI_CV_SwaggerHasPsychUp kept its turn-0 bonus (+5, C +3 from turn 1) and
+    // AI_CV_Conversion never reached its roll. Unfixed: 0 on the second line.
+    const rulesContext = liveRules();
+    const history = createFactoryAiBattleHistory(rulesContext);
+    const challenge = { factoryWinStreak: 28, trainerOpponentId: 222 };
+    expect(createFactoryAiViewFromLiveRules({ rulesContext, history, challenge }).attacker.battleTurnCount).toBe(0);
+    const later = Object.freeze({ ...rulesContext, battleTurnCounter: 3 });
+    expect(createFactoryAiViewFromLiveRules({ rulesContext: later, history, challenge }).attacker.battleTurnCount).toBe(3);
+  });
+
   it("accumulates target moves, persists observed facts, and clears move/ability history on switch", () => {
     const initialRules = liveRules(70);
     let history = syncFactoryAiBattleHistory(

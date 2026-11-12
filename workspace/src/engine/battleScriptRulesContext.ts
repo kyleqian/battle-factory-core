@@ -836,6 +836,12 @@ export type BattleScriptRulesContext = Readonly<
      * reads the stored value without advancing RNG.
      */
     randomTurnNumber: number;
+    /**
+     * Source u8 gBattleResults.battleTurnCounter: 0 at battle start, +1 (capped at 0xFF) each time BattleTurnPassed
+     * reaches its tail with the battle still on (battle_main.c:3995-3999). The AI's `get_turn_count` reads it
+     * (battle_ai_script_commands.c:1111).
+     */
+    battleTurnCounter: number;
     /** Source u8 gWishFutureKnock.weatherDuration -- the one shared weather timer every Cmd_set<weather> writes (include/battle.h:172, byte offset 0x28). */
     weatherTimer: number;
     /** Source gWishFutureKnock.wishCounter[MAX_BATTLERS_COUNT], owned by positional battler slots. */
@@ -1040,6 +1046,7 @@ export type BattleScriptRulesContextInput = Readonly<{
   sideTimers?: readonly [BattleScriptSideTimerInput?, BattleScriptSideTimerInput?];
   weather?: number;
   randomTurnNumber?: number;
+  battleTurnCounter?: number;
   weatherTimer?: number;
   wishCounter?: readonly number[];
   wishMonId?: readonly number[];
@@ -2790,6 +2797,7 @@ export function createBattleScriptRulesContext(
     ]) as unknown as readonly [BattleScriptSideTimerState, BattleScriptSideTimerState],
     weather: requireUnsigned(input.weather ?? 0, 0xffff_ffff, "weather") >>> 0,
     randomTurnNumber: requireUnsigned(input.randomTurnNumber ?? 0xffff, 0xffff, "randomTurnNumber"),
+    battleTurnCounter: requireUnsigned(input.battleTurnCounter ?? 0, 0xff, "battleTurnCounter"),
     weatherTimer: requireUnsigned(input.weatherTimer ?? 0, 0xff, "weatherTimer"),
     wishCounter: Object.freeze([
       requireUnsigned(input.wishCounter?.[0] ?? 0, 0xff, "wishCounter[0]"),

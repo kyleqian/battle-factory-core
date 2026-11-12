@@ -126,10 +126,10 @@ export type FactoryAiChallengePolicy = Readonly<{
   factoryWinStreak: number;
   trainerOpponentId: number;
   /**
-   * Source `gBattleResults.battleTurnCounter`, needed only by
-   * `AI_CV_Swagger` after its Psych Up/target-ATK gate (doc §33). Optional
-   * while older callers have no turn counter; the policy's source default is
-   * the real battle-start value 0.
+   * Source `gBattleResults.battleTurnCounter`, read by `AI_CV_Swagger`
+   * after its Psych Up/target-ATK gate (doc §33) and by `AI_CV_Conversion`.
+   * An explicit override for fixtures; when absent the live driver reads
+   * the rules context's `battleTurnCounter`.
    */
   battleTurnCount?: number;
 }>;
@@ -385,7 +385,9 @@ export function createFactoryAiViewFromLiveRules(input: Readonly<{
       turnOrderWeather: turnOrderWeather(input.rulesContext),
       randomTurnNumber: input.rulesContext.randomTurnNumber,
       ...((attacker.status1 & BATTLE_SCRIPT_STATUS1_PARALYSIS) !== 0 ? { isParalyzed: true } : {}),
-      battleTurnCount: input.challenge.battleTurnCount ?? 0,
+      // gBattleResults.battleTurnCounter (battle_ai_script_commands.c:1111). The rules context carries the live value;
+      // `challenge.battleTurnCount` stays as an explicit override for fixtures (docs/parity-mac/ai-turn-counter.md).
+      battleTurnCount: input.challenge.battleTurnCount ?? input.rulesContext.battleTurnCounter,
       lightScreenUp: (input.rulesContext.sideStatuses[1] & SIDE_STATUS_LIGHTSCREEN) !== 0,
       reflectUp: (input.rulesContext.sideStatuses[1] & SIDE_STATUS_REFLECT) !== 0,
       ...(weather === undefined ? {} : { currentWeather: weather }),
