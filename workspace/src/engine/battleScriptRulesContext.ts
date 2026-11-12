@@ -207,6 +207,15 @@ export type BattleScriptSpecialStatus = Readonly<{
   specialDmg: number;
   /** Source s32 gSpecialStatuses[battler].shellBellDmg. */
   shellBellDmg: number;
+  /**
+   * Source `gSpecialStatuses[battler].intimidatedMon` / `.traced`
+   * (`battle_util.c:2559-2581`): set when a switch-in queues Intimidate /
+   * Trace for this battler SLOT, tested before queuing again, and cleared
+   * with the rest of the struct by `SpecialStatusesClear`
+   * (`HandleAction_ActionFinished`, `battle_util.c:663`). Absent = 0.
+   */
+  intimidatedMon?: 0 | 1;
+  traced?: 0 | 1;
 }>;
 
 /** Modeled struct SideTimer fields, including Follow Me's timer/target (include/battle.h:149-174) -- see the field comment on BattleScriptRulesContext.sideTimers. */
@@ -481,6 +490,8 @@ export type BattleScriptRulesBattler = BattleScriptRulesBattlerBase & Readonly<{
     physicalDmg?: number;
     specialDmg?: number;
     shellBellDmg?: number;
+    intimidatedMon?: 0 | 1;
+    traced?: 0 | 1;
   }>;
   chargingTurn?: 0 | 1;
   /** ProtectStruct bits read by WasUnableToUseMove but not by admission yet. */
@@ -1140,6 +1151,8 @@ function createBattleScriptSpecialStatus(
       value?.shellBellDmg ?? 0,
       `battlers[${battler}].specialStatus.shellBellDmg`,
     ),
+    ...(value?.intimidatedMon === 1 ? { intimidatedMon: 1 as const } : {}),
+    ...(value?.traced === 1 ? { traced: 1 as const } : {}),
   });
 }
 

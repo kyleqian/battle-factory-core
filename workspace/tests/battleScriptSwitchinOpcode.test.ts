@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { handleBattleActionFinished } from "../src/engine/battleActionFinished.ts";
 import {
   createBattleScriptRulesContext,
   createBattleScriptStatusRulesExecution,
@@ -1514,6 +1515,44 @@ describe("production forced-switch tail opcodes (SWITCHHANDLEORDER/GETSWITCHEDMO
     expect(state.rulesContext.battleTextBuff1MonNick).toEqual({ battler: 0, partyIndex: 0 });
     expect(state.rng.calls).toBe(0);
   });
+
+  it.each([
+    ["Intimidate", ABILITY_INTIMIDATE, 1 << 19, "intimidatedMon"],
+    ["Trace", ABILITY_TRACE, 1 << 20, "traced"],
+  ] as const)(
+    "switchineffects: %s is queued once per battler slot until an action finishes (gSpecialStatuses flag, battle_util.c:2559-2581)",
+    (_name, ability, status3Bit, flag) => {
+      // docs/parity-mac/intimidate-once-per-slot.md (ROM seed 1083: an Intimidate mon replaced at end of turn, KO'd by the next
+      // turn's first action; the next Intimidate mon into that slot does not lower Attack).
+      const rc = context({
+        battlers: [
+          battler({ side: 0, species: URSARING, types: ["TYPE_NORMAL", "TYPE_NORMAL"] }),
+          battler({ side: 1, species: SUNKERN, hp: 100, types: ["TYPE_GRASS", "TYPE_GRASS"], partyIndex: 0, ability }),
+          battler({ side: 0 }),
+          battler({ side: 1 }),
+        ],
+      });
+      // First entry: the status3 bit is queued and the slot flag is raised.
+      const first = stepAtProgramCounter(SWITCHINEFFECTS_PC, rc).result;
+      if (first.kind !== "advanced") throw new Error(`expected advance, got ${first.kind}`);
+      expect(first.state.rulesContext.battlers[1].status3 & status3Bit).toBe(status3Bit);
+      expect(first.state.rulesContext.battlers[1].specialStatus[flag]).toBe(1);
+      // The queued effect ran (state 6 clears the status3 bit); the slot flag stays raised. A second mon with the same
+      // ability entering that slot now queues nothing. Unfixed: queued again.
+      const afterEffect = createBattleScriptRulesContext({
+        ...first.state.rulesContext,
+        battlers: first.state.rulesContext.battlers.map((b, index) =>
+          index === 1 ? { ...b, status3: (b.status3 & ~status3Bit) >>> 0 } : b),
+      } as never);
+      expect(afterEffect.battlers[1].specialStatus[flag]).toBe(1); // survives normalisation
+      const second = stepAtProgramCounter(SWITCHINEFFECTS_PC, afterEffect).result;
+      if (second.kind !== "advanced") throw new Error(`expected advance, got ${second.kind}`);
+      expect(second.state.rulesContext.battlers[1].status3 & status3Bit).toBe(0);
+      // SpecialStatusesClear (HandleAction_ActionFinished, battle_util.c:663) lowers the flag again.
+      const finished = handleBattleActionFinished(first.state, 0);
+      expect(finished.rulesContext.battlers[1].specialStatus[flag] ?? 0).toBe(0);
+    },
+  );
 
   it.each([
     ["Intimidate", ABILITY_INTIMIDATE, 1 << 19],

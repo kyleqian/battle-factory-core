@@ -1286,18 +1286,30 @@ function createSwitchineffectsOpcodeHandler(): BattleScriptOpcodeHandler<BattleS
     // (`:5296`). Marking here and falling through is that shape; returning
     // early was ISSUES #134 (receipt:
     // `tools/probe/receipts/issue134-switchineffects-clears-off.json`).
-    if (nextActive.ability === ABILITY_INTIMIDATE && !(nextActive.status3 & STATUS3_INTIMIDATE_POKES)) {
+    // The gate is `gSpecialStatuses[battler].intimidatedMon` / `.traced` (`:2560`, `:2576`), a per-SLOT flag that only
+    // `SpecialStatusesClear` (HandleAction_ActionFinished) resets: a second Intimidate / Trace mon entering the same
+    // slot before any action has finished (the first came in at end of turn, the next turn's first action KOs it)
+    // does not activate (ROM seed 1083; docs/parity-mac/intimidate-once-per-slot.md).
+    if (nextActive.ability === ABILITY_INTIMIDATE && nextActive.specialStatus.intimidatedMon !== 1) {
       const battlers = nextRules.battlers.map((candidate, index) =>
         index === battler
-          ? Object.freeze({ ...candidate, status3: (candidate.status3 | STATUS3_INTIMIDATE_POKES) >>> 0 })
+          ? Object.freeze({
+            ...candidate,
+            status3: (candidate.status3 | STATUS3_INTIMIDATE_POKES) >>> 0,
+            specialStatus: Object.freeze({ ...candidate.specialStatus, intimidatedMon: 1 as const }),
+          })
           : candidate
       ) as unknown as BattleScriptRulesBattlers;
       nextRules = Object.freeze({ ...nextRules, battlers: Object.freeze(battlers) });
     }
-    if (nextActive.ability === ABILITY_TRACE && !(nextActive.status3 & STATUS3_TRACE)) {
+    if (nextActive.ability === ABILITY_TRACE && nextActive.specialStatus.traced !== 1) {
       const battlers = nextRules.battlers.map((candidate, index) =>
         index === battler
-          ? Object.freeze({ ...candidate, status3: (candidate.status3 | STATUS3_TRACE) >>> 0 })
+          ? Object.freeze({
+            ...candidate,
+            status3: (candidate.status3 | STATUS3_TRACE) >>> 0,
+            specialStatus: Object.freeze({ ...candidate.specialStatus, traced: 1 as const }),
+          })
           : candidate
       ) as unknown as BattleScriptRulesBattlers;
       nextRules = Object.freeze({ ...nextRules, battlers: Object.freeze(battlers) });
