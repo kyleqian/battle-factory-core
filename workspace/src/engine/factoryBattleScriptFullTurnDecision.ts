@@ -2324,10 +2324,41 @@ function legalMoveDecisions(
       ? [Object.freeze({
           kind: "use-move" as const,
           moveSlot: slot as BattleMoveSlot,
-          targetBattler: sourceMoveTarget(moveId, battler),
+          targetBattler: moveMenuTarget(source, moveId, battler),
         })]
       : []);
   return Object.freeze(legal);
+}
+
+/** include/constants/moves.h MOVE_CURSE. */
+const MOVE_CURSE = 174;
+
+/**
+ * The target a battler carries out of the move menu. The two controllers
+ * differ for exactly one move. The PLAYER's `HandleInputChooseMove`
+ * (`battle_controller_player.c:486-501`) replaces Curse's table target
+ * (MOVE_TARGET_SELECTED) by MOVE_TARGET_USER when neither of the user's
+ * types is Ghost, so a non-Ghost Curse is sent with the user as its target.
+ * The OPPONENT's `OpponentHandleChooseMove` (`battle_controller_opponent.c:1581`,
+ * `gBattleMoves[...].target & (USER_OR_SELECTED | USER)`) reads the table
+ * only, so its Curse keeps the foe as target. The target matters before the
+ * script's own `copybyte gBattlerTarget, gBattlerAttacker`: `Cmd_ppreduce`'s
+ * Pressure test is `gBattlerAttacker != gBattlerTarget`
+ * (`battle_script_commands.c:1223-1225`), so against a Pressure foe the
+ * player's non-Ghost Curse costs 1 PP and the opponent's costs 2 (ROM seed
+ * 3375: Muk's Curse into Dusclops, docs/parity-mac/curse-player-target.md).
+ * Execution-time retargets (Encore, forced Struggle) go through
+ * `GetMoveTarget`, which has no such case, and keep `sourceMoveTarget`.
+ */
+function moveMenuTarget(
+  source: BattleScriptRulesContext["battlers"][number],
+  moveId: number,
+  battler: BattleSinglesBattler,
+): BattleSinglesBattler {
+  if (battler === 0 && moveId === MOVE_CURSE && !source.types.includes("TYPE_GHOST")) {
+    return battler;
+  }
+  return sourceMoveTarget(moveId, battler);
 }
 
 /**
