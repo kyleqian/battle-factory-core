@@ -78,7 +78,7 @@ through the engine's own menus (POKEMON at the action menu, the party row, SHIFT
 
 ## Proof that a voluntary switch really happens on the ROM
 
-50 `random-v1` battles (seeds 20001..20050): 266 voluntary switches, 15 switch probes and 18 move probes in total.
+50 `random-v1` battles (seeds 20001..20050): 133 voluntary switches, 15 switch probes and 18 move probes in total.
 From the ROM drive of the first three (the driver's menu states and the ROM's own `gBattlerPartyIndexes` / `gBattleMons`):
 
 | seed | decision | ROM menus, by frame | ROM active Pokemon before | ROM active Pokemon at the next decision |

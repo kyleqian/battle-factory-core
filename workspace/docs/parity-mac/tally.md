@@ -49,8 +49,15 @@ whose resulting numbers (HP, the RNG stream, the wide state) matched the ROM:
 
 ### Rows with no effect in a Factory singles battle
 
-Shown with their reason instead of a count: Illuminate, Stench (field abilities), Run Away (wild battles), Pickup (after
-a wild battle), Plus / Minus (need the partner in doubles), Lightning Rod (redirects in doubles only).
+Shown with their reason instead of a count:
+
+- Illuminate, Stench (field abilities), Run Away (wild battles), Pickup (after a wild battle), Plus / Minus (need the
+  partner in doubles), Lightning Rod (redirects in doubles only).
+- Helping Hand: `Cmd_trysethelpinghand` (`battle_script_commands.c:9170-9186`) needs `BATTLE_TYPE_DOUBLE`; in singles
+  the move always fails (it is used and fails in the batches).
+- Return: no Factory Pokemon has it. `SetMonMoveAvoidReturn` (`battle_factory.c:913`) writes Frustration instead at
+  every place a Factory Pokemon is made (`:461` rentals, `:501` opponents, `:822` Noland). The row is in the list
+  because the set table names Return.
 
 ## Limits
 

@@ -142,12 +142,14 @@ SITUATION_ROWS = sorted(set(SITUATION_LABELS.values()) | {
     "screen:reflect:halves-a-hit", "screen:light-screen:halves-a-hit", "screen:reflect:ends", "screen:light-screen:ends", "screen:mist:ends", "outcome:player-won", "outcome:player-lost",
     "outcome:draw", "move:critical-hit", "move:super-effective", "move:not-very-effective", "move:multi-turn-forced-continuation", "move:forced-encore",
 })
-# abilities / hold effects with no battle effect in a Factory singles trainer battle (the "none" rows); see docs/parity-mac/tally.md for the source lines
+# rows that cannot take effect in a Factory singles trainer battle (shown with the reason instead of a count); docs/parity-mac/tally.md
 NO_EFFECT = {
     "ability:ABILITY_ILLUMINATE": "field ability only (wild encounter rate)", "ability:ABILITY_PICKUP": "after-battle item pick-up; not in a Frontier battle",
     "ability:ABILITY_RUN_AWAY": "fleeing from a wild battle only", "ability:ABILITY_STENCH": "field ability only (wild encounter rate)",
     "ability:ABILITY_PLUS": "needs a partner with Minus on the field (doubles)", "ability:ABILITY_MINUS": "needs a partner with Plus on the field (doubles)",
     "ability:ABILITY_LIGHTNING_ROD": "redirects Electric moves to itself in doubles; no effect in singles (Gen 3)",
+    "move:EFFECT_HELPING_HAND": "always fails in singles: Cmd_trysethelpinghand needs BATTLE_TYPE_DOUBLE (battle_script_commands.c:9170-9186)",
+    "move:EFFECT_RETURN": "no Factory Pokemon has Return: SetMonMoveAvoidReturn writes Frustration instead (battle_factory.c:913, called at :461 / :501 / :822)",
 }
 
 
