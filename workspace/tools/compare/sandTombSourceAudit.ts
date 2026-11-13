@@ -1,4 +1,5 @@
 /** Strict dev-time authoritative-source audit for unsupported MOVE_SAND_TOMB. */
+import "../../src/engine/monPicPixelsInstall.ts"; // iss215: standalone node run must install the sprite pixel provider (bnd257d)
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";

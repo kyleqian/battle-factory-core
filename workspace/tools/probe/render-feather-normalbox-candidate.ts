@@ -33,6 +33,7 @@
 // clip) before any variant is scored.
 //
 // Usage: npx tsx tools/probe/render-feather-normalbox-candidate.ts
+import "../../src/engine/monPicPixelsInstall.ts"; // iss215: standalone node run must install the sprite pixel provider (bnd257d)
 import { readFileSync } from "node:fs";
 import { execFileSync } from "node:child_process";
 import { renderAppTrace } from "../compare/appTrace.ts";

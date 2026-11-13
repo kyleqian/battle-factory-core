@@ -20,6 +20,7 @@
 // instrument's render 3223/RAM 3222 claim: that RAM tick also has four.
 // Exhaustive RAM scanning found that only RAM 3231-3234 has a sole live,
 // magnified ember (the eleventh spawn, in reused sprite slot 9).
+import "../../src/engine/monPicPixelsInstall.ts"; // iss215: standalone node run must install the sprite pixel provider (bnd257d)
 import { readFileSync } from "node:fs";
 import { renderAppTrace } from "../compare/appTrace.ts";
 import { runOracleTrace, type Trace } from "../compare/oracleClient.ts";

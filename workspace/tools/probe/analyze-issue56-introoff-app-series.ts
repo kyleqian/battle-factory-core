@@ -10,6 +10,7 @@
 // this fixture (no appStage - this fixture needs no synthetic state).
 //
 // Run: node --experimental-strip-types tools/probe/analyze-issue56-introoff-app-series.ts
+import "../../src/engine/monPicPixelsInstall.ts"; // iss215: standalone node run must install the sprite pixel provider (bnd257d)
 
 import { readFileSync } from "node:fs";
 import { createInitialState, tick, render } from "../../src/engine/core.ts";

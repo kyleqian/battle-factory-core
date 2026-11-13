@@ -1,3 +1,4 @@
+import "../../src/engine/monPicPixelsInstall.ts"; // iss215: standalone node run must install the sprite pixel provider (bnd257d)
 import frontierMonsData from "../../src/data/gen/battle-frontier-mons.json" with { type: "json" };
 import naturesData from "../../src/data/gen/natures.json" with { type: "json" };
 import type { FactoryRentalRecord } from "../../src/engine/battleScenario.ts";

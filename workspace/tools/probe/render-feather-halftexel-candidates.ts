@@ -30,6 +30,7 @@
 // Usage: npx tsx tools/probe/render-feather-halftexel-candidates.ts
 // (needs the oracle service up; reuses the SAME turn6 7421-7549/129-tick window and
 // oracle/shipped captures as render-feather-order-candidates.ts, one oracle call.)
+import "../../src/engine/monPicPixelsInstall.ts"; // iss215: standalone node run must install the sprite pixel provider (bnd257d)
 
 import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { execFileSync } from "node:child_process";

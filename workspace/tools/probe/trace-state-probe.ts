@@ -1,3 +1,4 @@
+import "../../src/engine/monPicPixelsInstall.ts"; // iss215: standalone node run must install the sprite pixel provider (bnd257d)
 import { createInitialState, tick } from "../../src/engine/core.ts";
 import { traceAdvances } from "../compare/traceReplay.ts";
 import { APP_STAGES } from "../compare/appTrace.ts";

@@ -76,6 +76,7 @@
 // (inclusive on both ends -- `factoryRentalGeneration.ts:328` draws
 // `start + rand % (end - start + 1)`) indexed into
 // `battle-frontier-mons.json`.
+import "../../src/engine/monPicPixelsInstall.ts"; // iss215: standalone node run must install the sprite pixel provider (bnd257d)
 
 import type { EngineState } from "../../src/engine/core.ts";
 import type { BattleScriptRulesContext } from "../../src/engine/battleScriptRulesContext.ts";

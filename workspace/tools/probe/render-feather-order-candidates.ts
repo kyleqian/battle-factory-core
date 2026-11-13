@@ -14,6 +14,7 @@
 // docstring on `patchTieGroups` below for the proof sketch).
 //
 // Usage: npx tsx tools/probe/render-feather-order-candidates.ts
+import "../../src/engine/monPicPixelsInstall.ts"; // iss215: standalone node run must install the sprite pixel provider (bnd257d)
 
 import { execFileSync } from "node:child_process";
 import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
