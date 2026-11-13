@@ -426,7 +426,8 @@ build ok, **14,724 tests pass, 3 fail**. The three are not from this lane: `test
 `revengeActualCore.ts`, `superpowerActualCore.ts`) do not import `src/engine/monPicPixelsInstall.ts`, which the box's
 lazy-sprite change (`bnd257d`) now needs; the other render tools import it. With that module preloaded the Megahorn
 tool gives 353 of 353 again. Left to the box (presentation tools). The commits after `61d84a74f` are documents, the
-tally tool (Python) and the per-battle JSON; no test reads them.
+tally tool (Python) and the per-battle JSON; no test reads them. Box master `e83b18c0e` (PROGRESS text and one browser
+audio check script) was merged after that run; the gate was not run again.
 
 An earlier gate of this pass, on `7227a52bc` (fixes 29 to 32 with box master `9b877623a`): typecheck ok, build ok,
 14,685 pass, 3 fail: three `randomRoundSoak` tests that failed on box master since `9f8c9aa7d`; the box re-pinned them
