@@ -17,9 +17,10 @@ What was built (tools only, no rule in them):
 |---|---|---|
 | three test players: `census` (the old one), `ai-v1` (the game's own AI on the player's side), `random-v1` (random legal actions, voluntary switches, refusal probes) | `tools/integration/romReplayPlayers.ts` | `replay-players.md` |
 | wide compare at every decision, and the winner | `tools/integration/soundCensusRomReplay.ts`, `tools/audio/soundEventProbe.py` | `wide-compare.md` |
-| one battle: `REPLAY_OUT=/abs/dir tools/audio/romReplayWide.sh SEED [POLICY [SYMBOLS]]` | `tools/audio/romReplayWide.sh`, `romReplaySummary.py`, `romReplayBatchReport.py` | `wide-compare.md` |
+| one battle: `REPLAY_OUT=/abs/dir tools/audio/romReplayWide.sh SEED [POLICY [SYMBOLS [CHALLENGE]]]` | `tools/audio/romReplayWide.sh`, `romReplaySummary.py`, `romReplayBatchReport.py` | `wide-compare.md`, `replay-players.md` |
+| the eighth challenge and later (sets 372..849): the fourth argument, `7` | the same | `replay-players.md` |
 | the tally | `tools/audio/romReplayTally.py` | `tally.md` |
-| staged battles (real sets, a written script, `expect` rows) | `--stage FILE`, `docs/parity-mac/stages/` | `staged-battles.md` |
+| staged battles (real sets, a written script, `expect` rows); the Metronome sweep is 497 of them | `--stage FILE`, `docs/parity-mac/stages/` | `staged-battles.md` |
 
 A battle "matches" in this pass when every engine turn state is in the ROM timeline in order, the ROM drive used every
 decision and ended at the outcome, both sides name the same winner, and no wide field differs at any decision.
@@ -28,130 +29,166 @@ decision and ended at the outcome, both sides name the same winner, and no wide 
 
 Every number here is a count of battles of the named list and player. It says what was driven, not how good the engine
 is. Per-battle rows: `docs/replay-batches/2026-11-13-fourth-pass.json`; text: `docs/replay-batches/2026-11-13-fourth-pass.md`.
-All Scene OFF. Engine `50474f0dc` = fixes 29 to 32; engine `61d84a74f` = fixes 29 to 33 with box master `a21ec4148`
-merged in (the gated tip).
 
-| batch | what it is | battles | result |
+This is the **final run** of the pass: every list driven from scratch on one engine, `b36f7b6c9` (fixes 29 to 40), after
+the last fix. It is also the confirming batch of the work order.
+
+| list | what it is | battles | result |
 |---|---|---|---|
-| proof of the tool | `random-v1`, seeds 20001..20050 | 50 | 49 match. 20035 is an endless stall (no difference in the states its frame cap reaches). 133 voluntary switches, 15 switch probes and 18 move probes; the ROM refused every probe. ROM-side proof of three of the switches: `replay-players.md`. Engine `61d84a74f`. |
-| first mixed batch | seeds 20101..21100: 600 `ai-v1`, 200 `census`, 200 `random-v1`. 41 of them are Noland battles (20 silver, 21 gold). | 1,000 | `ai-v1` 600 of 600. `census` 200 of 200. `random-v1` 199 of 200: 20734 is an endless stall (729 states match up to the 600,000-frame cap). 627 voluntary switches (593 `random-v1`, 34 `ai-v1`), 119 refusal probes, the ROM refused every one. 20293, 20493 and 20569 needed the long caps. 913 battles on engine `50474f0dc`, 87 on `61d84a74f`. |
-| the pool with the wide compare | old player, the 962 seeds of `docs/replay-batches/regression-pool.txt` (the 64 list is inside) | 962 | 962 match (860 on `50474f0dc`, 102 on `61d84a74f`). |
-| the Brain lists with the wide compare | old player, 204 silver and 204 gold Noland battles | 408 | 407 match (9098 and 6347 with the long caps). Gold 1447 is not staged by the lab (known, `oracle/battle_lab.py`). |
-| staged | `stages/foresight-noland.json` | 1 | matches, and the expected row is in its tally. Engine `61d84a74f`. |
+| proof | `random-v1`, seeds 20001..20050 | 50 | 49 match. 20035 is an endless stall (951 states match up to the 600,000-frame cap). 133 voluntary switches, 33 refusal probes; the ROM refused every probe. |
+| mixed | seeds 20101..21100: 600 `ai-v1`, 200 `census`, 200 `random-v1`; 41 of them Noland battles | 1,000 | `ai-v1` 600 of 600. `census` 200 of 200. `random-v1` 199 of 200: 20734 is an endless stall (729 states match). 627 voluntary switches, 119 refusal probes, all refused. 20293, 20493 and 20569 needed the long caps. |
+| pool | old player, the 962 seeds of `docs/replay-batches/regression-pool.txt` (the 64 list is inside) | 962 | 962 match. |
+| Brain | old player, 204 silver and 204 gold Noland battles | 408 | 408 match (9098 and 6347 with the long caps; gold 1447 is staged now). |
+| **eighth challenge** | seeds 22001..22600 at the game's challenge number 7 (sets 372..849, the legendary Pokemon, trainers 200 and up): 360 `ai-v1`, 120 `census`, 120 `random-v1` | 600 | `ai-v1` 357 of 360: 22152, 22462 and 22527 are endless stalls (804, 979 and 1,043 states match). `census` 120 of 120. `random-v1` 120 of 120. 247 voluntary switches, 17 refusal probes, all refused. |
+| former lab failures | 3623 5633 5736 8075 9188 6048 9073, silver 10127, gold 10022 | 9 | 9 match. |
+| staged | `docs/parity-mac/stages/*.json` | 13 | 13 match, each with its expected rows in its own tally. |
+| Metronome sweep | 497 staged battles (`staged-battles.md`) | 497 | 497 match (7 of them with the long caps). 1,470 voluntary switches and 407 refusal probes (the random player, in the 167 battles against the opponent's Chansey); the ROM refused every probe. |
+| Battle Scene ON | the first 500 battles of the mixed list again, Scene ON (300 `ai-v1`, 100 `census`, 100 `random-v1`) | 500 | 500 match (7 of them with a longer frame cap: a Scene ON battle has about three times the frames). 309 voluntary switches, 47 refusal probes, all refused. |
 
-How the two engines were used: fix 33 came out of the pool run, after the mixed batch. Fix 33 changes only what
-Perish Song, Magic Coat and a Leppa Berry write, and Metronome can call the two moves. So every battle of the three
-lists with one of these in a party (Perish Song, Magic Coat, Metronome, a Leppa Berry holder: 225 battles) was driven
-again on `61d84a74f`, with the 50 proof battles, the long battles and the staged battle. The others were not driven a
-second time.
+No difference is left in anything driven: no wrong damage, status, stage, PP, item, timer, weather or winner at any
+decision, and no legality error (the ROM took every decision the engine offered and refused every refusal probe). The
+five battles that do not count as a match are endless stalls, with every state up to the frame cap equal.
 
-What the first run of the mixed batch found, before the fixes (622 battles driven on the engine without fixes 29 to
-32): 617 matched; 20276 gave fix 30; 20596 gave the wrong winner of fix 29; 3 were the long ones. The pool run on
-engine `50474f0dc` found 5908 and 7879 (fix 33).
+The eighth challenge had never been replayed in any pass (a seed's streak was `(seed * 11) % 49`: challenges 1 to 7
+only). All 94 sets that exist only there (756..849) were on the field in a matching battle of this list.
 
-In all, the wide state was compared at 72,321 decisions (mixed 25,159, proof 1,463, pool 34,991, Brain 10,708).
+### What the pass found (fixes 29 to 40, in the table below)
 
-### What the pass found (fixes 29 to 33, in the table below)
+Found by the wide compare and the new players, in generated battles:
 
-- **Fix 29: Perish Song after the deciding faint.** Found first by the wide compare on two battles of the old pool
-  (342, 457: the state after the last blow), then as a wrong winner in the mixed batch (20596: the game says draw, the
-  engine said the player won).
-- **Fix 30: a Pokemon thawed by a Fire move** stayed frozen in its party record (20276). Only a player that switches
-  could ever show the effect on play.
+- **Fix 29: Perish Song after the deciding faint** (342, 457; the wrong winner in 20596: a draw, the engine said the
+  player won).
+- **Fix 30: a Pokemon thawed by a Fire move** stayed frozen in its party record (20276).
 - **Fix 31:** a fainted Pokemon's party status (no effect on play).
-- **Fix 32: Foresight in the AI's other two passes** (a lead of the second pass), with a staged silver Noland battle.
-- **Fix 33: three PP changes that did not reach the party record** (Perish Song and Magic Coat against Pressure, a
-  Leppa Berry). Found by the wide compare on the old pool with the old player (5908, 7879). After it, all 31 places
-  where the game's battle code writes a party Pokemon were checked against the engine (`party-pp-writes.md`).
+- **Fix 33: three PP changes that did not reach the party record** (5908, 7879).
 
-Fixes 30, 31 and 33 are one kind of error: the Pokemon on the field was right and its party record was not. The old
-compare could not see a party record, and the old player never left the field by choice, so no battle number changed.
+Leads of the earlier passes, each with a ROM proof:
 
-No other difference appeared: no wrong damage, no wrong status, stage, PP, item, timer or weather at any decision of any
-battle driven in this pass, and no legality error (every decision the engine offered was taken by the ROM, and every
-refusal probe was refused by the ROM).
+- **Fix 32: Foresight in the AI's other two passes** (staged silver Noland battle).
+- **Fix 34: the game's item check after every action** (the cure berry after Pursuit on a switching Pokemon, #214).
+- **Fix 35: a forced Struggle that never starts** sorts as Struggle at the end of the turn.
 
-### Known leads of the earlier passes
+Found by the Metronome sweep (497 staged battles with real sets; the last two have nothing to do with Metronome, the
+sweep only happened to reach them):
+
+- **Fix 36: a Transformed Pokemon's moves spent the PP of its own moves** in the party record.
+- **Fix 37:** a faint cleared the Lock-On mark early (no effect on play).
+- **Fix 38: an opponent's Intimidate blocked by the player's Mist lowered the opponent's own Attack.**
+- **Fix 39: a Pokemon that faints from Spikes as it is switched in ends the turn.** The engine let the other side still
+  use its move against the replacement. This one needs no rare move: Spikes and a weak switch-in are enough.
+- **Fix 40:** after an end-of-turn faint whose replacement dies on Spikes, the game forgets the player's last move;
+  the engine forgot the other side's.
+
+Fixes 30, 31, 33 and 36 are one kind of error: the Pokemon on the field was right and its party record was not. The
+old compare could not see a party record, and the old player never left the field by choice.
+
+The record of each turn had a hole until the first stop of this pass: a turn without a player decision (the second
+turn of a two-turn move, a recharge turn, the later turns of Rollout / Outrage / Uproar) was not in it, so the tally
+could not count what happened there (`tally.md`). The final run's records have every turn.
+
+### Known leads of the earlier passes: all closed
 
 | lead | state |
 |---|---|
 | Foresight in the AI try-to-faint and check-viability type checks | **fixed** (fix 32), staged ROM battle `stages/foresight-noland.json` |
-| The AI final pick with masked slots and the score flattening at 0 | **proven unreachable** from the source: `tools/report/ai-score-bounds.py` walks every path of the three AI scripts; a usable slot ends at 77 or more, a masked slot at 25 or less (`ai-scripts-unusable-slots.md`, pinned by `tests/parityMacAiScoreBounds.test.ts`) |
-| The Rain Dance stale-register read (`AI_CV_RainDance`) | **proven unreachable** from the pool data: no Rain Dance set belongs to a species with Drizzle or Speed Boost (`ai-heal-weather-stale-register.md`, last section) |
-| Cure berries in the after-faint item pass (`HandleFaintedMonActions` state 6, `battle_util.c:1961`, battler 0 only) | **open, reach narrowed.** A status that a berry cures is always followed by an item pass before the next state 6, with one exception: Pursuit that hits a switching Pokemon runs only part of the move-end steps (`BattleScript_PursuitDmgOnSwitchOut`: `moveendfromto MOVEEND_ON_DAMAGE_ABILITIES, MOVEEND_CHOICE_MOVE`), which skips the item step. So the case is: the **player** uses Pursuit on an opponent that switches out, the outgoing Pokemon's contact ability (Static, Poison Point, Flame Body, Effect Spore) statuses the player's Pokemon, and that Pokemon holds the matching cure berry. The game cures it right after the switch, the engine at the end of the turn. The only rule effect found: a paralysis cured before the end-of-turn speed order. Not fixed yet. |
-| The forced Struggle that never started (`gProtectStructs[].noValidMoves` kept) | **open, reach narrowed.** The flag is cleared when the Struggle starts (`battle_util.c:100-102`) and when its user faints (`FaintClearSetData`, `battle_main.c:3294`). It is kept when the user's turn is cancelled: `BattleScript_FaintedMonSendOutNew` ends with `cancelallactions` (`battle_scripts_1.s:2895`), so when the faster Pokemon faints from its own move (Struggle recoil in a stall, Explosion) and its replacement comes in, the slower one's queued Struggle never runs. The end-of-turn order then reads Struggle (priority 0) for it; the engine reads the move under its cursor. They differ only when that move has a non-zero priority (Protect, Quick Attack ...). Needs Pokemon that are not Factory sets to stage (ROM-only proof). Not fixed yet. |
-| White Herb on a Baton Pass switch-in: "Spikes already damaged" stays set | modeled by fix 25, still never seen on the ROM; a staged battle is on the list |
+| The AI final pick with masked slots and the score flattening at 0 | **proven unreachable** from the source: `tools/report/ai-score-bounds.py` (a usable slot ends at 77 or more, a masked slot at 25 or less; `ai-scripts-unusable-slots.md`) |
+| The Rain Dance stale-register read (`AI_CV_RainDance`) | **proven unreachable** from the pool data: no Rain Dance set belongs to a species with Drizzle or Speed Boost (`ai-heal-weather-stale-register.md`) |
+| Cure berries in the after-action item pass (`HandleFaintedMonActions` state 6) | **fixed** (fix 34), Mechanic Lab ROM proof (`cure-berry-after-action.md`) |
+| The forced Struggle that never started (`gProtectStructs[].noValidMoves` kept) | **fixed** (fix 35), Mechanic Lab ROM proof (`forced-struggle-never-started.md`) |
+| White Herb on a Baton Pass switch-in: "Spikes already damaged" stays set | **seen on the ROM** (Mechanic Lab seed 701): the next Pokemon of that side takes no Spikes damage. The engine already did this; a test pins it (`white-herb-baton-pass.md`) |
+| Magic Coat against Pressure (fix 33) | **source and test only**, and Factory sets alone cannot stage it: the three Magic Coat sets (Spoink 121, Kecleon 220, Grumpig 251) are of challenges 1 and 2, and the only Pressure Pokemon there (Absol 247: Bite, Razor Wind, Future Sight, Quick Attack) has no move that Magic Coat reflects. It can occur only when Metronome calls Magic Coat against a Pressure Pokemon that uses a status move in the same turn (Dusclops, the legendary Pokemon) |
 
 ### The tally
 
-Rows: every move effect (166), ability (71) and hold effect (39) of the Level 50 sets, and 107 situations (switches,
-traps, refusals, each status and its per-turn step, weather, screens, outcomes): 383. The full table, with a column per
-player: `docs/replay-batches/2026-11-13-fourth-pass-tally.md`. Rules of the rows: `tally.md`.
+The full table, with a column per player: `docs/replay-batches/2026-11-13-fourth-pass-tally.md`. Rules: `tally.md`.
+It is made from the 3,534 matching Scene OFF battles of the final run.
 
-| kind | rows | cannot occur (source proof) | covered by a matching battle | zero |
+The rows of the work order (every move effect, ability and hold effect of the Level 50 sets, and the situations):
+
+| rows | count | cannot occur (source proof) | covered by a matching battle | zero |
 |---|---|---|---|---|
-| move effects | 166 | 3 | 162 | 1 |
-| abilities | 71 | 7 | 62 | 2 |
-| hold effects | 39 | 0 | 37 | 2 |
-| situations | 107 | 2 | 96 | 9 |
-| all | 383 | 12 | 357 | 14 |
+| move effects | 166 | 1 | 165 | 0 |
+| abilities | 71 | 7 | 64 | 0 |
+| hold effects | 39 | 0 | 39 | 0 |
+| situations | 108 | 2 | 103 | 3 |
+| together | 384 | 10 | 371 | **3** |
 
-What each batch added:
+Row families added in this pass:
 
-- **The mixed batch alone** covers 345 rows. Per player in that batch: `ai-v1` (600 battles) covers 317 rows, 8 of
-  them only it (Triple Kick, Tri Attack, Dragon Rage, Snore, Rapid Spin, Hyper Cutter, a stolen item, Curse damage).
-  `census` (200) covers 303, 7 only it. `random-v1` (199) covers 317, 18 only it, among them every refusal row (five
-  kinds of trap, four kinds of refused move), Arena Trap, Shadow Tag, Suction Cups, Forecast and the recharge turn.
-- **The 50 proof battles** add 2: Pursuit that hits a switching Pokemon, and Marvel Scale.
-- **The pool and the Brain lists** (old player) add 10: Damp, Sturdy, Vital Spirit, White Smoke, Focus Band, the Leppa
-  Berry, the burn of Blaze Kick and of a thawing Fire move, Bide storing and attacking (through Metronome).
-- Over all batches: `census` covers 342 rows (17 only it), `random-v1` 323 (13 only it), `ai-v1` 317 (1 only it).
-  No player can be dropped: each fills rows the other two do not.
+| rows | count | cannot occur | covered | zero |
+|---|---|---|---|---|
+| move effects only Metronome can reach | 29 | 1 | 26 | 2 |
+| every set on the field | 739 | 0 | 739 | 0 |
+| every move of the sets used and worked | 274 | 1 | 273 | 0 |
 
-The 12 rows that cannot occur, each with its source reason in `tally.md`: Illuminate, Stench, Run Away, Pickup, Plus,
-Minus, Lightning Rod; Helping Hand; Return; Hidden Power (only Unown has it, and the Factory never hands out Unown);
-Snatch stealing a move (Snatch can never run); "Torment blocks the chosen move" at move use (a dead script).
+- **The 3 zero rows:** a move refused under Imprison; Imprison blocking a move that was already chosen; Rage building.
+  All three need Metronome to call the move at the right moment (no set has Imprison or Rage). The sweep called
+  Imprison and Rage, but not in the turn that shows these. They need more Metronome battles of the right shape.
+- **The 2 zero Metronome rows:** Camouflage; the flinch of Twister. Not called (or no flinch) in 497 sweep battles.
+- **The 10 + 2 rows that cannot occur**, each with its source reason in `tally.md`: Illuminate, Stench, Run Away,
+  Pickup, Plus, Minus, Lightning Rod; Helping Hand (always fails in singles; also as a move row); Snatch stealing a
+  move; "Torment blocks the chosen move" at move use (a dead script); Teleport (always fails in a trainer battle).
+- Return and Hidden Power were wrongly on that list at the first stop: no Factory Pokemon has them, but Metronome can
+  call them. They are covered now (the sweep).
 
-The 14 zero rows (each needs a staged battle or a source proof):
+What each list added (rows of the first table / Metronome rows / sets):
 
-- reachable with Factory sets: Liquid Ooze; Magnet Pull and the switch it refuses; Mental Herb; Rawst Berry; the
-  flinch of Sky Attack; Rapid Spin clearing Spikes / Leech Seed / a trap; a move refused under Disable; Uproar waking
-  a sleeper;
-- reachable only when Metronome calls the move (no set has Mist, Imprison or Rage): Mist blocking a stat drop, Mist
-  ending, a move refused under Imprison, Imprison blocking a chosen move, Rage building.
+| after | rows covered | Metronome rows | sets on the field |
+|---|---|---|---|
+| proof (50) | 240 | 0 | 210 |
+| + mixed (1,000) | 348 | 4 | 645 |
+| + pool (962) | 359 | 13 | 645 |
+| + Brain (408) | 359 | 13 | 645 |
+| + eighth challenge (600) | 359 | 13 | **739** |
+| + staged (13) | 369 | 15 | 739 |
+| + Metronome sweep (497) | 371 | 26 | 739 |
 
-### Not done in this pass (so far)
+Per player, over all lists: `census` (1,699 matching battles) covers 344 of the 371 rows, 3 of them only it;
+`random-v1` (368) covers 336, 4 only it (the refusal rows); `ai-v1` (957) covers 329, 1 only it; the staged battles
+(510) cover 340, 12 only they.
 
-The pass is not at its finish line. This is the state at the first stop (the first mixed batch matches and the gates
-are green), written so that the fixes can be delivered.
+The 13 staged battles fill 10 rows no generated battle filled: Magnet Pull and the switch it refuses, Mental Herb,
+Rawst Berry, the flinch of Sky Attack, Rapid Spin clearing, a move refused under Disable, an uproar waking a sleeper at
+the end of the turn, Mist blocking a stat drop, Mist ending.
 
-- **The tally is not full.** 14 rows are zero (listed above). Each needs a staged battle or a source proof. The nine
-  that Factory sets can reach come first.
-- **Metronome-only effects are not rows yet.** No Level 50 set has Mist, Imprison, Rage, Snatch, Bide, Mirror Move,
-  Nature Power, Mimic, Sketch, Transform or Assist, but Metronome (Chansey 227, Clefable 389) can call most of them.
-  The plan is a staged "Metronome sweep" (many lab seeds of one staged battle), with a row per called effect.
-- **Two leads are open** (table above): the cure berry in the after-faint item pass, and the forced Struggle flag that
-  is kept after `cancelallactions`. The White Herb / Baton Pass / Spikes flag is still unseen on the ROM.
-- **Magic Coat against Pressure** (fix 33) has no ROM battle; source and test only.
-- **Not started:** the 500 Scene ON battles in the same mix; the confirming batch after the last fix; the lab setup
-  failures in `oracle/battle_lab.py` (3623 5633 5736 8075 9188, Brain 10127, gold 10022; 6048 and gold 1447; 9073).
-  The work order puts the lab work after this stop.
-- **A switch-heavier random player** was not needed so far: `random-v1` made 593 voluntary switches in its 200 battles
-  of the mixed batch and filled every trap refusal except Magnet Pull, and Pursuit hit a switching Pokemon in the proof
-  batch.
-- **A hole found in every pass so far: the eighth challenge and later was never replayed.** A seed's streak is
-  `(seed * 11) % 49`, so every generated battle is of challenges 1 to 7 (sets 110..755). From the eighth challenge on
-  the game draws from sets 372..849. The 94 sets 756..849 (the legendary birds and beasts, the Regis, Latias, Latios,
-  and the strongest sets of ten other species: 11 species appear nowhere else) were never in a replayed battle. Their
-  move effects and items are in the tally through other sets, but these Pokemon themselves, their species abilities
-  in play and the AI against them are not. Next step: an opt-in challenge number for the generator and a mixed batch
-  at challenge 8, with tally rows per species.
-- **Out of this pass:** Open Level, and the later battles of a round (every battle driven here starts from a fresh
-  team with no rental swap; the streak only picks the set range and the trainer).
+### Found on the way, outside the battle rules (not fixed here)
+
+- **The rental select screen lets the player take two Pokemon of one species.** The six rentals can hold one species
+  twice (a quirk of `GenerateInitialRentalMons`, which the engine has). The game's select screen then refuses the
+  second one: "Can't select same POKeMON." (`Select_AreSpeciesValid`, `battle_factory_screen.c:2256-2276`; the swap
+  screen has the same check, `Swap_AlreadyHasSameSpecies`, `:4162`). The engine's RENT handler has no such check
+  (`src/engine/core.ts`, the `MENU_OPTION_RENT` branch; `docs/rent-flow-notes.md` lists it as an open risk). It shows
+  mostly from the eighth challenge on, where about 3 teams in 100 have such a pair in their first three rentals. The
+  replay tool now picks a team the game would allow. For the box.
+- **One animation evidence test fails on master** (`tests/animation/sandTombEvidenceCheckpoint`): a file-hash pin that
+  a box commit did not update (see "Gates"). For the box.
+
+### Not done
+
+- **3 tally rows are zero** (above): two Imprison rows and "Rage building". 2 Metronome rows are zero (Camouflage,
+  Twister's flinch). Next: Metronome battles shaped for them (an opponent that is slower than Chansey and attacks,
+  for Rage; an opponent Chansey against a player that keeps using a shared move, for Imprison).
+- **Magic Coat against Pressure** (fix 33): source and test only; Factory sets alone cannot stage it (leads table).
+- **Open Level, and later battles of a round:** not started, by the work order. What each would take is below.
 - **Presentation, seen in code only, not touched:** when the player is trapped the engine's party menu says the
   Pokemon "is already in battle"; the game says it "can't be switched out". The forced-move menu gap of the earlier
   passes is unchanged.
 - **What the wide compare leaves out** is listed in `wide-compare.md` ("What is left out, and why").
+- **`ai-v1`** sees only what was revealed of the opponent and is a decision policy, not a faithful copy of the game's
+  AI on the player's side (`replay-players.md`). Its switches are few (34 in 600 battles); `random-v1` supplies the
+  switches.
+
+### Open Level and later battles of a round: what it would take (not started)
+
+- **Open Level.** The replay request and the lab are Level 50 only (`level: 50`; `LEVEL_50_SET_RANGES` in
+  `oracle/battle_lab.py`). It needs: the lab's `factoryLegal` staging for the Open Level ranges and levels; the level
+  mode in the replay request and in the engine's battle construction (the engine side was not looked at in this lane);
+  a tally pool for the Open Level sets. The battle rules are the same code; what is new is the sets (372..881) and the
+  level-100 numbers.
+- **Later battles of a round** (the team carried over, HP and PP restored, a rental swap between battles). Every battle
+  driven so far starts from a fresh team. It needs a ROM drive through the screens between two battles (the lab has a
+  `walkup` mode for the walk to the first battle only), the swap screen's decisions in the test players, and a compare
+  of the team at the start of each battle. `rentalSwapCount` in the request already sets the rental rank.
 
 ## Third pass (2026-11-12): Frontier Brain (Noland) battles
 
@@ -317,6 +354,13 @@ late may also need the earlier ones).
 | 31 | No effect on play: a fainted Pokémon kept its last status in the party record (the game clears it). Fixed so the wide compare checks fainted party members too. | new (wide compare) | `faint-party-status.md` | - |
 | 32 | Against a Ghost that the opponent had hit with Foresight, the full AI (silver Noland's Machoke or Hitmonlee) still saw its Normal and Fighting moves as doing 1 damage, and its Cross Chop took one random roll too many. | second-pass lead | `ai-effectiveness-foresight.md` | staged battle `foresight-noland` (lab seed 30046) |
 | 33 | A switch-in rebuilds PP from the party record, and three PP changes never reached it. A Perish Song user that paid the extra Pressure PP, and a Magic Coat user that bounced a Pressure Pokémon's move, got that PP back after leaving the field and returning. A Pokémon whose Leppa Berry restored a move lost the restored PP again the same way. The party menu and the summary showed the wrong PP too. | new (wide compare) | `party-pp-writes.md` | 5908 (Perish Song), 7879 (Leppa Berry); Magic Coat: source and test only |
+| 34 | After every action the game checks the player's held item once more and eats a cure berry at once. The engine did that for White Herb only. When the player's Pursuit hits a switching opponent whose Static (Poison Point, Flame Body, Effect Spore) strikes, the game cures the player right after the switch; the engine waited for the end-of-turn item step, after the two Pokémon are sorted by speed, so weather damage, Leech Seed and poison could come in the other order. | lead #214 | `cure-berry-after-action.md` | Mechanic Lab (seed 502) |
+| 35 | A Pokémon with no usable move must Struggle. When the faster Pokémon on the other side faints from its own move and is replaced at once, the Struggle does not happen; the game then sorts that Pokémon for the end-of-turn effects as if it had used Struggle. The engine used the priority of the move under its cursor (Protect, Endure, Quick Attack ...), so it went first where the game lets the faster one go first. | second-pass lead | `forced-struggle-never-started.md` | Mechanic Lab (seed 601) |
+| 36 | After Transform (only through Metronome in the Level 50 Factory) every copied move a Pokémon used wrote its PP over the PP of the Pokémon's own move in that slot. It came back from the bench with the wrong PP on its real moves. | new (Metronome sweep) | `transformed-pp.md` | staged battle `metronome-transform` |
+| 37 | No effect on play: a faint cleared the Lock-On mark its owner had left on the other Pokémon; the game clears it when the next Pokémon enters the slot. | new (Metronome sweep) | `lock-on-mark-at-faint.md` | staged battle `metronome-lock-on` |
+| 38 | When Mist protected the player's Pokémon from an opponent's Intimidate, the engine lowered the Intimidate user's own Attack by one stage. The game lowers nobody's. | new (Metronome sweep) | `intimidate-against-mist.md` | staged battle `metronome-lock-on` |
+| 39 | When a Pokémon that was switched in fainted from Spikes and was replaced, the engine still ran the other side's chosen move against the replacement. The game ends the turn there. Both sides. | new (Metronome sweep; needs no Metronome) | `faint-on-switch-in-cancels-turn.md` | staged battle `spikes-faint-cancels-turn` |
+| 40 | When a Pokémon faints at the end of a turn and its replacement faints from Spikes as it comes in, the game forgets the last move of the first Pokémon still present (the player's). The engine forgot the fainted side's. Encore, Disable and Torment read it on the next turn. | new (Metronome sweep; needs no Metronome) | `end-turn-attacker.md` | staged battle `spikes-faint-at-turn-end` |
 
 Group view against the handoff's queue (a seed can sit in two groups):
 
@@ -362,8 +406,7 @@ New source-read leads found on the way (no ROM seed yet):
 | seed | state | next step |
 |---|---|---|
 | 796, 1986, 2297, 2716, 2907, 3009, 3807, 4560, 4924, 5464, 5632, 6430 | Both sides are out of PP and trade Struggle while Leftovers heals; the battle does not end. Driven with the engine budget at 2,000,000 frames and the ROM drive at 600,000 frames: 720 to 943 engine states match in order and no mismatch appears (796: 894). | none: they cannot be driven "to battle end" in practical time. Keep them off the regression list; they are long-run checks, not open rule bugs. |
-| 1447 with `ROM_REPLAY_SYMBOLS=1` (gold Noland; request `factoryBrain`, challenge 5, player sets 569 649 605, seed 1447) | The lab fails before the battle is staged: `RuntimeError: battle lab route did not reach the player action menu` (`oracle/battle_lab.py` `_finish_intro_to_action_menu`). Same message as bulk seed 6048. | top layer (lab code; this lane does not edit `oracle/`). |
-| 3623, 5736 | The lab staging itself plays turn 1 before the snapshot (an A press of the intro acknowledgement lands on the first action menu; `oracle/battle_lab.py` `_finish_intro_to_action_menu`). The replay now refuses such a setup (rc 13) instead of reporting a mismatch. | top layer: make the staging stop pressing A once the action menu is up. |
+| 1447 (gold Noland), 3623, 5633, 5736, 8075, 9188, 6048, 9073, silver 10127, gold 10022 | **closed (fourth pass).** These were lab setup failures (`oracle/battle_lab.py`: an A press of the intro landed on the first action menu; or the route did not reach the menu). The top layer fixed the lab (`3917eca39`, on master). All ten are staged now and match to the end on the fourth pass's final engine. | - |
 
 Long battles that do end need higher caps than the stock chain (engine 200,000 frames, ROM drive 80,000): 705 (82,835 ROM
 frames), 1338, 1904, 2546 (426,522), 2658, 2742, 3504 (398,092), 3589, 3789, 4485, 5437, 5950 (144,657), 6720, 6765.
@@ -411,6 +454,10 @@ Fourth pass:
 | `factoryBrainRoundShape` | gold seed 24 -> 14 | on seed 24 the third battle of the round ends with Perish Song taking both last Pokemon: a draw now, so the round ends there (fix 29) |
 | `tools/report/ability-item-parity-census.ts`, `docs/gate6-coverage-manifest.json` / `.md` | pinned source lines moved (twice) | fixes 29, 32 and 33 added lines above them; no row changed its content |
 | `factoryAiScoredWiringParity` samples | + a Foresight target | fix 32 added an input |
+| `battleScriptHitChainOpcode` "faint cleanup clears another battler's sure-hit marker ..." | now "... leaves another battler's sure-hit marker alone" | it pinned the wrong rule (fix 37) |
+| `battleScriptRulesContext` key list | + `noValidMovesKept`, `intimidateBattler` | fixes 35, 38 |
+| `battleScriptSketchOpcode` "transformed user" row | Sketch's party PP after the turn 0 -> 1 | a Transformed Pokemon's `ppreduce` does not write the party record (fix 36) |
+| `docs/gate6-coverage-manifest.json` / `.md` | pinned source lines moved, two new test paths | fixes 34 and 35 |
 
 One presentation lead seen while re-pinning and not looked at: census battle 32 trips `sa125`'s ON - OFF row check on a
 CONFUSION anchor (139 vs 100).
@@ -418,6 +465,14 @@ CONFUSION anchor (139 vs 100).
 ## Gates
 
 Typecheck, full suite and build are run on a clean checkout of the branch tip (a separate gate worktree).
+
+Fourth pass, second stop: gate on `d0afbccc2` (fixes 29 to 40, with master `937c7caee` merged in): typecheck ok, build
+ok, **14,745 tests pass, 1 fails**. The one is not from this lane: `tests/animation/sandTombEvidenceCheckpoint` fails
+the same way on a clean checkout of master `937c7caee`. Its fixture pins the sha256 of
+`tools/compare/sandTombSourceAudit.ts`, and box commit `11e1a66b4` (the sprite pixel provider installs) changed that
+file. Left to the box. The commits after `d0afbccc2` are documents, the per-battle JSON and the tally table; no test
+reads them. The gate before it, on `04d65eb7c`, had one more failure: `battleScriptSketchOpcode` "transformed user",
+which pinned the party PP write that fix 36 removed (re-pinned in `d0afbccc2`).
 
 Fourth pass, first stop: gate on `61d84a74f` (fixes 29 to 33 with box master `a21ec4148` merged in): typecheck ok,
 build ok, **14,724 tests pass, 3 fail**. The three are not from this lane: `tests/animation/megaHornActualCore`,

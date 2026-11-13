@@ -1,0 +1,62 @@
+{
+ "name": "rapid-spin",
+ "why": "Wartortle (set 281) uses Rapid Spin every turn against Jumpluff (set 334, Leech Seed): the spin removes the seed.",
+ "seed": 40001,
+ "challengeNum": 2,
+ "battleNum": 0,
+ "trainerId": 122,
+ "playerSetIds": [
+  281,
+  269,
+  276
+ ],
+ "opponentSetIds": [
+  334,
+  283,
+  297
+ ],
+ "script": {
+  "actions": [
+   {
+    "move": 2
+   },
+   {
+    "move": 2
+   },
+   {
+    "move": 2
+   },
+   {
+    "move": 2
+   },
+   {
+    "move": 2
+   },
+   {
+    "move": 2
+   },
+   {
+    "move": 2
+   },
+   {
+    "move": 2
+   },
+   {
+    "move": 2
+   },
+   {
+    "move": 2
+   },
+   {
+    "move": 2
+   },
+   {
+    "move": 2
+   }
+  ],
+  "then": "census"
+ },
+ "expect": [
+  "situation:field:rapid-spin:clears"
+ ]
+}
