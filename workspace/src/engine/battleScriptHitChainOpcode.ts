@@ -4705,6 +4705,11 @@ function createCleareffectsonfaintOpcodeHandler(
     const nextRulesContext = Object.freeze({
       ...rulesContext,
       battlers: Object.freeze(battlers),
+      // BtlController_EmitSetMonData(REQUEST_STATUS_BATTLE, status1 = 0) (battle_script_commands.c:3071-3073): the fainted
+      // Pokemon's PARTY status is cleared with the battler's (docs/parity-mac/faint-party-status.md).
+      ...(clearsStatus1
+        ? { party: withBattleScriptPartyMemberStatus1(rulesContext.party, activeBattlerState.side, activeBattlerState.partyIndex, 0) }
+        : {}),
       choicedMove,
       moveHistory: Object.freeze({
         ...rulesContext.moveHistory,

@@ -472,18 +472,12 @@ if (mode === "request") {
     // Left out of the check (docs/parity-mac/wide-compare.md):
     //  - a fainted active Pokemon (0 HP on both sides) keeps only its party index, species and HP: its slot is about to be refilled, and the ROM has already run
     //    FaintClearSetData at the replacement menu while the engine's request boundary sits before it;
-    //  - a fainted party member (0 HP on both sides) keeps only its species and HP: the ROM clears its status1 at the faint (Cmd_cleareffectsonfaint,
-    //    battle_script_commands.c:3063-3079), the engine's party record keeps the last value, and nothing reads the status of a fainted Pokemon
-    //    (Cmd_if_status_in_party and the party menu test HP first; nothing revives in the Factory);
     //  - a ROM party member whose box could not be read on that frame (see soundEventProbe.py read_party_member) is skipped.
     let unread = 0;
     const strip = (w: any, engineWide: any, romWide: any) => ({
       ...w,
       battlers: w.battlers.map((x: any, i: number) => (engineWide.battlers[i].hp === 0 && romWide.battlers[i].hp === 0 ? { partyIndex: x.partyIndex, species: x.species, hp: 0 } : x)),
-      parties: w.parties.map((side: any[], si: number) => side.map((m: any, mi: number) => {
-        if (engineWide.parties[si][mi].hp === 0 && romWide.parties[si][mi].hp === 0) return { species: romWide.parties[si][mi].species === null ? null : m.species, hp: 0 };
-        return romWide.parties[si][mi].species === null ? { hp: m.hp, status1: m.status1 } : m;
-      })),
+      parties: w.parties.map((side: any[], si: number) => side.map((m: any, mi: number) => (romWide.parties[si][mi].species === null ? { hp: m.hp, status1: m.status1 } : m))),
     });
     const points: unknown[] = []; const fields: Record<string, number> = {};
     const compared = Math.min(engine.wide.length, drive.wide.length);

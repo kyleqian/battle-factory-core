@@ -38,14 +38,12 @@ infatuation bits are inside `status2`.
 - **A fainted active Pokemon** (0 HP on both sides): only its party slot, species and HP. Its slot is about to be
   refilled, and the ROM has already run `FaintClearSetData` when the replacement menu opens while the engine's request
   boundary sits before it.
-- **`status1` of a fainted party member.** The ROM clears it at the faint (`Cmd_cleareffectsonfaint`,
-  `battle_script_commands.c:3063-3079`); the engine's party record keeps the last value. Nothing reads the status of a
-  fainted Pokemon (`Cmd_if_status_in_party` and the party menu test HP first) and nothing revives in the Factory.
 - **The state after the deciding blow.** It is written to the summary as `finalNotes` and does not fail a battle. The
   ROM goes on with the rest of that turn (the driver waits for the end-turn handler; `HandleWishPerishSongOnTurnEnd`
-  still runs: Perish Song can take the winner's Pokemon after the battle is decided), the engine stops at the outcome,
-  and the Factory restores the party after every battle. What carries over is the winner, and that is compared. See the
-  open lead "Perish Song after the deciding faint" in `STATUS.md`.
+  still runs), the engine stops where its last script ends, and the Factory restores the party after every battle. What
+  carries over is the winner, and that is compared. The first use of these notes found a real rule error (Perish Song
+  after the deciding faint, `perish-song-after-outcome.md`); what is left in them is `isFirstTurn` and similar counters
+  of the last turn's clean-up.
 - **Not in the wide state at all:** `gProtectStructs`, `gSpecialStatuses`, `gLastUsedAbility` and the other per-move
   scratch values (they are reset every turn and show in the next damage number or roll), `gBattleStruct` internals, the
   opponent's AI structs (covered by the RNG stream), Follow Me (doubles), the battle-start entry order.

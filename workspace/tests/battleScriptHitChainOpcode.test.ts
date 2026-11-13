@@ -7,6 +7,7 @@ import {
   type BattleScriptRulesContext,
   type BattleScriptRulesContextInput,
   type BattleScriptStatusRulesExternalPorts,
+  withBattleScriptPartyMemberStatus1,
 } from "../src/engine/battleScriptRulesContext.ts";
 import {
   loadBattleScriptProgram,
@@ -3938,6 +3939,21 @@ describe("production cleareffectsonfaint (Cmd_cleareffectsonfaint) dispatch", ()
       ]);
     },
   );
+
+  // docs/parity-mac/faint-party-status.md: BtlController_EmitSetMonData(REQUEST_STATUS_BATTLE, 0) (battle_script_commands.c:3071-3073) clears the PARTY
+  // Pokemon's status with the battler's. The engine's party record kept the last status of a fainted Pokemon (the ROM's party read 0 in every
+  // wide-compare battle with a statused faint, for example ROM seeds 10 and 12).
+  it("writes the cleared status to the fainted Pokemon's party record", () => {
+    const base = context(0, {}, {}, { hp: 0, status1: 0x40 });
+    const slot = base.battlers[1]!.partyIndex;
+    const rc = Object.freeze({ ...base, party: withBattleScriptPartyMemberStatus1(base.party, 1, slot, 0x40) }) as typeof base;
+    expect(rc.party.opponent[slot]!.status1).toBe(0x40);
+    const { result } = stepAtProgramCounter(cleareffectsonfaintTargetPc, rc);
+    if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+    // Unfixed: 0x40.
+    expect(result.state.rulesContext.party.opponent[slot]!.status1).toBe(0);
+    expect(result.state.rulesContext.party.player).toBe(rc.party.player);
+  });
 
   it("clears STATUS2_INFATUATED_WITH(target) on every other battler while leaving unrelated status2 bits alone", () => {
     const infatuatedWithTarget = (1 << (16 + 1)) >>> 0; // gBitTable[1] << 16
