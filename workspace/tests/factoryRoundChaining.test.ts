@@ -1,19 +1,12 @@
 import { describe, expect, it } from "vitest";
-import frontierMonsData from "../src/data/gen/battle-frontier-mons.json" with { type: "json" };
-import naturesData from "../src/data/gen/natures.json" with { type: "json" };
 import type { GbaButton } from "../src/input.ts";
-import type { FactoryRentalRecord } from "../src/engine/battleScenario.ts";
-import type { BattleSubmittedDecision } from "../src/engine/battleDecisionBoundary.ts";
-import { createFactoryCorpusPartyMember } from "../src/engine/factoryCorpusParty.ts";
-import { createInitialState, tick, type EngineState } from "../src/engine/core.ts";
+import { tick, type EngineState } from "../src/engine/core.ts";
+import type { FactoryRoundBattleOrchestratorState } from "../src/engine/factoryRoundBattleOrchestrator.ts";
 import {
-  chooseFactoryRoundSwap,
-  completeFactoryRoundPresentation,
-  createFactoryRoundBattleOrchestrator,
-  advanceFactoryRoundPresentation,
-  submitFactoryRoundPlayerDecision,
-  type FactoryRoundBattleOrchestratorState,
-} from "../src/engine/factoryRoundBattleOrchestrator.ts";
+  driveGeneratedRoundToCompletion,
+  PLAYER_TRAINER_ID,
+  stateAtDecidedRound,
+} from "./helpers/factoryRoundCarrier.ts";
 import {
   advanceFactoryCarry,
   createInitialFactoryCarry,
@@ -24,135 +17,8 @@ import { getFactoryRentalRank } from "../src/engine/factoryRentalGeneration.ts";
 import { TRAINER_FRONTIER_BRAIN } from "../src/engine/factoryAiMaskSelection.ts";
 import { getFactoryFrontierBrainStatus } from "../src/engine/frontierBrainStatus.ts";
 
-const PLAYER_TRAINER_ID = 0x89ab_cdef;
-const natureByName = new Map(naturesData.natures.map((row) => [row.name, row.index]));
-
-// ---------------------------------------------------------------------------
-// Orchestrator-level round driver (mirrors factoryRoundBattleOrchestrator.
-// test.ts's own carrier helper): drives a real generated round to
-// roundComplete/roundLost through the orchestrator's public battle API,
-// bypassing the draft/battleRoom UI entirely - the seams this file's
-// scenario tests exercise are the terminal decline -> next-draft chain, not
-// the already-proven in-round battle mechanics. The player rents the same
-// three known-strong sets factoryRoundBattleOrchestrator.test.ts's own
-// carrier helper uses (664/678/527), so win/loss outcomes come from a
-// deliberately scripted battle plan (or a scripted swap-accept for the loss
-// case below), not from the live rental generator's arbitrary slot 0/1/2
-// pull - this file is pinning the chaining/carry wiring, not party strength.
-// ---------------------------------------------------------------------------
-
-function record(setId: number, fixedIv = 31): FactoryRentalRecord {
-  const set = frontierMonsData.entries[setId]!;
-  const personality = natureByName.get(set.nature)!;
-  const input = {
-    setId,
-    personality,
-    fixedIv,
-    abilitySlot: (personality & 1) as 0 | 1,
-    otId: PLAYER_TRAINER_ID,
-  };
-  return Object.freeze({
-    ...input,
-    abilitySlot: createFactoryCorpusPartyMember(input).abilitySlot,
-  });
-}
-
-function acknowledgeAndAdvance(
-  state: FactoryRoundBattleOrchestratorState,
-): FactoryRoundBattleOrchestratorState {
-  const commandId = state.round.presentation?.command.commandId;
-  if (commandId === undefined) throw new Error("expected a presentation command");
-  return advanceFactoryRoundPresentation(
-    completeFactoryRoundPresentation(state, { commandId }),
-  );
-}
-
-function choosePlayerDecision(
-  state: FactoryRoundBattleOrchestratorState,
-): BattleSubmittedDecision {
-  const boundary = state.battle?.boundary;
-  if (boundary?.kind !== "decision-required" || boundary.request.side !== "player") {
-    throw new Error("expected a player decision");
-  }
-  if (boundary.request.kind === "forced-switch") {
-    return { kind: "switch", partyIndex: boundary.request.legalPartyIndexes[0]! };
-  }
-  const active = state.battle!.rules.rulesContext.battlers[0]!;
-  const preferredSlot = active.partyIndex === 1 && active.isFirstTurn === 2 ? 3 : 0;
-  return boundary.request.legalDecisions.find(
-    (decision) => decision.kind === "use-move" && decision.moveSlot === preferredSlot,
-  ) ?? boundary.request.legalDecisions.find(
-    (decision) => decision.kind === "use-move",
-  )!;
-}
-
-/**
- * Drives a fresh `generateInitial` round to completion via the orchestrator's
- * public API only (no tick()/UI). `seed` is the round's starting
- * `rngValue`; `chooseSwap` lets a caller script an AskSwapMon accept (used
- * below to reach a scripted `roundLost`, matching
- * factoryRoundBattleOrchestrator.test.ts's own "lostAfterSwap" recipe).
- */
-function driveGeneratedRoundToCompletion(
-  carry: FactoryCarry,
-  seed: number,
-  chooseSwap: (
-    state: FactoryRoundBattleOrchestratorState,
-  ) => Parameters<typeof chooseFactoryRoundSwap>[1] = () => ({ type: "decline" }),
-  // "strong" (the known-reliable 664/678/527 trio) drives a win; "weak"
-  // rents whatever the live generator pulls into slots 0/1/2 - unlike the
-  // curated trio, arbitrary generated rentals are not tuned to win and are
-  // used below to reach a scripted roundLost regardless of carried streak.
-  partyStrength: "strong" | "weak" = "strong",
-): FactoryRoundBattleOrchestratorState {
-  const playerRecords = [record(664), record(678), record(527)] as const;
-  const savedRentalRecords = [...playerRecords, record(1), record(2), record(3)] as const;
-  let state = createFactoryRoundBattleOrchestrator({
-    id: `factory-round-chaining-carrier-${seed}`,
-    rngValue: seed,
-    factoryWinStreak: carry.factoryWinStreak,
-    playerTrainerId: carry.playerTrainerId,
-    battleTowerLevel50WinStreak: 0,
-    factorySymbolsCount: carry.factorySymbolsCount,
-    facilityState: { rentsCount: carry.rentsCount },
-    rentals: partyStrength === "strong"
-      ? {
-        type: "currentRecords",
-        playerRentalRecords: playerRecords,
-        savedRentalRecords,
-      }
-      : { type: "generateInitial", selectedRentalIndexes: [0, 1, 2] },
-  });
-  for (
-    let budget = 0;
-    budget < 1_000
-      && state.round.rules.phase !== "roundComplete"
-      && state.round.rules.phase !== "roundLost";
-    budget += 1
-  ) {
-    if (state.battle !== null) {
-      state = submitFactoryRoundPlayerDecision(state, choosePlayerDecision(state));
-      continue;
-    }
-    if (
-      state.round.rules.phase === "presentingBattleStart"
-      || state.round.rules.phase === "presentingBattleWin"
-      || state.round.rules.phase === "presentingSwapResult"
-    ) {
-      state = acknowledgeAndAdvance(state);
-      continue;
-    }
-    if (state.round.rules.phase === "awaitingSwapDecision") {
-      const commandId = state.round.presentation?.command.commandId;
-      if (commandId === undefined) throw new Error("expected swap-offer presentation command");
-      state = completeFactoryRoundPresentation(state, { commandId });
-      state = chooseFactoryRoundSwap(state, chooseSwap(state));
-      continue;
-    }
-    throw new Error(`unexpected carrier phase ${state.round.rules.phase}`);
-  }
-  return state;
-}
+// The orchestrator-level round driver (the strong 664 / 678 / 527 trio, scripted wins or a scripted loss) lives in
+// tests/helpers/factoryRoundCarrier.ts (shared with lbrd.test.ts).
 
 /**
  * tick()s an EngineState already parked at a decided round's terminal
@@ -192,17 +58,6 @@ function nextChallenge(
       round.facilityState.rentsCount,
     ),
     seed: round.round.rules.rngValue,
-  };
-}
-
-function stateAtDecidedRound(
-  round: FactoryRoundBattleOrchestratorState,
-  carry: FactoryCarry,
-): EngineState {
-  return {
-    ...createInitialState(),
-    factoryCarry: carry,
-    factoryRoundBattleOrchestrator: round,
   };
 }
 
