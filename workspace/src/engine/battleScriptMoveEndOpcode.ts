@@ -1069,6 +1069,17 @@ function createMoveendOpcodeHandler(): BattleScriptOpcodeHandler<BattleScriptRul
       });
       const outcome = executeMoveendState(currentContext, rules);
       if (outcome.kind === "transfer") {
+        // battle_script_commands.c:4489-4492: the endMode 2 check runs after every step, also after one that called a script
+        // (`effect` TRUE). When that step's increment lands on endState the steps end here, and the re-entered moveend only
+        // advances past the command. Only BattleScript_PursuitDmgOnSwitchOut meets it: its MOVEEND_SYNCHRONIZE_ATTACKER (step 5)
+        // can call a script and endState is MOVEEND_CHOICE_MOVE (6) (parity-mac fix 43, docs/parity-mac/pursuit-synchronize-moveend.md).
+        const transferred = outcome.transition.rulesContext;
+        if (endMode === 2 && transferred.moveendState === endState) {
+          return Object.freeze({
+            ...outcome.transition,
+            rulesContext: Object.freeze({ ...transferred, moveendState: MOVEEND_COUNT }),
+          });
+        }
         return outcome.transition;
       }
       rules = outcome.rules;
