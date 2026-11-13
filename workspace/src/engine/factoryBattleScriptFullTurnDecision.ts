@@ -723,6 +723,24 @@ function buildRules(
   return Object.freeze({ adapter: ADAPTER, phase, pendingPlayerDecision, rulesContext });
 }
 
+/**
+ * `gProtectStructs[b].noValidMoves` for the turn's second mover when its move action is cancelled. The game sets the flag at selection
+ * (AreAllMovesUnusable, battle_util.c:1125-1140) and clears it only when the forced Struggle starts (HandleAction_UseMove, :100-102) or when that
+ * battler faints (FaintClearSetData, battle_main.c:3294). When the first mover faints from its own action and its replacement comes in at once,
+ * `cancelallactions` (battle_scripts_1.s:2895) drops the second action: the Struggle never starts and the flag is still set when ENDTURN_ORDER sorts
+ * the battlers, so the sort reads Struggle's priority 0 for it and not the priority of the slot under its cursor.
+ * `faintedBattler` is the battler the faint dance replaced: when that is the second mover itself, its cell was cleared with it.
+ */
+function keepNoValidMovesOfCancelledStruggle(
+  rulesContext: BattleScriptRulesContext,
+  second: Readonly<{ mover: number; forcedStruggle: boolean }> | null,
+  faintedBattler: number,
+): BattleScriptRulesContext {
+  if (second === null || !second.forcedStruggle || second.mover === faintedBattler) return rulesContext;
+  if (rulesContext.battlers[second.mover]!.hp === 0) return rulesContext;
+  return createBattleScriptRulesContext({ ...rulesContext, noValidMovesKept: rulesContext.noValidMovesKept | (1 << second.mover) });
+}
+
 function buildForcedSwitchPendingRules(
   rulesContext: BattleScriptRulesContext,
   pendingScript: PendingForcedSwitchScript,
@@ -1785,6 +1803,30 @@ function actionEncoreArm(
   });
 }
 
+/**
+ * `HandleAction_UseMove`'s "choose target" block (`battle_util.c:148-156`), after its move / target arms: a
+ * MOVE_TARGET_SELECTED move goes to the foe's Follow Me user while that Pokemon's Follow Me is up and it has HP. In
+ * singles the target such a move carries is the foe already, with one exception: the player's Curse while the user is
+ * not a Ghost type, which the player's controller banks with the user itself as target (`moveMenuTarget`). Follow Me
+ * aims it at the foe; `Cmd_ppreduce`'s Pressure test reads that target (parity-mac fix 42,
+ * docs/parity-mac/follow-me-redirect.md).
+ */
+function followMeActionTarget(
+  rules: BattleScriptRulesContext,
+  mover: BattleScriptBattlerId,
+  moveId: number,
+  target: BattleScriptBattlerId,
+): BattleScriptBattlerId {
+  const move = MOVES_BY_ID.get(moveId);
+  if (!move || move.target.length !== 1 || move.target[0] !== "MOVE_TARGET_SELECTED") return target;
+  const attackerSide = rules.battlers[mover]!.side;
+  const followMe = rules.sideTimers[attackerSide === 0 ? 1 : 0]!;
+  if (followMe.followmeTimer === 0) return target;
+  const followTarget = followMe.followmeTarget;
+  if (rules.battlers[followTarget]!.side === attackerSide || rules.battlers[followTarget]!.hp === 0) return target;
+  return followTarget;
+}
+
 /** Runs one battler's chosen move from its LITERAL topology entry (census precedent, `factoryBattleScriptDecision.ts`'s own mechanism). */
 function runMoveAction(
   program: BattleScriptProgram,
@@ -1821,7 +1863,7 @@ function runMoveAction(
     mover,
     executedMoveId,
     moveSlot,
-    retarget?.target ?? target,
+    followMeActionTarget(actionRules, mover, executedMoveId, retarget?.target ?? target),
     forcedStruggle,
     encore?.movePosition ?? moveSlot,
   );
@@ -3157,7 +3199,7 @@ function continueFullTurnAfterAction(
     // itself already handles any still-pending second action.
     return finishFullTurn(
       ctx.rng, rngBeforeCalls, faint.state,
-      buildForcedSwitchPendingRules(faint.state.rulesContext, {
+      buildForcedSwitchPendingRules(keepNoValidMovesOfCancelledStruggle(faint.state.rulesContext, second, faint.battler), {
         programCounter: faint.state.programCounter,
         callStack: faint.state.callStack,
         scheduler: faint.state.scheduler,
@@ -3180,6 +3222,13 @@ function continueFullTurnAfterAction(
   // faint.kind is "no-fainted-battlers" (run the second action, if any) or
   // "resumed" (skip it, per cancelallactions).
   let preEndTurnState = handleBattleActionFinished(faint.state, actingMover);
+  if (faint.kind === "resumed") {
+    preEndTurnState = Object.freeze({
+      ...preEndTurnState,
+      // "resumed": the dance replaced a trainer-side Pokemon by itself (a player-side one asks the player, above)
+      rulesContext: keepNoValidMovesOfCancelledStruggle(preEndTurnState.rulesContext, second, 1),
+    });
+  }
   if (second !== null && faint.kind === "no-fainted-battlers") {
     // RunTurnActionsFunctions clears these action-local bits when advancing
     // gCurrentTurnActionNumber (battle_main.c:4949-4954). In particular, a
@@ -3205,7 +3254,14 @@ function continueFullTurnAfterAction(
       // slot set to B_ACTION_CANCEL_PARTNER by Cmd_switchineffects
       // (battle_script_commands.c:5270-5274); HandleAction_ActionFinished
       // dispatches nothing for it (receipts rcp154-c1 / rcp154-c1f).
-      preEndTurnState = Object.freeze({ ...preEndTurnState, rulesContext: betweenActionsRules });
+      // parity-mac fix 39: `cancelallactions` inside action 1's own script (a switched-in Pokemon that faints from Spikes and is replaced) sets
+      // every slot to B_ACTION_CANCEL_PARTNER too. A forced Struggle dropped this way keeps its no-valid-moves flag (fix 35).
+      preEndTurnState = Object.freeze({
+        ...preEndTurnState,
+        rulesContext: betweenActionsRules.actionsByTurnOrder[1] === B_ACTION_CANCEL_PARTNER
+          ? keepNoValidMovesOfCancelledStruggle(betweenActionsRules, second, -1)
+          : betweenActionsRules,
+      });
     } else {
       const preAction2State: MachineState = Object.freeze({
         ...preEndTurnState,
@@ -3354,6 +3410,8 @@ export const reduceFactoryFullTurnDecision: BattleDecisionReducer<FactoryFullTur
   // GetWhoStrikesFirst (battle_main.c:4702-4714) still reads its slot.
   const rc0 = createBattleScriptRulesContext({
     ...rc0Encore,
+    // TurnValuesCleanUp(FALSE) zeroed every gProtectStructs cell at the end of the previous turn.
+    noValidMovesKept: 0,
     chosenMovePositions: Object.freeze([
       playerSwitch ? rc0Encore.chosenMovePositions[0] : rules.pendingPlayerDecision.moveSlot,
       trainerSwitch ? rc0Encore.chosenMovePositions[1] : ctx.decision.moveSlot,

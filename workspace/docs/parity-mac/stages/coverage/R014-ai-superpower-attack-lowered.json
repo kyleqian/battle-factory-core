@@ -1,0 +1,47 @@
+{
+ "name": "R014-ai-superpower-attack-lowered",
+ "rules": [
+  "R014"
+ ],
+ "why": "Challenge 6. The opponent leads with Nidoqueen 701 (Superpower; White Herb). The player's Granbull 664 lowers its Attack with Intimidate at the start, and the White Herb undoes that on switch-in (ITEMEFFECT_ON_SWITCH_IN, battle_util.c:3312) and is used up. On turn 1 the player switches to Tauros 696: its Intimidate lowers Nidoqueen's Attack again and nothing undoes it. From turn 2 on, AI_CV_Superpower sees Attack below normal against a Normal-type target and gives -1 (battle_ai_scripts.s:2395). If the herb has not been used by turn 1, the turn-1 scoring already sees the lowered Attack.",
+ "seed": 93000,
+ "challengeNum": 6,
+ "battleNum": 0,
+ "trainerId": 180,
+ "playerSetIds": [
+  664,
+  696,
+  747
+ ],
+ "opponentSetIds": [
+  701,
+  666,
+  700
+ ],
+ "script": {
+  "actions": [
+   {
+    "switch": 1
+   },
+   {
+    "prefer": 3
+   },
+   {
+    "prefer": 3
+   },
+   {
+    "prefer": 3
+   }
+  ],
+  "then": "census"
+ },
+ "expect": [],
+ "cover": [
+  {
+   "file": "src/engine/factoryAiCheckViability.ts",
+   "text": "DEFAULT_STAT_STAGE) {\n    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: -",
+   "at": 20
+  }
+ ],
+ "coverAny": true
+}

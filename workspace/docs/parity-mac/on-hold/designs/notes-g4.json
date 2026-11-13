@@ -1,0 +1,145 @@
+{
+ "group": "g4: R030-R048 (rules a player meets rarely)",
+ "rules": [
+  {
+   "id": "R030",
+   "stages": [
+    "R030-curse-last-move-ai-replacement"
+   ],
+   "chance": 0.5,
+   "comment": "player's slow Snorlax uses Curse last every turn while the toxic'd AI lead dies at turn end; no AI replacement has a Fighting move, so the damage pass runs with Curse"
+  },
+  {
+   "id": "R031",
+   "stages": [],
+   "notStageable": "Looks impossible in Factory singles. After every action HandleAction_TryFinish runs HandleFaintedMonActions (battle_util.c:638-645), so a Pokemon that faints before its own move is replaced at once, and the switch-in cancels its pending action (B_ACTION_CANCEL_PARTNER, battle_script_commands.c:5268-5273); if it was the last Pokemon the battle ends first. The other mid-turn faints (Explosion user, recoil, Destiny Bond, Spikes on a Baton Pass or switch) hit a Pokemon whose action is already used or is a switch. No chain found where an attacker at 0 HP reaches attackcanceler (battle_script_commands.c:924). Not proven; the Mechanic Lab would not help (it is the turn machinery, not a missing move)."
+  },
+  {
+   "id": "R032",
+   "stages": [
+    "R032-metronome-rage-miss"
+   ],
+   "chance": 0.01,
+   "comment": "player Metronome x10; needs Rage (1/340) on a turn the AI's Azumarill Protects or digs; low but player-driven"
+  },
+  {
+   "id": "R033",
+   "stages": [],
+   "notStageable": "Looks impossible in singles. Every protect-affected stat-lowering path meets Protect earlier: ordinary moves at accuracycheck (JumpIfMoveAffectedByProtect, battle_script_commands.c:1044, :1109), Memento through its own protected branch (battle_scripts_1.s:2206), Intimidate passes STAT_CHANGE_NOT_PROTECT_AFFECTED, Curse is excluded by name in ChangeStatBuffs (battle_script_commands.c:6981-6986), and self-drops (Superpower, Overheat) need a hit that a protected target blocks. Metronome calls run the same scripts. No custom party changes this (it is script structure), so the Mechanic Lab cannot stage it either."
+  },
+  {
+   "id": "R034",
+   "stages": [
+    "R034-role-play-own-tempo-cures-confusion"
+   ],
+   "chance": 0.3,
+   "comment": "Spinda (Own Tempo) confuses Kadabra, Kadabra Role Plays Own Tempo and is cured at move end"
+  },
+  {
+   "id": "R035",
+   "stages": [],
+   "notStageable": "Real sets can build it only with a 1/340 Metronome call in one exact turn: no set from 267 up has Taunt, so the AI's Clefable 389 must call Taunt with Metronome and leave the field in that same turn (Taunt lasts only into the next turn's choice: timer 2, battle_script_commands.c:9160, minus 1 at turn end, battle_util.c:1749). The player cannot force the exit: Roar/Whirlwind (priority -6) is itself blocked by the fresh Taunt, and a KO or residual faint cannot be timed to the Taunt turn. About 0.1% per seed. Mechanic Lab: give the AI's Pokemon (challenge 4 or later) Taunt and Counter, let it Taunt on turn 1 and score Counter on turn 2 (both copies: player's last move an attack, then a status move)."
+  },
+  {
+   "id": "R036",
+   "stages": [
+    "R036-roar-after-ghost-curse-evasion"
+   ],
+   "chance": 0.5,
+   "comment": "Dusclops 666 Ghost-Curses Granbull, Granbull's Roar brings in Muk (Minimize) or Claydol (Double Team)"
+  },
+  {
+   "id": "R037",
+   "stages": [
+    "R037-noland-cloyster-dive-sandstorm"
+   ],
+   "chance": 0.02,
+   "comment": "Noland silver only; hits only seeds whose Brain party holds Cloyster 371 (Water/Ice Dive user); the Color Change type-1 route is not staged"
+  },
+  {
+   "id": "R038",
+   "stages": [
+    "R038-noland-foresight-ghost-user"
+   ],
+   "chance": 0.02,
+   "comment": "copy of docs/parity-mac/stages/noland-foresight-ghost.json (seed 79001 known good); crules gives cover null for every piece (fix 41 rewrote the lines), so the cover here is a marker on the current Ghost-user roll line (factoryAiCheckViability.ts runCvForesight) -- check it before use"
+  },
+  {
+   "id": "R039",
+   "stages": [
+    "R039-overheat-spatk-min-weezing-memento"
+   ],
+   "chance": 0.35,
+   "comment": "Granbull 474 Overheat x4 (White Herb) to Sp. Atk -6, Weezing 501 scores Memento -8 on turn 5; only the Sp. Atk piece is aimed at (Attack -6 needs 6 Superpowers, only 5 PP)"
+  },
+  {
+   "id": "R040",
+   "stages": [],
+   "notStageable": "Same barrier as R035: the taunted target needs a Metronome-called Taunt from Clefable 389 and Clefable leaving the field in that same turn; no Magic Coat set from 372 up can bounce a Taunt either. About 0.1% per seed. Mechanic Lab: an AI Pokemon (challenge 4 or later) with Taunt and Mirror Coat and no Counter; Taunt on turn 1, Mirror Coat scored on turn 2."
+  },
+  {
+   "id": "R041",
+   "stages": [
+    "R041-pain-split-speed-tie"
+   ],
+   "chance": 0.9,
+   "comment": "exact Speed tie 105 at IV 31 (Misdreavus 374 vs Heracross 424), turn 1"
+  },
+  {
+   "id": "R042",
+   "stages": [
+    "R042-cradily-ancientpower-psych-up"
+   ],
+   "chance": 0.3,
+   "comment": "needs Cradily's AncientPower 10% all-stats boost while Claydol has +3; covers the Sp. Def and evasion tests; the final roll only if Cradily copied Claydol's evasion first"
+  },
+  {
+   "id": "R043",
+   "stages": [
+    "R043-superpower-speed-tie"
+   ],
+   "chance": 0.9,
+   "comment": "exact Speed tie 70 at IV 31 (Regirock 762 vs Registeel 764), turn 1; the first piece has no cover in crules"
+  },
+  {
+   "id": "R044",
+   "stages": [
+    "R044-superpower-atk-minus3-swagger"
+   ],
+   "chance": 0.5,
+   "comment": "Registeel 841 Superpower x4 (White Herb) to Attack -3; Hypno 593 (Swagger + Psych Up) scores Swagger from turn 5"
+  },
+  {
+   "id": "R045",
+   "stages": [
+    "R045-encore-disable-speed-tie"
+   ],
+   "chance": 0.9,
+   "comment": "exact Speed tie 90 at IV 31 (Dewgong 488 vs Skarmory 482), Encore and Disable, turn 1; the Eruption piece is not aimed at"
+  },
+  {
+   "id": "R046",
+   "stages": [
+    "R046-scary-face-vs-speed-boost"
+   ],
+   "chance": 0.95,
+   "comment": "Mightyena 307 Scary Face vs Ninjask 343 (Speed Boost only), turn 1"
+  },
+  {
+   "id": "R047",
+   "stages": [
+    "R047-roar-after-leech-seed-accuracy-down"
+   ],
+   "chance": 0.5,
+   "comment": "Ludicolo 688 seeds Vaporeon, Vaporeon's Roar brings in a Smokescreen user"
+  },
+  {
+   "id": "R048",
+   "stages": [
+    "R048-roar-after-toxic-accuracy-down"
+   ],
+   "chance": 0.5,
+   "comment": "Ludicolo 688 badly poisons Vaporeon, Vaporeon's Roar brings in a Smokescreen user (same battle as R047)"
+  }
+ ]
+}

@@ -1,0 +1,94 @@
+{
+ "name": "R021-immunity-poison-fang",
+ "rules": [
+  "R021"
+ ],
+ "why": "The player's Mightyena (set 202, Poison Fang in slot 1) uses Poison Fang on the opponent's lead Zangoose (set 240, Immunity) for four turns; then Arbok (set 217, Poison Fang in slot 0, the first replacement) keeps using Poison Fang. Poison Fang without STAB from Mightyena does about a fifth of Zangoose's HP, so several hits land before Zangoose faints, and each hit that leaves Zangoose standing has a 30% roll of the bad-poison effect; that roll reaches SetMoveEffect's toxic case, where the Immunity test runs (not primary, not certain, so no prevention script). Both player Pokemon have Intimidate, so Zangoose hits softer. Risk: Zangoose's Roar (1 in 4 per turn at challenge 1) pulls in a random player Pokemon; Wigglytuff (set 207) then uses Disable or Sing, which does no harm.",
+ "seed": 0,
+ "challengeNum": 1,
+ "battleNum": 0,
+ "trainerId": 80,
+ "playerSetIds": [
+  202,
+  207,
+  217
+ ],
+ "opponentSetIds": [
+  240,
+  164,
+  250
+ ],
+ "script": {
+  "actions": [
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   }
+  ],
+  "then": "census",
+  "replacements": [
+   2,
+   1
+  ]
+ },
+ "expect": [],
+ "cover": [
+  {
+   "file": "src/engine/battleScriptHitChainOpcode.ts",
+   "text": "&& (primary || certain)) {\n        return preventionCall(\"BattleScript_PSNPrevention\", true, ABILITY_IMMUNITY);\n      }\n      if (\n        (isBattlerOfType(effectBattlerState, \"TYPE_POISON\") || isBattlerOfType(effectBattlerState, \"TYPE_STEEL\"))\n        && abilityEffectHitmarkerSet\n        && (primary || certain)\n      ) {\n        return preventionCall(\"BattleScript_PSNPrevention\", false);\n      }\n      if",
+   "at": 0
+  }
+ ],
+ "coverAny": true,
+ "chance": 0.55,
+ "seeds": 60,
+ "onHold": {
+  "group": "g3",
+  "seedsHunted": 5,
+  "result": "no matching hit in 5 seeds (hunt stopped)"
+ }
+}

@@ -52,6 +52,7 @@ import {
   resolveBattleScriptBattlerHoldEffectParam,
   resolveBattleScriptMoveBasePp,
   wasBattleScriptBattlerUnableToUseMove,
+  withBattleScriptPartyMemberPp,
   withBattleScriptPartyMemberStatus1,
   type BattleScriptRulesBattlerState,
   type BattleScriptRulesContext,
@@ -72,6 +73,7 @@ import {
 import { moveEndLumStatusName } from "./battleScriptMoveEndOpcode.ts";
 import {
   runBattleScriptFaintedActionsOrchestration,
+  runBattleScriptPostBattleOutcomeScript,
   type BattleScriptFaintedActionsResult,
 } from "./battleScriptFaintedActionsOrchestration.ts";
 import {
@@ -214,6 +216,8 @@ const ABILITY_AIR_LOCK = 77;
 const STAT_SPEED = 3;
 /** include/constants/moves.h MOVE_NONE; include/constants/battle.h B_ACTION_USE_MOVE. */
 const MOVE_NONE = 0;
+/** include/constants/moves.h MOVE_STRUGGLE. */
+const MOVE_STRUGGLE = 165;
 const B_ACTION_USE_MOVE = 0;
 const MAX_STAT_STAGE = 12;
 /** include/constants/battle.h -- STAT_ATK/STAT_SPATK. */
@@ -1114,6 +1118,24 @@ type ItemsTickOutcome =
   | Readonly<{ kind: "case-barrier"; state: MachineState; detail: string }>;
 
 /**
+ * `ItemBattleEffects(ITEMEFFECT_NORMAL, battler, TRUE)` for a caller outside the end-of-turn loop. `HandleFaintedMonActions` state 6 makes this
+ * call for battler 0 after every action (`battle_util.c:1958-1962`; `HandleAction_TryFinish`, `:638-645`). With `moveTurn` TRUE only White Herb and
+ * the eight cure items can fire (`:3384`, `:3500-3594`); Leftovers, the HP / PP berries and the stat berries are gated off (`:3337`, `:3348`, `:3401`).
+ * Returns the state after the item's script, or null when nothing fired (docs/parity-mac/cure-berry-after-action.md).
+ */
+export function runBattleScriptItemEffectNormalOnMoveTurn(
+  program: BattleScriptProgram,
+  handlers: Handlers,
+  state: MachineState,
+  battler: BattleScriptBattlerId,
+): MachineState | null {
+  const outcome = runItemsTick(program, handlers, state, battler, true);
+  if (outcome.kind === "advance") return null;
+  if (outcome.kind === "fired") return outcome.state;
+  throw new Error(`ItemBattleEffects(ITEMEFFECT_NORMAL, ${battler}, TRUE) did not complete (${outcome.kind})`);
+}
+
+/**
  * `WEATHER_HAS_EFFECT` (include/battle_util.h:47): `ABILITY_ON_FIELD` is `ABILITYEFFECT_CHECK_ON_FIELD`
  * (`battle_util.c:3140-3149`), which counts a battler only while `hp != 0`, for Cloud Nine and Air Lock.
  */
@@ -1435,16 +1457,21 @@ function runItemsTick(
     // pp[slot] is 0 here (restorePpSlot's own gate) this is min(param, maxPP). Factory rentals are always built via
     // CreateMon/CreateMonWithEVSpreadNatureOTID (battle_factory.c:435,476,812), which zero ppBonuses -- ZeroMonData's
     // own struct-clear -- so maxPP is exactly the base gBattleMoves[move].pp, never a PP-Up-inflated value, for every
-    // real Leppa carrier (LAPRAS, NIDOKING, doc §2b). No party-level PP mirror exists in this engine at all (unlike
-    // the status1 cure rows' withBattleScriptPartyMemberStatus1) -- only the active battler's own `pp` tuple (Cmd_
-    // ppreduce's own single source of truth) is patched, collapsing source's controller round trip into one atomic
-    // tick, the same simplification already established for every other landed end-turn case (doc §6).
+    // real Leppa carrier (LAPRAS, NIDOKING, doc §2b). Source writes the restored PP to the PARTY Pokemon with
+    // BtlController_EmitSetMonData(i + REQUEST_PPMOVE1_BATTLE, &changedPP) (battle_util.c:3377) and to the battler in the
+    // ITEM_PP_CHANGE tail (`gBattleMons[battler].pp[i] = changedPP`, `:3615-3617`). Both are written here in one atomic tick.
+    // The party write was missing: the restored PP was lost when the Pokemon left the field and came back
+    // (docs/parity-mac/party-pp-writes.md).
     const move = b.moves[slot]!;
     const param = resolveBattleScriptBattlerHoldEffectParam(scannedRules, battler);
     const maxPp = resolveBattleScriptMoveBasePp(move);
     const restoredPp = Math.min(param, maxPp);
     const pp = b.pp.map((value, index) => (index === slot ? restoredPp : value)) as unknown as BattleScriptRulesBattlerState["pp"];
-    const withPp = withBattler(scannedRules, battler, { pp });
+    const withBattlerPp = withBattler(scannedRules, battler, { pp });
+    const withPp = Object.freeze({
+      ...withBattlerPp,
+      party: withBattleScriptPartyMemberPp(withBattlerPp.party, b.side, b.partyIndex, slot, restoredPp),
+    });
     // ISSUES #72 batch 7 (STRINGID_PKMNSITEMRESTOREDPP): scriptingBattler is
     // the berry holder ({B_SCR_ACTIVE_NAME_WITH_PREFIX}/{B_LAST_ITEM}, same
     // shape the STAT_UP_BERRIES branch above already sets); battleTextBuff1Move
@@ -2181,14 +2208,17 @@ export function turnOrderBattlerInputs(
  * not with Struggle's 0. ROM proof (Mechanic Lab, docs/parity-mac/
  * endturn-order-forced-struggle.md): a slow Shuckle out of Protect PP
  * Struggles after a faster Blissey's Tackle, and Shuckle's Leftovers heals
- * FIRST at end of turn (Protect's +3). Not modeled: a battler whose forced
- * Struggle never started (its action was skipped) keeps the cell set.
+ * FIRST at end of turn (Protect's +3). A battler whose forced Struggle never
+ * started (the rest of the turn was cancelled) keeps the cell set, and the
+ * sort reads MOVE_STRUGGLE for it: `rulesContext.noValidMovesKept`
+ * (docs/parity-mac/forced-struggle-never-started.md, ROM proof there).
  */
 function endTurnChosenMove(
   rulesContext: BattleScriptRulesContext,
   battler: BattleScriptBattlerId,
 ): number {
   if (rulesContext.chosenActionByBattler[battler] !== B_ACTION_USE_MOVE) return MOVE_NONE;
+  if (((rulesContext.noValidMovesKept >> battler) & 1) !== 0) return MOVE_STRUGGLE;
   return rulesContext.battlers[battler].moves[rulesContext.chosenMovePositions[battler]!] ?? MOVE_NONE;
 }
 
@@ -2490,6 +2520,31 @@ function finishTurnValuesCleanUp(
   return hitMarker === cleaned.hitMarker ? cleaned : Object.freeze({ ...cleaned, hitMarker });
 }
 
+/**
+ * The head of `DoFieldEndTurnEffects` (`battle_util.c:1186-1191`): on EVERY entry it sets gBattlerAttacker (and gBattlerTarget) to the first battler
+ * that is not absent. `BattleTurnPassed` (`battle_main.c:3956-3972`) calls it each time it is entered, and it is entered again after every script an
+ * end-of-turn step runs. `HandleFaintedMonActions` starts with a script of its own (`BattleScript_GiveExp`, `battle_util.c` state 1), so by the time
+ * the faint replacement script runs, gBattlerAttacker is that first present battler: not the battler whose poison / weather / Future Sight step
+ * caused the faint. One reader: a replacement that faints from Spikes as it comes in runs `moveendall`
+ * (`BattleScript_SpikesOnFaintedBattlerFainted`), whose MOVEEND_UPDATE_LAST_MOVES writes gLastMoves[gBattlerAttacker] = MOVE_UNAVAILABLE. The game
+ * forgets the last move of the first present Pokemon there; the engine forgot the fainted side's (docs/parity-mac/end-turn-attacker.md).
+ * Only the attacker is set here: the faint sweep sets its own target (the fainted battler), as the source does.
+ */
+function withBattleTurnPassedEntryAttacker(state: MachineState): MachineState {
+  const rules = state.rulesContext;
+  const count = rules.battleTopology.battlersCount;
+  let first = 0;
+  while (first < count && (rules.absentBattlerFlags & (1 << first)) !== 0) first += 1;
+  if (first >= count || rules.selectorRoles.attacker === first) return state;
+  return Object.freeze({
+    ...state,
+    rulesContext: Object.freeze({
+      ...rules,
+      selectorRoles: Object.freeze({ ...rules.selectorRoles, attacker: first as BattleScriptBattlerId }),
+    }),
+  });
+}
+
 function mapFaintedActionsResult(result: BattleScriptFaintedActionsResult): BattleEndTurnResult {
   if (result.kind === "no-fainted-battlers") {
     return Object.freeze({
@@ -2515,6 +2570,7 @@ function mapFaintedActionsResult(result: BattleScriptFaintedActionsResult): Batt
 }
 
 type PostFaintKind = "next-turn" | "resumed" | "terminal";
+const DEFER_POST_BATTLE_OUTCOME_SCRIPT = Object.freeze({ deferPostBattleOutcomeScript: true });
 
 /**
  * `HandleWishPerishSongOnTurnEnd` state 1. The source resumes
@@ -2533,7 +2589,7 @@ function runPerishSongAfterFutureAttacks(
   let completionKind = initialCompletionKind;
   const count = state.rulesContext.battleTopology.battlersCount;
   if (state.rulesContext.wishPerishSongState > 1) {
-    return finishWishPerishSong(state, completionKind);
+    return finishWishPerishSong(program, handlers, state, completionKind);
   }
   // `HandleWishPerishSongOnTurnEnd` case 1 (`battle_util.c:1834-1861`) walks
   // gBattlerByTurnOrder from the SAME `wishPerishSongBattlerId` the previous
@@ -2600,19 +2656,9 @@ function runPerishSongAfterFutureAttacks(
       const fainted = runBattleScriptFaintedActionsOrchestration(
         program,
         handlers,
-        withoutEndTurnHitMarkers(state),
+        withBattleTurnPassedEntryAttacker(withoutEndTurnHitMarkers(state)),
+        DEFER_POST_BATTLE_OUTCOME_SCRIPT,
       );
-      if (fainted.kind === "terminal") {
-        return Object.freeze({
-          kind: "terminal",
-          state: Object.freeze({
-            ...fainted.state,
-            rulesContext: clearFollowMeTimersForTurnValuesCleanUp(
-              fainted.state.rulesContext,
-            ),
-          }),
-        });
-      }
       if (fainted.kind === "player-choice-required") {
         return Object.freeze({
           kind: "player-choice-required",
@@ -2630,11 +2676,18 @@ function runPerishSongAfterFutureAttacks(
         });
       }
       state = withEndTurnHitMarkers(fainted.state);
-      if (fainted.kind === "resumed") completionKind = "resumed";
+      // A KO that decides the battle does not end the sweep: BattleTurnPassed calls HandleWishPerishSongOnTurnEnd
+      // again after HandleFaintedMonActions with no gBattleOutcome test (battle_main.c:3968-3972), so the next
+      // battler in turn order still counts down or is taken (ROM seeds 342 / 457: the winner's Pokemon faints after
+      // the battle is won), and its checkteamslost ORs the other side's flag in (battle_script_commands.c
+      // Cmd_checkteamslost, :3564 / :3577: B_OUTCOME_WON | B_OUTCOME_LOST = B_OUTCOME_DREW when it was the last one).
+      // docs/parity-mac/perish-song-after-outcome.md.
+      if (fainted.kind === "terminal") completionKind = "terminal";
+      else if (fainted.kind === "resumed" && completionKind !== "terminal") completionKind = "resumed";
     }
   }
 
-  return finishWishPerishSong(withWishPerishSongCursor(state, 2, 0), completionKind);
+  return finishWishPerishSong(program, handlers, withWishPerishSongCursor(state, 2, 0), completionKind);
 }
 
 /**
@@ -2643,17 +2696,23 @@ function runPerishSongAfterFutureAttacks(
  * through to `BattleTurnPassed`'s closing cleanup (`battle_main.c:3974-3992`).
  */
 function finishWishPerishSong(
+  program: BattleScriptProgram,
+  handlers: Handlers,
   initialState: MachineState,
   completionKind: PostFaintKind,
 ): BattleEndTurnResult {
   // `battle_util.c:1887`: the paired clear on the FALSE return.
   const state = withoutEndTurnHitMarkers(initialState);
   if (completionKind === "terminal") {
+    // The battle was decided inside BattleTurnPassed. Only now, with the Future Sight / Perish Song sweep through, does source
+    // leave for HandleEndTurn_BattleWon / _BattleLost (battle_main.c:3988-3992): the battle-won / battle-lost script runs once,
+    // on the final gBattleOutcome (a second deciding faint may have turned WON or LOST into DREW).
+    const finished = runBattleScriptPostBattleOutcomeScript(program, handlers, state);
     return Object.freeze({
       kind: "terminal",
       state: Object.freeze({
-        ...state,
-        rulesContext: clearFollowMeTimersForTurnValuesCleanUp(state.rulesContext),
+        ...finished,
+        rulesContext: clearFollowMeTimersForTurnValuesCleanUp(finished.rulesContext),
       }),
     });
   }
@@ -2679,6 +2738,7 @@ function runFutureAttacksAfterFaints(
 ): BattleEndTurnResult {
   // `battle_util.c:1787`, same raise as the Perish Song sweep below.
   let state = withEndTurnHitMarkers(initialState);
+  let sweepKind: PostFaintKind = completionKind;
   const count = state.rulesContext.battleTopology.battlersCount;
   if (state.rulesContext.wishPerishSongState !== 0) {
     return runPerishSongAfterFutureAttacks(program, handlers, state, completionKind);
@@ -2752,19 +2812,9 @@ function runFutureAttacksAfterFaints(
       const fainted = runBattleScriptFaintedActionsOrchestration(
         program,
         handlers,
-        withoutEndTurnHitMarkers(state),
+        withBattleTurnPassedEntryAttacker(withoutEndTurnHitMarkers(state)),
+        DEFER_POST_BATTLE_OUTCOME_SCRIPT,
       );
-      if (fainted.kind === "terminal") {
-        return Object.freeze({
-          kind: "terminal",
-          state: Object.freeze({
-            ...fainted.state,
-            rulesContext: clearFollowMeTimersForTurnValuesCleanUp(
-              fainted.state.rulesContext,
-            ),
-          }),
-        });
-      }
       if (fainted.kind === "player-choice-required") {
         return Object.freeze({
           kind: "player-choice-required",
@@ -2778,6 +2828,9 @@ function runFutureAttacksAfterFaints(
         return Object.freeze({ kind: "non-terminal-barrier", state: fainted.state, instruction: fainted.instruction });
       }
       state = withEndTurnHitMarkers(fainted.state);
+      // As in the Perish Song sweep below: a delayed hit that decides the battle does not end HandleWishPerishSongOnTurnEnd.
+      if (fainted.kind === "terminal") sweepKind = "terminal";
+      else if (fainted.kind === "resumed" && sweepKind !== "terminal") sweepKind = "resumed";
     }
   }
 
@@ -2785,7 +2838,7 @@ function runFutureAttacksAfterFaints(
     program,
     handlers,
     withWishPerishSongCursor(state, 1, 0),
-    completionKind,
+    sweepKind,
   );
 }
 
@@ -2958,7 +3011,7 @@ export function runBattleEndTurnOrchestration(
       return Object.freeze({ kind: "case-barrier", state: fieldResult.state, caseName: fieldResult.caseName, detail: fieldResult.detail });
     }
     if (fieldResult.kind === "outcome-decided") {
-      const faintedResult = runBattleScriptFaintedActionsOrchestration(program, handlers, fieldResult.state);
+      const faintedResult = runBattleScriptFaintedActionsOrchestration(program, handlers, withBattleTurnPassedEntryAttacker(fieldResult.state), DEFER_POST_BATTLE_OUTCOME_SCRIPT);
       return finishFaintedThenDelayed(program, handlers, faintedResult);
     }
     state = fieldResult.state;
@@ -2974,6 +3027,6 @@ export function runBattleEndTurnOrchestration(
   }
 
   // HandleFaintedMonActions() always runs, gBattleOutcome gate or not (doc §1) -- reuse the already-landed orchestration verbatim.
-  const faintedResult = runBattleScriptFaintedActionsOrchestration(program, handlers, state);
+  const faintedResult = runBattleScriptFaintedActionsOrchestration(program, handlers, withBattleTurnPassedEntryAttacker(state), DEFER_POST_BATTLE_OUTCOME_SCRIPT);
   return finishFaintedThenDelayed(program, handlers, faintedResult);
 }

@@ -1,0 +1,75 @@
+{
+ "name": "foresight-noland",
+ "why": "Silver Noland with Hitmonlee (set 338: Mega Kick, Brick Break, Foresight, Rock Tomb) and Machoke (set 283: Cross Chop, Rock Slide, Foresight, Scary Face) against Sableye: the AI's try-to-faint and check-viability passes must read Foresight on the target (docs/parity-mac/ai-effectiveness-foresight.md).",
+ "seed": 30046,
+ "mode": "factoryBrain",
+ "challengeNum": 2,
+ "battleNum": 6,
+ "playerSetIds": [
+  301,
+  268,
+  342
+ ],
+ "script": {
+  "actions": [
+   {
+    "switch": 1
+   },
+   {
+    "move": 1
+   },
+   {
+    "move": 1
+   },
+   {
+    "move": 1
+   },
+   {
+    "move": 1
+   },
+   {
+    "move": 1
+   },
+   {
+    "move": 1
+   },
+   {
+    "move": 1
+   },
+   {
+    "move": 1
+   },
+   {
+    "move": 1
+   },
+   {
+    "move": 3
+   },
+   {
+    "move": 3
+   },
+   {
+    "move": 3
+   },
+   {
+    "move": 3
+   },
+   {
+    "move": 3
+   },
+   {
+    "move": 3
+   },
+   {
+    "move": 3
+   },
+   {
+    "move": 3
+   }
+  ],
+  "then": "census"
+ },
+ "expect": [
+  "move:EFFECT_FORESIGHT"
+ ]
+}

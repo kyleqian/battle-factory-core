@@ -6648,23 +6648,35 @@ describe("AI_CV_Foresight (data/battle_ai_scripts.s:1940-1963, non-BUGFIX)", () 
     expect(foresightRun(1, {})).toMatchObject({ kind: "scored", scoreDelta: -2, draws: [] });
   });
 
-  it("Ghost user (type1) reaches Foresight2's <80 roll", () => {
+  it("Ghost user (type1) reaches Foresight2's <80 roll, and a roll of 80 or more goes on into Foresight3's roll", () => {
+    // seed 4 -> 25 < 80: JUMP to End after one draw.
     const jumped = foresightRun(4, { types: ["TYPE_GHOST", "TYPE_NORMAL"] });
     if (jumped.kind !== "scored") throw new Error("unreachable");
     expect(jumped.draws.map((d) => d.kind)).toEqual(["foresight-roll-1"]);
     expect(jumped).toMatchObject({ scoreDelta: 0 });
     expect(jumped.draws[0]).toMatchObject({ jumped: true });
 
-    const fellThrough = foresightRun(1, { types: ["TYPE_GHOST", "TYPE_NORMAL"] });
-    if (fellThrough.kind !== "scored") throw new Error("unreachable");
-    expect(fellThrough).toMatchObject({ scoreDelta: 2 });
-    expect(fellThrough.draws[0]).toMatchObject({ kind: "foresight-roll-1", jumped: false });
+    // seed 1 -> 198 >= 80: no jump, and nothing stands between :1958 and the label :1959, so Foresight3's roll runs
+    // too: 33 < 80 JUMP to End. Two draws, score 0. (parity-mac fix 41: this row was pinned as one draw and +2.)
+    const second = foresightRun(1, { types: ["TYPE_GHOST", "TYPE_NORMAL"] });
+    if (second.kind !== "scored") throw new Error("unreachable");
+    expect(second).toMatchObject({ scoreDelta: 0 });
+    expect(second.draws).toHaveLength(2);
+    expect(second.draws).toMatchObject([{ kind: "foresight-roll-1", jumped: false }, { kind: "foresight-roll-2", jumped: true }]);
+    expect(second.rng.calls).toBe(2);
+
+    // seed 2 -> 140, then 195: both 80 or more. Two draws, +2.
+    const both = foresightRun(2, { types: ["TYPE_GHOST", "TYPE_NORMAL"] });
+    if (both.kind !== "scored") throw new Error("unreachable");
+    expect(both).toMatchObject({ scoreDelta: 2 });
+    expect(both.draws).toHaveLength(2);
+    expect(both.draws).toMatchObject([{ kind: "foresight-roll-1", jumped: false }, { kind: "foresight-roll-2", jumped: false }]);
   });
 
   it("Ghost user (type2 only) also reaches Foresight2", () => {
     const result = foresightRun(1, { types: ["TYPE_NORMAL", "TYPE_GHOST"] });
     if (result.kind !== "scored") throw new Error("unreachable");
-    expect(result.draws.map((d) => d.kind)).toEqual(["foresight-roll-1"]);
+    expect(result.draws.map((d) => d.kind)).toEqual(["foresight-roll-1", "foresight-roll-2"]);
   });
 
   it("high user evasion (>8) reaches Foresight3's <80 roll", () => {

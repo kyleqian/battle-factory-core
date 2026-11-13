@@ -1,0 +1,74 @@
+{
+ "name": "noland-foresight-ghost",
+ "why": "The trainer AI's score for Foresight when the Foresight user is a Ghost type (fix 41, docs/parity-mac/ai-foresight-ghost-second-roll.md). Silver Noland leads with Machoke (set 283: Cross Chop, Rock Slide, Foresight, Scary Face), a Fighting type. The player's Jumpluff (set 334) puts it to sleep, Kecleon (set 325) gives it Color Change with Skill Swap, Banette (set 342) hits it with Shadow Ball: Machoke is a Ghost type. From then on the AI scores Machoke's Foresight every turn with the two random rolls of AI_CV_Foresight2 and AI_CV_Foresight3 (data/battle_ai_scripts.s:1957-1961). The engine before fix 41 rolled once and leaves the ROM's battle in the first such turn.",
+ "seed": 79001,
+ "mode": "factoryBrain",
+ "challengeNum": 2,
+ "battleNum": 6,
+ "playerSetIds": [
+  334,
+  325,
+  342
+ ],
+ "script": {
+  "actions": [
+   {
+    "prefer": 1
+   },
+   {
+    "switch": 1
+   },
+   {
+    "prefer": 3
+   },
+   {
+    "switch": 2
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   }
+  ],
+  "then": "census"
+ },
+ "expect": [
+  "move:EFFECT_SKILL_SWAP",
+  "ability:ABILITY_COLOR_CHANGE",
+  "move:EFFECT_FORESIGHT"
+ ]
+}

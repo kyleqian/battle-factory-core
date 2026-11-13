@@ -12,6 +12,12 @@
 //     `request` / `native`) gives a `factoryBrain` lab request (no trainer / set ids: the ROM's own FillFactoryBrainParty rolls his party). `replay` then recovers the ROM's
 //     RNG cursor before that roll from the first Brain Pokemon's personality, lets the engine's production generation re-roll the party from it, and checks every member
 //     against the ROM read-back.
+//   Test players (parity-mac fourth pass, docs/parity-mac/replay-players.md): --policy=census|ai-v1|random-v1 (or the environment variable ROM_REPLAY_POLICY; default
+//     census) on `replay` / `native`. The players are in romReplayPlayers.ts; `request` writes the name into the request's `replay` note. A voluntary switch is a
+//     decision {kind: "switch", voluntary: true}; random-v1 also writes refusal probes {kind: "switch-refused" | "move-refused"} that the ROM must refuse.
+//   Wide compare (parity-mac fourth pass, docs/parity-mac/wide-compare.md): `replay` writes `wide`, one state per decision (both active Pokemon: statuses, stat stages,
+//     moves, PP, item, ability, types, the disable-struct counters; both parties; both sides' screens and Spikes; weather; Wish / Future Sight), and `finalWide`.
+//     `compare --drive=drive.json` checks them against the ROM's states at the same decisions (soundEventProbe.py lab --drive writes `drive.wide`).
 import "../../src/engine/monPicPixelsInstall.ts";
 import { writeFileSync, readFileSync } from "node:fs";
 import {
@@ -25,6 +31,8 @@ import { battlerMoveSelectionIsForced } from "../../src/engine/factoryBattleScri
 import { createFactoryCorpusPartyMember } from "../../src/engine/factoryCorpusParty.ts";
 import { NO_MOVES_MESSAGE_HOLD_AT } from "../../src/engine/battleCommandPresentation.ts";
 import { PARTY_LIST_INPUT_ELAPSED } from "../../src/engine/partySelect.ts";
+import { PARTY_SELECT_OPEN_TOTAL_FRAMES } from "../../src/engine/battlePartySelect.ts";
+import { createPlayer, createScriptPlayer, PLAYER_POLICIES, type PlayerPolicyName } from "./romReplayPlayers.ts";
 import { collectSoundTick } from "../../src/audio/soundEvents.ts";
 import { beginScreenSoundTick, runScheduledScreenSounds } from "../../src/engine/screenSounds.ts";
 import { emitTickSounds } from "../../src/engine/tickSounds.ts";
@@ -37,9 +45,19 @@ import speciesNamesData from "../../src/data/gen/species-names.json" with { type
 
 const [mode] = process.argv.slice(2);
 const arg = (name: string) => process.argv.find((a) => a.startsWith(`--${name}=`))?.slice(name.length + 3);
-const seed = Number(arg("seed"));
+// parity-mac fourth pass, staged battles (docs/parity-mac/staged-battles.md): --stage=FILE replaces the census battle of a seed by a written one
+// ({name, seed, challengeNum, battleNum, trainerId, playerSetIds, opponentSetIds, script}): real Factory sets, a real Factory trainer, the lab's own
+// factoryLegal staging, the same production replay path; only the choice of sets and the player's actions are written by hand.
+const stage: any = arg("stage") === undefined ? null : JSON.parse(readFileSync(arg("stage")!, "utf8"));
+const seed = stage === null ? Number(arg("seed")) : Number(stage.seed);
 const scene = (arg("scene") ?? "on") as "on" | "off";
-const streak = (seed * 11) % 49;
+// parity-mac fourth pass: the census mapping (seed * 11) % 49 only reaches challenges 1 to 7 (sets 110..755). --challenge=N / ROM_REPLAY_CHALLENGE=N (N = the
+// game's 0-based challengeNum; 7 = the eighth challenge, sets 372..849) puts the seed's battle into that challenge: streak N * 7 + (seed * 11) % 7. Unset = the
+// census mapping, so every older list keeps its battles.
+const challengeArg = arg("challenge") ?? (process.env.ROM_REPLAY_CHALLENGE || undefined);
+const challengeOverride = challengeArg === undefined ? null : Number(challengeArg);
+if (challengeOverride !== null && !(Number.isInteger(challengeOverride) && challengeOverride >= 0 && challengeOverride <= 99)) throw new Error("--challenge / ROM_REPLAY_CHALLENGE must be an integer 0..99");
+const streak = stage !== null ? stage.challengeNum * 7 + stage.battleNum : challengeOverride !== null ? challengeOverride * 7 + ((seed * 11) % 7) : (seed * 11) % 49;
 // parity-mac: very long battles (PP stall into Struggle on both sides) pass the default; --frame-budget=N raises it for one run.
 const frameBudget = Number(arg("frame-budget") ?? 200000);
 // parity-mac: the player's Factory symbols for `request` / `native` (GetPlayerSymbolCountForFacility, frontier_util.c:1657-1698). 0 = the census config: streak 20 is the
@@ -47,6 +65,9 @@ const frameBudget = Number(arg("frame-budget") ?? 200000);
 // The environment variable ROM_REPLAY_SYMBOLS gives the same through an unchanged chain script (tools/audio/romDriveSeed.sh).
 const symbols = Number(arg("symbols") ?? process.env.ROM_REPLAY_SYMBOLS ?? 0);
 if (symbols !== 0 && symbols !== 1) throw new Error("--symbols / ROM_REPLAY_SYMBOLS must be 0 or 1");
+// parity-mac fourth pass: the test player (romReplayPlayers.ts). The census player is the default, so every older chain and list keeps its battles.
+const policy = (stage !== null ? "script" : arg("policy") ?? process.env.ROM_REPLAY_POLICY ?? "census") as PlayerPolicyName | "script";
+if (policy !== "script" && !PLAYER_POLICIES.includes(policy)) throw new Error(`--policy / ROM_REPLAY_POLICY must be one of ${PLAYER_POLICIES.join(", ")}`);
 
 // The lab stages the Tower streak at challengeNum * 7 (the stock bug reads it for opponent IVs); the census engine uses 0. Equal for challengeNum 0 (streak < 7).
 const towerStreak = Math.floor(streak / 7) * 7;
@@ -183,13 +204,45 @@ function adoptedOrchestrator(setup: any, freshBattleRngValue: number) {
 
 type Segment = { frames: number; buttons: string[] };
 // forced (parity-mac): the ROM asks no move for this turn (forced Struggle / Encore, battle_main.c:4184-4197): FIGHT at the action menu commits it, the move menu never opens.
-type Decision = { kind: "move" | "switch"; slot?: number; partyIndex?: number; forced?: true; menuOpenFrame: number; fightMenuFrame?: number; commitFrame: number | null };
+// voluntary (parity-mac fourth pass): the player chose the switch at the action menu (POKEMON). switch-refused / move-refused: a refusal probe; the engine does nothing.
+type Decision = {
+  kind: "move" | "switch" | "switch-refused" | "move-refused"; slot?: number; partyIndex?: number; forced?: true; voluntary?: true; source?: string;
+  menuOpenFrame: number; fightMenuFrame?: number; commitFrame: number | null;
+};
+
+// The wide state of one decision point, in the shape soundEventProbe.py `wide_state` reads from the ROM (raw source fields; types as type ids).
+const TYPE_IDS = ["TYPE_NORMAL", "TYPE_FIGHTING", "TYPE_FLYING", "TYPE_POISON", "TYPE_GROUND", "TYPE_ROCK", "TYPE_BUG", "TYPE_GHOST", "TYPE_STEEL", "TYPE_MYSTERY",
+  "TYPE_FIRE", "TYPE_WATER", "TYPE_GRASS", "TYPE_ELECTRIC", "TYPE_PSYCHIC", "TYPE_ICE", "TYPE_DRAGON", "TYPE_DARK"];
+function wideOf(rc: any) {
+  const battler = (b: any) => ({
+    partyIndex: b.partyIndex, species: b.species, hp: b.hp, maxHp: b.maxHP, status1: b.status1 >>> 0, status2: b.status2 >>> 0, status3: b.status3 >>> 0,
+    statStages: [...b.statStages], moves: [...b.moves], pp: [...b.pp], item: b.item, ability: b.ability, types: b.types.map((t: string) => TYPE_IDS.indexOf(t)),
+    stats: [b.attack, b.defense, b.speed, b.spAttack, b.spDefense],
+    disabledMove: b.disabledMove, encoredMove: b.encoredMove, protectUses: b.protectUses, stockpileCounter: b.stockpileCounter, substituteHP: b.substituteHP,
+    disableTimer: b.disableTimer, encoreTimer: b.encoreTimer, perishSongTimer: b.perishSongTimer, furyCutterCounter: b.furyCutterCounter,
+    rolloutTimer: b.rolloutTimer, chargeTimer: b.chargeTimer, tauntTimer: b.tauntTimer, isFirstTurn: b.isFirstTurn,
+    truantCounter: b.truantCounter, mimickedMoves: b.mimickedMoves, rechargeTimer: b.rechargeTimer,
+  });
+  const party = (members: any[]) => members.slice(0, 3).map((m) => ({ species: m.species, hp: m.hp, status1: (m.status1 ?? 0) >>> 0, pp: [...m.pp], item: m.item ?? 0 }));
+  const side = (i: number) => ({
+    status: rc.sideStatuses[i], reflectTimer: rc.sideTimers[i].reflectTimer, lightscreenTimer: rc.sideTimers[i].lightscreenTimer, mistTimer: rc.mistTimers[i],
+    safeguardTimer: rc.sideTimers[i].safeguardTimer, spikesAmount: rc.sideTimers[i].spikesAmount,
+  });
+  return {
+    battlers: [battler(rc.battlers[0]), battler(rc.battlers[1])], parties: [party(rc.party.player), party(rc.party.opponent)], sides: [side(0), side(1)],
+    weather: rc.weather, weatherTimer: rc.weatherTimer,
+    futureSightCounter: rc.futureSightCounter.slice(0, 2), futureSightAttacker: rc.futureSightAttacker.slice(0, 2), futureSightMove: rc.futureSightMove.slice(0, 2),
+    wishCounter: rc.wishCounter.slice(0, 2), wishMonId: rc.wishMonId.slice(0, 2),
+  };
+}
 function play(initial: any, record: boolean, patchRng: number | null = null) {
   let state = initial; let frame = 0; let ended = false; let error: string | null = null; let frame0: number | null = null;
-  const sound: unknown[][] = []; const inputs: Segment[] = []; const slotUses = [0, 0, 0, 0];
+  const sound: unknown[][] = []; const inputs: Segment[] = [];
+  const player = policy === "script" ? createScriptPlayer(seed, stage.script) : createPlayer(policy, seed);
+  const wide: unknown[] = []; let lastRules: any = null;
   let actionMenuRng: number | null = null; let randomTurnNumber: number | null = null; const timeline: number[][] = []; let lastTl = "";
   // aud243d: the engine's DECISIONS (absolute engine frames; result() makes them frame0-relative) for the ROM-side semantic driver (tools/audio/soundEventProbe.py lab --drive).
-  const traceEvents = arg("events") !== undefined; const turnEvents: unknown[] = [];
+  const traceEvents = arg("events") !== undefined; const turnEvents: unknown[] = []; let recordedEvents = new WeakSet<object>();
   const decisions: Decision[] = []; let openSwitch: Decision | null = null;
   const owned = () => Boolean(state.battleStartIntro || state.battleResolutionPresentation || state.battleCommandPresentation);
   const step = (buttons: readonly string[] = []) => {
@@ -209,14 +262,24 @@ function play(initial: any, record: boolean, patchRng: number | null = null) {
     });
     for (const e of events) sound.push(e.mode === undefined ? [e.frame, e.kind, e.id, e.pan] : [e.frame, e.kind, e.id, e.pan, e.mode]);
     if (frame0 !== null && state.battle) {
-      const rc = state.battle.rules.rulesContext;
+      const rc = state.battle.rules.rulesContext; lastRules = rc;
       const row = [rc.currentMove, rc.battlers[0].hp, rc.battlers[1].hp, state.battle.rng.value, rc.moveHistory.lastMoves[0], rc.moveHistory.lastMoves[1]];
       if (row.join() !== lastTl) { lastTl = row.join(); timeline.push([frame - frame0, ...row]); }
     }
     if (openSwitch && !forcedSelector()) { openSwitch.commitFrame = frame; openSwitch = null; }
-    if (traceEvents && frame0 !== null && state.battleResolutionPresentation && !before.battleResolutionPresentation) {
+    // One chunk per resolved turn. A turn without a player decision (the second turn of a two-turn move, a recharge turn, the later turns of Rollout /
+    // Outrage / Uproar / Bide) is resolved while the previous turn's presentation object is still up, so "the presentation appeared" alone missed it: its
+    // events never reached the tally. A new turn is also known by the rules object changing under a presentation with other segments.
+    const resBefore: any = before.battleResolutionPresentation; const resNow: any = state.battleResolutionPresentation;
+    if (traceEvents && frame0 !== null && resNow && (!resBefore || (resNow.segments !== resBefore.segments && state.battle?.rules !== before.battle?.rules))) {
       const res: any = state.battleResolutionPresentation;
-      turnEvents.push({ frame: frame - frame0, battlersBefore: JSON.parse(JSON.stringify((before.battle?.rules.rulesContext as any)?.battlers ?? null)), events: (res.segments ?? []).flatMap((seg: any) => seg.events ?? []).map((e: any) => ({ seq: e.sequence, ...e.payload, label: e.provenance?.sourceLabel })) });
+      const rulesBefore: any = before.battle?.rules.rulesContext ?? null;
+      // wideBefore (parity-mac fourth pass): the wide state the turn starts from, for the tally (tools/audio/romReplayTally.py).
+      // A turn resolved under the previous turn's presentation carries that turn's events again in its segments: keep only the events not recorded yet.
+      if (!resBefore) recordedEvents = new WeakSet<object>();
+      const fresh = (res.segments ?? []).flatMap((seg: any) => seg.events ?? []).filter((e: any) => !recordedEvents.has(e));
+      for (const e of fresh) recordedEvents.add(e);
+      turnEvents.push({ frame: frame - frame0, battlersBefore: JSON.parse(JSON.stringify(rulesBefore?.battlers ?? null)), wideBefore: rulesBefore === null ? null : wideOf(rulesBefore), events: fresh.map((e: any) => ({ seq: e.sequence, ...e.payload, label: e.provenance?.sourceLabel })) });
     }
     if (!owned()) ended = true;
   };
@@ -230,11 +293,15 @@ function play(initial: any, record: boolean, patchRng: number | null = null) {
     while (!ended && !p()) {
       const s = forcedSelector();
       if (s) {
-        const target = typeof s.cursor === "number" ? s.party.findIndex((r: any) => r.legal && r.partyIndex === Math.min(...s.party.filter((m: any) => m.legal).map((m: any) => m.partyIndex))) : -1;
         if (!openSwitch && frame0 !== null) {
-          openSwitch = { kind: "switch", partyIndex: Math.min(...s.party.filter((m: any) => m.legal).map((m: any) => m.partyIndex)), menuOpenFrame: frame, commitFrame: null };
-          decisions.push(openSwitch);
+          // A forced replacement: the test player picks among the party slots the engine says are legal.
+          const rules = state.battle!.rules.rulesContext;
+          const partyIndex = player.chooseReplacement(rules, s.party.filter((m: any) => m.legal).map((m: any) => m.partyIndex));
+          openSwitch = { kind: "switch", partyIndex, menuOpenFrame: frame, commitFrame: null };
+          decisions.push(openSwitch); wide.push(wideOf(rules));
         }
+        const wanted = openSwitch ? openSwitch.partyIndex! : Math.min(...s.party.filter((m: any) => m.legal).map((m: any) => m.partyIndex));
+        const target = typeof s.cursor === "number" ? s.party.findIndex((r: any) => r.legal && r.partyIndex === wanted) : -1;
         pulse(s.message !== null ? "A" : (!s.submenuOpen && (typeof s.cursor === "number" ? s.cursor !== target : (s.cursor as string) !== "magby")) ? "DOWN" : "A");
         continue;
       }
@@ -246,14 +313,53 @@ function play(initial: any, record: boolean, patchRng: number | null = null) {
     until(() => phase() === "action-menu");
     frame0 = frame; actionMenuRng = state.battle?.rng.value ?? null; randomTurnNumber = (state.battle?.rules.rulesContext as any)?.randomTurnNumber ?? null;
     if (patchRng !== null && state.battle) state = { ...state, battle: { ...state.battle, rng: { ...state.battle.rng, value: patchRng } } };
-    if (!record) return { frame0, actionMenuRng, randomTurnNumber, state, sound, inputs, error, frames: frame, timeline, decisions, turnEvents };
+    if (!record) return { frame0, actionMenuRng, randomTurnNumber, state, sound, inputs, error, frames: frame, timeline, decisions, turnEvents, wide, finalWide: null, playerStats: player.stats, battleOutcome: null };
+    // The action cursor: bit 0 = right column, bit 1 = lower row (FIGHT 0, BAG 1, POKEMON 2, RUN 3). The engine keeps it between turns as the ROM does.
+    const actionCursorTo = (want: 0 | 2) => {
+      for (let i = 0; i < 3 && !ended; i += 1) {
+        const cursor = state.battleCommandPresentation?.actionCursor ?? want;
+        if (cursor === want) break;
+        pulse((cursor & 1) ? "LEFT" : (want === 2 ? "DOWN" : "UP"));
+      }
+    };
     while (!ended) {
       const actionMenuFrame = frame;
-      const forcedMove = state.battleCommandPresentation!.forcedMove ?? null;
+      const menuNow = state.battleCommandPresentation!; const rulesNow = state.battle!.rules.rulesContext;
+      const forcedMove = menuNow.forcedMove ?? null;
+      const turn = player.chooseTurn({
+        rules: rulesNow,
+        legalSlots: forcedMove !== null ? [forcedMove.decision.moveSlot] : ([0, 1, 2, 3] as const).filter((s) => menuNow.legalMoveBySlot[s] !== null),
+        legalSwitches: (menuNow.request.legalDecisions as any[]).filter((d) => d.kind === "switch").map((d) => d.partyIndex),
+        forcedMove: forcedMove !== null || battlerMoveSelectionIsForced(rulesNow as never, 0),
+      });
+      const wideNow = wideOf(rulesNow);
+      // Refusal probes: the engine offers no such decision, so nothing is pressed here; the ROM driver tries them and must be refused.
+      for (const probe of turn.probes) { decisions.push({ ...probe, menuOpenFrame: actionMenuFrame, commitFrame: actionMenuFrame }); wide.push(wideNow); }
+      wide.push(wideNow);
+      if (turn.action.kind === "switch") {
+        // A voluntary switch through the engine's own menus: POKEMON, the party row, SHIFT.
+        const decision: Decision = { kind: "switch", partyIndex: turn.action.partyIndex, voluntary: true, source: turn.source, menuOpenFrame: actionMenuFrame, commitFrame: null };
+        decisions.push(decision);
+        actionCursorTo(2);
+        pulse("A");
+        until(() => state.battlePartySelect !== null && state.battlePartySelect.openElapsed >= PARTY_SELECT_OPEN_TOTAL_FRAMES);
+        const row = state.battlePartySelect?.rows.findIndex((r: any) => r.partyIndex === decision.partyIndex) ?? -1;
+        if (row < 0 || !state.battlePartySelect!.rows[row]!.legal) throw new Error(`voluntary switch: party index ${decision.partyIndex} is not a legal row of the engine's party menu`);
+        for (let i = 0; i < 5 && !ended && state.battlePartySelect && state.battlePartySelect.cursor !== row; i += 1) pulse("DOWN");
+        pulse("A"); // the row: SHIFT / SUMMARY / CANCEL opens on SHIFT
+        pulse("A"); // SHIFT
+        if (state.battlePartySelect?.outcome?.kind !== "select") throw new Error(`voluntary switch: the engine's party menu did not take party index ${decision.partyIndex}`);
+        decision.commitFrame = frame;
+        until(() => state.battlePartySelect === null);
+        until(() => !state.battleCommandPresentation);
+        until(() => phase() === "action-menu");
+        continue;
+      }
+      const chosenSlot = turn.action.slot;
+      actionCursorTo(0);
       if (forcedMove !== null) {
         // enc276: FIGHT commits the forced turn, as in the ROM; the move menu never opens (Struggle shows "has no moves left!" first).
-        slotUses[forcedMove.decision.moveSlot]!++;
-        decisions.push({ kind: "move", slot: forcedMove.decision.moveSlot, forced: true, menuOpenFrame: actionMenuFrame, commitFrame: frame + 2 }); // pulse("A") presses A on its 2nd step
+        decisions.push({ kind: "move", slot: forcedMove.decision.moveSlot, forced: true, source: turn.source, menuOpenFrame: actionMenuFrame, commitFrame: frame + 2 }); // pulse("A") presses A on its 2nd step
         pulse("A");
         if (phase() === "no-moves-message") {
           until(() => (state.battleCommandPresentation?.lifecycle.phaseElapsed ?? NO_MOVES_MESSAGE_HOLD_AT) >= NO_MOVES_MESSAGE_HOLD_AT);
@@ -267,41 +373,57 @@ function play(initial: any, record: boolean, patchRng: number | null = null) {
       until(() => phase() === "fight-menu");
       if (ended) break;
       const fightMenuFrame = frame;
-      const menu = state.battleCommandPresentation!;
-      const legal = ([0, 1, 2, 3] as const).filter((s) => menu.legalMoveBySlot[s] !== null);
-      const slot = legal.length === 0 ? 0 : legal.reduce((best, s) => (slotUses[s]! < slotUses[best]! ? s : best), legal[0]!);
-      slotUses[slot]!++;
+      const slot = chosenSlot;
       for (let i = 0; i < 4; i++) {
         const cursor = state.battleCommandPresentation!.fightCursor;
         if (cursor === slot) break;
         pulse((cursor & 1) !== (slot & 1) ? ((slot & 1) ? "RIGHT" : "LEFT") : ((slot & 2) ? "DOWN" : "UP"));
       }
       const forced = battlerMoveSelectionIsForced(state.battle!.rules.rulesContext as never, 0);
-      decisions.push({ kind: "move", slot, ...(forced ? { forced: true as const } : {}), menuOpenFrame: actionMenuFrame, fightMenuFrame, commitFrame: frame + 2 }); // pulse("A") presses A on its 2nd step
+      decisions.push({ kind: "move", slot, ...(forced ? { forced: true as const } : {}), source: turn.source, menuOpenFrame: actionMenuFrame, fightMenuFrame, commitFrame: frame + 2 }); // pulse("A") presses A on its 2nd step
       pulse("A");
       until(() => !state.battleCommandPresentation);
       until(() => phase() === "action-menu");
     }
   } catch (e) { error = String(e); }
-  return { frame0, actionMenuRng, randomTurnNumber, state, sound, inputs, error, frames: frame, timeline, decisions, turnEvents };
+  return { frame0, actionMenuRng, randomTurnNumber, state, sound, inputs, error, frames: frame, timeline, decisions, turnEvents, wide, finalWide: lastRules === null ? null : wideOf(lastRules), playerStats: player.stats, battleOutcome: lastRules?.battleOutcome ?? null };
 }
 
 const rel = (r: ReturnType<typeof play>, v: number | null | undefined) => (v === null || v === undefined ? v : v - (r.frame0 ?? 0));
 const result = (r: ReturnType<typeof play>, extra: object = {}) => ({
   ...(r.turnEvents.length ? { turnEvents: r.turnEvents } : {}),
   decisions: r.decisions.map((d) => ({ ...d, menuOpenFrame: rel(r, d.menuOpenFrame), fightMenuFrame: rel(r, d.fightMenuFrame), commitFrame: rel(r, d.commitFrame) })),
-  seed, scene, error: r.error, frame0: r.frame0, actionMenuRng: r.actionMenuRng, randomTurnNumber: r.randomTurnNumber, frames: r.frames,
+  seed, scene, policy, playerStats: r.playerStats, wide: r.wide, finalWide: r.finalWide, battleOutcome: r.battleOutcome,
+  error: r.error, frame0: r.frame0, actionMenuRng: r.actionMenuRng, randomTurnNumber: r.randomTurnNumber, frames: r.frames,
   sound: r.sound.map((e) => [(e[0] as number) - (r.frame0 ?? 0), ...e.slice(1)]), inputs: r.inputs, timeline: r.timeline, ...extra,
 });
 
-if (mode === "request") {
+if (mode === "request" && stage !== null) {
+  // A staged battle: the request is the stage file's own sets and trainer. `mode: "factoryBrain"` (challengeNum 2 or 5, battleNum 6) stages Noland:
+  // the player's sets are chosen, his party is rolled by the ROM from the seed.
+  const stagedCommon = {
+    schemaVersion: 1, profile: scene === "on" ? "battle-scene-on" : "battle-scene-off", level: 50, challengeNum: stage.challengeNum, rentalSwapCount: 0,
+    replay: { policy: "script", stage: stage.name }, playerSetIds: stage.playerSetIds, seed,
+    trace: { segments: [{ frames: 1, buttons: [] }], captureFrames: [0] },
+  };
+  writeFileSync(arg("out")!, JSON.stringify(stage.mode === "factoryBrain"
+    ? { ...stagedCommon, mode: "factoryBrain" }
+    : { ...stagedCommon, mode: "factoryLegal", battleNum: stage.battleNum, trainerId: stage.trainerId, opponentSetIds: stage.opponentSetIds }, null, 1));
+} else if (mode === "request") {
   const o = nativeOrchestrator();
   const r = play(o, false);
   const g = r.state.opponentGenerations[0]; const rentals = r.state.round.rules.playerKernelParty;
   const setIds = (g.generation.opponents as any[]).map((x) => x.setId);
-  const playerSetIds = r.state.config.rentals.type === "generateInitial" ? (r.state.initialRentalGeneration!.rentals as any[]).slice(0, 3).map((x) => x.setId) : [];
+  // The player's team: the first three of the six rentals that the game lets a player select. The six can hold one species twice (the `currSpecies` quirk of
+  // GenerateInitialRentalMons, battle_factory.c:566-576), but the select screen refuses a second Pokemon of a species already picked (Select_AreSpeciesValid,
+  // battle_factory_screen.c:2256-2276, "Can't select same POKeMON"). Common from the eighth challenge on (sets 372..849 hold each species several times).
+  const speciesOfSet = (setId: number): string => (frontierMonsData as any).entries[setId].species;
+  const pickSelectable = (rentalList: any[]) => rentalList.reduce((team: any[], x: any) =>
+    (team.length < 3 && !team.some((y) => speciesOfSet(y.setId) === speciesOfSet(x.setId)) ? [...team, x] : team), []);
+  const playerSetIds = r.state.config.rentals.type === "generateInitial" ? pickSelectable(r.state.initialRentalGeneration!.rentals as any[]).map((x: any) => x.setId) : [];
   void rentals;
-  const common = { schemaVersion: 1, profile: scene === "on" ? "battle-scene-on" : "battle-scene-off", level: 50, challengeNum: Math.floor(streak / 7), rentalSwapCount: 0 };
+  // `replay` is this tool's own note (the test player and the census seed); soundEventProbe.py / romStateTimeline.py drop it before the lab validates the request.
+  const common = { schemaVersion: 1, profile: scene === "on" ? "battle-scene-on" : "battle-scene-off", level: 50, challengeNum: Math.floor(streak / 7), rentalSwapCount: 0, replay: { policy, censusSeed: seed, symbols, ...(challengeOverride !== null ? { challenge: challengeOverride } : {}) } };
   // parity-mac: Noland. The lab's factoryBrain mode takes no trainer / battle number / opponent sets (challenge 2 = silver, 5 = gold, always battle 7).
   writeFileSync(arg("out")!, JSON.stringify(g.kind === "frontier-brain" ? {
     ...common, mode: "factoryBrain", playerSetIds, seed,
@@ -362,7 +484,11 @@ if (mode === "request") {
 } else if (mode === "compare") {
   // aud243c: engine timeline rows [frame, currentMove, hp0, hp1, rng, last0, last1] against romStateTimeline.py rows of the same shape. The engine resolves a turn at its
   // commit, so each engine state (hp0, hp1, rng, last0, last1) must appear among the ROM's states in order; the first that does not is the divergence.
-  const engine = JSON.parse(readFileSync(arg("engine")!, "utf8")); const rom = JSON.parse(readFileSync(arg("rom")!, "utf8")).rows as number[][];
+  // parity-mac fourth pass: --drive=drive.json (the closed-loop drive's own output). Without --rom its `drive.timeline` is the ROM timeline (the same rows the
+  // frozen re-run gives when the trace is deterministic), and its `drive.wide` states are checked against the engine's (docs/parity-mac/wide-compare.md).
+  const engine = JSON.parse(readFileSync(arg("engine")!, "utf8"));
+  const drive = arg("drive") === undefined ? null : JSON.parse(readFileSync(arg("drive")!, "utf8")).drive;
+  const rom = (arg("rom") === undefined ? drive.timeline : JSON.parse(readFileSync(arg("rom")!, "utf8")).rows) as number[][];
   const key = (r: number[]) => r.slice(2, 7).join();
   let at = 0; const matched: unknown[] = []; let divergence: unknown = null;
   // Row 0 is the engine's action-menu state, whose RNG is the ROM's pre-AI value by construction (see replay); compare from the first committed turn.
@@ -371,7 +497,43 @@ if (mode === "request") {
     if (found < 0) { divergence = { engine: row, romAfter: rom.slice(at, at + 6) }; break; }
     matched.push({ engineFrame: row[0], romFrame: rom[found]![0], hp: [row[2], row[3]], rng: row[4], lastMoves: [row[5], row[6]] }); at = found;
   }
-  const out = { seed, scene, matched: matched.length, engineRows: engine.timeline.length, romRows: rom.length, rows: matched, divergence };
+  let wide: unknown = null;
+  if (drive !== null && Array.isArray(drive.wide) && Array.isArray(engine.wide)) {
+    const diff = (a: any, b: any, path: string, into: { path: string; engine: unknown; rom: unknown }[]) => {
+      if (Array.isArray(a) && Array.isArray(b) && a.length === b.length) a.forEach((v, i) => diff(v, b[i], `${path}.${i}`, into));
+      else if (a !== null && b !== null && typeof a === "object" && typeof b === "object" && !Array.isArray(a) && !Array.isArray(b)) {
+        for (const k of new Set([...Object.keys(a), ...Object.keys(b)])) diff(a[k], b[k], path === "" ? k : `${path}.${k}`, into);
+      } else if (JSON.stringify(a) !== JSON.stringify(b)) into.push({ path, engine: a ?? null, rom: b ?? null });
+    };
+    // Left out of the check (docs/parity-mac/wide-compare.md):
+    //  - a fainted active Pokemon (0 HP on both sides) keeps only its party index, species and HP: its slot is about to be refilled, and the ROM has already run
+    //    FaintClearSetData at the replacement menu while the engine's request boundary sits before it;
+    //  - a ROM party member whose box could not be read on that frame (see soundEventProbe.py read_party_member) is skipped.
+    let unread = 0;
+    const strip = (w: any, engineWide: any, romWide: any) => ({
+      ...w,
+      battlers: w.battlers.map((x: any, i: number) => (engineWide.battlers[i].hp === 0 && romWide.battlers[i].hp === 0 ? { partyIndex: x.partyIndex, species: x.species, hp: 0 } : x)),
+      parties: w.parties.map((side: any[], si: number) => side.map((m: any, mi: number) => (romWide.parties[si][mi].species === null ? { hp: m.hp, status1: m.status1 } : m))),
+    });
+    const points: unknown[] = []; const fields: Record<string, number> = {};
+    const compared = Math.min(engine.wide.length, drive.wide.length);
+    const pair = (e: any, r: any) => {
+      for (const side of r.parties) for (const m of side) if (m.species === null) unread += 1;
+      return [strip(e, e, r), strip(r, e, r)] as const;
+    };
+    for (let i = 0; i < compared; i += 1) {
+      const [we, wr] = pair(engine.wide[i], drive.wide[i]);
+      const d: { path: string; engine: unknown; rom: unknown }[] = []; diff(we, wr, "", d);
+      if (d.length === 0) continue;
+      for (const row of d) fields[row.path] = (fields[row.path] ?? 0) + 1;
+      const dec = engine.decisions[i] ?? {};
+      points.push({ index: i, decision: { kind: dec.kind, slot: dec.slot, partyIndex: dec.partyIndex, voluntary: dec.voluntary, forced: dec.forced }, diffs: d.slice(0, 16) });
+    }
+    const final: { path: string; engine: unknown; rom: unknown }[] = [];
+    if (engine.finalWide && drive.finalWide) { const [we, wr] = pair(engine.finalWide, drive.finalWide); diff(we, wr, "", final); }
+    wide = { compared, engineStates: engine.wide.length, romStates: drive.wide.length, diffPoints: points.length, first: points[0] ?? null, fields, final: final.slice(0, 24), unreadRomPartyMembers: unread };
+  }
+  const out = { seed, scene, matched: matched.length, engineRows: engine.timeline.length, romRows: rom.length, rows: matched, divergence, wide };
   console.log(JSON.stringify(out)); if (arg("out")) writeFileSync(arg("out")!, JSON.stringify(out));
 } else if (mode === "scan") {
   const setup = JSON.parse(readFileSync(arg("setup")!, "utf8")); const target = setup.snapshot.rngValue >>> 0;

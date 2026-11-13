@@ -1,0 +1,152 @@
+{
+ "name": "metronome-camouflage",
+ "why": "Camouflage fails for both Metronome sets (Chansey 227 and Clefable 389 are Normal types, and the Factory's terrain gives the Normal type). It can work only when the Metronome user has another type. The player's Banette (set 237) burns and weakens the opponent's Kecleon (set 220). The player's Girafarig (set 235) takes Kecleon's Color Change with Skill Swap and makes Kecleon faint. The opponent sends Chansey (set 227). Girafarig gives Color Change to Chansey with a second Skill Swap and hits it with Psybeam: Chansey is a Psychic type now. A third Skill Swap takes Color Change back, so Chansey stays a Psychic type. Then the player waits (Wish, Skill Swap, Psybeam) until Chansey's Metronome calls Camouflage.",
+ "seed": 77050,
+ "challengeNum": 1,
+ "battleNum": 0,
+ "trainerId": 85,
+ "playerSetIds": [
+  237,
+  235,
+  170
+ ],
+ "opponentSetIds": [
+  220,
+  227,
+  204
+ ],
+ "script": {
+  "actions": [
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "switch": 1
+   },
+   {
+    "prefer": 3
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 3
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 3
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 3
+   },
+   {
+    "prefer": 3
+   },
+   {
+    "prefer": 3
+   },
+   {
+    "prefer": 3
+   },
+   {
+    "prefer": 3
+   },
+   {
+    "prefer": 3
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   }
+  ],
+  "then": "census"
+ },
+ "expect": [
+  "move:EFFECT_CAMOUFLAGE"
+ ]
+}

@@ -1,0 +1,81 @@
+{
+ "name": "R044-superpower-atk-minus3-swagger",
+ "rules": [
+  "R044"
+ ],
+ "why": "The player's Registeel (set 841) uses Superpower every turn; its White Herb undoes the first drop (Clear Body does not block a self-drop, MOVE_EFFECT_CERTAIN), so after four Superpowers its Attack is at -3. The opponent's Hypno (set 593: Psych Up, Swagger, Mega Kick, Shadow Ball) resists Fighting and survives. From turn 5 AI_CV_Swagger takes its Psych Up branch with the target's Attack at -3 or lower (+3, turn count in the result register).",
+ "seed": 0,
+ "challengeNum": 7,
+ "battleNum": 0,
+ "trainerId": 200,
+ "playerSetIds": [
+  841,
+  772,
+  552
+ ],
+ "opponentSetIds": [
+  593,
+  736,
+  825
+ ],
+ "script": {
+  "actions": [
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   }
+  ],
+  "then": "census"
+ },
+ "expect": [],
+ "cover": [
+  {
+   "file": "src/engine/factoryAiCheckViability.ts",
+   "text": "\n    const turnC",
+   "at": 0
+  },
+  {
+   "file": "src/engine/factoryAiCheckViability.ts",
+   "text": ": 3,\n      funcResultAfter: turn",
+   "at": 0
+  },
+  {
+   "file": "src/engine/factoryAiCheckViability.ts",
+   "text": "? turnCount as AiWeatherValue : undefined,\n ",
+   "at": 0
+  },
+  {
+   "file": "src/engine/factoryAiCheckViability.ts",
+   "text": ": undefined,\n    });",
+   "at": 0
+  }
+ ],
+ "coverAny": true,
+ "chance": 0.5,
+ "seeds": 60,
+ "onHold": {
+  "group": "g4",
+  "seedsHunted": 0,
+  "result": "untested"
+ }
+}

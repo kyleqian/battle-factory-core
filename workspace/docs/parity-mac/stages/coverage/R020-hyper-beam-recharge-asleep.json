@@ -1,0 +1,159 @@
+{
+ "name": "R020-hyper-beam-recharge-asleep",
+ "rules": [
+  "R020"
+ ],
+ "why": "Challenge 7. The player's Aerodactyl 531 (Choice Band, base speed 130) uses Hyper Beam every turn it can; Gen 3 always sets the recharge (battle_script_commands.c:2728-2732). The opponent leads with Exeggutor 534 (Frustration, Curse, Sleep Powder, Rest; Chesto Berry), which survives a banded Hyper Beam and moves after it. When the AI picks Sleep Powder on a Hyper Beam turn, Aerodactyl falls asleep with the recharge pending; on the next turn CANCELER_ASLEEP stops it before CANCELER_RECHARGE, and the end-turn clean-up removes STATUS2_RECHARGE when the timer reaches 0 (battle_main.c:4878-4883). Exeggutor's Rest plus Chesto Berry gives it more full-HP turns to try; Meganium 541 (Grass Whistle) and Slowking 506 (Yawn: a Yawn on the recharge turn puts the user to sleep right after its next Hyper Beam; Ice Beam freezes are another way) are the replacements. Ursaring 805 and Snorlax 826 also have Hyper Beam in slot 0.",
+ "seed": 99001,
+ "challengeNum": 7,
+ "battleNum": 0,
+ "trainerId": 200,
+ "playerSetIds": [
+  531,
+  805,
+  826
+ ],
+ "opponentSetIds": [
+  534,
+  541,
+  506
+ ],
+ "script": {
+  "actions": [
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   }
+  ],
+  "then": "census",
+  "replacements": [
+   1,
+   2
+  ]
+ },
+ "expect": [],
+ "cover": [
+  {
+   "file": "src/engine/battleEndTurnOrchestration.ts",
+   "text": "{\n        up",
+   "at": 0
+  }
+ ],
+ "coverAny": true
+}

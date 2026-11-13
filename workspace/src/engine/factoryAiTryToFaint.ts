@@ -27,7 +27,6 @@ import {
   IGNORED_POWERFUL_MOVE_EFFECTS,
   MOVES_BY_ID,
   TYPE_EFFECTIVENESS,
-  typeMultiplierTenths,
 } from "./factoryAiCheckBadMove.ts";
 import { advanceRngValue } from "./rng.ts";
 import type { BattleRngState } from "./battleDecisionBoundary.ts";
@@ -66,6 +65,12 @@ export type FactoryAiTryToFaintTarget = FactoryAiTryToFaintBattler & Readonly<{
    */
   targetSideReflectUp?: boolean;
   targetSideLightScreenUp?: boolean;
+  /**
+   * `STATUS2_FORESIGHT` on the target. `TypeCalc` (`battle_script_commands.c:1536-1591`) breaks out of the type table at the
+   * `TYPE_FORESIGHT` row when it is set (`:1560-1566`), so Normal / Fighting -> Ghost x0 is not applied to the AI's damage
+   * estimate or to its x4 probe. Optional, default false (docs/parity-mac/ai-effectiveness-foresight.md).
+   */
+  isForesighted?: boolean;
   /**
    * The live `CalculateBaseDamage` terms for (AI battler -> target) from `battleScriptDamageTerms`, the SAME builder
    * the real hit chain uses: species, hold effect and param (Choice Band, type-boost items, Thick Club, Light Ball,
@@ -164,7 +169,7 @@ export function estimateDamage(
   let damage = calculateBaseDamage(aiDamageCalcInput(attacker, defender, move));
   damage = applyStab(damage, attacker.types, move.type);
   if (!(defender.ability === "ABILITY_LEVITATE" && move.type === "TYPE_GROUND")) {
-    damage = applyTypeEffectiveness(damage, move.type, defender.types, TYPE_EFFECTIVENESS).damage;
+    damage = applyTypeEffectiveness(damage, move.type, defender.types, TYPE_EFFECTIVENESS, defender.isForesighted === true).damage;
   }
   damage = Math.trunc((damage * simulatedRngPercent) / 100);
   if (damage === 0) damage = 1;
@@ -190,12 +195,14 @@ function isQuadrupleEffective(
   moveType: string,
   defenderTypes: readonly [string, string],
   defenderAbility: string,
+  defenderHasForesight = false,
 ): boolean {
   if (defenderAbility === "ABILITY_LEVITATE" && moveType === "TYPE_GROUND") return false;
   const stab = attackerTypes[0] === moveType || attackerTypes[1] === moveType;
-  const multiplierTenths = typeMultiplierTenths(moveType, defenderTypes);
   let value = stab ? 60 : 40;
-  value = Math.trunc((value * multiplierTenths) / 10);
+  // The same table walk as the damage estimate, row by row with the Foresight break (the x4 result itself needs two x2 rows,
+  // which a Foresighted Ghost never gives; the walk is shared so the two probes cannot drift apart).
+  value = applyTypeEffectiveness(value, moveType, defenderTypes, TYPE_EFFECTIVENESS, defenderHasForesight).damage;
   if (value === 240) value = 160;
   return value === 160;
 }
@@ -292,7 +299,7 @@ export function runTryToFaint(input: Readonly<{
   // (x4 into Steel / Rock, not the strongest) scored -1 with no Random() (docs/parity-mac/ai-try-to-faint-not-strongest.md).
   if (
     mostPowerful !== "not-most-powerful"
-    && isQuadrupleEffective(input.attacker.types, move.type, input.target.types, input.target.ability)
+    && isQuadrupleEffective(input.attacker.types, move.type, input.target.types, input.target.ability, input.target.isForesighted === true)
   ) {
     const draw = nextDraw(rng, input.drawOrdinalStart, `${input.reasonPrefix}-double-super-effective`);
     rng = draw.after;

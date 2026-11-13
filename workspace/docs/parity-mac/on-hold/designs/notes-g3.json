@@ -1,0 +1,74 @@
+{
+ "group": "g3: R021-R029 (uncommon battle rules)",
+ "rules": [
+  {
+   "id": "R021",
+   "stages": [
+    "R021-immunity-poison-fang"
+   ],
+   "chance": 0.55,
+   "comment": "player's Mightyena then Arbok spam Poison Fang on Zangoose 240; each surviving hit is a 30% roll; Zangoose's random Roar is the main risk"
+  },
+  {
+   "id": "R022",
+   "stages": [
+    "R022-uproar-blocks-hypnosis"
+   ],
+   "chance": 0.9,
+   "comment": "player's Politoed spams Hypnosis; opponent Vigoroth 221 picks Uproar 1 in 4 per turn and it lasts 2-5 turns"
+  },
+  {
+   "id": "R023",
+   "stages": [
+    "R023-pain-split-substitute"
+   ],
+   "chance": 0.85,
+   "comment": "challenge 7: player's Dusclops spams Pain Split; Golem 498 cannot hurt it and the AI chooses between Substitute and Double Team"
+  },
+  {
+   "id": "R024",
+   "stages": [
+    "R024-pursuit-ko-on-switch"
+   ],
+   "chance": 0.95,
+   "comment": "player's Ghosts Haunter/Banette switch every turn; Raticate 197's only move that touches them is Pursuit (random 1 in 4); two hits knock out"
+  },
+  {
+   "id": "R025",
+   "stages": [
+    "R025-shield-dust-kings-rock"
+   ],
+   "chance": 0.38,
+   "comment": "player's King's Rock Hitmonchan 339 Mach Punches Venomoth 331 (quarter damage, never faints); 10% per hit for about 4-5 hits until Hitmonchan falls"
+  },
+  {
+   "id": "R026",
+   "stages": [
+    "R026-sticky-hold-trick"
+   ],
+   "chance": 0.48,
+   "comment": "player's Kecleon 325 Tricks Swalot 353 on turn 1; Sticky Hold only in the seeds that give Swalot its second ability slot (about half)"
+  },
+  {
+   "id": "R027",
+   "stages": [
+    "R027-thrash-ghost-cancels-lock"
+   ],
+   "chance": 0.85,
+   "comment": "player's Tauros 408 Thrash knocks out Dugtrio 372 on turn 1; both opponent reserves are Ghosts, so the locked turn 2 Thrash does not affect and the lock is cancelled at turn end"
+  },
+  {
+   "id": "R028",
+   "stages": [
+    "R028-explosion-draw"
+   ],
+   "chance": 0.9,
+   "comment": "challenge 7: three faster player Exploders (slot 0) each knock out one slow opponent with no protection; the third Explosion leaves both sides empty"
+  },
+  {
+   "id": "R029",
+   "stages": [],
+   "notStageable": "Impossible as written. The marked line (battleEndTurnOrchestration.ts:1653) returns only when battleOutcome is nonzero after the Leech Seed tick, but nothing in that tick can write it: BattleScript_LeechSeedTurnDrain and its Liquid Ooze tail (data/battle_scripts_1.s:3265-3285) end with tryfaintmon BS_ATTACKER / tryfaintmon BS_TARGET / end2 and have no checkteamslost (unlike BattleScript_DoTurnDmg at :3741-3746, which poison, burn, Nightmare, Curse and Wrap use), and Cmd_tryfaintmon (src/battle_script_commands.c:2965-3045) never writes gBattleOutcome. Cmd_checkteamslost is the only writer (the engine says so at battleScriptFaintedActionsOrchestration.ts:629; the teleport writer is not reachable in the Factory), and the end-turn passes only run while battleOutcome is 0 (battle_main.c:3961). So when Leech Seed drain or Liquid Ooze takes a side's last Pokemon, the battle is decided later, by checkteamslost in the fainted-actions pass (HandleFaintedMonActions, BattleScript_HandleFaintedMon :2831), and the line stays dark. A stage where Leech Seed ends the battle (a seeder against the opponent's last Pokemon) would run other code but never this marker; the line can only be covered by a test that enters the tick with battleOutcome already nonzero, which a real battle does not do."
+  }
+ ]
+}

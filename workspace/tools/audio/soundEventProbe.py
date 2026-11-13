@@ -26,14 +26,14 @@ open-loop trace for romStateTimeline.py / a sound pass of `lab`).
 saved pre-frame state) only when the m4a RAM signature changed during it. Plain stepping
 is the reference; tools/audio/compareProbe.py proves a hybrid log equal to a stepping log.
 """
-import bisect, json, os, re, sys, time
+import bisect, json, os, re, struct, sys, time
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 HARNESS = next(p for p in (ROOT, *ROOT.parents) if (p / "oracle/emerald_core.py").is_file())
 sys.path.insert(0, str(HARNESS / "oracle"))
 from emerald_core import EmeraldOracle  # noqa: E402
-from battle_lab import BattleLab, validate_request  # noqa: E402
+from battle_lab import BattleLab, SUBSTRUCT_POSITIONS, validate_request  # noqa: E402
 from mgba import ffi  # noqa: E402
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import romDecisionDriver  # noqa: E402
@@ -89,7 +89,62 @@ def extra_hook_names(rest, environ):
 DRIVE_FRAME_CAP = 80000
 
 
-def drive_lab(oracle, funcs, decisions, cap=None):
+def read_party_member(oracle, base):
+    """Species, item and PP of one struct Pokemon, with HP and status1 (outside the encrypted box). GetBoxMonData / SetBoxMonData decrypt the box IN PLACE and
+    encrypt it again before they return (pokemon.c), and an emulator frame can end inside one (the opponent's AI runs for more than a frame while the player's
+    menu opens): the 48 data bytes are then plain, or half way. The box checksum (the sum of the 24 plain halfwords) tells which: try the encrypted reading, then
+    the plain one; neither -> species / item / pp are None and the caller reads again on a later frame."""
+    raw = bytes(oracle.core.memory.u8[base:base + 100])
+    personality, ot_id = struct.unpack_from("<II", raw, 0)
+    checksum = struct.unpack_from("<H", raw, 28)[0]
+    data, key = raw[32:80], personality ^ ot_id
+    xored = b"".join(struct.pack("<I", struct.unpack_from("<I", data, o)[0] ^ key) for o in range(0, 48, 4))
+    out = {"species": None, "hp": struct.unpack_from("<H", raw, 86)[0], "status1": struct.unpack_from("<I", raw, 80)[0], "pp": None, "item": None}
+    for physical in (xored, data):
+        if sum(struct.unpack("<24H", physical)) & 0xFFFF == checksum:
+            order = SUBSTRUCT_POSITIONS[personality % 24]
+            growth, attacks = physical[order[0] * 12:order[0] * 12 + 12], physical[order[1] * 12:order[1] * 12 + 12]
+            out["species"], out["item"] = struct.unpack_from("<HH", growth, 0)
+            out["pp"] = list(attacks[8:12])
+            break
+    return out
+
+
+def wide_state(oracle, lab=None):
+    """parity-mac fourth pass: the battle state the wide compare checks at every decision point (soundCensusRomReplay.ts `wideOf` builds the same shape from the
+    engine). Raw source fields: gBattleMons, gDisableStructs, gStatuses3, both parties (HP, status1, PP, item of each member), gSideStatuses / gSideTimers,
+    gBattleWeather and gWishFutureKnock (include/battle.h:70-102, 149-174)."""
+    sym = oracle.symbols
+    r8, r16, r32 = oracle.read_u8, oracle.read_u16, oracle.read_u32
+
+    def battler(b):
+        base, d = sym["gBattleMons"] + b * 0x58, sym["gDisableStructs"] + b * 0x1C
+        return {"partyIndex": r8(sym["gBattlerPartyIndexes"] + b * 2), "species": r16(base), "hp": r16(base + 0x28), "maxHp": r16(base + 0x2C),
+                "status1": r32(base + 0x4C), "status2": r32(base + 0x50), "status3": r32(sym["gStatuses3"] + b * 4),
+                "statStages": [r8(base + 0x18 + i) for i in range(8)], "moves": [r16(base + 0x0C + i * 2) for i in range(4)],
+                "pp": [r8(base + 0x24 + i) for i in range(4)], "item": r16(base + 0x2E), "ability": r8(base + 0x20), "types": [r8(base + 0x21), r8(base + 0x22)],
+                "stats": [r16(base + 2 + i * 2) for i in range(5)],
+                "disabledMove": r16(d + 4), "encoredMove": r16(d + 6), "protectUses": r8(d + 8), "stockpileCounter": r8(d + 9), "substituteHP": r8(d + 0xA),
+                "disableTimer": r8(d + 0xB) & 0xF, "encoreTimer": r8(d + 0xE) & 0xF, "perishSongTimer": r8(d + 0xF) & 0xF, "furyCutterCounter": r8(d + 0x10),
+                "rolloutTimer": r8(d + 0x11) & 0xF, "chargeTimer": r8(d + 0x12) & 0xF, "tauntTimer": r8(d + 0x13) & 0xF, "isFirstTurn": r8(d + 0x16),
+                "truantCounter": r8(d + 0x18) & 1, "mimickedMoves": r8(d + 0x18) >> 4, "rechargeTimer": r8(d + 0x19)}
+
+    def party(symbol):
+        return [read_party_member(oracle, sym[symbol] + i * 100) for i in range(3)]
+
+    def side(i):
+        t = sym["gSideTimers"] + i * 0xC
+        return {"status": r16(sym["gSideStatuses"] + i * 2), "reflectTimer": r8(t), "lightscreenTimer": r8(t + 2), "mistTimer": r8(t + 4), "safeguardTimer": r8(t + 6),
+                "spikesAmount": r8(t + 10)}
+
+    w = sym["gWishFutureKnock"]
+    return {"battlers": [battler(0), battler(1)], "parties": [party("gPlayerParty"), party("gEnemyParty")], "sides": [side(0), side(1)],
+            "weather": r16(sym["gBattleWeather"]), "weatherTimer": r8(w + 0x28),
+            "futureSightCounter": [r8(w + i) for i in range(2)], "futureSightAttacker": [r8(w + 4 + i) for i in range(2)],
+            "futureSightMove": [r16(w + 0x18 + i * 2) for i in range(2)], "wishCounter": [r8(w + 0x20 + i) for i in range(2)], "wishMonId": [r8(w + 0x24 + i) for i in range(2)]}
+
+
+def drive_lab(oracle, funcs, decisions, cap=None, lab=None):
     """Closed-loop run of the staged lab battle (aud243d): returns the executed segments, anchors, ROM timeline (romStateTimeline.py row shape) and stop reason."""
     sym = oracle.symbols
     mons, tasks = sym["gBattleMons"], sym["gTasks"]
@@ -110,6 +165,7 @@ def drive_lab(oracle, funcs, decisions, cap=None):
                         oracle.read_u32(sym["gBattleControllerExecFlags"]), oracle.read_u32(sym["gBattlerControllerFuncs"] + 4), tuple(live))}
 
     frames, timeline, stop, error = [], [], "outcome", None
+    wide, reread = [], 0  # one wide state per decision, read on the frame its menu was first seen (parity-mac fourth pass)
     row = hp_row()
     timeline.append([0, *row])
     limit = DRIVE_FRAME_CAP if cap is None else cap
@@ -120,6 +176,25 @@ def drive_lab(oracle, funcs, decisions, cap=None):
         except romDecisionDriver.DriverError as e:
             stop, error = e.reason, e.dump
             break
+        if lab is not None:
+            def capture():
+                w = wide_state(oracle, lab)
+                if driver.last_state.startswith("party"):
+                    # While the battle party menu is open gPlayerParty is in MENU order (party_menu.c UpdatePartyToBattleOrder:
+                    # gPlayerParty[menu slot of party id i] = party member i); put it back in party-id order.
+                    w["parties"][0] = [w["parties"][0][romDecisionDriver.menu_slot_for_party_id(obs["partyOrder"], i)] for i in range(3)]
+                return w
+            if len(wide) < driver.opened:
+                wide.append(capture())
+                reread = 4
+            elif reread and any(m["species"] is None for side in wide[-1]["parties"] for m in side):
+                # a party member was caught with its box half decrypted: take that member (only) from the next frames
+                reread -= 1
+                again = capture()["parties"]
+                for side, fresh_side in zip(wide[-1]["parties"], again):
+                    for i, m in enumerate(side):
+                        if m["species"] is None and fresh_side[i]["species"] is not None:
+                            side[i] = fresh_side[i]
         if buttons is None:
             break
         if len(frames) >= limit:
@@ -134,7 +209,8 @@ def drive_lab(oracle, funcs, decisions, cap=None):
             row = cur
     return {"stop": stop, "error": error, "frames": len(frames), "decisionsConsumed": driver.index, "decisionsTotal": len(decisions),
             "segments": romDecisionDriver.rle(frames), "anchors": driver.anchors, "timeline": timeline, "outcome": oracle.read_u8(sym["gBattleOutcome"]),
-            "transitions": driver.trace, "lastObs": {k: v for k, v in obs.items() if k != "sig"}}
+            "transitions": driver.trace, "lastObs": {k: v for k, v in obs.items() if k != "sig"},
+            **({} if lab is None else {"wide": wide, "finalWide": wide_state(oracle, lab)})}
 
 
 def main():
@@ -309,7 +385,7 @@ def main():
 
     replay_trace = None
     def run_drive(oracle, path, cap):
-        return drive_lab(oracle, romDecisionDriver.resolve_funcs(REF), romDecisionDriver.load_decisions(path), cap)
+        return drive_lab(oracle, romDecisionDriver.resolve_funcs(REF), romDecisionDriver.load_decisions(path), cap, lab)
 
     drive_path = rest[rest.index("--drive") + 1] if "--drive" in rest else None
     drive_out = Path(rest[rest.index("--drive-out") + 1]) if "--drive-out" in rest else None
@@ -358,6 +434,8 @@ def main():
     else:
         request = json.loads(Path(rest[0]).read_text())
         request["profile"] = profile  # one request file serves both scenes; only the profile field differs
+        # parity-mac fourth pass: `replay` (the test player's name and the census seed) is the replay tool's own note; the lab does not know the key.
+        replay_note = request.pop("replay", None)
         request = validate_request(request, profile)
         label = f"lab {Path(rest[0]).name}"
         lab = BattleLab(oracle, profile)
@@ -391,7 +469,8 @@ def main():
             # parity-mac: the validated request of a factoryBrain staging carries the fields the lab filled in itself (battleNum 6, trainerId 1022, opponentSetIds []),
             # and validate_request refuses them on input: drop them so the frozen request can be staged again (romStateTimeline.py).
             frozen = {k: v for k, v in request.items() if not (request["mode"] == "factoryBrain" and k in ("battleNum", "trainerId", "opponentSetIds"))}
-            drive_out.write_text(json.dumps({**frozen, "trace": {"segments": drive_result["segments"], "captureFrames": [0]}}, indent=1))
+            drive_out.write_text(json.dumps({**frozen, **({} if replay_note is None else {"replay": replay_note}),
+                                             "trace": {"segments": drive_result["segments"], "captureFrames": [0]}}, indent=1))
     t_window = time.time()
     done = 0
     for seg in segments:

@@ -1,0 +1,88 @@
+{
+ "name": "R022-uproar-blocks-hypnosis",
+ "rules": [
+  "R022"
+ ],
+ "why": "The opponent's lead Vigoroth (set 221: Slash, Counter, Encore, Uproar; Vital Spirit) picks a random move each turn at challenge 1, so it starts an Uproar with 1 in 4 each turn, and the Uproar lasts at least two turns. The player's Politoed (set 265, Hypnosis in slot 2) uses Hypnosis every turn. Before the Uproar Hypnosis fails on Vital Spirit (no harm); once Vigoroth is in an Uproar, jumpifcantmakeasleep finds the Uproar battler first (UproarWakeUpCheck) and the move fails with the Uproar message. Politoed is bulky and only Slash and Uproar hurt it; Counter fails against status moves, and an Encore just keeps Hypnosis going.",
+ "seed": 91000,
+ "challengeNum": 1,
+ "battleNum": 0,
+ "trainerId": 80,
+ "playerSetIds": [
+  265,
+  164,
+  186
+ ],
+ "opponentSetIds": [
+  221,
+  250,
+  203
+ ],
+ "script": {
+  "actions": [
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   }
+  ],
+  "then": "census"
+ },
+ "expect": [],
+ "cover": [
+  {
+   "file": "src/engine/battleScriptStatusPrimaryOpcode.ts",
+   "text": "{\n          upro",
+   "at": 0
+  },
+  {
+   "file": "src/engine/battleScriptStatusPrimaryOpcode.ts",
+   "text": "{\n      const mu",
+   "at": 0
+  }
+ ],
+ "coverAny": true
+}

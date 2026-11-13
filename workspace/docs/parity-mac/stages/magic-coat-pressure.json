@@ -1,0 +1,71 @@
+{
+ "name": "magic-coat-pressure",
+ "why": "Magic Coat against Pressure, with a real Magic Coat slot. The opponent's Venomoth (set 226) takes Pressure from the player's Absol (set 247) with Skill Swap. The player switches to Kecleon (set 220) and uses Magic Coat every turn. When Venomoth's Sleep Powder is reflected, Kecleon pays one more PP from its Magic Coat slot, in the party record too (PressurePPLose, battle_util.c:740-765; docs/parity-mac/party-pp-writes.md).",
+ "seed": 73000,
+ "challengeNum": 1,
+ "battleNum": 0,
+ "trainerId": 85,
+ "playerSetIds": [
+  247,
+  220,
+  164
+ ],
+ "opponentSetIds": [
+  226,
+  178,
+  192
+ ],
+ "script": {
+  "actions": [
+   {
+    "prefer": 3
+   },
+   {
+    "prefer": 3
+   },
+   {
+    "switch": 1
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   }
+  ],
+  "then": "census"
+ },
+ "expect": [
+  "situation:volatile:magic-coat:bounces-under-pressure"
+ ]
+}

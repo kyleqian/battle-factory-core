@@ -19,6 +19,7 @@ def main():
     oracle = EmeraldOracle(REF / "pokeemerald.gba", REF / "pokeemerald.map", HARNESS / "oracle/bootstrap" / bootstrap)
     request = json.loads(Path(req_path).read_text())
     request["profile"] = profile
+    request.pop("replay", None)  # the replay tool's own note (test player, census seed); the lab does not know the key
     request = validate_request(request, profile)
     BattleLab(oracle, profile).prepare(request)
     sym = oracle.symbols

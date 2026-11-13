@@ -62,6 +62,8 @@ import {
 } from "./battleScriptProgram.ts";
 import type { BattleScriptBattlerId } from "./battleScriptEvents.ts";
 import { computeCastformTypeChange } from "./battleScriptTryCastformDataChangeOpcode.ts";
+// A cycle of two function imports (the end-of-turn module calls this one for its faint sweep): both are used inside functions only.
+import { runBattleScriptItemEffectNormalOnMoveTurn } from "./battleEndTurnOrchestration.ts";
 import {
   type BattleScriptRulesBattlers,
   type BattleScriptRulesContext,
@@ -348,6 +350,14 @@ export function runBattleScriptFaintedActionsOrchestration(
   program: BattleScriptProgram,
   handlers: BattleScriptOpcodeHandlers<BattleScriptRulesContext>,
   initialState: BattleScriptMachineState<BattleScriptRulesContext>,
+  /**
+   * `deferPostBattleOutcomeScript`: a deciding faint returns `terminal` WITHOUT the battle-won / battle-lost script. For
+   * `BattleTurnPassed`, where source runs that script only after the whole function is through (`HandleEndTurn_BattleWon` /
+   * `_BattleLost` via `sEndTurnFuncsTable[gBattleOutcome]`, battle_main.c:3988-3992), i.e. after
+   * `HandleWishPerishSongOnTurnEnd` has taken or counted down the remaining battlers. The caller then runs
+   * `runBattleScriptPostBattleOutcomeScript` once. docs/parity-mac/perish-song-after-outcome.md.
+   */
+  options: Readonly<{ deferPostBattleOutcomeScript?: boolean }> = {},
 ): BattleScriptFaintedActionsResult {
   const faintedBattlers = collectFaintedBattlers(initialState.rulesContext);
   if (faintedBattlers.length === 0) {
@@ -374,7 +384,7 @@ export function runBattleScriptFaintedActionsOrchestration(
     state = run.state;
   }
 
-  return runFaintedBattlerHandlers(program, handlers, state, faintedBattlers);
+  return runFaintedBattlerHandlers(program, handlers, state, faintedBattlers, options.deferPostBattleOutcomeScript === true);
 }
 
 function replaceBattler(
@@ -440,6 +450,7 @@ function runPendingSwitchinEffects(
           ),
         ) as BattleScriptRulesContext["aiObservedAbilityIds"],
         scriptingBattler: id,
+        intimidateBattler: id, // battle_util.c:3011
         lastUsedAbility: PENDING_ENTRY_ABILITY.intimidate,
       }),
     }), INTIMIDATE_LABEL);
@@ -493,6 +504,15 @@ function runPendingSwitchinEffects(
       rulesContext: Object.freeze({ ...rules, scriptingBattler: 0 }),
     }), WHITE_HERB_END2_LABEL);
   }
+  // The same call, `ItemBattleEffects(ITEMEFFECT_NORMAL, 0, TRUE)` (`battle_util.c:1961`), also fires the eight cure items of battler 0 (Cheri, Pecha,
+  // Rawst, Aspear, Chesto, Persim, Lum Berry, Mental Herb: `:3500-3594`, no `moveTurn` gate). Only White Herb was ported here. It matters when the
+  // player's Pokemon holds its cure item and gets the status in a script that skips the move-end item step: Pursuit on a switching Pokemon
+  // (`BattleScript_PursuitDmgOnSwitchOut`: `moveendfromto MOVEEND_ON_DAMAGE_ABILITIES, MOVEEND_CHOICE_MOVE`), where the leaving Pokemon's Static,
+  // Poison Point, Flame Body or Effect Spore can strike. The game cures it right after that action, before the end of the turn; and a Pokemon that
+  // enters with a status and its cure item is cured right after it comes in. Battler 0 only: the opponent's holder waits for its next item step.
+  // docs/parity-mac/cure-berry-after-action.md.
+  const cured = runBattleScriptItemEffectNormalOnMoveTurn(program, handlers, Object.freeze({ ...state, haltReason: null }), 0);
+  if (cured !== null) state = cured;
   // `AbilityBattleEffects(ABILITYEFFECT_FORECAST, ...)`, the last term of state 6 (`battle_util.c:1962`, body
   // `:2955-2972`): every Forecast battler whose form no longer fits the weather runs `CastformDataTypeChange`
   // (`:2396-2429`, SET_BATTLER_TYPE at once) and `BattleScript_CastformChange`. Source returns at the first one and
@@ -550,6 +570,15 @@ function runPendingSwitchinEffects(
  * RETURN_OPPONENT_MON1/2) as non-consuming, so the `BattleState.rng` cursor
  * is untouched by this pass either way.
  */
+/** The battle-won / battle-lost script of a decided battle (see `deferPostBattleOutcomeScript`). */
+export function runBattleScriptPostBattleOutcomeScript(
+  program: BattleScriptProgram,
+  handlers: BattleScriptOpcodeHandlers<BattleScriptRulesContext>,
+  completed: BattleScriptMachineState<BattleScriptRulesContext>,
+): BattleScriptMachineState<BattleScriptRulesContext> {
+  return runPostBattleOutcomeScript(program, handlers, completed);
+}
+
 function runPostBattleOutcomeScript(
   program: BattleScriptProgram,
   handlers: BattleScriptOpcodeHandlers<BattleScriptRulesContext>,
@@ -575,6 +604,7 @@ function runFaintedBattlerHandlers(
   handlers: BattleScriptOpcodeHandlers<BattleScriptRulesContext>,
   initialState: BattleScriptMachineState<BattleScriptRulesContext>,
   faintedBattlers: readonly BattleScriptBattlerId[],
+  deferPostBattleOutcomeScript = false,
 ): BattleScriptFaintedActionsResult {
   let state = initialState;
   for (const faintedBattler of faintedBattlers) {
@@ -604,7 +634,7 @@ function runFaintedBattlerHandlers(
   return completed.rulesContext.battleOutcome !== 0
     ? Object.freeze({
       kind: "terminal",
-      state: runPostBattleOutcomeScript(program, handlers, completed),
+      state: deferPostBattleOutcomeScript ? completed : runPostBattleOutcomeScript(program, handlers, completed),
     })
     : Object.freeze({ kind: "resumed", state: completed });
 }

@@ -1,0 +1,38 @@
+{
+ "name": "uproar-wakes-at-move",
+ "why": "Venomoth (set 226) puts Machoke (set 178, slower than Vigoroth) to sleep, Vigoroth (set 221) comes in and uses Uproar first: the sleeper wakes when it tries to move.",
+ "seed": 41000,
+ "challengeNum": 1,
+ "battleNum": 0,
+ "trainerId": 85,
+ "playerSetIds": [
+  226,
+  221,
+  164
+ ],
+ "opponentSetIds": [
+  178,
+  171,
+  192
+ ],
+ "script": {
+  "actions": [
+   {
+    "move": 2
+   },
+   {
+    "switch": 1
+   },
+   {
+    "move": 3
+   },
+   {
+    "move": 3
+   }
+  ],
+  "then": "census"
+ },
+ "expect": [
+  "situation:volatile:uproar:wakes-at-move"
+ ]
+}

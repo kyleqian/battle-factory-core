@@ -1,0 +1,106 @@
+{
+ "name": "R001-lunatone-spdef-max",
+ "rules": [
+  "R001"
+ ],
+ "why": "Challenge 2 (AI_CheckBadMove only, so the AI picks at random among its moves that are not scored down). The opponent leads Lunatone (set 327: Psychic, Ice Beam, Cosmic Power, Calm Mind). The player has only Dark types (Crawdaunt 354, Sneasel 317, Sharpedo 347): Psychic has no effect on them, so AI_CheckBadMove scores it -10 and Lunatone picks among Ice Beam, Cosmic Power and Calm Mind (2 in 3 a stat move). Every Cosmic Power and every Calm Mind raises Lunatone's Sp. Def by one. The player never attacks: it switches Crawdaunt and Sneasel in and out every turn (both resist Ice Beam), so Lunatone stays on the field and no move of the player lands on it (no AI switch). After six stat moves Sp. Def is +6 while Sp. Atk is below +6 (unless all six were Calm Minds, 1 in 64): from the next turn AI_CBM_CalmMind (battle_ai_scripts.s:590-593) scores Calm Mind -8, the runCbmCalmMind branch. About 9 Lunatone turns on average.",
+ "seed": 0,
+ "challengeNum": 2,
+ "battleNum": 0,
+ "trainerId": 100,
+ "playerSetIds": [
+  354,
+  317,
+  347
+ ],
+ "opponentSetIds": [
+  327,
+  275,
+  276
+ ],
+ "script": {
+  "actions": [
+   {
+    "preferSwitch": 1
+   },
+   {
+    "preferSwitch": 0
+   },
+   {
+    "preferSwitch": 1
+   },
+   {
+    "preferSwitch": 0
+   },
+   {
+    "preferSwitch": 1
+   },
+   {
+    "preferSwitch": 0
+   },
+   {
+    "preferSwitch": 1
+   },
+   {
+    "preferSwitch": 0
+   },
+   {
+    "preferSwitch": 1
+   },
+   {
+    "preferSwitch": 0
+   },
+   {
+    "preferSwitch": 1
+   },
+   {
+    "preferSwitch": 0
+   },
+   {
+    "preferSwitch": 1
+   },
+   {
+    "preferSwitch": 0
+   },
+   {
+    "preferSwitch": 1
+   },
+   {
+    "preferSwitch": 0
+   },
+   {
+    "preferSwitch": 1
+   },
+   {
+    "preferSwitch": 0
+   },
+   {
+    "preferSwitch": 1
+   },
+   {
+    "preferSwitch": 0
+   }
+  ],
+  "then": "census",
+  "replacements": [
+   2,
+   1
+  ]
+ },
+ "expect": [],
+ "cover": [
+  {
+   "file": "src/engine/factoryAiCheckBadMove.ts",
+   "text": "? -8 : 0; // first gate jumps to Score_Minus10 / end\n}\n\n/**\n * `AI_CBM_D",
+   "at": 0
+  }
+ ],
+ "coverAny": true,
+ "chance": 0.8,
+ "seeds": 20,
+ "onHold": {
+  "group": "g1",
+  "seedsHunted": 0,
+  "result": "untested"
+ }
+}

@@ -15,6 +15,7 @@ import {
   BATTLE_SCRIPT_MOVE_RESULT_NO_EFFECT,
   resolveBattleScriptMoveType,
   wasBattleScriptBattlerUnableToUseMove,
+  withBattleScriptPartyMemberStatus1,
   type BattleScriptRulesBattlerState,
   type BattleScriptRulesBattlers,
   type BattleScriptRulesContext,
@@ -148,10 +149,17 @@ function executeDefrost(
 
   const status1 = (targetState.status1 & ~BATTLE_SCRIPT_STATUS1_FREEZE) >>> 0;
   const nextTarget = Object.freeze({ ...targetState, status1 });
-  const rulesContext = advanceState(
+  const thawed = advanceState(
     rules,
     replaceBattler(rules.battlers, target, nextTarget),
   );
+  // BtlController_EmitSetMonData(REQUEST_STATUS_BATTLE) right after the clear (battle_script_commands.c:4265-4268, MOVEEND_DEFROST): the party
+  // Pokemon is thawed too. A switch-in rebuilds status1 from the party record, so without this write a Pokemon thawed by a Fire
+  // move was frozen again when it came back (docs/parity-mac/defrost-party-status.md, ROM seed 20276).
+  const rulesContext = Object.freeze({
+    ...thawed,
+    party: withBattleScriptPartyMemberStatus1(thawed.party, targetState.side, targetState.partyIndex, status1),
+  });
   const transfer = resolveBattleScriptLabel(
     context.program,
     "BattleScript_DefrostedViaFireMove",

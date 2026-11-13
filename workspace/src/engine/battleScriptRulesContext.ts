@@ -849,6 +849,21 @@ export type BattleScriptRulesContext = Readonly<
      * (battle_ai_script_commands.c:1111).
      */
     battleTurnCounter: number;
+    /**
+     * Source gProtectStructs[b].noValidMoves as it stands at the END of the turn, one bit per battler. The game sets the flag at action selection when
+     * every move slot is unusable (AreAllMovesUnusable, battle_util.c:1125-1140) and clears it when the forced Struggle starts
+     * (HandleAction_UseMove, :100-102). A battler whose move action never starts, because the rest of the turn was cancelled
+     * (BattleScript_FaintedMonSendOutNew's cancelallactions, battle_scripts_1.s:2895), keeps it until TurnValuesCleanUp(FALSE) at the turn's very end.
+     * ENDTURN_ORDER's GetWhoStrikesFirst then reads MOVE_STRUGGLE for that battler (battle_main.c:4700). 0 at the start of every turn.
+     * docs/parity-mac/forced-struggle-never-started.md.
+     */
+    noValidMovesKept: number;
+    /**
+     * Source gBattleStruct->intimidateBattler: the Pokemon whose Intimidate script is running (set by AbilityBattleEffects' INTIMIDATE1 / INTIMIDATE2
+     * cases, battle_util.c:3011 / :3083). Cmd_trygetintimidatetarget reads it, and writes it back into gBattleScripting.battler, on every pass of the
+     * loop (battle_script_commands.c:9571): a script the loop calls in between may change the scripting battler (BattleScript_MistProtected does).
+     */
+    intimidateBattler: BattleScriptBattlerId;
     /** Source u8 gWishFutureKnock.weatherDuration -- the one shared weather timer every Cmd_set<weather> writes (include/battle.h:172, byte offset 0x28). */
     weatherTimer: number;
     /** Source gWishFutureKnock.wishCounter[MAX_BATTLERS_COUNT], owned by positional battler slots. */
@@ -1055,6 +1070,8 @@ export type BattleScriptRulesContextInput = Readonly<{
   weather?: number;
   randomTurnNumber?: number;
   battleTurnCounter?: number;
+  noValidMovesKept?: number;
+  intimidateBattler?: BattleScriptBattlerId;
   weatherTimer?: number;
   wishCounter?: readonly number[];
   wishMonId?: readonly number[];
@@ -2812,6 +2829,8 @@ export function createBattleScriptRulesContext(
     weather: requireUnsigned(input.weather ?? 0, 0xffff_ffff, "weather") >>> 0,
     randomTurnNumber: requireUnsigned(input.randomTurnNumber ?? 0xffff, 0xffff, "randomTurnNumber"),
     battleTurnCounter: requireUnsigned(input.battleTurnCounter ?? 0, 0xff, "battleTurnCounter"),
+    noValidMovesKept: requireUnsigned(input.noValidMovesKept ?? 0, 0xf, "noValidMovesKept"),
+    intimidateBattler: requireUnsigned(input.intimidateBattler ?? 0, 3, "intimidateBattler") as BattleScriptBattlerId,
     weatherTimer: requireUnsigned(input.weatherTimer ?? 0, 0xff, "weatherTimer"),
     wishCounter: Object.freeze([
       requireUnsigned(input.wishCounter?.[0] ?? 0, 0xff, "wishCounter[0]"),

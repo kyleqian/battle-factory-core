@@ -1,0 +1,31 @@
+{
+ "name": "magnet-pull",
+ "why": "Aron (set 122, Steel) against Nosepass (set 150) when its ability is Magnet Pull: the game refuses the switch.",
+ "seed": 40002,
+ "challengeNum": 0,
+ "battleNum": 0,
+ "trainerId": 74,
+ "playerSetIds": [
+  122,
+  115,
+  143
+ ],
+ "opponentSetIds": [
+  150,
+  129,
+  164
+ ],
+ "script": {
+  "actions": [
+   {
+    "probeSwitch": 1,
+    "move": 0
+   }
+  ],
+  "then": "census"
+ },
+ "expect": [
+  "situation:switch:refused:magnet-pull",
+  "ability:ABILITY_MAGNET_PULL"
+ ]
+}

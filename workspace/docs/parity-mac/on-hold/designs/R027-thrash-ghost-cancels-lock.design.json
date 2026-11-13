@@ -1,0 +1,51 @@
+{
+ "name": "R027-thrash-ghost-cancels-lock",
+ "rules": [
+  "R027"
+ ],
+ "why": "Challenge 3. The player's Tauros (set 408, Thrash in slot 1) uses Thrash on turn 1 and knocks out the opponent's lead Dugtrio (set 372: about 130-154 damage against 101 HP). Thrash's lock (2 or 3 turns) goes on, and both of the opponent's other Pokemon are Ghosts (Misdreavus 374, Dusclops 378), so the replacement is a Ghost. On turn 2 the locked Thrash does not affect it (targetNotAffected), and at the end of that turn the Thrash tick sees WasUnableToUseMove and cancels the lock. Tauros is faster than both Ghosts; a Confuse Ray or Thunder Wave from them first only adds the self-hit / full-paralysis ways to the same branch. Risks: Dugtrio's critical Earthquake, or a Tri Attack burn/freeze before the Thrash.",
+ "seed": 0,
+ "challengeNum": 3,
+ "battleNum": 0,
+ "trainerId": 120,
+ "playerSetIds": [
+  408,
+  411,
+  445
+ ],
+ "opponentSetIds": [
+  372,
+  374,
+  378
+ ],
+ "script": {
+  "actions": [
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 1
+   }
+  ],
+  "then": "census"
+ },
+ "expect": [],
+ "cover": [
+  {
+   "file": "src/engine/battleEndTurnOrchestration.ts",
+   "text": "{\n    const { ru",
+   "at": 0
+  }
+ ],
+ "coverAny": true,
+ "chance": 0.85,
+ "seeds": 30,
+ "onHold": {
+  "group": "g3",
+  "seedsHunted": 2,
+  "result": "no matching hit in 2 seeds (hunt stopped)"
+ }
+}

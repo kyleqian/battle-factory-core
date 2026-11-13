@@ -1405,18 +1405,25 @@ export const ppreduceOpcodeHandler: BattleScriptOpcodeHandler<BattleScriptRulesC
     const pp = attackerBattler.pp.map((value, index) => (index === slot ? nextPp : value)) as unknown as
       BattleScriptRulesBattlerState["pp"];
     const withActivePp = withBattler(rulesContext, attacker, { pp, notFirstStrike: 1 });
-    nextRulesContext = Object.freeze({
-      ...withActivePp,
-      party: withBattleScriptPartyMemberPp(
-        withActivePp.party,
-        attackerBattler.side,
-        attackerBattler.partyIndex,
-        slot,
-        nextPp,
-      ),
-    });
+    // Cmd_ppreduce writes the party Pokemon only when the move is its own: not while it is Transformed, and not a slot Mimic filled
+    // (battle_script_commands.c:1239-1246, the `MOVE_IS_PERMANENT(gBattlerAttacker, gCurrMovePos)` gate around
+    // BtlController_EmitSetMonData). A Transformed Pokemon spends the PP of its copied moves only; the party record keeps the PP of its real moves.
+    // The engine wrote the copied move's PP over the real move's (ROM: staged battle metronome-transform, docs/parity-mac/transformed-pp.md).
+    const isPermanent = (attackerBattler.status2 & BATTLE_SCRIPT_STATUS2_TRANSFORMED) === 0
+      && (attackerBattler.mimickedMoves & (1 << slot)) === 0;
+    nextRulesContext = isPermanent
+      ? Object.freeze({
+        ...withActivePp,
+        party: withBattleScriptPartyMemberPp(
+          withActivePp.party,
+          attackerBattler.side,
+          attackerBattler.partyIndex,
+          slot,
+          nextPp,
+        ),
+      })
+      : withActivePp;
 
-    const isPermanent = (attackerBattler.status2 & BATTLE_SCRIPT_STATUS2_TRANSFORMED) === 0;
     if (isPermanent) {
       events = Object.freeze([
         Object.freeze({ kind: "set-battler-pp-data" as const, battler: attacker, movePosition: slot, pp: nextPp }),
@@ -4646,26 +4653,23 @@ function createCleareffectsonfaintOpcodeHandler(
       const preventedByActive =
         (candidate.status2 & STATUS2_ESCAPE_PREVENTION) !== 0
         && candidate.battlerPreventingEscape === active;
-      const sureHitByActive =
-        (candidate.status3 & BATTLE_SCRIPT_STATUS3_ALWAYS_HITS) !== 0
-        && candidate.battlerWithSureHit === active;
       const status2 = (
         candidate.status2
         & ~infatuationBit
         & (wrappedByActive ? ~STATUS2_WRAPPED_MASK : ~0)
         & (preventedByActive ? ~STATUS2_ESCAPE_PREVENTION : ~0)
       ) >>> 0;
-      const status3 = sureHitByActive
-        ? (candidate.status3 & ~BATTLE_SCRIPT_STATUS3_ALWAYS_HITS) >>> 0
-        : candidate.status3;
-      return status2 === candidate.status2 && status3 === candidate.status3
+      // FaintClearSetData's loop over the other battlers (battle_main.c:3274-3282) frees escape prevention, infatuation and Wrap. It does NOT touch a
+      // Lock-On / Mind Reader mark the fainted Pokemon left (STATUS3_ALWAYS_HITS with battlerWithSureHit): that one goes when the next Pokemon enters
+      // the slot (SwitchInClearSetData, :3166-3170, ported in battleScriptSwitchinOpcode.ts) or when its two turns run out. The engine cleared it here
+      // too. No effect on play (nobody can use the mark in between); seen by the wide compare at the replacement menu (ROM: staged battle
+      // metronome-lock-on, docs/parity-mac/lock-on-mark-at-faint.md).
+      return status2 === candidate.status2
         ? candidate
         : Object.freeze({
             ...candidate,
             status2,
-            status3,
             ...(preventedByActive ? { battlerPreventingEscape: 0 as BattleScriptBattlerId } : {}),
-            ...(sureHitByActive ? { battlerWithSureHit: 0 as BattleScriptBattlerId } : {}),
           });
     }) as unknown as BattleScriptRulesBattlers;
 
@@ -4705,6 +4709,11 @@ function createCleareffectsonfaintOpcodeHandler(
     const nextRulesContext = Object.freeze({
       ...rulesContext,
       battlers: Object.freeze(battlers),
+      // BtlController_EmitSetMonData(REQUEST_STATUS_BATTLE, status1 = 0) (battle_script_commands.c:3071-3073): the fainted
+      // Pokemon's PARTY status is cleared with the battler's (docs/parity-mac/faint-party-status.md).
+      ...(clearsStatus1
+        ? { party: withBattleScriptPartyMemberStatus1(rulesContext.party, activeBattlerState.side, activeBattlerState.partyIndex, 0) }
+        : {}),
       choicedMove,
       moveHistory: Object.freeze({
         ...rulesContext.moveHistory,

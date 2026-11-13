@@ -1,0 +1,124 @@
+{
+ "name": "R042-cradily-ancientpower-psych-up",
+ "rules": [
+  "R042"
+ ],
+ "why": "The player's Claydol (set 524, Levitate, Leftovers) raises Defense and Sp. Def with Cosmic Power, then evasion with Double Team, so the target has a stat at +3 or more. The opponent's Cradily (set 512: Earthquake, AncientPower, Swagger, Psych Up) cannot touch Claydol with Earthquake and AncientPower is resisted, so the battle is long. When AncientPower's 10% all-stats boost lands, the next turn AI_CV_PsychUp finds the user's Attack, Defense and Sp. Atk raised and tests Sp. Def and evasion (and, if Cradily copied Claydol's evasion with Psych Up before, the final roll).",
+ "seed": 0,
+ "challengeNum": 4,
+ "battleNum": 0,
+ "trainerId": 140,
+ "playerSetIds": [
+  524,
+  482,
+  552
+ ],
+ "opponentSetIds": [
+  512,
+  559,
+  492
+ ],
+ "script": {
+  "actions": [
+   {
+    "prefer": 3
+   },
+   {
+    "prefer": 3
+   },
+   {
+    "prefer": 3
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 3
+   },
+   {
+    "prefer": 3
+   },
+   {
+    "prefer": 3
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 3
+   },
+   {
+    "prefer": 3
+   },
+   {
+    "prefer": 3
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 3
+   },
+   {
+    "prefer": 3
+   },
+   {
+    "prefer": 3
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   }
+  ],
+  "then": "census"
+ },
+ "expect": [],
+ "cover": [
+  {
+   "file": "src/engine/factoryAiCheckViability.ts",
+   "text": "|| userSpDef",
+   "at": 0
+  },
+  {
+   "file": "src/engine/factoryAiCheckViability.ts",
+   "text": "\n  if (userE",
+   "at": 0
+  },
+  {
+   "file": "src/engine/factoryAiCheckViability.ts",
+   "text": ": -2,\n  });\n}\n\nc",
+   "at": 0
+  }
+ ],
+ "coverAny": true,
+ "chance": 0.3,
+ "seeds": 80,
+ "onHold": {
+  "group": "g4",
+  "seedsHunted": 0,
+  "result": "untested"
+ }
+}

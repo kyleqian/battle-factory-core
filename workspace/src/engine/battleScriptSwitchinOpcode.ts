@@ -797,14 +797,29 @@ function hpthresholdsOpcodeHandler(
   return transitionBattleScriptCommand(context, Object.freeze({ kind: "advance" }));
 }
 
-/** `Cmd_cancelallactions` (`battle_script_commands.c:5850-5858`): writes only the untracked `gActionsByTurnOrder`, no reader anywhere in this engine's modeled scope. */
+/**
+ * `Cmd_cancelallactions` (`battle_script_commands.c:5850-5858`): every slot of `gActionsByTurnOrder` becomes B_ACTION_CANCEL_PARTNER, so no further
+ * action of this turn runs. `BattleScript_FaintedMonSendOutNew` ends with it (`battle_scripts_1.s:2895`): after a replacement that comes in before the
+ * turn is over, the turn is over. This was a no-op here ("no reader"). The turn reducer skips the second action itself when ITS OWN faint sweep ran
+ * the replacement, but not when the replacement happens inside the first action's script: a Pokemon that is switched in and faints from Spikes
+ * (`BattleScript_SpikesOnAttackerFainted` -> `BattleScript_HandleFaintedMon`). The other side then still acted. The reducer reads this array between
+ * the two actions (docs/parity-mac/faint-on-switch-in-cancels-turn.md; ROM: staged battle spikes-faint-cancels-turn).
+ */
 function cancelallactionsOpcodeHandler(
   context: BattleScriptOpcodeHandlerContext<BattleScriptRulesContext>,
 ): BattleScriptCommandTransition<BattleScriptRulesContext> {
   if (context.instruction.operands.length !== 0) {
     throw new Error(`invalid B_SCR_OP_CANCELALLACTIONS shape at program counter ${context.state.programCounter}`);
   }
-  return transitionBattleScriptCommand(context, Object.freeze({ kind: "advance" }));
+  const rules = context.state.rulesContext;
+  const actionsByTurnOrder = rules.actionsByTurnOrder.map((action, slot) =>
+    slot < rules.battleTopology.battlersCount ? B_ACTION_CANCEL_PARTNER : action
+  ) as unknown as BattleScriptRulesContext["actionsByTurnOrder"];
+  return transitionBattleScriptCommand(
+    context,
+    Object.freeze({ kind: "advance" }),
+    { rulesContext: Object.freeze({ ...rules, actionsByTurnOrder }) },
+  );
 }
 
 /**
@@ -1412,8 +1427,14 @@ function createTrygetintimidatetargetOpcodeHandler(): BattleScriptOpcodeHandler<
   return (context) => {
     const jump = resolveBattleScriptLabel(context.program, context.instruction.operands[0]!.expression);
     if (!jump) throw new Error("Cmd_trygetintimidatetarget has an unresolved return label");
-    const rules = context.state.rulesContext;
-    const source = rules.scriptingBattler;
+    // `gBattleScripting.battler = gBattleStruct->intimidateBattler` on EVERY pass (battle_script_commands.c:9571), not the scripting battler as it
+    // happens to stand: `statbuffchange` hands a Mist-protected target to BattleScript_MistProtected with the scripting battler set to that TARGET
+    // (ChangeStatBuffs, battle_script_commands.c). Reading the scripting battler made the next pass take the protected Pokemon for the intimidator and
+    // lower the real intimidator's own Attack (ROM: staged battle metronome-lock-on, docs/parity-mac/intimidate-against-mist.md).
+    const source = context.state.rulesContext.intimidateBattler;
+    const rules = context.state.rulesContext.scriptingBattler === source
+      ? context.state.rulesContext
+      : Object.freeze({ ...context.state.rulesContext, scriptingBattler: source });
     let target = rules.selectorRoles.target ?? 0;
     while (
       target < rules.battleTopology.battlersCount
@@ -1426,6 +1447,7 @@ function createTrygetintimidatetargetOpcodeHandler(): BattleScriptOpcodeHandler<
       return transitionBattleScriptCommand(
         context,
         Object.freeze({ kind: "jump", programCounter: jump.programCounter }),
+        { rulesContext: rules },
       );
     }
     return transitionBattleScriptCommand(

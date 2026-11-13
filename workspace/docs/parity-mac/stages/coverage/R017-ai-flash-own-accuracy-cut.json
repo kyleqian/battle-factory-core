@@ -1,0 +1,59 @@
+{
+ "name": "R017-ai-flash-own-accuracy-cut",
+ "rules": [
+  "R017"
+ ],
+ "why": "Challenge 7. The opponent leads with Shuckle 528 (Sandstorm, Dig, Flash, Double Team; base speed 5). The player's Fearow 375 (Keen Eye, so Shuckle's Flash cannot cut its accuracy, and a Flying type that Dig cannot touch) uses Mud-Slap every turn: each hit lowers Shuckle's accuracy one stage. After two hits Shuckle's accuracy stage is 4, and every later turn AI_CV_AccuracyDown3 takes the second roll for Flash (battle_ai_scripts.s:1205-1207). Shuckle's Double Team can make some Mud-Slaps miss, so the script tries eight times.",
+ "seed": 96000,
+ "challengeNum": 7,
+ "battleNum": 0,
+ "trainerId": 200,
+ "playerSetIds": [
+  375,
+  511,
+  550
+ ],
+ "opponentSetIds": [
+  528,
+  376,
+  395
+ ],
+ "script": {
+  "actions": [
+   {
+    "prefer": 3
+   },
+   {
+    "prefer": 3
+   },
+   {
+    "prefer": 3
+   },
+   {
+    "prefer": 3
+   },
+   {
+    "prefer": 3
+   },
+   {
+    "prefer": 3
+   },
+   {
+    "prefer": 3
+   },
+   {
+    "prefer": 3
+   }
+  ],
+  "then": "census"
+ },
+ "expect": [],
+ "cover": [
+  {
+   "file": "src/engine/factoryAiCheckViability.ts",
+   "text": "{\n    const draw2 = nextDraw(rng, ordinal, `${input.reasonPrefix}-draw2`);\n    rng = draw2.after;\n    ordinal += 1;\n    const succeeded2 = draw2.randomValue % 256 >= 80",
+   "at": 0
+  }
+ ],
+ "coverAny": true
+}

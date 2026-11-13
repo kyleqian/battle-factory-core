@@ -1,0 +1,49 @@
+{
+ "name": "R015-ai-sweet-scent",
+ "rules": [
+  "R015"
+ ],
+ "why": "Challenge 7. The opponent leads with Victreebel 395 (Giga Drain, Sleep Powder, Sweet Scent, Synthesis). The AI scores every move each turn it chooses, so on the first turn Sweet Scent (EFFECT_EVASION_DOWN) reaches AI_CV_EvasionDown (battle_ai_scripts.s:1235-1246). The player just attacks with Fearow.",
+ "seed": 94000,
+ "challengeNum": 7,
+ "battleNum": 0,
+ "trainerId": 200,
+ "playerSetIds": [
+  375,
+  826,
+  805
+ ],
+ "opponentSetIds": [
+  395,
+  498,
+  506
+ ],
+ "script": {
+  "actions": [
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   }
+  ],
+  "then": "census"
+ },
+ "expect": [],
+ "cover": [
+  {
+   "file": "src/engine/factoryAiCheckViability.ts",
+   "text": "function runCvEvasionDow",
+   "at": 0
+  },
+  {
+   "file": "src/engine/factoryAiCheckViability.ts",
+   "text": "{\n    // The eleventh CBM-blocked pair's oth",
+   "at": 0
+  }
+ ],
+ "coverAny": true
+}

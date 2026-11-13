@@ -185,6 +185,97 @@ class RomDriverTest(unittest.TestCase):
         with self.assertRaises(rd.DriverError):
             rd.RomDriver([{"kind": "move", "slot": 0}], FUNCS).step(obs("party", tasks=True))
 
+    # parity-mac fourth pass: voluntary switches, refusal probes, refused decisions.
+    SEL = {**FUNCS, "HandleTurnActionSelectionState": 0x8000}
+
+    def test_a_voluntary_switch_goes_to_pokemon_then_picks_the_party_slot(self):
+        d = rd.RomDriver([{"kind": "switch", "partyIndex": 2, "voluntary": True}], FUNCS)
+        self.assertEqual(d.step(obs("action", action=1)), ["LEFT"])
+        d.advanced(); d.step(obs("action", action=0)); d.advanced()  # release frame
+        self.assertEqual(d.step(obs("action", action=0)), ["DOWN"])
+        d.advanced(); d.step(obs("action", action=2)); d.advanced()
+        self.assertEqual(d.step(obs("action", action=2)), ["A"])
+        self.assertEqual((d.index, d.opened), (0, 1))  # one anchor, not consumed at the action menu
+        d.advanced(); d.step(obs("other")); d.advanced()
+        self.assertEqual(d.step(obs("party", slot=0, tasks=True)), ["DOWN"])
+        d.advanced(); d.step(obs("party", slot=1, tasks=True)); d.advanced()
+        self.assertEqual(d.step(obs("party", slot=1, tasks=True)), ["DOWN"])
+        d.advanced(); d.step(obs("party", slot=2, tasks=True)); d.advanced()
+        self.assertEqual(d.step(obs("party", slot=2, tasks=True)), ["A"])
+        self.assertEqual((d.index, d.pending), (1, "real"))
+
+    def test_a_forced_replacement_at_the_action_menu_is_unplanned(self):
+        with self.assertRaises(rd.DriverError):
+            rd.RomDriver([{"kind": "switch", "partyIndex": 1}], FUNCS).step(obs("action"))
+
+    def test_the_action_menu_again_without_a_turn_is_a_refused_decision(self):
+        sel = {"mainFunc": 0x8001}
+        d = rd.RomDriver([{"kind": "move", "slot": 0}, {"kind": "move", "slot": 1}], self.SEL)
+        run(d, [{**obs("action"), **sel}, {**obs("other"), **sel}, {**obs("move"), **sel}, {**obs("other"), **sel}])
+        self.assertEqual((d.index, d.pending, d.left_selection), (1, "real", False))
+        with self.assertRaises(rd.DriverError) as cm:
+            run(d, [{**obs("other"), **sel}] * 3 + [{**obs("action"), **sel}])
+        self.assertEqual(cm.exception.dump["reason"], "rom-refused-decision")
+        # the same menus with a turn in between (gBattleMainFunc left the selection function) are a normal next turn
+        d = rd.RomDriver([{"kind": "move", "slot": 0}, {"kind": "move", "slot": 1}], self.SEL)
+        run(d, [{**obs("action"), **sel}, {**obs("other"), **sel}, {**obs("move"), **sel}, {**obs("other"), "mainFunc": 0x9001}, {**obs("other"), **sel}])
+        self.assertEqual(d.step({**obs("action"), **sel}), ["A"])
+        self.assertIsNone(d.pending)
+
+    def test_a_move_refusal_probe_expects_the_action_menu_without_a_turn(self):
+        sel = {"mainFunc": 0x8001}
+        d = rd.RomDriver([{"kind": "move-refused", "slot": 1}, {"kind": "move", "slot": 0}], self.SEL)
+        out = run(d, [{**obs("action"), **sel}, {**obs("other"), **sel}, {**obs("move"), **sel}, {**obs("move", move=1), **sel}, {**obs("move", move=1), **sel}])
+        self.assertEqual(out, [["A"], [], ["RIGHT"], [], ["A"]])
+        self.assertEqual((d.index, d.pending), (1, "probe"))
+        run(d, [{**obs("other"), **sel}] * 2)
+        # refused as expected: the ROM re-opens the MOVE menu (battle_main.c:4380-4389) and the real decision is taken there
+        self.assertEqual(d.step({**obs("move", move=1), **sel}), ["LEFT"])
+        self.assertIsNone(d.pending)
+        # a turn that ran after the probe means the ROM took it
+        d = rd.RomDriver([{"kind": "move-refused", "slot": 0}, {"kind": "move", "slot": 0}], self.SEL)
+        run(d, [{**obs("action"), **sel}, {**obs("other"), **sel}, {**obs("move"), **sel}, {**obs("other"), "mainFunc": 0x9001}])
+        with self.assertRaises(rd.DriverError) as cm:
+            d.step({**obs("action"), **sel})
+        self.assertEqual(cm.exception.dump["reason"], "rom-accepted-refused-decision")
+
+    def test_after_a_move_probe_a_switch_decision_backs_out_of_the_move_menu(self):
+        sel = {"mainFunc": 0x8001}
+        d = rd.RomDriver([{"kind": "move-refused", "slot": 0}, {"kind": "switch", "partyIndex": 1, "voluntary": True}], self.SEL)
+        run(d, [{**obs("action"), **sel}, {**obs("other"), **sel}, {**obs("move"), **sel}, {**obs("other"), **sel}])
+        self.assertEqual(d.step({**obs("move"), **sel}), ["B"])  # the re-opened move menu
+        d.advanced(); d.step({**obs("other"), **sel}); d.advanced()
+        self.assertEqual(d.step({**obs("action"), **sel}), ["DOWN"])  # POKEMON
+
+    def test_a_refused_real_move_shows_the_move_menu_again(self):
+        sel = {"mainFunc": 0x8001}
+        d = rd.RomDriver([{"kind": "move", "slot": 0}, {"kind": "move", "slot": 1}], self.SEL)
+        run(d, [{**obs("action"), **sel}, {**obs("other"), **sel}, {**obs("move"), **sel}, {**obs("other"), **sel}])
+        with self.assertRaises(rd.DriverError) as cm:
+            d.step({**obs("move"), **sel})
+        self.assertEqual(cm.exception.dump["reason"], "rom-refused-decision")
+
+    def test_a_switch_refusal_probe_pulses_a_then_backs_out_with_b(self):
+        sel = {"mainFunc": 0x8001}
+        d = rd.RomDriver([{"kind": "switch-refused", "partyIndex": 1}, {"kind": "move", "slot": 0}], self.SEL)
+        run(d, [{**obs("action"), **sel}, {**obs("action"), **sel}, {**obs("action", action=2), **sel}, {**obs("other"), **sel}])
+        run(d, [{**obs("party", slot=0, tasks=True), **sel}, {**obs("party", slot=1, tasks=True), **sel}])
+        self.assertEqual(d.step({**obs("party", slot=1, tasks=True), **sel}), ["A"])
+        self.assertEqual((d.index, d.pending), (1, "probe"))
+        d.advanced()
+        pressed = [b for b in run(d, [{**obs("party", slot=1, tasks=True, sig=i), **sel} for i in range(400)]) if b]
+        self.assertIn(["A"], pressed[:4])
+        self.assertEqual(pressed[-1], ["B"])
+        self.assertEqual(d.step({**obs("action", action=2), **sel}), ["UP"])  # back at the action menu, no turn ran: the real decision starts
+
+    def test_a_committed_switch_that_keeps_the_party_menu_open_is_refused_by_the_rom(self):
+        d = rd.RomDriver([{"kind": "switch", "partyIndex": 0}], FUNCS)
+        self.assertEqual(d.step(obs("party", slot=0, tasks=True)), ["A"])
+        d.advanced()
+        with self.assertRaises(rd.DriverError) as cm:
+            run(d, [obs("party", slot=0, tasks=True, sig=i) for i in range(rd.PARTY_COMMIT_FRAME_CAP + 5)])
+        self.assertEqual(cm.exception.dump["reason"], "rom-refused-switch")
+
     def test_watchdog_fires_after_a_frozen_signature_with_a_state_dump(self):
         d = rd.RomDriver([{"kind": "move", "slot": 0}], FUNCS, watchdog=50)
         with self.assertRaises(rd.DriverError) as cm:

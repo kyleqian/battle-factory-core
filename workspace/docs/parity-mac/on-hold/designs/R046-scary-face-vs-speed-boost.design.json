@@ -1,0 +1,48 @@
+{
+ "name": "R046-scary-face-vs-speed-boost",
+ "rules": [
+  "R046"
+ ],
+ "why": "Challenge number 2 (AI_CheckBadMove). The opponent's Mightyena (set 307) knows Scary Face; the player's Ninjask (set 343) has Speed Boost as its only ability, so the AI's guess of the target's ability is Speed Boost. On turn 1 AI_CBM_SpeedDown gives Scary Face -10.",
+ "seed": 0,
+ "challengeNum": 2,
+ "battleNum": 0,
+ "trainerId": 100,
+ "playerSetIds": [
+  343,
+  325,
+  342
+ ],
+ "opponentSetIds": [
+  307,
+  330,
+  371
+ ],
+ "script": {
+  "actions": [
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   }
+  ],
+  "then": "census"
+ },
+ "expect": [],
+ "cover": [
+  {
+   "file": "src/engine/factoryAiCheckBadMove.ts",
+   "text": "{\n    return Object.freeze({ rng, draws: Object.freeze([]), scoreDelta: -10 });\n  }\n  const resu",
+   "at": 0
+  }
+ ],
+ "coverAny": true,
+ "chance": 0.95,
+ "seeds": 20,
+ "onHold": {
+  "group": "g4",
+  "seedsHunted": 0,
+  "result": "untested"
+ }
+}

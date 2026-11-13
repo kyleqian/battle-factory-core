@@ -300,6 +300,9 @@ describe("production opcode 0 (Cmd_attackcanceler) dispatch", () => {
       );
       expect(result.kind).toBe("advanced");
       expect(result.state.rulesContext.battlers[1].pp).toEqual([13, 35, 0, 0]);
+      // docs/parity-mac/party-pp-writes.md: PressurePPLose's BtlController_EmitSetMonData(REQUEST_PPMOVE1_BATTLE + moveIndex)
+      // (battle_util.c:759-763) writes the party Pokemon too. Unfixed: the party record kept its old PP.
+      expect(result.state.rulesContext.party.opponent[result.state.rulesContext.battlers[1].partyIndex]!.pp[0]).toBe(13);
       expect(result.state.events.at(-1)).toMatchObject({
         kind: "set-battler-pp-data", battler: 1, movePosition: 0, pp: 13,
       });

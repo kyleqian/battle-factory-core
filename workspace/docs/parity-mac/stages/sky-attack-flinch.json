@@ -1,0 +1,41 @@
+{
+ "name": "sky-attack-flinch",
+ "why": "Fearow (set 663) uses Sky Attack on Shuckle (set 720: slow, and it survives the hit) until Shuckle flinches.",
+ "seed": 41011,
+ "challengeNum": 6,
+ "battleNum": 0,
+ "trainerId": 207,
+ "playerSetIds": [
+  663,
+  668,
+  675
+ ],
+ "opponentSetIds": [
+  720,
+  661,
+  682
+ ],
+ "script": {
+  "actions": [
+   {
+    "move": 3
+   },
+   {
+    "move": 3
+   },
+   {
+    "move": 3
+   },
+   {
+    "move": 3
+   },
+   {
+    "move": 3
+   }
+  ],
+  "then": "census"
+ },
+ "expect": [
+  "move:EFFECT_SKY_ATTACK"
+ ]
+}

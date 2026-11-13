@@ -1,0 +1,64 @@
+{
+ "decisions": [
+  {
+   "kind": "switch",
+   "partyIndex": 1,
+   "voluntary": true
+  },
+  {
+   "kind": "switch",
+   "partyIndex": 0,
+   "voluntary": true
+  },
+  {
+   "kind": "switch",
+   "partyIndex": 1,
+   "voluntary": true
+  },
+  {
+   "kind": "switch",
+   "partyIndex": 0,
+   "voluntary": true
+  },
+  {
+   "kind": "switch",
+   "partyIndex": 1,
+   "voluntary": true
+  },
+  {
+   "kind": "switch",
+   "partyIndex": 0,
+   "voluntary": true
+  },
+  {
+   "kind": "switch",
+   "partyIndex": 1,
+   "voluntary": true
+  },
+  {
+   "kind": "switch",
+   "partyIndex": 0,
+   "voluntary": true
+  },
+  {
+   "kind": "switch",
+   "partyIndex": 1,
+   "voluntary": true
+  },
+  {
+   "kind": "switch",
+   "partyIndex": 0,
+   "voluntary": true
+  },
+  {
+   "kind": "switch",
+   "partyIndex": 1,
+   "voluntary": true
+  },
+  {
+   "kind": "switch",
+   "partyIndex": 0,
+   "voluntary": true
+  }
+ ]
+}

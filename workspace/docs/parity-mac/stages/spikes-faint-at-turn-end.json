@@ -1,0 +1,25 @@
+{
+ "name": "spikes-faint-at-turn-end",
+ "why": "The opponent's Pokemon faints from poison at the end of a turn and its replacement (2 HP left) faints from the player's Spikes as it comes in. The game then forgets the PLAYER's last move (gLastMoves[0] = 0xFFFF), not the opponent's (docs/parity-mac/end-turn-attacker.md).",
+ "seed": 52079,
+ "challengeNum": 1,
+ "battleNum": 0,
+ "trainerId": 91,
+ "playerSetIds": [
+  211,
+  260,
+  191
+ ],
+ "opponentSetIds": [
+  227,
+  247,
+  257
+ ],
+ "script": {
+  "actions": [],
+  "then": "random-v1"
+ },
+ "expect": [
+  "situation:entry:spikes-damage"
+ ]
+}

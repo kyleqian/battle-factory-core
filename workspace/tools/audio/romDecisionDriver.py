@@ -12,6 +12,16 @@ from pathlib import Path
 
 FUNC_NAMES = ("HandleInputChooseAction", "HandleInputChooseMove", "WaitForMonSelection", "Task_HandleChooseMonInput")
 END_FUNC_NAMES = ("HandleEndTurn_BattleWon", "HandleEndTurn_BattleLost")
+# parity-mac fourth pass: gBattleMainFunc is this function while the ROM collects the turn's actions (battle_main.c HandleTurnActionSelectionState) and another one
+# while a turn runs. A decision the ROM took makes gBattleMainFunc leave it before the next menu; a decision the ROM REFUSED shows a menu again without leaving
+# it: a move that cannot be selected (TrySetCantSelectMoveBattleScript) plays its message and re-opens the MOVE menu (stateIdAfterSelScript =
+# STATE_WAIT_ACTION_CHOSEN with B_ACTION_USE_MOVE, battle_main.c:4380-4389); a switch under a trap (party_menu.c TrySwitchInPokemon) keeps the party menu open.
+SELECTION_FUNC_NAME = "HandleTurnActionSelectionState"
+# Frames a committed switch may keep the party menu open (the close fade is about 70 frames); longer means the ROM refused it and the menu waits for input.
+PARTY_COMMIT_FRAME_CAP = 600
+# A refusal probe in the party menu: A is pulsed this long (SHIFT, then the refusal message), then B backs out to the action menu.
+PARTY_PROBE_A_FRAMES = 150
+DECISION_KINDS = ("move", "switch", "switch-refused", "move-refused")
 # parity-mac: gBattleOutcome is set inside the script that decides the battle (checkteamslost), but the turn is not over: the rest of
 # that script and BattleTurnPassed's HandleFaintedMonActions / HandleWishPerishSongOnTurnEnd still run (a pending Future Sight still
 # rolls accuracy, ROM seed 1181) before gBattleMainFunc becomes sEndTurnFuncsTable[outcome]. The drive goes on until then.
@@ -52,7 +62,7 @@ def pick_funcs(nm, text_range):
             funcs[name] = inside[0]
         else:
             raise SystemExit(f"romDecisionDriver: cannot resolve {name}: {[hex(a) for a in addrs]} (player range {hex(lo)}-{hex(hi)})")
-    for name in END_FUNC_NAMES:  # optional: without them the drive stops at the outcome, as before
+    for name in (*END_FUNC_NAMES, SELECTION_FUNC_NAME):  # optional: without them the drive stops at the outcome / cannot tell a refused decision, as before
         addrs = nm.get(name, [])
         if len(addrs) == 1:
             funcs[name] = addrs[0]
@@ -78,9 +88,9 @@ def load_decisions(path_or_obj):
     raw = path_or_obj if isinstance(path_or_obj, (list, dict)) else json.loads(Path(path_or_obj).read_text())
     decisions = raw["decisions"] if isinstance(raw, dict) else raw
     for i, d in enumerate(decisions):
-        if d.get("kind") == "move" and d.get("slot") in (0, 1, 2, 3):
+        if d.get("kind") in ("move", "move-refused") and d.get("slot") in (0, 1, 2, 3):
             continue
-        if d.get("kind") == "switch" and isinstance(d.get("partyIndex"), int) and 0 <= d["partyIndex"] < 6:
+        if d.get("kind") in ("switch", "switch-refused") and isinstance(d.get("partyIndex"), int) and 0 <= d["partyIndex"] < 6:
             continue
         raise SystemExit(f"romDecisionDriver: decision {i} is malformed: {d}")
     return decisions
@@ -117,6 +127,11 @@ class RomDriver:
         self.trace = []  # (frame, state) transitions, for the dump
         self.pulse_phase = 0
         self.outcome_frame = None  # first frame gBattleOutcome was seen non-zero
+        # parity-mac fourth pass (voluntary switches, refusal probes, legality):
+        self.opened = 0  # anchors opened so far (the lab captures the wide state when this grows)
+        self.pending = None  # "real" / "probe": the last decision closed at a menu the player chose at; checked when the next action menu opens
+        self.left_selection = False  # gBattleMainFunc left HandleTurnActionSelectionState since that decision closed
+        self.party_commit = None  # (frame, "real" | "probe") of the A that picked a party slot
 
     def classify(self, obs):
         f = obs["func"] & ~1
@@ -155,8 +170,13 @@ class RomDriver:
             return self.pulse()  # the deciding turn is still running: its messages need A
         state = self.classify(obs)
         kind = state.split("-")[0]
+        selection = self.funcs.get(SELECTION_FUNC_NAME)
+        if selection is not None and obs.get("mainFunc") is not None and (obs["mainFunc"] & ~1) != selection:
+            self.left_selection = True
         if self.block and kind != self.block:
             self.block = None
+        if kind != "party":
+            self.party_commit = None
         if state != self.last_state:
             self.trace.append((self.frame, state))
             self.last_state = state
@@ -170,13 +190,28 @@ class RomDriver:
         want = None if self.done() else self.decisions[self.index]
         if self.block and kind == self.block and kind != "party":
             return self.pulse()
+        if state in ("action", "move") and self.current is None and self.pending is not None:
+            # A menu the player chooses at is back. A decision the ROM took has run a turn in between; a probe must not have.
+            if selection is not None:
+                if self.pending == "real" and not self.left_selection:
+                    raise DriverError("the ROM refused the decision before this menu (no turn ran)", self.dump(obs, "rom-refused-decision"))
+                if self.pending == "probe" and self.left_selection:
+                    raise DriverError("the ROM took a decision the engine says is not allowed (a turn ran)", self.dump(obs, "rom-accepted-refused-decision"))
+            self.pending = None
+        voluntary = want is not None and (want["kind"] == "switch-refused" or (want["kind"] == "switch" and want.get("voluntary")))
         if state == "action":
-            if want is None or want["kind"] != "move":
+            if want is None or not (want["kind"] in ("move", "move-refused") or voluntary):
                 raise DriverError("action menu without a move decision", self.dump(obs, "unplanned-action-menu"))
             self.open_anchor(want, "menuOpenFrame")
             cursor = obs["actionCursor"]
             if cursor & 1:
                 return self.press("LEFT")
+            if voluntary:
+                # POKEMON is the lower left entry (cursor 2).
+                if not cursor & 2:
+                    return self.press("DOWN")
+                self.block = "action"
+                return self.press("A")
             if cursor & 2:
                 return self.press("UP")
             self.block = "action"
@@ -185,7 +220,10 @@ class RomDriver:
                 self.close_anchor()
             return self.press("A")
         if state == "move":
-            if want is None or want["kind"] != "move":
+            if voluntary and self.current is None:
+                # The move menu re-opened after a refused move probe and the next decision is made at the action menu: B goes back there.
+                return self.press("B")
+            if want is None or want["kind"] not in ("move", "move-refused"):
                 raise DriverError("move menu without a move decision", self.dump(obs, "unplanned-move-menu"))
             self.open_anchor(want, "menuOpenFrame")
             self.current.setdefault("moveMenuFrame", self.frame)
@@ -197,15 +235,25 @@ class RomDriver:
             self.close_anchor()
             self.block = "move"
             return self.press("A")
+        if kind == "party" and self.block == "party":
+            since, what = self.party_commit if self.party_commit else (self.frame, "real")
+            if what == "probe":
+                # A for a while (SHIFT, then the refusal message), then B out of the party menu; the next action menu checks that no turn ran.
+                if self.frame - since < PARTY_PROBE_A_FRAMES:
+                    return self.pulse()
+                self.pulse_phase = (self.pulse_phase + 1) % PULSE_PERIOD
+                return self.press("B") if self.pulse_phase == 0 else []
+            if self.frame - since > PARTY_COMMIT_FRAME_CAP:
+                raise DriverError("the ROM refused the switch (the party menu stays open)", self.dump(obs, "rom-refused-switch"))
+            return self.pulse()
         if state == "party-choose":
-            if self.block == "party":
-                return self.pulse()
-            if want is None or want["kind"] != "switch":
+            if want is None or want["kind"] not in ("switch", "switch-refused"):
                 raise DriverError("party menu without a switch decision", self.dump(obs, "unplanned-party-menu"))
             self.open_anchor(want, "menuOpenFrame")
             slot, target = obs["slotId"], menu_slot_for_party_id(obs.get("partyOrder"), want["partyIndex"])
             if slot != target:
                 return self.press("DOWN" if slot < target else "UP")
+            self.party_commit = (self.frame, "probe" if want["kind"] == "switch-refused" else "real")
             self.close_anchor()
             self.block = "party"
             return self.press("A")
@@ -220,12 +268,22 @@ class RomDriver:
     def open_anchor(self, want, key):
         if self.current is None:
             self.current = {"index": self.index, "kind": want["kind"], key: self.frame}
+            self.opened += 1
 
     def close_anchor(self):
+        want = self.decisions[self.index]
         self.current["commitFrame"] = self.frame + 1  # the advance that carries the press
         self.anchors.append(self.current)
         self.current = None
         self.index += 1
+        # A forced replacement is answered inside a running turn: nothing to check at the next action menu.
+        if want["kind"] in ("switch-refused", "move-refused"):
+            self.pending = "probe"
+        elif want["kind"] == "move" or want.get("voluntary"):
+            self.pending = "real"
+        else:
+            self.pending = None
+        self.left_selection = False
 
     def advanced(self):
         self.frame += 1

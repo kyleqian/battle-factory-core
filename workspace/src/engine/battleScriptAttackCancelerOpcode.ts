@@ -233,7 +233,8 @@ function resolveTailBranches(
         ...rulesContext,
         battlers,
         scriptingBattler: winner,
-        ...(nextPp === null ? {} : {
+        // PressurePPLose's party write has the same gate as Cmd_ppreduce's (battle_util.c:758-763): not for a Transformed owner, not for a Mimic slot.
+        ...(nextPp === null || (owner.status2 & BATTLE_SCRIPT_STATUS2_TRANSFORMED) !== 0 || (owner.mimickedMoves & (1 << movePosition)) !== 0 ? {} : {
           party: withBattleScriptPartyMemberPp(
             rulesContext.party,
             owner.side,
@@ -452,7 +453,13 @@ export const attackCancelerOpcodeHandler: BattleScriptOpcodeHandler<BattleScript
           ...rulesContext,
           battlers: Object.freeze(battlers),
         });
-        if ((owner.status2 & BATTLE_SCRIPT_STATUS2_TRANSFORMED) === 0) {
+        if ((owner.status2 & BATTLE_SCRIPT_STATUS2_TRANSFORMED) === 0 && (owner.mimickedMoves & (1 << movePosition)) === 0) {
+          // PressurePPLose's BtlController_EmitSetMonData(REQUEST_PPMOVE1_BATTLE + moveIndex) (battle_util.c:759-763): the
+          // party Pokemon's PP follows the battler's (docs/parity-mac/party-pp-writes.md).
+          rulesContext = Object.freeze({
+            ...rulesContext,
+            party: withBattleScriptPartyMemberPp(rulesContext.party, owner.side, owner.partyIndex, movePosition, nextPp),
+          });
           events.push(Object.freeze({
             kind: "set-battler-pp-data",
             battler: coatOwner,

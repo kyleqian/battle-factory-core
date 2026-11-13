@@ -1,0 +1,101 @@
+{
+ "name": "metronome-magic-coat-pressure",
+ "why": "Magic Coat called by Metronome, against Pressure. The player's Dusclops (set 378, Pressure) uses Confuse Ray or Will-O-Wisp every turn against the opponent's Clefable (set 389), which is faster. When Clefable's Metronome calls Magic Coat, Dusclops's move is reflected. Clefable has no Magic Coat slot, so the game takes no extra PP for the reflection (PressurePPLose, battle_util.c:740-765, finds no slot); only the Metronome slot pays (2 PP: Metronome's own Pressure loss).",
+ "seed": 76026,
+ "challengeNum": 3,
+ "battleNum": 0,
+ "trainerId": 153,
+ "playerSetIds": [
+  378,
+  467,
+  434
+ ],
+ "opponentSetIds": [
+  389,
+  417,
+  385
+ ],
+ "script": {
+  "actions": [
+   {
+    "prefer": 3
+   },
+   {
+    "prefer": 3
+   },
+   {
+    "prefer": 3
+   },
+   {
+    "prefer": 3
+   },
+   {
+    "prefer": 3
+   },
+   {
+    "prefer": 3
+   },
+   {
+    "prefer": 3
+   },
+   {
+    "prefer": 3
+   },
+   {
+    "prefer": 3
+   },
+   {
+    "prefer": 3
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   }
+  ],
+  "then": "census"
+ },
+ "expect": [
+  "situation:volatile:magic-coat:bounces-under-pressure"
+ ]
+}

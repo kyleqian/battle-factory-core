@@ -1,0 +1,72 @@
+{
+ "name": "R032-metronome-rage-miss",
+ "rules": [
+  "R032"
+ ],
+ "why": "Rage only runs through Metronome. The player's Chansey (set 227) uses Metronome every turn (10 PP). The opponent's Azumarill (set 192) picks its moves at random at challenge 1: Protect (priority +3) or the first turn of Dig makes a Rage that Metronome calls miss, and BattleScript_RageMiss sets MOVE_EFFECT_RAGE before clearstatusfromeffect (battle_scripts_1.s:1129-1131). Chance per seed is about 10 calls x 1/340 x one in three that Azumarill is protected or underground.",
+ "seed": 0,
+ "challengeNum": 1,
+ "battleNum": 0,
+ "trainerId": 80,
+ "playerSetIds": [
+  227,
+  240,
+  202
+ ],
+ "opponentSetIds": [
+  192,
+  235,
+  226
+ ],
+ "script": {
+  "actions": [
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   }
+  ],
+  "then": "census"
+ },
+ "expect": [],
+ "cover": [
+  {
+   "file": "src/engine/battleScriptSemiInvulnerableOpcode.ts",
+   "text": "?? 0;\n    co",
+   "at": 0
+  }
+ ],
+ "coverAny": true,
+ "chance": 0.01,
+ "seeds": 200,
+ "onHold": {
+  "group": "g4",
+  "seedsHunted": 0,
+  "result": "untested"
+ }
+}

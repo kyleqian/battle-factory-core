@@ -1,0 +1,44 @@
+{
+ "name": "R016-ai-charm-clear-body",
+ "rules": [
+  "R016"
+ ],
+ "why": "Challenge 2, where the AI runs AI_CheckBadMove. The opponent leads with Minun 292 (Thunderbolt, Attract, Charm, Wish); the player leads with Metang 311, whose only ability is Clear Body. On the first turn the AI scores Charm: AI_CBM_AttackDown reaches CheckIfAbilityBlocksStatChange and gives -10 (battle_ai_scripts.s:308-312). Torkoal 357 (White Smoke) is in the player's party too.",
+ "seed": 95000,
+ "challengeNum": 2,
+ "battleNum": 0,
+ "trainerId": 100,
+ "playerSetIds": [
+  311,
+  357,
+  297
+ ],
+ "opponentSetIds": [
+  292,
+  281,
+  299
+ ],
+ "script": {
+  "actions": [
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   }
+  ],
+  "then": "census"
+ },
+ "expect": [],
+ "cover": [
+  {
+   "file": "src/engine/factoryAiCheckBadMove.ts",
+   "text": "? -10 : 0 });\n}\n\n/**\n * Shar",
+   "at": 0
+  }
+ ],
+ "coverAny": true
+}

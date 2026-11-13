@@ -7,6 +7,7 @@ import {
   type BattleScriptRulesContext,
   type BattleScriptRulesContextInput,
   type BattleScriptStatusRulesExternalPorts,
+  withBattleScriptPartyMemberStatus1,
 } from "../src/engine/battleScriptRulesContext.ts";
 import {
   loadBattleScriptProgram,
@@ -855,6 +856,32 @@ describe("production ppreduce (Cmd_ppreduce) dispatch", () => {
     expect(result.state.rulesContext.battlers[0]!.pp[0]).toBe(34);
     expect(result.state.events.some((e) => e.kind === "set-battler-pp-data" && e.pp === 34)).toBe(true);
     expect(result.state.scheduler.pendingControllerBattlers).toContain(0);
+  });
+
+  // parity-mac fix 36 (docs/parity-mac/transformed-pp.md): Cmd_ppreduce's BtlController_EmitSetMonData is inside
+  // `MOVE_IS_PERMANENT(gBattlerAttacker, gCurrMovePos)` (battle_script_commands.c:1239-1246): not Transformed, not a Mimic slot.
+  it("writes the party record's PP for the Pokemon's own move, and not while it is Transformed or for a Mimic slot", () => {
+    const own = stepTwiceFromAttackstring(context(0, { pp: [35, 0, 0, 0] }));
+    if (own.kind !== "advanced") throw new Error("expected advance");
+    const before = context(0, { pp: [35, 0, 0, 0] }).party.player[0]!.pp[0];
+    expect(own.state.rulesContext.party.player[0]!.pp[0]).toBe(34);
+
+    const transformed = stepTwiceFromAttackstring(context(0, { pp: [5, 0, 0, 0], status2: 0x200000 }));
+    if (transformed.kind !== "advanced") throw new Error("expected advance");
+    expect(transformed.state.rulesContext.battlers[0]!.pp[0]).toBe(4);
+    expect(transformed.state.rulesContext.party.player[0]!.pp[0]).toBe(before);
+    expect(transformed.state.events.some((e) => e.kind === "set-battler-pp-data")).toBe(false);
+
+    const plain = context(0, { pp: [5, 0, 0, 0] });
+    const withMimicSlot = createBattleScriptRulesContext({
+      ...plain,
+      battlers: plain.battlers.map((b, i) => (i === 0 ? { ...b, mimickedMoves: 1 } : b)) as never,
+    });
+    const mimicked = stepTwiceFromAttackstring(withMimicSlot);
+    if (mimicked.kind !== "advanced") throw new Error("expected advance");
+    expect(mimicked.state.rulesContext.battlers[0]!.pp[0]).toBe(4);
+    expect(mimicked.state.rulesContext.party.player[0]!.pp[0]).toBe(before);
+    expect(mimicked.state.events.some((e) => e.kind === "set-battler-pp-data")).toBe(false);
   });
 
   it("does not deduct PP when the slot is already zero", () => {
@@ -3939,6 +3966,21 @@ describe("production cleareffectsonfaint (Cmd_cleareffectsonfaint) dispatch", ()
     },
   );
 
+  // docs/parity-mac/faint-party-status.md: BtlController_EmitSetMonData(REQUEST_STATUS_BATTLE, 0) (battle_script_commands.c:3071-3073) clears the PARTY
+  // Pokemon's status with the battler's. The engine's party record kept the last status of a fainted Pokemon (the ROM's party read 0 in every
+  // wide-compare battle with a statused faint, for example ROM seeds 10 and 12).
+  it("writes the cleared status to the fainted Pokemon's party record", () => {
+    const base = context(0, {}, {}, { hp: 0, status1: 0x40 });
+    const slot = base.battlers[1]!.partyIndex;
+    const rc = Object.freeze({ ...base, party: withBattleScriptPartyMemberStatus1(base.party, 1, slot, 0x40) }) as typeof base;
+    expect(rc.party.opponent[slot]!.status1).toBe(0x40);
+    const { result } = stepAtProgramCounter(cleareffectsonfaintTargetPc, rc);
+    if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+    // Unfixed: 0x40.
+    expect(result.state.rulesContext.party.opponent[slot]!.status1).toBe(0);
+    expect(result.state.rulesContext.party.player).toBe(rc.party.player);
+  });
+
   it("clears STATUS2_INFATUATED_WITH(target) on every other battler while leaving unrelated status2 bits alone", () => {
     const infatuatedWithTarget = (1 << (16 + 1)) >>> 0; // gBitTable[1] << 16
     const rc = context(0, { status2: infatuatedWithTarget | 0x1 }, {}, { hp: 0 });
@@ -3999,7 +4041,11 @@ describe("production cleareffectsonfaint (Cmd_cleareffectsonfaint) dispatch", ()
     expect(otherResult.state.rulesContext.battlers[0].status2).toBe(1 << 26);
   });
 
-  it("faint cleanup clears another battler's sure-hit marker only when the fainted battler owns it", () => {
+  // parity-mac fix 37 (docs/parity-mac/lock-on-mark-at-faint.md). This case pinned the opposite: that a faint clears the Lock-On mark its owner
+  // left on the other Pokemon. FaintClearSetData's loop (battle_main.c:3274-3282) frees escape prevention, infatuation and Wrap only; the mark goes
+  // when the next Pokemon enters the slot (SwitchInClearSetData, :3166-3170). ROM: staged battle metronome-lock-on (status3 still 8 at the
+  // replacement menu).
+  it("faint cleanup leaves another battler's sure-hit marker alone, whoever owns it", () => {
     const owned = context(
       0,
       { status3: 1 << 3, battlerWithSureHit: 1 },
@@ -4009,8 +4055,8 @@ describe("production cleareffectsonfaint (Cmd_cleareffectsonfaint) dispatch", ()
     const ownedResult = stepAtProgramCounter(cleareffectsonfaintTargetPc, owned).result;
     if (ownedResult.kind !== "advanced") throw new Error("expected advance");
     expect(ownedResult.state.rulesContext.battlers[0]).toMatchObject({
-      status3: 0,
-      battlerWithSureHit: 0,
+      status3: 1 << 3,
+      battlerWithSureHit: 1,
     });
 
     const other = context(

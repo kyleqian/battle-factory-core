@@ -1,0 +1,56 @@
+{
+ "name": "metronome-transform",
+ "why": "Chansey (set 227) calls Transform through Metronome on its eighth use; the moves it copies must not spend the PP of its own moves in the party record (docs/parity-mac/transformed-pp.md).",
+ "seed": 50110,
+ "challengeNum": 1,
+ "battleNum": 0,
+ "trainerId": 86,
+ "playerSetIds": [
+  227,
+  244,
+  171
+ ],
+ "opponentSetIds": [
+  183,
+  215,
+  204
+ ],
+ "script": {
+  "actions": [
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   }
+  ],
+  "then": "census"
+ },
+ "expect": [
+  "move:EFFECT_TRANSFORM"
+ ]
+}

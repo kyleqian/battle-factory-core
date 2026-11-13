@@ -1,0 +1,76 @@
+{
+ "name": "R045-encore-disable-speed-tie",
+ "rules": [
+  "R045"
+ ],
+ "why": "Challenge 7, every Pokemon has IV 31. The opponent's Dewgong (set 488: Encore and Disable) has Speed 90; the player's Skarmory (set 482) also has Speed 90 and no Quick Claw. On turn 1 none of Skarmory's moves is disabled, so AI_CV_Encore (and AI_CV_Disable) reach if_target_faster and draw the tie roll.",
+ "seed": 0,
+ "challengeNum": 7,
+ "battleNum": 0,
+ "trainerId": 200,
+ "playerSetIds": [
+  482,
+  772,
+  552
+ ],
+ "opponentSetIds": [
+  488,
+  463,
+  825
+ ],
+ "script": {
+  "actions": [
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   }
+  ],
+  "then": "census"
+ },
+ "expect": [],
+ "cover": [
+  {
+   "file": "src/engine/factoryAiCheckViability.ts",
+   "text": "{\n    tieDraw = nextDraw(rng, ordinal, `${input.reasonPrefix}-target-faster-tie`);\n    rng = tieDraw.after;\n    tieRoll = tieDraw.randomValue;\n    ordinal += 1;\n  }\n  const strikesFirst = getWhoStrikesFirst(attacker, target, tieRoll, turnOrder.weather, turnOrder.randomTurnNumber);\n  if (tieDraw) {\n    draws.push(Object.freeze({ ...tieDraw, kind: \"target-faster-tie\" as const, strikesFirst }));\n  }\n  if (strikesFirst === 1) {\n    // Target faster: Sc",
+   "at": 0
+  },
+  {
+   "file": "src/engine/factoryAiCheckViability.ts",
+   "text": "{\n    draws.push(Object.freeze({ ...tieDraw, kind: \"target-faster-tie\" as const, strikesFirst }));\n  }\n  if (strikesFirst === 1) {\n    // Target faster: Sco",
+   "at": 0
+  },
+  {
+   "file": "src/engine/factoryAiCheckViability.ts",
+   "text": "{\n    tieDraw = nextDraw(rng, ordinal, `${input.reasonPrefix}-target-faster-tie`);\n    rng = tieDraw.after;\n    tieRoll = tieDraw.randomValue;\n    ordinal += 1;\n  }\n  const strikesFirst = getWhoStrikesFirst(attacker, target, tieRoll, turnOrder.weather, turnOrder.randomTurnNumber);\n  if (tieDraw) {\n    draws.push(Object.freeze({ ...tieDraw, kind: \"target-faster-tie\" as const, strikesFirst }));\n  }\n  if (strikesFirst === 1) {\n    // Target faster: ju",
+   "at": 0
+  },
+  {
+   "file": "src/engine/factoryAiCheckViability.ts",
+   "text": "{\n    draws.push(Object.freeze({ ...tieDraw, kind: \"target-faster-tie\" as const, strikesFirst }));\n  }\n  if (strikesFirst === 1) {\n    // Target faster: jum",
+   "at": 0
+  },
+  {
+   "file": "src/engine/factoryAiCheckViability.ts",
+   "text": "{\n    tieDraw = nextDraw(rng, ordinal, `${input.reasonPrefix}-target-faster-tie`);\n    rng = tieDraw.after;\n    tieRoll = tieDraw.randomValue;\n    ordinal += 1;\n  }\n  const strikesFirst = getWhoStrikesFirst(attacker, target, tieRoll, turnOrder.weather, turnOrder.randomTurnNumber);\n  if (tieDraw) {\n    draws.push(Object.freeze({ ...tieDraw, kind: \"target-faster-tie\" as const, strikesFirst }));\n  }\n\n  const tar",
+   "at": 0
+  },
+  {
+   "file": "src/engine/factoryAiCheckViability.ts",
+   "text": "{\n    draws.push(Object.freeze({ ...tieDraw, kind: \"target-faster-tie\" as const, strikesFirst }));\n  }\n\n  const targ",
+   "at": 0
+  }
+ ],
+ "coverAny": true,
+ "chance": 0.9,
+ "seeds": 20,
+ "onHold": {
+  "group": "g4",
+  "seedsHunted": 0,
+  "result": "untested"
+ }
+}

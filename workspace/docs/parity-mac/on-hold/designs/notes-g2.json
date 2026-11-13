@@ -1,0 +1,85 @@
+{
+ "group": "g2 (R011-R020)",
+ "rules": [
+  {
+   "id": "R011",
+   "stages": [
+    "R011-ai-smelling-salt"
+   ],
+   "chance": 0.95,
+   "comment": "AI Granbull 376 leads at challenge 7; Smelling Salt is scored by AI_CheckViability on turn 1."
+  },
+  {
+   "id": "R012",
+   "stages": [
+    "R012-ai-substitute-statused-target"
+   ],
+   "chance": 0.5,
+   "comment": "AI Zapdos 779 vs player's Cradily using Toxic every turn; covered on the turn after Zapdos's Thunder Wave (or Thunderbolt) paralyzes Cradily and Cradily still gets its Toxic off."
+  },
+  {
+   "id": "R013",
+   "stages": [
+    "R013-ai-superpower-low-hp-faster"
+   ],
+   "chance": 0.55,
+   "comment": "Player's Dusclops (Ghost, so Nidoqueen never uses Superpower) burns AI Nidoqueen 701 and Seismic Tosses it to 40% or less while Nidoqueen is faster."
+  },
+  {
+   "id": "R014",
+   "stages": [
+    "R014-ai-superpower-attack-lowered"
+   ],
+   "chance": 0.9,
+   "comment": "Player's Granbull Intimidate uses up Nidoqueen 701's White Herb at the start; switching to Tauros (Intimidate) leaves its Attack at -1 for the AI's scoring."
+  },
+  {
+   "id": "R015",
+   "stages": [
+    "R015-ai-sweet-scent"
+   ],
+   "chance": 0.95,
+   "comment": "AI Victreebel 395 leads at challenge 7; Sweet Scent is scored by AI_CV_EvasionDown on turn 1."
+  },
+  {
+   "id": "R016",
+   "stages": [
+    "R016-ai-charm-clear-body"
+   ],
+   "chance": 0.95,
+   "comment": "AI Minun 292 vs the player's Metang 311 (Clear Body only) at challenge 2; Charm is scored -10 on turn 1."
+  },
+  {
+   "id": "R017",
+   "stages": [
+    "R017-ai-flash-own-accuracy-cut"
+   ],
+   "chance": 0.85,
+   "comment": "Player's Keen Eye Fearow Mud-Slaps AI Shuckle 528 twice; then Flash is scored with the user's accuracy stage 4 or lower."
+  },
+  {
+   "id": "R018",
+   "stages": [
+    "R018-endure-fixed-damage"
+   ],
+   "chance": 0.5,
+   "comment": "Player's Vigoroth uses Endure every turn against AI Chansey 332's Seismic Toss; covered when Endure works on the toss that would knock it out (fails about half the time)."
+  },
+  {
+   "id": "R019",
+   "stages": [
+    "R019-focus-energy-twice"
+   ],
+   "chance": 0.95,
+   "comment": "Player's Hitmonlee 233 uses Focus Energy twice against a harmless Marshtomp."
+  },
+  {
+   "id": "R020",
+   "stages": [
+    "R020-hyper-beam-recharge-asleep"
+   ],
+   "chance": 0.3,
+   "comment": "Player's banded Aerodactyl Hyper Beams; the AI's Exeggutor 534 Sleep Powder after it (or Slowking's Yawn on a recharge turn) leaves the recharge unspent while asleep. Depends on the AI picking the sleep move."
+  }
+ ]
+}
