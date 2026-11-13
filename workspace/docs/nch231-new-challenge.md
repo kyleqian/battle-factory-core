@@ -14,7 +14,7 @@ InitFactoryChallenge -> PreBattleRoom -> rental draft`, with the front half alre
 ## What the new path does
 
 In the free-roam Lobby (`EngineState.lobbyFreeRoam`), pressing A while idle, standing at (4,8) facing north at the singles
-attendant at (4,7) (`isFactoryLobbyFacingSinglesAttendant`, `src/engine/factoryLobbyFreeRoam.ts`), hands off to
+attendant at (4,7) (`isFactoryLobbyFacingSinglesAttendant`, `src/engine/factoryLobbyFreeRoam.ts`), opens the attendant conversation (lbrb), which ends by handing off to
 `enterChainedFactoryChallenge` (`src/engine/core.ts`, the same field resets the record-choice auto-chain already used).
 That generates the next draft from the LIVE gameplay RNG cursor via `generateFactoryChallengeDraft(carry, rngValue)`.
 
@@ -44,11 +44,10 @@ This means the "lose, walk to the attendant, press A" scenario in the brief is a
 
 ## ROM frames skipped (documented divergence)
 
-The attendant dialogue is not modelled; the handoff is direct. Skipped, relative to the ROM: attendant greeting and
-the "Which challenge?" menu, the save prompt (`SaveBeforeChallenge`), "step this way", the door walk and warp into
-PreBattleRoom, the PreBattleRoom comments / briefing, and the fade into the draft. The first draft frame is available
-the frame after A. The timing of the real sequence was not measured against the ROM; the new draft's own contents and
-interaction come from the existing generator and are unchanged.
+lbrb (`docs/lbrb-attendant-conversation.md`) now models the attendant greeting, the CHALLENGE / INFO / EXIT menu, the Level menu, the
+save prompt and dialog, "step this way", the door walk and the fade, ROM-measured. A at the attendant opens that conversation; the draft is
+dealt from the live cursor when the fade ends. Still skipped, relative to the ROM: the PreBattleRoom briefing between the fade and the draft
+(~6556–6970 in the happy-path window) and Open Level.
 
 Assumption: the idle player at (4,8) with facing north (reached by walking north into the attendant's tile, which
 blocks) counts as standing facing the attendant; the predicate reads only position and facing, not the bump counter.

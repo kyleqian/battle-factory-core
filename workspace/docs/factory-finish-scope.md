@@ -72,3 +72,8 @@ Audio remains explicitly deferred under the existing S11 decision. This
 authorization does not reopen settled exceptions such as ambient/VBlank
 rental-RNG synchronization (#55), doubles, the overworld, the Open-level rule
 set, the general outside-Factory animation campaign or the separate Rust port.
+
+## lbr-b scope note — Open Level (2026-11-13)
+
+The attendant's "Level 50 or Open Level?" menu draws OPEN LEVEL as the ROM does but A on it is a no-op: the app only plays Level 50
+(deliberate divergence, like REST in the Lobby). Open Level stays out of scope; see `docs/lbrb-attendant-conversation.md`.
