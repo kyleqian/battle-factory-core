@@ -48,8 +48,25 @@ exactly what the all-selectable request draws (fails unfixed: fewer draws), and 
 
 Seeds 95 and 529 match to battle end. See `STATUS.md`.
 
-## Not covered
+## The final pick with masked slots, and the flattening at 0: proven unreachable (fourth pass)
 
-C's final pool (`ChooseMoveOrAction_Singles`) compares every non-empty slot's score, masked ones included, and each `score`
-command clamps at 0. A masked slot could only be picked if every usable slot's score fell to the masked slot's own
-(0 to about +5). Not observed; the engine keeps masked slots out of the pool.
+C's final pool (`ChooseMoveOrAction_Singles`) compares every non-empty slot's score, masked ones included, and each
+`score` command flattens a negative result to 0 (`Cmd_score`, `battle_ai_script_commands.c:703-711`). The engine keeps
+masked slots out of the pool and does not flatten. The two can differ only if a masked slot's score reaches a usable
+slot's, or a usable slot's score reaches 0.
+
+`tools/report/ai-score-bounds.py` reads `data/battle_ai_scripts.s` and walks every path of the Factory's three scripts
+(every branch taken both ways, so the bounds are wider than what can happen):
+
+| script | lowest sum of the negative `score` steps on a path | highest sum of the positive steps |
+|---|---|---|
+| `AI_CheckBadMove` | -12 | +5 |
+| `AI_TryToFaint` | -1 | +6 |
+| `AI_CheckViability` | -10 | +14 |
+
+A usable slot starts at 100 and ends a decision at 77 or more. A masked slot starts at 0 and ends at 25 or less
+(flattening only removes negative steps). So a masked slot never ties with or beats a usable one, a usable slot never
+reaches 0, and the engine's pick is the game's pick. A decision with no usable slot never reaches the chooser (forced
+Struggle and Encore skip it, `battle_main.c:4184-4197`).
+
+`tests/parityMacAiScoreBounds.test.ts` pins the three bounds, so a change of the reference scripts re-opens the question.
