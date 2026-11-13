@@ -119,14 +119,19 @@ lbr-d2a ROM ticks (`docs/lbrd2a-won-tail-rom.md`) for the won farewell constants
 Item 0c DONE. Item 0d: the Mac lane owns battle rules; fold `mac/parity-mac` at run start if it moved; nightly replay from the pool; ISSUES #214 holds its
 source-read leads. **Top layer, 2026-11-13 after your run:** the Mac lane also owns the replay tools and every replay upgrade now, and the finish line has no
 battle count (item 0d, "Top layer, 2026-11-13"); the lab staging failures are fixed (`oracle/battle_lab.py`, same item).
-**Delivered 2026-11-13 14:05 UTC for your next fold: `mac/parity-mac` = `ba58f0ec6`, battle-rule fixes 29 to 40** (found by the new players, the wide compare
-and staged battles; `docs/parity-mac/STATUS.md`, "Fourth pass"; one commit per fix, each with a failing-without test and a ROM battle). Your master `0b80af10e`
-is an ancestor of it, so the merge is a fast-forward unless master has moved. Its gate ran on `d0afbccc2` (the commits after it are documents and one stage
-file): typecheck ok, build ok, 14,745 tests pass, 1 fails. **That one is yours and fails on your master too:** `tests/animation/sandTombEvidenceCheckpoint`
+**Delivered 2026-11-13 19:11 UTC for your next fold: `mac/parity-mac` = `42e1f4f91`, battle-rule fixes 29 to 41.** It replaces the 14:05 UTC delivery
+(`ba58f0ec6`, fixes 29 to 40), which it contains. Fixes 29 to 40 were found by the new players, the wide compare and staged battles
+(`docs/parity-mac/STATUS.md`, "Fourth pass"); fix 41 (`4f90eaf6c`: the AI's Foresight score for a Ghost-type user makes two random rolls, the engine made
+one) by the finer tally ("Fifth pass", `docs/parity-mac/rule-coverage.md`). One commit per fix, each with a failing-without test and a ROM battle. Your
+master `0d84f6bfb` is an ancestor of it, so the merge is a fast-forward unless master has moved. Its gate ran on `42e1f4f91` itself: typecheck ok, build ok,
+14,745 tests pass, 1 fails. **That one is yours and fails on your master too:** `tests/animation/sandTombEvidenceCheckpoint`
 pins the sha256 of `tools/compare/sandTombSourceAudit.ts`, which your `11e1a66b4` (iss215 pixel-provider installs) changed; re-pin it (the top layer re-ran
-it on `0b80af10e`: same failure). Top-layer checks of the delivery: 54 sampled battles (eighth challenge, mixed, Scene ON) and the 13 staged battles
-re-driven on a clean checkout of `ba58f0ec6`, all match and equal the lane's rows; fixes 36, 38, 39, 40 each taken out alone make their staged battle
-differ from the ROM; typecheck ok. The lane's final run: 4,039 battles on that engine, 4,034 match, 5 endless stalls (no difference up to the frame cap).
+it on `0b80af10e`: same failure). Top-layer checks: for `ba58f0ec6`, 54 sampled battles and the 13 staged battles re-driven on a clean checkout match and
+equal the lane's rows, and fixes 36, 38, 39, 40 each taken out alone make their staged battle differ from the ROM; for `42e1f4f91` (the only engine change
+since is `src/engine/factoryAiCheckViability.ts`, fix 41), 36 sampled battles of the lane's final run re-driven on a clean checkout match and equal its rows,
+and fix 41's staged battle (`stages/noland-foresight-ghost.json`) matches 20 / 20 states with the fix and differs at state 6 of 21 with the old file.
+The lane's final run on the fix 41 engine: 3,546 battles, 3,541 match, 5 endless Struggle stalls (no difference up to the frame cap); every tally row is
+covered by a ROM-matched or staged battle or proven unable to occur.
 **Two findings for you from that lane (file them in ISSUES; not battle rules, not fixed there):** (1) the rental select screen lets the player take two
 Pokemon of one species; the game refuses the second ("Can't select same POKeMON.", `Select_AreSpeciesValid`, `battle_factory_screen.c:2256-2276`; the
 swap screen has `Swap_AlreadyHasSameSpecies`, `:4162`); the engine's `MENU_OPTION_RENT` branch in `src/engine/core.ts` has no such check; about 3 teams in
