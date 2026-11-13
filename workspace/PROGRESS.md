@@ -5,6 +5,18 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 2026-11-13 — bnd257d (integration lane worker, 53 min): the browser sprite chunk is a dynamic import (bundle hygiene, finish plan Phase 3)
+
+- **State:** folded (branch removed; `docs/bnd257d-lazy-sprites.md`). ENGINE_BUILD moves (a dead 1-byte `assets-sprites` stub left the headless graph; every real
+  headless chunk is byte-identical; tell the website). Supervisor sign-off of the scout's "reverses bnd256c" point: recorded in the brief, reversible.
+- **Website:** `mountFactoryGame` still returns at once, but the first draw / `ready` wait for the sprite chunk; **presses before `ready` are dropped**; a failed
+  import calls `onError` (`docs/library-package.md`). Dev ABI `__POKEBENCH__` appears after the pixels load (tools poll on a timer; AGENTS.md note).
+- **Sizes (`build:lib`):** static graph 40.47 -> 28.70 MB; `assets-sprites` 11.77 MB dynamic; largest file 11.77 MB; total unchanged.
+- **Gates:** worker typecheck 0, test:gate 362 / 362, differential 5 traces 821 / 821 byte-identical, play:random 2 min / scene 0 errors / overlays.
+  Supervisor on the merge with lbr-c / aud245b: build:lib 0; 6 lib / boundary files green after a rebuild; fixed a 5 s-timeout cascade in `bnd257dLazySprites` (120077475).
+
+---
+
 ## 2026-11-13 — aud245b (side lane worker, 36 min): player follow-ups (music after resume, pan, cry volume, fetch on first use)
 
 - **State:** folded (branch removed). No `src/engine` / session change: ENGINE_BUILD and headless size unchanged. Section in `docs/aud245-audio-player.md`.
