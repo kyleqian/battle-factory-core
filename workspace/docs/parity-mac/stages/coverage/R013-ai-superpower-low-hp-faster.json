@@ -1,0 +1,66 @@
+{
+ "name": "R013-ai-superpower-low-hp-faster",
+ "rules": [
+  "R013"
+ ],
+ "why": "Challenge 7. The opponent leads with Nidoqueen 701 (Superpower, Sludge Bomb, Earthquake, Shadow Ball; White Herb, base speed 76). The player's Dusclops 378 (base speed 25, a Ghost type) burns it with Will-O-Wisp, then uses Seismic Toss (50 HP) every turn: about 197 -> 173 -> 99 -> 25 HP. Against a Ghost the AI scores Superpower -10 in CheckBadMove, so Nidoqueen never uses it and its Attack stays normal; the Ghost type is no-effect (x0), not a resist, so AI_CV_Superpower goes on past the type checks. With Nidoqueen faster and at 40% HP or less, the HP test takes the clean zero branch (battle_ai_scripts.s:2392-2404). If Dusclops faints first, Snorlax 826 (slower, Normal type) is the next target.",
+ "seed": 92000,
+ "challengeNum": 7,
+ "battleNum": 0,
+ "trainerId": 200,
+ "playerSetIds": [
+  378,
+  826,
+  805
+ ],
+ "opponentSetIds": [
+  701,
+  506,
+  528
+ ],
+ "script": {
+  "actions": [
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 1
+   }
+  ],
+  "then": "census",
+  "replacements": [
+   1,
+   2
+  ]
+ },
+ "expect": [],
+ "cover": [
+  {
+   "file": "src/engine/factoryAiCheckViability.ts",
+   "text": ": 0,\n  });\n}\n\n/**\n * `AI_CV_Magi",
+   "at": 0
+  }
+ ],
+ "coverAny": true
+}

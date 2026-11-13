@@ -1,0 +1,155 @@
+{
+ "name": "R024-pursuit-ko-on-switch",
+ "rules": [
+  "R024"
+ ],
+ "why": "The player's Haunter (set 179) and Banette (set 237) are Ghosts and switch with each other every turn. The opponent's lead Raticate (set 197: Endeavor, Pursuit, Scary Face, Quick Attack) picks a random move at challenge 1; Endeavor and Quick Attack cannot touch a Ghost, so only Pursuit hurts. When Raticate picks Pursuit (1 in 4 per turn) it strikes the Pokemon that is switching out at double power, super effective: about 127-150 on Haunter (139 HP) and 73-86 on Banette (148 HP). The second hit on the same Pokemon is a sure knock-out (a Haunter hit often is one already), so getbattlerfainted after Pursuit's switch-out hit reports the faint. Raticate never switches (it has a super-effective move).",
+ "seed": 93000,
+ "challengeNum": 1,
+ "battleNum": 0,
+ "trainerId": 80,
+ "playerSetIds": [
+  179,
+  237,
+  232
+ ],
+ "opponentSetIds": [
+  197,
+  186,
+  250
+ ],
+ "script": {
+  "actions": [
+   {
+    "preferSwitch": 1
+   },
+   {
+    "preferSwitch": 0
+   },
+   {
+    "preferSwitch": 1
+   },
+   {
+    "preferSwitch": 0
+   },
+   {
+    "preferSwitch": 1
+   },
+   {
+    "preferSwitch": 0
+   },
+   {
+    "preferSwitch": 1
+   },
+   {
+    "preferSwitch": 0
+   },
+   {
+    "preferSwitch": 1
+   },
+   {
+    "preferSwitch": 0
+   },
+   {
+    "preferSwitch": 1
+   },
+   {
+    "preferSwitch": 0
+   },
+   {
+    "preferSwitch": 1
+   },
+   {
+    "preferSwitch": 0
+   },
+   {
+    "preferSwitch": 1
+   },
+   {
+    "preferSwitch": 0
+   },
+   {
+    "preferSwitch": 1
+   },
+   {
+    "preferSwitch": 0
+   },
+   {
+    "preferSwitch": 1
+   },
+   {
+    "preferSwitch": 0
+   },
+   {
+    "preferSwitch": 1
+   },
+   {
+    "preferSwitch": 0
+   },
+   {
+    "preferSwitch": 1
+   },
+   {
+    "preferSwitch": 0
+   },
+   {
+    "preferSwitch": 1
+   },
+   {
+    "preferSwitch": 0
+   },
+   {
+    "preferSwitch": 1
+   },
+   {
+    "preferSwitch": 0
+   },
+   {
+    "preferSwitch": 1
+   },
+   {
+    "preferSwitch": 0
+   },
+   {
+    "preferSwitch": 1
+   },
+   {
+    "preferSwitch": 0
+   },
+   {
+    "preferSwitch": 1
+   },
+   {
+    "preferSwitch": 0
+   },
+   {
+    "preferSwitch": 1
+   },
+   {
+    "preferSwitch": 0
+   },
+   {
+    "preferSwitch": 1
+   },
+   {
+    "preferSwitch": 0
+   },
+   {
+    "preferSwitch": 1
+   },
+   {
+    "preferSwitch": 0
+   }
+  ],
+  "then": "census"
+ },
+ "expect": [],
+ "cover": [
+  {
+   "file": "src/engine/battleScriptSwitchinOpcode.ts",
+   "text": "? 1 : 0 }),\n",
+   "at": 0
+  }
+ ],
+ "coverAny": true
+}

@@ -1,0 +1,125 @@
+{
+ "name": "R018-endure-fixed-damage",
+ "rules": [
+  "R018"
+ ],
+ "why": "Challenge 2 (the AI runs only AI_CheckBadMove). The opponent leads with Chansey 332 (Seismic Toss, Shadow Ball, Double Team, Soft-Boiled). Against the player's Normal-type Vigoroth 326 Shadow Ball is scored -10 and Soft-Boiled is bad at full HP, so Chansey picks Seismic Toss or Double Team. Vigoroth uses Endure every turn; Seismic Toss takes 50 HP at a time until Vigoroth has 50 HP or less. On the first Seismic Toss after that on a turn Endure worked, Cmd_adjustsetdamage clamps the damage to leave 1 HP and sets MOVE_RESULT_FOE_ENDURED. A failed Endure that turn (repeated Endure halves its chance) knocks Vigoroth out instead.",
+ "seed": 97001,
+ "challengeNum": 2,
+ "battleNum": 0,
+ "trainerId": 100,
+ "playerSetIds": [
+  326,
+  297,
+  304
+ ],
+ "opponentSetIds": [
+  332,
+  341,
+  291
+ ],
+ "script": {
+  "actions": [
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   }
+  ],
+  "then": "census"
+ },
+ "expect": [],
+ "cover": [
+  {
+   "file": "src/engine/battleScriptHitChainOpcode.ts",
+   "text": "w.effect === \"EFFECT_FALSE_SWIPE\" || targetBattler.endured === 1 || focusBanded)\n    && targetBattler.hp <= damage;\n\n  let moveResultFlags = nextRulesContext.moveResultFlags;\n  let lastUsedItem = nextRulesContext.lastUsedItem;\n  if (shouldClamp) {\n    damage = targetBattler.hp - 1;\n    if (targetBattler.endured === 1) {\n      move",
+   "at": 320
+  }
+ ],
+ "coverAny": true
+}

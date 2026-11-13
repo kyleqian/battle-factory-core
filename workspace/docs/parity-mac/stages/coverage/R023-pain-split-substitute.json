@@ -1,0 +1,83 @@
+{
+ "name": "R023-pain-split-substitute",
+ "rules": [
+  "R023"
+ ],
+ "why": "Challenge 7 (Pain Split and Substitute sets only meet there). The player's Dusclops (set 378, Pain Split in slot 2) uses Pain Split every turn on the opponent's lead Golem (set 498: Focus Punch, Substitute, Double Team, Rest). Golem cannot touch the Ghost: the AI scores Focus Punch -10 (no effect), Rest -3 above half HP, so it picks between Substitute and Double Team (ties broken at random; Double Team gets +3 only at 90% HP or more, and the first Pain Split drops Golem to about 86%). Golem is faster, so on the turn it makes a Substitute, Dusclops's Pain Split that same turn hits the Substitute and painsplitdmgcalc jumps to the failure script; a Substitute made earlier stays up for the next Pain Split. Pain Split never rolls accuracy, so Double Team does not matter.",
+ "seed": 92000,
+ "challengeNum": 7,
+ "battleNum": 0,
+ "trainerId": 200,
+ "playerSetIds": [
+  378,
+  411,
+  445
+ ],
+ "opponentSetIds": [
+  498,
+  470,
+  560
+ ],
+ "script": {
+  "actions": [
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   }
+  ],
+  "then": "census"
+ },
+ "expect": [],
+ "cover": [
+  {
+   "file": "src/engine/battleScriptPainSplitOpcode.ts",
+   "text": "{\n      cons",
+   "at": 0
+  }
+ ],
+ "coverAny": true
+}

@@ -1,0 +1,49 @@
+{
+ "name": "R011-ai-smelling-salt",
+ "rules": [
+  "R011"
+ ],
+ "why": "Challenge 7 (sets 372..849), where the trainer AI runs AI_CheckViability. The opponent leads with Granbull 376 (Mega Kick, Smelling Salt, Thunder Wave, Roar). The AI scores every one of Granbull's moves on every turn it chooses, so on the first turn Smelling Salt reaches AI_CV_SmellingSalt (data/battle_ai_scripts.s:751, 2313-2320). If Granbull's own Thunder Wave paralyzes the player's Moltres, the later turns also take the +1 branch. The player just attacks.",
+ "seed": 90000,
+ "challengeNum": 7,
+ "battleNum": 0,
+ "trainerId": 200,
+ "playerSetIds": [
+  758,
+  805,
+  826
+ ],
+ "opponentSetIds": [
+  376,
+  528,
+  402
+ ],
+ "script": {
+  "actions": [
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   }
+  ],
+  "then": "census"
+ },
+ "expect": [],
+ "cover": [
+  {
+   "file": "src/engine/factoryAiCheckViability.ts",
+   "text": "{\n    // AI_CV_Smell",
+   "at": 0
+  },
+  {
+   "file": "src/engine/factoryAiCheckViability.ts",
+   "text": "function runCvSm",
+   "at": 0
+  }
+ ],
+ "coverAny": true
+}

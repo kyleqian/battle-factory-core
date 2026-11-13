@@ -1,0 +1,88 @@
+{
+ "name": "R025-shield-dust-kings-rock",
+ "rules": [
+  "R025"
+ ],
+ "why": "The player's Hitmonchan (set 339, King's Rock, Mach Punch in slot 1) uses Mach Punch every turn on the opponent's lead Venomoth (set 331, Shield Dust; no Skill Swap in this set). Mach Punch is King's Rock affected, and Fighting is quarter damage against Bug/Poison (about 10-12 of Venomoth's 166 HP), so Venomoth never faints and every hit has a 10% King's Rock roll; a winning roll calls the flinch SetMoveEffect directly and Shield Dust returns first. Mach Punch has priority, so Hitmonchan hits once per turn until Venomoth's Psychic/Sludge Bomb/Signal Beam/Giga Drain (random among the four at challenge 2) knock it out, about 4-5 hits.",
+ "seed": 94001,
+ "challengeNum": 2,
+ "battleNum": 0,
+ "trainerId": 100,
+ "playerSetIds": [
+  339,
+  340,
+  280
+ ],
+ "opponentSetIds": [
+  331,
+  272,
+  302
+ ],
+ "script": {
+  "actions": [
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 1
+   }
+  ],
+  "then": "census"
+ },
+ "expect": [],
+ "cover": [
+  {
+   "file": "src/engine/battleScriptHitChainOpcode.ts",
+   "text": "&& !abilityEffectHitmarkerSet\n  ) {\n",
+   "at": 0
+  },
+  {
+   "file": "src/engine/battleScriptHitChainOpcode.ts",
+   "text": "{\n    return baseRulesContext;\n  }\n  if (eff",
+   "at": 0
+  }
+ ],
+ "coverAny": true
+}
