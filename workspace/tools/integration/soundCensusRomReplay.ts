@@ -32,7 +32,7 @@ import { createFactoryCorpusPartyMember } from "../../src/engine/factoryCorpusPa
 import { NO_MOVES_MESSAGE_HOLD_AT } from "../../src/engine/battleCommandPresentation.ts";
 import { PARTY_LIST_INPUT_ELAPSED } from "../../src/engine/partySelect.ts";
 import { PARTY_SELECT_OPEN_TOTAL_FRAMES } from "../../src/engine/battlePartySelect.ts";
-import { createPlayer, PLAYER_POLICIES, type PlayerPolicyName } from "./romReplayPlayers.ts";
+import { createPlayer, createScriptPlayer, PLAYER_POLICIES, type PlayerPolicyName } from "./romReplayPlayers.ts";
 import { collectSoundTick } from "../../src/audio/soundEvents.ts";
 import { beginScreenSoundTick, runScheduledScreenSounds } from "../../src/engine/screenSounds.ts";
 import { emitTickSounds } from "../../src/engine/tickSounds.ts";
@@ -45,9 +45,13 @@ import speciesNamesData from "../../src/data/gen/species-names.json" with { type
 
 const [mode] = process.argv.slice(2);
 const arg = (name: string) => process.argv.find((a) => a.startsWith(`--${name}=`))?.slice(name.length + 3);
-const seed = Number(arg("seed"));
+// parity-mac fourth pass, staged battles (docs/parity-mac/staged-battles.md): --stage=FILE replaces the census battle of a seed by a written one
+// ({name, seed, challengeNum, battleNum, trainerId, playerSetIds, opponentSetIds, script}): real Factory sets, a real Factory trainer, the lab's own
+// factoryLegal staging, the same production replay path; only the choice of sets and the player's actions are written by hand.
+const stage: any = arg("stage") === undefined ? null : JSON.parse(readFileSync(arg("stage")!, "utf8"));
+const seed = stage === null ? Number(arg("seed")) : Number(stage.seed);
 const scene = (arg("scene") ?? "on") as "on" | "off";
-const streak = (seed * 11) % 49;
+const streak = stage === null ? (seed * 11) % 49 : stage.challengeNum * 7 + stage.battleNum;
 // parity-mac: very long battles (PP stall into Struggle on both sides) pass the default; --frame-budget=N raises it for one run.
 const frameBudget = Number(arg("frame-budget") ?? 200000);
 // parity-mac: the player's Factory symbols for `request` / `native` (GetPlayerSymbolCountForFacility, frontier_util.c:1657-1698). 0 = the census config: streak 20 is the
@@ -56,8 +60,8 @@ const frameBudget = Number(arg("frame-budget") ?? 200000);
 const symbols = Number(arg("symbols") ?? process.env.ROM_REPLAY_SYMBOLS ?? 0);
 if (symbols !== 0 && symbols !== 1) throw new Error("--symbols / ROM_REPLAY_SYMBOLS must be 0 or 1");
 // parity-mac fourth pass: the test player (romReplayPlayers.ts). The census player is the default, so every older chain and list keeps its battles.
-const policy = (arg("policy") ?? process.env.ROM_REPLAY_POLICY ?? "census") as PlayerPolicyName;
-if (!PLAYER_POLICIES.includes(policy)) throw new Error(`--policy / ROM_REPLAY_POLICY must be one of ${PLAYER_POLICIES.join(", ")}`);
+const policy = (stage !== null ? "script" : arg("policy") ?? process.env.ROM_REPLAY_POLICY ?? "census") as PlayerPolicyName | "script";
+if (policy !== "script" && !PLAYER_POLICIES.includes(policy)) throw new Error(`--policy / ROM_REPLAY_POLICY must be one of ${PLAYER_POLICIES.join(", ")}`);
 
 // The lab stages the Tower streak at challengeNum * 7 (the stock bug reads it for opponent IVs); the census engine uses 0. Equal for challengeNum 0 (streak < 7).
 const towerStreak = Math.floor(streak / 7) * 7;
@@ -228,7 +232,8 @@ function wideOf(rc: any) {
 function play(initial: any, record: boolean, patchRng: number | null = null) {
   let state = initial; let frame = 0; let ended = false; let error: string | null = null; let frame0: number | null = null;
   const sound: unknown[][] = []; const inputs: Segment[] = [];
-  const player = createPlayer(policy, seed); const wide: unknown[] = []; let lastRules: any = null;
+  const player = policy === "script" ? createScriptPlayer(seed, stage.script) : createPlayer(policy, seed);
+  const wide: unknown[] = []; let lastRules: any = null;
   let actionMenuRng: number | null = null; let randomTurnNumber: number | null = null; const timeline: number[][] = []; let lastTl = "";
   // aud243d: the engine's DECISIONS (absolute engine frames; result() makes them frame0-relative) for the ROM-side semantic driver (tools/audio/soundEventProbe.py lab --drive).
   const traceEvents = arg("events") !== undefined; const turnEvents: unknown[] = [];
@@ -379,7 +384,18 @@ const result = (r: ReturnType<typeof play>, extra: object = {}) => ({
   sound: r.sound.map((e) => [(e[0] as number) - (r.frame0 ?? 0), ...e.slice(1)]), inputs: r.inputs, timeline: r.timeline, ...extra,
 });
 
-if (mode === "request") {
+if (mode === "request" && stage !== null) {
+  // A staged battle: the request is the stage file's own sets and trainer. `mode: "factoryBrain"` (challengeNum 2 or 5, battleNum 6) stages Noland:
+  // the player's sets are chosen, his party is rolled by the ROM from the seed.
+  const stagedCommon = {
+    schemaVersion: 1, profile: scene === "on" ? "battle-scene-on" : "battle-scene-off", level: 50, challengeNum: stage.challengeNum, rentalSwapCount: 0,
+    replay: { policy: "script", stage: stage.name }, playerSetIds: stage.playerSetIds, seed,
+    trace: { segments: [{ frames: 1, buttons: [] }], captureFrames: [0] },
+  };
+  writeFileSync(arg("out")!, JSON.stringify(stage.mode === "factoryBrain"
+    ? { ...stagedCommon, mode: "factoryBrain" }
+    : { ...stagedCommon, mode: "factoryLegal", battleNum: stage.battleNum, trainerId: stage.trainerId, opponentSetIds: stage.opponentSetIds }, null, 1));
+} else if (mode === "request") {
   const o = nativeOrchestrator();
   const r = play(o, false);
   const g = r.state.opponentGenerations[0]; const rentals = r.state.round.rules.playerKernelParty;

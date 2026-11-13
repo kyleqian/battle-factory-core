@@ -68,8 +68,27 @@ def write_facts(prefix, summary):
         json.dump(facts, f, separators=(",", ":"))
 
 
+def check_stage(prefix, summary, stage_path):
+    """A staged battle names the tally rows it exists for (`expect`). They must be in the tally of this very battle, and the battle must match the ROM."""
+    import gzip
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    import romReplayTally
+    stage = json.loads(Path(stage_path).read_text())
+    summary["stage"] = {"name": stage["name"], "expect": {row: False for row in stage.get("expect", [])}, "ok": False}
+    if not summary["match"]:
+        return
+    with gzip.open(f"{prefix}.facts.json.gz", "rt") as f:
+        counts = romReplayTally.tally_battle(json.load(f))
+    for row in summary["stage"]["expect"]:
+        summary["stage"]["expect"][row] = romReplayTally.covered(row, counts) > 0
+    summary["stage"]["ok"] = all(summary["stage"]["expect"].values())
+    summary["stage"]["rows"] = sorted(r for r in counts if not r.endswith("#used"))
+
+
 if __name__ == "__main__":
     result = summarize(sys.argv[1], sys.argv[2], sys.argv[3])
     if result["match"]:
         write_facts(sys.argv[1], result)
+    if len(sys.argv) > 4:
+        check_stage(sys.argv[1], result, sys.argv[4])
     print(json.dumps(result))

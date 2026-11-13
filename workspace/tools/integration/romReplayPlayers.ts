@@ -6,6 +6,8 @@
 //   random-v1  a uniformly random legal move; with probability 0.2 a voluntary switch to a uniformly random legal bench Pokemon (when the engine allows one); a forced
 //              replacement is uniformly random. It also PROBES what the engine says is not allowed: a switch when the engine offers none although the bench has a
 //              healthy Pokemon (a trap), and a move slot the engine says cannot be selected. The ROM must refuse a probe; a probe never changes the battle.
+//   script     a staged battle (docs/parity-mac/staged-battles.md): the actions are written down, one per turn; when the list ends another player takes over.
+//              A written action the engine does not offer stops the replay (the staging is wrong), it is never bent into something else.
 // Every player draws from its own generator, seeded from the battle seed and the policy name. None reads or advances the battle RNG, and none touches the state the
 // opponent's AI reads (the orchestrator's aiHistory, the rules context's aiObserved* fields): ai-v1 keeps its own FactoryAiBattleHistory, synced from the mirrored state,
 // so it knows of the opponent what the game's AI would know of the player (moves seen, ability / item seen), not the real set.
@@ -24,6 +26,10 @@ import speciesTypesData from "../../src/data/gen/species-types.json" with { type
 export const PLAYER_POLICIES = ["census", "ai-v1", "random-v1"] as const;
 export type PlayerPolicyName = (typeof PLAYER_POLICIES)[number];
 
+/** One written turn of a staged battle: exactly one of move / switch, with optional refusal probes before it. */
+export type ScriptStep = Readonly<{ move?: number; switch?: number; probeSwitch?: number; probeMove?: number }>;
+export type PlayerScript = Readonly<{ actions: readonly ScriptStep[]; replacements?: readonly number[]; then?: PlayerPolicyName }>;
+
 export type PlayerAction = Readonly<{ kind: "move"; slot: number } | { kind: "switch"; partyIndex: number }>;
 /** What the ROM must refuse: a switch while the engine offers none, or a move slot the engine says is not selectable. */
 export type PlayerProbe = Readonly<{ kind: "switch-refused"; partyIndex: number } | { kind: "move-refused"; slot: number }>;
@@ -40,7 +46,7 @@ export type PlayerMenu = Readonly<{
 }>;
 
 export type Player = Readonly<{
-  name: PlayerPolicyName;
+  name: PlayerPolicyName | "script";
   chooseTurn(menu: PlayerMenu): PlayerTurn;
   chooseReplacement(rules: any, legalPartyIndexes: readonly number[]): number;
   stats: Record<string, number>;
@@ -204,6 +210,48 @@ export function createPlayer(name: PlayerPolicyName, seed: number): Player {
       }
       count("replacementFallbacks");
       return pick(rand, legal);
+    },
+  };
+}
+
+/** The player of a staged battle: the written actions in order, then the `then` player (default census). */
+export function createScriptPlayer(seed: number, script: PlayerScript): Player {
+  const rest = createPlayer(script.then ?? "census", seed);
+  const stats: Record<string, number> = {};
+  const count = (k: string) => { stats[k] = (stats[k] ?? 0) + 1; };
+  let turn = 0; let replacement = 0;
+  return {
+    name: "script", stats,
+    chooseTurn: (menu) => {
+      const step = script.actions[turn];
+      turn += 1;
+      if (step === undefined) { count("afterScript"); return rest.chooseTurn(menu); }
+      const where = `staged battle, written turn ${turn}`;
+      const probes: PlayerProbe[] = [];
+      if (step.probeSwitch !== undefined) {
+        if (menu.legalSwitches.length > 0) throw new Error(`${where}: probeSwitch, but the engine offers a switch (${menu.legalSwitches.join(", ")})`);
+        probes.push({ kind: "switch-refused", partyIndex: step.probeSwitch }); count("switchProbes");
+      }
+      if (step.probeMove !== undefined) {
+        if (menu.legalSlots.includes(step.probeMove) || menu.forcedMove) throw new Error(`${where}: probeMove ${step.probeMove}, but the engine offers that slot or the turn is forced`);
+        probes.push({ kind: "move-refused", slot: step.probeMove }); count("moveProbes");
+      }
+      if ((step.move === undefined) === (step.switch === undefined)) throw new Error(`${where}: a step needs exactly one of move / switch`);
+      if (step.switch !== undefined) {
+        if (!menu.legalSwitches.includes(step.switch)) throw new Error(`${where}: switch to party slot ${step.switch} is not offered by the engine (offered: ${menu.legalSwitches.join(", ") || "none"})`);
+        count("voluntarySwitches");
+        return { probes, action: { kind: "switch", partyIndex: step.switch }, source: "script" };
+      }
+      if (!menu.legalSlots.includes(step.move!)) throw new Error(`${where}: move slot ${step.move} is not offered by the engine (offered: ${menu.legalSlots.join(", ") || "none"})`);
+      count("moves");
+      return { probes, action: { kind: "move", slot: step.move! }, source: "script" };
+    },
+    chooseReplacement: (rules, legal) => {
+      const wanted = script.replacements?.[replacement];
+      replacement += 1; count("replacements");
+      if (wanted === undefined) return rest.chooseReplacement(rules, legal);
+      if (!legal.includes(wanted)) throw new Error(`staged battle, replacement ${replacement}: party slot ${wanted} is not legal (legal: ${legal.join(", ")})`);
+      return wanted;
     },
   };
 }
