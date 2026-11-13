@@ -5,10 +5,27 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 2026-11-13 — rps278 (side lane worker, 28 min): `randomRoundSoak` re-pinned after lbr-b
+## 2026-11-13 — CAX31 daily run (supervisor, Opus 5.5): wind-down: parity-mac fold, sound playback, attendant + hand-off event, forced-turn menu, lazy sprites
 
-- **State:** folded (tests + `docs/rps278-soak-repin.md`; no src). #89 Baton Pass seed 11 -> 3; carried-streak / depth window 2,000 -> 6,000 frames; #99 swap offer seed 1 -> 0.
-  Each pin mutation-checked (still fails when the guarded behaviour breaks). Supervisor on master: the file **64 / 64**.
+- **State:** master clean, no workers or worktrees (a read-only lbr-d scout may finish after this entry; it leaves no edits). No push. **No DEFERRED items.**
+  ENGINE_BUILD `eb-952d7267a01bd728` -> **`eb-8faf63dbde5168d5`** (read from dist and `engineBuildCheck`; moved by the parity-mac fold, lbr-b, lbr-c, enc276, bnd257d; tell the website).
+  Evidence `.integration/validation/sv-20261113/` (gates in `gates/`); worker evidence `.integration/evidence/{aud244b,aud245,enc276,enc276v,bnd257d,cln277,aud247}`.
+- **Website (Mac), all additive:** `options.audio` / `setAudio` / `getAudio` (Ogg + AAC in `dist-lib/audio/`, muted by default); event `{ type: "challenge-request", frame }`
+  after `challenge-end` when the player confirms the attendant's save (the game then holds until `destroy()`; prefetch a challenge at `challenge-end`); mount option
+  `start: "after-save"`; `ready` now waits for the lazy sprite chunk and presses before `ready` are dropped. Docs: `docs/library-package.md`, `lib-types`.
+- **Gameplay (replay only, item 0d):** `mac/parity-mac` `344eda36c` folded (28 battle-rule fixes; Mac: 0 engine mismatches on 8,660 ordinary seeds and 407 Brain
+  battles). Box: nightly 44 / 44 (40 pool + 4 Brain) on the merge; wind-down permanent list **64 / 64** on the final engine. ISSUES #211 / #212 / #204 closed.
+- **Folded:** aud244b (BGM / fanfare / loop SE assets), aud245 + aud245b + aud247 (WebAudio player; draft music at mount from the ROM clock), lbr-b (attendant conversation),
+  lbr-c (hand-off event), enc276 + enc276v (#213: Encore / Struggle skip the move menu, census 0..999 both scenes digest-identical), bnd257d (browser static graph
+  40.5 -> 28.7 MB), cln277 (suite wall measured; < 15 min not reachable test-side), rps278 (soak re-pins after lbr-b), iss215 (tools install the pixel provider; #215 found by the final suite).
+- **Gates (final tree; suite on `e83b18c0e`, later commits tools / tests / docs only):** full suite 1,780 passed / 3 failed (the #215 tools, fixed in `9f7290038`, the 3 files
+  then 3 / 3) / 44 skipped; test:smoke 448 / 448; build / build:lib 0. Soaks (tree `a21ec4148`, engine == final): vanilla 0:20 OFF **20 / 20**, ON **20 / 20**; 0:60 default
+  **60 / 60**, winning **60 / 60**, winning-swap **60 / 60** (all `budget`); varied-RNG first-round winning carry 0 / 14 / 28 **100 / 100** each, winning-swap carry 0 **100 / 100**.
+  play:random 4.5 min / scene `--lobby-new-challenge`: ON 20 battles / 7 swaps, OFF 27 / 12, 7 new challenges from the Lobby each, 0 page / console errors / overlays.
+- **lbr-d prep (no src):** scout `docs/lbr-d-scout.md` (two-step plan, change list, re-pin list); lbr-d2a ROM tail evidence (`docs/lbrd2a-won-tail-rom.md`,
+  fixture `tests/fixtures/data/factory-seventh-win-tail-off.json`): the won profile's `declineInputDelay` 39 vs ROM 41 and `recordSavedInputDelay` 70 vs ROM 74; farewell glyph +-1 tick to settle with a compare trace.
+- **Next:** lbr-d1 (engine + session change per the scout), aud246 (S11 close), Lobby NPC wander after the script releases, the PreBattleRoom
+  briefing; fold `mac/parity-mac` at run start if it moved; nightly replay from the pool. Papercut: typecheck / build OOM beside two other workers (use 2 lanes when one runs a suite).
 
 ---
 
@@ -21,53 +38,6 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Sizes (`build:lib`):** static graph 40.47 -> 28.70 MB; `assets-sprites` 11.77 MB dynamic; largest file 11.77 MB; total unchanged.
 - **Gates:** worker typecheck 0, test:gate 362 / 362, differential 5 traces 821 / 821 byte-identical, play:random 2 min / scene 0 errors / overlays.
   Supervisor on the merge with lbr-c / aud245b: build:lib 0; 6 lib / boundary files green after a rebuild; fixed a 5 s-timeout cascade in `bnd257dLazySprites` (120077475).
-
----
-
-## 2026-11-13 — aud247 (ts lane worker): the music already playing at mount
-
-- **State:** on master. Audio-side only (`src/audio/initialMusic.ts`, `musicTracker.ts` seed, `lib.ts`): no `src/engine` / session change, ENGINE_BUILD and headless bundle unchanged. Section "aud247" in `docs/aud245-audio-player.md`.
-- **ROM proof (RAM read, evidence `.integration/evidence/aud247/`):** at the anchor (Scene OFF = ON) `gMPlayInfo_BGM` = song 469, status 0x1ff, `clock` 3287; clock advances 0.96 ticks / frame (1920 in 2000), so the draft BGM began 3424 frames before frame 0.
-  Seed: draft = `bgm 469` at frame -3424; `"after-save"` Lobby = `bgm 469` at frame 0 (map music is MUS_B_FACTORY; no ROM position exists for the skipped dialogue / save, so song start). Resume: seed + fast-forward events through the existing `restore`. `reset()` now re-seeds and restores.
-- **Gates:** typecheck 0 (first run OOM-killed beside another worker's suite, rerun 0), build / build:lib 0, `tests/aud247InitialMusic.test.ts` (7) + aud245* + audioHeadlessBoundary + factoryLibrary + lbrc 84 / 84. `audioCheck.mjs --frames 600`: BGM source started at ctx 0.36 s, file offset 57.64 s (new `tap.musicStarts` in the tool); no audio option: 0 requests.
-- **Open:** the Lobby / after-save position is the song start, not a ROM measurement.
-
----
-
-## 2026-11-13 — aud245b (side lane worker, 36 min): player follow-ups (music after resume, pan, cry volume, fetch on first use)
-
-- **State:** folded (branch removed). No `src/engine` / session change: ENGINE_BUILD and headless size unchanged. Section in `docs/aud245-audio-player.md`.
-- **Did:** `src/audio/musicTracker.ts`: `lib.ts` always attaches the sink; resume events feed the tracker only, `AudioPlayer.restore` starts the BGM at its loop position;
-  `pan` events re-pan live SE1 / SE2 (`m4aMPlayPanpotControl` law); cry gain `(volume & 0x7f) / 120`; only BGM 469 + SEs 5 / 32 / 9 / 15 prefetched, the rest on first use.
-- **Gates:** worker typecheck 0, test:gate 362 / 362, build / build:lib 0. Supervisor: 6 audio / library files 44 / 44; audioCheck 1800 frames: 14 files fetched (was 186),
-  38 sources, peak 0.56, 0 errors; no audio option: 0 requests.
-- **Open:** no event for the music already playing at mount (draft BGM 469 starts only at the next `bgm` event); first-use fetch makes 9 of 38 starts late (was 3).
-
----
-
-## 2026-11-13 — cln277 (side lane worker, 141 min): full-suite wall target (Cleanup 5) measured: not reachable with test-side changes
-
-- **State:** folded `e0d074ec1` (tests + doc only; `docs/cln277-suite-wall.md`). `liveSpriteOrderHost.test.ts` memoizes its 20-seed sweep (87.8 -> 58.5 s, 22 / 22 unchanged).
-- **Finding:** the suite is CPU-bound (~7,000 s CPU; < 15 min at 5 workers needs ~4,500 s); file splits are CPU-neutral, collect / GC / JIT ~1-2 % each.
-  Largest lever left: `tools/integration/generatedCommandAnimationReplay.ts` renders every presenting frame and drops the pixels (~670 s CPU, ~2.2 min wall);
-  making it opt-in cuts render-crash coverage, so it is not taken; even then ~21 min here. 503 files spawn node children (~8 min wall). Rest = engine speed.
-  Supervisor decision (reversible): keep coverage; Cleanup 5's "< 15 min" stays open as a measured non-goal on this box (no DEFERRED entry: nothing blocks).
-- **Found red:** `tests/randomRoundSoak.test.ts` 3 failures on master since lbr-b (#89 seed 32, carried streak / depth after a later loss, #99 swap offer):
-  the attendant conversation moved the soak seeds' deals. Re-pin step queued after lbr-c.
-
----
-
-## 2026-11-13 — enc276 (integration lane worker, 200-min cap): a forced turn goes from FIGHT straight into the turn (ISSUES #213)
-
-- **State:** folded `5b1814cf6` (branch removed; evidence `.integration/evidence/enc276/`). ENGINE_BUILD moves again (merged tree; read at wind-down). `docs/enc276-forced-turn-no-menu.md`.
-  **Final-tree verification (enc276v, 114 min, tree `5b1814cf6`):** census 0..999 ON / OFF vs `17af89768`: 0 digests / command rows / errors moved (796 / 995
-  budget-cut, common segments identical); ROM seeds 60 87 89 90 119 159 161 193 all match; soaks vanilla 0:20 OFF **20 / 20**, ON **20 / 20**, winning 0:12 **12 / 12**;
-  test:smoke 448 / 448; full suite 1,776 passed, only `randomRoundSoak` 3 failures (lbr-b, bisected to `9f8c9aa7d`). ISSUES #213 removed.
-- **Did:** Encore: FIGHT submits the Encored move, no move menu. Struggle: FIGHT prints "<mon> has no moves left!" (ROM-tuned glyph / arrow / bounce timing), A submits.
-  Decision set unchanged; 30 tool / test route drivers follow the forced turn; `randomRoundSoak` seed 21 re-pinned (frames only).
-- **Proof so far (worker, on `093ee66ed`):** census 0..999 ON and OFF vs `17af89768`: 0 digests / command rows / errors moved (29 forced-turn seeds); ROM seeds 60 87 89
-  90 119 159 161 193 still match. ROM windows: encore-off 181 / 189, struggle-off 158 / 189, struggle-on 116 / 189, encore-on 46 / 189 (residuals named: bounce stop,
-  the staged route's missing Scene ON SPLASH body, Struggle HP drain / recoil timing after the animation). typecheck / test:gate 362 / 362 / build / build:lib 0.
 
 ---
 
@@ -90,102 +60,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Full `npm test`** (still running at the cap, 1,630 files in, 3 failures, all in `tests/randomRoundSoak.test.ts`: ISSUES #89 seed 32, max-depth tracking, ISSUES #99 vanilla swap offer).
   **Those 3 fail identically on lbr-b's tip `435515cbd`** (checked in a throwaway worktree), so they come from lbr-b's changed soak deals, not lbr-c; the supervisor should re-pin them. `test:gate` 362 / 362 is green.
 - **Next:** lbr-d (7-win Lobby return); re-pin the 3 `randomRoundSoak.test.ts` seed pins.
-
----
-
-## 2026-11-13 — lbr-b (ts lane worker, 180-min cap reached after its last commit): the singles attendant conversation (handoff item 0b, step 2)
-
-- **State:** on master (`9f8c9aa7d`..`7952dfe02`). ENGINE_BUILD `eb-adfdcfdc91f4247f` -> `eb-317927f84c1b839e` (read from dist; tell the website). `docs/lbrb-attendant-conversation.md`.
-- **Did:** A at the attendant runs the ROM conversation (`src/engine/factoryLobbyAttendant.ts` + `...Render.ts`): welcome, CHALLENGE / INFO / EXIT, INFO 9 pages,
-  "Level 50 or Open Level?" (Open Level drawn, unselectable: scope note in `docs/factory-finish-scope.md`), save question, save dialog, "Please step this way.",
-  door walk, fade, draft. The Lobby vblank RNG keeps running through the conversation, so the deal now comes from the hand-off tick (soak / goalPlay /
-  play:random seeds deal differently). Consumers drive it by tapping A (`randomRoundSoakDriver.ts`, `goalPlay.ts`, `tests/helpers/lobbyAttendant.ts`).
-- **ROM windows** (`tools/compare/traces/lbrb-*.json`, OFF): happy path a-e and info 1-3 **256 / 256** each; residuals named in the doc: field NPC wander after
-  the script releases (exit-type branches), happy-f 16 / 60 (the PreBattleRoom briefing before the draft is not modelled, since nch231).
-- **Gates:** worker: touched tests 291 / 291 files, soaks vanilla ON / OFF and winning 0:12 OK (all `budget`). It was stopped at the cap before reporting.
-  Supervisor on `7952dfe02`+: typecheck 0, test:gate **362 / 362 (2,843)**, `lbra` + `lbrb` 25 / 25, build 0 (first try OOM-killed beside 2 workers, rerun 0),
-  build:lib 0, compares `lbrb-happy-c-off` / `lbrb-info2-off` 256 / 256, play:random 2 min / scene seed 13: 0 page / console errors / overlays,
-  ON 11 battles / 9 swaps, OFF 16 / 9 and 1 new challenge from the Lobby through the conversation.
-- **Next:** lbr-c (challenge-request event at the save dialog), lbr-d (7-win Lobby return); NPC wander after release (open, presentation).
-
----
-
-## 2026-11-13 — aud245 (side lane worker, 112 min): WebAudio player, muted by default (S11 design step 9)
-
-- **State:** folded `69bc691dd` (branch `worker/side-20261113-023351`, removed; evidence `.integration/evidence/aud245/`). No `src/engine/` change; ENGINE_BUILD unchanged
-  `eb-adfdcfdc91f4247f`; headless bundle byte-identical (3,189,511 B). `docs/aud245-audio-player.md`.
-- **Website (additive API, tell the Mac):** `FactoryGameOptions.audio?: { enabled?, volume?, baseUrl? }`, `FactoryGame.setAudio(enabled)` / `getAudio()`
-  (`lib-types`, `docs/library-package.md`); dev shell `?audio=1`. `dist-lib/audio/` ships Ogg + an AAC `.m4a` fallback (picked by `canPlayType` / decode failure),
-  14.8 MB together; with `baseUrl` the host serves the unhashed files from `src/assets/gen/audio/`. Safari not checked on this box.
-- **Did:** `src/audio/player.ts` (lazy chunk 193 kB + manifest chunk 496 kB): SE1 / 2 / 3 priority from the song headers, cry duck 85 / 256, fanfare pause /
-  continue, fades, cry pan law, loops (7 ms crossfade at the four non-exact wraps). Limits: BGM silent after a `resume` until the next music event; `pan`
-  events and cry volume ignored; all 186 files fetched at enable.
-- **Gates:** worker typecheck 0, test:gate 362 / 362, full suite green except `bnd253SrcJsonShipped` (fixed after, file re-run), build / build:lib 0;
-  frame-hash identity with the player attached, both scenes. Supervisor: 8 audio / library test files 57 / 57; `tools/browser/audioCheck.mjs --frames 1800`:
-  `?audio=1` 1 context running, 38 sources started, peak 0.57, 0 decode failures, 0 errors; no audio option: 0 contexts, 0 audio requests.
-- **Next:** aud246 close (soaks, ROADMAP S11 tick by the supervisor); the limits above as small follow-ups.
-
----
-
-## 2026-11-13 — aud244b (side lane worker, 82 min): BGM / fanfare / looping-SE assets with ROM loop points (S11 design step 8, done)
-
-- **State:** folded `197011863` (branch `worker/side-20261113-010956`, removed; evidence `.integration/evidence/aud244b/`). No `src/*.ts` change: ENGINE_BUILD unchanged.
-  `docs/aud244b-bgm-fanfare-loops.md`. Audio assets 6.14 -> 7.45 MB (songs 1.28 MB; 32768 Hz stereo, an integer sample count per 48 ROM frames).
-- **Did:** recorder kinds `bgm` / `fanfare` / `seloop` (`tools/audio/{soundRecorder,songTicks,loopCut}.py`), manifest schema `/2` with `loopStartSamples` /
-  `loopEndSamples` (ticks from the ROM `GOTO` targets = `songLoops`). BGM 354 / 412 / 469 / 476 loop, fanfares 368 / 459 / 466 one-shot; SE_LOW_HEALTH / SE_M_GUST loop.
-  Seams: SE_M_GUST and bgm:354 sample-exact at the wrap; 412 / 469 / 476 / SE_LOW_HEALTH are not periodic in the ROM's own output (pass-vs-pass rms diff
-  is the same size as the seam: PSG / noise phase, mGBA per-frame sample jitter), so **aud245 crossfades 5-10 ms at those four wraps**. MUS_VS_FRONTIER_BRAIN (471)
-  is in no ROM log yet: not recorded.
-- **Gates:** worker typecheck 0, test:gate 362 / 362, full suite 1,773 passed / 44 skipped (14,618 tests), build / build:lib 0, validator 0.
-  Supervisor: `aud244a` / `aud244b` / `bnd253SrcJsonShipped` tests 17 / 17, validator 0 (worktree, `--raw` main checkout).
-- **Next:** aud245 (WebAudio player, design section 6).
-
----
-
-## 2026-11-13 — CAX31 daily run (supervisor, Opus 5.5): run start, `mac/parity-mac` 344eda36c folded
-
-- **State:** master `5a2fe1d83` = merge of `mac/parity-mac` `344eda36c` (52 commits, 28 battle-rule fixes + Brain replay seam; docs `docs/parity-mac/`).
-  ENGINE_BUILD `eb-952d7267a01bd728` -> `eb-adfdcfdc91f4247f` (read from dist; tell the website). Evidence `.integration/validation/sv-20261113/gates/`.
-- **Gates on the merge:** typecheck 0; full suite (5 workers) **1,772 files passed / 44 skipped, 14,613 tests passed**; build / build:lib 0.
-- **Gameplay status (replay only, per item 0d):** the Mac lane reports the open list empty on `344eda36c`: 8,660 ordinary seeds 1161..10000 with 0 engine
-  mismatches, silver Brain 204 / 204, gold 203 / 203, regression 64 / 64 (`docs/parity-mac/STATUS.md`). Box nightly check on the merge is in the
-  replay ledger. ISSUES #211 / #212 / #204 removed (all rows fixed with ROM proof by the Mac lane; #204 seed 50 ON was never driven); new #213
-  (Encore / Struggle skip the move menu, presentation, left on purpose by the Mac lane) and #214 (source-read leads).
-
----
-
-## 2026-11-12 — CAX31 daily run (supervisor, Opus 5.5): wind-down: aiv270 / aiv271 / fix274 / aud244a / lbr-a / pnm273 folded
-
-- **State:** master clean, no active workers, no worktrees. Final src == `f55e68f8e` (pnm273) plus test-only `bbcc41497`; later commits docs only. ENGINE_BUILD
-  `eb-9d34d28f1b19ef3d` -> `eb-952d7267a01bd728` (read from dist; moved by aiv270, aiv271, fix274, lbr-a, pnm273; tell the website). No push. No DEFERRED items.
-  Evidence `.integration/validation/sv-20261111/` (gates in `gates/`); worker evidence `.integration/evidence/{aiv270,aiv271,dia272,fix274,aud244a,lbra,pnm273}`.
-- **Gameplay (user item 0d: first priority).** aiv270 (#204 A / B; supervisor wrote its doc after the 200-min cap), aiv271 (#204 C, AI damage sims use the real
-  hit chain's terms; side lane), fix274 (#209 effect byte cleared per action, #210 move slot written at selection; side lane, proof from dia272 scratch fixes).
-  Census 0..999 per scene: 77 / 35 / 21 changed seeds, 0 unexplained, ON / OFF sets identical. ROM: 22 30 39 42 50 53 57 now match to battle end.
-  Supervisor re-drives: 30 ON 11 / 11, 39 OFF 11 / 11, 53 ON 8 / 8; C read for each fix (`Cmd_if_type_effectiveness`, `GetWhoStrikesFirst`, `AI_CalcDmg`,
-  `battle_main.c:4398`). ISSUES #209 / #210 removed, #204 trimmed (switch-into scorer stub, seed 60 lead).
-- **Sound (item 0):** aud244a recorder + 6.14 MB OGG (1,128 cries, 181 SEs; `docs/aud244a-recorder-assets.md`); no src change. Next aud244b, then aud245.
-- **Lobby (item 0b):** lbr-a: loss / forfeit / retire end in the walkable Lobby, forfeit skips the record question; soak / play:random walk to the attendant.
-  Supervisor reran `lbra-loss-off` 2258 / 2258. Open: no Scene ON loss / retire lab; no app SE_SAVE on the loss / retire result script.
-- **Name (item 0c):** pnm273 `PLAYER_NAME` = "PLAYER"; compare harness keeps MEMORY; only name pixels move; census 0..49 digest-identical.
-- **Gates** (tree `f55e68f8e`): full suite (3 workers, beside the soaks) **1 failed / 14,553 passed, 1,763 files + 44 skipped**: the only failure was
-  `bnd253SrcJsonShipped` (aud244a's manifest has no src importer yet); fixed in `bbcc41497` (pending-runtime-import list, shrink-only list untouched), file 4 / 4.
-  build / build:lib 0. Vanilla 0:20 OFF **20 / 20**, ON **20 / 20**; 0:60 default **60 / 60**, winning **60 / 60**, winning-swap **60 / 60** (all `budget`); varied-RNG first-round winning carry 0 / 14 / 28 **100 / 100** each,
-  winning-swap carry 0 **100 / 100**; play:random 5 min / scene: ON 22 battles / 9 swaps, OFF 36 / 17, 0 page errors / console errors / overlays.
-- **ROM replay (item 0d wind-down):** the 40-seed permanent list on `f55e68f8e`, Scene OFF: **24 / 40 match** to battle end; newly matching 22 30 39 42 50 53 57 (this run) and 75 88 110 155 158;
-  still diverging 60 + 15 seeds from 79 up (ISSUES #211). New ISSUES #212 lists the audit rows. Created `docs/replay-ledger.md` (`docs/replay-ledger.md`).
-- **Folded: dia275** (side lane, diagnosis only, 14 min; `docs/dia275-triage.md`): #211 seeds 109 / 107 / 79 share audit row A2 (switch-in scorer counts
-  power-0 moves as super-effective; one-line fix, isolated check flips all three); 123 = A4 (pass-2 base damage 0); 95 / 114 = AI draw count (not located).
-- **Next:** gameplay queue first: A2 fix (re-drive 109 / 107 / 79), A4 (123), seed 60 (dia272 forced-Struggle lead), then the rest of #211 / #212;
-  then aud244b, lbr-b. The replay runs once at run start (item 0d).
-
----
-
-## 2026-11-12 — pnm273 (ts lane worker): the player's name defaults to "PLAYER" (handoff item 0c)
-
-- **State:** committed on master (not pushed). ENGINE_BUILD `eb-8838f1fea2958ffc` -> `eb-952d7267a01bd728` (read from dist, includes the fix274 merge that landed meanwhile; tell the website). `docs/pnm273-player-name.md`.
-  typecheck 0; test:gate 362 / 362 (2836 tests; it ran before the last merge); touched tests (103 files importing the three modules + the appTrace importers) green; build / build:lib 0. Full suite not run (supervisor).
-- **Did:** `PLAYER_NAME` in `src/engine/playerName.ts`, used by the forfeit, both record and the BP messages; harness `tools/compare/harnessPlayerName.ts` renders "MEMORY" for compare traces (no-op under vitest: `isolate:false` leaked it).
-  Production differential: only x17-51 y124-133 changes (123 / 250 frf250b, 73 / 133 record-yes); with the override 6 traces / 4412 captures byte-identical; ROM compares 250 / 250, 133 / 133, 178 / 178; census seeds 0..49 both scenes 100 / 100 lines identical (kernel digest unchanged).
-  Tests: `tests/pnm273PlayerName.test.ts` (8), 3 files re-pinned; `factoryTerminalMessages.test.ts` keeps MEMORY (it pins the oracle-save extractor).
-- **Next:** per-player name (`playerName` mount option) when wanted; no compare trace reaches the BP award box (app-side render checked only).

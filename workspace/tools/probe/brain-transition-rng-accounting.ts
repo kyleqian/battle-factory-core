@@ -8,6 +8,7 @@
 // `GetSpecialBattleTransition` performs in source immediately after
 // `FillFactoryTrainerParty` returns (battle_tower.c:2093-2100). Read-only:
 // does not touch src/, does not advance any state that gets rendered.
+import "../../src/engine/monPicPixelsInstall.ts"; // iss215: standalone node run must install the sprite pixel provider (bnd257d)
 import { createInitialState } from "../../src/engine/core.ts";
 import { pickFrontierTransition } from "../../src/engine/opponentGen.ts";
 import transitionsFrontierData from "../../src/data/gen/battle-transitions-frontier.json" with { type: "json" };

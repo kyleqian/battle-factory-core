@@ -25,6 +25,7 @@
  * No `src/` file is edited. Run:
  *   node --experimental-strip-types tools/probe/analyze-turn5-6-reopen-bounce-app-series.ts
  */
+import "../../src/engine/monPicPixelsInstall.ts"; // iss215: standalone node run must install the sprite pixel provider (bnd257d)
 import { readFileSync } from "node:fs";
 import { createInitialState, tick, type EngineState } from "../../src/engine/core.ts";
 import { traceAdvances } from "../compare/traceReplay.ts";

@@ -6,6 +6,7 @@
 // replays through its __POKEBENCH__.advance() ABI; the page is deterministic given its inputs, so the page and
 // the mirror stay in lockstep without reading anything back. A little uniform-random input (menus opened and
 // cancelled, B-backs, START) is mixed in so the run keeps exploring.
+import "../../src/engine/monPicPixelsInstall.ts"; // iss215: standalone node run must install the sprite pixel provider (bnd257d)
 
 import { createInitialState, tick, type EngineState } from "../../src/engine/core.ts";
 import type { GbaButton } from "../../src/input.ts";

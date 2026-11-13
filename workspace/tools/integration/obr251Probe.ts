@@ -1,4 +1,5 @@
 // obr251 probe: per-frame presentation command timeline of the aud241b opponent-faint stage (A press at 501).
+import "../../src/engine/monPicPixelsInstall.ts"; // iss215: standalone node run must install the sprite pixel provider (bnd257d)
 import { createInitialState, tick } from "../../src/engine/core.ts";
 import { APP_STAGES } from "../compare/appTrace.ts";
 import { traceAdvances } from "../compare/traceReplay.ts";

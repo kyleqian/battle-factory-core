@@ -1,0 +1,1417 @@
+{
+ "schema": "factory-seventh-win-tail-off/v1",
+ "oracleProfile": "battle-scene-off",
+ "sourceTrace": "tools/compare/traces-groundtruth/battle1-postwin-dense.json",
+ "relativeTo": "same staged seventh-win Factory Lobby CB2_LoadMap handoff as factory-seventh-win-timeline-off.json; ticks are identical",
+ "preMenuControls": [
+  {
+   "relativeTick": 300,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "relativeTick": 1100,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "relativeTick": 2200,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "relativeTick": 3500,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "relativeTick": 4400,
+   "buttons": [
+    "A"
+   ]
+  }
+ ],
+ "menuDraw": 4422,
+ "source": "BattleFactoryLobby/scripts.inc AskRecordBattle/RecordBattle/EndRecordBattle (msgbox DEFAULT, closemessage, releaseall)",
+ "scriptStatusLegend": {
+  "0": "running (includes waitmessage/native waits)",
+  "1": "waiting (menu)",
+  "2": "shutdown (releaseall done)"
+ },
+ "cases": {
+  "no": {
+   "answer": "NO (default cursor, A at the menu's first input-ready tick)",
+   "inputs": [
+    {
+     "tick": 4424,
+     "buttons": [
+      "A"
+     ]
+    },
+    {
+     "tick": 4465,
+     "buttons": [
+      "A"
+     ]
+    }
+   ],
+   "directionHold": {
+    "button": "DOWN",
+    "from": 4466
+   },
+   "recordResultAfterAnswer": 1,
+   "menuGoneTick": 4425,
+   "printerStartTicks": [
+    4425
+   ],
+   "printerIdleTicks": [
+    4462
+   ],
+   "scriptShutdownTick": 4466,
+   "firstAvatarRunningStateTick": 4467,
+   "firstPlayerPositionChangeTick": 4475,
+   "framebufferSpans": [
+    {
+     "start": 4422,
+     "end": 4422,
+     "state": {
+      "sha256": "1c541a880f5f",
+      "printerActive": 0,
+      "messageTaskState": null,
+      "scriptStatus": 1
+     }
+    },
+    {
+     "start": 4423,
+     "end": 4423,
+     "state": {
+      "sha256": "b4d63e9952ab",
+      "printerActive": 0,
+      "messageTaskState": null,
+      "scriptStatus": 1
+     }
+    },
+    {
+     "start": 4424,
+     "end": 4424,
+     "state": {
+      "sha256": "b4d63e9952ab",
+      "printerActive": 0,
+      "messageTaskState": null,
+      "scriptStatus": 0,
+      "buttons": [
+       "A"
+      ]
+     }
+    },
+    {
+     "start": 4425,
+     "end": 4425,
+     "state": {
+      "sha256": "1c541a880f5f",
+      "printerActive": 1,
+      "messageTaskState": 1,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4426,
+     "end": 4426,
+     "state": {
+      "sha256": "1c541a880f5f",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4427,
+     "end": 4427,
+     "state": {
+      "sha256": "0e5da030d255",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4428,
+     "end": 4428,
+     "state": {
+      "sha256": "62a3cbe0c039",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4429,
+     "end": 4430,
+     "state": {
+      "sha256": "a8914742544d",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4431,
+     "end": 4431,
+     "state": {
+      "sha256": "8949945989dd",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4432,
+     "end": 4432,
+     "state": {
+      "sha256": "02c84e64f218",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4433,
+     "end": 4433,
+     "state": {
+      "sha256": "dc9e2f3d58fa",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4434,
+     "end": 4435,
+     "state": {
+      "sha256": "3f55a9297680",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4436,
+     "end": 4436,
+     "state": {
+      "sha256": "5f69f4c4add2",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4437,
+     "end": 4437,
+     "state": {
+      "sha256": "9f349bd0378c",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4438,
+     "end": 4438,
+     "state": {
+      "sha256": "a9cc3423b51a",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4439,
+     "end": 4439,
+     "state": {
+      "sha256": "e93a10155a64",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4440,
+     "end": 4440,
+     "state": {
+      "sha256": "bbb197e50670",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4441,
+     "end": 4441,
+     "state": {
+      "sha256": "c8a2898bb92b",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4442,
+     "end": 4443,
+     "state": {
+      "sha256": "4c4f97e97809",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4444,
+     "end": 4444,
+     "state": {
+      "sha256": "5afc7a33e541",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4445,
+     "end": 4446,
+     "state": {
+      "sha256": "42977001f15a",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4447,
+     "end": 4447,
+     "state": {
+      "sha256": "6868b0dd742d",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4448,
+     "end": 4448,
+     "state": {
+      "sha256": "b506cfb0959c",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4449,
+     "end": 4449,
+     "state": {
+      "sha256": "250316964ee1",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4450,
+     "end": 4451,
+     "state": {
+      "sha256": "a1c91c501093",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4452,
+     "end": 4452,
+     "state": {
+      "sha256": "251adb953843",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4453,
+     "end": 4453,
+     "state": {
+      "sha256": "e14854adfef5",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4454,
+     "end": 4454,
+     "state": {
+      "sha256": "5ad50943e16c",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4455,
+     "end": 4456,
+     "state": {
+      "sha256": "b33dad4592a6",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4457,
+     "end": 4457,
+     "state": {
+      "sha256": "365c2fd60fac",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4458,
+     "end": 4458,
+     "state": {
+      "sha256": "74da8bc86e88",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4459,
+     "end": 4459,
+     "state": {
+      "sha256": "d7540a47ca0b",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4460,
+     "end": 4460,
+     "state": {
+      "sha256": "a72d19b1257c",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4461,
+     "end": 4461,
+     "state": {
+      "sha256": "ce46ad1647e0",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4462,
+     "end": 4464,
+     "state": {
+      "sha256": "def8396773a1",
+      "printerActive": 0,
+      "messageTaskState": null,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4465,
+     "end": 4465,
+     "state": {
+      "sha256": "def8396773a1",
+      "printerActive": 0,
+      "messageTaskState": null,
+      "scriptStatus": 0,
+      "buttons": [
+       "A"
+      ]
+     }
+    },
+    {
+     "start": 4466,
+     "end": 4466,
+     "state": {
+      "sha256": "def8396773a1",
+      "printerActive": 0,
+      "messageTaskState": null,
+      "scriptStatus": 2,
+      "buttons": [
+       "DOWN"
+      ]
+     }
+    },
+    {
+     "start": 4467,
+     "end": 4467,
+     "state": {
+      "sha256": "cd880b376315",
+      "printerActive": 0,
+      "messageTaskState": null,
+      "scriptStatus": 2,
+      "buttons": [
+       "DOWN"
+      ]
+     }
+    },
+    {
+     "start": 4468,
+     "end": 4470,
+     "state": {
+      "sha256": "5e5618076fdc",
+      "printerActive": 0,
+      "messageTaskState": null,
+      "scriptStatus": 2,
+      "buttons": [
+       "DOWN"
+      ]
+     }
+    }
+   ]
+  },
+  "yes": {
+   "answer": "YES (UP then A) -> SaveBattle 'recorded' message -> shared farewell",
+   "inputs": [
+    {
+     "tick": 4424,
+     "buttons": [
+      "UP"
+     ]
+    },
+    {
+     "tick": 4430,
+     "buttons": [
+      "A"
+     ]
+    },
+    {
+     "tick": 4504,
+     "buttons": [
+      "A"
+     ]
+    },
+    {
+     "tick": 4545,
+     "buttons": [
+      "A"
+     ]
+    }
+   ],
+   "directionHold": {
+    "button": "DOWN",
+    "from": 4546
+   },
+   "recordResultAfterAnswer": 0,
+   "menuGoneTick": 4431,
+   "printerStartTicks": [
+    4449,
+    4505
+   ],
+   "printerIdleTicks": [
+    4501,
+    4542
+   ],
+   "scriptShutdownTick": 4546,
+   "firstAvatarRunningStateTick": 4547,
+   "firstPlayerPositionChangeTick": 4555,
+   "framebufferSpans": [
+    {
+     "start": 4428,
+     "end": 4429,
+     "state": {
+      "sha256": "6066aa89611f",
+      "printerActive": 0,
+      "messageTaskState": null,
+      "scriptStatus": 1
+     }
+    },
+    {
+     "start": 4430,
+     "end": 4430,
+     "state": {
+      "sha256": "6066aa89611f",
+      "printerActive": 0,
+      "messageTaskState": null,
+      "scriptStatus": 0,
+      "buttons": [
+       "A"
+      ]
+     }
+    },
+    {
+     "start": 4431,
+     "end": 4448,
+     "state": {
+      "sha256": "1c541a880f5f",
+      "printerActive": 0,
+      "messageTaskState": null,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4449,
+     "end": 4450,
+     "state": {
+      "sha256": "1c541a880f5f",
+      "printerActive": 1,
+      "messageTaskState": 1,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4451,
+     "end": 4451,
+     "state": {
+      "sha256": "1c541a880f5f",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4452,
+     "end": 4452,
+     "state": {
+      "sha256": "0e5da030d255",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4453,
+     "end": 4453,
+     "state": {
+      "sha256": "5b1ae4a03717",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4454,
+     "end": 4454,
+     "state": {
+      "sha256": "1beb3cb2262e",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4455,
+     "end": 4455,
+     "state": {
+      "sha256": "991b84c2c2c2",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4456,
+     "end": 4456,
+     "state": {
+      "sha256": "46158603e6ea",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4457,
+     "end": 4457,
+     "state": {
+      "sha256": "41bf317c39e5",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4458,
+     "end": 4458,
+     "state": {
+      "sha256": "d22e774c668f",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4459,
+     "end": 4459,
+     "state": {
+      "sha256": "76201f68210a",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4460,
+     "end": 4461,
+     "state": {
+      "sha256": "b9f3855ea206",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4462,
+     "end": 4462,
+     "state": {
+      "sha256": "00438af05b9e",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4463,
+     "end": 4463,
+     "state": {
+      "sha256": "8f347931c559",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4464,
+     "end": 4464,
+     "state": {
+      "sha256": "ba3dd5ab7d9d",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4465,
+     "end": 4465,
+     "state": {
+      "sha256": "bfc1bf93d10f",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4466,
+     "end": 4466,
+     "state": {
+      "sha256": "d9509cd480c0",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4467,
+     "end": 4468,
+     "state": {
+      "sha256": "e25836895114",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4469,
+     "end": 4469,
+     "state": {
+      "sha256": "40697dddbc5a",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4470,
+     "end": 4470,
+     "state": {
+      "sha256": "2e291815feec",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4471,
+     "end": 4472,
+     "state": {
+      "sha256": "23a6434749b8",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4473,
+     "end": 4473,
+     "state": {
+      "sha256": "164683b78b21",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4474,
+     "end": 4474,
+     "state": {
+      "sha256": "30815579466c",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4475,
+     "end": 4475,
+     "state": {
+      "sha256": "f1964a895b13",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4476,
+     "end": 4476,
+     "state": {
+      "sha256": "8562d9d339e6",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4477,
+     "end": 4477,
+     "state": {
+      "sha256": "332d5e998337",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4478,
+     "end": 4478,
+     "state": {
+      "sha256": "5fd7f7442a1a",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4479,
+     "end": 4479,
+     "state": {
+      "sha256": "aa6ebaaf2452",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4480,
+     "end": 4480,
+     "state": {
+      "sha256": "ece17415e217",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4481,
+     "end": 4481,
+     "state": {
+      "sha256": "788726ff8337",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4482,
+     "end": 4483,
+     "state": {
+      "sha256": "c770ebceb657",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4484,
+     "end": 4484,
+     "state": {
+      "sha256": "6cdc148d6b3b",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4485,
+     "end": 4485,
+     "state": {
+      "sha256": "5bde3d6f6cf4",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4486,
+     "end": 4487,
+     "state": {
+      "sha256": "99e5f7ea1225",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4488,
+     "end": 4488,
+     "state": {
+      "sha256": "eef990e9dd8c",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4489,
+     "end": 4489,
+     "state": {
+      "sha256": "fe9d90f4252c",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4490,
+     "end": 4490,
+     "state": {
+      "sha256": "7de7ad31fbdc",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4491,
+     "end": 4491,
+     "state": {
+      "sha256": "cf25b6a04df2",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4492,
+     "end": 4492,
+     "state": {
+      "sha256": "569e20410498",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4493,
+     "end": 4493,
+     "state": {
+      "sha256": "8eb230225dd3",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4494,
+     "end": 4494,
+     "state": {
+      "sha256": "da8213c029fe",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4495,
+     "end": 4496,
+     "state": {
+      "sha256": "dcb00f7603a2",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4497,
+     "end": 4497,
+     "state": {
+      "sha256": "facb829643ea",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4498,
+     "end": 4498,
+     "state": {
+      "sha256": "4c9b69c092d9",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4499,
+     "end": 4499,
+     "state": {
+      "sha256": "e67e07074550",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4500,
+     "end": 4500,
+     "state": {
+      "sha256": "ea782787c1e6",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4501,
+     "end": 4503,
+     "state": {
+      "sha256": "82f322a8bde0",
+      "printerActive": 0,
+      "messageTaskState": null,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4504,
+     "end": 4504,
+     "state": {
+      "sha256": "82f322a8bde0",
+      "printerActive": 0,
+      "messageTaskState": null,
+      "scriptStatus": 0,
+      "buttons": [
+       "A"
+      ]
+     }
+    },
+    {
+     "start": 4505,
+     "end": 4505,
+     "state": {
+      "sha256": "82f322a8bde0",
+      "printerActive": 1,
+      "messageTaskState": 1,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4506,
+     "end": 4506,
+     "state": {
+      "sha256": "82f322a8bde0",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4507,
+     "end": 4507,
+     "state": {
+      "sha256": "0e5da030d255",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4508,
+     "end": 4508,
+     "state": {
+      "sha256": "62a3cbe0c039",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4509,
+     "end": 4510,
+     "state": {
+      "sha256": "a8914742544d",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4511,
+     "end": 4511,
+     "state": {
+      "sha256": "8949945989dd",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4512,
+     "end": 4512,
+     "state": {
+      "sha256": "02c84e64f218",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4513,
+     "end": 4513,
+     "state": {
+      "sha256": "dc9e2f3d58fa",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4514,
+     "end": 4515,
+     "state": {
+      "sha256": "3f55a9297680",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4516,
+     "end": 4516,
+     "state": {
+      "sha256": "5f69f4c4add2",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4517,
+     "end": 4517,
+     "state": {
+      "sha256": "9f349bd0378c",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4518,
+     "end": 4518,
+     "state": {
+      "sha256": "a9cc3423b51a",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4519,
+     "end": 4519,
+     "state": {
+      "sha256": "e93a10155a64",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4520,
+     "end": 4520,
+     "state": {
+      "sha256": "bbb197e50670",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4521,
+     "end": 4521,
+     "state": {
+      "sha256": "c8a2898bb92b",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4522,
+     "end": 4523,
+     "state": {
+      "sha256": "4c4f97e97809",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4524,
+     "end": 4524,
+     "state": {
+      "sha256": "5afc7a33e541",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4525,
+     "end": 4526,
+     "state": {
+      "sha256": "42977001f15a",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4527,
+     "end": 4527,
+     "state": {
+      "sha256": "6868b0dd742d",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4528,
+     "end": 4528,
+     "state": {
+      "sha256": "b506cfb0959c",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4529,
+     "end": 4529,
+     "state": {
+      "sha256": "250316964ee1",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4530,
+     "end": 4531,
+     "state": {
+      "sha256": "a1c91c501093",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4532,
+     "end": 4532,
+     "state": {
+      "sha256": "251adb953843",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4533,
+     "end": 4533,
+     "state": {
+      "sha256": "e14854adfef5",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4534,
+     "end": 4534,
+     "state": {
+      "sha256": "5ad50943e16c",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4535,
+     "end": 4536,
+     "state": {
+      "sha256": "b33dad4592a6",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4537,
+     "end": 4537,
+     "state": {
+      "sha256": "365c2fd60fac",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4538,
+     "end": 4538,
+     "state": {
+      "sha256": "74da8bc86e88",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4539,
+     "end": 4539,
+     "state": {
+      "sha256": "d7540a47ca0b",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4540,
+     "end": 4540,
+     "state": {
+      "sha256": "a72d19b1257c",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4541,
+     "end": 4541,
+     "state": {
+      "sha256": "ce46ad1647e0",
+      "printerActive": 1,
+      "messageTaskState": 2,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4542,
+     "end": 4544,
+     "state": {
+      "sha256": "def8396773a1",
+      "printerActive": 0,
+      "messageTaskState": null,
+      "scriptStatus": 0
+     }
+    },
+    {
+     "start": 4545,
+     "end": 4545,
+     "state": {
+      "sha256": "def8396773a1",
+      "printerActive": 0,
+      "messageTaskState": null,
+      "scriptStatus": 0,
+      "buttons": [
+       "A"
+      ]
+     }
+    },
+    {
+     "start": 4546,
+     "end": 4546,
+     "state": {
+      "sha256": "def8396773a1",
+      "printerActive": 0,
+      "messageTaskState": null,
+      "scriptStatus": 2,
+      "buttons": [
+       "DOWN"
+      ]
+     }
+    },
+    {
+     "start": 4547,
+     "end": 4547,
+     "state": {
+      "sha256": "cd880b376315",
+      "printerActive": 0,
+      "messageTaskState": null,
+      "scriptStatus": 2,
+      "buttons": [
+       "DOWN"
+      ]
+     }
+    },
+    {
+     "start": 4548,
+     "end": 4550,
+     "state": {
+      "sha256": "5e5618076fdc",
+      "printerActive": 0,
+      "messageTaskState": null,
+      "scriptStatus": 2,
+      "buttons": [
+       "DOWN"
+      ]
+     }
+    }
+   ]
+  }
+ },
+ "limits": {
+  "noPngOrRgbAssets": true,
+  "noProductionRendererUse": true,
+  "framebufferEvidence": "raw RGB888 SHA-256 (12-hex prefix) only"
+ }
+}
