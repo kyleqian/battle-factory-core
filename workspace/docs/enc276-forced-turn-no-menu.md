@@ -81,4 +81,7 @@ HOLD_AT, no fight phase; constants; ON/OFF share the flow).
   64/64 green. Shard 1 (2205 passed) ran BEFORE the driver patches and was not re-run on the final tree.
 - `npm run build` and `npm run build:lib`: both built.
 - ENGINE_BUILD: `eb-83a3535c3259b331`.
-- Soak: see the final message (vanilla 0:20 both scenes, winning 0:12 --parallel 3 did not finish within the worker cap if not listed there).
+- Soak: NOT obtained. `--seeds 0:20 --policy vanilla --scene off|on --parallel 3` each hit my 580 s guard (`Terminated`, no summary) while the box ran at
+  load average ~13 with a sibling worker's full suite; winning 0:12 --parallel 3 was not run. The soak driver itself is patched for the forced turn and
+  `tests/randomRoundSoak.test.ts` (64 tests, including vanilla/winning milestone seeds) is green.
+- Not done in the cap: shard 1 re-run on the final tree, census / ROM re-drive re-run on the final tree, `npm run test:smoke` on the final tree.
