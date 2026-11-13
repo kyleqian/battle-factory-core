@@ -155,7 +155,7 @@ describe("lbrb: the engine", () => {
     let s = tick(before, new Set<GbaButton>(["A"]));
     expect(s.lobbyAttendant).not.toBeNull();
     expect(s.pendingGeneratedRound ?? null).toBeNull();
-    const seen = new Set<number>([s.rngValue]);
+    const seen = new Set<unknown>([s.rngValue]);
     for (let i = 0; i < 30; i += 1) {
       s = tick(s, new Set<GbaButton>());
       seen.add(s.rngValue);
@@ -168,7 +168,7 @@ describe("lbrb: the engine", () => {
 
   it("each conversation stage renders a distinct frame", () => {
     let s = tick(lobby(), new Set<GbaButton>(["A"]));
-    const hashes = new Set<string>();
+    const hashes = new Set<number>();
     for (let i = 0; i < 120; i += 1) {
       s = tick(s, new Set<GbaButton>());
       hashes.add(frameHash(render(s)));
