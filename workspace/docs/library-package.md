@@ -78,6 +78,28 @@ palettes alone; it now reads `src/assets/gen/battle-sprite-palettes.json`
   resolution segment's kernel events in order, hex, 16 chars, exactly what
   `tools/integration/*Census.ts` compute.
 
+## First draw and `ready` wait for the sprite chunk (bnd257d, additive behaviour note for the website)
+
+**For the website: `mountFactoryGame` still returns synchronously, but the canvas stays blank and `ready` is delayed until the sprite sheets have
+loaded.** The battle back / opponent front sprite sheets (~11.8 MB raw, ~0.94 MB gzip) are no longer in the entry's static graph; `src/lib.ts`
+`import()`s a small installer chunk (`dist-lib/chunks/monPicPixelsInstall-*.js`) that pulls in `assets-sprites-*.js` and installs the tables
+(`docs/bnd257d-lazy-sprites.md`). Nothing in the contract types changes. What a host sees:
+
+- The first `draw`, the frame loop and `ready` start only after the chunk resolves. The website needs its own loader / placeholder until `ready`
+  (the same wait it needs while `resume` fast-forwards). Real-time play and trace frames begin after the load, so timing is unaffected.
+- **Input before `ready` / before the load is DROPPED**, not latched: `press()` while the sprites are still loading is ignored (the player cannot see
+  the screen, and a blind press would otherwise land in frame 0 of the trace). Send input after `ready`. Once the pixels are in, the old behaviour
+  is unchanged (presses latch, including during a `resume` fast-forward).
+- A rejected import (offline, a missing chunk) calls `onError({ message: "sprite pixels failed to load: ...", frame: 0 })`, logs the error and does
+  not start the loop: no `ready`, no frames. The host may `destroy()` and mount again.
+- `destroy()` before the load finishes cancels the start (no draw, no `ready`).
+- The headless entry is untouched (`headless.js` and every headless chunk are byte-identical; `ENGINE_BUILD` moved once only because the 1-byte empty
+  `assets-sprites` stub chunk that nothing imported left `chunks-headless/`, see the doc above).
+- A consumer's bundler still sees one more chunk to serve; the sprite chunk is fetched only by a mount, on first use.
+- Internal / dev shell only: `mountFactoryGameInternal` returns `pixelsReady: Promise<void>`; `src/main.ts` defines `__POKEBENCH__` and
+  `__POKEBENCH_SESSION__` after it resolves (poll for them with a timer, not requestAnimationFrame). When a provider is already installed (vitest
+  setup, node render tools) the mount is fully synchronous exactly as before.
+
 ## Gamepad
 
 `connectGamepad(game, options?)` (`src/gamepad.ts`, exported from `@pokebench/factory`,
@@ -170,17 +192,20 @@ raw / gzip, readable (unminified) output:
 
 | Entry | Files | Total | Largest file |
 | --- | --- | --- | --- |
-| headless (`dist-lib/headless.js` + `chunks-headless/`) | 6 | 10.7 MB / 1.19 MB (bnd256c; was 22.5 MB / 2.14 MB) | `data-battle-script` 3.7 MB / 0.24 MB |
-| browser (`dist-lib/index.js` + `chunks/`) | 6 | 40.2 MB / 3.41 MB | `assets-sprites` 14.5 MB / 1.04 MB |
+| headless (`dist-lib/headless.js` + `chunks-headless/`) | 5 (bnd257d; 6 with the stub) | 10.7 MB / 1.19 MB (bnd256c; was 22.5 MB / 2.14 MB) | `data-battle-script` 3.7 MB / 0.24 MB |
+| browser (`dist-lib/index.js` + `chunks/`) | 10 | 41.2 MB (bnd257d; static graph 28.7 MB, dynamic sprite chunk 11.8 MB / 0.94 MB gzip) | `assets-sprites` 11.8 MB (was 14.5 MB with `party-mon-icons`, now in `assets-gen`) |
 
 The headless graph no longer carries sprite pixels (bnd256c,
 `docs/bnd256c-pixel-provider.md`): the battle sprite sheets are reached through
 an installable provider (`src/engine/monPicPixels.ts`), and only the browser
-entry installs it (`src/lib.ts` statically imports `monPicPixelsInstall.ts`).
-`chunks-headless/` keeps a 1-byte empty `assets-sprites-*.js` stub that nothing
-imports. The browser entry is unchanged (its sprite chunk is split in a later
-step, `bnd-d`). The tarball (`npm pack`) was 5.4 MB before bnd256c and has not
+entry installs it (`src/lib.ts` dynamically imports `monPicPixelsInstall.ts` since bnd257d; it was a static import in bnd256c).
+`chunks-headless/` kept a 1-byte empty `assets-sprites-*.js` stub that nothing
+imported until bnd257d removed the last sprite JSON import from the headless graph (the stub is gone; every other headless chunk is
+byte-identical). The browser entry's sprite chunk became a dynamic import in bnd257d. The tarball (`npm pack`) was 5.4 MB before bnd256c and has not
 been re-measured.
+
+(bnd257d: the static graph is now `index.js` 237 B + a 7.3 MB `lib-*` chunk + the four static data / asset chunks, 28.7 MB in all, and the 11.8 MB sprite chunk is
+a separate dynamic chunk; the consumer figures below predate it and were not re-measured.)
 
 A consumer's own bundler concatenates the package's static chunk imports, so a
 default Vite build of an app that imports only `mountFactoryGame` emits ONE

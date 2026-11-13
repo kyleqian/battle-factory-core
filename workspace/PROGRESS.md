@@ -5,10 +5,54 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 2026-11-13 — rps278 (side lane worker, 28 min): `randomRoundSoak` re-pinned after lbr-b
+
+- **State:** folded (tests + `docs/rps278-soak-repin.md`; no src). #89 Baton Pass seed 11 -> 3; carried-streak / depth window 2,000 -> 6,000 frames; #99 swap offer seed 1 -> 0.
+  Each pin mutation-checked (still fails when the guarded behaviour breaks). Supervisor on master: the file **64 / 64**.
+
+---
+
+## 2026-11-13 — bnd257d (integration lane worker, 53 min): the browser sprite chunk is a dynamic import (bundle hygiene, finish plan Phase 3)
+
+- **State:** folded (branch removed; `docs/bnd257d-lazy-sprites.md`). ENGINE_BUILD moves (a dead 1-byte `assets-sprites` stub left the headless graph; every real
+  headless chunk is byte-identical; tell the website). Supervisor sign-off of the scout's "reverses bnd256c" point: recorded in the brief, reversible.
+- **Website:** `mountFactoryGame` still returns at once, but the first draw / `ready` wait for the sprite chunk; **presses before `ready` are dropped**; a failed
+  import calls `onError` (`docs/library-package.md`). Dev ABI `__POKEBENCH__` appears after the pixels load (tools poll on a timer; AGENTS.md note).
+- **Sizes (`build:lib`):** static graph 40.47 -> 28.70 MB; `assets-sprites` 11.77 MB dynamic; largest file 11.77 MB; total unchanged.
+- **Gates:** worker typecheck 0, test:gate 362 / 362, differential 5 traces 821 / 821 byte-identical, play:random 2 min / scene 0 errors / overlays.
+  Supervisor on the merge with lbr-c / aud245b: build:lib 0; 6 lib / boundary files green after a rebuild; fixed a 5 s-timeout cascade in `bnd257dLazySprites` (120077475).
+
+---
+
+## 2026-11-13 — aud245b (side lane worker, 36 min): player follow-ups (music after resume, pan, cry volume, fetch on first use)
+
+- **State:** folded (branch removed). No `src/engine` / session change: ENGINE_BUILD and headless size unchanged. Section in `docs/aud245-audio-player.md`.
+- **Did:** `src/audio/musicTracker.ts`: `lib.ts` always attaches the sink; resume events feed the tracker only, `AudioPlayer.restore` starts the BGM at its loop position;
+  `pan` events re-pan live SE1 / SE2 (`m4aMPlayPanpotControl` law); cry gain `(volume & 0x7f) / 120`; only BGM 469 + SEs 5 / 32 / 9 / 15 prefetched, the rest on first use.
+- **Gates:** worker typecheck 0, test:gate 362 / 362, build / build:lib 0. Supervisor: 6 audio / library files 44 / 44; audioCheck 1800 frames: 14 files fetched (was 186),
+  38 sources, peak 0.56, 0 errors; no audio option: 0 requests.
+- **Open:** no event for the music already playing at mount (draft BGM 469 starts only at the next `bgm` event); first-use fetch makes 9 of 38 starts late (was 3).
+
+---
+
+## 2026-11-13 — cln277 (side lane worker, 141 min): full-suite wall target (Cleanup 5) measured: not reachable with test-side changes
+
+- **State:** folded `e0d074ec1` (tests + doc only; `docs/cln277-suite-wall.md`). `liveSpriteOrderHost.test.ts` memoizes its 20-seed sweep (87.8 -> 58.5 s, 22 / 22 unchanged).
+- **Finding:** the suite is CPU-bound (~7,000 s CPU; < 15 min at 5 workers needs ~4,500 s); file splits are CPU-neutral, collect / GC / JIT ~1-2 % each.
+  Largest lever left: `tools/integration/generatedCommandAnimationReplay.ts` renders every presenting frame and drops the pixels (~670 s CPU, ~2.2 min wall);
+  making it opt-in cuts render-crash coverage, so it is not taken; even then ~21 min here. 503 files spawn node children (~8 min wall). Rest = engine speed.
+  Supervisor decision (reversible): keep coverage; Cleanup 5's "< 15 min" stays open as a measured non-goal on this box (no DEFERRED entry: nothing blocks).
+- **Found red:** `tests/randomRoundSoak.test.ts` 3 failures on master since lbr-b (#89 seed 32, carried streak / depth after a later loss, #99 swap offer):
+  the attendant conversation moved the soak seeds' deals. Re-pin step queued after lbr-c.
+
+---
+
 ## 2026-11-13 — enc276 (integration lane worker, 200-min cap): a forced turn goes from FIGHT straight into the turn (ISSUES #213)
 
 - **State:** folded `5b1814cf6` (branch removed; evidence `.integration/evidence/enc276/`). ENGINE_BUILD moves again (merged tree; read at wind-down). `docs/enc276-forced-turn-no-menu.md`.
-  **Final-tree verification is running** (enc276v, integration lane): census 0..999 both scenes, 8-seed ROM re-drive, soaks, full suite. #213 stays open until it lands.
+  **Final-tree verification (enc276v, 114 min, tree `5b1814cf6`):** census 0..999 ON / OFF vs `17af89768`: 0 digests / command rows / errors moved (796 / 995
+  budget-cut, common segments identical); ROM seeds 60 87 89 90 119 159 161 193 all match; soaks vanilla 0:20 OFF **20 / 20**, ON **20 / 20**, winning 0:12 **12 / 12**;
+  test:smoke 448 / 448; full suite 1,776 passed, only `randomRoundSoak` 3 failures (lbr-b, bisected to `9f8c9aa7d`). ISSUES #213 removed.
 - **Did:** Encore: FIGHT submits the Encored move, no move menu. Struggle: FIGHT prints "<mon> has no moves left!" (ROM-tuned glyph / arrow / bounce timing), A submits.
   Decision set unchanged; 30 tool / test route drivers follow the forced turn; `randomRoundSoak` seed 21 re-pinned (frames only).
 - **Proof so far (worker, on `093ee66ed`):** census 0..999 ON and OFF vs `17af89768`: 0 digests / command rows / errors moved (29 forced-turn seeds); ROM seeds 60 87 89
@@ -33,7 +77,9 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Gates:** typecheck 0 (the first "0" was a masked `| tail`; the real run caught lib-types parity, fixed), build 0 (`tsc -b` 0 + `vite build`; the `npm run build` one-liner was OOM-killed twice
   beside two other workers' suites, so `vite build` ran with `--max-old-space-size=4096`, 0), build:lib 0 (same way), `lbra` / `lbrc` / library / goalPlay / nch231 / lbrb / frf250b / audio sink files green,
   play:random 2 min / scene `--lobby-new-challenge` seed 13: 0 page / console errors / overlays, ON 2 and OFF 1 new challenge from the Lobby; soak vanilla 0:20 OFF 20 / 20 OK (all `budget`).
-- **Next:** lbr-d (7-win Lobby return).
+- **Full `npm test`** (still running at the cap, 1,630 files in, 3 failures, all in `tests/randomRoundSoak.test.ts`: ISSUES #89 seed 32, max-depth tracking, ISSUES #99 vanilla swap offer).
+  **Those 3 fail identically on lbr-b's tip `435515cbd`** (checked in a throwaway worktree), so they come from lbr-b's changed soak deals, not lbr-c; the supervisor should re-pin them. `test:gate` 362 / 362 is green.
+- **Next:** lbr-d (7-win Lobby return); re-pin the 3 `randomRoundSoak.test.ts` seed pins.
 
 ---
 

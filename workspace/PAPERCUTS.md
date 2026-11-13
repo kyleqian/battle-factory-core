@@ -12,6 +12,7 @@ history.
 
 - **`oracle/emerald_core.py` in a worktree looks for `vendor/` one level too high**: the recorder needs
   `PYTHONPATH=/srv/pokebench/vendor/libmgba-py` (aud244b ~3 min). Same root as the `romDriveSeed.sh` worktree entry below.
+- **`tests/randomRoundSoak.test.ts` keeps its helpers un-exported**: a seed-range re-scan needs a copied scratch test (rps278 ~5 min).
 - **`npm run extract:audio` in a fresh worktree re-records and rewrites `aud244a-asset-list.json`** unless `--raw` points at the main
   checkout's `.integration/evidence/aud244a/raw` (aud244b ~5 min).
 

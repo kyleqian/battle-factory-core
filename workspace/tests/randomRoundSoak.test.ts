@@ -599,7 +599,13 @@ describe("random round soak driver (green milestone pin)", () => {
     // of seeds 0..39 (80,000 frames, default options, scratch .integration/evidence/lbra/scan.ts). Hits (Baton Pass commit followed by a
     // forced-selector halt on a still-living outgoing slot): 11, 21, 24, 37. Seed 11 is the pin (commit 49491, halt 49531, after
     // two Lobby new challenges); the run plays on through the Lobby to the frame budget.
-    const result = runSeed(11, {
+    //
+    // rps278 (lbr-b: the attendant conversation takes frames and the Lobby vblank RNG keeps running, so each new challenge is dealt
+    // from a later cursor): seed 11 no longer commits Baton Pass at all. Re-scanned full-policy seeds 0..39 (same options: 80,000
+    // frames, default options, same joint event + clean errorMessage + OK + >= 1 Lobby new challenge). Hits: 3, 5, 13, 14, 29, 38.
+    // Seed 3 is the pin (lowest; Baton Pass commits 3, first commit 48916, halt 48956, two Lobby new challenges). Details and the
+    // mutation check: docs/rps278-soak-repin.md.
+    const result = runSeed(3, {
       maxFrames: 80_000,
       renderEvery: 0,
       coverage: observer as never,
@@ -675,12 +681,18 @@ describe("real max-depth tracking (Milestone M-A step 1)", () => {
     const initialState = stateAtDecidedRound(round2Lost, carry1);
 
     // Let the soak driver run forward from that decided round2 loss: within
-    // a couple thousand frames the default policy declines the record menu
+    // a few thousand frames the default policy declines the record menu
     // and the run re-chains into a fresh round 3 (carry reset to 0 on the
     // loss), so by the time diagnostics are captured, the OLD snapshot field
     // has already forgotten the streak-7 depth this run actually reached.
+    //
+    // rps278 (lbr-b): the loss now ends in the Lobby and the attendant conversation has to play out before the next draft, so a
+    // fresh round 3 is no longer entered inside 2,000 frames (diagnostics.carriedWinStreak was still null there). Probed this exact
+    // state: carriedWinStreak is null at <= 2,500 frames and the fresh round 3 (carry 0, presentingBattleStart) exists at 3,000;
+    // it stays 0 through every probed budget up to 20,000. 6,000 sits in the middle of that stable range (2x the first-hit frame),
+    // so a few hundred frames of future conversation drift cannot flip it back to null.
     const result = runSeed(999, {
-      maxFrames: 2_000,
+      maxFrames: 6_000,
       renderEvery: 0,
       policy: "vanilla",
       stateFactory: () => initialState,
@@ -702,14 +714,20 @@ describe("ISSUES #99 (soak driver swap-offer misroute) — swap offer answered b
   // and full/winning accepted ~85% instead of a 50/50 roll.
   it("vanilla policy always declines the swap offer and never enters the swap screen", () => {
     const notes: string[] = [];
-    // Seed 1 wins a battle and reaches the swap-offer menu inside 32,000 frames
+    // Seed 0 wins a battle and reaches the swap-offer menu inside 32,000 frames
     // under this policy's always-GO-ON continuation; capped well short of
     // vanilla's 600,000-frame default full-round budget. (lbra: seed 0 used to
     // get there through the old loss -> new-draft chain; its first challenge
     // is a battle-1 loss, so its second challenge now starts from the Lobby with
-    // a different RNG and does not reach a swap offer in 32,000 frames. Scan of
-    // vanilla seeds 0..11: 1..11 all reach one, every offer "NO".)
-    runSeed(1, {
+    // a different RNG and did not reach a swap offer in 32,000 frames, so the pin
+    // moved to seed 1.
+    // rps278: lbr-b's attendant conversation moved every Lobby deal again; seed 1's
+    // first swap offer is now at frame 37,226, past the window. Scan of vanilla seeds 0..11
+    // (80,000 frames): all 12 reach one and every offer is "NO" with no swap screen;
+    // first-offer frames 0: 16,867, 1: 37,226, 2: 38,334, 3: 36,681, 4: 20,724,
+    // 5: 18,356, 6: 23,881, 7: 39,275, 8: 41,477, 9: 22,423, 10: 19,522, 11: 17,823.
+    // Seed 0 is the lowest that is inside 32,000 with a wide margin, so the window is kept.)
+    runSeed(0, {
       policy: "vanilla",
       maxFrames: 32_000,
       renderEvery: 0,

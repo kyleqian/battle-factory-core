@@ -3,11 +3,13 @@
 // turns button presses into the recorded input trace, fast-forwards a resumed
 // trace, and reports the challenge's events. The dev shell (src/main.ts) uses
 // mountFactoryGameInternal for its test ABI; hosts use mountFactoryGame.
-import { installBundledMonPicPixels } from "./engine/monPicPixelsInstall.ts";
+import { monPicPixelsInstalled } from "./engine/monPicPixels.ts";
 import { render, SCREEN_HEIGHT, SCREEN_WIDTH } from "./engine/core.ts";
 import type { FactoryAudioState, FactoryEvent, FactoryGame, FactoryGameOptions, TraceSegment } from "./factoryContract.ts";
 import type { AudioPlayer, AudioStats } from "./audio/player.ts";
-import type { SoundEvent } from "./audio/soundEvents.ts";
+import { initialMusicEvents } from "./audio/initialMusic.ts";
+import { MusicTracker } from "./audio/musicTracker.ts";
+import { collectSoundTick, type SoundEvent } from "./audio/soundEvents.ts";
 import { ENGINE_BUILD, FactorySession } from "./factorySession.ts";
 import { normalizeButtons, type GbaButton } from "./input.ts";
 import type { SessionContainedError, SessionTrace } from "./sessionRecorder.ts";
@@ -47,6 +49,8 @@ export interface FactoryGameInternal extends FactoryGame {
   /** Bench ABI: back to the challenge's first frame. */
   reset(): void;
   draw(): void;
+  /** bnd257d: resolves once the sprite pixels are installed (already resolved when a provider was installed before the mount); rejects if the sprite chunk fails to load. */
+  readonly pixelsReady: Promise<void>;
   /** Dev / test: the audio player's counters (null until the player chunk has loaded). */
   audioStats(): AudioStats | null;
   sessionTrace(error?: unknown): SessionTrace;
@@ -72,8 +76,13 @@ export function mountFactoryGame(options: FactoryGameOptions): FactoryGame {
 }
 
 export function mountFactoryGameInternal(options: MountInternalOptions): FactoryGameInternal {
-  // A call, not a bare side-effect import: `"sideEffects": false` lets the bundler drop the latter (bnd256c follow-up).
-  installBundledMonPicPixels();
+  // bnd257d: the sprite sheets (~12 MB) are a dynamic chunk. mountFactoryGame still returns synchronously; the first draw, the loop and `ready`
+  // wait for the pixels, and press() is dropped until then. An already installed provider (vitest setup, render tools) keeps it all synchronous.
+  let pixelsInstalled = monPicPixelsInstalled();
+  const pixelsReady: Promise<void> = pixelsInstalled
+    ? Promise.resolve()
+    : // A call, not a bare side-effect import: `"sideEffects": false` lets the bundler drop the latter (bnd256c follow-up).
+      import("./engine/monPicPixelsInstall.ts").then((module) => module.installBundledMonPicPixels());
   const { canvas } = options;
   canvas.width = SCREEN_WIDTH;
   canvas.height = SCREEN_HEIGHT;
@@ -106,28 +115,29 @@ export function mountFactoryGameInternal(options: MountInternalOptions): Factory
   let audio: AudioPlayer | null = null;
   let audioLoading = false;
   let audioFailed = false;
-  const audioBacklog: SoundEvent[] = [];
+  // The tracker keeps the music state of the live frame (live ticks and the resume fast-forward); a player that starts late, or after a
+  // fast-forward, is brought to that state by `restore` instead of waiting for the next music event. It is always attached: write-only.
+  const music = new MusicTracker(initialMusicEvents(options.start));
   const audioSink = {
     push(event: SoundEvent): void {
-      if (audio) audio.push(event);
-      else if (audioBacklog.length < 512) audioBacklog.push(event);
+      music.push(event);
+      audio?.push(event);
     },
   };
+  session.attachSoundSink(audioSink);
   function loadAudio(): void {
     if (audio || audioLoading || audioFailed || destroyed) return;
     audioLoading = true;
-    session.attachSoundSink(audioSink);
     void import("./audio/player.ts").then(
       ({ createAudioPlayer }) => {
         audioLoading = false;
         if (destroyed) return;
         audio = createAudioPlayer({ enabled: audioWanted.enabled, volume: audioWanted.volume, baseUrl: options.audio?.baseUrl });
-        for (const event of audioBacklog.splice(0)) audio.push(event);
+        if (!resuming) audio.restore(music.events(), session.frame);
       },
       (error: unknown) => {
         audioLoading = false;
         audioFailed = true;
-        session.attachSoundSink(null);
         console.warn("pokebench audio: the player failed to load; the game continues muted", error);
       },
     );
@@ -183,7 +193,9 @@ export function mountFactoryGameInternal(options: MountInternalOptions): Factory
     while (resuming.segment < resuming.segments.length) {
       const segment = resuming.segments[resuming.segment]!;
       while (resuming.frame < segment.frames) {
-        session.replayStep(resuming.held);
+        // The fast-forward is silent, but its sound events say what music is playing when it ends.
+        const held = resuming.held;
+        for (const event of collectSoundTick(session.frame + 1, () => session.replayStep(held)).events) music.push(event);
         resuming.frame += 1;
         if (now() >= deadline) return false;
       }
@@ -192,6 +204,7 @@ export function mountFactoryGameInternal(options: MountInternalOptions): Factory
     }
     session.preloadTrace(resuming.segments);
     resuming = null;
+    audio?.restore(music.events(), session.frame);
     return true;
   }
 
@@ -245,8 +258,25 @@ export function mountFactoryGameInternal(options: MountInternalOptions): Factory
       }
     }
   }
-  draw();
-  if (!crashed) raf = requestAnimationFrame(loop);
+  const startLoop = (): void => {
+    draw();
+    if (!crashed) raf = requestAnimationFrame(loop);
+  };
+  if (pixelsInstalled) startLoop();
+  else {
+    pixelsReady.then(
+      () => {
+        pixelsInstalled = true;
+        if (!destroyed) startLoop();
+      },
+      (error: unknown) => {
+        if (destroyed) return;
+        crashed = true;
+        console.error("pokebench: the sprite pixels failed to load; the game did not start", error);
+        options.onError?.({ message: `sprite pixels failed to load: ${error instanceof Error ? error.message : String(error)}`, frame: session.frame });
+      },
+    );
+  }
   if (options.audio) loadAudio();
 
   return {
@@ -259,7 +289,9 @@ export function mountFactoryGameInternal(options: MountInternalOptions): Factory
     get session() {
       return session;
     },
+    pixelsReady,
     press(button) {
+      if (!pixelsInstalled) return;
       held.add(button);
       latched.add(button);
     },
@@ -293,8 +325,9 @@ export function mountFactoryGameInternal(options: MountInternalOptions): Factory
     },
     reset() {
       session = new FactorySession(sessionOptions);
-      if (audio || audioLoading) session.attachSoundSink(audioSink);
-      audio?.reset();
+      session.attachSoundSink(audioSink);
+      music.reset();
+      audio?.restore(music.events(), session.frame);
       held.clear();
       latched.clear();
       resuming = null;

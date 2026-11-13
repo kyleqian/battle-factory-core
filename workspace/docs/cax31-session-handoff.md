@@ -20,7 +20,7 @@ decision. The run that was killed on 2026-10-26 (`cax31-20261026.jsonl`, exs207
 worker on `worker/integration-20261026-213055`) was timing work; its branch is
 kept and is long-tail.
 
-## State at restart (written at the 2026-11-12 wind-down; PROGRESS.md top entry has details)
+## State at restart (written at the 2026-11-13 wind-down; PROGRESS.md top entry has details)
 
 - Phases 1 and 2 met (finish plan). Core library package folded (`062a82a3f`, `docs/library-package.md`). The Mac's
   `worker/lib-v2-mac` is folded up to `90c6684d5`; if the Mac moves that branch again, merge the new tip the same way
@@ -95,6 +95,13 @@ kept and is long-tail.
   and leads seed 60: forced-Struggle turn runs the AI chooser, scratch 36 / 82 -> 73 / 82). aud244a recorder + 6.14 MB OGG cries / SEs
   (`docs/aud244a-recorder-assets.md`). lbr-a (`docs/lbra-lobby-return.md`): loss / forfeit / retire end in the walkable Lobby; soak / play:random walk to the
   attendant. pnm273: `PLAYER_NAME` (`docs/pnm273-player-name.md`; compare harness renders MEMORY).
+- **2026-11-13 run: the Mac lane's 28 battle-rule fixes folded, sound playback, the attendant conversation and the host hand-off event.** `mac/parity-mac`
+  `344eda36c` merged at run start (suite 14,613 / 14,613; ISSUES #211 / #212 / #204 closed); nightly replay 44 / 44 (`docs/replay-ledger.md`). aud244b (BGM / fanfare /
+  looping-SE assets, `docs/aud244b-bgm-fanfare-loops.md`), aud245 + aud245b (WebAudio player, `docs/aud245-audio-player.md`; additive `options.audio` / `setAudio` /
+  `getAudio`; Ogg + AAC fallback), lbr-b (attendant conversation, `docs/lbrb-attendant-conversation.md`), lbr-c (`challenge-request` event + hold, `start: "after-save"`,
+  `docs/lbrc-challenge-request.md`), enc276 (#213: Encore / Struggle skip the move menu, census-neutral, `docs/enc276-forced-turn-no-menu.md`), bnd257d (lazy browser
+  sprite chunk; `ready` waits for it; presses before `ready` dropped; `docs/bnd257d-lazy-sprites.md`), cln277 (suite wall measured: < 15 min not reachable test-side,
+  `docs/cln277-suite-wall.md`). Census baseline for enc276-style deltas: `.integration/evidence/enc276/census/{on,off}-17af89768` (pre-enc276; enc276 moved no digest).
 - Census baseline for the next delta: `.integration/evidence/fix274/census/{on,off}-237ee0e5e` (the fix274 fixed arms; src == master's final engine src at the 2026-11-12 wind-down
   except pnm273's name strings, which the pnm273 0..49 census showed digest-neutral).
 - **4b(d) DONE** (frs247, `docs/frs247-faint-replacement-reshow.md`): the faint-replacement return rises from black, no player bar.
@@ -104,11 +111,13 @@ kept and is long-tail.
 This repo is the **game core library**; the website repo (Mac) owns login, streaks, menus, the on-screen pad and hosting —
 never brief those here. One worker at a time; each run folds the next audio step(s) plus at least one cleanup step.
 
-**Status at the 2026-11-12 wind-down:** item 0: aud244a DONE (cries + SEs); next aud244b (BGM / fanfares with ROM loops, the looping SE_LOW_HEALTH / SE_M_GUST),
-then aud245 player. Item 0b: lbr-a DONE; next lbr-b (attendant conversation), then lbr-c, lbr-d; open from lbr-a: no Scene ON loss / retire ROM lab, the app emits
-no SE_SAVE on the loss / retire result script (ROM 4007 / 7503 in the lbra windows). Item 0c DONE (pnm273). Item 0d: #204 C / #209 / #210 DONE; next in the
-gameplay queue: audit A2 (switch-in scorer power gate; `docs/dia275-triage.md`: seeds 109 / 107 / 79), A4 (pass-2 base damage 0, = ISSUES #204
-remainder; seed 123), seed 60 (dia272 lead), the rest of ISSUES #211 (95 / 114 = AI draw count) and #212 (A3, B1, B2, ...). A1 is mostly covered by aiv271 (status1 / pinch / weather / Flash Fire now come from the real builder); re-check its rows on a seed.
+**Status at the 2026-11-13 wind-down:** item 0: aud244b, aud245, aud245b DONE (playback works, muted by default; Safari not checked on the box); next: aud246
+close (S11 step 10: soaks unchanged, audio RAM receipts, ROADMAP S11 tick), the initial-music gap if aud247 did not land (see PROGRESS), then the residual audio
+lists (ISSUES #198 etc.). Item 0b: lbr-a / lbr-b / lbr-c DONE; next lbr-d (7-win Lobby return in the same mount); open: field NPC wander after the script releases
+(lbr-b doc), the PreBattleRoom briefing before the draft (nch231 divergence), no Scene ON loss / retire ROM lab, no app SE_SAVE on the loss / retire result script.
+Item 0c DONE. Item 0d: the Mac lane owns battle rules; fold `mac/parity-mac` at run start if it moved; nightly replay from the pool; ISSUES #214 holds its
+source-read leads. Cleanup 5's "< 15 min" suite target: measured non-goal on this box (cln277); the 670 s render lever in
+`tools/integration/generatedCommandAnimationReplay.ts` would trade render-crash coverage (not taken).
 
 0. **User decision 2026-11-11 (Kyle, "Yes, start sound"): start sound PLAYBACK now, alongside the ROM-driver gameplay
    fixes.**

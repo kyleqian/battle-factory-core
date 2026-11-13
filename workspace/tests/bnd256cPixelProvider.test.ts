@@ -100,11 +100,11 @@ describe("bnd256c static ratchets", () => {
     expect(seen.has(resolve(root, "src/lib.ts"))).toBe(false);
   });
 
-  it("src/lib.ts statically imports the install module", () => {
+  it("src/lib.ts imports the install module dynamically (bnd257d) and calls the installer", () => {
     const lib = strip(readFileSync(resolve(root, "src/lib.ts"), "utf8"));
-    expect(lib).toMatch(/^import \{ installBundledMonPicPixels \} from "\.\/engine\/monPicPixelsInstall\.ts";$/m);
-    // A call inside the mount: package.json `"sideEffects": false` drops a bare side-effect import from bundles.
-    expect(lib).toMatch(/export function mountFactoryGameInternal\([^)]*\)[^{]*\{\s*(\/\/[^\n]*\n\s*)*installBundledMonPicPixels\(\);/);
+    expect(lib).not.toMatch(/^import .*monPicPixelsInstall\.ts"/m);
+    // A call after the import: package.json `"sideEffects": false` drops a bare side-effect import from bundles.
+    expect(lib).toMatch(/import\("\.\/engine\/monPicPixelsInstall\.ts"\)\.then\(\(module\) => module\.installBundledMonPicPixels\(\)\)/);
   });
 
   // Needs `npm run build:lib` first (dist-lib is git-ignored), so it only runs where a build exists. Manual check: after build:lib,
