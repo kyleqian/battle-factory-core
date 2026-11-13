@@ -4,7 +4,7 @@
   "R002"
  ],
  "why": "Challenge 2. The opponent leads Minun (set 292: Thunderbolt, Attract, Charm, Wish). The player leads Pinsir (set 369), whose only ability is Hyper Cutter, so get_ability reads Hyper Cutter with no guess. Every turn the AI scores Charm (EFFECT_ATTACK_DOWN_2) through AI_CBM_AttackDown (battle_ai_scripts.s:277-281): the target's Attack is not at -6 and its ability is Hyper Cutter, so -10, the runCbmAttackDown Hyper Cutter branch. It runs in the first AI turn already. Pinsir uses Swords Dance / Endure, so it stays in for a few turns; Gligar 315 (Hyper Cutter or Sand Veil) is the second chance.",
- "seed": 0,
+ "seed": 90000,
  "challengeNum": 2,
  "battleNum": 0,
  "trainerId": 100,
@@ -45,10 +45,5 @@
  ],
  "coverAny": true,
  "chance": 0.95,
- "seeds": 10,
- "onHold": {
-  "group": "g1",
-  "seedsHunted": 0,
-  "result": "untested"
- }
+ "seeds": 10
 }

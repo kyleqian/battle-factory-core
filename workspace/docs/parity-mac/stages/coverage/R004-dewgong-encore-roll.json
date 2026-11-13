@@ -4,7 +4,7 @@
   "R004"
  ],
  "why": "Challenge 7. The opponent leads Dewgong (set 488: Blizzard, Double-Edge, Encore, Disable; speed 90). The player leads Registeel (set 764: Metal Claw, Curse, Amnesia, Rest; speed 70, so not faster than Dewgong); Steel resists both Blizzard and Double-Edge. Registeel uses Amnesia every turn (it fails at +6 but is still its last move) with a Rest now and then; both effects are in AI_CV_Encore_EncouragedMovesToEncore. So every AI turn from turn 2 on, while no move of Registeel is disabled, AI_CV_Encore reaches the <30 roll of AI_CV_Encore2 (about 12 percent per turn): the jump to End is the runCvEncore branch. Dewgong's Disable turns take the other route; Encore on Registeel does not stop the scoring. The player never attacks, so Dewgong stays in for some 25 turns.",
- "seed": 0,
+ "seed": 90000,
  "challengeNum": 7,
  "battleNum": 0,
  "trainerId": 200,
@@ -105,10 +105,5 @@
  ],
  "coverAny": true,
  "chance": 0.6,
- "seeds": 40,
- "onHold": {
-  "group": "g1",
-  "seedsHunted": 0,
-  "result": "untested"
- }
+ "seeds": 40
 }
