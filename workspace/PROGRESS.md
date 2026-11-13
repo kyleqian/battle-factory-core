@@ -5,6 +5,21 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 2026-11-13 — aud244b (side lane worker, 82 min): BGM / fanfare / looping-SE assets with ROM loop points (S11 design step 8, done)
+
+- **State:** folded `197011863` (branch `worker/side-20261113-010956`, removed; evidence `.integration/evidence/aud244b/`). No `src/*.ts` change: ENGINE_BUILD unchanged.
+  `docs/aud244b-bgm-fanfare-loops.md`. Audio assets 6.14 -> 7.45 MB (songs 1.28 MB; 32768 Hz stereo, an integer sample count per 48 ROM frames).
+- **Did:** recorder kinds `bgm` / `fanfare` / `seloop` (`tools/audio/{soundRecorder,songTicks,loopCut}.py`), manifest schema `/2` with `loopStartSamples` /
+  `loopEndSamples` (ticks from the ROM `GOTO` targets = `songLoops`). BGM 354 / 412 / 469 / 476 loop, fanfares 368 / 459 / 466 one-shot; SE_LOW_HEALTH / SE_M_GUST loop.
+  Seams: SE_M_GUST and bgm:354 sample-exact at the wrap; 412 / 469 / 476 / SE_LOW_HEALTH are not periodic in the ROM's own output (pass-vs-pass rms diff
+  is the same size as the seam: PSG / noise phase, mGBA per-frame sample jitter), so **aud245 crossfades 5-10 ms at those four wraps**. MUS_VS_FRONTIER_BRAIN (471)
+  is in no ROM log yet: not recorded.
+- **Gates:** worker typecheck 0, test:gate 362 / 362, full suite 1,773 passed / 44 skipped (14,618 tests), build / build:lib 0, validator 0.
+  Supervisor: `aud244a` / `aud244b` / `bnd253SrcJsonShipped` tests 17 / 17, validator 0 (worktree, `--raw` main checkout).
+- **Next:** aud245 (WebAudio player, design section 6).
+
+---
+
 ## 2026-11-13 — CAX31 daily run (supervisor, Opus 5.5): run start, `mac/parity-mac` 344eda36c folded
 
 - **State:** master `5a2fe1d83` = merge of `mac/parity-mac` `344eda36c` (52 commits, 28 battle-rule fixes + Brain replay seam; docs `docs/parity-mac/`).

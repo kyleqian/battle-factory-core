@@ -8,6 +8,13 @@ report `PAPERCUT: <what>, ~<minutes lost>` in their final message.
 Delete an entry when its underlying friction is fixed; git preserves its
 history.
 
+## Worker friction, 2026-11-13 run
+
+- **`oracle/emerald_core.py` in a worktree looks for `vendor/` one level too high**: the recorder needs
+  `PYTHONPATH=/srv/pokebench/vendor/libmgba-py` (aud244b ~3 min). Same root as the `romDriveSeed.sh` worktree entry below.
+- **`npm run extract:audio` in a fresh worktree re-records and rewrites `aud244a-asset-list.json`** unless `--raw` points at the main
+  checkout's `.integration/evidence/aud244a/raw` (aud244b ~5 min).
+
 ## Worker friction, 2026-11-12 run
 
 - **mGBA python `StereoBuffer.read()` returns a slice that does not keep its buffer alive**: alternate frames read garbage, which looks
