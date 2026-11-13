@@ -3,9 +3,11 @@
  * (`battle_script_commands.c:8508-8534`).
  */
 import {
+  markBattleScriptControllerPending,
   transitionBattleScriptCommand,
   type BattleScriptOpcodeHandler,
   type BattleScriptOpcodeHandlers,
+  type BattleScriptSchedulerState,
 } from "./battleScriptMachine.ts";
 import {
   resolveBattleScriptLabel,
@@ -14,11 +16,13 @@ import {
 } from "./battleScriptProgram.ts";
 import {
   BATTLE_SCRIPT_ABILITY_SOUNDPROOF,
+  BATTLE_SCRIPT_STATUS2_TRANSFORMED,
   BATTLE_SCRIPT_STATUS3_PERISH_SONG,
 } from "./battleScriptSourceConstants.ts";
-import type {
-  BattleScriptRulesBattlerState,
-  BattleScriptRulesContext,
+import {
+  withBattleScriptPartyMemberPp,
+  type BattleScriptRulesBattlerState,
+  type BattleScriptRulesContext,
 } from "./battleScriptRulesContext.ts";
 import type { BattleScriptBattlerId } from "./battleScriptEvents.ts";
 import { requireBattlerRole, withBattler } from "./battleScriptHitChainOpcode.ts";
@@ -65,20 +69,24 @@ function handler(program: BattleScriptProgram): BattleScriptOpcodeHandler<Battle
       }
     }
 
-    // PressurePPLoseOnUsingPerishSong: unlike ordinary ppreduce, this scans
-    // every other battler because Perish Song's move target is USER.
+    // PressurePPLoseOnUsingPerishSong (battle_util.c:799-828): unlike ordinary ppreduce, this scans
+    // every other battler because Perish Song's move target is USER. One PP per Pressure holder while
+    // nonzero, then ONE persistent controller write after the loop (`:822-827`,
+    // BtlController_EmitSetMonData(REQUEST_PPMOVE1_BATTLE + perishSongPos)): the party Pokemon's PP
+    // follows the battler's. Without the party write the extra PP came back when the user left the field
+    // and returned (ROM seed 5908, docs/parity-mac/party-pp-writes.md).
     const attacker = requireBattlerRole(rules, "attacker");
     const attackerState = rules.battlers[attacker];
     const perishSongPos = attackerState.moves.findIndex((move) => move === MOVE_PERISH_SONG);
+    let scheduler: BattleScriptSchedulerState = context.state.scheduler;
+    let events: ReadonlyArray<Readonly<{ kind: "set-battler-pp-data"; battler: BattleScriptBattlerId; movePosition: number; pp: number }>> = Object.freeze([]);
     if (perishSongPos !== -1) {
       let pp = attackerState.pp[perishSongPos]!;
+      let pressureHolders = 0;
       for (let i = 0; i < count; i += 1) {
-        if (
-          i !== attacker
-          && rules.battlers[i as BattleScriptBattlerId].ability === ABILITY_PRESSURE
-          && pp !== 0
-        ) {
-          pp -= 1;
+        if (i !== attacker && rules.battlers[i as BattleScriptBattlerId].ability === ABILITY_PRESSURE) {
+          pressureHolders += 1;
+          if (pp !== 0) pp -= 1;
         }
       }
       if (pp !== attackerState.pp[perishSongPos]) {
@@ -86,6 +94,18 @@ function handler(program: BattleScriptProgram): BattleScriptOpcodeHandler<Battle
           (value, index) => index === perishSongPos ? pp : value,
         ) as unknown as BattleScriptRulesBattlerState["pp"];
         rules = withBattler(rules, attacker, { pp: nextPp });
+      }
+      const permanent = (attackerState.status2 & BATTLE_SCRIPT_STATUS2_TRANSFORMED) === 0
+        && (attackerState.mimickedMoves & (1 << perishSongPos)) === 0;
+      if (pressureHolders !== 0 && permanent) {
+        rules = Object.freeze({
+          ...rules,
+          party: withBattleScriptPartyMemberPp(rules.party, attackerState.side, attackerState.partyIndex, perishSongPos, pp),
+        });
+        scheduler = markBattleScriptControllerPending(Object.freeze({ ...scheduler, activeBattler: attacker }), attacker);
+        events = Object.freeze([
+          Object.freeze({ kind: "set-battler-pp-data" as const, battler: attacker, movePosition: perishSongPos, pp }),
+        ]);
       }
     }
 
@@ -97,13 +117,13 @@ function handler(program: BattleScriptProgram): BattleScriptOpcodeHandler<Battle
       return transitionBattleScriptCommand(
         context,
         Object.freeze({ kind: "jump", programCounter: failure.programCounter }),
-        { rulesContext: rules },
+        { rulesContext: rules, scheduler, events },
       );
     }
     return transitionBattleScriptCommand(
       context,
       Object.freeze({ kind: "advance" }),
-      { rulesContext: rules },
+      { rulesContext: rules, scheduler, events },
     );
   };
 }

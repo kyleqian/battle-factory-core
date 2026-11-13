@@ -453,6 +453,12 @@ export const attackCancelerOpcodeHandler: BattleScriptOpcodeHandler<BattleScript
           battlers: Object.freeze(battlers),
         });
         if ((owner.status2 & BATTLE_SCRIPT_STATUS2_TRANSFORMED) === 0) {
+          // PressurePPLose's BtlController_EmitSetMonData(REQUEST_PPMOVE1_BATTLE + moveIndex) (battle_util.c:759-763): the
+          // party Pokemon's PP follows the battler's (docs/parity-mac/party-pp-writes.md).
+          rulesContext = Object.freeze({
+            ...rulesContext,
+            party: withBattleScriptPartyMemberPp(rulesContext.party, owner.side, owner.partyIndex, movePosition, nextPp),
+          });
           events.push(Object.freeze({
             kind: "set-battler-pp-data",
             battler: coatOwner,

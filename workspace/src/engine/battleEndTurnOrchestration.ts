@@ -52,6 +52,7 @@ import {
   resolveBattleScriptBattlerHoldEffectParam,
   resolveBattleScriptMoveBasePp,
   wasBattleScriptBattlerUnableToUseMove,
+  withBattleScriptPartyMemberPp,
   withBattleScriptPartyMemberStatus1,
   type BattleScriptRulesBattlerState,
   type BattleScriptRulesContext,
@@ -1436,16 +1437,21 @@ function runItemsTick(
     // pp[slot] is 0 here (restorePpSlot's own gate) this is min(param, maxPP). Factory rentals are always built via
     // CreateMon/CreateMonWithEVSpreadNatureOTID (battle_factory.c:435,476,812), which zero ppBonuses -- ZeroMonData's
     // own struct-clear -- so maxPP is exactly the base gBattleMoves[move].pp, never a PP-Up-inflated value, for every
-    // real Leppa carrier (LAPRAS, NIDOKING, doc §2b). No party-level PP mirror exists in this engine at all (unlike
-    // the status1 cure rows' withBattleScriptPartyMemberStatus1) -- only the active battler's own `pp` tuple (Cmd_
-    // ppreduce's own single source of truth) is patched, collapsing source's controller round trip into one atomic
-    // tick, the same simplification already established for every other landed end-turn case (doc §6).
+    // real Leppa carrier (LAPRAS, NIDOKING, doc §2b). Source writes the restored PP to the PARTY Pokemon with
+    // BtlController_EmitSetMonData(i + REQUEST_PPMOVE1_BATTLE, &changedPP) (battle_util.c:3377) and to the battler in the
+    // ITEM_PP_CHANGE tail (`gBattleMons[battler].pp[i] = changedPP`, `:3615-3617`). Both are written here in one atomic tick.
+    // The party write was missing: the restored PP was lost when the Pokemon left the field and came back
+    // (docs/parity-mac/party-pp-writes.md).
     const move = b.moves[slot]!;
     const param = resolveBattleScriptBattlerHoldEffectParam(scannedRules, battler);
     const maxPp = resolveBattleScriptMoveBasePp(move);
     const restoredPp = Math.min(param, maxPp);
     const pp = b.pp.map((value, index) => (index === slot ? restoredPp : value)) as unknown as BattleScriptRulesBattlerState["pp"];
-    const withPp = withBattler(scannedRules, battler, { pp });
+    const withBattlerPp = withBattler(scannedRules, battler, { pp });
+    const withPp = Object.freeze({
+      ...withBattlerPp,
+      party: withBattleScriptPartyMemberPp(withBattlerPp.party, b.side, b.partyIndex, slot, restoredPp),
+    });
     // ISSUES #72 batch 7 (STRINGID_PKMNSITEMRESTOREDPP): scriptingBattler is
     // the berry holder ({B_SCR_ACTIVE_NAME_WITH_PREFIX}/{B_LAST_ITEM}, same
     // shape the STAT_UP_BERRIES branch above already sets); battleTextBuff1Move

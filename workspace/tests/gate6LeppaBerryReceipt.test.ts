@@ -146,6 +146,9 @@ describe("Gate-6 LEPPA BERRY end-turn PP restore Battle Scene OFF receipt", () =
     const { result, initial } = runEndTurn(emptiedSlotContext());
     const holder = result.state.rulesContext.battlers[0]!;
     expect(holder.pp).toEqual(receipt.restore.ppAfter);
+    // docs/parity-mac/party-pp-writes.md: BtlController_EmitSetMonData(i + REQUEST_PPMOVE1_BATTLE, &changedPP) (battle_util.c:3377)
+    // writes the PARTY Pokemon. Unfixed: the party record kept 0 and the restored PP was lost on a switch (ROM seed 7879).
+    expect(result.state.rulesContext.party.player[holder.partyIndex]!.pp[0]).toBe(receipt.restore.ppAfter[0]);
     expect(holder.item).toBe(0);
     expect(holder.hp).toBe(receipt.playerHpAcrossTrace.final);
     expect(result.state.rulesContext.scriptingBattler).toBe(0);

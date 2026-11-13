@@ -198,6 +198,28 @@ describe("B_SCR_OP_TRYSETPERISHSONG", () => {
       .toEqual([2, 2]);
   });
 
+  // docs/parity-mac/party-pp-writes.md. PressurePPLoseOnUsingPerishSong (battle_util.c:799-828) ends with one
+  // BtlController_EmitSetMonData(REQUEST_PPMOVE1_BATTLE + perishSongPos) (:822-827): the party Pokemon's PP follows the battler's.
+  // ROM seed 5908 (census player): Murkrow's encored Perish Song into Absol (Pressure); ROM party PP 0, the engine's stayed 1.
+  it("writes the Pressure PP loss to the party record with one controller update", () => {
+    const { result } = stepOpcode(context({}, { ability: ABILITY_PRESSURE }));
+    if (result.kind !== "advanced") throw new Error("expected advance");
+    const rules = result.state.rulesContext;
+    expect(rules.battlers[0].pp[0]).toBe(4);
+    // Unfixed: the party record kept its old value and no event was sent.
+    expect(rules.party.player[rules.battlers[0].partyIndex]!.pp[0]).toBe(4);
+    expect(result.state.events.map((event) => [event.kind, (event as { battler?: number }).battler, (event as { pp?: number }).pp]))
+      .toEqual([["set-battler-pp-data", 0, 4]]);
+    expect(result.state.scheduler.pendingControllerBattlers).toEqual([0]);
+
+    // No Pressure holder: no extra PP, no party write, no event.
+    const plain = stepOpcode(context());
+    if (plain.result.kind !== "advanced") throw new Error("expected advance");
+    expect(plain.result.state.rulesContext.battlers[0].pp[0]).toBe(5);
+    expect(plain.result.state.rulesContext.party).toBe(plain.initial.rulesContext.party);
+    expect(plain.result.state.events).toEqual(plain.initial.events);
+  });
+
   it("matches the ordinary OFF receipt: PP 5->4 and both battlers start at timer 3", () => {
     const result = runToTerminal(context());
     expect(result.kind).toBe("halted");
