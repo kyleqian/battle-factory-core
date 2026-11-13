@@ -117,7 +117,11 @@ lists (ISSUES #198 etc.). Item 0b: lbr-a / lbr-b / lbr-c DONE; next lbr-d (7-win
 lbr-d2a ROM ticks (`docs/lbrd2a-won-tail-rom.md`) for the won farewell constants; open: field NPC wander after the script releases
 (lbr-b doc), the PreBattleRoom briefing before the draft (nch231 divergence), no Scene ON loss / retire ROM lab, no app SE_SAVE on the loss / retire result script.
 Item 0c DONE. Item 0d: the Mac lane owns battle rules; fold `mac/parity-mac` at run start if it moved; nightly replay from the pool; ISSUES #214 holds its
-source-read leads. Cleanup 5's "< 15 min" suite target: measured non-goal on this box (cln277); the 670 s render lever in
+source-read leads. **Top layer, 2026-11-13 after your run:** the Mac lane also owns the replay tools and every replay upgrade now, and the finish line has no
+battle count (item 0d, "Top layer, 2026-11-13"); the lab staging failures are fixed (`oracle/battle_lab.py`, same item). Its next fold brings battle-rule fixes
+29 and later (found by the new players and the wide compare; `docs/parity-mac/STATUS.md`, fourth pass); it has already merged your master up to `e83b18c0e`.
+**Website:** the live site runs `eb-adfdcfdc91f4247f` (your `5a2fe1d83`, the 28 fixes; deployed 2026-11-13 04:03 UTC on Kyle's word). Your later builds
+(`eb-8faf63dbde5168d5`: audio, `challenge-request`, `start: "after-save"`, lazy sprites) are not on the site; the site repo adopts them when Kyle asks. Cleanup 5's "< 15 min" suite target: measured non-goal on this box (cln277); the 670 s render lever in
 `tools/integration/generatedCommandAnimationReplay.ts` would trade render-crash coverage (not taken).
 
 0. **User decision 2026-11-11 (Kyle, "Yes, start sound"): start sound PLAYBACK now, alongside the ROM-driver gameplay
@@ -262,9 +266,14 @@ source-read leads. Cleanup 5's "< 15 min" suite target: measured non-goal on thi
           --frame-budget=2000000` and drive `--frames 600000`). Top layer's additions above seed 7056: 7503 7651 7878 7985
           8773 9045 9336 9425 9553 9562 9563 match to the end; 7267 matches to the end with drive `--frames 1500000`
           (1,017,274 ROM frames, 1,446 states); 7130 7816 7834 7944 9579 are endless (813 to 946 states match, no mismatch);
-       2. lab failures (top-layer code, the top layer owns them): rc 13 "the lab staging already played a turn" on 3623
-          5633 5736 8075 9188, silver Brain 10127 and gold Brain 10022; "route did not reach the player action menu" on
-          6048 and gold Brain 1447; 9073 (no traceback).
+       2. lab failures: **FIXED by the top layer 2026-11-13 (`oracle: battle lab never taps A once the first action menu is
+          issued`, `oracle/battle_lab.py` + 4 tests in `oracle/test_battle_lab.py`).** One cause for all: a check frame
+          could land where the player's choose-action command was issued but the exec flags still carried the opponent's
+          bit, so the next blind A tap picked FIGHT and the one after it move 1 (in 6048 / gold 1447 the player's Pokemon
+          then fainted and the taps sat in the party menu). Now 3623 5633 5736 8075 9188 6048, silver Brain 10127, gold
+          Brain 1447 and 10022 all match to battle end; 98 seeds that already worked (300..399) stage byte-identical
+          `setup.json`. 9073 was a one-time failure of the bulk run (matches when driven again). So for seeds 1..10000 on
+          the fold engine: no lab failure is left; gold 1447 is a normal gold Brain seed again.
      - **Regression pool** = `docs/replay-batches/regression-pool.txt`: 962 ordinary seeds that diverged on an older engine
        and match to battle end with the stock chain now (the 64 above, 113 of the old open list, 785 of the bulk batch).
        Brain seeds, 1..10000: silver = seed % 49 == 33 (not 9098, a long battle); gold = seed % 49 == 26 driven with
@@ -314,8 +323,27 @@ source-read leads. Cleanup 5's "< 15 min" suite target: measured non-goal on thi
         part; check burn / pinch `maxHp` / Guts / weather / Flash Fire against it), A5-A7, B1 (Toxic counter), B3-B8.
      - Every audit row is source-read only. Confirm it on the ROM with the fix (a seed, or a Mechanic Lab `overrides.parties`
        scenario). File ISSUES entries from the audit doc at your next ISSUES edit; the top layer did not touch `ISSUES.md`.
-   - **Replay upgrades (tools only; at most one per run, when the run has room after its audio and gameplay-fix steps; in
-     this order):**
+   - **Top layer, 2026-11-13 (Kyle's decisions of that night). The Mac lane owns every replay upgrade below and the replay
+     tools. This replaces "at most one per run" and the old finish line.**
+     - **Do not edit on the box:** `tools/audio/romDrive*`, `tools/audio/romReplay*`, `tools/audio/soundEventProbe.py`,
+       `tools/integration/soundCensusRomReplay.ts`, `tools/integration/romReplayPlayers.ts`, top-level `tools/replay-batch/`
+       and `oracle/battle_lab.py`. The Mac lane is changing them (fourth pass, `docs/parity-mac/STATUS.md`); a box edit
+       collides at the next fold. If a box change breaks one of them, say so in PROGRESS and leave the fix to the Mac.
+     - **Your replay work stays as it is:** the nightly check from the pool (40 seeds + 4 Brain, old player, stock chain)
+       and the fold of `mac/parity-mac` at run start. Nothing else.
+     - **What the Mac lane built (arrives with the next fold):** three test players (`census` = the old one, `ai-v1` =
+       the game's own trainer AI on the player's side, `random-v1` = random legal actions with voluntary switches; Kyle:
+       AI against AI is the main share, random is a subset only), a wide compare at every decision (status, volatiles,
+       stat stages, PP, item, ability, types, bench, side statuses and timers, weather, the winner), a tally of what
+       really took effect per move effect / ability / hold effect / situation, and staged battles
+       (`docs/parity-mac/stages/`). So upgrades 2, 4, 5 and the Brain part of 3 are done there; 1 and the rest of 3 are
+       its to schedule.
+     - **Finish line for "battle logic is done" (Kyle: a battle count "doesn't itself mean any quality"):** the tally is
+       full (every row is covered by a battle that matches the ROM, by a staged battle, or by a source proof that it cannot
+       occur in the Factory), no difference is open, the old lists still match, the gates are green. No number of battles
+       is part of it. Do not report a battle count as a measure of quality.
+   - **Replay upgrades (tools only; the Mac lane's from 2026-11-13, see the bullet above; kept here as the record of what
+     each one is):**
      1. **One pass and a batch runner.** Read the state timeline during the drive (`romStateTimeline.py` re-runs the ROM
         today), fewer process starts per seed, and a `--jobs N --minutes M` runner that writes the ledger rows. Mac: 18 s per
         seed alone (audit doc section 5). Report the CAX31 per-seed time before and after.
@@ -327,8 +355,9 @@ source-read leads. Cleanup 5's "< 15 min" suite target: measured non-goal on thi
      5. **Tally and steering.** Count, per move effect / ability / hold effect, how often it took effect in a fully matched
         battle (not "named in source", not "printed a message"). Steer new battles toward the zero rows with Mechanic Lab
         `overrides.parties` teams.
-   - **Finish line for "battle logic is done":** 3,000 consecutive clean new seeds with the random player across Level 50,
-     Open Level and the Brain, and no zero row in the tally without a source proof that it cannot occur in the Factory.
+   - **Finish line for "battle logic is done":** superseded 2026-11-13 by the top-layer bullet above (the full tally, no
+     battle count). The old text was: 3,000 consecutive clean new seeds with the random player across Level 50, Open Level
+     and the Brain, and no zero row in the tally without a source proof that it cannot occur in the Factory.
 
 1. **Audio (S11)** — the main program for several runs: `docs/s11-audio-design.md` section 7. Next: **aud241** battle
    controller family (effectiveness, SE_FAINT, faint / send-out cries with mode + pan, ball / tray / low-HP, battle BGM start /
