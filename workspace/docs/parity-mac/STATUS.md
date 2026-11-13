@@ -5,6 +5,103 @@ Branch `worker/parity-mac`. Method: every seed is played by the engine and repla
 "matches" when every engine state is found in order on the ROM to battle end. Lists and decision: `docs/cax31-session-handoff.md`
 item 0d, `docs/gameplay-parity-audit-2026-11-12.md` sections 7 and 8. Evidence is kept outside git; every row re-derives from the seed.
 
+## Stopped 2026-11-13 (Kyle winds down the Mac)
+
+Sixth pass, stopped at about 20:00 UTC on the top layer's word: the battle-rule work moves to the box.
+
+### Fixes 42 and 43 (what was wrong for the game, the ROM result)
+
+| # | What was wrong for the game | ROM result | Doc |
+|---|---|---|---|
+| 42 | The player's Curse, used by a Pokemon that is not a Ghost type, is aimed at its own user. When the opponent used Follow Me earlier in the turn, the game aims it at the Follow Me user instead, so Pressure on that Pokemon makes the Curse cost two PP. The engine kept the Curse on its user and took one PP. Reachable only with a Follow Me user that has Pressure (a Metronome-called Role Play or Skill Swap). | Mechanic Lab, lab seed 801: Curse PP 10, 8, 6 against Dusclops (Pressure) using Follow Me; control (Splash) 10, 9, 8. The engine test with the same numbers fails without the fix (9) and passes with it (8). | `follow-me-redirect.md` |
+| 43 | When Pursuit hits a switching Pokemon and that Pokemon's Static, Poison Point or Flame Body gives the Pursuit user a status that its Synchronize passes back, the game ends the after-move steps there and goes on with the switch. The engine ran the remaining steps; one of them swapped attacker and target back and the switch then ran for the wrong side: the engine stopped with an error. Reachable only when the Pursuit user got Synchronize (Skill Swap from Alakazam 596 onto Fearow 473 or Altaria 508). | Mechanic Lab, lab seeds 801 and 802: Umbreon's Pursuit on the switching Electabuzz, Static paralyses Umbreon, Synchronize paralyses Electabuzz back, the switch goes on, last moves stay 0; seed 803 (Static never fires) is the control. The engine test stops with the error without the fix (about one seed in three of 40 did) and gives the ROM's result with it. | `pursuit-synchronize-moveend.md` |
+
+Both came from the two leads of the fifth pass. The lead "getmovetarget ignores Follow Me" itself cannot happen in a
+singles battle (the reason is in `follow-me-redirect.md` and `rule-coverage.md`). The lab requests and decisions are in
+`stages/mechanic-lab/` with how to drive them.
+
+### What is on hold by Kyle's word
+
+- **The (c) list of the finer tally** (`rule-coverage-list.md`; numbered in `rule-coverage-c-rules.json`, R001..R110,
+  uncommon first). 110 reachable rules no matching battle had run. **12 are now covered**: a staged battle that ran the
+  rule's piece of code and matched the ROM to the end (`stages/coverage/`, with the lab seeds: R011, R013-R018, R020,
+  R022-R025). **98 are not covered.** For 31 more of them a stage file was designed (in scratch, not committed): two were hunted
+  without a hit (R012 over 64 seeds, R019 over 20), the others were stopped before or during their hunt. One design reading says R029 (the battle ending on the Leech
+  Seed damage) cannot happen, because the Leech Seed scripts never run `checkteamslost`; that reading is not checked.
+  No engine difference was found by the twelve; two engine errors during the hunt were the staging's own mistake (a
+  replacement into a fainted slot), not the engine's.
+- **Discovery batches.** Batch 1 (1,000) added no tally row and no difference, but ran 45 pieces of code the final run
+  had not; batch 2 was stopped at 793 of 1,000 battles driven (no difference; the battles that reached a frame cap had no difference up to it). Its record
+  is not in `docs/replay-batches/` (the fifth-pass JSON has the first 221).
+- **The swap round flow and Open Level**: the plan below, nothing built.
+
+#### The round flow between battles (the swap) and Open Level: what can be reached, what a tool would need (plan only)
+
+**What the replay and the lab reach today.**
+
+- Every generated battle is the first battle of a fresh rental: the lab's `factoryLegal` mode restores its rental
+  checkpoint, re-enters the select screen (`DoBattleFactorySelectScreen`), takes the three requested sets and starts one
+  battle (`oracle/BATTLE_LAB.md`, "Modes"). The battle number is a request field, but the team is always freshly
+  rented: no HP, PP, status or held item carried in, no swapped Pokemon.
+- `rentalSwapCount` only changes which rentals the select screen may offer (the rental rank). It does not play a swap.
+- `factoryBrain` with `walkup: true` drives the room before Noland (the heal line, his call, the GO ON / RECORD /
+  REST / RETIRE menu, the swap prompt), and nothing after the battle.
+- The lab is Level 50 only (challenge numbers 0..7; "Version-1 boundaries").
+- The replay (`tools/integration/soundCensusRomReplay.ts`) builds one battle on the engine side from the ROM's read-back
+  and enters the engine below the app shell (`core.ts` is not loaded). The engine has the round flow
+  (`factoryRoundBattleOrchestrator.ts`, `factorySwap.ts`, `factoryRoundChaining.ts`, `roundController.ts`), but no
+  replay has run it.
+
+**The round flow: what a tool would need.**
+
+1. A ROM drive that goes on after the last turn of a battle: the win text, the heal, the swap screen (keep or swap; which
+   own Pokemon; which of the beaten trainer's three), the walk to the next battle and its intro, up to the next action
+   menu. The ROM decision driver (`tools/audio/romDecisionDriver.py`) would need these screens as decision points, the
+   way it has the action and party menus now. Alternative: a lab checkpoint at the swap screen of battle N (a new lab
+   mode), which would make each later battle a short drive.
+2. A replay request for a round: the seed, the first team, and the swap decisions (from the test players: never swap,
+   always swap the weakest, random). The engine side would run `factoryRoundBattleOrchestrator.ts` from the rental
+   screen through all seven battles, with the same decisions.
+3. A compare at the start of every battle: the player's three party records (species, moves, PP, HP, IVs, EVs,
+   personality, item), the trainer id and the opponent's three, and the battle number; then the turn compare as now.
+   What the game carries between battles and must match: full heal of HP, PP and status (`special HealPlayerParty`,
+   `data/maps/BattleFrontier_BattleFactoryBattleRoom/scripts.inc:82` and `:172`), the held items restored, the swapped Pokemon built from the opponent's record, the
+   next trainer from the trainer schedule (the seventh battle from the "hard" table, `battle_tower.c:1104-1129`), the
+   opponents' sets and their IVs (the seventh battle's higher IVs, `GetFactoryMonFixedIV`).
+4. Tally rows for the round: swaps (none / one), each battle number 1..7, the seventh battle's trainer table.
+5. Cost: a round is seven battles, about seven times the frames of one battle plus the screens; a long-cap drive.
+
+**Open Level: what a tool would need.**
+
+1. The lab: an Open Level `factoryLegal` staging. Today the request's `level` is fixed at 50 and the set ranges are
+   the Level 50 table; Open Level uses the second half of `sInitialRentalMonRanges` (`battle_factory.c:169-190`: sets
+   372..881) and the Open Level level (`GetFrontierEnemyMonLevel`, `battle_tower.c:3233-3260`; the Factory builds its
+   Pokemon at `FRONTIER_MAX_LEVEL_OPEN` = `MAX_LEVEL`, `battle_factory.c:417-425`).
+2. The replay request and the engine's battle construction with the level mode (the damage formula's level term, the
+   stats at that level, the Open Level set ranges in `factoryRentalGeneration.ts`). The engine side was not checked
+   in this lane for Open Level.
+3. A tally pool for the Open Level sets (372..881; sets above `FRONTIER_MONS_HIGH_TIER` = 849 appear only above level 50,
+   `include/constants/battle_frontier_mons.h:862`).
+4. The battle rules are the same code; what is new is the sets, the levels and the larger numbers.
+
+
+### How the box re-drives these battles and runs the coverage tool
+
+- Staged battles: `REPLAY_OUT=/abs/dir tools/audio/romReplayWide.sh --stage docs/parity-mac/stages/NAME.json` (also
+  for `stages/coverage/*.json`). The probe finds `vendor/mgba-venv` itself, or takes `POKEBENCH_MGBA_PYTHON`. Nothing
+  in the repo tools is Mac-only.
+- Mechanic Lab runs: `stages/mechanic-lab/README.md` (repo tools only).
+- The coverage tool: `python3 tools/audio/romReplayCoverage.py collect OUT.cov DIR ... [--stages docs/parity-mac/stages]
+  [--skip-policy ai-v1]` reads the `ID.summary.json` and `ID.setup.json` that `romReplayWide.sh` keeps for every
+  matching battle; it needs Node (with `--experimental-strip-types`) and Python 3, nothing else. The evidence
+  directories of this lane are on the Mac (outside git), so on the box the lists must be driven again first. The coverage
+  file must be collected on one engine: `merge` and `report` refuse files whose source differs.
+- Not in the repo (scratch scripts on the Mac): the hunter that drives a stage file with many lab seeds and screens
+  each seed on the engine for the piece of code before driving it on the ROM, and the batch / snapshot runners. What
+  the hunter does: per lab seed, `soundCensusRomReplay.ts request --stage`, the lab setup
+  (`soundEventProbe.py ... --setup-out`), the engine replay with `NODE_V8_COVERAGE` set, `count_at` for the stage's
+  `cover` markers, and only then the full `romReplayWide.sh --stage` drive.
+
 ## Fifth pass (2026-11-13, evening): the zero rows, the finer tally, discovery batches
 
 Task (work order of 14:10 UTC): fill the zero rows of the tally; a finer tally that names the rule code no ROM-matched
@@ -459,6 +556,8 @@ late may also need the earlier ones).
 | 39 | When a Pokémon that was switched in fainted from Spikes and was replaced, the engine still ran the other side's chosen move against the replacement. The game ends the turn there. Both sides. | new (Metronome sweep; needs no Metronome) | `faint-on-switch-in-cancels-turn.md` | staged battle `spikes-faint-cancels-turn` |
 | 40 | When a Pokémon faints at the end of a turn and its replacement faints from Spikes as it comes in, the game forgets the last move of the first Pokémon still present (the player's). The engine forgot the fainted side's. Encore, Disable and Torment read it on the next turn. | new (Metronome sweep; needs no Metronome) | `end-turn-attacker.md` | staged battle `spikes-faint-at-turn-end` |
 | 41 | The trainer AI's score for its own Foresight when the Foresight user is a Ghost type: the game rolls a second random number when the first is 80 or more, and gives +2 only when both are. The engine rolled once. So the AI liked Foresight too often there and took one random number too few: the rest of the battle went on differently from the game. A player meets it only against silver Noland's Machoke or Hitmonlee after moving Color Change to it (Skill Swap) and hitting it with a Ghost move. | new (fifth pass: rule code no matching battle had run, read against the script) | `ai-foresight-ghost-second-roll.md` | staged battle `noland-foresight-ghost` (lab seed 79001): 20 of 20 states with the fix; without it the battle leaves the ROM's at the first turn after the type change (6 of 21 states) |
+| 42 | The player's non-Ghost Curse is aimed at its own user; with the opponent's Follow Me up the game aims it at the Follow Me user, and Pressure on that Pokemon makes the Curse cost two PP. The engine kept it on its user (one PP). | new (sixth pass, from the fifth pass's Follow Me lead) | `follow-me-redirect.md` | Mechanic Lab lab seed 801 (ROM only; engine test with the same numbers) |
+| 43 | When the Pursuit user's Synchronize answers Static, Poison Point or Flame Body during a Pursuit on a switching Pokemon, the game ends the after-move steps there. The engine ran the rest and then stopped with an error in the switch. | new (sixth pass, from the fifth pass's Pursuit lead) | `pursuit-synchronize-moveend.md` | Mechanic Lab lab seeds 801, 802 (ROM only; engine test with the same numbers) |
 
 Group view against the handoff's queue (a seed can sit in two groups):
 

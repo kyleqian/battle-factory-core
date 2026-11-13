@@ -89,14 +89,13 @@ pool species has Drizzle, Sand Stream or Drought; the jump-command entries cite 
 
 - **Fix 41** (`ai-foresight-ghost-second-roll.md`): reading a never-run AI branch against the game's script showed that
   the engine made one random roll where the game makes two. ROM proof by a staged battle.
-- **Two suspected differences, not proven** (rare set-ups; leads for the next pass):
-  - `battleScriptMoveEndOpcode.ts` (`executeMoveendState`): for a script that ends the move-end steps at a given step
-    (`moveendfromto`), the game stops there even when the step before it called a script
-    (`battle_script_commands.c:4491-4492`); the engine returns for the script call before it checks where to stop
-    (`:1071-1080`). Only the Pursuit-on-switch-out script uses this with a step that can call a script: a Pursuit user
-    that got Synchronize (Skill Swap) and is hurt by Static, Poison Point or Flame Body.
-  - `battleScriptSwitchinOpcode.ts` (`VARIOUS_GET_MOVE_TARGET`): the engine always runs the random target draw; the game
-    first takes the opponent's Follow Me target without a draw (`battle_util.c:3843-3846`). Needs a Ghost-type Curse
-    aimed at its own user (the user became a Ghost type after choosing Curse) in a turn in which the opponent used
-    Follow Me.
+- **The two leads, checked on the ROM (sixth pass):**
+  - Pursuit on a switching Pokemon when the Pursuit user has Synchronize: **a real difference, fix 43**
+    (`pursuit-synchronize-moveend.md`). The game ends the move-end steps after Synchronize; the engine ran the rest and
+    then stopped with an error in the switch. Mechanic Lab ROM run and a test with the same numbers.
+  - Follow Me and a Ghost Curse aimed at its own user: **cannot happen in a singles battle** as stated. With the foe's
+    Follow Me up, the game aims the Curse at the Follow Me user when the move starts (`HandleAction_UseMove`,
+    `battle_util.c:148-156`), so `BattleScript_GhostCurse` never reaches `getmovetarget`. Checking it found a related
+    real difference: the engine lacked that start-of-move redirect, which changes the PP a non-Ghost Curse costs
+    against a Pressure Follow Me user: **fix 42** (`follow-me-redirect.md`).
 - **Not done yet:** a staged battle or a steered batch for each (c) group, starting with the uncommon ones.

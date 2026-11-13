@@ -1,0 +1,3370 @@
+[
+ {
+  "rule": "AI: Calm Mind is a bad move when Special Defense is already maxed",
+  "freq": [
+   "uncommon"
+  ],
+  "how": "an AI Calm Mind user with Sp. Def at +6 and Sp. Atk below +6, e.g. Lunatone 327 after six Cosmic Powers, or Sp. Atk cut by a Mist Ball / Memento after six Calm Minds",
+  "reason": "AI_CBM_CalmMind (battle_ai_scripts.s:590-593) scores -8 when the user's Sp. Def is at +6 but Sp. Atk is not. 16 Calm Mind sets of 267+ exist; Lunatone 327 has both Cosmic Power and Calm Mind.",
+  "pieces": [
+   {
+    "file": "factoryAiCheckBadMove.ts",
+    "function": "runCbmCalmMind",
+    "line": 1061,
+    "cover": {
+     "file": "src/engine/factoryAiCheckBadMove.ts",
+     "text": "? -8 : 0; // first gate jumps to Score_Minus10 / end\n}\n\n/**\n * `AI_CBM_D",
+     "at": 0
+    },
+    "body": "? -8"
+   }
+  ],
+  "id": "R001"
+ },
+ {
+  "rule": "AI: Charm is a bad move against a Hyper Cutter target",
+  "freq": [
+   "uncommon"
+  ],
+  "how": "the game's AI Minun 292 (Charm) in challenge 2 facing Gligar, Crawdaunt, Kingler or Pinsir with Hyper Cutter (or a Hyper Cutter passed by Skill Swap / Trace)",
+  "reason": "AI_CBM_AttackDown (battle_ai_scripts.s:277-281) scores -10 when the target's known or guessed ability is Hyper Cutter. Charm (ATTACK_DOWN_2) is on sets 292, 446, 798; Hyper Cutter is on Gligar 315, Crawdaunt 354, Kingler 358, Pinsir 369 (all challenge 2, same range as Minun 292).",
+  "pieces": [
+   {
+    "file": "factoryAiCheckBadMove.ts",
+    "function": "runCbmAttackDown",
+    "line": 856,
+    "cover": {
+     "file": "src/engine/factoryAiCheckBadMove.ts",
+     "text": "{\n    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: -10 });\n  }\n  const tail = nextGetAbilityDraw(rng, ordinal, `${reason}-shared-tail`, target);\n  rng = tail.rng;\n  if (tail.draw) draws.push(tail.draw);\n  const blocksChange = tail.ability === ABILITY_CLEAR_BODY || tail.ability === ABILITY_WHITE_SMOKE;\n  return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: blocksChange ? -10 : 0 });\n}\n\n/**\n",
+     "at": 0
+    },
+    "body": "{\n    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: -10 });\n  }"
+   }
+  ],
+  "id": "R002"
+ },
+ {
+  "rule": "AI: Dig / Fly / Dive / Bounce encouraged in Hail (swapped weather check)",
+  "freq": [
+   "uncommon"
+  ],
+  "how": "AI Dig/Fly/Dive/Bounce user while Hail is up (or with the AI register left at 3), target with no known Protect and not toxic / cursed / seeded",
+  "reason": "Non-BUGFIX AI_CV_SemiInvulnerable2 sends Hail to the Ground/Rock/Steel check. Semi-invulnerable sets 372+ (Golduck 418, Xatu 484, Shiftry 494, Rapidash 515, Shuckle 528, Jolteon 539, Skarmory 578, Suicune 772) meet Hail users Glalie 399, Walrein 452, Regice 796 in challenge 7+; a carried register value 3 also takes it.",
+  "pieces": [
+   {
+    "file": "factoryAiCheckViability.ts",
+    "function": "runCvSemiInvulnerable",
+    "line": 2308,
+    "cover": {
+     "file": "src/engine/factoryAiCheckViability.ts",
+     "text": "{\n    // Non-BUGFIX: Hai",
+     "at": 0
+    },
+    "body": "{\n    // Non-BUGFIX: Hail -> CheckSandstormTypes (Ground/Rock/Steel resist).\n    if (AI_CV_SANDSTORM_RESISTANT_TYPES.has(userType1)) {\n      return tryEncourage(input.rng, input.drawOrdinalStart, typeFuncResultCollision(userType1));\n    }\n    if (AI_CV_SANDSTORM_RESISTANT_TYPES.has(userType2)) {\n   "
+   }
+  ],
+  "id": "R003"
+ },
+ {
+  "rule": "AI: Encore viability roll (target slower, last move worth encoring)",
+  "freq": [
+   "uncommon"
+  ],
+  "how": "AI Dewgong 488 with Encore, target not faster whose last move is in the encourage list, roll below 30",
+  "reason": "AI_CV_Encore2's roll below 30 ends at zero instead of +3. Encore is on Dewgong 488 (challenge 4, 7+) and Noland's Wobbuffet 290.",
+  "pieces": [
+   {
+    "file": "factoryAiCheckViability.ts",
+    "function": "runCvEncore",
+    "line": 8185,
+    "cover": {
+     "file": "src/engine/factoryAiCheckViability.ts",
+     "text": "? 0 : 3,\n    fun",
+     "at": 0
+    },
+    "body": "? 0"
+   }
+  ],
+  "id": "R004"
+ },
+ {
+  "rule": "AI: Focus Punch is scored up by 5 when the user is behind a Substitute and the target is infatuated or confused",
+  "freq": [
+   "uncommon"
+  ],
+  "how": "The AI's Machamp (set 810) has its Substitute up and the target is infatuated by its Attract (or Golem 498 / Registeel 840 behind a Substitute against a confused target); Focus Punch is not resisted, the target is awake, and the roll is 100 or more",
+  "reason": "Sets of the full-AI ranges have Focus Punch with Substitute (Golem 498, Machamp 810, Registeel 840); Machamp 810 also has Attract.",
+  "pieces": [
+   {
+    "file": "factoryAiCheckViability.ts",
+    "function": "runCvFocusPunch",
+    "line": 5602,
+    "cover": {
+     "file": "src/engine/factoryAiCheckViability.ts",
+     "text": "? 5 : 1;\n   ",
+     "at": 0
+    },
+    "body": "? 5"
+   }
+  ],
+  "id": "R005"
+ },
+ {
+  "rule": "AI: Knock Off viability (no bonus against a target below 30% HP)",
+  "freq": [
+   "uncommon"
+  ],
+  "how": "the game's AI Armaldo 513 with Knock Off scoring its moves while the target is below 30% HP",
+  "reason": "AI_CV_KnockOff (battle_ai_scripts.s) ends at zero when the target is under 30% HP. Armaldo 513 has Knock Off (challenge 4 and 7+, where the viability script runs).",
+  "pieces": [
+   {
+    "file": "factoryAiCheckViability.ts",
+    "function": "runCvKnockOff",
+    "line": 1868,
+    "cover": {
+     "file": "src/engine/factoryAiCheckViability.ts",
+     "text": "{\n    return Object.freeze({\n      rng: input.rng,\n      draws: Object.freeze([]),\n      scoreDelta: 0,\n      funcResultAfter: i",
+     "at": 0
+    },
+    "body": "{\n    return Object.freeze({\n      rng: input.rng,\n      draws: Object.freeze([]),\n      scoreDelta: 0,\n      funcResultAfter: input.funcResultCarry,\n    });\n  }"
+   }
+  ],
+  "id": "R006"
+ },
+ {
+  "rule": "AI: Pain Split is scored up when the user moves first, has 40% HP or less and the target has 80% HP or more",
+  "freq": [
+   "uncommon"
+  ],
+  "how": "Challenge 7 or later: the AI's Misdreavus 374 or Dusclops 378 has 40% HP or less, is not slower than the target, and the target has 80% HP or more (for example a fresh switch-in).",
+  "reason": "Two scored sets have Pain Split (Misdreavus 374, Dusclops 378); this is the +1 case.",
+  "pieces": [
+   {
+    "file": "factoryAiCheckViability.ts",
+    "function": "runCvPainSplit",
+    "line": 8808,
+    "cover": {
+     "file": "src/engine/factoryAiCheckViability.ts",
+     "text": "\n  return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: user",
+     "at": 0
+    },
+    "body": "return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: userHpPercent > 40 ? -1"
+   },
+   {
+    "file": "factoryAiCheckViability.ts",
+    "function": "runCvPainSplit",
+    "line": 8809,
+    "cover": {
+     "file": "src/engine/factoryAiCheckViability.ts",
+     "text": ": 1 });\n}\n\n/",
+     "at": 0
+    },
+    "body": ": 1"
+   }
+  ],
+  "id": "R007"
+ },
+ {
+  "rule": "AI: Revenge is scored down when the target is asleep, infatuated or confused",
+  "freq": [
+   "uncommon"
+  ],
+  "how": "The AI's Machamp 811 (challenge 7 or later) or Noland's Qwilfish 316 (silver battle) faces a Pokemon that is asleep (for example after Rest), infatuated or confused.",
+  "reason": "Two scored sets have Revenge (Qwilfish 316, Machamp 811); a target that is asleep, infatuated or confused gives -2 with no roll.",
+  "pieces": [
+   {
+    "file": "factoryAiCheckViability.ts",
+    "function": "runCvRevenge",
+    "line": 7762,
+    "cover": {
+     "file": "src/engine/factoryAiCheckViability.ts",
+     "text": "{\n    return Object.freeze({ rng: input.rng, draws: Object.freeze([]), scoreDelta: -2 });\n  }\n  ",
+     "at": 0
+    },
+    "body": "{\n    return Object.freeze({ rng: input.rng, draws: Object.freeze([]), scoreDelta: -2 });\n  }"
+   }
+  ],
+  "id": "R008"
+ },
+ {
+  "rule": "AI: Skill Swap viability roll against a target with a wanted ability",
+  "freq": [
+   "uncommon"
+  ],
+  "how": "AI Skill Swap user (Alakazam 596, Gengar 613) facing a target whose known or guessed ability is in the list, roll below 50",
+  "reason": "AI_CV_ChangeSelfAbility3's roll below 50 ends at zero instead of +2; the encourage list (Static, Swift Swim, Chlorophyll, Sand Veil, ...) is common in the pool.",
+  "pieces": [
+   {
+    "file": "factoryAiCheckViability.ts",
+    "function": "runCvChangeSelfAbility",
+    "line": 8594,
+    "cover": {
+     "file": "src/engine/factoryAiCheckViability.ts",
+     "text": "? 0 : 2,\n      funcResultAfter,\n    });\n  }\n\n  // Ta",
+     "at": 0
+    },
+    "body": "? 0"
+   }
+  ],
+  "id": "R009"
+ },
+ {
+  "rule": "AI: Skill Swap viability, reading a trapping ability without guessing",
+  "freq": [
+   "uncommon"
+  ],
+  "how": "AI Alakazam 596 / Gengar 613 scoring Skill Swap against an Arena Trap Dugtrio before its ability is revealed (or Noland's Kecleon vs Wobbuffet / Magneton)",
+  "reason": "Cmd_get_ability (battle_ai_script_commands.c:1350-1402) reads Shadow Tag / Magnet Pull / Arena Trap directly when the ability is not yet known. Skill Swap: Alakazam 596, Gengar 613 (challenge 5, 7+), Noland's Kecleon 325; Arena Trap Dugtrio 564/660 and Wobbuffet 290 / Magneton 349 share those ranges.",
+  "pieces": [
+   {
+    "file": "factoryAiCheckViability.ts",
+    "function": "runCvChangeSelfAbility",
+    "line": 8565,
+    "cover": {
+     "file": "src/engine/factoryAiCheckViability.ts",
+     "text": "{\n    targetAbility = ta",
+     "at": 0
+    },
+    "body": "{\n    targetAbility = targetRealAbility;\n  }"
+   }
+  ],
+  "id": "R010"
+ },
+ {
+  "rule": "AI: Smelling Salt bonus against a paralyzed target",
+  "freq": [
+   "uncommon"
+  ],
+  "how": "the game's AI Granbull 376 (Smelling Salt) in challenge 7 or later",
+  "reason": "Dispatch to AI_CV_SmellingSalt (battle_ai_scripts.s:751). Granbull 376 has Smelling Salt and is in the 372..849 range.",
+  "pieces": [
+   {
+    "file": "factoryAiCheckViability.ts",
+    "function": "runCheckViability",
+    "line": 7065,
+    "cover": {
+     "file": "src/engine/factoryAiCheckViability.ts",
+     "text": "{\n    // AI_CV_Smell",
+     "at": 0
+    },
+    "body": "{\n    // AI_CV_SmellingSalt (data/battle_ai_scripts.s:2313-2320): target\n    // paralyzed -> +1, else zero. No draws, no funcResult write.\n    const smellingSalt = runCvSmellingSalt({\n      rng: input.rng,\n      targetIsParalyzed: input.target.isParalyzed ?? false,\n    });\n    return Object.freeze({"
+   },
+   {
+    "file": "factoryAiCheckViability.ts",
+    "function": "runCvSmellingSalt",
+    "line": 8954,
+    "cover": {
+     "file": "src/engine/factoryAiCheckViability.ts",
+     "text": "function runCvSm",
+     "at": 0
+    },
+    "body": "function runCvSmellingSalt(input: Readonly<{\n  rng: BattleRngState;\n  targetIsParalyzed: boolean;\n}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> {\n  return Object.freeze({\n    rng: input.rng,\n    draws: Object.freeze([]),\n    scoreDelta: inp"
+   }
+  ],
+  "id": "R011"
+ },
+ {
+  "rule": "AI: Substitute gets no extra point when the target's last move was a status move and the target itself already has that kind of condition",
+  "freq": [
+   "uncommon"
+  ],
+  "how": "The AI's Substitute user is not slower than the target, the target's last move was a sleep, poison, paralysis or burn move, and the target has a status condition. Example: the AI's Zapdos 779 paralyzed it with Thunder Wave, then it used Toxic.",
+  "reason": "Ten scored sets have Substitute. When the target's last move was a sleep, poison, paralysis or burn move and the target itself has a status condition, the last roll is skipped.",
+  "pieces": [
+   {
+    "file": "factoryAiCheckViability.ts",
+    "function": "runCvSubstitute",
+    "line": 8368,
+    "cover": {
+     "file": "src/engine/factoryAiCheckViability.ts",
+     "text": "\n    return endsAtZero();\n  }\n  if (lastEffect === \"EFFECT_C",
+     "at": 0
+    },
+    "body": "return endsAtZero();\n  }"
+   },
+   {
+    "file": "factoryAiCheckViability.ts",
+    "function": "runCvSubstitute",
+    "line": 8375,
+    "cover": {
+     "file": "src/engine/factoryAiCheckViability.ts",
+     "text": "\n    return endsAtZero();\n  }\n  if (lastEffect === \"EFFECT_L",
+     "at": 0
+    },
+    "body": "return endsAtZero();\n  }"
+   }
+  ],
+  "id": "R012"
+ },
+ {
+  "rule": "AI: Superpower is not scored down when the user moves first and has 40% HP or less",
+  "freq": [
+   "uncommon"
+  ],
+  "how": "Challenge 6 or later: the AI's Superpower user (701, 762 or 841) moves before the target, has 40% HP or less and normal Attack, and the target does not resist Fighting.",
+  "reason": "Same three sets; when the user is not slower and has 40% HP or less the move keeps its score.",
+  "pieces": [
+   {
+    "file": "factoryAiCheckViability.ts",
+    "function": "runCvSuperpower",
+    "line": 7858,
+    "cover": {
+     "file": "src/engine/factoryAiCheckViability.ts",
+     "text": ": 0,\n  });\n}\n\n/**\n * `AI_CV_Magi",
+     "at": 0
+    },
+    "body": ": 0"
+   }
+  ],
+  "id": "R013"
+ },
+ {
+  "rule": "AI: Superpower is scored down when the user's Attack is lowered",
+  "freq": [
+   "uncommon"
+  ],
+  "how": "Challenge 6 or later: the AI's Superpower user has Attack below normal (after its second Superpower, because the White Herb undoes only the first drop) and the target does not resist Fighting.",
+  "reason": "Three scored sets have Superpower (Nidoqueen 701, Regirock 762, Registeel 841); with Attack below normal the move gets -1.",
+  "pieces": [
+   {
+    "file": "factoryAiCheckViability.ts",
+    "function": "runCvSuperpower",
+    "line": 7824,
+    "cover": {
+     "file": "src/engine/factoryAiCheckViability.ts",
+     "text": "DEFAULT_STAT_STAGE) {\n    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: -",
+     "at": 20
+    },
+    "body": "{\n    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: -1 });\n  }"
+   }
+  ],
+  "id": "R014"
+ },
+ {
+  "rule": "AI: Sweet Scent (evasion-lowering move) viability",
+  "freq": [
+   "uncommon"
+  ],
+  "how": "the game's AI Victreebel 395 (Sweet Scent) in challenge 7 or later",
+  "reason": "AI_CV_EvasionDown (battle_ai_scripts.s:1235-1246). Victreebel 395 has Sweet Scent and is in the 372..849 range where the viability script runs (challenge 7+).",
+  "pieces": [
+   {
+    "file": "factoryAiCheckViability.ts",
+    "function": "runCvEvasionDown",
+    "line": 3453,
+    "cover": {
+     "file": "src/engine/factoryAiCheckViability.ts",
+     "text": "function runCvEvasionDow",
+     "at": 0
+    },
+    "body": "function runCvEvasionDown(input: Readonly<{\n  rng: BattleRngState;\n  attackerHp: number;\n  attackerMaxHp: number;\n  targetEvasionStage: number;\n  targetHp: number;\n  targetMaxHp: number;\n  drawOrdinalStart: number;\n  reasonPrefix: string;\n}>): Readonly<{ rng: BattleRngState; draws: readonly FactoryA"
+   },
+   {
+    "file": "factoryAiCheckViability.ts",
+    "function": "runCheckViability",
+    "line": 6083,
+    "cover": {
+     "file": "src/engine/factoryAiCheckViability.ts",
+     "text": "{\n    // The eleventh CBM-blocked pair's oth",
+     "at": 0
+    },
+    "body": "{\n    // The eleventh CBM-blocked pair's other CV half (doc \u00a724).\n    const evasionDown = runCvEvasionDown({\n      rng: input.rng,\n      attackerHp: input.attacker.hp,\n      attackerMaxHp: input.attacker.maxHp,\n      targetEvasionStage: input.target.evasionStage,\n      targetHp: input.target.hp,\n   "
+   }
+  ],
+  "id": "R015"
+ },
+ {
+  "rule": "AI: a stat-lowering move is bad against Clear Body / White Smoke",
+  "freq": [
+   "uncommon"
+  ],
+  "how": "the game's AI uses Charm (Minun 292, Espeon 446, Latias 798) on a Clear Body or White Smoke Pokemon",
+  "reason": "CheckIfAbilityBlocksStatChange (battle_ai_scripts.s:308-312) scores -10 for a Clear Body / White Smoke target; reached from Charm's check. Clear Body / White Smoke species are in every Charm user's range (Metang 311, Torkoal 357 with Minun 292; Tentacruel 434, Metagross 466 with Espeon 446; Regis / Metagross with Latias 798).",
+  "pieces": [
+   {
+    "file": "factoryAiCheckBadMove.ts",
+    "function": "runCbmAttackDown",
+    "line": 863,
+    "cover": {
+     "file": "src/engine/factoryAiCheckBadMove.ts",
+     "text": "? -10 : 0 });\n}\n\n/**\n * Shar",
+     "at": 0
+    },
+    "body": "? -10"
+   }
+  ],
+  "id": "R016"
+ },
+ {
+  "rule": "AI: accuracy-lowering move viability when the AI's own accuracy is cut",
+  "freq": [
+   "uncommon"
+  ],
+  "how": "an AI Sand Attack / Smokescreen user whose own accuracy has been lowered two or more stages",
+  "reason": "AI_CV_AccuracyDown3 rolls for -2 when the user's own accuracy stage is 4 or lower. 8 accuracy-lowering sets 372+; the player's side in the same range has Sand Attack / Smokescreen / Flash / Mud-Slap / Octazooka.",
+  "pieces": [
+   {
+    "file": "factoryAiCheckViability.ts",
+    "function": "runCvAccuracyDown",
+    "line": 4224,
+    "cover": {
+     "file": "src/engine/factoryAiCheckViability.ts",
+     "text": "{\n    const draw2 = nextDraw(rng, ordinal, `${input.reasonPrefix}-draw2`);\n    rng = draw2.after;\n    ordinal += 1;\n    const succeeded2 = draw2.randomValue % 256 >= 80",
+     "at": 0
+    },
+    "body": "{\n    const draw2 = nextDraw(rng, ordinal, `${input.reasonPrefix}-draw2`);\n    rng = draw2.after;\n    ordinal += 1;\n    const succeeded2 = draw2.randomValue % 256 >= 80;\n    draws.push(Object.freeze({ ...draw2, kind: \"accuracy-down-roll-2\" as const, succeeded: succeeded2 }));\n    if (succeeded2) sco"
+   }
+  ],
+  "id": "R017"
+ },
+ {
+  "rule": "Endure leaves the Pokemon at 1 HP",
+  "freq": [
+   "uncommon"
+  ],
+  "how": "a Pokemon that used Endure this turn is hit by a fixed-damage move (Seismic Toss, Night Shade, Dragon Rage, Sonic Boom, Psywave, Counter, Mirror Coat) that would knock it out",
+  "reason": "Cmd_adjustsetdamage marks MOVE_RESULT_FOE_ENDURED when an enduring target is clamped to 1 HP by fixed damage",
+  "pieces": [
+   {
+    "file": "battleScriptHitChainOpcode.ts",
+    "function": "adjustsetdamageOpcodeHandler",
+    "line": 2178,
+    "cover": {
+     "file": "src/engine/battleScriptHitChainOpcode.ts",
+     "text": "w.effect === \"EFFECT_FALSE_SWIPE\" || targetBattler.endured === 1 || focusBanded)\n    && targetBattler.hp <= damage;\n\n  let moveResultFlags = nextRulesContext.moveResultFlags;\n  let lastUsedItem = nextRulesContext.lastUsedItem;\n  if (shouldClamp) {\n    damage = targetBattler.hp - 1;\n    if (targetBattler.endured === 1) {\n      move",
+     "at": 320
+    },
+    "body": "{\n      moveResultFlags = (moveResultFlags | BATTLE_SCRIPT_MOVE_RESULT_FOE_ENDURED) >>> 0;\n    }"
+   }
+  ],
+  "id": "R018"
+ },
+ {
+  "rule": "Focus Energy fails if the user is already pumped",
+  "freq": [
+   "uncommon"
+  ],
+  "how": "a Pokemon with Focus Energy (Hitmonlee 233, Pinsir 264, ...) uses it a second time without switching out",
+  "reason": "Cmd_setfocusenergy fails when STATUS2_FOCUS_ENERGY is already set (battle_script_commands.c:7751-7755).",
+  "pieces": [
+   {
+    "file": "battleScriptSetfocusenergyOpcode.ts",
+    "function": "setfocusenergyHandler",
+    "line": 35,
+    "cover": {
+     "file": "src/engine/battleScriptSetfocusenergyOpcode.ts",
+     "text": "? Object.fre",
+     "at": 0
+    },
+    "body": "? Object.freeze({\n      ...rules,\n      moveResultFlags:\n        (rules.moveResultFlags | BATTLE_SCRIPT_MOVE_RESULT_FAILED) >>> 0,\n      multistringChooser: BATTLE_SCRIPT_B_MSG_FOCUS_ENERGY_FAILED,\n    })"
+   }
+  ],
+  "id": "R019"
+ },
+ {
+  "rule": "Hyper Beam's recharge wearing off at the end of the turn",
+  "freq": [
+   "uncommon"
+  ],
+  "how": "a Pokemon that used Hyper Beam and is asleep or frozen (or a Truant loafing turn) on its recharge turn, so the recharge is never spent",
+  "reason": "TurnValuesCleanUp (battle_main.c:4878-4883): when rechargeTimer reaches 0 the STATUS2_RECHARGE flag is removed, for a battler that never reached CANCELER_RECHARGE.",
+  "pieces": [
+   {
+    "file": "battleEndTurnOrchestration.ts",
+    "function": "decrementDisableStructTurnTimers",
+    "line": 2431,
+    "cover": {
+     "file": "src/engine/battleEndTurnOrchestration.ts",
+     "text": "{\n        up",
+     "at": 0
+    },
+    "body": "{\n        update.status2 = (\n          battler.status2 & ~BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_RECHARGE\n        ) >>> 0;\n      }"
+   }
+  ],
+  "id": "R020"
+ },
+ {
+  "rule": "Immunity stops Poison Fang's bad poison",
+  "freq": [
+   "uncommon"
+  ],
+  "how": "Poison Fang (Arbok 217 / Mightyena 202, 30% chance) hits Zangoose 240 (Immunity) in challenge 1, or Metronome calls Poison Fang against Snorlax",
+  "reason": "SetMoveEffect's toxic case on an Immunity Pokemon: not primary/certain, so it falls through to 'no status change'",
+  "pieces": [
+   {
+    "file": "battleScriptHitChainOpcode.ts",
+    "function": "applySetMoveEffect",
+    "line": 3500,
+    "cover": {
+     "file": "src/engine/battleScriptHitChainOpcode.ts",
+     "text": "&& (primary || certain)) {\n        return preventionCall(\"BattleScript_PSNPrevention\", true, ABILITY_IMMUNITY);\n      }\n      if (\n        (isBattlerOfType(effectBattlerState, \"TYPE_POISON\") || isBattlerOfType(effectBattlerState, \"TYPE_STEEL\"))\n        && abilityEffectHitmarkerSet\n        && (primary || certain)\n      ) {\n        return preventionCall(\"BattleScript_PSNPrevention\", false);\n      }\n      if",
+     "at": 0
+    },
+    "body": "&& (primary || certain)"
+   }
+  ],
+  "id": "R021"
+ },
+ {
+  "rule": "Nobody can be put to sleep during an Uproar",
+  "freq": [
+   "uncommon"
+  ],
+  "how": "a sleep move (Hypnosis, Sleep Powder, Yawn, ...) used while Vigoroth 221 (or a Metronome Uproar) is in an uproar",
+  "reason": "UproarWakeUpCheck finds a battler with STATUS2_UPROAR and the sleep move fails (battle_script_commands.c:6801-6826, 6832-6835).",
+  "pieces": [
+   {
+    "file": "battleScriptStatusPrimaryOpcode.ts",
+    "function": "(module)",
+    "line": 213,
+    "cover": {
+     "file": "src/engine/battleScriptStatusPrimaryOpcode.ts",
+     "text": "{\n          upro",
+     "at": 0
+    },
+    "body": "{\n          uproarBattler = battlerId;\n          break;\n        }"
+   },
+   {
+    "file": "battleScriptStatusPrimaryOpcode.ts",
+    "function": "(module)",
+    "line": 227,
+    "cover": {
+     "file": "src/engine/battleScriptStatusPrimaryOpcode.ts",
+     "text": "{\n      const mu",
+     "at": 0
+    },
+    "body": "{\n      const multistringChooser = uproarBattler === target ? B_MSG_CANT_SLEEP_UPROAR : B_MSG_UPROAR_KEPT_AWAKE;\n      const nextRulesContext = Object.freeze({ ...rulesContext, multistringChooser, scriptingBattler: uproarBattler });\n      return transitionBattleScriptCommand(\n        context,\n      "
+   }
+  ],
+  "id": "R022"
+ },
+ {
+  "rule": "Pain Split fails against a Substitute",
+  "freq": [
+   "uncommon"
+  ],
+  "how": "Pain Split used on a target behind a Substitute",
+  "reason": "Cmd_painsplitdmgcalc jumps to the failure script when the target has a Substitute (battle_script_commands.c:8051, 8067-8070).",
+  "pieces": [
+   {
+    "file": "battleScriptPainSplitOpcode.ts",
+    "function": "(module)",
+    "line": 44,
+    "cover": {
+     "file": "src/engine/battleScriptPainSplitOpcode.ts",
+     "text": "{\n      cons",
+     "at": 0
+    },
+    "body": "{\n      const failure = resolveBattleScriptLabel(program, failureExpression);\n      if (!failure) {\n        throw new Error(`Cmd_painsplitdmgcalc unresolved failure target ${failureExpression}`);\n      }\n      return transitionBattleScriptCommand(\n        context,\n        Object.freeze({ kind: \"jump"
+   }
+  ],
+  "id": "R023"
+ },
+ {
+  "rule": "Pursuit knocking out a Pokemon as it switches out",
+  "freq": [
+   "uncommon"
+  ],
+  "how": "Pursuit hits a Pokemon that is switching out and knocks it out",
+  "reason": "getbattlerfainted after Pursuit's switch-out hit (battle_scripts_1.s:3144) reports the faint and runs getexp.",
+  "pieces": [
+   {
+    "file": "battleScriptSwitchinOpcode.ts",
+    "function": "(module)",
+    "line": 1097,
+    "cover": {
+     "file": "src/engine/battleScriptSwitchinOpcode.ts",
+     "text": "? 1 : 0 }),\n",
+     "at": 0
+    },
+    "body": "? 1"
+   }
+  ],
+  "id": "R024"
+ },
+ {
+  "rule": "Shield Dust blocks King's Rock flinch",
+  "freq": [
+   "uncommon"
+  ],
+  "how": "a King's Rock holder (Swellow 214, Hitmonchan 234, Mightyena 307 ...) wins its 10% roll against Venomoth 226/331 (Shield Dust)",
+  "reason": "King's Rock calls SetMoveEffect(FALSE,0) flinch directly, and Shield Dust stops it (on the seteffect path the shared Shield Dust guard returns first)",
+  "pieces": [
+   {
+    "file": "battleScriptHitChainOpcode.ts",
+    "function": "applyBattleScriptNonCertainFlinchMoveEffect",
+    "line": 3782,
+    "cover": {
+     "file": "src/engine/battleScriptHitChainOpcode.ts",
+     "text": "&& !abilityEffectHitmarkerSet\n  ) {\n",
+     "at": 0
+    },
+    "body": "&& !abilityEffectHitmarkerSet"
+   },
+   {
+    "file": "battleScriptHitChainOpcode.ts",
+    "function": "applyBattleScriptNonCertainFlinchMoveEffect",
+    "line": 3783,
+    "cover": {
+     "file": "src/engine/battleScriptHitChainOpcode.ts",
+     "text": "{\n    return baseRulesContext;\n  }\n  if (eff",
+     "at": 0
+    },
+    "body": "{\n    return baseRulesContext;\n  }"
+   }
+  ],
+  "id": "R025"
+ },
+ {
+  "rule": "Sticky Hold blocks Trick",
+  "freq": [
+   "uncommon"
+  ],
+  "how": "Trick used on Swalot 353 / Muk 612 or 708 (Sticky Hold), e.g. Kecleon 325 against Swalot 353, or Mr. Mime 572 against Muk",
+  "reason": "Cmd_tryswapitems jumps to BattleScript_StickyHoldActivates for a Sticky Hold target (battle_script_commands.c:9229-9234).",
+  "pieces": [
+   {
+    "file": "battleScriptTryswapitemsOpcode.ts",
+    "function": "(module)",
+    "line": 152,
+    "cover": {
+     "file": "src/engine/battleScriptTryswapitemsOpcode.ts",
+     "text": "{\n      cons",
+     "at": 0
+    },
+    "body": "{\n      const stickyHold = resolveBattleScriptLabel(\n        program,\n        \"BattleScript_StickyHoldActivates\",\n      );\n      if (!stickyHold) {\n        throw new Error(\"Cmd_tryswapitems: unresolved BattleScript_StickyHoldActivates\");\n      }\n      return transitionBattleScriptCommand(\n        co"
+   }
+  ],
+  "id": "R026"
+ },
+ {
+  "rule": "a Thrash / Petal Dance / Outrage lock ending when the user could not use the move",
+  "freq": [
+   "uncommon"
+  ],
+  "how": "a Pokemon locked into Thrash/Petal Dance that is fully paralysed, infatuated, hurts itself in confusion, or hits a Ghost-type (no effect) during the lock",
+  "reason": "battle_util.c:1673-1674: WasUnableToUseMove cancels the multi-turn lock at the end of the turn.",
+  "pieces": [
+   {
+    "file": "battleEndTurnOrchestration.ts",
+    "function": "runThrashTick",
+    "line": 998,
+    "cover": {
+     "file": "src/engine/battleEndTurnOrchestration.ts",
+     "text": "{\n    const { ru",
+     "at": 0
+    },
+    "body": "{\n    const { rulesContext: canceledRc } = cancelBattleScriptMultiTurnMoves(decrementedRc, battler);\n    return Object.freeze({ kind: \"advance\", state: Object.freeze({ ...state, rulesContext: canceledRc }) });\n  }"
+   }
+  ],
+  "id": "R027"
+ },
+ {
+  "rule": "a battle that ends in a draw",
+  "freq": [
+   "uncommon"
+  ],
+  "how": "both sides' last Pokemon faint in the same action or end of turn (Explosion / Self-Destruct, Destiny Bond, Perish Song, recoil)",
+  "reason": "Cmd_checkteamslost (battle_script_commands.c:3563-3577) ORs LOST and WON when both parties are out of HP, giving B_OUTCOME_DREW; the following throw is only a guard for other values.",
+  "pieces": [
+   {
+    "file": "factoryBattleScriptTerminalDecision.ts",
+    "function": "mapFactoryBattleOutcome",
+    "line": 93,
+    "cover": {
+     "file": "src/engine/factoryBattleScriptTerminalDecision.ts",
+     "text": "\n  throw new",
+     "at": 0
+    },
+    "body": "throw new Error(\n    `battleOutcome ${battleOutcome} is outside the terminal WON(1)/LOST(2)/DREW(3) domain`,\n  );"
+   }
+  ],
+  "id": "R028"
+ },
+ {
+  "rule": "the battle ending on Leech Seed damage at the end of the turn",
+  "freq": [
+   "uncommon"
+  ],
+  "how": "Leech Seed drain (or Liquid Ooze hurting the seeder) taking the last Pokemon of a side",
+  "reason": "BattleScript_LeechSeedTurnDrain runs tryfaintmon for both battlers (battle_scripts_1.s:3283-3284); a deciding faint stops the rest of the end-of-turn effects (BattleTurnPassed's gBattleOutcome test, battle_main.c:3961).",
+  "pieces": [
+   {
+    "file": "battleEndTurnOrchestration.ts",
+    "function": "runDoBattlerEndTurnEffects",
+    "line": 1653,
+    "cover": {
+     "file": "src/engine/battleEndTurnOrchestration.ts",
+     "text": "return Object.freeze({ kind: \"outcome-decided\", state: l",
+     "at": 0
+    },
+    "body": "return Object.freeze({ kind: \"outcome-decided\", state: leechSeed.state });"
+   }
+  ],
+  "id": "R029"
+ },
+ {
+  "rule": "A ???-type move (Curse) does no damage in the damage formula",
+  "freq": [
+   "rare"
+  ],
+  "how": "the AI's Ghost-type Pokemon (Dusclops 666) at half HP or less faints from its own Curse, and the AI picks the replacement by its damage pass with Curse still the current move",
+  "reason": "CalculateBaseDamage gives 0 for TYPE_MYSTERY; the AI's switch-in scorer (AI_CalcDmg with the global gCurrentMove, battle_ai_switch_items.c:778) can reach it with Curse as the current move.",
+  "pieces": [
+   {
+    "file": "damageCalc.ts",
+    "function": "calculateBaseDamageWithPower",
+    "line": 486,
+    "cover": {
+     "file": "src/engine/damageCalc.ts",
+     "text": "{\n    damage = 0",
+     "at": 0
+    },
+    "body": "{\n    damage = 0;\n  }"
+   }
+  ],
+  "id": "R030"
+ },
+ {
+  "rule": "A fainted Pokemon's move is skipped when it starts",
+  "freq": [
+   "rare"
+  ],
+  "how": "an attacker at 0 HP reaches the start of its own move; usually its action is cancelled when its replacement switches in (battle_script_commands.c:5268-5273) or the battle ends first, so this may be unreachable, but that is not proven",
+  "reason": "Cmd_attackcanceler sends an attacker at 0 HP straight to BattleScript_MoveEnd with HITMARKER_UNABLE_TO_USE_MOVE (battle_script_commands.c:924-929).",
+  "pieces": [
+   {
+    "file": "battleScriptActionAdmission.ts",
+    "function": "preflightBattleScriptActionEntry",
+    "line": 4016,
+    "cover": {
+     "file": "src/engine/battleScriptActionAdmission.ts",
+     "text": "&& (\n      rulesContext.hitMarker\n      & BA",
+     "at": 0
+    },
+    "body": "&& (\n      rulesContext.hitMarker\n      & BATTLE_SCRIPT_HITMARKER_NO_ATTACKSTRING\n    ) === 0"
+   },
+   {
+    "file": "battleScriptActionAdmission.ts",
+    "function": "preflightBattleScriptActionEntry",
+    "line": 4020,
+    "cover": {
+     "file": "src/engine/battleScriptActionAdmission.ts",
+     "text": "{\n    return makeDecision(\n      rulesContext,\n      \"entry\",\n      \"stop\",\n      \"f",
+     "at": 0
+    },
+    "body": "{\n    return makeDecision(\n      rulesContext,\n      \"entry\",\n      \"stop\",\n      \"fainted-attacker\",\n      Object.freeze({\n        kind: \"jump\",\n        sourceProgramCounter: sourcePc,\n        targetLabel: \"BattleScript_MoveEnd\",\n      }),\n      preserveCurrentAction(),\n      rulesContext.moveResul"
+   }
+  ],
+  "id": "R031"
+ },
+ {
+  "rule": "A missed Rage does not clear the Rage status",
+  "freq": [
+   "rare"
+  ],
+  "how": "Metronome calls Rage and it misses",
+  "reason": "BattleScript_RageMiss sets MOVE_EFFECT_RAGE before clearstatusfromeffect (battle_scripts_1.s:1129-1131); sStatusFlagsForMoveEffects has no RAGE entry, so nothing is cleared (battle_script_commands.c:608-625, 2951-2963).",
+  "pieces": [
+   {
+    "file": "battleScriptSemiInvulnerableOpcode.ts",
+    "function": "(module)",
+    "line": 79,
+    "cover": {
+     "file": "src/engine/battleScriptSemiInvulnerableOpcode.ts",
+     "text": "?? 0;\n    co",
+     "at": 0
+    },
+    "body": "?? 0"
+   }
+  ],
+  "id": "R032"
+ },
+ {
+  "rule": "A stat-lowering effect fails against a protected target",
+  "freq": [
+   "rare"
+  ],
+  "how": "a protect-affected stat-lowering effect reaching its stat change while the target is protected",
+  "reason": "ChangeStatBuffs jumps to 'But it failed' when the target is protected (battle_script_commands.c:6981-6986). Every ordinary stat-lowering move already stops at the accuracy check's Protect test (:1044, :1109) or Memento's protected branch (battle_scripts_1.s:2206), so this may be unreachable in singles, but not proven.",
+  "pieces": [
+   {
+    "file": "battleScriptStatBuffs.ts",
+    "function": "blockedProtect",
+    "line": 235,
+    "cover": {
+     "file": "src/engine/battleScriptStatBuffs.ts",
+     "text": "function blockedProt",
+     "at": 0
+    },
+    "body": "function blockedProtect(): BattleScriptChangeStatBuffsOutcome {\n    const nextRulesContext = withMoveResultMissed(\n      Object.freeze({\n        ...rulesContext,\n        moveHistory: withClearedLandedMove(rulesContext.moveHistory, target),\n      }),\n    );\n    const programCounter = resolveRequiredL"
+   },
+   {
+    "file": "battleScriptStatBuffs.ts",
+    "function": "changeStatBuffs",
+    "line": 262,
+    "cover": {
+     "file": "src/engine/battleScriptStatBuffs.ts",
+     "text": "{\n      return blockedPr",
+     "at": 0
+    },
+    "body": "{\n      return blockedProtect();\n    }"
+   }
+  ],
+  "id": "R033"
+ },
+ {
+  "rule": "A status-immunity ability cures its holder at the end of a move",
+  "freq": [
+   "rare"
+  ],
+  "how": "a Pokemon that already has poison gets Immunity through Skill Swap, Role Play, Trace or a Metronome-called Transform",
+  "reason": "ABILITYEFFECT_IMMUNITY (battle_util.c:2873-2951): a battler with Immunity that has poison is cured at MOVEEND_IMMUNITY_ABILITIES. Normally the ability prevents the status, so it needs an ability change.",
+  "pieces": [
+   {
+    "file": "battleScriptMoveEndOpcode.ts",
+    "function": "immunityAbilityCure",
+    "line": 140,
+    "cover": {
+     "file": "src/engine/battleScriptMoveEndOpcode.ts",
+     "text": "? Object.freeze({ status1: 0, status2: battlerState.status2, statusName: \"po",
+     "at": 0
+    },
+    "body": "? Object.freeze({ status1: 0, status2: battlerState.status2, statusName: \"poison\" })"
+   },
+   {
+    "file": "battleScriptMoveEndOpcode.ts",
+    "function": "immunityAbilityCure",
+    "line": 144,
+    "cover": {
+     "file": "src/engine/battleScriptMoveEndOpcode.ts",
+     "text": "? Object.freeze({\n          status1: battlerState.status1,\n          status2: (battlerState.status2 & ~STATUS2_C",
+     "at": 0
+    },
+    "body": "? Object.freeze({\n          status1: battlerState.status1,\n          status2: (battlerState.status2 & ~STATUS2_CONFUSION) >>> 0,\n          statusName: \"confusion\",\n        })"
+   },
+   {
+    "file": "battleScriptMoveEndOpcode.ts",
+    "function": "immunityAbilityCure",
+    "line": 152,
+    "cover": {
+     "file": "src/engine/battleScriptMoveEndOpcode.ts",
+     "text": "? Object.freeze({ status1: 0, status2: battlerState.status2, statusName: \"pa",
+     "at": 0
+    },
+    "body": "? Object.freeze({ status1: 0, status2: battlerState.status2, statusName: \"paralysis\" })"
+   },
+   {
+    "file": "battleScriptMoveEndOpcode.ts",
+    "function": "immunityAbilityCure",
+    "line": 157,
+    "cover": {
+     "file": "src/engine/battleScriptMoveEndOpcode.ts",
+     "text": "? Object.freeze({\n          status1: 0,\n",
+     "at": 0
+    },
+    "body": "? Object.freeze({\n          status1: 0,\n          status2: (battlerState.status2 & ~STATUS2_NIGHTMARE) >>> 0,\n          statusName: \"sleep\",\n        })"
+   },
+   {
+    "file": "battleScriptMoveEndOpcode.ts",
+    "function": "immunityAbilityCure",
+    "line": 165,
+    "cover": {
+     "file": "src/engine/battleScriptMoveEndOpcode.ts",
+     "text": "? Object.freeze({ status1: 0, status2: battlerState.status2, statusName: \"bu",
+     "at": 0
+    },
+    "body": "? Object.freeze({ status1: 0, status2: battlerState.status2, statusName: \"burn\" })"
+   },
+   {
+    "file": "battleScriptMoveEndOpcode.ts",
+    "function": "immunityAbilityCure",
+    "line": 169,
+    "cover": {
+     "file": "src/engine/battleScriptMoveEndOpcode.ts",
+     "text": "? Object.freeze({ status1: 0, status2: battlerState.status2, statusName: \"ic",
+     "at": 0
+    },
+    "body": "? Object.freeze({ status1: 0, status2: battlerState.status2, statusName: \"ice\" })"
+   },
+   {
+    "file": "battleScriptMoveEndOpcode.ts",
+    "function": "immunityAbilityCure",
+    "line": 173,
+    "cover": {
+     "file": "src/engine/battleScriptMoveEndOpcode.ts",
+     "text": "? Object.freeze({\n          status1: battlerState.status1,\n          status2: (battlerState.status2 & ~STATUS2_I",
+     "at": 0
+    },
+    "body": "? Object.freeze({\n          status1: battlerState.status1,\n          status2: (battlerState.status2 & ~STATUS2_INFATUATION) >>> 0,\n          statusName: \"love\",\n        })"
+   },
+   {
+    "file": "battleScriptMoveEndOpcode.ts",
+    "function": "executeMoveendState",
+    "line": 669,
+    "cover": {
+     "file": "src/engine/battleScriptMoveEndOpcode.ts",
+     "text": "{\n          const curedBattlers = replaceBattlerAt(b",
+     "at": 0
+    },
+    "body": "{\n          const curedBattlers = replaceBattlerAt(baseRules.battlers, battlerId, Object.freeze({\n            ...battlerState,\n            status1: cure.status1,\n            status2: cure.status2,\n          }));\n          const nextRules = Object.freeze({\n            ...baseRules,\n            battle"
+   }
+  ],
+  "id": "R034"
+ },
+ {
+  "rule": "AI: Counter is scored up by a roll when the target is under Taunt",
+  "freq": [
+   "rare"
+  ],
+  "how": "Challenge 7 or later: the AI's Clefable 389 calls Taunt with Metronome and faints in the same turn; its replacement knows Counter (for example Snorlax 824) and is scored on the next turn. The first copy of this line runs when the target's last move was an attack, the second when it was a status move.",
+  "reason": "No set from 267 up has Taunt (helper `'TAUNT' in m.moves and m.index >= 267` returned nothing), but the AI's Clefable 389 can call Taunt with Metronome at challenge 7 and later, and Taunt counts for one more turn (timer 2, battle_script_commands.c:9160; minus 1 each turn end, battle_util.c:1749), so a Counter user can be scored against a taunted target.",
+  "pieces": [
+   {
+    "file": "factoryAiCheckViability.ts",
+    "function": "runCvCounter",
+    "line": 7692,
+    "cover": {
+     "file": "src/engine/factoryAiCheckViability.ts",
+     "text": "&& !roll(\"counter-taunt-roll\", 100)) score += 1;\n   ",
+     "at": 0
+    },
+    "body": "&& !roll(\"counter-taunt-roll\", 100)"
+   },
+   {
+    "file": "factoryAiCheckViability.ts",
+    "function": "runCvCounter",
+    "line": 7692,
+    "cover": {
+     "file": "src/engine/factoryAiCheckViability.ts",
+     "text": "score += 1;\n    cons",
+     "at": 0
+    },
+    "body": "score += 1;"
+   },
+   {
+    "file": "factoryAiCheckViability.ts",
+    "function": "runCvCounter",
+    "line": 7702,
+    "cover": {
+     "file": "src/engine/factoryAiCheckViability.ts",
+     "text": "&& !roll(\"counter-taunt-roll\", 100)) score += 1;\n  c",
+     "at": 0
+    },
+    "body": "&& !roll(\"counter-taunt-roll\", 100)"
+   },
+   {
+    "file": "factoryAiCheckViability.ts",
+    "function": "runCvCounter",
+    "line": 7702,
+    "cover": {
+     "file": "src/engine/factoryAiCheckViability.ts",
+     "text": "score += 1;\n  co",
+     "at": 0
+    },
+    "body": "score += 1;"
+   }
+  ],
+  "id": "R035"
+ },
+ {
+  "rule": "AI: Double Team and Minimize are scored up at random when the target is cursed",
+  "freq": [
+   "rare"
+  ],
+  "how": "The AI's Dusclops (set 666) puts its Ghost Curse on the target and then faints; the next AI Pokemon has Double Team or Minimize and the cursed target is still in",
+  "reason": "A Ghost-type Curse user exists in the full-AI ranges (Dusclops 666; helper: \"m.index>=267 and 'CURSE' in m.eff and 'GHOST' in m.ty\"), and sets of the same ranges have Double Team (670, 688, 699, 720, 735 in 660..755).",
+  "pieces": [
+   {
+    "file": "factoryAiCheckViability.ts",
+    "function": "runCvEvasionUp",
+    "line": 4467,
+    "cover": {
+     "file": "src/engine/factoryAiCheckViability.ts",
+     "text": "{\n    const draw7 = ",
+     "at": 0
+    },
+    "body": "{\n    const draw7 = nextDraw(rng, ordinal, `${input.reasonPrefix}-draw7`);\n    rng = draw7.after;\n    ordinal += 1;\n    const succeeded7 = draw7.randomValue % 256 >= 70;\n    draws.push(Object.freeze({ ...draw7, kind: \"evasion-up-roll-7\" as const, succeeded: succeeded7 }));\n    if (succeeded7) score "
+   }
+  ],
+  "id": "R036"
+ },
+ {
+  "rule": "AI: Fly, Dig, Dive and Bounce are scored up at random for an Ice-type user when the weather check reads sandstorm",
+  "freq": [
+   "rare"
+  ],
+  "how": "Noland's silver battle (sets 267..371): the player's Kecleon (set 325) uses Skill Swap to give Color Change to Noland's Parasect, Croconaw or Azumarill (all have Dig), an Ice move then hits it so it becomes Ice type, and a sandstorm is up (Sandslash 330 or Cacturne 359) when Noland's AI scores Dig; the target is not badly poisoned, cursed or seeded and has not shown Protect",
+  "reason": "Reachable, but only by a type change: no set of 267..849 with Fly/Dig/Dive/Bounce has Ice as its first type (helper: \"m.index>=267 and 'SEMI_INVULNERABLE' in m.eff and 'ICE' in m.ty\" gives only Cloyster 371, Water/Ice). Color Change makes both types Ice (battle_util.c:2752-2760).",
+  "pieces": [
+   {
+    "file": "factoryAiCheckViability.ts",
+    "function": "runCvSemiInvulnerable",
+    "line": 2322,
+    "cover": {
+     "file": "src/engine/factoryAiCheckViability.ts",
+     "text": "{\n      return tryEncourage(input.rng, input.drawOrdinalStart, typeFuncResultCollision(userType1));\n    }\n    if (us",
+     "at": 0
+    },
+    "body": "{\n      return tryEncourage(input.rng, input.drawOrdinalStart, typeFuncResultCollision(userType1));\n    }"
+   },
+   {
+    "file": "factoryAiCheckViability.ts",
+    "function": "runCvSemiInvulnerable",
+    "line": 2325,
+    "cover": {
+     "file": "src/engine/factoryAiCheckViability.ts",
+     "text": "{\n      return tryEncourage(input.rng, input.drawOrdinalStart, typeFuncResultCollision(userType2));\n    }\n    // fal",
+     "at": 0
+    },
+    "body": "{\n      return tryEncourage(input.rng, input.drawOrdinalStart, typeFuncResultCollision(userType2));\n    }"
+   }
+  ],
+  "id": "R037"
+ },
+ {
+  "rule": "AI: Foresight is scored up by a roll when the user is a Ghost type",
+  "freq": [
+   "rare"
+  ],
+  "how": "Noland's silver battle: the player's Kecleon 325 uses Skill Swap on Noland's Machoke 283 or Hitmonlee 338 (it gets Color Change), then a Ghost move such as Shadow Ball hits it and makes it a Ghost type.",
+  "reason": "Foresight is scored only for Noland's silver sets Machoke 283 and Hitmonlee 338; they can become Ghost types through Color Change. POSSIBLE ENGINE ERROR: in the game script AI_CV_Foresight2 falls into AI_CV_Foresight3 (data/battle_ai_scripts.s:1957-1961), so a Ghost user draws a second roll when the first is 80 or more; this code draws one roll only.",
+  "pieces": [
+   {
+    "file": "factoryAiCheckViability.ts",
+    "function": "runCvForesight",
+    "line": 7988,
+    "cover": null,
+    "body": "const kind = isGhost ? (\"foresight-roll-1\" as const)"
+   },
+   {
+    "file": "factoryAiCheckViability.ts",
+    "function": "runCvForesight",
+    "line": 7989,
+    "cover": null,
+    "body": ": (\"foresight-roll-2\" as const)"
+   },
+   {
+    "file": "factoryAiCheckViability.ts",
+    "function": "runCvForesight",
+    "line": 7995,
+    "cover": null,
+    "body": "? 0"
+   },
+   {
+    "file": "factoryAiCheckViability.ts",
+    "function": "runCvForesight",
+    "line": 7995,
+    "cover": null,
+    "body": ": 2"
+   }
+  ],
+  "id": "R038"
+ },
+ {
+  "rule": "AI: Memento is scored down when the target's Attack or Sp. Atk is already at its minimum",
+  "freq": [
+   "rare"
+  ],
+  "how": "The AI's active Pokemon is Weezing (set 501) or has copied Memento with Transform, and the player's active Pokemon has Attack at -6 (for example three Charms from Espeon 446 or Latias 798, Intimidate switch-ins, its own Superpower drops).",
+  "reason": "AI_CBM_Memento's first gate (battle_ai_scripts.s:483): target Attack at -6 gives -10. Weezing set 501 has Memento and is in the AI range (challenge numbers 4 and 7+).",
+  "pieces": [
+   {
+    "file": "factoryAiCheckBadMove.ts",
+    "function": "runCbmMemento",
+    "line": 3598,
+    "cover": {
+     "file": "src/engine/factoryAiCheckBadMove.ts",
+     "text": "{\n    return -10;\n  }\n  if (",
+     "at": 0
+    },
+    "body": "{\n    return -10;\n  }"
+   },
+   {
+    "file": "factoryAiCheckBadMove.ts",
+    "function": "runCbmMemento",
+    "line": 3601,
+    "cover": {
+     "file": "src/engine/factoryAiCheckBadMove.ts",
+     "text": "{\n    return -8;\n  }\n  return ru",
+     "at": 0
+    },
+    "body": "{\n    return -8;\n  }"
+   }
+  ],
+  "id": "R039"
+ },
+ {
+  "rule": "AI: Mirror Coat gets an extra random +1 when the target is taunted",
+  "freq": [
+   "rare"
+  ],
+  "how": "Sets 372..849 with full AI: the AI's Clefable (set 389) calls Taunt with Metronome and faints the same turn to a damaging move; its replacement has Mirror Coat and no Counter (for example Milotic 751) and scores Mirror Coat while the target is still taunted",
+  "reason": "Not sure it is impossible, so c: no set of 267..849 has Taunt (helper: \"m.index>=267 and 'TAUNT' in m.eff\" returns nothing), but Metronome can call it (not in sMovesForbiddenToCopy, battle_script_commands.c:725-747) and Taunt lasts into the next turn.",
+  "pieces": [
+   {
+    "file": "factoryAiCheckViability.ts",
+    "function": "runCvMirrorCoat",
+    "line": 5279,
+    "cover": {
+     "file": "src/engine/factoryAiCheckViability.ts",
+     "text": "{\n      roll(\"mi",
+     "at": 0
+    },
+    "body": "{\n      roll(\"mirror-coat-roll-3\", 100, 1);\n    }"
+   },
+   {
+    "file": "factoryAiCheckViability.ts",
+    "function": "runCvMirrorCoat",
+    "line": 5294,
+    "cover": {
+     "file": "src/engine/factoryAiCheckViability.ts",
+     "text": "{\n    roll(\"mirror-coat-roll-5\",",
+     "at": 0
+    },
+    "body": "{\n    roll(\"mirror-coat-roll-5\", 100, 1);\n  }"
+   }
+  ],
+  "id": "R040"
+ },
+ {
+  "rule": "AI: Pain Split viability, who-moves-first coin flip on a Speed tie",
+  "freq": [
+   "rare"
+  ],
+  "how": "AI Misdreavus 374 / Dusclops 378 scoring Pain Split at target HP 80%+ when its effective Speed equals the target's",
+  "reason": "if_target_faster draws Random() & 1 on equal Speed. Pain Split is on Misdreavus 374 and Dusclops 378 (challenge 7+ viability range).",
+  "pieces": [
+   {
+    "file": "factoryAiCheckViability.ts",
+    "function": "runCvPainSplit",
+    "line": 8794,
+    "cover": {
+     "file": "src/engine/factoryAiCheckViability.ts",
+     "text": "{\n    tieDraw = nextDraw(rng, ordinal, `${input.reasonPrefix}-target-faster-tie`);\n    rng = tieDraw.after;\n    tieRoll = tieDraw.randomValue;\n    ordinal += 1;\n  }\n  const strikesFirst = getWhoStrikesFirst(attacker, target, tieRoll, turnOrder.weather, turnOrder.randomTurnNumber);\n  if (tieDraw) {\n    draws.push(Object.freeze({ ...tieDraw, kind: \"target-faster-tie\" as const, strikesFirst }));\n  }\n\n  const use",
+     "at": 0
+    },
+    "body": "{\n    tieDraw = nextDraw(rng, ordinal, `${input.reasonPrefix}-target-faster-tie`);\n    rng = tieDraw.after;\n    tieRoll = tieDraw.randomValue;\n    ordinal += 1;\n  }"
+   },
+   {
+    "file": "factoryAiCheckViability.ts",
+    "function": "runCvPainSplit",
+    "line": 8801,
+    "cover": {
+     "file": "src/engine/factoryAiCheckViability.ts",
+     "text": "{\n    draws.push(Object.freeze({ ...tieDraw, kind: \"target-faster-tie\" as const, strikesFirst }));\n  }\n\n  const user",
+     "at": 0
+    },
+    "body": "{\n    draws.push(Object.freeze({ ...tieDraw, kind: \"target-faster-tie\" as const, strikesFirst }));\n  }"
+   }
+  ],
+  "id": "R041"
+ },
+ {
+  "rule": "AI: Psych Up is scored by the user's own stat stages when the target has a raised stat (+1, +2, or a random -2)",
+  "freq": [
+   "rare"
+  ],
+  "how": "The AI's Cradily (set 512) gets the all-stats boost of AncientPower, then scores Psych Up against a target with a stat at +3 or more (after two Swaggers, or the target's own Swords Dance / Belly Drum); or any Psych Up user that copied a target with those boosts",
+  "reason": "The Special Defense test runs only when the user's Attack, Defense and Special Attack are all raised and the target has a stat at +3 or more. Cradily 512 has AncientPower, Swagger and Psych Up, so one set can do it.",
+  "pieces": [
+   {
+    "file": "factoryAiCheckViability.ts",
+    "function": "runCvPsychUp",
+    "line": 5111,
+    "cover": {
+     "file": "src/engine/factoryAiCheckViability.ts",
+     "text": "|| userSpDef",
+     "at": 0
+    },
+    "body": "|| userSpDefLow"
+   },
+   {
+    "file": "factoryAiCheckViability.ts",
+    "function": "runCvPsychUp",
+    "line": 5114,
+    "cover": {
+     "file": "src/engine/factoryAiCheckViability.ts",
+     "text": "\n  if (userE",
+     "at": 0
+    },
+    "body": "if (userEvasionLow) {\n    // ScoreUp1's +1 falls through into PsychUp3's +1: +2 total.\n    return Object.freeze({ rng: input.rng, draws: Object.freeze([]), scoreDelta: 2 });\n  }\n\n  const roll = nextDraw(input.rng, input.drawOrdinalStart, `${input.reasonPrefix}-psych-up-roll`);\n  const jumped = roll."
+   },
+   {
+    "file": "factoryAiCheckViability.ts",
+    "function": "runCvPsychUp",
+    "line": 5125,
+    "cover": {
+     "file": "src/engine/factoryAiCheckViability.ts",
+     "text": ": -2,\n  });\n}\n\nc",
+     "at": 0
+    },
+    "body": ": -2"
+   }
+  ],
+  "id": "R042"
+ },
+ {
+  "rule": "AI: Superpower viability, who-moves-first coin flip on a Speed tie",
+  "freq": [
+   "rare"
+  ],
+  "how": "AI Nidoqueen 701 / Regirock 762 / Registeel 841 scoring Superpower when its effective Speed equals the target's",
+  "reason": "if_target_faster draws Random() & 1 on equal Speed. Superpower sets 701, 762, 841 are in the viability range.",
+  "pieces": [
+   {
+    "file": "factoryAiCheckViability.ts",
+    "function": "runCvSuperpower",
+    "line": 7833,
+    "cover": null,
+    "body": "{\n    tieDraw = nextDraw(rng, ordinal, `${input.reasonPrefix}-target-faster-tie`);\n    rng = tieDraw.after;\n    tieRoll = tieDraw.randomValue;\n    ordinal += 1;\n  }"
+   },
+   {
+    "file": "factoryAiCheckViability.ts",
+    "function": "runCvSuperpower",
+    "line": 7840,
+    "cover": {
+     "file": "src/engine/factoryAiCheckViability.ts",
+     "text": "{\n    draws.push(Object.freeze({ ...tieDraw, kind: \"target-faster-tie\" as const, strikesFirst }));\n  }\n  const targetFaster = strikesFirst === 1;\n\n  const hpPercent = Math.floor((100 * input.attacker.hp) / input.attacker.maxHp);\n  if (targetFaster) {\n    // Su",
+     "at": 0
+    },
+    "body": "{\n    draws.push(Object.freeze({ ...tieDraw, kind: \"target-faster-tie\" as const, strikesFirst }));\n  }"
+   }
+  ],
+  "id": "R043"
+ },
+ {
+  "rule": "AI: Swagger is scored up when the user also knows Psych Up and the target's Attack is at -3 or lower",
+  "freq": [
+   "rare"
+  ],
+  "how": "The AI's Pokemon knows Swagger and Psych Up (13 sets from challenge 4, for example Metagross 562 or Snorlax 652) and the player's Pokemon has Attack at -3 or lower: at challenge 7 or later two Charms from the AI's Espeon 446 or Latias 798 before it faints, or the player's own repeated Superpower.",
+  "reason": "13 sets from 428 up have Swagger and Psych Up (helper `'SWAGGER' in m.moves and 'PSYCH_UP' in m.moves and m.index >= 267`). These lines give +3 and leave the turn number in the AI's result register when the target's Attack stage is 3 or less. The extra +2 on the first turn cannot happen (Attack cannot be at -3 before turn 1); the rest can.",
+  "pieces": [
+   {
+    "file": "factoryAiCheckViability.ts",
+    "function": "runCvSwagger",
+    "line": 7598,
+    "cover": {
+     "file": "src/engine/factoryAiCheckViability.ts",
+     "text": "\n    const turnC",
+     "at": 0
+    },
+    "body": "const turnCount = Math.max(0, Math.min(0xff, Math.trunc(input.battleTurnCount)));\n    return Object.freeze({\n      rng: input.rng,\n      draws: Object.freeze([]),\n      scoreDelta: turnCount === 0 ? 5"
+   },
+   {
+    "file": "factoryAiCheckViability.ts",
+    "function": "runCvSwagger",
+    "line": 7603,
+    "cover": {
+     "file": "src/engine/factoryAiCheckViability.ts",
+     "text": ": 3,\n      funcResultAfter: turn",
+     "at": 0
+    },
+    "body": ": 3"
+   },
+   {
+    "file": "factoryAiCheckViability.ts",
+    "function": "runCvSwagger",
+    "line": 7604,
+    "cover": {
+     "file": "src/engine/factoryAiCheckViability.ts",
+     "text": "? turnCount as AiWeatherValue : undefined,\n ",
+     "at": 0
+    },
+    "body": "? turnCount"
+   },
+   {
+    "file": "factoryAiCheckViability.ts",
+    "function": "runCvSwagger",
+    "line": 7604,
+    "cover": {
+     "file": "src/engine/factoryAiCheckViability.ts",
+     "text": ": undefined,\n    });",
+     "at": 0
+    },
+    "body": ": undefined"
+   }
+  ],
+  "id": "R044"
+ },
+ {
+  "rule": "AI: a Speed tie is decided by a random draw when the AI checks who moves first",
+  "freq": [
+   "rare"
+  ],
+  "how": "The AI's Encore user (Dewgong 488 from challenge 4, or Noland's Wobbuffet 290 in the silver battle) has exactly the same Speed as the target, and the target has no disabled move. The tie can come from equal stats, a Speed change or paralysis.",
+  "reason": "The game's speed check draws a random number when the two Speeds are equal; the draw moves every later roll of the turn.",
+  "pieces": [
+   {
+    "file": "factoryAiCheckViability.ts",
+    "function": "runCvEncore",
+    "line": 8157,
+    "cover": {
+     "file": "src/engine/factoryAiCheckViability.ts",
+     "text": "{\n    tieDraw = nextDraw(rng, ordinal, `${input.reasonPrefix}-target-faster-tie`);\n    rng = tieDraw.after;\n    tieRoll = tieDraw.randomValue;\n    ordinal += 1;\n  }\n  const strikesFirst = getWhoStrikesFirst(attacker, target, tieRoll, turnOrder.weather, turnOrder.randomTurnNumber);\n  if (tieDraw) {\n    draws.push(Object.freeze({ ...tieDraw, kind: \"target-faster-tie\" as const, strikesFirst }));\n  }\n  if (strikesFirst === 1) {\n    // Target faster: Sc",
+     "at": 0
+    },
+    "body": "{\n    tieDraw = nextDraw(rng, ordinal, `${input.reasonPrefix}-target-faster-tie`);\n    rng = tieDraw.after;\n    tieRoll = tieDraw.randomValue;\n    ordinal += 1;\n  }"
+   },
+   {
+    "file": "factoryAiCheckViability.ts",
+    "function": "runCvEncore",
+    "line": 8164,
+    "cover": {
+     "file": "src/engine/factoryAiCheckViability.ts",
+     "text": "{\n    draws.push(Object.freeze({ ...tieDraw, kind: \"target-faster-tie\" as const, strikesFirst }));\n  }\n  if (strikesFirst === 1) {\n    // Target faster: Sco",
+     "at": 0
+    },
+    "body": "{\n    draws.push(Object.freeze({ ...tieDraw, kind: \"target-faster-tie\" as const, strikesFirst }));\n  }"
+   },
+   {
+    "file": "factoryAiCheckViability.ts",
+    "function": "runCvDisable",
+    "line": 8713,
+    "cover": {
+     "file": "src/engine/factoryAiCheckViability.ts",
+     "text": "{\n    tieDraw = nextDraw(rng, ordinal, `${input.reasonPrefix}-target-faster-tie`);\n    rng = tieDraw.after;\n    tieRoll = tieDraw.randomValue;\n    ordinal += 1;\n  }\n  const strikesFirst = getWhoStrikesFirst(attacker, target, tieRoll, turnOrder.weather, turnOrder.randomTurnNumber);\n  if (tieDraw) {\n    draws.push(Object.freeze({ ...tieDraw, kind: \"target-faster-tie\" as const, strikesFirst }));\n  }\n  if (strikesFirst === 1) {\n    // Target faster: ju",
+     "at": 0
+    },
+    "body": "{\n    tieDraw = nextDraw(rng, ordinal, `${input.reasonPrefix}-target-faster-tie`);\n    rng = tieDraw.after;\n    tieRoll = tieDraw.randomValue;\n    ordinal += 1;\n  }"
+   },
+   {
+    "file": "factoryAiCheckViability.ts",
+    "function": "runCvDisable",
+    "line": 8720,
+    "cover": {
+     "file": "src/engine/factoryAiCheckViability.ts",
+     "text": "{\n    draws.push(Object.freeze({ ...tieDraw, kind: \"target-faster-tie\" as const, strikesFirst }));\n  }\n  if (strikesFirst === 1) {\n    // Target faster: jum",
+     "at": 0
+    },
+    "body": "{\n    draws.push(Object.freeze({ ...tieDraw, kind: \"target-faster-tie\" as const, strikesFirst }));\n  }"
+   },
+   {
+    "file": "factoryAiCheckViability.ts",
+    "function": "runCvEruption",
+    "line": 8899,
+    "cover": {
+     "file": "src/engine/factoryAiCheckViability.ts",
+     "text": "{\n    tieDraw = nextDraw(rng, ordinal, `${input.reasonPrefix}-target-faster-tie`);\n    rng = tieDraw.after;\n    tieRoll = tieDraw.randomValue;\n    ordinal += 1;\n  }\n  const strikesFirst = getWhoStrikesFirst(attacker, target, tieRoll, turnOrder.weather, turnOrder.randomTurnNumber);\n  if (tieDraw) {\n    draws.push(Object.freeze({ ...tieDraw, kind: \"target-faster-tie\" as const, strikesFirst }));\n  }\n\n  const tar",
+     "at": 0
+    },
+    "body": "{\n    tieDraw = nextDraw(rng, ordinal, `${input.reasonPrefix}-target-faster-tie`);\n    rng = tieDraw.after;\n    tieRoll = tieDraw.randomValue;\n    ordinal += 1;\n  }"
+   },
+   {
+    "file": "factoryAiCheckViability.ts",
+    "function": "runCvEruption",
+    "line": 8906,
+    "cover": {
+     "file": "src/engine/factoryAiCheckViability.ts",
+     "text": "{\n    draws.push(Object.freeze({ ...tieDraw, kind: \"target-faster-tie\" as const, strikesFirst }));\n  }\n\n  const targ",
+     "at": 0
+    },
+    "body": "{\n    draws.push(Object.freeze({ ...tieDraw, kind: \"target-faster-tie\" as const, strikesFirst }));\n  }"
+   }
+  ],
+  "id": "R045"
+ },
+ {
+  "rule": "AI: a Speed-lowering move is scored down against a target with Speed Boost",
+  "freq": [
+   "rare"
+  ],
+  "how": "Challenge number 2 (sets 267..371, also Noland silver): the AI's active Pokemon knows Scary Face (sets 283, 300, 302, 307, 310, 311, 346) and the player's active Pokemon is Ninjask (set 343); or any target whose Speed Boost the AI has already seen after Skill Swap / Role Play.",
+  "reason": "AI_CBM_SpeedDown's Speed Boost gate (battle_ai_scripts.s:289) gives -10. Both halves exist in the AI range: Ninjask set 343 (Speed Boost is its only ability) and seven Scary Face sets, all in 267..371.",
+  "pieces": [
+   {
+    "file": "factoryAiCheckBadMove.ts",
+    "function": "runCbmSpeedDown",
+    "line": 821,
+    "cover": {
+     "file": "src/engine/factoryAiCheckBadMove.ts",
+     "text": "{\n    return Object.freeze({ rng, draws: Object.freeze([]), scoreDelta: -10 });\n  }\n  const resu",
+     "at": 0
+    },
+    "body": "{\n    return Object.freeze({ rng, draws: Object.freeze([]), scoreDelta: -10 });\n  }"
+   }
+  ],
+  "id": "R046"
+ },
+ {
+  "rule": "AI: an accuracy-lowering move is scored up at random when the target has Leech Seed on it",
+  "freq": [
+   "rare"
+  ],
+  "how": "An AI Pokemon seeds the target with Leech Seed and then faints; the next AI Pokemon has Sand Attack, Smokescreen or Flash and the seeded target is still in",
+  "reason": "Sets of the full-AI ranges have Sand Attack / Smokescreen / Flash and others have Leech Seed (for example Breloom 480, Shiftry 494 next to Magmar 511 in sets 468..563); no single set has both.",
+  "pieces": [
+   {
+    "file": "factoryAiCheckViability.ts",
+    "function": "runCvAccuracyDown",
+    "line": 4244,
+    "cover": {
+     "file": "src/engine/factoryAiCheckViability.ts",
+     "text": "{\n    const draw4 = ",
+     "at": 0
+    },
+    "body": "{\n    const draw4 = nextDraw(rng, ordinal, `${input.reasonPrefix}-draw4`);\n    rng = draw4.after;\n    ordinal += 1;\n    const succeeded4 = draw4.randomValue % 256 >= 70;\n    draws.push(Object.freeze({ ...draw4, kind: \"accuracy-down-roll-4\" as const, succeeded: succeeded4 }));\n    if (succeeded4) sco"
+   }
+  ],
+  "id": "R047"
+ },
+ {
+  "rule": "AI: an accuracy-lowering move is scored up at random when the target is badly poisoned",
+  "freq": [
+   "rare"
+  ],
+  "how": "An AI Pokemon badly poisons the target with Toxic and then faints; the next AI Pokemon has Sand Attack, Smokescreen or Flash (for example Magmar 511, Shuckle 528, Charizard 550) and the poisoned target is still in",
+  "reason": "Sets of the full-AI ranges have Sand Attack / Smokescreen / Flash (8 sets from 372 up, 4 more for Noland silver) and others have Toxic (18 sets from 267 up); no single set has both.",
+  "pieces": [
+   {
+    "file": "factoryAiCheckViability.ts",
+    "function": "runCvAccuracyDown",
+    "line": 4234,
+    "cover": {
+     "file": "src/engine/factoryAiCheckViability.ts",
+     "text": "{\n    const draw3 = nextDraw(rng, ordinal, `${input.reasonPrefix}-draw3`);\n    rng = draw3.after;\n    ordinal += 1;\n    const su",
+     "at": 0
+    },
+    "body": "{\n    const draw3 = nextDraw(rng, ordinal, `${input.reasonPrefix}-draw3`);\n    rng = draw3.after;\n    ordinal += 1;\n    const succeeded3 = draw3.randomValue % 256 >= 70;\n    draws.push(Object.freeze({ ...draw3, kind: \"accuracy-down-roll-3\" as const, succeeded: succeeded3 }));\n    if (succeeded3) sco"
+   }
+  ],
+  "id": "R048"
+ },
+ {
+  "rule": "AI: an accuracy-lowering move is scored up at random when the user is rooted by Ingrain",
+  "freq": [
+   "rare"
+  ],
+  "how": "Sets 372..849 with full AI: the AI's Clefable (set 389) roots itself with an Ingrain called by Metronome, then a Transform called by Metronome copies a target that has Sand Attack, Smokescreen or Flash (or a called Baton Pass hands the roots to a teammate with such a move), and the AI scores that move",
+  "reason": "Not sure it is impossible, so c: no Ingrain set (490, 587, 704) has an accuracy-lowering move or Baton Pass (helper: \"m.index>=267 and 'INGRAIN' in m.eff\"), but Metronome can call Ingrain, Transform and Baton Pass, and the roots stay through both (battle_main.c:3176).",
+  "pieces": [
+   {
+    "file": "factoryAiCheckViability.ts",
+    "function": "runCvAccuracyDown",
+    "line": 4254,
+    "cover": {
+     "file": "src/engine/factoryAiCheckViability.ts",
+     "text": "{\n    const draw5 = nextDraw(rng, ordinal, `${input.reasonPrefix}-draw5`);\n    rng = draw5.after;\n    ordinal += 1;\n    const succeeded5 = draw5.randomValue % 256 >= 12",
+     "at": 0
+    },
+    "body": "{\n    const draw5 = nextDraw(rng, ordinal, `${input.reasonPrefix}-draw5`);\n    rng = draw5.after;\n    ordinal += 1;\n    const succeeded5 = draw5.randomValue % 256 >= 128;\n    draws.push(Object.freeze({ ...draw5, kind: \"accuracy-down-roll-5\" as const, succeeded: succeeded5 }));\n    if (succeeded5) sc"
+   }
+  ],
+  "id": "R049"
+ },
+ {
+  "rule": "AI: marks its own Imprison move down when its Imprison is already active",
+  "freq": [
+   "rare"
+  ],
+  "how": "The AI's Clefable (set 389, challenge 3 or 7 and later) called Imprison with Metronome against a Pokemon that shares one of its moves (Double Team, Reflect) and stays in; the AI then scores its moves",
+  "reason": "Reachable, but only as a flag: Metronome can call Imprison for the AI's Pokemon. Only the scoring of the AI's own Imprison move reads the flag (factoryAiCheckBadMove.ts:2631) and no set has Imprison, so no decision can change.",
+  "pieces": [
+   {
+    "file": "factoryAiDecisionPolicy.ts",
+    "function": "chooseFactoryAiScoredDecision",
+    "line": 1094,
+    "cover": {
+     "file": "src/engine/factoryAiDecisionPolicy.ts",
+     "text": "? { imprison",
+     "at": 0
+    },
+    "body": "? { imprisonedOthers: true }"
+   }
+  ],
+  "id": "R050"
+ },
+ {
+  "rule": "AI: marks its own Mist move down when Mist is already up on its side",
+  "freq": [
+   "rare"
+  ],
+  "how": "The AI's Clefable (set 389, challenge 3 or 7 and later) called Mist with Metronome and Mist is still up when the AI next scores its moves",
+  "reason": "Reachable, but only as a flag: Metronome can put Mist on the AI's side. Only the scoring of the AI's own Mist move reads the flag (factoryAiCheckBadMove.ts:2518) and no set has Mist, so no decision can change.",
+  "pieces": [
+   {
+    "file": "factoryAiDecisionPolicy.ts",
+    "function": "chooseFactoryAiScoredDecision",
+    "line": 1092,
+    "cover": {
+     "file": "src/engine/factoryAiDecisionPolicy.ts",
+     "text": "? { mistUp: ",
+     "at": 0
+    },
+    "body": "? { mistUp: true }"
+   }
+  ],
+  "id": "R051"
+ },
+ {
+  "rule": "AI: marks its own Mud Sport move down when Mud Sport is already active",
+  "freq": [
+   "rare"
+  ],
+  "how": "The AI's Clefable (set 389, challenge 3 or 7 and later) called Mud Sport with Metronome and stays in; the AI then scores its moves",
+  "reason": "Reachable, but only as a flag: Metronome can call Mud Sport for the AI's Pokemon. Only the scoring of the AI's own Mud Sport move reads the flag (factoryAiCheckBadMove.ts:2644) and no set has Mud Sport, so no decision can change.",
+  "pieces": [
+   {
+    "file": "factoryAiDecisionPolicy.ts",
+    "function": "chooseFactoryAiScoredDecision",
+    "line": 1095,
+    "cover": {
+     "file": "src/engine/factoryAiDecisionPolicy.ts",
+     "text": "? { mudSport",
+     "at": 0
+    },
+    "body": "? { mudSportUp: true }"
+   }
+  ],
+  "id": "R052"
+ },
+ {
+  "rule": "AI: own Focus Energy state passed to the bad-move check",
+  "freq": [
+   "rare"
+  ],
+  "how": "AI Clefable 389 calls Focus Energy through Metronome, then picks its next move",
+  "reason": "Reachable: the AI's Clefable 389 (challenge 3, 7+) can get Focus Energy through Metronome. The flag is read only by the Focus Energy check (factoryAiCheckBadMove.ts:1815, AI_CBM_FocusEnergy :383), which no AI set reaches, so it changes no score.",
+  "pieces": [
+   {
+    "file": "factoryAiDecisionPolicy.ts",
+    "function": "chooseFactoryAiScoredDecision",
+    "line": 1090,
+    "cover": {
+     "file": "src/engine/factoryAiDecisionPolicy.ts",
+     "text": "? { hasFocus",
+     "at": 0
+    },
+    "body": "? { hasFocusEnergy: true }"
+   }
+  ],
+  "id": "R053"
+ },
+ {
+  "rule": "AI: switch out a sleeping Natural Cure Pokemon",
+  "freq": [
+   "rare"
+  ],
+  "how": "The opponent's Blissey, Chansey, Starmie, Altaria, Roselia, Corsola or Staryu (Natural Cure) is asleep with at least half HP, the player's last move against it missed or failed, and the AI's first 50 % roll fails",
+  "reason": "When the last move against the sleeper missed or failed, the 'last landed move' is 0xFFFF; after a failed first 50 % roll the engine takes that move's power as 0 and makes a second 50 % roll. The ROM reads gBattleMoves[0xFFFF] past the end of the table here (battle_ai_switch_items.c:235); that byte is 0 in the ROM image (0x083DC88D), the same value, but no matched battle has run this.",
+  "pieces": [
+   {
+    "file": "factoryAiSwitchPolicy.ts",
+    "function": "evaluateFactoryAiSwitchPolicy",
+    "line": 575,
+    "cover": {
+     "file": "src/engine/factoryAiSwitchPolicy.ts",
+     "text": "?? 0;\n        if",
+     "at": 0
+    },
+    "body": "?? 0"
+   },
+   {
+    "file": "factoryAiSwitchPolicy.ts",
+    "function": "evaluateFactoryAiSwitchPolicy",
+    "line": 600,
+    "cover": {
+     "file": "src/engine/factoryAiSwitchPolicy.ts",
+     "text": ": null;\n    ",
+     "at": 0
+    },
+    "body": ": null"
+   },
+   {
+    "file": "factoryAiSwitchPolicy.ts",
+    "function": "evaluateFactoryAiSwitchPolicy",
+    "line": 602,
+    "cover": {
+     "file": "src/engine/factoryAiSwitchPolicy.ts",
+     "text": "{\n          selected = select(de",
+     "at": 0
+    },
+    "body": "{\n          selected = select(defensive);\n        }"
+   }
+  ],
+  "id": "R054"
+ },
+ {
+  "rule": "Baton Pass moves an opponent's Lock-On / Mind Reader lock to the incoming Pokemon",
+  "freq": [
+   "rare"
+  ],
+  "how": "an opponent's Metronome calls Lock-On or Mind Reader on a Pokemon that then uses Baton Pass while the lock is active",
+  "reason": "When the Lock-On target Baton Passes, the opponent's sure-hit lock is reset to its two-turn form (battle_main.c:3178-3186).",
+  "pieces": [
+   {
+    "file": "battleScriptSwitchinOpcode.ts",
+    "function": "(module)",
+    "line": 626,
+    "cover": {
+     "file": "src/engine/battleScriptSwitchinOpcode.ts",
+     "text": "&& candidate.battlerWithSureHit === battler;\n      const cle",
+     "at": 0
+    },
+    "body": "&& candidate.battlerWithSureHit === battler"
+   },
+   {
+    "file": "battleScriptSwitchinOpcode.ts",
+    "function": "(module)",
+    "line": 632,
+    "cover": {
+     "file": "src/engine/battleScriptSwitchinOpcode.ts",
+     "text": "? (\n          (c",
+     "at": 0
+    },
+    "body": "? (\n          (candidate.status3 & ~STATUS3_ALWAYS_HITS)\n          | STATUS3_ALWAYS_HITS_TURN_2\n        ) >>> 0"
+   }
+  ],
+  "id": "R055"
+ },
+ {
+  "rule": "Beat Up fails when no party member can attack",
+  "freq": [
+   "rare"
+  ],
+  "how": "Metronome calls Beat Up while the user is statused and its teammates are fainted or statused",
+  "reason": "With no healthy, unstatused party member on the first pass Cmd_trydobeatup jumps to 'But it failed' (battle_script_commands.c:9001-9004).",
+  "pieces": [
+   {
+    "file": "battleScriptBeatUpOpcode.ts",
+    "function": "(module)",
+    "line": 137,
+    "cover": {
+     "file": "src/engine/battleScriptBeatUpOpcode.ts",
+     "text": "? initialFai",
+     "at": 0
+    },
+    "body": "? initialFailure.programCounter"
+   }
+  ],
+  "id": "R056"
+ },
+ {
+  "rule": "Beat Up stops once the target has fainted",
+  "freq": [
+   "rare"
+  ],
+  "how": "Metronome calls Beat Up with two or more healthy unstatused party members and an early hit knocks the target out",
+  "reason": "Cmd_trydobeatup jumps to the end when the target's HP is 0 (battle_script_commands.c:8966-8968).",
+  "pieces": [
+   {
+    "file": "battleScriptBeatUpOpcode.ts",
+    "function": "(module)",
+    "line": 89,
+    "cover": {
+     "file": "src/engine/battleScriptBeatUpOpcode.ts",
+     "text": "{\n      retu",
+     "at": 0
+    },
+    "body": "{\n      return transitionBattleScriptCommand(\n        context,\n        Object.freeze({ kind: \"jump\", programCounter: end.programCounter }),\n      );\n    }"
+   }
+  ],
+  "id": "R057"
+ },
+ {
+  "rule": "Charge doubles the user's next Electric move",
+  "freq": [
+   "rare"
+  ],
+  "how": "Metronome calls Charge, and on the next turn the same Pokemon uses an Electric move (a second Metronome call picking e.g. Thunderbolt); the engine's GET_MOVE_TYPE vs the C's base type only differs for Electric Hidden Power, impossible in Factory (equal IVs give Hidden Power Fighting or Dark)",
+  "reason": "Cmd_damagecalc doubles damage when STATUS3_CHARGED_UP and the move is Electric (battle_script_commands.c:1298-1299)",
+  "pieces": [
+   {
+    "file": "battleScriptHitChainOpcode.ts",
+    "function": "damagecalcOpcodeHandler",
+    "line": 1632,
+    "cover": {
+     "file": "src/engine/battleScriptHitChainOpcode.ts",
+     "text": "{\n    damage *= ",
+     "at": 0
+    },
+    "body": "{\n    damage *= 2;\n  }"
+   }
+  ],
+  "id": "R058"
+ },
+ {
+  "rule": "Charge doubling the AI's damage estimate when it picks a Pokemon to switch in",
+  "freq": [
+   "rare"
+  ],
+  "how": "the AI's Chansey 227 / Clefable 389 gets Charge from Metronome, then switches by a Metronome-called Baton Pass or a voluntary switch scored by damage",
+  "reason": "AI_CalcDmg doubles for a Charged attacker with an Electric gCurrentMove (battle_script_commands.c:1306-1319); the test runs when the Pokemon being replaced is Charged and still active (Baton Pass or the AI's voluntary switch; a fainted one has its status3 cleared, battle_main.c:3273).",
+  "pieces": [
+   {
+    "file": "battleScriptOpenPartyScreenOpcode.ts",
+    "function": "calculateAiSwitchIntoBaseDamage",
+    "line": 104,
+    "cover": {
+     "file": "src/engine/battleScriptOpenPartyScreenOpcode.ts",
+     "text": "&& resolveBa",
+     "at": 0
+    },
+    "body": "&& resolveBattleScriptMoveTypeName(rules.currentMove, 0) === \"TYPE_ELECTRIC\""
+   },
+   {
+    "file": "battleScriptOpenPartyScreenOpcode.ts",
+    "function": "calculateAiSwitchIntoBaseDamage",
+    "line": 105,
+    "cover": {
+     "file": "src/engine/battleScriptOpenPartyScreenOpcode.ts",
+     "text": "{\n    baseDa",
+     "at": 0
+    },
+    "body": "{\n    baseDamage *= 2;\n  }"
+   }
+  ],
+  "id": "R059"
+ },
+ {
+  "rule": "Choice Band in Future Sight / Doom Desire damage",
+  "freq": [
+   "rare"
+  ],
+  "how": "a Future Sight user holding Choice Band (Alakazam 596 / Mr. Mime 572 Trick it onto Xatu 385 / Whiscash 483 in challenge 7+), or a Metronome Doom Desire by a Choice Band holder",
+  "reason": "Choice Band multiplies Attack inside CalculateBaseDamage for the stored Future Sight / Doom Desire damage (pokemon.c).",
+  "pieces": [
+   {
+    "file": "battleScriptTrysetfutureattackOpcode.ts",
+    "function": "calculateFutureAttackBaseDamage",
+    "line": 83,
+    "cover": {
+     "file": "src/engine/battleScriptTrysetfutureattackOpcode.ts",
+     "text": "attack = Math.trunc(attack * 150 / 100); // Choi",
+     "at": 0
+    },
+    "body": "attack = Math.trunc(attack * 150 / 100);"
+   }
+  ],
+  "id": "R060"
+ },
+ {
+  "rule": "Conversion 2 fails against a two-turn move",
+  "freq": [
+   "rare"
+  ],
+  "how": "a Metronome user is hit by Fly/Dig/Dive/Bounce/Solar Beam/Sky Attack/Razor Wind, the foe starts the same move again before it, and Metronome then calls Conversion 2",
+  "reason": "Cmd_settypetorandomresistance fails when the last landed move is a two-turn move and its user is still charging (STATUS2_MULTIPLETURNS, battle_script_commands.c:8081-8085)",
+  "pieces": [
+   {
+    "file": "battleScriptTypeChangeOpcode.ts",
+    "function": "(module)",
+    "line": 144,
+    "cover": {
+     "file": "src/engine/battleScriptTypeChangeOpcode.ts",
+     "text": "{\n      return jumpToFailure(con",
+     "at": 0
+    },
+    "body": "{\n      return jumpToFailure(context);\n    }"
+   }
+  ],
+  "id": "R061"
+ },
+ {
+  "rule": "Conversion 2's fallback scan after 1000 failed random picks (with the game's stale-index bug)",
+  "freq": [
+   "rare"
+  ],
+  "how": "Metronome (Chansey 227 / Clefable 389) calls Conversion 2 after being hit by a type with almost no resisting type left, e.g. a Dragon hit (only Steel resists): 1000 random picks all miss (about 1 in 7,000) or the user is already Steel",
+  "reason": "Cmd_settypetorandomresistance's second loop, including the TYPE_EFFECT_DEF_TYPE(i) stale-index bug (battle_script_commands.c:8108-8128)",
+  "pieces": [
+   {
+    "file": "battleScriptTypeChangeOpcode.ts",
+    "function": "conversion2FallbackTypeWithStaleIndexBug",
+    "line": 113,
+    "cover": {
+     "file": "src/engine/battleScriptTypeChangeOpcode.ts",
+     "text": "function con",
+     "at": 0
+    },
+    "body": "function conversion2FallbackTypeWithStaleIndexBug(\n  attackType: string,\n  heldTypes: readonly string[],\n  staleRandomIndex: number,\n): string | null {\n  const staleDefendingType = TYPE_EFFECTIVENESS[staleRandomIndex]?.defendingType;\n  for (const row of TYPE_EFFECTIVENESS) {\n    if (\n      row.attac"
+   },
+   {
+    "file": "battleScriptTypeChangeOpcode.ts",
+    "function": "(module)",
+    "line": 178,
+    "cover": {
+     "file": "src/engine/battleScriptTypeChangeOpcode.ts",
+     "text": "\n    const selec",
+     "at": 0
+    },
+    "body": "const selected = attackType\n      ? conversion2FallbackTypeWithStaleIndexBug(attackType, battler.types, staleIndex)"
+   },
+   {
+    "file": "battleScriptTypeChangeOpcode.ts",
+    "function": "(module)",
+    "line": 182,
+    "cover": {
+     "file": "src/engine/battleScriptTypeChangeOpcode.ts",
+     "text": "{\n      return jumpToFailure(Obj",
+     "at": 0
+    },
+    "body": "{\n      return jumpToFailure(Object.freeze({\n        ...context,\n        state: Object.freeze({ ...context.state, rng }),\n      }));\n    }\n    return transitionBattleScriptCommand(\n      context,\n      Object.freeze({ kind: \"advance\" }),\n      {\n        rulesContext: Object.freeze({\n          ...wit"
+   }
+  ],
+  "id": "R062"
+ },
+ {
+  "rule": "Disable ending early when the disabled move is no longer in the moveset",
+  "freq": [
+   "rare"
+  ],
+  "how": "a disabled Pokemon whose moveset changes, e.g. Chansey/Clefable's Metronome calling Transform while one of its moves is disabled",
+  "reason": "battle_util.c:1700-1709: if the disabled move is not among the battler's moves, Disable is cleared silently.",
+  "pieces": [
+   {
+    "file": "battleEndTurnOrchestration.ts",
+    "function": "runDisableTick",
+    "line": 492,
+    "cover": {
+     "file": "src/engine/battleEndTurnOrchestration.ts",
+     "text": "{\n    return Object.freeze({\n      kind: \"advance\",\n      state: Object.freeze({\n        ...state,\n        rulesContext: withBattler(state.rulesContext, battler, {\n          di",
+     "at": 0
+    },
+    "body": "{\n    return Object.freeze({\n      kind: \"advance\",\n      state: Object.freeze({\n        ...state,\n        rulesContext: withBattler(state.rulesContext, battler, {\n          disabledMove: 0,\n          disableTimer: 0,\n        }),\n      }),\n    });\n  }"
+   }
+  ],
+  "id": "R063"
+ },
+ {
+  "rule": "Encore ending early when the encored move left its slot",
+  "freq": [
+   "rare"
+  ],
+  "how": "an encored Metronome user (Chansey/Clefable) whose Metronome calls Transform, replacing the encored slot",
+  "reason": "battle_util.c:1724-1728: if moves[encoredMovePos] is no longer the encored move, Encore is cleared silently.",
+  "pieces": [
+   {
+    "file": "battleEndTurnOrchestration.ts",
+    "function": "runDoBattlerEndTurnEffects",
+    "line": 1707,
+    "cover": {
+     "file": "src/engine/battleEndTurnOrchestration.ts",
+     "text": "{\n        state ",
+     "at": 0
+    },
+    "body": "{\n        state = Object.freeze({\n          ...state,\n          rulesContext: withBattler(state.rulesContext, battler, {\n            encoredMove: 0,\n            encoreTimer: 0,\n          }),\n        });\n      }"
+   }
+  ],
+  "id": "R064"
+ },
+ {
+  "rule": "Eruption / Water Spout keep an already-set base power",
+  "freq": [
+   "rare"
+  ],
+  "how": "Eruption or Water Spout running while a base power from an earlier command of the same action is still set",
+  "reason": "Cmd_scaledamagebyhealthratio scales only when gDynamicBasePower is 0 (battle_script_commands.c:9381); no ordinary path that sets it before Eruption in the same action was found (it is cleared after every action, battle_util.c:678), so this may be unreachable, but not proven.",
+  "pieces": [
+   {
+    "file": "battleScriptRankedBatch1Opcode.ts",
+    "function": "scaledDamageHandler",
+    "line": 64,
+    "cover": {
+     "file": "src/engine/battleScriptRankedBatch1Opcode.ts",
+     "text": "{\n    return transitionBattleScriptCommand(context, Object.freeze({ kind: \"advance\" }));\n  }\n  const att",
+     "at": 0
+    },
+    "body": "{\n    return transitionBattleScriptCommand(context, Object.freeze({ kind: \"advance\" }));\n  }"
+   }
+  ],
+  "id": "R065"
+ },
+ {
+  "rule": "Focus Band lets the target survive a one-hit KO move",
+  "freq": [
+   "rare"
+  ],
+  "how": "a one-hit KO move (Fissure, Horn Drill, Guillotine, Sheer Cold) hits a Focus Band holder and the 10% Focus Band roll succeeds",
+  "reason": "A Focus Band that triggered leaves the target at 1 HP against a hitting one-hit KO move (battle_script_commands.c:7551-7556).",
+  "pieces": [
+   {
+    "file": "battleScriptTryKOOpcode.ts",
+    "function": "(module)",
+    "line": 172,
+    "cover": {
+     "file": "src/engine/battleScriptTryKOOpcode.ts",
+     "text": "{\n        battleMoveDamage = targetBattler.hp - 1;\n        moveResultFlags = (moveResultFlags | BATTLE_SCRIPT_MOVE_RESULT_FOE_HU",
+     "at": 0
+    },
+    "body": "{\n        battleMoveDamage = targetBattler.hp - 1;\n        moveResultFlags = (moveResultFlags | BATTLE_SCRIPT_MOVE_RESULT_FOE_HUNG_ON) >>> 0;\n        lastUsedItem = targetBattler.item;\n      }"
+   }
+  ],
+  "id": "R066"
+ },
+ {
+  "rule": "Focus Punch set-up before the turn is skipped for a loafing Truant Pokemon",
+  "freq": [
+   "rare"
+  ],
+  "how": "a Pokemon that got Truant through Skill Swap (e.g. an Alakazam / Gengar Skill Swap user swapping Slaking's Truant on to a Focus Punch user) chooses Focus Punch on its loafing turn",
+  "reason": "CheckFocusPunch_ClearVarsBeforeTurnStarts (battle_main.c:4914-4917) skips BattleScript_FocusPunchSetUp when the user's truantCounter is set; engine matches.",
+  "pieces": [
+   {
+    "file": "factoryBattleScriptFullTurnDecision.ts",
+    "function": "runFocusPunchSetUpPrePass",
+    "line": 1724,
+    "cover": {
+     "file": "src/engine/factoryBattleScriptFullTurnDecision.ts",
+     "text": "continue;\n    co",
+     "at": 0
+    },
+    "body": "continue;"
+   }
+  ],
+  "id": "R067"
+ },
+ {
+  "rule": "Frozen Pokemon using Flame Wheel thaws itself and attacks",
+  "freq": [
+   "rare"
+  ],
+  "how": "a frozen Pokemon picks Flame Wheel (Growlithe 136, Quilava 181; challenges 0-1) and the 1-in-5 thaw roll fails",
+  "reason": "CANCELER_FROZEN: a frozen attacker whose move has EFFECT_THAW_HIT is let through on the 4-in-5 roll instead of being stopped (battle_util.c:2059-2070).",
+  "pieces": [
+   {
+    "file": "battleScriptActionAdmission.ts",
+    "function": "advanceBattleScriptAttackCancelerFrozen",
+    "line": 1643,
+    "cover": {
+     "file": "src/engine/battleScriptActionAdmission.ts",
+     "text": "{\n        reason = \"thaw",
+     "at": 0
+    },
+    "body": "{\n        reason = \"thaw-hit-allowed\";\n      }"
+   },
+   {
+    "file": "battleScriptActionAdmission.ts",
+    "function": "advanceBattleScriptAttackCancelerThaw",
+    "line": 3859,
+    "cover": {
+     "file": "src/engine/battleScriptActionAdmission.ts",
+     "text": "&& isThawHit",
+     "at": 0
+    },
+    "body": "&& isThawHit"
+   },
+   {
+    "file": "battleScriptActionAdmission.ts",
+    "function": "advanceBattleScriptAttackCancelerThaw",
+    "line": 3861,
+    "cover": {
+     "file": "src/engine/battleScriptActionAdmission.ts",
+     "text": "? (\n      sourceBattler.status1\n",
+     "at": 0
+    },
+    "body": "? (\n      sourceBattler.status1\n      & ~BATTLE_SCRIPT_STATUS1_FREEZE\n    ) >>> 0"
+   },
+   {
+    "file": "battleScriptActionAdmission.ts",
+    "function": "advanceBattleScriptAttackCancelerThaw",
+    "line": 3868,
+    "cover": {
+     "file": "src/engine/battleScriptActionAdmission.ts",
+     "text": ": Object.freeze({ ...sourceBattler, status1:",
+     "at": 0
+    },
+    "body": ": Object.freeze({ ...sourceBattler, status1: nextStatus1 })"
+   },
+   {
+    "file": "battleScriptActionAdmission.ts",
+    "function": "advanceBattleScriptAttackCancelerThaw",
+    "line": 3871,
+    "cover": {
+     "file": "src/engine/battleScriptActionAdmission.ts",
+     "text": ": Object.freeze(rulesContext.battlers.map((candidate, index) =>\n      index === attacker ? nextBattler : candidate\n    )) as unknown as BattleScriptRulesContext[\"battlers\"];\n  const trackerAfter = BATTLE_SCRIPT_ATTACK_CANCELER_PHASES.CANCELER_E",
+     "at": 0
+    },
+    "body": ": Object.freeze(rulesContext.battlers.map("
+   },
+   {
+    "file": "battleScriptActionAdmission.ts",
+    "function": "(module)",
+    "line": 3871,
+    "cover": {
+     "file": "src/engine/battleScriptActionAdmission.ts",
+     "text": "(candidate, index) =>\n      index === attacker ? nextBattler : candidate\n    )) as unknown as BattleScriptRulesContext[\"battlers\"];\n  const trackerAfter = BATTLE_SCRIPT_ATTACK_CANCELER_PHASES.CANCELER_END",
+     "at": 0
+    },
+    "body": "(candidate, index) =>\n      index === attacker ? nextBattler : candidate"
+   },
+   {
+    "file": "battleScriptActionAdmission.ts",
+    "function": "advanceBattleScriptAttackCancelerThaw",
+    "line": 3880,
+    "cover": {
+     "file": "src/engine/battleScriptActionAdmission.ts",
+     "text": "? 1\n      : ",
+     "at": 0
+    },
+    "body": "? 1"
+   },
+   {
+    "file": "battleScriptActionAdmission.ts",
+    "function": "advanceBattleScriptAttackCancelerThaw",
+    "line": 3885,
+    "cover": {
+     "file": "src/engine/battleScriptActionAdmission.ts",
+     "text": ": defrostedByMove\n      ? \"d",
+     "at": 0
+    },
+    "body": ": defrostedByMove\n      ? \"defrosted-by-move\"\n      : \"frozen-status-sync\""
+   },
+   {
+    "file": "battleScriptActionAdmission.ts",
+    "function": "advanceBattleScriptAttackCancelerThaw",
+    "line": 3888,
+    "cover": {
+     "file": "src/engine/battleScriptActionAdmission.ts",
+     "text": "? 2 as const",
+     "at": 0
+    },
+    "body": "? 2"
+   },
+   {
+    "file": "battleScriptActionAdmission.ts",
+    "function": "advanceBattleScriptAttackCancelerThaw",
+    "line": 3890,
+    "cover": {
+     "file": "src/engine/battleScriptActionAdmission.ts",
+     "text": "? Object.freeze({\n      kind: \"handoff\",\n      sourceProgramCounter: sourcePc,\n      targetLabel: \"BattleScript_MoveUsedUnfr",
+     "at": 0
+    },
+    "body": "? Object.freeze({\n      kind: \"handoff\",\n      sourceProgramCounter: sourcePc,\n      targetLabel: \"BattleScript_MoveUsedUnfroze\",\n    })"
+   },
+   {
+    "file": "battleScriptActionAdmission.ts",
+    "function": "advanceBattleScriptAttackCancelerThaw",
+    "line": 3900,
+    "cover": {
+     "file": "src/engine/battleScriptActionAdmission.ts",
+     "text": "? Object.freeze({\n      kind: \"p",
+     "at": 0
+    },
+    "body": "? Object.freeze({\n      kind: \"push\",\n      sourceProgramCounter: sourcePc,\n    })"
+   },
+   {
+    "file": "battleScriptActionAdmission.ts",
+    "function": "advanceBattleScriptAttackCancelerThaw",
+    "line": 3907,
+    "cover": {
+     "file": "src/engine/battleScriptActionAdmission.ts",
+     "text": "? Object.freeze({\n        kind: \"set",
+     "at": 0
+    },
+    "body": "? Object.freeze({\n        kind: \"set\",\n        sourceConstant: \"B_MSG_DEFROSTED_BY_MOVE\",\n        value: 1,\n      })"
+   },
+   {
+    "file": "battleScriptActionAdmission.ts",
+    "function": "advanceBattleScriptAttackCancelerThaw",
+    "line": 3915,
+    "cover": {
+     "file": "src/engine/battleScriptActionAdmission.ts",
+     "text": "? Object.freeze({\n        kind: \"fro",
+     "at": 0
+    },
+    "body": "? Object.freeze({\n        kind: \"frozen-status1-sync\",\n        activeBattler: Object.freeze({\n          sourceGlobal: \"gActiveBattler\",\n          after: attacker,\n        }),\n        emit: Object.freeze({\n          sourceFunction: \"BtlController_EmitSetMonData\",\n          sourceRequest: \"REQUEST_STA"
+   }
+  ],
+  "id": "R068"
+ },
+ {
+  "rule": "Ghost-type Curse aimed at the user picks a random foe",
+  "freq": [
+   "rare"
+  ],
+  "how": "a player's Pokemon picks Curse while not Ghost-type (the player menu aims it at the user, battle_controller_player.c:485-498) and becomes Ghost-type before it moves (e.g. Color Change from Skill Swap / Trace, hit by a faster Ghost move)",
+  "reason": "BattleScript_GhostCurse runs getmovetarget when the target is the user itself (battle_scripts_1.s:1512-1513). This operand is evaluated only for VARIOUS_GET_MOVE_TARGET.",
+  "pieces": [
+   {
+    "file": "battleScriptSwitchinOpcode.ts",
+    "function": "(module)",
+    "line": 886,
+    "cover": {
+     "file": "src/engine/battleScriptSwitchinOpcode.ts",
+     "text": "&& rules.battleTopology.battlersCount ==",
+     "at": 0
+    },
+    "body": "&& rules.battleTopology.battlersCount === 2"
+   },
+   {
+    "file": "battleScriptSwitchinOpcode.ts",
+    "function": "(module)",
+    "line": 898,
+    "cover": {
+     "file": "src/engine/battleScriptSwitchinOpcode.ts",
+     "text": "&& !getMoveT",
+     "at": 0
+    },
+    "body": "&& !getMoveTargetSupported"
+   },
+   {
+    "file": "battleScriptSwitchinOpcode.ts",
+    "function": "(module)",
+    "line": 1101,
+    "cover": {
+     "file": "src/engine/battleScriptSwitchinOpcode.ts",
+     "text": "{\n      const { ",
+     "at": 0
+    },
+    "body": "{\n      const { rng, target } = drawBattleScriptSelectedMoveTarget(\n        rules,\n        battler as BattleScriptBattlerId,\n        context.state.rng,\n        context.instruction,\n      );\n      const nextRules = Object.freeze({\n        ...rules,\n        selectorRoles: Object.freeze({ ...rules.sele"
+   }
+  ],
+  "id": "R069"
+ },
+ {
+  "rule": "Guts in Future Sight / Doom Desire damage",
+  "freq": [
+   "rare"
+  ],
+  "how": "Kadabra 169 Role Plays Guts (Machoke 178, Raticate 197) and uses Future Sight",
+  "reason": "Guts with a status multiplies Attack (pokemon.c).",
+  "pieces": [
+   {
+    "file": "battleScriptTrysetfutureattackOpcode.ts",
+    "function": "calculateFutureAttackBaseDamage",
+    "line": 98,
+    "cover": {
+     "file": "src/engine/battleScriptTrysetfutureattackOpcode.ts",
+     "text": "&& attacker.stat",
+     "at": 0
+    },
+    "body": "&& attacker.status1 !== 0"
+   },
+   {
+    "file": "battleScriptTrysetfutureattackOpcode.ts",
+    "function": "calculateFutureAttackBaseDamage",
+    "line": 98,
+    "cover": {
+     "file": "src/engine/battleScriptTrysetfutureattackOpcode.ts",
+     "text": "attack = Math.trunc(attack * 150 / 100);\n  i",
+     "at": 0
+    },
+    "body": "attack = Math.trunc(attack * 150 / 100);"
+   },
+   {
+    "file": "battleScriptTrysetfutureattackOpcode.ts",
+    "function": "calculateFutureAttackBaseDamage",
+    "line": 111,
+    "cover": {
+     "file": "src/engine/battleScriptTrysetfutureattackOpcode.ts",
+     "text": "? \"ABILITY_G",
+     "at": 0
+    },
+    "body": "? \"ABILITY_GUTS\""
+   }
+  ],
+  "id": "R070"
+ },
+ {
+  "rule": "Heal Bell does not cure a Soundproof user",
+  "freq": [
+   "rare"
+  ],
+  "how": "a Heal Bell user that holds Soundproof: Clefable 389 gets Soundproof from Metronome-called Skill Swap / Role Play on Mr. Mime / Electrode / Exploud (sets 380-397), then Metronome calls Heal Bell",
+  "reason": "A Heal Bell user with Soundproof keeps its own status (battle_script_commands.c:8387-8396).",
+  "pieces": [
+   {
+    "file": "battleScriptHealpartystatusOpcode.ts",
+    "function": "healpartystatusHandler",
+    "line": 134,
+    "cover": {
+     "file": "src/engine/battleScriptHealpartystatusOpcode.ts",
+     "text": "{\n      choo",
+     "at": 0
+    },
+    "body": "{\n      chooser |= BATTLE_SCRIPT_B_MSG_BELL_SOUNDPROOF_ATTACKER;\n      rules = recordBattleScriptAbilityReveal(\n        rules,\n        attacker,\n        rules.battlers[attacker].ability,\n      );\n    }"
+   }
+  ],
+  "id": "R071"
+ },
+ {
+  "rule": "Heal Bell skips the party update when every party member is Soundproof",
+  "freq": [
+   "rare"
+  ],
+  "how": "Metronome-called Heal Bell from a user that has gained Soundproof while both teammates are Soundproof (Clefable 389 with Mr. Mime 380 and Electrode 396 / Exploud 397)",
+  "reason": "With toHeal == 0 Cmd_healpartystatus sends no status update (battle_script_commands.c:8458-8463).",
+  "pieces": [
+   {
+    "file": "battleScriptHealpartystatusOpcode.ts",
+    "function": "healpartystatusHandler",
+    "line": 195,
+    "cover": {
+     "file": "src/engine/battleScriptHealpartystatusOpcode.ts",
+     "text": "{\n    return",
+     "at": 0
+    },
+    "body": "{\n    return transitionBattleScriptCommand(\n      context,\n      Object.freeze({ kind: \"advance\" }),\n      { rulesContext: rules, scheduler },\n    );\n  }"
+   }
+  ],
+  "id": "R072"
+ },
+ {
+  "rule": "Hidden Power's type skips the ??? type",
+  "freq": [
+   "rare"
+  ],
+  "how": "Metronome calls Hidden Power for a Pokemon whose (equal) IVs are odd, e.g. 3, 9, 15, 21 or 31",
+  "reason": "Hidden Power's type index at or past TYPE_MYSTERY is moved up one (battle_script_commands.c:8909-8911); with the Factory's equal IVs an odd IV gives Dark.",
+  "pieces": [
+   {
+    "file": "battleScriptRankedBatch1Opcode.ts",
+    "function": "hiddenPowerFromIvs",
+    "line": 54,
+    "cover": {
+     "file": "src/engine/battleScriptRankedBatch1Opcode.ts",
+     "text": "type += 1; /",
+     "at": 0
+    },
+    "body": "type += 1;"
+   }
+  ],
+  "id": "R073"
+ },
+ {
+  "rule": "Hustle in Future Sight / Doom Desire damage",
+  "freq": [
+   "rare"
+  ],
+  "how": "Kadabra 169 Role Plays Hustle (Corsola 151, Togetic 183, Delibird 118; challenge 0) or gets it by Skill Swap, then uses Future Sight",
+  "reason": "Hustle multiplies Attack in CalculateBaseDamage for the stored damage (pokemon.c).",
+  "pieces": [
+   {
+    "file": "battleScriptTrysetfutureattackOpcode.ts",
+    "function": "calculateFutureAttackBaseDamage",
+    "line": 89,
+    "cover": {
+     "file": "src/engine/battleScriptTrysetfutureattackOpcode.ts",
+     "text": "attack = Math.trunc(attack * 150 / 100); // Hust",
+     "at": 0
+    },
+    "body": "attack = Math.trunc(attack * 150 / 100);"
+   }
+  ],
+  "id": "R074"
+ },
+ {
+  "rule": "Imprison fails if the user is already imprisoning",
+  "freq": [
+   "rare"
+  ],
+  "how": "Metronome calls Imprison twice for the same Pokemon (first one succeeding because it shares a move with the foe) without switching out",
+  "reason": "Cmd_tryimprison jumps to the failure script when STATUS3_IMPRISONED_OTHERS is already set (battle_script_commands.c:9414-9417).",
+  "pieces": [
+   {
+    "file": "battleScriptTryimprisonOpcode.ts",
+    "function": "(module)",
+    "line": 59,
+    "cover": {
+     "file": "src/engine/battleScriptTryimprisonOpcode.ts",
+     "text": "{\n      retu",
+     "at": 0
+    },
+    "body": "{\n      return transitionBattleScriptCommand(\n        context,\n        Object.freeze({ kind: \"jump\", programCounter: failure.programCounter }),\n      );\n    }"
+   }
+  ],
+  "id": "R075"
+ },
+ {
+  "rule": "Jump Kick / Hi Jump Kick crash damage is at least 1",
+  "freq": [
+   "rare"
+  ],
+  "how": "Hi Jump Kick (or Metronome's Jump Kick) misses while its would-be damage is 0 or 1 (a weak hit into a double resist such as a Bug/Flying or Poison/Flying target)",
+  "reason": "DMG_RECOIL_FROM_MISS halves the would-be damage and raises 0 to 1 (Cmd_manipulatedamage battle_script_commands.c:6740-6759).",
+  "pieces": [
+   {
+    "file": "battleScriptIngrainLeechSeedWrapOpcode.ts",
+    "function": "(module)",
+    "line": 492,
+    "cover": {
+     "file": "src/engine/battleScriptIngrainLeechSeedWrapOpcode.ts",
+     "text": "damage = 1;\n",
+     "at": 0
+    },
+    "body": "damage = 1;"
+   }
+  ],
+  "id": "R076"
+ },
+ {
+  "rule": "Lightning Rod draws a called Electric move",
+  "freq": [
+   "rare"
+  ],
+  "how": "Metronome, Sleep Talk (Regice 839 has Thunderbolt), Assist or Mirror Move calls an Electric move against a Pokemon with Lightning Rod",
+  "reason": "GetMoveTarget for a move called by Metronome / Sleep Talk / Assist / Mirror Move checks whether the drawn target lacks Lightning Rod while a foe has it (battle_util.c:3854-3856). In singles the only foe is the holder, so the result is always 'no redirect'.",
+  "pieces": [
+   {
+    "file": "battleScriptSleepTalkOpcode.ts",
+    "function": "resolveDynamicMoveTarget",
+    "line": 241,
+    "cover": {
+     "file": "src/engine/battleScriptSleepTalkOpcode.ts",
+     "text": "&& rules.battlers[ta",
+     "at": 0
+    },
+    "body": "&& rules.battlers[target].ability !== ABILITY_LIGHTNING_ROD"
+   }
+  ],
+  "id": "R077"
+ },
+ {
+  "rule": "Lock-On / Mind Reader make a one-hit KO move hit",
+  "freq": [
+   "rare"
+  ],
+  "how": "Metronome calls Lock-On or Mind Reader, then the same Pokemon uses a one-hit KO move (Metronome-called Fissure / Horn Drill / Guillotine / Sheer Cold) on the next turn",
+  "reason": "With STATUS3_ALWAYS_HITS from the attacker and no lower level, Cmd_tryKO hits without a random roll (battle_script_commands.c:7531-7535).",
+  "pieces": [
+   {
+    "file": "battleScriptTryKOOpcode.ts",
+    "function": "(module)",
+    "line": 153,
+    "cover": {
+     "file": "src/engine/battleScriptTryKOOpcode.ts",
+     "text": "&& targetBat",
+     "at": 0
+    },
+    "body": "&& targetBattler.battlerWithSureHit === attacker"
+   },
+   {
+    "file": "battleScriptTryKOOpcode.ts",
+    "function": "(module)",
+    "line": 154,
+    "cover": {
+     "file": "src/engine/battleScriptTryKOOpcode.ts",
+     "text": "&& attackerBattler.level >= targetBattler.level;",
+     "at": 0
+    },
+    "body": "&& attackerBattler.level >= targetBattler.level"
+   },
+   {
+    "file": "battleScriptTryKOOpcode.ts",
+    "function": "(module)",
+    "line": 156,
+    "cover": {
+     "file": "src/engine/battleScriptTryKOOpcode.ts",
+     "text": "? null\n     ",
+     "at": 0
+    },
+    "body": "? null"
+   },
+   {
+    "file": "battleScriptTryKOOpcode.ts",
+    "function": "(module)",
+    "line": 163,
+    "cover": {
+     "file": "src/engine/battleScriptTryKOOpcode.ts",
+     "text": "?? rng;\n\n   ",
+     "at": 0
+    },
+    "body": "?? rng"
+   }
+  ],
+  "id": "R078"
+ },
+ {
+  "rule": "Lock-On / Mind Reader makes the next move hit",
+  "freq": [
+   "rare"
+  ],
+  "how": "Metronome (Chansey 227 / Clefable 389) calls Lock-On or Mind Reader, then next turn the user runs one of Roar/Whirlwind, Fissure/Horn Drill/Guillotine/Sheer Cold, Pain Split, Ghost Curse, Role Play, Yawn, Skill Swap (by a second Metronome call)",
+  "reason": "Cmd_accuracycheck NO_ACC_CALC_CHECK_LOCK_ON skips the semi-invulnerable and Protect checks when the user locked on (battle_script_commands.c:1103-1113)",
+  "pieces": [
+   {
+    "file": "battleScriptHitChainOpcode.ts",
+    "function": "accuracycheckNoAccCalc",
+    "line": 1094,
+    "cover": {
+     "file": "src/engine/battleScriptHitChainOpcode.ts",
+     "text": "&& targetBattler.battlerWithSureHit === attacker\n  ) {\n    return transitionBattleScriptCommand(context, Object.freeze({ kind: \"advance\" }));\n  }\n\n  con",
+     "at": 0
+    },
+    "body": "&& targetBattler.battlerWithSureHit === attacker"
+   },
+   {
+    "file": "battleScriptHitChainOpcode.ts",
+    "function": "accuracycheckNoAccCalc",
+    "line": 1095,
+    "cover": {
+     "file": "src/engine/battleScriptHitChainOpcode.ts",
+     "text": "{\n    return transitionBattleScriptCommand(context, Object.freeze({ kind: \"advance\" }));\n  }\n\n  const se",
+     "at": 0
+    },
+    "body": "{\n    return transitionBattleScriptCommand(context, Object.freeze({ kind: \"advance\" }));\n  }"
+   }
+  ],
+  "id": "R079"
+ },
+ {
+  "rule": "Marvel Scale in Future Sight / Doom Desire damage",
+  "freq": [
+   "rare"
+  ],
+  "how": "Future Sight used against a Milotic that has a status condition",
+  "reason": "Marvel Scale with a status multiplies the target's Defense in the stored damage (pokemon.c).",
+  "pieces": [
+   {
+    "file": "battleScriptTrysetfutureattackOpcode.ts",
+    "function": "calculateFutureAttackBaseDamage",
+    "line": 99,
+    "cover": {
+     "file": "src/engine/battleScriptTrysetfutureattackOpcode.ts",
+     "text": "defense = Ma",
+     "at": 0
+    },
+    "body": "defense = Math.trunc(defense * 150 / 100);"
+   }
+  ],
+  "id": "R080"
+ },
+ {
+  "rule": "Memento fails if the target's Attack and Sp. Atk are already at minimum",
+  "freq": [
+   "rare"
+  ],
+  "how": "Memento used on a target whose Attack is already at -6",
+  "reason": "Cmd_trymemento fails for an unprotected target at -6 Attack and -6 Sp. Atk (battle_script_commands.c:9074-9080).",
+  "pieces": [
+   {
+    "file": "battleScriptTrymementoOpcode.ts",
+    "function": "(module)",
+    "line": 45,
+    "cover": {
+     "file": "src/engine/battleScriptTrymementoOpcode.ts",
+     "text": "&& targetSta",
+     "at": 0
+    },
+    "body": "&& targetState.statStages[STAT_SPATK] === MIN_STAT_STAGE"
+   },
+   {
+    "file": "battleScriptTrymementoOpcode.ts",
+    "function": "(module)",
+    "line": 46,
+    "cover": {
+     "file": "src/engine/battleScriptTrymementoOpcode.ts",
+     "text": "&& rules.mis",
+     "at": 0
+    },
+    "body": "&& rules.missType !== B_MSG_PROTECTED"
+   },
+   {
+    "file": "battleScriptTrymementoOpcode.ts",
+    "function": "(module)",
+    "line": 47,
+    "cover": {
+     "file": "src/engine/battleScriptTrymementoOpcode.ts",
+     "text": "{\n      cons",
+     "at": 0
+    },
+    "body": "{\n      const failure = resolveBattleScriptLabel(context.program, failureOperand.expression);\n      if (!failure) throw new Error(`Cmd_trymemento: unresolved failure target ${failureOperand.expression}`);\n      return transitionBattleScriptCommand(\n        context,\n        Object.freeze({ kind: \"jum"
+   }
+  ],
+  "id": "R081"
+ },
+ {
+  "rule": "Mud Sport / Water Sport fails if the user already has it active",
+  "freq": [
+   "rare"
+  ],
+  "how": "the same Pokemon gets Mud Sport (or Water Sport) twice from Metronome without switching out",
+  "reason": "Cmd_settypebasedhalvers jumps to the failure script when the user's STATUS3_MUDSPORT / WATERSPORT bit is already set.",
+  "pieces": [
+   {
+    "file": "battleScriptChargeSportOpcode.ts",
+    "function": "jumpToFailure",
+    "line": 27,
+    "cover": {
+     "file": "src/engine/battleScriptChargeSportOpcode.ts",
+     "text": "function jum",
+     "at": 0
+    },
+    "body": "function jumpToFailure(\n  context: Parameters<BattleScriptOpcodeHandler<BattleScriptRulesContext>>[0],\n) {\n  const target = context.instruction.operands[0]\n    ? resolveBattleScriptLabel(context.program, context.instruction.operands[0]!.expression)\n    : undefined;\n  if (!target) throw new Error(\"un"
+   },
+   {
+    "file": "battleScriptChargeSportOpcode.ts",
+    "function": "Object.freeze",
+    "line": 97,
+    "cover": {
+     "file": "src/engine/battleScriptChargeSportOpcode.ts",
+     "text": "return jumpT",
+     "at": 0
+    },
+    "body": "return jumpToFailure(context);"
+   }
+  ],
+  "id": "R082"
+ },
+ {
+  "rule": "Own Tempo preventing the confusion after Thrash / Petal Dance ends",
+  "freq": [
+   "rare"
+  ],
+  "how": "an Own Tempo Pokemon finishing a Thrash/Petal Dance/Outrage lock; no set has both, so Own Tempo must come by Skill Swap/Role Play/Trace or the move by Metronome",
+  "reason": "SetMoveEffect's MOVE_EFFECT_CONFUSION does nothing for an Own Tempo battler (applyConfusionStatus2Mutation mirrors it).",
+  "pieces": [
+   {
+    "file": "battleEndTurnOrchestration.ts",
+    "function": "runThrashTick",
+    "line": 1026,
+    "cover": {
+     "file": "src/engine/battleEndTurnOrchestration.ts",
+     "text": "{\n    return Object.freeze({ kind: \"advance\", state: Object.freeze({ ...state, rulesContext: mut",
+     "at": 0
+    },
+    "body": "{\n    return Object.freeze({ kind: \"advance\", state: Object.freeze({ ...state, rulesContext: mutation.rulesContext }) });\n  }"
+   }
+  ],
+  "id": "R083"
+ },
+ {
+  "rule": "Plus / Minus in Future Sight / Doom Desire damage",
+  "freq": [
+   "rare"
+  ],
+  "how": "Kadabra 169 Role Plays Plus or Minus (Plusle 186 / Minun 187) and uses Future Sight while a Pokemon with the other ability is on the field",
+  "reason": "Plus with Minus on the field (or Minus with Plus) multiplies Special Attack (pokemon.c, ABILITY_ON_FIELD2).",
+  "pieces": [
+   {
+    "file": "battleScriptTrysetfutureattackOpcode.ts",
+    "function": "calculateFutureAttackBaseDamage",
+    "line": 94,
+    "cover": {
+     "file": "src/engine/battleScriptTrysetfutureattackOpcode.ts",
+     "text": "&& fieldAbilities.includes(58))\n",
+     "at": 0
+    },
+    "body": "&& fieldAbilities.includes(58)"
+   },
+   {
+    "file": "battleScriptTrysetfutureattackOpcode.ts",
+    "function": "calculateFutureAttackBaseDamage",
+    "line": 95,
+    "cover": {
+     "file": "src/engine/battleScriptTrysetfutureattackOpcode.ts",
+     "text": "{\n    spAtta",
+     "at": 0
+    },
+    "body": "{\n    spAttack = Math.trunc(spAttack * 150 / 100);\n  }"
+   }
+  ],
+  "id": "R084"
+ },
+ {
+  "rule": "Pressure costs Imprison an extra PP",
+  "freq": [
+   "rare"
+  ],
+  "how": "Metronome calls Imprison against a Pressure Pokemon (Dusclops, Absol, Aerodactyl, ...)",
+  "reason": "PressurePPLoseOnUsingImprison searches the user's moves for Imprison for each opposing Pressure battler (battle_util.c:767-789); the search runs but finds nothing, since only Metronome can call Imprison.",
+  "pieces": [
+   {
+    "file": "battleScriptTryimprisonOpcode.ts",
+    "function": "(module)",
+    "line": 76,
+    "cover": {
+     "file": "src/engine/battleScriptTryimprisonOpcode.ts",
+     "text": "\n      const pos",
+     "at": 0
+    },
+    "body": "const position = attackerState.moves.findIndex((move) => move === MOVE_IMPRISON);\n      if (position === -1) continue;\n      imprisonPosition = position;\n      const currentPp: number = nextPpValue ?? attackerState.pp[position]"
+   }
+  ],
+  "id": "R085"
+ },
+ {
+  "rule": "Skill Swap fails",
+  "freq": [
+   "rare"
+  ],
+  "how": "Metronome calls Lock-On, then later Metronome calls Skill Swap while the target uses Protect / Detect",
+  "reason": "Cmd_tryswapabilities fails for Wonder Guard (not in pool), both abilities none (impossible), or MOVE_RESULT_NO_EFFECT (battle_script_commands.c:9394-9401); the last happens when attackcanceler marked a protected target as missed but a Lock-On let the accuracy check pass.",
+  "pieces": [
+   {
+    "file": "battleScriptTryswapabilitiesOpcode.ts",
+    "function": "(module)",
+    "line": 69,
+    "cover": {
+     "file": "src/engine/battleScriptTryswapabilitiesOpcode.ts",
+     "text": "{\n      cons",
+     "at": 0
+    },
+    "body": "{\n      const failure = resolveBattleScriptLabel(program, failureExpression);\n      if (!failure) {\n        throw new Error(\n          `Cmd_tryswapabilities: unresolved failure target ${failureExpression}`,\n        );\n      }\n      return transitionBattleScriptCommand(\n        context,\n        Objec"
+   }
+  ],
+  "id": "R086"
+ },
+ {
+  "rule": "Sleep Talk fails when no move can be called",
+  "freq": [
+   "rare"
+  ],
+  "how": "a sleeping Sleep Talk user locked into Sleep Talk by Encore or by a Tricked Choice Band, or with its other moves blocked by Disable / Torment / Imprison",
+  "reason": "When every slot is excluded or blocked, Cmd_trychoosesleeptalkmove skips to the failure (battle_script_commands.c:8257-8261).",
+  "pieces": [
+   {
+    "file": "battleScriptSleepTalkOpcode.ts",
+    "function": "(module)",
+    "line": 313,
+    "cover": {
+     "file": "src/engine/battleScriptSleepTalkOpcode.ts",
+     "text": "{\n      return transitionBattleScriptCommand(\n        context,\n        Object.freeze({ kind: \"ad",
+     "at": 0
+    },
+    "body": "{\n      return transitionBattleScriptCommand(\n        context,\n        Object.freeze({ kind: \"advance\" }),\n      );\n    }"
+   }
+  ],
+  "id": "R087"
+ },
+ {
+  "rule": "Sleep Talk skips moves a Choice Band lock forbids",
+  "freq": [
+   "rare"
+  ],
+  "how": "a Sleep Talk set (none holds Choice Band) receives a Choice Band by Trick (Furret 304, Linoone 308, Kecleon 325 with Seaking 333 in challenge 2; Mr. Mime 572 / Alakazam 596 later) and uses Sleep Talk while asleep",
+  "reason": "With a Choice Band and a recorded choice, every other slot is unusable for Sleep Talk (CheckMoveLimitations, battle_util.c:1114-1115).",
+  "pieces": [
+   {
+    "file": "battleScriptSleepTalkOpcode.ts",
+    "function": "sleepTalkUnusableMask",
+    "line": 166,
+    "cover": {
+     "file": "src/engine/battleScriptSleepTalkOpcode.ts",
+     "text": "&& choicedMove !== 0 // ",
+     "at": 0
+    },
+    "body": "&& choicedMove !== 0"
+   },
+   {
+    "file": "battleScriptSleepTalkOpcode.ts",
+    "function": "sleepTalkUnusableMask",
+    "line": 167,
+    "cover": {
+     "file": "src/engine/battleScriptSleepTalkOpcode.ts",
+     "text": "&& choicedMove !== 0xfff",
+     "at": 0
+    },
+    "body": "&& choicedMove !== 0xffff"
+   },
+   {
+    "file": "battleScriptSleepTalkOpcode.ts",
+    "function": "sleepTalkUnusableMask",
+    "line": 168,
+    "cover": {
+     "file": "src/engine/battleScriptSleepTalkOpcode.ts",
+     "text": "&& choicedMove !== m",
+     "at": 0
+    },
+    "body": "&& choicedMove !== move"
+   }
+  ],
+  "id": "R088"
+ },
+ {
+  "rule": "Sleep Talk skips moves an Encore forbids",
+  "freq": [
+   "rare"
+  ],
+  "how": "Encore (Wobbuffet 290 in challenge 2, Dewgong 488 in challenges 4 and 7+) on a sleeping Sleep Talk user whose last move was Sleep Talk; Sleep Talk then finds no move and fails",
+  "reason": "With an Encore active, every slot except the encored move is unusable for Sleep Talk (CheckMoveLimitations, battle_util.c:1111-1112).",
+  "pieces": [
+   {
+    "file": "battleScriptSleepTalkOpcode.ts",
+    "function": "sleepTalkUnusableMask",
+    "line": 164,
+    "cover": {
+     "file": "src/engine/battleScriptSleepTalkOpcode.ts",
+     "text": "&& battler.e",
+     "at": 0
+    },
+    "body": "&& battler.encoredMove !== move"
+   }
+  ],
+  "id": "R089"
+ },
+ {
+  "rule": "Soundproof blocks a sound move; a locked-in Uproar that is blocked uses no PP",
+  "freq": [
+   "rare"
+  ],
+  "how": "an Uproar already in progress (Metronome-called Uproar by Clefable 389) hits a Soundproof target that switched in (Mr. Mime / Electrode / Exploud, sets 380-397)",
+  "reason": "battle_util.c ABILITYEFFECT_MOVES_BLOCK sets HITMARKER_NO_PPDEDUCT when the blocked attacker has STATUS2_MULTIPLETURNS; Uproar is the only multi-turn sound move.",
+  "pieces": [
+   {
+    "file": "battleScriptAbilityMovesBlock.ts",
+    "function": "advanceBattleScriptMovesBlockAbility",
+    "line": 475,
+    "cover": {
+     "file": "src/engine/battleScriptAbilityMovesBlock.ts",
+     "text": "? (rules.hit",
+     "at": 0
+    },
+    "body": "? (rules.hitMarker | BATTLE_SCRIPT_HITMARKER_NO_PPDEDUCT) >>> 0"
+   }
+  ],
+  "id": "R090"
+ },
+ {
+  "rule": "Spite on a transformed Pokemon does not change its real PP",
+  "freq": [
+   "rare"
+  ],
+  "how": "Spite used on a Pokemon that transformed (Metronome-called Transform) after it used one of its copied moves",
+  "reason": "The PP loss is sent to the party only for a permanent move; a transformed target's copied moves are not (battle_script_commands.c:8346-8352).",
+  "pieces": [
+   {
+    "file": "battleScriptTryspiteppreduceOpcode.ts",
+    "function": "(module)",
+    "line": 100,
+    "cover": {
+     "file": "src/engine/battleScriptTryspiteppreduceOpcode.ts",
+     "text": ": Object.fre",
+     "at": 0
+    },
+    "body": ": Object.freeze([])"
+   }
+  ],
+  "id": "R091"
+ },
+ {
+  "rule": "Sticky Hold keeps an item from Covet",
+  "freq": [
+   "rare"
+  ],
+  "how": "Covet (Linoone 203) hits a Sticky Hold Pokemon holding an item (Swalot 248 in challenge 1; or an ability copied by Skill Swap/Role Play/Trace)",
+  "reason": "Covet's MOVE_EFFECT_STEAL_ITEM checks Sticky Hold before the user's own item (C order matches), shows BattleScript_NoItemSteal and re-runs seteffectwithchance",
+  "pieces": [
+   {
+    "file": "battleScriptHitChainOpcode.ts",
+    "function": "applySetMoveEffect",
+    "line": 3170,
+    "cover": {
+     "file": "src/engine/battleScriptHitChainOpcode.ts",
+     "text": "{\n        const prog",
+     "at": 0
+    },
+    "body": "{\n        const programCounter = resolveRequiredLabelProgramCounter(context.program, \"BattleScript_NoItemSteal\");\n        const revealedRules = recordBattleScriptAbilityReveal(\n          Object.freeze({\n            ...baseRulesContext,\n            lastUsedAbility: ABILITY_STICKY_HOLD,\n          }),\n"
+   }
+  ],
+  "id": "R092"
+ },
+ {
+  "rule": "Sticky Hold vs Knock Off",
+  "freq": [
+   "rare"
+  ],
+  "how": "Knock Off (e.g. Armaldo 513) hits Muk 516 (Sticky Hold) after Muk used Rest and ate its Chesto Berry",
+  "reason": "Knock Off on a Sticky Hold Pokemon with no item does nothing (no Sticky Hold message)",
+  "pieces": [
+   {
+    "file": "battleScriptHitChainOpcode.ts",
+    "function": "applySetMoveEffect",
+    "line": 3323,
+    "cover": {
+     "file": "src/engine/battleScriptHitChainOpcode.ts",
+     "text": "return passThrough();\n        co",
+     "at": 0
+    },
+    "body": "return passThrough();"
+   }
+  ],
+  "id": "R093"
+ },
+ {
+  "rule": "Thick Club in Future Sight / Doom Desire damage",
+  "freq": [
+   "rare"
+  ],
+  "how": "Clefable 389 (Metronome) takes Marowak's Thick Club with a Metronome-called Trick, then Metronome calls Future Sight or Doom Desire (challenge 7+)",
+  "reason": "The species test runs whenever a Future Sight / Doom Desire user holds a Thick Club (pokemon.c).",
+  "pieces": [
+   {
+    "file": "battleScriptTrysetfutureattackOpcode.ts",
+    "function": "calculateFutureAttackBaseDamage",
+    "line": 88,
+    "cover": {
+     "file": "src/engine/battleScriptTrysetfutureattackOpcode.ts",
+     "text": "&& (attacker",
+     "at": 0
+    },
+    "body": "&& (attacker.species === 104 || attacker.species === 105)"
+   },
+   {
+    "file": "battleScriptTrysetfutureattackOpcode.ts",
+    "function": "calculateFutureAttackBaseDamage",
+    "line": 88,
+    "cover": {
+     "file": "src/engine/battleScriptTrysetfutureattackOpcode.ts",
+     "text": "attack *= 2;\n  i",
+     "at": 0
+    },
+    "body": "attack *= 2;"
+   }
+  ],
+  "id": "R094"
+ },
+ {
+  "rule": "Trace waiting when there is no Pokemon to copy",
+  "freq": [
+   "rare"
+  ],
+  "how": "a Trace Pokemon (Gardevoir, Porygon2 lines) with Trace still waiting when the foe is fainted at the faint check, e.g. it was switched in as a Pursuit user fainted from Rough Skin on the opponent's last Pokemon",
+  "reason": "ABILITYEFFECT_TRACE (battle_util.c:3051-3060): in singles Trace copies only if the foe has hp != 0 and an ability; otherwise STATUS3_TRACE stays set.",
+  "pieces": [
+   {
+    "file": "battleScriptFaintedActionsOrchestration.ts",
+    "function": "runPendingSwitchinEffects",
+    "line": 468,
+    "cover": {
+     "file": "src/engine/battleScriptFaintedActionsOrchestration.ts",
+     "text": "continue;\n    const oppo",
+     "at": 0
+    },
+    "body": "continue;"
+   }
+  ],
+  "id": "R095"
+ },
+ {
+  "rule": "Transform fails on a transformed or semi-invulnerable target",
+  "freq": [
+   "rare"
+  ],
+  "how": "Metronome calls Transform while the target is mid-Fly / Dig / Dive / Bounce or has itself transformed",
+  "reason": "Cmd_transformdataexecution fails when the target is already transformed or is in Fly / Dig / Dive / Bounce (battle_script_commands.c:7768-7773).",
+  "pieces": [
+   {
+    "file": "battleScriptTransformOpcode.ts",
+    "function": "(module)",
+    "line": 54,
+    "cover": {
+     "file": "src/engine/battleScriptTransformOpcode.ts",
+     "text": "{\n      retu",
+     "at": 0
+    },
+    "body": "{\n      return transitionBattleScriptCommand(\n        context,\n        Object.freeze({ kind: \"advance\" }),\n        {\n          rulesContext: Object.freeze({\n            ...chosenRules,\n            moveResultFlags: (chosenRules.moveResultFlags | BATTLE_SCRIPT_MOVE_RESULT_FAILED) >>> 0,\n            mu"
+   }
+  ],
+  "id": "R096"
+ },
+ {
+  "rule": "Trick fails",
+  "freq": [
+   "rare"
+  ],
+  "how": "Trick (Kecleon 325, Mr. Mime 572, Alakazam 596, ...) when neither Pokemon holds an item any more",
+  "reason": "In a Frontier battle Cmd_tryswapitems fails only when neither Pokemon holds an item (Enigma Berry and Mail are not in the pool; the side and knocked-off rules are skipped for BATTLE_TYPE_FRONTIER), battle_script_commands.c:9220-9227.",
+  "pieces": [
+   {
+    "file": "battleScriptTryswapitemsOpcode.ts",
+    "function": "failureControl",
+    "line": 89,
+    "cover": {
+     "file": "src/engine/battleScriptTryswapitemsOpcode.ts",
+     "text": "function fai",
+     "at": 0
+    },
+    "body": "function failureControl(program: BattleScriptProgram, expression: string) {\n  const failure = resolveBattleScriptLabel(program, expression);\n  if (!failure) {\n    throw new Error(`Cmd_tryswapitems: unresolved failure target ${expression}`);\n  }\n  return Object.freeze({\n    kind: \"jump\" as const,\n   "
+   },
+   {
+    "file": "battleScriptTryswapitemsOpcode.ts",
+    "function": "(module)",
+    "line": 114,
+    "cover": {
+     "file": "src/engine/battleScriptTryswapitemsOpcode.ts",
+     "text": "() => transi",
+     "at": 0
+    },
+    "body": "() => transitionBattleScriptCommand(\n      context,\n      failureControl(program, failureExpression),\n    )"
+   }
+  ],
+  "id": "R097"
+ },
+ {
+  "rule": "Type-boosting held item in Future Sight / Doom Desire damage",
+  "freq": [
+   "rare"
+  ],
+  "how": "Chansey 227 (Metronome) takes Lairon 215's Metal Coat with a Metronome-called Trick, then Metronome calls Doom Desire (both sets in challenge 1)",
+  "reason": "Doom Desire (Steel, physical) with a Steel-boosting item multiplies Attack (pokemon.c sHoldEffectToType loop).",
+  "pieces": [
+   {
+    "file": "battleScriptTrysetfutureattackOpcode.ts",
+    "function": "calculateFutureAttackBaseDamage",
+    "line": 80,
+    "cover": {
+     "file": "src/engine/battleScriptTrysetfutureattackOpcode.ts",
+     "text": "attack = Math.trunc(attack * (pa",
+     "at": 0
+    },
+    "body": "attack = Math.trunc(attack * (param + 100) / 100);"
+   }
+  ],
+  "id": "R098"
+ },
+ {
+  "rule": "Uproar keeping a drowsy (Yawn) Pokemon awake",
+  "freq": [
+   "rare"
+  ],
+  "how": "Yawn's sleep due at the end of a turn while either Pokemon is in an Uproar",
+  "reason": "battle_util.c:1759 + UproarWakeUpCheck (battle_script_commands.c:6801-6823): Yawn's sleep does not land while any battler is in an Uproar, unless the target has Soundproof.",
+  "pieces": [
+   {
+    "file": "battleEndTurnOrchestration.ts",
+    "function": "runYawnTick",
+    "line": 1083,
+    "cover": {
+     "file": "src/engine/battleEndTurnOrchestration.ts",
+     "text": "{\n        bl",
+     "at": 0
+    },
+    "body": "{\n        blockedByUproar = true;\n        break;\n      }"
+   }
+  ],
+  "id": "R099"
+ },
+ {
+  "rule": "Weather Ball stays a 50-power Normal move under Cloud Nine",
+  "freq": [
+   "rare"
+  ],
+  "how": "Metronome calls Weather Ball while a Cloud Nine Pokemon (Psyduck / Golduck) is on the field",
+  "reason": "Cmd_setweatherballtype changes nothing when WEATHER_HAS_EFFECT is false (battle_script_commands.c:9789).",
+  "pieces": [
+   {
+    "file": "battleScriptEnvironmentAttackOpcode.ts",
+    "function": "(module)",
+    "line": 93,
+    "cover": {
+     "file": "src/engine/battleScriptEnvironmentAttackOpcode.ts",
+     "text": "{\n      retu",
+     "at": 0
+    },
+    "body": "{\n      return transitionBattleScriptCommand(context, Object.freeze({ kind: \"advance\" }));\n    }"
+   }
+  ],
+  "id": "R100"
+ },
+ {
+  "rule": "Weather Ball's type follows the weather",
+  "freq": [
+   "rare"
+  ],
+  "how": "Metronome calls Weather Ball during rain (Rain Dance)",
+  "reason": "Rain makes Weather Ball Water type (battle_script_commands.c:9793-9794).",
+  "pieces": [
+   {
+    "file": "battleScriptEnvironmentAttackOpcode.ts",
+    "function": "(module)",
+    "line": 98,
+    "cover": {
+     "file": "src/engine/battleScriptEnvironmentAttackOpcode.ts",
+     "text": "type = TYPE_WATE",
+     "at": 0
+    },
+    "body": "type = TYPE_WATER;"
+   },
+   {
+    "file": "battleScriptEnvironmentAttackOpcode.ts",
+    "function": "(module)",
+    "line": 99,
+    "cover": {
+     "file": "src/engine/battleScriptEnvironmentAttackOpcode.ts",
+     "text": "type = TYPE_ROCK",
+     "at": 0
+    },
+    "body": "type = TYPE_ROCK;"
+   },
+   {
+    "file": "battleScriptEnvironmentAttackOpcode.ts",
+    "function": "(module)",
+    "line": 100,
+    "cover": {
+     "file": "src/engine/battleScriptEnvironmentAttackOpcode.ts",
+     "text": "type = TYPE_FIRE",
+     "at": 0
+    },
+    "body": "type = TYPE_FIRE;"
+   }
+  ],
+  "id": "R101"
+ },
+ {
+  "rule": "White Herb restoring lowered stats when a Pokemon enters through Baton Pass",
+  "freq": [
+   "rare"
+  ],
+  "how": "a Pokemon with a lowered stat (Superpower, Overheat, Intimidate, Charm...) Baton Passes to a teammate holding White Herb",
+  "reason": "ItemBattleEffects(ITEMEFFECT_ON_SWITCH_IN) White Herb (battle_util.c:3311-3326) resets passed-down negative stages and runs BattleScript_WhiteHerbEnd2.",
+  "pieces": [
+   {
+    "file": "battleScriptSwitchinOpcode.ts",
+    "function": "(module)",
+    "line": 1372,
+    "cover": {
+     "file": "src/engine/battleScriptSwitchinOpcode.ts",
+     "text": "{\n      const sc",
+     "at": 0
+    },
+    "body": "{\n      const script = resolveBattleScriptLabel(context.program, \"BattleScript_WhiteHerbEnd2\");\n      if (!script) throw new Error(\"committed Battle Script program has no BattleScript_WhiteHerbEnd2\");\n      const battlers = nextRules.battlers.map("
+   },
+   {
+    "file": "battleScriptSwitchinOpcode.ts",
+    "function": "(module)",
+    "line": 1375,
+    "cover": {
+     "file": "src/engine/battleScriptSwitchinOpcode.ts",
+     "text": "(candidate, index) =>\n        index === battler\n          ? Object.freeze({\n            ...candidate,\n            statSt",
+     "at": 0
+    },
+    "body": "(candidate, index) =>\n        index === battler\n          ? Object.freeze({\n            ...candidate,\n            statStages: Object.freeze(candidate.statStages.map((stage) => (stage < DEFAULT_STAT_STAGE ? DEFAULT_STAT_STAGE : stage))),\n          })\n          : candidate"
+   },
+   {
+    "file": "battleScriptSwitchinOpcode.ts",
+    "function": "(module)",
+    "line": 1381,
+    "cover": {
+     "file": "src/engine/battleScriptSwitchinOpcode.ts",
+     "text": "\n      ) as unknown as BattleScriptRulesBattlers;\n      return transitionBattleScriptCommand(\n        context,\n        Object.freeze({ kind: \"ju",
+     "at": 0
+    },
+    "body": ") as unknown as BattleScriptRulesBattlers;\n      return transitionBattleScriptCommand(\n        context,\n        Object.freeze({ kind: \"jump\", programCounter: script.programCounter }),\n        {\n          rulesContext: Object.freeze({\n            ...nextRules,\n            battlers: Object.freeze(batt"
+   }
+  ],
+  "id": "R102"
+ },
+ {
+  "rule": "a held cure berry or herb curing a status at the end of the turn or right after an action",
+  "freq": [
+   "rare"
+  ],
+  "how": "the player's Pokemon gets a status in a script that skips the move-end item step (Pursuit on a switching foe with Static/Poison Point/Flame Body/Effect Spore) while holding the matching berry (no Pursuit set has one: needs Trick)",
+  "reason": "HandleFaintedMonActions state 6 calls ItemBattleEffects(ITEMEFFECT_NORMAL, 0, TRUE) after every action (battle_util.c:1958-1962); this is the arm where a cure item of battler 0 fires.",
+  "pieces": [
+   {
+    "file": "battleEndTurnOrchestration.ts",
+    "function": "runBattleScriptItemEffectNormalOnMoveTurn",
+    "line": 1133,
+    "cover": {
+     "file": "src/engine/battleEndTurnOrchestration.ts",
+     "text": "\n  if (outcome.kind === \"fir",
+     "at": 0
+    },
+    "body": "if (outcome.kind === \"fired\") return outcome.state;\n  throw new Error(`ItemBattleEffects(ITEMEFFECT_NORMAL, ${battler}, TRUE) did not complete (${outcome.kind})`);"
+   },
+   {
+    "file": "battleEndTurnOrchestration.ts",
+    "function": "runItemsTick",
+    "line": 1371,
+    "cover": {
+     "file": "src/engine/battleEndTurnOrchestration.ts",
+     "text": "\n    return runStatus1CureTick(program, handlers, scannedState, battler, b.status1 & ~STATUS1_PA",
+     "at": 0
+    },
+    "body": "return runStatus1CureTick(program, handlers, scannedState, battler, b.status1 & ~STATUS1_PARALYSIS, BERRY_CURE_PRLZ_END2_LABEL);\n  }"
+   },
+   {
+    "file": "battleEndTurnOrchestration.ts",
+    "function": "runItemsTick",
+    "line": 1375,
+    "cover": {
+     "file": "src/engine/battleEndTurnOrchestration.ts",
+     "text": "\n    return runStatus1CureTick(program, handlers, scannedState, battler, b.status1 & ~(S",
+     "at": 0
+    },
+    "body": "return runStatus1CureTick(program, handlers, scannedState, battler, b.status1 & ~(STATUS1_PSN_ANY | STATUS1_TOXIC_COUNTER), BERRY_CURE_PSN_END2_LABEL);\n  }"
+   },
+   {
+    "file": "battleEndTurnOrchestration.ts",
+    "function": "runItemsTick",
+    "line": 1379,
+    "cover": {
+     "file": "src/engine/battleEndTurnOrchestration.ts",
+     "text": "\n    return runStatus1CureTick(program, handlers, scannedState, battler, b.status1 & ~STATUS1_BU",
+     "at": 0
+    },
+    "body": "return runStatus1CureTick(program, handlers, scannedState, battler, b.status1 & ~STATUS1_BURN, BERRY_CURE_BRN_END2_LABEL);\n  }"
+   },
+   {
+    "file": "battleEndTurnOrchestration.ts",
+    "function": "runItemsTick",
+    "line": 1425,
+    "cover": {
+     "file": "src/engine/battleEndTurnOrchestration.ts",
+     "text": "\n    const withStatus2 = withBattler(scannedRules, battler, {\n      status2: (b.status2 & ~BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_I",
+     "at": 0
+    },
+    "body": "const withStatus2 = withBattler(scannedRules, battler, {\n      status2: (b.status2 & ~BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_INFATUATION) >>> 0,\n    });\n    const rc = Object.freeze({\n      ...withStatus2,\n      scriptingBattler: battler,\n      multistringChooser: B_MSG_CURED_PROBLEM,\n      // battleSc"
+   },
+   {
+    "file": "battleScriptFaintedActionsOrchestration.ts",
+    "function": "runPendingSwitchinEffects",
+    "line": 515,
+    "cover": {
+     "file": "src/engine/battleScriptFaintedActionsOrchestration.ts",
+     "text": "state = cure",
+     "at": 0
+    },
+    "body": "state = cured;"
+   }
+  ],
+  "id": "R103"
+ },
+ {
+  "rule": "an Uproar keeps Pokemon from falling asleep",
+  "freq": [
+   "rare"
+  ],
+  "how": "Effect Spore rolls sleep on a contact attacker while the Effect Spore holder is in an Uproar, e.g. Chansey 227 copies Parasect's Effect Spore with Metronome-Role Play and later Metronome-Uproar",
+  "reason": "SetMoveEffect's sleep case fails while any battler is in an Uproar (sleep moves are filtered earlier by jumpifcantmakeasleep, so only Effect Spore reaches this)",
+  "pieces": [
+   {
+    "file": "battleScriptHitChainOpcode.ts",
+    "function": "applySetMoveEffect",
+    "line": 3431,
+    "cover": {
+     "file": "src/engine/battleScriptHitChainOpcode.ts",
+     "text": "{\n            up",
+     "at": 0
+    },
+    "body": "{\n            uproarActive = true;\n            break;\n          }"
+   }
+  ],
+  "id": "R104"
+ },
+ {
+  "rule": "an ability that stops a status (Immunity, Water Veil, Limber) shows its 'prevents' message",
+  "freq": [
+   "rare"
+  ],
+  "how": "the status is forced (primary or certain) onto a Pokemon with that ability: Synchronize passing a status back (BattleScript_SynchronizeActivates uses seteffectprimary), Chansey 227 (Serene Grace) Metronome calling Zap Cannon on a Limber Persian/Hitmonlee in challenge 1, or Sacred Fire (50% x2 = certain) on a Water Veil Pokemon",
+  "reason": "message-choice arm of the Immunity/Water Veil/Limber prevention call; it also clears HITMARKER_STATUS_ABILITY_EFFECT",
+  "pieces": [
+   {
+    "file": "battleScriptHitChainOpcode.ts",
+    "function": "preventionCall",
+    "line": 3390,
+    "cover": {
+     "file": "src/engine/battleScriptHitChainOpcode.ts",
+     "text": "? (abilityEf",
+     "at": 0
+    },
+    "body": "? (abilityEffectHitmarkerSet ? B_MSG_ABILITY_PREVENTS_ABILITY_STATUS : B_MSG_ABILITY_PREVENTS_MOVE_STATUS)"
+   },
+   {
+    "file": "battleScriptHitChainOpcode.ts",
+    "function": "preventionCall",
+    "line": 3392,
+    "cover": {
+     "file": "src/engine/battleScriptHitChainOpcode.ts",
+     "text": "&& abilityEffectHitmarkerSet\n      ?",
+     "at": 0
+    },
+    "body": "&& abilityEffectHitmarkerSet"
+   },
+   {
+    "file": "battleScriptHitChainOpcode.ts",
+    "function": "preventionCall",
+    "line": 3393,
+    "cover": {
+     "file": "src/engine/battleScriptHitChainOpcode.ts",
+     "text": "? (hitMarker & ~HITMARKER_STATUS_ABILITY_EFFECT) >>> 0\n ",
+     "at": 0
+    },
+    "body": "? (hitMarker & ~HITMARKER_STATUS_ABILITY_EFFECT) >>> 0"
+   },
+   {
+    "file": "battleScriptHitChainOpcode.ts",
+    "function": "preventionCall",
+    "line": 3399,
+    "cover": {
+     "file": "src/engine/battleScriptHitChainOpcode.ts",
+     "text": ": { lastUsedAbil",
+     "at": 0
+    },
+    "body": ": { lastUsedAbility: abilityId }"
+   },
+   {
+    "file": "battleScriptHitChainOpcode.ts",
+    "function": "preventionCall",
+    "line": 3401,
+    "cover": {
+     "file": "src/engine/battleScriptHitChainOpcode.ts",
+     "text": "{\n      nextRule",
+     "at": 0
+    },
+    "body": "{\n      nextRulesContext = recordBattleScriptAbilityReveal(\n        nextRulesContext,\n        effectBattler,\n        abilityId,\n      );\n    }"
+   },
+   {
+    "file": "battleScriptHitChainOpcode.ts",
+    "function": "applySetMoveEffect",
+    "line": 3446,
+    "cover": {
+     "file": "src/engine/battleScriptHitChainOpcode.ts",
+     "text": "{\n        return preventionCall(\"BattleScript_PSNPrevention\", true, ABILITY_IMMUNITY);\n      }\n      if (\n        (isBattlerOfType(effectBattlerState, \"TYPE_POISON\") || isBattlerOfType(effectBattlerState, \"TYPE_STEEL\"))\n        && abilityEffectHitmarkerSet\n        && (primary || certain)\n      ) {\n        return preventionCall(\"BattleScript_PSNPrevention\", false);\n      }\n      sta",
+     "at": 0
+    },
+    "body": "{\n        return preventionCall(\"BattleScript_PSNPrevention\", true, ABILITY_IMMUNITY);\n      }"
+   },
+   {
+    "file": "battleScriptHitChainOpcode.ts",
+    "function": "applySetMoveEffect",
+    "line": 3465,
+    "cover": {
+     "file": "src/engine/battleScriptHitChainOpcode.ts",
+     "text": "{\n        return preventionCall(\"BattleScript_BRNPrevention\", tr",
+     "at": 0
+    },
+    "body": "{\n        return preventionCall(\"BattleScript_BRNPrevention\", true, ABILITY_WATER_VEIL);\n      }"
+   },
+   {
+    "file": "battleScriptHitChainOpcode.ts",
+    "function": "applySetMoveEffect",
+    "line": 3490,
+    "cover": {
+     "file": "src/engine/battleScriptHitChainOpcode.ts",
+     "text": "{\n          retu",
+     "at": 0
+    },
+    "body": "{\n          return preventionCall(\"BattleScript_PRLZPrevention\", true, ABILITY_LIMBER);\n        }"
+   }
+  ],
+  "id": "R105"
+ },
+ {
+  "rule": "bad poison (Toxic) damage counter stopping at 15/16",
+  "freq": [
+   "rare"
+  ],
+  "how": "a badly poisoned Pokemon that survives 15 end-of-turn Toxic ticks without switching (heavy healing: Recover/Wish/Leftovers/Ingrain, foe not attacking)",
+  "reason": "battle_util.c:1542-1543: the Toxic counter is not raised past TURN(15).",
+  "pieces": [
+   {
+    "file": "battleEndTurnOrchestration.ts",
+    "function": "bumpToxicCounter",
+    "line": 668,
+    "cover": {
+     "file": "src/engine/battleEndTurnOrchestration.ts",
+     "text": "? b.status1 ",
+     "at": 0
+    },
+    "body": "? b.status1"
+   },
+   {
+    "file": "battleEndTurnOrchestration.ts",
+    "function": "bumpToxicCounter",
+    "line": 669,
+    "cover": {
+     "file": "src/engine/battleEndTurnOrchestration.ts",
+     "text": "return rulesContext;\n  r",
+     "at": 0
+    },
+    "body": "return rulesContext;"
+   }
+  ],
+  "id": "R106"
+ },
+ {
+  "rule": "choosing again when a Baton Pass replacement faints on Spikes",
+  "freq": [
+   "rare"
+  ],
+  "how": "the player Baton Passes into a Pokemon low enough on HP to faint from the Spikes on its side, with another Pokemon left",
+  "reason": "Resuming a paused Baton Pass: the chosen replacement faints on its own side's Spikes, BattleScript_SpikesOnAttackerFainted (battle_scripts_1.s:3397-3401) goes to HandleFaintedMon and the player is asked again.",
+  "pieces": [
+   {
+    "file": "factoryBattleScriptFullTurnDecision.ts",
+    "function": "resumeFullTurnForcedSwitch",
+    "line": 2982,
+    "cover": {
+     "file": "src/engine/factoryBattleScriptFullTurnDecision.ts",
+     "text": "{\n      // I",
+     "at": 0
+    },
+    "body": "{\n      // ISSUES #127: the replacement this pause just sent out fainted on entry\n      // to its own side's Spikes, so `Cmd_switchineffects`' BS_ATTACKER branch\n      // (battle_script_commands.c:5228-5253) ran `BattleScript_SpikesOnAttacker`\n      // -> `tryfaintmon_spikes` -> `goto BattleScript_H"
+   }
+  ],
+  "id": "R107"
+ },
+ {
+  "rule": "end-of-turn order for a Pokemon whose forced Struggle was cancelled",
+  "freq": [
+   "rare"
+  ],
+  "how": "the slower Pokemon has no usable moves (forced Struggle) and the faster one's Explosion / Self-Destruct or recoil knocks out both, with the player still having a replacement",
+  "reason": "When the second mover would have been forced to Struggle and the first mover's action knocks it out too, its no-usable-moves flag is not kept (FaintClearSetData, battle_main.c:3294, clears it); this changes the end-of-turn sort.",
+  "pieces": [
+   {
+    "file": "factoryBattleScriptFullTurnDecision.ts",
+    "function": "keepNoValidMovesOfCancelledStruggle",
+    "line": 740,
+    "cover": {
+     "file": "src/engine/factoryBattleScriptFullTurnDecision.ts",
+     "text": "return rulesContext;\n  r",
+     "at": 0
+    },
+    "body": "return rulesContext;"
+   }
+  ],
+  "id": "R108"
+ },
+ {
+  "rule": "the battle ending on Curse damage at the end of the turn",
+  "freq": [
+   "rare"
+  ],
+  "how": "a Ghost-type's Curse (Dusclops set 666) taking a side's last Pokemon at the end of the turn",
+  "reason": "BattleScript_CurseTurnDmg can faint the last Pokemon; the rest of the end-of-turn effects are skipped.",
+  "pieces": [
+   {
+    "file": "battleEndTurnOrchestration.ts",
+    "function": "runDoBattlerEndTurnEffects",
+    "line": 1674,
+    "cover": {
+     "file": "src/engine/battleEndTurnOrchestration.ts",
+     "text": "return Object.freeze({ kind: \"outcome-decided\", state: c",
+     "at": 0
+    },
+    "body": "return Object.freeze({ kind: \"outcome-decided\", state: curse.state });"
+   }
+  ],
+  "id": "R109"
+ },
+ {
+  "rule": "the player's cancelled action when the opponent's Roar or Whirlwind drags in a Pokemon that faints on Spikes",
+  "freq": [
+   "rare"
+  ],
+  "how": "a faster opponent Roars / Whirlwinds a player Pokemon out onto Spikes and the dragged-in Pokemon faints, with the player having another Pokemon left",
+  "reason": "The first action (the trainer's) paused for a player choice while the player is the second mover; the saved second action carries the player's forced-Struggle flag, which the end-of-turn order reads later.",
+  "pieces": [
+   {
+    "file": "factoryBattleScriptFullTurnDecision.ts",
+    "function": "reduceFactoryFullTurnDecision",
+    "line": 3581,
+    "cover": {
+     "file": "src/engine/factoryBattleScriptFullTurnDecision.ts",
+     "text": "? playerForcedStruggle : trainerForcedStruggle,\n        ",
+     "at": 0
+    },
+    "body": "? playerForcedStruggle"
+   },
+   {
+    "file": "factoryBattleScriptFullTurnDecision.ts",
+    "function": "reduceFactoryFullTurnDecision",
+    "line": 3582,
+    "cover": {
+     "file": "src/engine/factoryBattleScriptFullTurnDecision.ts",
+     "text": "? playerRetargets : trainerRetargets,\n      ",
+     "at": 0
+    },
+    "body": "? playerRetargets"
+   }
+  ],
+  "id": "R110"
+ }
+]
