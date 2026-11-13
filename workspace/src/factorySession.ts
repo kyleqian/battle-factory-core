@@ -20,6 +20,8 @@
 // freezes on the save dialog's first frame until the host destroys the mount.
 import { createInitialState, tick, type EngineState } from "./engine/core.ts";
 import { ANCHOR_FACTORY_METADATA } from "./engine/factoryAnchorSession.ts";
+import { createFactoryLobbyAttendantState } from "./engine/factoryLobbyAttendant.ts";
+import { createFactoryLobbyFreeRoamState } from "./engine/factoryLobbyFreeRoam.ts";
 import { createInitialFactoryCarry, generateFactoryChallengeDraft } from "./engine/factoryRoundChaining.ts";
 import {
   clearContainedPresentationErrors,
@@ -53,6 +55,14 @@ export interface FactorySessionOptions {
    * `challenge-request` event is reported.
    */
   readonly challengeRequest?: "hold" | "continue" | undefined;
+  /**
+   * lbr-c: "draft" (default) starts at the draft screen. "after-save" starts in the Lobby at the attendant's "Please step this way."
+   * (the save dialog already done), plays the door walk and fade, and deals a fresh challenge-0 draft exactly as the in-game new challenge
+   * does (carry streak 0 / rents 0, nch231). `gameplaySeed` is then the Lobby's vblank RNG cursor on the first frame (absent = the
+   * anchor's), and the draft comes from that cursor advanced by the walk's frames: deterministic from the seed, but not the deal a
+   * plain `gameplaySeed` mount makes. See docs/lbrc-challenge-request.md.
+   */
+  readonly start?: "draft" | "after-save" | undefined;
 }
 
 /**
@@ -68,6 +78,7 @@ export function createChallengeState(options: FactorySessionOptions): EngineStat
     ...(options.presentationSeed !== undefined ? { presentationSeed: options.presentationSeed } : {}),
     ...(options.presentationRngPolicy !== undefined ? { presentationRngPolicy: options.presentationRngPolicy } : {}),
   });
+  if (options.start === "after-save") return createAfterSaveState(base, options.gameplaySeed);
   if (options.gameplaySeed === undefined) return base;
   if (!Number.isInteger(options.gameplaySeed) || options.gameplaySeed < 0 || options.gameplaySeed > 0xffffffff) {
     throw new Error(`gameplaySeed must be a u32, got ${options.gameplaySeed}`);
@@ -81,6 +92,21 @@ export function createChallengeState(options: FactorySessionOptions): EngineStat
     rngValue: generation.rngValue,
     factoryCarry: carry,
     pendingGeneratedRound: Object.freeze({ rngValueBefore: bootRngValue, carry }),
+  };
+}
+
+function createAfterSaveState(base: EngineState, gameplaySeed: number | undefined): EngineState {
+  if (gameplaySeed !== undefined && (!Number.isInteger(gameplaySeed) || gameplaySeed < 0 || gameplaySeed > 0xffffffff)) {
+    throw new Error(`gameplaySeed must be a u32, got ${gameplaySeed}`);
+  }
+  const attendant = createFactoryLobbyAttendantState(0);
+  return {
+    ...base,
+    lobbyFreeRoam: createFactoryLobbyFreeRoamState(),
+    lobbyAttendant: Object.freeze({ ...attendant, screen: "step" as const, page: 0, age: 0, lead: null }),
+    rngMode: "vblank",
+    rngValue: (gameplaySeed ?? base.rngValue) >>> 0,
+    factoryCarry: createInitialFactoryCarry(ANCHOR_FACTORY_METADATA.playerTrainerId),
   };
 }
 

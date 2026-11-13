@@ -22,6 +22,8 @@ export interface ReplayOptions {
   battleScene: BattleScene;
   gameplaySeed?: number;
   presentationSeed?: number;
+  /** Same as `FactoryGameOptions.start`: the trace replays only with the start it was played from. */
+  start?: "draft" | "after-save";
   segments: TraceSegment[];
 }
 

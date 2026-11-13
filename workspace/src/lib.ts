@@ -85,6 +85,7 @@ export function mountFactoryGameInternal(options: MountInternalOptions): Factory
     gameplaySeed: options.gameplaySeed,
     presentationSeed: options.presentationSeed,
     challengeRequest: options.challengeRequest,
+    start: options.start,
   };
   let session = new FactorySession(sessionOptions);
   const held = new Set<GbaButton>();

@@ -182,3 +182,59 @@ describe("lbrc: continue mode and the not-ended guard", () => {
     expect(fresh.state.attendantRequestHold).toBe(false);
   }, 120_000);
 });
+
+describe('lbrc: mount option start: "after-save"', () => {
+  function playFromAfterSave(seed: number | undefined, frames: number) {
+    const options = { battleScene: "off" as const, start: "after-save" as const, gameplaySeed: seed };
+    const session = new FactorySession(options);
+    const player = new RandomPlayer(new Rng(1), new ActionLog(false), "winning");
+    player.retireRate = 1;
+    const events: FactoryEvent[] = [];
+    let firstDraftFrame: number | null = null;
+    for (let frame = 1; frame <= frames && session.ended === null; frame += 1) {
+      events.push(...session.tick(player.decide(session.state), frame));
+      if (firstDraftFrame === null && session.state.lobbyFreeRoam === null) firstDraftFrame = session.frame;
+    }
+    return { options, session, events, firstDraftFrame };
+  }
+
+  it("begins at 'Please step this way.' in the Lobby with no ended challenge, then walks, fades and deals a fresh draft (streak 0, rents 0)", () => {
+    const session = new FactorySession({ battleScene: "off", start: "after-save", gameplaySeed: 12345 });
+    expect(session.state.lobbyFreeRoam).not.toBeNull();
+    expect(session.state.lobbyAttendant).toMatchObject({ screen: "step", phase: "talk", page: 0, age: 0 });
+    expect(session.state.rngValue).toBe(12345);
+    expect(session.ended).toBeNull();
+    const draftStart = new FactorySession({ battleScene: "off", gameplaySeed: 12345 });
+    expect(frameHash(session.state)).not.toBe(frameHash(draftStart.state));
+    for (let i = 0; i < 30; i += 1) session.tick(new Set<GbaButton>(), 0);
+    expect(session.state.lobbyAttendant).toMatchObject({ screen: "step", age: 30 });
+    session.reset();
+    const events: FactoryEvent[] = [];
+    const frames = tapA(session, events, 600, (state) => state.lobbyFreeRoam === null);
+    expect(frames).toBeLessThan(600);
+    expect(events).toEqual([]);
+    expect(session.state.pendingGeneratedRound?.carry).toMatchObject({ factoryWinStreak: 0, rentsCount: 0, battlePoints: 0, factorySymbolsCount: 0 });
+    expect(session.state.draftScreen).not.toBeNull();
+  });
+
+  it("the deal is a deterministic function of the seed (same seed, same draft; another seed, another draft)", () => {
+    const deal = (seed: number): string => {
+      const session = new FactorySession({ battleScene: "off", start: "after-save", gameplaySeed: seed });
+      tapA(session, [], 600, (state) => state.lobbyFreeRoam === null);
+      return JSON.stringify([session.state.pendingGeneratedRound?.rngValueBefore, session.state.draftScreen]);
+    };
+    expect(deal(777)).toBe(deal(777));
+    expect(deal(777)).not.toBe(deal(778));
+  });
+
+  it("plays a whole challenge to challenge-end, no challenge-end at the start, and replays from the same start", () => {
+    const run = playFromAfterSave(4242, 60_000);
+    expect(run.session.ended).toBe("retire");
+    expect(types(run.events)).toEqual(["battle-end", "challenge-end"]);
+    expect(run.events[0]).toMatchObject({ result: "win", streak: 1 });
+    const replay = replayChallenge({ ...run.options, segments: run.session.trace() });
+    expect(replay.ended).toBe("retire");
+    expect(replay.digest).toBe(run.session.digest());
+    expect(replay.battles).toEqual(run.session.battles);
+  }, 120_000);
+});

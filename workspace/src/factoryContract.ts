@@ -45,6 +45,13 @@ export interface FactoryGameOptions {
   gameplaySeed?: number;
   /** u32 presentation-only Random2 seed (visuals); absent = the documented default. */
   presentationSeed?: number;
+  /**
+   * lbr-c (additive). Absent / "draft": the mount starts at the draft screen. "after-save": it starts in the Lobby at the attendant's
+   * "Please step this way." (the save dialog already done), the door walk and fade follow, then a fresh challenge-0 draft is dealt.
+   * `gameplaySeed` is then the Lobby RNG cursor on the first frame; the resulting draft is a deterministic function of it
+   * (not the deal a plain `gameplaySeed` mount makes). A resume trace, and `replayChallenge`, must pass the same `start`.
+   */
+  start?: "draft" | "after-save";
   /** Fast-forward through these before the player gets control; `ready` follows. */
   resume?: TraceSegment[];
   onEvent?: (event: FactoryEvent) => void;
@@ -115,5 +122,7 @@ export interface ReplayOptions {
   battleScene: BattleScene;
   gameplaySeed?: number;
   presentationSeed?: number;
+  /** Same as `FactoryGameOptions.start`: the trace replays only with the start it was played from. */
+  start?: "draft" | "after-save";
   segments: TraceSegment[];
 }

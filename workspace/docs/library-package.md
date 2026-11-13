@@ -62,6 +62,9 @@ palettes alone; it now reads `src/assets/gen/battle-sprite-palettes.json`
   leaves a frozen save window, which is the spec. The host prefetches the next server challenge at `challenge-end`, and on `challenge-request`
   destroys the mount and mounts that challenge (it starts at the draft as any mount does). `challenge-end` fires exactly where it did and the trace
   read at it is a prefix of every later read: nothing after the end belongs in the upload, and the event adds no frame to the trace.
+  Optional `start: "after-save"` (`FactoryGameOptions`, `ReplayOptions`) starts the mount at "Please step this way." in the Lobby (door walk, fade,
+  then a fresh draft) so the cut after `challenge-request` is short; `gameplaySeed` is then the Lobby RNG cursor, and the same `start` must be
+  passed to `resume` mounts and `replayChallenge`.
 - A forfeit (RUN, then YES on the forfeit box) is a lost battle: `battle-end` with outcome loss and `challenge-end loss` on the same
   tick, and `replayChallenge` reproduces it from the input stream alone (`docs/frf250b-forfeit.md`).
 - `resume` ticks the given runs without drawing (spread over animation

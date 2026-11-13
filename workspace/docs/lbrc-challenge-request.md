@@ -54,4 +54,25 @@ default).
 
 ## Not done / notes
 
-* Mount option `start: "after-save"`: see the section at the end of this file.
+* Mount option `start: "after-save"`: done, below.
+
+## `start: "after-save"` (additive mount option)
+
+`FactoryGameOptions.start?: "draft" | "after-save"` (also `ReplayOptions.start`, `FactorySessionOptions.start`; `lib-types`). Absent or `"draft"` = today.
+
+* **What it starts at.** The walkable Lobby with the attendant's box open on "Please step this way." (`createAfterSaveState` in
+  `src/factorySession.ts`: Lobby free-roam spawn, attendant state `step` at age 0, no ended challenge). The player's A closes the box, then
+  the 64-frame door walk, the 37-frame fade, and the same hand-off the in-game new challenge uses (`enterChainedFactoryChallenge` with
+  `carryForNewChallengeAfterLobby`): a fresh challenge-0 draft, win streak 0, rents 0, symbols and BP 0 (a new mount has no save).
+* **A fresh challenge** the same way a normal mount is one: no `challenge-end` at the start (`ended` is null, the Lobby is "entered" before the
+  first tick), events are the usual `battle-end` / `round-end` / `challenge-end`, and a RETIRE later in the mount reports `challenge-end retire`.
+* **RNG semantics (ROM-faithful, and what is not).** In the ROM the Lobby runs on the free-running per-VBlank RNG, so the deal after the door
+  walk depends on the whole conversation's length (nch231, lbr-b). A fresh mount has no conversation: `gameplaySeed` is the **Lobby RNG cursor on
+  the first frame** (absent = the anchor boot cursor), the cursor advances one vblank step per tick like every Lobby frame, and the draft is
+  dealt from the cursor of the hand-off tick. That is deterministic from (seed, the player's inputs: how long they take to press A), which the
+  trace already holds, so a replay is exact; it is **not** the draft a plain `gameplaySeed` mount deals (that one deals directly from the seed, with
+  no ROM counterpart either). The host stores the seed with the server challenge as before and must pass the same `start` to the mount, to
+  `resume`'d mounts and to `replayChallenge`: a trace only replays with the start it was played from.
+* The server picks `gameplaySeed` for the next challenge; the cursor the player's last conversation reached is not carried over (the previous mount is gone).
+* Pinned in `tests/lbrc.test.ts` (start state, deal deterministic from the seed and different across seeds, whole challenge to `challenge-end`
+  and a headless replay with the same `start`).
