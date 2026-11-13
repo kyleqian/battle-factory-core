@@ -127,7 +127,7 @@ async function runCase(name, query, { forceAac = false, gesture = true } = {}) {
   page.on("console", (m) => { if ((m.type() === "error" || m.type() === "warning") && !/not allowed to start/.test(m.text())) errors.push(`${m.type()}: ${m.text()}`); });
   await page.addInitScript(initScript, forceAac);
   await page.goto(`${base}?pokebench=1&battleScene=${SCENE}${query}`);
-  await page.waitForFunction(() => typeof window.__POKEBENCH__ === "object");
+  await page.waitForFunction(() => typeof window.__POKEBENCH__ === "object", null, { polling: 100 });
   await page.evaluate(() => window.__POKEBENCH__.reset());
   if (gesture) await page.mouse.click(10, 10);
   const startedAt = Date.now();
