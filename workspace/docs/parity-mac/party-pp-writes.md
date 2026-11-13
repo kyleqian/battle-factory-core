@@ -78,13 +78,21 @@ the field and in the party record.
   Magic Coat reflects. So the Pressure is moved: the opponent's Venomoth (set 226) takes it from the player's Absol
   with Skill Swap, the player switches to Kecleon and uses Magic Coat every turn. Kecleon's Magic Coat PP at the
   player's decisions, the same on the ROM and in the engine, on the field and in the party record:
-  15, 13 (Sleep Powder reflected: two PP), 12 (nothing to reflect: one PP), 11, 9 (reflected), 7 (reflected), 6, 5, 4,
+  15, 13 (Sleep Powder reflected: one PP for the use, which Pressure never raises, and one for the reflection), 12
+  (nothing to reflect: one PP), 11, 9 (reflected), 7 (reflected), 6, 5, 4,
   3, 1 (reflected), 0 (reflected with one PP left: the use takes it, the extra loss finds 0 and takes nothing,
   `:756-757`). Five reflections; the battle matches the ROM to the end.
-- **Called by Metronome.** Metronome may call Magic Coat (it is not in `sMovesForbiddenToCopy`,
-  `battle_script_commands.c:725-747`). The caller has no Magic Coat slot, so the search at `:747-754` finds nothing
-  and no extra PP is taken; only the Metronome slot pays (two PP: Metronome's own loss to Pressure in `Cmd_ppreduce`).
-  A staged battle for this case is in `STATUS.md`, section "Fifth pass".
+- **Called by Metronome** (`stages/metronome-magic-coat-pressure.json`, lab seed 76026). Metronome may call Magic Coat
+  (it is not in `sMovesForbiddenToCopy`, `battle_script_commands.c:725-747`). The player's Dusclops (set 378,
+  Pressure) uses Confuse Ray or Will-O-Wisp every turn against the opponent's faster Clefable (set 389). In the turn in
+  which Clefable's Metronome calls Magic Coat, Dusclops's Will-O-Wisp is reflected, and **Clefable's Metronome slot
+  pays one PP in all (2 -> 1), no other slot pays**, the same on the ROM and in the engine:
+  - the use: Metronome has no `ppreduce` of its own; the called move's script pays from the Metronome slot. Magic
+    Coat's `trysetmagiccoat` sets `ppNotAffectedByPressure` (`:9537-9550`), so its `ppreduce` takes one PP even against
+    Pressure (`:1212`). In the turns in which Metronome called a move aimed at Dusclops the slot paid two (10, 8, 6, 4,
+    2 in this battle).
+  - the reflection: `PressurePPLose` looks for Magic Coat among Clefable's four moves (`battle_util.c:747-754`), finds
+    none, and takes nothing.
 
 ## Not covered (source read, no reachable case found)
 
