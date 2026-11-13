@@ -306,8 +306,9 @@ describe("mountFactoryGame", () => {
     expect(trace.every((run) => typeof run.t === "number" && run.t >= 0)).toBe(true);
     expect(game.trace(2)).toEqual(trace.slice(2));
     expect(game.session.recorder.segmentsFrom(3).map(({ frames, buttons }) => ({ frames, buttons }))).toEqual([{ frames: 1, buttons: [] }]);
+    // aud245: the contract gained setAudio / getAudio (additive).
     const contractOnly = mountFactoryGame({ canvas: fakeCanvas().canvas, battleScene: "off" });
-    expect(Object.keys(contractOnly).sort()).toEqual(["destroy", "engine", "frame", "press", "release", "trace"]);
+    expect(Object.keys(contractOnly).sort()).toEqual(["destroy", "engine", "frame", "getAudio", "press", "release", "setAudio", "trace"]);
     contractOnly.destroy();
     game.destroy();
     const before = game.frame;
