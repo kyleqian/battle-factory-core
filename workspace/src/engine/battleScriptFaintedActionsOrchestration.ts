@@ -450,6 +450,7 @@ function runPendingSwitchinEffects(
           ),
         ) as BattleScriptRulesContext["aiObservedAbilityIds"],
         scriptingBattler: id,
+        intimidateBattler: id, // battle_util.c:3011
         lastUsedAbility: PENDING_ENTRY_ABILITY.intimidate,
       }),
     }), INTIMIDATE_LABEL);

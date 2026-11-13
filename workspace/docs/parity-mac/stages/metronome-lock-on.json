@@ -1,0 +1,59 @@
+{
+ "name": "metronome-lock-on",
+ "why": "Chansey (set 227) calls Lock-On and then Mist through Metronome and faints. The Lock-On mark is still on the opponent at the replacement menu (docs/parity-mac/lock-on-mark-at-faint.md). Two turns later the opponent's Arbok enters with Intimidate against the player's Mist: nobody's Attack falls (docs/parity-mac/intimidate-against-mist.md). The Mist ends after its five turns.",
+ "seed": 50039,
+ "challengeNum": 1,
+ "battleNum": 0,
+ "trainerId": 82,
+ "playerSetIds": [
+  227,
+  241,
+  209
+ ],
+ "opponentSetIds": [
+  193,
+  181,
+  217
+ ],
+ "script": {
+  "actions": [
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   }
+  ],
+  "then": "census"
+ },
+ "expect": [
+  "move:EFFECT_LOCK_ON",
+  "move:EFFECT_MIST",
+  "situation:screen:mist:blocks-stat-drop",
+  "situation:screen:mist:ends"
+ ]
+}

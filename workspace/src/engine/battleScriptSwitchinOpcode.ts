@@ -1412,8 +1412,14 @@ function createTrygetintimidatetargetOpcodeHandler(): BattleScriptOpcodeHandler<
   return (context) => {
     const jump = resolveBattleScriptLabel(context.program, context.instruction.operands[0]!.expression);
     if (!jump) throw new Error("Cmd_trygetintimidatetarget has an unresolved return label");
-    const rules = context.state.rulesContext;
-    const source = rules.scriptingBattler;
+    // `gBattleScripting.battler = gBattleStruct->intimidateBattler` on EVERY pass (battle_script_commands.c:9571), not the scripting battler as it
+    // happens to stand: `statbuffchange` hands a Mist-protected target to BattleScript_MistProtected with the scripting battler set to that TARGET
+    // (ChangeStatBuffs, battle_script_commands.c). Reading the scripting battler made the next pass take the protected Pokemon for the intimidator and
+    // lower the real intimidator's own Attack (ROM: staged battle metronome-lock-on, docs/parity-mac/intimidate-against-mist.md).
+    const source = context.state.rulesContext.intimidateBattler;
+    const rules = context.state.rulesContext.scriptingBattler === source
+      ? context.state.rulesContext
+      : Object.freeze({ ...context.state.rulesContext, scriptingBattler: source });
     let target = rules.selectorRoles.target ?? 0;
     while (
       target < rules.battleTopology.battlersCount
@@ -1426,6 +1432,7 @@ function createTrygetintimidatetargetOpcodeHandler(): BattleScriptOpcodeHandler<
       return transitionBattleScriptCommand(
         context,
         Object.freeze({ kind: "jump", programCounter: jump.programCounter }),
+        { rulesContext: rules },
       );
     }
     return transitionBattleScriptCommand(

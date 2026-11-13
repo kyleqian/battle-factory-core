@@ -858,6 +858,12 @@ export type BattleScriptRulesContext = Readonly<
      * docs/parity-mac/forced-struggle-never-started.md.
      */
     noValidMovesKept: number;
+    /**
+     * Source gBattleStruct->intimidateBattler: the Pokemon whose Intimidate script is running (set by AbilityBattleEffects' INTIMIDATE1 / INTIMIDATE2
+     * cases, battle_util.c:3011 / :3083). Cmd_trygetintimidatetarget reads it, and writes it back into gBattleScripting.battler, on every pass of the
+     * loop (battle_script_commands.c:9571): a script the loop calls in between may change the scripting battler (BattleScript_MistProtected does).
+     */
+    intimidateBattler: BattleScriptBattlerId;
     /** Source u8 gWishFutureKnock.weatherDuration -- the one shared weather timer every Cmd_set<weather> writes (include/battle.h:172, byte offset 0x28). */
     weatherTimer: number;
     /** Source gWishFutureKnock.wishCounter[MAX_BATTLERS_COUNT], owned by positional battler slots. */
@@ -1065,6 +1071,7 @@ export type BattleScriptRulesContextInput = Readonly<{
   randomTurnNumber?: number;
   battleTurnCounter?: number;
   noValidMovesKept?: number;
+  intimidateBattler?: BattleScriptBattlerId;
   weatherTimer?: number;
   wishCounter?: readonly number[];
   wishMonId?: readonly number[];
@@ -2823,6 +2830,7 @@ export function createBattleScriptRulesContext(
     randomTurnNumber: requireUnsigned(input.randomTurnNumber ?? 0xffff, 0xffff, "randomTurnNumber"),
     battleTurnCounter: requireUnsigned(input.battleTurnCounter ?? 0, 0xff, "battleTurnCounter"),
     noValidMovesKept: requireUnsigned(input.noValidMovesKept ?? 0, 0xf, "noValidMovesKept"),
+    intimidateBattler: requireUnsigned(input.intimidateBattler ?? 0, 3, "intimidateBattler") as BattleScriptBattlerId,
     weatherTimer: requireUnsigned(input.weatherTimer ?? 0, 0xff, "weatherTimer"),
     wishCounter: Object.freeze([
       requireUnsigned(input.wishCounter?.[0] ?? 0, 0xff, "wishCounter[0]"),

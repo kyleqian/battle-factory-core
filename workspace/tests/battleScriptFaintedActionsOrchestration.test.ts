@@ -490,6 +490,27 @@ describe("runBattleScriptFaintedActionsOrchestration (HandleFaintedMonActions eq
     expect(result.state.rng.calls).toBe(initial.rng.calls);
   });
 
+  // parity-mac fix 38 (docs/parity-mac/intimidate-against-mist.md): Cmd_trygetintimidatetarget reads gBattleStruct->intimidateBattler on every pass
+  // (battle_script_commands.c:9571). The engine read the scripting battler, which BattleScript_MistProtected leaves pointing at the protected target:
+  // the next pass took the player's Pokemon for the intimidator and lowered the real intimidator's own Attack.
+  it("state 6: an opponent's Intimidate blocked by the player's Mist lowers nobody's Attack", () => {
+    const rc = context({
+      battlers: [
+        battler({ side: 0 }),
+        battler({ side: 1, ability: 22, status3: 1 << 19 }),
+        battler({ side: 0 }),
+        battler({ side: 1 }),
+      ],
+      mistTimers: [3, 0],
+    });
+    const result = runBattleScriptFaintedActionsOrchestration(program, handlers, haltedAtOwnEnd(rc));
+    expect(result.kind).toBe("no-fainted-battlers");
+    expect(result.state.rulesContext.battlers[0].statStages[1]).toBe(6);
+    expect(result.state.rulesContext.battlers[1].statStages[1]).toBe(6);
+    expect(result.state.events.filter((event) => event.kind === "message").map((event) => event.messageId))
+      .toEqual(["STRINGID_PKMNPROTECTEDBYMIST"]);
+  });
+
   // parity-mac fix 34 (docs/parity-mac/cure-berry-after-action.md): state 6's `ItemBattleEffects(ITEMEFFECT_NORMAL, 0, TRUE)` (`battle_util.c:1961`)
   // also fires the cure items of battler 0. It is the only item step after a Pursuit hit on a switching Pokemon, whose script skips the move-end one.
   it("state 6 cures battler 0's paralysis with its Cheri Berry (the game's item check after every action)", () => {

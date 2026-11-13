@@ -256,6 +256,7 @@ describe("source-shaped Battle Script rules context", () => {
       "giveExpState",
       "hitMarker",
       "hpDealt",
+      "intimidateBattler",
       "knockedOffMons",
       "lastUsedAbility",
       "lastUsedItem",

@@ -487,6 +487,7 @@ export function initializeFreshFactoryBattle(
     rulesContextBeforeB = Object.freeze({
       ...rulesContextBeforeB,
       scriptingBattler: battler,
+      intimidateBattler: battler, // battle_util.c:3011
       lastUsedAbility: INTIMIDATE_ID,
     });
     // `AbilityBattleEffects` records `(battler, gLastUsedAbility)` on every
