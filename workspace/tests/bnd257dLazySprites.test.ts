@@ -28,7 +28,7 @@ describe("bnd257d: importing the renderer with no provider installed", () => {
     expect(scene.grovyleFrontSprite.frame2).toBe(sheet.frame2);
     expect(scene.grovyleFrontSprite.palette).toBe(sheet.palette);
     expect({ ...scene.grovyleFrontSprite, tileset: 1 }).toEqual({ tileset: 1, frame2: sheet.frame2, palette: sheet.palette });
-  });
+  }, 60_000); // cold import of the whole engine graph after resetModules: > 5 s when run alone on a loaded box
 
   it("the lazy table view forwards reads, `in` and key enumeration to the installed table", async () => {
     vi.resetModules();
