@@ -119,19 +119,28 @@ lbr-d2a ROM ticks (`docs/lbrd2a-won-tail-rom.md`) for the won farewell constants
 Item 0c DONE. Item 0d: the Mac lane owns battle rules; fold `mac/parity-mac` at run start if it moved; nightly replay from the pool; ISSUES #214 holds its
 source-read leads. **Top layer, 2026-11-13 after your run:** the Mac lane also owns the replay tools and every replay upgrade now, and the finish line has no
 battle count (item 0d, "Top layer, 2026-11-13"); the lab staging failures are fixed (`oracle/battle_lab.py`, same item).
-**Delivered 2026-11-13 19:11 UTC for your next fold: `mac/parity-mac` = `42e1f4f91`, battle-rule fixes 29 to 41.** It replaces the 14:05 UTC delivery
-(`ba58f0ec6`, fixes 29 to 40), which it contains. Fixes 29 to 40 were found by the new players, the wide compare and staged battles
-(`docs/parity-mac/STATUS.md`, "Fourth pass"); fix 41 (`4f90eaf6c`: the AI's Foresight score for a Ghost-type user makes two random rolls, the engine made
-one) by the finer tally ("Fifth pass", `docs/parity-mac/rule-coverage.md`). One commit per fix, each with a failing-without test and a ROM battle. Your
-master `0d84f6bfb` is an ancestor of it, so the merge is a fast-forward unless master has moved. Its gate ran on `42e1f4f91` itself: typecheck ok, build ok,
-14,745 tests pass, 1 fails. **That one is yours and fails on your master too:** `tests/animation/sandTombEvidenceCheckpoint`
+**Later that evening the Mac lane stopped (Kyle winds down the Mac): battle rules and the replay tools are yours again, and
+the hunt for rare cases is on hold** (item 0d, "Mac lane stopped").
+**Delivered 2026-11-13 20:17 UTC for your next fold, the Mac lane's last: `mac/parity-mac` = `165548c4b`, battle-rule fixes 29 to 43** (`165548c4b`
+adds only `docs/parity-mac/on-hold/` to the gated `85ee1361e`; the branch is also on GitHub as `worker/parity-mac`). It replaces
+the 14:05 UTC (`ba58f0ec6`, fixes 29 to 40) and 19:11 UTC (`42e1f4f91`, 29 to 41) deliveries, which it contains. Fixes 29 to 40 were found by the new
+players, the wide compare and staged battles (`docs/parity-mac/STATUS.md`, "Fourth pass"); fix 41 (`4f90eaf6c`: the AI's Foresight score for a Ghost-type
+user makes two random rolls, the engine made one), fix 42 (`55a89a0ad`: the foe's Follow Me redirects the player's self-aimed Curse, so the Follow Me
+user's Pressure costs a second PP) and fix 43 (`72eea3053`: the Pursuit user's Synchronize ends Pursuit's move-end steps; the engine ran on and crashed
+in the switch) by the finer tally ("Fifth pass", `docs/parity-mac/rule-coverage.md`). One commit per fix, each with a failing-without test and ROM proof;
+for 42 and 43 the proof is a Mechanic Lab run (custom teams, ROM side only; `docs/parity-mac/stages/mechanic-lab/`), not a whole matched battle. Your
+master `cef8376e9` merges with it without conflict (checked with `git merge-tree`). Its gate ran on `85ee1361e` itself: typecheck ok, build ok,
+14,749 tests pass, 1 fails. **That one is yours and fails on your master too:** `tests/animation/sandTombEvidenceCheckpoint`
 pins the sha256 of `tools/compare/sandTombSourceAudit.ts`, which your `11e1a66b4` (iss215 pixel-provider installs) changed; re-pin it (the top layer re-ran
 it on `0b80af10e`: same failure). Top-layer checks: for `ba58f0ec6`, 54 sampled battles and the 13 staged battles re-driven on a clean checkout match and
 equal the lane's rows, and fixes 36, 38, 39, 40 each taken out alone make their staged battle differ from the ROM; for `42e1f4f91` (the only engine change
 since is `src/engine/factoryAiCheckViability.ts`, fix 41), 36 sampled battles of the lane's final run re-driven on a clean checkout match and equal its rows,
-and fix 41's staged battle (`stages/noland-foresight-ghost.json`) matches 20 / 20 states with the fix and differs at state 6 of 21 with the old file.
+and fix 41's staged battle (`stages/noland-foresight-ghost.json`) matches 20 / 20 states with the fix and differs at state 6 of 21 with the old file;
+for `85ee1361e`, fix 42's and fix 43's tests fail with their old engine file and pass with the fix, and the same 36 battles plus all 32 staged battles
+(`stages/*.json`, `stages/coverage/*.json`) re-driven on a clean checkout match.
 The lane's final run on the fix 41 engine: 3,546 battles, 3,541 match, 5 endless Struggle stalls (no difference up to the frame cap); every tally row is
-covered by a ROM-matched or staged battle or proven unable to occur.
+covered by a ROM-matched or staged battle or proven unable to occur. Of the finer tally's 110 reachable never-run rules, 12 are now covered by staged
+battles; 98 are on hold (item 0d, "Mac lane stopped").
 **Two findings for you from that lane (file them in ISSUES; not battle rules, not fixed there):** (1) the rental select screen lets the player take two
 Pokemon of one species; the game refuses the second ("Can't select same POKeMON.", `Select_AreSpeciesValid`, `battle_factory_screen.c:2256-2276`; the
 swap screen has `Swap_AlreadyHasSameSpecies`, `:4162`); the engine's `MENU_OPTION_RENT` branch in `src/engine/core.ts` has no such check; about 3 teams in
@@ -341,8 +350,27 @@ game says it "can't be switched out" (seen in code only).
         part; check burn / pinch `maxHp` / Guts / weather / Flash Fire against it), A5-A7, B1 (Toxic counter), B3-B8.
      - Every audit row is source-read only. Confirm it on the ROM with the fix (a seed, or a Mechanic Lab `overrides.parties`
        scenario). File ISSUES entries from the audit doc at your next ISSUES edit; the top layer did not touch `ISSUES.md`.
+   - **Mac lane stopped, 2026-11-13 evening (Kyle is winding down the Mac: "can we offload fixes to hcloud?"). This
+     replaces "Two machines" above and the Mac-lane ownership in the next bullet; the finish line there still stands.**
+     - **Battle rules and the replay tools are yours again.** The do-not-edit list in the next bullet no longer applies.
+       Fold `mac/parity-mac` once more (the status paragraph near the top names the tip); after that the branch does not
+       move, so the two-runs fallback does not apply either.
+     - **On hold by Kyle's word ("I guess we can hold off on that for now"): the hunt for rare cases.** That is the
+       coverage list's reachable rules (`docs/parity-mac/rule-coverage.md`, class (c)), the discovery batches, and the plan
+       for the swap between battles and Open Level. Do not start them unless Kyle asks. `docs/parity-mac/STATUS.md`,
+       section "Stopped 2026-11-13", says where each one stopped.
+     - **What you keep:** the nightly check from the pool, and now also every staged battle
+       (`docs/parity-mac/stages/*.json` and `stages/coverage/*.json`, 32 on 2026-11-13;
+       `REPLAY_OUT=/abs tools/audio/romReplayWide.sh --stage FILE`, cwd `workspace/`): they guard the rare-rule fixes.
+       Leave `docs/parity-mac/on-hold/` alone: untested designs. If either shows a difference, fixing it is the main program of that run: one commit per fix, a
+       test that fails without it, a ROM battle. Otherwise sound stays the main program.
+     - **The new tools run on this box:** on 2026-11-13 the top layer ran `romReplayWide.sh` from `42e1f4f91` here, a
+       staged battle (`stages/noland-foresight-ghost.json`, 20 / 20) and an `ai-v1` battle (seed 20126, 11 / 11); both
+       match and equal the Mac's rows, under a minute each. How to re-drive any recorded battle: `howToReDrive` in
+       `docs/replay-batches/2026-11-13-fifth-pass.json`.
    - **Top layer, 2026-11-13 (Kyle's decisions of that night). The Mac lane owns every replay upgrade below and the replay
-     tools. This replaces "at most one per run" and the old finish line.**
+     tools. This replaces "at most one per run" and the old finish line.** (Ownership superseded the same evening by
+     "Mac lane stopped" above.)
      - **Do not edit on the box:** `tools/audio/romDrive*`, `tools/audio/romReplay*`, `tools/audio/soundEventProbe.py`,
        `tools/integration/soundCensusRomReplay.ts`, `tools/integration/romReplayPlayers.ts`, top-level `tools/replay-batch/`
        and `oracle/battle_lab.py`. The Mac lane is changing them (fourth pass, `docs/parity-mac/STATUS.md`); a box edit
