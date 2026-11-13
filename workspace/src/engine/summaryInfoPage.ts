@@ -55,7 +55,7 @@ import summaryMarkingsData from "../assets/gen/summary-markings.json" with { typ
 import summaryButtonsData from "../assets/gen/summary-buttons.json" with { type: "json" };
 import summaryBallData from "../assets/gen/summary-ball.json" with { type: "json" };
 import frontSpritesData from "../assets/gen/front-sprites.json" with { type: "json" };
-import opponentFrontSpritesData from "../assets/gen/battle-opponent-front-sprites.json" with { type: "json" };
+import { frontPixels } from "./monPicPixels.ts";
 import fontNormalData from "../data/gen/font-normal.json" with { type: "json" };
 import charmapData from "../data/gen/charmap.json" with { type: "json" };
 import summaryMoveEffectBattleData from "../assets/gen/summary-move-effect-battle.json" with { type: "json" };
@@ -97,7 +97,6 @@ const statusIcons = partyMenuContentData as unknown as {
   statusIcons: { palette: RgbColor[]; frames: Record<string, { columns: number; rows: number; tiles: number[][] }> };
 };
 const frontSprites = frontSpritesData as unknown as Record<string, { tileset: TileGrid; animationFrame1: TileGrid; palette: RgbColor[] }>;
-const opponentFrontSprites = opponentFrontSpritesData as unknown as Record<string, { tileset: TileGrid; frame2: TileGrid; palette: RgbColor[] }>;
 
 /**
  * gMonFrontPicTable + gMonPaletteTable for any Battle Frontier species. The
@@ -107,7 +106,7 @@ const opponentFrontSprites = opponentFrontSpritesData as unknown as Record<strin
 function summaryFrontSprite(species: string): { tileset: TileGrid; animationFrame1: TileGrid; palette: RgbColor[] } | undefined {
   const own = frontSprites[species];
   if (own) return own;
-  const opponent = opponentFrontSprites[species];
+  const opponent = frontPixels(species) as { tileset: TileGrid; frame2: TileGrid; palette: RgbColor[] } | undefined;
   return opponent && { tileset: opponent.tileset, animationFrame1: opponent.frame2, palette: opponent.palette };
 }
 const font = fontNormalData as unknown as FontData;
