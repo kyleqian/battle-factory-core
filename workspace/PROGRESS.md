@@ -5,6 +5,18 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 2026-11-13 — CAX31 daily run (supervisor, Opus 5.5): run start, `mac/parity-mac` 344eda36c folded
+
+- **State:** master `5a2fe1d83` = merge of `mac/parity-mac` `344eda36c` (52 commits, 28 battle-rule fixes + Brain replay seam; docs `docs/parity-mac/`).
+  ENGINE_BUILD `eb-952d7267a01bd728` -> `eb-adfdcfdc91f4247f` (read from dist; tell the website). Evidence `.integration/validation/sv-20261113/gates/`.
+- **Gates on the merge:** typecheck 0; full suite (5 workers) **1,772 files passed / 44 skipped, 14,613 tests passed**; build / build:lib 0.
+- **Gameplay status (replay only, per item 0d):** the Mac lane reports the open list empty on `344eda36c`: 8,660 ordinary seeds 1161..10000 with 0 engine
+  mismatches, silver Brain 204 / 204, gold 203 / 203, regression 64 / 64 (`docs/parity-mac/STATUS.md`). Box nightly check on the merge is in the
+  replay ledger. ISSUES #211 / #212 / #204 removed (all rows fixed with ROM proof by the Mac lane; #204 seed 50 ON was never driven); new #213
+  (Encore / Struggle skip the move menu, presentation, left on purpose by the Mac lane) and #214 (source-read leads).
+
+---
+
 ## 2026-11-12 — CAX31 daily run (supervisor, Opus 5.5): wind-down: aiv270 / aiv271 / fix274 / aud244a / lbr-a / pnm273 folded
 
 - **State:** master clean, no active workers, no worktrees. Final src == `f55e68f8e` (pnm273) plus test-only `bbcc41497`; later commits docs only. ENGINE_BUILD
@@ -40,17 +52,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   Production differential: only x17-51 y124-133 changes (123 / 250 frf250b, 73 / 133 record-yes); with the override 6 traces / 4412 captures byte-identical; ROM compares 250 / 250, 133 / 133, 178 / 178; census seeds 0..49 both scenes 100 / 100 lines identical (kernel digest unchanged).
   Tests: `tests/pnm273PlayerName.test.ts` (8), 3 files re-pinned; `factoryTerminalMessages.test.ts` keeps MEMORY (it pins the oracle-save extractor).
 - **Next:** per-player name (`playerName` mount option) when wanted; no compare trace reaches the BP award box (app-side render checked only).
-
----
-
-## 2026-11-12 — lbra / lbr-a (ts lane worker): loss / forfeit / retire end in the walkable Lobby (no new-draft chain); handoff item 0b step 1
-
-- **State:** committed on master (not pushed). ENGINE_BUILD `eb-551744f3a2c9b7ed` -> `eb-8838f1fea2958ffc` (read from dist; tell the website). `docs/lbra-lobby-return.md`.
-  Gates so far: typecheck 0, test:gate 362 / 362 (2836 tests), build / build:lib 0. Soaks: vanilla 0:20 OFF **20 / 20**, ON **20 / 20** (all `budget`), winning 0:12 **12 / 12** (run in slices / `--parallel` to fit the 10-min command limit).
-- **Did:** loss / forfeit / retire warp to the Lobby and play `LostChallenge` (record question YES/NO unless forfeit: `disableRecordBattle` skips it, bug fixed),
-  then free-roam; `enterChainedFactoryChallenge` removed for these end types (7-win path untouched); loss carry reset on Lobby entry. Soak driver / goalPlay /
-  play:random walk to the attendant and press A after a loss (nch231). Library `challenge-end` frame unchanged (pinned). `tests/lbra.test.ts` (14), 5 old-chain re-pins.
-  ROM windows `tools/compare/traces/lbra-*.json`: loss OFF **2258 / 2258**; forfeit OFF 896 / 1050, ON 766 / 1050; retire OFF 1315 / 1554 (all residuals named in the doc).
-  SE_SAVE: forfeit OFF 895 (ROM = app); ROM loss OFF 4007 / retire OFF 7503, app emits none there (audio lane).
-- **Next:** lbr-b attendant conversation, lbr-c challenge-request event, lbr-d 7-win Lobby return; a closed-loop Scene ON loss / retire lab (unmeasured).
-- **Notes:** play:random 2 min / scene both: 0 page errors / console errors / overlays (ON 7 battles, OFF 16, new challenges from the Lobby 1 / 3). The next draft after a loss now uses the live Lobby vblank cursor (ROM-faithful), not the old chain's cursor. Evidence `.integration/evidence/lbra/`.

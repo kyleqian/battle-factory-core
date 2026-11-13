@@ -13,23 +13,18 @@ defects are all authorized in the finish-up mission (`docs/factory-finish-scope.
 gameplay / RNG when proved against source; use main-lane ownership and gameplay gates. Historical presentation-only
 exclusions are superseded. Unrelated expansions stay parked.
 
-## #211 — ROM replay divergences, seeds 61..160 batch (top layer 2026-11-12; re-driven at the 2026-11-12 CAX31 wind-down)
+## #213 — Encore / forced Struggle: the engine opens the move menu after FIGHT (presentation; Mac lane, 2026-11-12)
 
-Scene OFF, `f55e68f8e`: 79 87 89 90 94 95 107 109 114 119 123 137 138 152 159 still diverge (first diverging row per seed in `docs/replay-ledger.md`;
-75 88 110 155 158 now match). Not diagnosed; triage by first diverging row (dia263 / dia269 / dia272 shape). Seed 60 is the dia272 forced-Struggle lead (#204).
+Battle rules are fixed (parity-mac fix 5, `docs/parity-mac/encore-struggle-selection.md`). Left on purpose by the Mac lane: after FIGHT the engine
+still opens its move menu with the forced move as the only legal slot; the ROM goes straight to the turn (and prints "... has no moves left!" for
+Struggle). Both scenes. Needs a ROM window per case (Encore, Struggle) and the same flow in both scenes.
 
-## #212 — Gameplay audit rows, source-read only (`docs/gameplay-parity-audit-2026-11-12.md` section 2)
+## #214 — Leads from the Mac lane's 2026-11-12 passes (source-read only, no ROM seed)
 
-Open until confirmed on the ROM with the fix: A2 / A3 (switch-in scorer: no power gate, no Levitate), A4 (pass-2 base damage 0, = the #204 remainder),
-A5 (AI turn counter 0), A6 / A7 (CheckViability target drops ability / Sp. Atk stage), B1 (Toxic counter survives a switch), B2 (Encore auto-confirms),
-B3 (Endure vs Future Sight), B4 (Shell Bell on Future Sight), B5 (Castform revert), B6 (confusion self-hit Explosion halving), B7 (Pain Split as physical),
-B8 (Hidden Power physicality). A1 is mostly covered by aiv271 (re-check its rows on a seed).
-
-## #204 — AI residuals after the view fill (aiv266 / aiv267 / aiv270 / aiv271)
-
-Causes A / B (aiv270) and C (aiv271, `docs/aiv271-ai-damage-terms.md`: AI damage sims take the real hit chain's `battleScriptDamageTerms`) are
-fixed; seeds 22 / 30 / 39 match both scenes and 57 ON matches. Open: the AI switch-into scorer (`battle_ai_switch_items.c:778`) still uses a
-`baseDamage: 0` stub in `battleAiSwitchInto.ts` (unaudited). Seed 60's forced-Struggle AI lead (`docs/dia272-leads.md`, scratch 36 / 82 -> 73 / 82 OFF) and seed 50 ON (not driven) are the next items.
+- Cure berries after Pursuit-on-switch: `HandleFaintedMonActions` state 6 runs `ItemBattleEffects(ITEMEFFECT_NORMAL, 0, TRUE)` for the player's
+  battler; the engine ports only White Herb there (a status berry cures a few steps early in the ROM). Low value.
+- Census battle 32 trips `sa125`'s ON - OFF row check on a CONFUSION anchor (139 vs 100); presentation, not looked at.
+- Long / endless Struggle-Leftovers stalls (796, 1986, ... `docs/parity-mac/STATUS.md` "Still open") match every state up to the ROM cap; not bugs.
 
 ## #200 — Opponent faint-replacement party summary residuals (obr251, 2026-11-07)
 
