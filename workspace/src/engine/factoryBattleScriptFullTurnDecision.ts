@@ -1803,6 +1803,30 @@ function actionEncoreArm(
   });
 }
 
+/**
+ * `HandleAction_UseMove`'s "choose target" block (`battle_util.c:148-156`), after its move / target arms: a
+ * MOVE_TARGET_SELECTED move goes to the foe's Follow Me user while that Pokemon's Follow Me is up and it has HP. In
+ * singles the target such a move carries is the foe already, with one exception: the player's Curse while the user is
+ * not a Ghost type, which the player's controller banks with the user itself as target (`moveMenuTarget`). Follow Me
+ * aims it at the foe; `Cmd_ppreduce`'s Pressure test reads that target (parity-mac fix 42,
+ * docs/parity-mac/follow-me-redirect.md).
+ */
+function followMeActionTarget(
+  rules: BattleScriptRulesContext,
+  mover: BattleScriptBattlerId,
+  moveId: number,
+  target: BattleScriptBattlerId,
+): BattleScriptBattlerId {
+  const move = MOVES_BY_ID.get(moveId);
+  if (!move || move.target.length !== 1 || move.target[0] !== "MOVE_TARGET_SELECTED") return target;
+  const attackerSide = rules.battlers[mover]!.side;
+  const followMe = rules.sideTimers[attackerSide === 0 ? 1 : 0]!;
+  if (followMe.followmeTimer === 0) return target;
+  const followTarget = followMe.followmeTarget;
+  if (rules.battlers[followTarget]!.side === attackerSide || rules.battlers[followTarget]!.hp === 0) return target;
+  return followTarget;
+}
+
 /** Runs one battler's chosen move from its LITERAL topology entry (census precedent, `factoryBattleScriptDecision.ts`'s own mechanism). */
 function runMoveAction(
   program: BattleScriptProgram,
@@ -1839,7 +1863,7 @@ function runMoveAction(
     mover,
     executedMoveId,
     moveSlot,
-    retarget?.target ?? target,
+    followMeActionTarget(actionRules, mover, executedMoveId, retarget?.target ?? target),
     forcedStruggle,
     encore?.movePosition ?? moveSlot,
   );
