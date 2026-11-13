@@ -1858,9 +1858,25 @@ class BattleLab:
         Factory intro route. The public frame-zero contract is semantic, so
         never expose one of those variable messages as though it were the
         action menu.
+
+        Never tap A once the player's controller holds the choose-action
+        command. ready() stays false there while the opponent's controller
+        still runs (its AI can take several frames, and an emulated frame
+        can end inside them with the menu already taking input); a tap
+        after such a check picked FIGHT, the next one the first move, and
+        the staging played turn 1. A tap that starts before the command is
+        issued cannot reach the menu: only the first main-loop pass that
+        samples the keys sees A as new, and HandleInputChooseAction first
+        runs two passes after the command.
         """
         player_buffer = self.oracle.symbols["gBattleBufferA"]
         exec_flags = self.oracle.symbols["gBattleControllerExecFlags"]
+
+        def menu_issued() -> bool:
+            return (
+                self.oracle.read_u8(player_buffer) == CONTROLLER_CHOOSE_ACTION
+                and self.oracle.read_u32(exec_flags) & PLAYER_CONTROLLER_FLAG != 0
+            )
 
         def ready() -> bool:
             return (
@@ -1874,7 +1890,8 @@ class BattleLab:
             self._advance(120, (), after_frame)
             if ready():
                 return
-            self._advance(2, ("A",), after_frame)
+            # Same 2-frame slot either way, so the check frames never move.
+            self._advance(2, () if menu_issued() else ("A",), after_frame)
             self._advance(12, (), after_frame)
             if ready():
                 return
