@@ -12,6 +12,8 @@ history.
 
 - **`oracle/emerald_core.py` in a worktree looks for `vendor/` one level too high**: the recorder needs
   `PYTHONPATH=/srv/pokebench/vendor/libmgba-py` (aud244b ~3 min). Same root as the `romDriveSeed.sh` worktree entry below.
+- **typecheck (7.5 GB) / `npm run build` are OOM-killed (exit 137) beside two other workers' suites** on the 15 GB box (lbr-b build, lbr-c build x2, aud247 typecheck ~5 min each).
+  Workaround: `tsc -b` then `vite build` with `NODE_OPTIONS=--max-old-space-size=4096`; supervisor: at most two workers when one runs a full suite.
 - **`tests/randomRoundSoak.test.ts` keeps its helpers un-exported**: a seed-range re-scan needs a copied scratch test (rps278 ~5 min).
 - **`npm run extract:audio` in a fresh worktree re-records and rewrites `aud244a-asset-list.json`** unless `--raw` points at the main
   checkout's `.integration/evidence/aud244a/raw` (aud244b ~5 min).
