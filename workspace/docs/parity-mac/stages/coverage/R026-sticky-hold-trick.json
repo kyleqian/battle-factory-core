@@ -4,7 +4,7 @@
   "R026"
  ],
  "why": "The player's Kecleon (set 325, Choice Band, Trick in slot 0) uses Trick on the opponent's lead Swalot (set 353, Leftovers). Swalot is Liquid Ooze or Sticky Hold by the seed's ability slot; with Sticky Hold, tryswapitems jumps to BattleScript_StickyHoldActivates (both hold items, Factory battle). Trick is tried on up to three turns in case Kecleon is fully paralysed by Body Slam; Swalot's Shadow Ball cannot touch Kecleon and Counter fails against Trick.",
- "seed": 0,
+ "seed": 70000,
  "challengeNum": 2,
  "battleNum": 0,
  "trainerId": 100,
@@ -42,10 +42,5 @@
  ],
  "coverAny": true,
  "chance": 0.48,
- "seeds": 50,
- "onHold": {
-  "group": "g3",
-  "seedsHunted": 4,
-  "result": "no matching hit in 4 seeds (hunt stopped)"
- }
+ "seeds": 50
 }
