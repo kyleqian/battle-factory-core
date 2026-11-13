@@ -4,7 +4,7 @@
   "R010"
  ],
  "why": "Challenge 5. The opponent leads Gengar (set 613, Skill Swap; Levitate). The player leads Dugtrio (set 564: Sand Veil or Arena Trap by the ability slot). Arena Trap has no switch-in message, so it is not in the AI's battle history. When Dugtrio's ability is Arena Trap, the AI's scoring of Skill Swap (AI_CV_ChangeSelfAbility, get_ability AI_TARGET) reads the trapping ability directly (battle_ai_script_commands.c:1369-1376), the runCvChangeSelfAbility trapper block, in the first AI turn. Dugtrio uses Double-Edge (no effect on the Ghost) so it never hurts Gengar; Gengar's Giga Drain likely knocks it out on turn 1 or 2, but the first scoring is enough. With Sand Veil the same turn may instead give the R009 roll.",
- "seed": 0,
+ "seed": 90000,
  "challengeNum": 5,
  "battleNum": 0,
  "trainerId": 160,
@@ -42,10 +42,5 @@
  ],
  "coverAny": true,
  "chance": 0.5,
- "seeds": 30,
- "onHold": {
-  "group": "g1",
-  "seedsHunted": 0,
-  "result": "untested"
- }
+ "seeds": 30
 }
