@@ -13,6 +13,14 @@ defects are all authorized in the finish-up mission (`docs/factory-finish-scope.
 gameplay / RNG when proved against source; use main-lane ownership and gameplay gates. Historical presentation-only
 exclusions are superseded. Unrelated expansions stay parked.
 
+## #215 — Standalone node tools that render battle sprites must install the pixel provider (bnd257d, 2026-11-13)
+
+Since bnd257d `battleScene.ts` reads sprite pixels only through `monPicPixels.ts`. Inside vitest the setup file installs them; a tool run as its own
+`node` process does not, and throws "mon pic pixels not installed" on the first mon-pic read. The final suite caught three
+(`tools/compare/{megaHorn,superpower,revenge}ActualCore.ts`, fixed with `import "../../src/engine/monPicPixelsInstall.ts"`). About 30 more
+`tools/compare` / `tools/probe` files import `core.ts` / `battleScene.ts` without the installer; those with no spawning test are unchecked.
+Fix: add the import to each tool that renders (or one shared tool entry helper) and a ratchet test.
+
 ## #214 — Leads from the Mac lane's 2026-11-12 passes (source-read only, no ROM seed)
 
 - Cure berries after Pursuit-on-switch: `HandleFaintedMonActions` state 6 runs `ItemBattleEffects(ITEMEFFECT_NORMAL, 0, TRUE)` for the player's

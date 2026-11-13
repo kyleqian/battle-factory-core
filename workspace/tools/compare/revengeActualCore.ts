@@ -1,4 +1,5 @@
 /** Complete retained-RGB actual-core gate for MOVE_REVENGE. */
+import "../../src/engine/monPicPixelsInstall.ts"; // bnd257d: battleScene reads sprite pixels through the provider; a standalone node run must install it
 import{createHash}from"node:crypto";import{execFileSync}from"node:child_process";import{readFileSync}from"node:fs";import{resolve}from"node:path";
 import{createSceneOnMovePresentation,type SceneOnRevengeConfig}from"../../src/animation/sceneOnPresentation.ts";import{createInitialState,render}from"../../src/engine/core.ts";import{createScratchDir}from"../lib/scratch.ts";
 import{revengeConfigFor,revengeRowsFor,verifyRevengeProduction,type RevengeWindow}from"./revengeProduction.ts";import{verifyRevengeReducer}from"./verifyRevengeReducer.ts";type Json=Record<string,any>;const root=resolve(import.meta.dirname,"../..");const sha=(v:Uint8Array|string)=>createHash("sha256").update(v).digest("hex");
