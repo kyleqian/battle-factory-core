@@ -1,0 +1,72 @@
+{
+ "name": "R008-machamp-revenge-asleep",
+ "rules": [
+  "R008"
+ ],
+ "why": "Challenge 7. The opponent leads Machamp (set 811: Revenge, Rock Slide, Facade, Counter). The player leads Lapras (set 822: Sheer Cold, Horn Drill, Rest, Sleep Talk; Leppa Berry, no Chesto) and uses Rest every turn: it fails while Lapras is at full HP, and works as soon as Machamp has hit it once. Lapras then sleeps two turns (Rest again while asleep does nothing; after waking it rests again). Every AI turn while Lapras is asleep, AI_CV_Revenge scores -2 without a roll, the runCvRevenge status block. Lapras is bulky (226 HP), so it survives the hits before the first Rest.",
+ "seed": 0,
+ "challengeNum": 7,
+ "battleNum": 0,
+ "trainerId": 200,
+ "playerSetIds": [
+  822,
+  764,
+  476
+ ],
+ "opponentSetIds": [
+  811,
+  762,
+  765
+ ],
+ "script": {
+  "actions": [
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   }
+  ],
+  "then": "census"
+ },
+ "expect": [],
+ "cover": [
+  {
+   "file": "src/engine/factoryAiCheckViability.ts",
+   "text": "{\n    return Object.freeze({ rng: input.rng, draws: Object.freeze([]), scoreDelta: -2 });\n  }\n  ",
+   "at": 0
+  }
+ ],
+ "coverAny": true,
+ "chance": 0.85,
+ "seeds": 15,
+ "onHold": {
+  "group": "g1",
+  "seedsHunted": 0,
+  "result": "untested"
+ }
+}

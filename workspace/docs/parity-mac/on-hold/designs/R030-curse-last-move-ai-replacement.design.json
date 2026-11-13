@@ -1,0 +1,78 @@
+{
+ "name": "R030-curse-last-move-ai-replacement",
+ "rules": [
+  "R030"
+ ],
+ "why": "The AI picks its replacement after a faint with a damage pass that uses the last move of the turn (AI_CalcDmg with gCurrentMove, battle_ai_switch_items.c:775-779); when that move is Curse (type ???) the damage formula gives 0. The player's Skarmory (set 482) badly poisons the opponent's Dugtrio (set 468, fast and frail, no healing). The player switches to Snorlax (set 556, Speed 30) and uses Curse every turn, so Curse is always the last move of the turn. When Dugtrio faints from the poison at the end of a turn, the AI scores its replacements: Milotic (559) and Electrode (492) have no Fighting move, so no candidate has a super-effective move against Snorlax, the type pass finds nothing and the damage pass runs with Curse as the current move.",
+ "seed": 0,
+ "challengeNum": 4,
+ "battleNum": 0,
+ "trainerId": 140,
+ "playerSetIds": [
+  482,
+  556,
+  552
+ ],
+ "opponentSetIds": [
+  468,
+  559,
+  492
+ ],
+ "script": {
+  "actions": [
+   {
+    "prefer": 3
+   },
+   {
+    "preferSwitch": 1
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   }
+  ],
+  "then": "census"
+ },
+ "expect": [],
+ "cover": [
+  {
+   "file": "src/engine/damageCalc.ts",
+   "text": "{\n    damage = 0",
+   "at": 0
+  }
+ ],
+ "coverAny": true,
+ "chance": 0.5,
+ "seeds": 60,
+ "onHold": {
+  "group": "g4",
+  "seedsHunted": 0,
+  "result": "untested"
+ }
+}

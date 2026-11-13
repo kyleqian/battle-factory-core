@@ -1,0 +1,68 @@
+{
+ "name": "R039-overheat-spatk-min-weezing-memento",
+ "rules": [
+  "R039"
+ ],
+ "why": "The opponent's Weezing (set 501: Memento, Sludge Bomb, Facade, Destiny Bond) leads. The player's Granbull (set 474) uses Overheat every turn: White Herb undoes the first drop, so after four Overheats its Sp. Atk is at -6. Granbull is weak (Sp. Atk 60, no STAB) so Weezing (Sitrus Berry) usually survives the four hits; on the fifth turn the AI's bad-move check scores Memento against a target at minimum Sp. Atk (AI_CBM_Memento, data/battle_ai_scripts.s:483-484, -8). Lost if Weezing uses Memento or Destiny Bond earlier or faints.",
+ "seed": 0,
+ "challengeNum": 4,
+ "battleNum": 0,
+ "trainerId": 140,
+ "playerSetIds": [
+  474,
+  482,
+  552
+ ],
+ "opponentSetIds": [
+  501,
+  559,
+  492
+ ],
+ "script": {
+  "actions": [
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   }
+  ],
+  "then": "census"
+ },
+ "expect": [],
+ "cover": [
+  {
+   "file": "src/engine/factoryAiCheckBadMove.ts",
+   "text": "{\n    return -10;\n  }\n  if (",
+   "at": 0
+  },
+  {
+   "file": "src/engine/factoryAiCheckBadMove.ts",
+   "text": "{\n    return -8;\n  }\n  return ru",
+   "at": 0
+  }
+ ],
+ "coverAny": true,
+ "chance": 0.35,
+ "seeds": 80,
+ "onHold": {
+  "group": "g4",
+  "seedsHunted": 0,
+  "result": "untested"
+ }
+}

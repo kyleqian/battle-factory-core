@@ -1,0 +1,85 @@
+{
+ "group": "g1: R001-R010 (trainer-AI scoring rules)",
+ "rules": [
+  {
+   "id": "R001",
+   "stages": [
+    "R001-lunatone-spdef-max"
+   ],
+   "chance": 0.8,
+   "comment": "Lunatone 327 vs three Dark types that only switch: six stat moves put Sp. Def at +6 (Sp. Atk lower), then Calm Mind scores -8"
+  },
+  {
+   "id": "R002",
+   "stages": [
+    "R002-minun-charm-hyper-cutter"
+   ],
+   "chance": 0.95,
+   "comment": "Minun 292 Charm vs Hyper Cutter Pinsir 369 (single ability): runs in the first AI turn"
+  },
+  {
+   "id": "R003",
+   "stages": [
+    "R003-rapidash-bounce-hail"
+   ],
+   "chance": 0.9,
+   "comment": "player's Walrein sets Hail turn 1; AI Rapidash 515 scores Bounce in Hail from turn 2 (player never uses Protect)"
+  },
+  {
+   "id": "R004",
+   "stages": [
+    "R004-dewgong-encore-roll"
+   ],
+   "chance": 0.6,
+   "comment": "AI Dewgong 488 vs slower Registeel spamming Amnesia/Rest (encouraged last move): 12 percent roll per undisabled turn over ~25 turns"
+  },
+  {
+   "id": "R005",
+   "stages": [
+    "R005-machamp-sub-focus-punch-attract"
+   ],
+   "chance": 0.45,
+   "comment": "AI Machamp 810 vs three Ghosts it cannot hit: needs its Substitute and a successful Attract (opposite gender, 3 tries); then the 61 percent roll gives +5"
+  },
+  {
+   "id": "R006",
+   "stages": [
+    "R006-armaldo-knock-off-low-target"
+   ],
+   "chance": 0.7,
+   "comment": "AI Armaldo 513 vs Meganium using Substitute each turn until below 30 percent HP"
+  },
+  {
+   "id": "R007",
+   "stages": [
+    "R007-misdreavus-pain-split-low"
+   ],
+   "chance": 0.6,
+   "comment": "AI Misdreavus 374 toxic + seeded by slower Ludicolo 688 (kept at 80 percent+): about 40 percent HP at turn 4; piece 1 runs from turn 1"
+  },
+  {
+   "id": "R008",
+   "stages": [
+    "R008-machamp-revenge-asleep"
+   ],
+   "chance": 0.85,
+   "comment": "AI Machamp 811 vs Lapras 822 using Rest (no Chesto): asleep target gives Revenge -2"
+  },
+  {
+   "id": "R009",
+   "stages": [
+    "R009-gengar-skill-swap-roll"
+   ],
+   "chance": 0.35,
+   "comment": "AI Gengar 613 Skill Swap vs Shiftry (Chlorophyll/Early Bird) then Houndoom, Ludicolo: 20 percent roll per guessed encouraged ability; depends on the player's ability slot varying with the seed"
+  },
+  {
+   "id": "R010",
+   "stages": [
+    "R010-gengar-skill-swap-arena-trap"
+   ],
+   "chance": 0.5,
+   "comment": "AI Gengar 613 Skill Swap vs Arena Trap Dugtrio 564: turn 1; only when the player's Dugtrio has ability slot Arena Trap (about half the seeds if the lab's player personalities vary with the seed)"
+  }
+ ]
+}

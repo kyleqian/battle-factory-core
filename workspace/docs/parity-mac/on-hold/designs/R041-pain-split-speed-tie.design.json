@@ -1,0 +1,56 @@
+{
+ "name": "R041-pain-split-speed-tie",
+ "rules": [
+  "R041"
+ ],
+ "why": "Challenge 7, every Pokemon has IV 31. The opponent's Misdreavus (set 374, Pain Split) has Speed 105 (base 85, Impish, no Speed EVs); the player's Heracross (set 424) also has Speed 105 and no Quick Claw. On turn 1 the player is at full HP, so AI_CV_PainSplit reaches if_target_faster, which draws Random() & 1 on the tie.",
+ "seed": 0,
+ "challengeNum": 7,
+ "battleNum": 0,
+ "trainerId": 200,
+ "playerSetIds": [
+  424,
+  772,
+  552
+ ],
+ "opponentSetIds": [
+  374,
+  463,
+  825
+ ],
+ "script": {
+  "actions": [
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   }
+  ],
+  "then": "census"
+ },
+ "expect": [],
+ "cover": [
+  {
+   "file": "src/engine/factoryAiCheckViability.ts",
+   "text": "{\n    tieDraw = nextDraw(rng, ordinal, `${input.reasonPrefix}-target-faster-tie`);\n    rng = tieDraw.after;\n    tieRoll = tieDraw.randomValue;\n    ordinal += 1;\n  }\n  const strikesFirst = getWhoStrikesFirst(attacker, target, tieRoll, turnOrder.weather, turnOrder.randomTurnNumber);\n  if (tieDraw) {\n    draws.push(Object.freeze({ ...tieDraw, kind: \"target-faster-tie\" as const, strikesFirst }));\n  }\n\n  const use",
+   "at": 0
+  },
+  {
+   "file": "src/engine/factoryAiCheckViability.ts",
+   "text": "{\n    draws.push(Object.freeze({ ...tieDraw, kind: \"target-faster-tie\" as const, strikesFirst }));\n  }\n\n  const user",
+   "at": 0
+  }
+ ],
+ "coverAny": true,
+ "chance": 0.9,
+ "seeds": 20,
+ "onHold": {
+  "group": "g4",
+  "seedsHunted": 0,
+  "result": "untested"
+ }
+}

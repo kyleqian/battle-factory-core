@@ -1,0 +1,87 @@
+{
+ "name": "R047-roar-after-leech-seed-accuracy-down",
+ "rules": [
+  "R047"
+ ],
+ "why": "The opponent's Ludicolo (set 688: Leech Seed, Rain Dance, Double Team, Toxic; no damaging move) leads against the player's Vaporeon (set 442). Vaporeon uses Roar every turn (priority -6), so after Ludicolo seeds or badly poisons it, Roar sends in Magmar (511, Smokescreen) or Charizard (550, Smokescreen). On the next turn the AI scores Smokescreen against the seeded / badly poisoned Vaporeon (AI_CV_AccuracyDown). Leech Seed stays while Vaporeon stays in, and Roar keeps rotating the opponent, so Ludicolo comes back to add the other status.",
+ "seed": 0,
+ "challengeNum": 7,
+ "battleNum": 0,
+ "trainerId": 200,
+ "playerSetIds": [
+  442,
+  552,
+  376
+ ],
+ "opponentSetIds": [
+  688,
+  511,
+  550
+ ],
+ "script": {
+  "actions": [
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 1
+   }
+  ],
+  "then": "census"
+ },
+ "expect": [],
+ "cover": [
+  {
+   "file": "src/engine/factoryAiCheckViability.ts",
+   "text": "{\n    const draw4 = ",
+   "at": 0
+  }
+ ],
+ "coverAny": true,
+ "chance": 0.5,
+ "seeds": 60,
+ "onHold": {
+  "group": "g4",
+  "seedsHunted": 0,
+  "result": "untested"
+ }
+}
