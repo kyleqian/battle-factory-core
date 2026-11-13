@@ -14,6 +14,14 @@ export type FactoryEvent =
   | { type: "battle-end"; result: "win" | "loss"; streak: number; frame: number }
   | { type: "round-end"; streak: number; frame: number }
   | { type: "challenge-end"; reason: "loss" | "retire"; streak: number; frame: number }
+  /**
+   * After `challenge-end`, the player confirmed the save at the Lobby attendant and the ROM's save dialog began (the player asked for
+   * a new challenge). Fires at most once per mount, never before `challenge-end`. The game then HOLDS on that frame (input ignored,
+   * the picture does not change) until the host calls `destroy()` and mounts the next challenge; if the host does nothing, it just
+   * stays there. Nothing after `challenge-end` belongs in the uploaded trace. The host should prefetch the next server challenge at
+   * `challenge-end` so the re-mount is instant.
+   */
+  | { type: "challenge-request"; frame: number }
   | { type: "contained-error"; message: string; frame: number };
 
 export interface FactoryGameOptions {
