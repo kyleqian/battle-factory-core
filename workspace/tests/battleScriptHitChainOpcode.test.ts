@@ -858,6 +858,32 @@ describe("production ppreduce (Cmd_ppreduce) dispatch", () => {
     expect(result.state.scheduler.pendingControllerBattlers).toContain(0);
   });
 
+  // parity-mac fix 36 (docs/parity-mac/transformed-pp.md): Cmd_ppreduce's BtlController_EmitSetMonData is inside
+  // `MOVE_IS_PERMANENT(gBattlerAttacker, gCurrMovePos)` (battle_script_commands.c:1239-1246): not Transformed, not a Mimic slot.
+  it("writes the party record's PP for the Pokemon's own move, and not while it is Transformed or for a Mimic slot", () => {
+    const own = stepTwiceFromAttackstring(context(0, { pp: [35, 0, 0, 0] }));
+    if (own.kind !== "advanced") throw new Error("expected advance");
+    const before = context(0, { pp: [35, 0, 0, 0] }).party.player[0]!.pp[0];
+    expect(own.state.rulesContext.party.player[0]!.pp[0]).toBe(34);
+
+    const transformed = stepTwiceFromAttackstring(context(0, { pp: [5, 0, 0, 0], status2: 0x200000 }));
+    if (transformed.kind !== "advanced") throw new Error("expected advance");
+    expect(transformed.state.rulesContext.battlers[0]!.pp[0]).toBe(4);
+    expect(transformed.state.rulesContext.party.player[0]!.pp[0]).toBe(before);
+    expect(transformed.state.events.some((e) => e.kind === "set-battler-pp-data")).toBe(false);
+
+    const plain = context(0, { pp: [5, 0, 0, 0] });
+    const withMimicSlot = createBattleScriptRulesContext({
+      ...plain,
+      battlers: plain.battlers.map((b, i) => (i === 0 ? { ...b, mimickedMoves: 1 } : b)) as never,
+    });
+    const mimicked = stepTwiceFromAttackstring(withMimicSlot);
+    if (mimicked.kind !== "advanced") throw new Error("expected advance");
+    expect(mimicked.state.rulesContext.battlers[0]!.pp[0]).toBe(4);
+    expect(mimicked.state.rulesContext.party.player[0]!.pp[0]).toBe(before);
+    expect(mimicked.state.events.some((e) => e.kind === "set-battler-pp-data")).toBe(false);
+  });
+
   it("does not deduct PP when the slot is already zero", () => {
     const rc = context(0, { pp: [0, 0, 0, 0] });
     const result = stepTwiceFromAttackstring(rc);
