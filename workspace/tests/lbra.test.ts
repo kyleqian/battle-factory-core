@@ -8,6 +8,7 @@ import { advanceRngValue } from "../src/engine/rng.ts";
 import type { FactoryEvent } from "../src/factoryContract.ts";
 import { FactorySession } from "../src/factorySession.ts";
 import type { GbaButton } from "../src/input.ts";
+import { driveAttendantConversation } from "./helpers/lobbyAttendant.ts";
 import { ActionLog, RandomPlayer, Rng } from "../tools/soak/randomRoundSoakDriver.ts";
 
 type Kind = "loss" | "forfeit" | "retire";
@@ -142,9 +143,13 @@ describe("lbra: a new challenge from the attendant after a loss", () => {
     expect(isFactoryLobbyFacingSinglesAttendant(state.lobbyFreeRoam!)).toBe(true);
     const cursor = state.rngValue;
     expect(cursor).not.toBe(createInitialState().rngValue);
-    const after = tick(state, new Set<GbaButton>(["A"]));
+    const opened = tick(state, new Set<GbaButton>(["A"]));
+    expect(opened.lobbyAttendant).not.toBeNull();
+    const drive = driveAttendantConversation(opened);
+    const after = drive.state;
     expect(after.lobbyFreeRoam).toBeNull();
-    expect(after.pendingGeneratedRound?.rngValueBefore).toBe(advanceRngValue(cursor));
+    expect(drive.beforeHandoff.rngValue).not.toBe(cursor);
+    expect(after.pendingGeneratedRound?.rngValueBefore).toBe(advanceRngValue(drive.beforeHandoff.rngValue));
     expect(after.factoryCarry).toMatchObject({ factoryWinStreak: 0, rentsCount: 0 });
   }, 120_000);
 });

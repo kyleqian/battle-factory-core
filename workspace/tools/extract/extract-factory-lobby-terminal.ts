@@ -170,7 +170,7 @@ function readBlocks(path: string, count: number): Block[] {
     // The free-roam walk (docs/factory-lobby-freeroam-ground-truth.md §3a)
     // needs the full set; the terminal lock only ever shows frame 1.
     player: { frame: 1, frames: Array.from({ length: 9 }, (_, i) => extractPose(join(people, "brendan", "walking.png"), i)), palette: loadJascPal(join(paletteDir, "brendan.pal")) },
-    scientist: { frame: 0, frames: [extractPose(join(people, "scientist_1.png"), 0)], palette: loadJascPal(join(paletteDir, "npc_3.pal")) },
+    scientist: { frame: 0, frames: Array.from({ length: 9 }, (_, i) => extractPose(join(people, "scientist_1.png"), i)), palette: loadJascPal(join(paletteDir, "npc_3.pal")) },
     // The wandering woman (OBJ_EVENT_GFX_WOMAN_1, docs/factory-lobby-freeroam-
     // ground-truth.md §6d) leaves her spawn during the free-roam Lobby window,
     // so the full standard 9-frame sheet is banked (same layout as Brendan:

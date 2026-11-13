@@ -659,7 +659,12 @@ import {
   type FactoryLobbyFreeRoamState,
   type LobbyDirection,
 } from "./factoryLobbyFreeRoam.ts";
-import { renderFactoryLobbyFreeRoam } from "./factoryTerminalRender.ts";
+import { renderFactoryLobbyAttendant, renderFactoryLobbyFreeRoam } from "./factoryTerminalRender.ts";
+import {
+  advanceFactoryLobbyAttendant,
+  createFactoryLobbyAttendantState,
+  type FactoryLobbyAttendantState,
+} from "./factoryLobbyAttendant.ts";
 import { renderFactoryTerminalPresentation } from "./factoryTerminalRender.ts";
 import {
   renderBattlePartySelect,
@@ -867,6 +872,8 @@ export interface EngineState {
    * the loss timeline). Null until that handoff; see factoryLobbyFreeRoam.ts.
    */
   lobbyFreeRoam: FactoryLobbyFreeRoamState | null;
+  /** The singles-attendant conversation over the free-roam Lobby (lbr-b); null outside it. */
+  lobbyAttendant: FactoryLobbyAttendantState | null;
   /** In-session Factory progression carried across chained rounds; see factoryRoundChaining.ts. */
   factoryCarry: FactoryCarry;
   /**
@@ -982,6 +989,7 @@ function enterChainedFactoryChallenge(
     factoryTerminal: null,
     factoryRoundBattleOrchestrator: null,
     lobbyFreeRoam: null,
+    lobbyAttendant: null,
     factoryCarry: nextCarry,
     pendingGeneratedRound: Object.freeze({ rngValueBefore, carry: nextCarry }),
   };
@@ -1015,6 +1023,7 @@ export function createInitialState(
     factoryTerminal: null,
     factoryRoundBattleOrchestrator: null,
     lobbyFreeRoam: null,
+    lobbyAttendant: null,
     factoryCarry: createInitialFactoryCarry(ANCHOR_FACTORY_METADATA.playerTrainerId),
     pendingGeneratedRound: null,
     presentationRng: createPresentationRngSession(options.presentationSeed, options.presentationRngPolicy),
@@ -1207,19 +1216,47 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
     // Free-roam Lobby overworld owns both input and rendering once the
     // terminal decline chain has handed off (factoryLobbyFreeRoam.ts). A/B
     // are no-ops (silent NPCs, no PC, no exit warp — user decisions), except
-    // A facing the singles attendant, which starts a new challenge from the
-    // live gameplay RNG cursor (nch231, docs/nch231-new-challenge.md).
+    // A facing the singles attendant, which opens the ROM attendant
+    // conversation (factoryLobbyAttendant.ts, docs/lbrb-attendant-conversation.md);
+    // its door warp starts a new challenge from the live gameplay RNG cursor
+    // (nch231, docs/nch231-new-challenge.md).
+    if (state.lobbyAttendant) {
+      const attendant = advanceFactoryLobbyAttendant(state.lobbyAttendant, {
+        a: newKeys.has("A"),
+        b: newKeys.has("B"),
+        up: newAndRepeatedKeys.has("UP"),
+        down: newAndRepeatedKeys.has("DOWN"),
+      });
+      if (attendant.done === "draft") {
+        return enterChainedFactoryChallenge(
+          state,
+          keyRepeat,
+          carryForNewChallengeAfterLobby(state.factoryCarry),
+          rngValue,
+        );
+      }
+      return {
+        ...state,
+        frame: state.frame + 1,
+        keyRepeat,
+        lobbyAttendant: attendant.done === "freeRoam" ? null : attendant,
+        rngMode: "vblank",
+        rngValue,
+      };
+    }
     if (
       state.appRoute === "generated-orchestrator" &&
       newKeys.has("A") &&
       isFactoryLobbyFacingSinglesAttendant(state.lobbyFreeRoam)
     ) {
-      return enterChainedFactoryChallenge(
-        state,
+      return {
+        ...state,
+        frame: state.frame + 1,
         keyRepeat,
-        carryForNewChallengeAfterLobby(state.factoryCarry),
+        lobbyAttendant: createFactoryLobbyAttendantState(state.frame),
+        rngMode: "vblank",
         rngValue,
-      );
+      };
     }
     const lobbyFreeRoam = advanceFactoryLobbyFreeRoam(state.lobbyFreeRoam, {
       heldDirs: lobbyHeldDirections(buttons),
@@ -4108,6 +4145,9 @@ export function render(state: EngineState): Uint8Array {
   // (factoryLobbyFreeRoam.ts); its spawn frame is byte-identical to the
   // terminal's bare-field frame, so the handoff is invisible.
   if (state.lobbyFreeRoam) {
+    if (state.lobbyAttendant) {
+      return renderFactoryLobbyAttendant(state.lobbyFreeRoam, state.lobbyAttendant);
+    }
     return renderFactoryLobbyFreeRoam(state.lobbyFreeRoam, state.frame);
   }
   const generatedTerminalCommand = terminalCommandForRound(

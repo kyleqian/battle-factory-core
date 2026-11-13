@@ -1424,7 +1424,6 @@ function errorOrigin(frames: string[]): string {
 // ---------------------------------------------------------------------------
 
 const NO_BUTTONS: ReadonlySet<GbaButton> = new Set();
-const A_BUTTON: ReadonlySet<GbaButton> = new Set<GbaButton>(["A"]);
 
 /**
  * "full": arbitrary-but-legal play — every UI choice the real menus expose.
@@ -1721,9 +1720,10 @@ export class RandomPlayer {
     if (orch?.battleStartIntro) return this.onIntro(state);
     if (orch?.battleCommandPresentation) return this.onCommand(state);
     if (state.lobbyFreeRoam) {
-      // lbra: every loss / forfeit / retire ends in the Lobby; A at the attendant starts the next challenge (terminal only with `newChallengeFromLobby: false`).
-      return this.newChallengeFromLobby && isFactoryLobbyFacingSinglesAttendant(state.lobbyFreeRoam)
-        ? A_BUTTON
+      // lbra/lbrb: every loss / forfeit / retire ends in the Lobby; A at the attendant opens the ROM conversation, and
+      // tapping A through it (CHALLENGE, LV. 50, YES, save) starts the next challenge (terminal only with `newChallengeFromLobby: false`).
+      return this.newChallengeFromLobby && (state.lobbyAttendant !== null || isFactoryLobbyFacingSinglesAttendant(state.lobbyFreeRoam))
+        ? this.pressAdvance(state, "lobby attendant A", false)
         : NO_BUTTONS;
     }
     if (state.factoryTerminal) return this.onTerminal(state);
@@ -1789,10 +1789,10 @@ export class RandomPlayer {
     return presentation?.lifecycle.phase === "action-menu";
   }
 
-  private pressAdvance(state: EngineState, label: string): ReadonlySet<GbaButton> {
+  private pressAdvance(state: EngineState, label: string, allowB = true): ReadonlySet<GbaButton> {
     // Message-advance mash with jittered gaps; occasionally B (harmless
     // everywhere A-advance surfaces live, and it exercises B paths).
-    const useB = this.explores && this.pressRng.chance(0.06);
+    const useB = allowB && this.explores && this.pressRng.chance(0.06);
     this.note(state, `${label}${useB ? " (B)" : ""}`);
     return this.press(useB ? "B" : "A", 22);
   }

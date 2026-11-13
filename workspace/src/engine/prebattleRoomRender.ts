@@ -400,9 +400,10 @@ export function drawMessageBoxWaitArrow(
   fb: Uint8Array,
   line2: string,
   yOffset: number,
+  baseY: number = MESSAGE_TEXT_LINE2_ORIGIN.y,
 ): void {
   const x = MESSAGE_TEXT_LINE2_ORIGIN.x + measureText(font, charmap, line2);
-  const y = MESSAGE_TEXT_LINE2_ORIGIN.y - yOffset;
+  const y = baseY - yOffset;
   for (let py = 0; py < downArrow.blitHeight; py += 1) {
     for (let px = 0; px < downArrow.blitWidth; px += 1) {
       const index = downArrow.indices[py]?.[px] ?? 0;

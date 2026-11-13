@@ -1,7 +1,7 @@
 import { createFramebuffer, fillFramebuffer, setPixel } from "./framebuffer.ts";
 import type { RgbColor } from "./bg.ts";
 import { fadeColor } from "./fadeRender.ts";
-import { bgFadeY, FADE_IN, objFadeY } from "./paletteFade.ts";
+import { bgFadeY, EXIT_FADE_OUT, FADE_IN, objFadeY } from "./paletteFade.ts";
 import {
   drawMessageBoxFrame,
   drawMessageBoxText,
@@ -38,7 +38,11 @@ import messageBoxData from "../assets/gen/prebattle-room-msgbox.json" with { typ
 import fontData from "../data/gen/font-normal.json" with { type: "json" };
 import charmapData from "../data/gen/charmap.json" with { type: "json" };
 import { measureText, type FontData } from "./font.ts";
+import { drawFactoryLobbyAttendant } from "./factoryLobbyAttendantRender.ts";
+import type { FactoryLobbyAttendantState } from "./factoryLobbyAttendant.ts";
 import {
+  LOBBY_FREE_ROAM_POSE_FRAMES,
+  LOBBY_FREE_ROAM_TILE_FRAMES,
   lobbyFreeRoamCameraOrigin,
   lobbyFreeRoamPlayerFrame,
   lobbyFreeRoamPlayerFrameHFlipped,
@@ -862,4 +866,83 @@ export function renderFactoryLobbyFreeRoam(
   }, womanScreen === null
     ? undefined
     : new Map<string, LobbyPlayerOverride>([["woman", womanScreen]]));
+}
+
+/**
+ * The attendant conversation's door walk and warp fade (lbr-b): the singles
+ * attendant walks up 3 tiles and vanishes, the player follows 4 tiles up at
+ * 16 frames/tile (BattleFrontier_BattleFactoryLobby_Movement_AttendantEnterDoor /
+ * _PlayerEnterDoor), then the field fades to black (`fade`).
+ */
+export function renderFactoryLobbyDoorWalk(
+  walkTick: number,
+  tick: number,
+  fade: { readonly bgY: number; readonly objY: number } = { bgY: 0, objY: 0 },
+): Uint8Array {
+  const walked = Math.min(walkTick, 4 * LOBBY_FREE_ROAM_TILE_FRAMES);
+  const tiles = Math.floor(walked / LOBBY_FREE_ROAM_TILE_FRAMES);
+  const within = walked % LOBBY_FREE_ROAM_TILE_FRAMES;
+  const player: FactoryLobbyFreeRoamState = Object.freeze({
+    x: 4,
+    y: 8 - tiles,
+    facing: "north" as const,
+    turnRemaining: 0,
+    turnTarget: "north" as const,
+    stepRemaining: within === 0 ? 0 : LOBBY_FREE_ROAM_TILE_FRAMES - within,
+    stepFromX: 4,
+    stepFromY: 8 - tiles,
+    stepDir: "north" as const,
+    animClock: walked - 1 + 2 * LOBBY_FREE_ROAM_POSE_FRAMES,
+    heldDir: null,
+    pendingDir: null,
+    bumpElapsed: 0,
+  });
+  const cameraOrigin = lobbyFreeRoamCameraOrigin(player, layout.cameraOriginPx);
+  const woman = womanAtTick(tick);
+  const overrides = new Map<string, LobbyPlayerOverride>();
+  if (woman !== null) {
+    overrides.set("woman", {
+      x: woman.x - 56 - cameraOrigin.x,
+      y: woman.y - cameraOrigin.y,
+      frame: woman.frame,
+      hFlip: woman.hFlip,
+    });
+  }
+  const attendantWalked = Math.min(walkTick, 3 * LOBBY_FREE_ROAM_TILE_FRAMES + 1);
+  const attendantPose = Math.max(0, attendantWalked - 1);
+  const attendantTile = Math.floor(attendantPose / LOBBY_FREE_ROAM_TILE_FRAMES);
+  const attendantStepping = attendantPose % LOBBY_FREE_ROAM_TILE_FRAMES < LOBBY_FREE_ROAM_TILE_FRAMES / 2 && attendantWalked < 3 * LOBBY_FREE_ROAM_TILE_FRAMES;
+  overrides.set("singlesAttendant", {
+    x: 4 * 16 - cameraOrigin.x,
+    y: 7 * 16 - attendantWalked - cameraOrigin.y - 16,
+    frame: attendantStepping ? (attendantTile % 2 === 0 ? 6 : 5) : 1,
+    hFlip: false,
+  });
+  if (attendantWalked > 3 * LOBBY_FREE_ROAM_TILE_FRAMES) {
+    overrides.set("singlesAttendant", { x: -64, y: -64, frame: 0, hFlip: false });
+  }
+  return renderFactoryTerminalField(fade.bgY, fade.objY, cameraOrigin, {
+    x: LOBBY_PLAYER_SCREEN_POS.x,
+    y: LOBBY_PLAYER_SCREEN_POS.y,
+    frame: lobbyFreeRoamPlayerFrame(player),
+    hFlip: false,
+  }, overrides);
+}
+
+/** The free-roam field with the attendant conversation's dialogue drawn over it. */
+export function renderFactoryLobbyAttendant(
+  lobby: FactoryLobbyFreeRoamState,
+  attendant: FactoryLobbyAttendantState,
+): Uint8Array {
+  const tick = attendant.startFrame;
+  if (attendant.phase === "walk") return renderFactoryLobbyDoorWalk(attendant.phaseTick + 1, tick);
+  if (attendant.phase === "fade") {
+    return renderFactoryLobbyDoorWalk(4 * LOBBY_FREE_ROAM_TILE_FRAMES, tick, {
+      bgY: bgFadeY(attendant.phaseTick, EXIT_FADE_OUT),
+      objY: objFadeY(attendant.phaseTick, EXIT_FADE_OUT),
+    });
+  }
+  const fb = renderFactoryLobbyFreeRoam(lobby, tick);
+  drawFactoryLobbyAttendant(fb, attendant);
+  return fb;
 }
