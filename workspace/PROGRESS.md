@@ -47,7 +47,9 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Gates:** typecheck 0 (the first "0" was a masked `| tail`; the real run caught lib-types parity, fixed), build 0 (`tsc -b` 0 + `vite build`; the `npm run build` one-liner was OOM-killed twice
   beside two other workers' suites, so `vite build` ran with `--max-old-space-size=4096`, 0), build:lib 0 (same way), `lbra` / `lbrc` / library / goalPlay / nch231 / lbrb / frf250b / audio sink files green,
   play:random 2 min / scene `--lobby-new-challenge` seed 13: 0 page / console errors / overlays, ON 2 and OFF 1 new challenge from the Lobby; soak vanilla 0:20 OFF 20 / 20 OK (all `budget`).
-- **Next:** lbr-d (7-win Lobby return).
+- **Full `npm test`** (still running at the cap, 1,630 files in, 3 failures, all in `tests/randomRoundSoak.test.ts`: ISSUES #89 seed 32, max-depth tracking, ISSUES #99 vanilla swap offer).
+  **Those 3 fail identically on lbr-b's tip `435515cbd`** (checked in a throwaway worktree), so they come from lbr-b's changed soak deals, not lbr-c; the supervisor should re-pin them. `test:gate` 362 / 362 is green.
+- **Next:** lbr-d (7-win Lobby return); re-pin the 3 `randomRoundSoak.test.ts` seed pins.
 
 ---
 
