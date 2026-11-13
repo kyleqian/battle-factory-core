@@ -119,8 +119,8 @@ lbr-d2a ROM ticks (`docs/lbrd2a-won-tail-rom.md`) for the won farewell constants
 Item 0c DONE. Item 0d: the Mac lane owns battle rules; fold `mac/parity-mac` at run start if it moved; nightly replay from the pool; ISSUES #214 holds its
 source-read leads. **Top layer, 2026-11-13 after your run:** the Mac lane also owns the replay tools and every replay upgrade now, and the finish line has no
 battle count (item 0d, "Top layer, 2026-11-13"); the lab staging failures are fixed (`oracle/battle_lab.py`, same item).
-**Later that evening the Mac lane stopped (Kyle winds down the Mac): battle rules and the replay tools are yours again, and
-the hunt for rare cases is on hold** (item 0d, "Mac lane stopped").
+**Later that evening the Mac lane stopped (Kyle winds down the Mac for a day or two): battle rules, the replay tools and the
+rare-rule hunt (as a side job next to sound) are yours now** (item 0d, "Mac lane stopped").
 **Delivered 2026-11-13 20:17 UTC for your next fold, the Mac lane's last: `mac/parity-mac` = `165548c4b`, battle-rule fixes 29 to 43** (`165548c4b`
 adds only `docs/parity-mac/on-hold/` to the gated `85ee1361e`; the branch is also on GitHub as `worker/parity-mac`). It replaces
 the 14:05 UTC (`ba58f0ec6`, fixes 29 to 40) and 19:11 UTC (`42e1f4f91`, 29 to 41) deliveries, which it contains. Fixes 29 to 40 were found by the new
@@ -140,7 +140,7 @@ for `85ee1361e`, fix 42's and fix 43's tests fail with their old engine file and
 (`stages/*.json`, `stages/coverage/*.json`) re-driven on a clean checkout match.
 The lane's final run on the fix 41 engine: 3,546 battles, 3,541 match, 5 endless Struggle stalls (no difference up to the frame cap); every tally row is
 covered by a ROM-matched or staged battle or proven unable to occur. Of the finer tally's 110 reachable never-run rules, 12 are now covered by staged
-battles; 98 are on hold (item 0d, "Mac lane stopped").
+battles; the other 98 are your side job now (item 0d, "Mac lane stopped").
 **Two findings for you from that lane (file them in ISSUES; not battle rules, not fixed there):** (1) the rental select screen lets the player take two
 Pokemon of one species; the game refuses the second ("Can't select same POKeMON.", `Select_AreSpeciesValid`, `battle_factory_screen.c:2256-2276`; the
 swap screen has `Swap_AlreadyHasSameSpecies`, `:4162`); the engine's `MENU_OPTION_RENT` branch in `src/engine/core.ts` has no such check; about 3 teams in
@@ -355,15 +355,32 @@ game says it "can't be switched out" (seen in code only).
      - **Battle rules and the replay tools are yours again.** The do-not-edit list in the next bullet no longer applies.
        Fold `mac/parity-mac` once more (the status paragraph near the top names the tip); after that the branch does not
        move, so the two-runs fallback does not apply either.
-     - **On hold by Kyle's word ("I guess we can hold off on that for now"): the hunt for rare cases.** That is the
-       coverage list's reachable rules (`docs/parity-mac/rule-coverage.md`, class (c)), the discovery batches, and the plan
-       for the swap between battles and Open Level. Do not start them unless Kyle asks. `docs/parity-mac/STATUS.md`,
-       section "Stopped 2026-11-13", says where each one stopped.
+     - **The rare-rule hunt is yours, as a side job next to sound (Kyle, 2026-11-13 ~20:30 UTC: "Yeah, let the box do
+       it. ... the Mac is going to be offline for ... a day or two. So any work that needs to ... get done needs to be in
+       the box").** The list: `docs/parity-mac/rule-coverage-c-rules.json`, R001..R110, the reachable battle rules whose
+       code no ROM-matched battle has run (`docs/parity-mac/rule-coverage.md`, class (c)); 12 are covered
+       (`stages/coverage/`), 98 are left. Why it matters: of the first 15 rules checked, 3 were wrong (fixes 41, 42, 43).
+       - **Pace:** one or two worker steps per run, after the fold and the nightly check; sound and the Lobby keep the
+         rest. A difference the hunt finds is that run's main program: one commit per fix, a test that fails without it,
+         a ROM battle (or a Mechanic Lab run when no Factory set-up reaches it, as for 42 and 43).
+       - **Order:** first the 31 designs in `docs/parity-mac/on-hold/designs/` (README there: check one, rename it to
+         `.json`, drive it over several lab seeds; one that matches moves to `stages/coverage/`). Then design stages for
+         the rest in list order (the uncommon rules first). The scratch hunter (`on-hold/hunter/`) has Mac paths: copy it
+         under `tools/` with box paths if you use it. A rule no stage can reach gets its reason in `rule-coverage.md`
+         (class (a) or (b)); check the designers' unchecked "cannot occur" notes (R029, R031, R033, R035, R040) at source
+         before you accept them.
+       - **Record** per run in a box section of `docs/parity-mac/STATUS.md` and in PROGRESS: rules covered, left,
+         differences found.
+     - **Still on hold:** the discovery batches (1,793 battles found nothing new after fix 41; record in
+       `on-hold/discovery2-793.json`) and the swap between battles / Open Level (plan only, `STATUS.md`, "Stopped
+       2026-11-13"). Do not start them unless Kyle asks.
+     - **Also fix, not only file:** the two findings in the status paragraph near the top (duplicate species at the rental
+       select; the trapped party-menu text). Small steps; any run.
      - **What you keep:** the nightly check from the pool, and now also every staged battle
        (`docs/parity-mac/stages/*.json` and `stages/coverage/*.json`, 32 on 2026-11-13;
-       `REPLAY_OUT=/abs tools/audio/romReplayWide.sh --stage FILE`, cwd `workspace/`): they guard the rare-rule fixes.
-       Leave `docs/parity-mac/on-hold/` alone: untested designs. If either shows a difference, fixing it is the main program of that run: one commit per fix, a
-       test that fails without it, a ROM battle. Otherwise sound stays the main program.
+       `REPLAY_OUT=/abs tools/audio/romReplayWide.sh --stage FILE`, cwd `workspace/`; the hunt adds to `stages/coverage/`):
+       they guard the rare-rule fixes. If either shows a difference, fixing it is the main program of that run: one commit
+       per fix, a test that fails without it, a ROM battle. Otherwise sound stays the main program.
      - **The new tools run on this box:** on 2026-11-13 the top layer ran `romReplayWide.sh` from `42e1f4f91` here, a
        staged battle (`stages/noland-foresight-ghost.json`, 20 / 20) and an `ai-v1` battle (seed 20126, 11 / 11); both
        match and equal the Mac's rows, under a minute each. How to re-drive any recorded battle: `howToReDrive` in
