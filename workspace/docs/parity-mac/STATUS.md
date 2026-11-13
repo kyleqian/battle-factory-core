@@ -749,3 +749,51 @@ Design mistakes fixed on the way (all in the staging, none in the engine):
   (the statused-target arm after a status move) alone: the original Zapdos staging hit at lab seed 190000. A Jynx variant
   (sleep from Lovely Kiss) never reaches it: an asleep or fully paralysed Pokemon's `gLastMoves` becomes 0xFFFF, not its Toxic.
   Note for later designs: do not give two cover entries the same `text[at:at+30]`.
+
+### Box hunt rrh1, second part: the rest of the high-chance designs
+
+After R001..R012 the hunt went on to the other designs, by chance note. **14 more rules covered: R021, R026, R027, R028,
+R034, R036, R041, R042, R043, R044, R045, R046, R047, R048. The finer tally's (c) list: 37 covered by staged battles
+(the Mac's 12 and the box's 25), R019 proven unreachable (class (b)), 72 left. No engine difference was found, so there is
+no `stages/coverage/pending/`.** Each of the 14 was re-driven once more from a clean command line (`romReplayWide.sh
+--stage`, `nice -n 19`, one at a time): all match, `diffPoints` 0, engine and ROM outcome equal.
+
+| rule | stage file (lab seed) | lab seeds tried | states matched | re-drive wall |
+|---|---|---|---|---|
+| R021 Immunity vs Poison Fang | R021-immunity-poison-fang (80000) | 1 (design's `replacements` fixed up front) | 16 / 16 | 34 s |
+| R026 Sticky Hold vs Trick | R026-sticky-hold-trick (70000) | 1 | 15 / 15 | 34 s |
+| R027 Thrash cancelled, user could not move | R027-thrash-ghost-cancels-lock (70000) | 1 | 67 / 67 | 59 s |
+| R028 Explosion on both sides: draw | R028-explosion-draw (60000) | 15 + 1 (wrong cover) | 5 / 5, outcome 3 both | 30 s |
+| R034 Role Play Own Tempo cures confusion | R034-role-play-own-tempo-cures-confusion (90000) | 1 | 13 / 13 | 33 s |
+| R036 AI Roar after Ghost Curse | R036-roar-after-ghost-curse-evasion (90000) | 1 | 17 / 17 | 35 s |
+| R041 AI Pain Split, speed tie | R041-pain-split-speed-tie (90000) | 1 | 24 / 24 | 42 s |
+| R042 AI Psych Up | R042-cradily-ancientpower-psych-up (91003) | 4 | 62 / 62 | 57 s |
+| R043 AI Superpower, speed tie | R043-superpower-speed-tie (91000) | 1 | 10 / 10 | 33 s |
+| R044 AI Swagger, Psych Up branch | R044-superpower-atk-minus3-swagger (90000) | 1 | 22 / 22 | 44 s |
+| R045 AI Encore / Disable, speed tie | R045-encore-disable-speed-tie (90000) | 1 | 32 / 32 | 45 s |
+| R046 AI Scary Face vs Speed Boost | R046-scary-face-vs-speed-boost (91000) | 1 | 17 / 17 | 41 s |
+| R047 AI Roar after Leech Seed | R047-roar-after-leech-seed-accuracy-down (90001) | 2 | 29 / 29 | 43 s |
+| R048 AI Roar after Toxic | R048-roar-after-toxic-accuracy-down (91000) | 1 | 25 / 25 | 43 s |
+
+More design mistakes fixed on the way (staging only):
+
+- R028: the cover marker was the `throw new` of `mapFactoryBattleOutcome` (an engine stop, class (b)); the 15 seeds all ran the
+  draw (outcome 3) and "failed" the marker. The marker is now `return "draw"` (the DREW arm); seed 60000 matches.
+- R034: eight cover entries, five of them with one label; cut to the last one (the Own Tempo cure branch,
+  `const curedBattler`), which is the rule. R045: six entries in three same-label pairs; cut to the first two. R041 / R043 /
+  R045 mark the shared speed-tie draw in `runAiTargetFaster`-style code, so one stage proves the tie draw for the others too.
+- R042, R044: of the three or four markers, the Psych Up `-2` roll arm (R042) and the weather ternary arm (R044) did not run in
+  the matching battle; the markers that are the rule did (`coverAny`). Those two arms are still not covered.
+
+**R019 (Focus Energy twice) cannot occur, class (b)**: `battle_scripts_1.s:889` jumps to `BattleScript_ButItFailed` when
+`STATUS2_FOCUS_ENERGY` is set, before `setfocusenergy` (`:890`); the already-set branch of `Cmd_setfocusenergy` is dead code
+(written in `rule-coverage.md`; 20 Mac seeds and 10 of mine never had it). Design removed from `on-hold/designs/`.
+
+Left in `on-hold/designs/` (updated `onHold`):
+
+- **R030** (Curse as the last move, AI replacement damage pass): 44 lab seeds (60000..60043), no hit; the engine battle runs fine.
+  In seed 60019 Dugtrio is poisoned but kills Snorlax in two Earthquakes before it faints, so no Curse user is left for the
+  replacement. The design needs a sturdier Curse user or faster poison.
+- **R039** (AI Memento markers `-10` / `-8`): 80 lab seeds (90000..90079), no hit, no engine error. In seed 90079 Granbull
+  (157 HP) is knocked out by Weezing in three turns, before its Sp. Atk reaches -6; the design needs a sturdier Overheat user.
+- **R032, R037, R038** (chance 0.01 to 0.02, 200 seeds each): not tried; at 15 s a seed each is about 50 minutes.
