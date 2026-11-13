@@ -348,6 +348,14 @@ export function runBattleScriptFaintedActionsOrchestration(
   program: BattleScriptProgram,
   handlers: BattleScriptOpcodeHandlers<BattleScriptRulesContext>,
   initialState: BattleScriptMachineState<BattleScriptRulesContext>,
+  /**
+   * `deferPostBattleOutcomeScript`: a deciding faint returns `terminal` WITHOUT the battle-won / battle-lost script. For
+   * `BattleTurnPassed`, where source runs that script only after the whole function is through (`HandleEndTurn_BattleWon` /
+   * `_BattleLost` via `sEndTurnFuncsTable[gBattleOutcome]`, battle_main.c:3988-3992), i.e. after
+   * `HandleWishPerishSongOnTurnEnd` has taken or counted down the remaining battlers. The caller then runs
+   * `runBattleScriptPostBattleOutcomeScript` once. docs/parity-mac/perish-song-after-outcome.md.
+   */
+  options: Readonly<{ deferPostBattleOutcomeScript?: boolean }> = {},
 ): BattleScriptFaintedActionsResult {
   const faintedBattlers = collectFaintedBattlers(initialState.rulesContext);
   if (faintedBattlers.length === 0) {
@@ -374,7 +382,7 @@ export function runBattleScriptFaintedActionsOrchestration(
     state = run.state;
   }
 
-  return runFaintedBattlerHandlers(program, handlers, state, faintedBattlers);
+  return runFaintedBattlerHandlers(program, handlers, state, faintedBattlers, options.deferPostBattleOutcomeScript === true);
 }
 
 function replaceBattler(
@@ -550,6 +558,15 @@ function runPendingSwitchinEffects(
  * RETURN_OPPONENT_MON1/2) as non-consuming, so the `BattleState.rng` cursor
  * is untouched by this pass either way.
  */
+/** The battle-won / battle-lost script of a decided battle (see `deferPostBattleOutcomeScript`). */
+export function runBattleScriptPostBattleOutcomeScript(
+  program: BattleScriptProgram,
+  handlers: BattleScriptOpcodeHandlers<BattleScriptRulesContext>,
+  completed: BattleScriptMachineState<BattleScriptRulesContext>,
+): BattleScriptMachineState<BattleScriptRulesContext> {
+  return runPostBattleOutcomeScript(program, handlers, completed);
+}
+
 function runPostBattleOutcomeScript(
   program: BattleScriptProgram,
   handlers: BattleScriptOpcodeHandlers<BattleScriptRulesContext>,
@@ -575,6 +592,7 @@ function runFaintedBattlerHandlers(
   handlers: BattleScriptOpcodeHandlers<BattleScriptRulesContext>,
   initialState: BattleScriptMachineState<BattleScriptRulesContext>,
   faintedBattlers: readonly BattleScriptBattlerId[],
+  deferPostBattleOutcomeScript = false,
 ): BattleScriptFaintedActionsResult {
   let state = initialState;
   for (const faintedBattler of faintedBattlers) {
@@ -604,7 +622,7 @@ function runFaintedBattlerHandlers(
   return completed.rulesContext.battleOutcome !== 0
     ? Object.freeze({
       kind: "terminal",
-      state: runPostBattleOutcomeScript(program, handlers, completed),
+      state: deferPostBattleOutcomeScript ? completed : runPostBattleOutcomeScript(program, handlers, completed),
     })
     : Object.freeze({ kind: "resumed", state: completed });
 }

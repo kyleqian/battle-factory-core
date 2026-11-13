@@ -2058,7 +2058,10 @@ describe("HandleWishPerishSongOnTurnEnd state 1", () => {
     )).toBe(true);
   });
 
-  it("when both sides are at zero, turn order feeds the first faint through checkteamslost before the scan resumes", () => {
+  // docs/parity-mac/perish-song-after-outcome.md. BattleTurnPassed calls HandleWishPerishSongOnTurnEnd again after HandleFaintedMonActions with no
+  // gBattleOutcome test (battle_main.c:3968-3972): a Perish Song KO that decides the battle does not end the sweep. ROM seeds 342 / 457 (census player):
+  // the winner's Pokemon is taken too, after the battle is won. The engine stopped at the first deciding faint and left it alive.
+  it("when both sides are at zero, the sweep goes on after the faint that decides the battle: two last Pokemon are a draw", () => {
     const rc = context({
       battlers: [
         battler({ side: 0, speed: 50, status3: STATUS3_PERISH_SONG, perishSongTimer: 0, perishSongTimerStartValue: 3 }),
@@ -2066,14 +2069,68 @@ describe("HandleWishPerishSongOnTurnEnd state 1", () => {
         battler({ side: 0 }),
         battler({ side: 1 }),
       ],
-      // Same as above: the faster battler 1 leads because ENDTURN_ORDER
-      // re-sorts by speed, not because the array was staged (ISSUES #131).
+      // The faster battler 1 leads because ENDTURN_ORDER re-sorts by speed, not because the array was staged (ISSUES #131).
     });
     const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(1));
     const result = runBattleEndTurnOrchestration(program, handlers, scratchState(rc, 1));
     expect(result.kind).toBe("terminal");
-    expect(result.state.rulesContext.battlers.slice(0, 2).map(({ hp }) => hp))
-      .toEqual([100, 0]);
-    expect(result.state.rulesContext.battleOutcome).not.toBe(0);
+    // Unfixed: [100, 0] and outcome 1 (the player won with a Pokemon the game takes).
+    expect(result.state.rulesContext.battlers.slice(0, 2).map(({ hp }) => hp)).toEqual([0, 0]);
+    // Cmd_checkteamslost ORs the flags: B_OUTCOME_WON (1) from the first faint, B_OUTCOME_LOST (2) from the second = B_OUTCOME_DREW (3),
+    // and sEndTurnFuncsTable[B_OUTCOME_DREW] is HandleEndTurn_BattleLost (battle_main.c:559): the challenge is lost.
+    expect(result.state.rulesContext.battleOutcome).toBe(3);
+    const fell = result.state.events.filter((event) => event.kind === "message" && (event as { messageId?: string }).messageId === "STRINGID_PKMNPERISHCOUNTFELL");
+    expect(fell.length).toBe(2);
+  });
+
+  it("the same with the player's Pokemon first in turn order: lost, then drawn", () => {
+    const rc = context({
+      battlers: [
+        battler({ side: 0, speed: 100, status3: STATUS3_PERISH_SONG, perishSongTimer: 0, perishSongTimerStartValue: 3 }),
+        battler({ side: 1, speed: 50, partyIndex: 2, status3: STATUS3_PERISH_SONG, perishSongTimer: 0, perishSongTimerStartValue: 3 }),
+        battler({ side: 0 }),
+        battler({ side: 1 }),
+      ],
+    });
+    const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(0));
+    const result = runBattleEndTurnOrchestration(program, handlers, scratchState(rc, 0));
+    expect(result.kind).toBe("terminal");
+    expect(result.state.rulesContext.battlers.slice(0, 2).map(({ hp }) => hp)).toEqual([0, 0]);
+    expect(result.state.rulesContext.battleOutcome).toBe(3);
+  });
+
+  it("a winner with a healthy bench still loses the Pokemon on the field, stays the winner, and is asked for no replacement (ROM seed 342)", () => {
+    const rc = context({
+      battlers: [
+        battler({ side: 0, speed: 50, status3: STATUS3_PERISH_SONG, perishSongTimer: 0, perishSongTimerStartValue: 3 }),
+        battler({ side: 1, speed: 100, partyIndex: 2, status3: STATUS3_PERISH_SONG, perishSongTimer: 0, perishSongTimerStartValue: 3 }),
+        battler({ side: 0 }),
+        battler({ side: 1 }),
+      ],
+      party: { player: sixSlots(100, 80), opponent: sixSlots(0, 0, 100) },
+    });
+    const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(1));
+    const result = runBattleEndTurnOrchestration(program, handlers, scratchState(rc, 1));
+    // checkteamslost jumps to BattleScript_FaintedMonEnd when gBattleOutcome is already set: no party menu.
+    expect(result.kind).toBe("terminal");
+    expect(result.state.rulesContext.battlers.slice(0, 2).map(({ hp }) => hp)).toEqual([0, 0]);
+    expect(result.state.rulesContext.party.player.slice(0, 2).map(({ hp }) => hp)).toEqual([0, 80]);
+    expect(result.state.rulesContext.battleOutcome).toBe(1);
+  });
+
+  it("after the deciding faint the other Pokemon's count still goes down", () => {
+    const rc = context({
+      battlers: [
+        battler({ side: 0, speed: 50, status3: STATUS3_PERISH_SONG, perishSongTimer: 2, perishSongTimerStartValue: 3 }),
+        battler({ side: 1, speed: 100, partyIndex: 2, status3: STATUS3_PERISH_SONG, perishSongTimer: 0, perishSongTimerStartValue: 3 }),
+        battler({ side: 0 }),
+        battler({ side: 1 }),
+      ],
+    });
+    const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(1));
+    const result = runBattleEndTurnOrchestration(program, handlers, scratchState(rc, 1));
+    expect(result.kind).toBe("terminal");
+    expect(result.state.rulesContext.battlers.slice(0, 2).map(({ hp, perishSongTimer }) => [hp, perishSongTimer])).toEqual([[100, 1], [0, 0]]);
+    expect(result.state.rulesContext.battleOutcome).toBe(1);
   });
 });

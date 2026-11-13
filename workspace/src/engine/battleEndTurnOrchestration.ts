@@ -72,6 +72,7 @@ import {
 import { moveEndLumStatusName } from "./battleScriptMoveEndOpcode.ts";
 import {
   runBattleScriptFaintedActionsOrchestration,
+  runBattleScriptPostBattleOutcomeScript,
   type BattleScriptFaintedActionsResult,
 } from "./battleScriptFaintedActionsOrchestration.ts";
 import {
@@ -2515,6 +2516,7 @@ function mapFaintedActionsResult(result: BattleScriptFaintedActionsResult): Batt
 }
 
 type PostFaintKind = "next-turn" | "resumed" | "terminal";
+const DEFER_POST_BATTLE_OUTCOME_SCRIPT = Object.freeze({ deferPostBattleOutcomeScript: true });
 
 /**
  * `HandleWishPerishSongOnTurnEnd` state 1. The source resumes
@@ -2533,7 +2535,7 @@ function runPerishSongAfterFutureAttacks(
   let completionKind = initialCompletionKind;
   const count = state.rulesContext.battleTopology.battlersCount;
   if (state.rulesContext.wishPerishSongState > 1) {
-    return finishWishPerishSong(state, completionKind);
+    return finishWishPerishSong(program, handlers, state, completionKind);
   }
   // `HandleWishPerishSongOnTurnEnd` case 1 (`battle_util.c:1834-1861`) walks
   // gBattlerByTurnOrder from the SAME `wishPerishSongBattlerId` the previous
@@ -2601,18 +2603,8 @@ function runPerishSongAfterFutureAttacks(
         program,
         handlers,
         withoutEndTurnHitMarkers(state),
+        DEFER_POST_BATTLE_OUTCOME_SCRIPT,
       );
-      if (fainted.kind === "terminal") {
-        return Object.freeze({
-          kind: "terminal",
-          state: Object.freeze({
-            ...fainted.state,
-            rulesContext: clearFollowMeTimersForTurnValuesCleanUp(
-              fainted.state.rulesContext,
-            ),
-          }),
-        });
-      }
       if (fainted.kind === "player-choice-required") {
         return Object.freeze({
           kind: "player-choice-required",
@@ -2630,11 +2622,18 @@ function runPerishSongAfterFutureAttacks(
         });
       }
       state = withEndTurnHitMarkers(fainted.state);
-      if (fainted.kind === "resumed") completionKind = "resumed";
+      // A KO that decides the battle does not end the sweep: BattleTurnPassed calls HandleWishPerishSongOnTurnEnd
+      // again after HandleFaintedMonActions with no gBattleOutcome test (battle_main.c:3968-3972), so the next
+      // battler in turn order still counts down or is taken (ROM seeds 342 / 457: the winner's Pokemon faints after
+      // the battle is won), and its checkteamslost ORs the other side's flag in (battle_script_commands.c
+      // Cmd_checkteamslost, :3564 / :3577: B_OUTCOME_WON | B_OUTCOME_LOST = B_OUTCOME_DREW when it was the last one).
+      // docs/parity-mac/perish-song-after-outcome.md.
+      if (fainted.kind === "terminal") completionKind = "terminal";
+      else if (fainted.kind === "resumed" && completionKind !== "terminal") completionKind = "resumed";
     }
   }
 
-  return finishWishPerishSong(withWishPerishSongCursor(state, 2, 0), completionKind);
+  return finishWishPerishSong(program, handlers, withWishPerishSongCursor(state, 2, 0), completionKind);
 }
 
 /**
@@ -2643,17 +2642,23 @@ function runPerishSongAfterFutureAttacks(
  * through to `BattleTurnPassed`'s closing cleanup (`battle_main.c:3974-3992`).
  */
 function finishWishPerishSong(
+  program: BattleScriptProgram,
+  handlers: Handlers,
   initialState: MachineState,
   completionKind: PostFaintKind,
 ): BattleEndTurnResult {
   // `battle_util.c:1887`: the paired clear on the FALSE return.
   const state = withoutEndTurnHitMarkers(initialState);
   if (completionKind === "terminal") {
+    // The battle was decided inside BattleTurnPassed. Only now, with the Future Sight / Perish Song sweep through, does source
+    // leave for HandleEndTurn_BattleWon / _BattleLost (battle_main.c:3988-3992): the battle-won / battle-lost script runs once,
+    // on the final gBattleOutcome (a second deciding faint may have turned WON or LOST into DREW).
+    const finished = runBattleScriptPostBattleOutcomeScript(program, handlers, state);
     return Object.freeze({
       kind: "terminal",
       state: Object.freeze({
-        ...state,
-        rulesContext: clearFollowMeTimersForTurnValuesCleanUp(state.rulesContext),
+        ...finished,
+        rulesContext: clearFollowMeTimersForTurnValuesCleanUp(finished.rulesContext),
       }),
     });
   }
@@ -2679,6 +2684,7 @@ function runFutureAttacksAfterFaints(
 ): BattleEndTurnResult {
   // `battle_util.c:1787`, same raise as the Perish Song sweep below.
   let state = withEndTurnHitMarkers(initialState);
+  let sweepKind: PostFaintKind = completionKind;
   const count = state.rulesContext.battleTopology.battlersCount;
   if (state.rulesContext.wishPerishSongState !== 0) {
     return runPerishSongAfterFutureAttacks(program, handlers, state, completionKind);
@@ -2753,18 +2759,8 @@ function runFutureAttacksAfterFaints(
         program,
         handlers,
         withoutEndTurnHitMarkers(state),
+        DEFER_POST_BATTLE_OUTCOME_SCRIPT,
       );
-      if (fainted.kind === "terminal") {
-        return Object.freeze({
-          kind: "terminal",
-          state: Object.freeze({
-            ...fainted.state,
-            rulesContext: clearFollowMeTimersForTurnValuesCleanUp(
-              fainted.state.rulesContext,
-            ),
-          }),
-        });
-      }
       if (fainted.kind === "player-choice-required") {
         return Object.freeze({
           kind: "player-choice-required",
@@ -2778,6 +2774,9 @@ function runFutureAttacksAfterFaints(
         return Object.freeze({ kind: "non-terminal-barrier", state: fainted.state, instruction: fainted.instruction });
       }
       state = withEndTurnHitMarkers(fainted.state);
+      // As in the Perish Song sweep below: a delayed hit that decides the battle does not end HandleWishPerishSongOnTurnEnd.
+      if (fainted.kind === "terminal") sweepKind = "terminal";
+      else if (fainted.kind === "resumed" && sweepKind !== "terminal") sweepKind = "resumed";
     }
   }
 
@@ -2785,7 +2784,7 @@ function runFutureAttacksAfterFaints(
     program,
     handlers,
     withWishPerishSongCursor(state, 1, 0),
-    completionKind,
+    sweepKind,
   );
 }
 
@@ -2958,7 +2957,7 @@ export function runBattleEndTurnOrchestration(
       return Object.freeze({ kind: "case-barrier", state: fieldResult.state, caseName: fieldResult.caseName, detail: fieldResult.detail });
     }
     if (fieldResult.kind === "outcome-decided") {
-      const faintedResult = runBattleScriptFaintedActionsOrchestration(program, handlers, fieldResult.state);
+      const faintedResult = runBattleScriptFaintedActionsOrchestration(program, handlers, fieldResult.state, DEFER_POST_BATTLE_OUTCOME_SCRIPT);
       return finishFaintedThenDelayed(program, handlers, faintedResult);
     }
     state = fieldResult.state;
@@ -2974,6 +2973,6 @@ export function runBattleEndTurnOrchestration(
   }
 
   // HandleFaintedMonActions() always runs, gBattleOutcome gate or not (doc §1) -- reuse the already-landed orchestration verbatim.
-  const faintedResult = runBattleScriptFaintedActionsOrchestration(program, handlers, state);
+  const faintedResult = runBattleScriptFaintedActionsOrchestration(program, handlers, state, DEFER_POST_BATTLE_OUTCOME_SCRIPT);
   return finishFaintedThenDelayed(program, handlers, faintedResult);
 }
