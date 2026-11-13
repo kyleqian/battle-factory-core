@@ -47,6 +47,7 @@ import { isFactoryLobbyFacingSinglesAttendant } from "../../src/engine/factoryLo
 import {
   MENU_OPTION_RENT,
   MENU_OPTION_SUMMARY,
+  isSelectSpeciesValid,
 } from "../../src/engine/factoryDraftScreen.ts";
 import {
   isCursorInputReady,
@@ -1823,6 +1824,24 @@ export class RandomPlayer {
       const rerolledThirdPick = this.rng.int(6);
       if (!this.coverageDraftLike) this.draft.picks[2] = rerolledThirdPick;
       return this.press("A", 8);
+    }
+    if (draft.mode === "invalid") {
+      // "Can't select same POKéMON." (iss216): dismiss with A and swap the refused pick for
+      // the first unplanned slot whose species is still valid. No RNG draw, so seeds that
+      // never meet a duplicate keep their streams.
+      if (!isMonPicInputReady(draft.monPic)) return NO_BUTTONS;
+      const refused = draft.cursorPos;
+      const replacement = draft.rentals.findIndex(
+        (rental, slot) =>
+          draft.selectedIds[slot] === 0
+          && !this.draft.picks.includes(slot)
+          && rental.species !== draft.rentals[refused]!.species
+          && isSelectSpeciesValid(draft.rentals, draft.selectedIds, draft.selectingMonsState, slot),
+      );
+      this.draft.picks = this.draft.picks.map((pick) => (pick === refused ? (replacement === -1 ? pick : replacement) : pick));
+      this.draft.rented -= 1;
+      this.note(state, `draft: same species refused on slot ${refused}, re-plan slot ${replacement}`);
+      return this.press("A", 10);
     }
     if (draft.mode === "cursor") {
       if (!isCursorInputReady(draft.monPic)) return NO_BUTTONS;

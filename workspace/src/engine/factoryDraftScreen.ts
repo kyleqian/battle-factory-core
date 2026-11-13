@@ -82,7 +82,8 @@ export interface RentalSlot {
   species: string;
 }
 
-export type DraftScreenMode = "cursor" | "menu";
+/** "invalid" = Select_Task_HandleChooseMons' STATE_CHOOSE_MONS_INVALID (:1696): the same-species refusal waits for A with the mon pic still open. */
+export type DraftScreenMode = "cursor" | "menu" | "invalid";
 
 /** Select_MenuOptionFuncs order: SUMMARY, RENT/DESELECT, OTHERS. */
 export const MENU_OPTION_COUNT = 3;
@@ -100,6 +101,26 @@ const SELECT_MON_MESSAGES = [
   "Select the third POKéMON.",
 ];
 const CONFIRM_MONS_MESSAGE = "Are these three POKéMON OK?";
+/** gText_CantSelectSamePkmn (strings.c:1623). */
+export const CANT_SELECT_SAME_MESSAGE = "Can't select same POKéMON.";
+
+/**
+ * Select_AreSpeciesValid (:2255-2276): renting `slot` is refused when an
+ * already-picked ball (selectedId 1..selectingMonsState-1) holds its species.
+ */
+export function isSelectSpeciesValid(
+  rentals: readonly { readonly species: string }[],
+  selectedIds: readonly number[],
+  selectingMonsState: number,
+  slot: number,
+): boolean {
+  const species = rentals[slot]!.species;
+  for (let rank = 1; rank < selectingMonsState; rank += 1) {
+    const picked = selectedIds.indexOf(rank);
+    if (picked !== -1 && rentals[picked]!.species === species) return false;
+  }
+  return true;
+}
 
 /** Select_PrintSelectMonString (battle_factory_screen.c:1893-1909). */
 export function selectMonMessage(selectingMonsState: number): string {
@@ -617,7 +638,8 @@ export function renderFactoryDraftScreen(state: DraftScreenState): Uint8Array {
   // and CloseMonPic's Select_ErasePopupMenu erases it a tick before `mode`
   // itself flips back to "cursor" - see monPic.ts.
   const monPicVisual = getMonPicVisual(state.monPic);
-  if (monPicVisual.menuHighlightVisible) {
+  // Select_ErasePopupMenu (:1957): the same-species refusal erases the popup but leaves the mon pic open.
+  if (monPicVisual.menuHighlightVisible && state.mode !== "invalid") {
     // Menu-highlight redraw scheduling (see MenuHighlightRedrawState doc):
     // a single OAM sprite move, no piecemeal reveal - stays at the old row
     // for 2 ticks after the input, then jumps straight to the new one.
@@ -646,7 +668,7 @@ export function renderFactoryDraftScreen(state: DraftScreenState): Uint8Array {
       0,
     );
   }
-  if (monPicVisual.menuTextVisible) {
+  if (monPicVisual.menuTextVisible && state.mode !== "invalid") {
     for (let i = 0; i < MENU_OPTION_LABELS.length; i += 1) {
       drawText(
         fb,
@@ -713,7 +735,7 @@ export function renderFactoryDraftScreenFaded(state: DraftScreenState, bgY: numb
   drawSpriteFaded(fb, ARROW_SHEET, arrow.palette, 35 * arrowPos + 32, 88, 2, 2, 0, objY);
 
   const monPicVisual = getMonPicVisual(state.monPic);
-  if (monPicVisual.menuHighlightVisible) {
+  if (monPicVisual.menuHighlightVisible && state.mode !== "invalid") {
     const highlightMenuCursorPos = state.menuHighlightRedraw
       ? state.menuHighlightRedraw.fromMenuCursorPos
       : state.menuCursorPos;
@@ -721,7 +743,7 @@ export function renderFactoryDraftScreenFaded(state: DraftScreenState, bgY: numb
     drawSpriteFaded(fb, { tileset: menuHighlight.left.tileset }, menuHighlight.palette, 176 + 16, highlightY + 8, 4, 2, 0, objY);
     drawSpriteFaded(fb, { tileset: menuHighlight.right.tileset }, menuHighlight.palette, 208 + 16, highlightY + 8, 4, 2, 0, objY);
   }
-  if (monPicVisual.menuTextVisible) {
+  if (monPicVisual.menuTextVisible && state.mode !== "invalid") {
     for (let i = 0; i < MENU_OPTION_LABELS.length; i += 1) {
       drawTextFaded(
         fb,

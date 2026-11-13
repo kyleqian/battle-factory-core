@@ -27,6 +27,8 @@ import {
   selectedRentalParty,
   selectedRentalSlotIndexes,
   selectMonMessage,
+  isSelectSpeciesValid,
+  CANT_SELECT_SAME_MESSAGE,
   type DraftScreenState,
 } from "./factoryDraftScreen.ts";
 import {
@@ -2978,6 +2980,21 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
         // (frozen, not reset - see speciesNameFade.ts doc).
         speciesNameFade = deactivateSpeciesNameFade(speciesNameFade);
       }
+    } else if (draftScreen.mode === "invalid") {
+      // STATE_CHOOSE_MONS_INVALID (:1696-1706): only A is read (the pic is open, so
+      // monPicAnimating is FALSE); it closes the pic and restores the select prompt.
+      if (newKeys.has("A")) {
+        playSelectSe(); // :1698
+        rentConfirmRedraw = { fromMessage: draftScreen.message, fromSelected: false, elapsed: 0 };
+        ballAnimStall = activeSlotsBeforeAction;
+        draftScreen = {
+          ...draftScreen,
+          mode: "cursor",
+          message: selectMonMessage(draftScreen.selectingMonsState),
+        };
+        monPic = closeMonPic(monPic.variant);
+        speciesNameFade = activateSpeciesNameFade(speciesNameFade);
+      }
     } else if (isMonPicInputReady(monPic)) {
       // Select_Task_HandleMenu's STATE_MENU_HANDLE_INPUT: only reachable once
       // the mon pic finishes opening (see monPic.ts).
@@ -3005,24 +3022,34 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
         // slot/handler, context-sensitive on the cursored ball's selectedId.
         const slot = draftScreen.cursorPos;
         const isSelected = draftScreen.selectedIds[slot] !== 0;
-        const { selectedIds, selectingMonsState } = isSelected
-          ? applyDeselect(draftScreen.selectedIds, draftScreen.selectingMonsState, slot)
-          : applySelect(draftScreen.selectedIds, draftScreen.selectingMonsState, slot);
-        ballAnims[slot] = isSelected ? null : initialBallAnimState();
-        rentConfirmRedraw = { fromMessage: draftScreen.message, fromSelected: isSelected, elapsed: 0 };
-        ballAnimStall = activeSlotsBeforeAction.filter((i) => i !== slot);
-        draftScreen = {
-          ...draftScreen,
-          mode: "cursor",
-          selectedIds,
-          selectingMonsState,
-          message: selectMonMessage(selectingMonsState),
-        };
-        monPic = closeMonPic(monPic.variant);
-        // battle_factory_screen.c:1965-1969/1611 - RENT/DESELECT resumes the
-        // breathe UNLESS this was the confirming 3rd pick (SELECT_CONFIRM_MONS
-        // skips straight to the YES/NO task without touching `active`).
-        if (!isMonsConfirmed(selectingMonsState)) speciesNameFade = activateSpeciesNameFade(speciesNameFade);
+        if (
+          !isSelected
+          && !isSelectSpeciesValid(draftScreen.rentals, draftScreen.selectedIds, draftScreen.selectingMonsState, slot)
+        ) {
+          // :1953-1958 SELECT_INVALID_MON: print the refusal, erase the popup, keep the pic open.
+          rentConfirmRedraw = { fromMessage: draftScreen.message, fromSelected: false, elapsed: 0 };
+          ballAnimStall = activeSlotsBeforeAction;
+          draftScreen = { ...draftScreen, mode: "invalid", message: CANT_SELECT_SAME_MESSAGE };
+        } else {
+          const { selectedIds, selectingMonsState } = isSelected
+            ? applyDeselect(draftScreen.selectedIds, draftScreen.selectingMonsState, slot)
+            : applySelect(draftScreen.selectedIds, draftScreen.selectingMonsState, slot);
+          ballAnims[slot] = isSelected ? null : initialBallAnimState();
+          rentConfirmRedraw = { fromMessage: draftScreen.message, fromSelected: isSelected, elapsed: 0 };
+          ballAnimStall = activeSlotsBeforeAction.filter((i) => i !== slot);
+          draftScreen = {
+            ...draftScreen,
+            mode: "cursor",
+            selectedIds,
+            selectingMonsState,
+            message: selectMonMessage(selectingMonsState),
+          };
+          monPic = closeMonPic(monPic.variant);
+          // battle_factory_screen.c:1965-1969/1611 - RENT/DESELECT resumes the
+          // breathe UNLESS this was the confirming 3rd pick (SELECT_CONFIRM_MONS
+          // skips straight to the YES/NO task without touching `active`).
+          if (!isMonsConfirmed(selectingMonsState)) speciesNameFade = activateSpeciesNameFade(speciesNameFade);
+        }
       } else if (newKeys.has("A") && draftScreen.menuCursorPos === MENU_OPTION_OTHERS) {
         playSelectSe(); // :1607
         // Select_OptionOthers: closes the popup with no selection change,

@@ -10,6 +10,8 @@ import {
   applyDeselect,
   applySelect,
   selectMonMessage,
+  isSelectSpeciesValid,
+  CANT_SELECT_SAME_MESSAGE,
 } from "../src/engine/factoryDraftScreen.ts";
 import { createInitialState, tick } from "../src/engine/core.ts";
 import type { GbaButton } from "../src/input.ts";
@@ -117,5 +119,91 @@ describe("engine RENT/DESELECT integration (core.ts tick())", () => {
     expect(state.draftScreen.selectingMonsState).toBe(1);
     expect(state.draftScreen.ballAnims[0]).toBeNull();
     expect(state.draftScreen.message).toBe("Select the first POKéMON.");
+  });
+});
+
+describe("same-species refusal (iss216, Select_AreSpeciesValid :2255-2276)", () => {
+  // The anchor deal has no duplicate: give slot 6 slot 1's species so the 2nd pick is refused.
+  function withDuplicatePair() {
+    const state = createInitialState();
+    const rentals = state.draftScreen.rentals.map((rental, i) =>
+      i === 5 ? { ...rental, species: state.draftScreen.rentals[0]!.species } : rental);
+    return { ...state, draftScreen: { ...state.draftScreen, rentals } };
+  }
+  function openMenuOnSlot(state: ReturnType<typeof createInitialState>, slot: number) {
+    let s = state;
+    for (let i = 0; i < slot; i += 1) {
+      s = tap(s, "RIGHT");
+      s = idle(s, 8);
+    }
+    s = tap(s, "A");
+    s = idle(s, 40);
+    s = tap(s, "DOWN");
+    return idle(s, 4);
+  }
+
+  it("isSelectSpeciesValid compares only earlier picks' species", () => {
+    const rentals = [{ species: "A" }, { species: "B" }, { species: "A" }];
+    expect(isSelectSpeciesValid(rentals, [1, 0, 0], 2, 2)).toBe(false);
+    expect(isSelectSpeciesValid(rentals, [0, 1, 0], 2, 2)).toBe(true);
+    expect(isSelectSpeciesValid(rentals, [0, 0, 0], 1, 2)).toBe(true);
+  });
+
+  it("refuses the 2nd rental of a species: prompt text, popup gone, pic open, still 1 pick", () => {
+    let s = openMenuOnSlot(withDuplicatePair(), 0);
+    s = tap(s, "A"); // RENT slot 1
+    expect(s.draftScreen.selectedIds[0]).toBe(1);
+    s = idle(s, 40);
+    s = openMenuOnSlot(s, 5);
+    s = tap(s, "A"); // RENT the duplicate
+    expect(s.draftScreen.mode).toBe("invalid");
+    expect(s.draftScreen.message).toBe(CANT_SELECT_SAME_MESSAGE);
+    expect(s.draftScreen.selectedIds[5]).toBe(0);
+    expect(s.draftScreen.selectingMonsState).toBe(2);
+    expect(s.draftScreen.monPic.phase).toBe("open");
+    expect(s.draftScreen.ballAnims[5]).toBeNull();
+  });
+
+  it("only A leaves the refusal; B and the d-pad are ignored, then the prompt is restored with 2 picks possible", () => {
+    let s = openMenuOnSlot(withDuplicatePair(), 0);
+    s = idle(tap(s, "A"), 40);
+    s = tap(openMenuOnSlot(s, 5), "A");
+    for (const key of ["B", "UP", "DOWN", "LEFT", "RIGHT"] as const) {
+      s = idle(tap(s, key), 6);
+      expect(s.draftScreen.mode).toBe("invalid");
+      expect(s.draftScreen.cursorPos).toBe(5);
+    }
+    s = tap(s, "A");
+    expect(s.draftScreen.mode).toBe("cursor");
+    expect(s.draftScreen.message).toBe("Select the second POKéMON.");
+    expect(s.draftScreen.monPic.phase).toBe("closing");
+    s = idle(s, 40);
+    expect(s.draftScreen.monPic.phase).toBe("closed");
+    expect(s.draftScreen.selectedIds).toEqual([1, 0, 0, 0, 0, 0]);
+    // a non-duplicate slot can still be rented afterwards
+    s = openMenuOnSlot(tap(idle(s, 8), "LEFT"), 0);
+    s = tap(s, "A");
+    expect(s.draftScreen.selectingMonsState).toBe(3);
+  });
+
+  it("deselecting the earlier pick re-allows the same species", () => {
+    let s = openMenuOnSlot(withDuplicatePair(), 0);
+    s = idle(tap(s, "A"), 40);
+    s = tap(openMenuOnSlot(s, 5), "A"); // refused
+    s = idle(tap(s, "A"), 40);
+    s = idle(tap(s, "RIGHT"), 8); // 6 -> 1 (wraps)
+    expect(s.draftScreen.cursorPos).toBe(0);
+    s = tap(s, "A");
+    s = idle(s, 40);
+    s = idle(tap(s, "DOWN"), 4);
+    s = idle(tap(s, "A"), 40); // DESELECT slot 1
+    expect(s.draftScreen.selectedIds).toEqual([0, 0, 0, 0, 0, 0]);
+    s = idle(tap(s, "LEFT"), 8); // 1 -> 6
+    s = tap(s, "A");
+    s = idle(s, 40);
+    s = idle(tap(s, "DOWN"), 4);
+    s = tap(s, "A"); // RENT slot 6: now valid
+    expect(s.draftScreen.mode).toBe("cursor");
+    expect(s.draftScreen.selectedIds[5]).toBe(1);
   });
 });
