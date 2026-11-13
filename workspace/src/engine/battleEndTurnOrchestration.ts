@@ -2520,6 +2520,31 @@ function finishTurnValuesCleanUp(
   return hitMarker === cleaned.hitMarker ? cleaned : Object.freeze({ ...cleaned, hitMarker });
 }
 
+/**
+ * The head of `DoFieldEndTurnEffects` (`battle_util.c:1186-1191`): on EVERY entry it sets gBattlerAttacker (and gBattlerTarget) to the first battler
+ * that is not absent. `BattleTurnPassed` (`battle_main.c:3956-3972`) calls it each time it is entered, and it is entered again after every script an
+ * end-of-turn step runs. `HandleFaintedMonActions` starts with a script of its own (`BattleScript_GiveExp`, `battle_util.c` state 1), so by the time
+ * the faint replacement script runs, gBattlerAttacker is that first present battler: not the battler whose poison / weather / Future Sight step
+ * caused the faint. One reader: a replacement that faints from Spikes as it comes in runs `moveendall`
+ * (`BattleScript_SpikesOnFaintedBattlerFainted`), whose MOVEEND_UPDATE_LAST_MOVES writes gLastMoves[gBattlerAttacker] = MOVE_UNAVAILABLE. The game
+ * forgets the last move of the first present Pokemon there; the engine forgot the fainted side's (docs/parity-mac/end-turn-attacker.md).
+ * Only the attacker is set here: the faint sweep sets its own target (the fainted battler), as the source does.
+ */
+function withBattleTurnPassedEntryAttacker(state: MachineState): MachineState {
+  const rules = state.rulesContext;
+  const count = rules.battleTopology.battlersCount;
+  let first = 0;
+  while (first < count && (rules.absentBattlerFlags & (1 << first)) !== 0) first += 1;
+  if (first >= count || rules.selectorRoles.attacker === first) return state;
+  return Object.freeze({
+    ...state,
+    rulesContext: Object.freeze({
+      ...rules,
+      selectorRoles: Object.freeze({ ...rules.selectorRoles, attacker: first as BattleScriptBattlerId }),
+    }),
+  });
+}
+
 function mapFaintedActionsResult(result: BattleScriptFaintedActionsResult): BattleEndTurnResult {
   if (result.kind === "no-fainted-battlers") {
     return Object.freeze({
@@ -2631,7 +2656,7 @@ function runPerishSongAfterFutureAttacks(
       const fainted = runBattleScriptFaintedActionsOrchestration(
         program,
         handlers,
-        withoutEndTurnHitMarkers(state),
+        withBattleTurnPassedEntryAttacker(withoutEndTurnHitMarkers(state)),
         DEFER_POST_BATTLE_OUTCOME_SCRIPT,
       );
       if (fainted.kind === "player-choice-required") {
@@ -2787,7 +2812,7 @@ function runFutureAttacksAfterFaints(
       const fainted = runBattleScriptFaintedActionsOrchestration(
         program,
         handlers,
-        withoutEndTurnHitMarkers(state),
+        withBattleTurnPassedEntryAttacker(withoutEndTurnHitMarkers(state)),
         DEFER_POST_BATTLE_OUTCOME_SCRIPT,
       );
       if (fainted.kind === "player-choice-required") {
@@ -2986,7 +3011,7 @@ export function runBattleEndTurnOrchestration(
       return Object.freeze({ kind: "case-barrier", state: fieldResult.state, caseName: fieldResult.caseName, detail: fieldResult.detail });
     }
     if (fieldResult.kind === "outcome-decided") {
-      const faintedResult = runBattleScriptFaintedActionsOrchestration(program, handlers, fieldResult.state, DEFER_POST_BATTLE_OUTCOME_SCRIPT);
+      const faintedResult = runBattleScriptFaintedActionsOrchestration(program, handlers, withBattleTurnPassedEntryAttacker(fieldResult.state), DEFER_POST_BATTLE_OUTCOME_SCRIPT);
       return finishFaintedThenDelayed(program, handlers, faintedResult);
     }
     state = fieldResult.state;
@@ -3002,6 +3027,6 @@ export function runBattleEndTurnOrchestration(
   }
 
   // HandleFaintedMonActions() always runs, gBattleOutcome gate or not (doc §1) -- reuse the already-landed orchestration verbatim.
-  const faintedResult = runBattleScriptFaintedActionsOrchestration(program, handlers, state, DEFER_POST_BATTLE_OUTCOME_SCRIPT);
+  const faintedResult = runBattleScriptFaintedActionsOrchestration(program, handlers, withBattleTurnPassedEntryAttacker(state), DEFER_POST_BATTLE_OUTCOME_SCRIPT);
   return finishFaintedThenDelayed(program, handlers, faintedResult);
 }
