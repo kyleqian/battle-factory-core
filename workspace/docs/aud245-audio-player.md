@@ -122,8 +122,7 @@ tracker but never the player. `AudioPlayer.restore(events, liveFrame)` replays t
 into the loop, including after several loops and for crossfaded loops), so no restart is heard. Ended SEs and fanfares make no sound;
 a fanfare that is still running is resumed at its position with the BGM paused as in the live model; faded/replaced BGM is restored as
 the replacement. Called from `loadAudio` (player created after the fast-forward or mounted muted/late) and at the end of resume.
-Limitation: the session emits no event for the music playing at frame 0 (e.g. 469), so that track is untracked until the first `bgm`
-event (no new events, out of scope).
+Limitation (closed by aud247, below): the session emits no event for the music playing at frame 0.
 
 **2. `pan` events** (`m4aMPlayPanpotControl`, m4a.c:1314, called from `SE12PanpotControl`, sound.c:600). It sets `track->panX` on SE1 and
 SE2 only; `TrkVolPitSet` uses `y = 2*pan + panX`, `volMR = (y+128)*x>>8`, `volML = (127-y)*x>>8`. The player applies `m4aPanGains(pan)`
@@ -146,3 +145,33 @@ events after the live frame ignored; the tracker; pan splice / no-op / SE3 / pan
 once, decode cache), `tests/aud245bLibRestore.test.ts` (4: lib mount with `resumeSync` and a fake AudioContext/fetch: resume with audio,
 no audio option then `setAudio(true)`, muted then enabled). `tests/aud245AudioPlayer.test.ts` got one `await flush()` between two pushes
 (the second SE no longer finds the first loaded). The frame-identity test is unchanged and green.
+
+## aud247: the music already playing at mount
+
+Problem: the session emits no SoundEvent for the BGM already sounding on frame 0, so a fresh mount was silent until the next `bgm` event.
+Fix, audio-side only: `src/audio/initialMusic.ts` (`initialMusicEvents(start)`) is a table keyed by the mount `start`; `lib.ts` seeds the
+`MusicTracker` with it (`new MusicTracker(initialMusicEvents(options.start))`, `reset()` returns to the seed). The player's existing
+`restore` then starts the BGM at its loop position on the first `loadAudio` / `setAudio(true)` / resume end, and any real `bgm` event
+replaces the seed. Touched: `src/audio/initialMusic.ts` (new), `src/audio/musicTracker.ts`, `src/lib.ts`. Not touched: `src/engine`,
+`src/factorySession.ts`, `soundEvents.ts`: frame output, `ENGINE_BUILD` and the headless bundle are unchanged.
+
+ROM proof (dev-time RAM read, ROADMAP recipe; script and output in `.integration/evidence/aud247/readAnchor.py`, `anchor.json`, `readClock.py`,
+`clock.json`). `gMPlayInfo_BGM` at the bootstrap anchor, Scene OFF (`factory-battle-scene-off.json`) and Scene ON (`factory.json`) alike:
+`songHeader == gSongTable[469]` (MUS_B_FACTORY), `status` 0x1ff (running), `trackCount` 10, **`clock` 3287**. SE1 holds song 9 and SE2 song 5 but both
+are finished (`status` 0x80000000), SE3 is empty: only the BGM is sounding. Advancing the oracle, `clock` was 3344 / 3402 / 3863 / 4439 / 5207 after
+60 / 120 / 600 / 1200 / 2000 frames: exactly 0.96 ticks per frame (144 BPM), and it keeps counting through the loop (3720 -> 168).
+So the draft BGM started 3287 / 0.96 = **3424 frames before frame 0**; the seed is `{ frame: -3424, kind: "bgm", id: 469 }` and the existing loop
+arithmetic (including the loop wrap and the onset offset) gives the file position (57.3 s into the song, before the loop end at 64.8 s).
+
+| mount start | seeded music | position | proof |
+| --- | --- | --- | --- |
+| default (`"draft"`, also `undefined`) | BGM 469 | 3424 frames in (clock 3287) | RAM read above, both profiles identical |
+| `"after-save"` (Lobby, "Please step this way.") | BGM 469 (Lobby map music, `BattleFrontier_BattleFactoryLobby/map.json` `"music": "MUS_B_FACTORY"`) | song start (frame 0) | song id: map.json. Position: not recoverable, the engine skips the attendant dialogue, the save and the door walk, so no ROM state corresponds to this frame (the `factory-pre-report.json` Lobby bootstrap has clock 430 at its own anchor, a different moment); starting at the song start, not at `loopStart` |
+| `resume` | the start's seed, then the fast-forward's `bgm` / `stop` / fanfare events | as above plus the elapsed frames | `restore` as in aud245b; a resumed trace with no music event continues the draft BGM at 3424 + frames |
+
+`reset()` of the mount re-seeds the tracker and calls `restore` (it used to silence the player and leave it silent until the next `bgm`).
+
+Tests: `tests/aud247InitialMusic.test.ts` (7: table, tracker seed / replace / reset; library mount with fake AudioContext/fetch: fresh draft mount starts
+BGM 469 at frame 0 at the 3424-frame loop position and fetches `bgm-469.ogg`, after-save starts it from the song start, resume of a 200-frame
+trace continues it at 3624 frames, `setAudio(true)` at frame 0, reset restarts it; no audio option still fetches nothing). `aud245FrameIdentity`,
+`aud245bLibRestore`, `audioHeadlessBoundary`, `factoryLibrary`, `lbrc` stay green.
