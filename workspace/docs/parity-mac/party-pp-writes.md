@@ -65,3 +65,11 @@ matched to the engine's party write:
   to the party record ..."; `tests/gate6LeppaBerryReceipt.test.ts` (party PP after the restore);
   `tests/battleScriptAttackCancelerOpcode.test.ts` "delegates PressurePPLose to the Magic Coat owner's ..." (party PP).
 - Magic Coat against Pressure has no ROM battle yet (source and test only); a staged battle is on the list.
+
+## Not covered (source read, no reachable case found)
+
+The game's Leppa Berry search reads the moves and PP of the **party record** (`battle_util.c:3355-3363`); the engine
+reads the Pokemon on the field. The two differ only while the holder is Transformed or has a Mimic move (the field
+copy then has other moves). No Level 50 set has Transform or Mimic. Metronome can call Transform, and its two users
+(Chansey 227, Clefable 389) do not hold a Leppa Berry. The berry would have to reach one of them through two uses of
+Trick by the other side (take it from Nidoking 606 or Lapras 822, then hand it over). Left as it is.

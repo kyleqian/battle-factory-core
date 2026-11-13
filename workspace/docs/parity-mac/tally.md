@@ -58,6 +58,14 @@ Shown with their reason instead of a count:
 - Return: no Factory Pokemon has it. `SetMonMoveAvoidReturn` (`battle_factory.c:913`) writes Frustration instead at
   every place a Factory Pokemon is made (`:461` rentals, `:501` opponents, `:822` Noland). The row is in the list
   because the set table names Return.
+- Hidden Power: the only Level 50 set with it is Unown (set 126), and the Factory never hands out Unown: the three
+  places that draw a Factory Pokemon skip it (`battle_factory.c:337` opponents, `:562` rentals, `:781` Noland).
+- Snatch stealing a move: Snatch can never run. No Level 50 set has it; Metronome may not call it
+  (`sMovesForbiddenToCopy`, `battle_script_commands.c:725-747`, read by `Cmd_metronome` `:7898-7921`); no set has
+  Mirror Move, Assist or Mimic, and what those could copy after a Metronome call is a move that ran, so never Snatch.
+- "Torment blocks the chosen move" at move use: the script `BattleScript_MoveUsedIsTormented`
+  (`battle_scripts_1.s:3567`) is referenced by no C code (only declared, `include/battle_scripts.h:81`). Torment acts
+  at move selection only (`battle_util.c:999-1012`); that is the row `move-refused:torment`.
 
 ## Limits
 
@@ -66,4 +74,7 @@ Shown with their reason instead of a count:
   wide state.
 - The move span ends at the next move or at the first end-of-turn script; a message that belongs to an ability's own
   script inside a span still fails the move (that is how the game shows it).
+- A forced Struggle is counted from the move itself (no set has Struggle, so a Struggle that ran is a forced one). The
+  engine does not play the game's "has no moves left" line (a known presentation gap, `STATUS.md`), so that line
+  cannot be the evidence.
 - A staged battle names its rows in `expect` and is checked against this same tally (`staged-battles.md`).

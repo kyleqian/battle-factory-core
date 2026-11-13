@@ -149,6 +149,9 @@ NO_EFFECT = {
     "ability:ABILITY_PLUS": "needs a partner with Minus on the field (doubles)", "ability:ABILITY_MINUS": "needs a partner with Plus on the field (doubles)",
     "ability:ABILITY_LIGHTNING_ROD": "redirects Electric moves to itself in doubles; no effect in singles (Gen 3)",
     "move:EFFECT_HELPING_HAND": "always fails in singles: Cmd_trysethelpinghand needs BATTLE_TYPE_DOUBLE (battle_script_commands.c:9170-9186)",
+    "situation:volatile:torment:blocks-chosen-move": "dead script: no C code references BattleScript_MoveUsedIsTormented (only its declaration, battle_scripts.h:81); Torment acts at move selection only (battle_util.c:999-1012), which is the row move-refused:torment",
+    "situation:volatile:snatch:steals": "Snatch can never run: no Level 50 set has it, Metronome may not call it (sMovesForbiddenToCopy, battle_script_commands.c:725-747, used by Cmd_metronome :7898-7921), and no set has Mirror Move, Assist or Mimic; a move those could copy after a Metronome call is still never Snatch",
+    "move:EFFECT_HIDDEN_POWER": "only Unown (set 126) has Hidden Power, and the Factory never hands out Unown: battle_factory.c:337 (opponents), :562 (rentals), :781 (Noland)",
     "move:EFFECT_RETURN": "no Factory Pokemon has Return: SetMonMoveAvoidReturn writes Frustration instead (battle_factory.c:913, called at :461 / :501 / :822)",
 }
 
@@ -252,6 +255,8 @@ def tally_battle(facts):
             effect, a, t = mv["effect"], s["a"], s["t"]
             row = "move:" + effect
             hit(row + "#used")
+            if mv["move"] == "MOVE_STRUGGLE":  # no set has Struggle: a Struggle that ran is the forced one (the engine does not play the "no moves left" line)
+                hit("situation:move:forced-struggle")
             worked = not s["failed"]
             if worked:
                 hit(row + "#worked")
