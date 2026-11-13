@@ -5,13 +5,16 @@
 // mountFactoryGameInternal for its test ABI; hosts use mountFactoryGame.
 import { installBundledMonPicPixels } from "./engine/monPicPixelsInstall.ts";
 import { render, SCREEN_HEIGHT, SCREEN_WIDTH } from "./engine/core.ts";
-import type { FactoryEvent, FactoryGame, FactoryGameOptions, TraceSegment } from "./factoryContract.ts";
+import type { FactoryAudioState, FactoryEvent, FactoryGame, FactoryGameOptions, TraceSegment } from "./factoryContract.ts";
+import type { AudioPlayer, AudioStats } from "./audio/player.ts";
+import type { SoundEvent } from "./audio/soundEvents.ts";
 import { ENGINE_BUILD, FactorySession } from "./factorySession.ts";
 import { normalizeButtons, type GbaButton } from "./input.ts";
 import type { SessionContainedError, SessionTrace } from "./sessionRecorder.ts";
 
 export type {
   BattleScene,
+  FactoryAudioState,
   FactoryEvent,
   FactoryGame,
   FactoryGameOptions,
@@ -42,6 +45,8 @@ export interface FactoryGameInternal extends FactoryGame {
   /** Bench ABI: back to the challenge's first frame. */
   reset(): void;
   draw(): void;
+  /** Dev / test: the audio player's counters (null until the player chunk has loaded). */
+  audioStats(): AudioStats | null;
   sessionTrace(error?: unknown): SessionTrace;
   containedErrors(): SessionContainedError[];
 }
@@ -58,6 +63,8 @@ export function mountFactoryGame(options: FactoryGameOptions): FactoryGame {
     press: (button) => game.press(button),
     release: (button) => game.release(button),
     trace: (fromSegment) => game.trace(fromSegment),
+    setAudio: (enabled) => game.setAudio(enabled),
+    getAudio: () => game.getAudio(),
     destroy: () => game.destroy(),
   };
 }
@@ -89,6 +96,39 @@ export function mountFactoryGameInternal(options: MountInternalOptions): Factory
   let destroyed = false;
   let crashed = false;
   let readySent = false;
+  // aud245: the player is a separate chunk (src/audio/player.ts), imported only when audio is asked for. Its sink is write-only:
+  // events go in, nothing comes back, and a session ticks identically with or without it.
+  const audioWanted = { enabled: options.audio?.enabled ?? false, volume: Math.max(0, Math.min(1, options.audio?.volume ?? 1)) };
+  let audio: AudioPlayer | null = null;
+  let audioLoading = false;
+  let audioFailed = false;
+  const audioBacklog: SoundEvent[] = [];
+  const audioSink = {
+    push(event: SoundEvent): void {
+      if (audio) audio.push(event);
+      else if (audioBacklog.length < 512) audioBacklog.push(event);
+    },
+  };
+  function loadAudio(): void {
+    if (audio || audioLoading || audioFailed || destroyed) return;
+    audioLoading = true;
+    session.attachSoundSink(audioSink);
+    void import("./audio/player.ts").then(
+      ({ createAudioPlayer }) => {
+        audioLoading = false;
+        if (destroyed) return;
+        audio = createAudioPlayer({ enabled: audioWanted.enabled, volume: audioWanted.volume, baseUrl: options.audio?.baseUrl });
+        for (const event of audioBacklog.splice(0)) audio.push(event);
+      },
+      (error: unknown) => {
+        audioLoading = false;
+        audioFailed = true;
+        session.attachSoundSink(null);
+        console.warn("pokebench audio: the player failed to load; the game continues muted", error);
+      },
+    );
+  }
+
   let resuming: { segments: TraceSegment[]; segment: number; frame: number; held: ReadonlySet<GbaButton> } | null = null;
 
   const emit = (event: FactoryEvent): void => {
@@ -203,6 +243,7 @@ export function mountFactoryGameInternal(options: MountInternalOptions): Factory
   }
   draw();
   if (!crashed) raf = requestAnimationFrame(loop);
+  if (options.audio) loadAudio();
 
   return {
     get engine() {
@@ -224,6 +265,19 @@ export function mountFactoryGameInternal(options: MountInternalOptions): Factory
     trace(fromSegment = 0) {
       return session.trace(fromSegment);
     },
+    setAudio(enabled) {
+      audioWanted.enabled = enabled;
+      if (audio) audio.setEnabled(enabled);
+      else if (enabled) loadAudio();
+    },
+    getAudio(): FactoryAudioState {
+      return {
+        enabled: audioWanted.enabled,
+        volume: audioWanted.volume,
+        state: audio ? audio.state() : audioFailed ? "unsupported" : audioLoading ? "loading" : "off",
+      };
+    },
+    audioStats: () => audio?.stats() ?? null,
     advance(segments) {
       for (const segment of segments) {
         const buttons = new Set(normalizeButtons(segment.buttons ?? []));
@@ -235,6 +289,8 @@ export function mountFactoryGameInternal(options: MountInternalOptions): Factory
     },
     reset() {
       session = new FactorySession(sessionOptions);
+      if (audio || audioLoading) session.attachSoundSink(audioSink);
+      audio?.reset();
       held.clear();
       latched.clear();
       resuming = null;
@@ -246,6 +302,8 @@ export function mountFactoryGameInternal(options: MountInternalOptions): Factory
     containedErrors: () => session.containedErrors.map((entry) => ({ ...entry })),
     destroy() {
       destroyed = true;
+      session.attachSoundSink(null);
+      audio?.destroy();
       cancelAnimationFrame(raf);
       held.clear();
       latched.clear();

@@ -29,6 +29,27 @@ export interface FactoryGameOptions {
   onEvent?: (event: FactoryEvent) => void;
   /** An engine throw stops the game (the frame stays on screen); absent = logged only. */
   onError?: (error: { message: string; frame: number }) => void;
+  /**
+   * Sound (additive, aud245). Absent or `enabled` false = muted: no audio file is fetched, no AudioContext is created. The player
+   * (WebAudio, a lazily-loaded chunk) plays the session's sound events and has no effect on game frames. Browsers only start audio
+   * after a user gesture; the first key press / click on the page resumes it.
+   */
+  audio?: {
+    /** Start with sound on (default false). */
+    enabled?: boolean;
+    /** Master volume 0..1 (default 1). */
+    volume?: number;
+    /** Fetch the audio files from `${baseUrl}/<file>` (and `aac/` for the Safari fallback) instead of the bundled asset URLs. */
+    baseUrl?: string;
+  };
+}
+
+/** What `getAudio()` reports. */
+export interface FactoryAudioState {
+  enabled: boolean;
+  volume: number;
+  /** "off": never started (muted, nothing loaded); "suspended": waiting for a user gesture; "running": audible. */
+  state: "off" | "loading" | "suspended" | "running" | "closed" | "unsupported";
 }
 
 export interface FactoryGame {
@@ -45,6 +66,9 @@ export interface FactoryGame {
    * the event's frame; idle runs are cut every 600 frames.
    */
   trace(fromSegment?: number): TraceSegment[];
+  /** Sound on / off at any time (a mute button). Switching on loads the audio player on first use; call it from a click. */
+  setAudio(enabled: boolean): void;
+  getAudio(): FactoryAudioState;
   destroy(): void;
 }
 

@@ -85,6 +85,31 @@ dev shell (`src/main.ts`) opts in; `src/headless.ts` does not import it, so
 `ENGINE_BUILD` is unaffected. Pinned by `tests/bnd255Gamepad.test.ts`, including
 equality of the input stream with direct `press` / `release`.
 
+## Sound (additive API change, aud245)
+
+**For the website: this is an additive change to the contract; nothing existing moves.** `FactoryGameOptions` gains
+`audio?: { enabled?: boolean; volume?: number; baseUrl?: string }`, `FactoryGame` gains `setAudio(enabled: boolean): void` and
+`getAudio(): FactoryAudioState` (`{ enabled, volume, state: "off" | "loading" | "suspended" | "running" | "closed" | "unsupported" }`),
+declared in `lib-types/index.d.ts` and `src/factoryContract.ts`. Omit `audio` and nothing changes: no audio file is requested, no
+`AudioContext` exists, no audio code is loaded.
+
+- The player (`src/audio/player.ts`) is its own chunk, `import()`ed by `lib.ts` only when `options.audio` is passed or `setAudio(true)`
+  is first called. `dist-lib/index.js` and its static chunks do not reference it or the audio files, and `headless.js` is byte-identical
+  (pinned by `tests/audioHeadlessBoundary.test.ts`; `ENGINE_BUILD` did not move).
+- Muted by default. Browsers keep an `AudioContext` suspended until a user gesture: the player resumes it on the host page's first
+  `pointerdown` / `keydown` / `touchend` / `click`, so wire `setAudio(true)` to a mute-button click. `getAudio().state` reads `suspended`
+  until then.
+- Files. The package ships them in `dist-lib/audio/` (Ogg Vorbis, plus the AAC `.m4a` Safari fallback, 14.8 MB for both; hashed names), and the
+  player chunk references them with `new URL(..., import.meta.url)`, so a consumer's bundler emits them next to its own assets. Nothing
+  is fetched until audio is turned on; turning it on fetches ~180 SE files up front (warm-up) and the rest (songs, cries) on first use.
+  `baseUrl` instead fetches `${baseUrl}/<file>` and `${baseUrl}/aac/<file>` with the repo's UNHASHED names (`src/assets/gen/audio/`,
+  `bgm-354.ogg`, `aac/bgm-354.m4a`); those files are not in the package, so a CDN setup copies them from the repo.
+- Format. Ogg Vorbis where the browser can play it, AAC-in-MP4 where it cannot (Safari / iOS older than 18.4), chosen by `canPlayType` and
+  re-chosen on an Ogg decode failure. Mac-side encode command and size impact: `docs/aud245-audio-player.md`.
+- The sink is write-only: frame hashes, digest and trace are identical with audio on or off
+  (`tests/aud245FrameIdentity.test.ts`). Because audio is not in the trace, a `resume` fast-forward is silent and background music
+  starts at the next music event.
+
 ## Tests
 
 `tests/factoryLibrary.test.ts` drives the real engine with the soak's

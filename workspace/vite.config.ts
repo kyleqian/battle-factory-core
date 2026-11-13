@@ -83,6 +83,7 @@ export function manualChunks(id: string): string | undefined {
   const at = id.indexOf("/src/");
   if (at === -1) return undefined;
   const rel = id.slice(at + 5);
+  if (rel.startsWith("assets/gen/audio/")) return "audio-data"; // aud245: only the lazy player imports these; keep them out of the shared assets-gen chunk
   if (rel.startsWith("assets/gen/")) {
     return /battle-opponent-front-sprites|battle-back-sprites|party-mon-icons/.test(rel) ? "assets-sprites" : "assets-gen";
   }
@@ -100,6 +101,9 @@ export async function engineBuildDefine(command: string): Promise<Record<string,
   return { [ENGINE_BUILD_DEFINE]: JSON.stringify(value) };
 }
 
+// aud245: the audio files (some under 4 KB) must stay real files the player fetches, never base64 inside a JS chunk.
+export const assetsInlineLimit = (file: string): boolean | undefined => (file.replaceAll("\\", "/").includes("/assets/gen/audio/") ? false : undefined);
+
 export default defineConfig(async ({ command, mode }) => ({
   root: ".",
   // Vitest only (the app / lib builds keep vite's default JSON handling): emit each generated JSON module as
@@ -115,6 +119,7 @@ export default defineConfig(async ({ command, mode }) => ({
   build: {
     outDir: "dist",
     target: "es2022",
+    assetsInlineLimit,
     rollupOptions: {
       output: {
         manualChunks,

@@ -102,10 +102,13 @@ function showCrashOverlay(error: unknown, session: FactorySession): void {
 
 // The library owns the frame loop, the input trace and the contained-error
 // bookkeeping; the shell only wires the keyboard and the test ABI to it.
+// `?audio=1` turns sound on in the dev shell (muted otherwise; the first key press resumes the AudioContext).
+const audioOn = new URLSearchParams(location.search).get("audio") === "1";
 const game = mountFactoryGameInternal({
   canvas,
   battleScene,
   presentationSeed,
+  ...(audioOn ? { audio: { enabled: true } } : {}),
   onCrash: showCrashOverlay,
 });
 
@@ -128,6 +131,9 @@ connectGamepad(game);
 // moment merely LOOKS wrong, `__POKEBENCH_SESSION__()` in the console yields
 // a deterministic replay of the whole session up to that moment.
 (window as unknown as Record<string, unknown>).__POKEBENCH_SESSION__ = (): SessionTrace => game.sessionTrace();
+
+// Sound counters for tools/browser/audioCheck.mjs (only when ?audio=1).
+if (audioOn) (window as unknown as Record<string, unknown>).__POKEBENCH_AUDIO__ = () => ({ stats: game.audioStats(), state: game.getAudio() });
 
 // Deterministic test ABI, mirrored from the pewter demo: reset() rewinds to
 // the real draft on the production generated route, advance() replays trace
