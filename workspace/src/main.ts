@@ -108,6 +108,8 @@ const game = mountFactoryGameInternal({
   canvas,
   battleScene,
   presentationSeed,
+  // The shell plays the in-game new-challenge path (soak / goalPlay / play:random); `?challengeRequest=hold` behaves like a host mount.
+  challengeRequest: new URLSearchParams(location.search).get("challengeRequest") === "hold" ? "hold" : "continue",
   ...(audioOn ? { audio: { enabled: true } } : {}),
   onCrash: showCrashOverlay,
 });

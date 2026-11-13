@@ -26,7 +26,7 @@ interface Run {
 }
 
 function play(kind: Kind, scene: "on" | "off"): Run {
-  const session = new FactorySession({ battleScene: scene });
+  const session = new FactorySession({ battleScene: scene, challengeRequest: "continue" });
   const player =
     kind === "retire"
       ? new RandomPlayer(new Rng(1), new ActionLog(false), "winning")

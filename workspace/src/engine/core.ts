@@ -874,6 +874,11 @@ export interface EngineState {
   lobbyFreeRoam: FactoryLobbyFreeRoamState | null;
   /** The singles-attendant conversation over the free-roam Lobby (lbr-b); null outside it. */
   lobbyAttendant: FactoryLobbyAttendantState | null;
+  /**
+   * lbr-c: set by the library session once the challenge has ended. From then on, the moment the attendant's save dialog starts
+   * the conversation freezes (no input, same frame) until the host destroys the mount. False everywhere else (soaks, shell).
+   */
+  attendantRequestHold: boolean;
   /** In-session Factory progression carried across chained rounds; see factoryRoundChaining.ts. */
   factoryCarry: FactoryCarry;
   /**
@@ -990,6 +995,7 @@ function enterChainedFactoryChallenge(
     factoryRoundBattleOrchestrator: null,
     lobbyFreeRoam: null,
     lobbyAttendant: null,
+    attendantRequestHold: false,
     factoryCarry: nextCarry,
     pendingGeneratedRound: Object.freeze({ rngValueBefore, carry: nextCarry }),
   };
@@ -1024,6 +1030,7 @@ export function createInitialState(
     factoryRoundBattleOrchestrator: null,
     lobbyFreeRoam: null,
     lobbyAttendant: null,
+    attendantRequestHold: false,
     factoryCarry: createInitialFactoryCarry(ANCHOR_FACTORY_METADATA.playerTrainerId),
     pendingGeneratedRound: null,
     presentationRng: createPresentationRngSession(options.presentationSeed, options.presentationRngPolicy),
@@ -1221,6 +1228,9 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
     // its door warp starts a new challenge from the live gameplay RNG cursor
     // (nch231, docs/nch231-new-challenge.md).
     if (state.lobbyAttendant) {
+      if (state.attendantRequestHold && state.lobbyAttendant.saveDialogStarted) {
+        return { ...state, frame: state.frame + 1, keyRepeat, rngMode: "vblank", rngValue };
+      }
       const attendant = advanceFactoryLobbyAttendant(state.lobbyAttendant, {
         a: newKeys.has("A"),
         b: newKeys.has("B"),

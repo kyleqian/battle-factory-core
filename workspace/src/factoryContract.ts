@@ -29,6 +29,11 @@ export type FactoryEvent =
   | { type: "round-end"; streak: number; frame: number }
   /** The challenge is over: a lost battle, or RETIRE confirmed at the attendant. */
   | { type: "challenge-end"; reason: "loss" | "retire"; streak: number; frame: number }
+  /**
+   * lbr-c. After `challenge-end`, the player confirmed the save at the Lobby attendant and the ROM's save dialog began. Fires at most
+   * once per mount. The game then holds on that frame (ignores input) until the host destroys the mount and mounts the next challenge.
+   */
+  | { type: "challenge-request"; frame: number }
   /** A contained presentation throw (the battle went on with that command drawn static). */
   | { type: "contained-error"; message: string; frame: number };
 
