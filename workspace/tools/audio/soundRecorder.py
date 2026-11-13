@@ -2,7 +2,7 @@
 """Dev-time sound recorder (aud244a): capture the real mixed mGBA output for one ROM sound at a time.
 
   /srv/pokebench/vendor/mgba-venv/bin/python tools/audio/soundRecorder.py ASSET_LIST.json OUT_DIR
-      [--rate HZ] [--shard I/N] [--only KEY[,KEY]] [--limit N] [--kinds se,cry]
+      [--rate HZ] [--shard I/N] [--only KEY[,KEY]] [--limit N] [--kinds se,cry,bgm,fanfare,seloop] [--passes N]
 
 Method (docs/aud244a-recorder-assets.md). The oracle's canonical Factory state is silenced (`m4aMPlayAllStop`, then frames
 until the output is digital silence) and snapshotted once. Every sound then starts from that snapshot with a REGISTER-POKE
@@ -13,6 +13,11 @@ frame the call was made in; leading silence (the ROM's own ~1-2 frame mixer late
 every music player / PCM / PSG channel is inactive AND the output has been silent for SILENT_FRAMES frames; trailing silence is
 trimmed. Output per sound: OUT_DIR/<key>.wav (16-bit, mono for cries after a centre-pan L == R check, stereo for SEs) and
 OUT_DIR/<key>.json (lengthFrames = frames from the call to the first all-inactive frame, lengthSamples, onset, peak, rms ...).
+
+aud244b kinds: `bgm` (PlayBGM -> m4aSongNumStart), `fanfare` (m4aSongNumStart, one-shot like an SE) and `seloop`
+(the two SEs that never go inactive, se:90:none / se:132:63). Looping songs are recorded for `--passes` passes of the ROM loop (stop clock from
+songTicks.py) with the player's per-frame tick `clock` and `tempoC` logged next to the audio (`clockFrames`, `tempoC`, `frameSamples`), so
+tools/audio/loopCut.py can find the loop boundaries in frames and then in samples. Untrimmed except for the leading near-silence.
 """
 import argparse, array, hashlib, json, os, struct, sys, time, wave
 from pathlib import Path
@@ -34,6 +39,9 @@ sys.path.insert(0, str(HARNESS / "oracle"))
 from emerald_core import EmeraldOracle  # noqa: E402
 from mgba import ffi  # noqa: E402
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import songTicks  # noqa: E402
+
 REF = (ROOT / "reference/pokeemerald").resolve()
 BOOTSTRAP = HARNESS / "oracle/bootstrap/factory.json"
 CRY_MODE_ID = {"NORMAL": 0, "DOUBLES": 1, "ENCOUNTER": 2, "HIGH_PITCH": 3, "ECHO_START": 4, "FAINT": 5, "ECHO_END": 6,
@@ -50,6 +58,9 @@ RETURN_SENTINEL = 0x08001000
 SOUND_CHANNEL_ON = 0xC7
 SOUND_INFO_CHANS, SOUND_CHANNEL_SIZE, SOUND_CHANNELS = 0x50, 0x40, 12
 CGB_CHANNEL_SIZE, CGB_CHANNELS = 0x40, 4
+PLAYER_CLOCK, PLAYER_TEMPO_C = 0x0C, 0x22   # MusicPlayerInfo.clock (u32 ticks) / tempoC (u16 tick accumulator)
+LOOP_SE_IDS = (90, 132)
+TAIL_TICKS = 96      # ticks recorded past the last loop boundary (the seam window needs audio after loopEnd)
 
 
 def s8(v):
@@ -161,6 +172,34 @@ class Recorder:
         if max((abs(x) for x in array.array("h", pcm)), default=0) != 0:
             raise RuntimeError("clean state not digitally silent after warm-up")
 
+    def player_of(self, song):
+        """MusicPlayerInfo address of the song's player (gSongTable entry: header u32, ms u16, me u16)."""
+        return self.players[self.o.read_u16(self.sym["gSongTable"] + 8 * song + 4)]
+
+    def record_song(self, start, player, stop_clock=None, max_frames=MAX_FRAMES):
+        """Like record(), but logs the player's tick clock / tempoC per frame; with stop_clock the recording ends once the clock reaches it (looping songs)."""
+        self.start_clean()
+        start()
+        chunks, frame_samples, clocks, tempo_c, first_inactive, silent_run = [], [], [], [], None, 0
+        for f in range(1, max_frames + 1):
+            pcm = self.frame()
+            chunks.append(pcm)
+            frame_samples.append(len(pcm) // 4)
+            clocks.append(self.o.read_u32(player + PLAYER_CLOCK))
+            tempo_c.append(self.o.read_u16(player + PLAYER_TEMPO_C))
+            if stop_clock is not None:
+                if clocks[-1] >= stop_clock:
+                    break
+                continue
+            peak = max((abs(x) for x in array.array("h", pcm)), default=0)
+            silent_run = silent_run + 1 if peak <= SILENT_PEAK else 0
+            if first_inactive is None and f > 3 and not self.active():  # a song's player only reports its tracks from the 2nd frame on
+                first_inactive = f
+            if first_inactive is not None and silent_run >= SILENT_FRAMES:
+                break
+        capped = (first_inactive is None) if stop_clock is None else clocks[-1] < stop_clock
+        return array.array("h", b"".join(chunks)), frame_samples, first_inactive, capped, clocks, tempo_c
+
     # -- one recording --------------------------------------------------------------------------------------------------
     def record(self, start, players=True, max_frames=MAX_FRAMES):
         self.start_clean()
@@ -193,6 +232,15 @@ def trim_tail(data):
     return array.array("h", data[2 * first: 2 * last]), first
 
 
+def trim_head(data):
+    """Drop only the leading near-silence (a looping recording is cut to its loop later); returns (stereo array, leading-silent sample count)."""
+    n = len(data) // 2
+    first = 0
+    while first < n and abs(data[2 * first]) <= SILENT_PEAK and abs(data[2 * first + 1]) <= SILENT_PEAK:
+        first += 1
+    return array.array("h", data[2 * first:]), first
+
+
 def write_wav(path, samples, channels, rate):
     with wave.open(str(path), "wb") as w:
         w.setnchannels(channels)
@@ -223,6 +271,49 @@ def file_stem(key):
     return f"cry-{int(k[1]):03d}-{k[2].lower()}"
 
 
+def song_loop_info(kind, row):
+    if kind == "seloop":
+        return songTicks.parse_se_track(row["name"].lower())
+    r = songTicks.song_loops()[row["id"]]
+    return {"loops": r["loops"], "loopStartTick": r["loopStartTick"], "loopEndTick": r["loopEndTick"], "totalTicks": r["totalTicks"],
+            "tempoBpm": r["tempoBpm"][-1][1] if r["tempoBpm"] else 150}
+
+
+def record_song_job(rec, a, out, kind, key, row):
+    """bgm / fanfare / seloop: one song, recorded to OUT/<stem>-full.wav + <stem>.json (stereo, leading near-silence trimmed into onsetSamples)."""
+    stem = key.replace(":", "-") if kind != "seloop" else file_stem(key)
+    if (out / f"{stem}.json").exists() and not a.force:
+        return
+    info = song_loop_info(kind, row)
+    song = row["id"]
+    player = rec.player_of(song)
+    if kind == "fanfare":
+        start = lambda: rec.call("m4aSongNumStart", (song,))  # PlayFanfare = m4aMPlayStop(BGM) + this + a task that resumes the BGM; the BGM is silenced here
+    elif kind == "bgm":
+        start = lambda: rec.call("PlayBGM", (song,))
+    else:
+        pan = row["pan"]
+        start = (lambda: rec.call("PlaySE", (song,))) if row["vias"][0] == "PlaySE" else (lambda: rec.call(row["vias"][0], (song, pan & 0xFF)))
+    stop_clock = None
+    max_frames = MAX_FRAMES
+    if info["loops"]:
+        stop_clock = info["loopStartTick"] + a.passes * (info["loopEndTick"] - info["loopStartTick"]) + TAIL_TICKS
+        max_frames = int(stop_clock * 150 / info["tempoBpm"]) + 600
+    else:
+        max_frames = 6000
+    data, frame_samples, first_inactive, capped, clocks, tempo_c = rec.record_song(start, player, stop_clock, max_frames)
+    trimmed, onset = trim_tail(data) if stop_clock is None else trim_head(data)
+    meta = {"key": key, "kind": kind, "via": "PlayBGM" if kind == "bgm" else "m4aSongNumStart" if kind == "fanfare" else row["vias"][0], "file": f"{stem}-full.wav",
+            "rate": a.rate, "channels": 2, "songId": song, "name": row["name"], "player": (rec.players.index(player)), "passes": a.passes, "loop": info,
+            "framesRecorded": len(frame_samples), "lengthFrames": first_inactive, "capped": capped, "lengthSamples": len(trimmed) // 2, "onsetSamples": onset,
+            "frameSamples": frame_samples, "clockFrames": clocks, "tempoC": tempo_c}
+    meta.update(stats(trimmed))
+    meta["sha256"] = hashlib.sha256(trimmed.tobytes()).hexdigest()
+    write_wav(out / f"{stem}-full.wav", trimmed, 2, a.rate)
+    (out / f"{stem}.json").write_text(json.dumps(meta) + "\n")
+    say(f"{key} {row['name']}: {len(frame_samples)} frames, {len(trimmed) // 2} samples, onset {onset}, capped {capped}, clock {clocks[-1]}")
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("assets")
@@ -232,6 +323,7 @@ def main():
     ap.add_argument("--only", default="")
     ap.add_argument("--limit", type=int, default=0)
     ap.add_argument("--kinds", default="se,cry")
+    ap.add_argument("--passes", type=int, default=4, help="loop passes recorded after the intro (bgm / seloop)")
     ap.add_argument("--force", action="store_true")
     a = ap.parse_args()
     out = Path(a.out)
@@ -245,6 +337,15 @@ def main():
     if "cry" in kinds:
         for r in assets["cry"]:
             jobs.append(("cry", key_of("cry", r), r))
+    for kind in ("bgm", "fanfare"):
+        if kind in kinds:
+            for r in assets["songs"]:
+                if r["kind"] == kind:
+                    jobs.append((kind, f"{kind}:{r['id']}", r))
+    if "seloop" in kinds:
+        for r in assets["se"]:
+            if r["id"] in LOOP_SE_IDS:
+                jobs.append(("seloop", key_of("se", r), r))
     if a.only:
         want = set(a.only.split(","))
         jobs = [j for j in jobs if j[1] in want]
@@ -257,6 +358,9 @@ def main():
     rec.prepare()
     say(f"shard {a.shard}: booted + silenced in {time.time() - t0:.1f}s, {len(jobs)} jobs, rate {a.rate}")
     for n, (kind, key, row) in enumerate(jobs):
+        if kind in ("bgm", "fanfare", "seloop"):
+            record_song_job(rec, a, out, kind, key, row)
+            continue
         stem = file_stem(key)
         variants = []
         if kind == "se":
