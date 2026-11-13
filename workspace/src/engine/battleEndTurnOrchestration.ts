@@ -216,6 +216,8 @@ const ABILITY_AIR_LOCK = 77;
 const STAT_SPEED = 3;
 /** include/constants/moves.h MOVE_NONE; include/constants/battle.h B_ACTION_USE_MOVE. */
 const MOVE_NONE = 0;
+/** include/constants/moves.h MOVE_STRUGGLE. */
+const MOVE_STRUGGLE = 165;
 const B_ACTION_USE_MOVE = 0;
 const MAX_STAT_STAGE = 12;
 /** include/constants/battle.h -- STAT_ATK/STAT_SPATK. */
@@ -2206,14 +2208,17 @@ export function turnOrderBattlerInputs(
  * not with Struggle's 0. ROM proof (Mechanic Lab, docs/parity-mac/
  * endturn-order-forced-struggle.md): a slow Shuckle out of Protect PP
  * Struggles after a faster Blissey's Tackle, and Shuckle's Leftovers heals
- * FIRST at end of turn (Protect's +3). Not modeled: a battler whose forced
- * Struggle never started (its action was skipped) keeps the cell set.
+ * FIRST at end of turn (Protect's +3). A battler whose forced Struggle never
+ * started (the rest of the turn was cancelled) keeps the cell set, and the
+ * sort reads MOVE_STRUGGLE for it: `rulesContext.noValidMovesKept`
+ * (docs/parity-mac/forced-struggle-never-started.md, ROM proof there).
  */
 function endTurnChosenMove(
   rulesContext: BattleScriptRulesContext,
   battler: BattleScriptBattlerId,
 ): number {
   if (rulesContext.chosenActionByBattler[battler] !== B_ACTION_USE_MOVE) return MOVE_NONE;
+  if (((rulesContext.noValidMovesKept >> battler) & 1) !== 0) return MOVE_STRUGGLE;
   return rulesContext.battlers[battler].moves[rulesContext.chosenMovePositions[battler]!] ?? MOVE_NONE;
 }
 

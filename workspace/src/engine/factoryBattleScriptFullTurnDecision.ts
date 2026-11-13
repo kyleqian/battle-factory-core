@@ -723,6 +723,24 @@ function buildRules(
   return Object.freeze({ adapter: ADAPTER, phase, pendingPlayerDecision, rulesContext });
 }
 
+/**
+ * `gProtectStructs[b].noValidMoves` for the turn's second mover when its move action is cancelled. The game sets the flag at selection
+ * (AreAllMovesUnusable, battle_util.c:1125-1140) and clears it only when the forced Struggle starts (HandleAction_UseMove, :100-102) or when that
+ * battler faints (FaintClearSetData, battle_main.c:3294). When the first mover faints from its own action and its replacement comes in at once,
+ * `cancelallactions` (battle_scripts_1.s:2895) drops the second action: the Struggle never starts and the flag is still set when ENDTURN_ORDER sorts
+ * the battlers, so the sort reads Struggle's priority 0 for it and not the priority of the slot under its cursor.
+ * `faintedBattler` is the battler the faint dance replaced: when that is the second mover itself, its cell was cleared with it.
+ */
+function keepNoValidMovesOfCancelledStruggle(
+  rulesContext: BattleScriptRulesContext,
+  second: Readonly<{ mover: number; forcedStruggle: boolean }> | null,
+  faintedBattler: number,
+): BattleScriptRulesContext {
+  if (second === null || !second.forcedStruggle || second.mover === faintedBattler) return rulesContext;
+  if (rulesContext.battlers[second.mover]!.hp === 0) return rulesContext;
+  return createBattleScriptRulesContext({ ...rulesContext, noValidMovesKept: rulesContext.noValidMovesKept | (1 << second.mover) });
+}
+
 function buildForcedSwitchPendingRules(
   rulesContext: BattleScriptRulesContext,
   pendingScript: PendingForcedSwitchScript,
@@ -3157,7 +3175,7 @@ function continueFullTurnAfterAction(
     // itself already handles any still-pending second action.
     return finishFullTurn(
       ctx.rng, rngBeforeCalls, faint.state,
-      buildForcedSwitchPendingRules(faint.state.rulesContext, {
+      buildForcedSwitchPendingRules(keepNoValidMovesOfCancelledStruggle(faint.state.rulesContext, second, faint.battler), {
         programCounter: faint.state.programCounter,
         callStack: faint.state.callStack,
         scheduler: faint.state.scheduler,
@@ -3180,6 +3198,13 @@ function continueFullTurnAfterAction(
   // faint.kind is "no-fainted-battlers" (run the second action, if any) or
   // "resumed" (skip it, per cancelallactions).
   let preEndTurnState = handleBattleActionFinished(faint.state, actingMover);
+  if (faint.kind === "resumed") {
+    preEndTurnState = Object.freeze({
+      ...preEndTurnState,
+      // "resumed": the dance replaced a trainer-side Pokemon by itself (a player-side one asks the player, above)
+      rulesContext: keepNoValidMovesOfCancelledStruggle(preEndTurnState.rulesContext, second, 1),
+    });
+  }
   if (second !== null && faint.kind === "no-fainted-battlers") {
     // RunTurnActionsFunctions clears these action-local bits when advancing
     // gCurrentTurnActionNumber (battle_main.c:4949-4954). In particular, a
@@ -3354,6 +3379,8 @@ export const reduceFactoryFullTurnDecision: BattleDecisionReducer<FactoryFullTur
   // GetWhoStrikesFirst (battle_main.c:4702-4714) still reads its slot.
   const rc0 = createBattleScriptRulesContext({
     ...rc0Encore,
+    // TurnValuesCleanUp(FALSE) zeroed every gProtectStructs cell at the end of the previous turn.
+    noValidMovesKept: 0,
     chosenMovePositions: Object.freeze([
       playerSwitch ? rc0Encore.chosenMovePositions[0] : rules.pendingPlayerDecision.moveSlot,
       trainerSwitch ? rc0Encore.chosenMovePositions[1] : ctx.decision.moveSlot,

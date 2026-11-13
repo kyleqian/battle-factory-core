@@ -274,6 +274,7 @@ describe("source-shaped Battle Script rules context", () => {
       "multiHitEffect",
       "multiHitStringCounter",
       "multistringChooser",
+      "noValidMovesKept",
       "painSplitHp",
       "party",
       "paydayMoney",
