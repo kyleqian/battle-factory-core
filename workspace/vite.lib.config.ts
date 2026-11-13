@@ -6,7 +6,8 @@
 // The app build (vite.config.ts) is unchanged apart from sharing the chunking.
 //
 //   npm run build:lib   (runs both configs)
-import { cpSync, mkdirSync } from "node:fs";
+import { cpSync, mkdirSync, readFileSync } from "node:fs";
+import { basename } from "node:path";
 import { defineConfig } from "vite";
 import { assetsInlineLimit, engineBuildDefine, manualChunks } from "./vite.config.ts";
 
@@ -29,11 +30,24 @@ export default defineConfig(async () => ({
     rollupOptions: {
       output: {
         chunkFileNames: "chunks/[name]-[hash].js",
+        assetFileNames: "audio/[name]-[hash][extname]",
         manualChunks,
       },
     },
   },
   plugins: [
+    {
+      // Vite inlines every asset in lib mode (the player chunk would carry ~15 MB of base64). The audio files are emitted as
+      // real files next to the chunks and referenced with new URL(..., import.meta.url), so the host bundler / CDN serves them.
+      name: "pokebench-lib-audio-assets",
+      enforce: "pre" as const,
+      load(this: { emitFile(file: { type: "asset"; name: string; source: Buffer }): string }, id: string) {
+        const file = id.replace(/\?.*$/, "").replaceAll("\\", "/");
+        if (!/\/assets\/gen\/audio\/(?:aac\/)?[^/]+\.(?:ogg|m4a)$/.test(file)) return null;
+        const ref = this.emitFile({ type: "asset", name: basename(file), source: readFileSync(file) });
+        return `export default new URL(import.meta.ROLLUP_FILE_URL_${ref}).href;`;
+      },
+    },
     {
       name: "pokebench-lib-types",
       closeBundle() {
