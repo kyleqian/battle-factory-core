@@ -1,12 +1,18 @@
 #!/usr/bin/env python3
-"""aud244a spot validation: decode committed OGGs (libvorbisfile via ctypes) and compare with the raw recorder captures.
+"""aud244a/b spot validation: decode committed OGGs (libvorbisfile via ctypes) and compare with the raw recorder captures.
 
-  python3 tools/audio/validateAudioAssets.py [--raw DIR] [--keys KEY,KEY,...] [--out FILE]
+  python3 tools/audio/validateAudioAssets.py [--raw DIR] [--loops DIR] [--keys KEY,KEY,...] [--out FILE]
 
 Per key: decoded slice vs raw WAV (Pearson correlation, SNR in dB at lag 0), RMS, peak/clipping of the decoded audio, recorded
 length in frames vs the ROM-log duration (cries: cry start -> the BGM-duck restore `IsCryPlaying` event in the aud237..aud243
 logs, +-2 frames expected from the duck task's polling) or vs the channel-activity duration (SEs: audible frames must end
 within [lengthFrames - 4, lengthFrames + 8]). Pure python3 + libvorbisfile.so.3; no emulator.
+
+aud244b: every bgm / fanfare / looping-SE entry is decoded too (length == manifest lengthSamples, Pearson / SNR against the cut WAV in --loops
+when present) and, for loops, the seam is checked: the manifest seam metrics are recomputed from the raw multi-pass recording (--loops-full, when
+present; max abs / rms difference between the audio after loopEnd and after loopStart, backward window too) and must reproduce, and the decoded
+file's wrap step |x[loopStart] - x[loopEnd-1]| is compared with the 99th-percentile / maximum adjacent-sample step of the loop body (`wrapRatio` =
+wrap / p99; wrap <= bodyStepMax = no click larger than the signal's own largest step). SE_M_GUST (sample-exact period) must pass both; the other loops report the numbers (see docs/aud244b).
 """
 import argparse, array, collections, ctypes, glob, json, math, wave
 from pathlib import Path
@@ -14,6 +20,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 AUDIO = ROOT / "src/assets/gen/audio"
 FPS = 59.7275
+LOOP_KEYS = ["bgm:354", "bgm:412", "bgm:469", "bgm:476", "fanfare:368", "fanfare:459", "fanfare:466", "se:90:none", "se:132:63"]
 DEFAULT_KEYS = ["se:5:none", "se:16:63", "se:139:-63", "cry:19:FAINT", "cry:95:WEAK", "cry:19:NORMAL"]
 
 
@@ -47,6 +54,47 @@ def pearson_snr(a, b):
     return corr, snr
 
 
+def wav_samples(path):
+    with wave.open(str(path)) as w:
+        return array.array("h", w.readframes(w.getnframes()))
+
+
+def window_diff(a, i, j, n):
+    x, y = a[2 * i:2 * (i + n)], a[2 * j:2 * (j + n)]
+    d = [abs(p - q) for p, q in zip(x, y)]
+    return max(d), math.sqrt(sum(v * v for v in d) / len(d))
+
+
+def check_loop_sound(key, m, dec, loops_dir, full_dir):
+    """Decoded audio + seam check for one bgm / fanfare / looping-SE manifest entry (stereo, offset 0)."""
+    row = {"key": key, "file": m["file"], "sampleRate": m["sampleRate"], "lengthSamples": m["lengthSamples"], "decodedSamples": len(dec) // 2, "lengthMatches": len(dec) // 2 == m["lengthSamples"]}
+    cut = loops_dir / (m["file"].replace(".ogg", ".wav"))
+    if cut.is_file():
+        corr, snr = pearson_snr(dec, wav_samples(cut))
+        row.update(corrVsCut=round(corr, 4), snrDbVsCut=round(snr, 1))
+    row["peak"] = max(max(dec), -min(dec))
+    row["clipped"] = sum(1 for x in dec if x >= 32767 or x <= -32768)
+    if not m.get("loops"):
+        return row
+    s, e = m["loopStartSamples"], m["loopEndSamples"]
+    steps = sorted(abs(dec[2 * i + c] - dec[2 * i + c - 2]) for i in range(s + 1, e) for c in (0, 1))
+    p99 = steps[int(len(steps) * 0.99)]
+    wrap = max(abs(dec[2 * s + c] - dec[2 * (e - 1) + c]) for c in (0, 1))
+    row.update(loopStartSamples=s, loopEndSamples=e, wrapStep=wrap, bodyStepP99=p99, bodyStepMax=steps[-1], wrapRatio=round(wrap / max(p99, 1), 3))
+    seam = m["seam"]
+    cut_json = loops_dir / (m["file"].replace(".ogg", ".json"))
+    full = full_dir / (m["file"].replace(".ogg", "-full.wav"))
+    if cut_json.is_file() and full.is_file():
+        cj = json.loads(cut_json.read_text())
+        a, w, ss, ee = wav_samples(full), seam["windowSamples"], cj["sourceStartSample"], cj["sourceEndSample"]
+        fwd, bwd = window_diff(a, ss, ee, w), window_diff(a, ss - w, ee - w, w)
+        mx, rms = max(fwd[0], bwd[0]), math.sqrt((fwd[1] ** 2 + bwd[1] ** 2) / 2)
+        row.update(rawSeamMax=mx, rawSeamRms=round(rms, 2), seamMatchesManifest=mx == seam["maxAbsDiff"] and abs(rms - seam["rmsDiff"]) < 0.01)
+    else:
+        row["rawSeamSkipped"] = "raw multi-pass recording not present"
+    return row
+
+
 def rom_cry_durations():
     """(species, mode) -> [frames from the cry event to the next IsCryPlaying duck restore] over the committed logs."""
     out = collections.defaultdict(list)
@@ -67,6 +115,8 @@ def rom_cry_durations():
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--raw", default=str(ROOT / ".integration/evidence/aud244a/raw"))
+    ap.add_argument("--loops", default=str(ROOT / ".integration/evidence/aud244b/cut"))
+    ap.add_argument("--loops-full", default=str(ROOT / ".integration/evidence/aud244b/full32"))
     ap.add_argument("--audio", default=str(AUDIO))
     ap.add_argument("--keys", default=",".join(DEFAULT_KEYS))
     ap.add_argument("--out", default="")
@@ -102,6 +152,22 @@ def main():
             row["lengthMatchesActivity"] = m["lengthFrames"] - 4 <= audible_end_frames <= m["lengthFrames"] + 8
         report.append(row)
         print(json.dumps(row))
+    loop_rows = []
+    for key in LOOP_KEYS:
+        m = manifest["sounds"][key]
+        if m["file"] not in decoded_cache:
+            decoded_cache[m["file"]] = decode_ogg(audio / m["file"])
+        dec, ch, rate = decoded_cache[m["file"]]
+        assert ch == 2 and rate == m["sampleRate"] == manifest["sampleRates"]["song"], (key, ch, rate)
+        row = check_loop_sound(key, m, dec, Path(a.loops), Path(a.loops_full))
+        assert row["lengthMatches"], row
+        assert row["clipped"] == 0, row
+        assert row.get("corrVsCut", 1) > 0.9 and row.get("snrDbVsCut", 99) > 8, row
+        assert row.get("seamMatchesManifest", True), row
+        if key == "se:132:63":
+            assert row["wrapStep"] <= row["bodyStepMax"] and m["seam"]["maxAbsDiff"] <= 200, row
+        loop_rows.append(row)
+        print(json.dumps(row))
     # whole-set cry duration check against every ROM-log (species, mode) with a duck-restore pair
     diffs = []
     for (sp, mode), frames in sorted(cry_logs.items()):
@@ -112,7 +178,7 @@ def main():
     summary = {"cryLogPairs": len(diffs), "within2Frames": len(diffs) - len(off), "outside": off[:20]}
     print(json.dumps(summary))
     if a.out:
-        Path(a.out).write_text(json.dumps({"spot": report, "cryLogSummary": summary}, indent=1) + "\n")
+        Path(a.out).write_text(json.dumps({"spot": report, "loops": loop_rows, "cryLogSummary": summary}, indent=1) + "\n")
 
 
 if __name__ == "__main__":
