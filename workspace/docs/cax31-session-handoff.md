@@ -237,8 +237,42 @@ remainder; seed 123), seed 60 (dia272 lead), the rest of ISSUES #211 (95 / 114 =
        audit doc section 8. A seed moves from open to regression when a fix makes it match to battle end.
      - A new divergence joins the open list with its seed, scene and first diverging row. One ISSUES entry per CAUSE, not per seed.
      - Not drivable until replay upgrade 3: 24 Brain seeds (33, 82, 131 and 21 in section 7's batch).
+   - **Top layer, 2026-11-12 evening (the Mac bulk run is finished). This bullet applies from the fold of `mac/parity-mac`
+     `344eda36c` on. From then it replaces the "Two lists" bullet above, the "24 Brain seeds" line and rule 1 of "When the
+     replay runs".**
+     - **Result:** seeds 1161..10000 OFF, 8,840 battles: `docs/replay-batches/2026-11-12-seeds-1161-10000.md` (and `.json`).
+       Old engine: 7,828 match, 830 diverge, 182 not staged (180 silver Brain, 6048, 9073). On the Mac lane's engine
+       `680b907f3`, all 8,660 ordinary seeds: 8,612 match to battle end with the stock chain, 25 more with the long caps,
+       16 are endless stalls with every state matching up to the 600,000-frame ROM cap, 7 are refused by the lab, **0 diverge**.
+       The top layer then drove 460 of them from scratch on `344eda36c` (all 310 seeds whose opponent runs the full AI and
+       has one of the seven moves of fixes 27 / 28, plus 150 random others): 460 match.
+     - **The open list is empty.** No seed is known to diverge on `344eda36c`. These are not rule bugs; do not chase them
+       on the box:
+       1. long battles and endless Struggle / Leftovers stalls (`docs/parity-mac/STATUS.md`; long caps = `replay
+          --frame-budget=2000000` and drive `--frames 600000`). Top layer's additions above seed 7056: 7503 7651 7878 7985
+          8773 9045 9336 9425 9553 9562 9563 match to the end; 7267 matches to the end with drive `--frames 1500000`
+          (1,017,274 ROM frames, 1,446 states); 7130 7816 7834 7944 9579 are endless (813 to 946 states match, no mismatch);
+       2. lab failures (top-layer code, the top layer owns them): rc 13 "the lab staging already played a turn" on 3623
+          5633 5736 8075 9188, silver Brain 10127 and gold Brain 10022; "route did not reach the player action menu" on
+          6048 and gold Brain 1447; 9073 (no traceback).
+     - **Regression pool** = `docs/replay-batches/regression-pool.txt`: 962 ordinary seeds that diverged on an older engine
+       and match to battle end with the stock chain now (the 64 above, 113 of the old open list, 785 of the bulk batch).
+       Brain seeds, 1..10000: silver = seed % 49 == 33 (not 9098, a long battle); gold = seed % 49 == 26 driven with
+       `ROM_REPLAY_SYMBOLS=1` (not 1447, 6347). The Brain part of replay upgrade 3 is done by the Mac lane
+       (`docs/parity-mac/brain-replay-seam.md`).
+     - **Nightly check from the fold on.** Same budget as rule 1 (background, `nice -n 19`, 2 lanes, hard 60-minute wall
+       cap, do not wait for it). The seeds change every night: draw them at random from the pool file, seeded with the run
+       date, as many as the cap allows (start with 40), plus 2 silver and 2 gold Brain seeds. Do not drive the fixed 64
+       every night. Write the drawn seeds and the result in `docs/replay-ledger.md`. "The permanent list" in rules 2 and 3
+       stays the fixed 64.
+     - **Re-drive once before a failure counts.** In the bulk run 9 seeds in a row (4777..4812) matched 0 states once and
+       matched fully when driven again: the ROM side started from another `gRngValue` on the same request
+       (`frozenTimelineEqualsDrive` false). Cause not found. A seed with `matched` 0 or `frozenTimelineEqualsDrive` false is
+       driven a second time; only a repeated mismatch is a regression.
+     - **The whole pool is the Mac's job:** the top layer re-drives all of it after each fold that changes gameplay (about
+       25 minutes there) and edits this bullet and the pool file.
    - **Ledger:** create and keep `docs/replay-ledger.md`: per run the commit, seed range, matched / driven, new divergent seeds,
-     the highest seed driven (1160 now; a Mac session is driving 1161..10000 from 2026-11-12, the box drives no new seeds, and the Mac's results land in `docs/replay-batches/` on branch `worker/replay-batch-mac`) and the consecutive-clean count. A seed is driven as "new" once only.
+     the highest seed driven (10000 now: the Mac bulk run of 2026-11-12, results in `docs/replay-batches/`; the box drives no new seeds) and the consecutive-clean count. A seed is driven as "new" once only.
    - **Two machines (Kyle, 2026-11-12, last decision of the day: "Sure, let's try that"). This replaces the earlier
      "battle-rule fixes are the MAIN program of every box run" pace of the same day.**
      - **The Mac lane owns battle-rule diagnosis and fixes.** It is a separate session on the Mac working on branch
