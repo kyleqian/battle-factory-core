@@ -5,6 +5,23 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 2026-11-13 — lbr-b (ts lane worker, 180-min cap reached after its last commit): the singles attendant conversation (handoff item 0b, step 2)
+
+- **State:** on master (`9f8c9aa7d`..`7952dfe02`). ENGINE_BUILD `eb-adfdcfdc91f4247f` -> `eb-317927f84c1b839e` (read from dist; tell the website). `docs/lbrb-attendant-conversation.md`.
+- **Did:** A at the attendant runs the ROM conversation (`src/engine/factoryLobbyAttendant.ts` + `...Render.ts`): welcome, CHALLENGE / INFO / EXIT, INFO 9 pages,
+  "Level 50 or Open Level?" (Open Level drawn, unselectable: scope note in `docs/factory-finish-scope.md`), save question, save dialog, "Please step this way.",
+  door walk, fade, draft. The Lobby vblank RNG keeps running through the conversation, so the deal now comes from the hand-off tick (soak / goalPlay /
+  play:random seeds deal differently). Consumers drive it by tapping A (`randomRoundSoakDriver.ts`, `goalPlay.ts`, `tests/helpers/lobbyAttendant.ts`).
+- **ROM windows** (`tools/compare/traces/lbrb-*.json`, OFF): happy path a-e and info 1-3 **256 / 256** each; residuals named in the doc: field NPC wander after
+  the script releases (exit-type branches), happy-f 16 / 60 (the PreBattleRoom briefing before the draft is not modelled, since nch231).
+- **Gates:** worker: touched tests 291 / 291 files, soaks vanilla ON / OFF and winning 0:12 OK (all `budget`). It was stopped at the cap before reporting.
+  Supervisor on `7952dfe02`+: typecheck 0, test:gate **362 / 362 (2,843)**, `lbra` + `lbrb` 25 / 25, build 0 (first try OOM-killed beside 2 workers, rerun 0),
+  build:lib 0, compares `lbrb-happy-c-off` / `lbrb-info2-off` 256 / 256, play:random 2 min / scene seed 13: 0 page / console errors / overlays,
+  ON 11 battles / 9 swaps, OFF 16 / 9 and 1 new challenge from the Lobby through the conversation.
+- **Next:** lbr-c (challenge-request event at the save dialog), lbr-d (7-win Lobby return); NPC wander after release (open, presentation).
+
+---
+
 ## 2026-11-13 — aud245 (side lane worker, 112 min): WebAudio player, muted by default (S11 design step 9)
 
 - **State:** folded `69bc691dd` (branch `worker/side-20261113-023351`, removed; evidence `.integration/evidence/aud245/`). No `src/engine/` change; ENGINE_BUILD unchanged
