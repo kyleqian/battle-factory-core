@@ -13,6 +13,17 @@ defects are all authorized in the finish-up mission (`docs/factory-finish-scope.
 gameplay / RNG when proved against source; use main-lane ownership and gameplay gates. Historical presentation-only
 exclusions are superseded. Unrelated expansions stay parked.
 
+## #216 — Rental select lets the player rent two Pokemon of one species (Mac lane finding, 2026-11-13)
+
+- ROM: `Select_AreSpeciesValid` (`battle_factory_screen.c:2256-2276`) refuses the second pick of a species with "Can't select same
+  POKeMON."; the swap screen has `Swap_AlreadyHasSameSpecies` (`:4162`). The engine's `MENU_OPTION_RENT` branch in `src/engine/core.ts`
+  has no such check. About 3 offers in 100 from the eighth challenge on contain such a pair (code read, `docs/parity-mac/STATUS.md`).
+
+## #217 — Trapped player's party menu says "is already in battle!" (Mac lane finding, 2026-11-13, code read only)
+
+- When the active Pokemon is trapped (Mean Look / Arena Trap / ...), the ROM's party menu refuses the switch with the "can't be switched
+  out" text (`party_menu.c` / `battle_util.c` trap check); the engine's `battlePartySelect.ts` refusal path prints `gText_PkmnAlreadyInBattle`.
+
 ## #214 — Leads from the Mac lane's 2026-11-12 passes (source-read only, no ROM seed)
 
 - Cure berries after Pursuit-on-switch: `HandleFaintedMonActions` state 6 runs `ItemBattleEffects(ITEMEFFECT_NORMAL, 0, TRUE)` for the player's
