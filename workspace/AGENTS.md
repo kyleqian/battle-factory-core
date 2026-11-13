@@ -294,7 +294,9 @@ change. The selected worker lane exports both named URLs and makes
 - Controls: arrows + WASD to move, Enter = Start, Shift = Select, Z = A,
   X/Esc = B, Q = L, E = R.
 - `window.__POKEBENCH__ = { reset(), advance(segments) }` under `?pokebench=1`,
-  deterministic and synchronous.
+  deterministic and synchronous. It (and `__POKEBENCH_SESSION__`) is defined only
+  once the sprite chunk has loaded (bnd257d); wait for it with a timer poll
+  (`waitForFunction(..., null, { polling: 100 })`), never the default rAF poll.
 - `npm run dev` opens a playable demo; no console errors. `npm run build` and
   `npm test` must pass.
 
