@@ -62,6 +62,19 @@ outlasts ten Rock Slides or Rock Tombs. Real, and rare.
 Tests: `tests/parityMacAiForesightTryToFaintViability.test.ts` (three cases, all fail without the fix);
 `tests/factoryAiScoredWiringParity.test.ts` carries the new field in its exhaustive samples.
 
-ROM proof: none yet. A staged Noland battle exists (`docs/parity-mac/stages/foresight-noland.json`, lab seed 30031:
-Noland's party has Machoke 283) and matches the ROM, but the AI never chose Foresight in it, for the reason above. See
-`STATUS.md` for the state of the staged battle.
+## ROM proof (staged battle)
+
+`docs/parity-mac/stages/foresight-noland.json` (lab seed 30046, `factoryBrain` challenge 2; player sets 301 Sealeo,
+268 Sableye, 342 Banette; Noland's party as the ROM rolled it: Wigglytuff, Hitmonlee 338, Machoke 283). The script
+switches to Sableye, uses Faint Attack nine times and Recover eight times, then the census player takes over.
+
+    REPLAY_OUT=/abs/dir tools/audio/romReplayWide.sh --stage docs/parity-mac/stages/foresight-noland.json
+
+When Hitmonlee comes in, its Rock Tomb scores below Foresight (Sableye is slower, so the speed-drop script takes 3
+points off), and Noland uses Foresight on Sableye. On the next turn:
+
+- ROM: Hitmonlee uses Brick Break (it now counts as a knock-out, +4) and Sableye faints from full HP.
+- Engine without the fix: Hitmonlee uses Mega Kick; the replay stops at state 36 of 45 (the ROM asks for a replacement
+  the engine has no decision for).
+- Engine with the fix: all 45 states, every wide state and the winner match; the battle's own tally has
+  `move:EFFECT_FORESIGHT`. Later in the same battle Machoke uses Foresight on Banette and the states still match.
