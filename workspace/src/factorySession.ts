@@ -13,9 +13,11 @@
 //                at the attendant) without a lost battle
 //   challenge-request   (lbr-c) after the challenge ended, the player confirmed
 //                the save at the attendant and the ROM save dialog began
-// After `challenge-end` the engine keeps running (the dev shell and soaks use
-// the in-game new-challenge path) but the only further event is the one
-// `challenge-request`: one mount is one challenge. With `challengeRequest:
+// After a loss / retire `challenge-end` the engine keeps running (the dev shell
+// and soaks use the in-game new-challenge path) but the only further event is
+// the one `challenge-request`. A 7-win (`round-end`) is not an end: the game
+// returns to the Lobby (lbr-d1) and the attendant continues the streak; no
+// `challenge-end` / `challenge-request` until a later loss or retire. With `challengeRequest:
 // "hold"` (the default; the library mount and `replayChallenge`) the game then
 // freezes on the save dialog's first frame until the host destroys the mount.
 import { createInitialState, tick, type EngineState } from "./engine/core.ts";

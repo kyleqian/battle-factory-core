@@ -12,7 +12,8 @@ Step lbr-c (handoff item 0b, step 3). Additive library contract change. Engine a
   first frame, 10 ticks after the YES (`menuToSaveInfoFirstGlyph`; the same frame lbr-b draws "Would you like to save the game?" from).
   `frame` is the session frame of that tick.
 * **At most once per mount**, never before `challenge-end`, never on a mount whose challenge has not ended (the Lobby is only reachable
-  after an end today; the guard is `session.ended !== null`, and a test pins that the lbr-b behaviour is unchanged otherwise).
+  after a loss / retire end, or after a 7-win, which is NOT an end since lbr-d1: the Lobby after a won round keeps `ended` null, so the attendant
+  continues the streak and emits no `challenge-request`; the guard is `session.ended !== null`, and a test pins that the lbr-b behaviour is unchanged otherwise).
 * NO / B at "I need to save the game" or an earlier menu give the farewell and no event; that path is unchanged.
 
 ## The hold

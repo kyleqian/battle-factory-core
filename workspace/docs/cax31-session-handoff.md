@@ -113,8 +113,7 @@ never brief those here. One worker at a time; each run folds the next audio step
 
 **Status at the 2026-11-13 wind-down:** item 0: aud244b, aud245, aud245b DONE (playback works, muted by default; Safari not checked on the box); next: aud246
 close (S11 step 10: soaks unchanged, audio RAM receipts, ROADMAP S11 tick), the initial-music gap if aud247 did not land (see PROGRESS), then the residual audio
-lists (ISSUES #198 etc.). Item 0b: lbr-a / lbr-b / lbr-c DONE; next lbr-d (7-win Lobby return in the same mount): brief lbr-d1 from `docs/lbr-d-scout.md` section 5, using the
-lbr-d2a ROM ticks (`docs/lbrd2a-won-tail-rom.md`) for the won farewell constants; open: field NPC wander after the script releases
+lists (ISSUES #198 etc.). Item 0b: lbr-a / lbr-b / lbr-c / **lbr-d1 DONE** (a 7-win returns to the Lobby in the same mount, streak kept, per-round BP text, won gates 41 / 74; `docs/lbrd-win-lobby-return.md`); open: lbr-d2b compare trace for the farewell glyph +-1 tick and the won Lobby door walk, field NPC wander after the script releases
 (lbr-b doc), the PreBattleRoom briefing before the draft (nch231 divergence), no Scene ON loss / retire ROM lab, no app SE_SAVE on the loss / retire result script.
 Item 0c DONE. Item 0d: the Mac lane owns battle rules; fold `mac/parity-mac` at run start if it moved; nightly replay from the pool; ISSUES #214 holds its
 source-read leads. **Top layer, 2026-11-13 after your run:** the Mac lane also owns the replay tools and every replay upgrade now, and the finish line has no
@@ -223,7 +222,7 @@ game says it "can't be switched out" (seen in code only).
           cut is short; it is optional, and can follow later.
         - Document it in `docs/library-package.md` and `lib-types`, and name the event plus the new ENGINE_BUILD in
           PROGRESS so the Mac wires the site.
-     4. **lbr-d, 7 wins:** return to the Lobby inside the same mount and trace (BP, save, record, farewell), then the
+     4. **lbr-d, 7 wins (lbr-d1 DONE 2026-11-13; compare trace lbr-d2b open):** return to the Lobby inside the same mount and trace (BP, save, record, farewell), then the
         attendant continues the streak in-game. That is the same server challenge, so no host hand-off and no
         `challenge-request`; `round-end` stays where it is.
 0c. **User decision 2026-11-12 (Kyle): the player's name defaults to "PLAYER", not the oracle save's "MEMORY".**

@@ -50,12 +50,13 @@ palettes alone; it now reads `src/assets/gen/battle-sprite-palettes.json`
 - Events come from the engine state after each tick: `battle-end` when the
   round's `lastBattle` changes (streak = carried wins + `battleIndex`, +1 on
   a win: the Factory streak as the ROM counts it); `round-end` when the phase
-  reaches `roundComplete`; `challenge-end loss` at `roundLost`;
+  reaches `roundComplete` (a 7-win; the game then returns to the walkable Lobby and keeps running: no `challenge-end`, no `challenge-request`, lbr-d1);
+  `challenge-end loss` at `roundLost`;
   `challenge-end retire` when the Lobby free-roam begins without a lost
   battle (RETIRE + YES at the attendant); `contained-error` mirrors
-  `containedErrors`. After `challenge-end` the only further event is the one
-  `challenge-request` below: one mount is one challenge (the in-game
-  new-challenge path stays for the shell and soaks).
+  `containedErrors`. After a **loss or retire** `challenge-end` the only further event is
+  the one `challenge-request` below: that challenge ends there. After a **7-win** the mount continues in the Lobby (streak kept, BP banked); the attendant
+  starts the next draft in the same mount and trace, and a later loss or retire still emits `challenge-end` (`docs/lbrd-win-lobby-return.md`).
 - **`challenge-request` (lbr-c, additive; full spec `docs/lbrc-challenge-request.md`).** After `challenge-end`, when the player confirms the save at
   the Lobby attendant (CHALLENGE, LV. 50, YES) the library reports `{ type: "challenge-request", frame }` once, on the first frame of the ROM's
   save dialog, and the game then HOLDS on that frame (input ignored, picture fixed) until the host calls `destroy()`; a host that ignores the event
