@@ -255,6 +255,7 @@ describe("SE players and priority (MPlayStart)", () => {
     const h = harness();
     await flush();
     h.player.push(ev("se", 10, { id: 12, pan: -64 }));
+    await flush(); // aud245b: files load on first use, so the first SE must have its file before the second (same player) cuts it
     h.player.push(ev("se", 400, { id: 13, pan: 50 }));
     await flush();
     expect(h.fetched.some((u) => u.includes("se-012-panm64"))).toBe(true);

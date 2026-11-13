@@ -14,6 +14,11 @@ const FADE_STEPS = 16;
 const LOOKAHEAD_S = 90;
 const MAX_PASSES_AHEAD = 48;
 const PUMP_MS = 250;
+/** The volume the cries were recorded at (tools/audio/soundRecorder.py CRY_VOLUME; sound.c PlayCry_ByMode(.., volume 120)). */
+const CRY_RECORDED_VOLUME = 120;
+/** Files fetched once audio is live so the first sounds are not late; everything else is fetched on first use. */
+const PREFETCH_BGM = [469];
+const PREFETCH_SE = [5, 32, 9, 15];
 
 export type AudioState = "off" | "loading" | "suspended" | "running" | "closed" | "unsupported";
 
@@ -41,6 +46,10 @@ export interface AudioStats {
   fallbacks: number;
   /** Ducks restored by the player because no restore event came when the cry ended. */
   duckRestores: number;
+  /** Events replayed by `restore` (music state of a fast-forward or of a late start), not played as sounds. */
+  restored: number;
+  /** Files fetched by the start-up prefetch (a subset of `fetches`). */
+  prefetched: number;
 }
 
 export interface AudioContextLike {
@@ -67,6 +76,8 @@ export interface AudioParamLike {
 }
 export interface GainNodeLike extends AudioNodeLike {
   readonly gain: AudioParamLike;
+  channelCount?: number;
+  channelCountMode?: string;
 }
 export interface AudioBufferLike {
   readonly duration: number;
@@ -110,6 +121,12 @@ export interface AudioPlayer {
   stats(): AudioStats;
   /** A new session (reset): stop everything, forget the clock anchor. */
   reset(): void;
+  /**
+   * Bring the music to the state the game is in at `liveFrame` from the events that led there (a `resume` fast-forward, or audio
+   * switched on late): replays them on the logical voice model without playing them, then starts what is still sounding at the
+   * position it has reached. Events after `liveFrame` are ignored.
+   */
+  restore(events: readonly SoundEvent[], liveFrame: number): void;
   /** Runs the lookahead scheduler / duck fallback once (the interval timer calls it). */
   pump(): void;
   destroy(): void;
@@ -129,6 +146,8 @@ interface Voice {
   /** Wall time the voice ends (Infinity: loops until stopped). */
   end: number;
   pan: number | null;
+  /** Cries: the volume factor against the recording (cryVolumeGain). */
+  gain: number;
   out: GainNodeLike | null;
   sources: { src: BufferSourceLike; gain: GainNodeLike | null }[];
   /** Pause position in sound seconds while paused (fanfare pauses the BGM). */
@@ -137,6 +156,11 @@ interface Voice {
   /** Non-exact loops: wall time the last scheduled pass reaches the loop end. */
   boundary: number;
   dead: boolean;
+  /** SE1 / SE2 voices: the node every source feeds, so a runtime pan change can be spliced in after it. */
+  pre: GainNodeLike | null;
+  /** The pan a `pan` event moved this voice to (null: never moved, the recording plays as is). */
+  livePan: number | null;
+  panStage: { left: GainNodeLike; right: GainNodeLike } | null;
   /** The loop scheduler's inputs, kept so `pump` can add passes. */
   loaded: Loaded | null;
   connect: ((src: BufferSourceLike, gain: GainNodeLike | null) => void) | null;
@@ -150,6 +174,11 @@ const kindOfFile = (file: string): "se" | "cry" | "song" => (file.startsWith("cr
 export function m4aPanGains(pan: number): { left: number; right: number } {
   const y = Math.max(-128, Math.min(127, pan * 2));
   return { left: (127 - y) / 127, right: (y + 128) / 128 };
+}
+
+/** Cry volume (m4a.c SetPokemonCryVolume: `volume & 0x7F` is the cry song's VOL; TrkVolPitSet: x = vol * volX >> 5, linear in vol) relative to the recording's 120. */
+export function cryVolumeGain(volume: number | undefined): number {
+  return volume === undefined ? 1 : (volume & 0x7f) / CRY_RECORDED_VOLUME;
 }
 
 export function createAudioPlayer(options: AudioPlayerOptions = {}): AudioPlayer {
@@ -186,7 +215,8 @@ class Player implements AudioPlayer {
   private timer: unknown = null;
   private gestureArmed = false;
   private destroyed = false;
-  private warmed = false;
+  private prefetched = false;
+  private restoring = false;
   private readonly counters: AudioStats = {
     state: "off",
     enabled: false,
@@ -202,6 +232,8 @@ class Player implements AudioPlayer {
     decoded: 0,
     fallbacks: 0,
     duckRestores: 0,
+    restored: 0,
+    prefetched: 0,
   };
   private readonly onGesture = (): void => {
     if (this.enabled) this.activate();
@@ -306,7 +338,40 @@ class Player implements AudioPlayer {
   push(event: SoundEvent): void {
     if (this.destroyed) return;
     this.counters.events[event.kind] = (this.counters.events[event.kind] ?? 0) + 1;
-    const t = this.timeFor(event.frame);
+    this.handle(event, this.timeFor(event.frame));
+    this.pump();
+  }
+
+  restore(events: readonly SoundEvent[], liveFrame: number): void {
+    if (this.destroyed) return;
+    for (const voice of [...this.voices.values()]) this.killVoice(voice);
+    this.voices.clear();
+    this.duck = 1;
+    if (this.bgmBus && this.ctx) this.bgmBus.gain.setValueAtTime(1, this.ctx.currentTime);
+    // The game's live frame plays at `now + latency`; every earlier event sits that many frames back on the same clock.
+    const anchor = this.clock() + this.latency;
+    this.anchorWall = anchor;
+    this.anchorFrame = liveFrame;
+    this.syncOffset();
+    const { blocked, preempted, missing } = this.counters;
+    const started = { ...this.counters.started };
+    this.restoring = true;
+    try {
+      for (const event of events) {
+        if (event.frame > liveFrame) continue;
+        this.counters.events[event.kind] = (this.counters.events[event.kind] ?? 0) + 1;
+        this.counters.restored += 1;
+        this.handle(event, anchor + (event.frame - liveFrame) / FRAME_HZ);
+      }
+    } finally {
+      this.restoring = false;
+    }
+    Object.assign(this.counters, { blocked, preempted, missing, started });
+    // Whatever is still sounding (the BGM at its loop position, a fanfare part-way) starts now; ended voices stay silent.
+    if (this.audible()) for (const voice of this.voices.values()) if (!voice.dead && voice.paused === null && voice.end > anchor && voice.sources.length === 0) this.realize(voice, anchor);
+  }
+
+  private handle(event: SoundEvent, t: number): void {
     switch (event.kind) {
       case "se":
       case "fanfare":
@@ -331,9 +396,9 @@ class Player implements AudioPlayer {
         this.setDuck((event.volume ?? 256) / 256, t);
         break;
       case "pan":
+        this.panEvent(event.pan ?? 0, t);
         break;
     }
-    this.pump();
   }
 
   // ---- clock ----
@@ -362,7 +427,7 @@ class Player implements AudioPlayer {
   // ---- context ----
 
   private audible(): boolean {
-    return this.enabled && this.ctx !== null && this.ctx.state === "running";
+    return !this.restoring && this.enabled && this.ctx !== null && this.ctx.state === "running";
   }
 
   private armGestures(): void {
@@ -418,19 +483,30 @@ class Player implements AudioPlayer {
     if (this.ctx.state !== "running" || !this.enabled) return;
     this.disarmGestures();
     this.master!.gain.setValueAtTime(this.level, this.ctx.currentTime);
-    for (const voice of this.voices.values()) if (!voice.dead && voice.paused === null && voice.end === Number.POSITIVE_INFINITY && voice.sources.length === 0) this.realize(voice, this.clock());
-    this.warmEffects();
+    const now = this.clock();
+    for (const voice of this.voices.values()) {
+      const sounding = voice.end === Number.POSITIVE_INFINITY || (voice.slot === "BGM" && voice.end > now);
+      if (!voice.dead && voice.paused === null && sounding && voice.sources.length === 0) this.realize(voice, now);
+    }
+    this.prefetch();
   }
 
-  /** The SE files are small; fetch and decode them once audio is live so the first SE_SELECT is not late. */
-  private warmEffects(): void {
-    if (this.warmed) return;
-    this.warmed = true;
+  /** Only the Lobby / draft BGM and the common UI SEs are fetched ahead (once audio is live); every other file waits for its first use. */
+  private prefetch(): void {
+    if (this.prefetched) return;
+    this.prefetched = true;
     const files = new Set<string>();
-    for (const [key, sound] of Object.entries(this.assets.manifest.sounds)) if (key.startsWith("se:")) files.add(sound.file);
-    const queue = [...files];
+    const { sounds } = this.assets.manifest;
+    for (const [key, sound] of Object.entries(sounds)) {
+      const [kind, id] = key.split(":");
+      if ((kind === "bgm" && PREFETCH_BGM.includes(Number(id))) || (kind === "se" && PREFETCH_SE.includes(Number(id)))) files.add(sound.file);
+    }
+    const queue = [...files].filter((file) => !this.loaded.has(file));
     const worker = async (): Promise<void> => {
-      for (let file = queue.shift(); file !== undefined && !this.destroyed; file = queue.shift()) await this.load(file);
+      for (let file = queue.shift(); file !== undefined && !this.destroyed; file = queue.shift()) {
+        this.counters.prefetched += 1;
+        await this.load(file);
+      }
     };
     for (let i = 0; i < 4; i += 1) void worker();
   }
@@ -589,7 +665,7 @@ class Player implements AudioPlayer {
       slot = oldest!.slot;
       this.killVoice(oldest!, t);
     }
-    this.begin({ slot, kind: "cry", id: species, priority: event.priority ?? 0, sound, t, pan: event.pan });
+    this.begin({ slot, kind: "cry", id: species, priority: event.priority ?? 0, sound, t, pan: event.pan, gain: cryVolumeGain(event.volume) });
   }
 
   private stop(event: SoundEvent, t: number): void {
@@ -644,7 +720,7 @@ class Player implements AudioPlayer {
 
   // ---- voices ----
 
-  private begin(spec: { slot: Slot; kind: Voice["kind"]; id: number; priority: number; sound: PlayerSound; t: number; pan: number | null }): Voice {
+  private begin(spec: { slot: Slot; kind: Voice["kind"]; id: number; priority: number; sound: PlayerSound; t: number; pan: number | null; gain?: number }): Voice {
     const { sound } = spec;
     const t0 = spec.t + sound.onsetSamples / sound.sampleRate;
     const looping = sound.loops === true;
@@ -657,12 +733,16 @@ class Player implements AudioPlayer {
       t0,
       end: looping ? Number.POSITIVE_INFINITY : t0 + sound.lengthSamples / sound.sampleRate,
       pan: spec.pan,
+      gain: spec.gain ?? 1,
       out: null,
       sources: [],
       paused: null,
       fade: null,
       boundary: 0,
       dead: false,
+      pre: null,
+      livePan: null,
+      panStage: null,
       loaded: null,
       connect: null,
     };
@@ -753,19 +833,20 @@ class Player implements AudioPlayer {
     out.gain.setValueAtTime(this.fadeValue(voice, at), nowCtx);
     if (voice.fade && at < voice.fade.t + voice.fade.dur) this.applyFade(voice, voice.fade);
     out.connect(voice.slot === "BGM" ? this.bgmBus : this.master);
-    // Cries are mono recordings of the centred voice: m4a's pan law becomes a left and a right gain into a 2-channel merger.
+    // Cries are mono recordings of the centred voice: m4a's pan law becomes a left and a right gain into a 2-channel merger, scaled by the cry volume.
     let inputs: AudioNodeLike[] = [out];
-    if (voice.kind === "cry" && voice.pan !== null) {
-      const gains = m4aPanGains(voice.pan);
-      const merger = ctx.createChannelMerger(2);
-      merger.connect(out);
-      const left = ctx.createGain();
-      const right = ctx.createGain();
-      left.gain.value = gains.left;
-      right.gain.value = gains.right;
-      left.connect(merger, 0, 0);
-      right.connect(merger, 0, 1);
-      inputs = [left, right];
+    voice.pre = null;
+    voice.panStage = null;
+    if (voice.kind === "cry" && (voice.pan !== null || voice.gain !== 1)) {
+      const stage = this.panStage(out, voice.pan === null ? { left: 1, right: 1 } : m4aPanGains(voice.pan), voice.gain);
+      inputs = [stage.left, stage.right];
+    } else if (voice.kind === "se" && (voice.slot === "SE1" || voice.slot === "SE2")) {
+      // SE12PanpotControl can move a playing SE: every source feeds `pre`, which is rewired through a pan stage on the first change.
+      const pre = ctx.createGain();
+      pre.connect(out);
+      voice.pre = pre;
+      inputs = [pre];
+      if (voice.livePan !== null) this.splicePan(voice, voice.livePan, at);
     }
     const connectSource = (src: BufferSourceLike, gain: GainNodeLike | null): void => {
       if (gain) src.connect(gain);
@@ -802,6 +883,56 @@ class Player implements AudioPlayer {
     voice.loaded = loaded;
     voice.connect = connectSource;
     this.extendLoop(voice, loaded, connectSource);
+  }
+
+  /** left / right gains (m4a pan law x volume) into a 2-channel merger feeding `into`. */
+  private panStage(into: AudioNodeLike, gains: { left: number; right: number }, volume: number): { left: GainNodeLike; right: GainNodeLike } {
+    const ctx = this.ctx!;
+    const merger = ctx.createChannelMerger(2);
+    merger.connect(into);
+    const left = ctx.createGain();
+    const right = ctx.createGain();
+    left.gain.value = gains.left * volume;
+    right.gain.value = gains.right * volume;
+    left.connect(merger, 0, 0);
+    right.connect(merger, 0, 1);
+    return { left, right };
+  }
+
+  /**
+   * SE12PanpotControl (sound.c:600; m4a.c m4aMPlayPanpotControl sets every track's panX): the SE playing on SE1 / SE2 moves to `pan`.
+   * The recording was made at its start pan with the stereo mix baked in, so the mid signal (L + R) / 2, which the law keeps at unity
+   * (gL + gR = 2 within 0.4%), is re-panned: left = mid * (127 - y) / 127, right = mid * (y + 128) / 128, y = 2 * pan. A pan equal to
+   * the recording's own leaves the recording untouched; the song's own stereo (ply_pan inside the song) is lost once it moves.
+   */
+  private panEvent(pan: number, t: number): void {
+    for (const slot of ["SE1", "SE2"] as Slot[]) {
+      const voice = this.live(slot, t);
+      if (!voice || voice.kind !== "se") continue;
+      if (voice.livePan === null && pan === (voice.sound.pan ?? 0)) continue;
+      voice.livePan = pan;
+      if (voice.pre) this.splicePan(voice, pan, t);
+    }
+  }
+
+  private splicePan(voice: Voice, pan: number, t: number): void {
+    const ctx = this.ctx;
+    const pre = voice.pre;
+    if (!ctx || !pre || !voice.out) return;
+    const gains = m4aPanGains(pan);
+    if (!voice.panStage) {
+      pre.disconnect?.();
+      pre.channelCount = 1;
+      pre.channelCountMode = "explicit";
+      const stage = this.panStage(voice.out, gains, 1);
+      pre.connect(stage.left);
+      pre.connect(stage.right);
+      voice.panStage = stage;
+      return;
+    }
+    const at = Math.max(this.c(t), ctx.currentTime);
+    voice.panStage.left.gain.setValueAtTime(gains.left, at);
+    voice.panStage.right.gain.setValueAtTime(gains.right, at);
   }
 
   private source(loaded: Loaded): BufferSourceLike {
