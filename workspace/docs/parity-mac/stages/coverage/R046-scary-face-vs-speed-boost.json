@@ -4,7 +4,7 @@
   "R046"
  ],
  "why": "Challenge number 2 (AI_CheckBadMove). The opponent's Mightyena (set 307) knows Scary Face; the player's Ninjask (set 343) has Speed Boost as its only ability, so the AI's guess of the target's ability is Speed Boost. On turn 1 AI_CBM_SpeedDown gives Scary Face -10.",
- "seed": 0,
+ "seed": 91000,
  "challengeNum": 2,
  "battleNum": 0,
  "trainerId": 100,
@@ -39,10 +39,5 @@
  ],
  "coverAny": true,
  "chance": 0.95,
- "seeds": 20,
- "onHold": {
-  "group": "g4",
-  "seedsHunted": 0,
-  "result": "untested"
- }
+ "seeds": 20
 }
