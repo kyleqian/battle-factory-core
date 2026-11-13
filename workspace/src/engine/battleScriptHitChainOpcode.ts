@@ -4653,26 +4653,23 @@ function createCleareffectsonfaintOpcodeHandler(
       const preventedByActive =
         (candidate.status2 & STATUS2_ESCAPE_PREVENTION) !== 0
         && candidate.battlerPreventingEscape === active;
-      const sureHitByActive =
-        (candidate.status3 & BATTLE_SCRIPT_STATUS3_ALWAYS_HITS) !== 0
-        && candidate.battlerWithSureHit === active;
       const status2 = (
         candidate.status2
         & ~infatuationBit
         & (wrappedByActive ? ~STATUS2_WRAPPED_MASK : ~0)
         & (preventedByActive ? ~STATUS2_ESCAPE_PREVENTION : ~0)
       ) >>> 0;
-      const status3 = sureHitByActive
-        ? (candidate.status3 & ~BATTLE_SCRIPT_STATUS3_ALWAYS_HITS) >>> 0
-        : candidate.status3;
-      return status2 === candidate.status2 && status3 === candidate.status3
+      // FaintClearSetData's loop over the other battlers (battle_main.c:3274-3282) frees escape prevention, infatuation and Wrap. It does NOT touch a
+      // Lock-On / Mind Reader mark the fainted Pokemon left (STATUS3_ALWAYS_HITS with battlerWithSureHit): that one goes when the next Pokemon enters
+      // the slot (SwitchInClearSetData, :3166-3170, ported in battleScriptSwitchinOpcode.ts) or when its two turns run out. The engine cleared it here
+      // too. No effect on play (nobody can use the mark in between); seen by the wide compare at the replacement menu (ROM: staged battle
+      // metronome-lock-on, docs/parity-mac/lock-on-mark-at-faint.md).
+      return status2 === candidate.status2
         ? candidate
         : Object.freeze({
             ...candidate,
             status2,
-            status3,
             ...(preventedByActive ? { battlerPreventingEscape: 0 as BattleScriptBattlerId } : {}),
-            ...(sureHitByActive ? { battlerWithSureHit: 0 as BattleScriptBattlerId } : {}),
           });
     }) as unknown as BattleScriptRulesBattlers;
 

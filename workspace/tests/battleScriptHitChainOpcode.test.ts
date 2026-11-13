@@ -4041,7 +4041,11 @@ describe("production cleareffectsonfaint (Cmd_cleareffectsonfaint) dispatch", ()
     expect(otherResult.state.rulesContext.battlers[0].status2).toBe(1 << 26);
   });
 
-  it("faint cleanup clears another battler's sure-hit marker only when the fainted battler owns it", () => {
+  // parity-mac fix 37 (docs/parity-mac/lock-on-mark-at-faint.md). This case pinned the opposite: that a faint clears the Lock-On mark its owner
+  // left on the other Pokemon. FaintClearSetData's loop (battle_main.c:3274-3282) frees escape prevention, infatuation and Wrap only; the mark goes
+  // when the next Pokemon enters the slot (SwitchInClearSetData, :3166-3170). ROM: staged battle metronome-lock-on (status3 still 8 at the
+  // replacement menu).
+  it("faint cleanup leaves another battler's sure-hit marker alone, whoever owns it", () => {
     const owned = context(
       0,
       { status3: 1 << 3, battlerWithSureHit: 1 },
@@ -4051,8 +4055,8 @@ describe("production cleareffectsonfaint (Cmd_cleareffectsonfaint) dispatch", ()
     const ownedResult = stepAtProgramCounter(cleareffectsonfaintTargetPc, owned).result;
     if (ownedResult.kind !== "advanced") throw new Error("expected advance");
     expect(ownedResult.state.rulesContext.battlers[0]).toMatchObject({
-      status3: 0,
-      battlerWithSureHit: 0,
+      status3: 1 << 3,
+      battlerWithSureHit: 1,
     });
 
     const other = context(
