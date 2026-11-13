@@ -1,0 +1,16 @@
+{
+ "decisions": [
+  {
+   "kind": "move",
+   "slot": 0
+  },
+  {
+   "kind": "move",
+   "slot": 0
+  },
+  {
+   "kind": "move",
+   "slot": 1
+  }
+ ]
+}

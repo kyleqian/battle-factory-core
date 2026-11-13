@@ -69,3 +69,15 @@ script skips `getmovetarget`. A Curse called by Metronome, Sleep Talk, Assist or
 
   Decisions: Curse, Curse, Splash. The Mechanic Lab drives the ROM only; the engine side is the test above with the
   same numbers.
+
+## With and without the fix
+
+| | engine | ROM |
+|---|---|---|
+| without fix 42 | the test's Follow Me row fails: Curse PP 10 -> 9 | Curse PP 10 -> 8 (`stages/mechanic-lab/fix42-follow-me-curse.request.json`, lab seed 801) |
+| with fix 42 | 10 -> 8; the control row 10 -> 9 | control: 10 -> 9 (`fix42-follow-me-curse-control`) |
+
+The Mechanic Lab has no engine side, so there is no "states matched" count: the engine number is the test's, made with
+the ROM's numbers. A staging with real sets would need a Follow Me user with Pressure (a Metronome-called Role Play or
+Skill Swap), not staged.
+

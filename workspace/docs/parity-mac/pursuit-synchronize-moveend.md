@@ -55,3 +55,14 @@ end check. Now the check is applied to the state the script call leaves, as in t
 
   Decisions: voluntary switches to party slot 1, 0, 1, 0, ... The Mechanic Lab drives the ROM only; the engine side is
   the test above.
+
+## With and without the fix
+
+| | engine | ROM |
+|---|---|---|
+| without fix 43 | the test's seed 5 (Static fires) stops with "Cmd_switchhandleorder: battler 1 has no decided monToSwitchIntoId"; about one seed in three of a sweep of 40 did | lab seed 801: Umbreon paralysed at decision 4, Electabuzz paralysed at decision 5, the switches go on, last moves 0 (`stages/mechanic-lab/fix43-pursuit-synchronize.request.json`); seed 802 the same at decisions 6 and 7 |
+| with fix 43 | seed 5: Umbreon and Electabuzz paralysed, the switch goes on, last moves 0; the control seed 1: no status | control: seed 803, Static never fires, no status |
+
+The Mechanic Lab has no engine side, so there is no "states matched" count: the engine numbers are the test's. A
+staging with real sets needs Synchronize moved to a Pursuit user by Skill Swap; not staged.
+
