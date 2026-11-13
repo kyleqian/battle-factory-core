@@ -16,9 +16,9 @@ const UNSHIPPED_ALLOWLIST: readonly string[] = [
 
 /**
  * Runtime data committed ahead of its importer (not part of the shrink-only list): aud244a's sound-asset manifest is
- * loaded by the aud245 WebAudio player (dynamic import, handoff item 0). Delete the entry when aud245 imports it.
+ * loaded by the aud245 WebAudio player (dynamic import, handoff item 0). aud245 imported it (src/audio/playerAssets.ts), so the list is empty; kept for the next pending import.
  */
-const PENDING_RUNTIME_IMPORT: readonly string[] = ["src/assets/gen/audio/manifest.json"];
+const PENDING_RUNTIME_IMPORT: readonly string[] = [];
 
 function walk(dir: string, suffix: string, out: string[] = []): string[] {
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
