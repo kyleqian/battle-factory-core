@@ -55,7 +55,7 @@ Chosen end vs the clock-derived boundary (`nominalEndShift`, samples): +1, -3, +
   the one after the loop start with max abs diff **123, rms 0.87** (backward window 0, first 256 samples 0; the signal rms is 2516, peak 11301). Decoded from the OGG the wrap step is 3320 against a body maximum adjacent-sample step of 4940.
 * **bgm:354 is exact at the wrap itself**: short-window diff 0, intro -> loop junction diff 1, 8192-window max 1140 / rms 61.7 (2.3 % of the signal rms), decoded wrap step 3. Its loop is exactly 2504.000 frames, a multiple of 8.
 * **bgm:412 / 469 / 476 and SE_LOW_HEALTH are not periodic at the sample level**, so a splice cannot be bit-exact with the ROM: seam max 3808..6204, rms 580..1583 against a signal rms of 2000..3430
-  (whole-body pass-vs-pass rms diff is of the same size: bodyRmsDiff 1814 / 1508 / 3430 / 539). Reasons, all measured, not guessed:
+  (whole-body pass-vs-pass rms diff is of the same size: bodyRmsDiff 1814 / 1508 / 3430 / 539). Reasons (1 measured; 2 and 3 are the likely causes, not isolated per channel):
   1. mGBA's per-frame sample counts jitter (447 / 448 / 450 / 451 at 26758 Hz, 548 / 549 at 32768) and the output phase is not restored by a state load, so two recordings are not sample-aligned.
      A loop that is not a multiple of 8 frames (bgm:412 846.99, bgm:469 3700 = 462.5 x 8, bgm:476 4655, SE_LOW_HEALTH 36) lands on a different 512-cycle grid phase on every pass.
   2. Likely (the measured symptom, not isolated per channel): PSG / noise channels run their own counters / LFSR, so the waveform phase at the next pass is not tied to the song tick and passes differ by up to one
