@@ -4,7 +4,7 @@
   "R006"
  ],
  "why": "Challenge 4 (full AI). The opponent leads Armaldo (set 513: Iron Tail, Ancient Power, Brick Break, Knock Off; speed 65). The player leads Meganium (set 541; speed 100) and uses Substitute every turn: each Substitute costs a quarter of its HP and Armaldo's best move breaks it, so after about four Substitutes (Leftovers slows it a little) Meganium is below 30 percent at the start of a turn. Then the AI scores Knock Off through AI_CV_KnockOff: target HP below 30 ends the handler at zero, the runCvKnockOff early-return block. Golem 498 (Substitute in the same slot) and Medicham 469 (Endure in the same slot) follow with the same step.",
- "seed": 0,
+ "seed": 90000,
  "challengeNum": 4,
  "battleNum": 0,
  "trainerId": 140,
@@ -85,10 +85,5 @@
  ],
  "coverAny": true,
  "chance": 0.7,
- "seeds": 30,
- "onHold": {
-  "group": "g1",
-  "seedsHunted": 0,
-  "result": "untested"
- }
+ "seeds": 30
 }
