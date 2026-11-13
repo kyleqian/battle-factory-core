@@ -136,7 +136,7 @@ SITUATION_LABELS = {
     "MoveUsedIsConfused": "volatile:confusion:turn", "NoMovesLeft": "move:forced-struggle",
 }
 SITUATION_ROWS = sorted(set(SITUATION_LABELS.values()) | {
-    "status:poison:end-turn-damage", "volatile:uproar:wakes-at-move",
+    "status:poison:end-turn-damage", "volatile:uproar:wakes-at-move", "volatile:magic-coat:bounces-under-pressure",
     "switch:voluntary", "switch:forced-replacement", "switch:natural-cure-on-switch-out", "switch:baton-pass-passes-stages", "switch:refused:wrap", "switch:refused:mean-look",
     "switch:refused:ingrain", "switch:refused:shadow-tag", "switch:refused:arena-trap", "switch:refused:magnet-pull", "move-refused:no-pp", "move-refused:disable", "move-refused:torment",
     "move-refused:taunt", "move-refused:imprison", "move-refused:choice-band", "status:toxic:end-turn-damage", "weather:rain:continues", "weather:rain:ends", "weather:sandstorm:damage",
@@ -436,6 +436,12 @@ def tally_battle(facts):
             # the common tail): its message is the evidence (battle_message.c:966, :1123)
             if kind == "message" and ev.get("messageId") == "STRINGID_ITSUCKEDLIQUIDOOZE":
                 hit("ability:ABILITY_LIQUID_OOZE")
+            # Magic Coat reflecting a move of a Pokemon that has Pressure at that moment: the Magic Coat user pays one more PP from its Magic Coat slot
+            # (PressurePPLose, battle_util.c:740-765; fix 33). Pressure can be a copied ability here (Skill Swap, Role Play, Trace).
+            if new_run and label.startswith("MagicCoatBounce"):
+                user = (ev.get("actionSnapshot") or {}).get("attacker")
+                if user in (0, 1) and cur[user]["ability"] == "ABILITY_PRESSURE":
+                    hit("situation:volatile:magic-coat:bounces-under-pressure")
             # An uproar wakes a sleeper in two places: at the end of the turn (BattleScript_MonWokeUpInUproar, the row volatile:uproar:wakes) and when the
             # sleeper tries to move (the attack canceler's UproarWakeUpCheck, battle_util.c: the same line printed by BattleScript_MoveUsedWokeUp)
             if kind == "message" and ev.get("messageId") == "STRINGID_PKMNWOKEUPINUPROAR" and label.startswith("MoveUsedWokeUp"):

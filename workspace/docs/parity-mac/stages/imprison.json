@@ -1,0 +1,147 @@
+{
+ "name": "imprison",
+ "why": "The opponent's Chansey (set 227) calls Imprison through Metronome. The player's Graveler (set 166) has Defense Curl, a move Chansey has too. After Imprison the game refuses Defense Curl at the move menu, and in the turn Imprison is called it stops the Defense Curl that was already chosen.",
+ "seed": 70080,
+ "challengeNum": 1,
+ "battleNum": 0,
+ "trainerId": 88,
+ "playerSetIds": [
+  166,
+  208,
+  171
+ ],
+ "opponentSetIds": [
+  227,
+  203,
+  236
+ ],
+ "script": {
+  "actions": [
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   }
+  ],
+  "then": "random-v1"
+ },
+ "expect": [
+  "situation:move-refused:imprison",
+  "situation:volatile:imprison:blocks-chosen-move"
+ ]
+}

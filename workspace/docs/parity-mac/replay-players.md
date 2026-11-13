@@ -18,6 +18,17 @@ One battle: `REPLAY_OUT=/abs/dir tools/audio/romReplayWide.sh SEED [POLICY [SYMB
   species twice (the `currSpecies` quirk of `GenerateInitialRentalMons`, `battle_factory.c:566-576`); the select screen
   refuses the second one (`Select_AreSpeciesValid`, `battle_factory_screen.c:2256-2276`, "Can't select same
   POKeMON."). No battle of the older lists had such a pair in its first three; at the eighth challenge about 3 in 100 do.
+- **Above the eighth challenge nothing new can be staged, and the sets and trainers do not change again** (checked in
+  the source for the fifth pass). Sets: `GetFactoryMonId` uses range 7 (372..849) for every challenge number of 7 and
+  more (`battle_factory.c:829-866`). Trainers: `GetRandomScaledFrontierTrainerId` uses range 7 (trainers 200..299) for
+  every battle once the challenge number is above 7; up to 7 the seventh battle of a challenge draws from the "hard"
+  table (`battle_tower.c:1104-1129`). The AI flags are the full set from the fifth challenge on
+  (`GetAiScriptsInBattleFactory`, `battle_factory.c:889-911`). What does change is the IVs: `GetFactoryMonFixedIV`
+  (`battle_factory.c:739-757`) reads one row past its table when its argument is exactly 8, and the value there means
+  "random IVs". That is the ninth challenge (rentals and opponents), and the "elevated" rentals of the eighth. From
+  the tenth challenge every IV is 31, as in the eighth. So a ninth-challenge battle has the same sets, trainers and AI
+  as an eighth-challenge battle, with other stats. The lab accepts the challenge numbers 0..7 only; challenge numbers
+  8 and 9 are not driven.
 
 ## The three players
 

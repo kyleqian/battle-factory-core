@@ -85,6 +85,21 @@ Level 50 sets have Metronome (Chansey 227, Clefable 389), ten PP each, so these 
 them (the "Metronome sweep"). Teleport is one of them and can never work: it always fails in a trainer battle
 (`battle_scripts_1.s:1929`). Splash counts by a use (its whole effect is the line "But nothing happened!").
 
+Camouflage is one of them and fails for both Metronome sets as they are: it gives the type of the battle's ground, a
+building gives Normal (`sEnvironmentToType`, `battle_script_commands.c:826-838`; an indoor map is a building,
+`battle_setup.c:662-665`), and the command fails when the user has that type already (`Cmd_settypetoenvironment`,
+`:9831-9843`). Chansey and Clefable are Normal types. The row fills only when the Metronome user has another type at
+that moment. The one way with Factory sets: Color Change, moved to Chansey by Skill Swap (the staged battle
+`stages/metronome-camouflage.json`).
+
+## A row added in the fifth pass
+
+`situation:volatile:magic-coat:bounces-under-pressure`: Magic Coat reflected a move of a Pokemon that had Pressure at
+that moment. The Magic Coat user then pays one more PP from its Magic Coat slot (`PressurePPLose`,
+`battle_util.c:740-765`, called by the attack canceler). Evidence: the reflect script ran and the Pokemon whose move
+was reflected had Pressure in the turn's state (a copied Pressure counts: Skill Swap, Role Play, Trace). With this row
+the work order's list has 385 rows.
+
 ## What the record of a battle holds
 
 `ID.facts.json.gz` has one entry per resolved turn. Until the first stop of the fourth pass it had one entry per player

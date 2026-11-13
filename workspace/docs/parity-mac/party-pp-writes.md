@@ -64,7 +64,27 @@ matched to the engine's party write:
 - Tests (each fails without the fix): `tests/battleScriptTrysetperishsongOpcode.test.ts` "writes the Pressure PP loss
   to the party record ..."; `tests/gate6LeppaBerryReceipt.test.ts` (party PP after the restore);
   `tests/battleScriptAttackCancelerOpcode.test.ts` "delegates PressurePPLose to the Magic Coat owner's ..." (party PP).
-- Magic Coat against Pressure has no ROM battle yet (source and test only); a staged battle is on the list.
+- Magic Coat against Pressure: the staged battle below (fifth pass).
+
+## Magic Coat against Pressure on the ROM (fifth pass)
+
+Which slot pays: the Magic Coat user's own Magic Coat slot. The attack canceler calls
+`PressurePPLose(attacker, target, MOVE_MAGIC_COAT)` (`battle_util.c:740-765`): it needs Pressure on the Pokemon whose
+move is reflected, looks for Magic Coat among the four moves of the Pokemon that reflects, and takes one PP there, on
+the field and in the party record.
+
+- **With a real Magic Coat slot** (`stages/magic-coat-pressure.json`, lab seed 73000). The only Level 50 set with Magic
+  Coat is Kecleon 220 (second challenge), and the only Pressure Pokemon of that challenge, Absol 247, has no move that
+  Magic Coat reflects. So the Pressure is moved: the opponent's Venomoth (set 226) takes it from the player's Absol
+  with Skill Swap, the player switches to Kecleon and uses Magic Coat every turn. Kecleon's Magic Coat PP at the
+  player's decisions, the same on the ROM and in the engine, on the field and in the party record:
+  15, 13 (Sleep Powder reflected: two PP), 12 (nothing to reflect: one PP), 11, 9 (reflected), 7 (reflected), 6, 5, 4,
+  3, 1 (reflected), 0 (reflected with one PP left: the use takes it, the extra loss finds 0 and takes nothing,
+  `:756-757`). Five reflections; the battle matches the ROM to the end.
+- **Called by Metronome.** Metronome may call Magic Coat (it is not in `sMovesForbiddenToCopy`,
+  `battle_script_commands.c:725-747`). The caller has no Magic Coat slot, so the search at `:747-754` finds nothing
+  and no extra PP is taken; only the Metronome slot pays (two PP: Metronome's own loss to Pressure in `Cmd_ppreduce`).
+  A staged battle for this case is in `STATUS.md`, section "Fifth pass".
 
 ## Not covered (source read, no reachable case found)
 
