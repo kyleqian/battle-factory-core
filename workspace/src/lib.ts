@@ -7,6 +7,7 @@ import { installBundledMonPicPixels } from "./engine/monPicPixelsInstall.ts";
 import { render, SCREEN_HEIGHT, SCREEN_WIDTH } from "./engine/core.ts";
 import type { FactoryAudioState, FactoryEvent, FactoryGame, FactoryGameOptions, TraceSegment } from "./factoryContract.ts";
 import type { AudioPlayer, AudioStats } from "./audio/player.ts";
+import { initialMusicEvents } from "./audio/initialMusic.ts";
 import { MusicTracker } from "./audio/musicTracker.ts";
 import { collectSoundTick, type SoundEvent } from "./audio/soundEvents.ts";
 import { ENGINE_BUILD, FactorySession } from "./factorySession.ts";
@@ -109,7 +110,7 @@ export function mountFactoryGameInternal(options: MountInternalOptions): Factory
   let audioFailed = false;
   // The tracker keeps the music state of the live frame (live ticks and the resume fast-forward); a player that starts late, or after a
   // fast-forward, is brought to that state by `restore` instead of waiting for the next music event. It is always attached: write-only.
-  const music = new MusicTracker();
+  const music = new MusicTracker(initialMusicEvents(options.start));
   const audioSink = {
     push(event: SoundEvent): void {
       music.push(event);
@@ -300,7 +301,7 @@ export function mountFactoryGameInternal(options: MountInternalOptions): Factory
       session = new FactorySession(sessionOptions);
       session.attachSoundSink(audioSink);
       music.reset();
-      audio?.reset();
+      audio?.restore(music.events(), session.frame);
       held.clear();
       latched.clear();
       resuming = null;

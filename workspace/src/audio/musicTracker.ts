@@ -11,6 +11,14 @@ export class MusicTracker implements SoundSink {
   private duck: SoundEvent | null = null;
   private tail: SoundEvent[] = [];
 
+  /** `initial`: the events that explain the music at frame 0 (aud247); `reset` returns to them. */
+  private readonly initial: readonly SoundEvent[];
+
+  constructor(initial: readonly SoundEvent[] = []) {
+    this.initial = initial;
+    this.reset();
+  }
+
   push(event: SoundEvent): void {
     switch (event.kind) {
       case "bgm":
@@ -45,5 +53,6 @@ export class MusicTracker implements SoundSink {
     this.head = null;
     this.duck = null;
     this.tail = [];
+    for (const event of this.initial) this.push(event);
   }
 }
