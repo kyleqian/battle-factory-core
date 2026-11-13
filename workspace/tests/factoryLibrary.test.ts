@@ -113,7 +113,8 @@ describe("FactorySession events (contract v2)", () => {
       { type: "challenge-end", reason: "loss", streak: 0, frame: session.frame },
     ]);
     expect(session.battles).toEqual([{ result: "loss", streak: 0, frame: session.frame }]);
-    expect(playLive(session, player, 3_000)).toEqual([]);
+    // lbr-c: after the end, the only event a mount can still report is the one challenge-request (docs/lbrc-challenge-request.md).
+    expect(playLive(session, player, 3_000).map((event) => event.type).filter((type) => type !== "challenge-request")).toEqual([]);
     expect(session.ended).toBe("loss");
     const replay = replayChallenge({ battleScene: "off", segments: session.trace() });
     expect(replay).toMatchObject({ streak: 0, ended: "loss", battles: session.battles, digest: session.digest() });
