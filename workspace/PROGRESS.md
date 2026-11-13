@@ -24,6 +24,16 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 2026-11-13 — aud247 (ts lane worker): the music already playing at mount
+
+- **State:** on master. Audio-side only (`src/audio/initialMusic.ts`, `musicTracker.ts` seed, `lib.ts`): no `src/engine` / session change, ENGINE_BUILD and headless bundle unchanged. Section "aud247" in `docs/aud245-audio-player.md`.
+- **ROM proof (RAM read, evidence `.integration/evidence/aud247/`):** at the anchor (Scene OFF = ON) `gMPlayInfo_BGM` = song 469, status 0x1ff, `clock` 3287; clock advances 0.96 ticks / frame (1920 in 2000), so the draft BGM began 3424 frames before frame 0.
+  Seed: draft = `bgm 469` at frame -3424; `"after-save"` Lobby = `bgm 469` at frame 0 (map music is MUS_B_FACTORY; no ROM position exists for the skipped dialogue / save, so song start). Resume: seed + fast-forward events through the existing `restore`. `reset()` now re-seeds and restores.
+- **Gates:** typecheck 0 (first run OOM-killed beside another worker's suite, rerun 0), build / build:lib 0, `tests/aud247InitialMusic.test.ts` (7) + aud245* + audioHeadlessBoundary + factoryLibrary + lbrc 84 / 84. `audioCheck.mjs --frames 600`: BGM source started at ctx 0.36 s, file offset 57.64 s (new `tap.musicStarts` in the tool); no audio option: 0 requests.
+- **Open:** the Lobby / after-save position is the song start, not a ROM measurement.
+
+---
+
 ## 2026-11-13 — aud245b (side lane worker, 36 min): player follow-ups (music after resume, pan, cry volume, fetch on first use)
 
 - **State:** folded (branch removed). No `src/engine` / session change: ENGINE_BUILD and headless size unchanged. Section in `docs/aud245-audio-player.md`.

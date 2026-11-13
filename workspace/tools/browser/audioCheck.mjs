@@ -66,7 +66,7 @@ const browser = await chromium.launch({ headless: true, args: ["--autoplay-polic
 
 const initScript = (forceAac) => {
   window.requestAnimationFrame = () => 0;
-  const tap = { contexts: 0, sources: 0, starts: 0, loopSources: 0, startedSeconds: 0, decodes: 0, decodeFail: 0, peakMax: 0, peakNonZero: 0, samples: 0, resumes: 0, states: [] };
+  const tap = { contexts: 0, sources: 0, starts: 0, loopSources: 0, startedSeconds: 0, decodes: 0, decodeFail: 0, peakMax: 0, peakNonZero: 0, samples: 0, resumes: 0, states: [], musicStarts: [] };
   window.__AUDIO_TAP__ = tap;
   const Native = window.AudioContext ?? window.webkitAudioContext;
   if (!Native) return;
@@ -97,7 +97,13 @@ const initScript = (forceAac) => {
       const node = super.createBufferSource();
       tap.sources += 1;
       const start = node.start.bind(node);
-      node.start = (...a) => { tap.starts += 1; if (node.loop) tap.loopSources += 1; return start(...a); };
+      node.start = (...a) => {
+        tap.starts += 1;
+        if (node.loop) tap.loopSources += 1;
+        // Music (a buffer longer than 30 s): when the page asked for it and at which file offset (aud247: the BGM at mount).
+        if (node.buffer && node.buffer.duration > 30 && tap.musicStarts.length < 8) tap.musicStarts.push({ wallMs: Math.round(performance.now()), ctxTime: this.currentTime, offset: a[1] ?? 0, loop: node.loop });
+        return start(...a);
+      };
       return node;
     }
     decodeAudioData(...a) {
