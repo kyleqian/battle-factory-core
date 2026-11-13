@@ -276,7 +276,10 @@ const SILVER_STREAK = 14;
 // battleIndex 6's effective streak is 41, the gold threshold.
 // aiv271 (AI damage sims take the real CalculateBaseDamage terms: held-item / species / status / pinch / weather, so the AI now picks the move the ROM picks):
 // GOLD_SEED 8 -> 24, the lowest seed in 1..40 whose move-slot-0 policy still wins six ordinary battles (seeds 1..23 lose before the sixth win).
-const GOLD_SEED = 24;
+// parity-mac fix 29 (docs/parity-mac/perish-song-after-outcome.md): seed 24's third battle ends with Perish Song taking the last Pokemon of BOTH sides in one
+// turn. The game calls that a draw, which ends the challenge (sEndTurnFuncsTable[B_OUTCOME_DREW] = HandleEndTurn_BattleLost); the engine used to stop at the
+// opponent's faint and call it a win. GOLD_SEED 24 -> 14, the lowest seed in 1..40 whose move-slot-0 policy wins six ordinary battles on the fixed engine.
+const GOLD_SEED = 14;
 const GOLD_STREAK = 35;
 
 describe("Frontier Brain round shape: real seven-battle rounds (Noland rung 2c)", () => {
