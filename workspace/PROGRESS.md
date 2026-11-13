@@ -5,6 +5,18 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 2026-11-13 — cln277 (side lane worker, 141 min): full-suite wall target (Cleanup 5) measured: not reachable with test-side changes
+
+- **State:** folded `e0d074ec1` (tests + doc only; `docs/cln277-suite-wall.md`). `liveSpriteOrderHost.test.ts` memoizes its 20-seed sweep (87.8 -> 58.5 s, 22 / 22 unchanged).
+- **Finding:** the suite is CPU-bound (~7,000 s CPU; < 15 min at 5 workers needs ~4,500 s); file splits are CPU-neutral, collect / GC / JIT ~1-2 % each.
+  Largest lever left: `tools/integration/generatedCommandAnimationReplay.ts` renders every presenting frame and drops the pixels (~670 s CPU, ~2.2 min wall);
+  making it opt-in cuts render-crash coverage, so it is not taken; even then ~21 min here. 503 files spawn node children (~8 min wall). Rest = engine speed.
+  Supervisor decision (reversible): keep coverage; Cleanup 5's "< 15 min" stays open as a measured non-goal on this box (no DEFERRED entry: nothing blocks).
+- **Found red:** `tests/randomRoundSoak.test.ts` 3 failures on master since lbr-b (#89 seed 32, carried streak / depth after a later loss, #99 swap offer):
+  the attendant conversation moved the soak seeds' deals. Re-pin step queued after lbr-c.
+
+---
+
 ## 2026-11-13 — enc276 (integration lane worker, 200-min cap): a forced turn goes from FIGHT straight into the turn (ISSUES #213)
 
 - **State:** folded `5b1814cf6` (branch removed; evidence `.integration/evidence/enc276/`). ENGINE_BUILD moves again (merged tree; read at wind-down). `docs/enc276-forced-turn-no-menu.md`.
