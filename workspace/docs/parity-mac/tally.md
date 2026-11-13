@@ -82,7 +82,8 @@ has its "cannot occur" reason here too.
 `sMovesForbiddenToCopy`, `battle_script_commands.c:725-747`): Mist, Imprison, Rage, Bide, Transform, Mirror Move,
 Nature Power, Assist, Conversion, Teleport, Hidden Power, Return and others. They are rows too (`move:EFFECT_X`). Two
 Level 50 sets have Metronome (Chansey 227, Clefable 389), ten PP each, so these rows fill only in battles staged for
-them (the "Metronome sweep").
+them (the "Metronome sweep"). Teleport is one of them and can never work: it always fails in a trainer battle
+(`battle_scripts_1.s:1929`). Splash counts by a use (its whole effect is the line "But nothing happened!").
 
 ## What the record of a battle holds
 

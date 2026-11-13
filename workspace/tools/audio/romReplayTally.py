@@ -150,6 +150,7 @@ NO_EFFECT = {
     "ability:ABILITY_RUN_AWAY": "fleeing from a wild battle only", "ability:ABILITY_STENCH": "field ability only (wild encounter rate)",
     "ability:ABILITY_PLUS": "needs a partner with Minus on the field (doubles)", "ability:ABILITY_MINUS": "needs a partner with Plus on the field (doubles)",
     "ability:ABILITY_LIGHTNING_ROD": "redirects Electric moves to itself in doubles; no effect in singles (Gen 3)",
+    "move:EFFECT_TELEPORT": "always fails in a trainer battle: BattleScript_EffectTeleport jumps to BattleScript_ButItFailed on BATTLE_TYPE_TRAINER (battle_scripts_1.s:1929); only Metronome can call it",
     "moveid:MOVE_HELPING_HAND": "always fails in singles: Cmd_trysethelpinghand needs BATTLE_TYPE_DOUBLE (battle_script_commands.c:9170-9186)",
     "move:EFFECT_HELPING_HAND": "always fails in singles: Cmd_trysethelpinghand needs BATTLE_TYPE_DOUBLE (battle_script_commands.c:9170-9186)",
     "situation:volatile:torment:blocks-chosen-move": "dead script: no C code references BattleScript_MoveUsedIsTormented (only its declaration, battle_scripts.h:81); Torment acts at move selection only (battle_util.c:999-1012), which is the row move-refused:torment",
@@ -518,6 +519,8 @@ def tally_battle(facts):
 
 def covered(row, counts):
     """The count that covers a row: for a move effect, its added effect when it has one, else `worked`."""
+    if row == "move:EFFECT_SPLASH":  # its whole effect is the line "But nothing happened!" (battle_scripts_1.s:1172-1181): a use is the row
+        return counts.get(row + "#used", 0)
     if row.startswith("move:"):
         return counts.get(row + ("#secondary" if SECONDARY.get(row[5:]) else "#worked"), 0)
     if row.startswith("moveid:"):

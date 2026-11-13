@@ -135,21 +135,24 @@ describe("source-complete COPYMOVEPERMANENTLY / EFFECT_SKETCH", () => {
     expect(state.rng).toMatchObject({ calls: 0, ledger: [] });
   });
 
+  // The last column is Sketch's PP in the PARTY record after the turn. ppreduce precedes every Sketch gate and spends Sketch's PP; the party
+  // record follows, except for a Transformed user: Cmd_ppreduce writes the party Pokemon only inside MOVE_IS_PERMANENT
+  // (battle_script_commands.c:1239-1246; parity-mac fix 36, docs/parity-mac/transformed-pp.md). That row pinned 0 before the fix.
   it.each([
-    ["transformed user", TACKLE, { status2: BATTLE_SCRIPT_STATUS2_TRANSFORMED }, 0],
-    ["Struggle", STRUGGLE, {}, 0],
-    ["none", 0, {}, 0],
-    ["unavailable", UNAVAILABLE, {}, 0],
-    ["Sketch", SKETCH, {}, 0],
-    ["duplicate outside Sketch slot", TACKLE, { moves: [SKETCH, TACKLE, 0, 0] as const }, 0],
-    ["target Substitute", TACKLE, {}, 1 << 24],
-  ])("walks the %s failure gate to END without durable mutation or RNG", (_name, move, changes, status2) => {
+    ["transformed user", TACKLE, { status2: BATTLE_SCRIPT_STATUS2_TRANSFORMED }, 0, 1],
+    ["Struggle", STRUGGLE, {}, 0, 0],
+    ["none", 0, {}, 0, 0],
+    ["unavailable", UNAVAILABLE, {}, 0, 0],
+    ["Sketch", SKETCH, {}, 0, 0],
+    ["duplicate outside Sketch slot", TACKLE, { moves: [SKETCH, TACKLE, 0, 0] as const }, 0, 0],
+    ["target Substitute", TACKLE, {}, 1 << 24, 0],
+  ])("walks the %s failure gate to END without durable mutation or RNG", (_name, move, changes, status2, partyPp) => {
     const source = rules(move, changes, status2);
     const state = run(source);
     expect(state.rulesContext.battlers[0].moves).toBe(source.battlers[0].moves);
-    // ppreduce precedes every Sketch gate and durably spends Sketch's PP.
+    expect(state.rulesContext.battlers[0].pp[0]).toBe(0);
     expect(state.rulesContext.party.player[0].moves).toBe(source.party.player[0].moves);
-    expect(state.rulesContext.party.player[0].pp).toEqual([0, 40, 0, 0]);
+    expect(state.rulesContext.party.player[0].pp).toEqual([partyPp, 40, 0, 0]);
     expect(state.events.some(({ kind }) => kind === "set-battler-moves-pp-data")).toBe(false);
     expect(state.rng).toMatchObject({ calls: 0, ledger: [] });
   });

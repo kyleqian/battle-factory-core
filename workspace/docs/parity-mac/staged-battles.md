@@ -35,6 +35,23 @@ The lab accepts only teams the Factory could hand out (no repeated species or he
 challenge's range). The opponent's moves are still chosen by the game's AI and the ROM's RNG, so a staging usually
 needs a few seeds until the wanted situation happens; `expect` says when it did.
 
+## The scripted player's steps
+
+- `{"move": slot}` / `{"switch": partySlot}`: the action of that turn. The replay stops with an error when the engine
+  does not offer it.
+- `{"prefer": slot}`: the move when the engine offers it; else this turn goes to the `then` player and the list goes
+  on. For a staging whose move the other side can take away (Pressure, Disable, Torment, a copied move set).
+- `"probeSwitch"` / `"probeMove"` before a step: a refusal probe.
+
+## The Metronome sweep
+
+Two Level 50 sets have Metronome (Chansey 227, Clefable 389). 31 move effects, and several situations (Mist, Imprison,
+Rage, Transform, Lock-On), are reached only when Metronome calls the move. The sweep is 497 staged battles made by a
+script (not kept in the repo; the ones that found something are in `stages/`): 220 with the player's Chansey using
+Metronome until its ten PP are gone, 110 with Clefable at the fourth challenge, 167 with the opponent's Chansey against
+a player Pokemon that shares a move with it (so that Imprison can seal it; the random player probes). It found fixes 36
+to 40.
+
 ## What a staged battle cannot do
 
 Pokemon that are not Factory sets (a level, a move set or an item no set has). Those need the Mechanic Lab with
