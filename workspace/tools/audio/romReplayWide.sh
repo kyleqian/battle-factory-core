@@ -2,9 +2,11 @@
 # parity-mac fourth pass: one battle of the real-ROM replay with a named test player and the wide compare (docs/parity-mac/replay-players.md, wide-compare.md).
 # Chain: request -> ROM setup -> engine replay (decisions + wide states) -> closed-loop ROM drive (timeline + wide states) -> compare. The frozen-trace re-run of
 # tools/audio/romDriveSeed.sh is not done here (REPLAY_TIMELINE=1 adds it); the compare reads the drive's own timeline.
-# Usage (cwd = workspace/): REPLAY_OUT=/abs/outdir tools/audio/romReplayWide.sh SEED [POLICY [SYMBOLS]]
+# Usage (cwd = workspace/): REPLAY_OUT=/abs/outdir tools/audio/romReplayWide.sh SEED [POLICY [SYMBOLS [CHALLENGE]]]
 #                           REPLAY_OUT=/abs/outdir tools/audio/romReplayWide.sh --stage docs/parity-mac/stages/NAME.json   (a staged battle)
 #   POLICY census (default) | ai-v1 | random-v1.  SYMBOLS 0 (default) | 1 (seed % 49 == 26 is then the gold Noland battle).
+#   CHALLENGE (optional, or ROM_REPLAY_CHALLENGE): the game's 0-based challenge number for this battle (7 = the eighth challenge, sets 372..849). Unset = the
+#   census mapping (seed * 11) % 49, which only reaches challenges 1 to 7. The ID gets -cN.
 #   REPLAY_SCENE=on|off (default off).  REPLAY_KEEP=1 keeps every file of a matching battle (default: request, setup and summary only).
 #   REPLAY_FRAME_BUDGET / REPLAY_DRIVE_FRAMES: engine frame budget / ROM frame cap for very long battles.
 # Writes OUTDIR/ID.summary.json (ID = SEED-POLICY, with -gold for SYMBOLS 1 and -on for Scene ON) and appends "ID rc=N" to OUTDIR/done.txt.
@@ -15,14 +17,16 @@ SC=${REPLAY_SCENE:-off}
 D=${REPLAY_OUT:?set REPLAY_OUT to an absolute output directory}; mkdir -p "$D"
 if [ "${1:-}" = --stage ]; then
   # A staged battle (docs/parity-mac/staged-battles.md): --stage FILE.json. The ID is the stage's name; the player is the stage's written script.
-  STAGE=$2; P=script; G=0
+  STAGE=$2; P=script; G=0; unset ROM_REPLAY_CHALLENGE
   S=$(python3 -c "import json,sys; print(json.load(open(sys.argv[1]))['seed'])" "$STAGE") || exit 2
   ID=$(python3 -c "import json,sys; print('stage-' + json.load(open(sys.argv[1]))['name'])" "$STAGE") || exit 2
   WHICH="--stage=$STAGE"
 else
-  STAGE=; S=$1; P=${2:-census}; G=${3:-0}
+  STAGE=; S=$1; P=${2:-census}; G=${3:-0}; C=${4:-${ROM_REPLAY_CHALLENGE:-}}
   ID="$S-$P"; [ "$G" = 1 ] && ID="$ID-gold"
+  [ -n "$C" ] && ID="$ID-c$C"
   WHICH="--seed=$S"
+  export ROM_REPLAY_CHALLENGE=$C
 fi
 [ "$SC" = on ] && ID="$ID-on"
 T="$D/$ID"

@@ -67,6 +67,29 @@ Shown with their reason instead of a count:
   (`battle_scripts_1.s:3567`) is referenced by no C code (only declared, `include/battle_scripts.h:81`). Torment acts
   at move selection only (`battle_util.c:999-1012`); that is the row `move-refused:torment`.
 
+## Two more row families (proposed in the fourth pass)
+
+| kind | rows | covered when |
+|---|---|---|
+| `set:N` | every Level 50 set the Factory can hand out (739: sets 110..849 without Unown) | the set was on the field in a matching battle (known by its species, moves and item at the battle's start) |
+| `moveid:MOVE_X` | every move of those sets (274) | the move was used and its span has no miss / failure / immunity message. Finer than the row per move effect: moves of one effect differ in type, power and flags |
+
+They answer "was every Pokemon and every move of the pool really played", which the rows per effect do not. Helping Hand
+has its "cannot occur" reason here too.
+
+## What the record of a battle holds
+
+`ID.facts.json.gz` has one entry per resolved turn. Until the first stop of the fourth pass it had one entry per player
+decision: a turn without a decision (the second turn of a two-turn move, a recharge turn, the later turns of Rollout,
+Outrage, Uproar or Bide) was missing, so nothing that happened in such a turn could be counted (the flinch of Sky
+Attack was never seen for that reason). Counts made from older records are too low, never too high. The tally of the
+final batch is made from records with every turn.
+
+Rows whose evidence is a message, not a script label (the label prints nothing itself): Liquid Ooze ("it sucked up the
+liquid ooze"), and Rapid Spin clearing (the three scripts `WrapFree`, `LeechSeedFree`, `SpikesFree`, not
+`RapidSpinAway`). An uproar wakes a sleeper in two places, so there are two rows: at the end of the turn
+(`volatile:uproar:wakes`) and when the sleeper tries to move (`volatile:uproar:wakes-at-move`).
+
 ## Limits
 
 - Counts are "at least": two activations of one script back to back in one turn count once.

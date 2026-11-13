@@ -51,7 +51,13 @@ const arg = (name: string) => process.argv.find((a) => a.startsWith(`--${name}=`
 const stage: any = arg("stage") === undefined ? null : JSON.parse(readFileSync(arg("stage")!, "utf8"));
 const seed = stage === null ? Number(arg("seed")) : Number(stage.seed);
 const scene = (arg("scene") ?? "on") as "on" | "off";
-const streak = stage === null ? (seed * 11) % 49 : stage.challengeNum * 7 + stage.battleNum;
+// parity-mac fourth pass: the census mapping (seed * 11) % 49 only reaches challenges 1 to 7 (sets 110..755). --challenge=N / ROM_REPLAY_CHALLENGE=N (N = the
+// game's 0-based challengeNum; 7 = the eighth challenge, sets 372..849) puts the seed's battle into that challenge: streak N * 7 + (seed * 11) % 7. Unset = the
+// census mapping, so every older list keeps its battles.
+const challengeArg = arg("challenge") ?? (process.env.ROM_REPLAY_CHALLENGE || undefined);
+const challengeOverride = challengeArg === undefined ? null : Number(challengeArg);
+if (challengeOverride !== null && !(Number.isInteger(challengeOverride) && challengeOverride >= 0 && challengeOverride <= 99)) throw new Error("--challenge / ROM_REPLAY_CHALLENGE must be an integer 0..99");
+const streak = stage !== null ? stage.challengeNum * 7 + stage.battleNum : challengeOverride !== null ? challengeOverride * 7 + ((seed * 11) % 7) : (seed * 11) % 49;
 // parity-mac: very long battles (PP stall into Struggle on both sides) pass the default; --frame-budget=N raises it for one run.
 const frameBudget = Number(arg("frame-budget") ?? 200000);
 // parity-mac: the player's Factory symbols for `request` / `native` (GetPlayerSymbolCountForFacility, frontier_util.c:1657-1698). 0 = the census config: streak 20 is the
@@ -236,7 +242,7 @@ function play(initial: any, record: boolean, patchRng: number | null = null) {
   const wide: unknown[] = []; let lastRules: any = null;
   let actionMenuRng: number | null = null; let randomTurnNumber: number | null = null; const timeline: number[][] = []; let lastTl = "";
   // aud243d: the engine's DECISIONS (absolute engine frames; result() makes them frame0-relative) for the ROM-side semantic driver (tools/audio/soundEventProbe.py lab --drive).
-  const traceEvents = arg("events") !== undefined; const turnEvents: unknown[] = [];
+  const traceEvents = arg("events") !== undefined; const turnEvents: unknown[] = []; let recordedEvents = new WeakSet<object>();
   const decisions: Decision[] = []; let openSwitch: Decision | null = null;
   const owned = () => Boolean(state.battleStartIntro || state.battleResolutionPresentation || state.battleCommandPresentation);
   const step = (buttons: readonly string[] = []) => {
@@ -261,11 +267,19 @@ function play(initial: any, record: boolean, patchRng: number | null = null) {
       if (row.join() !== lastTl) { lastTl = row.join(); timeline.push([frame - frame0, ...row]); }
     }
     if (openSwitch && !forcedSelector()) { openSwitch.commitFrame = frame; openSwitch = null; }
-    if (traceEvents && frame0 !== null && state.battleResolutionPresentation && !before.battleResolutionPresentation) {
+    // One chunk per resolved turn. A turn without a player decision (the second turn of a two-turn move, a recharge turn, the later turns of Rollout /
+    // Outrage / Uproar / Bide) is resolved while the previous turn's presentation object is still up, so "the presentation appeared" alone missed it: its
+    // events never reached the tally. A new turn is also known by the rules object changing under a presentation with other segments.
+    const resBefore: any = before.battleResolutionPresentation; const resNow: any = state.battleResolutionPresentation;
+    if (traceEvents && frame0 !== null && resNow && (!resBefore || (resNow.segments !== resBefore.segments && state.battle?.rules !== before.battle?.rules))) {
       const res: any = state.battleResolutionPresentation;
       const rulesBefore: any = before.battle?.rules.rulesContext ?? null;
       // wideBefore (parity-mac fourth pass): the wide state the turn starts from, for the tally (tools/audio/romReplayTally.py).
-      turnEvents.push({ frame: frame - frame0, battlersBefore: JSON.parse(JSON.stringify(rulesBefore?.battlers ?? null)), wideBefore: rulesBefore === null ? null : wideOf(rulesBefore), events: (res.segments ?? []).flatMap((seg: any) => seg.events ?? []).map((e: any) => ({ seq: e.sequence, ...e.payload, label: e.provenance?.sourceLabel })) });
+      // A turn resolved under the previous turn's presentation carries that turn's events again in its segments: keep only the events not recorded yet.
+      if (!resBefore) recordedEvents = new WeakSet<object>();
+      const fresh = (res.segments ?? []).flatMap((seg: any) => seg.events ?? []).filter((e: any) => !recordedEvents.has(e));
+      for (const e of fresh) recordedEvents.add(e);
+      turnEvents.push({ frame: frame - frame0, battlersBefore: JSON.parse(JSON.stringify(rulesBefore?.battlers ?? null)), wideBefore: rulesBefore === null ? null : wideOf(rulesBefore), events: fresh.map((e: any) => ({ seq: e.sequence, ...e.payload, label: e.provenance?.sourceLabel })) });
     }
     if (!owned()) ended = true;
   };
@@ -400,10 +414,16 @@ if (mode === "request" && stage !== null) {
   const r = play(o, false);
   const g = r.state.opponentGenerations[0]; const rentals = r.state.round.rules.playerKernelParty;
   const setIds = (g.generation.opponents as any[]).map((x) => x.setId);
-  const playerSetIds = r.state.config.rentals.type === "generateInitial" ? (r.state.initialRentalGeneration!.rentals as any[]).slice(0, 3).map((x) => x.setId) : [];
+  // The player's team: the first three of the six rentals that the game lets a player select. The six can hold one species twice (the `currSpecies` quirk of
+  // GenerateInitialRentalMons, battle_factory.c:566-576), but the select screen refuses a second Pokemon of a species already picked (Select_AreSpeciesValid,
+  // battle_factory_screen.c:2256-2276, "Can't select same POKeMON"). Common from the eighth challenge on (sets 372..849 hold each species several times).
+  const speciesOfSet = (setId: number): string => (frontierMonsData as any).entries[setId].species;
+  const pickSelectable = (rentalList: any[]) => rentalList.reduce((team: any[], x: any) =>
+    (team.length < 3 && !team.some((y) => speciesOfSet(y.setId) === speciesOfSet(x.setId)) ? [...team, x] : team), []);
+  const playerSetIds = r.state.config.rentals.type === "generateInitial" ? pickSelectable(r.state.initialRentalGeneration!.rentals as any[]).map((x: any) => x.setId) : [];
   void rentals;
   // `replay` is this tool's own note (the test player and the census seed); soundEventProbe.py / romStateTimeline.py drop it before the lab validates the request.
-  const common = { schemaVersion: 1, profile: scene === "on" ? "battle-scene-on" : "battle-scene-off", level: 50, challengeNum: Math.floor(streak / 7), rentalSwapCount: 0, replay: { policy, censusSeed: seed, symbols } };
+  const common = { schemaVersion: 1, profile: scene === "on" ? "battle-scene-on" : "battle-scene-off", level: 50, challengeNum: Math.floor(streak / 7), rentalSwapCount: 0, replay: { policy, censusSeed: seed, symbols, ...(challengeOverride !== null ? { challenge: challengeOverride } : {}) } };
   // parity-mac: Noland. The lab's factoryBrain mode takes no trainer / battle number / opponent sets (challenge 2 = silver, 5 = gold, always battle 7).
   writeFileSync(arg("out")!, JSON.stringify(g.kind === "frontier-brain" ? {
     ...common, mode: "factoryBrain", playerSetIds, seed,

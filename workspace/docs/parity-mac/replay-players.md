@@ -8,6 +8,17 @@ Code: `tools/integration/romReplayPlayers.ts` (the players), `tools/integration/
 or the environment variable `ROM_REPLAY_POLICY`; default `census`), `tools/audio/romDecisionDriver.py` (the ROM side).
 One battle: `REPLAY_OUT=/abs/dir tools/audio/romReplayWide.sh SEED [POLICY [SYMBOLS]]`.
 
+## Which battle a seed is
+
+- The streak of a seed is `(seed * 11) % 49`: challenges 1 to 7 (sets 110..755). The fourth argument of
+  `romReplayWide.sh` (or `ROM_REPLAY_CHALLENGE`) names the game's 0-based challenge number instead; `7` is the eighth
+  challenge, where the game draws from sets 372..849 (the legendary Pokemon are only there). The battle number inside
+  the challenge is then `(seed * 11) % 7`. The ID gets `-c7`. Without the argument every older seed is the battle it was.
+- The player's team is the first three of the six rentals **that the game lets a player select**. The six can hold one
+  species twice (the `currSpecies` quirk of `GenerateInitialRentalMons`, `battle_factory.c:566-576`); the select screen
+  refuses the second one (`Select_AreSpeciesValid`, `battle_factory_screen.c:2256-2276`, "Can't select same
+  POKeMON."). No battle of the older lists had such a pair in its first three; at the eighth challenge about 3 in 100 do.
+
 ## The three players
 
 | name | what it does | what it is for |

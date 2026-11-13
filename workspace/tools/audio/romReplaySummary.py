@@ -20,8 +20,11 @@ def summarize(prefix, battle_id, symbols):
     tl = Path(f"{prefix}.tl.json")
     wide = c.get("wide")
     decisions = e["decisions"]
+    req = Path(f"{prefix}.req.json")
+    request = json.loads(req.read_text()) if req.exists() else {}
     out = {
         "id": battle_id, "seed": e["seed"], "scene": e["scene"], "policy": e.get("policy", "census"), "symbols": int(symbols),
+        "challengeNum": request.get("challengeNum"), "mode": request.get("mode"),
         "engineError": e["error"], "engineDecisions": len(decisions), "playerStats": e.get("playerStats"),
         "voluntarySwitches": sum(1 for x in decisions if x.get("voluntary")), "probes": sum(1 for x in decisions if x["kind"].endswith("-refused")),
         "drive": {**{k: dr[k] for k in ("stop", "frames", "decisionsConsumed", "decisionsTotal", "outcome")}, "errorReason": reason},

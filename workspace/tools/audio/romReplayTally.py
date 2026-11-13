@@ -130,11 +130,13 @@ SITUATION_LABELS = {
     "SubstituteFade": "volatile:substitute:breaks", "FocusPunchSetUp": "volatile:focus-punch:tightens", "MoveEffectSleep": "status:sleep:inflicted", "MoveEffectPoison": "status:poison:inflicted",
     "MoveEffectToxic": "status:toxic:inflicted", "MoveEffectBurn": "status:burn:inflicted", "MoveEffectFreeze": "status:freeze:inflicted", "MoveEffectParalysis": "status:paralysis:inflicted",
     "MoveEffectConfusion": "volatile:confusion:inflicted", "MoveEffectWrap": "volatile:wrap:inflicted", "IntimidateActivates": "entry:intimidate", "KnockedOff": "item:knocked-off",
-    "ItemSteal": "item:stolen", "SafeguardProtected": "screen:safeguard:blocks-status", "MistProtected": "screen:mist:blocks-stat-drop", "RapidSpinAway": "field:rapid-spin:clears",
+    "ItemSteal": "item:stolen", "SafeguardProtected": "screen:safeguard:blocks-status", "MistProtected": "screen:mist:blocks-stat-drop",
+    # BattleScript_RapidSpinAway itself prints nothing (rapidspinfree; return): the three scripts it pushes do (battle_scripts_1.s:3488-3506)
+    "WrapFree": "field:rapid-spin:clears", "LeechSeedFree": "field:rapid-spin:clears", "SpikesFree": "field:rapid-spin:clears",
     "MoveUsedIsConfused": "volatile:confusion:turn", "NoMovesLeft": "move:forced-struggle",
 }
 SITUATION_ROWS = sorted(set(SITUATION_LABELS.values()) | {
-    "status:poison:end-turn-damage",
+    "status:poison:end-turn-damage", "volatile:uproar:wakes-at-move",
     "switch:voluntary", "switch:forced-replacement", "switch:natural-cure-on-switch-out", "switch:baton-pass-passes-stages", "switch:refused:wrap", "switch:refused:mean-look",
     "switch:refused:ingrain", "switch:refused:shadow-tag", "switch:refused:arena-trap", "switch:refused:magnet-pull", "move-refused:no-pp", "move-refused:disable", "move-refused:torment",
     "move-refused:taunt", "move-refused:imprison", "move-refused:choice-band", "status:toxic:end-turn-damage", "weather:rain:continues", "weather:rain:ends", "weather:sandstorm:damage",
@@ -148,6 +150,7 @@ NO_EFFECT = {
     "ability:ABILITY_RUN_AWAY": "fleeing from a wild battle only", "ability:ABILITY_STENCH": "field ability only (wild encounter rate)",
     "ability:ABILITY_PLUS": "needs a partner with Minus on the field (doubles)", "ability:ABILITY_MINUS": "needs a partner with Plus on the field (doubles)",
     "ability:ABILITY_LIGHTNING_ROD": "redirects Electric moves to itself in doubles; no effect in singles (Gen 3)",
+    "moveid:MOVE_HELPING_HAND": "always fails in singles: Cmd_trysethelpinghand needs BATTLE_TYPE_DOUBLE (battle_script_commands.c:9170-9186)",
     "move:EFFECT_HELPING_HAND": "always fails in singles: Cmd_trysethelpinghand needs BATTLE_TYPE_DOUBLE (battle_script_commands.c:9170-9186)",
     "situation:volatile:torment:blocks-chosen-move": "dead script: no C code references BattleScript_MoveUsedIsTormented (only its declaration, battle_scripts.h:81); Torment acts at move selection only (battle_util.c:999-1012), which is the row move-refused:torment",
     "situation:volatile:snatch:steals": "Snatch can never run: no Level 50 set has it, Metronome may not call it (sMovesForbiddenToCopy, battle_script_commands.c:725-747, used by Cmd_metronome :7898-7921), and no set has Mirror Move, Assist or Mimic; a move those could copy after a Metronome call is still never Snatch",
@@ -172,6 +175,32 @@ def pool_rows():
         if he != "HOLD_EFFECT_NONE":
             rows.add("hold:" + he)
     return rows | {"situation:" + r for r in SITUATION_ROWS}
+
+
+def factory_sets():
+    """The Level 50 sets the Factory can hand out (no Unown: battle_factory.c:337 / :562 / :781), as the game builds them (Return -> Frustration, :913)."""
+    mons = json.loads((GEN / "battle-frontier-mons.json").read_text())["entries"]
+    items = {r["itemTableId"]: r["itemId"] for r in json.loads((GEN / "battle-frontier-held-items.json").read_text())["entries"]}
+    out = {}
+    for i in POOL:
+        s = mons[i]
+        if s["species"] == "SPECIES_UNOWN":
+            continue
+        moves = tuple(MOVE_BY_NAME["MOVE_FRUSTRATION" if mv == "MOVE_RETURN" else mv]["id"] for mv in s["moves"] if mv != "MOVE_NONE")
+        out[i] = {"species": SPECIES_ID[s["species"]], "moves": moves, "item": items[s["itemTableId"]]}
+    return out
+
+
+FACTORY_SETS = factory_sets()
+SET_BY_BUILD = collections.defaultdict(list)
+for _i, _s in FACTORY_SETS.items():
+    SET_BY_BUILD[(_s["species"], _s["moves"], _s["item"])].append(_i)
+
+
+def proposed_rows():
+    """Two more row families, proposed in the fourth pass (docs/parity-mac/tally.md): every set was on the field in a matching battle; every move of the
+    sets was used and worked (a row per move, finer than the row per move effect)."""
+    return {f"set:{i}" for i in FACTORY_SETS} | {"moveid:" + MOVES[m]["move"] for s in FACTORY_SETS.values() for m in s["moves"]}
 
 
 def tally_battle(facts):
@@ -221,6 +250,12 @@ def tally_battle(facts):
                 hit("situation:move-refused:torment" if me["status2"] & STATUS2_TORMENT else "situation:move-refused:unclassified")
         elif d["kind"] == "move" and d.get("forced"):
             hit("situation:move:forced-encore" if me["encoredMove"] else "situation:move:multi-turn-forced-continuation")
+    # proposed rows: the sets that were on the field (once per battle). A set is known by its species, moves and item at the battle's start.
+    fielded = {(b, w["battlers"][b]["partyIndex"]) for w in facts["wide"] for b in (0, 1)}
+    for b, index in fielded:
+        m = facts["parties"]["player" if b == 0 else "opponent"][index]
+        for i in SET_BY_BUILD.get((m["species"], tuple(x for x in m["moves"] if x), m["item"]), ()):
+            hit(f"set:{i}")
     # battle-start entry abilities are before the first recorded turn: read them from the first wide state
     if facts["wide"]:
         w0 = facts["wide"][0]["battlers"]
@@ -255,6 +290,9 @@ def tally_battle(facts):
             effect, a, t = mv["effect"], s["a"], s["t"]
             row = "move:" + effect
             hit(row + "#used")
+            hit("moveid:" + mv["move"] + "#used")
+            if not s["failed"]:
+                hit("moveid:" + mv["move"] + "#worked")
             if mv["move"] == "MOVE_STRUGGLE":  # no set has Struggle: a Struggle that ran is the forced one (the engine does not play the "no moves left" line)
                 hit("situation:move:forced-struggle")
             worked = not s["failed"]
@@ -385,6 +423,14 @@ def tally_battle(facts):
                 if label.startswith("SideStatusWoreOff"):
                     name = " ".join(str(x) for x in ev.get("substitutions", [])).upper()
                     hit("situation:screen:" + ("reflect" if "REFLECT" in name else "light-screen" if "LIGHT" in name else "mist" if "MIST" in name else "unknown") + ":ends")
+            # Liquid Ooze has no script label of its own that prints (AbsorbLiquidOoze / LeechSeedTurnPrintLiquidOoze only set the string and fall into
+            # the common tail): its message is the evidence (battle_message.c:966, :1123)
+            if kind == "message" and ev.get("messageId") == "STRINGID_ITSUCKEDLIQUIDOOZE":
+                hit("ability:ABILITY_LIQUID_OOZE")
+            # An uproar wakes a sleeper in two places: at the end of the turn (BattleScript_MonWokeUpInUproar, the row volatile:uproar:wakes) and when the
+            # sleeper tries to move (the attack canceler's UproarWakeUpCheck, battle_util.c: the same line printed by BattleScript_MoveUsedWokeUp)
+            if kind == "message" and ev.get("messageId") == "STRINGID_PKMNWOKEUPINUPROAR" and label.startswith("MoveUsedWokeUp"):
+                hit("situation:volatile:uproar:wakes-at-move")
             if poison_pending and kind == "hp-change" and ev.get("battler") in (0, 1):
                 # the poison line names no battler; the HP change after it does
                 hit("situation:status:toxic:end-turn-damage" if cur[ev["battler"]]["status1"] & STATUS1_TOXIC else "situation:status:poison:end-turn-damage")
@@ -466,6 +512,8 @@ def covered(row, counts):
     """The count that covers a row: for a move effect, its added effect when it has one, else `worked`."""
     if row.startswith("move:"):
         return counts.get(row + ("#secondary" if SECONDARY.get(row[5:]) else "#worked"), 0)
+    if row.startswith("moveid:"):
+        return counts.get(row + "#worked", 0)
     return counts.get(row, 0)
 
 
@@ -483,20 +531,20 @@ def main(argv):
                 total[row] += n
                 by_policy[facts["policy"]][row] += n
                 first.setdefault(row, facts["id"])
-    rows = pool_rows()
+    rows = pool_rows() | proposed_rows()
     extra = {r.split("#")[0] for r in total} - rows
     policies = sorted(battles)
     table = []
     for row in sorted(rows | extra):
         table.append({"row": row, "inPool": row in rows, "covered": covered(row, total), "byPolicy": {p: covered(row, by_policy[p]) for p in policies},
-                      **({"used": total.get(row + "#used", 0), "worked": total.get(row + "#worked", 0)} if row.startswith("move:") else {}),
+                      **({"used": total.get(row + "#used", 0), "worked": total.get(row + "#worked", 0)} if row.startswith(("move:", "moveid:")) else {}),
                       "note": NO_EFFECT.get(row), "firstBattle": first.get(row) or first.get(row + "#worked") or first.get(row + "#used")})
     result = {"battles": dict(battles), "rows": table}
     zero = [r for r in table if r["inPool"] and r["covered"] == 0 and not r["note"]]
     print(json.dumps({"battles": dict(battles), "rows": len(table), "poolRows": len(rows), "zeroRows": len(zero), "noEffectRows": sum(1 for r in table if r["note"])}))
     if "--zero" in argv:
         for r in zero:
-            print("  ZERO", r["row"], f"(used {r.get('used')}, worked {r.get('worked')})" if r["row"].startswith("move:") else "")
+            print("  ZERO", r["row"], f"(used {r.get('used')}, worked {r.get('worked')})" if "used" in r else "")
     if opt("--out"):
         Path(opt("--out")).write_text(json.dumps(result, indent=1))
     if opt("--md"):

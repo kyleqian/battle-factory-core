@@ -4,7 +4,7 @@
 
 Reads every `*.summary.json` under the DIRs and `done.txt` (battles whose chain failed before a summary: rc 12 = the lab did not stage the battle,
 rc 13 = the engine replay refused the staging, ...). A later DIR overrides an earlier one for the same battle id, so a re-drive directory (long caps,
-second drive) can be given after the first run. `--list` (lines `SEED POLICY SYMBOLS`) restricts the report to those battles and names the ones missing.
+second drive) can be given after the first run. `--list` (lines `SEED POLICY SYMBOLS [CHALLENGE]`) restricts the report to those battles and names the ones missing.
 Prints one table by test player: driven, match, and what the others are. `--json` writes one row per battle (the per-seed record kept under
 docs/replay-batches/).
 """
@@ -12,8 +12,8 @@ import collections, glob, json, re, sys
 from pathlib import Path
 
 
-def battle_id(seed, policy, symbols):
-    return f"{seed}-{policy}" + ("-gold" if str(symbols) == "1" else "")
+def battle_id(seed, policy, symbols="0", challenge=None):
+    return f"{seed}-{policy}" + ("-gold" if str(symbols) == "1" else "") + (f"-c{challenge}" if challenge not in (None, "") else "")
 
 
 def load(dirs):
@@ -36,6 +36,7 @@ def load(dirs):
                 and (s["wide"] is None or s["wide"]["diffPoints"] == 0)
             rows[s["id"]] = {
                 "id": s["id"], "seed": s["seed"], "policy": s["policy"], "symbols": s["symbols"], "scene": s["scene"],
+                **({"challengeNum": s["challengeNum"]} if s.get("challengeNum") is not None else {}),
                 "result": "match" if s["match"] else "unfinished" if unfinished else s["class"],
                 "statesMatched": s["matched"], "engineStates": s["engineStates"], "decisions": s["drive"]["decisionsTotal"], "romFrames": s["drive"]["frames"],
                 "voluntarySwitches": s["voluntarySwitches"], "probes": s["probes"], "outcome": s.get("outcome"),
