@@ -22,7 +22,9 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   then 3 / 3) / 44 skipped; test:smoke 448 / 448; build / build:lib 0. Soaks (tree `a21ec4148`, engine == final): vanilla 0:20 OFF **20 / 20**, ON **20 / 20**; 0:60 default
   **60 / 60**, winning **60 / 60**, winning-swap **60 / 60** (all `budget`); varied-RNG first-round winning carry 0 / 14 / 28 **100 / 100** each, winning-swap carry 0 **100 / 100**.
   play:random 4.5 min / scene `--lobby-new-challenge`: ON 20 battles / 7 swaps, OFF 27 / 12, 7 new challenges from the Lobby each, 0 page / console errors / overlays.
-- **Next:** lbr-d (7-win Lobby return; scout report `docs/lbr-d-scout.md` if it landed), aud246 (S11 close), Lobby NPC wander after the script releases, the PreBattleRoom
+- **lbr-d prep (no src):** scout `docs/lbr-d-scout.md` (two-step plan, change list, re-pin list); lbr-d2a ROM tail evidence (`docs/lbrd2a-won-tail-rom.md`,
+  fixture `tests/fixtures/data/factory-seventh-win-tail-off.json`): the won profile's `declineInputDelay` 39 vs ROM 41 and `recordSavedInputDelay` 70 vs ROM 74; farewell glyph +-1 tick to settle with a compare trace.
+- **Next:** lbr-d1 (engine + session change per the scout), aud246 (S11 close), Lobby NPC wander after the script releases, the PreBattleRoom
   briefing; fold `mac/parity-mac` at run start if it moved; nightly replay from the pool. Papercut: typecheck / build OOM beside two other workers (use 2 lanes when one runs a suite).
 
 ---

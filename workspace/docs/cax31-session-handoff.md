@@ -113,7 +113,8 @@ never brief those here. One worker at a time; each run folds the next audio step
 
 **Status at the 2026-11-13 wind-down:** item 0: aud244b, aud245, aud245b DONE (playback works, muted by default; Safari not checked on the box); next: aud246
 close (S11 step 10: soaks unchanged, audio RAM receipts, ROADMAP S11 tick), the initial-music gap if aud247 did not land (see PROGRESS), then the residual audio
-lists (ISSUES #198 etc.). Item 0b: lbr-a / lbr-b / lbr-c DONE; next lbr-d (7-win Lobby return in the same mount); open: field NPC wander after the script releases
+lists (ISSUES #198 etc.). Item 0b: lbr-a / lbr-b / lbr-c DONE; next lbr-d (7-win Lobby return in the same mount): brief lbr-d1 from `docs/lbr-d-scout.md` section 5, using the
+lbr-d2a ROM ticks (`docs/lbrd2a-won-tail-rom.md`) for the won farewell constants; open: field NPC wander after the script releases
 (lbr-b doc), the PreBattleRoom briefing before the draft (nch231 divergence), no Scene ON loss / retire ROM lab, no app SE_SAVE on the loss / retire result script.
 Item 0c DONE. Item 0d: the Mac lane owns battle rules; fold `mac/parity-mac` at run start if it moved; nightly replay from the pool; ISSUES #214 holds its
 source-read leads. Cleanup 5's "< 15 min" suite target: measured non-goal on this box (cln277); the 670 s render lever in
