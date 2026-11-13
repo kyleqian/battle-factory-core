@@ -92127,12 +92127,12 @@
         "id": "state:B_WEATHER_HAIL",
         "label": "B_WEATHER_HAIL",
         "family": "weather",
-        "sourceLine": 298,
+        "sourceLine": 300,
         "status": "tier1-covered",
         "evidence": [
           {
             "path": "src/engine/battleEndTurnOrchestration.ts",
-            "locator": "line:298",
+            "locator": "line:300",
             "kind": "source-state-symbol"
           },
           {
@@ -92170,12 +92170,12 @@
         "id": "state:B_WEATHER_RAIN",
         "label": "B_WEATHER_RAIN",
         "family": "weather",
-        "sourceLine": 295,
+        "sourceLine": 297,
         "status": "tier1-covered",
         "evidence": [
           {
             "path": "src/engine/battleEndTurnOrchestration.ts",
-            "locator": "line:295",
+            "locator": "line:297",
             "kind": "source-state-symbol"
           },
           {
@@ -92217,12 +92217,12 @@
         "id": "state:B_WEATHER_SANDSTORM",
         "label": "B_WEATHER_SANDSTORM",
         "family": "weather",
-        "sourceLine": 296,
+        "sourceLine": 298,
         "status": "tier1-covered",
         "evidence": [
           {
             "path": "src/engine/battleEndTurnOrchestration.ts",
-            "locator": "line:296",
+            "locator": "line:298",
             "kind": "source-state-symbol"
           },
           {
@@ -92264,12 +92264,12 @@
         "id": "state:B_WEATHER_SUN",
         "label": "B_WEATHER_SUN",
         "family": "weather",
-        "sourceLine": 297,
+        "sourceLine": 299,
         "status": "tier1-covered",
         "evidence": [
           {
             "path": "src/engine/battleEndTurnOrchestration.ts",
-            "locator": "line:297",
+            "locator": "line:299",
             "kind": "source-state-symbol"
           },
           {
@@ -93049,12 +93049,12 @@
         "id": "state:SIDE_STATUS_LIGHTSCREEN",
         "label": "SIDE_STATUS_LIGHTSCREEN",
         "family": "side-state",
-        "sourceLine": 290,
+        "sourceLine": 292,
         "status": "tier1-covered",
         "evidence": [
           {
             "path": "src/engine/battleEndTurnOrchestration.ts",
-            "locator": "line:290",
+            "locator": "line:292",
             "kind": "source-state-symbol"
           },
           {
@@ -93080,12 +93080,12 @@
         "id": "state:SIDE_STATUS_MIST",
         "label": "SIDE_STATUS_MIST",
         "family": "side-state",
-        "sourceLine": 292,
+        "sourceLine": 294,
         "status": "tier1-covered",
         "evidence": [
           {
             "path": "src/engine/battleEndTurnOrchestration.ts",
-            "locator": "line:292",
+            "locator": "line:294",
             "kind": "source-state-symbol"
           },
           {
@@ -93107,12 +93107,12 @@
         "id": "state:SIDE_STATUS_REFLECT",
         "label": "SIDE_STATUS_REFLECT",
         "family": "side-state",
-        "sourceLine": 289,
+        "sourceLine": 291,
         "status": "tier1-covered",
         "evidence": [
           {
             "path": "src/engine/battleEndTurnOrchestration.ts",
-            "locator": "line:289",
+            "locator": "line:291",
             "kind": "source-state-symbol"
           },
           {
@@ -93146,12 +93146,12 @@
         "id": "state:SIDE_STATUS_SAFEGUARD",
         "label": "SIDE_STATUS_SAFEGUARD",
         "family": "side-state",
-        "sourceLine": 291,
+        "sourceLine": 293,
         "status": "tier1-covered",
         "evidence": [
           {
             "path": "src/engine/battleEndTurnOrchestration.ts",
-            "locator": "line:291",
+            "locator": "line:293",
             "kind": "source-state-symbol"
           },
           {
@@ -93189,12 +93189,12 @@
         "id": "state:SIDE_STATUS_WORE_OFF_LABEL",
         "label": "SIDE_STATUS_WORE_OFF_LABEL",
         "family": "side-state",
-        "sourceLine": 301,
+        "sourceLine": 303,
         "status": "tier1-covered",
         "evidence": [
           {
             "path": "src/engine/battleEndTurnOrchestration.ts",
-            "locator": "line:301",
+            "locator": "line:303",
             "kind": "source-state-symbol"
           },
           {
