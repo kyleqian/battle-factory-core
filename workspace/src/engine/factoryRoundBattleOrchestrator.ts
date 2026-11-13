@@ -1926,7 +1926,12 @@ function beginCommandResolution(
         idleBounceElapsed: presentation.idleBounceElapsed,
         ...(presentation.forcedMove !== null
           && presentation.pendingDecision === presentation.forcedMove.decision
-          ? { forced: presentation.forcedMove.kind }
+          ? {
+            forced: presentation.forcedMove.kind,
+            ...(presentation.forcedMove.dismissedWaitCursorAge === undefined
+              ? {}
+              : { forcedWaitCursorAge: presentation.forcedMove.dismissedWaitCursorAge }),
+          }
           : {}),
       }),
       usedMessageHoldFrames: presentation.usedMessageHoldFrames,

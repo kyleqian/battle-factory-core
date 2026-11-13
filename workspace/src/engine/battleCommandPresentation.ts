@@ -274,6 +274,8 @@ export type BattleCommandPresentationState = Readonly<{
   forcedMove: Readonly<{
     kind: BattleScriptForcedMoveSelection;
     decision: BattleMoveDecision;
+    /** Struggle: the wait ▼ age when the "has no moves left!" box was dismissed (the ROM leaves the ▼ frozen through the hold). */
+    dismissedWaitCursorAge?: number;
   }> | null;
   pendingDecision: BattleCommandDecision | null;
 }>;
@@ -343,9 +345,11 @@ export const FORFEIT_MESSAGE_TEXT = `${FORFEIT_MESSAGE_PLAYER_NAME} forfeited th
  * the ▼ at once and leaves the typed text up until the used-move message starts, `NO_MOVES_DISMISS_HOLD_FRAMES` after the press
  * (the Encore press reaches its used-move message in the ordinary 10 frames).
  */
-export const NO_MOVES_MESSAGE_FIRST_GLYPH_AT = 4;
-export const NO_MOVES_MESSAGE_HOLD_AT = 30;
+export const NO_MOVES_MESSAGE_FIRST_GLYPH_AT = 3;
+export const NO_MOVES_MESSAGE_HOLD_AT = 29;
 export const NO_MOVES_DISMISS_HOLD_FRAMES = 9;
+/** The idle sprite bounce stops this many frames into the dismiss hold (ROM: press + 7, well before the used-move message). */
+export const NO_MOVES_BOUNCE_STOP_AFTER = 6;
 
 export function moveBattleCommandActionCursor(
   cursor: 0 | 1 | 2 | 3,
@@ -715,10 +719,12 @@ export function advanceBattleCommandPresentation(
         && (newKeys.has("A") || newKeys.has("B"))
         && state.forcedMove !== null
       ) {
+        const forcedMove = Object.freeze({ ...state.forcedMove, dismissedWaitCursorAge: elapsed - 1 - NO_MOVES_MESSAGE_HOLD_AT });
         return withLifecycle(state, "submitting", 0, {
-          pendingDecision: state.forcedMove.decision,
-          fightCursor: state.forcedMove.decision.moveSlot,
-          fightDisplayCursor: state.forcedMove.decision.moveSlot,
+          forcedMove,
+          pendingDecision: forcedMove.decision,
+          fightCursor: forcedMove.decision.moveSlot,
+          fightDisplayCursor: forcedMove.decision.moveSlot,
         });
       }
       return withLifecycle(state, "no-moves-message", elapsed);

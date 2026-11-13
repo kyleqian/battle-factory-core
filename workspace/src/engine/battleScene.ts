@@ -55327,6 +55327,11 @@ export function renderBattleResolutionSceneOffView(
     } else {
       drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
       drawBattleMessageTextLines(fb, forcedBottom.lines[0] ?? "", forcedBottom.lines[1] ?? "", Infinity);
+      drawCursor(
+        fb,
+        CURSOR_Y_OFFSETS[Math.floor(forcedBottom.waitCursorAge / 9) % CURSOR_Y_OFFSETS.length]!,
+        LINE2_ORIGIN.x + measureText(font, charmap, forcedBottom.lines[1] ?? ""),
+      );
     }
     return;
   }

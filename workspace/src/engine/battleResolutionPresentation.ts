@@ -4,6 +4,7 @@ import type { LiveBattlerX2History, LiveMoveBattlerX2Input } from "./liveBattler
 import { battleMoveAnimationRequest, type BattleMoveAnimationRequest } from "./battleMoveAnimation.ts";
 import { opponentPartySummaryDrawTiming } from "./midBattleOpponentPartySummaryTiming.ts";
 import {
+  NO_MOVES_BOUNCE_STOP_AFTER,
   NO_MOVES_DISMISS_HOLD_FRAMES,
   battleCommandFieldBattlerFromPartyMember,
   createBattleCommandDisplayedField,
@@ -735,7 +736,7 @@ export type BattleResolutionConfirmHandoff = Readonly<{
    * enc276: the move was confirmed with no move menu (Encore, or a forced Struggle). Encore keeps the action menu up through the
    * handoff; Struggle keeps the dismissed "has no moves left!" box up, behind `holdRemaining` extra frames before the stage walk.
    */
-  forced?: Readonly<{ kind: "encore" } | { kind: "struggle"; holdRemaining: number }>;
+  forced?: Readonly<{ kind: "encore" } | { kind: "struggle"; holdRemaining: number; waitCursorAge: number }>;
   /**
    * fpp150: the turn opens with the Focus Punch pre-pass, whose empty box the ROM prints 3 rows after turn order (R4: 68 -> 71,
    * shown 72) where an action's first print lands 9 rows after it (36 -> 45, glyph 46). The handoff ends after
@@ -852,6 +853,7 @@ export type CreateBattleResolutionPresentationInput = Readonly<{
     idleBounceElapsed: number;
     /** enc276: the command presentation confirmed a forced move with no move menu. */
     forced?: "encore" | "struggle";
+    forcedWaitCursorAge?: number;
   }>;
   opponentTrainer?: BattleResolutionOpponentTrainer | null;
   /**
@@ -5278,7 +5280,7 @@ export function createBattleResolutionPresentation(
           ...(input.confirmHandoff!.forced === "encore"
             ? { forced: Object.freeze({ kind: "encore" as const }) }
             : input.confirmHandoff!.forced === "struggle"
-              ? { forced: Object.freeze({ kind: "struggle" as const, holdRemaining: NO_MOVES_DISMISS_HOLD_FRAMES }) }
+              ? { forced: Object.freeze({ kind: "struggle" as const, holdRemaining: NO_MOVES_DISMISS_HOLD_FRAMES, waitCursorAge: input.confirmHandoff!.forcedWaitCursorAge ?? 0 }) }
               : {}),
           ...(battleResolutionOpensWithFocusPunchPrePass(events) ? { focusPunchPrePass: true as const } : {}),
         }),
@@ -5431,7 +5433,8 @@ export function advanceBattleResolutionConfirmHandoff(
       }),
       confirmHandoff: Object.freeze({
         ...handoff,
-        forced: Object.freeze({ kind: "struggle" as const, holdRemaining: handoff.forced.holdRemaining - 1 }),
+        bounceReset: handoff.bounceReset || NO_MOVES_DISMISS_HOLD_FRAMES - (handoff.forced.holdRemaining - 1) >= NO_MOVES_BOUNCE_STOP_AFTER,
+        forced: Object.freeze({ kind: "struggle" as const, holdRemaining: handoff.forced.holdRemaining - 1, waitCursorAge: handoff.forced.waitCursorAge }),
         idleBounceElapsed: handoff.idleBounceElapsed + 1,
       }),
       fadeTick: state.fadeTick + 1,

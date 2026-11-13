@@ -1113,7 +1113,7 @@ export type BattleResolutionPresentationRenderView = Readonly<{
      */
     forcedBottom: Readonly<
       | { kind: "encore"; prompt: string }
-      | { kind: "struggle"; lines: readonly string[] }
+      | { kind: "struggle"; lines: readonly string[]; waitCursorAge: number }
     > | null;
   }> | null;
   switchIn: Readonly<{
@@ -2081,6 +2081,7 @@ export function createBattleResolutionPresentationRenderView(
             : Object.freeze({
               kind: "struggle" as const,
               lines: resolveNoMovesLeftMessageLines(state.field, 0),
+              waitCursorAge: state.confirmHandoff.forced.waitCursorAge,
             }),
       });
   // ISSUES #78 residual (1): the white ball-fade only ever runs on a
