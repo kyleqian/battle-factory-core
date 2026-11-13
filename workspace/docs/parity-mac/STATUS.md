@@ -5,6 +5,102 @@ Branch `worker/parity-mac`. Method: every seed is played by the engine and repla
 "matches" when every engine state is found in order on the ROM to battle end. Lists and decision: `docs/cax31-session-handoff.md`
 item 0d, `docs/gameplay-parity-audit-2026-11-12.md` sections 7 and 8. Evidence is kept outside git; every row re-derives from the seed.
 
+## Fifth pass (2026-11-13, evening): the zero rows, the finer tally, discovery batches
+
+Task (work order of 14:10 UTC): fill the zero rows of the tally; a finer tally that names the rule code no ROM-matched
+battle has run, classified; discovery batches with new seeds in the background.
+
+### What was wrong for the game (fix 41)
+
+| # | What was wrong | Found by | ROM proof |
+|---|---|---|---|
+| 41 | The trainer AI's score for its own Foresight when the Foresight user is a Ghost type: the game rolls twice, the engine rolled once. The engine's battle took one random number too few and went on differently from the game. A player meets it only against silver Noland's Machoke or Hitmonlee after moving Color Change to it (Skill Swap) and hitting it with a Ghost move. | the finer tally: the branch had never run in a matching battle; read against the game's script | staged battle `noland-foresight-ghost` (lab seed 79001): 20 of 20 states with the fix; 6 of 21 without it |
+
+Details: `ai-foresight-ghost-second-roll.md`. Test: `tests/factoryAiCheckViability.test.ts` ("AI_CV_Foresight").
+
+### Step 1: the zero rows are filled
+
+Every row of the tally that was zero is now covered by a staged battle that matches the ROM (`staged-battles.md`,
+section "Fifth pass"): a move refused under Imprison, Imprison stopping a chosen move, Rage building, the flinch of
+Twister, Camouflage. The tally has one new row, Magic Coat reflecting the move of a Pressure Pokemon; two staged
+battles fill it.
+
+Magic Coat against Pressure, what the game does with the PP: the Magic Coat user pays one more PP **from its Magic
+Coat slot**, on the field and in the party record. When Metronome called the Magic Coat there is no Magic Coat slot, so
+nothing more is paid; the Metronome slot pays one PP for the use (Magic Coat's own use is never raised by Pressure).
+Both match the ROM (`party-pp-writes.md`). The fourth pass said Factory sets alone cannot stage this; that was wrong
+(Skill Swap moves Pressure to the Pokemon whose move is reflected).
+
+### Step 2: the finer tally (rule code no matching battle has run)
+
+The tool `tools/audio/romReplayCoverage.py` replays, engine side only, every battle that matched the ROM, with V8
+coverage, and lists every piece of the battle-rule code (134 files of `src/engine/`) that no such battle ran. The
+offsets were proven to map to the `.ts` source on a known branch. Method, scope, what is left out:
+`rule-coverage.md`. The list by rule: `rule-coverage-list.md`.
+
+- Counted: every matching battle of the lists, 5,352 (the fourth pass's final run and Scene ON list, discovery batch 1,
+  the Metronome shapes, the new stage files; none dropped); for the trainer AI files only the 2,903 without the
+  `ai-v1` player, because `ai-v1` runs the same AI code for the player's side.
+- **1,933 pieces of rule code were never run.** (a) cannot occur in a Factory Level 50 singles battle: 290 pieces, 163
+  rules. (b) not a battle rule: 1,445 pieces, 172 rules. **(c) reachable: 198 pieces, 110 rules**: 29 that a player
+  meets uncommonly, 81 rarely, none commonly. 134 of the 198 are in the battle scripts and the turn flow, 64 in the
+  trainer AI.
+- Reading the (c) list against the source gave fix 41 and two suspected differences that need rare set-ups (leads
+  for the next pass, in `rule-coverage.md`).
+- Not done: a staged battle or a steered batch for each (c) group (to start with the 29 uncommon ones).
+
+### Step 3: discovery batches
+
+- **Batch 1** (engine `b36f7b6c9`): seeds 60001..61000, 600 `ai-v1`, 200 `census`, 200 `random-v1`, challenge
+  numbers 0 to 7 (125 battles each), one in four with Battle Scene ON. 996 match the ROM to the end. 4 are Struggle
+  stalls that reach the ROM's frame cap of 600,000 frames (60039, 60183, 60421, 60987): every state compared matches.
+  No difference. 511 voluntary switches and 153 refusal probes by `random-v1`; the ROM refused every probe.
+- What batch 1 added: **no new tally row and no difference, but 45 pieces of rule code** that no battle of the final
+  run had run (28 of them the Scene ON list of the fourth pass runs too). By the work order's rule the family goes on.
+- **Batch 2** (seeds 61001..62000, the same mix): 221 battles in the record (89 `random-v1`, 88 `ai-v1`, 44 `census`),
+  221 match. It ran on the lanes the fold work left free and goes on; 779 not in the record.
+- Every battle is staged as the first battle of its challenge (the lab's request); the seventh battle of a challenge
+  (the "hard" trainer table, higher IVs) is only reached by the Noland battles.
+
+### Above the eighth challenge (checked in the source)
+
+The sets, the trainers and the AI do not change again above the eighth challenge (sets 372..849, trainers 200..299,
+all three AI scripts). Only the IVs change: the ninth challenge reads one row past the game's IV table and gets random
+IVs; from the tenth every IV is 31, as in the eighth. The lab stages challenge numbers 0..7 only, so the ninth
+challenge is not driven. Source lines: `replay-players.md`.
+
+### The final run on the engine with fix 41
+
+Every list of the fourth pass driven again from scratch on the engine with fix 41 (`4f90eaf6c`), with the six new
+stage files and the long-cap re-drives. Rows: `docs/replay-batches/2026-11-13-fifth-pass.json`; text and table:
+`2026-11-13-fifth-pass.md`.
+
+| list | battles | result |
+|---|---|---|
+| proof (`random-v1`) | 50 | 49 match; 20035 is the endless Struggle stall of the fourth pass (951 states match up to the cap) |
+| mixed (600 `ai-v1`, 200 `census`, 200 `random-v1`) | 1,000 | 999 match; 20734 the same stall (729 states) |
+| pool (`census`) | 962 | 962 match |
+| brain (`census`, silver and gold Noland) | 408 | 408 match (9098 and 6347 with the long ROM caps) |
+| challenge8 (eighth challenge) | 600 | 597 match; 22152, 22462, 22527 the same stalls |
+| lab (former lab failures) | 9 | 9 match |
+| staged (`docs/parity-mac/stages/`, 20 files) | 20 | 20 match, each with its expected rows |
+| Metronome sweep | 497 | 497 match |
+
+3,546 battles, 3,541 match, 5 Struggle stalls with no difference up to the cap. **The tally of this run alone: 375
+rows covered, 10 cannot occur, 0 zero** (385 rows); 28 of 28 Metronome-only effects; 739 of 739 sets; 273 of 273
+moves. Discovery batches, shapes and the proof battles (all lists of the pass): 5,095 battles in the JSON.
+
+### Not done
+
+- **(c) groups of the finer tally:** 110 reachable rules never run in a matching battle; no staged battle or steered
+  batch for them yet. The 29 uncommon ones first.
+- **Two suspected differences** from the reading (move-end steps after a Pursuit on a switching Pokemon that gets
+  Synchronize; Follow Me and a self-aimed Ghost Curse): not proven, `rule-coverage.md`.
+- **The discovery family is not finished:** batch 1 added covered code, batch 2 has 221 of 1,000 battles in the record.
+- **The ninth challenge** (random IVs) cannot be driven: the lab stages challenge numbers 0..7 only.
+- **The four Struggle stalls of batch 1** were not driven to their end (each would need several million frames).
+- **Open Level, and the round flow between battles:** not started, by the work order.
+
 ## Fourth pass (2026-11-13): three test players, the wide compare, the tally
 
 Task: the replay could not see part of the game. Its player took the least-used legal move and never switched by
@@ -96,7 +192,7 @@ could not count what happened there (`tally.md`). The final run's records have e
 | Cure berries in the after-action item pass (`HandleFaintedMonActions` state 6) | **fixed** (fix 34), Mechanic Lab ROM proof (`cure-berry-after-action.md`) |
 | The forced Struggle that never started (`gProtectStructs[].noValidMoves` kept) | **fixed** (fix 35), Mechanic Lab ROM proof (`forced-struggle-never-started.md`) |
 | White Herb on a Baton Pass switch-in: "Spikes already damaged" stays set | **seen on the ROM** (Mechanic Lab seed 701): the next Pokemon of that side takes no Spikes damage. The engine already did this; a test pins it (`white-herb-baton-pass.md`) |
-| Magic Coat against Pressure (fix 33) | **source and test only**, and Factory sets alone cannot stage it: the three Magic Coat sets (Spoink 121, Kecleon 220, Grumpig 251) are of challenges 1 and 2, and the only Pressure Pokemon there (Absol 247: Bite, Razor Wind, Future Sight, Quick Attack) has no move that Magic Coat reflects. It can occur only when Metronome calls Magic Coat against a Pressure Pokemon that uses a status move in the same turn (Dusclops, the legendary Pokemon) |
+| Magic Coat against Pressure (fix 33) | **closed in the fifth pass, ROM proof.** The fourth pass said Factory sets alone cannot stage it; that was wrong: Skill Swap can move Pressure to the Pokemon whose move is reflected. Two staged battles match the ROM: a real Magic Coat slot (`stages/magic-coat-pressure.json`, Kecleon 220 against a Venomoth that took Absol's Pressure: the Magic Coat slot pays one more PP, in the party record too) and Magic Coat called by Metronome (`stages/metronome-magic-coat-pressure.json`: no slot pays the extra PP). `party-pp-writes.md` |
 
 ### The tally
 
@@ -165,10 +261,11 @@ the end of the turn, Mist blocking a stat drop, Mist ending.
 
 ### Not done
 
-- **3 tally rows are zero** (above): two Imprison rows and "Rage building". 2 Metronome rows are zero (Camouflage,
-  Twister's flinch). Next: Metronome battles shaped for them (an opponent that is slower than Chansey and attacks,
-  for Rage; an opponent Chansey against a player that keeps using a shared move, for Imprison).
-- **Magic Coat against Pressure** (fix 33): source and test only; Factory sets alone cannot stage it (leads table).
+- ~~3 tally rows are zero; 2 Metronome rows are zero~~ **closed in the fifth pass** (staged battles, section "Fifth
+  pass").
+- ~~Magic Coat against Pressure: source and test only; Factory sets alone cannot stage it~~ **wrong, and closed in the
+  fifth pass**: Factory sets can stage it (Skill Swap moves Pressure to the Pokemon whose move is reflected), and
+  Metronome can call Magic Coat. Both are staged and match the ROM (`party-pp-writes.md`).
 - **Open Level, and later battles of a round:** not started, by the work order. What each would take is below.
 - **Presentation, seen in code only, not touched:** when the player is trapped the engine's party menu says the
   Pokemon "is already in battle"; the game says it "can't be switched out". The forced-move menu gap of the earlier
@@ -459,6 +556,8 @@ Fourth pass:
 | `battleScriptRulesContext` key list | + `noValidMovesKept`, `intimidateBattler` | fixes 35, 38 |
 | `battleScriptSketchOpcode` "transformed user" row | Sketch's party PP after the turn 0 -> 1 | a Transformed Pokemon's `ppreduce` does not write the party record (fix 36) |
 | `docs/gate6-coverage-manifest.json` / `.md` | pinned source lines moved, two new test paths | fixes 34 and 35 |
+| `factoryAiCheckViability` "AI_CV_Foresight" (fifth pass) | a Ghost-type user with a first roll of 80 or more: one draw and +2 -> two draws and 0 or +2; the type2 row: one draw -> two | fix 41: the game makes the second roll (`data/battle_ai_scripts.s:1957-1961`) |
+| `abilityItemParityCensus` (fifth pass) | two pinned sites of `runCvSkillSwap` move 8563 -> 8579 and 8569 -> 8585; the census document is unchanged | fix 41 added 16 lines above them |
 
 One presentation lead seen while re-pinning and not looked at: census battle 32 trips `sa125`'s ON - OFF row check on a
 CONFUSION anchor (139 vs 100).
@@ -466,6 +565,13 @@ CONFUSION anchor (139 vs 100).
 ## Gates
 
 Typecheck, full suite and build are run on a clean checkout of the branch tip (a separate gate worktree).
+
+Fifth pass: gate on `59ef2ded9` (fixes 29 to 41, the coverage tool, master `0d84f6bfb` merged in): typecheck ok, build
+ok, **14,745 tests pass, 1 fails**: the same `sandTombEvidenceCheckpoint` pin as below, which fails on master too.
+Two earlier runs of this pass's gate found two things that are fixed in `59ef2ded9`: a type error in fix 41's own test
+(`50da81972`), and the ability/item census pin of two line numbers that fix 41 moved (`59ef2ded9`, an honest re-pin).
+The commits after `59ef2ded9` are documents: this section, the finer-tally documents and classes file, the batch
+record.
 
 Fourth pass, second stop: gate on `d0afbccc2` (fixes 29 to 40, with master `937c7caee` merged in): typecheck ok, build
 ok, **14,745 tests pass, 1 fails**. The one is not from this lane: `tests/animation/sandTombEvidenceCheckpoint` fails
