@@ -55,11 +55,10 @@ Shown with their reason instead of a count:
   partner in doubles), Lightning Rod (redirects in doubles only).
 - Helping Hand: `Cmd_trysethelpinghand` (`battle_script_commands.c:9170-9186`) needs `BATTLE_TYPE_DOUBLE`; in singles
   the move always fails (it is used and fails in the batches).
-- Return: no Factory Pokemon has it. `SetMonMoveAvoidReturn` (`battle_factory.c:913`) writes Frustration instead at
-  every place a Factory Pokemon is made (`:461` rentals, `:501` opponents, `:822` Noland). The row is in the list
-  because the set table names Return.
-- Hidden Power: the only Level 50 set with it is Unown (set 126), and the Factory never hands out Unown: the three
-  places that draw a Factory Pokemon skip it (`battle_factory.c:337` opponents, `:562` rentals, `:781` Noland).
+- Not in this list (a correction of the first stop): **Return** and **Hidden Power**. No Factory Pokemon has either
+  (`SetMonMoveAvoidReturn`, `battle_factory.c:913`, writes Frustration instead of Return; the only Hidden Power set is
+  Unown, which the Factory never hands out, `:337` / `:562` / `:781`). But Metronome can call both, so they are rows
+  that only Metronome can fill, with the 29 other effects of that kind (below).
 - Snatch stealing a move: Snatch can never run. No Level 50 set has it; Metronome may not call it
   (`sMovesForbiddenToCopy`, `battle_script_commands.c:725-747`, read by `Cmd_metronome` `:7898-7921`); no set has
   Mirror Move, Assist or Mimic, and what those could copy after a Metronome call is a move that ran, so never Snatch.
@@ -76,6 +75,14 @@ Shown with their reason instead of a count:
 
 They answer "was every Pokemon and every move of the pool really played", which the rows per effect do not. Helping Hand
 has its "cannot occur" reason here too.
+
+## Effects only Metronome can reach
+
+31 move effects belong to no Level 50 set but to a move Metronome may call (every move outside
+`sMovesForbiddenToCopy`, `battle_script_commands.c:725-747`): Mist, Imprison, Rage, Bide, Transform, Mirror Move,
+Nature Power, Assist, Conversion, Teleport, Hidden Power, Return and others. They are rows too (`move:EFFECT_X`). Two
+Level 50 sets have Metronome (Chansey 227, Clefable 389), ten PP each, so these rows fill only in battles staged for
+them (the "Metronome sweep").
 
 ## What the record of a battle holds
 

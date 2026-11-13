@@ -48,3 +48,24 @@ opponent lead Arcanine (59, ability slot 0 = Intimidate) with four Splash. Drive
 
 A second run with a slower passer (Arcanine moves first, Baton Pass is the turn's last action) shows the same restore
 before the next turn.
+
+## The Spikes flag (fourth pass: now seen on the ROM, no change needed)
+
+`Cmd_switchineffects` sets `SIDE_STATUS_SPIKES_DAMAGED` when the entering Pokemon takes its Spikes damage and clears
+it at its very end. The White Herb script above ends the action before that, so the flag stays set, and the **next**
+Pokemon of that side takes no Spikes damage (its own switch-in then clears the flag). The fix above modeled this from
+the source; it had never been seen on the ROM.
+
+ROM (Mechanic Lab, Scene OFF, seed 701): player Jolteon (Baton Pass), Snorlax (White Herb), Blissey; opponent
+Arcanine (Intimidate, four Spikes). Decisions: Splash; Baton Pass to Snorlax; switch to Blissey; switch to Jolteon.
+
+| frame | with the herb | without the herb (control) |
+|---|---|---|
+| 355 | Spikes laid | the same |
+| 749 | Snorlax enters with Attack -1: Spikes damage 235 -> 206, flag set | the same |
+| 994 / 854 | herb used, Attack back to 0, **flag still set** | flag cleared |
+| 1438 / 1302 | Blissey enters: **330 / 330, no Spikes damage**; the flag is cleared at 1576 | Blissey enters: 330 -> 275 |
+| 2181 / 2198 | Jolteon enters: 140 -> 105 (the damage is back) | 140 -> 105 |
+
+Engine: `tests/parityMacWhiteHerbBatonPassSpikesFlag.test.ts` plays the same two turns through the reducer. It passes
+on the engine as it was: the model was right.

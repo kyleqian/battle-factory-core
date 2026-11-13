@@ -154,8 +154,6 @@ NO_EFFECT = {
     "move:EFFECT_HELPING_HAND": "always fails in singles: Cmd_trysethelpinghand needs BATTLE_TYPE_DOUBLE (battle_script_commands.c:9170-9186)",
     "situation:volatile:torment:blocks-chosen-move": "dead script: no C code references BattleScript_MoveUsedIsTormented (only its declaration, battle_scripts.h:81); Torment acts at move selection only (battle_util.c:999-1012), which is the row move-refused:torment",
     "situation:volatile:snatch:steals": "Snatch can never run: no Level 50 set has it, Metronome may not call it (sMovesForbiddenToCopy, battle_script_commands.c:725-747, used by Cmd_metronome :7898-7921), and no set has Mirror Move, Assist or Mimic; a move those could copy after a Metronome call is still never Snatch",
-    "move:EFFECT_HIDDEN_POWER": "only Unown (set 126) has Hidden Power, and the Factory never hands out Unown: battle_factory.c:337 (opponents), :562 (rentals), :781 (Noland)",
-    "move:EFFECT_RETURN": "no Factory Pokemon has Return: SetMonMoveAvoidReturn writes Frustration instead (battle_factory.c:913, called at :461 / :501 / :822)",
 }
 
 
@@ -197,10 +195,20 @@ for _i, _s in FACTORY_SETS.items():
     SET_BY_BUILD[(_s["species"], _s["moves"], _s["item"])].append(_i)
 
 
+def metronome_only_effects():
+    """Move effects that no Level 50 set has but Metronome can call: every move outside sMovesForbiddenToCopy (battle_script_commands.c:725-747)."""
+    src = (REF / "src/battle_script_commands.c").read_text()
+    start = src.index("sMovesForbiddenToCopy[] =")
+    forbidden = set(re.findall(r"\b(MOVE_\w+)", src[start:src.index("};", start)]))
+    in_sets = {MOVES[m]["effect"] for s in FACTORY_SETS.values() for m in s["moves"]}
+    return {m["effect"] for m in MOVES.values() if m["id"] != 0 and m["move"] not in forbidden} - in_sets
+
+
 def proposed_rows():
     """Two more row families, proposed in the fourth pass (docs/parity-mac/tally.md): every set was on the field in a matching battle; every move of the
     sets was used and worked (a row per move, finer than the row per move effect)."""
-    return {f"set:{i}" for i in FACTORY_SETS} | {"moveid:" + MOVES[m]["move"] for s in FACTORY_SETS.values() for m in s["moves"]}
+    return {f"set:{i}" for i in FACTORY_SETS} | {"moveid:" + MOVES[m]["move"] for s in FACTORY_SETS.values() for m in s["moves"]} \
+        | {"move:" + e for e in metronome_only_effects()}
 
 
 def tally_battle(facts):
