@@ -52,6 +52,32 @@ Metronome until its ten PP are gone, 110 with Clefable at the fourth challenge, 
 a player Pokemon that shares a move with it (so that Imprison can seal it; the random player probes). It found fixes 36
 to 40.
 
+## Fifth pass: the last zero rows
+
+Six stage files fill what the fourth pass left at zero. Each was found by driving one staging with many lab seeds,
+then driven again from the repo file (match, expected rows present).
+
+| stage file | lab seed | what happens | rows |
+|---|---|---|---|
+| `imprison.json` | 70080 | the opponent's Chansey 227 calls Imprison through Metronome; the player's Graveler 166 has Defense Curl, as Chansey has | `move-refused:imprison`, `volatile:imprison:blocks-chosen-move` |
+| `rage-builds.json` | 71118 | Chansey calls Rage and moves first; the player's slower Parasect 177 hits it in the same turn | `volatile:rage:builds` |
+| `metronome-twister-flinch.json` | 70107 | Chansey calls Twister, moves first, the player's Pokemon flinches | `move:EFFECT_TWISTER` (the flinch) |
+| `metronome-camouflage.json` | 77050 | Chansey is made a Psychic type first (Color Change moved to it by two Skill Swaps, then Psybeam); its Metronome calls Camouflage, which gives the Normal type back | `move:EFFECT_CAMOUFLAGE` |
+| `magic-coat-pressure.json` | 73000 | Kecleon 220 reflects the Sleep Powder of a Venomoth that took Pressure by Skill Swap | `volatile:magic-coat:bounces-under-pressure` |
+| `metronome-magic-coat-pressure.json` | 76026 | Clefable 389 calls Magic Coat through Metronome and reflects the Will-O-Wisp of Dusclops 378 (Pressure) | the same row |
+
+How they were found:
+
+- **Two shapes of 160 staged battles each** (made by a script, not kept in the repo): the opponent's Chansey against a
+  slower player Pokemon that keeps using Defense Curl (Imprison, Twister), and against a slower player Pokemon that
+  attacks every turn (Rage). All 320 match the ROM; five needed the long frame caps.
+- **A cheaper hunt for the rarest ones** (Camouflage; Magic Coat called by Metronome): per lab seed only the request,
+  the ROM's setup and the engine's replay are run (about 8 seconds), and the stage's `expect` rows are looked for in
+  the engine's own events. Only a seed whose engine battle has the rows is driven on the ROM. Camouflage took 51 seeds
+  of one staging and 55 of a variant; Magic Coat by Metronome took 27.
+- Why Camouflage needs the detour, and what the game does with the PP when Magic Coat meets Pressure: `tally.md`,
+  `party-pp-writes.md`.
+
 ## What a staged battle cannot do
 
 Pokemon that are not Factory sets (a level, a move set or an item no set has). Those need the Mechanic Lab with
