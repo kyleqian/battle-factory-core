@@ -1,0 +1,33 @@
+{
+ "name": "foresight-noland",
+ "why": "Silver Noland with Machoke (set 283: Cross Chop, Rock Slide, Foresight, Scary Face) against Ghost-type rentals: the AI's try-to-faint and check-viability passes must read Foresight on the target (docs/parity-mac/ai-effectiveness-foresight.md).",
+ "seed": 30031,
+ "mode": "factoryBrain",
+ "challengeNum": 2,
+ "battleNum": 6,
+ "playerSetIds": [
+  301,
+  268,
+  342
+ ],
+ "script": {
+  "actions": [
+   {
+    "move": 1
+   },
+   {
+    "move": 1
+   },
+   {
+    "move": 1
+   },
+   {
+    "move": 1
+   }
+  ],
+  "then": "census"
+ },
+ "expect": [
+  "move:EFFECT_FORESIGHT"
+ ]
+}

@@ -1253,6 +1253,8 @@ export function chooseFactoryAiScoredDecision(input: Readonly<{
           ...(view.attacker.stockpileCount === undefined ? {} : { stockpileCount: view.attacker.stockpileCount }),
         },
         target: {
+          // STATUS2_FORESIGHT on the target, for the pass's TypeCalc probes (docs/parity-mac/ai-effectiveness-foresight.md)
+          ...(view.target.isForesighted === true ? { isForesighted: true } : {}),
           speed: view.target.speed,
           speedStage: view.target.statStages.speed,
           types: view.target.types,

@@ -287,6 +287,8 @@ export type FactoryAiCheckViabilityBattler = Readonly<{
   speed: number;
   speedStage: number;
   types: readonly [string, string];
+  /** STATUS2_FORESIGHT (read for the TARGET): TypeCalc stops at the TYPE_FORESIGHT row. Optional, default false. */
+  isForesighted?: boolean;
   isFirstTurn: number;
   evasionStage: number;
   accStage: number;
@@ -1746,10 +1748,12 @@ function runCvAbsorb(input: Readonly<{
   attackerTypes: readonly [string, string];
   moveType: string;
   targetTypes: readonly [string, string];
+  /** STATUS2_FORESIGHT on the target: TypeCalc stops at the TYPE_FORESIGHT row (battle_script_commands.c:1560-1566). */
+  targetIsForesighted?: boolean;
   drawOrdinalStart: number;
   reasonPrefix: string;
 }>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> {
-  const classified = classifyHighCritEffectiveness(input.attackerTypes, input.moveType, input.targetTypes);
+  const classified = classifyHighCritEffectiveness(input.attackerTypes, input.moveType, input.targetTypes, input.targetIsForesighted === true);
   if (classified !== AI_EFFECTIVENESS_X0_5 && classified !== AI_EFFECTIVENESS_X0_25) {
     return Object.freeze({ rng: input.rng, draws: Object.freeze([]), scoreDelta: 0 });
   }
@@ -1789,8 +1793,10 @@ function runCvDreamEater(input: Readonly<{
   attackerTypes: readonly [string, string];
   moveType: string;
   targetTypes: readonly [string, string];
+  /** STATUS2_FORESIGHT on the target: TypeCalc stops at the TYPE_FORESIGHT row (battle_script_commands.c:1560-1566). */
+  targetIsForesighted?: boolean;
 }>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> {
-  const classified = classifyHighCritEffectiveness(input.attackerTypes, input.moveType, input.targetTypes);
+  const classified = classifyHighCritEffectiveness(input.attackerTypes, input.moveType, input.targetTypes, input.targetIsForesighted === true);
   const scoreDelta = classified === AI_EFFECTIVENESS_X0_25 || classified === AI_EFFECTIVENESS_X0_5 ? -1 : 0;
   return Object.freeze({
     rng: input.rng,
@@ -2550,6 +2556,8 @@ function runCvRecharge(input: Readonly<{
   attackerTypes: readonly [string, string];
   moveType: string;
   targetTypes: readonly [string, string];
+  /** STATUS2_FORESIGHT on the target: TypeCalc stops at the TYPE_FORESIGHT row (battle_script_commands.c:1560-1566). */
+  targetIsForesighted?: boolean;
   drawOrdinalStart: number;
   reasonPrefix: string;
 }>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> {
@@ -2557,7 +2565,7 @@ function runCvRecharge(input: Readonly<{
   let rng = input.rng;
   let ordinal = input.drawOrdinalStart;
 
-  const classified = classifyHighCritEffectiveness(input.attackerTypes, input.moveType, input.targetTypes);
+  const classified = classifyHighCritEffectiveness(input.attackerTypes, input.moveType, input.targetTypes, input.targetIsForesighted === true);
   if (classified === AI_EFFECTIVENESS_X0_25 || classified === AI_EFFECTIVENESS_X0_5) {
     return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: -1 });
   }
@@ -2947,9 +2955,12 @@ function classifyHighCritEffectiveness(
   attackerTypes: readonly [string, string],
   moveType: string,
   targetTypes: readonly [string, string],
+  targetHasForesight = false,
 ): number {
   const stabbed = applyStab(AI_EFFECTIVENESS_X1, attackerTypes, moveType);
-  let value = applyTypeEffectiveness(stabbed, moveType, targetTypes, TYPE_EFFECTIVENESS).damage;
+  // TypeCalc (battle_script_commands.c:1536-1591) breaks out of the table at the TYPE_FORESIGHT row when the target has
+  // STATUS2_FORESIGHT (:1560-1566): Normal / Fighting -> Ghost x0 is never applied (docs/parity-mac/ai-effectiveness-foresight.md).
+  let value = applyTypeEffectiveness(stabbed, moveType, targetTypes, TYPE_EFFECTIVENESS, targetHasForesight).damage;
   if (value === 120) value = AI_EFFECTIVENESS_X2; // Super effective STAB.
   if (value === 240) value = AI_EFFECTIVENESS_X4;
   if (value === 30) value = AI_EFFECTIVENESS_X0_5; // Not very effective STAB.
@@ -2993,10 +3004,12 @@ function runCvHighCrit(input: Readonly<{
   attackerTypes: readonly [string, string];
   moveType: string;
   targetTypes: readonly [string, string];
+  /** STATUS2_FORESIGHT on the target: TypeCalc stops at the TYPE_FORESIGHT row (battle_script_commands.c:1560-1566). */
+  targetIsForesighted?: boolean;
   drawOrdinalStart: number;
   reasonPrefix: string;
 }>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> {
-  const classified = classifyHighCritEffectiveness(input.attackerTypes, input.moveType, input.targetTypes);
+  const classified = classifyHighCritEffectiveness(input.attackerTypes, input.moveType, input.targetTypes, input.targetIsForesighted === true);
   if (classified === AI_EFFECTIVENESS_X0_25 || classified === AI_EFFECTIVENESS_X0_5) {
     return Object.freeze({ rng: input.rng, draws: Object.freeze([]), scoreDelta: 0 });
   }
@@ -4796,8 +4809,10 @@ function runCvChargeUpMove(input: Readonly<{
   attackerTypes: readonly [string, string];
   moveType: string;
   targetTypes: readonly [string, string];
+  /** STATUS2_FORESIGHT on the target: TypeCalc stops at the TYPE_FORESIGHT row (battle_script_commands.c:1560-1566). */
+  targetIsForesighted?: boolean;
 }>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> {
-  const classified = classifyHighCritEffectiveness(input.attackerTypes, input.moveType, input.targetTypes);
+  const classified = classifyHighCritEffectiveness(input.attackerTypes, input.moveType, input.targetTypes, input.targetIsForesighted === true);
   if (classified === AI_EFFECTIVENESS_X0_25 || classified === AI_EFFECTIVENESS_X0_5) {
     return Object.freeze({ rng: input.rng, draws: Object.freeze([]), scoreDelta: -2 });
   }
@@ -4855,6 +4870,8 @@ function runCvOverheat(input: Readonly<{
   attackerTypes: readonly [string, string];
   moveType: string;
   targetTypes: readonly [string, string];
+  /** STATUS2_FORESIGHT on the target: TypeCalc stops at the TYPE_FORESIGHT row (battle_script_commands.c:1560-1566). */
+  targetIsForesighted?: boolean;
   drawOrdinalStart: number;
   reasonPrefix: string;
 }>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> {
@@ -4862,7 +4879,7 @@ function runCvOverheat(input: Readonly<{
   let rng = input.rng;
   let ordinal = input.drawOrdinalStart;
 
-  const classified = classifyHighCritEffectiveness(input.attackerTypes, input.moveType, input.targetTypes);
+  const classified = classifyHighCritEffectiveness(input.attackerTypes, input.moveType, input.targetTypes, input.targetIsForesighted === true);
   if (classified === AI_EFFECTIVENESS_X0_25 || classified === AI_EFFECTIVENESS_X0_5) {
     return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: -1 });
   }
@@ -5554,6 +5571,8 @@ function runCvFocusPunch(input: Readonly<{
   attackerTypes: readonly [string, string];
   moveType: string;
   targetTypes: readonly [string, string];
+  /** STATUS2_FORESIGHT on the target: TypeCalc stops at the TYPE_FORESIGHT row (battle_script_commands.c:1560-1566). */
+  targetIsForesighted?: boolean;
   funcResultCarry: AiWeatherValue | undefined;
   drawOrdinalStart: number;
   reasonPrefix: string;
@@ -5562,7 +5581,7 @@ function runCvFocusPunch(input: Readonly<{
   let rng = input.rng;
   let ordinal = input.drawOrdinalStart;
 
-  const classified = classifyHighCritEffectiveness(input.attackerTypes, input.moveType, input.targetTypes);
+  const classified = classifyHighCritEffectiveness(input.attackerTypes, input.moveType, input.targetTypes, input.targetIsForesighted === true);
   if (classified === AI_EFFECTIVENESS_X0_25 || classified === AI_EFFECTIVENESS_X0_5) {
     return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: -1, funcResultAfter: input.funcResultCarry });
   }
@@ -5739,6 +5758,7 @@ export function runCheckViability(input: Readonly<{
       attackerTypes: input.attacker.types,
       moveType: move.type,
       targetTypes: input.target.types,
+      targetIsForesighted: input.target.isForesighted === true,
       drawOrdinalStart: input.drawOrdinalStart,
       reasonPrefix: input.reasonPrefix,
     });
@@ -6211,6 +6231,7 @@ export function runCheckViability(input: Readonly<{
       attackerTypes: input.attacker.types,
       moveType: move.type,
       targetTypes: input.target.types,
+      targetIsForesighted: input.target.isForesighted === true,
       drawOrdinalStart: input.drawOrdinalStart,
       reasonPrefix: input.reasonPrefix,
     });
@@ -6231,6 +6252,7 @@ export function runCheckViability(input: Readonly<{
       attackerTypes: input.attacker.types,
       moveType: move.type,
       targetTypes: input.target.types,
+      targetIsForesighted: input.target.isForesighted === true,
     });
     return Object.freeze({
       kind: "scored",
@@ -6341,6 +6363,7 @@ export function runCheckViability(input: Readonly<{
       attackerTypes: input.attacker.types,
       moveType: move.type,
       targetTypes: input.target.types,
+      targetIsForesighted: input.target.isForesighted === true,
       drawOrdinalStart: input.drawOrdinalStart,
       reasonPrefix: input.reasonPrefix,
     });
@@ -6553,6 +6576,7 @@ export function runCheckViability(input: Readonly<{
       attackerTypes: input.attacker.types,
       moveType: move.type,
       targetTypes: input.target.types,
+      targetIsForesighted: input.target.isForesighted === true,
     });
     return Object.freeze({
       kind: "scored",
@@ -6573,6 +6597,7 @@ export function runCheckViability(input: Readonly<{
       attackerTypes: input.attacker.types,
       moveType: move.type,
       targetTypes: input.target.types,
+      targetIsForesighted: input.target.isForesighted === true,
       drawOrdinalStart: input.drawOrdinalStart,
       reasonPrefix: input.reasonPrefix,
     });
@@ -6728,6 +6753,7 @@ export function runCheckViability(input: Readonly<{
       attackerTypes: input.attacker.types,
       moveType: move.type,
       targetTypes: input.target.types,
+      targetIsForesighted: input.target.isForesighted === true,
       funcResultCarry,
       drawOrdinalStart: input.drawOrdinalStart,
       reasonPrefix: input.reasonPrefix,
@@ -6767,6 +6793,7 @@ export function runCheckViability(input: Readonly<{
       attackerTypes: input.attacker.types,
       moveType: move.type,
       targetTypes: input.target.types,
+      targetIsForesighted: input.target.isForesighted === true,
       drawOrdinalStart: input.drawOrdinalStart,
       reasonPrefix: input.reasonPrefix,
     });
@@ -7237,6 +7264,7 @@ export function runCheckViability(input: Readonly<{
       attackerTypes: input.attacker.types,
       moveType: move.type,
       targetTypes: input.target.types,
+      targetIsForesighted: input.target.isForesighted === true,
       drawOrdinalStart: input.drawOrdinalStart,
       reasonPrefix: input.reasonPrefix,
     });
@@ -7779,6 +7807,8 @@ function runCvSuperpower(input: Readonly<{
   attackerTypes: readonly [string, string];
   moveType: string;
   targetTypes: readonly [string, string];
+  /** STATUS2_FORESIGHT on the target: TypeCalc stops at the TYPE_FORESIGHT row (battle_script_commands.c:1560-1566). */
+  targetIsForesighted?: boolean;
   drawOrdinalStart: number;
   reasonPrefix: string;
 }>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> {
@@ -7786,7 +7816,7 @@ function runCvSuperpower(input: Readonly<{
   let rng = input.rng;
   let ordinal = input.drawOrdinalStart;
 
-  const classified = classifyHighCritEffectiveness(input.attackerTypes, input.moveType, input.targetTypes);
+  const classified = classifyHighCritEffectiveness(input.attackerTypes, input.moveType, input.targetTypes, input.targetIsForesighted === true);
   if (classified === AI_EFFECTIVENESS_X0_25 || classified === AI_EFFECTIVENESS_X0_5) {
     return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: -1 });
   }
@@ -8847,6 +8877,8 @@ function runCvEruption(input: Readonly<{
   attackerTypes: readonly [string, string];
   moveType: string;
   targetTypes: readonly [string, string];
+  /** STATUS2_FORESIGHT on the target: TypeCalc stops at the TYPE_FORESIGHT row (battle_script_commands.c:1560-1566). */
+  targetIsForesighted?: boolean;
   drawOrdinalStart: number;
   reasonPrefix: string;
 }>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number }> {
@@ -8854,7 +8886,7 @@ function runCvEruption(input: Readonly<{
   let rng = input.rng;
   let ordinal = input.drawOrdinalStart;
 
-  const classified = classifyHighCritEffectiveness(input.attackerTypes, input.moveType, input.targetTypes);
+  const classified = classifyHighCritEffectiveness(input.attackerTypes, input.moveType, input.targetTypes, input.targetIsForesighted === true);
   if (classified === AI_EFFECTIVENESS_X0_25 || classified === AI_EFFECTIVENESS_X0_5) {
     return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: -1 });
   }

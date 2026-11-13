@@ -30,10 +30,38 @@ are -10 without Foresight and 0 with it (the second case fails unfixed).
 
 Seed 959 matches to battle end. See `STATUS.md`.
 
-## Open next to this (source-read, no ROM seed yet)
+## The other two AI passes (fourth pass, fix 32)
 
-The same `TypeCalc` feeds the other two AI passes, and their ports do not take Foresight either:
-`src/engine/factoryAiTryToFaint.ts` (`estimateDamage`, `isQuadrupleEffective`: `Cmd_if_can_faint`,
-`Cmd_get_how_powerful_move_is`, the x4 test) and the `if_type_effectiveness` checks in
-`src/engine/factoryAiCheckViability.ts`. Reach: a full-AI opponent (challenge 4 and up) with a Normal / Fighting move against a
-Foresighted Ghost.
+The same `TypeCalc` feeds the other two passes, and their ports did not take Foresight:
+
+- `AI_TryToFaint`: `Cmd_if_can_faint` and `Cmd_get_how_powerful_move_is` run `AI_CalcDmg` and then `TypeCalc`
+  (`battle_ai_script_commands.c`), and the x4 probe runs `TypeCalc` on a fixed 40. Engine:
+  `src/engine/factoryAiTryToFaint.ts` `estimateDamage` and `isQuadrupleEffective` now pass the target's Foresight state
+  to the shared table walk (`applyTypeEffectiveness`, which already had the Foresight break for real hits).
+- `AI_CheckViability`: every `if_type_effectiveness` probe. Engine: `classifyHighCritEffectiveness` in
+  `src/engine/factoryAiCheckViability.ts` takes the target's Foresight state; its nine handlers (Absorb, Dream Eater,
+  Recharge, High Crit, Charge-Up, Overheat, Focus Punch, Superpower, Eruption) get it from the decision policy.
+
+What was wrong for the game: against a Ghost that the opponent had hit with Foresight or Odor Sleuth, the full AI
+still saw its Normal and Fighting moves as doing 1 damage ("cannot knock out", "not my strongest move"), and its
+Cross Chop took one random roll too many, which moved every later random number of the battle.
+
+Reach, from the pool data and the AI scripts:
+
+- The full AI is Noland, or an ordinary trainer from challenge 4 on. The only sets with a Foresight move are 178
+  (Machoke), 283 (Machoke: Cross Chop, Rock Slide, Foresight, Scary Face) and 338 (Hitmonlee: Mega Kick, Brick Break,
+  Foresight, Rock Tomb). None is in an ordinary trainer's range from challenge 4 on; 283 and 338 are in **silver
+  Noland's** range (267..371).
+- The shipped (non-`BUGFIX`) `AI_CV_Foresight` reads the **user's** types, so Machoke and Hitmonlee score Foresight -2
+  (`data/battle_ai_scripts.s`, `AI_CV_Foresight`). Noland uses it only when everything else scores below 98: against a
+  Ghost that is after his Rock move has run out of PP (Cross Chop / Mega Kick / Brick Break sit at 90, "no effect").
+
+So the case is: silver Noland, one of those two sets, a Ghost rental (268 Sableye, 284 Haunter, 342 Banette) that
+outlasts ten Rock Slides or Rock Tombs. Real, and rare.
+
+Tests: `tests/parityMacAiForesightTryToFaintViability.test.ts` (three cases, all fail without the fix);
+`tests/factoryAiScoredWiringParity.test.ts` carries the new field in its exhaustive samples.
+
+ROM proof: none yet. A staged Noland battle exists (`docs/parity-mac/stages/foresight-noland.json`, lab seed 30031:
+Noland's party has Machoke 283) and matches the ROM, but the AI never chose Foresight in it, for the reason above. See
+`STATUS.md` for the state of the staged battle.
