@@ -314,7 +314,7 @@ function stateAtDecidedRound(
 function driveTerminalAnswering(
   state: EngineState,
   choice: "yes" | "no" | "cancel",
-  maxTicks = 3_000,
+  maxTicks = 8_000,
 ): EngineState {
   let s = state;
   const A: ReadonlySet<GbaButton> = new Set(["A"]);
@@ -324,14 +324,16 @@ function driveTerminalAnswering(
   let cursorMoved = choice !== "yes";
   let choiceSent = false;
   for (let i = 0; i < maxTicks; i += 1) {
-    if (s.pendingGeneratedRound !== null) return s;
+    if (s.lobbyFreeRoam !== null) return s;
     const terminal = s.factoryTerminal;
     const readyForChoice =
       terminal !== null &&
       terminal.recordChoice === null &&
       terminal.recordPromptReleaseAge !== null &&
       terminal.age >= terminal.recordPromptReleaseAge + terminal.profile.recordMenuInputDelay;
-    let buttons: ReadonlySet<GbaButton> = i % 2 === 0 ? A : NONE;
+    // Once the record prompt is dismissed the mashed A must not reach the menu: it would answer the default NO.
+    const menuPending = terminal !== null && terminal.recordPromptReleaseAge !== null && terminal.recordChoice === null;
+    let buttons: ReadonlySet<GbaButton> = i % 2 === 0 && !menuPending ? A : NONE;
     if (readyForChoice && !choiceSent) {
       if (!cursorMoved) {
         buttons = UP;
@@ -343,30 +345,34 @@ function driveTerminalAnswering(
     }
     s = tick(s, buttons);
   }
-  throw new Error(`terminal did not chain into the next draft within ${maxTicks} ticks (choice=${choice})`);
+  throw new Error(`terminal did not reach the walkable Lobby within ${maxTicks} ticks (choice=${choice})`);
 }
 
-describe("ISSUES #104 (tick()-level): the generated-orchestrator re-chain also fires on YES/cancel", () => {
-  it("YES re-chains into a fresh generated draft, same as NO", () => {
+// lbr-d1: the won terminal no longer chains into a draft; every answer plays the ROM's farewell and hands over the walkable Lobby
+// with the streak kept (the attendant's A deals the next challenge, tests/lbrd.test.ts).
+describe("ISSUES #104 (tick()-level): the won record answers YES / cancel end in the walkable Lobby", () => {
+  it("YES shows the recorded message, the farewell and the Lobby, same as NO", () => {
     const carry = createInitialFactoryCarry(PLAYER_TRAINER_ID);
     const round1 = driveGeneratedRoundToCompletion(carry, 17);
     expect(round1.round.rules.phase).toBe("roundComplete");
 
     const chained = driveTerminalAnswering(stateAtDecidedRound(round1, carry), "yes");
-    expect(chained.pendingGeneratedRound).not.toBeNull();
-    expect(chained.factoryTerminal).toBeNull();
-    expect(chained.factoryRoundBattleOrchestrator).toBeNull();
-    expect(chained.lobbyFreeRoam).toBeNull();
+    expect(chained.lobbyFreeRoam).not.toBeNull();
+    expect(chained.pendingGeneratedRound).toBeNull();
+    expect(chained.factoryTerminal?.recordChoice).toBe("yes");
+    expect(chained.lobbyStreakKept).toBe(true);
+    expect(chained.factoryCarry.factoryWinStreak).toBe(7);
   });
 
-  it("B-cancel re-chains into a fresh generated draft, same as NO", () => {
+  it("B-cancel ends in the walkable Lobby, same as NO", () => {
     const carry = createInitialFactoryCarry(PLAYER_TRAINER_ID);
     const round1 = driveGeneratedRoundToCompletion(carry, 17);
 
     const chained = driveTerminalAnswering(stateAtDecidedRound(round1, carry), "cancel");
-    expect(chained.pendingGeneratedRound).not.toBeNull();
-    expect(chained.factoryTerminal).toBeNull();
-    expect(chained.factoryRoundBattleOrchestrator).toBeNull();
-    expect(chained.lobbyFreeRoam).toBeNull();
+    expect(chained.lobbyFreeRoam).not.toBeNull();
+    expect(chained.pendingGeneratedRound).toBeNull();
+    expect(chained.factoryTerminal?.recordChoice).toBe("cancel");
+    expect(chained.lobbyStreakKept).toBe(true);
+    expect(chained.factoryCarry.factoryWinStreak).toBe(7);
   });
 });

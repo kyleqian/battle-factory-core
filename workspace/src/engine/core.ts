@@ -879,6 +879,11 @@ export interface EngineState {
    * the conversation freezes (no input, same frame) until the host destroys the mount. False everywhere else (soaks, shell).
    */
   attendantRequestHold: boolean;
+  /**
+   * lbr-d1: set at the Lobby entry after a 7-win round (the ROM's WonChallenge leaves FACTORY_DATA_WIN_STREAK_ACTIVE set), so the
+   * attendant's next start keeps the carried streak and rents instead of zeroing them. Cleared by every new challenge.
+   */
+  lobbyStreakKept: boolean;
   /** In-session Factory progression carried across chained rounds; see factoryRoundChaining.ts. */
   factoryCarry: FactoryCarry;
   /**
@@ -918,6 +923,19 @@ export interface InitialEngineStateOptions {
 
 type FactoryTerminalCommand =
   Parameters<typeof createFactoryTerminalPresentation>[0];
+
+/** The terminal for a round command; a won round shows the BP its roundOutcome awards on top of the carried total. */
+function createTerminalForRound(
+  command: FactoryTerminalCommand,
+  orchestrator: FactoryRoundBattleOrchestratorState | null,
+  carry: FactoryCarry,
+): FactoryTerminalPresentationState {
+  const awarded = orchestrator?.roundOutcome?.battlePointsAwarded;
+  return createFactoryTerminalPresentation(
+    command,
+    awarded === undefined ? undefined : { before: carry.battlePoints, awarded },
+  );
+}
 
 function terminalCommandForRound(
   round: RoundControllerState | null,
@@ -996,6 +1014,7 @@ function enterChainedFactoryChallenge(
     lobbyFreeRoam: null,
     lobbyAttendant: null,
     attendantRequestHold: false,
+    lobbyStreakKept: false,
     factoryCarry: nextCarry,
     pendingGeneratedRound: Object.freeze({ rngValueBefore, carry: nextCarry }),
   };
@@ -1031,6 +1050,7 @@ export function createInitialState(
     lobbyFreeRoam: null,
     lobbyAttendant: null,
     attendantRequestHold: false,
+    lobbyStreakKept: false,
     factoryCarry: createInitialFactoryCarry(ANCHOR_FACTORY_METADATA.playerTrainerId),
     pendingGeneratedRound: null,
     presentationRng: createPresentationRngSession(options.presentationSeed, options.presentationRngPolicy),
@@ -1114,7 +1134,7 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
     factoryTerminal === null &&
     pendingTerminalCommand !== null
   ) {
-    factoryTerminal = createFactoryTerminalPresentation(pendingTerminalCommand);
+    factoryTerminal = createTerminalForRound(pendingTerminalCommand, factoryRoundBattleOrchestrator, state.factoryCarry);
   }
 
   if (state.factoryRoundBattleOrchestrator?.battleResolutionPresentation) {
@@ -1144,7 +1164,7 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
     const generatedTerminalCommand = terminalCommandForRound(generatedRound);
     const generatedFactoryTerminal =
       factoryTerminal === null && generatedTerminalCommand !== null
-        ? createFactoryTerminalPresentation(generatedTerminalCommand)
+        ? createTerminalForRound(generatedTerminalCommand, factoryRoundBattleOrchestrator, state.factoryCarry)
         : factoryTerminal;
     return {
       ...state,
@@ -1208,7 +1228,7 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
             ),
             factoryTerminal: factoryTerminal === null && forfeitTerminalCommand !== null
               ? advanceForfeitTerminalAge(
-                  disableForfeitRecordQuestion(createFactoryTerminalPresentation(forfeitTerminalCommand)),
+                  disableForfeitRecordQuestion(createTerminalForRound(forfeitTerminalCommand, factoryRoundBattleOrchestrator, state.factoryCarry)),
                 )
               : factoryTerminal,
           }
@@ -1241,7 +1261,7 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
         return enterChainedFactoryChallenge(
           state,
           keyRepeat,
-          carryForNewChallengeAfterLobby(state.factoryCarry),
+          state.lobbyStreakKept ? state.factoryCarry : carryForNewChallengeAfterLobby(state.factoryCarry),
           rngValue,
         );
       }
@@ -1316,60 +1336,35 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
     // timeline). From that box-gone age the app hands input/rendering to the
     // walkable-lobby overworld (factoryLobbyFreeRoam.ts); until then the
     // terminal presentation still owns the screen.
-    // 7-win chaining (queue item 2, ROADMAP "User decisions 2026-08-14" #2):
-    // the WIN terminal's accepted record answer re-enters a fresh GENERATED
-    // draft screen directly (lbr-d will replace this with the ROM's Lobby
-    // return). A LOSS / FORFEIT / RETIRE no longer chains (lbra, user decision
-    // 2026-11-12): it plays out the ROM's Lobby result script below and hands
-    // over the walkable Lobby, where A at the attendant starts the next
-    // challenge. Scoped to the production generated-orchestrator route, whose
-    // roundOutcome carries the real BP/symbol award the carry needs.
-    if (
-      state.appRoute === "generated-orchestrator" &&
-      factoryRoundBattleOrchestrator !== null &&
-      factoryRoundBattleOrchestrator.roundOutcome !== null &&
-      isFactoryTerminalRoundWon(factoryTerminal) &&
-      (state.factoryTerminal?.recordChoice ?? null) === null &&
-      factoryTerminal.recordChoice !== null
-    ) {
-      const nextCarry = advanceFactoryCarry(
-        state.factoryCarry,
-        isFactoryTerminalRoundWon(factoryTerminal),
-        factoryRoundBattleOrchestrator.roundOutcome,
-        factoryRoundBattleOrchestrator.facilityState.rentsCount,
-      );
-      // The ROM's Random() cursor is one continuous global: the just-finished
-      // round's ending orchestrator cursor is the source-faithful seed for
-      // the next challenge's generation (factoryRoundChaining.ts's doc; see
-      // factoryRoundBattleOrchestrator.test.ts's "uninterrupted orchestrator
-      // cursor" case).
-      const rngValueBefore = factoryRoundBattleOrchestrator.round.rules.rngValue;
-      return enterChainedFactoryChallenge(state, keyRepeat, nextCarry, rngValueBefore);
-    }
     const freeRoamBoxGoneAge = factoryTerminalDeclineBoxGoneAge(factoryTerminal);
     const lobbyFreeRoam =
       freeRoamBoxGoneAge !== null && factoryTerminal.age >= freeRoamBoxGoneAge
         ? state.lobbyFreeRoam ?? createFactoryLobbyFreeRoamState()
         : state.lobbyFreeRoam;
-    // LostChallenge (Lobby scripts.inc:65-75) clears the win-streak-active flag: the lost
-    // challenge's symbols / BP stay, the streak and rents are zero when the Lobby opens.
-    const lossCarry =
+    // The Lobby result script runs once at Lobby entry. LostChallenge (Lobby scripts.inc:65-75) clears the
+    // win-streak-active flag: the lost challenge's symbols / BP stay, the streak and rents are zero. WonChallenge
+    // (:40-59) never clears it (lbr-d1): the streak (+7), symbols, BP and rents are banked and the attendant's next
+    // start continues the streak (battle_factory.c:208-212).
+    const lobbyEntryOutcome =
       state.lobbyFreeRoam === null &&
       lobbyFreeRoam !== null &&
-      state.appRoute === "generated-orchestrator" &&
-      factoryRoundBattleOrchestrator !== null &&
-      factoryRoundBattleOrchestrator.roundOutcome !== null &&
-      !isFactoryTerminalRoundWon(factoryTerminal)
-        ? advanceFactoryCarry(
-            state.factoryCarry,
-            false,
-            factoryRoundBattleOrchestrator.roundOutcome,
-            factoryRoundBattleOrchestrator.facilityState.rentsCount,
-          )
-        : state.factoryCarry;
+      state.appRoute === "generated-orchestrator"
+        ? factoryRoundBattleOrchestrator?.roundOutcome ?? null
+        : null;
+    const enteringLobby = lobbyEntryOutcome !== null;
+    const roundWon = isFactoryTerminalRoundWon(factoryTerminal);
+    const lobbyEntryCarry = lobbyEntryOutcome !== null
+      ? advanceFactoryCarry(
+          state.factoryCarry,
+          roundWon,
+          lobbyEntryOutcome,
+          factoryRoundBattleOrchestrator!.facilityState.rentsCount,
+        )
+      : state.factoryCarry;
     return {
       ...state,
-      factoryCarry: lossCarry,
+      factoryCarry: lobbyEntryCarry,
+      lobbyStreakKept: enteringLobby ? roundWon : state.lobbyStreakKept,
       frame: state.frame + 1,
       keyRepeat,
       // The shared return-to-field span (docs/post-terminal-return-to-lobby-
@@ -4170,7 +4165,7 @@ export function render(state: EngineState): Uint8Array {
     (
       pendingTerminalCommand === null
         ? null
-        : createFactoryTerminalPresentation(pendingTerminalCommand)
+        : createTerminalForRound(pendingTerminalCommand, state.factoryRoundBattleOrchestrator, state.factoryCarry)
     );
   if (terminalPresentation) {
     return renderFactoryTerminalPresentation(

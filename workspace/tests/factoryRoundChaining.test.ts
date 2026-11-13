@@ -159,10 +159,12 @@ function driveGeneratedRoundToCompletion(
  * (factoryRoundBattleOrchestrator set, factoryTerminal null) forward by
  * holding A every other frame (JOY_NEW is edge-triggered - see keyRepeat.ts)
  * without ever touching UP/DOWN, so the record menu's cursor stays at its
- * default (NO). Stops the instant this file's new terminal-decline ->
- * next-draft transition fires (pendingGeneratedRound becomes non-null).
+ * default (NO). Since lbra / lbr-d1 every round end returns to the walkable
+ * Lobby, so the mashed A also runs the attendant conversation; it stops the
+ * instant the hand-off deals the next draft (pendingGeneratedRound becomes
+ * non-null). The pure carry / seed of that boundary is `nextChallenge`.
  */
-function driveTerminalToNextDraft(state: EngineState, maxTicks = 3_000): EngineState {
+function driveTerminalToNextDraft(state: EngineState, maxTicks = 8_000): EngineState {
   let s = state;
   const A: ReadonlySet<GbaButton> = new Set(["A"]);
   const NONE: ReadonlySet<GbaButton> = new Set();
@@ -171,6 +173,26 @@ function driveTerminalToNextDraft(state: EngineState, maxTicks = 3_000): EngineS
     s = tick(s, i % 2 === 0 ? A : NONE);
   }
   throw new Error(`terminal did not chain into the next draft within ${maxTicks} ticks`);
+}
+
+/**
+ * The carry the Lobby entry banks for a decided round (core.ts) and the end cursor of the orchestrator round
+ * (the draft seed before lbr-d1; since then the live Lobby cursor deals the draft, so a trajectory test that
+ * wants a stable chain drives the next round from the round's own end cursor).
+ */
+function nextChallenge(
+  round: FactoryRoundBattleOrchestratorState,
+  carry: FactoryCarry,
+): { readonly carry: FactoryCarry; readonly seed: number } {
+  return {
+    carry: advanceFactoryCarry(
+      carry,
+      round.round.rules.phase === "roundComplete",
+      round.roundOutcome!,
+      round.facilityState.rentsCount,
+    ),
+    seed: round.round.rules.rngValue,
+  };
 }
 
 function stateAtDecidedRound(
@@ -258,7 +280,7 @@ describe("factoryRoundChaining (pure carry + generation)", () => {
 });
 
 describe("factory round chaining (tick() scenario)", () => {
-  it("(a) a completed round's terminal chains into a generated draft with the correct rank/streak inputs", () => {
+  it("(a) a completed round's terminal returns to the Lobby and the attendant then deals a generated draft that keeps the streak", () => {
     const carry = createInitialFactoryCarry(PLAYER_TRAINER_ID);
     const round1 = driveGeneratedRoundToCompletion(carry, 17);
     expect(round1.round.rules.phase).toBe("roundComplete");
@@ -271,7 +293,10 @@ describe("factory round chaining (tick() scenario)", () => {
     expect(chained.factoryRoundBattleOrchestrator).toBeNull();
     expect(chained.factoryCarry.factoryWinStreak).toBe(7);
     expect(chained.factoryCarry.rentsCount).toBe(round1.facilityState.rentsCount);
-    expect(chained.pendingGeneratedRound!.rngValueBefore).toBe(round1.round.rules.rngValue);
+    // lbr-d1: the draft is dealt from the Lobby's live vblank cursor at the hand-off, not the round's end cursor.
+    expect(chained.pendingGeneratedRound!.rngValueBefore).not.toBe(round1.round.rules.rngValue);
+    expect(chained.pendingGeneratedRound!.carry).toEqual(chained.factoryCarry);
+    expect(chained.lobbyStreakKept).toBe(false);
 
     const expected = generateFactoryChallengeDraft(
       chained.factoryCarry,
@@ -319,18 +344,14 @@ describe("factory round chaining (tick() scenario)", () => {
     const carry0 = createInitialFactoryCarry(PLAYER_TRAINER_ID);
     const round1 = driveGeneratedRoundToCompletion(carry0, 9);
     expect(round1.round.rules.phase).toBe("roundComplete");
-    const chained1 = driveTerminalToNextDraft(stateAtDecidedRound(round1, carry0));
-    const carry1 = chained1.factoryCarry;
-    const seed2 = chained1.pendingGeneratedRound!.rngValueBefore;
+    const { carry: carry1, seed: seed2 } = nextChallenge(round1, carry0);
     expect(carry1.factoryWinStreak).toBe(7);
     expect(generateFactoryChallengeDraft(carry1, seed2).generation.challengeNum)
       .toBe(Math.floor(carry1.factoryWinStreak / 7));
 
     const round2 = driveGeneratedRoundToCompletion(carry1, seed2);
     expect(round2.round.rules.phase).toBe("roundComplete");
-    const chained2 = driveTerminalToNextDraft(stateAtDecidedRound(round2, carry1));
-    const carry2 = chained2.factoryCarry;
-    const seed3 = chained2.pendingGeneratedRound!.rngValueBefore;
+    const { carry: carry2, seed: seed3 } = nextChallenge(round2, carry1);
     expect(carry2.factoryWinStreak).toBe(14);
     expect(carry2.battlePoints).toBeGreaterThan(carry1.battlePoints);
     expect(carry2.rentsCount).toBe(round2.facilityState.rentsCount);
@@ -352,9 +373,7 @@ describe("factory round chaining (tick() scenario)", () => {
       winStreak: carry2.factoryWinStreak + round3.round.rules.battleIndex,
       symbolsCount: carry2.factorySymbolsCount,
     })).toBe("silver");
-    const chained3 = driveTerminalToNextDraft(stateAtDecidedRound(round3, carry2));
-    const carry3 = chained3.factoryCarry;
-    const seed4 = chained3.pendingGeneratedRound!.rngValueBefore;
+    const { carry: carry3, seed: seed4 } = nextChallenge(round3, carry2);
     expect(carry3.factoryWinStreak).toBe(21);
     expect(carry3.battlePoints).toBeGreaterThan(carry2.battlePoints);
     expect(carry3.rentsCount).toBe(round3.facilityState.rentsCount);
@@ -364,23 +383,18 @@ describe("factory round chaining (tick() scenario)", () => {
 
     const round4 = driveGeneratedRoundToCompletion(carry3, seed4);
     expect(round4.round.rules.phase).toBe("roundComplete");
-    const chained4 = driveTerminalToNextDraft(stateAtDecidedRound(round4, carry3));
-    const carry4 = chained4.factoryCarry;
+    const { carry: carry4, seed: seed5 } = nextChallenge(round4, carry3);
     expect(carry4.factoryWinStreak).toBe(28);
     expect(carry4.battlePoints).toBeGreaterThan(carry3.battlePoints);
     expect(carry4.rentsCount).toBe(round4.facilityState.rentsCount);
     expect(carry4.factorySymbolsCount).toBe(round4.roundOutcome!.newSymbolsCount);
-    expect(generateFactoryChallengeDraft(
-      carry4,
-      chained4.pendingGeneratedRound!.rngValueBefore,
-    ).generation.challengeNum).toBe(Math.floor(carry4.factoryWinStreak / 7));
+    expect(generateFactoryChallengeDraft(carry4, seed5).generation.challengeNum).toBe(Math.floor(carry4.factoryWinStreak / 7));
   });
 
   it("(c) a loss resets the streak but keeps symbols/BP, and still re-enters a draft", () => {
     const carry0 = createInitialFactoryCarry(PLAYER_TRAINER_ID);
     const round1 = driveGeneratedRoundToCompletion(carry0, 17);
-    const chained1 = driveTerminalToNextDraft(stateAtDecidedRound(round1, carry0));
-    const carry1 = chained1.factoryCarry;
+    const { carry: carry1 } = nextChallenge(round1, carry0);
     expect(carry1.battlePoints).toBeGreaterThan(0);
 
     const round2Lost = driveGeneratedRoundToCompletion(

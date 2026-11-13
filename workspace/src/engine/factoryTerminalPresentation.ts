@@ -265,7 +265,8 @@ export const FACTORY_ROUND_WON_TERMINAL_PROFILE: FactoryTerminalRoundWonProfile 
     declineMenuClearDelay: 1,
     declineTextClearDelay: 3,
     declineTextFirstDelay: 4,
-    declineInputDelay: 39,
+    // lbr-d1: input gates measured on the won tail (docs/lbrd2a-won-tail-rom.md): ROM 41 / 74 (the loss profile's 39 / 70 stay).
+    declineInputDelay: 41,
     declineReleaseClearDelay: 2,
     declineFarewell: Object.freeze([
       "We look forward to your next visit.",
@@ -273,7 +274,7 @@ export const FACTORY_ROUND_WON_TERMINAL_PROFILE: FactoryTerminalRoundWonProfile 
     ] as const),
     recordSavedTextClearDelay: 21,
     recordSavedTextFirstDelay: 22,
-    recordSavedInputDelay: 70,
+    recordSavedInputDelay: 74,
     recordSavedMessage: Object.freeze([
       `${PLAYER_NAME}’s battle was recorded`,
       "on the FRONTIER PASS.",
@@ -435,17 +436,37 @@ export function createFactoryTerminalLossPresentation(
   };
 }
 
+/**
+ * The BP the won script awards (`frontier_givepoints`, frontier_util.c:1853-1910): 3 for the first
+ * two challenges, 4 / 5 later, +10 for a Brain win. The default profile is the 3 BP text.
+ */
+export interface FactoryTerminalBattlePointAward {
+  /** The save's BP before the award (the carry's total when the Lobby script runs). */
+  readonly before: number;
+  readonly awarded: number;
+}
+
+function wonProfileForAward(awarded: number): FactoryTerminalRoundWonProfile {
+  if (awarded === FACTORY_ROUND_WON_TERMINAL_PROFILE.battlePointAward) return FACTORY_ROUND_WON_TERMINAL_PROFILE;
+  return Object.freeze({
+    ...FACTORY_ROUND_WON_TERMINAL_PROFILE,
+    battlePointAward: awarded,
+    getPoints: Object.freeze([`${PLAYER_NAME} obtained ${awarded} Battle Point(s).`, ""] as const),
+  });
+}
+
 export function createFactoryTerminalRoundWonPresentation(
   command: Pick<
     Extract<BattlePresentationCommand, { readonly type: "roundCompleted" }>,
     "type" | "commandId" | "battleIndex" | "opponent"
   >,
-  battlePointsBeforeAward = 0,
+  award: FactoryTerminalBattlePointAward = { before: 0, awarded: FACTORY_ROUND_WON_TERMINAL_PROFILE.battlePointAward },
 ): FactoryTerminalRoundWonPresentationState {
+  const battlePointsBeforeAward = award.before;
   return {
     commandId: command.commandId,
     battleIndex: command.battleIndex,
-    profile: FACTORY_ROUND_WON_TERMINAL_PROFILE,
+    profile: wonProfileForAward(award.awarded),
     age: 0,
     frontierBrain: command.opponent.frontierBrain !== undefined,
     congratsScrollReleaseAge: null,
@@ -475,10 +496,11 @@ export function createFactoryTerminalPresentation(
     BattlePresentationCommand,
     { readonly type: "roundLost" | "roundCompleted" }
   >,
+  award?: FactoryTerminalBattlePointAward,
 ): FactoryTerminalPresentationState {
   return command.type === "roundLost"
     ? createFactoryTerminalLossPresentation(command)
-    : createFactoryTerminalRoundWonPresentation(command);
+    : createFactoryTerminalRoundWonPresentation(command, award);
 }
 
 /**

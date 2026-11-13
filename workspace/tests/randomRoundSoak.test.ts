@@ -419,7 +419,10 @@ describe("random round soak driver (green milestone pin)", () => {
       // full-suite shard; frame-only delta).
       // enc276 (docs/enc276-forced-turn-no-menu.md; a forced Encore / Struggle turn skips the move menu, Struggle prints its no-moves
       // message): frames only + render calls, 40_796 -> 41_021, renderCalls 2_891 -> 2_895; same battle 7, turn 3, end state, diagnostics.
-      frames: 41_021,
+      // lbr-d1 (docs/lbrd-win-lobby-return.md): the won terminal no longer chains into a draft at the record answer, it plays the
+      // farewell and hands over the walkable Lobby, and the first-decision snapshot now runs to that Lobby entry: frames 41_021 -> 41_068,
+      // renderCalls 2_895 -> 2_899, terminalRecordChoice null -> "no" (the mashed A answers the default NO); same battle 7, turn 3, end state.
+      frames: 41_068,
       battle: 7,
       turn: 3,
       diagnostics: {
@@ -430,8 +433,8 @@ describe("random round soak driver (green milestone pin)", () => {
         battleRngSegmentCount: 7,
         terminalOutcome: "roundWon",
         terminalRecordMenuInputReadyReached: true,
-        terminalRecordChoice: null,
-        renderCalls: 2_895,
+        terminalRecordChoice: "no",
+        renderCalls: 2_899,
       },
     });
     expect(second).toEqual(first);
@@ -1486,7 +1489,10 @@ describe("ISSUES #104 (driver): continuous-play outcome semantics retuned -- OK 
     // now carries 7; re-scanned seeds 0..12: only seed 2 chains two round wins (carry 14), so it is pinned.
     // parity-mac (docs/parity-mac/STATUS.md "Re-pins"): the battle-rule fixes of that lane move every trajectory; seed 2 now carries 7.
     // Re-scanned seeds 0..30 under the same options: seeds 0, 10, 16, 17 and 19 chain two round wins, so the lowest (0) is pinned.
-    const result = runSeed(0, {
+    // lbr-d1 (a won round now returns to the Lobby and the draft is dealt from the Lobby's live cursor at the attendant, with the
+    // streak kept): seed 0 now carries 7; re-scanned seeds 0..23 under the same options: seeds 10 and 13 chain two round wins
+    // (carry 14), so the lowest (10) is pinned.
+    const result = runSeed(10, {
       policy: "winning",
       maxRounds: 3,
       renderEvery: 0,

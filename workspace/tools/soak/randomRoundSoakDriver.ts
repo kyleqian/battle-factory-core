@@ -1272,7 +1272,7 @@ export type SoakScene = "on" | "off";
 export type SeedResult = {
   seed: number;
   outcome: SeedOutcome;
-  /** Challenges started from the Lobby attendant (absent with `newChallengeFromLobby: false`). */
+  /** Challenges started from the Lobby attendant, wins included (lbr-d1; absent with `newChallengeFromLobby: false`). */
   lobbyNewChallenges?: number;
   /**
    * OK sub-outcome: "budget" (frame budget reached while still making
@@ -1720,7 +1720,7 @@ export class RandomPlayer {
     if (orch?.battleStartIntro) return this.onIntro(state);
     if (orch?.battleCommandPresentation) return this.onCommand(state);
     if (state.lobbyFreeRoam) {
-      // lbra/lbrb: every loss / forfeit / retire ends in the Lobby; A at the attendant opens the ROM conversation, and
+      // lbra/lbrb/lbr-d1: every loss / forfeit / retire / 7-win ends in the Lobby; A at the attendant opens the ROM conversation, and
       // tapping A through it (CHALLENGE, LV. 50, YES, save) starts the next challenge (terminal only with `newChallengeFromLobby: false`).
       return this.newChallengeFromLobby && (state.lobbyAttendant !== null || isFactoryLobbyFacingSinglesAttendant(state.lobbyFreeRoam))
         ? this.pressAdvance(state, "lobby attendant A", false)

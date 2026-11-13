@@ -128,6 +128,8 @@ export class FactorySession {
   private prevLastBattle: object | null = null;
   private prevPhase: string | null = null;
   private prevLobby = false;
+  /** Set at `round-end`: the next Lobby entry is the ROM's won-script return (lbr-d1), not a retire. */
+  private wonLobbyPending = false;
   private requestSent = false;
   private soundSink: SoundSink | null = null;
 
@@ -219,6 +221,7 @@ export class FactorySession {
     this.containedErrors.length = 0;
     this.streak = 0;
     this.ended = null;
+    this.wonLobbyPending = false;
     this.requestSent = false;
     this.hash = new Sha256();
     this.hashed = new WeakSet();
@@ -267,6 +270,7 @@ export class FactorySession {
     }
     if (phase !== this.prevPhase && this.ended === null) {
       if (phase === "roundComplete") {
+        this.wonLobbyPending = true;
         events.push({ type: "round-end", streak: this.streak, frame });
       } else if (phase === "roundLost") {
         this.ended = "loss";
@@ -275,8 +279,12 @@ export class FactorySession {
     }
     const lobby = this.state.lobbyFreeRoam !== null;
     if (lobby && !this.prevLobby && this.ended === null) {
-      this.ended = "retire";
-      events.push({ type: "challenge-end", reason: "retire", streak: this.streak, frame });
+      if (this.wonLobbyPending) {
+        this.wonLobbyPending = false;
+      } else {
+        this.ended = "retire";
+        events.push({ type: "challenge-end", reason: "retire", streak: this.streak, frame });
+      }
     }
     if (this.ended !== null && !this.requestSent && this.state.lobbyAttendant?.saveDialogStarted === true) {
       this.requestSent = true;
