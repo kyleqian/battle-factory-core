@@ -4,7 +4,7 @@
   "R028"
  ],
  "why": "Challenge 7. All three player Pokemon have Explosion in slot 0: Weezing (597), Metagross (832), Electrode (588), each faster than all three opponents (Vileplume 586, Exeggutor 534, Machamp 808: no Protect, Detect, Endure, Substitute, evasion, Focus Band, Quick Claw, Damp, Intimidate, priority move, Ghost/Rock/Steel type). Each Explosion knocks out its target even on the lowest roll (Defense halved), so turn by turn one Pokemon of each side faints; on turn 3 the last two faint in the same action, Cmd_checkteamslost ORs LOST and WON, and the outcome maps to a draw. Weezing (the slowest exploder) leads against the slowest opponent, Vileplume.",
- "seed": 0,
+ "seed": 60000,
  "challengeNum": 7,
  "battleNum": 0,
  "trainerId": 200,
@@ -43,16 +43,11 @@
  "cover": [
   {
    "file": "src/engine/factoryBattleScriptTerminalDecision.ts",
-   "text": "\n  throw new",
+   "text": "return \"draw\"",
    "at": 0
   }
  ],
  "coverAny": true,
  "chance": 0.9,
- "seeds": 30,
- "onHold": {
-  "group": "g3",
-  "seedsHunted": 1,
-  "result": "no matching hit in 1 seeds (hunt stopped)"
- }
+ "seeds": 30
 }
