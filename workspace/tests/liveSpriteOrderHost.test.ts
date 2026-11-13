@@ -13,10 +13,18 @@ import {
 import type { BattleKernelSemanticEvent } from "../src/engine/battleDecisionBoundary.ts";
 import { applySpriteOrderPresentationEvent, createSpriteOrderTracker, type SpriteOrderPresentationEvent } from "../src/engine/spriteOrderEventTransform.ts";
 import { battleMoveAnimationRequest } from "../src/engine/battleMoveAnimation.ts";
-import { ORDER_CONSUMER_MOVES, predictLentOrders, predictTrackers, scanRoute } from "../tools/integration/orderCrossBodyRouteScan.ts";
+import { ORDER_CONSUMER_MOVES, predictLentOrders, predictTrackers, scanRoute as scanRouteUncached } from "../tools/integration/orderCrossBodyRouteScan.ts";
 import { evidenceEvents, maskSlotsOf, productionReplay } from "../tools/integration/spriteOrderBattleUnitsReplay.ts";
 
 type Replay = ReturnType<typeof generatedCommandAnimationReplay>;
+// cln277: the 20-seed sweep and the later-body routes are replayed by several tests; the replay is deterministic and read-only here, so compute each once per worker.
+const routeMemo = new Map<string, ReturnType<typeof scanRouteUncached>>();
+const scanRoute = (seed: number, slots: readonly (0 | 1 | 2 | 3)[]) => {
+  const key = JSON.stringify([seed, slots]);
+  let route = routeMemo.get(key);
+  if (!route) { route = scanRouteUncached(seed, slots); routeMemo.set(key, route); }
+  return route;
+};
 // 20-battle sweep: command edges compared host vs pure, host known, host declines where pure is known (all 27 = seed 17,
 // "command resolution without an action prompt": the locked-action continuation the host refused before prep47), later bodies with a
 // known pre-body tracker (35 of 80 without the battle units).
