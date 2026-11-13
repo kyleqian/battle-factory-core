@@ -1,7 +1,7 @@
 // bnd257d: the browser sprite sheets are a dynamic chunk (docs/bnd257d-lazy-sprites.md). Every test here re-imports the graph with NO provider
 // installed (the suite setup installs one in the main registry), the state a browser page is in until the sprite chunk resolves.
 import { existsSync, readFileSync, readdirSync } from "node:fs";
-import { resolve } from "node:path";
+import { dirname, resolve } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import frontSprites from "../src/assets/gen/battle-opponent-front-sprites.json" with { type: "json" };
 import type { FactoryEvent } from "../src/factoryContract.ts";
@@ -199,16 +199,23 @@ describe("bnd257d static ratchets", () => {
     expect(manualChunks("/x/src/assets/gen/battle-opponent-front-sprites.json")).toBe("assets-sprites");
   });
 
-  // Needs `npm run build:lib` (dist-lib is git-ignored): the entry and its static chunks never import the sprite chunk statically.
+  // Needs `npm run build:lib` (dist-lib is git-ignored): the entry's static import graph never reaches the sprite chunk; the installer chunk does.
   const chunks = resolve(root, "dist-lib/chunks");
   it.skipIf(!existsSync(chunks))("the built browser entry reaches the sprite chunk only through import()", () => {
-    const names = readdirSync(chunks);
-    const sprites = names.find((name) => name.startsWith("assets-sprites-"));
-    expect(sprites).toBeDefined();
-    const files = [resolve(root, "dist-lib/index.js"), ...names.map((name) => resolve(chunks, name))];
-    for (const file of files) {
+    const seen = new Set<string>();
+    const stack = [resolve(root, "dist-lib/index.js")];
+    while (stack.length > 0) {
+      const file = stack.pop()!;
+      if (seen.has(file)) continue;
+      seen.add(file);
       const source = readFileSync(file, "utf8");
-      expect(source, file).not.toMatch(new RegExp(`^(?:import|export)[^\\n]*assets-sprites-`, "m"));
+      for (const match of source.matchAll(/^(?:import|export)\b[^\n]*?from\s*"(\.[^"]+)"/gm)) stack.push(resolve(dirname(file), match[1]!));
     }
+    const names = [...seen].map((file) => file.slice(root.length + 1));
+    expect(names.length).toBeGreaterThan(3);
+    expect(names.filter((name) => /assets-sprites|monPicPixelsInstall/.test(name))).toEqual([]);
+    const installer = readdirSync(chunks).find((name) => name.startsWith("monPicPixelsInstall-"));
+    expect(installer).toBeDefined();
+    expect(readFileSync(resolve(chunks, installer!), "utf8")).toMatch(/assets-sprites-/);
   });
 });

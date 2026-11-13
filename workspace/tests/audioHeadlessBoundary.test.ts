@@ -70,7 +70,8 @@ describe("headless build graph has no audio beyond the SoundEvent type module", 
     const playerChunk = chunks.find((chunk) => Object.keys(chunk.modules).some((id) => id.endsWith("/src/audio/player.ts")))!;
     expect(playerChunk).toBeDefined();
     expect(sync.has(playerChunk.fileName)).toBe(false);
-    expect(entry.dynamicImports).toContain(playerChunk.fileName);
+    // bnd257d: the entry's code may sit in a shared chunk (src/lib.ts imports the sprite installer dynamically), so look at every synchronous chunk.
+    expect([...sync].flatMap((name) => byName.get(name)!.dynamicImports)).toContain(playerChunk.fileName);
     // The manifest / song table live in the audio-only chunk, not in the shared assets-gen chunk.
     const dataChunk = chunks.find((chunk) => Object.keys(chunk.modules).some((id) => id.endsWith("/assets/gen/audio/manifest.json")))!;
     expect(dataChunk.fileName).toMatch(/audio-data/);
