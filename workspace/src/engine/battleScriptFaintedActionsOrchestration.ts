@@ -62,6 +62,8 @@ import {
 } from "./battleScriptProgram.ts";
 import type { BattleScriptBattlerId } from "./battleScriptEvents.ts";
 import { computeCastformTypeChange } from "./battleScriptTryCastformDataChangeOpcode.ts";
+// A cycle of two function imports (the end-of-turn module calls this one for its faint sweep): both are used inside functions only.
+import { runBattleScriptItemEffectNormalOnMoveTurn } from "./battleEndTurnOrchestration.ts";
 import {
   type BattleScriptRulesBattlers,
   type BattleScriptRulesContext,
@@ -501,6 +503,15 @@ function runPendingSwitchinEffects(
       rulesContext: Object.freeze({ ...rules, scriptingBattler: 0 }),
     }), WHITE_HERB_END2_LABEL);
   }
+  // The same call, `ItemBattleEffects(ITEMEFFECT_NORMAL, 0, TRUE)` (`battle_util.c:1961`), also fires the eight cure items of battler 0 (Cheri, Pecha,
+  // Rawst, Aspear, Chesto, Persim, Lum Berry, Mental Herb: `:3500-3594`, no `moveTurn` gate). Only White Herb was ported here. It matters when the
+  // player's Pokemon holds its cure item and gets the status in a script that skips the move-end item step: Pursuit on a switching Pokemon
+  // (`BattleScript_PursuitDmgOnSwitchOut`: `moveendfromto MOVEEND_ON_DAMAGE_ABILITIES, MOVEEND_CHOICE_MOVE`), where the leaving Pokemon's Static,
+  // Poison Point, Flame Body or Effect Spore can strike. The game cures it right after that action, before the end of the turn; and a Pokemon that
+  // enters with a status and its cure item is cured right after it comes in. Battler 0 only: the opponent's holder waits for its next item step.
+  // docs/parity-mac/cure-berry-after-action.md.
+  const cured = runBattleScriptItemEffectNormalOnMoveTurn(program, handlers, Object.freeze({ ...state, haltReason: null }), 0);
+  if (cured !== null) state = cured;
   // `AbilityBattleEffects(ABILITYEFFECT_FORECAST, ...)`, the last term of state 6 (`battle_util.c:1962`, body
   // `:2955-2972`): every Forecast battler whose form no longer fits the weather runs `CastformDataTypeChange`
   // (`:2396-2429`, SET_BATTLER_TYPE at once) and `BattleScript_CastformChange`. Source returns at the first one and

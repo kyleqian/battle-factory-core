@@ -490,6 +490,56 @@ describe("runBattleScriptFaintedActionsOrchestration (HandleFaintedMonActions eq
     expect(result.state.rng.calls).toBe(initial.rng.calls);
   });
 
+  // parity-mac fix 34 (docs/parity-mac/cure-berry-after-action.md): state 6's `ItemBattleEffects(ITEMEFFECT_NORMAL, 0, TRUE)` (`battle_util.c:1961`)
+  // also fires the cure items of battler 0. It is the only item step after a Pursuit hit on a switching Pokemon, whose script skips the move-end one.
+  it("state 6 cures battler 0's paralysis with its Cheri Berry (the game's item check after every action)", () => {
+    const rc = context({
+      battlers: [
+        battler({ side: 0, item: 133, status1: 0x40 }),
+        battler({ side: 1 }),
+        battler({ side: 0 }),
+        battler({ side: 1 }),
+      ],
+    });
+    const initial = haltedAtOwnEnd(rc);
+    const result = runBattleScriptFaintedActionsOrchestration(program, handlers, initial);
+    expect(result.kind).toBe("no-fainted-battlers");
+    expect(result.state.rulesContext.battlers[0].status1).toBe(0);
+    expect(result.state.rulesContext.battlers[0].item).toBe(0);
+    expect(result.state.events.filter((event) => event.kind === "message").map((event) => event.messageId))
+      .toEqual(["STRINGID_PKMNSITEMCUREDPARALYSIS"]);
+    expect(result.state.rng.calls).toBe(initial.rng.calls);
+  });
+
+  it("state 6 cures sleep with a Chesto Berry and any status with a Lum Berry, for battler 0", () => {
+    for (const [item, status1, message] of [[134, 3, "STRINGID_PKMNSITEMWOKEIT"], [141, 0x10, "STRINGID_PKMNSITEMCUREDPROBLEM"]] as const) {
+      const rc = context({
+        battlers: [battler({ side: 0, item, status1 }), battler({ side: 1 }), battler({ side: 0 }), battler({ side: 1 })],
+      });
+      const result = runBattleScriptFaintedActionsOrchestration(program, handlers, haltedAtOwnEnd(rc));
+      expect(result.state.rulesContext.battlers[0].status1).toBe(0);
+      expect(result.state.rulesContext.battlers[0].item).toBe(0);
+      expect(result.state.events.filter((event) => event.kind === "message").map((event) => event.messageId)).toEqual([message]);
+    }
+  });
+
+  it("state 6 leaves the opponent's cure berry alone (the game passes battler 0), and Leftovers does nothing there", () => {
+    const rc = context({
+      battlers: [
+        battler({ side: 0, item: 200, hp: 50 }), // Leftovers: gated off when moveTurn is TRUE (battle_util.c:3401)
+        battler({ side: 1, item: 133, status1: 0x40 }),
+        battler({ side: 0 }),
+        battler({ side: 1 }),
+      ],
+    });
+    const initial = haltedAtOwnEnd(rc);
+    const result = runBattleScriptFaintedActionsOrchestration(program, handlers, initial);
+    expect(result.state.rulesContext.battlers[1].status1).toBe(0x40);
+    expect(result.state.rulesContext.battlers[1].item).toBe(133);
+    expect(result.state.rulesContext.battlers[0].hp).toBe(50);
+    expect(result.state.events.filter((event) => event.kind === "message")).toEqual([]);
+  });
+
   it("state 6 records replacement Trace's COPIED ability onto battler 0, not onto the tracer (ISSUES #128)", () => {
     const rc = context({
       battlers: [

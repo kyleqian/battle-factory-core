@@ -1116,6 +1116,24 @@ type ItemsTickOutcome =
   | Readonly<{ kind: "case-barrier"; state: MachineState; detail: string }>;
 
 /**
+ * `ItemBattleEffects(ITEMEFFECT_NORMAL, battler, TRUE)` for a caller outside the end-of-turn loop. `HandleFaintedMonActions` state 6 makes this
+ * call for battler 0 after every action (`battle_util.c:1958-1962`; `HandleAction_TryFinish`, `:638-645`). With `moveTurn` TRUE only White Herb and
+ * the eight cure items can fire (`:3384`, `:3500-3594`); Leftovers, the HP / PP berries and the stat berries are gated off (`:3337`, `:3348`, `:3401`).
+ * Returns the state after the item's script, or null when nothing fired (docs/parity-mac/cure-berry-after-action.md).
+ */
+export function runBattleScriptItemEffectNormalOnMoveTurn(
+  program: BattleScriptProgram,
+  handlers: Handlers,
+  state: MachineState,
+  battler: BattleScriptBattlerId,
+): MachineState | null {
+  const outcome = runItemsTick(program, handlers, state, battler, true);
+  if (outcome.kind === "advance") return null;
+  if (outcome.kind === "fired") return outcome.state;
+  throw new Error(`ItemBattleEffects(ITEMEFFECT_NORMAL, ${battler}, TRUE) did not complete (${outcome.kind})`);
+}
+
+/**
  * `WEATHER_HAS_EFFECT` (include/battle_util.h:47): `ABILITY_ON_FIELD` is `ABILITYEFFECT_CHECK_ON_FIELD`
  * (`battle_util.c:3140-3149`), which counts a battler only while `hp != 0`, for Cloud Nine and Air Lock.
  */
