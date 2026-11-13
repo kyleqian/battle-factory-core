@@ -3230,7 +3230,14 @@ function continueFullTurnAfterAction(
       // slot set to B_ACTION_CANCEL_PARTNER by Cmd_switchineffects
       // (battle_script_commands.c:5270-5274); HandleAction_ActionFinished
       // dispatches nothing for it (receipts rcp154-c1 / rcp154-c1f).
-      preEndTurnState = Object.freeze({ ...preEndTurnState, rulesContext: betweenActionsRules });
+      // parity-mac fix 39: `cancelallactions` inside action 1's own script (a switched-in Pokemon that faints from Spikes and is replaced) sets
+      // every slot to B_ACTION_CANCEL_PARTNER too. A forced Struggle dropped this way keeps its no-valid-moves flag (fix 35).
+      preEndTurnState = Object.freeze({
+        ...preEndTurnState,
+        rulesContext: betweenActionsRules.actionsByTurnOrder[1] === B_ACTION_CANCEL_PARTNER
+          ? keepNoValidMovesOfCancelledStruggle(betweenActionsRules, second, -1)
+          : betweenActionsRules,
+      });
     } else {
       const preAction2State: MachineState = Object.freeze({
         ...preEndTurnState,

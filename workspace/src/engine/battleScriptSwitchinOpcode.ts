@@ -797,14 +797,29 @@ function hpthresholdsOpcodeHandler(
   return transitionBattleScriptCommand(context, Object.freeze({ kind: "advance" }));
 }
 
-/** `Cmd_cancelallactions` (`battle_script_commands.c:5850-5858`): writes only the untracked `gActionsByTurnOrder`, no reader anywhere in this engine's modeled scope. */
+/**
+ * `Cmd_cancelallactions` (`battle_script_commands.c:5850-5858`): every slot of `gActionsByTurnOrder` becomes B_ACTION_CANCEL_PARTNER, so no further
+ * action of this turn runs. `BattleScript_FaintedMonSendOutNew` ends with it (`battle_scripts_1.s:2895`): after a replacement that comes in before the
+ * turn is over, the turn is over. This was a no-op here ("no reader"). The turn reducer skips the second action itself when ITS OWN faint sweep ran
+ * the replacement, but not when the replacement happens inside the first action's script: a Pokemon that is switched in and faints from Spikes
+ * (`BattleScript_SpikesOnAttackerFainted` -> `BattleScript_HandleFaintedMon`). The other side then still acted. The reducer reads this array between
+ * the two actions (docs/parity-mac/faint-on-switch-in-cancels-turn.md; ROM: staged battle spikes-faint-cancels-turn).
+ */
 function cancelallactionsOpcodeHandler(
   context: BattleScriptOpcodeHandlerContext<BattleScriptRulesContext>,
 ): BattleScriptCommandTransition<BattleScriptRulesContext> {
   if (context.instruction.operands.length !== 0) {
     throw new Error(`invalid B_SCR_OP_CANCELALLACTIONS shape at program counter ${context.state.programCounter}`);
   }
-  return transitionBattleScriptCommand(context, Object.freeze({ kind: "advance" }));
+  const rules = context.state.rulesContext;
+  const actionsByTurnOrder = rules.actionsByTurnOrder.map((action, slot) =>
+    slot < rules.battleTopology.battlersCount ? B_ACTION_CANCEL_PARTNER : action
+  ) as unknown as BattleScriptRulesContext["actionsByTurnOrder"];
+  return transitionBattleScriptCommand(
+    context,
+    Object.freeze({ kind: "advance" }),
+    { rulesContext: Object.freeze({ ...rules, actionsByTurnOrder }) },
+  );
 }
 
 /**

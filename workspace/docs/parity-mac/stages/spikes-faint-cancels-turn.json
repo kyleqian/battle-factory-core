@@ -1,0 +1,25 @@
+{
+ "name": "spikes-faint-cancels-turn",
+ "why": "The random player switches a weakened Pokemon into Spikes; it faints as it comes in and is replaced. The game cancels the rest of that turn: the opponent's Plusle does not use its move (docs/parity-mac/faint-on-switch-in-cancels-turn.md).",
+ "seed": 52165,
+ "challengeNum": 1,
+ "battleNum": 0,
+ "trainerId": 102,
+ "playerSetIds": [
+  170,
+  226,
+  207
+ ],
+ "opponentSetIds": [
+  227,
+  246,
+  172
+ ],
+ "script": {
+  "actions": [],
+  "then": "random-v1"
+ },
+ "expect": [
+  "situation:entry:spikes-damage"
+ ]
+}
