@@ -34,6 +34,8 @@ const RESUME_BUDGET_MS = 12;
 export interface MountInternalOptions extends FactoryGameOptions {
   /** Replay `resume` inline inside the mount call instead of across animation frames. */
   resumeSync?: boolean;
+  /** lbr-c: "hold" (default, the library behaviour) or "continue" (the dev shell's in-game new-challenge path). */
+  challengeRequest?: "hold" | "continue";
   /** The dev shell's crash overlay: the error and the session it happened in. */
   onCrash?: (error: unknown, session: FactorySession) => void;
 }
@@ -52,7 +54,7 @@ export interface FactoryGameInternal extends FactoryGame {
 }
 
 export function mountFactoryGame(options: FactoryGameOptions): FactoryGame {
-  const game = mountFactoryGameInternal(options);
+  const game = mountFactoryGameInternal({ ...options, challengeRequest: "hold" });
   return {
     get engine() {
       return game.engine;
@@ -82,6 +84,8 @@ export function mountFactoryGameInternal(options: MountInternalOptions): Factory
     battleScene: options.battleScene,
     gameplaySeed: options.gameplaySeed,
     presentationSeed: options.presentationSeed,
+    challengeRequest: options.challengeRequest,
+    start: options.start,
   };
   let session = new FactorySession(sessionOptions);
   const held = new Set<GbaButton>();

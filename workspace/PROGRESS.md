@@ -17,6 +17,26 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 2026-11-13 — lbr-c (ts lane worker): `challenge-request` library event + hold at the attendant's save dialog (handoff item 0b, step 3)
+
+- **State:** on master (`0d28c22e4`..). ENGINE_BUILD `eb-317927f84c1b839e` -> `eb-93bc6e7a6b44c19b` (read from dist and `engineBuildCheck`; tell the website). `docs/lbrc-challenge-request.md`, `docs/library-package.md`.
+- **Website (additive, tell the Mac): new `FactoryEvent` `{ type: "challenge-request", frame }`** (`lib-types`). After `challenge-end`, when the player confirms the save at the
+  attendant (CHALLENGE, LV. 50, YES) it fires once, on the first frame of the ROM save dialog, and the game HOLDS there (input ignored, picture fixed) until `destroy()`.
+  Host: prefetch the next server challenge at `challenge-end`; on `challenge-request` destroy + mount it (starts at the draft). A host that ignores it just leaves a frozen
+  save window (the spec). `challenge-end` is where it was; the trace read at it is a prefix of every later read and the event adds no frame (`tests/lbrc.test.ts`, replay equality).
+- **Also additive: `FactoryGameOptions.start?: "draft" | "after-save"`** (also `ReplayOptions.start`): the mount begins in the Lobby at "Please step this way." (door walk, fade, fresh draft: streak 0).
+  `gameplaySeed` = the Lobby RNG cursor on the first frame, so the deal is deterministic from the seed but is NOT the deal a plain seed mount makes; pass the same `start` to `resume` and `replayChallenge`
+  (`docs/lbrc-challenge-request.md`).
+- **Did:** `saveDialogStarted` on the attendant state, `attendantRequestHold` in the engine (set by the session once ended; guard: not ended = lbr-b behaviour), `FactorySession`
+  option `challengeRequest: "hold" | "continue"` (default hold, so `replayChallenge` ticks what the mount ticks). The dev shell passes `"continue"` (event reported, no hold), so
+  goalPlay / `play:random --lobby-new-challenge` keep starting new challenges in-game; the soak runs the bare engine (no session). `?challengeRequest=hold` in the shell = host behaviour.
+- **Gates:** typecheck 0 (the first "0" was a masked `| tail`; the real run caught lib-types parity, fixed), build 0 (`tsc -b` 0 + `vite build`; the `npm run build` one-liner was OOM-killed twice
+  beside two other workers' suites, so `vite build` ran with `--max-old-space-size=4096`, 0), build:lib 0 (same way), `lbra` / `lbrc` / library / goalPlay / nch231 / lbrb / frf250b / audio sink files green,
+  play:random 2 min / scene `--lobby-new-challenge` seed 13: 0 page / console errors / overlays, ON 2 and OFF 1 new challenge from the Lobby; soak vanilla 0:20 OFF 20 / 20 OK (all `budget`).
+- **Next:** lbr-d (7-win Lobby return).
+
+---
+
 ## 2026-11-13 — lbr-b (ts lane worker, 180-min cap reached after its last commit): the singles attendant conversation (handoff item 0b, step 2)
 
 - **State:** on master (`9f8c9aa7d`..`7952dfe02`). ENGINE_BUILD `eb-adfdcfdc91f4247f` -> `eb-317927f84c1b839e` (read from dist; tell the website). `docs/lbrb-attendant-conversation.md`.

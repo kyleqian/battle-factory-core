@@ -14,6 +14,14 @@ export type FactoryEvent =
   | { type: "battle-end"; result: "win" | "loss"; streak: number; frame: number }
   | { type: "round-end"; streak: number; frame: number }
   | { type: "challenge-end"; reason: "loss" | "retire"; streak: number; frame: number }
+  /**
+   * After `challenge-end`, the player confirmed the save at the Lobby attendant and the ROM's save dialog began (the player asked for
+   * a new challenge). Fires at most once per mount, never before `challenge-end`. The game then HOLDS on that frame (input ignored,
+   * the picture does not change) until the host calls `destroy()` and mounts the next challenge; if the host does nothing, it just
+   * stays there. Nothing after `challenge-end` belongs in the uploaded trace. The host should prefetch the next server challenge at
+   * `challenge-end` so the re-mount is instant.
+   */
+  | { type: "challenge-request"; frame: number }
   | { type: "contained-error"; message: string; frame: number };
 
 export interface FactoryGameOptions {
@@ -24,6 +32,13 @@ export interface FactoryGameOptions {
   gameplaySeed?: number;
   /** u32 presentation-only seed; absent = the documented default. */
   presentationSeed?: number;
+  /**
+   * lbr-c (additive). Absent / "draft": the mount starts at the draft screen. "after-save": it starts in the Lobby at the attendant's
+   * "Please step this way." (the save dialog already done), the door walk and fade follow, then a fresh challenge-0 draft is dealt.
+   * `gameplaySeed` is then the Lobby RNG cursor on the first frame; the resulting draft is a deterministic function of it
+   * (not the deal a plain `gameplaySeed` mount makes). A resume trace, and `replayChallenge`, must pass the same `start`.
+   */
+  start?: "draft" | "after-save";
   /** Fast-forward through these before the player gets control; `ready` follows. */
   resume?: TraceSegment[];
   onEvent?: (event: FactoryEvent) => void;

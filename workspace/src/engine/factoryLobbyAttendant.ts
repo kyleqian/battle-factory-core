@@ -216,6 +216,8 @@ export interface FactoryLobbyAttendantState {
   readonly phaseTick: number;
   /** Set when the conversation ends back in free roam (core clears the state). */
   readonly done: "freeRoam" | "draft" | null;
+  /** lbr-c: the ROM save dialog has begun (its window drew its first frame). Stays set for the rest of the conversation. */
+  readonly saveDialogStarted: boolean;
 }
 
 export interface AttendantInput {
@@ -295,6 +297,7 @@ export function createFactoryLobbyAttendantState(startFrame: number): FactoryLob
     closingTo: "freeRoam",
     phaseTick: 0,
     done: null,
+    saveDialogStarted: false,
   });
 }
 
@@ -389,7 +392,12 @@ export function advanceFactoryLobbyAttendant(
   if (state.lead !== null) {
     const age = state.age + 1;
     const lead = age >= 0 ? null : Object.freeze({ ...state.lead, tick: state.lead.tick + 1 });
-    return Object.freeze({ ...state, age, lead });
+    return Object.freeze({
+      ...state,
+      age,
+      lead,
+      saveDialogStarted: state.saveDialogStarted || (lead === null && state.screen === "saveInfo"),
+    });
   }
   const age = state.age + 1;
   const ticked: FactoryLobbyAttendantState = Object.freeze({ ...state, age });

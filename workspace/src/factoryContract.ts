@@ -29,6 +29,11 @@ export type FactoryEvent =
   | { type: "round-end"; streak: number; frame: number }
   /** The challenge is over: a lost battle, or RETIRE confirmed at the attendant. */
   | { type: "challenge-end"; reason: "loss" | "retire"; streak: number; frame: number }
+  /**
+   * lbr-c. After `challenge-end`, the player confirmed the save at the Lobby attendant and the ROM's save dialog began. Fires at most
+   * once per mount. The game then holds on that frame (ignores input) until the host destroys the mount and mounts the next challenge.
+   */
+  | { type: "challenge-request"; frame: number }
   /** A contained presentation throw (the battle went on with that command drawn static). */
   | { type: "contained-error"; message: string; frame: number };
 
@@ -40,6 +45,13 @@ export interface FactoryGameOptions {
   gameplaySeed?: number;
   /** u32 presentation-only Random2 seed (visuals); absent = the documented default. */
   presentationSeed?: number;
+  /**
+   * lbr-c (additive). Absent / "draft": the mount starts at the draft screen. "after-save": it starts in the Lobby at the attendant's
+   * "Please step this way." (the save dialog already done), the door walk and fade follow, then a fresh challenge-0 draft is dealt.
+   * `gameplaySeed` is then the Lobby RNG cursor on the first frame; the resulting draft is a deterministic function of it
+   * (not the deal a plain `gameplaySeed` mount makes). A resume trace, and `replayChallenge`, must pass the same `start`.
+   */
+  start?: "draft" | "after-save";
   /** Fast-forward through these before the player gets control; `ready` follows. */
   resume?: TraceSegment[];
   onEvent?: (event: FactoryEvent) => void;
@@ -110,5 +122,7 @@ export interface ReplayOptions {
   battleScene: BattleScene;
   gameplaySeed?: number;
   presentationSeed?: number;
+  /** Same as `FactoryGameOptions.start`: the trace replays only with the start it was played from. */
+  start?: "draft" | "after-save";
   segments: TraceSegment[];
 }

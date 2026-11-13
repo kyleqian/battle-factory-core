@@ -11,11 +11,17 @@
 //   challenge-end loss   the phase becomes `roundLost`
 //   challenge-end retire the player enters the Lobby free-roam (RETIRE + YES
 //                at the attendant) without a lost battle
+//   challenge-request   (lbr-c) after the challenge ended, the player confirmed
+//                the save at the attendant and the ROM save dialog began
 // After `challenge-end` the engine keeps running (the dev shell and soaks use
-// the in-game new-challenge path) but no further events are produced: one
-// mount is one challenge.
+// the in-game new-challenge path) but the only further event is the one
+// `challenge-request`: one mount is one challenge. With `challengeRequest:
+// "hold"` (the default; the library mount and `replayChallenge`) the game then
+// freezes on the save dialog's first frame until the host destroys the mount.
 import { createInitialState, tick, type EngineState } from "./engine/core.ts";
 import { ANCHOR_FACTORY_METADATA } from "./engine/factoryAnchorSession.ts";
+import { createFactoryLobbyAttendantState } from "./engine/factoryLobbyAttendant.ts";
+import { createFactoryLobbyFreeRoamState } from "./engine/factoryLobbyFreeRoam.ts";
 import { createInitialFactoryCarry, generateFactoryChallengeDraft } from "./engine/factoryRoundChaining.ts";
 import {
   clearContainedPresentationErrors,
@@ -43,6 +49,20 @@ export interface FactorySessionOptions {
   readonly gameplaySeed?: number | undefined;
   readonly presentationSeed?: number | undefined;
   readonly presentationRngPolicy?: PresentationRngPolicyId | undefined;
+  /**
+   * lbr-c: what the attendant's save dialog does after the challenge ended. "hold" (default) freezes the game there for the host to
+   * destroy the mount; "continue" lets the dev shell / tests run the in-game new-challenge path as before. Either way one
+   * `challenge-request` event is reported.
+   */
+  readonly challengeRequest?: "hold" | "continue" | undefined;
+  /**
+   * lbr-c: "draft" (default) starts at the draft screen. "after-save" starts in the Lobby at the attendant's "Please step this way."
+   * (the save dialog already done), plays the door walk and fade, and deals a fresh challenge-0 draft exactly as the in-game new challenge
+   * does (carry streak 0 / rents 0, nch231). `gameplaySeed` is then the Lobby's vblank RNG cursor on the first frame (absent = the
+   * anchor's), and the draft comes from that cursor advanced by the walk's frames: deterministic from the seed, but not the deal a
+   * plain `gameplaySeed` mount makes. See docs/lbrc-challenge-request.md.
+   */
+  readonly start?: "draft" | "after-save" | undefined;
 }
 
 /**
@@ -58,6 +78,7 @@ export function createChallengeState(options: FactorySessionOptions): EngineStat
     ...(options.presentationSeed !== undefined ? { presentationSeed: options.presentationSeed } : {}),
     ...(options.presentationRngPolicy !== undefined ? { presentationRngPolicy: options.presentationRngPolicy } : {}),
   });
+  if (options.start === "after-save") return createAfterSaveState(base, options.gameplaySeed);
   if (options.gameplaySeed === undefined) return base;
   if (!Number.isInteger(options.gameplaySeed) || options.gameplaySeed < 0 || options.gameplaySeed > 0xffffffff) {
     throw new Error(`gameplaySeed must be a u32, got ${options.gameplaySeed}`);
@@ -71,6 +92,21 @@ export function createChallengeState(options: FactorySessionOptions): EngineStat
     rngValue: generation.rngValue,
     factoryCarry: carry,
     pendingGeneratedRound: Object.freeze({ rngValueBefore: bootRngValue, carry }),
+  };
+}
+
+function createAfterSaveState(base: EngineState, gameplaySeed: number | undefined): EngineState {
+  if (gameplaySeed !== undefined && (!Number.isInteger(gameplaySeed) || gameplaySeed < 0 || gameplaySeed > 0xffffffff)) {
+    throw new Error(`gameplaySeed must be a u32, got ${gameplaySeed}`);
+  }
+  const attendant = createFactoryLobbyAttendantState(0);
+  return {
+    ...base,
+    lobbyFreeRoam: createFactoryLobbyFreeRoamState(),
+    lobbyAttendant: Object.freeze({ ...attendant, screen: "step" as const, page: 0, age: 0, lead: null }),
+    rngMode: "vblank",
+    rngValue: (gameplaySeed ?? base.rngValue) >>> 0,
+    factoryCarry: createInitialFactoryCarry(ANCHOR_FACTORY_METADATA.playerTrainerId),
   };
 }
 
@@ -92,6 +128,7 @@ export class FactorySession {
   private prevLastBattle: object | null = null;
   private prevPhase: string | null = null;
   private prevLobby = false;
+  private requestSent = false;
   private soundSink: SoundSink | null = null;
 
   // No parameter properties: tools import src/ under node --experimental-strip-types, which cannot transform them.
@@ -182,6 +219,7 @@ export class FactorySession {
     this.containedErrors.length = 0;
     this.streak = 0;
     this.ended = null;
+    this.requestSent = false;
     this.hash = new Sha256();
     this.hashed = new WeakSet();
     this.containedSeen = 0;
@@ -197,6 +235,9 @@ export class FactorySession {
   }
 
   private step(buttons: ReadonlySet<GbaButton>, sink: SoundSink | null = null): FactoryEvent[] {
+    if (this.ended !== null && !this.state.attendantRequestHold && (this.options.challengeRequest ?? "hold") === "hold") {
+      this.state = { ...this.state, attendantRequestHold: true };
+    }
     if (sink === null) {
       this.state = tick(this.state, buttons);
     } else {
@@ -236,6 +277,10 @@ export class FactorySession {
     if (lobby && !this.prevLobby && this.ended === null) {
       this.ended = "retire";
       events.push({ type: "challenge-end", reason: "retire", streak: this.streak, frame });
+    }
+    if (this.ended !== null && !this.requestSent && this.state.lobbyAttendant?.saveDialogStarted === true) {
+      this.requestSent = true;
+      events.push({ type: "challenge-request", frame });
     }
     this.prevLastBattle = lastBattle;
     this.prevPhase = phase;

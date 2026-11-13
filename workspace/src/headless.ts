@@ -11,6 +11,7 @@ export function replayChallenge(options: ReplayOptions): ReplayResult {
     battleScene: options.battleScene,
     gameplaySeed: options.gameplaySeed,
     presentationSeed: options.presentationSeed,
+    start: options.start,
   });
   session.resume(options.segments);
   return {
