@@ -272,7 +272,7 @@ def uncovered_runs(rel, f):
                 never = not any(hit[k] for k in range(a, min(b, n)) if owner[k] == owner[i])
                 first = next((ln.strip() for ln in body.split("\n") if re.search(r"\w", ln)), body.strip())
                 lead = text[starts[line_of(starts, i) - 1]:i].strip()  # what stands before the run on its first line (the condition of an untaken branch)
-                runs.append({"function": name or "(module)", "functionLine": line_of(starts, a), "neverCalled": never, "line": line_of(starts, i),
+                runs.append({"function": name or "(module)", "functionLine": line_of(starts, a), "neverCalled": never, "offset": i, "line": line_of(starts, i),
                              "endLine": line_of(starts, j - 1), "chars": len(body.strip()), "text": first[:160], "lead": lead[-200:], "body": body.strip()[:1500],
                              "class": auto_class(body, lead)})
             i = j
@@ -431,13 +431,13 @@ def diff(argv):
     print(json.dumps({"newlyRunRanges": added}))
 
 
-def count_at(cov_dir, rel, snippet, root=ROOT):
-    """How often the code at the first character of `snippet` (a text that occurs once in the file `rel`) ran, in the V8 coverage files of cov_dir.
+def count_at(cov_dir, rel, snippet, root=ROOT, at=0):
+    """How often the code at character `at` of `snippet` (a text that occurs once in the file `rel`) ran, in the V8 coverage files of cov_dir.
     None when the file was not loaded. The innermost reported range decides."""
     text = (Path(root) / rel).read_text(encoding="utf-8")
     if text.count(snippet) != 1:
         raise SystemExit(f"{rel}: the snippet must occur exactly once (it occurs {text.count(snippet)} times): {snippet!r}")
-    at = text.index(snippet)
+    at = text.index(snippet) + at
     total = None
     for cov in glob.glob(str(Path(cov_dir) / "coverage-*.json")):
         script = next((s for s in json.loads(Path(cov).read_text())["result"] if s["url"].endswith("/" + rel)), None)

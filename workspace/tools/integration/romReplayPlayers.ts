@@ -27,7 +27,7 @@ export const PLAYER_POLICIES = ["census", "ai-v1", "random-v1"] as const;
 export type PlayerPolicyName = (typeof PLAYER_POLICIES)[number];
 
 /** One written turn of a staged battle: exactly one of move / switch, with optional refusal probes before it. */
-export type ScriptStep = Readonly<{ move?: number; switch?: number; prefer?: number; probeSwitch?: number; probeMove?: number }>;
+export type ScriptStep = Readonly<{ move?: number; switch?: number; prefer?: number; preferSwitch?: number; probeSwitch?: number; probeMove?: number }>;
 export type PlayerScript = Readonly<{ actions: readonly ScriptStep[]; replacements?: readonly number[]; then?: PlayerPolicyName }>;
 
 export type PlayerAction = Readonly<{ kind: "move"; slot: number } | { kind: "switch"; partyIndex: number }>;
@@ -235,6 +235,13 @@ export function createScriptPlayer(seed: number, script: PlayerScript): Player {
       if (step.probeMove !== undefined) {
         if (menu.legalSlots.includes(step.probeMove) || menu.forcedMove) throw new Error(`${where}: probeMove ${step.probeMove}, but the engine offers that slot or the turn is forced`);
         probes.push({ kind: "move-refused", slot: step.probeMove }); count("moveProbes");
+      }
+      if (step.preferSwitch !== undefined) {
+        // "switch to this party slot when the engine offers it" (the slot may have fainted); else the `then` player decides this turn.
+        if (step.move !== undefined || step.switch !== undefined || step.prefer !== undefined) throw new Error(`${where}: a preferSwitch step takes no move / switch / prefer`);
+        if (!menu.legalSwitches.includes(step.preferSwitch)) { count("preferNotOffered"); return rest.chooseTurn(menu); }
+        count("switches");
+        return { probes, action: { kind: "switch", partyIndex: step.preferSwitch }, source: "script" };
       }
       if (step.prefer !== undefined) {
         // "use this slot when the engine offers it": for a staging whose move can be taken away by the other side (no PP under Pressure, Disable,
