@@ -77,9 +77,8 @@ Verified in headless Chromium (below): the Ogg set decodes and plays, and the AA
 matches; CoreAudio may trim the encoder delay itself and then the `leadSamples` bias would be an over-shift of < 0.4 k samples
 (< 13 ms at 32 kHz) on SEs. The panned SE lead measurement is inconsistent between two otherwise identical variants (0 vs 306); cause unknown.
 
-Known limitations: after a `resume` fast-forward there is no BGM event, so music is silent until the next music event (audio is not in the
-trace); linear (not equal-power) crossfade; cry `volume` is ignored (the recording includes it); the literal m4a pan law reaches gain ~2
-at a hard pan; the `pan` event is ignored; turning audio on warms up all ~180 SE files (a few MB) at once.
+Known limitations: linear (not equal-power) crossfade; the literal m4a pan law reaches gain ~2 at a hard pan. (The resume/late-start
+silence, the ignored cry `volume` and `pan` event, and the warm-up of all SE files were fixed in aud245b, below.)
 
 ## Browser check (`node tools/browser/audioCheck.mjs --frames 3600 --also-aac`, after `npm run build`)
 
@@ -108,3 +107,42 @@ cries, fanfare, fades, loops incl. the crossfades, AAC fallback, baseUrl, clock)
 digest, battles, trace identical with the real player attached, Scene OFF and ON), `tests/aud245AudioFallback.test.ts` (the `.m4a` set vs
 the manifest, `song-players.json`), `tests/audioHeadlessBoundary.test.ts` (headless graph and the lib build's synchronous graph exclude the
 player and the audio files; the player sits in a dynamic chunk), `tests/aud244aAudioManifest.test.ts`.
+
+## aud245b: follow-ups (restore, pan, cry volume, lazy fetch)
+
+Touched: `src/audio/player.ts`, `src/audio/musicTracker.ts` (new), `src/lib.ts`. Not touched: `src/engine`, `src/factorySession.ts`,
+`src/audio/soundEvents.ts`, so frame output and `ENGINE_BUILD` are unchanged and the headless bundle is byte-identical (3,208,045 bytes).
+
+**1. Music after a `resume` fast-forward or a late `setAudio(true)`.** `lib.ts` now always attaches a sink; it feeds a `MusicTracker`
+(last `bgm` event, last `duck`, and the events after the last `bgm`, tail capped at 1024, oldest SE dropped first; `cry` and `pan`
+ignored) and, when present, the player. The resume fast-forward wraps `session.replayStep` in `collectSoundTick`, so its events reach the
+tracker but never the player. `AudioPlayer.restore(events, liveFrame)` replays the tracker's events on the logical voice model with
+`audible()` forced false (nothing is scheduled, the priority/preempt counters it touched are put back), anchors `liveFrame` at
+`now + latency`, then starts the voices that are still sounding **at their exact loop position** (the voice's start frame gives the offset
+into the loop, including after several loops and for crossfaded loops), so no restart is heard. Ended SEs and fanfares make no sound;
+a fanfare that is still running is resumed at its position with the BGM paused as in the live model; faded/replaced BGM is restored as
+the replacement. Called from `loadAudio` (player created after the fast-forward or mounted muted/late) and at the end of resume.
+Limitation: the session emits no event for the music playing at frame 0 (e.g. 469), so that track is untracked until the first `bgm`
+event (no new events, out of scope).
+
+**2. `pan` events** (`m4aMPlayPanpotControl`, m4a.c:1314, called from `SE12PanpotControl`, sound.c:600). It sets `track->panX` on SE1 and
+SE2 only; `TrkVolPitSet` uses `y = 2*pan + panX`, `volMR = (y+128)*x>>8`, `volML = (127-y)*x>>8`. The player applies `m4aPanGains(pan)`
+to the live SE1/SE2 `se` voice through a left/right gain stage spliced after a per-voice `pre` gain (mono mix, so the stage's gL+gR ~ 2
+keeps the mid level about unity); later pans use `setValueAtTime`. SE3 and BGM are untouched. A pan equal to the recorded pan with no
+earlier live pan is a no-op. Limit: once an SE is re-panned its own recorded stereo (ply_pan) is replaced by the mono mix.
+
+**3. Cry `volume`.** `SetPokemonCryVolume` (m4a.c:1701, `volumeValue = val & 0x7F`) feeds `TrkVolPitSet` (m4a.c:765, `x = vol*volX >> 5`),
+so loudness is linear in `vol`. Cries were recorded at volume 120 (`CRY_VOLUME`, soundRecorder.py:49), so
+`gain = (volume & 0x7f) / 120` (`cryVolumeGain`; no `volume` means 1). Applied to the cry source, combined with the pan stage if any.
+
+**4. Lazy fetch.** Enabling audio fetches only the prefetch set: BGM 469 (`BGM_DRAFT`, Lobby/draft) and SEs 5, 32, 9, 15 (common UI;
+5 files, `stats.prefetched`). Every other file is fetched on first use, once; the decode cache is kept. A first use waits for its fetch,
+so it can start late (`late` counts it; the music/SE is not played retroactively beyond the existing late rule). Browser check, 1800 frames
+(`audioCheck.mjs --frames 1800`): **186 requests (186 ogg, 186 fetches/decoded) before, 14 after** (14 fetches, 14 decoded, 5 prefetched,
+37 sources); `late` 3 -> 9 for the first uses.
+
+Tests: `tests/aud245bAudioFollowups.test.ts` (19: restore positions, after loops, ended events, fanfare, fade/replace, muted then enabled,
+events after the live frame ignored; the tracker; pan splice / no-op / SE3 / pan while loading; cry volume; prefetch set, first-use fetch
+once, decode cache), `tests/aud245bLibRestore.test.ts` (4: lib mount with `resumeSync` and a fake AudioContext/fetch: resume with audio,
+no audio option then `setAudio(true)`, muted then enabled). `tests/aud245AudioPlayer.test.ts` got one `await flush()` between two pushes
+(the second SE no longer finds the first loaded). The frame-identity test is unchanged and green.
