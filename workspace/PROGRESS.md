@@ -5,6 +5,23 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 2026-11-13 — aud245 (side lane worker, 112 min): WebAudio player, muted by default (S11 design step 9)
+
+- **State:** folded `69bc691dd` (branch `worker/side-20261113-023351`, removed; evidence `.integration/evidence/aud245/`). No `src/engine/` change; ENGINE_BUILD unchanged
+  `eb-adfdcfdc91f4247f`; headless bundle byte-identical (3,189,511 B). `docs/aud245-audio-player.md`.
+- **Website (additive API, tell the Mac):** `FactoryGameOptions.audio?: { enabled?, volume?, baseUrl? }`, `FactoryGame.setAudio(enabled)` / `getAudio()`
+  (`lib-types`, `docs/library-package.md`); dev shell `?audio=1`. `dist-lib/audio/` ships Ogg + an AAC `.m4a` fallback (picked by `canPlayType` / decode failure),
+  14.8 MB together; with `baseUrl` the host serves the unhashed files from `src/assets/gen/audio/`. Safari not checked on this box.
+- **Did:** `src/audio/player.ts` (lazy chunk 193 kB + manifest chunk 496 kB): SE1 / 2 / 3 priority from the song headers, cry duck 85 / 256, fanfare pause /
+  continue, fades, cry pan law, loops (7 ms crossfade at the four non-exact wraps). Limits: BGM silent after a `resume` until the next music event; `pan`
+  events and cry volume ignored; all 186 files fetched at enable.
+- **Gates:** worker typecheck 0, test:gate 362 / 362, full suite green except `bnd253SrcJsonShipped` (fixed after, file re-run), build / build:lib 0;
+  frame-hash identity with the player attached, both scenes. Supervisor: 8 audio / library test files 57 / 57; `tools/browser/audioCheck.mjs --frames 1800`:
+  `?audio=1` 1 context running, 38 sources started, peak 0.57, 0 decode failures, 0 errors; no audio option: 0 contexts, 0 audio requests.
+- **Next:** aud246 close (soaks, ROADMAP S11 tick by the supervisor); the limits above as small follow-ups.
+
+---
+
 ## 2026-11-13 — aud244b (side lane worker, 82 min): BGM / fanfare / looping-SE assets with ROM loop points (S11 design step 8, done)
 
 - **State:** folded `197011863` (branch `worker/side-20261113-010956`, removed; evidence `.integration/evidence/aud244b/`). No `src/*.ts` change: ENGINE_BUILD unchanged.
