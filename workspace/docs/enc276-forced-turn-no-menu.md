@@ -85,3 +85,29 @@ HOLD_AT, no fight phase; constants; ON/OFF share the flow).
   load average ~13 with a sibling worker's full suite; winning 0:12 --parallel 3 was not run. The soak driver itself is patched for the forced turn and
   `tests/randomRoundSoak.test.ts` (64 tests, including vanilla/winning milestone seeds) is green.
 - Not done in the cap: shard 1 re-run on the final tree, census / ROM re-drive re-run on the final tree, `npm run test:smoke` on the final tree.
+
+## Final-tree verification (enc276v)
+
+Tree `5b1814cf6eca0e1f2bde74705ebcb0fe8cbf4e17` (master = enc276 merged with lbr-b's Lobby attendant change and aud244b / aud245), worktree branch
+`worker/integration-20261113-050415`. No `src/` change was needed for enc276; this step adds only this section. Evidence (git-ignored):
+`.integration/evidence/enc276v/` in the worktree.
+
+- **Census 0..999, both scenes** (`LSD194_SPLIT=4 LSD194_CENSUS_JOBS=3 sh tools/integration/lsd194Census.sh <root> <full sha>:off <full sha>:on`, explicit SHA) vs the
+  `17af89768` base arms, `tools/integration/enc276CensusDelta.py`: **off and on both** `sameSeedSet: true, digestMoved: [], commandRowsMoved: [], errorsMoved: []`,
+  `frameBudgetBoth: [796, 995]`. The common prefix of 796 / 995 (census driver patched to emit the cumulative kernel-events digest after every segment, base tree with its own
+  driver): per-segment digests identical over the whole common prefix and the command rows of every complete common segment identical, 4/4 (off 796: 316 of 331 base
+  segments; off 995: 328 / 344; on 796: 282 / 293; on 995: 291 / 302; the final tree's cut lands earlier because it needs more frames per forced turn). The census does
+  not reach the Lobby: it builds `createFactoryRoundBattleOrchestrator` and drives the battle only, so lbr-b's attendant code is outside it.
+- **ROM re-drive** (`tools/audio/romDriveSeed.sh SEED off DIR`, seeds 60 87 89 90 119 159 161 193, first drive each): all 8 stop on `outcome`, `matched == engineStates`
+  (82, 69, 96, 73, 21, 63, 35, 21), `frozenTimelineEqualsDrive: true`, `divergence: null`, no engine error.
+- **Soaks** (nohup, `--parallel 3`): vanilla `--seeds 0:20 --scene off` OK 20 / CRASH 0 / HANG 0 (774 s); vanilla `--scene on` OK 20 / 0 / 0 (1091 s);
+  `--policy winning --seeds 0:12` OK 12 / 0 / 0 (605 s; deepest carry 28).
+- **`npm run test:smoke`**: 8 files / 448 tests passed.
+- **Full `POKEBENCH_VITEST_MAX_WORKERS=4 npm test`** (nohup, load average 10-15 from a sibling worker): 1822 files, **1776 passed, 1 failed, 44 skipped, 1 unreported**;
+  14654 tests passed, 3 failed, 242 skipped; 2004 s. The one unreported file was lost to a `Worker exited unexpectedly` error (box under load);
+  `tests/animation/gigaDrainEvidence.test.ts` re-run alone: 4/4 green.
+  The 3 failures are all in `tests/randomRoundSoak.test.ts` (seed 32 Baton Pass pin, the max-depth-survives-a-loss pin, the swap-offer pin; 61/64 pass), reproduced alone,
+  and **not caused by enc276**: the file is 64/64 at `9f8c9aa7d^` and 3 failed at `9f8c9aa7d` (lbr-b, "ROM attendant conversation at the singles attendant"), which is not in
+  the enc276 branch, and 3 failed on the master parent `435515cbd` (no enc276). The earlier enc276 verification had this file 64/64 on the enc276 branch, consistent with that.
+  The pins are timing windows the attendant conversation moved (e.g. seed 1 vanilla reaches its swap offers, all "NO", only after 32,000 frames; at 32,000 frames it is on its
+  2nd Lobby challenge with `maxBattleDepth` 0). The soaks above still end OK. Re-pinning them is lbr-b / Lobby soak-driver follow-up work (out of scope here).
