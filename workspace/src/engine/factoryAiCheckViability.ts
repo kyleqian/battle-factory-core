@@ -7963,11 +7963,17 @@ function runCvMagicCoat(input: Readonly<{
  * ```
  *
  * User is Ghost type (type1 or type2) OR user's own evasion stage > 8 jumps
- * past the deterministic -2. The Ghost path reaches `Foresight2`'s <80 roll,
- * the high-evasion path `Foresight3`'s <80 roll -- same odds, two mutually
- * exclusive draw sites (both JUMP to End at zero, FALL-THROUGH +2). The
- * `get_user_type1/2` reads write funcResult (the user's type, only TYPE id
- * 0-3 ever colliding with an `AI_WEATHER_*` compare).
+ * past the deterministic -2. The high-evasion path reaches `Foresight3`'s
+ * <80 roll (JUMP to End at zero, FALL-THROUGH +2). The Ghost path reaches
+ * `Foresight2`'s <80 roll, and that roll's FALL-THROUGH is not the +2: no
+ * `score` and no `goto` stand between `:1958` and the label `:1959`, so a
+ * first roll of 80 or more runs `Foresight3`'s roll as well
+ * (`Cmd_if_random_less_than`, `battle_ai_script_commands.c:663-671`: no
+ * jump means the next instruction). A Ghost user draws once when its first
+ * roll is under 80 (score 0), else twice (score +2 only when the second is
+ * 80 or more as well). The `get_user_type1/2` reads write funcResult (the
+ * user's type, only TYPE id 0-3 ever colliding with an `AI_WEATHER_*`
+ * compare).
  */
 function runCvForesight(input: Readonly<{
   rng: BattleRngState;
@@ -7986,15 +7992,25 @@ function runCvForesight(input: Readonly<{
       funcResultAfter: typeChainFuncResultAfter(input.attackerTypes, new Set(["TYPE_GHOST"])),
     });
   }
-  const kind = isGhost ? ("foresight-roll-1" as const) : ("foresight-roll-2" as const);
-  const roll = nextDraw(input.rng, input.drawOrdinalStart, `${input.reasonPrefix}-${kind}`);
+  const funcResultAfter = typeChainFuncResultAfter(input.attackerTypes, new Set(["TYPE_GHOST"]));
+  const draws: FactoryAiCheckViabilityDraw[] = [];
+  let rng = input.rng;
+  let ordinal = input.drawOrdinalStart;
+  if (isGhost) {
+    // AI_CV_Foresight2 (:1957-1958)
+    const first = nextDraw(rng, ordinal, `${input.reasonPrefix}-foresight-roll-1`);
+    rng = first.after;
+    ordinal += 1;
+    const firstJumped = first.randomValue % 256 < 80;
+    draws.push(Object.freeze({ ...first, kind: "foresight-roll-1" as const, jumped: firstJumped }));
+    if (firstJumped) return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: 0, funcResultAfter });
+    // no jump: the script goes on into AI_CV_Foresight3
+  }
+  // AI_CV_Foresight3 (:1959-1961)
+  const roll = nextDraw(rng, ordinal, `${input.reasonPrefix}-foresight-roll-2`);
   const jumped = roll.randomValue % 256 < 80;
-  return Object.freeze({
-    rng: roll.after,
-    draws: Object.freeze([Object.freeze({ ...roll, kind, jumped })]),
-    scoreDelta: jumped ? 0 : 2,
-    funcResultAfter: typeChainFuncResultAfter(input.attackerTypes, new Set(["TYPE_GHOST"])),
-  });
+  draws.push(Object.freeze({ ...roll, kind: "foresight-roll-2" as const, jumped }));
+  return Object.freeze({ rng: roll.after, draws: Object.freeze(draws), scoreDelta: jumped ? 0 : 2, funcResultAfter });
 }
 
 /**
