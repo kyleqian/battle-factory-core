@@ -6661,14 +6661,16 @@ describe("AI_CV_Foresight (data/battle_ai_scripts.s:1940-1963, non-BUGFIX)", () 
     const second = foresightRun(1, { types: ["TYPE_GHOST", "TYPE_NORMAL"] });
     if (second.kind !== "scored") throw new Error("unreachable");
     expect(second).toMatchObject({ scoreDelta: 0 });
-    expect(second.draws.map((d) => [d.kind, d.jumped])).toEqual([["foresight-roll-1", false], ["foresight-roll-2", true]]);
+    expect(second.draws).toHaveLength(2);
+    expect(second.draws).toMatchObject([{ kind: "foresight-roll-1", jumped: false }, { kind: "foresight-roll-2", jumped: true }]);
     expect(second.rng.calls).toBe(2);
 
     // seed 2 -> 140, then 195: both 80 or more. Two draws, +2.
     const both = foresightRun(2, { types: ["TYPE_GHOST", "TYPE_NORMAL"] });
     if (both.kind !== "scored") throw new Error("unreachable");
     expect(both).toMatchObject({ scoreDelta: 2 });
-    expect(both.draws.map((d) => [d.kind, d.jumped])).toEqual([["foresight-roll-1", false], ["foresight-roll-2", false]]);
+    expect(both.draws).toHaveLength(2);
+    expect(both.draws).toMatchObject([{ kind: "foresight-roll-1", jumped: false }, { kind: "foresight-roll-2", jumped: false }]);
   });
 
   it("Ghost user (type2 only) also reaches Foresight2", () => {
