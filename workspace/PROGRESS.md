@@ -5,6 +5,18 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 2026-11-13 — enc276 (integration lane worker, 200-min cap): a forced turn goes from FIGHT straight into the turn (ISSUES #213)
+
+- **State:** folded `5b1814cf6` (branch removed; evidence `.integration/evidence/enc276/`). ENGINE_BUILD moves again (merged tree; read at wind-down). `docs/enc276-forced-turn-no-menu.md`.
+  **Final-tree verification is running** (enc276v, integration lane): census 0..999 both scenes, 8-seed ROM re-drive, soaks, full suite. #213 stays open until it lands.
+- **Did:** Encore: FIGHT submits the Encored move, no move menu. Struggle: FIGHT prints "<mon> has no moves left!" (ROM-tuned glyph / arrow / bounce timing), A submits.
+  Decision set unchanged; 30 tool / test route drivers follow the forced turn; `randomRoundSoak` seed 21 re-pinned (frames only).
+- **Proof so far (worker, on `093ee66ed`):** census 0..999 ON and OFF vs `17af89768`: 0 digests / command rows / errors moved (29 forced-turn seeds); ROM seeds 60 87 89
+  90 119 159 161 193 still match. ROM windows: encore-off 181 / 189, struggle-off 158 / 189, struggle-on 116 / 189, encore-on 46 / 189 (residuals named: bounce stop,
+  the staged route's missing Scene ON SPLASH body, Struggle HP drain / recoil timing after the animation). typecheck / test:gate 362 / 362 / build / build:lib 0.
+
+---
+
 ## 2026-11-13 — lbr-b (ts lane worker, 180-min cap reached after its last commit): the singles attendant conversation (handoff item 0b, step 2)
 
 - **State:** on master (`9f8c9aa7d`..`7952dfe02`). ENGINE_BUILD `eb-adfdcfdc91f4247f` -> `eb-317927f84c1b839e` (read from dist; tell the website). `docs/lbrb-attendant-conversation.md`.
