@@ -1046,6 +1046,18 @@ function frf250aStage(state: EngineState, bounceAge: number): EngineState {
   };
 }
 
+// enc276: frf250a's Rattata pair with the SPLASH turn's controller hold on the staged turn; the Struggle window's later turn uses Struggle (no SPLASH hold).
+function enc276Stage(state: EngineState, id: string, scene: "on" | "off", opponentMoveId: number, bounceAge: number): EngineState {
+  return frf250aStage(midBattleSwitchStage(state, id, [RATTATA_LV50_BENCH, RATTATA_LV50_BENCH], [105, 105], {
+    battleScene: scene,
+    player: rattataAtLevel(50, 150),
+    trainer: rattataAtLevel(40, opponentMoveId),
+    sceneOffNoAnimations: scene === "off",
+    // Struggle: the turn-2 used-move hold is not SPLASH's; Scene ON's Struggle body starts 8 frames after the app's own (a generic body-start residual, not the forced-turn handoff).
+    ...(opponentMoveId === 269 ? { laterTurnsUsedMessageHoldFrames: scene === "on" ? 8 : 0 } : {}),
+  }), bounceAge);
+}
+
 function pmo239SwitchReopenOffStage(state: EngineState): EngineState {
   return midBattleSwitchStage(state, "pmo239-switch-0-to-2-off", [PMO239_PIDGEY_BENCH, PMO239_MACHOP_BENCH], [115, 145]);
 }
@@ -1055,6 +1067,8 @@ type MidBattleSwitchStageOptions = Readonly<{
   player?: FactoryFullTurnBattlerConfig;
   trainer?: FactoryFullTurnBattlerConfig;
   usedMessageHoldFrames?: number;
+  /** The hold for every turn after the staged first one (the SPLASH controller hold belongs to the SPLASH turn only). */
+  laterTurnsUsedMessageHoldFrames?: number;
   sceneOffNoAnimations?: boolean;
   /** `null`: no bench for that side (the last faint is a hard terminal, the full-turn reducer's default shape). */
   trainerBenchHp?: readonly [number, number] | null;
@@ -1184,7 +1198,7 @@ function midBattleSwitchStage(
     moveSelectionCursors: cursors,
     battlePresentationBoundaries: boundaries,
     aiHistory: createFactoryAiBattleHistory(staged.rules.rulesContext),
-    usedMessageHoldFrames: usedMessageHold,
+    usedMessageHoldFrames: options.laterTurnsUsedMessageHoldFrames ?? usedMessageHold,
   });
   return {
     ...state,
@@ -1935,6 +1949,12 @@ export const APP_STAGES: Readonly<Record<string, AppStage>> = {
   // frf250a: BAG / RUN on the action menu (two Level-50 Rattata, both scenes; tools/battle-lab/frf250a-*.json).
   "frf250a-bagrun-on": (state) => frf250aStage(aud241bStage(state, "frf250a-bagrun-on", "on", 50, 50), 27),
   "frf250a-bagrun-off": (state) => frf250aStage(aud241bStage(state, "frf250a-bagrun-off", "off", 50, 50), 34),
+  // enc276: a forced turn goes from FIGHT straight into the turn (tools/battle-lab/enc276-*.json): the L50 player's SPLASH is
+  // Encored (opponent L40 ENCORE) / Taunted into forced Struggle (opponent L40 TAUNT); turn 2's FIGHT has no move menu.
+  "enc276-encore-on": (state) => enc276Stage(state, "enc276-encore-on", "on", 227, 27),
+  "enc276-encore-off": (state) => enc276Stage(state, "enc276-encore-off", "off", 227, 30),
+  "enc276-struggle-on": (state) => enc276Stage(state, "enc276-struggle-on", "on", 269, 27),
+  "enc276-struggle-off": (state) => enc276Stage(state, "enc276-struggle-off", "off", 269, 30),
   "pmo239-switch-0-to-2-off": pmo239SwitchReopenOffStage,
   "mechanic-selection-reject-torment-off": tormentSelectionRejectionOffStage,
   "party-menu-status-item-off": partyMenuStatusItemOffStage,

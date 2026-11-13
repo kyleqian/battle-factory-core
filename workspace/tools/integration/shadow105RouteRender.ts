@@ -18,6 +18,7 @@ import { renderBattleResolutionLiveView } from "../../src/engine/battleScene.ts"
 import { createHash } from "node:crypto";
 import { PARTY_LIST_INPUT_ELAPSED } from "../../src/engine/partySelect.ts";
 import type { GbaButton } from "../../src/input.ts";
+import { NO_MOVES_MESSAGE_HOLD_AT } from "../../src/engine/battleCommandPresentation.ts";
 
 const arg = (name: string, fallback?: string) => process.argv.find((a) => a.startsWith(`--${name}=`))?.slice(name.length + 3) ?? fallback;
 const seed = Number(arg("seed")), streak = Number(arg("streak", "0")), scene = "on" as const, out = arg("out")!;
@@ -123,7 +124,18 @@ let end = "terminal";
 try {
   until(() => phase() === "action-menu");
   while (!ended) {
+    const forcedSlot = state.battleCommandPresentation?.forcedMove?.decision.moveSlot ?? null;
     pulse("A");
+    if (forcedSlot !== null) {
+      slotUses[forcedSlot]!++;
+      if (phase() === "no-moves-message") {
+        until(() => (state.battleCommandPresentation?.lifecycle.phaseElapsed ?? NO_MOVES_MESSAGE_HOLD_AT) >= NO_MOVES_MESSAGE_HOLD_AT);
+        pulse("A");
+      }
+      until(() => !state.battleCommandPresentation);
+      until(() => phase() === "action-menu");
+      continue;
+    }
     until(() => phase() === "fight-menu");
     if (ended) break;
     const menu = state.battleCommandPresentation!;

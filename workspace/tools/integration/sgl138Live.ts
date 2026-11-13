@@ -28,6 +28,7 @@ import { tickLiveMovePresentationRngSession } from "../../src/engine/liveMovePre
 import { PARTY_LIST_INPUT_ELAPSED } from "../../src/engine/partySelect.ts";
 import { statsChangeParams, statsChangeSpan } from "../../src/animation/statsChange.ts";
 import type { GbaButton } from "../../src/input.ts";
+import { NO_MOVES_MESSAGE_HOLD_AT } from "../../src/engine/battleCommandPresentation.ts";
 
 /** sgs134's census open receipts (fixtures/sgs134/exposure.json): the projected gate of every gated request, by seed / segment / event. */
 export type Sgl138Open = { seed: number; seg: string; i: number; tok: string; cls: string; gate: number | null; move: string | null };
@@ -137,7 +138,18 @@ export function sgl138Battle(seed: number, scene: "on" | "off"): { commands: Sgl
   };
   until(() => phase() === "action-menu");
   while (!ended) {
+    const forcedSlot = state.battleCommandPresentation?.forcedMove?.decision.moveSlot ?? null;
     pulse("A");
+    if (forcedSlot !== null) {
+      slotUses[forcedSlot]!++;
+      if (phase() === "no-moves-message") {
+        until(() => (state.battleCommandPresentation?.lifecycle.phaseElapsed ?? NO_MOVES_MESSAGE_HOLD_AT) >= NO_MOVES_MESSAGE_HOLD_AT);
+        pulse("A");
+      }
+      until(() => !state.battleCommandPresentation);
+      until(() => phase() === "action-menu");
+      continue;
+    }
     until(() => phase() === "fight-menu");
     if (ended) break;
     const menu = state.battleCommandPresentation!;

@@ -23,6 +23,7 @@ import { adoptFactoryBrainOpponentSchedule } from "../../src/engine/factoryBrain
 import { getLevel50FactoryRentalRange } from "../../src/engine/factoryRentalGeneration.ts";
 import { battlerMoveSelectionIsForced } from "../../src/engine/factoryBattleScriptFullTurnDecision.ts";
 import { createFactoryCorpusPartyMember } from "../../src/engine/factoryCorpusParty.ts";
+import { NO_MOVES_MESSAGE_HOLD_AT } from "../../src/engine/battleCommandPresentation.ts";
 import { PARTY_LIST_INPUT_ELAPSED } from "../../src/engine/partySelect.ts";
 import { collectSoundTick } from "../../src/audio/soundEvents.ts";
 import { beginScreenSoundTick, runScheduledScreenSounds } from "../../src/engine/screenSounds.ts";
@@ -248,6 +249,20 @@ function play(initial: any, record: boolean, patchRng: number | null = null) {
     if (!record) return { frame0, actionMenuRng, randomTurnNumber, state, sound, inputs, error, frames: frame, timeline, decisions, turnEvents };
     while (!ended) {
       const actionMenuFrame = frame;
+      const forcedMove = state.battleCommandPresentation!.forcedMove ?? null;
+      if (forcedMove !== null) {
+        // enc276: FIGHT commits the forced turn, as in the ROM; the move menu never opens (Struggle shows "has no moves left!" first).
+        slotUses[forcedMove.decision.moveSlot]!++;
+        decisions.push({ kind: "move", slot: forcedMove.decision.moveSlot, forced: true, menuOpenFrame: actionMenuFrame, commitFrame: frame + 2 }); // pulse("A") presses A on its 2nd step
+        pulse("A");
+        if (phase() === "no-moves-message") {
+          until(() => (state.battleCommandPresentation?.lifecycle.phaseElapsed ?? NO_MOVES_MESSAGE_HOLD_AT) >= NO_MOVES_MESSAGE_HOLD_AT);
+          pulse("A");
+        }
+        until(() => !state.battleCommandPresentation);
+        until(() => phase() === "action-menu");
+        continue;
+      }
       pulse("A");
       until(() => phase() === "fight-menu");
       if (ended) break;

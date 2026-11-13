@@ -417,7 +417,9 @@ describe("random round soak driver (green milestone pin)", () => {
       // obr251 (docs/obr251-opponent-party-summary.md; the draw hold on each opponent faint replacement): frames only + render calls,
       // 39_117 -> 40_796, renderCalls 2_782 -> 2_891; same battle 7, turn 3, end state, outcome (re-pinned by cln242 from the failing
       // full-suite shard; frame-only delta).
-      frames: 40_796,
+      // enc276 (docs/enc276-forced-turn-no-menu.md; a forced Encore / Struggle turn skips the move menu, Struggle prints its no-moves
+      // message): frames only + render calls, 40_796 -> 41_021, renderCalls 2_891 -> 2_895; same battle 7, turn 3, end state, diagnostics.
+      frames: 41_021,
       battle: 7,
       turn: 3,
       diagnostics: {
@@ -429,7 +431,7 @@ describe("random round soak driver (green milestone pin)", () => {
         terminalOutcome: "roundWon",
         terminalRecordMenuInputReadyReached: true,
         terminalRecordChoice: null,
-        renderCalls: 2_891,
+        renderCalls: 2_895,
       },
     });
     expect(second).toEqual(first);

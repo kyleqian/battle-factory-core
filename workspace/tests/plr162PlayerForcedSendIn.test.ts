@@ -22,6 +22,7 @@ import {
 } from "../src/engine/switchInTail";
 import { SEND_IN_TAIL_OFF_CRY_FRAMES } from "../src/data/sendInTailOff";
 import type { GbaButton } from "../src/input";
+import { NO_MOVES_MESSAGE_HOLD_AT } from "../src/engine/battleCommandPresentation.ts";
 
 const SPECIES_CASTFORM = 385;
 
@@ -102,7 +103,18 @@ function switchIns(seed: number, scene: "on" | "off") {
   };
   until(() => phase() === "action-menu");
   while (!ended) {
+    const forcedSlot = state.battleCommandPresentation?.forcedMove?.decision.moveSlot ?? null;
     pulse("A");
+    if (forcedSlot !== null) {
+      slotUses[forcedSlot]!++;
+      if (phase() === "no-moves-message") {
+        until(() => (state.battleCommandPresentation?.lifecycle.phaseElapsed ?? NO_MOVES_MESSAGE_HOLD_AT) >= NO_MOVES_MESSAGE_HOLD_AT);
+        pulse("A");
+      }
+      until(() => !state.battleCommandPresentation);
+      until(() => phase() === "action-menu");
+      continue;
+    }
     until(() => phase() === "fight-menu");
     if (ended) break;
     const menu = state.battleCommandPresentation!;

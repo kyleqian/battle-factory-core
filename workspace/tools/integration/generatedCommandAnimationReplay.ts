@@ -10,6 +10,7 @@ import {
   liveMoveAnimationDuration, liveMoveAnimationPresentation,
 } from "../../src/engine/liveMoveAnimation.ts";
 import type { GbaButton } from "../../src/input.ts";
+import { NO_MOVES_MESSAGE_HOLD_AT } from "../../src/engine/battleCommandPresentation.ts";
 import { PARTY_LIST_INPUT_ELAPSED } from "../../src/engine/partySelect.ts";
 import type { BattleMoveAnimationRequest } from "../../src/engine/battleMoveAnimation.ts";
 import type { LiveSpriteOrderHost } from "../../src/engine/liveSpriteOrderHost.ts";
@@ -188,7 +189,18 @@ export function generatedCommandAnimationReplay(
       boundaries.push(state.battle!);
       continue;
     }
+    const forced = state.battleCommandPresentation!.forcedMove ?? null;
     pulse("A");
+    if (forced !== null) {
+      if (phase() === "no-moves-message") {
+        until(() => (state.battleCommandPresentation?.lifecycle.phaseElapsed ?? NO_MOVES_MESSAGE_HOLD_AT) >= NO_MOVES_MESSAGE_HOLD_AT);
+        pulse("A");
+      }
+      until(() => !state.battleCommandPresentation);
+      until(() => phase() === "action-menu");
+      boundaries.push(state.battle!);
+      continue;
+    }
     until(() => phase() === "fight-menu");
     for (let i=0; i<4; i++) {
       const cursor = state.battleCommandPresentation!.fightCursor;

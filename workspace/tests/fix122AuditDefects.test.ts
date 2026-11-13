@@ -14,6 +14,7 @@ import {
   liveTrackedFrontIdleRest,
 } from "../src/engine/liveBattlerX2History.ts";
 import movesData from "../src/data/gen/moves.json" with { type: "json" };
+import { NO_MOVES_MESSAGE_HOLD_AT } from "../src/engine/battleCommandPresentation.ts";
 
 // fix122 (docs/fix122-audit26-defects.md): live audit 26's (aud118) two banked defects, landed.
 describe("fix122 DEFECT A: Struggle 165 keeps its target's x2 (Move_STRUGGLE shakes it only with the relative ShakeMonInPlace)", () => {
@@ -115,7 +116,18 @@ function battleFailures(seed: number, scene: "on" | "off"): Failure[] {
   };
   until(() => phase() === "action-menu");
   while (!ended) {
+    const forcedSlot = state.battleCommandPresentation?.forcedMove?.decision.moveSlot ?? null;
     pulse("A");
+    if (forcedSlot !== null) {
+      slotUses[forcedSlot]!++;
+      if (phase() === "no-moves-message") {
+        until(() => (state.battleCommandPresentation?.lifecycle.phaseElapsed ?? NO_MOVES_MESSAGE_HOLD_AT) >= NO_MOVES_MESSAGE_HOLD_AT);
+        pulse("A");
+      }
+      until(() => !state.battleCommandPresentation);
+      until(() => phase() === "action-menu");
+      continue;
+    }
     until(() => phase() === "fight-menu");
     if (ended) break;
     const menu = state.battleCommandPresentation!;

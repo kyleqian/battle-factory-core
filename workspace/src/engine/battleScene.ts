@@ -55311,11 +55311,28 @@ export function renderBattleResolutionSceneOffView(
         opponent: view.visibility.opponent.sprite,
       },
     );
-    drawFightSubmenuChromeFromLiveState(
-      fb,
-      view.confirmHandoff.fightMenu.displayCursor,
-      view.confirmHandoff.fightMenu.moveset,
-    );
+    const forcedBottom = view.confirmHandoff.forcedBottom;
+    if (forcedBottom === null) {
+      drawFightSubmenuChromeFromLiveState(
+        fb,
+        view.confirmHandoff.fightMenu.displayCursor,
+        view.confirmHandoff.fightMenu.moveset,
+      );
+    } else if (forcedBottom.kind === "encore") {
+      drawBattleCommandActionChrome(fb, {
+        prompt: forcedBottom.prompt,
+        options: ["FIGHT", "BAG", "POKéMON", "RUN"],
+        cursor: 0,
+      });
+    } else {
+      drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+      drawBattleMessageTextLines(fb, forcedBottom.lines[0] ?? "", forcedBottom.lines[1] ?? "", Infinity);
+      drawCursor(
+        fb,
+        CURSOR_Y_OFFSETS[Math.floor(forcedBottom.waitCursorAge / 9) % CURSOR_Y_OFFSETS.length]!,
+        LINE2_ORIGIN.x + measureText(font, charmap, forcedBottom.lines[1] ?? ""),
+      );
+    }
     return;
   }
   // S10A Substitute fade (liveSubstituteFade.ts): the fading battler's layer per row; the BG copy blends below the

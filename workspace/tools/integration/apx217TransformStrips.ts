@@ -23,6 +23,7 @@ import { createPresentationRngSession } from "../../src/engine/presentationRngHo
 import { tickLiveMovePresentationRngSession } from "../../src/engine/liveMovePresentationRng.ts";
 import { PARTY_LIST_INPUT_ELAPSED } from "../../src/engine/partySelect.ts";
 import { liveMovePlaybackClassification, liveMovePlaybackCode } from "../../src/engine/liveMovePlayback.ts";
+import { NO_MOVES_MESSAGE_HOLD_AT } from "../../src/engine/battleCommandPresentation.ts";
 
 export type Apx217Strip = { seed: number; moveId: number; attacker: number; code: string; rows: number; nonStaticRows: number; sha256: string;
   frames: Uint8Array[]; staticFrame: Uint8Array | null;
@@ -93,7 +94,18 @@ export function apx217Strip(seed: number, moveId: number, attacker: number, code
   const slotUses = [0, 0, 0, 0];
   until(() => phase() === "action-menu");
   while (!ended && !done) {
+    const forcedSlot = state.battleCommandPresentation?.forcedMove?.decision.moveSlot ?? null;
     pulse("A");
+    if (forcedSlot !== null) {
+      slotUses[forcedSlot]!++;
+      if (phase() === "no-moves-message") {
+        until(() => (state.battleCommandPresentation?.lifecycle.phaseElapsed ?? NO_MOVES_MESSAGE_HOLD_AT) >= NO_MOVES_MESSAGE_HOLD_AT);
+        pulse("A");
+      }
+      until(() => !state.battleCommandPresentation);
+      until(() => phase() === "action-menu");
+      continue;
+    }
     until(() => phase() === "fight-menu");
     if (ended || done) break;
     const menu = state.battleCommandPresentation!;

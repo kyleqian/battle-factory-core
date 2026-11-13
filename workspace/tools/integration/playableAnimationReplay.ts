@@ -1,5 +1,6 @@
 import { readFileSync } from "node:fs";
 import { createHash } from "node:crypto";
+import { NO_MOVES_MESSAGE_HOLD_AT } from "../../src/engine/battleCommandPresentation.ts";
 import { createInitialState, tick, render, type EngineState } from "../../src/engine/core.ts";
 import "../../src/engine/monPicPixelsInstall.ts";
 import { liveMoveAnimationDuration } from "../../src/engine/liveMoveAnimation.ts";
@@ -100,7 +101,19 @@ export function playableAnimationReplay(
   boundaries.push(state);
   for (const slot of moveSlots) {
     until(() => commandPhase() === "action-menu");
+    const forced = state.factoryRoundBattleOrchestrator!.battleCommandPresentation!.forcedMove ?? null;
     pulse("A");
+    if (forced !== null) {
+      if (commandPhase() === "no-moves-message") {
+        until(() => (state.factoryRoundBattleOrchestrator?.battleCommandPresentation?.lifecycle.phaseElapsed ?? NO_MOVES_MESSAGE_HOLD_AT) >= NO_MOVES_MESSAGE_HOLD_AT);
+        pulse("A");
+      }
+      until(() => !state.factoryRoundBattleOrchestrator?.battleCommandPresentation);
+      until(() => commandPhase() === "action-menu");
+      if (state.sceneOnPresentation !== null) throw new Error("live route injected a dev probe");
+      boundaries.push(state);
+      continue;
+    }
     until(() => commandPhase() === "fight-menu");
     for (let i=0; i<4; i++) {
       const cursor = state.factoryRoundBattleOrchestrator!.battleCommandPresentation!.fightCursor;

@@ -18,7 +18,9 @@ import {
 } from "./battleDecisionBoundary.ts";
 import { playSelectSe } from "./screenSounds.ts";
 import {
+  battleScriptForcedMoveSelection,
   describeIllegalMoveSelection,
+  type BattleScriptForcedMoveSelection,
   type BattleScriptSelectionRejection,
 } from "./battleScriptActionAdmission.ts";
 import {
@@ -130,6 +132,7 @@ export type BattleCommandPresentationPhase =
   | "rejection-message"
   | "rejection-reopen"
   | "bag-message"
+  | "no-moves-message"
   | "forfeit-question"
   | "forfeit-closing"
   | "forfeit-message"
@@ -264,6 +267,16 @@ export type BattleCommandPresentationState = Readonly<{
    * to 0 for every route that does not supply it.
    */
   usedMessageHoldFrames: number;
+  /**
+   * enc276: the turn's move is forced (all moves unusable = Struggle, or Encore), so FIGHT confirms it with no move menu
+   * (`HandleTurnActionSelectionState`, battle_main.c:4182-4197). `null` on every ordinary turn.
+   */
+  forcedMove: Readonly<{
+    kind: BattleScriptForcedMoveSelection;
+    decision: BattleMoveDecision;
+    /** Struggle: the wait ▼ age when the "has no moves left!" box was dismissed (the ROM leaves the ▼ frozen through the hold). */
+    dismissedWaitCursorAge?: number;
+  }> | null;
   pendingDecision: BattleCommandDecision | null;
 }>;
 
@@ -324,6 +337,19 @@ export const FORFEIT_MESSAGE_FIRST_GLYPH_AT = 10;
 export const FORFEIT_MESSAGE_END_AT = 98;
 export const FORFEIT_MESSAGE_PLAYER_NAME = PLAYER_NAME;
 export const FORFEIT_MESSAGE_TEXT = `${FORFEIT_MESSAGE_PLAYER_NAME} forfeited the match!`;
+
+/**
+ * enc276 (ROM-measured, Scene ON and OFF, both oracle profiles): FIGHT on a Struggle turn prints
+ * `BattleScript_NoMovesLeft` ("<mon> has no / moves left!", ends in `\p`). The box lands +4 after the A press, types one glyph
+ * per frame (a space draws nothing), and the wait ▼ first shows +30; the box is held until A or B. The dismissing press hides
+ * the ▼ at once and leaves the typed text up until the used-move message starts, `NO_MOVES_DISMISS_HOLD_FRAMES` after the press
+ * (the Encore press reaches its used-move message in the ordinary 10 frames).
+ */
+export const NO_MOVES_MESSAGE_FIRST_GLYPH_AT = 3;
+export const NO_MOVES_MESSAGE_HOLD_AT = 29;
+export const NO_MOVES_DISMISS_HOLD_FRAMES = 9;
+/** The idle sprite bounce stops this many frames into the dismiss hold (ROM: press + 7, well before the used-move message). */
+export const NO_MOVES_BOUNCE_STOP_AFTER = 6;
 
 export function moveBattleCommandActionCursor(
   cursor: 0 | 1 | 2 | 3,
@@ -571,6 +597,14 @@ export function createBattleCommandPresentation(
     rejectionReasonForSlot(3),
   ];
 
+  const forcedKind = battleScriptForcedMoveSelection(rules, request.battler);
+  const forcedMoves = request.legalDecisions.filter(
+    (decision): decision is BattleMoveDecision => decision.kind === "use-move",
+  );
+  const forcedMove = forcedKind !== null && forcedMoves.length === 1
+    ? Object.freeze({ kind: forcedKind, decision: forcedMoves[0]! })
+    : null;
+
   return Object.freeze({
     request,
     lifecycle: Object.freeze({ phase: "action-enter", phaseElapsed: 0 }),
@@ -589,6 +623,7 @@ export function createBattleCommandPresentation(
   rejectionWaitCursorAge: 0,
   forfeitCursor: 1,
   forfeitDisplayCursor: 1,
+  forcedMove,
   pendingDecision: null,
   usedMessageHoldFrames,
 });
@@ -677,6 +712,23 @@ export function advanceBattleCommandPresentation(
         ? withLifecycle(state, "action-menu", 0)
         : withLifecycle(state, "bag-message", elapsed);
     }
+    case "no-moves-message": {
+      const elapsed = state.lifecycle.phaseElapsed + 1;
+      if (
+        elapsed >= NO_MOVES_MESSAGE_HOLD_AT
+        && (newKeys.has("A") || newKeys.has("B"))
+        && state.forcedMove !== null
+      ) {
+        const forcedMove = Object.freeze({ ...state.forcedMove, dismissedWaitCursorAge: elapsed - 1 - NO_MOVES_MESSAGE_HOLD_AT });
+        return withLifecycle(state, "submitting", 0, {
+          forcedMove,
+          pendingDecision: forcedMove.decision,
+          fightCursor: forcedMove.decision.moveSlot,
+          fightDisplayCursor: forcedMove.decision.moveSlot,
+        });
+      }
+      return withLifecycle(state, "no-moves-message", elapsed);
+    }
     case "forfeit-question": {
       const elapsed = state.lifecycle.phaseElapsed + 1;
       state = Object.freeze({ ...state, forfeitDisplayCursor: state.forfeitCursor });
@@ -731,6 +783,15 @@ export function advanceBattleCommandPresentation(
   if (state.lifecycle.phase === "action-menu") {
     if (newKeys.has("A")) {
       if (state.actionCursor === 0) {
+        if (state.forcedMove !== null) {
+          return state.forcedMove.kind === "struggle"
+            ? withLifecycle(state, "no-moves-message", 0)
+            : withLifecycle(state, "submitting", 0, {
+              pendingDecision: state.forcedMove.decision,
+              fightCursor: state.forcedMove.decision.moveSlot,
+              fightDisplayCursor: state.forcedMove.decision.moveSlot,
+            });
+        }
         return withLifecycle(state, "fight-opening", 0);
       }
       if (state.actionCursor === 2) {
