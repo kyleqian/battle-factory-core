@@ -53,9 +53,15 @@ palettes alone; it now reads `src/assets/gen/battle-sprite-palettes.json`
   reaches `roundComplete`; `challenge-end loss` at `roundLost`;
   `challenge-end retire` when the Lobby free-roam begins without a lost
   battle (RETIRE + YES at the attendant); `contained-error` mirrors
-  `containedErrors`. After `challenge-end` nothing more is reported: one
-  mount is one challenge (the in-game new-challenge path stays for the shell
-  and soaks).
+  `containedErrors`. After `challenge-end` the only further event is the one
+  `challenge-request` below: one mount is one challenge (the in-game
+  new-challenge path stays for the shell and soaks).
+- **`challenge-request` (lbr-c, additive; full spec `docs/lbrc-challenge-request.md`).** After `challenge-end`, when the player confirms the save at
+  the Lobby attendant (CHALLENGE, LV. 50, YES) the library reports `{ type: "challenge-request", frame }` once, on the first frame of the ROM's
+  save dialog, and the game then HOLDS on that frame (input ignored, picture fixed) until the host calls `destroy()`; a host that ignores the event
+  leaves a frozen save window, which is the spec. The host prefetches the next server challenge at `challenge-end`, and on `challenge-request`
+  destroys the mount and mounts that challenge (it starts at the draft as any mount does). `challenge-end` fires exactly where it did and the trace
+  read at it is a prefix of every later read: nothing after the end belongs in the upload, and the event adds no frame to the trace.
 - A forfeit (RUN, then YES on the forfeit box) is a lost battle: `battle-end` with outcome loss and `challenge-end loss` on the same
   tick, and `replayChallenge` reproduces it from the input stream alone (`docs/frf250b-forfeit.md`).
 - `resume` ticks the given runs without drawing (spread over animation
