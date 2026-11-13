@@ -129,28 +129,33 @@ window.addEventListener("keyup", (event) => {
 // Dev-shell opt-in: the library mount never polls the gamepad itself.
 connectGamepad(game);
 
-// The session trace is always exportable, not just on a crash: when a played
-// moment merely LOOKS wrong, `__POKEBENCH_SESSION__()` in the console yields
-// a deterministic replay of the whole session up to that moment.
-(window as unknown as Record<string, unknown>).__POKEBENCH_SESSION__ = (): SessionTrace => game.sessionTrace();
-
 // Sound counters for tools/browser/audioCheck.mjs (only when ?audio=1).
 if (audioOn) (window as unknown as Record<string, unknown>).__POKEBENCH_AUDIO__ = () => ({ stats: game.audioStats(), state: game.getAudio() });
 
-// Deterministic test ABI, mirrored from the pewter demo: reset() rewinds to
-// the real draft on the production generated route, advance() replays trace
-// segments synchronously.
-if (benchMode) {
-  (window as unknown as Record<string, unknown>).__POKEBENCH__ = {
-    reset(): void {
-      game.reset();
-    },
-    advance(segments: Array<{ frames: number; buttons?: string[] }>): void {
-      game.advance(segments);
-    },
-    // contain209: the presentation throws contained so far (a contained throw never escapes advance()).
-    containedErrors(): SessionContainedError[] {
-      return game.containedErrors();
-    },
-  };
+// bnd257d: the sprite pixels load in a dynamic chunk, so the globals tools wait for (`__POKEBENCH__`, `__POKEBENCH_SESSION__`) appear only
+// once the first draw is possible. A failed load was already reported by the library (console.error); nothing is defined then.
+function exposeGlobals(): void {
+  // The session trace is always exportable, not just on a crash: when a played
+  // moment merely LOOKS wrong, `__POKEBENCH_SESSION__()` in the console yields
+  // a deterministic replay of the whole session up to that moment.
+  (window as unknown as Record<string, unknown>).__POKEBENCH_SESSION__ = (): SessionTrace => game.sessionTrace();
+
+  // Deterministic test ABI, mirrored from the pewter demo: reset() rewinds to
+  // the real draft on the production generated route, advance() replays trace
+  // segments synchronously.
+  if (benchMode) {
+    (window as unknown as Record<string, unknown>).__POKEBENCH__ = {
+      reset(): void {
+        game.reset();
+      },
+      advance(segments: Array<{ frames: number; buttons?: string[] }>): void {
+        game.advance(segments);
+      },
+      // contain209: the presentation throws contained so far (a contained throw never escapes advance()).
+      containedErrors(): SessionContainedError[] {
+        return game.containedErrors();
+      },
+    };
+  }
 }
+void game.pixelsReady.then(exposeGlobals, () => {});

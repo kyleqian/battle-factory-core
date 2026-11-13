@@ -168,7 +168,7 @@ async function runSceneUniform(browser, port, scene, options, outDir, log) {
       result.consoleErrors.push(text.slice(0, 500));
     });
     await page.goto(url, { waitUntil: "load", timeout: 120_000 });
-    await page.waitForFunction(() => typeof window.__POKEBENCH_SESSION__ === "function", null, { timeout: 60_000 });
+    await page.waitForFunction(() => typeof window.__POKEBENCH_SESSION__ === "function", null, { timeout: 60_000, polling: 100 });
     await page.locator('[data-testid="game-surface"]').click({ position: { x: 5, y: 5 } }).catch(() => {});
   };
 
@@ -350,7 +350,8 @@ async function runSceneGoal(browser, port, scene, options, outDir, log) {
       result.consoleErrors.push(text.slice(0, 500));
     });
     await page.goto(url, { waitUntil: "load", timeout: 120_000 });
-    await page.waitForFunction(() => typeof window.__POKEBENCH__ === "object", null, { timeout: 60_000 });
+    // bnd257d: the globals appear once the sprite chunk has loaded; poll on a timer, since the init script above stubs requestAnimationFrame (the default poll).
+    await page.waitForFunction(() => typeof window.__POKEBENCH__ === "object", null, { timeout: 60_000, polling: 100 });
     result.goal.challenges += 1;
   };
 

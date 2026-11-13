@@ -3,7 +3,7 @@
 // turns button presses into the recorded input trace, fast-forwards a resumed
 // trace, and reports the challenge's events. The dev shell (src/main.ts) uses
 // mountFactoryGameInternal for its test ABI; hosts use mountFactoryGame.
-import { installBundledMonPicPixels } from "./engine/monPicPixelsInstall.ts";
+import { monPicPixelsInstalled } from "./engine/monPicPixels.ts";
 import { render, SCREEN_HEIGHT, SCREEN_WIDTH } from "./engine/core.ts";
 import type { FactoryAudioState, FactoryEvent, FactoryGame, FactoryGameOptions, TraceSegment } from "./factoryContract.ts";
 import type { AudioPlayer, AudioStats } from "./audio/player.ts";
@@ -49,6 +49,8 @@ export interface FactoryGameInternal extends FactoryGame {
   /** Bench ABI: back to the challenge's first frame. */
   reset(): void;
   draw(): void;
+  /** bnd257d: resolves once the sprite pixels are installed (already resolved when a provider was installed before the mount); rejects if the sprite chunk fails to load. */
+  readonly pixelsReady: Promise<void>;
   /** Dev / test: the audio player's counters (null until the player chunk has loaded). */
   audioStats(): AudioStats | null;
   sessionTrace(error?: unknown): SessionTrace;
@@ -74,8 +76,13 @@ export function mountFactoryGame(options: FactoryGameOptions): FactoryGame {
 }
 
 export function mountFactoryGameInternal(options: MountInternalOptions): FactoryGameInternal {
-  // A call, not a bare side-effect import: `"sideEffects": false` lets the bundler drop the latter (bnd256c follow-up).
-  installBundledMonPicPixels();
+  // bnd257d: the sprite sheets (~12 MB) are a dynamic chunk. mountFactoryGame still returns synchronously; the first draw, the loop and `ready`
+  // wait for the pixels, and press() is dropped until then. An already installed provider (vitest setup, render tools) keeps it all synchronous.
+  let pixelsInstalled = monPicPixelsInstalled();
+  const pixelsReady: Promise<void> = pixelsInstalled
+    ? Promise.resolve()
+    : // A call, not a bare side-effect import: `"sideEffects": false` lets the bundler drop the latter (bnd256c follow-up).
+      import("./engine/monPicPixelsInstall.ts").then((module) => module.installBundledMonPicPixels());
   const { canvas } = options;
   canvas.width = SCREEN_WIDTH;
   canvas.height = SCREEN_HEIGHT;
@@ -251,8 +258,25 @@ export function mountFactoryGameInternal(options: MountInternalOptions): Factory
       }
     }
   }
-  draw();
-  if (!crashed) raf = requestAnimationFrame(loop);
+  const startLoop = (): void => {
+    draw();
+    if (!crashed) raf = requestAnimationFrame(loop);
+  };
+  if (pixelsInstalled) startLoop();
+  else {
+    pixelsReady.then(
+      () => {
+        pixelsInstalled = true;
+        if (!destroyed) startLoop();
+      },
+      (error: unknown) => {
+        if (destroyed) return;
+        crashed = true;
+        console.error("pokebench: the sprite pixels failed to load; the game did not start", error);
+        options.onError?.({ message: `sprite pixels failed to load: ${error instanceof Error ? error.message : String(error)}`, frame: session.frame });
+      },
+    );
+  }
   if (options.audio) loadAudio();
 
   return {
@@ -265,7 +289,9 @@ export function mountFactoryGameInternal(options: MountInternalOptions): Factory
     get session() {
       return session;
     },
+    pixelsReady,
     press(button) {
+      if (!pixelsInstalled) return;
       held.add(button);
       latched.add(button);
     },

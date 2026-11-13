@@ -25,7 +25,7 @@ import menuBgData from "../assets/gen/menu-bg.json" with { type: "json" };
 import pokeballData from "../assets/gen/pokeball.json" with { type: "json" };
 import arrowData from "../assets/gen/arrow.json" with { type: "json" };
 import frontSpritesData from "../assets/gen/front-sprites.json" with { type: "json" };
-import opponentFrontSpritesData from "../assets/gen/battle-opponent-front-sprites.json" with { type: "json" };
+import { frontPixels } from "./monPicPixels.ts";
 
 interface TileGrid {
   columns: number;
@@ -53,10 +53,8 @@ const menuBg = menuBgData as unknown as {
 const pokeball = pokeballData as unknown as { tileset: TileGrid; grayPalette: RgbColor[] };
 const arrow = arrowData as unknown as { tileset: TileGrid; palette: RgbColor[] };
 const frontSprites = frontSpritesData as unknown as Record<string, { tileset: TileGrid; palette: RgbColor[] }>;
-const opponentFrontSprites = opponentFrontSpritesData as unknown as Record<string, { tileset: TileGrid; palette: RgbColor[] }>;
-
 function frontSprite(species: string): { tileset: TileGrid; palette: RgbColor[] } | undefined {
-  return frontSprites[species] ?? opponentFrontSprites[species];
+  return frontSprites[species] ?? (frontPixels(species) as { tileset: TileGrid; palette: RgbColor[] } | undefined);
 }
 
 const WINDOW_LEFT = 88;

@@ -2,7 +2,11 @@
 // never reads them, so this module holds no JSON import: a host that renders installs the tables once (monPicPixelsInstall.ts).
 import type { BattleCommandMonPicTileset } from "./battleCommandFieldArt.ts";
 
-export type MonPicPixelSheet = Readonly<{ tileset: BattleCommandMonPicTileset; frame2?: BattleCommandMonPicTileset }>;
+export type MonPicPixelSheet = Readonly<{
+  tileset: BattleCommandMonPicTileset;
+  frame2?: BattleCommandMonPicTileset;
+  palette?: readonly Readonly<{ r: number; g: number; b: number }>[];
+}>;
 export type MonPicPixelTables = Readonly<{
   back: Readonly<Record<string, MonPicPixelSheet>>;
   front: Readonly<Record<string, MonPicPixelSheet>>;
@@ -29,4 +33,39 @@ export function backPixels(speciesSymbol: string): MonPicPixelSheet | undefined 
 
 export function frontPixels(speciesSymbol: string): MonPicPixelSheet | undefined {
   return tables().front[speciesSymbol];
+}
+
+export type MonPicSide = "back" | "front";
+
+/**
+ * A frozen stand-in for one species' sheet whose enumerable getters read the provider on access, so a module-scope constant can name a
+ * sheet without reading pixels before an install (bnd257d: the browser installs after a dynamic import). Spreads and property reads at
+ * render time see the installed sheet; a read before the install throws "mon pic pixels not installed".
+ */
+export function lazyMonPicSheet<T extends MonPicPixelSheet>(side: MonPicSide, speciesSymbol: string): T {
+  const sheet = () => tables()[side][speciesSymbol] as MonPicPixelSheet;
+  return Object.freeze(
+    Object.defineProperties(
+      {},
+      {
+        tileset: { enumerable: true, get: () => sheet().tileset },
+        frame2: { enumerable: true, get: () => sheet().frame2 },
+        palette: { enumerable: true, get: () => sheet().palette },
+      },
+    ),
+  ) as T;
+}
+
+/** The whole table as a live view (reads, `in`, key enumeration forward to the installed table; nothing is read before an install). */
+export function lazyMonPicTable<T extends object>(side: MonPicSide): T {
+  const target = () => tables()[side] as unknown as T;
+  return new Proxy({} as T, {
+    get: (_unused, key) => Reflect.get(target(), key),
+    has: (_unused, key) => Reflect.has(target(), key),
+    ownKeys: () => Reflect.ownKeys(target()),
+    getOwnPropertyDescriptor: (_unused, key) => {
+      const descriptor = Reflect.getOwnPropertyDescriptor(target(), key);
+      return descriptor === undefined ? undefined : { ...descriptor, configurable: true };
+    },
+  });
 }
