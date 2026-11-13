@@ -4,7 +4,7 @@
   "R042"
  ],
  "why": "The player's Claydol (set 524, Levitate, Leftovers) raises Defense and Sp. Def with Cosmic Power, then evasion with Double Team, so the target has a stat at +3 or more. The opponent's Cradily (set 512: Earthquake, AncientPower, Swagger, Psych Up) cannot touch Claydol with Earthquake and AncientPower is resisted, so the battle is long. When AncientPower's 10% all-stats boost lands, the next turn AI_CV_PsychUp finds the user's Attack, Defense and Sp. Atk raised and tests Sp. Def and evasion (and, if Cradily copied Claydol's evasion with Psych Up before, the final roll).",
- "seed": 0,
+ "seed": 91003,
  "challengeNum": 4,
  "battleNum": 0,
  "trainerId": 140,
@@ -115,10 +115,5 @@
  ],
  "coverAny": true,
  "chance": 0.3,
- "seeds": 80,
- "onHold": {
-  "group": "g4",
-  "seedsHunted": 0,
-  "result": "untested"
- }
+ "seeds": 80
 }
