@@ -65,7 +65,7 @@ Size: Ogg 7,450,299 B, AAC 7,376,225 B (SE 56 kbps = 1,238,605 B vs 1,618,342; c
 Encode command (a Mac without ffmpeg can `brew install ffmpeg` and run the extractor):
 
     FFMPEG=ffmpeg npm run extract:audio-aac
-    # per file, what it runs:  ffmpeg -i x.ogg -ac <1|2> -ar <32000|16000> -c:a aac -b:a <56k|16k|64k> -movflags +faststart aac/x.m4a
+    # per file, what it runs:  ffmpeg -i x.ogg -ac <1|2> -ar <32000|16000> -c:a aac -profile:a aac_low -b:a <56k|16k|64k> -movflags +faststart aac/x.m4a
     # system-encoder alternative:  afconvert -f m4af -d aac -b 32000 -r 16000 in.wav out.m4a   (decode the .ogg to WAV first)
 
 (`afconvert` output has a different encoder delay, so re-measure `leadSamples` if you swap encoders: the extractor does it.)
