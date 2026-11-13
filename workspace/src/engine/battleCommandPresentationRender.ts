@@ -27,10 +27,12 @@ import {
   FORFEIT_MESSAGE_TEXT,
   FORFEIT_QUESTION_FIRST_GLYPH_AT,
   FORFEIT_QUESTION_LINES,
+  NO_MOVES_MESSAGE_FIRST_GLYPH_AT,
+  NO_MOVES_MESSAGE_HOLD_AT,
   REJECTION_MESSAGE_FIRST_GLYPH_AT,
   REJECTION_MESSAGE_HOLD_AT,
 } from "./battleCommandPresentation.ts";
-import { resolveMoveSelectionRejectionMessageLines } from "./battleResolutionPresentation.ts";
+import { resolveMoveSelectionRejectionMessageLines, resolveNoMovesLeftMessageLines } from "./battleResolutionPresentation.ts";
 import { battleStringPrintableLength } from "./battleStringResolver.ts";
 
 type BattleWindowAsset = Readonly<{
@@ -197,6 +199,16 @@ export function createBattleCommandPresentationRenderView(
         Math.max(0, elapsed - BAG_MESSAGE_FIRST_GLYPH_AT + 1),
       ),
       waitCursorAge: null,
+    });
+  } else if (phase === "no-moves-message") {
+    const lines = resolveNoMovesLeftMessageLines(presentation.field, 0);
+    rejectionMessage = Object.freeze({
+      lines,
+      visibleCharacters: Math.min(
+        battleStringPrintableLength(lines),
+        Math.max(0, elapsed - NO_MOVES_MESSAGE_FIRST_GLYPH_AT + 1),
+      ),
+      waitCursorAge: elapsed >= NO_MOVES_MESSAGE_HOLD_AT ? elapsed - NO_MOVES_MESSAGE_HOLD_AT : null,
     });
   } else if (phase === "forfeit-question" || phase === "forfeit-closing") {
     rejectionMessage = Object.freeze({
@@ -499,6 +511,7 @@ export function renderBattleCommandPresentation(
       assets.drawRejectionMessage(framebuffer, view);
       return;
     case "bag-message":
+    case "no-moves-message":
     case "forfeit-question":
     case "forfeit-closing":
     case "forfeit-message":

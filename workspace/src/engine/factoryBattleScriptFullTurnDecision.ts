@@ -76,6 +76,7 @@ import {
 } from "./battleDecisionBoundary.ts";
 import { handleBattleActionFinished } from "./battleActionFinished.ts";
 import {
+  battleScriptForcedMoveSelection,
   checkBattleScriptMoveLimitations,
   describeIllegalMoveSelection,
   type BattleScriptSelectionRejection,
@@ -2493,8 +2494,7 @@ export function battlerUsesForcedStruggle(
   // settles those at STATE_BEFORE_ACTION_CHOSEN (`battle_main.c:4098-4104`),
   // before the `B_ACTION_USE_MOVE` case runs `AreAllMovesUnusable` at all. An
   // Encore lock does NOT (ISSUES #138) -- `:4184` precedes `:4192`.
-  if (battlerStatusMoveLock(rulesContext, battler) !== 0) return false;
-  return battlerHasNoUsableMoveSlot(rulesContext, battler);
+  return battleScriptForcedMoveSelection(rulesContext, battler) === "struggle";
 }
 
 /**
@@ -2543,10 +2543,7 @@ export function battlerMoveSelectionIsForced(
   rulesContext: BattleScriptRulesContext,
   battler: BattleSinglesBattler,
 ): boolean {
-  if (battlerStatusMoveLock(rulesContext, battler) !== 0) return false;
-  if (battlerHasNoUsableMoveSlot(rulesContext, battler)) return true;
-  const battlerState = rulesContext.battlers[battler]!;
-  return battlerState.encoreTimer !== 0 && battlerState.encoredMove !== 0;
+  return battleScriptForcedMoveSelection(rulesContext, battler) !== null;
 }
 
 /**

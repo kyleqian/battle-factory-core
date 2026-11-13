@@ -5,6 +5,7 @@ import {
 } from "./liveMovePresentationRng.ts";
 import type { PresentationRngHost } from "./presentationRngHost.ts";
 import {
+  resolveNoMovesLeftMessageLines,
   isWeatherContinuesAnimation, WEATHER_CONTINUES_BODY_ROWS, WEATHER_CONTINUES_LAUNCH_LEAD_ROWS, WEATHER_CONTINUES_MOVE_IDS,
 } from "./battleResolutionPresentation.ts";
 import type { LiveMoveSpriteAllocatorInput, LiveMoveSpriteOrderInput } from "./liveMoveSpriteAllocator.ts";
@@ -21,6 +22,10 @@ import {
   type BattleCommandFieldBattler,
   type BattleCommandUiStatus,
 } from "./battleCommandPresentation.ts";
+import {
+  BATTLE_COMMAND_ACTION_PROMPT_PREFIX,
+  BATTLE_COMMAND_ACTION_PROMPT_SUFFIX,
+} from "./battleCommandPresentationRender.ts";
 import {
   createBattleCommandFieldArtView,
   type BattleCommandFieldArtView,
@@ -1102,6 +1107,14 @@ export type BattleResolutionPresentationRenderView = Readonly<{
       moveset: FightMoveset;
       displayCursor: 0 | 1 | 2 | 3;
     }>;
+    /**
+     * enc276: a forced move was confirmed with no move menu, so the bottom strip is not the fight chrome: the live action menu
+     * (Encore) or the dismissed "has no moves left!" box (Struggle, fully typed, no wait ▼).
+     */
+    forcedBottom: Readonly<
+      | { kind: "encore"; prompt: string }
+      | { kind: "struggle"; lines: readonly string[] }
+    > | null;
   }> | null;
   switchIn: Readonly<{
     elapsed: number;
@@ -2058,6 +2071,17 @@ export function createBattleResolutionPresentationRenderView(
           ),
           displayCursor: state.confirmHandoff.fightDisplayCursor,
         }),
+        forcedBottom: state.confirmHandoff.forced === undefined
+          ? null
+          : state.confirmHandoff.forced.kind === "encore"
+            ? Object.freeze({
+              kind: "encore" as const,
+              prompt: `${BATTLE_COMMAND_ACTION_PROMPT_PREFIX}${state.field.player.name}${BATTLE_COMMAND_ACTION_PROMPT_SUFFIX}`,
+            })
+            : Object.freeze({
+              kind: "struggle" as const,
+              lines: resolveNoMovesLeftMessageLines(state.field, 0),
+            }),
       });
   // ISSUES #78 residual (1): the white ball-fade only ever runs on a
   // mid-battle SWITCH resolution. The `fadeTick` clock + the hardcoded

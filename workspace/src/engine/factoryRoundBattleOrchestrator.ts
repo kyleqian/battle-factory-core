@@ -1924,6 +1924,10 @@ function beginCommandResolution(
       confirmHandoff: Object.freeze({
         fightDisplayCursor: presentation.fightDisplayCursor,
         idleBounceElapsed: presentation.idleBounceElapsed,
+        ...(presentation.forcedMove !== null
+          && presentation.pendingDecision === presentation.forcedMove.decision
+          ? { forced: presentation.forcedMove.kind }
+          : {}),
       }),
       usedMessageHoldFrames: presentation.usedMessageHoldFrames,
       opponentTrainer: factoryTrainerPresentationForOpponent(

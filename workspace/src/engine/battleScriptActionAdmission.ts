@@ -2634,6 +2634,31 @@ export type BattleScriptSelectionRejection = Readonly<{
 }>;
 
 /**
+ * `HandleTurnActionSelectionState`'s B_ACTION_USE_MOVE case
+ * (`battle_main.c:4182-4197`): `AreAllMovesUnusable()` ("struggle", with the
+ * `BattleScript_NoMovesLeft` message) is checked before
+ * `gDisableStructs[b].encoredMove != 0` ("encore"); both confirm the move with
+ * no move menu. A STATUS2_MULTIPLETURNS / RECHARGE lock never reaches the
+ * controller at all (`:4160-4165`), so it is neither. Pure.
+ */
+export type BattleScriptForcedMoveSelection = "struggle" | "encore";
+
+export function battleScriptForcedMoveSelection(
+  rulesContext: BattleScriptRulesContext,
+  battler: BattleScriptBattlerId,
+): BattleScriptForcedMoveSelection | null {
+  const state = rulesContext.battlers[battler]!;
+  if (
+    state.status2 & (
+      BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_MULTIPLETURNS
+      | BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_RECHARGE
+    )
+  ) return null;
+  if ((checkBattleScriptMoveLimitations(rulesContext, battler) & 0x0f) === 0x0f) return "struggle";
+  return state.encoreTimer !== 0 && state.encoredMove !== 0 ? "encore" : null;
+}
+
+/**
  * Pure, side-effect-free mirror of `TrySetCantSelectMoveBattleScript`
  * (`battle_util.c:976-1080`) for exactly one battler/moveSlot pair --
  * ISSUES #72 scout `docs/selection-rejection-subsystem-scout.md` §2.2

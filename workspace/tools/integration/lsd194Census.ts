@@ -40,6 +40,7 @@ import {
 import { battleResolutionCommandDuration, battleResolutionFieldBeforeCommand, liveMoveRandom2PlanContextAt } from "../../src/engine/battleResolutionPresentationRender.ts";
 import { createPresentationRngSession } from "../../src/engine/presentationRngHost.ts";
 import { tickLiveMovePresentationRngSession } from "../../src/engine/liveMovePresentationRng.ts";
+import { NO_MOVES_MESSAGE_HOLD_AT } from "../../src/engine/battleCommandPresentation.ts";
 import { PARTY_LIST_INPUT_ELAPSED } from "../../src/engine/partySelect.ts";
 import { battleStringPrintableLength } from "../../src/engine/battleStringResolver.ts";
 import { createBattleResolutionPresentationRenderView } from "../../src/engine/battleResolutionPresentationRender.ts";
@@ -184,7 +185,18 @@ for (let seed = from!; seed <= to!; seed += 1) {
   try {
     until(() => phase() === "action-menu");
     while (!ended) {
+      const forcedSlot = state.battleCommandPresentation!.forcedMove?.decision.moveSlot ?? null;
       pulse("A");
+      if (forcedSlot !== null) {
+        slotUses[forcedSlot]!++;
+        if (phase() === "no-moves-message") {
+          until(() => (state.battleCommandPresentation?.lifecycle.phaseElapsed ?? NO_MOVES_MESSAGE_HOLD_AT) >= NO_MOVES_MESSAGE_HOLD_AT);
+          pulse("A");
+        }
+        until(() => !state.battleCommandPresentation);
+        until(() => phase() === "action-menu");
+        continue;
+      }
       until(() => phase() === "fight-menu");
       if (ended) break;
       const menu = state.battleCommandPresentation!;

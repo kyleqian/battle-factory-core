@@ -2006,6 +2006,10 @@ export class RandomPlayer {
       // PAUSE_UNTIL_PRESS gate; early presses are dropped, so just mash.
       return this.pressAdvance(state, "rejection dismiss");
     }
+    if (phase === "no-moves-message") {
+      // enc276: Struggle's "has no moves left!" is a PAUSE_UNTIL_PRESS gate; early presses are dropped, so just mash.
+      return this.pressAdvance(state, "no moves left dismiss");
+    }
     if (phase === "forfeit-question") {
       // frf250a/b: RUN opens the forfeit prompt; B answers NO once the box is up (early presses are dropped).
       // Only an opted-in test player (forfeitRate) answers YES: the soak keeps B so its runs stay meaningful.
@@ -2060,6 +2064,7 @@ export class RandomPlayer {
         return this.press("A", 10);
       }
       this.note(state, intent.target === 0 ? "action: FIGHT" : "action: POKEMON");
+      if (intent.target === 0 && presentation.forcedMove !== null) this.commitForcedFight(state, presentation);
       this.actionIntent = null;
       return this.press("A", 8);
     }
@@ -2213,6 +2218,28 @@ export class RandomPlayer {
     // action-enter / fight-opening / fight-closing / rejection-reopen /
     // party-handoff pre-selector / submitting: presentation-owned, no input.
     return NO_BUTTONS;
+  }
+
+  /**
+   * enc276: a forced turn (Encore, or Struggle) has no move menu, so FIGHT on the
+   * action menu is the move commit. Same coverage bookkeeping as the fight-menu commit.
+   */
+  private commitForcedFight(
+    state: EngineState,
+    presentation: NonNullable<
+      NonNullable<EngineState["factoryRoundBattleOrchestrator"]>["battleCommandPresentation"]
+    >,
+  ): void {
+    const forced = presentation.forcedMove!;
+    const slot = forced.decision.moveSlot;
+    const committedMoveId = forced.kind === "struggle" ? 165 : presentation.field.player.moveIds[slot] ?? 0;
+    this.note(state, `forced ${forced.kind}: FIGHT commits slot ${slot} (move ${
+      forced.kind === "struggle" ? "165 STRUGGLE (all slots unusable)" : committedMoveId
+    }), no move menu`);
+    this.coverage?.recordPlayerFightCommit(committedMoveId);
+    if (this.policy === "coverage-fight" && committedMoveId !== 0) {
+      this.fightUseCountByMoveId.set(committedMoveId, (this.fightUseCountByMoveId.get(committedMoveId) ?? 0) + 1);
+    }
   }
 
   /**

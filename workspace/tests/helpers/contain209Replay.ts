@@ -3,6 +3,7 @@
 // vi.doMock'd copy. Records each presented command's rows and the rendered frame hashes of every move-animation command.
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
+import { NO_MOVES_MESSAGE_HOLD_AT } from "../../src/engine/battleCommandPresentation.ts";
 import type * as Core from "../../src/engine/core.ts";
 import type { GbaButton } from "../../src/input.ts";
 
@@ -64,7 +65,18 @@ export function contain209Replay(core: typeof Core, moveSlots: readonly (0 | 1 |
   if (commandPhase() !== "action-menu") throw new Error("draft input did not reach an ordinary command");
   let actionMenus = 0;
   for (const slot of moveSlots) {
+    const forced = state.factoryRoundBattleOrchestrator!.battleCommandPresentation!.forcedMove ?? null;
     pulse("A");
+    if (forced !== null) {
+      if (commandPhase() === "no-moves-message") {
+        until(() => (state.factoryRoundBattleOrchestrator?.battleCommandPresentation?.lifecycle.phaseElapsed ?? NO_MOVES_MESSAGE_HOLD_AT) >= NO_MOVES_MESSAGE_HOLD_AT);
+        pulse("A");
+      }
+      until(() => !state.factoryRoundBattleOrchestrator?.battleCommandPresentation);
+      until(() => commandPhase() === "action-menu");
+      actionMenus += 1;
+      continue;
+    }
     until(() => commandPhase() === "fight-menu");
     for (let i = 0; i < 4; i++) {
       const cursor = state.factoryRoundBattleOrchestrator!.battleCommandPresentation!.fightCursor;
