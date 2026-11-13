@@ -483,6 +483,8 @@ def selfcheck(argv):
 
 
 if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        raise SystemExit(__doc__)
     cmd, rest = sys.argv[1], sys.argv[2:]
     if cmd == "collect":
         collect(rest)
