@@ -470,8 +470,8 @@ Fourth pass, second stop: gate on `d0afbccc2` (fixes 29 to 40, with master `937c
 ok, **14,745 tests pass, 1 fails**. The one is not from this lane: `tests/animation/sandTombEvidenceCheckpoint` fails
 the same way on a clean checkout of master `937c7caee`. Its fixture pins the sha256 of
 `tools/compare/sandTombSourceAudit.ts`, and box commit `11e1a66b4` (the sprite pixel provider installs) changed that
-file. Left to the box. The commits after `d0afbccc2` are documents, the per-battle JSON and the tally table; no test
-reads them. The gate before it, on `04d65eb7c`, had one more failure: `battleScriptSketchOpcode` "transformed user",
+file. Left to the box. The commits after `d0afbccc2` are documents, the per-battle JSON, the tally table, one stage
+file, and a merge of master `0b80af10e` (one line of handoff text); no test reads them. The gate before it, on `04d65eb7c`, had one more failure: `battleScriptSketchOpcode` "transformed user",
 which pinned the party PP write that fix 36 removed (re-pinned in `d0afbccc2`).
 
 Fourth pass, first stop: gate on `61d84a74f` (fixes 29 to 33 with box master `a21ec4148` merged in): typecheck ok,
