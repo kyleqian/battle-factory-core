@@ -289,7 +289,8 @@ battle count (item 0d, "Top layer, 2026-11-13"); the lab staging failures are fi
        (`frozenTimelineEqualsDrive` false). Cause not found. A seed with `matched` 0 or `frozenTimelineEqualsDrive` false is
        driven a second time; only a repeated mismatch is a regression.
      - **The whole pool is the Mac's job:** the top layer re-drives all of it after each fold that changes gameplay (about
-       25 minutes there) and edits this bullet and the pool file.
+       25 minutes there) and edits this bullet and the pool file. **Last re-drive: 2026-11-13 on `937c7caee` (your
+       2026-11-13 wind-down engine + the lab fix), old player, stock chain: 962 / 962 match to battle end.**
    - **Ledger:** create and keep `docs/replay-ledger.md`: per run the commit, seed range, matched / driven, new divergent seeds,
      the highest seed driven (10000 now: the Mac bulk run of 2026-11-12, results in `docs/replay-batches/`; the box drives no new seeds) and the consecutive-clean count. A seed is driven as "new" once only.
    - **Two machines (Kyle, 2026-11-12, last decision of the day: "Sure, let's try that"). This replaces the earlier
