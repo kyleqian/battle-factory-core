@@ -64,5 +64,8 @@ sweep.
   outcome 3; the same with the player's first; a winner with a healthy bench loses the Pokemon, stays the winner and is
   asked for no replacement; the other Pokemon's count still goes down). All four fail without the fix. The old test of
   this situation asserted the wrong end state (`[100, 0]`) and is replaced.
-- The draw itself (two last Pokemon) is read from the source lines above. A staged ROM battle for it is on the list of
-  staged battles in `STATUS.md`.
+- **The draw on the ROM: battle 20596 with the `ai-v1` player** (`REPLAY_OUT=/abs/dir tools/audio/romReplayWide.sh 20596
+  ai-v1`). Both sides are on their last Pokemon (Feraligatr, Absol), both with a perish count of 0. The opponent's Absol
+  is taken first. ROM: Feraligatr is taken next and `gBattleOutcome` is 3 (draw). Engine before the fix: outcome 1
+  (player won), found by the new winner check of the replay with every turn state matching (13 of 13). Engine with the
+  fix: outcome 3, and the state after the last blow agrees.
