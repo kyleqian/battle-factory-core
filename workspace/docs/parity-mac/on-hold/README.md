@@ -3,7 +3,9 @@
 Kept so nothing is lost when the Mac winds down. **None of this is tested or wired into anything.** No test, tool or
 `stages/*.json` glob reads this folder. The work is on hold by Kyle's word (`STATUS.md`, "Stopped 2026-11-13").
 
-- `designs/*.design.json`: 31 stage designs for rules of the finer tally's (c) list (`../rule-coverage-c-rules.json`,
+- `designs/*.design.json`: 31 stage designs (11 of them, R001..R010 and R012, were hunted on the box on 2026-11-14 and moved to
+  `../stages/coverage/`; the hunter is now `tools/replay-hunt/`, see `STATUS.md`, "Box hunt 2026-11-14 (rrh1)"; the rest below are
+  as the Mac left them) for rules of the finer tally's (c) list (`../rule-coverage-c-rules.json`,
   R001..R110). Each is in the stage-file format (`../staged-battles.md`) plus `rules`, `cover` (the piece of engine code
   the rule is about), `chance` and `seeds` (the designer's guesses), and `onHold` (how many lab seeds were hunted
   before the stop). 27 were never hunted. R012 (64 seeds), R019 (20), R021 (5) and R026 (4) were hunted with no

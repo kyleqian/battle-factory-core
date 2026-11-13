@@ -710,3 +710,42 @@ ones); the 290 list 267 / 267 of its stock-chain seeds; the 154 list 146 / 146 o
 95 / 95; a random sample of 400 seeds that matched on the old engine 400 / 400. The long battles that end (705 and the
 thirteen of the new lists) were driven on that engine too and match to the end; the endless ones of the 290 list were
 driven on engine `462d6429d` (before fixes 22-26), the later ones on `e05bdf321`.
+
+## Box hunt 2026-11-14 (rrh1): the first eleven on-hold designs
+
+The Mac lane stopped; the rare-rule hunt is a side job of the box. The scratch hunter is now `tools/replay-hunt/`
+(`prehunt.py`, `huntq.py`, README; box paths, cwd = `workspace/`, outputs under `.integration/evidence/rrh1/`). Per lab seed
+it runs the request, the ROM setup and the engine replay under `NODE_V8_COVERAGE`, checks the stage's `cover` markers
+(`romReplayCoverage.count_at`), and drives only a seed that ran the piece with `romReplayWide.sh --stage`. About 15 s per
+seed with two hunts side by side next to the nightly check; a matched drive (request, setup, engine, ROM drive, compare)
+takes 32 to 68 s.
+
+**Covered: R001..R010 and R012 (11 rules); the finer tally's (c) list is now 23 covered, 87 left. No engine difference
+was found.** Each file moved to `stages/coverage/` (the `.design.json` removed, `onHold` dropped, `rules` / `cover`
+kept), and re-driven once more from a clean command line: all 11 match, `stage.ok` true.
+
+| rule | stage file (lab seed) | lab seeds tried | states matched |
+|---|---|---|---|
+| R001 AI Calm Mind -8 when Sp. Def is +6 | R001-lunatone-spdef-max (90000) | 6 (design's `replacements` named a fainted slot: engine errors) + 1 | 13 / 13 |
+| R002 AI Charm vs Hyper Cutter | R002-minun-charm-hyper-cutter (90000) | 1 | 19 / 19 |
+| R003 AI Bounce / Dive in Hail | R003-rapidash-bounce-hail (90000) | 1 | 83 / 83 |
+| R004 AI Encore roll < 30 | R004-dewgong-encore-roll (90000) | 1 | 54 / 54 |
+| R005 AI Focus Punch +5 behind a Substitute | R005-machamp-sub-focus-punch-attract (90000) | 1 | 30 / 30 |
+| R006 AI Knock Off, target under 30% | R006-armaldo-knock-off-low-target (90000) | 1 | 14 / 14 |
+| R007 AI Pain Split +1 (user first, <= 40%) | R007-misdreavus-pain-split-low (90001) | 1 (wrong cover: hit but not the +1 arm) + 2 | 14 / 14 |
+| R008 AI Revenge vs asleep target | R008-machamp-revenge-asleep (90000) | 1 | 37 / 37 |
+| R009 AI Skill Swap roll | R009-gengar-skill-swap-roll (90002) | 20 (replacements) + 3 | 21 / 21 |
+| R010 AI Skill Swap vs Arena Trap | R010-gengar-skill-swap-arena-trap (90000) | 1 | 10 / 10 |
+| R012 AI Substitute, statused target | R012-ai-substitute-statused-target (190000) | 15 + 15 + 4 + 1 (judging bug) | 12 / 12 |
+
+Design mistakes fixed on the way (all in the staging, none in the engine):
+
+- R001, R009: the fixed `replacements` list named a party slot that was already fainted (`staged battle, replacement N:
+  party slot K is not legal`); removed, the `then` player chooses. R009 hit the piece in 17 of 20 seeds, all lost to that error.
+- R007: the first cover marker is the user-moves-first return of AI_CV_PainSplit, which runs for any HP; only the second
+  (`: 1` arm, the +1 score) is the rule. Cover reduced to the second marker, `coverAny` unchanged (one marker).
+- R012: the design's two `cover` entries have the same display label in `prehunt.py`, so its `got` dict kept only the
+  second (the Leech Seed arm, not the rule) and the Mac's 64 seeds plus 15 of mine were judged on the wrong marker. The first
+  (the statused-target arm after a status move) alone: the original Zapdos staging hit at lab seed 190000. A Jynx variant
+  (sleep from Lovely Kiss) never reaches it: an asleep or fully paralysed Pokemon's `gLastMoves` becomes 0xFFFF, not its Toxic.
+  Note for later designs: do not give two cover entries the same `text[at:at+30]`.

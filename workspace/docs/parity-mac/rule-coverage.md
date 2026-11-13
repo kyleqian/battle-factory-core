@@ -79,6 +79,10 @@ not move, a battle that ends in a draw, a battle that ends on Leech Seed; and se
 Smelling Salt against a paralysed target, Sweet Scent, Charm against Hyper Cutter, Superpower at low HP). The whole
 list with what each needs: `rule-coverage-list.md`.
 
+**Covered so far (box hunt rrh1, 2026-11-14): 23 of the 110** have a staged battle in `stages/coverage/` that ran the rule's piece
+and matched the ROM to the end (R001..R018, R020, R022..R025; the Mac lane's 12 and the box's 11: R001..R010, R012); **87 are not covered.**
+See `STATUS.md`, "Box hunt 2026-11-14 (rrh1)".
+
 How the classes were made: the patterns above, then a reading of every other piece against the C source by eleven
 reading passes, each with the same brief (class (a) or (b) only with a reason that can be pointed to, else (c)). Every
 entry of the classes file names its reason. It is a reading of the source, not a test: a wrong (a) or (b) would hide
