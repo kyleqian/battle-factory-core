@@ -43,7 +43,7 @@ longer waits for census parity (handoff "Next work" item 0).
    lib build and `package.json` `exports`; `src/main.ts` becomes a thin shell
    over it (the test ABI, `?battleScene=`, `?pokebench=1` and the crash
    overlay unchanged). One step, with full suite + build + browser play.
-2. **Audio (S11)**, the main program after step 1 (design ACCEPTED 2026-11-01: `docs/s11-audio-design.md`; its section 7 is the step list; steps 1-3 folded by 2026-11-02, step 4 (screens) DONE 2026-11-04, step 5 aud241 (battle controller) DONE 2026-11-05, aud242 move-animation SEs next): a design step first
+2. **Audio (S11)**, the main program after step 1 (design ACCEPTED 2026-11-01: `docs/s11-audio-design.md`; its section 7 is the step list; steps 1-3 folded by 2026-11-02, step 4 (screens) DONE 2026-11-04, step 5 aud241 (battle controller) DONE 2026-11-05, aud242 / aud243 DONE by 2026-11-10; steps 8-9 (assets aud244a / b, WebAudio player aud245 / aud245b / aud247) DONE 2026-11-13; aud246 close next): a design step first
    (oracle audio-event log from the ELF symbols for `PlaySE` / `PlayCry*` /
    `PlayBGM` / `PlayFanfare`; our kernel already emits `play-se` /
    `play-fanfare` / `play-faint-cry`), then sound-event parity by census like
