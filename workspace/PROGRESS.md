@@ -20,7 +20,9 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 ## 2026-11-13 — enc276 (integration lane worker, 200-min cap): a forced turn goes from FIGHT straight into the turn (ISSUES #213)
 
 - **State:** folded `5b1814cf6` (branch removed; evidence `.integration/evidence/enc276/`). ENGINE_BUILD moves again (merged tree; read at wind-down). `docs/enc276-forced-turn-no-menu.md`.
-  **Final-tree verification is running** (enc276v, integration lane): census 0..999 both scenes, 8-seed ROM re-drive, soaks, full suite. #213 stays open until it lands.
+  **Final-tree verification (enc276v, 114 min, tree `5b1814cf6`):** census 0..999 ON / OFF vs `17af89768`: 0 digests / command rows / errors moved (796 / 995
+  budget-cut, common segments identical); ROM seeds 60 87 89 90 119 159 161 193 all match; soaks vanilla 0:20 OFF **20 / 20**, ON **20 / 20**, winning 0:12 **12 / 12**;
+  test:smoke 448 / 448; full suite 1,776 passed, only `randomRoundSoak` 3 failures (lbr-b, bisected to `9f8c9aa7d`). ISSUES #213 removed.
 - **Did:** Encore: FIGHT submits the Encored move, no move menu. Struggle: FIGHT prints "<mon> has no moves left!" (ROM-tuned glyph / arrow / bounce timing), A submits.
   Decision set unchanged; 30 tool / test route drivers follow the forced turn; `randomRoundSoak` seed 21 re-pinned (frames only).
 - **Proof so far (worker, on `093ee66ed`):** census 0..999 ON and OFF vs `17af89768`: 0 digests / command rows / errors moved (29 forced-turn seeds); ROM seeds 60 87 89

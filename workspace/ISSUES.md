@@ -13,12 +13,6 @@ defects are all authorized in the finish-up mission (`docs/factory-finish-scope.
 gameplay / RNG when proved against source; use main-lane ownership and gameplay gates. Historical presentation-only
 exclusions are superseded. Unrelated expansions stay parked.
 
-## #213 — Encore / forced Struggle: the engine opens the move menu after FIGHT (presentation; Mac lane, 2026-11-12)
-
-Battle rules are fixed (parity-mac fix 5, `docs/parity-mac/encore-struggle-selection.md`). Left on purpose by the Mac lane: after FIGHT the engine
-still opens its move menu with the forced move as the only legal slot; the ROM goes straight to the turn (and prints "... has no moves left!" for
-Struggle). Both scenes. Needs a ROM window per case (Encore, Struggle) and the same flow in both scenes.
-
 ## #214 — Leads from the Mac lane's 2026-11-12 passes (source-read only, no ROM seed)
 
 - Cure berries after Pursuit-on-switch: `HandleFaintedMonActions` state 6 runs `ItemBattleEffects(ITEMEFFECT_NORMAL, 0, TRUE)` for the player's
