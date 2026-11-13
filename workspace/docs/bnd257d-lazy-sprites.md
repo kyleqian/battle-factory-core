@@ -76,7 +76,7 @@ need the old build).** If the supervisor wants the value kept, the only way is a
 
 - `npm run typecheck`: exit 0 (on the tree with all `src/` changes).
 - `npm run test:gate`: 361 / 362 files, 2842 / 2843 tests on the pre-fix tree; the one failure was `audioHeadlessBoundary` (the shared-`lib` chunk
-  point above), fixed and re-run green; the final-tree gate result is in the last section.
+  point above), fixed and re-run green; final tree: see Receipt.
 - Touched suites green: `bnd257dLazySprites` (9), `bnd256cPixelProvider` (8), `factoryLibrary` (10, unchanged), `audioHeadlessBoundary` (3),
   `engineBuildHash` (6), `bnd255Gamepad` (12), `battleScene` (306), the `monPic*` and `summary*` suites (incl. `summaryAllFactorySpecies`).
 - The new uninstalled-import test (`tests/bnd257dLazySprites.test.ts`): after `vi.resetModules()` it imports `core.ts`, `battleScene.ts`,
@@ -93,6 +93,14 @@ need the old build).** If the supervisor wants the value kept, the only way is a
   console errors 0, contained 0, overlays 0, divergences 0, mirror-only throws 0 (summary `.integration/random-play/2026-11-13T07-36-57-678Z`).
 - Real-time (non-bench) built page, real rAF, headless Chromium: the sprite chunk and its installer were requested lazily, a `z` key press sent right
   after DOMContentLoaded was dropped, the session reached frame 182 in ~3 s, the canvas was non-blank, 0 page / console errors.
+
+## Receipt
+
+Tested code commit `be2dd5321912081a32bf41b6ecaefcb480907bf3` (tree `79af411715e8101246b2ef4ff1ebb9e3d845af4d`, branch
+`worker/integration-20261113-065952`, base `1658751e0`): `npm run typecheck` exit 0; `npm run test:gate` 362 / 362 files, 2843 / 2843 tests;
+`build:lib`, `build`, differential and `play:random` as above ran on the same `src/` (the commits after the build touch tests, tools/browser, docs
+only). The full `npm test` was not run (step instruction: gate + touched suites; `ANIMATION_VERIFICATION.md` asks for it on production changes, so
+the supervisor's union run covers it). Only a docs commit follows this receipt.
 
 ## Not done / follow-ups
 
