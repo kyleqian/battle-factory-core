@@ -1,0 +1,25 @@
+{
+ "name": "disable-refused",
+ "why": "Drowzee (set 114) has Disable; the random player probes the disabled move.",
+ "seed": 40001,
+ "challengeNum": 0,
+ "battleNum": 0,
+ "trainerId": 74,
+ "playerSetIds": [
+  115,
+  129,
+  143
+ ],
+ "opponentSetIds": [
+  114,
+  150,
+  171
+ ],
+ "script": {
+  "actions": [],
+  "then": "random-v1"
+ },
+ "expect": [
+  "situation:move-refused:disable"
+ ]
+}

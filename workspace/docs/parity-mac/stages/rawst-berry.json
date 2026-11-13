@@ -1,0 +1,38 @@
+{
+ "name": "rawst-berry",
+ "why": "Banette (set 237, Rawst Berry) burns Kadabra (set 169) with Will-O-Wisp; when Kadabra has Synchronize, Banette is burned back and its berry cures it.",
+ "seed": 40001,
+ "challengeNum": 1,
+ "battleNum": 0,
+ "trainerId": 85,
+ "playerSetIds": [
+  237,
+  164,
+  171
+ ],
+ "opponentSetIds": [
+  169,
+  178,
+  192
+ ],
+ "script": {
+  "actions": [
+   {
+    "move": 1
+   },
+   {
+    "move": 1
+   },
+   {
+    "move": 1
+   },
+   {
+    "move": 1
+   }
+  ],
+  "then": "census"
+ },
+ "expect": [
+  "hold:HOLD_EFFECT_CURE_BRN"
+ ]
+}

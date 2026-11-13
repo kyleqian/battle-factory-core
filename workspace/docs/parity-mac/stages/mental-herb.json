@@ -1,0 +1,38 @@
+{
+ "name": "mental-herb",
+ "why": "Luvdisc (set 123) uses Attract on Beautifly (set 157, Mental Herb) when their genders differ: the herb cures the infatuation.",
+ "seed": 40000,
+ "challengeNum": 0,
+ "battleNum": 0,
+ "trainerId": 74,
+ "playerSetIds": [
+  123,
+  115,
+  129
+ ],
+ "opponentSetIds": [
+  157,
+  143,
+  150
+ ],
+ "script": {
+  "actions": [
+   {
+    "move": 1
+   },
+   {
+    "move": 1
+   },
+   {
+    "move": 1
+   },
+   {
+    "move": 1
+   }
+  ],
+  "then": "census"
+ },
+ "expect": [
+  "hold:HOLD_EFFECT_CURE_ATTRACT"
+ ]
+}

@@ -28,7 +28,7 @@ function config(trainerPp: readonly [number, number, number, number]): FactoryFu
     },
     // slower than both player Pokemon; every move is Endure (priority +3)
     trainer: {
-      species: SPECIES_WOBBUFFET, moveId: ENDURE, moves: [ENDURE, ENDURE, ENDURE, ENDURE], pp: trainerPp,
+      species: SPECIES_WOBBUFFET, moveId: ENDURE, moves: [ENDURE, ENDURE, ENDURE, ENDURE] as [number, number, number, number], pp: trainerPp,
       attack: 100, defense: 200, spAttack: 100, spDefense: 100, speed: 50, hp: 300,
     },
     playerBenchHp: [200, 0] as [number, number],
