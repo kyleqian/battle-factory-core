@@ -118,8 +118,20 @@ lbr-d2a ROM ticks (`docs/lbrd2a-won-tail-rom.md`) for the won farewell constants
 (lbr-b doc), the PreBattleRoom briefing before the draft (nch231 divergence), no Scene ON loss / retire ROM lab, no app SE_SAVE on the loss / retire result script.
 Item 0c DONE. Item 0d: the Mac lane owns battle rules; fold `mac/parity-mac` at run start if it moved; nightly replay from the pool; ISSUES #214 holds its
 source-read leads. **Top layer, 2026-11-13 after your run:** the Mac lane also owns the replay tools and every replay upgrade now, and the finish line has no
-battle count (item 0d, "Top layer, 2026-11-13"); the lab staging failures are fixed (`oracle/battle_lab.py`, same item). Its next fold brings battle-rule fixes
-29 and later (found by the new players and the wide compare; `docs/parity-mac/STATUS.md`, fourth pass); it has already merged your master up to `e83b18c0e`.
+battle count (item 0d, "Top layer, 2026-11-13"); the lab staging failures are fixed (`oracle/battle_lab.py`, same item).
+**Delivered 2026-11-13 14:05 UTC for your next fold: `mac/parity-mac` = `ba58f0ec6`, battle-rule fixes 29 to 40** (found by the new players, the wide compare
+and staged battles; `docs/parity-mac/STATUS.md`, "Fourth pass"; one commit per fix, each with a failing-without test and a ROM battle). Your master `0b80af10e`
+is an ancestor of it, so the merge is a fast-forward unless master has moved. Its gate ran on `d0afbccc2` (the commits after it are documents and one stage
+file): typecheck ok, build ok, 14,745 tests pass, 1 fails. **That one is yours and fails on your master too:** `tests/animation/sandTombEvidenceCheckpoint`
+pins the sha256 of `tools/compare/sandTombSourceAudit.ts`, which your `11e1a66b4` (iss215 pixel-provider installs) changed; re-pin it (the top layer re-ran
+it on `0b80af10e`: same failure). Top-layer checks of the delivery: 54 sampled battles (eighth challenge, mixed, Scene ON) and the 13 staged battles
+re-driven on a clean checkout of `ba58f0ec6`, all match and equal the lane's rows; fixes 36, 38, 39, 40 each taken out alone make their staged battle
+differ from the ROM; typecheck ok. The lane's final run: 4,039 battles on that engine, 4,034 match, 5 endless stalls (no difference up to the frame cap).
+**Two findings for you from that lane (file them in ISSUES; not battle rules, not fixed there):** (1) the rental select screen lets the player take two
+Pokemon of one species; the game refuses the second ("Can't select same POKeMON.", `Select_AreSpeciesValid`, `battle_factory_screen.c:2256-2276`; the
+swap screen has `Swap_AlreadyHasSameSpecies`, `:4162`); the engine's `MENU_OPTION_RENT` branch in `src/engine/core.ts` has no such check; about 3 teams in
+100 from the eighth challenge on offer such a pair; (2) when the player is trapped, the engine's party menu says the Pokemon "is already in battle"; the
+game says it "can't be switched out" (seen in code only).
 **Website:** the live site runs `eb-adfdcfdc91f4247f` (your `5a2fe1d83`, the 28 fixes; deployed 2026-11-13 04:03 UTC on Kyle's word). Your later builds
 (`eb-8faf63dbde5168d5`: audio, `challenge-request`, `start: "after-save"`, lazy sprites) are not on the site; the site repo adopts them when Kyle asks. Cleanup 5's "< 15 min" suite target: measured non-goal on this box (cln277); the 670 s render lever in
 `tools/integration/generatedCommandAnimationReplay.ts` would trade render-crash coverage (not taken).
