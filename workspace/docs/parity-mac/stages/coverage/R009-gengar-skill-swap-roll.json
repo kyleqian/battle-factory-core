@@ -4,7 +4,7 @@
   "R009"
  ],
  "why": "Challenge 5 (full AI). The opponent leads Gengar (set 613: Psychic, Thunderbolt, Giga Drain, Skill Swap; Levitate, not in the list). The player leads Shiftry (set 590: Chlorophyll or Early Bird; Grass/Dark, so Psychic has no effect and Thunderbolt / Giga Drain are resisted) and stalls with Sunny Day and Synthesis. Every AI turn AI_CV_ChangeSelfAbility guesses Shiftry's ability (Random & 1); a guessed Chlorophyll reaches the <50 roll of AI_CV_ChangeSelfAbility3 (about 20 percent), whose jump is the runCvChangeSelfAbility '? 0' branch. When Shiftry's real ability is Early Bird, Gengar's Skill Swaps only trade Early Bird / Levitate, so the guess and roll repeat every turn (about 10 percent a turn); when it is Chlorophyll, Gengar takes it with its first unrolled Skill Swap and the window closes. Then Houndoom 618 (Early Bird / Flash Fire; its Double-Edge cannot touch Gengar) and Ludicolo 592 (Swift Swim / Rain Dish, both in the list; Double Team) give more turns. Alakazam 596 (Skill Swap) is the opponent's second Pokemon.",
- "seed": 0,
+ "seed": 90002,
  "challengeNum": 5,
  "battleNum": 0,
  "trainerId": 160,
@@ -90,11 +90,7 @@
     "prefer": 2
    }
   ],
-  "then": "census",
-  "replacements": [
-   1,
-   2
-  ]
+  "then": "census"
  },
  "expect": [],
  "cover": [
@@ -106,10 +102,5 @@
  ],
  "coverAny": true,
  "chance": 0.35,
- "seeds": 60,
- "onHold": {
-  "group": "g1",
-  "seedsHunted": 0,
-  "result": "untested"
- }
+ "seeds": 60
 }

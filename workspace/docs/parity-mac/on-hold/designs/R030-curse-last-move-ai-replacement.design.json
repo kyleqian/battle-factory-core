@@ -72,7 +72,7 @@
  "seeds": 60,
  "onHold": {
   "group": "g4",
-  "seedsHunted": 0,
-  "result": "untested"
+  "seedsHunted": 44,
+  "result": "no hit in lab seeds 60000..60043 (box hunt rrh1). Engine runs fine; the AI replacement never reaches the damage pass with Curse. In seed 60019 Dugtrio (102 HP) takes toxic ticks 6,12,18,24 but Dugtrio kills Snorlax first (216 -> 128 -> 0 in two Earthquakes), so the player has no Curse user left when the poison faint comes. The design needs a sturdier Curse user or faster poison."
  }
 }

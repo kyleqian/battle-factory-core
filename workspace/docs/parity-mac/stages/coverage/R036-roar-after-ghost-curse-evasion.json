@@ -4,7 +4,7 @@
   "R036"
  ],
  "why": "The opponent's Dusclops (set 666, Ghost) can put its Curse on the player's Granbull (set 376; Normal, so Shadow Ball cannot touch it and Curse is a good pick). Granbull uses Roar every turn (priority -6, always last), which sends in a random other opponent Pokemon. Both others have an evasion move: Muk (420, Minimize) and Claydol (524, Double Team). On the next turn the AI scores that move against the cursed Granbull and draws the cursed-target roll (AI_CV_EvasionUp). Granbull keeps the curse as long as it stays in.",
- "seed": 0,
+ "seed": 90000,
  "challengeNum": 7,
  "battleNum": 0,
  "trainerId": 200,
@@ -78,10 +78,5 @@
  ],
  "coverAny": true,
  "chance": 0.5,
- "seeds": 60,
- "onHold": {
-  "group": "g4",
-  "seedsHunted": 0,
-  "result": "untested"
- }
+ "seeds": 60
 }

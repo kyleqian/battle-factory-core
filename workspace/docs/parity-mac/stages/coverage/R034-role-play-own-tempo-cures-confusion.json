@@ -4,7 +4,7 @@
   "R034"
  ],
  "why": "The opponent's Spinda (set 145, Own Tempo only) picks at random at challenge 0, and all four of its moves can confuse (Teeter Dance always, Dizzy Punch 20%, Psybeam 10%). The player's Kadabra (set 169) is faster and stalls two turns with Future Sight (the second one fails), so Spinda has two turns to confuse it. Then Kadabra uses Role Play and copies Own Tempo while confused: at the end of Role Play the immunity check cures the confusion (ABILITYEFFECT_IMMUNITY, battle_util.c:2873-2951, from MOVEEND_IMMUNITY_ABILITIES). If Kadabra is not confused by then, Own Tempo blocks later confusion and the seed is lost.",
- "seed": 0,
+ "seed": 90000,
  "challengeNum": 0,
  "battleNum": 0,
  "trainerId": 0,
@@ -51,51 +51,11 @@
  "cover": [
   {
    "file": "src/engine/battleScriptMoveEndOpcode.ts",
-   "text": "? Object.freeze({ status1: 0, status2: battlerState.status2, statusName: \"po",
-   "at": 0
-  },
-  {
-   "file": "src/engine/battleScriptMoveEndOpcode.ts",
-   "text": "? Object.freeze({\n          status1: battlerState.status1,\n          status2: (battlerState.status2 & ~STATUS2_C",
-   "at": 0
-  },
-  {
-   "file": "src/engine/battleScriptMoveEndOpcode.ts",
-   "text": "? Object.freeze({ status1: 0, status2: battlerState.status2, statusName: \"pa",
-   "at": 0
-  },
-  {
-   "file": "src/engine/battleScriptMoveEndOpcode.ts",
-   "text": "? Object.freeze({\n          status1: 0,\n",
-   "at": 0
-  },
-  {
-   "file": "src/engine/battleScriptMoveEndOpcode.ts",
-   "text": "? Object.freeze({ status1: 0, status2: battlerState.status2, statusName: \"bu",
-   "at": 0
-  },
-  {
-   "file": "src/engine/battleScriptMoveEndOpcode.ts",
-   "text": "? Object.freeze({ status1: 0, status2: battlerState.status2, statusName: \"ic",
-   "at": 0
-  },
-  {
-   "file": "src/engine/battleScriptMoveEndOpcode.ts",
-   "text": "? Object.freeze({\n          status1: battlerState.status1,\n          status2: (battlerState.status2 & ~STATUS2_I",
-   "at": 0
-  },
-  {
-   "file": "src/engine/battleScriptMoveEndOpcode.ts",
    "text": "{\n          const curedBattlers = replaceBattlerAt(b",
    "at": 0
   }
  ],
  "coverAny": true,
  "chance": 0.3,
- "seeds": 80,
- "onHold": {
-  "group": "g4",
-  "seedsHunted": 0,
-  "result": "untested"
- }
+ "seeds": 80
 }

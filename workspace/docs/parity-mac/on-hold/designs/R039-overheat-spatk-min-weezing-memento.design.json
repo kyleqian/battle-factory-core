@@ -62,7 +62,7 @@
  "seeds": 80,
  "onHold": {
   "group": "g4",
-  "seedsHunted": 0,
-  "result": "untested"
+  "seedsHunted": 80,
+  "result": "no hit in lab seeds 90000..90079 (box hunt rrh1), no engine error. In seed 90079 the player Granbull (157 HP) is knocked out by Weezing in three turns (157 -> 77 -> 22 -> 0), so its Sp. Atk never reaches -6 and the AI never scores Memento against it. The design needs a sturdier Overheat user."
  }
 }

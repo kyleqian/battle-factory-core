@@ -4,7 +4,7 @@
   "R005"
  ],
  "why": "Challenge 7. The opponent leads Machamp (set 810: Focus Punch, Substitute, Attract, Double Team). The player has only Ghost types (Dusclops 476, Misdreavus 566, Gengar 613): Machamp cannot hurt them at all (Focus Punch has no effect, its other moves are status moves) and the player never attacks, so Machamp stays in and makes its Substitute, its Double Teams and, when the genders differ, Attract. AI_CV_FocusPunch still runs for Focus Punch every turn (a no-effect move is not 'resisted'): with the target infatuated and Machamp behind its Substitute, the >=100 roll gives +5, the runCvFocusPunch '? 5' branch. Each Ghost stays about ten turns (Double Team / Protect, Mean Look, Skill Swap: nothing that breaks the Substitute), then the next comes in, so three independent gender draws: about 7 in 8 that one of them can be infatuated by Machamp.",
- "seed": 0,
+ "seed": 90000,
  "challengeNum": 7,
  "battleNum": 0,
  "trainerId": 200,
@@ -123,10 +123,5 @@
  ],
  "coverAny": true,
  "chance": 0.45,
- "seeds": 50,
- "onHold": {
-  "group": "g1",
-  "seedsHunted": 0,
-  "result": "untested"
- }
+ "seeds": 50
 }

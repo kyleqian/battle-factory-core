@@ -4,7 +4,7 @@
   "R012"
  ],
  "why": "Challenge 7. The opponent leads with Zapdos 779 (Thunderbolt, Drill Peck, Thunder Wave, Substitute), faster than the player's Cradily 704 (base speed 43). Cradily uses Toxic every turn, so its last move is always a poison move (gLastMoves is written even when Toxic fails on an already poisoned or substituted Zapdos). Toxic does not slow Zapdos, so Zapdos stays the faster one. As soon as Zapdos's Thunder Wave (or Thunderbolt's 10%) paralyzes Cradily and Cradily still gets its Toxic off that turn, the next turn's AI_CV_Substitute (battle_ai_scripts.s:1559-1574) reads last move EFFECT_TOXIC and a target with a status and ends at zero without the last roll. Machamp 810 and Golem 498 (Substitute users, faster than Cradily and Shuckle 720) keep the chance alive after Zapdos; the player's Shuckle 720 (Toxic in slot 0) is the first replacement.",
- "seed": 0,
+ "seed": 190000,
  "challengeNum": 7,
  "battleNum": 0,
  "trainerId": 200,
@@ -69,11 +69,7 @@
     "prefer": 0
    }
   ],
-  "then": "census",
-  "replacements": [
-   1,
-   2
-  ]
+  "then": "census"
  },
  "expect": [],
  "cover": [
@@ -81,19 +77,9 @@
    "file": "src/engine/factoryAiCheckViability.ts",
    "text": "\n    return endsAtZero();\n  }\n  if (lastEffect === \"EFFECT_C",
    "at": 0
-  },
-  {
-   "file": "src/engine/factoryAiCheckViability.ts",
-   "text": "\n    return endsAtZero();\n  }\n  if (lastEffect === \"EFFECT_L",
-   "at": 0
   }
  ],
  "coverAny": true,
  "chance": 0.5,
- "seeds": 80,
- "onHold": {
-  "group": "g2",
-  "seedsHunted": 64,
-  "result": "no matching hit in 64 seeds (hunt stopped)"
- }
+ "seeds": 80
 }

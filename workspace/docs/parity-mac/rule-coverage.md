@@ -79,6 +79,13 @@ not move, a battle that ends in a draw, a battle that ends on Leech Seed; and se
 Smelling Salt against a paralysed target, Sweet Scent, Charm against Hyper Cutter, Superpower at low HP). The whole
 list with what each needs: `rule-coverage-list.md`.
 
+**Covered so far (box hunt rrh1, 2026-11-14): 37 of the 110** have a staged battle in `stages/coverage/` that ran the rule's piece
+and matched the ROM to the end (the Mac lane's 12 and the box's 25: R001..R010, R012, R021, R026, R027, R028, R034, R036, R041..R048).
+**R019 (Focus Energy used twice) is class (b), not (c):** `BattleScript_EffectFocusEnergy` (`data/battle_scripts_1.s:885-890`) has
+`jumpifstatus2 BS_ATTACKER, STATUS2_FOCUS_ENERGY, BattleScript_ButItFailed` at line 889, before `setfocusenergy` at line 890,
+so the "already set" branch of `Cmd_setfocusenergy` (`battleScriptSetfocusenergyOpcode.ts`) is dead code: no script reaches it with the
+bit set. That leaves **72 of the 110 not covered** (R019 counted out). See `STATUS.md`, "Box hunt 2026-11-14 (rrh1)".
+
 How the classes were made: the patterns above, then a reading of every other piece against the C source by eleven
 reading passes, each with the same brief (class (a) or (b) only with a reason that can be pointed to, else (c)). Every
 entry of the classes file names its reason. It is a reading of the source, not a test: a wrong (a) or (b) would hide

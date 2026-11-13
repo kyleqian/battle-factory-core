@@ -4,7 +4,7 @@
   "R021"
  ],
  "why": "The player's Mightyena (set 202, Poison Fang in slot 1) uses Poison Fang on the opponent's lead Zangoose (set 240, Immunity) for four turns; then Arbok (set 217, Poison Fang in slot 0, the first replacement) keeps using Poison Fang. Poison Fang without STAB from Mightyena does about a fifth of Zangoose's HP, so several hits land before Zangoose faints, and each hit that leaves Zangoose standing has a 30% roll of the bad-poison effect; that roll reaches SetMoveEffect's toxic case, where the Immunity test runs (not primary, not certain, so no prevention script). Both player Pokemon have Intimidate, so Zangoose hits softer. Risk: Zangoose's Roar (1 in 4 per turn at challenge 1) pulls in a random player Pokemon; Wigglytuff (set 207) then uses Disable or Sing, which does no harm.",
- "seed": 0,
+ "seed": 80000,
  "challengeNum": 1,
  "battleNum": 0,
  "trainerId": 80,
@@ -69,11 +69,7 @@
     "prefer": 0
    }
   ],
-  "then": "census",
-  "replacements": [
-   2,
-   1
-  ]
+  "then": "census"
  },
  "expect": [],
  "cover": [
@@ -85,10 +81,5 @@
  ],
  "coverAny": true,
  "chance": 0.55,
- "seeds": 60,
- "onHold": {
-  "group": "g3",
-  "seedsHunted": 5,
-  "result": "no matching hit in 5 seeds (hunt stopped)"
- }
+ "seeds": 60
 }

@@ -4,7 +4,7 @@
   "R043"
  ],
  "why": "Challenge 7, every Pokemon has IV 31. The opponent's Regirock (set 762, Superpower) has Speed 70; the player's Registeel (set 764, Steel, so Superpower is not resisted) also has Speed 70 and no Quick Claw. On turn 1 Regirock's Attack is not lowered, so AI_CV_Superpower reaches if_target_faster and draws the tie roll.",
- "seed": 0,
+ "seed": 91000,
  "challengeNum": 7,
  "battleNum": 0,
  "trainerId": 200,
@@ -42,10 +42,5 @@
  ],
  "coverAny": true,
  "chance": 0.9,
- "seeds": 20,
- "onHold": {
-  "group": "g4",
-  "seedsHunted": 0,
-  "result": "untested"
- }
+ "seeds": 20
 }
