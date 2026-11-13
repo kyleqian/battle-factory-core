@@ -24,6 +24,7 @@ import { liveMoveAnimationPresentation, liveMoveHiddenSides } from "../../src/en
 import { liveSubstituteSwapView } from "../../src/engine/liveSubstituteSwap.ts";
 import { PARTY_LIST_INPUT_ELAPSED } from "../../src/engine/partySelect.ts";
 import type { GbaButton } from "../../src/input.ts";
+import { NO_MOVES_MESSAGE_HOLD_AT } from "../../src/engine/battleCommandPresentation.ts";
 
 type S = ReturnType<typeof createFactoryRoundBattleOrchestrator>;
 export type Cf78Body = { turn: number; moveId: number; side: number; player: string; opponent: string;
@@ -93,7 +94,19 @@ export function cf78RoutePlay(seed: number, streak: number, scene: "on" | "off")
   until(() => phase() === "action-menu");
   while (!ended) {
     mark();
-    pulse("A"); until(() => phase() === "fight-menu"); if (ended) break;
+    const forcedSlot = state.battleCommandPresentation?.forcedMove?.decision.moveSlot ?? null;
+    pulse("A");
+    if (forcedSlot !== null) {
+      slotUses[forcedSlot]!++;
+      if (phase() === "no-moves-message") {
+        until(() => (state.battleCommandPresentation?.lifecycle.phaseElapsed ?? NO_MOVES_MESSAGE_HOLD_AT) >= NO_MOVES_MESSAGE_HOLD_AT);
+        pulse("A");
+      }
+      until(() => !state.battleCommandPresentation);
+      until(() => phase() === "action-menu");
+      continue;
+    }
+    until(() => phase() === "fight-menu"); if (ended) break;
     const menu = state.battleCommandPresentation!;
     const legal = ([0, 1, 2, 3] as const).filter((s) => menu.legalMoveBySlot[s] !== null);
     const slot = legal.length === 0 ? 0 : legal.reduce((best, s) => (slotUses[s]! < slotUses[best]! ? s : best), legal[0]!);

@@ -18,6 +18,7 @@ import { createPresentationRngSession } from "../src/engine/presentationRngHost"
 import { tickLiveMovePresentationRngSession } from "../src/engine/liveMovePresentationRng";
 import { PARTY_LIST_INPUT_ELAPSED } from "../src/engine/partySelect";
 import type { GbaButton } from "../src/input";
+import { NO_MOVES_MESSAGE_HOLD_AT } from "../src/engine/battleCommandPresentation.ts";
 
 type Row = [number, string, string, string | null, number | null];
 type Command = [number, string, number | null, number | null];
@@ -114,7 +115,18 @@ function battleUses(seed: number, scene: "on" | "off"): Use[] {
   };
   until(() => phase() === "action-menu");
   while (!ended) {
+    const forcedSlot = state.battleCommandPresentation?.forcedMove?.decision.moveSlot ?? null;
     pulse("A");
+    if (forcedSlot !== null) {
+      slotUses[forcedSlot]!++;
+      if (phase() === "no-moves-message") {
+        until(() => (state.battleCommandPresentation?.lifecycle.phaseElapsed ?? NO_MOVES_MESSAGE_HOLD_AT) >= NO_MOVES_MESSAGE_HOLD_AT);
+        pulse("A");
+      }
+      until(() => !state.battleCommandPresentation);
+      until(() => phase() === "action-menu");
+      continue;
+    }
     until(() => phase() === "fight-menu");
     if (ended) break;
     const menu = state.battleCommandPresentation!;

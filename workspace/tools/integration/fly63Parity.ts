@@ -13,6 +13,7 @@ import {
 } from "../../src/engine/factoryRoundBattleOrchestrator.ts";
 import { PARTY_LIST_INPUT_ELAPSED } from "../../src/engine/partySelect.ts";
 import type { GbaButton } from "../../src/input.ts";
+import { NO_MOVES_MESSAGE_HOLD_AT } from "../../src/engine/battleCommandPresentation.ts";
 
 const arg = (n: string, d: string) => process.argv.find((a) => a.startsWith(`--${n}=`))?.slice(n.length + 3) ?? d;
 const seed = Number(arg("seed", "81")), streak = Number(arg("streak", "9")), out = arg("out", "");
@@ -69,7 +70,19 @@ function play(scene: "on" | "off") {
   until(() => phase() === "action-menu");
   while (!ended) {
     mark();
-    pulse("A"); until(() => phase() === "fight-menu"); if (ended) break;
+    const forcedSlot = state.battleCommandPresentation?.forcedMove?.decision.moveSlot ?? null;
+    pulse("A");
+    if (forcedSlot !== null) {
+      slotUses[forcedSlot]!++;
+      if (phase() === "no-moves-message") {
+        until(() => (state.battleCommandPresentation?.lifecycle.phaseElapsed ?? NO_MOVES_MESSAGE_HOLD_AT) >= NO_MOVES_MESSAGE_HOLD_AT);
+        pulse("A");
+      }
+      until(() => !state.battleCommandPresentation);
+      until(() => phase() === "action-menu");
+      continue;
+    }
+    until(() => phase() === "fight-menu"); if (ended) break;
     const menu = state.battleCommandPresentation!;
     const legal = ([0, 1, 2, 3] as const).filter((s) => menu.legalMoveBySlot[s] !== null);
     const slot = legal.length === 0 ? 0 : legal.reduce((best, s) => (slotUses[s]! < slotUses[best]! ? s : best), legal[0]!);

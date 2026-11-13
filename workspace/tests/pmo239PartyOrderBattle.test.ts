@@ -12,6 +12,7 @@ import {
 import { battlePartyDisplayRows, getPartyIdFromBattleSlot, isIdentityBattlePartyOrder } from "../src/engine/battlePartyOrder";
 import { PARTY_LIST_INPUT_ELAPSED } from "../src/engine/partySelect";
 import type { GbaButton } from "../src/input";
+import { NO_MOVES_MESSAGE_HOLD_AT } from "../src/engine/battleCommandPresentation.ts";
 
 const FRAME_BUDGET = 200000;
 
@@ -79,7 +80,17 @@ function playBattle(seed: number, scene: "on" | "off") {
   };
   until(() => phase() === "action-menu");
   while (!ended) {
+    const forcedSlot = state.battleCommandPresentation?.forcedMove?.decision.moveSlot ?? null;
     pulse("A");
+    if (forcedSlot !== null) {
+      if (phase() === "no-moves-message") {
+        until(() => (state.battleCommandPresentation?.lifecycle.phaseElapsed ?? NO_MOVES_MESSAGE_HOLD_AT) >= NO_MOVES_MESSAGE_HOLD_AT);
+        pulse("A");
+      }
+      until(() => !state.battleCommandPresentation);
+      until(() => phase() === "action-menu");
+      continue;
+    }
     until(() => phase() === "fight-menu");
     if (ended) break;
     pulse("A");

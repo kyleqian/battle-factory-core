@@ -36,6 +36,7 @@ import { PARTY_LIST_INPUT_ELAPSED } from "../../src/engine/partySelect.ts";
 import type { GbaButton } from "../../src/input.ts";
 import movesJson from "../../src/data/gen/moves.json" with { type: "json" };
 import { classifyPresentationDecline } from "./liveShareCensusGates.ts";
+import { NO_MOVES_MESSAGE_HOLD_AT } from "../../src/engine/battleCommandPresentation.ts";
 
 const arg = (name: string, fallback?: string) => process.argv.find((a) => a.startsWith(`--${name}=`))?.slice(name.length + 3) ?? fallback;
 const [fromSeed, toSeed] = arg("seeds", "0..9")!.split("..").map(Number) as [number, number];
@@ -293,7 +294,18 @@ function playBattle(battle: number, seed: number, streak: number): void {
   try {
     until(() => phase() === "action-menu");
     while (!ended) {
+      const forcedSlot = state.battleCommandPresentation?.forcedMove?.decision.moveSlot ?? null;
       pulse("A");
+      if (forcedSlot !== null) {
+        slotUses[forcedSlot]!++;
+        if (phase() === "no-moves-message") {
+          until(() => (state.battleCommandPresentation?.lifecycle.phaseElapsed ?? NO_MOVES_MESSAGE_HOLD_AT) >= NO_MOVES_MESSAGE_HOLD_AT);
+          pulse("A");
+        }
+        until(() => !state.battleCommandPresentation);
+        until(() => phase() === "action-menu");
+        continue;
+      }
       until(() => phase() === "fight-menu");
       if (ended) break;
       const menu = state.battleCommandPresentation!;

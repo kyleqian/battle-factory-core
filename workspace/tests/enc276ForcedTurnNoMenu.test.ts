@@ -53,7 +53,7 @@ function boundary(playerPp: readonly [number, number, number, number]) {
 function encoredBoundary() {
   const { request, rules } = boundary([20, 20, 20, 20]);
   const player = { ...rules.battlers[0]!, encoredMove: SPLASH, encoredMovePos: 0, encoreTimer: 3 };
-  const encoredRules = { ...rules, battlers: rules.battlers.map((b, i) => (i === 0 ? player : b)) } as BattleScriptRulesContext;
+  const encoredRules = { ...rules, battlers: rules.battlers.map((b, i) => (i === 0 ? player : b)) } as unknown as BattleScriptRulesContext;
   const legalDecisions = request.legalDecisions.filter((d) => d.kind !== "use-move" || d.moveSlot === 0);
   return { request: { ...request, legalDecisions } as BattleCommandRequest, rules: encoredRules };
 }
