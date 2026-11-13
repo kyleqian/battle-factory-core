@@ -1717,6 +1717,35 @@ function runFocusPunchSetUpPrePass(handlers: Handlers, priorState: MachineState)
   return Object.freeze({ kind: "terminal", state });
 }
 
+/** include/constants/moves.h MOVE_RAGE. */
+const MOVE_RAGE = 99;
+/** include/constants/battle.h STATUS2_RAGE. */
+const STATUS2_RAGE = 1 << 23;
+
+/**
+ * `TryClearRageStatuses` (`battle_util.c:1973-1981`), which
+ * `CheckFocusPunch_ClearVarsBeforeTurnStarts` calls once the Focus Punch
+ * set-up loop is done and before action 1 (`battle_main.c:4925`): a battler
+ * with STATUS2_RAGE whose banked gChosenMoveByBattler is not MOVE_RAGE loses
+ * the flag. The bank is MOVE_NONE for a switch, a locked move and a forced
+ * Struggle (`:4004` resets it every turn), and Metronome / Sleep Talk / Mirror
+ * Move calling Rage bank the CALLING move, so that Rage lasts one turn. Without
+ * this the flag was never dropped and every later hit kept raising Attack
+ * (ROM seed 1904: Clefable's Metronome called Rage, docs/parity-mac/rage-status-clear.md).
+ */
+function tryClearRageStatuses(state: MachineState): MachineState {
+  let rules = state.rulesContext;
+  for (const battler of [0, 1] as const) {
+    const mon = rules.battlers[battler]!;
+    if ((mon.status2 & STATUS2_RAGE) === 0) continue;
+    if (rules.chosenMoveByBattler[battler] === MOVE_RAGE) continue;
+    rules = withBattler(rules, battler, {
+      status2: (mon.status2 & ~STATUS2_RAGE) >>> 0,
+    });
+  }
+  return rules === state.rulesContext ? state : Object.freeze({ ...state, rulesContext: rules });
+}
+
 /**
  * `HandleAction_UseMove`'s two Encore arms (`battle_util.c:111-117` and
  * `:119-128`), evaluated on the rules context at this battler's OWN action
@@ -2295,10 +2324,41 @@ function legalMoveDecisions(
       ? [Object.freeze({
           kind: "use-move" as const,
           moveSlot: slot as BattleMoveSlot,
-          targetBattler: sourceMoveTarget(moveId, battler),
+          targetBattler: moveMenuTarget(source, moveId, battler),
         })]
       : []);
   return Object.freeze(legal);
+}
+
+/** include/constants/moves.h MOVE_CURSE. */
+const MOVE_CURSE = 174;
+
+/**
+ * The target a battler carries out of the move menu. The two controllers
+ * differ for exactly one move. The PLAYER's `HandleInputChooseMove`
+ * (`battle_controller_player.c:486-501`) replaces Curse's table target
+ * (MOVE_TARGET_SELECTED) by MOVE_TARGET_USER when neither of the user's
+ * types is Ghost, so a non-Ghost Curse is sent with the user as its target.
+ * The OPPONENT's `OpponentHandleChooseMove` (`battle_controller_opponent.c:1581`,
+ * `gBattleMoves[...].target & (USER_OR_SELECTED | USER)`) reads the table
+ * only, so its Curse keeps the foe as target. The target matters before the
+ * script's own `copybyte gBattlerTarget, gBattlerAttacker`: `Cmd_ppreduce`'s
+ * Pressure test is `gBattlerAttacker != gBattlerTarget`
+ * (`battle_script_commands.c:1223-1225`), so against a Pressure foe the
+ * player's non-Ghost Curse costs 1 PP and the opponent's costs 2 (ROM seed
+ * 3375: Muk's Curse into Dusclops, docs/parity-mac/curse-player-target.md).
+ * Execution-time retargets (Encore, forced Struggle) go through
+ * `GetMoveTarget`, which has no such case, and keep `sourceMoveTarget`.
+ */
+function moveMenuTarget(
+  source: BattleScriptRulesContext["battlers"][number],
+  moveId: number,
+  battler: BattleSinglesBattler,
+): BattleSinglesBattler {
+  if (battler === 0 && moveId === MOVE_CURSE && !source.types.includes("TYPE_GHOST")) {
+    return battler;
+  }
+  return sourceMoveTarget(moveId, battler);
 }
 
 /**
@@ -2373,9 +2433,13 @@ function isVoluntarySwitchTrapped(
 
 /**
  * Publishes the legal Factory-singles command surface for either battler.
- * Locked actions remain move-only. Trainer switching uses ShouldSwitch's
- * source-specific hard precheck (not the player party-menu gate: notably,
- * the AI's Arena Trap check has no Flying/Levitate exception).
+ * STATUS2_MULTIPLETURNS / RECHARGE actions remain move-only (source never
+ * asks the controller, `battle_main.c:4160-4165`). An Encored battler DOES
+ * get `BtlController_EmitChooseAction` (`:4166-4170`): its move is fixed but
+ * it may still switch (docs/parity-mac/encore-struggle-selection.md).
+ * Trainer switching uses ShouldSwitch's source-specific hard precheck (not
+ * the player party-menu gate: notably, the AI's Arena Trap check has no
+ * Flying/Levitate exception).
  */
 function legalCommandDecisions(
   rulesContext: BattleScriptRulesContext,
@@ -2383,7 +2447,7 @@ function legalCommandDecisions(
 ): readonly BattleCommandDecision[] {
   const moves = legalMoveDecisions(rulesContext, battler);
   if (
-    lockedMoveDecision(rulesContext, battler) !== null
+    battlerStatusMoveLock(rulesContext, battler) !== 0
     || (
       battler === 0
         ? isVoluntarySwitchTrapped(rulesContext, battler)
@@ -2460,6 +2524,44 @@ function battlerHasNoUsableMoveSlot(
   return (
     checkBattleScriptMoveLimitations(rulesContext, battler) & 0x0f
   ) === 0x0f;
+}
+
+/**
+ * `HandleTurnActionSelectionState`'s B_ACTION_USE_MOVE case
+ * (`battle_main.c:4182-4197`): the controller is asked for a MOVE
+ * (`BtlController_EmitChooseMove`, `:4199-4219`) only when neither
+ * `AreAllMovesUnusable()` (`:4184`, forced Struggle) nor
+ * `gDisableStructs[b].encoredMove != 0` (`:4192`) holds. In both of those
+ * cases the action itself WAS chosen by the controller (the player's action
+ * menu; the opponent's `AI_TrySwitchOrUseItem`,
+ * `battle_controller_opponent.c:1540`), but `OpponentHandleChooseMove`
+ * (`:1551-1567`, `BattleAI_SetupAIData` + `BattleAI_ChooseMoveOrAction`) never
+ * runs: zero AI move-chooser draws. False for a STATUS2 lock, which never
+ * reaches a controller at all.
+ */
+export function battlerMoveSelectionIsForced(
+  rulesContext: BattleScriptRulesContext,
+  battler: BattleSinglesBattler,
+): boolean {
+  if (battlerStatusMoveLock(rulesContext, battler) !== 0) return false;
+  if (battlerHasNoUsableMoveSlot(rulesContext, battler)) return true;
+  const battlerState = rulesContext.battlers[battler]!;
+  return battlerState.encoreTimer !== 0 && battlerState.encoredMove !== 0;
+}
+
+/**
+ * The auto-confirmed action of a STATUS2_MULTIPLETURNS / RECHARGE battler
+ * (`battle_main.c:4160-4165`: B_ACTION_USE_MOVE with no controller request),
+ * or null. The Encore branch of `lockedMoveDecision` is deliberately not
+ * included: source still emits ChooseAction for an Encored battler.
+ */
+function statusLockedMoveDecision(
+  rulesContext: BattleScriptRulesContext,
+  battler: BattleSinglesBattler,
+): BattleMoveDecision | null {
+  return battlerStatusMoveLock(rulesContext, battler) === 0
+    ? null
+    : lockedMoveDecision(rulesContext, battler);
 }
 
 /**
@@ -2689,6 +2791,9 @@ function runEndTurnTail(
     rulesContext: Object.freeze({
       ...endTurn.state.rulesContext,
       randomTurnNumber,
+      // battle_main.c:3995-3999: gBattleResults.battleTurnCounter++ (u8, stops at 0xFF). The AI's get_turn_count reads it
+      // (docs/parity-mac/ai-turn-counter.md, audit lead A5).
+      battleTurnCounter: Math.min(0xff, endTurn.state.rulesContext.battleTurnCounter + 1),
       // BattleTurnPassed's closing loop (battle_main.c:4001-4005).
       chosenMoveByBattler: Object.freeze([0, 0, 0, 0] as const),
     }),
@@ -2697,8 +2802,8 @@ function runEndTurnTail(
 
   // HandleTurnActionSelectionState auto-confirms a multi-turn player's
   // B_ACTION_USE_MOVE, so only the trainer command remains to collect.
-  const lockedPlayerDecision = lockedMoveDecision(continuingState.rulesContext, 0);
-  const lockedTrainerDecision = lockedMoveDecision(continuingState.rulesContext, 1);
+  const lockedPlayerDecision = statusLockedMoveDecision(continuingState.rulesContext, 0);
+  const lockedTrainerDecision = statusLockedMoveDecision(continuingState.rulesContext, 1);
   if (lockedPlayerDecision !== null && lockedTrainerDecision !== null) {
     // Source auto-confirms both locked B_ACTION_USE_MOVE entries without
     // exposing either controller command. Resolve the next turn inside this
@@ -3196,7 +3301,7 @@ export const reduceFactoryFullTurnDecision: BattleDecisionReducer<FactoryFullTur
       "awaiting-trainer-command",
       ctx.decision,
     );
-    const lockedTrainerDecision = lockedMoveDecision(rules.rulesContext, 1);
+    const lockedTrainerDecision = statusLockedMoveDecision(rules.rulesContext, 1);
     if (lockedTrainerDecision !== null) {
       // HandleTurnActionSelectionState has already auto-confirmed the
       // trainer's locked action, so the player's submitted command completes
@@ -3393,7 +3498,7 @@ export const reduceFactoryFullTurnDecision: BattleDecisionReducer<FactoryFullTur
   if (prePass.kind === "player-choice") {
     throw new Error("BattleScript_FocusPunchSetUp has no openpartyscreen");
   }
-  const actionsInitialState = prePass.state;
+  const actionsInitialState = tryClearRageStatuses(prePass.state);
 
   const action1 = mover1SwitchPartyIndex !== null
     ? runVoluntarySwitchAction(

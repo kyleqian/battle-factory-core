@@ -33,6 +33,7 @@ import {
   BATTLE_SCRIPT_STATUS3_PERISH_SONG,
   BATTLE_SCRIPT_STATUS3_ROOTED,
 } from "./battleScriptSourceConstants.ts";
+import { calculateAiSwitchIntoBaseDamage } from "./battleScriptOpenPartyScreenOpcode.ts";
 import { ABILITY_SYMBOLS } from "./battleScriptSwitchinOpcode.ts";
 import { advanceRngValue } from "./rng.ts";
 import type { TypeEffectivenessEntry } from "./damageCalc.ts";
@@ -507,6 +508,13 @@ export function evaluateFactoryAiSwitchPolicy(
     const opponent = rules.battlers[lastHitBy as 0 | 1 | 2 | 3];
     if (!opponent) return null;
 
+    // battle_ai_switch_items.c:389-396 excludes party slot i when it equals
+    // gBattlerPartyIndexes[battlerIn1 / battlerIn2] or monToSwitchIntoId[battlerIn1 / battlerIn2]. Both start as
+    // the AI's own battler, but `:407` REASSIGNS battlerIn1 = gLastHitBy[gActiveBattler] at the first candidate
+    // whose typing matches, and the loop keeps running with it: every later candidate is then also skipped when
+    // its slot number equals the OPPOSING battler's active party index (or that battler's monToSwitchIntoId).
+    // battlerIn2 keeps the AI's own exclusions. ROM seed 152 (docs/parity-mac/ai-resist-switch-battlerin1.md).
+    let battlerIn1: 0 | 1 | 2 | 3 = 1;
     for (let partyIndex = 0; partyIndex < BATTLE_SCRIPT_PARTY_SIZE; partyIndex += 1) {
       const member = party[partyIndex]!;
       if (!legalAvailableMember(
@@ -515,9 +523,14 @@ export function evaluateFactoryAiSwitchPolicy(
         activePartyIndex,
         reservedPartyIndex,
       )) continue;
+      if (
+        partyIndex === rules.battlers[battlerIn1]!.partyIndex
+        || partyIndex === rules.monToSwitchIntoId[battlerIn1]
+      ) continue;
       const flags = aiTypeCalc(lastMoveId, member.species, partyAbility(member));
       const matches = wanted === "immune" ? flags.doesNotAffect : flags.notVeryEffective;
       if (!matches) continue;
+      battlerIn1 = lastHitBy as 0 | 1 | 2 | 3;
       for (let moveSlot = 0; moveSlot < member.moves.length; moveSlot += 1) {
         const moveId = member.moves[moveSlot]!;
         if (
@@ -670,7 +683,13 @@ export function evaluateFactoryAiSwitchPolicy(
       activePartyIndex,
       target.types,
       input.suitableDamageFallback ?? {
-        baseDamage: 0,
+        // AI_TrySwitchOrUseItem reaches the SAME GetMostSuitableMonToSwitchInto as the faint replacement
+        // (battle_ai_switch_items.c:547), so pass 2's AI_CalcDmg is real here too: gCurrentMove from the
+        // AI's active battler into the opposing one. At action selection gCurrentMove is normally MOVE_NONE
+        // (HandleAction_ActionFinished, battle_util.c:670), whose CalculateBaseDamage is 3, not 0: a 0 scored
+        // every candidate 0 and fell to the first legal slot (ROM seed 123, Perish Song switch;
+        // docs/parity-mac/opponent-replacement-pass1.md).
+        baseDamage: () => calculateAiSwitchIntoBaseDamage(rules, 1, 0),
         activeTypes: active.types,
         opposingTypes: target.types,
         opposingAbility: target.ability,

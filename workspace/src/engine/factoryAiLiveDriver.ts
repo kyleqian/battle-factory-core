@@ -84,6 +84,7 @@ import {
   evaluateFactoryAiSwitchPolicy,
   type FactoryAiSwitchPolicyResult,
 } from "./factoryAiSwitchPolicy.ts";
+import { battlerMoveSelectionIsForced } from "./factoryBattleScriptFullTurnDecision.ts";
 import {
   factoryAiLastCalcMovePower,
   type FactoryAiTryToFaintBattler,
@@ -119,16 +120,18 @@ export type FactoryAiBattleHistory = Readonly<{
   ];
   knownItemEffects: readonly [number, number, number, number];
   partyIndexes: readonly [number, number, number, number];
+  /** The rules context's `aiHistoryClears` at the last sync: a changed count means the slot was re-entered since. */
+  clears: readonly [number, number, number, number];
 }>;
 
 export type FactoryAiChallengePolicy = Readonly<{
   factoryWinStreak: number;
   trainerOpponentId: number;
   /**
-   * Source `gBattleResults.battleTurnCounter`, needed only by
-   * `AI_CV_Swagger` after its Psych Up/target-ATK gate (doc §33). Optional
-   * while older callers have no turn counter; the policy's source default is
-   * the real battle-start value 0.
+   * Source `gBattleResults.battleTurnCounter`, read by `AI_CV_Swagger`
+   * after its Psych Up/target-ATK gate (doc §33) and by `AI_CV_Conversion`.
+   * An explicit override for fixtures; when absent the live driver reads
+   * the rules context's `battleTurnCounter`.
    */
   battleTurnCount?: number;
 }>;
@@ -162,6 +165,7 @@ export function createFactoryAiBattleHistory(
       FactoryAiBattleHistory["knownItemEffects"],
     partyIndexes: Object.freeze(rulesContext.battlers.map((battler) => battler.partyIndex)) as
       FactoryAiBattleHistory["partyIndexes"],
+    clears: Object.freeze([...rulesContext.aiHistoryClears]) as unknown as FactoryAiBattleHistory["clears"],
   });
 }
 
@@ -216,8 +220,12 @@ export function syncFactoryAiBattleHistory(
     rulesContext.battlers.map((battler) => battler.partyIndex),
   ) as FactoryAiBattleHistory["partyIndexes"];
 
+  // SwitchInClearSetData clears both histories on EVERY switch-in (battle_main.c:3260-3261). A changed party index
+  // catches a different Pokemon; the clear count also catches a slot that went A -> B -> A between two AI decisions
+  // (the AI was locked into a multi-turn move and made none): the game has forgotten A's moves and ability.
+  const clears = Object.freeze([...rulesContext.aiHistoryClears]) as unknown as FactoryAiBattleHistory["clears"];
   for (let battler = 0; battler < 4; battler += 1) {
-    if (partyIndexes[battler] !== history.partyIndexes[battler]) {
+    if (partyIndexes[battler] !== history.partyIndexes[battler] || clears[battler] !== history.clears[battler]) {
       usedMoves = replaceAt(usedMoves, battler, Object.freeze([])) as
         FactoryAiBattleHistory["usedMoves"];
       knownAbilities = replaceAt(knownAbilities, battler, null) as
@@ -245,6 +253,7 @@ export function syncFactoryAiBattleHistory(
     knownAbilities,
     knownItemEffects,
     partyIndexes,
+    clears,
   });
   for (let battler = 0; battler < 4; battler += 1) {
     const abilityId = rulesContext.aiObservedAbilityIds[battler]!;
@@ -376,6 +385,7 @@ export function createFactoryAiViewFromLiveRules(input: Readonly<{
       hp: attacker.hp,
       maxHp: attacker.maxHP,
       usablePartyMons: countUsablePartyMons(input.rulesContext.party.opponent, attacker.partyIndex),
+      movePp: Object.freeze([attacker.pp[0] ?? 0, attacker.pp[1] ?? 0, attacker.pp[2] ?? 0, attacker.pp[3] ?? 0]) as unknown as readonly [number, number, number, number],
       ability: abilityName(attacker.ability),
       turnOrderAbility: attackerTurnOrder.ability ?? null,
       turnOrderHoldEffect: attackerTurnOrder.holdEffect ?? null,
@@ -383,7 +393,9 @@ export function createFactoryAiViewFromLiveRules(input: Readonly<{
       turnOrderWeather: turnOrderWeather(input.rulesContext),
       randomTurnNumber: input.rulesContext.randomTurnNumber,
       ...((attacker.status1 & BATTLE_SCRIPT_STATUS1_PARALYSIS) !== 0 ? { isParalyzed: true } : {}),
-      battleTurnCount: input.challenge.battleTurnCount ?? 0,
+      // gBattleResults.battleTurnCounter (battle_ai_script_commands.c:1111). The rules context carries the live value;
+      // `challenge.battleTurnCount` stays as an explicit override for fixtures (docs/parity-mac/ai-turn-counter.md).
+      battleTurnCount: input.challenge.battleTurnCount ?? input.rulesContext.battleTurnCounter,
       lightScreenUp: (input.rulesContext.sideStatuses[1] & SIDE_STATUS_LIGHTSCREEN) !== 0,
       reflectUp: (input.rulesContext.sideStatuses[1] & SIDE_STATUS_REFLECT) !== 0,
       ...(weather === undefined ? {} : { currentWeather: weather }),
@@ -556,6 +568,18 @@ export type FactoryAiLiveTransition<RulesState extends FactoryAiLiveRules> =
       rng: BattleRngState;
       transition: ReturnType<typeof submitBattleDecision<RulesState>>;
     }>
+    | Readonly<{
+      /**
+       * AI_TrySwitchOrUseItem answered B_ACTION_USE_MOVE and source then sends
+       * no ChooseMove (forced Struggle or Encore, battle_main.c:4184-4197):
+       * the move chooser never ran, so there is no scoring trace and no draw
+       * beyond the switch precheck's.
+       */
+      phase: "forced-move";
+      submission: BattleDecisionSubmission;
+      rng: BattleRngState;
+      transition: ReturnType<typeof submitBattleDecision<RulesState>>;
+    }>
   );
 
 type RecordedAiDraw = Readonly<{
@@ -650,6 +674,37 @@ export function submitLiveFactoryAiDecision<
   );
   if (moveDecisions.length === 0) {
     throw new Error("Factory AI switch precheck declined but no legal move remains");
+  }
+  if (battlerMoveSelectionIsForced(state.rules.rulesContext, 1)) {
+    // battle_main.c:4184-4197: AreAllMovesUnusable() (Struggle) and
+    // encoredMove != 0 both leave STATE_WAIT_ACTION_CHOSEN without
+    // BtlController_EmitChooseMove, so OpponentHandleChooseMove
+    // (battle_controller_opponent.c:1551-1567: BattleAI_SetupAIData +
+    // BattleAI_ChooseMoveOrAction) never runs. Zero chooser draws; the W2
+    // gBattleMovePower register is not touched either (no AI_CalcDmg).
+    if (moveDecisions.length !== 1) {
+      throw new Error("Factory AI forced move selection must publish exactly one move decision");
+    }
+    const submission = Object.freeze({
+      requestId: state.boundary.request.requestId,
+      side: state.boundary.request.side,
+      decision: moveDecisions[0]!,
+    });
+    const transition = submitBattleDecision(
+      state,
+      submission,
+      replayAiDraws(switchPolicy.draws, reducer),
+    );
+    return Object.freeze({
+      phase: "forced-move",
+      submission,
+      rng: switchPolicy.rng,
+      transition,
+      history: syncedHistory,
+      view,
+      switchPolicy,
+      actionGate: FACTORY_AI_ACTION_GATE,
+    }) as FactoryAiLiveTransition<RulesState>;
   }
   const policyRequest: BattleCommandRequest = createBattleCommandRequest({
     ...state.boundary.request,

@@ -287,7 +287,13 @@ export function runTryToFaint(input: Readonly<{
 
   let rng = input.rng;
   const draws: FactoryAiTryToFaintDraw[] = [];
-  if (isQuadrupleEffective(input.attacker.types, move.type, input.target.types, input.target.ability)) {
+  // `if_equal MOVE_NOT_MOST_POWERFUL, Score_Minus1` (:2620) JUMPS to `Score_Minus1` (`score -1` / `end`): a move
+  // that is not the strongest never reaches the x4 test (:2621) and never spends its roll. ROM seed 236: Cross Chop
+  // (x4 into Steel / Rock, not the strongest) scored -1 with no Random() (docs/parity-mac/ai-try-to-faint-not-strongest.md).
+  if (
+    mostPowerful !== "not-most-powerful"
+    && isQuadrupleEffective(input.attacker.types, move.type, input.target.types, input.target.ability)
+  ) {
     const draw = nextDraw(rng, input.drawOrdinalStart, `${input.reasonPrefix}-double-super-effective`);
     rng = draw.after;
     // if_random_less_than 80, AI_TryToFaint_End (:2624): the JUMP (roll < 80,

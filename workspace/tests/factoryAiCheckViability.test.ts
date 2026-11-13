@@ -7820,10 +7820,17 @@ describe("AI_CV_MirrorMove (data/battle_ai_scripts.s:838-894, EFFECT_MIRROR_MOVE
     expect(result).toMatchObject({ scoreDelta: -1, draws: [{ kind: "mirror-move-roll-2", jumped: false }] });
   });
 
-  it("target faster: MirrorMove2's roll-2 regardless of last move", () => {
-    const result = mirrorRun(1, 80, 120, MOVE_TOXIC_TEST);
+  it("target faster, NON-encouraged last move: MirrorMove2's roll-2", () => {
+    const result = mirrorRun(1, 80, 120, MOVE_TACKLE_TEST);
     if (result.kind !== "scored") throw new Error("unreachable");
     expect(result.draws[0]).toMatchObject({ kind: "mirror-move-roll-2" });
+  });
+
+  it("target faster, ENCOURAGED last move: MirrorMove2's `if_in_hwords ..., AI_CV_MirrorMove_End` (:848) ends with no roll", () => {
+    // parity-mac (docs/parity-mac/ai-speed-tie-draw-order.md): this case pinned an unconditional roll-2 before.
+    const result = mirrorRun(1, 80, 120, MOVE_TOXIC_TEST);
+    if (result.kind !== "scored") throw new Error("unreachable");
+    expect(result).toMatchObject({ scoreDelta: 0, draws: [] });
   });
 });
 

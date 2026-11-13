@@ -5,10 +5,12 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { MONS, lsd194Production } from "./lsd194Production.ts";
 
-export const SST200_MOVES: Record<string, { id: number; self: boolean }> = {
+// parity-mac: `playerSelf` -- the PLAYER's move menu sends a non-Ghost Curse with the user as its target (HandleInputChooseMove,
+// battle_controller_player.c:486-501); the opponent's Curse keeps the foe (docs/parity-mac/curse-player-target.md).
+export const SST200_MOVES: Record<string, { id: number; self: boolean; playerSelf?: boolean }> = {
   tickle: { id: 321, self: false }, memento: { id: 262, self: false }, superpower: { id: 276, self: false }, "silver-wind": { id: 318, self: false },
   "ancient-power": { id: 246, self: false }, "calm-mind": { id: 347, self: true }, "dragon-dance": { id: 349, self: true },
-  "cosmic-power": { id: 322, self: true }, curse: { id: 174, self: false },
+  "cosmic-power": { id: 322, self: true }, curse: { id: 174, self: false, playerSelf: true },
 };
 
 type Row = { type: string; start: number; dur: number; lines: string[] | null; timing: { minimumFrames?: number; holdFrames?: number } | null };
@@ -30,7 +32,7 @@ export function productionFor(move: string, scene: "on" | "off", wanted: number,
   const m = SST200_MOVES[move]!;
   for (let seed = from; seed <= 800; seed += 1) {
     let rows: Row[];
-    try { rows = lsd194Production({ scene, seed, player: MONS.PRIMEAPE, opponent: MONS.ONIX, pMove: foe ? 33 : m.id, oMove: foe ? m.id : 33, pSelf: foe ? false : m.self, oSelf: foe ? m.self : false }).rows as Row[]; } catch { continue; }
+    try { rows = lsd194Production({ scene, seed, player: MONS.PRIMEAPE, opponent: MONS.ONIX, pMove: foe ? 33 : m.id, oMove: foe ? m.id : 33, pSelf: foe ? false : (m.playerSelf ?? m.self), oSelf: foe ? m.self : false }).rows as Row[]; } catch { continue; }
     const c = chainOf(rows);
     if (c.chain.length === wanted) return { seed, rows, ...c };
   }

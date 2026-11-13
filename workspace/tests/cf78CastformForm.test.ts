@@ -93,14 +93,17 @@ describe("cf78: census route 950 through the production orchestrator, Scene ON /
   it("battle 950 (seed 950, streak 13): the player's CASTFORM in hail; the ROM-proven bodies with it transformed are live (cast83)", () => {
     const r = cf78Parity(950, 13);
     expect(r.rngEqual && r.rulesEqual && r.boundaryEqual && r.facilityEqual).toBe(true);
-    expect(r.castformBodiesOn).toBe(21); // abl261 (ISSUES #202): battle 950 is a census seed the full ability resolver changes (ON 304 -> 480 commands); 19 -> 21
+    // parity-mac re-pin (docs/parity-mac/castform-reverts-with-weather.md): CASTFORM now reverts to Normal when the hail runs out
+    // (HandleFaintedMonActions state 6, ABILITYEFFECT_FORECAST), so battle 950 holds 11 bodies with it transformed (was 21), all
+    // 11 live (was 20 of 21), and 31 other live bodies (was 22). Scene ON / OFF parity above is unchanged.
+    expect(r.castformBodiesOn).toBe(11); // abl261 (ISSUES #202): battle 950 is a census seed the full ability resolver changes (ON 304 -> 480 commands); 19 -> 21
     // cast83: Shock Wave / Icy Wind / Water Pulse by the ice-form CASTFORM (351 / 196 / 352 :by:3) are live; Ember (residual), Rest,
     // Hail, Ice Ball and Fly at it still decline (docs/cast83-castform-forms.md).
     // apx219: + the ice-form Water Pulse 352 after an unknown order history (census seed 950), drawn approximately (known-entry order).
     // apx221: every other Castform body is drawn approximately with the displayed form's art (castform-form), 19 of 19.
-    expect(r.castformLiveBodiesOn).toBe(20); // abl261: 19 -> 20 of 21 (the other Castform body keeps declining; reported in docs/abl261-ability-damage.md)
+    expect(r.castformLiveBodiesOn).toBe(11); // abl261: 19 -> 20 of 21 (the other Castform body keeps declining; reported in docs/abl261-ability-damage.md)
     // Every other body keeps its decision: the 9 live on 9115d5ec3 (census battle 950, docs/cf78-castform-needle-arm.md).
-    expect(r.liveBodiesOn - r.castformLiveBodiesOn).toBe(22); // abl261: 9 -> 22 (the changed battle is longer, same decisions)
+    expect(r.liveBodiesOn - r.castformLiveBodiesOn).toBe(31); // abl261: 9 -> 22 (the changed battle is longer, same decisions)
     // The form at every one of them: hail (3), on the player's slot (SEALEO's Hail from turn 6).
     expect(new Set(r.bodies.flatMap((b) => b.castformForm[0] !== 0 || b.castformForm[1] !== 0 ? [b.castformForm.join(",")] : [])))
       .toEqual(new Set(["3,0"]));

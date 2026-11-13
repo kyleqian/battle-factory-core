@@ -996,15 +996,17 @@ function runCbmDefenseUp(attackerDefStage: number): number {
  *     end
  * ```
  *
- * `AI_CBM_AttackUp`'s own gate applied a second time for STAT_DEF at a
- * different penalty (-8, not -10), sequentially, no interaction between the
- * two checks -- a separate, third handler `EFFECT_BULK_UP` reaches on the
+ * `AI_CBM_AttackUp`'s own gate, then (only when it did not jump to
+ * `Score_Minus10` / `end`) a second gate for STAT_DEF at -8 -- a separate, third handler `EFFECT_BULK_UP` reaches on the
  * CBM side ONLY (`:210`); its CV side (`:771`) instead dispatches straight
  * to `AI_CV_DefenseUp`, shared with `DEFENSE_UP`/`DEFENSE_UP_2` (doc
  * §17.1/§18.1).
  */
 function runCbmBulkUp(attackerAtkStage: number, attackerDefStage: number): number {
-  return runCbmAttackUp(attackerAtkStage) + (attackerDefStage === MAX_STAT_STAGE ? -8 : 0);
+  // `if_stat_level_equal ..., Score_Minus10` JUMPS to `Score_Minus10` (`score -10` / `end`, :628-630), so the second
+  // gate is reached only when the first did not fire: one penalty at most (ROM seed 898: Curse with Attack AND Defense
+  // at +6 scores 90, not 82; docs/parity-mac/ai-dual-stat-penalty.md).
+  return attackerAtkStage === MAX_STAT_STAGE ? -10 : attackerDefStage === MAX_STAT_STAGE ? -8 : 0;
 }
 
 /**
@@ -1046,7 +1048,7 @@ function runCbmSpAtkUp(attackerSpAtkStage: number): number {
  * `runCbmBulkUp` composes `runCbmAttackUp` above.
  */
 function runCbmCosmicPower(attackerDefStage: number, attackerSpDefStage: number): number {
-  return runCbmDefenseUp(attackerDefStage) + (attackerSpDefStage === MAX_STAT_STAGE ? -8 : 0);
+  return attackerDefStage === MAX_STAT_STAGE ? -10 : attackerSpDefStage === MAX_STAT_STAGE ? -8 : 0; // first gate jumps to Score_Minus10 / end
 }
 
 /**
@@ -1056,7 +1058,7 @@ function runCbmCosmicPower(attackerDefStage: number, attackerSpDefStage: number)
  * `runCbmSpAtkUp` for the first check.
  */
 function runCbmCalmMind(attackerSpAtkStage: number, attackerSpDefStage: number): number {
-  return runCbmSpAtkUp(attackerSpAtkStage) + (attackerSpDefStage === MAX_STAT_STAGE ? -8 : 0);
+  return attackerSpAtkStage === MAX_STAT_STAGE ? -10 : attackerSpDefStage === MAX_STAT_STAGE ? -8 : 0; // first gate jumps to Score_Minus10 / end
 }
 
 /**
@@ -1075,7 +1077,7 @@ function runCbmCalmMind(attackerSpAtkStage: number, attackerSpDefStage: number):
  * check exactly as `runCbmBulkUp` does.
  */
 function runCbmDragonDance(attackerAtkStage: number, attackerSpeedStage: number): number {
-  return runCbmAttackUp(attackerAtkStage) + (attackerSpeedStage === MAX_STAT_STAGE ? -8 : 0);
+  return attackerAtkStage === MAX_STAT_STAGE ? -10 : attackerSpeedStage === MAX_STAT_STAGE ? -8 : 0; // first gate jumps to Score_Minus10 / end
 }
 
 /**
@@ -1309,7 +1311,7 @@ export function runCheckBadMovePreamble(input: Readonly<{
   if (!isMovePowerOther) {
     // AI_CBM_CheckIfNegatesType: `if_type_effectiveness AI_EFFECTIVENESS_x0` is the AI probe
     // (dual non-immunity glitch), not the true multiplier.
-    const aiEffectiveness = computeAiEffectiveness(move.type, target.types);
+    const aiEffectiveness = computeAiEffectiveness(move.type, target.types, target.isForesighted ?? false);
     if (aiEffectiveness === 0) {
       return Object.freeze({ kind: "scored", rng, draws: Object.freeze(draws), scoreDelta: -10 });
     }
@@ -2709,7 +2711,7 @@ function runCbmHighRiskForDamage(
   draws: readonly FactoryAiCheckBadMoveDraw[];
   scoreDelta: number;
 }> {
-  const aiEffectiveness = computeAiEffectiveness(moveType, target.types);
+  const aiEffectiveness = computeAiEffectiveness(moveType, target.types, target.isForesighted ?? false);
   if (aiEffectiveness === 0) {
     return Object.freeze({ rng, draws: Object.freeze([]), scoreDelta: -10 });
   }
@@ -2774,9 +2776,16 @@ function runCbmSleep(
  * Ground/Flying is 1 here, not x0 (battle_ai_script_commands.c:1515-1557;
  * battle_script_commands.c:1502-1506,1536-1591).
  */
-function computeAiEffectiveness(moveType: string, types: readonly [string, string]): number {
+function computeAiEffectiveness(moveType: string, types: readonly [string, string], targetHasForesight = false): number {
   let aiEffectiveness = 40;
   for (const entry of TYPE_EFFECTIVENESS) {
+    // TypeCalc (battle_script_commands.c:1560-1566): at the TYPE_FORESIGHT sentinel row the walk BREAKS when the
+    // defender has STATUS2_FORESIGHT, so the Normal / Fighting -> Ghost immunity rows behind it are never applied.
+    // `Cmd_if_type_effectiveness` calls that same TypeCalc (ROM seed 959; docs/parity-mac/ai-effectiveness-foresight.md).
+    if (entry.attackingType === "TYPE_FORESIGHT") {
+      if (targetHasForesight) break;
+      continue;
+    }
     if (entry.attackingType !== moveType || !types.includes(entry.defendingType)) continue;
     aiEffectiveness = Math.trunc((aiEffectiveness * entry.multiplierTenths) / 10);
     if (aiEffectiveness === 0 && entry.multiplierTenths !== 0) aiEffectiveness = 1;
@@ -2801,7 +2810,7 @@ function runCbmParalyze(
   draws: readonly FactoryAiCheckBadMoveDraw[];
   scoreDelta: number;
 }> {
-  const aiEffectiveness = computeAiEffectiveness(moveType, target.types);
+  const aiEffectiveness = computeAiEffectiveness(moveType, target.types, target.isForesighted ?? false);
   if (aiEffectiveness === 0) {
     return Object.freeze({ rng, draws: Object.freeze([]), scoreDelta: -10 });
   }
@@ -2875,7 +2884,7 @@ function runCbmOneHitKO(
   draws: readonly FactoryAiCheckBadMoveDraw[];
   scoreDelta: number;
 }> {
-  if (computeAiEffectiveness(moveType, target.types) === 0) {
+  if (computeAiEffectiveness(moveType, target.types, target.isForesighted ?? false) === 0) {
     return Object.freeze({ rng, draws: Object.freeze([]), scoreDelta: -10 });
   }
   const ability = nextGetAbilityDraw(rng, ordinal, `${reason}-ability`, target);
@@ -2971,7 +2980,7 @@ function runCbmWillOWisp(
   scoreDelta: number;
 }> {
   const ability = nextGetAbilityDraw(rng, ordinal, `${reason}-ability`, target);
-  const aiEffectiveness = computeAiEffectiveness(moveType, target.types);
+  const aiEffectiveness = computeAiEffectiveness(moveType, target.types, target.isForesighted ?? false);
   const blocked = ability.ability === ABILITY_WATER_VEIL
     || (target.hasAnyStatus ?? false)
     || aiEffectiveness === 0
@@ -3085,7 +3094,7 @@ function runCbmExplosion(
   draws: readonly FactoryAiCheckBadMoveDraw[];
   scoreDelta: number;
 }> {
-  if (computeAiEffectiveness(moveType, target.types) === 0) {
+  if (computeAiEffectiveness(moveType, target.types, target.isForesighted ?? false) === 0) {
     return Object.freeze({ rng, draws: Object.freeze([]), scoreDelta: -10 });
   }
   const ability = nextGetAbilityDraw(rng, ordinal, `${reason}-ability`, target);
@@ -3147,7 +3156,7 @@ function runCbmDreamEater(
   if (!(target.isAsleep ?? false)) {
     return -8;
   }
-  return computeAiEffectiveness(moveType, target.types) === 0 ? -10 : 0;
+  return computeAiEffectiveness(moveType, target.types, target.isForesighted ?? false) === 0 ? -10 : 0;
 }
 
 /**
@@ -3325,12 +3334,12 @@ function runCbmBellyDrum(attacker: FactoryAiCheckBadMoveAttacker): number {
  *
  * The same dual-stat shape as `AI_CBM_BulkUp`/`AI_CBM_Curse` with the gates
  * flipped to the target's own ATK then DEF at MIN_STAT_STAGE (the stats
- * Tickle lowers), sequentially, no interaction -- so both stages at floor
- * score -18. Zero ability/type reads.
+ * Tickle lowers): the first gate jumps to `Score_Minus10` / `end`, so both
+ * stages at the floor score -10. Zero ability/type reads.
  */
 function runCbmTickle(targetAtkStage: number, targetDefStage: number): number {
-  return (targetAtkStage === MIN_STAT_STAGE ? -10 : 0)
-    + (targetDefStage === MIN_STAT_STAGE ? -8 : 0);
+  // The first gate JUMPS to Score_Minus10 (`score -10` / `end`): both stages at the floor score -10, not -18.
+  return targetAtkStage === MIN_STAT_STAGE ? -10 : targetDefStage === MIN_STAT_STAGE ? -8 : 0;
 }
 
 /**
@@ -3629,7 +3638,7 @@ function runCbmSpitUpAndSwallow(
   target: FactoryAiCheckBadMoveTarget,
   attackerStockpileCount: number,
 ): number {
-  if (computeAiEffectiveness(moveType, target.types) === 0) {
+  if (computeAiEffectiveness(moveType, target.types, target.isForesighted ?? false) === 0) {
     return -10;
   }
   return attackerStockpileCount === 0 ? -10 : 0;

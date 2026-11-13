@@ -223,7 +223,7 @@ function drive(
 }
 
 function commandDraws(result: ReturnType<typeof drive>) {
-  return result.phase === "switch"
+  return result.phase !== "move"
     ? result.switchPolicy.draws
     : [...result.switchPolicy.draws, ...result.trace.draws];
 }

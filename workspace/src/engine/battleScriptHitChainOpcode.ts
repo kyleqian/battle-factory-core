@@ -232,7 +232,11 @@ const MOVE_RESULT_FOE_HUNG_ON = 1 << 7;
 /** include/constants/battle.h: hitMarker bits datahpupdate/hitanimation/healthbarupdate read. */
 const HITMARKER_IGNORE_BIDE = 1 << 5;
 const HITMARKER_IGNORE_SUBSTITUTE = 1 << 8;
+/** include/constants/moves.h MOVE_PAIN_SPLIT. */
+const MOVE_PAIN_SPLIT_ID = 220;
 const HITMARKER_PASSIVE_HP_UPDATE = 1 << 20;
+/** include/battle.h:455 F_DYNAMIC_TYPE_IGNORE_PHYSICALITY. */
+const F_DYNAMIC_TYPE_IGNORE_PHYSICALITY = 1 << 6;
 /** include/constants/battle.h:183,199,201 -- tryfaintmon's own hitMarker bits. */
 const HITMARKER_DESTINYBOND = 1 << 6;
 const HITMARKER_PLAYER_FAINTED = 1 << 22;
@@ -2587,12 +2591,33 @@ function createDatahpupdateOpcodeHandler(
     const noPassiveUpdate = (hitMarker & HITMARKER_PASSIVE_HP_UPDATE) === 0;
     let battlerChanges: Partial<BattleScriptRulesBattlerState> = { hp: nextHp };
     if (noPassiveUpdate) {
-      const moveType = resolveMoveTypeName(rulesContext, rulesContext.currentMove);
+      // battle_script_commands.c:1855-1860: the Counter / Mirror Coat record does NOT use GET_MOVE_TYPE. A dynamic type
+      // that carries F_DYNAMIC_TYPE_IGNORE_PHYSICALITY (Cmd_hiddenpowercalc, :8912 -- Hidden Power only) is ignored here
+      // and the move's table type (Normal) decides: Hidden Power of any type is recorded as a physical hit, so Counter
+      // answers it and Mirror Coat never does. Weather Ball's dynamic type has no such flag and still counts
+      // (docs/parity-mac/hidden-power-damage-record.md, audit lead B8).
+      const moveType = (rulesContext.dynamicMoveType & F_DYNAMIC_TYPE_IGNORE_PHYSICALITY) !== 0
+        ? resolveMoveTypeName(Object.freeze({ ...rulesContext, dynamicMoveType: 0 }), rulesContext.currentMove)
+        : resolveMoveTypeName(rulesContext, rulesContext.currentMove);
       const physical = isTypePhysical(moveType);
       const retaliationBattlerId = isTargetOperand
         ? requireBattlerRole(rulesContext, "attacker")
         : requireBattlerRole(rulesContext, "target");
-      battlerChanges = {
+      // battle_script_commands.c:1938: `IS_TYPE_PHYSICAL(moveType) && ... && gCurrentMove != MOVE_PAIN_SPLIT`. Pain
+      // Split is Normal-typed, so it fails the physical test AND the `!IS_TYPE_PHYSICAL` else-branch (:1953): it
+      // records neither Counter's nor Mirror Coat's damage cell, only Shell Bell's (:1932-1933, already
+      // IGNORE_SHELL_BELL from Cmd_painsplitdmgcalc). ROM seed 483: Counter after Pain Split fails
+      // (docs/parity-mac/pain-split-not-physical.md).
+      const painSplit = physical && rulesContext.currentMove === MOVE_PAIN_SPLIT_ID;
+      battlerChanges = painSplit ? {
+        ...battlerChanges,
+        specialStatus: Object.freeze({
+          ...battlerState.specialStatus,
+          shellBellDmg: battlerState.specialStatus.shellBellDmg === 0
+            ? dealt
+            : battlerState.specialStatus.shellBellDmg,
+        }),
+      } : {
         ...battlerChanges,
         specialStatus: physical
           ? Object.freeze({

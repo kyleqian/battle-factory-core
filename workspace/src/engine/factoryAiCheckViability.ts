@@ -1989,6 +1989,12 @@ function runCvHealBody(input: Readonly<{
   let rng = input.rng;
   let ordinal = input.drawOrdinalStart;
 
+  // `if_hp_equal AI_USER, 100, AI_CV_Heal3` (:1325) comes BEFORE `if_target_faster` (:1326): at full HP the script
+  // scores -3 with no speed check, so no tie draw (docs/parity-mac/ai-speed-tie-draw-order.md).
+  if (Math.floor((100 * input.attacker.hp) / input.attacker.maxHp) === 100) {
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: -3 });
+  }
+
   const turnOrder = aiTurnOrder(input);
   const { attacker, target } = turnOrder;
 
@@ -2065,7 +2071,8 @@ function runCvHealBody(input: Readonly<{
  * `Cmd_get_weather` (`battle_ai_script_commands.c:1644-1665`): it writes
  * `funcResult` ONLY when a real weather bit is set, so the exit value is the
  * stale-fallback formula `currentWeather ?? staleCarry` (same shape
- * `weatherSetterCvScore` uses). The Heal body writes nothing further.
+ * `weatherSetterCvScore` uses), and that value is also what the weather gate
+ * itself tests. The Heal body writes nothing further.
  */
 function runCvHealWeather(input: Readonly<{
   rng: BattleRngState;
@@ -2076,8 +2083,13 @@ function runCvHealWeather(input: Readonly<{
   reasonPrefix: string;
 }>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number; funcResultAfter: AiWeatherValue | undefined }> {
   const funcResultAfter = input.attacker.currentWeather ?? input.staleFuncResultFallback;
-  const weatherPenalty = input.attacker.currentWeather !== undefined
-    && input.attacker.currentWeather !== AI_WEATHER_SUN
+  // docs/parity-mac/ai-heal-weather-stale-register.md: the three `if_equal` (:1317-1319) test `funcResult`, not the weather.
+  // With clear weather `get_weather` wrote nothing, so they test the carried value: AI_TryToFaint's last
+  // `get_how_powerful_move_is` leaves 2 (most powerful) or 1 (not most powerful), which read as sandstorm / rain and
+  // cost the heal 2 points (ROM seed 7922, Noland's Tropius: Synthesis 100 instead of 102, Body Slam wins the tie).
+  // The penalty read only the real weather, so a carried value never applied; `weatherSetterCvScore` already reads the
+  // register. An unknown carry (`undefined`) stays without a penalty, as there.
+  const weatherPenalty = funcResultAfter !== undefined && funcResultAfter !== AI_WEATHER_SUN
     ? -2
     : 0;
   const body = runCvHealBody({
@@ -2282,7 +2294,12 @@ function runCvSemiInvulnerable(input: Readonly<{
   const userType1 = input.attacker.types[0];
   const userType2 = input.attacker.types[1];
 
-  if (weather === AI_WEATHER_HAIL) {
+  // docs/parity-mac/ai-heal-weather-stale-register.md: the two `if_equal` after `get_weather` test `funcResult`, i.e.
+  // `weatherWrite`, not the weather. In clear weather a carried 3 / 2 (after AI_TryToFaint, 2 = "most powerful") takes
+  // the hail / sandstorm branch. Mechanic Lab ROM proof: Lapras (Water / Ice) with Dive in slot 0 and Ice Beam, its
+  // most powerful move, in slot 3 against a faster target: slot 0 gets the TryEncourage roll and +1, slots 1 and 2 (the
+  // register then holds TYPE_ICE) do not. These branches tested `weather`, so a carried value never took them.
+  if (weatherWrite === AI_WEATHER_HAIL) {
     // Non-BUGFIX: Hail -> CheckSandstormTypes (Ground/Rock/Steel resist).
     if (AI_CV_SANDSTORM_RESISTANT_TYPES.has(userType1)) {
       return tryEncourage(input.rng, input.drawOrdinalStart, typeFuncResultCollision(userType1));
@@ -2294,7 +2311,7 @@ function runCvSemiInvulnerable(input: Readonly<{
     return semiInvulnerable5(typeFuncResultCollision(userType2));
   }
 
-  if (weather === AI_WEATHER_SANDSTORM) {
+  if (weatherWrite === AI_WEATHER_SANDSTORM) {
     // Non-BUGFIX: Sandstorm -> CheckIceType (Ice type resist).
     if (userType1 === "TYPE_ICE") {
       return tryEncourage(input.rng, input.drawOrdinalStart, typeFuncResultCollision(userType1));
@@ -2839,23 +2856,27 @@ function runCvSelfKO(input: Readonly<{
 
   const hpPercent = Math.floor((100 * input.attacker.hp) / input.attacker.maxHp);
 
-  const turnOrder = aiTurnOrder(input);
-  const { attacker, target } = turnOrder;
-
-  let tieRoll = 0;
-  let tieDraw: ReturnType<typeof nextDraw> | null = null;
-  if (effectiveSpeed(attacker, turnOrder.weather, turnOrder.randomTurnNumber)
-    === effectiveSpeed(target, turnOrder.weather, turnOrder.randomTurnNumber)) {
-    tieDraw = nextDraw(rng, ordinal, `${input.reasonPrefix}-target-faster-tie`);
-    rng = tieDraw.after;
-    tieRoll = tieDraw.randomValue;
-    ordinal += 1;
+  // `if_hp_less_than AI_USER, 80, AI_CV_SelfKO_Encourage2` (:807) jumps PAST `if_target_faster` (:808): below 80% HP
+  // the speed check never runs and its tie draw is never spent (ROM seed 114; docs/parity-mac/ai-speed-tie-draw-order.md).
+  let targetFaster = false;
+  if (hpPercent >= 80) {
+    const turnOrder = aiTurnOrder(input);
+    const { attacker, target } = turnOrder;
+    let tieRoll = 0;
+    let tieDraw: ReturnType<typeof nextDraw> | null = null;
+    if (effectiveSpeed(attacker, turnOrder.weather, turnOrder.randomTurnNumber)
+      === effectiveSpeed(target, turnOrder.weather, turnOrder.randomTurnNumber)) {
+      tieDraw = nextDraw(rng, ordinal, `${input.reasonPrefix}-target-faster-tie`);
+      rng = tieDraw.after;
+      tieRoll = tieDraw.randomValue;
+      ordinal += 1;
+    }
+    const strikesFirst = getWhoStrikesFirst(attacker, target, tieRoll, turnOrder.weather, turnOrder.randomTurnNumber);
+    if (tieDraw) {
+      draws.push(Object.freeze({ ...tieDraw, kind: "target-faster-tie" as const, strikesFirst }));
+    }
+    targetFaster = strikesFirst === 1;
   }
-  const strikesFirst = getWhoStrikesFirst(attacker, target, tieRoll, turnOrder.weather, turnOrder.randomTurnNumber);
-  if (tieDraw) {
-    draws.push(Object.freeze({ ...tieDraw, kind: "target-faster-tie" as const, strikesFirst }));
-  }
-  const targetFaster = strikesFirst === 1;
 
   // Encourage1: HP < 80 or target faster -> Encourage2.
   if (hpPercent < 80 || targetFaster) {
@@ -5419,6 +5440,13 @@ function runCvBatonPass(input: Readonly<{
     || (input.attacker.spAtkStage ?? DEFAULT_STAT_STAGE) > threshold
     || input.attacker.spDefStage > threshold
     || input.attacker.evasionStage > threshold;
+
+  // BatonPass5 (:1999-2004): with no stat above stage 7 the script goes straight to ScoreDown2. `if_target_faster`
+  // exists only at BatonPass2 (:1987, some stat > 8) and BatonPass7 (:2007, some stat > 7), so the ordinary unboosted
+  // Baton Pass spends no tie draw (docs/parity-mac/ai-speed-tie-draw-order.md).
+  if (!userAnyStatAbove(7)) {
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: -2 });
+  }
 
   const turnOrder = aiTurnOrder(input);
   const { attacker, target } = turnOrder;
@@ -9407,6 +9435,12 @@ function runCvMirrorMove(input: Readonly<{
       scoreDelta: jumped ? 0 : 2,
       funcResultAfter,
     });
+  }
+
+  // MirrorMove2 (:846-850): `if_in_hwords ..._EncouragedMovesToMirror, AI_CV_MirrorMove_End` (:848) ends with no roll
+  // when the last move is encouraged, which on this label means the target was faster.
+  if (encouraged) {
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: 0, funcResultAfter });
   }
 
   // MirrorMove2: <80 roll, -1 on fall-through.

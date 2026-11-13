@@ -80,7 +80,7 @@ Mirrors the executable-frontier move census for the last two enumerable battle-v
 | ABILITY_COLOR_CHANGE | engine-referenced | 2 (2) | 2 | ON_DAMAGE | 0 | 0 | 3 |
 | ABILITY_PLUS | engine-referenced | 2 (2) | 2 | — | 2 | 0 | 3 |
 | ABILITY_MINUS | engine-referenced | 2 (2) | 2 | — | 2 | 0 | 3 |
-| ABILITY_FORECAST | engine-referenced | 2 (2) | 2 | ON_SWITCHIN, FORECAST | 1 | 0 | 5 |
+| ABILITY_FORECAST | engine-referenced | 2 (2) | 2 | ON_SWITCHIN, FORECAST | 1 | 0 | 7 |
 | ABILITY_WHITE_SMOKE | engine-referenced | 2 (2) | 2 | — | 3 | 0 | 12 |
 | ABILITY_WONDER_GUARD | engine-referenced | 1 (1) | 1 | — | 12 | 1 | 11 |
 | ABILITY_DRIZZLE | zero-carrier | 0 (0) | 0 | ON_SWITCHIN | 0 | 0 | 2 |
@@ -107,7 +107,7 @@ Mirrors the executable-frontier move census for the last two enumerable battle-v
 | HOLD_EFFECT_SHELL_BELL | engine-referenced | 43 | 46 | SHELL_BELL | KINGSROCK_SHELLBELL | 0 | 0 | 2 |
 | HOLD_EFFECT_CURE_CONFUSION | engine-referenced | 31 | 31 | PERSIM_BERRY | NORMAL, MOVE_END | 0 | 0 | 4 |
 | HOLD_EFFECT_FLINCH | engine-referenced | 27 | 27 | KINGS_ROCK | KINGSROCK_SHELLBELL | 0 | 0 | 2 |
-| HOLD_EFFECT_RESTORE_STATS | engine-referenced | 23 | 25 | WHITE_HERB | ON_SWITCH_IN, NORMAL, MOVE_END | 0 | 0 | 4 |
+| HOLD_EFFECT_RESTORE_STATS | engine-referenced | 23 | 25 | WHITE_HERB | ON_SWITCH_IN, NORMAL, MOVE_END | 0 | 0 | 6 |
 | HOLD_EFFECT_CURE_PAR | engine-referenced | 21 | 21 | CHERI_BERRY | NORMAL, MOVE_END | 0 | 0 | 4 |
 | HOLD_EFFECT_SPEED_UP | engine-referenced | 21 | 22 | SALAC_BERRY | NORMAL | 0 | 0 | 2 |
 | HOLD_EFFECT_SP_ATTACK_UP | engine-referenced | 16 | 16 | PETAYA_BERRY | NORMAL | 0 | 0 | 2 |

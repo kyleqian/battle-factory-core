@@ -210,6 +210,20 @@ describe("B_SCR_OP_PAINSPLITDMGCALC / EFFECT_PAIN_SPLIT", () => {
     expect(finished.rulesContext.battlers[1].specialStatus.shellBellDmg).toBe(0);
   });
 
+  it("records no Counter / Mirror Coat damage: `gCurrentMove != MOVE_PAIN_SPLIT` (battle_script_commands.c:1938)", () => {
+    // docs/parity-mac/pain-split-not-physical.md (ROM seed 483: Counter after Pain Split fails). The side that LOSES HP
+    // runs datahpupdate's damage branch; Pain Split is Normal-typed, so the unfixed code filed it as a physical hit.
+    const targetLoses = run(rules(60, 160)); // both end at 110: the target lost 50
+    expect(targetLoses.rulesContext.battlers[1].hp).toBe(110);
+    expect(targetLoses.rulesContext.battlers[1].protectPhysicalDmg ?? 0).toBe(0); // unfixed: 50
+    expect(targetLoses.rulesContext.battlers[1].protectSpecialDmg ?? 0).toBe(0);
+    expect(targetLoses.rulesContext.battlers[1].specialStatus.physicalDmg ?? 0).toBe(0);
+    const attackerLoses = run(rules(160, 60)); // the attacker lost 50
+    expect(attackerLoses.rulesContext.battlers[0].hp).toBe(110);
+    expect(attackerLoses.rulesContext.battlers[0].protectPhysicalDmg ?? 0).toBe(0); // unfixed: 50
+    expect(attackerLoses.rulesContext.battlers[0].specialStatus.physicalDmg ?? 0).toBe(0);
+  });
+
   it("uses the existing HP-update clamp when the shared average exceeds a battler's maxHP", () => {
     const final = run(rules(167, 50, 0, 50));
     expect(final.rulesContext.battlers[0].hp).toBe(108);

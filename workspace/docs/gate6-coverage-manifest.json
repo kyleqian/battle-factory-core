@@ -96725,7 +96725,7 @@
           ],
           "sourceHookPresent": true,
           "censusStatus": "engine-referenced",
-          "engineReferenceCount": 5,
+          "engineReferenceCount": 7,
           "oracleReceiptCards": [
             "R3",
             "R4",
@@ -98514,7 +98514,7 @@
           ],
           "sourceHookPresent": true,
           "censusStatus": "engine-referenced",
-          "engineReferenceCount": 4,
+          "engineReferenceCount": 6,
           "oracleReceiptCards": [
             "R12",
             "R12b",

@@ -647,17 +647,23 @@ function runPushCursorAndCallbackTickScript(
   return Object.freeze({ kind: "fired", state: resumed });
 }
 
-/** `status1 += STATUS1_TOXIC_TURN(1)` capped at TURN(15) (battle_util.c:1542-1543), plus the party status1 mirror `datahpupdate`'s own sync already establishes for HP. */
+/**
+ * `status1 += STATUS1_TOXIC_TURN(1)` capped at TURN(15) (battle_util.c:1542-1543).
+ * C bumps `gBattleMons[gActiveBattler].status1` ONLY: no
+ * `BtlController_EmitSetMonData(REQUEST_STATUS_BATTLE)` follows, so the party
+ * record keeps the status word of the last real sync (STATUS1_TOXIC_POISON
+ * with counter 0 from `SetMoveEffect`, battle_script_commands.c:2488). A
+ * badly poisoned mon that leaves the field and returns reloads that word
+ * (`battle_main.c` SwitchInClearSetData + the REQUEST_ALL_BATTLE copy) and
+ * its damage restarts at 1/16. Do NOT mirror the bump into the party
+ * (docs/parity-mac/toxic-counter-switch.md; ROM seed 165: 8 damage, not 24).
+ */
 function bumpToxicCounter(rulesContext: BattleScriptRulesContext, battler: BattleScriptBattlerId): BattleScriptRulesContext {
   const b = rulesContext.battlers[battler];
   const atCap = (b.status1 & STATUS1_TOXIC_COUNTER) === STATUS1_TOXIC_TURN_15;
   const nextStatus1 = atCap ? b.status1 : ((b.status1 + STATUS1_TOXIC_TURN_1) >>> 0);
   if (nextStatus1 === b.status1) return rulesContext;
-  const withStatus = withBattler(rulesContext, battler, { status1: nextStatus1 });
-  return Object.freeze({
-    ...withStatus,
-    party: withBattleScriptPartyMemberStatus1(withStatus.party, b.side, b.partyIndex, nextStatus1),
-  });
+  return withBattler(rulesContext, battler, { status1: nextStatus1 });
 }
 
 function floorDivAtLeastOne(value: number, divisor: number): number {
@@ -2167,12 +2173,16 @@ export function turnOrderBattlerInputs(
  * `BattleTurnPassed` does not reset them until its closing block
  * (`battle_main.c:4001-4004`), i.e. after every end-turn effect.
  *
- * KNOWN GAP: source substitutes MOVE_STRUGGLE when
- * `gProtectStructs[battler].noValidMoves` is set (`:4700`); this engine has
- * no `noValidMoves` cell, so a forced-Struggle battler contributes its
- * unusable slot's own priority instead of Struggle's 0. Reachable only when
- * every slot of a battler is unusable AND one of them has a non-zero
- * priority bracket.
+ * Source substitutes MOVE_STRUGGLE when `gProtectStructs[battler].noValidMoves`
+ * is set (`:4700`), but by the time this sort runs the cell is FALSE again:
+ * `HandleAction_UseMove` clears it when the forced Struggle starts
+ * (`battle_util.c:100-102`). So a battler that Struggled this turn sorts with
+ * the priority of the slot its cursor still points at -- the read below --
+ * not with Struggle's 0. ROM proof (Mechanic Lab, docs/parity-mac/
+ * endturn-order-forced-struggle.md): a slow Shuckle out of Protect PP
+ * Struggles after a faster Blissey's Tackle, and Shuckle's Leftovers heals
+ * FIRST at end of turn (Protect's +3). Not modeled: a battler whose forced
+ * Struggle never started (its action was skipped) keeps the cell set.
  */
 function endTurnChosenMove(
   rulesContext: BattleScriptRulesContext,
@@ -2296,6 +2306,12 @@ const PROTECT_STRUCT_CLEAR: Partial<BattleScriptRulesBattlerState> = Object.free
   protectSpecialBattlerId: 0,
 });
 
+/** `TurnValuesCleanUp(TRUE)`'s two fields (`battle_main.c:4866-4867`). */
+const ENTER_TURN_PROTECT_CLEAR: Partial<BattleScriptRulesBattlerState> = Object.freeze({
+  protected: 0,
+  endured: 0,
+});
+
 function clearProtectStructsForNextTurn(rulesContext: BattleScriptRulesContext): BattleScriptRulesContext {
   let next = rulesContext;
   for (let i = 0; i < next.battleTopology.battlersCount; i += 1) {
@@ -2410,15 +2426,28 @@ function syncSubstituteStatus2(
 
 /**
  * `TurnValuesCleanUp(TRUE)` at `BattleTurnPassed`'s entry (`battle_main.c:3960`):
- * only the both-branch statements -- the substitute sync and the side-global
- * Follow Me clear -- plus the `protected`/`endured` pair the `TRUE` branch
- * owns (audit FINDING 4; no modeled end-turn reader, left to the tail memset).
+ * the `protected`/`endured` pair the `TRUE` branch owns (`:4864-4868`), then
+ * the both-branch statements -- the substitute sync and the side-global
+ * Follow Me clear. `endured` has an end-turn reader: the delayed Future Sight
+ * / Doom Desire hit runs `adjustnormaldamage2` (battle_scripts_1.s:3517),
+ * whose Endure clamp reads `gProtectStructs[gBattlerTarget].endured`
+ * (`battle_script_commands.c:1726-1730`). With the flag left to the tail
+ * memset, a Pokemon that used Endure survived a Future Sight landing the same
+ * turn at 1 HP; the game lets it faint (ROM seed 2215,
+ * docs/parity-mac/endure-future-sight.md).
  */
 function enterTurnValuesCleanUp(
   rulesContext: BattleScriptRulesContext,
 ): BattleScriptRulesContext {
+  let next = rulesContext;
+  for (let i = 0; i < next.battleTopology.battlersCount; i += 1) {
+    const battler = next.battlers[i]!;
+    if (battler.protected === 1 || battler.endured === 1) {
+      next = withBattler(next, i as BattleScriptBattlerId, ENTER_TURN_PROTECT_CLEAR);
+    }
+  }
   return clearFollowMeTimersForTurnValuesCleanUp(
-    syncSubstituteStatus2(rulesContext),
+    syncSubstituteStatus2(next),
   );
 }
 
@@ -2428,16 +2457,37 @@ function enterTurnValuesCleanUp(
  * `isFirstTurn`/`rechargeTimer` decrements, then the both-branch substitute
  * sync, then the two side-global Follow Me timers.
  */
+/**
+ * `BattleTurnPassed`'s three gHitMarker clears right after `TurnValuesCleanUp(FALSE)`
+ * (`battle_main.c:3974-3977`): HITMARKER_NO_ATTACKSTRING (1 << 9),
+ * HITMARKER_UNABLE_TO_USE_MOVE (1 << 19), HITMARKER_PLAYER_FAINTED (1 << 22).
+ * `RunTurnActionsFunctions` clears the first two only BETWEEN actions
+ * (`:4949-4954`, the reducer's own between-actions clear); what the LAST
+ * action of a turn sets survives until here. Without this, a last mover that
+ * stayed "frozen solid" (CANCELER_FROZEN sets NO_ATTACKSTRING,
+ * `battle_util.c:2067`) made the next turn's first action skip its attack
+ * string and PP deduction and take the SECOND-turn branch of a two-turn move
+ * (`jumpifword CMP_COMMON_BITS, gHitMarker, HITMARKER_NO_ATTACKSTRING`,
+ * battle_scripts_1.s:780 / 1066 / 1813 / 1909 / 1975): ROM seed 342, Solar
+ * Beam (docs/parity-mac/turn-passed-hitmarker-clear.md).
+ */
+/** include/battle.h IGNORE_SHELL_BELL. */
+const FUTURE_ATTACK_IGNORE_SHELL_BELL = 0xffff;
+
+const BATTLE_TURN_PASSED_HITMARKER_CLEAR_MASK = ((1 << 9) | (1 << 19) | (1 << 22)) >>> 0;
+
 function finishTurnValuesCleanUp(
   rulesContext: BattleScriptRulesContext,
 ): BattleScriptRulesContext {
-  return clearFollowMeTimersForTurnValuesCleanUp(
+  const cleaned = clearFollowMeTimersForTurnValuesCleanUp(
     syncSubstituteStatus2(
       decrementDisableStructTurnTimers(
         clearProtectStructsForNextTurn(rulesContext),
       ),
     ),
   );
+  const hitMarker = (cleaned.hitMarker & ~BATTLE_TURN_PASSED_HITMARKER_CLEAR_MASK) >>> 0;
+  return hitMarker === cleaned.hitMarker ? cleaned : Object.freeze({ ...cleaned, hitMarker });
 }
 
 function mapFaintedActionsResult(result: BattleScriptFaintedActionsResult): BattleEndTurnResult {
@@ -2660,6 +2710,17 @@ function runFutureAttacksAfterFaints(
     if (counters[battler] === 0 && counters[partner] === 0) {
       sideStatuses[rc.battlers[battler].side] &= ~SIDE_STATUS_FUTUREATTACK;
     }
+    // `gSpecialStatuses[gBattlerTarget].shellBellDmg = IGNORE_SHELL_BELL` (battle_util.c:1816): the delayed hit's
+    // datahpupdate then leaves the marker alone (battle_script_commands.c:1932-1933 writes only a 0 cell), so
+    // MOVEEND_KINGSROCK_SHELLBELL (battle_util.c:3789-3790), which BattleScript_FutureAttackEnd's moveendfromto
+    // reaches, does not heal the attacker's Shell Bell off Future Sight / Doom Desire. ROM seed 475
+    // (docs/parity-mac/shell-bell-future-sight.md).
+    rc = withBattler(rc, battler, {
+      specialStatus: Object.freeze({
+        ...rc.battlers[battler].specialStatus,
+        shellBellDmg: FUTURE_ATTACK_IGNORE_SHELL_BELL,
+      }),
+    });
     rc = Object.freeze({
       ...rc,
       battleMoveDamage: rc.futureSightDmg[battler],
@@ -2839,14 +2900,13 @@ function clearEndTurnFlinchAndSleepLocks(
  * point) and before the next turn's decision boundary is computed.
  *
  * `TurnValuesCleanUp(TRUE)` (top of `BattleTurnPassed`, source `var0=TRUE`)
- * clears `protected`/`endured` plus both Follow Me timers. The timers are
+ * clears `protected`/`endured` plus both Follow Me timers. All three are
  * cleared literally at entry below, before any field/battler/faint/delayed
- * work can return a resumable barrier. The full `ProtectStruct` memset
- * remains modeled once at `TurnValuesCleanUp(FALSE)`'s tail call
- * (`battle_main.c:3974`, doc §1.3/§2.4); no modeled reader currently needs
- * its `TRUE`/`FALSE` mid-pass split (see
- * `docs/counter-retaliation-design.md` §2.2). That tail calls the same timer
- * helper again, matching source and making the clear idempotent. The
+ * work can return a resumable barrier (the delayed Future Sight hit reads
+ * `endured`). The full `ProtectStruct` memset is modeled at
+ * `TurnValuesCleanUp(FALSE)`'s tail call (`battle_main.c:3974`, doc
+ * §1.3/§2.4). That tail calls the same timer helper again, matching source
+ * and making the clear idempotent. The
  * post-faint positional Future Sight/Doom Desire phase is applied below;
  * The post-faint positional Future Sight/Doom Desire and Perish Song phases
  * are both applied below in their source order.

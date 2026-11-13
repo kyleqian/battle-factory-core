@@ -173,6 +173,7 @@ const PROBE_ATTACKER: Required<FactoryAiScoredBattlerView> = Object.freeze({
   holdEffect: 1,
   currentWeather: AI_WEATHER_SUN as AiWeatherValue,
   usablePartyMons: 1,
+  movePp: [1, 1, 1, 1] as const, // read by the policy itself (which slots are scripted), not handed to a scorer
   hasSubstitute: true,
   anyMoveDisabled: true,
   anyMoveEncored: true,
@@ -409,6 +410,21 @@ describe("handler-input fields are all populated by the live adapter (wiring par
       `AI_CheckViability handler-input fields the pass-3 adapter never populates -- wire them in factoryAiDecisionPolicy.ts's runCheckViability call (add a view field, carry it in the attacker/target literal, pin it with a through-the-adapter test). Offending: ${missing.join(", ")}`,
     ).toEqual([]);
     assertNoExtras(populated, declared, "AI_CheckViability");
+  });
+
+  it("AI_CheckViability: the TARGET literal carries the target's own ability and Sp. Atk stage (not only the attacker's)", () => {
+    // docs/parity-mac/ai-cv-target-ability-spatk.md (audit leads A6, A7). The union check above passed because the ATTACKER
+    // literal has both fields; the handlers read them on the target (`input.target.ability`, `input.target.spAtkStage`) and
+    // got ABILITY_NONE / stage 6. Unfixed: both undefined.
+    capturedCv.length = 0;
+    const view: FactoryAiScoredView = {
+      ...PROBE_VIEW,
+      target: { ...PROBE_VIEW.target, ability: "ABILITY_ARENA_TRAP", statStages: { ...PROBE_VIEW.target.statStages, spAtk: 10 } },
+    };
+    chooseFactoryAiScoredDecision({ view, request: fourSlotRequest, rng: { value: 1, calls: 0 } });
+    const input = capturedCv[0] as Readonly<{ target: FactoryAiCheckViabilityBattler }>;
+    expect(input).toBeDefined();
+    expect([input.target.ability, input.target.spAtkStage]).toEqual(["ABILITY_ARENA_TRAP", 10]);
   });
 
   it("AI_CheckBadMove: every declared handler-input field is carried by the CBM attacker/target adapters", () => {

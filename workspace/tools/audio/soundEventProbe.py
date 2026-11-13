@@ -105,6 +105,7 @@ def drive_lab(oracle, funcs, decisions, cap=None):
         slot = oracle.read_u8(sym["gPartyMenu"] + 9)
         return {"func": func, "actionCursor": oracle.read_u8(sym["gActionSelectionCursor"]), "moveCursor": oracle.read_u8(sym["gMoveSelectionCursor"]),
                 "slotId": slot - 256 if slot & 0x80 else slot, "partyOrder": [oracle.read_u8(sym["gBattlePartyCurrentOrder"] + i) for i in range(3)], "partyTasks": live, "outcome": oracle.read_u8(sym["gBattleOutcome"]),
+                "mainFunc": oracle.read_u32(sym["gBattleMainFunc"]),
                 "sig": (func, row[1], row[2], row[3], oracle.read_u32(sym["gBattlescriptCurrInstr"]), oracle.read_u32(sym["gBattleMainFunc"]),
                         oracle.read_u32(sym["gBattleControllerExecFlags"]), oracle.read_u32(sym["gBattlerControllerFuncs"] + 4), tuple(live))}
 
@@ -374,14 +375,23 @@ def main():
                 {"descriptor": {k: v for k, v in descriptor.items() if k != "preCheckpointCaptures"}, "snapshot": lab.snapshot(),
                  # aud243c: the opponent's turn-1 decision is already made at the menu (gRngValue is post-AI); the replay aligns on gRandomTurnNumber instead.
                  "randomTurnNumber": oracle.read_u16(oracle.symbols["gRandomTurnNumber"]),
-                 "opponentReply": [oracle.read_u8(oracle.symbols["gBattleBufferB"] + 0x200 + i) for i in range(4)]}, separators=(",", ":")))
+                 "opponentReply": [oracle.read_u8(oracle.symbols["gBattleBufferB"] + 0x200 + i) for i in range(4)],
+                 # parity-mac: AI_THINKING_STRUCT->simulatedRNG (gBattleResources->ai, +0x18): the four `100 - Random() % 16` of BattleAI_SetupAIData
+                 # (battle_ai_script_commands.c:340-341). They pin where the opponent's pre-menu draws sit in the RNG stream (soundCensusRomReplay replay).
+                 "opponentAiSimulatedRng": [oracle.read_u8(oracle.read_u32(oracle.read_u32(oracle.symbols["gBattleResources"]) + 0x14) + 0x18 + i) for i in range(4)],
+                 # parity-mac: gLastMoves of both battlers; [0, 0] only before the first turn (the replay refuses a staging that already played one)
+                 "lastMoves": [oracle.read_u16(oracle.symbols["gLastMoves"] + 2 * i) for i in range(2)]},
+                separators=(",", ":")))
     drive_result = None
     if drive_path is not None:
         drive_result = run_drive(oracle, drive_path, frames_cap)
         segments = []
         replay_trace["segments"] = drive_result["segments"]
         if drive_out is not None:
-            drive_out.write_text(json.dumps({**request, "trace": {"segments": drive_result["segments"], "captureFrames": [0]}}, indent=1))
+            # parity-mac: the validated request of a factoryBrain staging carries the fields the lab filled in itself (battleNum 6, trainerId 1022, opponentSetIds []),
+            # and validate_request refuses them on input: drop them so the frozen request can be staged again (romStateTimeline.py).
+            frozen = {k: v for k, v in request.items() if not (request["mode"] == "factoryBrain" and k in ("battleNum", "trainerId", "opponentSetIds"))}
+            drive_out.write_text(json.dumps({**frozen, "trace": {"segments": drive_result["segments"], "captureFrames": [0]}}, indent=1))
     t_window = time.time()
     done = 0
     for seg in segments:

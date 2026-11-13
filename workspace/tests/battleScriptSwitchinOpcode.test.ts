@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { handleBattleActionFinished } from "../src/engine/battleActionFinished.ts";
 import {
   createBattleScriptRulesContext,
   createBattleScriptStatusRulesExecution,
@@ -503,6 +504,8 @@ describe("production forced-switch tail opcodes (SWITCHHANDLEORDER/GETSWITCHEDMO
     expect(rules.moveResultFlags).toBe(0);
     expect(rules.choicedMove).toEqual([70, 0, 72, 73]);
     expect(rules.aiObservedAbilityIds).toEqual([ABILITY_INTIMIDATE, 0, ABILITY_TRACE, ABILITY_DRIZZLE]);
+    // parity-mac: the same switch-in is counted for the AI history kept outside the kernel (ai-history-reentry.md).
+    expect(rules.aiHistoryClears).toEqual([0, 1, 0, 0]);
     // SwitchInClearSetData does not call ClearBattlerItemEffectHistory.
     expect(rules.aiObservedItemEffects).toEqual([10, 20, 30, 40]);
     expect(rules.moveHistory).toMatchObject({
@@ -1513,6 +1516,86 @@ describe("production forced-switch tail opcodes (SWITCHHANDLEORDER/GETSWITCHEDMO
     expect(state.rulesContext.lastUsedAbility).toBe(5);
     expect(state.rulesContext.battleTextBuff1MonNick).toEqual({ battler: 0, partyIndex: 0 });
     expect(state.rng.calls).toBe(0);
+  });
+
+  it.each([
+    ["Intimidate", ABILITY_INTIMIDATE, 1 << 19, "intimidatedMon"],
+    ["Trace", ABILITY_TRACE, 1 << 20, "traced"],
+  ] as const)(
+    "switchineffects: %s is queued once per battler slot until an action finishes (gSpecialStatuses flag, battle_util.c:2559-2581)",
+    (_name, ability, status3Bit, flag) => {
+      // docs/parity-mac/intimidate-once-per-slot.md (ROM seed 1083: an Intimidate mon replaced at end of turn, KO'd by the next
+      // turn's first action; the next Intimidate mon into that slot does not lower Attack).
+      const rc = context({
+        battlers: [
+          battler({ side: 0, species: URSARING, types: ["TYPE_NORMAL", "TYPE_NORMAL"] }),
+          battler({ side: 1, species: SUNKERN, hp: 100, types: ["TYPE_GRASS", "TYPE_GRASS"], partyIndex: 0, ability }),
+          battler({ side: 0 }),
+          battler({ side: 1 }),
+        ],
+      });
+      // First entry: the status3 bit is queued and the slot flag is raised.
+      const first = stepAtProgramCounter(SWITCHINEFFECTS_PC, rc).result;
+      if (first.kind !== "advanced") throw new Error(`expected advance, got ${first.kind}`);
+      expect(first.state.rulesContext.battlers[1].status3 & status3Bit).toBe(status3Bit);
+      expect(first.state.rulesContext.battlers[1].specialStatus[flag]).toBe(1);
+      // The queued effect ran (state 6 clears the status3 bit); the slot flag stays raised. A second mon with the same
+      // ability entering that slot now queues nothing. Unfixed: queued again.
+      const afterEffect = createBattleScriptRulesContext({
+        ...first.state.rulesContext,
+        battlers: first.state.rulesContext.battlers.map((b, index) =>
+          index === 1 ? { ...b, status3: (b.status3 & ~status3Bit) >>> 0 } : b),
+      } as never);
+      expect(afterEffect.battlers[1].specialStatus[flag]).toBe(1); // survives normalisation
+      const second = stepAtProgramCounter(SWITCHINEFFECTS_PC, afterEffect).result;
+      if (second.kind !== "advanced") throw new Error(`expected advance, got ${second.kind}`);
+      expect(second.state.rulesContext.battlers[1].status3 & status3Bit).toBe(0);
+      // SpecialStatusesClear (HandleAction_ActionFinished, battle_util.c:663) lowers the flag again.
+      const finished = handleBattleActionFinished(first.state, 0);
+      expect(finished.rulesContext.battlers[1].specialStatus[flag] ?? 0).toBe(0);
+    },
+  );
+
+  it("switchineffects: a White Herb holder that enters with a lowered stage (Baton Pass) restores it at once and the script ends there", () => {
+    // docs/parity-mac/white-herb-baton-pass.md. ItemBattleEffects(ITEMEFFECT_ON_SWITCH_IN) (battle_util.c:3305-3330) runs
+    // BattleScriptExecute(BattleScript_WhiteHerbEnd2): the running script is replaced and `end2` finishes the action.
+    // ROM (Mechanic Lab): Baton Pass hands Attack -1 to a White Herb Snorlax; stage and item are reset before the foe moves.
+    // Unfixed: the opcode advanced with the stage still lowered and the herb still held.
+    const WHITE_HERB = 180;
+    const SIDE_STATUS_SPIKES_DAMAGED = 1 << 7;
+    const rc = context({
+      battlers: [
+        battler({ side: 0, species: URSARING, types: ["TYPE_NORMAL", "TYPE_NORMAL"] }),
+        battler({
+          side: 1, species: SUNKERN, hp: 100, types: ["TYPE_GRASS", "TYPE_GRASS"], partyIndex: 0,
+          item: WHITE_HERB, statStages: [6, 5, 6, 4, 6, 6, 6, 7],
+        }),
+        battler({ side: 0 }),
+        battler({ side: 1 }),
+      ],
+      sideStatuses: [0, SIDE_STATUS_SPIKES_DAMAGED],
+    });
+    const { execution, result } = stepAtProgramCounter(SWITCHINEFFECTS_PC, rc);
+    if (result.kind !== "advanced") throw new Error(`expected a jump into the item script, got ${result.kind}`);
+    expect(result.state.programCounter).not.toBe(SWITCHINEFFECTS_PC + 1);
+    expect(result.state.rulesContext.battlers[1].statStages).toEqual([6, 6, 6, 6, 6, 6, 6, 7]);
+    // Run the item script out: it prints, removes the herb and ends the action without coming back to the opcode.
+    let state = result.state;
+    let halted = false;
+    for (let guard = 0; guard < 200 && !halted; guard += 1) {
+      const stepped = stepBattleScriptMachine(program, state, execution.handlers);
+      if (stepped.kind === "unsupported") throw new Error(`unsupported ${JSON.stringify(stepped.state.haltReason)}`);
+      halted = stepped.kind === "halted";
+      state = stepped.state;
+      for (const pending of state.scheduler.pendingControllerBattlers) state = acknowledgeBattleScriptMachineController(state, pending);
+    }
+    expect(state.haltReason).toMatchObject({ kind: "terminal", opcodeName: "B_SCR_OP_END2" });
+    const after = state.rulesContext;
+    expect(after.battlers[1].item).toBe(0);
+    expect(state.events.flatMap((event) => (event.kind === "message" ? [event.messageId] : [])))
+      .toContain("STRINGID_PKMNSITEMRESTOREDSTATUS");
+    // The opcode's tail did not run: SPIKES_DAMAGED is still set (battle_script_commands.c:5268 is inside the skipped body).
+    expect(after.sideStatuses[1] & SIDE_STATUS_SPIKES_DAMAGED).toBe(SIDE_STATUS_SPIKES_DAMAGED);
   });
 
   it.each([

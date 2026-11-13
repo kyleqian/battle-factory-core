@@ -387,6 +387,23 @@ export type FactoryRoundBattleOrchestratorConfig = Readonly<{
     /** Source challenge battle number this schedule is for (1 = battle 2). */
     battleIndex: number;
   }>;
+  /**
+   * The Frontier Brain sibling of `adoptedInitialOpponent` (the real-ROM
+   * replay seam, docs/parity-mac/brain-replay-seam.md): battle 1's opponent
+   * is a Brain party the source already rolled
+   * (`adoptFactoryBrainOpponentSchedule`), and the fresh kernel is seeded
+   * from the later battle cursor. Battle 1 must be a Brain battle by this
+   * config's own streak and symbols (`getFactoryFrontierBrainStatus`); the
+   * status, trainer id and transition are derived exactly as for a
+   * generated Brain opponent. Mutually exclusive with
+   * `adoptedInitialOpponent`.
+   */
+  adoptedInitialBrainOpponent?: Readonly<{
+    generation: FactoryBrainOpponentGenerationResult;
+    freshBattleRngValue: number;
+    /** Adapter-pinned draws before the fresh battle kernel begins. */
+    preCommandRngCalls?: number;
+  }>;
 }>;
 
 /**
@@ -760,6 +777,66 @@ function generationSegment(
   });
 }
 
+function scheduledBrainOpponent(
+  status: Exclude<FrontierBrainStatus, "not-ready">,
+  generation: FactoryBrainOpponentGenerationResult,
+  storedTrainerIds: readonly number[],
+): FactoryScheduledOpponentGeneration {
+  // GetSpecialBattleTransition's own Random() call, source-immediate after
+  // the third opponent's personality is accepted (no intervening draws --
+  // docs/brain-transition-wiring-design.md §2/§5). Precomputed here, once,
+  // and carried on the opponent rather than drawn from the ordinary path's
+  // tick-level cursor -- only `.presentation` is kept; the post-draw
+  // `.rngValue` is intentionally discarded, not folded into any cursor
+  // this orchestrator tracks (the brain battle is always the round's last,
+  // so no "next generation" ever needs it, and folding it in would wire
+  // the two independent RNG systems together, which the design forbids).
+  const { presentation: transitionPresentation } = selectFrontierTransition(
+    generation.rngValue,
+  );
+  return Object.freeze({
+    kind: "frontier-brain",
+    status,
+    trainerId: TRAINER_FRONTIER_BRAIN,
+    storedTrainerIds,
+    generation,
+    transitionPresentation,
+  });
+}
+
+/**
+ * `adoptedInitialBrainOpponent`: battle 1 must be a Brain battle by the
+ * config's own streak and symbols, and the adopted party must be the one
+ * that streak's challenge builds. Adopting a Brain party into an ordinary
+ * battle (or the other tier's party) would silently play the wrong
+ * opponent -- reject instead, as `adoptNextOpponentOrGenerate` does for
+ * the opposite mix-up.
+ */
+function adoptedBrainOpponentFor(
+  config: FactoryRoundBattleOrchestratorConfig,
+  generation: FactoryBrainOpponentGenerationResult,
+): FactoryScheduledOpponentGeneration {
+  const brainStatus = getFactoryFrontierBrainStatus({
+    battleMode: "singles",
+    winStreak: config.factoryWinStreak,
+    symbolsCount: config.factorySymbolsCount ?? 0,
+  });
+  if (brainStatus === "not-ready") {
+    return fail(
+      "adoptedInitialBrainOpponent needs a Frontier Brain battle, but win streak "
+      + `${config.factoryWinStreak} with ${config.factorySymbolsCount ?? 0} symbol(s) is an ordinary battle`,
+    );
+  }
+  const challengeNum = Math.floor(config.factoryWinStreak / 7);
+  if (generation.challengeNum !== challengeNum) {
+    return fail(
+      `adoptedInitialBrainOpponent was built for challenge ${generation.challengeNum}, `
+      + `but win streak ${config.factoryWinStreak} is challenge ${challengeNum}`,
+    );
+  }
+  return scheduledBrainOpponent(brainStatus, generation, []);
+}
+
 /**
  * Source `frontier_getbrainstatus` gate (`pre-battle-room scripts.inc:61,
  * 80-81`): checked BEFORE `factory_generateopponentmons` (`GenerateOpponentMons`,
@@ -787,26 +864,7 @@ function generateOpponentFor(
       playerRentalSetIds: savedRentalRecords.map((record) => record.setId),
       playerTrainerId: config.playerTrainerId,
     });
-    // GetSpecialBattleTransition's own Random() call, source-immediate after
-    // the third opponent's personality is accepted (no intervening draws --
-    // docs/brain-transition-wiring-design.md §2/§5). Precomputed here, once,
-    // and carried on the opponent rather than drawn from the ordinary path's
-    // tick-level cursor -- only `.presentation` is kept; the post-draw
-    // `.rngValue` is intentionally discarded, not folded into any cursor
-    // this orchestrator tracks (the brain battle is always the round's last,
-    // so no "next generation" ever needs it, and folding it in would wire
-    // the two independent RNG systems together, which the design forbids).
-    const { presentation: transitionPresentation } = selectFrontierTransition(
-      generation.rngValue,
-    );
-    return Object.freeze({
-      kind: "frontier-brain",
-      status: brainStatus,
-      trainerId: TRAINER_FRONTIER_BRAIN,
-      storedTrainerIds,
-      generation,
-      transitionPresentation,
-    });
+    return scheduledBrainOpponent(brainStatus, generation, storedTrainerIds);
   }
   const generation = generateFactoryOpponent({
     rngValue,
@@ -946,6 +1004,10 @@ export function createFactoryRoundBattleOrchestrator(
   }
 
   const adopted = config.adoptedInitialOpponent;
+  const adoptedBrain = config.adoptedInitialBrainOpponent;
+  if (adopted !== undefined && adoptedBrain !== undefined) {
+    return fail("adoptedInitialOpponent and adoptedInitialBrainOpponent are mutually exclusive");
+  }
   const firstOpponent: FactoryScheduledOpponentGeneration = adopted !== undefined
     ? Object.freeze({
       kind: "ordinary",
@@ -953,8 +1015,26 @@ export function createFactoryRoundBattleOrchestrator(
       storedTrainerIds: adopted.generation.storedTrainerIds,
       generation: adopted.generation,
     })
-    : generateOpponentFor(config, 0, rngValue, [], savedRentalRecords);
-  if (adopted === undefined) {
+    : adoptedBrain !== undefined
+      ? adoptedBrainOpponentFor(config, adoptedBrain.generation)
+      : generateOpponentFor(config, 0, rngValue, [], savedRentalRecords);
+  if (adoptedBrain !== undefined) {
+    // One construction segment per member: each has its own source cursor.
+    for (let opponentIndex = 0; opponentIndex < 3; opponentIndex += 1) {
+      const construction = adoptedBrain.generation.drawLedger.filter(
+        (draw) => draw.opponentIndex === opponentIndex,
+      );
+      rngSegments.push(generationSegment(
+        "opponent-construction",
+        0,
+        facilityRngCalls,
+        construction[0]!.rngBefore,
+        construction.at(-1)!.rngAfter,
+        construction.length,
+      ));
+      facilityRngCalls += construction.length;
+    }
+  } else if (adopted === undefined) {
     rngSegments.push(generationSegment(
       "opponent-generation",
       0,
@@ -991,7 +1071,9 @@ export function createFactoryRoundBattleOrchestrator(
     }
   }
   const opponent = generatedOpponent(firstOpponent);
-  rngValue = adopted?.freshBattleRngValue ?? firstOpponent.generation.rngValue;
+  rngValue = adopted?.freshBattleRngValue
+    ?? adoptedBrain?.freshBattleRngValue
+    ?? firstOpponent.generation.rngValue;
   const round = createGeneratedFactoryRoundController({
     id: config.id,
     playerParty: asBattleParty(playerRentalRecords),
@@ -1022,7 +1104,7 @@ export function createFactoryRoundBattleOrchestrator(
     rngSegments: Object.freeze(rngSegments),
     facilityRngCalls,
     activeBattleCallStart: null,
-    pendingBattlePreCommandRngCalls: adopted?.preCommandRngCalls ?? 0,
+    pendingBattlePreCommandRngCalls: adopted?.preCommandRngCalls ?? adoptedBrain?.preCommandRngCalls ?? 0,
     nextBattleRequestId: 1,
     usedMessageHoldFrames: 0,
     roundOutcome: null,
@@ -2235,7 +2317,8 @@ function settledCommandForResolutionHandoff(
       || boundary.displayedHp !== field.hp
       // `status1` is not itself a display identity: toxic's source-owned
       // turn counter lives in bits 8..11 of gBattleMons.status1, advances at
-      // end turn, and is synced into the party record despite remaining absent
+      // end turn on the battler only (battle_util.c:1542-1543; the party
+      // record keeps the word written at infliction) and is absent
       // from the healthbox icon. Compare the controller-committed icon
       // semantics while retaining the fatal check for a genuinely stale icon.
       || battleCommandUiStatusFromStatus1(boundary.displayedStatus1)

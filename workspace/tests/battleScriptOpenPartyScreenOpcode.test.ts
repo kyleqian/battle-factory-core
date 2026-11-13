@@ -260,6 +260,37 @@ describe("production openpartyscreen (Cmd_openpartyscreen) dispatch, BS_FAINTED 
       expect(result.state.rng.calls).toBe(0);
     });
 
+    it("pass 1 sees the opposing battler's ability: Earthquake into a Levitate WEEZING is not super effective (ROM seed 284 sends WHISCASH, party index 2)", () => {
+      // docs/parity-mac/opponent-replacement-pass1.md. QUAGSIRE 195 (Earthquake / Sludge Bomb / Double-Edge / Curse),
+      // WHISCASH 324 (Sleep Talk / Rest / Surf / Fissure); the fainted RAPIDASH's last-seen gCurrentMove is Thunderbolt.
+      const bench = (): BattleScriptPartyMemberInput[] => [
+        { species: 78, hp: 0, moves: [TACKLE, 0, 0, 0] },
+        { species: 195, hp: 165, moves: [89, 188, 38, 174] },
+        { species: 324, hp: 180, moves: [214, 156, 57, 90] },
+        EMPTY_SLOT,
+        EMPTY_SLOT,
+        EMPTY_SLOT,
+      ];
+      const stage = (ability: number) => context({
+        battlers: [
+          battler({ side: 0, species: 110, ability, types: ["TYPE_POISON", "TYPE_POISON"] }),
+          battler({ side: 1, species: 78, hp: 0, types: ["TYPE_FIRE", "TYPE_FIRE"], partyIndex: 0 }),
+          battler({ side: 0 }),
+          battler({ side: 1 }),
+        ],
+        currentMove: 85,
+        party: { player: [EMPTY_SLOT, EMPTY_SLOT, EMPTY_SLOT, EMPTY_SLOT, EMPTY_SLOT, EMPTY_SLOT], opponent: bench() },
+      });
+      const levitate = stepAtProgramCounter(OPEN_PARTY_SCREEN_PC, stage(26)).result;
+      if (levitate.kind !== "advanced") throw new Error(`expected advanced, got ${levitate.kind}`);
+      expect(levitate.state.rulesContext.monToSwitchIntoId[1]).toBe(2);
+      expect(levitate.state.rng.calls).toBe(0);
+      // Control: without Levitate the same bench resolves in pass 1 on QUAGSIRE's Earthquake.
+      const grounded = stepAtProgramCounter(OPEN_PARTY_SCREEN_PC, stage(0)).result;
+      if (grounded.kind !== "advanced") throw new Error(`expected advanced, got ${grounded.kind}`);
+      expect(grounded.state.rulesContext.monToSwitchIntoId[1]).toBe(1);
+    });
+
     it("doubles topology: not modeled (Factory singles only)", () => {
       const rc = context({
         battlers: [

@@ -296,6 +296,89 @@ describe("live Factory AI rules adapter (Gate-5 rung 6)", () => {
     expect(result.transition.state.rng).toEqual(result.rng);
   });
 
+  // docs/parity-mac/encore-struggle-selection.md. battle_main.c:4184-4197: AreAllMovesUnusable() and encoredMove != 0
+  // both leave action selection without BtlController_EmitChooseMove, so OpponentHandleChooseMove
+  // (battle_controller_opponent.c:1551-1567) never runs. AI_TrySwitchOrUseItem (:1540) still does.
+  for (const forced of [
+    { name: "forced Struggle (all PP 0)", changes: { pp: [0, 0, 0, 0] as const } },
+    { name: "Encore", changes: { encoreTimer: 3, encoredMove: BODY_SLAM, encoredMovePos: 0, encoreTimerStartValue: 3 } },
+  ]) {
+    it(`${forced.name}: the switch precheck runs, the move chooser does not (0 chooser draws)`, () => {
+      const base = liveRules(0, 0, {}, {
+        trainerMoves: [BODY_SLAM, SURF, ROCK_SLIDE, THUNDERBOLT],
+        opponentBench: [{ species: 132, moves: [BODY_SLAM, 0, 0, 0] }],
+      });
+      const rulesContext = createBattleScriptRulesContext({
+        ...base,
+        battlers: base.battlers.map((b, index) => index === 1 ? { ...b, ...forced.changes } : b),
+      } as never);
+      const forcedRequest = createBattleCommandRequest({
+        ...request,
+        legalDecisions: [{ kind: "use-move", moveSlot: 0, targetBattler: 0 }, { kind: "switch", partyIndex: 1 }],
+      });
+      const result = submitLiveFactoryAiDecision(
+        createBattleState({ rules: { rulesContext } as FactoryAiLiveRules, rngSeed: 919694434, request: forcedRequest }),
+        createFactoryAiBattleHistory(rulesContext),
+        { factoryWinStreak: 28, trainerOpponentId: 222 },
+        terminalReducer(),
+      );
+      // Unfixed: phase "move" with the scored chooser's draws appended.
+      expect(result.phase).toBe("forced-move");
+      expect(result.submission.decision).toEqual({ kind: "use-move", moveSlot: 0, targetBattler: 0 });
+      expect(result.rng).toEqual(result.switchPolicy.rng);
+      expect(result.rng.calls).toBe(result.switchPolicy.draws.length);
+      expect(result.transition.state.rng).toEqual(result.rng);
+    });
+  }
+
+  // docs/parity-mac/ai-scripts-unusable-slots.md. BattleAI_DoAIProcessing (battle_ai_script_commands.c:582-589) blanks
+  // moveConsidered only for a 0-PP slot; a slot masked by CheckMoveLimitations for another reason (Choice lock, Disable, Taunt,
+  // Torment) is still scripted. ROM seed 95: Choice Band Absol, 2 get_ability draws on each of the two locked-out slots.
+  it("scripts every slot that still has PP, even when only one is selectable; a 0-PP slot is not scripted", () => {
+    const rulesContext = liveRules(0, 0, {}, {
+      opponentBench: [{ species: 132, moves: [BODY_SLAM, 0, 0, 0] }],
+    });
+    const challenge = { factoryWinStreak: 28, trainerOpponentId: 222 };
+    const drive = (context: BattleScriptRulesContext, legalSlots: readonly (0 | 1 | 2 | 3)[]) => {
+      const result = submitLiveFactoryAiDecision(
+        createBattleState({
+          rules: { rulesContext: context } as FactoryAiLiveRules,
+          rngSeed: 919694434,
+          request: createBattleCommandRequest({
+            ...request,
+            legalDecisions: [
+              ...legalSlots.map((moveSlot) => ({ kind: "use-move" as const, moveSlot, targetBattler: 0 as const })),
+              { kind: "switch" as const, partyIndex: 1 as const },
+            ],
+          }),
+        }),
+        createFactoryAiBattleHistory(context),
+        challenge,
+        terminalReducer(),
+      );
+      if (result.phase !== "move" || result.trace.mask === 0) throw new Error("expected a scored move phase");
+      return result;
+    };
+
+    const scripted = (result: ReturnType<typeof drive>) =>
+      result.trace.slotScores.map((slot) => "checkBadMoveDelta" in slot && slot.checkBadMoveDelta !== null);
+    const allSelectable = drive(rulesContext, [0, 1, 2, 3]);
+    const locked = drive(rulesContext, [2]);
+    // Same scripts on the same four slots, so the same draws; only the pool differs. Unfixed: the locked run draws fewer.
+    expect(locked.trace.draws).toEqual(allSelectable.trace.draws);
+    expect(scripted(locked)).toEqual([true, true, true, true]);
+    expect(locked.trace.bestMoveSlots).toEqual([2]);
+    expect(locked.submission.decision).toEqual({ kind: "use-move", moveSlot: 2, targetBattler: 0 });
+
+    const emptySlot = createBattleScriptRulesContext({
+      ...rulesContext,
+      battlers: rulesContext.battlers.map((b, index) => index === 1 ? { ...b, pp: [10, 0, 10, 10] } : b),
+    } as never);
+    const withEmpty = drive(emptySlot, [0, 2, 3]);
+    expect(scripted(withEmpty)).toEqual([true, false, true, true]);
+    expect(withEmpty.trace.draws.every((draw) => !("moveSlot" in draw) || draw.kind === "setup-simulated-rng" || draw.moveSlot !== 1)).toBe(true);
+  });
+
   it("preserves the 13-draw all-Surf scoring carrier after the failed precheck prefix", () => {
     const rulesContext = liveRules(0, 0, {}, {
       trainerMoves: [SURF, SURF, SURF, SURF],
@@ -359,6 +442,7 @@ describe("live Factory AI rules adapter (Gate-5 rung 6)", () => {
         hp: 135,
         maxHp: 135,
         usablePartyMons: 0, // no party staged: nothing usable (aip262)
+        movePp: [10, 10, 10, 10], // parity-mac: which slots the scoring scripts run on (pp != 0)
         ability: "ABILITY_NONE",
         battleTurnCount: 7,
         lightScreenUp: false,
@@ -448,6 +532,18 @@ describe("live Factory AI rules adapter (Gate-5 rung 6)", () => {
     });
   });
 
+  it("the AI's turn count is the rules context's battleTurnCounter (get_turn_count, battle_ai_script_commands.c:1111)", () => {
+    // docs/parity-mac/ai-turn-counter.md (audit lead A5). The live caller passes no `battleTurnCount`; the view used to
+    // default to 0 for the whole battle, so AI_CV_SwaggerHasPsychUp kept its turn-0 bonus (+5, C +3 from turn 1) and
+    // AI_CV_Conversion never reached its roll. Unfixed: 0 on the second line.
+    const rulesContext = liveRules();
+    const history = createFactoryAiBattleHistory(rulesContext);
+    const challenge = { factoryWinStreak: 28, trainerOpponentId: 222 };
+    expect(createFactoryAiViewFromLiveRules({ rulesContext, history, challenge }).attacker.battleTurnCount).toBe(0);
+    const later = Object.freeze({ ...rulesContext, battleTurnCounter: 3 });
+    expect(createFactoryAiViewFromLiveRules({ rulesContext: later, history, challenge }).attacker.battleTurnCount).toBe(3);
+  });
+
   it("accumulates target moves, persists observed facts, and clears move/ability history on switch", () => {
     const initialRules = liveRules(70);
     let history = syncFactoryAiBattleHistory(
@@ -466,6 +562,28 @@ describe("live Factory AI rules adapter (Gate-5 rung 6)", () => {
     expect(history.knownAbilities[0]).toBeNull();
     // Source switch/faint setup clears move+ability history, not itemEffects.
     expect(history.knownItemEffects[0]).toBe(29);
+  });
+
+  it("forgets a Pokemon that left and came back between two AI decisions (same party index, slot re-entered)", () => {
+    // docs/parity-mac/ai-history-reentry.md. SwitchInClearSetData clears the move and ability history on every switch-in
+    // (battle_main.c:3260-3261). The history is synced only at an AI decision; while the AI is locked into a multi-turn
+    // move the player can switch A -> B -> A, and the party index is the same again. Unfixed: both facts were kept.
+    const initialRules = liveRules(70);
+    let history = syncFactoryAiBattleHistory(createFactoryAiBattleHistory(initialRules), initialRules);
+    history = recordFactoryAiKnownAbility(history, 0, "ABILITY_ROCK_HEAD");
+    history = recordFactoryAiKnownItemEffect(history, 0, 29);
+    expect(history.usedMoves[0]).toEqual([70]);
+    // Two switch-ins of slot 0 later the same Pokemon is back and has not moved yet (gLastMoves 0).
+    const reentered = Object.freeze({ ...liveRules(0), aiHistoryClears: Object.freeze([2, 0, 0, 0]) }) as ReturnType<typeof liveRules>;
+    history = syncFactoryAiBattleHistory(history, reentered);
+    expect(history.usedMoves[0]).toEqual([]);
+    expect(history.knownAbilities[0]).toBeNull();
+    expect(history.knownItemEffects[0]).toBe(29); // item-effect history is not cleared by a switch-in
+    // No further re-entry: nothing is cleared again.
+    history = recordFactoryAiKnownAbility(history, 0, "ABILITY_ROCK_HEAD");
+    history = syncFactoryAiBattleHistory(history, Object.freeze({ ...liveRules(89), aiHistoryClears: Object.freeze([2, 0, 0, 0]) }) as ReturnType<typeof liveRules>);
+    expect(history.usedMoves[0]).toEqual([89]);
+    expect(history.knownAbilities[0]).toBe("ABILITY_ROCK_HEAD");
   });
 
   it("sync consumes production reveal handoffs and projects known ability/item facts into the trainer view", () => {

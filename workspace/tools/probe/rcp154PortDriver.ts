@@ -69,6 +69,10 @@ export type PortRun = Readonly<{
  * `anySlot` (the trainer: every rcp154 card gives it four copies of one
  * move, so the ROM AI's slot is a random pick among identical moves) an
  * unusable slot -- e.g. out of PP -- falls back to the first legal use-move.
+ * A request with exactly ONE legal use-move is a forced turn (Encore / forced
+ * Struggle: the ROM asks the action but no move, battle_main.c:4184-4197), so
+ * the plan's slot for that turn is not a real choice and the forced move is
+ * taken (docs/parity-mac/encore-struggle-selection.md).
  */
 function legalMove(
   legal: readonly BattleCommandDecision[],
@@ -79,7 +83,9 @@ function legalMove(
   const moves = legal.filter((decision) => decision.kind === "use-move" && decision.moveSlot === moveSlot);
   const chosen = moves.find((decision) => decision.kind === "use-move" && decision.targetBattler === targetBattler)
     ?? moves[0]
-    ?? (anySlot ? legal.find((decision) => decision.kind === "use-move") : undefined);
+    ?? (anySlot || legal.filter((decision) => decision.kind === "use-move").length === 1
+      ? legal.find((decision) => decision.kind === "use-move")
+      : undefined);
   if (!chosen) throw new Error(`no legal use-move for slot ${moveSlot}: ${JSON.stringify(legal)}`);
   return chosen;
 }

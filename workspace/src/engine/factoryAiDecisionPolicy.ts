@@ -630,6 +630,17 @@ export type FactoryAiScoredBattlerView = Readonly<{
    * hand-built views, defaulting to the CBM layer's zero-member default.
    */
   usablePartyMons?: number;
+  /**
+   * `gBattleMons[gBattlerAttacker].pp[0..3]` (AI_USER only). `BattleAI_DoAIProcessing`
+   * (`battle_ai_script_commands.c:582-589`) blanks `moveConsidered` ONLY when the
+   * slot's PP is 0; a slot that `CheckMoveLimitations` masks for any other
+   * reason (Choice Band lock, Disable, Taunt, Torment, Imprison) keeps its
+   * move, so every scoring script still runs on it and spends its draws
+   * (`BattleAI_SetupAIData`, `:333-341`, only zeroes its starting score).
+   * The live driver fills it; hand-built views may omit it, which keeps the
+   * older "scripts run on legal slots only" reading.
+   */
+  movePp?: readonly [number, number, number, number];
   /** `gBattleMons[].status2 & STATUS2_SUBSTITUTE` -- `AI_CBM_Substitute`'s own first gate (attacker's own copy only). Optional, defaulting to `false`. */
   hasSubstitute?: boolean;
   /** `gDisableStructs[].disabledMove != MOVE_NONE` (any move disabled) -- `AI_CBM_Disable`'s single gate (target only, EFFECT_DISABLE). Optional, defaulting to `false`. */
@@ -1096,6 +1107,8 @@ export function chooseFactoryAiScoredDecision(input: Readonly<{
     moveSlot: BattleMoveSlot;
     moveId: number;
     legal: boolean;
+    /** `moveConsidered != MOVE_NONE`: the scoring scripts run on this slot (see `movePp`). */
+    considered: boolean;
     checkBadMoveDelta: number | null;
     tryToFaintDelta: number | null;
     checkViabilityDelta: number | null;
@@ -1107,18 +1120,24 @@ export function chooseFactoryAiScoredDecision(input: Readonly<{
       moveSlot,
       moveId: view.moves[moveSlot],
       legal: legalBySlot.has(moveSlot),
+      considered: view.attacker.movePp === undefined
+        ? legalBySlot.has(moveSlot)
+        : view.moves[moveSlot] !== 0 && view.attacker.movePp[moveSlot] !== 0,
       checkBadMoveDelta: null,
       tryToFaintDelta: null,
       checkViabilityDelta: null,
     });
   }
 
-  // Pass 1: AI_CheckBadMove, movesetIndex 0..3 (always -- mask 1 or 7). An
-  // illegal slot's `moveConsidered` is 0 in the real ROM (BattleAI_DoAIProcessing,
+  // Pass 1: AI_CheckBadMove, movesetIndex 0..3 (always -- mask 1 or 7). A
+  // 0-PP slot's `moveConsidered` is 0 in the real ROM (BattleAI_DoAIProcessing,
   // `:591-598`), which runs no AI command at all for that slot in any logic
   // ID -- `funcResult` stays untouched, matching this port's own `continue`.
+  // A slot that is unusable for another reason (Choice lock, Disable, Taunt,
+  // Torment, Imprison) IS scripted: its draws are spent and its funcResult
+  // writes carry, only its starting score is 0 (docs/parity-mac/ai-scripts-unusable-slots.md).
   for (const slotAcc of slotAccumulators) {
-    if (!slotAcc.legal) continue;
+    if (!slotAcc.considered) continue;
     const cbm = runCheckBadMovePreamble({
       rng,
       moveId: slotAcc.moveId,
@@ -1152,7 +1171,7 @@ export function chooseFactoryAiScoredDecision(input: Readonly<{
   if (mask === 7) {
     // Pass 2: AI_TryToFaint, movesetIndex 0..3.
     for (const slotAcc of slotAccumulators) {
-      if (!slotAcc.legal) continue;
+      if (!slotAcc.considered) continue;
       const ttf = runTryToFaint({
         rng,
         moveId: slotAcc.moveId,
@@ -1189,7 +1208,7 @@ export function chooseFactoryAiScoredDecision(input: Readonly<{
     // writes-conditionally handler does either, per its own audited branch.
     let cvFuncResult: AiWeatherValue | undefined = ttfExitFuncResult;
     for (const slotAcc of slotAccumulators) {
-      if (!slotAcc.legal) continue;
+      if (!slotAcc.considered) continue;
       const staleFuncResultFallback = cvFuncResult;
       const cv = runCheckViability({
         rng,
@@ -1242,6 +1261,12 @@ export function chooseFactoryAiScoredDecision(input: Readonly<{
           accStage: view.target.statStages.acc,
           atkStage: view.target.statStages.atk,
           defStage: view.target.statStages.def,
+          // docs/parity-mac/ai-cv-target-ability-spatk.md (audit leads A6, A7): both were only on the ATTACKER literal, so the
+          // handlers' target reads fell to their defaults. `spAtkStage`: AI_CV_PsychUp / the phazing script test the TARGET's
+          // SPATK stage (data/battle_ai_scripts.s:1293, :2089). `ability`: Cmd_get_ability AI_TARGET returns the real ability
+          // without a guess for Shadow Tag / Magnet Pull / Arena Trap (battle_ai_script_commands.c, the trapper branch).
+          spAtkStage: view.target.statStages.spAtk,
+          ability: view.target.ability,
           spDefStage: view.target.statStages.spDef,
           hp: view.target.hp,
           maxHp: view.target.maxHp,
@@ -1290,14 +1315,17 @@ export function chooseFactoryAiScoredDecision(input: Readonly<{
 
   const slotScores: FactoryAiScoredSlot[] = slotAccumulators.map((slotAcc) => {
     if (!slotAcc.legal) {
+      // An unusable slot starts at 0 (BattleAI_SetupAIData). When it was
+      // scripted its deltas are kept in the trace; it never joins the tie
+      // pool below (from 0 it cannot reach a usable slot's score).
       return Object.freeze({
         moveSlot: slotAcc.moveSlot,
         moveId: slotAcc.moveId,
         legal: false,
         initialScore: DEFAULT_MOVE_SCORE,
-        checkBadMoveDelta: null,
-        tryToFaintDelta: null,
-        checkViabilityDelta: null,
+        checkBadMoveDelta: slotAcc.checkBadMoveDelta,
+        tryToFaintDelta: slotAcc.tryToFaintDelta,
+        checkViabilityDelta: slotAcc.checkViabilityDelta,
         finalScore: 0,
       });
     }

@@ -170,7 +170,10 @@ function anchors(seed: number): { anchors: Anchor[]; unanchored: number; offAnim
 // the frozen turn (none in 0..99; their constants are checked against the ROM receipts below and by the census delta).
 // Seed 49 (thr153): ISSUES #141a's THRASH lock-in re-run moved census battles 18 / 76 off their player BRN route; 49 carries
 // BRN|inflicted|player and BRN|STRINGID_PKMNHURTBYBURN|player (first such seed in 0..79 not moved by the fix).
-const SEEDS = [7, 11, 12, 18, 19, 20, 49, 60, 76, 87];
+// Seed 101 (parity-mac, docs/parity-mac/STATUS.md "Re-pins"): the lane's battle-rule fixes moved the listed battles off their opponent
+// BRN route; 101 carries BRN|inflicted|opponent. (Battle 32 is the only such seed in 0..99, and it trips this test's ON - OFF row
+// check on an unrelated CONFUSION anchor, 139 vs 100: a presentation lead, not looked at here.)
+const SEEDS = [7, 11, 12, 18, 19, 20, 49, 60, 76, 87, 101];
 
 describe("sa125: the ROM receipts (sta123 rom-r1.json, 18 scenarios both sides)", () => {
   const all = Object.entries(ROM).flatMap(([stem, s]) => s.on.statusAnimations.map((a) => ({ stem, side: s.attackerSide, ...a })));

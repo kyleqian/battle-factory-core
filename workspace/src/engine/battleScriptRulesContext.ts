@@ -207,6 +207,15 @@ export type BattleScriptSpecialStatus = Readonly<{
   specialDmg: number;
   /** Source s32 gSpecialStatuses[battler].shellBellDmg. */
   shellBellDmg: number;
+  /**
+   * Source `gSpecialStatuses[battler].intimidatedMon` / `.traced`
+   * (`battle_util.c:2559-2581`): set when a switch-in queues Intimidate /
+   * Trace for this battler SLOT, tested before queuing again, and cleared
+   * with the rest of the struct by `SpecialStatusesClear`
+   * (`HandleAction_ActionFinished`, `battle_util.c:663`). Absent = 0.
+   */
+  intimidatedMon?: 0 | 1;
+  traced?: 0 | 1;
 }>;
 
 /** Modeled struct SideTimer fields, including Follow Me's timer/target (include/battle.h:149-174) -- see the field comment on BattleScriptRulesContext.sideTimers. */
@@ -481,6 +490,8 @@ export type BattleScriptRulesBattler = BattleScriptRulesBattlerBase & Readonly<{
     physicalDmg?: number;
     specialDmg?: number;
     shellBellDmg?: number;
+    intimidatedMon?: 0 | 1;
+    traced?: 0 | 1;
   }>;
   chargingTurn?: 0 | 1;
   /** ProtectStruct bits read by WasUnableToUseMove but not by admission yet. */
@@ -690,6 +701,13 @@ export type BattleScriptRulesContext = Readonly<
     aiObservedAbilityIds: BattleScriptMoveEndBytes;
     /** BattleHistory reveal handoff populated only at source RecordItemEffectBattle-equivalent activation sites. */
     aiObservedItemEffects: BattleScriptMoveEndBytes;
+    /**
+     * Per battler slot, how many times SwitchInClearSetData ran ClearBattlerMoveHistory / ClearBattlerAbilityHistory
+     * (battle_main.c:3260-3261), modulo 256. The AI history lives outside the kernel and is synced only at an AI
+     * decision; a slot that changed and changed back between two decisions (the AI was move-locked) shows the same
+     * party index, so the sync compares this count as well (docs/parity-mac/ai-history-reentry.md).
+     */
+    aiHistoryClears: BattleScriptMoveEndBytes;
     /** Source u16 gPaydayMoney. */
     paydayMoney: number;
     /** Source u8 gBattleStruct->moneyMultiplier. */
@@ -825,6 +843,12 @@ export type BattleScriptRulesContext = Readonly<
      * reads the stored value without advancing RNG.
      */
     randomTurnNumber: number;
+    /**
+     * Source u8 gBattleResults.battleTurnCounter: 0 at battle start, +1 (capped at 0xFF) each time BattleTurnPassed
+     * reaches its tail with the battle still on (battle_main.c:3995-3999). The AI's `get_turn_count` reads it
+     * (battle_ai_script_commands.c:1111).
+     */
+    battleTurnCounter: number;
     /** Source u8 gWishFutureKnock.weatherDuration -- the one shared weather timer every Cmd_set<weather> writes (include/battle.h:172, byte offset 0x28). */
     weatherTimer: number;
     /** Source gWishFutureKnock.wishCounter[MAX_BATTLERS_COUNT], owned by positional battler slots. */
@@ -951,6 +975,7 @@ export type BattleScriptRulesContextInput = Readonly<{
   lastUsedItem?: number;
   aiObservedAbilityIds?: readonly number[];
   aiObservedItemEffects?: readonly number[];
+  aiHistoryClears?: readonly number[];
   paydayMoney?: number;
   moneyMultiplier?: number;
   playerMoney?: number;
@@ -1029,6 +1054,7 @@ export type BattleScriptRulesContextInput = Readonly<{
   sideTimers?: readonly [BattleScriptSideTimerInput?, BattleScriptSideTimerInput?];
   weather?: number;
   randomTurnNumber?: number;
+  battleTurnCounter?: number;
   weatherTimer?: number;
   wishCounter?: readonly number[];
   wishMonId?: readonly number[];
@@ -1140,6 +1166,8 @@ function createBattleScriptSpecialStatus(
       value?.shellBellDmg ?? 0,
       `battlers[${battler}].specialStatus.shellBellDmg`,
     ),
+    ...(value?.intimidatedMon === 1 ? { intimidatedMon: 1 as const } : {}),
+    ...(value?.traced === 1 ? { traced: 1 as const } : {}),
   });
 }
 
@@ -2632,6 +2660,11 @@ export function createBattleScriptRulesContext(
     0xff,
     "aiObservedItemEffects",
   ) as BattleScriptMoveEndBytes;
+  const aiHistoryClears = createMoveEndArray(
+    input.aiHistoryClears,
+    0xff,
+    "aiHistoryClears",
+  ) as BattleScriptMoveEndBytes;
   const battleTopology = createBattleScriptBattleTopology(input.battleTopology);
   const party = createBattleScriptPartyBySide(input.party);
   return Object.freeze({
@@ -2666,6 +2699,7 @@ export function createBattleScriptRulesContext(
     lastUsedItem: requireUnsigned(input.lastUsedItem ?? 0, 0xffff, "lastUsedItem"),
     aiObservedAbilityIds,
     aiObservedItemEffects,
+    aiHistoryClears,
     paydayMoney: requireUnsigned(input.paydayMoney ?? 0, 0xffff, "paydayMoney"),
     moneyMultiplier: requireUnsigned(input.moneyMultiplier ?? 1, 0xff, "moneyMultiplier"),
     playerMoney: requireUnsigned(input.playerMoney ?? 0, 999_999, "playerMoney"),
@@ -2777,6 +2811,7 @@ export function createBattleScriptRulesContext(
     ]) as unknown as readonly [BattleScriptSideTimerState, BattleScriptSideTimerState],
     weather: requireUnsigned(input.weather ?? 0, 0xffff_ffff, "weather") >>> 0,
     randomTurnNumber: requireUnsigned(input.randomTurnNumber ?? 0xffff, 0xffff, "randomTurnNumber"),
+    battleTurnCounter: requireUnsigned(input.battleTurnCounter ?? 0, 0xff, "battleTurnCounter"),
     weatherTimer: requireUnsigned(input.weatherTimer ?? 0, 0xff, "weatherTimer"),
     wishCounter: Object.freeze([
       requireUnsigned(input.wishCounter?.[0] ?? 0, 0xff, "wishCounter[0]"),

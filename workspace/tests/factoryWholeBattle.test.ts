@@ -223,7 +223,11 @@ describe("fresh Factory whole-battle integration (Gate-5 rungs 4/6)", () => {
     // point is that every trainer command comes from the live Factory AI on one
     // uninterrupted cursor -- which the assertions below still pin. Every value
     // is regenerated from the union engine.
-    expect(state.boundary).toEqual({ kind: "terminal", outcome: "trainer-win" });
+    // Re-pinned 2026-11-12 (parity-mac, docs/parity-mac/STATUS.md "Re-pins"): the AI fixes of that lane (scripts run on
+    // every slot with PP, try-to-faint ends at -1, speed-tie draw order, replacement pass 1) change this self-authored
+    // battle's AI draw counts from the third decision on, and the run ends in a PLAYER win again (Hariyama survives at 38).
+    // Still no oracle receipt; the point pinned here is unchanged: one uninterrupted cursor under the live AI.
+    expect(state.boundary).toEqual({ kind: "terminal", outcome: "player-win" });
     if (state.boundary.kind !== "terminal") throw new Error("expected terminal boundary");
     expect(forcedSwitches).toBe(2);
     expect(aiChosenSubmissions).toHaveLength(8);
@@ -234,11 +238,11 @@ describe("fresh Factory whole-battle integration (Gate-5 rungs 4/6)", () => {
         .toBeGreaterThanOrEqual(aiDecisionDrawRanges[decision - 1]![1]);
     }
     expect(sawNonterminalOpponentFaint).toBe(true);
-    // The player still KOs Granbull and leaves Hariyama at 14 before falling.
+    // The player KOs all three opponents and keeps its last member at 38.
     expect(state.rules.rulesContext.party.opponent.slice(0, 3).map((member) => member.hp))
-      .toEqual([0, 14, 177]);
-    expect(state.rules.rulesContext.party.player.slice(0, 3).map((member) => member.hp))
       .toEqual([0, 0, 0]);
+    expect(state.rules.rulesContext.party.player.slice(0, 3).map((member) => member.hp))
+      .toEqual([0, 0, 38]);
     // Draws A/B, every AI policy ledger, hit chains, forced-switch tail, and
     // continuing-turn boundary draws share one cursor. Repeated entries are
     // player/forced-switch submissions (zero draws); no transition resets or
@@ -256,7 +260,8 @@ describe("fresh Factory whole-battle integration (Gate-5 rungs 4/6)", () => {
     expect(cursorCheckpoints).toEqual([
       // [0..4] byte-identical to the pre-union stream; [5] is where
       // ENDTURN_ORDER's tie draw first lands (23 -> 24).
-      2, 2, 11, 12, 12, 24, 24, 46, 46, 72, 72, 94, 95, 95, 106, 106, 119, 119, 130,
+      // 2026-11-12 parity-mac re-pin: was 2, 2, 11, 12, 12, 24, 24, 46, 46, 72, 72, 94, 95, 95, 106, 106, 119, 119, 130.
+      2, 2, 11, 12, 12, 30, 30, 50, 50, 75, 75, 98, 98, 119, 120, 120, 136, 136, 145,
     ]);
 
     const resolution = deriveBattleResolutionFromTerminalBoundary({
@@ -267,10 +272,10 @@ describe("fresh Factory whole-battle integration (Gate-5 rungs 4/6)", () => {
       preBattleOpponentParty,
     });
     expect(resolution).toMatchObject({
-      outcome: "loss",
-      rngValue: expectedRngValue(130),
+      outcome: "win",
+      rngValue: expectedRngValue(145),
     });
-    expect(resolution.playerParty.map((member) => member.hp)).toEqual([0, 0, 0]);
-    expect(resolution.opponentParty.map((member) => member.hp)).toEqual([0, 14, 177]);
+    expect(resolution.playerParty.map((member) => member.hp)).toEqual([0, 0, 38]);
+    expect(resolution.opponentParty.map((member) => member.hp)).toEqual([0, 0, 0]);
   });
 });

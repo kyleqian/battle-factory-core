@@ -255,10 +255,14 @@ describe("ISSUES #138 -- Encore vs AreAllMovesUnusable ordering (live ROM receip
   });
 
   it("control arm: the kernel's own turn 3 spends TACKLE's PP and takes no recoil, as the ROM does", () => {
-    const { trainerAutoConfirmed, resolved } = runReceiptTurnThree(CONTROL_ARM);
-    // No slot is masked, so `battle_main.c:4192` auto-confirms the encored
-    // move without exposing a trainer command at all.
-    expect(trainerAutoConfirmed).toBe(true);
+    const { trainerAutoConfirmed, trainerDecisions, resolved } = runReceiptTurnThree(CONTROL_ARM);
+    // No slot is masked, so `battle_main.c:4192` fixes the MOVE to the encored
+    // one. The ACTION is still asked (`:4166-4170` ChooseAction ->
+    // AI_TrySwitchOrUseItem), so the trainer command is collected and lists
+    // exactly the encored slot (docs/parity-mac/encore-struggle-selection.md).
+    expect(trainerAutoConfirmed).toBe(false);
+    expect(trainerDecisions).toHaveLength(1);
+    expect(trainerDecisions![0]).toMatchObject({ kind: "use-move", moveSlot: 0 });
     const after = resolved.state.rules.rulesContext;
     expect(after.battlers[1].pp).toEqual([33, 34, 35, 35]);
     expect(after.battlers[1].hp).toBe(CONTROL_ARM.trainerHp);

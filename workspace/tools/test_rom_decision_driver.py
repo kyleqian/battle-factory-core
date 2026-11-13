@@ -98,6 +98,22 @@ class RomDriverTest(unittest.TestCase):
         d.advanced()
         self.assertEqual(d.step(obs("action", action=0)), ["A"])
 
+    def test_a_forced_move_decision_is_consumed_at_the_action_menu(self):
+        # parity-mac: forced Struggle / Encore turns open no move menu on the ROM (battle_main.c:4184-4197)
+        d = rd.RomDriver([{"kind": "move", "slot": 2, "forced": True}, {"kind": "move", "slot": 1}], FUNCS)
+        self.assertEqual(run(d, [obs("action", action=0), obs("action", action=0)]), [["A"], []])
+        self.assertEqual(d.index, 1)
+        self.assertEqual(d.anchors, [{"index": 0, "kind": "move", "menuOpenFrame": 0, "commitFrame": 1}])
+        # the action handler is still installed on the commit frames: no second decision is consumed there
+        self.assertEqual(d.step(obs("action", action=0)), [])
+        self.assertEqual(d.index, 1)
+        d.advanced()
+        d.step(obs("other"))
+        d.advanced()
+        # the next turn's action menu, then its move menu, take decision 1 as usual
+        self.assertEqual(run(d, [obs("action", action=0), obs("action", action=0), obs("move", move=1)])[-1], ["A"])
+        self.assertTrue(d.done())
+
     def test_move_menu_navigates_the_2x2_grid_and_records_the_anchor(self):
         d = rd.RomDriver([{"kind": "move", "slot": 3}], FUNCS)
         frames = [obs("move", move=0), obs("move", move=0), obs("move", move=1), obs("move", move=1), obs("move", move=3)]
@@ -144,6 +160,21 @@ class RomDriverTest(unittest.TestCase):
     def test_outcome_stops_the_driver(self):
         d = rd.RomDriver([{"kind": "move", "slot": 0}], FUNCS)
         self.assertIsNone(d.step(obs("move", outcome=2)))
+
+    def test_after_the_outcome_the_drive_runs_on_until_the_end_turn_handler(self):
+        # parity-mac: the deciding turn is still running when gBattleOutcome is set (ROM seed 1181: a pending Future Sight rolls after it)
+        funcs = {**FUNCS, "HandleEndTurn_BattleWon": 0x7000, "HandleEndTurn_BattleLost": 0x7100}
+        d = rd.RomDriver([], funcs)
+        running = {**obs("other", outcome=1), "mainFunc": 0x5001}
+        out = []
+        for _ in range(20):
+            out.append(d.step(running))
+            d.advanced()
+        self.assertNotIn(None, out)  # still driving
+        self.assertIn(["A"], out)  # and pulsing A for the remaining messages
+        self.assertIsNone(d.step({**obs("other", outcome=1), "mainFunc": 0x7001}))  # Thumb bit masked: the handler started
+        # an observation without mainFunc (older probes) keeps the old behaviour
+        self.assertIsNone(rd.RomDriver([], funcs).step(obs("other", outcome=1)))
 
     def test_unplanned_menus_raise(self):
         with self.assertRaises(rd.DriverError) as cm:
