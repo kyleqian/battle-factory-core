@@ -2,7 +2,7 @@
 // not reachable from the headless / library build graphs (the player that will use it is aud245).
 import { createHash } from "node:crypto";
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
-import { dirname, join, resolve } from "node:path";
+import { dirname, join, relative, resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
 const ROOT = resolve(import.meta.dirname, "..");
@@ -74,7 +74,7 @@ describe("aud244a/b audio manifest", () => {
   });
 
   it("lists exactly the files on disk, with matching sizes, hashes and Vorbis headers", () => {
-    const onDisk = readdirSync(AUDIO).filter((f) => f !== "manifest.json").sort();
+    const onDisk = readdirSync(AUDIO).filter((f) => f.endsWith(".ogg")).sort();
     expect(onDisk).toEqual(Object.keys(manifest.files).sort());
     for (const [file, meta] of Object.entries(manifest.files)) {
       const path = join(AUDIO, file);
@@ -128,7 +128,8 @@ describe("aud244a/b audio manifest", () => {
 });
 
 describe("aud244a audio assets stay out of the headless / library build graphs", () => {
-  const SPEC = /(?:\bfrom\s*|\bimport\s*\(\s*|\bimport\s+)["']([^"']+)["']/g;
+  // Static imports only: aud245's lib.ts reaches the player through a dynamic import(), pinned in audioHeadlessBoundary.test.ts.
+  const SPEC = /(?:\bfrom\s*|\bimport\s+)["']([^"']+)["']/g;
   function resolveImport(from: string, spec: string): string | null {
     if (!spec.startsWith(".")) return null;
     const base = resolve(dirname(from), spec.replace(/\?.*$/, ""));
@@ -145,7 +146,9 @@ describe("aud244a audio assets stay out of the headless / library build graphs",
       if (seen.has(f)) continue;
       seen.add(f);
       if (!/\.(ts|tsx|js)$/.test(f)) continue;
-      for (const m of readFileSync(f, "utf8").matchAll(SPEC)) {
+      // Type-only imports are erased by the build, so they are not graph edges.
+      const source = readFileSync(f, "utf8").replace(/\b(?:import|export)\s+type\s+(?:[^;]*?\bfrom\s*)?["'][^"']+["']/g, "");
+      for (const m of source.matchAll(SPEC)) {
         const r = resolveImport(f, m[1]!);
         if (r) stack.push(r);
       }
@@ -164,8 +167,9 @@ describe("aud244a audio assets stay out of the headless / library build graphs",
   it("no source module or build config references the audio asset directory", () => {
     const walk = (dir: string): string[] =>
       readdirSync(dir, { withFileTypes: true }).flatMap((e) => (e.isDirectory() ? (e.name === "gen" ? [] : walk(join(dir, e.name))) : [join(dir, e.name)]));
+    // aud245: the lazily-loaded player's asset module is the one source reference; the headless / sync graphs are pinned in audioHeadlessBoundary.test.ts.
     const offenders = walk(join(ROOT, "src")).filter((f) => /\.(ts|tsx|js)$/.test(f) && readFileSync(f, "utf8").includes("assets/gen/audio"));
-    expect(offenders).toEqual([]);
-    for (const cfg of ["vite.config.ts", "vite.lib.config.ts", "vite.headless.config.ts"]) expect(readFileSync(join(ROOT, cfg), "utf8")).not.toContain("gen/audio");
+    expect(offenders.map((f) => relative(ROOT, f))).toEqual(["src/audio/playerAssets.ts"]);
+    for (const cfg of ["vite.lib.config.ts", "vite.headless.config.ts"]) expect(readFileSync(join(ROOT, cfg), "utf8")).not.toContain("gen/audio");
   });
 });

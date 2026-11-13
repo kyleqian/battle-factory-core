@@ -8,7 +8,7 @@
 //   npm run build:lib   (runs both configs)
 import { cpSync, mkdirSync } from "node:fs";
 import { defineConfig } from "vite";
-import { engineBuildDefine, manualChunks } from "./vite.config.ts";
+import { assetsInlineLimit, engineBuildDefine, manualChunks } from "./vite.config.ts";
 
 export default defineConfig(async () => ({
   root: ".",
@@ -17,6 +17,7 @@ export default defineConfig(async () => ({
     outDir: "dist-lib",
     emptyOutDir: true,
     target: "es2022",
+    assetsInlineLimit,
     // Readable output: the host bundler (the website's Vite) minifies.
     minify: false,
     sourcemap: false,
