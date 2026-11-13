@@ -5,6 +5,17 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 2026-11-13 — aud245b (side lane worker, 36 min): player follow-ups (music after resume, pan, cry volume, fetch on first use)
+
+- **State:** folded (branch removed). No `src/engine` / session change: ENGINE_BUILD and headless size unchanged. Section in `docs/aud245-audio-player.md`.
+- **Did:** `src/audio/musicTracker.ts`: `lib.ts` always attaches the sink; resume events feed the tracker only, `AudioPlayer.restore` starts the BGM at its loop position;
+  `pan` events re-pan live SE1 / SE2 (`m4aMPlayPanpotControl` law); cry gain `(volume & 0x7f) / 120`; only BGM 469 + SEs 5 / 32 / 9 / 15 prefetched, the rest on first use.
+- **Gates:** worker typecheck 0, test:gate 362 / 362, build / build:lib 0. Supervisor: 6 audio / library files 44 / 44; audioCheck 1800 frames: 14 files fetched (was 186),
+  38 sources, peak 0.56, 0 errors; no audio option: 0 requests.
+- **Open:** no event for the music already playing at mount (draft BGM 469 starts only at the next `bgm` event); first-use fetch makes 9 of 38 starts late (was 3).
+
+---
+
 ## 2026-11-13 — cln277 (side lane worker, 141 min): full-suite wall target (Cleanup 5) measured: not reachable with test-side changes
 
 - **State:** folded `e0d074ec1` (tests + doc only; `docs/cln277-suite-wall.md`). `liveSpriteOrderHost.test.ts` memoizes its 20-seed sweep (87.8 -> 58.5 s, 22 / 22 unchanged).
