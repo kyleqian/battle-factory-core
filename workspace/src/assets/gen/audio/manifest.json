@@ -1,5 +1,5 @@
 {
- "schema": "aud244a-audio-manifest/1",
+ "schema": "aud244b-audio-manifest/2",
  "encoder": {
   "package": "wasm-media-encoders@0.7.0",
   "format": "ogg-vorbis",
@@ -7,28 +7,153 @@
  },
  "sampleRates": {
   "se": 26758,
-  "cry": 13379
+  "cry": 13379,
+  "song": 32768
  },
  "cryPackGapSamples": 1024,
- "note": "Cries are packed per species (NORMAL, WEAK, FAINT) in one mono file; a sound is samples [offsetSamples, offsetSamples + lengthSamples) of its file. SEs are one stereo file per (id, pan). Leading/trailing near-silence is trimmed; onsetSamples is the trimmed ROM mixer latency at the file's sampleRate.",
+ "note": "Cries are packed per species (NORMAL, WEAK, FAINT) in one mono file; a sound is samples [offsetSamples, offsetSamples + lengthSamples) of its file. SEs are one stereo file per (id, pan). Leading/trailing near-silence is trimmed; onsetSamples is the trimmed ROM mixer latency at the file's sampleRate. aud244b: BGM (bgm:<song>), fanfares (fanfare:<song>) and the two looping SEs (se:90:none, se:132:63) are stereo at sampleRates.song. A sound with loops=true plays samples [0, loopEndSamples) once and then repeats [loopStartSamples, loopEndSamples) until stopped; lengthSamples === loopEndSamples. Fanfares are one-shot (loops=false). seam.* is the measured sample difference between the audio after the wrap and the audio after the loop start (see docs/aud244b-bgm-fanfare-loops.md).",
  "totals": {
-  "sounds": 1309,
-  "files": 557,
-  "seBytes": 1591978,
+  "sounds": 1318,
+  "files": 566,
+  "seBytes": 1618342,
   "cryBytes": 4549302,
-  "bytes": 6141280
+  "songBytes": 1282655,
+  "bytes": 7450299
  },
- "excluded": [
-  {
-   "key": "se:90:none",
-   "reason": "SE_LOW_HEALTH never goes inactive within the recorder cap (loops until stopped); needs the aud244b loop treatment"
-  },
-  {
-   "key": "se:132:63",
-   "reason": "SE_M_GUST never goes inactive within the recorder cap (loops until stopped); needs the aud244b loop treatment"
-  }
- ],
+ "excluded": [],
  "sounds": {
+  "bgm:354": {
+   "file": "bgm-354.ogg",
+   "kind": "bgm",
+   "via": "PlayBGM",
+   "sampleRate": 32768,
+   "channels": 2,
+   "offsetSamples": 0,
+   "lengthSamples": 1573963,
+   "lengthFrames": null,
+   "onsetSamples": 4982,
+   "peak": 17190,
+   "rms": 2596.58,
+   "id": 354,
+   "name": "MUS_VICTORY_GYM_LEADER",
+   "loops": true,
+   "loopStartSamples": 200206,
+   "loopEndSamples": 1573963,
+   "loopPasses": 1,
+   "loopStartTick": 345,
+   "loopEndTick": 2649,
+   "tempoBpm": 138,
+   "seam": {
+    "windowSamples": 8192,
+    "maxAbsDiff": 1140,
+    "rmsDiff": 61.74,
+    "shortMaxAbsDiff": 0,
+    "shortRmsDiff": 0,
+    "junctionMaxAbsDiff": 1,
+    "bodyRms": 2668.5,
+    "sourcePass": 1,
+    "nominalEndShift": 1
+   }
+  },
+  "bgm:412": {
+   "file": "bgm-412.ogg",
+   "kind": "bgm",
+   "via": "PlayBGM",
+   "sampleRate": 32768,
+   "channels": 2,
+   "offsetSamples": 0,
+   "lengthSamples": 527110,
+   "lengthFrames": null,
+   "onsetSamples": 5055,
+   "peak": 16541,
+   "rms": 2821.01,
+   "id": 412,
+   "name": "MUS_VICTORY_TRAINER",
+   "loops": true,
+   "loopStartSamples": 62425,
+   "loopEndSamples": 527110,
+   "loopPasses": 1,
+   "loopStartTick": 112,
+   "loopEndTick": 880,
+   "tempoBpm": 136,
+   "seam": {
+    "windowSamples": 8192,
+    "maxAbsDiff": 5755,
+    "rmsDiff": 1582.85,
+    "shortMaxAbsDiff": 3067,
+    "shortRmsDiff": 1527.41,
+    "junctionMaxAbsDiff": 10742,
+    "bodyRms": 2856.2,
+    "sourcePass": 4,
+    "nominalEndShift": -3
+   }
+  },
+  "bgm:469": {
+   "file": "bgm-469.ogg",
+   "kind": "bgm",
+   "via": "PlayBGM",
+   "sampleRate": 32768,
+   "channels": 2,
+   "offsetSamples": 0,
+   "lengthSamples": 2124781,
+   "lengthFrames": null,
+   "onsetSamples": 592,
+   "peak": 19873,
+   "rms": 3012.46,
+   "id": 469,
+   "name": "MUS_B_FACTORY",
+   "loops": true,
+   "loopStartSamples": 94868,
+   "loopEndSamples": 2124781,
+   "loopPasses": 1,
+   "loopStartTick": 168,
+   "loopEndTick": 3720,
+   "tempoBpm": 144,
+   "seam": {
+    "windowSamples": 8192,
+    "maxAbsDiff": 6204,
+    "rmsDiff": 1325.02,
+    "shortMaxAbsDiff": 1740,
+    "shortRmsDiff": 448.6,
+    "junctionMaxAbsDiff": 7762,
+    "bodyRms": 3048,
+    "sourcePass": 2,
+    "nominalEndShift": 1
+   }
+  },
+  "bgm:476": {
+   "file": "bgm-476.ogg",
+   "kind": "bgm",
+   "via": "PlayBGM",
+   "sampleRate": 32768,
+   "channels": 2,
+   "offsetSamples": 0,
+   "lengthSamples": 2952068,
+   "lengthFrames": null,
+   "onsetSamples": 633,
+   "peak": 16210,
+   "rms": 3377.73,
+   "id": 476,
+   "name": "MUS_VS_TRAINER",
+   "loops": true,
+   "loopStartSamples": 398219,
+   "loopEndSamples": 2952068,
+   "loopPasses": 1,
+   "loopStartTick": 960,
+   "loopEndTick": 7104,
+   "tempoBpm": 198,
+   "seam": {
+    "windowSamples": 8192,
+    "maxAbsDiff": 3808,
+    "rmsDiff": 1008.61,
+    "shortMaxAbsDiff": 3378,
+    "shortRmsDiff": 1318.55,
+    "junctionMaxAbsDiff": 15923,
+    "bodyRms": 3431.7,
+    "sourcePass": 3,
+    "nominalEndShift": 549
+   }
+  },
   "cry:1:FAINT": {
    "file": "cry-001.ogg",
    "kind": "cry",
@@ -18077,6 +18202,54 @@
    "name": "SPECIES_CHIMECHO",
    "mode": "WEAK"
   },
+  "fanfare:368": {
+   "file": "fanfare-368.ogg",
+   "kind": "fanfare",
+   "via": "m4aSongNumStart",
+   "sampleRate": 32768,
+   "channels": 2,
+   "offsetSamples": 0,
+   "lengthSamples": 66716,
+   "lengthFrames": 139,
+   "onsetSamples": 1128,
+   "peak": 9226,
+   "rms": 1412.15,
+   "id": 368,
+   "name": "MUS_HEAL",
+   "loops": false
+  },
+  "fanfare:459": {
+   "file": "fanfare-459.ogg",
+   "kind": "fanfare",
+   "via": "m4aSongNumStart",
+   "sampleRate": 32768,
+   "channels": 2,
+   "offsetSamples": 0,
+   "lengthSamples": 136367,
+   "lengthFrames": 266,
+   "onsetSamples": 8266,
+   "peak": 14592,
+   "rms": 1998.66,
+   "id": 459,
+   "name": "MUS_OBTAIN_B_POINTS",
+   "loops": false
+  },
+  "fanfare:466": {
+   "file": "fanfare-466.ogg",
+   "kind": "fanfare",
+   "via": "m4aSongNumStart",
+   "sampleRate": 32768,
+   "channels": 2,
+   "offsetSamples": 0,
+   "lengthSamples": 163722,
+   "lengthFrames": 334,
+   "onsetSamples": 8260,
+   "peak": 14243,
+   "rms": 2471.8,
+   "id": 466,
+   "name": "MUS_OBTAIN_SYMBOL",
+   "loops": false
+  },
   "se:5:none": {
    "file": "se-005-nopan.ogg",
    "kind": "se",
@@ -18300,6 +18473,40 @@
    "id": 55,
    "name": "SE_SAVE",
    "pan": null
+  },
+  "se:90:none": {
+   "file": "se-090-nopan.ogg",
+   "kind": "se",
+   "via": "PlaySE",
+   "sampleRate": 32768,
+   "channels": 2,
+   "offsetSamples": 0,
+   "lengthSamples": 19743,
+   "lengthFrames": null,
+   "onsetSamples": 545,
+   "peak": 4962,
+   "rms": 1999.65,
+   "id": 90,
+   "name": "SE_LOW_HEALTH",
+   "pan": null,
+   "loops": true,
+   "loopStartSamples": 0,
+   "loopEndSamples": 19743,
+   "loopPasses": 1,
+   "loopStartTick": 0,
+   "loopEndTick": 36,
+   "tempoBpm": 150,
+   "seam": {
+    "windowSamples": 8192,
+    "maxAbsDiff": 3853,
+    "rmsDiff": 580.44,
+    "shortMaxAbsDiff": 494,
+    "shortRmsDiff": 93.69,
+    "junctionMaxAbsDiff": null,
+    "bodyRms": 1999.5,
+    "sourcePass": 4,
+    "nominalEndShift": -9
+   }
   },
   "se:102:-64": {
    "file": "se-102-panm64.ogg",
@@ -18620,6 +18827,40 @@
    "id": 131,
    "name": "SE_M_ROCK_THROW",
    "pan": 63
+  },
+  "se:132:63": {
+   "file": "se-132-panp63.ogg",
+   "kind": "se",
+   "via": "PlaySE12WithPanning",
+   "sampleRate": 32768,
+   "channels": 2,
+   "offsetSamples": 0,
+   "lengthSamples": 90494,
+   "lengthFrames": null,
+   "onsetSamples": 1128,
+   "peak": 11301,
+   "rms": 2455.85,
+   "id": 132,
+   "name": "SE_M_GUST",
+   "pan": 63,
+   "loops": true,
+   "loopStartSamples": 11492,
+   "loopEndSamples": 90494,
+   "loopPasses": 3,
+   "loopStartTick": 24,
+   "loopEndTick": 72,
+   "tempoBpm": 150,
+   "seam": {
+    "windowSamples": 8192,
+    "maxAbsDiff": 123,
+    "rmsDiff": 0.87,
+    "shortMaxAbsDiff": 0,
+    "shortRmsDiff": 0,
+    "junctionMaxAbsDiff": 11316,
+    "bodyRms": 2515.5,
+    "sourcePass": 2,
+    "nominalEndShift": 2
+   }
   },
   "se:133:-63": {
    "file": "se-133-panm63.ogg",
@@ -20975,6 +21216,22 @@
   }
  },
  "files": {
+  "bgm-354.ogg": {
+   "bytes": 240662,
+   "sha256": "fea4735eb85fc021cd9c8c28f329ca72cc8c9113ba895a86406a05220c4db72b"
+  },
+  "bgm-412.ogg": {
+   "bytes": 96329,
+   "sha256": "cd4979dad2252197bd39e22f3049d868112788bd31eee42bd574876f11dbd022"
+  },
+  "bgm-469.ogg": {
+   "bytes": 403728,
+   "sha256": "dc7e3fd09f8ccda0fb9ca4b44fb5087c1879b964ce7aab6764446006113ce266"
+  },
+  "bgm-476.ogg": {
+   "bytes": 467847,
+   "sha256": "8cbf2b4888b8391a6830902bfd51e67e3097146ab43bae303475b120fe97eed5"
+  },
   "cry-001.ogg": {
    "bytes": 12654,
    "sha256": "2188447c33b9763ba34cc116fd1de491791b47809c61722b91a5250ffc19818c"
@@ -22479,6 +22736,18 @@
    "bytes": 7805,
    "sha256": "7b9e9bf6f06785493d7b3b9dee4318391d03e95501126c5a56bf7dcdb364f62e"
   },
+  "fanfare-368.ogg": {
+   "bytes": 16096,
+   "sha256": "2856767470e6f265013be011331e3fb125be05536f1e921c0086c6e331393e75"
+  },
+  "fanfare-459.ogg": {
+   "bytes": 26735,
+   "sha256": "5f2a0c9527e704bfe6dd1c1e46e94973da4da6f1245f39444d25995586d3209b"
+  },
+  "fanfare-466.ogg": {
+   "bytes": 31258,
+   "sha256": "2b4a6a5167f532ea4f9421e2be32416710495dc501e91380162ee644eeb2c644"
+  },
   "se-005-nopan.ogg": {
    "bytes": 5502,
    "sha256": "313ba2af0f082a013529cbccc9475c888acff291e3b436bb9d003d038c28a4c0"
@@ -22534,6 +22803,10 @@
   "se-055-nopan.ogg": {
    "bytes": 7332,
    "sha256": "a77df1554c4a3f95b87680d97dcd2c81ffd6ed06ea462e0e5ab8c533c648c311"
+  },
+  "se-090-nopan.ogg": {
+   "bytes": 6098,
+   "sha256": "643b5d533f67614e9561527137f89f8f7a1450d8ba9790cebbed6e254846c345"
   },
   "se-102-panm64.ogg": {
    "bytes": 8039,
@@ -22614,6 +22887,10 @@
   "se-131-panp63.ogg": {
    "bytes": 8403,
    "sha256": "ae91353377b5791d5596dcf4a69e3cde5bd704838d56893ad44170ec1921c72f"
+  },
+  "se-132-panp63.ogg": {
+   "bytes": 20266,
+   "sha256": "0ef45ed937602a2c87095133210ce816d079b52d3f2c56f4ef3a4d65f82a7d63"
   },
   "se-133-panm63.ogg": {
    "bytes": 7123,
