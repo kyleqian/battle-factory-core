@@ -7,6 +7,7 @@ from itertools import permutations
 
 from battle_lab import (
     ACTION_MENU_MAX_ACKS,
+    ACTION_MENU_MAX_ACKS_BRAIN,
     ATTENDANT_DIALOGUE_ROUTE,
     BATTLE_MON_SIZE,
     CONTROLLER_CHOOSE_ACTION,
@@ -671,6 +672,80 @@ class CatalogAndLegalityTests(unittest.TestCase):
         # (BOOTSTRAP.md's v3 table, steps 1-16); this total plus 60 further
         # idle frames reaches the same state factory.json bakes in directly.
         self.assertEqual(sum(frames for frames, _ in ATTENDANT_DIALOGUE_ROUTE), 2916)
+
+
+class ScriptedMenuOracle(FakeOracle):
+    """Plays back (gBattleBufferA[0][0], exec flags) per frame; records A."""
+
+    def __init__(self, timeline):
+        super().__init__()
+        self.timeline = timeline
+        self.frame = 0
+        self.a_frames: list[int] = []
+
+    def advance(self, buttons: list[str]) -> None:
+        self.frame += 1
+        if "A" in buttons:
+            self.a_frames.append(self.frame)
+        buffer, flags = self.timeline(self.frame)
+        self.write_u8(self.symbols["gBattleBufferA"], buffer)
+        self.write_u32(self.symbols["gBattleControllerExecFlags"], flags)
+
+
+class IntroAcknowledgementTests(unittest.TestCase):
+    PRINT_STRING = 16  # any controller command other than choose-action
+
+    def finish(self, timeline, **kwargs) -> ScriptedMenuOracle:
+        oracle = ScriptedMenuOracle(timeline)
+        BattleLab(oracle, "battle-scene-off")._finish_intro_to_action_menu(**kwargs)
+        return oracle
+
+    def test_no_tap_while_the_menu_waits_on_the_opponent_controller(self):
+        # The live failure (ROM seeds 3623, 6048, 1447, ...): the check at
+        # frame 120 lands while the choose-action command is already with
+        # the player's controller and the opponent's AI still holds its
+        # exec bit. A tap there picks FIGHT.
+        def timeline(frame):
+            if frame < 115:
+                return self.PRINT_STRING, 1
+            return CONTROLLER_CHOOSE_ACTION, 3 if frame < 127 else 1
+
+        oracle = self.finish(timeline)
+        self.assertEqual(oracle.a_frames, [])
+        self.assertEqual(oracle.frame, 134)
+
+    def test_taps_keep_their_cadence_until_the_menu_is_issued(self):
+        def timeline(frame):
+            if frame < 300:
+                return self.PRINT_STRING, 1
+            return CONTROLLER_CHOOSE_ACTION, 1
+
+        oracle = self.finish(timeline)
+        self.assertEqual(oracle.a_frames, [121, 122, 255, 256])
+        self.assertEqual(oracle.frame, 388)
+
+    def test_stale_choose_action_byte_without_the_player_bit_still_taps(self):
+        # The buffer byte alone is not the menu: the command is only live
+        # while the player's exec bit is set.
+        def timeline(frame):
+            if frame < 200:
+                return CONTROLLER_CHOOSE_ACTION, 2
+            return CONTROLLER_CHOOSE_ACTION, 1
+
+        oracle = self.finish(timeline)
+        self.assertEqual(oracle.a_frames, [121, 122])
+        self.assertEqual(oracle.frame, 254)
+
+    def test_gives_up_after_the_documented_worst_case(self):
+        for max_acks in (ACTION_MENU_MAX_ACKS, ACTION_MENU_MAX_ACKS_BRAIN):
+            with self.subTest(max_acks=max_acks):
+                oracle = ScriptedMenuOracle(lambda frame: (self.PRINT_STRING, 0))
+                with self.assertRaisesRegex(RuntimeError, "player action menu"):
+                    BattleLab(oracle, "battle-scene-off")._finish_intro_to_action_menu(
+                        max_acks=max_acks
+                    )
+                self.assertEqual(oracle.frame, max_acks * (120 + 2 + 12))
+                self.assertEqual(len(oracle.a_frames), max_acks * 2)
 
 
 class MechanicLoadoutTests(unittest.TestCase):
