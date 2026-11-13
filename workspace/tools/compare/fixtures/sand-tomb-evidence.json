@@ -30,7 +30,7 @@
   },
   "source": {
     "audit": "tools/compare/sandTombSourceAudit.ts",
-    "auditSha256": "efb759aa9b593d01b97415ef0418ad46fd1c7053e749df6f13473a7f7cd24d56",
+    "auditSha256": "0c54a1358eee8b87fa94d79e5d70159c7c93d434defd90a8dcf4ced2d90b0031",
     "probe": "tools/compare/sandTombProbe.py",
     "probeSha256": "0e17f5b368d60df219df249fd5e6b142a662ad1e443bf6e138b187aaac2ea7c3",
     "evidenceVerifier": "tools/compare/sandTombEvidence.ts",
