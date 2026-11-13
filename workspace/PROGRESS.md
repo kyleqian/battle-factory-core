@@ -5,6 +5,13 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 2026-11-13 — rps278 (side lane worker, 28 min): `randomRoundSoak` re-pinned after lbr-b
+
+- **State:** folded (tests + `docs/rps278-soak-repin.md`; no src). #89 Baton Pass seed 11 -> 3; carried-streak / depth window 2,000 -> 6,000 frames; #99 swap offer seed 1 -> 0.
+  Each pin mutation-checked (still fails when the guarded behaviour breaks). Supervisor on master: the file **64 / 64**.
+
+---
+
 ## 2026-11-13 — bnd257d (integration lane worker, 53 min): the browser sprite chunk is a dynamic import (bundle hygiene, finish plan Phase 3)
 
 - **State:** folded (branch removed; `docs/bnd257d-lazy-sprites.md`). ENGINE_BUILD moves (a dead 1-byte `assets-sprites` stub left the headless graph; every real
