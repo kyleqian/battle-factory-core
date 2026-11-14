@@ -1984,3 +1984,19 @@ current app stage should be rejected before replay.
 - **`audit21Check.ts` lists at most 40 residual rows** (aud129, tmr136, ~2 min each).
 - **battle_lab rejects an impossible gender silently through the probe wrapper** (male Chansey: the job just produced no output; sgs134).
 - **A 0:60 soak gate with `--parallel 3` prints nothing until its children finish** (~56 min under load tonight) — not a hang.
+
+## 2026-11-14 run (CAX31 supervisor + workers)
+
+- **`git worktree remove` deletes a worker's ignored `.integration/evidence/<step>/`** (supervisor): rrh1-rrh3, aud248 and lbr-d2b scratch
+  evidence was lost this way; aud249 then re-drove aud248's baseline ROM runs (~25 min). Workaround: `cp -a <wt>/workspace/.integration/evidence/<step>
+  .integration/evidence/` before removing. Lane launcher could do it on exit. Hits: 5 steps.
+- **The 9-to-10-minute foreground limit vs long jobs**: full `npm test` (cln279 sharded it 8 ways; lbr-d2b never got a result), 0:20 soaks
+  (~35 min at `--parallel 2`), hunter runs over many seeds (rrh2 twice), T2 ROM drives (aud248 ~15 min of chunking overhead). Workers read
+  "no background jobs" into the session rules; briefs should say explicitly that `nohup ... &` + polling is allowed for gates. ~10-20 min / worker.
+- **`tools/integration/lsd194Census.sh` names `lsd194CensusDelta.py`, which does not exist** (aud249, aud250 wrote inline compares, ~5 min each).
+- **`tools/audio/soundScoreboard.py` runs `main()` on import** (aud249, ~5 min).
+- **`tools/soak/randomRoundSoak.ts --help` starts a default soak** instead of printing usage (iss216).
+- **Parity census (constant-name ratchet) and the gate-6 coverage manifest go stale on any engine refactor** and need a hand regeneration (iss216).
+- **Hunter (`tools/replay-hunt/`) gaps**: cover entries sharing a label, no seed cap, no stall warning, no duplicate item / species check (rrh1-rrh3
+  fixed each in turn; ~60 min total across the three batches).
+- **`claude-sonnet-5-5` prints `[claude-code:unrecognized_model]` at worker start** — harmless, workers run normally.
