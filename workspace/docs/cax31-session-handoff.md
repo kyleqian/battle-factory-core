@@ -1,4 +1,4 @@
-# CAX31 session handoff — 2026-10-26 (finish plan; state updated 2026-11-11)
+# CAX31 session handoff — 2026-10-26 (finish plan; state updated 2026-11-14)
 
 The user approved `docs/finish-plan.md` on 2026-10-26 and restarted the
 running CAX31 session on it. Run on CAX31's `master` at
@@ -102,6 +102,9 @@ kept and is long-tail.
   `docs/lbrc-challenge-request.md`), enc276 (#213: Encore / Struggle skip the move menu, census-neutral, `docs/enc276-forced-turn-no-menu.md`), bnd257d (lazy browser
   sprite chunk; `ready` waits for it; presses before `ready` dropped; `docs/bnd257d-lazy-sprites.md`), cln277 (suite wall measured: < 15 min not reachable test-side,
   `docs/cln277-suite-wall.md`). Census baseline for enc276-style deltas: `.integration/evidence/enc276/census/{on,off}-17af89768` (pre-enc276; enc276 moved no digest).
+- **2026-11-14 run: the Mac lane's last fold, three hunt batches, the General_* sounds, the Lobby flow up to the draft.** `mac/parity-mac` `165548c4b`
+  merged at run start (suite 14,750 / 14,750); nightly replay 44 / 44 + 32 / 32 staged. rrh1-rrh3 (50 / 110 rules covered), aud248 (S11 scoreboard +
+  stat-change SE), aud249 / aud250 (General_* SEs), lbr-d1 / d2b / e / f (7-win Lobby return, PreBattleRoom briefing), iss216 (#216 / #217), cln279.
 - Census baseline for the next delta: `.integration/evidence/fix274/census/{on,off}-237ee0e5e` (the fix274 fixed arms; src == master's final engine src at the 2026-11-12 wind-down
   except pnm273's name strings, which the pnm273 0..49 census showed digest-neutral).
 - **4b(d) DONE** (frs247, `docs/frs247-faint-replacement-reshow.md`): the faint-replacement return rises from black, no player bar.
@@ -111,40 +114,23 @@ kept and is long-tail.
 This repo is the **game core library**; the website repo (Mac) owns login, streaks, menus, the on-screen pad and hosting —
 never brief those here. One worker at a time; each run folds the next audio step(s) plus at least one cleanup step.
 
-**Status at the 2026-11-13 wind-down:** item 0: aud244b, aud245, aud245b DONE (playback works, muted by default; Safari not checked on the box); next: aud246
-close (S11 step 10: soaks unchanged, audio RAM receipts, ROADMAP S11 tick), the initial-music gap if aud247 did not land (see PROGRESS), then the residual audio
-lists (ISSUES #198 etc.). Item 0b: lbr-a / lbr-b / lbr-c / **lbr-d1 DONE** (a 7-win returns to the Lobby in the same mount, streak kept, per-round BP text, won gates 41 / 74; `docs/lbrd-win-lobby-return.md`); open: lbr-d2b compare trace for the farewell glyph +-1 tick and the won Lobby door walk, field NPC wander after the script releases
-(lbr-b doc), the PreBattleRoom briefing before the draft (nch231 divergence), no Scene ON loss / retire ROM lab, no app SE_SAVE on the loss / retire result script.
-Item 0c DONE. Item 0d: the Mac lane owns battle rules; fold `mac/parity-mac` at run start if it moved; nightly replay from the pool; ISSUES #214 holds its
-source-read leads. **Top layer, 2026-11-13 after your run:** the Mac lane also owns the replay tools and every replay upgrade now, and the finish line has no
-battle count (item 0d, "Top layer, 2026-11-13"); the lab staging failures are fixed (`oracle/battle_lab.py`, same item).
-**Later that evening the Mac lane stopped (Kyle winds down the Mac for a day or two): battle rules, the replay tools and the
-rare-rule hunt (as a side job next to sound) are yours now** (item 0d, "Mac lane stopped").
-**Delivered 2026-11-13 20:17 UTC for your next fold, the Mac lane's last: `mac/parity-mac` = `165548c4b`, battle-rule fixes 29 to 43** (`165548c4b`
-adds only `docs/parity-mac/on-hold/` to the gated `85ee1361e`; the branch is also on GitHub as `worker/parity-mac`). It replaces
-the 14:05 UTC (`ba58f0ec6`, fixes 29 to 40) and 19:11 UTC (`42e1f4f91`, 29 to 41) deliveries, which it contains. Fixes 29 to 40 were found by the new
-players, the wide compare and staged battles (`docs/parity-mac/STATUS.md`, "Fourth pass"); fix 41 (`4f90eaf6c`: the AI's Foresight score for a Ghost-type
-user makes two random rolls, the engine made one), fix 42 (`55a89a0ad`: the foe's Follow Me redirects the player's self-aimed Curse, so the Follow Me
-user's Pressure costs a second PP) and fix 43 (`72eea3053`: the Pursuit user's Synchronize ends Pursuit's move-end steps; the engine ran on and crashed
-in the switch) by the finer tally ("Fifth pass", `docs/parity-mac/rule-coverage.md`). One commit per fix, each with a failing-without test and ROM proof;
-for 42 and 43 the proof is a Mechanic Lab run (custom teams, ROM side only; `docs/parity-mac/stages/mechanic-lab/`), not a whole matched battle. Your
-master `cef8376e9` merges with it without conflict (checked with `git merge-tree`). Its gate ran on `85ee1361e` itself: typecheck ok, build ok,
-14,749 tests pass, 1 fails. **That one is yours and fails on your master too:** `tests/animation/sandTombEvidenceCheckpoint`
-pins the sha256 of `tools/compare/sandTombSourceAudit.ts`, which your `11e1a66b4` (iss215 pixel-provider installs) changed; re-pin it (the top layer re-ran
-it on `0b80af10e`: same failure). Top-layer checks: for `ba58f0ec6`, 54 sampled battles and the 13 staged battles re-driven on a clean checkout match and
-equal the lane's rows, and fixes 36, 38, 39, 40 each taken out alone make their staged battle differ from the ROM; for `42e1f4f91` (the only engine change
-since is `src/engine/factoryAiCheckViability.ts`, fix 41), 36 sampled battles of the lane's final run re-driven on a clean checkout match and equal its rows,
-and fix 41's staged battle (`stages/noland-foresight-ghost.json`) matches 20 / 20 states with the fix and differs at state 6 of 21 with the old file;
-for `85ee1361e`, fix 42's and fix 43's tests fail with their old engine file and pass with the fix, and the same 36 battles plus all 32 staged battles
-(`stages/*.json`, `stages/coverage/*.json`) re-driven on a clean checkout match.
-The lane's final run on the fix 41 engine: 3,546 battles, 3,541 match, 5 endless Struggle stalls (no difference up to the frame cap); every tally row is
-covered by a ROM-matched or staged battle or proven unable to occur. Of the finer tally's 110 reachable never-run rules, 12 are now covered by staged
-battles; the other 98 are your side job now (item 0d, "Mac lane stopped").
-**Two findings for you from that lane (file them in ISSUES; not battle rules, not fixed there):** (1) the rental select screen lets the player take two
-Pokemon of one species; the game refuses the second ("Can't select same POKeMON.", `Select_AreSpeciesValid`, `battle_factory_screen.c:2256-2276`; the
-swap screen has `Swap_AlreadyHasSameSpecies`, `:4162`); the engine's `MENU_OPTION_RENT` branch in `src/engine/core.ts` has no such check; about 3 teams in
-100 from the eighth challenge on offer such a pair; (2) when the player is trapped, the engine's party menu says the Pokemon "is already in battle"; the
-game says it "can't be switched out" (seen in code only).
+**Status at the 2026-11-14 wind-down (PROGRESS top entry has the gates):** `mac/parity-mac` `165548c4b` (fixes 29 to 43) is FOLDED; the branch no
+longer moves (the Mac is offline), so there is no fold next run. Battle rules, the replay tools and the rare-rule hunt are the box's.
+- **Item 0 (sound):** aud248 measured S11 (`docs/aud248-s11-scoreboard.md`: not met; T1 + T2 by family, reproducible) and added the stat-change SE;
+  aud249 / aud250 emit the General_* SEs (nine status conditions, weather continues, Focus Punch setup, Leech Seed drain, Castform). Next, by size
+  (ISSUES #219 / #220): the held-item effect animation is not presented at all (#220: a presentation + timing gap, ~214-235 frames per Leftovers /
+  berry segment, then its SEs); move-body SE lifetimes (aud242 family, largest); cries in animation tasks (Roar / Howl / Hyper Voice); the second
+  `Status_*` play +14 frames. aud246 (S11 close) waits for those.
+- **Item 0b (Lobby):** lbr-d1 (7-win returns to the Lobby, streak kept), lbr-d2b (won compare traces), lbr-e (PreBattleRoom walk + briefing before
+  the draft, traces 255 / 255; moves every in-game new challenge's deal toward the ROM), lbr-f (won record question 1 tick earlier) DONE. Next:
+  merge branch `lbr-f-residual2` (saving -> saved +2 ticks; it moves the Lobby hand-off deal, so re-scan the `tests/lbrd.test.ts` seeds first,
+  `docs/lbrf-won-timing.md`); field NPC wander after release; no Scene ON loss / retire ROM lab; no app SE_SAVE on the loss / retire result script.
+- **Item 0d (battle rules):** nightly replay at run start from the pool + all staged battles (`docs/replay-ledger.md`; 2026-11-14: 44 / 44, 32 / 32).
+  Rare-rule hunt: rrh1-rrh3 this run, 50 of 110 (c) rules covered by ROM-matched stages (`docs/parity-mac/stages/coverage/`, now 50 files, all
+  re-driven nightly), R019 / R029 / R031 / R033 class (b), no differences found; box tools in `tools/replay-hunt/` (designcheck, stall warnings,
+  sets.py). rrh3 found the remaining rules hard to reach with Factory sets (Metronome-only, Taunt, stalls): next hunt steps need new team ideas or
+  a Mechanic Lab + Tier-1 pairing; one step per run at most.
+- **Cleanup:** cln279 (second sweep of step-id scripts, 236 files) DONE. **ISSUES #216 / #217** (duplicate-species rental, trapped switch text) FIXED.
 **Website:** the live site runs `eb-adfdcfdc91f4247f` (your `5a2fe1d83`, the 28 fixes; deployed 2026-11-13 04:03 UTC on Kyle's word). Your later builds
 (`eb-8faf63dbde5168d5`: audio, `challenge-request`, `start: "after-save"`, lazy sprites) are not on the site; the site repo adopts them when Kyle asks. Cleanup 5's "< 15 min" suite target: measured non-goal on this box (cln277); the 670 s render lever in
 `tools/integration/generatedCommandAnimationReplay.ts` would trade render-crash coverage (not taken).
