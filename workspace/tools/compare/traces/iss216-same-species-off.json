@@ -1,5 +1,6 @@
 {
   "oracleProfile": "battle-scene-off",
+  "appRoute": "generated-orchestrator",
   "appStage": {"id": "iss216-dup-draft-off", "frame": 0},
   "segments": [
     {"frames": 2, "buttons": ["A"]},
