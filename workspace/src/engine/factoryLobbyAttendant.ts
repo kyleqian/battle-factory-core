@@ -124,7 +124,8 @@ export const ATTENDANT_SCREENS: Readonly<Record<AttendantScreenId, AttendantScre
     pages: [page("end", "SAVING…", "DON'T TURN OFF THE POWER.")],
     menu: null,
     saveWindow: true,
-    autoHold: 259,
+    // lbr-f: ROM-measured on the lbrd-won-attendant window (docs/lbrf-won-timing.md): 261, not lbr-b's inferred 259.
+    autoHold: 261,
   },
   saved: {
     pages: [page("end", `${PLAYER_NAME} saved the game.`)],
@@ -157,6 +158,8 @@ export const ATTENDANT_TIMING = Object.freeze({
   scrollThirdLineDelay: 8,
   /** A on a finished final page -> the next message's first glyph. */
   messageToMessageFirstGlyph: 5,
+  /** SAVING... -> saved (start_menu.c SaveDoSaveCallback, not a script message): the box is blank 2 frames before the first glyph, not 1. */
+  savingToSavedFirstGlyph: 6,
   /** A on a menu / yes-no choice -> menu gone; text cleared; next message's first glyph. */
   menuGoneTick: 2,
   menuChoiceClearTick: Object.freeze({ challenge: 4, level: 4, yesNo: 3 }),
@@ -404,7 +407,7 @@ export function advanceFactoryLobbyAttendant(
   if (!attendantAcceptsInput(state)) {
     if (def.autoHold !== null && state.page === def.pages.length - 1) {
       const typed = attendantLastGlyphAge(state.screen, state.page);
-      if (age === typed + def.autoHold) return startScreen(ticked, "saved", "auto", ATTENDANT_TIMING.messageToMessageFirstGlyph);
+      if (age === typed + def.autoHold) return startScreen(ticked, "saved", "auto", ATTENDANT_TIMING.savingToSavedFirstGlyph);
     }
     return ticked;
   }

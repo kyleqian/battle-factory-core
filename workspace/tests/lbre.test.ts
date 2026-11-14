@@ -29,21 +29,21 @@ const { APP_STAGES } = (await import(/* @vite-ignore */ appTracePath)) as {
 const NONE = new Set<GbaButton>();
 const A = new Set<GbaButton>(["A"]);
 
-function lobbyState(scene: "on" | "off", streak = 0): EngineState {
+function lobbyState(scene: "on" | "off", streak = 0, rng = 0x12345678): EngineState {
   const base = createInitialState({ battleScene: scene, presentationSeed: 0xabc });
   const carry = createInitialFactoryCarry(base.factoryCarry.playerTrainerId);
   return {
     ...base,
     lobbyFreeRoam: createFactoryLobbyFreeRoamState(),
-    rngValue: 0x12345678,
+    rngValue: rng,
     rngMode: "vblank",
     lobbyStreakKept: streak > 0,
     factoryCarry: Object.freeze({ ...carry, factoryWinStreak: streak, rentsCount: streak === 0 ? 0 : 3, battlePoints: 21 }),
   };
 }
 
-function enterEntry(scene: "on" | "off", streak = 0): EngineState {
-  return driveAttendantConversation(tick(lobbyState(scene, streak), A)).state;
+function enterEntry(scene: "on" | "off", streak = 0, rng = 0x12345678): EngineState {
+  return driveAttendantConversation(tick(lobbyState(scene, streak, rng), A)).state;
 }
 
 describe("lbr-e: the PreBattleRoom entry timeline (ROM-measured)", () => {
@@ -141,8 +141,10 @@ describe("lbr-e: briefing text for a continued streak", () => {
   });
 
   it("a continued streak runs the same entry through the engine (carry kept, same timeline)", () => {
-    const fresh = driveBriefing(enterEntry("off", 0));
-    const kept = driveBriefing(enterEntry("off", 7));
+    // The type / style lines come from the dealt opponent set, so the briefing's typing length varies with the deal; this cursor (scanned, lbr-f2) deals both runs the same length.
+    const rng = 0x4ea349da;
+    const fresh = driveBriefing(enterEntry("off", 0, rng));
+    const kept = driveBriefing(enterEntry("off", 7, rng));
     expect(kept.state.pendingGeneratedRound!.carry.factoryWinStreak).toBe(7);
     expect(kept.state.pendingGeneratedRound!.carry.rentsCount).toBe(3);
     expect(kept.state.factoryCarry.factoryWinStreak).toBe(7);
