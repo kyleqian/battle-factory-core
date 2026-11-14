@@ -123,8 +123,8 @@ longer moves (the Mac is offline), so there is no fold next run. Battle rules, t
   `Status_*` play +14 frames. aud246 (S11 close) waits for those.
 - **Item 0b (Lobby):** lbr-d1 (7-win returns to the Lobby, streak kept), lbr-d2b (won compare traces), lbr-e (PreBattleRoom walk + briefing before
   the draft, traces 255 / 255; moves every in-game new challenge's deal toward the ROM), lbr-f (won record question 1 tick earlier) DONE. Next:
-  merge branch `lbr-f-residual2` (saving -> saved +2 ticks; it moves the Lobby hand-off deal, so re-scan the `tests/lbrd.test.ts` seeds first,
-  `docs/lbrf-won-timing.md`); field NPC wander after release; no Scene ON loss / retire ROM lab; no app SE_SAVE on the loss / retire result script.
+  merge branch `lbr-f-residual2` (saving -> saved +2 ticks; it moves the Lobby hand-off deal; lbr-f2 re-pinned the lbrd / lbre seeds on the
+  branch, tip `f58db4171`; run typecheck, test:gate, full suite and soaks before merging; `docs/lbrf-won-timing.md`); field NPC wander after release; no Scene ON loss / retire ROM lab; no app SE_SAVE on the loss / retire result script.
 - **Item 0d (battle rules):** nightly replay at run start from the pool + all staged battles (`docs/replay-ledger.md`; 2026-11-14: 44 / 44, 32 / 32).
   Rare-rule hunt: rrh1-rrh3 this run, 50 of 110 (c) rules covered by ROM-matched stages (`docs/parity-mac/stages/coverage/`, now 50 files, all
   re-driven nightly), R019 / R029 / R031 / R033 class (b), no differences found; box tools in `tools/replay-hunt/` (designcheck, stall warnings,

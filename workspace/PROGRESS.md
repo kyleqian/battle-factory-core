@@ -29,8 +29,9 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   build / build:lib 0; test:gate on `010ef7abe` 362 files / 2,843 tests. Soaks: vanilla 0:20 OFF **20 / 20**, ON **20 / 20**; 0:60 default **60 / 60**, winning **60 / 60**, winning-swap **60 / 60** (all `budget`); varied-RNG first-round winning carry 0 / 14 / 28
   **100 / 100** each, winning-swap carry 0 **100 / 100**. play:random 10 min / scene `--lobby-new-challenge` on the final build (`010ef7abe`): ON 33 battles / 13 swaps / 11 new challenges from the Lobby, OFF 57 / 13 / 24; **0 page / console errors / overlays**.
 - **Next:** #220 (held-item effect presentation + its SEs) is the biggest sound / timing gap; then the aud242 move-body lifetimes, cries in
-  animation tasks, the second `Status_*` play (+14). Lobby: merge `lbr-f-residual2` after re-scanning the `tests/lbrd.test.ts` seeds (it moves the
-  hand-off deal; `docs/lbrf-won-timing.md`), NPC wander. Hunt: the remaining 56 rules need new team ideas (rrh3) — one step per run at most.
+  animation tasks, the second `Status_*` play (+14). Lobby: merge branch `lbr-f-residual2` (`f58db4171`: the fix + lbr-f2's re-pins, lbrd `WIN_TWO_SEED` 35 -> 2 (the only
+  seed of 1-7 passing the full file: fragile), lbre same-timeline exact at cursor `0x4ea349da`; lb* + randomRoundSoak 129 / 129, attendant
+  trace 1349 / 1416) after typecheck, test:gate, full suite and soaks; then NPC wander. Hunt: the remaining 56 rules need new team ideas (rrh3) — one step per run at most.
   Nightly replay from the pool at run start; no Mac fold (the branch no longer moves).
 
 ---
