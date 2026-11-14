@@ -16,10 +16,15 @@ import {
   prebattleEntryScene,
 } from "../src/engine/prebattleEntry.ts";
 import type { GbaButton } from "../src/input.ts";
-import { APP_STAGES } from "../tools/compare/appTrace.ts";
 import { traceAdvances } from "../tools/compare/traceReplay.ts";
 import { frameHash } from "../tools/browser/goalPlay.ts";
 import { driveAttendantConversation, driveBriefing } from "./helpers/lobbyAttendant.ts";
+
+// appTrace.ts is outside the typechecked tests graph (tsconfig include), so load its stage registry untyped.
+const appTracePath = "../tools/compare/appTrace.ts";
+const { APP_STAGES } = (await import(/* @vite-ignore */ appTracePath)) as {
+  APP_STAGES: Record<string, (state: EngineState) => EngineState>;
+};
 
 const NONE = new Set<GbaButton>();
 const A = new Set<GbaButton>(["A"]);
@@ -103,7 +108,7 @@ describe("lbr-e: the PreBattleRoom entry timeline (ROM-measured)", () => {
   });
 
   it("every phase draws a distinct, correctly sized frame and the replay is deterministic", () => {
-    const hashes = new Set<string>();
+    const hashes = new Set<ReturnType<typeof frameHash>>();
     let s = enterEntry("off");
     const seen = new Set<string>();
     for (let i = 0; i < 4000 && s.prebattleEntry !== null; i += 1) {

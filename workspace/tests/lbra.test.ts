@@ -4,7 +4,6 @@
 import { describe, expect, it } from "vitest";
 import { createInitialState, tick, type EngineState } from "../src/engine/core.ts";
 import { isFactoryLobbyFacingSinglesAttendant } from "../src/engine/factoryLobbyFreeRoam.ts";
-import { advanceRngValue } from "../src/engine/rng.ts";
 import type { FactoryEvent } from "../src/factoryContract.ts";
 import { FactorySession } from "../src/factorySession.ts";
 import type { GbaButton } from "../src/input.ts";
