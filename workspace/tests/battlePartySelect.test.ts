@@ -586,6 +586,46 @@ describe("voluntary battle party selector", () => {
     expect(state).toMatchObject({ message: null, cursor: active, outcome: null });
   });
 
+  describe("trapped switch (ISSUES #217, TrySwitchInPokemon party_menu.c:5811-5850)", () => {
+    function trapped(patchBattlers: (b: [Record<string, unknown>, Record<string, unknown>]) => void) {
+      const { request, rulesContext } = liveSelectorParts();
+      const battlers = [{ ...rulesContext.battlers[0]! }, { ...rulesContext.battlers[1]! }] as [Record<string, unknown>, Record<string, unknown>];
+      patchBattlers(battlers);
+      const rules = { ...rulesContext, battlers: Object.freeze(battlers) } as unknown as typeof rulesContext;
+      const moveOnly = { ...request, legalDecisions: request.legalDecisions.filter((d) => d.kind !== "switch") };
+      return { rules, state: settleOpenFade(createBattlePartySelectState(moveOnly, rules)) };
+    }
+    function pick(state: BattlePartySelectState, row: number) {
+      let next = state;
+      while (next.cursor !== row) next = advanceBattlePartySelect(next, new Set(["DOWN"]));
+      next = advanceBattlePartySelect(next, new Set(["A"]));
+      return advanceBattlePartySelect(next, new Set(["A"]));
+    }
+
+    it("a bench pick under STATUS2_ESCAPE_PREVENTION prints the ACTIVE mon's \"can't be switched out!\"; the active slot still says 'already in battle!' first", () => {
+      const { state } = trapped(([player]) => { player.status2 = (player.status2 as number) | (1 << 26); });
+      const active = state.rows.findIndex((row) => row.active);
+      const bench = state.rows.findIndex((row, i) => i !== active && !row.fainted);
+      expect(state.rows.every((row) => !row.legal)).toBe(true);
+      const activeName = state.rows[active]!.name;
+      expect(pick(state, bench)).toMatchObject({ submenuOpen: false, outcome: null, message: `${activeName} can't be switched\nout!` });
+      expect(pick(state, active)).toMatchObject({ outcome: null, message: `${activeName} is already\nin battle!` });
+    });
+
+    it("an opposing Arena Trap names the foe and the ability (PARTY_ACTION_ABILITY_PREVENTS)", () => {
+      const { state, rules } = trapped(([, foe]) => { foe.ability = 71; });
+      const bench = state.rows.findIndex((row) => !row.active && !row.fainted);
+      const foeName = (rules.party.opponent[rules.battlers[1]!.partyIndex]!.species);
+      expect(foeName).toBeGreaterThan(0);
+      const message = pick(state, bench).message as string;
+      expect(message).toMatch(/^Foe [A-Z0-9 .'-]+'s ARENA TRAP\nprevents switching!$/);
+    });
+
+    it("an untrapped switch has no trap message", () => {
+      expect(liveSelector().trapMessage).toBeNull();
+    });
+  });
+
   it("right-aligns the current HP in a three-character field (DisplayPartyPokemonHP, STR_CONV_MODE_RIGHT_ALIGN 3): one slash, never two", () => {
     // Slot 1's card: hp text origin (198,20), max HP "/137" at (213,20); FONT_SMALL digits, the slash and CHAR_SPACER are 5 px.
     const base = liveSelector();

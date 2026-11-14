@@ -139,10 +139,9 @@ import {
   BATTLE_SCRIPT_STATUS1_FREEZE,
   BATTLE_SCRIPT_STATUS1_SLEEP,
   BATTLE_SCRIPT_STATUS2_MASKS,
-  BATTLE_SCRIPT_STATUS2_WRAPPED_MASK,
-  BATTLE_SCRIPT_STATUS3_ROOTED,
 } from "./battleScriptSourceConstants.ts";
 import { isFactoryAiSwitchPrecheckBlocked } from "./factoryAiSwitchPolicy.ts";
+import { voluntarySwitchTrap } from "./battleSwitchTrap.ts";
 import { drawBattleScriptSelectedMoveTarget } from "./battleScriptSwitchinOpcode.ts";
 import { mapFactoryBattleOutcome } from "./factoryBattleScriptTerminalDecision.ts";
 import { battleCommandSpeciesDisplayName } from "./battleCommandPresentation.ts";
@@ -204,14 +203,8 @@ const ZERO_IVS = uniformBattleScriptIvs(0);
 /** GetFactoryMonFixedIV(challenge 0, non-final) => sFixedIVTable[0][0] = 3. */
 const FACTORY_FIRST_CHALLENGE_IVS = uniformBattleScriptIvs(3);
 /** include/constants/abilities.h: exact identity constants used by the cited source gates below. */
-const ABILITY_SHADOW_TAG = 23;
-const ABILITY_LEVITATE = 26;
-const ABILITY_MAGNET_PULL = 42;
 const ABILITY_KEEN_EYE = 51;
 const ABILITY_RUN_AWAY = 50;
-const ABILITY_ARENA_TRAP = 71;
-/** include/constants/battle.h: STATUS2_ESCAPE_PREVENTION. */
-const STATUS2_ESCAPE_PREVENTION = 1 << 26;
 /** include/constants/moves.h. */
 const MOVE_PURSUIT = 228;
 const MOVE_FOCUS_PUNCH = 264;
@@ -2447,31 +2440,7 @@ function isVoluntarySwitchTrapped(
   rulesContext: BattleScriptRulesContext,
   battler: BattleSinglesBattler,
 ): boolean {
-  const active = rulesContext.battlers[battler]!;
-  if (
-    (active.status2 & (BATTLE_SCRIPT_STATUS2_WRAPPED_MASK | STATUS2_ESCAPE_PREVENTION)) !== 0
-    || (active.status3 & BATTLE_SCRIPT_STATUS3_ROOTED) !== 0
-  ) {
-    return true;
-  }
-  const opponent = (battler === 0 ? 1 : 0) as BattleSinglesBattler;
-  const holder = rulesContext.battlers[opponent]!;
-  if (
-    holder.hp === 0
-    || (rulesContext.absentBattlerFlags & (1 << opponent)) !== 0
-  ) {
-    return false;
-  }
-  if (holder.ability === ABILITY_SHADOW_TAG) return true;
-  if (
-    holder.ability === ABILITY_ARENA_TRAP
-    && !active.types.includes("TYPE_FLYING")
-    && active.ability !== ABILITY_LEVITATE
-  ) {
-    return true;
-  }
-  return holder.ability === ABILITY_MAGNET_PULL
-    && active.types.includes("TYPE_STEEL");
+  return voluntarySwitchTrap(rulesContext, battler) !== null;
 }
 
 /**

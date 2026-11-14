@@ -43,6 +43,7 @@ import {
 import type { SummaryScreenState } from "./summaryScreen.ts";
 import { battlePartyDisplayRows, IDENTITY_BATTLE_PARTY_ORDER, type BattlePartyCurrentOrder } from "./battlePartyOrder.ts";
 import type { BattleScriptRulesContext } from "./battleScriptRulesContext.ts";
+import { voluntarySwitchTrap } from "./battleSwitchTrap.ts";
 import { getMonGender, type MonGender } from "./monGender.ts";
 import type { PartySelectState } from "./partySelect.ts";
 import { movePartyMenuCursor, partyMenuDirection, type PartyMenuCursor } from "./partyMenuCursor.ts";
@@ -147,6 +148,8 @@ export type BattlePartySelectRow = Readonly<{
 
 export type BattlePartySelectState = Readonly<{
   requestId: number;
+  /** TrySwitchInPokemon's PARTY_ACTION_CANT_SWITCH / ABILITY_PREVENTS refusal text for a bench pick; null when the switch is not trapped. */
+  trapMessage?: string | null;
   rows: readonly [
     BattlePartySelectRow,
     BattlePartySelectRow,
@@ -547,8 +550,22 @@ export function createBattlePartySelectState(
       status: partyMenuAilment(member.hp, primaryStatusFromStatus1(member.status1 ?? 0)),
     });
   }) as unknown as BattlePartySelectState["rows"];
+  const trap = voluntarySwitchTrap(rules, request.battler as 0 | 1);
+  let trapMessage: string | null = null;
+  if (trap !== null) {
+    if (trap.kind === "cant-switch") {
+      trapMessage = battlePartyCantSwitchOutMessage(SPECIES_NAMES[rules.party.player[activePartyIndex]!.species]!.name);
+    } else {
+      const foe = rules.battlers[request.battler === 0 ? 1 : 0]!;
+      trapMessage = battlePartyAbilityPreventsMessage(
+        SPECIES_NAMES[rules.party.opponent[foe.partyIndex]!.species]!.name,
+        trap.abilityName,
+      );
+    }
+  }
   return Object.freeze({
     requestId: request.requestId,
+    trapMessage,
     rows: Object.freeze(rows),
     // OpenPartyMenuInBattle (party_menu.c:5774-5779) calls
     // InitPartyMenu(..., keepCursorPos=FALSE, ...) which forces slot 0
@@ -617,6 +634,16 @@ export function battlePartyAlreadyInBattleMessage(row: BattlePartySelectRow): st
   return `${row.name}${PARTY_ALREADY_IN_BATTLE_LINE_1_SUFFIX}\n${PARTY_ALREADY_IN_BATTLE_LINE_2}`;
 }
 
+/** gText_PkmnCantSwitchOut ("{STR_VAR_1} can't be switched\nout!"): STR_VAR_1 is the ACTIVE battler's nickname. */
+export function battlePartyCantSwitchOutMessage(activeName: string): string {
+  return `${activeName} can't be switched\nout!`;
+}
+
+/** gText_PkmnsXPreventsSwitching ("{B_BUFF1}'s {B_LAST_ABILITY}\nprevents switching!\p"): B_BUFF1 is the trapping foe with its "Foe " prefix. */
+export function battlePartyAbilityPreventsMessage(foeName: string, abilityName: string): string {
+  return `Foe ${foeName}'s ${abilityName}\nprevents switching!`;
+}
+
 /** Source-shaped list/submenu input for a three-mon singles Factory party. */
 export function advanceBattlePartySelect(
   state: BattlePartySelectState,
@@ -672,14 +699,16 @@ export function advanceBattlePartySelect(
         });
       }
       if (!row.legal) {
-        // TrySwitchInPokemon (party_menu.c:5811-5823), after the HP test above:
-        // the active battler's own slot refuses with "is already in battle!"
-        // through DisplayPartyMenuMessage, the same WIN_MSG route as the
-        // no-energy refusal (fsw235; this was a silent no-op).
+        // TrySwitchInPokemon (party_menu.c:5811-5850), after the HP test above: the active battler's own slot
+        // refuses with "is already in battle!" first; any other illegal pick is a trapped switch
+        // (PARTY_ACTION_CANT_SWITCH / ABILITY_PREVENTS, the last two checks). Both go through
+        // DisplayPartyMenuMessage, the same WIN_MSG route as the no-energy refusal (fsw235).
         return Object.freeze({
           ...closeActionWindow(next),
           ...PARTY_MESSAGE_CLOCK_START,
-          message: battlePartyAlreadyInBattleMessage(row),
+          message: row.active || state.trapMessage == null
+            ? battlePartyAlreadyInBattleMessage(row)
+            : state.trapMessage,
         });
       }
       // The confirm A lands while the SEND OUT submenu is open; the real menu
