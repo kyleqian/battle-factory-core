@@ -30,11 +30,11 @@ Anchors, command age (`lifecycle.phaseElapsed`) minus table op frame, measured p
 ## C. Second Status_* play ~14 frames late (Gap C): diagnosed, not a loop / relaunch error, not fixed
 
 - The loop spacing (14) and the id / pan rows of the second play equal the ROM's in the flatter / swagger / dreameater windows; the engine's two plays are identical (command age 10 for the first SE both times).
-- The ROM's second first-SE sits at command age 31 (flatter 721 -> 752, swagger 691 -> 723) / 25 (dreameater 540 -> 565) against 17 / 18 / 10 for the first play: +14 / +14 / +15.
+- The ROM's second first-SE sits at command age 31 (flatter 721 -> 752) / 32 (swagger 691 -> 723) / 25 (dreameater 540 -> 565) against 17 / 18 / 10 for the first play (engine: 10 both times): the second play is +14 / +14 / +15 later than the first, relative to the engine.
 - Not a turn-start drift: the move body of the same dreameater turn lands within one frame (ROM SE 189 at 777, engine 776). Not the IsBattleSEPlaying gate (`battle_gfx_sfx_util.c:554`, <= 30 calls): no SE is playing within 30 frames of the second launch
   (the last SE before it is 197@272 / 176@528 / 176@499, 200+ frames earlier; SE_SELECT rows are not near it). Both plays are `status2animation` / `chosenstatus2animation` (`Cmd_status2animation` / `Cmd_chosenstatusanimation`,
   `battle_script_commands.c:5769 / 5788`) -> `BtlController_EmitStatusAnimation`, the same controller path. The second play follows `printstring STRINGID_PKMNISCONFUSED; waitmessage` (`BattleScript_MoveUsedIsConfused`, `data/battle_scripts_1.s:3796`),
-  the first is `chosenstatus2animation` before its message (`BattleScript_MoveEffectConfusion:3932`); the dreameater plays are both after a message, so the message order alone does not explain it. Unproven candidates: a ROM-side delay in the second launch of the same
+  the first is `chosenstatus2animation` before its message (`BattleScript_MoveEffectConfusion:3932`); that script-order difference is a candidate for the confusion windows only (the dreameater scripts were not read). Unproven candidates: a ROM-side delay in the second launch of the same
   status animation (health-box `statusAnimActive` / task cleanup). A fix needs a pixel window of the second play (the command start in the ROM), not more sound windows: left open.
 
 ## Evidence
