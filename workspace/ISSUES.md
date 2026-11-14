@@ -31,6 +31,10 @@ exclusions are superseded. Unrelated expansions stay parked.
 window (pinned in `tests/aud248StatChangeSounds.test.ts`), secondary-effect stat changes (Metal Claw, Steel Wing) are not `stats-change`
 commands and stay silent; 3. cries (cry-task rows not ported); 4. battle-controller extras and window-end artifacts; 5. SE_SHINY and declined
 (static) move bodies. Scene ON seeds 6568 / 7682 stall at the 80,000-frame ROM drive cap and cannot be aligned.
+- **aud249 (2026-11-14)** emits the nine `Status_*` and the four weather-continues SEs (Scene ON; `docs/aud249-general-anim-sounds.md`). Open:
+  `General_HeldItemEffect` (SE 152 / 228 / 102, 43 ROM-only rows on 5 seeds) has no presented command in the live route; the second
+  `Status_*` play of one animation lands ~14 frames later in the ROM than modelled and the first play +2 over the stat anchor;
+  FOCUS_PUNCH_SETUP / LEECH_SEED_DRAIN / CASTFORM_CHANGE SEs decoded but not emitted (uncalibrated anchors); TurnTrap / Snatch unresolved in the extractor.
 
 ## #214 — Leads from the Mac lane's 2026-11-12 passes (source-read only, no ROM seed)
 
