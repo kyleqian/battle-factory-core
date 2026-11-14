@@ -818,15 +818,15 @@ engine = ROM.
 
 | rule | stage file (lab seed) | lab seeds tried | states matched / decisions | outcome |
 |---|---|---|---|---|
-| R054 Natural Cure, sleeper switched in | R054-natural-cure-sleeper-switch (91017) | 18 + 25 + 18 (three designs) | 24 / 24 | 2 / 2 |
+| R054 Natural Cure, sleeper switched in | R054-natural-cure-sleeper-switch (91017) | 18 (final design; 18 + 25 in two earlier designs, no hit) | 24 / 24 | 2 / 2 |
 | R060 Choice Band, Future Sight | R060-choice-band-future-sight (90000) | 1 | 17 / 17 | 2 / 2 |
 | R066 Focus Band, OHKO | R066-focus-band-ohko (90011) | 12 | 54 / 54 | 1 / 1 |
-| R070 Guts (Kadabra), Future Sight | R070-kadabra-guts-future-sight (90000) | 1 (after 1 wrong design) | 26 / 26 | 1 / 1 |
-| R074 Hustle (Kadabra), Future Sight | R074-kadabra-hustle-future-sight (91000) | 2 | 26 / 26 | 2 / 2 |
-| R084 Plus (Kadabra), Future Sight | R084-kadabra-plus-future-sight (91000) | 2 (after 1 first-entry-only) | 33 / 33 | 2 / 2 |
-| R087 + R089 Sleep Talk, Encore | R089-sleep-talk-encore (90005) | 14 + 22 | 78 / 78 | 1 / 1 |
-| R088 Sleep Talk, Choice Band | R088-sleep-talk-choice-band (90005) | 6 | 53 / 53 | 1 / 1 |
-| R092 Covet vs Sticky Hold | R092-covet-sticky-hold (93000) | 4 | 30 / 26 | 2 / 2 |
+| R070 Guts (Kadabra), Future Sight | R070-kadabra-guts-future-sight (90000) | 1 (final design; the first design's lab setup failed, a second matched with entry 0 only) | 26 / 26 | 1 / 1 |
+| R074 Hustle (Kadabra), Future Sight | R074-kadabra-hustle-future-sight (91000) | 1 | 26 / 26 | 2 / 2 |
+| R084 Plus (Kadabra), Future Sight | R084-kadabra-plus-future-sight (91000) | 1 (final design; an earlier one matched with entry 0 only) | 33 / 33 | 2 / 2 |
+| R087 + R089 Sleep Talk, Encore | R089-sleep-talk-encore (90005) | 6 (final design; 14 + more in earlier ones, no hit) | 78 / 78 | 1 / 1 |
+| R088 Sleep Talk, Choice Band | R088-sleep-talk-choice-band (90005) | 6 (final design; v1 swapped the band back) | 53 / 53 | 1 / 1 |
+| R092 Covet vs Sticky Hold | R092-covet-sticky-hold (93000) | 1 | 30 / 26 | 2 / 2 |
 
 R054's design makes `gLastLandedMoves` hold `MOVE_UNAVAILABLE` (a failed Fake Out) so `ShouldSwitchIfNaturalCure` reads the move
 table at 0xFFFF; the marker that ran is the `?? 0` arm in `factoryAiSwitchPolicy.ts`. The engine returns 0 for the missing move, and the
