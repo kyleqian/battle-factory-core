@@ -26,10 +26,11 @@ exclusions are superseded. Unrelated expansions stay parked.
 ## #220 — Held-item effect animation (B_ANIM_HELD_ITEM_EFFECT) is not presented (aud250, 2026-11-14)
 
 - `HELD_ITEM_EFFECT` only sets `pendingHeldItemEffectBattler` (`src/engine/battleResolutionPresentation.ts` ~2870-2935, ~4136-4160,
-  ~4576-4584); no presentation command and no live renderer exist, in either scene. In the aud250 ROM windows the held-item segments
+  ~4576-4584); no presentation command and no live renderer exist. In the aud250 Scene ON ROM windows the held-item segments
   (Leftovers, berries, ...) run ~214-235 frames longer than the engine's, so every later frame of such a battle is early, and the
   General_HeldItemEffect SEs (152 / 228 / 102; 43 ROM-only rows on 5 Scene ON seeds) cannot play. Fix = a presented command + renderer
-  (Scene ON) and the ROM segment length (both scenes; check what OFF waits), then the SEs. `docs/aud250-general-anim-sounds.md`.
+  (Scene ON) and the ROM segment length, then the SEs. Scene OFF is unmeasured: the ROM takes `BattleScript_Pausex20` (32 frames) there;
+  check the engine's OFF hold. Plan (3 steps, file:line): `docs/hie-scout.md`; `docs/aud250-general-anim-sounds.md`.
 
 ## #219 — S11 sound gaps after the aud248 scoreboard (2026-11-14)
 

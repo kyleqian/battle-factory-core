@@ -119,7 +119,7 @@ longer moves (the Mac is offline), so there is no fold next run. Battle rules, t
 - **Item 0 (sound):** aud248 measured S11 (`docs/aud248-s11-scoreboard.md`: not met; T1 + T2 by family, reproducible) and added the stat-change SE;
   aud249 / aud250 emit the General_* SEs (nine status conditions, weather continues, Focus Punch setup, Leech Seed drain, Castform). Next, by size
   (ISSUES #219 / #220): the held-item effect animation is not presented at all (#220: a presentation + timing gap, ~214-235 frames per Leftovers /
-  berry segment, then its SEs); move-body SE lifetimes (aud242 family, largest); cries in animation tasks (Roar / Howl / Hyper Voice); the second
+  berry segment in Scene ON, then its SEs; 3-step plan in `docs/hie-scout.md`); move-body SE lifetimes (aud242 family, largest); cries in animation tasks (Roar / Howl / Hyper Voice); the second
   `Status_*` play +14 frames. aud246 (S11 close) waits for those.
 - **Item 0b (Lobby):** lbr-d1 (7-win returns to the Lobby, streak kept), lbr-d2b (won compare traces), lbr-e (PreBattleRoom walk + briefing before
   the draft, traces 255 / 255; moves every in-game new challenge's deal toward the ROM), lbr-f (won record question 1 tick earlier) DONE. Next:

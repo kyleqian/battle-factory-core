@@ -23,7 +23,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Folded:** iss216 (#216 / #217), lbr-d1 (7-win Lobby return), lbr-d2b (won traces), lbr-e (PreBattleRoom, 3 traces 255 / 255), lbr-f
   (won record prompt 1 tick earlier), aud248 (S11 scoreboard, `docs/aud248-s11-scoreboard.md`: **acceptance not met**; stat-change SE), aud249 /
   aud250 (General_* SEs; census 0..199 gameplay fields equal both scenes), cln279 (236 step-id scripts deleted). Filed #219 (sound gaps), #220
-  (held-item effect animation not presented: ~214-235 frames short per Leftovers / berry segment, both scenes).
+  (held-item effect animation not presented: ~214-235 frames short per Leftovers / berry segment in Scene ON; plan `docs/hie-scout.md`).
 - **Gates (final engine `da0272fb4`; `010ef7abe` after it fixes 3 ratchets, src import-path only):** full suite 14,829 passed / 3 failed -> the 3
   (animation boundary, dif256 harness, iss215 tools; from this run's merges) fixed in `010ef7abe`, those files + touched 8 / 8; typecheck 0;
   build / build:lib 0; test:gate on `010ef7abe` 362 files / 2,843 tests. Soaks: vanilla 0:20 OFF **20 / 20**, ON **20 / 20**; 0:60 default **60 / 60**, winning **60 / 60**, winning-swap **60 / 60** (all `budget`); varied-RNG first-round winning carry 0 / 14 / 28
