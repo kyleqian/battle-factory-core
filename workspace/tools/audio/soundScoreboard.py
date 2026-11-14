@@ -20,6 +20,7 @@ CONTROLLER = {9, 12, 13, 14, 15, 16, 32, 55, 79, 90, 114, 115, 116}
 STAT = {239, 245}
 KINDS = {"se", "cry", "bgm", "fanfare"}
 DELTAS = {}
+ID_DELTAS = {}
 FAMILIES = ["move-animation SE", "stat-change SE", "cry", "battle-controller SE", "bgm", "fanfare", "screen SE"]
 
 
@@ -61,6 +62,8 @@ def score_run(engine, drive, rom):
                     fam = family(e[i][1], e[i][2], name)
                     out[fam]["exact" if e[i][0] == r[j][0] else "offset"] += 1
                     DELTAS.setdefault(fam, []).append(e[i][0] - r[j][0])
+                    if e[i][1] == "se":
+                        ID_DELTAS.setdefault(e[i][2], []).append(e[i][0] - r[j][0])
             else:
                 for j in range(j1, j2):
                     out[family(r[j][1], r[j][2], name)]["missing"] += 1
@@ -80,6 +83,7 @@ def main(argv):
     result = {}
     for scene in ("on", "off"):
         DELTAS.clear()
+        ID_DELTAS.clear()
         tot = {f: {"exact": 0, "offset": 0, "missing": 0, "extra": 0} for f in FAMILIES}
         seeds, per_seed, miss_ids = [], {}, {}
         for eng_p in sorted(d.glob(f"*-{scene}.engine.json"), key=lambda p: int(p.name.split("-")[0])):
@@ -104,7 +108,8 @@ def main(argv):
                 key = f"{kind} {row[1]}:{row[2]}"
                 miss_ids[key] = miss_ids.get(key, 0) + 1
         deltas = {f: {"n": len(v), "median": sorted(v)[len(v) // 2], "p10": sorted(v)[len(v) // 10], "p90": sorted(v)[(len(v) * 9) // 10]} for f, v in DELTAS.items() if v}
-        result[scene] = {"deltas": deltas, "seeds": seeds, "totals": tot, "idRows": dict(sorted(miss_ids.items(), key=lambda kv: -kv[1])), "perSeed": per_seed}
+        id_deltas = {str(k): sorted(v) for k, v in sorted(ID_DELTAS.items())}
+        result[scene] = {"idDeltas": id_deltas, "deltas": deltas, "seeds": seeds, "totals": tot, "idRows": dict(sorted(miss_ids.items(), key=lambda kv: -kv[1])), "perSeed": per_seed}
     for scene, r in result.items():
         print(f"== Scene {scene.upper()}: {len(r['seeds'])} aligned seeds {r['seeds']}")
         print(f"{'family':24}{'exact':>8}{'offset':>8}{'missing':>9}{'extra':>7}")

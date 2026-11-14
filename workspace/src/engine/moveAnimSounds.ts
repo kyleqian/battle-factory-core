@@ -7,6 +7,7 @@ import { BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS } from "./battleScriptSourceConst
 import type { BattleResolutionPresentationState } from "./battleResolutionPresentation.ts";
 import { statsChangeParams } from "../animation/statsChange.ts";
 import { liveMoveSourceAge, statsChangeSourceAge } from "./battleResolutionPresentationRender.ts";
+import { WEATHER_CONTINUES_LAUNCH_LEAD_ROWS, isWeatherContinuesAnimation, type BattleStatusAnimationName, type WeatherContinuesAnimation } from "./battleResolutionPresentation.ts";
 
 export interface TimedOp {
   readonly op: "playsewithpan" | "playse" | "waitplaysewithpan" | "loopsewithpan" | "panse" | "panse_adjustnone" | "panse_adjustall" | "setpan" | "soundtask_loopse" | "soundtask_fireblast" | "soundtask_se1" | "soundtask_se2";
@@ -26,6 +27,8 @@ interface TimingTable {
   readonly sides: number;
   readonly variants: readonly (readonly TimedOp[])[];
   readonly moves: readonly Readonly<{ move: number; variants: readonly number[] }>[];
+  /** aud249: gBattleAnims_StatusConditions + gBattleAnims_General, one variant per attacker side. */
+  readonly general: readonly Readonly<{ label: string; variants: readonly number[] }>[];
 }
 const timing = timingData as unknown as TimingTable;
 
@@ -37,11 +40,11 @@ const AGE_TO_SOUND_ROWS = 7;
 /** One sound row of an op and its offset (script frames) from the op's own frame. */
 export interface OpRow { readonly offset: number; readonly emission: SoundEmission; /** Written by a pan task (RunTasks, after the script step of the same iteration), not by the script command. */ readonly task?: true }
 
-/** loopsewithpan is t0, t0 + wait, then every wait + 1 frames. */
-function loopOffsets(op: TimedOp): readonly number[] {
+/** loopsewithpan is t0, t0 + wait, then every wait + 1 frames; the status / General launches (ROM T2 windows) play every gap at wait + 1 (`uniform`). */
+function loopOffsets(op: TimedOp, uniform: boolean): readonly number[] {
   const wait = op.wait ?? 0;
   const offsets: number[] = [];
-  for (let play = 0; play < (op.times ?? 1); play += 1) offsets.push(play === 0 ? 0 : wait + (play - 1) * (wait + 1));
+  for (let play = 0; play < (op.times ?? 1); play += 1) offsets.push(play === 0 ? 0 : uniform ? play * (wait + 1) : wait + (play - 1) * (wait + 1));
   return offsets;
 }
 
@@ -133,9 +136,9 @@ function fireBlastRows(op: TimedOp, context: AnimPanContext): readonly OpRow[] {
 }
 
 /** Exported for tests/aud242cMoveAnimSounds.test.ts (the panse_adjustnone / _adjustall / framesToWait arithmetic has no ROM window). */
-export function moveAnimOpRows(op: TimedOp, context: AnimPanContext): readonly OpRow[] {
+export function moveAnimOpRows(op: TimedOp, context: AnimPanContext, uniformLoop = false): readonly OpRow[] {
   switch (op.op) {
-    case "loopsewithpan": return loopOffsets(op).map((offset) => ({ offset, emission: { kind: "se", id: op.id, pan: animSoundPan(op.pan ?? 0, context) } }));
+    case "loopsewithpan": return loopOffsets(op, uniformLoop).map((offset) => ({ offset, emission: { kind: "se", id: op.id, pan: animSoundPan(op.pan ?? 0, context) } }));
     case "playse": return [{ offset: 0, emission: { kind: "se", id: op.id, pan: null } }];
     case "setpan": return [{ offset: 0, emission: { kind: "pan", id: null, pan: animSoundPan(op.pan ?? 0, context) } }];
     case "panse": case "panse_adjustnone": case "panse_adjustall": return panRows(op, context);
@@ -173,6 +176,18 @@ export function emitStatsChangeSounds(after: BattleResolutionPresentationState |
   });
 }
 
+/** Per iteration the script step runs before RunTasks: every command's row, then the pan tasks' rows in creation order. */
+function emitOpsAt(ops: readonly TimedOp[], context: AnimPanContext, scriptRow: number, uniformLoop = false): void {
+  const due: OpRow[] = [];
+  for (const op of ops) {
+    const base = scriptRow - op.frame;
+    if (base < 0) continue;
+    for (const row of moveAnimOpRows(op, context, uniformLoop)) if (row.offset === base) due.push(row);
+  }
+  for (const row of due) if (row.task !== true) emitSound(row.emission);
+  for (const row of due) if (row.task === true) emitSound(row.emission);
+}
+
 /** Called once per collected tick with the round's resolution presentation after the tick; emits the ops whose frame is this tick's. */
 export function emitMoveAnimSounds(after: BattleResolutionPresentationState | null): void {
   if (after === null || after.lifecycle.phase !== "presenting") return;
@@ -185,13 +200,46 @@ export function emitMoveAnimSounds(after: BattleResolutionPresentationState | nu
     attackerSide: request.attacker === 0 ? "player" : "opponent",
     targetSide: request.target === 0 ? "player" : "opponent",
   } as const;
-  const due: OpRow[] = [];
-  for (const op of variantOf(request.moveId, request.turn, request.attacker === 0 ? 0 : 1)) {
-    const base = age - FIRST_COMMAND_AGE - AGE_TO_SOUND_ROWS - op.frame;
-    if (base < 0) continue;
-    for (const row of moveAnimOpRows(op, context)) if (row.offset === base) due.push(row);
+  emitOpsAt(variantOf(request.moveId, request.turn, request.attacker === 0 ? 0 : 1), context, age - FIRST_COMMAND_AGE - AGE_TO_SOUND_ROWS);
+}
+
+const STATUS_ANIMATION_LABELS: Readonly<Record<BattleStatusAnimationName, string>> = {
+  PSN: "Status_Poison", CONFUSION: "Status_Confusion", BRN: "Status_Burn", INFATUATION: "Status_Infatuation", SLP: "Status_Sleep",
+  PRZ: "Status_Paralysis", FRZ: "Status_Freeze", CURSED: "Status_Curse", NIGHTMARE: "Status_Nightmare",
+};
+const WEATHER_LABELS: Readonly<Record<WeatherContinuesAnimation, string>> = {
+  RAIN_CONTINUES: "General_Rain", SUN_CONTINUES: "General_Sun", SANDSTORM_CONTINUES: "General_Sandstorm", HAIL_CONTINUES: "General_Hail",
+};
+/** Status-animation command age (rows since the launch, after the IsBattleSEPlaying gate) of the script's first command. */
+export const STATUS_ANIMATION_SCRIPT_AGE = 7;
+/** Weather-continues body age -> script row: the move-body clock (FIRST_COMMAND_AGE + AGE_TO_SOUND_ROWS). */
+const WEATHER_SCRIPT_AGE = FIRST_COMMAND_AGE + AGE_TO_SOUND_ROWS;
+
+function generalVariant(label: string, attackerSide: 0 | 1): readonly TimedOp[] {
+  const entry = timing.general.find((g) => g.label === label);
+  return entry === undefined ? [] : timing.variants[entry.variants[attackerSide]!]!;
+}
+
+/**
+ * aud249: the SEs of the General_* animations the live presentation runs (Scene ON only: Cmd_statusanimation / Cmd_playanimation test
+ * HITMARKER_NO_ANIMATIONS, so OFF presents none of these commands). Status conditions play with statusAnimActive (every pan follows the battler's
+ * side, BattleAnimAdjustPanning :1265-1271); the end-turn weather bodies are General_Rain / the Sun, Sandstorm, Hail move scripts with battler 0 as attacker.
+ */
+export function emitGeneralAnimSounds(after: BattleResolutionPresentationState | null): void {
+  if (after === null || after.lifecycle.phase !== "presenting") return;
+  const command = after.segments[after.segmentIndex]?.commands[after.commandIndex];
+  if (command === undefined) return;
+  const elapsed = after.lifecycle.phaseElapsed;
+  if (command.type === "status-animation") {
+    const age = elapsed - (command.timing.seGateFrames ?? 0);
+    if (age < 0) return;
+    const side = command.battler === 0 ? "player" : "opponent";
+    emitOpsAt(generalVariant(STATUS_ANIMATION_LABELS[command.animation], command.battler), { attackerSide: side, targetSide: side, statusAnimActive: true }, age - STATUS_ANIMATION_SCRIPT_AGE, true);
+  } else if (command.type === "general-animation" && command.animated === true && isWeatherContinuesAnimation(command.animation)) {
+    const age = elapsed - WEATHER_CONTINUES_LAUNCH_LEAD_ROWS;
+    if (age < 0) return;
+    emitOpsAt(generalVariant(WEATHER_LABELS[command.animation], command.battler), {
+      attackerSide: command.battler === 0 ? "player" : "opponent", targetSide: command.battler === 0 ? "opponent" : "player",
+    }, age - WEATHER_SCRIPT_AGE, true);
   }
-  // Per iteration the script step runs before RunTasks: every command's row, then the pan tasks' rows in creation order.
-  for (const row of due) if (row.task !== true) emitSound(row.emission);
-  for (const row of due) if (row.task === true) emitSound(row.emission);
 }

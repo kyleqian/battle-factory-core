@@ -92,11 +92,13 @@ describe("move-animation SEs after the aud242g sprite lifetime waits", () => {
     });
   }
 
-  it("dreameater-player: the Spore prelude (turn 1) is frame-exact (delta 0) and the ROM's two SE197 sleep rows are not emitted", () => {
+  it("dreameater-player: the Spore prelude (turn 1) is frame-exact (delta 0), including the first Status_Sleep SE197 (aud249); the second SE197 row carries the second-play residual", () => {
     const rom = fixture("dreameater-player");
     const ours = ourEvents(rom).filter((e) => isMoveSe(e) && e.frame < 700);
-    const theirs = rom.events.filter((e) => e.noop !== true && isMoveSe(e) && e.frame < 700 && e.id !== 197);
-    expect(ours.map(row)).toEqual(theirs.map(row));
+    const theirs = rom.events.filter((e) => e.noop !== true && isMoveSe(e) && e.frame < 700);
     expect(rom.events.filter((e) => e.id === 197).map(row)).toEqual(["272:197:63", "565:197:63"]);
+    const second = (rows: Array<{ id: number | null; frame: number }>) => rows.filter((e) => e.id === 197)[1]!;
+    expect(ours.filter((e) => e.id !== 197 || e !== second(ours)).map(row)).toEqual(theirs.filter((e) => e !== second(theirs)).map(row));
+    expect(second(theirs).frame - second(ours).frame).toBe(15);
   });
 });
