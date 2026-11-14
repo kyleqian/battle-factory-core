@@ -1,7 +1,8 @@
 """usage (cwd = workspace/): python3 tools/replay-hunt/prehunt.py STAGE.json OUTDIR FIRST_SEED COUNT
 Like p4/stagehunt.py, but cheap: per lab seed do the request, the ROM setup and the ENGINE replay only, and look for the stage's `expect` rows in the
 engine's own events. Only a seed whose engine battle has every row is driven on the ROM (the full wide replay). Stops at the first seed whose wide
-replay matches the ROM and has the rows (OUTDIR/found.json)."""
+replay matches the ROM and has the rows (OUTDIR/found.json).
+rrh3: STALL-WARNING when an engine battle hits the frame budget or has 100+ decisions, or the ROM drive stops short of the engine's states; STALL-ABORT after 3 stalled seeds."""
 import gzip, json, os, subprocess, sys
 stage_path, out, first, count = os.path.abspath(sys.argv[1]), os.path.abspath(sys.argv[2]), int(sys.argv[3]), int(sys.argv[4])
 W = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -19,6 +20,8 @@ if bad:
     print("HUNT-END", flush=True)
     sys.exit(2)
 design_errors = 0
+stalls = 0
+STALL_DECISIONS = int(os.environ.get("PREHUNT_STALL_DECISIONS", "100"))  # the ROM drive stops at about 80000 frames, about 115+ states: a battle with this many engine decisions is likely to be cut short
 env = {**os.environ, "REPLAY_OUT": out, "REPLAY_KEEP": "0", 
        "ROM_REPLAY_POLICY": "script", "ROM_REPLAY_SYMBOLS": "0"}
 env.pop("ROM_REPLAY_CHALLENGE", None)
@@ -64,6 +67,12 @@ for seed in range(first, first + count):
             if design_errors >= 3:
                 print("DESIGN-ERROR: the script names a slot the engine does not offer (3 seeds); fix the design", flush=True)
                 break
+    if "frame budget" in str(e.get("error")) or len(e["decisions"]) >= STALL_DECISIONS:
+        stalls += 1
+        print(seed, f"STALL-WARNING: engine battle {'hit the frame budget' if e.get('error') else 'has ' + str(len(e['decisions'])) + ' decisions'}; the design may stall (a Protect/Rest/Recover/Double Team loop). Give the stage a team that cannot stall.", flush=True)
+        if stalls >= 3:
+            print("STALL-ABORT: 3 stalled seeds; fix the design", flush=True)
+            break
     ran = [k for k in got if k.startswith("ran:") and got[k]]
     rows_ok = all(v for k, v in got.items() if not k.startswith("ran:"))
     covers_ok = (len(ran) > 0) if base.get("coverAny") else all(v for k, v in got.items() if k.startswith("ran:"))
@@ -82,6 +91,8 @@ for seed in range(first, first + count):
         json.dump(stage, open(f"{out}/found.json", "w"), indent=1)
         print("FOUND seed", seed, flush=True)
         break
+    if s["matched"] < s["engineStates"]:
+        print(f"   STALL-WARNING: the ROM drive matched {s['matched']} of {s['engineStates']} engine states and stopped (frame cap about 80000); a ROM-side stop is not an engine difference", flush=True)
     if not s["match"]:
         print("   NOTE: a staged battle that does not match the ROM:", s["class"], json.dumps(s.get("divergence"))[:200], flush=True)
 print("HUNT-END", flush=True)

@@ -18,3 +18,8 @@ All commands run with cwd = `workspace/`; outputs go under `.integration/evidenc
 - `designcheck.py STAGE...` (run by `prehunt.py` and so by `huntq.py`) refuses a design before any seed: `replacements` that repeat, name more than two slots, or name the lead 0 with no switch in the script; a `cover` snippet that does not occur exactly once; a `cover` marker whose line is an error `throw`.
 - `prehunt.py` stops after 3 seeds whose engine error is `... is not legal` (a script that names an unoffered slot): `DESIGN-ERROR`.
 - `huntq.py --max-seeds N` caps seeds per stage; `--out DIR` (default `.integration/evidence/rrh2`).
+
+## rrh3 changes
+
+- `designcheck.py` also refuses a set id outside the challenge's range, a species twice on one side or on both sides, and a held item twice on one side (each makes the lab setup fail on every seed; rrh3 lost 3 minutes to a duplicate Lum Berry).
+- `prehunt.py` prints `STALL-WARNING` when the engine battle hits the frame budget or has `PREHUNT_STALL_DECISIONS` (default 100) or more decisions (the ROM drive stops near 115 states), and when the ROM drive matched fewer states than the engine ran; `STALL-ABORT` after 3 stalled seeds. A ROM-side stop is not an engine difference.
