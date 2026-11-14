@@ -422,7 +422,9 @@ describe("random round soak driver (green milestone pin)", () => {
       // lbr-d1 (docs/lbrd-win-lobby-return.md): the won terminal no longer chains into a draft at the record answer, it plays the
       // farewell and hands over the walkable Lobby, and the first-decision snapshot now runs to that Lobby entry: frames 41_021 -> 41_068,
       // renderCalls 2_895 -> 2_899, terminalRecordChoice null -> "no" (the mashed A answers the default NO); same battle 7, turn 3, end state.
-      frames: 41_068,
+      // hie1 (ISSUES #220 step 1; the held-item effect presented, here Scene OFF's `playanimation B_ANIM_HELD_ITEM_EFFECT` Pausex20 hold):
+      // frames only + render calls, 41_068 -> 41_099, renderCalls 2_899 -> 2_907; same battle 7, turn 3, end state, diagnostics.
+      frames: 41_099,
       battle: 7,
       turn: 3,
       diagnostics: {
@@ -434,7 +436,7 @@ describe("random round soak driver (green milestone pin)", () => {
         terminalOutcome: "roundWon",
         terminalRecordMenuInputReadyReached: true,
         terminalRecordChoice: "no",
-        renderCalls: 2_899,
+        renderCalls: 2_907,
       },
     });
     expect(second).toEqual(first);
@@ -974,7 +976,8 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // fsw235 (the forced party menu opens on slot 0, so a slot-0 replacement needs no DOWN and a slot-2 one needs two): frames
       // only, 9140 -> 9134; decision notes identical apart from the menu presses; same battle / turn / end state.
       // lbra: frames only, 9134 -> 9185; the snapshot is now taken when the walkable Lobby opens (the loss's record answer plays the ROM farewell first, +51 frames) instead of at the old chain; same battle / turn / end state.
-      frames: 9185,
+      // hie1 (the Scene OFF held-item effect hold): frames only, 9185 -> 9212; same battle / turn / end state.
+      frames: 9212,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 0,
@@ -997,7 +1000,8 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // rep203: fnt201 (the faint script lead) 8920 -> 9190; hpb202 adds 0 (lsd194SoakPins.ts on 5021eb05e / 00bc66214 / e7f6d136d); same battle / turn / end state.
       // fsw235: frames only (the menu presses), 9190 -> 9186; same battle / turn / end state.
       // lbra: frames only, 9186 -> 9233; the snapshot is now taken when the walkable Lobby opens (the loss's record answer plays the ROM farewell first, +47 frames) instead of at the old chain; same battle / turn / end state.
-      frames: 9233,
+      // hie1 (the Scene OFF held-item effect hold): frames only, 9233 -> 9271; same battle / turn / end state.
+      frames: 9271,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 0,
@@ -1499,7 +1503,10 @@ describe("ISSUES #104 (driver): continuous-play outcome semantics retuned -- OK 
     // (carry 14), so the lowest (10) is pinned.
     // lbr-e (the attendant hand-off walks the PreBattleRoom entry and deals after the walk): seed 10 now carries 7; re-scanned seeds 0..39
     // under the same options: seeds 16, 19 and 35 chain two round wins (carry 14), so the lowest (16) is pinned.
-    const result = runSeed(16, {
+    // hie1 (the held-item effect presented: every Leftovers / berry print moves later, so the soak's random presses land differently):
+    // seed 16 now carries 7; re-scanned seeds 0..80 under the same options: seeds 47, 50, 61 and 70 chain two round wins (carry 14),
+    // so the lowest (47) is pinned.
+    const result = runSeed(47, {
       policy: "winning",
       maxRounds: 3,
       renderEvery: 0,

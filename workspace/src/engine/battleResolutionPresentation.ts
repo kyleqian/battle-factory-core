@@ -158,6 +158,27 @@ export type BattleStatusAnimationName = keyof typeof STATUS_ANIMATION_ADDED_ROWS
  */
 export const FOCUS_PUNCH_SETUP_COMMAND_FRAMES = 124;
 /**
+ * hie1 (ISSUES #220, docs/hie-scout.md step 1; staged labs `hie1-{leftovers,sitrus,shellbell,cheri}-{on,off}`): every ITEMEFFECT
+ * script plays `playanimation ..., B_ANIM_HELD_ITEM_EFFECT` right before its print. Scene ON: the animation runs its own ~204 rows
+ * (src/animation/heldItemHeal.ts: first glyph of the print at age 204) and the print waits for the controller, so the general-animation
+ * command lasts HELD_ITEM_EFFECT_COMMAND_FRAMES + a controller launch lead that depends on how the script was entered:
+ * a RESTART (the item script runs from its own start, Leftovers / Sitrus: the animation event's execution is below the event before it)
+ * leads by HELD_ITEM_EFFECT_RESTART_LEAD_FRAMES, a CONTINUATION of the move script (Shell Bell, a cure berry after the hit) by
+ * HELD_ITEM_EFFECT_CONTINUE_LEAD_FRAMES. Scene OFF: Cmd_playanimation takes BattleScript_Pausex20 (`pause B_WAIT_TIME_SHORT`) and the
+ * print follows after the script's own executions (`heldItemEffectOffHoldFrames`), plus the same two leads. Behind a Substitute the
+ * ROM skips the animation (TryHandleLaunchBattleTableAnimation; Scene ON only: the Scene OFF pause is unconditional).
+ */
+export const HELD_ITEM_EFFECT_COMMAND_FRAMES = 214;
+export const HELD_ITEM_EFFECT_RESTART_LEAD_FRAMES = 15;
+export const HELD_ITEM_EFFECT_CONTINUE_LEAD_FRAMES = 9;
+/**
+ * A cure berry's script continues from the move's own `set-battler-status-data` receipt, whose `status` command (off121 / the 32-frame
+ * default) already presents the frames up to the animation in both scenes (Scene OFF: the 35 executions; Scene ON: the 32 default),
+ * so the held-item command presents the rest. Scene ON only: the ROM spends one frame more than the other continuations (224 vs 223);
+ * Scene OFF's 35 + the continue lead is exact.
+ */
+export const HELD_ITEM_EFFECT_AFTER_STATUS_EXTRA_FRAMES = 1;
+/**
  * wth236: the end-turn weather animations. BattleScript_DamagingWeatherContinues' `playanimation_var BS_ATTACKER, sB_ANIM_ARG1`
  * (General_Sandstorm / General_Hail: `goto Move_SANDSTORM` / `Move_HAIL`) and BattleScript_RainContinuesOrEnds /
  * SunlightContinues' `playanimation BS_ATTACKER, B_ANIM_RAIN_CONTINUES / B_ANIM_SUN_CONTINUES` (General_Rain; General_Sun =
@@ -614,7 +635,7 @@ export type BattleResolutionPresentationCommand =
       type: "general-animation";
       eventSequence: number;
       battler: 0 | 1;
-      animation: "FOCUS_PUNCH_SETUP" | "LEECH_SEED_DRAIN" | "CASTFORM_CHANGE" | WeatherContinuesAnimation;
+      animation: "FOCUS_PUNCH_SETUP" | "HELD_ITEM_EFFECT" | "LEECH_SEED_DRAIN" | "CASTFORM_CHANGE" | WeatherContinuesAnimation;
       /** cff230: a CASTFORM_CHANGE's target form (the event's argument & ~CASTFORM_SUBSTITUTE; 0 = normal). */
       castformForm?: number;
       /** cff232 / snd233: extra rows before the morph's lead (a weather-loop change at battler 1, both scenes); absent = 0. */
@@ -1295,6 +1316,44 @@ function sourcePauseUsedMoveHoldFrames(
     return null;
   }
   return null;
+}
+/**
+ * hie1: the executions the interpreter spent on the way to `events[index]` and the lead the controller adds. A restart (the event's
+ * execution is below the one before it, or it is the first event) counts from execution 0 and leads by the restart lead; a
+ * continuation counts from the previous event and leads by the continue lead.
+ */
+function heldItemEffectExecutionsAndLead(
+  events: readonly BattleKernelSemanticEvent[],
+  index: number,
+): { executions: number; lead: number } {
+  const execution = instructionExecutionOf(events[index]!);
+  const previous = index === 0 ? null : events[index - 1]!.provenance?.instructionExecution ?? null;
+  return previous === null || execution < previous
+    ? { executions: execution, lead: HELD_ITEM_EFFECT_RESTART_LEAD_FRAMES }
+    : { executions: execution - previous, lead: HELD_ITEM_EFFECT_CONTINUE_LEAD_FRAMES };
+}
+/**
+ * hie1: Scene OFF's presented hold for an item print whose source is `playanimation ..., B_ANIM_HELD_ITEM_EFFECT` right before it
+ * (battle_script_commands.c:4014-4018 -> BattleScript_Pausex20, `pause B_WAIT_TIME_SHORT` = 32 frames). Every instruction from the
+ * previous receipt to the print runs once per frame (the pause's own blocked retries included), so the hold is that execution count
+ * plus the controller lead. When the status command of a cure berry's status-data receipt (off121) already presents those executions
+ * (`executionsPresented`: the last command is that `status`), only the lead remains. Null when the print is not preceded by that
+ * instruction or has no provenance.
+ */
+function heldItemEffectOffHoldFrames(
+  events: readonly BattleKernelSemanticEvent[],
+  messageIndex: number,
+  executionsPresented: boolean,
+): number | null {
+  const programCounter = events[messageIndex]!.provenance?.programCounter;
+  if (programCounter === undefined || programCounter < 1) return null;
+  const instruction = BATTLE_SCRIPT_PROGRAM.instructions[programCounter - 1];
+  if (
+    instruction?.opcodeName !== "B_SCR_OP_PLAYANIMATION"
+    || !instruction.operands.some((operand) => operand.expression === "B_ANIM_HELD_ITEM_EFFECT")
+  ) return null;
+  const { executions, lead } = heldItemEffectExecutionsAndLead(events, messageIndex);
+  return (executionsPresented ? 0 : executions) + lead;
 }
 /**
  * off121 (docs/off121-status-command.md): in Scene OFF `Cmd_statusanimation` is skipped (HITMARKER_NO_ANIMATIONS,
@@ -4375,6 +4434,7 @@ export function projectBattleResolutionCommands(
   let currentField: BattleResolutionDisplayedField = field;
   const substituteFades: { at: number; battler: 0 | 1; sequence: number }[] = [];
   const statsChanges: { at: number; battler: 0 | 1; sequence: number; argument: number; frames: number; seGate: number }[] = [];
+  const heldItemEffects: { at: number; battler: 0 | 1; sequence: number; frames: number; afterStatus: boolean }[] = [];
 
   for (let index = 0; index < events.length; index += 1) {
     const event = events[index]!;
@@ -4427,6 +4487,20 @@ export function projectBattleResolutionCommands(
           switchInBattler,
           pendingSwitch.get(switchInBattler)!.toPartyIndex,
         ).field;
+      if (
+        pendingHeldItemEffectBattler === null
+        && (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0
+      ) {
+        const heldItemHold = heldItemEffectOffHoldFrames(events, index, commands[commands.length - 1]?.type === "status");
+        if (heldItemHold !== null) {
+          commands.push(Object.freeze({
+            type: "move-animation",
+            eventSequence: event.sequence,
+            battler: lastMoveAttacker ?? 0,
+            timing: Object.freeze({ minimumFrames: heldItemHold }),
+          }));
+        }
+      }
       commands.push(Object.freeze({
         type: "message",
         eventSequence: event.sequence,
@@ -4581,6 +4655,12 @@ export function projectBattleResolutionCommands(
         payload.battler ?? -1,
         "held-item effect animation",
       );
+      const { lead } = heldItemEffectExecutionsAndLead(events, index);
+      heldItemEffects.push({
+        at: commands.length, battler: pendingHeldItemEffectBattler, sequence: event.sequence,
+        frames: HELD_ITEM_EFFECT_COMMAND_FRAMES + lead,
+        afterStatus: events[index - 1]?.payload.kind === "set-battler-status-data" && commands[commands.length - 1]?.type === "status",
+      });
       continue;
     }
     if (
@@ -5034,16 +5114,30 @@ export function projectBattleResolutionCommands(
   // The fade command itself, after whatever the queue last showed (the dismissed STRINGID_SUBSTITUTEDMG) and before the
   // "faded" message; and each stats-change command at its STATS_CHANGE event. Inserted in (position, event) order.
   const inserts = [
-    ...substituteFades.map((fade) => ({ at: fade.at, sequence: fade.sequence, fade, statsChange: null })),
-    ...statsChanges.map((statsChange) => ({ at: statsChange.at, sequence: statsChange.sequence, fade: null, statsChange })),
+    ...substituteFades.map((fade) => ({ at: fade.at, sequence: fade.sequence, fade, statsChange: null, heldItem: null })),
+    ...statsChanges.map((statsChange) => ({ at: statsChange.at, sequence: statsChange.sequence, fade: null, statsChange, heldItem: null })),
+    ...heldItemEffects.map((heldItem) => ({ at: heldItem.at, sequence: heldItem.sequence, fade: null, statsChange: null, heldItem })),
   ].sort((a, b) => a.at - b.at || a.sequence - b.sequence);
   if (inserts.length !== 0) {
     const ordered: BattleResolutionPresentationCommand[] = [];
     let next = 0;
     for (let index = 0; index <= commands.length; index += 1) {
       for (; next < inserts.length && inserts[next]!.at === index; next += 1) {
-        const { fade, statsChange } = inserts[next]!;
-        if (fade !== null) {
+        const { fade, statsChange, heldItem } = inserts[next]!;
+        if (heldItem !== null) {
+          const atStart = battleResolutionFieldBeforeCommand(field, ordered, ordered.length);
+          if ((heldItem.battler === 0 ? atStart.player : atStart.opponent).substituteDoll !== true) {
+            const statusBefore = ordered[ordered.length - 1];
+            const presented = heldItem.afterStatus && statusBefore?.type === "status" ? statusBefore.timing.minimumFrames : 0;
+            ordered.push(Object.freeze({
+              type: "general-animation" as const, eventSequence: heldItem.sequence, battler: heldItem.battler,
+              animation: "HELD_ITEM_EFFECT" as const,
+              timing: Object.freeze({
+                minimumFrames: heldItem.frames - presented + (presented > 0 ? HELD_ITEM_EFFECT_AFTER_STATUS_EXTRA_FRAMES : 0),
+              }),
+            }));
+          }
+        } else if (fade !== null) {
           ordered.push(Object.freeze({
             type: "substitute-fade" as const, eventSequence: fade.sequence, battler: fade.battler,
             timing: Object.freeze({ minimumFrames: substituteFadeDuration(fade.battler === 0 ? "player" : "opponent") }),

@@ -844,7 +844,10 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
       faintBattler: 0,
       advance: "button",
     });
-    expect(chargeResolution.segments[0]!.commands[11]).toMatchObject({
+    // hie1: the Scene OFF `playanimation B_ANIM_HELD_ITEM_EFFECT` pause (Pausex20) is now a presented hold (command 10) before Shell Bell's print.
+    expect(chargeResolution.segments[0]!.commands[10]).toMatchObject({ type: "move-animation" });
+    expect(chargeResolution.segments[0]!.commands[11]).toMatchObject({ type: "message" });
+    expect(chargeResolution.segments[0]!.commands[12]).toMatchObject({
       type: "hp",
       battler: 1,
       from: 93,
@@ -867,7 +870,7 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
 
     // Dismiss "METAPOD fainted!". ISSUES #93: this used to jump straight to
     // "forced-party-handoff" here, before Shell Bell's own trailing
-    // sprite-visibility/message/hp commands (indices 8-11) ever presented --
+    // sprite-visibility/hold/message/hp commands (indices 8-12) ever presented --
     // real source runs those `Cmd_moveend` item effects strictly before
     // `HandleFaintedMonActions` ever opens the party menu.
     state = advanceFactoryRoundBattleResolution(state, new Set(["A"]));
@@ -883,7 +886,7 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
     }
     expect(state.battleResolutionPresentation?.lifecycle.phase).toBe("forced-party-handoff");
     expect(state.battleForcedPartySelect).not.toBeNull();
-    // The Shell Bell heal (segment 0's own command 11, 93 -> 94) must have
+    // The Shell Bell heal (segment 0's own command 12, 93 -> 94) must have
     // fully applied before the handoff's own field boundary is captured --
     // this is the exact value the pre-fix bug got wrong.
     expect(
