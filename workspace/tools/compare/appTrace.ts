@@ -9,6 +9,8 @@
 import "./harnessPlayerName.ts";
 import type { Trace } from "./oracleClient.ts";
 import { createInitialState, render, tick } from "../../src/engine/core.ts";
+import { createInitialFactoryCarry } from "../../src/engine/factoryRoundChaining.ts";
+import { driveGeneratedRoundToCompletion, PLAYER_TRAINER_ID as CARRIER_PLAYER_TRAINER_ID } from "../../tests/helpers/factoryRoundCarrier.ts";
 import { presentationRngFromTrace } from "../../src/engine/presentationRngHost.ts";
 import type { EngineState } from "../../src/engine/core.ts";
 import { traceAdvances } from "./traceReplay.ts";
@@ -1836,6 +1838,12 @@ export const APP_STAGES: Readonly<Record<string, AppStage>> = {
     rngMode: "frontierBattle",
   }),
   "loss-terminal-window-off": lossTerminalWindowStage,
+  // lbr-d2b: a real generated round driven to roundComplete (seven wins), parked at its terminal. The first tick creates the won terminal
+  // (age 1), so stage frame F == the oracle tick of the Lobby CB2_LoadMap handoff (terminal age 0, docs/lbrd2b-won-windows.md).
+  "seventh-win-terminal-off": (state) => {
+    const carry = createInitialFactoryCarry(CARRIER_PLAYER_TRAINER_ID);
+    return { ...state, factoryCarry: carry, factoryRoundBattleOrchestrator: driveGeneratedRoundToCompletion(carry, 17) };
+  },
   "win-terminal-window-off": winTerminalWindowStage,
   "mid-battle-switch-dense-off": midBattleSwitchDenseOffStage,
   "aud241b-opponent-faint-on": (state) => aud241bStage(state, "aud241b-opponent-faint-on", "on", 50, 12),
