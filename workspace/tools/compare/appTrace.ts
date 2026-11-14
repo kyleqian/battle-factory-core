@@ -988,7 +988,7 @@ function midBattleSwitchDenseOffStage(state: EngineState): EngineState {
 // aud241b: hit / faint / low-HP sound windows (tools/battle-lab/aud241b-*.json): both sides are Rattata at
 // the given levels with SEISMIC TOSS x4 (a fixed, RNG-free damage equal to the attacker's level), so the faint
 // and red-HP turns are deterministic. Stats are the ROM's for nature 0, IV 31, EV 0.
-function rattataAtLevel(level: number, moveId = 69): FactoryFullTurnBattlerConfig {
+function rattataAtLevel(level: number, moveId = 69, item = 0): FactoryFullTurnBattlerConfig {
   const stat = (base: number, hp = false): number => {
     const raw = Math.floor(((2 * base + 31) * level) / 100);
     return hp ? raw + level + 10 : raw + 5;
@@ -997,6 +997,7 @@ function rattataAtLevel(level: number, moveId = 69): FactoryFullTurnBattlerConfi
   return Object.freeze({
     ...RATTATA_LV50,
     level,
+    item,
     moveId,
     moves: [moveId, moveId, moveId, moveId] as const,
     pp: [20, 20, 20, 20] as const,
@@ -1027,6 +1028,26 @@ function aud241bStage(
     ...(frontierBrain ? { frontierBrain } : {}),
     battleScene: scene,
     player: rattataAtLevel(playerLevel, playerMoveId),
+    trainer: rattataAtLevel(opponentLevel, opponentMoveId),
+    usedMessageHoldFrames: 0,
+    sceneOffNoAnimations: scene === "off",
+  });
+}
+
+// hie1: held-item effect windows (tools/battle-lab/hie1-*.json): the player's Rattata holds `playerItem`; the opponent's move / level is
+// chosen per site so the item fires (Leftovers end-turn, Sitrus after the hit, Shell Bell on the player's hit, Cheri cures Thunder Wave).
+function hie1Stage(
+  state: EngineState,
+  id: string,
+  scene: "on" | "off",
+  playerLevel: number,
+  opponentLevel: number,
+  playerItem: number,
+  opponentMoveId = 69,
+): EngineState {
+  return midBattleSwitchStage(state, id, [RATTATA_LV50_BENCH, RATTATA_LV50_BENCH], [105, 105], {
+    battleScene: scene,
+    player: rattataAtLevel(playerLevel, 69, playerItem),
     trainer: rattataAtLevel(opponentLevel, opponentMoveId),
     usedMessageHoldFrames: 0,
     sceneOffNoAnimations: scene === "off",
@@ -1907,6 +1928,15 @@ export const APP_STAGES: Readonly<Record<string, AppStage>> = {
   "aud242b-fireblast-player-on": (state) => aud241bStage(state, "aud242b-fireblast-player-on", "on", 50, 12, 126, undefined, false, 69),
   "aud242b-dragonclaw-opponent-on": (state) => aud241bStage(state, "aud242b-dragonclaw-opponent-on", "on", 12, 50, 69, undefined, false, 337),
   "aud242b-cosmicpower-player-on": (state) => aud241bStage(state, "aud242b-cosmicpower-player-on", "on", 50, 12, 322, undefined, false, 69),
+  // hie1: held-item effect (docs/hie-scout.md step 1).
+  "hie1-leftovers-on": (state) => hie1Stage(state, "hie1-leftovers-on", "on", 50, 40, 200, 69),
+  "hie1-leftovers-off": (state) => hie1Stage(state, "hie1-leftovers-off", "off", 50, 40, 200, 69),
+  "hie1-sitrus-on": (state) => hie1Stage(state, "hie1-sitrus-on", "on", 30, 50, 142, 69),
+  "hie1-sitrus-off": (state) => hie1Stage(state, "hie1-sitrus-off", "off", 30, 50, 142, 69),
+  "hie1-shellbell-on": (state) => hie1Stage(state, "hie1-shellbell-on", "on", 40, 50, 219, 69),
+  "hie1-shellbell-off": (state) => hie1Stage(state, "hie1-shellbell-off", "off", 40, 50, 219, 69),
+  "hie1-cheri-on": (state) => hie1Stage(state, "hie1-cheri-on", "on", 50, 40, 133, 86),
+  "hie1-cheri-off": (state) => hie1Stage(state, "hie1-cheri-off", "off", 50, 40, 133, 86),
   // aud250: General_FocusPunchSetUp / General_LeechSeedDrain sound anchors (docs/aud250-general-anim-sounds.md).
   "aud250-focuspunch-player-on": (state) => aud241bStage(state, "aud250-focuspunch-player-on", "on", 50, 12, 264, undefined, false, 69),
   "aud250-leechseed-player-on": (state) => aud241bStage(state, "aud250-leechseed-player-on", "on", 50, 12, 73, undefined, false, 69),
