@@ -608,7 +608,12 @@ describe("random round soak driver (green milestone pin)", () => {
     // frames, default options, same joint event + clean errorMessage + OK + >= 1 Lobby new challenge). Hits: 3, 5, 13, 14, 29, 38.
     // Seed 3 is the pin (lowest; Baton Pass commits 3, first commit 48916, halt 48956, two Lobby new challenges). Details and the
     // mutation check: docs/rps278-soak-repin.md.
-    const result = runSeed(3, {
+    //
+    // lbr-e (the in-game new challenge now walks the PreBattleRoom entry and is dealt after the walk, from the cursor of ROM frame 6660
+    // instead of the hand-off tick's): seed 3 no longer commits Baton Pass. Re-scanned full-policy seeds 0..13 (same options and joint
+    // event; scratch .integration/evidence/lbre/scan.ts): seed 12 is the first and lowest hit (commit 31364, halt 31613, four Lobby new
+    // challenges). docs/lbre-prebattle-briefing.md "Re-pins".
+    const result = runSeed(12, {
       maxFrames: 80_000,
       renderEvery: 0,
       coverage: observer as never,
@@ -1492,7 +1497,9 @@ describe("ISSUES #104 (driver): continuous-play outcome semantics retuned -- OK 
     // lbr-d1 (a won round now returns to the Lobby and the draft is dealt from the Lobby's live cursor at the attendant, with the
     // streak kept): seed 0 now carries 7; re-scanned seeds 0..23 under the same options: seeds 10 and 13 chain two round wins
     // (carry 14), so the lowest (10) is pinned.
-    const result = runSeed(10, {
+    // lbr-e (the attendant hand-off walks the PreBattleRoom entry and deals after the walk): seed 10 now carries 7; re-scanned seeds 0..39
+    // under the same options: seeds 16, 19 and 35 chain two round wins (carry 14), so the lowest (16) is pinned.
+    const result = runSeed(16, {
       policy: "winning",
       maxRounds: 3,
       renderEvery: 0,
