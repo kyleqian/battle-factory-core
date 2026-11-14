@@ -1,0 +1,78 @@
+{
+ "name": "R084-kadabra-plus-future-sight",
+ "rules": [
+  "R084"
+ ],
+ "why": "Challenge 0, trainer 0. Player Kadabra (169) Role Plays the lead Plusle (186, Plus), keeps attacking with Confusion until Plusle faints, and alternates Future Sight with Confusion: when Minun (187, Minus) is the foe, a Plus Kadabra gets the Plus/Minus 1.5 Sp. Atk in the Future Sight damage. Togetic 183 is the third.",
+ "seed": 91000,
+ "challengeNum": 0,
+ "battleNum": 0,
+ "trainerId": 0,
+ "playerSetIds": [
+  169,
+  178,
+  197
+ ],
+ "opponentSetIds": [
+  186,
+  187,
+  183
+ ],
+ "script": {
+  "actions": [
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 2
+   }
+  ],
+  "then": "census"
+ },
+ "expect": [],
+ "cover": [
+  {
+   "file": "src/engine/battleScriptTrysetfutureattackOpcode.ts",
+   "text": "&& fieldAbilities.includes(58))\n",
+   "at": 0
+  },
+  {
+   "file": "src/engine/battleScriptTrysetfutureattackOpcode.ts",
+   "text": "{\n    spAtta",
+   "at": 0
+  }
+ ],
+ "coverAny": false,
+ "chance": 0.2,
+ "seeds": 20
+}
