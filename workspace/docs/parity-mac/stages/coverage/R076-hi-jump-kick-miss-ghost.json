@@ -1,0 +1,73 @@
+{
+ "name": "R076-hi-jump-kick-miss-ghost",
+ "rules": [
+  "R076"
+ ],
+ "why": "Challenge 7. Player Medicham (373) uses Hi Jump Kick every turn against a Ghost lead (Dusclops 476: Toxic, Confuse Ray, Double Team, Protect; it cannot hurt Medicham quickly): the kick does no damage to a Ghost, so a miss (10 percent a turn, more with Double Team or Protect) takes the 'at least 1' floor of DMG_RECOIL_FROM_MISS.",
+ "seed": 90001,
+ "challengeNum": 7,
+ "battleNum": 0,
+ "trainerId": 200,
+ "playerSetIds": [
+  373,
+  397,
+  380
+ ],
+ "opponentSetIds": [
+  476,
+  566,
+  709
+ ],
+ "script": {
+  "actions": [
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 1
+   }
+  ],
+  "then": "census"
+ },
+ "expect": [],
+ "cover": [
+  {
+   "file": "src/engine/battleScriptIngrainLeechSeedWrapOpcode.ts",
+   "text": "damage = 1;\n",
+   "at": 0
+  }
+ ],
+ "coverAny": true,
+ "chance": 0.7,
+ "seeds": 20
+}
