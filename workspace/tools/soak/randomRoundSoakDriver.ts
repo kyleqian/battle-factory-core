@@ -1732,6 +1732,7 @@ export class RandomPlayer {
     if (state.battleScene) return this.pressAdvance(state, "battleScene A");
     if (state.battleRoom) return this.pressAdvance(state, "battleRoom A");
     if (state.prebattleRoom) return this.pressAdvance(state, "prebattleRoom A");
+    if (state.prebattleEntry) return this.pressAdvance(state, "prebattle briefing A", false);
     if (state.summaryScreen.isOpen || state.summaryScreen.transition) {
       return this.onSummary(state);
     }
@@ -1755,6 +1756,7 @@ export class RandomPlayer {
     if (state.battleScene) return "battleScene";
     if (state.battleRoom) return `battleRoom:${state.battleRoom.phase}`;
     if (state.prebattleRoom) return `prebattleRoom:${state.prebattleRoom.phase}`;
+    if (state.prebattleEntry) return `prebattleEntry:${state.prebattleEntry.phase}`;
     if (state.summaryScreen.isOpen) return "summaryScreen";
     return "draftScreen";
   }

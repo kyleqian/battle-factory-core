@@ -210,8 +210,13 @@ describe('lbrc: mount option start: "after-save"', () => {
     expect(session.state.lobbyAttendant).toMatchObject({ screen: "step", age: 30 });
     session.reset();
     const events: FactoryEvent[] = [];
-    const frames = tapA(session, events, 600, (state) => state.lobbyFreeRoam === null);
-    expect(frames).toBeLessThan(600);
+    let sawEntry = false;
+    const frames = tapA(session, events, 1800, (state) => {
+      sawEntry ||= state.prebattleEntry !== null;
+      return state.lobbyFreeRoam === null && state.prebattleEntry === null;
+    });
+    expect(sawEntry).toBe(true);
+    expect(frames).toBeLessThan(1800);
     expect(events).toEqual([]);
     expect(session.state.pendingGeneratedRound?.carry).toMatchObject({ factoryWinStreak: 0, rentsCount: 0, battlePoints: 0, factorySymbolsCount: 0 });
     expect(session.state.draftScreen).not.toBeNull();
@@ -220,7 +225,7 @@ describe('lbrc: mount option start: "after-save"', () => {
   it("the deal is a deterministic function of the seed (same seed, same draft; another seed, another draft)", () => {
     const deal = (seed: number): string => {
       const session = new FactorySession({ battleScene: "off", start: "after-save", gameplaySeed: seed });
-      tapA(session, [], 600, (state) => state.lobbyFreeRoam === null);
+      tapA(session, [], 1800, (state) => state.lobbyFreeRoam === null && state.prebattleEntry === null);
       return JSON.stringify([session.state.pendingGeneratedRound?.rngValueBefore, session.state.draftScreen]);
     };
     expect(deal(777)).toBe(deal(777));

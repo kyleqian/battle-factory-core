@@ -92,9 +92,10 @@ describe("goal-directed browser play (tools/browser/goalPlay.ts)", () => {
   it("lbra: the walk-back is the default (a loss ends in the Lobby, so the page must go on from it)", () => {
     const initialState: EngineState = { ...createInitialState({ battleScene: "off" }), lobbyFreeRoam: createFactoryLobbyFreeRoamState() };
     const director = new GoalPlayDirector({ seed: 2, scene: "off", initialState, lobbyWanderFrames: 200 });
-    for (let i = 0; i < 60 && director.state.lobbyFreeRoam !== null && !director.done; i += 1) director.runFrames(60);
+    for (let i = 0; i < 120 && (director.state.lobbyFreeRoam !== null || director.state.prebattleEntry !== null) && !director.done; i += 1) director.runFrames(60);
     expect(director.restart).toBeNull();
     expect(director.state.lobbyFreeRoam).toBeNull();
+    expect(director.state.prebattleEntry).toBeNull();
     expect(director.state.pendingGeneratedRound).not.toBeNull();
   });
 
@@ -102,10 +103,11 @@ describe("goal-directed browser play (tools/browser/goalPlay.ts)", () => {
     const initialState: EngineState = { ...createInitialState({ battleScene: "off" }), lobbyFreeRoam: createFactoryLobbyFreeRoamState() };
     const director = new GoalPlayDirector({ seed: 2, scene: "off", initialState, newChallengeFromLobby: true, lobbyWanderFrames: 200 });
     const segments: FrameSegment[] = [];
-    for (let i = 0; i < 60 && director.state.lobbyFreeRoam !== null && !director.done; i += 1) for (const segment of director.runFrames(60)) segments.push(segment);
+    for (let i = 0; i < 120 && (director.state.lobbyFreeRoam !== null || director.state.prebattleEntry !== null) && !director.done; i += 1) for (const segment of director.runFrames(60)) segments.push(segment);
     expect(director.mirrorError).toBeNull();
     expect(director.restart).toBeNull();
     expect(director.state.lobbyFreeRoam).toBeNull();
+    expect(director.state.prebattleEntry).toBeNull();
     expect(director.state.pendingGeneratedRound).not.toBeNull();
     // Policy frames after the lobby (draft) count the crossing once.
     for (const segment of director.runFrames(120)) segments.push(segment);

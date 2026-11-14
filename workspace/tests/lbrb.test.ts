@@ -14,7 +14,7 @@ import {
 import { createFactoryLobbyFreeRoamState, isFactoryLobbyFacingSinglesAttendant } from "../src/engine/factoryLobbyFreeRoam.ts";
 import { frameHash } from "../tools/browser/goalPlay.ts";
 import type { GbaButton } from "../src/input.ts";
-import { driveAttendantConversation } from "./helpers/lobbyAttendant.ts";
+import { driveAttendantConversation, driveBriefing } from "./helpers/lobbyAttendant.ts";
 
 const NONE: AttendantInput = { a: false, b: false, up: false, down: false };
 const A: AttendantInput = { ...NONE, a: true };
@@ -180,8 +180,9 @@ describe("lbrb: the engine", () => {
     const opened = tick(lobby(), new Set<GbaButton>(["A"]));
     const drive = driveAttendantConversation(opened);
     expect(drive.state.lobbyAttendant).toBeNull();
-    expect(drive.state.pendingGeneratedRound).not.toBeNull();
+    expect(drive.state.prebattleEntry).not.toBeNull();
     expect(drive.frames).toBeGreaterThan(300);
+    expect(driveBriefing(drive.state).state.pendingGeneratedRound).not.toBeNull();
   });
 
   it("B at the menu through the engine gives the farewell and returns to free roam without dealing", () => {

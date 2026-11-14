@@ -9,7 +9,13 @@ import {
 } from "../src/engine/factoryLobbyFreeRoam.ts";
 import { createInitialFactoryCarry } from "../src/engine/factoryRoundChaining.ts";
 import type { GbaButton } from "../src/input.ts";
-import { driveAttendantConversation } from "./helpers/lobbyAttendant.ts";
+import { driveAttendantConversation, driveBriefing } from "./helpers/lobbyAttendant.ts";
+
+const driveToDraft = (start: EngineState) => {
+  const conversation = driveAttendantConversation(start);
+  const briefing = driveBriefing(conversation.state);
+  return { ...conversation, ...briefing, state: briefing.state, frames: conversation.frames + briefing.frames, conversation, briefing };
+};
 import { GoalPlayDirector, appendFrame, frameHash, type FrameSegment } from "../tools/browser/goalPlay.ts";
 
 const PLAYER_TRAINER_ID = createInitialState().factoryCarry.playerTrainerId;
@@ -39,8 +45,10 @@ describe("nch231: A facing the singles attendant starts a new challenge", () => 
     expect(opened.lobbyAttendant).not.toBeNull();
     expect(opened.lobbyFreeRoam).not.toBeNull();
     expect(opened.pendingGeneratedRound ?? null).toBeNull();
-    const drive = driveAttendantConversation(opened);
+    const drive = driveToDraft(opened);
     const after = drive.state;
+    expect(drive.conversation.state.prebattleEntry).not.toBeNull();
+    expect(drive.conversation.state.pendingGeneratedRound ?? null).toBeNull();
 
     expect(after.lobbyFreeRoam).toBeNull();
     expect(after.lobbyAttendant).toBeNull();
@@ -51,8 +59,10 @@ describe("nch231: A facing the singles attendant starts a new challenge", () => 
     // Loss / retire: the win streak and rents count reset (InitFactoryChallenge); symbols and BP stay.
     expect(after.factoryCarry).toMatchObject({ factoryWinStreak: 0, rentsCount: 0, factorySymbolsCount: 1, battlePoints: 21 });
     // The cursor kept running through the conversation frames (lbrb): the deal is the live cursor's next step, never the boot anchor.
-    expect(drive.beforeHandoff.rngValue).not.toBe(0x12345678);
-    expect(after.pendingGeneratedRound?.rngValueBefore).toBe(advanceRngValue(drive.beforeHandoff.rngValue));
+    expect(drive.conversation.beforeHandoff.rngValue).not.toBe(0x12345678);
+    // lbr-e: dealt after the PreBattleRoom walk, from the cursor at the end of the tick before the deal tick (never the hand-off's).
+    expect(after.pendingGeneratedRound?.rngValueBefore).toBe(drive.beforeDeal.rngValue);
+    expect(drive.beforeDeal.rngValue).not.toBe(advanceRngValue(drive.conversation.beforeHandoff.rngValue));
     expect(after.rngValue).not.toBe(createInitialState().rngValue);
     expect(after.pendingGeneratedRound?.carry).toBe(after.factoryCarry);
     expect(after.factoryRoundBattleOrchestrator).toBeNull();
@@ -61,8 +71,8 @@ describe("nch231: A facing the singles attendant starts a new challenge", () => 
   });
 
   it("a different RNG cursor deals a different rental pool", () => {
-    const a = driveAttendantConversation(tick(lobbyState("off"), new Set<GbaButton>(["A"]))).state;
-    const b = driveAttendantConversation(tick({ ...lobbyState("off"), rngValue: 0x0badf00d }, new Set<GbaButton>(["A"]))).state;
+    const a = driveToDraft(tick(lobbyState("off"), new Set<GbaButton>(["A"]))).state;
+    const b = driveToDraft(tick({ ...lobbyState("off"), rngValue: 0x0badf00d }, new Set<GbaButton>(["A"]))).state;
     expect(JSON.stringify(a.draftScreen)).not.toBe(JSON.stringify(b.draftScreen));
   });
 
@@ -93,7 +103,7 @@ describe("nch231: A facing the singles attendant starts a new challenge", () => 
   });
 
   it("the carry reset starts from the initial carry too", () => {
-    const after = driveAttendantConversation(
+    const after = driveToDraft(
       tick({ ...lobbyState("off"), factoryCarry: createInitialFactoryCarry(PLAYER_TRAINER_ID) }, new Set<GbaButton>(["A"])),
     ).state;
     expect(after.factoryCarry).toMatchObject({ factoryWinStreak: 0, rentsCount: 0, battlePoints: 0 });
@@ -162,6 +172,12 @@ describe("nch231: a recorded retire -> lobby -> A -> second draft session replay
       press(null, 6);
     }
     expect(s.lobbyFreeRoam).toBeNull();
+    // lbr-e: then the PreBattleRoom briefing (A taps again) until the draft opens.
+    for (let i = 0; i < 4000 && s.prebattleEntry !== null; i += 1) {
+      press("A", 2);
+      press(null, 6);
+    }
+    expect(s.prebattleEntry).toBeNull();
     expect(s.pendingGeneratedRound).not.toBeNull();
     expect(s.pendingGeneratedRound!.rngValueBefore).not.toBe(rngBefore);
     press(null, 60);

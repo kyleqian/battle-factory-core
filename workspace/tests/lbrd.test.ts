@@ -118,15 +118,20 @@ for (const scene of ["off", "on"] as const) {
       const after: FactoryEvent[] = [];
       let state = lobby;
       let frames = 0;
-      while (state.lobbyFreeRoam !== null && frames < 6_000) {
+      let sawEntry = false;
+      while ((state.lobbyFreeRoam !== null || state.prebattleEntry !== null) && frames < 8_000) {
         for (const keys of [A, A, IDLE, IDLE, IDLE, IDLE, IDLE, IDLE]) {
           after.push(...session.tick(keys, 0));
           state = session.state;
           frames += 1;
-          if (state.lobbyFreeRoam === null) break;
+          sawEntry ||= state.prebattleEntry !== null;
+          if (state.lobbyFreeRoam === null && state.prebattleEntry === null) break;
         }
       }
+      // lbr-e: the continued streak walks the same PreBattleRoom entry (no streak-dependent text) before the draft opens.
+      expect(sawEntry).toBe(true);
       expect(state.lobbyFreeRoam).toBeNull();
+      expect(state.prebattleEntry).toBeNull();
       expect(after).toEqual([]);
       expect(session.ended).toBeNull();
       expect(state.attendantRequestHold).toBe(false);

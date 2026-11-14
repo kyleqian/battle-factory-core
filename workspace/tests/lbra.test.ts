@@ -8,7 +8,7 @@ import { advanceRngValue } from "../src/engine/rng.ts";
 import type { FactoryEvent } from "../src/factoryContract.ts";
 import { FactorySession } from "../src/factorySession.ts";
 import type { GbaButton } from "../src/input.ts";
-import { driveAttendantConversation } from "./helpers/lobbyAttendant.ts";
+import { driveAttendantConversation, driveBriefing } from "./helpers/lobbyAttendant.ts";
 import { ActionLog, RandomPlayer, Rng } from "../tools/soak/randomRoundSoakDriver.ts";
 
 type Kind = "loss" | "forfeit" | "retire";
@@ -146,10 +146,13 @@ describe("lbra: a new challenge from the attendant after a loss", () => {
     const opened = tick(state, new Set<GbaButton>(["A"]));
     expect(opened.lobbyAttendant).not.toBeNull();
     const drive = driveAttendantConversation(opened);
-    const after = drive.state;
-    expect(after.lobbyFreeRoam).toBeNull();
+    expect(drive.state.lobbyFreeRoam).toBeNull();
+    expect(drive.state.prebattleEntry).not.toBeNull();
     expect(drive.beforeHandoff.rngValue).not.toBe(cursor);
-    expect(after.pendingGeneratedRound?.rngValueBefore).toBe(advanceRngValue(drive.beforeHandoff.rngValue));
+    // lbr-e: the deal runs after the PreBattleRoom walk, from the cursor at the end of the previous tick.
+    const brief = driveBriefing(drive.state);
+    const after = brief.state;
+    expect(after.pendingGeneratedRound?.rngValueBefore).toBe(brief.beforeDeal.rngValue);
     expect(after.factoryCarry).toMatchObject({ factoryWinStreak: 0, rentsCount: 0 });
   }, 120_000);
 });
