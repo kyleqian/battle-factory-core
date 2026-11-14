@@ -4,6 +4,14 @@ import { renderBattleResolutionLiveView } from "./battleScene.ts";
 // current state into a 240x160 RGBA buffer. The browser shell (src/main.ts)
 // and tools/compare/appTrace.ts both drive this same core.
 
+import {
+  PREBATTLE_ENTRY_TIMING,
+  advancePrebattleEntry,
+  createPrebattleEntryState,
+  dealPrebattleEntry,
+  type PrebattleEntryState,
+} from "./prebattleEntry.ts";
+import { renderPrebattleEntry } from "./prebattleEntryRender.ts";
 import type { GbaButton } from "../input.ts";
 import {
   ANCHOR_DRAFT_RENTAL_RECORDS,
@@ -651,7 +659,6 @@ import {
   advanceFactoryCarry,
   carryForNewChallengeAfterLobby,
   createInitialFactoryCarry,
-  generateFactoryChallengeDraft,
   type FactoryCarry,
 } from "./factoryRoundChaining.ts";
 import {
@@ -886,6 +893,8 @@ export interface EngineState {
    * attendant's next start keeps the carried streak and rents instead of zeroing them. Cleared by every new challenge.
    */
   lobbyStreakKept: boolean;
+  /** lbr-e: the PreBattleRoom walk and briefing between the Lobby door fade and the draft (prebattleEntry.ts); null everywhere else. */
+  prebattleEntry: PrebattleEntryState | null;
   /** In-session Factory progression carried across chained rounds; see factoryRoundChaining.ts. */
   factoryCarry: FactoryCarry;
   /**
@@ -979,24 +988,20 @@ function lobbyHeldDirections(buttons: ReadonlySet<GbaButton>): ReadonlySet<Lobby
 }
 
 /**
- * Re-enters the app's boot flow (the Lv-50 singles rental draft, "Select the
- * first POKeMON.") with a freshly generated rental pool. The ROM's Random()
- * cursor is one continuous global, so generation starts from `rngValueBefore`;
- * frame, scene mode, route and the presentation session are kept.
+ * lbr-e: the door warp's hand-off for an in-game new challenge. Resets the per-challenge state, but the
+ * draft is not dealt here: the ROM script walks both NPCs first and generates the rentals after the walk
+ * (prebattleEntry.ts). The deal tick fills draftScreen / rngValue / pendingGeneratedRound.
  */
-function enterChainedFactoryChallenge(
+function enterPrebattleEntry(
   state: EngineState,
   keyRepeat: KeyRepeatState,
   nextCarry: FactoryCarry,
-  rngValueBefore: number,
+  rngValue: number,
 ): EngineState {
-  const { generation, draftScreen: nextDraftScreen } =
-    generateFactoryChallengeDraft(nextCarry, rngValueBefore);
   return {
     ...state,
     frame: state.frame + 1,
     battle1OpponentConstructionRngValues: Object.freeze([]),
-    draftScreen: nextDraftScreen,
     keyRepeat,
     summaryScreen: CLOSED_SUMMARY_SCREEN_STATE,
     prebattleRoom: null,
@@ -1005,7 +1010,7 @@ function enterChainedFactoryChallenge(
     postwin: null,
     battleSetup: null,
     rngMode: "vblank",
-    rngValue: generation.rngValue,
+    rngValue,
     battleControllerExecFlags: 0,
     roundController: null,
     stagedBattleTurn: null,
@@ -1018,7 +1023,8 @@ function enterChainedFactoryChallenge(
     attendantRequestHold: false,
     lobbyStreakKept: false,
     factoryCarry: nextCarry,
-    pendingGeneratedRound: Object.freeze({ rngValueBefore, carry: nextCarry }),
+    pendingGeneratedRound: null,
+    prebattleEntry: createPrebattleEntryState(nextCarry),
   };
 }
 
@@ -1053,6 +1059,7 @@ export function createInitialState(
     lobbyAttendant: null,
     attendantRequestHold: false,
     lobbyStreakKept: false,
+    prebattleEntry: null,
     factoryCarry: createInitialFactoryCarry(ANCHOR_FACTORY_METADATA.playerTrainerId),
     pendingGeneratedRound: null,
     presentationRng: createPresentationRngSession(options.presentationSeed, options.presentationRngPolicy),
@@ -1241,6 +1248,29 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
     };
   }
 
+  if (state.prebattleEntry) {
+    const advance = advancePrebattleEntry(state.prebattleEntry, { a: newKeys.has("A") });
+    let entryNext: EngineState = state;
+    if (advance.state !== null && advance.state.phase === "draftFadeIn") {
+      // The draft screen runs under its own fade-in (input ignored); the entry owns the frame counter and RNG as usual.
+      entryNext = tickEngineState({ ...state, prebattleEntry: null }, new Set<GbaButton>());
+    } else {
+      entryNext = { ...state, frame: state.frame + 1, keyRepeat, rngMode: "vblank", rngValue };
+    }
+    if (advance.deal) {
+      const deal = dealPrebattleEntry(state.prebattleEntry.carry, state.rngValue);
+      const dealt = deal.draft;
+      return {
+        ...entryNext,
+        draftScreen: dealt.draftScreen,
+        rngValue: advanceRngValue(dealt.generation.rngValue),
+        pendingGeneratedRound: Object.freeze({ rngValueBefore: deal.rngValueBefore, carry: state.prebattleEntry.carry }),
+        prebattleEntry: Object.freeze({ ...advance.state!, messages: deal.messages }),
+      };
+    }
+    return { ...entryNext, prebattleEntry: advance.state };
+  }
+
   if (state.lobbyFreeRoam) {
     // Free-roam Lobby overworld owns both input and rendering once the
     // terminal decline chain has handed off (factoryLobbyFreeRoam.ts). A/B
@@ -1260,12 +1290,19 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
         down: newAndRepeatedKeys.has("DOWN"),
       });
       if (attendant.done === "draft") {
-        return enterChainedFactoryChallenge(
+        return enterPrebattleEntry(
           state,
           keyRepeat,
           state.lobbyStreakKept ? state.factoryCarry : carryForNewChallengeAfterLobby(state.factoryCarry),
           rngValue,
         );
+      }
+      if (attendant.phase === "fade") {
+        for (const warp of PREBATTLE_ENTRY_TIMING.warpExtraRng) {
+          if (attendant.phaseTick === warp.fadeTick) {
+            for (let i = 0; i < warp.extra; i += 1) rngValue = advanceRngValue(rngValue);
+          }
+        }
       }
       return {
         ...state,
@@ -4162,7 +4199,18 @@ function renderWithoutFactoryTerminal(state: EngineState): Uint8Array {
       );
 }
 
+function renderPrebattleEntryState(state: EngineState): Uint8Array {
+  const entry = state.prebattleEntry!;
+  if (entry.phase === "black") return blackFrame();
+  if (entry.phase === "draftFadeIn") {
+    const ticks = entry.phaseTick;
+    return renderFactoryDraftScreenFaded(state.draftScreen, bgFadeY(ticks, FADE_IN), objFadeY(ticks, FADE_IN));
+  }
+  return renderPrebattleEntry(entry);
+}
+
 export function render(state: EngineState): Uint8Array {
+  if (state.prebattleEntry) return renderPrebattleEntryState(state);
   // docs/post-terminal-return-to-lobby-ground-truth.md §3: the 108-tick
   // fade/black/battle-room-flash/black return-to-field span is shared,
   // byte-identical machinery ahead of EITHER outcome's own destination-map

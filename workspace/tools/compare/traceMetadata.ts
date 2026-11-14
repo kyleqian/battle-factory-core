@@ -2,6 +2,7 @@ export type AppTraceMetadata = Readonly<{
   appRoute?: "generated-orchestrator" | "canonical-recorded";
   battleScene?: "on" | "off";
   appStage?: unknown;
+  appRngRebase?: unknown;
   oracleBattleLab?: unknown;
   /** App-only presentation Random2 seed/policy (docs/presentation-rng.md). */
   presentationRng?: unknown;
@@ -15,6 +16,7 @@ export function stripAppTraceMetadata<T extends AppTraceMetadata>(
     appRoute: _appRoute,
     battleScene: _battleScene,
     appStage: _appStage,
+    appRngRebase: _appRngRebase,
     oracleBattleLab: _oracleBattleLab,
     presentationRng: _presentationRng,
     ...oracleTrace

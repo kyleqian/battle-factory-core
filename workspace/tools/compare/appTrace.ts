@@ -2006,6 +2006,12 @@ export async function renderAppTrace(trace: Trace): Promise<AppCapture[]> {
     }
   };
 
+  const applyRngRebase = (): void => {
+    if (trace.appRngRebase && trace.appRngRebase.frame === frame) {
+      state = { ...state, rngValue: trace.appRngRebase.rngValue };
+    }
+  };
+
   const captureFrame = (): void => {
     if (!captureFrames.has(frame)) return;
     const rgba = heldCursorMask === null
@@ -2021,6 +2027,7 @@ export async function renderAppTrace(trace: Trace): Promise<AppCapture[]> {
     state = tick(state, advance.buttons);
     frame = advance.frame;
     applyStage();
+    applyRngRebase();
     captureFrame();
   }
 

@@ -25,6 +25,15 @@ export interface Trace {
    * New main/round-loop traces must opt into battle-scene-off explicitly.
    */
   oracleProfile?: OracleProfile;
+  /**
+   * App-only: after the tick that yields `frame`, set the app's RNG cursor to `rngValue` (the ROM's cursor at that
+   * frame). Lab-staged routes leave the app and ROM cursors on one orbit but far apart; this aligns them so
+   * cursor-dependent screens (the lbr-e draft deal) compare equal. Never sent to the ROM oracle.
+   */
+  appRngRebase?: {
+    readonly frame: number;
+    readonly rngValue: number;
+  };
   /** Dev-only named state injection consumed by appTrace and stripped here. */
   appStage?: {
     readonly id: string;
