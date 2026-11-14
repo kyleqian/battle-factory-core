@@ -1,0 +1,73 @@
+{
+ "name": "R089-sleep-talk-encore",
+ "rules": [
+  "R087",
+  "R089"
+ ],
+ "why": "Challenge 2, trainer 100. Player Jumpluff (334) Sleep Powders the lead Seaking (333, Sleep Talk); Wobbuffet (290) switches in and Encores the sleeping Seaking, whose last move is Sleep Talk: its next Sleep Talk finds no move the Encore allows and fails. Haunter (284) takes over after the Encore so the battle ends (Wobbuffet alone cannot kill: the first version hit the frame budget).",
+ "seed": 90005,
+ "challengeNum": 2,
+ "battleNum": 0,
+ "trainerId": 100,
+ "playerSetIds": [
+  334,
+  290,
+  284
+ ],
+ "opponentSetIds": [
+  333,
+  275,
+  332
+ ],
+ "script": {
+  "actions": [
+   {
+    "prefer": 1
+   },
+   {
+    "preferSwitch": 1
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "preferSwitch": 2
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   }
+  ],
+  "then": "census"
+ },
+ "expect": [],
+ "cover": [
+  {
+   "file": "src/engine/battleScriptSleepTalkOpcode.ts",
+   "text": "&& battler.e",
+   "at": 0
+  },
+  {
+   "file": "src/engine/battleScriptSleepTalkOpcode.ts",
+   "text": "{\n      return transitionBattleScriptCommand(\n        context,\n        Object.freeze({ kind: \"ad",
+   "at": 0
+  }
+ ],
+ "coverAny": false,
+ "chance": 0.15,
+ "seeds": 40
+}

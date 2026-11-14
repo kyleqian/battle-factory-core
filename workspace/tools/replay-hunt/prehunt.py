@@ -9,8 +9,16 @@ sys.path.insert(0, W + "/tools/audio")
 os.chdir(W)
 import romReplayTally
 import romReplayCoverage, shutil
+sys.path.insert(0, W + "/tools/replay-hunt")
+import designcheck
 os.makedirs(out, exist_ok=True)
 base = json.load(open(stage_path))
+bad = designcheck.problems(base)
+if bad:
+    print("REJECTED design:", *bad, sep="\n  ", flush=True)
+    print("HUNT-END", flush=True)
+    sys.exit(2)
+design_errors = 0
 env = {**os.environ, "REPLAY_OUT": out, "REPLAY_KEEP": "0", 
        "ROM_REPLAY_POLICY": "script", "ROM_REPLAY_SYMBOLS": "0"}
 env.pop("ROM_REPLAY_CHALLENGE", None)
@@ -45,12 +53,17 @@ for seed in range(first, first + count):
     counts = romReplayTally.tally_battle(facts)
     got = {row: romReplayTally.covered(row, counts) > 0 for row in base.get("expect", [])}
     watch = {row: counts.get(row + "#used", 0) for row in base.get("watch", [])}
-    for c in cover:
-        got["ran:" + c["file"].split("/")[-1] + ":" + c["text"][c.get("at", 0):c.get("at", 0) + 30].strip()] = (romReplayCoverage.count_at(covdir, c["file"], c["text"], root=W, at=c.get("at", 0)) or 0) > 0
+    for i, c in enumerate(cover):
+        got[f"ran:{i}:" + c["file"].split("/")[-1] + ":" + c["text"][c.get("at", 0):c.get("at", 0) + 30].strip()] = (romReplayCoverage.count_at(covdir, c["file"], c["text"], root=W, at=c.get("at", 0)) or 0) > 0
     print(seed, "engine", "error" if e.get("error") else "ok", "decisions", len(e["decisions"]), got, watch, flush=True)
     if e.get("error"):
         json.dump({**stage, "engineError": str(e.get("error"))[:2000]}, open(f"{out}/engine-error-{seed}.json", "w"), indent=1)
         print("ENGINE-ERROR", seed, str(e.get("error"))[:300], flush=True)
+        if "is not legal" in str(e.get("error")):
+            design_errors += 1
+            if design_errors >= 3:
+                print("DESIGN-ERROR: the script names a slot the engine does not offer (3 seeds); fix the design", flush=True)
+                break
     ran = [k for k in got if k.startswith("ran:") and got[k]]
     rows_ok = all(v for k, v in got.items() if not k.startswith("ran:"))
     covers_ok = (len(ran) > 0) if base.get("coverAny") else all(v for k, v in got.items() if k.startswith("ran:"))

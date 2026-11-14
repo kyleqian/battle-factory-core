@@ -1,0 +1,65 @@
+{
+ "name": "R054-natural-cure-sleeper-switch",
+ "rules": [
+  "R054"
+ ],
+ "why": "Challenge 3, trainer 120. The lead is Altaria (412, Natural Cure with no second slot, Cheri Berry). Player Jynx (377, faster) puts it to sleep with Lovely Kiss on turn 1, then uses Fake Out every turn: Fake Out only works on the first turn after switching in, so it fails (MOVE_RESULT_FAILED), and a failed move leaves MOVE_UNAVAILABLE as the last move that landed on Altaria (a second Lovely Kiss on a sleeper only prints 'already asleep' and does not: tried first, 25 seeds without the marker). Altaria is asleep with all its HP, so ShouldSwitchIfNaturalCure runs and, when its first 50% roll fails, reads the last landed move's power (the marker lines). First tried with Chansey 332 at challenge 2: 18 lab seeds without a hit and a 318-decision stall.",
+ "seed": 91017,
+ "challengeNum": 3,
+ "battleNum": 0,
+ "trainerId": 120,
+ "playerSetIds": [
+  377,
+  395,
+  437
+ ],
+ "opponentSetIds": [
+  412,
+  464,
+  401
+ ],
+ "script": {
+  "actions": [
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 1
+   }
+  ],
+  "then": "census"
+ },
+ "expect": [],
+ "cover": [
+  {
+   "file": "src/engine/factoryAiSwitchPolicy.ts",
+   "text": "?? 0;\n        if",
+   "at": 0
+  },
+  {
+   "file": "src/engine/factoryAiSwitchPolicy.ts",
+   "text": ": null;\n    ",
+   "at": 0
+  },
+  {
+   "file": "src/engine/factoryAiSwitchPolicy.ts",
+   "text": "{\n          selected = select(de",
+   "at": 0
+  }
+ ],
+ "coverAny": true,
+ "chance": 0.4,
+ "seeds": 20
+}

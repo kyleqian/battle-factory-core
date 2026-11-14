@@ -1,0 +1,80 @@
+{
+ "name": "R070-kadabra-guts-future-sight",
+ "rules": [
+  "R070"
+ ],
+ "why": "Challenge 0, trainer 0. Player Kadabra (169) Role Plays the lead Machoke (178, Guts, no second slot), keeps hitting with Confusion until Machoke faints, then alternates Future Sight with Confusion. If Parasect 177 (Stun Spore) or Roselia 171 (Toxic, Cotton Spore, Grass Whistle) has put a status on Kadabra by then, the Future Sight damage gets Guts' 1.5 attack.",
+ "seed": 90000,
+ "challengeNum": 0,
+ "battleNum": 0,
+ "trainerId": 0,
+ "playerSetIds": [
+  169,
+  197,
+  184
+ ],
+ "opponentSetIds": [
+  178,
+  177,
+  171
+ ],
+ "script": {
+  "actions": [
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 2
+   }
+  ],
+  "then": "census"
+ },
+ "expect": [],
+ "cover": [
+  {
+   "file": "src/engine/battleScriptTrysetfutureattackOpcode.ts",
+   "text": "&& attacker.stat",
+   "at": 0
+  },
+  {
+   "file": "src/engine/battleScriptTrysetfutureattackOpcode.ts",
+   "text": "attack = Math.trunc(attack * 150 / 100);\n  i",
+   "at": 0
+  },
+  {
+   "file": "src/engine/battleScriptTrysetfutureattackOpcode.ts",
+   "text": "? \"ABILITY_G",
+   "at": 0
+  }
+ ],
+ "coverAny": false,
+ "chance": 0.1,
+ "seeds": 20
+}

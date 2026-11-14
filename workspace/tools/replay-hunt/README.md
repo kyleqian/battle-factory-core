@@ -11,3 +11,10 @@ All commands run with cwd = `workspace/`; outputs go under `.integration/evidenc
 - `huntq.py JOBS GLOB...`: prehunt for many stage files at once, JOBS at a time (at most 2 on the shared box).
 - Run under `nice -n 19`; the scripts already nice their children. Never run more than two ROM drives at once.
 - Format of a stage file: `docs/parity-mac/staged-battles.md`; the covered ones: `docs/parity-mac/stages/coverage/`.
+
+## rrh2 changes
+
+- Each `cover` entry is judged on its own marker: the key is `ran:<index>:<file>:<text[at:at+30]>`, so two entries with the same label no longer overwrite each other (rrh1: R012, R034, R045).
+- `designcheck.py STAGE...` (run by `prehunt.py` and so by `huntq.py`) refuses a design before any seed: `replacements` that repeat, name more than two slots, or name the lead 0 with no switch in the script; a `cover` snippet that does not occur exactly once; a `cover` marker whose line is an error `throw`.
+- `prehunt.py` stops after 3 seeds whose engine error is `... is not legal` (a script that names an unoffered slot): `DESIGN-ERROR`.
+- `huntq.py --max-seeds N` caps seeds per stage; `--out DIR` (default `.integration/evidence/rrh2`).

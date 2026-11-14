@@ -1,0 +1,55 @@
+{
+ "name": "R066-focus-band-ohko",
+ "rules": [
+  "R066"
+ ],
+ "why": "Challenge 2, trainer 100. The lead is Wobbuffet (290, Focus Band) with Counter / Mirror Coat / Encore / Destiny Bond only. Player Crawdaunt (354, Guillotine) tries Guillotine every turn (30% accuracy, 5 PP): a hit on a Focus Band holder survives 1 time in 10.",
+ "seed": 90011,
+ "challengeNum": 2,
+ "battleNum": 0,
+ "trainerId": 100,
+ "playerSetIds": [
+  354,
+  334,
+  284
+ ],
+ "opponentSetIds": [
+  290,
+  275,
+  332
+ ],
+ "script": {
+  "actions": [
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   }
+  ],
+  "then": "census"
+ },
+ "expect": [],
+ "cover": [
+  {
+   "file": "src/engine/battleScriptTryKOOpcode.ts",
+   "text": "{\n        battleMoveDamage = targetBattler.hp - 1;\n        moveResultFlags = (moveResultFlags | BATTLE_SCRIPT_MOVE_RESULT_FOE_HU",
+   "at": 0
+  }
+ ],
+ "coverAny": true,
+ "chance": 0.12,
+ "seeds": 30
+}

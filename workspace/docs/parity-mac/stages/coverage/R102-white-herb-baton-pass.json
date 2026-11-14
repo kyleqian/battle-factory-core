@@ -1,0 +1,43 @@
+{
+ "name": "R102-white-herb-baton-pass",
+ "rules": [
+  "R102"
+ ],
+ "why": "Challenge 4, trainer 140. Player lead Mr. Mime (478) is Intimidated by the lead Tauros (504) at battle start, then Baton Passes the lowered Attack to Granbull (474, White Herb), which restores it on entering.",
+ "seed": 90000,
+ "challengeNum": 4,
+ "battleNum": 0,
+ "trainerId": 140,
+ "playerSetIds": [
+  478,
+  474,
+  471
+ ],
+ "opponentSetIds": [
+  504,
+  506,
+  481
+ ],
+ "script": {
+  "actions": [
+   {
+    "prefer": 0
+   },
+   {
+    "preferSwitch": 1
+   }
+  ],
+  "then": "census"
+ },
+ "expect": [],
+ "cover": [
+  {
+   "file": "src/engine/battleScriptSwitchinOpcode.ts",
+   "text": "const battlers = nextRules.battlers.map((candidate, index) =>\n        index === battler\n          ? Object.freeze({\n            ...candidate,\n            statStages: Object.freeze(candidate.statStages.map(",
+   "at": 0
+  }
+ ],
+ "coverAny": true,
+ "chance": 0.8,
+ "seeds": 6
+}

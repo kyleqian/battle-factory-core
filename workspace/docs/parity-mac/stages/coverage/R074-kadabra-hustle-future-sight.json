@@ -1,0 +1,52 @@
+{
+ "name": "R074-kadabra-hustle-future-sight",
+ "rules": [
+  "R074"
+ ],
+ "why": "Challenge 0, trainer 0 (AI moves at random). Player Kadabra (169) Role Plays the lead Togetic (183, Hustle in the 50% slot), then uses Future Sight: the Future Sight damage gets Hustle's 1.5 attack. Delibird 118 and Corsola 151 (also a Hustle slot) follow.",
+ "seed": 91000,
+ "challengeNum": 0,
+ "battleNum": 0,
+ "trainerId": 0,
+ "playerSetIds": [
+  169,
+  178,
+  197
+ ],
+ "opponentSetIds": [
+  183,
+  118,
+  151
+ ],
+ "script": {
+  "actions": [
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   }
+  ],
+  "then": "census"
+ },
+ "expect": [],
+ "cover": [
+  {
+   "file": "src/engine/battleScriptTrysetfutureattackOpcode.ts",
+   "text": "attack = Math.trunc(attack * 150 / 100); // Hust",
+   "at": 0
+  }
+ ],
+ "coverAny": true,
+ "chance": 0.4,
+ "seeds": 20
+}

@@ -1,0 +1,40 @@
+{
+ "name": "R060-choice-band-future-sight",
+ "rules": [
+  "R060"
+ ],
+ "why": "Challenge 7, trainer 200. Player Alakazam (596) is faster than the lead Xatu (385): its Trick puts Choice Band on Xatu. If Xatu's AI then picks Future Sight, the Future Sight damage gets Choice Band's 1.5 attack. Whiscash 483 (Future Sight too) follows.",
+ "seed": 90000,
+ "challengeNum": 7,
+ "battleNum": 0,
+ "trainerId": 200,
+ "playerSetIds": [
+  596,
+  817,
+  501
+ ],
+ "opponentSetIds": [
+  385,
+  483,
+  464
+ ],
+ "script": {
+  "actions": [
+   {
+    "prefer": 0
+   }
+  ],
+  "then": "census"
+ },
+ "expect": [],
+ "cover": [
+  {
+   "file": "src/engine/battleScriptTrysetfutureattackOpcode.ts",
+   "text": "attack = Math.trunc(attack * 150 / 100); // Choi",
+   "at": 0
+  }
+ ],
+ "coverAny": true,
+ "chance": 0.3,
+ "seeds": 30
+}

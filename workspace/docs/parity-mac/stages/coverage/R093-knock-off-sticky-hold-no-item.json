@@ -1,0 +1,55 @@
+{
+ "name": "R093-knock-off-sticky-hold-no-item",
+ "rules": [
+  "R093"
+ ],
+ "why": "Challenge 4, trainer 140. Player Armaldo (513) Knock Offs the lead Muk (516, Sticky Hold in the 50% slot) after Muk used Rest and ate its Chesto Berry: Sticky Hold with no item does nothing.",
+ "seed": 90006,
+ "challengeNum": 4,
+ "battleNum": 0,
+ "trainerId": 140,
+ "playerSetIds": [
+  513,
+  468,
+  471
+ ],
+ "opponentSetIds": [
+  516,
+  506,
+  481
+ ],
+ "script": {
+  "actions": [
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 3
+   },
+   {
+    "prefer": 3
+   },
+   {
+    "prefer": 3
+   },
+   {
+    "prefer": 3
+   }
+  ],
+  "then": "census"
+ },
+ "expect": [],
+ "cover": [
+  {
+   "file": "src/engine/battleScriptHitChainOpcode.ts",
+   "text": "if (targetState.item === ITEM_NONE) return passThrough();\n        const programCounter = resolveRequiredLabelProgramCounter(\n          context.program,\n          \"BattleScript_StickyHoldActivates\"",
+   "at": 36
+  }
+ ],
+ "coverAny": true,
+ "chance": 0.15,
+ "seeds": 20
+}

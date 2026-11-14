@@ -1,0 +1,68 @@
+{
+ "name": "R088-sleep-talk-choice-band",
+ "rules": [
+  "R088"
+ ],
+ "why": "Challenge 2, trainer 100. Player Jumpluff (334) Sleep Powders the lead Seaking (333, Sleep Talk); Furret (304) switches in and Tricks Choice Band onto the sleeping Seaking; its next Sleep Talk runs with a Choice Band lock. After the Trick the script keeps Furret on Frustration (a second Trick would swap the band back).",
+ "seed": 90005,
+ "challengeNum": 2,
+ "battleNum": 0,
+ "trainerId": 100,
+ "playerSetIds": [
+  334,
+  304,
+  284
+ ],
+ "opponentSetIds": [
+  333,
+  275,
+  332
+ ],
+ "script": {
+  "actions": [
+   {
+    "prefer": 1
+   },
+   {
+    "preferSwitch": 1
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 1
+   }
+  ],
+  "then": "census"
+ },
+ "expect": [],
+ "cover": [
+  {
+   "file": "src/engine/battleScriptSleepTalkOpcode.ts",
+   "text": "&& choicedMove !== 0 // ",
+   "at": 0
+  },
+  {
+   "file": "src/engine/battleScriptSleepTalkOpcode.ts",
+   "text": "&& choicedMove !== 0xfff",
+   "at": 0
+  },
+  {
+   "file": "src/engine/battleScriptSleepTalkOpcode.ts",
+   "text": "&& choicedMove !== m",
+   "at": 0
+  }
+ ],
+ "coverAny": true,
+ "chance": 0.15,
+ "seeds": 40
+}

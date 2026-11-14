@@ -86,6 +86,29 @@ and matched the ROM to the end (the Mac lane's 12 and the box's 25: R001..R010, 
 so the "already set" branch of `Cmd_setfocusenergy` (`battleScriptSetfocusenergyOpcode.ts`) is dead code: no script reaches it with the
 bit set. That leaves **72 of the 110 not covered** (R019 counted out). See `STATUS.md`, "Box hunt 2026-11-14 (rrh1)".
 
+**Box hunt rrh2 (2026-11-14): 49 of the 110 covered, four now class (b), 57 left.** Twelve more rules have a staged battle in
+`stages/coverage/` that ran the piece and matched the ROM to the end: R054, R060, R066, R070, R074, R084, R087 (with R089), R088,
+R089, R092, R093, R102. Three of the designers' "cannot occur" notes were checked against the decomp and move to class (b):
+
+- **R029 (battle ends on Leech Seed damage): dead code.** `BattleScript_LeechSeedTurnDrain` (`data/battle_scripts_1.s:3265-3285`)
+  has no `checkteamslost` (compare `BattleScript_DoTurnDmg`, `:3741-3746`). `gBattleOutcome` is written only by `Cmd_checkteamslost`
+  (`battle_script_commands.c:3564`, `:3577`), teleport (`:6489-6491`) and the forfeit / run / link paths (`battle_main.c:1874`,
+  `:5061`, `:5067`; `battle_util.c:481-535`, `:622`). The engine branch is `battleEndTurnOrchestration.ts:1653`.
+- **R031 (a fainted attacker's move skipped at `Cmd_attackcanceler`): unreachable.** The check is `battle_script_commands.c:924-929`
+  (engine `battleScriptActionAdmission.ts:4016`, `:4020`). Every action ends through `Cmd_end` / `Cmd_end2` (`:3957`, `:3963`) →
+  `HandleAction_TryFinish` (`battle_util.c:638-645`) → `HandleFaintedMonActions` (`battle_util.c:1894-1985`), so the replacement is in
+  before the next action; the replacement switch-in sets `B_ACTION_CANCEL_PARTNER` (`battle_script_commands.c:5268-5273`); the last mon
+  is handled by `checkteamslost`, and `Cmd_attackcanceler` `:919` and `battle_main.c:4939` end the turn. Pursuit (`:8752`) hits a live user.
+- **R033 (a stat-lowering move fails against a protected target; `battleScriptStatBuffs.ts:235`, `:262`): unreachable in singles.**
+  `ChangeStatBuffs` (`battle_script_commands.c:6981-6986`) uses `JumpIfMoveAffectedByProtect` → `DEFENDER_IS_PROTECTED` (`:57`), but
+  `Cmd_attackcanceler` (`:992-1000`) has already cancelled every protect-affected move. The exceptions never reach the branch:
+  two-turn first turns, Curse, Intimidate (`battle_scripts_1.s:4033`), `accuracycheck` (`:1109`, `:1123`) and Memento (`battle_scripts_1.s:2206`).
+
+**R035 and R040 (AI Counter / Mirror Coat scored up under Taunt) stay class (c)**: `AI_CV_Counter` (`battle_ai_scripts.s:1618-1637`) uses
+`if_target_not_taunted`, so the branch is reachable. But no set from id 267 up has Taunt and only an AI Metronome user (Clefable 389,
+Chansey 227) can call it, about 0.1% of lab seeds, and a Mechanic Lab stage is ROM-only (`romReplayWide --stage` cannot drive it). Not stageable
+cheaply; left uncovered. See `STATUS.md`, "Box hunt 2026-11-14 (rrh2)".
+
 How the classes were made: the patterns above, then a reading of every other piece against the C source by eleven
 reading passes, each with the same brief (class (a) or (b) only with a reason that can be pointed to, else (c)). Every
 entry of the classes file names its reason. It is a reading of the source, not a test: a wrong (a) or (b) would hide

@@ -1,0 +1,46 @@
+{
+ "name": "R092-covet-sticky-hold",
+ "rules": [
+  "R092"
+ ],
+ "why": "Challenge 1, trainer 80. Player Linoone (203) is faster than the lead Swalot (248, Sticky Hold in the 50% slot, Lax Incense): Covet hits it and Sticky Hold keeps the item.",
+ "seed": 93000,
+ "challengeNum": 1,
+ "battleNum": 0,
+ "trainerId": 80,
+ "playerSetIds": [
+  203,
+  184,
+  192
+ ],
+ "opponentSetIds": [
+  248,
+  240,
+  243
+ ],
+ "script": {
+  "actions": [
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   }
+  ],
+  "then": "census"
+ },
+ "expect": [],
+ "cover": [
+  {
+   "file": "src/engine/battleScriptHitChainOpcode.ts",
+   "text": "{\n        const prog",
+   "at": 0
+  }
+ ],
+ "coverAny": true,
+ "chance": 0.5,
+ "seeds": 20
+}
