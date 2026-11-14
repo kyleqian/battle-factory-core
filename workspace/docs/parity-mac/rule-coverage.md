@@ -86,9 +86,9 @@ and matched the ROM to the end (the Mac lane's 12 and the box's 25: R001..R010, 
 so the "already set" branch of `Cmd_setfocusenergy` (`battleScriptSetfocusenergyOpcode.ts`) is dead code: no script reaches it with the
 bit set. That leaves **72 of the 110 not covered** (R019 counted out). See `STATUS.md`, "Box hunt 2026-11-14 (rrh1)".
 
-**Box hunt rrh2 (2026-11-14): 47 of the 110 covered, four now class (b), 59 left.** Ten more rules have a staged battle in
+**Box hunt rrh2 (2026-11-14): 49 of the 110 covered, four now class (b), 57 left.** Twelve more rules have a staged battle in
 `stages/coverage/` that ran the piece and matched the ROM to the end: R054, R060, R066, R070, R074, R084, R087 (with R089), R088,
-R089, R092. Three of the designers' "cannot occur" notes were checked against the decomp and move to class (b):
+R089, R092, R093, R102. Three of the designers' "cannot occur" notes were checked against the decomp and move to class (b):
 
 - **R029 (battle ends on Leech Seed damage): dead code.** `BattleScript_LeechSeedTurnDrain` (`data/battle_scripts_1.s:3265-3285`)
   has no `checkteamslost` (compare `BattleScript_DoTurnDmg`, `:3741-3746`). `gBattleOutcome` is written only by `Cmd_checkteamslost`

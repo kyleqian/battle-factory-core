@@ -798,7 +798,7 @@ Left in `on-hold/designs/` (updated `onHold`):
   (157 HP) is knocked out by Weezing in three turns, before its Sp. Atk reaches -6; the design needs a sturdier Overheat user.
 - **R032, R037, R038** (chance 0.01 to 0.02, 200 seeds each): not tried; at 15 s a seed each is about 50 minutes.
 
-## Box hunt 2026-11-14 (rrh2): hunter fixes, source checks, nine new designs
+## Box hunt 2026-11-14 (rrh2): hunter fixes, source checks, eleven new designs
 
 Evidence under `.integration/evidence/rrh2/` (git-ignored; designs in `designs/`, hunt logs in `chunt/`, clean re-drives in `redrive/`).
 
@@ -812,7 +812,7 @@ tools/replay-hunt/sets.py "EXPR over m"` queries the Factory sets on the box.
 **Source checks** (full lines in `rule-coverage.md`): R029, R031, R033 are class (b) (dead code or unreachable in singles, decomp file:line given);
 R035 and R040 stay (c) but are not stageable cheaply (no Taunt set from id 267 up; Mechanic Lab is ROM-only).
 
-**New stages: ten rules, nine files, all match the ROM, every cover entry run (R054: `coverAny`, see below).** Each was re-driven once
+**New stages: twelve rules, eleven files, all match the ROM, every cover entry run (R054: `coverAny`, see below).** Each was re-driven once
 more from a clean command line (`romReplayWide.sh --stage`, `nice -n 19`, one at a time): `match True`, `stage.ok True`, outcome
 engine = ROM.
 
@@ -827,6 +827,8 @@ engine = ROM.
 | R087 + R089 Sleep Talk, Encore | R089-sleep-talk-encore (90005) | 6 (final design; 14 + more in earlier ones, no hit) | 78 / 78 | 1 / 1 |
 | R088 Sleep Talk, Choice Band | R088-sleep-talk-choice-band (90005) | 6 (final design; v1 swapped the band back) | 53 / 53 | 1 / 1 |
 | R092 Covet vs Sticky Hold | R092-covet-sticky-hold (93000) | 1 | 30 / 26 | 2 / 2 |
+| R093 Knock Off vs Sticky Hold, no item | R093-knock-off-sticky-hold-no-item (90006) | 7 (the first design's lab setup failed on every seed: two sets outside the challenge range) | 20 / 20 | 2 / 2 |
+| R102 White Herb through Baton Pass | R102-white-herb-baton-pass (90000) | 1 | 75 / 75 | 2 / 2 |
 
 R054's design makes `gLastLandedMoves` hold `MOVE_UNAVAILABLE` (a failed Fake Out) so `ShouldSwitchIfNaturalCure` reads the move
 table at 0xFFFF; the marker that ran is the `?? 0` arm in `factoryAiSwitchPolicy.ts`. The engine returns 0 for the missing move, and the
@@ -849,5 +851,6 @@ ROM's row matched anyway in this seed, so that read produces no visible differen
   and designs per command (`--max-seeds`).
 
 **Not designed or not finished:** R068 (no freeze move in the lab at challenges 0 and 1), R081, R097, R107, R110 (too convoluted for
-the time), R106 (probably unreachable; not tested), R080 (above), R093 and R099 (not tried). R030, R032, R037, R038, R039 were skipped
-by the brief. Counts after rrh2: 47 of the 110 covered; R019, R029, R031, R033 class (b); 59 left.
+the time), R106 (probably unreachable; not tested), R080 (above), R099 (not stageable, below). R030, R032, R037, R038, R039 were skipped
+by the brief. Counts after rrh2: 49 of the 110 covered; R019, R029, R031, R033 class (b); 57 left.
+Read and dropped late: R077 (Regice is the only Sleep Talk user with an Electric move, and its Chesto Berry cures any sleep at once), R099 (Uproar users in range have Vital Spirit, which blocks Yawn itself), R105, R067, R097 (too many steps).
