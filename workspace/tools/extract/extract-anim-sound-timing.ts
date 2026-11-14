@@ -27,7 +27,7 @@ const SONGS_PATH = join(REF, "include", "constants", "songs.h");
 const scriptText = readFileSync(SCRIPT_PATH, "utf8");
 const songsText = readFileSync(SONGS_PATH, "utf8");
 
-const constants = new Map<string, number>([["SOUND_PAN_ATTACKER", -64], ["SOUND_PAN_TARGET", 63]]);
+const constants = new Map<string, number>([["SOUND_PAN_ATTACKER", -64], ["SOUND_PAN_TARGET", 63], ["TRUE", 1], ["FALSE", 0]]);
 for (const m of songsText.matchAll(/^#define\s+((?:SE|MUS)_\w+)\s+(\d+)/gm)) constants.set(m[1]!, Number(m[2]));
 
 function value(token: string): number {
@@ -364,7 +364,7 @@ const isCreation = (op: string): boolean => creationMacros.has(op);
 // Return values (gBattleAnimArgs[ARG_RET_ID]) the preceding visual task writes, resolved from the request (singles; the Factory is never a contest).
 function returnValue(task: string, attackerSide: number): number | null {
   switch (task) {
-    case "AnimTask_IsContest": case "AnimTask_GetTargetIsAttackerPartner": return 0;
+    case "AnimTask_IsContest": case "AnimTask_GetTargetIsAttackerPartner": case "AnimTask_IsMonInvisible": return 0;
     case "AnimTask_GetAttackerSide": return attackerSide;
     case "AnimTask_GetTargetSide": return 1 - attackerSide;
     case "AnimTask_IsTargetPlayerSide": return 1 - attackerSide === 0 ? 1 : 0;
@@ -552,6 +552,31 @@ moveTable.forEach((label, move) => {
   moves.push(entry);
 });
 
+// aud249: the general animations (gBattleAnims_StatusConditions + gBattleAnims_General) walk the same way; turn 0, one variant per attacker side.
+const generalTables = ["gBattleAnims_StatusConditions", "gBattleAnims_General"];
+const generalLabels: string[] = [];
+{
+  const lines = scriptText.split("\n");
+  let table = false;
+  for (const raw of lines) {
+    const code = raw.replace(/@.*$/, "").trimEnd();
+    const label = /^([A-Za-z_]\w*)::?$/.exec(code);
+    if (label !== null) { table = generalTables.includes(label[1]!); continue; }
+    const word = /^\s+\.4byte\s+(\w+)/.exec(code);
+    if (table && word !== null) generalLabels.push(word[1]!);
+  }
+}
+const general = generalLabels.map((label) => {
+  const variants = [0, 1].map((side) => {
+    const result = walk(label, 0, side);
+    const ops = result.events.map(({ line: _line, ...rest }) => rest);
+    const key = JSON.stringify(ops);
+    if (!poolIndex.has(key)) { poolIndex.set(key, variantPool.length); variantPool.push(ops as SoundOp[]); }
+    return { index: poolIndex.get(key)!, end: result.end, gated: result.gated };
+  });
+  return { label, variants: variants.map((v) => v.index), ends: variants.map((v) => v.end), gated: variants.map((v) => v.gated) };
+});
+
 const sha = (path: string) => createHash("sha256").update(readFileSync(path)).digest("hex").slice(0, 16);
 const out = {
   schema: "anim-sound-timing/v2",
@@ -564,6 +589,7 @@ const out = {
   sides: SIDES,
   variants: variantPool,
   moves: moves.map((m) => ({ move: m.move, label: m.label, variants: m.variants, ends: m.ends, gated: m.gated })),
+  general,
 };
 mkdirSync(outDir, { recursive: true });
 writeFileSync(join(outDir, "anim-sound-timing.json"), `${JSON.stringify(out)}\n`);
@@ -579,4 +605,5 @@ writeFileSync(join(outDir, "anim-sound-timing.json"), `${JSON.stringify(out)}\n`
   if (process.env.ANIM_SOUND_BLOCKERS) console.log(Object.entries(blockers).sort((a, b) => b[1] - a[1]).slice(0, 25).map(([k, v]) => `${k}:${v}`).join(" "));
   console.log(`turn 0 / player attacker: ${emitted} resolved ops, ${gatedTotal} unresolved ops by reason ${JSON.stringify(tally)}`);
 }
+console.log(`general: ${general.map((g) => `${g.label}:${g.variants[0]}/${g.ends[0]}/${g.gated[0]}`).join(" ")}`);
 console.log(`anim-sound-timing: ${moves.length} moves, ${variantPool.length} distinct variants, ${variantPool.reduce((n, v) => n + v.length, 0)} ops`);
