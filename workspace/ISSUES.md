@@ -13,16 +13,15 @@ defects are all authorized in the finish-up mission (`docs/factory-finish-scope.
 gameplay / RNG when proved against source; use main-lane ownership and gameplay gates. Historical presentation-only
 exclusions are superseded. Unrelated expansions stay parked.
 
-## #216 — Rental select lets the player rent two Pokemon of one species (Mac lane finding, 2026-11-13)
+## #218 — iss216 residuals (2026-11-14)
 
-- ROM: `Select_AreSpeciesValid` (`battle_factory_screen.c:2256-2276`) refuses the second pick of a species with "Can't select same
-  POKeMON."; the swap screen has `Swap_AlreadyHasSameSpecies` (`:4162`). The engine's `MENU_OPTION_RENT` branch in `src/engine/core.ts`
-  has no such check. About 3 offers in 100 from the eighth challenge on contain such a pair (code read, `docs/parity-mac/STATUS.md`).
-
-## #217 — Trapped player's party menu says "is already in battle!" (Mac lane finding, 2026-11-13, code read only)
-
-- When the active Pokemon is trapped (Mean Look / Arena Trap / ...), the ROM's party menu refuses the switch with the "can't be switched
-  out" text (`party_menu.c` / `battle_util.c` trap check); the engine's `battlePartySelect.ts` refusal path prints `gText_PkmnAlreadyInBattle`.
+- `iss216-same-species-off` (staged duplicate pair, Scene OFF): 391 / 469 frames. The refusal window 169..244 is exact. Left: (a) after the
+  dismiss the rented ball's frame is one tick off the ROM (133..176 px every 7 / 4 frames, 264+; ball stall after the refusal / dismiss print
+  tried 0 / 1 / 2 ticks, none exact); (b) the OFF-profile flash-close residuals (frames 37..57, 139, 142, 247..263, 407..427), the same
+  pattern as any OFF rent close. The refusal costs no ball stall on the ROM; the dismiss costs one.
+- #217: the trapped switch text (`gText_PkmnCantSwitchOut`, and `gText_PkmnsXPreventsSwitching` for Shadow Tag / Arena Trap / Magnet Pull) is
+  Tier-1 from source (`tests/battlePartySelect.test.ts`), no ROM lab window: the WIN_MSG route is the one the no-energy refusal already
+  proves; the `\p` ending of the ability text is treated like PAUSE_UNTIL_PRESS (unmeasured).
 
 ## #214 — Leads from the Mac lane's 2026-11-12 passes (source-read only, no ROM seed)
 
