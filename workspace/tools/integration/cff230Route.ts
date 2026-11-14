@@ -11,13 +11,15 @@ import { renderBattleResolutionLiveView } from "../../src/engine/battleScene.ts"
 import { createPresentationRngSession } from "../../src/engine/presentationRngHost.ts";
 import { tickLiveMovePresentationRngSession } from "../../src/engine/liveMovePresentationRng.ts";
 import { PARTY_LIST_INPUT_ELAPSED } from "../../src/engine/partySelect.ts";
+import { collectSoundTick, type SoundEvent } from "../../src/audio/soundEvents.ts";
+import { emitTickSounds } from "../../src/engine/tickSounds.ts";
 import { NO_MOVES_MESSAGE_HOLD_AT } from "../../src/engine/battleCommandPresentation.ts";
 
 export type RouteFrame = { frame: number; segment: number; command: number; type: string; rgba: Uint8Array };
 export type RouteSegment = { index: number; events: any[]; commands: any[]; frames: RouteFrame[]; startFrame: number; raw: any };
 
 /** Plays census seed `seed`; returns the segments whose events hold a CASTFORM_CHANGE (frames rendered when `render`). */
-export function cff230Route(seed: number, render: boolean, stopAfterSegments = 99, scene: "on" | "off" = "on"): { segments: RouteSegment[] } {
+export function cff230Route(seed: number, render: boolean, stopAfterSegments = 99, scene: "on" | "off" = "on", onStep?: (frame: number, state: any, sounds: readonly SoundEvent[]) => void): { segments: RouteSegment[] } {
   let state = beginFactoryRoundBattleStartIntro(createFactoryRoundBattleOrchestrator({
     id: `live-share-census-${seed}-${(seed * 11) % 49}`, rngValue: seed, battleScene: scene,
     factoryWinStreak: (seed * 11) % 49, playerTrainerId: 416049562,
@@ -31,9 +33,14 @@ export function cff230Route(seed: number, render: boolean, stopAfterSegments = 9
   const buf = new Uint8Array(240 * 160 * 4);
   const step = (buttons: readonly string[] = []) => {
     if (++frame > 200000) throw new Error("frame budget");
-    if (state.battleStartIntro) state = advanceFactoryRoundBattleStartIntro(state, new Set(buttons) as never);
-    else if (state.battleResolutionPresentation) state = advanceFactoryRoundBattleResolution(state, new Set(buttons) as never);
-    else if (state.battleCommandPresentation) state = advanceFactoryRoundBattleCommand(state, new Set(buttons) as never);
+    const before = state;
+    const { events: sounds } = collectSoundTick(frame, () => {
+      if (state.battleStartIntro) state = advanceFactoryRoundBattleStartIntro(state, new Set(buttons) as never);
+      else if (state.battleResolutionPresentation) state = advanceFactoryRoundBattleResolution(state, new Set(buttons) as never);
+      else if (state.battleCommandPresentation) state = advanceFactoryRoundBattleCommand(state, new Set(buttons) as never);
+      if (onStep) emitTickSounds({ battleScene: null, factoryRoundBattleOrchestrator: before } as never, { battleScene: null, factoryRoundBattleOrchestrator: state } as never);
+    });
+    onStep?.(frame, state, sounds);
     rng = tickLiveMovePresentationRngSession(rng, state, liveMoveRandom2PlanContextAt);
     const r = state.battleResolutionPresentation as any;
     if (r) {

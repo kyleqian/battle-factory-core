@@ -279,7 +279,7 @@ function play(initial: any, record: boolean, patchRng: number | null = null) {
       if (!resBefore) recordedEvents = new WeakSet<object>();
       const fresh = (res.segments ?? []).flatMap((seg: any) => seg.events ?? []).filter((e: any) => !recordedEvents.has(e));
       for (const e of fresh) recordedEvents.add(e);
-      turnEvents.push({ frame: frame - frame0, battlersBefore: JSON.parse(JSON.stringify(rulesBefore?.battlers ?? null)), wideBefore: rulesBefore === null ? null : wideOf(rulesBefore), events: fresh.map((e: any) => ({ seq: e.sequence, ...e.payload, label: e.provenance?.sourceLabel })) });
+      turnEvents.push({ frame: frame - frame0, battlersBefore: JSON.parse(JSON.stringify(rulesBefore?.battlers ?? null)), wideBefore: rulesBefore === null ? null : wideOf(rulesBefore), events: fresh.map((e: any) => ({ seq: e.sequence, ...e.payload, label: e.provenance?.sourceLabel })), commands: (res.segments ?? []).flatMap((seg: any) => (seg.commands ?? []).map((c: any) => ({ type: c.type, seq: c.eventSequence, battler: c.battler, animation: c.animation, frames: c.timing?.minimumFrames }))) });
     }
     if (!owned()) ended = true;
   };

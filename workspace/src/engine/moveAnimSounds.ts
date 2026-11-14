@@ -7,7 +7,7 @@ import { BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS } from "./battleScriptSourceConst
 import type { BattleResolutionPresentationState } from "./battleResolutionPresentation.ts";
 import { statsChangeParams } from "../animation/statsChange.ts";
 import { liveMoveSourceAge, statsChangeSourceAge } from "./battleResolutionPresentationRender.ts";
-import { WEATHER_CONTINUES_LAUNCH_LEAD_ROWS, isWeatherContinuesAnimation, type BattleStatusAnimationName, type WeatherContinuesAnimation } from "./battleResolutionPresentation.ts";
+import { FOCUS_PUNCH_SETUP_BEHIND_SUBSTITUTE_COMMAND_FRAMES, WEATHER_CONTINUES_LAUNCH_LEAD_ROWS, isWeatherContinuesAnimation, type BattleStatusAnimationName, type WeatherContinuesAnimation } from "./battleResolutionPresentation.ts";
 
 export interface TimedOp {
   readonly op: "playsewithpan" | "playse" | "waitplaysewithpan" | "loopsewithpan" | "panse" | "panse_adjustnone" | "panse_adjustall" | "setpan" | "soundtask_loopse" | "soundtask_fireblast" | "soundtask_se1" | "soundtask_se2";
@@ -145,7 +145,7 @@ export function moveAnimOpRows(op: TimedOp, context: AnimPanContext, uniformLoop
     case "soundtask_se1": case "soundtask_se2": return [{ offset: 0, emission: { kind: "se", id: op.id, pan: animSoundPan(op.pan ?? 0, context), player: op.op === "soundtask_se1" ? "SE1" : "SE2" } }];
     case "soundtask_loopse": return loopSeRows(op, context);
     case "soundtask_fireblast": return fireBlastRows(op, context);
-    default: return [{ offset: 0, emission: { kind: "se", id: op.id, pan: animSoundPan(op.pan ?? 0, context) } }];
+    default: return [{ offset: uniformLoop && op.op === "waitplaysewithpan" ? 1 : 0, emission: { kind: "se", id: op.id, pan: animSoundPan(op.pan ?? 0, context) } }];
   }
 }
 
@@ -215,6 +215,11 @@ export const STATUS_ANIMATION_SCRIPT_AGE = 7;
 /** Weather-continues body age -> script row: the move-body clock (FIRST_COMMAND_AGE + AGE_TO_SOUND_ROWS). */
 const WEATHER_SCRIPT_AGE = FIRST_COMMAND_AGE + AGE_TO_SOUND_ROWS;
 
+/** aud250: command age -> script row of the General_* commands (ROM windows: focus punch x2 sides, leech seed drain x2 sides, castform rain-opp in both scenes). */
+export const FOCUS_PUNCH_SETUP_SCRIPT_AGE = 5;
+export const LEECH_SEED_DRAIN_SCRIPT_AGE = 7;
+export const CASTFORM_CHANGE_SCRIPT_AGE = 5;
+
 function generalVariant(label: string, attackerSide: 0 | 1): readonly TimedOp[] {
   const entry = timing.general.find((g) => g.label === label);
   return entry === undefined ? [] : timing.variants[entry.variants[attackerSide]!]!;
@@ -241,5 +246,19 @@ export function emitGeneralAnimSounds(after: BattleResolutionPresentationState |
     emitOpsAt(generalVariant(WEATHER_LABELS[command.animation], command.battler), {
       attackerSide: command.battler === 0 ? "player" : "opponent", targetSide: command.battler === 0 ? "opponent" : "player",
     }, age - WEATHER_SCRIPT_AGE, true);
+  } else if (command.type === "general-animation") {
+    const side = command.battler === 0 ? "player" : "opponent";
+    const other = command.battler === 0 ? "opponent" : "player";
+    if (command.animation === "CASTFORM_CHANGE") {
+      // Plays in both scenes (Cmd_docastformchangeanimation has no HITMARKER_NO_ANIMATIONS test; the Scene OFF ROM plays SE 203 / 204 too).
+      emitOpsAt(generalVariant("General_CastformChange", command.battler), { attackerSide: side, targetSide: other }, elapsed - (command.castformLeadExtra ?? 0) - CASTFORM_CHANGE_SCRIPT_AGE, true);
+    } else if ((after.segments[after.segmentIndex]!.beforeRules.rulesContext.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) === 0) {
+      if (command.animation === "FOCUS_PUNCH_SETUP" && command.timing.minimumFrames !== FOCUS_PUNCH_SETUP_BEHIND_SUBSTITUTE_COMMAND_FRAMES) {
+        emitOpsAt(generalVariant("General_FocusPunchSetUp", command.battler), { attackerSide: side, targetSide: other }, elapsed - FOCUS_PUNCH_SETUP_SCRIPT_AGE, true);
+      } else if (command.animation === "LEECH_SEED_DRAIN" && command.animated === true) {
+        // command.battler is the seeded (drained) battler = the animation's target; the seeder is the attacker.
+        emitOpsAt(generalVariant("General_LeechSeedDrain", command.battler === 0 ? 1 : 0), { attackerSide: other, targetSide: side }, elapsed - LEECH_SEED_DRAIN_SCRIPT_AGE, true);
+      }
+    }
   }
 }
