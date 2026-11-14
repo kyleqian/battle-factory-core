@@ -31,7 +31,8 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Next:** #220 (held-item effect presentation + its SEs) is the biggest sound / timing gap; then the aud242 move-body lifetimes, cries in
   animation tasks, the second `Status_*` play (+14). Lobby: merge branch `lbr-f-residual2` (`f58db4171`: the fix + lbr-f2's re-pins, lbrd `WIN_TWO_SEED` 35 -> 2 (the only
   seed of 1-7 passing the full file: fragile), lbre same-timeline exact at cursor `0x4ea349da`; lb* + randomRoundSoak 129 / 129, attendant
-  trace 1349 / 1416) after typecheck, test:gate, full suite and soaks; then NPC wander. Hunt: the remaining 56 rules need new team ideas (rrh3) — one step per run at most.
+  trace 1349 / 1416) after typecheck, test:gate, full suite and soaks; then NPC wander (`docs/lobby-wander-scout.md`). Cries in
+  animation tasks: `docs/cry-task-scout.md`. Hunt: the remaining 56 rules need new team ideas (rrh3) — one step per run at most.
   Nightly replay from the pool at run start; no Mac fold (the branch no longer moves).
 
 ---
