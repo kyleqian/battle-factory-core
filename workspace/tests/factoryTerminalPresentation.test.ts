@@ -780,7 +780,7 @@ describe("Factory Scene-OFF roundWon terminal adapter", () => {
     for (let age = 1; age <= 4424; age += 1) {
       terminal = advanceFactoryTerminalPresentation(terminal, {
         pressedA: age === 300 || age === 1100 || age === 2200 ||
-          age === 2571 || age === 3500 || age === 3780 ||
+          age === 2571 || age === 3500 || age === 3779 ||
           age === 4400 || age === 4422 || age === 4423 || age === 4424,
       });
       if (age === 2571) expect(terminal.exchangeReleaseAge).toBeNull();
@@ -801,9 +801,14 @@ describe("Factory Scene-OFF roundWon terminal adapter", () => {
         expect(factoryTerminalCompletion(terminal)).toEqual({
           commandId: command.commandId,
         });
-        expect(factoryTerminalRecordPromptFirstAge(terminal)).toBe(3718);
+        expect(factoryTerminalRecordPromptFirstAge(terminal)).toBe(3717);
       }
-      if (age === 3780) expect(terminal.recordPromptReleaseAge).toBeNull();
+      // lbr-f: ROM (lbrf-gate-3779 / 3780 traces): the arrow first draws on 3779 and a NEW A is accepted from 3780, not before.
+      if (age === 3779) {
+        expect(factoryTerminalRecordPromptInputReady(terminal)).toBe(false);
+        expect(terminal.recordPromptReleaseAge).toBeNull();
+      }
+      if (age === 3780) expect(factoryTerminalRecordPromptInputReady(terminal)).toBe(true);
       if (age === 4400) expect(terminal.recordPromptReleaseAge).toBe(4400);
       if (age === 4421) expect(factoryTerminalRecordMenuVisible(terminal)).toBe(false);
       if (age === 4422) {

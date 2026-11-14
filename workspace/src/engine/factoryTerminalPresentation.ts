@@ -254,7 +254,8 @@ export const FACTORY_ROUND_WON_TERMINAL_PROFILE: FactoryTerminalRoundWonProfile 
     exchangeInputDelay: 51,
     exchangeNextPageVisualDelay: 2,
     restoreDelayFromExchangeRelease: 49,
-    recordPromptDelayFromRestore: 169,
+    // lbr-f: the won route's record question types / blinks 1 tick earlier than the loss route's (docs/lbrf-won-timing.md).
+    recordPromptDelayFromRestore: 168,
     recordPromptTextDelay: 1,
     recordPromptInputDelay: 63,
     recordScrollTicks: 4,

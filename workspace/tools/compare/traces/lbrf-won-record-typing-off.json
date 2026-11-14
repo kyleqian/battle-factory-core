@@ -1,0 +1,259 @@
+{
+ "appRoute": "generated-orchestrator",
+ "oracleProfile": "battle-scene-off",
+ "appStage": {
+  "id": "seventh-win-terminal-off",
+  "frame": 5113
+ },
+ "oracleBattleLab": {
+  "scenario": "../../battle-lab/lbrd2b-seventh-win-off.json"
+ },
+ "segments": [
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 30,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 900,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 700,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 30,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 900,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 700,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 30,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 900,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 400,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 400,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 101,
+   "buttons": []
+  },
+  {
+   "frames": 299,
+   "buttons": []
+  },
+  {
+   "frames": 1,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 799,
+   "buttons": []
+  },
+  {
+   "frames": 1,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 1099,
+   "buttons": []
+  },
+  {
+   "frames": 1,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 1299,
+   "buttons": []
+  },
+  {
+   "frames": 1,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 899,
+   "buttons": []
+  },
+  {
+   "frames": 1,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 23,
+   "buttons": []
+  },
+  {
+   "frames": 1,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 40,
+   "buttons": []
+  },
+  {
+   "frames": 1,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 55,
+   "buttons": []
+  }
+ ],
+ "captureFrames": [
+  8840,
+  8841,
+  8842,
+  8843,
+  8844,
+  8845,
+  8846,
+  8847,
+  8848,
+  8849,
+  8850,
+  8851,
+  8852,
+  8853,
+  8854,
+  8855,
+  8856,
+  8857,
+  8858,
+  8859,
+  8860,
+  8861,
+  8862,
+  8863,
+  8864,
+  8865,
+  8866,
+  8867,
+  8868,
+  8869,
+  8870,
+  8871,
+  8872,
+  8873,
+  8874,
+  8875,
+  8876,
+  8877,
+  8878,
+  8879,
+  8880,
+  8881,
+  8882,
+  8883,
+  8884,
+  8885,
+  8886,
+  8887,
+  8888,
+  8889,
+  8890,
+  8891,
+  8892,
+  8893,
+  8894,
+  8895,
+  8896,
+  8897,
+  8898,
+  8899
+ ]
+}
