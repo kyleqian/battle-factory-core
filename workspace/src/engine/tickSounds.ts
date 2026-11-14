@@ -4,7 +4,7 @@ import { emitBattleEndSounds, emitForfeitEndSounds } from "./battleEndSounds.ts"
 import { emitBattleHitSounds } from "./battleHitSounds.ts";
 import { emitBattleStartIntroSounds, emitMidBattleSwitchSounds, emitPartySendOutSounds } from "./battleStartSounds.ts";
 import { playerFaintReplacementSendOutTimingOfSegment } from "./battleResolutionPresentationRender.ts";
-import { emitMoveAnimSounds } from "./moveAnimSounds.ts";
+import { emitMoveAnimSounds, emitStatsChangeSounds } from "./moveAnimSounds.ts";
 import type { EngineState } from "./core.ts";
 
 export type TickSoundState = Pick<EngineState, "battleScene" | "factoryRoundBattleOrchestrator">;
@@ -47,6 +47,7 @@ export function emitTickSounds(state: TickSoundState, next: TickSoundState): voi
       );
     }
     if (orchestratorAfter?.battleResolutionPresentation) emitMoveAnimSounds(orchestratorAfter.battleResolutionPresentation);
+    if (orchestratorAfter?.battleResolutionPresentation) emitStatsChangeSounds(orchestratorAfter.battleResolutionPresentation);
     emitForfeitEndSounds(
       state.factoryRoundBattleOrchestrator?.battleCommandPresentation?.lifecycle.phase ?? null,
       orchestratorAfter !== null && orchestratorAfter !== undefined && orchestratorAfter.battle === null,

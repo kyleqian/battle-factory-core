@@ -1540,6 +1540,20 @@ export function liveMoveSourceAge(
   return Object.freeze({ request: command.animation, age });
 }
 
+/**
+ * aud248: the presented stats-change command and its age (rows since the animation's rel 0, after the IsBattleSEPlaying gate; the same age as the
+ * `stats-change` render effect). Null when another command is presented, before the gate, or behind a Substitute (the ROM plays nothing).
+ */
+export function statsChangeSourceAge(
+  state: BattleResolutionPresentationState,
+): Readonly<{ battler: 0 | 1; argument: number; age: number }> | null {
+  const command = state.segments[state.segmentIndex]?.commands[state.commandIndex];
+  if (command === undefined || command.type !== "stats-change") return null;
+  const age = state.lifecycle.phaseElapsed - (command.timing.seGateFrames ?? 0);
+  if (age < 0 || fieldBattler(currentCommandField(state), command.battler).substituteDoll === true) return null;
+  return Object.freeze({ battler: command.battler, argument: command.argument, age });
+}
+
 /** The body age shown on this row: held at 0 over the pre + lead rows and at the last body row over the post rows. */
 function liveMoveUniversalRowAge(
   state: BattleResolutionPresentationState,
