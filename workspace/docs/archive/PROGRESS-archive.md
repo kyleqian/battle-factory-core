@@ -1,3 +1,20 @@
+## 2026-11-13 — lbr-d1 (ts lane worker): a 7-win returns to the walkable Lobby in the same mount (handoff item 0b, step 4)
+
+- **State:** on master (engine `afa750655`, tests `d811222d8`, docs after). ENGINE_BUILD `eb-8faf63dbde5168d5` -> **`eb-a781acbda4dff91e`** (read from dist and `engineBuildCheck`; tell the website:
+  7-win trajectories moved, the next draft is dealt from the Lobby cursor). `docs/lbrd-win-lobby-return.md`.
+- **Website contract:** after `round-end` the mount keeps running in the Lobby (no `challenge-end`, no `challenge-request` hold for a won round); the attendant continues the streak in the same mount and trace.
+  A later retire or loss still emits `challenge-end` (then the usual `challenge-request` hold).
+- **Did:** removed the 7-win -> new-draft chain; carry banked on Lobby entry + `lobbyStreakKept` (attendant hand-off keeps streak / rents); won terminal BP text per round (3 / 4 / 5, 14 for a Brain win);
+  won input gates 41 / 74 (ROM, lbr-d2a); `FactorySession` `wonLobbyPending` retire-guard; soak / `play:random` walk to the attendant after a 7-win; re-pins (chaining a / b / c, issue104 YES / cancel,
+  randomRoundSoak seven-win pin seed 10 + test b); `tests/lbrd.test.ts` (15, OFF and ON); lbrc / library / session-header wording; handoff 0b ticked.
+- **Gates:** typecheck 0; test:smoke 448 / 448; test:gate 362 files / 2,843 tests; brief vitest list 12 files / 178 tests; 47 more importing files 242 tests; build / build:lib 0;
+  soak winning 0:20 **20 / 20 OK** (all `budget`; all 20 seeds reached a 7-win and continued in the Lobby, 15 reached carry 14, seed 2 carry 28).
+  soak winning-swap 0:20 **20 / 20 OK** (worker); play:random 2 min / scene `--lobby-new-challenge` (supervisor, worker cut at its 120-min cap before it): 0 page / console errors / overlays, a round advance in each scene.
+- **Next:** lbr-d2b compare trace (farewell glyph +-1 tick, `recordDisabledFarewellEdgeFromRestore`, won Lobby door walk); full suite at the supervisor's wind-down (not run here).
+  Papercut: soak 0:20 --parallel 2 takes ~35 min each (results only print at the end).
+
+---
+
 ## 2026-11-13 — CAX31 daily run (supervisor, Opus 5.5): wind-down: parity-mac fold, sound playback, attendant + hand-off event, forced-turn menu, lazy sprites
 
 - **State:** master clean, no workers or worktrees (a read-only lbr-d scout may finish after this entry; it leaves no edits). No push. **No DEFERRED items.**

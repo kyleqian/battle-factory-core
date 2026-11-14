@@ -5,6 +5,36 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 2026-11-14 — CAX31 daily run (supervisor, Opus 5.5): wind-down: last Mac fold, rare-rule hunt 50 / 110, General_* sounds, Lobby up to the draft
+
+- **State:** master clean, no workers; worktrees removed (evidence copied to `.integration/evidence/` first, except rrh1-3 / aud248 / lbr-d2b
+  scratch, lost with their worktrees before I caught it; their committed stages / docs / traces re-run). Branch **`lbr-f-residual2`** kept
+  (unmerged, see Next). No push. **No DEFERRED items.** Oracles restarted at run start (both predated the harness's battle-lab fix).
+  ENGINE_BUILD `eb-8faf63dbde5168d5` -> **`eb-93fedef9241b4242`** (dist-lib of the final engine; tell the website). Evidence
+  `.integration/validation/sv-20261114/` (`gates/` = fold, `final/` = wind-down).
+- **Website (Mac):** after a 7-win the mount keeps running in the Lobby (no `challenge-end` / `challenge-request` for a won round; the
+  attendant continues the streak). An in-game new challenge now walks through the PreBattleRoom briefing before the draft, so its deal moved
+  (toward the ROM). The rental draft refuses a second Pokemon of one species. More battle sounds play (stat changes, status conditions, weather,
+  Focus Punch, Leech Seed, Castform). No API change.
+- **Gameplay (replay, item 0d):** `mac/parity-mac` `165548c4b` (fixes 29 to 43) folded at run start: sandTomb sha re-pinned, typecheck 0, full
+  suite 14,750 / 14,750. Nightly (pinned worktree): pool 40 + 4 Brain **44 / 44**, staged battles **32 / 32**. Wind-down permanent list
+  **64 / 64** (1,148 states) on the final engine. Rare-rule hunt rrh1 / rrh2 / rrh3: **50 of 110** (c) rules covered by ROM-matched stages
+  (`docs/parity-mac/stages/coverage/`, 50 files), R019 / R029 / R031 / R033 class (b), **no differences**; `docs/parity-mac/STATUS.md` box sections.
+- **Folded:** iss216 (#216 / #217), lbr-d1 (7-win Lobby return), lbr-d2b (won traces), lbr-e (PreBattleRoom, 3 traces 255 / 255), lbr-f
+  (won record prompt 1 tick earlier), aud248 (S11 scoreboard, `docs/aud248-s11-scoreboard.md`: **acceptance not met**; stat-change SE), aud249 /
+  aud250 (General_* SEs; census 0..199 gameplay fields equal both scenes), cln279 (236 step-id scripts deleted). Filed #219 (sound gaps), #220
+  (held-item effect animation not presented: ~214-235 frames short per Leftovers / berry segment, both scenes).
+- **Gates (final engine `da0272fb4`; `010ef7abe` after it fixes 3 ratchets, src import-path only):** full suite 14,829 passed / 3 failed -> the 3
+  (animation boundary, dif256 harness, iss215 tools; from this run's merges) fixed in `010ef7abe`, those files + touched 8 / 8; typecheck 0;
+  build / build:lib 0; test:gate on `010ef7abe` 362 files / 2,843 tests. Soaks: vanilla 0:20 OFF **20 / 20**, ON **20 / 20**; 0:60 default **60 / 60**, winning **60 / 60**, winning-swap **60 / 60** (all `budget`); varied-RNG first-round winning carry 0 / 14 / 28
+  **100 / 100** each, winning-swap carry 0 **100 / 100**. play:random 10 min / scene `--lobby-new-challenge` on the final build (`010ef7abe`): ON 33 battles / 13 swaps / 11 new challenges from the Lobby, OFF 57 / 13 / 24; **0 page / console errors / overlays**.
+- **Next:** #220 (held-item effect presentation + its SEs) is the biggest sound / timing gap; then the aud242 move-body lifetimes, cries in
+  animation tasks, the second `Status_*` play (+14). Lobby: merge `lbr-f-residual2` after re-scanning the `tests/lbrd.test.ts` seeds (it moves the
+  hand-off deal; `docs/lbrf-won-timing.md`), NPC wander. Hunt: the remaining 56 rules need new team ideas (rrh3) — one step per run at most.
+  Nightly replay from the pool at run start; no Mac fold (the branch no longer moves).
+
+---
+
 ## 2026-11-14 — cln279 (ts lane worker): cleanup 1, second sweep: 236 unreferenced step-id scripts / fixtures deleted
 
 - **State:** on master, committed (`dfb2ca8d1`); no src change, ENGINE_BUILD unchanged. One reversible commit: 236 files, 1,182,306 bytes under `tools/integration` and `tools/compare` (fixtures / json only a deleted probe read included).
@@ -33,20 +63,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Residuals (ISSUES #218):** `iss216-same-species-off` 391 / 469 (refusal window 169..244 exact; the rented ball is one tick off after the dismiss, plus the known OFF flash-close residuals); #217 has no ROM lab window
   (Tier-1 from source; the `\p` ending of the ability text is unmeasured).
 - **Next:** none required. Papercut: soak 0:20 with the default policy and `--parallel 2` runs about 3 min per 7 seeds (vanilla), fine in chunks; `--help` on the soak tool starts a default soak instead of printing usage.
-
----
-
-## 2026-11-13 — lbr-d1 (ts lane worker): a 7-win returns to the walkable Lobby in the same mount (handoff item 0b, step 4)
-
-- **State:** on master (engine `afa750655`, tests `d811222d8`, docs after). ENGINE_BUILD `eb-8faf63dbde5168d5` -> **`eb-a781acbda4dff91e`** (read from dist and `engineBuildCheck`; tell the website:
-  7-win trajectories moved, the next draft is dealt from the Lobby cursor). `docs/lbrd-win-lobby-return.md`.
-- **Website contract:** after `round-end` the mount keeps running in the Lobby (no `challenge-end`, no `challenge-request` hold for a won round); the attendant continues the streak in the same mount and trace.
-  A later retire or loss still emits `challenge-end` (then the usual `challenge-request` hold).
-- **Did:** removed the 7-win -> new-draft chain; carry banked on Lobby entry + `lobbyStreakKept` (attendant hand-off keeps streak / rents); won terminal BP text per round (3 / 4 / 5, 14 for a Brain win);
-  won input gates 41 / 74 (ROM, lbr-d2a); `FactorySession` `wonLobbyPending` retire-guard; soak / `play:random` walk to the attendant after a 7-win; re-pins (chaining a / b / c, issue104 YES / cancel,
-  randomRoundSoak seven-win pin seed 10 + test b); `tests/lbrd.test.ts` (15, OFF and ON); lbrc / library / session-header wording; handoff 0b ticked.
-- **Gates:** typecheck 0; test:smoke 448 / 448; test:gate 362 files / 2,843 tests; brief vitest list 12 files / 178 tests; 47 more importing files 242 tests; build / build:lib 0;
-  soak winning 0:20 **20 / 20 OK** (all `budget`; all 20 seeds reached a 7-win and continued in the Lobby, 15 reached carry 14, seed 2 carry 28).
-  soak winning-swap 0:20 **20 / 20 OK** (worker); play:random 2 min / scene `--lobby-new-challenge` (supervisor, worker cut at its 120-min cap before it): 0 page / console errors / overlays, a round advance in each scene.
-- **Next:** lbr-d2b compare trace (farewell glyph +-1 tick, `recordDisabledFarewellEdgeFromRestore`, won Lobby door walk); full suite at the supervisor's wind-down (not run here).
-  Papercut: soak 0:20 --parallel 2 takes ~35 min each (results only print at the end).
