@@ -32,9 +32,9 @@ interface WonLobby {
 
 /**
  * Soak seeds that win their first round with the "winning" policy (scene-identical outcomes); seed 16 also wins the second, seed 0 loses it.
- * lbr-f: the saving -> saved timing fix moved the attendant hand-off cursor, so the deal moved; seeds 16 / 19 / 35 re-checked, 16 pinned (was 10).
+ * lbr-f: the saving -> saved timing fix moved the attendant hand-off cursor, so the deal moved; scan 1..7 on the full file (lbr-f2): only 2 passes (was 10, then 16).
  */
-const WIN_TWO_SEED = 35;
+const WIN_TWO_SEED = 2;
 const WIN_THEN_LOSE_SEED = 0;
 
 function newPlayer(seed: number): RandomPlayer {
