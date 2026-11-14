@@ -63,7 +63,7 @@ Mirrors the executable-frontier move census for the last two enumerable battle-v
 | ABILITY_SHIELD_DUST | engine-referenced | 6 (6) | 6 | — | 2 | 0 | 5 |
 | ABILITY_RAIN_DISH | engine-referenced | 6 (0) | 6 | ENDTURN | 0 | 0 | 3 |
 | ABILITY_HUSTLE | engine-referenced | 6 (1) | 6 | — | 2 | 0 | 3 |
-| ABILITY_ARENA_TRAP | engine-referenced | 6 (0) | 6 | — | 2 | 3 | 4 |
+| ABILITY_ARENA_TRAP | engine-referenced | 6 (0) | 6 | — | 2 | 3 | 5 |
 | ABILITY_VITAL_SPIRIT | engine-referenced | 6 (5) | 6 | IMMUNITY | 5 | 0 | 13 |
 | ABILITY_LIMBER | engine-referenced | 5 (5) | 5 | IMMUNITY | 4 | 0 | 10 |
 | ABILITY_CLOUD_NINE | engine-referenced | 5 (0) | 5 | ON_SWITCHIN | 1 | 0 | 18 |
@@ -72,10 +72,10 @@ Mirrors the executable-frontier move census for the last two enumerable battle-v
 | ABILITY_PURE_POWER | engine-referenced | 5 (5) | 5 | — | 1 | 0 | 2 |
 | ABILITY_COMPOUND_EYES | engine-referenced | 4 (3) | 4 | — | 2 | 0 | 1 |
 | ABILITY_HUGE_POWER | engine-referenced | 4 (0) | 4 | — | 1 | 0 | 2 |
-| ABILITY_MAGNET_PULL | engine-referenced | 4 (0) | 4 | — | 2 | 3 | 4 |
+| ABILITY_MAGNET_PULL | engine-referenced | 4 (0) | 4 | — | 2 | 3 | 5 |
 | ABILITY_MARVEL_SCALE | engine-referenced | 4 (4) | 4 | — | 1 | 0 | 2 |
 | ABILITY_SPEED_BOOST | engine-referenced | 3 (2) | 3 | ENDTURN | 0 | 0 | 4 |
-| ABILITY_SHADOW_TAG | engine-referenced | 3 (3) | 3 | — | 2 | 3 | 4 |
+| ABILITY_SHADOW_TAG | engine-referenced | 3 (3) | 3 | — | 2 | 3 | 5 |
 | ABILITY_ROUGH_SKIN | engine-referenced | 3 (3) | 3 | ON_DAMAGE | 0 | 0 | 3 |
 | ABILITY_COLOR_CHANGE | engine-referenced | 2 (2) | 2 | ON_DAMAGE | 0 | 0 | 3 |
 | ABILITY_PLUS | engine-referenced | 2 (2) | 2 | — | 2 | 0 | 3 |

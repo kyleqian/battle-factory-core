@@ -9,7 +9,7 @@ const ABILITY_ARENA_TRAP = 71;
 const STATUS2_ESCAPE_PREVENTION = 1 << 26;
 
 /** gAbilityNames entries of the three trapping abilities. */
-const TRAP_ABILITY_NAMES: Readonly<Record<number, string>> = Object.freeze({
+const trapAbilityDisplayNames: Readonly<Record<number, string>> = Object.freeze({
   [ABILITY_SHADOW_TAG]: "SHADOW TAG",
   [ABILITY_MAGNET_PULL]: "MAGNET PULL",
   [ABILITY_ARENA_TRAP]: "ARENA TRAP",
@@ -47,5 +47,5 @@ export function voluntarySwitchTrap(
     )
     || (holder.ability === ABILITY_MAGNET_PULL && active.types.includes("TYPE_STEEL"));
   if (!trapped) return null;
-  return Object.freeze({ kind: "ability", ability: holder.ability, abilityName: TRAP_ABILITY_NAMES[holder.ability]! });
+  return Object.freeze({ kind: "ability", ability: holder.ability, abilityName: trapAbilityDisplayNames[holder.ability]! });
 }
