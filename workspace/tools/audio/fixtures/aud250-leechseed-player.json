@@ -21,16 +21,16 @@
   "m4aMPlayStop": "0x082e0978",
   "m4aMPlayContinue": "0x082e02a8"
  },
- "mode": "hybrid",
- "steps": 3610981,
+ "mode": "step",
+ "steps": 38951221,
  "hybrid": {
-  "fast": 751,
-  "restepped": 71,
+  "fast": 0,
+  "restepped": 0,
   "state_mismatch": 0,
   "mismatches": []
  },
- "seconds": 6.2,
- "windowSeconds": 4.7,
+ "seconds": 36.0,
+ "windowSeconds": 34.5,
  "events": [
   {
    "frame": 1,
@@ -47,6 +47,15 @@
    "name": "SE_SELECT",
    "pan": null,
    "via": "PlaySE"
+  },
+  {
+   "frame": 86,
+   "kind": "stop",
+   "id": 90,
+   "name": "SE_LOW_HEALTH",
+   "pan": null,
+   "via": "HandleLowHpMusicChange",
+   "noop": true
   },
   {
    "frame": 96,
@@ -137,6 +146,18 @@
    "via": "PlaySE12WithPanning"
   },
   {
+   "frame": 232,
+   "kind": "duck",
+   "id": 476,
+   "name": "MUS_VS_TRAINER",
+   "pan": null,
+   "player": "BGM",
+   "via": "DestroyAnimSoundTask",
+   "tracks": 65535,
+   "volume": 256,
+   "noop": true
+  },
+  {
    "frame": 406,
    "kind": "se",
    "id": 238,
@@ -161,12 +182,42 @@
    "via": "PlaySE12WithPanning"
   },
   {
+   "frame": 594,
+   "kind": "duck",
+   "id": 476,
+   "name": "MUS_VS_TRAINER",
+   "pan": null,
+   "player": "BGM",
+   "via": "DestroyAnimSoundTask",
+   "tracks": 65535,
+   "volume": 256,
+   "noop": true
+  },
+  {
    "frame": 597,
    "kind": "se",
    "id": 13,
    "name": "SE_EFFECTIVE",
    "pan": -64,
    "via": "PlaySE12WithPanning"
+  },
+  {
+   "frame": 646,
+   "kind": "stop",
+   "id": 90,
+   "name": "SE_LOW_HEALTH",
+   "pan": null,
+   "via": "HandleLowHpMusicChange",
+   "noop": true
+  },
+  {
+   "frame": 647,
+   "kind": "stop",
+   "id": 90,
+   "name": "SE_LOW_HEALTH",
+   "pan": null,
+   "via": "HandleLowHpMusicChange",
+   "noop": true
   },
   {
    "frame": 697,
@@ -265,6 +316,14 @@
    "r1": 33703116
   },
   {
+   "frame": 86,
+   "fn": "m4aSongNumStop",
+   "via": "HandleLowHpMusicChange",
+   "r0": 90,
+   "r1": 1,
+   "noop": true
+  },
+  {
    "frame": 96,
    "fn": "PlaySE12WithPanning",
    "via": "CalculatePanIncrement",
@@ -419,6 +478,14 @@
    "r1": 63
   },
   {
+   "frame": 232,
+   "fn": "m4aMPlayVolumeControl",
+   "via": "DestroyAnimSoundTask",
+   "r0": 50361376,
+   "r1": 65535,
+   "noop": true
+  },
+  {
    "frame": 406,
    "fn": "PlaySE12WithPanning",
    "via": "CalculatePanIncrement",
@@ -459,6 +526,14 @@
    "via": "PlaySE12WithPanning",
    "r0": 131,
    "r1": 4294967233
+  },
+  {
+   "frame": 594,
+   "fn": "m4aMPlayVolumeControl",
+   "via": "DestroyAnimSoundTask",
+   "r0": 50361376,
+   "r1": 65535,
+   "noop": true
   },
   {
    "frame": 597,
@@ -473,6 +548,22 @@
    "via": "PlaySE12WithPanning",
    "r0": 13,
    "r1": 4294967232
+  },
+  {
+   "frame": 646,
+   "fn": "m4aSongNumStop",
+   "via": "HandleLowHpMusicChange",
+   "r0": 90,
+   "r1": 1,
+   "noop": true
+  },
+  {
+   "frame": 647,
+   "fn": "m4aSongNumStop",
+   "via": "HandleLowHpMusicChange",
+   "r0": 90,
+   "r1": 1,
+   "noop": true
   },
   {
    "frame": 697,

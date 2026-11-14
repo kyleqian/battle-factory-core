@@ -21,16 +21,16 @@
   "m4aMPlayStop": "0x082e0978",
   "m4aMPlayContinue": "0x082e02a8"
  },
- "mode": "hybrid",
- "steps": 1417234,
+ "mode": "step",
+ "steps": 38923780,
  "hybrid": {
-  "fast": 796,
-  "restepped": 26,
+  "fast": 0,
+  "restepped": 0,
   "state_mismatch": 0,
   "mismatches": []
  },
- "seconds": 3.7,
- "windowSeconds": 2.3,
+ "seconds": 35.7,
+ "windowSeconds": 34.2,
  "events": [
   {
    "frame": 1,
@@ -57,6 +57,27 @@
    "via": "PlaySE12WithPanning"
   },
   {
+   "frame": 152,
+   "kind": "duck",
+   "id": 476,
+   "name": "MUS_VS_TRAINER",
+   "pan": null,
+   "player": "BGM",
+   "via": "DestroyAnimSoundTask",
+   "tracks": 65535,
+   "volume": 256,
+   "noop": true
+  },
+  {
+   "frame": 288,
+   "kind": "stop",
+   "id": 90,
+   "name": "SE_LOW_HEALTH",
+   "pan": null,
+   "via": "HandleLowHpMusicChange",
+   "noop": true
+  },
+  {
    "frame": 328,
    "kind": "se",
    "id": 238,
@@ -79,6 +100,18 @@
    "name": "SE_M_ROCK_THROW",
    "pan": 63,
    "via": "PlaySE12WithPanning"
+  },
+  {
+   "frame": 516,
+   "kind": "duck",
+   "id": 476,
+   "name": "MUS_VS_TRAINER",
+   "pan": null,
+   "player": "BGM",
+   "via": "DestroyAnimSoundTask",
+   "tracks": 65535,
+   "volume": 256,
+   "noop": true
   },
   {
    "frame": 519,
@@ -119,6 +152,22 @@
    "r1": 63
   },
   {
+   "frame": 152,
+   "fn": "m4aMPlayVolumeControl",
+   "via": "DestroyAnimSoundTask",
+   "r0": 50361376,
+   "r1": 65535,
+   "noop": true
+  },
+  {
+   "frame": 288,
+   "fn": "m4aSongNumStop",
+   "via": "HandleLowHpMusicChange",
+   "r0": 90,
+   "r1": 1,
+   "noop": true
+  },
+  {
    "frame": 328,
    "fn": "PlaySE12WithPanning",
    "via": "CalculatePanIncrement",
@@ -159,6 +208,14 @@
    "via": "PlaySE12WithPanning",
    "r0": 131,
    "r1": 63
+  },
+  {
+   "frame": 516,
+   "fn": "m4aMPlayVolumeControl",
+   "via": "DestroyAnimSoundTask",
+   "r0": 50361376,
+   "r1": 65535,
+   "noop": true
   },
   {
    "frame": 519,
