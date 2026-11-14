@@ -430,7 +430,7 @@ game says it "can't be switched out" (seen in code only).
    abl261 / aip262 / aiv267 proof shape (tests, re-drive seeds, census attribution, full suite): the causes are in `docs/dia269-leads.md` (2026-11-11): fix ISSUES #204 A
    (seed 22), B (30), C (39), #209 (53), #210 (42) one step each, then seeds 50 / 57 / 60 (unconfirmed), then drive seeds 61..100 for new leads. After that, the sound segment diff
    (`tools/audio/soundSegmentDiff.py`, aud243d section 5: missing move-animation SE streams and stat-change SEs) over K >= 20 aligned seeds per scene; remaining aud242 lifetimes and the #198 alignment audit (`docs/al198-scout.md`) can interleave; next lifetimes ranked in `docs/aud242g-scout.md`. Open aud241 gaps: ISSUES #196 / #197, the canonical battleScene route plays no end sounds.
-2. **Cleanup (one commit per step, verified by typecheck + full suite + build), in this order:** (1), (2), (3), (6) DONE;
+2. **Cleanup (one commit per step, verified by typecheck + full suite + build), in this order:** (1) DONE (cln237 first sweep 2,103 files; cln279 second sweep 2026-11-14: 236 more step-id scripts / fixtures, 1.18 MB, `docs/archive/cln279-deleted.txt`, closure tool `tools/cleanup/keepClosure.ts`), (2), (3), (6) DONE;
    (5) DONE (cln240 + cln242 + cln244 Dive; optional: `summaryAllFactorySpecies` 134 s and `substituteDollDefenderLive` 80 s for < 15 min); (4) DONE (cln241);
    (7) evidence stops going into git (policy line in AGENTS.md DONE 2026-11-07; cln243 DONE 2026-11-07, 11,691 files / 204 MB untracked,
    `docs/cln243-evidence-untrack.md`; the ~593 MB rest of `tools/compare/evidence` is read by tests; remaining per `docs/cln7-scout.md`: ~590 MB of tracked evidence looks write-only;
