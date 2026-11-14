@@ -95050,7 +95050,7 @@
           ],
           "sourceHookPresent": true,
           "censusStatus": "engine-referenced",
-          "engineReferenceCount": 4,
+          "engineReferenceCount": 5,
           "oracleReceiptCards": [],
           "evidence": [
             {
@@ -96040,7 +96040,7 @@
           ],
           "sourceHookPresent": true,
           "censusStatus": "engine-referenced",
-          "engineReferenceCount": 4,
+          "engineReferenceCount": 5,
           "oracleReceiptCards": [],
           "evidence": [
             {
@@ -97364,7 +97364,7 @@
           ],
           "sourceHookPresent": true,
           "censusStatus": "engine-referenced",
-          "engineReferenceCount": 4,
+          "engineReferenceCount": 5,
           "oracleReceiptCards": [
             "gate6-arena-trap-off"
           ],
