@@ -47,6 +47,7 @@ commands and stay silent; 3. cries (cry-task rows not ported); 4. battle-control
 - **aud250 (2026-11-14)** emits FOCUS_PUNCH_SETUP / LEECH_SEED_DRAIN / CASTFORM_CHANGE (anchors 5 / 7 / 5, ROM windows). Open: the second
   `Status_*` play is 14-15 frames later in the ROM (not a loop error; needs a pixel window of the second play); `Status_Freeze` SE 242 moved +1
   by the wait+1 rule without a ROM window; held-item effect is #220.
+- Cries inside move-animation tasks (Roar / Hyper Voice / Howl): 2-step plan in `docs/cry-task-scout.md` (needs a measured cry-length table).
 
 ## #214 — Leads from the Mac lane's 2026-11-12 passes (source-read only, no ROM seed)
 
