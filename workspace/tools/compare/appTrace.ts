@@ -1907,6 +1907,11 @@ export const APP_STAGES: Readonly<Record<string, AppStage>> = {
   "aud242b-fireblast-player-on": (state) => aud241bStage(state, "aud242b-fireblast-player-on", "on", 50, 12, 126, undefined, false, 69),
   "aud242b-dragonclaw-opponent-on": (state) => aud241bStage(state, "aud242b-dragonclaw-opponent-on", "on", 12, 50, 69, undefined, false, 337),
   "aud242b-cosmicpower-player-on": (state) => aud241bStage(state, "aud242b-cosmicpower-player-on", "on", 50, 12, 322, undefined, false, 69),
+  // aud250: General_FocusPunchSetUp / General_LeechSeedDrain sound anchors (docs/aud250-general-anim-sounds.md).
+  "aud250-focuspunch-player-on": (state) => aud241bStage(state, "aud250-focuspunch-player-on", "on", 50, 12, 264, undefined, false, 69),
+  "aud250-leechseed-player-on": (state) => aud241bStage(state, "aud250-leechseed-player-on", "on", 50, 12, 73, undefined, false, 69),
+  "aud250-focuspunch-opponent-on": (state) => aud241bStage(state, "aud250-focuspunch-opponent-on", "on", 12, 50, 69, undefined, false, 264),
+  "aud250-leechseed-opponent-on": (state) => aud241bStage(state, "aud250-leechseed-opponent-on", "on", 12, 50, 69, undefined, false, 73),
   "aud242b-flatter-player-on": (state) => aud241bStage(state, "aud242b-flatter-player-on", "on", 50, 12, 260, undefined, false, 69),
   "aud242b-superpower-player-on": (state) => aud241bStage(state, "aud242b-superpower-player-on", "on", 50, 12, 276, undefined, false, 69),
   "aud242b-dragonrage-opponent-off": (state) => aud241bStage(state, "aud242b-dragonrage-opponent-off", "off", 12, 50, 69, undefined, false, 82),

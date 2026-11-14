@@ -1,0 +1,648 @@
+{
+ "schema": "audio-sound-events/v1",
+ "window": "lab aud250-leechseed-player-on.json",
+ "profile": "battle-scene-on",
+ "frames": 822,
+ "hooks": {
+  "m4aSongNumStart": "0x082e0130",
+  "m4aSongNumStop": "0x082e01fc",
+  "PlayCryInternal": "0x080a344c",
+  "PlaySE12WithPanning": "0x080a37b4",
+  "PlaySE1WithPanning": "0x080a3808",
+  "PlaySE2WithPanning": "0x080a383c",
+  "SE12PanpotControl": "0x080a3870",
+  "PlayBGM": "0x080a3778",
+  "PlayFanfare": "0x080a30e4",
+  "PlayFanfareByFanfareNum": "0x080a3060",
+  "m4aMPlayFadeOut": "0x082e02f8",
+  "m4aMPlayFadeOutTemporarily": "0x082e0308",
+  "m4aMPlayFadeIn": "0x082e0328",
+  "m4aMPlayVolumeControl": "0x082e111c",
+  "m4aMPlayStop": "0x082e0978",
+  "m4aMPlayContinue": "0x082e02a8"
+ },
+ "mode": "hybrid",
+ "steps": 3610981,
+ "hybrid": {
+  "fast": 751,
+  "restepped": 71,
+  "state_mismatch": 0,
+  "mismatches": []
+ },
+ "seconds": 6.2,
+ "windowSeconds": 4.7,
+ "events": [
+  {
+   "frame": 1,
+   "kind": "se",
+   "id": 5,
+   "name": "SE_SELECT",
+   "pan": null,
+   "via": "PlaySE"
+  },
+  {
+   "frame": 21,
+   "kind": "se",
+   "id": 5,
+   "name": "SE_SELECT",
+   "pan": null,
+   "via": "PlaySE"
+  },
+  {
+   "frame": 96,
+   "kind": "se",
+   "id": 169,
+   "name": "SE_M_POISON_POWDER",
+   "pan": -64,
+   "via": "PlaySE12WithPanning"
+  },
+  {
+   "frame": 106,
+   "kind": "se",
+   "id": 169,
+   "name": "SE_M_POISON_POWDER",
+   "pan": -64,
+   "via": "PlaySE12WithPanning"
+  },
+  {
+   "frame": 116,
+   "kind": "se",
+   "id": 169,
+   "name": "SE_M_POISON_POWDER",
+   "pan": -64,
+   "via": "PlaySE12WithPanning"
+  },
+  {
+   "frame": 130,
+   "kind": "se",
+   "id": 167,
+   "name": "SE_M_TAIL_WHIP",
+   "pan": 63,
+   "via": "PlaySE12WithPanning"
+  },
+  {
+   "frame": 140,
+   "kind": "se",
+   "id": 167,
+   "name": "SE_M_TAIL_WHIP",
+   "pan": 63,
+   "via": "PlaySE12WithPanning"
+  },
+  {
+   "frame": 151,
+   "kind": "se",
+   "id": 167,
+   "name": "SE_M_TAIL_WHIP",
+   "pan": 63,
+   "via": "PlaySE12WithPanning"
+  },
+  {
+   "frame": 162,
+   "kind": "se",
+   "id": 167,
+   "name": "SE_M_TAIL_WHIP",
+   "pan": 63,
+   "via": "PlaySE12WithPanning"
+  },
+  {
+   "frame": 173,
+   "kind": "se",
+   "id": 167,
+   "name": "SE_M_TAIL_WHIP",
+   "pan": 63,
+   "via": "PlaySE12WithPanning"
+  },
+  {
+   "frame": 184,
+   "kind": "se",
+   "id": 167,
+   "name": "SE_M_TAIL_WHIP",
+   "pan": 63,
+   "via": "PlaySE12WithPanning"
+  },
+  {
+   "frame": 195,
+   "kind": "se",
+   "id": 167,
+   "name": "SE_M_TAIL_WHIP",
+   "pan": 63,
+   "via": "PlaySE12WithPanning"
+  },
+  {
+   "frame": 206,
+   "kind": "se",
+   "id": 167,
+   "name": "SE_M_TAIL_WHIP",
+   "pan": 63,
+   "via": "PlaySE12WithPanning"
+  },
+  {
+   "frame": 406,
+   "kind": "se",
+   "id": 238,
+   "name": "SE_M_SKY_UPPERCUT",
+   "pan": 0,
+   "via": "PlaySE12WithPanning"
+  },
+  {
+   "frame": 526,
+   "kind": "se",
+   "id": 214,
+   "name": "SE_M_STRENGTH",
+   "pan": -63,
+   "via": "PlaySE12WithPanning"
+  },
+  {
+   "frame": 544,
+   "kind": "se",
+   "id": 131,
+   "name": "SE_M_ROCK_THROW",
+   "pan": -63,
+   "via": "PlaySE12WithPanning"
+  },
+  {
+   "frame": 597,
+   "kind": "se",
+   "id": 13,
+   "name": "SE_EFFECTIVE",
+   "pan": -64,
+   "via": "PlaySE12WithPanning"
+  },
+  {
+   "frame": 697,
+   "kind": "se",
+   "id": 180,
+   "name": "SE_M_ABSORB",
+   "pan": 63,
+   "via": "PlaySE12WithPanning"
+  },
+  {
+   "frame": 715,
+   "kind": "se",
+   "id": 142,
+   "name": "SE_M_CRABHAMMER",
+   "pan": 63,
+   "via": "PlaySE12WithPanning"
+  },
+  {
+   "frame": 721,
+   "kind": "se",
+   "id": 142,
+   "name": "SE_M_CRABHAMMER",
+   "pan": 63,
+   "via": "PlaySE12WithPanning"
+  },
+  {
+   "frame": 727,
+   "kind": "se",
+   "id": 142,
+   "name": "SE_M_CRABHAMMER",
+   "pan": 63,
+   "via": "PlaySE12WithPanning"
+  },
+  {
+   "frame": 733,
+   "kind": "se",
+   "id": 142,
+   "name": "SE_M_CRABHAMMER",
+   "pan": 63,
+   "via": "PlaySE12WithPanning"
+  },
+  {
+   "frame": 739,
+   "kind": "se",
+   "id": 142,
+   "name": "SE_M_CRABHAMMER",
+   "pan": 63,
+   "via": "PlaySE12WithPanning"
+  },
+  {
+   "frame": 745,
+   "kind": "se",
+   "id": 142,
+   "name": "SE_M_CRABHAMMER",
+   "pan": 63,
+   "via": "PlaySE12WithPanning"
+  },
+  {
+   "frame": 751,
+   "kind": "se",
+   "id": 142,
+   "name": "SE_M_CRABHAMMER",
+   "pan": 63,
+   "via": "PlaySE12WithPanning"
+  },
+  {
+   "frame": 757,
+   "kind": "se",
+   "id": 142,
+   "name": "SE_M_CRABHAMMER",
+   "pan": 63,
+   "via": "PlaySE12WithPanning"
+  },
+  {
+   "frame": 810,
+   "kind": "se",
+   "id": 179,
+   "name": "SE_M_ABSORB_2",
+   "pan": -64,
+   "via": "PlaySE12WithPanning"
+  }
+ ],
+ "calls": [
+  {
+   "frame": 1,
+   "fn": "m4aSongNumStart",
+   "via": "PlaySE",
+   "r0": 5,
+   "r1": 33703116
+  },
+  {
+   "frame": 21,
+   "fn": "m4aSongNumStart",
+   "via": "PlaySE",
+   "r0": 5,
+   "r1": 33703116
+  },
+  {
+   "frame": 96,
+   "fn": "PlaySE12WithPanning",
+   "via": "CalculatePanIncrement",
+   "r0": 169,
+   "r1": 4294967232
+  },
+  {
+   "frame": 96,
+   "fn": "m4aSongNumStart",
+   "via": "PlaySE12WithPanning",
+   "r0": 169,
+   "r1": 4294967232
+  },
+  {
+   "frame": 106,
+   "fn": "PlaySE12WithPanning",
+   "via": "CalculatePanIncrement",
+   "r0": 169,
+   "r1": 4294967232
+  },
+  {
+   "frame": 106,
+   "fn": "m4aSongNumStart",
+   "via": "PlaySE12WithPanning",
+   "r0": 169,
+   "r1": 4294967232
+  },
+  {
+   "frame": 116,
+   "fn": "PlaySE12WithPanning",
+   "via": "CalculatePanIncrement",
+   "r0": 169,
+   "r1": 4294967232
+  },
+  {
+   "frame": 116,
+   "fn": "m4aSongNumStart",
+   "via": "PlaySE12WithPanning",
+   "r0": 169,
+   "r1": 4294967232
+  },
+  {
+   "frame": 130,
+   "fn": "PlaySE12WithPanning",
+   "via": "CalculatePanIncrement",
+   "r0": 167,
+   "r1": 63
+  },
+  {
+   "frame": 130,
+   "fn": "m4aSongNumStart",
+   "via": "PlaySE12WithPanning",
+   "r0": 167,
+   "r1": 63
+  },
+  {
+   "frame": 140,
+   "fn": "PlaySE12WithPanning",
+   "via": "CalculatePanIncrement",
+   "r0": 167,
+   "r1": 63
+  },
+  {
+   "frame": 140,
+   "fn": "m4aSongNumStart",
+   "via": "PlaySE12WithPanning",
+   "r0": 167,
+   "r1": 63
+  },
+  {
+   "frame": 151,
+   "fn": "PlaySE12WithPanning",
+   "via": "CalculatePanIncrement",
+   "r0": 167,
+   "r1": 63
+  },
+  {
+   "frame": 151,
+   "fn": "m4aSongNumStart",
+   "via": "PlaySE12WithPanning",
+   "r0": 167,
+   "r1": 63
+  },
+  {
+   "frame": 162,
+   "fn": "PlaySE12WithPanning",
+   "via": "CalculatePanIncrement",
+   "r0": 167,
+   "r1": 63
+  },
+  {
+   "frame": 162,
+   "fn": "m4aSongNumStart",
+   "via": "PlaySE12WithPanning",
+   "r0": 167,
+   "r1": 63
+  },
+  {
+   "frame": 173,
+   "fn": "PlaySE12WithPanning",
+   "via": "CalculatePanIncrement",
+   "r0": 167,
+   "r1": 63
+  },
+  {
+   "frame": 173,
+   "fn": "m4aSongNumStart",
+   "via": "PlaySE12WithPanning",
+   "r0": 167,
+   "r1": 63
+  },
+  {
+   "frame": 184,
+   "fn": "PlaySE12WithPanning",
+   "via": "CalculatePanIncrement",
+   "r0": 167,
+   "r1": 63
+  },
+  {
+   "frame": 184,
+   "fn": "m4aSongNumStart",
+   "via": "PlaySE12WithPanning",
+   "r0": 167,
+   "r1": 63
+  },
+  {
+   "frame": 195,
+   "fn": "PlaySE12WithPanning",
+   "via": "CalculatePanIncrement",
+   "r0": 167,
+   "r1": 63
+  },
+  {
+   "frame": 195,
+   "fn": "m4aSongNumStart",
+   "via": "PlaySE12WithPanning",
+   "r0": 167,
+   "r1": 63
+  },
+  {
+   "frame": 206,
+   "fn": "PlaySE12WithPanning",
+   "via": "CalculatePanIncrement",
+   "r0": 167,
+   "r1": 63
+  },
+  {
+   "frame": 206,
+   "fn": "m4aSongNumStart",
+   "via": "PlaySE12WithPanning",
+   "r0": 167,
+   "r1": 63
+  },
+  {
+   "frame": 406,
+   "fn": "PlaySE12WithPanning",
+   "via": "CalculatePanIncrement",
+   "r0": 238,
+   "r1": 0
+  },
+  {
+   "frame": 406,
+   "fn": "m4aSongNumStart",
+   "via": "PlaySE12WithPanning",
+   "r0": 238,
+   "r1": 0
+  },
+  {
+   "frame": 526,
+   "fn": "PlaySE12WithPanning",
+   "via": "CalculatePanIncrement",
+   "r0": 214,
+   "r1": 4294967233
+  },
+  {
+   "frame": 526,
+   "fn": "m4aSongNumStart",
+   "via": "PlaySE12WithPanning",
+   "r0": 214,
+   "r1": 4294967233
+  },
+  {
+   "frame": 544,
+   "fn": "PlaySE12WithPanning",
+   "via": "CalculatePanIncrement",
+   "r0": 131,
+   "r1": 4294967233
+  },
+  {
+   "frame": 544,
+   "fn": "m4aSongNumStart",
+   "via": "PlaySE12WithPanning",
+   "r0": 131,
+   "r1": 4294967233
+  },
+  {
+   "frame": 597,
+   "fn": "PlaySE12WithPanning",
+   "via": "InitMoveSelectionsVarsAndStrings",
+   "r0": 13,
+   "r1": 4294967232
+  },
+  {
+   "frame": 597,
+   "fn": "m4aSongNumStart",
+   "via": "PlaySE12WithPanning",
+   "r0": 13,
+   "r1": 4294967232
+  },
+  {
+   "frame": 697,
+   "fn": "PlaySE12WithPanning",
+   "via": "CalculatePanIncrement",
+   "r0": 180,
+   "r1": 63
+  },
+  {
+   "frame": 697,
+   "fn": "m4aSongNumStart",
+   "via": "PlaySE12WithPanning",
+   "r0": 180,
+   "r1": 63
+  },
+  {
+   "frame": 715,
+   "fn": "PlaySE12WithPanning",
+   "via": "CalculatePanIncrement",
+   "r0": 142,
+   "r1": 63
+  },
+  {
+   "frame": 715,
+   "fn": "m4aSongNumStart",
+   "via": "PlaySE12WithPanning",
+   "r0": 142,
+   "r1": 63
+  },
+  {
+   "frame": 721,
+   "fn": "PlaySE12WithPanning",
+   "via": "CalculatePanIncrement",
+   "r0": 142,
+   "r1": 63
+  },
+  {
+   "frame": 721,
+   "fn": "m4aSongNumStart",
+   "via": "PlaySE12WithPanning",
+   "r0": 142,
+   "r1": 63
+  },
+  {
+   "frame": 727,
+   "fn": "PlaySE12WithPanning",
+   "via": "CalculatePanIncrement",
+   "r0": 142,
+   "r1": 63
+  },
+  {
+   "frame": 727,
+   "fn": "m4aSongNumStart",
+   "via": "PlaySE12WithPanning",
+   "r0": 142,
+   "r1": 63
+  },
+  {
+   "frame": 733,
+   "fn": "PlaySE12WithPanning",
+   "via": "CalculatePanIncrement",
+   "r0": 142,
+   "r1": 63
+  },
+  {
+   "frame": 733,
+   "fn": "m4aSongNumStart",
+   "via": "PlaySE12WithPanning",
+   "r0": 142,
+   "r1": 63
+  },
+  {
+   "frame": 739,
+   "fn": "PlaySE12WithPanning",
+   "via": "CalculatePanIncrement",
+   "r0": 142,
+   "r1": 63
+  },
+  {
+   "frame": 739,
+   "fn": "m4aSongNumStart",
+   "via": "PlaySE12WithPanning",
+   "r0": 142,
+   "r1": 63
+  },
+  {
+   "frame": 745,
+   "fn": "PlaySE12WithPanning",
+   "via": "CalculatePanIncrement",
+   "r0": 142,
+   "r1": 63
+  },
+  {
+   "frame": 745,
+   "fn": "m4aSongNumStart",
+   "via": "PlaySE12WithPanning",
+   "r0": 142,
+   "r1": 63
+  },
+  {
+   "frame": 751,
+   "fn": "PlaySE12WithPanning",
+   "via": "CalculatePanIncrement",
+   "r0": 142,
+   "r1": 63
+  },
+  {
+   "frame": 751,
+   "fn": "m4aSongNumStart",
+   "via": "PlaySE12WithPanning",
+   "r0": 142,
+   "r1": 63
+  },
+  {
+   "frame": 757,
+   "fn": "PlaySE12WithPanning",
+   "via": "CalculatePanIncrement",
+   "r0": 142,
+   "r1": 63
+  },
+  {
+   "frame": 757,
+   "fn": "m4aSongNumStart",
+   "via": "PlaySE12WithPanning",
+   "r0": 142,
+   "r1": 63
+  },
+  {
+   "frame": 810,
+   "fn": "PlaySE12WithPanning",
+   "via": "CalculatePanIncrement",
+   "r0": 179,
+   "r1": 4294967232
+  },
+  {
+   "frame": 810,
+   "fn": "m4aSongNumStart",
+   "via": "PlaySE12WithPanning",
+   "r0": 179,
+   "r1": 4294967232
+  }
+ ],
+ "trace": {
+  "route": "generated-orchestrator",
+  "battleScene": "on",
+  "appStage": {
+   "id": "aud250-leechseed-player-on",
+   "frame": 0
+  },
+  "segments": [
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 18,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 800,
+    "buttons": []
+   }
+  ]
+ }
+}
