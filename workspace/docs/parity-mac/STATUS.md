@@ -797,3 +797,57 @@ Left in `on-hold/designs/` (updated `onHold`):
 - **R039** (AI Memento markers `-10` / `-8`): 80 lab seeds (90000..90079), no hit, no engine error. In seed 90079 Granbull
   (157 HP) is knocked out by Weezing in three turns, before its Sp. Atk reaches -6; the design needs a sturdier Overheat user.
 - **R032, R037, R038** (chance 0.01 to 0.02, 200 seeds each): not tried; at 15 s a seed each is about 50 minutes.
+
+## Box hunt 2026-11-14 (rrh2): hunter fixes, source checks, nine new designs
+
+Evidence under `.integration/evidence/rrh2/` (git-ignored; designs in `designs/`, hunt logs in `chunt/`, clean re-drives in `redrive/`).
+
+**Hunter fixes (commit 3618fe534).** `prehunt.py`: each `cover` entry is judged on its own marker (key `ran:{i}:file:text[at:at+30]`), so a
+`coverAny false` stage needs every entry to run. `huntq.py`: `--max-seeds N` and `--out DIR`; tags REJECTED and DESIGN-ERROR (after three
+"is not legal" errors). New `designcheck.py`: rejects a design whose `replacements` names a slot twice, more than two, or lead 0 without a
+switch, a `cover` snippet that does not occur exactly once, and a cover marker on a `throw` line. Demonstrated on a doctored design
+(`demo-bad.json`, `demo-designcheck.txt`): huntq rejected it without spending a seed. `sets.py` (commit f40bc7aed): `python3
+tools/replay-hunt/sets.py "EXPR over m"` queries the Factory sets on the box.
+
+**Source checks** (full lines in `rule-coverage.md`): R029, R031, R033 are class (b) (dead code or unreachable in singles, decomp file:line given);
+R035 and R040 stay (c) but are not stageable cheaply (no Taunt set from id 267 up; Mechanic Lab is ROM-only).
+
+**New stages: ten rules, nine files, all match the ROM, every cover entry run (R054: `coverAny`, see below).** Each was re-driven once
+more from a clean command line (`romReplayWide.sh --stage`, `nice -n 19`, one at a time): `match True`, `stage.ok True`, outcome
+engine = ROM.
+
+| rule | stage file (lab seed) | lab seeds tried | states matched / decisions | outcome |
+|---|---|---|---|---|
+| R054 Natural Cure, sleeper switched in | R054-natural-cure-sleeper-switch (91017) | 18 + 25 + 18 (three designs) | 24 / 24 | 2 / 2 |
+| R060 Choice Band, Future Sight | R060-choice-band-future-sight (90000) | 1 | 17 / 17 | 2 / 2 |
+| R066 Focus Band, OHKO | R066-focus-band-ohko (90011) | 12 | 54 / 54 | 1 / 1 |
+| R070 Guts (Kadabra), Future Sight | R070-kadabra-guts-future-sight (90000) | 1 (after 1 wrong design) | 26 / 26 | 1 / 1 |
+| R074 Hustle (Kadabra), Future Sight | R074-kadabra-hustle-future-sight (91000) | 2 | 26 / 26 | 2 / 2 |
+| R084 Plus (Kadabra), Future Sight | R084-kadabra-plus-future-sight (91000) | 2 (after 1 first-entry-only) | 33 / 33 | 2 / 2 |
+| R087 + R089 Sleep Talk, Encore | R089-sleep-talk-encore (90005) | 14 + 22 | 78 / 78 | 1 / 1 |
+| R088 Sleep Talk, Choice Band | R088-sleep-talk-choice-band (90005) | 6 | 53 / 53 | 1 / 1 |
+| R092 Covet vs Sticky Hold | R092-covet-sticky-hold (93000) | 4 | 30 / 26 | 2 / 2 |
+
+R054's design makes `gLastLandedMoves` hold `MOVE_UNAVAILABLE` (a failed Fake Out) so `ShouldSwitchIfNaturalCure` reads the move
+table at 0xFFFF; the marker that ran is the `?? 0` arm in `factoryAiSwitchPolicy.ts`. The engine returns 0 for the missing move, and the
+ROM's row matched anyway in this seed, so that read produces no visible difference here. The two other markers did not run (`coverAny`).
+(An "already asleep" Lovely Kiss does NOT set `MOVE_UNAVAILABLE`; version two spent 25 seeds on that.)
+
+**No engine / ROM difference was found; there is no `stages/coverage/pending/`.** No engine error either, other than the stall below.
+
+**Design mistakes (staging only), for the next hunter:**
+
+- A species on both sides makes the lab setup fail on every seed (R070 v1: Machoke on both teams). `designcheck.py` does not check this yet.
+- A stall battle (two mons that cannot hurt each other) hits the ROM frame cap (~80000 frames, about 115+ states): the result is
+  "class state" with the ROM stopping early. That is not an engine difference. R080 (Marvel Scale, Milotic Recover against Struggle) hit
+  its marker on every seed and stalled on every seed; parked, no stage. R054 v1 (Chansey) stalled the same way ("frame budget").
+- The first cover entry alone matching is not enough when `coverAny` is false: R070 and R084 matched with only entry 0 run; the scripts
+  were reordered so the boost branch is exercised.
+- A census opponent can undo a Trick (R088 v1 swapped the Choice Band back): script the move after the Trick.
+- A `?? 0` marker only counts when the right-hand side runs.
+- `timeout 520 huntq.py ...` over too many seeds is killed at the 9-minute foreground limit with no output; split into fewer seeds
+  and designs per command (`--max-seeds`).
+
+**Not designed or not finished:** R068 (no freeze move in the lab at challenges 0 and 1), R081, R097, R107, R110 (too convoluted for
+the time), R106 (probably unreachable; not tested), R080 (above), R093 and R099 (not tried). R030, R032, R037, R038, R039 were skipped
+by the brief. Counts after rrh2: 47 of the 110 covered; R019, R029, R031, R033 class (b); 59 left.
