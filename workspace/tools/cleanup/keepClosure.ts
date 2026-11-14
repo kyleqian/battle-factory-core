@@ -26,6 +26,9 @@ const SEEDS = [
   'tools/integration/lsd194Census.sh',
   'tools/integration/rst197CensusDelta.py',
   'tools/integration/start-local-preview.sh',
+  'tools/integration/soundCensusDelta.py',
+  'tools/integration/soundCensusExpected.ts',
+  'tools/integration/pmf240CardProof.ts',
 ];
 
 const TEXT_EXT = /\.(ts|tsx|js|mjs|cjs|py|sh|json|jsonl|c|h|txt|html|css|yml|yaml|toml|rs|cfg|ini|s|tsv|csv)$/i;

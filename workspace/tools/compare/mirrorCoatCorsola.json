@@ -1,5 +1,0 @@
-{"species": 222, "level": 50, "nature": 8,
- "ivs": {"hp": 3, "attack": 3, "defense": 3, "speed": 3, "spAttack": 3, "spDefense": 3},
- "evs": {"hp": 170, "attack": 0, "defense": 170, "speed": 0, "spAttack": 0, "spDefense": 170},
- "moves": [243, 243, 243, 243], "ppUps": [0, 0, 0, 0], "item": 142, "abilitySlot": 0,
- "friendship": 0, "gender": "female", "shiny": false}
