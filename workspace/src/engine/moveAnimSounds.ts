@@ -5,7 +5,6 @@ import timingData from "../data/gen/anim-sound-timing.json" with { type: "json" 
 import { animSoundPan, animSoundPan2, calculatePanIncrement, emitSound, keepPanInRange, type AnimPanContext, type SoundEmission } from "../audio/soundEvents.ts";
 import { BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS } from "./battleScriptSourceConstants.ts";
 import type { BattleResolutionPresentationState } from "./battleResolutionPresentation.ts";
-import { statsChangeParams } from "../animation/statsChange.ts";
 import { liveMoveSourceAge, statsChangeSourceAge } from "./battleResolutionPresentationRender.ts";
 import { FOCUS_PUNCH_SETUP_BEHIND_SUBSTITUTE_COMMAND_FRAMES, WEATHER_CONTINUES_LAUNCH_LEAD_ROWS, isWeatherContinuesAnimation, type BattleStatusAnimationName, type WeatherContinuesAnimation } from "./battleResolutionPresentation.ts";
 
@@ -168,10 +167,8 @@ export function emitStatsChangeSounds(after: BattleResolutionPresentationState |
   if (after === null || after.lifecycle.phase !== "presenting") return;
   const source = statsChangeSourceAge(after);
   if (source === null || source.age !== STATS_CHANGE_SE_AGE) return;
-  const params = statsChangeParams(source.argument);
-  if (params === null) return;
   emitSound({
-    kind: "se", id: params.direction === "up" ? SE_M_STAT_INCREASE : SE_M_STAT_DECREASE,
+    kind: "se", id: source.direction === "up" ? SE_M_STAT_INCREASE : SE_M_STAT_DECREASE,
     pan: animSoundPan2(SOUND_PAN_ATTACKER_VALUE, { attackerSide: source.battler === 0 ? "player" : "opponent", targetSide: source.battler === 0 ? "opponent" : "player" }),
   });
 }

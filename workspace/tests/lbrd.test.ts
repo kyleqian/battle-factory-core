@@ -16,7 +16,7 @@ import {
   driveGeneratedRoundToCompletion,
   PLAYER_TRAINER_ID,
   stateAtDecidedRound,
-} from "./helpers/factoryRoundCarrier.ts";
+} from "../tools/compare/factoryRoundCarrier.ts";
 
 type Scene = "on" | "off";
 

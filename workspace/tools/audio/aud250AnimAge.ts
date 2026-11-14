@@ -2,6 +2,7 @@
 // engine and prints, per presented command of the wanted types, the first frame (1-based, as the probe's `frame`), its phaseElapsed at every emitted
 // SE and the ROM rows, so a command-age anchor can be read off: anchor = elapsed at the ROM frame of the first row minus its script time.
 //   node --experimental-strip-types --no-warnings tools/audio/aud250AnimAge.ts FIXTURE.json [type[,type]]
+import "../../src/engine/monPicPixelsInstall.ts"; // iss215: standalone node run must install the sprite pixel provider (bnd257d)
 import { readFileSync } from "node:fs";
 import { collectSoundTick } from "../../src/audio/soundEvents.ts";
 import { createInitialState, tick } from "../../src/engine/core.ts";

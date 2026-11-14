@@ -6,7 +6,7 @@ import {
   driveGeneratedRoundToCompletion,
   PLAYER_TRAINER_ID,
   stateAtDecidedRound,
-} from "./helpers/factoryRoundCarrier.ts";
+} from "../tools/compare/factoryRoundCarrier.ts";
 import {
   advanceFactoryCarry,
   createInitialFactoryCarry,
@@ -18,7 +18,7 @@ import { TRAINER_FRONTIER_BRAIN } from "../src/engine/factoryAiMaskSelection.ts"
 import { getFactoryFrontierBrainStatus } from "../src/engine/frontierBrainStatus.ts";
 
 // The orchestrator-level round driver (the strong 664 / 678 / 527 trio, scripted wins or a scripted loss) lives in
-// tests/helpers/factoryRoundCarrier.ts (shared with lbrd.test.ts).
+// tools/compare/factoryRoundCarrier.ts (shared with lbrd.test.ts and appTrace.ts).
 
 /**
  * tick()s an EngineState already parked at a decided round's terminal

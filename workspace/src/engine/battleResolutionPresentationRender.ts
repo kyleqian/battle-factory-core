@@ -82,6 +82,7 @@ import { BACK_ANIM_NATURE_ORDER } from "../animation/backSendOutAnim.ts";
 import { natureFromPersonality } from "./opponentGen.ts";
 import { OPPONENT_SUMMARY_FADE_DELAY_FRAMES, OPPONENT_SUMMARY_FADE_FRAMES } from "./midBattleOpponentPartySummaryTiming.ts";
 import { frontSendOutSpriteFrameAtTick } from "../animation/sendOutSpriteFrame.ts";
+import { statsChangeParams } from "../animation/statsChange.ts";
 
 export const BATTLE_RESOLUTION_NEXT_COMMAND_HANDOFF_FRAMES =
   BATTLE_COMMAND_ACTION_ENTER_DELAY;
@@ -1546,12 +1547,16 @@ export function liveMoveSourceAge(
  */
 export function statsChangeSourceAge(
   state: BattleResolutionPresentationState,
-): Readonly<{ battler: 0 | 1; argument: number; age: number }> | null {
+): Readonly<{ battler: 0 | 1; argument: number; age: number; direction: "up" | "down" }> | null {
   const command = state.segments[state.segmentIndex]?.commands[state.commandIndex];
   if (command === undefined || command.type !== "stats-change") return null;
   const age = state.lifecycle.phaseElapsed - (command.timing.seGateFrames ?? 0);
   if (age < 0 || fieldBattler(currentCommandField(state), command.battler).substituteDoll === true) return null;
-  return Object.freeze({ battler: command.battler, argument: command.argument, age });
+  // The pure General_StatsChange reducer's params (null for an argument it rejects: the ROM plays nothing); read here so the sound
+  // emitter stays outside the animation boundary (tests/animation/animationBoundaryRatchet.test.ts).
+  const params = statsChangeParams(command.argument);
+  if (params === null) return null;
+  return Object.freeze({ battler: command.battler, argument: command.argument, age, direction: params.direction });
 }
 
 /** The body age shown on this row: held at 0 over the pre + lead rows and at the last body row over the post rows. */

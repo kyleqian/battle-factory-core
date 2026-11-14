@@ -10,7 +10,7 @@ import "./harnessPlayerName.ts";
 import type { Trace } from "./oracleClient.ts";
 import { createInitialState, render, tick } from "../../src/engine/core.ts";
 import { createInitialFactoryCarry } from "../../src/engine/factoryRoundChaining.ts";
-import { driveGeneratedRoundToCompletion, PLAYER_TRAINER_ID as CARRIER_PLAYER_TRAINER_ID } from "../../tests/helpers/factoryRoundCarrier.ts";
+import { driveGeneratedRoundToCompletion, PLAYER_TRAINER_ID as CARRIER_PLAYER_TRAINER_ID } from "./factoryRoundCarrier.ts";
 import { presentationRngFromTrace } from "../../src/engine/presentationRngHost.ts";
 import type { EngineState } from "../../src/engine/core.ts";
 import { traceAdvances } from "./traceReplay.ts";
