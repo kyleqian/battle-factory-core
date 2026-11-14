@@ -23,6 +23,15 @@ exclusions are superseded. Unrelated expansions stay parked.
   Tier-1 from source (`tests/battlePartySelect.test.ts`), no ROM lab window: the WIN_MSG route is the one the no-energy refusal already
   proves; the `\p` ending of the ability text is treated like PAUSE_UNTIL_PRESS (unmeasured).
 
+## #219 — S11 sound gaps after the aud248 scoreboard (2026-11-14)
+
+`docs/aud248-s11-scoreboard.md` (T1 census 0..999 + T2 ROM replays, ~20 aligned seeds per scene; reproduce with
+`tools/audio/aud248RunSeed.sh` + `tools/audio/soundScoreboard.py`). S11 acceptance is not met. Ranked missing families:
+1. move-animation SE streams (largest); 2. stat-change SE 239 / 245: emitted since aud248 at command age 7, ROM-minus-ours -2..+23 frames per
+window (pinned in `tests/aud248StatChangeSounds.test.ts`), secondary-effect stat changes (Metal Claw, Steel Wing) are not `stats-change`
+commands and stay silent; 3. cries (cry-task rows not ported); 4. battle-controller extras and window-end artifacts; 5. SE_SHINY and declined
+(static) move bodies. Scene ON seeds 6568 / 7682 stall at the 80,000-frame ROM drive cap and cannot be aligned.
+
 ## #214 — Leads from the Mac lane's 2026-11-12 passes (source-read only, no ROM seed)
 
 - Cure berries after Pursuit-on-switch: `HandleFaintedMonActions` state 6 runs `ItemBattleEffects(ITEMEFFECT_NORMAL, 0, TRUE)` for the player's
