@@ -5,7 +5,8 @@ import timingData from "../data/gen/anim-sound-timing.json" with { type: "json" 
 import { animSoundPan, animSoundPan2, calculatePanIncrement, emitSound, keepPanInRange, type AnimPanContext, type SoundEmission } from "../audio/soundEvents.ts";
 import { BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS } from "./battleScriptSourceConstants.ts";
 import type { BattleResolutionPresentationState } from "./battleResolutionPresentation.ts";
-import { liveMoveSourceAge } from "./battleResolutionPresentationRender.ts";
+import { statsChangeParams } from "../animation/statsChange.ts";
+import { liveMoveSourceAge, statsChangeSourceAge } from "./battleResolutionPresentationRender.ts";
 
 export interface TimedOp {
   readonly op: "playsewithpan" | "playse" | "waitplaysewithpan" | "loopsewithpan" | "panse" | "panse_adjustnone" | "panse_adjustall" | "setpan" | "soundtask_loopse" | "soundtask_fireblast" | "soundtask_se1" | "soundtask_se2";
@@ -151,6 +152,25 @@ function variantOf(move: number, turn: number, attackerSide: 0 | 1): readonly Ti
   if (entry === undefined) return [];
   const turnIndex = turn < timing.turns ? turn : timing.turns - 2 + (turn & 1);
   return timing.variants[entry.variants[turnIndex * timing.sides + attackerSide]!]!;
+}
+
+/** StatsChangeAnimation_Step2 plays its SE (battle_anim_utility_funcs.c:561-564) on this stats-change command age. */
+export const STATS_CHANGE_SE_AGE = 7;
+const SE_M_STAT_INCREASE = 239;
+const SE_M_STAT_DECREASE = 245;
+const SOUND_PAN_ATTACKER_VALUE = -64;
+
+/** General_StatsChange's SE (both scenes): SE_M_STAT_INCREASE / DECREASE with BattleAnimAdjustPanning2(SOUND_PAN_ATTACKER) for the animated battler. */
+export function emitStatsChangeSounds(after: BattleResolutionPresentationState | null): void {
+  if (after === null || after.lifecycle.phase !== "presenting") return;
+  const source = statsChangeSourceAge(after);
+  if (source === null || source.age !== STATS_CHANGE_SE_AGE) return;
+  const params = statsChangeParams(source.argument);
+  if (params === null) return;
+  emitSound({
+    kind: "se", id: params.direction === "up" ? SE_M_STAT_INCREASE : SE_M_STAT_DECREASE,
+    pan: animSoundPan2(SOUND_PAN_ATTACKER_VALUE, { attackerSide: source.battler === 0 ? "player" : "opponent", targetSide: source.battler === 0 ? "opponent" : "player" }),
+  });
 }
 
 /** Called once per collected tick with the round's resolution presentation after the tick; emits the ops whose frame is this tick's. */
