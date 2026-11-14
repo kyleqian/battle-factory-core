@@ -854,3 +854,59 @@ ROM's row matched anyway in this seed, so that read produces no visible differen
 the time), R106 (probably unreachable; not tested), R080 (above), R099 (not stageable, below). R030, R032, R037, R038, R039 were skipped
 by the brief. Counts after rrh2: 49 of the 110 covered; R019, R029, R031, R033 class (b); 57 left.
 Read and dropped late: R077 (Regice is the only Sleep Talk user with an Electric move, and its Chesto Berry cures any sleep at once), R099 (Uproar users in range have Vital Spirit, which blocks Yawn itself), R105, R067, R097 (too many steps).
+
+## Box hunt 2026-11-14 (rrh3): one more rule covered, hunter checks, the R054 out-of-bounds read
+
+Evidence under `.integration/evidence/rrh3/` (git-ignored; designs in `designs/`, hunt logs in `chunt/`, clean re-drive in `redrive/`,
+`stall-warning-demo.txt`, `designcheck-dup-item.txt`).
+
+**Hunter fixes (commit a4d2b54c9).** `designcheck.py` now also refuses a set id outside the challenge's range, a species twice on one side or
+on both sides, and a held item twice on one side (each makes the lab setup fail on every seed; rrh3's first R095 design lost a hunt to a
+duplicate Lum Berry). Checked: no false positive on the 50 promoted stage files; the doctored design is rejected
+(`designcheck-dup-item.txt`). `prehunt.py` prints `STALL-WARNING` when an engine battle hits the frame budget or has 100 or more decisions
+(`PREHUNT_STALL_DECISIONS`) and when the ROM drive matched fewer states than the engine ran; `STALL-ABORT` after three stalled seeds.
+Demonstrated on the R076 design with the threshold lowered to 50 (`stall-warning-demo.txt`: seed 90001, 81 decisions, warning printed,
+drive then matched 81 / 81).
+
+**New stage: one rule, matches the ROM.** Re-driven once more from a clean command line (`romReplayWide.sh --stage`, `nice -n 19`):
+`match True`, `stage.ok True`.
+
+| rule | stage file (lab seed) | lab seeds tried | states matched / decisions | outcome |
+|---|---|---|---|---|
+| R076 Hi Jump Kick miss against a Ghost: crash damage floor of 1 | R076-hi-jump-kick-miss-ghost (90001) | 2 (design v1: 12 seeds, no hit; v2 hit on the second seed) | 81 / 81 | match |
+
+R076 v1 (Medicham against Gengar) never reached the marker: Gengar's Hypnosis, Confuse Ray and Attract and its speed left Medicham asleep,
+confused or fainted within about four turns. v2 uses Challenge 7 and a slow Dusclops lead (476: Toxic, Confuse Ray, Double Team, Protect) that
+cannot hurt Medicham quickly, so Hi Jump Kick is used for many turns and a miss takes the `damage = 1` floor.
+
+**Not covered; outcomes of this batch.**
+
+| rule | outcome |
+|---|---|
+| R095 Trace waiting, no foe to copy | 10 seeds, marker never ran (battles of 5 to 7 decisions). **Not proven unreachable:** `HandleFaintedMonActions` (`battle_util.c:1894-1985`) runs state 4 for every fainted battler, then state 6 (Trace) without looping again, so a foe replacement that faints on entering (Spikes on a damaged bench mon) leaves the player's new Trace holder with no foe at state 6. The rule text's own route (Pursuit user dies of Rough Skin on the last Pokemon) ends the battle first: `BattleScript_HandleFaintedMon` (`battle_scripts_1.s:2830-2832`) stops on `gBattleOutcome`. Stays (c). |
+| R109 Curse tick ends the battle | two designs (Dugtrio, Medicham, Dusclops 666 against three opponent orders), 14 seeds each, marker never ran. The last foe must be at 25% or less at the cast turn; a lottery over `random-v1`. Not found. |
+| R099 Uproar keeps a Yawn drowsy | not stageable: Uproar users in range (Vigoroth 221) have Vital Spirit, which blocks Yawn on the user; the alternative (Yawner faints after Yawn, Vigoroth uproars on the next turn) needs a Wartortle that dies to a slow Lickitung in one hit. Dropped. |
+| Metronome-only rules, R030, R032, R035, R037-R040, R067, R068, R080, R081, R097, R103, R105-R108, R110 | not attempted (no steer; seed lottery of about 15 s per seed at under 1% per rule, or skipped by the brief or already read as not cheaply stageable). |
+
+**No engine / ROM difference was found; no engine error either; there is no `stages/coverage/pending/`.**
+
+**R054 note: what the ROM reads at `gBattleMoves[MOVE_UNAVAILABLE]`.** C: `ShouldSwitchIfNaturalCure` (`battle_ai_switch_items.c:218-256`):
+when `gLastLandedMoves` is `MOVE_NONE` or `MOVE_UNAVAILABLE` (0xFFFF) and `Random() & 1` is 0, the `else if` at `:235` reads
+`gBattleMoves[0xFFFF].power`. `gBattleMoves` is at 0x0831C898 (`pokeemerald.map`), the entry is 12 bytes (`power` is byte 1), so the read is at
+0x0831C898 + 0xFFFF * 12 + 1 = 0x083DC88D, inside the Navel Rock metatile data (`gMetatiles_NavelRock` 0x083DB5A0 up to
+`gMetatileAttributes_NavelRock` 0x083DD1D0). In the pinned ROM (`reference-artifacts/pokeemerald.gba`, SHA-1 f3ae088181bf583e55daf962a92bb46f4f1d07b7,
+identical to the vendor copy) the 12 bytes there are `00 00 00 00 6b 72 e9 72 7b 72 f9 72`: effect 0, **power 0**. A ROM does not change at
+run time and the tileset is not moved, so the read is always 0, and the engine's `?? 0` returns 0. Same value, same `Random() & 1` that
+follows, so no Factory battle can make the difference matter. `gLastLandedMoves[target]` becomes `MOVE_UNAVAILABLE` at
+`battle_script_commands.c:4433` whenever a move that hit the target did not land (a miss, or `MOVE_RESULT_NO_EFFECT`); for an AI Natural Cure
+sleeper at half HP or more the read is reachable (it is what the R054 stage runs). Report only; no `src/` change.
+
+**Counts after rrh3: 50 of the 110 covered; R019, R029, R031, R033 class (b); 56 left.**
+
+**Design mistakes for the next hunter:** (1) a slow, non-disabling lead matters more than the type: Gengar's status moves ended R076 v1;
+(2) `prehunt.py` gives no hint that a cover marker needs a battle longer than the design's; R095 ended in 5 to 7 decisions every seed;
+(3) the script's `then random-v1` makes a multi-mon plan a lottery (R109); a plan that needs a specific mon to act at a specific turn needs
+`switch` actions.
+
+**Brief conflict:** the brief asks for "npm test and npm run build green" and also forbids npm test / typecheck / build. Only `docs/` and
+`tools/replay-hunt/` (Python) changed, so no test or build was run.

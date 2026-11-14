@@ -104,6 +104,11 @@ R089, R092, R093, R102. Three of the designers' "cannot occur" notes were checke
   `Cmd_attackcanceler` (`:992-1000`) has already cancelled every protect-affected move. The exceptions never reach the branch:
   two-turn first turns, Curse, Intimidate (`battle_scripts_1.s:4033`), `accuracycheck` (`:1109`, `:1123`) and Memento (`battle_scripts_1.s:2206`).
 
+**Box hunt rrh3 (2026-11-14): 50 of the 110 covered, four class (b), 56 left.** One more rule has a staged battle in `stages/coverage/`
+that ran the piece and matched the ROM to the end: R076 (Hi Jump Kick miss against a Ghost; the crash damage floor of 1). R095 (Trace
+waiting) was read against the decomp and stays (c): the route the rule text names ends the battle first, but a foe replacement that faints
+on entering leaves a Trace holder with no foe at faint-handling state 6 (`battle_util.c:1936-1958`). See `STATUS.md`, "Box hunt 2026-11-14 (rrh3)".
+
 **R035 and R040 (AI Counter / Mirror Coat scored up under Taunt) stay class (c)**: `AI_CV_Counter` (`battle_ai_scripts.s:1618-1637`) uses
 `if_target_not_taunted`, so the branch is reachable. But no set from id 267 up has Taunt and only an AI Metronome user (Clefable 389,
 Chansey 227) can call it, about 0.1% of lab seeds, and a Mechanic Lab stage is ROM-only (`romReplayWide --stage` cannot drive it). Not stageable
