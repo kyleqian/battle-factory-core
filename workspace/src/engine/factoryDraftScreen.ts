@@ -56,6 +56,8 @@ const arrow = arrowData as { tileset: { columns: number; rows: number; tiles: nu
 const textPalette = (textPaletteData as { colors: RgbColor[] }).colors;
 const font = fontNormalData as unknown as FontData;
 const charmap = new Map<string, number>((charmapData as { entries: [string, number][] }).entries);
+charmap.set("\uE053", 0x53);
+charmap.set("\uE054", 0x54);
 const menuHighlight = menuHighlightData as {
   left: { tileset: { columns: number; rows: number; tiles: number[][] } };
   right: { tileset: { columns: number; rows: number; tiles: number[][] } };
@@ -102,7 +104,7 @@ const SELECT_MON_MESSAGES = [
 ];
 const CONFIRM_MONS_MESSAGE = "Are these three POKéMON OK?";
 /** gText_CantSelectSamePkmn (strings.c:1623). */
-export const CANT_SELECT_SAME_MESSAGE = "Can't select same POKéMON.";
+export const CANT_SELECT_SAME_MESSAGE = "Can't select same \uE053\uE054.";
 
 /**
  * Select_AreSpeciesValid (:2255-2276): renting `slot` is refused when an
@@ -226,6 +228,8 @@ export interface RentConfirmRedrawState {
   fromMessage: string;
   fromSelected: boolean;
   elapsed: number;
+  /** Ticks the old message stays (default 2); the same-species refusal reprints after 1. */
+  messageLag?: number;
 }
 
 export interface DraftScreenState {
@@ -253,6 +257,8 @@ export interface DraftScreenState {
   ballAnims: (BallAnimState | null)[];
   /** In-flight RENT/DESELECT confirm redraw (see `RentConfirmRedrawState`); null once settled. */
   rentConfirmRedraw: RentConfirmRedrawState | null;
+  /** The refusal already erased the popup (:1957), so the close after its dismissal has no menu to show. */
+  popupPreErased: boolean;
   /**
    * Ball slots whose SpriteCB_Pokeball advance must be skipped THIS tick
    * (ISSUES #6, RAM-confirmed): a LEFT/RIGHT cursor move or a RENT/DESELECT
@@ -453,10 +459,19 @@ function menuOptionLabel(state: DraftScreenState, index: number): string {
   return MENU_OPTION_LABELS[index]!;
 }
 
+/** Select_ErasePopupMenu after a refusal reaches the screen a tick after the A press: text first, the highlight bar one tick later. */
+function popupTextErased(state: DraftScreenState): boolean {
+  return state.popupPreErased || (state.mode === "invalid" && !(state.rentConfirmRedraw && state.rentConfirmRedraw.elapsed < 1));
+}
+
+function popupBarErased(state: DraftScreenState): boolean {
+  return state.popupPreErased || (state.mode === "invalid" && !(state.rentConfirmRedraw && state.rentConfirmRedraw.elapsed < 2));
+}
+
 /** Select_PrintSelectMonString's own window-redraw lag - see RentConfirmRedrawState doc. */
 function currentMessage(state: DraftScreenState): string {
   const redraw = state.rentConfirmRedraw;
-  return redraw && redraw.elapsed < 2 ? redraw.fromMessage : state.message;
+  return redraw && redraw.elapsed < (redraw.messageLag ?? 2) ? redraw.fromMessage : state.message;
 }
 
 /**
@@ -639,7 +654,7 @@ export function renderFactoryDraftScreen(state: DraftScreenState): Uint8Array {
   // itself flips back to "cursor" - see monPic.ts.
   const monPicVisual = getMonPicVisual(state.monPic);
   // Select_ErasePopupMenu (:1957): the same-species refusal erases the popup but leaves the mon pic open.
-  if (monPicVisual.menuHighlightVisible && state.mode !== "invalid") {
+  if (monPicVisual.menuHighlightVisible && !popupBarErased(state)) {
     // Menu-highlight redraw scheduling (see MenuHighlightRedrawState doc):
     // a single OAM sprite move, no piecemeal reveal - stays at the old row
     // for 2 ticks after the input, then jumps straight to the new one.
@@ -668,7 +683,7 @@ export function renderFactoryDraftScreen(state: DraftScreenState): Uint8Array {
       0,
     );
   }
-  if (monPicVisual.menuTextVisible && state.mode !== "invalid") {
+  if (monPicVisual.menuTextVisible && !popupTextErased(state)) {
     for (let i = 0; i < MENU_OPTION_LABELS.length; i += 1) {
       drawText(
         fb,
@@ -735,7 +750,7 @@ export function renderFactoryDraftScreenFaded(state: DraftScreenState, bgY: numb
   drawSpriteFaded(fb, ARROW_SHEET, arrow.palette, 35 * arrowPos + 32, 88, 2, 2, 0, objY);
 
   const monPicVisual = getMonPicVisual(state.monPic);
-  if (monPicVisual.menuHighlightVisible && state.mode !== "invalid") {
+  if (monPicVisual.menuHighlightVisible && !popupBarErased(state)) {
     const highlightMenuCursorPos = state.menuHighlightRedraw
       ? state.menuHighlightRedraw.fromMenuCursorPos
       : state.menuCursorPos;
@@ -743,7 +758,7 @@ export function renderFactoryDraftScreenFaded(state: DraftScreenState, bgY: numb
     drawSpriteFaded(fb, { tileset: menuHighlight.left.tileset }, menuHighlight.palette, 176 + 16, highlightY + 8, 4, 2, 0, objY);
     drawSpriteFaded(fb, { tileset: menuHighlight.right.tileset }, menuHighlight.palette, 208 + 16, highlightY + 8, 4, 2, 0, objY);
   }
-  if (monPicVisual.menuTextVisible && state.mode !== "invalid") {
+  if (monPicVisual.menuTextVisible && !popupTextErased(state)) {
     for (let i = 0; i < MENU_OPTION_LABELS.length; i += 1) {
       drawTextFaded(
         fb,
@@ -823,6 +838,7 @@ export function createDraftScreenStateFromRentalRecords(
     selectingMonsState: 1,
     ballAnims: [null, null, null, null, null, null],
     rentConfirmRedraw: null,
+    popupPreErased: false,
     ballAnimStall: [],
     confirmReveal: null,
     yesNoCursorPos: INITIAL_YES_NO_CURSOR_POS,

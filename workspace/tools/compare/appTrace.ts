@@ -1643,6 +1643,16 @@ const TERMINAL_WINDOW_FROZEN_CURSOR_AGE: Readonly<Record<string, number>> = {
  * trace. Production code never imports this registry.
  */
 export const APP_STAGES: Readonly<Record<string, AppStage>> = {
+  // iss216: the anchor deal has no duplicate species; the ROM probe pokes slot 6's monId to slot 1's
+  // (tools/probe/stage-draft-same-species-off.py), the engine pokes the same identity (display unchanged).
+  "iss216-dup-draft-off": (state) => ({
+    ...state,
+    draftScreen: {
+      ...state.draftScreen,
+      rentals: state.draftScreen.rentals.map((rental, i) =>
+        i === 5 ? { ...rental, species: state.draftScreen.rentals[0]!.species } : rental),
+    },
+  }),
   "battle-command-generated-off": generatedBattleCommandStage,
   "factory-arbitrary-intro-yoshi-off": generatedBattleStartIntroArbitraryStage,
   "factory-arbitrary-intro-magneton-off": generatedBattleStartIntroMagnetonStage,

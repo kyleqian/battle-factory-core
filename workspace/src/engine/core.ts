@@ -2975,7 +2975,7 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
       } else if (newKeys.has("A")) {
         playSelectSe(); // :1688
         monPic = openMonPic(draftScreen.hasActed, draftScreen.hasOpenedMonPic);
-        draftScreen = { ...draftScreen, mode: "menu", menuCursorPos: 0, hasOpenedMonPic: true };
+        draftScreen = { ...draftScreen, mode: "menu", menuCursorPos: 0, hasOpenedMonPic: true, popupPreErased: false };
         // battle_factory_screen.c:1689 - opening the popup pauses the breathe
         // (frozen, not reset - see speciesNameFade.ts doc).
         speciesNameFade = deactivateSpeciesNameFade(speciesNameFade);
@@ -2991,6 +2991,7 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
           ...draftScreen,
           mode: "cursor",
           message: selectMonMessage(draftScreen.selectingMonsState),
+          popupPreErased: true,
         };
         monPic = closeMonPic(monPic.variant);
         speciesNameFade = activateSpeciesNameFade(speciesNameFade);
@@ -3027,8 +3028,7 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
           && !isSelectSpeciesValid(draftScreen.rentals, draftScreen.selectedIds, draftScreen.selectingMonsState, slot)
         ) {
           // :1953-1958 SELECT_INVALID_MON: print the refusal, erase the popup, keep the pic open.
-          rentConfirmRedraw = { fromMessage: draftScreen.message, fromSelected: false, elapsed: 0 };
-          ballAnimStall = activeSlotsBeforeAction;
+          rentConfirmRedraw = { fromMessage: draftScreen.message, fromSelected: false, elapsed: 0, messageLag: 1 };
           draftScreen = { ...draftScreen, mode: "invalid", message: CANT_SELECT_SAME_MESSAGE };
         } else {
           const { selectedIds, selectingMonsState } = isSelected

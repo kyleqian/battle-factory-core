@@ -158,6 +158,7 @@ describe("same-species refusal (iss216, Select_AreSpeciesValid :2255-2276)", () 
     s = tap(s, "A"); // RENT the duplicate
     expect(s.draftScreen.mode).toBe("invalid");
     expect(s.draftScreen.message).toBe(CANT_SELECT_SAME_MESSAGE);
+    expect(CANT_SELECT_SAME_MESSAGE).toBe("Can't select same \uE053\uE054."); // {PKMN} is the PK MN glyph pair (strings.c:1623)
     expect(s.draftScreen.selectedIds[5]).toBe(0);
     expect(s.draftScreen.selectingMonsState).toBe(2);
     expect(s.draftScreen.monPic.phase).toBe("open");
