@@ -23,6 +23,14 @@ exclusions are superseded. Unrelated expansions stay parked.
   Tier-1 from source (`tests/battlePartySelect.test.ts`), no ROM lab window: the WIN_MSG route is the one the no-energy refusal already
   proves; the `\p` ending of the ability text is treated like PAUSE_UNTIL_PRESS (unmeasured).
 
+## #220 — Held-item effect animation (B_ANIM_HELD_ITEM_EFFECT) is not presented (aud250, 2026-11-14)
+
+- `HELD_ITEM_EFFECT` only sets `pendingHeldItemEffectBattler` (`src/engine/battleResolutionPresentation.ts` ~2870-2935, ~4136-4160,
+  ~4576-4584); no presentation command and no live renderer exist, in either scene. In the aud250 ROM windows the held-item segments
+  (Leftovers, berries, ...) run ~214-235 frames longer than the engine's, so every later frame of such a battle is early, and the
+  General_HeldItemEffect SEs (152 / 228 / 102; 43 ROM-only rows on 5 Scene ON seeds) cannot play. Fix = a presented command + renderer
+  (Scene ON) and the ROM segment length (both scenes; check what OFF waits), then the SEs. `docs/aud250-general-anim-sounds.md`.
+
 ## #219 — S11 sound gaps after the aud248 scoreboard (2026-11-14)
 
 `docs/aud248-s11-scoreboard.md` (T1 census 0..999 + T2 ROM replays, ~20 aligned seeds per scene; reproduce with
@@ -34,7 +42,10 @@ commands and stay silent; 3. cries (cry-task rows not ported); 4. battle-control
 - **aud249 (2026-11-14)** emits the nine `Status_*` and the four weather-continues SEs (Scene ON; `docs/aud249-general-anim-sounds.md`). Open:
   `General_HeldItemEffect` (SE 152 / 228 / 102, 43 ROM-only rows on 5 seeds) has no presented command in the live route; the second
   `Status_*` play of one animation lands ~14 frames later in the ROM than modelled and the first play +2 over the stat anchor;
-  FOCUS_PUNCH_SETUP / LEECH_SEED_DRAIN / CASTFORM_CHANGE SEs decoded but not emitted (uncalibrated anchors); TurnTrap / Snatch unresolved in the extractor.
+  TurnTrap / Snatch unresolved in the extractor.
+- **aud250 (2026-11-14)** emits FOCUS_PUNCH_SETUP / LEECH_SEED_DRAIN / CASTFORM_CHANGE (anchors 5 / 7 / 5, ROM windows). Open: the second
+  `Status_*` play is 14-15 frames later in the ROM (not a loop error; needs a pixel window of the second play); `Status_Freeze` SE 242 moved +1
+  by the wait+1 rule without a ROM window; held-item effect is #220.
 
 ## #214 — Leads from the Mac lane's 2026-11-12 passes (source-read only, no ROM seed)
 
