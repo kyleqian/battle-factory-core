@@ -13,6 +13,20 @@ defects are all authorized in the finish-up mission (`docs/factory-finish-scope.
 gameplay / RNG when proved against source; use main-lane ownership and gameplay gates. Historical presentation-only
 exclusions are superseded. Unrelated expansions stay parked.
 
+## #221 — Lobby RNG cursor: battle-exit and map-load draws missing (lbw1 / lbw2, 2026-11-15)
+
+- Source-proven, ROM-measured (`docs/lbw1-lobby-wander-evidence.md`, sections lbw1 + lbw2; probes `tools/probe/lbw1-*`, `lbw2-*`). After a
+  battle that ends the challenge, the engine's `rngValue` at the Lobby is off the ROM's `gRngValue`, so the next in-game new-challenge
+  deal (nch231) does not match the ROM. Gaps (forfeit and loss give identical numbers):
+  - **E1:** per-VBlank draws resume 41 frames early: the ROM keeps `gMain.inBattle` set until `ReturnFromBattleToOverworld` (`main.c:366`).
+  - **E2:** 5 draws missing at the battle exit: `RandomlyGivePartyPokerus` + `PartySpreadPokerus` (`battle_main.c:5221-5222`), then 3 in
+    `MoveSaveBlocks_ResetHeap` via `ReturnToFieldLocal` (`load_save.c:74,129`).
+  - **E3:** 5 draws at Lobby entry+3 / +4 (`RoamerMoveToOtherLocationSet`, `UpdateTVScreensOnMap`, `MoveSaveBlocks_ResetHeap` via
+    `LoadMapInStepsLocal`); the attendant door warp already has this 2 + 3 pattern (`PREBATTLE_ENTRY_TIMING.warpExtraRng`).
+  - **E4:** the Lobby woman / fat man wander draws (not modelled; the lbw1 simulator matches the ROM on 6 traces and is the step-2 oracle).
+- Harness: every lbra / lbrd `appStage` injects a non-ROM `rngValue` (rebase values in the doc). Unmeasured: the won route's battle exit,
+  the non-terminal win back to the PreBattleRoom, a full boot -> draft -> battle -> forfeit route.
+
 ## #218 — iss216 residuals (2026-11-14)
 
 - `iss216-same-species-off` (staged duplicate pair, Scene OFF): 391 / 469 frames. The refusal window 169..244 is exact. Left: (a) after the
