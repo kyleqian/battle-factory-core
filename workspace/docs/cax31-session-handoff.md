@@ -131,8 +131,11 @@ tools and the rare-rule hunt are the box's.
 - **Item 0d (battle rules):** nightly replay at run start from the pool + all staged battles (now 69: `stages/*.json` + `stages/coverage/*.json`;
   2026-11-15: 44 / 44, 69 / 69, 51 min at 2 lanes). Rare-rule hunt as before (50 / 110; one step per run at most, needs new team ideas).
 - **Cleanup:** steps 1-7 are done or measured non-goals (cln243 showed the remaining tracked evidence is test-read). Nothing queued.
-**Website:** the live site runs `eb-adfdcfdc91f4247f` (your `5a2fe1d83`, the 28 fixes; deployed 2026-11-13 04:03 UTC on Kyle's word). Your later builds
-(`eb-8faf63dbde5168d5`: audio, `challenge-request`, `start: "after-save"`, lazy sprites) are not on the site; the site repo adopts them when Kyle asks. Cleanup 5's "< 15 min" suite target: measured non-goal on this box (cln277); the 670 s render lever in
+**Website:** the live site runs **`eb-c26961a07ff6b07b`** (your `49287331f`, the 2026-11-15 wind-down build; deployed 2026-11-15 ~13:30 UTC on Kyle's
+word, "Yes, update it"). The site adopted the lazy sprites and sound (a sound switch, off by default). It has NOT adopted `challenge-request` /
+`start: "after-save"`: the page still stops the game at `challenge-end` and offers a new challenge itself. Games already open on `eb-adfdcfdc91f4247f`
+or `eb-9d34d28f1b19ef3d` finish on those builds (checked live: an `eb-adfd` game resumed after the deploy, ended, replay-verified on its own build).
+Later builds reach the site only when Kyle asks again. Cleanup 5's "< 15 min" suite target: measured non-goal on this box (cln277); the 670 s render lever in
 `tools/integration/generatedCommandAnimationReplay.ts` would trade render-crash coverage (not taken).
 
 0. **User decision 2026-11-11 (Kyle, "Yes, start sound"): start sound PLAYBACK now, alongside the ROM-driver gameplay
