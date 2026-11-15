@@ -33,8 +33,10 @@ interface WonLobby {
 /**
  * Soak seeds that win their first round with the "winning" policy (scene-identical outcomes); seed 16 also wins the second, seed 0 loses it.
  * lbr-f: the saving -> saved timing fix moved the attendant hand-off cursor, so the deal moved; scan 1..7 on the full file (lbr-f2): only 2 passes (was 10, then 16).
+ * lbr-g (#221 E1-E3: the Lobby cursor is now the ROM's after a battle exit and map load) moved the deal again: seed 2's continuation lost; a scan of 0..60 on the
+ * mutated sequence (hand-off test, then continuation) found 0, 35 and 47; 0 is WIN_THEN_LOSE_SEED, so 35 (all 15 tests pass).
  */
-const WIN_TWO_SEED = 2;
+const WIN_TWO_SEED = 35;
 const WIN_THEN_LOSE_SEED = 0;
 
 function newPlayer(seed: number): RandomPlayer {
