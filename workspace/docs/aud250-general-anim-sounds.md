@@ -2,7 +2,7 @@
 
 Sound-only (no gameplay state, RNG, text, presentation length or frame-hash change). Follows `docs/aud249-general-anim-sounds.md` gaps A / C / D.
 
-## A. General_HeldItemEffect (SE 152 / 228 / 102): named visual gap, no emission
+## A. General_HeldItemEffect (SE 152 / 228 / 102): named visual gap, no emission (superseded: hie1 / hie2 present and draw it, hie3 emits the SEs: `docs/hie3-held-item-sounds.md`)
 
 - The kernel event `HELD_ITEM_EFFECT` (animation id) is parsed in `src/engine/battleResolutionPresentation.ts` (~4576-4584) and only sets `pendingHeldItemEffectBattler`
   (used for the item message owner ~2870-2935 and `B_LAST_ITEM` ~4136-4160). No presentation command is created: neither Scene ON nor OFF presents the animation.

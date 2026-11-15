@@ -23,13 +23,12 @@ exclusions are superseded. Unrelated expansions stay parked.
   Tier-1 from source (`tests/battlePartySelect.test.ts`), no ROM lab window: the WIN_MSG route is the one the no-energy refusal already
   proves; the `\p` ending of the ability text is treated like PAUSE_UNTIL_PRESS (unmeasured).
 
-## #220 — Held-item effect animation (B_ANIM_HELD_ITEM_EFFECT): SEs + small residuals open (aud250, 2026-11-14)
+## #220 — Held-item effect animation (B_ANIM_HELD_ITEM_EFFECT): small residuals open (aud250, 2026-11-14)
 
-- Steps 1-2 done: hie1 presents the segment length in both scenes (Scene ON `general-animation` HELD_ITEM_EFFECT, 214 + lead 15 restart /
+- Steps 1-3 done (SEs: `docs/hie3-held-item-sounds.md`): hie1 presents the segment length in both scenes (Scene ON `general-animation` HELD_ITEM_EFFECT, 214 + lead 15 restart /
   9 continuation; Scene OFF a Pausex20 hold), hie2 / hie2b draw it in Scene ON (rotation, stars, ring, tint, both sides; age 0 = command
   length - 204). Drift-aware proof (`docs/hie2-held-item-render.md`): every in-window frame matches the ROM at the lab's pre-segment offset
   (Sitrus both sides 229 / 229, Shell Bell 223 / 223, Leftovers 229 / 229, Cheri 192 / 192). Open remainder:
-  - **SEs** (hie-scout step 3): General_HeldItemEffect 152 / 228 / 102 (43 ROM-only rows on the 5 aud250 Scene ON seeds); Scene OFF has none.
   - **Residuals:** Shell Bell and Leftovers +1 frame (window and print) against the pre-segment offset (hie1's Leftovers "+8" did not
     reproduce under the drift-aware measure: it was measured against another offset). Cure berry (Cheri): ROM ages 1-11 are drawn inside
     the preceding 32-frame `status` command; the app starts the view at age 12 (11 frames, <= 964 px at 49,74-97,112). Unmeasured: a berry
@@ -47,12 +46,11 @@ window (pinned in `tests/aud248StatChangeSounds.test.ts`), secondary-effect stat
 commands and stay silent; 3. cries (cry-task rows not ported); 4. battle-controller extras and window-end artifacts; 5. SE_SHINY and declined
 (static) move bodies. Scene ON seeds 6568 / 7682 stall at the 80,000-frame ROM drive cap and cannot be aligned.
 - **aud249 (2026-11-14)** emits the nine `Status_*` and the four weather-continues SEs (Scene ON; `docs/aud249-general-anim-sounds.md`). Open:
-  `General_HeldItemEffect` (SE 152 / 228 / 102, 43 ROM-only rows on 5 seeds) has no presented command in the live route; the second
-  `Status_*` play of one animation lands ~14 frames later in the ROM than modelled and the first play +2 over the stat anchor;
+  the second `Status_*` play of one animation lands ~14 frames later in the ROM than modelled and the first play +2 over the stat anchor;
   TurnTrap / Snatch unresolved in the extractor.
 - **aud250 (2026-11-14)** emits FOCUS_PUNCH_SETUP / LEECH_SEED_DRAIN / CASTFORM_CHANGE (anchors 5 / 7 / 5, ROM windows). Open: the second
   `Status_*` play is 14-15 frames later in the ROM (not a loop error; needs a pixel window of the second play); `Status_Freeze` SE 242 moved +1
-  by the wait+1 rule without a ROM window; held-item effect is #220.
+  by the wait+1 rule without a ROM window; held-item effect SEs landed in hie3 (#220).
 - Cries inside move-animation tasks (Roar / Hyper Voice / Howl): 2-step plan in `docs/cry-task-scout.md` (needs a measured cry-length table).
 
 ## #214 — Leads from the Mac lane's 2026-11-12 passes (source-read only, no ROM seed)
