@@ -7,13 +7,14 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ## 2026-11-15 — CAX31 daily run (supervisor, Opus 5.5): in progress
 
-- **State:** master `3250873e3`+ green (full suite **14,839 / 14,839** on `3250873e3`). Worker hie2b (integration lane) running on branch
-  `worker/integration-20261115-012633` (base hie2 branch `worker/integration-20261115-000847`, kept until folded).
+- **State:** master green through `3250873e3` (full suite **14,839 / 14,839**); hie2 + hie2b merged (`e9b68fc07`), its full suite pending.
 - **Did:** nightly replay (pinned `9d0fb2f01`) **44 / 44** + stages **69 / 69** (`docs/replay-ledger.md`); merged `lbr-f-residual2` (`15777da20`)
   after its gates on the merge (typecheck, test:gate 2,843, full 14,830 / 14,830, soak vanilla 0:20 20 / 20, winning 0:60 60 / 60); hie1 (below);
-  lbrd's retire case moved to seed 2 (hie1 moved the deal). hie2 (renderer) NOT folded: its age-0 constants absorbed each lab's pre-segment drift
-  (app ~9 frames ahead of the ROM before the window); hie2b corrects that to age 0 = command frames - 204 with a drift-aware proof.
-- **Next:** fold hie2b after verification (full suite); then #220 step 3 (SEs); cries in animation tasks; Lobby NPC wander step 1 (evidence).
+  lbrd's retire case moved to seed 2 (hie1 moved the deal). hie2 drew the held-item effect but fitted its age 0 to each lab's pre-segment drift
+  (app ~9-20 frames ahead of the ROM before the window); hie2b replaced that with age 0 = command frames - 204 and proved every window at the
+  lab's own offset (`docs/hie2-held-item-render.md`; typecheck 0, test:gate 2,843, 252 importer files, build / build:lib 0, OFF + icePunch
+  differential 2,152 captures identical).
+- **Next:** #220 step 3 (SEs, hie3); cries in animation tasks; Lobby NPC wander step 1 (evidence).
 
 ---
 

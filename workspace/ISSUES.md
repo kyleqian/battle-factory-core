@@ -23,21 +23,19 @@ exclusions are superseded. Unrelated expansions stay parked.
   Tier-1 from source (`tests/battlePartySelect.test.ts`), no ROM lab window: the WIN_MSG route is the one the no-energy refusal already
   proves; the `\p` ending of the ability text is treated like PAUSE_UNTIL_PRESS (unmeasured).
 
-## #220 — Held-item effect animation (B_ANIM_HELD_ITEM_EFFECT): renderer + SEs open (aud250, 2026-11-14)
+## #220 — Held-item effect animation (B_ANIM_HELD_ITEM_EFFECT): SEs + small residuals open (aud250, 2026-11-14)
 
-- Step 1 (hie1) is done: the segment length is presented in both scenes (Scene ON a `general-animation` HELD_ITEM_EFFECT command, 214 + lead
-  15 restart / 9 continuation; Scene OFF a Pausex20 hold before the print), measured on 4 sites x 2 scenes (`tools/compare/traces/hie1-*`,
-  `tests/hie1HeldItemEffect.test.ts`; PROGRESS.md hie1 entry). Open remainder:
-  - **Renderer** (Scene ON, hie-scout step 2): the command draws the plain idle scene; rotation / stars / ring / tint are not drawn
-    (`generalAnimationRenderView` has no HELD_ITEM_EFFECT branch; art + reducers in `src/animation/heldItemHeal.ts` / the icePunch fixture scene).
-  - **SEs** (step 3): General_HeldItemEffect 152 / 228 / 102 (43 ROM-only rows on the 5 aud250 Scene ON seeds); Scene OFF has none.
-  - **Residuals of step 1** (ROM-minus-app print start, relative to the offset before the segment): Scene ON Leftovers still +8 / +9 frames
-    short (its ItemHealHP_Ret entry leads like Sitrus's restart in the kernel provenance but the ROM spends 9 more; Shell Bell, which shares
-    the script, is exact); Scene ON Shell Bell +1; Scene OFF exact at all 4 sites. The cure berry (Scene ON) is modelled through the status
-    command before it (+1). Unmeasured: a berry behind a Substitute (Scene ON skips the command; no lab window), multi-print berries
-    (confuse berry, stat berries: their stats-change hold is not re-measured).
-  - **Post-heal tail** (pre-existing, not this step): after `ItemHealHP_Ret`'s HP update (Leftovers / Shell Bell) the app's next text starts
-    ~17-19 frames later than the ROM in both scenes (Sitrus / RemoveItem path exact), so later frames of such a battle are ~18 late.
+- Steps 1-2 done: hie1 presents the segment length in both scenes (Scene ON `general-animation` HELD_ITEM_EFFECT, 214 + lead 15 restart /
+  9 continuation; Scene OFF a Pausex20 hold), hie2 / hie2b draw it in Scene ON (rotation, stars, ring, tint, both sides; age 0 = command
+  length - 204). Drift-aware proof (`docs/hie2-held-item-render.md`): every in-window frame matches the ROM at the lab's pre-segment offset
+  (Sitrus both sides 229 / 229, Shell Bell 223 / 223, Leftovers 229 / 229, Cheri 192 / 192). Open remainder:
+  - **SEs** (hie-scout step 3): General_HeldItemEffect 152 / 228 / 102 (43 ROM-only rows on the 5 aud250 Scene ON seeds); Scene OFF has none.
+  - **Residuals:** Shell Bell and Leftovers +1 frame (window and print) against the pre-segment offset (hie1's Leftovers "+8" did not
+    reproduce under the drift-aware measure: it was measured against another offset). Cure berry (Cheri): ROM ages 1-11 are drawn inside
+    the preceding 32-frame `status` command; the app starts the view at age 12 (11 frames, <= 964 px at 49,74-97,112). Unmeasured: a berry
+    behind a Substitute (Scene ON skips the command), multi-print berries (confuse / stat berries), an elevated opponent's shadow window.
+  - **Post-heal tail** (pre-existing): after `ItemHealHP_Ret`'s HP update (Leftovers / Shell Bell) the app's next text starts ~17-19 frames
+    later than the ROM in both scenes (Sitrus / RemoveItem path exact).
   Plan: `docs/hie-scout.md`; `docs/aud250-general-anim-sounds.md`.
 
 ## #219 — S11 sound gaps after the aud248 scoreboard (2026-11-14)
