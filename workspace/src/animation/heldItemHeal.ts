@@ -59,14 +59,19 @@ export interface SitrusRotation {
   readonly y2: number;
 }
 
-/** `null` means the identity/static battler draw is sufficient. */
-export function sitrusRotationAtAge(age: number): SitrusRotation | null {
+/**
+ * `null` means the identity/static battler draw is sufficient. `opponent` mirrors the angle (AnimTask_RotateMonToSideAndRestore
+ * negates the step for a battler on the opponent side); y2 is the same either way (|c| >> 3).
+ */
+export function sitrusRotationAtAge(age: number, opponent = false): SitrusRotation | null {
   if (age < 0 || age >= ROTATION_CYCLE_TICKS * ROTATION_CYCLE_COUNT) {
     return null;
   }
   const [pa, pb, pc, pd] = ROTATION_TABLE[age % ROTATION_CYCLE_TICKS]!;
   if (pb === 0 && pc === 0) return null;
-  return { pa, pb, pc, pd, y2: Math.abs(pc) >> 3 };
+  return opponent
+    ? { pa, pb: -pb, pc: -pc, pd, y2: Math.abs(pc) >> 3 }
+    : { pa, pb, pc, pd, y2: Math.abs(pc) >> 3 };
 }
 
 const STAR_SPAWNS = [
@@ -81,10 +86,12 @@ export interface SitrusStarPlacement {
   readonly cy: number;
 }
 
+/** `opponent` mirrors the spawn x offsets (SetAnimSpriteInitialXOffset with attacker == target negates them off the player side). */
 export function sitrusStarPlacementAtAge(
   age: number,
   spawnIndex: number,
   center: Readonly<{ x: number; y: number }>,
+  opponent = false,
 ): SitrusStarPlacement | null {
   const spawn = STAR_SPAWNS[spawnIndex];
   if (!spawn) return null;
@@ -92,7 +99,7 @@ export function sitrusStarPlacementAtAge(
   if (local < 0 || local >= STAR_VISIBLE_TICKS) return null;
   return {
     frameIndex: Math.floor((local + 1) / 7) % 8,
-    cx: center.x + spawn.dx - 16,
+    cx: center.x + (opponent ? -spawn.dx : spawn.dx) - 16,
     cy: center.y + spawn.dy + Math.floor((local + 1) / 8) - 16,
   };
 }

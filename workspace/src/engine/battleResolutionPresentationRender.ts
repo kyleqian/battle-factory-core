@@ -1,3 +1,4 @@
+import { SITRUS_ITEM_HEAL_TEXT_FIRST_AGE } from "../animation/heldItemHeal.ts";
 import type { LiveMovePaletteInput } from "./liveMoveAnimationPalette.ts";
 import { CASTFORM_CHANGE_LEAD_FRAMES, LIVE_TRANSFORM_MOVE_ID, liveTransformOf, withLiveTransform } from "./liveTransform.ts";
 import {
@@ -6,6 +7,7 @@ import {
 import type { PresentationRngHost } from "./presentationRngHost.ts";
 import {
   resolveNoMovesLeftMessageLines,
+  HELD_ITEM_EFFECT_AFTER_STATUS_EXTRA_FRAMES, HELD_ITEM_EFFECT_COMMAND_FRAMES, HELD_ITEM_EFFECT_CONTINUE_LEAD_FRAMES, HELD_ITEM_EFFECT_RESTART_LEAD_FRAMES,
   isWeatherContinuesAnimation, WEATHER_CONTINUES_BODY_ROWS, WEATHER_CONTINUES_LAUNCH_LEAD_ROWS, WEATHER_CONTINUES_MOVE_IDS,
 } from "./battleResolutionPresentation.ts";
 import type { LiveMoveSpriteAllocatorInput, LiveMoveSpriteOrderInput } from "./liveMoveSpriteAllocator.ts";
@@ -1354,6 +1356,19 @@ function applyCompletedCommand(
   throw new Error("battle resolution renderer received an unknown command");
 }
 
+/**
+ * ROM first identity rotation display (heldItemHeal.ts age 0), in frames after the HELD_ITEM_EFFECT command starts, per command path.
+ * Measured on the hie1 Scene ON labs (docs/hie2-held-item-render.md): script restart (Sitrus) 34, continuation (Shell Bell) 36,
+ * cure berry after its status command (Cheri) 8. Leftovers is a restart whose ROM start is a further 8 later (ISSUES #220's
+ * unmodelled lead), left out here so the timing stays the command's.
+ */
+function heldItemEffectAge0Frames(minimumFrames: number): number {
+  if (minimumFrames === HELD_ITEM_EFFECT_COMMAND_FRAMES + HELD_ITEM_EFFECT_RESTART_LEAD_FRAMES) return 34;
+  if (minimumFrames === HELD_ITEM_EFFECT_COMMAND_FRAMES + HELD_ITEM_EFFECT_CONTINUE_LEAD_FRAMES) return 36;
+  if (minimumFrames === HELD_ITEM_EFFECT_COMMAND_FRAMES + HELD_ITEM_EFFECT_CONTINUE_LEAD_FRAMES - 32 + HELD_ITEM_EFFECT_AFTER_STATUS_EXTRA_FRAMES) return 8;
+  return Math.max(0, minimumFrames - SITRUS_ITEM_HEAL_TEXT_FIRST_AGE - 9);
+}
+
 /** The displayed field at the start of `commands[index]`: `field` after the completed commands before it (currentCommandField's walk). */
 export function battleResolutionFieldBeforeCommand(
   field: BattleResolutionDisplayedField,
@@ -2366,6 +2381,13 @@ export function createBattleResolutionPresentationRenderView(
         type: "general-animation", battler: command.battler, animation: command.animation, age: state.lifecycle.phaseElapsed - 1,
         ...(state.liveMoveBattlerX2Input === undefined ? {} : { battlerX2Input: state.liveMoveBattlerX2Input }),
       }));
+    } else if (command.type === "general-animation" && command.animation === "HELD_ITEM_EFFECT" && fieldBattler(field, command.battler).substituteDoll !== true) {
+      // hie2: the age is relative to the ROM's first identity rotation display (heldItemEffectAge0Frames).
+      effect = Object.freeze({
+        type: "general-animation", battler: command.battler, animation: command.animation,
+        age: state.lifecycle.phaseElapsed - heldItemEffectAge0Frames(command.timing.minimumFrames),
+        ...(state.liveMoveBattlerX2Input === undefined ? {} : { battlerX2Input: state.liveMoveBattlerX2Input }),
+      });
     } else if (command.type === "general-animation" && fieldBattler(field, command.battler).substituteDoll !== true) {
       // fpp150 (fps147 §4d): command age a is ROM row X + 1 + a, so the reducer's rel is a - 1. Behind the doll the ROM plays
       // nothing (TryHandleLaunchBattleTableAnimation), the field stays as it is.
