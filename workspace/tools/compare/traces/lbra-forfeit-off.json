@@ -1,6 +1,10 @@
 {
  "appRoute": "generated-orchestrator",
  "oracleProfile": "battle-scene-off",
+ "appRngRebase": {
+  "frame": 250,
+  "rngValue": 3031698222
+ },
  "appStage": {
   "id": "frf250a-bagrun-off",
   "frame": 0

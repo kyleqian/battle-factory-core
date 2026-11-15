@@ -58,9 +58,11 @@ describe("Factory Lobby terminal visual extraction", () => {
     }
     expect(npcs.woman.palette).toHaveLength(16);
     // The attendant (scientist) walks through the door in the lbrb conversation: full sheet too.
+    // lbw3: the fat man (LOOK_AROUND) turns on the shared RNG stream, so he carries the S / N / W stand poses.
     expect(npcs.scientist.frames).toHaveLength(9);
+    expect(npcs.fatMan.frames).toHaveLength(3);
     for (const npc of [npcs.scientist, npcs.fatMan, npcs.camper, npcs.picnicker]) {
-      expect(npc.frames).toHaveLength(npc === npcs.scientist ? 9 : 1);
+      expect(npc.frames).toHaveLength(npc === npcs.scientist ? 9 : npc === npcs.fatMan ? 3 : 1);
       expect(npc.frames[0]).toMatchObject({ columns: 2, rows: 4 });
       expect(npc.frames[0].tiles).toHaveLength(8);
       expect(npc.palette).toHaveLength(16);

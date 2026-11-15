@@ -7,7 +7,6 @@ import {
   lobbyFreeRoamCameraOrigin,
   lobbyFreeRoamPlayerFrame,
   lobbyFreeRoamPlayerFrameHFlipped,
-  womanAtTick,
   LOBBY_PLAYER_SCREEN_POS,
   LOBBY_FREE_ROAM_TILE_FRAMES,
   LOBBY_FREE_ROAM_TURN_FRAMES,
@@ -18,6 +17,18 @@ import {
 import {
   renderFactoryLobbyFreeRoam,
 } from "../src/engine/factoryTerminalRender.ts";
+import {
+  createLobbyNpcs,
+  lobbyNpcDraw,
+  stepLobbyNpcs,
+  NPC_EAST,
+  NPC_NORTH,
+  NPC_SOUTH,
+  type LobbyNpcDraw,
+  type LobbyNpcsState,
+} from "../src/engine/lobbyNpcs.ts";
+import { lobbyNpcWorld } from "../src/engine/lobbyNpcDriver.ts";
+import { advanceRngValue } from "../src/engine/rng.ts";
 
 const SPAWN_CAMERA = { x: -48, y: 56 } as const;
 
@@ -35,6 +46,132 @@ function advance(
   return next;
 }
 
+const EAST_IDLE_WOMAN: LobbyNpcsState = {
+  ...createLobbyNpcs(),
+  shownWoman: { x: 11, y: 18, prevX: 11, prevY: 18, facing: NPC_EAST, walkFrames: 0, animIdx: 3 },
+};
+
+interface WalkScenario {
+  readonly dir: number;
+  readonly fromX: number;
+  readonly fromY: number;
+  readonly preFacing: number;
+  readonly preIdx: number;
+  readonly first: boolean;
+}
+
+/** Search seeds for a free-running woman whose walk matches `sc`; return her drawn sprite from the walk's first tick for 46 ticks. */
+function womanWalkDraws(sc: WalkScenario): LobbyNpcDraw[] | null {
+  const world = lobbyNpcWorld(null);
+  for (let seed = 1; seed <= 6000; seed += 1) {
+    let rng = seed;
+    let npcs = createLobbyNpcs();
+    let prev = npcs.woman;
+    let found = -1;
+    const draws: LobbyNpcDraw[] = [];
+    for (let j = 0; j < 900; j += 1) {
+      rng = advanceRngValue(rng);
+      const r = stepLobbyNpcs(npcs, rng, false, world);
+      npcs = r.npcs;
+      rng = r.rngValue;
+      const w = npcs.woman;
+      if (found < 0) {
+        const started = prev.walkFrames === 0 && w.walkFrames > 0;
+        if (started) {
+          const ok =
+            w.facing === sc.dir && prev.x === sc.fromX && prev.y === sc.fromY && prev.facing === sc.preFacing && prev.animIdx === sc.preIdx;
+          if (!ok && sc.first) break;
+          if (ok) found = j;
+        }
+      }
+      if (found >= 0) {
+        draws.push(lobbyNpcDraw(npcs.shownWoman));
+        if (draws.length === 46) return draws;
+      }
+      prev = w;
+    }
+  }
+  return null;
+}
+
+// lbw3: the retired hard-coded woman schedule (docs/factory-lobby-freeroam-ground-truth.md §6d, pixel-verified on loss-beyond-boundary-off / loss-lobby-walk-off),
+// kept ONLY as the oracle the state-driven NPC drawing (lobbyNpcs.ts) is checked against.
+/**
+ * The wandering-woman NPC (OBJ_EVENT_GFX_WOMAN_1, MOVEMENT_TYPE_WANDER_AROUND,
+ * map-json spawn (3,11)) leaves her spawn during the free-roam Lobby window.
+ * A general WanderAround model is out of scope (ISSUES #55 ambient RNG
+ * stream); this is the bounded per-trace schedule table from
+ * docs/factory-lobby-freeroam-ground-truth.md §6d, RAM-measured tick-by-tick
+ * (twice-run byte-identical on both committed lobby fixtures) and keyed to
+ * the canonical oracle ticks. Returns the woman's world box-top px (the
+ * app's own render anchor: tile*16 − cameraOrigin − 16) plus the
+ * woman_1.png sheet frame, or null for a tick that keeps her static at her
+ * map-json tile (no override).
+ *
+ * Tick windows (all canonical):
+ *  - ≤5184 idle SOUTH at (3,11), world (104,160)
+ *  - 5185-5200 NORTH walk (3,10), world y = 161−(T−5184), anim5 cmdIdx 2 then
+ *    3 → sheet frames 6 (north walk2) then 1 (north stand), sAnim_GoNorth.
+ *    NOTE: the rendered box-top lags the §6a logical table by 1px through the
+ *    walk and the settle tick (RAM-probe world box-top = logical, but the
+ *    OAM/rendered position is +1; measured pixel-exact on 5186-5205) — so
+ *    y here is the RENDERED world box-top.
+ *  - 5201-5295 idle NORTH at (3,10), world (104,144), frozen 5/3 (frame 1)
+ *  - 5296-5311 SOUTH walk (3,11), world y = 145+(T−5296), anim4 cmdIdx 0 then
+ *    1 → sheet frames 3 (south walk1) then 0 (south stand), sAnim_GoSouth
+ *  - 5312-5406 idle SOUTH at (3,11), world (104,160)
+ *  - 5407-5421 EAST walk (4,11), world x = 105+(T−5407), anim7 cmdIdx 2 then
+ *    3 → sheet frames 8 then 2 h-flipped (sAnim_GoEast)
+ *  - ≥5422 idle EAST at (4,11), world (120,160)
+ */
+interface WomanNpcAtTick {
+  readonly x: number;
+  readonly y: number;
+  readonly frame: number;
+  readonly hFlip: boolean;
+}
+
+function womanAtTick(tick: number): WomanNpcAtTick | null {
+  if (tick <= 5184) return null;
+  if (tick <= 5200) {
+    // North walk 5185-5200: anim5 cmdIdx 2 (sheet frame 6, walk2) then
+    // cmdIdx 3 (sheet frame 1, stand). The RENDERED pose lags the RAM cmdIdx
+    // by one frame (the same lag as the player's walk cycle): 5185 still shows
+    // the pre-walk south standing pose (frame 0), walk2 renders 5186-5193 and
+    // stand 5194-5200 (pixel-verified on the walk fixture).
+    // Rendered y = 161−(T−5184) (the +1 render lag through the walk + settle
+    // tick).
+    const frame = tick >= 5194 ? 1 : tick === 5185 ? 0 : 6;
+    return { x: 104, y: 161 - (tick - 5184), frame, hFlip: false };
+  }
+  if (tick <= 5295) return { x: 104, y: 144, frame: 1, hFlip: false };
+  if (tick <= 5311) {
+    // South walk 5296-5311: anim4 cmdIdx 0 (sheet frame 3, walk1) then
+    // cmdIdx 1 (sheet frame 0, stand), rendered one frame later: 5296 keeps
+    // the pre-walk north standing pose (frame 1), walk1 renders 5297-5304 and
+    // stand 5305-5311. Rendered y = 144+(T−5296) — the same 1px render lag
+    // the north walk carries (the oracle draws the walking woman 1px above
+    // the logical schedule; docs §8c).
+    const frame = tick >= 5305 ? 0 : tick === 5296 ? 1 : 3;
+    return { x: 104, y: 144 + (tick - 5296), frame, hFlip: false };
+  }
+  if (tick <= 5406) return { x: 104, y: 160, frame: 0, hFlip: false };
+  if (tick <= 5422) {
+    // East walk 5407-5422: anim7 cmdIdx 2 (sheet frame 8, walk2 h-flipped)
+    // then cmdIdx 3 (sheet frame 2, stand h-flipped), rendered one frame
+    // later: 5407 keeps the pre-walk south standing pose (frame 0, not
+    // h-flipped), walk2 renders 5408-5415, stand 5416-5422. Rendered x =
+    // 104+(T−5407) — the same 1px render lag class as the south walk's y
+    // (the oracle's drawn box is 1px left of the logical schedule; docs §8b);
+    // the lag persists through the 5422 settle tick (measured: oracle 5422
+    // drawn box x is 1px left of the 5430+ idle).
+    const frame = tick >= 5416 ? 2 : tick === 5407 ? 0 : 8;
+    const hFlip = tick > 5407;
+    return { x: 104 + (tick - 5407), y: 160, frame, hFlip };
+  }
+  return { x: 120, y: 160, frame: 2, hFlip: true };
+}
+
 describe("Factory Lobby free-roam (docs/factory-lobby-freeroam-ground-truth.md)", () => {
   it("spawns at map (4,8) facing north with the terminal's fixed-camera anchor", () => {
     const state = createFactoryLobbyFreeRoamState();
@@ -47,7 +184,7 @@ describe("Factory Lobby free-roam (docs/factory-lobby-freeroam-ground-truth.md)"
     expect([LOBBY_PLAYER_SCREEN_POS.x, LOBBY_PLAYER_SCREEN_POS.y]).toEqual([112, 56]);
     // The spawn render is byte-identical to the terminal's bare field frame
     // (the handoff is invisible; loss-terminal-decline-continuation-off 155/155).
-    const field = renderFactoryLobbyFreeRoam(state, 5093);
+    const field = renderFactoryLobbyFreeRoam(state, null);
     expect(field.length).toBe(240 * 160 * 4);
   });
 
@@ -279,55 +416,34 @@ describe("Factory Lobby free-roam (docs/factory-lobby-freeroam-ground-truth.md)"
     expect(state.x).toBe(4);
     expect(state.y).toBe(8);
   });
-  it("womanAtTick: the wandering woman's north-walk boundary ticks (§6a/§6d)", () => {
-    // ≤5184 idle SOUTH at spawn (3,11) — no override (static map-json tile).
-    expect(womanAtTick(5093)).toBeNull();
-    expect(womanAtTick(5184)).toBeNull();
-    // 5185-5200: NORTH walk; RENDERED box-top y = 161−(T−5184) (the §6a
-    // logical table lags the OAM by 1px through the walk + settle tick,
-    // pixel-verified), walk2 then stand pose. The rendered POSE lags the RAM
-    // cmdIdx by one frame: 5185 keeps the pre-walk south standing pose,
-    // walk2 renders 5186-5193 and stand 5194-5200.
-    expect(womanAtTick(5185)).toMatchObject({ x: 104, y: 160, frame: 0, hFlip: false });
-    expect(womanAtTick(5186)).toMatchObject({ y: 159, frame: 6 });
-    expect(womanAtTick(5192)).toMatchObject({ y: 153, frame: 6 });
-    expect(womanAtTick(5193)).toMatchObject({ y: 152, frame: 6 });
-    expect(womanAtTick(5194)).toMatchObject({ y: 151, frame: 1 });
-    expect(womanAtTick(5199)).toMatchObject({ y: 146, frame: 1 });
-    expect(womanAtTick(5200)).toMatchObject({ y: 145, frame: 1 });
-    // ≥5201 idle NORTH at (3,10), world (104,144), frozen standing pose.
-    expect(womanAtTick(5201)).toMatchObject({ x: 104, y: 144, frame: 1 });
-    expect(womanAtTick(5254)).toMatchObject({ x: 104, y: 144, frame: 1 });
+  it("lobbyNpcDraw reproduces the retired womanAtTick table on a north / south / east walk (the table is the oracle)", () => {
+    const scenarios = [
+      { name: "north (5185)", t0: 5185, dir: NPC_NORTH, fromX: 10, fromY: 18, preFacing: NPC_SOUTH, preIdx: 1, first: true },
+      { name: "south (5296)", t0: 5296, dir: NPC_SOUTH, fromX: 10, fromY: 17, preFacing: NPC_NORTH, preIdx: 3, first: false },
+      { name: "east (5407)", t0: 5407, dir: NPC_EAST, fromX: 10, fromY: 18, preFacing: NPC_SOUTH, preIdx: 1, first: false },
+    ] as const;
+    for (const sc of scenarios) {
+      const draws = womanWalkDraws(sc);
+      expect(draws, sc.name).not.toBeNull();
+      // 16 walk frames then >= 30 idle frames (the shortest delay is 32): all inside the oracle's window.
+      expect(draws!.length).toBe(46);
+      draws!.forEach((d, i) => {
+        const o = womanAtTick(sc.t0 + i);
+        expect(o, `${sc.name} T=${sc.t0 + i}`).not.toBeNull();
+        expect({ x: d.x + 56, y: d.y, frame: d.frame, hFlip: d.hFlip }, `${sc.name} T=${sc.t0 + i}`).toEqual({
+          x: o!.x,
+          y: o!.y,
+          frame: o!.frame,
+          hFlip: o!.hFlip ?? false,
+        });
+      });
+    }
   });
 
-  it("womanAtTick: the walk fixture's south + east extra movements (§6d)", () => {
-    // SOUTH walk (3,10)→(3,11) 5296-5311: rendered y = 144+(T−5296) — the
-    // logical 145+(T−5296) schedule lags the drawn box by 1px (the same
-    // render-lag class as the north walk's y; docs §8c), pose one frame
-    // behind the RAM cmdIdx (5296 keeps the idle-north pose, walk1 5297-5304,
-    // stand 5305-5311).
-    expect(womanAtTick(5296)).toMatchObject({ x: 104, y: 144, frame: 1 });
-    expect(womanAtTick(5297)).toMatchObject({ x: 104, y: 145, frame: 3 });
-    expect(womanAtTick(5303)).toMatchObject({ y: 151, frame: 3 });
-    expect(womanAtTick(5304)).toMatchObject({ y: 152, frame: 3 });
-    expect(womanAtTick(5305)).toMatchObject({ y: 153, frame: 0 });
-    expect(womanAtTick(5311)).toMatchObject({ y: 159, frame: 0 });
-    // EAST walk (3,11)→(4,11) 5407-5421: rendered x = 104+(T−5407) — the
-    // logical 105+(T−5407) schedule lags the drawn box by 1px (the same
-    // render-lag class as the south walk's y; docs §8b), pose one frame
-    // behind (5407 keeps the south standing pose, walk2 5408-5415 h-flipped,
-    // stand 5416-5421 h-flipped).
-    expect(womanAtTick(5407)).toMatchObject({ x: 104, y: 160, frame: 0, hFlip: false });
-    expect(womanAtTick(5408)).toMatchObject({ x: 105, frame: 8, hFlip: true });
-    expect(womanAtTick(5414)).toMatchObject({ x: 111, frame: 8 });
-    expect(womanAtTick(5415)).toMatchObject({ x: 112, frame: 8 });
-    expect(womanAtTick(5416)).toMatchObject({ x: 113, frame: 2 });
-    expect(womanAtTick(5421)).toMatchObject({ x: 118, frame: 2 });
-    // The 5422 settle tick keeps the 1px lag (oracle drawn box 1px left of
-    // the 5430+ idle), then idle-east from 5423 at x=120.
-    expect(womanAtTick(5422)).toMatchObject({ x: 119, frame: 2, hFlip: true });
+  it("the oracle table itself: idle before the first walk", () => {
+    expect(womanAtTick(5093)).toBeNull();
+    expect(womanAtTick(5184)).toBeNull();
     expect(womanAtTick(5423)).toMatchObject({ x: 120, y: 160, frame: 2, hFlip: true });
-    expect(womanAtTick(5472)).toMatchObject({ x: 120, frame: 2 });
   });
 
   it("hold-into-block then release + re-press: the new direction is honored (§7g)", () => {
@@ -400,7 +516,7 @@ describe("Factory Lobby free-roam (docs/factory-lobby-freeroam-ground-truth.md)"
     // Per-tile mirror maps dest c -> tile-local 7-(c%8):
     //   dest [12,12,13,13,0,0,0,0 | 0,0,0,0,13,12,12,12]
     // Frame palette index 12 = (123,115,66), 13 = (57,57,24).
-    const fb = renderFactoryLobbyFreeRoam(createFactoryLobbyFreeRoamState(), 5423);
+    const fb = renderFactoryLobbyFreeRoam(createFactoryLobbyFreeRoamState(), EAST_IDLE_WOMAN);
     const pixel = (x: number, y: number): [number, number, number, number] => {
       const i = (y * 240 + x) * 4;
       return [fb[i]!, fb[i + 1]!, fb[i + 2]!, fb[i + 3]!];

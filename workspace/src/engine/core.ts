@@ -616,7 +616,13 @@ import {
   POSTWIN_BRAIN_CANT_TELL_TEXT_TOTAL,
   type PostwinState,
 } from "./postwin.ts";
-import { LOBBY_FADE_IN_AFTER_ENTRY, lobbyLoadExtraRng, lobbyReturnRngSteps } from "./battleExitRng.ts";
+import {
+  BATTLE_EXIT_LOBBY_LOAD_AGE,
+  BATTLE_EXIT_LOBBY_LOAD_AGE_FORFEIT,
+  LOBBY_FADE_IN_AFTER_ENTRY,
+  lobbyLoadExtraRng,
+  lobbyReturnRngSteps,
+} from "./battleExitRng.ts";
 import type { BattleScenario } from "./battleScenario.ts";
 import {
   advanceRoundController,
@@ -669,6 +675,8 @@ import {
   type FactoryLobbyFreeRoamState,
   type LobbyDirection,
 } from "./factoryLobbyFreeRoam.ts";
+import { lobbyNpcsScriptFrozen, stepLobbyNpcsTick } from "./lobbyNpcDriver.ts";
+import type { LobbyNpcsState } from "./lobbyNpcs.ts";
 import { renderFactoryLobbyAttendant, renderFactoryLobbyFreeRoam } from "./factoryTerminalRender.ts";
 import {
   advanceFactoryLobbyAttendant,
@@ -882,6 +890,8 @@ export interface EngineState {
    * the loss timeline). Null until that handoff; see factoryLobbyFreeRoam.ts.
    */
   lobbyFreeRoam: FactoryLobbyFreeRoamState | null;
+  /** lbw3: the Lobby's woman (WANDER_AROUND) and fat man (LOOK_AROUND), the ROM's RNG-drawing field NPCs; seeded at the Lobby map load, null outside the Lobby. */
+  lobbyNpcs: LobbyNpcsState | null;
   /** The singles-attendant conversation over the free-roam Lobby (lbr-b); null outside it. */
   lobbyAttendant: FactoryLobbyAttendantState | null;
   /**
@@ -1020,6 +1030,7 @@ function enterPrebattleEntry(
     factoryTerminal: null,
     factoryRoundBattleOrchestrator: null,
     lobbyFreeRoam: null,
+    lobbyNpcs: null,
     lobbyAttendant: null,
     attendantRequestHold: false,
     lobbyStreakKept: false,
@@ -1057,6 +1068,7 @@ export function createInitialState(
     factoryTerminal: null,
     factoryRoundBattleOrchestrator: null,
     lobbyFreeRoam: null,
+    lobbyNpcs: null,
     lobbyAttendant: null,
     attendantRequestHold: false,
     lobbyStreakKept: false,
@@ -1104,6 +1116,22 @@ function continuationMoveSounds(before: PostwinState, after: PostwinState, direc
   if (cursor === null || after === before || before.dialoguePage !== 0) return false;
   if (postwinContinuationChoiceCount(before) === 4) return true;
   return cursor + direction >= 0 && cursor + direction <= 2;
+}
+
+/**
+ * Ticks since the Lobby entry (the ROM's CB2_LoadMap of the Lobby = 0) after this terminal-branch tick: from the return-to-field postwin clock
+ * (loss / won: `entry + 3` is age 105, forfeit 104), from a staged terminal's own age (age 0 = the map load; the RETIRE hand-off terminal starts at
+ * its fade-in age, entry + 13), or null when the terminal is not on a Lobby entry.
+ */
+function lobbyTicksSinceEntry(
+  terminalPostwin: PostwinState | null,
+  factoryTerminal: FactoryTerminalPresentationState,
+): number | null {
+  if (terminalPostwin !== null) {
+    return terminalPostwin.elapsed - (factoryTerminal.recordDisabled ? BATTLE_EXIT_LOBBY_LOAD_AGE_FORFEIT : BATTLE_EXIT_LOBBY_LOAD_AGE) + 3;
+  }
+  if (isFactoryTerminalRoundWon(factoryTerminal)) return factoryTerminal.age;
+  return factoryTerminal.age - (FACTORY_LOSS_TERMINAL_PROFILE.fieldFirstAge - LOBBY_FADE_IN_AFTER_ENTRY);
 }
 
 function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): EngineState {
@@ -1281,8 +1309,10 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
     // its door warp starts a new challenge from the live gameplay RNG cursor
     // (nch231, docs/nch231-new-challenge.md).
     if (state.lobbyAttendant) {
+      // The attendant script holds lockall: the NPCs neither run nor draw (their snapshot still follows the state).
+      const frozenNpcs = stepLobbyNpcsTick(state.lobbyNpcs, rngValue, true, state.lobbyFreeRoam);
       if (state.attendantRequestHold && state.lobbyAttendant.saveDialogStarted) {
-        return { ...state, frame: state.frame + 1, keyRepeat, rngMode: "vblank", rngValue };
+        return { ...state, frame: state.frame + 1, keyRepeat, lobbyNpcs: frozenNpcs.npcs, rngMode: "vblank", rngValue };
       }
       const attendant = advanceFactoryLobbyAttendant(state.lobbyAttendant, {
         a: newKeys.has("A"),
@@ -1310,6 +1340,7 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
         frame: state.frame + 1,
         keyRepeat,
         lobbyAttendant: attendant.done === "freeRoam" ? null : attendant,
+        lobbyNpcs: frozenNpcs.npcs,
         rngMode: "vblank",
         rngValue,
       };
@@ -1319,25 +1350,29 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
       newKeys.has("A") &&
       isFactoryLobbyFacingSinglesAttendant(state.lobbyFreeRoam)
     ) {
+      const lockedNpcs = stepLobbyNpcsTick(state.lobbyNpcs, rngValue, true, state.lobbyFreeRoam);
       return {
         ...state,
         frame: state.frame + 1,
         keyRepeat,
         lobbyAttendant: createFactoryLobbyAttendantState(state.frame),
+        lobbyNpcs: lockedNpcs.npcs,
         rngMode: "vblank",
-        rngValue,
+        rngValue: lockedNpcs.rngValue,
       };
     }
     const lobbyFreeRoam = advanceFactoryLobbyFreeRoam(state.lobbyFreeRoam, {
       heldDirs: lobbyHeldDirections(buttons),
     });
+    const roaming = stepLobbyNpcsTick(state.lobbyNpcs, rngValue, false, state.lobbyFreeRoam);
     return {
       ...state,
       frame: state.frame + 1,
       keyRepeat,
       lobbyFreeRoam,
+      lobbyNpcs: roaming.npcs,
       rngMode: "vblank",
-      rngValue,
+      rngValue: roaming.rngValue,
     };
   }
 
@@ -1414,9 +1449,25 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
       const extra = lobbyLoadExtraRng(factoryTerminal.age);
       for (let i = 0; i < extra; i += 1) terminalRngValue = advanceRngValue(terminalRngValue);
     }
+    // lbw3: the ROM's field NPCs run on the entry script's two unlocked ticks and from its final releaseall (this tick sets lobbyFreeRoam).
+    let lobbyNpcs = state.lobbyNpcs;
+    const ticksSinceEntry = lobbyTicksSinceEntry(terminalPostwin, factoryTerminal);
+    if (ticksSinceEntry !== null && ticksSinceEntry >= 0) {
+      // The ROM's releaseall lands the frame BEFORE the app's first free-roam tick (the walkable Lobby is handed over one tick late, tick 5093 vs ROM 5092).
+      const released = freeRoamBoxGoneAge !== null && factoryTerminal.age >= freeRoamBoxGoneAge - 1;
+      const stepped = stepLobbyNpcsTick(
+        lobbyNpcs,
+        terminalRngValue,
+        !released && lobbyNpcsScriptFrozen(ticksSinceEntry),
+        lobbyFreeRoam,
+      );
+      lobbyNpcs = stepped.npcs;
+      terminalRngValue = stepped.rngValue;
+    }
     return {
       ...state,
       factoryCarry: lobbyEntryCarry,
+      lobbyNpcs,
       lobbyStreakKept: enteringLobby ? roundWon : state.lobbyStreakKept,
       frame: state.frame + 1,
       keyRepeat,
@@ -4246,9 +4297,9 @@ export function render(state: EngineState): Uint8Array {
   // terminal's bare-field frame, so the handoff is invisible.
   if (state.lobbyFreeRoam) {
     if (state.lobbyAttendant) {
-      return renderFactoryLobbyAttendant(state.lobbyFreeRoam, state.lobbyAttendant);
+      return renderFactoryLobbyAttendant(state.lobbyFreeRoam, state.lobbyAttendant, state.lobbyNpcs);
     }
-    return renderFactoryLobbyFreeRoam(state.lobbyFreeRoam, state.frame);
+    return renderFactoryLobbyFreeRoam(state.lobbyFreeRoam, state.lobbyNpcs);
   }
   const generatedTerminalCommand = terminalCommandForRound(
     state.factoryRoundBattleOrchestrator?.round ?? null,

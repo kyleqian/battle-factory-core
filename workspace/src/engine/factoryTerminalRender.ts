@@ -32,6 +32,7 @@ import {
 
 import layoutData from "../data/gen/factory-lobby-terminal-layout.json" with { type: "json" };
 import tilesetData from "../assets/gen/factory-lobby-terminal-tileset.json" with { type: "json" };
+import { createLobbyNpcs, lobbyNpcDraw, type LobbyNpcDraw, type LobbyNpcsState } from "./lobbyNpcs.ts";
 import npcData from "../assets/gen/factory-lobby-terminal-npcs.json" with { type: "json" };
 import downArrowData from "../assets/gen/factory-terminal-down-arrow.json" with { type: "json" };
 import messageBoxData from "../assets/gen/prebattle-room-msgbox.json" with { type: "json" };
@@ -47,7 +48,6 @@ import {
   lobbyFreeRoamPlayerFrame,
   lobbyFreeRoamPlayerFrameHFlipped,
   LOBBY_PLAYER_SCREEN_POS,
-  womanAtTick,
   type FactoryLobbyFreeRoamState,
 } from "./factoryLobbyFreeRoam.ts";
 
@@ -836,36 +836,39 @@ export function renderFactoryTerminalPresentation(
  */
 export function renderFactoryLobbyFreeRoam(
   state: FactoryLobbyFreeRoamState,
-  tick: number,
+  npcs: LobbyNpcsState | null,
 ): Uint8Array {
   const cameraOrigin = lobbyFreeRoamCameraOrigin(
     state,
     layout.cameraOriginPx,
   );
-  const woman = womanAtTick(tick);
-  // The doc's world box-top is the sprite's LOGICAL x/y (gSprites[i].x/y,
-  // docs §6a), which is +56 in x over the app's tile-anchored world px
-  // (tile.x*16; the extra +56 is the sprite's fixed centerToCornerVec x +
-  // the coordinate frame the oracle's OAM is measured in — verified against
-  // the §6a OAM column at spawn (104,160)→(96,104) with cameraOrigin (-48,56)).
-  // Screen = (docWorld − (56,0)) − cameraOrigin, the same −16 y convention
-  // the NPC loop already uses.
-  const womanScreen = woman === null
-    ? null
-    : {
-        x: woman.x - 56 - cameraOrigin.x,
-        y: woman.y - cameraOrigin.y,
-        frame: woman.frame,
-        hFlip: woman.hFlip,
-      };
   return renderFactoryTerminalField(0, 0, cameraOrigin, {
     x: LOBBY_PLAYER_SCREEN_POS.x,
     y: LOBBY_PLAYER_SCREEN_POS.y,
     frame: lobbyFreeRoamPlayerFrame(state),
     hFlip: lobbyFreeRoamPlayerFrameHFlipped(state),
-  }, womanScreen === null
-    ? undefined
-    : new Map<string, LobbyPlayerOverride>([["woman", womanScreen]]));
+  }, lobbyNpcOverrides(npcs, cameraOrigin));
+}
+
+/**
+ * The wandering woman and the turning fat man from real NPC state (lobbyNpcs.ts): the sprites as of the previous tick (the OAM lags the
+ * callbacks by a frame), at the 16x32 feet anchor (box top = tile * 16 - 16) under the follow-camera.
+ */
+function lobbyNpcOverrides(
+  npcs: LobbyNpcsState | null,
+  cameraOrigin: { readonly x: number; readonly y: number },
+): Map<string, LobbyPlayerOverride> {
+  const shown = npcs ?? createLobbyNpcs();
+  const place = (draw: LobbyNpcDraw): LobbyPlayerOverride => ({
+    x: draw.x - cameraOrigin.x,
+    y: draw.y - cameraOrigin.y,
+    frame: draw.frame,
+    hFlip: draw.hFlip,
+  });
+  return new Map<string, LobbyPlayerOverride>([
+    ["woman", place(lobbyNpcDraw(shown.shownWoman))],
+    ["fatMan", place(lobbyNpcDraw(shown.shownFatMan))],
+  ]);
 }
 
 /**
@@ -876,7 +879,7 @@ export function renderFactoryLobbyFreeRoam(
  */
 export function renderFactoryLobbyDoorWalk(
   walkTick: number,
-  tick: number,
+  npcs: LobbyNpcsState | null,
   fade: { readonly bgY: number; readonly objY: number } = { bgY: 0, objY: 0 },
 ): Uint8Array {
   const walked = Math.min(walkTick, 4 * LOBBY_FREE_ROAM_TILE_FRAMES);
@@ -898,16 +901,7 @@ export function renderFactoryLobbyDoorWalk(
     bumpElapsed: 0,
   });
   const cameraOrigin = lobbyFreeRoamCameraOrigin(player, layout.cameraOriginPx);
-  const woman = womanAtTick(tick);
-  const overrides = new Map<string, LobbyPlayerOverride>();
-  if (woman !== null) {
-    overrides.set("woman", {
-      x: woman.x - 56 - cameraOrigin.x,
-      y: woman.y - cameraOrigin.y,
-      frame: woman.frame,
-      hFlip: woman.hFlip,
-    });
-  }
+  const overrides = lobbyNpcOverrides(npcs, cameraOrigin);
   const attendantWalked = Math.min(walkTick, 3 * LOBBY_FREE_ROAM_TILE_FRAMES + 1);
   const attendantPose = Math.max(0, attendantWalked - 1);
   const attendantTile = Math.floor(attendantPose / LOBBY_FREE_ROAM_TILE_FRAMES);
@@ -933,16 +927,16 @@ export function renderFactoryLobbyDoorWalk(
 export function renderFactoryLobbyAttendant(
   lobby: FactoryLobbyFreeRoamState,
   attendant: FactoryLobbyAttendantState,
+  npcs: LobbyNpcsState | null,
 ): Uint8Array {
-  const tick = attendant.startFrame;
-  if (attendant.phase === "walk") return renderFactoryLobbyDoorWalk(attendant.phaseTick + 1, tick);
+  if (attendant.phase === "walk") return renderFactoryLobbyDoorWalk(attendant.phaseTick + 1, npcs);
   if (attendant.phase === "fade") {
-    return renderFactoryLobbyDoorWalk(4 * LOBBY_FREE_ROAM_TILE_FRAMES, tick, {
+    return renderFactoryLobbyDoorWalk(4 * LOBBY_FREE_ROAM_TILE_FRAMES, npcs, {
       bgY: bgFadeY(attendant.phaseTick, EXIT_FADE_OUT),
       objY: objFadeY(attendant.phaseTick, EXIT_FADE_OUT),
     });
   }
-  const fb = renderFactoryLobbyFreeRoam(lobby, tick);
+  const fb = renderFactoryLobbyFreeRoam(lobby, npcs);
   drawFactoryLobbyAttendant(fb, attendant);
   return fb;
 }

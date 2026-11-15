@@ -1,6 +1,10 @@
 {
  "appRoute": "generated-orchestrator",
  "oracleProfile": "battle-scene-off",
+ "appRngRebase": {
+  "frame": 6700,
+  "rngValue": 2155949550
+ },
  "appStage": {
   "id": "win-terminal-window-off",
   "frame": 4623

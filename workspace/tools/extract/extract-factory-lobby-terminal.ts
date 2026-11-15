@@ -178,7 +178,8 @@ function readBlocks(path: string, count: number): Block[] {
     // walk2, 5=north walk1, 6=north walk2, 7=west walk1, 8=west walk2; east
     // reuses west h-flipped, sAnim_GoEast).
     woman: { frame: 0, frames: Array.from({ length: 9 }, (_, i) => extractPose(join(people, "woman_1.png"), i)), palette: loadJascPal(join(paletteDir, "npc_1.pal")) },
-    fatMan: { frame: 0, frames: [extractPose(join(people, "fat_man.png"), 0)], palette: loadJascPal(join(paletteDir, "npc_1.pal")) },
+    // The fat man (LOOK_AROUND, lbw3) only turns on the spot: the south / north / west stands (0 / 1 / 2; east reuses west h-flipped).
+    fatMan: { frame: 0, frames: [0, 1, 2].map((i) => extractPose(join(people, "fat_man.png"), i)), palette: loadJascPal(join(paletteDir, "npc_1.pal")) },
     camper: { frame: 0, frames: [extractPose(join(people, "camper.png"), 0)], palette: loadJascPal(join(paletteDir, "npc_3.pal")) },
     picnicker: { frame: 2, frames: [extractPose(join(people, "picnicker.png"), 2, true)], palette: loadJascPal(join(paletteDir, "npc_3.pal")) },
   });
