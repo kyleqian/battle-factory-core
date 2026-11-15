@@ -35,13 +35,16 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ## 2026-11-15 — CAX31 daily run (supervisor, Opus 5.5): in progress
 
-- **State:** master green through `3250873e3` (full suite **14,839 / 14,839**); hie2 + hie2b merged (`e9b68fc07`), its full suite pending.
+- **State:** master `5a42c61f5` (engine final unless noted); full suite **14,848 / 14,848** on `5054340cf` (after hie2b); final gates running on
+  `5a42c61f5` (`.integration/validation/sv-20261115/final/`), soaks on `029d0943b` (`soaks/`); lbw1 (Lobby NPC evidence, side lane) running.
 - **Did:** nightly replay (pinned `9d0fb2f01`) **44 / 44** + stages **69 / 69** (`docs/replay-ledger.md`); merged `lbr-f-residual2` (`15777da20`)
   after its gates on the merge (typecheck, test:gate 2,843, full 14,830 / 14,830, soak vanilla 0:20 20 / 20, winning 0:60 60 / 60); hie1 (below);
   lbrd's retire case moved to seed 2 (hie1 moved the deal). hie2 drew the held-item effect but fitted its age 0 to each lab's pre-segment drift
   (app ~9-20 frames ahead of the ROM before the window); hie2b replaced that with age 0 = command frames - 204 and proved every window at the
   lab's own offset (`docs/hie2-held-item-render.md`; typecheck 0, test:gate 2,843, 252 importer files, build / build:lib 0, OFF + icePunch
   differential 2,152 captures identical).
-- **Next:** #220 step 3 (SEs, hie3); cries in animation tasks; Lobby NPC wander step 1 (evidence).
+- **Also folded:** hie3 (held-item SEs, entry above), cry1 (cries in move tasks, entry above; Roar / Howl offsets rest on source rules + the drift-free
+  Hyper Voice anchor).
+- **Next:** wind-down gates; Lobby NPC wander step 2 if lbw1 says the cursor is exact.
 
 ---

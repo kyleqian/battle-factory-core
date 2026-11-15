@@ -8,6 +8,17 @@ report `PAPERCUT: <what>, ~<minutes lost>` in their final message.
 Delete an entry when its underlying friction is fixed; git preserves its
 history.
 
+## Worker friction, 2026-11-15 run
+
+- **Lab drift fools absolute-frame fits**: an app-vs-ROM `npm run compare` at equal frame indices hides the lab's pre-segment drift (the
+  app runs 9-20 frames ahead before the window), so a fitted epoch absorbs it (hie2: a whole rebrief, ~40 min). Measure the window at the
+  pre-segment offset (hash alignment: `.integration/evidence/hie1/align.py`, `.integration/evidence/hie2b/shift.py`). Hits: 1 (+ cry1 noted it).
+- **`tools/audio/fixtures/` is globbed by `tests/audioProbeFixtures.test.ts`**: a non-probe JSON there fails 6 tests (cry1 ~5 min; moved to `tests/fixtures/`).
+- **T1 `missing-cry-task` was a structural count emission could never lower** (cry1 changed `soundCensusDelta.py`'s classifier, ~5 min).
+- **Worker turns end while shards run in the background** (hie1 hit its cap mid full suite; hie2 ended "not the final report" with shards 4-6
+  backgrounded). Briefs now say "do NOT run the full npm test; the supervisor does".
+- Bump: typecheck > 120 s default tool timeout auto-backgrounds (cry1 ~3 min).
+
 ## Worker friction, 2026-11-13 run
 
 - **`oracle/emerald_core.py` in a worktree looks for `vendor/` one level too high**: the recorder needs
