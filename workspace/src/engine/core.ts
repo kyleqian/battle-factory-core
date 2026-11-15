@@ -616,6 +616,7 @@ import {
   POSTWIN_BRAIN_CANT_TELL_TEXT_TOTAL,
   type PostwinState,
 } from "./postwin.ts";
+import { LOBBY_FADE_IN_AFTER_ENTRY, lobbyLoadExtraRng, lobbyReturnRngSteps } from "./battleExitRng.ts";
 import type { BattleScenario } from "./battleScenario.ts";
 import {
   advanceRoundController,
@@ -1400,6 +1401,19 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
           factoryRoundBattleOrchestrator!.facilityState.rentsCount,
         )
       : state.factoryCarry;
+    // lbr-g: the return span draws per battleExitRng.ts (E1 + E2 + E3) instead of one draw per tick; a terminal without the span (staged 7th win,
+    // age 0 = the Lobby map load) only owes the E3 draws.
+    const terminalPostwin = postwin ? advancePostwin(postwin) : postwin;
+    let terminalRngValue = rngValue;
+    let terminalRngSteps = 1;
+    if (terminalPostwin !== null) {
+      terminalRngSteps = lobbyReturnRngSteps(terminalPostwin.elapsed, factoryTerminal.recordDisabled);
+      terminalRngValue = state.rngValue;
+      for (let i = 0; i < terminalRngSteps; i += 1) terminalRngValue = advanceRngValue(terminalRngValue);
+    } else if (isFactoryTerminalRoundWon(factoryTerminal)) {
+      const extra = lobbyLoadExtraRng(factoryTerminal.age);
+      for (let i = 0; i < extra; i += 1) terminalRngValue = advanceRngValue(terminalRngValue);
+    }
     return {
       ...state,
       factoryCarry: lobbyEntryCarry,
@@ -1413,13 +1427,13 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
       // branch below for WIN -- this branch is the LOSS/roundCompleted
       // sibling of that same requirement (render() prefers this state over
       // factoryTerminal until its own phase reaches "counterRoom").
-      postwin: postwin ? advancePostwin(postwin) : postwin,
+      postwin: terminalPostwin,
       factoryTerminal,
       roundController,
       factoryRoundBattleOrchestrator,
       lobbyFreeRoam,
-      rngMode: "vblank",
-      rngValue,
+      rngMode: terminalRngSteps === 0 ? "frontierBattle" : "vblank",
+      rngValue: terminalRngValue,
     };
   }
 
@@ -1943,7 +1957,13 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
       nextPostwin.rightThisWayDismissElapsed,
     );
     const alreadyAdvanced = rngMode === "vblank" ? 1 : 0;
-    for (let i = alreadyAdvanced; i < totalSteps; i += 1) {
+    // lbr-g E3: RETIRE-YES warps to the Lobby; its map load draws 2 / 3 extra on `entry + 3` / `entry + 4`, i.e. before the hand-off at
+    // the fade-in frame (POSTWIN_RETIRE_FADE_IN_DELAY = entry + 13).
+    const retireLoadExtra =
+      nextPostwin.question?.kind === "retire"
+        ? lobbyLoadExtraRng(postwinQuestionYesDelay(nextPostwin) - (POSTWIN_RETIRE_FADE_IN_DELAY - LOBBY_FADE_IN_AFTER_ENTRY))
+        : 0;
+    for (let i = alreadyAdvanced; i < totalSteps + retireLoadExtra; i += 1) {
       rngValue = advanceRngValue(rngValue);
     }
     if (
