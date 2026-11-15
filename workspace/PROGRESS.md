@@ -5,6 +5,17 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 2026-11-15 — lbw3 (ts lane worker): the Lobby NPC wander port (ISSUES #221 E4)
+
+- **State:** on master, committed (`d57c76a6e` pure module + Tier-1 replay, `fa1ed06de` engine wiring / renderer / traces, `7ee9d8bbc` soak re-pin, docs after). Battle rules untouched.
+- **Did:** `lobbyNpcs.ts` (woman WANDER_AROUND + fat man LOOK_AROUND, collision against range / grid / player + static objects), `lobbyNpcDriver.ts` (freeze timeline from ticks since the Lobby entry: unfrozen at +34 / +35 and from the release, frozen otherwise from +11 and during the attendant talk), `core.ts` runs it on the shared `rngValue` on every Lobby path, the renderer draws both NPCs from state (`womanAtTick` retired to a test oracle in `tests/factoryLobbyFreeRoam.test.ts`; fat man gets S / N / W poses). `docs/lbw3-lobby-npc-port.md`.
+- **Proof:** Tier-1 replay on 6 traces (tiles, facing, step, delay, anim index, 32-bit cursor every frame); engine route with `appRngRebase`: app cursor == ROM `gRngValue` every frame, max |offset| 0, NPC state identical. compare before -> after: loss-beyond-boundary 183/183, loss-lobby-walk 177/177, lbra-loss 2258/2258, forfeit 1087-1199 0 -> 109/113, retire-off 1315 -> 1476/1554, won-no 0 -> 54/54, won-yes 0 -> 54/54, won-attendant 0 -> 17/17 + 6/6 + 44/44 (residuals: forfeit 4 frames at the player sprite, retire 78 frames of dialog text pacing; none NPC).
+- **Re-pins (Lobby new-challenge deals only):** `lbrd.test.ts` WIN_TWO_SEED 35 -> 13; `randomRoundSoak.test.ts` ISSUES #89 Baton Pass seed 1 -> 0. `factoryLobbyTerminal.test.ts` fat man frames 1 -> 3. No other test moved.
+- **Gates:** typecheck 0; test:smoke 448 / 448; test:gate 362 files / 2,843; build / build:lib 0; npm test shard 1/6 305 files green (the supervisor runs the full suite).
+- **Next:** unproven (docs): the player in the woman's way, retire-after-won / injected / attendant-return entries use the shared rule; free-roam player-vs-NPC collision and depth sort still use the static spawn tiles. Evidence `.integration/evidence/lbw3/`.
+
+---
+
 ## 2026-11-15 — CAX31 daily run (supervisor, Opus 5.5): wind-down: held-item effect drawn + timed + sounds, cries in move tasks, Lobby cursor fix
 
 - **State:** master clean, no workers, no worktrees; no push. **No DEFERRED items.** Final engine `5a42c61f5` (after cry1), then lbr-g merged (`620b0607f`, #221 E1-E3) + the iss215 probe-import fix (`ff2d2afec`).
@@ -41,19 +52,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Next:** the cry-task audio modes (ROAR / HIGH_PITCH / ECHO fall back to NORMAL; scout step 2); Howl +4 / Roar +13 lab drifts unexplained. Evidence: `.integration/evidence/cry1/`.
 
 ---
-
-## 2026-11-15 — hie3 (ts lane worker): General_HeldItemEffect sound effects (ISSUES #220 step 3)
-
-- **State:** on master, committed (`b8ad30f62` engine + test + 5 fixtures, docs after). Sound only: frame hashes identical (differential vs `5054340cf`: hie1-sitrus-on 1823, hie1-cheri-on 1823, hie2-sitrus-opp-on 1101, hie1-sitrus-off 823 captures);
-  census seeds 0..99 Scene ON: only `sound` / `soundDigest` move (82 seeds), `eventsDigest` / `commands` / `soundAnim` identical, 0 errors.
-- **Did:** `moveAnimSounds.ts`: Scene ON `HELD_ITEM_EFFECT` plays 152 / 152 / 152 / 228 / 102 (pan attacker -64 / 63) at script frames 8 / 40 / 72 / 104 / 176 (table has only the first op; the rest is the measured spacing
-  after `waitforvisualfinish`); **script frame 0 = command start + minimumFrames - 214**, one rule (restart 15, continuation 9, cure berry -22). The cure berry's first SE (14 frames before the command) is emitted from the preceding
-  32-frame `status` command's age (it lasts exactly its length; no carry state). Scene OFF: none. Step-mode ROM windows on 5 labs (`tools/audio/fixtures/hie3-*-on.json`): ROM first SE 754 / 754 / 766 / 772 / 737 minus the
-  lab drift (9 / 9 / 17 / 17 / 20, hie2b's) = engine frame exactly, all five rows each (`tests/hie3HeldItemSounds.test.ts`, `docs/hie3-held-item-sounds.md`).
-- **T2 rescore** (5 Scene ON seeds 2 / 165 / 499 / 830 / 1028, ROM re-driven, before = base `moveAnimSounds.ts` on the same ROM files): ROM-only 152 24 -> 0, 228 8 -> 0, 102 11 -> 3 (the 3 are seed 499's SE_SHINY, not held items); extra 0.
-  The 8 events match with all five rows at one delta each (lab drift -18 .. -2, one +48 in seed 2).
-- **Gates:** typecheck 0; test:gate 362 files / 2,843; 25 files importing moveAnimSounds / tickSounds + aud24x / aud25x 280 / 280; build / build:lib 0. Full `npm test` not run (the step says the supervisor runs it).
-- **Next:** cries in animation tasks; the open #220 residuals (Cheri ages 1-11, Shell Bell / Leftovers +1, post-heal tail). Evidence: `.integration/evidence/hie3/`.
-
----
-

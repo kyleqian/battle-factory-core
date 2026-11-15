@@ -13,14 +13,12 @@ defects are all authorized in the finish-up mission (`docs/factory-finish-scope.
 gameplay / RNG when proved against source; use main-lane ownership and gameplay gates. Historical presentation-only
 exclusions are superseded. Unrelated expansions stay parked.
 
-## #221 — Lobby RNG cursor: NPC wander draws not modelled (lbw1 / lbw2, 2026-11-15)
+## #221 — Lobby RNG cursor: harness / unmeasured routes (lbw1 / lbw2 / lbw3, 2026-11-15)
 
 - E1-E3 (battle-exit VBlank hold, Pokerus + save-block draws, Lobby map-load draws) fixed by lbr-g (`src/engine/battleExitRng.ts`,
-  `tests/battleExitRng.test.ts`; draw-count offset 0 on 6 ROM traces from the battle exit to Lobby entry + 33). Open:
-  - **E4:** the Lobby woman / fat man wander draws from entry + 34 (WanderAround / LookAround Step2 + Step4) are not modelled, so the
-    in-game new-challenge deal still differs from the ROM's. The lbw1 simulator (`tools/probe/lbw1-lobby-wander-sim.py`) matches the ROM
-    on 6 traces and is the step-2 oracle; seed state and preconditions in `docs/lbw1-lobby-wander-evidence.md`.
-  - **Harness:** every lbra / lbrd `appStage` injects a non-ROM `rngValue` (rebase values in the doc).
+  `tests/battleExitRng.test.ts`), E4 (the woman / fat man wander draws) by lbw3 (`docs/lbw3-lobby-npc-port.md`; offset 0 on 6 ROM traces from the rebase to the end). Open:
+  - **Harness:** every lbra / lbrd `appStage` injects a non-ROM `rngValue`; the traces now carry an `appRngRebase` (values in `docs/lbw1-lobby-wander-evidence.md` and the trace files).
+  - **Unproven in the wander port:** the player inside the woman's range / in her way, and retire-after-won / injected / attendant-return entries (shared rule); free-roam player-vs-NPC collision and depth sort still use the static spawn tiles.
   - **Unmeasured:** the won route's real battle exit (reuses the loss rule), the non-terminal win's PreBattleRoom entry, a full
     boot -> draft -> battle -> forfeit route.
 
