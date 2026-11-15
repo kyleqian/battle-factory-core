@@ -60,14 +60,19 @@ export interface SitrusRotation {
 }
 
 /**
- * `null` means the identity/static battler draw is sufficient. `opponent` mirrors the angle (AnimTask_RotateMonToSideAndRestore
- * negates the step for a battler on the opponent side); y2 is the same either way (|c| >> 3).
+ * `null` means the identity/static battler draw is sufficient. `opponent`: AnimTask_RotateMonToSideAndRestore negates the step for an
+ * opponent-side battler, so its angles are the exact negatives of the player's; ObjAffineSet floors the u16 angle (>> 8), which
+ * rounds the player's negative angle away from zero and the opponent's positive one toward it on every odd step. The opponent's
+ * entry is therefore the player's mirrored entry at the even step one before it on the way out (ages 1 .. 15) and one after it on
+ * the way back (ages 17 .. 31); y2 is |c| >> 3 of that entry.
  */
 export function sitrusRotationAtAge(age: number, opponent = false): SitrusRotation | null {
   if (age < 0 || age >= ROTATION_CYCLE_TICKS * ROTATION_CYCLE_COUNT) {
     return null;
   }
-  const [pa, pb, pc, pd] = ROTATION_TABLE[age % ROTATION_CYCLE_TICKS]!;
+  const step = age % ROTATION_CYCLE_TICKS;
+  const index = opponent && step % 2 === 1 ? (step < ROTATION_CYCLE_TICKS / 2 ? step - 1 : (step + 1) % ROTATION_CYCLE_TICKS) : step;
+  const [pa, pb, pc, pd] = ROTATION_TABLE[index]!;
   if (pb === 0 && pc === 0) return null;
   return opponent
     ? { pa, pb: -pb, pc: -pc, pd, y2: Math.abs(pc) >> 3 }

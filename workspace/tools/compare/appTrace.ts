@@ -1937,6 +1937,13 @@ export const APP_STAGES: Readonly<Record<string, AppStage>> = {
   "hie1-shellbell-off": (state) => hie1Stage(state, "hie1-shellbell-off", "off", 40, 50, 219, 69),
   "hie1-cheri-on": (state) => hie1Stage(state, "hie1-cheri-on", "on", 50, 40, 133, 86),
   "hie1-cheri-off": (state) => hie1Stage(state, "hie1-cheri-off", "off", 50, 40, 133, 86),
+  // hie2: the opponent's Rattata holds the Sitrus Berry (the player's faster Seismic Toss triggers it).
+  "hie2-sitrus-opp-on": (state) => midBattleSwitchStage(state, "hie2-sitrus-opp-on", [RATTATA_LV50_BENCH, RATTATA_LV50_BENCH], [105, 105], {
+    battleScene: "on",
+    player: rattataAtLevel(50, 69),
+    trainer: rattataAtLevel(30, 69, 142),
+    usedMessageHoldFrames: 0,
+  }),
   // aud250: General_FocusPunchSetUp / General_LeechSeedDrain sound anchors (docs/aud250-general-anim-sounds.md).
   "aud250-focuspunch-player-on": (state) => aud241bStage(state, "aud250-focuspunch-player-on", "on", 50, 12, 264, undefined, false, 69),
   "aud250-leechseed-player-on": (state) => aud241bStage(state, "aud250-leechseed-player-on", "on", 50, 12, 73, undefined, false, 69),

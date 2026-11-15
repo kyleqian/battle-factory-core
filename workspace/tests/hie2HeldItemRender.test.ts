@@ -26,12 +26,18 @@ describe("hie2: HELD_ITEM_EFFECT render view", () => {
     expect(row.view.fieldArt.player.pic.palette).toBe(fieldArt.player.pic.palette);
   });
 
-  it("opponent mirrors the player's rotation (pb / pc negated, y2 equal) and hides the shadow while the script runs", () => {
-    for (const age of [3, 20, 40, 70]) {
-      const p = sitrusRotationAtAge(age, false), o = sitrusRotationAtAge(age, true);
-      if (p === null) { expect(o).toBeNull(); continue; }
-      expect(o).toEqual({ pa: p.pa, pb: -p.pb, pc: -p.pc, pd: p.pd, y2: p.y2 });
+  it("opponent: mirrored pb / pc, the entry one even step before (out) / after (back) on odd steps, y2 of that entry; shadow hidden while the script runs", () => {
+    const mirror = (p: NonNullable<ReturnType<typeof sitrusRotationAtAge>>) => ({ pa: p.pa, pb: -p.pb, pc: -p.pc, pd: p.pd, y2: p.y2 });
+    for (const age of [2, 14, 16, 18, 30, 34, 66]) {
+      const p = sitrusRotationAtAge(age, false)!;
+      expect(sitrusRotationAtAge(age, true), `even age ${age}`).toEqual(mirror(p));
     }
+    expect(sitrusRotationAtAge(1, true)).toBeNull();
+    expect(sitrusRotationAtAge(31, true)).toBeNull();
+    expect(sitrusRotationAtAge(15, true)).toEqual(mirror(sitrusRotationAtAge(14, false)!));
+    expect(sitrusRotationAtAge(17, true)).toEqual(mirror(sitrusRotationAtAge(18, false)!));
+    expect(sitrusRotationAtAge(29, true)).toEqual(mirror(sitrusRotationAtAge(30, false)!));
+    expect(sitrusRotationAtAge(96, true)).toBeNull();
     const row = generalAnimationRenderView(view(1, 30))!;
     expect(row.heldItem!.side).toBe("opponent");
     expect(row.heldItem!.center).toEqual(liveBattlerAnchors("opponent", fieldArt).picOffsetPoint);
