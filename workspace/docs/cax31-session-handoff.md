@@ -132,8 +132,11 @@ tools and the rare-rule hunt are the box's.
   2026-11-15: 44 / 44, 69 / 69, 51 min at 2 lanes). Rare-rule hunt as before (50 / 110; one step per run at most, needs new team ideas).
 - **Cleanup:** steps 1-7 are done or measured non-goals (cln243 showed the remaining tracked evidence is test-read). Nothing queued.
 **Website:** the live site runs **`eb-c26961a07ff6b07b`** (your `49287331f`, the 2026-11-15 wind-down build; deployed 2026-11-15 ~13:30 UTC on Kyle's
-word, "Yes, update it"). The site adopted the lazy sprites and sound (a sound switch, off by default). It has NOT adopted `challenge-request` /
-`start: "after-save"`: the page still stops the game at `challenge-end` and offers a new challenge itself. Games already open on `eb-adfdcfdc91f4247f`
+word, "Yes, update it"). The site adopted the lazy sprites and sound (a sound switch, off by default), and (same day, Kyle: "Yes, build it")
+**`challenge-request` + `start: "after-save"`**: after a loss / retire the game runs on in the Lobby, the player asks the attendant, and the site opens
+the next server challenge with `start: "after-save"` and mounts it (server column `start_mode`; the replay check passes `start`). Checked live: loss ->
+Lobby -> attendant -> new challenge -> a few turns -> forfeit, verified; the same trace replayed with `start` "draft" reaches no battle. So keep
+`challenge-request` / `start` stable, and name any change to them in PROGRESS. Games already open on `eb-adfdcfdc91f4247f`
 or `eb-9d34d28f1b19ef3d` finish on those builds (checked live: an `eb-adfd` game resumed after the deploy, ended, replay-verified on its own build).
 Later builds reach the site only when Kyle asks again. Cleanup 5's "< 15 min" suite target: measured non-goal on this box (cln277); the 670 s render lever in
 `tools/integration/generatedCommandAnimationReplay.ts` would trade render-crash coverage (not taken).
