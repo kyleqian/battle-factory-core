@@ -161,3 +161,34 @@ node tools/probe/lbw2-app-rng.ts tools/compare/traces/N.json OUT/app-N.json keep
 python3 tools/probe/lbw2-classify.py N [FIRST [LAST]]      # reads .integration/evidence/lbw2/{rom,app}-N.json
 python3 tools/run-mgba-probe.py --rm-log-on-success OUT/src.json -- python3 tools/probe/lbw2-draw-source.py tools/compare/traces/N.json OUT/src.json 291,293,294,352,353,383
 ```
+
+## lbr-g: engine fix for E1 + E2 + E3 (ISSUES #221)
+
+`src/engine/battleExitRng.ts` (wired in the `factoryTerminal` branch and the retire part of the `postwin` branch of `tickEngineState`, `core.ts`), identical in both scenes. Per tick draw counts, keyed on `PostwinState.elapsed` (43 = the ROM exit frame):
+
+| rule | ages (loss / won) | forfeit | decomp |
+|---|---|---|---|
+| E1 no draws while `gMain.inBattle` | < 43 | < 43 | `main.c:366`, `battle_main.c:5217-5230` |
+| E2a Pokerus pair on the exit frame (VBlank suppressed) | 43: 2 | 43: 2 | `battle_main.c:5221-5222` |
+| E2b `MoveSaveBlocks_ResetHeap` 1 + 2, over two frames | 45: 2, 46: 3 | same | `load_save.c:74,129`, `overworld.c:2074` |
+| E3 Lobby map load, `entry + 3` / `entry + 4` | 105: 3, 106: 4 | 104: 3, 105: 4 | `overworld.c:862,872`, `tv.c:826`, `overworld.c:2074` |
+| E3 without a battle exit (retire; staged 7th-win terminal) | `entry + 3`: 2 extra, `entry + 4`: 3 extra | | same |
+
+The forfeit return reaches the Lobby one tick sooner than the loss return after the same exit frame (ROM: exit-to-entry 58 vs 59 frames), so its E3 age is 104. Retire keys E3 on the RETIRE-YES delay (`entry` = fade-in delay 38 - 13); the staged won terminal on its own age (0 = the Lobby map load).
+
+Method: lbw2's (`tools/probe/lbw2-app-rng.ts` rebased at a frame where the engine cursor is live, `lbw2-classify.py`). Offset = engine draws minus ROM draws. Rebases: forfeit @250 = 3031698222, loss @3233 = 1298389302, retire @6700 = 2155949550, won x3 @5113 = 3758091126.
+
+| span | forfeit before -> after | loss before -> after | retire before -> after | won x3 before -> after |
+|---|---|---|---|---|
+| after the rebase | 0 -> 0 | 0 -> 0 | 0 -> 0 | 0 -> 0 |
+| E1 window (f 250-290 / 3233-3273) | +40 -> 0 | +40 -> 0 | n/a | n/a |
+| ROM exit frame (entry-58 / -59) | +39 -> 0 | +39 -> 0 | n/a | n/a |
+| return-to-field (+2, +3 frames later) | +36 -> 0 | +36 -> 0 | n/a | n/a |
+| Lobby map load, `entry+3` | +34 -> 0 | +34 -> 0 | -2 -> 0 | -2 -> 0 |
+| Lobby map load, `entry+4` | +31 -> 0 | +31 -> 0 | -5 -> 0 | -5 -> 0 |
+| through `entry+33` | +31 -> 0 | +31 -> 0 | -5 -> 0 | -5 -> 0 |
+| NPC window, `entry+34` (E4, out of scope) | +29 -> -2 | +29 -> -2 | -7 -> -2 | -7 -> -2 |
+
+Every span from the rebase to `entry+33` is delta 0 per frame on all six traces (forfeit, loss, retire, won-no, won-yes, won-attendant). The remaining -2 is the two NPC delay draws of E4.
+
+Not covered (no ROM measurement): the won route's real battle exit (the production 7th win reuses the loss rule: same `ReturnFromBattleToOverworld` code, but the won trace stages at `entry`), and the PreBattleRoom entry of a non-terminal win keeps its existing table (`postwinRngSteps`, already 43 / 45 / 46 / 105 / 106).
