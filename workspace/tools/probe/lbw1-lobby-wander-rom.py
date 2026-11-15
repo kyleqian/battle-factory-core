@@ -120,6 +120,10 @@ def snap(frame: int) -> dict:
             "faceLock": (fl1 >> 1) & 1,
             "player": fl2 & 1,
         }
+        if e["player"]:
+            sp = mem[G_SPRITES + e["spr"] * SPRITE_STRIDE : G_SPRITES + (e["spr"] + 1) * SPRITE_STRIDE]
+            e["anim"] = [sp[0x2A], sp[0x2B]]
+            e["sx"], e["sy"] = s16(sp, 0x20), s16(sp, 0x22)
         if e["mt"] in (1, 2) and not e["player"]:
             sp = mem[G_SPRITES + e["spr"] * SPRITE_STRIDE : G_SPRITES + (e["spr"] + 1) * SPRITE_STRIDE]
             e["data"] = [s16(sp, 0x2E + 2 * k) for k in range(8)]

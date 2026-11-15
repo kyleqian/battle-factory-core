@@ -675,7 +675,7 @@ import {
   type FactoryLobbyFreeRoamState,
   type LobbyDirection,
 } from "./factoryLobbyFreeRoam.ts";
-import { lobbyNpcsScriptFrozen, stepLobbyNpcsTick } from "./lobbyNpcDriver.ts";
+import { lobbyNpcTilesForPlayer, lobbyNpcsScriptFrozen, stepLobbyNpcsTick } from "./lobbyNpcDriver.ts";
 import type { LobbyNpcsState } from "./lobbyNpcs.ts";
 import { renderFactoryLobbyAttendant, renderFactoryLobbyFreeRoam } from "./factoryTerminalRender.ts";
 import {
@@ -1363,8 +1363,9 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
     }
     const lobbyFreeRoam = advanceFactoryLobbyFreeRoam(state.lobbyFreeRoam, {
       heldDirs: lobbyHeldDirections(buttons),
+      npcs: lobbyNpcTilesForPlayer(state.lobbyNpcs),
     });
-    const roaming = stepLobbyNpcsTick(state.lobbyNpcs, rngValue, false, state.lobbyFreeRoam);
+    const roaming = stepLobbyNpcsTick(state.lobbyNpcs, rngValue, false, lobbyFreeRoam);
     return {
       ...state,
       frame: state.frame + 1,

@@ -50,19 +50,42 @@ interface TerminalLayout {
 const layout = layoutData as TerminalLayout;
 
 /**
- * Standing NPC / attendant object-event cells (map.json object_events).
+ * Standing attendant / camper / picnicker object-event cells (map.json object_events); none of them ever moves.
  * Colliding with an object event is COLLISION_OBJECT_EVENT on a walkable
  * metatile — the doc's §3c probe pins the singles attendant blocking (4,7)
  * while (4,7)'s metatile is `.`.
  */
-const LOBBY_NPC_CELLS: ReadonlySet<string> = new Set([
+const LOBBY_STATIC_NPC_CELLS: ReadonlySet<string> = new Set([
   "4,7", // singles attendant
   "14,7", // doubles attendant
-  "3,11", // woman (wanders)
-  "6,10", // fat man
   "14,11", // camper
   "13,11", // picnicker
 ]);
+
+/** lbw4: an object event's current and previous map tile; DoesObjectCollideWithObjectAt matches either. */
+export interface LobbyObjectTile {
+  readonly x: number;
+  readonly y: number;
+  readonly prevX: number;
+  readonly prevY: number;
+}
+
+/** The wandering woman and the fat man at their map-load tiles: what a caller that supplies no live NPC state gets. */
+const LOBBY_SPAWN_WANDERERS: readonly LobbyObjectTile[] = [
+  { x: 3, y: 11, prevX: 3, prevY: 11 },
+  { x: 6, y: 10, prevX: 6, prevY: 10 },
+];
+
+/**
+ * lbw4: the wanderers as the player's collision check sees them. The ROM runs the player's input (CB1, `PlayerStep`) before the object-event
+ * callbacks of the same frame, so a check made on frame R sees the NPCs' state at the END of frame R - 1. `live` is the engine's NPC state
+ * before this tick's NPC step (the end of the previous tick); `lagged` the one before it. Which one a decision uses follows from where the
+ * engine's one-tick-late step start sits against the ROM frame (see the notes at each `startStep` call).
+ */
+export interface LobbyFreeRoamNpcTiles {
+  readonly live: readonly LobbyObjectTile[];
+  readonly lagged: readonly LobbyObjectTile[];
+}
 
 /**
  * Exit door-mat cells (9,11)+(10,11). In the REAL game these are walkable
@@ -73,12 +96,19 @@ const LOBBY_NPC_CELLS: ReadonlySet<string> = new Set([
 const LOBBY_DOOR_MAT_CELLS: ReadonlySet<string> = new Set(["9,11", "10,11"]);
 
 /** Map-grid collision: an out-of-map or layout-blocked cell is impassable. */
-export function isFactoryLobbyCellWalkable(x: number, y: number): boolean {
+export function isFactoryLobbyCellWalkable(
+  x: number,
+  y: number,
+  wanderers: readonly LobbyObjectTile[] = LOBBY_SPAWN_WANDERERS,
+): boolean {
   if (x < 0 || x >= layout.width || y < 0 || y >= layout.height) return false;
   if (layout.blocks[y * layout.width + x]!.collision !== 0) return false;
   const key = `${x},${y}`;
-  if (LOBBY_NPC_CELLS.has(key)) return false;
+  if (LOBBY_STATIC_NPC_CELLS.has(key)) return false;
   if (LOBBY_DOOR_MAT_CELLS.has(key)) return false;
+  for (const o of wanderers) {
+    if ((o.x === x && o.y === y) || (o.prevX === x && o.prevY === y)) return false;
+  }
   return true;
 }
 
@@ -152,12 +182,14 @@ export function createFactoryLobbyFreeRoamState(): FactoryLobbyFreeRoamState {
 function startStep(
   state: FactoryLobbyFreeRoamState,
   dir: LobbyDirection,
-  fresh = false,
+  fresh: boolean,
+  wanderers: readonly LobbyObjectTile[] | undefined,
+  pressStart = false,
 ): FactoryLobbyFreeRoamState {
   const { dx, dy } = DIR_DELTA[dir];
   const targetX = state.x + dx;
   const targetY = state.y + dy;
-  if (!isFactoryLobbyCellWalkable(targetX, targetY)) {
+  if (!isFactoryLobbyCellWalkable(targetX, targetY, wanderers)) {
     // Refused step (blocked target): clear the buffered press and enter the
     // border bump on THIS frame — the oracle's act-25 bump begins on the
     // exact blocked tick (§7b 5229), and the press must never re-arm while
@@ -175,7 +207,9 @@ function startStep(
     // animClock 0 at 5182). Continuations (a held walk re-arming at a tile
     // center) instead show progress 0 on the arrival frame — that frame IS the
     // arrived tile's full displacement (§7e re-arm).
-    stepRemaining: fresh
+    // lbw4: a step started from a buffered press (facing the pressed direction already) begins like a committed turn: the ROM's
+    // current tile moves on the press frame and the first pixel shows one tick later (ROM dump lbw4-woman-block-off 5761 / 5762).
+    stepRemaining: fresh || pressStart
       ? LOBBY_FREE_ROAM_TILE_FRAMES - 1
       : LOBBY_FREE_ROAM_TILE_FRAMES,
     // Fresh walk steps restart the GO anim at the pose the ROM's step
@@ -202,6 +236,8 @@ function startStep(
 
 export interface LobbyFreeRoamInput {
   readonly heldDirs: ReadonlySet<LobbyDirection>;
+  /** The wanderers' tiles (lbw4); omitted = both at their map-load tiles. */
+  readonly npcs?: LobbyFreeRoamNpcTiles;
 }
 
 export function advanceFactoryLobbyFreeRoam(
@@ -210,7 +246,23 @@ export function advanceFactoryLobbyFreeRoam(
 ): FactoryLobbyFreeRoamState {
   // A single held direction; fixtures never press diagonals.
   const heldDir = input.heldDirs.values().next().value ?? null;
+  const live = input.npcs?.live;
+  const lagged = input.npcs?.lagged;
   if (state.bumpElapsed > 0) {
+    // TryInterruptObjectEventSpecialAnim (field_player_avatar.c:353): the walk-in-place bump is cut short on any frame where the SAME
+    // direction is held and CheckForPlayerAvatarStaticCollision is clear again (a wanderer left the tile), and the step starts that frame.
+    // A wall never clears; a released or different direction does not interrupt here (the cycle runs out).
+    if (heldDir === state.facing) {
+      const { dx, dy } = DIR_DELTA[heldDir];
+      if (isFactoryLobbyCellWalkable(state.x + dx, state.y + dy, live)) {
+        // The walk starts at the GO anim command index the bump left (2, 3, 0, 1, ... advancing per 16-frame cycle) run through
+        // SetStepAnimHandleAlternation (1 -> 2, 3 -> 0); the rendered pose lags it by one frame.
+        const bumpIdx = (2 + Math.floor(state.bumpElapsed / LOBBY_FREE_ROAM_BUMP_FRAMES)) % 4;
+        const startIdx = bumpIdx === 3 ? 0 : bumpIdx === 1 ? 2 : bumpIdx;
+        const started = startStep({ ...state, bumpElapsed: 0, heldDir, pendingDir: null }, heldDir, false, live);
+        return Object.freeze({ ...started, animClock: (LOBBY_FREE_ROAM_POSE_FRAMES * startIdx + 4 * LOBBY_FREE_ROAM_POSE_FRAMES - 1) % (4 * LOBBY_FREE_ROAM_POSE_FRAMES) });
+      }
+    }
     // Border bump (act 25): the sprite freezes facing the blocked direction
     // while the 16-frame cycle counts. A completed cycle re-arms only while
     // the same direction is still held (§7b/§7f); a release settles and a
@@ -256,7 +308,8 @@ export function advanceFactoryLobbyFreeRoam(
     // (4,8) forever, VOFS flat 40), while a hold walks continuously. Holding
     // through the turn (>= the 8-frame turn) is the one-tile tap.
     if (heldDir === state.turnTarget) {
-      return startStep({ ...state, facing, turnRemaining, heldDir }, facing, true);
+      // Turn commit: the engine commits one tick after the ROM frame that decided, so it sees the NPC state of two ticks back.
+      return startStep({ ...state, facing, turnRemaining, heldDir }, facing, true, lagged);
     }
     return Object.freeze({
       ...state,
@@ -284,7 +337,7 @@ export function advanceFactoryLobbyFreeRoam(
     });
     if (heldDir === null) return arrived;
     if (heldDir === state.stepDir) {
-      return startStep(arrived, heldDir);
+      return startStep(arrived, heldDir, false, live);
     }
     // Direction changed at the tile center: turn in place, then the committed
     // step (mirrors the fresh-press rule). Held-hold continuations do not
@@ -302,7 +355,7 @@ export function advanceFactoryLobbyFreeRoam(
     // The buffered press fires the turn/step now (frame two of the measured
     // press->visual latency window).
     if (state.pendingDir === state.facing) {
-      return startStep(state, state.pendingDir);
+      return startStep(state, state.pendingDir, false, lagged, true);
     }
     return Object.freeze({
       ...state,
@@ -321,11 +374,42 @@ export function advanceFactoryLobbyFreeRoam(
   const { dx, dy } = DIR_DELTA[heldDir];
   if (
     state.facing === heldDir &&
-    !isFactoryLobbyCellWalkable(state.x + dx, state.y + dy)
+    !isFactoryLobbyCellWalkable(state.x + dx, state.y + dy, live)
   ) {
     return Object.freeze({ ...state, heldDir, pendingDir: null, bumpElapsed: 1 });
   }
   return Object.freeze({ ...state, heldDir, pendingDir: heldDir });
+}
+
+/**
+ * lbw4: the player as the ROM's object event at the END of the frame the engine tick just ran (the wanderers' callbacks of that frame
+ * run after the player's: the player's sprite is object slot 0, and `PlayerStep` runs in CB1 before any callback). `state` is the engine's
+ * state after the tick's own advance, `wanderers` the NPC state before the tick's NPC step. Measured relations (docs/lbw4): a step's
+ * current tile is the destination from the ROM frame that decides it, its previous tile stays the origin until `stepRemaining` hits 1;
+ * a step the engine starts on the NEXT tick (a buffered press, a turn that commits) is already under way on the ROM frame.
+ */
+export function lobbyFreeRoamRomObject(
+  state: FactoryLobbyFreeRoamState,
+  wanderers: readonly LobbyObjectTile[],
+): LobbyObjectTile {
+  const at = { x: state.x, y: state.y, prevX: state.x, prevY: state.y };
+  const toward = (dir: LobbyDirection): LobbyObjectTile => {
+    const { dx, dy } = DIR_DELTA[dir];
+    return { x: state.x + dx, y: state.y + dy, prevX: state.x, prevY: state.y };
+  };
+  if (state.stepRemaining >= 2) return toward(state.stepDir);
+  if (state.stepRemaining === 1) {
+    const { x, y } = toward(state.stepDir);
+    return { x, y, prevX: x, prevY: y };
+  }
+  if (state.bumpElapsed > 0 || state.turnRemaining > 1) return at;
+  const next =
+    state.turnRemaining === 1
+      ? state.heldDir === state.turnTarget ? state.turnTarget : null
+      : state.pendingDir !== null && state.pendingDir === state.facing ? state.pendingDir : null;
+  if (next === null) return at;
+  const { dx, dy } = DIR_DELTA[next];
+  return isFactoryLobbyCellWalkable(state.x + dx, state.y + dy, wanderers) ? toward(next) : at;
 }
 
 export function isFactoryLobbyIdle(state: FactoryLobbyFreeRoamState): boolean {
@@ -402,20 +486,18 @@ export function lobbyFreeRoamCameraOrigin(
 export function lobbyFreeRoamPlayerFrame(state: FactoryLobbyFreeRoamState): number {
   if (state.bumpElapsed > 0) {
     // Border bump (act 25, §7b/§7g item 3): sprite frozen facing the blocked
-    // direction, pose alternating walk-2 / stand between the back-to-back
-    // 16-frame bump cycles. The RENDERED pose lags the RAM cycle by one frame
-    // (the same lag as every other overworld pose): cycle 0's first frame
-    // (bumpElapsed 1 = the 5229 block tick) still shows the pre-bump standing
-    // pose, then walk-2 spans cycle 0's remaining frames (5230-5244), stand
-    // spans cycle 1 (5245-5260), and the alternation repeats while held.
-    const walkTwo =
-      Math.floor((state.bumpElapsed - 1) / LOBBY_FREE_ROAM_BUMP_FRAMES) % 2 === 0 &&
-      state.bumpElapsed !== 1;
+    // direction. The GO anim command index advances once per 16-frame cycle
+    // (2, 3, 0, 1, 2, ... = walk-2, stand, walk-1, stand; ROM dump lbw4 5777
+    // idx 2, 5793 idx 3, 5809 idx 0, ...) and the RENDERED pose lags the RAM
+    // index by one frame: bumpElapsed 1 (the block tick) still shows the
+    // pre-bump standing pose, cycle k's pose starts at bumpElapsed 16k + 2.
+    const cycle = state.bumpElapsed === 1 ? -1 : Math.floor((state.bumpElapsed - 2) / LOBBY_FREE_ROAM_BUMP_FRAMES) % 4;
+    const phase = cycle === 0 ? 2 : cycle === 2 ? 0 : 1;
     switch (state.facing) {
-      case "south": return walkTwo ? 4 : 0;
-      case "north": return walkTwo ? 6 : 1;
-      case "west": return walkTwo ? 8 : 2;
-      case "east": return walkTwo ? 8 : 2;
+      case "south": return phase === 0 ? 3 : phase === 2 ? 4 : 0;
+      case "north": return phase === 0 ? 5 : phase === 2 ? 6 : 1;
+      case "west": return phase === 0 ? 7 : phase === 2 ? 8 : 2;
+      case "east": return phase === 0 ? 7 : phase === 2 ? 8 : 2;
     }
   }
   if (state.turnRemaining > 0) {

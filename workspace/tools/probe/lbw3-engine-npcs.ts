@@ -25,7 +25,16 @@ const npc = (n: { x: number; y: number; prevX: number; prevY: number; facing: nu
   n === undefined ? null : [n.x, n.y, n.prevX, n.prevY, n.facing, n.step, n.delay];
 const snap = (f: number): void => {
   const n = state.lobbyNpcs;
-  rows.push({ f, rng: state.rngValue, free: state.lobbyFreeRoam !== null, att: state.lobbyAttendant !== null, w: npc(n?.woman), m: npc(n?.fatMan) });
+  const p = state.lobbyFreeRoam;
+  rows.push({
+    f,
+    rng: state.rngValue,
+    free: p !== null,
+    att: state.lobbyAttendant !== null,
+    w: npc(n?.woman),
+    m: npc(n?.fatMan),
+    p: p === null ? null : [p.x, p.y, p.stepRemaining, p.stepDir, p.turnRemaining, p.bumpElapsed, p.facing],
+  });
 };
 const applyStage = (f: number): void => {
   if (!trace.appStage || trace.appStage.frame !== f) return;

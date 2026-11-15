@@ -216,32 +216,33 @@ describe("Factory Lobby free-roam (docs/factory-lobby-freeroam-ground-truth.md)"
 
   it("follow-cam: the field scrolls along the direction of travel (west/east/north) (§5a)", () => {
     // Each player already faces its walk direction, so no turn: press
-    // (buffered) + step start + 1 step frame = 3 advances.
+    // (buffered) + step start at 15 + 1 step frame = 3 advances (lbw4: the
+    // buffered idle press starts its step the next tick, ROM-exact).
     const west = advance(
       { ...createFactoryLobbyFreeRoamState(), facing: "west" as const },
       ["west"],
       3,
     );
-    expect(west.stepRemaining).toBe(LOBBY_FREE_ROAM_TILE_FRAMES - 1);
-    expect(lobbyFreeRoamCameraOrigin(west, SPAWN_CAMERA)).toEqual({ x: -48 - 1, y: 56 });
+    expect(west.stepRemaining).toBe(LOBBY_FREE_ROAM_TILE_FRAMES - 2);
+    expect(lobbyFreeRoamCameraOrigin(west, SPAWN_CAMERA)).toEqual({ x: -48 - 2, y: 56 });
     // North: camera origin y decreases. (From (4,8) north is blocked by the
     // attendant NPC, so start one tile south on the walkable floor and assert
     // the 1px delta against the non-spawn tile's own anchor.)
     const northIdle = { ...createFactoryLobbyFreeRoamState(), x: 3, y: 9, facing: "north" as const };
     const northBase = lobbyFreeRoamCameraOrigin(northIdle, SPAWN_CAMERA);
     const north = advance(northIdle, ["north"], 3);
-    expect(north.stepRemaining).toBe(LOBBY_FREE_ROAM_TILE_FRAMES - 1);
+    expect(north.stepRemaining).toBe(LOBBY_FREE_ROAM_TILE_FRAMES - 2);
     const northCam = lobbyFreeRoamCameraOrigin(north, SPAWN_CAMERA);
     expect(northCam.x).toBe(northBase.x);
-    expect(northCam.y).toBe(northBase.y - 1);
+    expect(northCam.y).toBe(northBase.y - 2);
     // East: camera origin x increases.
     const east = advance(
       { ...createFactoryLobbyFreeRoamState(), facing: "east" as const },
       ["east"],
       3,
     );
-    expect(east.stepRemaining).toBe(LOBBY_FREE_ROAM_TILE_FRAMES - 1);
-    expect(lobbyFreeRoamCameraOrigin(east, SPAWN_CAMERA)).toEqual({ x: -48 + 1, y: 56 });
+    expect(east.stepRemaining).toBe(LOBBY_FREE_ROAM_TILE_FRAMES - 2);
+    expect(lobbyFreeRoamCameraOrigin(east, SPAWN_CAMERA)).toEqual({ x: -48 + 2, y: 56 });
   });
 
   it("turn poses: walk-2 for turn frames 1-4, standing pose for frames 5-8 (§5b)", () => {
@@ -475,8 +476,10 @@ describe("Factory Lobby free-roam (docs/factory-lobby-freeroam-ground-truth.md)"
     const cycleLast = advance(bumped, ["south"], LOBBY_FREE_ROAM_BUMP_FRAMES - 1);
     expect(cycleLast.bumpElapsed).toBe(LOBBY_FREE_ROAM_BUMP_FRAMES);
     expect(lobbyFreeRoamPlayerFrame(cycleLast)).toBe(4);
-    const cycleTwo = advance(cycleLast, ["south"], 1);
-    expect(cycleTwo.bumpElapsed).toBe(LOBBY_FREE_ROAM_BUMP_FRAMES + 1);
+    // lbw4: the GO anim index advances every 16-frame cycle (2, 3, 0, 1 = walk-2, stand, walk-1, stand) and
+    // the rendered pose lags the RAM index by one frame, so the stand pose starts at bumpElapsed 18.
+    const cycleTwo = advance(cycleLast, ["south"], 2);
+    expect(cycleTwo.bumpElapsed).toBe(LOBBY_FREE_ROAM_BUMP_FRAMES + 2);
     expect(lobbyFreeRoamPlayerFrame(cycleTwo)).toBe(0);
     // Held for many frames: still bumping in place, never re-armed.
     const longHold = advance(cycleTwo, ["south"], 40);
