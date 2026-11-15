@@ -122,14 +122,10 @@ function restoreBgm(bgm: number): void {
   emitSound({ kind: "duck", id: bgm, pan: null, volume: BGM_FULL_VOLUME });
 }
 
-/**
- * PlayCry_ByMode: PlayCryInternal ducks the BGM, starts the cry; Task_DuckBGMForPokemonCry restores when the cry ends. `restoreDelay` null = no restore row
- * (length unmodelled); `duckTask` false = PlayCry_DuckNoRestore (no restore task at all).
- */
-function startCry(bgm: number, species: number, mode: number, pan: number, restoreDelay?: number | null, duckTask = true): void {
+/** PlayCry_ByMode: PlayCryInternal ducks the BGM, starts the cry; Task_DuckBGMForPokemonCry restores when the cry ends. */
+function startCry(bgm: number, species: number, mode: number, pan: number, restoreDelay?: number): void {
   emitSound({ kind: "duck", id: bgm, pan: null, volume: BGM_DUCK_VOLUME });
   emitSound({ kind: "cry", id: species, pan, mode, volume: CRY_VOLUME, priority: CRY_PRIORITY });
-  if (!duckTask || restoreDelay === null) return;
   crySerial += 1;
   const serial = crySerial;
   ducking = { serial, bgm };
@@ -143,9 +139,23 @@ function startCry(bgm: number, species: number, mode: number, pan: number, resto
   });
 }
 
-/** A move-animation sound task's cry (battle_anim_sound_tasks.c): `duckTask` false is PlayCry_DuckNoRestore; `restoreDelay` null leaves the restore unmodelled. */
-export function playAnimTaskCry(bgm: number, species: number, mode: number, pan: number, duckTask: boolean, restoreDelay: number | null): void {
-  startCry(bgm, species, mode, pan, restoreDelay, duckTask);
+/**
+ * A move-animation sound task's cry (battle_anim_sound_tasks.c), emitted as stateless rows at known script frames (moveAnimSounds.ts): `duck` is the BGM duck row
+ * (the ROM logs it only when the BGM is not already at 85, i.e. on the first cry of the task; the later ones are no-ops).
+ */
+export function playAnimTaskCry(bgm: number, species: number, mode: number, pan: number, duck: boolean): void {
+  if (duck) emitSound({ kind: "duck", id: bgm, pan: null, volume: BGM_DUCK_VOLUME });
+  emitSound({ kind: "cry", id: species, pan, mode, volume: CRY_VOLUME, priority: CRY_PRIORITY });
+}
+
+/** StopCryAndClearCrySongs from a cry task's Step (the row only; the task's own cries never leave duck state behind). */
+export function stopAnimTaskCry(): void {
+  emitSound({ kind: "stop", id: null, pan: null, player: "cry" });
+}
+
+/** The cry task's BGM restore (Task_DuckBGMForPokemonCry on IsCryPlaying false, or DestroyAnimSoundTask at the animation's end), `delay` frames from now. */
+export function scheduleAnimTaskBgmRestore(bgm: number, delay: number): void {
+  scheduleAfter(delay, () => restoreBgm(bgm));
 }
 
 /** Task_PlayCryWhenReleasedFromBall: the send-out cry at pan +25 (opponent) / -25 (player), NORMAL or WEAK by the mon's HP and status. */

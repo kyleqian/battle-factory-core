@@ -3,7 +3,8 @@
 // presentation, never changes it. Data: src/data/gen/anim-sound-timing.json (tools/extract/extract-anim-sound-timing.ts). docs/aud242-move-anim-sounds.md.
 import timingData from "../data/gen/anim-sound-timing.json" with { type: "json" };
 import { animSoundPan, animSoundPan2, calculatePanIncrement, emitSound, keepPanInRange, type AnimPanContext, type SoundEmission } from "../audio/soundEvents.ts";
-import { CRY_MODE_ECHO_START, CRY_MODE_HIGH_PITCH, CRY_MODE_ROAR_1, playAnimTaskCry } from "./screenSounds.ts";
+import { CRY_MODE_ECHO_END, CRY_MODE_ECHO_START, CRY_MODE_HIGH_PITCH, CRY_MODE_ROAR_1, CRY_MODE_ROAR_2, playAnimTaskCry, scheduleAnimTaskBgmRestore, stopAnimTaskCry } from "./screenSounds.ts";
+import { cryTaskLength } from "./cryTaskLengths.ts";
 import { factoryBattleBgm } from "./battleStartSounds.ts";
 import { BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS } from "./battleScriptSourceConstants.ts";
 import type { BattleResolutionPresentationState } from "./battleResolutionPresentation.ts";
@@ -191,23 +192,66 @@ const MOVE_ROAR = 46;
 const MOVE_HOWL = 336;
 const MOVE_HYPER_VOICE = 304;
 
+type CryTaskRow =
+  | Readonly<{ at: number; row: "cry"; mode: number; duck: boolean }>
+  | Readonly<{ at: number; row: "stop" | "restore" }>;
+
 /**
- * cry1 (ISSUES #219 family 3): the first cry of the cry tasks (battle_anim_sound_tasks.c), at script frames from the extractor's rules (loadspritegfx / monbg 3, delay N + 2).
- * Roar: SoundTask_PlayDoubleCry plays ROAR_1 in its entry (script step, frame 6 = after loadspritegfx + monbg). Howl: SoundTask_PlayCryHighPitch plays HIGH_PITCH in its
- * entry after `delay 12` + RoarEffect's `delay 15` (frame 34). Hyper Voice: SoundTask_PlayCryWithEcho's first Step runs in the creating iteration's RunTasks (frame 3, c0:
- * StopCryAndClearCrySongs, a ROM no-op when no cry plays), c2 = frame 5 plays ECHO_START with PlayCry_DuckNoRestore. The second cries need per-species cry lengths (docs/cry1-cry-tasks.md).
+ * cry1 (ISSUES #219 family 3): the cry tasks of battle_anim_sound_tasks.c as rows at script frames (the extractor's rules: loadspritegfx / monbg 3, delay N + 2); all offsets
+ * are ROM-measured (tools/audio/fixtures/cry1-*.json, docs/cry1-cry-tasks.md), the lengths D come from cryTaskLengths.ts (a fitted per-species model; unknown species: first cries only).
+ * Roar (SoundTask_PlayDoubleCry): ROAR_1 at frame 6 (ducks), ROAR_2 11 later, the restore D_R2 after ROAR_2. Howl (SoundTask_PlayCryHighPitch): HIGH_PITCH at frame 34 (after
+ * `delay 12` + RoarEffect's `delay 15`), the restore D_HP later. Hyper Voice (SoundTask_PlayCryWithEcho, run twice, PlayCry_DuckNoRestore): ES at frame 5 (task created at 3), the
+ * Step's stop D_ES later, EE the frame after; the second round's c0 stop is 53 after the first ES (species independent), ES2 2 after it, stop, EE2 (ByMode); the BGM comes back
+ * at the earlier of EE2 + D_EE and the animation's DestroyAnimSoundTask (98 after the first ES). Only the effective rows (the ROM's `noop` duck / stop rows are not emitted).
  */
-const CRY_TASK_FIRST_CRY: Readonly<Record<number, Readonly<{ frame: number; mode: number; duckTask: boolean }>>> = {
-  [MOVE_ROAR]: { frame: 6, mode: CRY_MODE_ROAR_1, duckTask: true },
-  [MOVE_HOWL]: { frame: 34, mode: CRY_MODE_HIGH_PITCH, duckTask: true },
-  [MOVE_HYPER_VOICE]: { frame: 5, mode: CRY_MODE_ECHO_START, duckTask: false },
-};
+function cryTaskRows(move: number, species: number): readonly CryTaskRow[] | undefined {
+  if (move === MOVE_ROAR) {
+    const rows: CryTaskRow[] = [{ at: 6, row: "cry", mode: CRY_MODE_ROAR_1, duck: true }];
+    const second = cryTaskLength("ROAR_2", species);
+    if (second === undefined) return rows;
+    rows.push({ at: 17, row: "cry", mode: CRY_MODE_ROAR_2, duck: false }, { at: 17 + second, row: "restore" });
+    return rows;
+  }
+  if (move === MOVE_HOWL) {
+    const rows: CryTaskRow[] = [{ at: 34, row: "cry", mode: CRY_MODE_HIGH_PITCH, duck: true }];
+    const length = cryTaskLength("HIGH_PITCH", species);
+    if (length !== undefined) rows.push({ at: 34 + length, row: "restore" });
+    return rows;
+  }
+  if (move === MOVE_HYPER_VOICE) {
+    const rows: CryTaskRow[] = [{ at: 5, row: "cry", mode: CRY_MODE_ECHO_START, duck: true }];
+    const start = cryTaskLength("ECHO_START", species);
+    const end = cryTaskLength("ECHO_END", species);
+    if (start === undefined || end === undefined) return rows;
+    rows.push(
+      { at: 5 + start, row: "stop" },
+      { at: 6 + start, row: "cry", mode: CRY_MODE_ECHO_END, duck: false },
+      { at: 58, row: "stop" },
+      { at: 60, row: "cry", mode: CRY_MODE_ECHO_START, duck: false },
+      { at: 60 + start, row: "stop" },
+      { at: 61 + start, row: "cry", mode: CRY_MODE_ECHO_END, duck: false },
+      { at: Math.min(61 + start + end, 103), row: "restore" },
+    );
+    return rows;
+  }
+  return undefined;
+}
 
 /** The SPECIES_NONE guard: the task destroys itself and plays nothing. */
 export function emitCryTaskRows(move: number, species: number, attackerSide: "player" | "opponent", scriptRow: number, frontierBrain: boolean): void {
-  const first = CRY_TASK_FIRST_CRY[move];
-  if (first === undefined || species === 0 || scriptRow !== first.frame) return;
-  playAnimTaskCry(factoryBattleBgm(frontierBrain), species, first.mode, attackerSide === "player" ? SOUND_PAN_ATTACKER_VALUE : 63, first.duckTask, null);
+  if (species === 0) return;
+  const rows = cryTaskRows(move, species);
+  if (rows === undefined) return;
+  const bgm = factoryBattleBgm(frontierBrain);
+  for (const row of rows) {
+    if (row.at !== scriptRow) continue;
+    if (row.row === "cry") playAnimTaskCry(bgm, species, row.mode, attackerSide === "player" ? SOUND_PAN_ATTACKER_VALUE : 63, row.duck);
+    else if (row.row === "stop") stopAnimTaskCry();
+  }
+  // The restore is scheduled from the first cry: Hyper Voice's DestroyAnimSoundTask restore falls after the engine's presented animation has ended (the next command's frames).
+  const first = rows[0]!;
+  const restore = rows.find((row) => row.row === "restore");
+  if (restore !== undefined && first.at === scriptRow) scheduleAnimTaskBgmRestore(bgm, restore.at - first.at);
 }
 
 /** Called once per collected tick with the round's resolution presentation after the tick; emits the ops whose frame is this tick's. */

@@ -1,4 +1,4 @@
-// cry1 (ISSUES #219 family 3, step 1): the first cry of Roar / Howl / Hyper Voice in Scene ON, against step-mode ROM probe windows
+// cry1 (ISSUES #219 family 3): the cry-task rows (first cries, second cries, stops, BGM restore) of Roar / Howl / Hyper Voice in Scene ON, against step-mode ROM probe windows
 // (tools/audio/fixtures/cry1-*.json, soundEventProbe.py `lab` of tools/battle-lab/cry1-*.json; docs/cry1-cry-tasks.md).
 // The engine's labs differ from the ROM before the move (earlier-turn text / hit timing); the per-lab drift below is engine minus ROM at the first cry.
 import { readFileSync } from "node:fs";
@@ -6,7 +6,8 @@ import { describe, expect, it } from "vitest";
 import { collectSoundTick, type SoundEvent } from "../src/audio/soundEvents.ts";
 import { createInitialState, tick } from "../src/engine/core.ts";
 import { emitCryTaskRows } from "../src/engine/moveAnimSounds.ts";
-import { beginScreenSoundTick, playAnimTaskCry, runScheduledScreenSounds } from "../src/engine/screenSounds.ts";
+import { beginScreenSoundTick, runScheduledScreenSounds } from "../src/engine/screenSounds.ts";
+import { cryTaskLength, type CryTaskLengthMode } from "../src/engine/cryTaskLengths.ts";
 import { traceAdvances } from "../tools/compare/traceReplay.ts";
 
 interface FixtureEvent { frame: number; kind: string; id: number | null; pan: number | null; mode?: string; volume?: number; noop?: boolean; via?: string }
@@ -32,14 +33,14 @@ function replay(rom: Fixture): { rows: string[]; commandStart: number } {
     const res = (state as any).factoryRoundBattleOrchestrator?.battleResolutionPresentation;
     const command = res?.segments[res.segmentIndex]?.commands[res.commandIndex];
     if (commandStart < 0 && command?.type === "move-animation" && res.lifecycle.phase === "presenting" && MOVES.includes(command.animation?.moveId)) commandStart = advance.frame;
-    for (const e of result.events) if (e.kind === "cry" || e.kind === "duck") rows.push(describe_(e.frame, e.kind, e.id, e.pan, (e as any).mode, e.volume));
+    for (const e of result.events) if (e.kind === "cry" || e.kind === "duck" || (e.kind === "stop" && (e as any).player === "cry")) rows.push(describe_(e.frame, e.kind, e.id, e.pan, (e as any).mode, e.volume));
   }
   return { rows, commandStart };
 }
 const describe_ = (frame: number, kind: string, id: number | null, pan: number | null, mode: number | undefined, volume: number | undefined): string =>
-  kind === "duck" ? `duck@${frame}:${volume}` : `cry@${frame}:${id}:${pan}:${mode}`;
+  kind === "duck" ? `duck@${frame}:${volume}` : kind === "stop" ? `stop@${frame}` : `cry@${frame}:${id}:${pan}:${mode}`;
 
-const MODE_ID: Record<string, number> = { HIGH_PITCH: 3, ECHO_START: 4, ROAR_1: 7 };
+const MODE_ID: Record<string, number> = { HIGH_PITCH: 3, ECHO_START: 4, ECHO_END: 6, ROAR_1: 7, ROAR_2: 8 };
 /** First cry rows of the ROM window: the effective BGM duck (85) and the cry (noop duck rows are ROM log noise: the BGM is already at 85). */
 function romFirstCry(rom: Fixture): { duck: number; cry: FixtureEvent } {
   const cry = rom.events.find((e) => e.kind === "cry" && e.mode !== undefined && e.mode in MODE_ID)!;
@@ -92,12 +93,84 @@ describe("cry-task first cries (cry1, Scene ON)", () => {
   });
 });
 
+/** Effective ROM rows from the first cry to the BGM restore (duck 256), as `frame - first cry` strings; the `noop` rows are ROM log noise. */
+function romTaskRows(rom: Fixture, first: number): string[] {
+  const rows: string[] = [];
+  for (const e of rom.events) {
+    if (e.frame < first || e.noop === true) continue;
+    if (e.kind === "cry" && e.mode !== undefined && e.mode in MODE_ID) rows.push(`${e.frame - first}:cry:${e.id}:${e.pan}:${MODE_ID[e.mode]}`);
+    else if (e.kind === "stop" && (e as any).player === "cry") rows.push(`${e.frame - first}:stop`);
+    else if (e.kind === "duck") {
+      rows.push(`${e.frame - first}:duck:${e.volume}`);
+      if (e.volume === 256) break;
+    }
+  }
+  return rows;
+}
+
+function engineTaskRows(rom: Fixture, first: number, drift: number): string[] {
+  const rows: string[] = [];
+  for (const r of replay(rom).rows) {
+    const frame = Number(/@(\d+)/.exec(r)![1]);
+    if (frame < first + drift) continue;
+    const rel = frame - first - drift;
+    if (r.startsWith("cry@")) {
+      const [, , id, pan, mode] = r.split(/[@:]/);
+      if (Number(mode) === 0 || Number(mode) === 5) continue;
+      rows.push(`${rel}:cry:${id}:${pan}:${mode}`);
+    } else if (r.startsWith("stop@")) rows.push(`${rel}:stop`);
+    else {
+      rows.push(`${rel}:duck:${r.split(":")[1]}`);
+      if (r.endsWith(":256")) break;
+    }
+  }
+  return rows;
+}
+
+describe("cry-task second cries, stops and the BGM restore (cry1, Scene ON)", () => {
+  for (const site of SITES) {
+    it(`${site.name}: the engine's rows after the first cry equal the ROM's effective rows (offsets, ids, pans, modes, the duck 256) `, () => {
+      const rom = load(site.name);
+      const expected = romTaskRows(rom, site.rom);
+      expect(expected.length).toBeGreaterThanOrEqual(3);
+      expect(engineTaskRows(rom, site.rom, site.drift)).toEqual(expected);
+    });
+  }
+
+  it("Hyper Voice's two rounds: ES, stop at D_ES, EE, the round-2 stop 53 after the first ES, ES2 2 later, stop, EE2, the restore (frames after the first ES)", () => {
+    expect(romTaskRows(load("cry1-hypervoice-pidgey-player-on"), 69)).toEqual([
+      "0:duck:85", "0:cry:16:-64:4", "12:stop", "13:cry:16:-64:6", "53:stop", "55:cry:16:-64:4", "67:stop", "68:cry:16:-64:6", "80:duck:256",
+    ]);
+    expect(romTaskRows(load("cry1-hypervoice-jynx-player-on"), 67).map((r) => r.split(":").slice(0, 2).join(":"))).toEqual([
+      "0:duck", "0:cry", "26:stop", "27:cry", "53:stop", "55:cry", "81:stop", "82:cry", "98:duck",
+    ]);
+  });
+});
+
+describe("cry-task lengths: D = min(cap, ceil(K t) + 1) (the ROM-measured species of tests/fixtures/cry1-lengths.json, zero residual)", () => {
+  const measured = JSON.parse(readFileSync(new URL("fixtures/cry1-lengths.json", import.meta.url), "utf8")) as Record<string, Array<[number, number]>>;
+  const MODES: Record<string, CryTaskLengthMode> = { ES: "ECHO_START", EE: "ECHO_END", R2: "ROAR_2", HP: "HIGH_PITCH" };
+  for (const [key, mode] of Object.entries(MODES)) {
+    it(`${mode}: all ${measured[key]!.length} measured species`, () => {
+      expect(measured[key]!.map(([species]) => [species, cryTaskLength(mode, species)])).toEqual(measured[key]);
+    });
+  }
+  it("caps and an unknown species", () => {
+    expect(cryTaskLength("ECHO_START", 124)).toBe(26);
+    expect(cryTaskLength("HIGH_PITCH", 124)).toBe(51);
+    expect(cryTaskLength("ROAR_2", 124)).toBe(61);
+    expect(cryTaskLength("ECHO_END", 124)).toBe(131);
+    expect(cryTaskLength("ECHO_END", 99999)).toBeUndefined();
+  });
+});
+
 describe("cry task rows (unit)", () => {
   const rowsAt = (move: number, species: number, side: "player" | "opponent", scriptRow: number): SoundEvent[] =>
     [...collectSoundTick(1, () => emitCryTaskRows(move, species, side, scriptRow, false)).events];
+  const brief = (events: SoundEvent[]) => events.map((e) => [e.kind, e.id, e.pan, (e as any).mode, e.volume]);
 
-  it("plays the duck and the cry at the task's frame only, with the attacker's pan; SPECIES_NONE plays nothing", () => {
-    expect(rowsAt(46, 16, "player", 6).map((e) => [e.kind, e.id, e.pan, (e as any).mode, e.volume])).toEqual([["duck", BGM, null, undefined, 85], ["cry", 16, -64, 7, 120]]);
+  it("plays the duck and the cry at the task's first frame, with the attacker's pan; SPECIES_NONE and non-cry moves play nothing", () => {
+    expect(brief(rowsAt(46, 16, "player", 6))).toEqual([["duck", BGM, null, undefined, 85], ["cry", 16, -64, 7, 120]]);
     expect(rowsAt(46, 16, "opponent", 6).map((e) => e.pan)).toEqual([null, 63]);
     expect(rowsAt(336, 124, "player", 34).map((e) => (e as any).mode)).toEqual([undefined, 3]);
     expect(rowsAt(304, 124, "opponent", 5).map((e) => (e as any).mode)).toEqual([undefined, 4]);
@@ -107,21 +180,28 @@ describe("cry task rows (unit)", () => {
     expect(rowsAt(150, 16, "player", 6)).toEqual([]);
   });
 
-  it("PlayCry_DuckNoRestore never restores the BGM; ByMode restores after its delay; an unmodelled delay restores nothing", () => {
-    const run = (duckTask: boolean, restoreDelay: number | null): number[] => {
-      const restores: number[] = [];
-      for (let frame = 1; frame <= 40; frame += 1) {
-        const { events } = collectSoundTick(frame, () => {
-          beginScreenSoundTick(frame);
-          if (frame === 1) playAnimTaskCry(BGM, 16, 7, -64, duckTask, restoreDelay);
+  it("the second cries carry no duck row (already ducked); stops are cry-player stops; the restore is a duck 256", () => {
+    expect(brief(rowsAt(46, 124, "player", 17))).toEqual([["cry", 124, -64, 8, 120]]);
+    expect(rowsAt(304, 124, "player", 5 + 26).map((e) => [e.kind, (e as any).player])).toEqual([["stop", "cry"]]);
+    expect(brief(rowsAt(304, 124, "player", 5 + 27))).toEqual([["cry", 124, -64, 6, 120]]);
+    expect(brief(rowsAt(304, 124, "player", 58))).toEqual([["stop", null, null, undefined, undefined]]);
+    expect(brief(rowsAt(304, 124, "player", 60))).toEqual([["cry", 124, -64, 4, 120]]);
+  });
+
+  it("the BGM restore is scheduled from the first cry: Roar ROAR_2 + D_R2, Howl HIGH_PITCH + D_HP; Hyper Voice the earlier of EE2 + D_EE and the animation end (first ES + 98)", () => {
+    const restoreRow = (move: number, species: number, first: number): number => {
+      let found = -1;
+      for (let row = 0; row < 200; row += 1) {
+        const { events } = collectSoundTick(row + 1, () => {
+          beginScreenSoundTick(row + 1);
+          emitCryTaskRows(move, species, "player", row, false);
           runScheduledScreenSounds();
         });
-        for (const e of events) if (e.kind === "duck" && e.volume === 256) restores.push(e.frame);
+        if (events.some((e) => e.kind === "duck" && e.volume === 256)) found = row - first;
       }
-      return restores;
+      return found;
     };
-    expect(run(false, 12)).toEqual([]);
-    expect(run(true, null)).toEqual([]);
-    expect(run(true, 12)).toEqual([13]);
+    expect([restoreRow(46, 124, 6), restoreRow(46, 16, 6), restoreRow(336, 124, 34), restoreRow(336, 16, 34)]).toEqual([72, 23, 51, 11]);
+    expect([restoreRow(304, 16, 5), restoreRow(304, 69, 5), restoreRow(304, 124, 5)]).toEqual([80, 98, 98]);
   });
 });
