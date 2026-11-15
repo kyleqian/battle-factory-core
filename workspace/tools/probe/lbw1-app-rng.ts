@@ -2,6 +2,7 @@
 // usage: node tools/probe/lbw1-app-rng.ts TRACE.json OUT.json [FRAME0_RNG]   (optional: override the app cursor at frame 0, experiment only)
 import { readFileSync, writeFileSync } from "node:fs";
 import "../compare/harnessPlayerName.ts";
+import "../../src/engine/monPicPixelsInstall.ts";
 import { createInitialState, tick } from "../../src/engine/core.ts";
 import { presentationRngFromTrace } from "../../src/engine/presentationRngHost.ts";
 import { APP_STAGES } from "../compare/appTrace.ts";

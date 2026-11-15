@@ -3,6 +3,7 @@
 // usage: node tools/probe/lbw2-app-rng.ts TRACE.json OUT.json STAGE_RNG|keep [REBASE_FRAME REBASE_RNG]
 import { readFileSync, writeFileSync } from "node:fs";
 import "../compare/harnessPlayerName.ts";
+import "../../src/engine/monPicPixelsInstall.ts";
 import { createInitialState, tick } from "../../src/engine/core.ts";
 import { presentationRngFromTrace } from "../../src/engine/presentationRngHost.ts";
 import { APP_STAGES } from "../compare/appTrace.ts";
