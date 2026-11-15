@@ -6,7 +6,7 @@ import { animSoundPan, animSoundPan2, calculatePanIncrement, emitSound, keepPanI
 import { BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS } from "./battleScriptSourceConstants.ts";
 import type { BattleResolutionPresentationState } from "./battleResolutionPresentation.ts";
 import { liveMoveSourceAge, statsChangeSourceAge } from "./battleResolutionPresentationRender.ts";
-import { FOCUS_PUNCH_SETUP_BEHIND_SUBSTITUTE_COMMAND_FRAMES, WEATHER_CONTINUES_LAUNCH_LEAD_ROWS, isWeatherContinuesAnimation, type BattleStatusAnimationName, type WeatherContinuesAnimation } from "./battleResolutionPresentation.ts";
+import { FOCUS_PUNCH_SETUP_BEHIND_SUBSTITUTE_COMMAND_FRAMES, HELD_ITEM_EFFECT_COMMAND_FRAMES, WEATHER_CONTINUES_LAUNCH_LEAD_ROWS, isWeatherContinuesAnimation, type BattleStatusAnimationName, type WeatherContinuesAnimation } from "./battleResolutionPresentation.ts";
 
 export interface TimedOp {
   readonly op: "playsewithpan" | "playse" | "waitplaysewithpan" | "loopsewithpan" | "panse" | "panse_adjustnone" | "panse_adjustall" | "setpan" | "soundtask_loopse" | "soundtask_fireblast" | "soundtask_se1" | "soundtask_se2";
@@ -217,6 +217,22 @@ export const FOCUS_PUNCH_SETUP_SCRIPT_AGE = 5;
 export const LEECH_SEED_DRAIN_SCRIPT_AGE = 7;
 export const CASTFORM_CHANGE_SCRIPT_AGE = 5;
 
+/**
+ * hie3: General_HeldItemEffect. The extracted table holds only the first SE (playsewithpan 152 at script frame 8: the rest follow `waitforvisualfinish`, which the
+ * extractor cannot time). The rest is the script's own spacing, measured in five Scene ON ROM windows (step-mode probe, tests/hie3HeldItemSounds.test.ts): the
+ * three SE_M_TAKE_DOWN rotations are 32 frames each (152 at 8 / 40 / 72), SE_M_MORNING_SUN (228) follows the third at +32 and SE_SHINY (102) the granting stars at +72.
+ * Script frame 0 = the command's first frame + (minimumFrames - HELD_ITEM_EFFECT_COMMAND_FRAMES): the same drift-free epoch as the drawn animation (hie2b), so
+ * a restart (229) starts it 15 frames in, a continuation (223) 9, a cure berry (192, its 32-frame `status` command netted out) 22 frames BEFORE the command.
+ */
+const HELD_ITEM_EFFECT_LATER_SE_OPS: readonly TimedOp[] = [
+  { op: "playsewithpan", frame: 40, id: 152, pan: -64 }, { op: "playsewithpan", frame: 72, id: 152, pan: -64 },
+  { op: "playsewithpan", frame: 104, id: 228, pan: -64 }, { op: "playsewithpan", frame: 176, id: 102, pan: -64 },
+];
+
+function heldItemEffectOps(battler: 0 | 1): readonly TimedOp[] {
+  return [...generalVariant("General_HeldItemEffect", battler), ...HELD_ITEM_EFFECT_LATER_SE_OPS];
+}
+
 function generalVariant(label: string, attackerSide: 0 | 1): readonly TimedOp[] {
   const entry = timing.general.find((g) => g.label === label);
   return entry === undefined ? [] : timing.variants[entry.variants[attackerSide]!]!;
@@ -232,7 +248,15 @@ export function emitGeneralAnimSounds(after: BattleResolutionPresentationState |
   const command = after.segments[after.segmentIndex]?.commands[after.commandIndex];
   if (command === undefined) return;
   const elapsed = after.lifecycle.phaseElapsed;
-  if (command.type === "status-animation") {
+  if (command.type === "status") {
+    // A cure berry's script starts inside the netted `status` command before the held-item command (its first SEs fall before that command's first frame).
+    const next = after.segments[after.segmentIndex]!.commands[after.commandIndex + 1];
+    if (next?.type !== "general-animation" || next.animation !== "HELD_ITEM_EFFECT" || next.timing.minimumFrames >= HELD_ITEM_EFFECT_COMMAND_FRAMES) return;
+    if ((after.segments[after.segmentIndex]!.beforeRules.rulesContext.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0) return;
+    const side = next.battler === 0 ? "player" : "opponent";
+    emitOpsAt(heldItemEffectOps(next.battler), { attackerSide: side, targetSide: next.battler === 0 ? "opponent" : "player" },
+      elapsed - command.timing.minimumFrames - (next.timing.minimumFrames - HELD_ITEM_EFFECT_COMMAND_FRAMES), true);
+  } else if (command.type === "status-animation") {
     const age = elapsed - (command.timing.seGateFrames ?? 0);
     if (age < 0) return;
     const side = command.battler === 0 ? "player" : "opponent";
@@ -252,6 +276,8 @@ export function emitGeneralAnimSounds(after: BattleResolutionPresentationState |
     } else if ((after.segments[after.segmentIndex]!.beforeRules.rulesContext.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) === 0) {
       if (command.animation === "FOCUS_PUNCH_SETUP" && command.timing.minimumFrames !== FOCUS_PUNCH_SETUP_BEHIND_SUBSTITUTE_COMMAND_FRAMES) {
         emitOpsAt(generalVariant("General_FocusPunchSetUp", command.battler), { attackerSide: side, targetSide: other }, elapsed - FOCUS_PUNCH_SETUP_SCRIPT_AGE, true);
+      } else if (command.animation === "HELD_ITEM_EFFECT") {
+        emitOpsAt(heldItemEffectOps(command.battler), { attackerSide: side, targetSide: other }, elapsed - (command.timing.minimumFrames - HELD_ITEM_EFFECT_COMMAND_FRAMES), true);
       } else if (command.animation === "LEECH_SEED_DRAIN" && command.animated === true) {
         // command.battler is the seeded (drained) battler = the animation's target; the seeder is the attacker.
         emitOpsAt(generalVariant("General_LeechSeedDrain", command.battler === 0 ? 1 : 0), { attackerSide: other, targetSide: side }, elapsed - LEECH_SEED_DRAIN_SCRIPT_AGE, true);
