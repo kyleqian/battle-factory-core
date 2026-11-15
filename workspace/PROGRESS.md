@@ -5,6 +5,18 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 2026-11-15 — CAX31 daily run (supervisor, Opus 5.5): in progress
+
+- **State:** master `3250873e3`+ green (full suite **14,839 / 14,839** on `3250873e3`). Worker hie2b (integration lane) running on branch
+  `worker/integration-20261115-012633` (base hie2 branch `worker/integration-20261115-000847`, kept until folded).
+- **Did:** nightly replay (pinned `9d0fb2f01`) **44 / 44** + stages **69 / 69** (`docs/replay-ledger.md`); merged `lbr-f-residual2` (`15777da20`)
+  after its gates on the merge (typecheck, test:gate 2,843, full 14,830 / 14,830, soak vanilla 0:20 20 / 20, winning 0:60 60 / 60); hie1 (below);
+  lbrd's retire case moved to seed 2 (hie1 moved the deal). hie2 (renderer) NOT folded: its age-0 constants absorbed each lab's pre-segment drift
+  (app ~9 frames ahead of the ROM before the window); hie2b corrects that to age 0 = command frames - 204 with a drift-aware proof.
+- **Next:** fold hie2b after verification (full suite); then #220 step 3 (SEs); cries in animation tasks; Lobby NPC wander step 1 (evidence).
+
+---
+
 ## 2026-11-14 — hie1 (ts lane worker): the held-item effect is presented in both scenes (ISSUES #220 step 1)
 
 - **State:** on master, committed (`f05283ed0` labs / traces, `2610c0580` engine + re-pins, docs after). ENGINE_BUILD `eb-93fedef9241b4242` -> **`eb-e1bc81a090e2b568`** (read from dist-lib; battles with Leftovers / berries / Shell Bell run longer).
