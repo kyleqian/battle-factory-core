@@ -2,7 +2,7 @@
 """lbw1: per-frame ROM RAM probe of the Lobby field NPCs along a battle-lab-staged compare trace (Scene OFF).
 
 usage (through the probe runner):
-  python3 tools/run-mgba-probe.py OUT.json -- python3 tools/probe/lbw1-lobby-wander-rom.py TRACE.json OUT.json [START END]
+  python3 tools/run-mgba-probe.py OUT.json -- python3 tools/probe/lbw1-lobby-wander-rom.py TRACE.json OUT.json [START END] [--extra=N]   (N = no-input frames advanced past the trace end)
 
 Replays the trace's own oracleBattleLab scenario + segments (frame N = frames advanced since the lab checkpoint,
 the same numbering as compare-trace capture frames). Every frame records gRngValue, sRandCount (the ROM's own
@@ -15,6 +15,10 @@ from __future__ import annotations
 import json, sys
 from pathlib import Path
 
+EXTRA = 0
+for a in [a for a in sys.argv[1:] if a.startswith("--extra=")]:
+    EXTRA = int(a.split("=")[1])
+    sys.argv.remove(a)
 if len(sys.argv) not in (3, 5):
     raise SystemExit(__doc__)
 TRACE, OUT = Path(sys.argv[1]).resolve(), Path(sys.argv[2])
@@ -154,5 +158,10 @@ for seg in trace["segments"]:
             break
     if done:
         break
+if not done:
+    for _ in range(EXTRA):
+        oracle.advance([])
+        frame += 1
+        rows.append(snap(frame))
 OUT.write_text(json.dumps({"trace": TRACE.name, "grid": grid, "rows": rows}, separators=(",", ":")))
 print(len(rows), "rows")

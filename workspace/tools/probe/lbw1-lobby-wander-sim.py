@@ -311,6 +311,12 @@ for n in (woman, fat):
         elif k == "collision" and n.kind == "woman":
             pass
 stats["womanBlocked"] = sum(1 for k, v in woman.draws if k == "collision" and v)
+stats["blockedByReason"] = {}
+for k, v in woman.draws:
+    if k == "collision" and v:
+        name = {1: "range", 2: "map-grid", 3: "elevation", 4: "object"}[v]
+        stats["blockedByReason"][name] = stats["blockedByReason"].get(name, 0) + 1
+stats["dirsDrawn"] = sorted({STANDARD_DIRECTIONS[v & 3] for k, v in woman.draws if k == "dir"})
 stats["womanWalks"] = sum(1 for k, v in woman.draws if k == "collision" and not v)
 result = {
     "file": Path(args[0]).name,
