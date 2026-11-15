@@ -46,7 +46,7 @@ export function emitTickSounds(state: TickSoundState, next: TickSoundState): voi
         orchestratorAfter.round.rules.currentOpponent.frontierBrain !== undefined,
       );
     }
-    if (orchestratorAfter?.battleResolutionPresentation) emitMoveAnimSounds(orchestratorAfter.battleResolutionPresentation);
+    if (orchestratorAfter?.battleResolutionPresentation) emitMoveAnimSounds(orchestratorAfter.battleResolutionPresentation, orchestratorAfter.round.rules.currentOpponent.frontierBrain !== undefined);
     if (orchestratorAfter?.battleResolutionPresentation) emitStatsChangeSounds(orchestratorAfter.battleResolutionPresentation);
     if (orchestratorAfter?.battleResolutionPresentation) emitGeneralAnimSounds(orchestratorAfter.battleResolutionPresentation);
     emitForfeitEndSounds(

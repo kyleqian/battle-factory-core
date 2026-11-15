@@ -1541,7 +1541,7 @@ export function liveMoveScriptTailFrames(
  */
 export function liveMoveSourceAge(
   state: BattleResolutionPresentationState,
-): Readonly<{ request: BattleMoveAnimationRequest; age: number }> | null {
+): Readonly<{ request: BattleMoveAnimationRequest; age: number; attackerSpecies: number }> | null {
   const segment = state.segments[state.segmentIndex];
   const command = segment?.commands[state.commandIndex];
   if (command === undefined || command.type !== "move-animation" || command.animation === undefined) return null;
@@ -1549,7 +1549,7 @@ export function liveMoveSourceAge(
   if (liveMoveAnimationDuration(command.animation, field) === null) return null;
   const seGate = (command.timing.seGateFrames ?? 0) + (command.timing.scriptLeadFrames ?? 0);
   const age = state.lifecycle.phaseElapsed - seGate - liveMoveUniversalRows(command.animation, field).pre;
-  return Object.freeze({ request: command.animation, age });
+  return Object.freeze({ request: command.animation, age, attackerSpecies: fieldBattler(field, command.animation.attacker).species });
 }
 
 /**

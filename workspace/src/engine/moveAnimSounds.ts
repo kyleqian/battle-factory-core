@@ -3,6 +3,8 @@
 // presentation, never changes it. Data: src/data/gen/anim-sound-timing.json (tools/extract/extract-anim-sound-timing.ts). docs/aud242-move-anim-sounds.md.
 import timingData from "../data/gen/anim-sound-timing.json" with { type: "json" };
 import { animSoundPan, animSoundPan2, calculatePanIncrement, emitSound, keepPanInRange, type AnimPanContext, type SoundEmission } from "../audio/soundEvents.ts";
+import { CRY_MODE_ECHO_START, CRY_MODE_HIGH_PITCH, CRY_MODE_ROAR_1, playAnimTaskCry } from "./screenSounds.ts";
+import { factoryBattleBgm } from "./battleStartSounds.ts";
 import { BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS } from "./battleScriptSourceConstants.ts";
 import type { BattleResolutionPresentationState } from "./battleResolutionPresentation.ts";
 import { liveMoveSourceAge, statsChangeSourceAge } from "./battleResolutionPresentationRender.ts";
@@ -185,8 +187,31 @@ function emitOpsAt(ops: readonly TimedOp[], context: AnimPanContext, scriptRow: 
   for (const row of due) if (row.task === true) emitSound(row.emission);
 }
 
+const MOVE_ROAR = 46;
+const MOVE_HOWL = 336;
+const MOVE_HYPER_VOICE = 304;
+
+/**
+ * cry1 (ISSUES #219 family 3): the first cry of the cry tasks (battle_anim_sound_tasks.c), at script frames from the extractor's rules (loadspritegfx / monbg 3, delay N + 2).
+ * Roar: SoundTask_PlayDoubleCry plays ROAR_1 in its entry (script step, frame 6 = after loadspritegfx + monbg). Howl: SoundTask_PlayCryHighPitch plays HIGH_PITCH in its
+ * entry after `delay 12` + RoarEffect's `delay 15` (frame 34). Hyper Voice: SoundTask_PlayCryWithEcho's first Step runs in the creating iteration's RunTasks (frame 3, c0:
+ * StopCryAndClearCrySongs, a ROM no-op when no cry plays), c2 = frame 5 plays ECHO_START with PlayCry_DuckNoRestore. The second cries need per-species cry lengths (docs/cry1-cry-tasks.md).
+ */
+const CRY_TASK_FIRST_CRY: Readonly<Record<number, Readonly<{ frame: number; mode: number; duckTask: boolean }>>> = {
+  [MOVE_ROAR]: { frame: 6, mode: CRY_MODE_ROAR_1, duckTask: true },
+  [MOVE_HOWL]: { frame: 34, mode: CRY_MODE_HIGH_PITCH, duckTask: true },
+  [MOVE_HYPER_VOICE]: { frame: 5, mode: CRY_MODE_ECHO_START, duckTask: false },
+};
+
+/** The SPECIES_NONE guard: the task destroys itself and plays nothing. */
+export function emitCryTaskRows(move: number, species: number, attackerSide: "player" | "opponent", scriptRow: number, frontierBrain: boolean): void {
+  const first = CRY_TASK_FIRST_CRY[move];
+  if (first === undefined || species === 0 || scriptRow !== first.frame) return;
+  playAnimTaskCry(factoryBattleBgm(frontierBrain), species, first.mode, attackerSide === "player" ? SOUND_PAN_ATTACKER_VALUE : 63, first.duckTask, null);
+}
+
 /** Called once per collected tick with the round's resolution presentation after the tick; emits the ops whose frame is this tick's. */
-export function emitMoveAnimSounds(after: BattleResolutionPresentationState | null): void {
+export function emitMoveAnimSounds(after: BattleResolutionPresentationState | null, frontierBrain = false): void {
   if (after === null || after.lifecycle.phase !== "presenting") return;
   const segment = after.segments[after.segmentIndex];
   if (segment === undefined || (segment.beforeRules.rulesContext.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0) return;
@@ -197,7 +222,9 @@ export function emitMoveAnimSounds(after: BattleResolutionPresentationState | nu
     attackerSide: request.attacker === 0 ? "player" : "opponent",
     targetSide: request.target === 0 ? "player" : "opponent",
   } as const;
-  emitOpsAt(variantOf(request.moveId, request.turn, request.attacker === 0 ? 0 : 1), context, age - FIRST_COMMAND_AGE - AGE_TO_SOUND_ROWS);
+  const scriptRow = age - FIRST_COMMAND_AGE - AGE_TO_SOUND_ROWS;
+  emitOpsAt(variantOf(request.moveId, request.turn, request.attacker === 0 ? 0 : 1), context, scriptRow);
+  emitCryTaskRows(request.moveId, source.attackerSpecies, context.attackerSide, scriptRow, frontierBrain);
 }
 
 const STATUS_ANIMATION_LABELS: Readonly<Record<BattleStatusAnimationName, string>> = {

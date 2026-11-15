@@ -29,7 +29,12 @@ export const BGM_DRAFT = 469;
 export const BGM_BATTLE = 476;
 /** include/constants/pokemon.h CRY_MODE_*, the PlayCry_ByMode mode argument. */
 export const CRY_MODE_NORMAL = 0;
+export const CRY_MODE_HIGH_PITCH = 3;
+export const CRY_MODE_ECHO_START = 4;
 export const CRY_MODE_FAINT = 5;
+export const CRY_MODE_ECHO_END = 6;
+export const CRY_MODE_ROAR_1 = 7;
+export const CRY_MODE_ROAR_2 = 8;
 export const CRY_MODE_WEAK = 11;
 /** m4aMPlayVolumeControl(&gMPlayInfo_BGM, TRACKS_ALL, volume): PlayCryInternal's duck and the restore. */
 export const BGM_DUCK_VOLUME = 85;
@@ -117,10 +122,14 @@ function restoreBgm(bgm: number): void {
   emitSound({ kind: "duck", id: bgm, pan: null, volume: BGM_FULL_VOLUME });
 }
 
-/** PlayCry_ByMode: PlayCryInternal ducks the BGM, starts the cry; Task_DuckBGMForPokemonCry restores when the cry ends. */
-function startCry(bgm: number, species: number, mode: number, pan: number, restoreDelay?: number): void {
+/**
+ * PlayCry_ByMode: PlayCryInternal ducks the BGM, starts the cry; Task_DuckBGMForPokemonCry restores when the cry ends. `restoreDelay` null = no restore row
+ * (length unmodelled); `duckTask` false = PlayCry_DuckNoRestore (no restore task at all).
+ */
+function startCry(bgm: number, species: number, mode: number, pan: number, restoreDelay?: number | null, duckTask = true): void {
   emitSound({ kind: "duck", id: bgm, pan: null, volume: BGM_DUCK_VOLUME });
   emitSound({ kind: "cry", id: species, pan, mode, volume: CRY_VOLUME, priority: CRY_PRIORITY });
+  if (!duckTask || restoreDelay === null) return;
   crySerial += 1;
   const serial = crySerial;
   ducking = { serial, bgm };
@@ -132,6 +141,11 @@ function startCry(bgm: number, species: number, mode: number, pan: number, resto
     ducking = null;
     restoreBgm(bgm);
   });
+}
+
+/** A move-animation sound task's cry (battle_anim_sound_tasks.c): `duckTask` false is PlayCry_DuckNoRestore; `restoreDelay` null leaves the restore unmodelled. */
+export function playAnimTaskCry(bgm: number, species: number, mode: number, pan: number, duckTask: boolean, restoreDelay: number | null): void {
+  startCry(bgm, species, mode, pan, restoreDelay, duckTask);
 }
 
 /** Task_PlayCryWhenReleasedFromBall: the send-out cry at pan +25 (opponent) / -25 (player), NORMAL or WEAK by the mon's HP and status. */

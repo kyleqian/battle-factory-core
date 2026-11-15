@@ -1054,6 +1054,18 @@ function hie1Stage(
   });
 }
 
+// cry1: cry-task windows (tools/battle-lab/cry1-*.json): the attacker's species is staged over the Rattata stats (the cry follows the species; levels 50 / 12 as aud241b,
+// the other side uses SEISMIC TOSS, a modelled move, as the filler: Roar's -6 priority makes it move first).
+function cry1Stage(state: EngineState, id: string, species: number, attackerSide: "player" | "opponent", moveId: number): EngineState {
+  const attacker = { ...rattataAtLevel(50, moveId), species };
+  return midBattleSwitchStage(state, id, [RATTATA_LV50_BENCH, RATTATA_LV50_BENCH], [105, 105], {
+    battleScene: "on",
+    player: attackerSide === "player" ? attacker : rattataAtLevel(20, 69),
+    trainer: attackerSide === "player" ? rattataAtLevel(12, 69) : { ...rattataAtLevel(12, moveId), species },
+    usedMessageHoldFrames: 0,
+  });
+}
+
 // frf250a: the lab's frame 0 is some frames into the menu's idle bounce (the lab boots past the send-out); this staging-only
 // age aligns the app's bounce clock with each scene's ROM lab (measured: ON 27, OFF 34 of the 36-frame period).
 function frf250aStage(state: EngineState, bounceAge: number): EngineState {
@@ -1944,6 +1956,12 @@ export const APP_STAGES: Readonly<Record<string, AppStage>> = {
     trainer: rattataAtLevel(30, 69, 142),
     usedMessageHoldFrames: 0,
   }),
+  "cry1-roar-pidgey-player-on": (state) => cry1Stage(state, "cry1-roar-pidgey-player-on", 16, "player", 46),
+  "cry1-roar-jynx-player-on": (state) => cry1Stage(state, "cry1-roar-jynx-player-on", 124, "player", 46),
+  "cry1-roar-pidgey-opp-on": (state) => cry1Stage(state, "cry1-roar-pidgey-opp-on", 16, "opponent", 46),
+  "cry1-howl-jynx-player-on": (state) => cry1Stage(state, "cry1-howl-jynx-player-on", 124, "player", 336),
+  "cry1-hypervoice-pidgey-player-on": (state) => cry1Stage(state, "cry1-hypervoice-pidgey-player-on", 16, "player", 304),
+  "cry1-hypervoice-jynx-player-on": (state) => cry1Stage(state, "cry1-hypervoice-jynx-player-on", 124, "player", 304),
   // aud250: General_FocusPunchSetUp / General_LeechSeedDrain sound anchors (docs/aud250-general-anim-sounds.md).
   "aud250-focuspunch-player-on": (state) => aud241bStage(state, "aud250-focuspunch-player-on", "on", 50, 12, 264, undefined, false, 69),
   "aud250-leechseed-player-on": (state) => aud241bStage(state, "aud250-leechseed-player-on", "on", 50, 12, 73, undefined, false, 69),
