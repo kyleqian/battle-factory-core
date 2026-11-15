@@ -619,7 +619,11 @@ describe("random round soak driver (green milestone pin)", () => {
     // lbr-g (#221 E1-E3: the Lobby cursor is the ROM's after a battle exit / map load, so every Lobby new-challenge deal moved): seed 12 no longer
     // hits. Re-scanned full-policy seeds 0..30 (same options and joint event): seeds 1, 3 and 6 hit among others; seed 1 is the lowest
     // (commit 24897, halt 25611).
-    const result = runSeed(1, {
+    //
+    // lbw3 (#221 E4: the Lobby woman / fat man wander draws from the shared stream, so every Lobby new-challenge deal moved again): seed 1
+    // no longer commits Baton Pass. Re-scanned full-policy seeds 0..19 (same options and joint event; scratch .integration/evidence/lbw3/scan.ts):
+    // hits 0, 3, 7, 8, 14, 15, 17; seed 0 is the lowest (commit 68728, halt 69116, one Lobby new challenge).
+    const result = runSeed(0, {
       maxFrames: 80_000,
       renderEvery: 0,
       coverage: observer as never,
