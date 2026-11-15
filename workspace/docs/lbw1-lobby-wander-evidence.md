@@ -95,3 +95,69 @@ python3 tools/probe/lbw1-lobby-wander-table.py OUT.json          # entry / spawn
 node tools/probe/lbw1-app-rng.ts tools/compare/traces/TRACE.json APP.json [FRAME0_RNG]
 python3 tools/probe/lbw1-cursor-compare.py TRACE_NAME...         # needs rom-NAME.json and app-NAME.json in .integration/evidence/lbw1/
 ```
+
+## lbw2: cursor classification (evidence only, no `src/` change)
+
+Question: is the engine's `rngValue` at Lobby entry wrong on the production route, or only in the traces' `appStage` constants?
+**Both.** The stage constants are harness-only and arbitrary. Independent of them, the engine has four real accounting gaps between the end of a battle and the Lobby, all proved with the stage constant removed.
+
+**Method.** There is no trace that reaches the Lobby from the canonical boot: every lbra / lbrd trace is a battle-lab checkpoint (`oracleBattleLab`) on the ROM side and an `appStage` on the app side. So I removed the stage constant instead: `tools/probe/lbw2-app-rng.ts` re-bases the app cursor to the ROM's `gRngValue` at a frame where the engine's `rngValue` is the live cursor, and `tools/probe/lbw2-classify.py` reports the draw-count offset (app minus ROM) per frame, using the ROM's own `sRandCount`. `tools/probe/lbw2-draw-source.py` single-steps the ROM through a frame and logs every `Random()` caller (backtrace resolved against the pinned ELF, statics included). Evidence: `.integration/evidence/lbw2/` (not in git).
+
+### Offset timeline (offset k = engine is k draws ahead of the ROM; entry = Lobby map first frame)
+
+| span | forfeit (rebase @250) | loss (rebase @3233) | retire (rebase @6700) | won x3 (rebase @entry = stage) | source |
+|---|---|---|---|---|---|
+| after the rebase | 0 | 0 | 0 | 0 | harness |
+| engine resumes per-VBlank draws; ROM still `gMain.inBattle` | 0 -> +40 (f 250-290, entry-99..-59) | 0 -> +40 (f 3233-3273) | n/a (no battle) | n/a | **E1** |
+| ROM exit frame (`entry-58`) | +39 | +39 | n/a | n/a | **E2** |
+| ROM return-to-field (`entry-56`, `-55`) | +36 | +36 | n/a | n/a | **E2** |
+| Lobby map load, `entry+3` | +34 | +34 | -2 | -2 | **E3** |
+| Lobby map load, `entry+4` | +31 | +31 | -5 | -5 | **E3** |
+| NPC window, `entry+34` | +29 | +29 | -7 | -7 | **E4** |
+
+Flat everywhere else (every other frame from the rebase to entry+40 has delta 0). Loss and forfeit are identical, so the pattern is the battle-exit code, not the trace. Won-yes and won-attendant re-run to entry+40 give the same numbers as won-no.
+
+### Source of each ROM draw (decomp, `reference/pokeemerald`)
+
+| id | frame (forfeit) | draws | ROM function | decomp |
+|---|---|---|---|---|
+| E1 | 250-291 | engine draws 41, ROM 0 | `Random()` in `VBlankIntr` is gated by `!gMain.inBattle \|\| !(flags & (LINK\|FRONTIER\|RECORDED))`; `gMain.inBattle` stays 1 until `ReturnFromBattleToOverworld` (frame 291, `entry-58`) | `main.c:366`, `battle_main.c:5217-5230` |
+| E2a | 291 | 2 | `ReturnFromBattleToOverworld` -> `RandomlyGivePartyPokerus` + `PartySpreadPokerus`, before `inBattle = FALSE`; the VBlank of that frame is still suppressed | `battle_main.c:5221-5222` |
+| E2b | 293-294 | 3 | `CB2_ReturnToFieldLocal` -> `ReturnToFieldLocal` -> `ResetMirageTowerAndSaveBlockPtrs` -> `MoveSaveBlocks_ResetHeap`: 1 in `SetSaveBlocksPointers` (`offset + Random()`), then the 2-draw encryption key. It straddles two frames | `load_save.c:74,129`, `overworld.c:2074` |
+| E3a | 352 (`entry+3`) | 2 | `LoadMapFromWarp`: `RoamerMoveToOtherLocationSet` (1; `overworld.c:862`, in `LoadMapFromWarp`, `overworld.c:827`), then `UpdateTVScreensOnMap` -> `FindAnyTVShowOnTheAir` -> `GetRandomActiveShowIdx` (1; indoors only) | `overworld.c:862,872`, `tv.c:826` |
+| E3b | 353 (`entry+4`) | 3 | `DoMapLoadLoop` -> `LoadMapInStepsLocal` -> `ResetMirageTowerAndSaveBlockPtrs` -> `MoveSaveBlocks_ResetHeap` (same 1 + 2 as E2b) | `overworld.c:2074` |
+| E4 | 383 (`entry+34`) | 2 | `MovementType_WanderAround_Step2` (woman) and `MovementType_LookAround_Step2` (fat man): her/his first delay draw. Plain NPC draws, not map load | lbw1 sim |
+
+So the lbw1 "5 extra draws at entry+3 / entry+4, source unpinned" are **2 (Roamer + TV show) + 3 (`MoveSaveBlocks_ResetHeap`)**; and the "+2 at the window" are the NPCs, not the map. The engine already knows the 2 + 3 pattern for the attendant door warp (`PREBATTLE_ENTRY_TIMING.warpExtraRng`, fade tick 27 / 28, `src/engine/prebattleEntry.ts:43`), so E3 is the same warp, missing on the Lobby-entry side.
+
+### Per-trace offsets of lbw1, explained
+
+| trace | lbw1 offset | explanation |
+|---|---|---|
+| retire | constant +1592 from stage to entry, then -5, -2 | +1592 = **stage constant** (`win-terminal-window-off` injects 1939465134, which is the ROM cursor at frame **6636**, not at the stage frame 4623). From f 4624 to entry+2 the engine is exactly in lockstep (2100 frames, delta 0 each; no E1/E2 because retire warps from the PreBattleRoom, no battle exit). After the rebase at 6700: 0, -2, -5, -7 = E3 + E4 only. |
+| forfeit | +1639 at stage, +1603 at entry (a "36-draw gap") | stage value 1 = lab seed (the ROM lab consumed 1639 draws before its checkpoint, `1 -> 3031698222`); the engine's own first tick takes the cursor from `battle.rng.value`, so a rebase at frame 0 does not stick (it re-reads the stage seed). The 36 are **real**: E1 (+41) minus E2 (-5) = +36. |
+| loss | no relation within +-6000 | stage value 9 (`loss-terminal-window-off`), lab seed 305419896: different constants. With the rebase at 3233 it is identical to forfeit: +40, +36, then -5, -2 (**E1 / E2 / E3 / E4**). |
+| won x3 | no relation, same constant on all | `seventh-win-terminal-off` stage cursor 2994853427 (a generated round driven to completion, seed 17) vs ROM lab cursor 3758091126 at the same frame. Rebase at the stage frame: offset 0 at entry..entry+2, then -2, -5, -7 (**E3 / E4**). The won battle exit (E1 / E2 upstream) is not covered: the stage sits at entry. |
+
+### Verdict
+
+| gap | verdict | fix | proof |
+|---|---|---|---|
+| stage rngValue constants (all six traces) | **harness-only** | add `appRngRebase` (frame, ROM cursor): forfeit @250 = 3031698222, loss @3233 = 1298389302, retire @6700 = value of `rom-lbra-retire-off` row 6700, won x3 @5113 = 3758091126. A rebase before the battle ends does not stick (the engine reads `battle.rng.value` while a battle is live), so use a frame after it; the experiment runs show where. | retire lockstep for 2100 frames; won 0 offset at entry..entry+2 |
+| **E1** engine draws per VBlank 41 frames before the ROM | **engine** | keep `rngMode: "frontierBattle"` (no per-frame advance) from the forfeit / loss battle end until the `ReturnFromBattleToOverworld` frame (ROM `entry-58`; forfeit tick 291, loss tick 3274); resume VBlank draws the frame after | lbra-forfeit-off, lbra-loss-off (identical) |
+| **E2** missing `ReturnFromBattleToOverworld` + `MoveSaveBlocks_ResetHeap` draws | **engine** | 2 draws at the exit frame (Pokerus x2, VBlank not drawn that frame), then 1 draw at exit+2 and 2 at exit+3 (save-block move) | same two traces |
+| **E3** missing Lobby map-load draws | **engine** | 2 draws at `entry+3`, 3 at `entry+4`, on top of the VBlank draw; same 2 + 3 as `warpExtraRng`; reached by every path that warps into the Lobby (retire, forfeit, loss, won all proved) | all six traces |
+| **E4** NPC draws from `entry+34` | **engine (next step)** | the wander port itself (lbw1 simulator is the oracle); not a map-load rule | six traces, sim matches |
+
+Production-route consequence: on a real forfeit or loss the engine's cursor at the attendant is the ROM's +36 (E1/E2) -5 (E3) minus every NPC draw (E4 and after, about 1 per 30-130 frames plus the two NPCs' whole timeline), so the next draft after a Lobby wait would not match the ROM draft for the same inputs. After a retire it is -5 and the NPC draws. This is a real engine bug for the in-game new-challenge deal (nch231), not a harness artifact. It does not affect the lbra / lbrd pixel windows (they are rendering-only).
+
+Not measured: the won route's battle exit (E1 / E2 expected, same code, unproved because the stage sits at entry); whether the PreBattleRoom -> battle return (non-terminal win, `warp to PRE_BATTLE_ROOM`) lacks the same E3 draws (its own 2 + 3 at the map load are likely, not probed); a full from-boot route (draft -> battle -> forfeit) on the ROM.
+
+### Reproduce (lbw2)
+
+```
+python3 tools/run-mgba-probe.py --rm-log-on-success OUT/rom-N.json -- python3 tools/probe/lbw1-lobby-wander-rom.py tools/compare/traces/N.json OUT/rom-N.json START END
+node tools/probe/lbw2-app-rng.ts tools/compare/traces/N.json OUT/app-N.json keep REBASE_FRAME ROM_RNG_AT_THAT_FRAME     # or STAGE_RNG REBASE... for the stage-frame variant
+python3 tools/probe/lbw2-classify.py N [FIRST [LAST]]      # reads .integration/evidence/lbw2/{rom,app}-N.json
+python3 tools/run-mgba-probe.py --rm-log-on-success OUT/src.json -- python3 tools/probe/lbw2-draw-source.py tools/compare/traces/N.json OUT/src.json 291,293,294,352,353,383
+```
