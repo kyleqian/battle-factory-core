@@ -7,7 +7,6 @@ import {
 import type { PresentationRngHost } from "./presentationRngHost.ts";
 import {
   resolveNoMovesLeftMessageLines,
-  HELD_ITEM_EFFECT_AFTER_STATUS_EXTRA_FRAMES, HELD_ITEM_EFFECT_COMMAND_FRAMES, HELD_ITEM_EFFECT_CONTINUE_LEAD_FRAMES, HELD_ITEM_EFFECT_RESTART_LEAD_FRAMES,
   isWeatherContinuesAnimation, WEATHER_CONTINUES_BODY_ROWS, WEATHER_CONTINUES_LAUNCH_LEAD_ROWS, WEATHER_CONTINUES_MOVE_IDS,
 } from "./battleResolutionPresentation.ts";
 import type { LiveMoveSpriteAllocatorInput, LiveMoveSpriteOrderInput } from "./liveMoveSpriteAllocator.ts";
@@ -1357,16 +1356,13 @@ function applyCompletedCommand(
 }
 
 /**
- * ROM first identity rotation display (heldItemHeal.ts age 0), in frames after the HELD_ITEM_EFFECT command starts, per command path.
- * Measured on the hie1 Scene ON labs (docs/hie2-held-item-render.md): script restart (Sitrus) 34, continuation (Shell Bell) 36,
- * cure berry after its status command (Cheri) 8. Leftovers is a restart whose ROM start is a further 8 later (ISSUES #220's
- * unmodelled lead), left out here so the timing stays the command's.
+ * ROM first identity rotation display (heldItemHeal.ts age 0), in frames after the HELD_ITEM_EFFECT command starts. The ROM's first
+ * print glyph is exactly age 0 + SITRUS_ITEM_HEAL_TEXT_FIRST_AGE and the command lasts until that print, so age 0 is the command's
+ * length less that age, on every path (restart 25, continuation 19; docs/hie2-held-item-render.md). Negative for the cure berry (-12):
+ * its animation starts that many frames inside the preceding 32-frame status command, so the held-item view starts at age 12.
  */
 function heldItemEffectAge0Frames(minimumFrames: number): number {
-  if (minimumFrames === HELD_ITEM_EFFECT_COMMAND_FRAMES + HELD_ITEM_EFFECT_RESTART_LEAD_FRAMES) return 34;
-  if (minimumFrames === HELD_ITEM_EFFECT_COMMAND_FRAMES + HELD_ITEM_EFFECT_CONTINUE_LEAD_FRAMES) return 36;
-  if (minimumFrames === HELD_ITEM_EFFECT_COMMAND_FRAMES + HELD_ITEM_EFFECT_CONTINUE_LEAD_FRAMES - 32 + HELD_ITEM_EFFECT_AFTER_STATUS_EXTRA_FRAMES) return 8;
-  return Math.max(0, minimumFrames - SITRUS_ITEM_HEAL_TEXT_FIRST_AGE - 9);
+  return minimumFrames - SITRUS_ITEM_HEAL_TEXT_FIRST_AGE;
 }
 
 /** The displayed field at the start of `commands[index]`: `field` after the completed commands before it (currentCommandField's walk). */

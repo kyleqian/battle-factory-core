@@ -1,5 +1,9 @@
 // hie2 (ISSUES #220 step 2): the Scene ON HELD_ITEM_EFFECT general-animation's render view (battleScene.ts generalAnimationRenderView).
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
+import { createInitialState, tick } from "../src/engine/core.ts";
+import { traceAdvances } from "../tools/compare/traceReplay.ts";
+import { createBattleResolutionPresentationRenderView } from "../src/engine/battleResolutionPresentationRender.ts";
 import { sitrusRotationAtAge, sitrusStarPlacementAtAge, sitrusTintCoeffAtAge } from "../src/animation/heldItemHeal.ts";
 import { createBattleCommandFieldArtView } from "../src/engine/battleCommandFieldArt.ts";
 import { liveBattlerAnchors } from "../src/engine/liveMoveAnimation.ts";
@@ -59,4 +63,34 @@ describe("hie2: HELD_ITEM_EFFECT render view", () => {
     expect(opp.view.fieldArt.opponent.pic.palette).not.toBe(fieldArt.opponent.pic.palette);
     expect(opp.view.fieldArt.player.pic.palette).toBe(fieldArt.player.pic.palette);
   });
+});
+
+// hie2b: the animation's age 0 is the command's length less the ROM's first-glyph age (204), measured on each lab's drift-free alignment
+// (docs/hie2-held-item-render.md); the cure berry's is negative (its animation starts inside the preceding status command).
+describe("hie2b: HELD_ITEM_EFFECT epoch", () => {
+  const appTracePath = "../tools/compare/appTrace.ts";
+  async function ageAtCommandStart(id: string): Promise<number> {
+    const { APP_STAGES } = (await import(/* @vite-ignore */ appTracePath)) as { APP_STAGES: Record<string, (state: never) => never> };
+    const trace = JSON.parse(readFileSync(new URL(`../tools/compare/traces/${id}.json`, import.meta.url), "utf8"));
+    let state: ReturnType<typeof createInitialState> = createInitialState({ appRoute: trace.appRoute, battleScene: "on" });
+    state = APP_STAGES[id]!(state as never) as never;
+    for (const advance of traceAdvances(trace.segments)) {
+      state = tick(state, advance.buttons);
+      const resolution = state.factoryRoundBattleOrchestrator?.battleResolutionPresentation;
+      const command = resolution?.segments[0]?.commands[resolution.commandIndex];
+      if (resolution !== undefined && resolution !== null && command?.type === "general-animation" && command.animation === "HELD_ITEM_EFFECT"
+        && resolution.lifecycle.phaseElapsed === 0) {
+        return (createBattleResolutionPresentationRenderView(resolution).effect as { age: number }).age;
+      }
+    }
+    throw new Error(`${id}: no HELD_ITEM_EFFECT command`);
+  }
+
+  for (const [id, age] of [
+    ["hie1-sitrus-on", -25], ["hie2-sitrus-opp-on", -25], ["hie1-leftovers-on", -25], ["hie1-shellbell-on", -19], ["hie1-cheri-on", 12],
+  ] as const) {
+    it(`${id}: age ${age} at the command's first frame`, async () => {
+      expect(await ageAtCommandStart(id)).toBe(age);
+    }, 60000);
+  }
 });
