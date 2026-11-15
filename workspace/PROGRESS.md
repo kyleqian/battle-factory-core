@@ -5,6 +5,22 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 2026-11-14 — hie1 (ts lane worker): the held-item effect is presented in both scenes (ISSUES #220 step 1)
+
+- **State:** on master, committed (`f05283ed0` labs / traces, `2610c0580` engine + re-pins, docs after). ENGINE_BUILD `eb-93fedef9241b4242` -> **`eb-e1bc81a090e2b568`** (read from dist-lib; battles with Leftovers / berries / Shell Bell run longer).
+  Presentation only: eventsDigest identical on census seeds 0..199, both scenes (`.integration/evidence/hie1/census`, `censusDiff.mjs`); only `commands` / sound frames moved (sound ids / pans equal).
+- **Did:** `battleResolutionPresentation.ts`: Scene ON a `general-animation` HELD_ITEM_EFFECT command at the kernel event (`HELD_ITEM_EFFECT_COMMAND_FRAMES` 214 + lead 15 for a script restart
+  (Leftovers, Sitrus) / 9 for a continuation of the move script (Shell Bell, cure berries); skipped behind a Substitute doll; a cure berry's preceding 32-frame `status` command is netted out, +1);
+  Scene OFF the Pausex20 as a `move-animation` hold before the print (kernel executions since the previous receipt + the same leads; after a status command, the lead only). Kernel, RNG, sprite-order / allocator pins untouched.
+- **Measured** (ROM minus app at the print, `hie1-{leftovers,sitrus,shellbell,cheri}-{on,off}` labs, before -> after): OFF 51 / 50 / 45 / 9 -> 0 at all four sites; ON 237 / 229 / 223 / 203 -> +8 / 0 / +1 / 0
+  (Leftovers keeps +8: unmodelled per-site lead, ISSUES #220). The lead spread is per path (restart 15 / continue 9), not constant. Pre-existing, left: Leftovers / Shell Bell post-heal tail ~+18 late (ISSUES #220).
+- **Re-pins:** `tests/factoryRoundBattleOrchestrator.test.ts` (Shell Bell: one hold command shifts hp 11 -> 12); `tests/randomRoundSoak.test.ts` seed 21 frames 41_068 -> 41_099 / renderCalls 2_899 -> 2_907, vanilla seeds 0 / 1 frames 9_185 -> 9_212, 9_233 -> 9_271
+  (all frames only), winning-carry test seed 16 -> 47 (seed 16 now carries 7; scanned 0..80: 47 / 50 / 61 / 70 chain two wins). New `tests/hie1HeldItemEffect.test.ts` (9). `ice-punch-grovyle-onix` unchanged.
+- **Gates:** typecheck 0; test:smoke 448 / 448; test:gate 362 files / 2,843 tests (+ new file); build / build:lib 0; 166 importing files green after the re-pins; soak vanilla 0:20 default scene **20 / 20 OK** (`budget`).
+- **Next:** #220 step 2 (renderer: rotation / stars / ring / tint on the battler) and step 3 (SEs 152 / 228 / 102); the Leftovers ON +8 and the ItemHealHP_Ret tail are the open timing residuals.
+
+---
+
 ## 2026-11-14 — CAX31 daily run (supervisor, Opus 5.5): wind-down: last Mac fold, rare-rule hunt 50 / 110, General_* sounds, Lobby up to the draft
 
 - **State:** master clean, no workers; worktrees removed (evidence copied to `.integration/evidence/` first, except rrh1-3 / aud248 / lbr-d2b
@@ -48,20 +64,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Next:** set `appRoute` on that one trace (or allowlist it). Notes: one foreground `npm test` exceeds the 10-min cap; shards of 3-7 min each work.
 
 ---
-
-## 2026-11-14 — iss216 (ts lane worker): rental select refuses a second Pokemon of one species; trapped switch prints the ROM text (ISSUES #216, #217)
-
-- **State:** on master, committed (engine `ec35a617c`, `ae5db0299`, #217 commits after). ENGINE_BUILD `eb-a781acbda4dff91e` -> **`eb-a68be11111cd7dd3`** (read from dist-lib; the draft and the party menu moved).
-- **#216:** `Select_AreSpeciesValid` (`battle_factory_screen.c:2256-2276`) ported: RENT of a second same-species ball prints "Can't select same \uE053\uE054." (the PK MN glyph pair, `{PKMN}`),
-  erases the popup, keeps the pic open and the pick count unchanged; only A leaves it (`STATE_CHOOSE_MONS_INVALID`) and restores the select prompt. ROM staging by RAM poke
-  (`tools/probe/stage-draft-same-species-off.py`, `tools/compare/draftSameSpecies.ts`, trace `iss216-same-species-off`, appStage `iss216-dup-draft-off`). Measured: text reprints 1 tick
-  after the A, popup text 1 tick and its highlight bar 2 ticks after, no ball stall on the refusal, one on the dismiss. The soak driver re-plans a refused pick without drawing RNG.
-  The swap screen's `Swap_AlreadyHasSameSpecies` was already ported (`factorySwap.ts` `duplicateSpecies`, `tests/factorySwap.test.ts`, probe doc `docs/factory-swap-duplicate-species-off-probe.md`).
-- **#217:** the ROM runs "is already in battle" (active slot) before the trap checks; a bench pick under Wrap / Mean Look / Ingrain / Rooted prints `gText_PkmnCantSwitchOut` with the ACTIVE mon's name,
-  under Shadow Tag / Arena Trap / Magnet Pull `gText_PkmnsXPreventsSwitching` ("Foe X's ABILITY\nprevents switching!"). `battleSwitchTrap.ts` is the one trap check (the legal-decision list uses it too);
-  `battlePartySelect.ts` prints the text. The forced route (`partySelect.ts`) never has a trapped bench: unchanged.
-- **Gates:** typecheck 0; test:smoke 448 / 448; test:gate 362 files / 2,843 tests (after regenerating the ability census and gate-6 manifest); 210 test files importing a changed module 2,276 tests;
-  build / build:lib 0; soak vanilla 0:20 OFF **20 / 20** (7 + 13); soak winning vary-rng first-round carry 28 seeds 0:100 **100 / 100** (25 + 75). No soak pin moved.
-- **Residuals (ISSUES #218):** `iss216-same-species-off` 391 / 469 (refusal window 169..244 exact; the rented ball is one tick off after the dismiss, plus the known OFF flash-close residuals); #217 has no ROM lab window
-  (Tier-1 from source; the `\p` ending of the ability text is unmeasured).
-- **Next:** none required. Papercut: soak 0:20 with the default policy and `--parallel 2` runs about 3 min per 7 seeds (vanilla), fine in chunks; `--help` on the soak tool starts a default soak instead of printing usage.

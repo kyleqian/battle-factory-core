@@ -176,7 +176,9 @@ for (const scene of ["off", "on"] as const) {
 
 describe("lbrd: a later retire or loss in the continued challenge still ends it (Scene OFF)", () => {
   it("a retire after the continuation emits challenge-end retire exactly once, on its own Lobby-entry frame", () => {
-    const run = playToWonLobby(WIN_THEN_LOSE_SEED, "off");
+    // hie1 (held-item effect hold) moved the deal: seed 0's continuation now loses its first battle before any retire prompt, so the
+    // retire case uses the seed that wins its continuation.
+    const run = playToWonLobby(WIN_TWO_SEED, "off");
     expect(run.session.ended).toBeNull();
     run.player.retireRate = 1;
     const more = playOn(run, (_events, state) => state.lobbyFreeRoam !== null && run.session.ended !== null);

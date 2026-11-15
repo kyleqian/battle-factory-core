@@ -45,7 +45,9 @@ const scanRoute = (seed: number, slots: readonly (0 | 1 | 2 | 3)[]) => {
 // without them compared stays 895, hostKnown / declines / laterAfter unchanged.
 // parity-mac re-pin (docs/parity-mac/STATUS.md "Re-pins"): the 20 sweep battles changed with the AI / replacement fixes (they are
 // shorter in bodies): compared 898 -> 840, hostKnown 798 -> 740, laterAfter 72 -> 65; declines 0 and 0 mismatches unchanged.
-const SWEEP_PIN = { compared: 840, hostKnown: 740, declines: 0, laterAfter: 65 };
+// hie1: + the sweep's 6 Scene ON held-item-effect command edges (5 with a known host), each equal to the pure transform (0 mismatches);
+// without them compared / hostKnown stay 840 / 740, declines and laterAfter unchanged.
+const SWEEP_PIN = { compared: 846, hostKnown: 745, declines: 0, laterAfter: 65 };
 const bodies = (run: Replay) => run.commands.filter(row => row.type === "move-animation");
 
 function expectRulesEqual(on: Replay, off: Replay): void {
