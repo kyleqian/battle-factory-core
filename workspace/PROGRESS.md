@@ -5,6 +5,19 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 2026-11-15 — cry1 (ts lane worker): cries inside move-animation tasks (ISSUES #219 family 3, step 1)
+
+- **State:** on master, committed (`28272f3f8` first cries + fixtures, `6bcc6705a` second cries / stops / restore + length model, docs after). Sound only: frame hashes identical (differential vs `029d0943b`, `--harness-from-head`: cry1-roar-jynx-player-on, cry1-hypervoice-jynx-player-on,
+  cry1-howl-jynx-player-on 1823 captures each); census seeds 0..99 Scene ON: only `sound` / `soundDigest` move (9 seeds, 12 Roars = 48 rows), `eventsDigest` / `commands` / `soundAnim` identical, 0 errors.
+- **Did:** `moveAnimSounds.ts` plays the cry tasks in Scene ON: Roar ROAR_1 at script frame 6 (ducks), ROAR_2 +11, restore ROAR_2 + D_R2; Howl HIGH_PITCH at 34, restore + D_HP; Hyper Voice ES at 5 (DuckNoRestore), stop at D_ES, EE +1, round-2 stop at +53 (species independent), ES2 +55, stop, EE2, restore at the earlier of
+  EE2 + D_EE and first ES + 98 (scheduled from the first cry: it falls after the engine's presented animation). Lengths: `cryTaskLengths.ts`, D = min(cap, ceil(K t) + 1), t = native cry frames (`genCryNativeFrames.py` -> `cryNativeFrames.ts`), one K per mode (ES .94996 cap 26, EE .970325 cap 141, R2 .944111 cap 61, HP .919943 cap 51):
+  zero residual on 41 / 41 / 32 / 35 ROM species, and 32 / 32 pre-registered held-out edge species exact. 6 step-mode ROM windows (`tools/audio/fixtures/cry1-*-on.json`) pin every effective row (`tests/cry1CryTasks.test.ts`, 23 tests); engine = ROM + lab drift (+13 / +13 / +1 Roar, +4 Howl, 0 / 0 Hyper Voice).
+- **Rescore:** T1 `missing-cry-task` 371 -> 0 (ROAR 336, HYPER VOICE 27, HOWL 8 sites; `soundCensusDelta.py` now counts a site emitted when its window holds a cry-task cry); T2 (seed 2: two Roars, ROM 4 cry rows + duck / restore all matched, missing 0 / extra 0; seeds 165 / 499 / 830 / 1028 use none).
+- **Gates:** typecheck 0; test:gate 362 files / 2,843; 29 importer / aud24x / aud25x / hie3 / cry1 files green; build / build:lib 0. Full `npm test` not run (the supervisor runs it).
+- **Next:** the cry-task audio modes (ROAR / HIGH_PITCH / ECHO fall back to NORMAL; scout step 2); Howl +4 / Roar +13 lab drifts unexplained. Evidence: `.integration/evidence/cry1/`.
+
+---
+
 ## 2026-11-15 — hie3 (ts lane worker): General_HeldItemEffect sound effects (ISSUES #220 step 3)
 
 - **State:** on master, committed (`b8ad30f62` engine + test + 5 fixtures, docs after). Sound only: frame hashes identical (differential vs `5054340cf`: hie1-sitrus-on 1823, hie1-cheri-on 1823, hie2-sitrus-opp-on 1101, hie1-sitrus-off 823 captures);
@@ -32,17 +45,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Next:** #220 step 3 (SEs, hie3); cries in animation tasks; Lobby NPC wander step 1 (evidence).
 
 ---
-
-## 2026-11-14 — hie1 (ts lane worker): the held-item effect is presented in both scenes (ISSUES #220 step 1)
-
-- **State:** on master, committed (`f05283ed0` labs / traces, `2610c0580` engine + re-pins, docs after). ENGINE_BUILD `eb-93fedef9241b4242` -> **`eb-e1bc81a090e2b568`** (read from dist-lib; battles with Leftovers / berries / Shell Bell run longer).
-  Presentation only: eventsDigest identical on census seeds 0..199, both scenes (`.integration/evidence/hie1/census`, `censusDiff.mjs`); only `commands` / sound frames moved (sound ids / pans equal).
-- **Did:** `battleResolutionPresentation.ts`: Scene ON a `general-animation` HELD_ITEM_EFFECT command at the kernel event (`HELD_ITEM_EFFECT_COMMAND_FRAMES` 214 + lead 15 for a script restart
-  (Leftovers, Sitrus) / 9 for a continuation of the move script (Shell Bell, cure berries); skipped behind a Substitute doll; a cure berry's preceding 32-frame `status` command is netted out, +1);
-  Scene OFF the Pausex20 as a `move-animation` hold before the print (kernel executions since the previous receipt + the same leads; after a status command, the lead only). Kernel, RNG, sprite-order / allocator pins untouched.
-- **Measured** (ROM minus app at the print, `hie1-{leftovers,sitrus,shellbell,cheri}-{on,off}` labs, before -> after): OFF 51 / 50 / 45 / 9 -> 0 at all four sites; ON 237 / 229 / 223 / 203 -> +8 / 0 / +1 / 0
-  (Leftovers keeps +8: unmodelled per-site lead, ISSUES #220). The lead spread is per path (restart 15 / continue 9), not constant. Pre-existing, left: Leftovers / Shell Bell post-heal tail ~+18 late (ISSUES #220).
-- **Re-pins:** `tests/factoryRoundBattleOrchestrator.test.ts` (Shell Bell: one hold command shifts hp 11 -> 12); `tests/randomRoundSoak.test.ts` seed 21 frames 41_068 -> 41_099 / renderCalls 2_899 -> 2_907, vanilla seeds 0 / 1 frames 9_185 -> 9_212, 9_233 -> 9_271
-  (all frames only), winning-carry test seed 16 -> 47 (seed 16 now carries 7; scanned 0..80: 47 / 50 / 61 / 70 chain two wins). New `tests/hie1HeldItemEffect.test.ts` (9). `ice-punch-grovyle-onix` unchanged.
-- **Gates:** typecheck 0; test:smoke 448 / 448; test:gate 362 files / 2,843 tests (+ new file); build / build:lib 0; 166 importing files green after the re-pins; soak vanilla 0:20 default scene **20 / 20 OK** (`budget`).
-- **Next:** #220 step 2 (renderer: rotation / stars / ring / tint on the battler) and step 3 (SEs 152 / 228 / 102); the Leftovers ON +8 and the ItemHealHP_Ret tail are the open timing residuals.

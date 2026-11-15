@@ -94,7 +94,7 @@ def t1(arm, json_out):
         subprocess.run(["node", "--experimental-strip-types", "--no-warnings", "tools/integration/soundCensusExpected.ts", kp, ep], check=True)
         E = json.load(open(ep))
     tot = Counter(); gated_by_end = Counter(); per_class_moves = defaultdict(Counter); offsets = Counter(); examples = defaultdict(list)
-    cmds = Counter(); scene = None; after_end = Counter()
+    cmds = Counter(); scene = None; after_end = Counter(); cry_emitted = Counter()
     def put(cls, n, seed, move, ex=None):
         tot[cls] += n
         per_class_moves[cls][label_of.get(move, move)] += n
@@ -132,6 +132,9 @@ def t1(arm, json_out):
                 for e in ev: put("extra", 1, s, move, e)
                 continue
             cmds["live"] += 1
+            # cry1: a cry-task site counts as emitted (not missing) when the command's window holds a cry-task cry (modes HIGH_PITCH 3, ECHO_START 4, ECHO_END 6, ROAR_1 7, ROAR_2 8).
+            cry_rows = [e for e in r["sound"] if first <= e[0] <= last and e[1] == "cry" and len(e) > 4 and e[4] in (3, 4, 6, 7, 8)]
+            if n_cry and cry_rows: cry_emitted[label_of.get(move, move)] += n_cry; n_cry = 0
             if exp["gated"]: put("missing-gated", exp["gated"], s, move, exp["ends"]); gated_by_end[exp["ends"]] += exp["gated"]
             if n_cry: put("missing-cry-task", n_cry, s, move)
             left = list(ev)
@@ -157,6 +160,7 @@ def t1(arm, json_out):
     print("%-18s %9s" % ("class", "count"))
     for c in CLASSES: print("%-18s %9d" % (c, tot[c]))
     print("missing-other rows:", dict(after_end))
+    print("cry-task sites emitted (cry1; no longer missing-cry-task):", dict(cry_emitted))
     print("gated ops by table `ends` reason:", dict(gated_by_end))
     print("known-offset by (move, delta) top:", offsets.most_common(12))
     for c in CLASSES:
