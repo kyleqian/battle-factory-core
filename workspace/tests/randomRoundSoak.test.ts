@@ -615,7 +615,11 @@ describe("random round soak driver (green milestone pin)", () => {
     // instead of the hand-off tick's): seed 3 no longer commits Baton Pass. Re-scanned full-policy seeds 0..13 (same options and joint
     // event; scratch .integration/evidence/lbre/scan.ts): seed 12 is the first and lowest hit (commit 31364, halt 31613, four Lobby new
     // challenges). docs/lbre-prebattle-briefing.md "Re-pins".
-    const result = runSeed(12, {
+    //
+    // lbr-g (#221 E1-E3: the Lobby cursor is the ROM's after a battle exit / map load, so every Lobby new-challenge deal moved): seed 12 no longer
+    // hits. Re-scanned full-policy seeds 0..30 (same options and joint event): seeds 1, 3 and 6 hit among others; seed 1 is the lowest
+    // (commit 24897, halt 25611).
+    const result = runSeed(1, {
       maxFrames: 80_000,
       renderEvery: 0,
       coverage: observer as never,
@@ -737,7 +741,9 @@ describe("ISSUES #99 (soak driver swap-offer misroute) — swap offer answered b
     // first-offer frames 0: 16,867, 1: 37,226, 2: 38,334, 3: 36,681, 4: 20,724,
     // 5: 18,356, 6: 23,881, 7: 39,275, 8: 41,477, 9: 22,423, 10: 19,522, 11: 17,823.
     // Seed 0 is the lowest that is inside 32,000 with a wide margin, so the window is kept.)
-    runSeed(0, {
+    // lbr-g (#221 E1-E3, the Lobby cursor is the ROM's): seed 0 no longer reaches a swap offer inside 32,000 frames; scan of vanilla seeds 0..6
+    // under the same window: 1, 2, 3 reach offers (all "NO", no swap screen), so the lowest (1) is pinned.
+    runSeed(1, {
       policy: "vanilla",
       maxFrames: 32_000,
       renderEvery: 0,
@@ -1506,7 +1512,9 @@ describe("ISSUES #104 (driver): continuous-play outcome semantics retuned -- OK 
     // hie1 (the held-item effect presented: every Leftovers / berry print moves later, so the soak's random presses land differently):
     // seed 16 now carries 7; re-scanned seeds 0..80 under the same options: seeds 47, 50, 61 and 70 chain two round wins (carry 14),
     // so the lowest (47) is pinned.
-    const result = runSeed(47, {
+    // lbr-g (#221 E1-E3, the Lobby cursor is the ROM's): seed 47 now carries 7; re-scanned seeds 0..54 under the same options: seeds 13, 16, 36
+    // and 40 chain two round wins (carry 14), so the lowest (13) is pinned.
+    const result = runSeed(13, {
       policy: "winning",
       maxRounds: 3,
       renderEvery: 0,
