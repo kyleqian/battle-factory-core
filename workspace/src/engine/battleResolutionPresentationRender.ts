@@ -1,3 +1,4 @@
+import { SITRUS_ITEM_HEAL_TEXT_FIRST_AGE } from "../animation/heldItemHeal.ts";
 import type { LiveMovePaletteInput } from "./liveMoveAnimationPalette.ts";
 import { CASTFORM_CHANGE_LEAD_FRAMES, LIVE_TRANSFORM_MOVE_ID, liveTransformOf, withLiveTransform } from "./liveTransform.ts";
 import {
@@ -1354,6 +1355,16 @@ function applyCompletedCommand(
   throw new Error("battle resolution renderer received an unknown command");
 }
 
+/**
+ * ROM first identity rotation display (heldItemHeal.ts age 0), in frames after the HELD_ITEM_EFFECT command starts. The ROM's first
+ * print glyph is exactly age 0 + SITRUS_ITEM_HEAL_TEXT_FIRST_AGE and the command lasts until that print, so age 0 is the command's
+ * length less that age, on every path (restart 25, continuation 19; docs/hie2-held-item-render.md). Negative for the cure berry (-12):
+ * its animation starts that many frames inside the preceding 32-frame status command, so the held-item view starts at age 12.
+ */
+function heldItemEffectAge0Frames(minimumFrames: number): number {
+  return minimumFrames - SITRUS_ITEM_HEAL_TEXT_FIRST_AGE;
+}
+
 /** The displayed field at the start of `commands[index]`: `field` after the completed commands before it (currentCommandField's walk). */
 export function battleResolutionFieldBeforeCommand(
   field: BattleResolutionDisplayedField,
@@ -2366,6 +2377,13 @@ export function createBattleResolutionPresentationRenderView(
         type: "general-animation", battler: command.battler, animation: command.animation, age: state.lifecycle.phaseElapsed - 1,
         ...(state.liveMoveBattlerX2Input === undefined ? {} : { battlerX2Input: state.liveMoveBattlerX2Input }),
       }));
+    } else if (command.type === "general-animation" && command.animation === "HELD_ITEM_EFFECT" && fieldBattler(field, command.battler).substituteDoll !== true) {
+      // hie2: the age is relative to the ROM's first identity rotation display (heldItemEffectAge0Frames).
+      effect = Object.freeze({
+        type: "general-animation", battler: command.battler, animation: command.animation,
+        age: state.lifecycle.phaseElapsed - heldItemEffectAge0Frames(command.timing.minimumFrames),
+        ...(state.liveMoveBattlerX2Input === undefined ? {} : { battlerX2Input: state.liveMoveBattlerX2Input }),
+      });
     } else if (command.type === "general-animation" && fieldBattler(field, command.battler).substituteDoll !== true) {
       // fpp150 (fps147 §4d): command age a is ROM row X + 1 + a, so the reducer's rel is a - 1. Behind the doll the ROM plays
       // nothing (TryHandleLaunchBattleTableAnimation), the field stays as it is.

@@ -7955,7 +7955,19 @@ export function statsChangeRenderView(view: BattleResolutionPresentationRenderVi
 export type GeneralAnimationRenderView = Readonly<{
   view: BattleResolutionPresentationRenderView;
   sprites: readonly Readonly<{ x: number; y: number; frame: number; oamSlot: number }>[];
+  /** hie2: General_HeldItemEffect's animated battler (affine rotation; null = the plain draw) and its stars / ring. */
+  heldItem?: Readonly<{
+    side: "player" | "opponent";
+    rotation: ReturnType<typeof sitrusRotationAtAge>;
+    center: Readonly<{ x: number; y: number }>;
+    age: number;
+  }>;
 }>;
+
+/** General_HeldItemEffect's simple_palette_blend colour (RGB(17, 31, 25), battle_anim_scripts.s) - the script's, not a species'. */
+const HELD_ITEM_EFFECT_TINT_COLOR: RgbColor = Object.freeze({ r: 140, g: 255, b: 206 });
+/** The thin ring's last live age (heldItemHeal.ts ring window 167 .. 198): the script's last visual finishes there. */
+const HELD_ITEM_EFFECT_SCRIPT_LAST_AGE = 198;
 
 /** fps147 §4e: production draws the Endure particles in this gSprites slot order. */
 const FOCUS_PUNCH_SETUP_PARTICLE_DRAW_SLOTS = Object.freeze([9, 7, 5, 4, 3]);
@@ -7971,6 +7983,7 @@ const FOCUS_PUNCH_SETUP_PARTICLE_DRAW_SLOTS = Object.freeze([9, 7, 5, 4, 3]);
  */
 export function generalAnimationRenderView(view: BattleResolutionPresentationRenderView): GeneralAnimationRenderView | null {
   const effect = view.effect;
+  if (effect?.type === "general-animation" && effect.animation === "HELD_ITEM_EFFECT") return heldItemEffectRenderView(view, effect);
   if (effect?.type !== "general-animation" || effect.animation !== "FOCUS_PUNCH_SETUP") return null;
   if (effect.age < 0) return null;
   const side = effect.battler === 0 ? "player" as const : "opponent" as const;
@@ -8003,6 +8016,52 @@ export function generalAnimationRenderView(view: BattleResolutionPresentationRen
   return Object.freeze({
     view: Object.freeze({ ...view, fieldArt, postBodyShadowHidden: view.postBodyShadowHidden || row.enemyShadowHidden }),
     sprites,
+  });
+}
+
+/**
+ * hie2 (ISSUES #220 step 2, docs/hie2-held-item-render.md): B_ANIM_HELD_ITEM_EFFECT's General_HeldItemEffect over the field as it
+ * is, for either side and any species. `effect.age` is heldItemHeal.ts's age (0 = the first identity rotation display). The animated
+ * battler (the attacker) is rotated by AnimTask_RotateMonToSideAndRestore x3 (ages 0 .. 95; mirrored off the player side) and its OBJ
+ * palette blended toward the script's RGB(17, 31, 25) (ages 168 .. 187); the two granting stars and the thin ring sit at the battler's
+ * GetBattlerSpriteCoord(X_2 / Y_PIC_OFFSET) (picOffsetPoint). The opponent stands at its tracked front idle rest as in the status /
+ * focus-punch views, and an elevated opponent's shadow hides while the script runs (SpriteCB_EnemyShadow, gAnimScriptActive).
+ * Null before the animation's first row; the field stays as it is.
+ */
+function heldItemEffectRenderView(
+  view: BattleResolutionPresentationRenderView,
+  effect: Extract<NonNullable<BattleResolutionPresentationRenderView["effect"]>, { type: "general-animation" }>,
+): GeneralAnimationRenderView | null {
+  if (effect.age < 0) return null;
+  const side = effect.battler === 0 ? "player" as const : "opponent" as const;
+  const opponentSide = side === "opponent";
+  const rotation = sitrusRotationAtAge(effect.age, opponentSide);
+  const tint = sitrusTintCoeffAtAge(effect.age);
+  const rest = effect.battlerX2Input === undefined
+    ? { x2: 0, y2: 0 }
+    : liveBattlerAnchors("opponent", view.fieldArt, effect.battlerX2Input).frontIdleRest;
+  const place = (at: "player" | "opponent") => {
+    const art = view.fieldArt[at];
+    const base = at === "opponent" ? rest : { x2: 0, y2: 0 };
+    const blend = at === side && tint > 0;
+    if (base.x2 === 0 && base.y2 === 0 && !blend) return art;
+    return Object.freeze({
+      ...art,
+      origin: Object.freeze({ x: art.origin.x + base.x2, y: art.origin.y + base.y2 }),
+      ...(blend ? {
+        pic: Object.freeze({
+          ...art.pic, palette: blendPaletteToward(art.pic.palette as RgbColor[], HELD_ITEM_EFFECT_TINT_COLOR, tint),
+        }),
+      } : {}),
+    });
+  };
+  const player = place("player"), opponent = place("opponent");
+  const fieldArt = player === view.fieldArt.player && opponent === view.fieldArt.opponent
+    ? view.fieldArt : Object.freeze({ ...view.fieldArt, player, opponent });
+  return Object.freeze({
+    view: Object.freeze({ ...view, fieldArt, postBodyShadowHidden: view.postBodyShadowHidden || (opponentSide && effect.age <= HELD_ITEM_EFFECT_SCRIPT_LAST_AGE) }),
+    sprites: Object.freeze([]),
+    heldItem: Object.freeze({ side, rotation, center: liveBattlerAnchors(side, view.fieldArt).picOffsetPoint, age: effect.age }),
   });
 }
 
@@ -10113,10 +10172,11 @@ export function drawGrantingStarsAtAge(
   fb: Uint8Array,
   age: number,
   center: Readonly<{ x: number; y: number }>,
+  opponent = false,
 ): void {
   const { tileset, palette, grantingStarsAnim } = battleAnimItemHeal.sparkle;
   for (let i = TURN5_SITRUS_STAR_SPAWNS.length - 1; i >= 0; i -= 1) {
-    const placement = sitrusStarPlacementAtAge(age, i, center);
+    const placement = sitrusStarPlacementAtAge(age, i, center, opponent);
     if (!placement) continue;
     const frame = grantingStarsAnim[placement.frameIndex]!;
     for (let ty = 0; ty < 4; ty += 1) {
@@ -55442,13 +55502,26 @@ export function renderBattleResolutionSceneOffView(
       if (!view.postBodyShadowHidden && view.field.opponent.hp > 0) {
         drawGeneratedOpponentShadow(fb, view.fieldArt);
       }
-      drawSpriteSheet(
-        fb,
-        view.fieldArt.opponent.pic.tileset as Tileset,
-        view.fieldArt.opponent.pic.palette as RgbColor[],
-        view.fieldArt.opponent.origin.x,
-        view.fieldArt.opponent.origin.y - battleCommandFieldArtElevation(view.fieldArt.opponent, "opponent"),
-      );
+      const heldItem = generalAnimation?.heldItem;
+      const rotated = heldItem?.side === "opponent" ? heldItem.rotation : null;
+      if (rotated) {
+        drawSpriteSheetAffineRotate(
+          fb,
+          view.fieldArt.opponent.pic.tileset as Tileset,
+          view.fieldArt.opponent.pic.palette as RgbColor[],
+          view.fieldArt.opponent.origin.x + 32,
+          view.fieldArt.opponent.origin.y - battleCommandFieldArtElevation(view.fieldArt.opponent, "opponent") + 32 + rotated.y2,
+          rotated.pa, rotated.pb, rotated.pc, rotated.pd,
+        );
+      } else {
+        drawSpriteSheet(
+          fb,
+          view.fieldArt.opponent.pic.tileset as Tileset,
+          view.fieldArt.opponent.pic.palette as RgbColor[],
+          view.fieldArt.opponent.origin.x,
+          view.fieldArt.opponent.origin.y - battleCommandFieldArtElevation(view.fieldArt.opponent, "opponent"),
+        );
+      }
     }
   }
   if (view.visibility.player.sprite) {
@@ -55463,6 +55536,16 @@ export function renderBattleResolutionSceneOffView(
         view.fieldArt.player.origin.x,
         view.fieldArt.player.origin.y,
         faint.sink.skipPixelRows,
+      );
+    } else if (generalAnimation?.heldItem?.side === "player" && generalAnimation.heldItem.rotation) {
+      const rotated = generalAnimation.heldItem.rotation;
+      drawSpriteSheetAffineRotate(
+        fb,
+        view.fieldArt.player.pic.tileset as Tileset,
+        playerMonPalette,
+        view.fieldArt.player.origin.x + 32,
+        view.fieldArt.player.origin.y + 32 + rotated.y2,
+        rotated.pa, rotated.pb, rotated.pc, rotated.pd,
       );
     } else {
       drawSpriteSheet(
@@ -55479,6 +55562,18 @@ export function renderBattleResolutionSceneOffView(
   for (const sprite of generalAnimation?.sprites ?? []) {
     drawSpriteSheet(fb, subTileset(focusEnergyArt.focusEnergy.tileset, sprite.frame * 4, 4), focusEnergyArt.focusEnergy.palette,
       sprite.x - 8, sprite.y - 16);
+  }
+  if (generalAnimation?.heldItem) {
+    // hie2: General_HeldItemEffect's two granting stars, then the thin ring (the Sitrus fixture's own draw order and clip).
+    const { side, center, age } = generalAnimation.heldItem;
+    drawGrantingStarsAtAge(fb, age, center, side === "opponent");
+    const ring = sitrusRingMatrixAtAge(age);
+    if (ring) {
+      drawSpriteSheetAffineRotate(
+        fb, battleAnimItemHeal.ring.tileset, battleAnimItemHeal.ring.palette, center.x, center.y,
+        ring.pa, ring.pb, ring.pc, ring.pd, PLAYER_BALL_OPEN_VISIBLE_BOTTOM,
+      );
+    }
   }
   if (fade?.bgCopy) drawSubstituteFadeBgCopy(fb, fade.bgCopy);
   if (view.visibility.opponent.healthbox) {
