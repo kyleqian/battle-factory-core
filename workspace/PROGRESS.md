@@ -5,6 +5,30 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 2026-11-15 — CAX31 daily run (supervisor, Opus 5.5): wind-down: held-item effect drawn + timed + sounds, cries in move tasks, Lobby cursor fix
+
+- **State:** master clean, no workers, no worktrees; no push. **No DEFERRED items.** Final engine `5a42c61f5` (after cry1), then lbr-g merged (`620b0607f`, #221 E1-E3) + the iss215 probe-import fix (`ff2d2afec`).
+  ENGINE_BUILD `eb-93fedef9241b4242` -> **`eb-0c05d14e04bac704`** (dist-lib of `5a42c61f5`; after lbr-g **`eb-c26961a07ff6b07b`**, the build to ship; tell the website). Evidence `.integration/validation/sv-20261115/`.
+- **Website (Mac):** Leftovers / berries / Shell Bell now play the ROM's held-item animation (Scene ON) and its pause (Scene OFF), so those
+  battles run longer; the animation's three sounds play; Roar / Howl / Hyper Voice play their cries (the player still uses the NORMAL sample for the
+  ROAR / HIGH_PITCH / ECHO modes). After a loss / forfeit / retire / 7-win the Lobby RNG cursor now follows the ROM up to the NPC wander, so an in-game new challenge deals a different (closer to the ROM) draft. No API change.
+- **Gameplay (replay, item 0d):** nightly check on `9d0fb2f01`: pool **44 / 44** (1,780 states), staged battles **69 / 69** (`docs/replay-ledger.md`).
+  No battle-rule change this run, so no wind-down permanent-list drive.
+- **Folded:** `lbr-f-residual2` (saving -> saved +2 ticks; gates on the merge: full 14,830 / 14,830, soaks 20 / 20 + 60 / 60); hie1 (held-item command
+  + OFF Pausex20 hold), hie2 + hie2b (Scene ON drawing; hie2's age-0 fit absorbed each lab's pre-segment drift, hie2b replaced it with one rule,
+  age 0 = command frames - 204, every window exact at the lab's own offset), hie3 (SEs 152 / 228 / 102: ROM-only 24 / 8 / 11 -> 0 / 0 / 3 on 5 seeds),
+  cry1 (T1 `missing-cry-task` 371 -> 0), lbw1 + lbw2 (Lobby NPC wander simulator matches the ROM on 6 traces; ISSUES #221 filed), lbr-g (#221 E1-E3: VBlank draws held until ReturnFromBattleToOverworld, Pokerus + save-block draws, Lobby map-load draws; offset 0 on 6 traces from the battle exit to entry + 33; re-pins lbrd WIN_TWO_SEED 2 -> 35, randomRoundSoak Baton Pass 12 -> 1 / vanilla swap-offer 0 -> 1 / winning chain 47 -> 13).
+- **Gates (final engine `5a42c61f5`):** full suite **14,935 / 14,935**; build / build:lib 0 (typecheck by every worker + test:gate 2,843). Soaks
+  (`029d0943b` = hie3 tree; cry1 is sound-events only): vanilla 0:20 OFF **20 / 20**, ON **20 / 20**; 0:60 default **60 / 60**, winning **60 / 60**;
+  varied-RNG first-round winning carry 0 / 14 / 28 **100 / 100** each, winning-swap carry 0 **100 / 100**; on `5a42c61f5`: winning-swap 0:60
+  **60 / 60**, vanilla 0:20 ON **20 / 20**. play:random 10 min / scene `--lobby-new-challenge` on `5a42c61f5`: ON 33 battles / 13 swaps / 8 new
+  challenges, OFF 53 / 16 / 15; **0 page / console errors / overlays**. **lbr-g** (on its branch): typecheck 0, build / build:lib 0, test:gate 2,843, full suite 14,937 passed / 1 failed (iss215 tools ratchet, the lbw probes, fixed in `ff2d2afec`), soak vanilla 0:20 **20 / 20**; merged tree: lb* / ratchet / soak-pin tests 142 / 142, build:lib 0, soak winning 0:20 **20 / 20**. The 0:60 and varied-RNG gates did not re-run after lbr-g (next run).
+- **Next:** Run start: the 0:60 / varied-RNG soaks on master (lbr-g landed after them). #221 E4 = the Lobby NPC wander port (lbw1 simulator is the test oracle; `docs/lbw1-lobby-wander-evidence.md`); cry-task
+  audio modes (cry-task-scout step 2); #220 residuals (cure berry ages 1-11, +1 Shell Bell / Leftovers, post-heal tail ~18); the second
+  `Status_*` play +14; move-body SE lifetimes (aud242 family); then aud246 (S11 close). Nightly replay at run start as usual.
+
+---
+
 ## 2026-11-15 — cry1 (ts lane worker): cries inside move-animation tasks (ISSUES #219 family 3, step 1)
 
 - **State:** on master, committed (`28272f3f8` first cries + fixtures, `6bcc6705a` second cries / stops / restore + length model, docs after). Sound only: frame hashes identical (differential vs `029d0943b`, `--harness-from-head`: cry1-roar-jynx-player-on, cry1-hypervoice-jynx-player-on,
@@ -33,18 +57,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 2026-11-15 — CAX31 daily run (supervisor, Opus 5.5): in progress
-
-- **State:** master `5a42c61f5` (engine final unless noted); full suite **14,848 / 14,848** on `5054340cf` (after hie2b); final gates running on
-  `5a42c61f5` (`.integration/validation/sv-20261115/final/`), soaks on `029d0943b` (`soaks/`); lbw1 (Lobby NPC evidence, side lane) running.
-- **Did:** nightly replay (pinned `9d0fb2f01`) **44 / 44** + stages **69 / 69** (`docs/replay-ledger.md`); merged `lbr-f-residual2` (`15777da20`)
-  after its gates on the merge (typecheck, test:gate 2,843, full 14,830 / 14,830, soak vanilla 0:20 20 / 20, winning 0:60 60 / 60); hie1 (below);
-  lbrd's retire case moved to seed 2 (hie1 moved the deal). hie2 drew the held-item effect but fitted its age 0 to each lab's pre-segment drift
-  (app ~9-20 frames ahead of the ROM before the window); hie2b replaced that with age 0 = command frames - 204 and proved every window at the
-  lab's own offset (`docs/hie2-held-item-render.md`; typecheck 0, test:gate 2,843, 252 importer files, build / build:lib 0, OFF + icePunch
-  differential 2,152 captures identical).
-- **Also folded:** hie3 (held-item SEs, entry above), cry1 (cries in move tasks, entry above; Roar / Howl offsets rest on source rules + the drift-free
-  Hyper Voice anchor).
-- **Next:** wind-down gates; Lobby NPC wander step 2 if lbw1 says the cursor is exact.
-
----

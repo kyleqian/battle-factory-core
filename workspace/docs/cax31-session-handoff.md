@@ -1,4 +1,4 @@
-# CAX31 session handoff — 2026-10-26 (finish plan; state updated 2026-11-14)
+# CAX31 session handoff — 2026-10-26 (finish plan; state updated 2026-11-15)
 
 The user approved `docs/finish-plan.md` on 2026-10-26 and restarted the
 running CAX31 session on it. Run on CAX31's `master` at
@@ -105,6 +105,10 @@ kept and is long-tail.
 - **2026-11-14 run: the Mac lane's last fold, three hunt batches, the General_* sounds, the Lobby flow up to the draft.** `mac/parity-mac` `165548c4b`
   merged at run start (suite 14,750 / 14,750); nightly replay 44 / 44 + 32 / 32 staged. rrh1-rrh3 (50 / 110 rules covered), aud248 (S11 scoreboard +
   stat-change SE), aud249 / aud250 (General_* SEs), lbr-d1 / d2b / e / f (7-win Lobby return, PreBattleRoom briefing), iss216 (#216 / #217), cln279.
+- **2026-11-15 run: the held-item effect, cries in move tasks, the Lobby cursor.** Nightly replay 44 / 44 + 69 / 69 staged; `lbr-f-residual2` merged;
+  hie1 / hie2 / hie2b / hie3 (#220: held-item effect timed in both scenes, drawn in Scene ON, its SEs), cry1 (Roar / Howl / Hyper Voice cries), lbw1 / lbw2
+  (Lobby NPC wander simulator + RNG cursor classification, ISSUES #221), lbr-g (#221 E1-E3: the Lobby cursor after a challenge-ending battle).
+  Lesson (PAPERCUTS): a lab is often 9-20 frames out of step before the window; measure windows at the pre-segment offset, never by equal frame index.
 - Census baseline for the next delta: `.integration/evidence/fix274/census/{on,off}-237ee0e5e` (the fix274 fixed arms; src == master's final engine src at the 2026-11-12 wind-down
   except pnm273's name strings, which the pnm273 0..49 census showed digest-neutral).
 - **4b(d) DONE** (frs247, `docs/frs247-faint-replacement-reshow.md`): the faint-replacement return rises from black, no player bar.
@@ -114,23 +118,19 @@ kept and is long-tail.
 This repo is the **game core library**; the website repo (Mac) owns login, streaks, menus, the on-screen pad and hosting —
 never brief those here. One worker at a time; each run folds the next audio step(s) plus at least one cleanup step.
 
-**Status at the 2026-11-14 wind-down (PROGRESS top entry has the gates):** `mac/parity-mac` `165548c4b` (fixes 29 to 43) is FOLDED; the branch no
-longer moves (the Mac is offline), so there is no fold next run. Battle rules, the replay tools and the rare-rule hunt are the box's.
-- **Item 0 (sound):** aud248 measured S11 (`docs/aud248-s11-scoreboard.md`: not met; T1 + T2 by family, reproducible) and added the stat-change SE;
-  aud249 / aud250 emit the General_* SEs (nine status conditions, weather continues, Focus Punch setup, Leech Seed drain, Castform). Next, by size
-  (ISSUES #219 / #220): the held-item effect animation is not presented at all (#220: a presentation + timing gap, ~214-235 frames per Leftovers /
-  berry segment in Scene ON, then its SEs; 3-step plan in `docs/hie-scout.md`); move-body SE lifetimes (aud242 family, largest); cries in animation tasks (Roar / Howl / Hyper Voice); the second
-  `Status_*` play +14 frames. aud246 (S11 close) waits for those.
-- **Item 0b (Lobby):** lbr-d1 (7-win returns to the Lobby, streak kept), lbr-d2b (won compare traces), lbr-e (PreBattleRoom walk + briefing before
-  the draft, traces 255 / 255; moves every in-game new challenge's deal toward the ROM), lbr-f (won record question 1 tick earlier) DONE. Next:
-  merge branch `lbr-f-residual2` (saving -> saved +2 ticks; it moves the Lobby hand-off deal; lbr-f2 re-pinned the lbrd / lbre seeds on the
-  branch, tip `f58db4171`; run typecheck, test:gate, full suite and soaks before merging; `docs/lbrf-won-timing.md`); field NPC wander after release (2-step plan, `docs/lobby-wander-scout.md`); no Scene ON loss / retire ROM lab; no app SE_SAVE on the loss / retire result script.
-- **Item 0d (battle rules):** nightly replay at run start from the pool + all staged battles (`docs/replay-ledger.md`; 2026-11-14: 44 / 44, 32 / 32).
-  Rare-rule hunt: rrh1-rrh3 this run, 50 of 110 (c) rules covered by ROM-matched stages (`docs/parity-mac/stages/coverage/`, now 50 files, all
-  re-driven nightly), R019 / R029 / R031 / R033 class (b), no differences found; box tools in `tools/replay-hunt/` (designcheck, stall warnings,
-  sets.py). rrh3 found the remaining rules hard to reach with Factory sets (Metronome-only, Taunt, stalls): next hunt steps need new team ideas or
-  a Mechanic Lab + Tier-1 pairing; one step per run at most.
-- **Cleanup:** cln279 (second sweep of step-id scripts, 236 files) DONE. **ISSUES #216 / #217** (duplicate-species rental, trapped switch text) FIXED.
+**Status at the 2026-11-15 wind-down (PROGRESS top entry has the gates):** no Mac fold (the branch no longer moves). Battle rules, the replay
+tools and the rare-rule hunt are the box's.
+- **Item 0 (sound):** #220 held-item effect DONE (hie1 timing both scenes, hie2 / hie2b Scene ON drawing, hie3 SEs; residuals in ISSUES #220);
+  cry1 emits the cry-task cries (T1 `missing-cry-task` 371 -> 0; `docs/cry1-cry-tasks.md`). Next, by size (ISSUES #219): move-body SE lifetimes
+  (aud242 family, largest); the cry-task audio modes (ROAR / HIGH_PITCH / ECHO play the NORMAL sample: cry-task-scout step 2, ~1,880 recordings);
+  the second `Status_*` play +14 frames. aud246 (S11 close) waits for those.
+- **Item 0b (Lobby):** `lbr-f-residual2` MERGED. lbw1 / lbw2 (`docs/lbw1-lobby-wander-evidence.md`): the hand simulator reproduces the woman /
+  fat man wander on 6 ROM traces; the engine's Lobby cursor gaps are ISSUES #221 (E1-E3 fixed by lbr-g, `src/engine/battleExitRng.ts`; its 0:60 / varied-RNG soaks are not run yet: run them at the next run start). Next: #221 E4, the
+  NPC wander port (simulator = test oracle; rebase the lbra / lbrd appStage cursors as the doc lists); no Scene ON loss / retire ROM lab; no app
+  SE_SAVE on the loss / retire result script.
+- **Item 0d (battle rules):** nightly replay at run start from the pool + all staged battles (now 69: `stages/*.json` + `stages/coverage/*.json`;
+  2026-11-15: 44 / 44, 69 / 69, 51 min at 2 lanes). Rare-rule hunt as before (50 / 110; one step per run at most, needs new team ideas).
+- **Cleanup:** steps 1-7 are done or measured non-goals (cln243 showed the remaining tracked evidence is test-read). Nothing queued.
 **Website:** the live site runs `eb-adfdcfdc91f4247f` (your `5a2fe1d83`, the 28 fixes; deployed 2026-11-13 04:03 UTC on Kyle's word). Your later builds
 (`eb-8faf63dbde5168d5`: audio, `challenge-request`, `start: "after-save"`, lazy sprites) are not on the site; the site repo adopts them when Kyle asks. Cleanup 5's "< 15 min" suite target: measured non-goal on this box (cln277); the 670 s render lever in
 `tools/integration/generatedCommandAnimationReplay.ts` would trade render-crash coverage (not taken).
