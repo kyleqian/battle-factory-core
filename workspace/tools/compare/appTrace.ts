@@ -2005,6 +2005,16 @@ export const APP_STAGES: Readonly<Record<string, AppStage>> = {
   "aud242j-silverwind-player-on": (state) => aud241bStage(state, "aud242j-silverwind-player-on", "on", 50, 12, 318, undefined, false, 69),
   "aud242j-silverwind-opponent-on": (state) => aud241bStage(state, "aud242j-silverwind-opponent-on", "on", 12, 50, 69, undefined, false, 318),
   "aud242j-dig-player-on": (state) => aud241bStage(state, "aud242j-dig-player-on", "on", 50, 12, 91, undefined, false, 69),
+  // aud242k: Ancient Power, Fire Punch, Yawn, Smokescreen, Scary Face, Wish, Safeguard, Lovely Kiss, Crunch (player attacker, Scene ON).
+  "aud242k-ancientpower-player-on": (state) => aud241bStage(state, "aud242k-ancientpower-player-on", "on", 50, 12, 246, undefined, false, 69),
+  "aud242k-firepunch-player-on": (state) => aud241bStage(state, "aud242k-firepunch-player-on", "on", 50, 12, 7, undefined, false, 69),
+  "aud242k-yawn-player-on": (state) => aud241bStage(state, "aud242k-yawn-player-on", "on", 50, 12, 281, undefined, false, 69),
+  "aud242k-smokescreen-player-on": (state) => aud241bStage(state, "aud242k-smokescreen-player-on", "on", 50, 12, 108, undefined, false, 69),
+  "aud242k-scaryface-player-on": (state) => aud241bStage(state, "aud242k-scaryface-player-on", "on", 50, 12, 184, undefined, false, 69),
+  "aud242k-wish-player-on": (state) => aud241bStage(state, "aud242k-wish-player-on", "on", 50, 12, 273, undefined, false, 69),
+  "aud242k-safeguard-player-on": (state) => aud241bStage(state, "aud242k-safeguard-player-on", "on", 50, 12, 219, undefined, false, 69),
+  "aud242k-lovelykiss-player-on": (state) => aud241bStage(state, "aud242k-lovelykiss-player-on", "on", 50, 12, 142, undefined, false, 69),
+  "aud242k-crunch-player-on": (state) => aud241bStage(state, "aud242k-crunch-player-on", "on", 50, 12, 242, undefined, false, 69),
   // aud242i: Faint Attack (attacker_fade_to_invisible / _from_invisible and SetAttackerInvisibleWaitForSignal lifetimes).
   "aud242i-faintattack-player-on": (state) => aud241bStage(state, "aud242i-faintattack-player-on", "on", 50, 12, 185, undefined, false, 69),
   "aud242i-faintattack-opponent-on": (state) => aud241bStage(state, "aud242i-faintattack-opponent-on", "on", 12, 50, 69, undefined, false, 185),

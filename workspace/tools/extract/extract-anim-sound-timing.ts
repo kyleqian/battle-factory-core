@@ -172,6 +172,8 @@ const METALLIC_SHINE_LENGTH = 95;
 // localised (Metal Claw's SE_M_HARDEN loop task, counted in iterations, plays its second SE exactly 2 wall frames late: 28 -> 30); the other 2 are not
 // (somewhere in the 96-call shine or its destroy, which clears the BG tilemap). The shift is applied to every later op; the loop's own second play is the named residual.
 const METALLIC_SHINE_LOAD_LAG = 4;
+// AnimTask_ScaryFace loads its BG tilemap, image and palette in the creating step like AnimTask_MetallicShine: the ROM window (aud242k Scary Face) puts the first op after its wait 6 wall frames later than the 77-call count.
+const SCARY_FACE_LOAD_LAG = 6;
 // ---- Instant visual tasks (aud242d). Cmd_createvisualtask runs `taskFunc(taskId)` BEFORE `gAnimVisualTaskCount++` (battle_anim.c:437-439), and an
 // entry function whose every path is straight-line code ending in `DestroyAnimVisualTask(taskId)` (-> `gAnimVisualTaskCount--`, battle_anim.c:274-277)
 // nets to 0 in the creating step: a following waitforvisualfinish never waits for it (lifetime -1, like the PlaySE1/2WithPanning tasks). Sprites a task
@@ -627,6 +629,7 @@ function walk(bodyLabel: string, turn: number, attackerSide: number): Walk {
       // AnimTask_MetallicShine decompresses its tilemap and image and loads a palette in the creating step (battle_anim_dark.c:866-870): a measured
       // VBlank overrun (METALLIC_SHINE_LOAD_LAG; Metal Claw and Steel Wing, aud242d), like BG_LOAD_LAG.
       if ((op === "metallic_shine" || (op === "createvisualtask" && args[0] === "AnimTask_MetallicShine")) && frame !== null) lags.push({ after: frame, frames: METALLIC_SHINE_LOAD_LAG });
+      if (op === "createvisualtask" && args[0] === "AnimTask_ScaryFace" && frame !== null) lags.push({ after: frame, frames: SCARY_FACE_LOAD_LAG });
       let life = lifetimeOf(cmd, attackerSide);
       const colorCycle = op === "blend_color_cycle" || op === "blend_color_cycleexclude" || op === "blend_color_cyclebytag" || (op === "createvisualtask" && /^AnimTask_BlendColorCycle/.test(args[0] ?? ""));
       if (frame !== null && life !== null && "exact" in life && (colorCycle || op === "simple_palette_blend" || (op === "createsprite" && args[0] === "gSimplePaletteBlendSpriteTemplate"))) {
