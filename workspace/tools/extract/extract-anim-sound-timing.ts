@@ -347,6 +347,25 @@ function moveParticleBeyondTargetLifetime(attackerSide: number, pic: PicContext,
   }
   return null;
 }
+function flailMovementLength(): number {
+  let [state, count, angle, shrinks, amplitude] = [0, 0, 0, 0x20, 0x800];
+  const s16 = (v: number): number => ((v + 0x8000) & 0xffff) - 0x8000;
+  for (let call = 1; call < 100000; call += 1) {
+    if (state === 2) return call - 1;
+    angle = s16(angle + (state === 0 ? 0x200 : -0x200));
+    if (state === 0 ? angle >= amplitude : angle <= -amplitude) {
+      const diff = s16(amplitude - angle);
+      const [div, mod] = [Math.trunc(diff / (amplitude * 2)), diff % (amplitude * 2)];
+      if ((div & 1) === 0) { angle = state === 0 ? amplitude - mod : mod - amplitude; state = 1 - state; }
+      else angle = state === 0 ? mod - amplitude : amplitude - mod;
+    }
+    count += 1;
+    if (count > 8) {
+      if (shrinks > 0) { shrinks -= 1; amplitude = Math.max(amplitude - 0x40, 16); } else state = 2;
+    }
+  }
+  throw new Error("AnimTask_FlailMovement does not end");
+}
 function lifetimeOf(cmd: Command, attackerSide: number, pic: PicContext): Lifetime {
   const { op, args } = cmd;
   if (op === "createvisualtask" && (args[0] === "AnimTask_BlendBattleAnimPal" || args[0] === "AnimTask_BlendBattleAnimPalExclude" || args[0] === "AnimTask_BlendParticle")) {
@@ -457,6 +476,14 @@ function lifetimeOf(cmd: Command, attackerSide: number, pic: PicContext): Lifeti
   // AnimTask_ElectricBolt (battle_anim_electric.c:685-724): the entry only sets func; the step's data[10] counts calls 1.. and call 11 (data[10] == 10) destroys.
   // The five segment sprites are CreateSprite'd by the task, which gAnimVisualTaskCount does not count.
   if (op === "createvisualtask" && args[0] === "AnimTask_ElectricBolt") return { exact: 10 };
+  // ---- aud242m (docs section 17). AnimAngerMark (battle_anim_effects_2.c:2281-2299) installs RunStoredCallbackWhenAffineAnimEnds (battle_anim_mons.c:729-733) with
+  // DestroySpriteAndMatrix stored; gAngerMarkAffineAnimCmds (:586-591) are two 8-tick frames, so the affine END is reached at call 16 (sprite.c:1055-1178: one delta per
+  // call from the begin call on), the callback sees it in call 17, installs the destroy, which runs in call 18: gone 17 ticks after F (the ROM-validated visual port
+  // src/animation/swagger.ts draws the mark for exactly 17 ticks, ages 0..16).
+  if (sprite("gAngerMarkSpriteTemplate")) return { exact: 17 };
+  // AnimTask_FlailMovement (battle_anim_effects_3.c:2845-2931): the entry only sets func; the step (call 1..) integrates data[2] by 0x200 per call and every call past the ninth
+  // shrinks the amplitude data[14] by 0x40 (down to 16) for 0x20 calls, then sets data[0] = 2; the next call destroys the task (call K, gone K - 1 ticks after F).
+  if (op === "createvisualtask" && args[0] === "AnimTask_FlailMovement") return { exact: flailMovementLength() };
   // ---- aud242f (docs section 10). Call numbering as above: sprite callback call 0 = init (script step), call k >= 1 = AnimateSprites of iteration F + k - 1; a
   // sprite destroyed at call K is gone K - 1 ticks after F. SetCallbackToStoredInData6 / `sprite->callback = x` only install: x first runs in the NEXT call.
   // AnimBowMon (battle_anim_effects_1.c:4400-4496, arg 0 = step kind): kind 0 = Step1 (call 1 sets data[0] = 6 and TranslateSpriteLinearById; calls 2..7 translate,
@@ -631,6 +658,9 @@ const isCreation = (op: string): boolean => creationMacros.has(op);
 function returnValue(task: string, attackerSide: number): number | null {
   switch (task) {
     case "AnimTask_IsContest": case "AnimTask_GetTargetIsAttackerPartner": case "AnimTask_IsMonInvisible": return 0;
+    // aud242m: every Factory mon has friendship 0 (battle_factory.c:459, 820; the controllers leave gAnimFriendship 0, battle_anim.c:181): GetFrustrationPowerLevel
+    // (battle_anim_mons.c:1993-2006, `<= 30`) and GetReturnPowerLevel (battle_anim_effects_3.c:5060-5073, `< 60`) both write 0 (the strongest Frustration / weakest Return branch).
+    case "AnimTask_GetFrustrationPowerLevel": case "AnimTask_GetReturnPowerLevel": return 0;
     case "AnimTask_GetAttackerSide": return attackerSide;
     case "AnimTask_GetTargetSide": return 1 - attackerSide;
     case "AnimTask_IsTargetPlayerSide": return 1 - attackerSide === 0 ? 1 : 0;
