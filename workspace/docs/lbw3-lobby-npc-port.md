@@ -113,7 +113,7 @@ Per case a committed compare trace (the lbw4 route to 5254 + the branch; `tools/
   because the history now decides the first pose; the pin documents the engine's own turn path.
 - **Proof:** per trace ROM dump (`lbw1-lobby-wander-rom.py`) vs engine (`lbw3-engine-npcs.ts` + `lbw3-engine-compare.py`): max |offset| 0 and NPC state identical on every frame of all four.
   `npm run compare`, capture windows from 5254: `lbw5-fatman-off` 254 / 254, `lbw5-bump-turn-off` (chg-LEFT-d75) 269 / 269, `lbw5-turn-refuse-off` (tdep-P5856) 745 / 745, `lbw5-race-off` (race-P5944) 796 / 796.
-  All 64 sweep branches (6 fat man + 20 bump + 44 race / turn) match on player cur / prv, both wanderers and the cursor except the three below. No regression: lbw4-woman-block-off 501 / 501, lbra-loss-off 2258 / 2258,
+  All 64 sweep branches (6 fat man + 20 bump + 44 race / turn) match on player cur / prv, both wanderers and the cursor except the 3 pre-existing no-release-gap `fatN-j*-g0` branches (last bullet); retire-off stays 1476 / 1554 (the dialog-text residual above). No regression: lbw4-woman-block-off 501 / 501, lbra-loss-off 2258 / 2258,
   loss-beyond-boundary 183 / 183, loss-lobby-walk 177 / 177, won-no 54 / 54, won-yes 54 / 54, won-attendant 17 + 6 + 44, lbra-forfeit 113 / 113.
 - **Residuals (pose only, one frame each, excluded from the committed capture lists):** the first step frame after a bump interrupt (5394 in bump-turn, 5866 in turn-refuse: the ROM shows the new walk pose
   on that frame and keeps it nine frames, the engine's lagged clock shows stand); a bump-cycle boundary one frame early at 5946 (turn-refuse) and 6009 (race, after a bump settles); the fat-man bump
