@@ -5,6 +5,7 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { unpackMonPicTable, type PackedMonPicSheets } from "../../src/engine/monPicSheetCodec.ts";
 import { monPicGeometry, type MonPicGeometry } from "../../src/engine/monPicGeometry.ts";
 
 type Tileset = { columns: number; rows: number; tiles: number[][] };
@@ -37,7 +38,8 @@ export function extractBattlePicGeometry(
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   const out = extractBattlePicGeometry(
-    readJson("src/assets/gen/battle-back-sprites.json"), readJson("src/assets/gen/battle-opponent-front-sprites.json"),
+    unpackMonPicTable(readJson<PackedMonPicSheets>("src/assets/gen/battle-back-sprite-rows.json")),
+    unpackMonPicTable(readJson<PackedMonPicSheets>("src/assets/gen/battle-opponent-front-sprite-rows.json")),
     readJson("src/assets/gen/castform-forms.json"), readJson("src/animation/assets/substitute.json"),
   );
   const target = join(root, "src", "assets", "gen", "battle-pic-geometry.json");

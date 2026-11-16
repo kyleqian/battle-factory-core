@@ -3,8 +3,7 @@
 // Substitute doll and the CASTFORM forms, and a static ratchet on the tick-path modules.
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import backSprites from "../src/assets/gen/battle-back-sprites.json" with { type: "json" };
-import frontSprites from "../src/assets/gen/battle-opponent-front-sprites.json" with { type: "json" };
+import { backSprites, frontSprites } from "./helpers/battleSprites.ts";
 import castformForms from "../src/assets/gen/castform-forms.json" with { type: "json" };
 import picGeometry from "../src/assets/gen/battle-pic-geometry.json" with { type: "json" };
 import substituteDoll from "../src/animation/assets/substitute.json" with { type: "json" };

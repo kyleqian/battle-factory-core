@@ -40,7 +40,9 @@ import { readFileSync } from "node:fs";
 import "../../src/engine/monPicPixelsInstall.ts";
 import { PNG } from "pngjs";
 import { runOracleTrace, type Trace } from "../compare/oracleClient.ts";
-import opponentFrontSpritesAsset from "../../src/assets/gen/battle-opponent-front-sprites.json" with { type: "json" };
+import { bundledMonPicTables } from "../../src/engine/monPicPixelsInstall.ts";
+
+const opponentFrontSpritesAsset = bundledMonPicTables().front;
 import battleBgAsset from "../../src/assets/gen/battle-bg.json" with { type: "json" };
 import oamDump from "./turn9-clone-oam-dump.json" with { type: "json" };
 

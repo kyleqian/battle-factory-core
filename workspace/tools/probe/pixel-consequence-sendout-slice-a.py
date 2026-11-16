@@ -52,12 +52,20 @@ def main() -> int:
         raise SystemExit(f"usage: {sys.argv[0]} <settled-frame.png>")
     frame_path = Path(sys.argv[1])
     w, h, fb = load_png(frame_path)
-    asset = json.loads(
-        Path("src/assets/gen/battle-opponent-front-sprites.json").read_text()
-    )
-    rattata = asset["RATTATA"]
-    tileset = rattata["tileset"]
-    palette = rattata["palette"]
+    # dl2: the sheet is packed rows (src/engine/monPicSheetCodec.ts): 4096 hex pixels per 64x64 frame, then 16 colours x 3 base-32 digits.
+    packed = json.loads(
+        Path("src/assets/gen/battle-opponent-front-sprite-rows.json").read_text()
+    )["RATTATA"]
+    tiles = []
+    for ty in range(8):
+        for tx in range(8):
+            tiles.append([int(packed[(ty * 8 + py) * 64 + tx * 8 + px], 16) for py in range(8) for px in range(8)])
+    tileset = {"columns": 8, "rows": 8, "tiles": tiles}
+    digits = packed[len(packed) - 48:]
+    palette = []
+    for c in range(16):
+        r, g, b = ((int(d, 32) << 3) | (int(d, 32) >> 2) for d in digits[c * 3:c * 3 + 3])
+        palette.append({"r": r, "g": g, "b": b})
 
     ox, oy = 144, 8 + 16  # app origin for RATTATA (yOffset 16)
 

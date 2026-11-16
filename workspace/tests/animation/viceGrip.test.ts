@@ -1,7 +1,6 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import frontPics from "../../src/assets/gen/battle-opponent-front-sprites.json";
-import backPics from "../../src/assets/gen/battle-back-sprites.json";
+import { backSprites as backPics, frontSprites as frontPics } from "../helpers/battleSprites.ts";
 import cut from "../../src/assets/gen/battle-anim-cutting-slice.json";
 import {
   viceGripAtAge,
