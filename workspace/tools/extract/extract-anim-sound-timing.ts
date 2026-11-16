@@ -775,6 +775,24 @@ function lifetimeOf(cmd: Command, attackerSide: number, pic: PicContext, rollout
   // AnimClappingHand / AnimClappingHand2 (:1606-1675; script args[3..7] = x, y, side, anchored, N): data[0] = N cycles of 12 calls (x2 -+12 -> 0 -> -+12 in steps of 2); the call that completes
   // the Nth cycle (call 12N, abs(x2) == 12 on the way back) decrements data[0] to 0 and the same call destroys it: gone 12N - 1 ticks after F (N <= 0: the first step call destroys, 0).
   if (sprite("gClappingHandSpriteTemplate") || sprite("gClappingHand2SpriteTemplate")) { const n = intArg(args[7]); return n === null ? null : { exact: n < 1 ? 0 : 12 * n - 1 }; }
+  // AnimReversalOrb (battle_anim_effects_3.c:3140-3180; d = script args[3]): the init installs the step and runs it once itself (call 0 = step 1); the outward phase ends after d steps
+  // (data[4] == d at step d, calls 0..d-1), the inward phase after d more (the destroying step is step 2d = call 2d - 1): gone 2d - 2 ticks after F.
+  if (sprite("gReversalOrbSpriteTemplate")) { const d = intArg(args[3]); return d === null || d < 1 || d > 0x7fff ? null : { exact: 2 * d - 2 }; }
+  // AnimSpinningSparkle (battle_anim_mons.c:2380-2390) installs RunStoredCallbackWhenAnimEnds with DestroyAnimSprite stored; sAnim_SpinningSparkle (battle_anim_status_effects.c:100-107) is
+  // 5 x 3 = 15 ticks: BeginAnim in call 0, END (animEnded) at call 15 (sprite.c:909-960), call 16 only installs the stored callback (SetCallbackToStoredInData6 does not run it, :423-427),
+  // call 17 destroys: gone 16 ticks after F (the aud242j water bubble shape: RunStored END + 1, stored callback END + 2).
+  if (sprite("gSpinningSparkleSpriteTemplate")) return { exact: 16 };
+  // AnimFallingRock (battle_anim_rock.c:297-333; TranslateSpriteInEllipse battle_anim_mons.c:516-533): the init runs the ellipse once itself (sDuration 16: steps in call 0..15), call 16 hands over
+  // to AnimFallingRock_Step, which in call 17 restarts the ellipse (sDuration 32: steps in calls 17..48), call 49 hands over to DestroySpriteAndMatrix and call 50 destroys: gone 49 ticks
+  // after F, whatever the script args.
+  if (sprite("gFallingRockSpriteTemplate")) return { exact: 49 };
+  // AnimThoughtBubble (battle_anim_effects_1.c:5490-5517; d = script args[4]): all four gMetronomeThroughtBubbleAnimCmds (:2026-2058) are 4 x 2 = 8 ticks. The init starts the anim (BeginAnim call 0,
+  // END call 8) and installs RunStored (call 9 installs AnimThoughtBubble_Step), Step runs from call 10 and the call whose --data[0] reaches 0 (call d + 9) starts the closing anim (BeginAnim
+  // in that call, END d + 17) with DestroyAnimSprite stored: call d + 18 installs it, call d + 19 destroys: gone d + 18 ticks after F.
+  if (sprite("gThoughtBubbleSpriteTemplate")) { const d = intArg(args[4]); return d === null || d < 1 || d > 0x7fff ? null : { exact: d + 18 }; }
+  // AnimTauntFinger (:5606-5651): the init starts a 1-frame anim and installs Step1; ++data[1] > 10 first holds in call 11, which starts the 7 x 4 = 28 tick gTauntFingerAnimCmds3 / 4 (:2144-2172,
+  // BeginAnim call 11, END call 39) with Step2 stored (RunStored: call 40 installs it, call 41 runs it); Step2 destroys once ++data[1] > 5, the 6th run: call 46 = gone 45 ticks after F.
+  if (sprite("gTauntFingerSpriteTemplate")) return { exact: 45 };
   // AnimTask_InvertScreenColor (battle_anim_normal.c:759-778) inverts the palette buffer and destroys itself in the creating step: net 0 in gAnimVisualTaskCount (exact -1).
   if (op === "invert_screen_color" || (op === "createvisualtask" && args[0] === "AnimTask_InvertScreenColor")) return { exact: -1 };
 

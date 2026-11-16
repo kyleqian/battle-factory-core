@@ -57,6 +57,10 @@ function ourEvents(rom: Fixture): SoundEvent[] {
 const SPECS: Array<{ name: string; ids: number[]; deltas: number[] }> = [
   { name: "encore-player", ids: [222, 223], deltas: Array(10).fill(-1) },
   { name: "flatter-player", ids: [223, 229], deltas: [-3, -3, 0] },
+  // Reversal: +2 on all three rows (SE209, SE217 before the five-orb wait, SE123 after the 50-tick orbs + `delay 20` + `delay 8`): the aud242a idle-lead class. Taunt: -4 on all five rows (the rows
+  // behind the 63-tick thought bubble / 45-tick finger wait and the anger-mark SEs included).
+  { name: "reversal-player", ids: [209, 217, 123], deltas: [2, 2, 2] },
+  { name: "taunt-player", ids: [186, 167, 194], deltas: [-4, -4, -4, -4, -4] },
 ];
 
 describe("move-animation SEs of the aud242p lifetimes", () => {

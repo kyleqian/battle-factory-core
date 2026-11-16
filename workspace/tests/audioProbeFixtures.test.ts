@@ -157,6 +157,8 @@ describe("audio probe fixtures", () => {
       "aud242o-rollout5-player.json",
       "aud242p-encore-player.json",
       "aud242p-flatter-player.json",
+      "aud242p-reversal-player.json",
+      "aud242p-taunt-player.json",
       "aud250-focuspunch-opponent.json",
       "aud250-focuspunch-player.json",
       "aud250-leechseed-opponent.json",
