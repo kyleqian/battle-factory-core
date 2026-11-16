@@ -1995,6 +1995,8 @@ export const APP_STAGES: Readonly<Record<string, AppStage>> = {
   "aud242f-bubblebeam-player-on": (state) => aud241bStage(state, "aud242f-bubblebeam-player-on", "on", 50, 12, 61, undefined, false, 69),
   "aud242f-psychic-player-on": (state) => aud241bStage(state, "aud242f-psychic-player-on", "on", 50, 12, 94, undefined, false, 69),
   "aud242f-growth-player-on": (state) => aud241bStage(state, "aud242f-growth-player-on", "on", 50, 12, 74, undefined, false, 69),
+  // aud242h: Body Slam (gVerticalDipSpriteTemplate wait).
+  "aud242h-bodyslam-player-on": (state) => aud241bStage(state, "aud242h-bodyslam-player-on", "on", 50, 12, 34, undefined, false, 69),
   "aud242f-swagger-player-on": (state) => aud241bStage(state, "aud242f-swagger-player-on", "on", 50, 12, 207, undefined, false, 69),
   // aud242g: SetPsychicBackground / Tri Attack triangle lifetimes (docs/aud242-move-anim-sounds.md section 11).
   "aud242g-triattack-player-on": (state) => aud241bStage(state, "aud242g-triattack-player-on", "on", 50, 12, 161, undefined, false, 69),

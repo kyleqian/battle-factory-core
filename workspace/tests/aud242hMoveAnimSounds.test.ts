@@ -1,4 +1,4 @@
-// aud242h: the move-animation SEs gated by the blend_color_cycle lifetime (AnimTask_BlendColorCycle; tools/extract/extract-anim-sound-timing.ts)
+// aud242h: the move-animation SEs gated by the blend_color_cycle lifetime (AnimTask_BlendColorCycle, DoVerticalDip; tools/extract/extract-anim-sound-timing.ts)
 // of a live Scene ON move animation reproduce the ROM's. The fixtures are committed oracle output of tools/audio/soundEventProbe.py (stepping mode, with the call log
 // and the BlendPalette hook, AUDIO_PROBE_EXTRA_HOOKS=BlendPalette) and carry the replay trace; this test needs no emulator. See docs/aud242-move-anim-sounds.md section 12.
 import { readFileSync } from "node:fs";
@@ -57,9 +57,11 @@ function ourEvents(rom: Fixture): SoundEvent[] {
 const SPECS: Record<string, { delta: number }> = {
   // Move_PSYCHIC: blend_color_cycle (AnimTask_BlendColorCycle: 3 fades of PaletteFadeCalls with delay 2) then loopsewithpan SE184 x3 (frames 132 / 142 / 153).
   "psychic-player": { delta: 2 },
+  // Move_BODY_SLAM: SE152 at the start, then the gVerticalDipSpriteTemplate wait (2 x 6 + 3), delay 11 and the SlideMonToOffset / hitsplat rows: SE141 x2 (loopsewithpan).
+  "bodyslam-player": { delta: 2 },
 };
 
-describe("move-animation SEs after the aud242h blend_color_cycle wait", () => {
+describe("move-animation SEs after the aud242h blend_color_cycle / vertical-dip waits", () => {
   for (const [name, spec] of Object.entries(SPECS)) {
     it(`${name}: (frame, kind, id, pan) equals the ROM at a named +${spec.delta} frame residual`, () => {
       const rom = fixture(name);

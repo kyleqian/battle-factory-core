@@ -276,6 +276,16 @@ function lifetimeOf(cmd: Command): Lifetime {
   const arc = (index: number): Lifetime => { const d = intArg(args[index]); return d === null ? null : { exact: d }; };
   // AnimSpriteOnMonPos (battle_anim_mons.c:1515-1536): init call, then animEnded of sAnim_ToxicBubble (battle_anim_poison.c:16-23: 4 x 5 = 20).
   if (sprite("gToxicBubbleSpriteTemplate")) return { exact: 20 };
+  // AnimShadowBall (battle_anim_ghost.c:400-458): call 0 is the init; AnimShadowBall_Step case 0 / 1 / 2 each take max(arg, 1) calls (data[n] -= 1 until <= 0),
+  // case 3 destroys at call a0 + a1 + a2 + 1 (a0 or a2 of 0 divide by zero: declined).
+  if (sprite("gShadowBallSpriteTemplate")) {
+    const a = [0, 1, 2].map((i) => intArg(args[3 + i]));
+    return a.some((d) => d === null) || a[0]! < 1 || a[2]! < 1 ? null : { exact: Math.max(a[0]!, 1) + Math.max(a[1]!, 1) + Math.max(a[2]!, 1) };
+  }
+  // DoVerticalDip (battle_anim_mon_movement.c:451-471): call 0 is the init (callback TranslateSpriteLinearById, battle_anim_mons.c:651-663); D translating calls,
+  // the call after sets the stored callback, ReverseVerticalDipDirection runs one call and re-arms, D more calls, one to set DestroyAnimSprite, then it destroys:
+  // call 2D + 4, exact 2D + 3.
+  if (sprite("gVerticalDipSpriteTemplate")) { const d = intArg(args[3]); return d === null || d < 0 ? null : { exact: 2 * d + 3 }; }
   // AnimFang (battle_anim_effects_3.c:1515-1519): gFangAnimCmds (:321-328) 8 + 16 + 4 + 4 = 32.
   if (sprite("gFangSpriteTemplate")) return { exact: 32 };
   // Arc sprites (InitAnimArcTranslation + TranslateAnimHorizontalArc, battle_anim_mons.c:785-801, AnimTranslateLinear :1111): data[0] = duration D; D calls
