@@ -7,10 +7,8 @@ import { describe, expect, it } from "vitest";
 import {
   CRY_ECHO_END_FRAMES, CRY_ECHO_START_FRAMES, CRY_FAINT_FRAMES, CRY_HIGH_PITCH_FRAMES, CRY_NORMAL_FRAMES, CRY_ROAR_2_FRAMES, CRY_WEAK_FRAMES,
 } from "../src/data/cryModeFrames.ts";
-import { FAINT_CRY_RESTORE_FRAMES } from "../src/data/faintCryFrames.ts";
 import { SEND_IN_TAIL_OFF_CRY_FRAMES } from "../src/data/sendInTailOff.ts";
 import { collectSoundTick, type SoundEvent } from "../src/audio/soundEvents.ts";
-import { cryTaskLength } from "../src/engine/cryTaskLengths.ts";
 import { beginScreenSoundTick, BGM_BATTLE, CRY_MODE_NORMAL, CRY_MODE_WEAK, playSendOutCry, runScheduledScreenSounds } from "../src/engine/screenSounds.ts";
 
 const fixture = (name: string) => JSON.parse(readFileSync(new URL(`./fixtures/${name}`, import.meta.url), "utf8"));
@@ -42,15 +40,13 @@ describe("cry3 derived cry lengths", () => {
     expect(CRY_NORMAL_FRAMES).toEqual(SEND_IN_TAIL_OFF_CRY_FRAMES);
   });
 
-  it("the same derivation reproduces cry1's 149 measured cry-task species-modes and its fitted model", () => {
+  it("the same derivation reproduces cry1's 149 measured cry-task species-modes", () => {
     const tables = { ES: CRY_ECHO_START_FRAMES, EE: CRY_ECHO_END_FRAMES, R2: CRY_ROAR_2_FRAMES, HP: CRY_HIGH_PITCH_FRAMES };
-    const modes = { ES: "ECHO_START", EE: "ECHO_END", R2: "ROAR_2", HP: "HIGH_PITCH" } as const;
     let rows = 0;
     for (const key of ["ES", "EE", "R2", "HP"] as const) {
       for (const [species, length] of cry1[key]) {
         rows += 1;
         expect(tables[key][species]! + 1, `${key} ${species}`).toBe(length);
-        expect(cryTaskLength(modes[key], species), `fit ${key} ${species}`).toBe(length);
       }
     }
     expect(rows).toBe(149);
@@ -64,11 +60,9 @@ describe("cry3 derived cry lengths", () => {
     expect(readFileSync(out, "utf8")).toBe(readFileSync(new URL("../src/data/cryModeFrames.ts", import.meta.url), "utf8"));
   });
 
-  it("FAINT: the derivation equals the oracle on all species; aud241b's fitted table (still used by playFaintCry) is off on 24 of them", () => {
+  it("FAINT: the derivation equals the oracle on all species", () => {
     expect(cry3.FAINT).toHaveLength(FACTORY_SPECIES.length);
     for (const [species, restore] of cry3.FAINT) expect(CRY_FAINT_FRAMES[species]! + 1, `FAINT ${species}`).toBe(restore);
-    const fitWrong = cry3.FAINT.filter(([species, restore]) => FAINT_CRY_RESTORE_FRAMES[species] !== restore);
-    expect(fitWrong).toHaveLength(24);
   });
 
   it("a send-out cry of a species with no earlier measurement now restores the BGM and runs the switch-in callback", () => {

@@ -7,7 +7,7 @@ import { collectSoundTick, type SoundEvent } from "../src/audio/soundEvents.ts";
 import { createInitialState, tick } from "../src/engine/core.ts";
 import { emitCryTaskRows } from "../src/engine/moveAnimSounds.ts";
 import { beginScreenSoundTick, runScheduledScreenSounds } from "../src/engine/screenSounds.ts";
-import { cryTaskLength, type CryTaskLengthMode } from "../src/engine/cryTaskLengths.ts";
+import { CRY_ECHO_END_FRAMES, CRY_ECHO_START_FRAMES, CRY_HIGH_PITCH_FRAMES, CRY_ROAR_2_FRAMES } from "../src/data/cryModeFrames.ts";
 import { traceAdvances } from "../tools/compare/traceReplay.ts";
 
 interface FixtureEvent { frame: number; kind: string; id: number | null; pan: number | null; mode?: string; volume?: number; noop?: boolean; via?: string }
@@ -147,20 +147,16 @@ describe("cry-task second cries, stops and the BGM restore (cry1, Scene ON)", ()
   });
 });
 
-describe("cry-task lengths: D = min(cap, ceil(K t) + 1) (the ROM-measured species of tests/fixtures/cry1-lengths.json, zero residual)", () => {
+describe("cry-task lengths: the derived cryModeFrames.ts tables + 1 (the ROM-measured species of tests/fixtures/cry1-lengths.json)", () => {
   const measured = JSON.parse(readFileSync(new URL("fixtures/cry1-lengths.json", import.meta.url), "utf8")) as Record<string, Array<[number, number]>>;
-  const MODES: Record<string, CryTaskLengthMode> = { ES: "ECHO_START", EE: "ECHO_END", R2: "ROAR_2", HP: "HIGH_PITCH" };
-  for (const [key, mode] of Object.entries(MODES)) {
-    it(`${mode}: all ${measured[key]!.length} measured species`, () => {
-      expect(measured[key]!.map(([species]) => [species, cryTaskLength(mode, species)])).toEqual(measured[key]);
+  const TABLES = { ES: CRY_ECHO_START_FRAMES, EE: CRY_ECHO_END_FRAMES, R2: CRY_ROAR_2_FRAMES, HP: CRY_HIGH_PITCH_FRAMES } as const;
+  for (const [key, table] of Object.entries(TABLES)) {
+    it(`${key}: all ${measured[key]!.length} measured species`, () => {
+      expect(measured[key]!.map(([species]) => [species, table[species]! + 1])).toEqual(measured[key]);
     });
   }
-  it("caps and an unknown species", () => {
-    expect(cryTaskLength("ECHO_START", 124)).toBe(26);
-    expect(cryTaskLength("HIGH_PITCH", 124)).toBe(51);
-    expect(cryTaskLength("ROAR_2", 124)).toBe(61);
-    expect(cryTaskLength("ECHO_END", 124)).toBe(131);
-    expect(cryTaskLength("ECHO_END", 99999)).toBeUndefined();
+  it("Jynx hits the note-length caps (ES 26, HP 51, R2 61, EE 131 = 130 + 1)", () => {
+    expect([CRY_ECHO_START_FRAMES[124], CRY_HIGH_PITCH_FRAMES[124], CRY_ROAR_2_FRAMES[124], CRY_ECHO_END_FRAMES[124]].map((n) => n! + 1)).toEqual([26, 51, 61, 131]);
   });
 });
 

@@ -4,7 +4,7 @@
 import timingData from "../data/gen/anim-sound-timing.json" with { type: "json" };
 import { animSoundPan, animSoundPan2, calculatePanIncrement, emitSound, keepPanInRange, type AnimPanContext, type SoundEmission } from "../audio/soundEvents.ts";
 import { scheduleAfter, CRY_MODE_ECHO_END, CRY_MODE_ECHO_START, CRY_MODE_HIGH_PITCH, CRY_MODE_ROAR_1, CRY_MODE_ROAR_2, playAnimTaskCry, scheduleAnimTaskBgmRestore, stopAnimTaskCry } from "./screenSounds.ts";
-import { cryTaskLength } from "./cryTaskLengths.ts";
+import { CRY_ECHO_END_FRAMES, CRY_ECHO_START_FRAMES, CRY_HIGH_PITCH_FRAMES, CRY_ROAR_2_FRAMES } from "../data/cryModeFrames.ts";
 import { factoryBattleBgm } from "./battleStartSounds.ts";
 import { BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS } from "./battleScriptSourceConstants.ts";
 import type { BattleResolutionPresentationState } from "./battleResolutionPresentation.ts";
@@ -268,13 +268,21 @@ const MOVE_ROAR = 46;
 const MOVE_HOWL = 336;
 const MOVE_HYPER_VOICE = 304;
 
+const CRY_TASK_FRAMES = { ECHO_START: CRY_ECHO_START_FRAMES, ECHO_END: CRY_ECHO_END_FRAMES, ROAR_2: CRY_ROAR_2_FRAMES, HIGH_PITCH: CRY_HIGH_PITCH_FRAMES } as const;
+
+/** Frames from a cry task's PlayCry call to the frame IsCryPlaying turns false: the derived cry length + 1. */
+function cryTaskLength(mode: keyof typeof CRY_TASK_FRAMES, species: number): number | undefined {
+  const frames = CRY_TASK_FRAMES[mode][species];
+  return frames === undefined ? undefined : frames + 1;
+}
+
 type CryTaskRow =
   | Readonly<{ at: number; row: "cry"; mode: number; duck: boolean }>
   | Readonly<{ at: number; row: "stop" | "restore" }>;
 
 /**
  * cry1 (ISSUES #219 family 3): the cry tasks of battle_anim_sound_tasks.c as rows at script frames (the extractor's rules: loadspritegfx / monbg 3, delay N + 2); all offsets
- * are ROM-measured (tools/audio/fixtures/cry1-*.json, docs/cry1-cry-tasks.md), the lengths D come from cryTaskLengths.ts (a fitted per-species model; unknown species: first cries only).
+ * are ROM-measured (tools/audio/fixtures/cry1-*.json, docs/cry1-cry-tasks.md), the lengths D come from cryModeFrames.ts (the derived cry length + 1, the frame IsCryPlaying turns false; unknown species: first cries only).
  * Roar (SoundTask_PlayDoubleCry): ROAR_1 at frame 6 (ducks), ROAR_2 11 later, the restore D_R2 after ROAR_2. Howl (SoundTask_PlayCryHighPitch): HIGH_PITCH at frame 34 (after
  * `delay 12` + RoarEffect's `delay 15`), the restore D_HP later. Hyper Voice (SoundTask_PlayCryWithEcho, run twice, PlayCry_DuckNoRestore): ES at frame 5 (task created at 3), the
  * Step's stop D_ES later, EE the frame after; the second round's c0 stop is 53 after the first ES (species independent), ES2 2 after it, stop, EE2 (ByMode); the BGM comes back
