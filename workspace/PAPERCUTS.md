@@ -2036,3 +2036,7 @@ current app stage should be rejected before replay.
   "npm test green" line as conflicting with "the supervisor runs the full suite" (ais1, ~2 min).
 - **`npm run test:gate` does not run several sound tests** (`aud252LossBallOpen`, `aud248StatChangeSounds`): hie4's timing fix broke the aud252 pin unseen until cry3's
   importer sweep (supervisor re-pinned). Briefs touching timing should name `tests/aud2*` + `tests/cry*` explicitly.
+- **Disk filled to 99 % (2.3 GB free) mid-run** (aud254 lost ~15 min to broken tool output): `/tmp` held 35 GB of old worker scratch (census copies, oracle logs from
+  earlier days) and `.integration/evidence` 87 GB, 68 GB of it census `tree/` snapshots (~840 MB each, `lsd194Census.sh` copies src / tools / node_modules per arm).
+  Supervisor removed `/tmp` entries older than a day (not open) and the 32 tree snapshots older than a day (list in `.integration/evidence/TREES-PRUNED-20261116.txt`;
+  rebuildable from the arm's commit): 62 % used after. Census tooling could symlink node_modules and delete the tree after scoring.
