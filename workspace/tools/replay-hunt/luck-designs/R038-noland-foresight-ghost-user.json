@@ -1,0 +1,83 @@
+{
+ "name": "R038-noland-foresight-ghost-user",
+ "rules": [
+  "R038"
+ ],
+ "why": "Same chain as docs/parity-mac/stages/noland-foresight-ghost.json (fix 41; its seed 79001 is known to work). Silver Noland's Machoke (set 283) or Hitmonlee (338) is the Foresight user. The player's Jumpluff (set 334) puts it to sleep, Kecleon (set 325) gives it Color Change with Skill Swap, Banette (set 342) hits it with Shadow Ball: it is a Ghost type now, and every later turn the AI scores Foresight with the Ghost-user roll (AI_CV_Foresight2, data/battle_ai_scripts.s:1957-1961). Noland's party comes from the seed, so only seeds where Machoke or Hitmonlee leads can hit.",
+ "seed": 0,
+ "challengeNum": 2,
+ "battleNum": 6,
+ "playerSetIds": [
+  334,
+  325,
+  342
+ ],
+ "script": {
+  "actions": [
+   {
+    "prefer": 1
+   },
+   {
+    "preferSwitch": 1
+   },
+   {
+    "prefer": 3
+   },
+   {
+    "preferSwitch": 2
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   }
+  ],
+  "then": "census"
+ },
+ "expect": [],
+ "cover": [
+  {
+   "file": "src/engine/factoryAiCheckViability.ts",
+   "text": "const first = nextDraw(rng, ordinal, `${input.reasonPrefix}-foresight-roll-1`);",
+   "at": 0
+  }
+ ],
+ "coverAny": true,
+ "chance": 0.02,
+ "seeds": 200,
+ "mode": "factoryBrain"
+}

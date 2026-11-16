@@ -3,7 +3,7 @@ Like p4/stagehunt.py, but cheap: per lab seed do the request, the ROM setup and 
 engine's own events. Only a seed whose engine battle has every row is driven on the ROM (the full wide replay). Stops at the first seed whose wide
 replay matches the ROM and has the rows (OUTDIR/found.json).
 rrh3: STALL-WARNING when an engine battle hits the frame budget or has 100+ decisions, or the ROM drive stops short of the engine's states; STALL-ABORT after 3 stalled seeds."""
-import gzip, json, os, subprocess, sys
+import fcntl, gzip, json, os, subprocess, sys, time
 stage_path, out, first, count = os.path.abspath(sys.argv[1]), os.path.abspath(sys.argv[2]), int(sys.argv[3]), int(sys.argv[4])
 W = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0, W + "/tools/audio")
@@ -21,6 +21,29 @@ if bad:
     sys.exit(2)
 design_errors = 0
 stalls = 0
+
+
+def drive_on_rom(sp):
+    """The ROM drive; with PREHUNT_DRIVE_SLOTS=DIR:N at most N drives run at once across processes (luckHunt.sh: 2)."""
+    slots = os.environ.get("PREHUNT_DRIVE_SLOTS")
+    held = None
+    if slots:
+        d, n = slots.rsplit(":", 1)
+        os.makedirs(d, exist_ok=True)
+        while held is None:
+            for i in range(int(n)):
+                fh = open(f"{d}/slot{i}.lock", "a")
+                try:
+                    fcntl.flock(fh, fcntl.LOCK_EX | fcntl.LOCK_NB); held = fh; break
+                except OSError:
+                    fh.close()
+            if held is None:
+                time.sleep(2)
+    try:
+        subprocess.run(["nice", "-n", "19", "tools/audio/romReplayWide.sh", "--stage", sp], cwd=W, env=env, capture_output=True)
+    finally:
+        if held:
+            held.close()
 STALL_DECISIONS = int(os.environ.get("PREHUNT_STALL_DECISIONS", "100"))  # the ROM drive stops at about 80000 frames, about 115+ states: a battle with this many engine decisions is likely to be cut short
 env = {**os.environ, "REPLAY_OUT": out, "REPLAY_KEEP": "0", 
        "ROM_REPLAY_POLICY": "script", "ROM_REPLAY_SYMBOLS": "0"}
@@ -80,7 +103,7 @@ for seed in range(first, first + count):
         continue
     if cover:
         json.dump(stage, open(f"{out}/engine-hit-{seed}.json", "w"), indent=1)
-    subprocess.run(["nice", "-n", "19", "tools/audio/romReplayWide.sh", "--stage", sp], cwd=W, env=env, capture_output=True)
+    drive_on_rom(sp)
     summary = f"{out}/stage-{base['name']}.summary.json"
     if not os.path.exists(summary):
         print(seed, "  wide: no summary", flush=True); continue

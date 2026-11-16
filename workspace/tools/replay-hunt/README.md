@@ -23,3 +23,34 @@ All commands run with cwd = `workspace/`; outputs go under `.integration/evidenc
 
 - `designcheck.py` also refuses a set id outside the challenge's range, a species twice on one side or on both sides, and a held item twice on one side (each makes the lab setup fail on every seed; rrh3 lost 3 minutes to a duplicate Lum Berry).
 - `prehunt.py` prints `STALL-WARNING` when the engine battle hits the frame budget or has `PREHUNT_STALL_DECISIONS` (default 100) or more decisions (the ROM drive stops near 115 states), and when the ROM drive matched fewer states than the engine ran; `STALL-ABORT` after 3 stalled seeds. A ROM-side stop is not an engine difference.
+
+## luckHunt (luck1)
+
+`tools/replay-hunt/luckHunt.sh` hunts the luck-only rules without a person: it goes round and round over the designs in
+`tools/replay-hunt/luck-designs/*.json` (`LUCK_HUNT_DESIGNS` can name other globs), one fresh lab seed per design per round. Per seed it runs
+`prehunt.py DESIGN WORK SEED 1` (engine first; the ROM drive only when a `cover` marker ran), and on a marker hit the ROM drive
+(`romReplayWide.sh --stage`) is recorded as match, stopped (the drive ended before a real difference; not an engine difference) or differ.
+A design that has matched or differed is done and leaves the round; a design with 6 lab or engine failures in a row is disabled.
+It is started from `workspace/` (the day job does this under `nice -n 19`) and needs no git: it writes nothing outside `LUCK_HUNT_OUT`.
+
+| env | meaning |
+|---|---|
+| `LUCK_HUNT_OUT` | required, absolute: every file goes here (also `TMPDIR` of the children) |
+| `LUCK_HUNT_DEADLINE_EPOCH` | no new seed starts after it; running seeds finish (a seed takes 15 s to about 2 min, with the drive up to 5); exit 0 (default: start + 1 hour) |
+| `LUCK_HUNT_JOBS` | seeds at a time (default 3); at most 2 ROM drives at once however many jobs (flock slots in `OUT/locks`, `PREHUNT_DRIVE_SLOTS`) |
+| `LUCK_HUNT_SEED_TIMEOUT` | seconds before one seed is killed (default 1500) |
+| `LUCK_HUNT_DAY` | override the UTC day (`YYYYMMDD`), for tests |
+
+Outputs in `LUCK_HUNT_OUT`: `summary.json` and `summary.md` (rewritten after every seed and at the end: per rule seeds tried, marker hits, ROM
+match / differ / stopped, and `stageFilesReady`, the stage files to promote), `hits/<design>/<seed>/` (stage file with the seed set,
+`rom.summary.json`, `prehunt.log`), `seeds.jsonl` (one line per seed), `hunt.log`, `logs/<design>.log`, `state.json` (the seed counter).
+SIGTERM or SIGINT stops it cleanly with a valid summary. A ROM DIFFERENCE is listed in `summary.md` with its seed and stage file; do not fix
+the engine from the hunter.
+
+**Seed rule: a seed is never used on two days.** Seed = `1,000,000 + 20,000 * (UTC days since 2026-11-16) + k`, where `k` is a counter in
+`OUT/state.json` (a restart with the same OUT continues it; a day gives at most 20,000 seeds). So each day has its own block, and the lab
+seeds of the other hunts (below 1,000,000) are never reused. Do not pass a different OUT for the same day expecting the same seeds again:
+use `LUCK_HUNT_DAY` only in tests.
+
+Test (no ROM drive): `tools/replay-hunt/test-luckHunt.sh` (a deadline in the past exits 0 at once with a valid summary and no seed; a
+deadline 15 s ahead ends within one seed's time).

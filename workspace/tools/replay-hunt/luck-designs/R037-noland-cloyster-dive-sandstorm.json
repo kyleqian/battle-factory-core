@@ -1,0 +1,112 @@
+{
+ "name": "R037-noland-cloyster-dive-sandstorm",
+ "rules": [
+  "R037"
+ ],
+ "why": "Silver Noland (challenge number 2, full AI). Cloyster (set 371: Dive, Toxic, Double Team, Protect) is Water/Ice, the only Dive/Dig/Fly/Bounce set of the range with an Ice type; when the weather check reads sandstorm and the user is not Rock/Ground/Steel, AI_CV_SemiInvulnerable falls into the Ice-type test and the second type (Ice) encourages Dive. Noland's party is drawn by the seed, so only seeds whose Brain party holds Cloyster can hit (about 3 in 100). The player's Sandslash (set 330) raises a sandstorm, Piloswine (set 335, Ice/Ground, immune to the sand) Roars twice so Noland's Pokemon rotate while the sand is up, then Sandslash renews the sand; the cycle repeats. None of the player's Pokemon ever uses Protect (the gate before the weather test).",
+ "seed": 0,
+ "challengeNum": 2,
+ "battleNum": 6,
+ "playerSetIds": [
+  330,
+  335,
+  359
+ ],
+ "script": {
+  "actions": [
+   {
+    "prefer": 3
+   },
+   {
+    "preferSwitch": 1
+   },
+   {
+    "prefer": 3
+   },
+   {
+    "prefer": 3
+   },
+   {
+    "preferSwitch": 0
+   },
+   {
+    "prefer": 3
+   },
+   {
+    "preferSwitch": 1
+   },
+   {
+    "prefer": 3
+   },
+   {
+    "prefer": 3
+   },
+   {
+    "preferSwitch": 0
+   },
+   {
+    "prefer": 3
+   },
+   {
+    "preferSwitch": 1
+   },
+   {
+    "prefer": 3
+   },
+   {
+    "prefer": 3
+   },
+   {
+    "preferSwitch": 0
+   },
+   {
+    "prefer": 3
+   },
+   {
+    "preferSwitch": 1
+   },
+   {
+    "prefer": 3
+   },
+   {
+    "prefer": 3
+   },
+   {
+    "preferSwitch": 0
+   },
+   {
+    "prefer": 3
+   },
+   {
+    "preferSwitch": 1
+   },
+   {
+    "prefer": 3
+   },
+   {
+    "prefer": 3
+   },
+   {
+    "preferSwitch": 0
+   }
+  ],
+  "then": "census"
+ },
+ "expect": [],
+ "cover": [
+  {
+   "file": "src/engine/factoryAiCheckViability.ts",
+   "text": "{\n      return tryEncourage(input.rng, input.drawOrdinalStart, typeFuncResultCollision(userType1));\n    }\n    if (us",
+   "at": 0
+  },
+  {
+   "file": "src/engine/factoryAiCheckViability.ts",
+   "text": "{\n      return tryEncourage(input.rng, input.drawOrdinalStart, typeFuncResultCollision(userType2));\n    }\n    // fal",
+   "at": 0
+  }
+ ],
+ "coverAny": true,
+ "chance": 0.02,
+ "seeds": 200,
+ "mode": "factoryBrain"
+}

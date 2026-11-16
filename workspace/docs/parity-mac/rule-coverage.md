@@ -114,6 +114,28 @@ on entering leaves a Trace holder with no foe at faint-handling state 6 (`battle
 Chansey 227) can call it, about 0.1% of lab seeds, and a Mechanic Lab stage is ROM-only (`romReplayWide --stage` cannot drive it). Not stageable
 cheaply; left uncovered. See `STATUS.md`, "Box hunt 2026-11-14 (rrh2)".
 
+**Luck step luck1 (2026-11-16): lab designs for the luck-only rules, and the ones left out.** Fourteen designs are in
+`tools/replay-hunt/luck-designs/` (R030 R032 R035 R037 R038 R039 R040 R067 R080 R095 R097 R107 R109 R110), driven by
+`tools/replay-hunt/luckHunt.sh`. Left out, with the reason:
+
+- **R106 (bad poison counter stopping at 15): no design, the counter cannot get that far in the pools.** The tick is `maxHP / 16` times
+  the counter (`battle_util.c:1538-1543`), so tick n costs n/16 of max HP. The best sustained healing a set has is Recover, Soft-Boiled or
+  Milk Drink at half of max HP (`BattleScript_EffectRestoreHp`, `battle_scripts_1.s:672-676`) plus Leftovers 1/16, and Wish also only
+  half and not on the turn it is cast. From a full start the Pokemon is dead by tick 13 (HP after the tick and Leftovers, then
+  Recover: 100, 93.75, 81.25, 62.5 percent, then tick 13 takes 81.25). Rest and Heal Bell-type cures reset the counter, and a switch resets it.
+- **R068 (a frozen Pokemon picks Flame Wheel): no practical design.** Flame Wheel sets are Growlithe 136 (challenge 0) and Quilava 181
+  (challenges 0, 1). In challenges 0 and 1 no set has a freezing move: the Ice-move sets there carry only Icy Wind or Aurora Beam
+  (`src/data/battle_moves.h:2551-2553` and `:809-811`, speed / attack drops, no freeze); the only route is Chansey 227's
+  Metronome calling an Ice move (about 8 moves of 340) and then the 10 percent freeze, well under 0.1 percent per turn.
+- **R081 (Memento fails against a target at minimum Attack and Sp. Atk): no design built.** Both stats must be at -6 (`Cmd_trymemento`,
+  `battle_script_commands.c:9072`). Attack -6 takes three Charms (Espeon 446, Latias 798) and Sp. Atk -6 takes three Overheats of an
+  AI Fire set without White Herb, on a target that must survive all six turns; the only Memento set is Weezing 501 and the AI does not
+  use it at -6 (R039 gate), so the user would be the player's Weezing after a switch. Possible in principle, but the chance per seed is far
+  below what a hunter can spend.
+- **R103, R105, R108: not designed in luck1.** Their blockers are a set-up, not luck (R103 needs a cure berry on a Pursuit user, R105 a
+  Synchronize or Serene Grace status forced onto an Immunity / Water Veil / Limber holder, R108 a forced Struggle with a self-KO), and
+  need hand-built Mechanic Lab parties.
+
 How the classes were made: the patterns above, then a reading of every other piece against the C source by eleven
 reading passes, each with the same brief (class (a) or (b) only with a reason that can be pointed to, else (c)). Every
 entry of the classes file names its reason. It is a reading of the source, not a test: a wrong (a) or (b) would hide
