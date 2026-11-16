@@ -4,8 +4,7 @@ import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import castformForms from "../src/assets/gen/castform-forms.json" with { type: "json" };
-import backSprites from "../src/assets/gen/battle-back-sprites.json" with { type: "json" };
-import frontSprites from "../src/assets/gen/battle-opponent-front-sprites.json" with { type: "json" };
+import { backSprites, frontSprites } from "./helpers/battleSprites.ts";
 import {
   battleCommandFieldArtElevation, battleCommandFieldSpriteOrigin, createBattleCommandFieldArtView,
 } from "../src/engine/battleCommandFieldArt.ts";

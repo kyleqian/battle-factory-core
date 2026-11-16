@@ -65,7 +65,8 @@ export function lazyMonPicTable<T extends object>(side: MonPicSide): T {
     ownKeys: () => Reflect.ownKeys(target()),
     getOwnPropertyDescriptor: (_unused, key) => {
       const descriptor = Reflect.getOwnPropertyDescriptor(target(), key);
-      return descriptor === undefined ? undefined : { ...descriptor, configurable: true };
+      // A decode-on-read entry (dl2) is an accessor until first read; report the value so the view stays a plain data table.
+      return descriptor === undefined ? undefined : { value: Reflect.get(target(), key), writable: true, enumerable: descriptor.enumerable, configurable: true };
     },
   });
 }

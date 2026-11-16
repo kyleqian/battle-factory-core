@@ -3,8 +3,7 @@ import { mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import backSpritesData from "../src/assets/gen/battle-back-sprites.json" with { type: "json" };
-import frontSpritesData from "../src/assets/gen/battle-opponent-front-sprites.json" with { type: "json" };
+import { backSprites as backSpritesData, frontSprites as frontSpritesData } from "./helpers/battleSprites.ts";
 import frontierMonsData from "../src/data/gen/battle-frontier-mons.json" with { type: "json" };
 import monPicCoordsData from "../src/data/gen/mon-pic-coords.json" with { type: "json" };
 
@@ -81,8 +80,8 @@ describe("Battle Factory battle-mon pic catalog", () => {
       execFileSync(process.execPath, ["--experimental-strip-types", "tools/extract/extract-battle-mon-pics.ts", "--out-dir", outputDirectory], { stdio: "pipe" });
     }
     for (const relativePath of [
-      "src/assets/gen/battle-back-sprites.json",
-      "src/assets/gen/battle-opponent-front-sprites.json",
+      "src/assets/gen/battle-back-sprite-rows.json",
+      "src/assets/gen/battle-opponent-front-sprite-rows.json",
       "src/data/gen/mon-pic-coords.json",
     ]) {
       expect(readFileSync(join(first, relativePath), "utf8"), `first regeneration ${relativePath}`).toBe(

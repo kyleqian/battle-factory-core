@@ -8,13 +8,14 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { unpackMonPicTable, type PackedMonPicSheets } from "../../src/engine/monPicSheetCodec.ts";
 
 type Rgb = { r: number; g: number; b: number };
 type SpriteTable = Record<string, { palette: Rgb[] }>;
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
 const read = (name: string): SpriteTable =>
-  JSON.parse(readFileSync(join(root, "src", "assets", "gen", name), "utf8")) as SpriteTable;
+  unpackMonPicTable(JSON.parse(readFileSync(join(root, "src", "assets", "gen", name), "utf8")) as PackedMonPicSheets);
 
 export function extractBattleSpritePalettes(back: SpriteTable, front: SpriteTable): { back: Record<string, Rgb[]>; front: Record<string, Rgb[]> } {
   const palettes = (table: SpriteTable): Record<string, Rgb[]> =>
@@ -27,7 +28,7 @@ export function extractBattleSpritePalettes(back: SpriteTable, front: SpriteTabl
 }
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
-  const out = extractBattleSpritePalettes(read("battle-back-sprites.json"), read("battle-opponent-front-sprites.json"));
+  const out = extractBattleSpritePalettes(read("battle-back-sprite-rows.json"), read("battle-opponent-front-sprite-rows.json"));
   const target = join(root, "src", "assets", "gen", "battle-sprite-palettes.json");
   writeFileSync(target, `${JSON.stringify(out)}\n`);
   console.log(`wrote ${target}: ${Object.keys(out.back).length} back + ${Object.keys(out.front).length} front palettes`);

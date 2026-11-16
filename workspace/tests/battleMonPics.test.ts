@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
-import backSprites from "../src/assets/gen/battle-back-sprites.json" with { type: "json" };
-import opponentFrontSprites from "../src/assets/gen/battle-opponent-front-sprites.json" with { type: "json" };
+import { backSprites, frontSprites as opponentFrontSprites } from "./helpers/battleSprites.ts";
 import coords from "../src/data/gen/mon-pic-coords.json" with { type: "json" };
 
 // Oracle cross-check (docs/battle-bringup-notes.md's battle-1 send-out
@@ -35,7 +34,7 @@ describe("battle-back-sprites.json", () => {
 
   it("pins MURKROW's source back-picture geometry and first opaque tile", () => {
     expect(coords.back.MURKROW).toEqual({ width: 48, height: 48, yOffset: 9 });
-    expect(backSprites.MURKROW.tileset.tiles.findIndex((tile) =>
+    expect(backSprites.MURKROW.tileset.tiles.findIndex((tile: number[]) =>
       tile.some((pixel) => pixel !== 0)
     )).toBe(9);
   });
@@ -55,7 +54,7 @@ describe("battle-opponent-front-sprites.json", () => {
   it("pins GROVYLE's front sprite as byte-identical to the oracle's on-screen pixels (0/1693 diff)", () => {
     // Regression pin for the exact tile content confirmed 100% pixel-exact
     // this session - tile 3 is the first non-blank tile in raster order.
-    const firstNonBlank = opponentFrontSprites.GROVYLE.tileset.tiles.findIndex((t) => t.some((v) => v !== 0));
+    const firstNonBlank = opponentFrontSprites.GROVYLE.tileset.tiles.findIndex((t: number[]) => t.some((v) => v !== 0));
     expect(firstNonBlank).toBe(3);
   });
 });

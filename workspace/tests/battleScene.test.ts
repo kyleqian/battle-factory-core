@@ -242,7 +242,7 @@ import {
 } from "../src/engine/turn12ResolutionAdapter.ts";
 import { composeOpponentHealthbox, HEALTHBOX_FRAME_ORIGIN } from "../src/engine/healthboxAssembly.ts";
 import { createInitialState, tick, type EngineState } from "../src/engine/core.ts";
-import grovyleFrontSpritesAsset from "../src/assets/gen/battle-opponent-front-sprites.json" with { type: "json" };
+import { frontSprites as grovyleFrontSpritesAsset } from "./helpers/battleSprites.ts";
 import sendOutHealthboxOpponentAsset from "./fixtures/data/sendout-healthbox-opponent.json" with { type: "json" };
 import battleHealthboxAsset from "../src/assets/gen/battle-healthbox.json" with { type: "json" };
 import ramDump from "./fixtures/data/battle1-turn1-ram-dump.json" with { type: "json" };

@@ -21,7 +21,9 @@
 import { readFileSync } from "node:fs";
 import { PNG } from "pngjs";
 import { runOracleTrace, type Trace } from "../compare/oracleClient.ts";
-import opponentFrontSpritesAsset from "../../src/assets/gen/battle-opponent-front-sprites.json" with { type: "json" };
+import { bundledMonPicTables } from "../../src/engine/monPicPixelsInstall.ts";
+
+const opponentFrontSpritesAsset = bundledMonPicTables().front;
 import battleBgAsset from "../../src/assets/gen/battle-bg.json" with { type: "json" };
 
 const TRACE_PATH = "tools/compare/traces-groundtruth/battle1-turn10-dense.json";

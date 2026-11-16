@@ -30,7 +30,9 @@
 //
 // Usage: node --experimental-strip-types tools/probe/verify-turn13-frame2.ts
 import turn13MurkrowFrame2VramDump from "../../tests/fixtures/data/turn13-murkrow-frame2-vram-dump.json" with { type: "json" };
-import opponentFrontSprites from "../../src/assets/gen/battle-opponent-front-sprites.json" with { type: "json" };
+import { bundledMonPicTables } from "../../src/engine/monPicPixelsInstall.ts";
+
+const opponentFrontSprites = bundledMonPicTables().front as Record<string, any>;
 
 interface VramTick {
   tick: number; // RAM tick (render = RAM + 1, same convention as dump-turn13-murkrow-materialize.py)

@@ -13,6 +13,9 @@
 //   node --experimental-strip-types tools/extract/extract-battle-mon-pics.ts
 //
 // Never imported at runtime - the production build only reads its JSON output.
+// The two pixel sheets are written packed (src/engine/monPicSheetCodec.ts, docs/dl2-sprite-repack.md): one string per species,
+// image rows at one hex digit per pixel, palette as 5-bit digits. src/assets/gen/battle-back-sprites.json and
+// battle-opponent-front-sprites.json (the former tile JSON) no longer exist; tests/dl2SpriteRepack.test.ts pins their old bytes.
 
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, isAbsolute, join } from "node:path";
@@ -20,6 +23,7 @@ import { fileURLToPath } from "node:url";
 import { decodeIndexedPng } from "./indexedPng.ts";
 import { sliceTiles } from "./tiles.ts";
 import { loadJascPal } from "./jascPal.ts";
+import { encodeMonPicSheet } from "../../src/engine/monPicSheetCodec.ts";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const RUN_ROOT = join(HERE, "..", "..");
@@ -176,18 +180,22 @@ function appendCatalogSpecies(established: Record<string, string>): string[] {
   return [...Object.keys(established), ...catalogSpecies.filter((species) => !(species in established))];
 }
 
+function packSheets(table: Record<string, Sprite & { frame2?: Sprite["tileset"] }>): Record<string, string> {
+  return Object.fromEntries(Object.entries(table).map(([species, sprite]) => [species, encodeMonPicSheet(sprite)]));
+}
+
 const backSprites: Record<string, Sprite> = {};
 for (const species of appendCatalogSpecies(ESTABLISHED_BACK_ORDER)) {
   backSprites[species] = loadPic(sourceForSpecies(species), "back.png");
 }
-writeJson(join(ASSETS_GEN, "battle-back-sprites.json"), backSprites);
+writeJson(join(ASSETS_GEN, "battle-back-sprite-rows.json"), packSheets(backSprites));
 
 const opponentFrontSprites: Record<string, Sprite & { frame2?: { columns: number; rows: number; tiles: number[][] } }> = {};
 for (const species of appendCatalogSpecies(ESTABLISHED_FRONT_ORDER)) {
   const source = sourceForSpecies(species);
   opponentFrontSprites[species] = loadBattleFrontPic(source, !ONE_FRAME_ANIMATION_SPECIES.has(species));
 }
-writeJson(join(ASSETS_GEN, "battle-opponent-front-sprites.json"), opponentFrontSprites);
+writeJson(join(ASSETS_GEN, "battle-opponent-front-sprite-rows.json"), packSheets(opponentFrontSprites));
 
 // --- gMonBackPicCoords / gMonFrontPicCoords, in full -------------------------
 // Struct literal: [SPECIES_X] = { .size = MON_COORDS_SIZE(w, h), .y_offset = N },

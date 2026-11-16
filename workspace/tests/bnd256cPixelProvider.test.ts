@@ -3,8 +3,7 @@
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { describe, expect, it, vi } from "vitest";
-import backSprites from "../src/assets/gen/battle-back-sprites.json" with { type: "json" };
-import frontSprites from "../src/assets/gen/battle-opponent-front-sprites.json" with { type: "json" };
+import { backSprites, frontSprites } from "./helpers/battleSprites.ts";
 import speciesAsset from "../src/data/gen/species-stats.json" with { type: "json" };
 import { createBattleCommandFieldArtView } from "../src/engine/battleCommandFieldArt.ts";
 import { backPixels, frontPixels, installMonPicPixels, monPicPixelsInstalled, type MonPicPixelTables } from "../src/engine/monPicPixels.ts";
@@ -81,7 +80,7 @@ const strip = (source: string) => source.replace(/\/\*[\s\S]*?\*\//g, "").replac
 describe("bnd256c static ratchets", () => {
   it("battleCommandFieldArt.ts imports no sprite pixel JSON", () => {
     const source = strip(readFileSync(resolve(root, "src/engine/battleCommandFieldArt.ts"), "utf8"));
-    expect(source).not.toMatch(/battle-back-sprites|battle-opponent-front-sprites|party-mon-icons/);
+    expect(source).not.toMatch(/battle-back-sprite-rows|battle-opponent-front-sprite-rows|battle-back-sprites|battle-opponent-front-sprites|party-mon-icons/);
     expect(strip(readFileSync(resolve(root, "src/engine/monPicPixels.ts"), "utf8"))).not.toMatch(/\.json/);
   });
 

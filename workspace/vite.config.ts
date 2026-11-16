@@ -85,7 +85,7 @@ export function manualChunks(id: string): string | undefined {
   const rel = id.slice(at + 5);
   if (rel.startsWith("assets/gen/audio/")) return "audio-data"; // aud245: only the lazy player imports these; keep them out of the shared assets-gen chunk
   if (rel.startsWith("assets/gen/")) {
-    return /battle-opponent-front-sprites|battle-back-sprites/.test(rel) ? "assets-sprites" : "assets-gen";
+    return /battle-opponent-front-sprite-rows|battle-back-sprite-rows/.test(rel) ? "assets-sprites" : "assets-gen";
   }
   if (rel.startsWith("animation/assets/")) return "animation-assets";
   if (rel.startsWith("data/gen/")) return rel.startsWith("data/gen/battle-script-") ? "data-battle-script" : "data-gen";

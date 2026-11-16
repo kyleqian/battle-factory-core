@@ -3,7 +3,7 @@
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import frontSprites from "../src/assets/gen/battle-opponent-front-sprites.json" with { type: "json" };
+import { frontSprites } from "./helpers/battleSprites.ts";
 import type { FactoryEvent } from "../src/factoryContract.ts";
 
 const root = resolve(import.meta.dirname, "..");
@@ -183,7 +183,7 @@ describe("bnd257d static ratchets", () => {
         const file = resolve(dir, entry.name);
         if (entry.isDirectory()) {
           if (entry.name !== "assets") walk(file);
-        } else if (file.endsWith(".ts") && /battle-back-sprites|battle-opponent-front-sprites/.test(strip(readFileSync(file, "utf8")))) {
+        } else if (file.endsWith(".ts") && /battle-back-sprite-rows|battle-opponent-front-sprite-rows|battle-back-sprites|battle-opponent-front-sprites/.test(strip(readFileSync(file, "utf8")))) {
           hits.push(file.slice(root.length + 1));
         }
       }
@@ -195,8 +195,8 @@ describe("bnd257d static ratchets", () => {
   it("party-mon-icons is not in the sprite manual chunk", async () => {
     const { manualChunks } = await import("../vite.config.ts");
     expect(manualChunks("/x/src/assets/gen/party-mon-icons.json")).toBe("assets-gen");
-    expect(manualChunks("/x/src/assets/gen/battle-back-sprites.json")).toBe("assets-sprites");
-    expect(manualChunks("/x/src/assets/gen/battle-opponent-front-sprites.json")).toBe("assets-sprites");
+    expect(manualChunks("/x/src/assets/gen/battle-back-sprite-rows.json")).toBe("assets-sprites");
+    expect(manualChunks("/x/src/assets/gen/battle-opponent-front-sprite-rows.json")).toBe("assets-sprites");
   });
 
   // Needs `npm run build:lib` (dist-lib is git-ignored): the entry's static import graph never reaches the sprite chunk; the installer chunk does.

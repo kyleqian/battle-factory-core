@@ -4,8 +4,7 @@
 // re-extraction of either sprite table without re-running the palette
 // extractor fails here instead of drifting the live move palettes.
 import { describe, expect, it } from "vitest";
-import backSprites from "../src/assets/gen/battle-back-sprites.json" with { type: "json" };
-import frontSprites from "../src/assets/gen/battle-opponent-front-sprites.json" with { type: "json" };
+import { backSprites, frontSprites } from "./helpers/battleSprites.ts";
 import palettes from "../src/assets/gen/battle-sprite-palettes.json" with { type: "json" };
 import { extractBattleSpritePalettes } from "../tools/extract/extract-battle-sprite-palettes.ts";
 
