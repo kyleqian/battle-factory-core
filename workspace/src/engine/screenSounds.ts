@@ -120,7 +120,7 @@ function restoreBgm(bgm: number): void {
 }
 
 /** PlayCry_ByMode: PlayCryInternal ducks the BGM, starts the cry; Task_DuckBGMForPokemonCry restores when the cry ends. */
-function startCry(bgm: number, species: number, mode: number, pan: number, restoreDelay?: number, onRestore?: () => void): void {
+function startCry(bgm: number, species: number, mode: number, pan: number, restoreDelay?: number, onRestore?: (restoreFrames: number) => void): void {
   emitSound({ kind: "duck", id: bgm, pan: null, volume: BGM_DUCK_VOLUME });
   emitSound({ kind: "cry", id: species, pan, mode, volume: CRY_VOLUME, priority: CRY_PRIORITY });
   crySerial += 1;
@@ -129,11 +129,12 @@ function startCry(bgm: number, species: number, mode: number, pan: number, resto
   // IsCryPlaying turns false one frame after the cry's last sample frame (cryModeFrames.ts: every Factory species, NORMAL and WEAK).
   const length = restoreDelay ?? (mode === CRY_MODE_WEAK ? CRY_WEAK_FRAMES[species] : CRY_NORMAL_FRAMES[species]);
   if (length === undefined) return;
-  scheduleAfter(restoreDelay ?? length + 1, () => {
+  const restoreFrames = restoreDelay ?? length + 1;
+  scheduleAfter(restoreFrames, () => {
     if (ducking?.serial !== serial) return;
     ducking = null;
     restoreBgm(bgm);
-    onRestore?.();
+    onRestore?.(restoreFrames);
   });
 }
 
@@ -157,7 +158,7 @@ export function scheduleAnimTaskBgmRestore(bgm: number, delay: number): void {
 }
 
 /** Task_PlayCryWhenReleasedFromBall: the send-out cry at pan +25 (opponent) / -25 (player), NORMAL or WEAK by the mon's HP and status. */
-export function playSendOutCry(bgm: number, species: number, mode: number, pan: number, onRestore?: () => void): void {
+export function playSendOutCry(bgm: number, species: number, mode: number, pan: number, onRestore?: (restoreFrames: number) => void): void {
   startCry(bgm, species, mode, pan, undefined, onRestore);
 }
 
