@@ -251,7 +251,13 @@ export function advanceFactoryLobbyFreeRoam(
   if (state.bumpElapsed > 0) {
     // TryInterruptObjectEventSpecialAnim (field_player_avatar.c:353): the walk-in-place bump is cut short on any frame where the SAME
     // direction is held and CheckForPlayerAvatarStaticCollision is clear again (a wanderer left the tile), and the step starts that frame.
-    // A wall never clears; a released or different direction does not interrupt here (the cycle runs out).
+    // A wall never clears; a released direction does not interrupt here (the cycle runs out).
+    // lbw5: a DIFFERENT held direction interrupts at once (`movementDirection != direction`: ObjectEventClearHeldMovement), and the runningState
+    // is still MOVING, so there is no turn in place: the new direction's step (or bump) starts on that frame, at the GO anim's first pose.
+    if (heldDir !== null && heldDir !== state.facing) {
+      const started = startStep({ ...state, bumpElapsed: 0, facing: heldDir, heldDir, pendingDir: null }, heldDir, false, live);
+      return Object.freeze({ ...started, animClock: started.stepRemaining > 0 ? 4 * LOBBY_FREE_ROAM_POSE_FRAMES - 1 : started.animClock });
+    }
     if (heldDir === state.facing) {
       const { dx, dy } = DIR_DELTA[heldDir];
       if (isFactoryLobbyCellWalkable(state.x + dx, state.y + dy, live)) {
@@ -265,24 +271,13 @@ export function advanceFactoryLobbyFreeRoam(
     }
     // Border bump (act 25): the sprite freezes facing the blocked direction
     // while the 16-frame cycle counts. A completed cycle re-arms only while
-    // the same direction is still held (§7b/§7f); a release settles and a
-    // new held direction turns at the boundary.
+    // the same direction is still held (§7b/§7f); a release settles (a
+    // different held direction never gets here: it interrupted above).
     if (state.bumpElapsed % LOBBY_FREE_ROAM_BUMP_FRAMES === 0) {
       if (heldDir === state.facing) {
         return Object.freeze({
           ...state,
           bumpElapsed: state.bumpElapsed + 1,
-          heldDir,
-          pendingDir: null,
-        });
-      }
-      if (heldDir !== null) {
-        return Object.freeze({
-          ...state,
-          bumpElapsed: 0,
-          turnRemaining: LOBBY_FREE_ROAM_TURN_FRAMES,
-          turnTarget: heldDir,
-          animClock: 0,
           heldDir,
           pendingDir: null,
         });
