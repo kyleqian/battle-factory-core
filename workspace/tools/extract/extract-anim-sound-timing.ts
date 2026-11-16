@@ -157,6 +157,10 @@ function paletteFadeCalls(delay: number, startY: number, targetY: number): numbe
   }
   return calls + 5;
 }
+function cycleNumBlends(cmd: { op: string; args: string[] }): number | null {
+  const named = cmd.args.find((a) => a.startsWith("num_blends="));
+  return intArg(cmd.op === "createvisualtask" ? cmd.args[4] : named);
+}
 function blendColorCycleLength(delay: number, numBlends: number, initialY: number, targetY: number): number {
   if (numBlends < 1) return -1;
   let exact = 0;
@@ -581,6 +585,9 @@ function lifetimeOf(cmd: Command, attackerSide: number, pic: PicContext): Lifeti
   // gone max(d, 0) ticks after F. AnimSparkElectricityFlashing (:629-666): the init runs the step itself in call 0 (data[0] = args[6] is checked, then decremented), call k checks d - k;
   // destroyed at call max(d, 0), gone max(d, 0) - 1 ticks after F (the data[4] = args[10] & 0x7FFF modulus never affects the lifetime).
   if (sprite("gThunderboltOrbSpriteTemplate")) { const d = intArg(args[3]); return d === null ? null : { exact: Math.max(d, 0) }; }
+  // aud242n: AnimSparkElectricity (:515-569) sets data[0] = gBattleAnimArgs[3] (script args[6]) and installs DestroyAnimSpriteAfterTimer (battle_anim_flying.c:539-551), which
+  // runs from the next call: call k >= 1 destroys when data[0]-- <= 0, i.e. at call max(d, 0) + 1, gone max(d, 0) ticks after F. Args 0..2 and 4..6 only place and rotate it.
+  if (sprite("gSparkElectricitySpriteTemplate")) { const d = intArg(args[6]); return d === null ? null : { exact: Math.max(d, 0) }; }
   if (sprite("gSparkElectricityFlashingSpriteTemplate")) { const d = intArg(args[6]); return d === null ? null : { exact: Math.max(d, 0) - 1 }; }
   // AnimTask_SwayMon (battle_anim_mon_movement.c:751-815): the entry only sets func (data[11] = 0, data[12] = 1); the step's call k adds `period` (script args[4], as a u16) to the
   // sine index, waveIndex = index >> 8, and a half-wave crossing (waveIndex >= 0x80 while data[12] == 1, or < 0x7f while data[12] == 0) flips the state and decrements the
@@ -837,6 +844,7 @@ function walk(bodyLabel: string, turn: number, attackerSide: number, pic: PicCon
   // gPaletteFade is one shared object: a BeginNormalPaletteFade while another normal / hardware fade is active returns FALSE (palette.c:156-163), so a color cycle that
   // overlaps another fade is left unmodelled. `fadeBusy` = the last iteration a normal fade (simple_palette_blend / color cycle) of this walk may be active.
   let fadeBusy = -1;
+  let fadeChain = false;
   // aud242i: `waitsound` keeps the script frame unknown within [frame, soundWait] (soundWait = the upper bound of the last SE's end, seBound); only a following
   // waitforvisualfinish whose exact finish is at or after it makes the frame exact again. seUnknown: an SE the table cannot bound (panse / sound task / unknown song) or a
   // creation whose callback can play one; no waitsound resolves after it.
@@ -877,8 +885,17 @@ function walk(bodyLabel: string, turn: number, attackerSide: number, pic: PicCon
       let life = lifetimeOf(cmd, attackerSide, pic);
       const colorCycle = op === "blend_color_cycle" || op === "blend_color_cycleexclude" || op === "blend_color_cyclebytag" || (op === "createvisualtask" && /^AnimTask_BlendColorCycle/.test(args[0] ?? ""));
       if (frame !== null && life !== null && "exact" in life && (colorCycle || op === "simple_palette_blend" || (op === "createsprite" && args[0] === "gSimplePaletteBlendSpriteTemplate"))) {
-        if (colorCycle && (frame <= fadeBusy || (fade !== null && frame < fade + FADE_IN_DONE))) life = null;
-        else fadeBusy = Math.max(fadeBusy, frame + life.exact);
+        const cycleBlends = colorCycle ? cycleNumBlends(cmd) : null;
+        if (colorCycle && fade !== null && frame < fade + FADE_IN_DONE) life = null;
+        else if (colorCycle && frame <= fadeBusy) {
+          // aud242n: a one-blend cycle created while a one-fade chain is active is refused (palette.c:156-163): tNumBlends goes to 0 without a fade (battle_anim_normal.c:464-466),
+          // and AnimTask_BlendColorCycleLoop destroys it in the RunTasks of the iteration the running fade clears `active` (fadeBusy), starting nothing. A refused cycle
+          // does not extend the busy window. A multi-blend cycle in the window can start the next fade in that same RunTasks, so those stay unmodelled.
+          life = cycleBlends === 1 && !fadeChain ? { exact: fadeBusy - frame } : null;
+        } else {
+          fadeBusy = Math.max(fadeBusy, frame + life.exact);
+          fadeChain = cycleBlends !== null && cycleBlends > 1;
+        }
       }
       if (frame !== null) pending.push({ at: frame, life, name: op === "createsprite" || op === "createvisualtask" ? args[0] ?? op : op });
       const known = returnValue(args[0] ?? "", attackerSide);
