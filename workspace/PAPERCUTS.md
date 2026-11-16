@@ -2023,3 +2023,9 @@ current app stage should be rejected before replay.
 - **Hunter (`tools/replay-hunt/`) gaps**: cover entries sharing a label, no seed cap, no stall warning, no duplicate item / species check (rrh1-rrh3
   fixed each in turn; ~60 min total across the three batches).
 - **`claude-sonnet-5-5` prints `[claude-code:unrecognized_model]` at worker start** — harmless, workers run normally.
+
+## 2026-11-16 night run (CAX31 supervisor)
+
+- **A fresh `git worktree add` for the pinned nightly replay lacks the ignored `reference/pokeemerald` link and `node_modules`** (supervisor): every
+  seed failed in seconds with `mGBA could not load ROM` and the run "finished" 113 / 113 failed. Fix: `ln -s /srv/pokebench/vendor/pokeemerald
+  <wt>/workspace/reference/pokeemerald` and `ln -s <main>/node_modules <wt>/workspace/node_modules`, then drive one seed by hand before the batch. ~10 min.
