@@ -60,7 +60,7 @@ describe("lbw4: the free-roam player and the wandering woman share the ROM's col
       const label = `frame ${fx.start + 1 + i}`;
       rng = advanceRngValue(rng);
       const before = npcs;
-      player = advanceFactoryLobbyFreeRoam(player, { heldDirs: down === 1 ? ["south"] : [], npcs: lobbyNpcTilesForPlayer(npcs) }) as FactoryLobbyFreeRoamState;
+      player = advanceFactoryLobbyFreeRoam(player, { heldDirs: new Set(down === 1 ? (["south"] as const) : []), npcs: lobbyNpcTilesForPlayer(npcs) }) as FactoryLobbyFreeRoamState;
       const step = stepLobbyNpcsTick(npcs, rng, false, player);
       npcs = step.npcs;
       rng = step.rngValue;
