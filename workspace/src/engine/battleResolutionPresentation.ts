@@ -411,7 +411,7 @@ export type BattleSwitchInTiming = Readonly<{ minimumFrames: number }>;
 export type BattleSpriteVisibilityTiming = Readonly<{
   minimumFrames: 1 | typeof FORCED_RETURN_TO_BALL_SEND_IN_GAP_FRAMES | typeof SCENE_OFF_BATON_PASS_RETURN_TO_BALL_PRINT_GAP_FRAMES;
 }>;
-export type BattleTurnEndTiming = Readonly<{ minimumFrames: 8 }>;
+export type BattleTurnEndTiming = Readonly<{ minimumFrames: 8 | 9 }>;
 export type BattleTrainerSlideTiming = Readonly<{ minimumFrames: 38 }>;
 
 export type BattleResolutionPresentationCommand =
@@ -1616,14 +1616,44 @@ const HP_TIMING = Object.freeze({ minimumFrames: 28 } as const);
  * other `datahpupdate; printfromtable`, Leech Seed's turn-end drain, has no ROM window here).
  */
 const HP_PRINT_TAIL_FRAMES = 3;
-function hpPrintTailTiming(event: BattleKernelSemanticEvent): BattleHpTiming {
+function hpPrintTailTiming(event: BattleKernelSemanticEvent, events?: readonly BattleKernelSemanticEvent[], index?: number): BattleHpTiming {
   const programCounter = event.provenance?.programCounter;
   if (programCounter === undefined) return HP_TIMING;
   const at = (offset: number) => BATTLE_SCRIPT_PROGRAM.instructions[programCounter + offset]?.opcodeName;
   return at(0) === "B_SCR_OP_DATAHPUPDATE" && at(1) === "B_SCR_OP_PRINTFROMTABLE" && at(-1) === "B_SCR_OP_HEALTHBARUPDATE"
     && at(-2) === "B_SCR_OP_WAITANIMATION" && at(-3) === "B_SCR_OP_ATTACKANIMATION"
-    ? Object.freeze({ minimumFrames: 28, tailFrames: HP_PRINT_TAIL_FRAMES } as const) : HP_TIMING;
+    ? Object.freeze({ minimumFrames: 28, tailFrames: HP_PRINT_TAIL_FRAMES } as const)
+    : at(0) === "B_SCR_OP_DATAHPUPDATE" && at(-1) === "B_SCR_OP_HEALTHBARUPDATE" && at(-2) === "B_SCR_OP_ORWORD"
+      && at(-3) === "B_SCR_OP_WAITMESSAGE" && at(-4) === "B_SCR_OP_PRINTSTRING"
+      ? (at(1) === "B_SCR_OP_RETURN" && events !== undefined && index !== undefined && healContinuesMoveScript(events, index) ? SHELL_BELL_HP_TIMING : ITEM_HEAL_HP_TIMING) : HP_TIMING;
 }
+/** hie4: the heal's script (its `playanimation` event on Scene ON, else its print) runs in the same script run as the event before it (its execution count did not restart). */
+function healContinuesMoveScript(events: readonly BattleKernelSemanticEvent[], hpChangeIndex: number): boolean {
+  for (let i = hpChangeIndex - 1; i > 0; i -= 1) {
+    const payload = events[i]!.payload;
+    if (payload.kind !== "message") continue;
+    const animation = events[i - 1]!.payload;
+    const start = animation.kind === "animation" && animation.animationId === "HELD_ITEM_EFFECT" && i > 1 ? i - 1 : i;
+    const execution = events[start]!.provenance?.instructionExecution;
+    const before = events[start - 1]!.provenance?.instructionExecution;
+    return execution !== undefined && before !== undefined && execution > before;
+  }
+  return false;
+}
+/**
+ * hie4 (ISSUES #220 post-heal tail): `BattleScript_ItemHealHP_Ret` / `_RemoveItem` / `BerryConfuseHealEnd2` (and Wish's heal) run `printstring; waitmessage;
+ * orword; healthbarupdate; datahpupdate` with no `attackanimation; waitanimation` in front: the 28-row floor belongs to the ordinary hit's script (lsd194 §2.1), so
+ * the bar is its own `battleHealthBarAnimationFrames + 1` (a Leftovers / Shell Bell heal is a few pixels, 21 rows shorter than the floor). Bars longer than 27 rows are unchanged.
+ */
+const ITEM_HEAL_HP_TIMING = Object.freeze({ minimumFrames: 0 } as const);
+/**
+ * hie4: Shell Bell's `ItemHealHP_Ret` is a `call` out of the move script's `moveend`, so the heal returns into `moveend; end` and the turn-action machine
+ * (Leftovers / the berries restart a script that `end2`s straight back into the end-turn loop): 3 rows more before the action prompt, measured in both scenes
+ * (hie1-shellbell-{off,on}: ROM text run 82 vs the end2 path's 79).
+ */
+const SHELL_BELL_HP_TIMING = Object.freeze({ minimumFrames: 0, tailFrames: 3 } as const);
+/** hie4: ... and the blank box run before the prompt is 1 row longer than the end2 path's (ROM 7 vs 6, both scenes): turn-end 9 after a Shell Bell heal. */
+const SHELL_BELL_TURN_END_TIMING = Object.freeze({ minimumFrames: 9 } as const);
 /**
  * lsd194 (docs/lsd194-print-floor-and-drain.md; lsd186 receipts, 6 ROM cases: 3 scenarios x both scenes, twice-fresh): the turn-end Leech
  * Seed drain, `BattleScript_LeechSeedTurnDrain` (`playanimation; orword; healthbarupdate; datahpupdate; copyword; jumpifability;
@@ -4798,7 +4828,7 @@ export function projectBattleResolutionCommands(
         to: payload.to,
         healthValue: health.healthValue,
         timing: drainRole === "seeded" ? LEECH_SEED_DRAIN_SEEDED_HP_TIMING
-          : drainRole === "receiver" ? LEECH_SEED_DRAIN_RECEIVER_HP_TIMING : hpPrintTailTiming(event),
+          : drainRole === "receiver" ? LEECH_SEED_DRAIN_RECEIVER_HP_TIMING : hpPrintTailTiming(event, events, index),
       }));
       if (payload.to === 0) zeroHpBattlers.add(battler);
       continue;
@@ -5189,7 +5219,11 @@ export function projectBattleResolutionCommands(
   if (!commands.some(
     (command) => command.type === "message" && command.advance === "button",
   )) {
-    commands.push(Object.freeze({ type: "turn-end", timing: TURN_END_TIMING }));
+    const lastHp = commands[commands.length - 1];
+    commands.push(Object.freeze({
+      type: "turn-end",
+      timing: lastHp?.type === "hp" && lastHp.timing === SHELL_BELL_HP_TIMING ? SHELL_BELL_TURN_END_TIMING : TURN_END_TIMING,
+    }));
   }
   return Object.freeze(commands);
 }
