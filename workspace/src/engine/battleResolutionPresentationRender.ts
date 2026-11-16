@@ -28,7 +28,9 @@ import {
   BATTLE_COMMAND_ACTION_PROMPT_SUFFIX,
 } from "./battleCommandPresentationRender.ts";
 import {
+  battleCommandFieldArtElevation,
   createBattleCommandFieldArtView,
+  type BattleCommandFieldArtBattler,
   type BattleCommandFieldArtView,
 } from "./battleCommandFieldArt.ts";
 import type {
@@ -259,9 +261,9 @@ export const MID_BATTLE_SWITCH_OUT_SCALE_STEP = 48;
  * 304->3, 352->5, 400->7, 448->8, 496->9, 544->10, 592->11, 640->11, 688->12,
  * 736->12. The feet anchor keeps the sprite's feet on the ground as it grows.
  */
-export function midBattleSwitchOutFeetAnchorY2(scale: number): number {
+export function midBattleSwitchOutFeetAnchorY2(scale: number, yOffset = 13): number {
   if (scale <= MID_BATTLE_SWITCH_OUT_SCALE_START) return 0;
-  const varr = 64 - 2 * 13;
+  const varr = 64 - 2 * yOffset;
   const shift = Math.floor((varr << 8) / scale);
   return Math.floor((varr - shift) / 2);
 }
@@ -299,6 +301,8 @@ export type MidBattleSwitchOutView = Readonly<{
 export function midBattleSwitchOutAt(
   elapsed: number,
   battler: 0 | 1,
+  /** ais2: `GetBattlerYDeltaFromSpriteId` of the recalled battler (default: the player RATTATA back-pic 13 of the staged fixture). */
+  yOffset = 13,
 ): MidBattleSwitchOutView {
   const renderedElapsed = elapsed - 2;
   const inWindow = renderedElapsed >= MID_BATTLE_SWITCH_OUT_SCALE_UP_ELAPSED
@@ -312,7 +316,7 @@ export function midBattleSwitchOutAt(
     elapsed,
     battler,
     scale,
-    y2: midBattleSwitchOutFeetAnchorY2(scale),
+    y2: midBattleSwitchOutFeetAnchorY2(scale, yOffset),
     spriteVisible: renderedElapsed < MID_BATTLE_SWITCH_OUT_SPRITE_FREED_ELAPSED,
   });
 }
@@ -814,6 +818,8 @@ export const MID_BATTLE_SWITCH_SEND_IN_PARTICLE_START_TRACE = 1187; // send-in s
 export function midBattleSwitchParticleSchedulesAt(
   traceFrame: number,
   window: "recall" | "send-in",
+  /** ais2: false = no stolen update tick (the opponent's recall: the party-summary sprite-sheet work of the player's staged fixture is absent). */
+  recallStolenTick = true,
 ): readonly MidBattleSwitchParticle[] {
   const start = window === "recall"
     ? MID_BATTLE_SWITCH_RECALL_PARTICLE_START_TRACE
@@ -832,13 +838,13 @@ export function midBattleSwitchParticleSchedulesAt(
     // THROUGH the destroy-tick's rendered frame (the frame showing the tick
     // before the destroy), so the alive test is `traceFrame > destroyTick`.
     const destroyTick = window === "recall"
-      ? start + 26 + i + (i >= 6 ? 1 : 0)
+      ? start + 26 + i + (recallStolenTick && i >= 6 ? 1 : 0)
       : start + 27 + i;
     if (traceFrame > destroyTick) continue;
     const age = traceFrame - start - 2 - i;
     if (age < 0) continue;
     const frozen =
-      (window === "recall" && traceFrame >= 1122 && i >= 6)
+      (window === "recall" && recallStolenTick && traceFrame >= 1122 && i >= 6)
       || (window === "send-in" && traceFrame >= 1205);
     out.push(Object.freeze({ i, age, frozen, dx: 0, dy: 0 }));
   }
@@ -860,6 +866,17 @@ export type MidBattleSwitchFadeAt = Readonly<{ bg: number; obj: number }>;
  * though each spans several presentation commands.
  */
 export const MID_BATTLE_SWITCH_FADE_BASE_TRACE = 1035;
+/** ais2: the staged voluntary fixture's trace frame of the recall (`switch-out`) command's elapsed 0 (CONTROLLER_RETURNMONTOBALL, 1086). */
+export const MID_BATTLE_SWITCH_OUT_TRACE = 1086;
+const MID_BATTLE_SWITCH_RECALL_END_TRACE = 1140;
+
+/**
+ * ais2: `GetBattlerYDeltaFromSpriteId` of the opponent (battle_anim_mons.c:1897-1941): `gMonFrontPicCoords[species].y_offset`, or
+ * `sCastformElevations[form]` for a CASTFORM. `SetBattlerSpriteYOffsetFromYScale`'s feet anchor reads it.
+ */
+export function opponentBattlerYDelta(art: BattleCommandFieldArtBattler): number {
+  return art.castformForm !== undefined ? battleCommandFieldArtElevation(art, "opponent") : art.coords.yOffset;
+}
 
 /**
  * ISSUES #78 residual (1): the mid-battle switch white ball-fade, ported as a
@@ -892,6 +909,8 @@ export const MID_BATTLE_SWITCH_FADE_BASE_TRACE = 1035;
  */
 export function midBattleSwitchFadeAt(
   traceFrame: number,
+  /** ais2: false = the recall's white-out without the frame-1121 stolen tick (the opponent's recall). */
+  recallStolenTick = true,
 ): MidBattleSwitchFadeAt | null {
   // The §8.3 tables are the fade's per-tick STATE; the oracle's rendered
   // frame lags one tick behind them, so each coefficient is the table value
@@ -899,7 +918,7 @@ export function midBattleSwitchFadeAt(
   const inRecall = traceFrame >= 1088 && traceFrame <= 1139;
   if (inRecall) {
     return Object.freeze({
-      bg: recallWhiteCoefficientAtFrame(traceFrame - 2),
+      bg: recallWhiteCoefficientAtFrame(traceFrame - 2, recallStolenTick),
       obj: Math.max(0, Math.min(16, traceFrame - 1090)),
     });
   }
@@ -915,7 +934,7 @@ export function midBattleSwitchFadeAt(
   return null;
 }
 
-function recallWhiteCoefficientAtFrame(frame: number): number {
+function recallWhiteCoefficientAtFrame(frame: number, stolenTick = true): number {
   const k = frame - 1088;
   if (k < 0) return 0;
   if (k <= 16) return 2 * Math.floor((k + 1) / 2); // white in 1088-1104
@@ -924,8 +943,8 @@ function recallWhiteCoefficientAtFrame(frame: number): number {
     // White out 1110-1126. The frame-1121 stolen tick (heavy party-summary
     // sprite-sheet work) skips that frame's update: y holds at 6 for three
     // ticks (1119-1121), and the remaining steps shift one frame later.
-    if (k === 33) return 6;
-    const shifted = k >= 34 ? k - 1 : k;
+    if (stolenTick && k === 33) return 6;
+    const shifted = stolenTick && k >= 34 ? k - 1 : k;
     return 16 - 2 * Math.ceil((shifted - 22) / 2);
   }
   return 0; // finishing 1128-1131 clears, then idle
@@ -1160,7 +1179,7 @@ export type BattleResolutionPresentationRenderView = Readonly<{
    * colored). The message window and both healthboxes are never faded. Null
    * outside the windows.
    */
-  midBattleSwitchFade: Readonly<{ bg: number; obj: number }> | null;
+  midBattleSwitchFade: Readonly<{ bg: number; obj: number; /** ais2: the battler whose OBJ row `obj` blends (default 0, the player's recall / send-in). */ objBattler?: 0 | 1 }> | null;
   /**
    * §10.2 residual 1b: the mid-battle switch ball-open particles (recall
    * 1089-1130 base (72,112) prio 2, send-in 1187-1228 base (72,123) prio 1).
@@ -1169,10 +1188,12 @@ export type BattleResolutionPresentationRenderView = Readonly<{
    */
   midBattleSwitchParticles: Readonly<{
     /** snd145: "opponent-send-in" = an opponent switch-in's burst at the opponent ball (base (176,59), prio 1, no terrain clip). */
-    window: "recall" | "send-in" | "opponent-send-in";
+    window: "recall" | "send-in" | "opponent-send-in" | "opponent-recall";
     schedules: readonly MidBattleSwitchParticle[];
     /** pfb229: a Scene ON player send-in's species-keyed burst y (omitted = the fitted 119). */
     originY?: number;
+    /** ais2: the "opponent-recall" burst's drawn origin (base (176, 72) = GetBattlerSpriteCoord + 32, less the 8x8 tile's 4). */
+    originX?: number;
   }> | null;
   /**
    * The terminal win/loss-text trainer slide-in/out, generic across any
@@ -2064,6 +2085,9 @@ export function createBattleResolutionPresentationRenderView(
   // obr251: the opponent summary's age, summed over completed commands: since its draw began (incl. the script lead, subtracted at
   // the end) and, once hidden, since its hide began (Task_HidePartyStatusSummary_DuringBattle's fade outlives the hide command).
   let summary = null as OpponentSummaryAge | null;
+  // ais2: frames since the opponent's recall (`switch-out`) began, summed over completed commands: the ball effect (AnimTask_SwitchOutBallEffect's
+  // white fade, mon tint and particles) outlives that 32-frame command into the sprite-visibility / party-summary commands that follow.
+  let opponentRecallSince: number | null = null;
   const fainted = new Set<0 | 1>();
   const spriteVisibility = new Map<0 | 1, boolean>([[0, true], [1, true]]);
   // Recalled battlers (real CONTROLLER_RETURNMONTOBALL receipts) lose their
@@ -2193,14 +2217,24 @@ export function createBattleResolutionPresentationRenderView(
   }
   for (let index = 0; index < state.commandIndex; index += 1) {
     const completed = segment.commands[index]!;
-    if (summary !== null) {
+    if (summary !== null || opponentRecallSince !== null) {
       let frames: number;
       try {
         frames = battleResolutionCommandDuration(completed, field);
       } catch {
         frames = battleResolutionCommandFallbackDuration(completed);
       }
-      summary = Object.freeze({ ...summary, sinceDraw: summary.sinceDraw + frames, sinceHide: summary.sinceHide === null ? null : summary.sinceHide + frames });
+      if (summary !== null) summary = Object.freeze({ ...summary, sinceDraw: summary.sinceDraw + frames, sinceHide: summary.sinceHide === null ? null : summary.sinceHide + frames });
+      if (opponentRecallSince !== null) opponentRecallSince += frames;
+    }
+    if (completed.type === "switch-out" && completed.battler === 1 && !completed.targetAtRest && !completed.skipAnimation && !semiInvulnerableHidden[1]) {
+      let frames: number;
+      try {
+        frames = battleResolutionCommandDuration(completed, field);
+      } catch {
+        frames = battleResolutionCommandFallbackDuration(completed);
+      }
+      opponentRecallSince = frames;
     }
     field = applyCompletedCommand(field, completed);
     semiInvulnerableHidden = applyLiveSemiInvulnerableCommand(semiInvulnerableHidden, completed);
@@ -2507,14 +2541,16 @@ export function createBattleResolutionPresentationRenderView(
       // Pass attacker hidden by its completed live body (liveSemiInvulnerableHideBattler) is likewise already invisible: its
       // returntoball frees it unseen (prep27 s0.1: no recall scale-up in the ROM), so the span draws nothing either.
       // offs152: the Scene OFF forced hold draws the target at rest (the generic draw) until the recall receipt.
+      const recalledYDelta = command.battler === 1 ? opponentBattlerYDelta(createBattleCommandFieldArtView(field).opponent) : undefined;
       switchOut = command.targetAtRest ? null : command.skipAnimation || semiInvulnerableHidden[command.battler]
         ? Object.freeze({
-            ...midBattleSwitchOutAt(state.lifecycle.phaseElapsed, command.battler),
+            ...midBattleSwitchOutAt(state.lifecycle.phaseElapsed, command.battler, recalledYDelta),
             spriteVisible: false,
           })
         : midBattleSwitchOutAt(
             state.lifecycle.phaseElapsed,
             command.battler,
+            recalledYDelta,
           );
     } else if (command.type === "sprite-visibility") {
       spriteVisibility.set(command.battler, command.visible);
@@ -2587,6 +2623,21 @@ export function createBattleResolutionPresentationRenderView(
       origin: Object.freeze({ x: baseFieldArt.opponent.origin.x + ordinaryRest.x2, y: baseFieldArt.opponent.origin.y + ordinaryRest.y2 }),
     }),
   });
+  // ais2: the opponent's recall ball effect (AnimTask_SwitchOutBallEffect): the player's recall windows on the opponent's own switch-out clock.
+  const opponentRecallElapsed = command?.type === "switch-out" && command.battler === 1 && !command.targetAtRest && !command.skipAnimation
+      && !semiInvulnerableHidden[1]
+    ? state.lifecycle.phaseElapsed
+    : opponentRecallSince === null ? null : opponentRecallSince + state.lifecycle.phaseElapsed;
+  if (opponentRecallElapsed !== null && MID_BATTLE_SWITCH_OUT_TRACE + opponentRecallElapsed < MID_BATTLE_SWITCH_RECALL_END_TRACE && midBattleSwitchFade === null && midBattleSwitchParticles === null) {
+    const traceFrame = MID_BATTLE_SWITCH_OUT_TRACE + opponentRecallElapsed;
+    const fade = midBattleSwitchFadeAt(traceFrame, false);
+    if (fade !== null) midBattleSwitchFade = Object.freeze({ ...fade, objBattler: 1 as const });
+    const schedules = midBattleSwitchParticleSchedulesAt(traceFrame, "recall", false);
+    if (schedules.length > 0) {
+      // GetBattlerSpriteCoord(BATTLER_COORD_X / _Y) is the slot's fixed (176, 40) (sBattlerCoords, no species term), +32 for the feet: base (176, 72).
+      midBattleSwitchParticles = Object.freeze({ window: "opponent-recall" as const, schedules, originX: 172, originY: 68 });
+    }
+  }
   const playerHit = effect?.type === "hit" && effect.battler === 0
     ? effect
     : null;

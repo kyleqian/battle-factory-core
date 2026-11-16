@@ -7386,9 +7386,10 @@ function drawParticleTile(fb: Uint8Array, tileIndex: number, hFlip: boolean, ox:
  */
 function drawMidBattleSwitchBallOpenParticles(
   fb: Uint8Array,
-  window: "recall" | "send-in" | "opponent-send-in",
+  window: "recall" | "send-in" | "opponent-send-in" | "opponent-recall",
   schedules: readonly MidBattleSwitchParticle[],
   sendInOriginY = 119,
+  opponentRecallOriginX = 172,
 ): void {
   if (schedules.length === 0) return;
   // snd145: an opponent send-in bursts at the opponent ball (176,64) - 5, the battle-start opponent's PARTICLE_ORIGIN; no terrain clip.
@@ -7396,7 +7397,9 @@ function drawMidBattleSwitchBallOpenParticles(
     ? { x: 68, y: 108 }
     : window === "opponent-send-in"
       ? PARTICLE_ORIGIN
-      : { x: 68, y: sendInOriginY };
+      : window === "opponent-recall"
+        ? { x: opponentRecallOriginX, y: sendInOriginY }
+        : { x: 68, y: sendInOriginY };
   const anim = battleAnimParticles.regularBallAnim;
   const alive: AliveParticle[] = schedules.map((p) => ({
     i: p.i,
@@ -7435,7 +7438,7 @@ function drawMidBattleSwitchBallOpenParticles(
       frame.hFlip,
       origin.x + p.dx,
       origin.y + p.dy,
-      window === "opponent-send-in" ? undefined : 112,
+      window === "opponent-send-in" || window === "opponent-recall" ? undefined : 112,
     );
   }
 }
@@ -55426,7 +55429,7 @@ export function renderBattleResolutionSceneOffView(
   // Only the player side -- the opponent sprite's OBJ row is never touched
   // (§8.1). `coeff 0` returns the original array identity so the regular
   // (no-fade) frames are pixel-inert.
-  const playerMonPalette = midBattleFade === null
+  const playerMonPalette = midBattleFade === null || midBattleFade.objBattler === 1
     ? view.fieldArt.player.pic.palette as RgbColor[]
     : blendPaletteToward(
         view.fieldArt.player.pic.palette as RgbColor[],
@@ -55447,7 +55450,9 @@ export function renderBattleResolutionSceneOffView(
   // scale-up, then freed -- the field stays empty until the send-in).
   const switchOut = view.switchOut;
   if (switchOut !== null && switchOut.battler === 1 && switchOut.spriteVisible) {
-    drawMidBattleSwitchOutSprite(fb, view.fieldArt.opponent, switchOut);
+    drawMidBattleSwitchOutSprite(fb, view.fieldArt.opponent, switchOut, midBattleFade?.objBattler === 1
+      ? blendPaletteToward(view.fieldArt.opponent.pic.palette as RgbColor[], BALL_OPEN_FADE_POKE_COLOR, midBattleFade.obj)
+      : undefined);
   }
   if (switchOut !== null && switchOut.battler === 0 && switchOut.spriteVisible) {
     drawMidBattleSwitchOutSprite(fb, view.fieldArt.player, switchOut, playerMonPalette);
@@ -55462,6 +55467,7 @@ export function renderBattleResolutionSceneOffView(
       view.midBattleSwitchParticles.window,
       view.midBattleSwitchParticles.schedules,
       view.midBattleSwitchParticles.originY,
+      view.midBattleSwitchParticles.originX,
     );
   }
   // sad133: the status animation's priority-3 OAM (the confusion ducks' far half) behind the battlers.
