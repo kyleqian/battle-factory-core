@@ -5,6 +5,18 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 2026-11-16 — aud251 (ts lane worker): S11 T2 scoreboard refresh + controller "extras" are window-end artifacts (tooling / test only)
+
+- **State:** on master, committed (`bec227124` refresh doc, then the Part 2 commit). No `src/` change: frame hashes, census and gameplay untouched by construction. Doc `docs/aud251-s11-scoreboard-refresh.md`; evidence `.integration/evidence/aud251/`.
+- **Refresh** (same 21 ON / 20 OFF seeds and commands as aud248, all 41 still align to battle end, 0 FAIL): ROM-only rows ON **1679 -> 240**, OFF **95 -> 6** (move-animation SE 1569 -> 206, stat-change 85 / 89 -> 15 / 0, cries 8 -> 0, SE_SHINY 107 -> 0).
+  Top ON ROM-only rows left: Confuse Ray 65, Encore 18, stat-up 15, Rock Throw 15, Thunderbolt 12, Comet Punch 12 (the move-SE lifetime family, other worker).
+- **Part 2:** the victory BGM 412 and SE_BALL_OPEN extras of the last resolution are artifacts (the drive stops at the outcome, before the ROM plays them): ROM window +500 idle frames shows them at +377 / +350 / +975, same ordered rows as the engine.
+  `aud248RunSeed.sh` now runs the sound pass with that tail; `tests/aud251OutcomeTail.test.ts` pins the ROM tails. Engine extras ON 36 -> 17, OFF 24 -> 4; BGM extras 0.
+- **Next:** SE_EFFECTIVE pair ordering (seed 2741: 15 ON / 4 OFF), 2 extra + 3 missing SE_BALL_OPEN on ON seeds (different place in the last resolution), then the move-SE long tail; ISSUES #219 updated.
+- **NOT run:** full `npm test`, build / build:lib (no `src/` change; supervisor's); the 0..999 T1 census; differential / census commands (no engine change).
+
+---
+
 ## 2026-11-16 night run (CAX31 supervisor, Opus 5.5, 13:30 -> 05:30 UTC): in progress
 
 - **State:** master has lazy1 (below), luck1, aud242k, aud242l folded; workers running: aud242m (integration lane), dl1 (side lane, doc only).
