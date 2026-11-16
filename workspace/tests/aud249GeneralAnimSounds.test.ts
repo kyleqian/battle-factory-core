@@ -64,11 +64,12 @@ describe("General / Status animation sound table (aud249)", () => {
 
   // ROM frame minus ours of the animation's first row, per window and play. STATUS_ANIMATION_SCRIPT_AGE = 7 is calibrated on the one frame-exact window
   // (aud242g dreameater turn 1: Status_Sleep SE197 at delta 0, tests/aud242gMoveAnimSounds.test.ts). Here the move body before the confusion is not
-  // ROM-exact (the same windows' stat-change SE is +5 / +6 frames early, aud248), so the first play carries that drift +2 more; the second play comes
-  // 14 frames later still in all three windows (the dreameater second SE197 is +15): a named second-play lead (docs/aud249-general-anim-sounds.md).
+  // ROM-exact (the same windows' stat-change SE is +5 / +6 frames early, aud248), so the first play carries that drift +2 more. sta3: the second play
+  // lands on the first play's residual (second == first): the action transition into a pre-move print and the pre-move launch rows are now in the
+  // timing (docs/aud249-general-anim-sounds.md sta3, tests/sta3PreMoveStatusTiming.test.ts).
   const WINDOWS: ReadonlyArray<{ name: string; first: number; second: number }> = [
-    { name: "aud242c-flatter-player", first: 7, second: 21 },
-    { name: "aud242f-swagger-player", first: 8, second: 22 },
+    { name: "aud242c-flatter-player", first: 7, second: 7 },
+    { name: "aud242f-swagger-player", first: 8, second: 8 },
   ];
   for (const { name, first, second } of WINDOWS) {
     it(`${name}: both confusion plays have the ROM's six rows (id, pan, 14-frame spacing) at ${first} / ${second} frames residual`, () => {

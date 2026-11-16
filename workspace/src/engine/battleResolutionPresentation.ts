@@ -1000,6 +1000,17 @@ export const WAITMESSAGE_LONG_MESSAGE_IDS: ReadonlySet<string> = new Set([
 const BATTLE_SCRIPT_PROGRAM = loadBattleScriptProgram();
 
 /**
+ * sta3 (docs/aud249-general-anim-sounds.md, ROM windows aud242c / aud242f / aud242g, step-mode `gBattlescriptCurrInstr` per frame): a
+ * pre-move `printstring; waitmessage B_WAIT_TIME_LONG; status2animation` (BattleScript_MoveUsedIsConfused / IsAsleep) reaches the next
+ * command 3 rows after the engine's message ends (waitmessage's completing row, the launch instruction's row, the controller row); the
+ * script is scene-independent, so the 3 are message-box rows in both scenes.
+ */
+export const PRE_MOVE_STATUS_ANIMATION_LEAD_ROWS = 3;
+const PRE_MOVE_STATUS_ANIMATION_TIMING = Object.freeze({
+  minimumFrames: 0,
+  holdFrames: WAITMESSAGE_LONG_HOLD_FRAMES + PRE_MOVE_STATUS_ANIMATION_LEAD_ROWS,
+} as const);
+/**
  * Executes the cadence expressed immediately after a real source print
  * command. This is keyed by immutable interpreter provenance, not by the
  * rendered string or the move/species that happened to reach it. The legacy
@@ -1017,7 +1028,10 @@ function messageTimingFromSourceProvenance(
     && following.operands.length === 1
     && following.operands[0]!.expression === "B_WAIT_TIME_LONG"
   ) {
-    return WAITMESSAGE_LONG_TIMING;
+    const launch = BATTLE_SCRIPT_PROGRAM.instructions[programCounter + 2]?.opcodeName;
+    return launch === "B_SCR_OP_STATUS2ANIMATION" || launch === "B_SCR_OP_STATUSANIMATION"
+      ? PRE_MOVE_STATUS_ANIMATION_TIMING
+      : WAITMESSAGE_LONG_TIMING;
   }
   return null;
 }
@@ -1096,6 +1110,12 @@ const ACTION_TRANSITION_ROWS = 6;
  */
 const SCENE_OFF_MOVEEND_NEXT_USED_GLYPH_ROWS = 1 + ACTION_TRANSITION_ROWS;
 
+/**
+ * sta3 (docs/aud249-general-anim-sounds.md): the next action's first print after the MoveEnd receipts. STRINGID_PKMNISCONFUSED is
+ * BattleScript_MoveUsedIsConfused's first instruction (attackcanceler jumps there: u = 2), ROM-measured as the same E + 1 + d + n + 6 + u.
+ */
+const ACTION_TRANSITION_NEXT_PRINTS: ReadonlySet<string> = new Set(["STRINGID_USEDMOVE", "STRINGID_PKMNISCONFUSED", "STRINGID_PKMNFASTASLEEP"]);
+
 const ACTION_TRANSITION_WAIT_ROWS: Readonly<Record<string, number>> = Object.freeze({ B_WAIT_TIME_LONG: WAITMESSAGE_LONG_HOLD_FRAMES });
 
 /**
@@ -1120,6 +1140,8 @@ function actionTransitionPauseFrames(
   if (e1 === undefined) return null;
   let execution = e1;
   let used: number | null = null;
+  let statusFramesAfter = 0;
+  let usedIsPreMove = false;
   for (let index = receiptIndex + 1; index < events.length; index += 1) {
     const event = events[index]!;
     const next = event.provenance?.instructionExecution;
@@ -1128,8 +1150,16 @@ function actionTransitionPauseFrames(
       execution = next;
       continue;
     }
-    if (next >= e1 || event.payload.kind !== "message" || event.payload.messageId !== "STRINGID_USEDMOVE") return null;
+    if (next < e1 && event.payload.kind === "set-battler-status-data" && used === null) {
+      // sta3: the sleep counter's status write inside the next action's attackcanceler draws nothing; its 1-frame command is presented after the pause.
+      const frames = sceneOnStatusFrames(events, index);
+      if (frames === null) return null;
+      statusFramesAfter += frames;
+      continue;
+    }
+    if (next >= e1 || event.payload.kind !== "message" || !ACTION_TRANSITION_NEXT_PRINTS.has(event.payload.messageId)) return null;
     used = next;
+    usedIsPreMove = event.payload.messageId !== "STRINGID_USEDMOVE";
     break;
   }
   if (used === null) return null;
@@ -1165,7 +1195,9 @@ function actionTransitionPauseFrames(
     if (timing === undefined || (timing.holdFrames ?? 0) > 0) return null;
     presented += timing.minimumFrames;
   }
-  const frames = e1 - anchorExecution - 1 + ACTION_TRANSITION_ROWS + used - presented;
+  // sta3 (aud242g dreameater, ROM): before a pre-move print the status icon's second controller row (production presents one frame) is one more row.
+  const iconSecondRow = anchor.payload.kind === "status-icon-update" && usedIsPreMove ? 1 : 0;
+  const frames = e1 - anchorExecution - 1 + ACTION_TRANSITION_ROWS + used - presented - statusFramesAfter + iconSecondRow;
   return frames > 0 ? frames : null;
 }
 
