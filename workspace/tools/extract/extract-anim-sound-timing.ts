@@ -115,7 +115,8 @@ function shakeMonLength(x: number, y: number, numTimes: number, delay: number): 
 // (IsSoftwarePaletteFadeFinishing). The sprite's Step sees !active in the next AnimateSprites and destroys itself; the script's waitforvisualfinish
 // passes one iteration after that: n calls = the sprite is gone `n` ticks after the creation tick.
 function simplePaletteBlendLength(delay: number, startY: number, targetY: number): number {
-  const deltaY = delay < 0 ? 2 - delay : 2;
+  // gPaletteFade.deltaY is a 4-bit field (palette.h:52): delay -31 gives (2 + 31) & 15 = 1, not 33 (aud242n: the Spark ROM window steps y by 1 per 2 frames).
+  const deltaY = delay < 0 ? (2 - delay) & 15 : 2;
   const wait = delay < 0 ? 0 : delay;
   let [y, calls, waits] = [startY, 0, 0];
   for (;;) {
@@ -146,7 +147,8 @@ function complexPaletteBlendLength(delay: number, numBlends: number): number {
 // calls between y values (palette.c:406-455) and 5 finishing calls (IsSoftwarePaletteFadeFinishing, palette.c:807-828). The task destroys itself in the RunTasks of the iteration the
 // last fade clears (AnimTask_BlendColorCycleLoop, `!active` and tNumBlends 0): gone (that iteration - F) ticks after the creation tick.
 function paletteFadeCalls(delay: number, startY: number, targetY: number): number {
-  const deltaY = delay < 0 ? 2 - delay : 2;
+  // gPaletteFade.deltaY is a 4-bit field (palette.h:52): delay -31 gives (2 + 31) & 15 = 1, not 33 (aud242n: the Spark ROM window steps y by 1 per 2 frames).
+  const deltaY = delay < 0 ? (2 - delay) & 15 : 2;
   const wait = delay < 0 ? 0 : delay;
   let [y, calls] = [startY, 0];
   for (;;) {
@@ -156,6 +158,10 @@ function paletteFadeCalls(delay: number, startY: number, targetY: number): numbe
     calls += wait;
   }
   return calls + 5;
+}
+function cycleNumBlends(cmd: { op: string; args: string[] }): number | null {
+  const named = cmd.args.find((a) => a.startsWith("num_blends="));
+  return intArg(cmd.op === "createvisualtask" ? cmd.args[4] : named);
 }
 function blendColorCycleLength(delay: number, numBlends: number, initialY: number, targetY: number): number {
   if (numBlends < 1) return -1;
@@ -347,6 +353,75 @@ function moveParticleBeyondTargetLifetime(attackerSide: number, pic: PicContext,
   }
   return null;
 }
+function flailMovementLength(): number {
+  let [state, count, angle, shrinks, amplitude] = [0, 0, 0, 0x20, 0x800];
+  const s16 = (v: number): number => ((v + 0x8000) & 0xffff) - 0x8000;
+  for (let call = 1; call < 100000; call += 1) {
+    if (state === 2) return call - 1;
+    angle = s16(angle + (state === 0 ? 0x200 : -0x200));
+    if (state === 0 ? angle >= amplitude : angle <= -amplitude) {
+      const diff = s16(amplitude - angle);
+      const [div, mod] = [Math.trunc(diff / (amplitude * 2)), diff % (amplitude * 2)];
+      if ((div & 1) === 0) { angle = state === 0 ? amplitude - mod : mod - amplitude; state = 1 - state; }
+      else angle = state === 0 ? mod - amplitude : amplitude - mod;
+    }
+    count += 1;
+    if (count > 8) {
+      if (shrinks > 0) { shrinks -= 1; amplitude = Math.max(amplitude - 0x40, 16); } else state = 2;
+    }
+  }
+  throw new Error("AnimTask_FlailMovement does not end");
+}
+// ---- aud242n: Confuse Ray / Will-O-Wisp. BattleAnimAdjustPanning (battle_anim.c:1263-1303), singles, no status animation: the player attacker keeps the pan, the opponent attacker
+// negates it (-64 -> 64 -> clamped 63); KeepPanInRange / CalculatePanIncrement (:1322-1346).
+function adjustPanning(pan: number, attackerSide: number): number {
+  const p = attackerSide === 0 ? pan : -pan;
+  return Math.min(Math.max(p, -64), 63);
+}
+function adjustPanningVarLength(attackerSide: number, sourceArg: number, targetArg: number, incArg: number, wait: number): number | null {
+  const s16 = (v: number): number => ((v + 0x8000) & 0xffff) - 0x8000;
+  const [source, target] = [adjustPanning(sourceArg, attackerSide), adjustPanning(targetArg, attackerSide)];
+  const step = source < target ? Math.abs(incArg) : source > target ? -Math.abs(incArg) : 0;
+  let [pan, counter] = [source, 0];
+  for (let call = 0; call < 4096; call += 1) {
+    if (counter === wait) { counter = 0; pan = Math.min(Math.max(s16(pan + step), -64), 63); } else counter += 1;
+    if (pan === target) return call - 1;
+  }
+  return null;
+}
+// AnimConfuseRayBallBounce (battle_anim_ghost.c:220-311). Call 0 is the init: the sprite starts at the attacker's x plus the side-signed offset (SetAnimSpriteInitialXOffset,
+// battle_anim_mons.c:763-776), data[0] = |dx| << 8 / speed is the duration (InitAnimLinearTranslationWithSpeed, :1155-1160) and data[6] = 16. Step1 (calls 1..) runs
+// UpdateConfuseRayBallBlend and then AnimTranslateLinear (data[0]-- while > 0); the call that finds data[0] == 0 installs Step2. Step2 sets data[0] = 1, translates, and when
+// data[6] == 0 installs DestroyAnimSpriteAndDisableBlend (which runs one call later), else UpdateConfuseRayBallBlend. The blend counter (:288-311) steps data[6] on every call
+// (data[7] is reset to its high byte on each step): 16 -> 0 (call 16, set to 0x100), 0x101 .. 0x10d (13 calls, 0x10d -> 0), 0 -> 16 up, 16 -> 0 down, ...
+function confuseRayBallBounceLength(attackerSide: number, offset: number, speed: number): number | null {
+  const [attackerX, targetX] = [BATTLER_X[attackerSide === 0 ? 0 : 1], BATTLER_X[attackerSide === 0 ? 1 : 0]];
+  const x = attackerX > targetX ? attackerX - offset : attackerX < targetX ? attackerX + offset : attackerX;
+  const duration = Math.trunc((Math.abs(targetX - x) << 8) / speed);
+  if (duration < 1) return null;
+  let [d0, d6, d7, step2] = [duration, 16, 0, false];
+  const update = (): void => {
+    if (d6 > 0xff) { d6 += 1; if (d6 === 0x10d) d6 = 0; return; }
+    const old = d7;
+    d7 += 1;
+    if ((old & 0xff) !== 0) return;
+    d7 &= 0xff00;
+    if ((d7 & 0x100) !== 0) d6 += 1; else d6 -= 1;
+    if (d6 === 0 || d6 === 16) d7 ^= 0x100;
+    if (d6 === 0) d6 = 0x100;
+  };
+  for (let call = 1; call < 100000; call += 1) {
+    if (!step2) {
+      update();
+      if (d0 === 0) step2 = true; else d0 -= 1;
+    } else {
+      d0 = 0;
+      if (d6 === 0) return call;
+      update();
+    }
+  }
+  return null;
+}
 function lifetimeOf(cmd: Command, attackerSide: number, pic: PicContext): Lifetime {
   const { op, args } = cmd;
   if (op === "createvisualtask" && (args[0] === "AnimTask_BlendBattleAnimPal" || args[0] === "AnimTask_BlendBattleAnimPalExclude" || args[0] === "AnimTask_BlendParticle")) {
@@ -457,6 +532,14 @@ function lifetimeOf(cmd: Command, attackerSide: number, pic: PicContext): Lifeti
   // AnimTask_ElectricBolt (battle_anim_electric.c:685-724): the entry only sets func; the step's data[10] counts calls 1.. and call 11 (data[10] == 10) destroys.
   // The five segment sprites are CreateSprite'd by the task, which gAnimVisualTaskCount does not count.
   if (op === "createvisualtask" && args[0] === "AnimTask_ElectricBolt") return { exact: 10 };
+  // ---- aud242m (docs section 17). AnimAngerMark (battle_anim_effects_2.c:2281-2299) installs RunStoredCallbackWhenAffineAnimEnds (battle_anim_mons.c:729-733) with
+  // DestroySpriteAndMatrix stored; gAngerMarkAffineAnimCmds (:586-591) are two 8-tick frames, so the affine END is reached at call 16 (sprite.c:1055-1178: one delta per
+  // call from the begin call on), the callback sees it in call 17, installs the destroy, which runs in call 18: gone 17 ticks after F (the ROM-validated visual port
+  // src/animation/swagger.ts draws the mark for exactly 17 ticks, ages 0..16).
+  if (sprite("gAngerMarkSpriteTemplate")) return { exact: 17 };
+  // AnimTask_FlailMovement (battle_anim_effects_3.c:2845-2931): the entry only sets func; the step (call 1..) integrates data[2] by 0x200 per call and every call past the ninth
+  // shrinks the amplitude data[14] by 0x40 (down to 16) for 0x20 calls, then sets data[0] = 2; the next call destroys the task (call K, gone K - 1 ticks after F).
+  if (op === "createvisualtask" && args[0] === "AnimTask_FlailMovement") return { exact: flailMovementLength() };
   // ---- aud242f (docs section 10). Call numbering as above: sprite callback call 0 = init (script step), call k >= 1 = AnimateSprites of iteration F + k - 1; a
   // sprite destroyed at call K is gone K - 1 ticks after F. SetCallbackToStoredInData6 / `sprite->callback = x` only install: x first runs in the NEXT call.
   // AnimBowMon (battle_anim_effects_1.c:4400-4496, arg 0 = step kind): kind 0 = Step1 (call 1 sets data[0] = 6 and TranslateSpriteLinearById; calls 2..7 translate,
@@ -504,6 +587,9 @@ function lifetimeOf(cmd: Command, attackerSide: number, pic: PicContext): Lifeti
   // gone max(d, 0) ticks after F. AnimSparkElectricityFlashing (:629-666): the init runs the step itself in call 0 (data[0] = args[6] is checked, then decremented), call k checks d - k;
   // destroyed at call max(d, 0), gone max(d, 0) - 1 ticks after F (the data[4] = args[10] & 0x7FFF modulus never affects the lifetime).
   if (sprite("gThunderboltOrbSpriteTemplate")) { const d = intArg(args[3]); return d === null ? null : { exact: Math.max(d, 0) }; }
+  // aud242n: AnimSparkElectricity (:515-569) sets data[0] = gBattleAnimArgs[3] (script args[6]) and installs DestroyAnimSpriteAfterTimer (battle_anim_flying.c:539-551), which
+  // runs from the next call: call k >= 1 destroys when data[0]-- <= 0, i.e. at call max(d, 0) + 1, gone max(d, 0) ticks after F. Args 0..2 and 4..6 only place and rotate it.
+  if (sprite("gSparkElectricitySpriteTemplate")) { const d = intArg(args[6]); return d === null ? null : { exact: Math.max(d, 0) }; }
   if (sprite("gSparkElectricityFlashingSpriteTemplate")) { const d = intArg(args[6]); return d === null ? null : { exact: Math.max(d, 0) - 1 }; }
   // AnimTask_SwayMon (battle_anim_mon_movement.c:751-815): the entry only sets func (data[11] = 0, data[12] = 1); the step's call k adds `period` (script args[4], as a u16) to the
   // sine index, waveIndex = index >> 8, and a half-wave crossing (waveIndex >= 0x80 while data[12] == 1, or < 0x7f while data[12] == 0) flips the state and decrements the
@@ -608,6 +694,25 @@ function lifetimeOf(cmd: Command, attackerSide: number, pic: PicContext): Lifeti
   // AnimWishStar (battle_anim_effects_3.c:2104-2140): x = 256 (player) / -16, x2 = -/+ (72 * call >> 4); newX = x + x2 + 32 is a u32, so the player's star is destroyed when it
   // goes negative: 288 - (72c >> 4) < 0 at call 65 (the opponent's: 16 + (72c >> 4) > 304 at call 65 too): gone 64 ticks after F, both sides.
   if (sprite("gWishStarSpriteTemplate")) return { exact: 64 };
+  // ---- aud242n (docs section 18). SoundTask_AdjustPanningVar (battle_anim_sound_tasks.c:370-407): the entry runs the step once itself (call 0), then RunTasks calls; the pan (data[11])
+  // moves by the increment on every (r9 + 1)-th call, KeepPanInRange clamps it, and the call on which it equals the target pan destroys the task: call K, gone K - 1 ticks after F
+  // (K = 0: destroyed inside the creating step, net 0 in gAnimVisualTaskCount, exact -1). Used by Confuse Ray (pan -64 -> 63 step 2) and Will-O-Wisp.
+  if (op === "createvisualtask" && args[0] === "SoundTask_AdjustPanningVar") {
+    const a = [2, 3, 4, 5].map((i) => intArg(args[i]));
+    if (a.some((v) => v === null)) return null;
+    const n = adjustPanningVarLength(attackerSide, a[0]!, a[1]!, a[2]!, a[3]!);
+    return n === null ? null : { exact: n };
+  }
+  // gConfuseRayBallBounceSpriteTemplate (battle_anim_ghost.c:220-311, args 28 / 0 / 288 in Move_CONFUSE_RAY): a Step1 / Step2 sprite whose lifetime comes only from the x distance and the
+  // blend counter (no pic Y, no RNG, no damage).
+  if (sprite("gConfuseRayBallBounceSpriteTemplate")) {
+    const [offset, speed] = [intArg(args[3]), intArg(args[5])];
+    if (offset === null || speed === null || speed < 1) return null;
+    const n = confuseRayBallBounceLength(attackerSide, offset, speed);
+    return n === null ? null : { exact: n };
+  }
+  // gConfuseRayBallSpiralSpriteTemplate (:313-341): the init installs the step and runs it at once (call 0: data[7] 0 -> 1), so call k has data[7] = k + 1 and call 60 (61) destroys: gone 59 ticks after F.
+  if (sprite("gConfuseRayBallSpiralSpriteTemplate")) return { exact: 59 };
   if (op === "create_basic_hitsplat_sprite") return { bound: 10 };
 
   return null;
@@ -631,6 +736,9 @@ const isCreation = (op: string): boolean => creationMacros.has(op);
 function returnValue(task: string, attackerSide: number): number | null {
   switch (task) {
     case "AnimTask_IsContest": case "AnimTask_GetTargetIsAttackerPartner": case "AnimTask_IsMonInvisible": return 0;
+    // aud242m: every Factory mon has friendship 0 (battle_factory.c:459, 820; the controllers leave gAnimFriendship 0, battle_anim.c:181): GetFrustrationPowerLevel
+    // (battle_anim_mons.c:1993-2006, `<= 30`) and GetReturnPowerLevel (battle_anim_effects_3.c:5060-5073, `< 60`) both write 0 (the strongest Frustration / weakest Return branch).
+    case "AnimTask_GetFrustrationPowerLevel": case "AnimTask_GetReturnPowerLevel": return 0;
     case "AnimTask_GetAttackerSide": return attackerSide;
     case "AnimTask_GetTargetSide": return 1 - attackerSide;
     case "AnimTask_IsTargetPlayerSide": return 1 - attackerSide === 0 ? 1 : 0;
@@ -738,6 +846,7 @@ function walk(bodyLabel: string, turn: number, attackerSide: number, pic: PicCon
   // gPaletteFade is one shared object: a BeginNormalPaletteFade while another normal / hardware fade is active returns FALSE (palette.c:156-163), so a color cycle that
   // overlaps another fade is left unmodelled. `fadeBusy` = the last iteration a normal fade (simple_palette_blend / color cycle) of this walk may be active.
   let fadeBusy = -1;
+  let fadeChain = false;
   // aud242i: `waitsound` keeps the script frame unknown within [frame, soundWait] (soundWait = the upper bound of the last SE's end, seBound); only a following
   // waitforvisualfinish whose exact finish is at or after it makes the frame exact again. seUnknown: an SE the table cannot bound (panse / sound task / unknown song) or a
   // creation whose callback can play one; no waitsound resolves after it.
@@ -778,8 +887,17 @@ function walk(bodyLabel: string, turn: number, attackerSide: number, pic: PicCon
       let life = lifetimeOf(cmd, attackerSide, pic);
       const colorCycle = op === "blend_color_cycle" || op === "blend_color_cycleexclude" || op === "blend_color_cyclebytag" || (op === "createvisualtask" && /^AnimTask_BlendColorCycle/.test(args[0] ?? ""));
       if (frame !== null && life !== null && "exact" in life && (colorCycle || op === "simple_palette_blend" || (op === "createsprite" && args[0] === "gSimplePaletteBlendSpriteTemplate"))) {
-        if (colorCycle && (frame <= fadeBusy || (fade !== null && frame < fade + FADE_IN_DONE))) life = null;
-        else fadeBusy = Math.max(fadeBusy, frame + life.exact);
+        const cycleBlends = colorCycle ? cycleNumBlends(cmd) : null;
+        if (colorCycle && fade !== null && frame < fade + FADE_IN_DONE) life = null;
+        else if (colorCycle && frame <= fadeBusy) {
+          // aud242n: a one-blend cycle created while a one-fade chain is active is refused (palette.c:156-163): tNumBlends goes to 0 without a fade (battle_anim_normal.c:464-466),
+          // and AnimTask_BlendColorCycleLoop destroys it in the RunTasks of the iteration the running fade clears `active` (fadeBusy), starting nothing. A refused cycle
+          // does not extend the busy window. A multi-blend cycle in the window can start the next fade in that same RunTasks, so those stay unmodelled.
+          life = cycleBlends === 1 && !fadeChain ? { exact: fadeBusy - frame } : null;
+        } else {
+          fadeBusy = Math.max(fadeBusy, frame + life.exact);
+          fadeChain = cycleBlends !== null && cycleBlends > 1;
+        }
       }
       if (frame !== null) pending.push({ at: frame, life, name: op === "createsprite" || op === "createvisualtask" ? args[0] ?? op : op });
       const known = returnValue(args[0] ?? "", attackerSide);

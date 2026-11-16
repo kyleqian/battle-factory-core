@@ -6,6 +6,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 PREFIX = os.environ.get("AUD242_LAB_PREFIX", "aud242b")
+FRIENDSHIP = os.environ.get("AUD242_FRIENDSHIP")
 template = json.loads((ROOT / "tools/battle-lab/aud242a-ember-player-on.json").read_text())
 for arg in sys.argv[1:]:
     name, side, move, *species = arg.split(":")
@@ -15,6 +16,9 @@ for arg in sys.argv[1:]:
     parties[under][0]["level"], parties[other][0]["level"] = 50, 12
     parties[under][0]["moves"] = [int(move)] * 4
     parties[other][0]["moves"] = [69] * 4
+    if FRIENDSHIP is not None:
+        for mon in parties[under] + parties[other]:
+            mon["friendship"] = int(FRIENDSHIP)
     if species:
         parties[under][0]["species"], parties[other][0]["species"] = int(species[0]), int(species[1])
     (ROOT / f"tools/battle-lab/{PREFIX}-{name}-{side}-on.json").write_text(json.dumps(lab) + "\n")

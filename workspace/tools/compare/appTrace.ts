@@ -2029,6 +2029,13 @@ export const APP_STAGES: Readonly<Record<string, AppStage>> = {
   "aud242k-lovelykiss-player-on": (state) => aud241bStage(state, "aud242k-lovelykiss-player-on", "on", 50, 12, 142, undefined, false, 69),
   "aud242k-crunch-player-on": (state) => aud241bStage(state, "aud242k-crunch-player-on", "on", 50, 12, 242, undefined, false, 69),
   "aud242k-recover-player-on": (state) => aud241bStage(state, "aud242k-recover-player-on", "on", 50, 12, 105, undefined, false, 69),
+  "aud242m-frustration-player-on": (state) => aud241bStage(state, "aud242m-frustration-player-on", "on", 50, 12, 218, undefined, false, 69),
+  "aud242m-flail-player-on": (state) => aud241bStage(state, "aud242m-flail-player-on", "on", 50, 12, 175, undefined, false, 69),
+  "aud242m-return-player-on": (state) => aud241bStage(state, "aud242m-return-player-on", "on", 50, 12, 216, undefined, false, 69),
+  "aud242n-confuseray-player-on": (state) => aud241bStage(state, "aud242n-confuseray-player-on", "on", 50, 12, 109, undefined, false, 69),
+  "aud242n-confuseray-opponent-on": (state) => aud241bStage(state, "aud242n-confuseray-opponent-on", "on", 12, 50, 69, undefined, false, 109),
+  "aud242n-spark-player-on": (state) => aud241bStage(state, "aud242n-spark-player-on", "on", 50, 12, 209, undefined, false, 69),
+  "aud242n-spark-opponent-on": (state) => aud241bStage(state, "aud242n-spark-opponent-on", "on", 12, 50, 69, undefined, false, 209),
   // aud242l: Blizzard (snowball / ice crystal lifetimes depend on both battlers' pic Y): the species only differ in the staged battlers' `species` (the ICY_WIND rows come before any damage).
   "aud242l-blizzard-fearow-bulbasaur-opponent-on": (state) => aud242lBlizzardStage(state, "aud242l-blizzard-fearow-bulbasaur-opponent-on", "opponent", 22, 1),
   "aud242l-blizzard-bulbasaur-charizard-opponent-on": (state) => aud242lBlizzardStage(state, "aud242l-blizzard-bulbasaur-charizard-opponent-on", "opponent", 1, 6),

@@ -880,3 +880,94 @@ Frame hashes: `npm run compare:differential -- <3 Blizzard Scene ON traces> --ba
 
 - T1 is self-consistency: the ROM check of the class grid is the four windows above (three distinct opponent classes and one player class); a class between them is covered by the visual-port cross-check, not by its own ROM window.
 - Top gated census moves now: Confuse Ray 47, Spark 32, Tri Attack 24, Petal Dance 22, Frustration 19, Rollout 17, Flail 15, Dive 10.
+
+## 17. aud242m: Frustration, Return and Flail (T1 family 1, slice 12)
+
+Extractor `lifetimeOf` / `returnValue` in `tools/extract/extract-anim-sound-timing.ts` (aud242m block); table regenerated (356 moves, 358 distinct variants, 1172 ops).
+
+### 17.1 Ports (C-cited, none fitted to a ROM window)
+
+- **Friendship branch (`returnValue`).** `AnimTask_GetFrustrationPowerLevel` (`battle_anim_mons.c:1993-2006`, `<= 30` -> 0) and `AnimTask_GetReturnPowerLevel` (`battle_anim_effects_3.c:5060-5073`, `< 60` -> 0) read `gAnimFriendship`. Every Factory mon has friendship 0 (`battle_factory.c:459`, `:820`; the controllers copy the mon's friendship into the move-animation buffer, `battle_controller_player.c:2477`, and the engine adapter passes 0), so Frustration takes `Frustration_Strongest` and Return `ReturnWeak`.
+  The `mechanicLab` template's mons have friendship 70 (Frustration Strong / Return Medium); the aud242m labs therefore set `friendship: 0` on every mon (`AUD242_FRIENDSHIP=0 AUD242_LAB_PREFIX=aud242m tools/audio/makeAud242bLabs.py`), the Factory value. The first, friendship-70 windows took the Strong / Medium branches, which is how the labs' value was found; they were replaced, not kept.
+- **`gAngerMarkSpriteTemplate` = 17 ticks** (`battle_anim_effects_2.c:2281-2299`: init sets `callback = AnimAngerMark`, which runs the two 8-tick affine commands, `battle_anim_mons.c:586-591`, `:729-733`, then destroys). Cross-checked against the ROM-validated visual port `src/animation/swagger.ts` (17 ticks) and the Frustration ROM window below (two marks 18 script frames apart = 17 + the following `playsewithpan` frame).
+- **`AnimTask_FlailMovement`** (`flailMovementLength()`): the task's `sin` angle state machine is simulated with s16 arithmetic (amplitude 0x800 shrinking by 0x40 per 9-count after 0x20 shrinks) and its end call is the sprite lifetime; nothing is measured.
+
+### 17.2 ROM windows (probe step mode, `AUDIO_PROBE_EXTRA_HOOKS=BlendPalette`, Scene ON, player attacker Lv50, friendship 0)
+
+Fixtures `tools/audio/fixtures/aud242m-{frustration,flail,return}-player.json`, labs `tools/battle-lab/aud242m-*-player-on.json`, stages `aud242m-*-player-on` in `appTrace.ts`, test `tests/aud242mMoveAnimSounds.test.ts`. Recipe as section 15 (`--frames 700`).
+
+| window | rows | ids / pans | ROM minus ours |
+|---|---|---|---|
+| Frustration (Strongest) | 9 (DRAGON_RAGE 171, SWAGGER2 194 x2, COMET_PUNCH 139 x6) | equal | **+1** (the idle class) |
+| Flail | 3 (162 x2, MEGA_KICK2 141) | equal | **+2** |
+| Return (Weak) | 3 (TAIL_WHIP 167 x2, COMET_PUNCH 139) | equal | **+1** |
+
+Every row's id, pan and relative spacing equal the ROM's; the constant is the existing #198 idle lead class (recorded, not fitted).
+
+### 17.3 Counts (turn 0, player attacker)
+
+| | before (`b8f8e9203`) | after |
+|---|---|---|
+| all moves: ops resolved / unresolved | 935 / 177 | 948 / 174 |
+| L50 (276 moves): emitted / gated | 731 / 103 | 744 / 100 |
+
+Only Frustration, Return and Flail changed (semantic old-vs-new table diff); they are fully resolved in all turn / side variants.
+
+Census T1 (seeds 0..99 Scene ON, arms `on-085998622` (aud242l head) and fresh `on-d5ea5c8fb`, each scored inside its own tree): exact 24,492 -> 24,678, **missing-gated 308 -> 274**, missing-other 51, missing-declined 1, extra 0, unclassified 128 in both (the psn2 / SE148 note). `rst197CensusDelta.py`: 100 / 100 battles, 31,264 commands, bad 0.
+Frame hashes: `npm run compare:differential -- <Frustration, Flail, Return Scene ON traces> --base b8f8e9203 --harness-from-head`: 240 / 240 captures byte-identical (captures 60..692 step 8).
+
+### 17.4 Residuals
+
+Remaining top gated census moves: Confuse Ray 47 (ball-bounce translation needs the target's pic Y, a blend oscillation state machine and the `AdjustPanningVar` task), Spark 32 (`AnimSparkElectricity` plus overlapping `blend_color_cycle`), Tri Attack 24, Petal Dance 22, Rollout 17 (depends on the battle's rolloutCounter, not a lifetime), Dive 10.
+
+## 18. aud242n: Confuse Ray and Spark (T1 family 1, slice 13)
+
+Extractor `lifetimeOf` / the walk in `tools/extract/extract-anim-sound-timing.ts` (aud242n blocks); table regenerated (356 moves, 359 distinct variants, 1175 ops). Both lifetimes are ported from the C with the same integer arithmetic; nothing is fitted to a ROM window.
+
+### 18.1 Confuse Ray (ports)
+
+`Move_CONFUSE_RAY` waits on four things: a `BlendColorCycleByTag` (119 ticks, already modelled), `gConfuseRayBallBounceSpriteTemplate`, `gConfuseRayBallSpiralSpriteTemplate` and `SoundTask_AdjustPanningVar`.
+
+- **`SoundTask_AdjustPanningVar`** (`battle_anim_sound_tasks.c:370-407`, `adjustPanningVarLength()`): source / target pans go through `BattleAnimAdjustPanning` (`battle_anim.c:1263-1303`, singles: a player attacker keeps the pan, an opponent attacker negates; clamp [-64, 63]); the step moves the pan by `+-|inc|` every `wait + 1` calls (s16 arithmetic, clamped) and the task ends the call after the pan equals the target. **62 ticks (player attacker) / 61 (opponent)**.
+- **`AnimConfuseRayBallBounce`** (`battle_anim_ghost.c:220-311`, `confuseRayBallBounceLength()`): the start x is the attacker's x offset by `SetAnimSpriteInitialXOffset` (`battle_anim_mons.c:741-850`), the duration is `(|targetX - x| << 8) / speed`, Step1 / Step2 count it with the `data[6]` / `data[7]` blend counter (`UpdateConfuseRayBallBlend`, `:288-311`, wraps 0x101..0x10d to 0, direction toggled at 0 / 16). Only the x coordinates enter, so the lifetime does not depend on the battler's pic Y, RNG or damage. **75 ticks**.
+- **`gConfuseRayBallSpiralSpriteTemplate`** (`:313-341`): the init installs the step and runs it once, so call 60 destroys: **59 ticks**.
+
+The 119-tick blend cycle dominates the wait, so the sprite (75) and the pan task (62 / 61) are only needed to resolve it; they are not independently pinned by the ROM window.
+
+### 18.2 Spark (ports)
+
+- **`gSparkElectricitySpriteTemplate`** (`AnimSparkElectricity`, `battle_anim_electric.c:515-569`): sets `data[0] = gBattleAnimArgs[3]` (script args[6]) and installs `DestroyAnimSpriteAfterTimer` (`battle_anim_flying.c:539-551`); call k >= 1 destroys when `data[0]-- <= 0`: gone `max(d, 0)` ticks after the creation iteration (10..13 in `Move_SPARK`).
+- **Refused colour cycles (the shared `gPaletteFade`).** `BeginNormalPaletteFade` returns FALSE without touching anything while `gPaletteFade.active` (`palette.c:156-163`); `AnimTask_BlendColorCycle` (`battle_anim_normal.c:447-500`) still decrements `tNumBlends`, so a one-blend cycle created while another fade runs starts nothing and `AnimTask_BlendColorCycleLoop` destroys it in the RunTasks of the iteration the running fade clears `active`. Spark creates six overlapping delay -31 cycles in 56 frames, so the walk now gives such a cycle `exact = fadeBusy - frame` (it does not extend the busy window). A multi-blend cycle inside the window can start the next fade in that same RunTasks (task order decides who gets it): that case, and a refusal behind a multi-blend chain, stay unmodelled (`life = null`) exactly as before.
+- **`gPaletteFade.deltaY` is a 4-bit field** (`palette.h:52`): `BeginNormalPaletteFade` adds `-delay` to 2 and the field truncates, so delay -31 steps y by `(2 + 31) & 15 = 1`, not 33. `paletteFadeCalls()` now masks it. The ROM BlendPalette log confirms it (y 0, 1, 2, ... one per 2 frames). The only delay below -13 in the scripts is Spark's; the semantic table diff against the previous commit changes Spark only.
+
+### 18.3 ROM windows (probe step mode, `AUDIO_PROBE_EXTRA_HOOKS=BlendPalette`, Scene ON, attacker Lv50 on the named side)
+
+Fixtures `tools/audio/fixtures/aud242n-{confuseray,spark}-{player,opponent}.json`, labs `tools/battle-lab/aud242n-*-on.json` (`AUD242_LAB_PREFIX=aud242n tools/audio/makeAud242bLabs.py <name>:<side>:<moveId>`), stages `aud242n-*-on` in `appTrace.ts`, test `tests/aud242nMoveAnimSounds.test.ts` (`--frames 700` for Confuse Ray, 450 for Spark).
+
+| window | rows | ids / pans | ROM minus ours |
+|---|---|---|---|
+| Confuse Ray, player | 1 (SE_M_STRING_SHOT2 130 at ROM 229, pan 63) | equal | **0** |
+| Confuse Ray, opponent | 1 (130 at ROM 233, pan -63) | equal | **0** |
+| Spark, player | 5 (THUNDERBOLT2 119 x3 at ROM 69 / 85 / 111 pan -64, HYPER_BEAM 215 at 138 pan 63, 119 at 149) | equal | **+5** on the three opening rows, **+6** on the last two |
+| Spark, opponent | 5 (119 x3 at 73 / 89 / 115 pan 63, 215 at 142 pan -63, 119 at 153) | equal | **+5**, then **+6** |
+
+The +5 is the aud242a idle-lead class (two `loadspritegfx` before the first SE; recorded, ISSUES #198). The extra +1 behind Spark's first wait is a ROM VBlank overrun in the step that creates the eight flashing sprites (script frame 50): the BlendPalette log shows that cycle's second fade call one frame late (BG y0 at 111, OBJ y0 at 112, against 69 / 69 for the first cycle). It is recorded as the test's `extra`, not modelled; the intervals inside each group (16, 26 and 11 frames) equal the ROM's.
+
+Named gap: the ball bounce sprite itself plays SE_M_CONFUSE_RAY (196) with `gAnimCustomPanning` (`battle_anim_ghost.c:249-256`), 13 ROM rows per cast, a sprite-callback site the table does not model. The test asserts they are ROM-only (13 / 0).
+
+### 18.4 Counts and census
+
+| | before (`9cc3398ff`) | after |
+|---|---|---|
+| all moves: ops resolved / unresolved (turn 0, player attacker) | 948 / 174 | 951 / 171 |
+| all-moves ops in the table | 1172 | 1175 |
+| L50 (276 moves): emitted / gated | 744 / 100 | 747 / 97 |
+
+Only Confuse Ray (gated 1 -> 0) and Spark (2 -> 0) changed (semantic old-vs-new table diff).
+
+Census T1 (seeds 0..99 Scene ON, arms `on-9cc3398ff` (aud242m head), `on-b5005d97b` (Confuse Ray) and `on-05e2d0bc6` (Spark), each scored inside its own tree, which needs a `reference` symlink): exact 24,678 -> 24,725 -> **24,757**, **missing-gated 274 -> 227 -> 195**, missing-other 51, missing-declined 1, extra 0, unclassified 128 in all three. Sound sequence delta base -> final: 27 of 100 seeds changed, all by added rows (Confuse Ray +47 SE130 rows, Spark +32 SE119 / SE215 rows, matching the exact-count deltas; the scorer's per-tuple `added` histogram counts distinct tuples, not rows); none removed. `rst197CensusDelta.py` base vs final: 100 / 100 battles identical (31,264 commands, bad 0).
+Frame hashes: `npm run compare:differential -- <Confuse Ray player, Confuse Ray opponent, Spark player Scene ON traces> --base 9cc3398ff --harness-from-head`: 240 / 240 captures byte-identical (captures 60..692 step 8).
+
+### 18.5 Residuals
+
+The Confuse Ray sprite SE196 rows (13 per cast, ROM-only). Spark's +5 / +6 (idle lead plus one overrun frame). Remaining top gated census moves: Tri Attack 24, Petal Dance 22, Rollout 17 (rolloutCounter, not a lifetime), Dive 10.
