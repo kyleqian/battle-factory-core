@@ -31,7 +31,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ## 2026-11-16 — ais1 (ts lane worker): AI mid-battle switch gets "withdrew" + return-to-ball, recall SE at its ROM frame (presentation only)
 
-- **State:** on master, committed; `docs/ais1-ai-switch-withdraw.md`; evidence `.integration/evidence/ais1/`. Typecheck 0, touched tests green; build / gate / soaks: see Notes.
+- **State:** on master, committed; `docs/ais1-ai-switch-withdraw.md`; evidence `.integration/evidence/ais1/`. Typecheck 0, `build` / `build:lib` 0, `test:gate` 362 files / 2843 tests green, touched tests green, soaks `winning-swap` and `winning` 0:20 20/20 each (run as 4 x 5 seeds, `--parallel 2`).
 - **Did:** the AI switch's RETURNMON message + battler-1 return-to-ball are synthesized in the presentation layer (dispatcher `synthesized-ai-switch`, like the player's recall); the aud253 stop-gap
   (recall SE on the tray draw, 31 frames late) is removed, the `switch-out` command's SE_BALL_OPEN is now exact (seed 2741: recall / tray rows 0 delta, send-in -2; segment +74 vs ROM 75-77).
   Census 0..99 both scenes: 7 AI-switch battles gain exactly one message+switch-out+hide triple (21 rows/scene), nothing else; 4 double-faint seeds lose a spurious stop-gap SE 15. ROM chains 15/26/28/71/2741 match to the end.
