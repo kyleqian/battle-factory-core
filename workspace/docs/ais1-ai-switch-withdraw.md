@@ -48,9 +48,54 @@ The segment grew by +74 frames (ROM's gap 75-77); the residual 1-3 frames is the
 
 ## Residuals / open
 
-- Pixel comparison of the opponent return-to-ball at the pre-segment offset was not done in this step (no ROM window of the withdraw frames captured); only the sound rows and the
-  command timings (message 24 / switch-out 32, the player's measured values) are verified.
-- Scene ON: the renderer's `midBattleSwitchOutFeetAnchorY2` uses the player RATTATA y_offset 13 constant; the opponent sprite's anchor / elevation is not specialised. The recall ball
-  particles / fade (`AnimTask_SwitchOutBallEffect`) are not drawn for either side.
-- Pursuit-interception AI switches, Focus Punch pre-pass + AI switch, and Frontier Brain battles are unprobed (no seed in the census exercises them; the Brain path should carry
-  `opponentTrainer`).
+Superseded by the ais2 section below: the pixel comparison, the opponent anchor and the recall ball effect are done there. Still open: Pursuit-interception AI switches, Focus Punch pre-pass + AI switch,
+and Frontier Brain battles are unprobed (no census seed exercises them; the Brain path should carry `opponentTrainer`).
+
+## ais2: pixel compare against the ROM, the recall ball effect, the opponent anchor (presentation only)
+
+Files: `src/engine/battleResolutionPresentationRender.ts` (opponent recall effect, `opponentBattlerYDelta`), `src/engine/battleScene.ts` (opponent-recall particle origin, opponent mon tint),
+`src/engine/midBattleOpponentPartySummaryTiming.ts` + the draw command in `battleResolutionPresentation.ts` (tray span), `tools/integration/soundCensusRomReplay.ts` (`replay --render=LO:HI --render-dir=DIR`
+writes the engine's 240x160 frames for replay frames LO..HI). Tests: `tests/ais2AiSwitchFrames.test.ts` (fixture `tests/fixtures/ais2-ai-switch-rom-frames.json`), `aud253` DELTAS 2741 re-pinned, `ais1` tray 100 -> 101.
+
+### Method
+
+Seed 2741 (ROM chain 19/19 in both scenes; Scene ON chain made here: `tools/audio/romDriveSeed.sh 2741 on`). The AI switch is segment 5: Scene OFF engine commit 2707 / ROM commit 2768 (pre-segment drift 61),
+Scene ON engine 3774 / ROM 3865 (drift 91). ROM frames: the frozen trace with `trace.captureFrames` (<= 256 per `bin/oracle lab` call), engine frame f compared with ROM frame f + drift, md5 of the RGBA.
+Frame hashes of 202 (OFF 2727..2928) and 206 (ON 3790..3995) ROM frames are the fixture; the test replays the engine and requires every frame equal.
+
+### The 1-3 frame residual, located
+
+- **The tray span (fixed).** `BattleScript_DoSwitchOut` runs `switchhandleorder BS_ATTACKER, 1` between `drawpartystatussummary` and `getswitchedmondata`; a faint replacement's script has no such command. The opponent's
+  draw command is now 101 frames for a voluntary AI switch (`OPPONENT_SUMMARY_SWITCH_ORDER_FRAMES`, keyed on the draw's `BattleScript_DoSwitchOut` label; 100 / 123 for faint replacements as before). The tray slide,
+  hold and fade-out are exact against the ROM through the tray's end (frames 2727..2928 and 3790..3995 equal the ROM's). Sound: send-in SE 15 and the cry go from -2 to -1.
+- **The send-in ball (attributed, not fixed).** The remaining -1 / 2-frame difference starts at the opponent's send-in ball throw: engine frame 2929 (ON 3996) draws the ball 2 frames before the ROM's 2931 and
+  drops it 1 frame before the ROM's last (2944 vs 2945), so the ROM's ball flight is one frame longer and the ball-open SE (+1) and the fade that follows it are one frame later. It is not specific to the withdraw: it is the opponent
+  `switch-in` command's own timeline (a faint replacement's send-in shares it; its SE 15 row carries the same -1), and Scene ON shows the identical 112 / 111 px ball rows and fade. Out of the withdraw / switch-out paths this
+  step may touch, left as the pinned -1 (`aud253` DELTAS 2741 `[0, 0, -1, -1]`).
+
+### Recall ball effect (AnimTask_SwitchOutBallEffect), now drawn for the opponent
+
+`AnimateBallOpenParticles(x, y + 32, ...)` + `LaunchBallFadeMonTask(FALSE, ...)` at the `switch-out` command's elapsed 2: the white fade of the BG palette rows, the mon's tint toward the ball colour (ramp 0 -> 16) and the
+16 particles. The window is the player recall's (`midBattleSwitchFadeAt` / `midBattleSwitchParticleSchedulesAt`, trace 1086 = elapsed 0) on the opponent's own clock: elapsed since the `switch-out` began, carried across the
+sprite-visibility and party-summary commands that follow it (the effect outlives the 32-frame command), cut at elapsed 54. Two measured differences from the player's staged fixture: (1) no stolen update tick
+(`recallStolenTick = false`): the fixture's frame-1121 stall is the player-side party-summary sprite-sheet work, absent here; with it the BG white-out is off by one step from frame 2794 (ROM 2855); without it 2794..2802 are exact; (2) the
+particle base is the slot's fixed `GetBattlerSpriteCoord` (176, 40) + 32 = (176, 72) (sBattlerCoords has no species term), drawn at (172, 68), no terrain clip. The mon is tinted by the same `BALL_OPEN_FADE_POKE_COLOR`
+(the recalled mon's ball is a POKE BALL in every Factory set). The player's recall (the voluntary-switch clock) is untouched: `turn5-switchin` 175 / 241 and `turn13-switchin` 242 / 242 equal master's.
+
+### Opponent anchor (item 2)
+
+`SetBattlerSpriteYOffsetFromYScale` reads `GetBattlerYDeltaFromSpriteId`: `gMonFrontPicCoords[species].y_offset` for the opponent (the Castform elevation for a Castform). `midBattleSwitchOutAt(elapsed, battler, yOffset)`
+takes it (`opponentBattlerYDelta(art)`; default 13 stays the player's RATTATA). Seed 2741's recalled MURKROW has y_offset 11 (the 13 constant gave `varr` 38 instead of 42); both scenes' scale-up frames are exact with it.
+The player's own anchor still uses the staged fixture's 13 for any species (`gMonBackPicCoords` was not touched: the player recall traces are pinned to master).
+
+### Census 0..99, both scenes (`lsd194Census.sh`, base `dcecf376b` vs `335d90c1f`)
+
+Digests / errors equal in all 100 battles per scene; 93 identical; the 7 AI-switch battles (seeds 15, 26, 28, 41, 52, 61, 99) change exactly one command, the opponent `party-summary` 100 -> 101 frames. 0 bad.
+Sound: only those 7 rows move, 1 frame each way (the send-in SE 15 / cry and later rows +1).
+
+### Residuals / open
+
+- The send-in ball 2-frame / 1-frame difference above (shared with faint replacements).
+- The recalled mon's ball is assumed POKE BALL (every Factory set); a different ball would change the tint / particle palette.
+- The player's recall anchor / particle origin are the staged fixture's constants for a non-RATTATA player mon (unchanged).
+- Pursuit-interception and Focus-Punch-pre-pass AI switches stay unprobed (as ais1).

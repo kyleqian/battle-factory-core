@@ -39,6 +39,15 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Next:** pixel-compare the opponent withdraw against a ROM window; opponent feet-anchor y2 and ball-return particles in Scene ON (ISSUES #222); Pursuit-interception AI switch.
 - **Notes:** full `npm test` NOT run (supervisor does). No `unsupported-branch` barrier added. Pixel comparison NOT done.
 
+## 2026-11-16 — ais2 (ts lane worker): AI switch pixels vs the ROM, opponent recall ball effect + anchor, tray +1 (presentation only)
+
+- **State:** on master, committed (`56d40119a`, `335d90c1f`, docs); `docs/ais1-ai-switch-withdraw.md` "ais2"; evidence `.integration/evidence/ais2/`. Typecheck 0, `build` / `build:lib` 0, `test:gate` green, `tests/ais1*` / `aud25*` / `aud24*` green, soaks `winning-swap` and `winning` 0:20 20/20 (SOAK_NOTE).
+- **Did:** seed 2741 AI switch compared pixel-for-pixel at the pre-segment offsets (OFF 61, ON 91): the residual is the opponent tray span, 101 frames for a voluntary AI switch (`switchhandleorder` in `BattleScript_DoSwitchOut`); fixed, send-in SE 15 / cry -2 -> -1.
+  Opponent switch-out anchor from `gMonFrontPicCoords` y_offset (MURKROW 11). Recall ball effect drawn for the opponent (BG white fade, mon tint, 16 particles at fixed (172,68), no stolen tick), exact in both scenes. `tests/ais2AiSwitchFrames.test.ts`
+  pins 202 (OFF) + 206 (ON) ROM frames. Census 0..99 both scenes: only the 7 AI-switch seeds change, one command (party-summary 100 -> 101); player recall traces unchanged. New `soundCensusRomReplay.ts replay --render=LO:HI --render-dir=DIR`.
+- **Next:** the opponent send-in ball starts 2 frames / ends 1 frame early vs the ROM (shared with faint replacements, SE 15 -1 pinned); player anchor still hardcodes y_offset 13; Pursuit / Focus Punch AI switches unprobed (ISSUES #222).
+- **Notes:** full `npm test` NOT run (supervisor does). The player's own recall effect not generalised (keeps the voluntary-switch clock).
+
 ## 2026-11-16 night run (CAX31 supervisor, Opus 5.5, 13:30 -> 05:30 UTC): in progress
 
 - **State:** folded: lazy1, luck1, aud242k / l / m / n, dl1, dl2, rrh4, aud251 (entries above / below). Running: aud242o (integration), lbw5 (side).
