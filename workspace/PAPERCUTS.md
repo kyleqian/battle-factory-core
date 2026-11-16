@@ -2031,3 +2031,8 @@ current app stage should be rejected before replay.
   <wt>/workspace/reference/pokeemerald` and `ln -s <main>/node_modules <wt>/workspace/node_modules`, then drive one seed by hand before the batch. ~10 min.
 - **Concurrent `npm run typecheck` in two lanes OOM-kills one (exit 137)** (aud242o, lbw5, lazy1, supervisor; ~4-10 min each): each `tsc -b` peaks at ~6 GB on a 15 GB box.
   `typecheck` now takes `flock /tmp/pokebench-typecheck.lock` (supervisor, 2026-11-16 night), so lanes queue instead; worktrees based on older commits do not have it yet.
+- **Workers read "foreground only" into the rules and refuse `nohup` gates, then chunk 20-seed soaks into 5-seed calls** (ais1 ~45 min of soak chunks, aud242k / aud242l / lazy1
+  / hie4 / cry3 lost 5-15 min each to the 10-minute tool cap). Briefs now say explicitly that `nohup ... &` + polling is allowed. A worker also read the launcher's closing
+  "npm test green" line as conflicting with "the supervisor runs the full suite" (ais1, ~2 min).
+- **`npm run test:gate` does not run several sound tests** (`aud252LossBallOpen`, `aud248StatChangeSounds`): hie4's timing fix broke the aud252 pin unseen until cry3's
+  importer sweep (supervisor re-pinned). Briefs touching timing should name `tests/aud2*` + `tests/cry*` explicitly.
