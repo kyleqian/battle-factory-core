@@ -762,3 +762,70 @@ Gates on `4e31b7675` + the aud248 residual row: `npm run typecheck` 0; `npm run 
 
 - Top gated census moves now: Blizzard 88, Confuse Ray 47, Spark 32, Tri Attack 24, Ancient Power 23, Petal Dance 22, Fire Punch 21, Yawn 20.
 - Struggle +7 and Dig's -6 / +23 are recorded offsets, not fixed (ISSUES #198).
+
+## 15. aud242k: Fire Punch / Ancient Power / Yawn / Smokescreen / Safeguard / Scary Face / Crunch / Lovely Kiss / Wish / Recover lifetimes
+
+Ranked by T1 census gated weight among the moves whose gated ops depend only on fixed or arithmetic C lifetimes: Ancient Power 23, Fire Punch 21, Yawn 20, Smokescreen 19, Wish 17, Safeguard 15, Scary Face 15, Crunch 13, Lovely Kiss 12, Recover 13.
+Skipped: Blizzard 88 (the snowball path needs a per-species pic offset), Confuse Ray 47, Spark 32 (`ElectricityEffect`, delay -31 colour cycles), Petal Dance 22 (`create_petal_dance_*_flower_sprite`), Tri Attack (`gLargeFlameScatterSpriteTemplate`, `invert_screen_color`, lightning, ice crystals still open), Rollout (`AnimTask_Rollout`), Flail (`AnimTask_FlailMovement` plus a damage-dependent shake).
+
+### 15.1 Lifetimes derived (C; also cited in the extractor, `lifetimeOf`, aud242k block)
+
+Call numbering as in section 8: a sprite whose callback destroys at call K is gone K - 1 ticks after F.
+
+| lifetime | C | exact (ticks after F) |
+|---|---|---|
+| `gFireSpiralInwardSpriteTemplate` | `battle_anim_fire.c:466-478`, `battle_anim_mons.c:468-486` | 30 |
+| `gFireSpreadSpriteTemplate` / `gGrantingStarsSpriteTemplate` | `battle_anim_fire.c:481-492`, `battle_anim_effects_1.c:4099-4113`, `battle_anim_mons.c:607-621` | `D + 1` |
+| `AnimTask_DeepInhale` / `gYawnCloudSpriteTemplate` | `battle_anim_effects_3.c:3474-3510`, `3532-3563`, `battle_anim_mons.c:780-788` | 64 / 65 |
+| `gBlackBallSpriteTemplate` (`AnimThrowProjectile`) / `gBlackSmokeSpriteTemplate` | `battle_anim_mons.c:1572-1589`, `battle_anim_effects_3.c:1182-1209` | `D` / `T` |
+| `gGuardRingSpriteTemplate` / `gAncientPowerRockSpriteTemplate` | `battle_anim_effects_2.c:3799-3820`, `battle_anim_rock.c:571-582`, `battle_anim_mons.c:1093-1100` | 14 / `D + 1` |
+| `shake_mon_or_platform` | `battle_anim_normal.c:853-915` | `T` |
+| `gDevilSpriteTemplate` | `battle_anim_effects_2.c:3580-3610` | 89 |
+| `gEyeSparkleSpriteTemplate` | `battle_anim_effects_2.c:3504-3514`, `1011-1019` | 20 |
+| `AnimTask_ScaryFace` | `battle_anim_effects_2.c:3324-3410` | 77, plus `SCARY_FACE_LOAD_LAG` 6 (below) |
+| `AnimTask_ShakeTargetInPattern` | `battle_anim_fire.c:1344-1375` | `maxShakes - 2` (needs >= 1) |
+| `create_sharp_teeth_sprite` / `gSharpTeethSpriteTemplate` / `gClampJawSpriteTemplate` | `battle_anim_dark.c:320-352` | `2H - 1` |
+| `gWishStarSpriteTemplate` | `battle_anim_effects_3.c:2104-2140` | 64 |
+| `gHealingBlueStarSpriteTemplate` (`AnimSpriteOnMonPos`) | `battle_anim_mons.c:1515-1536`, `battle_anim_effects_1.c:1825-1836` | 21 (2+2+2+3+5+3+2+2) |
+| `create_power_absorption_orb_sprite` | `battle_anim_effects_1.c:2230-2240` (`StartAnimLinearTranslation`) | `D + 1` |
+
+`AnimTask_ScaryFace` loads its BG tilemap, image and palette in the creating step like `AnimTask_MetallicShine`; the ROM window puts the first op after its wait 6 wall frames after the 77-call count, so the extractor applies `SCARY_FACE_LOAD_LAG = 6` to every later op (same mechanism as `METALLIC_SHINE_LOAD_LAG`, section 8).
+
+### 15.2 ROM windows (probe step mode, Scene ON, player attacker)
+
+Fixtures `tools/audio/fixtures/aud242k-{ancientpower,firepunch,yawn,smokescreen,scaryface,wish,safeguard,lovelykiss,crunch,recover}-player.json`, labs `tools/battle-lab/aud242k-*-player-on.json` (made by `tools/audio/makeAud242bLabs.py`, `AUD242_LAB_PREFIX=aud242k`; Recover's trace is two turns because the move fails at full HP), stages in `appTrace.ts`, test `tests/aud242kMoveAnimSounds.test.ts`. Recipe: `AUDIO_PROBE_EXTRA_HOOKS=BlendPalette python3 tools/run-mgba-probe.py --rm-log-on-success OUT.json -- python3 tools/audio/soundEventProbe.py OUT.json lab <lab>.json --frames N --profile on --compact` (N = 600; Recover 1900).
+
+| window | rows timed by the new lifetimes (ROM frames) | ROM minus ours |
+|---|---|---|
+| Ancient Power | SE171 77, SE177 144 | +2 |
+| Fire Punch | SE144 78, SE147 115 | +2 |
+| Yawn | SE237 62, SE232 127, SE237 205 | +1 |
+| Smokescreen | SE135 71, SE159 111 | -2 |
+| Scary Face | SE189 67, SE192 126, SE130 210 (behind `AnimTask_ScaryFace`) | -2 (+4 before the 6-frame lag) |
+| Wish | SE207 91, SE195 218 / 234 / 251 | -5 |
+| Safeguard | SE225 65, SE102 92 | -4 |
+| Lovely Kiss | SE200 71, SE226 161 (behind the Devil) | 0 |
+| Crunch | SE161 109, SE161 135 (behind the sharp-teeth sprites) | +2 |
+| Recover (second turn) | SE140 x3 ROM 1087 / 1100 / 1114, SE179 1207 | -2 |
+
+Every row of a window carries one offset, so the intervals the lifetimes produce are ROM-exact; the offsets are the known start classes (idle lead +2, status -2..-5, ISSUES #198).
+
+- The first Scary Face window had its last row 6 frames later than the first two rows' offset, which gave `SCARY_FACE_LOAD_LAG`.
+- Lovely Kiss's SE197 rows (ROM 224 / 517 vs ours 221 / 499, +3 / +18) are the Status_Sleep animation of the sleeping target (SE_M_SNORE, the status-animation step), not the move under test; they predate this step.
+- The `aud242c` Crunch window's "ROM only" row (135) is now emitted and matches, so its `romOnly` entry was removed. `tests/aud248StatChangeSounds.test.ts` names the new windows' stat-SE residuals: Ancient Power null (secondary effect, not run as a stats-change command), Scary Face +14, Smokescreen 0.
+
+### 15.3 Counts (turn 0, player attacker)
+
+| | before (`b5bb454a9`) | after |
+|---|---|---|
+| all moves: ops resolved / unresolved | 910 / 202 | 924 / 188 |
+| L50 (276 moves): emitted / gated | 707 / 127 | 720 / 114 |
+
+Moves whose turn-0 gated count fell to 0: Fire Punch, Smokescreen, Lovely Kiss, Scary Face, Safeguard, Synthesis, Crunch, Ancient Power, Nature Power, Wish, Tickle, Yawn (2 -> 0) and Recover.
+
+Census T1 (seeds 0..99 Scene ON, fresh arms `on-b5bb454a9` (the parent) and `on-d4502e1b0`, each scored in its own tree against its own table): exact 24,175 -> 24,404, missing-gated 570 -> 396, missing-other 51, missing-declined 1, extra 0. unclassified is 128 in BOTH arms (not 0): SE148 in the message / HP windows, the sound-only Status_Poison tail added by `36e9335ab` (psn2) after the `bd46a5fbf` t1cls arm, which the classifier does not attribute; this step does not change it. `rst197CensusDelta.py`: 100 / 100 battles, 31,264 commands identical, bad 0; `soundCensusDelta.py` arm-vs-arm: 53 seeds with added SE rows only (no removed or moved rows).
+
+### 15.4 Residuals
+
+- Top gated census moves now: Blizzard 88, Confuse Ray 47, Spark 32, Tri Attack 24, Petal Dance 22, Rollout 17, Flail 15 (ranking aids: `ANIM_SOUND_BLOCKERS=1`, `ANIM_SOUND_BLOCKERS_BY_MOVE=file`).
+- Unmodelled lifetimes with the most gated L50 ops behind them: `create_hyper_beam_orb_sprite` 52, `gEndureEnergySpriteTemplate` 45, `gHydroPumpOrbSpriteTemplate` 44, `gFireSpinSpriteTemplate` 42, `gAuroraBeamRingSpriteTemplate` 40, `gAirWaveCrescentSpriteTemplate` 40.
