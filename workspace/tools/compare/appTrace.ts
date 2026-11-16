@@ -2000,6 +2000,11 @@ export const APP_STAGES: Readonly<Record<string, AppStage>> = {
   // aud242i: Sludge Bomb (waitsound after SE_M_DIG, gSludgeBombHitParticleSpriteTemplate wait).
   "aud242i-sludgebomb-player-on": (state) => aud241bStage(state, "aud242i-sludgebomb-player-on", "on", 50, 12, 188, undefined, false, 69),
   "aud242i-sludgebomb-opponent-on": (state) => aud241bStage(state, "aud242i-sludgebomb-opponent-on", "on", 12, 50, 69, undefined, false, 188),
+  // aud242j: Struggle (ShakeMonInPlace / MovementWaves), Attract (heart projectile / burst), Silver Wind (flying sparks), Dig's second turn (DigUpMovement).
+  "aud242j-struggle-player-on": (state) => aud241bStage(state, "aud242j-struggle-player-on", "on", 50, 12, 165, undefined, false, 69),
+  "aud242j-silverwind-player-on": (state) => aud241bStage(state, "aud242j-silverwind-player-on", "on", 50, 12, 318, undefined, false, 69),
+  "aud242j-silverwind-opponent-on": (state) => aud241bStage(state, "aud242j-silverwind-opponent-on", "on", 12, 50, 69, undefined, false, 318),
+  "aud242j-dig-player-on": (state) => aud241bStage(state, "aud242j-dig-player-on", "on", 50, 12, 91, undefined, false, 69),
   // aud242i: Faint Attack (attacker_fade_to_invisible / _from_invisible and SetAttackerInvisibleWaitForSignal lifetimes).
   "aud242i-faintattack-player-on": (state) => aud241bStage(state, "aud242i-faintattack-player-on", "on", 50, 12, 185, undefined, false, 69),
   "aud242i-faintattack-opponent-on": (state) => aud241bStage(state, "aud242i-faintattack-opponent-on", "on", 12, 50, 69, undefined, false, 185),
