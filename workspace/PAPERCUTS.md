@@ -2029,3 +2029,5 @@ current app stage should be rejected before replay.
 - **A fresh `git worktree add` for the pinned nightly replay lacks the ignored `reference/pokeemerald` link and `node_modules`** (supervisor): every
   seed failed in seconds with `mGBA could not load ROM` and the run "finished" 113 / 113 failed. Fix: `ln -s /srv/pokebench/vendor/pokeemerald
   <wt>/workspace/reference/pokeemerald` and `ln -s <main>/node_modules <wt>/workspace/node_modules`, then drive one seed by hand before the batch. ~10 min.
+- **Concurrent `npm run typecheck` in two lanes OOM-kills one (exit 137)** (aud242o, lbw5, lazy1, supervisor; ~4-10 min each): each `tsc -b` peaks at ~6 GB on a 15 GB box.
+  `typecheck` now takes `flock /tmp/pokebench-typecheck.lock` (supervisor, 2026-11-16 night), so lanes queue instead; worktrees based on older commits do not have it yet.
