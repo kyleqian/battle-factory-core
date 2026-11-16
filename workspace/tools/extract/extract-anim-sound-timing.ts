@@ -726,7 +726,13 @@ function lifetimeOf(cmd: Command, attackerSide: number, pic: PicContext, rollout
   }
   // gConfuseRayBallSpiralSpriteTemplate (:313-341): the init installs the step and runs it at once (call 0: data[7] 0 -> 1), so call k has data[7] = k + 1 and call 60 (61) destroys: gone 59 ticks after F.
   if (sprite("gConfuseRayBallSpiralSpriteTemplate")) return { exact: 59 };
-  if (op === "create_basic_hitsplat_sprite") return { bound: 10 };
+  // AnimHitSplatBasic (battle_anim_normal.c:1006-1018): affine anim `animation` (sAffineAnim_HitSplat_0..3, :134-163), RunStoredCallbackWhenAffineAnimEnds (sprite.c:729-733) with
+  // DestroyAnimSprite stored. Anims 1..3 are one shape (a 0 frame, then the 8 frame): exact 10, ROM-measured on anim 2 (aud242p Poison Sting window: the wait ends 10 ticks after the
+  // hit splat, the Shake task there is 8; Spark / Poison Tail agree). Anim 0 (the 8 frame alone) and a non-literal animation stay the bound.
+  if (op === "create_basic_hitsplat_sprite" || sprite("gBasicHitSplatSpriteTemplate")) {
+    const a = op === "create_basic_hitsplat_sprite" ? intNamed("animation") : intArg(args[6]);
+    return a !== null && a >= 1 && a <= 3 ? { exact: 10 } : { bound: 10 };
+  }
   // ---- aud242o (docs section 19). AnimPetalDanceBigFlower / SmallFlower (battle_anim_effects_1.c:2482-2548; D = duration): the init sets data[0] = D, runs InitAnimLinearTranslation
   // (battle_anim_mons.c:1065-1091, data[0] unchanged) and calls the step at once. The step is AnimTranslateLinear (:1111-1139, data[0]-- per call while non-zero): calls 0..D - 1 translate,
   // call D finds data[0] == 0 and DestroyAnimSprite: gone D - 1 ticks after F (the sway only moves x2 / y2 / the oam flip bit).
@@ -734,6 +740,12 @@ function lifetimeOf(cmd: Command, attackerSide: number, pic: PicContext, rollout
     const d = op.startsWith("create_") ? intNamed("duration") : intArg(args[6]);
     return d === null || d < 1 ? null : { exact: d - 1 };
   }
+  // ---- aud242p: AnimTask_LeafBlade (battle_anim_effects_1.c:3255-3466, Step2 :3476-3496, trail callback :3498-3512). The entry runs the first arc init and installs Step (RunTasks calls 1..): seven arc states
+  // (0, 2, .., 12; InitAnimArcTranslation with data[0] = 10, AnimTranslateLinear :1111: 10 translating calls and the 11th returns TRUE) of 11 calls each, six 0xFF holds (++data[1] > 5: 6 calls) and six one-call
+  // setups (1, 3, .., 11): the main sprite dies in call 119, state 13 starts in call 120. Every arc call (77) first creates a trail sprite (Step2) that dies on its 9th flip: data[0] = (#trails before) & 1,
+  // flips on callback calls 2, 4, .. (data[0] 0) or 1, 3, .. (data[0] 1). The last trail (76 before, even) is created in call 119 and dies on its 18th callback call = iteration F + 137, before RunTasks; state 13 sees
+  // data[12] == 0 there and destroys: gone 136 ticks after F.
+  if (op === "create_leaf_blade_task" || (op === "createvisualtask" && args[0] === "AnimTask_LeafBlade")) return { exact: 136 };
   // AnimTask_Rollout: gone destroyCall - 1 ticks after F (the dirt sprites are CreateSprite'd, not counted by waitforvisualfinish).
   if (op === "createvisualtask" && args[0] === "AnimTask_Rollout") { counterUsed = true; return { exact: rolloutShape(rolloutCounter).destroyCall - 1 }; }
   // ---- AnimDiveBall (battle_anim_flying.c:1010-1047; args a2 = wait, a3 = acceleration): the sprite starts at the attacker's pic Y (+ a1) and the init installs Step1 without running it. Calls
@@ -760,6 +772,56 @@ function lifetimeOf(cmd: Command, attackerSide: number, pic: PicContext, rollout
   if (sprite("gLargeFlameSpriteTemplate") || sprite("gLargeFlameScatterSpriteTemplate")) { const n = intArg(args[5]); return n === null || n < 1 || n > 0x7fff ? null : { exact: n - 1 }; }
   // AnimLightning (battle_anim_electric.c:459-474): the init installs the step, which destroys once sAnim_Lightning (:40-48: 5 + 5 + 8 + 5 + 5 = 28 ticks) ends: exact 28.
   if (sprite("gLightningSpriteTemplate")) return { exact: 28 };
+  // ---- aud242p (docs section 20). AnimTask_HardwarePaletteFade (battle_anim_utility_funcs.c:199-216; args blendCnt, delay, y, targetY, reset = script args[2..6]): the entry runs
+  // BeginHardwarePaletteFade (palette.c:728-744: delayCounter = delay, so the first update is immediate) in the script step and installs a step that destroys once `active` clears. CB2's
+  // UpdateHardwarePaletteFade (:746-785) then steps y every delay + 1 iterations from iteration F; the step past targetY (|targetY - y| steps later) sets hardwareFadeFinishing, the VBlank
+  // of that iteration (UpdateBlendRegisters) clears `active`, and the task's RunTasks of the next iteration destroys it: gone (delay + 1) * |targetY - y| + 1 ticks after F.
+  if (op === "createvisualtask" && args[0] === "AnimTask_HardwarePaletteFade") {
+    const [delay, y, target] = [intArg(args[3]), intArg(args[4]), intArg(args[5])];
+    return delay === null || y === null || target === null || delay < 0 || y < 0 || target < 0 ? null : { exact: (delay + 1) * Math.abs(target - y) + 1 };
+  }
+  // AnimSpotlight (battle_anim_effects_3.c:1545-1604; affine anims :330-376): the init installs Step1 (call 0). The affine anim 0 (0 + 20 ticks) ends at call 20 (sprite.c:1055-1178: the END
+  // is reached at call begin + sum of the frame durations, the aud242m anger-mark rule), so state 0 passes in call 21; states 1 / 2 / 3 take 21 / 41 / 21 calls (22..104); state 4 (call 105)
+  // ChangeSpriteAffineAnim(1) (0 + 19 ticks, begin call 105, END at call 124); state 5 sees it in call 125 and installs Step2, which destroys in call 126: gone 125 ticks after F.
+  if (sprite("gSpotlightSpriteTemplate")) return { exact: 125 };
+  // AnimClappingHand / AnimClappingHand2 (:1606-1675; script args[3..7] = x, y, side, anchored, N): data[0] = N cycles of 12 calls (x2 -+12 -> 0 -> -+12 in steps of 2); the call that completes
+  // the Nth cycle (call 12N, abs(x2) == 12 on the way back) decrements data[0] to 0 and the same call destroys it: gone 12N - 1 ticks after F (N <= 0: the first step call destroys, 0).
+  if (sprite("gClappingHandSpriteTemplate") || sprite("gClappingHand2SpriteTemplate")) { const n = intArg(args[7]); return n === null ? null : { exact: n < 1 ? 0 : 12 * n - 1 }; }
+  // AnimReversalOrb (battle_anim_effects_3.c:3140-3180; d = script args[3]): the init installs the step and runs it once itself (call 0 = step 1); the outward phase ends after d steps
+  // (data[4] == d at step d, calls 0..d-1), the inward phase after d more (the destroying step is step 2d = call 2d - 1): gone 2d - 2 ticks after F.
+  if (sprite("gReversalOrbSpriteTemplate")) { const d = intArg(args[3]); return d === null || d < 1 || d > 0x7fff ? null : { exact: 2 * d - 2 }; }
+  // AnimSpinningSparkle (battle_anim_mons.c:2380-2390) installs RunStoredCallbackWhenAnimEnds with DestroyAnimSprite stored; sAnim_SpinningSparkle (battle_anim_status_effects.c:100-107) is
+  // 5 x 3 = 15 ticks: BeginAnim in call 0, END (animEnded) at call 15 (sprite.c:909-960), call 16 only installs the stored callback (SetCallbackToStoredInData6 does not run it, :423-427),
+  // call 17 destroys: gone 16 ticks after F (the aud242j water bubble shape: RunStored END + 1, stored callback END + 2).
+  if (sprite("gSpinningSparkleSpriteTemplate")) return { exact: 16 };
+  // AnimFallingRock (battle_anim_rock.c:297-333; TranslateSpriteInEllipse battle_anim_mons.c:516-533): the init runs the ellipse once itself (sDuration 16: steps in call 0..15), call 16 hands over
+  // to AnimFallingRock_Step, which in call 17 restarts the ellipse (sDuration 32: steps in calls 17..48), call 49 hands over to DestroySpriteAndMatrix and call 50 destroys: gone 49 ticks
+  // after F, whatever the script args.
+  if (sprite("gFallingRockSpriteTemplate")) return { exact: 49 };
+  // AnimThoughtBubble (battle_anim_effects_1.c:5490-5517; d = script args[4]): all four gMetronomeThroughtBubbleAnimCmds (:2026-2058) are 4 x 2 = 8 ticks. The init starts the anim (BeginAnim call 0,
+  // END call 8) and installs RunStored (call 9 installs AnimThoughtBubble_Step), Step runs from call 10 and the call whose --data[0] reaches 0 (call d + 9) starts the closing anim (BeginAnim
+  // in that call, END d + 17) with DestroyAnimSprite stored: call d + 18 installs it, call d + 19 destroys: gone d + 18 ticks after F.
+  if (sprite("gThoughtBubbleSpriteTemplate")) { const d = intArg(args[4]); return d === null || d < 1 || d > 0x7fff ? null : { exact: d + 18 }; }
+  // AnimTauntFinger (:5606-5651): the init starts a 1-frame anim and installs Step1; ++data[1] > 10 first holds in call 11, which starts the 7 x 4 = 28 tick gTauntFingerAnimCmds3 / 4 (:2144-2172,
+  // BeginAnim call 11, END call 39) with Step2 stored (RunStored: call 40 installs it, call 41 runs it); Step2 destroys once ++data[1] > 5, the 6th run: call 46 = gone 45 ticks after F.
+  if (sprite("gTauntFingerSpriteTemplate")) return { exact: 45 };
+  // ---- aud242p slice 4. AnimSlideHandOrFootToTarget / AnimJumpKick (battle_anim_fight.c:421-443) -> AnimTravelDiagonally (battle_anim_mons.c:1591-1624; D = gBattleAnimArgs[4] = script
+  // args[7]): data[0] = D and StartAnimLinearTranslation with DestroyAnimSprite stored in the init (the AnimPowerAbsorptionOrb shape): D + 1. AnimRockBlastRock (battle_anim_rock.c:800-806) ->
+  // TranslateAnimSpriteToTargetMonLocation (battle_anim_mons.c:1546-1570, D = args[7]) in the init: D + 1; AnimThrowMistBall (battle_anim_ice.c:1090-1095) only installs that function, which
+  // runs in call 1: D + 2. D = 0 divides by zero (declined).
+  if (sprite("gKarateChopSpriteTemplate") || sprite("gJumpKickSpriteTemplate") || sprite("gRockBlastRockSpriteTemplate") || sprite("gMistBallSpriteTemplate")) {
+    const d = intArg(args[7]);
+    return d === null || d < 1 ? null : { exact: d + (sprite("gMistBallSpriteTemplate") ? 2 : 1) };
+  }
+  // AnimRevengeScratch (battle_anim_fight.c:964-982): the init installs RunStoredCallbackWhenAnimEnds (battle_anim_mons.c:735) with DestroyAnimSprite stored; sAnim_RevengeSmallScratch is
+  // 3 x 4 = 12 frames (:308-314), sAnim_RevengeBigScratch 2 x 6 = 12 (:350-355): the anim ends at call 12, the stored callback is installed at 13 and destroys at 14 = 13.
+  if (sprite("gRevengeSmallScratchSpriteTemplate") || sprite("gRevengeBigScratchSpriteTemplate")) return { exact: 13 };
+  // ---- aud242p slice 3. AnimLeechLifeNeedle (battle_anim_bug.c:229-251) and AnimTranslateStinger (:366-398; duration D = script args[5] / args[7]): data[0] = D, the init installs
+  // StartAnimLinearTranslation with DestroyAnimSprite in data[6]: the AnimPowerAbsorptionOrb shape (calls 1..D translate, D + 1 installs the stored callback, D + 2 destroys) = D + 1.
+  if (op === "create_leech_life_needle_sprite" || op === "create_linear_stinger_sprite" || sprite("gLeechLifeNeedleSpriteTemplate") || sprite("gLinearStingerSpriteTemplate")) {
+    const d = op.startsWith("create_") ? intNamed("duration") : intArg(args[op === "createsprite" && args[0] === "gLeechLifeNeedleSpriteTemplate" ? 5 : 7]);
+    return d === null || d < 1 ? null : { exact: d + 1 };
+  }
   // AnimTask_InvertScreenColor (battle_anim_normal.c:759-778) inverts the palette buffer and destroys itself in the creating step: net 0 in gAnimVisualTaskCount (exact -1).
   if (op === "invert_screen_color" || (op === "createvisualtask" && args[0] === "AnimTask_InvertScreenColor")) return { exact: -1 };
 
@@ -1098,6 +1160,13 @@ function walk(bodyLabel: string, turn: number, attackerSide: number, pic: PicCon
       // aud242o: AnimConfuseRayBallBounce plays SE_M_CONFUSE_RAY itself (battle_anim_ghost.c:220-311): Step1 with PlaySE12WithPanning(gAnimCustomPanning), Step2 with PlaySE. The
       // runtime needs the creating pan task to share the sprite's iteration (the pan is read call by call), else the rows stay unmodelled.
       case "createsprite": {
+        // aud242p: gClappingHandSpriteTemplate with side arg 0 plays SE_M_ENCORE (PlaySE1WithPanning, BattleAnimAdjustPanning(SOUND_PAN_ATTACKER), :1638-1650) each time x2 crosses 0:
+        // calls 6, 18, ... 12N - 6 of its step (offsets call - 1). gClappingHand2 (data[3] = 255) and the side-1 hand are silent.
+        if (args[0] === "gClappingHandSpriteTemplate" && frame !== null && intArg(args[5]) === 0) {
+          const n = intArg(args[7]);
+          if (n !== null) for (let k = 0; k < n; k += 1) events.push({ op: "soundtask_se1", frame: frame + shiftAt(frame) + 5 + 12 * k, id: value("SE_M_ENCORE"), pan: value("SOUND_PAN_ATTACKER"), line });
+          break;
+        }
         if (args[0] !== "gConfuseRayBallBounceSpriteTemplate" || frame === null) break;
         const [offset, speed] = [intArg(args[3]), intArg(args[5])];
         const ball = offset === null || speed === null || speed < 1 ? null : confuseRayBallBounceLength(attackerSide, offset, speed);

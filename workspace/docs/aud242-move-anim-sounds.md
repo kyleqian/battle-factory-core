@@ -1017,3 +1017,85 @@ Frame hashes: `npm run compare:differential -- <aud242o rollout, triattack, dive
 ### 19.4 Residuals
 
 Idle-lead +2 / +3 and Dive's -7 (#198). Rollout's turn-over-turn presentation drift (+13 / +15 / +20 / +29). Remaining top gated census moves: Dynamic Punch 10, Extrasensory 8, Leaf Blade 8, Flatter 8, Secret Power 8, Heal Bell 8, Ice Ball 6 (the next counter-dimension candidate), Fury Cutter 6.
+
+## 20. aud242p: Encore, Flatter, Reversal, Taunt, Karate Chop, Revenge, Mist Ball, Leaf Blade (T1 family 1, slice 15) and the Scene ON T2 re-score
+
+Base `67a98cf93` (aud242o). Goal (A): re-score Scene ON T2 over the 21 aligned seeds. Goal (B): port the next ROM-only move-SE families from the C, each with a file:line citation, none fitted to a window. Conventions as section 19: "gone n ticks after F", RunTasks / AnimateSprites order (sprites run before tasks inside one iteration), `delay N` = N + 2, a script sprite's init is call 0.
+
+### 20.1 Lifetimes ported (`tools/extract/extract-anim-sound-timing.ts`, `lifetimeOf`)
+
+| lifetime | C | exact (ticks after F) |
+|---|---|---|
+| `AnimTask_HardwarePaletteFade` (Encore / Flatter backdrop) | `battle_anim_utility_funcs.c:199-216`, `palette.c:728-785` | `(delay + 1) * abs(targetY - y) + 1` |
+| `gSpotlightSpriteTemplate` (Flatter) | `battle_anim_effects_3.c:1545-1604`, affine anims `:330-376` | 125 |
+| `AnimClappingHand` / `AnimClappingHand2` (Encore) | `battle_anim_effects_1.c` (the clap sprites) | `12 n - 1`, plus the N `soundtask_se1` SE_M_ENCORE rows the sprite plays (side arg 0 only) |
+| `AnimReversalOrb` | `battle_anim_effects_3.c` | `2 d - 2` |
+| `AnimSpinningSparkle` | `battle_anim_effects_1.c` (RunStored) | 16 (a first guess of 15 missed the RunStored install call) |
+| falling rock (Fall Rock) | `battle_anim_rock.c` | 49 |
+| `AnimThoughtBubble` | `battle_anim_effects_1.c:5490-5517` | `d + 18` |
+| `AnimTauntFinger` | `battle_anim_effects_1.c:5606-5651` | 45 |
+| `AnimLeechLifeNeedle` / linear stinger (`StartAnimLinearTranslation` shape) | `battle_anim_effects_1.c` | `d + 1` (init does not run the step; calls 1..D translate, D + 1 installs the stored callback, D + 2 destroys) |
+| `gBasicHitSplatSpriteTemplate` / `create_basic_hitsplat_sprite`, animations 1..3 | `battle_anim_mons.c` hit splat, `gBasicHitSplatSpriteTemplate` | **10 (ROM-measured, see 20.3)**; animation 0 and a non-literal animation stay `{bound: 10}` |
+| `gKarateChopSpriteTemplate`, `gJumpKickSpriteTemplate`, `gRockBlastRockSpriteTemplate` (`AnimTravelDiagonally` shape) | `battle_anim_effects_1.c`/`_2.c`/`_3.c` (per template) | `d + 1` (d = duration, >= 1) |
+| `gMistBallSpriteTemplate` (`AnimThrowMistBall`, installs the callback from call 1) | `battle_anim_effects_1.c`/`_2.c`/`_3.c` (per template) | `d + 2` |
+| `gRevengeSmallScratchSpriteTemplate` / `gRevengeBigScratchSpriteTemplate` | `battle_anim_effects_1.c`/`_2.c`/`_3.c` (per template) | 13 |
+| `AnimTask_LeafBlade` / `create_leaf_blade_task` | `battle_anim_effects_1.c:3255-3466`, Step2 `:3476-3496`, trail callback `:3498-3512`, `AnimTranslateLinear` `battle_anim_mons.c:1111` | 136 |
+
+Timing rules used. A callback chain that ends in `RunStoredCallbackWhenAnimEnds` over a regular anim of total T ticks: END at call T, the install at T + 1, the destroy at T + 2, so exact T + 1; a callback that checks `animEnded` itself (DestroyAnimSprite, AnimSpriteOnMonPos) gives exact T. `StartAnimLinearTranslation` with duration D: exact D + 1 (above); a callback installed by an intermediate function that itself runs in call 1 (AnimThrowMistBall) adds one more.
+
+Leaf Blade (the one new task shape): the task entry only sets up the first arc and installs `AnimTask_LeafBlade_Step` (calls 1..). Seven arc states (0, 2, .., 12) of 11 calls each (`data[0] = 10`: ten translating calls, the 11th returns TRUE), six 0xFF holds of 6 calls (`++data[1] > 5`) and six one-call setup states (1, 3, .., 11) put the end of the last arc at call 119 and state 13 at call 120. Every arc call (77 of them) first creates a trail sprite (Step2) that flips every second callback call and dies on its 9th flip; `data[0] = (#trails before) & 1` picks the phase. The last trail (76 before, even phase) is created in call 119 and dies on its 18th callback call, i.e. iteration F + 137 before RunTasks; state 13 then sees `data[12] == 0` and destroys: gone **136** ticks after F. The first `waitforvisualfinish` therefore passes at F + 136 and frees the SE_M_LEER row behind it.
+
+### 20.2 ROM windows (probe step mode, Scene ON, level 50, player attacker, friendship 0)
+
+Fixtures `tools/audio/fixtures/aud242p-*-player.json`, labs `tools/battle-lab/aud242p-*-player-on.json`, stages `aud242p-*-player-on` in `tools/compare/appTrace.ts`, test `tests/aud242pMoveAnimSounds.test.ts` (ROM frame minus ours, per row, 0 = exact).
+
+| window | rows (ids) | ROM - ours | reading |
+|---|---|---|---|
+| Encore | 222, 223 (10 rows) | -1 on all 10 | the clap SE rows are timed; a flat -1 on every row, not diagnosed further |
+| Flatter | 223, 229 (3 rows) | -3, -3, 0 | SE223 is the known -3 (Flatter SE223 class); the two SE229 rows drift 3 frames against each other in the ROM. **Undiagnosed**, listed as a residual, not fitted |
+| Reversal | 209, 217, 123 | +2, +2, +2 | the aud242a idle-lead class (#198) |
+| Taunt | 186, 167, 194 (5 rows) | -4 on all | a flat presentation offset (the thought-bubble 63-tick and finger 45-tick waits and the anger-mark rows are exact among themselves) |
+| Karate Chop | 135, 139 | 0, 0 | |
+| Mist Ball | 129, 159, 246 | +2, +2, +2 | idle-lead class |
+| Revenge | 152, 193, 123, 141 | -10 on all four | the opponent (Pound, priority 0 before Revenge) moves first and its body is not a live adapter in the engine; the inter-row gaps 75 / 17 / 10 are exact |
+| Leaf Blade | 128 x3, 192 | 0 on all four | the SE_M_LEER row at 224 verifies the 136-tick task |
+| Hi Jump Kick (aud242b windows, existing) | 113 / 117 rows | 0 | the former `romOnly` rows (113:123:63, 117:123:-63) are now emitted exactly; the `aud242bMoveAnimSounds` specs became `{ delta: 0 }` |
+
+Hit splat animations 1..3 = 10: my derivation of the affine anim frame handling (`sprite.c`) gave 11 and was one tick wrong (it broke the aud242n Spark and aud242e Poison Tail windows); the ROM window of Poison Sting (animation 2) measures exactly 10 and the aud242n / aud242e windows agree, so 10 is the measured value and the affine derivation above it is not trusted.
+
+### 20.3 What is emitted but cannot be seen, and what has no window
+
+- Moves with no live presentation adapter never reach `emitMoveAnimSounds` (`liveMoveSourceAge` needs `liveMoveAnimationDuration(...) !== null`, `src/engine/liveMoveAnimation.ts`): **Poison Sting (40), Leech Life (141), Rock Smash (249), Jump Kick (26)** and the other adapterless moves emit nothing in the engine however complete the table row is. Their table rows are now fully timed (Poison Sting 8 ops, Rock Smash 2) but that is invisible to T1 / T2; the labs and fixtures that I built for Poison Sting / Leech Life produced no engine SE and were removed. Adding a live adapter is presentation work (out of scope here).
+- **Disable** (55 % accuracy) and **Rock Blast** (90 %): no window is possible, because the engine stage RNG differs from the lab seed. Disable is emitted from the same C ports without a ROM window; Rock Blast is not engine-visible.
+
+### 20.4 Counts, census, T2
+
+| | before (`67a98cf93` table) | after (`ffbccb113`) |
+|---|---|---|
+| all moves: ops resolved / unresolved (turn 0, player attacker) | 964 / 160 | 1008 / 125 |
+| all-moves ops in the table | 1202 | 1247 |
+| L50 (276 moves): emitted / gated | 760 / 86 | 785 / 70 |
+| table: distinct variants | 367 | 370 |
+
+Moves changed in the table: Encore, Flatter, Disable, Reversal, Taunt, Leech Life, Poison Sting, Rock Smash, Karate Chop, Jump Kick, Hi Jump Kick, Revenge, Mist Ball, Rock Blast, Leaf Blade.
+
+T1 census (seeds 0..99 Scene ON; base arm `on-67eacbe83`, final arm `on-ffbccb113`, each scored inside its own tree): exact 25,795 -> **25,840**, **missing-gated 122 -> 95**, extra 0, missing-other 51, missing-declined 1, unclassified 128 unchanged. `rst197CensusDelta.py`: 100 / 100 battles identical (events digest and commands). The arm-vs-arm sound delta: 13 seeds change, all sequence changes by added rows (SE123, SE229 both pans, SE170, SE192, SE222, SE223), none removed.
+
+T2 (Scene ON, the 21 aligned seeds; ROM side unchanged, only the engine replay regenerated, no ROM run): move-animation SE exact / offset / missing / extra **286 / 3592 / 113 / 0 at the aud242o head -> 288 / 3627 / 76 / 0** (the aud251 measurement at an older engine was missing 206). Stat-change, cry and battle-controller rows unchanged.
+
+Frame hashes: `npm run compare:differential -- <Encore, Leaf Blade, Revenge player Scene ON traces> --base 67a98cf93 --harness-from-head`: 240 / 240 captures byte-identical.
+
+### 20.5 Remaining top missing-gated census moves and what each one is
+
+| move | gated | class | blocker |
+|---|---|---|---|
+| Dynamic Punch | 10 | `waitsound` SE length | `waitsound` after SE_M_VITAL_THROW2: `seBound` has only an upper bound of the track; 50 % accuracy, so no window either |
+| Extrasensory | 8 | unresolved task lifetimes | `AnimTask_BlendMonInAndOut`, `AnimTask_ExtrasensoryDistortion` |
+| Secret Power | 8 | branch dimension | a script branch the table cannot take statically; not examined in detail |
+| Heal Bell | 8 | unresolved sprite lifetimes | `gBellSpriteTemplate`, `gHealBellMusicNoteSpriteTemplate`, `gThinRingExpandingSpriteTemplate` and the palette-blend task |
+| Ice Ball | 6 | per-battle counter | the same counter dimension as Rollout (the next counter candidate) |
+| Fury Cutter | 6 | per-battle counter + branch | `AnimTask_GetFuryCutterHitCount` and `IsFuryCutterHitRight` |
+| Soft Boiled | 5 | lifetimes + `setarg` | `gSoftBoiledEggSpriteTemplate` and `setarg 7, 0xFFFF` before the wait |
+| Eruption | 4 | unresolved task | `AnimTask_EruptionLaunchRocks` |
+
+Other single-blocker live moves not yet ported: Recycle, Milk Drink, Pain Split, Air Cutter, Smelling Salt, Will-O-Wisp, Needle Arm, Extreme Speed, Luster Purge. Torment's `AnimTask_TormentAttacker` plays SE_M_METRONOME from inside the task (a task-internal SE op). No pan or id difference was found in any of the windows above: every remaining difference is an offset class (idle-lead +2, Flatter -3, Revenge -10 from the non-live opponent body, Taunt -4, Encore -1) or a missing lifetime.
