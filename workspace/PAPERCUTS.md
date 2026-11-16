@@ -8,6 +8,15 @@ report `PAPERCUT: <what>, ~<minutes lost>` in their final message.
 Delete an entry when its underlying friction is fixed; git preserves its
 history.
 
+## Worker friction, 2026-11-16 run
+
+- **`npm run compare` takes `--capture-range START:END` (not `--frames`); the usage text shows only after a failed run** (lbw4 ~2 min).
+- **Ground-truth traces live in `tools/compare/traces-groundtruth/`, not `traces/`**; a brief naming only the trace stem sends the worker
+  searching (lbw4 ~3 min). Briefs should give the path.
+- Bump (worker turns vs full suite): a brief saying "you need not run the full npm test" still got six 6-9 min shard calls (lbw4 ~45 min);
+  say "do NOT run the full npm test".
+- Bump: typecheck / shard tests auto-background at the 120 s default tool timeout (lbw3 ~3 min).
+
 ## Worker friction, 2026-11-15 run
 
 - **Lab drift fools absolute-frame fits**: an app-vs-ROM `npm run compare` at equal frame indices hides the lab's pre-segment drift (the
