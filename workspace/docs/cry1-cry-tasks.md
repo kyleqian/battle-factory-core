@@ -59,7 +59,27 @@ whose K t lies within ~0.01 of an integer can still be off by one. Species outsi
 
 ## Residuals
 
-- The cry modes ROAR_1 / ROAR_2 / HIGH_PITCH / ECHO_START / ECHO_END play the NORMAL sample in the player (scout step 2: audio assets / player modes; out of scope here).
+- (Closed by cry2, below: the cry-task modes play their own recordings.)
 - Roar / Howl script-frame offsets are unverified apart from the lab drift (above); the Howl +4 is unexplained.
 - The engine's Hyper Voice animation is ~8 script rows shorter than the ROM's (DestroyAnimSoundTask restore lands in the next command); the restore is scheduled, not row-gated.
 - A species outside the measured intervals can be +-1 on D; a Roar behind a Substitute / in Scene OFF, and cries when the user is a species-0 mon, are not measured (species 0 plays nothing).
+
+## cry2: assets + player
+
+Playback only (`src/engine` untouched: frame hashes, `ENGINE_BUILD` and the headless graph unchanged).
+
+- **Which sounds.** `tools/audio/audioAssetList.py` derives (species, mode) from `src/data/gen/battle-frontier-mons.json` (all 882 sets): MOVE_ROAR -> ROAR_1 + ROAR_2 (37 species, 41 sets; 35 within Level 50's 0..849),
+  MOVE_HOWL -> HIGH_PITCH (Loudred), MOVE_HYPER_VOICE -> ECHO_START + ECHO_END (Exploud), plus all five modes for the 7 species that can run another move as themselves (Metronome: Abra, Chansey, Clefable, Cleffa; Assist: Sentret;
+  Mimic: Jigglypuff, Abra; Mirror Move: Spearow). **112 sounds on 46 species** (ROAR_1 44, ROAR_2 44, HIGH_PITCH 8, ECHO_START 8, ECHO_END 8), not 376 x 5 = 1,880. A species outside the set playing a task mode (a lab, a future Copycat) falls back to NORMAL.
+- **Recording.** The existing recorder, ROM `PlayCryInternal(species, pan 0, volume 120, priority 10, mode)`: every mode's pitch, length, release, chorus and reverse (ECHO_START) are in the recording. Natural lengths 11..91 frames,
+  none capped, none clipped. Left/right difference is up to 6.5% of the peak (cry:173:ECHO_END; ROAR 2%, ECHO modes 4-6%: the chorus voice), above the base cries' 5.1%; like them it is stored as the (L + R) / 2 mono mix and panned at runtime, so only the chorus's stereo spread is lost. Encoded like the base cries (Ogg 13379 Hz mono, AAC 16 kbps twin at 16000 Hz), packed per species into a **second file** `cry-NNN-task.ogg` / `aac/cry-NNN-task.m4a`:
+  the 566 existing files are byte-identical and an ordinary cry never fetches the task modes. `validateAudioAssets.py` (default keys now include ROAR_2 / HIGH_PITCH / ECHO_END): decoded correlation 0.97-0.99, SNR 11-16 dB, no clipping (as the base cries).
+- **Bytes.** cry Ogg 4,549,302 -> 4,918,888 (+369,586), AAC 4,237,939 -> 4,553,498 (+315,559); total manifest 7,450,299 -> 7,819,885 (Ogg), 7,376,225 -> 7,691,784 (AAC). Files 566 -> 612, sounds 1,318 -> 1,430. Budgets in `tests/aud244aAudioManifest.test.ts` re-pinned (cry 5.0 MB, total 8.0 MB).
+- **Player.** `CRY_MODE_NAMES` (`src/audio/player.ts`) maps 3 / 4 / 6 / 7 / 8 as well as 0 / 5 / 11; `startCry` plays the mode's own sample and falls back to the species' NORMAL cry only when that asset is missing (`stats.cryFallbacks`; `missing` only when neither exists).
+  No WebAudio re-synthesis. The BGM duck / restore, pan, volume and `stop` (the Hyper Voice stops cut a reversed ECHO_START at its ROM frame) are the unchanged event paths.
+- **Tests.** `tests/cry2CryTaskPlayer.test.ts` (mode ids == the engine's `CRY_MODE_*`; all 112 recorded cries resolve to their own offset / length / file, never NORMAL's; the base modes unchanged; a trimmed manifest falls back and counts it; AAC twins present),
+  `tests/aud244aAudioManifest.test.ts` (the 112 are exactly the data-derived set; separate `-task` files).
+- **Browser** (`tools/browser/audioCheck.mjs`, Chromium, built bundle, `?audio=1`, 7,200 frames = 122 s real time): 0 console errors, 22 files fetched / decoded, 0 missing, 0 cry fallbacks; all 92 `cry-NNN-task` files (46 Ogg + 46 AAC) decode in the real browser and cover their slices (new check in the tool).
+  The seed-3 winning run plays only NORMAL / FAINT cries, so **no task cry sounded live in the browser**: that path is proven by the fake-context test plus the decode check, not by ear. The tool's per-kind event check was stale since aud247 (the seeded music's 2 restore replays count in `events`); it now subtracts `stats.restored`.
+- **Not done / residual.** The cry-task lengths used by the engine (`cryTaskLengths.ts`) are cry1's fit, not these recordings' lengths (the recorder's channel-activity length of ECHO_START / ROAR cries differs from the fitted stop-to-restore delay; they measure different ROM events).
+  Re-running `audioAssetList.py` now also lists 36 newer SE tuples from logs added since aud244a (not recorded; the committed list kept its SE / song rows).

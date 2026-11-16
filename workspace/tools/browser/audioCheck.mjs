@@ -11,7 +11,7 @@
  * Playwright lives outside package.json (see tools/browser/randomPlay.mjs); POKEBENCH_BROWSER_DIR overrides .integration/browser.
  */
 import { createServer } from "node:http";
-import { existsSync, readFileSync, statSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { extname, join, normalize, resolve, sep } from "node:path";
 import { pathToFileURL } from "node:url";
 import { FactorySession } from "../../src/factorySession.ts";
@@ -30,7 +30,8 @@ const MIME = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css
 // Node-side run: the buttons per frame, and the sink's event counts by kind.
 const session = new FactorySession({ battleScene: SCENE, presentationSeed: DEFAULT_PRESENTATION_RNG_SEED });
 const nodeEvents = {};
-session.attachSoundSink({ push: (e) => { nodeEvents[e.kind] = (nodeEvents[e.kind] ?? 0) + 1; } });
+const nodeCryModes = {};
+session.attachSoundSink({ push: (e) => { nodeEvents[e.kind] = (nodeEvents[e.kind] ?? 0) + 1; if (e.kind === "cry") nodeCryModes[e.mode ?? 0] = (nodeCryModes[e.mode ?? 0] ?? 0) + 1; } });
 const player = new RandomPlayer(new Rng(SEED), new ActionLog(false), "winning");
 const perFrame = [];
 for (let frame = 1; frame <= FRAMES; frame += 1) {
@@ -160,6 +161,37 @@ async function runCase(name, query, { forceAac = false, gesture = true } = {}) {
   return { name, wallSeconds: (Date.now() - startedAt) / 1000, ...result, audioRequests: audioRequests.length, audioFilesFetched: new Set(audioRequests).size, ogg: audioRequests.filter((p) => p.endsWith(".ogg")).length, m4a: audioRequests.filter((p) => p.endsWith(".m4a")).length, playerChunkRequests, errors };
 }
 
+// cry2: the real browser decodes the cry-task files (Ogg and the AAC twin) and they cover every recorded task slice.
+async function decodeTaskFiles() {
+  const manifest = JSON.parse(readFileSync(join("src/assets/gen/audio/manifest.json"), "utf8"));
+  const sounds = Object.values(manifest.sounds).filter((x) => x.kind === "cry" && x.file.endsWith("-task.ogg"));
+  const byFile = new Map();
+  for (const x of sounds) byFile.set(x.file, Math.max(byFile.get(x.file) ?? 0, x.offsetSamples + x.lengthSamples));
+  const hashed = (_dir, stem, ext) => readdirSync(join(DIST, "assets")).find((f) => f.startsWith(`${stem}-`) && f.endsWith(ext) && /^[\w-]{8}$/.test(f.slice(stem.length + 1, -ext.length)));
+  const page = await browser.newPage();
+  await page.goto(base);
+  const rows = [];
+  for (const [file, end] of byFile) {
+    const stem = file.replace(/\.ogg$/, "");
+    for (const [ext, rate] of [[".ogg", manifest.sampleRates.cry], [".m4a", manifest.alt.sampleRates.cry]]) {
+      const name = hashed(DIST, stem, ext);
+      const r = await page.evaluate(async ([url]) => {
+        window.__decodeCtx ??= new AudioContext();
+        try {
+          const buf = await window.__decodeCtx.decodeAudioData(await (await fetch(url)).arrayBuffer());
+          let peak = 0;
+          for (const v of buf.getChannelData(0)) peak = Math.max(peak, Math.abs(v));
+          return { duration: buf.duration, peak };
+        } catch (e) { return { error: String(e) }; }
+      }, [`${base}assets/${name}`]);
+      rows.push({ file: file.replace(/\.ogg$/, ext), ok: !r.error && r.duration >= end / rate - 0.02 && r.peak > 0.05, expectSeconds: end / rate, ...r });
+    }
+  }
+  await page.close();
+  return rows;
+}
+const taskDecode = await decodeTaskFiles();
+
 const cases = [];
 cases.push(await runCase("audio=1 (ogg)", "&audio=1"));
 if (FORMAT === "aac" || args.includes("--also-aac")) cases.push(await runCase("audio=1 (aac forced)", "&audio=1", { forceAac: true }));
@@ -167,15 +199,17 @@ cases.push(await runCase("no audio option", ""));
 await browser.close();
 server.close();
 
-console.log(JSON.stringify({ scene: SCENE, seed: SEED, frames: FRAMES, nodeEvents, cases }, null, 2));
+console.log(JSON.stringify({ scene: SCENE, seed: SEED, frames: FRAMES, nodeEvents, nodeCryModes, taskDecode: { files: taskDecode.length, bad: taskDecode.filter((r) => !r.ok) }, cases }, null, 2));
 const on = cases[0];
 const off = cases[cases.length - 1];
 const failures = [];
 if (!on.audio || on.audio.stats.sources < 1) failures.push("audio=1: no buffer sources were created");
 if (on.tap.contexts !== 1) failures.push(`audio=1: expected exactly one AudioContext, saw ${on.tap.contexts}`);
 if (on.tap.starts < 1) failures.push("audio=1: no source.start()");
-if (on.audio) for (const kind of Object.keys(nodeEvents)) if ((on.audio.stats.events[kind] ?? 0) !== nodeEvents[kind]) failures.push(`audio=1: ${kind} events ${on.audio.stats.events[kind]} != node ${nodeEvents[kind]}`);
+if (on.audio) for (const kind of Object.keys(nodeEvents)) if ((on.audio.stats.events[kind] ?? 0) - (kind === "bgm" ? on.audio.stats.restored : 0) !== nodeEvents[kind]) failures.push(`audio=1: ${kind} events ${on.audio.stats.events[kind]} != node ${nodeEvents[kind]}`);
 if (off.tap.contexts !== 0 || off.audioRequests !== 0 || off.playerChunkRequests.length !== 0) failures.push("no audio option: an AudioContext was made or audio / player chunk was fetched");
+if (taskDecode.some((r) => !r.ok)) failures.push(`cry-task files that did not decode / cover their slices: ${JSON.stringify(taskDecode.filter((r) => !r.ok).slice(0, 3))}`);
+if (on.audio && on.audio.stats.cryFallbacks > 0) failures.push(`audio=1: ${on.audio.stats.cryFallbacks} cry events played a NORMAL fallback`);
 for (const c of cases) if (c.errors.length) failures.push(`${c.name}: page errors/warnings ${JSON.stringify(c.errors.slice(0, 3))}`);
 if (failures.length) { console.error(`FAIL\n${failures.join("\n")}`); process.exit(1); }
 console.log("OK");

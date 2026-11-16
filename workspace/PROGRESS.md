@@ -5,6 +5,18 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 2026-11-16 — cry2 (ts lane worker): the cry-task modes recorded and played (cry-task-scout step 2)
+
+- **State:** on master, committed (`8bbc1cf5f` assets, player + Tier-1 after, docs / check tool last). Playback only; `src/engine`, frame hashes and the headless graph untouched.
+- **Did:** recorded ROAR_1 / ROAR_2 / HIGH_PITCH / ECHO_START / ECHO_END with the existing recorder for the species that can use the move (Roar sets 37, Loudred, Exploud, + 7 Metronome / Assist / Mimic / Mirror Move users):
+  **112 sounds on 46 species** in `cry-NNN-task.ogg` (+ AAC twins). Existing 566 files byte-identical. Cry Ogg +369,586 B (4.55 -> 4.92 MB), AAC +315,559 B; total Ogg 7.82 MB, AAC 7.69 MB.
+  Player: `CRY_MODE_NAMES` maps all 8 modes, NORMAL only when the asset is missing (`stats.cryFallbacks`). `docs/cry1-cry-tasks.md` "cry2".
+- **Gates:** typecheck 0; test:gate 362 files / 2,843; audio files (manifest, fallback, player, followups, frame identity, headless boundary, cry1, new `cry2CryTaskPlayer`) 98 / 98; build / build:lib 0.
+  Browser `audioCheck.mjs --frames 7200` (122 s, `?audio=1`): 0 console errors, 0 missing / fallbacks, all 92 task files decode in Chromium (Ogg + AAC). The check's bgm count was stale since aud247 (fixed).
+- **Next:** no task cry sounded in the browser run (seed 3 plays NORMAL / FAINT only): hear one live. The engine's cry-task lengths remain cry1's fit. Evidence `.integration/evidence/cry2/`.
+
+---
+
 ## 2026-11-16 — aud242h (ts lane worker): move-animation SE lifetimes, slice 8 (ISSUES #219 family 1)
 
 - **State:** on master, committed (`cf66a94a3` blend_color_cycle + Psychic / Growth, `dbc3f7178` Shadow Ball ball + vertical dip + Body Slam, docs after). Sound only.
@@ -27,16 +39,5 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   lbra-loss 2258, beyond-boundary 183, lobby-walk 177, won-no 54, won-yes 54, won-attendant 17 + 6 + 44, six lbw3 traces offset 0. Tier-1 `tests/lbw4LobbyNpcPlayer.test.ts`.
 - **Gates:** typecheck 0; test:gate 362 files / 2,843; npm test shards 1-6 of 6 green (1,814 files); build / build:lib 0.
 - **Next:** unproven: same-frame race for one tile, turn-commit refusal, fat man in the way, direction change during a bump (docs). Evidence `.integration/evidence/lbw4/`.
-
----
-
-## 2026-11-15 — lbw3 (ts lane worker): the Lobby NPC wander port (ISSUES #221 E4)
-
-- **State:** on master, committed (`d57c76a6e` pure module + Tier-1 replay, `fa1ed06de` engine wiring / renderer / traces, `7ee9d8bbc` soak re-pin, docs after). Battle rules untouched.
-- **Did:** `lobbyNpcs.ts` (woman WANDER_AROUND + fat man LOOK_AROUND, collision against range / grid / player + static objects), `lobbyNpcDriver.ts` (freeze timeline from ticks since the Lobby entry: unfrozen at +34 / +35 and from the release, frozen otherwise from +11 and during the attendant talk), `core.ts` runs it on the shared `rngValue` on every Lobby path, the renderer draws both NPCs from state (`womanAtTick` retired to a test oracle in `tests/factoryLobbyFreeRoam.test.ts`; fat man gets S / N / W poses). `docs/lbw3-lobby-npc-port.md`.
-- **Proof:** Tier-1 replay on 6 traces (tiles, facing, step, delay, anim index, 32-bit cursor every frame); engine route with `appRngRebase`: app cursor == ROM `gRngValue` every frame, max |offset| 0, NPC state identical. compare before -> after: loss-beyond-boundary 183/183, loss-lobby-walk 177/177, lbra-loss 2258/2258, forfeit 1087-1199 0 -> 109/113, retire-off 1315 -> 1476/1554, won-no 0 -> 54/54, won-yes 0 -> 54/54, won-attendant 0 -> 17/17 + 6/6 + 44/44 (residuals: forfeit 4 frames at the player sprite, retire 78 frames of dialog text pacing; none NPC).
-- **Re-pins (Lobby new-challenge deals only):** `lbrd.test.ts` WIN_TWO_SEED 35 -> 13; `randomRoundSoak.test.ts` ISSUES #89 Baton Pass seed 1 -> 0. `factoryLobbyTerminal.test.ts` fat man frames 1 -> 3. No other test moved.
-- **Gates:** typecheck 0; test:smoke 448 / 448; test:gate 362 files / 2,843; build / build:lib 0; npm test shards 1-4 of 6 green (1,208 files; shards 5-6 not run, the supervisor runs the full suite).
-- **Next:** unproven (docs): the player in the woman's way, retire-after-won / injected / attendant-return entries use the shared rule; free-roam player-vs-NPC collision and depth sort still use the static spawn tiles. Evidence `.integration/evidence/lbw3/`.
 
 ---
