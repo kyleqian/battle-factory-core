@@ -17,6 +17,17 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 2026-11-16 — aud252 (ts lane worker): S11 controller sound gaps (SE_EFFECTIVE pans of end-turn weather, loss-path SE_BALL_OPEN), sound only
+
+- **State:** on master, committed. Sound-only (`battleHitSounds.ts`, `battleEndSounds.ts`, `tickSounds.ts`); doc section "aud252" in `docs/aud251-s11-scoreboard-refresh.md`; evidence `.integration/evidence/aud252/`.
+- **Did:** (1) end-turn weather damage SE_EFFECTIVE pans by `gBattlerTarget` (always the player, -64; `tests/aud252EndTurnSounds.test.ts`, ROM Hail fixture `aud252-hail-damage-player.json`). (2) the loss's SE_BALL_OPEN
+  now follows the ball-return command (22 ticks after its first tick) instead of the faint dismissal + 24, so it comes after an opponent held-item effect as in the ROM (`tests/aud252LossBallOpen.test.ts`, 1914 / 2230 ROM rows; ball-open error -364 / -350 -> +1 / +14).
+  T2 controller rows: ON missing 19 -> 2, extra 17 -> 0; OFF missing 6 -> 2, extra 4 -> 0. Census 0..99 both scenes: commands 100 / 100 identical, sound differs only in SE 15 rows; differential 133 / 133 identical.
+- **Next:** AI mid-battle switch (seed 2741 res5: ROM extra SE 15 at the recall, tray / ball open ~75 ticks later than ours), SE_LOW_HEALTH 90 x1 (seed 2), secondary-effect stat changes; ISSUES #219 trimmed.
+- **NOT run:** full `npm test` (supervisor's); ran typecheck, aud24x / aud25x / tickSounds / audioProbeFixtures tests.
+
+---
+
 ## 2026-11-16 night run (CAX31 supervisor, Opus 5.5, 13:30 -> 05:30 UTC): in progress
 
 - **State:** folded: lazy1, luck1, aud242k / l / m / n, dl1, dl2, rrh4, aud251 (entries above / below). Running: aud242o (integration), lbw5 (side).

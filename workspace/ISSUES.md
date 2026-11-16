@@ -54,10 +54,10 @@ exclusions are superseded. Unrelated expansions stay parked.
 2. stat-change SE 239 / 245: emitted since aud248 at command age 7, ROM-minus-ours -2..+23 frames per window (pinned in `tests/aud248StatChangeSounds.test.ts`),
 secondary-effect stat changes (Metal Claw, Steel Wing; 15 ON rows in the aud251 table) are not `stats-change` commands and stay silent; 3. declined (static) move bodies
 (BEAT UP / WITHDRAW / ROCK SMASH; T1, not re-measured by aud251). Cries and SE_SHINY closed (aud251 table: 0 missing). Scene ON seeds 6568 / 7682 stall at the 80,000-frame ROM drive cap and cannot be aligned.
-- **aud251 (2026-11-16)**: `docs/aud251-s11-scoreboard-refresh.md` (41 seeds, all aligned; ON missing 1679 -> 238, OFF 95 -> 6). The controller "extras" SE_BALL_OPEN 15 / victory BGM 412 were
-  window-end artifacts (the ROM plays them after the drive stops at the outcome; `aud248RunSeed.sh` now runs the sound pass 500 idle frames longer; `tests/aud251OutcomeTail.test.ts`):
-  extra SE 15 16 -> 2 ON / 0 OFF, BGM 5 / 4 -> 0. Open: SE_BALL_OPEN ON 2 extra + 3 missing (a different place in the last resolution, not looked at), SE_EFFECTIVE 13 pairs in seed 2741
-  (15 ON / 4 OFF, missing + extra at neighbouring offsets), SE_LOW_HEALTH 90 x1.
+- **aud251 / aud252 (2026-11-16)**: `docs/aud251-s11-scoreboard-refresh.md` (41 seeds, all aligned; ON missing 1679 -> 238, OFF 95 -> 6). The controller "extras" SE_BALL_OPEN 15 / victory BGM 412 were
+  window-end artifacts (`aud248RunSeed.sh` runs the sound pass 500 idle frames longer; `tests/aud251OutcomeTail.test.ts`). aud252 fixed the SE_EFFECTIVE pans of end-turn weather damage and the loss-path SE_BALL_OPEN placement
+  after an opponent held-item effect (controller rows ON missing 2 / extra 0, OFF missing 2 / extra 0). Open: the opponent's mid-battle (AI) switch in seed 2741 res5 (ROM extra SE 15 at the recall, tray 114 / ball open /
+  cry ~75 ticks later than the engine's; needs a ROM step window of an AI switch), SE_LOW_HEALTH 90 x1 (seed 2, ROM +581, both scenes).
 - **aud249 (2026-11-14)** emits the nine `Status_*` and the four weather-continues SEs (Scene ON; `docs/aud249-general-anim-sounds.md`). Open:
   the second `Status_*` play of one animation lands ~14 frames later in the ROM than modelled and the first play +2 over the stat anchor;
   TurnTrap / Snatch unresolved in the extractor.
