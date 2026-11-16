@@ -38,6 +38,8 @@ export interface AudioStats {
   preempted: number;
   /** Events whose sound has no recorded asset. */
   missing: number;
+  /** Cry events whose own mode has no recording, played as the species' NORMAL cry. */
+  cryFallbacks: number;
   /** Voices that started late because their file was still loading. */
   late: number;
   fetches: number;
@@ -166,7 +168,10 @@ interface Voice {
   connect: ((src: BufferSourceLike, gain: GainNodeLike | null) => void) | null;
 }
 
-const CRY_MODE_NAMES: Record<number, string> = { 0: "NORMAL", 5: "FAINT", 11: "WEAK" };
+/** include/constants/pokemon.h CRY_MODE_* -> the recorded mode (tools/audio/soundRecorder.py CRY_MODE_ID). Pitch, length, release, chorus and reverse are in the recordings. */
+export const CRY_MODE_NAMES: Readonly<Record<number, string>> = {
+  0: "NORMAL", 3: "HIGH_PITCH", 4: "ECHO_START", 5: "FAINT", 6: "ECHO_END", 7: "ROAR_1", 8: "ROAR_2", 11: "WEAK",
+};
 
 const kindOfFile = (file: string): "se" | "cry" | "song" => (file.startsWith("cry-") ? "cry" : file.startsWith("se-") ? "se" : "song");
 
@@ -227,6 +232,7 @@ class Player implements AudioPlayer {
     blocked: 0,
     preempted: 0,
     missing: 0,
+    cryFallbacks: 0,
     late: 0,
     fetches: 0,
     decoded: 0,
@@ -353,7 +359,7 @@ class Player implements AudioPlayer {
     this.anchorWall = anchor;
     this.anchorFrame = liveFrame;
     this.syncOffset();
-    const { blocked, preempted, missing } = this.counters;
+    const { blocked, preempted, missing, cryFallbacks } = this.counters;
     const started = { ...this.counters.started };
     this.restoring = true;
     try {
@@ -366,7 +372,7 @@ class Player implements AudioPlayer {
     } finally {
       this.restoring = false;
     }
-    Object.assign(this.counters, { blocked, preempted, missing, started });
+    Object.assign(this.counters, { blocked, preempted, missing, cryFallbacks, started });
     // Whatever is still sounding (the BGM at its loop position, a fanfare part-way) starts now; ended voices stay silent.
     if (this.audible()) for (const voice of this.voices.values()) if (!voice.dead && voice.paused === null && voice.end > anchor && voice.sources.length === 0) this.realize(voice, anchor);
   }
@@ -645,11 +651,14 @@ class Player implements AudioPlayer {
 
   private startCry(event: SoundEvent, t: number): void {
     const species = event.id!;
-    const sound = this.assets.manifest.sounds[`cry:${species}:${CRY_MODE_NAMES[event.mode ?? 0] ?? "NORMAL"}`];
+    const sounds = this.assets.manifest.sounds;
+    const own = sounds[`cry:${species}:${CRY_MODE_NAMES[event.mode ?? 0] ?? "NORMAL"}`];
+    const sound = own ?? sounds[`cry:${species}:NORMAL`];
     if (!sound) {
       this.counters.missing += 1;
       return;
     }
+    if (!own) this.counters.cryFallbacks += 1;
     let slot: Slot | undefined;
     let oldest: Voice | undefined;
     for (const candidate of ["CRY0", "CRY1"].slice(0, CRY_VOICES) as Slot[]) {
