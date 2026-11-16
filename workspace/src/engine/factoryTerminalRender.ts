@@ -904,6 +904,7 @@ export function renderFactoryLobbyDoorWalk(
     heldDir: null,
     pendingDir: null,
     bumpElapsed: 0,
+    idleIdx: 1,
   });
   const cameraOrigin = lobbyFreeRoamCameraOrigin(player, layout.cameraOriginPx);
   const overrides = lobbyNpcOverrides(npcs, cameraOrigin);
