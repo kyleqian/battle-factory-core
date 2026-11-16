@@ -670,3 +670,49 @@ Tested code commit `dbc3f7178` (later commits are docs only).
 - `npm run typecheck`, `npm run build`, `npm run build:lib`: each exit 0. `npm run test:gate`: 362 files, 2,843 passed. aud24x / aud25x / moveAnimSounds / tickSounds importer tests: 26 files, 282 passed. `npm test` run as shards 1-6 of 6 (the unsharded run exceeds the foreground cap): all green.
 - `npm run compare:differential` (`--harness-from-head`, base `f205895b4`) over 3 Scene ON traces (Psychic, Growth, Body Slam; frames 60..692 step 8): 240 / 240 captures byte-identical.
 - Census (seeds 0..99 Scene ON, `soundCensusDelta.py --t1`, arm baseline `on-f205895b4`; "before" = the base-commit table): exact 23,547 -> 23,795, missing-gated 1,066 -> 950, extra 0, unclassified 11,093 -> 11,093 (unchanged). `rst197CensusDelta.py`: 100 / 100 battles identical (`commands`, `eventsDigest`).
+
+## 13. aud242i: `waitsound` as an SE-length bound, Sludge Bomb, Faint Attack (Scene ON)
+
+Ranked by T1 census weight: Sludge Bomb (198 gated ops) first, then Faint Attack (62).
+
+### 13.1 Lifetimes derived (C; also cited in the extractor)
+
+| lifetime | C | model |
+|---|---|---|
+| `waitsound` | `battle_anim.c:1635-1658` (`Cmd_waitsound` polls `IsSEPlaying`) | the SE's length is a **bound** (m4a songs from `sound/songs/midi/*.s`: `N*tbs/2` -> BPM = N*tbs, minimum BPM), resolved by the visual finish that follows, so `waitsound` stays `pending` unless a visual wait ends it later (the SE-length parse was wrong for `se_m_bubble3`: `220*tbs/2`) |
+| Sludge Bomb hit particles / poison bubbles | `battle_anim_poison.c` (`gSludgeBombHitParticleSpriteTemplate`, `AnimSludgeBombHitParticle`), `battle_anim_mons.c` (`AnimTranslateLinear` family) | exact lifetimes of the particle sprites; `blend_color_cycle` as in section 12 |
+| `AnimTask_AttackerFadeToInvisible` / `FromInvisible` (and the `attacker_fade_*` macros) | `battle_anim_dark.c:191-263` (16 steps, one every `step_delay + 1` calls) | `16 * (d + 1) - 1` |
+| `AnimTask_SetAttackerInvisibleWaitForSignal` | `battle_anim_utility_funcs.c:1079-1092` (destroyed in its first call) | exact `-1` |
+| `Task_ClearMonBg` (`clearmonbg` after a `monbg`) | `battle_anim.c:852-910`: two `ResetBattleAnimBg` calls, which overrun VBlank by 2 frames when a mon BG was active | a `{after, frames: 2}` lag after the clearmonbg step (guarded by `monbg` having run) |
+| `loadspritegfx` / `monbg` | `Cmd_loadspritegfx` (+3), `Cmd_monbg` sets `sAnimFramesToWait = 1` (+3) | previously both counted +3 together |
+
+### 13.2 ROM windows (probe step mode, Scene ON, player and opponent attacker)
+
+Fixtures `tools/audio/fixtures/aud242i-{sludge,faint}-{player,opponent}.json`, labs `tools/battle-lab/aud242i-{sludgebomb,faintattack}-{player,opponent}-on.json` (stages in `appTrace.ts`), test `tests/aud242iMoveAnimSounds.test.ts`.
+
+| window | rows | ROM minus ours |
+|---|---|---|
+| Sludge Bomb, both sides | 10 x SE126, 3 x SE175, then 6 x SE148 (`SE_M_TOXIC`, after the `waitsound` and the hit-particle wait): 19 / 19 rows | +2 (idle-lead class) |
+| Faint Attack, both sides | SE190 (ROM 112 / 116), SE123 (155 / 159) behind the fade, elliptical task and invisible signal | +3 on both rows (named residual: a script-start offset the first row already had; the interval is exact) |
+| Poison Tail (aud242e fixture) | the SE148 rows after its `clearmonbg` | +4 -> +2 (the `Task_ClearMonBg` overrun explains the old "undiagnosed" extra; the five `extra` entries are gone) |
+
+### 13.3 Counts (turn 0, player attacker)
+
+| | before (`d39e33b3c`) | after |
+|---|---|---|
+| all moves: ops resolved / unresolved | 899 / 213 | 906 / 206 |
+| L50: emitted / gated | 697 / 137 | 704 / 130 (the two moves are in the Level-50 inventory: +6 Sludge Bomb, +1 Faint Attack) |
+
+Census T1 (seeds 0..99 Scene ON, fresh arms `on-d39e33b3c` and `on-04b803f5f`, each scored against its own table): exact 23,795 -> 24,055, missing-gated 950 -> 690, missing-other 51 -> 51, missing-declined 1, extra 0, unclassified 11,093 -> 11,093 (unchanged: SEs outside any move window, a tooling gap that predates this step; not 0). `rst197CensusDelta.py`: `commands` / `eventsDigest` identical on 100 / 100 battles.
+
+### 13.4 Residuals
+
+- Still the top gated census moves: Blizzard 88, Confuse Ray 47, Dig 37, Spark 32, Struggle 30 (`gMovementWavesSpriteTemplate`, `AnimTask_ShakeMonInPlace`), Attract 28 (`AnimRedHeartProjectile`, `AnimParticleBurst`), Silver Wind 25, Tri Attack 24.
+- Faint Attack's +3 is a recorded offset, not fixed (ISSUES #198).
+
+### 13.5 Acceptance receipt (aud242i)
+
+Tested code commit `04b803f5f` (later commits are docs only).
+
+- `npm run typecheck`, `npm run build`, `npm run build:lib`: each exit 0. `npm run test:gate`: 362 files, 2,843 passed. aud24x / aud25x / moveAnimSounds / tickSounds importer tests: 27 files, 287 passed. The full `npm test` was not run (the supervisor runs it).
+- `npm run compare:differential` (`--harness-from-head`, base `d39e33b3c`) over 3 Scene ON traces (Sludge Bomb player, Faint Attack player and opponent; frames 60..692 step 8): 240 / 240 captures byte-identical.

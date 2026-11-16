@@ -5,6 +5,18 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 2026-11-16 — aud242i (ts lane worker): move-animation SE lifetimes, slice 9 (ISSUES #219 family 1)
+
+- **State:** on master, committed (`9752b45a0` waitsound bound + Sludge Bomb, `04b803f5f` Faint Attack + clearmonbg overrun, docs after). Sound only.
+- **Did:** `waitsound` as an SE-length bound resolved by the visual finish; Sludge Bomb hit-particle lifetime; attacker fade / invisible-signal lifetimes (Faint Attack); `Task_ClearMonBg`
+  overruns VBlank by 2 frames (a lag in the walk). ROM windows (step mode, both sides): Sludge Bomb 19 / 19 rows +2, Faint Attack +3 (script-start offset, interval exact), Poison Tail +4 -> +2.
+- **Counts:** L50 emitted / gated 697 / 137 -> 704 / 130; all moves resolved 899 / 213 -> 906 / 206. T1 (seeds 0..99 ON, fresh arms `on-d39e33b3c` / `on-04b803f5f`): exact 23,795 -> 24,055,
+  missing-gated 950 -> 690, extra 0, unclassified 11,093 -> 11,093 (unchanged: pre-existing tooling gap, not 0). `commands` / `eventsDigest` identical 100 / 100; differential 240 / 240 (3 traces).
+- **Gates:** typecheck 0; test:gate 362 files / 2,843; importer tests 27 files / 287; build / build:lib 0. Full `npm test` not run (supervisor).
+- **Next:** Blizzard 88, Confuse Ray 47, Dig 37, Spark 32, Struggle 30, Attract 28 (`docs/aud242-move-anim-sounds.md` 13.4). Evidence `.integration/evidence/aud242i/`.
+
+---
+
 ## 2026-11-16 — cry2 (ts lane worker): the cry-task modes recorded and played (cry-task-scout step 2)
 
 - **State:** on master, committed (`8bbc1cf5f` assets, player + Tier-1 after, docs / check tool last). Playback only; `src/engine`, frame hashes and the headless graph untouched.
@@ -29,15 +41,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 2026-11-16 — lbw4 (ts lane worker): player <-> Lobby NPC interaction in free roam (ISSUES #221 E4 remainder)
-
-- **State:** on master, committed (`e6c46d86e` engine + trace, `562f916bd` depth sort + Tier-1, docs after). Battle rules untouched.
-- **Did:** player collision against the woman / fat man's live current OR previous tile; the woman sees the player's ROM cur / prv (player slot runs first);
-  held-same-direction bump interrupt, 4-cycle bump pose and post-bump walk pose; idle press starts its step a tick earlier (ROM-exact); depth sort from drawn y.
-  Talk targets: none (the NPC scripts exist, the engine keeps NPCs silent by decision). `docs/lbw3-lobby-npc-port.md` lbw4 section.
-- **Proof:** new ROM trace `lbw4-woman-block-off` (player blocked by her current and previous tile): NPC state + cursor max |offset| 0, compare 501 / 501. No regression:
-  lbra-loss 2258, beyond-boundary 183, lobby-walk 177, won-no 54, won-yes 54, won-attendant 17 + 6 + 44, six lbw3 traces offset 0. Tier-1 `tests/lbw4LobbyNpcPlayer.test.ts`.
-- **Gates:** typecheck 0; test:gate 362 files / 2,843; npm test shards 1-6 of 6 green (1,814 files); build / build:lib 0.
-- **Next:** unproven: same-frame race for one tile, turn-commit refusal, fat man in the way, direction change during a bump (docs). Evidence `.integration/evidence/lbw4/`.
-
----

@@ -110,7 +110,7 @@ Calm Mind -5; `AnimTask_MetallicShine` loses 4 wall frames at creation (2 locali
 **aud242e (2026-11-08)** sprite / mon-task lifetimes (L50 640 emitted, 194 gated; all 833 resolved): Toxic +3; Rock Tomb / Sludge /
 Poison Fang / Water Pulse / Rolling Kick / Double-Edge / Overheat +2; Water Gun 0; Absorb / Mega Drain / Giga Drain -1; Counter -16 (used
 second). `simple_palette_blend` corrected one tick shorter from ROM BlendPalette logs, so Hyper Beam 0 -> +1 and Ice Beam +1 -> +2 (toward
-the +2 class: the alignment audit is the lead). Open: Overheat SE147 rows +3 more, Poison Tail later rows +4, Thunderbolt SE215 +1;
+the +2 class: the alignment audit is the lead). Open: Overheat SE147 rows +3 more, Thunderbolt SE215 +1 (Poison Tail's later rows fixed in aud242i);
 next blockers hyper beam orb (52 ops), Hydro Pump orb (44), Fire Spin (42), aurora ring (40), air wave (40), power absorption orb (35).
 **aud242f (2026-11-08)** BowMon / HornHit / Ice Beam + Ice Punch crystals / fist / BreathPuff sprites, ScaleMonAndRestore / GrowAndShrink
 (L50 674 emitted, 160 gated; all 868 resolved): Horn Drill 0; Headbutt / Ice Punch / Ice Beam (its 7 SE137 rows now emitted) / Hidden
@@ -125,9 +125,10 @@ three rows after the nine-sprite step (SE_M_HYPER_BEAM, both SE_M_THUNDERBOLT2) 
 (ROM 272, 565) not emitted. Still gated: Tri Attack's `gLargeFlameScatterSpriteTemplate` / `AnimTask_ShakeTargetInPattern`, the
 `ElectricityEffect` wait ending Thunderbolt / Spark.
 **aud242h (2026-11-16)** `blend_color_cycle`, Shadow Ball ball, vertical dip (L50 697 emitted, 137 gated; all 899 resolved): Psychic +2, Body Slam +2,
-Growth's 2nd SE152 exact at its -4 (`docs/aud242-move-anim-sounds.md` section 12). Open (top census gated ops): Sludge Bomb 198 (SE-length table,
-`waitsound` keeping `pending`, hit-particle / poison-bubble lifetimes), Blizzard 88, Faint Attack 62, Confuse Ray 47, Dig 37, Spark 32, Struggle 30,
-Attract 28; Shadow Ball ball has no ROM window (Rattata-only stage is Ghost-immune).
+Growth's 2nd SE152 exact at its -4. Shadow Ball ball has no ROM window (Rattata-only stage is Ghost-immune).
+**aud242i (2026-11-16)** `waitsound` as an SE-length bound, Sludge Bomb (+2, 19 rows both sides), Faint Attack (SE123 now emitted, +3 on both sides, a script-start
+offset), the `Task_ClearMonBg` 2-frame overrun (Poison Tail's later rows +4 -> +2) (L50 704 emitted, 130 gated; all 906 resolved; `docs/aud242-move-anim-sounds.md` section 13).
+Open (top census gated ops): Blizzard 88, Confuse Ray 47, Dig 37, Spark 32, Struggle 30, Attract 28.
 
 ## #194 — Opponent RATTATA Quick Attack differs above the clip row (qak247, 2026-11-04)
 
