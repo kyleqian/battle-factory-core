@@ -9,7 +9,9 @@ import {
 } from "../src/data/cryModeFrames.ts";
 import { FAINT_CRY_RESTORE_FRAMES } from "../src/data/faintCryFrames.ts";
 import { SEND_IN_TAIL_OFF_CRY_FRAMES } from "../src/data/sendInTailOff.ts";
+import { collectSoundTick, type SoundEvent } from "../src/audio/soundEvents.ts";
 import { cryTaskLength } from "../src/engine/cryTaskLengths.ts";
+import { beginScreenSoundTick, BGM_BATTLE, CRY_MODE_NORMAL, CRY_MODE_WEAK, playSendOutCry, runScheduledScreenSounds } from "../src/engine/screenSounds.ts";
 
 const fixture = (name: string) => JSON.parse(readFileSync(new URL(`./fixtures/${name}`, import.meta.url), "utf8"));
 const cry3 = fixture("cry3-lengths.json") as { NORMAL: [number, number][]; WEAK: [number, number][]; FAINT: [number, number][] };
@@ -67,5 +69,26 @@ describe("cry3 derived cry lengths", () => {
     for (const [species, restore] of cry3.FAINT) expect(CRY_FAINT_FRAMES[species]! + 1, `FAINT ${species}`).toBe(restore);
     const fitWrong = cry3.FAINT.filter(([species, restore]) => FAINT_CRY_RESTORE_FRAMES[species] !== restore);
     expect(fitWrong).toHaveLength(24);
+  });
+
+  it("a send-out cry of a species with no earlier measurement now restores the BGM and runs the switch-in callback", () => {
+    // Pikachu 25, Venusaur 3: not among the five hand-measured WEAK species; Jynx 124 hits the 140-tick cap.
+    for (const [species, mode, table] of [[25, CRY_MODE_WEAK, CRY_WEAK_FRAMES], [3, CRY_MODE_WEAK, CRY_WEAK_FRAMES], [124, CRY_MODE_WEAK, CRY_WEAK_FRAMES], [25, CRY_MODE_NORMAL, CRY_NORMAL_FRAMES]] as const) {
+      const events: SoundEvent[] = [];
+      let restored = -1;
+      let now = 0;
+      for (let frame = 1; frame <= 160; frame += 1) {
+        now = frame;
+        const result = collectSoundTick(frame, () => {
+          beginScreenSoundTick(frame);
+          if (frame === 1) playSendOutCry(BGM_BATTLE, species, mode, 25, () => { restored = now; });
+          runScheduledScreenSounds();
+        });
+        events.push(...result.events);
+      }
+      const ducks = events.filter((e) => e.kind === "duck");
+      expect(ducks.map((e) => [e.frame, (e as { volume?: number }).volume]), `${species}/${mode}`).toEqual([[1, 85], [1 + table[species]! + 1, 256]]);
+      expect(restored).toBe(1 + table[species]! + 1);
+    }
   });
 });
