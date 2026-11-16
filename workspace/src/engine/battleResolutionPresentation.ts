@@ -1655,46 +1655,6 @@ const SHELL_BELL_HP_TIMING = Object.freeze({ minimumFrames: 0, tailFrames: 3 } a
 /** hie4: ... and the blank box run before the prompt is 1 row longer than the end2 path's (ROM 7 vs 6, both scenes): turn-end 9 after a Shell Bell heal. */
 const SHELL_BELL_TURN_END_TIMING = Object.freeze({ minimumFrames: 9 } as const);
 /**
- * hpd1 (docs/hpd1-hp-hold.md): the ordinary hit's `hp` command has NO 28-frame floor where the shape is measured. The ROM's hold after `healthbarupdate` is the
- * bar's frames + 2 (Cmd_datahpupdate blocks on the controller, battle_script_commands.c:1932-1960) and then the script rows to the
- * next presented event, so the command is the bar's frames + 1 plus `tailFrames`, measured in 14 / 12 ROM windows (7 damages, both
- * scenes; 0 frames ROM - app across bars of 9..90 frames):
- *   - hit -> next action's USEDMOVE (the action-transition pause below already presents the d rows after `datahpupdate`): +1, the
- *     `datahpupdate` row itself;
- *   - hit -> only MoveEnd receipts then the turn end (nothing else presented): + d = the rows from `datahpupdate` to the first
- *     MoveEnd receipt (`critmessage`, `waitmessage`, `resultmessage`, `waitmessage`, `seteffectwithchance`, `tryfaintmon`, `moveendall`).
- * Any other shape (an effectiveness / crit print, a faint, a heal, a held item next) and every hit ON THE PLAYER (all 20 ROM labs hit the foe; the off108
- * Rest window's foe-Tackle-on-player anchor moves -3 -> -14 without the floor) has no ROM window yet: it keeps the legacy 28-frame floor.
- */
-const HP_DATAHPUPDATE_ROW_FRAMES = 1;
-/** The rows between this `datahpupdate` and the next event when that is a MoveEnd receipt (d), or null. */
-function hpMoveEndLeadRows(events: readonly BattleKernelSemanticEvent[], index: number): number | null {
-  const event = events[index]!;
-  const programCounter = event.provenance?.programCounter;
-  if (programCounter === undefined || BATTLE_SCRIPT_PROGRAM.instructions[programCounter]?.opcodeName !== "B_SCR_OP_DATAHPUPDATE") return null;
-  const next = events[index + 1];
-  if (next?.payload.kind !== "set-battler-sprite-visibility" || next.provenance?.opcodeName !== "B_SCR_OP_MOVEEND") return null;
-  const hpExecution = event.provenance?.instructionExecution;
-  const receiptExecution = next.provenance.instructionExecution;
-  return hpExecution === undefined || receiptExecution === undefined || receiptExecution <= hpExecution ? null : receiptExecution - hpExecution - 1;
-}
-/** Applies the hpd1 tail to the plain hp commands of a finished command list (see hpMoveEndLeadRows). */
-function applyHpHitTails(
-  commands: BattleResolutionPresentationCommand[],
-  leadRows: ReadonlyMap<number, number>,
-): void {
-  for (let index = 0; index < commands.length; index += 1) {
-    const command = commands[index]!;
-    const lead = command.type === "hp" ? leadRows.get(command.eventSequence) : undefined;
-    if (command.type !== "hp" || lead === undefined || command.timing !== HP_TIMING) continue;
-    const rest = commands.slice(index + 1);
-    const transition = rest[0]?.type === "move-animation" && rest[1]?.type === "sprite-visibility";
-    const endsTurn = rest.length > 0 && rest.every((c) => c.type === "sprite-visibility" || c.type === "turn-end");
-    const tailFrames = transition ? HP_DATAHPUPDATE_ROW_FRAMES : endsTurn ? lead : 0;
-    if (tailFrames > 0) commands[index] = Object.freeze({ ...command, timing: Object.freeze({ minimumFrames: 0, tailFrames }) });
-  }
-}
-/**
  * lsd194 (docs/lsd194-print-floor-and-drain.md; lsd186 receipts, 6 ROM cases: 3 scenarios x both scenes, twice-fresh): the turn-end Leech
  * Seed drain, `BattleScript_LeechSeedTurnDrain` (`playanimation; orword; healthbarupdate; datahpupdate; copyword; jumpifability;
  * manipulatedamage; setbyte; goto`) then `BattleScript_LeechSeedTurnPrintAndUpdateHp` (`orword; healthbarupdate; datahpupdate;
@@ -4462,7 +4422,6 @@ export function projectBattleResolutionCommands(
 ): readonly BattleResolutionPresentationCommand[] {
   const commands: BattleResolutionPresentationCommand[] = [];
   const pendingHealth = new Map<0 | 1, { eventSequence: number; healthValue: number; instructionExecution: number | undefined }>();
-  const hpLeadRows = new Map<number, number>();
   let leechDrainAnimated = false;
   const pendingSwitch = new Map<
     0 | 1,
@@ -4861,8 +4820,6 @@ export function projectBattleResolutionCommands(
         }));
       }
       leechDrainAnimated = false;
-      const moveEndLead = drainRole === null && battler === 1 ? hpMoveEndLeadRows(events, index) : null;
-      if (moveEndLead !== null) hpLeadRows.set(health.eventSequence, moveEndLead);
       commands.push(Object.freeze({
         type: "hp",
         eventSequence: health.eventSequence,
@@ -5268,7 +5225,6 @@ export function projectBattleResolutionCommands(
       timing: lastHp?.type === "hp" && lastHp.timing === SHELL_BELL_HP_TIMING ? SHELL_BELL_TURN_END_TIMING : TURN_END_TIMING,
     }));
   }
-  applyHpHitTails(commands, hpLeadRows);
   return Object.freeze(commands);
 }
 

@@ -56,11 +56,8 @@ const SPECS: Array<{ name: string; ids: number[]; delta: number; rows: number; e
   { name: "petaldance-player", ids: [202, 141], delta: 2, rows: 2 },
   { name: "dive-player", ids: [162, 233], delta: -7, rows: 2 },
   { name: "rollout-player", ids: [162, 175, 141], delta: 3, rows: 21 },
-  // Five Rollout turns (counters 1..5) behind an opponent Defense Curl: the ROM's turn starts drift from ours by the presentation (not sound) offsets 9 / 35 / 61 / 85 / 110 (each turn ends on its MEGA_KICK2 row), constant inside a turn.
-  // hpd1 (docs/hpd1-hp-hold.md): the hit's hold is now the ROM's (bar + 1 + tail, no 28 floor), so the per-turn increment is the near-constant 26 / 26 / 24 / 25
-  // (was 13 / 15 / 20 / 29 = a per-turn constant ~13 plus the floor's over-hold of 0 / 2 / 7 / 16); the +-1 is the app/ROM damage-roll difference (rol1). The ~25 per turn
-  // that remains is not the hold (the labs' hold delta is 0).
-  { name: "rollout5-player", ids: [162, 175, 141], delta: 0, rows: 111, turnDeltas: [9, 35, 61, 85, 110] },
+  // Five Rollout turns (counters 1..5) behind an opponent Defense Curl: the ROM's turn starts drift from ours by the presentation (not sound) offsets 9 / 14 / 21 / 33 / 54 (each turn ends on its MEGA_KICK2 row), constant inside a turn. hpd2: the locked player's chained turn waits the foe's AI selection before the next `used` print (14-frame handoff, was 6): 8 frames per chained turn off the old 9 / 22 / 37 / 57 / 86.
+  { name: "rollout5-player", ids: [162, 175, 141], delta: 0, rows: 111, turnDeltas: [9, 14, 21, 33, 54] },
 ];
 
 describe("move-animation SEs of the aud242o lifetimes", () => {

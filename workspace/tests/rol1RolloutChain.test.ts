@@ -5,7 +5,9 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import type { BattleMoveAnimationRequest } from "../src/engine/battleMoveAnimation.ts";
 import type { BattleResolutionDisplayedField, BattleResolutionPresentationCommand } from "../src/engine/battleResolutionPresentation.ts";
-import { battleResolutionCommandDuration } from "../src/engine/battleResolutionPresentationRender.ts";
+import {
+  BATTLE_RESOLUTION_LOCKED_CONTINUATION_HANDOFF_FRAMES, BATTLE_RESOLUTION_NEXT_COMMAND_HANDOFF_FRAMES, battleResolutionCommandDuration,
+} from "../src/engine/battleResolutionPresentationRender.ts";
 import { battleHealthBarAnimationFrames } from "../src/engine/healthboxAssembly.ts";
 import { liveMoveAnimationDuration } from "../src/engine/liveMoveAnimation.ts";
 import speciesStats from "../src/data/gen/species-stats.json" with { type: "json" };
@@ -50,7 +52,7 @@ describe("rol1: the five-turn Rollout window (ROM, Scene ON)", () => {
     expect(stat.map((f) => first("SE_M_HEADBUTT", f) - f)).toEqual([221, 220, 220, 220, 220]);
   });
 
-  it("a floor-28 hp command (the pre-hpd1 Rollout hit; hpd1: the foe hit now carries bar + 1 + tail, tests/hpd1HpHold.test.ts) is flat for the small damages", () => {
+  it("the model's hp command is flat for the small damages (floor 28) and only grows once the bar frames exceed it", () => {
     // Lv100 Rattata (max HP 201): ROM drain starts +104 after the hit sound and clears at drain + bar + ~15 (measured per counter: 23 / 24 / 30 / 37).
     const maxHp = 201;
     const duration = (damage: number) => battleResolutionCommandDuration(hpCommand(maxHp, maxHp - damage), field(maxHp));
@@ -61,5 +63,12 @@ describe("rol1: the five-turn Rollout window (ROM, Scene ON)", () => {
     const big = 38;
     expect(duration(big)).toBe(battleHealthBarAnimationFrames({ maxHp, from: maxHp, to: maxHp - big }) + 1);
     expect(duration(big)).toBeGreaterThan(28);
+  });
+
+  it("hpd2: a locked player's chained turn waits 8 frames longer than the menu handoff (ROM: BattleTurnPassed -> script start 13 / 13 / 13 / 12, box blank 15 vs 7)", () => {
+    // tools/integration/hpd2Probe.py (per-frame gBattleMainFunc / gBattlescriptCurrInstr, Scene ON and OFF): the player is auto-confirmed, so the foe's
+    // selection (HandleTurnActionSelectionState, 9 frames) and SetActionsAndBattlersTurnOrder / RunTurnActionsFunctions (3) sit between the turn end and the next print.
+    expect(BATTLE_RESOLUTION_LOCKED_CONTINUATION_HANDOFF_FRAMES - BATTLE_RESOLUTION_NEXT_COMMAND_HANDOFF_FRAMES).toBe(8);
+    expect(BATTLE_RESOLUTION_LOCKED_CONTINUATION_HANDOFF_FRAMES).toBe(14);
   });
 });
