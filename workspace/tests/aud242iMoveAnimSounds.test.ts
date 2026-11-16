@@ -58,9 +58,13 @@ const SPECS: Record<string, { delta: number; rows: number }> = {
   // Move_SLUDGE_BOMB: ten SE126 + sludge projectiles, three SE175, `waitsound`, the hit-particle / blend_color_cycle wait, six SE148 (SE_M_TOXIC, PoisonBubblesEffect).
   "sludge-player": { delta: 2, rows: 19 },
   "sludge-opponent": { delta: 2, rows: 19 },
+  // Move_FAINT_ATTACK: SE190 (before the first wait, already emitted), then after attacker_fade_to_invisible + the clearmonbg overrun the SE123 row. +3 on both rows and both sides:
+  // the script start of this move is one frame earlier than the usual +2 idle-lead class (constant per move, like the other moves' named deltas), the interval is exact.
+  "faint-player": { delta: 3, rows: 2 },
+  "faint-opponent": { delta: 3, rows: 2 },
 };
 
-describe("move-animation SEs after the aud242i waitsound wait (Sludge Bomb)", () => {
+describe("move-animation SEs after the aud242i waits (Sludge Bomb waitsound, Faint Attack fade + clearmonbg)", () => {
   for (const [name, spec] of Object.entries(SPECS)) {
     it(`${name}: (frame, kind, id, pan) equals the ROM at a named +${spec.delta} frame residual`, () => {
       const rom = fixture(name);

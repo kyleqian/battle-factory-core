@@ -2000,6 +2000,9 @@ export const APP_STAGES: Readonly<Record<string, AppStage>> = {
   // aud242i: Sludge Bomb (waitsound after SE_M_DIG, gSludgeBombHitParticleSpriteTemplate wait).
   "aud242i-sludgebomb-player-on": (state) => aud241bStage(state, "aud242i-sludgebomb-player-on", "on", 50, 12, 188, undefined, false, 69),
   "aud242i-sludgebomb-opponent-on": (state) => aud241bStage(state, "aud242i-sludgebomb-opponent-on", "on", 12, 50, 69, undefined, false, 188),
+  // aud242i: Faint Attack (attacker_fade_to_invisible / _from_invisible and SetAttackerInvisibleWaitForSignal lifetimes).
+  "aud242i-faintattack-player-on": (state) => aud241bStage(state, "aud242i-faintattack-player-on", "on", 50, 12, 185, undefined, false, 69),
+  "aud242i-faintattack-opponent-on": (state) => aud241bStage(state, "aud242i-faintattack-opponent-on", "on", 12, 50, 69, undefined, false, 185),
   "aud242f-swagger-player-on": (state) => aud241bStage(state, "aud242f-swagger-player-on", "on", 50, 12, 207, undefined, false, 69),
   // aud242g: SetPsychicBackground / Tri Attack triangle lifetimes (docs/aud242-move-anim-sounds.md section 11).
   "aud242g-triattack-player-on": (state) => aud241bStage(state, "aud242g-triattack-player-on", "on", 50, 12, 161, undefined, false, 69),

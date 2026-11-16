@@ -78,7 +78,7 @@ interface Spec {
 // start their body 1 frame before ours). Named extras on single rows:
 //  - Overheat's four SE_M_FIRE_PUNCH rows (id 147, after the eight-flame creation step and the flame wait) land 3 later in the ROM than the model; the creation
 //    step makes eight sprites and the ROM loses wall frames there (VBlank overrun; Thunderbolt's nine-sprite step shows +1, same class). Undiagnosed beyond that.
-//  - Poison Tail's rows after its first wait are +4 where the first rows are +2 (undiagnosed, ISSUES proposal).
+//  - Poison Tail's SE_M_TOXIC rows after its clearmonbg are +2 like the first rows (aud242i: Task_ClearMonBg's ResetBattleAnimBg overruns 2 frames, modelled as a lag; they were +4 before).
 //  - Counter is used second: the ROM's opponent move body (SE214 / SE131) is not emitted, and our Counter body starts 16 frames after the ROM's; the one
 //    pre-body row (SE238, the status/menu SE before the turn) keeps the ROM's frame.
 const SPECS: Record<string, Spec> = {
@@ -93,7 +93,7 @@ const SPECS: Record<string, Spec> = {
   "watergun-player": { delta: 0 },
   "waterpulse-player": { delta: 2 },
   "doubleedge-player": { delta: 2 },
-  "poisontail-player": { delta: 2, extra: { "99:120:-64": 2, "201:148:63": 2, "209:148:63": 2, "217:148:63": 2, "225:148:63": 2, "233:148:63": 2 } },
+  "poisontail-player": { delta: 2, extra: { "99:120:-64": 2 } },
   "rollingkick-player": { delta: 2 },
   "absorb-player": { delta: -1, romOnlyFrom: 600 },
   "megadrain-player": { delta: -1 },

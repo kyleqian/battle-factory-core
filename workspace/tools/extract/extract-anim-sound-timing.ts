@@ -392,6 +392,17 @@ function lifetimeOf(cmd: Command): Lifetime {
   // InitSpriteDataForLinearTranslation divides by d: 0 crashes the ROM, declined); the step's call k >= 1 runs TranslateSpriteLinearFixedPoint (battle_anim_mons.c:607-621,
   // data[0]-- while > 0) and destroys on the same call once data[0] is 0, i.e. at call d: gone d - 1 ticks after F.
   if (sprite("gSludgeBombHitParticleSpriteTemplate")) { const d = intArg(args[5]); return d === null || d < 1 ? null : { exact: d - 1 }; }
+  // AnimTask_AttackerFadeToInvisible / ...FromInvisible (battle_anim_dark.c:191-263; macros attacker_fade_to_invisible / _from_invisible step_delay=d): the entry only sets
+  // func and BLDALPHA; the step's data[2] counts 0 -> d over calls 1..d and call d + 1 steps the blend (blendA 0 -> 16 resp. 16 -> 0, 16 steps) resetting data[2], so the
+  // 16th step is call 16 * (d + 1), which destroys the task: gone 16 * (d + 1) - 1 ticks after F.
+  const fadeMacro = op === "attacker_fade_to_invisible" || op === "attacker_fade_from_invisible";
+  if (fadeMacro || (op === "createvisualtask" && (args[0] === "AnimTask_AttackerFadeToInvisible" || args[0] === "AnimTask_AttackerFadeFromInvisible"))) {
+    const d = intArg(fadeMacro ? (args.find((a) => a.startsWith("step_delay=")) ?? args[args.length - 1]) : args[2]);
+    return d === null || d < 0 || d > 255 ? null : { exact: 16 * (d + 1) - 1 };
+  }
+  // AnimTask_SetAttackerInvisibleWaitForSignal (battle_anim_utility_funcs.c:1079-1092): outside contests the entry does gAnimVisualTaskCount-- (net 0 after Cmd_createvisualtask's
+  // own ++, battle_anim.c:439-441), so a following waitforvisualfinish never waits for it (it lives until the script sets arg 7 = 0x1000).
+  if (op === "createvisualtask" && args[0] === "AnimTask_SetAttackerInvisibleWaitForSignal") return { exact: -1 };
   if (op === "create_basic_hitsplat_sprite") return { bound: 10 };
   return null;
 }
@@ -514,6 +525,7 @@ function walk(bodyLabel: string, turn: number, attackerSide: number): Walk {
   // waitforvisualfinish whose exact finish is at or after it makes the frame exact again. seUnknown: an SE the table cannot bound (panse / sound task / unknown song) or a
   // creation whose callback can play one; no waitsound resolves after it.
   let soundWait: number | null = null;
+  let monBgActive = false;
   let seEnd = -1;
   let seUnknown = false;
   const TIMED = new Set(["delay", "loadspritegfx", "monbg", "fadetobg", "fadetobgfromset", "restorebg", "changebg", "waitbgfadeout", "waitbgfadein", "waitsound", "playsewithpan", "playse", "waitplaysewithpan", "loopsewithpan", "panse", "panse_adjustnone", "panse_adjustall", "setpan", "createsoundtask"]);
@@ -561,7 +573,12 @@ function walk(bodyLabel: string, turn: number, attackerSide: number): Walk {
       case "call": stack.push(pc); pc = [args[0]!, 0]; break;
       case "goto": pc = [args[0]!, 0]; break;
       case "delay": if (frame !== null) frame += Math.max(value(args[0]!), 0) + 2; break;
-      case "loadspritegfx": case "monbg": if (frame !== null) frame += 3; break;
+      case "loadspritegfx": if (frame !== null) frame += 3; break;
+      case "monbg": if (frame !== null) frame += 3; monBgActive = true; break;
+      // Cmd_clearmonbg (battle_anim.c:852-883) creates Task_ClearMonBg (priority 5): its first run only counts, the second (the iteration after the script step) calls
+      // ResetBattleAnimBg / ClearBattleAnimBg and overruns VBlank: the stepped ROM shows ResetBattleAnimBg in iteration C + 1 and the task's DestroyTask 2 frames later, and the
+      // script's following `delay` ticks resume 2 frames late (Faint Attack, both clearmonbg, tools/audio/fixtures/aud242i-faint-*.json). Only while a monbg is active.
+      case "clearmonbg": if (frame !== null && monBgActive) lags.push({ after: frame + 1, frames: 2 }); monBgActive = false; break;
       case "waitforvisualfinish": {
         if (frame === null) break;
         if (pending.length === 0) {
