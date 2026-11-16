@@ -714,6 +714,13 @@ function lifetimeOf(cmd: Command, attackerSide: number, pic: PicContext): Lifeti
   // gConfuseRayBallSpiralSpriteTemplate (:313-341): the init installs the step and runs it at once (call 0: data[7] 0 -> 1), so call k has data[7] = k + 1 and call 60 (61) destroys: gone 59 ticks after F.
   if (sprite("gConfuseRayBallSpiralSpriteTemplate")) return { exact: 59 };
   if (op === "create_basic_hitsplat_sprite") return { bound: 10 };
+  // ---- aud242o (docs section 19). AnimPetalDanceBigFlower / SmallFlower (battle_anim_effects_1.c:2482-2548; D = duration): the init sets data[0] = D, runs InitAnimLinearTranslation
+  // (battle_anim_mons.c:1065-1091, data[0] unchanged) and calls the step at once. The step is AnimTranslateLinear (:1111-1139, data[0]-- per call while non-zero): calls 0..D - 1 translate,
+  // call D finds data[0] == 0 and DestroyAnimSprite: gone D - 1 ticks after F (the sway only moves x2 / y2 / the oam flip bit).
+  if (op === "create_petal_dance_big_flower_sprite" || op === "create_petal_dance_small_flower_sprite" || sprite("gPetalDanceBigFlowerSpriteTemplate") || sprite("gPetalDanceSmallFlowerSpriteTemplate")) {
+    const d = op.startsWith("create_") ? intNamed("duration") : intArg(args[6]);
+    return d === null || d < 1 ? null : { exact: d - 1 };
+  }
 
   return null;
 }
