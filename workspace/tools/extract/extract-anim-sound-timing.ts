@@ -431,7 +431,50 @@ function lifetimeOf(cmd: Command, attackerSide: number): Lifetime {
     const side = anchor === 0 ? attackerSide : 1 - attackerSide;
     return { exact: Math.ceil((side === 0 ? 272 : 264) / speed) };
   }
+  // ---- aud242k (docs section 15). Same call numbering as above (sprite call 0 = init in the script step, gone K - 1 ticks after F for a destroy at call K).
+  // AnimFireSpiralInward (battle_anim_fire.c:466-478): sDuration = 30, the init runs TranslateSpriteInGrowingCircle once (battle_anim_mons.c:468-486), calls 1..29 finish the
+  // count, call 30 installs DestroyAnimSprite, call 31 destroys = 30 (the same shape as the Ice Punch swirl). AnimFireSpread (:481-492; D = gBattleAnimArgs[4] = script args[7]) and
+  // AnimGrantingStars (battle_anim_effects_1.c:4099-4113; D = gBattleAnimArgs[5] = args[8]): the init installs TranslateSpriteLinearFixedPoint (:607-621), calls 1..D translate,
+  // call D + 1 installs DestroyAnimSprite, call D + 2 destroys = D + 1.
+  if (sprite("gFireSpiralInwardSpriteTemplate")) return { exact: 30 };
+  if (sprite("gFireSpreadSpriteTemplate")) { const d = intArg(args[7]); return d === null || d < 0 ? null : { exact: d + 1 }; }
+  if (sprite("gGrantingStarsSpriteTemplate")) { const d = intArg(args[8]); return d === null || d < 0 ? null : { exact: d + 1 }; }
+  // AnimTask_DeepInhale (battle_anim_effects_3.c:3474-3510): the entry only sets func; the step's RunAffineAnimFromTaskData (battle_anim_mons.c:1800-1862) runs the frames of
+  // gDeepInhaleAffineAnimCmds (:780-788: 4 + 16 + 4 + 24 + 16 = 64) over calls 1..64 and the END command on call 65 returns FALSE and destroys: gone 64 ticks after F.
+  // AnimYawnCloud (:3532-3563): data[0] counts calls from 1; from call 59 on every 2nd call advances data[2] and the call that makes it 4 destroys: call 66, gone 65 ticks after F.
+  if (op === "createvisualtask" && args[0] === "AnimTask_DeepInhale") return { exact: 64 };
+  if (sprite("gYawnCloudSpriteTemplate")) return { exact: 65 };
+  // AnimThrowProjectile (battle_anim_mons.c:1572-1589; D = gBattleAnimArgs[4] = script args[7]): the arc of InitAnimArcTranslation / TranslateAnimHorizontalArc, D translating calls,
+  // call D + 1 destroys (the Sludge / Water Gun arc) = D. AnimBlackSmoke (battle_anim_effects_3.c:1182-1209; T = gBattleAnimArgs[4] = args[7]): the init installs the step, calls 1..T
+  // decrement data[1], call T + 1 destroys = T.
+  if (sprite("gBlackBallSpriteTemplate")) return arc(7);
+  if (sprite("gBlackSmokeSpriteTemplate")) { const d = intArg(args[7]); return d === null || d < 0 ? null : { exact: d }; }
+  // AnimGuardRing (battle_anim_effects_2.c:3799-3820) and AnimRaiseSprite (battle_anim_rock.c:571-582; D = gBattleAnimArgs[3] = args[6]): data[0] = D, the init installs
+  // StartAnimLinearTranslation (battle_anim_mons.c:1093-1100), which translates at once from call 1 (calls 1..D), call D + 1 installs DestroyAnimSprite, call D + 2 destroys = D + 1
+  // (the Ice Beam crystal shape).
+  if (sprite("gGuardRingSpriteTemplate")) return { exact: 14 };
+  if (sprite("gAncientPowerRockSpriteTemplate")) { const d = intArg(args[6]); return d === null || d < 1 ? null : { exact: d + 1 }; }
+  // AnimShakeMonOrBattlePlatforms (battle_anim_normal.c:853-915; T = shake_duration): sTimer = T, the init installs the step, calls 1..T decrement it, call T + 1 restores the
+  // coordinate and destroys = T.
+  if (op === "shake_mon_or_platform" || sprite("gShakeMonOrPlatformSpriteTemplate")) { const d = op === "shake_mon_or_platform" ? intNamed("shake_duration") : intArg(args[5]); return d === null || d < 0 ? null : { exact: d }; }
+  // AnimDevil (battle_anim_effects_2.c:3580-3610): one callback; call c has data[3] = c + 1 and destroys when it exceeds 90: call 90, gone 89 ticks after F.
+  if (sprite("gDevilSpriteTemplate")) return { exact: 89 };
+  // AnimEyeSparkle (:3504-3514): the init installs the step, gEyeSparkleAnimCmds (:1011-1019) is 5 x 4 = 20 frames, animEnded at call 20, destroy at call 21 = 20.
+  if (sprite("gEyeSparkleSpriteTemplate")) return { exact: 20 };
+  // AnimTask_ScaryFace (battle_anim_effects_2.c:3324-3410): the entry loads the BG and sets func; the step's case 0 ends on its 14th blend (every 2nd call: call 28), case 1 takes 21
+  // calls (29..49), case 2 ends on its 14th decrement (calls 51, 53, ..., 77), and case 3 / 4 clear the BG and destroy in the next call: call 78, gone 77 ticks after F.
+  if (op === "createvisualtask" && args[0] === "AnimTask_ScaryFace") return { exact: 77 };
+  // AnimTask_ShakeTargetInPattern (battle_anim_fire.c:1344-1375; maxShakes = script args[3]): the entry is the step (call 0 stores the args); every call counts tShakeNum and the
+  // call where it equals maxShakes (call maxShakes - 1) destroys: gone maxShakes - 2 ticks after F.
+  if (op === "createvisualtask" && args[0] === "AnimTask_ShakeTargetInPattern") { const n = intArg(args[3]); return n === null || n < 1 ? null : { exact: n - 2 }; }
+  // AnimBite (battle_anim_dark.c:320-352, create_sharp_teeth_sprite; H = half_duration): the init installs Step1; calls 1..H count data[3] up (call H installs Step2), Step2 counts it
+  // down over calls H + 1..2H and the call that reaches 0 destroys: call 2H, gone 2H - 1 ticks after F.
+  if (op === "create_sharp_teeth_sprite" || sprite("gSharpTeethSpriteTemplate") || sprite("gClampJawSpriteTemplate")) { const h = op === "create_sharp_teeth_sprite" ? intNamed("half_duration") : intArg(args[8]); return h === null || h < 1 ? null : { exact: 2 * h - 1 }; }
+  // AnimWishStar (battle_anim_effects_3.c:2104-2140): x = 256 (player) / -16, x2 = -/+ (72 * call >> 4); newX = x + x2 + 32 is a u32, so the player's star is destroyed when it
+  // goes negative: 288 - (72c >> 4) < 0 at call 65 (the opponent's: 16 + (72c >> 4) > 304 at call 65 too): gone 64 ticks after F, both sides.
+  if (sprite("gWishStarSpriteTemplate")) return { exact: 64 };
   if (op === "create_basic_hitsplat_sprite") return { bound: 10 };
+
   return null;
 }
 // Macros whose body (transitively) is a createsprite / createvisualtask create a visual task or sprite the wait must account for.
