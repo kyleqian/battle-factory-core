@@ -128,7 +128,9 @@ three rows after the nine-sprite step (SE_M_HYPER_BEAM, both SE_M_THUNDERBOLT2) 
 Growth's 2nd SE152 exact at its -4. Shadow Ball ball has no ROM window (Rattata-only stage is Ghost-immune).
 **aud242i (2026-11-16)** `waitsound` as an SE-length bound, Sludge Bomb (+2, 19 rows both sides), Faint Attack (SE123 now emitted, +3 on both sides, a script-start
 offset), the `Task_ClearMonBg` 2-frame overrun (Poison Tail's later rows +4 -> +2) (L50 704 emitted, 130 gated; all 906 resolved; `docs/aud242-move-anim-sounds.md` section 13).
-Open (top census gated ops): Blizzard 88, Confuse Ray 47, Dig 37, Spark 32, Struggle 30, Attract 28.
+**aud242j (2026-11-16)** Struggle (+7), Silver Wind (+2 both sides), Dig unleash (0), Attract (C-derived, no ROM window: needs opposite-gender parties) (L50 707 emitted, 127 gated; all 910 resolved;
+`docs/aud242-move-anim-sounds.md` section 14). Open: Dig's turn-0 rows (SE175 -6, the opponent's SE141 +23: `DigSetUp` end lifetime), Silver Wind's stat SE239 not emitted.
+Open (top census gated ops): Blizzard 88, Confuse Ray 47, Spark 32, Tri Attack 24, Ancient Power 23, Petal Dance 22.
 
 ## #194 — Opponent RATTATA Quick Attack differs above the clip row (qak247, 2026-11-04)
 

@@ -1,3 +1,15 @@
+## 2026-11-16 — aud242h (ts lane worker): move-animation SE lifetimes, slice 8 (ISSUES #219 family 1)
+
+- **State:** on master, committed (`cf66a94a3` blend_color_cycle + Psychic / Growth, `dbc3f7178` Shadow Ball ball + vertical dip + Body Slam, docs after). Sound only.
+- **Did:** ported `AnimTask_BlendColorCycle` (palette-fade call count), `gShadowBallSpriteTemplate`, `gVerticalDipSpriteTemplate` lifetimes (C cited in the extractor; `docs/aud242-move-anim-sounds.md` section 12).
+  ROM windows (step mode): Psychic +2, Body Slam +2, Growth 2nd SE152 exact at its -4; Shadow Ball is C-derived only (Rattata stage is Ghost-immune).
+- **Counts:** L50 emitted / gated 692 / 142 -> 697 / 137; all moves resolved 894 / 218 -> 899 / 213. T1 (seeds 0..99 ON, arm `on-f205895b4`): exact 23,547 -> 23,795, missing-gated 1,066 -> 950, extra 0,
+  unclassified 11,093 -> 11,093 (unchanged: SEs outside move windows, a pre-existing tooling gap, not 0). `commands` / `eventsDigest` identical 100 / 100; differential 240 / 240 byte-identical (3 traces).
+- **Gates:** typecheck 0; test:gate 362 files / 2,843; npm test shards 1-6 of 6 green (1,845 files); build / build:lib 0.
+- **Next:** Sludge Bomb (198 gated: SE-length table + `waitsound` keeps `pending`), Blizzard 88, Faint Attack 62, Confuse Ray 47. Evidence `.integration/evidence/aud242h/`.
+
+---
+
 ## 2026-11-16 — lbw4 (ts lane worker): player <-> Lobby NPC interaction in free roam (ISSUES #221 E4 remainder)
 
 - **State:** on master, committed (`e6c46d86e` engine + trace, `562f916bd` depth sort + Tier-1, docs after). Battle rules untouched.

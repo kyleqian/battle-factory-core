@@ -716,3 +716,49 @@ Tested code commit `04b803f5f` (later commits are docs only).
 
 - `npm run typecheck`, `npm run build`, `npm run build:lib`: each exit 0. `npm run test:gate`: 362 files, 2,843 passed. aud24x / aud25x / moveAnimSounds / tickSounds importer tests: 27 files, 287 passed. The full `npm test` was not run (the supervisor runs it).
 - `npm run compare:differential` (`--harness-from-head`, base `d39e33b3c`) over 3 Scene ON traces (Sludge Bomb player, Faint Attack player and opponent; frames 60..692 step 8): 240 / 240 captures byte-identical.
+
+## 14. aud242j: Struggle / Attract / Dig unleash / Silver Wind lifetimes
+
+Ranked by T1 census weight among the moves whose gated ops depend only on C-derivable fixed lifetimes: Struggle 30, Attract 28, Dig 37, Silver Wind 25.
+Skipped: Blizzard (per-species pic offset), Confuse Ray (BallBounce translation, blend state machine, `SoundTask_AdjustPanningVar`), Spark (`ElectricityEffect`, delay -31 colour cycles).
+
+### 14.1 Lifetimes derived (C; also cited in the extractor, `lifetimeOf(cmd, attackerSide)`)
+
+| lifetime | C | exact (ticks after F) |
+|---|---|---|
+| `AnimTask_ShakeMonInPlace` (Struggle) | `battle_anim_mon_movement.c:251-299` | `max(shakes-1, 0) * (delay+1) - 1` |
+| `gMovementWavesSpriteTemplate` (`AnimMovementWaves`, Attract) | `battle_anim_effects_2.c:3173-3216` | `n*33 - 1` (`n == 0`: -1) |
+| `gRedHeartProjectileSpriteTemplate` / `gRedHeartBurstSpriteTemplate` | `battle_anim_effects_2.c:3624-3666`, `1130-1150` | 95 / 40 |
+| `AnimTask_DigUpMovement` (`FALSE` half) | `battle_anim_ground.c:386-418` | 0 (the `TRUE` half stays unmodelled) |
+| Silver Wind sparks (`gSilverWind{Big,Medium,Small}SparkSpriteTemplate`, `AnimFlyingParticle`) | `battle_anim_effects_1.c:3517-3590` | `ceil((272 or 264) / speed)`, width by the anchor's side |
+
+### 14.2 ROM windows (probe step mode, Scene ON)
+
+Fixtures `tools/audio/fixtures/aud242j-{struggle-player,silverwind-player,silverwind-opponent,dig-player}.json`, labs `tools/battle-lab/aud242j-*-on.json` (stages in `appTrace.ts`), test `tests/aud242jMoveAnimSounds.test.ts`.
+
+| window | rows | ROM minus ours |
+|---|---|---|
+| Struggle (player) | SE162 x4 (ROM 75 / 87 / 100 / 113), SE141 (141) behind `ShakeMonInPlace` | +7 (interval exact; the move starts later than the idle-lead class) |
+| Silver Wind (player) | SE132 + SE228 (ROM 70), SE133 (208) behind the spark particles | +2 |
+| Silver Wind (opponent) | SE132 + SE228 (ROM 74), SE133 (215) | +2 |
+| Dig unleash (second turn, player) | SE114 (ROM 1048) behind `AnimTask_DigUpMovement` | 0 |
+
+- Attract is C-derived only: a same-gender Rattata lab does not animate it (no SE212 / 226 / 227 in the ROM log); a ROM window needs opposite-gender parties.
+- Dig's turn-0 rows (SE175 x5 at ROM 60..196, ours 66..202: -6; the opponent's SE141 at ROM 585 vs ours 562: +23) predate this step and are not changed by it; the `DigSetUp` end lifetime is the open item.
+- Silver Wind's ROM stat-raise SE239 (ROM 360) is not emitted by us (secondary-effect stat change; named gap in `tests/aud248StatChangeSounds.test.ts`).
+
+### 14.3 Counts (turn 0, player attacker)
+
+| | before (`70b923b38`) | after |
+|---|---|---|
+| all moves: ops resolved / unresolved | 906 / 206 | 910 / 202 |
+| L50: emitted / gated | 704 / 130 | 707 / 127 (+3 emitted; Dig's turn-0 op is unchanged) |
+
+Census T1 (seeds 0..99 Scene ON, arms `on-04b803f5f` and fresh `on-4e31b7675`, each scored against its own table): exact 24,055 -> 24,175, missing-gated 690 -> 570, missing-other 51, missing-declined 1, extra 0, unclassified 11,093 -> 11,093 (unchanged, pre-existing tooling gap, not 0). `rst197CensusDelta.py`: 100 / 100 battles, `commands` / `eventsDigest` identical.
+
+Gates on `4e31b7675` + the aud248 residual row: `npm run typecheck` 0; `npm run test:gate` 362 files / 2,843; aud24x / aud25x / moveAnimSounds / tickSounds importer tests 28 files / 292; `npm run build`, `npm run build:lib` 0. `npm run compare:differential` (`--harness-from-head`, base `70b923b38`, Struggle, Silver Wind, Dig two-turn traces): 303 / 303 captures byte-identical.
+
+### 14.4 Residuals
+
+- Top gated census moves now: Blizzard 88, Confuse Ray 47, Spark 32, Tri Attack 24, Ancient Power 23, Petal Dance 22, Fire Punch 21, Yawn 20.
+- Struggle +7 and Dig's -6 / +23 are recorded offsets, not fixed (ISSUES #198).
