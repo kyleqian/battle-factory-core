@@ -36,16 +36,26 @@ if (nonMove) {
   writeFileSync(process.argv[3]!, JSON.stringify(out));
   process.exit(0);
 }
-for (const [move, turn, attacker, target] of keys) {
+for (const [move, turn, attacker, target, pic] of keys) {
   const entry = (timing as any).moves[move!];
-  if (entry === undefined) { out[`${move},${turn},${attacker},${target}`] = null; continue; }
+  if (entry === undefined) { out[`${move},${turn},${attacker},${target},${pic ?? ""}`] = null; continue; }
   const turnIndex = turn! < timing.turns ? turn! : timing.turns - 2 + (turn! & 1);
   const slot = turnIndex * timing.sides + (attacker === 0 ? 0 : 1);
   const context = { attackerSide: attacker === 0 ? "player" : "opponent", targetSide: target === 0 ? "player" : "opponent" } as const;
   const rows: unknown[] = [];
-  for (const op of (timing as any).variants[entry.variants[slot]]) {
+  // aud242l: a pic-dependent slot picks its grid cell from the battlers' pic Y ("player,opponent"); an unknown / absent class keeps the reference walk.
+  let variant = entry.variants[slot];
+  const grid = entry.pic === undefined ? undefined : (timing as any).picGrids[entry.pic[slot]];
+  if (grid !== undefined && pic) {
+    const [playerY, opponentY] = String(pic).split(",").map(Number);
+    const side = attacker === 0 ? 0 : 1;
+    const row = (timing as any).picYs[side].indexOf(side === 0 ? playerY : opponentY);
+    const column = (timing as any).picYs[1 - side].indexOf(side === 0 ? opponentY : playerY);
+    if (row >= 0 && column >= 0) variant = grid[row * (timing as any).picYs[1 - side].length + column];
+  }
+  for (const op of (timing as any).variants[variant]) {
     for (const row of moveAnimOpRows(op, context)) rows.push([op.frame + row.offset, row.emission.kind, row.emission.id, row.emission.pan, row.task === true ? 1 : 0]);
   }
-  out[`${move},${turn},${attacker},${target}`] = { rows, gated: entry.gated[slot], ends: entry.ends[slot] };
+  out[`${move},${turn},${attacker},${target},${pic ?? ""}`] = { rows, gated: entry.gated[slot], ends: entry.ends[slot] };
 }
 writeFileSync(process.argv[3]!, JSON.stringify(out));

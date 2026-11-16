@@ -87,7 +87,7 @@ interface SoundOp {
   line: number;
 }
 type Reason = "bg-fade" | "unmodelled-lifetime" | "waitsound" | "unresolved-branch" | "after-unresolved-branch";
-interface Walk { events: SoundOp[]; end: string; frame: number | null; gated: number; reasons: Record<string, number> }
+interface Walk { events: SoundOp[]; end: string; frame: number | null; gated: number; reasons: Record<string, number>; usedPic: boolean }
 
 // ---- Lifetimes of the creation ops (ticks after the creation tick at which the visual task / sprite is gone). Exact entries are the
 // source-derived or RAM-probed lifetimes src/animation already uses (shakeMon.ts, slideMon.ts, dragonRage.ts); a bound is an upper
@@ -172,6 +172,8 @@ const METALLIC_SHINE_LENGTH = 95;
 // localised (Metal Claw's SE_M_HARDEN loop task, counted in iterations, plays its second SE exactly 2 wall frames late: 28 -> 30); the other 2 are not
 // (somewhere in the 96-call shine or its destroy, which clears the BG tilemap). The shift is applied to every later op; the loop's own second play is the named residual.
 const METALLIC_SHINE_LOAD_LAG = 4;
+// AnimTask_ScaryFace loads its BG tilemap, image and palette in the creating step like AnimTask_MetallicShine: the ROM window (aud242k Scary Face) puts the first op after its wait 6 wall frames later than the 77-call count.
+const SCARY_FACE_LOAD_LAG = 6;
 // ---- Instant visual tasks (aud242d). Cmd_createvisualtask runs `taskFunc(taskId)` BEFORE `gAnimVisualTaskCount++` (battle_anim.c:437-439), and an
 // entry function whose every path is straight-line code ending in `DestroyAnimVisualTask(taskId)` (-> `gAnimVisualTaskCount--`, battle_anim.c:274-277)
 // nets to 0 in the creating step: a following waitforvisualfinish never waits for it (lifetime -1, like the PlaySE1/2WithPanning tasks). Sprites a task
@@ -226,7 +228,126 @@ auditInstantTasks();
 function blendAnimPalLength(delay: number, startY: number, targetY: number): number {
   return delay + Math.abs(targetY - startY) * (delay + 1) - 1;
 }
-function lifetimeOf(cmd: Command, attackerSide: number): Lifetime {
+// ---- aud242l: the Blizzard snowball / ice crystal lifetimes (docs/aud242-move-anim-sounds.md section 16). Both sprites are fast linear translations that run until they
+// leave the screen, so the lifetime is a function of the attacker's and the target's BATTLER_COORD_Y_PIC_OFFSET (= GetBattlerSpriteFinal_Y(..., TRUE), a per-species value:
+// battle_anim_mons.c:112-170, 172-292) and the fixed singles battler X (sBattlerCoords, :20-26). The walk is repeated for every (attackerY, targetY) class; picClasses below.
+const sineTable: number[] = [];
+for (const m of readFileSync(join(REF, "src", "trig.c"), "utf8").slice(readFileSync(join(REF, "src", "trig.c"), "utf8").indexOf("gSineTable[]")).split("};")[0]!.matchAll(/Q_8_8\(([-0-9.]+)\)/g)) sineTable.push(Math.trunc(Number(m[1]) * 256));
+const gbaSin = (index: number, amplitude: number): number => (amplitude * sineTable[((index % 256) + 256) % 256]!) >> 8;
+const gbaCos = (index: number, amplitude: number): number => (amplitude * sineTable[(((index + 64) % 256) + 256) % 256]!) >> 8;
+/** Singles sBattlerCoords x (player, opponent). */
+const BATTLER_X = [72, 176] as const;
+interface PicContext { readonly attackerY: number; readonly targetY: number }
+let picUsed = false;
+interface FastSprite { x: number; y: number; x2: number; y2: number; d: number[]; callback: string; destroyed: boolean }
+// InitAnimFastLinearTranslationWithSpeed + InitAnimFastLinearTranslation (battle_anim_mons.c:1171-1197, 1244-1249); a zero duration is a division by zero (declined).
+function fastInit(s: FastSprite): boolean {
+  const xDiff = s.d[2]! - s.d[1]!;
+  const yDiff = s.d[4]! - s.d[3]!;
+  const duration = Math.trunc((Math.abs(xDiff) << 4) / s.d[0]!);
+  if (!Number.isFinite(duration) || duration === 0) return false;
+  let dx = Math.trunc(((Math.abs(xDiff) << 4) & 0xffff) / duration);
+  let dy = Math.trunc(((Math.abs(yDiff) << 4) & 0xffff) / duration);
+  dx = xDiff < 0 ? dx | 1 : dx & ~1;
+  dy = yDiff < 0 ? dy | 1 : dy & ~1;
+  s.d[0] = duration; s.d[1] = dx; s.d[2] = dy; s.d[3] = 0; s.d[4] = 0;
+  return true;
+}
+// AnimFastTranslateLinear (:1208-1236); true = the data[0] == 0 early return.
+function fastTranslate(s: FastSprite): boolean {
+  if (s.d[0] === 0) return true;
+  s.d[3] = (s.d[3]! + s.d[1]!) & 0xffff;
+  s.d[4] = (s.d[4]! + s.d[2]!) & 0xffff;
+  s.x2 = (s.d[1]! & 1) !== 0 ? -(s.d[3]! >>> 4) : s.d[3]! >>> 4;
+  s.y2 = (s.d[2]! & 1) !== 0 ? -(s.d[4]! >>> 4) : s.d[4]! >>> 4;
+  s.d[0] = s.d[0]! - 1;
+  return false;
+}
+const offScreen = (s: FastSprite, bottom: number): boolean => s.x + s.x2 > 256 || s.x + s.x2 < -16 || s.y + s.y2 > bottom || s.y + s.y2 < -16;
+// The shared start of AnimSwirlingSnowball (battle_anim_ice.c:666-721) and AnimMoveParticleBeyondTarget (:788-844): the sprite is placed on the far side of the attacker along
+// the attacker -> target line (InitSpritePosToAnimAttacker + the reversed fast translation run until off screen, battle_anim_mons.c:833-847). The snowball keeps its data row from
+// before InitAnimFastLinearTranslationWithSpeed, the crystal the initialised one (`saveAfterInit`; only the crystal adds arg 3 to the target y when it averages positions).
+function fastParticleStart(attackerSide: number, pic: PicContext, [a0, a1, a2, a3]: number[], speed: number, multi: boolean, saveAfterInit: boolean): { sprite: FastSprite; saved: number[] } | null {
+  const [ax, tx] = [BATTLER_X[attackerSide === 0 ? 0 : 1], BATTLER_X[attackerSide === 0 ? 1 : 0]];
+  const sprite: FastSprite = { x: ax + (ax > tx ? -a0 : ax < tx ? a0 : 0), y: pic.attackerY + a1, x2: 0, y2: 0, d: [], callback: "", destroyed: false };
+  // multi: SetAverageBattlerPositions in singles = the target's own X_2 / Y_PIC_OFFSET (no partner).
+  sprite.d = [speed, sprite.x, tx + (attackerSide === 0 ? a2 : -a2), sprite.y, multi && !saveAfterInit ? pic.targetY : pic.targetY + a3, 0, 0, 0];
+  let saved = [...sprite.d];
+  if (!fastInit(sprite)) return null;
+  if (saveAfterInit) saved = [...sprite.d];
+  sprite.d[1] = sprite.d[1]! ^ 1; sprite.d[2] = sprite.d[2]! ^ 1;
+  for (let guard = 0; ; guard += 1) {
+    sprite.d[0] = 1;
+    fastTranslate(sprite);
+    if (offScreen(sprite, 160)) break;
+    if (guard === 4095) return null;
+  }
+  sprite.x += sprite.x2; sprite.y += sprite.y2; sprite.x2 = 0; sprite.y2 = 0;
+  return { sprite, saved };
+}
+// gSwirlingSnowballSpriteTemplate (args a0..a5; battle_anim_ice.c:666-776): call 1 is InitAnimFastLinearTranslationWithSpeedAndPos (inside the creating iteration), then the
+// translation to the target, Step1 (which runs Step2 at once), 32 Step2 swirl calls, one call of the End switch, then End translating by one fast step per call until off screen.
+// Returns the number of calls after call 1 that run before the destroying one (the lifetime in ticks after F, section 8 numbering).
+function swirlingSnowballLifetime(attackerSide: number, pic: PicContext, a: number[]): number | null {
+  const [speed, multi] = [a[4]!, a[5]! !== 0];
+  const start = fastParticleStart(attackerSide, pic, a, speed, multi, false);
+  if (start === null) return null;
+  const { sprite, saved } = start;
+  sprite.d = [...saved];
+  sprite.d[1] = sprite.x; sprite.d[3] = sprite.y;
+  if (!fastInit(sprite)) return null;
+  sprite.callback = "wait-end";
+  fastTranslate(sprite);
+  const amplitude = attackerSide === 0 ? -20 : 20;
+  for (let calls = 1; calls < 4096; calls += 1) {
+    switch (sprite.callback) {
+      case "wait-end": if (fastTranslate(sprite)) sprite.callback = "step1"; break;
+      case "step1":
+      case "step2": {
+        if (sprite.callback === "step1") {
+          sprite.x += sprite.x2; sprite.y += sprite.y2; sprite.x2 = 0; sprite.y2 = 0;
+          sprite.d[0] = 128; sprite.d[3] = gbaSin(128, amplitude); sprite.d[4] = gbaCos(128, 15); sprite.d[5] = 0;
+          sprite.callback = "step2";
+        }
+        if (sprite.d[5]! <= 31) {
+          sprite.x2 = gbaSin(sprite.d[0]!, amplitude) - sprite.d[3]!;
+          sprite.y2 = gbaCos(sprite.d[0]!, 15) - sprite.d[4]!;
+          sprite.d[0] = (sprite.d[0]! + 16) & 0xff;
+          sprite.d[5] = sprite.d[5]! + 1;
+        } else {
+          sprite.x += sprite.x2; sprite.y += sprite.y2; sprite.x2 = 0; sprite.y2 = 0; sprite.d[3] = 0; sprite.d[4] = 0;
+          sprite.callback = "end";
+        }
+        break;
+      }
+      case "end":
+        sprite.d[0] = 1;
+        fastTranslate(sprite);
+        if (offScreen(sprite, 256)) return calls;
+        break;
+      default: return null;
+    }
+  }
+  return null;
+}
+// gBlizzardIceCrystalSpriteTemplate = AnimMoveParticleBeyondTarget (a0..a7, :788-863): the same placement, then AnimWiggleParticleTowardsTarget (amplitude a5, frequency a6) from call 1
+// (run inside the creating iteration by the init's own AnimateSprite pass) until data[0] == 1 and the sprite is off screen.
+function moveParticleBeyondTargetLifetime(attackerSide: number, pic: PicContext, a: number[]): number | null {
+  const start = fastParticleStart(attackerSide, pic, a, a[4]!, a[7]! !== 0, true);
+  if (start === null) return null;
+  const { sprite, saved } = start;
+  sprite.d = [...saved];
+  sprite.d[5] = a[5]!; sprite.d[6] = a[6]!;
+  for (let calls = 1; calls < 4096; calls += 1) {
+    fastTranslate(sprite);
+    if (sprite.d[0] === 0) sprite.d[0] = 1;
+    sprite.y2 += gbaSin(sprite.d[7]!, sprite.d[5]!);
+    sprite.d[7] = (sprite.d[7]! + sprite.d[6]!) & 0xff;
+    if (sprite.d[0] === 1 && offScreen(sprite, 160)) return calls - 1;
+  }
+  return null;
+}
+function lifetimeOf(cmd: Command, attackerSide: number, pic: PicContext): Lifetime {
   const { op, args } = cmd;
   if (op === "createvisualtask" && (args[0] === "AnimTask_BlendBattleAnimPal" || args[0] === "AnimTask_BlendBattleAnimPalExclude" || args[0] === "AnimTask_BlendParticle")) {
     const [delay, startY, targetY] = [intArg(args[3]), intArg(args[4]), intArg(args[5])];
@@ -274,8 +395,22 @@ function lifetimeOf(cmd: Command, attackerSide: number): Lifetime {
   const intNamed = (key: string): number | null => intArg(args.find((a) => a.startsWith(`${key}=`)));
   const sprite = (template: string): boolean => op === "createsprite" && args[0] === template;
   const arc = (index: number): Lifetime => { const d = intArg(args[index]); return d === null ? null : { exact: d }; };
+  // aud242l: Blizzard's sprites run until they leave the screen along a line fixed by the two battlers' pic Y (battle_anim_ice.c:666-863); `picUsed` marks a walk whose result depends on it.
+  if (sprite("gSwirlingSnowballSpriteTemplate") || sprite("gBlizzardIceCrystalSpriteTemplate")) {
+    const snowball = args[0] === "gSwirlingSnowballSpriteTemplate";
+    const a = args.slice(3, snowball ? 9 : 11).map(intArg);
+    if (a.some((v) => v === null) || a.length !== (snowball ? 6 : 8)) return null;
+    picUsed = true;
+    const n = snowball ? swirlingSnowballLifetime(attackerSide, pic, a as number[]) : moveParticleBeyondTargetLifetime(attackerSide, pic, a as number[]);
+    return n === null ? null : { exact: n };
+  }
   // AnimSpriteOnMonPos (battle_anim_mons.c:1515-1536): init call, then animEnded of sAnim_ToxicBubble (battle_anim_poison.c:16-23: 4 x 5 = 20).
   if (sprite("gToxicBubbleSpriteTemplate")) return { exact: 20 };
+  // AnimSpriteOnMonPos again, gHealingBlueStarAnimCmds (battle_anim_effects_1.c:1825-1836): 2 + 2 + 2 + 3 + 5 + 3 + 2 + 2 = 21 frames.
+  if (sprite("gHealingBlueStarSpriteTemplate")) return { exact: 21 };
+  // AnimPowerAbsorptionOrb (battle_anim_effects_1.c:2230-2240): data[0] = duration, the init installs StartAnimLinearTranslation with DestroySpriteAndMatrix in data[6]: the
+  // AnimRaiseSprite shape below, D + 1 (D = 0 divides by zero: declined).
+  if (op === "create_power_absorption_orb_sprite" || sprite("gPowerAbsorptionOrbSpriteTemplate")) { const d = op === "create_power_absorption_orb_sprite" ? intNamed("duration") : intArg(args[5]); return d === null || d < 1 ? null : { exact: d + 1 }; }
   // AnimShadowBall (battle_anim_ghost.c:400-458): call 0 is the init; AnimShadowBall_Step case 0 / 1 / 2 each take max(arg, 1) calls (data[n] -= 1 until <= 0),
   // case 3 destroys at call a0 + a1 + a2 + 1 (a0 or a2 of 0 divide by zero: declined).
   if (sprite("gShadowBallSpriteTemplate")) {
@@ -431,7 +566,50 @@ function lifetimeOf(cmd: Command, attackerSide: number): Lifetime {
     const side = anchor === 0 ? attackerSide : 1 - attackerSide;
     return { exact: Math.ceil((side === 0 ? 272 : 264) / speed) };
   }
+  // ---- aud242k (docs section 15). Same call numbering as above (sprite call 0 = init in the script step, gone K - 1 ticks after F for a destroy at call K).
+  // AnimFireSpiralInward (battle_anim_fire.c:466-478): sDuration = 30, the init runs TranslateSpriteInGrowingCircle once (battle_anim_mons.c:468-486), calls 1..29 finish the
+  // count, call 30 installs DestroyAnimSprite, call 31 destroys = 30 (the same shape as the Ice Punch swirl). AnimFireSpread (:481-492; D = gBattleAnimArgs[4] = script args[7]) and
+  // AnimGrantingStars (battle_anim_effects_1.c:4099-4113; D = gBattleAnimArgs[5] = args[8]): the init installs TranslateSpriteLinearFixedPoint (:607-621), calls 1..D translate,
+  // call D + 1 installs DestroyAnimSprite, call D + 2 destroys = D + 1.
+  if (sprite("gFireSpiralInwardSpriteTemplate")) return { exact: 30 };
+  if (sprite("gFireSpreadSpriteTemplate")) { const d = intArg(args[7]); return d === null || d < 0 ? null : { exact: d + 1 }; }
+  if (sprite("gGrantingStarsSpriteTemplate")) { const d = intArg(args[8]); return d === null || d < 0 ? null : { exact: d + 1 }; }
+  // AnimTask_DeepInhale (battle_anim_effects_3.c:3474-3510): the entry only sets func; the step's RunAffineAnimFromTaskData (battle_anim_mons.c:1800-1862) runs the frames of
+  // gDeepInhaleAffineAnimCmds (:780-788: 4 + 16 + 4 + 24 + 16 = 64) over calls 1..64 and the END command on call 65 returns FALSE and destroys: gone 64 ticks after F.
+  // AnimYawnCloud (:3532-3563): data[0] counts calls from 1; from call 59 on every 2nd call advances data[2] and the call that makes it 4 destroys: call 66, gone 65 ticks after F.
+  if (op === "createvisualtask" && args[0] === "AnimTask_DeepInhale") return { exact: 64 };
+  if (sprite("gYawnCloudSpriteTemplate")) return { exact: 65 };
+  // AnimThrowProjectile (battle_anim_mons.c:1572-1589; D = gBattleAnimArgs[4] = script args[7]): the arc of InitAnimArcTranslation / TranslateAnimHorizontalArc, D translating calls,
+  // call D + 1 destroys (the Sludge / Water Gun arc) = D. AnimBlackSmoke (battle_anim_effects_3.c:1182-1209; T = gBattleAnimArgs[4] = args[7]): the init installs the step, calls 1..T
+  // decrement data[1], call T + 1 destroys = T.
+  if (sprite("gBlackBallSpriteTemplate")) return arc(7);
+  if (sprite("gBlackSmokeSpriteTemplate")) { const d = intArg(args[7]); return d === null || d < 0 ? null : { exact: d }; }
+  // AnimGuardRing (battle_anim_effects_2.c:3799-3820) and AnimRaiseSprite (battle_anim_rock.c:571-582; D = gBattleAnimArgs[3] = args[6]): data[0] = D, the init installs
+  // StartAnimLinearTranslation (battle_anim_mons.c:1093-1100), which translates at once from call 1 (calls 1..D), call D + 1 installs DestroyAnimSprite, call D + 2 destroys = D + 1
+  // (the Ice Beam crystal shape).
+  if (sprite("gGuardRingSpriteTemplate")) return { exact: 14 };
+  if (sprite("gAncientPowerRockSpriteTemplate")) { const d = intArg(args[6]); return d === null || d < 1 ? null : { exact: d + 1 }; }
+  // AnimShakeMonOrBattlePlatforms (battle_anim_normal.c:853-915; T = shake_duration): sTimer = T, the init installs the step, calls 1..T decrement it, call T + 1 restores the
+  // coordinate and destroys = T.
+  if (op === "shake_mon_or_platform" || sprite("gShakeMonOrPlatformSpriteTemplate")) { const d = op === "shake_mon_or_platform" ? intNamed("shake_duration") : intArg(args[5]); return d === null || d < 0 ? null : { exact: d }; }
+  // AnimDevil (battle_anim_effects_2.c:3580-3610): one callback; call c has data[3] = c + 1 and destroys when it exceeds 90: call 90, gone 89 ticks after F.
+  if (sprite("gDevilSpriteTemplate")) return { exact: 89 };
+  // AnimEyeSparkle (:3504-3514): the init installs the step, gEyeSparkleAnimCmds (:1011-1019) is 5 x 4 = 20 frames, animEnded at call 20, destroy at call 21 = 20.
+  if (sprite("gEyeSparkleSpriteTemplate")) return { exact: 20 };
+  // AnimTask_ScaryFace (battle_anim_effects_2.c:3324-3410): the entry loads the BG and sets func; the step's case 0 ends on its 14th blend (every 2nd call: call 28), case 1 takes 21
+  // calls (29..49), case 2 ends on its 14th decrement (calls 51, 53, ..., 77), and case 3 / 4 clear the BG and destroy in the next call: call 78, gone 77 ticks after F.
+  if (op === "createvisualtask" && args[0] === "AnimTask_ScaryFace") return { exact: 77 };
+  // AnimTask_ShakeTargetInPattern (battle_anim_fire.c:1344-1375; maxShakes = script args[3]): the entry is the step (call 0 stores the args); every call counts tShakeNum and the
+  // call where it equals maxShakes (call maxShakes - 1) destroys: gone maxShakes - 2 ticks after F.
+  if (op === "createvisualtask" && args[0] === "AnimTask_ShakeTargetInPattern") { const n = intArg(args[3]); return n === null || n < 1 ? null : { exact: n - 2 }; }
+  // AnimBite (battle_anim_dark.c:320-352, create_sharp_teeth_sprite; H = half_duration): the init installs Step1; calls 1..H count data[3] up (call H installs Step2), Step2 counts it
+  // down over calls H + 1..2H and the call that reaches 0 destroys: call 2H, gone 2H - 1 ticks after F.
+  if (op === "create_sharp_teeth_sprite" || sprite("gSharpTeethSpriteTemplate") || sprite("gClampJawSpriteTemplate")) { const h = op === "create_sharp_teeth_sprite" ? intNamed("half_duration") : intArg(args[8]); return h === null || h < 1 ? null : { exact: 2 * h - 1 }; }
+  // AnimWishStar (battle_anim_effects_3.c:2104-2140): x = 256 (player) / -16, x2 = -/+ (72 * call >> 4); newX = x + x2 + 32 is a u32, so the player's star is destroyed when it
+  // goes negative: 288 - (72c >> 4) < 0 at call 65 (the opponent's: 16 + (72c >> 4) > 304 at call 65 too): gone 64 ticks after F, both sides.
+  if (sprite("gWishStarSpriteTemplate")) return { exact: 64 };
   if (op === "create_basic_hitsplat_sprite") return { bound: 10 };
+
   return null;
 }
 // Macros whose body (transitively) is a createsprite / createvisualtask create a visual task or sprite the wait must account for.
@@ -536,7 +714,18 @@ const blockersByLabel = new Map<string, Set<string>>();
 const whatIf = process.env.ANIM_SOUND_WHATIF !== undefined;
 const allBlockers = new Map<string, Set<string>>();
 const noteAll = (label: string, what: string): void => { const set = allBlockers.get(label) ?? new Set<string>(); set.add(what); allBlockers.set(label, set); };
-function walk(bodyLabel: string, turn: number, attackerSide: number): Walk {
+// Per-species GetBattlerSpriteFinal_Y(..., TRUE) for the two sides (battle_anim_mons.c:112-170 player: back yOffset + 80 + 8, 172-292 opponent: front yOffset - elevation + 40; both clamped
+// to 104); data/gen/mon-pic-coords.json + enemy-mon-elevations.json. picYs[side] = the sorted distinct values a battler on that side can have.
+const picCoords = JSON.parse(readFileSync(join(RUN_ROOT, "src", "data", "gen", "mon-pic-coords.json"), "utf8")) as { back: Record<string, { yOffset: number }>; front: Record<string, { yOffset: number }> };
+const elevations = JSON.parse(readFileSync(join(RUN_ROOT, "src", "data", "gen", "enemy-mon-elevations.json"), "utf8")) as Record<string, number>;
+const picYs: number[][] = [
+  [...new Set(Object.values(picCoords.back).map((c) => Math.min(c.yOffset + 80 + 8, 104)))].sort((a, b) => a - b),
+  [...new Set(Object.entries(picCoords.front).map(([name, c]) => Math.min(c.yOffset - (elevations[name] ?? 0) + 40, 104)))].sort((a, b) => a - b),
+];
+const middle = (values: number[]): number => values[Math.floor(values.length / 2)]!;
+/** The walk's default class (and the runtime fallback): the middle value of each side's pic Y. */
+const referencePic = (attackerSide: number): PicContext => ({ attackerY: middle(picYs[attackerSide]!), targetY: middle(picYs[1 - attackerSide]!) });
+function walk(bodyLabel: string, turn: number, attackerSide: number, pic: PicContext = referencePic(attackerSide)): Walk {
   const events: SoundOp[] = [];
   const reasons: Record<string, number> = {};
   const stack: Array<[string, number]> = [];
@@ -560,7 +749,8 @@ function walk(bodyLabel: string, turn: number, attackerSide: number): Walk {
   // Wall-clock frames the ROM spends in a VBlank-overrun lag (no main-loop iteration): ops at iteration > `after` play `frames` later.
   const lags: Array<{ after: number; frames: number }> = [];  // `after`: first affected iteration - 1 (fractional .5 = from the same iteration)
   const shiftAt = (iteration: number): number => lags.reduce((n, l) => (iteration > l.after ? n + l.frames : n), 0);
-  const finish = (end: string): Walk => ({ events, end, frame, gated, reasons });
+  picUsed = false;
+  const finish = (end: string): Walk => ({ events, end, frame, gated, reasons, usedPic: picUsed });
   const unresolved = (reason: Reason): void => { frame = null; why ??= reason; };
   const gate = (): void => { gated += 1; const reason = why ?? "unresolved-branch"; reasons[reason] = (reasons[reason] ?? 0) + 1; };
   let pc: [string, number] = [bodyLabel, 0];
@@ -584,7 +774,8 @@ function walk(bodyLabel: string, turn: number, attackerSide: number): Walk {
       // AnimTask_MetallicShine decompresses its tilemap and image and loads a palette in the creating step (battle_anim_dark.c:866-870): a measured
       // VBlank overrun (METALLIC_SHINE_LOAD_LAG; Metal Claw and Steel Wing, aud242d), like BG_LOAD_LAG.
       if ((op === "metallic_shine" || (op === "createvisualtask" && args[0] === "AnimTask_MetallicShine")) && frame !== null) lags.push({ after: frame, frames: METALLIC_SHINE_LOAD_LAG });
-      let life = lifetimeOf(cmd, attackerSide);
+      if (op === "createvisualtask" && args[0] === "AnimTask_ScaryFace" && frame !== null) lags.push({ after: frame, frames: SCARY_FACE_LOAD_LAG });
+      let life = lifetimeOf(cmd, attackerSide, pic);
       const colorCycle = op === "blend_color_cycle" || op === "blend_color_cycleexclude" || op === "blend_color_cyclebytag" || (op === "createvisualtask" && /^AnimTask_BlendColorCycle/.test(args[0] ?? ""));
       if (frame !== null && life !== null && "exact" in life && (colorCycle || op === "simple_palette_blend" || (op === "createsprite" && args[0] === "gSimplePaletteBlendSpriteTemplate"))) {
         if (colorCycle && (frame <= fadeBusy || (fade !== null && frame < fade + FADE_IN_DONE))) life = null;
@@ -738,20 +929,40 @@ function walk(bodyLabel: string, turn: number, attackerSide: number): Walk {
 
 const TURNS = 6;
 const SIDES = 2;
-const moves: Array<{ move: number; label: string; variants: number[]; ends: string[]; gated: number[]; reasons: Array<Record<string, number>> }> = [];
+const moves: Array<{ move: number; label: string; variants: number[]; ends: string[]; gated: number[]; reasons: Array<Record<string, number>>; pic: number[] }> = [];
 const variantPool: SoundOp[][] = [];
 const poolIndex = new Map<string, number>();
+const stripLines = (events: SoundOp[]): SoundOp[] => events.map(({ line: _line, ...rest }) => rest as SoundOp);
+const poolOf = (events: SoundOp[]): number => {
+  const ops = stripLines(events);
+  const key = JSON.stringify(ops);
+  if (!poolIndex.has(key)) { poolIndex.set(key, variantPool.length); variantPool.push(ops); }
+  return poolIndex.get(key)!;
+};
+// aud242l: a (turn, side) walk whose lifetimes depend on the two battlers' pic Y is repeated for every (attackerY, targetY) class; the grid of pooled variant indices (row = attacker
+// class, column = target class, both in picYs order) goes to picGrids and the move's `pic` slot points at it (-1 = pic-independent). An all-equal grid collapses to the plain variant.
+const picGrids: number[][] = [];
+const gridIndex = new Map<string, number>();
 moveTable.forEach((label, move) => {
-  const entry = { move, label, variants: [] as number[], ends: [] as string[], gated: [] as number[], reasons: [] as Array<Record<string, number>> };
+  const entry = { move, label, variants: [] as number[], ends: [] as string[], gated: [] as number[], reasons: [] as Array<Record<string, number>>, pic: [] as number[] };
   for (let turn = 0; turn < TURNS; turn += 1) {
     for (let side = 0; side < SIDES; side += 1) {
       const result = walk(label, turn, side);
-      const key = JSON.stringify(result.events.map(({ line: _line, ...rest }) => rest));
-      if (!poolIndex.has(key)) { poolIndex.set(key, variantPool.length); variantPool.push(result.events.map(({ line: _line, ...rest }) => rest) as SoundOp[]); }
-      entry.variants.push(poolIndex.get(key)!);
+      let grid = -1;
+      if (result.usedPic) {
+        const cells: number[] = [];
+        for (const attackerY of picYs[side]!) for (const targetY of picYs[1 - side]!) cells.push(poolOf(walk(label, turn, side, { attackerY, targetY }).events));
+        if (cells.some((c) => c !== cells[0])) {
+          const key = JSON.stringify(cells);
+          if (!gridIndex.has(key)) { gridIndex.set(key, picGrids.length); picGrids.push(cells); }
+          grid = gridIndex.get(key)!;
+        }
+      }
+      entry.variants.push(poolOf(result.events));
       entry.ends.push(result.end);
       entry.gated.push(result.gated);
       entry.reasons.push(result.reasons);
+      entry.pic.push(grid);
     }
   }
   moves.push(entry);
@@ -793,7 +1004,9 @@ const out = {
   turns: TURNS,
   sides: SIDES,
   variants: variantPool,
-  moves: moves.map((m) => ({ move: m.move, label: m.label, variants: m.variants, ends: m.ends, gated: m.gated })),
+  picYs,
+  picGrids,
+  moves: moves.map((m) => ({ move: m.move, label: m.label, variants: m.variants, ends: m.ends, gated: m.gated, ...(m.pic.some((g) => g >= 0) ? { pic: m.pic } : {}) })),
   general,
 };
 mkdirSync(outDir, { recursive: true });
