@@ -23,7 +23,8 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Did:** (1) end-turn weather damage SE_EFFECTIVE pans by `gBattlerTarget` (always the player, -64; `tests/aud252EndTurnSounds.test.ts`, ROM Hail fixture `aud252-hail-damage-player.json`). (2) the loss's SE_BALL_OPEN
   now follows the ball-return command (22 ticks after its first tick) instead of the faint dismissal + 24, so it comes after an opponent held-item effect as in the ROM (`tests/aud252LossBallOpen.test.ts`, 1914 / 2230 ROM rows; ball-open error -364 / -350 -> +1 / +14).
   T2 controller rows: ON missing 19 -> 2, extra 17 -> 0; OFF missing 6 -> 2, extra 4 -> 0. Census 0..99 both scenes: commands 100 / 100 identical, sound differs only in SE 15 rows; differential 133 / 133 identical.
-- **Next:** AI mid-battle switch (seed 2741 res5: ROM extra SE 15 at the recall, tray / ball open ~75 ticks later than ours), SE_LOW_HEALTH 90 x1 (seed 2), secondary-effect stat changes; ISSUES #219 trimmed.
+(3) Scene ON Double Team plays SE_M_STAT_INCREASE 34 rows after its last SE inside the live move window (`emitDoubleTeamStatsChangeSound`; `tests/aud252DoubleTeamStatSe.test.ts`): ON stat-change SE missing 15 -> 0 (they were Double Team, not secondary effects); census ON commands identical, only SE 239 rows added.
+- **Next:** AI mid-battle switch (seed 2741 res5: ROM extra SE 15 at the recall, tray / ball open ~75 ticks later than ours), SE_LOW_HEALTH 90 x1 (seed 2); ISSUES #219 trimmed.
 - **NOT run:** full `npm test` (supervisor's); ran typecheck, aud24x / aud25x / tickSounds / audioProbeFixtures tests.
 
 ---

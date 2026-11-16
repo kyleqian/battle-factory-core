@@ -52,7 +52,7 @@ exclusions are superseded. Unrelated expansions stay parked.
 `tools/audio/aud248RunSeed.sh` + `tools/audio/soundScoreboard.py`). S11 acceptance is not met. Ranked missing families:
 1. move-animation SE streams (largest; aud251 refresh: ON 206 ROM-only rows left of 1569, Confuse Ray 65 / Encore 18 / Rock Throw 15 / Thunderbolt 12 / Comet Punch 12);
 2. stat-change SE 239 / 245: emitted since aud248 at command age 7, ROM-minus-ours -2..+23 frames per window (pinned in `tests/aud248StatChangeSounds.test.ts`),
-secondary-effect stat changes (Metal Claw, Steel Wing; 15 ON rows in the aud251 table) are not `stats-change` commands and stay silent; 3. declined (static) move bodies
+the 15 ON rows missing in the aud251 table were Double Team (fixed by aud252, 0 missing); Metal Claw / Steel Wing secondary effects are unmeasured in T2; 3. declined (static) move bodies
 (BEAT UP / WITHDRAW / ROCK SMASH; T1, not re-measured by aud251). Cries and SE_SHINY closed (aud251 table: 0 missing). Scene ON seeds 6568 / 7682 stall at the 80,000-frame ROM drive cap and cannot be aligned.
 - **aud251 / aud252 (2026-11-16)**: `docs/aud251-s11-scoreboard-refresh.md` (41 seeds, all aligned; ON missing 1679 -> 238, OFF 95 -> 6). The controller "extras" SE_BALL_OPEN 15 / victory BGM 412 were
   window-end artifacts (`aud248RunSeed.sh` runs the sound pass 500 idle frames longer; `tests/aud251OutcomeTail.test.ts`). aud252 fixed the SE_EFFECTIVE pans of end-turn weather damage and the loss-path SE_BALL_OPEN placement
