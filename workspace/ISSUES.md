@@ -56,8 +56,8 @@ the 15 ON rows missing in the aud251 table were Double Team (fixed by aud252, 0 
 (BEAT UP / WITHDRAW / ROCK SMASH; T1, not re-measured by aud251). Cries and SE_SHINY closed (aud251 table: 0 missing). Scene ON seeds 6568 / 7682 stall at the 80,000-frame ROM drive cap and cannot be aligned.
 - **aud251 / aud252 (2026-11-16)**: `docs/aud251-s11-scoreboard-refresh.md` (41 seeds, all aligned; ON missing 1679 -> 238, OFF 95 -> 6). The controller "extras" SE_BALL_OPEN 15 / victory BGM 412 were
   window-end artifacts (`aud248RunSeed.sh` runs the sound pass 500 idle frames longer; `tests/aud251OutcomeTail.test.ts`). aud252 fixed the SE_EFFECTIVE pans of end-turn weather damage and the loss-path SE_BALL_OPEN placement
-  after an opponent held-item effect (controller rows ON missing 2 / extra 0, OFF missing 2 / extra 0). Open: the opponent's mid-battle (AI) switch in seed 2741 res5 (ROM extra SE 15 at the recall, tray 114 / ball open /
-  cry ~75 ticks later than the engine's; needs a ROM step window of an AI switch), SE_LOW_HEALTH 90 x1 (seed 2, ROM +581, both scenes).
+  after an opponent held-item effect (controller rows ON missing 2 / extra 0, OFF missing 2 / extra 0). aud253 emitted the AI-switch recall SE_BALL_OPEN and the player switch-in's HandleLowHpMusicChange (seeds 2 / 2741: controller rows 0 / 0 in both scenes). Open: the AI switch's presentation is ~75 frames
+  shorter than the ROM's (no RETURNMON message / ball return in the kernel's events), the forced party-menu send-out's low-HP SE, WEAK cry restore lengths of species not yet measured, the Scene ON +71 low-HP constant (one window).
 - **aud249 (2026-11-14)** emits the nine `Status_*` and the four weather-continues SEs (Scene ON; `docs/aud249-general-anim-sounds.md`). Open:
   the second `Status_*` play of one animation lands ~14 frames later in the ROM than modelled and the first play +2 over the stat anchor;
   TurnTrap / Snatch unresolved in the extractor.
