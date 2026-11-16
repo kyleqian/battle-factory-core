@@ -58,3 +58,58 @@ Scene OFF presents none of these commands (the kernel skips them under HITMARKER
 - D. Not emitted although decoded: `FOCUS_PUNCH_SETUP`, `LEECH_SEED_DRAIN`, `CASTFORM_CHANGE` (presented commands exist; their age anchors are not calibrated against a ROM window), `General_TurnTrap` and `General_SnatchMove`
   (extractor leaves an unresolved branch), Substitute fade / appear (no SE).
 - E. Poison 148 / 137 rows still ROM-only (24 / 44) are move-body rows, not Status_* (aud242 family).
+
+## psn1: does the ROM play the 6th `Status_Poison` SE 148? (2026-11-16, Scene ON, evidence only, `src/` untouched)
+
+Lab: the existing `tools/battle-lab/aud242e-toxic-player-on.json` (Lv50 Toxic user vs Lv12 Tackle user, seed 1), traced two turns: Toxic (turn 1, poisons) then a second Fight press (turn 2). The poison end-of-turn tick is one `status-animation` PSN command per turn.
+The single-turn ROM window is the committed fixture `tools/audio/fixtures/aud242e-toxic-player.json` (same 6 rows); the two-turn recording is `.integration/evidence/psn1/rom-2turn.json`.
+
+ROM SE 148 rows of the `Status_Poison` plays (frame 1-based, pan 63 = the animated battler's side), `loopsewithpan` 148, wait 13, x6:
+
+| play | frames | gaps | rows |
+|---|---|---|---|
+| turn 1 | 296 310 324 338 352 366 | 14 x5 | **6** |
+| turn 2 | 904 918 932 946 960 974 | 14 x5 | **6** |
+
+(Toxic's own move-body rows, 8 + 6 before frame 270, are the aud242 family and not under test.)
+
+Engine rows for the same stage (`aud250AnimAge.ts` on a fixture with the committed `aud242e-toxic-player-on` appStage and the two-turn segments): the PSN command starts at frame 279 / 881 (`minimumFrames` 71) and emits
+**5** rows each: 286 300 314 328 342 and 888 902 916 930 944 (command age 7, 21 .. 63; engine Toxic move body is ROM -3: 65 vs 68).
+
+| | first row | rows | ROM - engine, first row | 6th row |
+|---|---|---|---|---|
+| turn 1 | ROM 296 / engine 286 | 6 / 5 | +10 (move body before it: +3) | ROM 366; engine would be 356 = command age 77, the command's window ends at age 71 |
+| turn 2 | ROM 904 / engine 888 | 6 / 5 | +16 | ROM 974; engine would be 958 |
+
+**Verdict:**
+- **The ROM plays the 6th SE 148, yes: at first + 70 frames (5 x 14), in both turns.** The engine's 5-of-6 is an emitter gap, not a ROM property.
+- Source mechanism (`battle_anim.c` `Cmd_loopsewithpan` / `Task_LoopAndPlaySE`, line 482): the loop is a parallel task (`gAnimSoundTaskCount`), and the script's `end` (and so `gAnimScriptActive`) waits until the task has played its
+  6th SE (script frame 70) and destroyed itself. So the ROM cannot finish the animation before the 6th SE: its 71 active rows (`STATUS_ANIMATION_ADDED_ROWS.PSN` 71 = 70 + 1, sta123 receipts) run from script frame 0 to just after
+  that SE. The engine puts script frame 0 at command age 7 (`STATUS_ANIMATION_SCRIPT_AGE`, calibrated on the ROM first row) inside a 71-row window that starts at the receipt, so its 6th SE lands at age 77, past the window, and
+  `emitGeneralAnimSounds` (which only runs inside the command) never emits it. The 7 rows of lead are therefore not part of the ROM's 71 active rows (an engine window / ROM script start offset), not a sound property.
+- **Window rule that fixes it** (sound-only, no presentation-length change): emit the script-frame-70 row of the PSN loop at command age 77, i.e. let the status-animation SE emission run a short tail past `minimumFrames`
+  (age <= `STATUS_ANIMATION_SCRIPT_AGE` + 70) instead of stopping at the window end. The alternative, raising `PSN` to 78 rows, would change every PSN presentation length that the sta123 / seg127 receipts measured as exact,
+  so it needs its own pixel window and is not recommended. CONFUSION (100 rows, last SE at age 7 + 70 = 77) already fits its window, which is why only PSN loses a row (128 / 128 commands in the t1cls census).
+  Any other animation whose last SE falls after its window (grep the table for `ends` vs last SE) needs the same tail.
+- Second play offset: here the two plays are one turn apart, ROM - engine is +10 then +16, i.e. the second play is **+6** later relative to the first, not ~14. The ~14 of residual C was measured between two plays inside one
+  confusion window; the Toxic plays are separated by a whole turn whose engine drift (e.g. SE 238 at ROM 552 / engine 532 = +20 in between) is not removable without more anchors, so this window neither confirms nor refutes C.
+  The first-play offset of +10 vs the move body's +3 (a residual +7 over the preceding ROM-exact stat anchor) matches residual B's direction (flatter / swagger +2, dreameater 0): the lead of 7 is not constant across windows.
+
+Reproduce (the ROM side needs no oracle service; ~12 s + 5 s):
+```sh
+E=.integration/evidence/psn1; mkdir -p $E; rm -f $E/rom-2turn.json $E/rom-2turn.json.log
+python3 - <<'PY'
+import json
+d=json.load(open('tools/battle-lab/aud242e-toxic-player-on.json'))
+d['trace']['segments']=[{"frames":2,"buttons":["A"]},{"frames":18,"buttons":[]},{"frames":2,"buttons":["A"]},{"frames":700,"buttons":[]},{"frames":2,"buttons":["A"]},{"frames":18,"buttons":[]},{"frames":2,"buttons":["A"]},{"frames":800,"buttons":[]}]
+json.dump(d,open('.integration/evidence/psn1/psn1-toxic-2turn-on.json','w'))
+PY
+python3 tools/run-mgba-probe.py $E/rom-2turn.json -- python3 tools/audio/soundEventProbe.py $E/rom-2turn.json lab $E/psn1-toxic-2turn-on.json --frames 1550 --fast --compact
+python3 - <<'PY'   # engine side: reuse the committed aud242e-toxic-player-on stage with the two-turn segments
+import json
+d=json.load(open('.integration/evidence/psn1/rom-2turn.json')); d['trace']['appStage']={"id":"aud242e-toxic-player-on","frame":0}
+json.dump(d,open('.integration/evidence/psn1/rom-2turn-fixture.json','w'))
+PY
+node --experimental-strip-types --no-warnings tools/audio/aud250AnimAge.ts $E/rom-2turn-fixture.json status-animation,move-animation
+```
+Evidence: `.integration/evidence/psn1/` (`rom-2turn.json`, `engine-rows.txt`). No fixture or test was added (the committed single-turn fixture already holds the ROM rows).
