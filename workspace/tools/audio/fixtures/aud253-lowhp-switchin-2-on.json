@@ -1,0 +1,179 @@
+{
+ "schema": "audio-sound-events/v1",
+ "window": "lab 2-on.frozen-tail.json",
+ "profile": "battle-scene-on",
+ "frames": 200,
+ "hooks": {
+  "m4aSongNumStart": "0x082e0130",
+  "m4aSongNumStop": "0x082e01fc",
+  "PlayCryInternal": "0x080a344c",
+  "PlaySE12WithPanning": "0x080a37b4",
+  "PlaySE1WithPanning": "0x080a3808",
+  "PlaySE2WithPanning": "0x080a383c",
+  "SE12PanpotControl": "0x080a3870",
+  "PlayBGM": "0x080a3778",
+  "PlayFanfare": "0x080a30e4",
+  "PlayFanfareByFanfareNum": "0x080a3060",
+  "m4aMPlayFadeOut": "0x082e02f8",
+  "m4aMPlayFadeOutTemporarily": "0x082e0308",
+  "m4aMPlayFadeIn": "0x082e0328",
+  "m4aMPlayVolumeControl": "0x082e111c",
+  "m4aMPlayStop": "0x082e0978",
+  "m4aMPlayContinue": "0x082e02a8",
+  "HandleLowHpMusicChange": "0x0805e990",
+  "BtlController_EmitSwitchInAnim": "0x080339a0",
+  "BtlController_EmitHealthBarUpdate": "0x08033efc",
+  "BtlController_EmitSetMonData": "0x08033900",
+  "BtlController_EmitPrintString": "0x08033be4",
+  "BufferStringBattle": "0x0814e0c4",
+  "BtlController_EmitDrawPartyStatusSummary": "0x0803438c"
+ },
+ "mode": "step",
+ "steps": 9896545,
+ "hybrid": {
+  "fast": 0,
+  "restepped": 0,
+  "state_mismatch": 0,
+  "mismatches": []
+ },
+ "seconds": 17.7,
+ "windowSeconds": 16.2,
+ "events": [
+  {
+   "frame": 10870,
+   "kind": "se",
+   "id": 15,
+   "name": "SE_BALL_OPEN",
+   "pan": null,
+   "via": "PlaySE"
+  },
+  {
+   "frame": 10886,
+   "kind": "duck",
+   "id": 476,
+   "name": "MUS_VS_TRAINER",
+   "pan": null,
+   "player": "BGM",
+   "via": "PlayCry_ByMode",
+   "tracks": 65535,
+   "volume": 85
+  },
+  {
+   "frame": 10886,
+   "kind": "cry",
+   "id": 9,
+   "name": "SPECIES_BLASTOISE",
+   "pan": -25,
+   "volume": 120,
+   "priority": 10,
+   "mode": "WEAK",
+   "via": "PlayCry_ByMode"
+  },
+  {
+   "frame": 10948,
+   "kind": "duck",
+   "id": 476,
+   "name": "MUS_VS_TRAINER",
+   "pan": null,
+   "player": "BGM",
+   "via": "IsCryPlaying",
+   "tracks": 65535,
+   "volume": 256
+  },
+  {
+   "frame": 11019,
+   "kind": "duck",
+   "id": 476,
+   "name": "MUS_VS_TRAINER",
+   "pan": null,
+   "player": "BGM",
+   "via": "SetBattleEndCallbacks",
+   "tracks": 65535,
+   "volume": 256,
+   "noop": true
+  },
+  {
+   "frame": 11019,
+   "kind": "se",
+   "id": 90,
+   "name": "SE_LOW_HEALTH",
+   "pan": null,
+   "via": "PlaySE"
+  }
+ ],
+ "calls": [
+  {
+   "frame": 10870,
+   "fn": "m4aSongNumStart",
+   "via": "PlaySE",
+   "r0": 15,
+   "r1": 28
+  },
+  {
+   "frame": 10886,
+   "fn": "m4aMPlayVolumeControl",
+   "via": "PlayCry_ByMode",
+   "r0": 50361376,
+   "r1": 65535
+  },
+  {
+   "frame": 10886,
+   "fn": "PlayCryInternal",
+   "via": "PlayCry_ByMode",
+   "r0": 9,
+   "r1": 4294967271
+  },
+  {
+   "frame": 10948,
+   "fn": "m4aMPlayVolumeControl",
+   "via": "IsCryPlaying",
+   "r0": 50361376,
+   "r1": 65535
+  },
+  {
+   "frame": 11019,
+   "fn": "m4aMPlayVolumeControl",
+   "via": "SetBattleEndCallbacks",
+   "r0": 50361376,
+   "r1": 65535,
+   "noop": true
+  },
+  {
+   "frame": 11019,
+   "fn": "HandleLowHpMusicChange",
+   "via": "SetBattleEndCallbacks",
+   "r0": 33703148,
+   "r1": 0,
+   "r2": 33703148,
+   "r3": 0
+  },
+  {
+   "frame": 11019,
+   "fn": "m4aSongNumStart",
+   "via": "PlaySE",
+   "r0": 90,
+   "r1": 0
+  },
+  {
+   "frame": 11021,
+   "fn": "BtlController_EmitPrintString",
+   "via": "PrepareStringBattle",
+   "r0": 0,
+   "r1": 340,
+   "r2": 340,
+   "r3": 50352128,
+   "noop": true
+  },
+  {
+   "frame": 11021,
+   "fn": "BufferStringBattle",
+   "via": "SetControllerToOpponent",
+   "r0": 340,
+   "r1": 0,
+   "r2": 33701992,
+   "r3": 1,
+   "noop": true
+  }
+ ],
+ "from": 10860
+}

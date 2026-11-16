@@ -42,8 +42,12 @@ export const BGM_FULL_VOLUME = 0x100;
 /** PlayCry_ByMode(species, 0 pan, ...): volume 120, priority 10 (m4a PlayCryInternal arguments, oracle-probed). */
 const CRY_VOLUME = 120;
 const CRY_PRIORITY = 10;
-/** CRY_MODE_WEAK cry lengths in frames (species id -> same unit as SEND_IN_TAIL_OFF_CRY_FRAMES). Only oracle-measured species: Onix, tools/audio/fixtures/summary-party-window.json. */
-const WEAK_CRY_FRAMES: Readonly<Record<number, number>> = { 95: 78 };
+/**
+ * CRY_MODE_WEAK cry lengths in frames (species id -> same unit as SEND_IN_TAIL_OFF_CRY_FRAMES; the BGM restore follows one frame later).
+ * Only oracle-measured species: Onix (tools/audio/fixtures/summary-party-window.json) and 9 / 83 / 130 / 198, the duck-to-restore
+ * spans of the aud251 chain windows (62 / 25 / 65 / 54 frames, docs/aud251-s11-scoreboard-refresh.md aud253).
+ */
+const WEAK_CRY_FRAMES: Readonly<Record<number, number>> = { 9: 61, 83: 24, 95: 78, 130: 64, 198: 53 };
 
 /** Ticks from the accepted input to each summary sound (oracle-probed, tools/audio/fixtures/summary-*.json). */
 export const SUMMARY_OPEN_CRY_DELAY = 63;
@@ -123,7 +127,7 @@ function restoreBgm(bgm: number): void {
 }
 
 /** PlayCry_ByMode: PlayCryInternal ducks the BGM, starts the cry; Task_DuckBGMForPokemonCry restores when the cry ends. */
-function startCry(bgm: number, species: number, mode: number, pan: number, restoreDelay?: number): void {
+function startCry(bgm: number, species: number, mode: number, pan: number, restoreDelay?: number, onRestore?: () => void): void {
   emitSound({ kind: "duck", id: bgm, pan: null, volume: BGM_DUCK_VOLUME });
   emitSound({ kind: "cry", id: species, pan, mode, volume: CRY_VOLUME, priority: CRY_PRIORITY });
   crySerial += 1;
@@ -136,6 +140,7 @@ function startCry(bgm: number, species: number, mode: number, pan: number, resto
     if (ducking?.serial !== serial) return;
     ducking = null;
     restoreBgm(bgm);
+    onRestore?.();
   });
 }
 
@@ -159,8 +164,8 @@ export function scheduleAnimTaskBgmRestore(bgm: number, delay: number): void {
 }
 
 /** Task_PlayCryWhenReleasedFromBall: the send-out cry at pan +25 (opponent) / -25 (player), NORMAL or WEAK by the mon's HP and status. */
-export function playSendOutCry(bgm: number, species: number, mode: number, pan: number): void {
-  startCry(bgm, species, mode, pan);
+export function playSendOutCry(bgm: number, species: number, mode: number, pan: number, onRestore?: () => void): void {
+  startCry(bgm, species, mode, pan, undefined, onRestore);
 }
 
 /** aud241b: `PlayCry_ByMode(species, CRY_MODE_FAINT)` (`playfaintcry`): the BGM duck, the cry, the restore when the cry ends (fitted per species). */

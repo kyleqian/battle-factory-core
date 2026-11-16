@@ -14,6 +14,7 @@ import {
 import type { BattleResolutionPresentationCommand, BattleResolutionPresentationState, PartyBallState } from "./battleResolutionPresentation.ts";
 import { emitOpponentPartySummarySounds } from "./midBattleOpponentPartySummary.ts";
 import type { FactoryBattleStartIntroState } from "./factoryBattleStartIntro.ts";
+import { BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS } from "./battleScriptSourceConstants.ts";
 import { partySendOutReleaseClock, type PartySelectState, type PartySendOutTiming } from "./partySelect.ts";
 import {
   BGM_BATTLE,
@@ -23,9 +24,11 @@ import {
   SE_BALL_TRAY_ENTER,
   SE_BALL_TRAY_EXIT,
   cryModeFor,
+  handleLowHpMusicChange,
   playBallOpenSe,
   playSelectSe,
   playSendOutCry,
+  scheduleAfter,
   startBattleBgm,
 } from "./screenSounds.ts";
 
@@ -163,6 +166,18 @@ const SWITCH_IN_BALL_OPEN_ELAPSED_PLAYER = 47;
 const SWITCH_IN_BALL_OPEN_ELAPSED_OPPONENT = 18;
 const SWITCH_IN_CRY_AFTER_BALL_OPEN = 16;
 
+/**
+ * SwitchIn_HandleSoundAndEnd (battle_controller_player.c:1087): once the cry is done (and no special anim runs) the BGM is restored and
+ * HandleLowHpMusicChange runs on the incoming mon. Scene OFF: the restore's own frame; Scene ON: the healthbox's special animation holds it
+ * 71 frames longer (one oracle window, seed 2 res11: restore 10948, SE_LOW_HEALTH 11019).
+ */
+const SWITCH_IN_LOW_HP_AFTER_RESTORE_SCENE_ON = 71;
+
+function switchInLowHp(hp: number, maxHP: number, sceneOff: boolean): void {
+  if (sceneOff) handleLowHpMusicChange(hp, maxHP);
+  else scheduleAfter(SWITCH_IN_LOW_HP_AFTER_RESTORE_SCENE_ON, () => handleLowHpMusicChange(hp, maxHP));
+}
+
 function currentCommand(
   resolution: BattleResolutionPresentationState | null,
 ): Readonly<{ command: BattleResolutionPresentationCommand; elapsed: number }> | null {
@@ -194,11 +209,14 @@ export function emitMidBattleSwitchSounds(
   if (crossed(open)) playBallOpenSe();
   if (crossed(open + SWITCH_IN_CRY_AFTER_BALL_OPEN)) {
     const { incoming } = command;
+    const hitMarker = after!.segments[after!.segmentIndex]?.beforeRules?.rulesContext.hitMarker;
+    const sceneOff = hitMarker === undefined || (hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0;
     playSendOutCry(
       factoryBattleBgm(frontierBrain),
       incoming.species,
       cryModeFor(incoming.hp, incoming.maxHP, command.incomingStatus1 !== 0),
       command.battler === 0 ? CRY_PAN_PLAYER : CRY_PAN_OPPONENT,
+      command.battler === 0 ? () => switchInLowHp(incoming.hp, incoming.maxHP, sceneOff) : undefined,
     );
   }
 }

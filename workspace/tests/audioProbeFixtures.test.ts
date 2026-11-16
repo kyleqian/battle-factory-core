@@ -160,6 +160,8 @@ describe("audio probe fixtures", () => {
       "aud250-leechseed-opponent.json",
       "aud250-leechseed-player.json",
       "aud252-hail-damage-player.json",
+      "aud253-ai-switch-2741-off.json",
+      "aud253-lowhp-switchin-2-on.json",
       "battle-intro-window-off.json",
       "battle-intro-window.json",
       "battle-window-off.json",
