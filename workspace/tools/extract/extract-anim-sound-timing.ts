@@ -366,6 +366,56 @@ function flailMovementLength(): number {
   }
   throw new Error("AnimTask_FlailMovement does not end");
 }
+// ---- aud242n: Confuse Ray / Will-O-Wisp. BattleAnimAdjustPanning (battle_anim.c:1263-1303), singles, no status animation: the player attacker keeps the pan, the opponent attacker
+// negates it (-64 -> 64 -> clamped 63); KeepPanInRange / CalculatePanIncrement (:1322-1346).
+function adjustPanning(pan: number, attackerSide: number): number {
+  const p = attackerSide === 0 ? pan : -pan;
+  return Math.min(Math.max(p, -64), 63);
+}
+function adjustPanningVarLength(attackerSide: number, sourceArg: number, targetArg: number, incArg: number, wait: number): number | null {
+  const s16 = (v: number): number => ((v + 0x8000) & 0xffff) - 0x8000;
+  const [source, target] = [adjustPanning(sourceArg, attackerSide), adjustPanning(targetArg, attackerSide)];
+  const step = source < target ? Math.abs(incArg) : source > target ? -Math.abs(incArg) : 0;
+  let [pan, counter] = [source, 0];
+  for (let call = 0; call < 4096; call += 1) {
+    if (counter === wait) { counter = 0; pan = Math.min(Math.max(s16(pan + step), -64), 63); } else counter += 1;
+    if (pan === target) return call - 1;
+  }
+  return null;
+}
+// AnimConfuseRayBallBounce (battle_anim_ghost.c:220-311). Call 0 is the init: the sprite starts at the attacker's x plus the side-signed offset (SetAnimSpriteInitialXOffset,
+// battle_anim_mons.c:763-776), data[0] = |dx| << 8 / speed is the duration (InitAnimLinearTranslationWithSpeed, :1155-1160) and data[6] = 16. Step1 (calls 1..) runs
+// UpdateConfuseRayBallBlend and then AnimTranslateLinear (data[0]-- while > 0); the call that finds data[0] == 0 installs Step2. Step2 sets data[0] = 1, translates, and when
+// data[6] == 0 installs DestroyAnimSpriteAndDisableBlend (which runs one call later), else UpdateConfuseRayBallBlend. The blend counter (:288-311) steps data[6] on every call
+// (data[7] is reset to its high byte on each step): 16 -> 0 (call 16, set to 0x100), 0x101 .. 0x10d (13 calls, 0x10d -> 0), 0 -> 16 up, 16 -> 0 down, ...
+function confuseRayBallBounceLength(attackerSide: number, offset: number, speed: number): number | null {
+  const [attackerX, targetX] = [BATTLER_X[attackerSide === 0 ? 0 : 1], BATTLER_X[attackerSide === 0 ? 1 : 0]];
+  const x = attackerX > targetX ? attackerX - offset : attackerX < targetX ? attackerX + offset : attackerX;
+  const duration = Math.trunc((Math.abs(targetX - x) << 8) / speed);
+  if (duration < 1) return null;
+  let [d0, d6, d7, step2] = [duration, 16, 0, false];
+  const update = (): void => {
+    if (d6 > 0xff) { d6 += 1; if (d6 === 0x10d) d6 = 0; return; }
+    const old = d7;
+    d7 += 1;
+    if ((old & 0xff) !== 0) return;
+    d7 &= 0xff00;
+    if ((d7 & 0x100) !== 0) d6 += 1; else d6 -= 1;
+    if (d6 === 0 || d6 === 16) d7 ^= 0x100;
+    if (d6 === 0) d6 = 0x100;
+  };
+  for (let call = 1; call < 100000; call += 1) {
+    if (!step2) {
+      update();
+      if (d0 === 0) step2 = true; else d0 -= 1;
+    } else {
+      d0 = 0;
+      if (d6 === 0) return call;
+      update();
+    }
+  }
+  return null;
+}
 function lifetimeOf(cmd: Command, attackerSide: number, pic: PicContext): Lifetime {
   const { op, args } = cmd;
   if (op === "createvisualtask" && (args[0] === "AnimTask_BlendBattleAnimPal" || args[0] === "AnimTask_BlendBattleAnimPalExclude" || args[0] === "AnimTask_BlendParticle")) {
@@ -635,6 +685,25 @@ function lifetimeOf(cmd: Command, attackerSide: number, pic: PicContext): Lifeti
   // AnimWishStar (battle_anim_effects_3.c:2104-2140): x = 256 (player) / -16, x2 = -/+ (72 * call >> 4); newX = x + x2 + 32 is a u32, so the player's star is destroyed when it
   // goes negative: 288 - (72c >> 4) < 0 at call 65 (the opponent's: 16 + (72c >> 4) > 304 at call 65 too): gone 64 ticks after F, both sides.
   if (sprite("gWishStarSpriteTemplate")) return { exact: 64 };
+  // ---- aud242n (docs section 18). SoundTask_AdjustPanningVar (battle_anim_sound_tasks.c:370-407): the entry runs the step once itself (call 0), then RunTasks calls; the pan (data[11])
+  // moves by the increment on every (r9 + 1)-th call, KeepPanInRange clamps it, and the call on which it equals the target pan destroys the task: call K, gone K - 1 ticks after F
+  // (K = 0: destroyed inside the creating step, net 0 in gAnimVisualTaskCount, exact -1). Used by Confuse Ray (pan -64 -> 63 step 2) and Will-O-Wisp.
+  if (op === "createvisualtask" && args[0] === "SoundTask_AdjustPanningVar") {
+    const a = [2, 3, 4, 5].map((i) => intArg(args[i]));
+    if (a.some((v) => v === null)) return null;
+    const n = adjustPanningVarLength(attackerSide, a[0]!, a[1]!, a[2]!, a[3]!);
+    return n === null ? null : { exact: n };
+  }
+  // gConfuseRayBallBounceSpriteTemplate (battle_anim_ghost.c:220-311, args 28 / 0 / 288 in Move_CONFUSE_RAY): a Step1 / Step2 sprite whose lifetime comes only from the x distance and the
+  // blend counter (no pic Y, no RNG, no damage).
+  if (sprite("gConfuseRayBallBounceSpriteTemplate")) {
+    const [offset, speed] = [intArg(args[3]), intArg(args[5])];
+    if (offset === null || speed === null || speed < 1) return null;
+    const n = confuseRayBallBounceLength(attackerSide, offset, speed);
+    return n === null ? null : { exact: n };
+  }
+  // gConfuseRayBallSpiralSpriteTemplate (:313-341): the init installs the step and runs it at once (call 0: data[7] 0 -> 1), so call k has data[7] = k + 1 and call 60 (61) destroys: gone 59 ticks after F.
+  if (sprite("gConfuseRayBallSpiralSpriteTemplate")) return { exact: 59 };
   if (op === "create_basic_hitsplat_sprite") return { bound: 10 };
 
   return null;
