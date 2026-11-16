@@ -41,7 +41,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ## 2026-11-16 — ais2 (ts lane worker): AI switch pixels vs the ROM, opponent recall ball effect + anchor, tray +1 (presentation only)
 
-- **State:** on master, committed (`56d40119a`, `335d90c1f`, docs); `docs/ais1-ai-switch-withdraw.md` "ais2"; evidence `.integration/evidence/ais2/`. Typecheck 0, `build` / `build:lib` 0, `test:gate` green, `tests/ais1*` / `aud25*` / `aud24*` green, soaks `winning-swap` and `winning` 0:20 20/20 (SOAK_NOTE).
+- **State:** on master, committed (`56d40119a`, `335d90c1f`, docs); `docs/ais1-ai-switch-withdraw.md` "ais2"; evidence `.integration/evidence/ais2/`. Typecheck 0, `build` / `build:lib` 0, `test:gate` green, `tests/ais1*` / `aud25*` / `aud24*` green, soaks `winning-swap` and `winning` 0:20 20/20 each (run as 4 x 5 seeds, `--parallel 2`).
 - **Did:** seed 2741 AI switch compared pixel-for-pixel at the pre-segment offsets (OFF 61, ON 91): the residual is the opponent tray span, 101 frames for a voluntary AI switch (`switchhandleorder` in `BattleScript_DoSwitchOut`); fixed, send-in SE 15 / cry -2 -> -1.
   Opponent switch-out anchor from `gMonFrontPicCoords` y_offset (MURKROW 11). Recall ball effect drawn for the opponent (BG white fade, mon tint, 16 particles at fixed (172,68), no stolen tick), exact in both scenes. `tests/ais2AiSwitchFrames.test.ts`
   pins 202 (OFF) + 206 (ON) ROM frames. Census 0..99 both scenes: only the 7 AI-switch seeds change, one command (party-summary 100 -> 101); player recall traces unchanged. New `soundCensusRomReplay.ts replay --render=LO:HI --render-dir=DIR`.
