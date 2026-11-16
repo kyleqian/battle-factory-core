@@ -186,6 +186,13 @@ export function createFactoryLobbyFreeRoamState(): FactoryLobbyFreeRoamState {
   });
 }
 
+/** Walk clock for a step that interrupts a bump: SetStepAnimHandleAlternation maps the bump's command index (1 -> 2, 3 -> 0); the pose lags one frame. */
+function bumpWalkClock(state: FactoryLobbyFreeRoamState): number {
+  const bumpIdx = (bumpStartIdx(state) + Math.floor(state.bumpElapsed / LOBBY_FREE_ROAM_BUMP_FRAMES)) % 4;
+  const startIdx = bumpIdx === 3 ? 0 : bumpIdx === 1 ? 2 : bumpIdx;
+  return (LOBBY_FREE_ROAM_POSE_FRAMES * startIdx + 4 * LOBBY_FREE_ROAM_POSE_FRAMES - 1) % (4 * LOBBY_FREE_ROAM_POSE_FRAMES);
+}
+
 function bumpStartIdx(state: FactoryLobbyFreeRoamState): number {
   return state.idleIdx === 1 ? 2 : 0;
 }
@@ -263,17 +270,15 @@ export function advanceFactoryLobbyFreeRoam(
     // is still MOVING, so there is no turn in place: the new direction's step (or bump) starts on that frame, at the GO anim's first pose.
     if (heldDir !== null && heldDir !== state.facing) {
       const started = startStep({ ...state, bumpElapsed: 0, facing: heldDir, heldDir, pendingDir: null }, heldDir, false, live);
-      return Object.freeze({ ...started, animClock: started.stepRemaining > 0 ? 4 * LOBBY_FREE_ROAM_POSE_FRAMES - 1 : started.animClock });
+      return Object.freeze({ ...started, animClock: started.stepRemaining > 0 ? bumpWalkClock(state) : started.animClock });
     }
     if (heldDir === state.facing) {
       const { dx, dy } = DIR_DELTA[heldDir];
       if (isFactoryLobbyCellWalkable(state.x + dx, state.y + dy, live)) {
         // The walk starts at the GO anim command index the bump left (2, 3, 0, 1, ... advancing per 16-frame cycle) run through
         // SetStepAnimHandleAlternation (1 -> 2, 3 -> 0); the rendered pose lags it by one frame.
-        const bumpIdx = (bumpStartIdx(state) + Math.floor(state.bumpElapsed / LOBBY_FREE_ROAM_BUMP_FRAMES)) % 4;
-        const startIdx = bumpIdx === 3 ? 0 : bumpIdx === 1 ? 2 : bumpIdx;
         const started = startStep({ ...state, bumpElapsed: 0, heldDir, pendingDir: null }, heldDir, false, live);
-        return Object.freeze({ ...started, animClock: (LOBBY_FREE_ROAM_POSE_FRAMES * startIdx + 4 * LOBBY_FREE_ROAM_POSE_FRAMES - 1) % (4 * LOBBY_FREE_ROAM_POSE_FRAMES) });
+        return Object.freeze({ ...started, animClock: bumpWalkClock(state) });
       }
     }
     // Border bump (act 25): the sprite freezes facing the blocked direction
