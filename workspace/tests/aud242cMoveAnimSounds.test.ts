@@ -76,7 +76,7 @@ const FADE_SPECS: Record<string, Spec> = {
   "machpunch-opponent": { delta: 0 },
   "machpunch-player": { delta: 0 },
   "hyperfang-player": { delta: 2 },
-  "crunch-player": { delta: 2, romOnly: ["135:161:63"] },
+  "crunch-player": { delta: 2 },
 };
 
 // Every row of a window is shifted by the same named per-move offset (ISSUES #198: the ROM script start vs the live adapter's body clock; the
