@@ -829,3 +829,54 @@ Census T1 (seeds 0..99 Scene ON, fresh arms `on-b5bb454a9` (the parent) and `on-
 
 - Top gated census moves now: Blizzard 88, Confuse Ray 47, Spark 32, Tri Attack 24, Petal Dance 22, Rollout 17, Flail 15 (ranking aids: `ANIM_SOUND_BLOCKERS=1`, `ANIM_SOUND_BLOCKERS_BY_MOVE=file`).
 - Unmodelled lifetimes with the most gated L50 ops behind them: `create_hyper_beam_orb_sprite` 52, `gEndureEnergySpriteTemplate` 45, `gHydroPumpOrbSpriteTemplate` 44, `gFireSpinSpriteTemplate` 42, `gAuroraBeamRingSpriteTemplate` 40, `gAirWaveCrescentSpriteTemplate` 40.
+
+## 16. aud242l: Blizzard (snowball and ice crystal lifetimes per battler pic Y)
+
+Blizzard was the largest gated T1-census move (88 ops over seeds 0..99 Scene ON): 11 `SE_M_ICY_WIND` ops per cast wait behind `waitforvisualfinish` for the `gSwirlingSnowballSpriteTemplate` and `gBlizzardIceCrystalSpriteTemplate` sprites (`Move_BLIZZARD`, `BlizzardIceCrystals` x2, then `IceCrystalEffectLong`). Both sprites run until they leave the screen along a line fixed by the attacker's and the target's `BATTLER_COORD_Y_PIC_OFFSET`, so the lifetime is a function of two per-species values. `SE_M_BLIZZARD` (panse) and `SE_M_BLIZZARD2` were already resolved; only the ICY_WIND ops move.
+
+### 16.1 Lifetimes derived (C; also cited in the extractor, `swirlingSnowballLifetime` / `moveParticleBeyondTargetLifetime`)
+
+Call numbering as in section 8 (call 0 = the creating script step, call k >= 1 = `AnimateSprites` of iteration F + k - 1; a sprite destroyed at call K is gone K - 1 ticks after F).
+
+| item | C |
+|---|---|
+| pic Y per species | `GetBattlerSpriteFinal_Y(battler, TRUE)` (`battle_anim_mons.c:112-170, 172-292`): player `back yOffset + 80 + 8`, opponent `front yOffset - elevation + 40`, both clamped to 104; data `mon-pic-coords.json`, `enemy-mon-elevations.json`. Singles battler X 72 / 176 (`sBattlerCoords`, `:20-26`) |
+| fast linear translation | `InitAnimFastLinearTranslation*` / `AnimFastTranslateLinear` (`battle_anim_mons.c:1171-1258`): u16 fixed point, sign in bit 0 of the step, `duration = (|dx| << 4) / speed` |
+| start position | both sprites are first placed `|arg0|` behind the attacker and then run the reversed translation until off screen (`:833-847`, `battle_anim_ice.c:666-721, 788-844`); the snowball keeps its pre-init data row, the crystal the initialised one |
+| snowball | `AnimSwirlingSnowball` -> `AnimFastTranslateLinearWaitEnd` -> Step1 -> 32 Step2 swirl calls -> End (one fast step per call until off screen, bounds 256 / -16, `battle_anim_ice.c:722-776`) |
+| ice crystal | `AnimMoveParticleBeyondTarget` -> `AnimWiggleParticleTowardsTarget` (`:845-863`) until `data[0] == 1` and the sprite is off screen (bottom 160) |
+
+Extractor: the sprite walks above reuse the C arithmetic (sine table parsed from `trig.c`), and `walk` is repeated for every (attacker pic Y, target pic Y) class of the side pair (`picYs`: 17 player values, 31 opponent values). A class grid whose cells are not all equal is stored in `picGrids` (cell = pooled variant index; row = attacker class, column = target class); the move's `pic[slot]` points at it (-1 = pic independent). A player-attacker Blizzard is species independent (the first ICY_WIND is always at impact age 208, the grid collapses to the plain variant); an opponent attacker spans 194..206 over 31 x 17 classes (13 distinct variants).
+
+Runtime: `liveMoveSourceAge` now also returns `picOffsetY(battler)` (the live battler's pic Y through `liveBattlerAnchors(...).picOffsetPoint.y`, which is the same formula), and `variantOf` indexes the grid with it; an unknown class falls back to the middle-class reference walk. Sound only; no gameplay, RNG or presentation state is read or written.
+
+Cross-check: `tests/aud242lMoveAnimSounds.test.ts` compares every one of the 1,054 classes (17 x 31 x 2 sides) against the ROM-validated visual port (`blizzardImpactStartAge`, `src/animation/blizzard.ts`): the first ICY_WIND row follows the panse row by `impactAge - 45`, 0 mismatches. The extractor was written from the C and validated against the port, not fitted to the ROM windows.
+
+### 16.2 ROM windows (probe step mode, Scene ON)
+
+Fixtures `tools/audio/fixtures/aud242l-blizzard-{fearow-bulbasaur,bulbasaur-charizard,bulbasaur-bulbasaur}-opponent.json` and `aud242l-blizzard-bulbasaur-fearow-player.json`, labs `tools/battle-lab/aud242l-*-on.json` (`AUD242_LAB_PREFIX=aud242l tools/audio/makeAud242bLabs.py name:side:59:attackerSpecies:targetSpecies`), stages `aud242lBlizzardStage` in `appTrace.ts`, test `tests/aud242lMoveAnimSounds.test.ts`. Recipe as section 15 (`--frames 700`). The attacker is Lv50, the target Lv12 Seismic Toss; the species only change the staged battlers' `species` (the ICY_WIND rows come before any damage).
+
+| window (attacker / target) | attacker, target pic Y | ROM: BLIZZARD2 -> first ICY_WIND | ROM - ours, all 13 rows |
+|---|---|---|---|
+| opponent Fearow / player Bulbasaur | 34, 104 | 80 | +2 |
+| opponent Bulbasaur / player Charizard | 54, 92 | 91 | +2 |
+| opponent Bulbasaur / player Bulbasaur | 54, 104 | 87 | +2 |
+| player Bulbasaur / opponent Fearow | 104 (player), 34 | 93 | +2 |
+
+Per window the 13 rows (panse, BLIZZARD2, 11 ICY_WIND at the 6-frame spacing) are frame-, id- and pan-exact after one constant +2 that is the older idle lead class of the Blizzard panse row itself (the panse is at ROM 111 vs ours 109), not a lifetime residual; the four different BLIZZARD2 -> ICY_WIND spacings (80 / 91 / 87 / 93) are each reproduced, which a single reference walk cannot.
+
+### 16.3 Counts (turn 0, player attacker)
+
+| | before (`651824b21`) | after |
+|---|---|---|
+| all moves: ops resolved / unresolved | 924 / 188 | 935 / 177 |
+| L50 (276 moves): emitted / gated | 720 / 114 | 731 / 103 |
+
+Census T1 (seeds 0..99 Scene ON, `LSD194_SHARDS=0`, arms `on-d4502e1b0` (the aud242k head's code and table; reused from `.integration/evidence/aud242k`) and fresh `on-085998622`, each scored inside its own tree against its own table): exact 24,404 -> 24,492, missing-gated 396 -> 308, missing-other 51, missing-declined 1, extra 0, unclassified 128 in both (the aud242k psn2 / SE148 note). `rst197CensusDelta.py`: 100 / 100 battles, 31,264 commands, `eventsDigest` identical, bad 0; `soundCensusDelta.py` arm-vs-arm: 4 seeds with added ICY_WIND rows only. The census harness now records the battlers' pic Y per move command (`soundAnim` element 10) and `soundCensusExpected.ts` picks the grid cell with it.
+
+Frame hashes: `npm run compare:differential -- <3 Blizzard Scene ON traces> --base 651824b21 --harness-from-head`: 240 / 240 captures byte-identical (opponent Fearow / Bulbasaur, opponent Bulbasaur / Charizard, player Bulbasaur / Fearow; captures 60..692 step 8).
+
+### 16.4 Residuals
+
+- T1 is self-consistency: the ROM check of the class grid is the four windows above (three distinct opponent classes and one player class); a class between them is covered by the visual-port cross-check, not by its own ROM window.
+- Top gated census moves now: Confuse Ray 47, Spark 32, Tri Attack 24, Petal Dance 22, Frustration 19, Rollout 17, Flail 15, Dive 10.
