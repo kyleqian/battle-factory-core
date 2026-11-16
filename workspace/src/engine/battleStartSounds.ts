@@ -12,10 +12,11 @@ import {
   generatedPlayerVisualLag,
 } from "./battleScene.ts";
 import type { BattleResolutionPresentationCommand, BattleResolutionPresentationState, PartyBallState } from "./battleResolutionPresentation.ts";
+import { sceneOffPlayerForcedSwitchInDuration, sceneOnPlayerForcedSwitchInDuration } from "./switchInTail.ts";
 import { emitOpponentPartySummarySounds } from "./midBattleOpponentPartySummary.ts";
 import type { FactoryBattleStartIntroState } from "./factoryBattleStartIntro.ts";
 import { BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS } from "./battleScriptSourceConstants.ts";
-import { partySendOutReleaseClock, type PartySelectState, type PartySendOutTiming } from "./partySelect.ts";
+import { PARTY_SENDOUT_DEFAULT_TIMING, partySendOutReleaseClock, type PartySelectState, type PartySendOutTiming } from "./partySelect.ts";
 import {
   BGM_BATTLE,
   BGM_DRAFT,
@@ -167,15 +168,24 @@ const SWITCH_IN_BALL_OPEN_ELAPSED_OPPONENT = 18;
 const SWITCH_IN_CRY_AFTER_BALL_OPEN = 16;
 
 /**
- * SwitchIn_HandleSoundAndEnd (battle_controller_player.c:1087): once the cry is done (and no special anim runs) the BGM is restored and
- * HandleLowHpMusicChange runs on the incoming mon. Scene OFF: the restore's own frame; Scene ON: the healthbox's special animation holds it
- * 71 frames longer (one oracle window, seed 2 res11: restore 10948, SE_LOW_HEALTH 11019).
+ * SwitchIn_HandleSoundAndEnd (battle_controller_player.c:1087): the BGM restore and `HandleLowHpMusicChange` of the incoming mon run once the controller
+ * reached it (`SwitchIn_CleanShinyAnimShowSubstitute` waited for the healthbox slide and, Scene ON, the back animation) AND the cry is done.
+ * switchInTail.ts models that end as B + D - 2 (ball spawn B, `D = sceneOn|OffPlayerForcedSwitchInDuration`), the ball opens at B + 47 and the cry
+ * starts 16 later, so the controller end is `D - 65` frames after the cry starts (aud254: ROM windows 237 Scene ON, Gligar 86 and Pupitar 38,
+ * Scene OFF Pupitar 26 under its 28-frame restore; seed 2 Scene ON Blastoise 133). The SE follows the later of that and the cry's restore.
  */
-const SWITCH_IN_LOW_HP_AFTER_RESTORE_SCENE_ON = 71;
+const SWITCH_IN_CONTROLLER_END_AFTER_CRY_START = 65;
 
-function switchInLowHp(hp: number, maxHP: number, sceneOff: boolean): void {
-  if (sceneOff) handleLowHpMusicChange(hp, maxHP);
-  else scheduleAfter(SWITCH_IN_LOW_HP_AFTER_RESTORE_SCENE_ON, () => handleLowHpMusicChange(hp, maxHP));
+function switchInLowHp(
+  incoming: Readonly<{ species: number; hp: number; maxHP: number; personality?: number }>,
+  sceneOff: boolean,
+  restoreFrames: number,
+): void {
+  const duration = sceneOff
+    ? sceneOffPlayerForcedSwitchInDuration(incoming.species)
+    : sceneOnPlayerForcedSwitchInDuration(incoming.species, incoming.personality ?? 0);
+  const delay = Math.max(0, duration - SWITCH_IN_CONTROLLER_END_AFTER_CRY_START - restoreFrames);
+  scheduleAfter(delay, () => handleLowHpMusicChange(incoming.hp, incoming.maxHP));
 }
 
 function currentCommand(
@@ -216,7 +226,7 @@ export function emitMidBattleSwitchSounds(
       incoming.species,
       cryModeFor(incoming.hp, incoming.maxHP, command.incomingStatus1 !== 0),
       command.battler === 0 ? CRY_PAN_PLAYER : CRY_PAN_OPPONENT,
-      command.battler === 0 ? () => switchInLowHp(incoming.hp, incoming.maxHP, sceneOff) : undefined,
+      command.battler === 0 ? (restoreFrames) => switchInLowHp(incoming, sceneOff, restoreFrames) : undefined,
     );
   }
 }
@@ -228,6 +238,13 @@ export function emitMidBattleSwitchSounds(
  * CASTFORM's late release into both.
  */
 const PARTY_SEND_OUT_BALL_OPEN_RELEASE_CLOCK = 143;
+/**
+ * aud254: the forced send-in runs the same `SwitchIn_HandleSoundAndEnd` (battle_controller_player.c:1087) as a voluntary one: BGM restore, then
+ * `HandleLowHpMusicChange` of the incoming mon, once the cry is done AND the controller reached it (back animation and healthbox slide done:
+ * Scene ON waits for the back animation, `SwitchIn_CleanShinyAnimShowSubstitute`). pfr192: the controller idles at B + D - 2 and the blank
+ * message starts at B + D + 11 (`prompt` B + D + 17 minus the 6-frame action-menu lead), so the controller end is 13 frames before `blankStart`.
+ */
+const PARTY_SEND_OUT_CONTROLLER_END_BEFORE_BLANK = 13;
 
 export function emitPartySendOutSounds(
   before: PartySelectState | null,
@@ -244,6 +261,13 @@ export function emitPartySendOutSounds(
   if (crossed(PARTY_SEND_OUT_BALL_OPEN_RELEASE_CLOCK)) playBallOpenSe();
   if (crossed(PARTY_SEND_OUT_BALL_OPEN_RELEASE_CLOCK + SWITCH_IN_CRY_AFTER_BALL_OPEN)) {
     const mon = after.party[after.cursor];
-    playSendOutCry(factoryBattleBgm(frontierBrain), mon.speciesId, cryModeFor(mon.hp, mon.maxHp, mon.status !== "none"), CRY_PAN_PLAYER);
+    const remaining = (timing ?? PARTY_SENDOUT_DEFAULT_TIMING).blankStart - PARTY_SEND_OUT_CONTROLLER_END_BEFORE_BLANK - after.sendOutElapsed;
+    playSendOutCry(
+      factoryBattleBgm(frontierBrain),
+      mon.speciesId,
+      cryModeFor(mon.hp, mon.maxHp, mon.status !== "none"),
+      CRY_PAN_PLAYER,
+      (restoreFrames) => scheduleAfter(Math.max(0, remaining - restoreFrames), () => handleLowHpMusicChange(mon.hp, mon.maxHp)),
+    );
   }
 }

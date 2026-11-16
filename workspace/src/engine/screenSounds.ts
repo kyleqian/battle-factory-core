@@ -78,6 +78,7 @@ interface Scheduled {
   readonly frame: number;
   readonly run: () => void;
   readonly openCry?: true;
+  readonly task?: true;
 }
 
 let currentFrame = 0;
@@ -100,19 +101,22 @@ export function beginScreenSoundTick(frame: number): void {
 /** Called once at the end of each collected tick: runs what came due on this frame, in scheduling order. */
 export function runScheduledScreenSounds(): void {
   if (!soundCollecting()) return;
-  for (let index = 0; index < queue.length; index += 1) {
-    const entry = queue[index]!;
-    if (entry.frame !== currentFrame) continue;
-    queue.splice(index, 1);
-    index -= 1;
-    entry.run();
+  // aud254: a frame's callback1 work (a new PlayCry_ByMode, which resets the duck counter) runs before RunTasks (Task_DuckBGMForPokemonCry's restore).
+  for (const tasks of [false, true]) {
+    for (let index = 0; index < queue.length; index += 1) {
+      const entry = queue[index]!;
+      if (entry.frame !== currentFrame || (entry.task === true) !== tasks) continue;
+      queue.splice(index, 1);
+      index -= 1;
+      entry.run();
+    }
   }
 }
 
-export function scheduleAfter(delay: number, run: () => void, openCry?: true): void {
+export function scheduleAfter(delay: number, run: () => void, openCry?: true, task?: true): void {
   if (!soundCollecting()) return;
   if (delay === 0) run();
-  else queue.push(openCry ? { frame: currentFrame + delay, run, openCry } : { frame: currentFrame + delay, run });
+  else queue.push({ frame: currentFrame + delay, run, ...(openCry ? { openCry } : {}), ...(task ? { task } : {}) });
 }
 
 function restoreBgm(bgm: number): void {
@@ -120,7 +124,7 @@ function restoreBgm(bgm: number): void {
 }
 
 /** PlayCry_ByMode: PlayCryInternal ducks the BGM, starts the cry; Task_DuckBGMForPokemonCry restores when the cry ends. */
-function startCry(bgm: number, species: number, mode: number, pan: number, restoreDelay?: number, onRestore?: () => void): void {
+function startCry(bgm: number, species: number, mode: number, pan: number, restoreDelay?: number, onRestore?: (restoreFrames: number) => void): void {
   emitSound({ kind: "duck", id: bgm, pan: null, volume: BGM_DUCK_VOLUME });
   emitSound({ kind: "cry", id: species, pan, mode, volume: CRY_VOLUME, priority: CRY_PRIORITY });
   crySerial += 1;
@@ -129,12 +133,13 @@ function startCry(bgm: number, species: number, mode: number, pan: number, resto
   // IsCryPlaying turns false one frame after the cry's last sample frame (cryModeFrames.ts: every Factory species, NORMAL and WEAK).
   const length = restoreDelay ?? (mode === CRY_MODE_WEAK ? CRY_WEAK_FRAMES[species] : CRY_NORMAL_FRAMES[species]);
   if (length === undefined) return;
-  scheduleAfter(restoreDelay ?? length + 1, () => {
+  const restoreFrames = restoreDelay ?? length + 1;
+  scheduleAfter(restoreFrames, () => {
     if (ducking?.serial !== serial) return;
     ducking = null;
     restoreBgm(bgm);
-    onRestore?.();
-  });
+    onRestore?.(restoreFrames);
+  }, undefined, true);
 }
 
 /**
@@ -157,7 +162,7 @@ export function scheduleAnimTaskBgmRestore(bgm: number, delay: number): void {
 }
 
 /** Task_PlayCryWhenReleasedFromBall: the send-out cry at pan +25 (opponent) / -25 (player), NORMAL or WEAK by the mon's HP and status. */
-export function playSendOutCry(bgm: number, species: number, mode: number, pan: number, onRestore?: () => void): void {
+export function playSendOutCry(bgm: number, species: number, mode: number, pan: number, onRestore?: (restoreFrames: number) => void): void {
   startCry(bgm, species, mode, pan, undefined, onRestore);
 }
 
