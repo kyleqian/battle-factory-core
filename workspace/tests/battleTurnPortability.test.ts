@@ -178,7 +178,8 @@ describe("Battle Scene OFF full-turn kernel portability", () => {
         from: 91,
         to: 63,
         healthValue: 28,
-        timing: { minimumFrames: 28 },
+        // hpd1 (docs/hpd1-hp-hold.md): a foe hit followed by the next action's USEDMOVE is bar + 1 + the `datahpupdate` row (ROM: 0 off over 7 damages).
+        timing: { minimumFrames: 0, tailFrames: 1 },
       },
       // trn181 (docs/trn181-action-transition-on.md): the action-transition pause P = d + 6 + u (HP anchor), Scene ON like OFF.
       {
