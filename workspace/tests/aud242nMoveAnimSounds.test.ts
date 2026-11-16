@@ -52,10 +52,10 @@ function ourEvents(rom: Fixture): SoundEvent[] {
   return events;
 }
 
-// delta = ROM frame - our frame (0: the lead-0 class). The SE_M_STRING_SHOT2 row sits behind the wait on the 119-tick blend cycle, the 75-tick ball bounce and the 62 / 61-tick pan task.
+// delta = ROM frame - our frame (0: the lead-0 class). The SE_M_STRING_SHOT2 row (130; 196 = the ball bounce sprite SEs, aud242o) sits behind the wait on the 119-tick blend cycle, the 75-tick ball bounce and the 62 / 61-tick pan task.
 const SPECS: Array<{ name: string; ids: number[]; delta: number; rows: number; extra?: Record<string, number> }> = [
-  { name: "confuseray-player", ids: [130], delta: 0, rows: 1 },
-  { name: "confuseray-opponent", ids: [130], delta: 0, rows: 1 },
+  { name: "confuseray-player", ids: [130, 196], delta: 0, rows: 14 },
+  { name: "confuseray-opponent", ids: [130, 196], delta: 0, rows: 14 },
   // Spark: +5 on the three opening SE_M_THUNDERBOLT2 rows (two loadspritegfx, the aud242a idle-lead class) and one more frame behind the first wait (`extra`): in the ROM the
   // 8-sprite step at script frame 50 pushes the fade's second call one frame late (BlendPalette log: BG y0 at 111, OBJ y0 at 112, against 69 / 69 for the first cycle). Recorded, not modelled.
   { name: "spark-player", ids: [119, 215], delta: 5, rows: 5, extra: { "138:215:63": 1, "149:119:63": 1 } },
@@ -74,13 +74,4 @@ describe("move-animation SEs of the aud242n lifetimes", () => {
   }
 });
 
-// The ball bounce sprite itself plays SE_M_CONFUSE_RAY (196) with gAnimCustomPanning (battle_anim_ghost.c:249-256, :258-286): 13 ROM rows per cast, a sprite-callback site the table does not model.
-describe("named gap: Confuse Ray sprite SEs", () => {
-  for (const name of ["confuseray-player", "confuseray-opponent"]) {
-    it(`${name}: the 13 SE196 rows are ROM-only`, () => {
-      const rom = fixture(name);
-      expect(rom.events.filter((e) => e.noop !== true && isMoveSe(e) && e.id === 196)).toHaveLength(13);
-      expect(ourEvents(rom).filter((e) => isMoveSe(e) && e.id === 196)).toHaveLength(0);
-    });
-  }
-});
+// The 13 SE196 rows of the ball bounce sprite (battle_anim_ghost.c:249-256, :258-286) are in the confuseray specs above since aud242o (docs section 19).

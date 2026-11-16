@@ -70,7 +70,7 @@ const moveTable: string[] = [];
 }
 
 interface SoundOp {
-  op: "playsewithpan" | "playse" | "waitplaysewithpan" | "loopsewithpan" | "panse" | "panse_adjustnone" | "panse_adjustall" | "setpan" | "soundtask_loopse" | "soundtask_fireblast" | "soundtask_se1" | "soundtask_se2";
+  op: "playsewithpan" | "playse" | "waitplaysewithpan" | "loopsewithpan" | "panse" | "panse_adjustnone" | "panse_adjustall" | "setpan" | "soundtask_loopse" | "soundtask_fireblast" | "soundtask_se1" | "soundtask_se2" | "sprite_confuseray_ball";
   frame: number;
   id: number | null;
   /** The pan argument as written (the starting pan of a panse*; the only one of a setpan). */
@@ -84,6 +84,7 @@ interface SoundOp {
   step?: number;
   gap?: number;
   id2?: number;
+  /** sprite_confuseray_ball: `times` is the Step1 translate count D (data[0]), `gap` the sprite's last call n; pan / target / inc / wait are the creating SoundTask_AdjustPanningVar's arguments as written. */
   line: number;
 }
 type Reason = "bg-fade" | "unmodelled-lifetime" | "waitsound" | "unresolved-branch" | "after-unresolved-branch";
@@ -394,7 +395,7 @@ function adjustPanningVarLength(attackerSide: number, sourceArg: number, targetA
 // UpdateConfuseRayBallBlend and then AnimTranslateLinear (data[0]-- while > 0); the call that finds data[0] == 0 installs Step2. Step2 sets data[0] = 1, translates, and when
 // data[6] == 0 installs DestroyAnimSpriteAndDisableBlend (which runs one call later), else UpdateConfuseRayBallBlend. The blend counter (:288-311) steps data[6] on every call
 // (data[7] is reset to its high byte on each step): 16 -> 0 (call 16, set to 0x100), 0x101 .. 0x10d (13 calls, 0x10d -> 0), 0 -> 16 up, 16 -> 0 down, ...
-function confuseRayBallBounceLength(attackerSide: number, offset: number, speed: number): number | null {
+function confuseRayBallBounceLength(attackerSide: number, offset: number, speed: number): { n: number; duration: number } | null {
   const [attackerX, targetX] = [BATTLER_X[attackerSide === 0 ? 0 : 1], BATTLER_X[attackerSide === 0 ? 1 : 0]];
   const x = attackerX > targetX ? attackerX - offset : attackerX < targetX ? attackerX + offset : attackerX;
   const duration = Math.trunc((Math.abs(targetX - x) << 8) / speed);
@@ -416,7 +417,7 @@ function confuseRayBallBounceLength(attackerSide: number, offset: number, speed:
       if (d0 === 0) step2 = true; else d0 -= 1;
     } else {
       d0 = 0;
-      if (d6 === 0) return call;
+      if (d6 === 0) return { n: call, duration };
       update();
     }
   }
@@ -708,8 +709,8 @@ function lifetimeOf(cmd: Command, attackerSide: number, pic: PicContext): Lifeti
   if (sprite("gConfuseRayBallBounceSpriteTemplate")) {
     const [offset, speed] = [intArg(args[3]), intArg(args[5])];
     if (offset === null || speed === null || speed < 1) return null;
-    const n = confuseRayBallBounceLength(attackerSide, offset, speed);
-    return n === null ? null : { exact: n };
+    const ball = confuseRayBallBounceLength(attackerSide, offset, speed);
+    return ball === null ? null : { exact: ball.n };
   }
   // gConfuseRayBallSpiralSpriteTemplate (:313-341): the init installs the step and runs it at once (call 0: data[7] 0 -> 1), so call k has data[7] = k + 1 and call 60 (61) destroys: gone 59 ticks after F.
   if (sprite("gConfuseRayBallSpiralSpriteTemplate")) return { exact: 59 };
@@ -861,6 +862,8 @@ function walk(bodyLabel: string, turn: number, attackerSide: number, pic: PicCon
   let monBgActive = false;
   let seEnd = -1;
   let seUnknown = false;
+  // aud242o: the last SoundTask_AdjustPanningVar of this walk (its creation iteration and arguments as written): the Confuse Ray ball reads its gAnimCustomPanning.
+  let panVarTask: { at: number; args: number[] } | null = null;
   const TIMED = new Set(["delay", "loadspritegfx", "monbg", "fadetobg", "fadetobgfromset", "restorebg", "changebg", "waitbgfadeout", "waitbgfadein", "waitsound", "playsewithpan", "playse", "waitplaysewithpan", "loopsewithpan", "panse", "panse_adjustnone", "panse_adjustall", "setpan", "createsoundtask"]);
   // Wall-clock frames the ROM spends in a VBlank-overrun lag (no main-loop iteration): ops at iteration > `after` play `frames` later.
   const lags: Array<{ after: number; frames: number }> = [];  // `after`: first affected iteration - 1 (fractional .5 = from the same iteration)
@@ -1035,10 +1038,26 @@ function walk(bodyLabel: string, turn: number, attackerSide: number, pic: PicCon
       }
       // Cmd_createvisualtask runs the task function at once; the PlaySE1/2WithPanning tasks play with BattleAnimAdjustPanning(arg 1) in that step.
       case "createvisualtask": {
+        if (args[0] === "SoundTask_AdjustPanningVar") {
+          const a = [2, 3, 4, 5].map((i) => intArg(args[i]));
+          panVarTask = frame === null || a.some((v) => v === null) ? null : { at: frame, args: a as number[] };
+          break;
+        }
         if (args[0] !== "SoundTask_PlaySE1WithPanning" && args[0] !== "SoundTask_PlaySE2WithPanning") break;
         if (frame === null) { gate(); break; }
         seUnknown = true;
         events.push({ op: args[0] === "SoundTask_PlaySE1WithPanning" ? "soundtask_se1" : "soundtask_se2", frame: frame + shiftAt(frame), id: value(args[2]!), pan: value(args[3]!), line });
+        break;
+      }
+      // aud242o: AnimConfuseRayBallBounce plays SE_M_CONFUSE_RAY itself (battle_anim_ghost.c:220-311): Step1 with PlaySE12WithPanning(gAnimCustomPanning), Step2 with PlaySE. The
+      // runtime needs the creating pan task to share the sprite's iteration (the pan is read call by call), else the rows stay unmodelled.
+      case "createsprite": {
+        if (args[0] !== "gConfuseRayBallBounceSpriteTemplate" || frame === null) break;
+        const [offset, speed] = [intArg(args[3]), intArg(args[5])];
+        const ball = offset === null || speed === null || speed < 1 ? null : confuseRayBallBounceLength(attackerSide, offset, speed);
+        if (ball === null || panVarTask === null || panVarTask.at !== frame) break;
+        const [pan, target, inc, wait] = panVarTask.args as [number, number, number, number];
+        events.push({ op: "sprite_confuseray_ball", frame: frame + shiftAt(frame), id: value("SE_M_CONFUSE_RAY"), pan, target, inc, wait, times: ball.duration, gap: ball.n, line });
         break;
       }
       case "setpan":
