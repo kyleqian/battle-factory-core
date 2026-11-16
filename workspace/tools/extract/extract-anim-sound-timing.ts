@@ -388,6 +388,10 @@ function lifetimeOf(cmd: Command): Lifetime {
     }
     return null;
   }
+  // ---- aud242i (docs section 13). AnimSludgeBombHitParticle (battle_anim_poison.c:231-258; d = gBattleAnimArgs[2] = script args[5]): call 0 is the init (data[0] = d, then
+  // InitSpriteDataForLinearTranslation divides by d: 0 crashes the ROM, declined); the step's call k >= 1 runs TranslateSpriteLinearFixedPoint (battle_anim_mons.c:607-621,
+  // data[0]-- while > 0) and destroys on the same call once data[0] is 0, i.e. at call d: gone d - 1 ticks after F.
+  if (sprite("gSludgeBombHitParticleSpriteTemplate")) { const d = intArg(args[5]); return d === null || d < 1 ? null : { exact: d - 1 }; }
   if (op === "create_basic_hitsplat_sprite") return { bound: 10 };
   return null;
 }
@@ -431,6 +435,62 @@ const FADE_IN_DONE = 38;
 const BG_LOAD_LAG: Readonly<Record<string, number>> = { BG_IMPACT_OPPONENT: 1, BG_IMPACT_PLAYER: 1, BG_IMPACT_CONTESTS: 1, BG_HIGHSPEED_OPPONENT: 0, BG_HIGHSPEED_PLAYER: 0, BG_DARK: 0 };
 const bgLoadLag = (bg: string | undefined): number => BG_LOAD_LAG[bg ?? ""] ?? 0;
 
+// ---- aud242i: SE length bounds for `waitsound` (Cmd_waitsound, battle_anim.c:1635-1658: SE1 / SE2 still has a track -> sAnimFramesToWait = 1, no WaitAnimFrameCount, so the
+// script re-polls every iteration and resumes in the first iteration after the last track's FINE). IsSEPlaying (sound.c:606-613) tests the MPlayer track bits only
+// (voices in release do not count). A song's tracks end after the sum of their W waits; the m4a player advances BPM / 150 ticks per VBlank (`TEMPO, n` is n * 2 BPM). The
+// bound is an UPPER bound on the frames from the play to the resume: the longest track in ticks + 1 at the slowest tempo of the song, + 3 frames (start-up tempoC phase,
+// FINE tick). Songs with PATT / PEND / REPT / GOTO (patterns, loops) are unknown. The audited consumer only needs `bound <= the visual finish` (the wait is then exact).
+const songPlayers = new Map<string, string>();
+for (const m of readFileSync(join(REF, "sound", "song_table.inc"), "utf8").matchAll(/^\s*song\s+(\w+)\s*,\s*(MUSIC_PLAYER_\w+)/gm)) songPlayers.set(m[1]!, m[2]!);
+const seBoundCache = new Map<string, { frames: number; player: string } | null>();
+function seBound(token: string): { frames: number; player: string } | null {
+  const name = token.trim().toLowerCase();
+  if (!/^se_\w+$/.test(name)) return null;
+  if (seBoundCache.has(name)) return seBoundCache.get(name)!;
+  let result: { frames: number; player: string } | null = null;
+  try {
+    const src = readFileSync(join(REF, "sound", "songs", "midi", `${name}.s`), "utf8");
+    const tbs = Number(new RegExp(`\\.equ\\s+${name}_tbs,\\s*(\\d+)`).exec(src)?.[1] ?? NaN);
+    let ticks = 0;
+    let minBpm = Infinity;
+    let ok = Number.isFinite(tbs) && songPlayers.has(name);
+    for (const track of src.split(/^@\*+ Track \d+[^\n]*\n/m).slice(1)) {
+      const body = track.split("@****")[0]!;
+      let t = 0;
+      for (const raw of body.split("\n")) {
+        const line = raw.split("@")[0]!;
+        if (/\b(PATT|PEND|REPT|GOTO)\b/.test(line)) ok = false;
+        if (/\.byte\s+TEMPO/.test(line)) {
+          const base = new RegExp(`TEMPO\\s*,\\s*(\\d+)\\*${name}_tbs/2`).exec(line);
+          if (base === null) ok = false; else minBpm = Math.min(minBpm, Number(base[1]) * tbs);
+        }
+        const w = /\.byte\s+W(\d+)\b/.exec(line);
+        if (w !== null) t += Number(w[1]);
+      }
+      ticks = Math.max(ticks, t);
+    }
+    // A tempo command is `N * tbs / 2` (value N * tbs / 2, BPM N * tbs); the slowest one bounds the song.
+    if (ok && Number.isFinite(minBpm)) result = { frames: Math.ceil(((ticks + 1) * 150) / minBpm) + 3, player: songPlayers.get(name)! };
+  } catch { result = null; }
+  seBoundCache.set(name, result);
+  return result;
+}
+// A script sprite / task whose callback chain contains a PlaySE (battle_anim*.c, audio-sound-sources.json cAnimSites) can start an SE the script does not list: a waitsound
+// after such a creation is left unresolved (the callback is matched by name prefix against the site functions).
+const cSoundSiteFunctions: string[] = (JSON.parse(readFileSync(join(RUN_ROOT, "tests", "fixtures", "data", "audio-sound-sources.json"), "utf8")) as { cAnimSites: { rows: Array<{ fn: string }> } }).cAnimSites.rows
+  .map((r) => r.fn).filter((fn) => !fn.startsWith("Cmd_"));
+const templateCallbacks = new Map<string, string>();
+for (const file of readdirSync(join(REF, "src"))) {
+  if (!/^battle_anim.*\.c$/.test(file)) continue;
+  for (const m of readFileSync(join(REF, "src", file), "utf8").matchAll(/const struct SpriteTemplate (\w+)\s*=\s*\{[^}]*?\.callback = (\w+)/g)) templateCallbacks.set(m[1]!, m[2]!);
+}
+function creationMayPlaySound(cmd: Command): boolean {
+  const { op, args } = cmd;
+  const name = op === "createsprite" ? templateCallbacks.get(args[0] ?? "") : op === "createvisualtask" ? args[0] : op;
+  if (name === undefined) return true;
+  return cSoundSiteFunctions.some((fn) => fn.startsWith(name) || name.startsWith(fn));
+}
+
 const blockers: Record<string, number> = {};
 const blockersByLabel = new Map<string, Set<string>>();
 // ANIM_SOUND_WHATIF=file: continue past every unmodelled lifetime as if it were gone at once and write every distinct blocker per body (ranking aid, no table effect).
@@ -450,6 +510,13 @@ function walk(bodyLabel: string, turn: number, attackerSide: number): Walk {
   // gPaletteFade is one shared object: a BeginNormalPaletteFade while another normal / hardware fade is active returns FALSE (palette.c:156-163), so a color cycle that
   // overlaps another fade is left unmodelled. `fadeBusy` = the last iteration a normal fade (simple_palette_blend / color cycle) of this walk may be active.
   let fadeBusy = -1;
+  // aud242i: `waitsound` keeps the script frame unknown within [frame, soundWait] (soundWait = the upper bound of the last SE's end, seBound); only a following
+  // waitforvisualfinish whose exact finish is at or after it makes the frame exact again. seUnknown: an SE the table cannot bound (panse / sound task / unknown song) or a
+  // creation whose callback can play one; no waitsound resolves after it.
+  let soundWait: number | null = null;
+  let seEnd = -1;
+  let seUnknown = false;
+  const TIMED = new Set(["delay", "loadspritegfx", "monbg", "fadetobg", "fadetobgfromset", "restorebg", "changebg", "waitbgfadeout", "waitbgfadein", "waitsound", "playsewithpan", "playse", "waitplaysewithpan", "loopsewithpan", "panse", "panse_adjustnone", "panse_adjustall", "setpan", "createsoundtask"]);
   // Wall-clock frames the ROM spends in a VBlank-overrun lag (no main-loop iteration): ops at iteration > `after` play `frames` later.
   const lags: Array<{ after: number; frames: number }> = [];  // `after`: first affected iteration - 1 (fractional .5 = from the same iteration)
   const shiftAt = (iteration: number): number => lags.reduce((n, l) => (iteration > l.after ? n + l.frames : n), 0);
@@ -471,7 +538,9 @@ function walk(bodyLabel: string, turn: number, attackerSide: number): Walk {
     const cmd = program[index]!;
     const { op, args, line } = cmd;
     pc = [label, index + 1];
+    if (soundWait !== null && (TIMED.has(op) || isCreation(op))) { soundWait = null; unresolved("waitsound"); pending = []; }
     if (isCreation(op)) {
+      if (creationMayPlaySound(cmd)) seUnknown = true;
       // AnimTask_MetallicShine decompresses its tilemap and image and loads a palette in the creating step (battle_anim_dark.c:866-870): a measured
       // VBlank overrun (METALLIC_SHINE_LOAD_LAG; Metal Claw and Steel Wing, aud242d), like BG_LOAD_LAG.
       if ((op === "metallic_shine" || (op === "createvisualtask" && args[0] === "AnimTask_MetallicShine")) && frame !== null) lags.push({ after: frame, frames: METALLIC_SHINE_LOAD_LAG });
@@ -495,7 +564,10 @@ function walk(bodyLabel: string, turn: number, attackerSide: number): Walk {
       case "loadspritegfx": case "monbg": if (frame !== null) frame += 3; break;
       case "waitforvisualfinish": {
         if (frame === null) break;
-        if (pending.length === 0) break;
+        if (pending.length === 0) {
+          if (soundWait !== null) { if (frame >= soundWait) soundWait = null; else unresolved("waitsound"); }
+          break;
+        }
         const exact = pending.filter((p) => p.life !== null && "exact" in p.life).map((p) => p.at + (p.life as { exact: number }).exact);
         const bounds = pending.filter((p) => p.life !== null && "bound" in p.life).map((p) => p.at + (p.life as { bound: number }).bound);
         if (whatIf && pending.some((p) => p.life === null)) {
@@ -511,6 +583,11 @@ function walk(bodyLabel: string, turn: number, attackerSide: number): Walk {
         }
         const gone = exact.length === 0 ? -1 : Math.max(...exact);
         if (bounds.some((b) => b > gone)) { unresolved("unmodelled-lifetime"); pending = []; break; }
+        if (soundWait !== null) {
+          // The script resumes at max(S, gone + 1) with S in [frame, soundWait]: exact only when the frame it is known to reach is already past the SE bound.
+          if (Math.max(frame, gone + 1) < soundWait) { unresolved("waitsound"); pending = []; soundWait = null; break; }
+          soundWait = null;
+        }
         if (frame <= gone) frame = gone + 1;
         pending = [];
         break;
@@ -545,7 +622,12 @@ function walk(bodyLabel: string, turn: number, attackerSide: number): Walk {
         if (frame === null) break;
         if (fade !== null && frame < fade + FADE_IN_DONE) frame = fade + FADE_IN_DONE;
         break;
-      case "waitsound": if (whatIf) { noteAll(bodyLabel, "!waitsound"); pending = []; break; } unresolved("waitsound"); pending = []; break;
+      case "waitsound":
+        if (whatIf) { noteAll(bodyLabel, "!waitsound"); pending = []; break; }
+        if (frame === null) break;
+        if (seUnknown) { unresolved("waitsound"); pending = []; break; }
+        soundWait = seEnd;
+        break;
       case "jumpifmoveturn": if (value(args[0]!) === turn) pc = [args[1]!, 0]; break;
       case "choosetwoturnanim": pc = [args[(turn & 1) === 1 ? 1 : 0]!, 0]; break;
       case "jumpifcontest": break;
@@ -559,6 +641,11 @@ function walk(bodyLabel: string, turn: number, attackerSide: number): Walk {
       case "playsewithpan": case "playse": case "waitplaysewithpan": case "loopsewithpan": {
         if (frame === null) { gate(); break; }
         const at = op === "waitplaysewithpan" ? frame + value(args[2]!) : frame;
+        {
+          const bound = seBound(args[0]!);
+          const last = op === "loopsewithpan" ? at + Math.max(value(args[3]!) - 1, 0) * (value(args[2]!) + 1) : at;
+          if (bound === null) seUnknown = true; else seEnd = Math.max(seEnd, last + bound.frames);
+        }
         const base = { op, frame: at + shiftAt(at), id: value(args[0]!), pan: op === "playse" ? null : value(args[1]!), line };
         if (op === "waitplaysewithpan") events.push({ ...base, wait: value(args[2]!) });
         else if (op === "loopsewithpan") events.push({ ...base, wait: value(args[2]!), times: value(args[3]!) });
@@ -570,6 +657,7 @@ function walk(bodyLabel: string, turn: number, attackerSide: number): Walk {
       // waitforvisualfinish counts only gAnimVisualTaskCount (the sound task count gates Cmd_end), so no lifetime is pushed.
       case "panse": case "panse_adjustnone": case "panse_adjustall":
         if (frame === null) { gate(); break; }
+        seUnknown = true;
         events.push({ op, frame: frame + shiftAt(frame), id: value(args[0]!), pan: value(args[1]!), target: value(args[2]!), inc: value(args[3]!), wait: value(args[4]!), line });
         break;
       // Cmd_createsoundtask: CreateTask(func, 1), func(taskId) at once, gAnimSoundTaskCount++ (it gates only Cmd_end / Cmd_waitsound). Only the two
@@ -578,6 +666,7 @@ function walk(bodyLabel: string, turn: number, attackerSide: number): Walk {
         const task = args[0];
         if (task !== "SoundTask_LoopSEAdjustPanning" && task !== "SoundTask_FireBlast") break;
         if (frame === null) { gate(); break; }
+        seUnknown = true;
         const at = frame + shiftAt(frame);
         if (task === "SoundTask_FireBlast") events.push({ op: "soundtask_fireblast", frame: at, id: value(args[1]!), id2: value(args[2]!), pan: null, line });
         else events.push({ op: "soundtask_loopse", frame: at, id: value(args[1]!), pan: value(args[2]!), target: value(args[3]!), inc: value(args[4]!), times: value(args[5]!), step: value(args[6]!), gap: value(args[7]!), line });
@@ -587,11 +676,13 @@ function walk(bodyLabel: string, turn: number, attackerSide: number): Walk {
       case "createvisualtask": {
         if (args[0] !== "SoundTask_PlaySE1WithPanning" && args[0] !== "SoundTask_PlaySE2WithPanning") break;
         if (frame === null) { gate(); break; }
+        seUnknown = true;
         events.push({ op: args[0] === "SoundTask_PlaySE1WithPanning" ? "soundtask_se1" : "soundtask_se2", frame: frame + shiftAt(frame), id: value(args[2]!), pan: value(args[3]!), line });
         break;
       }
       case "setpan":
         if (frame === null) { gate(); break; }
+        seUnknown = true;
         events.push({ op, frame: frame + shiftAt(frame), id: null, pan: value(args[0]!), line });
         break;
       default: break;
