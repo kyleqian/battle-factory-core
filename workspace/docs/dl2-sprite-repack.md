@@ -69,8 +69,8 @@ for all 752 strings; the files hold only `[0-9a-f]` and `[0-9a-v]` digits; lazy 
   `tools/probe/verify-turn{9,10,13}-*.ts`, and the python probe `tools/probe/pixel-consequence-sendout-slice-a.py` (inline decode).
   `tools/bundle/spriteBudget.mjs` measures the packed strings; `tools/bundle/packExperiment.mjs` (the dl1 experiment this step implements) is removed.
 - `vite.config.ts` `manualChunks`: the new file names go to `assets-sprites`. `bnd257dLazySprites` / `bnd256cPixelProvider` ratchets use the new names.
-- `summaryInfoPage` / `monPicRender` read `front-sprites.json`? They read `frontPixels(species)` (the provider) as a fallback since bnd257d, and
-  `src/assets/gen/front-sprites.json` is a different small table (the draft / summary catalog, 8 KiB brotli); left alone.
+- `summaryInfoPage` / `monPicRender` import `src/assets/gen/front-sprites.json` (the draft / summary catalog: 110 KB raw, ~8 KiB brotli, a different table from the
+  battle sheets) and fall back to `frontPixels(species)`, which already goes through the provider; left alone.
 
 ## Acceptance
 
