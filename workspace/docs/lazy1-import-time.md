@@ -62,7 +62,7 @@ The change moves *when* a pure computation runs, never *what* it computes. Evide
   **PASS, 1,488 captures byte-identical across 8 traces** (draft, battle OFF, battle ON, canonical battle 2, post-win, fight submenu, swap, lobby).
 - `npm run typecheck` 0. `npm run build:lib` ok (see ENGINE_BUILD below). `npm run test:smoke` 448 / 448.
 - Soak `npm run soak -- --seeds 0:20 --policy vanilla --parallel 4`: **20 / 20 OK** (8.5 min).
-- Full suite and the winning soaks: see PROGRESS.md (the winning soak ran on a reduced seed range because of the box load; it is stated there with the exact range).
+- Full `npm test` (4 vitest shards, 3 workers): 15,018 passed, 0 failed. Winning soak `--policy winning --seeds 0:24 --parallel 6`, parent vs this tree: **24 / 24, per-seed lines identical** (seeds 0:60 was not run, the cap did not allow two arms x 60 seeds on the loaded box).
 
 ## ENGINE_BUILD
 

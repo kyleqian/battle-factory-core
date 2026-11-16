@@ -5,6 +5,21 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 2026-11-16 — lazy1 (ts lane worker): website load time, step A (import-time work lazy, no behaviour change)
+
+- **State:** on master, committed (`6d9d6ec10` opcode-name index, `ca46797a5` lazy thunks, `c6076ea27` test / tool names + `docs/lazy1-import-time.md`). No API change. ENGINE_BUILD `eb-b17e87a4a52c33ad` -> **`eb-56f55ed08774e7a4`** (dist-lib; tell the website).
+- **Import time (Node `import()`, median of 5, box load 7.8, so about 3.6x the quiet figures):** `index.js` **2743 -> 832 ms**, `headless.js` **2106 -> 380 ms**. Quiet-box `index.js` about 230 ms: not shown below 200.
+  Left: 467 ms of compiling 67 MB of chunks (step B, size), 39 ms `loadBattleScriptProgram` (stays, memoized), about 90 ms of data-chunk bodies, ~30 ms small tables. Per-item table in the doc.
+- **Did:** (1) per-program opcode-name index replaces about 120 full instruction scans per handler build (30 -> 2 ms, also faster every turn at runtime); (2) `lazyValue` memo thunks for the 100 sample-battle constants of the legacy Battle 1/2 march (`battleScene.ts`, `battleSceneCanonical.ts`, Turn 13 / 15 / 16 adapters): no sample battle runs at import. Nothing deleted (all read).
+- **Gates:** census seeds 0..99 ON and OFF vs parent `b5bb454a9`: 100 / 100 identical each (`rst197CensusDelta` bad 0, `soundCensusDelta` identical 100); `compare:differential` 8 traces (draft-menu, battle2-off-turn1-staged, battle2-turn1-rockslide, presentation-rng-playable-live-bodies-seeded-on, battle1-postwin-next-prompt, fight-submenu, battle1-swap-player-picker, lbw4-woman-block-off) **1,488 / 1,488 identical**;
+  typecheck 0; full `npm test` as 4 vitest shards (3 workers) **15,018 passed, 0 failed** (shard 2 first run caught `battlesceneSplitEligibility` keyed on the renamed symbols, fixed, re-run green); `npm run build` and `build:lib` 0; vanilla soak 0:20 **20 / 20**;
+  winning soak **0:24 24 / 24, per-seed lines identical to the parent** (`--parallel 6`).
+- **NOT run:** winning soak 0:60 (only 0:24: two arms x 60 seeds did not fit the cap on a loaded 8-core box, 2.4 min / seed / core); `tools/probe/*` one-off scripts still import the old constant names (not in `tsc -b`, not run by tests).
+- **Next:** step B (download size: 67 MB dist-lib, 467 ms compile); re-time on a quiet box. A supervisor may want the winning soak 6:60 as the closing check. Evidence `.integration/evidence/lazy1/`.
+- PAPERCUT: `npm run typecheck` 5 min on a loaded box, ~5 min lost; the ability-item census pins source line numbers, so any line shift in `battleScript*` files breaks `abilityItemParityCensus.test.ts`, ~10 min lost; the foreground tool limit (5 / 10 min) backgrounded two of my runs, ~15 min lost (re-run sharded).
+
+---
+
 ## 2026-11-16 — CAX31 daily run (supervisor, Opus 5.5): wind-down: Lobby NPCs walk like the ROM, cry-task samples, three move-sound slices
 
 - **State:** master clean, no workers, no worktrees; no push. **No DEFERRED items.** Final tree `36e9335ab` (psn2). ENGINE_BUILD `eb-c26961a07ff6b07b` -> **`eb-b17e87a4a52c33ad`**
@@ -39,13 +54,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Next:** ROM window for Poison's 6th SE; then the move-SE lifetimes of the wind-down entry.
 
 ---
-
-## 2026-11-16 — aud242j (ts lane worker): move-animation SE lifetimes, slice 10 (ISSUES #219 family 1)
-
-- **State:** on master, committed (`8908b011b` lifetimes, `4e31b7675` ROM windows, docs after). Sound only.
-- **Did:** `AnimTask_ShakeMonInPlace`, `AnimMovementWaves`, Red Heart projectile / burst, `AnimTask_DigUpMovement` (FALSE), Silver Wind sparks (C cited in the extractor; `docs/aud242-move-anim-sounds.md` section 14).
-  ROM windows (step mode): Struggle +7, Silver Wind +2 (both sides), Dig unleash 0; Attract C-derived only (same-gender lab does not animate it).
-- **Counts:** L50 emitted / gated 704 / 130 -> 707 / 127; all moves resolved 906 / 206 -> 910 / 202. T1 (seeds 0..99 ON, arms `on-04b803f5f` / `on-4e31b7675`): exact 24,055 -> 24,175,
-  missing-gated 690 -> 570, extra 0, unclassified 11,093 -> 11,093 (unchanged: pre-existing tooling gap, not 0). `commands` / `eventsDigest` identical 100 / 100; differential 303 / 303 (3 traces).
-- **Gates:** typecheck 0; test:gate 362 files / 2,843; importer tests 28 files / 292; build / build:lib 0. Full `npm test` not run (supervisor).
-- **Next:** Blizzard 88, Confuse Ray 47, Spark 32, Tri Attack 24; Dig turn-0 offsets (-6 / +23). Evidence `.integration/evidence/aud242j/`.

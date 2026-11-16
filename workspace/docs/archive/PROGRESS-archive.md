@@ -1,3 +1,15 @@
+## 2026-11-16 — aud242j (ts lane worker): move-animation SE lifetimes, slice 10 (ISSUES #219 family 1)
+
+- **State:** on master, committed (`8908b011b` lifetimes, `4e31b7675` ROM windows, docs after). Sound only.
+- **Did:** `AnimTask_ShakeMonInPlace`, `AnimMovementWaves`, Red Heart projectile / burst, `AnimTask_DigUpMovement` (FALSE), Silver Wind sparks (C cited in the extractor; `docs/aud242-move-anim-sounds.md` section 14).
+  ROM windows (step mode): Struggle +7, Silver Wind +2 (both sides), Dig unleash 0; Attract C-derived only (same-gender lab does not animate it).
+- **Counts:** L50 emitted / gated 704 / 130 -> 707 / 127; all moves resolved 906 / 206 -> 910 / 202. T1 (seeds 0..99 ON, arms `on-04b803f5f` / `on-4e31b7675`): exact 24,055 -> 24,175,
+  missing-gated 690 -> 570, extra 0, unclassified 11,093 -> 11,093 (unchanged: pre-existing tooling gap, not 0). `commands` / `eventsDigest` identical 100 / 100; differential 303 / 303 (3 traces).
+- **Gates:** typecheck 0; test:gate 362 files / 2,843; importer tests 28 files / 292; build / build:lib 0. Full `npm test` not run (supervisor).
+- **Next:** Blizzard 88, Confuse Ray 47, Spark 32, Tri Attack 24; Dig turn-0 offsets (-6 / +23). Evidence `.integration/evidence/aud242j/`.
+
+---
+
 ## 2026-11-16 — aud242i (ts lane worker): move-animation SE lifetimes, slice 9 (ISSUES #219 family 1)
 
 - **State:** on master, committed (`9752b45a0` waitsound bound + Sludge Bomb, `04b803f5f` Faint Attack + clearmonbg overrun, docs after). Sound only.
