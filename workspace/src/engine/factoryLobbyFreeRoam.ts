@@ -159,6 +159,12 @@ export interface FactoryLobbyFreeRoamState {
    * by 16 marks a completed cycle (re-arm while held, settle on release).
    */
   readonly bumpElapsed: number;
+  /**
+   * lbw5: the GO anim command index the idle (face) pose sits on, 1 or 3. Every in-place turn and every tile step toggles it
+   * (SetStepAnimHandleAlternation: a walk / turn starts at 1 -> 2, 3 -> 0 and ends one command later), and it decides the first pose
+   * of the next fresh walk (I 3: walk2, I 1: walk1) and of a turn (I 1: walk2 then stand, I 3: walk1 then stand).
+   */
+  readonly idleIdx: 1 | 3;
 }
 
 export function createFactoryLobbyFreeRoamState(): FactoryLobbyFreeRoamState {
@@ -176,7 +182,12 @@ export function createFactoryLobbyFreeRoamState(): FactoryLobbyFreeRoamState {
     heldDir: null,
     pendingDir: null,
     bumpElapsed: 0,
+    idleIdx: 1,
   });
+}
+
+function bumpStartIdx(state: FactoryLobbyFreeRoamState): number {
+  return state.idleIdx === 1 ? 2 : 0;
 }
 
 function startStep(
@@ -220,11 +231,7 @@ function startStep(
     // pre-state cmdIdx 0/3) it ends at 1 → the walk maps 1→2 (walk2).
     // Measured on the walk fixture: south/west fresh steps render walk1
     // (animClock 0), north fresh steps render walk2 (animClock 16).
-    animClock: fresh
-      ? dir === "north"
-        ? LOBBY_FREE_ROAM_POSE_FRAMES * 2
-        : 0
-      : state.animClock,
+    animClock: fresh || pressStart ? (state.idleIdx === 1 ? LOBBY_FREE_ROAM_POSE_FRAMES * 2 : 0) : state.animClock,
     stepFromX: state.x,
     stepFromY: state.y,
     stepDir: dir,
@@ -263,7 +270,7 @@ export function advanceFactoryLobbyFreeRoam(
       if (isFactoryLobbyCellWalkable(state.x + dx, state.y + dy, live)) {
         // The walk starts at the GO anim command index the bump left (2, 3, 0, 1, ... advancing per 16-frame cycle) run through
         // SetStepAnimHandleAlternation (1 -> 2, 3 -> 0); the rendered pose lags it by one frame.
-        const bumpIdx = (2 + Math.floor(state.bumpElapsed / LOBBY_FREE_ROAM_BUMP_FRAMES)) % 4;
+        const bumpIdx = (bumpStartIdx(state) + Math.floor(state.bumpElapsed / LOBBY_FREE_ROAM_BUMP_FRAMES)) % 4;
         const startIdx = bumpIdx === 3 ? 0 : bumpIdx === 1 ? 2 : bumpIdx;
         const started = startStep({ ...state, bumpElapsed: 0, heldDir, pendingDir: null }, heldDir, false, live);
         return Object.freeze({ ...started, animClock: (LOBBY_FREE_ROAM_POSE_FRAMES * startIdx + 4 * LOBBY_FREE_ROAM_POSE_FRAMES - 1) % (4 * LOBBY_FREE_ROAM_POSE_FRAMES) });
@@ -282,7 +289,9 @@ export function advanceFactoryLobbyFreeRoam(
           pendingDir: null,
         });
       }
-      return Object.freeze({ ...state, bumpElapsed: 0, heldDir, pendingDir: null });
+      // lbw5: the idle pose settles on the last cycle's command index (the bump anim starts at alt(idleIdx) and advances one per cycle).
+      const lastIdx = (bumpStartIdx(state) + state.bumpElapsed / LOBBY_FREE_ROAM_BUMP_FRAMES - 1) % 4;
+      return Object.freeze({ ...state, bumpElapsed: 0, idleIdx: lastIdx <= 1 ? 1 : 3, heldDir, pendingDir: null });
     }
     return Object.freeze({
       ...state,
@@ -300,7 +309,7 @@ export function advanceFactoryLobbyFreeRoam(
         // starts the step on the ROM frame the tile clears (ROM dump lbw5 tdep-P5856).
         const { dx, dy } = DIR_DELTA[state.turnTarget];
         if (!isFactoryLobbyCellWalkable(state.x + dx, state.y + dy, live)) {
-          return Object.freeze({ ...state, facing: state.turnTarget, turnRemaining: 0, heldDir, pendingDir: null, bumpElapsed: 1 });
+          return Object.freeze({ ...state, facing: state.turnTarget, turnRemaining: 0, heldDir, pendingDir: null, bumpElapsed: 1, idleIdx: state.idleIdx === 1 ? 3 : 1 });
         }
       }
       return Object.freeze({ ...state, turnRemaining, heldDir, pendingDir: null });
@@ -313,11 +322,12 @@ export function advanceFactoryLobbyFreeRoam(
     // through the turn (>= the 8-frame turn) is the one-tile tap.
     if (heldDir === state.turnTarget) {
       // Turn commit: the engine commits one tick after the ROM frame that decided, so it sees the NPC state of two ticks back.
-      return startStep({ ...state, facing, turnRemaining, heldDir }, facing, true, lagged);
+      return startStep({ ...state, facing, turnRemaining, heldDir, idleIdx: state.idleIdx === 1 ? 3 : 1 }, facing, true, lagged);
     }
     return Object.freeze({
       ...state,
       facing,
+      idleIdx: state.idleIdx === 1 ? 3 : 1,
       turnRemaining,
       heldDir,
       pendingDir: null,
@@ -336,6 +346,7 @@ export function advanceFactoryLobbyFreeRoam(
       y: state.y + dy,
       stepRemaining: 0,
       animClock: state.animClock + 1,
+      idleIdx: Math.floor((state.animClock + 2) / LOBBY_FREE_ROAM_POSE_FRAMES) % 4 === 2 ? 1 : 3,
       heldDir,
       pendingDir: null,
     });
@@ -495,8 +506,8 @@ export function lobbyFreeRoamPlayerFrame(state: FactoryLobbyFreeRoamState): numb
     // idx 2, 5793 idx 3, 5809 idx 0, ...) and the RENDERED pose lags the RAM
     // index by one frame: bumpElapsed 1 (the block tick) still shows the
     // pre-bump standing pose, cycle k's pose starts at bumpElapsed 16k + 2.
-    const cycle = state.bumpElapsed === 1 ? -1 : Math.floor((state.bumpElapsed - 2) / LOBBY_FREE_ROAM_BUMP_FRAMES) % 4;
-    const phase = cycle === 0 ? 2 : cycle === 2 ? 0 : 1;
+    const idx = state.bumpElapsed === 1 ? -1 : (bumpStartIdx(state) + Math.floor((state.bumpElapsed - 2) / LOBBY_FREE_ROAM_BUMP_FRAMES)) % 4;
+    const phase = idx === 2 ? 2 : idx === 0 ? 0 : 1;
     switch (state.facing) {
       case "south": return phase === 0 ? 3 : phase === 2 ? 4 : 0;
       case "north": return phase === 0 ? 5 : phase === 2 ? 6 : 1;
@@ -512,6 +523,14 @@ export function lobbyFreeRoamPlayerFrame(state: FactoryLobbyFreeRoamState): numb
     // pose (GO_FAST cmdIdx 3: south 0 / north 1 / west 2). East reuses west
     // h-flipped (GO_FAST_EAST = GO_FAST_WEST hFlip).
     const walkTwo = state.turnRemaining > LOBBY_FREE_ROAM_TURN_FRAMES / 2;
+    if (walkTwo && state.idleIdx === 3) {
+      switch (state.turnTarget) {
+        case "south": return 3;
+        case "north": return 5;
+        case "west": return 7;
+        case "east": return 7;
+      }
+    }
     switch (state.turnTarget) {
       case "south": return walkTwo ? 4 : 0;
       case "north": return walkTwo ? 6 : 1;

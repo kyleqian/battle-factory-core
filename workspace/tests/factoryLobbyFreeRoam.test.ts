@@ -287,7 +287,11 @@ describe("Factory Lobby free-roam (docs/factory-lobby-freeroam-ground-truth.md)"
     expect(turning.animClock).toBe(0);
     const stepping = advance(turning, ["west"], LOBBY_FREE_ROAM_TURN_FRAMES);
     expect(stepping.stepRemaining).toBe(LOBBY_FREE_ROAM_TILE_FRAMES - 1);
-    expect(lobbyFreeRoamPlayerFrame(stepping)).toBe(7);
+    // lbw5: the first pose of a fresh walk follows the GO anim's idle command index (idleIdx), which every turn and tile step toggles:
+    // the walk's tile steps and this turn leave it at 1 -> walk-2 (west frame 8). (The ROM does not turn at all on a direction change while
+    // moving; this pin only documents the engine's own turn path.)
+    expect(stepping.idleIdx).toBe(1);
+    expect(lobbyFreeRoamPlayerFrame(stepping)).toBe(8);
   });
 
   it("turns in place for 8 frames before stepping a fresh direction (§2)", () => {
