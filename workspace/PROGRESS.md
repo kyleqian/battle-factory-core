@@ -46,6 +46,9 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   `docs/dl2-sprite-repack.md`; frames identical). No API change. dl1 (`docs/dl1-download-size.md`) ranks the rest: per-species pictures (~677 KiB, needs a hold rule + optional
   `spriteBase` option), per-move animation assets (~225), the retired canonical march (~63-190, needs a product decision). Also check the CDN serves brotli-11: the handoff's 3.26 MB matches gzip-9.
 - **rrh4 (side):** R108, R105, R077 staged and matched on the ROM (53 / 110 covered); R065 -> class (b), R069 -> (a). Supervisor re-drove R108: match, 6 / 6.
+- **hie4 (side):** Leftovers / Shell Bell post-heal text now ROM-exact in both scenes (item-heal HP command drops the ordinary hit's 28-frame floor; ISSUES #220); census 0..99 both scenes:
+  outcomes / digests identical, 66 / 100 battles move timing only; soaks 20 / 20 x3. **rol1 (integration, doc + test):** the Rollout chain drift is that same 28-frame floor on ordinary hits
+  (the ROM hold is ~bar + 14 rows, no floor); hpd1 is replacing it.
 - **lbw5 (side):** Lobby player <-> NPC cases proven on the ROM; bump direction change and turn-commit refusal fixed (`factoryLobbyFreeRoam.ts`, `idleIdx` pose state); forfeit window 109 -> 113 / 113; lbw4 / lbra / won-* windows unchanged; supervisor `npm run compare` lbw5-bump-turn-off 269 / 269.
 - **aud242o / p (integration, sound only):** Petal Dance, Confuse Ray ball bounce, Tri Attack, Dive, Rollout counter, Encore, Flatter, Reversal, Taunt, Karate Chop, Revenge, Mist Ball, Leaf Blade;
   T1 missing-gated 195 -> **95**; T2 ON move-SE missing (21 seeds) **76** (aud251: 206); differentials 320 / 320, 240 / 240.

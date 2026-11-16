@@ -44,8 +44,9 @@ exclusions are superseded. Unrelated expansions stay parked.
     reproduce under the drift-aware measure: it was measured against another offset). Cure berry (Cheri): ROM ages 1-11 are drawn inside
     the preceding 32-frame `status` command; the app starts the view at age 12 (11 frames, <= 964 px at 49,74-97,112). Unmeasured: a berry
     behind a Substitute (Scene ON skips the command), multi-print berries (confuse / stat berries), an elevated opponent's shadow window.
-  - **Post-heal tail** (pre-existing): after `ItemHealHP_Ret`'s HP update (Leftovers / Shell Bell) the app's next text starts ~17-19 frames
-    later than the ROM in both scenes (Sitrus / RemoveItem path exact).
+  - **Post-heal tail: fixed by hie4 (2026-11-16, `docs/hie2-held-item-render.md` "hie4")**: the item-heal `datahpupdate` drops the hit's 28-row floor; Leftovers / Shell Bell next text exact
+    in both scenes at the pre-segment offset. Open: the Shell Bell split (+3 move-end rows, turn-end 9) rests on one lab per scene; Wish's heal and the confuse berry take the no-floor bar by
+    source shape without a ROM window. The ordinary hit's own floor: rol1 / hpd1 (`docs/rol1-rollout-chain.md`).
   Plan: `docs/hie-scout.md`; `docs/aud250-general-anim-sounds.md`.
 
 ## #219 — S11 sound gaps after the aud248 scoreboard (2026-11-14)
