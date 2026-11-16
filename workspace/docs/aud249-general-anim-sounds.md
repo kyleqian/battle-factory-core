@@ -117,3 +117,42 @@ Evidence: `.integration/evidence/psn1/` (`rom-2turn.json`, `engine-rows.txt`). N
 ## psn2: the 6th `Status_Poison` SE 148 (2026-11-16, sound-only)
 
 `emitGeneralAnimSounds` now schedules, at the status-animation script's first row (command age `STATUS_ANIMATION_SCRIPT_AGE`), every table row whose command age falls at or after the window end (`scheduleStatusAnimationTail`, the existing `scheduleAfter` queue), so a `loopsewithpan` row past the 71 / 100 / ... presentation window still plays, as the ROM's parallel sound task does (battle_anim.c:482). The window itself is unchanged (frames identical). A scan of all nine `Status_*` scripts (`ops` rows + `STATUS_ANIMATION_SCRIPT_AGE` against `STATUS_ANIMATION_ADDED_ROWS`) shows only `Status_Poison` needs it (last SE age 77 of 71); `Status_Confusion` ends at 80 of 100 and the rest are earlier still. The Toxic window `tools/audio/fixtures/aud242e-toxic-player.json` is pinned in `tests/aud249GeneralAnimSounds.test.ts`: six SE 148 rows, 14 apart, pan 63, engine 286..356 vs ROM 296..366 (the +10 first-row residual of psn1 is unchanged).
+
+## sta2: where the second `Status_*` play's +14 comes from (2026-11-16, evidence only, existing fixtures, `src/` / `tests/` untouched)
+
+**Answer: no op of `Status_Confusion` / `ConfusionEffect` explains it.** The script is a straight line (`loadspritegfx`, `call ConfusionEffect`: one `loopsewithpan SE_M_DIZZY_PUNCH, TARGET, 13, 6`, five `create_confusion_duck_sprite … duration=90`, `return`, `end`; `battle_anim_scripts.s:10230 / 10156`);
+there is no `waitforvisualfinish` / `delay` / `loop` the table fails to resolve, and the table row (`loopsewithpan` frame 3, wait 13, times 6) already matches the ROM's six rows (14 apart). The ROM's second play is the same script, same length. The +14 sits **between** the two status-animation commands (the message section), not inside a play.
+
+Anchor: the BGM `duck 476` (volume 256) event is `Cmd_end`'s `m4aMPlayVolumeControl(&gMPlayInfo_BGM, TRACKS_ALL, 256)` (`battle_anim.c:520`, the same call that sets `gAnimScriptActive = FALSE`), so each ROM `duck` marks a script end. `end` waits for the last SE: last loop SE at first + 70, `se_m_dizzy_punch.s` is 24 ticks of W plus the poll, so end = first SE + 96 (Confusion).
+
+| window (fixture) | play | ROM first SE | ROM script end (duck) | ROM SE -> end | engine SE (age 10) | engine window end | engine SE -> end |
+|---|---|---|---|---|---|---|---|
+| aud242c-flatter-player | 1 | 458 | 554 | 96 | 451 | 541 | 90 |
+| aud242c-flatter-player | 2 | 752 | (848, past the 822-frame window) | - | 731 | 821 | 90 |
+| aud242f-swagger-player | 1 | 429 | 525 | 96 | 421 | 511 | 90 |
+| aud242f-swagger-player | 2 | 723 | 819 | 96 | 701 | 791 | 90 |
+| aud242g-dreameater-player (Status_Sleep, SE 197) | 1 | 272 | 365 | 93 | 272 | 359 | 87 |
+| aud242g-dreameater-player | 2 | 565 | 658 | 93 | 550 | 637 | 87 |
+
+Window end of the engine = command start + `STATUS_ANIMATION_ADDED_ROWS` (100 / 97); engine commands between the plays (`.integration/evidence/sta2/cmds-*.txt`): flatter / swagger `status-animation` 100 rows, `message` 91 (hold 64), two 1-row `sprite-visibility`, `message` 87, then the second `status-animation` at +280 (dreameater: 97, message 87, `status-icon` / `sprite-visibility` x2 / `status` 1 row each, message 90, second SLP at +278).
+
+Decomposition of the second-play lead (ROM minus engine, second play relative to the first = 14 / 14 / 15):
+
+- ROM play 1 SE -> script end is 96 / 96 / 93, the second play's is 96 / 93 (swagger / dreameater, the only second plays with a visible duck): **both plays last the same**, so the script/loop model is not the cause.
+- script end -> next play's first SE: ROM 198 / 198 / 200 (554 -> 752, 525 -> 723, 365 -> 565) vs engine 190 / 190 / 191: **+8 / +8 / +9**; the remaining +6 is play 1 itself (ROM SE -> end 96 vs 90 / 93 vs 87), i.e. the engine's age-7 SE anchor (SE at command age 10) sits 6 frames later in the window than the ROM's. If the 100 / 97 windows are right (they are measured gAnimScriptActive rows, sta123), the ROM first SE is at command age 4 (script row 1 + table frame 3, the plain source reading) and the whole +14 is the message section: ROM end -> second command start (second SE - 4) = 194 / 194 / 196 vs engine 180 / 180 / 181 = **+14 / +14 / +15**.
+  The two readings differ only in where the 6 frames go; the sum is the same. Not resolvable from sound events alone.
+
+What lies between the plays in the ROM (`BattleScript_MoveEffectConfusion` `chosenstatus2animation; printstring; waitmessage` -> next battler's `HandleAction_UseMove` -> `BattleScript_MoveUsedIsConfused` `printstring; waitmessage; status2animation`, `battle_scripts_1.s:3932 / 3796`; dreameater analog: the sleep message, the status / sprite commands, the next printstring) is controller-handshake work the engine models as message (text + 64 hold) plus 1-row commands. A +14 spread over ~4 handshakes is the likely size of one or two missing per-instruction controller waits, but **which transition is short is not identified**; the fixtures hold no frame between 528 and 752 (flatter) except SEs and ducks.
+
+Proposed fix (not applied, `src/` untouched): (1) a ROM step-mode window of one confusion turn recording `gBattlescriptCurrInstr` and `gBattleControllerExecFlags` per frame from play 1's `end` (duck) to play 2's first SE, and compare against the engine's command boundaries (`.integration/evidence/sta2/cmds-flatter.txt` style); (2) add the missing frames to the identified message-to-action transition (not to `STATUS_ANIMATION_ADDED_ROWS`, which the SE -> end spacing shows is consistent between plays); (3) only then re-derive `STATUS_ANIMATION_SCRIPT_AGE` (7 -> 1 if the window anchor holds) and the +7 / +8 first-play residuals of the tests; update `tests/aud249GeneralAnimSounds.test.ts` WINDOWS (`first` / `second`). Frames in Scene ON would change (the message section), so it needs the usual neutrality census, unlike the sound-only fixes.
+
+Reproduce (no emulator, no test run; scratch scripts are under the ignored `.integration/evidence/sta2/`):
+```
+python3 - <<'PY'
+import json
+for n in ['aud242c-flatter-player','aud242f-swagger-player','aud242g-dreameater-player']:
+    d=json.load(open(f'tools/audio/fixtures/{n}.json')); print(n,[(e['frame'],e['kind'],e.get('id')) for e in d['events'] if e['kind'] in ('se','duck') and not e.get('noop') and e['frame']>250])
+PY
+node --experimental-strip-types --no-warnings .integration/evidence/sta2/cmds.ts aud242c-flatter-player 380 780   # engine command boundaries (createInitialState + APP_STAGES + traceAdvances + tick, then print state.factoryRoundBattleOrchestrator.battleResolutionPresentation command changes)
+node --experimental-strip-types --no-warnings .integration/evidence/sta2/rows.ts                                  # engine SE rows (same replay as tests/aud249GeneralAnimSounds.test.ts ourEvents)
+```
