@@ -82,5 +82,41 @@ Trace `tools/compare/traces/lbw4-woman-block-off.json` (Battle Scene OFF, lbra-l
   501 / 501 (5700..6200); no regression on lbra-loss-off 2258 / 2258, loss-beyond-boundary 183 / 183, loss-lobby-walk 177 / 177, won-no 9580-9633 54 / 54, won-yes 9660-9713 54 / 54,
   won-attendant 17 / 17 + 6 / 6 + 44 / 44. Tier-1: `tests/lbw4LobbyNpcPlayer.test.ts` + `tests/fixtures/lbw4/woman-block.json.gz` (generator `tools/probe/lbw4-make-fixture.py`) replay 440 frames
   of player cur / prv, both wanderers and the cursor.
-- **Unproven:** a same-frame race for one tile (the ordering is from source and slot order, not from a racing trace), a turn-commit refusal by the woman (bump one tick earlier), a direction change during a bump
-  (the ROM interrupts at once, the engine at the cycle end; pre-existing), the fat man in the player's way.
+- **Unproven at lbw4 (all four proven in lbw5, below):** a same-frame race for one tile, a turn-commit refusal by the woman, a direction change during a bump, the fat man in the player's way.
+
+## lbw5 -- the four lbw4 "Unproven" player <-> NPC cases, on the ROM
+
+Method: `tools/probe/lbw5-sweep.py` replays `lbw4-woman-block-off` to frame 5254 (a segment boundary: player idle at grid (11,15), facing south, woman and fat man
+mid-wander), saves the raw emulator state and runs many button timelines from there (Scene OFF); each branch is a fixture row set
+`[held mask, gRngValue, player cur / prv, woman, fat man]`. `tools/probe/lbw5-check.ts` replays a sweep through the engine and prints the first mismatch per branch.
+Release timing was swept to the frame (the woman's ring walk is deterministic from 5254, so a press one frame earlier or later flips the outcome).
+Per case a committed compare trace (the lbw4 route to 5254 + the branch; `tools/probe/lbw5-make-trace.py`) and, for all four together, one Tier-1 fixture
+(`tests/fixtures/lbw5/player-npc.json.gz`, 11 branches, `tools/probe/lbw5-make-fixture.py`; `tests/lbw5LobbyNpcPlayer.test.ts`).
+
+| case | branches swept | ROM result | engine |
+| --- | --- | --- | --- |
+| 1 fat man in the way | RIGHT, a 24-frame release, DOWN held 130 from (13,15): bump at (13,16) | `LOOK_AROUND` never moves and never gives way; the bump runs for the whole hold; the player never enters (13,17) | already exact (tiles, cursor) |
+| 2 direction change during a bump | 20 (LEFT / RIGHT after 60..105 frames of the fat-man bump) | the other direction interrupts at once and starts its step that frame (`TryInterruptObjectEventSpecialAnim`: `movementDirection != direction` clears the held movement; runningState is still MOVING, so there is **no turn in place**) | **fixed**: the engine finished the bump cycle, then turned 8 frames |
+| 3 turn-commit refusal by the woman | 18 (`tdep`: press 5838..5857 against her departing tile, `tarr`: 5946..5958 against her arriving tile) | arriving: pressed up to P5952 the step starts, from P5953 the woman is already on the tile and it bumps; departing: the bump lasts 2 / 1 / 0 ticks for P5855 / P5856 / P5857 and the step starts on the same ROM frame (611) | **fixed**: the commit tick decided against the renderer's lagged NPC state (end of T-2) and was one tick late on the departing side |
+| 4 same-frame race for one tile | 11 (`race`: DOWN pressed 5940..5950 while the woman steps onto (11,17)) | the player is first up to P5944, the woman from P5945 (the player's CB1 runs before the woman's callback: she sees the player's moved cur / prv and turns away) | already exact |
+
+- **Fix 1 (case 2, `advanceFactoryLobbyFreeRoam`):** in the bump branch a held direction different from the facing now calls `startStep` at once (the old cycle-end turn-after-bump
+  branch is gone); the walk starts at the GO anim command index the bump had reached, run through `SetStepAnimHandleAlternation` (it preserves the index across a direction change).
+- **Fix 2 (case 3):** at `turnRemaining === 1` (the ROM frame that decides the committed step) a target the woman holds, seen against `live` (end of the previous tick),
+  starts the bump then; the same-direction interrupt that follows starts the step on the ROM frame the tile clears.
+- **Player idle GO-anim index (`idleIdx`, 1 or 3):** the sweep showed the walk / turn poses depend on history the engine's `animClock` did not carry. `SetStepAnimHandleAlternation` maps 1 -> 2, 3 -> 0
+  and a walk / turn ends one command later, so every turn and every tile step toggles the idle index; the turn shows walk-2 then stand from I = 1 and walk-1 then stand from I = 3; a fresh
+  walk after the turn starts at walk-1 (I after the turn = 3) or walk-2 (= 1); a bump starts at command 2 (I = 1) or 0 (I = 3) and advances one per 16 frames, the idle pose settling on the last
+  command's index (<= 1 -> 1, else 3). Spawn I = 1 (facing north, command 1; ROM `lbw4` route 4800). This replaces the old "north fresh = walk-2, others walk-1" heuristic, which held only for the
+  histories the walk fixtures had. Verified exact on loss-lobby-walk 177 / 177, loss-beyond-boundary, lbra-loss-off and every won / forfeit window (forfeit 1087-1199 improves 109 / 113 -> 113 / 113).
+  `tests/factoryLobbyFreeRoam.test.ts` "resets the walk cycle after a turn": a direction change **while moving** (not ROM behaviour: see below) now ends in walk-2 (west frame 8) instead of walk-1,
+  because the history now decides the first pose; the pin documents the engine's own turn path.
+- **Proof:** per trace ROM dump (`lbw1-lobby-wander-rom.py`) vs engine (`lbw3-engine-npcs.ts` + `lbw3-engine-compare.py`): max |offset| 0 and NPC state identical on every frame of all four.
+  `npm run compare`, capture windows from 5254: `lbw5-fatman-off` 254 / 254, `lbw5-bump-turn-off` (chg-LEFT-d75) 269 / 269, `lbw5-turn-refuse-off` (tdep-P5856) 745 / 745, `lbw5-race-off` (race-P5944) 796 / 796.
+  All 64 sweep branches (6 fat man + 20 bump + 44 race / turn) match on player cur / prv, both wanderers and the cursor except the three below. No regression: lbw4-woman-block-off 501 / 501, lbra-loss-off 2258 / 2258,
+  loss-beyond-boundary 183 / 183, loss-lobby-walk 177 / 177, won-no 54 / 54, won-yes 54 / 54, won-attendant 17 + 6 + 44, lbra-forfeit 113 / 113.
+- **Residuals (pose only, one frame each, excluded from the committed capture lists):** the first step frame after a bump interrupt (5394 in bump-turn, 5866 in turn-refuse: the ROM shows the new walk pose
+  on that frame and keeps it nine frames, the engine's lagged clock shows stand); a bump-cycle boundary one frame early at 5946 (turn-refuse) and 6009 (race, after a bump settles); the fat-man bump
+  settle after a release 5455 (the ROM runs one extra 16-frame cycle). None moves a tile, an NPC or the cursor.
+- **Pre-existing, not changed:** a held direction change while a step is in flight (RIGHT -> DOWN with no release gap: `fatN-j*-g0`, 3 of 6 branches) mismatches: the ROM has no turn in place while MOVING, the engine turns
+  for 8 frames at the tile center. Not reachable from the lab route in the fixtures (they release first) and out of this step's four cases.
