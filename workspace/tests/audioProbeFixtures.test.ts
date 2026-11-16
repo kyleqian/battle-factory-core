@@ -134,6 +134,7 @@ describe("audio probe fixtures", () => {
       "aud242k-crunch-player.json",
       "aud242k-firepunch-player.json",
       "aud242k-lovelykiss-player.json",
+      "aud242k-recover-player.json",
       "aud242k-safeguard-player.json",
       "aud242k-scaryface-player.json",
       "aud242k-smokescreen-player.json",

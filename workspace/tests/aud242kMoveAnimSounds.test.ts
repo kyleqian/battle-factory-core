@@ -1,4 +1,4 @@
-// aud242k: the move-animation SEs behind the Ancient Power / Fire Punch / Yawn / Smokescreen / Scary Face / Wish / Safeguard / Lovely Kiss / Crunch lifetimes (tools/extract/extract-anim-sound-timing.ts, aud242k block).
+// aud242k: the move-animation SEs behind the Ancient Power / Fire Punch / Yawn / Smokescreen / Scary Face / Wish / Safeguard / Lovely Kiss / Crunch / Recover (second turn, damaged) lifetimes (tools/extract/extract-anim-sound-timing.ts, aud242k block).
 // Fixtures are committed oracle output of tools/audio/soundEventProbe.py (stepping mode, call log + BlendPalette hook) and carry the replay trace; no emulator is needed.
 // See docs/aud242-move-anim-sounds.md section 15.
 import { readFileSync } from "node:fs";
@@ -63,6 +63,7 @@ const SPECS: Array<{ name: string; ids: number[]; delta: number; rows: number }>
   { name: "safeguard-player", ids: [225, 102], delta: -4, rows: 2 },
   { name: "lovelykiss-player", ids: [200, 226], delta: 0, rows: 2 },
   { name: "crunch-player", ids: [161], delta: 2, rows: 2 },
+  { name: "recover-player", ids: [140, 179], delta: -2, rows: 4 },
 ];
 
 describe("move-animation SEs of the aud242k lifetimes", () => {
