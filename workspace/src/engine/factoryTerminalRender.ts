@@ -274,6 +274,11 @@ export function renderFactoryTerminalField(
       (a.object.tile.y - b.object.tile.y) ||
       (a.object.tile.x - b.object.tile.x)
     );
+  // lbw4: SetObjectSubpriorityByElevation puts the sprite lower on the screen in front (16px buckets, then OAM y), so the draw order is
+  // the drawn sprite's own top y (live: a wandering NPC or a stepping player re-sorts), not the spawn tile; stable on ties.
+  const drawnY = (e: (typeof objects)[number]): number =>
+    (e.object.asset === "player" ? playerOverride?.y : npcOverrides?.get(e.object.id)?.y) ?? e.pos.y;
+  objects.sort((a, b) => drawnY(a) - drawnY(b));
   for (const { object, pos } of objects) {
     if (object.asset === "player") {
       // The terminal lock only ever shows the player's north-standing pose
