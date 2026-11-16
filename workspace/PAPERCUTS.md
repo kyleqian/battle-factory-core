@@ -16,6 +16,9 @@ history.
 - Bump (worker turns vs full suite): a brief saying "you need not run the full npm test" still got six 6-9 min shard calls (lbw4 ~45 min);
   say "do NOT run the full npm test".
 - Bump: typecheck / shard tests auto-background at the 120 s default tool timeout (lbw3 ~3 min).
+- **`npm run extract:audio` wipes the whole audio output dir, incl. the non-regenerated `song-players.json`**; and the AAC step needs a
+  static ffmpeg that only exists at `/tmp/aud245-ffm` (cry2 ~5 min, restored with git).
+- Bump (shards vs 600 s cap): only one `npm test` shard fits per foreground call (aud242h).
 
 ## Worker friction, 2026-11-15 run
 
