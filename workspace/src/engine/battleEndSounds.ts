@@ -22,8 +22,12 @@ const END_FADE_SPEED = 5;
 
 /** Ticks from the dismiss (A) of the last "fainted!" box to `PlayBGM(victory)` (attacker-faint path, all four win windows). */
 export const VICTORY_BGM_AFTER_FAINT_DISMISS = 22;
-/** Ticks from the dismiss of the last "fainted!" box of a loss to `returnopponentmon1toball`'s SE_BALL_OPEN. */
-export const OPPONENT_BALL_OPEN_AFTER_FAINT_DISMISS = 24;
+/**
+ * Ticks from the first tick of `returnopponentmon1toball`'s command (BattleScript_LocalBattleLostPrintTrainersWinText, battle_scripts_1.s:2962: the
+ * script runs after the turn's remaining commands, e.g. a held-item effect) to its SE_BALL_OPEN.
+ */
+export const OPPONENT_BALL_OPEN_AFTER_RETURN_TO_BALL = 22;
+const LOSS_TAIL_SCRIPT = "BattleScript_LocalBattleLostPrintTrainersWinText";
 /** Ticks from P (the A on the trainer's lose / win text) to each end sound. */
 export const END_FADE_AFTER_TEXT_DISMISS = 6;
 export const RETURN_BGM_AFTER_TEXT_DISMISS = 53;
@@ -40,6 +44,17 @@ function currentButtonMessage(
   if (segment === undefined || command === undefined || command.type !== "message" || command.advance !== "button") return null;
   const payload = segment.events.find((event) => event.sequence === command.eventSequence)?.payload;
   return { command, segment, messageId: payload !== undefined && "messageId" in payload ? (payload.messageId as string) : null };
+}
+
+/** The loss's `returnopponentmon1toball` command (a sprite-visibility of the opponent that is hidden): SE_BALL_OPEN on its first tick. */
+export function emitLossBallOpenSound(after: BattleResolutionPresentationState | null): void {
+  if (after === null || after.lifecycle.phase !== "presenting" || after.lifecycle.phaseElapsed !== 0) return;
+  const segment = after.segments[after.segmentIndex];
+  const command = segment?.commands[after.commandIndex];
+  if (command === undefined || command.type !== "sprite-visibility") return;
+  const event = segment!.events.find((candidate) => candidate.sequence === command.eventSequence);
+  if (event?.provenance?.sourceLabel !== LOSS_TAIL_SCRIPT) return;
+  scheduleAfter(OPPONENT_BALL_OPEN_AFTER_RETURN_TO_BALL, playBallOpenSe);
 }
 
 /** Called once per collected tick with the round's resolution presentation before and after the tick; write-only. */
@@ -66,8 +81,6 @@ export function emitBattleEndSounds(
         stopLowHpSound();
         emitSound({ kind: "bgm", id: victory, pan: null });
       });
-    } else if (lost && command.faintBattler === 0 && segment.afterRules.rulesContext.battlers[1]!.hp !== 0) {
-      scheduleAfter(OPPONENT_BALL_OPEN_AFTER_FAINT_DISMISS, playBallOpenSe);
     }
     return;
   }
