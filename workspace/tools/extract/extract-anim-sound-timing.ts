@@ -472,6 +472,17 @@ function lifetimeOf(cmd: Command, attackerSide: number, pic: PicContext, rollout
     if (duration === null || duration < 1) return null;
     return { exact: duration - 2 };
   }
+  // aud242q: AnimTask_BlendMonInAndOut (battle_anim_mons.c:1714-1768; script args[4] = coeff, [5] = delay, [6] = times): the entry only sets func (first step call 1); a step fires every
+  // max(delay,1) calls, coeff up-fires then coeff down-fires per repeat, and the last down-fire destroys: call 2*coeff*times*delay, gone one tick earlier.
+  if (op === "createvisualtask" && args[0] === "AnimTask_BlendMonInAndOut") {
+    const [coeff, delay, times] = [intArg(args[4]), intArg(args[5]), intArg(args[6])];
+    if (coeff === null || delay === null || times === null || coeff < 1 || times < 1) return null;
+    return { exact: 2 * coeff * times * Math.max(delay, 1) - 1 };
+  }
+  // AnimTask_ExtrasensoryDistortion (battle_anim_psychic.c:954-1050): func-only entry; data[1] counts 24 case-0 calls (1..24), case 1 at call 25, destroy at call 26.
+  if (op === "createvisualtask" && args[0] === "AnimTask_ExtrasensoryDistortion") return { exact: 25 };
+  // AnimTask_TransparentCloneGrowAndShrink (battle_anim_psychic.c:1052-1117): func-only entry; data[1] += 4 to 48 (calls 1..12), -= 4 to 0 (13..24), case 2 at 25, destroy at 26.
+  if (op === "createvisualtask" && args[0] === "AnimTask_TransparentCloneGrowAndShrink") return { exact: 25 };
   if (op === "createvisualtask" && (args[0] === "AnimTask_ShakeMon" || args[0] === "AnimTask_ShakeMon2")) {
     const [x, y, numTimes, delay] = [intArg(args[3]), intArg(args[4]), intArg(args[5]), intArg(args[6])];
     if (x === null || y === null || numTimes === null || delay === null || numTimes < 1) return null;
