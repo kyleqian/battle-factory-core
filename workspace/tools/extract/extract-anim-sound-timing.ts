@@ -760,6 +760,21 @@ function lifetimeOf(cmd: Command, attackerSide: number, pic: PicContext, rollout
   if (sprite("gLargeFlameSpriteTemplate") || sprite("gLargeFlameScatterSpriteTemplate")) { const n = intArg(args[5]); return n === null || n < 1 || n > 0x7fff ? null : { exact: n - 1 }; }
   // AnimLightning (battle_anim_electric.c:459-474): the init installs the step, which destroys once sAnim_Lightning (:40-48: 5 + 5 + 8 + 5 + 5 = 28 ticks) ends: exact 28.
   if (sprite("gLightningSpriteTemplate")) return { exact: 28 };
+  // ---- aud242p (docs section 20). AnimTask_HardwarePaletteFade (battle_anim_utility_funcs.c:199-216; args blendCnt, delay, y, targetY, reset = script args[2..6]): the entry runs
+  // BeginHardwarePaletteFade (palette.c:728-744: delayCounter = delay, so the first update is immediate) in the script step and installs a step that destroys once `active` clears. CB2's
+  // UpdateHardwarePaletteFade (:746-785) then steps y every delay + 1 iterations from iteration F; the step past targetY (|targetY - y| steps later) sets hardwareFadeFinishing, the VBlank
+  // of that iteration (UpdateBlendRegisters) clears `active`, and the task's RunTasks of the next iteration destroys it: gone (delay + 1) * |targetY - y| + 1 ticks after F.
+  if (op === "createvisualtask" && args[0] === "AnimTask_HardwarePaletteFade") {
+    const [delay, y, target] = [intArg(args[3]), intArg(args[4]), intArg(args[5])];
+    return delay === null || y === null || target === null || delay < 0 || y < 0 || target < 0 ? null : { exact: (delay + 1) * Math.abs(target - y) + 1 };
+  }
+  // AnimSpotlight (battle_anim_effects_3.c:1545-1604; affine anims :330-376): the init installs Step1 (call 0). The affine anim 0 (0 + 20 ticks) ends at call 20 (sprite.c:1055-1178: the END
+  // is reached at call begin + sum of the frame durations, the aud242m anger-mark rule), so state 0 passes in call 21; states 1 / 2 / 3 take 21 / 41 / 21 calls (22..104); state 4 (call 105)
+  // ChangeSpriteAffineAnim(1) (0 + 19 ticks, begin call 105, END at call 124); state 5 sees it in call 125 and installs Step2, which destroys in call 126: gone 125 ticks after F.
+  if (sprite("gSpotlightSpriteTemplate")) return { exact: 125 };
+  // AnimClappingHand / AnimClappingHand2 (:1606-1675; script args[3..7] = x, y, side, anchored, N): data[0] = N cycles of 12 calls (x2 -+12 -> 0 -> -+12 in steps of 2); the call that completes
+  // the Nth cycle (call 12N, abs(x2) == 12 on the way back) decrements data[0] to 0 and the same call destroys it: gone 12N - 1 ticks after F (N <= 0: the first step call destroys, 0).
+  if (sprite("gClappingHandSpriteTemplate") || sprite("gClappingHand2SpriteTemplate")) { const n = intArg(args[7]); return n === null ? null : { exact: n < 1 ? 0 : 12 * n - 1 }; }
   // AnimTask_InvertScreenColor (battle_anim_normal.c:759-778) inverts the palette buffer and destroys itself in the creating step: net 0 in gAnimVisualTaskCount (exact -1).
   if (op === "invert_screen_color" || (op === "createvisualtask" && args[0] === "AnimTask_InvertScreenColor")) return { exact: -1 };
 
@@ -1098,6 +1113,13 @@ function walk(bodyLabel: string, turn: number, attackerSide: number, pic: PicCon
       // aud242o: AnimConfuseRayBallBounce plays SE_M_CONFUSE_RAY itself (battle_anim_ghost.c:220-311): Step1 with PlaySE12WithPanning(gAnimCustomPanning), Step2 with PlaySE. The
       // runtime needs the creating pan task to share the sprite's iteration (the pan is read call by call), else the rows stay unmodelled.
       case "createsprite": {
+        // aud242p: gClappingHandSpriteTemplate with side arg 0 plays SE_M_ENCORE (PlaySE1WithPanning, BattleAnimAdjustPanning(SOUND_PAN_ATTACKER), :1638-1650) each time x2 crosses 0:
+        // calls 6, 18, ... 12N - 6 of its step (offsets call - 1). gClappingHand2 (data[3] = 255) and the side-1 hand are silent.
+        if (args[0] === "gClappingHandSpriteTemplate" && frame !== null && intArg(args[5]) === 0) {
+          const n = intArg(args[7]);
+          if (n !== null) for (let k = 0; k < n; k += 1) events.push({ op: "soundtask_se1", frame: frame + shiftAt(frame) + 5 + 12 * k, id: value("SE_M_ENCORE"), pan: value("SOUND_PAN_ATTACKER"), line });
+          break;
+        }
         if (args[0] !== "gConfuseRayBallBounceSpriteTemplate" || frame === null) break;
         const [offset, speed] = [intArg(args[3]), intArg(args[5])];
         const ball = offset === null || speed === null || speed < 1 ? null : confuseRayBallBounceLength(attackerSide, offset, speed);
