@@ -12,7 +12,9 @@ const fixture = JSON.parse(readFileSync(new URL("./fixtures/aud252-loss-itemeffe
   seeds: Record<string, { scene: "on" | "off"; setup: unknown; rom: Row[] }>;
 };
 // engine minus ROM frame offsets (relative to the last decision's commit): the item effect and the faint sit in the presentation-length residual
-const DELTAS: Record<string, number[]> = { "1914": [-5, -11, -19, -19, -19, -19, -19, 1], "2230": [7, -4, -6, -6, -6, -6, -6, 14] };
+// hie4 (2026-11-16) dropped the 28-row floor on the item-heal HP command: the loss SE_BALL_OPEN after the held-item heal moved 20 / 21 rows earlier and
+// now sits at the same engine-minus-ROM offset as the item effect's SEs before it (-19 / -19; -7 / -6), where aud252 pinned it over-held (+1 / +14).
+const DELTAS: Record<string, number[]> = { "1914": [-5, -11, -19, -19, -19, -19, -19, -19], "2230": [7, -4, -6, -6, -6, -6, -6, -7] };
 const script = new URL("../tools/integration/soundCensusRomReplay.ts", import.meta.url).pathname;
 
 function engineRows(seed: string, scene: string, setup: unknown): Row[] {
