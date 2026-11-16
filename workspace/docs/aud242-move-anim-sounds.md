@@ -951,7 +951,7 @@ Fixtures `tools/audio/fixtures/aud242n-{confuseray,spark}-{player,opponent}.json
 | Spark, player | 5 (THUNDERBOLT2 119 x3 at ROM 69 / 85 / 111 pan -64, HYPER_BEAM 215 at 138 pan 63, 119 at 149) | equal | **+5** on the three opening rows, **+6** on the last two |
 | Spark, opponent | 5 (119 x3 at 73 / 89 / 115 pan 63, 215 at 142 pan -63, 119 at 153) | equal | **+5**, then **+6** |
 
-The +5 is the aud242a idle-lead class (two `loadspritegfx` before the first SE; recorded, ISSUES #198). The extra +1 behind Spark's first wait is a ROM VBlank overrun in the step that creates the eight flashing sprites (script frame 50): the BlendPalette log shows that cycle's second fade call one frame late (BG y0 at 111, OBJ y0 at 112, against 69 / 69 for the first cycle). It is recorded as the test's `extra`, not modelled; the intervals inside each group and across the wait (gone 69 -> +6 ticks, then 11 to the last row) equal the ROM's.
+The +5 is the aud242a idle-lead class (two `loadspritegfx` before the first SE; recorded, ISSUES #198). The extra +1 behind Spark's first wait is a ROM VBlank overrun in the step that creates the eight flashing sprites (script frame 50): the BlendPalette log shows that cycle's second fade call one frame late (BG y0 at 111, OBJ y0 at 112, against 69 / 69 for the first cycle). It is recorded as the test's `extra`, not modelled; the intervals inside each group (16, 26 and 11 frames) equal the ROM's.
 
 Named gap: the ball bounce sprite itself plays SE_M_CONFUSE_RAY (196) with `gAnimCustomPanning` (`battle_anim_ghost.c:249-256`), 13 ROM rows per cast, a sprite-callback site the table does not model. The test asserts they are ROM-only (13 / 0).
 
@@ -965,7 +965,7 @@ Named gap: the ball bounce sprite itself plays SE_M_CONFUSE_RAY (196) with `gAni
 
 Only Confuse Ray (gated 1 -> 0) and Spark (2 -> 0) changed (semantic old-vs-new table diff).
 
-Census T1 (seeds 0..99 Scene ON, arms `on-9cc3398ff` (aud242m head), `on-b5005d97b` (Confuse Ray) and `on-05e2d0bc6` (Spark), each scored inside its own tree, which needs a `reference` symlink): exact 24,678 -> 24,725 -> **24,757**, **missing-gated 274 -> 227 -> 195**, missing-other 51, missing-declined 1, extra 0, unclassified 128 in all three. Sound sequence delta base -> final: 27 of 100 seeds changed, all by added rows (SE130 x 25, SE119 / SE215 x 16); none removed. `rst197CensusDelta.py` base vs final: 100 / 100 battles identical (31,264 commands, bad 0).
+Census T1 (seeds 0..99 Scene ON, arms `on-9cc3398ff` (aud242m head), `on-b5005d97b` (Confuse Ray) and `on-05e2d0bc6` (Spark), each scored inside its own tree, which needs a `reference` symlink): exact 24,678 -> 24,725 -> **24,757**, **missing-gated 274 -> 227 -> 195**, missing-other 51, missing-declined 1, extra 0, unclassified 128 in all three. Sound sequence delta base -> final: 27 of 100 seeds changed, all by added rows (Confuse Ray +47 SE130 rows, Spark +32 SE119 / SE215 rows, matching the exact-count deltas; the scorer's per-tuple `added` histogram counts distinct tuples, not rows); none removed. `rst197CensusDelta.py` base vs final: 100 / 100 battles identical (31,264 commands, bad 0).
 Frame hashes: `npm run compare:differential -- <Confuse Ray player, Confuse Ray opponent, Spark player Scene ON traces> --base 9cc3398ff --harness-from-head`: 240 / 240 captures byte-identical (captures 60..692 step 8).
 
 ### 18.5 Residuals
