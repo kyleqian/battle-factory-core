@@ -106,16 +106,15 @@ The ROM reaches pan +64 on `SE_M_STAT_INCREASE` vs an opponent target (check `Ba
 **aud242d (2026-11-07)** instant tasks + BlendBattleAnimPal / Exclude / BlendParticle / complex_palette_blend / metallic_shine
 (L50 emitted 550 -> 592, all 783 resolved): Thunderbolt / Icy Wind / Double-Edge / Metal Claw / Steel Wing +2, Hail / Sunny Day -4,
 Calm Mind -5; `AnimTask_MetallicShine` loses 4 wall frames at creation (2 localised), the SE_M_HARDEN loop's 2nd SE +2 extra. Open:
-`blend_color_cycle`, `HardwarePaletteFade`, Thunderbolt SE215 one frame late, Hail / Sunny Day rows after 760 not emitted.
+`HardwarePaletteFade`, Thunderbolt SE215 one frame late, Hail / Sunny Day rows after 760 not emitted.
 **aud242e (2026-11-08)** sprite / mon-task lifetimes (L50 640 emitted, 194 gated; all 833 resolved): Toxic +3; Rock Tomb / Sludge /
 Poison Fang / Water Pulse / Rolling Kick / Double-Edge / Overheat +2; Water Gun 0; Absorb / Mega Drain / Giga Drain -1; Counter -16 (used
 second). `simple_palette_blend` corrected one tick shorter from ROM BlendPalette logs, so Hyper Beam 0 -> +1 and Ice Beam +1 -> +2 (toward
 the +2 class: the alignment audit is the lead). Open: Overheat SE147 rows +3 more, Poison Tail later rows +4, Thunderbolt SE215 +1;
-next blockers hyper beam orb (52 ops), Hydro Pump orb (44), Fire Spin (42), aurora ring (40), air wave (40), power absorption orb (35),
-`blend_color_cycle` (32).
+next blockers hyper beam orb (52 ops), Hydro Pump orb (44), Fire Spin (42), aurora ring (40), air wave (40), power absorption orb (35).
 **aud242f (2026-11-08)** BowMon / HornHit / Ice Beam + Ice Punch crystals / fist / BreathPuff sprites, ScaleMonAndRestore / GrowAndShrink
 (L50 674 emitted, 160 gated; all 868 resolved): Horn Drill 0; Headbutt / Ice Punch / Ice Beam (its 7 SE137 rows now emitted) / Hidden
-Power +2; Swagger -3, Growth -4 (2nd SE152 behind `blend_color_cycle`). Blizzard's snowball ends off-screen (per-species pic offset:
+Power +2; Swagger -3, Growth -4. Blizzard's snowball ends off-screen (per-species pic offset:
 needs a species-aware model, doc 10.5); Tri Attack, Bubblebeam, Luster Purge, ExtremeSpeed, Psychic, Curse, Spark, Attract unmodelled.
 **aud243a (2026-11-08)** census T1 over 0..999 Scene ON (`docs/aud243a-sound-census.md`): 14,353 gated op sites (13,796 `end`, 557
 `unresolved-branch`; top Sludge Bomb, Bubblebeam, Struggle, Blizzard, Thunderbolt, Psychic, Tri Attack, Dream Eater), 240 cry-task sites
@@ -125,6 +124,10 @@ offsets above are invisible to T1 (known-offset 0); they need the ROM replay (au
 three rows after the nine-sprite step (SE_M_HYPER_BEAM, both SE_M_THUNDERBOLT2) +1 more, undiagnosed. Dream Eater's two SE197 sleep rows
 (ROM 272, 565) not emitted. Still gated: Tri Attack's `gLargeFlameScatterSpriteTemplate` / `AnimTask_ShakeTargetInPattern`, the
 `ElectricityEffect` wait ending Thunderbolt / Spark.
+**aud242h (2026-11-16)** `blend_color_cycle`, Shadow Ball ball, vertical dip (L50 697 emitted, 137 gated; all 899 resolved): Psychic +2, Body Slam +2,
+Growth's 2nd SE152 exact at its -4 (`docs/aud242-move-anim-sounds.md` section 12). Open (top census gated ops): Sludge Bomb 198 (SE-length table,
+`waitsound` keeping `pending`, hit-particle / poison-bubble lifetimes), Blizzard 88, Faint Attack 62, Confuse Ray 47, Dig 37, Spark 32, Struggle 30,
+Attract 28; Shadow Ball ball has no ROM window (Rattata-only stage is Ghost-immune).
 
 ## #194 — Opponent RATTATA Quick Attack differs above the clip row (qak247, 2026-11-04)
 

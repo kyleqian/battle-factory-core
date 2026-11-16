@@ -621,3 +621,44 @@ Tested code commit `470c0b94e` (tree `HEAD^{tree}` at that commit; the later com
 - `npm run compare:differential` (`--harness-from-head`, base `09ea8b3a7`) over 10 Scene ON move traces (aud242g Dream Eater / Tri Attack / Bubblebeam, aud242e Thunderbolt, aud242f Psychic / Swagger / Ice Beam / Growth / Luster Purge / Curse; frames 60..821 step 8, Dream Eater 60..1519): **1,047 / 1,047 captures byte-identical**.
 - ENGINE_BUILD (headless graph; the table is in it): `eb-01603ce9f24e6eec` (`09ea8b3a7`) -> `eb-52789eb6d9c84998`.
 - Census (`LSD194_SHARDS=0`, seeds 0..99 Scene ON, `soundCensusDelta.py --t1`) vs the aud243a arm `on-858ea0343` shard r0: exact 24,430 -> 24,616 (+186), missing-other 237 -> 51 (the 186 `inside the command` rows are gone: Bubble Beam 78, Thunderbolt 56, Dream Eater 27, Curse 22, Tri Attack 3), missing-gated 1,052 -> 1,052 (unchanged), missing-cry-task 16, extra 0, unclassified 0.
+
+## 12. aud242h: `blend_color_cycle`, Shadow Ball ball, vertical dip (Scene ON)
+
+Ranked by T1 census weight (`missing-gated`, seeds 0..99 Scene ON). Port the `AnimTask_BlendColorCycle` lifetime and two sprite lifetimes; Sludge Bomb (198 gated ops, the top blocker) stays open (see 12.4).
+
+### 12.1 Lifetimes derived (C; also cited in the extractor)
+
+| lifetime | C | exact (ticks after F) |
+|---|---|---|
+| `blend_color_cycle` / `_exclude` / `_bytag`, `AnimTask_BlendColorCycle*` | `battle_anim_normal.c:447-560` (task: n fades, fade 1 `0 -> targetY`, then alternating `targetY <-> initialY`, last fade back to 0), `palette.c:114-200, 406-520` (a fade costs 2 calls per y value + `delay` waits + 5 finishing calls; a negative delay raises deltaY to `2 - delay`), `battle_main.c:1863-1869` | `blendColorCycleLength(delay, numBlends, initialY, targetY)`: sum over fades of `fadeCalls - 2` (first) / `- 1` (rest) |
+| `gShadowBallSpriteTemplate` | `battle_anim_ghost.c:400-458`: init, then `AnimShadowBall_Step` cases 0 / 1 / 2 take `max(a0,1)` / `max(a1,1)` / `max(a2,1)` calls, case 3 destroys | `a0 + a1 + a2` (a0 or a2 < 1 divides by zero: declined) |
+| `gVerticalDipSpriteTemplate` | `battle_anim_mon_movement.c:451-471` + `battle_anim_mons.c:651-663`: D translating calls, set-callback call, Reverse call, D calls, set-callback call, destroy | `2D + 3` |
+
+`gPaletteFade` is shared and `BeginNormalPaletteFade` returns FALSE while a fade is active, so a `blend_color_cycle` that overlaps another running fade (an earlier fade that has not finished, or a `fadetobg` still inside its fade-in) is left gated (`fadeBusy` in `walk`).
+
+### 12.2 ROM windows (probe step mode, `AUDIO_PROBE_EXTRA_HOOKS=BlendPalette`, Scene ON, player attacker)
+
+Fixtures `tools/audio/fixtures/aud242h-{psychic,bodyslam}-player.json` (+ the existing `aud242f-growth-player.json`), labs `aud242f-psychic-player-on.json`, `aud242h-bodyslam-player-on.json` (stage in `appTrace.ts`), test `tests/aud242hMoveAnimSounds.test.ts` (Growth is pinned in `aud242fMoveAnimSounds.test.ts`).
+
+| window | rows | ROM minus ours |
+|---|---|---|
+| Psychic | SE184 x3 (ROM 132 / 142 / 153; the `loopsewithpan` behind `blend_color_cycle`); BlendPalette log y 0..8..0 matches the model | +2 (idle-lead class) |
+| Growth | second SE152 (ROM 90; was ROM-only) | -4 (the existing Growth status class, same as its first row) |
+| Body Slam | SE152, then SE141 x2 (ROM 108 / 118) behind the vertical-dip wait | +2 |
+
+Shadow Ball has no ROM window: the harness stages Rattata vs Rattata and Ghost into Normal has no effect (no animation plays), so the ball lifetime is C-derived only.
+
+### 12.3 Counts (turn 0, player attacker)
+
+| | before (`f205895b4`) | after |
+|---|---|---|
+| all moves: ops resolved / unresolved | 894 / 218 | 899 / 213 |
+| L50 (276 moves): emitted / gated | 692 / 142 | 697 / 137 |
+
+Census T1 (seeds 0..99 Scene ON, arm baseline `on-f205895b4`, the old table read against the new arm for the "before"): exact 23,547 -> 23,795, missing-gated 1,066 -> 950, missing-other 51 -> 51, extra 0, unclassified 11,093 -> 11,093 (unchanged: SEs outside any move window, i.e. stat-change / status / held-item SEs, a tooling gap that predates this step). Census `commands` / `eventsDigest` identical on 100 / 100 seeds (`rst197CensusDelta.py`).
+
+### 12.4 Residuals
+
+- Sludge Bomb (198), Blizzard (88), Faint Attack (62), Confuse Ray (47), Dig (37), Spark (32), Struggle (30), Attract (28) remain the top gated census moves. Sludge Bomb needs the SE-length table (`waitsound` must keep `pending`, `Cmd_waitsound` `battle_anim.c:1635-1658`), the hit-particle and poison-bubble lifetimes; Blizzard needs a target-species resolver.
+- Faint Attack needs `AnimTask_SetAttackerInvisibleWaitForSignal`; Struggle `gMovementWavesSpriteTemplate`; Shadow Ball a Ghost-able target in the harness for a ROM window.
+- Per-window offsets are recorded, not fixed (ISSUES #198).

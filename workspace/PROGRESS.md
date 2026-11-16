@@ -5,6 +5,18 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 2026-11-16 — aud242h (ts lane worker): move-animation SE lifetimes, slice 8 (ISSUES #219 family 1)
+
+- **State:** on master, committed (`cf66a94a3` blend_color_cycle + Psychic / Growth, `dbc3f7178` Shadow Ball ball + vertical dip + Body Slam, docs after). Sound only.
+- **Did:** ported `AnimTask_BlendColorCycle` (palette-fade call count), `gShadowBallSpriteTemplate`, `gVerticalDipSpriteTemplate` lifetimes (C cited in the extractor; `docs/aud242-move-anim-sounds.md` section 12).
+  ROM windows (step mode): Psychic +2, Body Slam +2, Growth 2nd SE152 exact at its -4; Shadow Ball is C-derived only (Rattata stage is Ghost-immune).
+- **Counts:** L50 emitted / gated 692 / 142 -> 697 / 137; all moves resolved 894 / 218 -> 899 / 213. T1 (seeds 0..99 ON, arm `on-f205895b4`): exact 23,547 -> 23,795, missing-gated 1,066 -> 950, extra 0,
+  unclassified 11,093 -> 11,093 (unchanged: SEs outside move windows, a pre-existing tooling gap, not 0). `commands` / `eventsDigest` identical 100 / 100; differential 240 / 240 byte-identical (3 traces).
+- **Gates:** see the docs section 12.5 receipt.
+- **Next:** Sludge Bomb (198 gated: SE-length table + `waitsound` keeps `pending`), Blizzard 88, Faint Attack 62, Confuse Ray 47. Evidence `.integration/evidence/aud242h/`.
+
+---
+
 ## 2026-11-16 — lbw4 (ts lane worker): player <-> Lobby NPC interaction in free roam (ISSUES #221 E4 remainder)
 
 - **State:** on master, committed (`e6c46d86e` engine + trace, `562f916bd` depth sort + Tier-1, docs after). Battle rules untouched.
@@ -28,25 +40,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Next:** unproven (docs): the player in the woman's way, retire-after-won / injected / attendant-return entries use the shared rule; free-roam player-vs-NPC collision and depth sort still use the static spawn tiles. Evidence `.integration/evidence/lbw3/`.
 
 ---
-
-## 2026-11-15 — CAX31 daily run (supervisor, Opus 5.5): wind-down: held-item effect drawn + timed + sounds, cries in move tasks, Lobby cursor fix
-
-- **State:** master clean, no workers, no worktrees; no push. **No DEFERRED items.** Final engine `5a42c61f5` (after cry1), then lbr-g merged (`620b0607f`, #221 E1-E3) + the iss215 probe-import fix (`ff2d2afec`).
-  ENGINE_BUILD `eb-93fedef9241b4242` -> **`eb-0c05d14e04bac704`** (dist-lib of `5a42c61f5`; after lbr-g **`eb-c26961a07ff6b07b`**, the build to ship; tell the website). Evidence `.integration/validation/sv-20261115/`.
-- **Website (Mac):** Leftovers / berries / Shell Bell now play the ROM's held-item animation (Scene ON) and its pause (Scene OFF), so those
-  battles run longer; the animation's three sounds play; Roar / Howl / Hyper Voice play their cries (the player still uses the NORMAL sample for the
-  ROAR / HIGH_PITCH / ECHO modes). After a loss / forfeit / retire / 7-win the Lobby RNG cursor now follows the ROM up to the NPC wander, so an in-game new challenge deals a different (closer to the ROM) draft. No API change.
-- **Gameplay (replay, item 0d):** nightly check on `9d0fb2f01`: pool **44 / 44** (1,780 states), staged battles **69 / 69** (`docs/replay-ledger.md`).
-  No battle-rule change this run, so no wind-down permanent-list drive.
-- **Folded:** `lbr-f-residual2` (saving -> saved +2 ticks; gates on the merge: full 14,830 / 14,830, soaks 20 / 20 + 60 / 60); hie1 (held-item command
-  + OFF Pausex20 hold), hie2 + hie2b (Scene ON drawing; hie2's age-0 fit absorbed each lab's pre-segment drift, hie2b replaced it with one rule,
-  age 0 = command frames - 204, every window exact at the lab's own offset), hie3 (SEs 152 / 228 / 102: ROM-only 24 / 8 / 11 -> 0 / 0 / 3 on 5 seeds),
-  cry1 (T1 `missing-cry-task` 371 -> 0), lbw1 + lbw2 (Lobby NPC wander simulator matches the ROM on 6 traces; ISSUES #221 filed), lbr-g (#221 E1-E3: VBlank draws held until ReturnFromBattleToOverworld, Pokerus + save-block draws, Lobby map-load draws; offset 0 on 6 traces from the battle exit to entry + 33; re-pins lbrd WIN_TWO_SEED 2 -> 35, randomRoundSoak Baton Pass 12 -> 1 / vanilla swap-offer 0 -> 1 / winning chain 47 -> 13).
-- **Gates (final engine `5a42c61f5`):** full suite **14,935 / 14,935**; build / build:lib 0 (typecheck by every worker + test:gate 2,843). Soaks
-  (`029d0943b` = hie3 tree; cry1 is sound-events only): vanilla 0:20 OFF **20 / 20**, ON **20 / 20**; 0:60 default **60 / 60**, winning **60 / 60**;
-  varied-RNG first-round winning carry 0 / 14 / 28 **100 / 100** each, winning-swap carry 0 **100 / 100**; on `5a42c61f5`: winning-swap 0:60
-  **60 / 60**, vanilla 0:20 ON **20 / 20**. play:random 10 min / scene `--lobby-new-challenge` on `5a42c61f5`: ON 33 battles / 13 swaps / 8 new
-  challenges, OFF 53 / 16 / 15; **0 page / console errors / overlays**. **lbr-g** (on its branch): typecheck 0, build / build:lib 0, test:gate 2,843, full suite 14,937 passed / 1 failed (iss215 tools ratchet, the lbw probes, fixed in `ff2d2afec`), soak vanilla 0:20 **20 / 20**; merged tree: lb* / ratchet / soak-pin tests 142 / 142, build:lib 0, soak winning 0:20 **20 / 20**. The 0:60 and varied-RNG gates did not re-run after lbr-g (next run).
-- **Next:** Run start: the 0:60 / varied-RNG soaks on master (lbr-g landed after them). #221 E4 = the Lobby NPC wander port (lbw1 simulator is the test oracle; `docs/lbw1-lobby-wander-evidence.md`); cry-task
-  audio modes (cry-task-scout step 2); #220 residuals (cure berry ages 1-11, +1 Shell Bell / Leftovers, post-heal tail ~18); the second
-  `Status_*` play +14; move-body SE lifetimes (aud242 family); then aud246 (S11 close). Nightly replay at run start as usual.
