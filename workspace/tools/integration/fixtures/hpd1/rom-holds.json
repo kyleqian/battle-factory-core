@@ -1,0 +1,305 @@
+{
+ "note": "hpd1: ROM (Battle Scene ON 8012 / OFF 8014) frame indices of the foe HP-bar drain start / end, the next text-box change, and the action menu, per fixed-damage hit; tools/integration/hpd1Measure.mjs on the trace frames (tools/compare/traces/hpd1-*.json). shape c = the hit ends the turn; shape a = the foe's USEDMOVE follows.",
+ "cases": [
+  {
+   "case": "sonicboom",
+   "scene": "on",
+   "shape": "c",
+   "playerLevel": 50,
+   "moveId": 49,
+   "foeLevel": 100,
+   "damage": 20,
+   "rom": {
+    "barStart": 476,
+    "barEnd": 492,
+    "boxChange": 513,
+    "menu": 521
+   }
+  },
+  {
+   "case": "sonicboom",
+   "scene": "off",
+   "shape": "c",
+   "playerLevel": 50,
+   "moveId": 49,
+   "foeLevel": 100,
+   "damage": 20,
+   "rom": {
+    "barStart": 386,
+    "barEnd": 402,
+    "boxChange": 423,
+    "menu": 431
+   }
+  },
+  {
+   "case": "dragonrage",
+   "scene": "on",
+   "shape": "c",
+   "playerLevel": 50,
+   "moveId": 82,
+   "foeLevel": 100,
+   "damage": 40,
+   "rom": {
+    "barStart": 604,
+    "barEnd": 641,
+    "boxChange": 661,
+    "menu": 669
+   }
+  },
+  {
+   "case": "dragonrage",
+   "scene": "off",
+   "shape": "c",
+   "playerLevel": 50,
+   "moveId": 82,
+   "foeLevel": 100,
+   "damage": 40,
+   "rom": {
+    "barStart": 388,
+    "barEnd": 425,
+    "boxChange": 445,
+    "menu": 453
+   }
+  },
+  {
+   "case": "toss10",
+   "scene": "on",
+   "shape": "c",
+   "playerLevel": 10,
+   "moveId": 69,
+   "foeLevel": 100,
+   "damage": 10,
+   "rom": {
+    "barStart": 645,
+    "barEnd": 653,
+    "boxChange": 672,
+    "menu": 680
+   }
+  },
+  {
+   "case": "toss10",
+   "scene": "off",
+   "shape": "c",
+   "playerLevel": 10,
+   "moveId": 69,
+   "foeLevel": 100,
+   "damage": 10,
+   "rom": {
+    "barStart": 386,
+    "barEnd": 394,
+    "boxChange": 413,
+    "menu": 421
+   }
+  },
+  {
+   "case": "toss30",
+   "scene": "on",
+   "shape": "c",
+   "playerLevel": 30,
+   "moveId": 69,
+   "foeLevel": 100,
+   "damage": 30,
+   "rom": {
+    "barStart": 645,
+    "barEnd": 674,
+    "boxChange": 692,
+    "menu": 700
+   }
+  },
+  {
+   "case": "toss30",
+   "scene": "off",
+   "shape": "c",
+   "playerLevel": 30,
+   "moveId": 69,
+   "foeLevel": 100,
+   "damage": 30,
+   "rom": {
+    "barStart": 386,
+    "barEnd": 415,
+    "boxChange": 433,
+    "menu": 441
+   }
+  },
+  {
+   "case": "toss50",
+   "scene": "on",
+   "shape": "c",
+   "playerLevel": 50,
+   "moveId": 69,
+   "foeLevel": 100,
+   "damage": 50,
+   "rom": {
+    "barStart": 652,
+    "barEnd": 698,
+    "boxChange": 719,
+    "menu": 727
+   }
+  },
+  {
+   "case": "toss50",
+   "scene": "off",
+   "shape": "c",
+   "playerLevel": 50,
+   "moveId": 69,
+   "foeLevel": 100,
+   "damage": 50,
+   "rom": {
+    "barStart": 386,
+    "barEnd": 432,
+    "boxChange": 453,
+    "menu": 461
+   }
+  },
+  {
+   "case": "toss80",
+   "scene": "on",
+   "shape": "c",
+   "playerLevel": 80,
+   "moveId": 69,
+   "foeLevel": 100,
+   "damage": 80,
+   "rom": {
+    "barStart": 656,
+    "barEnd": 735,
+    "boxChange": 753,
+    "menu": 761
+   }
+  },
+  {
+   "case": "toss80",
+   "scene": "off",
+   "shape": "c",
+   "playerLevel": 80,
+   "moveId": 69,
+   "foeLevel": 100,
+   "damage": 80,
+   "rom": {
+    "barStart": 386,
+    "barEnd": 465,
+    "boxChange": 483,
+    "menu": 491
+   }
+  },
+  {
+   "case": "a-sonicboom",
+   "scene": "on",
+   "shape": "a",
+   "playerLevel": 60,
+   "moveId": 49,
+   "foeLevel": 50,
+   "damage": 20,
+   "rom": {
+    "barStart": 156,
+    "barEnd": 175,
+    "boxChange": 194,
+    "menu": 520
+   }
+  },
+  {
+   "case": "a-sonicboom",
+   "scene": "off",
+   "shape": "a",
+   "playerLevel": 60,
+   "moveId": 49,
+   "foeLevel": 50,
+   "damage": 20,
+   "rom": {
+    "barStart": 135,
+    "barEnd": 154,
+    "boxChange": 173,
+    "menu": 430
+   }
+  },
+  {
+   "case": "a-dragonrage",
+   "scene": "on",
+   "shape": "a",
+   "playerLevel": 60,
+   "moveId": 82,
+   "foeLevel": 50,
+   "damage": 40,
+   "rom": {
+    "barStart": 284,
+    "barEnd": 323,
+    "boxChange": 342,
+    "menu": 668
+   }
+  },
+  {
+   "case": "a-dragonrage",
+   "scene": "off",
+   "shape": "a",
+   "playerLevel": 60,
+   "moveId": 82,
+   "foeLevel": 50,
+   "damage": 40,
+   "rom": {
+    "barStart": 137,
+    "barEnd": 176,
+    "boxChange": 195,
+    "menu": 452
+   }
+  },
+  {
+   "case": "a-toss60",
+   "scene": "on",
+   "shape": "a",
+   "playerLevel": 60,
+   "moveId": 69,
+   "foeLevel": 50,
+   "damage": 60,
+   "rom": {
+    "barStart": 332,
+    "barEnd": 391,
+    "boxChange": 410,
+    "menu": 736
+   }
+  },
+  {
+   "case": "a-toss60",
+   "scene": "off",
+   "shape": "a",
+   "playerLevel": 60,
+   "moveId": 69,
+   "foeLevel": 50,
+   "damage": 60,
+   "rom": {
+    "barStart": 135,
+    "barEnd": 194,
+    "boxChange": 213,
+    "menu": 470
+   }
+  },
+  {
+   "case": "a-toss90",
+   "scene": "on",
+   "shape": "a",
+   "playerLevel": 90,
+   "moveId": 69,
+   "foeLevel": 50,
+   "damage": 90,
+   "rom": {
+    "barStart": 336,
+    "barEnd": 425,
+    "boxChange": 444,
+    "menu": 770
+   }
+  },
+  {
+   "case": "a-toss90",
+   "scene": "off",
+   "shape": "a",
+   "playerLevel": 90,
+   "moveId": 69,
+   "foeLevel": 50,
+   "damage": 90,
+   "rom": {
+    "barStart": 135,
+    "barEnd": 224,
+    "boxChange": 243,
+    "menu": 500
+   }
+  }
+ ]
+}
