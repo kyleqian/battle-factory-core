@@ -70,7 +70,7 @@ const moveTable: string[] = [];
 }
 
 interface SoundOp {
-  op: "playsewithpan" | "playse" | "waitplaysewithpan" | "loopsewithpan" | "panse" | "panse_adjustnone" | "panse_adjustall" | "setpan" | "soundtask_loopse" | "soundtask_fireblast" | "soundtask_se1" | "soundtask_se2" | "sprite_confuseray_ball";
+  op: "playsewithpan" | "playse" | "waitplaysewithpan" | "loopsewithpan" | "panse" | "panse_adjustnone" | "panse_adjustall" | "setpan" | "soundtask_loopse" | "soundtask_fireblast" | "soundtask_se1" | "soundtask_se2" | "sprite_confuseray_ball" | "task_rollout";
   frame: number;
   id: number | null;
   /** The pan argument as written (the starting pan of a panse*; the only one of a setpan). */
@@ -88,7 +88,7 @@ interface SoundOp {
   line: number;
 }
 type Reason = "bg-fade" | "unmodelled-lifetime" | "waitsound" | "unresolved-branch" | "after-unresolved-branch";
-interface Walk { events: SoundOp[]; end: string; frame: number | null; gated: number; reasons: Record<string, number>; usedPic: boolean }
+interface Walk { events: SoundOp[]; end: string; frame: number | null; gated: number; reasons: Record<string, number>; usedPic: boolean; usedCounter: boolean }
 
 // ---- Lifetimes of the creation ops (ticks after the creation tick at which the visual task / sprite is gone). Exact entries are the
 // source-derived or RAM-probed lifetimes src/animation already uses (shakeMon.ts, slideMon.ts, dragonRage.ts); a bound is an upper
@@ -246,6 +246,7 @@ const gbaCos = (index: number, amplitude: number): number => (amplitude * sineTa
 const BATTLER_X = [72, 176] as const;
 interface PicContext { readonly attackerY: number; readonly targetY: number }
 let picUsed = false;
+let counterUsed = false;
 interface FastSprite { x: number; y: number; x2: number; y2: number; d: number[]; callback: string; destroyed: boolean }
 // InitAnimFastLinearTranslationWithSpeed + InitAnimFastLinearTranslation (battle_anim_mons.c:1171-1197, 1244-1249); a zero duration is a division by zero (declined).
 function fastInit(s: FastSprite): boolean {
@@ -390,6 +391,17 @@ function adjustPanningVarLength(attackerSide: number, sourceArg: number, targetA
   }
   return null;
 }
+// ---- aud242o: AnimTask_Rollout (battle_anim_rock.c:584-715, :738-749). GetRolloutCounter = 1..5 (else 1). The entry only sets data and `func` (RunTasks calls 1..): case 0 is 10 calls that
+// each play SE_M_HEADBUTT (calls 1..10), case 1 is 20 calls (11..30), case 2 is 10 calls (31..40), case 3 is D = data[8] calls (41..40 + D; 32 for counter 1, 48 - 8 c otherwise) and
+// every p = max(D / 8 - 1, 1) of them plays SE_M_DIG (pan data[13] += (pan2 - pan1) / D first) and creates a dirt sprite (AnimRolloutParticle: 18 arc calls, destroyed on the 19th, i.e. the
+// iteration 19 after its creation, before that iteration's RunTasks, and it then decrements data[11]). Case 4 destroys at the first call at or after 41 + D whose data[11] is 0.
+function rolloutShape(counter: number): { length: number; period: number; lastDirtCall: number; destroyCall: number } {
+  const c = counter >= 1 && counter <= 5 ? counter : 1;
+  const length = c === 1 ? 32 : 48 - c * 8;
+  const period = Math.max(Math.trunc(length / 8) - 1, 1);
+  const lastDirtCall = 40 + period * Math.floor(length / period);
+  return { length, period, lastDirtCall, destroyCall: Math.max(41 + length, lastDirtCall + 19) };
+}
 // AnimConfuseRayBallBounce (battle_anim_ghost.c:220-311). Call 0 is the init: the sprite starts at the attacker's x plus the side-signed offset (SetAnimSpriteInitialXOffset,
 // battle_anim_mons.c:763-776), data[0] = |dx| << 8 / speed is the duration (InitAnimLinearTranslationWithSpeed, :1155-1160) and data[6] = 16. Step1 (calls 1..) runs
 // UpdateConfuseRayBallBlend and then AnimTranslateLinear (data[0]-- while > 0); the call that finds data[0] == 0 installs Step2. Step2 sets data[0] = 1, translates, and when
@@ -423,7 +435,7 @@ function confuseRayBallBounceLength(attackerSide: number, offset: number, speed:
   }
   return null;
 }
-function lifetimeOf(cmd: Command, attackerSide: number, pic: PicContext): Lifetime {
+function lifetimeOf(cmd: Command, attackerSide: number, pic: PicContext, rolloutCounter: number): Lifetime {
   const { op, args } = cmd;
   if (op === "createvisualtask" && (args[0] === "AnimTask_BlendBattleAnimPal" || args[0] === "AnimTask_BlendBattleAnimPalExclude" || args[0] === "AnimTask_BlendParticle")) {
     const [delay, startY, targetY] = [intArg(args[3]), intArg(args[4]), intArg(args[5])];
@@ -722,6 +734,8 @@ function lifetimeOf(cmd: Command, attackerSide: number, pic: PicContext): Lifeti
     const d = op.startsWith("create_") ? intNamed("duration") : intArg(args[6]);
     return d === null || d < 1 ? null : { exact: d - 1 };
   }
+  // AnimTask_Rollout: gone destroyCall - 1 ticks after F (the dirt sprites are CreateSprite'd, not counted by waitforvisualfinish).
+  if (op === "createvisualtask" && args[0] === "AnimTask_Rollout") { counterUsed = true; return { exact: rolloutShape(rolloutCounter).destroyCall - 1 }; }
   // ---- AnimDiveBall (battle_anim_flying.c:1010-1047; args a2 = wait, a3 = acceleration): the sprite starts at the attacker's pic Y (+ a1) and the init installs Step1 without running it. Calls
   // 1..a2 count data[0] down; then every call adds a3 to data[2] and moves y2 up by data[2] >> 8 until y + y2 <= -32; the next 22 calls (data[3]++ > 20) hide it and the 22nd installs Step2,
   // which adds the final data[2] >> 8 to y2 every call and destroys on the call y2 > 0: destroyed at call K, gone K - 1 ticks after F. Pic Y dependent.
@@ -867,7 +881,7 @@ const picYs: number[][] = [
 const middle = (values: number[]): number => values[Math.floor(values.length / 2)]!;
 /** The walk's default class (and the runtime fallback): the middle value of each side's pic Y. */
 const referencePic = (attackerSide: number): PicContext => ({ attackerY: middle(picYs[attackerSide]!), targetY: middle(picYs[1 - attackerSide]!) });
-function walk(bodyLabel: string, turn: number, attackerSide: number, pic: PicContext = referencePic(attackerSide)): Walk {
+function walk(bodyLabel: string, turn: number, attackerSide: number, pic: PicContext = referencePic(attackerSide), rolloutCounter = 1): Walk {
   const events: SoundOp[] = [];
   const reasons: Record<string, number> = {};
   const stack: Array<[string, number]> = [];
@@ -895,7 +909,8 @@ function walk(bodyLabel: string, turn: number, attackerSide: number, pic: PicCon
   const lags: Array<{ after: number; frames: number }> = [];  // `after`: first affected iteration - 1 (fractional .5 = from the same iteration)
   const shiftAt = (iteration: number): number => lags.reduce((n, l) => (iteration > l.after ? n + l.frames : n), 0);
   picUsed = false;
-  const finish = (end: string): Walk => ({ events, end, frame, gated, reasons, usedPic: picUsed });
+  counterUsed = false;
+  const finish = (end: string): Walk => ({ events, end, frame, gated, reasons, usedPic: picUsed, usedCounter: counterUsed });
   const unresolved = (reason: Reason): void => { frame = null; why ??= reason; };
   const gate = (): void => { gated += 1; const reason = why ?? "unresolved-branch"; reasons[reason] = (reasons[reason] ?? 0) + 1; };
   let pc: [string, number] = [bodyLabel, 0];
@@ -920,7 +935,7 @@ function walk(bodyLabel: string, turn: number, attackerSide: number, pic: PicCon
       // VBlank overrun (METALLIC_SHINE_LOAD_LAG; Metal Claw and Steel Wing, aud242d), like BG_LOAD_LAG.
       if ((op === "metallic_shine" || (op === "createvisualtask" && args[0] === "AnimTask_MetallicShine")) && frame !== null) lags.push({ after: frame, frames: METALLIC_SHINE_LOAD_LAG });
       if (op === "createvisualtask" && args[0] === "AnimTask_ScaryFace" && frame !== null) lags.push({ after: frame, frames: SCARY_FACE_LOAD_LAG });
-      let life = lifetimeOf(cmd, attackerSide, pic);
+      let life = lifetimeOf(cmd, attackerSide, pic, rolloutCounter);
       const colorCycle = op === "blend_color_cycle" || op === "blend_color_cycleexclude" || op === "blend_color_cyclebytag" || (op === "createvisualtask" && /^AnimTask_BlendColorCycle/.test(args[0] ?? ""));
       if (frame !== null && life !== null && "exact" in life && (colorCycle || op === "simple_palette_blend" || (op === "createsprite" && args[0] === "gSimplePaletteBlendSpriteTemplate"))) {
         const cycleBlends = colorCycle ? cycleNumBlends(cmd) : null;
@@ -1069,6 +1084,11 @@ function walk(bodyLabel: string, turn: number, attackerSide: number, pic: PicCon
           panVarTask = frame === null || a.some((v) => v === null) ? null : { at: frame, args: a as number[] };
           break;
         }
+        if (args[0] === "AnimTask_Rollout") {
+          if (frame === null) { gate(); break; }
+          events.push({ op: "task_rollout", frame: frame + shiftAt(frame), id: value("SE_M_HEADBUTT"), id2: value("SE_M_DIG"), pan: -64, target: 63, times: rolloutShape(rolloutCounter).length, line });
+          break;
+        }
         if (args[0] !== "SoundTask_PlaySE1WithPanning" && args[0] !== "SoundTask_PlaySE2WithPanning") break;
         if (frame === null) { gate(); break; }
         seUnknown = true;
@@ -1112,9 +1132,12 @@ const poolOf = (events: SoundOp[]): number => {
 // aud242l: a (turn, side) walk whose lifetimes depend on the two battlers' pic Y is repeated for every (attackerY, targetY) class; the grid of pooled variant indices (row = attacker
 // class, column = target class, both in picYs order) goes to picGrids and the move's `pic` slot points at it (-1 = pic-independent). An all-equal grid collapses to the plain variant.
 const picGrids: number[][] = [];
+// aud242o: a walk that reads the Rollout counter is repeated for counters 1..5; the move's `counter` slot points at the 5 variant indexes in counterGrids (-1 = counter-independent).
+const counterGrids: number[][] = [];
+const counterIndex = new Map<string, number>();
 const gridIndex = new Map<string, number>();
 moveTable.forEach((label, move) => {
-  const entry = { move, label, variants: [] as number[], ends: [] as string[], gated: [] as number[], reasons: [] as Array<Record<string, number>>, pic: [] as number[] };
+  const entry = { move, label, variants: [] as number[], ends: [] as string[], gated: [] as number[], reasons: [] as Array<Record<string, number>>, pic: [] as number[], counter: [] as number[] };
   for (let turn = 0; turn < TURNS; turn += 1) {
     for (let side = 0; side < SIDES; side += 1) {
       const result = walk(label, turn, side);
@@ -1128,6 +1151,16 @@ moveTable.forEach((label, move) => {
           grid = gridIndex.get(key)!;
         }
       }
+      let counterGrid = -1;
+      if (result.usedCounter) {
+        const cells = [1, 2, 3, 4, 5].map((counter) => poolOf(walk(label, turn, side, referencePic(side), counter).events));
+        if (cells.some((c) => c !== cells[0])) {
+          const key = JSON.stringify(cells);
+          if (!counterIndex.has(key)) { counterIndex.set(key, counterGrids.length); counterGrids.push(cells); }
+          counterGrid = counterIndex.get(key)!;
+        }
+      }
+      entry.counter.push(counterGrid);
       entry.variants.push(poolOf(result.events));
       entry.ends.push(result.end);
       entry.gated.push(result.gated);
@@ -1176,7 +1209,8 @@ const out = {
   variants: variantPool,
   picYs,
   picGrids,
-  moves: moves.map((m) => ({ move: m.move, label: m.label, variants: m.variants, ends: m.ends, gated: m.gated, ...(m.pic.some((g) => g >= 0) ? { pic: m.pic } : {}) })),
+  counterGrids,
+  moves: moves.map((m) => ({ move: m.move, label: m.label, variants: m.variants, ends: m.ends, gated: m.gated, ...(m.pic.some((g) => g >= 0) ? { pic: m.pic } : {}), ...(m.counter.some((g) => g >= 0) ? { counter: m.counter } : {}) })),
   general,
 };
 mkdirSync(outDir, { recursive: true });
