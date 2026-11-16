@@ -11,8 +11,8 @@ type Row = [number, string, number | null, number | null];
 const fixture = JSON.parse(readFileSync(new URL("./fixtures/aud253-ai-switch-lowhp.json", import.meta.url), "utf8")) as {
   seeds: Record<string, { scene: "on" | "off"; kinds: string[]; anchor: { kind: string; id: number; index: number }; setup: unknown; rom: Row[] }>;
 };
-// engine minus ROM frame offsets, relative to the anchor row: 2741's recall ball open rides the tray draw (the ROM's is 31 earlier: no RETURNMON window), the send-in is 2 short
-const DELTAS: Record<string, number[]> = { "2741": [31, 0, -2, -2], "2": [0, 0, 0, 0, 0] };
+// engine minus ROM frame offsets, relative to the anchor row. ais1: 2741's recall ball open is now the synthesized RETURNMON + return-to-ball switch-out command's (was the tray-draw stop-gap, 31 frames late), so it is exact; the send-in ball open and cry are 2 short
+const DELTAS: Record<string, number[]> = { "2741": [0, 0, -2, -2], "2": [0, 0, 0, 0, 0] };
 const script = new URL("../tools/integration/soundCensusRomReplay.ts", import.meta.url).pathname;
 
 function engineRows(seed: string): Row[] {

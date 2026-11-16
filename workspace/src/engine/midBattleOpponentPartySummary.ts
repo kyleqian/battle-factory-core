@@ -11,7 +11,7 @@ import {
   drawBallStatusBar,
 } from "./battleScene.ts";
 import type { BattleResolutionPresentationCommand, BattleResolutionPresentationState, PartyBallState } from "./battleResolutionPresentation.ts";
-import { SE_BALL_TRAY_ENTER, playBallOpenSe } from "./screenSounds.ts";
+import { SE_BALL_TRAY_ENTER } from "./screenSounds.ts";
 import {
   OPPONENT_SUMMARY_FADE_DELAY_FRAMES,
   OPPONENT_SUMMARY_FADE_FRAMES,
@@ -82,8 +82,7 @@ function currentCommand(
 
 /**
  * CreatePartyStatusSummarySprites' `PlaySE12WithPanning(SE_BALL_TRAY_ENTER, 0)`, at the bar's creation (both scenes). Write-only.
- * An AI switch (a draw with no lead: no opponent faint before it) is `BattleScript_ActionSwitch`'s returnatktoball first: the recall's
- * SE_BALL_OPEN, which the kernel's event stream (no RETURNMON / return-to-ball) never reaches, so it rides the draw's tick, ahead of the tray SE.
+ * An AI switch's recall SE_BALL_OPEN is the `switch-out` command's (ais1: the synthesized RETURNMON / return-to-ball precede the draw).
  */
 export function emitOpponentPartySummarySounds(
   before: BattleResolutionPresentationState | null,
@@ -97,6 +96,5 @@ export function emitOpponentPartySummarySounds(
   const prior = currentCommand(before);
   const previous = prior !== null && prior.command === command ? prior.elapsed : -1;
   if (!(previous < lead && lead <= elapsed)) return;
-  if (lead === 0) playBallOpenSe();
   emitSound({ kind: "se", id: SE_BALL_TRAY_ENTER, pan: 0, player: "SE12" });
 }

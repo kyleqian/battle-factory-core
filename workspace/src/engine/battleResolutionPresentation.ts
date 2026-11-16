@@ -235,6 +235,7 @@ export const FOCUS_PUNCH_SETUP_SCRIPT = "BattleScript_FocusPunchSetUp";
 /** STATUS2_SUBSTITUTE (include/constants/battle.h:216). */
 const FOCUS_PUNCH_STATUS2_SUBSTITUTE = 1 << 24;
 const SYNTHESIZED_SWITCH_DISPATCHER = "synthesized-voluntary-switch";
+const SYNTHESIZED_AI_SWITCH_DISPATCHER = "synthesized-ai-switch";
 
 /**
  * fpo187 (docs/fpo187-focus-punch-on-prepass-row.md, ont193): Scene ON only, the pre-pass `playanimation` launch
@@ -4438,12 +4439,14 @@ export function projectBattleResolutionCommands(
 
   for (let index = 0; index < events.length; index += 1) {
     const event = events[index]!;
-    if (!Number.isSafeInteger(event.sequence) || (event.sequence <= lastSequence && event.provenance?.dispatcher !== SYNTHESIZED_SWITCH_DISPATCHER)) {
+    const synthesized = event.provenance?.dispatcher === SYNTHESIZED_SWITCH_DISPATCHER
+      || event.provenance?.dispatcher === SYNTHESIZED_AI_SWITCH_DISPATCHER;
+    if (!Number.isSafeInteger(event.sequence) || (event.sequence <= lastSequence && !synthesized)) {
       throw new Error(
         `battle resolution event sequence ${event.sequence} is not strictly increasing after ${lastSequence}`,
       );
     }
-    if (event.provenance?.dispatcher !== SYNTHESIZED_SWITCH_DISPATCHER) lastSequence = event.sequence;
+    if (!synthesized) lastSequence = event.sequence;
     const payload = event.payload;
     if (payload.kind === "animation" && payload.animationId === "LEECH_SEED_DRAIN") leechDrainAnimated = true;
     if (payload.kind === "set-battler-pp-data") {
@@ -5329,9 +5332,12 @@ export function createBattleResolutionPresentation(
     player: input.fieldBoundary.player,
     opponent: input.fieldBoundary.opponent,
   });
-  const events = input.sourceDecision.kind === "switch"
+  const playerEvents = input.sourceDecision.kind === "switch"
     ? withSynthesizedSwitchRecallEvents(input.transition.events, field)
     : input.transition.events;
+  const events = input.opponentTrainer === undefined || input.opponentTrainer === null
+    ? playerEvents
+    : withSynthesizedAiSwitchRecallEvents(playerEvents);
   const segment = Object.freeze({
     field,
     beforeRules: input.beforeRules,
@@ -5451,6 +5457,55 @@ function withSynthesizedSwitchRecallEvents(
       }),
     }),
     ...events.slice(recallAt),
+  ]);
+}
+
+/**
+ * ais1: the opponent's AI mid-battle switch is the same `BattleScript_ActionSwitch` prelude the kernel skips for either side
+ * (`runVoluntarySwitchAction` begins at the Pursuit loop), so its first receipt is BattleScript_DoSwitchOut's summary draw. The
+ * ROM prints STRINGID_RETURNMON ("<TRAINER> withdrew <MON>!") and runs `returnatktoball` (`OpponentHandleReturnMonToBall` ->
+ * `DoSwitchOutAnimation`, B_ANIM_SWITCH_OUT_OPPONENT_MON, the same 32-frame span as the player's) before that draw: both receipts are
+ * synthesized ahead of the summary exactly as the player's are (negative sequences, their own dispatcher so the Focus Punch
+ * pre-pass / menu-SE terms keyed on the player's voluntary switch do not move). A switch after a move body in the segment
+ * (Pursuit's interception) is left as the kernel emits it.
+ */
+function withSynthesizedAiSwitchRecallEvents(
+  events: readonly BattleKernelSemanticEvent[],
+): readonly BattleKernelSemanticEvent[] {
+  const summaryAt = events.findIndex((event, index) =>
+    event.payload.kind === "draw-party-status-summary" && event.payload.battler === 1
+    && event.provenance?.sourceLabel === "BattleScript_DoSwitchOut"
+    && !events.slice(0, index).some(({ payload }) =>
+      (payload.kind === "animation" && payload.animationId === "MOVE_ANIMATION")
+      || (payload.kind === "set-battler-sprite-visibility" && payload.battler === 1 && payload.invisible)));
+  if (summaryAt < 0) return events;
+  const provenance = (opcodeName: string) => Object.freeze({
+    programCounter: -1,
+    opcodeId: -1,
+    opcodeName,
+    dispatcher: SYNTHESIZED_AI_SWITCH_DISPATCHER,
+    sourceLabel: "BattleScript_ActionSwitch",
+    sourceStatementLine: -1,
+    instructionExecution: -1,
+  });
+  return Object.freeze([
+    ...events.slice(0, summaryAt),
+    Object.freeze({
+      sequence: -4,
+      payload: Object.freeze({
+        kind: "message",
+        messageId: "STRINGID_RETURNMON",
+        substitutions: Object.freeze([]),
+        introBattler: 1 as const,
+      }),
+      provenance: provenance("B_SCR_OP_PRINTSTRING"),
+    }),
+    Object.freeze({
+      sequence: -3,
+      payload: Object.freeze({ kind: "set-battler-sprite-visibility", battler: 1 as const, invisible: true }),
+      provenance: provenance("B_SCR_OP_RETURNATKTOBALL"),
+    }),
+    ...events.slice(summaryAt),
   ]);
 }
 
