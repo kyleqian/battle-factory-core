@@ -1,4 +1,4 @@
-# CAX31 session handoff — 2026-10-26 (finish plan; state updated 2026-11-15)
+# CAX31 session handoff — 2026-10-26 (finish plan; state updated 2026-11-16)
 
 The user approved `docs/finish-plan.md` on 2026-10-26 and restarted the
 running CAX31 session on it. Run on CAX31's `master` at
@@ -109,6 +109,10 @@ kept and is long-tail.
   hie1 / hie2 / hie2b / hie3 (#220: held-item effect timed in both scenes, drawn in Scene ON, its SEs), cry1 (Roar / Howl / Hyper Voice cries), lbw1 / lbw2
   (Lobby NPC wander simulator + RNG cursor classification, ISSUES #221), lbr-g (#221 E1-E3: the Lobby cursor after a challenge-ending battle).
   Lesson (PAPERCUTS): a lab is often 9-20 frames out of step before the window; measure windows at the pre-segment offset, never by equal frame index.
+- **2026-11-16 run: the Lobby NPCs, cry-task samples, three move-sound slices.** Nightly replay 44 / 44 + 69 / 69; run-start soaks on `ec10cf3bf` all green;
+  lbw3 / lbw4 (#221 E4: Lobby wander port + player collision; the in-game new-challenge deal now follows the ROM), cry2 (cry-task mode assets + player),
+  aud242h / i / j (move-animation SE lifetimes; Sludge Bomb, blend_color_cycle, Faint Attack, Struggle, Silver Wind, Dig). T1 census arm for the next
+  slice: `on-4e31b7675` (aud242j's).
 - Census baseline for the next delta: `.integration/evidence/fix274/census/{on,off}-237ee0e5e` (the fix274 fixed arms; src == master's final engine src at the 2026-11-12 wind-down
   except pnm273's name strings, which the pnm273 0..49 census showed digest-neutral).
 - **4b(d) DONE** (frs247, `docs/frs247-faint-replacement-reshow.md`): the faint-replacement return rises from black, no player bar.
@@ -118,18 +122,19 @@ kept and is long-tail.
 This repo is the **game core library**; the website repo (Mac) owns login, streaks, menus, the on-screen pad and hosting —
 never brief those here. One worker at a time; each run folds the next audio step(s) plus at least one cleanup step.
 
-**Status at the 2026-11-15 wind-down (PROGRESS top entry has the gates):** no Mac fold (the branch no longer moves). Battle rules, the replay
+**Status at the 2026-11-16 wind-down (PROGRESS top entry has the gates):** no Mac fold (the branch no longer moves). Battle rules, the replay
 tools and the rare-rule hunt are the box's.
-- **Item 0 (sound):** #220 held-item effect DONE (hie1 timing both scenes, hie2 / hie2b Scene ON drawing, hie3 SEs; residuals in ISSUES #220);
-  cry1 emits the cry-task cries (T1 `missing-cry-task` 371 -> 0; `docs/cry1-cry-tasks.md`). Next, by size (ISSUES #219): move-body SE lifetimes
-  (aud242 family, largest); the cry-task audio modes (ROAR / HIGH_PITCH / ECHO play the NORMAL sample: cry-task-scout step 2, ~1,880 recordings);
-  the second `Status_*` play +14 frames. aud246 (S11 close) waits for those.
-- **Item 0b (Lobby):** `lbr-f-residual2` MERGED. lbw1 / lbw2 (`docs/lbw1-lobby-wander-evidence.md`): the hand simulator reproduces the woman /
-  fat man wander on 6 ROM traces; the engine's Lobby cursor gaps are ISSUES #221 (E1-E3 fixed by lbr-g, `src/engine/battleExitRng.ts`; its 0:60 / varied-RNG soaks are not run yet: run them at the next run start). Next: #221 E4, the
-  NPC wander port (simulator = test oracle; rebase the lbra / lbrd appStage cursors as the doc lists); no Scene ON loss / retire ROM lab; no app
-  SE_SAVE on the loss / retire result script.
+- **Item 0 (sound):** cry2 DONE (the five cry-task modes recorded for the 46 species that can use Roar / Howl / Hyper Voice or call them, 112 sounds,
+  played from their own files; `docs/cry1-cry-tasks.md` "cry2"). Move-body SE lifetimes: aud242h / i / j DONE (docs sections 12-14; T1 census 0..99 ON
+  missing-gated 1,066 -> 570). Next, by size (ISSUES #219 / #198): the next lifetime slices (Blizzard 88 needs a per-species off-screen resolver,
+  Confuse Ray 47, Spark 32, Tri Attack 24, Dig turn-0 offsets); the T1 `unclassified` 11,093 tooling gap (SEs outside move windows: stat / status /
+  held-item; fix the classifier before calling S11 parity); the second `Status_*` play +14 frames; hear a task cry live once. aud246 (S11 close) waits.
+- **Item 0b (Lobby):** #221 E4 DONE: lbw3 (the woman / fat man wander on the shared cursor, cursor == ROM on 6 traces) and lbw4 (player <-> NPC
+  collision from live tiles, depth sort; `lbw4-woman-block-off` 501 / 501), `docs/lbw3-lobby-npc-port.md`. Open (ISSUES #221): same-frame tile race,
+  turn-commit refusal, the fat man in the way, unmeasured entry routes; the retire-off dialog text pacing residual (78 frames, `lbra-retire-off`
+  7544-7627); no Scene ON loss / retire ROM lab; no app SE_SAVE on the loss / retire result script.
 - **Item 0d (battle rules):** nightly replay at run start from the pool + all staged battles (now 69: `stages/*.json` + `stages/coverage/*.json`;
-  2026-11-15: 44 / 44, 69 / 69, 51 min at 2 lanes). Rare-rule hunt as before (50 / 110; one step per run at most, needs new team ideas).
+  2026-11-16: 44 / 44, 69 / 69, 50 min at 2 lanes). Rare-rule hunt as before (50 / 110; one step per run at most, needs new team ideas).
 - **Cleanup:** steps 1-7 are done or measured non-goals (cln243 showed the remaining tracked evidence is test-read). Nothing queued.
 **Website:** the live site runs **`eb-c26961a07ff6b07b`** (your `49287331f`, the 2026-11-15 wind-down build; deployed 2026-11-15 ~13:30 UTC on Kyle's
 word, "Yes, update it"). The site adopted the lazy sprites and sound (a sound switch, off by default), and (same day, Kyle: "Yes, build it")
@@ -138,7 +143,7 @@ the next server challenge with `start: "after-save"` and mounts it (server colum
 Lobby -> attendant -> new challenge -> a few turns -> forfeit, verified; the same trace replayed with `start` "draft" reaches no battle. So keep
 `challenge-request` / `start` stable, and name any change to them in PROGRESS. Games already open on `eb-adfdcfdc91f4247f`
 or `eb-9d34d28f1b19ef3d` finish on those builds (checked live: an `eb-adfd` game resumed after the deploy, ended, replay-verified on its own build).
-Later builds reach the site only when Kyle asks again. Cleanup 5's "< 15 min" suite target: measured non-goal on this box (cln277); the 670 s render lever in
+Later builds reach the site only when Kyle asks again. The 2026-11-16 wind-down build is `eb-4f7e2a7803523e94` (`3564a9712`; no API change; it adds 112 `cry-NNN-task` audio files + AAC twins that the site must serve with the rest of the audio). Cleanup 5's "< 15 min" suite target: measured non-goal on this box (cln277); the 670 s render lever in
 `tools/integration/generatedCommandAnimationReplay.ts` would trade render-crash coverage (not taken).
 
 0. **User decision 2026-11-11 (Kyle, "Yes, start sound"): start sound PLAYBACK now, alongside the ROM-driver gameplay

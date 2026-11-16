@@ -1,3 +1,15 @@
+## 2026-11-16 — cry2 (ts lane worker): the cry-task modes recorded and played (cry-task-scout step 2)
+
+- **State:** on master, committed (`8bbc1cf5f` assets, player + Tier-1 after, docs / check tool last). Playback only; `src/engine`, frame hashes and the headless graph untouched.
+- **Did:** recorded ROAR_1 / ROAR_2 / HIGH_PITCH / ECHO_START / ECHO_END with the existing recorder for the species that can use the move (Roar sets 37, Loudred, Exploud, + 7 Metronome / Assist / Mimic / Mirror Move users):
+  **112 sounds on 46 species** in `cry-NNN-task.ogg` (+ AAC twins). Existing 566 files byte-identical. Cry Ogg +369,586 B (4.55 -> 4.92 MB), AAC +315,559 B; total Ogg 7.82 MB, AAC 7.69 MB.
+  Player: `CRY_MODE_NAMES` maps all 8 modes, NORMAL only when the asset is missing (`stats.cryFallbacks`). `docs/cry1-cry-tasks.md` "cry2".
+- **Gates:** typecheck 0; test:gate 362 files / 2,843; audio files (manifest, fallback, player, followups, frame identity, headless boundary, cry1, new `cry2CryTaskPlayer`) 98 / 98; build / build:lib 0.
+  Browser `audioCheck.mjs --frames 7200` (122 s, `?audio=1`): 0 console errors, 0 missing / fallbacks, all 92 task files decode in Chromium (Ogg + AAC). The check's bgm count was stale since aud247 (fixed).
+- **Next:** no task cry sounded in the browser run (seed 3 plays NORMAL / FAINT only): hear one live. The engine's cry-task lengths remain cry1's fit. Evidence `.integration/evidence/cry2/`.
+
+---
+
 ## 2026-11-16 — aud242h (ts lane worker): move-animation SE lifetimes, slice 8 (ISSUES #219 family 1)
 
 - **State:** on master, committed (`cf66a94a3` blend_color_cycle + Psychic / Growth, `dbc3f7178` Shadow Ball ball + vertical dip + Body Slam, docs after). Sound only.
@@ -9,6 +21,7 @@
 - **Next:** Sludge Bomb (198 gated: SE-length table + `waitsound` keeps `pending`), Blizzard 88, Faint Attack 62, Confuse Ray 47. Evidence `.integration/evidence/aud242h/`.
 
 ---
+
 
 ## 2026-11-16 — lbw4 (ts lane worker): player <-> Lobby NPC interaction in free roam (ISSUES #221 E4 remainder)
 
