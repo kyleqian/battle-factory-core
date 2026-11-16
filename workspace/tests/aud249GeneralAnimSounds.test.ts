@@ -84,4 +84,15 @@ describe("General / Status animation sound table (aud249)", () => {
       expect(theirs[6]!.frame - ours[6]!.frame).toBe(second);
     });
   }
+
+  // psn2: the script's `end` waits for the loopsewithpan task (battle_anim.c:482), so the 6th Status_Poison SE 148 (command age 77 of a 71-row window) still plays (docs/aud249 psn1 / psn2).
+  // The only status animation with an SE past its window (the table scan: Confusion's last SE is age 80 of 100, the rest are earlier still).
+  it("aud242e-toxic-player: the poison tick plays the ROM's six SE 148 rows at the 14-frame spacing (the 6th past the 71-frame window), first row +10 vs ROM", () => {
+    const rom = load("aud242e-toxic-player");
+    const theirs = rom.events.filter((e) => e.noop !== true && e.kind === "se" && e.id === 148 && e.frame >= 270);
+    const ours = ourEvents(rom, "on").filter((e) => e.kind === "se" && e.id === 148 && e.frame >= 270);
+    expect(theirs.map((e) => e.frame)).toEqual([296, 310, 324, 338, 352, 366]);
+    expect(ours.map((e) => `${e.id}:${e.pan}`)).toEqual(theirs.map((e) => `${e.id}:${e.pan}`));
+    expect(ours.map((e) => e.frame)).toEqual([286, 300, 314, 328, 342, 356]);
+  });
 });

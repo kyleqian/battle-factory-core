@@ -113,3 +113,7 @@ PY
 node --experimental-strip-types --no-warnings tools/audio/aud250AnimAge.ts $E/rom-2turn-fixture.json status-animation,move-animation
 ```
 Evidence: `.integration/evidence/psn1/` (`rom-2turn.json`, `engine-rows.txt`). No fixture or test was added (the committed single-turn fixture already holds the ROM rows).
+
+## psn2: the 6th `Status_Poison` SE 148 (2026-11-16, sound-only)
+
+`emitGeneralAnimSounds` now schedules, at the status-animation script's first row (command age `STATUS_ANIMATION_SCRIPT_AGE`), every table row whose command age falls at or after the window end (`scheduleStatusAnimationTail`, the existing `scheduleAfter` queue), so a `loopsewithpan` row past the 71 / 100 / ... presentation window still plays, as the ROM's parallel sound task does (battle_anim.c:482). The window itself is unchanged (frames identical). A scan of all nine `Status_*` scripts (`ops` rows + `STATUS_ANIMATION_SCRIPT_AGE` against `STATUS_ANIMATION_ADDED_ROWS`) shows only `Status_Poison` needs it (last SE age 77 of 71); `Status_Confusion` ends at 80 of 100 and the rest are earlier still. The Toxic window `tools/audio/fixtures/aud242e-toxic-player.json` is pinned in `tests/aud249GeneralAnimSounds.test.ts`: six SE 148 rows, 14 apart, pan 63, engine 286..356 vs ROM 296..366 (the +10 first-row residual of psn1 is unchanged).

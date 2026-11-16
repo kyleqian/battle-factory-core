@@ -3,7 +3,7 @@
 // presentation, never changes it. Data: src/data/gen/anim-sound-timing.json (tools/extract/extract-anim-sound-timing.ts). docs/aud242-move-anim-sounds.md.
 import timingData from "../data/gen/anim-sound-timing.json" with { type: "json" };
 import { animSoundPan, animSoundPan2, calculatePanIncrement, emitSound, keepPanInRange, type AnimPanContext, type SoundEmission } from "../audio/soundEvents.ts";
-import { CRY_MODE_ECHO_END, CRY_MODE_ECHO_START, CRY_MODE_HIGH_PITCH, CRY_MODE_ROAR_1, CRY_MODE_ROAR_2, playAnimTaskCry, scheduleAnimTaskBgmRestore, stopAnimTaskCry } from "./screenSounds.ts";
+import { scheduleAfter, CRY_MODE_ECHO_END, CRY_MODE_ECHO_START, CRY_MODE_HIGH_PITCH, CRY_MODE_ROAR_1, CRY_MODE_ROAR_2, playAnimTaskCry, scheduleAnimTaskBgmRestore, stopAnimTaskCry } from "./screenSounds.ts";
 import { cryTaskLength } from "./cryTaskLengths.ts";
 import { factoryBattleBgm } from "./battleStartSounds.ts";
 import { BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS } from "./battleScriptSourceConstants.ts";
@@ -310,6 +310,16 @@ function generalVariant(label: string, attackerSide: 0 | 1): readonly TimedOp[] 
 }
 
 /**
+ * psn2: the script's `end` waits for its parallel loopsewithpan task (battle_anim.c:482), so an SE past the command's window still plays. Schedules the rows whose command age
+ * (script row + STATUS_ANIMATION_SCRIPT_AGE) falls at or after the window end; only Status_Poison's 6th SE 148 (age 77 of 71) has one. Sound-only: the window is not lengthened.
+ */
+function scheduleStatusAnimationTail(ops: readonly TimedOp[], context: AnimPanContext, windowRows: number): void {
+  const tailRows = new Set<number>();
+  for (const op of ops) for (const row of moveAnimOpRows(op, context, true)) if (op.frame + row.offset + STATUS_ANIMATION_SCRIPT_AGE >= windowRows) tailRows.add(op.frame + row.offset);
+  for (const scriptRow of tailRows) scheduleAfter(scriptRow, () => emitOpsAt(ops, context, scriptRow, true));
+}
+
+/**
  * aud249: the SEs of the General_* animations the live presentation runs (Scene ON only: Cmd_statusanimation / Cmd_playanimation test
  * HITMARKER_NO_ANIMATIONS, so OFF presents none of these commands). Status conditions play with statusAnimActive (every pan follows the battler's
  * side, BattleAnimAdjustPanning :1265-1271); the end-turn weather bodies are General_Rain / the Sun, Sandstorm, Hail move scripts with battler 0 as attacker.
@@ -331,7 +341,10 @@ export function emitGeneralAnimSounds(after: BattleResolutionPresentationState |
     const age = elapsed - (command.timing.seGateFrames ?? 0);
     if (age < 0) return;
     const side = command.battler === 0 ? "player" : "opponent";
-    emitOpsAt(generalVariant(STATUS_ANIMATION_LABELS[command.animation], command.battler), { attackerSide: side, targetSide: side, statusAnimActive: true }, age - STATUS_ANIMATION_SCRIPT_AGE, true);
+    const ops = generalVariant(STATUS_ANIMATION_LABELS[command.animation], command.battler);
+    const context = { attackerSide: side, targetSide: side, statusAnimActive: true } as const;
+    emitOpsAt(ops, context, age - STATUS_ANIMATION_SCRIPT_AGE, true);
+    if (age === STATUS_ANIMATION_SCRIPT_AGE) scheduleStatusAnimationTail(ops, context, command.timing.minimumFrames - (command.timing.seGateFrames ?? 0));
   } else if (command.type === "general-animation" && command.animated === true && isWeatherContinuesAnimation(command.animation)) {
     const age = elapsed - WEATHER_CONTINUES_LAUNCH_LEAD_ROWS;
     if (age < 0) return;
