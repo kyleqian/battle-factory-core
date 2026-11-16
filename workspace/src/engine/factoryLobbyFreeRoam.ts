@@ -294,6 +294,15 @@ export function advanceFactoryLobbyFreeRoam(
   if (state.turnRemaining > 0) {
     const turnRemaining = state.turnRemaining - 1;
     if (turnRemaining > 0) {
+      if (turnRemaining === 1 && heldDir === state.turnTarget) {
+        // lbw5: this tick is the ROM frame that decides the step (the engine commits one tick later). A target the woman holds at that frame
+        // (seen as of the end of the previous tick) starts the bump now, not at the commit tick: the same-direction interrupt that follows then
+        // starts the step on the ROM frame the tile clears (ROM dump lbw5 tdep-P5856).
+        const { dx, dy } = DIR_DELTA[state.turnTarget];
+        if (!isFactoryLobbyCellWalkable(state.x + dx, state.y + dy, live)) {
+          return Object.freeze({ ...state, facing: state.turnTarget, turnRemaining: 0, heldDir, pendingDir: null, bumpElapsed: 1 });
+        }
+      }
       return Object.freeze({ ...state, turnRemaining, heldDir, pendingDir: null });
     }
     const facing = state.turnTarget;
