@@ -154,7 +154,7 @@ function main(): void {
 
   const FORBIDDEN = new Set([
     "ONIX_SITRUS_ROTATE_RENDER_LAG",
-    "ONIX_SITRUS_IDENTITY_RENDER_TICK",
+    "onixSitrusIdentityRenderTick",
     "onixSitrusRotateMatrix",
     "turn5SitrusRingMatrix",
     "turn10OnixDarkPaletteCache",

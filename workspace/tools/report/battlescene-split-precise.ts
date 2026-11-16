@@ -276,7 +276,7 @@ function main(): void {
     "menuHealthboxPlayerContentMask",
     // 3 + 5. ONIX cluster + module-eval invariant guard + their consumers.
     "ONIX_SITRUS_ROTATE_RENDER_LAG",
-    "ONIX_SITRUS_IDENTITY_RENDER_TICK",
+    "onixSitrusIdentityRenderTick",
     "onixSitrusRotateMatrix",
     "onixSitrusTintCoeff",
     "turn5SitrusRingMatrix",
@@ -284,8 +284,7 @@ function main(): void {
     "turn5SitrusOnixHp",
     "turn5GrantingStarPlacement",
     // 5. batch-3 blockers (destructured out of the SHARED TURN13_RESOLUTION).
-    "TURN13_DRAGONBREATH_KICKOFF_LINE1",
-    "TURN13_DRAGONBREATH_KICKOFF_LINE2",
+    "turn13DragonbreathKickoffLines",
     // 2. would force battleSceneCanonical.ts to import src/animation/.
     "drawTurn16PostSwitchField",
   ]);
