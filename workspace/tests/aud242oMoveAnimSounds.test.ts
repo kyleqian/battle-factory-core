@@ -54,6 +54,7 @@ function ourEvents(rom: Fixture): SoundEvent[] {
 
 const SPECS: Array<{ name: string; ids: number[]; delta: number; rows: number; extra?: Record<string, number> }> = [
   { name: "petaldance-player", ids: [202, 141], delta: 2, rows: 2 },
+  { name: "dive-player", ids: [162, 233], delta: -7, rows: 2 },
 ];
 
 describe("move-animation SEs of the aud242o lifetimes", () => {

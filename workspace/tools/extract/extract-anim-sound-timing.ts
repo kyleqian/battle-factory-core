@@ -722,6 +722,25 @@ function lifetimeOf(cmd: Command, attackerSide: number, pic: PicContext): Lifeti
     const d = op.startsWith("create_") ? intNamed("duration") : intArg(args[6]);
     return d === null || d < 1 ? null : { exact: d - 1 };
   }
+  // ---- AnimDiveBall (battle_anim_flying.c:1010-1047; args a2 = wait, a3 = acceleration): the sprite starts at the attacker's pic Y (+ a1) and the init installs Step1 without running it. Calls
+  // 1..a2 count data[0] down; then every call adds a3 to data[2] and moves y2 up by data[2] >> 8 until y + y2 <= -32; the next 22 calls (data[3]++ > 20) hide it and the 22nd installs Step2,
+  // which adds the final data[2] >> 8 to y2 every call and destroys on the call y2 > 0: destroyed at call K, gone K - 1 ticks after F. Pic Y dependent.
+  if (sprite("gDiveBallSpriteTemplate")) {
+    const [a1, wait, accel] = [intArg(args[4]), intArg(args[5]), intArg(args[6])];
+    if (a1 === null || wait === null || accel === null || accel < 1) return null;
+    picUsed = true;
+    const y = pic.attackerY + a1;
+    let [d0, d2, d3, y2, step2] = [wait, 0, 0, 0, false];
+    for (let call = 1; call < 100000; call += 1) {
+      if (step2) {
+        y2 += d2 >> 8;
+        if (y2 > 0) return { exact: call - 1 };
+      } else if (d0 > 0) d0 -= 1;
+      else if (y + y2 > -32) { d2 += accel; y2 -= d2 >> 8; }
+      else { if (d3++ > 20) step2 = true; }
+    }
+    return null;
+  }
   // AnimLargeFlame (battle_anim_fire.c:518-550; gLargeFlameSpriteTemplate / gLargeFlameScatterSpriteTemplate, S = arg 2): the init only installs the step, which counts data[0] up
   // from call 1 and destroys at call S (data[1] = S): gone S - 1 ticks after F.
   if (sprite("gLargeFlameSpriteTemplate") || sprite("gLargeFlameScatterSpriteTemplate")) { const n = intArg(args[5]); return n === null || n < 1 || n > 0x7fff ? null : { exact: n - 1 }; }
