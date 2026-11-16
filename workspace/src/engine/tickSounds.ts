@@ -1,7 +1,7 @@
 // The post-tickEngineState sound block of tick() (core.ts), shared with tools/integration/lsd194Census.ts so the census emits through the same code.
 import { soundCollecting } from "../audio/soundEvents.ts";
 import { emitBattleEndSounds, emitForfeitEndSounds, emitLossBallOpenSound } from "./battleEndSounds.ts";
-import { emitBattleHitSounds } from "./battleHitSounds.ts";
+import { emitBattleHitSounds, emitDoubleTeamStatsChangeSound } from "./battleHitSounds.ts";
 import { emitBattleStartIntroSounds, emitMidBattleSwitchSounds, emitPartySendOutSounds } from "./battleStartSounds.ts";
 import { playerFaintReplacementSendOutTimingOfSegment } from "./battleResolutionPresentationRender.ts";
 import { emitGeneralAnimSounds, emitMoveAnimSounds, emitStatsChangeSounds } from "./moveAnimSounds.ts";
@@ -48,6 +48,7 @@ export function emitTickSounds(state: TickSoundState, next: TickSoundState): voi
     }
     if (orchestratorAfter?.battleResolutionPresentation) emitMoveAnimSounds(orchestratorAfter.battleResolutionPresentation, orchestratorAfter.round.rules.currentOpponent.frontierBrain !== undefined);
     if (orchestratorAfter?.battleResolutionPresentation) emitStatsChangeSounds(orchestratorAfter.battleResolutionPresentation);
+    if (orchestratorAfter?.battleResolutionPresentation) emitDoubleTeamStatsChangeSound(orchestratorAfter.battleResolutionPresentation);
     if (orchestratorAfter?.battleResolutionPresentation) emitGeneralAnimSounds(orchestratorAfter.battleResolutionPresentation);
     emitForfeitEndSounds(
       state.factoryRoundBattleOrchestrator?.battleCommandPresentation?.lifecycle.phase ?? null,

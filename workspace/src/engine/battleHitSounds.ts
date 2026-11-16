@@ -13,6 +13,9 @@ import {
   SE_SUPER_EFFECTIVE,
 } from "./screenSounds.ts";
 import { factoryBattleBgm } from "./battleStartSounds.ts";
+import { animSoundPan2, emitSound } from "../audio/soundEvents.ts";
+import { liveMoveSourceAge } from "./battleResolutionPresentationRender.ts";
+import type { BattleKernelSemanticEvent } from "./battleDecisionBoundary.ts";
 import { BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS } from "./battleScriptSourceConstants.ts";
 import type {
   BattleResolutionPresentationCommand,
@@ -107,4 +110,33 @@ export function emitBattleHitSounds(
 
 function sceneLag(segment: BattleResolutionSegment): number {
   return (segment.beforeRules.rulesContext.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) === 0 ? SCENE_ON_LAG : 0;
+}
+
+const MOVE_DOUBLE_TEAM = 104;
+/** Double Team's last SE is on script row 131; the STATS_CHANGE animation's SE_M_STAT_INCREASE follows 34 rows later (ROM windows: seed 2 x3, all +34). */
+const DOUBLE_TEAM_STAT_SE_SCRIPT_ROW = 165;
+/** Move-body age -> script row (moveAnimSounds FIRST_COMMAND_AGE + AGE_TO_SOUND_ROWS). */
+const MOVE_BODY_AGE_TO_SCRIPT_ROW = 8;
+const SE_M_STAT_INCREASE = 239;
+
+/**
+ * Scene ON Double Team: the live move window already contains the STATS_CHANGE animation (sc106: no stats-change command, so emitStatsChangeSounds is silent),
+ * and the ROM plays General_StatsChange's SE_M_STAT_INCREASE inside it. Only when the segment presents the evasion rise (not at +6) for the attacker.
+ */
+export function emitDoubleTeamStatsChangeSound(after: BattleResolutionPresentationState | null): void {
+  if (after === null || after.lifecycle.phase !== "presenting") return;
+  const source = liveMoveSourceAge(after);
+  if (source === null || source.request.moveId !== MOVE_DOUBLE_TEAM || source.age - MOVE_BODY_AGE_TO_SCRIPT_ROW !== DOUBLE_TEAM_STAT_SE_SCRIPT_ROW) return;
+  const segment = after.segments[after.segmentIndex];
+  const command = segment?.commands[after.commandIndex];
+  if (segment === undefined || command === undefined || command.type !== "move-animation") return;
+  let rise: BattleKernelSemanticEvent | undefined;
+  for (const event of segment.events) {
+    if (event.sequence <= command.eventSequence) continue;
+    if (event.payload.kind === "message" && event.payload.messageId === "STRINGID_USEDMOVE") break;
+    if (event.payload.kind === "animation" && event.payload.animationId === "STATS_CHANGE") { rise = event; break; }
+  }
+  if (rise === undefined || rise.payload.kind !== "animation" || rise.payload.battler !== source.request.attacker) return;
+  const side = source.request.attacker === 0 ? "player" : "opponent";
+  emitSound({ kind: "se", id: SE_M_STAT_INCREASE, pan: animSoundPan2(-64, { attackerSide: side, targetSide: side === "player" ? "opponent" : "player" }) });
 }
