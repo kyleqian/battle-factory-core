@@ -410,7 +410,7 @@ export type BattleSwitchInTiming = Readonly<{ minimumFrames: number }>;
 export type BattleSpriteVisibilityTiming = Readonly<{
   minimumFrames: 1 | typeof FORCED_RETURN_TO_BALL_SEND_IN_GAP_FRAMES | typeof SCENE_OFF_BATON_PASS_RETURN_TO_BALL_PRINT_GAP_FRAMES;
 }>;
-export type BattleTurnEndTiming = Readonly<{ minimumFrames: 8 }>;
+export type BattleTurnEndTiming = Readonly<{ minimumFrames: 8 | 9 }>;
 export type BattleTrainerSlideTiming = Readonly<{ minimumFrames: 38 }>;
 
 export type BattleResolutionPresentationCommand =
@@ -1651,6 +1651,8 @@ const ITEM_HEAL_HP_TIMING = Object.freeze({ minimumFrames: 0 } as const);
  * (hie1-shellbell-{off,on}: ROM text run 82 vs the end2 path's 79).
  */
 const SHELL_BELL_HP_TIMING = Object.freeze({ minimumFrames: 0, tailFrames: 3 } as const);
+/** hie4: ... and the blank box run before the prompt is 1 row longer than the end2 path's (ROM 7 vs 6, both scenes): turn-end 9 after a Shell Bell heal. */
+const SHELL_BELL_TURN_END_TIMING = Object.freeze({ minimumFrames: 9 } as const);
 /**
  * lsd194 (docs/lsd194-print-floor-and-drain.md; lsd186 receipts, 6 ROM cases: 3 scenarios x both scenes, twice-fresh): the turn-end Leech
  * Seed drain, `BattleScript_LeechSeedTurnDrain` (`playanimation; orword; healthbarupdate; datahpupdate; copyword; jumpifability;
@@ -5214,7 +5216,11 @@ export function projectBattleResolutionCommands(
   if (!commands.some(
     (command) => command.type === "message" && command.advance === "button",
   )) {
-    commands.push(Object.freeze({ type: "turn-end", timing: TURN_END_TIMING }));
+    const lastHp = commands[commands.length - 1];
+    commands.push(Object.freeze({
+      type: "turn-end",
+      timing: lastHp?.type === "hp" && lastHp.timing === SHELL_BELL_HP_TIMING ? SHELL_BELL_TURN_END_TIMING : TURN_END_TIMING,
+    }));
   }
   return Object.freeze(commands);
 }
