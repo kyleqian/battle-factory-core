@@ -1,0 +1,36 @@
+{
+ "name": "R109-dusclops-curse-last-pokemon",
+ "rules": [
+  "R109"
+ ],
+ "why": "Challenge 6. The player's Dusclops (666: Double-Edge, Shadow Ball, Curse, Rest) leads. Its Curse puts a quarter-HP end-of-turn damage on the foe; when the cursed foe is the opponent's last Pokemon and is at or below a quarter HP, the Curse damage faints it at the end of the turn and the battle ends there (BattleScript_CurseTurnDmg, runDoBattlerEndTurnEffects). The player plays random legal actions (Curse is one of four moves).",
+ "seed": 0,
+ "challengeNum": 6,
+ "battleNum": 0,
+ "trainerId": 180,
+ "playerSetIds": [
+  666,
+  724,
+  687
+ ],
+ "opponentSetIds": [
+  700,
+  698,
+  689
+ ],
+ "script": {
+  "actions": [],
+  "then": "random-v1"
+ },
+ "expect": [],
+ "cover": [
+  {
+   "file": "src/engine/battleEndTurnOrchestration.ts",
+   "text": "return Object.freeze({ kind: \"outcome-decided\", state: c",
+   "at": 0
+  }
+ ],
+ "coverAny": true,
+ "chance": 0.03,
+ "seeds": 150
+}

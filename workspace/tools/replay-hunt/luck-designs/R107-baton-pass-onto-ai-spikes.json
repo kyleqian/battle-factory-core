@@ -1,0 +1,36 @@
+{
+ "name": "R107-baton-pass-onto-ai-spikes",
+ "rules": [
+  "R107"
+ ],
+ "why": "Challenge 4. The opponent's Skarmory (482: Spikes, Roar, Drill Peck, Toxic) lays Spikes on the player's side. The player's Mr. Mime (478, Baton Pass) and its two bulky partners play random legal actions; when a wounded partner is the Baton Pass choice it faints on the Spikes and the player must choose again with a Pokemon left (resumeFullTurnForcedSwitch). Random play, so most seeds miss.",
+ "seed": 0,
+ "challengeNum": 4,
+ "battleNum": 0,
+ "trainerId": 140,
+ "playerSetIds": [
+  478,
+  556,
+  529
+ ],
+ "opponentSetIds": [
+  482,
+  559,
+  560
+ ],
+ "script": {
+  "actions": [],
+  "then": "random-v1"
+ },
+ "expect": [],
+ "cover": [
+  {
+   "file": "src/engine/factoryBattleScriptFullTurnDecision.ts",
+   "text": "{\n      // I",
+   "at": 0
+  }
+ ],
+ "coverAny": true,
+ "chance": 0.03,
+ "seeds": 150
+}

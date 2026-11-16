@@ -1,0 +1,82 @@
+{
+ "name": "R030-skarmory-toxic-curse-ai-replacement",
+ "rules": [
+  "R030"
+ ],
+ "why": "Challenge 5. The player's Skarmory (578: Toxic, Curse, Rest, Fly) badly poisons the opponent's lead Dugtrio (564: fast, frail, only Double-Edge touches a Steel/Flying mon) and then uses Curse every turn, so Curse is the last move of every turn (Skarmory is slower). Skarmory is Steel/Flying and survives Dugtrio's resisted hits. When Dugtrio faints from the poison at turn end, the AI scores its replacements with the last move still Curse (battle_ai_switch_items.c:775-779): Dewgong (584) and Miltank (603) have no Fire/Electric move, so neither is super-effective against Skarmory, the type pass finds nothing and the damage pass runs with Curse as the current move, which gives 0 damage (damageCalc.ts TYPE_MYSTERY).",
+ "seed": 0,
+ "challengeNum": 5,
+ "battleNum": 0,
+ "trainerId": 160,
+ "playerSetIds": [
+  578,
+  565,
+  628
+ ],
+ "opponentSetIds": [
+  564,
+  584,
+  603
+ ],
+ "script": {
+  "actions": [
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 1
+   }
+  ],
+  "then": "census"
+ },
+ "expect": [],
+ "cover": [
+  {
+   "file": "src/engine/damageCalc.ts",
+   "text": "{\n    damage = 0",
+   "at": 0
+  }
+ ],
+ "coverAny": true,
+ "chance": 0.3,
+ "seeds": 60
+}

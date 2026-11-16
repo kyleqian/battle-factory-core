@@ -1,0 +1,61 @@
+{
+ "name": "R067-gengar-truant-skill-swap-focus-punch",
+ "rules": [
+  "R067"
+ ],
+ "why": "Challenge 7. The opponent's lead Slaking (659: Truant, Choice Band, Earthquake...) cannot hurt the player's Gengar (613, Levitate). Gengar uses Skill Swap on turn 1 and so has Truant; Slaking's Choice Band locks it into its first move. Gengar kills Slaking with Psychic; the AI's replacement Machamp (810: Focus Punch, Substitute, Attract, Double Team) is then Skill Swapped as well (Gengar passes Truant on) and on a loafing turn the AI may choose Focus Punch, which makes the Focus Punch set-up pre-pass skip it (runFocusPunchSetUpPrePass). The step needs Gengar's Skill Swap twice and the AI picking Focus Punch on the loafing turn, so most seeds miss.",
+ "seed": 0,
+ "challengeNum": 7,
+ "battleNum": 0,
+ "trainerId": 200,
+ "playerSetIds": [
+  613,
+  565,
+  725
+ ],
+ "opponentSetIds": [
+  659,
+  810,
+  836
+ ],
+ "script": {
+  "actions": [
+   {
+    "prefer": 3
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 3
+   },
+   {
+    "prefer": 3
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 3
+   },
+   {
+    "prefer": 3
+   }
+  ],
+  "then": "random-v1"
+ },
+ "expect": [],
+ "cover": [
+  {
+   "file": "src/engine/factoryBattleScriptFullTurnDecision.ts",
+   "text": "continue;\n    co",
+   "at": 0
+  }
+ ],
+ "coverAny": true,
+ "chance": 0.03,
+ "seeds": 120
+}
