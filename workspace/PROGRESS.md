@@ -5,6 +5,20 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 2026-11-16 night run (CAX31 supervisor, Opus 5.5, 13:30 -> 05:30 UTC): in progress
+
+- **State:** master has lazy1 (below), luck1, aud242k, aud242l folded; workers running: aud242m (integration lane), dl1 (side lane, doc only).
+- **Nightly replay (item 0d)** on `b5bb454a9`: pool **44 / 44** (1,366 states), staged battles **69 / 69** (`docs/replay-ledger.md`). No luck-hunt summary yet (first day job 2026-11-17 05:45).
+- **luck1 (side lane):** `tools/replay-hunt/luckHunt.sh` (+ `luckHunt.py`, `test-luckHunt.sh`, README "luckHunt") and 14 designs in `tools/replay-hunt/luck-designs/`
+  (R030 R032 R035 R037 R038 R039 R040 R067 R080 R095 R097 R107 R109 R110; R106 impossible, R068 / R081 impractical, R103 / R105 / R108 need a hand set-up: `docs/parity-mac/rule-coverage.md`).
+  Seeds `1,000,000 + 20,000 x days since 2026-11-16 + k`. Proof: 15 min, 96 seeds, 14 designs, 0 marker hits; deadline test ok. Supervisor checks: deadline test ok (past: instant, short: 19 s);
+  a 150 s run leaves the checkout clean; the hit path on the covered R002 design: hit -> ROM drive -> match -> `found.stage.json` (`.integration/evidence/luck1/supervisor-hit-check`).
+- **aud242k / aud242l (integration lane, sound only):** 10 more move-SE lifetimes (Ancient Power ... Recover) and Blizzard per pic-Y class; T1 census 0..99 ON missing-gated **570 -> 308**, extra 0;
+  differentials 428 / 428 and 240 / 240 identical; census commands 100 / 100 identical (ISSUES #219).
+- **lazy1 supervisor check:** same-load A/B (load ~4.8): `index.js` import **2,480 -> 810 ms** (base `b5bb454a9` built in a temp worktree vs master).
+
+---
+
 ## 2026-11-16 — lazy1 (ts lane worker): website load time, step A (import-time work lazy, no behaviour change)
 
 - **State:** on master, committed (`6d9d6ec10` opcode-name index, `ca46797a5` lazy thunks, `c6076ea27` test / tool names + `docs/lazy1-import-time.md`). No API change. ENGINE_BUILD `eb-b17e87a4a52c33ad` -> **`eb-56f55ed08774e7a4`** (dist-lib; tell the website).
