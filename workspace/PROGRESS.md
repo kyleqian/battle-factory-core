@@ -65,6 +65,9 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **hpd1 (integration, evidence only):** the ROM post-hit hold is `damage + 17 / 18` with no floor (20 ROM windows, both scenes); its implementation `bab95ae43` was reverted (`74f4b3dc6`) because
   `rol1-rollout5-on` got worse: a ~26-frame constant per chained Rollout turn surfaced. hpd2 is on it. **Full suite on `f52ab720a`: 15,291 pass, 2 fail** (`tests/randomRoundSoak.test.ts` "full" seed-0 pin
   and the #89 Baton Pass seed): bisected to ais1 (the AI-switch withdraw message re-rolls the exploring soak policy). Re-pin after ais2.
+- **aud254 (side, sound only):** forced party-menu send-in runs `HandleLowHpMusicChange` (`battle_controller_player.c:1087`); the Scene ON low-HP delay is a controller-end model, not the +71
+  constant (a second ROM window refuted it); a cry starting on the previous cry's restore frame supersedes it (source order only). Seed 237 both scenes: engine minus ROM 0.
+- **Disk:** hit 99 % at ~23:00 UTC; supervisor freed `/tmp` scratch > 1 day old and 32 census `tree/` snapshots > 1 day old (`.integration/evidence/TREES-PRUNED-20261116.txt`): 62 % used.
 - **lbw5 (side):** Lobby player <-> NPC cases proven on the ROM; bump direction change and turn-commit refusal fixed (`factoryLobbyFreeRoam.ts`, `idleIdx` pose state); forfeit window 109 -> 113 / 113; lbw4 / lbra / won-* windows unchanged; supervisor `npm run compare` lbw5-bump-turn-off 269 / 269.
 - **aud242o / p (integration, sound only):** Petal Dance, Confuse Ray ball bounce, Tri Attack, Dive, Rollout counter, Encore, Flatter, Reversal, Taunt, Karate Chop, Revenge, Mist Ball, Leaf Blade;
   T1 missing-gated 195 -> **95**; T2 ON move-SE missing (21 seeds) **76** (aud251: 206); differentials 320 / 320, 240 / 240.
