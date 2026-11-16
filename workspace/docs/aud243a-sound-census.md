@@ -65,3 +65,32 @@ Reading it: the emitter is self-consistent with its table on 236527 rows (no clo
 - ROM-side comparison, the #196 / #197 / #198 offsets, low-HP / WEAK-cry mode (the census row has no HP), battle-BGM start.
 - Stale-text caution (fixed): the Scene ON action-transition pause precedes the "used" print, so it is never attributed to a move.
 - Not-ported kinds we can only count by static reachability (cry tasks) and not by executed path.
+
+## T1 classifier (t1cls)
+
+The 11,093 `unclassified` rows of every recent T1 run (seeds 0..99 Scene ON) were never an emitter gap: they are SEs / pans the other emitters (`emitStatsChangeSounds`, `emitGeneralAnimSounds`) fire
+inside **non-move commands**, which the classifier did not attribute. `lsd194Census.ts` now also writes `soundCmd` (per seed: one row per presenting command of any type: `[command index, type,
+battler, first frame, last frame, animation name, animated]`; no existing field changes), and `soundCensusDelta.py --t1` attributes every SE / pan outside a move-animation window to the command
+window that contains it (a cure berry's `status` command is the lead of the `HELD_ITEM_EFFECT` command after it). Per command it compares the emitted rows with the table's general / status variant
+(`soundCensusExpected.ts --nonmove`, same self-consistency rule as the move table: the walk is the table's, not the emitter's clock) and prints a second, per-family table. Controller ids and the move table are untouched.
+
+| | before (`on-4e31b7675`) | after (`on-bd46a5fbf`, same `src/`) |
+|---|---|---|
+| exact / missing-gated / extra (move family) | 24,175 / 570 / 0 | **24,175 / 570 / 0** (missing-declined 1, missing-other 51, known-offset 0 unchanged) |
+| unclassified | 11,093 | **0** (residual by id / source: none) |
+
+Per family (non-move, emitted rows = exact; `lead` = frames from the command's first presenting frame to the table's script frame 0, a constant per family):
+STATUS PSN 640 (lead 7), CONFUSION 1,278 (7), INFATUATION 210 (7), SLP 188 (7), PRZ 129 (7; 13 x2 / 18 x1 with an SE gate), BRN 24 (7), FRZ 20, CURSED 3; weather SUN 5,248 pan + SE (9), HAIL 520 (9), RAIN 81, SANDSTORM 62;
+HELD_ITEM_EFFECT 2,030 (15 / 9 / -22 for restart / continuation / cure berry, hie2b / hie3); LEECH_SEED_DRAIN 290 (7); FOCUS_PUNCH_SETUP 10 (5); stats-change 360 (7; 24 / 15 with an SE gate). All 11,093 rows match a table row
+of their command (non-move exact 11,093, known-offset 0, extra 0). The 5,207 `pan` rows are the Sun `panse_adjustnone` pan task (128 rows per Sun command), not an unknown emitter.
+
+**Finding (not hidden, not fixed here: `src/` is out of scope):** non-move **missing 128**, all `Status_Poison`: the table's loop (`loopsewithpan` 148, 6 times, wait 13) has its 6th SE at script frame 70 = frame 77 of the
+command, but the `status-animation` PSN command presents only 71 rows (`STATUS_ANIMATION_ADDED_ROWS`), so the engine plays 5 of 6 in each of the 128 commands (CONFUSION plays 6 of 6 in its 100-row command). Whether the ROM plays the 6th is a T2 question
+(ROM window of a Poison status); same shape as the move-family `missing-other` (51, Signal Beam / Mud Shot pan tasks after the command end). Two LEECH_SEED_DRAIN commands are not `animated` and emit nothing, by design.
+
+Reproduce (a fresh arm is 1 minute at 4 jobs; an arm from before `bd46a5fbf` has no `soundCmd` and the tool says so):
+```sh
+LSD194_SHARDS=0 LSD194_SPLIT=4 LSD194_CENSUS_JOBS=4 sh tools/integration/lsd194Census.sh <fresh-root> HEAD:on   # seeds 0..99 ON -> <root>/on-<sha>
+python3 tools/integration/soundCensusDelta.py --t1 <root>/on-<sha> --json t1.json                              # move table + "non-move families" table
+```
+Evidence: `.integration/evidence/t1cls/` (arm + `t1-after.json`). No test exists for the tool; the table above is the acceptance reading.

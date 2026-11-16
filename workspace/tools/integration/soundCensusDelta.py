@@ -3,6 +3,8 @@
 
   soundCensusDelta.py BASE FINAL            arm-vs-arm: per seed sound digest equal / event-sequence equal / changed; per (kind, id, pan) count and frame-delta histograms.
   soundCensusDelta.py --t1 ARM [--json out] T1 per executed move-animation command: emitted move-animation SEs against the aud242 table (anim-sound-timing.json) -> class table.
+                                          t1cls: the non-move SEs (Status_* / weather-continues / held item / leech seed / focus punch / castform / stats-change commands) are attributed by the arm's `soundCmd`
+                                          presenting windows and compared per command with the table's general variants -> a second, per-family table (the move table's numbers do not include it).
 
 T1 IS SELF-CONSISTENCY, NOT ROM PARITY. Expected rows come from the same table the emitter reads (walked independently of the age clock by soundCensusExpected.ts), so
 exact only says the emitter fired what the table says at the frame the table says; ROM-vs-engine offsets (#196 / #197 / #198) are invisible here and belong to T2 (aud243b).
@@ -82,6 +84,78 @@ def cry_sites():
     return out
 
 
+def family_of(w, nxt):
+    """t1cls: (family name, owner command window) of a non-move presenting window; a cure berry's `status` command is the lead of the HELD_ITEM_EFFECT command that follows it."""
+    typ, anim = w[1], w[5]
+    if typ == "status" and nxt is not None and nxt[1] == "general-animation" and nxt[5] == "HELD_ITEM_EFFECT": return "general-animation:HELD_ITEM_EFFECT", True
+    if typ in ("status-animation", "general-animation"): return f"{typ}:{anim}", False
+    if typ == "stats-change": return "stats-change", False
+    return None, False
+
+
+def nkey(w):
+    return f"{w[1]},{w[2]},{'null' if w[5] is None else w[5]}"
+
+
+def nonmove_expected(wins):
+    keys = sorted({(w[1], w[2], w[5]) for w in wins if w[1] in ("status-animation", "general-animation", "stats-change")}, key=str)
+    with tempfile.TemporaryDirectory() as td:
+        kp, ep = os.path.join(td, "keys.json"), os.path.join(td, "expected.json")
+        json.dump(keys, open(kp, "w"))
+        subprocess.run(["node", "--experimental-strip-types", "--no-warnings", "tools/integration/soundCensusExpected.ts", kp, ep, "--nonmove"], check=True)
+        return json.load(open(ep))
+
+
+def t1_nonmove(A):
+    """Per non-move command: its emitted SEs / pans (the window, plus the cure-berry lead window) against the table's rows of its family. Returns (per-family Counter, lead histogram, residual Counter, examples)."""
+    fam = defaultdict(Counter); lead = defaultdict(Counter); resid = Counter(); noemit = defaultdict(Counter); ex = defaultdict(list)
+    E = nonmove_expected([w for r in A.values() for w in (r.get("soundCmd") or [])])
+    for s in sorted(A):
+        r = A[s]; wins = r.get("soundCmd")
+        if wins is None: sys.exit("arm has no soundCmd column (regenerate with tools/integration/lsd194Census.sh at a tree >= t1cls)")
+        by_idx = {w[0]: w for w in wins}
+        owned = defaultdict(list)
+        for e in r["sound"]:
+            if e[1] not in ("se", "pan") or (e[1] == "se" and e[2] in CONTROLLER_IDS): continue
+            if any(w[5] <= e[0] <= w[6] for w in r["soundAnim"]): continue
+            cand = [w for w in wins if w[3] <= e[0] <= w[4]]
+            if not cand: resid[("outside any presenting window", e[1], e[2])] += 1; continue
+            w = cand[0]; f, lead_of_next = family_of(w, by_idx.get(w[0] + 1))
+            if f is None: resid[(f"in {w[1]} window", e[1], e[2])] += 1; continue
+            owned[w[0] + 1 if lead_of_next else w[0]].append(e)
+        # a family command that emitted nothing still counts (its table rows are then missing only when the table says the command animates: see `noemit`)
+        for w in wins:
+            f, _ = family_of(w, None)
+            if f is not None and w[0] not in owned and w[1] != "status": noemit[f][("animated" if len(w) > 6 and w[6] else "not animated") if w[1] == "general-animation" else "-"] += 1
+        for idx, evs in owned.items():
+            w = by_idx[idx]; f, _ = family_of(w, None)
+            rows = [tuple(x) for x in E[nkey(w)]["rows"]]
+            if w[1] == "stats-change": rows = None
+            fam[f]["commands"] += 1; fam[f]["emitted"] += len(evs)
+            if rows is None:
+                tup = [(e[1], e[2], e[3]) for e in evs]; want = {(r_[1], r_[2], r_[3]) for r_ in E[nkey(w)]["rows"]}
+                for t, e in zip(tup, evs):
+                    if t in want and len(evs) == 1: fam[f]["exact"] += 1; lead[f][e[0] - w[3]] += 1
+                    elif t in want: fam[f]["extra"] += 1
+                    else: fam[f]["extra"] += 1; ex[f].append((s, w[0], e))
+                continue
+            votes = Counter(e[0] - r_[0] for e in evs for r_ in rows if (e[1], e[2], e[3]) == (r_[1], r_[2], r_[3]))
+            d0 = votes.most_common(1)[0][0] if votes else None
+            left = list(rows); rest = []
+            for e in evs:
+                hit = next((r_ for r_ in left if d0 is not None and e[0] - r_[0] == d0 and (e[1], e[2], e[3]) == (r_[1], r_[2], r_[3])), None)
+                if hit: left.remove(hit); fam[f]["exact"] += 1
+                else: rest.append(e)
+            for e in rest:
+                hit = next((r_ for r_ in left if (e[1], e[2], e[3]) == (r_[1], r_[2], r_[3])), None)
+                if hit: left.remove(hit); fam[f]["known-offset"] += 1; lead[f][("off", e[0] - hit[0] - d0)] += 1
+                else: fam[f]["extra"] += 1; ex[f].append((s, w[0], e))
+            fam[f]["missing"] += len(left)
+            if len(ex[f]) < 4 and left: ex[f].append((s, w[0], "missing " + json.dumps(left[:2])))
+            if d0 is not None: lead[f][d0 - w[3]] += 1
+    return fam, lead, resid, noemit, ex
+
+
 def t1(arm, json_out):
     A = load_arm(arm)
     timing = json.load(open("src/data/gen/anim-sound-timing.json"))
@@ -152,9 +226,12 @@ def t1(arm, json_out):
                 else:
                     put("missing-other", 1, s, move, [frame, *want]); after_end["after the command's last presenting frame" if frame > last else "inside the command"] += 1
             for e in left: put("extra", 1, s, move, e)
-        for e in r["sound"]:
-            if e[1] in ("se", "pan") and not (e[1] == "se" and e[2] in CONTROLLER_IDS) and not inwin(e[0]):
-                put("unclassified", 1, s, None, e)
+        if r.get("soundCmd") is None:
+            for e in r["sound"]:
+                if e[1] in ("se", "pan") and not (e[1] == "se" and e[2] in CONTROLLER_IDS) and not inwin(e[0]):
+                    put("unclassified", 1, s, None, e)
+    nm = t1_nonmove(A) if all(r.get("soundCmd") is not None for r in A.values()) else None
+    if nm: tot["unclassified"] += sum(nm[2].values())
     print(f"T1 (self-consistency, NOT ROM parity) arm={arm} scene={scene} seeds={len(A)}")
     print("commands:", dict(cmds))
     print("%-18s %9s" % ("class", "count"))
@@ -163,11 +240,25 @@ def t1(arm, json_out):
     print("cry-task sites emitted (cry1; no longer missing-cry-task):", dict(cry_emitted))
     print("gated ops by table `ends` reason:", dict(gated_by_end))
     print("known-offset by (move, delta) top:", offsets.most_common(12))
+    if nm:
+        fam, lead, resid, noemit, ex = nm
+        print("non-move families (t1cls; emitted SEs / pans in the command's window vs the table's general variant; NOT part of the move table above except `unclassified` = the residual):")
+        print("%-40s %8s %8s %6s %7s %6s %7s  lead (first-frame -> table frame 0) | known-offset deltas" % ("family", "commands", "emitted", "exact", "offset", "extra", "missing"))
+        for f in sorted(fam):
+            c = fam[f]; l = lead[f]
+            print("%-40s %8d %8d %6d %7d %6d %7d  %s" % (f, c["commands"], c["emitted"], c["exact"], c["known-offset"], c["extra"], c["missing"],
+                  dict(Counter({k: v for k, v in l.items() if not isinstance(k, tuple)}).most_common(3)) | ({"off": dict(Counter({k[1]: v for k, v in l.items() if isinstance(k, tuple)}).most_common(3))} if any(isinstance(k, tuple) for k in l) else {})))
+        for key in ("exact", "known-offset", "extra", "missing", "emitted"): print("non-move total %-12s %d" % (key, sum(fam[f][key] for f in fam)))
+        print("non-move commands that emitted nothing:", {f: dict(v) for f, v in noemit.items()})
+        print("residual unclassified (id, source):", dict(nm[2]))
+        for f in sorted(ex):
+            if ex[f]: print("non-move examples", f, ex[f][:3])
     for c in CLASSES:
         if per_class_moves[c]: print(c, "top moves:", per_class_moves[c].most_common(8), "examples (seed, move, detail):", examples[c][:3])
     if json_out:
         json.dump({"arm": arm, "scene": scene, "seeds": len(A), "commands": dict(cmds), "classes": {c: tot[c] for c in CLASSES}, "gatedByEnds": dict(gated_by_end),
-                   "knownOffsetTop": [[list(k), v] for k, v in offsets.most_common(40)]}, open(json_out, "w"), indent=1)
+                   "knownOffsetTop": [[list(k), v] for k, v in offsets.most_common(40)],
+                   "nonMove": ({"families": {f: dict(c) for f, c in nm[0].items()}, "residual": {str(k): v for k, v in nm[2].items()}, "noEmit": {f: dict(v) for f, v in nm[3].items()}} if nm else None)}, open(json_out, "w"), indent=1)
 
 
 if __name__ == "__main__":

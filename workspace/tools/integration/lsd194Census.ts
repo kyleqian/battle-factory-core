@@ -3,7 +3,7 @@
 // attacker battler, target battler, first presenting frame, last presenting frame, frame of body age 0 (null: no live body), 1 when the segment is HITMARKER_NO_ANIMATIONS, 1 for the Scene ON action-transition pause (command.actionTransition)] (the T1 attribution input of
 // soundCensusDelta.py). Events come from the same emitters tick() calls (emitTickSounds on the orchestrator before/after each step, battleScene null) between beginScreenSoundTick and runScheduledScreenSounds
 // inside collectSoundTick; menu SEs fire inside the advance functions and are collected too. A tree without those modules writes sound / soundDigest / soundAnim = null. No existing field changes.
-// t1cls: trailing per-seed field `soundCmd` = one row per presenting command of any type [command index, type, battler, first presenting frame, last presenting frame, animation name or null] (soundCensusDelta.py --t1 attributes non-move SEs by it). No existing field changes.
+// t1cls: trailing per-seed field `soundCmd` = one row per presenting command of any type [command index, type, battler, first presenting frame, last presenting frame, animation name or null, 1 when the command is `animated`] (soundCensusDelta.py --t1 attributes non-move SEs by it). No existing field changes.
 // apx210 (finish plan Phase 2, liveMovePlayback.ts): trailing field [21] = a move-animation's playback class ("live", "static:<reason>",
 // later "approx:<reason>", "pause" = no body request; null otherwise). Set from (command, field before it) when the segment is seen, then
 // refined on the command's first presenting row from the production render view (the presentation gates). Fields [0..20] are unchanged.
@@ -149,10 +149,10 @@ for (let seed = from!; seed <= to!; seed += 1) {
     }
     if (soundOn && r?.lifecycle.phase === "presenting") {
       const s = r.segments[r.segmentIndex]; const c = s?.commands[r.commandIndex];
-      // t1cls: every command's presenting window [command index, type, battler, first frame, last frame, animation name (general / status animation)].
+      // t1cls: every command's presenting window [command index, type, battler, first frame, last frame, animation name (general / status animation), animated flag].
       if (c && cmdIndex.has(c)) {
         let w = cmdWin.get(c);
-        if (!w) { w = [cmdIndex.get(c)!, c.type, c.battler ?? null, frame, frame, typeof c.animation === "string" ? c.animation : null]; cmdWin.set(c, w); }
+        if (!w) { w = [cmdIndex.get(c)!, c.type, c.battler ?? null, frame, frame, typeof c.animation === "string" ? c.animation : null, c.animated === true ? 1 : 0]; cmdWin.set(c, w); }
         w[4] = frame;
       }
       if (c?.type === "move-animation") {

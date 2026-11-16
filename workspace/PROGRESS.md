@@ -5,6 +5,16 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 2026-11-16 — t1cls (ts lane worker): T1 classifier attributes the non-move SEs
+
+- **State:** on master, committed; tooling only (`lsd194Census.ts` `soundCmd` column, `soundCensusDelta.py --t1`, `soundCensusExpected.ts --nonmove`), nothing under `src/`.
+- **Did:** the 11,093 `unclassified` were SEs / pans inside non-move commands (status animations, weather, held item, leech seed, focus punch, stats-change; Sun's 5,207 pans = its pan task). Attributed by command window, compared per command with the table.
+- **Counts (seeds 0..99 ON, arms `on-4e31b7675` -> `on-bd46a5fbf`, same src):** move family exact / missing-gated / extra **24,175 / 570 / 0 unchanged**; unclassified 11,093 -> **0**; non-move 11,093 exact, extra 0, **missing 128** (Status_Poison plays 5 of 6 SE 148: ISSUES #219).
+- **Gates:** `npm run test:smoke`; no test imports the tool. Command and table in `docs/aud243a-sound-census.md` "T1 classifier (t1cls)". Evidence `.integration/evidence/t1cls/`.
+- **Next:** ROM window for Poison's 6th SE; then the move-SE lifetimes of the wind-down entry.
+
+---
+
 ## 2026-11-16 — CAX31 daily run (supervisor, Opus 5.5): wind-down: Lobby NPCs walk like the ROM, cry-task samples, three move-sound slices
 
 - **State:** master clean, no workers, no worktrees; no push. **No DEFERRED items.** Final tree `3564a9712`. ENGINE_BUILD `eb-c26961a07ff6b07b` -> **`eb-4f7e2a7803523e94`**

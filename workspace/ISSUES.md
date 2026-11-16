@@ -61,6 +61,7 @@ commands and stay silent; 3. cries (cry-task rows not ported); 4. battle-control
   `Status_*` play is 14-15 frames later in the ROM (not a loop error; needs a pixel window of the second play); `Status_Freeze` SE 242 moved +1
   by the wait+1 rule without a ROM window; held-item effect SEs landed in hie3 (#220).
 - **cry1 (2026-11-15)** emits the cry-task cries, stops and BGM restores of Roar / Howl / Hyper Voice (`docs/cry1-cry-tasks.md`; first cries frame-exact against ROM windows, the second cries and restores from a fitted per-species length model, 0 residual on 141 measured species-modes). The five cry-task modes are recorded and played from their own assets (cry2: `docs/cry1-cry-tasks.md`). Open: Roar / Howl windows inherit a lab drift (+13 / +13 / +1 / +4) so their script-frame offset is unverified apart from the drift-free Hyper Voice anchor; the model can be off by one for a species near a step edge (none seen in 32 pre-registered edge species).
+- **t1cls (2026-11-16)**: T1 `unclassified` is 0 (non-move SEs are attributed by command window, `docs/aud243a-sound-census.md`); the one non-move T1 gap it exposes is `Status_Poison`: 128 / 128 commands play 5 of the table's 6 SE 148 (the 6th falls 7 frames after the 71-row command; ROM window needed).
 
 ## #214 — Leads from the Mac lane's 2026-11-12 passes (source-read only, no ROM seed)
 
