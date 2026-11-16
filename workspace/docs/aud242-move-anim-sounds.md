@@ -880,3 +880,42 @@ Frame hashes: `npm run compare:differential -- <3 Blizzard Scene ON traces> --ba
 
 - T1 is self-consistency: the ROM check of the class grid is the four windows above (three distinct opponent classes and one player class); a class between them is covered by the visual-port cross-check, not by its own ROM window.
 - Top gated census moves now: Confuse Ray 47, Spark 32, Tri Attack 24, Petal Dance 22, Frustration 19, Rollout 17, Flail 15, Dive 10.
+
+## 17. aud242m: Frustration, Return and Flail (T1 family 1, slice 12)
+
+Extractor `lifetimeOf` / `returnValue` in `tools/extract/extract-anim-sound-timing.ts` (aud242m block); table regenerated (356 moves, 358 distinct variants, 1172 ops).
+
+### 17.1 Ports (C-cited, none fitted to a ROM window)
+
+- **Friendship branch (`returnValue`).** `AnimTask_GetFrustrationPowerLevel` (`battle_anim_mons.c:1993-2006`, `<= 30` -> 0) and `AnimTask_GetReturnPowerLevel` (`battle_anim_effects_3.c:5060-5073`, `< 60` -> 0) read `gAnimFriendship`. Every Factory mon has friendship 0 (`battle_factory.c:459`, `:820`; the controllers copy the mon's friendship into the move-animation buffer, `battle_controller_player.c:2477`, and the engine adapter passes 0), so Frustration takes `Frustration_Strongest` and Return `ReturnWeak`.
+  The `mechanicLab` template's mons have friendship 70 (Frustration Strong / Return Medium); the aud242m labs therefore set `friendship: 0` on every mon (`AUD242_FRIENDSHIP=0 AUD242_LAB_PREFIX=aud242m tools/audio/makeAud242bLabs.py`), the Factory value. The first, friendship-70 windows took the Strong / Medium branches, which is how the labs' value was found; they were replaced, not kept.
+- **`gAngerMarkSpriteTemplate` = 17 ticks** (`battle_anim_effects_2.c:2281-2299`: init sets `callback = AnimAngerMark`, which runs the two 8-tick affine commands, `battle_anim_mons.c:586-591`, `:729-733`, then destroys). Cross-checked against the ROM-validated visual port `src/animation/swagger.ts` (17 ticks) and the Frustration ROM window below (two marks 18 script frames apart = 17 + the following `playsewithpan` frame).
+- **`AnimTask_FlailMovement`** (`flailMovementLength()`): the task's `sin` angle state machine is simulated with s16 arithmetic (amplitude 0x800 shrinking by 0x40 per 9-count after 0x20 shrinks) and its end call is the sprite lifetime; nothing is measured.
+
+### 17.2 ROM windows (probe step mode, `AUDIO_PROBE_EXTRA_HOOKS=BlendPalette`, Scene ON, player attacker Lv50, friendship 0)
+
+Fixtures `tools/audio/fixtures/aud242m-{frustration,flail,return}-player.json`, labs `tools/battle-lab/aud242m-*-player-on.json`, stages `aud242m-*-player-on` in `appTrace.ts`, test `tests/aud242mMoveAnimSounds.test.ts`. Recipe as section 15 (`--frames 700`).
+
+| window | rows | ids / pans | ROM minus ours |
+|---|---|---|---|
+| Frustration (Strongest) | 9 (DRAGON_RAGE 171, SWAGGER2 194 x2, COMET_PUNCH 139 x6) | equal | **+1** (the idle class) |
+| Flail | 3 (162 x2, MEGA_KICK2 141) | equal | **+2** |
+| Return (Weak) | 3 (TAIL_WHIP 167 x2, COMET_PUNCH 139) | equal | **+1** |
+
+Every row's id, pan and relative spacing equal the ROM's; the constant is the existing #198 idle lead class (recorded, not fitted).
+
+### 17.3 Counts (turn 0, player attacker)
+
+| | before (`b8f8e9203`) | after |
+|---|---|---|
+| all moves: ops resolved / unresolved | 935 / 177 | 948 / 174 |
+| L50 (276 moves): emitted / gated | 731 / 103 | 744 / 100 |
+
+Only Frustration, Return and Flail changed (semantic old-vs-new table diff); they are fully resolved in all turn / side variants.
+
+Census T1 (seeds 0..99 Scene ON, arms `on-085998622` (aud242l head) and fresh `on-d5ea5c8fb`, each scored inside its own tree): exact 24,492 -> 24,678, **missing-gated 308 -> 274**, missing-other 51, missing-declined 1, extra 0, unclassified 128 in both (the psn2 / SE148 note). `rst197CensusDelta.py`: 100 / 100 battles, 31,264 commands, bad 0.
+Frame hashes: `npm run compare:differential -- <Frustration, Flail, Return Scene ON traces> --base b8f8e9203 --harness-from-head`: 240 / 240 captures byte-identical (captures 60..692 step 8).
+
+### 17.4 Residuals
+
+Remaining top gated census moves: Confuse Ray 47 (ball-bounce translation needs the target's pic Y, a blend oscillation state machine and the `AdjustPanningVar` task), Spark 32 (`AnimSparkElectricity` plus overlapping `blend_color_cycle`), Tri Attack 24, Petal Dance 22, Rollout 17 (depends on the battle's rolloutCounter, not a lifetime), Dive 10.
