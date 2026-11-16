@@ -156,12 +156,17 @@ def t1_nonmove(A):
     return fam, lead, resid, noemit, ex
 
 
+# aud242l: soundAnim row element 10 = the battlers' pic Y [player, opponent] (absent in older arms): picks the Blizzard pic class of the table.
+def pic_key(a):
+    return ",".join(str(v) for v in a[10]) if len(a) > 10 and a[10] else ""
+
+
 def t1(arm, json_out):
     A = load_arm(arm)
     timing = json.load(open("src/data/gen/anim-sound-timing.json"))
     label_of = {m["move"]: m["label"] for m in timing["moves"]}
     cry = cry_sites()
-    keys = sorted({(a[1], a[2], a[3], a[4]) for r in A.values() for a in r["soundAnim"] if a[1] is not None})
+    keys = sorted({(a[1], a[2], a[3], a[4], pic_key(a)) for r in A.values() for a in r["soundAnim"] if a[1] is not None})
     with tempfile.TemporaryDirectory() as td:
         kp, ep = os.path.join(td, "keys.json"), os.path.join(td, "expected.json")
         json.dump(keys, open(kp, "w"))
@@ -192,7 +197,7 @@ def t1(arm, json_out):
                     cmds["no body request, not a transition"] += 1; put("unclassified", 1, s, None, "animation-less non-transition command " + str(idx))
                 for e in ev: put("extra", 1, s, move, e)
                 continue
-            exp = E.get(f"{move},{turn},{att},{tgt}")
+            exp = E.get(f"{move},{turn},{att},{tgt},{pic_key(a)}")
             if exp is None:
                 cmds["move without table entry"] += 1
                 for e in ev: put("unclassified", 1, s, move, e)
