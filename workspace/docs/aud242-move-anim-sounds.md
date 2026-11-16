@@ -971,3 +971,49 @@ Frame hashes: `npm run compare:differential -- <Confuse Ray player, Confuse Ray 
 ### 18.5 Residuals
 
 The Confuse Ray sprite SE196 rows (13 per cast, ROM-only). Spark's +5 / +6 (idle lead plus one overrun frame). Remaining top gated census moves: Tri Attack 24, Petal Dance 22, Rollout 17 (rolloutCounter, not a lifetime), Dive 10.
+
+## 19. aud242o: Petal Dance, Confuse Ray ball SE, Tri Attack, Dive, Rollout (T1 family 1, slice 14)
+
+Table regenerated (356 moves, 367 distinct variants, 1202 ops). Every lifetime is ported from the C with the same integer arithmetic; nothing is fitted to a ROM window. Extractor blocks: `lifetimeOf`, `rolloutShape`, `confuseRayBallBounceLength`, the Dive ball simulation and the `sprite_confuseray_ball` / `task_rollout` events in `tools/extract/extract-anim-sound-timing.ts`; rows in `src/engine/moveAnimSounds.ts` (`confuseRayBallRows`, `rolloutRows`).
+
+### 19.1 Ports
+
+- **Petal Dance flowers** (`gPetalDanceBigFlowerSpriteTemplate` / `gPetalDanceSmallFlowerSpriteTemplate`): the flower sprite is gone `D - 1` ticks after its creation iteration (`exact: d - 1`, `D` = the script's duration arg).
+- **Confuse Ray ball bounce SE196** (`battle_anim_ghost.c:249-256`, `:258-286`): the ball sprite plays `SE_M_CONFUSE_RAY` from its callback (a sprite-callback sound source, a non-task row) on the bounce phase counter; its pan comes from the `SoundTask_AdjustPanningVar` that shares the sprite's frame (`animSoundPan`, `calculatePanIncrement`, `keepPanInRange`, simulated in `confuseRayBallRows`). 13 rows per cast per side; the aud242n "named gap" test is now part of the `confuseray-*` specs.
+- **Tri Attack** (`battle_anim_effects_3.c` / `battle_anim_fire.c`): `gLargeFlameSpriteTemplate` / `gLargeFlameScatterSpriteTemplate` are gone `intArg(args[5]) - 1` ticks after creation (script arg 2, n 1..0x7fff); `gLightningSpriteTemplate` 28; `AnimTask_InvertScreenColor` / `invert_screen_color` is a net-zero task destroyed in its creating step (`exact: -1`).
+- **Bug fix, `AnimTask_ShakeTargetInPattern`** (`battle_anim_fire.c:1344-1375`): `maxShakes` is `gBattleAnimArgs[0]`, i.e. script `args[2]` (createvisualtask args are `name, priority, arg0...`); the extractor read `args[3]`. Every ShakeTargetInPattern lifetime was wrong; the Tri Attack ice rows were 12 frames early until this was fixed. The semantic table diff old-vs-new moves Tri Attack only.
+- **Dive** (`gDiveBallSpriteTemplate`): a simulation of the ball step (pic-Y dependent): `y = pic.attackerY + a1`, `wait = args[5]`, `accel = args[6]`; Step1 rises until `y + y2 <= -32`, 22 hidden calls, Step2 falls by `d2 >> 8` until `y2 > 0`; `exact: call - 1`. The table is per pic class (`picGrids`, aud242l mechanism).
+- **Rollout** (`AnimTask_Rollout`, `battle_anim_normal.c`; counter 1..5 = `GetRolloutCounter`, `request.rolloutCounter`): the live counter is a new table dimension (`counter` slot per move, `counterGrids`, 5 variants per slot, deduplicated). `rolloutShape(c)`: length 32 for counter 1, else `48 - 8c`; dirt period `max(trunc(length / 8) - 1, 1)`; the task is destroyed at call `max(41 + length, lastDirtCall + 19)` (a task whose entry only sets `func` has its first step at call 1). Rows: `SE_M_HEADBUTT` x10 at offsets 0..9 (pan -64), `SE_M_DIG` every `period` dirt steps from offset 40 with the pan stepping `trunc((pan2 - pan1) / length)` before each play, and `SE_M_MEGA_KICK2` at frame 101 / 101 / 95 / 87 / 79 (counters 1..5; the bodies' lengths 167 / 167 / 161 / 153 / 145 minus the same constant). The emitter passes `request.rolloutCounter` (outside 1..5 -> the counter 1 variant); the census learned the counter as `soundAnim` element 11 (`lsd194Census.ts`, `soundCensusDelta.py` `counter_key`, `soundCensusExpected.ts`; an older arm without it scores the counter 1 variant).
+
+### 19.2 ROM windows (probe step mode, `AUD242_FRIENDSHIP=0 AUDIO_PROBE_EXTRA_HOOKS=BlendPalette`, Scene ON, attacker Lv50)
+
+Fixtures `tools/audio/fixtures/aud242o-*.json` (and the rewritten `aud242n-confuseray-*`, `aud242g` Tri Attack), labs `tools/battle-lab/aud242o-*-on.json`, stages `aud242o-*-on` in `appTrace.ts`, test `tests/aud242oMoveAnimSounds.test.ts` (+ the specs moved in `aud242n` / `aud242g`).
+
+| window | rows | ids | ROM minus ours |
+|---|---|---|---|
+| Petal Dance, player | 2 (SE202, SE141) | equal | **+2** |
+| Confuse Ray, player / opponent | 14 each (SE130 + 13 SE196, pans from the pan task) | equal | **0** / **0** |
+| Tri Attack, player | 17 | equal | **+2** (all rows) |
+| Dive, player (set-up turn) | 2 (SE162, SE233) | equal | **-7** |
+| Rollout, player, one cast (counter 1) | 21 (10 SE162, 10 SE175, SE141) | equal, pans equal | **+3** |
+| Rollout, player, 5 turns behind an opponent Defense Curl (counters 1..5) | 111 | equal, pans equal | **+9 / +22 / +37 / +57 / +86**, constant inside each turn |
+
+Notes. The +2 is the idle-lead class (#198). Dive's -7 is a charge-turn presentation offset (every row of the window, including the headbutt, so it is not a lifetime error). The Rollout one-cast +3 and the five-turn offsets are presentation offsets of the turn start, not of the rows: every row of a turn moves by the same amount, so the in-turn intervals (the SE162 run, the SE175 pan steps and gaps, the MEGA_KICK2 gap) equal the ROM's for all five counters; the accumulated drift (+13, +15, +20, +29 turn over turn) is not diagnosed here (candidates: the turn bodies' per-counter lengths and the per-counter lag ages in `liveMoveTimingPolicy.ts`, or the non-Rollout part of each turn); it is outside the sound table (the window's Defense Curl stat SE rows drift by 2 / 16 / 31 / 51 / 80, i.e. the same per-turn amounts minus the constant 6-7 frames between the stat-change row and the Rollout rows; `tests/aud248StatChangeSounds.test.ts` takes them as a per-row residual list). The five-turn lab uses an opponent Defense Curl and a Lv100 target because a Seismic Toss / Tail Whip opponent made the stage's RNG miss Rollout (the stage is calibrated for the existing windows).
+
+### 19.3 Counts and census
+
+| | before (`23c5c3279`) | after |
+|---|---|---|
+| all moves: ops resolved / unresolved (turn 0, player attacker) | 951 / 171 | 964 / 160 |
+| all-moves ops in the table | 1175 | 1202 |
+| L50 (276 moves): emitted / gated | 747 / 97 | 760 / 86 |
+| table: distinct variants | 359 | 367 |
+
+Moves changed (semantic old-vs-new table diff): Petal Dance, Confuse Ray, Tri Attack, Rollout, Dive (gated 1 -> 0, 0 -> 0 (+SE196 rows), 8 -> 0, 1 -> 0, 1 -> 0 at turn 0 player).
+
+Census T1 (seeds 0..99 Scene ON; base arm `on-05e2d0bc6` = the aud242n head, scored inside its own tree; final arm `on-67eacbe83` scored here): exact 24,757 -> **25,795**, **missing-gated 195 -> 122**, extra 0, missing-other 51, missing-declined 1, unclassified 128 unchanged. Rollout, Petal Dance, Tri Attack, Dive and Spark are off the missing-gated list. Sound sequence delta base -> final: 35 of 100 seeds changed, all by added rows (SE196 26 tuples of 12 / 13 rows, SE141 x7, SE162 / SE175 rows), none removed. `rst197CensusDelta.py` base vs final: 100 / 100 battles identical (31,264 commands, bad 0).
+Frame hashes: `npm run compare:differential -- <aud242o rollout, triattack, dive, petaldance player Scene ON traces> --base 23c5c3279 --harness-from-head`: 320 / 320 captures byte-identical.
+
+### 19.4 Residuals
+
+Idle-lead +2 / +3 and Dive's -7 (#198). Rollout's turn-over-turn presentation drift (+13 / +15 / +20 / +29). Remaining top gated census moves: Dynamic Punch 10, Extrasensory 8, Leaf Blade 8, Flatter 8, Secret Power 8, Heal Bell 8, Ice Ball 6 (the next counter-dimension candidate), Fury Cutter 6.

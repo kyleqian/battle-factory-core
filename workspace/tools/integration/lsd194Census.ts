@@ -167,6 +167,8 @@ for (let seed = from!; seed <= to!; seed += 1) {
         if (a[7] === null && render?.liveMoveSourceAge) { const src = render.liveMoveSourceAge(r); if (src && src.age === 0) a[7] = frame; }
         // aud242l: the live battlers' pic Y [player, opponent] (the Blizzard lifetime classes); absent in a tree without `picOffsetY`.
         if (a[10] === undefined && render?.liveMoveSourceAge) { const src = render.liveMoveSourceAge(r); if (src?.picOffsetY) a[10] = [src.picOffsetY(0), src.picOffsetY(1)]; }
+        // aud242o: the live rollout counter (1..5) of the Rollout sound variants; absent in an older arm.
+        if (a[11] === undefined && c.animation?.rolloutCounter !== undefined) a[11] = c.animation.rolloutCounter;
       }
     }
     if (!owned()) ended = true;

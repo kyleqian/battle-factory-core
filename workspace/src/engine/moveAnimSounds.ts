@@ -12,7 +12,7 @@ import { liveMoveSourceAge, statsChangeSourceAge } from "./battleResolutionPrese
 import { FOCUS_PUNCH_SETUP_BEHIND_SUBSTITUTE_COMMAND_FRAMES, HELD_ITEM_EFFECT_COMMAND_FRAMES, WEATHER_CONTINUES_LAUNCH_LEAD_ROWS, isWeatherContinuesAnimation, type BattleStatusAnimationName, type WeatherContinuesAnimation } from "./battleResolutionPresentation.ts";
 
 export interface TimedOp {
-  readonly op: "playsewithpan" | "playse" | "waitplaysewithpan" | "loopsewithpan" | "panse" | "panse_adjustnone" | "panse_adjustall" | "setpan" | "soundtask_loopse" | "soundtask_fireblast" | "soundtask_se1" | "soundtask_se2";
+  readonly op: "playsewithpan" | "playse" | "waitplaysewithpan" | "loopsewithpan" | "panse" | "panse_adjustnone" | "panse_adjustall" | "setpan" | "soundtask_loopse" | "soundtask_fireblast" | "soundtask_se1" | "soundtask_se2" | "sprite_confuseray_ball" | "task_rollout";
   readonly frame: number;
   readonly id: number | null;
   readonly pan: number | null;
@@ -28,7 +28,9 @@ interface TimingTable {
   readonly turns: number;
   readonly sides: number;
   readonly variants: readonly (readonly TimedOp[])[];
-  readonly moves: readonly Readonly<{ move: number; variants: readonly number[]; pic?: readonly number[] }>[];
+  readonly moves: readonly Readonly<{ move: number; variants: readonly number[]; pic?: readonly number[]; counter?: readonly number[] }>[];
+  /** aud242o: per Rollout counter 1..5, the variant index (the walk reads AnimTask_Rollout's length from GetRolloutCounter). */
+  readonly counterGrids: readonly (readonly number[])[];
   /** aud242l: per side, the sorted distinct pic Y (GetBattlerSpriteFinal_Y(..., TRUE)) a battler on that side can have. */
   readonly picYs: readonly (readonly number[])[];
   /** aud242l: grids of variant indices, row = attacker pic Y class, column = target pic Y class (both in picYs order). */
@@ -119,6 +121,61 @@ function loopSeRows(op: TimedOp, context: AnimPanContext): readonly OpRow[] {
 }
 
 /**
+ * AnimConfuseRayBallBounce (battle_anim_ghost.c:220-311, aud242o): the sprite plays the SE itself. Sprite call 0 is the init (script step), call k >= 1 is AnimateSprites of iteration
+ * k - 1 (before the same iteration's RunTasks); `times` = D Step1 translate calls (calls 1..D), call D + 1 installs Step2 and plays nothing, Step2 runs calls D + 2..n (`gap`).
+ * data[5] (the phase) steps by 5 (mod 256) on every call that does not return early; a call plays when its old phase is 0 or above 196 and the new one is above 0: Step1 with
+ * PlaySE12WithPanning(gAnimCustomPanning), Step2 with PlaySE. gAnimCustomPanning is the pan task's data[11] after its calls 0..k - 1 (SoundTask_AdjustPanningVar: call 0 is the
+ * creating step, call j >= 1 RunTasks of iteration j - 1, sprites run first); once the task ends it keeps its last value.
+ */
+function confuseRayBallRows(op: TimedOp, context: AnimPanContext): readonly OpRow[] {
+  const arg = (n: number | null | undefined): number => n ?? 0;
+  const source = animSoundPan(arg(op.pan), context);
+  const target = animSoundPan(arg(op.target), context);
+  const increment = calculatePanIncrement(source, target, arg(op.inc));
+  const wait = arg(op.wait);
+  const [duration, last] = [arg(op.times), arg(op.gap)];
+  let [pan, counter, taskDone] = [source, 0, false];
+  const stepPanTask = (): void => {
+    if (taskDone) return;
+    if (counter++ === wait) { counter = 0; pan = keepPanInRange(pan + increment); }
+    if (pan === target) taskDone = true;
+  };
+  stepPanTask();
+  const rows: OpRow[] = [];
+  let phase = 0;
+  for (let call = 1; call <= last; call += 1) {
+    if (call !== duration + 1) {
+      const [old, next] = [phase, (phase + 5) & 0xff];
+      phase = next;
+      if ((old === 0 || old > 196) && next > 0) rows.push({ offset: call - 1, emission: { kind: "se", id: op.id, pan: call <= duration ? pan : null } });
+    }
+    stepPanTask();
+  }
+  return rows;
+}
+
+/**
+ * AnimTask_Rollout (battle_anim_rock.c:584-715, aud242o): the entry only sets `func`, so call n >= 1 is RunTasks of iteration n - 1 (offset n - 1). Case 0 plays `id` (SE_M_HEADBUTT) at the
+ * start pan on calls 1..10; case 3 (calls 41..40 + D, D = `times`) plays `id2` (SE_M_DIG) every p = max(D / 8 - 1, 1) calls after adding (pan2 - pan1) / D (C division) to the pan.
+ */
+function rolloutRows(op: TimedOp, context: AnimPanContext): readonly OpRow[] {
+  const length = op.times ?? 32;
+  const first = animSoundPan(op.pan ?? 0, context);
+  const last = animSoundPan(op.target ?? 0, context);
+  const increment = Math.trunc((last - first) / length);
+  const period = Math.max(Math.trunc(length / 8) - 1, 1);
+  const rows: OpRow[] = [];
+  for (let call = 1; call <= 10; call += 1) rows.push({ offset: call - 1, emission: { kind: "se", id: op.id, pan: first }, task: true });
+  let pan = first;
+  for (let step = 1; step <= length; step += 1) {
+    if (step % period !== 0) continue;
+    pan += increment;
+    rows.push({ offset: 40 + step - 1, emission: { kind: "se", id: op.id2 ?? null, pan }, task: true });
+  }
+  return rows;
+}
+
+/**
  * SoundTask_FireBlast: no immediate call, so call n runs in RunTasks of iteration n. Step1 (calls 0..109) plays the loop SE when its counter wraps (call 0,
  * then every 11) with the current pan and then adds the increment (2, signed toward the target); call 110 switches to Step2, which plays the ending SE
  * at the target pan twice, 6 calls apart (calls 111 and 117), and ends.
@@ -151,6 +208,8 @@ export function moveAnimOpRows(op: TimedOp, context: AnimPanContext, uniformLoop
     case "soundtask_se1": case "soundtask_se2": return [{ offset: 0, emission: { kind: "se", id: op.id, pan: animSoundPan(op.pan ?? 0, context), player: op.op === "soundtask_se1" ? "SE1" : "SE2" } }];
     case "soundtask_loopse": return loopSeRows(op, context);
     case "soundtask_fireblast": return fireBlastRows(op, context);
+    case "sprite_confuseray_ball": return confuseRayBallRows(op, context);
+    case "task_rollout": return rolloutRows(op, context);
     default: return [{ offset: uniformLoop && op.op === "waitplaysewithpan" ? 1 : 0, emission: { kind: "se", id: op.id, pan: animSoundPan(op.pan ?? 0, context) } }];
   }
 }
@@ -160,11 +219,13 @@ export function moveAnimOpRows(op: TimedOp, context: AnimPanContext, uniformLoop
  * A move whose sprite lifetimes depend on the two battlers' pic Y (Blizzard, aud242l) carries a grid per slot; `picY` reads the live values and an unknown class keeps
  * the reference walk.
  */
-function variantOf(move: number, turn: number, attackerSide: 0 | 1, picY?: (battler: 0 | 1) => number): readonly TimedOp[] {
+function variantOf(move: number, turn: number, attackerSide: 0 | 1, picY?: (battler: 0 | 1) => number, rolloutCounter?: number): readonly TimedOp[] {
   const entry = timing.moves[move];
   if (entry === undefined) return [];
   const turnIndex = turn < timing.turns ? turn : timing.turns - 2 + (turn & 1);
   const slot = turnIndex * timing.sides + attackerSide;
+  const counterGrid = entry.counter === undefined ? undefined : timing.counterGrids[entry.counter[slot]!];
+  if (counterGrid !== undefined) return timing.variants[counterGrid[rolloutCounter !== undefined && rolloutCounter >= 1 && rolloutCounter <= 5 ? rolloutCounter - 1 : 0]!]!;
   const grid = entry.pic === undefined || picY === undefined ? undefined : timing.picGrids[entry.pic[slot]!];
   if (grid !== undefined) {
     const row = timing.picYs[attackerSide]!.indexOf(picY!(attackerSide));
@@ -282,7 +343,7 @@ export function emitMoveAnimSounds(after: BattleResolutionPresentationState | nu
     targetSide: request.target === 0 ? "player" : "opponent",
   } as const;
   const scriptRow = age - FIRST_COMMAND_AGE - AGE_TO_SOUND_ROWS;
-  emitOpsAt(variantOf(request.moveId, request.turn, request.attacker === 0 ? 0 : 1, source.picOffsetY), context, scriptRow);
+  emitOpsAt(variantOf(request.moveId, request.turn, request.attacker === 0 ? 0 : 1, source.picOffsetY, request.rolloutCounter), context, scriptRow);
   emitCryTaskRows(request.moveId, source.attackerSpecies, context.attackerSide, scriptRow, frontierBrain);
 }
 
