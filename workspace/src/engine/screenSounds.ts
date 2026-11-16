@@ -78,6 +78,7 @@ interface Scheduled {
   readonly frame: number;
   readonly run: () => void;
   readonly openCry?: true;
+  readonly task?: true;
 }
 
 let currentFrame = 0;
@@ -100,19 +101,22 @@ export function beginScreenSoundTick(frame: number): void {
 /** Called once at the end of each collected tick: runs what came due on this frame, in scheduling order. */
 export function runScheduledScreenSounds(): void {
   if (!soundCollecting()) return;
-  for (let index = 0; index < queue.length; index += 1) {
-    const entry = queue[index]!;
-    if (entry.frame !== currentFrame) continue;
-    queue.splice(index, 1);
-    index -= 1;
-    entry.run();
+  // aud254: a frame's callback1 work (a new PlayCry_ByMode, which resets the duck counter) runs before RunTasks (Task_DuckBGMForPokemonCry's restore).
+  for (const tasks of [false, true]) {
+    for (let index = 0; index < queue.length; index += 1) {
+      const entry = queue[index]!;
+      if (entry.frame !== currentFrame || (entry.task === true) !== tasks) continue;
+      queue.splice(index, 1);
+      index -= 1;
+      entry.run();
+    }
   }
 }
 
-export function scheduleAfter(delay: number, run: () => void, openCry?: true): void {
+export function scheduleAfter(delay: number, run: () => void, openCry?: true, task?: true): void {
   if (!soundCollecting()) return;
   if (delay === 0) run();
-  else queue.push(openCry ? { frame: currentFrame + delay, run, openCry } : { frame: currentFrame + delay, run });
+  else queue.push({ frame: currentFrame + delay, run, ...(openCry ? { openCry } : {}), ...(task ? { task } : {}) });
 }
 
 function restoreBgm(bgm: number): void {
@@ -135,7 +139,7 @@ function startCry(bgm: number, species: number, mode: number, pan: number, resto
     ducking = null;
     restoreBgm(bgm);
     onRestore?.(restoreFrames);
-  });
+  }, undefined, true);
 }
 
 /**
