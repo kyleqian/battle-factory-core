@@ -52,6 +52,10 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **cry3 (side, sound only):** every Factory species has a source-derived cry length for NORMAL / WEAK / FAINT and the task modes (`src/data/cryModeFrames.ts`, `npm run extract:cry-mode-frames`;
   WEAK = pitch 15000 vs 15360, note length 140); 1,128 / 1,128 ROM measurements equal. Formerly silent WEAK BGM restores now play (8 rows in census 0..99). Follow-up: `faintCryFrames.ts` fit is
   off on 24 / 376 species (`CRY_FAINT_FRAMES` is exact; switching moves faint-restore rows: its own step). Supervisor re-pinned `tests/aud252LossBallOpen.test.ts` after hie4 (test:gate does not run it).
+- **cry4 (side, sound only):** faint-cry restores read cry3's exact table (24 species were 1-21 frames off; ROM-probed 24 / 24) and the cry-task lengths too (fits deleted); 46 restore rows move in census 0..99.
+- **hpd1 (integration, evidence only):** the ROM post-hit hold is `damage + 17 / 18` with no floor (20 ROM windows, both scenes); its implementation `bab95ae43` was reverted (`74f4b3dc6`) because
+  `rol1-rollout5-on` got worse: a ~26-frame constant per chained Rollout turn surfaced. hpd2 is on it. **Full suite on `f52ab720a`: 15,291 pass, 2 fail** (`tests/randomRoundSoak.test.ts` "full" seed-0 pin
+  and the #89 Baton Pass seed): bisected to ais1 (the AI-switch withdraw message re-rolls the exploring soak policy). Re-pin after ais2.
 - **lbw5 (side):** Lobby player <-> NPC cases proven on the ROM; bump direction change and turn-commit refusal fixed (`factoryLobbyFreeRoam.ts`, `idleIdx` pose state); forfeit window 109 -> 113 / 113; lbw4 / lbra / won-* windows unchanged; supervisor `npm run compare` lbw5-bump-turn-off 269 / 269.
 - **aud242o / p (integration, sound only):** Petal Dance, Confuse Ray ball bounce, Tri Attack, Dive, Rollout counter, Encore, Flatter, Reversal, Taunt, Karate Chop, Revenge, Mist Ball, Leaf Blade;
   T1 missing-gated 195 -> **95**; T2 ON move-SE missing (21 seeds) **76** (aud251: 206); differentials 320 / 320, 240 / 240.
