@@ -18,7 +18,9 @@ exclusions are superseded. Unrelated expansions stay parked.
 - E1-E3 (battle-exit VBlank hold, Pokerus + save-block draws, Lobby map-load draws) fixed by lbr-g (`src/engine/battleExitRng.ts`,
   `tests/battleExitRng.test.ts`), E4 (the woman / fat man wander draws) by lbw3 (`docs/lbw3-lobby-npc-port.md`; offset 0 on 6 ROM traces from the rebase to the end). Open:
   - **Harness:** every lbra / lbrd `appStage` injects a non-ROM `rngValue`; the traces now carry an `appRngRebase` (values in `docs/lbw1-lobby-wander-evidence.md` and the trace files).
-  - **Unproven in the wander port:** retire-after-won / injected / attendant-return entries (shared rule); lbw4 measured the player in the woman's way (`docs/lbw3-lobby-npc-port.md`), still open there: a same-frame race for one tile, a turn-commit refusal by the woman, the fat man in the player's way, a direction change during a bump.
+  - **Unproven in the wander port:** retire-after-won / injected / attendant-return entries (shared rule). lbw5 (2026-11-16) proved the fat man in the way, the same-frame tile race (exact already),
+    a direction change during a bump and a turn-commit refusal (both fixed) on the ROM (`lbw5-*-off` traces, `tests/lbw5LobbyNpcPlayer.test.ts`). Open: five single-frame player-pose residuals
+    (first step after a bump interrupt, bump-cycle boundary, bump settle; listed in `docs/lbw3-lobby-npc-port.md` "lbw5") and a held direction change while a step is in flight (ROM goes straight, the engine turns 8 frames).
   - **Unmeasured:** the won route's real battle exit (reuses the loss rule), the non-terminal win's PreBattleRoom entry, a full
     boot -> draft -> battle -> forfeit route.
 
@@ -145,7 +147,13 @@ Ancient Power / Fire Punch / Crunch +2, Yawn +1, Lovely Kiss 0, Smokescreen / Sc
 **aud242n (2026-11-16)** Confuse Ray (pan task 62 / 61, ball bounce 75, spiral 59) and Spark (`AnimSparkElectricity` timer, a one-blend colour cycle refused under a running fade, 4-bit
 `deltaY`) (L50 747 emitted, 97 gated; section 18): Confuse Ray 0, Spark +5 / +6. T1 0..99 ON missing-gated 308 -> 274 -> **195**. Not modelled: Confuse Ray ball-bounce SE196 (13 rows per cast, ROM-only),
 multi-blend cycles over another fade.
-Open (top census gated ops): Tri Attack 24, Petal Dance 22, Rollout 17 (rollout counter), Dive 10; Confuse Ray ball-bounce SE196.
+**aud242o (2026-11-16)** Petal Dance, Confuse Ray ball-bounce SE196, Tri Attack rest, Dive, Rollout (live rollout counter as a table dimension `counterGrids`); extractor fix:
+`AnimTask_ShakeTargetInPattern` read `args[3]` for `args[2]` (L50 760 emitted, 86 gated; section 19): Petal Dance / Tri Attack +2, Confuse Ray 0, Dive set-up -7, Rollout one cast +3.
+**The five-turn Rollout window drifts per turn (+9 / +22 / +37 / +57 / +86; the Defense Curl stat SEs drift the same): the Scene ON Rollout chain presentation is short (rol1 investigating).**
+**aud242p (2026-11-16)** Encore -1, Flatter -3 / -3 / 0 (3-frame SE229 drift undiagnosed), Reversal +2, Taunt -4, Karate Chop 0, Mist Ball +2, Revenge -10 (opponent Pound body not live), Leaf Blade 0,
+Disable (no window); hit splats 1-3 = 10 ticks (ROM-measured; the affine derivation gave 11) (L50 785 emitted, 70 gated; section 20). T1 0..99 ON missing-gated 195 -> 122 -> **95**;
+T2 ON (21 seeds) move-SE missing 113 (aud242o head) -> **76**, extra 0.
+Open (census gated): Dynamic Punch 10 (SE-length bound), Extrasensory 8, Secret Power 8 (branch), Heal Bell 8, Ice Ball 6 (counter), Fury Cutter 6 (counter + branch), Soft-Boiled 5, Eruption 4.
 
 ## #194 — Opponent RATTATA Quick Attack differs above the clip row (qak247, 2026-11-04)
 

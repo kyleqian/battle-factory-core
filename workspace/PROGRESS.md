@@ -36,6 +36,9 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   `docs/dl2-sprite-repack.md`; frames identical). No API change. dl1 (`docs/dl1-download-size.md`) ranks the rest: per-species pictures (~677 KiB, needs a hold rule + optional
   `spriteBase` option), per-move animation assets (~225), the retired canonical march (~63-190, needs a product decision). Also check the CDN serves brotli-11: the handoff's 3.26 MB matches gzip-9.
 - **rrh4 (side):** R108, R105, R077 staged and matched on the ROM (53 / 110 covered); R065 -> class (b), R069 -> (a). Supervisor re-drove R108: match, 6 / 6.
+- **lbw5 (side):** Lobby player <-> NPC cases proven on the ROM; bump direction change and turn-commit refusal fixed (`factoryLobbyFreeRoam.ts`, `idleIdx` pose state); forfeit window 109 -> 113 / 113; lbw4 / lbra / won-* windows unchanged; supervisor `npm run compare` lbw5-bump-turn-off 269 / 269.
+- **aud242o / p (integration, sound only):** Petal Dance, Confuse Ray ball bounce, Tri Attack, Dive, Rollout counter, Encore, Flatter, Reversal, Taunt, Karate Chop, Revenge, Mist Ball, Leaf Blade;
+  T1 missing-gated 195 -> **95**; T2 ON move-SE missing (21 seeds) **76** (aud251: 206); differentials 320 / 320, 240 / 240.
 - **aud242m / n (integration, sound only):** Frustration / Flail, Confuse Ray, Spark; T1 missing-gated 308 -> **195**; differentials 240 / 240 each; census commands 100 / 100.
 - **Nightly replay (item 0d)** on `b5bb454a9`: pool **44 / 44** (1,366 states), staged battles **69 / 69** (`docs/replay-ledger.md`). No luck-hunt summary yet (first day job 2026-11-17 05:45).
 - **luck1 (side lane):** `tools/replay-hunt/luckHunt.sh` (+ `luckHunt.py`, `test-luckHunt.sh`, README "luckHunt") and 14 designs in `tools/replay-hunt/luck-designs/`
