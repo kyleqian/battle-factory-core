@@ -32,6 +32,11 @@ const FAINT_SOUND_OFFSET = 2;
 /** HealthbarDone's HandleLowHpMusicChange runs one tick after the hp command's end; the SetMonData (datahpupdate) one later. */
 const HEALTHBAR_DONE_AFTER_HP_END = 1;
 const SET_MON_DATA_AFTER_HEALTHBAR_DONE = 1;
+/**
+ * BattleScript_DamagingWeatherLoop runs `effectivenesssound; hitanimation BS_ATTACKER` (battle_scripts_1.s:3212): PlayerHandlePlaySE pans by the side of
+ * gActiveBattler = gBattlerTarget, which DoFieldEndTurnEffects (battle_util.c:1186-1191) has set to the first present battler (the player), so both ticks pan to the player.
+ */
+const DAMAGING_WEATHER_LOOP_SCRIPT = "BattleScript_DamagingWeatherLoop";
 
 function currentCommand(
   resolution: BattleResolutionPresentationState | null,
@@ -42,14 +47,19 @@ function currentCommand(
   return segment === undefined || command === undefined ? null : { command, segment, elapsed: resolution.lifecycle.phaseElapsed };
 }
 
-/** Cmd_effectivenesssound's SE for the hit animation command, from the kernel `play-se` receipt that precedes it (null: none played). */
-function effectivenessSong(segment: BattleResolutionSegment, eventSequence: number): number | null {
+/**
+ * Cmd_effectivenesssound's SE for the hit animation command, from the kernel `play-se` receipt that precedes it (null: none played),
+ * and whether the receipt belongs to the end-turn weather loop.
+ */
+function effectivenessSong(segment: BattleResolutionSegment, eventSequence: number): Readonly<{ song: number; weatherLoop: boolean }> | null {
   const index = segment.events.findIndex((event) => event.sequence === eventSequence);
   for (let at = index - 1; at >= 0; at -= 1) {
-    const payload = segment.events[at]!.payload;
+    const { payload, provenance } = segment.events[at]!;
     if (payload.kind === "play-se") {
       const { songId } = payload;
-      return songId === SE_NOT_EFFECTIVE || songId === SE_EFFECTIVE || songId === SE_SUPER_EFFECTIVE ? songId : null;
+      return songId === SE_NOT_EFFECTIVE || songId === SE_EFFECTIVE || songId === SE_SUPER_EFFECTIVE
+        ? { song: songId, weatherLoop: provenance?.sourceLabel === DAMAGING_WEATHER_LOOP_SCRIPT }
+        : null;
     }
     if (payload.kind === "animation") return null;
   }
@@ -77,7 +87,10 @@ export function emitBattleHitSounds(
   const lag = sceneLag(segment);
   if (command.type === "hit-animation") {
     const song = effectivenessSong(segment, command.eventSequence);
-    if (song !== null) scheduleAfter(lag, () => playPannedSe(song, command.battler === 0 ? SE_PAN_PLAYER : SE_PAN_OPPONENT));
+    if (song !== null) {
+      const panBattler = song.weatherLoop ? 0 : command.battler;
+      scheduleAfter(lag, () => playPannedSe(song.song, panBattler === 0 ? SE_PAN_PLAYER : SE_PAN_OPPONENT));
+    }
     return;
   }
   if (command.type !== "faint") return;
