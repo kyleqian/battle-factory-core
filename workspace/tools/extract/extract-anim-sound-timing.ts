@@ -29,6 +29,7 @@ const songsText = readFileSync(SONGS_PATH, "utf8");
 
 const constants = new Map<string, number>([["SOUND_PAN_ATTACKER", -64], ["SOUND_PAN_TARGET", 63], ["TRUE", 1], ["FALSE", 0]]);
 for (const m of songsText.matchAll(/^#define\s+((?:SE|MUS)_\w+)\s+(\d+)/gm)) constants.set(m[1]!, Number(m[2]));
+for (const m of readFileSync(join(REF, "include", "constants", "battle.h"), "utf8").matchAll(/^#define\s+(BATTLE_ENVIRONMENT_\w+)\s+(\d+)/gm)) constants.set(m[1]!, Number(m[2]));
 
 function value(token: string): number {
   const t = token.trim();
@@ -856,6 +857,22 @@ function returnValue(task: string, attackerSide: number): number | null {
   }
 }
 
+// aud242q: tasks that write a value the script branches on, beyond returnValue()'s ARG_RET_ID ones. `index` is the gBattleAnimArgs slot written.
+//  - AnimTask_GetBattleEnvironment (battle_anim_utility_funcs.c:940-944): args[0] = gBattleEnvironment; the Factory is BATTLE_ENVIRONMENT_BUILDING (battle_main.c:672-674
+//    recorded / battle_setup.c:663-665 MAP_TYPE_INDOOR; the engine's rules context pins the same value, factoryBattleScriptDecision.ts).
+//  - AnimTask_GetIceBallCounter (battle_anim_ice.c:1609-1615): args[arg] = rolloutTimerStartValue - rolloutTimer - 1 = request.rolloutCounter - 1 (GetRolloutCounter is start - timer).
+//  - AnimTask_IsFuryCutterHitRight / GetFuryCutterHitCount (battle_anim_effects_2.c:3822-3832): ARG_RET_ID = furyCutterCounter & 1 / furyCutterCounter (request.rolloutCounter 1..5).
+function counterReturn(args: string[], rolloutCounter: number): { index: number; value: number; counter: boolean } | null {
+  const c = rolloutCounter >= 1 && rolloutCounter <= 5 ? rolloutCounter : 1;
+  switch (args[0]) {
+    case "AnimTask_GetBattleEnvironment": return { index: 0, value: value("BATTLE_ENVIRONMENT_BUILDING"), counter: false };
+    case "AnimTask_GetIceBallCounter": return { index: value(args[2] ?? "0"), value: c - 1, counter: true };
+    case "AnimTask_IsFuryCutterHitRight": return { index: 7, value: c & 1, counter: true };
+    case "AnimTask_GetFuryCutterHitCount": return { index: 7, value: c, counter: true };
+    default: return null;
+  }
+}
+
 /** Iterations after the fadetobg / restorebg step at which waitbgfadeout / waitbgfadein pass (Task_FadeToBg + UpdateHardwarePaletteFade, derived above). */
 const FADE_OUT_DONE = 19;
 const FADE_IN_DONE = 38;
@@ -952,6 +969,7 @@ function walk(bodyLabel: string, turn: number, attackerSide: number, pic: PicCon
   let gated = 0;
   let pending: Array<{ at: number; life: Lifetime; name: string }> = [];
   let ret: number | null = null;
+  let retIndex = 7;
   let fade: number | null = null;
   // gPaletteFade is one shared object: a BeginNormalPaletteFade while another normal / hardware fade is active returns FALSE (palette.c:156-163), so a color cycle that
   // overlaps another fade is left unmodelled. `fadeBusy` = the last iteration a normal fade (simple_palette_blend / color cycle) of this walk may be active.
@@ -1015,7 +1033,11 @@ function walk(bodyLabel: string, turn: number, attackerSide: number, pic: PicCon
       if (frame !== null) pending.push({ at: frame, life, name: op === "createsprite" || op === "createvisualtask" ? args[0] ?? op : op });
       const known = returnValue(args[0] ?? "", attackerSide);
       ret = op === "createvisualtask" ? known : ret;
+      if (op === "createvisualtask") retIndex = 7;
       if (op === "createvisualtask" && known === null && /^AnimTask_(Is|Get)\w*(Side|Contest|Environment|Partner|Power|Count|Hit|Right)/.test(args[0] ?? "")) ret = null;
+      // aud242q: tasks that write gBattleAnimArgs[0] (GetBattleEnvironment) or an indexed arg (GetIceBallCounter) or read the per-battle counter (Fury Cutter).
+      const written = op === "createvisualtask" ? counterReturn(args, rolloutCounter) : null;
+      if (written !== null) { ret = written.value; retIndex = written.index; counterUsed ||= written.counter; }
     }
     switch (op) {
       case "end": return finish("end");
@@ -1099,7 +1121,7 @@ function walk(bodyLabel: string, turn: number, attackerSide: number, pic: PicCon
       case "choosetwoturnanim": pc = [args[(turn & 1) === 1 ? 1 : 0]!, 0]; break;
       case "jumpifcontest": break;
       case "jumpargeq": case "jumpreteq": case "jumprettrue": case "jumpretfalse": {
-        const [expected, target] = op === "jumpargeq" ? [args[0] === "ARG_RET_ID" || args[0] === "7" ? args[1]! : null, args[2]!]
+        const [expected, target] = op === "jumpargeq" ? [value(args[0]!) === retIndex ? args[1]! : null, args[2]!]
           : op === "jumpreteq" ? [args[0]!, args[1]!] : [op === "jumprettrue" ? "1" : "0", args[0]!];
         if (ret === null || expected === null) { gate(); return finish("unresolved-branch"); }
         if (value(expected) === ret) pc = [target, 0];
