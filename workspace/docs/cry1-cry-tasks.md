@@ -83,3 +83,29 @@ Playback only (`src/engine` untouched: frame hashes, `ENGINE_BUILD` and the head
   The seed-3 winning run plays only NORMAL / FAINT cries, so **no task cry sounded live in the browser**: that path is proven by the fake-context test plus the decode check, not by ear. The tool's per-kind event check was stale since aud247 (the seeded music's 2 restore replays count in `events`); it now subtracts `stats.restored`.
 - **Not done / residual.** The cry-task lengths used by the engine (`cryTaskLengths.ts`) are cry1's fit, not these recordings' lengths (the recorder's channel-activity length of ECHO_START / ROAR cries differs from the fitted stop-to-restore delay; they measure different ROM events).
   Re-running `audioAssetList.py` now also lists 36 newer SE tuples from logs added since aud244a (not recorded; the committed list kept its SE / song rows).
+
+## cry3: source-derived NORMAL / WEAK cry lengths for every Factory species (S11 audio, sound-only)
+
+`src/engine/screenSounds.ts` `startCry` gave a BGM restore (and, since aud253, the switch-in `HandleLowHpMusicChange` / SE_LOW_HEALTH at it) only to the five WEAK species someone had measured (`WEAK_CRY_FRAMES`: Onix + 9 / 83 / 130 / 198); every other
+WEAK send-out stayed ducked with no restore. cry1's per-mode fit was not a ROM table; cry3 shows it is the **exact** consequence of `PlayCryInternal`'s pitch argument, so one derivation covers every mode.
+
+**Derivation** (`tools/audio/genCryModeFrames.py` -> `src/data/cryModeFrames.ts`, `npm run extract:cry-mode-frames`; reference/ source only, byte-identical on two runs):
+- `PlayCryInternal` (src/sound.c, the switch is parsed, not copied): every mode is one note of the species' sample with a pitch and a note length (default 140): NORMAL 15360, **WEAK 15000** (length 140, release 0), FAINT 14440, ECHO_START 15600 / 25, ECHO_END 15555, ROAR_2 15616 / 60, HIGH_PITCH 15800 / 50.
+- `SetPokemonCryPitch` (src/m4a.c): `b = pitch + 0x80`, key `(b >> 8) & 0x7F`, tune `((b >> 1) & 0x7F) - 64`; `TrkVolPitSet`: `x = tune * 4`, keyM `x >> 8`, pitM `x & 0xFF` (WEAK: key 59, tune -52 -> key 58, fine 48; NORMAL: key 60, fine 0).
+- `MidiKeyToFreq(wav, key + keyM, pitM)` with the exact gScaleTable / gFreqTable integer arithmetic gives the channel frequency in whole Hz (key 60 / fine 0 = `freq >> 10`, so NORMAL is the offs152 formula); the mixer advances `divFreq / 2^23` sample per output sample
+  (`divFreq = (16777216 / pcmFreq + 1) >> 1`, `pcmFreq = (597275 * 224 + 5000) / 10000`, SOUND_MODE_FREQ_13379). Length in frames = `min(note length, ceil(size * 2^23 / (F * divFreq * 224)))`; the BGM restore (`IsCryPlaying` false, `Task_DuckBGMForPokemonCry`) is one frame later.
+- WEAK is the NORMAL cry 1.1104x longer (2^(1.8125/12) in a real-valued model; the integer tables decide the last frame). Only Jynx (124) WEAK exceeds the note length (149 -> 140; ROM 141 = 140 + 1), the same cap cry1 fitted (`cap = length + 1`).
+
+**Proof.** `tools/audio/cryLengthProbe.py` (register-poke `PlayCry_ByMode(species, 0, mode)` on the oracle's canonical snapshot, `soundRecorder.py`'s Recorder; counts frames to `IsPokemonCryPlaying` false and to the BGM-duck task's restore) was first calibrated on the five known WEAK species
+(restore 62 / 25 / 79 / 65 / 54 = the aud251 chain windows and Onix), then run on **all 376 Factory species in NORMAL, WEAK and FAINT** (1,128 ROM measurements, ~40 s; `tests/fixtures/cry3-lengths.json`, raw `.integration/evidence/cry3/`). Derived length + 1 equals the ROM on **1,128 / 1,128**
+(NORMAL 376 = `SEND_IN_TAIL_OFF_CRY_FRAMES` exactly, max 134; WEAK 376, max 140; FAINT 376). The same derivation reproduces **all 149** cry1 step-mode species-modes (ES 41, EE 41, R2 32, HP 35) and cry1's fitted `cryTaskLength` model (`tests/cry3CryModeFrames.test.ts`). The probe is a dev
+register-poke, not a controller replay; its one convention (restore = table length + 1) is the engine's own and is pinned by the five aud251 windows.
+
+**Engine.** `screenSounds.ts` `startCry`: WEAK -> `CRY_WEAK_FRAMES`, otherwise `CRY_NORMAL_FRAMES` (equal to the old `SEND_IN_TAIL_OFF_CRY_FRAMES` lookup, so NORMAL rows cannot move); `WEAK_CRY_FRAMES` deleted. Nothing else in `src/` changes; `cryTaskLengths.ts` (cry1's fit) and `faintCryFrames.ts` are untouched.
+
+**Neutrality.** `lsd194Census.sh` seeds 0..99, `513f567dc` vs the change, Scene ON and OFF: 0 errors; `rst197CensusDelta.py`: commands identical 100 / 100 (31,285 ON / 30,601 OFF); `soundCensusDelta.py`: 93 / 100 seeds identical in each scene, the 7 that move (2, 11, 15, 47, 52, 95, 99) differ only by
+**added** `duck 476` BGM-restore rows (8 per scene: seed 95 has two; 0 removed, 0 moved, no other kind). No SE_LOW_HEALTH 90 appears in 0..99 (no switch-in of a red-bar WEAK mon among those seeds). `compare:differential --base 513f567dc` summary-info-onix (summary WEAK cry), turn5-switchin,
+turn13-switchin: 605 / 605 captures byte-identical.
+
+**Residuals.** (1) `faintCryFrames.ts` (aud241b's linear fit `ceil(1.205 t + 0.91)`) is wrong on 24 of 376 species (`tests/cry3CryModeFrames.test.ts` pins both); `CRY_FAINT_FRAMES` is exact on all 376 measured. Switching `playFaintCry` to it would move existing faint-restore rows, so it was left for its own step.
+(2) cry1's `cryTaskLengths.ts` can be replaced by the generated ES / EE / ROAR_2 / HIGH_PITCH tables (same values on every measured species; no behaviour change, not done here). (3) WEAK_DOUBLES (mode 12, the double-battle release) is not generated (Factory singles only). (4) `tests/aud252LossBallOpen.test.ts` (seeds 1914 / 2230) fails identically on the base `513f567dc`, before this step.

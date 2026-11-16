@@ -3,7 +3,7 @@
 import { emitSound, soundCollecting } from "../audio/soundEvents.ts";
 import speciesStatsData from "../data/gen/species-stats.json" with { type: "json" };
 import { FAINT_CRY_RESTORE_FRAMES } from "../data/faintCryFrames.ts";
-import { SEND_IN_TAIL_OFF_CRY_FRAMES } from "../data/sendInTailOff.ts";
+import { CRY_NORMAL_FRAMES, CRY_WEAK_FRAMES } from "../data/cryModeFrames.ts";
 
 /** SE_SELECT (include/constants/songs.h), pan-less `PlaySE`. */
 export const SE_SELECT = 5;
@@ -42,12 +42,6 @@ export const BGM_FULL_VOLUME = 0x100;
 /** PlayCry_ByMode(species, 0 pan, ...): volume 120, priority 10 (m4a PlayCryInternal arguments, oracle-probed). */
 const CRY_VOLUME = 120;
 const CRY_PRIORITY = 10;
-/**
- * CRY_MODE_WEAK cry lengths in frames (species id -> same unit as SEND_IN_TAIL_OFF_CRY_FRAMES; the BGM restore follows one frame later).
- * Only oracle-measured species: Onix (tools/audio/fixtures/summary-party-window.json) and 9 / 83 / 130 / 198, the duck-to-restore
- * spans of the aud251 chain windows (62 / 25 / 65 / 54 frames, docs/aud251-s11-scoreboard-refresh.md aud253).
- */
-const WEAK_CRY_FRAMES: Readonly<Record<number, number>> = { 9: 61, 83: 24, 95: 78, 130: 64, 198: 53 };
 
 /** Ticks from the accepted input to each summary sound (oracle-probed, tools/audio/fixtures/summary-*.json). */
 export const SUMMARY_OPEN_CRY_DELAY = 63;
@@ -133,8 +127,8 @@ function startCry(bgm: number, species: number, mode: number, pan: number, resto
   crySerial += 1;
   const serial = crySerial;
   ducking = { serial, bgm };
-  // IsCryPlaying turns false one frame after the cry's last sample frame; a WEAK cry's length is known only for the measured species.
-  const length = restoreDelay ?? (mode === CRY_MODE_WEAK ? WEAK_CRY_FRAMES[species] : SEND_IN_TAIL_OFF_CRY_FRAMES[species]);
+  // IsCryPlaying turns false one frame after the cry's last sample frame (cryModeFrames.ts: every Factory species, NORMAL and WEAK).
+  const length = restoreDelay ?? (mode === CRY_MODE_WEAK ? CRY_WEAK_FRAMES[species] : CRY_NORMAL_FRAMES[species]);
   if (length === undefined) return;
   scheduleAfter(restoreDelay ?? length + 1, () => {
     if (ducking?.serial !== serial) return;
