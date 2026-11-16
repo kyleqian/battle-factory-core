@@ -153,26 +153,33 @@ for (const m of metas) {
     cryBySpecies.set(m.species!, list);
   }
 }
-const MODE_ORDER = ["NORMAL", "WEAK", "FAINT"];
-for (const [species, list] of [...cryBySpecies].sort((a, b) => a[0] - b[0])) {
-  list.sort((a, b) => MODE_ORDER.indexOf(a.mode!) - MODE_ORDER.indexOf(b.mode!));
-  const parts: Int16Array[] = [];
-  let offset = 0;
-  const name = `cry-${String(species).padStart(3, "0")}.ogg`;
-  for (const m of list) {
-    const w = readWav(join(RAW, m.file));
-    if (w.channels !== 1 || w.rate !== CRY_RATE || w.samples.length !== m.lengthSamples) throw new Error(`unexpected cry WAV ${m.file}`);
-    sounds[m.key] = { ...common(m, name, offset), species, name: m.name, mode: m.mode };
-    parts.push(w.samples, new Int16Array(PACK_GAP));
-    offset += w.samples.length + PACK_GAP;
+// cry2: the cry-task modes (Roar / Howl / Hyper Voice) are packed per species into a second file, `cry-NNN-task.ogg`, so the
+// base cry files stay byte-identical and an ordinary cry never fetches the task modes.
+const MODE_ORDER = ["NORMAL", "WEAK", "FAINT", "ROAR_1", "ROAR_2", "HIGH_PITCH", "ECHO_START", "ECHO_END"];
+const BASE_MODES = new Set(["NORMAL", "WEAK", "FAINT"]);
+for (const [species, all] of [...cryBySpecies].sort((a, b) => a[0] - b[0])) {
+  for (const task of [false, true]) {
+    const list = all.filter((m) => BASE_MODES.has(m.mode!) !== task);
+    if (list.length === 0) continue;
+    list.sort((a, b) => MODE_ORDER.indexOf(a.mode!) - MODE_ORDER.indexOf(b.mode!));
+    const parts: Int16Array[] = [];
+    let offset = 0;
+    const name = `cry-${String(species).padStart(3, "0")}${task ? "-task" : ""}.ogg`;
+    for (const m of list) {
+      const w = readWav(join(RAW, m.file));
+      if (w.channels !== 1 || w.rate !== CRY_RATE || w.samples.length !== m.lengthSamples) throw new Error(`unexpected cry WAV ${m.file}`);
+      sounds[m.key] = { ...common(m, name, offset), species, name: m.name, mode: m.mode };
+      parts.push(w.samples, new Int16Array(PACK_GAP));
+      offset += w.samples.length + PACK_GAP;
+    }
+    const packed = new Int16Array(offset);
+    let o = 0;
+    for (const p of parts) {
+      packed.set(p, o);
+      o += p.length;
+    }
+    writeOgg(name, encodeOgg([f32(packed, 1, 0)], CRY_RATE), "cry");
   }
-  const all = new Int16Array(offset);
-  let o = 0;
-  for (const p of parts) {
-    all.set(p, o);
-    o += p.length;
-  }
-  writeOgg(name, encodeOgg([f32(all, 1, 0)], CRY_RATE), "cry");
 }
 
 const loopMetas: LoopMeta[] = readdirSync(LOOPS).filter((f) => f.endsWith(".json")).sort().map((f) => JSON.parse(readFileSync(join(LOOPS, f), "utf8")) as LoopMeta);
@@ -205,7 +212,7 @@ const manifest = {
   encoder: { package: "wasm-media-encoders@0.7.0", format: "ogg-vorbis", vbrQuality: QUALITY },
   sampleRates: { se: SE_RATE, cry: CRY_RATE, song: SONG_RATE },
   cryPackGapSamples: PACK_GAP,
-  note: "Cries are packed per species (NORMAL, WEAK, FAINT) in one mono file; a sound is samples [offsetSamples, offsetSamples + lengthSamples) of its file. SEs are one stereo file per (id, pan). Leading/trailing near-silence is trimmed; onsetSamples is the trimmed ROM mixer latency at the file's sampleRate. aud244b: BGM (bgm:<song>), fanfares (fanfare:<song>) and the two looping SEs (se:90:none, se:132:63) are stereo at sampleRates.song. A sound with loops=true plays samples [0, loopEndSamples) once and then repeats [loopStartSamples, loopEndSamples) until stopped; lengthSamples === loopEndSamples. Fanfares are one-shot (loops=false). seam.* is the measured sample difference between the audio after the wrap and the audio after the loop start (see docs/aud244b-bgm-fanfare-loops.md).",
+  note: "Cries are packed per species (NORMAL, WEAK, FAINT) in one mono file, and the cry-task modes (ROAR_1, ROAR_2, HIGH_PITCH, ECHO_START, ECHO_END; only species that can use Roar / Howl / Hyper Voice) in a second one, cry-NNN-task.ogg; a sound is samples [offsetSamples, offsetSamples + lengthSamples) of its file. SEs are one stereo file per (id, pan). Leading/trailing near-silence is trimmed; onsetSamples is the trimmed ROM mixer latency at the file's sampleRate. aud244b: BGM (bgm:<song>), fanfares (fanfare:<song>) and the two looping SEs (se:90:none, se:132:63) are stereo at sampleRates.song. A sound with loops=true plays samples [0, loopEndSamples) once and then repeats [loopStartSamples, loopEndSamples) until stopped; lengthSamples === loopEndSamples. Fanfares are one-shot (loops=false). seam.* is the measured sample difference between the audio after the wrap and the audio after the loop start (see docs/aud244b-bgm-fanfare-loops.md).",
   totals: { sounds: Object.keys(sorted).length, files: Object.keys(files).length, seBytes: totals.se, cryBytes: totals.cry, songBytes: totals.song, bytes: totals.se + totals.cry + totals.song },
   excluded,
   sounds: sorted,

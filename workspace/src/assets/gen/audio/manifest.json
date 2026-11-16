@@ -11,14 +11,14 @@
   "song": 32768
  },
  "cryPackGapSamples": 1024,
- "note": "Cries are packed per species (NORMAL, WEAK, FAINT) in one mono file; a sound is samples [offsetSamples, offsetSamples + lengthSamples) of its file. SEs are one stereo file per (id, pan). Leading/trailing near-silence is trimmed; onsetSamples is the trimmed ROM mixer latency at the file's sampleRate. aud244b: BGM (bgm:<song>), fanfares (fanfare:<song>) and the two looping SEs (se:90:none, se:132:63) are stereo at sampleRates.song. A sound with loops=true plays samples [0, loopEndSamples) once and then repeats [loopStartSamples, loopEndSamples) until stopped; lengthSamples === loopEndSamples. Fanfares are one-shot (loops=false). seam.* is the measured sample difference between the audio after the wrap and the audio after the loop start (see docs/aud244b-bgm-fanfare-loops.md).",
+ "note": "Cries are packed per species (NORMAL, WEAK, FAINT) in one mono file, and the cry-task modes (ROAR_1, ROAR_2, HIGH_PITCH, ECHO_START, ECHO_END; only species that can use Roar / Howl / Hyper Voice) in a second one, cry-NNN-task.ogg; a sound is samples [offsetSamples, offsetSamples + lengthSamples) of its file. SEs are one stereo file per (id, pan). Leading/trailing near-silence is trimmed; onsetSamples is the trimmed ROM mixer latency at the file's sampleRate. aud244b: BGM (bgm:<song>), fanfares (fanfare:<song>) and the two looping SEs (se:90:none, se:132:63) are stereo at sampleRates.song. A sound with loops=true plays samples [0, loopEndSamples) once and then repeats [loopStartSamples, loopEndSamples) until stopped; lengthSamples === loopEndSamples. Fanfares are one-shot (loops=false). seam.* is the measured sample difference between the audio after the wrap and the audio after the loop start (see docs/aud244b-bgm-fanfare-loops.md).",
  "totals": {
-  "sounds": 1318,
-  "files": 566,
+  "sounds": 1430,
+  "files": 612,
   "seBytes": 1618342,
-  "cryBytes": 4549302,
+  "cryBytes": 4918888,
   "songBytes": 1282655,
-  "bytes": 7450299
+  "bytes": 7819885
  },
  "excluded": [],
  "sounds": {
@@ -425,6 +425,38 @@
    "species": 6,
    "name": "SPECIES_CHARIZARD",
    "mode": "NORMAL"
+  },
+  "cry:6:ROAR_1": {
+   "file": "cry-006-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 0,
+   "lengthSamples": 6577,
+   "lengthFrames": 16,
+   "onsetSamples": 460,
+   "peak": 9141,
+   "rms": 1568.83,
+   "species": 6,
+   "name": "SPECIES_CHARIZARD",
+   "mode": "ROAR_1"
+  },
+  "cry:6:ROAR_2": {
+   "file": "cry-006-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 7601,
+   "lengthSamples": 14742,
+   "lengthFrames": 52,
+   "onsetSamples": 463,
+   "peak": 8630,
+   "rms": 2097.89,
+   "species": 6,
+   "name": "SPECIES_CHARIZARD",
+   "mode": "ROAR_2"
   },
   "cry:6:WEAK": {
    "file": "cry-006.ogg",
@@ -1114,6 +1146,38 @@
    "name": "SPECIES_RATICATE",
    "mode": "WEAK"
   },
+  "cry:21:ECHO_END": {
+   "file": "cry-021-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 48488,
+   "lengthSamples": 14275,
+   "lengthFrames": 49,
+   "onsetSamples": 461,
+   "peak": 8464,
+   "rms": 1679.6,
+   "species": 21,
+   "name": "SPECIES_SPEAROW",
+   "mode": "ECHO_END"
+  },
+  "cry:21:ECHO_START": {
+   "file": "cry-021-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 37697,
+   "lengthSamples": 9767,
+   "lengthFrames": 31,
+   "onsetSamples": 463,
+   "peak": 9370,
+   "rms": 1734.72,
+   "species": 21,
+   "name": "SPECIES_SPEAROW",
+   "mode": "ECHO_START"
+  },
   "cry:21:FAINT": {
    "file": "cry-021.ogg",
    "kind": "cry",
@@ -1130,6 +1194,22 @@
    "name": "SPECIES_SPEAROW",
    "mode": "FAINT"
   },
+  "cry:21:HIGH_PITCH": {
+   "file": "cry-021-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 22582,
+   "lengthSamples": 14091,
+   "lengthFrames": 46,
+   "onsetSamples": 461,
+   "peak": 9544,
+   "rms": 2069.6,
+   "species": 21,
+   "name": "SPECIES_SPEAROW",
+   "mode": "HIGH_PITCH"
+  },
   "cry:21:NORMAL": {
    "file": "cry-021.ogg",
    "kind": "cry",
@@ -1145,6 +1225,38 @@
    "species": 21,
    "name": "SPECIES_SPEAROW",
    "mode": "NORMAL"
+  },
+  "cry:21:ROAR_1": {
+   "file": "cry-021-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 0,
+   "lengthSamples": 6412,
+   "lengthFrames": 16,
+   "onsetSamples": 460,
+   "peak": 8534,
+   "rms": 1699.99,
+   "species": 21,
+   "name": "SPECIES_SPEAROW",
+   "mode": "ROAR_1"
+  },
+  "cry:21:ROAR_2": {
+   "file": "cry-021-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 7436,
+   "lengthSamples": 14122,
+   "lengthFrames": 47,
+   "onsetSamples": 461,
+   "peak": 8155,
+   "rms": 2070.53,
+   "species": 21,
+   "name": "SPECIES_SPEAROW",
+   "mode": "ROAR_2"
   },
   "cry:21:WEAK": {
    "file": "cry-021.ogg",
@@ -1834,6 +1946,38 @@
    "name": "SPECIES_CLEFAIRY",
    "mode": "WEAK"
   },
+  "cry:36:ECHO_END": {
+   "file": "cry-036-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 39265,
+   "lengthSamples": 9788,
+   "lengthFrames": 29,
+   "onsetSamples": 462,
+   "peak": 6266,
+   "rms": 1007.99,
+   "species": 36,
+   "name": "SPECIES_CLEFABLE",
+   "mode": "ECHO_END"
+  },
+  "cry:36:ECHO_START": {
+   "file": "cry-036-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 28305,
+   "lengthSamples": 9936,
+   "lengthFrames": 29,
+   "onsetSamples": 462,
+   "peak": 7349,
+   "rms": 1263.55,
+   "species": 36,
+   "name": "SPECIES_CLEFABLE",
+   "mode": "ECHO_START"
+  },
   "cry:36:FAINT": {
    "file": "cry-036.ogg",
    "kind": "cry",
@@ -1850,6 +1994,22 @@
    "name": "SPECIES_CLEFABLE",
    "mode": "FAINT"
   },
+  "cry:36:HIGH_PITCH": {
+   "file": "cry-036-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 17384,
+   "lengthSamples": 9897,
+   "lengthFrames": 28,
+   "onsetSamples": 461,
+   "peak": 6558,
+   "rms": 1201.17,
+   "species": 36,
+   "name": "SPECIES_CLEFABLE",
+   "mode": "HIGH_PITCH"
+  },
   "cry:36:NORMAL": {
    "file": "cry-036.ogg",
    "kind": "cry",
@@ -1865,6 +2025,38 @@
    "species": 36,
    "name": "SPECIES_CLEFABLE",
    "mode": "NORMAL"
+  },
+  "cry:36:ROAR_1": {
+   "file": "cry-036-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 0,
+   "lengthSamples": 5944,
+   "lengthFrames": 16,
+   "onsetSamples": 461,
+   "peak": 7295,
+   "rms": 1082.21,
+   "species": 36,
+   "name": "SPECIES_CLEFABLE",
+   "mode": "ROAR_1"
+  },
+  "cry:36:ROAR_2": {
+   "file": "cry-036-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 6968,
+   "lengthSamples": 9392,
+   "lengthFrames": 28,
+   "onsetSamples": 462,
+   "peak": 7234,
+   "rms": 1265.76,
+   "species": 36,
+   "name": "SPECIES_CLEFABLE",
+   "mode": "ROAR_2"
   },
   "cry:36:WEAK": {
    "file": "cry-036.ogg",
@@ -1962,6 +2154,38 @@
    "name": "SPECIES_NINETALES",
    "mode": "NORMAL"
   },
+  "cry:38:ROAR_1": {
+   "file": "cry-038-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 0,
+   "lengthSamples": 6024,
+   "lengthFrames": 16,
+   "onsetSamples": 461,
+   "peak": 7758,
+   "rms": 1498.71,
+   "species": 38,
+   "name": "SPECIES_NINETALES",
+   "mode": "ROAR_1"
+  },
+  "cry:38:ROAR_2": {
+   "file": "cry-038-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 7048,
+   "lengthSamples": 18072,
+   "lengthFrames": 65,
+   "onsetSamples": 462,
+   "peak": 8327,
+   "rms": 2099.1,
+   "species": 38,
+   "name": "SPECIES_NINETALES",
+   "mode": "ROAR_2"
+  },
   "cry:38:WEAK": {
    "file": "cry-038.ogg",
    "kind": "cry",
@@ -1977,6 +2201,38 @@
    "species": 38,
    "name": "SPECIES_NINETALES",
    "mode": "WEAK"
+  },
+  "cry:39:ECHO_END": {
+   "file": "cry-039-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 32960,
+   "lengthSamples": 7259,
+   "lengthFrames": 15,
+   "onsetSamples": 462,
+   "peak": 6919,
+   "rms": 1111.82,
+   "species": 39,
+   "name": "SPECIES_JIGGLYPUFF",
+   "mode": "ECHO_END"
+  },
+  "cry:39:ECHO_START": {
+   "file": "cry-039-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 24512,
+   "lengthSamples": 7424,
+   "lengthFrames": 15,
+   "onsetSamples": 461,
+   "peak": 8534,
+   "rms": 1341.37,
+   "species": 39,
+   "name": "SPECIES_JIGGLYPUFF",
+   "mode": "ECHO_START"
   },
   "cry:39:FAINT": {
    "file": "cry-039.ogg",
@@ -1994,6 +2250,22 @@
    "name": "SPECIES_JIGGLYPUFF",
    "mode": "FAINT"
   },
+  "cry:39:HIGH_PITCH": {
+   "file": "cry-039-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 16175,
+   "lengthSamples": 7313,
+   "lengthFrames": 14,
+   "onsetSamples": 464,
+   "peak": 8385,
+   "rms": 1367.94,
+   "species": 39,
+   "name": "SPECIES_JIGGLYPUFF",
+   "mode": "HIGH_PITCH"
+  },
   "cry:39:NORMAL": {
    "file": "cry-039.ogg",
    "kind": "cry",
@@ -2009,6 +2281,38 @@
    "species": 39,
    "name": "SPECIES_JIGGLYPUFF",
    "mode": "NORMAL"
+  },
+  "cry:39:ROAR_1": {
+   "file": "cry-039-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 0,
+   "lengthSamples": 6411,
+   "lengthFrames": 16,
+   "onsetSamples": 464,
+   "peak": 7272,
+   "rms": 925.6,
+   "species": 39,
+   "name": "SPECIES_JIGGLYPUFF",
+   "mode": "ROAR_1"
+  },
+  "cry:39:ROAR_2": {
+   "file": "cry-039-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 7435,
+   "lengthSamples": 7716,
+   "lengthFrames": 15,
+   "onsetSamples": 466,
+   "peak": 7167,
+   "rms": 1340.34,
+   "species": 39,
+   "name": "SPECIES_JIGGLYPUFF",
+   "mode": "ROAR_2"
   },
   "cry:39:WEAK": {
    "file": "cry-039.ogg",
@@ -2682,6 +2986,38 @@
    "name": "SPECIES_PERSIAN",
    "mode": "NORMAL"
   },
+  "cry:53:ROAR_1": {
+   "file": "cry-053-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 0,
+   "lengthSamples": 6520,
+   "lengthFrames": 16,
+   "onsetSamples": 461,
+   "peak": 6433,
+   "rms": 1051.59,
+   "species": 53,
+   "name": "SPECIES_PERSIAN",
+   "mode": "ROAR_1"
+  },
+  "cry:53:ROAR_2": {
+   "file": "cry-053-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 7544,
+   "lengthSamples": 14065,
+   "lengthFrames": 51,
+   "onsetSamples": 463,
+   "peak": 6029,
+   "rms": 1105.84,
+   "species": 53,
+   "name": "SPECIES_PERSIAN",
+   "mode": "ROAR_2"
+  },
   "cry:53:WEAK": {
    "file": "cry-053.ogg",
    "kind": "cry",
@@ -2922,6 +3258,38 @@
    "name": "SPECIES_GROWLITHE",
    "mode": "NORMAL"
   },
+  "cry:58:ROAR_1": {
+   "file": "cry-058-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 0,
+   "lengthSamples": 6443,
+   "lengthFrames": 16,
+   "onsetSamples": 461,
+   "peak": 7322,
+   "rms": 1480.99,
+   "species": 58,
+   "name": "SPECIES_GROWLITHE",
+   "mode": "ROAR_1"
+  },
+  "cry:58:ROAR_2": {
+   "file": "cry-058-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 7467,
+   "lengthSamples": 11121,
+   "lengthFrames": 36,
+   "onsetSamples": 461,
+   "peak": 7482,
+   "rms": 1911.65,
+   "species": 58,
+   "name": "SPECIES_GROWLITHE",
+   "mode": "ROAR_2"
+  },
   "cry:58:WEAK": {
    "file": "cry-058.ogg",
    "kind": "cry",
@@ -2969,6 +3337,38 @@
    "species": 59,
    "name": "SPECIES_ARCANINE",
    "mode": "NORMAL"
+  },
+  "cry:59:ROAR_1": {
+   "file": "cry-059-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 0,
+   "lengthSamples": 6889,
+   "lengthFrames": 16,
+   "onsetSamples": 460,
+   "peak": 7874,
+   "rms": 1541.82,
+   "species": 59,
+   "name": "SPECIES_ARCANINE",
+   "mode": "ROAR_1"
+  },
+  "cry:59:ROAR_2": {
+   "file": "cry-059-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 7913,
+   "lengthSamples": 13747,
+   "lengthFrames": 46,
+   "onsetSamples": 460,
+   "peak": 8097,
+   "rms": 2140.78,
+   "species": 59,
+   "name": "SPECIES_ARCANINE",
+   "mode": "ROAR_2"
   },
   "cry:59:WEAK": {
    "file": "cry-059.ogg",
@@ -3130,6 +3530,38 @@
    "name": "SPECIES_POLIWRATH",
    "mode": "WEAK"
   },
+  "cry:63:ECHO_END": {
+   "file": "cry-063-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 54726,
+   "lengthSamples": 17507,
+   "lengthFrames": 64,
+   "onsetSamples": 463,
+   "peak": 6938,
+   "rms": 1534.45,
+   "species": 63,
+   "name": "SPECIES_ABRA",
+   "mode": "ECHO_END"
+  },
+  "cry:63:ECHO_START": {
+   "file": "cry-063-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 43429,
+   "lengthSamples": 10273,
+   "lengthFrames": 31,
+   "onsetSamples": 461,
+   "peak": 6620,
+   "rms": 1459.81,
+   "species": 63,
+   "name": "SPECIES_ABRA",
+   "mode": "ECHO_START"
+  },
   "cry:63:FAINT": {
    "file": "cry-063.ogg",
    "kind": "cry",
@@ -3146,6 +3578,22 @@
    "name": "SPECIES_ABRA",
    "mode": "FAINT"
   },
+  "cry:63:HIGH_PITCH": {
+   "file": "cry-063-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 25927,
+   "lengthSamples": 16478,
+   "lengthFrames": 61,
+   "onsetSamples": 461,
+   "peak": 9353,
+   "rms": 1952.8,
+   "species": 63,
+   "name": "SPECIES_ABRA",
+   "mode": "HIGH_PITCH"
+  },
   "cry:63:NORMAL": {
    "file": "cry-063.ogg",
    "kind": "cry",
@@ -3161,6 +3609,38 @@
    "species": 63,
    "name": "SPECIES_ABRA",
    "mode": "NORMAL"
+  },
+  "cry:63:ROAR_1": {
+   "file": "cry-063-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 0,
+   "lengthSamples": 6413,
+   "lengthFrames": 16,
+   "onsetSamples": 461,
+   "peak": 7855,
+   "rms": 1103.17,
+   "species": 63,
+   "name": "SPECIES_ABRA",
+   "mode": "ROAR_1"
+  },
+  "cry:63:ROAR_2": {
+   "file": "cry-063-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 7437,
+   "lengthSamples": 17466,
+   "lengthFrames": 63,
+   "onsetSamples": 460,
+   "peak": 7817,
+   "rms": 1962.2,
+   "species": 63,
+   "name": "SPECIES_ABRA",
+   "mode": "ROAR_2"
   },
   "cry:63:WEAK": {
    "file": "cry-063.ogg",
@@ -5466,6 +5946,38 @@
    "name": "SPECIES_RHYHORN",
    "mode": "NORMAL"
   },
+  "cry:111:ROAR_1": {
+   "file": "cry-111-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 0,
+   "lengthSamples": 6392,
+   "lengthFrames": 16,
+   "onsetSamples": 461,
+   "peak": 8125,
+   "rms": 1621.08,
+   "species": 111,
+   "name": "SPECIES_RHYHORN",
+   "mode": "ROAR_1"
+  },
+  "cry:111:ROAR_2": {
+   "file": "cry-111-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 7416,
+   "lengthSamples": 14799,
+   "lengthFrames": 52,
+   "onsetSamples": 463,
+   "peak": 9204,
+   "rms": 2154.27,
+   "species": 111,
+   "name": "SPECIES_RHYHORN",
+   "mode": "ROAR_2"
+  },
   "cry:111:WEAK": {
    "file": "cry-111.ogg",
    "kind": "cry",
@@ -5530,6 +6042,38 @@
    "name": "SPECIES_RHYDON",
    "mode": "WEAK"
   },
+  "cry:113:ECHO_END": {
+   "file": "cry-113-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 45138,
+   "lengthSamples": 12474,
+   "lengthFrames": 41,
+   "onsetSamples": 460,
+   "peak": 8060,
+   "rms": 1200.54,
+   "species": 113,
+   "name": "SPECIES_CHANSEY",
+   "mode": "ECHO_END"
+  },
+  "cry:113:ECHO_START": {
+   "file": "cry-113-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 33857,
+   "lengthSamples": 10257,
+   "lengthFrames": 31,
+   "onsetSamples": 463,
+   "peak": 6748,
+   "rms": 1261.96,
+   "species": 113,
+   "name": "SPECIES_CHANSEY",
+   "mode": "ECHO_START"
+  },
   "cry:113:FAINT": {
    "file": "cry-113.ogg",
    "kind": "cry",
@@ -5546,6 +6090,22 @@
    "name": "SPECIES_CHANSEY",
    "mode": "FAINT"
   },
+  "cry:113:HIGH_PITCH": {
+   "file": "cry-113-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 20564,
+   "lengthSamples": 12269,
+   "lengthFrames": 39,
+   "onsetSamples": 462,
+   "peak": 7569,
+   "rms": 1439.32,
+   "species": 113,
+   "name": "SPECIES_CHANSEY",
+   "mode": "HIGH_PITCH"
+  },
   "cry:113:NORMAL": {
    "file": "cry-113.ogg",
    "kind": "cry",
@@ -5561,6 +6121,38 @@
    "species": 113,
    "name": "SPECIES_CHANSEY",
    "mode": "NORMAL"
+  },
+  "cry:113:ROAR_1": {
+   "file": "cry-113-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 0,
+   "lengthSamples": 6184,
+   "lengthFrames": 16,
+   "onsetSamples": 462,
+   "peak": 7307,
+   "rms": 1275.38,
+   "species": 113,
+   "name": "SPECIES_CHANSEY",
+   "mode": "ROAR_1"
+  },
+  "cry:113:ROAR_2": {
+   "file": "cry-113-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 7208,
+   "lengthSamples": 12332,
+   "lengthFrames": 40,
+   "onsetSamples": 460,
+   "peak": 6792,
+   "rms": 1460.32,
+   "species": 113,
+   "name": "SPECIES_CHANSEY",
+   "mode": "ROAR_2"
   },
   "cry:113:WEAK": {
    "file": "cry-113.ogg",
@@ -6426,6 +7018,38 @@
    "name": "SPECIES_LAPRAS",
    "mode": "NORMAL"
   },
+  "cry:131:ROAR_1": {
+   "file": "cry-131-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 0,
+   "lengthSamples": 6331,
+   "lengthFrames": 16,
+   "onsetSamples": 461,
+   "peak": 8574,
+   "rms": 1460.61,
+   "species": 131,
+   "name": "SPECIES_LAPRAS",
+   "mode": "ROAR_1"
+  },
+  "cry:131:ROAR_2": {
+   "file": "cry-131-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 7355,
+   "lengthSamples": 12681,
+   "lengthFrames": 40,
+   "onsetSamples": 460,
+   "peak": 8297,
+   "rms": 1984.09,
+   "species": 131,
+   "name": "SPECIES_LAPRAS",
+   "mode": "ROAR_2"
+  },
   "cry:131:WEAK": {
    "file": "cry-131.ogg",
    "kind": "cry",
@@ -6570,6 +7194,38 @@
    "name": "SPECIES_VAPOREON",
    "mode": "NORMAL"
   },
+  "cry:134:ROAR_1": {
+   "file": "cry-134-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 0,
+   "lengthSamples": 7465,
+   "lengthFrames": 16,
+   "onsetSamples": 460,
+   "peak": 6724,
+   "rms": 1300.37,
+   "species": 134,
+   "name": "SPECIES_VAPOREON",
+   "mode": "ROAR_1"
+  },
+  "cry:134:ROAR_2": {
+   "file": "cry-134-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 8489,
+   "lengthSamples": 16142,
+   "lengthFrames": 59,
+   "onsetSamples": 463,
+   "peak": 6806,
+   "rms": 1623.57,
+   "species": 134,
+   "name": "SPECIES_VAPOREON",
+   "mode": "ROAR_2"
+  },
   "cry:134:WEAK": {
    "file": "cry-134.ogg",
    "kind": "cry",
@@ -6618,6 +7274,38 @@
    "name": "SPECIES_JOLTEON",
    "mode": "NORMAL"
   },
+  "cry:135:ROAR_1": {
+   "file": "cry-135-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 0,
+   "lengthSamples": 6349,
+   "lengthFrames": 16,
+   "onsetSamples": 462,
+   "peak": 7287,
+   "rms": 1403.96,
+   "species": 135,
+   "name": "SPECIES_JOLTEON",
+   "mode": "ROAR_1"
+  },
+  "cry:135:ROAR_2": {
+   "file": "cry-135-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 7373,
+   "lengthSamples": 13109,
+   "lengthFrames": 42,
+   "onsetSamples": 461,
+   "peak": 7624,
+   "rms": 1855.36,
+   "species": 135,
+   "name": "SPECIES_JOLTEON",
+   "mode": "ROAR_2"
+  },
   "cry:135:WEAK": {
    "file": "cry-135.ogg",
    "kind": "cry",
@@ -6665,6 +7353,38 @@
    "species": 136,
    "name": "SPECIES_FLAREON",
    "mode": "NORMAL"
+  },
+  "cry:136:ROAR_1": {
+   "file": "cry-136-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 0,
+   "lengthSamples": 6582,
+   "lengthFrames": 16,
+   "onsetSamples": 461,
+   "peak": 7004,
+   "rms": 1442.89,
+   "species": 136,
+   "name": "SPECIES_FLAREON",
+   "mode": "ROAR_1"
+  },
+  "cry:136:ROAR_2": {
+   "file": "cry-136-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 7606,
+   "lengthSamples": 12852,
+   "lengthFrames": 42,
+   "onsetSamples": 460,
+   "peak": 7663,
+   "rms": 1938.67,
+   "species": 136,
+   "name": "SPECIES_FLAREON",
+   "mode": "ROAR_2"
   },
   "cry:136:WEAK": {
    "file": "cry-136.ogg",
@@ -6954,6 +7674,38 @@
    "name": "SPECIES_AERODACTYL",
    "mode": "NORMAL"
   },
+  "cry:142:ROAR_1": {
+   "file": "cry-142-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 0,
+   "lengthSamples": 6536,
+   "lengthFrames": 16,
+   "onsetSamples": 460,
+   "peak": 6757,
+   "rms": 1243.62,
+   "species": 142,
+   "name": "SPECIES_AERODACTYL",
+   "mode": "ROAR_1"
+  },
+  "cry:142:ROAR_2": {
+   "file": "cry-142-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 7560,
+   "lengthSamples": 17208,
+   "lengthFrames": 65,
+   "onsetSamples": 463,
+   "peak": 7433,
+   "rms": 1660.47,
+   "species": 142,
+   "name": "SPECIES_AERODACTYL",
+   "mode": "ROAR_2"
+  },
   "cry:142:WEAK": {
    "file": "cry-142.ogg",
    "kind": "cry",
@@ -7050,6 +7802,38 @@
    "name": "SPECIES_ARTICUNO",
    "mode": "NORMAL"
   },
+  "cry:144:ROAR_1": {
+   "file": "cry-144-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 0,
+   "lengthSamples": 6155,
+   "lengthFrames": 16,
+   "onsetSamples": 463,
+   "peak": 7668,
+   "rms": 1162.7,
+   "species": 144,
+   "name": "SPECIES_ARTICUNO",
+   "mode": "ROAR_1"
+  },
+  "cry:144:ROAR_2": {
+   "file": "cry-144-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 7179,
+   "lengthSamples": 17706,
+   "lengthFrames": 63,
+   "onsetSamples": 460,
+   "peak": 8070,
+   "rms": 1774.56,
+   "species": 144,
+   "name": "SPECIES_ARTICUNO",
+   "mode": "ROAR_2"
+  },
   "cry:144:WEAK": {
    "file": "cry-144.ogg",
    "kind": "cry",
@@ -7098,6 +7882,38 @@
    "name": "SPECIES_ZAPDOS",
    "mode": "NORMAL"
   },
+  "cry:145:ROAR_1": {
+   "file": "cry-145-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 0,
+   "lengthSamples": 6569,
+   "lengthFrames": 16,
+   "onsetSamples": 461,
+   "peak": 7067,
+   "rms": 1245.11,
+   "species": 145,
+   "name": "SPECIES_ZAPDOS",
+   "mode": "ROAR_1"
+  },
+  "cry:145:ROAR_2": {
+   "file": "cry-145-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 7593,
+   "lengthSamples": 13249,
+   "lengthFrames": 41,
+   "onsetSamples": 461,
+   "peak": 7194,
+   "rms": 1512.96,
+   "species": 145,
+   "name": "SPECIES_ZAPDOS",
+   "mode": "ROAR_2"
+  },
   "cry:145:WEAK": {
    "file": "cry-145.ogg",
    "kind": "cry",
@@ -7145,6 +7961,38 @@
    "species": 146,
    "name": "SPECIES_MOLTRES",
    "mode": "NORMAL"
+  },
+  "cry:146:ROAR_1": {
+   "file": "cry-146-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 0,
+   "lengthSamples": 6811,
+   "lengthFrames": 16,
+   "onsetSamples": 461,
+   "peak": 7449,
+   "rms": 1308.64,
+   "species": 146,
+   "name": "SPECIES_MOLTRES",
+   "mode": "ROAR_1"
+  },
+  "cry:146:ROAR_2": {
+   "file": "cry-146-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 7835,
+   "lengthSamples": 17669,
+   "lengthFrames": 63,
+   "onsetSamples": 463,
+   "peak": 7922,
+   "rms": 1805.28,
+   "species": 146,
+   "name": "SPECIES_MOLTRES",
+   "mode": "ROAR_2"
   },
   "cry:146:WEAK": {
    "file": "cry-146.ogg",
@@ -7289,6 +8137,38 @@
    "species": 149,
    "name": "SPECIES_DRAGONITE",
    "mode": "NORMAL"
+  },
+  "cry:149:ROAR_1": {
+   "file": "cry-149-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 0,
+   "lengthSamples": 6585,
+   "lengthFrames": 16,
+   "onsetSamples": 460,
+   "peak": 6506,
+   "rms": 1235.29,
+   "species": 149,
+   "name": "SPECIES_DRAGONITE",
+   "mode": "ROAR_1"
+  },
+  "cry:149:ROAR_2": {
+   "file": "cry-149-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 7609,
+   "lengthSamples": 14565,
+   "lengthFrames": 51,
+   "onsetSamples": 461,
+   "peak": 9147,
+   "rms": 2008.88,
+   "species": 149,
+   "name": "SPECIES_DRAGONITE",
+   "mode": "ROAR_2"
   },
   "cry:149:WEAK": {
    "file": "cry-149.ogg",
@@ -7578,6 +8458,38 @@
    "name": "SPECIES_TYPHLOSION",
    "mode": "NORMAL"
   },
+  "cry:157:ROAR_1": {
+   "file": "cry-157-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 0,
+   "lengthSamples": 6450,
+   "lengthFrames": 16,
+   "onsetSamples": 460,
+   "peak": 7008,
+   "rms": 1300.15,
+   "species": 157,
+   "name": "SPECIES_TYPHLOSION",
+   "mode": "ROAR_1"
+  },
+  "cry:157:ROAR_2": {
+   "file": "cry-157-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 7474,
+   "lengthSamples": 21193,
+   "lengthFrames": 91,
+   "onsetSamples": 461,
+   "peak": 10114,
+   "rms": 2058.47,
+   "species": 157,
+   "name": "SPECIES_TYPHLOSION",
+   "mode": "ROAR_2"
+  },
   "cry:157:WEAK": {
    "file": "cry-157.ogg",
    "kind": "cry",
@@ -7722,6 +8634,38 @@
    "name": "SPECIES_FERALIGATR",
    "mode": "NORMAL"
   },
+  "cry:160:ROAR_1": {
+   "file": "cry-160-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 0,
+   "lengthSamples": 6694,
+   "lengthFrames": 16,
+   "onsetSamples": 461,
+   "peak": 7153,
+   "rms": 1581.04,
+   "species": 160,
+   "name": "SPECIES_FERALIGATR",
+   "mode": "ROAR_1"
+  },
+  "cry:160:ROAR_2": {
+   "file": "cry-160-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 7718,
+   "lengthSamples": 17614,
+   "lengthFrames": 68,
+   "onsetSamples": 460,
+   "peak": 9196,
+   "rms": 2108.6,
+   "species": 160,
+   "name": "SPECIES_FERALIGATR",
+   "mode": "ROAR_2"
+  },
   "cry:160:WEAK": {
    "file": "cry-160.ogg",
    "kind": "cry",
@@ -7737,6 +8681,38 @@
    "species": 160,
    "name": "SPECIES_FERALIGATR",
    "mode": "WEAK"
+  },
+  "cry:161:ECHO_END": {
+   "file": "cry-161-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 30416,
+   "lengthSamples": 6467,
+   "lengthFrames": 12,
+   "onsetSamples": 462,
+   "peak": 5803,
+   "rms": 880.67,
+   "species": 161,
+   "name": "SPECIES_SENTRET",
+   "mode": "ECHO_END"
+  },
+  "cry:161:ECHO_START": {
+   "file": "cry-161-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 22614,
+   "lengthSamples": 6778,
+   "lengthFrames": 11,
+   "onsetSamples": 461,
+   "peak": 7067,
+   "rms": 1068.41,
+   "species": 161,
+   "name": "SPECIES_SENTRET",
+   "mode": "ECHO_START"
   },
   "cry:161:FAINT": {
    "file": "cry-161.ogg",
@@ -7754,6 +8730,22 @@
    "name": "SPECIES_SENTRET",
    "mode": "FAINT"
   },
+  "cry:161:HIGH_PITCH": {
+   "file": "cry-161-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 15011,
+   "lengthSamples": 6579,
+   "lengthFrames": 11,
+   "onsetSamples": 461,
+   "peak": 5831,
+   "rms": 1105.95,
+   "species": 161,
+   "name": "SPECIES_SENTRET",
+   "mode": "HIGH_PITCH"
+  },
   "cry:161:NORMAL": {
    "file": "cry-161.ogg",
    "kind": "cry",
@@ -7769,6 +8761,38 @@
    "species": 161,
    "name": "SPECIES_SENTRET",
    "mode": "NORMAL"
+  },
+  "cry:161:ROAR_1": {
+   "file": "cry-161-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 0,
+   "lengthSamples": 6400,
+   "lengthFrames": 13,
+   "onsetSamples": 465,
+   "peak": 6423,
+   "rms": 1069.99,
+   "species": 161,
+   "name": "SPECIES_SENTRET",
+   "mode": "ROAR_1"
+  },
+  "cry:161:ROAR_2": {
+   "file": "cry-161-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 7424,
+   "lengthSamples": 6563,
+   "lengthFrames": 11,
+   "onsetSamples": 464,
+   "peak": 6411,
+   "rms": 1070.48,
+   "species": 161,
+   "name": "SPECIES_SENTRET",
+   "mode": "ROAR_2"
   },
   "cry:161:WEAK": {
    "file": "cry-161.ogg",
@@ -8314,6 +9338,38 @@
    "name": "SPECIES_PICHU",
    "mode": "WEAK"
   },
+  "cry:173:ECHO_END": {
+   "file": "cry-173-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 34242,
+   "lengthSamples": 7768,
+   "lengthFrames": 17,
+   "onsetSamples": 461,
+   "peak": 5378,
+   "rms": 1079.8,
+   "species": 173,
+   "name": "SPECIES_CLEFFA",
+   "mode": "ECHO_END"
+  },
+  "cry:173:ECHO_START": {
+   "file": "cry-173-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 25157,
+   "lengthSamples": 8061,
+   "lengthFrames": 16,
+   "onsetSamples": 461,
+   "peak": 8163,
+   "rms": 1435.01,
+   "species": 173,
+   "name": "SPECIES_CLEFFA",
+   "mode": "ECHO_START"
+  },
   "cry:173:FAINT": {
    "file": "cry-173.ogg",
    "kind": "cry",
@@ -8330,6 +9386,22 @@
    "name": "SPECIES_CLEFFA",
    "mode": "FAINT"
   },
+  "cry:173:HIGH_PITCH": {
+   "file": "cry-173-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 16115,
+   "lengthSamples": 8018,
+   "lengthFrames": 16,
+   "onsetSamples": 462,
+   "peak": 8521,
+   "rms": 1375.51,
+   "species": 173,
+   "name": "SPECIES_CLEFFA",
+   "mode": "HIGH_PITCH"
+  },
   "cry:173:NORMAL": {
    "file": "cry-173.ogg",
    "kind": "cry",
@@ -8345,6 +9417,38 @@
    "species": 173,
    "name": "SPECIES_CLEFFA",
    "mode": "NORMAL"
+  },
+  "cry:173:ROAR_1": {
+   "file": "cry-173-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 0,
+   "lengthSamples": 6426,
+   "lengthFrames": 16,
+   "onsetSamples": 461,
+   "peak": 6760,
+   "rms": 1156.44,
+   "species": 173,
+   "name": "SPECIES_CLEFFA",
+   "mode": "ROAR_1"
+  },
+  "cry:173:ROAR_2": {
+   "file": "cry-173-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 7450,
+   "lengthSamples": 7641,
+   "lengthFrames": 16,
+   "onsetSamples": 460,
+   "peak": 6292,
+   "rms": 1358.43,
+   "species": 173,
+   "name": "SPECIES_CLEFFA",
+   "mode": "ROAR_2"
   },
   "cry:173:WEAK": {
    "file": "cry-173.ogg",
@@ -10026,6 +11130,38 @@
    "name": "SPECIES_STEELIX",
    "mode": "NORMAL"
   },
+  "cry:208:ROAR_1": {
+   "file": "cry-208-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 0,
+   "lengthSamples": 6096,
+   "lengthFrames": 16,
+   "onsetSamples": 464,
+   "peak": 7603,
+   "rms": 1165.74,
+   "species": 208,
+   "name": "SPECIES_STEELIX",
+   "mode": "ROAR_1"
+  },
+  "cry:208:ROAR_2": {
+   "file": "cry-208-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 7120,
+   "lengthSamples": 21189,
+   "lengthFrames": 91,
+   "onsetSamples": 463,
+   "peak": 9293,
+   "rms": 1774.07,
+   "species": 208,
+   "name": "SPECIES_STEELIX",
+   "mode": "ROAR_2"
+  },
   "cry:208:WEAK": {
    "file": "cry-208.ogg",
    "kind": "cry",
@@ -10121,6 +11257,38 @@
    "species": 210,
    "name": "SPECIES_GRANBULL",
    "mode": "NORMAL"
+  },
+  "cry:210:ROAR_1": {
+   "file": "cry-210-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 0,
+   "lengthSamples": 6225,
+   "lengthFrames": 16,
+   "onsetSamples": 461,
+   "peak": 7932,
+   "rms": 1474.85,
+   "species": 210,
+   "name": "SPECIES_GRANBULL",
+   "mode": "ROAR_1"
+  },
+  "cry:210:ROAR_2": {
+   "file": "cry-210-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 7249,
+   "lengthSamples": 17077,
+   "lengthFrames": 63,
+   "onsetSamples": 461,
+   "peak": 8735,
+   "rms": 2042.46,
+   "species": 210,
+   "name": "SPECIES_GRANBULL",
+   "mode": "ROAR_2"
   },
   "cry:210:WEAK": {
    "file": "cry-210.ogg",
@@ -10650,6 +11818,38 @@
    "name": "SPECIES_PILOSWINE",
    "mode": "NORMAL"
   },
+  "cry:221:ROAR_1": {
+   "file": "cry-221-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 0,
+   "lengthSamples": 6367,
+   "lengthFrames": 16,
+   "onsetSamples": 462,
+   "peak": 7977,
+   "rms": 1439.28,
+   "species": 221,
+   "name": "SPECIES_PILOSWINE",
+   "mode": "ROAR_1"
+  },
+  "cry:221:ROAR_2": {
+   "file": "cry-221-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 7391,
+   "lengthSamples": 11118,
+   "lengthFrames": 35,
+   "onsetSamples": 463,
+   "peak": 8947,
+   "rms": 1951,
+   "species": 221,
+   "name": "SPECIES_PILOSWINE",
+   "mode": "ROAR_2"
+  },
   "cry:221:WEAK": {
    "file": "cry-221.ogg",
    "kind": "cry",
@@ -10938,6 +12138,38 @@
    "name": "SPECIES_SKARMORY",
    "mode": "NORMAL"
   },
+  "cry:227:ROAR_1": {
+   "file": "cry-227-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 0,
+   "lengthSamples": 6314,
+   "lengthFrames": 16,
+   "onsetSamples": 461,
+   "peak": 6469,
+   "rms": 1153.86,
+   "species": 227,
+   "name": "SPECIES_SKARMORY",
+   "mode": "ROAR_1"
+  },
+  "cry:227:ROAR_2": {
+   "file": "cry-227-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 7338,
+   "lengthSamples": 16738,
+   "lengthFrames": 64,
+   "onsetSamples": 461,
+   "peak": 7583,
+   "rms": 1490.28,
+   "species": 227,
+   "name": "SPECIES_SKARMORY",
+   "mode": "ROAR_2"
+  },
   "cry:227:WEAK": {
    "file": "cry-227.ogg",
    "kind": "cry",
@@ -10986,6 +12218,38 @@
    "name": "SPECIES_HOUNDOUR",
    "mode": "NORMAL"
   },
+  "cry:228:ROAR_1": {
+   "file": "cry-228-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 0,
+   "lengthSamples": 5709,
+   "lengthFrames": 16,
+   "onsetSamples": 462,
+   "peak": 3773,
+   "rms": 613.2,
+   "species": 228,
+   "name": "SPECIES_HOUNDOUR",
+   "mode": "ROAR_1"
+  },
+  "cry:228:ROAR_2": {
+   "file": "cry-228-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 6733,
+   "lengthSamples": 10881,
+   "lengthFrames": 34,
+   "onsetSamples": 467,
+   "peak": 8993,
+   "rms": 1663.71,
+   "species": 228,
+   "name": "SPECIES_HOUNDOUR",
+   "mode": "ROAR_2"
+  },
   "cry:228:WEAK": {
    "file": "cry-228.ogg",
    "kind": "cry",
@@ -11033,6 +12297,38 @@
    "species": 229,
    "name": "SPECIES_HOUNDOOM",
    "mode": "NORMAL"
+  },
+  "cry:229:ROAR_1": {
+   "file": "cry-229-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 0,
+   "lengthSamples": 6233,
+   "lengthFrames": 16,
+   "onsetSamples": 460,
+   "peak": 7082,
+   "rms": 1275.63,
+   "species": 229,
+   "name": "SPECIES_HOUNDOOM",
+   "mode": "ROAR_1"
+  },
+  "cry:229:ROAR_2": {
+   "file": "cry-229-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 7257,
+   "lengthSamples": 14550,
+   "lengthFrames": 53,
+   "onsetSamples": 462,
+   "peak": 8064,
+   "rms": 1887.71,
+   "species": 229,
+   "name": "SPECIES_HOUNDOOM",
+   "mode": "ROAR_2"
   },
   "cry:229:WEAK": {
    "file": "cry-229.ogg",
@@ -11706,6 +13002,38 @@
    "name": "SPECIES_RAIKOU",
    "mode": "NORMAL"
   },
+  "cry:243:ROAR_1": {
+   "file": "cry-243-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 0,
+   "lengthSamples": 6361,
+   "lengthFrames": 16,
+   "onsetSamples": 460,
+   "peak": 8483,
+   "rms": 1367.23,
+   "species": 243,
+   "name": "SPECIES_RAIKOU",
+   "mode": "ROAR_1"
+  },
+  "cry:243:ROAR_2": {
+   "file": "cry-243-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 7385,
+   "lengthSamples": 13795,
+   "lengthFrames": 47,
+   "onsetSamples": 463,
+   "peak": 8345,
+   "rms": 1816.62,
+   "species": 243,
+   "name": "SPECIES_RAIKOU",
+   "mode": "ROAR_2"
+  },
   "cry:243:WEAK": {
    "file": "cry-243.ogg",
    "kind": "cry",
@@ -11754,6 +13082,38 @@
    "name": "SPECIES_ENTEI",
    "mode": "NORMAL"
   },
+  "cry:244:ROAR_1": {
+   "file": "cry-244-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 0,
+   "lengthSamples": 6564,
+   "lengthFrames": 16,
+   "onsetSamples": 460,
+   "peak": 7285,
+   "rms": 1520.84,
+   "species": 244,
+   "name": "SPECIES_ENTEI",
+   "mode": "ROAR_1"
+  },
+  "cry:244:ROAR_2": {
+   "file": "cry-244-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 7588,
+   "lengthSamples": 15329,
+   "lengthFrames": 55,
+   "onsetSamples": 462,
+   "peak": 9184,
+   "rms": 2109.57,
+   "species": 244,
+   "name": "SPECIES_ENTEI",
+   "mode": "ROAR_2"
+  },
   "cry:244:WEAK": {
    "file": "cry-244.ogg",
    "kind": "cry",
@@ -11801,6 +13161,38 @@
    "species": 245,
    "name": "SPECIES_SUICUNE",
    "mode": "NORMAL"
+  },
+  "cry:245:ROAR_1": {
+   "file": "cry-245-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 0,
+   "lengthSamples": 6400,
+   "lengthFrames": 16,
+   "onsetSamples": 461,
+   "peak": 7309,
+   "rms": 1420.64,
+   "species": 245,
+   "name": "SPECIES_SUICUNE",
+   "mode": "ROAR_1"
+  },
+  "cry:245:ROAR_2": {
+   "file": "cry-245-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 7424,
+   "lengthSamples": 14363,
+   "lengthFrames": 49,
+   "onsetSamples": 461,
+   "peak": 8782,
+   "rms": 1955.51,
+   "species": 245,
+   "name": "SPECIES_SUICUNE",
+   "mode": "ROAR_2"
   },
   "cry:245:WEAK": {
    "file": "cry-245.ogg",
@@ -12234,6 +13626,38 @@
    "name": "SPECIES_BLAZIKEN",
    "mode": "NORMAL"
   },
+  "cry:282:ROAR_1": {
+   "file": "cry-282-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 0,
+   "lengthSamples": 6224,
+   "lengthFrames": 16,
+   "onsetSamples": 461,
+   "peak": 8949,
+   "rms": 1998.03,
+   "species": 282,
+   "name": "SPECIES_BLAZIKEN",
+   "mode": "ROAR_1"
+  },
+  "cry:282:ROAR_2": {
+   "file": "cry-282-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 7248,
+   "lengthSamples": 20388,
+   "lengthFrames": 84,
+   "onsetSamples": 461,
+   "peak": 9868,
+   "rms": 2394.46,
+   "species": 282,
+   "name": "SPECIES_BLAZIKEN",
+   "mode": "ROAR_2"
+  },
   "cry:282:WEAK": {
    "file": "cry-282.ogg",
    "kind": "cry",
@@ -12426,6 +13850,38 @@
    "name": "SPECIES_POOCHYENA",
    "mode": "NORMAL"
   },
+  "cry:286:ROAR_1": {
+   "file": "cry-286-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 0,
+   "lengthSamples": 6556,
+   "lengthFrames": 16,
+   "onsetSamples": 461,
+   "peak": 6855,
+   "rms": 1127.09,
+   "species": 286,
+   "name": "SPECIES_POOCHYENA",
+   "mode": "ROAR_1"
+  },
+  "cry:286:ROAR_2": {
+   "file": "cry-286-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 7580,
+   "lengthSamples": 8218,
+   "lengthFrames": 25,
+   "onsetSamples": 463,
+   "peak": 6788,
+   "rms": 1158.73,
+   "species": 286,
+   "name": "SPECIES_POOCHYENA",
+   "mode": "ROAR_2"
+  },
   "cry:286:WEAK": {
    "file": "cry-286.ogg",
    "kind": "cry",
@@ -12473,6 +13929,38 @@
    "species": 287,
    "name": "SPECIES_MIGHTYENA",
    "mode": "NORMAL"
+  },
+  "cry:287:ROAR_1": {
+   "file": "cry-287-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 0,
+   "lengthSamples": 6679,
+   "lengthFrames": 16,
+   "onsetSamples": 463,
+   "peak": 8892,
+   "rms": 1611.28,
+   "species": 287,
+   "name": "SPECIES_MIGHTYENA",
+   "mode": "ROAR_1"
+  },
+  "cry:287:ROAR_2": {
+   "file": "cry-287-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 7703,
+   "lengthSamples": 14656,
+   "lengthFrames": 52,
+   "onsetSamples": 461,
+   "peak": 8754,
+   "rms": 1801.52,
+   "species": 287,
+   "name": "SPECIES_MIGHTYENA",
+   "mode": "ROAR_2"
   },
   "cry:287:WEAK": {
    "file": "cry-287.ogg",
@@ -13722,6 +15210,38 @@
    "name": "SPECIES_WAILMER",
    "mode": "NORMAL"
   },
+  "cry:313:ROAR_1": {
+   "file": "cry-313-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 0,
+   "lengthSamples": 6193,
+   "lengthFrames": 16,
+   "onsetSamples": 463,
+   "peak": 8929,
+   "rms": 1691.77,
+   "species": 313,
+   "name": "SPECIES_WAILMER",
+   "mode": "ROAR_1"
+  },
+  "cry:313:ROAR_2": {
+   "file": "cry-313-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 7217,
+   "lengthSamples": 18857,
+   "lengthFrames": 76,
+   "onsetSamples": 460,
+   "peak": 9931,
+   "rms": 2601.04,
+   "species": 313,
+   "name": "SPECIES_WAILMER",
+   "mode": "ROAR_2"
+  },
   "cry:313:WEAK": {
    "file": "cry-313.ogg",
    "kind": "cry",
@@ -13769,6 +15289,38 @@
    "species": 314,
    "name": "SPECIES_WAILORD",
    "mode": "NORMAL"
+  },
+  "cry:314:ROAR_1": {
+   "file": "cry-314-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 0,
+   "lengthSamples": 6744,
+   "lengthFrames": 16,
+   "onsetSamples": 467,
+   "peak": 9300,
+   "rms": 1692.71,
+   "species": 314,
+   "name": "SPECIES_WAILORD",
+   "mode": "ROAR_1"
+  },
+  "cry:314:ROAR_2": {
+   "file": "cry-314-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 7768,
+   "lengthSamples": 21180,
+   "lengthFrames": 91,
+   "onsetSamples": 461,
+   "peak": 10029,
+   "rms": 2622.11,
+   "species": 314,
+   "name": "SPECIES_WAILORD",
+   "mode": "ROAR_2"
   },
   "cry:314:WEAK": {
    "file": "cry-314.ogg",
@@ -14874,6 +16426,38 @@
    "name": "SPECIES_ELECTRIKE",
    "mode": "NORMAL"
   },
+  "cry:337:ROAR_1": {
+   "file": "cry-337-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 0,
+   "lengthSamples": 6600,
+   "lengthFrames": 16,
+   "onsetSamples": 460,
+   "peak": 8337,
+   "rms": 1363.99,
+   "species": 337,
+   "name": "SPECIES_ELECTRIKE",
+   "mode": "ROAR_1"
+  },
+  "cry:337:ROAR_2": {
+   "file": "cry-337-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 7624,
+   "lengthSamples": 10432,
+   "lengthFrames": 33,
+   "onsetSamples": 461,
+   "peak": 7437,
+   "rms": 1709.58,
+   "species": 337,
+   "name": "SPECIES_ELECTRIKE",
+   "mode": "ROAR_2"
+  },
   "cry:337:WEAK": {
    "file": "cry-337.ogg",
    "kind": "cry",
@@ -14921,6 +16505,38 @@
    "species": 338,
    "name": "SPECIES_MANECTRIC",
    "mode": "NORMAL"
+  },
+  "cry:338:ROAR_1": {
+   "file": "cry-338-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 0,
+   "lengthSamples": 6449,
+   "lengthFrames": 16,
+   "onsetSamples": 464,
+   "peak": 7860,
+   "rms": 1580.41,
+   "species": 338,
+   "name": "SPECIES_MANECTRIC",
+   "mode": "ROAR_1"
+  },
+  "cry:338:ROAR_2": {
+   "file": "cry-338-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 7473,
+   "lengthSamples": 15271,
+   "lengthFrames": 56,
+   "onsetSamples": 461,
+   "peak": 8160,
+   "rms": 1858.59,
+   "species": 338,
+   "name": "SPECIES_MANECTRIC",
+   "mode": "ROAR_2"
   },
   "cry:338:WEAK": {
    "file": "cry-338.ogg",
@@ -16490,6 +18106,22 @@
    "name": "SPECIES_LOUDRED",
    "mode": "FAINT"
   },
+  "cry:371:HIGH_PITCH": {
+   "file": "cry-371-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 0,
+   "lengthSamples": 11399,
+   "lengthFrames": 34,
+   "onsetSamples": 461,
+   "peak": 8168,
+   "rms": 1519.08,
+   "species": 371,
+   "name": "SPECIES_LOUDRED",
+   "mode": "HIGH_PITCH"
+  },
   "cry:371:NORMAL": {
    "file": "cry-371.ogg",
    "kind": "cry",
@@ -16521,6 +18153,38 @@
    "species": 371,
    "name": "SPECIES_LOUDRED",
    "mode": "WEAK"
+  },
+  "cry:372:ECHO_END": {
+   "file": "cry-372-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 11111,
+   "lengthSamples": 20278,
+   "lengthFrames": 78,
+   "onsetSamples": 460,
+   "peak": 8885,
+   "rms": 1697.82,
+   "species": 372,
+   "name": "SPECIES_EXPLOUD",
+   "mode": "ECHO_END"
+  },
+  "cry:372:ECHO_START": {
+   "file": "cry-372-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 0,
+   "lengthSamples": 10087,
+   "lengthFrames": 31,
+   "onsetSamples": 464,
+   "peak": 9632,
+   "rms": 1492.96,
+   "species": 372,
+   "name": "SPECIES_EXPLOUD",
+   "mode": "ECHO_START"
   },
   "cry:372:FAINT": {
    "file": "cry-372.ogg",
@@ -16938,6 +18602,38 @@
    "name": "SPECIES_ZANGOOSE",
    "mode": "NORMAL"
   },
+  "cry:380:ROAR_1": {
+   "file": "cry-380-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 0,
+   "lengthSamples": 6266,
+   "lengthFrames": 16,
+   "onsetSamples": 461,
+   "peak": 7775,
+   "rms": 1143.68,
+   "species": 380,
+   "name": "SPECIES_ZANGOOSE",
+   "mode": "ROAR_1"
+  },
+  "cry:380:ROAR_2": {
+   "file": "cry-380-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 7290,
+   "lengthSamples": 8387,
+   "lengthFrames": 26,
+   "onsetSamples": 461,
+   "peak": 7416,
+   "rms": 1257.3,
+   "species": 380,
+   "name": "SPECIES_ZANGOOSE",
+   "mode": "ROAR_2"
+  },
   "cry:380:WEAK": {
    "file": "cry-380.ogg",
    "kind": "cry",
@@ -17034,6 +18730,38 @@
    "name": "SPECIES_ARON",
    "mode": "NORMAL"
   },
+  "cry:382:ROAR_1": {
+   "file": "cry-382-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 0,
+   "lengthSamples": 6297,
+   "lengthFrames": 16,
+   "onsetSamples": 461,
+   "peak": 6619,
+   "rms": 1076.64,
+   "species": 382,
+   "name": "SPECIES_ARON",
+   "mode": "ROAR_1"
+  },
+  "cry:382:ROAR_2": {
+   "file": "cry-382-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 7321,
+   "lengthSamples": 8921,
+   "lengthFrames": 25,
+   "onsetSamples": 462,
+   "peak": 6383,
+   "rms": 1516.11,
+   "species": 382,
+   "name": "SPECIES_ARON",
+   "mode": "ROAR_2"
+  },
   "cry:382:WEAK": {
    "file": "cry-382.ogg",
    "kind": "cry",
@@ -17082,6 +18810,38 @@
    "name": "SPECIES_LAIRON",
    "mode": "NORMAL"
   },
+  "cry:383:ROAR_1": {
+   "file": "cry-383-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 0,
+   "lengthSamples": 6843,
+   "lengthFrames": 16,
+   "onsetSamples": 460,
+   "peak": 7443,
+   "rms": 1310.43,
+   "species": 383,
+   "name": "SPECIES_LAIRON",
+   "mode": "ROAR_1"
+  },
+  "cry:383:ROAR_2": {
+   "file": "cry-383-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 7867,
+   "lengthSamples": 15605,
+   "lengthFrames": 56,
+   "onsetSamples": 460,
+   "peak": 8722,
+   "rms": 2265.57,
+   "species": 383,
+   "name": "SPECIES_LAIRON",
+   "mode": "ROAR_2"
+  },
   "cry:383:WEAK": {
    "file": "cry-383.ogg",
    "kind": "cry",
@@ -17129,6 +18889,38 @@
    "species": 384,
    "name": "SPECIES_AGGRON",
    "mode": "NORMAL"
+  },
+  "cry:384:ROAR_1": {
+   "file": "cry-384-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 0,
+   "lengthSamples": 6456,
+   "lengthFrames": 16,
+   "onsetSamples": 460,
+   "peak": 9158,
+   "rms": 1575.2,
+   "species": 384,
+   "name": "SPECIES_AGGRON",
+   "mode": "ROAR_1"
+  },
+  "cry:384:ROAR_2": {
+   "file": "cry-384-task.ogg",
+   "kind": "cry",
+   "via": "PlayCryInternal",
+   "sampleRate": 13379,
+   "channels": 1,
+   "offsetSamples": 7480,
+   "lengthSamples": 18108,
+   "lengthFrames": 69,
+   "onsetSamples": 461,
+   "peak": 9397,
+   "rms": 2360.89,
+   "species": 384,
+   "name": "SPECIES_AGGRON",
+   "mode": "ROAR_2"
   },
   "cry:384:WEAK": {
    "file": "cry-384.ogg",
@@ -21252,6 +23044,10 @@
    "bytes": 11493,
    "sha256": "608de8ab4b7d85de419071bffdf25651969ebda8c669798b271833929aae8ca6"
   },
+  "cry-006-task.ogg": {
+   "bytes": 7259,
+   "sha256": "8eaf92917cf6bfa108a34fa00fcc436f9a2dd450604dbbd824c230ab6304f168"
+  },
   "cry-006.ogg": {
    "bytes": 14026,
    "sha256": "07fc4aa60af974baba099c9f8b7f3621db8db30c619410fb5b348325f59c00c7"
@@ -21311,6 +23107,10 @@
   "cry-020.ogg": {
    "bytes": 8999,
    "sha256": "3353dfb852656ffb551b90ad7c5af63d6b812a2e21c2847bdc93b9f08a076cb8"
+  },
+  "cry-021-task.ogg": {
+   "bytes": 14898,
+   "sha256": "7f6dea8b91fa1a6f8852014be26da33771c2c0a5300dee73c0da7dfcc0b1b6d7"
   },
   "cry-021.ogg": {
    "bytes": 12808,
@@ -21372,6 +23172,10 @@
    "bytes": 8213,
    "sha256": "ddbb343af60fdab28f9ea8871f0374fe45cbaa4318c722b2e7ad4f10b21ef999"
   },
+  "cry-036-task.ogg": {
+   "bytes": 11950,
+   "sha256": "ec53f938d5bb65ee50a3cd5a6cad1c30e0bd349ebfba191a2edd780bc6793412"
+  },
   "cry-036.ogg": {
    "bytes": 8671,
    "sha256": "867d267f695bb1fd6bd63a009424fa91af5e79cb833479a91ad2e1bf74dcff19"
@@ -21380,9 +23184,17 @@
    "bytes": 15620,
    "sha256": "b09e9df37d52d77d303ff4315259e43a0e0a0d3a764c717b5e169ce873a0e1ed"
   },
+  "cry-038-task.ogg": {
+   "bytes": 7597,
+   "sha256": "745fe161f87e617177294883fd721b15d25e8dfe7ea0c43d61ba9b150646480a"
+  },
   "cry-038.ogg": {
    "bytes": 16007,
    "sha256": "653064f7db9630666a60a2f1d70d9aeeb468f1996ee4d61985b3ea427c9dc8f9"
+  },
+  "cry-039-task.ogg": {
+   "bytes": 9985,
+   "sha256": "4aca261eca3ef6bcb8177c2780f1426a9122f32efef0e7c3f2f2f22bc2d12a0b"
   },
   "cry-039.ogg": {
    "bytes": 7256,
@@ -21440,6 +23252,10 @@
    "bytes": 8232,
    "sha256": "b9f298a6745f29435b5be6435da8df17b276b9a704e796ab0750a6ea6d56b849"
   },
+  "cry-053-task.ogg": {
+   "bytes": 6408,
+   "sha256": "f8132752bbb59056fa5f7b13b3004469f79d346953b6196126d85396248757c2"
+  },
   "cry-053.ogg": {
    "bytes": 11977,
    "sha256": "a45fb57eb2dea9b412132b9eade8fd5a52695c28184cb319a3ef91edff82acc6"
@@ -21460,9 +23276,17 @@
    "bytes": 11961,
    "sha256": "253c0fc581d201a5abd23810bd4f89ea573dc5adb9eeef35ffdf84e98c854265"
   },
+  "cry-058-task.ogg": {
+   "bytes": 6182,
+   "sha256": "fb13cc4e55b848bf7a46e8989be7bb70fa868c8f62eda60e0fc47031672576fd"
+  },
   "cry-058.ogg": {
    "bytes": 10473,
    "sha256": "16e37e8ffd53d59e78f8b61c82e69f449b727ac64ba93e2b94ee37a9b218793d"
+  },
+  "cry-059-task.ogg": {
+   "bytes": 7112,
+   "sha256": "afbf10be40080c93adedc61ccf2f28c0bbd6cc5a9ccf8c239cea632068f62d65"
   },
   "cry-059.ogg": {
    "bytes": 13060,
@@ -21479,6 +23303,10 @@
   "cry-062.ogg": {
    "bytes": 9154,
    "sha256": "4c6ddffc640b3a24816c0fc20096931f734dd22cdfb6d0cab1bfdfc2b692ab17"
+  },
+  "cry-063-task.ogg": {
+   "bytes": 18476,
+   "sha256": "8298a436201837b822956862f2304a2fea0a5df406b16971670d3401850e7139"
   },
   "cry-063.ogg": {
    "bytes": 16605,
@@ -21672,6 +23500,10 @@
    "bytes": 14519,
    "sha256": "0a609f45a1bb2471c23704c4c65f8e8fc3e44bc73a57b38fb43bebf6f46feef7"
   },
+  "cry-111-task.ogg": {
+   "bytes": 7175,
+   "sha256": "ea19f4392e9ecb1498497d91bffb83047be2f5c71cc1ab5f4a873569f712ce9c"
+  },
   "cry-111.ogg": {
    "bytes": 14077,
    "sha256": "e64bd901d0c59ed599b73c33915e8586d7590ff4b78de0c7676274da2390da64"
@@ -21679,6 +23511,10 @@
   "cry-112.ogg": {
    "bytes": 15101,
    "sha256": "a644214ba02e5adbd358fa188f46f9d77a2e8d66fa3d27fdfeff634e0b17291a"
+  },
+  "cry-113-task.ogg": {
+   "bytes": 14586,
+   "sha256": "df92ae33a93076ec95b0af7843c4a6eb82e9eb91c4552307054718fb6781e9ef"
   },
   "cry-113.ogg": {
    "bytes": 11432,
@@ -21752,6 +23588,10 @@
    "bytes": 14221,
    "sha256": "1bbfb4a19397f4e81100cd97795a60632fc27edbb01f1e614dce7baca8782f99"
   },
+  "cry-131-task.ogg": {
+   "bytes": 6683,
+   "sha256": "cad294b10e7789a3e96643aac93074fd3e8373629b87c34bb709035b0e2fcd2c"
+  },
   "cry-131.ogg": {
    "bytes": 12461,
    "sha256": "07ba7ee8fe6d94ed89eca763829aa9e5a9366a482faa9570234a23f5c790d1f2"
@@ -21764,13 +23604,25 @@
    "bytes": 11217,
    "sha256": "2889406b6ffa2d67f3be1c136e681c112c281c24a794bbeb391fc86df8b58e31"
   },
+  "cry-134-task.ogg": {
+   "bytes": 7069,
+   "sha256": "ab306e20ca8edd62ac01bfe34f12892cf1009d7c3ea2a0dc0406cab36dc68343"
+  },
   "cry-134.ogg": {
    "bytes": 13906,
    "sha256": "63e96a12769de7f247a742974b163611eb3b60a609745dc428387bd0edfd6aae"
   },
+  "cry-135-task.ogg": {
+   "bytes": 6613,
+   "sha256": "5990e43d2be6a72f9ee72c6d74e5ee8b02ca6c0d8dfa7672efc50fdad7976492"
+  },
   "cry-135.ogg": {
    "bytes": 11983,
    "sha256": "ad30d77fc136b4299848ccf569b2d265952a7143704b32acbf137b915d2bbdfb"
+  },
+  "cry-136-task.ogg": {
+   "bytes": 6904,
+   "sha256": "0fa8fa0fbd8822d99c8bdc50ade690f5a1f050c56358dcdc0bf7a73b700e86e4"
   },
   "cry-136.ogg": {
    "bytes": 12172,
@@ -21796,6 +23648,10 @@
    "bytes": 11573,
    "sha256": "8299d22609efc1d028fc6327fc46624500235a576a615a14f317c54edbd8e5c1"
   },
+  "cry-142-task.ogg": {
+   "bytes": 7840,
+   "sha256": "1c12967d6a2417bb0886ac30623eaf7fab477534104c4005f2e88f67ccc91617"
+  },
   "cry-142.ogg": {
    "bytes": 15742,
    "sha256": "a18a9962258d7e1a3abfff401e8ad802a5b84452b2cef608edd8a02fbbf5919a"
@@ -21804,13 +23660,25 @@
    "bytes": 7234,
    "sha256": "c169eeb1f823fb41ab30e1a82235e293144b53a6bf619d20ab68c35c58ddd123"
   },
+  "cry-144-task.ogg": {
+   "bytes": 7636,
+   "sha256": "2a23b1e8c69c3ed916a2da2007850b24f391cce0814e5eac4af133bcba6719cd"
+  },
   "cry-144.ogg": {
    "bytes": 15741,
    "sha256": "29ee3a3e181314e6d066f1ad50b642e750a8c16cc96d324828a27f4ec043d254"
   },
+  "cry-145-task.ogg": {
+   "bytes": 6827,
+   "sha256": "0eb989f8f425802e8bb8b8663d3c1700010f246aa963a4dee6369e12ef42b1f5"
+  },
   "cry-145.ogg": {
    "bytes": 12151,
    "sha256": "0bcb75951bd400ef7c8a5f4f6a824f8122c5bb21c382ef924b3c6b148a3304ff"
+  },
+  "cry-146-task.ogg": {
+   "bytes": 8266,
+   "sha256": "821b38ed268ce3ba6d0960e2c13b0912babe73121b1073ba57afb205063e1660"
   },
   "cry-146.ogg": {
    "bytes": 17060,
@@ -21823,6 +23691,10 @@
   "cry-148.ogg": {
    "bytes": 12574,
    "sha256": "d7ad4b9c84e7a1aff0d510299d5b5a8223c277e997b797d09a0d4b8c2375500b"
+  },
+  "cry-149-task.ogg": {
+   "bytes": 7274,
+   "sha256": "f33728c8ba35ef28b9ebb3fd0a65429f57bb33a5229ff346c965d38fffe72f66"
   },
   "cry-149.ogg": {
    "bytes": 13822,
@@ -21848,6 +23720,10 @@
    "bytes": 10113,
    "sha256": "64c586e83cdf87e6c0fd22ed96eb272933e035acc4be5f0d74b303d411e6fcaa"
   },
+  "cry-157-task.ogg": {
+   "bytes": 8641,
+   "sha256": "8bb573faffb8b4ca78a0538b6e6e57253cfedd03352bfc23f38062fe9f97a2c8"
+  },
   "cry-157.ogg": {
    "bytes": 22610,
    "sha256": "c10fbbae4c91a2267c395c8339a9436815d037540c0f9e67f5e89acdbb9a78c6"
@@ -21860,9 +23736,17 @@
    "bytes": 13650,
    "sha256": "fdfea7ed38defc83095a3539175ed4d9ae177900da8e68ded90145656e257929"
   },
+  "cry-160-task.ogg": {
+   "bytes": 7815,
+   "sha256": "6c80ece1798e01b63df6ec511ad55802fa61f5971cdde24b41dc11a23373f169"
+  },
   "cry-160.ogg": {
    "bytes": 16302,
    "sha256": "3a7f9c7d0092c5f94de05bc2d4e58f20fa62e92018f257f40acf80ed67541d12"
+  },
+  "cry-161-task.ogg": {
+   "bytes": 9013,
+   "sha256": "f1d1a00f6f1403fc6ee436d9635dd461b747e5eaca9202446e83523ff96fdd6e"
   },
   "cry-161.ogg": {
    "bytes": 6611,
@@ -21911,6 +23795,10 @@
   "cry-172.ogg": {
    "bytes": 8014,
    "sha256": "3bc1a856279d48a30cb9a266f140edea27385f92736ae9f930963aab296624b0"
+  },
+  "cry-173-task.ogg": {
+   "bytes": 10269,
+   "sha256": "aa250c129f6a05914af469a6e1f3694f188ad500719a00aabd641dc45e41d339"
   },
   "cry-173.ogg": {
    "bytes": 7469,
@@ -22052,6 +23940,10 @@
    "bytes": 9885,
    "sha256": "ea0fbf0caea96cd112d763c1fbda37fdb92bca46c1108461dff0f7eb672e6e8d"
   },
+  "cry-208-task.ogg": {
+   "bytes": 8584,
+   "sha256": "3a3d3fa3642a9e3061c7e2f1a47a281c9a2511b02c625ee1373ad2caf6686960"
+  },
   "cry-208.ogg": {
    "bytes": 22824,
    "sha256": "a65b1dcfdfe1a115377da0e5d32a5e2ef14b04aa518042d301969d53d459a0b3"
@@ -22059,6 +23951,10 @@
   "cry-209.ogg": {
    "bytes": 11821,
    "sha256": "e93426a8af960c0b97c7a4bb22a01bee9a869b84b35575b81a9c1867228874ce"
+  },
+  "cry-210-task.ogg": {
+   "bytes": 7678,
+   "sha256": "82829e961f96eff71ba1769cf752270deee6fca2453c2a171b4180a24533b01a"
   },
   "cry-210.ogg": {
    "bytes": 16146,
@@ -22104,6 +24000,10 @@
    "bytes": 10670,
    "sha256": "f28c397a468e2729bc3eca671a7288804db1fe3f6786379a1ae5865996407717"
   },
+  "cry-221-task.ogg": {
+   "bytes": 6355,
+   "sha256": "262ecb88a6e577bd2bf49b57998e6e7b3b2e8d5f8b1a8104af6ebf1ab064f8ea"
+  },
   "cry-221.ogg": {
    "bytes": 10678,
    "sha256": "9ce9424511f8f1acceebc202bcd9f4182dcc79f869b85cb085d1995d77459e46"
@@ -22128,13 +24028,25 @@
    "bytes": 12154,
    "sha256": "1b35715001b266e8f2f9202a843b6ca92dfe552c4b6bec664d5a58843a5de976"
   },
+  "cry-227-task.ogg": {
+   "bytes": 7435,
+   "sha256": "9eb578f21ece401cd319ffbae41e4e728ce0a67ac80289b18858a5505d70cd6b"
+  },
   "cry-227.ogg": {
    "bytes": 15107,
    "sha256": "f17454bb666dbd3be79fa2c85dcf35d68713d75b6fc4ca3570a415c66c3f3635"
   },
+  "cry-228-task.ogg": {
+   "bytes": 6202,
+   "sha256": "5d9153d64a6d19dedced2488fc86e29b8c76bc26995aa7f51982a3c1630af904"
+  },
   "cry-228.ogg": {
    "bytes": 10613,
    "sha256": "7c572b33ecfa2e32bd44a0aff22e6ca70c9290c2ba1952ea397e2e893960f507"
+  },
+  "cry-229-task.ogg": {
+   "bytes": 6974,
+   "sha256": "9a162231a50b6243bb188646f35ba27233f9a6cf8bdbccf48b925dc199909b73"
   },
   "cry-229.ogg": {
    "bytes": 13622,
@@ -22192,13 +24104,25 @@
    "bytes": 12343,
    "sha256": "dfe46b27f56aab844250ad6a1c34380bce9c1b97a5c3a8fcde644b754ca6eec0"
   },
+  "cry-243-task.ogg": {
+   "bytes": 6994,
+   "sha256": "e23f002a0683c313dd3c55696ca36691adf0d4275afe9890fceb230a086e8874"
+  },
   "cry-243.ogg": {
    "bytes": 12664,
    "sha256": "ab34b3cb9ba5413ba83e487a2873e1a362fbb781d1c5caa7d30d2b4706c98b26"
   },
+  "cry-244-task.ogg": {
+   "bytes": 7380,
+   "sha256": "32d4c02a61f1d2e70ef8287daa313f46eb0d01b225ab42dc02e348894b61fa2f"
+  },
   "cry-244.ogg": {
    "bytes": 13938,
    "sha256": "1d8713760f042547ab342588a92e3ddc034ddebb0069a30fa719aac71ccf8b95"
+  },
+  "cry-245-task.ogg": {
+   "bytes": 6880,
+   "sha256": "0158e86a1c010bb4131cc119cfc7b154eb043b370c21eb0eb1a24ced9d5f3b0c"
   },
   "cry-245.ogg": {
    "bytes": 12806,
@@ -22236,6 +24160,10 @@
    "bytes": 17960,
    "sha256": "a4827f1d26258ce271cb79acc2c96081f699f8d0fd801bec88c4447bef8b4440"
   },
+  "cry-282-task.ogg": {
+   "bytes": 8333,
+   "sha256": "1830a96984811cd582375dd8553152475f07b9693c8346172d9cad2c00a2ce92"
+  },
   "cry-282.ogg": {
    "bytes": 17986,
    "sha256": "6ddafd262ec6d63786832efb007df44f700514dc3b9bf87615bd9b4167f918cc"
@@ -22252,9 +24180,17 @@
    "bytes": 15488,
    "sha256": "762bf1f8561e50b9f2bb6c55ca45fb44a8e63c0cc42d1792d44e089fbc725e35"
   },
+  "cry-286-task.ogg": {
+   "bytes": 5763,
+   "sha256": "803483905caf7053f1fc1bfef6115eadc254fdeb7df135733c79dcd5eeabf901"
+  },
   "cry-286.ogg": {
    "bytes": 8212,
    "sha256": "e41b2be9746f51901a523a3357f68618bac270c853478e1dc0e16b186464a874"
+  },
+  "cry-287-task.ogg": {
+   "bytes": 7409,
+   "sha256": "e87237afff614a304558d7c440a17f6c670745396ad841737a6aa1c8877a1eac"
   },
   "cry-287.ogg": {
    "bytes": 13857,
@@ -22360,9 +24296,17 @@
    "bytes": 12915,
    "sha256": "03f3f4798bf642415b1250da09706446840426b1cebd96123aee577944655bf1"
   },
+  "cry-313-task.ogg": {
+   "bytes": 7934,
+   "sha256": "11da406d86b5b005464aecc3b07f9a388518203df80ef08c08e0dcd18f8b02f0"
+  },
   "cry-313.ogg": {
    "bytes": 17297,
    "sha256": "6fc7bac942e231e679a9204f7c1b3d9c460c8bb56c56788bbc19bf590b9e0e50"
+  },
+  "cry-314-task.ogg": {
+   "bytes": 8527,
+   "sha256": "51cbffe6ef14dc78954928e99c4a13e6e08e0f439875f90e2073181a172b03cb"
   },
   "cry-314.ogg": {
    "bytes": 23781,
@@ -22456,9 +24400,17 @@
    "bytes": 12170,
    "sha256": "2259329f7ae26066ab9de4f6c6a233a852eba0f23886f8a426e15eb891efe7d0"
   },
+  "cry-337-task.ogg": {
+   "bytes": 6243,
+   "sha256": "a6a03fc53cf9eecd500d0ec1ac43034d13dce220b0586f3004d25491c31e09c9"
+  },
   "cry-337.ogg": {
    "bytes": 10322,
    "sha256": "f37d0f49d3c88591304fae086dfb5fd8b72a20cc91023ec57cebe9b95e8bf41b"
+  },
+  "cry-338-task.ogg": {
+   "bytes": 7242,
+   "sha256": "093522be90afc3c043787deaded72156c3edf8d460aa1a9a9264f1fd5f4fb47b"
   },
   "cry-338.ogg": {
    "bytes": 13978,
@@ -22592,9 +24544,17 @@
    "bytes": 8317,
    "sha256": "25f4f835011c00009571e482dc1040714f559c10ab2333868368354db750a333"
   },
+  "cry-371-task.ogg": {
+   "bytes": 4948,
+   "sha256": "3a560763e929ff3373263257ddcadd8d1e125dca8c152ac3c187107db3cc1d02"
+  },
   "cry-371.ogg": {
    "bytes": 11082,
    "sha256": "b88045bfd093996f3ede14f934cad8e5ec9e36ab7358136e252ce553b98c7aa1"
+  },
+  "cry-372-task.ogg": {
+   "bytes": 9478,
+   "sha256": "12455f7c65c82d4a578139af51c10232b619a116fdceeba1adeeac0ac2a9db2f"
   },
   "cry-372.ogg": {
    "bytes": 18596,
@@ -22628,6 +24588,10 @@
    "bytes": 10565,
    "sha256": "38133a72d17bbbeb9a9aa7acef63c44420bcb8f1cedea445b97a0f7cfe0ba6de"
   },
+  "cry-380-task.ogg": {
+   "bytes": 5702,
+   "sha256": "ea23389afecde5e7d482ac003b3b042685a4398712a3c719f9a5c25ea91e8102"
+  },
   "cry-380.ogg": {
    "bytes": 8545,
    "sha256": "5fd71c84f04261d1beaf6bfc10d7c53c3164a74ab0569c24f806022b99625b08"
@@ -22636,13 +24600,25 @@
    "bytes": 13502,
    "sha256": "f6a6d5c86b2d9e4527c099862b7cc2df37124f7da70ae91cab08338bed3c0f2f"
   },
+  "cry-382-task.ogg": {
+   "bytes": 5625,
+   "sha256": "790b200206431088324c9ea678596dcee1102977a7d42fda46c8609457519320"
+  },
   "cry-382.ogg": {
    "bytes": 8714,
    "sha256": "0c019e9389f68eee83a23ab6c826c31537ed6c2cd8a96d1904fa0dad2c779f49"
   },
+  "cry-383-task.ogg": {
+   "bytes": 7478,
+   "sha256": "b1ef723db6c3ad0766759fa87e7968ad315f5e3162cb6b3facdea3e5cfff0b1e"
+  },
   "cry-383.ogg": {
    "bytes": 14635,
    "sha256": "36f53f0e92ff27d31f8b50499cf35469977d5af9773f32d2658497f0dc788c52"
+  },
+  "cry-384-task.ogg": {
+   "bytes": 7944,
+   "sha256": "441c18c6da105b6623fea8578fcbd0c4ff3a69c4d50e339a6430bf6249f14e11"
   },
   "cry-384.ogg": {
    "bytes": 17123,
@@ -23499,11 +25475,11 @@
    "song": 64000
   },
   "totals": {
-   "files": 566,
+   "files": 612,
    "seBytes": 1238605,
-   "cryBytes": 4237939,
+   "cryBytes": 4553498,
    "songBytes": 1899681,
-   "bytes": 7376225
+   "bytes": 7691784
   },
   "files": {
    "aac/bgm-354.m4a": {
@@ -23549,6 +25525,11 @@
    "aac/cry-005.m4a": {
     "bytes": 9990,
     "sha256": "da3d5bd74e89326215787162db9389b1f77255a049b8f91d131fbf1e86a56029",
+    "leadSamples": 0
+   },
+   "aac/cry-006-task.m4a": {
+    "bytes": 4447,
+    "sha256": "c726f9a720480b1d188fbab1e0926ab1022aba1d0ed7614e270b4bfc20441769",
     "leadSamples": 0
    },
    "aac/cry-006.m4a": {
@@ -23626,6 +25607,11 @@
     "sha256": "c7e4a9f838367171cb644c7e50c1f045abb6cd922fde0a0df300f987f983bf3a",
     "leadSamples": 0
    },
+   "aac/cry-021-task.m4a": {
+    "bytes": 11678,
+    "sha256": "fcf2269795693efddaac3ed7b6290a25e485802e6ab5c86d7826267b37180618",
+    "leadSamples": 0
+   },
    "aac/cry-021.m4a": {
     "bytes": 9815,
     "sha256": "7acced89c77f1119198528ee691da0f5783d575af13787ddd61fab1abb006fdf",
@@ -23701,6 +25687,11 @@
     "sha256": "33fdf9165897477dbeacf18181a8e3bd179a436746392e01e6d7f1e1b01dfb89",
     "leadSamples": 0
    },
+   "aac/cry-036-task.m4a": {
+    "bytes": 19403,
+    "sha256": "9b563217842e2394c370324aa9023111e2665f51933744a1a5486d6d6a438fa8",
+    "leadSamples": 0
+   },
    "aac/cry-036.m4a": {
     "bytes": 7142,
     "sha256": "79a996e060eac138de46128653848c49033e12e74ab369344a738bb0d67a036a",
@@ -23711,9 +25702,19 @@
     "sha256": "1a4274347349003ee6e445d29fdae35e96d9d81ab3c7fd8ebe2c7506efa60169",
     "leadSamples": 0
    },
+   "aac/cry-038-task.m4a": {
+    "bytes": 4828,
+    "sha256": "3ad9f6300eb7f4c50857c12436643eebfc6da13da76ba87b40f24194afb5132e",
+    "leadSamples": 0
+   },
    "aac/cry-038.m4a": {
     "bytes": 12660,
     "sha256": "0270886addebe9c727e0fca81c9077972d64b876870760f25efbaa4ae7d2c64c",
+    "leadSamples": 0
+   },
+   "aac/cry-039-task.m4a": {
+    "bytes": 19182,
+    "sha256": "2c287bfb20205ac17f361e4bbb8831216b444324a34e5853215c9cca63500194",
     "leadSamples": 0
    },
    "aac/cry-039.m4a": {
@@ -23786,6 +25787,11 @@
     "sha256": "273188bc24d6d5f65cba0631656d603606c91e48fdadddb30c8d621194a9dbb7",
     "leadSamples": 0
    },
+   "aac/cry-053-task.m4a": {
+    "bytes": 7215,
+    "sha256": "784b6d9bb24d9a8315e554f20a57255d40400824d854b5025e82fe8d7bc29585",
+    "leadSamples": 306
+   },
    "aac/cry-053.m4a": {
     "bytes": 12336,
     "sha256": "dd3e1432c749e18562d7ee8f18a9043f1bdd778e28ec854aaf5368c8b155d4b0",
@@ -23811,9 +25817,19 @@
     "sha256": "1382271ee4e03739c3d2ae9acaa4a38bd41abe1497fb119646b458e54061b2b8",
     "leadSamples": 0
    },
+   "aac/cry-058-task.m4a": {
+    "bytes": 4164,
+    "sha256": "48df61ff21520589c22bf7c714c39aabeffc3015d140d8e6081eae02e71b1ae7",
+    "leadSamples": 306
+   },
    "aac/cry-058.m4a": {
     "bytes": 6957,
     "sha256": "e972ff7d6d19d4ff084c9606bf5ffd9c884d356b8518f342017b393484459f4b",
+    "leadSamples": 0
+   },
+   "aac/cry-059-task.m4a": {
+    "bytes": 4309,
+    "sha256": "c8148ff849aba98e56c49002152a6615d651c1603fc58d43b04c7772c42be096",
     "leadSamples": 0
    },
    "aac/cry-059.m4a": {
@@ -23834,6 +25850,11 @@
    "aac/cry-062.m4a": {
     "bytes": 6757,
     "sha256": "bbb0d2dc7920c4ab624893665d0fa19a479e93bb5ccebf92ff622249b286f33c",
+    "leadSamples": 0
+   },
+   "aac/cry-063-task.m4a": {
+    "bytes": 12803,
+    "sha256": "4f06076488c37e8517d73343433f5016048647085bce49435220e9af20f42549",
     "leadSamples": 0
    },
    "aac/cry-063.m4a": {
@@ -24076,6 +26097,11 @@
     "sha256": "e42994ff9e921b43486ea56cd00b02764832efa4a42e626e55597bfda95c0e7f",
     "leadSamples": 0
    },
+   "aac/cry-111-task.m4a": {
+    "bytes": 5049,
+    "sha256": "e0ea642d865961070118173076a94177de7e103bdd34517bc88f136e76c66b18",
+    "leadSamples": 0
+   },
    "aac/cry-111.m4a": {
     "bytes": 12387,
     "sha256": "124a580f1497bf0cba4b543d9fcc1257eef9a8d3ff37613fd2904092135c58d9",
@@ -24084,6 +26110,11 @@
    "aac/cry-112.m4a": {
     "bytes": 18082,
     "sha256": "7dad1bea7f31439c37aa4c0a42eb54b0498dbf2f1d33d4c13fba7b3fe2a9eafb",
+    "leadSamples": 0
+   },
+   "aac/cry-113-task.m4a": {
+    "bytes": 15298,
+    "sha256": "fd6eec259cc6a1541c45a23aaf0d9c95f1557b3dc63b78924b08fa339c37f643",
     "leadSamples": 0
    },
    "aac/cry-113.m4a": {
@@ -24176,6 +26207,11 @@
     "sha256": "e30234c5e5e33e4346b93eb8bafb9828beaf3cc3bee6007168c1b167a135a90d",
     "leadSamples": 0
    },
+   "aac/cry-131-task.m4a": {
+    "bytes": 4039,
+    "sha256": "1ac71e465ef6ccd8e2c113bb393edbdf71cb6f510912cfd9332fa05b33f41d93",
+    "leadSamples": 0
+   },
    "aac/cry-131.m4a": {
     "bytes": 8670,
     "sha256": "9f71139e546d4428453a6e5067359407da6b214c9e942c2a0351101cd6423472",
@@ -24191,14 +26227,29 @@
     "sha256": "e29ed11418071d1e4c00bf7923ecf6145947b0c87e82eca18d34fc688118c61c",
     "leadSamples": 0
    },
+   "aac/cry-134-task.m4a": {
+    "bytes": 5304,
+    "sha256": "2939057847df625eb72389ac894107f0e228c384d32e49ce581ec96f12485022",
+    "leadSamples": 0
+   },
    "aac/cry-134.m4a": {
     "bytes": 10308,
     "sha256": "a553c05c196cf57faae6563eb4c47e0eb767ebd96a5bcfb9228d95c3479d18c8",
     "leadSamples": 0
    },
+   "aac/cry-135-task.m4a": {
+    "bytes": 4075,
+    "sha256": "ae188f960ec09d98d115b9966b48bcb10fd9e2f369326c647ef16ea651074e17",
+    "leadSamples": 0
+   },
    "aac/cry-135.m4a": {
     "bytes": 14725,
     "sha256": "378692e88d17cff0ced1c1213f536dda70508c65b44cac8c7b06d7b284373e34",
+    "leadSamples": 0
+   },
+   "aac/cry-136-task.m4a": {
+    "bytes": 5948,
+    "sha256": "e8905beae849836e669cdfe040190684dcf70354ffa83b670435b74901ad16fd",
     "leadSamples": 0
    },
    "aac/cry-136.m4a": {
@@ -24231,6 +26282,11 @@
     "sha256": "12a806c77632c05db48f7093b8621d305646d8c0e03c08a6ce9c6404f379df9b",
     "leadSamples": 0
    },
+   "aac/cry-142-task.m4a": {
+    "bytes": 4663,
+    "sha256": "0e96a0caedc7e7c169d17916fa24c4643c776b9b1fd4d84ca7147fb64b74e49e",
+    "leadSamples": 0
+   },
    "aac/cry-142.m4a": {
     "bytes": 13468,
     "sha256": "54649faa605b202206bde5f450f566f053fde2df344fea5985a80eb301d1a283",
@@ -24241,14 +26297,29 @@
     "sha256": "a20d6e6c1119801e52f1ce5539a7ff15f40d6cb5d0cd6127ad162844e4892cdc",
     "leadSamples": 0
    },
+   "aac/cry-144-task.m4a": {
+    "bytes": 4788,
+    "sha256": "c60d1c512e93913d4c6088c0e7732944cc302c07e0e77e187b6bcd6754d07fa6",
+    "leadSamples": 0
+   },
    "aac/cry-144.m4a": {
     "bytes": 18142,
     "sha256": "f6efc9cdf7471e9fbb58b0395fa0278f9ea639b7a967c58625848746a108850a",
     "leadSamples": 0
    },
+   "aac/cry-145-task.m4a": {
+    "bytes": 5958,
+    "sha256": "2feb54fba8e0394808366e6a86ccdbab12f73117a4abf84420527bf2022a2279",
+    "leadSamples": 0
+   },
    "aac/cry-145.m4a": {
     "bytes": 9375,
     "sha256": "3ea283d8fc568b16a89f13ebcc923a9cd54f136389e6d92abc0b09c0c743d4a3",
+    "leadSamples": 0
+   },
+   "aac/cry-146-task.m4a": {
+    "bytes": 4855,
+    "sha256": "2d7f48a7bbffa3eb3f7cadedfbbd48379999dd5ffd037e437547dcc907aef673",
     "leadSamples": 0
    },
    "aac/cry-146.m4a": {
@@ -24264,6 +26335,11 @@
    "aac/cry-148.m4a": {
     "bytes": 10331,
     "sha256": "51db8889fbc12deca0d569397126561b3fcb751f0e568bd4c09fc322b77228c4",
+    "leadSamples": 0
+   },
+   "aac/cry-149-task.m4a": {
+    "bytes": 10975,
+    "sha256": "8c12161e9ecf0cca2df86c2b099e45434eeb8964c828a040c15ea1c87ccdd46f",
     "leadSamples": 0
    },
    "aac/cry-149.m4a": {
@@ -24296,6 +26372,11 @@
     "sha256": "8d32769bddfae92612b20871b0dd62d6617e77b4adc08f73e706b11334901358",
     "leadSamples": 0
    },
+   "aac/cry-157-task.m4a": {
+    "bytes": 6019,
+    "sha256": "eac47f4aaa7f376ce024aa8035c06aab5dfe520fdfef85498627aca36837bdbe",
+    "leadSamples": 0
+   },
    "aac/cry-157.m4a": {
     "bytes": 18334,
     "sha256": "17b98cdf89402a3bf1427f5d33897d30195ad5a07dcdc41c23669523761f44d4",
@@ -24311,9 +26392,19 @@
     "sha256": "06647a6a5da788510f3e695db73665a3647c339665c6885ef8d795f360d96cdb",
     "leadSamples": 0
    },
+   "aac/cry-160-task.m4a": {
+    "bytes": 4810,
+    "sha256": "38a194ca918fe7d45b37e2fcc4416367d4660b8aca16b334425066edaa5fd23d",
+    "leadSamples": 0
+   },
    "aac/cry-160.m4a": {
     "bytes": 13689,
     "sha256": "330b13d270480531793b70780d50063a1860057d967a39ff5e5ce4f4e40ab644",
+    "leadSamples": 0
+   },
+   "aac/cry-161-task.m4a": {
+    "bytes": 15310,
+    "sha256": "3707c48cc4ea25dbf4d2ce2042d57959a1f94b2784e1773f70554b8675883461",
     "leadSamples": 0
    },
    "aac/cry-161.m4a": {
@@ -24374,6 +26465,11 @@
    "aac/cry-172.m4a": {
     "bytes": 5297,
     "sha256": "682418a961b6b5d443afd359fc3d44c3e72e6d4c9d69a41197125547ab7e0325",
+    "leadSamples": 0
+   },
+   "aac/cry-173-task.m4a": {
+    "bytes": 13660,
+    "sha256": "07491b1bf86a3228b4b4c846da9ae62920b5a1cf3f0446f4a35cfd8608d24e60",
     "leadSamples": 0
    },
    "aac/cry-173.m4a": {
@@ -24551,6 +26647,11 @@
     "sha256": "6d57658e9008918db9eb9b42ee6cc14ef2299622032cb49b1c48e20ed0c59845",
     "leadSamples": 0
    },
+   "aac/cry-208-task.m4a": {
+    "bytes": 5418,
+    "sha256": "f2b4c751b4da97603494be758a11796331b8b40c26684844f2883dd36317f1ca",
+    "leadSamples": 0
+   },
    "aac/cry-208.m4a": {
     "bytes": 20715,
     "sha256": "5aa67e843e5e2338d2e10881cd295ddd5c82a0993701c3ff776a0266a01e57ca",
@@ -24559,6 +26660,11 @@
    "aac/cry-209.m4a": {
     "bytes": 8101,
     "sha256": "2f99c77ad58322be117759c7c37b0344400c871468b6141fe33c807c68e2605e",
+    "leadSamples": 0
+   },
+   "aac/cry-210-task.m4a": {
+    "bytes": 6789,
+    "sha256": "039d7b7cea99a5550e1c9c1a25a0fc16b8c29374296a850ad2e45b68cd3087e6",
     "leadSamples": 0
    },
    "aac/cry-210.m4a": {
@@ -24616,6 +26722,11 @@
     "sha256": "375139ad4f8b27e421dc41fb00701aaae5484cba82ddffe67decb9921788d6f3",
     "leadSamples": 0
    },
+   "aac/cry-221-task.m4a": {
+    "bytes": 3765,
+    "sha256": "b1497d68d4528aa2fdb0ee2a5ad5111b81dffe7fbe4554e9f3ea8f16c7f2785a",
+    "leadSamples": 306
+   },
    "aac/cry-221.m4a": {
     "bytes": 13914,
     "sha256": "0a1cf878568841a69d58bdf685e69ca3c9b6e3fc409e64917fbe64135e7e4ee2",
@@ -24646,14 +26757,29 @@
     "sha256": "a42ce3be1bc4526902817e19a5770caf7a6f4bc15efa24fe341584b9b199a95d",
     "leadSamples": 0
    },
+   "aac/cry-227-task.m4a": {
+    "bytes": 5390,
+    "sha256": "ece9af700567dd8e17b04a819e624e2fc70cd7260c88eefc15bab71385bc18ae",
+    "leadSamples": 0
+   },
    "aac/cry-227.m4a": {
     "bytes": 12920,
     "sha256": "607b5a5cd87bb3995aec4455a9a09b6b0e4de18ac600d86ad91195d4d57ab0d3",
     "leadSamples": 0
    },
+   "aac/cry-228-task.m4a": {
+    "bytes": 3635,
+    "sha256": "6c097a2ce78c278bff1c2f7a73ee2128d6381576e9164645f875038a739b7916",
+    "leadSamples": 306
+   },
    "aac/cry-228.m4a": {
     "bytes": 6862,
     "sha256": "397b1db3d54b2aa9374192956cbfeee6aaf213e9994b47da7713e4243c2947ac",
+    "leadSamples": 0
+   },
+   "aac/cry-229-task.m4a": {
+    "bytes": 4410,
+    "sha256": "1e85ea3af99128bede99872c31cff3f93537b95759ca0a213e6b5c22f3b82adc",
     "leadSamples": 0
    },
    "aac/cry-229.m4a": {
@@ -24726,14 +26852,29 @@
     "sha256": "325e14289f9e0461e69c33ad1b5bc0ec9d5330e33fc44d70feefdeae86eb8ca1",
     "leadSamples": 0
    },
+   "aac/cry-243-task.m4a": {
+    "bytes": 4176,
+    "sha256": "b25cba6fcc5fc062dfa07b5021c206da54ba93d546515771058d932cc0f0f3ed",
+    "leadSamples": 0
+   },
    "aac/cry-243.m4a": {
     "bytes": 8229,
     "sha256": "0c4f8e3c6cef5c7631ab2bf37b5e489105a10e29c02f931c7c1e267ff4072b5d",
     "leadSamples": 0
    },
+   "aac/cry-244-task.m4a": {
+    "bytes": 7593,
+    "sha256": "3d0b523eb5d5b89534d5dcbf7f6a007e53ab647f7528739dbe858f28218b145f",
+    "leadSamples": 0
+   },
    "aac/cry-244.m4a": {
     "bytes": 22621,
     "sha256": "489ebe3527cb54aae3087e62b5a5ef76397fdcfae698de60bb8d12bfdc07ca3f",
+    "leadSamples": 0
+   },
+   "aac/cry-245-task.m4a": {
+    "bytes": 4321,
+    "sha256": "54801f5e1fc78d80bf77c6a890a28e4d0085dbaa7c3d214f01c5ca3ff403bcf5",
     "leadSamples": 0
    },
    "aac/cry-245.m4a": {
@@ -24781,6 +26922,11 @@
     "sha256": "81cd86fcc5e1a7742d0dd7c8d04ef6f3f2db55b303b4ef23cf0f6f507b979855",
     "leadSamples": 0
    },
+   "aac/cry-282-task.m4a": {
+    "bytes": 5102,
+    "sha256": "4551fb78ffbf2e811b9cf783e0e2d103f483ed15a42659c8d52a7e76ad9b8539",
+    "leadSamples": 0
+   },
    "aac/cry-282.m4a": {
     "bytes": 26859,
     "sha256": "a1f920ba0d16ccd267f962a2f93825adf1872903fb0eb7d65f32beb4464b7abc",
@@ -24801,9 +26947,19 @@
     "sha256": "1245795ec22af8431a8454a3a35ac2e43a032db3114f99734ac3d83d9cf762ee",
     "leadSamples": 0
    },
+   "aac/cry-286-task.m4a": {
+    "bytes": 7431,
+    "sha256": "f85c893f739e4c2c2f0d6031fb4d03444cffdd200f572aa38de4b639404df854",
+    "leadSamples": 306
+   },
    "aac/cry-286.m4a": {
     "bytes": 9801,
     "sha256": "06d3adf393becff880e37dfb86fa72d34afaf5e05be5316a708664e949c60f07",
+    "leadSamples": 0
+   },
+   "aac/cry-287-task.m4a": {
+    "bytes": 4396,
+    "sha256": "65335813b47e50b7132875146bdafd29314b4b65b366a5ae3229fca81adb393c",
     "leadSamples": 0
    },
    "aac/cry-287.m4a": {
@@ -24936,9 +27092,19 @@
     "sha256": "8c7461fe4e309b4fa98e3a6bef2837d2d6cb574bb849dc64a377c781d8258edf",
     "leadSamples": 0
    },
+   "aac/cry-313-task.m4a": {
+    "bytes": 14526,
+    "sha256": "cb36cc9f9f9db9485e909b76e633a0ca200844fff669f8d9e1179bbfc34f53d5",
+    "leadSamples": 0
+   },
    "aac/cry-313.m4a": {
     "bytes": 19251,
     "sha256": "76102751d5d407118e6d29ca7688c62dd24764151dac6f4458e9b74a6753540a",
+    "leadSamples": 0
+   },
+   "aac/cry-314-task.m4a": {
+    "bytes": 5241,
+    "sha256": "61e554749d278837b7ad041cf75a82d1a2a4d4bcbf5ec69ff62cbde4669f0b14",
     "leadSamples": 0
    },
    "aac/cry-314.m4a": {
@@ -25056,9 +27222,19 @@
     "sha256": "1152a1aafe2bcddeb2e29daff2accc60dc54f06a845c68a8c70744b9f1e0d4e5",
     "leadSamples": 0
    },
+   "aac/cry-337-task.m4a": {
+    "bytes": 3678,
+    "sha256": "98fede47862fbaa48c2f2363743087e327a50a40d7442149c8e04de8f854731e",
+    "leadSamples": 306
+   },
    "aac/cry-337.m4a": {
     "bytes": 6642,
     "sha256": "580978572f80177067c7a35fc5ba9c8628df802f03b0e7a5f5485100df9c1c7a",
+    "leadSamples": 0
+   },
+   "aac/cry-338-task.m4a": {
+    "bytes": 4387,
+    "sha256": "8b6108266fa999f915b007a8aff2ee4ac5428a33d05cc7de86ce98d517366387",
     "leadSamples": 0
    },
    "aac/cry-338.m4a": {
@@ -25226,9 +27402,19 @@
     "sha256": "d4294aa64b20dc7de6e1fa30150001f3a833754c9b72663e5046a1331a143b74",
     "leadSamples": 0
    },
+   "aac/cry-371-task.m4a": {
+    "bytes": 2560,
+    "sha256": "aa6fc32cd2e02b4e77969dc316fe5d461721927f1924c5a516d2c3917b2d920c",
+    "leadSamples": 306
+   },
    "aac/cry-371.m4a": {
     "bytes": 8750,
     "sha256": "c100033756cc11a215780795183ef0992f3832296398062c458f05a93bfff185",
+    "leadSamples": 0
+   },
+   "aac/cry-372-task.m4a": {
+    "bytes": 6290,
+    "sha256": "ba09989f182c33ab915bf434d3890742eca103d5785ead6bb32e1fcca167af10",
     "leadSamples": 0
    },
    "aac/cry-372.m4a": {
@@ -25271,6 +27457,11 @@
     "sha256": "4aae3f7ac095d8673f90f6904c0ed08b1a39423cb7b604fadf25c8a4c42c9222",
     "leadSamples": 0
    },
+   "aac/cry-380-task.m4a": {
+    "bytes": 3308,
+    "sha256": "d2932b23782eef13104a2fadb31569dc6bb3ada803e4e4188086728423cf2b3b",
+    "leadSamples": 306
+   },
    "aac/cry-380.m4a": {
     "bytes": 14908,
     "sha256": "f0844204c71565818285ce8e6ecf6a79d7f5752958870208331c94fcf3e2eb72",
@@ -25281,14 +27472,29 @@
     "sha256": "1f927c5331f15ea23ea631069f6956a88ad5384bb38425cd4303083583da7999",
     "leadSamples": 0
    },
+   "aac/cry-382-task.m4a": {
+    "bytes": 4770,
+    "sha256": "539ff16893250db467a176edb4f9039749ade0b957a3f43e73e1ae81711742ff",
+    "leadSamples": 306
+   },
    "aac/cry-382.m4a": {
     "bytes": 5976,
     "sha256": "bd744872975ac911a254b12e2f659b6c6544101851c7944c43517eccaa456ac9",
     "leadSamples": 0
    },
+   "aac/cry-383-task.m4a": {
+    "bytes": 4755,
+    "sha256": "9cac1cc4f00d44349d5c3cf8b16aac191479ff7d06795558e33dea4973fa1475",
+    "leadSamples": 0
+   },
    "aac/cry-383.m4a": {
     "bytes": 14770,
     "sha256": "e9f74cdcd2684b5545eff91b0a64362d2209d7bc39392c27956afa56b0984c98",
+    "leadSamples": 0
+   },
+   "aac/cry-384-task.m4a": {
+    "bytes": 4838,
+    "sha256": "de52350c0fc1468e9746a2e147a202a2599c6343970573d634c2e871de3132b3",
     "leadSamples": 0
    },
    "aac/cry-384.m4a": {

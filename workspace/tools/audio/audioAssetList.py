@@ -13,6 +13,11 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 SE_WRAPPERS = ["PlaySE", "PlaySE12WithPanning", "PlaySE1WithPanning", "PlaySE2WithPanning"]
 CRY_MODES = ["NORMAL", "WEAK", "FAINT"]
+# cry2: the cry-task modes (battle_anim_sound_tasks.c), recorded only for species that can use the move in Factory play.
+CRY_TASK_MOVES = {"MOVE_ROAR": ["ROAR_1", "ROAR_2"], "MOVE_HOWL": ["HIGH_PITCH"], "MOVE_HYPER_VOICE": ["ECHO_START", "ECHO_END"]}
+# Moves that run another move with the user's own species (Metronome / Assist / Mimic / Mirror Move): any of the three can come out.
+CRY_TASK_INDIRECT = {"MOVE_METRONOME", "MOVE_ASSIST", "MOVE_MIMIC", "MOVE_MIRROR_MOVE", "MOVE_COPYCAT", "MOVE_SKETCH"}
+ALL_CRY_MODES = CRY_MODES + [m for modes in CRY_TASK_MOVES.values() for m in modes]
 DEFAULT_EXTRA = [".integration/validation/sv-*/aud243*/**/*.json", ".integration/validation/sv-*/aud243*/*.json",
                  ".integration/evidence/*/rom*/*.json", ".integration/evidence/*/chain/*.json", ".integration/evidence/aud244a/logs/*.json"]
 
@@ -82,13 +87,22 @@ def main():
         vias = sorted(row["vias"], key=SE_WRAPPERS.index)
         se_rows.append({"id": sid, "name": songs.get(sid), "pan": pan, "vias": vias, "uses": sum(row["vias"].values()), "logs": len(row["logs"])})
 
+    task_modes = {}
+    for e in frontier["entries"]:
+        sp = by_name[e["species"]]
+        for mv in e["moves"]:
+            if mv in CRY_TASK_MOVES:
+                task_modes.setdefault(sp, set()).update(CRY_TASK_MOVES[mv])
+            elif mv in CRY_TASK_INDIRECT:
+                task_modes.setdefault(sp, set()).update(m for ms in CRY_TASK_MOVES.values() for m in ms)
     cry_rows = []
     for sp in factory:
-        for mode in CRY_MODES:
+        for mode in CRY_MODES + [m for m in ALL_CRY_MODES[len(CRY_MODES):] if m in task_modes.get(sp, ())]:
             row = cry.get((sp, mode))
             cry_rows.append({"species": sp, "name": species[sp], "mode": mode, "inLogs": row is not None,
                              "logPans": sorted(row["pans"]) if row else []})
-    outside = sorted({(sp, mode) for sp, mode in cry if sp not in set(factory) or mode not in CRY_MODES})
+    wanted = {(r["species"], r["mode"]) for r in cry_rows}
+    outside = sorted(k for k in cry if k not in wanted)
     song_rows = [{"kind": k, "id": i, "name": songs.get(i), "via": sorted(r["via"]), "logs": len(r["logs"])} for (k, i), r in sorted(song.items(), key=lambda kv: (kv[0][0], kv[0][1]))]
 
     out = {"schema": "aud244a-asset-list/1",
@@ -98,7 +112,7 @@ def main():
            "logCriesOutsideFactorySet": [{"species": s, "mode": m} for s, m in outside]}
     Path(a.out).write_text(json.dumps(out, indent=1) + "\n")
     print(f"{len(used)} logs ({out['logFiles']}), {len(se_rows)} se (id,pan) tuples over {len({r['id'] for r in se_rows})} ids, "
-          f"{len(cry_rows)} cries ({len(factory)} species x {len(CRY_MODES)}), {sum(r['inLogs'] for r in cry_rows)} of them seen in logs, "
+          f"{len(cry_rows)} cries ({len(factory)} species x {len(CRY_MODES)} + {len(cry_rows) - len(factory) * len(CRY_MODES)} task modes on {len(task_modes)} species), {sum(r['inLogs'] for r in cry_rows)} of them seen in logs, "
           f"{len(song_rows)} bgm/fanfare ids, {len(outside)} log cries outside the Factory set", file=sys.stderr)
 
 

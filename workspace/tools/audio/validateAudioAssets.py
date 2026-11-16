@@ -21,7 +21,7 @@ ROOT = Path(__file__).resolve().parents[2]
 AUDIO = ROOT / "src/assets/gen/audio"
 FPS = 59.7275
 LOOP_KEYS = ["bgm:354", "bgm:412", "bgm:469", "bgm:476", "fanfare:368", "fanfare:459", "fanfare:466", "se:90:none", "se:132:63"]
-DEFAULT_KEYS = ["se:5:none", "se:16:63", "se:139:-63", "cry:19:FAINT", "cry:95:WEAK", "cry:19:NORMAL"]
+DEFAULT_KEYS = ["se:5:none", "se:16:63", "se:139:-63", "cry:19:FAINT", "cry:95:WEAK", "cry:19:NORMAL", "cry:136:ROAR_2", "cry:371:HIGH_PITCH", "cry:372:ECHO_END"]
 
 
 def decode_ogg(path):

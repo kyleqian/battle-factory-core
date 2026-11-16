@@ -11,7 +11,8 @@ const AUDIO = join(ROOT, "src/assets/gen/audio");
 // Pinned budgets (bytes). The design estimate was cries ~3 MB, SEs < 2 MB; cries come in at ~4.5 MB (flat-spectrum 8-bit sample noise
 // costs ~40 kbps even at the lowest Vorbis quality), see docs/aud244a-recorder-assets.md.
 // aud244b adds the BGM / fanfare set (song, ~1.3 MB at 32768 Hz stereo) and the two looping SEs (in `se`).
-const BUDGET = { se: 1_700_000, cry: 4_700_000, song: 1_400_000, total: 7_600_000 };
+// cry2 adds the 112 cry-task cries (46 `cry-NNN-task.ogg`, +369,586 B).
+const BUDGET = { se: 1_700_000, cry: 5_000_000, song: 1_400_000, total: 8_000_000 };
 
 interface Sound {
   file: string; kind: "se" | "cry" | "bgm" | "fanfare"; via: string; sampleRate: number; channels: number; offsetSamples: number; lengthSamples: number;
@@ -29,6 +30,7 @@ interface AssetList {
 
 const manifest = JSON.parse(readFileSync(join(AUDIO, "manifest.json"), "utf8")) as Manifest;
 const assetList = JSON.parse(readFileSync(join(ROOT, "tools/audio/aud244a-asset-list.json"), "utf8")) as AssetList;
+const CRY_TASK_SOUNDS = 112;
 const seKey = (id: number, pan: number | null): string => `se:${id}:${pan ?? "none"}`;
 
 function oggInfo(path: string): { channels: number; rate: number; granule: number } {
@@ -106,7 +108,7 @@ describe("aud244a/b audio manifest", () => {
     const species = new Set(assetList.cry.map((c) => c.species));
     expect(species.size).toBe(376);
     for (const sp of species) for (const mode of ["NORMAL", "WEAK", "FAINT"]) expect(manifest.sounds[`cry:${sp}:${mode}`], `cry ${sp} ${mode}`).toBeDefined();
-    expect(assetList.cry.length).toBe(species.size * 3);
+    expect(assetList.cry.length).toBe(species.size * 3 + CRY_TASK_SOUNDS);
     for (const r of assetList.se) {
       const key = seKey(r.id, r.pan);
       expect(manifest.sounds[key] !== undefined || excluded.has(key), key).toBe(true);
@@ -117,6 +119,28 @@ describe("aud244a/b audio manifest", () => {
     expect(Object.values(manifest.sounds).filter((s) => s.kind === "bgm" || s.kind === "fanfare").length).toBe(assetList.songs.length);
     expect(Object.values(manifest.sounds).filter((s) => s.kind === "cry").length).toBe(assetList.cry.length);
     expect(Object.values(manifest.sounds).filter((s) => s.kind === "se").length).toBe(assetList.se.length);
+  });
+
+  it("records the cry-task modes (cry2) only for species that can use Roar / Howl / Hyper Voice", () => {
+    const frontier = JSON.parse(readFileSync(join(ROOT, "src/data/gen/battle-frontier-mons.json"), "utf8")) as { entries: { species: string; moves: string[] }[] };
+    const speciesId = new Map(Object.values(manifest.sounds).filter((x) => x.kind === "cry").map((x) => [x.name!, x.species!]));
+    const TASK = { MOVE_ROAR: ["ROAR_1", "ROAR_2"], MOVE_HOWL: ["HIGH_PITCH"], MOVE_HYPER_VOICE: ["ECHO_START", "ECHO_END"] } as Record<string, string[]>;
+    const INDIRECT = new Set(["MOVE_METRONOME", "MOVE_ASSIST", "MOVE_MIMIC", "MOVE_MIRROR_MOVE", "MOVE_COPYCAT", "MOVE_SKETCH"]);
+    const want = new Set<string>();
+    for (const e of frontier.entries) {
+      for (const mv of e.moves) {
+        const modes = TASK[mv] ?? (INDIRECT.has(mv) ? Object.values(TASK).flat() : []);
+        for (const mode of modes) want.add(`cry:${speciesId.get(e.species)}:${mode}`);
+      }
+    }
+    const have = Object.entries(manifest.sounds).filter(([, x]) => x.kind === "cry" && !["NORMAL", "WEAK", "FAINT"].includes(x.mode!)).map(([k]) => k);
+    expect(have.sort()).toEqual([...want].sort());
+    expect(have.length).toBe(CRY_TASK_SOUNDS);
+    for (const k of have) {
+      const x = manifest.sounds[k]!;
+      expect(x.file).toBe(`cry-${String(x.species).padStart(3, "0")}-task.ogg`);
+      expect(manifest.sounds[`cry:${x.species}:NORMAL`]!.file).not.toBe(x.file);
+    }
   });
 
   it("stays under the pinned size budget", () => {
