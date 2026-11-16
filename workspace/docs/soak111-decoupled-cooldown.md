@@ -63,6 +63,8 @@ assertion before sc106 existed. The test comment records this.
 
 ## 4. ISSUES #89 natural-seed search
 
+(The scanner was removed by cln237 and restored as `tools/soak/batonPassSearch.ts` (`--seeds A:B --parallel N`, the pin's own options by default; usage in its header). The command below is the original form.)
+
 Command: `node --experimental-strip-types --no-warnings tools/integration/soak111BatonPassSearch.ts --seeds=<lo>..<hi> --max-frames=200000 --stop-after=2 --out=<jsonl>`.
 It ran as 8 nohup shards of 50 seeds over 0..399, and each shard stopped after 2 hits. Results are in
 `tools/integration/fixtures/soak111/batonpass-search/s0..s7.jsonl`.

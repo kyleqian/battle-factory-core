@@ -519,7 +519,7 @@ describe("random round soak driver (green milestone pin)", () => {
     expect(result.frames).toBeGreaterThan(31_771);
   });
 
-  it("ISSUES #89: seed 32's mid-turn Baton Pass openpartyscreen halt resumes through the forced party selector", () => {
+  it("ISSUES #89: seed 3's mid-turn Baton Pass openpartyscreen halt resumes through the forced party selector", () => {
     // History: seed 27 (full policy) selected Baton Pass mid-turn and used to
     // crash at round 1 battle 1 turn 10, frame 30798, on an unimplemented
     // BattleScript_EffectBatonPass / B_SCR_OP_OPENPARTYSCREEN machine-barrier
@@ -534,7 +534,8 @@ describe("random round soak driver (green milestone pin)", () => {
     // its frame bound alone no longer exercised the halt), sc106's
     // stats-change frames re-rolled it again, and soak111's decoupled
     // press-cooldown stream gives every exploring seed a new trajectory.
-    // tools/integration/soak111BatonPassSearch.ts scanned full-policy seeds
+    // tools/integration/soak111BatonPassSearch.ts (removed by cln237; restored as tools/soak/batonPassSearch.ts, the one-command re-pin
+    // scanner: `--seeds A:B --parallel N`) scanned full-policy seeds
     // for a run that commits Baton Pass and then opens the forced party
     // selector on a still-living outgoing slot (Baton Pass's own switch);
     // seed 226 is the first whose halt lands inside the first round itself
@@ -623,7 +624,13 @@ describe("random round soak driver (green milestone pin)", () => {
     // lbw3 (#221 E4: the Lobby woman / fat man wander draws from the shared stream, so every Lobby new-challenge deal moved again): seed 1
     // no longer commits Baton Pass. Re-scanned full-policy seeds 0..19 (same options and joint event; scratch .integration/evidence/lbw3/scan.ts):
     // hits 0, 3, 7, 8, 14, 15, 17; seed 0 is the lowest (commit 68728, halt 69116, one Lobby new challenge).
-    const result = runSeed(0, {
+    //
+    // ais1 / ais2 (the AI's mid-battle switch prints "<TRAINER> withdrew <MON>!" and runs the opponent return-to-ball, plus one
+    // more tray frame; the exploring policy's press timings land on the new phases, a new trajectory as at fsw235 / pmo239 / frf250a):
+    // seed 0 no longer commits Baton Pass. Re-scanned full-policy seeds 0..79 (tools/soak/batonPassSearch.ts --seeds 0:80 --parallel 8,
+    // 80,000 frames, same options and joint event; ~50 s): hits 3, 8, 14, 15, 17, 19, 31, 33, 44, 55, 71, 77, all candidates. Seed 3 is
+    // the lowest (Baton Pass commits 5, first commit 45772, halt 55096 on MAWILE in battleIndex 1, one Lobby new challenge).
+    const result = runSeed(3, {
       maxFrames: 80_000,
       renderEvery: 0,
       coverage: observer as never,
@@ -928,12 +935,16 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // policy's party-menu walks / message dismisses now spend different presses, so a new trajectory as at fsw235:
       // 39466 / battle 2 turn 25 / depth 1 -> 18446 / battle 1 turn 23 / depth 0; roundLost. Pre-flw252 tree (e28adda1a^) still gives 39466.
       // lbra: frames only, 18446 -> 18523; the snapshot is now taken when the walkable Lobby opens (the loss's record answer plays the ROM farewell first, +77 frames) instead of at the old chain; same battle / turn / end state.
-      frames: 18523,
+      // ais1 (the AI's mid-battle switch prints "<TRAINER> withdrew <MON>!" and runs the opponent return-to-ball, so the exploring
+      // policy's press timings land on new phases, a new trajectory as at fsw235): 18523 / battle 1 turn 23 / depth 0 -> 38094 / battle 2
+      // turn 22 / depth 1; roundLost. ais2 (one more opponent tray frame on AI switches) does not move it again; seed 1 is unmoved by both,
+      // and the "vanilla" / "winning" pins did not move (only the exploring policy presses during the new messages).
+      frames: 38094,
       outcome: "OK",
       endState: "roundLost",
-      maxBattleDepth: 0,
-      battle: 1,
-      turn: 23,
+      maxBattleDepth: 1,
+      battle: 2,
+      turn: 22,
     });
     expect(runSeed(1, options)).toMatchObject({
       // msg175: 26878 -> 26810 (shorter used prints); trn178 (the Scene OFF action-transition pause): 26810 -> 27058; same battle / turn / end state.
