@@ -1034,6 +1034,19 @@ function aud241bStage(
   });
 }
 
+// aud242l: aud241bStage with the Blizzard user (Lv50) and a Seismic Toss target (Lv12) of the given species (attacker side `side`).
+function aud242lBlizzardStage(state: EngineState, id: string, side: "player" | "opponent", attackerSpecies: number, targetSpecies: number): EngineState {
+  const attacker = Object.freeze({ ...rattataAtLevel(50, 59), species: attackerSpecies });
+  const target = Object.freeze({ ...rattataAtLevel(12, 69), species: targetSpecies });
+  return midBattleSwitchStage(state, id, [RATTATA_LV50_BENCH, RATTATA_LV50_BENCH], [105, 105], {
+    battleScene: "on",
+    player: side === "player" ? attacker : target,
+    trainer: side === "player" ? target : attacker,
+    usedMessageHoldFrames: 0,
+    sceneOffNoAnimations: false,
+  });
+}
+
 // hie1: held-item effect windows (tools/battle-lab/hie1-*.json): the player's Rattata holds `playerItem`; the opponent's move / level is
 // chosen per site so the item fires (Leftovers end-turn, Sitrus after the hit, Shell Bell on the player's hit, Cheri cures Thunder Wave).
 function hie1Stage(
@@ -2016,6 +2029,11 @@ export const APP_STAGES: Readonly<Record<string, AppStage>> = {
   "aud242k-lovelykiss-player-on": (state) => aud241bStage(state, "aud242k-lovelykiss-player-on", "on", 50, 12, 142, undefined, false, 69),
   "aud242k-crunch-player-on": (state) => aud241bStage(state, "aud242k-crunch-player-on", "on", 50, 12, 242, undefined, false, 69),
   "aud242k-recover-player-on": (state) => aud241bStage(state, "aud242k-recover-player-on", "on", 50, 12, 105, undefined, false, 69),
+  // aud242l: Blizzard (snowball / ice crystal lifetimes depend on both battlers' pic Y): the species only differ in the staged battlers' `species` (the ICY_WIND rows come before any damage).
+  "aud242l-blizzard-fearow-bulbasaur-opponent-on": (state) => aud242lBlizzardStage(state, "aud242l-blizzard-fearow-bulbasaur-opponent-on", "opponent", 22, 1),
+  "aud242l-blizzard-bulbasaur-charizard-opponent-on": (state) => aud242lBlizzardStage(state, "aud242l-blizzard-bulbasaur-charizard-opponent-on", "opponent", 1, 6),
+  "aud242l-blizzard-bulbasaur-bulbasaur-opponent-on": (state) => aud242lBlizzardStage(state, "aud242l-blizzard-bulbasaur-bulbasaur-opponent-on", "opponent", 1, 1),
+  "aud242l-blizzard-bulbasaur-fearow-player-on": (state) => aud242lBlizzardStage(state, "aud242l-blizzard-bulbasaur-fearow-player-on", "player", 1, 22),
   // aud242i: Faint Attack (attacker_fade_to_invisible / _from_invisible and SetAttackerInvisibleWaitForSignal lifetimes).
   "aud242i-faintattack-player-on": (state) => aud241bStage(state, "aud242i-faintattack-player-on", "on", 50, 12, 185, undefined, false, 69),
   "aud242i-faintattack-opponent-on": (state) => aud241bStage(state, "aud242i-faintattack-opponent-on", "on", 12, 50, 69, undefined, false, 185),
