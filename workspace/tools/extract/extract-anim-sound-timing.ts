@@ -63,7 +63,7 @@ const moveTable: string[] = [];
     if (cmd !== null && current !== null && table === null) {
       labels.get(current)!.push({
         op: cmd[1]!,
-        args: cmd[2]!.trim() === "" ? [] : cmd[2]!.split(",").map((a) => a.trim()),
+        args: cmd[2]!.trim() === "" ? [] : splitArgs(cmd[2]!),
         line: i + 1,
       });
     }
@@ -96,6 +96,19 @@ interface Walk { events: SoundOp[]; end: string; frame: number | null; gated: nu
 // bound that only resolves a wait when an exact lifetime in the same wait dominates it.
 type Lifetime = { exact: number } | { bound: number } | null;
 const named = (arg: string): string => (arg.includes("=") ? arg.split("=")[1]!.trim() : arg);
+// aud242q: split on top-level commas only, so RGB(27, 27, 0) stays one argument (a plain split shifted every later argument).
+function splitArgs(text: string): string[] {
+  const out: string[] = [];
+  let [depth, start] = [0, 0];
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (c === "(") depth++;
+    else if (c === ")") depth--;
+    else if (c === "," && depth === 0) { out.push(text.slice(start, i).trim()); start = i + 1; }
+  }
+  out.push(text.slice(start).trim());
+  return out;
+}
 function intArg(arg: string | undefined): number | null {
   if (arg === undefined) return null;
   try { return value(named(arg)); } catch { return null; }
