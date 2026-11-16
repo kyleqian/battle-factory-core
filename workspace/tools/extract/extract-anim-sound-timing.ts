@@ -115,7 +115,8 @@ function shakeMonLength(x: number, y: number, numTimes: number, delay: number): 
 // (IsSoftwarePaletteFadeFinishing). The sprite's Step sees !active in the next AnimateSprites and destroys itself; the script's waitforvisualfinish
 // passes one iteration after that: n calls = the sprite is gone `n` ticks after the creation tick.
 function simplePaletteBlendLength(delay: number, startY: number, targetY: number): number {
-  const deltaY = delay < 0 ? 2 - delay : 2;
+  // gPaletteFade.deltaY is a 4-bit field (palette.h:52): delay -31 gives (2 + 31) & 15 = 1, not 33 (aud242n: the Spark ROM window steps y by 1 per 2 frames).
+  const deltaY = delay < 0 ? (2 - delay) & 15 : 2;
   const wait = delay < 0 ? 0 : delay;
   let [y, calls, waits] = [startY, 0, 0];
   for (;;) {
@@ -146,7 +147,8 @@ function complexPaletteBlendLength(delay: number, numBlends: number): number {
 // calls between y values (palette.c:406-455) and 5 finishing calls (IsSoftwarePaletteFadeFinishing, palette.c:807-828). The task destroys itself in the RunTasks of the iteration the
 // last fade clears (AnimTask_BlendColorCycleLoop, `!active` and tNumBlends 0): gone (that iteration - F) ticks after the creation tick.
 function paletteFadeCalls(delay: number, startY: number, targetY: number): number {
-  const deltaY = delay < 0 ? 2 - delay : 2;
+  // gPaletteFade.deltaY is a 4-bit field (palette.h:52): delay -31 gives (2 + 31) & 15 = 1, not 33 (aud242n: the Spark ROM window steps y by 1 per 2 frames).
+  const deltaY = delay < 0 ? (2 - delay) & 15 : 2;
   const wait = delay < 0 ? 0 : delay;
   let [y, calls] = [startY, 0];
   for (;;) {

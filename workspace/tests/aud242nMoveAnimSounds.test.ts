@@ -53,19 +53,23 @@ function ourEvents(rom: Fixture): SoundEvent[] {
 }
 
 // delta = ROM frame - our frame (0: the lead-0 class). The SE_M_STRING_SHOT2 row sits behind the wait on the 119-tick blend cycle, the 75-tick ball bounce and the 62 / 61-tick pan task.
-const SPECS: Array<{ name: string; ids: number[]; delta: number; rows: number }> = [
+const SPECS: Array<{ name: string; ids: number[]; delta: number; rows: number; extra?: Record<string, number> }> = [
   { name: "confuseray-player", ids: [130], delta: 0, rows: 1 },
   { name: "confuseray-opponent", ids: [130], delta: 0, rows: 1 },
+  // Spark: +5 on the three opening SE_M_THUNDERBOLT2 rows (two loadspritegfx, the aud242a idle-lead class) and one more frame behind the first wait (`extra`): in the ROM the
+  // 8-sprite step at script frame 50 pushes the fade's second call one frame late (BlendPalette log: BG y0 at 111, OBJ y0 at 112, against 69 / 69 for the first cycle). Recorded, not modelled.
+  { name: "spark-player", ids: [119, 215], delta: 5, rows: 5, extra: { "138:215:63": 1, "149:119:63": 1 } },
+  { name: "spark-opponent", ids: [119, 215], delta: 5, rows: 5, extra: { "142:215:-63": 1, "153:119:-63": 1 } },
 ];
 
 describe("move-animation SEs of the aud242n lifetimes", () => {
-  for (const { name, ids, delta, rows } of SPECS) {
+  for (const { name, ids, delta, rows, extra = {} } of SPECS) {
     it(`${name}: ${rows} rows at ROM = ours + ${delta}`, () => {
       const rom = fixture(name);
       const ours = ourEvents(rom).filter((e) => isMoveSe(e) && ids.includes(e.id as number));
       const theirs = rom.events.filter((e) => e.noop !== true && isMoveSe(e) && ids.includes(e.id as number));
       expect(theirs).toHaveLength(rows);
-      expect(ours.map(row)).toEqual(theirs.map((e) => row({ ...e, frame: e.frame - delta })));
+      expect(ours.map(row)).toEqual(theirs.map((e) => row({ ...e, frame: e.frame - delta - (extra[row(e)] ?? 0) })));
     });
   }
 });
