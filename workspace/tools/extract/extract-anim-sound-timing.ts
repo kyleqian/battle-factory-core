@@ -465,6 +465,13 @@ function lifetimeOf(cmd: Command, attackerSide: number, pic: PicContext, rollout
     if (delay === null || startY === null || targetY === null || delay === undefined) return null;
     return { exact: simplePaletteBlendLength(delay!, startY!, targetY!) };
   }
+  // aud242q: AnimTask_ShakeAndSinkMon (battle_anim_mon_movement.c:316-348): the entry runs the step once (call 0, in the script step); it decrements data[4] (= arg 4, the duration D,
+  // script args[6]) every call and destroys the task when it reaches 0, i.e. in call D - 1, the RunTasks of iteration F + D - 2 (D = 1 destroys in the creating step).
+  if (op === "createvisualtask" && args[0] === "AnimTask_ShakeAndSinkMon") {
+    const duration = intArg(args[6]);
+    if (duration === null || duration < 1) return null;
+    return { exact: duration - 2 };
+  }
   if (op === "createvisualtask" && (args[0] === "AnimTask_ShakeMon" || args[0] === "AnimTask_ShakeMon2")) {
     const [x, y, numTimes, delay] = [intArg(args[3]), intArg(args[4]), intArg(args[5]), intArg(args[6])];
     if (x === null || y === null || numTimes === null || delay === null || numTimes < 1) return null;
