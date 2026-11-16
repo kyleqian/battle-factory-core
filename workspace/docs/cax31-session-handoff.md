@@ -8,9 +8,9 @@ Mac supervisor stopped. Read the plan first, then PROGRESS.md's top entry.
 
 ## Standing user authorization (2026-10-26): daily runs
 
-The user asked on 2026-10-26 for a 10-hour run every day. The pokebench
-crontab starts `/srv/pokebench/ops/daily-run.sh` at 21:30 UTC, and each run
-it starts is authorized. This supersedes the "fresh user authorization" and
+The user asked on 2026-10-26 for a run every day (16 hours since 2026-11-16).
+The pokebench crontab starts `/srv/pokebench/ops/daily-run.sh` at 13:30 UTC,
+and each run it starts is authorized. This supersedes the "fresh user authorization" and
 "no recurring timers" wording in earlier handoffs, AGENTS.md and
 LOCAL_SETUP.md; automatic push stays off. Do not edit or disable the
 schedule. Leave this handoff ready for the next day's run and keep this
@@ -19,6 +19,38 @@ from starting until the user resolves it, so use one only for a real user
 decision. The run that was killed on 2026-10-26 (`cax31-20261026.jsonl`, exs207
 worker on `worker/integration-20261026-213055`) was timing work; its branch is
 kept and is long-tail.
+
+## New schedule and the luck hunt (Kyle, 2026-11-16 ~07:50 UTC; set up by the top layer)
+
+Kyle: "feel free to adjust the hours ... 10 hours was completely arbitrary ... I think sound is more important, though, like
+as a priority." So:
+
+- **Your run is now 16 hours, 13:30 -> 05:30 UTC** (`daily-run.sh` passes `-c 16`; the first one starts 2026-11-16 13:30). The
+  extra hours go to **sound (S11), still the main program.** Plan the wind-down for about 05:10 UTC.
+- **New day job, no Claude:** `/srv/pokebench/ops/day-hunt.sh` (crontab 05:45 UTC) runs `workspace/tools/replay-hunt/luckHunt.sh` under
+  `nice -n 19` until 13:15 UTC and writes `.integration/evidence/luck-hunt/<YYYYMMDD>/` (log `/srv/pokebench/ops/day-hunt.log`; off switch
+  `touch /srv/pokebench/ops/day-hunt.off`). It skips while that script does not exist, while a supervisor runs, or when the checkout has changes.
+  Do not edit the ops scripts or the crontab; ask in DEFERRED only if the job cannot work as specified.
+- **One worker step in this run (and none later unless it breaks): build `tools/replay-hunt/luckHunt.sh`.** Why: about 18 of the 56 rare
+  rules left have no steer; they happen only when random events line up (Metronome's pick, an AI's random choice, a faint on an exact
+  turn), under 1% of lab seeds at ~15 s a seed (rrh3, `docs/parity-mac/STATUS.md` "Box hunt 2026-11-14"). That is machine time, not
+  night time. Spec:
+  - **Designs:** one lab design per luck-only rule that makes the event possible: the rrh3 "not attempted" list (R030 R032 R035
+    R037-R040 R067 R068 R080 R081 R097 R103 R105-R108 R110), plus R095 and R109 (tried, marker never ran), plus any other left rule whose
+    blocker is luck rather than a missing set-up. Each passes `designcheck.py`; commit them (e.g. `tools/replay-hunt/luck-designs/`). A rule
+    with no possible design in the Factory pools: give the reason in `rule-coverage.md` and leave it out.
+  - **Loop:** round-robin over the designs, fresh lab seeds each round, never reusing a seed across days (keep a seed cursor in the
+    evidence root, or derive seeds from the date); engine first (`prehunt.py` / `huntq.py`); on a marker hit, drive the ROM for that seed
+    (`romReplayWide.sh --stage`) and record match / differ with the stage file.
+  - **Interface:** env `LUCK_HUNT_DEADLINE_EPOCH` (start no new seed after it; exit 0), `LUCK_HUNT_OUT` (everything goes there),
+    `LUCK_HUNT_JOBS` (parallel seeds, default 3). Writes nothing outside `LUCK_HUNT_OUT`: no tracked file, no git command. Ends with
+    `summary.json` + `summary.md`: per rule, seeds tried, marker hits, ROM match / differ, stage files ready to promote.
+  - **Prove it** on this box before the step closes: a 15-minute run with a deadline, on at least 3 designs, and a test that the
+    deadline stops it. Name the result in PROGRESS.
+- **Every run start, next to the nightly replay (minutes when nothing is new):** read the newest `luck-hunt/*/summary.json`. A ROM
+  difference is that run's main program (a real bug: one commit per fix, a test that fails without it). A match: promote its stage file
+  to `stages/coverage/` (the nightly replay then guards it) and count the rule covered in the tally.
+- **The other rare rules** (about 38, each needs a hand-built set-up) stay a side job after sound, one step per run at most.
 
 ## State at restart (written at the 2026-11-13 wind-down; PROGRESS.md top entry has details)
 
@@ -355,8 +387,8 @@ Later builds reach the site only when Kyle asks again. The 2026-11-16 wind-down 
        the box").** The list: `docs/parity-mac/rule-coverage-c-rules.json`, R001..R110, the reachable battle rules whose
        code no ROM-matched battle has run (`docs/parity-mac/rule-coverage.md`, class (c)); 12 are covered
        (`stages/coverage/`), 98 are left. Why it matters: of the first 15 rules checked, 3 were wrong (fixes 41, 42, 43).
-       - **Pace:** one or two worker steps per run, after the fold and the nightly check; sound and the Lobby keep the
-         rest. A difference the hunt finds is that run's main program: one commit per fix, a test that fails without it,
+       - **Pace (superseded 2026-11-16, see "New schedule and the luck hunt" at the top):** the luck-only rules go to the day
+         job; the hand-built ones stay one step per run at most, after sound. A difference the hunt finds is that run's main program: one commit per fix, a test that fails without it,
          a ROM battle (or a Mechanic Lab run when no Factory set-up reaches it, as for 42 and 43).
        - **Order:** first the 31 designs in `docs/parity-mac/on-hold/designs/` (README there: check one, rename it to
          `.json`, drive it over several lab seeds; one that matches moves to `stages/coverage/`). Then design stages for
