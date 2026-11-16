@@ -195,7 +195,7 @@ compared against ROM audio.
 
 `src/engine/screenSounds.ts` keeps its delayed-sound queue (open cry +63, stop +22, mon-change cry +21/+22) in module-level
 state, gated on `soundCollecting()`; it should be owned by the session's sound collector so two sessions in one process cannot
-share it. WEAK cry length is measured for ONIX only (78 frames; other species emit no BGM restore). BGM ids are constants
+share it. (WEAK cry lengths: all species since cry3, source-derived `src/data/cryModeFrames.ts`.) BGM ids are constants
 (469 draft / swap, 476 battle) until a BGM state exists (aud241). The first draft mon-change cry is 1 frame late vs the ROM
 (f149 vs f148; every other change matches +21).
 

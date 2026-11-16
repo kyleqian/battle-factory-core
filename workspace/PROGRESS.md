@@ -49,6 +49,9 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **hie4 (side):** Leftovers / Shell Bell post-heal text now ROM-exact in both scenes (item-heal HP command drops the ordinary hit's 28-frame floor; ISSUES #220); census 0..99 both scenes:
   outcomes / digests identical, 66 / 100 battles move timing only; soaks 20 / 20 x3. **rol1 (integration, doc + test):** the Rollout chain drift is that same 28-frame floor on ordinary hits
   (the ROM hold is ~bar + 14 rows, no floor); hpd1 is replacing it.
+- **cry3 (side, sound only):** every Factory species has a source-derived cry length for NORMAL / WEAK / FAINT and the task modes (`src/data/cryModeFrames.ts`, `npm run extract:cry-mode-frames`;
+  WEAK = pitch 15000 vs 15360, note length 140); 1,128 / 1,128 ROM measurements equal. Formerly silent WEAK BGM restores now play (8 rows in census 0..99). Follow-up: `faintCryFrames.ts` fit is
+  off on 24 / 376 species (`CRY_FAINT_FRAMES` is exact; switching moves faint-restore rows: its own step). Supervisor re-pinned `tests/aud252LossBallOpen.test.ts` after hie4 (test:gate does not run it).
 - **lbw5 (side):** Lobby player <-> NPC cases proven on the ROM; bump direction change and turn-commit refusal fixed (`factoryLobbyFreeRoam.ts`, `idleIdx` pose state); forfeit window 109 -> 113 / 113; lbw4 / lbra / won-* windows unchanged; supervisor `npm run compare` lbw5-bump-turn-off 269 / 269.
 - **aud242o / p (integration, sound only):** Petal Dance, Confuse Ray ball bounce, Tri Attack, Dive, Rollout counter, Encore, Flatter, Reversal, Taunt, Karate Chop, Revenge, Mist Ball, Leaf Blade;
   T1 missing-gated 195 -> **95**; T2 ON move-SE missing (21 seeds) **76** (aud251: 206); differentials 320 / 320, 240 / 240.
