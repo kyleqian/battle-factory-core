@@ -140,7 +140,12 @@ offset), the `Task_ClearMonBg` 2-frame overrun (Poison Tail's later rows +4 -> +
 Ancient Power / Fire Punch / Crunch +2, Yawn +1, Lovely Kiss 0, Smokescreen / Scary Face / Recover (2nd turn) -2, Safeguard -4, Wish -5; Scary Face stat SE +14 (presentation length).
 **aud242l (2026-11-16)** Blizzard per (attacker, target) pic-Y class (`picYs` / `picGrids`, live pic Y; L50 731 emitted, 103 gated; all 935 resolved; section 16): +2 on all 13 rows of
 4 windows (the panse-row idle lead class). T1 census 0..99 ON missing-gated 570 -> 396 -> **308**, extra 0.
-Open (top census gated ops): Confuse Ray 47, Spark 32, Tri Attack 24, Petal Dance 22, Frustration 19, Rollout 17, Flail 15, Dive 10.
+**aud242m (2026-11-16)** Frustration (friendship-0 Strongest branch: Factory mons have friendship 0, `battle_factory.c:459`, `:820`; Return is swapped to Frustration, `:913-918`), Flail
+(`AnimTask_FlailMovement` simulated), Anger Mark 17 (L50 744 emitted, 100 gated; section 17): Frustration / Return +1, Flail +2. Lab template friendship is 70: windows need `AUD242_FRIENDSHIP=0`.
+**aud242n (2026-11-16)** Confuse Ray (pan task 62 / 61, ball bounce 75, spiral 59) and Spark (`AnimSparkElectricity` timer, a one-blend colour cycle refused under a running fade, 4-bit
+`deltaY`) (L50 747 emitted, 97 gated; section 18): Confuse Ray 0, Spark +5 / +6. T1 0..99 ON missing-gated 308 -> 274 -> **195**. Not modelled: Confuse Ray ball-bounce SE196 (13 rows per cast, ROM-only),
+multi-blend cycles over another fade.
+Open (top census gated ops): Tri Attack 24, Petal Dance 22, Rollout 17 (rollout counter), Dive 10; Confuse Ray ball-bounce SE196.
 
 ## #194 — Opponent RATTATA Quick Attack differs above the clip row (qak247, 2026-11-04)
 

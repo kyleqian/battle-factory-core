@@ -19,7 +19,12 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ## 2026-11-16 night run (CAX31 supervisor, Opus 5.5, 13:30 -> 05:30 UTC): in progress
 
-- **State:** master has lazy1 (below), luck1, aud242k, aud242l folded; workers running: aud242m (integration lane), dl1 (side lane, doc only).
+- **State:** folded: lazy1, luck1, aud242k / l / m / n, dl1, dl2, rrh4, aud251 (entries above / below). Running: aud242o (integration), lbw5 (side).
+- **Website:** browser `lib` import ~3x faster (lazy1); first-battle download ~2,363 -> ~2,102 KiB brotli-11 (dl2: sprite sheets packed as image rows, decoded per species on first read;
+  `docs/dl2-sprite-repack.md`; frames identical). No API change. dl1 (`docs/dl1-download-size.md`) ranks the rest: per-species pictures (~677 KiB, needs a hold rule + optional
+  `spriteBase` option), per-move animation assets (~225), the retired canonical march (~63-190, needs a product decision). Also check the CDN serves brotli-11: the handoff's 3.26 MB matches gzip-9.
+- **rrh4 (side):** R108, R105, R077 staged and matched on the ROM (53 / 110 covered); R065 -> class (b), R069 -> (a). Supervisor re-drove R108: match, 6 / 6.
+- **aud242m / n (integration, sound only):** Frustration / Flail, Confuse Ray, Spark; T1 missing-gated 308 -> **195**; differentials 240 / 240 each; census commands 100 / 100.
 - **Nightly replay (item 0d)** on `b5bb454a9`: pool **44 / 44** (1,366 states), staged battles **69 / 69** (`docs/replay-ledger.md`). No luck-hunt summary yet (first day job 2026-11-17 05:45).
 - **luck1 (side lane):** `tools/replay-hunt/luckHunt.sh` (+ `luckHunt.py`, `test-luckHunt.sh`, README "luckHunt") and 14 designs in `tools/replay-hunt/luck-designs/`
   (R030 R032 R035 R037 R038 R039 R040 R067 R080 R095 R097 R107 R109 R110; R106 impossible, R068 / R081 impractical, R103 / R105 / R108 need a hand set-up: `docs/parity-mac/rule-coverage.md`).
