@@ -1,0 +1,73 @@
+{
+ "name": "R077-sleep-talk-thunderbolt-lightning-rod",
+ "rules": [
+  "R077"
+ ],
+ "why": "Challenge 7, trainer 200. The player's Regice (839: Ice Beam, Thunderbolt, Sleep Talk, Rest; Chesto Berry) leads against Gardevoir (437, faster, Hypnosis). A first Hypnosis is cured by the Chesto Berry (used up), a second one leaves Regice asleep; Regice's Ice Beams wear Gardevoir down and, once asleep, Sleep Talk calls Thunderbolt against the Lightning Rod foe (Manectric 393 / Rhydon 403) that replaces it: GetMoveTarget's Lightning Rod test runs (battle_util.c:3854-3856; the drawn target is the holder itself in singles, so no redirect).",
+ "seed": 90004,
+ "challengeNum": 7,
+ "battleNum": 0,
+ "trainerId": 200,
+ "playerSetIds": [
+  839,
+  826,
+  699
+ ],
+ "opponentSetIds": [
+  437,
+  393,
+  403
+ ],
+ "script": {
+  "actions": [
+   {
+    "move": 0
+   },
+   {
+    "move": 0
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   }
+  ],
+  "then": "census"
+ },
+ "expect": [],
+ "cover": [
+  {
+   "file": "src/engine/battleScriptSleepTalkOpcode.ts",
+   "text": "&& rules.battlers[ta",
+   "at": 0
+  }
+ ],
+ "coverAny": true,
+ "chance": 0.1,
+ "seeds": 40
+}
