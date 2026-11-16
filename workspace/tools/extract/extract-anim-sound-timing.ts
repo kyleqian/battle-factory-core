@@ -686,9 +686,9 @@ function lifetimeOf(cmd: Command, attackerSide: number, pic: PicContext): Lifeti
   // AnimTask_ScaryFace (battle_anim_effects_2.c:3324-3410): the entry loads the BG and sets func; the step's case 0 ends on its 14th blend (every 2nd call: call 28), case 1 takes 21
   // calls (29..49), case 2 ends on its 14th decrement (calls 51, 53, ..., 77), and case 3 / 4 clear the BG and destroy in the next call: call 78, gone 77 ticks after F.
   if (op === "createvisualtask" && args[0] === "AnimTask_ScaryFace") return { exact: 77 };
-  // AnimTask_ShakeTargetInPattern (battle_anim_fire.c:1344-1375; maxShakes = script args[3]): the entry is the step (call 0 stores the args); every call counts tShakeNum and the
+  // AnimTask_ShakeTargetInPattern (battle_anim_fire.c:1344-1375; maxShakes = gBattleAnimArgs[0] = script args[2] (aud242o: was read from args[3], the shake offset)): the entry is the step (call 0 stores the args); every call counts tShakeNum and the
   // call where it equals maxShakes (call maxShakes - 1) destroys: gone maxShakes - 2 ticks after F.
-  if (op === "createvisualtask" && args[0] === "AnimTask_ShakeTargetInPattern") { const n = intArg(args[3]); return n === null || n < 1 ? null : { exact: n - 2 }; }
+  if (op === "createvisualtask" && args[0] === "AnimTask_ShakeTargetInPattern") { const n = intArg(args[2]); return n === null || n < 1 ? null : { exact: n - 2 }; }
   // AnimBite (battle_anim_dark.c:320-352, create_sharp_teeth_sprite; H = half_duration): the init installs Step1; calls 1..H count data[3] up (call H installs Step2), Step2 counts it
   // down over calls H + 1..2H and the call that reaches 0 destroys: call 2H, gone 2H - 1 ticks after F.
   if (op === "create_sharp_teeth_sprite" || sprite("gSharpTeethSpriteTemplate") || sprite("gClampJawSpriteTemplate")) { const h = op === "create_sharp_teeth_sprite" ? intNamed("half_duration") : intArg(args[8]); return h === null || h < 1 ? null : { exact: 2 * h - 1 }; }
@@ -722,6 +722,13 @@ function lifetimeOf(cmd: Command, attackerSide: number, pic: PicContext): Lifeti
     const d = op.startsWith("create_") ? intNamed("duration") : intArg(args[6]);
     return d === null || d < 1 ? null : { exact: d - 1 };
   }
+  // AnimLargeFlame (battle_anim_fire.c:518-550; gLargeFlameSpriteTemplate / gLargeFlameScatterSpriteTemplate, S = arg 2): the init only installs the step, which counts data[0] up
+  // from call 1 and destroys at call S (data[1] = S): gone S - 1 ticks after F.
+  if (sprite("gLargeFlameSpriteTemplate") || sprite("gLargeFlameScatterSpriteTemplate")) { const n = intArg(args[5]); return n === null || n < 1 || n > 0x7fff ? null : { exact: n - 1 }; }
+  // AnimLightning (battle_anim_electric.c:459-474): the init installs the step, which destroys once sAnim_Lightning (:40-48: 5 + 5 + 8 + 5 + 5 = 28 ticks) ends: exact 28.
+  if (sprite("gLightningSpriteTemplate")) return { exact: 28 };
+  // AnimTask_InvertScreenColor (battle_anim_normal.c:759-778) inverts the palette buffer and destroys itself in the creating step: net 0 in gAnimVisualTaskCount (exact -1).
+  if (op === "invert_screen_color" || (op === "createvisualtask" && args[0] === "AnimTask_InvertScreenColor")) return { exact: -1 };
 
   return null;
 }
