@@ -226,7 +226,7 @@ auditInstantTasks();
 function blendAnimPalLength(delay: number, startY: number, targetY: number): number {
   return delay + Math.abs(targetY - startY) * (delay + 1) - 1;
 }
-function lifetimeOf(cmd: Command): Lifetime {
+function lifetimeOf(cmd: Command, attackerSide: number): Lifetime {
   const { op, args } = cmd;
   if (op === "createvisualtask" && (args[0] === "AnimTask_BlendBattleAnimPal" || args[0] === "AnimTask_BlendBattleAnimPalExclude" || args[0] === "AnimTask_BlendParticle")) {
     const [delay, startY, targetY] = [intArg(args[3]), intArg(args[4]), intArg(args[5])];
@@ -403,6 +403,34 @@ function lifetimeOf(cmd: Command): Lifetime {
   // AnimTask_SetAttackerInvisibleWaitForSignal (battle_anim_utility_funcs.c:1079-1092): outside contests the entry does gAnimVisualTaskCount-- (net 0 after Cmd_createvisualtask's
   // own ++, battle_anim.c:439-441), so a following waitforvisualfinish never waits for it (it lives until the script sets arg 7 = 0x1000).
   if (op === "createvisualtask" && args[0] === "AnimTask_SetAttackerInvisibleWaitForSignal") return { exact: -1 };
+  // ---- aud242j (docs section 14). AnimTask_ShakeMonInPlace (battle_anim_mon_movement.c:251-299; script args[5] = numShakes, args[6] = delay): the entry runs the step once
+  // (call 0); the step acts on every call where data[3] == 0 (call 0, then every delay + 1 calls) and the numShakes-th action destroys: call (numShakes - 1) * (delay + 1)
+  // (0 when numShakes <= 1), gone one tick less after F.
+  if (op === "createvisualtask" && args[0] === "AnimTask_ShakeMonInPlace") {
+    const [shakes, delay] = [intArg(args[5]), intArg(args[6])];
+    return shakes === null || delay === null || delay < 0 ? null : { exact: Math.max(shakes - 1, 0) * (delay + 1) - 1 };
+  }
+  // AnimMovementWaves (battle_anim_effects_2.c:3624-3666; loops = gBattleAnimArgs[2] = script args[5]): arg 2 == 0 destroys in the init; else the init starts the 4 x 8 = 32 tick
+  // anim (gMovementWavesAnimCmds1 / 2 :1130-1150; the same two anims) in call 0, animEnded is seen at call 33, which restarts it (--data[0]) with its first AnimateSprite in
+  // that call, so a loop is 33 calls and the sprite destroys at call loops * 33: gone loops * 33 - 1 ticks after F.
+  if (sprite("gMovementWavesSpriteTemplate")) { const n = intArg(args[5]); return n === null || n < 0 ? null : { exact: n === 0 ? -1 : n * 33 - 1 }; }
+  // AnimRedHeartProjectile (battle_anim_effects_2.c:3173-3196): data[0] = 95, InitAnimLinearTranslation, calls 1..95 translate (AnimTranslateLinear, battle_anim_mons.c:1111-1139),
+  // call 96 sees it finished and destroys: gone 95 ticks after F. AnimParticleBurst (:3198-3216): call 0 stores the args (data[0] 0 -> 1), call k adds 3 to data[3]
+  // (starting at 0) and destroys on the first value above 120: k = 41, gone 40 ticks after F (the args only move it).
+  if (sprite("gRedHeartProjectileSpriteTemplate")) return { exact: 95 };
+  if (sprite("gRedHeartBurstSpriteTemplate")) return { exact: 40 };
+  // AnimTask_DigUpMovement (battle_anim_ground.c:386-418): arg 0 FALSE runs AnimTask_DigSetVisibleUnderground in the entry (case 0), the first RunTasks (call 1, iteration F)
+  // destroys it: gone 0 ticks after F. (arg 0 TRUE, the rise from the hole, is not modelled: nothing waits for it.)
+  if (op === "createvisualtask" && args[0] === "AnimTask_DigUpMovement") return args[2] === "FALSE" ? { exact: 0 } : null;
+  // AnimFlyingParticle (battle_anim_effects_1.c:3517-3590; script args[6] = x step s = gBattleAnimArgs[3], args[9] = unk6: 0 = attacker's side, else the target's): call 0 places
+  // the sprite at x = -16 (opponent side, moving right) or 256 (player side, moving left); call k >= 1 has a = k - 1 and destroys once x + x2 leaves the screen:
+  // opponent side s * a >= 264, player side s * a >= 272 (AnimFlyingParticle_Step :3580-3590). Gone ceil(threshold / s) ticks after F.
+  if (sprite("gSilverWindBigSparkSpriteTemplate") || sprite("gSilverWindMediumSparkSpriteTemplate") || sprite("gSilverWindSmallSparkSpriteTemplate")) {
+    const [speed, anchor] = [intArg(args[6]), intArg(args[9])];
+    if (speed === null || anchor === null || speed < 1) return null;
+    const side = anchor === 0 ? attackerSide : 1 - attackerSide;
+    return { exact: Math.ceil((side === 0 ? 272 : 264) / speed) };
+  }
   if (op === "create_basic_hitsplat_sprite") return { bound: 10 };
   return null;
 }
@@ -556,7 +584,7 @@ function walk(bodyLabel: string, turn: number, attackerSide: number): Walk {
       // AnimTask_MetallicShine decompresses its tilemap and image and loads a palette in the creating step (battle_anim_dark.c:866-870): a measured
       // VBlank overrun (METALLIC_SHINE_LOAD_LAG; Metal Claw and Steel Wing, aud242d), like BG_LOAD_LAG.
       if ((op === "metallic_shine" || (op === "createvisualtask" && args[0] === "AnimTask_MetallicShine")) && frame !== null) lags.push({ after: frame, frames: METALLIC_SHINE_LOAD_LAG });
-      let life = lifetimeOf(cmd);
+      let life = lifetimeOf(cmd, attackerSide);
       const colorCycle = op === "blend_color_cycle" || op === "blend_color_cycleexclude" || op === "blend_color_cyclebytag" || (op === "createvisualtask" && /^AnimTask_BlendColorCycle/.test(args[0] ?? ""));
       if (frame !== null && life !== null && "exact" in life && (colorCycle || op === "simple_palette_blend" || (op === "createsprite" && args[0] === "gSimplePaletteBlendSpriteTemplate"))) {
         if (colorCycle && (frame <= fadeBusy || (fade !== null && frame < fade + FADE_IN_DONE))) life = null;
