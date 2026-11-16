@@ -2048,6 +2048,7 @@ export const APP_STAGES: Readonly<Record<string, AppStage>> = {
   "aud242p-karatechop-player-on": (state) => aud241bStage(state, "aud242p-karatechop-player-on", "on", 50, 12, 2, undefined, false, 69),
   "aud242p-revenge-player-on": (state) => aud241bStage(state, "aud242p-revenge-player-on", "on", 50, 12, 279, undefined, false, 1),
   "aud242p-mistball-player-on": (state) => aud241bStage(state, "aud242p-mistball-player-on", "on", 50, 12, 296, undefined, false, 69),
+  "aud242p-leafblade-player-on": (state) => aud241bStage(state, "aud242p-leafblade-player-on", "on", 50, 12, 348, undefined, false, 69),
   // aud242l: Blizzard (snowball / ice crystal lifetimes depend on both battlers' pic Y): the species only differ in the staged battlers' `species` (the ICY_WIND rows come before any damage).
   "aud242l-blizzard-fearow-bulbasaur-opponent-on": (state) => aud242lBlizzardStage(state, "aud242l-blizzard-fearow-bulbasaur-opponent-on", "opponent", 22, 1),
   "aud242l-blizzard-bulbasaur-charizard-opponent-on": (state) => aud242lBlizzardStage(state, "aud242l-blizzard-bulbasaur-charizard-opponent-on", "opponent", 1, 6),

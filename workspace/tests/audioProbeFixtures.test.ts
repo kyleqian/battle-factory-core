@@ -158,6 +158,7 @@ describe("audio probe fixtures", () => {
       "aud242p-encore-player.json",
       "aud242p-flatter-player.json",
       "aud242p-karatechop-player.json",
+      "aud242p-leafblade-player.json",
       "aud242p-mistball-player.json",
       "aud242p-revenge-player.json",
       "aud242p-reversal-player.json",

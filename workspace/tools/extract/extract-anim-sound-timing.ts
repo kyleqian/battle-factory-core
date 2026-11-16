@@ -740,6 +740,12 @@ function lifetimeOf(cmd: Command, attackerSide: number, pic: PicContext, rollout
     const d = op.startsWith("create_") ? intNamed("duration") : intArg(args[6]);
     return d === null || d < 1 ? null : { exact: d - 1 };
   }
+  // ---- aud242p: AnimTask_LeafBlade (battle_anim_effects_1.c:3255-3466, Step2 :3476-3496, trail callback :3498-3512). The entry runs the first arc init and installs Step (RunTasks calls 1..): seven arc states
+  // (0, 2, .., 12; InitAnimArcTranslation with data[0] = 10, AnimTranslateLinear :1111: 10 translating calls and the 11th returns TRUE) of 11 calls each, six 0xFF holds (++data[1] > 5: 6 calls) and six one-call
+  // setups (1, 3, .., 11): the main sprite dies in call 119, state 13 starts in call 120. Every arc call (77) first creates a trail sprite (Step2) that dies on its 9th flip: data[0] = (#trails before) & 1,
+  // flips on callback calls 2, 4, .. (data[0] 0) or 1, 3, .. (data[0] 1). The last trail (76 before, even) is created in call 119 and dies on its 18th callback call = iteration F + 137, before RunTasks; state 13 sees
+  // data[12] == 0 there and destroys: gone 136 ticks after F.
+  if (op === "create_leaf_blade_task" || (op === "createvisualtask" && args[0] === "AnimTask_LeafBlade")) return { exact: 136 };
   // AnimTask_Rollout: gone destroyCall - 1 ticks after F (the dirt sprites are CreateSprite'd, not counted by waitforvisualfinish).
   if (op === "createvisualtask" && args[0] === "AnimTask_Rollout") { counterUsed = true; return { exact: rolloutShape(rolloutCounter).destroyCall - 1 }; }
   // ---- AnimDiveBall (battle_anim_flying.c:1010-1047; args a2 = wait, a3 = acceleration): the sprite starts at the attacker's pic Y (+ a1) and the init installs Step1 without running it. Calls
