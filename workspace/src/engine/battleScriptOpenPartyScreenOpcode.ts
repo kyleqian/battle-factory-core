@@ -52,6 +52,7 @@ import {
   type BattleAiSwitchTypes,
 } from "./battleAiSwitchInto.ts";
 import { calculateBattleScriptBaseDamageForCurrentMove } from "./battleScriptHitChainOpcode.ts";
+import { firstInstructionWithOpcodeName } from "./battleScriptProgram.ts";
 
 /** include/constants/battle.h:55 -- BATTLE_OPPOSITE(id) = id ^ BIT_SIDE. */
 const BIT_SIDE = 1;
@@ -330,9 +331,7 @@ function createOpenPartyScreenOpcodeHandler(): BattleScriptOpcodeHandler<BattleS
 export function createBattleScriptOpenPartyScreenOpcodeHandlers(
   program: BattleScriptProgram,
 ): BattleScriptOpcodeHandlers<BattleScriptRulesContext> {
-  const instruction = program.instructions.find(
-    (candidate) => candidate.opcodeName === "B_SCR_OP_OPENPARTYSCREEN",
-  );
+  const instruction = firstInstructionWithOpcodeName(program, "B_SCR_OP_OPENPARTYSCREEN");
   if (!instruction) throw new Error("committed Battle Script program does not emit B_SCR_OP_OPENPARTYSCREEN");
   return Object.freeze({ [instruction.opcodeId]: createOpenPartyScreenOpcodeHandler() });
 }

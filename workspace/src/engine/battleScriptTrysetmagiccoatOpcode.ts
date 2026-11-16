@@ -15,6 +15,7 @@ import {
 import {
   resolveBattleScriptLabel,
   type BattleScriptProgram,
+  instructionsWithOpcodeName,
 } from "./battleScriptProgram.ts";
 import type {
   BattleScriptRulesBattlers,
@@ -75,9 +76,7 @@ BattleScriptOpcodeHandler<BattleScriptRulesContext> = (context) => {
 export function createBattleScriptTrysetmagiccoatOpcodeHandlers(
   program: BattleScriptProgram,
 ): BattleScriptOpcodeHandlers<BattleScriptRulesContext> {
-  const instructions = program.instructions.filter(
-    ({ opcodeName }) => opcodeName === "B_SCR_OP_TRYSETMAGICCOAT",
-  );
+  const instructions = instructionsWithOpcodeName(program, "B_SCR_OP_TRYSETMAGICCOAT");
   if (instructions.length !== 1) {
     throw new Error(
       `B_SCR_OP_TRYSETMAGICCOAT requires exactly 1 concrete start, got ${instructions.length}`,

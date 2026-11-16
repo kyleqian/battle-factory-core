@@ -18,6 +18,7 @@ import {
   resolveBattleScriptLabel,
   type BattleScriptInstruction,
   type BattleScriptProgram,
+  instructionsWithOpcodeName,
 } from "./battleScriptProgram.ts";
 import {
   BATTLE_SCRIPT_ITEM_ENIGMA_BERRY,
@@ -246,9 +247,7 @@ function createTryswapitemsHandler(
 export function createBattleScriptTryswapitemsOpcodeHandlers(
   program: BattleScriptProgram,
 ): BattleScriptOpcodeHandlers<BattleScriptRulesContext> {
-  const instructions = program.instructions.filter(
-    ({ opcodeName }) => opcodeName === "B_SCR_OP_TRYSWAPITEMS",
-  );
+  const instructions = instructionsWithOpcodeName(program, "B_SCR_OP_TRYSWAPITEMS");
   if (instructions.length !== 1) {
     throw new Error(
       "B_SCR_OP_TRYSWAPITEMS requires exactly 1 concrete start, "

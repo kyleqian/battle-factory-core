@@ -11,7 +11,7 @@ import {
   type BattleScriptOpcodeHandler,
   type BattleScriptOpcodeHandlers,
 } from "./battleScriptMachine.ts";
-import { resolveBattleScriptLabel, type BattleScriptProgram } from "./battleScriptProgram.ts";
+import { resolveBattleScriptLabel, type BattleScriptProgram, instructionsWithOpcodeName } from "./battleScriptProgram.ts";
 import { requireBattlerRole, withBattler } from "./battleScriptHitChainOpcode.ts";
 import type { BattleScriptRulesContext } from "./battleScriptRulesContext.ts";
 
@@ -57,9 +57,7 @@ function createTrycopyabilityHandler(): BattleScriptOpcodeHandler<BattleScriptRu
 export function createBattleScriptTrycopyabilityOpcodeHandlers(
   program: BattleScriptProgram,
 ): BattleScriptOpcodeHandlers<BattleScriptRulesContext> {
-  const instructions = program.instructions.filter(
-    ({ opcodeName }) => opcodeName === "B_SCR_OP_TRYCOPYABILITY",
-  );
+  const instructions = instructionsWithOpcodeName(program, "B_SCR_OP_TRYCOPYABILITY");
   if (instructions.length !== 1) {
     throw new Error(`B_SCR_OP_TRYCOPYABILITY requires exactly 1 concrete start, got ${instructions.length}`);
   }

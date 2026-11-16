@@ -375,6 +375,31 @@ export function loadBattleScriptProgram(): BattleScriptProgram {
   return cachedProgram;
 }
 
+const instructionsByOpcodeName = new WeakMap<BattleScriptProgram, Map<string, readonly BattleScriptInstruction[]>>();
+const NO_INSTRUCTIONS: readonly BattleScriptInstruction[] = Object.freeze([]);
+
+/** Same result as `program.instructions.filter((i) => i.opcodeName === name)` (program order), from a per-program index built on first use. */
+export function instructionsWithOpcodeName(program: BattleScriptProgram, name: string): readonly BattleScriptInstruction[] {
+  let index = instructionsByOpcodeName.get(program);
+  if (!index) {
+    const building = new Map<string, BattleScriptInstruction[]>();
+    for (const instruction of program.instructions) {
+      const bucket = building.get(instruction.opcodeName);
+      if (bucket) bucket.push(instruction);
+      else building.set(instruction.opcodeName, [instruction]);
+    }
+    for (const bucket of building.values()) Object.freeze(bucket);
+    index = building;
+    instructionsByOpcodeName.set(program, index);
+  }
+  return index.get(name) ?? NO_INSTRUCTIONS;
+}
+
+/** Same result as `program.instructions.find((i) => i.opcodeName === name)`. */
+export function firstInstructionWithOpcodeName(program: BattleScriptProgram, name: string): BattleScriptInstruction | undefined {
+  return instructionsWithOpcodeName(program, name)[0];
+}
+
 export function resolveBattleScriptLabel(program: BattleScriptProgram, label: string): BattleScriptLabelEntry | undefined {
   return program.labelEntries[label];
 }

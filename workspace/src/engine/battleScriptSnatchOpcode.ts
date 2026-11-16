@@ -13,6 +13,7 @@ import {
 import {
   resolveBattleScriptLabel,
   type BattleScriptProgram,
+  instructionsWithOpcodeName,
 } from "./battleScriptProgram.ts";
 import {
   BATTLE_SCRIPT_HITMARKER_SWAP_ATTACKER_TARGET,
@@ -110,7 +111,7 @@ export function createBattleScriptSnatchOpcodeHandlers(
   ] as const;
   const handlers: Record<number, BattleScriptOpcodeHandler<BattleScriptRulesContext>> = {};
   for (const [opcodeName, opcodeId, dispatcher, operandCount, handler] of specifications) {
-    const starts = program.instructions.filter((instruction) => instruction.opcodeName === opcodeName);
+    const starts = instructionsWithOpcodeName(program, opcodeName);
     if (
       starts.length < 1
       || starts.some((instruction) =>

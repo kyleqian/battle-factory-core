@@ -11,6 +11,7 @@ import {
   resolveBattleScriptLabel,
   type BattleScriptInstruction,
   type BattleScriptProgram,
+  instructionsWithOpcodeName,
 } from "./battleScriptProgram.ts";
 import type { BattleScriptRulesContext } from "./battleScriptRulesContext.ts";
 import { BATTLE_SCRIPT_STATUS3_GRUDGE } from "./battleScriptSourceConstants.ts";
@@ -60,9 +61,7 @@ function handler(program: BattleScriptProgram): BattleScriptOpcodeHandler<Battle
 export function createBattleScriptTrysetgrudgeOpcodeHandlers(
   program: BattleScriptProgram,
 ): BattleScriptOpcodeHandlers<BattleScriptRulesContext> {
-  const instructions = program.instructions.filter(
-    (instruction) => instruction.opcodeName === "B_SCR_OP_TRYSETGRUDGE",
-  );
+  const instructions = instructionsWithOpcodeName(program, "B_SCR_OP_TRYSETGRUDGE");
   if (instructions.length !== 1) {
     throw new Error(
       `B_SCR_OP_TRYSETGRUDGE requires exactly 1 concrete start, got ${instructions.length}`,

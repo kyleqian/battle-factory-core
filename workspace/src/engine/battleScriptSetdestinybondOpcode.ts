@@ -14,6 +14,7 @@ import {
 import type { BattleScriptProgram } from "./battleScriptProgram.ts";
 import type { BattleScriptRulesContext } from "./battleScriptRulesContext.ts";
 import { BATTLE_SCRIPT_STATUS2_MASKS } from "./battleScriptSourceConstants.ts";
+import { instructionsWithOpcodeName } from "./battleScriptProgram.ts";
 
 function createSetdestinybondHandler(): BattleScriptOpcodeHandler<BattleScriptRulesContext> {
   return (context) => {
@@ -43,9 +44,7 @@ function createSetdestinybondHandler(): BattleScriptOpcodeHandler<BattleScriptRu
 export function createBattleScriptSetdestinybondOpcodeHandlers(
   program: BattleScriptProgram,
 ): BattleScriptOpcodeHandlers<BattleScriptRulesContext> {
-  const instructions = program.instructions.filter(
-    (candidate) => candidate.opcodeName === "B_SCR_OP_SETDESTINYBOND",
-  );
+  const instructions = instructionsWithOpcodeName(program, "B_SCR_OP_SETDESTINYBOND");
   if (instructions.length !== 1) {
     throw new Error(`committed Battle Script program must emit one B_SCR_OP_SETDESTINYBOND, found ${instructions.length}`);
   }

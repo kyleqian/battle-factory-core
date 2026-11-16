@@ -11,7 +11,7 @@ import {
   type BattleScriptOpcodeHandler,
   type BattleScriptOpcodeHandlers,
 } from "./battleScriptMachine.ts";
-import { resolveBattleScriptLabel, type BattleScriptProgram } from "./battleScriptProgram.ts";
+import { resolveBattleScriptLabel, type BattleScriptProgram, instructionsWithOpcodeName } from "./battleScriptProgram.ts";
 import { requireBattlerRole } from "./battleScriptHitChainOpcode.ts";
 import type {
   BattleScriptRulesBattlers,
@@ -83,9 +83,7 @@ function createHandler(
 export function createBattleScriptTrysetspikesOpcodeHandlers(
   program: BattleScriptProgram,
 ): BattleScriptOpcodeHandlers<BattleScriptRulesContext> {
-  const instructions = program.instructions.filter(
-    ({ opcodeName }) => opcodeName === "B_SCR_OP_TRYSETSPIKES",
-  );
+  const instructions = instructionsWithOpcodeName(program, "B_SCR_OP_TRYSETSPIKES");
   if (instructions.length !== 1) {
     throw new Error(`B_SCR_OP_TRYSETSPIKES requires exactly 1 concrete start, got ${instructions.length}`);
   }

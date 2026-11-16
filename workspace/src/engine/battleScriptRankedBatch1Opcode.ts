@@ -15,6 +15,7 @@ import {
 import {
   resolveBattleScriptLabel,
   type BattleScriptProgram,
+  instructionsWithOpcodeName,
 } from "./battleScriptProgram.ts";
 import type {
   BattleScriptIvs,
@@ -194,7 +195,7 @@ export function createBattleScriptRankedBatch1OpcodeHandlers(
     operandCount: number,
     handler: BattleScriptOpcodeHandler<BattleScriptRulesContext>,
   ) => {
-    const instructions = program.instructions.filter((item) => item.opcodeName === name);
+    const instructions = instructionsWithOpcodeName(program, name);
     if (instructions.length !== 1) {
       throw new Error(`${name} requires exactly 1 concrete start, got ${instructions.length}`);
     }

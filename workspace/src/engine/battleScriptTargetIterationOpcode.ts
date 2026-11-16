@@ -33,6 +33,7 @@ import {
   BATTLE_SCRIPT_BATTLE_TYPE_DOUBLE,
   type BattleScriptRulesContext,
 } from "./battleScriptRulesContext.ts";
+import { firstInstructionWithOpcodeName } from "./battleScriptProgram.ts";
 
 function unsupportedBranch(
   context: BattleScriptOpcodeHandlerContext<BattleScriptRulesContext>,
@@ -128,15 +129,11 @@ function createJumpIfNextTargetValidOpcodeHandler(): BattleScriptOpcodeHandler<B
 export function createBattleScriptTargetIterationOpcodeHandlers(
   program: BattleScriptProgram,
 ): BattleScriptOpcodeHandlers<BattleScriptRulesContext> {
-  const selectFirstValidTarget = program.instructions.find(
-    (candidate) => candidate.opcodeName === "B_SCR_OP_SELECTFIRSTVALIDTARGET",
-  );
+  const selectFirstValidTarget = firstInstructionWithOpcodeName(program, "B_SCR_OP_SELECTFIRSTVALIDTARGET");
   if (!selectFirstValidTarget) {
     throw new Error("committed Battle Script program does not emit B_SCR_OP_SELECTFIRSTVALIDTARGET");
   }
-  const jumpIfNextTargetValid = program.instructions.find(
-    (candidate) => candidate.opcodeName === "B_SCR_OP_JUMPIFNEXTTARGETVALID",
-  );
+  const jumpIfNextTargetValid = firstInstructionWithOpcodeName(program, "B_SCR_OP_JUMPIFNEXTTARGETVALID");
   if (!jumpIfNextTargetValid) {
     throw new Error("committed Battle Script program does not emit B_SCR_OP_JUMPIFNEXTTARGETVALID");
   }

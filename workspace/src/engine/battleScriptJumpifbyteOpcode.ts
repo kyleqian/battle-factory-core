@@ -16,6 +16,7 @@
 import {
   resolveBattleScriptLabel,
   type BattleScriptProgram,
+  firstInstructionWithOpcodeName,
 } from "./battleScriptProgram.ts";
 import {
   transitionBattleScriptCommand,
@@ -163,9 +164,7 @@ function createJumpifbyteOpcodeHandler(): BattleScriptOpcodeHandler<BattleScript
 export function createBattleScriptJumpifbyteOpcodeHandlers(
   program: BattleScriptProgram,
 ): BattleScriptOpcodeHandlers<BattleScriptRulesContext> {
-  const instruction = program.instructions.find(
-    (candidate) => candidate.opcodeName === "B_SCR_OP_JUMPIFBYTE",
-  );
+  const instruction = firstInstructionWithOpcodeName(program, "B_SCR_OP_JUMPIFBYTE");
   if (!instruction) throw new Error("committed Battle Script program does not emit B_SCR_OP_JUMPIFBYTE");
   return Object.freeze({ [instruction.opcodeId]: createJumpifbyteOpcodeHandler() });
 }

@@ -54,7 +54,7 @@ import {
   type BattleScriptOpcodeHandler,
   type BattleScriptOpcodeHandlers,
 } from "./battleScriptMachine.ts";
-import { resolveBattleScriptLabel, type BattleScriptProgram } from "./battleScriptProgram.ts";
+import { resolveBattleScriptLabel, type BattleScriptProgram, instructionsWithOpcodeName } from "./battleScriptProgram.ts";
 import { withBattler } from "./battleScriptHitChainOpcode.ts";
 import { abilityPresentOnField } from "./battleScriptJumpifabilitypresentOpcode.ts";
 import type { BattleScriptControllerIdlePort } from "./battleScriptSourceCommands.ts";
@@ -249,9 +249,7 @@ export function createBattleScriptTryCastformDataChangeOpcodeHandlers(
     isControllerIdle: BattleScriptControllerIdlePort<BattleScriptRulesContext>;
   }>,
 ): BattleScriptOpcodeHandlers<BattleScriptRulesContext> {
-  const starts = program.instructions.filter(
-    (instruction) => instruction.opcodeName === "B_SCR_OP_TRYCASTFORMDATACHANGE",
-  );
+  const starts = instructionsWithOpcodeName(program, "B_SCR_OP_TRYCASTFORMDATACHANGE");
   if (starts.length !== 1) {
     throw new Error(`B_SCR_OP_TRYCASTFORMDATACHANGE requires exactly 1 concrete start, got ${starts.length}`);
   }
@@ -259,9 +257,7 @@ export function createBattleScriptTryCastformDataChangeOpcodeHandlers(
   if (instruction!.operands.length !== 0) {
     throw new Error(`invalid B_SCR_OP_TRYCASTFORMDATACHANGE shape at program counter ${instruction!.programCounter}`);
   }
-  const docastformchangeanimationStarts = program.instructions.filter(
-    (instruction) => instruction.opcodeName === "B_SCR_OP_DOCASTFORMCHANGEANIMATION",
-  );
+  const docastformchangeanimationStarts = instructionsWithOpcodeName(program, "B_SCR_OP_DOCASTFORMCHANGEANIMATION");
   if (docastformchangeanimationStarts.length !== 1) {
     throw new Error(`B_SCR_OP_DOCASTFORMCHANGEANIMATION requires exactly 1 concrete start, got ${docastformchangeanimationStarts.length}`);
   }

@@ -4,6 +4,7 @@ import {
   type BattleScriptOpcodeHandlers,
 } from "./battleScriptMachine.ts";
 import type { BattleScriptProgram } from "./battleScriptProgram.ts";
+import { instructionsWithOpcodeName } from "./battleScriptProgram.ts";
 
 export type BattleScriptSetByteRulesContext = Readonly<{
   battleCommunication0: number;
@@ -332,9 +333,7 @@ export function createBattleScriptSetByteCommandHandlers<
 >(
   program: BattleScriptProgram,
 ): BattleScriptOpcodeHandlers<RulesContext> {
-  const starts = program.instructions.filter(
-    (instruction) => instruction.opcodeName === "B_SCR_OP_SETBYTE",
-  );
+  const starts = instructionsWithOpcodeName(program, "B_SCR_OP_SETBYTE");
   const pointers = new Set<string>();
   if (starts.length !== 214) {
     throw new Error(`B_SCR_OP_SETBYTE requires all 214 concrete starts, got ${starts.length}`);
@@ -408,9 +407,7 @@ export function createBattleScriptBicbyteCommandHandlers<
 >(
   program: BattleScriptProgram,
 ): BattleScriptOpcodeHandlers<RulesContext> {
-  const starts = program.instructions.filter(
-    (instruction) => instruction.opcodeName === "B_SCR_OP_BICBYTE",
-  );
+  const starts = instructionsWithOpcodeName(program, "B_SCR_OP_BICBYTE");
   if (starts.length !== 11) {
     throw new Error(`B_SCR_OP_BICBYTE requires all 11 concrete starts, got ${starts.length}`);
   }

@@ -12,7 +12,7 @@ import {
   type BattleScriptOpcodeHandler,
   type BattleScriptOpcodeHandlers,
 } from "./battleScriptMachine.ts";
-import { resolveBattleScriptLabel, type BattleScriptProgram } from "./battleScriptProgram.ts";
+import { resolveBattleScriptLabel, type BattleScriptProgram, instructionsWithOpcodeName } from "./battleScriptProgram.ts";
 import { resolveDynamicMoveTarget } from "./battleScriptSleepTalkOpcode.ts";
 import {
   BATTLE_SCRIPT_HITMARKER_ATTACKSTRING_PRINTED,
@@ -135,9 +135,7 @@ function createMetronomeHandler(
 export function createBattleScriptMetronomeOpcodeHandlers(
   program: BattleScriptProgram,
 ): BattleScriptOpcodeHandlers<BattleScriptRulesContext> {
-  const instructions = program.instructions.filter(
-    ({ opcodeName }) => opcodeName === "B_SCR_OP_METRONOME",
-  );
+  const instructions = instructionsWithOpcodeName(program, "B_SCR_OP_METRONOME");
   if (
     instructions.length !== 1
     || instructions[0]!.opcodeId !== 0x9e

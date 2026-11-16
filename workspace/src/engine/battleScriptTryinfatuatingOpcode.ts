@@ -66,7 +66,7 @@ import {
   type BattleScriptOpcodeHandlers,
 } from "./battleScriptMachine.ts";
 import type { BattleScriptProgram } from "./battleScriptProgram.ts";
-import { resolveBattleScriptLabel } from "./battleScriptProgram.ts";
+import { resolveBattleScriptLabel, firstInstructionWithOpcodeName } from "./battleScriptProgram.ts";
 import { statusInfatuatedWithBit, withBattler } from "./battleScriptHitChainOpcode.ts";
 import { BATTLE_SCRIPT_STATUS2_MASKS } from "./battleScriptSourceConstants.ts";
 import type { BattleScriptRulesContext } from "./battleScriptRulesContext.ts";
@@ -136,9 +136,7 @@ function createTryinfatuatingHandler(): BattleScriptOpcodeHandler<BattleScriptRu
 export function createBattleScriptTryinfatuatingOpcodeHandlers(
   program: BattleScriptProgram,
 ): BattleScriptOpcodeHandlers<BattleScriptRulesContext> {
-  const instruction = program.instructions.find(
-    (candidate) => candidate.opcodeName === "B_SCR_OP_TRYINFATUATING",
-  );
+  const instruction = firstInstructionWithOpcodeName(program, "B_SCR_OP_TRYINFATUATING");
   if (!instruction) {
     throw new Error("committed Battle Script program does not emit B_SCR_OP_TRYINFATUATING");
   }

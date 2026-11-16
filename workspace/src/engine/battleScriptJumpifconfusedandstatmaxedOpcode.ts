@@ -22,7 +22,7 @@
  * than accepted as an arbitrary index.
  */
 import type { BattleScriptProgram } from "./battleScriptProgram.ts";
-import { resolveBattleScriptLabel } from "./battleScriptProgram.ts";
+import { resolveBattleScriptLabel, instructionsWithOpcodeName } from "./battleScriptProgram.ts";
 import {
   transitionBattleScriptCommand,
   type BattleScriptOpcodeHandler,
@@ -77,9 +77,7 @@ function createJumpifconfusedandstatmaxedOpcodeHandler(): BattleScriptOpcodeHand
 export function createBattleScriptJumpifconfusedandstatmaxedOpcodeHandlers(
   program: BattleScriptProgram,
 ): BattleScriptOpcodeHandlers<BattleScriptRulesContext> {
-  const starts = program.instructions.filter(
-    (instruction) => instruction.opcodeName === "B_SCR_OP_JUMPIFCONFUSEDANDSTATMAXED",
-  );
+  const starts = instructionsWithOpcodeName(program, "B_SCR_OP_JUMPIFCONFUSEDANDSTATMAXED");
   if (starts.length !== 2) {
     throw new Error(`B_SCR_OP_JUMPIFCONFUSEDANDSTATMAXED requires both concrete starts, got ${starts.length}`);
   }

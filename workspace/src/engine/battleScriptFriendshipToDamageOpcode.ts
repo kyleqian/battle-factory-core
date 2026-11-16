@@ -21,6 +21,7 @@ import {
 import type { BattleScriptProgram } from "./battleScriptProgram.ts";
 import { requireBattlerRole } from "./battleScriptHitChainOpcode.ts";
 import type { BattleScriptRulesContext } from "./battleScriptRulesContext.ts";
+import { instructionsWithOpcodeName } from "./battleScriptProgram.ts";
 
 export const BATTLE_SCRIPT_EFFECT_RETURN = 121;
 export const BATTLE_SCRIPT_EFFECT_FRUSTRATION = 123;
@@ -76,10 +77,7 @@ const friendshipToDamageHandler: BattleScriptOpcodeHandler<BattleScriptRulesCont
 export function createBattleScriptFriendshipToDamageOpcodeHandlers(
   program: BattleScriptProgram,
 ): BattleScriptOpcodeHandlers<BattleScriptRulesContext> {
-  const instructions = program.instructions.filter(
-    (candidate) =>
-      candidate.opcodeName === "B_SCR_OP_FRIENDSHIPTODAMAGECALCULATION",
-  );
+  const instructions = instructionsWithOpcodeName(program, "B_SCR_OP_FRIENDSHIPTODAMAGECALCULATION");
   if (instructions.length !== 1) {
     throw new Error(
       "B_SCR_OP_FRIENDSHIPTODAMAGECALCULATION requires exactly 1 concrete "

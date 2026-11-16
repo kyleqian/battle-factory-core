@@ -16,7 +16,7 @@ import {
   type BattleScriptRngState,
 } from "./battleScriptMachine.ts";
 import type { BattleScriptInstruction, BattleScriptProgram } from "./battleScriptProgram.ts";
-import { resolveBattleScriptLabel } from "./battleScriptProgram.ts";
+import { resolveBattleScriptLabel, instructionsWithOpcodeName } from "./battleScriptProgram.ts";
 import {
   BATTLE_SCRIPT_BATTLE_TYPE_DOUBLE,
   BATTLE_SCRIPT_HITMARKER_ATTACKSTRING_PRINTED,
@@ -487,15 +487,9 @@ function createJumpToCalledMoveHandler(
 export function createBattleScriptSleepTalkOpcodeHandlers(
   program: BattleScriptProgram,
 ): BattleScriptOpcodeHandlers<BattleScriptRulesContext> {
-  const tryChoose = program.instructions.filter(
-    (instruction) => instruction.opcodeName === "B_SCR_OP_TRYCHOOSESLEEPTALKMOVE",
-  );
-  const jumpToCalled = program.instructions.filter(
-    (instruction) => instruction.opcodeName === "B_SCR_OP_JUMPTOCALLEDMOVE",
-  );
-  const assistSelect = program.instructions.filter(
-    (instruction) => instruction.opcodeName === "B_SCR_OP_ASSISTATTACKSELECT",
-  );
+  const tryChoose = instructionsWithOpcodeName(program, "B_SCR_OP_TRYCHOOSESLEEPTALKMOVE");
+  const jumpToCalled = instructionsWithOpcodeName(program, "B_SCR_OP_JUMPTOCALLEDMOVE");
+  const assistSelect = instructionsWithOpcodeName(program, "B_SCR_OP_ASSISTATTACKSELECT");
   if (tryChoose.length !== 1) {
     throw new Error(
       `B_SCR_OP_TRYCHOOSESLEEPTALKMOVE requires one concrete start, got ${tryChoose.length}`,

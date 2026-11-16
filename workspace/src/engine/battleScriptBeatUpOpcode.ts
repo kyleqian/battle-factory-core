@@ -14,6 +14,7 @@ import {
 import {
   resolveBattleScriptLabel,
   type BattleScriptProgram,
+  instructionsWithOpcodeName,
 } from "./battleScriptProgram.ts";
 import {
   BATTLE_SCRIPT_PARTY_SIZE,
@@ -150,9 +151,7 @@ function createHandler(
 export function createBattleScriptBeatUpOpcodeHandlers(
   program: BattleScriptProgram,
 ): BattleScriptOpcodeHandlers<BattleScriptRulesContext> {
-  const instructions = program.instructions.filter(
-    ({ opcodeName }) => opcodeName === "B_SCR_OP_TRYDOBEATUP",
-  );
+  const instructions = instructionsWithOpcodeName(program, "B_SCR_OP_TRYDOBEATUP");
   const instruction = instructions[0];
   if (
     instructions.length !== 1

@@ -19,7 +19,7 @@ import {
   type BattleScriptOpcodeHandlers,
 } from "./battleScriptMachine.ts";
 import type { BattleScriptProgram } from "./battleScriptProgram.ts";
-import { resolveBattleScriptLabel } from "./battleScriptProgram.ts";
+import { resolveBattleScriptLabel, instructionsWithOpcodeName } from "./battleScriptProgram.ts";
 import { abilityPresentOnField } from "./battleScriptJumpifabilitypresentOpcode.ts";
 import { resolveDynamicMoveTarget } from "./battleScriptSleepTalkOpcode.ts";
 import {
@@ -170,9 +170,7 @@ function createCallenvironmentattackHandler(
 export function createBattleScriptEnvironmentAttackOpcodeHandlers(
   program: BattleScriptProgram,
 ): BattleScriptOpcodeHandlers<BattleScriptRulesContext> {
-  const weatherBall = program.instructions.filter(
-    ({ opcodeName }) => opcodeName === "B_SCR_OP_SETWEATHERBALLTYPE",
-  );
+  const weatherBall = instructionsWithOpcodeName(program, "B_SCR_OP_SETWEATHERBALLTYPE");
   if (
     weatherBall.length !== 1
     || weatherBall[0]!.opcodeId !== 0xe9
@@ -183,9 +181,7 @@ export function createBattleScriptEnvironmentAttackOpcodeHandlers(
       `invalid B_SCR_OP_SETWEATHERBALLTYPE committed shape (${weatherBall.length})`,
     );
   }
-  const naturePower = program.instructions.filter(
-    ({ opcodeName }) => opcodeName === "B_SCR_OP_CALLENVIRONMENTATTACK",
-  );
+  const naturePower = instructionsWithOpcodeName(program, "B_SCR_OP_CALLENVIRONMENTATTACK");
   if (
     naturePower.length !== 1
     || naturePower[0]!.opcodeId !== 0xcc

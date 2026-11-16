@@ -32,6 +32,7 @@ import type {
   BattleScriptRulesContext,
   BattleScriptSideTimerState,
 } from "./battleScriptRulesContext.ts";
+import { instructionsWithOpcodeName } from "./battleScriptProgram.ts";
 
 /** include/constants/battle.h:210-217. */
 const SIDE_STATUS_REFLECT = 1 << 0;
@@ -220,7 +221,7 @@ function registerSingleInstruction(
   opcodeName: string,
   handler: BattleScriptOpcodeHandler<BattleScriptRulesContext>,
 ): BattleScriptOpcodeHandlers<BattleScriptRulesContext> {
-  const starts = program.instructions.filter((instruction) => instruction.opcodeName === opcodeName);
+  const starts = instructionsWithOpcodeName(program, opcodeName);
   if (starts.length !== 1) {
     throw new Error(`${opcodeName} requires exactly 1 concrete start, got ${starts.length}`);
   }

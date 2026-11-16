@@ -18,6 +18,7 @@ import {
   BATTLE_SCRIPT_STATUS2_FOCUS_ENERGY,
 } from "./battleScriptSourceConstants.ts";
 import { requireBattlerRole, withBattler } from "./battleScriptHitChainOpcode.ts";
+import { instructionsWithOpcodeName } from "./battleScriptProgram.ts";
 
 /** battle_string_ids.h:500-501; indices into gFocusEnergyUsedStringIds. */
 export const BATTLE_SCRIPT_B_MSG_GETTING_PUMPED = 0;
@@ -55,9 +56,7 @@ const setfocusenergyHandler: BattleScriptOpcodeHandler<BattleScriptRulesContext>
 export function createBattleScriptSetfocusenergyOpcodeHandlers(
   program: BattleScriptProgram,
 ): BattleScriptOpcodeHandlers<BattleScriptRulesContext> {
-  const instructions = program.instructions.filter(
-    ({ opcodeName }) => opcodeName === "B_SCR_OP_SETFOCUSENERGY",
-  );
+  const instructions = instructionsWithOpcodeName(program, "B_SCR_OP_SETFOCUSENERGY");
   if (instructions.length !== 1) {
     throw new Error(
       "B_SCR_OP_SETFOCUSENERGY requires exactly 1 concrete start, "

@@ -26,7 +26,7 @@ import {
   type BattleScriptOpcodeHandler,
   type BattleScriptOpcodeHandlers,
 } from "./battleScriptMachine.ts";
-import { resolveBattleScriptLabel, type BattleScriptProgram } from "./battleScriptProgram.ts";
+import { resolveBattleScriptLabel, type BattleScriptProgram, firstInstructionWithOpcodeName } from "./battleScriptProgram.ts";
 import { requireBattlerRole } from "./battleScriptHitChainOpcode.ts";
 import type { BattleScriptRulesContext } from "./battleScriptRulesContext.ts";
 
@@ -52,9 +52,7 @@ function createJumpifnotfirstturnHandler(): BattleScriptOpcodeHandler<BattleScri
 export function createBattleScriptJumpifnotfirstturnOpcodeHandlers(
   program: BattleScriptProgram,
 ): BattleScriptOpcodeHandlers<BattleScriptRulesContext> {
-  const instruction = program.instructions.find(
-    (candidate) => candidate.opcodeName === "B_SCR_OP_JUMPIFNOTFIRSTTURN",
-  );
+  const instruction = firstInstructionWithOpcodeName(program, "B_SCR_OP_JUMPIFNOTFIRSTTURN");
   if (!instruction) {
     throw new Error("committed Battle Script program does not emit B_SCR_OP_JUMPIFNOTFIRSTTURN");
   }

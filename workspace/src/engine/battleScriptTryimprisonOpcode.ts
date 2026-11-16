@@ -14,6 +14,7 @@ import {
   resolveBattleScriptLabel,
   type BattleScriptInstruction,
   type BattleScriptProgram,
+  instructionsWithOpcodeName,
 } from "./battleScriptProgram.ts";
 import {
   withBattleScriptPartyMemberPp,
@@ -158,9 +159,7 @@ function handler(program: BattleScriptProgram): BattleScriptOpcodeHandler<Battle
 export function createBattleScriptTryimprisonOpcodeHandlers(
   program: BattleScriptProgram,
 ): BattleScriptOpcodeHandlers<BattleScriptRulesContext> {
-  const instructions = program.instructions.filter(
-    ({ opcodeName }) => opcodeName === "B_SCR_OP_TRYIMPRISON",
-  );
+  const instructions = instructionsWithOpcodeName(program, "B_SCR_OP_TRYIMPRISON");
   if (instructions.length !== 1) {
     throw new Error(
       `B_SCR_OP_TRYIMPRISON requires exactly 1 concrete start, got ${instructions.length}`,

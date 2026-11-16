@@ -16,15 +16,14 @@ import {
   type BattleScriptStatStages,
   type BattleScriptRulesContext,
 } from "./battleScriptRulesContext.ts";
+import { instructionsWithOpcodeName } from "./battleScriptProgram.ts";
 
 const DEFAULT_STAT_STAGE = 6;
 
 export function createBattleScriptNormalisebuffsOpcodeHandlers(
   program: BattleScriptProgram,
 ): BattleScriptOpcodeHandlers<BattleScriptRulesContext> {
-  const instructions = program.instructions.filter(
-    ({ opcodeName }) => opcodeName === "B_SCR_OP_NORMALISEBUFFS",
-  );
+  const instructions = instructionsWithOpcodeName(program, "B_SCR_OP_NORMALISEBUFFS");
   if (instructions.length !== 1) {
     throw new Error(`B_SCR_OP_NORMALISEBUFFS requires exactly 1 concrete start, got ${instructions.length}`);
   }

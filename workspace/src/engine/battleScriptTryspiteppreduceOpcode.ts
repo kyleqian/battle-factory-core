@@ -14,6 +14,7 @@ import {
   resolveBattleScriptLabel,
   type BattleScriptInstruction,
   type BattleScriptProgram,
+  instructionsWithOpcodeName,
 } from "./battleScriptProgram.ts";
 import { cancelBattleScriptMultiTurnMoves } from "./battleScriptMultiTurnCancellation.ts";
 import {
@@ -125,9 +126,7 @@ function handler(program: BattleScriptProgram): BattleScriptOpcodeHandler<Battle
 export function createBattleScriptTryspiteppreduceOpcodeHandlers(
   program: BattleScriptProgram,
 ): BattleScriptOpcodeHandlers<BattleScriptRulesContext> {
-  const instructions = program.instructions.filter(
-    ({ opcodeName }) => opcodeName === "B_SCR_OP_TRYSPITEPPREDUCE",
-  );
+  const instructions = instructionsWithOpcodeName(program, "B_SCR_OP_TRYSPITEPPREDUCE");
   if (instructions.length !== 1) {
     throw new Error(
       `B_SCR_OP_TRYSPITEPPREDUCE requires exactly 1 concrete start, got ${instructions.length}`,

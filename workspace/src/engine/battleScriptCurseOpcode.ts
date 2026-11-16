@@ -16,6 +16,7 @@
 import {
   resolveBattleScriptLabel,
   type BattleScriptProgram,
+  instructionsWithOpcodeName,
 } from "./battleScriptProgram.ts";
 import {
   transitionBattleScriptCommand,
@@ -131,9 +132,7 @@ export function createBattleScriptCurseOpcodeHandlers(
   program: BattleScriptProgram,
   resolveBattlerForBattleScript: BattleScriptBattlerSelectorResolverPort<BattleScriptRulesContext>,
 ): BattleScriptOpcodeHandlers<BattleScriptRulesContext> {
-  const jumpiftype2Starts = program.instructions.filter(
-    (instruction) => instruction.opcodeName === "B_SCR_OP_JUMPIFTYPE2",
-  );
+  const jumpiftype2Starts = instructionsWithOpcodeName(program, "B_SCR_OP_JUMPIFTYPE2");
   if (jumpiftype2Starts.length !== 1) {
     throw new Error(`B_SCR_OP_JUMPIFTYPE2 requires exactly 1 concrete start, got ${jumpiftype2Starts.length}`);
   }
@@ -151,9 +150,7 @@ export function createBattleScriptCurseOpcodeHandlers(
     throw new Error(`invalid B_SCR_OP_JUMPIFTYPE2 shape at program counter ${jumpiftype2!.programCounter}`);
   }
 
-  const cursetargetStarts = program.instructions.filter(
-    (instruction) => instruction.opcodeName === "B_SCR_OP_CURSETARGET",
-  );
+  const cursetargetStarts = instructionsWithOpcodeName(program, "B_SCR_OP_CURSETARGET");
   if (cursetargetStarts.length !== 1) {
     throw new Error(`B_SCR_OP_CURSETARGET requires exactly 1 concrete start, got ${cursetargetStarts.length}`);
   }

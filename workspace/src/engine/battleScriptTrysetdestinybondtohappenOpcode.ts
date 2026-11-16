@@ -21,6 +21,7 @@ import {
 import type { BattleScriptProgram } from "./battleScriptProgram.ts";
 import type { BattleScriptRulesContext } from "./battleScriptRulesContext.ts";
 import { applyTrySetDestinyBondToHappen } from "./battleScriptHitChainOpcode.ts";
+import { firstInstructionWithOpcodeName } from "./battleScriptProgram.ts";
 
 function requireBattlerRole(
   rulesContext: BattleScriptRulesContext,
@@ -48,9 +49,7 @@ function createTrysetdestinybondtohappenHandler(): BattleScriptOpcodeHandler<Bat
 export function createBattleScriptTrysetdestinybondtohappenOpcodeHandlers(
   program: BattleScriptProgram,
 ): BattleScriptOpcodeHandlers<BattleScriptRulesContext> {
-  const instruction = program.instructions.find(
-    (candidate) => candidate.opcodeName === "B_SCR_OP_TRYSETDESTINYBONDTOHAPPEN",
-  );
+  const instruction = firstInstructionWithOpcodeName(program, "B_SCR_OP_TRYSETDESTINYBONDTOHAPPEN");
   if (!instruction) {
     throw new Error("committed Battle Script program does not emit B_SCR_OP_TRYSETDESTINYBONDTOHAPPEN");
   }

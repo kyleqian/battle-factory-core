@@ -22,6 +22,7 @@ import type {
   BattleScriptProgram,
 } from "./battleScriptProgram.ts";
 import { BATTLE_SCRIPT_STATUS2_MASKS } from "./battleScriptSourceConstants.ts";
+import { firstInstructionWithOpcodeName } from "./battleScriptProgram.ts";
 
 export type BattleScriptMessagePayload = Extract<
   BattleScriptSemanticEventPayload,
@@ -143,7 +144,7 @@ function installHandler<RulesContext extends object>(
   opcodeName: string,
   handler: BattleScriptOpcodeHandler<RulesContext>,
 ): void {
-  const instruction = program.instructions.find((candidate) => candidate.opcodeName === opcodeName);
+  const instruction = firstInstructionWithOpcodeName(program, opcodeName);
   if (!instruction) throw new Error(`committed Battle Script program does not emit ${opcodeName}`);
   handlers[instruction.opcodeId] = handler;
 }

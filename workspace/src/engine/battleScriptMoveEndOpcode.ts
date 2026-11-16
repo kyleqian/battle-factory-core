@@ -25,7 +25,7 @@ import {
   type BattleScriptOpcodeHandlers,
   type BattleScriptRngState,
 } from "./battleScriptMachine.ts";
-import { resolveBattleScriptLabel, type BattleScriptProgram } from "./battleScriptProgram.ts";
+import { resolveBattleScriptLabel, type BattleScriptProgram, firstInstructionWithOpcodeName } from "./battleScriptProgram.ts";
 import { applyBattleScriptNonCertainFlinchMoveEffect } from "./battleScriptHitChainOpcode.ts";
 import {
   applyBattleScriptMoveEndChangedItemOwnership,
@@ -1096,7 +1096,7 @@ function createMoveendOpcodeHandler(): BattleScriptOpcodeHandler<BattleScriptRul
 export function createBattleScriptMoveEndOpcodeHandlers(
   program: BattleScriptProgram,
 ): BattleScriptOpcodeHandlers<BattleScriptRulesContext> {
-  const instruction = program.instructions.find((candidate) => candidate.opcodeName === "B_SCR_OP_MOVEEND");
+  const instruction = firstInstructionWithOpcodeName(program, "B_SCR_OP_MOVEEND");
   if (!instruction) throw new Error("committed Battle Script program does not emit B_SCR_OP_MOVEEND");
   return Object.freeze({ [instruction.opcodeId]: createMoveendOpcodeHandler() });
 }

@@ -11,7 +11,7 @@ import type {
   BattleScriptInstruction,
   BattleScriptProgram,
 } from "./battleScriptProgram.ts";
-import { resolveBattleScriptLabel } from "./battleScriptProgram.ts";
+import { resolveBattleScriptLabel, firstInstructionWithOpcodeName } from "./battleScriptProgram.ts";
 
 export type BattleScriptHaltReason =
   | Readonly<{
@@ -650,7 +650,7 @@ export function createBattleScriptControlHandlers<RulesContext extends object>(
     BattleScriptOpcodeHandler<RulesContext>
   >;
   const install = (opcodeName: string, handler: BattleScriptOpcodeHandler<RulesContext>) => {
-    const opcode = program.instructions.find((instruction) => instruction.opcodeName === opcodeName);
+    const opcode = firstInstructionWithOpcodeName(program, opcodeName);
     if (!opcode) throw new Error(`committed Battle Script program does not emit ${opcodeName}`);
     handlers[opcode.opcodeId] = handler;
   };

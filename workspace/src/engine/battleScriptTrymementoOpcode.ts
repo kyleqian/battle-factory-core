@@ -14,7 +14,7 @@ import {
   type BattleScriptOpcodeHandler,
   type BattleScriptOpcodeHandlers,
 } from "./battleScriptMachine.ts";
-import { resolveBattleScriptLabel, type BattleScriptProgram } from "./battleScriptProgram.ts";
+import { resolveBattleScriptLabel, type BattleScriptProgram, instructionsWithOpcodeName } from "./battleScriptProgram.ts";
 import { requireBattlerRole } from "./battleScriptHitChainOpcode.ts";
 import { STAT_ATK, STAT_SPATK } from "./battleScriptStatBuffs.ts";
 import type { BattleScriptRulesContext } from "./battleScriptRulesContext.ts";
@@ -76,9 +76,7 @@ function createTrymementoHandler(): BattleScriptOpcodeHandler<BattleScriptRulesC
 export function createBattleScriptTrymementoOpcodeHandlers(
   program: BattleScriptProgram,
 ): BattleScriptOpcodeHandlers<BattleScriptRulesContext> {
-  const instructions = program.instructions.filter(
-    ({ opcodeName }) => opcodeName === "B_SCR_OP_TRYMEMENTO",
-  );
+  const instructions = instructionsWithOpcodeName(program, "B_SCR_OP_TRYMEMENTO");
   if (instructions.length !== 2) {
     throw new Error(`B_SCR_OP_TRYMEMENTO requires exactly 2 concrete starts, got ${instructions.length}`);
   }

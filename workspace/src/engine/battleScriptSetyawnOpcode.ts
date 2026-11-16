@@ -17,7 +17,7 @@ import {
   type BattleScriptOpcodeHandler,
   type BattleScriptOpcodeHandlers,
 } from "./battleScriptMachine.ts";
-import { resolveBattleScriptLabel, type BattleScriptProgram } from "./battleScriptProgram.ts";
+import { resolveBattleScriptLabel, type BattleScriptProgram, instructionsWithOpcodeName } from "./battleScriptProgram.ts";
 import { withBattler } from "./battleScriptHitChainOpcode.ts";
 import {
   BATTLE_SCRIPT_STATUS1_SLEEP,
@@ -62,7 +62,7 @@ function createSetyawnHandler(): BattleScriptOpcodeHandler<BattleScriptRulesCont
 export function createBattleScriptSetyawnOpcodeHandlers(
   program: BattleScriptProgram,
 ): BattleScriptOpcodeHandlers<BattleScriptRulesContext> {
-  const starts = program.instructions.filter((instruction) => instruction.opcodeName === "B_SCR_OP_SETYAWN");
+  const starts = instructionsWithOpcodeName(program, "B_SCR_OP_SETYAWN");
   if (starts.length !== 1) {
     throw new Error(`B_SCR_OP_SETYAWN requires exactly 1 concrete start, got ${starts.length}`);
   }

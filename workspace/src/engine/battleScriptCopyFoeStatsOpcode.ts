@@ -19,6 +19,7 @@ import type {
   BattleScriptRulesContext,
   BattleScriptStatStages,
 } from "./battleScriptRulesContext.ts";
+import { instructionsWithOpcodeName } from "./battleScriptProgram.ts";
 
 const copyFoeStatsHandler: BattleScriptOpcodeHandler<BattleScriptRulesContext> = (
   context,
@@ -52,9 +53,7 @@ const copyFoeStatsHandler: BattleScriptOpcodeHandler<BattleScriptRulesContext> =
 export function createBattleScriptCopyFoeStatsOpcodeHandlers(
   program: BattleScriptProgram,
 ): BattleScriptOpcodeHandlers<BattleScriptRulesContext> {
-  const instructions = program.instructions.filter(
-    (candidate) => candidate.opcodeName === "B_SCR_OP_COPYFOESTATS",
-  );
+  const instructions = instructionsWithOpcodeName(program, "B_SCR_OP_COPYFOESTATS");
   if (instructions.length !== 1) {
     throw new Error(
       `B_SCR_OP_COPYFOESTATS requires exactly 1 concrete start, got ${instructions.length}`,

@@ -21,6 +21,7 @@ import {
   resolveBattleScriptLabel,
   type BattleScriptInstruction,
   type BattleScriptProgram,
+  instructionsWithOpcodeName,
 } from "./battleScriptProgram.ts";
 import type { BattleScriptRulesContext } from "./battleScriptRulesContext.ts";
 import { requireBattlerRole, withBattler } from "./battleScriptHitChainOpcode.ts";
@@ -76,9 +77,7 @@ function createSettauntHandler(
 export function createBattleScriptSettauntOpcodeHandlers(
   program: BattleScriptProgram,
 ): BattleScriptOpcodeHandlers<BattleScriptRulesContext> {
-  const instructions = program.instructions.filter(
-    (instruction) => instruction.opcodeName === "B_SCR_OP_SETTAUNT",
-  );
+  const instructions = instructionsWithOpcodeName(program, "B_SCR_OP_SETTAUNT");
   if (instructions.length !== 1) {
     throw new Error(
       "B_SCR_OP_SETTAUNT requires exactly 1 concrete start, "

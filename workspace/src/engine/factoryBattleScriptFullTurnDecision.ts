@@ -102,6 +102,7 @@ import {
   resolveBattleScriptLabel,
   type BattleScriptInstruction,
   type BattleScriptProgram,
+  firstInstructionWithOpcodeName,
 } from "./battleScriptProgram.ts";
 import type { BattleScriptBattlerId } from "./battleScriptEvents.ts";
 import {
@@ -1898,10 +1899,7 @@ function voluntarySwitchHandlers(
   opposingMoveId: number,
   opposingMoveTarget: BattleScriptBattlerId,
 ): Handlers {
-  const instruction = PROGRAM.instructions.find(
-    (candidate) =>
-      candidate.opcodeName === "B_SCR_OP_JUMPIFNOPURSUITSWITCHDMG",
-  );
+  const instruction = firstInstructionWithOpcodeName(PROGRAM, "B_SCR_OP_JUMPIFNOPURSUITSWITCHDMG");
   if (!instruction) {
     throw new Error("assembled program has no jumpifnopursuitswitchdmg instruction");
   }

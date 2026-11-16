@@ -60,7 +60,7 @@ import {
   type BattleScriptOpcodeHandlerContext,
   type BattleScriptOpcodeHandlers,
 } from "./battleScriptMachine.ts";
-import { resolveBattleScriptLabel, type BattleScriptProgram } from "./battleScriptProgram.ts";
+import { resolveBattleScriptLabel, type BattleScriptProgram, firstInstructionWithOpcodeName } from "./battleScriptProgram.ts";
 import { withBattler } from "./battleScriptHitChainOpcode.ts";
 import { resolveFirstValidTarget } from "./battleScriptTargetIterationOpcode.ts";
 import type { BattleScriptControllerIdlePort } from "./battleScriptSourceCommands.ts";
@@ -213,7 +213,7 @@ export function createBattleScriptExplosionOpcodeHandlers(
     BattleScriptOpcodeHandler<BattleScriptRulesContext>
   >;
   const install = (opcodeName: string, handler: BattleScriptOpcodeHandler<BattleScriptRulesContext>) => {
-    const instruction = program.instructions.find((candidate) => candidate.opcodeName === opcodeName);
+    const instruction = firstInstructionWithOpcodeName(program, opcodeName);
     if (!instruction) throw new Error(`committed Battle Script program does not emit ${opcodeName}`);
     handlers[instruction.opcodeId] = handler;
   };

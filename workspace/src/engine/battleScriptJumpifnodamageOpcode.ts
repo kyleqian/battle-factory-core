@@ -21,6 +21,7 @@ import {
 import {
   resolveBattleScriptLabel,
   type BattleScriptProgram,
+  instructionsWithOpcodeName,
 } from "./battleScriptProgram.ts";
 import { requireBattlerRole } from "./battleScriptHitChainOpcode.ts";
 import type { BattleScriptRulesContext } from "./battleScriptRulesContext.ts";
@@ -64,9 +65,7 @@ function createJumpifnodamageHandler(): BattleScriptOpcodeHandler<BattleScriptRu
 export function createBattleScriptJumpifnodamageOpcodeHandlers(
   program: BattleScriptProgram,
 ): BattleScriptOpcodeHandlers<BattleScriptRulesContext> {
-  const starts = program.instructions.filter(
-    (instruction) => instruction.opcodeName === "B_SCR_OP_JUMPIFNODAMAGE",
-  );
+  const starts = instructionsWithOpcodeName(program, "B_SCR_OP_JUMPIFNODAMAGE");
   if (starts.length !== 1) {
     throw new Error(
       `B_SCR_OP_JUMPIFNODAMAGE requires exactly 1 concrete start, got ${starts.length}`,

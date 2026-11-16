@@ -30,7 +30,7 @@ import {
   type BattleScriptOpcodeHandler,
   type BattleScriptOpcodeHandlers,
 } from "./battleScriptMachine.ts";
-import { resolveBattleScriptLabel, type BattleScriptProgram } from "./battleScriptProgram.ts";
+import { resolveBattleScriptLabel, type BattleScriptProgram, firstInstructionWithOpcodeName, instructionsWithOpcodeName } from "./battleScriptProgram.ts";
 import { recordBattleScriptAbilityReveal } from "./battleScriptAiReveal.ts";
 import { isBattlerOfType, unsupportedBranch, withBattler } from "./battleScriptHitChainOpcode.ts";
 import { readBattleScriptRulesByte, writeBattleScriptRulesByte } from "./battleScriptSetByte.ts";
@@ -603,7 +603,7 @@ function createRapidspinfreeHandler(): BattleScriptOpcodeHandler<BattleScriptRul
 }
 
 function findInstructionOpcodeId(program: BattleScriptProgram, opcodeName: string): number {
-  const instruction = program.instructions.find((candidate) => candidate.opcodeName === opcodeName);
+  const instruction = firstInstructionWithOpcodeName(program, opcodeName);
   if (!instruction) throw new Error(`committed Battle Script program does not emit ${opcodeName}`);
   return instruction.opcodeId;
 }
@@ -614,7 +614,7 @@ function registerSingleInstruction(
   expectedOperandCount: number,
   handler: BattleScriptOpcodeHandler<BattleScriptRulesContext>,
 ): BattleScriptOpcodeHandlers<BattleScriptRulesContext> {
-  const starts = program.instructions.filter((instruction) => instruction.opcodeName === opcodeName);
+  const starts = instructionsWithOpcodeName(program, opcodeName);
   if (starts.length !== 1) {
     throw new Error(`${opcodeName} requires exactly 1 concrete start, got ${starts.length}`);
   }

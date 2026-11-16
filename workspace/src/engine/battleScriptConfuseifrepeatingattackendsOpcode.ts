@@ -22,6 +22,7 @@ import {
 import type { BattleScriptProgram } from "./battleScriptProgram.ts";
 import { BATTLE_SCRIPT_STATUS2_MASKS } from "./battleScriptSourceConstants.ts";
 import type { BattleScriptRulesContext } from "./battleScriptRulesContext.ts";
+import { instructionsWithOpcodeName } from "./battleScriptProgram.ts";
 
 /** include/constants/battle.h:300 -- SetMoveEffect's Thrash-family lock-in case. */
 const MOVE_EFFECT_THRASH = 53;
@@ -49,9 +50,7 @@ function createConfuseifrepeatingattackendsHandler(): BattleScriptOpcodeHandler<
 export function createBattleScriptConfuseifrepeatingattackendsOpcodeHandlers(
   program: BattleScriptProgram,
 ): BattleScriptOpcodeHandlers<BattleScriptRulesContext> {
-  const starts = program.instructions.filter(
-    (instruction) => instruction.opcodeName === "B_SCR_OP_CONFUSEIFREPEATINGATTACKENDS",
-  );
+  const starts = instructionsWithOpcodeName(program, "B_SCR_OP_CONFUSEIFREPEATINGATTACKENDS");
   if (starts.length !== 1) {
     throw new Error(`B_SCR_OP_CONFUSEIFREPEATINGATTACKENDS requires exactly 1 concrete start, got ${starts.length}`);
   }

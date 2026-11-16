@@ -38,7 +38,7 @@ import {
   type BattleScriptOpcodeHandler,
   type BattleScriptOpcodeHandlers,
 } from "./battleScriptMachine.ts";
-import { resolveBattleScriptLabel, type BattleScriptProgram } from "./battleScriptProgram.ts";
+import { resolveBattleScriptLabel, type BattleScriptProgram, instructionsWithOpcodeName } from "./battleScriptProgram.ts";
 import type { BattleScriptRulesContext } from "./battleScriptRulesContext.ts";
 
 /** include/constants/abilities.h:17,81 -- BattleScript_EffectSolarBeam's own two concrete values. */
@@ -97,9 +97,7 @@ function createJumpifabilitypresentHandler(): BattleScriptOpcodeHandler<BattleSc
 export function createBattleScriptJumpifabilitypresentOpcodeHandlers(
   program: BattleScriptProgram,
 ): BattleScriptOpcodeHandlers<BattleScriptRulesContext> {
-  const instructions = program.instructions.filter(
-    (candidate) => candidate.opcodeName === "B_SCR_OP_JUMPIFABILITYPRESENT",
-  );
+  const instructions = instructionsWithOpcodeName(program, "B_SCR_OP_JUMPIFABILITYPRESENT");
   if (instructions.length !== 2) {
     throw new Error(`B_SCR_OP_JUMPIFABILITYPRESENT requires both concrete starts, got ${instructions.length}`);
   }

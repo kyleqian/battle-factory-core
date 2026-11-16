@@ -20,6 +20,7 @@ import {
   BATTLE_SCRIPT_STATUS3_SEMI_INVULNERABLE,
 } from "./battleScriptSourceConstants.ts";
 import movesData from "../data/gen/moves.json" with { type: "json" };
+import { instructionsWithOpcodeName } from "./battleScriptProgram.ts";
 
 type MoveRow = Readonly<{ id: number; pp: number }>;
 const BASE_PP_BY_MOVE = new Map(
@@ -125,9 +126,7 @@ function createHandler(): BattleScriptOpcodeHandler<BattleScriptRulesContext> {
 export function createBattleScriptTransformOpcodeHandlers(
   program: BattleScriptProgram,
 ): BattleScriptOpcodeHandlers<BattleScriptRulesContext> {
-  const instructions = program.instructions.filter(
-    ({ opcodeName }) => opcodeName === "B_SCR_OP_TRANSFORMDATAEXECUTION",
-  );
+  const instructions = instructionsWithOpcodeName(program, "B_SCR_OP_TRANSFORMDATAEXECUTION");
   if (instructions.length !== 1) {
     throw new Error(
       `B_SCR_OP_TRANSFORMDATAEXECUTION requires exactly 1 concrete start, got ${instructions.length}`,

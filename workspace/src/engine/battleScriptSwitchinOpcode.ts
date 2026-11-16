@@ -32,7 +32,7 @@ import {
   type BattleScriptOpcodeHandlers,
   type BattleScriptRngState,
 } from "./battleScriptMachine.ts";
-import { resolveBattleScriptLabel, type BattleScriptInstruction, type BattleScriptProgram } from "./battleScriptProgram.ts";
+import { resolveBattleScriptLabel, type BattleScriptInstruction, type BattleScriptProgram, firstInstructionWithOpcodeName } from "./battleScriptProgram.ts";
 import type { BattleScriptBattlerId, BattleScriptSemanticEventPayload } from "./battleScriptEvents.ts";
 import { recordBattleScriptAbilityReveal } from "./battleScriptAiReveal.ts";
 import type { BattleScriptControllerIdlePort } from "./battleScriptSourceCommands.ts";
@@ -1476,7 +1476,7 @@ export function createBattleScriptSwitchinOpcodeHandlers(
     BattleScriptOpcodeHandler<BattleScriptRulesContext>
   >;
   const install = (opcodeName: string, handler: BattleScriptOpcodeHandler<BattleScriptRulesContext>) => {
-    const instruction = program.instructions.find((candidate) => candidate.opcodeName === opcodeName);
+    const instruction = firstInstructionWithOpcodeName(program, opcodeName);
     if (!instruction) throw new Error(`committed Battle Script program does not emit ${opcodeName}`);
     handlers[instruction.opcodeId] = handler;
   };

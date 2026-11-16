@@ -17,6 +17,7 @@ import {
   resolveBattleScriptLabel,
   type BattleScriptInstruction,
   type BattleScriptProgram,
+  instructionsWithOpcodeName,
 } from "./battleScriptProgram.ts";
 import {
   withBattleScriptPartyMemberStatus1,
@@ -101,11 +102,7 @@ function createRefreshHandler(
 export function createBattleScriptRefreshOpcodeHandlers(
   program: BattleScriptProgram,
 ): BattleScriptOpcodeHandlers<BattleScriptRulesContext> {
-  const instructions = program.instructions.filter(
-    (instruction) =>
-      instruction.opcodeName
-      === "B_SCR_OP_CUREIFBURNEDPARALYZEDORPOISONED",
-  );
+  const instructions = instructionsWithOpcodeName(program, "B_SCR_OP_CUREIFBURNEDPARALYZEDORPOISONED");
   if (instructions.length !== 1) {
     throw new Error(
       "B_SCR_OP_CUREIFBURNEDPARALYZEDORPOISONED requires exactly 1 "

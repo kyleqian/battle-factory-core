@@ -16,6 +16,7 @@ import {
 import type { BattleScriptProgram } from "./battleScriptProgram.ts";
 import type { BattleScriptRulesContext } from "./battleScriptRulesContext.ts";
 import { requireBattlerRole } from "./battleScriptHitChainOpcode.ts";
+import { instructionsWithOpcodeName } from "./battleScriptProgram.ts";
 
 const doubleDamageIfDamagedHandler:
 BattleScriptOpcodeHandler<BattleScriptRulesContext> = (context) => {
@@ -42,9 +43,7 @@ BattleScriptOpcodeHandler<BattleScriptRulesContext> = (context) => {
 export function createBattleScriptDoubleDamageIfDamagedOpcodeHandlers(
   program: BattleScriptProgram,
 ): BattleScriptOpcodeHandlers<BattleScriptRulesContext> {
-  const instructions = program.instructions.filter(
-    ({ opcodeName }) => opcodeName === "B_SCR_OP_DOUBLEDAMAGEDEALTIFDAMAGED",
-  );
+  const instructions = instructionsWithOpcodeName(program, "B_SCR_OP_DOUBLEDAMAGEDEALTIFDAMAGED");
   if (instructions.length !== 1) {
     throw new Error(
       "B_SCR_OP_DOUBLEDAMAGEDEALTIFDAMAGED requires exactly 1 concrete start, "

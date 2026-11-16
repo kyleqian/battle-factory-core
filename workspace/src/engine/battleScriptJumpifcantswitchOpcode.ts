@@ -23,6 +23,7 @@ import {
   resolveBattleScriptLabel,
   type BattleScriptInstruction,
   type BattleScriptProgram,
+  instructionsWithOpcodeName,
 } from "./battleScriptProgram.ts";
 import {
   resolveBattleScriptBattlerAtPosition,
@@ -192,10 +193,7 @@ function createJumpifcantswitchHandler(): BattleScriptOpcodeHandler<BattleScript
 export function createBattleScriptJumpifcantswitchOpcodeHandlers(
   program: BattleScriptProgram,
 ): BattleScriptOpcodeHandlers<BattleScriptRulesContext> {
-  const starts = program.instructions.filter(
-    (instruction) =>
-      instruction.opcodeName === "B_SCR_OP_JUMPIFCANTSWITCH",
-  );
+  const starts = instructionsWithOpcodeName(program, "B_SCR_OP_JUMPIFCANTSWITCH");
   if (starts.length !== 2) {
     throw new Error(
       `B_SCR_OP_JUMPIFCANTSWITCH requires exactly 2 concrete starts, got ${starts.length}`,

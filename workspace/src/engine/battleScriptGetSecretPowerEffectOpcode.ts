@@ -14,6 +14,7 @@ import {
 } from "./battleScriptMachine.ts";
 import type { BattleScriptProgram } from "./battleScriptProgram.ts";
 import type { BattleScriptRulesContext } from "./battleScriptRulesContext.ts";
+import { instructionsWithOpcodeName } from "./battleScriptProgram.ts";
 
 const MOVE_EFFECT_SLEEP = 1;
 const MOVE_EFFECT_POISON = 2;
@@ -71,10 +72,7 @@ const getSecretPowerEffectHandler: BattleScriptOpcodeHandler<
 export function createBattleScriptGetSecretPowerEffectOpcodeHandlers(
   program: BattleScriptProgram,
 ): BattleScriptOpcodeHandlers<BattleScriptRulesContext> {
-  const instructions = program.instructions.filter(
-    (instruction) =>
-      instruction.opcodeName === "B_SCR_OP_GETSECRETPOWEREFFECT",
-  );
+  const instructions = instructionsWithOpcodeName(program, "B_SCR_OP_GETSECRETPOWEREFFECT");
   if (instructions.length !== 1) {
     throw new Error(
       "B_SCR_OP_GETSECRETPOWEREFFECT requires exactly 1 concrete start, "

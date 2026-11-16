@@ -28,6 +28,7 @@ import {
   type BattleScriptInstruction,
   type BattleScriptOperand,
   type BattleScriptProgram,
+  firstInstructionWithOpcodeName,
 } from "./battleScriptProgram.ts";
 import type {
   BattleScriptBattlerSelectorResolverPort,
@@ -4765,7 +4766,7 @@ export function createBattleScriptHitChainOpcodeHandlers(
     BattleScriptOpcodeHandler<BattleScriptRulesContext>
   >;
   const install = (opcodeName: string, handler: BattleScriptOpcodeHandler<BattleScriptRulesContext>) => {
-    const instruction = program.instructions.find((candidate) => candidate.opcodeName === opcodeName);
+    const instruction = firstInstructionWithOpcodeName(program, opcodeName);
     if (!instruction) throw new Error(`committed Battle Script program does not emit ${opcodeName}`);
     handlers[instruction.opcodeId] = handler;
   };

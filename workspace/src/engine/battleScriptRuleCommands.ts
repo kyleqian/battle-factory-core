@@ -12,7 +12,7 @@ import type {
   BattleScriptOperand,
   BattleScriptProgram,
 } from "./battleScriptProgram.ts";
-import { resolveBattleScriptLabel } from "./battleScriptProgram.ts";
+import { resolveBattleScriptLabel, firstInstructionWithOpcodeName } from "./battleScriptProgram.ts";
 import type { BattleScriptBattlerSelectorResolverPort } from "./battleScriptSourceCommands.ts";
 
 export type BattleScriptMultiHitRulesContext = Readonly<{
@@ -116,9 +116,7 @@ export function createBattleScriptRuleCommandHandlers<
     opcodeName: string,
     handler: BattleScriptOpcodeHandler<RulesContext>,
   ) => {
-    const instruction = program.instructions.find(
-      (candidate) => candidate.opcodeName === opcodeName,
-    );
+    const instruction = firstInstructionWithOpcodeName(program, opcodeName);
     if (!instruction) {
       throw new Error(`committed Battle Script program does not emit ${opcodeName}`);
     }

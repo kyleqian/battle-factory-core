@@ -13,6 +13,7 @@ import {
 import {
   resolveBattleScriptLabel,
   type BattleScriptProgram,
+  instructionsWithOpcodeName,
 } from "./battleScriptProgram.ts";
 import type {
   BattleScriptRulesBattlers,
@@ -90,10 +91,7 @@ function createHandler(
 export function createBattleScriptDisablelastusedattackOpcodeHandlers(
   program: BattleScriptProgram,
 ): BattleScriptOpcodeHandlers<BattleScriptRulesContext> {
-  const instructions = program.instructions.filter(
-    (instruction) =>
-      instruction.opcodeName === "B_SCR_OP_DISABLELASTUSEDATTACK",
-  );
+  const instructions = instructionsWithOpcodeName(program, "B_SCR_OP_DISABLELASTUSEDATTACK");
   if (instructions.length !== 1) {
     throw new Error(
       `expected one B_SCR_OP_DISABLELASTUSEDATTACK, got ${instructions.length}`,

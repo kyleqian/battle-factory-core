@@ -16,6 +16,7 @@ import {
   BATTLE_SCRIPT_STATUS2_MASKS,
   BATTLE_SCRIPT_STATUS2_WRAPPED_MASK,
 } from "./battleScriptSourceConstants.ts";
+import { instructionsWithOpcodeName } from "./battleScriptProgram.ts";
 
 /** battle_message.c:580-584 -- gSubstituteUsedStringIds indices. */
 export const BATTLE_SCRIPT_B_MSG_SET_SUBSTITUTE = 0;
@@ -74,9 +75,7 @@ function createSetsubstituteHandler(): BattleScriptOpcodeHandler<BattleScriptRul
 export function createBattleScriptSetsubstituteOpcodeHandlers(
   program: BattleScriptProgram,
 ): BattleScriptOpcodeHandlers<BattleScriptRulesContext> {
-  const instructions = program.instructions.filter(
-    (candidate) => candidate.opcodeName === "B_SCR_OP_SETSUBSTITUTE",
-  );
+  const instructions = instructionsWithOpcodeName(program, "B_SCR_OP_SETSUBSTITUTE");
   if (instructions.length !== 1) {
     throw new Error(`committed Battle Script program must emit one B_SCR_OP_SETSUBSTITUTE, found ${instructions.length}`);
   }

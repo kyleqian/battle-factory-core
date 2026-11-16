@@ -15,15 +15,14 @@ import type { BattleScriptProgram } from "./battleScriptProgram.ts";
 import { requireBattlerRole, withBattler } from "./battleScriptHitChainOpcode.ts";
 import type { BattleScriptRulesContext } from "./battleScriptRulesContext.ts";
 import { BATTLE_SCRIPT_STATUS2_MASKS } from "./battleScriptSourceConstants.ts";
+import { instructionsWithOpcodeName } from "./battleScriptProgram.ts";
 
 const STATUS2_BIDE_TURN_2 = 2 << 8;
 
 export function createBattleScriptSetbideOpcodeHandlers(
   program: BattleScriptProgram,
 ): BattleScriptOpcodeHandlers<BattleScriptRulesContext> {
-  const instructions = program.instructions.filter(
-    ({ opcodeName }) => opcodeName === "B_SCR_OP_SETBIDE",
-  );
+  const instructions = instructionsWithOpcodeName(program, "B_SCR_OP_SETBIDE");
   if (instructions.length !== 1) {
     throw new Error(`B_SCR_OP_SETBIDE requires exactly 1 concrete start, got ${instructions.length}`);
   }

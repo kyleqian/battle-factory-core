@@ -10,7 +10,7 @@ import {
   type BattleScriptOpcodeHandler,
   type BattleScriptOpcodeHandlers,
 } from "./battleScriptMachine.ts";
-import { resolveBattleScriptLabel, type BattleScriptProgram } from "./battleScriptProgram.ts";
+import { resolveBattleScriptLabel, type BattleScriptProgram, instructionsWithOpcodeName } from "./battleScriptProgram.ts";
 import { requireBattlerRole, withBattler } from "./battleScriptHitChainOpcode.ts";
 import {
   resolveBattleScriptCurrentMoveEffect,
@@ -40,9 +40,7 @@ function jumpToFailure(
 export function createBattleScriptChargeSportOpcodeHandlers(
   program: BattleScriptProgram,
 ): BattleScriptOpcodeHandlers<BattleScriptRulesContext> {
-  const charge = program.instructions.filter(
-    ({ opcodeName }) => opcodeName === "B_SCR_OP_SETCHARGE",
-  );
+  const charge = instructionsWithOpcodeName(program, "B_SCR_OP_SETCHARGE");
   if (
     charge.length !== 1
     || charge[0]!.opcodeId !== 0xcb
@@ -51,9 +49,7 @@ export function createBattleScriptChargeSportOpcodeHandlers(
   ) {
     throw new Error(`invalid B_SCR_OP_SETCHARGE committed shape (${charge.length})`);
   }
-  const sports = program.instructions.filter(
-    ({ opcodeName }) => opcodeName === "B_SCR_OP_SETTYPEBASEDHALVERS",
-  );
+  const sports = instructionsWithOpcodeName(program, "B_SCR_OP_SETTYPEBASEDHALVERS");
   if (
     sports.length !== 1
     || sports[0]!.opcodeId !== 0xe8

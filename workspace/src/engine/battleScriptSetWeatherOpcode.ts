@@ -18,6 +18,7 @@ import {
 import type { BattleScriptProgram } from "./battleScriptProgram.ts";
 import { BATTLE_SCRIPT_MOVE_RESULT_MISSED } from "./battleScriptSourceConstants.ts";
 import type { BattleScriptRulesContext } from "./battleScriptRulesContext.ts";
+import { instructionsWithOpcodeName } from "./battleScriptProgram.ts";
 
 /** include/constants/battle.h:232-244 -- the four TEMPORARY bits this engine's raw `weather` u32 field carries at Factory L50 (no PERMANENT setter exists). */
 const B_WEATHER_RAIN = (1 << 0) | (1 << 1) | (1 << 2);
@@ -89,7 +90,7 @@ function registerSingleInstruction(
   opcodeName: string,
   handler: BattleScriptOpcodeHandler<BattleScriptRulesContext>,
 ): BattleScriptOpcodeHandlers<BattleScriptRulesContext> {
-  const starts = program.instructions.filter((instruction) => instruction.opcodeName === opcodeName);
+  const starts = instructionsWithOpcodeName(program, opcodeName);
   if (starts.length !== 1) {
     throw new Error(`${opcodeName} requires exactly 1 concrete start, got ${starts.length}`);
   }

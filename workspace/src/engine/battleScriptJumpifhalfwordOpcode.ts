@@ -33,6 +33,7 @@ import movesData from "../data/gen/moves.json" with { type: "json" };
 import {
   resolveBattleScriptLabel,
   type BattleScriptProgram,
+  firstInstructionWithOpcodeName,
 } from "./battleScriptProgram.ts";
 import {
   transitionBattleScriptCommand,
@@ -187,9 +188,7 @@ function createJumpifhalfwordOpcodeHandler(): BattleScriptOpcodeHandler<BattleSc
 export function createBattleScriptJumpifhalfwordOpcodeHandlers(
   program: BattleScriptProgram,
 ): BattleScriptOpcodeHandlers<BattleScriptRulesContext> {
-  const instruction = program.instructions.find(
-    (candidate) => candidate.opcodeName === "B_SCR_OP_JUMPIFHALFWORD",
-  );
+  const instruction = firstInstructionWithOpcodeName(program, "B_SCR_OP_JUMPIFHALFWORD");
   if (!instruction) throw new Error("committed Battle Script program does not emit B_SCR_OP_JUMPIFHALFWORD");
   return Object.freeze({ [instruction.opcodeId]: createJumpifhalfwordOpcodeHandler() });
 }

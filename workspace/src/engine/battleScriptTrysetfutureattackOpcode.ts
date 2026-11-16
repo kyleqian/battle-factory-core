@@ -11,6 +11,7 @@ import {
 import {
   resolveBattleScriptLabel,
   type BattleScriptProgram,
+  instructionsWithOpcodeName,
 } from "./battleScriptProgram.ts";
 import {
   BATTLE_SCRIPT_BATTLE_TYPE_DOUBLE,
@@ -174,7 +175,7 @@ function createHandler(program: BattleScriptProgram): BattleScriptOpcodeHandler<
 export function createBattleScriptTrysetfutureattackOpcodeHandlers(
   program: BattleScriptProgram,
 ): BattleScriptOpcodeHandlers<BattleScriptRulesContext> {
-  const instructions = program.instructions.filter((i) => i.opcodeName === "B_SCR_OP_TRYSETFUTUREATTACK");
+  const instructions = instructionsWithOpcodeName(program, "B_SCR_OP_TRYSETFUTUREATTACK");
   if (instructions.length !== 1) throw new Error(`expected one B_SCR_OP_TRYSETFUTUREATTACK, got ${instructions.length}`);
   const instruction = instructions[0]!;
   if (instruction.opcodeId !== 0xc3 || instruction.dispatcher !== "Cmd_trysetfutureattack"

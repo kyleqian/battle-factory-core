@@ -32,6 +32,7 @@ import { withBattler } from "./battleScriptHitChainOpcode.ts";
 import { BATTLE_SCRIPT_MOVE_RESULT_MISSED } from "./battleScriptSourceConstants.ts";
 import type { BattleScriptRulesContext } from "./battleScriptRulesContext.ts";
 import movesData from "../data/gen/moves.json" with { type: "json" };
+import { firstInstructionWithOpcodeName } from "./battleScriptProgram.ts";
 
 type MoveEffectRow = Readonly<{ id: number; effect: string }>;
 
@@ -137,9 +138,7 @@ function createSetprotectlikeHandler(): BattleScriptOpcodeHandler<BattleScriptRu
 export function createBattleScriptProtectlikeOpcodeHandlers(
   program: BattleScriptProgram,
 ): BattleScriptOpcodeHandlers<BattleScriptRulesContext> {
-  const instruction = program.instructions.find(
-    (candidate) => candidate.opcodeName === "B_SCR_OP_SETPROTECTLIKE",
-  );
+  const instruction = firstInstructionWithOpcodeName(program, "B_SCR_OP_SETPROTECTLIKE");
   if (!instruction) {
     throw new Error("committed Battle Script program does not emit B_SCR_OP_SETPROTECTLIKE");
   }

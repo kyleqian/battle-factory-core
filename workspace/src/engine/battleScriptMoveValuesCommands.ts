@@ -9,6 +9,7 @@ import type { BattleScriptProgram } from "./battleScriptProgram.ts";
 import {
   BATTLE_SCRIPT_MOVE_VALUES_CLEANUP_HITMARKER_MASK,
 } from "./battleScriptSourceConstants.ts";
+import { firstInstructionWithOpcodeName } from "./battleScriptProgram.ts";
 
 export type BattleScriptMoveValuesRulesContext = Readonly<{
   moveResultFlags: number;
@@ -76,9 +77,7 @@ export function createBattleScriptMoveValuesCommandHandlers<
 >(
   program: BattleScriptProgram,
 ): BattleScriptOpcodeHandlers<RulesContext> {
-  const instruction = program.instructions.find(
-    (candidate) => candidate.opcodeName === "B_SCR_OP_MOVEVALUESCLEANUP",
-  );
+  const instruction = firstInstructionWithOpcodeName(program, "B_SCR_OP_MOVEVALUESCLEANUP");
   if (!instruction) {
     throw new Error(
       "committed Battle Script program does not emit B_SCR_OP_MOVEVALUESCLEANUP",

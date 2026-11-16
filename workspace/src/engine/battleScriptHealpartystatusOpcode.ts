@@ -32,6 +32,7 @@ import {
   withBattler,
 } from "./battleScriptHitChainOpcode.ts";
 import speciesStatsData from "../data/gen/species-stats.json" with { type: "json" };
+import { instructionsWithOpcodeName } from "./battleScriptProgram.ts";
 
 export const BATTLE_SCRIPT_MOVE_HEAL_BELL = 215;
 export const BATTLE_SCRIPT_ABILITY_SOUNDPROOF = 43;
@@ -225,9 +226,7 @@ const healpartystatusHandler: BattleScriptOpcodeHandler<BattleScriptRulesContext
 export function createBattleScriptHealpartystatusOpcodeHandlers(
   program: BattleScriptProgram,
 ): BattleScriptOpcodeHandlers<BattleScriptRulesContext> {
-  const instructions = program.instructions.filter(
-    ({ opcodeName }) => opcodeName === "B_SCR_OP_HEALPARTYSTATUS",
-  );
+  const instructions = instructionsWithOpcodeName(program, "B_SCR_OP_HEALPARTYSTATUS");
   if (instructions.length !== 1) {
     throw new Error(
       "B_SCR_OP_HEALPARTYSTATUS requires exactly 1 concrete start, got "

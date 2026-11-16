@@ -25,6 +25,7 @@
 import {
   resolveBattleScriptLabel,
   type BattleScriptProgram,
+  instructionsWithOpcodeName,
 } from "./battleScriptProgram.ts";
 import {
   transitionBattleScriptCommand,
@@ -97,9 +98,7 @@ function createJumpifstatus3conditionOpcodeHandler(): BattleScriptOpcodeHandler<
 export function createBattleScriptJumpifstatus3conditionOpcodeHandlers(
   program: BattleScriptProgram,
 ): BattleScriptOpcodeHandlers<BattleScriptRulesContext> {
-  const starts = program.instructions.filter(
-    (instruction) => instruction.opcodeName === "B_SCR_OP_JUMPIFSTATUS3CONDITION",
-  );
+  const starts = instructionsWithOpcodeName(program, "B_SCR_OP_JUMPIFSTATUS3CONDITION");
   if (starts.length !== 7) {
     throw new Error(`B_SCR_OP_JUMPIFSTATUS3CONDITION requires all 7 concrete starts, got ${starts.length}`);
   }

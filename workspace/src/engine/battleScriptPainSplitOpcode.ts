@@ -11,6 +11,7 @@ import {
   resolveBattleScriptLabel,
   type BattleScriptInstruction,
   type BattleScriptProgram,
+  instructionsWithOpcodeName,
 } from "./battleScriptProgram.ts";
 import type { BattleScriptRulesContext } from "./battleScriptRulesContext.ts";
 import { BATTLE_SCRIPT_STATUS2_SUBSTITUTE } from "./battleScriptRulesContext.ts";
@@ -79,9 +80,7 @@ function handler(program: BattleScriptProgram): BattleScriptOpcodeHandler<Battle
 export function createBattleScriptPainSplitOpcodeHandlers(
   program: BattleScriptProgram,
 ): BattleScriptOpcodeHandlers<BattleScriptRulesContext> {
-  const instructions = program.instructions.filter(
-    ({ opcodeName }) => opcodeName === "B_SCR_OP_PAINSPLITDMGCALC",
-  );
+  const instructions = instructionsWithOpcodeName(program, "B_SCR_OP_PAINSPLITDMGCALC");
   if (instructions.length !== 1) {
     throw new Error(
       `B_SCR_OP_PAINSPLITDMGCALC requires exactly 1 concrete start, got ${instructions.length}`,

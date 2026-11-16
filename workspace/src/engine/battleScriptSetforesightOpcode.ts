@@ -17,6 +17,7 @@ import type { BattleScriptProgram } from "./battleScriptProgram.ts";
 import type { BattleScriptRulesContext } from "./battleScriptRulesContext.ts";
 import { BATTLE_SCRIPT_STATUS2_FORESIGHT } from "./battleScriptSourceConstants.ts";
 import { requireBattlerRole, withBattler } from "./battleScriptHitChainOpcode.ts";
+import { instructionsWithOpcodeName } from "./battleScriptProgram.ts";
 
 const setforesightHandler: BattleScriptOpcodeHandler<BattleScriptRulesContext> = (
   context,
@@ -38,9 +39,7 @@ const setforesightHandler: BattleScriptOpcodeHandler<BattleScriptRulesContext> =
 export function createBattleScriptSetforesightOpcodeHandlers(
   program: BattleScriptProgram,
 ): BattleScriptOpcodeHandlers<BattleScriptRulesContext> {
-  const instructions = program.instructions.filter(
-    (instruction) => instruction.opcodeName === "B_SCR_OP_SETFORESIGHT",
-  );
+  const instructions = instructionsWithOpcodeName(program, "B_SCR_OP_SETFORESIGHT");
   if (instructions.length !== 1) {
     throw new Error(
       "B_SCR_OP_SETFORESIGHT requires exactly 1 concrete start, "

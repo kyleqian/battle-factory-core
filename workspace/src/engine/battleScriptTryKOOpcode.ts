@@ -60,7 +60,7 @@ import {
   type BattleScriptOpcodeHandlers,
 } from "./battleScriptMachine.ts";
 import type { BattleScriptProgram } from "./battleScriptProgram.ts";
-import { resolveBattleScriptLabel } from "./battleScriptProgram.ts";
+import { resolveBattleScriptLabel, firstInstructionWithOpcodeName } from "./battleScriptProgram.ts";
 import {
   resolveBattleScriptBattlerHoldEffect,
   resolveBattleScriptBattlerHoldEffectParam,
@@ -207,9 +207,7 @@ function createTryKOHandler(program: BattleScriptProgram): BattleScriptOpcodeHan
 export function createBattleScriptTryKOOpcodeHandlers(
   program: BattleScriptProgram,
 ): BattleScriptOpcodeHandlers<BattleScriptRulesContext> {
-  const instruction = program.instructions.find(
-    (candidate) => candidate.opcodeName === "B_SCR_OP_TRYKO",
-  );
+  const instruction = firstInstructionWithOpcodeName(program, "B_SCR_OP_TRYKO");
   if (!instruction) {
     throw new Error("committed Battle Script program does not emit B_SCR_OP_TRYKO");
   }

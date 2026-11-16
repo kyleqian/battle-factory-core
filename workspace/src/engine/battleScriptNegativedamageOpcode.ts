@@ -21,6 +21,7 @@ import {
 } from "./battleScriptMachine.ts";
 import type { BattleScriptProgram } from "./battleScriptProgram.ts";
 import type { BattleScriptRulesContext } from "./battleScriptRulesContext.ts";
+import { firstInstructionWithOpcodeName } from "./battleScriptProgram.ts";
 
 function createNegativedamageHandler(): BattleScriptOpcodeHandler<BattleScriptRulesContext> {
   return (context) => {
@@ -43,9 +44,7 @@ function createNegativedamageHandler(): BattleScriptOpcodeHandler<BattleScriptRu
 export function createBattleScriptNegativedamageOpcodeHandlers(
   program: BattleScriptProgram,
 ): BattleScriptOpcodeHandlers<BattleScriptRulesContext> {
-  const instruction = program.instructions.find(
-    (candidate) => candidate.opcodeName === "B_SCR_OP_NEGATIVEDAMAGE",
-  );
+  const instruction = firstInstructionWithOpcodeName(program, "B_SCR_OP_NEGATIVEDAMAGE");
   if (!instruction) {
     throw new Error("committed Battle Script program does not emit B_SCR_OP_NEGATIVEDAMAGE");
   }

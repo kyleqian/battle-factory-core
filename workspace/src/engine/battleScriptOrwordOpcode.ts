@@ -39,6 +39,7 @@ import {
   BATTLE_SCRIPT_HITMARKER_PASSIVE_HP_UPDATE,
 } from "./battleScriptSourceConstants.ts";
 import type { BattleScriptRulesContext } from "./battleScriptRulesContext.ts";
+import { instructionsWithOpcodeName } from "./battleScriptProgram.ts";
 
 /** include/constants/battle.h:182-204 -- every HITMARKER_* bit a concrete orword call site in the committed program names. */
 const ORWORD_HITMARKER_BITS: ReadonlyMap<string, number> = new Map([
@@ -99,9 +100,7 @@ function createOrwordOpcodeHandler(): BattleScriptOpcodeHandler<BattleScriptRule
 export function createBattleScriptOrwordOpcodeHandlers(
   program: BattleScriptProgram,
 ): BattleScriptOpcodeHandlers<BattleScriptRulesContext> {
-  const starts = program.instructions.filter(
-    (instruction) => instruction.opcodeName === "B_SCR_OP_ORWORD",
-  );
+  const starts = instructionsWithOpcodeName(program, "B_SCR_OP_ORWORD");
   if (starts.length !== 43) {
     throw new Error(`B_SCR_OP_ORWORD requires all 43 concrete starts, got ${starts.length}`);
   }

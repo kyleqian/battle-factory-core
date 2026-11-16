@@ -12,6 +12,7 @@ import {
   resolveBattleScriptLabel,
   type BattleScriptInstruction,
   type BattleScriptProgram,
+  instructionsWithOpcodeName,
 } from "./battleScriptProgram.ts";
 import type { BattleScriptRulesContext } from "./battleScriptRulesContext.ts";
 import { requireBattlerRole, withBattler } from "./battleScriptHitChainOpcode.ts";
@@ -80,9 +81,7 @@ function handler(program: BattleScriptProgram): BattleScriptOpcodeHandler<Battle
 export function createBattleScriptTrysetencoreOpcodeHandlers(
   program: BattleScriptProgram,
 ): BattleScriptOpcodeHandlers<BattleScriptRulesContext> {
-  const instructions = program.instructions.filter(
-    (instruction) => instruction.opcodeName === "B_SCR_OP_TRYSETENCORE",
-  );
+  const instructions = instructionsWithOpcodeName(program, "B_SCR_OP_TRYSETENCORE");
   if (instructions.length !== 1) {
     throw new Error(`B_SCR_OP_TRYSETENCORE requires exactly 1 concrete start, got ${instructions.length}`);
   }

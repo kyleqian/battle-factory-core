@@ -15,6 +15,7 @@ import {
 import {
   resolveBattleScriptLabel,
   type BattleScriptProgram,
+  instructionsWithOpcodeName,
 } from "./battleScriptProgram.ts";
 import {
   BATTLE_SCRIPT_MOVE_RESULT_NO_EFFECT,
@@ -124,10 +125,7 @@ const rolloutDamageCalculationHandler: BattleScriptOpcodeHandler<BattleScriptRul
 export function createBattleScriptRolloutOpcodeHandlers(
   program: BattleScriptProgram,
 ): BattleScriptOpcodeHandlers<BattleScriptRulesContext> {
-  const instructions = program.instructions.filter(
-    (instruction) =>
-      instruction.opcodeName === "B_SCR_OP_ROLLOUTDAMAGECALCULATION",
-  );
+  const instructions = instructionsWithOpcodeName(program, "B_SCR_OP_ROLLOUTDAMAGECALCULATION");
   if (instructions.length !== 1) {
     throw new Error(
       `B_SCR_OP_ROLLOUTDAMAGECALCULATION requires exactly 1 concrete start, got ${instructions.length}`,

@@ -11,6 +11,7 @@ import {
   resolveBattleScriptLabel,
   type BattleScriptInstruction,
   type BattleScriptProgram,
+  instructionsWithOpcodeName,
 } from "./battleScriptProgram.ts";
 import type { BattleScriptRulesContext } from "./battleScriptRulesContext.ts";
 
@@ -62,9 +63,7 @@ function createHandler(
 export function createBattleScriptGivepaydaymoneyOpcodeHandlers(
   program: BattleScriptProgram,
 ): BattleScriptOpcodeHandlers<BattleScriptRulesContext> {
-  const instructions = program.instructions.filter(
-    ({ opcodeName }) => opcodeName === "B_SCR_OP_GIVEPAYDAYMONEY",
-  );
+  const instructions = instructionsWithOpcodeName(program, "B_SCR_OP_GIVEPAYDAYMONEY");
   if (instructions.length !== 1) {
     throw new Error(
       `B_SCR_OP_GIVEPAYDAYMONEY requires exactly 1 concrete start, got ${instructions.length}`,

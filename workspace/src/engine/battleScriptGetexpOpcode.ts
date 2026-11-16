@@ -58,6 +58,7 @@ import {
 } from "./battleScriptMachine.ts";
 import type { BattleScriptProgram } from "./battleScriptProgram.ts";
 import type { BattleScriptRulesContext } from "./battleScriptRulesContext.ts";
+import { firstInstructionWithOpcodeName } from "./battleScriptProgram.ts";
 
 /** include/constants/battle.h:48-49. */
 const B_SIDE_OPPONENT = 1;
@@ -259,9 +260,7 @@ function createGetexpOpcodeHandler(): BattleScriptOpcodeHandler<BattleScriptRule
 export function createBattleScriptGetexpOpcodeHandlers(
   program: BattleScriptProgram,
 ): BattleScriptOpcodeHandlers<BattleScriptRulesContext> {
-  const instruction = program.instructions.find(
-    (candidate) => candidate.opcodeName === "B_SCR_OP_GETEXP",
-  );
+  const instruction = firstInstructionWithOpcodeName(program, "B_SCR_OP_GETEXP");
   if (!instruction) throw new Error("committed Battle Script program does not emit B_SCR_OP_GETEXP");
   return Object.freeze({ [instruction.opcodeId]: createGetexpOpcodeHandler() });
 }

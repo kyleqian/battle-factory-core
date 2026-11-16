@@ -19,6 +19,7 @@ import {
 } from "./battleScriptRulesContext.ts";
 import { BATTLE_SCRIPT_STATUS3_MINIMIZED } from "./battleScriptSourceConstants.ts";
 import { requireBattlerRole, withBattler } from "./battleScriptHitChainOpcode.ts";
+import { instructionsWithOpcodeName } from "./battleScriptProgram.ts";
 
 const setminimizeHandler: BattleScriptOpcodeHandler<BattleScriptRulesContext> = (
   context,
@@ -43,9 +44,7 @@ const setminimizeHandler: BattleScriptOpcodeHandler<BattleScriptRulesContext> = 
 export function createBattleScriptSetminimizeOpcodeHandlers(
   program: BattleScriptProgram,
 ): BattleScriptOpcodeHandlers<BattleScriptRulesContext> {
-  const instructions = program.instructions.filter(
-    (instruction) => instruction.opcodeName === "B_SCR_OP_SETMINIMIZE",
-  );
+  const instructions = instructionsWithOpcodeName(program, "B_SCR_OP_SETMINIMIZE");
   if (instructions.length !== 1) {
     throw new Error(
       `B_SCR_OP_SETMINIMIZE requires exactly 1 concrete start, got ${instructions.length}`,

@@ -14,6 +14,7 @@ import {
   resolveBattleScriptLabel,
   type BattleScriptInstruction,
   type BattleScriptProgram,
+  instructionsWithOpcodeName,
 } from "./battleScriptProgram.ts";
 import type { BattleScriptRulesContext } from "./battleScriptRulesContext.ts";
 import { requireBattlerRole, withBattler } from "./battleScriptHitChainOpcode.ts";
@@ -78,9 +79,7 @@ function createSettormentHandler(
 export function createBattleScriptSettormentOpcodeHandlers(
   program: BattleScriptProgram,
 ): BattleScriptOpcodeHandlers<BattleScriptRulesContext> {
-  const instructions = program.instructions.filter(
-    (instruction) => instruction.opcodeName === "B_SCR_OP_SETTORMENT",
-  );
+  const instructions = instructionsWithOpcodeName(program, "B_SCR_OP_SETTORMENT");
   if (instructions.length !== 1) {
     throw new Error(
       "B_SCR_OP_SETTORMENT requires exactly 1 concrete start, "

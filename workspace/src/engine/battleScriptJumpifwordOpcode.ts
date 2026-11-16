@@ -18,6 +18,7 @@
 import {
   resolveBattleScriptLabel,
   type BattleScriptProgram,
+  firstInstructionWithOpcodeName,
 } from "./battleScriptProgram.ts";
 import {
   transitionBattleScriptCommand,
@@ -249,9 +250,7 @@ function createJumpifwordOpcodeHandler(): BattleScriptOpcodeHandler<BattleScript
 export function createBattleScriptJumpifwordOpcodeHandlers(
   program: BattleScriptProgram,
 ): BattleScriptOpcodeHandlers<BattleScriptRulesContext> {
-  const instruction = program.instructions.find(
-    (candidate) => candidate.opcodeName === "B_SCR_OP_JUMPIFWORD",
-  );
+  const instruction = firstInstructionWithOpcodeName(program, "B_SCR_OP_JUMPIFWORD");
   if (!instruction) throw new Error("committed Battle Script program does not emit B_SCR_OP_JUMPIFWORD");
   return Object.freeze({ [instruction.opcodeId]: createJumpifwordOpcodeHandler() });
 }

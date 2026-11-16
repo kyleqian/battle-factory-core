@@ -29,6 +29,8 @@ import { abilityPresentOnField } from "./battleScriptJumpifabilitypresentOpcode.
 import {
   resolveBattleScriptLabel,
   type BattleScriptProgram,
+  firstInstructionWithOpcodeName,
+  instructionsWithOpcodeName,
 } from "./battleScriptProgram.ts";
 import {
   markBattleScriptControllerPending,
@@ -403,7 +405,7 @@ function createJumpifarraynotequalHandler(): BattleScriptOpcodeHandler<BattleScr
 }
 
 function findInstructionOpcodeId(program: BattleScriptProgram, opcodeName: string): number {
-  const instruction = program.instructions.find((candidate) => candidate.opcodeName === opcodeName);
+  const instruction = firstInstructionWithOpcodeName(program, opcodeName);
   if (!instruction) throw new Error(`committed Battle Script program does not emit ${opcodeName}`);
   return instruction.opcodeId;
 }
@@ -414,7 +416,7 @@ function registerSingleInstruction(
   expectedOperandCount: number,
   handler: BattleScriptOpcodeHandler<BattleScriptRulesContext>,
 ): BattleScriptOpcodeHandlers<BattleScriptRulesContext> {
-  const starts = program.instructions.filter((instruction) => instruction.opcodeName === opcodeName);
+  const starts = instructionsWithOpcodeName(program, opcodeName);
   if (starts.length !== 1) {
     throw new Error(`${opcodeName} requires exactly 1 concrete start, got ${starts.length}`);
   }
@@ -432,9 +434,7 @@ export function createBattleScriptDamagingWeatherOpcodeHandlers(
     resolveBattlerForBattleScript: BattleScriptBattlerSelectorResolverPort<BattleScriptRulesContext>;
   }>,
 ): BattleScriptOpcodeHandlers<BattleScriptRulesContext> {
-  const playanimationVarStarts = program.instructions.filter(
-    (instruction) => instruction.opcodeName === "B_SCR_OP_PLAYANIMATION_VAR",
-  );
+  const playanimationVarStarts = instructionsWithOpcodeName(program, "B_SCR_OP_PLAYANIMATION_VAR");
   if (playanimationVarStarts.length !== 2) {
     throw new Error(`B_SCR_OP_PLAYANIMATION_VAR requires exactly 2 concrete starts, got ${playanimationVarStarts.length}`);
   }

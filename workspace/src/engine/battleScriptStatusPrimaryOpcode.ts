@@ -19,7 +19,7 @@ import {
   type BattleScriptOpcodeHandler,
   type BattleScriptOpcodeHandlers,
 } from "./battleScriptMachine.ts";
-import { resolveBattleScriptLabel, type BattleScriptProgram } from "./battleScriptProgram.ts";
+import { resolveBattleScriptLabel, type BattleScriptProgram, firstInstructionWithOpcodeName } from "./battleScriptProgram.ts";
 import { isBattlerOfType, unsupportedBranch } from "./battleScriptHitChainOpcode.ts";
 import { BATTLE_SCRIPT_STATUS2_MASKS } from "./battleScriptSourceConstants.ts";
 import type { BattleScriptBattlerSelectorResolverPort } from "./battleScriptSourceCommands.ts";
@@ -258,7 +258,7 @@ export function createBattleScriptStatusPrimaryOpcodeHandlers(
   resolveBattlerForBattleScript: BattleScriptBattlerSelectorResolverPort<BattleScriptRulesContext>,
 ): BattleScriptOpcodeHandlers<BattleScriptRulesContext> {
   const findOpcodeId = (opcodeName: string): number => {
-    const instruction = program.instructions.find((candidate) => candidate.opcodeName === opcodeName);
+    const instruction = firstInstructionWithOpcodeName(program, opcodeName);
     if (!instruction) throw new Error(`committed Battle Script program does not emit ${opcodeName}`);
     return instruction.opcodeId;
   };

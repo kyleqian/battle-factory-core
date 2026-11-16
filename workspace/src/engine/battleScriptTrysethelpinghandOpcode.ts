@@ -16,6 +16,7 @@ import {
   resolveBattleScriptLabel,
   type BattleScriptInstruction,
   type BattleScriptProgram,
+  instructionsWithOpcodeName,
 } from "./battleScriptProgram.ts";
 import {
   BATTLE_SCRIPT_BATTLE_TYPE_DOUBLE,
@@ -103,10 +104,7 @@ function createTrysethelpinghandHandler(
 export function createBattleScriptTrysethelpinghandOpcodeHandlers(
   program: BattleScriptProgram,
 ): BattleScriptOpcodeHandlers<BattleScriptRulesContext> {
-  const instructions = program.instructions.filter(
-    (instruction) =>
-      instruction.opcodeName === "B_SCR_OP_TRYSETHELPINGHAND",
-  );
+  const instructions = instructionsWithOpcodeName(program, "B_SCR_OP_TRYSETHELPINGHAND");
   if (instructions.length !== 1) {
     throw new Error(
       "B_SCR_OP_TRYSETHELPINGHAND requires exactly 1 concrete start, "

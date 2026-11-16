@@ -22,6 +22,7 @@ import {
 import type { BattleScriptProgram } from "./battleScriptProgram.ts";
 import { requireBattlerRole } from "./battleScriptHitChainOpcode.ts";
 import type { BattleScriptRulesContext } from "./battleScriptRulesContext.ts";
+import { instructionsWithOpcodeName } from "./battleScriptProgram.ts";
 
 const FLAIL_HP_SCALE_TO_POWER = Object.freeze([
   [1, 200],
@@ -62,9 +63,7 @@ const remainingHpToPowerHandler: BattleScriptOpcodeHandler<BattleScriptRulesCont
 export function createBattleScriptRemainingHpToPowerOpcodeHandlers(
   program: BattleScriptProgram,
 ): BattleScriptOpcodeHandlers<BattleScriptRulesContext> {
-  const instructions = program.instructions.filter(
-    (candidate) => candidate.opcodeName === "B_SCR_OP_REMAININGHPTOPOWER",
-  );
+  const instructions = instructionsWithOpcodeName(program, "B_SCR_OP_REMAININGHPTOPOWER");
   if (instructions.length !== 1) {
     throw new Error(
       `B_SCR_OP_REMAININGHPTOPOWER requires exactly 1 concrete start, got ${instructions.length}`,

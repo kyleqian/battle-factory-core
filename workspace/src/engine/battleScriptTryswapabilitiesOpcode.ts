@@ -15,6 +15,7 @@ import {
   resolveBattleScriptLabel,
   type BattleScriptInstruction,
   type BattleScriptProgram,
+  instructionsWithOpcodeName,
 } from "./battleScriptProgram.ts";
 import {
   BATTLE_SCRIPT_MOVE_RESULT_NO_EFFECT,
@@ -107,10 +108,7 @@ function createTryswapabilitiesHandler(
 export function createBattleScriptTryswapabilitiesOpcodeHandlers(
   program: BattleScriptProgram,
 ): BattleScriptOpcodeHandlers<BattleScriptRulesContext> {
-  const instructions = program.instructions.filter(
-    (instruction) =>
-      instruction.opcodeName === "B_SCR_OP_TRYSWAPABILITIES",
-  );
+  const instructions = instructionsWithOpcodeName(program, "B_SCR_OP_TRYSWAPABILITIES");
   if (instructions.length !== 1) {
     throw new Error(
       "B_SCR_OP_TRYSWAPABILITIES requires exactly 1 concrete start, "

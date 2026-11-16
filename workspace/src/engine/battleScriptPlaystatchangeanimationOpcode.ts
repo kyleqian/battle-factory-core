@@ -63,6 +63,7 @@ import type {
 } from "./battleScriptSourceCommands.ts";
 import type { BattleScriptRulesContext, BattleScriptRulesBattlerState } from "./battleScriptRulesContext.ts";
 import type { BattleScriptProgram } from "./battleScriptProgram.ts";
+import { instructionsWithOpcodeName } from "./battleScriptProgram.ts";
 
 /** include/constants/battle_script_commands.h:382-388. */
 const BIT_STAT_TERMS: ReadonlyMap<string, number> = new Map([
@@ -285,9 +286,7 @@ export function createBattleScriptPlaystatchangeanimationOpcodeHandlers(
     resolveBattlerForBattleScript: BattleScriptBattlerSelectorResolverPort<BattleScriptRulesContext>;
   }>,
 ): BattleScriptOpcodeHandlers<BattleScriptRulesContext> {
-  const starts = program.instructions.filter(
-    (instruction) => instruction.opcodeName === "B_SCR_OP_PLAYSTATCHANGEANIMATION",
-  );
+  const starts = instructionsWithOpcodeName(program, "B_SCR_OP_PLAYSTATCHANGEANIMATION");
   if (starts.length !== 15) {
     throw new Error(`B_SCR_OP_PLAYSTATCHANGEANIMATION requires all 15 concrete starts, got ${starts.length}`);
   }

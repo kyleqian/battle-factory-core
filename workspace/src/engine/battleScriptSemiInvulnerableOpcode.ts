@@ -39,6 +39,7 @@ import type { BattleScriptProgram } from "./battleScriptProgram.ts";
 import { requireBattlerRole, unsupportedBranch, withBattler } from "./battleScriptHitChainOpcode.ts";
 import type { BattleScriptBattlerSelectorResolverPort } from "./battleScriptSourceCommands.ts";
 import type { BattleScriptRulesContext } from "./battleScriptRulesContext.ts";
+import { instructionsWithOpcodeName } from "./battleScriptProgram.ts";
 
 /** include/constants/battle.h:139. */
 const STATUS2_MULTIPLETURNS = 1 << 12;
@@ -99,9 +100,7 @@ export function createBattleScriptClearstatusfromeffectOpcodeHandlers(
     resolveBattlerForBattleScript: BattleScriptBattlerSelectorResolverPort<BattleScriptRulesContext>;
   }>,
 ): BattleScriptOpcodeHandlers<BattleScriptRulesContext> {
-  const starts = program.instructions.filter(
-    (instruction) => instruction.opcodeName === "B_SCR_OP_CLEARSTATUSFROMEFFECT",
-  );
+  const starts = instructionsWithOpcodeName(program, "B_SCR_OP_CLEARSTATUSFROMEFFECT");
   if (starts.length !== 5) {
     throw new Error(`B_SCR_OP_CLEARSTATUSFROMEFFECT requires all 5 concrete starts, got ${starts.length}`);
   }
@@ -172,7 +171,7 @@ function registerZeroOperandOpcode(
   dispatcher: string,
   handler: BattleScriptOpcodeHandler<BattleScriptRulesContext>,
 ): BattleScriptOpcodeHandlers<BattleScriptRulesContext> {
-  const starts = program.instructions.filter((instruction) => instruction.opcodeName === opcodeName);
+  const starts = instructionsWithOpcodeName(program, opcodeName);
   if (starts.length !== expectedCount) {
     throw new Error(`${opcodeName} requires all ${expectedCount} concrete starts, got ${starts.length}`);
   }

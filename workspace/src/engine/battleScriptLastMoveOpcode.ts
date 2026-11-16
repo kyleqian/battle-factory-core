@@ -13,7 +13,7 @@ import {
   type BattleScriptOpcodeHandler,
   type BattleScriptOpcodeHandlers,
 } from "./battleScriptMachine.ts";
-import { resolveBattleScriptLabel, type BattleScriptProgram } from "./battleScriptProgram.ts";
+import { resolveBattleScriptLabel, type BattleScriptProgram, instructionsWithOpcodeName } from "./battleScriptProgram.ts";
 import { requireBattlerRole, withBattler } from "./battleScriptHitChainOpcode.ts";
 import {
   resolveBattleScriptCurrentMoveEffect,
@@ -262,15 +262,9 @@ function createMirrorMoveHandler(
 export function createBattleScriptLastMoveOpcodeHandlers(
   program: BattleScriptProgram,
 ): BattleScriptOpcodeHandlers<BattleScriptRulesContext> {
-  const mimic = program.instructions.filter(
-    ({ opcodeName }) => opcodeName === "B_SCR_OP_MIMICATTACKCOPY",
-  );
-  const sketch = program.instructions.filter(
-    ({ opcodeName }) => opcodeName === "B_SCR_OP_COPYMOVEPERMANENTLY",
-  );
-  const mirrorMove = program.instructions.filter(
-    ({ opcodeName }) => opcodeName === "B_SCR_OP_TRYMIRRORMOVE",
-  );
+  const mimic = instructionsWithOpcodeName(program, "B_SCR_OP_MIMICATTACKCOPY");
+  const sketch = instructionsWithOpcodeName(program, "B_SCR_OP_COPYMOVEPERMANENTLY");
+  const mirrorMove = instructionsWithOpcodeName(program, "B_SCR_OP_TRYMIRRORMOVE");
   if (
     mimic.length !== 1
     || mimic[0]!.opcodeId !== 0x9d

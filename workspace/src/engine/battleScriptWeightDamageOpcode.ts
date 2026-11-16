@@ -16,6 +16,7 @@ import type { BattleScriptProgram } from "./battleScriptProgram.ts";
 import { requireBattlerRole } from "./battleScriptHitChainOpcode.ts";
 import type { BattleScriptRulesContext } from "./battleScriptRulesContext.ts";
 import speciesStatsData from "../data/gen/species-stats.json" with { type: "json" };
+import { instructionsWithOpcodeName } from "./battleScriptProgram.ts";
 
 type SpeciesWeightRow = Readonly<{
   id: number;
@@ -78,9 +79,7 @@ const weightDamageHandler: BattleScriptOpcodeHandler<BattleScriptRulesContext> =
 export function createBattleScriptWeightDamageOpcodeHandlers(
   program: BattleScriptProgram,
 ): BattleScriptOpcodeHandlers<BattleScriptRulesContext> {
-  const instructions = program.instructions.filter(
-    ({ opcodeName }) => opcodeName === "B_SCR_OP_WEIGHTDAMAGECALCULATION",
-  );
+  const instructions = instructionsWithOpcodeName(program, "B_SCR_OP_WEIGHTDAMAGECALCULATION");
   if (instructions.length !== 1) {
     throw new Error(
       "B_SCR_OP_WEIGHTDAMAGECALCULATION requires exactly 1 concrete start, "

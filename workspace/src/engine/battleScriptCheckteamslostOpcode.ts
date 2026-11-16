@@ -31,6 +31,7 @@ import {
   type BattleScriptPartyState,
   type BattleScriptRulesContext,
 } from "./battleScriptRulesContext.ts";
+import { firstInstructionWithOpcodeName } from "./battleScriptProgram.ts";
 
 /** include/constants/battle.h:100-101. */
 const B_OUTCOME_WON = 1;
@@ -133,9 +134,7 @@ function createCheckteamslostOpcodeHandler(): BattleScriptOpcodeHandler<BattleSc
 export function createBattleScriptCheckteamslostOpcodeHandlers(
   program: BattleScriptProgram,
 ): BattleScriptOpcodeHandlers<BattleScriptRulesContext> {
-  const instruction = program.instructions.find(
-    (candidate) => candidate.opcodeName === "B_SCR_OP_CHECKTEAMSLOST",
-  );
+  const instruction = firstInstructionWithOpcodeName(program, "B_SCR_OP_CHECKTEAMSLOST");
   if (!instruction) throw new Error("committed Battle Script program does not emit B_SCR_OP_CHECKTEAMSLOST");
   return Object.freeze({ [instruction.opcodeId]: createCheckteamslostOpcodeHandler() });
 }

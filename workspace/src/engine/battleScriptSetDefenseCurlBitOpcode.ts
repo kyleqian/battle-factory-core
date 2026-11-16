@@ -17,6 +17,7 @@ import type { BattleScriptProgram } from "./battleScriptProgram.ts";
 import type { BattleScriptRulesContext } from "./battleScriptRulesContext.ts";
 import { requireBattlerRole } from "./battleScriptHitChainOpcode.ts";
 import { BATTLE_SCRIPT_STATUS2_MASKS } from "./battleScriptSourceConstants.ts";
+import { instructionsWithOpcodeName } from "./battleScriptProgram.ts";
 
 const setDefenseCurlBitHandler: BattleScriptOpcodeHandler<BattleScriptRulesContext> = (
   context,
@@ -53,10 +54,7 @@ const setDefenseCurlBitHandler: BattleScriptOpcodeHandler<BattleScriptRulesConte
 export function createBattleScriptSetDefenseCurlBitOpcodeHandlers(
   program: BattleScriptProgram,
 ): BattleScriptOpcodeHandlers<BattleScriptRulesContext> {
-  const instructions = program.instructions.filter(
-    (instruction) =>
-      instruction.opcodeName === "B_SCR_OP_SETDEFENSECURLBIT",
-  );
+  const instructions = instructionsWithOpcodeName(program, "B_SCR_OP_SETDEFENSECURLBIT");
   if (instructions.length !== 1) {
     throw new Error(
       `B_SCR_OP_SETDEFENSECURLBIT requires exactly 1 concrete start, got ${instructions.length}`,

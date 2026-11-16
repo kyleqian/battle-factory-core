@@ -23,6 +23,7 @@ import {
   BATTLE_GAME_STAT_USED_STRUGGLE,
 } from "./battleGameStatMeta.ts";
 import type { BattleScriptGameStat } from "./battleScriptEvents.ts";
+import { instructionsWithOpcodeName } from "./battleScriptProgram.ts";
 
 const GAME_STAT_BY_SOURCE_EXPRESSION: Readonly<
   Record<string, BattleScriptGameStat>
@@ -85,10 +86,7 @@ const incrementGameStatHandler: BattleScriptOpcodeHandler<
 export function createBattleScriptIncrementGameStatOpcodeHandlers(
   program: BattleScriptProgram,
 ): BattleScriptOpcodeHandlers<BattleScriptRulesContext> {
-  const instructions = program.instructions.filter(
-    (instruction) =>
-      instruction.opcodeName === "B_SCR_OP_INCREMENTGAMESTAT",
-  );
+  const instructions = instructionsWithOpcodeName(program, "B_SCR_OP_INCREMENTGAMESTAT");
   if (instructions.length !== 2) {
     throw new Error(
       `B_SCR_OP_INCREMENTGAMESTAT requires exactly 2 concrete starts, got ${instructions.length}`,

@@ -10,7 +10,7 @@ import {
   type BattleScriptOpcodeHandler,
   type BattleScriptOpcodeHandlers,
 } from "./battleScriptMachine.ts";
-import { resolveBattleScriptLabel, type BattleScriptProgram } from "./battleScriptProgram.ts";
+import { resolveBattleScriptLabel, type BattleScriptProgram, instructionsWithOpcodeName } from "./battleScriptProgram.ts";
 import { requireBattlerRole, withBattler } from "./battleScriptHitChainOpcode.ts";
 import {
   resolveBattleScriptMoveType,
@@ -222,9 +222,7 @@ function createCamouflageHandler(): BattleScriptOpcodeHandler<BattleScriptRulesC
 export function createBattleScriptTypeChangeOpcodeHandlers(
   program: BattleScriptProgram,
 ): BattleScriptOpcodeHandlers<BattleScriptRulesContext> {
-  const conversion = program.instructions.filter(
-    ({ opcodeName }) => opcodeName === "B_SCR_OP_TRYCONVERSIONTYPECHANGE",
-  );
+  const conversion = instructionsWithOpcodeName(program, "B_SCR_OP_TRYCONVERSIONTYPECHANGE");
   if (
     conversion.length !== 1
     || conversion[0]!.opcodeId !== 0x90
@@ -234,12 +232,8 @@ export function createBattleScriptTypeChangeOpcodeHandlers(
   ) {
     throw new Error(`invalid B_SCR_OP_TRYCONVERSIONTYPECHANGE shape (${conversion.length})`);
   }
-  const conversion2 = program.instructions.filter(
-    ({ opcodeName }) => opcodeName === "B_SCR_OP_SETTYPETORANDOMRESISTANCE",
-  );
-  const camouflage = program.instructions.filter(
-    ({ opcodeName }) => opcodeName === "B_SCR_OP_SETTYPETOENVIRONMENT",
-  );
+  const conversion2 = instructionsWithOpcodeName(program, "B_SCR_OP_SETTYPETORANDOMRESISTANCE");
+  const camouflage = instructionsWithOpcodeName(program, "B_SCR_OP_SETTYPETOENVIRONMENT");
   for (const [instructions, opcodeId, dispatcher] of [
     [conversion2, 0xa6, "Cmd_settypetorandomresistance"],
     [camouflage, 0xeb, "Cmd_settypetoenvironment"],

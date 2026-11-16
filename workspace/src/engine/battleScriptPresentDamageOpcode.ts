@@ -18,6 +18,7 @@ import {
 import {
   resolveBattleScriptLabel,
   type BattleScriptProgram,
+  instructionsWithOpcodeName,
 } from "./battleScriptProgram.ts";
 import {
   type BattleScriptRulesContext,
@@ -99,9 +100,7 @@ const presentDamageHandler: BattleScriptOpcodeHandler<BattleScriptRulesContext> 
 export function createBattleScriptPresentDamageOpcodeHandlers(
   program: BattleScriptProgram,
 ): BattleScriptOpcodeHandlers<BattleScriptRulesContext> {
-  const instructions = program.instructions.filter(
-    ({ opcodeName }) => opcodeName === "B_SCR_OP_PRESENTDAMAGECALCULATION",
-  );
+  const instructions = instructionsWithOpcodeName(program, "B_SCR_OP_PRESENTDAMAGECALCULATION");
   if (instructions.length !== 1) {
     throw new Error(
       "B_SCR_OP_PRESENTDAMAGECALCULATION requires exactly 1 concrete start, "

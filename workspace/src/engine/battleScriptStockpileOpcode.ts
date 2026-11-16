@@ -10,6 +10,7 @@ import {
   resolveBattleScriptLabel,
   type BattleScriptInstruction,
   type BattleScriptProgram,
+  instructionsWithOpcodeName,
 } from "./battleScriptProgram.ts";
 import type { BattleScriptRulesContext } from "./battleScriptRulesContext.ts";
 import { BATTLE_SCRIPT_MOVE_RESULT_MISSED } from "./battleScriptSourceConstants.ts";
@@ -195,7 +196,7 @@ export function createBattleScriptStockpileOpcodeHandlers(
     dispatcher: string,
     operands: number,
   ) => {
-    const instructions = program.instructions.filter(({ opcodeName }) => opcodeName === name);
+    const instructions = instructionsWithOpcodeName(program, name);
     if (instructions.length !== expectedStarts) {
       throw new Error(
         `${name} requires exactly ${expectedStarts} concrete starts, got ${instructions.length}`,

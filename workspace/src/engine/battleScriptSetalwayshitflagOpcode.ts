@@ -7,15 +7,14 @@ import type { BattleScriptProgram } from "./battleScriptProgram.ts";
 import { requireBattlerRole, withBattler } from "./battleScriptHitChainOpcode.ts";
 import type { BattleScriptRulesContext } from "./battleScriptRulesContext.ts";
 import { BATTLE_SCRIPT_STATUS3_ALWAYS_HITS } from "./battleScriptSourceConstants.ts";
+import { instructionsWithOpcodeName } from "./battleScriptProgram.ts";
 
 export const BATTLE_SCRIPT_STATUS3_ALWAYS_HITS_TURN_2 = 2 << 3;
 
 export function createBattleScriptSetalwayshitflagOpcodeHandlers(
   program: BattleScriptProgram,
 ): BattleScriptOpcodeHandlers<BattleScriptRulesContext> {
-  const instructions = program.instructions.filter(
-    ({ opcodeName }) => opcodeName === "B_SCR_OP_SETALWAYSHITFLAG",
-  );
+  const instructions = instructionsWithOpcodeName(program, "B_SCR_OP_SETALWAYSHITFLAG");
   if (
     instructions.length !== 1
     || instructions[0]!.opcodeId !== 0xa7

@@ -18,6 +18,7 @@ import type {
   BattleScriptSideTimerState,
 } from "./battleScriptRulesContext.ts";
 import { requireBattlerRole } from "./battleScriptHitChainOpcode.ts";
+import { instructionsWithOpcodeName } from "./battleScriptProgram.ts";
 
 const setforcedtargetHandler: BattleScriptOpcodeHandler<BattleScriptRulesContext> = (
   context,
@@ -52,9 +53,7 @@ const setforcedtargetHandler: BattleScriptOpcodeHandler<BattleScriptRulesContext
 export function createBattleScriptSetforcedtargetOpcodeHandlers(
   program: BattleScriptProgram,
 ): BattleScriptOpcodeHandlers<BattleScriptRulesContext> {
-  const instructions = program.instructions.filter(
-    (instruction) => instruction.opcodeName === "B_SCR_OP_SETFORCEDTARGET",
-  );
+  const instructions = instructionsWithOpcodeName(program, "B_SCR_OP_SETFORCEDTARGET");
   if (instructions.length !== 1) {
     throw new Error(
       `B_SCR_OP_SETFORCEDTARGET requires exactly 1 concrete start, got ${instructions.length}`,

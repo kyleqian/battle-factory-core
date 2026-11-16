@@ -19,6 +19,7 @@
 import {
   resolveBattleScriptLabel,
   type BattleScriptProgram,
+  instructionsWithOpcodeName,
 } from "./battleScriptProgram.ts";
 import {
   transitionBattleScriptCommand,
@@ -133,9 +134,7 @@ export function createBattleScriptJumpifstatOpcodeHandlers(
   program: BattleScriptProgram,
   resolveBattlerForBattleScript: BattleScriptBattlerSelectorResolverPort<BattleScriptRulesContext>,
 ): BattleScriptOpcodeHandlers<BattleScriptRulesContext> {
-  const starts = program.instructions.filter(
-    (instruction) => instruction.opcodeName === "B_SCR_OP_JUMPIFSTAT",
-  );
+  const starts = instructionsWithOpcodeName(program, "B_SCR_OP_JUMPIFSTAT");
   if (starts.length !== 18) {
     throw new Error(`B_SCR_OP_JUMPIFSTAT requires all 18 concrete starts, got ${starts.length}`);
   }

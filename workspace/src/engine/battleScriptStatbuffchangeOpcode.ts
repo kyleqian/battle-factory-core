@@ -32,6 +32,8 @@ import type { BattleScriptBattlerId } from "./battleScriptEvents.ts";
 import {
   resolveBattleScriptLabel,
   type BattleScriptProgram,
+  firstInstructionWithOpcodeName,
+  instructionsWithOpcodeName,
 } from "./battleScriptProgram.ts";
 import {
   markBattleScriptControllerPending,
@@ -506,9 +508,7 @@ export function createBattleScriptStatbuffchangeOpcodeHandlers(
   program: BattleScriptProgram,
   ports: BattleScriptStatbuffchangeExternalPorts,
 ): BattleScriptOpcodeHandlers<BattleScriptRulesContext> {
-  const statbuffchangeStarts = program.instructions.filter(
-    (instruction) => instruction.opcodeName === "B_SCR_OP_STATBUFFCHANGE",
-  );
+  const statbuffchangeStarts = instructionsWithOpcodeName(program, "B_SCR_OP_STATBUFFCHANGE");
   if (statbuffchangeStarts.length !== 31) {
     throw new Error(`B_SCR_OP_STATBUFFCHANGE requires all 31 concrete starts, got ${statbuffchangeStarts.length}`);
   }
@@ -525,9 +525,7 @@ export function createBattleScriptStatbuffchangeOpcodeHandlers(
     }
   }
 
-  const orbyteStarts = program.instructions.filter(
-    (instruction) => instruction.opcodeName === "B_SCR_OP_ORBYTE",
-  );
+  const orbyteStarts = instructionsWithOpcodeName(program, "B_SCR_OP_ORBYTE");
   if (orbyteStarts.length !== 11) {
     throw new Error(`B_SCR_OP_ORBYTE requires all 11 concrete starts, got ${orbyteStarts.length}`);
   }
@@ -549,24 +547,18 @@ export function createBattleScriptStatbuffchangeOpcodeHandlers(
     [orbyteStarts[0]!.opcodeId]: createOrbyteOpcodeHandler(),
   };
 
-  const setgraphicalstatchangevaluesStart = program.instructions.find(
-    (instruction) => instruction.opcodeName === "B_SCR_OP_SETGRAPHICALSTATCHANGEVALUES",
-  );
+  const setgraphicalstatchangevaluesStart = firstInstructionWithOpcodeName(program, "B_SCR_OP_SETGRAPHICALSTATCHANGEVALUES");
   if (setgraphicalstatchangevaluesStart) {
     handlers[setgraphicalstatchangevaluesStart.opcodeId] = createSetgraphicalstatchangevaluesOpcodeHandler();
   }
-  const playanimationStart = program.instructions.find(
-    (instruction) => instruction.opcodeName === "B_SCR_OP_PLAYANIMATION",
-  );
+  const playanimationStart = firstInstructionWithOpcodeName(program, "B_SCR_OP_PLAYANIMATION");
   if (playanimationStart) {
     handlers[playanimationStart.opcodeId] = createPlayanimationOpcodeHandler(
       ports.isControllerIdle,
       ports.resolveBattlerForBattleScript,
     );
   }
-  const jumpifstatus2Start = program.instructions.find(
-    (instruction) => instruction.opcodeName === "B_SCR_OP_JUMPIFSTATUS2",
-  );
+  const jumpifstatus2Start = firstInstructionWithOpcodeName(program, "B_SCR_OP_JUMPIFSTATUS2");
   if (jumpifstatus2Start) {
     handlers[jumpifstatus2Start.opcodeId] = createJumpifstatus2OpcodeHandler(ports.resolveBattlerForBattleScript);
   }

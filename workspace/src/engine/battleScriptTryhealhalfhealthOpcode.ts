@@ -22,7 +22,7 @@ import {
   type BattleScriptOpcodeHandlers,
 } from "./battleScriptMachine.ts";
 import type { BattleScriptProgram } from "./battleScriptProgram.ts";
-import { resolveBattleScriptLabel } from "./battleScriptProgram.ts";
+import { resolveBattleScriptLabel, firstInstructionWithOpcodeName } from "./battleScriptProgram.ts";
 import type { BattleScriptRulesContext } from "./battleScriptRulesContext.ts";
 
 function requireBattlerRole(
@@ -82,9 +82,7 @@ function createTryhealhalfhealthHandler(): BattleScriptOpcodeHandler<BattleScrip
 export function createBattleScriptTryhealhalfhealthOpcodeHandlers(
   program: BattleScriptProgram,
 ): BattleScriptOpcodeHandlers<BattleScriptRulesContext> {
-  const instruction = program.instructions.find(
-    (candidate) => candidate.opcodeName === "B_SCR_OP_TRYHEALHALFHEALTH",
-  );
+  const instruction = firstInstructionWithOpcodeName(program, "B_SCR_OP_TRYHEALHALFHEALTH");
   if (!instruction) {
     throw new Error("committed Battle Script program does not emit B_SCR_OP_TRYHEALHALFHEALTH");
   }

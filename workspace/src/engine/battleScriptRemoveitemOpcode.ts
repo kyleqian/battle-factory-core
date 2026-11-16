@@ -34,6 +34,7 @@ import {
   withBattleScriptPartyMemberItem,
   type BattleScriptRulesContext,
 } from "./battleScriptRulesContext.ts";
+import { instructionsWithOpcodeName } from "./battleScriptProgram.ts";
 
 /** include/constants/items.h:5. */
 const ITEM_NONE = 0;
@@ -97,9 +98,7 @@ export function createBattleScriptRemoveitemOpcodeHandlers(
     resolveBattlerForBattleScript: BattleScriptBattlerSelectorResolverPort<BattleScriptRulesContext>;
   }>,
 ): BattleScriptOpcodeHandlers<BattleScriptRulesContext> {
-  const starts = program.instructions.filter(
-    (instruction) => instruction.opcodeName === "B_SCR_OP_REMOVEITEM",
-  );
+  const starts = instructionsWithOpcodeName(program, "B_SCR_OP_REMOVEITEM");
   if (starts.length !== 13) {
     throw new Error(`B_SCR_OP_REMOVEITEM requires all 13 concrete starts, got ${starts.length}`);
   }

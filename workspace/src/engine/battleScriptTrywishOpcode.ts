@@ -16,6 +16,7 @@ import {
   resolveBattleScriptLabel,
   type BattleScriptInstruction,
   type BattleScriptProgram,
+  instructionsWithOpcodeName,
 } from "./battleScriptProgram.ts";
 import type { BattleScriptBattlerId } from "./battleScriptEvents.ts";
 import type { BattleScriptRulesContext } from "./battleScriptRulesContext.ts";
@@ -115,9 +116,7 @@ function createTrywishHandler(
 export function createBattleScriptTrywishOpcodeHandlers(
   program: BattleScriptProgram,
 ): BattleScriptOpcodeHandlers<BattleScriptRulesContext> {
-  const instructions = program.instructions.filter(
-    (candidate) => candidate.opcodeName === "B_SCR_OP_TRYWISH",
-  );
+  const instructions = instructionsWithOpcodeName(program, "B_SCR_OP_TRYWISH");
   if (instructions.length !== 2) {
     throw new Error(`committed Battle Script program must emit two B_SCR_OP_TRYWISH instructions, found ${instructions.length}`);
   }
