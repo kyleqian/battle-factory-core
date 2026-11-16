@@ -28,7 +28,11 @@ interface TimingTable {
   readonly turns: number;
   readonly sides: number;
   readonly variants: readonly (readonly TimedOp[])[];
-  readonly moves: readonly Readonly<{ move: number; variants: readonly number[] }>[];
+  readonly moves: readonly Readonly<{ move: number; variants: readonly number[]; pic?: readonly number[] }>[];
+  /** aud242l: per side, the sorted distinct pic Y (GetBattlerSpriteFinal_Y(..., TRUE)) a battler on that side can have. */
+  readonly picYs: readonly (readonly number[])[];
+  /** aud242l: grids of variant indices, row = attacker pic Y class, column = target pic Y class (both in picYs order). */
+  readonly picGrids: readonly (readonly number[])[];
   /** aud249: gBattleAnims_StatusConditions + gBattleAnims_General, one variant per attacker side. */
   readonly general: readonly Readonly<{ label: string; variants: readonly number[] }>[];
 }
@@ -151,12 +155,23 @@ export function moveAnimOpRows(op: TimedOp, context: AnimPanContext, uniformLoop
   }
 }
 
-/** The resolved ops of the move's (turn, attacker side) walk: variant index = turn * sides + side (the side-dependent jumpret* branches resolve from the request). */
-function variantOf(move: number, turn: number, attackerSide: 0 | 1): readonly TimedOp[] {
+/**
+ * The resolved ops of the move's (turn, attacker side) walk: variant index = turn * sides + side (the side-dependent jumpret* branches resolve from the request).
+ * A move whose sprite lifetimes depend on the two battlers' pic Y (Blizzard, aud242l) carries a grid per slot; `picY` reads the live values and an unknown class keeps
+ * the reference walk.
+ */
+function variantOf(move: number, turn: number, attackerSide: 0 | 1, picY?: (battler: 0 | 1) => number): readonly TimedOp[] {
   const entry = timing.moves[move];
   if (entry === undefined) return [];
   const turnIndex = turn < timing.turns ? turn : timing.turns - 2 + (turn & 1);
-  return timing.variants[entry.variants[turnIndex * timing.sides + attackerSide]!]!;
+  const slot = turnIndex * timing.sides + attackerSide;
+  const grid = entry.pic === undefined || picY === undefined ? undefined : timing.picGrids[entry.pic[slot]!];
+  if (grid !== undefined) {
+    const row = timing.picYs[attackerSide]!.indexOf(picY!(attackerSide));
+    const column = timing.picYs[1 - attackerSide]!.indexOf(picY!(attackerSide === 0 ? 1 : 0));
+    if (row >= 0 && column >= 0) return timing.variants[grid[row * timing.picYs[1 - attackerSide]!.length + column]!]!;
+  }
+  return timing.variants[entry.variants[slot]!]!;
 }
 
 /** StatsChangeAnimation_Step2 plays its SE (battle_anim_utility_funcs.c:561-564) on this stats-change command age. */
@@ -267,7 +282,7 @@ export function emitMoveAnimSounds(after: BattleResolutionPresentationState | nu
     targetSide: request.target === 0 ? "player" : "opponent",
   } as const;
   const scriptRow = age - FIRST_COMMAND_AGE - AGE_TO_SOUND_ROWS;
-  emitOpsAt(variantOf(request.moveId, request.turn, request.attacker === 0 ? 0 : 1), context, scriptRow);
+  emitOpsAt(variantOf(request.moveId, request.turn, request.attacker === 0 ? 0 : 1, source.picOffsetY), context, scriptRow);
   emitCryTaskRows(request.moveId, source.attackerSpecies, context.attackerSide, scriptRow, frontierBrain);
 }
 
