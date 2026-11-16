@@ -1,3 +1,17 @@
+## 2026-11-16 — aud242i (ts lane worker): move-animation SE lifetimes, slice 9 (ISSUES #219 family 1)
+
+- **State:** on master, committed (`9752b45a0` waitsound bound + Sludge Bomb, `04b803f5f` Faint Attack + clearmonbg overrun, docs after). Sound only.
+- **Did:** `waitsound` as an SE-length bound resolved by the visual finish; Sludge Bomb hit-particle lifetime; attacker fade / invisible-signal lifetimes (Faint Attack); `Task_ClearMonBg`
+  overruns VBlank by 2 frames (a lag in the walk). ROM windows (step mode, both sides): Sludge Bomb 19 / 19 rows +2, Faint Attack +3 (script-start offset, interval exact), Poison Tail +4 -> +2.
+- **Counts:** L50 emitted / gated 697 / 137 -> 704 / 130; all moves resolved 899 / 213 -> 906 / 206. T1 (seeds 0..99 ON, fresh arms `on-d39e33b3c` / `on-04b803f5f`): exact 23,795 -> 24,055,
+  missing-gated 950 -> 690, extra 0, unclassified 11,093 -> 11,093 (unchanged: pre-existing tooling gap, not 0). `commands` / `eventsDigest` identical 100 / 100; differential 240 / 240 (3 traces).
+- **Gates:** typecheck 0; test:gate 362 files / 2,843; importer tests 27 files / 287; build / build:lib 0. Full `npm test` not run (supervisor).
+- **Next:** Blizzard 88, Confuse Ray 47, Dig 37, Spark 32, Struggle 30, Attract 28 (`docs/aud242-move-anim-sounds.md` 13.4). Evidence `.integration/evidence/aud242i/`.
+
+---
+
+---
+
 ## 2026-11-16 — cry2 (ts lane worker): the cry-task modes recorded and played (cry-task-scout step 2)
 
 - **State:** on master, committed (`8bbc1cf5f` assets, player + Tier-1 after, docs / check tool last). Playback only; `src/engine`, frame hashes and the headless graph untouched.
