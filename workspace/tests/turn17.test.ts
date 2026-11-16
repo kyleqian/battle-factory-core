@@ -23,7 +23,7 @@ import {
 import {
   TURN17_FIRE_PUNCH_RESOLUTION,
 } from "../src/animation/firePunch.ts";
-import { CANONICAL_OPPONENT_FLY_RESOLUTION } from "../src/engine/turn15FlyResolutionAdapter.ts";
+import { canonicalOpponentFlyResolution } from "../src/engine/turn15FlyResolutionAdapter.ts";
 import { resolveTurn13LatestCompletedCommandHandoff } from "../src/engine/turn13ResolutionAdapter.ts";
 import { createInitialState, tick } from "../src/engine/core.ts";
 import { CLOSED_FIGHT_SUBMENU_STATE } from "../src/engine/battleMenu.ts";
@@ -58,7 +58,7 @@ describe("turn 17 faint hold and outcome latency", () => {
         sendOutPressElapsed: 380,
         latestCompletedCommandHandoff: resolveTurn13LatestCompletedCommandHandoff(),
         resolutionOwner: Object.freeze({
-          resolution: CANONICAL_OPPONENT_FLY_RESOLUTION.strikeResolution,
+          resolution: canonicalOpponentFlyResolution().strikeResolution,
           forcedPartySelect: null,
           followingPresentation: null,
         }),

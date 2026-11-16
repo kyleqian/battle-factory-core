@@ -43,7 +43,7 @@ describe("turn1RockSlidePresentationStaging: staged real ROCK_SLIDE hit chain (d
     expect(message).toMatchObject({ messageId: "STRINGID_USEDMOVE", substitutions: [] });
   });
 
-  it("hp-change carries Grovyle's real pre-hit HP (143) as `from` and the real settled HP (101) as `to` -- the two RAM-dump reads (battleScene.ts's anchorOpponentBattler.hp/anchorOpponentAfterTurnHp) this window's opponent-healthbox render stops needing", () => {
+  it("hp-change carries Grovyle's real pre-hit HP (143) as `from` and the real settled HP (101) as `to` -- the two RAM-dump reads (battleScene.ts's getAnchorOpponentBattler().hp/getAnchorOpponentAfterTurnHp()) this window's opponent-healthbox render stops needing", () => {
     const { events } = stageTurn1RockSlideHitChain();
     const hpChange = events.find((e) => e.kind === "hp-change");
     expect(hpChange).toMatchObject({ battler: 1, from: 143, to: 101 });

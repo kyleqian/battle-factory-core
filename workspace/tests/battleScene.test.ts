@@ -25,7 +25,7 @@ import {
   endeavorShakeSteps,
   evaEvb,
   GROVYLE_FAINT_SINK_START_TICK,
-  GROVYLE_FAINT_SINK_STEPS,
+  grovyleFaintSinkSteps,
   faintSinkRowsAndY2,
   INITIAL_BATTLE_SCENE_STATE,
   onixSitrusRotateMatrix,
@@ -37,16 +37,16 @@ import {
   turn5OffSitrusOnixHp,
   turn5SitrusResettledBounceTick,
   turn5SitrusRingMatrix,
-  LEGACY_TURN6_FIGHT_COMMAND_PRESENTATION,
-  LEGACY_TURN7_FIGHT_COMMAND_PRESENTATION,
-  LEGACY_TURN8_FIGHT_COMMAND_PRESENTATION,
-  LEGACY_TURN9_FIELD_AND_BOUNCE_PRESENTATION,
-  LEGACY_TURN9_FIGHT_COMMAND_PRESENTATION,
-  LEGACY_TURN10_FIGHT_COMMAND_PRESENTATION,
-  LEGACY_TURN11_FIGHT_COMMAND_PRESENTATION,
-  LEGACY_TURN12_FIGHT_COMMAND_PRESENTATION,
-  LEGACY_TURN13_FIGHT_COMMAND_PRESENTATION,
-  LEGACY_TURN14_RETAINED_FLY_PRESENTATION,
+  legacyTurn6FightCommandPresentation,
+  legacyTurn7FightCommandPresentation,
+  legacyTurn8FightCommandPresentation,
+  legacyTurn9FieldAndBouncePresentation,
+  legacyTurn9FightCommandPresentation,
+  legacyTurn10FightCommandPresentation,
+  legacyTurn11FightCommandPresentation,
+  legacyTurn12FightCommandPresentation,
+  legacyTurn13FightCommandPresentation,
+  legacyTurn14RetainedFlyPresentation,
   PARTICLE_OAM_PRIORITY,
   PARTICLE_OAM_SUBPRIORITY,
   renderBattleScene,
@@ -57,7 +57,7 @@ import {
   shiftTop,
   sortAliveParticlesByScreenY,
   SWITCHIN_SENTOUT_TEXT_START_TICK,
-  SWITCHIN_SENTOUT_TEXT_TOTAL,
+  switchinSentoutTextTotal,
   switchinSentOutTextVisibleChars,
   TEXT_START_TICK,
   TEXT_TOTAL_CHARS,
@@ -70,17 +70,17 @@ import {
   TURN5_OFF_ENDEAVOR_FLICKER_START,
   TURN5_OFF_ENDEAVOR_HEALTHBOX_BOUNCE_START,
   TURN5_OFF_ENDEAVOR_HP_DRAIN_START_DELAY,
-  TURN4_ROCKSLIDE_HP,
+  turn4RockslideHp,
   TURN5_OFF_ROCKSLIDE_TEXT_DELAY,
   TURN5_OFF_ROCKSLIDE_ANIMATION_PROFILE,
   TURN5_OFF_ROCKSLIDE_HP_DRAIN_START_DELAY,
-  TURN5_ROCKSLIDE_OPPONENT_TO_HP,
+  turn5RockslideOpponentToHp,
   TURN5_OFF_SITRUS_ONIX_HP_CLIMB_START_TICK,
   TURN5_OFF_SITRUS_ONIX_HP_JUMP_TICK,
   TURN5_OFF_SITRUS_TEXT_CLEAR_TICK,
   TURN5_OFF_SITRUS_MENU_REDRAW_TICK,
   TURN5_FAINT_DISMISS_FREEZE_TICK_OFFSET,
-  TURN5_FAINTED_CURSOR_START_DELAY,
+  turn5FaintedCursorStartDelay,
   TURN5_OPPONENT_ICON_STATES,
   TURN5_ROCKSLIDE_PRESS_TICK,
   TURN5_SWITCHIN_PARTICLE_STALL_LOGICAL_TICK,
@@ -125,9 +125,8 @@ import {
   TURN11_ROCKSLIDE_PRESS_TICK,
   turn11AtkFloorTextStartTick,
   turn11AtkFloorTextVisibleChars,
-  TURN11_ATKFLOOR_KICKOFF_LINE1,
-  TURN11_ATKFLOOR_KICKOFF_LINE2,
-  TURN11_ATKFLOOR_TEXT_TOTAL,
+  turn11AtkfloorKickoffLines,
+  turn11AtkfloorTextTotal,
   turn11SuperEffectiveTextStartTick,
   turn11SuperEffectiveTextVisibleChars,
   turn11RockSlideResettledBounceTick,
@@ -150,8 +149,8 @@ import {
   turn13AccFellTextVisibleChars,
   TURN13_DRAGONBREATH_PRESS_TICK,
   TURN13_FAINT_SINK_START_TICK,
-  TURN13_FAINT_SINK_STEPS,
-  TURN13_HEALTHBOX_VANISH_TICK,
+  turn13FaintSinkSteps,
+  turn13HealthboxVanishTick,
   turn13FaintedTextStartTick,
   turn13FaintedTextVisibleChars,
   opponentFaintDismissEligible,
@@ -265,15 +264,15 @@ const TURN2_ON_PROFILE_HANDOFF = resolveTurn2CompletedResolutionNextCommandHando
 
 describe("dispatcher slices 3-4: FightCommandPresentation shadow equivalence", () => {
   const cases = [
-    ["turn 6", resolveTurn5FightCommandPresentation, LEGACY_TURN6_FIGHT_COMMAND_PRESENTATION],
-    ["turn 7", resolveTurn6FightCommandPresentation, LEGACY_TURN7_FIGHT_COMMAND_PRESENTATION],
-    ["turn 8", resolveTurn7FightCommandPresentation, LEGACY_TURN8_FIGHT_COMMAND_PRESENTATION],
-    ["turn 9", resolveTurn8FightCommandPresentation, LEGACY_TURN9_FIGHT_COMMAND_PRESENTATION],
-    ["turn 10", resolveTurn9FightCommandPresentation, LEGACY_TURN10_FIGHT_COMMAND_PRESENTATION],
-    ["turn 11", resolveTurn10FightCommandPresentation, LEGACY_TURN11_FIGHT_COMMAND_PRESENTATION],
-    ["turn 12", resolveTurn11FightCommandPresentation, LEGACY_TURN12_FIGHT_COMMAND_PRESENTATION],
-    ["turn 13", resolveTurn12FightCommandPresentation, LEGACY_TURN13_FIGHT_COMMAND_PRESENTATION],
-    ["turn 14 retained FLY", resolveTurn13FightCommandPresentation, LEGACY_TURN14_RETAINED_FLY_PRESENTATION],
+    ["turn 6", resolveTurn5FightCommandPresentation, legacyTurn6FightCommandPresentation()],
+    ["turn 7", resolveTurn6FightCommandPresentation, legacyTurn7FightCommandPresentation()],
+    ["turn 8", resolveTurn7FightCommandPresentation, legacyTurn8FightCommandPresentation()],
+    ["turn 9", resolveTurn8FightCommandPresentation, legacyTurn9FightCommandPresentation()],
+    ["turn 10", resolveTurn9FightCommandPresentation, legacyTurn10FightCommandPresentation()],
+    ["turn 11", resolveTurn10FightCommandPresentation, legacyTurn11FightCommandPresentation()],
+    ["turn 12", resolveTurn11FightCommandPresentation, legacyTurn12FightCommandPresentation()],
+    ["turn 13", resolveTurn12FightCommandPresentation, legacyTurn13FightCommandPresentation()],
+    ["turn 14 retained FLY", resolveTurn13FightCommandPresentation, legacyTurn14RetainedFlyPresentation()],
   ] as const;
 
   it("copies each legacy branch's semantic field, bounce regime, and available text content without a PP or turn member", () => {
@@ -284,7 +283,7 @@ describe("dispatcher slices 3-4: FightCommandPresentation shadow equivalence", (
       expect(Object.hasOwn(bridge, "episode")).toBe(false);
       expect(Object.keys(bridge).join(","), label).not.toContain("pp");
     }
-    expect(LEGACY_TURN9_FIELD_AND_BOUNCE_PRESENTATION.upcoming).toBeNull();
+    expect(legacyTurn9FieldAndBouncePresentation().upcoming).toBeNull();
     expect(resolveTurn8FightCommandPresentation().upcoming).not.toBeNull();
     expect(resolveTurn13FightCommandPresentation().retainedResolution?.segments)
       .toBe(resolveTurn13FightCommandPresentation().retainedResolution?.owner.resolution.segments);
@@ -1792,7 +1791,7 @@ describe("completed turn-4 receipt: turn 5 reopen consumes the retained continua
 // proves the RENDER, not the formula's own shape.
 describe("S7 slice K: faintSinkRowsAndY2 (docs/faint-switch-notes.md §7a's closed form)", () => {
   it("before the handoff tick S(6360), fully visible (keptRows=STEPS, y2=0)", () => {
-    expect(faintSinkRowsAndY2(GROVYLE_FAINT_SINK_START_TICK)).toEqual({ keptRows: GROVYLE_FAINT_SINK_STEPS, y2: 0 });
+    expect(faintSinkRowsAndY2(GROVYLE_FAINT_SINK_START_TICK)).toEqual({ keptRows: grovyleFaintSinkSteps(), y2: 0 });
     expect(faintSinkRowsAndY2(6000)).toEqual({ keptRows: 8, y2: 0 });
   });
 
@@ -1894,7 +1893,7 @@ describe("turn5FaintDismissCursorTick (docs/turn5-resolve-ab-pools-diagnosis.md 
 
   it("once dismissed, clamps at dismissTick - 1 forever after, reproducing the frozen tail's own last-live-phase offset (2) via cursorState", () => {
     const dismissTick = 6561; // the real RAM accept-edge tick (§11.1's own table)
-    const cursorStart = TURN5_ROCKSLIDE_PRESS_TICK + TURN5_FAINTED_CURSOR_START_DELAY;
+    const cursorStart = TURN5_ROCKSLIDE_PRESS_TICK + turn5FaintedCursorStartDelay();
     expect(turn5FaintDismissCursorTick(6561, dismissTick)).toBe(6560);
     expect(turn5FaintDismissCursorTick(6570, dismissTick)).toBe(6560);
     expect(turn5FaintDismissCursorTick(6613, dismissTick)).toBe(6560);
@@ -1935,8 +1934,8 @@ describe("S7 slice L: switchinSentOutTextVisibleChars (docs/faint-switch-notes.m
     expect(switchinSentOutTextVisibleChars(SWITCHIN_SENTOUT_TEXT_START_TICK - 1)).toBe(0);
     expect(switchinSentOutTextVisibleChars(SWITCHIN_SENTOUT_TEXT_START_TICK)).toBe(1);
     expect(switchinSentOutTextVisibleChars(SWITCHIN_SENTOUT_TEXT_START_TICK + 1)).toBe(2);
-    expect(switchinSentOutTextVisibleChars(SWITCHIN_SENTOUT_TEXT_START_TICK + SWITCHIN_SENTOUT_TEXT_TOTAL + 50)).toBe(
-      SWITCHIN_SENTOUT_TEXT_TOTAL,
+    expect(switchinSentOutTextVisibleChars(SWITCHIN_SENTOUT_TEXT_START_TICK + switchinSentoutTextTotal() + 50)).toBe(
+      switchinSentoutTextTotal(),
     );
   });
 });
@@ -2224,7 +2223,7 @@ describe("docs/turn5-resolve-ab-pools-diagnosis.md §17.4 (2026-08-18, ISSUES #9
 
 describe("docs/turn5-resolve-ab-pools-diagnosis.md §19 (2026-08-18, ISSUES #97): drawTurn5RockSlideAttack's faintSinkRowsAndY2 call runs 2 render ticks ahead of the shared formula's own default t-1 anchor - a dense oracle pixel sweep (GROVYLE's own column x=165) found the real sink's first erased row already showing at GROVYLE_FAINT_SINK_START_TICK itself (6360), not 2 ticks later as the unshifted formula would produce", () => {
   it("sanity: the shared faintSinkRowsAndY2 formula itself is untouched - called directly (no shift) it still reports unsunk (keptRows=steps) at t=GROVYLE_FAINT_SINK_START_TICK, only drawTurn5RockSlideAttack's own call site shifts its input", () => {
-    expect(faintSinkRowsAndY2(GROVYLE_FAINT_SINK_START_TICK)).toEqual({ keptRows: GROVYLE_FAINT_SINK_STEPS, y2: 0 });
+    expect(faintSinkRowsAndY2(GROVYLE_FAINT_SINK_START_TICK)).toEqual({ keptRows: grovyleFaintSinkSteps(), y2: 0 });
   });
 
   it("row 21 (GROVYLE's own sprite top row, the real hardware's first sink-erase boundary per §4a) is already erased in drawTurn5RockSlideAttack's own render of tick 6360 - byte-identical to its own render of 6361 (same step under the +2 shift) and different from the pre-window render of 6358", () => {
@@ -2240,7 +2239,7 @@ describe("docs/turn5-resolve-ab-pools-diagnosis.md §19 (2026-08-18, ISSUES #97)
     expect(onset).not.toEqual(before);
   });
 
-  it("the opponent healthbox is gone from drawTurn5RockSlideAttack's own render by tick 6377, not 6379 - a direct oracle screenshot comparison (6376 vs 6377) showed the real healthbox already gone at 6377, 2 ticks ahead of the unshifted GROVYLE_HEALTHBOX_VANISH_TICK gate, the same lag family as the sink fix above", () => {
+  it("the opponent healthbox is gone from drawTurn5RockSlideAttack's own render by tick 6377, not 6379 - a direct oracle screenshot comparison (6376 vs 6377) showed the real healthbox already gone at 6377, 2 ticks ahead of the unshifted grovyleHealthboxVanishTick() gate, the same lag family as the sink fix above", () => {
     const healthboxRegion = (t: number) => {
       const fb = new Uint8Array(240 * 160 * 4);
       drawTurn5RockSlideAttack(fb, t, t);
@@ -2285,8 +2284,8 @@ describe("docs/turn5-resolve-ab-pools-diagnosis.md §19.3 (2026-08-18, ISSUES #9
 
 describe("docs/turn5-resolve-ab-pools-diagnosis.md §20.1 (2026-08-19, ISSUES #97): drawTurn5RockSlideAttack's own rockSlideOpponentHp call runs 2 render ticks late - a leaf-compositor probe (probe-opponent-healthbox-hp1-vs-hp0.ts) found the never-show-empty-bar sliver's hp=1->hp=0 boundary differs from real hardware (RAM tick 6282, pixel-visible 6283) by exactly the 2 residual pixels at full-frame (52,33)/(52,34) and nowhere else, so the call site's own render tick is shifted `t + 2`, scoped to this one call site only", () => {
   it("sanity: the shared rockSlideOpponentHp function itself is untouched - called directly (no shift) it still reports hp=1 through t=6284, stepping to 0 only at t=6285", () => {
-    expect(rockSlideOpponentHp(6284, TURN5_ROCKSLIDE_PRESS_TICK, TURN4_ROCKSLIDE_HP.to, TURN5_ROCKSLIDE_OPPONENT_TO_HP, TURN5_OFF_ROCKSLIDE_HP_DRAIN_START_DELAY)).toBe(1);
-    expect(rockSlideOpponentHp(6285, TURN5_ROCKSLIDE_PRESS_TICK, TURN4_ROCKSLIDE_HP.to, TURN5_ROCKSLIDE_OPPONENT_TO_HP, TURN5_OFF_ROCKSLIDE_HP_DRAIN_START_DELAY)).toBe(0);
+    expect(rockSlideOpponentHp(6284, TURN5_ROCKSLIDE_PRESS_TICK, turn4RockslideHp().to, turn5RockslideOpponentToHp(), TURN5_OFF_ROCKSLIDE_HP_DRAIN_START_DELAY)).toBe(1);
+    expect(rockSlideOpponentHp(6285, TURN5_ROCKSLIDE_PRESS_TICK, turn4RockslideHp().to, turn5RockslideOpponentToHp(), TURN5_OFF_ROCKSLIDE_HP_DRAIN_START_DELAY)).toBe(0);
   });
 
   it("the call site actually wires the +2 shift through to the real render: the HP-bar sliver pixel at full-frame (52,33) changes color between render tick 6282 and 6283 - matching real hardware's own RAM-6282/pixel-6283 boundary - and stays at its new color through 6284, not the unshifted 6285", () => {
@@ -2619,7 +2618,7 @@ describe("ISSUES #97 remainder residual (B) (docs/turn5-confirmb-resolved-residu
   });
 });
 
-describe("ISSUES #97 remainder residual (B) (docs/turn5-confirmb-resolved-residuals.md §2.3, 2026-08-18): turn5SitrusOffHealTextVisibleChars - the OFF-profile-only sibling of turn5SitrusHealTextVisibleChars, anchored at TURN5_OFF_SITRUS_HEAL_TEXT_START_TICK (6850) instead of the stale ONIX_SITRUS_IDENTITY_RENDER_TICK epoch, same t-1/one-char-per-tick shape as residual (A)'s rockSlideTextVisibleChars fix - predicts full reveal (35 chars) at exactly t=6885, matching the given ground truth ('settles 6885') with zero fitting", () => {
+describe("ISSUES #97 remainder residual (B) (docs/turn5-confirmb-resolved-residuals.md §2.3, 2026-08-18): turn5SitrusOffHealTextVisibleChars - the OFF-profile-only sibling of turn5SitrusHealTextVisibleChars, anchored at TURN5_OFF_SITRUS_HEAL_TEXT_START_TICK (6850) instead of the stale onixSitrusIdentityRenderTick() epoch, same t-1/one-char-per-tick shape as residual (A)'s rockSlideTextVisibleChars fix - predicts full reveal (35 chars) at exactly t=6885, matching the given ground truth ('settles 6885') with zero fitting", () => {
   it("is 0 at and before the anchor tick (6850)", () => {
     expect(turn5SitrusOffHealTextVisibleChars(6850)).toBe(0);
   });
@@ -3077,8 +3076,8 @@ describe("S7 slice R rung 1: TURN11_ROCKSLIDE_PRESS_TICK - the synthetic anchor 
 describe("S7 slice R rung 1: turn11AtkFloorTextStartTick/turn11AtkFloorTextVisibleChars - the ATK-floor 'won't go any lower!' message, the ONE genuinely new mechanism this turn (docs/turn11-notes.md addendum §3), fresh-oracle-bisected against a real FEATHER_DANCE confirm press", () => {
   const pressTick = 13339; // FEATHER_PRESS_TICK, the real A-confirm press
   it("takes its reveal total from the resolver-owned staged lines", () => {
-    expect(TURN11_ATKFLOOR_TEXT_TOTAL).toBe(
-      TURN11_ATKFLOOR_KICKOFF_LINE1.length + TURN11_ATKFLOOR_KICKOFF_LINE2.length,
+    expect(turn11AtkfloorTextTotal()).toBe(
+      turn11AtkfloorKickoffLines()[0].length + turn11AtkfloorKickoffLines()[1].length,
     );
   });
   it("starts at render 13422 (pressTick+83)", () => {
@@ -3138,7 +3137,7 @@ describe("S7/S8 (docs/turn12-notes.md's 2026-07-21 update §3): TURN12_ROCKSLIDE
   });
 });
 
-describe("S7/S8: turn12MissTextStartTick/turn12MissTextVisibleChars - 'ONIX's\\nattack missed!' (TURN8_MISS_LINE1/2 reused verbatim), the arc's SECOND miss - fresh-oracle-pinned start (pressTick+449, NOT turn 8's own 471 - BIND's own kickoff text is a different length)", () => {
+describe("S7/S8: turn12MissTextStartTick/turn12MissTextVisibleChars - 'ONIX's\\nattack missed!' (turn8MissLines()[0]/2 reused verbatim), the arc's SECOND miss - fresh-oracle-pinned start (pressTick+449, NOT turn 8's own 471 - BIND's own kickoff text is a different length)", () => {
   const pressTick = TURN12_ROCKSLIDE_PRESS_TICK;
   it("starts at render 14686 (pressTick+449)", () => {
     expect(turn12MissTextStartTick(pressTick)).toBe(14686);
@@ -3236,19 +3235,19 @@ describe("S7/S8 turn 13 rung 3 (docs/turn13-notes.md §4/§5/§7): DRAGON_BREATH
   });
 
   it("faintSinkRowsAndY2 is identity-independent across distinct startTick/steps parameterizations", () => {
-    expect(TURN13_FAINT_SINK_STEPS).toBe(7);
-    expect(TURN13_FAINT_SINK_STEPS).not.toBe(GROVYLE_FAINT_SINK_STEPS);
+    expect(turn13FaintSinkSteps()).toBe(7);
+    expect(turn13FaintSinkSteps()).not.toBe(grovyleFaintSinkSteps());
     expect(TURN13_FAINT_SINK_START_TICK).not.toBe(GROVYLE_FAINT_SINK_START_TICK);
-    expect(faintSinkRowsAndY2(TURN13_FAINT_SINK_START_TICK, TURN13_FAINT_SINK_START_TICK, TURN13_FAINT_SINK_STEPS)).toEqual({ keptRows: TURN13_FAINT_SINK_STEPS, y2: 0 });
-    expect(faintSinkRowsAndY2(TURN13_FAINT_SINK_START_TICK + 8, TURN13_FAINT_SINK_START_TICK, TURN13_FAINT_SINK_STEPS)).toEqual({ keptRows: 3, y2: 32 });
-    expect(faintSinkRowsAndY2(TURN13_FAINT_SINK_START_TICK + 14, TURN13_FAINT_SINK_START_TICK, TURN13_FAINT_SINK_STEPS)).toEqual({ keptRows: 0, y2: TURN13_FAINT_SINK_STEPS * 8 });
+    expect(faintSinkRowsAndY2(TURN13_FAINT_SINK_START_TICK, TURN13_FAINT_SINK_START_TICK, turn13FaintSinkSteps())).toEqual({ keptRows: turn13FaintSinkSteps(), y2: 0 });
+    expect(faintSinkRowsAndY2(TURN13_FAINT_SINK_START_TICK + 8, TURN13_FAINT_SINK_START_TICK, turn13FaintSinkSteps())).toEqual({ keptRows: 3, y2: 32 });
+    expect(faintSinkRowsAndY2(TURN13_FAINT_SINK_START_TICK + 14, TURN13_FAINT_SINK_START_TICK, turn13FaintSinkSteps())).toEqual({ keptRows: 0, y2: turn13FaintSinkSteps() * 8 });
     // still reproduces Grovyle's own turn-5 endpoints unmodified (default params) - the generalization is additive, not a behavior change.
-    expect(faintSinkRowsAndY2(GROVYLE_FAINT_SINK_START_TICK)).toEqual({ keptRows: GROVYLE_FAINT_SINK_STEPS, y2: 0 });
+    expect(faintSinkRowsAndY2(GROVYLE_FAINT_SINK_START_TICK)).toEqual({ keptRows: grovyleFaintSinkSteps(), y2: 0 });
     expect(faintSinkRowsAndY2(GROVYLE_FAINT_SINK_START_TICK + 10)).toEqual({ keptRows: 3, y2: 40 });
   });
 
   it("healthbox vanish tick (15977) lands 2 ticks after the sink's own last erase step, matching docs/turn13-notes.md §4's own 'healthbox gone' citation", () => {
-    expect(TURN13_HEALTHBOX_VANISH_TICK).toBe(15977);
+    expect(turn13HealthboxVanishTick()).toBe(15977);
   });
 
   it("turn13FaintedTextStartTick/turn13FaintedTextVisibleChars: 'Foe PIDGEOTTO\\nfainted!' starts at render 15979 (oracle-bisected exact - 15978 still shows the old DRAGON_BREATH kickoff text), 1 char/tick, fully typed (21/21) after", () => {

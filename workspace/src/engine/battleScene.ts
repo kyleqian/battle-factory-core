@@ -865,20 +865,20 @@ import { drawMode0Objects, drawMode0Ppu, mgbaColorFromBgr555, mgbaDarkenColor, t
 import { compositeSemiTransparentObjPixel } from "./sprites.ts";
 import { fakeTearsControllerDisplayAtAge } from "./fakeTearsControllerPresentation.ts";
 import { resolveTurn6FeatherDanceWindowContent } from "./turn6FeatherDancePresentationStaging.ts";
-import { CANONICAL_OPPONENT_FLY_RESOLUTION } from "./turn15FlyResolutionAdapter.ts";
+import { canonicalOpponentFlyResolution } from "./turn15FlyResolutionAdapter.ts";
 import { mapStatus1ToBattleStatus } from "./battleResolutionAdapter.ts";
 import type {
   BattleSceneFollowingResolutionPresentation,
   BattleSceneResolutionOwner,
 } from "./battleSceneResolutionOwner.ts";
-import { CANONICAL_FIRE_PUNCH_RESOLUTION } from "./turn16FirePunchResolutionAdapter.ts";
+import { canonicalFirePunchResolution } from "./turn16FirePunchResolutionAdapter.ts";
 import {
   resolveTurn7FeatherDanceWindowContent,
   resolveTurn8FeatherDanceWindowContent,
 } from "./turn78FeatherDancePresentationStaging.ts";
 import { resolveBattle1PresentationHpValues } from "./battle1PresentationHpStaging.ts";
 import {
-  CANONICAL_TURN13_RETAINED_FLY_PRESENTATION_OWNER,
+  canonicalTurn13RetainedFlyPresentationOwner,
   resolveTurn13ResolutionAdapter,
   resolveTurn13SwitchInAdapter,
 } from "./turn13ResolutionAdapter.ts";
@@ -1555,16 +1555,16 @@ export { ACTION_MENU_BLANK_START_OFFSET, BALL_OAM_PRIORITY, BATTLE2_ROCK_SLIDE_R
 
 export { TURN5_SITRUS_RING_RENDER_LAG };
 export type { MenuIdleBounceTwoStateAsset } from "./battleSceneCanonical.ts";
-import { BATTLE2_TURN1_KERNEL, DRAGONBREATH_HIT_FLASH_OFFSET, DRAGONBREATH_KICKOFF_TEXT_TOTAL, GROVYLE_FAINT_SINK, INITIAL_BATTLE_SCENE_STATE, TURN10_AERIALACE_TEXT_TOTAL, TURN10_OFF_ROCKSLIDE_ANIMATION_PROFILE, TURN10_ONIX_AFTER_AERIALACE_HP, TURN11_ATKFLOOR_TEXT_TOTAL, TURN11_OFF_ROCKSLIDE_ANIMATION_PROFILE, TURN12_ONIX_AFTER_AERIALACE_HP, TURN13_SANDATTACK_DIRT_DRAW_ORDER, TURN14_DRAGONBREATH_TEXT_TOTAL, TURN14_FLYUP_LINE1, TURN14_FLYUP_LINE2, TURN15_FLY_STRIKE_LINE1, TURN15_FLY_STRIKE_LINE2, TURN15_ONIX_SHAKE_RAM_TICKS, TURN16_FAINT_ATTACK_TEXT_TOTAL, TURN16_FIRE_PUNCH_TEXT_TOTAL, TURN17_LOSS_TEXT_TOTAL, TURN1_OFF_ROCKSLIDE_ANIMATION_PROFILE, TURN1_ROCKSLIDE_HP, TURN2_ENDEAVOR_HP, TURN2_OFF_ENDEAVOR_FLICKER_START, TURN3_OFF_ENDEAVOR_FLICKER_START, TURN3_OFF_ROCKSLIDE_ANIMATION_PROFILE, TURN3_ROCKSLIDE_HP, TURN4_OFF_ROCKSLIDE_ANIMATION_PROFILE, TURN4_ROCKSLIDE_HP, TURN5_ENDEAVOR_HP, TURN5_OFF_ROCKSLIDE_ANIMATION_PROFILE, TURN5_ROCKSLIDE_OPPONENT_TO_HP, TURN5_SITRUS, TURN6_FEATHERDANCE_TEXT_TOTAL, TURN6_PIDGEOTTO_AFTER_ROCKSLIDE_HP, TURN7_PIDGEOTTO_AFTER_ROCKSLIDE_HP, TURN7_REGIME2_TO_REGIME1_SHIFT, TURN8_REGIME3_TO_REGIME1_SHIFT, TURN9_ONIX_AFTER_QUICKATTACK_HP, TURN9_QUICKATTACK_TEXT_TOTAL, TURN9_ROCKSLIDE_ANIMATION_PROFILE, battle2RockSlideMechanismPressTick, currentEpochPresentationAgeFromLatest, dragonBreathHp, dragonBreathTextStartTick, frontSpriteAnimFrame, grovyleStretchTintCoeff, playerHealthboxHpOverlayByHp, turn10AerialAceHp, turn10AerialAceTextStartTick, turn10NotVeryEffectiveTextStartTick, turn10SuperEffectiveTextStartTick, turn11AtkFloorTextStartTick, turn11SuperEffectiveTextStartTick, turn12MissTextStartTick, turn13AccFellTextStartTick, turn13MurkrowFrame, turn13SandAttackPidgeottoX2, turn13SandAttackTextStartTick, turn14KickoffBounceTick, turn14MurkrowInvisible, turn14SimpleVisibleChars, turn15FaintSinkSkipRows, turn15SimpleVisibleChars, turn15StrikeAttackerInvisible, turn15StrikeTargetHealthboxWobbleY2, turn15StrikeTargetHp, turn15StrikeTargetInvisible, turn15StrikeTargetShakeX2, turn16PartyElapsedAtTick, turn3KickoffBounceTick, turn3SubmenuBounceTickFromPresentationEpochAge, turn5FaintedCursorYOffset, turn5FaintedTextStartTick, turn5IconBarEva, turn5SitrusResettledBounceTick, turn6FeatherDanceTextStartTick, turn6KickoffBounceTick, turn7KickoffBounceTick, turn8BindTextStartTick, turn8KickoffBounceTick, turn8MissTextStartTick, turn9Ep2HealthboxWobbleY2, turn9Ep2OnixInvisible, turn9Hp, turn9NotVeryEffectiveTextStartTick, turn9QuickAttackTextStartTick, turn9SuperEffectiveTextStartTick } from "./battleSceneCanonical.ts";
-export { BATTLE2_TURN1_KERNEL, DRAGONBREATH_HIT_FLASH_OFFSET, DRAGONBREATH_KICKOFF_TEXT_TOTAL, GROVYLE_FAINT_SINK, INITIAL_BATTLE_SCENE_STATE, TURN10_AERIALACE_TEXT_TOTAL, TURN10_OFF_ROCKSLIDE_ANIMATION_PROFILE, TURN10_ONIX_AFTER_AERIALACE_HP, TURN11_ATKFLOOR_TEXT_TOTAL, TURN11_OFF_ROCKSLIDE_ANIMATION_PROFILE, TURN12_ONIX_AFTER_AERIALACE_HP, TURN13_SANDATTACK_DIRT_DRAW_ORDER, TURN14_DRAGONBREATH_TEXT_TOTAL, TURN14_FLYUP_LINE1, TURN14_FLYUP_LINE2, TURN15_FLY_STRIKE_LINE1, TURN15_FLY_STRIKE_LINE2, TURN15_ONIX_SHAKE_RAM_TICKS, TURN16_FAINT_ATTACK_TEXT_TOTAL, TURN16_FIRE_PUNCH_TEXT_TOTAL, TURN17_LOSS_TEXT_TOTAL, TURN1_OFF_ROCKSLIDE_ANIMATION_PROFILE, TURN1_ROCKSLIDE_HP, TURN2_ENDEAVOR_HP, TURN2_OFF_ENDEAVOR_FLICKER_START, TURN3_OFF_ENDEAVOR_FLICKER_START, TURN3_OFF_ROCKSLIDE_ANIMATION_PROFILE, TURN3_ROCKSLIDE_HP, TURN4_OFF_ROCKSLIDE_ANIMATION_PROFILE, TURN4_ROCKSLIDE_HP, TURN5_ENDEAVOR_HP, TURN5_OFF_ROCKSLIDE_ANIMATION_PROFILE, TURN5_ROCKSLIDE_OPPONENT_TO_HP, TURN5_SITRUS, TURN6_FEATHERDANCE_TEXT_TOTAL, TURN6_PIDGEOTTO_AFTER_ROCKSLIDE_HP, TURN7_PIDGEOTTO_AFTER_ROCKSLIDE_HP, TURN7_REGIME2_TO_REGIME1_SHIFT, TURN8_REGIME3_TO_REGIME1_SHIFT, TURN9_ONIX_AFTER_QUICKATTACK_HP, TURN9_QUICKATTACK_TEXT_TOTAL, TURN9_ROCKSLIDE_ANIMATION_PROFILE, battle2RockSlideMechanismPressTick, currentEpochPresentationAgeFromLatest, dragonBreathHp, dragonBreathTextStartTick, frontSpriteAnimFrame, grovyleStretchTintCoeff, playerHealthboxHpOverlayByHp, turn10AerialAceHp, turn10AerialAceTextStartTick, turn10NotVeryEffectiveTextStartTick, turn10SuperEffectiveTextStartTick, turn11AtkFloorTextStartTick, turn11SuperEffectiveTextStartTick, turn12MissTextStartTick, turn13AccFellTextStartTick, turn13MurkrowFrame, turn13SandAttackPidgeottoX2, turn13SandAttackTextStartTick, turn14KickoffBounceTick, turn14MurkrowInvisible, turn14SimpleVisibleChars, turn15FaintSinkSkipRows, turn15SimpleVisibleChars, turn15StrikeAttackerInvisible, turn15StrikeTargetHealthboxWobbleY2, turn15StrikeTargetHp, turn15StrikeTargetInvisible, turn15StrikeTargetShakeX2, turn16PartyElapsedAtTick, turn3KickoffBounceTick, turn3SubmenuBounceTickFromPresentationEpochAge, turn5FaintedCursorYOffset, turn5FaintedTextStartTick, turn5IconBarEva, turn5SitrusResettledBounceTick, turn6FeatherDanceTextStartTick, turn6KickoffBounceTick, turn7KickoffBounceTick, turn8BindTextStartTick, turn8KickoffBounceTick, turn8MissTextStartTick, turn9Ep2HealthboxWobbleY2, turn9Ep2OnixInvisible, turn9Hp, turn9NotVeryEffectiveTextStartTick, turn9QuickAttackTextStartTick, turn9SuperEffectiveTextStartTick };
-import { BATTLE2_TURN1_KABUTO_ROCK_SLIDE_HP, GROVYLE_FAINT_SINK_STEPS, GROVYLE_HEALTHBOX_VANISH_TICK, TURN14_FLYUP_TEXT_TOTAL, TURN15_FLY_STRIKE_TEXT_TOTAL, TURN5_SITRUS_HEAL_HP_END, TURN5_SITRUS_HEAL_HP_START, TURN5_SITRUS_HEAL_LINE1, TURN5_SITRUS_HEAL_LINE2, TURN5_SITRUS_RING_CENTER, dragonBreathTextVisibleChars, menuIdleHealthboxBounce, menuIdleOnixBounce, turn10AerialAceTextVisibleChars, turn10NotVeryEffectiveTextVisibleChars, turn10SuperEffectiveTextVisibleChars, turn11AtkFloorTextVisibleChars, turn11SuperEffectiveTextVisibleChars, turn6FeatherDanceTextVisibleChars, turn9NotVeryEffectiveTextVisibleChars, turn9QuickAttackTextVisibleChars, turn9SuperEffectiveTextVisibleChars } from "./battleSceneCanonical.ts";
-export { BATTLE2_TURN1_KABUTO_ROCK_SLIDE_HP, GROVYLE_FAINT_SINK_STEPS, GROVYLE_HEALTHBOX_VANISH_TICK, TURN14_FLYUP_TEXT_TOTAL, TURN15_FLY_STRIKE_TEXT_TOTAL, TURN5_SITRUS_HEAL_HP_END, TURN5_SITRUS_HEAL_HP_START, TURN5_SITRUS_HEAL_LINE1, TURN5_SITRUS_HEAL_LINE2, TURN5_SITRUS_RING_CENTER, dragonBreathTextVisibleChars, menuIdleHealthboxBounce, menuIdleOnixBounce, turn10AerialAceTextVisibleChars, turn10NotVeryEffectiveTextVisibleChars, turn10SuperEffectiveTextVisibleChars, turn11AtkFloorTextVisibleChars, turn11SuperEffectiveTextVisibleChars, turn6FeatherDanceTextVisibleChars, turn9NotVeryEffectiveTextVisibleChars, turn9QuickAttackTextVisibleChars, turn9SuperEffectiveTextVisibleChars };
-import { TURN5_FAINT_DISMISS_FREEZE_TICK_OFFSET, TURN5_FAINTED_CURSOR_START_DELAY, TURN5_FAINTED_LINE1, TURN5_FAINTED_LINE2, TURN5_FAINTED_TEXT_TOTAL, faintSinkRowsAndY2, playerSummaryEvaOffset, turn5RockSlideKoDismissEligible } from "./battleSceneCanonical.ts";
-export { TURN5_FAINT_DISMISS_FREEZE_TICK_OFFSET, TURN5_FAINTED_CURSOR_START_DELAY, TURN5_FAINTED_LINE1, TURN5_FAINTED_LINE2, TURN5_FAINTED_TEXT_TOTAL, faintSinkRowsAndY2, playerSummaryEvaOffset, turn5RockSlideKoDismissEligible };
-import { TURN1_ROCKSLIDE_ATTACK_LINE1, TURN1_ROCKSLIDE_ATTACK_LINE2, TURN1_ROCKSLIDE_KICKOFF_LINE1, TURN1_ROCKSLIDE_KICKOFF_LINE2, TURN2_ENDEAVOR_ATTACK_LINE1, TURN2_ENDEAVOR_ATTACK_LINE2, TURN4_DOUBLETEAM_KICKOFF_LINE1, TURN4_DOUBLETEAM_KICKOFF_LINE2, TURN5_ENDEAVOR_ATTACK_LINE1, TURN5_ENDEAVOR_ATTACK_LINE2, TURN8_BIND_LINE1, TURN8_BIND_LINE2, TURN8_BIND_TEXT_TOTAL, TURN8_MISS_LINE1, TURN8_MISS_LINE2, TURN8_MISS_TEXT_TOTAL, TURN13_ACCFELL_EVENT_LINE1, TURN13_ACCFELL_EVENT_LINE2, TURN13_ACCFELL_TEXT_TOTAL, TURN13_SANDATTACK_EVENT_LINE1, TURN13_SANDATTACK_EVENT_LINE2, TURN13_SANDATTACK_TEXT_TOTAL } from "./battleSceneCanonical.ts";
-export { TURN1_ROCKSLIDE_ATTACK_LINE1, TURN1_ROCKSLIDE_ATTACK_LINE2, TURN1_ROCKSLIDE_KICKOFF_LINE1, TURN1_ROCKSLIDE_KICKOFF_LINE2, TURN2_ENDEAVOR_ATTACK_LINE1, TURN2_ENDEAVOR_ATTACK_LINE2, TURN4_DOUBLETEAM_KICKOFF_LINE1, TURN4_DOUBLETEAM_KICKOFF_LINE2, TURN5_ENDEAVOR_ATTACK_LINE1, TURN5_ENDEAVOR_ATTACK_LINE2, TURN8_BIND_LINE1, TURN8_BIND_LINE2, TURN8_BIND_TEXT_TOTAL, TURN8_MISS_LINE1, TURN8_MISS_LINE2, TURN8_MISS_TEXT_TOTAL, TURN13_ACCFELL_EVENT_LINE1, TURN13_ACCFELL_EVENT_LINE2, TURN13_ACCFELL_TEXT_TOTAL, TURN13_SANDATTACK_EVENT_LINE1, TURN13_SANDATTACK_EVENT_LINE2, TURN13_SANDATTACK_TEXT_TOTAL };
-import { TURN11_ATKFLOOR_KICKOFF_LINE1, TURN11_ATKFLOOR_KICKOFF_LINE2, TURN6_ATKFELL_KICKOFF_LINE1, TURN6_ATKFELL_KICKOFF_LINE2, TURN6_FEATHERDANCE_KICKOFF_LINE1, TURN6_FEATHERDANCE_KICKOFF_LINE2, TURN6_ROCKSLIDE_ATTACK_LINE1, TURN6_ROCKSLIDE_ATTACK_LINE2, TURN7_ATKFELL_KICKOFF_LINE1, TURN7_ATKFELL_KICKOFF_LINE2, TURN7_FEATHERDANCE_KICKOFF_LINE1, TURN7_FEATHERDANCE_KICKOFF_LINE2, TURN7_ROCKSLIDE_ATTACK_LINE1, TURN7_ROCKSLIDE_ATTACK_LINE2, TURN8_ATKFELL_KICKOFF_LINE1, TURN8_ATKFELL_KICKOFF_LINE2, TURN8_FEATHERDANCE_KICKOFF_LINE1, TURN8_FEATHERDANCE_KICKOFF_LINE2, turn12MissTextVisibleChars, turn13AccFellTextVisibleChars, turn13SandAttackTextVisibleChars, turn5FaintedTextVisibleChars, turn8BindTextVisibleChars, turn8MissTextVisibleChars } from "./battleSceneCanonical.ts";
-export { TURN11_ATKFLOOR_KICKOFF_LINE1, TURN11_ATKFLOOR_KICKOFF_LINE2, TURN6_ATKFELL_KICKOFF_LINE1, TURN6_ATKFELL_KICKOFF_LINE2, TURN6_FEATHERDANCE_KICKOFF_LINE1, TURN6_FEATHERDANCE_KICKOFF_LINE2, TURN6_ROCKSLIDE_ATTACK_LINE1, TURN6_ROCKSLIDE_ATTACK_LINE2, TURN7_ATKFELL_KICKOFF_LINE1, TURN7_ATKFELL_KICKOFF_LINE2, TURN7_FEATHERDANCE_KICKOFF_LINE1, TURN7_FEATHERDANCE_KICKOFF_LINE2, TURN7_ROCKSLIDE_ATTACK_LINE1, TURN7_ROCKSLIDE_ATTACK_LINE2, TURN8_ATKFELL_KICKOFF_LINE1, TURN8_ATKFELL_KICKOFF_LINE2, TURN8_FEATHERDANCE_KICKOFF_LINE1, TURN8_FEATHERDANCE_KICKOFF_LINE2, turn12MissTextVisibleChars, turn13AccFellTextVisibleChars, turn13SandAttackTextVisibleChars, turn5FaintedTextVisibleChars, turn8BindTextVisibleChars, turn8MissTextVisibleChars };
+import { battle2Turn1Kernel, DRAGONBREATH_HIT_FLASH_OFFSET, DRAGONBREATH_KICKOFF_TEXT_TOTAL, grovyleFaintSink, INITIAL_BATTLE_SCENE_STATE, TURN10_AERIALACE_TEXT_TOTAL, TURN10_OFF_ROCKSLIDE_ANIMATION_PROFILE, TURN10_ONIX_AFTER_AERIALACE_HP, turn11AtkfloorTextTotal, TURN11_OFF_ROCKSLIDE_ANIMATION_PROFILE, TURN12_ONIX_AFTER_AERIALACE_HP, TURN13_SANDATTACK_DIRT_DRAW_ORDER, TURN14_DRAGONBREATH_TEXT_TOTAL, turn14FlyupLine1, turn14FlyupLine2, turn15FlyStrikeLine1, turn15FlyStrikeLine2, TURN15_ONIX_SHAKE_RAM_TICKS, TURN16_FAINT_ATTACK_TEXT_TOTAL, TURN16_FIRE_PUNCH_TEXT_TOTAL, TURN17_LOSS_TEXT_TOTAL, TURN1_OFF_ROCKSLIDE_ANIMATION_PROFILE, turn1RockslideHp, turn2EndeavorHp, TURN2_OFF_ENDEAVOR_FLICKER_START, TURN3_OFF_ENDEAVOR_FLICKER_START, TURN3_OFF_ROCKSLIDE_ANIMATION_PROFILE, turn3RockslideHp, TURN4_OFF_ROCKSLIDE_ANIMATION_PROFILE, turn4RockslideHp, turn5EndeavorHp, TURN5_OFF_ROCKSLIDE_ANIMATION_PROFILE, turn5RockslideOpponentToHp, turn5Sitrus, TURN6_FEATHERDANCE_TEXT_TOTAL, turn6PidgeottoAfterRockslideHp, turn7PidgeottoAfterRockslideHp, TURN7_REGIME2_TO_REGIME1_SHIFT, TURN8_REGIME3_TO_REGIME1_SHIFT, TURN9_ONIX_AFTER_QUICKATTACK_HP, TURN9_QUICKATTACK_TEXT_TOTAL, TURN9_ROCKSLIDE_ANIMATION_PROFILE, battle2RockSlideMechanismPressTick, currentEpochPresentationAgeFromLatest, dragonBreathHp, dragonBreathTextStartTick, frontSpriteAnimFrame, grovyleStretchTintCoeff, playerHealthboxHpOverlayByHp, turn10AerialAceHp, turn10AerialAceTextStartTick, turn10NotVeryEffectiveTextStartTick, turn10SuperEffectiveTextStartTick, turn11AtkFloorTextStartTick, turn11SuperEffectiveTextStartTick, turn12MissTextStartTick, turn13AccFellTextStartTick, turn13MurkrowFrame, turn13SandAttackPidgeottoX2, turn13SandAttackTextStartTick, turn14KickoffBounceTick, turn14MurkrowInvisible, turn14SimpleVisibleChars, turn15FaintSinkSkipRows, turn15SimpleVisibleChars, turn15StrikeAttackerInvisible, turn15StrikeTargetHealthboxWobbleY2, turn15StrikeTargetHp, turn15StrikeTargetInvisible, turn15StrikeTargetShakeX2, turn16PartyElapsedAtTick, turn3KickoffBounceTick, turn3SubmenuBounceTickFromPresentationEpochAge, turn5FaintedCursorYOffset, turn5FaintedTextStartTick, turn5IconBarEva, turn5SitrusResettledBounceTick, turn6FeatherDanceTextStartTick, turn6KickoffBounceTick, turn7KickoffBounceTick, turn8BindTextStartTick, turn8KickoffBounceTick, turn8MissTextStartTick, turn9Ep2HealthboxWobbleY2, turn9Ep2OnixInvisible, turn9Hp, turn9NotVeryEffectiveTextStartTick, turn9QuickAttackTextStartTick, turn9SuperEffectiveTextStartTick } from "./battleSceneCanonical.ts";
+export { battle2Turn1Kernel, DRAGONBREATH_HIT_FLASH_OFFSET, DRAGONBREATH_KICKOFF_TEXT_TOTAL, grovyleFaintSink, INITIAL_BATTLE_SCENE_STATE, TURN10_AERIALACE_TEXT_TOTAL, TURN10_OFF_ROCKSLIDE_ANIMATION_PROFILE, TURN10_ONIX_AFTER_AERIALACE_HP, turn11AtkfloorTextTotal, TURN11_OFF_ROCKSLIDE_ANIMATION_PROFILE, TURN12_ONIX_AFTER_AERIALACE_HP, TURN13_SANDATTACK_DIRT_DRAW_ORDER, TURN14_DRAGONBREATH_TEXT_TOTAL, turn14FlyupLine1, turn14FlyupLine2, turn15FlyStrikeLine1, turn15FlyStrikeLine2, TURN15_ONIX_SHAKE_RAM_TICKS, TURN16_FAINT_ATTACK_TEXT_TOTAL, TURN16_FIRE_PUNCH_TEXT_TOTAL, TURN17_LOSS_TEXT_TOTAL, TURN1_OFF_ROCKSLIDE_ANIMATION_PROFILE, turn1RockslideHp, turn2EndeavorHp, TURN2_OFF_ENDEAVOR_FLICKER_START, TURN3_OFF_ENDEAVOR_FLICKER_START, TURN3_OFF_ROCKSLIDE_ANIMATION_PROFILE, turn3RockslideHp, TURN4_OFF_ROCKSLIDE_ANIMATION_PROFILE, turn4RockslideHp, turn5EndeavorHp, TURN5_OFF_ROCKSLIDE_ANIMATION_PROFILE, turn5RockslideOpponentToHp, turn5Sitrus, TURN6_FEATHERDANCE_TEXT_TOTAL, turn6PidgeottoAfterRockslideHp, turn7PidgeottoAfterRockslideHp, TURN7_REGIME2_TO_REGIME1_SHIFT, TURN8_REGIME3_TO_REGIME1_SHIFT, TURN9_ONIX_AFTER_QUICKATTACK_HP, TURN9_QUICKATTACK_TEXT_TOTAL, TURN9_ROCKSLIDE_ANIMATION_PROFILE, battle2RockSlideMechanismPressTick, currentEpochPresentationAgeFromLatest, dragonBreathHp, dragonBreathTextStartTick, frontSpriteAnimFrame, grovyleStretchTintCoeff, playerHealthboxHpOverlayByHp, turn10AerialAceHp, turn10AerialAceTextStartTick, turn10NotVeryEffectiveTextStartTick, turn10SuperEffectiveTextStartTick, turn11AtkFloorTextStartTick, turn11SuperEffectiveTextStartTick, turn12MissTextStartTick, turn13AccFellTextStartTick, turn13MurkrowFrame, turn13SandAttackPidgeottoX2, turn13SandAttackTextStartTick, turn14KickoffBounceTick, turn14MurkrowInvisible, turn14SimpleVisibleChars, turn15FaintSinkSkipRows, turn15SimpleVisibleChars, turn15StrikeAttackerInvisible, turn15StrikeTargetHealthboxWobbleY2, turn15StrikeTargetHp, turn15StrikeTargetInvisible, turn15StrikeTargetShakeX2, turn16PartyElapsedAtTick, turn3KickoffBounceTick, turn3SubmenuBounceTickFromPresentationEpochAge, turn5FaintedCursorYOffset, turn5FaintedTextStartTick, turn5IconBarEva, turn5SitrusResettledBounceTick, turn6FeatherDanceTextStartTick, turn6KickoffBounceTick, turn7KickoffBounceTick, turn8BindTextStartTick, turn8KickoffBounceTick, turn8MissTextStartTick, turn9Ep2HealthboxWobbleY2, turn9Ep2OnixInvisible, turn9Hp, turn9NotVeryEffectiveTextStartTick, turn9QuickAttackTextStartTick, turn9SuperEffectiveTextStartTick };
+import { battle2Turn1KabutoRockSlideHp, grovyleFaintSinkSteps, grovyleHealthboxVanishTick, turn14FlyupTextTotal, turn15FlyStrikeTextTotal, turn5SitrusHealHpEnd, turn5SitrusHealHpStart, turn5SitrusHealLine1, turn5SitrusHealLine2, turn5SitrusRingCenter, dragonBreathTextVisibleChars, menuIdleHealthboxBounce, menuIdleOnixBounce, turn10AerialAceTextVisibleChars, turn10NotVeryEffectiveTextVisibleChars, turn10SuperEffectiveTextVisibleChars, turn11AtkFloorTextVisibleChars, turn11SuperEffectiveTextVisibleChars, turn6FeatherDanceTextVisibleChars, turn9NotVeryEffectiveTextVisibleChars, turn9QuickAttackTextVisibleChars, turn9SuperEffectiveTextVisibleChars } from "./battleSceneCanonical.ts";
+export { battle2Turn1KabutoRockSlideHp, grovyleFaintSinkSteps, grovyleHealthboxVanishTick, turn14FlyupTextTotal, turn15FlyStrikeTextTotal, turn5SitrusHealHpEnd, turn5SitrusHealHpStart, turn5SitrusHealLine1, turn5SitrusHealLine2, turn5SitrusRingCenter, dragonBreathTextVisibleChars, menuIdleHealthboxBounce, menuIdleOnixBounce, turn10AerialAceTextVisibleChars, turn10NotVeryEffectiveTextVisibleChars, turn10SuperEffectiveTextVisibleChars, turn11AtkFloorTextVisibleChars, turn11SuperEffectiveTextVisibleChars, turn6FeatherDanceTextVisibleChars, turn9NotVeryEffectiveTextVisibleChars, turn9QuickAttackTextVisibleChars, turn9SuperEffectiveTextVisibleChars };
+import { TURN5_FAINT_DISMISS_FREEZE_TICK_OFFSET, turn5FaintedCursorStartDelay, turn5FaintedLines, turn5FaintedTextTotal, faintSinkRowsAndY2, playerSummaryEvaOffset, turn5RockSlideKoDismissEligible } from "./battleSceneCanonical.ts";
+export { TURN5_FAINT_DISMISS_FREEZE_TICK_OFFSET, turn5FaintedCursorStartDelay, turn5FaintedLines, turn5FaintedTextTotal, faintSinkRowsAndY2, playerSummaryEvaOffset, turn5RockSlideKoDismissEligible };
+import { turn1RockslideAttackLines, turn1RockslideKickoffLines, turn2EndeavorAttackLines, turn4DoubleteamKickoffLines, turn5EndeavorAttackLines, turn8BindLines, turn8BindTextTotal, turn8MissLines, turn8MissTextTotal, turn13AccfellEventLines, turn13AccfellTextTotal, turn13SandattackEventLines, turn13SandattackTextTotal } from "./battleSceneCanonical.ts";
+export { turn1RockslideAttackLines, turn1RockslideKickoffLines, turn2EndeavorAttackLines, turn4DoubleteamKickoffLines, turn5EndeavorAttackLines, turn8BindLines, turn8BindTextTotal, turn8MissLines, turn8MissTextTotal, turn13AccfellEventLines, turn13AccfellTextTotal, turn13SandattackEventLines, turn13SandattackTextTotal };
+import { turn11AtkfloorKickoffLines, turn6AtkfellKickoffLines, turn6FeatherdanceKickoffLines, turn6RockslideAttackLines, turn7AtkfellKickoffLines, turn7FeatherdanceKickoffLines, turn7RockslideAttackLines, turn8AtkfellKickoffLines, turn8FeatherdanceKickoffLines, turn12MissTextVisibleChars, turn13AccFellTextVisibleChars, turn13SandAttackTextVisibleChars, turn5FaintedTextVisibleChars, turn8BindTextVisibleChars, turn8MissTextVisibleChars } from "./battleSceneCanonical.ts";
+export { turn11AtkfloorKickoffLines, turn6AtkfellKickoffLines, turn6FeatherdanceKickoffLines, turn6RockslideAttackLines, turn7AtkfellKickoffLines, turn7FeatherdanceKickoffLines, turn7RockslideAttackLines, turn8AtkfellKickoffLines, turn8FeatherdanceKickoffLines, turn12MissTextVisibleChars, turn13AccFellTextVisibleChars, turn13SandAttackTextVisibleChars, turn5FaintedTextVisibleChars, turn8BindTextVisibleChars, turn8MissTextVisibleChars };
 
 // --- slice 4 batch 5 (docs/battlescene-canonical-split-design.md §6, ISSUES #39 rank-5) ---
 import { turn5FaintDismissCursorTick, TURN5_PIDGEOTTO_BG_FADE_Y, turn5BgFadeY, turn5SitrusOffHealTextVisibleChars, turn5OffSitrusOnixHp, TURN5_PIDGEOTTO_HEALTHBOX_SLIDE_START_TICK, turn6ReopenBounceTick, TURN9_FIGHT_SUBMENU_BOUNCE_FREEZE_TICK, TURN9_FIGHT_SUBMENU_BOUNCE_INDEX_OFFSET, turn9FightSubmenuBrowseBounceTick, TURN11_KICKOFF_BOUNCE_INDEX_OFFSET, TURN12_KICKOFF_BOUNCE_INDEX_OFFSET } from "./battleSceneCanonical.ts";
@@ -1574,6 +1574,7 @@ import { drawTurn7RockSlideWindow, drawTurn7FieldBase, drawTurn8BindWindow, draw
 import { assertFeatherDanceAttackStatPalette, drawMessageText, drawTurn6StatFallBanner, legacyPidgeottoField, sendOutTextVisibleChars, textVisibleChars } from "./battleSceneCanonical.ts";
 export { turn5FaintDismissCursorTick, TURN5_PIDGEOTTO_BG_FADE_Y, turn5BgFadeY, turn5SitrusOffHealTextVisibleChars, turn5OffSitrusOnixHp, TURN5_PIDGEOTTO_HEALTHBOX_SLIDE_START_TICK, turn6ReopenBounceTick, TURN9_FIGHT_SUBMENU_BOUNCE_FREEZE_TICK, TURN9_FIGHT_SUBMENU_BOUNCE_INDEX_OFFSET, turn9FightSubmenuBrowseBounceTick, TURN11_KICKOFF_BOUNCE_INDEX_OFFSET, TURN12_KICKOFF_BOUNCE_INDEX_OFFSET };
 import { drawBattle2FightSubmenuWindow, drawFightSubmenuWindow, drawSendOutHandoff, drawTurn15MagbySettledMenuChrome, drawTurn15PartySelectWindow } from "./battleSceneCanonical.ts";
+import { lazyValue } from "./lazyValue.ts";
 
 interface Tileset {
   columns: number;
@@ -2694,11 +2695,11 @@ const battleAnimIceCrystalSmall: Tileset = {
  * glyph (docs/healthbox-assembly-notes.md), kept as a literal for that
  * reason alone.
  */
-const BATTLE1_PRESENTATION_HP = resolveBattle1PresentationHpValues();
-export const anchorOpponentBattler = BATTLE1_PRESENTATION_HP.opponent;
+const battle1PresentationHp = lazyValue(resolveBattle1PresentationHpValues);
+export const getAnchorOpponentBattler = lazyValue(() => battle1PresentationHp().opponent);
 /** S7 slice D: Grovyle's kernel-derived post-ROCK_SLIDE HP (101), the HP-bar drain's settled endpoint. */
-export const anchorOpponentAfterTurnHp = BATTLE1_PRESENTATION_HP.opponentAfterTurn1Hp;
-const anchorOpponentName = (speciesNamesAsset as { species: { name: string }[] }).species[anchorOpponentBattler.species]!.name;
+export const getAnchorOpponentAfterTurnHp = lazyValue(() => battle1PresentationHp().opponentAfterTurn1Hp);
+const getAnchorOpponentName = lazyValue(() => (speciesNamesAsset as { species: { name: string }[] }).species[getAnchorOpponentBattler().species]!.name);
 const ANCHOR_OPPONENT_GENDER = "male";
 
 const healthboxAssemblyAssets: HealthboxAssets = {
@@ -2723,13 +2724,13 @@ const healthboxAssemblyAssets: HealthboxAssets = {
  * before wiring this in: every cell the old heuristic called "real content"
  * the compositor also paints, with the identical RGB.
  */
-export const opponentHealthboxContent = composeOpponentHealthbox(healthboxAssemblyAssets, {
-  name: anchorOpponentName,
-  level: anchorOpponentBattler.level,
+export const getOpponentHealthboxContent = lazyValue(() => composeOpponentHealthbox(healthboxAssemblyAssets, {
+  name: getAnchorOpponentName(),
+  level: getAnchorOpponentBattler().level,
   gender: ANCHOR_OPPONENT_GENDER,
-  hpFraction: anchorOpponentBattler.hp / anchorOpponentBattler.maxHP,
+  hpFraction: getAnchorOpponentBattler().hp / getAnchorOpponentBattler().maxHP,
   status: "none",
-});
+}));
 export const KABUTO_SENDOUT_BATTLER = BATTLE2_ACTION_MENU_MODEL.opponent;
 export const kabutoHealthboxContent = composeOpponentHealthbox(healthboxAssemblyAssets, {
   name: KABUTO_SENDOUT_BATTLER.name,
@@ -3039,13 +3040,13 @@ const opponentHealthboxContentByHp = new Map<number, ReturnType<typeof composeOp
 export function opponentHealthboxContentForHp(hp: number): ReturnType<typeof composeOpponentHealthbox> {
   let cached = opponentHealthboxContentByHp.get(hp);
   if (!cached) {
-    cached = hp === anchorOpponentBattler.hp
-      ? opponentHealthboxContent
+    cached = hp === getAnchorOpponentBattler().hp
+      ? getOpponentHealthboxContent()
       : composeOpponentHealthbox(healthboxAssemblyAssets, {
-          name: anchorOpponentName,
-          level: anchorOpponentBattler.level,
+          name: getAnchorOpponentName(),
+          level: getAnchorOpponentBattler().level,
           gender: ANCHOR_OPPONENT_GENDER,
-          hpFraction: hp / anchorOpponentBattler.maxHP,
+          hpFraction: hp / getAnchorOpponentBattler().maxHP,
           status: "none",
         });
     opponentHealthboxContentByHp.set(hp, cached);
@@ -3057,9 +3058,9 @@ export function opponentHealthboxContentForHp(hp: number): ReturnType<typeof com
  * S7 slice E1b: Onix's kernel-derived turn-2 ENDEAVOR start/settle anchors.
  * Onix is unchanged at 117/full throughout turn 1.
  */
-export const anchorPlayerBattler = BATTLE1_PRESENTATION_HP.player;
+export const getAnchorPlayerBattler = lazyValue(() => battle1PresentationHp().player);
 /** Onix's own post-ENDEAVOR HP (`after_turn2.battler0.hp`, 101) - `endeavorHp`'s own settled endpoint. */
-export const anchorPlayerAfterTurnHp = BATTLE1_PRESENTATION_HP.playerAfterTurn2Hp;
+export const getAnchorPlayerAfterTurnHp = lazyValue(() => battle1PresentationHp().playerAfterTurn2Hp);
 
 /**
  * S7 slice E2b: Grovyle's own post-DRAGON_BREATH HP (`battle1-turn2-ram-
@@ -3071,7 +3072,7 @@ export const anchorPlayerAfterTurnHp = BATTLE1_PRESENTATION_HP.playerAfterTurn2H
  * verbatim (101-88=13, matching the damage-spread roll locked at RAM 3164,
  * `docs/dragon-breath-notes.md`'s phase table).
  */
-export const anchorOpponentAfterTurn2Hp = BATTLE1_PRESENTATION_HP.opponentAfterTurn2Hp;
+export const getAnchorOpponentAfterTurn2Hp = lazyValue(() => battle1PresentationHp().opponentAfterTurn2Hp);
 
 /**
  * S7 slice G (docs/battle-turn-notes.md §13/§20): Onix's post-turn-3
@@ -3081,7 +3082,7 @@ export const anchorOpponentAfterTurn2Hp = BATTLE1_PRESENTATION_HP.opponentAfterT
  * (Onix carries no chip damage between turns 2 and 3, same reasoning
  * `anchorOpponentAfterTurn2Hp`'s own doc already gives for Grovyle).
  */
-export const anchorPlayerAfterTurn3Hp = BATTLE1_PRESENTATION_HP.playerAfterTurn3Hp;
+export const getAnchorPlayerAfterTurn3Hp = lazyValue(() => battle1PresentationHp().playerAfterTurn3Hp);
 
 /**
  * Presentation-seam retirement (`docs/presentation-seam-scout.md` §11.3 step
@@ -3175,9 +3176,9 @@ export const anchorPlayerAfterTurn3Hp = BATTLE1_PRESENTATION_HP.playerAfterTurn3
  * every one of the three canonical callers now passes its own real fact,
  * matching FAKE_TEARS's own explicit-palette precedent (`:23256`).
  */
-export const TURN6_FEATHERDANCE_STAT_PALETTE = assertFeatherDanceAttackStatPalette(resolveTurn6FeatherDanceWindowContent().statChange.stat);
-const TURN7_FEATHERDANCE_STAT_PALETTE = assertFeatherDanceAttackStatPalette(resolveTurn7FeatherDanceWindowContent().statChange.stat);
-const TURN8_FEATHERDANCE_STAT_PALETTE = assertFeatherDanceAttackStatPalette(resolveTurn8FeatherDanceWindowContent().statChange.stat);
+export const turn6FeatherdanceStatPalette = lazyValue(() => assertFeatherDanceAttackStatPalette(resolveTurn6FeatherDanceWindowContent().statChange.stat));
+const turn7FeatherdanceStatPalette = lazyValue(() => assertFeatherDanceAttackStatPalette(resolveTurn7FeatherDanceWindowContent().statChange.stat));
+const turn8FeatherdanceStatPalette = lazyValue(() => assertFeatherDanceAttackStatPalette(resolveTurn8FeatherDanceWindowContent().statChange.stat));
 
 /**
  * S7 slice J (docs/battle-turn-notes.md §13/§23): Onix's own post-turn-5-
@@ -7770,7 +7771,7 @@ function drawSpriteSheetBlended(
  * bit-exact at every one of those ticks first).
  */
 function isOpponentHealthboxOpaqueAt(x: number, y: number): boolean {
-  const { width, height, pixels } = opponentHealthboxContent;
+  const { width, height, pixels } = getOpponentHealthboxContent();
   const lx = x - HEALTHBOX_FRAME_ORIGIN.x;
   const ly = y - HEALTHBOX_FRAME_ORIGIN.y;
   if (lx < 0 || lx >= width || ly < 0 || ly >= height) return false;
@@ -8412,7 +8413,7 @@ export function healthboxBackgroundColorAt(x: number, y: number, paletteOverride
 export function drawSendOutHealthbox(
   fb: Uint8Array,
   dx: number,
-  content: ReturnType<typeof composeOpponentHealthbox> = opponentHealthboxContent,
+  content: ReturnType<typeof composeOpponentHealthbox> = getOpponentHealthboxContent(),
   dy = 0,
 ): void {
   blitComposedCanvas(fb, content, HEALTHBOX_FRAME_ORIGIN.x + dx, HEALTHBOX_FRAME_ORIGIN.y + dy);
@@ -10130,12 +10131,11 @@ if (ONIX_SITRUS_ROTATE_RENDER_LAG - TURN5_SITRUS_RING_RENDER_LAG !== 1) {
       + "before changing either constant",
   );
 }
-export const ONIX_SITRUS_IDENTITY_RENDER_TICK =
-  TURN5_SITRUS.procTriggerRamTick + ONIX_SITRUS_ROTATE_RENDER_LAG;
+export const onixSitrusIdentityRenderTick = lazyValue(() => turn5Sitrus().procTriggerRamTick + ONIX_SITRUS_ROTATE_RENDER_LAG);
 
 /** `null` means "identity - let the plain static draw handle it" (both outside the rotation's own render window, and at the table's own identity entries). */
 export function onixSitrusRotateMatrix(t: number): { pa: number; pb: number; pc: number; pd: number; y2: number } | null {
-  return sitrusRotationAtAge(t - ONIX_SITRUS_IDENTITY_RENDER_TICK);
+  return sitrusRotationAtAge(t - onixSitrusIdentityRenderTick());
 }
 
 /**
@@ -10146,9 +10146,9 @@ export function onixSitrusRotateMatrix(t: number): { pa: number; pb: number; pc:
  */
 export function turn5GrantingStarPlacement(t: number, spawnIndex: number): { frameIndex: number; cx: number; cy: number } | null {
   return sitrusStarPlacementAtAge(
-    t - ONIX_SITRUS_IDENTITY_RENDER_TICK,
+    t - onixSitrusIdentityRenderTick(),
     spawnIndex,
-    TURN5_SITRUS_RING_CENTER,
+    turn5SitrusRingCenter(),
   );
 }
 
@@ -10190,15 +10190,15 @@ export function drawGrantingStarsAtAge(
 
 export function turn5SitrusHealTextVisibleChars(t: number): number {
   return sitrusHealTextVisibleCharsAtAge(
-    t - ONIX_SITRUS_IDENTITY_RENDER_TICK,
+    t - onixSitrusIdentityRenderTick(),
   );
 }
 
 export function turn5SitrusOnixHp(t: number): number {
   return sitrusDisplayedHpAtAge(
-    t - ONIX_SITRUS_IDENTITY_RENDER_TICK,
-    TURN5_SITRUS_HEAL_HP_START,
-    TURN5_SITRUS_HEAL_HP_END,
+    t - onixSitrusIdentityRenderTick(),
+    turn5SitrusHealHpStart(),
+    turn5SitrusHealHpEnd(),
   );
 }
 
@@ -10230,7 +10230,7 @@ export const ONIX_SITRUS_TINT_COLOR: RgbColor = { r: 140, g: 255, b: 206 };
 
 /** 0 outside the window (`drawSpriteSheetAffineTintedBlend`'s own no-op convention for `tintCoeff<=0`). */
 export function onixSitrusTintCoeff(t: number): number {
-  return sitrusTintCoeffAtAge(t - ONIX_SITRUS_IDENTITY_RENDER_TICK);
+  return sitrusTintCoeffAtAge(t - onixSitrusIdentityRenderTick());
 }
 
 /**
@@ -10245,7 +10245,7 @@ export function onixSitrusTintCoeff(t: number): number {
  * (non-null) matrix there, it just happens to paint nothing.
  */
 export function turn5SitrusRingMatrix(t: number): { pa: number; pb: number; pc: number; pd: number } | null {
-  return sitrusRingMatrixAtAge(t - ONIX_SITRUS_IDENTITY_RENDER_TICK);
+  return sitrusRingMatrixAtAge(t - onixSitrusIdentityRenderTick());
 }
 
 /**
@@ -10287,7 +10287,7 @@ export function turn5SitrusRingMatrix(t: number): { pa: number; pb: number; pc: 
 
 
 /** The wait-cursor's own X position for THIS text - `CURSOR_DEST_X`'s own doc explains why this isn't a fixed constant: it sits right after line 2's own last printed glyph, pixel-confirmed this session (oracle diff isolated to x=61-67, matching `LINE2_ORIGIN.x + measureText(...TURN5_FAINTED_LINE2)` = 60 exactly, not the intro's own 123). */
-export const TURN5_FAINTED_CURSOR_X = LINE2_ORIGIN.x + measureText(font, charmap, TURN5_FAINTED_LINE2);
+export const turn5FaintedCursorX = lazyValue(() => LINE2_ORIGIN.x + measureText(font, charmap, turn5FaintedLines()[1]));
 
 /** Visible character count (0..TURN5_FAINTED_TEXT_TOTAL) at absolute trace tick `t` - same 1-tick/char mechanism as every other message in this dossier. */
 
@@ -10330,11 +10330,11 @@ export const TURN5_FAINTED_CURSOR_X = LINE2_ORIGIN.x + measureText(font, charmap
  * "module-level constant derived once at import time" discipline rank 2's
  * own switch-in flip established.
  */
-export const TURN5_SWITCHIN = resolveTurn5SwitchInAdapter();
+export const turn5Switchin = lazyValue(resolveTurn5SwitchInAdapter);
 /** "BUG CATCHER DESTIN sent\nout PIDGEOTTO!" (docs §9, `sText_Trainer1SentOutPkmn` family, same line 1 as `SENDOUT_LINE1`) - starts printing at the oracle-pixel-confirmed absolute tick 6687, 1 char/tick. Line 2 is `TURN5_SWITCHIN.sentOutLine2`, sourced from the real forced-switch decision instead of a raw literal. */
 
-export const SWITCHIN_SENTOUT_LINE2 = TURN5_SWITCHIN.sentOutLine2;
-export const SWITCHIN_SENTOUT_TEXT_TOTAL = SWITCHIN_SENTOUT_LINE1.length + SWITCHIN_SENTOUT_LINE2.length;
+export const switchinSentoutLine2 = lazyValue(() => turn5Switchin().sentOutLine2);
+export const switchinSentoutTextTotal = lazyValue(() => SWITCHIN_SENTOUT_LINE1.length + switchinSentoutLine2().length);
 
 
 
@@ -10371,7 +10371,7 @@ export function turn5MaterializeCoeff(t: number): number {
 }
 
 
-export const TURN5_PIDGEOTTO_SETTLE_TICK = TURN5_SWITCHIN.materializeSettleTick;
+export const turn5PidgeottoSettleTick = lazyValue(() => turn5Switchin().materializeSettleTick);
 
 /**
  * S7 slice M (docs/faint-switch-notes.md §8e/§3d): Pidgeotto's own opponent
@@ -10385,17 +10385,17 @@ export const TURN5_PIDGEOTTO_SETTLE_TICK = TURN5_SWITCHIN.materializeSettleTick;
  * `TURN5_SWITCHIN` (declared above, near `SWITCHIN_SENTOUT_LINE2`), not
  * independently re-stated.
  */
-const PIDGEOTTO_LEVEL = TURN5_SWITCHIN.replacementLevel;
-export const pidgeottoHealthboxContent = composeOpponentHealthbox(healthboxAssemblyAssets, {
-  name: TURN5_SWITCHIN.replacementSpecies,
-  level: PIDGEOTTO_LEVEL,
+const pidgeottoLevel = lazyValue(() => turn5Switchin().replacementLevel);
+export const getPidgeottoHealthboxContent = lazyValue(() => composeOpponentHealthbox(healthboxAssemblyAssets, {
+  name: turn5Switchin().replacementSpecies,
+  level: pidgeottoLevel(),
   gender: "male",
-  hpFraction: TURN5_SWITCHIN.replacementHp.current / TURN5_SWITCHIN.replacementHp.max,
+  hpFraction: turn5Switchin().replacementHp.current / turn5Switchin().replacementHp.max,
   status: "none",
-});
+}));
 
 /** S7 slice N-4 rung (b) (docs/turn6-notes.md §4, RAM-confirmed via `dump-battler-full.py`): Pidgeotto's own max HP - the ROCK_SLIDE HP-drain window's own `hpFraction` denominator, now literally derived from `TURN5_SWITCHIN` (156) rather than independently re-stated. */
-export const PIDGEOTTO_MAX_HP = TURN5_SWITCHIN.replacementHp.max;
+export const pidgeottoMaxHp = lazyValue(() => turn5Switchin().replacementHp.max);
 
 /**
  * S7 slice N-4 rung (b): Pidgeotto's own opponent healthbox at an arbitrary
@@ -10410,13 +10410,13 @@ const pidgeottoHealthboxContentByHp = new Map<number, ReturnType<typeof composeO
 export function pidgeottoHealthboxContentForHp(hp: number): ReturnType<typeof composeOpponentHealthbox> {
   let cached = pidgeottoHealthboxContentByHp.get(hp);
   if (!cached) {
-    cached = hp === PIDGEOTTO_MAX_HP
-      ? pidgeottoHealthboxContent
+    cached = hp === pidgeottoMaxHp()
+      ? getPidgeottoHealthboxContent()
       : composeOpponentHealthbox(healthboxAssemblyAssets, {
-          name: TURN5_SWITCHIN.replacementSpecies,
-          level: PIDGEOTTO_LEVEL,
+          name: turn5Switchin().replacementSpecies,
+          level: pidgeottoLevel(),
           gender: "male",
-          hpFraction: hp / PIDGEOTTO_MAX_HP,
+          hpFraction: hp / pidgeottoMaxHp(),
           status: "none",
         });
     pidgeottoHealthboxContentByHp.set(hp, cached);
@@ -10600,16 +10600,16 @@ export function drawTurn13MurkrowSettled(fb: Uint8Array): void {
  * chaining the real forced-switch dance (`runBattleScriptFaintedActionsOrchestration`)
  * instead of independently re-stating DESTIN's replacement here.
  */
-const TURN13_SWITCHIN = resolveTurn13SwitchInAdapter();
+const turn13Switchin = lazyValue(resolveTurn13SwitchInAdapter);
 /** S7/S8 turn 13 rung 4 (docs/turn13-notes.md §6): MURKROW's own opponent healthbox, Lv50 (docs/turn15-notes.md §own re-confirmation, unchanged across the whole battle), full HP (142/142 switch-in, `pickHpBarBand` green per `verify-turn13.ts`'s own check) -- now literally derived from `TURN13_SWITCHIN`, not independently re-stated. */
-const MURKROW_LEVEL = TURN13_SWITCHIN.replacementLevel;
-export const murkrowHealthboxContent = composeOpponentHealthbox(healthboxAssemblyAssets, {
-  name: TURN13_SWITCHIN.replacementSpecies,
-  level: MURKROW_LEVEL,
+const murkrowLevel = lazyValue(() => turn13Switchin().replacementLevel);
+export const getMurkrowHealthboxContent = lazyValue(() => composeOpponentHealthbox(healthboxAssemblyAssets, {
+  name: turn13Switchin().replacementSpecies,
+  level: murkrowLevel(),
   gender: "male",
-  hpFraction: TURN13_SWITCHIN.replacementHp.current / TURN13_SWITCHIN.replacementHp.max,
+  hpFraction: turn13Switchin().replacementHp.current / turn13Switchin().replacementHp.max,
   status: "none",
-});
+}));
 const murkrowHealthboxContentByHp = new Map<string, ReturnType<typeof composeOpponentHealthbox>>();
 function murkrowHealthboxContentForHp(
   hp: number,
@@ -10619,14 +10619,14 @@ function murkrowHealthboxContentForHp(
   const key = `${hp}:${status}:${targetHp}`;
   let cached = murkrowHealthboxContentByHp.get(key);
   if (!cached) {
-    cached = hp === TURN13_SWITCHIN.replacementHp.max && status === "none"
-      ? murkrowHealthboxContent
+    cached = hp === turn13Switchin().replacementHp.max && status === "none"
+      ? getMurkrowHealthboxContent()
       : composeOpponentHealthbox(healthboxAssemblyAssets, {
-          name: TURN13_SWITCHIN.replacementSpecies,
-          level: MURKROW_LEVEL,
+          name: turn13Switchin().replacementSpecies,
+          level: murkrowLevel(),
           gender: "male",
-          hpFraction: hp / TURN13_SWITCHIN.replacementHp.max,
-          hpTargetFraction: targetHp / TURN13_SWITCHIN.replacementHp.max,
+          hpFraction: hp / turn13Switchin().replacementHp.max,
+          hpTargetFraction: targetHp / turn13Switchin().replacementHp.max,
           status,
         });
     murkrowHealthboxContentByHp.set(key, cached);
@@ -10635,7 +10635,7 @@ function murkrowHealthboxContentForHp(
 }
 
 /** "BUG CATCHER DESTIN sent\nout MURKROW!" prints 126 frames after accepted dismissal. */
-export const TURN13_SWITCHIN_SENTOUT_LINE2 = TURN13_SWITCHIN.sentOutLine2;
+export const turn13SwitchinSentoutLine2 = lazyValue(() => turn13Switchin().sentOutLine2);
 
 
 
@@ -10931,13 +10931,13 @@ export function drawTurn7FeatherDanceKickoffText(fb: Uint8Array, t: number, pres
   drawTurn7FieldBase(fb, t, frozenRegime2Tick, () => drawTurn6FeatherSprites(fb, t, true, turn7FeatherSprites));
   drawTurn6FeatherSprites(fb, t, false, turn7FeatherSprites);
   const eva = turn6StatFallEva(t, pressTick);
-  if (eva !== null) drawTurn6StatFallBanner(fb, t, pressTick, eva, TURN7_FEATHERDANCE_STAT_PALETTE);
+  if (eva !== null) drawTurn6StatFallBanner(fb, t, pressTick, eva, turn7FeatherdanceStatPalette());
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   const atkFellStart = turn6AtkFellTextStartTick(pressTick);
   if (t >= atkFellStart) {
-    drawMessageTextLines(fb, TURN7_ATKFELL_KICKOFF_LINE1, TURN7_ATKFELL_KICKOFF_LINE2, turn6AtkFellTextVisibleChars(t, pressTick));
+    drawMessageTextLines(fb, turn7AtkfellKickoffLines()[0], turn7AtkfellKickoffLines()[1], turn6AtkFellTextVisibleChars(t, pressTick));
   } else {
-    drawMessageTextLines(fb, TURN7_FEATHERDANCE_KICKOFF_LINE1, TURN7_FEATHERDANCE_KICKOFF_LINE2, turn6FeatherDanceTextVisibleChars(t, pressTick));
+    drawMessageTextLines(fb, turn7FeatherdanceKickoffLines()[0], turn7FeatherdanceKickoffLines()[1], turn6FeatherDanceTextVisibleChars(t, pressTick));
   }
 }
 
@@ -11008,13 +11008,13 @@ export function drawTurn8FeatherDanceKickoffText(fb: Uint8Array, t: number, pres
   drawTurn8FieldBase(fb, t, frozenRegime3Tick, () => drawTurn6FeatherSprites(fb, t, true, turn8FeatherSprites));
   drawTurn6FeatherSprites(fb, t, false, turn8FeatherSprites);
   const eva = turn6StatFallEva(t, pressTick);
-  if (eva !== null) drawTurn6StatFallBanner(fb, t, pressTick, eva, TURN8_FEATHERDANCE_STAT_PALETTE);
+  if (eva !== null) drawTurn6StatFallBanner(fb, t, pressTick, eva, turn8FeatherdanceStatPalette());
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   const atkFellStart = turn6AtkFellTextStartTick(pressTick);
   if (t >= atkFellStart) {
-    drawMessageTextLines(fb, TURN8_ATKFELL_KICKOFF_LINE1, TURN8_ATKFELL_KICKOFF_LINE2, turn6AtkFellTextVisibleChars(t, pressTick));
+    drawMessageTextLines(fb, turn8AtkfellKickoffLines()[0], turn8AtkfellKickoffLines()[1], turn6AtkFellTextVisibleChars(t, pressTick));
   } else {
-    drawMessageTextLines(fb, TURN8_FEATHERDANCE_KICKOFF_LINE1, TURN8_FEATHERDANCE_KICKOFF_LINE2, turn6FeatherDanceTextVisibleChars(t, pressTick));
+    drawMessageTextLines(fb, turn8FeatherdanceKickoffLines()[0], turn8FeatherdanceKickoffLines()[1], turn6FeatherDanceTextVisibleChars(t, pressTick));
   }
 }
 
@@ -11113,8 +11113,8 @@ export const TURN9_REGIME4_TO_REGIME1_SHIFT = TURN5_SITRUS_MENU_REDRAW_TICK - (T
  */
 
 
-export const LEGACY_TURN6_FIGHT_COMMAND_PRESENTATION = createFightCommandPresentation({
-  field: legacyPidgeottoField(TURN5_SITRUS_HEAL_HP_END, 6, TURN5_SWITCHIN.replacementHp.current),
+export const legacyTurn6FightCommandPresentation = lazyValue(() => createFightCommandPresentation({
+  field: legacyPidgeottoField(turn5SitrusHealHpEnd(), 6, turn5Switchin().replacementHp.current),
   bounce: {
     actionMenuRedrawTick: TURN5_SITRUS_MENU_REDRAW_TICK,
     idleBounceEpochTick: MENU_IDLE_BLANK_END_TICK + 1,
@@ -11135,29 +11135,29 @@ export const LEGACY_TURN6_FIGHT_COMMAND_PRESENTATION = createFightCommandPresent
         user: "opponent",
         target: "player",
         move: "FEATHER_DANCE",
-        text: { lines: [TURN6_FEATHERDANCE_KICKOFF_LINE1, TURN6_FEATHERDANCE_KICKOFF_LINE2] },
+        text: { lines: [turn6FeatherdanceKickoffLines()[0], turn6FeatherdanceKickoffLines()[1]] },
         statChange: {
           target: "player",
           stat: "attack",
           from: 6,
           to: 4,
-          text: { lines: [TURN6_ATKFELL_KICKOFF_LINE1, TURN6_ATKFELL_KICKOFF_LINE2] },
+          text: { lines: [turn6AtkfellKickoffLines()[0], turn6AtkfellKickoffLines()[1]] },
         },
       },
       {
         user: "player",
         target: "opponent",
         move: "ROCK_SLIDE",
-        text: { lines: [TURN6_ROCKSLIDE_ATTACK_LINE1, TURN6_ROCKSLIDE_ATTACK_LINE2] },
-        hpChange: { target: "opponent", from: PIDGEOTTO_MAX_HP, to: TURN6_PIDGEOTTO_AFTER_ROCKSLIDE_HP },
+        text: { lines: [turn6RockslideAttackLines()[0], turn6RockslideAttackLines()[1]] },
+        hpChange: { target: "opponent", from: pidgeottoMaxHp(), to: turn6PidgeottoAfterRockslideHp() },
         effectiveness: { text: { lines: [TURN6_SUPER_EFFECTIVE_LINE] } },
       },
     ],
   },
-});
+}));
 
-export const LEGACY_TURN7_FIGHT_COMMAND_PRESENTATION = createFightCommandPresentation({
-  field: legacyPidgeottoField(31, 4, TURN6_PIDGEOTTO_AFTER_ROCKSLIDE_HP),
+export const legacyTurn7FightCommandPresentation = lazyValue(() => createFightCommandPresentation({
+  field: legacyPidgeottoField(31, 4, turn6PidgeottoAfterRockslideHp()),
   bounce: {
     actionMenuRedrawTick: TURN6_ROCKSLIDE_PRESS_TICK + TURN6_ROCKSLIDE_MENU_REDRAW_DELAY,
     idleBounceEpochTick: MENU_IDLE_BLANK_END_TICK + 1,
@@ -11175,33 +11175,33 @@ export const LEGACY_TURN7_FIGHT_COMMAND_PRESENTATION = createFightCommandPresent
         user: "opponent",
         target: "player",
         move: "FEATHER_DANCE",
-        text: { lines: [TURN7_FEATHERDANCE_KICKOFF_LINE1, TURN7_FEATHERDANCE_KICKOFF_LINE2] },
+        text: { lines: [turn7FeatherdanceKickoffLines()[0], turn7FeatherdanceKickoffLines()[1]] },
         statChange: {
           target: "player",
           stat: "attack",
           from: 4,
           to: 2,
-          text: { lines: [TURN7_ATKFELL_KICKOFF_LINE1, TURN7_ATKFELL_KICKOFF_LINE2] },
+          text: { lines: [turn7AtkfellKickoffLines()[0], turn7AtkfellKickoffLines()[1]] },
         },
       },
       {
         user: "player",
         target: "opponent",
         move: "ROCK_SLIDE",
-        text: { lines: [TURN7_ROCKSLIDE_ATTACK_LINE1, TURN7_ROCKSLIDE_ATTACK_LINE2] },
+        text: { lines: [turn7RockslideAttackLines()[0], turn7RockslideAttackLines()[1]] },
         hpChange: {
           target: "opponent",
-          from: TURN6_PIDGEOTTO_AFTER_ROCKSLIDE_HP,
-          to: TURN7_PIDGEOTTO_AFTER_ROCKSLIDE_HP,
+          from: turn6PidgeottoAfterRockslideHp(),
+          to: turn7PidgeottoAfterRockslideHp(),
         },
         effectiveness: { text: { lines: [TURN6_SUPER_EFFECTIVE_LINE] } },
       },
     ],
   },
-});
+}));
 
-export const LEGACY_TURN8_FIGHT_COMMAND_PRESENTATION = createFightCommandPresentation({
-  field: legacyPidgeottoField(31, 2, TURN7_PIDGEOTTO_AFTER_ROCKSLIDE_HP),
+export const legacyTurn8FightCommandPresentation = lazyValue(() => createFightCommandPresentation({
+  field: legacyPidgeottoField(31, 2, turn7PidgeottoAfterRockslideHp()),
   bounce: {
     actionMenuRedrawTick: TURN7_ROCKSLIDE_PRESS_TICK + TURN7_ROCKSLIDE_MENU_REDRAW_DELAY,
     idleBounceEpochTick: MENU_IDLE_BLANK_END_TICK + 1,
@@ -11219,28 +11219,28 @@ export const LEGACY_TURN8_FIGHT_COMMAND_PRESENTATION = createFightCommandPresent
         user: "opponent",
         target: "player",
         move: "FEATHER_DANCE",
-        text: { lines: [TURN8_FEATHERDANCE_KICKOFF_LINE1, TURN8_FEATHERDANCE_KICKOFF_LINE2] },
+        text: { lines: [turn8FeatherdanceKickoffLines()[0], turn8FeatherdanceKickoffLines()[1]] },
         statChange: {
           target: "player",
           stat: "attack",
           from: 2,
           to: 0,
-          text: { lines: [TURN8_ATKFELL_KICKOFF_LINE1, TURN8_ATKFELL_KICKOFF_LINE2] },
+          text: { lines: [turn8AtkfellKickoffLines()[0], turn8AtkfellKickoffLines()[1]] },
         },
       },
       {
         user: "player",
         target: "opponent",
         move: "BIND",
-        text: { lines: [TURN8_BIND_LINE1, TURN8_BIND_LINE2] },
-        miss: { target: "opponent", text: { lines: [TURN8_MISS_LINE1, TURN8_MISS_LINE2] } },
+        text: { lines: [turn8BindLines()[0], turn8BindLines()[1]] },
+        miss: { target: "opponent", text: { lines: [turn8MissLines()[0], turn8MissLines()[1]] } },
       },
     ],
   },
-});
+}));
 
-export const LEGACY_TURN9_FIELD_AND_BOUNCE_PRESENTATION = createFightCommandPresentation({
-  field: legacyPidgeottoField(31, 0, TURN7_PIDGEOTTO_AFTER_ROCKSLIDE_HP),
+export const legacyTurn9FieldAndBouncePresentation = lazyValue(() => createFightCommandPresentation({
+  field: legacyPidgeottoField(31, 0, turn7PidgeottoAfterRockslideHp()),
   bounce: {
     actionMenuRedrawTick: TURN8_BIND_PRESS_TICK + TURN8_MENU_REDRAW_DELAY,
     idleBounceEpochTick: MENU_IDLE_BLANK_END_TICK + 1,
@@ -11252,7 +11252,7 @@ export const LEGACY_TURN9_FIELD_AND_BOUNCE_PRESENTATION = createFightCommandPres
     },
   },
   upcoming: null,
-});
+}));
 
 /**
  * The lunge redraw's own ground clip - pixel-confirmed against fresh oracle
@@ -12591,12 +12591,9 @@ export const TURN13_DRAGONBREATH_PRESS_TICK = 15516; // dragonBreathTextStartTic
  * replacing three separate direct staging-module imports plus a hand-fit
  * sink constant.
  */
-const TURN13_RESOLUTION = resolveTurn13ResolutionAdapter();
-export const TURN13_DRAGONBREATH_HP = TURN13_RESOLUTION.hp;
-export const [
-  TURN13_DRAGONBREATH_KICKOFF_LINE1,
-  TURN13_DRAGONBREATH_KICKOFF_LINE2,
-] = TURN13_RESOLUTION.kickoffLines;
+const turn13Resolution = lazyValue(resolveTurn13ResolutionAdapter);
+export const turn13DragonbreathHp = lazyValue(() => turn13Resolution().hp);
+export const turn13DragonbreathKickoffLines = lazyValue(() => turn13Resolution().kickoffLines);
  // S - oracle-pixel-bisected (first sink-visible sha change at render 15962, matching S+2 under faintSinkRowsAndY2's own d=t-1-S formula), matches docs/turn13-notes.md §7's own RAM-derived value exactly
 // steps/healthboxVanishFrame: createBattleResolutionPresentation's own
 // generic opponent-faint-timing formula (opponentFaintSinkGeometry,
@@ -12604,8 +12601,8 @@ export const [
 // yOffset=11 (mon-pic-coords.json) -- proven equal to the former hand-fit
 // TURN13_FAINT_SINK_STEPS=7/TURN13_HEALTHBOX_VANISH_TICK=15977 constants by
 // turn13ResolutionAdapterEquivalence.test.ts, not independently re-derived.
-export const TURN13_FAINT_SINK_STEPS = TURN13_RESOLUTION.faintSink.steps;
-export const TURN13_HEALTHBOX_VANISH_TICK = TURN13_FAINT_SINK_START_TICK + TURN13_RESOLUTION.faintSink.healthboxVanishFrame;
+export const turn13FaintSinkSteps = lazyValue(() => turn13Resolution().faintSink.steps);
+export const turn13HealthboxVanishTick = lazyValue(() => TURN13_FAINT_SINK_START_TICK + turn13Resolution().faintSink.healthboxVanishFrame);
 
 /** Same `pressTick+318`-relative anchor `drawDragonBreathScene` (turn 2's own DRAGON_BREATH) uses for Grovyle's own target hit-flash (`rockSlideMonBlinkInvisible`/`rockSlideHealthboxWobbleY2`, both already generic, reused verbatim - see `DRAGONBREATH_HIT_FLASH_OFFSET`'s own module doc) - re-anchored to `TURN13_DRAGONBREATH_PRESS_TICK`. Oracle-pixel-confirmed this session: omitting this (drawing Pidgeotto solid throughout) regressed a ~1085px diff at 15855-15863, isolated by `npm run compare` to exactly Pidgeotto's own on-field sprite - the SAME blink window turn 2's own target already exercises, not a new mechanism. */
 export const TURN13_HIT_FLASH_PRESS_TICK = TURN13_DRAGONBREATH_PRESS_TICK + DRAGONBREATH_HIT_FLASH_OFFSET;
@@ -12641,13 +12638,9 @@ export const TURN13_HIT_FLASH_PRESS_TICK = TURN13_DRAGONBREATH_PRESS_TICK + DRAG
  * receipt freezes that cursor at the real edge and starts the automatic
  * replacement from the same edge.
  */
-export const [
-  TURN13_DRAGONBREATH_FAINT_LINE1,
-  TURN13_DRAGONBREATH_FAINT_LINE2,
-] = TURN13_RESOLUTION.faintLines;
-export const TURN13_DRAGONBREATH_FAINT_TEXT_TOTAL =
-  TURN13_DRAGONBREATH_FAINT_LINE1.length
-  + TURN13_DRAGONBREATH_FAINT_LINE2.length;
+export const turn13DragonbreathFaintLines = lazyValue(() => turn13Resolution().faintLines);
+export const turn13DragonbreathFaintTextTotal = lazyValue(() => turn13DragonbreathFaintLines()[0].length
+  + turn13DragonbreathFaintLines()[1].length);
 export const TURN13_FAINTED_TEXT_DELAY = 463; // dbPressTick+463 = 15979, oracle-bisected exact (chars=1 first appears at render tick 15979; 15978 still shows the old DRAGON_BREATH text)
 
 
@@ -12656,8 +12649,8 @@ export const TURN13_FAINTED_TEXT_DELAY = 463; // dbPressTick+463 = 15979, oracle
  * existing legacy render inputs without changing dispatch: each value is
  * semantic field/bounce/move content, never a PP-derived episode selector.
  */
-export const LEGACY_TURN9_FIGHT_COMMAND_PRESENTATION = createFightCommandPresentation({
-  field: legacyPidgeottoField(31, 0, TURN7_PIDGEOTTO_AFTER_ROCKSLIDE_HP),
+export const legacyTurn9FightCommandPresentation = lazyValue(() => createFightCommandPresentation({
+  field: legacyPidgeottoField(31, 0, turn7PidgeottoAfterRockslideHp()),
   bounce: {
     actionMenuRedrawTick: TURN8_BIND_PRESS_TICK + TURN8_MENU_REDRAW_DELAY,
     idleBounceEpochTick: MENU_IDLE_BLANK_END_TICK + 1,
@@ -12686,16 +12679,16 @@ export const LEGACY_TURN9_FIGHT_COMMAND_PRESENTATION = createFightCommandPresent
         text: { lines: [ROCK_SLIDE_LINE1, ROCK_SLIDE_LINE2] },
         hpChange: {
           target: "opponent",
-          from: TURN7_PIDGEOTTO_AFTER_ROCKSLIDE_HP,
+          from: turn7PidgeottoAfterRockslideHp(),
           to: TURN9_PIDGEOTTO_AFTER_ROCKSLIDE_HP,
         },
         effectiveness: { text: { lines: [TURN6_SUPER_EFFECTIVE_LINE] } },
       },
     ],
   },
-});
+}));
 
-export const LEGACY_TURN10_FIGHT_COMMAND_PRESENTATION = createFightCommandPresentation({
+export const legacyTurn10FightCommandPresentation = lazyValue(() => createFightCommandPresentation({
   field: legacyPidgeottoField(
     TURN9_ONIX_AFTER_QUICKATTACK_HP,
     0,
@@ -12740,9 +12733,9 @@ export const LEGACY_TURN10_FIGHT_COMMAND_PRESENTATION = createFightCommandPresen
       },
     ],
   },
-});
+}));
 
-export const LEGACY_TURN11_FIGHT_COMMAND_PRESENTATION = createFightCommandPresentation({
+export const legacyTurn11FightCommandPresentation = lazyValue(() => createFightCommandPresentation({
   field: legacyPidgeottoField(
     TURN10_ONIX_AFTER_AERIALACE_HP,
     0,
@@ -12765,13 +12758,13 @@ export const LEGACY_TURN11_FIGHT_COMMAND_PRESENTATION = createFightCommandPresen
         user: "opponent",
         target: "player",
         move: "FEATHER_DANCE",
-        text: { lines: [TURN6_FEATHERDANCE_KICKOFF_LINE1, TURN6_FEATHERDANCE_KICKOFF_LINE2] },
+        text: { lines: [turn6FeatherdanceKickoffLines()[0], turn6FeatherdanceKickoffLines()[1]] },
         statChange: {
           target: "player",
           stat: "attack",
           from: 0,
           to: 0,
-          text: { lines: [TURN11_ATKFLOOR_KICKOFF_LINE1, TURN11_ATKFLOOR_KICKOFF_LINE2] },
+          text: { lines: [turn11AtkfloorKickoffLines()[0], turn11AtkfloorKickoffLines()[1]] },
         },
       },
       {
@@ -12788,9 +12781,9 @@ export const LEGACY_TURN11_FIGHT_COMMAND_PRESENTATION = createFightCommandPresen
       },
     ],
   },
-});
+}));
 
-export const LEGACY_TURN12_FIGHT_COMMAND_PRESENTATION = createFightCommandPresentation({
+export const legacyTurn12FightCommandPresentation = lazyValue(() => createFightCommandPresentation({
   field: legacyPidgeottoField(
     TURN10_ONIX_AFTER_AERIALACE_HP,
     0,
@@ -12826,13 +12819,13 @@ export const LEGACY_TURN12_FIGHT_COMMAND_PRESENTATION = createFightCommandPresen
         target: "opponent",
         move: "ROCK_SLIDE",
         text: { lines: [ROCK_SLIDE_LINE1, ROCK_SLIDE_LINE2] },
-        miss: { target: "opponent", text: { lines: [TURN8_MISS_LINE1, TURN8_MISS_LINE2] } },
+        miss: { target: "opponent", text: { lines: [turn8MissLines()[0], turn8MissLines()[1]] } },
       },
     ],
   },
-});
+}));
 
-export const LEGACY_TURN13_FIGHT_COMMAND_PRESENTATION = createFightCommandPresentation({
+export const legacyTurn13FightCommandPresentation = lazyValue(() => createFightCommandPresentation({
   field: legacyPidgeottoField(
     TURN12_ONIX_AFTER_AERIALACE_HP,
     0,
@@ -12855,35 +12848,35 @@ export const LEGACY_TURN13_FIGHT_COMMAND_PRESENTATION = createFightCommandPresen
         user: "opponent",
         target: "player",
         move: "SAND_ATTACK",
-        text: { lines: [TURN13_SANDATTACK_EVENT_LINE1, TURN13_SANDATTACK_EVENT_LINE2] },
+        text: { lines: [turn13SandattackEventLines()[0], turn13SandattackEventLines()[1]] },
         statChange: {
           target: "player",
           stat: "accuracy",
           from: 6,
           to: 5,
-          text: { lines: [TURN13_ACCFELL_EVENT_LINE1, TURN13_ACCFELL_EVENT_LINE2] },
+          text: { lines: [turn13AccfellEventLines()[0], turn13AccfellEventLines()[1]] },
         },
       },
       {
         user: "player",
         target: "opponent",
         move: "DRAGON_BREATH",
-        text: { lines: [TURN13_DRAGONBREATH_KICKOFF_LINE1, TURN13_DRAGONBREATH_KICKOFF_LINE2] },
+        text: { lines: [turn13DragonbreathKickoffLines()[0], turn13DragonbreathKickoffLines()[1]] },
         hpChange: {
           target: "opponent",
-          from: TURN13_DRAGONBREATH_HP.from,
-          to: TURN13_DRAGONBREATH_HP.to,
+          from: turn13DragonbreathHp().from,
+          to: turn13DragonbreathHp().to,
         },
         faint: {
           target: "opponent",
-          text: { lines: [TURN13_DRAGONBREATH_FAINT_LINE1, TURN13_DRAGONBREATH_FAINT_LINE2] },
+          text: { lines: [turn13DragonbreathFaintLines()[0], turn13DragonbreathFaintLines()[1]] },
         },
       },
     ],
   },
-});
+}));
 
-export const LEGACY_TURN14_RETAINED_FLY_PRESENTATION = createFightCommandPresentation({
+export const legacyTurn14RetainedFlyPresentation = lazyValue(() => createFightCommandPresentation({
   field: {
     player: {
       species: "ONIX",
@@ -12895,12 +12888,12 @@ export const LEGACY_TURN14_RETAINED_FLY_PRESENTATION = createFightCommandPresent
       attackStage: 0,
     },
     opponent: {
-      species: TURN13_SWITCHIN.replacementSpecies,
-      displayName: TURN13_SWITCHIN.replacementSpecies,
-      level: TURN13_SWITCHIN.replacementLevel,
+      species: turn13Switchin().replacementSpecies,
+      displayName: turn13Switchin().replacementSpecies,
+      level: turn13Switchin().replacementLevel,
       gender: "male",
       status: "none",
-      hp: TURN13_SWITCHIN.replacementHp,
+      hp: turn13Switchin().replacementHp,
       attackStage: 6,
     },
   },
@@ -12916,19 +12909,18 @@ export const LEGACY_TURN14_RETAINED_FLY_PRESENTATION = createFightCommandPresent
   },
   upcoming: null,
   retainedResolution: {
-    owner: CANONICAL_TURN13_RETAINED_FLY_PRESENTATION_OWNER,
-    segments: CANONICAL_TURN13_RETAINED_FLY_PRESENTATION_OWNER.resolution.segments,
+    owner: canonicalTurn13RetainedFlyPresentationOwner(),
+    segments: canonicalTurn13RetainedFlyPresentationOwner().resolution.segments,
   },
-});
-export const TURN13_FAINTED_CURSOR_X =
-  LINE2_ORIGIN.x
-  + measureText(font, charmap, TURN13_DRAGONBREATH_FAINT_LINE2);
-export const TURN13_FAINTED_CURSOR_START_DELAY = TURN13_FAINTED_TEXT_DELAY + TURN13_DRAGONBREATH_FAINT_TEXT_TOTAL + 1; // 485 -> trace tick 16001, oracle-pixel-confirmed this session: the naive "+1 after last glyph" tick (16000) put every one of cursorState's own perpetual-cycle phase transitions exactly 1 tick early (npm run compare isolated two mismatches, 16810 and 16819, both exactly at a phase-boundary tick) - one more tick of render lag than TURN5_FAINTED_CURSOR_START_DELAY's own convention, consistent with this being a re-anchored instance of a generic mechanism, not a byte-identical constant
+}));
+export const turn13FaintedCursorX = lazyValue(() => LINE2_ORIGIN.x
+  + measureText(font, charmap, turn13DragonbreathFaintLines()[1]));
+export const turn13FaintedCursorStartDelay = lazyValue(() => TURN13_FAINTED_TEXT_DELAY + turn13DragonbreathFaintTextTotal() + 1);
 
 
 /** The staged opponent-faint receipt accepts dismissal once its text cursor is settled. */
 export function opponentFaintDismissEligible(t: number): boolean {
-  return t >= TURN13_DRAGONBREATH_PRESS_TICK + TURN13_FAINTED_CURSOR_START_DELAY;
+  return t >= TURN13_DRAGONBREATH_PRESS_TICK + turn13FaintedCursorStartDelay();
 }
 
 /**
@@ -13156,7 +13148,7 @@ function drawStaticBgShiftedXRows(
 }
 
 /** The real opponent healthbox sprite's own `y2` wobble (`rockSlideHealthboxWobbleY2`) - same erase-then-redraw-translated shape as `drawDoubleTeamClones`' Grovyle erase, reusing `opponentHealthboxContent`/`HEALTHBOX_FRAME_ORIGIN` (`drawSendOutHealthbox`'s own asset, translated vertically here instead of horizontally). `content` defaults to the full-HP compositor result (every existing ROCK_SLIDE caller's own domain, where the wobble window falls entirely before the drain starts) - S7 slice E2b's DRAGON_BREATH caller passes Grovyle's real (already-101, not yet re-drained) content explicitly since its own hit-flash window also falls before ITS drain starts, but at a HP that isn't this module's full-send-out value. */
-export function drawOpponentHealthboxWobble(fb: Uint8Array, dy: number, content: ReturnType<typeof composeOpponentHealthbox> = opponentHealthboxContent): void {
+export function drawOpponentHealthboxWobble(fb: Uint8Array, dy: number, content: ReturnType<typeof composeOpponentHealthbox> = getOpponentHealthboxContent()): void {
   const { width, height, pixels } = content;
   for (let py = 0; py < height; py += 1) {
     for (let px = 0; px < width; px += 1) {
@@ -13570,12 +13562,12 @@ export const TURN14_DRAGONBREATH_MENU_REDRAW_DELAY = TURN14_MENU_REDRAW_TICK - T
  * "hard cut, no blank gap" convention boundary (i)'s own kickoff-text
  * transition already established (§7).
  */
-export const TURN15_FAINTED_LINE1 = CANONICAL_OPPONENT_FLY_RESOLUTION.faintLines[0]!;
-export const TURN15_FAINTED_LINE2 = CANONICAL_OPPONENT_FLY_RESOLUTION.faintLines[1]!;
-export const TURN15_FAINTED_TEXT_TOTAL = TURN15_FAINTED_LINE1.length + TURN15_FAINTED_LINE2.length;
+export const turn15FaintedLine1 = lazyValue(() => canonicalOpponentFlyResolution().faintLines[0]!);
+export const turn15FaintedLine2 = lazyValue(() => canonicalOpponentFlyResolution().faintLines[1]!);
+export const turn15FaintedTextTotal = lazyValue(() => turn15FaintedLine1().length + turn15FaintedLine2().length);
 export const TURN15_FAINTED_TEXT_START_TICK = 19328;
 /** Identical line2 content ("fainted!") to every prior faint text in this dossier gives an identical cursor X - reused directly rather than recomputed. */
-export const TURN15_FAINTED_CURSOR_X = TURN5_FAINTED_CURSOR_X;
+export const turn15FaintedCursorX = lazyValue(turn5FaintedCursorX);
 /**
  * `cursorState`'s own generic 4-phase/9-tick-per-phase bounce (§3.3),
  * re-anchored - oracle-pixel-confirmed exact via a dense 19335-19405
@@ -13593,11 +13585,11 @@ export const TURN15_FAINTED_CURSOR_X = TURN5_FAINTED_CURSOR_X;
  * (docs/turn15-notes.md §4's own "still un-dismissed" citation), which is
  * out of this rung's own scope.
  */
-export const TURN15_FAINTED_CURSOR_START_TICK = TURN15_FAINTED_TEXT_START_TICK + TURN15_FAINTED_TEXT_TOTAL + 1;
+export const turn15FaintedCursorStartTick = lazyValue(() => TURN15_FAINTED_TEXT_START_TICK + turn15FaintedTextTotal() + 1);
 
 /** The forced-switch dismissal is only accepted once the faint-text wait cursor exists. */
 export function turn15KoDismissEligible(t: number): boolean {
-  return t >= TURN15_FAINTED_CURSOR_START_TICK;
+  return t >= turn15FaintedCursorStartTick();
 }
 
 
@@ -14944,7 +14936,7 @@ export function drawTurn16FightSubmenuWindow(
             firePunchAge,
             TURN17_FIRE_PUNCH_RESOLUTION.faint!.cursorStartAge,
           );
-          drawCursor(fb, cursor.yOffset, TURN5_FAINTED_CURSOR_X);
+          drawCursor(fb, cursor.yOffset, turn5FaintedCursorX());
         }
         return;
       }
@@ -14998,7 +14990,7 @@ export function drawTurn16FightSubmenuWindow(
   const isNextCommand = followingPresentation?.menuRedrawElapsed !== null
     && followingPresentation?.menuRedrawElapsed !== undefined;
   const settledPreConfirm = isNextCommand && sm.confirmElapsed === null;
-  const resolvedTurn = CANONICAL_FIRE_PUNCH_RESOLUTION;
+  const resolvedTurn = canonicalFirePunchResolution();
   const resolvedOpponentStatus = mapStatus1ToBattleStatus(resolvedTurn.opponentStatus1);
   if (resolvedOpponentStatus !== "burn") throw new Error("canonical FIRE_PUNCH resolution lost its burn status-icon receipt");
 
@@ -31351,9 +31343,9 @@ export function renderSceneOnMovePresentation(
           state.config.fieldProfile.playerHp,
           state.config.fieldProfile.playerStatus,
           state.config.fieldProfile.playerGender ?? "male",
-          TURN13_SWITCHIN.replacementSpecies,
-          MURKROW_LEVEL,
-          TURN13_SWITCHIN.replacementHp.max,
+          turn13Switchin().replacementSpecies,
+          murkrowLevel(),
+          turn13Switchin().replacementHp.max,
         ),
       );
     }
@@ -49111,9 +49103,9 @@ export function renderSceneOnMovePresentation(
           state.config.fieldProfile.playerHp,
           state.config.fieldProfile.playerStatus,
           state.config.fieldProfile.playerGender ?? "male",
-          TURN13_SWITCHIN.replacementSpecies,
-          MURKROW_LEVEL,
-          TURN13_SWITCHIN.replacementHp.max,
+          turn13Switchin().replacementSpecies,
+          murkrowLevel(),
+          turn13Switchin().replacementHp.max,
         ),
       );
     }
@@ -49276,9 +49268,9 @@ export function renderSceneOnMovePresentation(
           state.config.fieldProfile.playerHp,
           state.config.fieldProfile.playerStatus,
           state.config.fieldProfile.playerGender ?? "female",
-          TURN13_SWITCHIN.replacementSpecies,
-          MURKROW_LEVEL,
-          TURN13_SWITCHIN.replacementHp.max,
+          turn13Switchin().replacementSpecies,
+          murkrowLevel(),
+          turn13Switchin().replacementHp.max,
         ),
       );
     }
@@ -49382,9 +49374,9 @@ export function renderSceneOnMovePresentation(
           state.config.fieldProfile.playerHp,
           state.config.fieldProfile.playerStatus,
           state.config.fieldProfile.playerGender ?? "male",
-          TURN13_SWITCHIN.replacementSpecies,
-          MURKROW_LEVEL,
-          TURN13_SWITCHIN.replacementHp.max,
+          turn13Switchin().replacementSpecies,
+          murkrowLevel(),
+          turn13Switchin().replacementHp.max,
         ),
       );
     }
@@ -49521,9 +49513,9 @@ export function renderSceneOnMovePresentation(
           state.config.fieldProfile.playerHp,
           state.config.fieldProfile.playerStatus,
           state.config.fieldProfile.playerGender ?? "male",
-          TURN13_SWITCHIN.replacementSpecies,
-          MURKROW_LEVEL,
-          TURN13_SWITCHIN.replacementHp.max,
+          turn13Switchin().replacementSpecies,
+          murkrowLevel(),
+          turn13Switchin().replacementHp.max,
         ),
       );
     }
@@ -49723,9 +49715,9 @@ export function renderSceneOnMovePresentation(
           state.config.fieldProfile.playerHp,
           state.config.fieldProfile.playerStatus,
           state.config.fieldProfile.playerGender ?? "male",
-          TURN5_SWITCHIN.replacementSpecies,
-          PIDGEOTTO_LEVEL,
-          PIDGEOTTO_MAX_HP,
+          turn5Switchin().replacementSpecies,
+          pidgeottoLevel(),
+          pidgeottoMaxHp(),
         ),
       );
     }
@@ -49857,9 +49849,9 @@ export function renderSceneOnMovePresentation(
           state.config.fieldProfile.playerHp,
           state.config.fieldProfile.playerStatus,
           state.config.fieldProfile.playerGender ?? "male",
-          TURN5_SWITCHIN.replacementSpecies,
-          PIDGEOTTO_LEVEL,
-          PIDGEOTTO_MAX_HP,
+          turn5Switchin().replacementSpecies,
+          pidgeottoLevel(),
+          pidgeottoMaxHp(),
         ),
       );
     }
@@ -50979,9 +50971,9 @@ export function renderSceneOnMovePresentation(
           state.config.fieldProfile.playerHp,
           state.config.fieldProfile.playerStatus,
           state.config.fieldProfile.playerGender ?? "male",
-          TURN5_SWITCHIN.replacementSpecies,
-          PIDGEOTTO_LEVEL,
-          PIDGEOTTO_MAX_HP,
+          turn5Switchin().replacementSpecies,
+          pidgeottoLevel(),
+          pidgeottoMaxHp(),
         ),
       );
     }
@@ -51104,9 +51096,9 @@ export function renderSceneOnMovePresentation(
             state.config.fieldProfile.playerHp,
             state.config.fieldProfile.playerStatus,
             state.config.fieldProfile.playerGender ?? "male",
-            TURN5_SWITCHIN.replacementSpecies,
-            PIDGEOTTO_LEVEL,
-            PIDGEOTTO_MAX_HP,
+            turn5Switchin().replacementSpecies,
+            pidgeottoLevel(),
+            pidgeottoMaxHp(),
           ),
         );
       }
@@ -51341,9 +51333,9 @@ export function renderSceneOnMovePresentation(
           state.config.fieldProfile.playerHp,
           state.config.fieldProfile.playerStatus,
           state.config.fieldProfile.playerGender ?? "male",
-          TURN5_SWITCHIN.replacementSpecies,
-          PIDGEOTTO_LEVEL,
-          PIDGEOTTO_MAX_HP,
+          turn5Switchin().replacementSpecies,
+          pidgeottoLevel(),
+          pidgeottoMaxHp(),
         ),
       );
     }
@@ -51544,9 +51536,9 @@ export function renderSceneOnMovePresentation(
           state.config.fieldProfile.playerHp,
           state.config.fieldProfile.playerStatus,
           state.config.fieldProfile.playerGender ?? "male",
-          TURN13_SWITCHIN.replacementSpecies,
-          MURKROW_LEVEL,
-          TURN13_SWITCHIN.replacementHp.max,
+          turn13Switchin().replacementSpecies,
+          murkrowLevel(),
+          turn13Switchin().replacementHp.max,
         ),
       );
     }
@@ -51851,9 +51843,9 @@ export function renderSceneOnMovePresentation(
           state.config.fieldProfile.playerHp,
           state.config.fieldProfile.playerStatus,
           state.config.fieldProfile.playerGender ?? "female",
-          TURN13_SWITCHIN.replacementSpecies,
-          MURKROW_LEVEL,
-          TURN13_SWITCHIN.replacementHp.max,
+          turn13Switchin().replacementSpecies,
+          murkrowLevel(),
+          turn13Switchin().replacementHp.max,
         ),
       );
     }
@@ -54929,7 +54921,7 @@ export function renderSceneOnMovePresentation(
   const opponentContent = opponentHealthboxContentForHp(
     target.geometry.side === "opponent"
       ? resolution.displayedHp
-      : anchorOpponentBattler.hp,
+      : getAnchorOpponentBattler().hp,
   );
   if (target.geometry.side === "opponent") {
     drawOpponentHealthboxWobble(fb, resolution.healthboxY2, opponentContent);

@@ -701,14 +701,14 @@ export const TURN17_LOSS_LINE2 = "SOME WATER";
 export const TURN17_LOSS_INPUT_READY_DELAY = 79;
 
 import { stageBattle2Turn1Kernel } from "./battle2CommandAdapter.ts";
-import { BALL_CLOSED_TILESET, KABUTO_SENDOUT_BATTLER, LINE2_ORIGIN, MATERIALIZE_TINT_COLOR, MESSAGE_PALETTE, MESSAGE_TEXT_COLORS, ONIX_SITRUS_IDENTITY_RENDER_TICK, OPPONENT_CORNER, PARTY_ENTRY_FADE_IN, PARTY_ENTRY_FADE_OUT, PARTY_SENDOUT_FADE_OUT, PLAYER_CORNER, TURN10_REGIME5_TO_REGIME1_SHIFT, TURN11_REGIME6_TO_REGIME1_SHIFT, TURN12_REGIME7_TO_REGIME1_SHIFT, TURN13_DRAGONBREATH_FAINT_LINE1, TURN13_DRAGONBREATH_FAINT_LINE2, TURN13_DRAGONBREATH_FAINT_TEXT_TOTAL, TURN13_DRAGONBREATH_HP, TURN13_DRAGONBREATH_KICKOFF_LINE1, TURN13_DRAGONBREATH_KICKOFF_LINE2, TURN13_DRAGONBREATH_PRESS_TICK, TURN13_FAINTED_CURSOR_START_DELAY, TURN13_FAINTED_CURSOR_X, TURN13_FAINT_SINK_STEPS, TURN13_HEALTHBOX_VANISH_TICK, TURN13_HIT_FLASH_PRESS_TICK, TURN13_MURKROW_MATERIALIZE_AFTER_DISMISS, TURN13_REGIME8_TO_REGIME1_SHIFT, TURN13_SWITCHIN_MENU_REDRAW_AFTER_DISMISS, TURN13_SWITCHIN_RESET_AFTER_DISMISS_SHIFT, TURN13_SWITCHIN_SENTOUT_LINE2, TURN14_MENU_REDRAW_RESET_SHIFT, TURN14_MENU_REDRAW_TICK, TURN15_FAINTED_CURSOR_START_TICK, TURN15_FAINTED_CURSOR_X, TURN15_FAINTED_LINE1, TURN15_FAINTED_LINE2, TURN15_FAINTED_TEXT_START_TICK, TURN15_FAINTED_TEXT_TOTAL, actionMenuAge, anchorOpponentAfterTurn2Hp, anchorOpponentAfterTurnHp, anchorPlayerAfterTurnHp, anchorPlayerBattler, battleBg, battleWindow, brendan, brendanSettledTileset, brendanThrowTilesets, charmap, cursorState, drawBallIcons, drawBallOpenParticles, drawBattle2ActionMenuWindow, drawComposedPlayerHealthbox, drawCursor, drawFightSubmenuChromeFromLatest, drawFightSubmenuChromeFromLiveState, drawGrantingStarsAtAge, drawGrovyleSettled, drawKabutoHSlideWobble, drawOpponentHealthboxWobble, drawOpponentSummaryExit, drawPlayerBallOpen, drawPlayerBallOpenParticles, drawPlayerMaterializeSettle, drawRockSprite, drawSendOutBall, drawSpriteSheetAffineTintedBlend, drawStaticBgShiftedY, drawTileBg, drawTileBgFaded, drawTurn13MurkrowSettled, drawTurn13SandAttackAccBanner, drawTurn15ForcedSwitchBall, drawTurn15ForcedSwitchRelease, drawTurn15MagbyHealthbox, drawTurn15PartyListObjMask, drawTurn15PartySelectList, drawTurn16FightSubmenuWindow, drawTurn5SitrusSettledMenuChrome, fadeTurn15PartyFramebuffer, font, getMenuHealthboxPlayerContentMask, healthboxBackgroundColorAt, introTrainer, kabutoHealthboxContent, kabutoHealthboxContentForHp, menuHealthboxPlayer, menuIdleBlank, murkrowFrontSprite, murkrowHealthboxContent, onixPlayerHealthboxContent, opponentHealthboxContent, pidgeottoFrontSprite, pidgeottoHealthboxContentForHp, playerSendOutClock, playerTrainerSendOutClock, sendOutBgFadeY, setPixel, summaryBall, trainerExitX, turn13SandAttackAccEva, turn15ReleaseFieldPalette } from "./battleScene.ts";
+import { BALL_CLOSED_TILESET, KABUTO_SENDOUT_BATTLER, LINE2_ORIGIN, MATERIALIZE_TINT_COLOR, MESSAGE_PALETTE, MESSAGE_TEXT_COLORS, onixSitrusIdentityRenderTick, OPPONENT_CORNER, PARTY_ENTRY_FADE_IN, PARTY_ENTRY_FADE_OUT, PARTY_SENDOUT_FADE_OUT, PLAYER_CORNER, TURN10_REGIME5_TO_REGIME1_SHIFT, TURN11_REGIME6_TO_REGIME1_SHIFT, TURN12_REGIME7_TO_REGIME1_SHIFT, turn13DragonbreathFaintLines, turn13DragonbreathFaintTextTotal, turn13DragonbreathHp, turn13DragonbreathKickoffLines, TURN13_DRAGONBREATH_PRESS_TICK, turn13FaintedCursorStartDelay, turn13FaintedCursorX, turn13FaintSinkSteps, turn13HealthboxVanishTick, TURN13_HIT_FLASH_PRESS_TICK, TURN13_MURKROW_MATERIALIZE_AFTER_DISMISS, TURN13_REGIME8_TO_REGIME1_SHIFT, TURN13_SWITCHIN_MENU_REDRAW_AFTER_DISMISS, TURN13_SWITCHIN_RESET_AFTER_DISMISS_SHIFT, turn13SwitchinSentoutLine2, TURN14_MENU_REDRAW_RESET_SHIFT, TURN14_MENU_REDRAW_TICK, turn15FaintedCursorStartTick, turn15FaintedCursorX, turn15FaintedLine1, turn15FaintedLine2, TURN15_FAINTED_TEXT_START_TICK, turn15FaintedTextTotal, actionMenuAge, getAnchorOpponentAfterTurn2Hp, getAnchorOpponentAfterTurnHp, getAnchorPlayerAfterTurnHp, getAnchorPlayerBattler, battleBg, battleWindow, brendan, brendanSettledTileset, brendanThrowTilesets, charmap, cursorState, drawBallIcons, drawBallOpenParticles, drawBattle2ActionMenuWindow, drawComposedPlayerHealthbox, drawCursor, drawFightSubmenuChromeFromLatest, drawFightSubmenuChromeFromLiveState, drawGrantingStarsAtAge, drawGrovyleSettled, drawKabutoHSlideWobble, drawOpponentHealthboxWobble, drawOpponentSummaryExit, drawPlayerBallOpen, drawPlayerBallOpenParticles, drawPlayerMaterializeSettle, drawRockSprite, drawSendOutBall, drawSpriteSheetAffineTintedBlend, drawStaticBgShiftedY, drawTileBg, drawTileBgFaded, drawTurn13MurkrowSettled, drawTurn13SandAttackAccBanner, drawTurn15ForcedSwitchBall, drawTurn15ForcedSwitchRelease, drawTurn15MagbyHealthbox, drawTurn15PartyListObjMask, drawTurn15PartySelectList, drawTurn16FightSubmenuWindow, drawTurn5SitrusSettledMenuChrome, fadeTurn15PartyFramebuffer, font, getMenuHealthboxPlayerContentMask, healthboxBackgroundColorAt, introTrainer, kabutoHealthboxContent, kabutoHealthboxContentForHp, menuHealthboxPlayer, menuIdleBlank, murkrowFrontSprite, getMurkrowHealthboxContent, onixPlayerHealthboxContent, getOpponentHealthboxContent, pidgeottoFrontSprite, pidgeottoHealthboxContentForHp, playerSendOutClock, playerTrainerSendOutClock, sendOutBgFadeY, setPixel, summaryBall, trainerExitX, turn13SandAttackAccEva, turn15ReleaseFieldPalette } from "./battleScene.ts";
 
 // --- slice 4 batch 9 reconnection imports ---
 import { playerHealthboxHpOverlayAssets } from "./battleScene.ts";
 
 // --- slice 4 batch 8 reconnection imports ---
 import { TURN7_ROCKSLIDE_TEXT_CLEAR_DELAY, turn7SuperEffectiveTextStartTick, turn7SuperEffectiveTextVisibleChars, turn7RockSlideResettledBounceTick, TURN6_ROCKSLIDE_TEXT_CLEAR_DELAY, turn6SuperEffectiveTextStartTick, turn6SuperEffectiveTextVisibleChars, turn6RockSlideResettledBounceTick, rockSlideResettledBounceTick, turn6StatFallEva, turn6AtkFellTextStartTick, turn6AtkFellTextVisibleChars, PLAYER_BALL_OPEN_VISIBLE_BOTTOM, endeavorHp, turn2KickoffTextVisibleChars, TURN_KICKOFF_LINE1, TURN_KICKOFF_LINE2, TURN2_KICKOFF_LINE2 } from "./battleMenu.ts";
-import { TURN14_BARE_SCENE_DELAY, anchorOpponentBattler, SWITCHIN_SENTOUT_LINE2, TURN5_FAINTED_CURSOR_X, pidgeottoHealthboxContent, drawTurn8FeatherDanceKickoffText, drawTurn7FeatherDanceKickoffText, drawTurn6FeatherSprites, TURN6_FEATHERDANCE_STAT_PALETTE, TURN5_BG_FADE_Y, TURN13_MURKROW_BG_FADE_START_AFTER_DISMISS, TURN13_MURKROW_RAMP_RENDER_AFTER_DISMISS, TURN5_MATERIALIZE_FLAT_COEFF, TURN5_MATERIALIZE_RAMP_COEFF, drawTurn5PidgeottoSettled, turn10BgDarkPalette, drawSpriteSheetTopRows, ONIX_SITRUS_TINT_COLOR, drawSpriteSheetTopClipped, turn10OnixDarkPalette, battleAnimItemHeal, eraseSpriteFootprint, anchorPlayerAfterTurn3Hp, turn5SitrusOnixHp, TURN9_REGIME4_TO_REGIME1_SHIFT, TURN5_SWITCHIN_PARTICLE_STALL_LOGICAL_TICK, TURN5_PIDGEOTTO_SETTLE_TICK, turn5MaterializeCoeff, onixSitrusRotateMatrix, onixSitrusTintCoeff, turn5SitrusRingMatrix, endeavorOnixInvisible, endeavorHealthboxBounceY2 } from "./battleScene.ts";
+import { TURN14_BARE_SCENE_DELAY, getAnchorOpponentBattler, switchinSentoutLine2, turn5FaintedCursorX, getPidgeottoHealthboxContent, drawTurn8FeatherDanceKickoffText, drawTurn7FeatherDanceKickoffText, drawTurn6FeatherSprites, turn6FeatherdanceStatPalette, TURN5_BG_FADE_Y, TURN13_MURKROW_BG_FADE_START_AFTER_DISMISS, TURN13_MURKROW_RAMP_RENDER_AFTER_DISMISS, TURN5_MATERIALIZE_FLAT_COEFF, TURN5_MATERIALIZE_RAMP_COEFF, drawTurn5PidgeottoSettled, turn10BgDarkPalette, drawSpriteSheetTopRows, ONIX_SITRUS_TINT_COLOR, drawSpriteSheetTopClipped, turn10OnixDarkPalette, battleAnimItemHeal, eraseSpriteFootprint, getAnchorPlayerAfterTurn3Hp, turn5SitrusOnixHp, TURN9_REGIME4_TO_REGIME1_SHIFT, TURN5_SWITCHIN_PARTICLE_STALL_LOGICAL_TICK, turn5PidgeottoSettleTick, turn5MaterializeCoeff, onixSitrusRotateMatrix, onixSitrusTintCoeff, turn5SitrusRingMatrix, endeavorOnixInvisible, endeavorHealthboxBounceY2 } from "./battleScene.ts";
 import turn15FieldPpuAsset from "../assets/gen/turn15-field-ppu-20302.json" with { type: "json" };
 import { drawBattleCommandActionChrome, renderBattleCommandPresentation } from "./battleCommandPresentationRender.ts";
 import { FIGHT_CONFIRM_TEXT_DELAY, FIGHT_SUBMENU_REOPEN_BOUNCE_SHIFT, FIGHT_SUBMENU_RESUMED_BOUNCE_SHIFT, GO_TEXT, GO_TEXT_START_TICK, PLAYER_THROW_BALL_START_TICK, ROCK_SLIDE_LINE2, STAT_ROSE_LINE1, STAT_ROSE_LINE2, brendanThrowDx, brendanThrowFrame, goTextVisibleChars, menuIdleBounce, playerHealthboxSlideDx, playerMaterializeBgFadeY, playerThrowBallSpin, playerThrowBallTopLeft, rockSlideBg3Y, rockSlideDrawOrder, rockSlideHealthboxWobbleY2, rockSlideMonBlinkInvisible, rockSlideMonShakeY2, rockSlideOpponentHp, rockSlideRockState, rockSlideTextStartTick, rockSlideTextVisibleChars, statRoseTextStartTick, statRoseTextVisibleChars, turn2KickoffBounceTick, turn2KickoffTextStartTick, turn2SubmenuBounceTickFromPresentationEpochAge, turnKickoffBounceTick, turnKickoffTextStartTick, turnKickoffTextVisibleChars } from "./battleMenu.ts";
@@ -731,7 +731,7 @@ import { composePlayerHealthboxHpOverlay } from "./healthboxAssembly.ts";
 import { latestCompletedCommandPresentationEpochElapsedSinceReset, type LatestCompletedCommandHandoff } from "./nextCommandHandoff.ts";
 import { TURN10_AERIALACE_HP } from "./turn10ResolutionAdapter.ts";
 import { TURN12_AERIALACE_HP } from "./turn12ResolutionAdapter.ts";
-import { CANONICAL_OPPONENT_FLY_RESOLUTION } from "./turn15FlyResolutionAdapter.ts";
+import { canonicalOpponentFlyResolution } from "./turn15FlyResolutionAdapter.ts";
 import { resolveTurn1RockSlideHpEndpoints } from "./turn1RockSlidePresentationStaging.ts";
 import { resolveTurn2EndeavorHpEndpoints } from "./turn2EndeavorPresentationStaging.ts";
 import { resolveTurn3RockSlideHpEndpoints } from "./turn3RockSlidePresentationStaging.ts";
@@ -753,7 +753,7 @@ import { resolveTurn6RockSlideAttackLines, resolveTurn7RockSlideAttackLines } fr
 import { resolveTurn7AtkFellLines, resolveTurn7FeatherDanceKickoffLines, resolveTurn8AtkFellLines, resolveTurn8FeatherDanceKickoffLines } from "./turn78FeatherDancePresentationStaging.ts";
 import { resolveTurn11AtkFloorLines } from "./turn11FeatherDancePresentationStaging.ts";
 import { type BattleSceneState } from "./battleScene.ts";
-import { ACTION_MENU_BLANK_END_OFFSET, BALL_OPEN_START_OFFSET, HEALTHBOX_SLIDE_START_DX, KABUTO_CORNER, MATERIALIZE_END_OFFSET, MATERIALIZE_START_OFFSET, MATERIALIZE_Y2_TABLE, ONIX_MATERIALIZE_CORNER, OPP_BAR_X2, PARTICLE_ORIGIN, PIDGEOTTO_MAX_HP, PLAYER_MATERIALIZE_ACCUMULATOR_LEAD, PLAYER_MATERIALIZE_END_TICK, PLAYER_MATERIALIZE_START_TICK, TICK0, TURN10_ROCKSLIDE_MENU_REDRAW_DELAY, TURN11_ROCKSLIDE_MENU_REDRAW_DELAY, TURN12_ROCKSLIDE_MENU_REDRAW_DELAY, TURN13_FAINTED_TEXT_DELAY, TURN5_BALL_HANDOFF_TICK, TURN5_SWITCHIN, TURN8_MENU_REDRAW_DELAY, TURN9_MENU_REDRAW_DELAY, actionMenuBounceTick, affineEmergeAccumulator, ballDisplay, ballStateTileIndex, battleAnimFlyBall, battleAnimHitsplat, battleAnimMudSand, battleAnimTables, battleIntroEncounterParams, battleSendOutEncounterParams, blendedSetPixel, drawBallStatusBar, drawCleanSwitchinParticles, drawFrontBackMaterialize, drawMessageTextLines, drawPlayerSideAffineMaterialize, drawRect, drawSendOutHealthbox, drawSpriteSheet, drawSpriteSheetAffineRotate, drawSpriteSheetAffineStretch, drawSpriteSheetBlendedOverFb, drawStatDecreaseBannerForBattlerPalette, drawStatIncreaseBannerForBattler, generatedBattleIntroSourceClock, generatedBattleStartPressTick, grovyleFrontSprite, healthboxSlideDx, kabutoFrontSprite, menuIdleBase, onixBackSprite, opponentHealthboxContentForHp, presentationForEncounter, sendOutTextStartTick, statAnimBanner, tableX2 } from "./battleScene.ts";
+import { ACTION_MENU_BLANK_END_OFFSET, BALL_OPEN_START_OFFSET, HEALTHBOX_SLIDE_START_DX, KABUTO_CORNER, MATERIALIZE_END_OFFSET, MATERIALIZE_START_OFFSET, MATERIALIZE_Y2_TABLE, ONIX_MATERIALIZE_CORNER, OPP_BAR_X2, PARTICLE_ORIGIN, pidgeottoMaxHp, PLAYER_MATERIALIZE_ACCUMULATOR_LEAD, PLAYER_MATERIALIZE_END_TICK, PLAYER_MATERIALIZE_START_TICK, TICK0, TURN10_ROCKSLIDE_MENU_REDRAW_DELAY, TURN11_ROCKSLIDE_MENU_REDRAW_DELAY, TURN12_ROCKSLIDE_MENU_REDRAW_DELAY, TURN13_FAINTED_TEXT_DELAY, TURN5_BALL_HANDOFF_TICK, turn5Switchin, TURN8_MENU_REDRAW_DELAY, TURN9_MENU_REDRAW_DELAY, actionMenuBounceTick, affineEmergeAccumulator, ballDisplay, ballStateTileIndex, battleAnimFlyBall, battleAnimHitsplat, battleAnimMudSand, battleAnimTables, battleIntroEncounterParams, battleSendOutEncounterParams, blendedSetPixel, drawBallStatusBar, drawCleanSwitchinParticles, drawFrontBackMaterialize, drawMessageTextLines, drawPlayerSideAffineMaterialize, drawRect, drawSendOutHealthbox, drawSpriteSheet, drawSpriteSheetAffineRotate, drawSpriteSheetAffineStretch, drawSpriteSheetBlendedOverFb, drawStatDecreaseBannerForBattlerPalette, drawStatIncreaseBannerForBattler, generatedBattleIntroSourceClock, generatedBattleStartPressTick, grovyleFrontSprite, healthboxSlideDx, kabutoFrontSprite, menuIdleBase, onixBackSprite, opponentHealthboxContentForHp, presentationForEncounter, sendOutTextStartTick, statAnimBanner, tableX2 } from "./battleScene.ts";
 import type { RgbColor } from "./bg.ts";
 import type { FactoryTrainerPresentation } from "./factoryTrainerPresentation.ts";
 import type { FactoryBattleStartIntroState } from "./factoryBattleStartIntro.ts";
@@ -822,7 +822,7 @@ export interface MenuIdleBounceTwoStateAsset {
  * byte-identical (41 -> 1). Both the drain and turn-5 steady-state consumers
  * read this typed endpoint.
  */
-export const TURN4_ROCKSLIDE_HP = resolveTurn4RockSlideHpEndpoints();
+export const turn4RockslideHp = lazyValue(resolveTurn4RockSlideHpEndpoints);
 
 
 
@@ -834,7 +834,7 @@ export const TURN4_ROCKSLIDE_HP = resolveTurn4RockSlideHpEndpoints();
  * `drawTurn3RockSlideAttack`/`drawTurn3RockSlideTurnEndSettledMenu` read this
  * staging pair while their settled boundary consumes the turn-3 receipt.
  */
-export const TURN3_ROCKSLIDE_HP = resolveTurn3RockSlideHpEndpoints();
+export const turn3RockslideHp = lazyValue(resolveTurn3RockSlideHpEndpoints);
 
 
 
@@ -908,7 +908,7 @@ export function grovyleStretchTintCoeff(localOffset: number): number {
  * battle2CommandAdapter.ts): computed once and reused by both the command
  * and resolution phases below, matching the kernel's own idempotent replay.
  */
-export const BATTLE2_TURN1_KERNEL = stageBattle2Turn1Kernel();
+export const battle2Turn1Kernel = lazyValue(stageBattle2Turn1Kernel);
 
 
 
@@ -1047,7 +1047,7 @@ export function turn3KickoffBounceTick(
 }
 
 
-export const TURN2_ENDEAVOR_HP = resolveTurn2EndeavorHpEndpoints();
+export const turn2EndeavorHp = lazyValue(resolveTurn2EndeavorHpEndpoints);
 
 
 /**
@@ -1104,7 +1104,7 @@ export const TURN5_OFF_ROCKSLIDE_ANIMATION_PROFILE = {
 };
 
 
-export const TURN5_ENDEAVOR_HP = resolveTurn5EndeavorHpEndpoints();
+export const turn5EndeavorHp = lazyValue(resolveTurn5EndeavorHpEndpoints);
 
 
 /**
@@ -1128,7 +1128,7 @@ export const TURN5_OFF_ENDEAVOR_HEALTHBOX_BOUNCE_START = 81;
 export const TURN5_OFF_ENDEAVOR_FLICKER_START = TURN5_OFF_ENDEAVOR_HEALTHBOX_BOUNCE_START + 1;
 
 
-export const GROVYLE_FAINT_SINK = resolveTurn5FaintSinkGeometry();
+export const grovyleFaintSink = lazyValue(resolveTurn5FaintSinkGeometry);
 
 
 
@@ -1147,7 +1147,7 @@ export const GROVYLE_FAINT_SINK = resolveTurn5FaintSinkGeometry();
  * from this adapter's own `procTriggerRamTick`/`onFieldCenter`, not an
  * independently hand-derived battleScene.ts literal.
  */
-export const TURN5_SITRUS = resolveTurn5SitrusAdapter();
+export const turn5Sitrus = lazyValue(resolveTurn5SitrusAdapter);
 
 
 
@@ -1203,7 +1203,7 @@ export function turn5SitrusResettledBounceTick(t: number): number {
  * PRE-turn-4 hp (41) and independently computes the turn-4 hit's own
  * settle, it does not consume this window's value.
  */
-export const TURN5_ROCKSLIDE_OPPONENT_TO_HP = resolveTurn5FaintWindowKoHp();
+export const turn5RockslideOpponentToHp = lazyValue(resolveTurn5FaintWindowKoHp);
 
 
 
@@ -1563,7 +1563,7 @@ export function turn6FeatherDanceTextStartTick(pressTick: number): number {
  * `resolveRockSlidePresentationWindowContent` - byte-identical to the former
  * bare literal, but now identified from provenance, not asserted.
  */
-export const TURN6_PIDGEOTTO_AFTER_ROCKSLIDE_HP = resolveTurn6RockSlideHpEndpoints().to;
+export const turn6PidgeottoAfterRockslideHp = lazyValue(() => resolveTurn6RockSlideHpEndpoints().to);
 
 
 
@@ -1612,7 +1612,7 @@ export function turn7KickoffBounceTick(t: number, pressTick: number): number {
  * flip as turn 6's own HP endpoint above, re-derived from this turn's own
  * staged facts, not copied from turn 6's.
  */
-export const TURN7_PIDGEOTTO_AFTER_ROCKSLIDE_HP = resolveTurn7RockSlideHpEndpoints().to;
+export const turn7PidgeottoAfterRockslideHp = lazyValue(() => resolveTurn7RockSlideHpEndpoints().to);
 
 
 
@@ -1962,9 +1962,9 @@ export function turn10SuperEffectiveTextStartTick(pressTick: number, delay: numb
  */
 
 
-export const [TURN11_ATKFLOOR_KICKOFF_LINE1, TURN11_ATKFLOOR_KICKOFF_LINE2] = resolveTurn11AtkFloorLines();
+export const turn11AtkfloorKickoffLines = lazyValue(resolveTurn11AtkFloorLines);
 
-export const TURN11_ATKFLOOR_TEXT_TOTAL = TURN11_ATKFLOOR_KICKOFF_LINE1.length + TURN11_ATKFLOOR_KICKOFF_LINE2.length;
+export const turn11AtkfloorTextTotal = lazyValue(() => turn11AtkfloorKickoffLines()[0].length + turn11AtkfloorKickoffLines()[1].length);
 
 
 export function turn11AtkFloorTextStartTick(pressTick: number): number {
@@ -2117,7 +2117,7 @@ export const TURN13_SANDATTACK_DIRT_DRAW_ORDER: readonly number[] = TURN13_SANDA
 );
 
 
-export const TURN1_ROCKSLIDE_HP = resolveTurn1RockSlideHpEndpoints();
+export const turn1RockslideHp = lazyValue(resolveTurn1RockSlideHpEndpoints);
 
 
 export const TURN1_OFF_ROCKSLIDE_ANIMATION_PROFILE = {
@@ -2134,10 +2134,10 @@ export function turn14MurkrowInvisible(t: number): boolean {
 
 
 /** "Foe MURKROW flew\nup high!" (`gFirstTurnOfTwoStringIds[B_MSG_TURN1_FLY]`) uses the ordinary one-character-per-frame printer, but its first visible glyph is render tick 17823. Fresh per-glyph diffs show the former 17822 anchor led the oracle by exactly one character (the three space ticks were consequently already exact); the completed string remains exact at 17846. */
-export const TURN14_FLYUP_LINE1 = CANONICAL_OPPONENT_FLY_RESOLUTION.chargeLines[0]!;
+export const turn14FlyupLine1 = lazyValue(() => canonicalOpponentFlyResolution().chargeLines[0]!);
 
 
-export const TURN14_FLYUP_LINE2 = CANONICAL_OPPONENT_FLY_RESOLUTION.chargeLines[1]!;
+export const turn14FlyupLine2 = lazyValue(() => canonicalOpponentFlyResolution().chargeLines[1]!);
 
 
 
@@ -2177,10 +2177,10 @@ export function turn14KickoffBounceTick(t: number, pressTick: number): number {
 
 
 /** "Foe MURKROW used\nFLY!" - reuses `TURN14_FLYUP_LINE1`'s own string shape (no new asset), FLY's own display name for line 2. Oracle-pixel-bisected exact (dense sha-transition probe, boundary (i) this session): first char 19007, 20 total chars (16+4) - independently confirmed by BOTH of the space characters producing a "no visible change" repeat tick exactly where the formula predicts (chars 3->4, the space after "Foe", at ticks 19009/19010; chars 11->12, the space after "MURKROW", at ticks 19017/19018) - not just fit to the settle tick. */
-export const TURN15_FLY_STRIKE_LINE1 = CANONICAL_OPPONENT_FLY_RESOLUTION.strikeLines[0]!;
+export const turn15FlyStrikeLine1 = lazyValue(() => canonicalOpponentFlyResolution().strikeLines[0]!);
 
 
-export const TURN15_FLY_STRIKE_LINE2 = CANONICAL_OPPONENT_FLY_RESOLUTION.strikeLines[1]!;
+export const turn15FlyStrikeLine2 = lazyValue(() => canonicalOpponentFlyResolution().strikeLines[1]!);
 
 
 
@@ -2392,6 +2392,7 @@ import { createBattle2CommandAdapterResolution } from "./battle2CommandAdapter.t
 import { TURN6_SUPER_EFFECTIVE_LINE } from "./battleMenu.ts";
 import menuIdleOnixBounceAsset from "../assets/gen/menu-idle-onix-bounce.json" with { type: "json" };
 import menuIdleHealthboxBounceAsset from "../assets/gen/menu-idle-healthbox-bounce.json" with { type: "json" };
+import { lazyValue } from "./lazyValue.ts";
 
 // --- slice 4 batch 1: leaves whose canonical-only deps already moved ---
 
@@ -2409,8 +2410,8 @@ export const menuIdleHealthboxBounce = menuIdleHealthboxBounceAsset as MenuIdleB
  * battle2Turn1.ts constants -- same `{from, to}` shape every other turn
  * window's own `rockSlideOpponentHp` boundary constant uses.
  */
-export const BATTLE2_TURN1_KABUTO_ROCK_SLIDE_HP = (() => {
-  const resolution = createBattle2CommandAdapterResolution(BATTLE2_TURN1_KERNEL);
+export const battle2Turn1KabutoRockSlideHp = lazyValue(() => {
+  const resolution = createBattle2CommandAdapterResolution(battle2Turn1Kernel());
   const hpCommand = resolution.segments[0]!.commands.find(
     (command) => command.type === "hp" && command.battler === 1,
   );
@@ -2420,7 +2421,7 @@ export const BATTLE2_TURN1_KABUTO_ROCK_SLIDE_HP = (() => {
     );
   }
   return { from: hpCommand.from, to: hpCommand.to };
-})();
+});
 
 
 
@@ -2432,12 +2433,12 @@ export function dragonBreathTextVisibleChars(t: number, pressTick: number, start
 }
 
 
-export const GROVYLE_FAINT_SINK_STEPS = GROVYLE_FAINT_SINK.steps;
+export const grovyleFaintSinkSteps = lazyValue(() => grovyleFaintSink().steps);
 
 
 
 /** Grovyle's own opponent healthbox vanishes entirely 2 ticks after the sink's own last visible erase-step (`GROVYLE_FAINT_SINK_START_TICK + 2*GROVYLE_FAINT_SINK_STEPS + 3` = 6521) - pixel-confirmed this session (dense oracle sweep of the healthbox's own crop: byte-identical bare background from tick 6521 on, a 7064px whole-healthbox-region diff the tick before). A distinct UI element from the sprite sink above (different screen region), not itemized in docs/faint-switch-notes.md §3/§7 - this session's own re-probe answers the brief's own "what happens to Grovyle's healthbox" question directly. ISSUES #39 rank-3 flip: `healthboxVanishFrame` is now the SAME generic formula's own output (`GROVYLE_FAINT_SINK.healthboxVanishFrame`), not an independently re-stated `+19`. */
-export const GROVYLE_HEALTHBOX_VANISH_TICK = GROVYLE_FAINT_SINK_START_TICK + GROVYLE_FAINT_SINK.healthboxVanishFrame;
+export const grovyleHealthboxVanishTick = lazyValue(() => GROVYLE_FAINT_SINK_START_TICK + grovyleFaintSink().healthboxVanishFrame);
 
 
 
@@ -2459,10 +2460,10 @@ export const GROVYLE_HEALTHBOX_VANISH_TICK = GROVYLE_FAINT_SINK_START_TICK + GRO
  * `STRINGID_PKMNSITEMRESTOREDHEALTH` resolution, not an independently
  * re-stated literal pair.
  */
-export const TURN5_SITRUS_HEAL_LINE1 = TURN5_SITRUS.healLines[0]!;
+export const turn5SitrusHealLine1 = lazyValue(() => turn5Sitrus().healLines[0]!);
 
 
-export const TURN5_SITRUS_HEAL_LINE2 = TURN5_SITRUS.healLines[1]!;
+export const turn5SitrusHealLine2 = lazyValue(() => turn5Sitrus().healLines[1]!);
 
 
 
@@ -2495,10 +2496,10 @@ export const TURN5_SITRUS_HEAL_LINE2 = TURN5_SITRUS.healLines[1]!;
  * are now `TURN5_SITRUS.hp.from`/`.to`, the real staged Sitrus proc's own
  * HP-change event, not independently re-stated literals.
  */
-export const TURN5_SITRUS_HEAL_HP_START = TURN5_SITRUS.hp.from;
+export const turn5SitrusHealHpStart = lazyValue(() => turn5Sitrus().hp.from);
 
 
-export const TURN5_SITRUS_HEAL_HP_END = TURN5_SITRUS.hp.to;
+export const turn5SitrusHealHpEnd = lazyValue(() => turn5Sitrus().hp.to);
 
 
 
@@ -2523,7 +2524,7 @@ export const TURN5_SITRUS_HEAL_HP_END = TURN5_SITRUS.hp.to;
  * `TURN5_SITRUS.onFieldCenter`, `turn5ResolutionAdapter.ts`'s own adapter-
  * owned fact, not an independently hand-derived literal here.
  */
-export const TURN5_SITRUS_RING_CENTER = TURN5_SITRUS.onFieldCenter;
+export const turn5SitrusRingCenter = lazyValue(() => turn5Sitrus().onFieldCenter);
 
 
 
@@ -2584,7 +2585,7 @@ export function turn10SuperEffectiveTextVisibleChars(t: number, pressTick: numbe
 export function turn11AtkFloorTextVisibleChars(t: number, pressTick: number): number {
   const start = turn11AtkFloorTextStartTick(pressTick);
   if (t < start) return 0;
-  return Math.min(TURN11_ATKFLOOR_TEXT_TOTAL, t - start + 1);
+  return Math.min(turn11AtkfloorTextTotal(), t - start + 1);
 }
 
 
@@ -2595,21 +2596,21 @@ export function turn11SuperEffectiveTextVisibleChars(t: number, pressTick: numbe
 }
 
 
-export const TURN14_FLYUP_TEXT_TOTAL = TURN14_FLYUP_LINE1.length + TURN14_FLYUP_LINE2.length;
+export const turn14FlyupTextTotal = lazyValue(() => turn14FlyupLine1().length + turn14FlyupLine2().length);
 
 
-export const TURN15_FLY_STRIKE_TEXT_TOTAL = TURN15_FLY_STRIKE_LINE1.length + TURN15_FLY_STRIKE_LINE2.length;
+export const turn15FlyStrikeTextTotal = lazyValue(() => turn15FlyStrikeLine1().length + turn15FlyStrikeLine2().length);
 
 // --- slice 4 batch: verbatim move ---
 
-export const [TURN5_FAINTED_LINE1, TURN5_FAINTED_LINE2] = resolveTurn5FaintWindowLines();
+export const turn5FaintedLines = lazyValue(resolveTurn5FaintWindowLines);
 
-export const TURN5_FAINTED_TEXT_TOTAL = TURN5_FAINTED_LINE1.length + TURN5_FAINTED_LINE2.length;
+export const turn5FaintedTextTotal = lazyValue(() => turn5FaintedLines()[0].length + turn5FaintedLines()[1].length);
 
-export const TURN5_FAINTED_CURSOR_START_DELAY = TURN5_FAINTED_TEXT_DELAY + TURN5_FAINTED_TEXT_TOTAL + 1;
+export const turn5FaintedCursorStartDelay = lazyValue(() => TURN5_FAINTED_TEXT_DELAY + turn5FaintedTextTotal() + 1);
 
 export function turn5RockSlideKoDismissEligible(t: number): boolean {
-  return t >= TURN5_ROCKSLIDE_PRESS_TICK + TURN5_FAINTED_CURSOR_START_DELAY;
+  return t >= TURN5_ROCKSLIDE_PRESS_TICK + turn5FaintedCursorStartDelay();
 }
 
 /**
@@ -2630,7 +2631,7 @@ export function turn5RockSlideKoDismissEligible(t: number): boolean {
  */
 export const TURN5_FAINT_DISMISS_FREEZE_TICK_OFFSET = 1;
 
-export function faintSinkRowsAndY2(t: number, startTick: number = GROVYLE_FAINT_SINK_START_TICK, steps: number = GROVYLE_FAINT_SINK_STEPS): { keptRows: number; y2: number } {
+export function faintSinkRowsAndY2(t: number, startTick: number = GROVYLE_FAINT_SINK_START_TICK, steps: number = grovyleFaintSinkSteps()): { keptRows: number; y2: number } {
   const d = t - 1 - startTick;
   if (d <= 0) return { keptRows: steps, y2: 0 };
   const k = Math.min(steps, Math.ceil(d / 2));
@@ -2649,78 +2650,78 @@ export function playerSummaryEvaOffset(
 
 // --- slice 4 batch 3: verbatim move ---
 
-export const [TURN4_DOUBLETEAM_KICKOFF_LINE1, TURN4_DOUBLETEAM_KICKOFF_LINE2] = resolveTurn4DoubleTeamKickoffLines();
+export const turn4DoubleteamKickoffLines = lazyValue(resolveTurn4DoubleTeamKickoffLines);
 
-export const [TURN8_BIND_LINE1, TURN8_BIND_LINE2] = resolveTurn8BindKickoffLines();
-export const [TURN8_MISS_LINE1, TURN8_MISS_LINE2] = resolveTurn8MissLines();
+export const turn8BindLines = lazyValue(resolveTurn8BindKickoffLines);
+export const turn8MissLines = lazyValue(resolveTurn8MissLines);
 
-export const TURN8_BIND_TEXT_TOTAL = TURN8_BIND_LINE1.length + TURN8_BIND_LINE2.length;
+export const turn8BindTextTotal = lazyValue(() => turn8BindLines()[0].length + turn8BindLines()[1].length);
 
-export const TURN8_MISS_TEXT_TOTAL = TURN8_MISS_LINE1.length + TURN8_MISS_LINE2.length;
+export const turn8MissTextTotal = lazyValue(() => turn8MissLines()[0].length + turn8MissLines()[1].length);
 
-export const [TURN2_ENDEAVOR_ATTACK_LINE1, TURN2_ENDEAVOR_ATTACK_LINE2] = resolveTurn2EndeavorAttackLines();
+export const turn2EndeavorAttackLines = lazyValue(resolveTurn2EndeavorAttackLines);
 
-export const [TURN5_ENDEAVOR_ATTACK_LINE1, TURN5_ENDEAVOR_ATTACK_LINE2] = resolveTurn5EndeavorAttackLines();
+export const turn5EndeavorAttackLines = lazyValue(resolveTurn5EndeavorAttackLines);
 
-export const [TURN13_SANDATTACK_EVENT_LINE1, TURN13_SANDATTACK_EVENT_LINE2] = resolveTurn13SandAttackKickoffLines();
-export const TURN13_SANDATTACK_TEXT_TOTAL = TURN13_SANDATTACK_EVENT_LINE1.length + TURN13_SANDATTACK_EVENT_LINE2.length;
+export const turn13SandattackEventLines = lazyValue(resolveTurn13SandAttackKickoffLines);
+export const turn13SandattackTextTotal = lazyValue(() => turn13SandattackEventLines()[0].length + turn13SandattackEventLines()[1].length);
 
-export const [TURN13_ACCFELL_EVENT_LINE1, TURN13_ACCFELL_EVENT_LINE2] = resolveTurn13AccFellLines();
-export const TURN13_ACCFELL_TEXT_TOTAL = TURN13_ACCFELL_EVENT_LINE1.length + TURN13_ACCFELL_EVENT_LINE2.length;
+export const turn13AccfellEventLines = lazyValue(resolveTurn13AccFellLines);
+export const turn13AccfellTextTotal = lazyValue(() => turn13AccfellEventLines()[0].length + turn13AccfellEventLines()[1].length);
 
-export const [TURN1_ROCKSLIDE_KICKOFF_LINE1, TURN1_ROCKSLIDE_KICKOFF_LINE2] = resolveTurn1DoubleTeamKickoffLines();
-export const [TURN1_ROCKSLIDE_ATTACK_LINE1, TURN1_ROCKSLIDE_ATTACK_LINE2] = resolveTurn1RockSlideAttackLines();
+export const turn1RockslideKickoffLines = lazyValue(resolveTurn1DoubleTeamKickoffLines);
+export const turn1RockslideAttackLines = lazyValue(resolveTurn1RockSlideAttackLines);
 
 // --- slice 4 batch 4: verbatim move ---
 
-export const [TURN6_FEATHERDANCE_KICKOFF_LINE1, TURN6_FEATHERDANCE_KICKOFF_LINE2] = resolveTurn6FeatherDanceKickoffLines();
+export const turn6FeatherdanceKickoffLines = lazyValue(resolveTurn6FeatherDanceKickoffLines);
 
-export const [TURN6_ATKFELL_KICKOFF_LINE1, TURN6_ATKFELL_KICKOFF_LINE2] = resolveTurn6AtkFellLines();
+export const turn6AtkfellKickoffLines = lazyValue(resolveTurn6AtkFellLines);
 
-export const [TURN7_FEATHERDANCE_KICKOFF_LINE1, TURN7_FEATHERDANCE_KICKOFF_LINE2] = resolveTurn7FeatherDanceKickoffLines();
-export const [TURN7_ATKFELL_KICKOFF_LINE1, TURN7_ATKFELL_KICKOFF_LINE2] = resolveTurn7AtkFellLines();
+export const turn7FeatherdanceKickoffLines = lazyValue(resolveTurn7FeatherDanceKickoffLines);
+export const turn7AtkfellKickoffLines = lazyValue(resolveTurn7AtkFellLines);
 
-export const [TURN8_FEATHERDANCE_KICKOFF_LINE1, TURN8_FEATHERDANCE_KICKOFF_LINE2] = resolveTurn8FeatherDanceKickoffLines();
-export const [TURN8_ATKFELL_KICKOFF_LINE1, TURN8_ATKFELL_KICKOFF_LINE2] = resolveTurn8AtkFellLines();
+export const turn8FeatherdanceKickoffLines = lazyValue(resolveTurn8FeatherDanceKickoffLines);
+export const turn8AtkfellKickoffLines = lazyValue(resolveTurn8AtkFellLines);
 
-export const [TURN6_ROCKSLIDE_ATTACK_LINE1, TURN6_ROCKSLIDE_ATTACK_LINE2] = resolveTurn6RockSlideAttackLines();
+export const turn6RockslideAttackLines = lazyValue(resolveTurn6RockSlideAttackLines);
 
-export const [TURN7_ROCKSLIDE_ATTACK_LINE1, TURN7_ROCKSLIDE_ATTACK_LINE2] = resolveTurn7RockSlideAttackLines();
+export const turn7RockslideAttackLines = lazyValue(resolveTurn7RockSlideAttackLines);
 
 export function turn5FaintedTextVisibleChars(t: number, pressTick: number): number {
   const start = turn5FaintedTextStartTick(pressTick);
   if (t < start) return 0;
-  return Math.min(TURN5_FAINTED_TEXT_TOTAL, t - start + 1);
+  return Math.min(turn5FaintedTextTotal(), t - start + 1);
 }
 
 export function turn8BindTextVisibleChars(t: number, pressTick: number): number {
   const start = turn8BindTextStartTick(pressTick);
   if (t < start) return 0;
-  return Math.min(TURN8_BIND_TEXT_TOTAL, t - start + 1);
+  return Math.min(turn8BindTextTotal(), t - start + 1);
 }
 
 export function turn8MissTextVisibleChars(t: number, pressTick: number): number {
   const start = turn8MissTextStartTick(pressTick);
   if (t < start) return 0;
-  return Math.min(TURN8_MISS_TEXT_TOTAL, t - start + 1);
+  return Math.min(turn8MissTextTotal(), t - start + 1);
 }
 
 export function turn12MissTextVisibleChars(t: number, pressTick: number): number {
   const start = turn12MissTextStartTick(pressTick);
   if (t < start) return 0;
-  return Math.min(TURN8_MISS_TEXT_TOTAL, t - start + 1);
+  return Math.min(turn8MissTextTotal(), t - start + 1);
 }
 
 export function turn13SandAttackTextVisibleChars(t: number, pressTick: number): number {
   const start = turn13SandAttackTextStartTick(pressTick);
   if (t < start) return 0;
-  return Math.min(TURN13_SANDATTACK_TEXT_TOTAL, t - start + 1);
+  return Math.min(turn13SandattackTextTotal(), t - start + 1);
 }
 
 export function turn13AccFellTextVisibleChars(t: number, pressTick: number): number {
   const start = turn13AccFellTextStartTick(pressTick);
   if (t < start) return 0;
-  return Math.min(TURN13_ACCFELL_TEXT_TOTAL, t - start + 1);
+  return Math.min(turn13AccfellTextTotal(), t - start + 1);
 }
 
 // --- slice 4 batch 5 (docs/battlescene-canonical-split-design.md §6, ISSUES #39 rank-5) ---
@@ -2780,7 +2781,7 @@ export function turn5BgFadeY(t: number): number {
  * below).
  */
 export function turn5SitrusOffHealTextVisibleChars(t: number): number {
-  const total = TURN5_SITRUS_HEAL_LINE1.length + TURN5_SITRUS_HEAL_LINE2.length;
+  const total = turn5SitrusHealLine1().length + turn5SitrusHealLine2().length;
   return Math.min(total, Math.max(0, (t - 1) - TURN5_OFF_SITRUS_HEAL_TEXT_START_TICK + 1));
 }
 
@@ -2805,8 +2806,8 @@ export function turn5SitrusOffHealTextVisibleChars(t: number): number {
  */
 export function turn5OffSitrusOnixHp(t: number): number {
   return Math.min(
-    TURN5_SITRUS_HEAL_HP_END,
-    Math.max(TURN5_SITRUS_HEAL_HP_START, TURN5_SITRUS_HEAL_HP_START + (t - TURN5_OFF_SITRUS_ONIX_HP_CLIMB_START_TICK)),
+    turn5SitrusHealHpEnd(),
+    Math.max(turn5SitrusHealHpStart(), turn5SitrusHealHpStart() + (t - TURN5_OFF_SITRUS_ONIX_HP_CLIMB_START_TICK)),
   );
 }
 
@@ -3154,7 +3155,7 @@ export function battle2CommandPresentationForRender(
     }
   }
 
-  const command = createBattle2CommandAdapterCommand(BATTLE2_TURN1_KERNEL, sm.cursor);
+  const command = createBattle2CommandAdapterCommand(battle2Turn1Kernel(), sm.cursor);
   return Object.freeze({
     ...command,
     lifecycle: Object.freeze({ phase, phaseElapsed }),
@@ -3455,12 +3456,12 @@ export function legacyPidgeottoField(playerHp: number, playerAttackStage: number
       attackStage: playerAttackStage,
     },
     opponent: {
-      species: TURN5_SWITCHIN.replacementSpecies,
-      displayName: TURN5_SWITCHIN.replacementSpecies,
-      level: TURN5_SWITCHIN.replacementLevel,
+      species: turn5Switchin().replacementSpecies,
+      displayName: turn5Switchin().replacementSpecies,
+      level: turn5Switchin().replacementLevel,
       gender: "male" as const,
       status: "none" as const,
-      hp: { current: opponentHp, max: PIDGEOTTO_MAX_HP },
+      hp: { current: opponentHp, max: pidgeottoMaxHp() },
       attackStage: 6,
     },
   };
@@ -3674,7 +3675,7 @@ export function drawTurn15PartySelectWindow(fb: Uint8Array, state: BattleSceneSt
     const local = party.elapsed - PARTY_ENTRY_FADE_OUT_START;
     const mask = new Uint8Array(fb.length);
     drawTurn13MurkrowSettled(mask);
-    drawSendOutHealthbox(mask, 0, murkrowHealthboxContent);
+    drawSendOutHealthbox(mask, 0, getMurkrowHealthboxContent());
     fadeTurn15PartyFramebuffer(fb, bgFadeY(local, PARTY_ENTRY_FADE_OUT), mask, objFadeY(local, PARTY_ENTRY_FADE_OUT));
     return true;
   }
@@ -3745,16 +3746,16 @@ export function drawTurn15FlyStrikeWindow(fb: Uint8Array, t: number, pressTick: 
   drawTurn15FlyBallDescent(fb, t);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   if (t >= TURN15_FAINTED_TEXT_START_TICK) {
-    drawMessageTextLines(fb, TURN15_FAINTED_LINE1, TURN15_FAINTED_LINE2, turn15SimpleVisibleChars(t, TURN15_FAINTED_TEXT_START_TICK, TURN15_FAINTED_TEXT_TOTAL));
-    const cursor = cursorState(t, TURN15_FAINTED_CURSOR_START_TICK);
-    if (cursor.visible) drawCursor(fb, cursor.yOffset, TURN15_FAINTED_CURSOR_X);
+    drawMessageTextLines(fb, turn15FaintedLine1(), turn15FaintedLine2(), turn15SimpleVisibleChars(t, TURN15_FAINTED_TEXT_START_TICK, turn15FaintedTextTotal()));
+    const cursor = cursorState(t, turn15FaintedCursorStartTick());
+    if (cursor.visible) drawCursor(fb, cursor.yOffset, turn15FaintedCursorX());
     return;
   }
   if (t >= TURN15_NOTVERYEFFECTIVE_TEXT_START_TICK) {
     drawMessageTextLines(fb, TURN9_NOTVERYEFFECTIVE_LINE, "", turn15SimpleVisibleChars(t, TURN15_NOTVERYEFFECTIVE_TEXT_START_TICK, TURN9_NOTVERYEFFECTIVE_LINE.length));
     return;
   }
-  drawMessageTextLines(fb, TURN15_FLY_STRIKE_LINE1, TURN15_FLY_STRIKE_LINE2, turn15SimpleVisibleChars(t, TURN15_FLY_STRIKE_TEXT_START_TICK, TURN15_FLY_STRIKE_TEXT_TOTAL));
+  drawMessageTextLines(fb, turn15FlyStrikeLine1(), turn15FlyStrikeLine2(), turn15SimpleVisibleChars(t, TURN15_FLY_STRIKE_TEXT_START_TICK, turn15FlyStrikeTextTotal()));
 }
 
 export function drawTurn14FightSubmenuWindow(
@@ -3809,7 +3810,7 @@ export function drawTurn14FlyMissWindow(fb: Uint8Array, t: number, pressTick: nu
   drawTurn14FlyBall(fb, t);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   if (t >= TURN14_MISSED_TEXT_START_TICK) {
-    drawMessageTextLines(fb, TURN8_MISS_LINE1, TURN8_MISS_LINE2, turn14SimpleVisibleChars(t, TURN14_MISSED_TEXT_START_TICK, TURN8_MISS_TEXT_TOTAL));
+    drawMessageTextLines(fb, turn8MissLines()[0], turn8MissLines()[1], turn14SimpleVisibleChars(t, TURN14_MISSED_TEXT_START_TICK, turn8MissTextTotal()));
     return;
   }
   if (t >= TURN14_DRAGONBREATH_TEXT_START_TICK) {
@@ -3817,7 +3818,7 @@ export function drawTurn14FlyMissWindow(fb: Uint8Array, t: number, pressTick: nu
     return;
   }
   if (t >= TURN14_FLYUP_TEXT_START_TICK) {
-    drawMessageTextLines(fb, TURN14_FLYUP_LINE1, TURN14_FLYUP_LINE2, turn14SimpleVisibleChars(t, TURN14_FLYUP_TEXT_START_TICK, TURN14_FLYUP_TEXT_TOTAL));
+    drawMessageTextLines(fb, turn14FlyupLine1(), turn14FlyupLine2(), turn14SimpleVisibleChars(t, TURN14_FLYUP_TEXT_START_TICK, turn14FlyupTextTotal()));
     return;
   }
   // Bare scene, no message box content at all (the empty-string kickoff
@@ -3931,7 +3932,7 @@ export function drawSendOutHandoff(
   const healthboxDx = isJenson
     ? healthboxSlideDx(t, handoffTick + 32, -110, true)
     : healthboxSlideDx(t, handoffTick + 33);
-  if (healthboxDx !== null) drawSendOutHealthbox(fb, healthboxDx, isJenson ? kabutoHealthboxContent : opponentHealthboxContent);
+  if (healthboxDx !== null) drawSendOutHealthbox(fb, healthboxDx, isJenson ? kabutoHealthboxContent : getOpponentHealthboxContent());
   const playerHealthboxDx = playerHealthboxSlideDx(playerTrainerT);
   if (playerHealthboxDx !== null) drawMenuHealthboxPlayer(fb, playerHealthboxDx);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
@@ -3968,7 +3969,7 @@ export function drawRockSlideAttack(fb: Uint8Array, t: number, pressTick: number
   }
   drawSpriteSheet(fb, onixBackSprite.tileset, onixBackSprite.palette, ONIX_MATERIALIZE_CORNER.x, ONIX_MATERIALIZE_CORNER.y);
   const healthboxY2 = rockSlideHealthboxWobbleY2(t, pressTick, TURN1_OFF_ROCKSLIDE_ANIMATION_PROFILE);
-  const opponentHp = rockSlideOpponentHp(t, pressTick, TURN1_ROCKSLIDE_HP.from, TURN1_ROCKSLIDE_HP.to, TURN1_OFF_ROCKSLIDE_HP_DRAIN_START_DELAY);
+  const opponentHp = rockSlideOpponentHp(t, pressTick, turn1RockslideHp().from, turn1RockslideHp().to, TURN1_OFF_ROCKSLIDE_HP_DRAIN_START_DELAY);
   drawSendOutHealthbox(fb, 0, opponentHealthboxContentForHp(opponentHp));
   if (healthboxY2 !== 0) drawOpponentHealthboxWobble(fb, healthboxY2);
   drawMenuHealthboxPlayer(fb, 0);
@@ -3991,16 +3992,16 @@ export function drawRockSlideWindow(fb: Uint8Array, t: number, pressTick: number
     let line2: string;
     let chars: number;
     if (t < statRoseStart) {
-      line1 = TURN1_ROCKSLIDE_KICKOFF_LINE1;
-      line2 = TURN1_ROCKSLIDE_KICKOFF_LINE2;
+      line1 = turn1RockslideKickoffLines()[0];
+      line2 = turn1RockslideKickoffLines()[1];
       chars = turnKickoffTextVisibleChars(t, pressTick);
     } else if (t < rockSlideStart) {
       line1 = STAT_ROSE_LINE1;
       line2 = STAT_ROSE_LINE2;
       chars = statRoseTextVisibleChars(t, pressTick, TURN1_OFF_STAT_ROSE_TEXT_DELAY);
     } else {
-      line1 = TURN1_ROCKSLIDE_ATTACK_LINE1;
-      line2 = TURN1_ROCKSLIDE_ATTACK_LINE2;
+      line1 = turn1RockslideAttackLines()[0];
+      line2 = turn1RockslideAttackLines()[1];
       chars = rockSlideTextVisibleChars(t, pressTick, TURN1_OFF_ROCKSLIDE_TEXT_DELAY);
     }
     drawMessageTextLines(fb, line1, line2, chars);
@@ -4030,26 +4031,26 @@ export function drawFaintedOpponentWindow(
       fb,
       t,
       frozenBounceTick,
-      pressTick + TURN13_FAINTED_CURSOR_START_DELAY,
+      pressTick + turn13FaintedCursorStartDelay(),
       opponentFaintPresentationOwner!,
       trainerPresentation,
     );
     return;
   }
-  drawTurn13FieldBase(fb, t, frozenBounceTick, undefined, undefined, 0, false, 0, TURN13_DRAGONBREATH_HP.to, { keptRows: 0, y2: TURN13_FAINT_SINK_STEPS * 8 }, false);
+  drawTurn13FieldBase(fb, t, frozenBounceTick, undefined, undefined, 0, false, 0, turn13DragonbreathHp().to, { keptRows: 0, y2: turn13FaintSinkSteps() * 8 }, false);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   drawMessageTextLines(
     fb,
-    TURN13_DRAGONBREATH_FAINT_LINE1,
-    TURN13_DRAGONBREATH_FAINT_LINE2,
+    turn13DragonbreathFaintLines()[0],
+    turn13DragonbreathFaintLines()[1],
     turn13FaintedTextVisibleChars(t, pressTick),
   );
-  const cursorStart = pressTick + TURN13_FAINTED_CURSOR_START_DELAY;
+  const cursorStart = pressTick + turn13FaintedCursorStartDelay();
   const cursorTick = dismiss === null
     ? t
     : Math.min(t, TICK0 + dismiss.cursor.frozenAtElapsed);
   const cursor = cursorState(cursorTick, cursorStart);
-  if (cursor.visible) drawCursor(fb, cursor.yOffset, TURN13_FAINTED_CURSOR_X);
+  if (cursor.visible) drawCursor(fb, cursor.yOffset, turn13FaintedCursorX());
 }
 
 export function drawDragonBreathKoWindow(
@@ -4075,16 +4076,16 @@ export function drawDragonBreathKoWindow(
   const hp = dragonBreathHp(
     t,
     dbPressTick,
-    TURN13_DRAGONBREATH_HP.from,
-    TURN13_DRAGONBREATH_HP.to,
+    turn13DragonbreathHp().from,
+    turn13DragonbreathHp().to,
   );
   const sink =
     t >= TURN13_FAINT_SINK_START_TICK
-      ? faintSinkRowsAndY2(t, TURN13_FAINT_SINK_START_TICK, TURN13_FAINT_SINK_STEPS)
+      ? faintSinkRowsAndY2(t, TURN13_FAINT_SINK_START_TICK, turn13FaintSinkSteps())
       : rockSlideMonBlinkInvisible(t, TURN13_HIT_FLASH_PRESS_TICK)
         ? { keptRows: 0, y2: 0 }
         : null;
-  const healthboxVisible = t < TURN13_HEALTHBOX_VANISH_TICK;
+  const healthboxVisible = t < turn13HealthboxVanishTick();
   drawTurn13FieldBase(fb, t, frozenBounceTick, undefined, undefined, 0, false, 0, hp, sink, healthboxVisible);
   if (healthboxVisible) {
     const healthboxY2 = rockSlideHealthboxWobbleY2(t, TURN13_HIT_FLASH_PRESS_TICK);
@@ -4093,8 +4094,8 @@ export function drawDragonBreathKoWindow(
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   drawMessageTextLines(
     fb,
-    TURN13_DRAGONBREATH_KICKOFF_LINE1,
-    TURN13_DRAGONBREATH_KICKOFF_LINE2,
+    turn13DragonbreathKickoffLines()[0],
+    turn13DragonbreathKickoffLines()[1],
     dragonBreathTextVisibleChars(t, dbPressTick),
   );
 }
@@ -4124,10 +4125,10 @@ export function drawTurn13SandAttackWindow(
   if (accEva !== null) drawTurn13SandAttackAccBanner(fb, t, pressTick, accEva);
   const accFellStart = turn13AccFellTextStartTick(pressTick);
   if (t >= accFellStart) {
-    drawMessageTextLines(fb, TURN13_ACCFELL_EVENT_LINE1, TURN13_ACCFELL_EVENT_LINE2, turn13AccFellTextVisibleChars(t, pressTick));
+    drawMessageTextLines(fb, turn13AccfellEventLines()[0], turn13AccfellEventLines()[1], turn13AccFellTextVisibleChars(t, pressTick));
     return;
   }
-  drawMessageTextLines(fb, TURN13_SANDATTACK_EVENT_LINE1, TURN13_SANDATTACK_EVENT_LINE2, turn13SandAttackTextVisibleChars(t, pressTick));
+  drawMessageTextLines(fb, turn13SandattackEventLines()[0], turn13SandattackEventLines()[1], turn13SandAttackTextVisibleChars(t, pressTick));
 }
 
 export function drawTurn13FightSubmenuWindow(
@@ -4235,7 +4236,7 @@ export function drawTurn12RockSlideWindow(fb: Uint8Array, t: number): void {
   if (t < textClearTick) {
     const missStart = turn12MissTextStartTick(pressTick);
     if (t >= missStart) {
-      drawMessageTextLines(fb, TURN8_MISS_LINE1, TURN8_MISS_LINE2, turn12MissTextVisibleChars(t, pressTick));
+      drawMessageTextLines(fb, turn8MissLines()[0], turn8MissLines()[1], turn12MissTextVisibleChars(t, pressTick));
     } else {
       drawMessageTextLines(fb, ROCK_SLIDE_LINE1, ROCK_SLIDE_LINE2, rockSlideTextVisibleChars(t, pressTick));
     }
@@ -4328,7 +4329,7 @@ export function drawTurn11FeatherDanceWindow(fb: Uint8Array, t: number, pressTic
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   const atkFloorStart = turn11AtkFloorTextStartTick(pressTick);
   if (t >= atkFloorStart) {
-    drawMessageTextLines(fb, TURN11_ATKFLOOR_KICKOFF_LINE1, TURN11_ATKFLOOR_KICKOFF_LINE2, turn11AtkFloorTextVisibleChars(t, pressTick));
+    drawMessageTextLines(fb, turn11AtkfloorKickoffLines()[0], turn11AtkfloorKickoffLines()[1], turn11AtkFloorTextVisibleChars(t, pressTick));
   } else {
     drawMessageTextLines(fb, TURN6_FEATHERDANCE_LINE1, TURN6_FEATHERDANCE_LINE2, turn6FeatherDanceTextVisibleChars(t, pressTick));
   }
@@ -4560,20 +4561,20 @@ export function drawTurn13SwitchinWindow(
     // cursor's own bbox at every sampled tick 16847-16946).
     drawMessageTextLines(
       fb,
-      TURN13_DRAGONBREATH_FAINT_LINE1,
-      TURN13_DRAGONBREATH_FAINT_LINE2,
-      TURN13_DRAGONBREATH_FAINT_TEXT_TOTAL,
+      turn13DragonbreathFaintLines()[0],
+      turn13DragonbreathFaintLines()[1],
+      turn13DragonbreathFaintTextTotal(),
     );
     const frozenCursorTick = TICK0 + dismiss.cursor.frozenAtElapsed;
     const cursor = cursorState(frozenCursorTick, cursorStart);
-    if (cursor.visible) drawCursor(fb, cursor.yOffset, TURN13_FAINTED_CURSOR_X);
+    if (cursor.visible) drawCursor(fb, cursor.yOffset, turn13FaintedCursorX());
     return;
   }
   if (continuationElapsed < TURN13_SWITCHIN_TEXT_CLEAR_AFTER_DISMISS) {
     drawMessageTextLines(
       fb,
       switchinSentOutLine1(trainerPresentation),
-      TURN13_SWITCHIN_SENTOUT_LINE2,
+      turn13SwitchinSentoutLine2(),
       turn13SwitchinSentOutTextVisibleChars(continuationElapsed, trainerPresentation),
     );
     return;
@@ -4605,7 +4606,7 @@ export function drawTurn13SwitchinPresentationFieldBase(fb: Uint8Array, t: numbe
   drawTurn5IconBar(fb, continuationElapsed, TURN13_ICONBAR_CREATE_AFTER_DISMISS, TURN13_ICONBAR_FADE_START_AFTER_DISMISS, TURN13_ICONBAR_DESTROY_AFTER_DISMISS, TURN13_OPPONENT_ICON_STATES);
   if (!murkrowInvisible) drawTurn13MurkrowSwitchinSprite(fb, continuationElapsed);
   const murkrowHealthboxDx = healthboxSlideDx(continuationElapsed, TURN13_MURKROW_SETTLE_AFTER_DISMISS + 1);
-  if (murkrowHealthboxDx !== null) drawSendOutHealthbox(fb, murkrowHealthboxDx, murkrowHealthboxContent);
+  if (murkrowHealthboxDx !== null) drawSendOutHealthbox(fb, murkrowHealthboxDx, getMurkrowHealthboxContent());
   if (onixHealthboxVisible) {
     const bounce = menuIdleBounce(turn5SitrusResettledBounceTick(shiftedBounceTick));
     const healthboxY2 = bounce.healthboxY2 + healthboxY2Extra;
@@ -4645,8 +4646,8 @@ export function drawTurn13MurkrowMaterialize(fb: Uint8Array, continuationElapsed
 export function drawGrantingStars(fb: Uint8Array, t: number): void {
   drawGrantingStarsAtAge(
     fb,
-    t - ONIX_SITRUS_IDENTITY_RENDER_TICK,
-    TURN5_SITRUS_RING_CENTER,
+    t - onixSitrusIdentityRenderTick(),
+    turn5SitrusRingCenter(),
   );
 }
 
@@ -4671,7 +4672,7 @@ export function drawDragonBreathScene(
   latestCompletedCommandHandoff: LatestCompletedCommandHandoff | null = null,
 ): void {
   drawStaticBgShiftedY(fb, 0);
-  const grovyleHp = dragonBreathHp(t, pressTick, anchorOpponentAfterTurnHp, anchorOpponentAfterTurn2Hp, TURN2_OFF_DRAGONBREATH_HP_DRAIN_START_DELAY);
+  const grovyleHp = dragonBreathHp(t, pressTick, getAnchorOpponentAfterTurnHp(), getAnchorOpponentAfterTurn2Hp(), TURN2_OFF_DRAGONBREATH_HP_DRAIN_START_DELAY);
   const grovyleContent = opponentHealthboxContentForHp(grovyleHp);
   const hitFlashPressTick = pressTick + (TURN2_OFF_DRAGONBREATH_HIT_FLASH_ANCHOR_DELAY - HIT_FLASH_RAM_ANCHOR_DELAY);
 
@@ -5212,7 +5213,7 @@ export function drawActionMenuIdleContentFromLatest(
   drawMenuIdleBaseWithOpponentHpFromLatest(fb, latest);
   const resolvedPlayerHp = playerHpOverride
     ?? latest?.content?.field.player.hp.current
-    ?? anchorPlayerAfterTurnHp;
+    ?? getAnchorPlayerAfterTurnHp();
   const { onixY2, healthboxY2 } = menuIdleBounce(bounceTick, bounceIndexOffset);
   drawTwoStateBounceRect(fb, menuIdleOnixBounce, onixY2);
   drawTwoStateBounceRect(fb, menuIdleHealthboxBounce, healthboxY2);
@@ -5291,8 +5292,8 @@ export function drawBattle2RockSlideAttack(
   const kabutoDisplayHp = rockSlideOpponentHp(
     t,
     mechanismPress,
-    BATTLE2_TURN1_KABUTO_ROCK_SLIDE_HP.from,
-    BATTLE2_TURN1_KABUTO_ROCK_SLIDE_HP.to,
+    battle2Turn1KabutoRockSlideHp().from,
+    battle2Turn1KabutoRockSlideHp().to,
   );
   const kabutoContent = kabutoHealthboxContentForHp(kabutoDisplayHp, KABUTO_SENDOUT_BATTLER.name, KABUTO_SENDOUT_BATTLER.level, KABUTO_SENDOUT_BATTLER.maxHP, KABUTO_SENDOUT_BATTLER.gender);
 
@@ -5443,7 +5444,7 @@ export function drawMenuHealthboxPlayer(fb: Uint8Array, dx: number, dy: number =
 }
 
 export function drawPlayerHealthboxHpOverlay(fb: Uint8Array, hp: number, yOffset = 0): void {
-  if (hp === anchorPlayerBattler.hp) return;
+  if (hp === getAnchorPlayerBattler().hp) return;
   const { width, height, pixels } = playerHealthboxHpOverlayForHp(hp);
   for (let py = 0; py < height; py += 1) {
     for (let px = 0; px < width; px += 1) {
@@ -5467,7 +5468,7 @@ export function turn14BareSceneStartTick(pressTick: number): number {
 
 export function drawTurnEndSettledMenu(fb: Uint8Array, t: number, pressTick: number): void {
   drawActionMenuIdleContentFromLatest(fb, rockSlideResettledBounceTick(t, pressTick, TURN1_CHOOSE_ACTION_RESET_AFTER_CONFIRM), null);
-  const opponentHp = rockSlideOpponentHp(t, pressTick, anchorOpponentBattler.hp, anchorOpponentAfterTurnHp, TURN1_OFF_ROCKSLIDE_HP_DRAIN_START_DELAY);
+  const opponentHp = rockSlideOpponentHp(t, pressTick, getAnchorOpponentBattler().hp, getAnchorOpponentAfterTurnHp(), TURN1_OFF_ROCKSLIDE_HP_DRAIN_START_DELAY);
   drawSendOutHealthbox(fb, 0, opponentHealthboxContentForHp(opponentHp));
 }
 
@@ -5493,7 +5494,7 @@ export function drawTurn5RockSlideWindow(
   // a blank/fainted frame; the switch only happens on the following tick.
   // Scoped `t - 1` here, same shape as the reveal fix below.
   if (t - 1 < faintedStart) {
-    drawMessageTextLines(fb, TURN1_ROCKSLIDE_ATTACK_LINE1, TURN1_ROCKSLIDE_ATTACK_LINE2, rockSlideTextVisibleChars(t - 1, pressTick, TURN5_OFF_ROCKSLIDE_TEXT_DELAY));
+    drawMessageTextLines(fb, turn1RockslideAttackLines()[0], turn1RockslideAttackLines()[1], rockSlideTextVisibleChars(t - 1, pressTick, TURN5_OFF_ROCKSLIDE_TEXT_DELAY));
     return;
   }
   if (t < TURN5_OFF_SITRUS_HEAL_TEXT_START_TICK) {
@@ -5501,7 +5502,7 @@ export function drawTurn5RockSlideWindow(
       drawMessageTextLines(
         fb,
         switchinSentOutLine1(trainerPresentation),
-        SWITCHIN_SENTOUT_LINE2,
+        switchinSentoutLine2(),
         switchinSentOutTextVisibleChars(t, trainerPresentation),
       );
       return;
@@ -5514,8 +5515,8 @@ export function drawTurn5RockSlideWindow(
     // `drawTurn6FightSubmenuWindow`'s own `turn6ReopenBounceTick(t - 1, ...)`
     // above), scoped to this single call site (turn5FaintedTextVisibleChars's
     // own RAM-confirmed `turn5FaintedTextStartTick` anchor is untouched).
-    drawMessageTextLines(fb, TURN5_FAINTED_LINE1, TURN5_FAINTED_LINE2, turn5FaintedTextVisibleChars(t - 1, pressTick));
-    const cursorStart = pressTick + TURN5_FAINTED_CURSOR_START_DELAY;
+    drawMessageTextLines(fb, turn5FaintedLines()[0], turn5FaintedLines()[1], turn5FaintedTextVisibleChars(t - 1, pressTick));
+    const cursorStart = pressTick + turn5FaintedCursorStartDelay();
     // docs/turn5-resolve-ab-pools-diagnosis.md §20.2 (ISSUES #97): this
     // gate's own first-appearance check was missing the same `t - 1`
     // display-basis correction the phase computation right below it
@@ -5528,7 +5529,7 @@ export function drawTurn5RockSlideWindow(
       // (turn5FaintedCursorYOffset's fixed-table formula is retired here but
       // left defined, see its own doc comment).
       const dismissTick = turn5FaintDismissElapsed === null ? null : TICK0 + turn5FaintDismissElapsed;
-      drawCursor(fb, cursorState(turn5FaintDismissCursorTick(t, dismissTick), cursorStart).yOffset, TURN5_FAINTED_CURSOR_X);
+      drawCursor(fb, cursorState(turn5FaintDismissCursorTick(t, dismissTick), cursorStart).yOffset, turn5FaintedCursorX());
     }
     return;
   }
@@ -5537,7 +5538,7 @@ export function drawTurn5RockSlideWindow(
   // docs (`TURN5_SITRUS_HEAL_TEXT_START_TICK`/`_TEXT_CLEAR_TICK`/`_MENU_
   // REDRAW_TICK`) for the pixel evidence pinning each boundary.
   if (t < TURN5_OFF_SITRUS_TEXT_CLEAR_TICK) {
-    drawMessageTextLines(fb, TURN5_SITRUS_HEAL_LINE1, TURN5_SITRUS_HEAL_LINE2, turn5SitrusOffHealTextVisibleChars(t));
+    drawMessageTextLines(fb, turn5SitrusHealLine1(), turn5SitrusHealLine2(), turn5SitrusOffHealTextVisibleChars(t));
     return;
   }
   if (t < TURN5_OFF_SITRUS_MENU_REDRAW_TICK) return;
@@ -5563,7 +5564,7 @@ export function drawTurn6FieldBase(fb: Uint8Array, t: number, bounceTickOrLatest
   // healthbox slide-in, anchored at TURN5_PIDGEOTTO_SETTLE_TICK - a no-op
   // (null) before the mon's own materialize settles.
   const pidgeottoHealthboxDx = turn5PidgeottoHealthboxSlideDx(t);
-  if (pidgeottoHealthboxVisible && pidgeottoHealthboxDx !== null) drawSendOutHealthbox(fb, pidgeottoHealthboxDx, pidgeottoHealthboxContent);
+  if (pidgeottoHealthboxVisible && pidgeottoHealthboxDx !== null) drawSendOutHealthbox(fb, pidgeottoHealthboxDx, getPidgeottoHealthboxContent());
   // S7 slice M-5: past the settled menu's own redraw tick, both the on-field
   // Onix sprite (region A) and its healthbox (region B, box+overlay as one
   // unit) pick up the resettled `menuIdleBounce` cycle - see
@@ -5582,7 +5583,7 @@ export function drawTurn6FieldBase(fb: Uint8Array, t: number, bounceTickOrLatest
 export function turn13FaintedTextVisibleChars(t: number, pressTick: number): number {
   const start = turn13FaintedTextStartTick(pressTick);
   if (t < start) return 0;
-  return Math.min(TURN13_DRAGONBREATH_FAINT_TEXT_TOTAL, t - start + 1);
+  return Math.min(turn13DragonbreathFaintTextTotal(), t - start + 1);
 }
 
 export function drawTurn9TurnEndSettledMenu(fb: Uint8Array, t: number, bounceRawTick: number = t): void {
@@ -5675,7 +5676,7 @@ export function drawTurn9RockSlideAttack(fb: Uint8Array, t: number): void {
   const bounce = menuIdleBounce(turn5SitrusResettledBounceTick(frozenBounceTick + TURN9_REGIME4_TO_REGIME1_SHIFT));
   drawSpriteSheet(fb, onixBackSprite.tileset, onixBackSprite.palette, ONIX_MATERIALIZE_CORNER.x, ONIX_MATERIALIZE_CORNER.y + bounce.onixY2);
   const healthboxY2 = rockSlideHealthboxWobbleY2(t, pressTick, TURN9_ROCKSLIDE_ANIMATION_PROFILE);
-  const opponentHp = rockSlideOpponentHp(t, pressTick, TURN7_PIDGEOTTO_AFTER_ROCKSLIDE_HP, TURN9_PIDGEOTTO_AFTER_ROCKSLIDE_HP, TURN9_ROCKSLIDE_HP_DRAIN_START_DELAY);
+  const opponentHp = rockSlideOpponentHp(t, pressTick, turn7PidgeottoAfterRockslideHp(), TURN9_PIDGEOTTO_AFTER_ROCKSLIDE_HP, TURN9_ROCKSLIDE_HP_DRAIN_START_DELAY);
   const opponentContent = pidgeottoHealthboxContentForHp(opponentHp);
   drawSendOutHealthbox(fb, 0, opponentContent);
   if (healthboxY2 !== 0) drawOpponentHealthboxWobble(fb, healthboxY2, opponentContent);
@@ -5706,7 +5707,7 @@ export function drawTurn9QuickAttackWindow(fb: Uint8Array, t: number, pressTick:
 
 export function drawTurn9FieldBase(fb: Uint8Array, t: number, bounceTick: number = t, beforeMonSprite?: () => void, onixHp: number = turn5SitrusOnixHp(t), onixX2: number = 0, onixInvisible: boolean = false, healthboxY2Override?: number, bounceIndexOffset: number = 0): void {
   drawTurn6FieldBase(fb, t, bounceTick + TURN9_REGIME4_TO_REGIME1_SHIFT, beforeMonSprite, onixHp, onixX2, onixInvisible, healthboxY2Override, undefined, undefined, undefined, undefined, undefined, bounceIndexOffset);
-  drawSendOutHealthbox(fb, 0, pidgeottoHealthboxContentForHp(TURN7_PIDGEOTTO_AFTER_ROCKSLIDE_HP));
+  drawSendOutHealthbox(fb, 0, pidgeottoHealthboxContentForHp(turn7PidgeottoAfterRockslideHp()));
 }
 
 export function drawTurn8TurnEndSettledMenu(fb: Uint8Array, t: number, pressTick: number, bounceRawTick: number = t, bounceIndexOffset: number = 0): void {
@@ -5715,7 +5716,7 @@ export function drawTurn8TurnEndSettledMenu(fb: Uint8Array, t: number, pressTick
   drawStaticBgShiftedY(fb, 0, 0);
   drawTurn5IconBar(fb, t);
   drawTurn5SwitchinSprite(fb, t);
-  drawSendOutHealthbox(fb, 0, pidgeottoHealthboxContentForHp(TURN7_PIDGEOTTO_AFTER_ROCKSLIDE_HP));
+  drawSendOutHealthbox(fb, 0, pidgeottoHealthboxContentForHp(turn7PidgeottoAfterRockslideHp()));
   drawSpriteSheet(fb, onixBackSprite.tileset, onixBackSprite.palette, ONIX_MATERIALIZE_CORNER.x, ONIX_MATERIALIZE_CORNER.y + bounce.onixY2);
   drawMenuHealthboxPlayer(fb, 0, bounce.healthboxY2);
   drawPlayerHealthboxHpOverlay(fb, turn5SitrusOnixHp(t), bounce.healthboxY2);
@@ -5748,9 +5749,9 @@ export function drawTurn8BindWindow(fb: Uint8Array, t: number, pressTick: number
   if (t < textClearTick) {
     const missStart = turn8MissTextStartTick(pressTick);
     if (t >= missStart) {
-      drawMessageTextLines(fb, TURN8_MISS_LINE1, TURN8_MISS_LINE2, turn8MissTextVisibleChars(t, pressTick));
+      drawMessageTextLines(fb, turn8MissLines()[0], turn8MissLines()[1], turn8MissTextVisibleChars(t, pressTick));
     } else {
-      drawMessageTextLines(fb, TURN8_BIND_LINE1, TURN8_BIND_LINE2, turn8BindTextVisibleChars(t, pressTick));
+      drawMessageTextLines(fb, turn8BindLines()[0], turn8BindLines()[1], turn8BindTextVisibleChars(t, pressTick));
     }
   }
 }
@@ -5793,7 +5794,7 @@ export function drawTurn8FightSubmenuWindow(
 
 export function drawTurn8FieldBase(fb: Uint8Array, t: number, bounceTick: number = t, beforeMonSprite?: () => void): void {
   drawTurn6FieldBase(fb, t, bounceTick + TURN8_REGIME3_TO_REGIME1_SHIFT, beforeMonSprite);
-  drawSendOutHealthbox(fb, 0, pidgeottoHealthboxContentForHp(TURN7_PIDGEOTTO_AFTER_ROCKSLIDE_HP));
+  drawSendOutHealthbox(fb, 0, pidgeottoHealthboxContentForHp(turn7PidgeottoAfterRockslideHp()));
 }
 
 export function drawTurn7RockSlideWindow(fb: Uint8Array, t: number): void {
@@ -5811,7 +5812,7 @@ export function drawTurn7RockSlideWindow(fb: Uint8Array, t: number): void {
     if (t >= superEffectiveStart) {
       drawMessageTextLines(fb, TURN6_SUPER_EFFECTIVE_LINE, "", turn7SuperEffectiveTextVisibleChars(t, pressTick));
     } else {
-      drawMessageTextLines(fb, TURN7_ROCKSLIDE_ATTACK_LINE1, TURN7_ROCKSLIDE_ATTACK_LINE2, rockSlideTextVisibleChars(t, pressTick));
+      drawMessageTextLines(fb, turn7RockslideAttackLines()[0], turn7RockslideAttackLines()[1], rockSlideTextVisibleChars(t, pressTick));
     }
   }
 }
@@ -5822,7 +5823,7 @@ export function drawTurn7RockSlideTurnEndSettledMenu(fb: Uint8Array, t: number, 
   drawStaticBgShiftedY(fb, 0, 0);
   drawTurn5IconBar(fb, t);
   drawTurn5SwitchinSprite(fb, t);
-  drawSendOutHealthbox(fb, 0, pidgeottoHealthboxContentForHp(TURN7_PIDGEOTTO_AFTER_ROCKSLIDE_HP));
+  drawSendOutHealthbox(fb, 0, pidgeottoHealthboxContentForHp(turn7PidgeottoAfterRockslideHp()));
   drawSpriteSheet(fb, onixBackSprite.tileset, onixBackSprite.palette, ONIX_MATERIALIZE_CORNER.x, ONIX_MATERIALIZE_CORNER.y + bounce.onixY2);
   drawMenuHealthboxPlayer(fb, 0, bounce.healthboxY2);
   drawPlayerHealthboxHpOverlay(fb, turn5SitrusOnixHp(t), bounce.healthboxY2);
@@ -5841,7 +5842,7 @@ export function drawTurn7RockSlideAttack(fb: Uint8Array, t: number, bounceTick: 
   const bounce = menuIdleBounce(turn5SitrusResettledBounceTick(bounceTick + TURN7_REGIME2_TO_REGIME1_SHIFT));
   drawSpriteSheet(fb, onixBackSprite.tileset, onixBackSprite.palette, ONIX_MATERIALIZE_CORNER.x, ONIX_MATERIALIZE_CORNER.y + bounce.onixY2);
   const healthboxY2 = rockSlideHealthboxWobbleY2(t, pressTick);
-  const opponentHp = rockSlideOpponentHp(t, pressTick, TURN6_PIDGEOTTO_AFTER_ROCKSLIDE_HP, TURN7_PIDGEOTTO_AFTER_ROCKSLIDE_HP);
+  const opponentHp = rockSlideOpponentHp(t, pressTick, turn6PidgeottoAfterRockslideHp(), turn7PidgeottoAfterRockslideHp());
   const opponentContent = pidgeottoHealthboxContentForHp(opponentHp);
   drawSendOutHealthbox(fb, 0, opponentContent);
   if (healthboxY2 !== 0) drawOpponentHealthboxWobble(fb, healthboxY2, opponentContent);
@@ -5895,7 +5896,7 @@ export function drawTurn7FightSubmenuWindow(
 
 export function drawTurn7FieldBase(fb: Uint8Array, t: number, bounceTick: number = t, beforeMonSprite?: () => void): void {
   drawTurn6FieldBase(fb, t, bounceTick + TURN7_REGIME2_TO_REGIME1_SHIFT, beforeMonSprite);
-  drawSendOutHealthbox(fb, 0, pidgeottoHealthboxContentForHp(TURN6_PIDGEOTTO_AFTER_ROCKSLIDE_HP));
+  drawSendOutHealthbox(fb, 0, pidgeottoHealthboxContentForHp(turn6PidgeottoAfterRockslideHp()));
 }
 
 export function drawTurn6FightSubmenuWindow(
@@ -5986,7 +5987,7 @@ export function drawTurn6RockSlideWindow(fb: Uint8Array, t: number, realPressTic
     if (t >= superEffectiveStart) {
       drawMessageTextLines(fb, TURN6_SUPER_EFFECTIVE_LINE, "", turn6SuperEffectiveTextVisibleChars(t, pressTick));
     } else {
-      drawMessageTextLines(fb, TURN6_ROCKSLIDE_ATTACK_LINE1, TURN6_ROCKSLIDE_ATTACK_LINE2, rockSlideTextVisibleChars(t, pressTick));
+      drawMessageTextLines(fb, turn6RockslideAttackLines()[0], turn6RockslideAttackLines()[1], rockSlideTextVisibleChars(t, pressTick));
     }
   }
 }
@@ -5997,7 +5998,7 @@ export function drawTurn6RockSlideTurnEndSettledMenu(fb: Uint8Array, t: number):
   drawStaticBgShiftedY(fb, 0, 0);
   drawTurn5IconBar(fb, t);
   drawTurn5SwitchinSprite(fb, t);
-  drawSendOutHealthbox(fb, 0, pidgeottoHealthboxContentForHp(TURN6_PIDGEOTTO_AFTER_ROCKSLIDE_HP));
+  drawSendOutHealthbox(fb, 0, pidgeottoHealthboxContentForHp(turn6PidgeottoAfterRockslideHp()));
   drawSpriteSheet(fb, onixBackSprite.tileset, onixBackSprite.palette, ONIX_MATERIALIZE_CORNER.x, ONIX_MATERIALIZE_CORNER.y + bounce.onixY2);
   drawMenuHealthboxPlayer(fb, 0, bounce.healthboxY2);
   drawPlayerHealthboxHpOverlay(fb, turn5SitrusOnixHp(t), bounce.healthboxY2);
@@ -6016,7 +6017,7 @@ export function drawTurn6RockSlideAttack(fb: Uint8Array, t: number, bounceTick: 
   const bounce = menuIdleBounce(turn5SitrusResettledBounceTick(bounceTick));
   drawSpriteSheet(fb, onixBackSprite.tileset, onixBackSprite.palette, ONIX_MATERIALIZE_CORNER.x, ONIX_MATERIALIZE_CORNER.y + bounce.onixY2);
   const healthboxY2 = rockSlideHealthboxWobbleY2(t, pressTick);
-  const opponentHp = rockSlideOpponentHp(t, pressTick, PIDGEOTTO_MAX_HP, TURN6_PIDGEOTTO_AFTER_ROCKSLIDE_HP);
+  const opponentHp = rockSlideOpponentHp(t, pressTick, pidgeottoMaxHp(), turn6PidgeottoAfterRockslideHp());
   const opponentContent = pidgeottoHealthboxContentForHp(opponentHp);
   drawSendOutHealthbox(fb, 0, opponentContent);
   if (healthboxY2 !== 0) drawOpponentHealthboxWobble(fb, healthboxY2, opponentContent);
@@ -6043,13 +6044,13 @@ export function drawTurn6FeatherDanceKickoffText(fb: Uint8Array, t: number, pres
   drawTurn6FieldBase(fb, t, pressTick - TURN6_BOUNCE_FREEZE_ANCHOR_OFFSET, () => drawTurn6FeatherSprites(fb, t, true));
   drawTurn6FeatherSprites(fb, t, false);
   const eva = turn6StatFallEva(t, pressTick);
-  if (eva !== null) drawTurn6StatFallBanner(fb, t, pressTick, eva, TURN6_FEATHERDANCE_STAT_PALETTE);
+  if (eva !== null) drawTurn6StatFallBanner(fb, t, pressTick, eva, turn6FeatherdanceStatPalette());
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   const atkFellStart = turn6AtkFellTextStartTick(pressTick);
   if (t >= atkFellStart) {
-    drawMessageTextLines(fb, TURN6_ATKFELL_KICKOFF_LINE1, TURN6_ATKFELL_KICKOFF_LINE2, turn6AtkFellTextVisibleChars(t, pressTick));
+    drawMessageTextLines(fb, turn6AtkfellKickoffLines()[0], turn6AtkfellKickoffLines()[1], turn6AtkFellTextVisibleChars(t, pressTick));
   } else {
-    drawMessageTextLines(fb, TURN6_FEATHERDANCE_KICKOFF_LINE1, TURN6_FEATHERDANCE_KICKOFF_LINE2, turn6FeatherDanceTextVisibleChars(t, pressTick));
+    drawMessageTextLines(fb, turn6FeatherdanceKickoffLines()[0], turn6FeatherdanceKickoffLines()[1], turn6FeatherDanceTextVisibleChars(t, pressTick));
   }
 }
 
@@ -6065,7 +6066,7 @@ export function turn13SwitchinSentOutTextVisibleChars(
 ): number {
   if (continuationElapsed < TURN13_SWITCHIN_SENTOUT_TEXT_AFTER_DISMISS) return 0;
   return Math.min(
-    switchinSentOutLine1(trainerPresentation).length + TURN13_SWITCHIN_SENTOUT_LINE2.length,
+    switchinSentOutLine1(trainerPresentation).length + turn13SwitchinSentoutLine2().length,
     continuationElapsed - TURN13_SWITCHIN_SENTOUT_TEXT_AFTER_DISMISS + 1,
   );
 }
@@ -6090,12 +6091,12 @@ export function drawTurn5SwitchinSprite(fb: Uint8Array, t: number, pidgeottoX2: 
   drawTurn5PidgeottoMaterialize(fb, t);
   drawSendOutBall(fb, t, TURN5_BALL_HANDOFF_TICK);
   drawTurn5SwitchinParticles(fb, t, TURN5_BALL_HANDOFF_TICK, TURN5_SWITCHIN_PARTICLE_STALL_LOGICAL_TICK);
-  if (t >= TURN5_PIDGEOTTO_SETTLE_TICK) drawTurn5PidgeottoSettled(fb, pidgeottoX2, sink);
+  if (t >= turn5PidgeottoSettleTick()) drawTurn5PidgeottoSettled(fb, pidgeottoX2, sink);
 }
 
 export function drawTurn5PidgeottoMaterialize(fb: Uint8Array, t: number): void {
   const materializeStart = TURN5_BALL_HANDOFF_TICK + MATERIALIZE_START_OFFSET;
-  if (t < materializeStart || t >= TURN5_PIDGEOTTO_SETTLE_TICK) return;
+  if (t < materializeStart || t >= turn5PidgeottoSettleTick()) return;
   const local = t - materializeStart;
   const accumulator = affineEmergeAccumulator(local + 1);
   const y2 = MATERIALIZE_Y2_TABLE[local] ?? 0;
@@ -6112,7 +6113,7 @@ export function switchinSentOutTextVisibleChars(
 ): number {
   if (t < SWITCHIN_SENTOUT_TEXT_START_TICK) return 0;
   return Math.min(
-    switchinSentOutLine1(trainerPresentation).length + SWITCHIN_SENTOUT_LINE2.length,
+    switchinSentOutLine1(trainerPresentation).length + switchinSentoutLine2().length,
     t - SWITCHIN_SENTOUT_TEXT_START_TICK + 1,
   );
 }
@@ -6130,7 +6131,7 @@ export function drawTurn5RockSlideAttack(fb: Uint8Array, t: number, bounceTick: 
   // default) - turn 13's own faintSinkRowsAndY2 call (battleScene.ts:14513)
   // passes its own explicit startTick/steps and is untouched.
   const sink = faintSinkRowsAndY2(t + 2);
-  if (sink.keptRows >= GROVYLE_FAINT_SINK_STEPS) {
+  if (sink.keptRows >= grovyleFaintSinkSteps()) {
     if (!rockSlideMonBlinkInvisible(t, pressTick, TURN5_OFF_ROCKSLIDE_ANIMATION_PROFILE)) {
       drawSpriteSheet(fb, grovyleFrontSprite.tileset, grovyleFrontSprite.palette, GROVYLE_CORNER.x, GROVYLE_CORNER.y + rockSlideMonShakeY2(t, pressTick, TURN5_OFF_ROCKSLIDE_ANIMATION_PROFILE));
     }
@@ -6195,8 +6196,8 @@ export function drawTurn5RockSlideAttack(fb: Uint8Array, t: number, bounceTick: 
       fb,
       battleAnimItemHeal.ring.tileset,
       battleAnimItemHeal.ring.palette,
-      TURN5_SITRUS_RING_CENTER.x,
-      TURN5_SITRUS_RING_CENTER.y,
+      turn5SitrusRingCenter().x,
+      turn5SitrusRingCenter().y,
       sitrusRing.pa,
       sitrusRing.pb,
       sitrusRing.pc,
@@ -6210,14 +6211,14 @@ export function drawTurn5RockSlideAttack(fb: Uint8Array, t: number, bounceTick: 
   // ticks late here - scoped `t + 2` at this one call site only (opponentHp
   // only ever takes {1,0} here; the compositor diff at that boundary is
   // exactly the 2 residual pixels, nothing else this function draws).
-  const opponentHp = rockSlideOpponentHp(t + 2, pressTick, TURN4_ROCKSLIDE_HP.to, TURN5_ROCKSLIDE_OPPONENT_TO_HP, TURN5_OFF_ROCKSLIDE_HP_DRAIN_START_DELAY);
+  const opponentHp = rockSlideOpponentHp(t + 2, pressTick, turn4RockslideHp().to, turn5RockslideOpponentToHp(), TURN5_OFF_ROCKSLIDE_HP_DRAIN_START_DELAY);
   // docs/turn5-resolve-ab-pools-diagnosis.md §19 (ISSUES #97): same 2-tick
   // lag family as the sink shift above - a direct oracle screenshot
   // comparison (6376 vs 6377) shows the real healthbox already gone by
   // 6377, but GROVYLE_HEALTHBOX_VANISH_TICK (6379) doesn't gate it off
   // until 6379. Scoped -2 at this call site only - the constant itself is
   // exclusive to this one gate (no other reader).
-  if (t < GROVYLE_HEALTHBOX_VANISH_TICK - 2) {
+  if (t < grovyleHealthboxVanishTick() - 2) {
     const opponentContent = opponentHealthboxContentForHp(opponentHp);
     drawSendOutHealthbox(fb, 0, opponentContent);
     if (healthboxY2 !== 0) drawOpponentHealthboxWobble(fb, healthboxY2, opponentContent);
@@ -6247,7 +6248,7 @@ export function drawTurn5EndeavorText(
     return;
   }
   const bounceTick = turn5KickoffBounceTickFromLatest(t, pressTick, latestCompletedCommandHandoff);
-  const onixHp = endeavorHp(t, pressTick, TURN5_ENDEAVOR_HP.from, TURN5_ENDEAVOR_HP.to, TURN5_OFF_ENDEAVOR_HP_DRAIN_START_DELAY);
+  const onixHp = endeavorHp(t, pressTick, turn5EndeavorHp().from, turn5EndeavorHp().to, TURN5_OFF_ENDEAVOR_HP_DRAIN_START_DELAY);
   drawActionMenuIdleContentFromLatest(
     fb,
     bounceTick,
@@ -6263,7 +6264,7 @@ export function drawTurn5EndeavorText(
     drawPlayerHealthboxHpOverlay(fb, onixHp, wobbleY2);
   }
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
-  drawMessageTextLines(fb, TURN5_ENDEAVOR_ATTACK_LINE1, TURN5_ENDEAVOR_ATTACK_LINE2, turn2KickoffTextVisibleChars(t, pressTick));
+  drawMessageTextLines(fb, turn5EndeavorAttackLines()[0], turn5EndeavorAttackLines()[1], turn2KickoffTextVisibleChars(t, pressTick));
 }
 
 export function turn5ReopenBounceTick(
@@ -6318,8 +6319,8 @@ export function drawTurn4RockSlideWindow(
       line2 = STAT_ROSE_LINE2;
       chars = statRoseTextVisibleChars(t, pressTick, TURN4_OFF_STAT_ROSE_TEXT_DELAY);
     } else {
-      line1 = TURN1_ROCKSLIDE_ATTACK_LINE1;
-      line2 = TURN1_ROCKSLIDE_ATTACK_LINE2;
+      line1 = turn1RockslideAttackLines()[0];
+      line2 = turn1RockslideAttackLines()[1];
       chars = rockSlideTextVisibleChars(t, pressTick, TURN4_OFF_ROCKSLIDE_TEXT_DELAY);
     }
     drawMessageTextLines(fb, line1, line2, chars);
@@ -6355,7 +6356,7 @@ export function drawTurn4RockSlideAttack(
   }
   drawSpriteSheet(fb, onixBackSprite.tileset, onixBackSprite.palette, ONIX_MATERIALIZE_CORNER.x, ONIX_MATERIALIZE_CORNER.y);
   const healthboxY2 = rockSlideHealthboxWobbleY2(t, pressTick, TURN4_OFF_ROCKSLIDE_ANIMATION_PROFILE);
-  const opponentHp = rockSlideOpponentHp(t, pressTick, TURN4_ROCKSLIDE_HP.from, TURN4_ROCKSLIDE_HP.to, TURN4_OFF_ROCKSLIDE_HP_DRAIN_START_DELAY);
+  const opponentHp = rockSlideOpponentHp(t, pressTick, turn4RockslideHp().from, turn4RockslideHp().to, TURN4_OFF_ROCKSLIDE_HP_DRAIN_START_DELAY);
   const opponentContent = opponentHealthboxContentForHp(opponentHp);
   drawSendOutHealthbox(fb, 0, opponentContent);
   if (healthboxY2 !== 0) drawOpponentHealthboxWobble(fb, healthboxY2, opponentContent);
@@ -6389,7 +6390,7 @@ export function drawTurn4KickoffText(
     turn3Content.field.player.hp.current,
   );
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
-  drawMessageTextLines(fb, TURN4_DOUBLETEAM_KICKOFF_LINE1, TURN4_DOUBLETEAM_KICKOFF_LINE2, turnKickoffTextVisibleChars(t, pressTick));
+  drawMessageTextLines(fb, turn4DoubleteamKickoffLines()[0], turn4DoubleteamKickoffLines()[1], turnKickoffTextVisibleChars(t, pressTick));
   drawStatsBanner(fb, t, pressTick, TURN4_OFF_STATS_BANNER_START_DELAY, TURN4_OFF_STATS_BANNER_END_DELAY, TURN4_OFF_STATS_BANNER_BG1_Y_ANCHOR_DELAY);
 }
 
@@ -6407,10 +6408,10 @@ export function drawTurn3RockSlideWindow(
   }
   const textClearTick = pressTick + TURN3_OFF_ROCKSLIDE_TEXT_CLEAR_DELAY;
   drawTurn3RockSlideAttack(fb, t, turn2Content);
-  drawPlayerHealthboxHpOverlay(fb, anchorPlayerAfterTurn3Hp);
+  drawPlayerHealthboxHpOverlay(fb, getAnchorPlayerAfterTurn3Hp());
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   if (t < textClearTick) {
-    drawMessageTextLines(fb, TURN1_ROCKSLIDE_ATTACK_LINE1, TURN1_ROCKSLIDE_ATTACK_LINE2, rockSlideTextVisibleChars(t, pressTick, TURN3_OFF_ROCKSLIDE_TEXT_DELAY));
+    drawMessageTextLines(fb, turn1RockslideAttackLines()[0], turn1RockslideAttackLines()[1], rockSlideTextVisibleChars(t, pressTick, TURN3_OFF_ROCKSLIDE_TEXT_DELAY));
   }
 }
 
@@ -6443,7 +6444,7 @@ export function drawTurn3RockSlideAttack(
   }
   drawSpriteSheet(fb, onixBackSprite.tileset, onixBackSprite.palette, ONIX_MATERIALIZE_CORNER.x, ONIX_MATERIALIZE_CORNER.y);
   const healthboxY2 = rockSlideHealthboxWobbleY2(t, pressTick, TURN3_OFF_ROCKSLIDE_ANIMATION_PROFILE);
-  const opponentHp = rockSlideOpponentHp(t, pressTick, TURN3_ROCKSLIDE_HP.from, TURN3_ROCKSLIDE_HP.to, TURN3_OFF_ROCKSLIDE_HP_DRAIN_START_DELAY);
+  const opponentHp = rockSlideOpponentHp(t, pressTick, turn3RockslideHp().from, turn3RockslideHp().to, TURN3_OFF_ROCKSLIDE_HP_DRAIN_START_DELAY);
   const opponentContent = opponentHealthboxContentForHp(opponentHp);
   drawSendOutHealthbox(fb, 0, opponentContent);
   if (healthboxY2 !== 0) drawOpponentHealthboxWobble(fb, healthboxY2, opponentContent);
@@ -6486,7 +6487,7 @@ export function drawTurn3EndeavorText(
     pressTick - TICK0,
     turn2Content,
   );
-  const onixHp = endeavorHp(t, pressTick, anchorPlayerAfterTurnHp, anchorPlayerAfterTurn3Hp, TURN3_OFF_ENDEAVOR_HP_DRAIN_START_DELAY);
+  const onixHp = endeavorHp(t, pressTick, getAnchorPlayerAfterTurnHp(), getAnchorPlayerAfterTurn3Hp(), TURN3_OFF_ENDEAVOR_HP_DRAIN_START_DELAY);
   drawActionMenuIdleContentFromLatest(
     fb,
     bounceTick,
@@ -6587,7 +6588,7 @@ export function drawTurn2KickoffText(
   // here rather than gating on a separate "drain window" branch, same
   // convention `drawRockSlideAttack`/`drawTurnEndSettledMenu` already use
   // for the opponent's own bar.
-  const onixHp = endeavorHp(t, pressTick, TURN2_ENDEAVOR_HP.from, TURN2_ENDEAVOR_HP.to, TURN2_OFF_ENDEAVOR_HP_DRAIN_START_DELAY);
+  const onixHp = endeavorHp(t, pressTick, turn2EndeavorHp().from, turn2EndeavorHp().to, TURN2_OFF_ENDEAVOR_HP_DRAIN_START_DELAY);
   drawPlayerHealthboxHpOverlay(fb, onixHp, endeavorHealthboxBounceY2(t, pressTick, TURN2_OFF_ENDEAVOR_HEALTHBOX_BOUNCE_START));
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   if (t >= dragonBreathStart) {
@@ -6597,7 +6598,7 @@ export function drawTurn2KickoffText(
     return;
   }
   if (t < pressTick + TURN2_OFF_ENDEAVOR_TEXT_CLEAR_DELAY) {
-    drawMessageTextLines(fb, TURN2_ENDEAVOR_ATTACK_LINE1, TURN2_ENDEAVOR_ATTACK_LINE2, turn2KickoffTextVisibleChars(t, pressTick));
+    drawMessageTextLines(fb, turn2EndeavorAttackLines()[0], turn2EndeavorAttackLines()[1], turn2KickoffTextVisibleChars(t, pressTick));
   }
 }
 
@@ -6612,7 +6613,7 @@ export function drawTurnKickoffText(fb: Uint8Array, t: number, pressTick: number
 export function playerHealthboxHpOverlayForHp(hp: number): ReturnType<typeof composePlayerHealthboxHpOverlay> {
   let cached = playerHealthboxHpOverlayByHp.get(hp);
   if (!cached) {
-    cached = composePlayerHealthboxHpOverlay(playerHealthboxHpOverlayAssets, hp, anchorPlayerBattler.maxHP);
+    cached = composePlayerHealthboxHpOverlay(playerHealthboxHpOverlayAssets, hp, getAnchorPlayerBattler().maxHP);
     playerHealthboxHpOverlayByHp.set(hp, cached);
   }
   return cached;

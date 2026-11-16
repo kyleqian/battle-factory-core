@@ -35,6 +35,7 @@ import {
   submitFactoryFullTurnDecision,
   type FactoryFullTurnDecisionRules,
 } from "./factoryBattleScriptFullTurnDecision.ts";
+import { lazyValue } from "./lazyValue.ts";
 
 const FLY = 19;
 const DRAGON_BREATH = 225;
@@ -278,5 +279,4 @@ export function resolveTurn15FlyResolutionAdapter(): Turn15FlyResolutionAdapter 
 }
 
 /** Cached production bridge shared by the exact renderer and input owner. */
-export const CANONICAL_OPPONENT_FLY_RESOLUTION =
-  resolveTurn15FlyResolutionAdapter();
+export const canonicalOpponentFlyResolution = lazyValue(resolveTurn15FlyResolutionAdapter);

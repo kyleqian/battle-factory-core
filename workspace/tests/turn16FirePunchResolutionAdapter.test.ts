@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { CANONICAL_FIRE_PUNCH_RESOLUTION } from "../src/engine/turn16FirePunchResolutionAdapter.ts";
+import { canonicalFirePunchResolution } from "../src/engine/turn16FirePunchResolutionAdapter.ts";
 
 describe("Turn-16 typed FIRE_PUNCH presentation bridge", () => {
   it("owns the faster opponent hit, player hit, burn icon receipt, residual, PP, and next command", () => {
-    const adapter = CANONICAL_FIRE_PUNCH_RESOLUTION;
+    const adapter = canonicalFirePunchResolution();
     expect(adapter.resolution.segments).toHaveLength(1);
     expect(adapter.resolution.pendingBoundary).toMatchObject({
       kind: "decision-required",

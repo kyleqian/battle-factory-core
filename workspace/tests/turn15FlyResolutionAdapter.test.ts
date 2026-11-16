@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { CANONICAL_OPPONENT_FLY_RESOLUTION } from "../src/engine/turn15FlyResolutionAdapter.ts";
+import { canonicalOpponentFlyResolution } from "../src/engine/turn15FlyResolutionAdapter.ts";
 
 describe("Turn-14/15 typed FLY presentation bridge", () => {
   it("owns charge, airborne miss, locked strike, faint, and forced request across the real intervening player request", () => {
-    const adapter = CANONICAL_OPPONENT_FLY_RESOLUTION;
+    const adapter = canonicalOpponentFlyResolution();
     expect(adapter.chargeResolution.segments).toHaveLength(1);
     expect(adapter.strikeResolution.segments).toHaveLength(2);
     expect(adapter.strikeResolution.resolutionId)

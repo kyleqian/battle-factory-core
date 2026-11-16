@@ -34,7 +34,7 @@ import { ROCK_SLIDE_LINE1, ROCK_SLIDE_LINE2 } from "../src/engine/battleMenu.ts"
  */
 describe("turn67RockSlidePresentationStaging: #39 rank-4 slice 1 (production path, flipped)", () => {
   describe("turn 6: Onix ROCK_SLIDE -> Pidgeotto, real -2 ATK stage already applied by this turn's own FEATHER_DANCE", () => {
-    it("reaches the script's own terminal end with the real recorded hit -- 156 -> 113 (-43), byte-identical to docs/turn6-notes.md §4 and battleScene.ts's own TURN6_PIDGEOTTO_AFTER_ROCKSLIDE_HP (11038)", () => {
+    it("reaches the script's own terminal end with the real recorded hit -- 156 -> 113 (-43), byte-identical to docs/turn6-notes.md §4 and battleScene.ts's own turn6PidgeottoAfterRockslideHp() (11038)", () => {
       const result = stageTurn6RockSlideHitChain();
       expect(result.targetHpAfter).toBe(113);
     });
@@ -71,7 +71,7 @@ describe("turn67RockSlidePresentationStaging: #39 rank-4 slice 1 (production pat
       expect(content.hp).toMatchObject({ battler: 1, from: 156, to: 113 });
     });
 
-    it("resolveTurn6RockSlideHpEndpoints exposes the real {from, to} pair that now literally drives TURN6_PIDGEOTTO_AFTER_ROCKSLIDE_HP's own .to value", () => {
+    it("resolveTurn6RockSlideHpEndpoints exposes the real {from, to} pair that now literally drives turn6PidgeottoAfterRockslideHp()'s own .to value", () => {
       expect(resolveTurn6RockSlideHpEndpoints()).toEqual({ from: 156, to: 113 });
     });
 
@@ -81,7 +81,7 @@ describe("turn67RockSlidePresentationStaging: #39 rank-4 slice 1 (production pat
   });
 
   describe("turn 7: repeats turn 6's exact move pair, real cumulative -4 ATK stage, own HP pair", () => {
-    it("reaches the script's own terminal end with the real recorded hit -- 113 -> 82 (-31), byte-identical to docs/turn7-notes.md §4 and battleScene.ts's own TURN7_PIDGEOTTO_AFTER_ROCKSLIDE_HP (11302)", () => {
+    it("reaches the script's own terminal end with the real recorded hit -- 113 -> 82 (-31), byte-identical to docs/turn7-notes.md §4 and battleScene.ts's own turn7PidgeottoAfterRockslideHp() (11302)", () => {
       const result = stageTurn7RockSlideHitChain();
       expect(result.targetHpAfter).toBe(82);
     });
@@ -102,7 +102,7 @@ describe("turn67RockSlidePresentationStaging: #39 rank-4 slice 1 (production pat
       expect(content.hp).toMatchObject({ battler: 1, from: 113, to: 82 });
     });
 
-    it("resolveTurn7RockSlideHpEndpoints exposes the real {from, to} pair that now literally drives TURN7_PIDGEOTTO_AFTER_ROCKSLIDE_HP's own .to value", () => {
+    it("resolveTurn7RockSlideHpEndpoints exposes the real {from, to} pair that now literally drives turn7PidgeottoAfterRockslideHp()'s own .to value", () => {
       expect(resolveTurn7RockSlideHpEndpoints()).toEqual({ from: 113, to: 82 });
     });
 

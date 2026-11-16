@@ -19,7 +19,7 @@ import {
  * (turns 1/4/5 already have staged proof via their own sibling modules).
  */
 describe("turn3RockSlidePresentationStaging: staged real ROCK_SLIDE hit chain (docs/presentation-seam-scout.md §10.2/§10.3)", () => {
-  it("reaches the script's own terminal end with the real recorded hit -- 88 -> 41, byte-identical to battleScene.ts's own anchorOpponentAfterTurn2Hp/anchorOpponentAfterTurn3Hp pair", () => {
+  it("reaches the script's own terminal end with the real recorded hit -- 88 -> 41, byte-identical to battleScene.ts's own getAnchorOpponentAfterTurn2Hp()/anchorOpponentAfterTurn3Hp pair", () => {
     const result = stageTurn3RockSlideHitChain();
     expect(result.targetHpAfter).toBe(41);
   });
@@ -46,7 +46,7 @@ describe("turn3RockSlidePresentationStaging: staged real ROCK_SLIDE hit chain (d
     expect(message).toMatchObject({ messageId: "STRINGID_USEDMOVE", substitutions: [] });
   });
 
-  it("hp-change carries Grovyle's real turn-3 pre-hit HP (88, battleScene.ts's own anchorOpponentAfterTurn2Hp) as `from` and the real settled HP (41, anchorOpponentAfterTurn3Hp) as `to` -- Grovyle SURVIVES, this is not a faint", () => {
+  it("hp-change carries Grovyle's real turn-3 pre-hit HP (88, battleScene.ts's own getAnchorOpponentAfterTurn2Hp()) as `from` and the real settled HP (41, anchorOpponentAfterTurn3Hp) as `to` -- Grovyle SURVIVES, this is not a faint", () => {
     const { events } = stageTurn3RockSlideHitChain();
     const hpChange = events.find((e) => e.kind === "hp-change");
     expect(hpChange).toMatchObject({ battler: 1, from: 88, to: 41 });
@@ -70,7 +70,7 @@ describe("turn3RockSlidePresentationStaging: staged real ROCK_SLIDE hit chain (d
     expect(content.hp).toMatchObject({ battler: 1, from: 88, to: 41 });
   });
 
-  it("resolveTurn3RockSlideHpEndpoints exposes the from/to pair battleScene.ts's rockSlideOpponentHp/opponentHealthboxContentForHp call sites at drawTurn3RockSlideAttack/drawTurn3RockSlideTurnEndSettledMenu need, replacing the anchorOpponentAfterTurn2Hp/anchorOpponentAfterTurn3Hp direct reads", () => {
+  it("resolveTurn3RockSlideHpEndpoints exposes the from/to pair battleScene.ts's rockSlideOpponentHp/opponentHealthboxContentForHp call sites at drawTurn3RockSlideAttack/drawTurn3RockSlideTurnEndSettledMenu need, replacing the getAnchorOpponentAfterTurn2Hp()/anchorOpponentAfterTurn3Hp direct reads", () => {
     expect(resolveTurn3RockSlideHpEndpoints()).toEqual({ from: 88, to: 41 });
   });
 });

@@ -230,7 +230,7 @@ import {
   CANONICAL_FORCED_SWITCH_RENTAL_RECORDS,
   partySendOutBattleMenuReady,
 } from "./partySelect.ts";
-import { CANONICAL_OPPONENT_FLY_RESOLUTION } from "./turn15FlyResolutionAdapter.ts";
+import { canonicalOpponentFlyResolution } from "./turn15FlyResolutionAdapter.ts";
 import { resolveTurn13LatestCompletedCommandHandoff } from "./turn13ResolutionAdapter.ts";
 import {
   createOpponentFaintPresentationOwner,
@@ -519,7 +519,7 @@ import {
   resolveTurn4LatestCompletedCommandHandoff,
   turn4FightCommandPresentationFromLatest,
 } from "./turn4ResolutionAdapter.ts";
-import { CANONICAL_FIRE_PUNCH_RESOLUTION } from "./turn16FirePunchResolutionAdapter.ts";
+import { canonicalFirePunchResolution } from "./turn16FirePunchResolutionAdapter.ts";
 import {
   advanceBattleSceneForcedPartySelect,
   beginBattleSceneFollowingResolution,
@@ -767,7 +767,7 @@ function createCanonicalCompletedCommandChain(): LatestCompletedCommandHandoff {
       requiredActiveResolutionSegment: retainedContent.segments[0],
       successor: {
         resolutionOwner: createBattleSceneResolutionOwner(
-          CANONICAL_OPPONENT_FLY_RESOLUTION.strikeResolution,
+          canonicalOpponentFlyResolution().strikeResolution,
         ),
       },
     }),
@@ -2579,7 +2579,7 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
     ) {
       lockedActionOwner = beginBattleSceneFollowingResolution(
         lockedActionOwner,
-        CANONICAL_FIRE_PUNCH_RESOLUTION.resolution,
+        canonicalFirePunchResolution().resolution,
         fightSubmenu.confirmElapsed,
       );
     }

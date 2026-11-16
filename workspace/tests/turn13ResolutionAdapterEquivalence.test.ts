@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
-  CANONICAL_TURN13_RETAINED_FLY_PRESENTATION_OWNER,
+  canonicalTurn13RetainedFlyPresentationOwner,
   isTurn13NextCommandHandoffReady,
   opponentFaintSinkGeometry,
   resolveTurn13CompletedResolutionNextCommandHandoff,
@@ -12,15 +12,15 @@ import {
 import {
   TURN13_DRAGONBREATH_PRESS_TICK,
   TURN13_FAINT_SINK_START_TICK,
-  TURN13_FAINT_SINK_STEPS,
-  TURN13_HEALTHBOX_VANISH_TICK,
+  turn13FaintSinkSteps,
+  turn13HealthboxVanishTick,
   opponentFaintDismissEligible,
   turn13FaintedTextStartTick,
   turn13FaintedTextVisibleChars,
 } from "../src/engine/battleScene.ts";
 import { currentPPForActiveMon } from "../src/engine/battleMenu.ts";
 import { rentalMoveset } from "../src/engine/battleSetup.ts";
-import { CANONICAL_OPPONENT_FLY_RESOLUTION } from "../src/engine/turn15FlyResolutionAdapter.ts";
+import { canonicalOpponentFlyResolution } from "../src/engine/turn15FlyResolutionAdapter.ts";
 
 /**
  * ISSUES #39 rank-2 regression pin (docs/battle-scene-retirement-
@@ -72,17 +72,17 @@ describe("turn13ResolutionAdapter: #39 rank-2 kernel-to-typed-owner equivalence 
     });
   });
 
-  describe("faint sink/healthbox-vanish geometry: TURN13_FAINT_SINK_STEPS/TURN13_HEALTHBOX_VANISH_TICK are now literally derived from the generic resolution formula", () => {
+  describe("faint sink/healthbox-vanish geometry: turn13FaintSinkSteps()/turn13HealthboxVanishTick() are now literally derived from the generic resolution formula", () => {
     it("battleScene.ts's exported constants equal the adapter's own faintSink fields, evaluated at Pidgeotto's real front-pic yOffset (11)", () => {
       const preview = resolveTurn13ResolutionAdapter();
-      expect(preview.faintSink.steps).toBe(TURN13_FAINT_SINK_STEPS);
+      expect(preview.faintSink.steps).toBe(turn13FaintSinkSteps());
       expect(preview.faintSink.healthboxVanishFrame).toBe(
-        TURN13_HEALTHBOX_VANISH_TICK - TURN13_FAINT_SINK_START_TICK,
+        turn13HealthboxVanishTick() - TURN13_FAINT_SINK_START_TICK,
       );
       // Numeric regression pin: the former hand-fit constants this flip
       // deleted (TURN13_FAINT_SINK_STEPS=7, TURN13_HEALTHBOX_VANISH_TICK=15977).
-      expect(TURN13_FAINT_SINK_STEPS).toBe(7);
-      expect(TURN13_HEALTHBOX_VANISH_TICK).toBe(15977);
+      expect(turn13FaintSinkSteps()).toBe(7);
+      expect(turn13HealthboxVanishTick()).toBe(15977);
     });
 
     it("opponentFaintSinkGeometry is the general formula (not hardcoded to Pidgeotto's own yOffset=11)", () => {
@@ -99,7 +99,7 @@ describe("turn13ResolutionAdapter: #39 rank-2 kernel-to-typed-owner equivalence 
   });
 
   describe("switch-in half (this slice): the forced-switch decision + Murkrow switch-in are now staged, chained through runBattleScriptFaintedActionsOrchestration", () => {
-    it("resolves DESTIN's real replacement -- MURKROW, party slot 1, Lv50, full 142/142 HP -- matching battleScene.ts's own MURKROW_LEVEL/hp-142 constants and destinCanonicalReplacements.test.ts's own proven decision", () => {
+    it("resolves DESTIN's real replacement -- MURKROW, party slot 1, Lv50, full 142/142 HP -- matching battleScene.ts's own murkrowLevel()/hp-142 constants and destinCanonicalReplacements.test.ts's own proven decision", () => {
       const switchIn = resolveTurn13SwitchInAdapter();
       expect(switchIn.replacementSpecies).toBe("MURKROW");
       expect(switchIn.replacementPartyIndex).toBe(1);
@@ -107,7 +107,7 @@ describe("turn13ResolutionAdapter: #39 rank-2 kernel-to-typed-owner equivalence 
       expect(switchIn.replacementHp).toEqual({ current: 142, max: 142 });
     });
 
-    it("sentOutLine2 is the real STRINGID_SWITCHINMON line-2 shape, byte-identical to battleScene.ts's own former raw literal TURN13_SWITCHIN_SENTOUT_LINE2", () => {
+    it("sentOutLine2 is the real STRINGID_SWITCHINMON line-2 shape, byte-identical to battleScene.ts's own former raw literal turn13SwitchinSentoutLine2()", () => {
       const switchIn = resolveTurn13SwitchInAdapter();
       expect(switchIn.sentOutLine2).toBe("out MURKROW!");
     });
@@ -129,11 +129,11 @@ describe("turn13ResolutionAdapter: #39 rank-2 kernel-to-typed-owner equivalence 
       const retained = content.retainedResolution;
 
       expect(retained).toBeDefined();
-      expect(retained!.owner).toBe(CANONICAL_TURN13_RETAINED_FLY_PRESENTATION_OWNER);
+      expect(retained!.owner).toBe(canonicalTurn13RetainedFlyPresentationOwner());
       expect(retained!.segments).toBe(retained!.owner.resolution.segments);
-      expect(retained!.segments).toBe(CANONICAL_OPPONENT_FLY_RESOLUTION.strikeResolution.segments);
-      expect(retained!.segments[0]).toBe(CANONICAL_OPPONENT_FLY_RESOLUTION.chargeResolution.segments[0]);
-      expect(retained!.segments[1]).toBe(CANONICAL_OPPONENT_FLY_RESOLUTION.strikeResolution.segments[1]);
+      expect(retained!.segments).toBe(canonicalOpponentFlyResolution().strikeResolution.segments);
+      expect(retained!.segments[0]).toBe(canonicalOpponentFlyResolution().chargeResolution.segments[0]);
+      expect(retained!.segments[1]).toBe(canonicalOpponentFlyResolution().strikeResolution.segments[1]);
       expect(content.upcoming).toBeNull();
     });
 
@@ -155,7 +155,7 @@ describe("turn13ResolutionAdapter: #39 rank-2 kernel-to-typed-owner equivalence 
       const onix = rentalMoveset("ONIX");
       const handoff = resolveTurn13CompletedResolutionNextCommandHandoff();
       const predecessorPp = currentPPForActiveMon(onix, resolveTurn13LatestCompletedCommandHandoff())[2];
-      const chargeOwnerPp = CANONICAL_OPPONENT_FLY_RESOLUTION
+      const chargeOwnerPp = canonicalOpponentFlyResolution()
         .chargeResolution.segments[0]!.afterRules.rulesContext.battlers[0]!.pp[2];
 
       expect(predecessorPp).toBe(18);

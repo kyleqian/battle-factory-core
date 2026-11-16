@@ -110,15 +110,13 @@ import { resolveTurn12LatestCompletedCommandHandoff } from "../src/engine/turn12
 import {
   renderBattleScene,
   TICK0,
-  TURN8_BIND_LINE1,
-  TURN8_BIND_LINE2,
-  TURN8_BIND_TEXT_TOTAL,
+  turn8BindLines,
+  turn8BindTextTotal,
   TURN8_BIND_TEXT_DELAY,
   turn8BindTextStartTick,
   turn8BindTextVisibleChars,
-  TURN8_MISS_LINE1,
-  TURN8_MISS_LINE2,
-  TURN8_MISS_TEXT_TOTAL,
+  turn8MissLines,
+  turn8MissTextTotal,
   TURN8_MISS_TEXT_DELAY,
   turn8MissTextStartTick,
   turn8MissTextVisibleChars,
@@ -753,9 +751,9 @@ describe("battleMenu: S7 slice O - turn 7's own FEATHER_DANCE/ROCK_SLIDE (Onix v
 
   it("S7 slice P: BIND's own kickoff text ('ONIX used\\nBIND!', 14 chars) starts at pressTick+421 (9846, docs/turn8-notes.md §5) and settles on the last glyph's own tick", () => {
     const pressTick = 9425; // this turn's own real confirm tick (A held 9424-9425)
-    expect(TURN8_BIND_LINE1).toBe("ONIX used");
-    expect(TURN8_BIND_LINE2).toBe("BIND!");
-    expect(TURN8_BIND_TEXT_TOTAL).toBe(14);
+    expect(turn8BindLines()[0]).toBe("ONIX used");
+    expect(turn8BindLines()[1]).toBe("BIND!");
+    expect(turn8BindTextTotal()).toBe(14);
     expect(TURN8_BIND_TEXT_DELAY).toBe(421);
     expect(turn8BindTextStartTick(pressTick)).toBe(9846);
     expect(turn8BindTextVisibleChars(9845, pressTick)).toBe(0);
@@ -766,9 +764,9 @@ describe("battleMenu: S7 slice O - turn 7's own FEATHER_DANCE/ROCK_SLIDE (Onix v
 
   it("S7 slice P: the miss message ('ONIX’s\\nattack missed!', 20 chars, matches sText_AttackMissed exactly) starts at pressTick+471 (9896) and settles at 9915 - the FIRST miss this engine ever renders, no move animation plays", () => {
     const pressTick = 9425;
-    expect(TURN8_MISS_LINE1).toBe("ONIX’s");
-    expect(TURN8_MISS_LINE2).toBe("attack missed!");
-    expect(TURN8_MISS_TEXT_TOTAL).toBe(20);
+    expect(turn8MissLines()[0]).toBe("ONIX’s");
+    expect(turn8MissLines()[1]).toBe("attack missed!");
+    expect(turn8MissTextTotal()).toBe(20);
     expect(TURN8_MISS_TEXT_DELAY).toBe(471);
     expect(turn8MissTextStartTick(pressTick)).toBe(9896);
     expect(turn8MissTextVisibleChars(9895, pressTick)).toBe(0);

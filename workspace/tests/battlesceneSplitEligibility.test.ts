@@ -48,7 +48,7 @@ describe("battleScene.ts split eligibility (decision (a))", () => {
 
   it("flags exactly the known 8-symbol ONIX-Sitrus cluster with the cluster label", () => {
     const clusterNames = [
-      "ONIX_SITRUS_IDENTITY_RENDER_TICK",
+      "onixSitrusIdentityRenderTick()",
       "ONIX_SITRUS_ROTATE_RENDER_LAG",
       "onixSitrusRotateMatrix",
       "onixSitrusTintCoeff",

@@ -12,7 +12,7 @@ import {
 } from "../src/engine/nextCommandHandoff.ts";
 import { createFightCommandPresentation } from "../src/engine/fightCommandPresentation.ts";
 import { createBattleSceneResolutionOwner } from "../src/engine/battleSceneResolutionOwner.ts";
-import { CANONICAL_OPPONENT_FLY_RESOLUTION } from "../src/engine/turn15FlyResolutionAdapter.ts";
+import { canonicalOpponentFlyResolution } from "../src/engine/turn15FlyResolutionAdapter.ts";
 
 describe("LatestCompletedCommandHandoff", () => {
   it("publishes an immutable canonical PP tuple, persisted slot, and readiness receipt", () => {
@@ -70,7 +70,7 @@ describe("LatestCompletedCommandHandoff", () => {
 
   it("carries an immutable semantic content view without deriving it from the PP tuple", () => {
     const retainedOwner = createBattleSceneResolutionOwner(
-      CANONICAL_OPPONENT_FLY_RESOLUTION.strikeResolution,
+      canonicalOpponentFlyResolution().strikeResolution,
     );
     const content = createFightCommandPresentation({
       field: {
@@ -176,10 +176,10 @@ describe("LatestCompletedCommandHandoff", () => {
 
   it("rejects retained segments that do not belong to the supplied owner", () => {
     const owner = createBattleSceneResolutionOwner(
-      CANONICAL_OPPONENT_FLY_RESOLUTION.chargeResolution,
+      canonicalOpponentFlyResolution().chargeResolution,
     );
     const foreignOwner = createBattleSceneResolutionOwner(
-      CANONICAL_OPPONENT_FLY_RESOLUTION.strikeResolution,
+      canonicalOpponentFlyResolution().strikeResolution,
     );
     expect(() => createFightCommandPresentation({
       field: {
@@ -245,7 +245,7 @@ describe("LatestCompletedCommandHandoff", () => {
 
   it("requires the retained content segment and any automatic-switch continuation without using a command identity", () => {
     const chargeOwner = createBattleSceneResolutionOwner(
-      CANONICAL_OPPONENT_FLY_RESOLUTION.chargeResolution,
+      canonicalOpponentFlyResolution().chargeResolution,
     );
     const guard = createNextCommandReopenGuard({
       minimumConfirmElapsed: 0,

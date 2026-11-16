@@ -88,7 +88,8 @@ import {
   createFightCommandPresentation,
   type FightCommandPresentation,
 } from "./fightCommandPresentation.ts";
-import { CANONICAL_OPPONENT_FLY_RESOLUTION } from "./turn15FlyResolutionAdapter.ts";
+import { canonicalOpponentFlyResolution } from "./turn15FlyResolutionAdapter.ts";
+import { lazyValue } from "./lazyValue.ts";
 
 const ONIX_MAX_HP = 117;
 /** The settled turn-14 menu is timed in the retained switch-in owner's local clock. */
@@ -99,8 +100,7 @@ const TURN13_SWITCHIN_MENU_REDRAW_ELAPSED = 291;
  * Content holds this owner by reference; it never reconstructs either
  * segment from the post-DRAGON_BREATH handoff's PP or cursor facts.
  */
-export const CANONICAL_TURN13_RETAINED_FLY_PRESENTATION_OWNER =
-  createBattleSceneResolutionOwner(CANONICAL_OPPONENT_FLY_RESOLUTION.strikeResolution);
+export const canonicalTurn13RetainedFlyPresentationOwner = lazyValue(() => createBattleSceneResolutionOwner(canonicalOpponentFlyResolution().strikeResolution));
 
 type MonPicCoordsAsset = Readonly<{
   front: Readonly<Record<string, Readonly<{ yOffset: number }>>>;
@@ -271,7 +271,7 @@ export function resolveTurn13CompletedResolutionNextCommandHandoff(): Turn13Comp
  */
 export function resolveTurn13FightCommandPresentation(): FightCommandPresentation {
   const switchIn = resolveTurn13SwitchInAdapter();
-  const owner = CANONICAL_TURN13_RETAINED_FLY_PRESENTATION_OWNER;
+  const owner = canonicalTurn13RetainedFlyPresentationOwner();
   return createFightCommandPresentation({
     field: {
       player: {

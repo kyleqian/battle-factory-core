@@ -6,7 +6,7 @@ import {
   stageTurn8BindHitReceipts,
   stageTurn8BindMiss,
 } from "../src/engine/turn8BindPresentationStaging.ts";
-import { TURN8_BIND_LINE1, TURN8_BIND_LINE2, TURN8_MISS_LINE1, TURN8_MISS_LINE2 } from "../src/engine/battleScene.ts";
+import { turn8BindLines, turn8MissLines} from "../src/engine/battleScene.ts";
 
 /**
  * ISSUES #39 rank-4 slice 5 (final rank-4 slice, `docs/rank4-prep-scout.md`
@@ -61,9 +61,9 @@ describe("turn8BindPresentationStaging: #39 rank-4 slice 5", () => {
       });
     });
 
-    it("resolveTurn8BindKickoffLines / resolveTurn8MissLines are byte-identical to battleScene.ts's own TURN8_BIND_LINE1/2 and TURN8_MISS_LINE1/2 hand literals", () => {
-      expect(resolveTurn8BindKickoffLines()).toEqual([TURN8_BIND_LINE1, TURN8_BIND_LINE2]);
-      expect(resolveTurn8MissLines()).toEqual([TURN8_MISS_LINE1, TURN8_MISS_LINE2]);
+    it("resolveTurn8BindKickoffLines / resolveTurn8MissLines are byte-identical to battleScene.ts's own turn8BindLines()[0]/2 and turn8MissLines()[0]/2 hand literals", () => {
+      expect(resolveTurn8BindKickoffLines()).toEqual([turn8BindLines()[0], turn8BindLines()[1]]);
+      expect(resolveTurn8MissLines()).toEqual([turn8MissLines()[0], turn8MissLines()[1]]);
     });
   });
 

@@ -29,6 +29,7 @@ import {
   submitFactoryFullTurnDecision,
   type FactoryFullTurnDecisionRules,
 } from "./factoryBattleScriptFullTurnDecision.ts";
+import { lazyValue } from "./lazyValue.ts";
 
 const FIRE_PUNCH = 7;
 const FAINT_ATTACK = 185;
@@ -228,5 +229,4 @@ export function resolveTurn16FirePunchResolutionAdapter(): Turn16FirePunchResolu
 }
 
 /** Cached source-owned receipt shared by the exact input and render seams. */
-export const CANONICAL_FIRE_PUNCH_RESOLUTION =
-  resolveTurn16FirePunchResolutionAdapter();
+export const canonicalFirePunchResolution = lazyValue(resolveTurn16FirePunchResolutionAdapter);

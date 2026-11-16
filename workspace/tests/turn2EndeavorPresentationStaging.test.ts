@@ -24,7 +24,7 @@ describe("turn2EndeavorPresentationStaging: staged real MOVE_ENDEAVOR chain (doc
     expect(advanceRngValue(first.fromValue)).toBe(first.toValue);
   });
 
-  it("reaches the script's own terminal end -- Onix (target, side 0) 117 -> 101 under ENDEAVOR's real hp-difference formula (target.hp - attacker.hp = 117 - 101 = 16 damage), matching battleScene.ts's anchorPlayerAfterTurnHp for real", () => {
+  it("reaches the script's own terminal end -- Onix (target, side 0) 117 -> 101 under ENDEAVOR's real hp-difference formula (target.hp - attacker.hp = 117 - 101 = 16 damage), matching battleScene.ts's getAnchorPlayerAfterTurnHp() for real", () => {
     const result = stageTurn2EndeavorHitChain();
     expect(result.targetHpAfter).toBe(101);
   });
@@ -52,7 +52,7 @@ describe("turn2EndeavorPresentationStaging: staged real MOVE_ENDEAVOR chain (doc
     expect(hpChange?.provenance.sourceLabel).toBe("BattleScript_HitFromAtkAnimation");
   });
 
-  it("hp-change carries Onix's real before_turn2 HP (117, battleScene.ts's anchorPlayerBattler.hp) as `from` and the real ENDEAVOR settle (101, anchorPlayerAfterTurnHp) as `to`, on battler 0 (Onix, the player side)", () => {
+  it("hp-change carries Onix's real before_turn2 HP (117, battleScene.ts's getAnchorPlayerBattler().hp) as `from` and the real ENDEAVOR settle (101, getAnchorPlayerAfterTurnHp()) as `to`, on battler 0 (Onix, the player side)", () => {
     const { events } = stageTurn2EndeavorHitChain();
     const hpChange = events.find((e) => e.kind === "hp-change");
     expect(hpChange).toMatchObject({ battler: 0, from: 117, to: 101 });

@@ -11,12 +11,12 @@ import { currentPPForActiveMon } from "../src/engine/battleMenu.ts";
 import { rentalMoveset } from "../src/engine/battleSetup.ts";
 import {
   GROVYLE_FAINT_SINK_START_TICK,
-  GROVYLE_FAINT_SINK_STEPS,
-  GROVYLE_HEALTHBOX_VANISH_TICK,
-  TURN5_SITRUS_HEAL_HP_END,
-  TURN5_SITRUS_HEAL_HP_START,
-  TURN5_SITRUS_HEAL_LINE1,
-  TURN5_SITRUS_HEAL_LINE2,
+  grovyleFaintSinkSteps,
+  grovyleHealthboxVanishTick,
+  turn5SitrusHealHpEnd,
+  turn5SitrusHealHpStart,
+  turn5SitrusHealLine1,
+  turn5SitrusHealLine2,
 } from "../src/engine/battleScene.ts";
 
 /**
@@ -40,25 +40,25 @@ import {
  * rank 1/2's own precedent.
  */
 describe("turn5ResolutionAdapter: #39 rank-3 kernel-to-typed-owner equivalence (production path, both halves)", () => {
-  describe("faint sink/healthbox-vanish geometry: GROVYLE_FAINT_SINK_STEPS/GROVYLE_HEALTHBOX_VANISH_TICK are now literally derived from the generic resolution formula", () => {
+  describe("faint sink/healthbox-vanish geometry: grovyleFaintSinkSteps()/grovyleHealthboxVanishTick() are now literally derived from the generic resolution formula", () => {
     it("battleScene.ts's exported constants equal the adapter's own faintSink fields, evaluated at Grovyle's real front-pic yOffset (4)", () => {
       const faintSink = resolveTurn5FaintSinkGeometry();
-      expect(faintSink.steps).toBe(GROVYLE_FAINT_SINK_STEPS);
+      expect(faintSink.steps).toBe(grovyleFaintSinkSteps());
       expect(faintSink.healthboxVanishFrame).toBe(
-        GROVYLE_HEALTHBOX_VANISH_TICK - GROVYLE_FAINT_SINK_START_TICK,
+        grovyleHealthboxVanishTick() - GROVYLE_FAINT_SINK_START_TICK,
       );
       // Numeric regression pin: the former hand-fit constants this flip
       // deleted (GROVYLE_FAINT_SINK_STEPS=8, GROVYLE_HEALTHBOX_VANISH_TICK
       // = GROVYLE_FAINT_SINK_START_TICK+19).
-      expect(GROVYLE_FAINT_SINK_STEPS).toBe(8);
-      expect(GROVYLE_HEALTHBOX_VANISH_TICK).toBe(GROVYLE_FAINT_SINK_START_TICK + 19);
+      expect(grovyleFaintSinkSteps()).toBe(8);
+      expect(grovyleHealthboxVanishTick()).toBe(GROVYLE_FAINT_SINK_START_TICK + 19);
     });
   });
 
   describe("switch-in half: DESTIN's real forced-switch decision, staged through runBattleScriptFaintedActionsOrchestration", () => {
     it(
       "resolves DESTIN's real replacement -- PIDGEOTTO, party slot 2, Lv50, full 156/156 HP -- matching "
-        + "battleScene.ts's own PIDGEOTTO_LEVEL/pidgeottoHealthboxContent and "
+        + "battleScene.ts's own pidgeottoLevel()/getPidgeottoHealthboxContent() and "
         + "tests/destinCanonicalReplacements.test.ts's own proven decision (PIDGEOTTO over MURKROW)",
       () => {
         const switchIn = resolveTurn5SwitchInAdapter();
@@ -71,7 +71,7 @@ describe("turn5ResolutionAdapter: #39 rank-3 kernel-to-typed-owner equivalence (
 
     it(
       "sentOutLine2 is the real STRINGID_SWITCHINMON line-2 shape, byte-identical to battleScene.ts's own "
-        + "former raw literal SWITCHIN_SENTOUT_LINE2 (\"out PIDGEOTTO!\")",
+        + "former raw literal switchinSentoutLine2() (\"out PIDGEOTTO!\")",
       () => {
         const switchIn = resolveTurn5SwitchInAdapter();
         expect(switchIn.sentOutLine2).toBe("out PIDGEOTTO!");
@@ -84,17 +84,17 @@ describe("turn5ResolutionAdapter: #39 rank-3 kernel-to-typed-owner equivalence (
       + "runBattleEndTurnOrchestration's already-ported HOLD_EFFECT_RESTORE_HP case -- no ONIX/SITRUS branch added",
     () => {
       it(
-        "battleScene.ts's own exported TURN5_SITRUS_HEAL_HP_START/_END equal a fresh, independently-computed "
+        "battleScene.ts's own exported turn5SitrusHealHpStart()/_END equal a fresh, independently-computed "
           + "adapter call's real 1 -> 31 HP climb, matching docs/battle-turn-notes.md's own RAM-confirmed finding",
         () => {
           const sitrus = resolveTurn5SitrusAdapter();
           expect(sitrus.hp).toEqual({ from: 1, to: 31 });
-          expect(TURN5_SITRUS_HEAL_HP_START).toBe(sitrus.hp.from);
-          expect(TURN5_SITRUS_HEAL_HP_END).toBe(sitrus.hp.to);
+          expect(turn5SitrusHealHpStart()).toBe(sitrus.hp.from);
+          expect(turn5SitrusHealHpEnd()).toBe(sitrus.hp.to);
           // Numeric regression pin: the former hand-fit constants this flip
           // deleted (TURN5_SITRUS_HEAL_HP_START=1, _END=31).
-          expect(TURN5_SITRUS_HEAL_HP_START).toBe(1);
-          expect(TURN5_SITRUS_HEAL_HP_END).toBe(31);
+          expect(turn5SitrusHealHpStart()).toBe(1);
+          expect(turn5SitrusHealHpEnd()).toBe(31);
         },
       );
 
@@ -104,14 +104,14 @@ describe("turn5ResolutionAdapter: #39 rank-3 kernel-to-typed-owner equivalence (
       });
 
       it(
-        "battleScene.ts's own exported TURN5_SITRUS_HEAL_LINE1/_LINE2 equal a fresh, independently-computed "
+        "battleScene.ts's own exported turn5SitrusHealLine1()/_LINE2 equal a fresh, independently-computed "
           + "adapter call's real STRINGID_PKMNSITEMRESTOREDHEALTH text, resolved through the existing generic "
           + "resolveBattleStringLines (no new string-table mechanism)",
         () => {
           const sitrus = resolveTurn5SitrusAdapter();
           expect(sitrus.healLines).toEqual(["ONIX’s SITRUS BERRY", "restored health!"]);
-          expect(TURN5_SITRUS_HEAL_LINE1).toBe(sitrus.healLines[0]);
-          expect(TURN5_SITRUS_HEAL_LINE2).toBe(sitrus.healLines[1]);
+          expect(turn5SitrusHealLine1()).toBe(sitrus.healLines[0]);
+          expect(turn5SitrusHealLine2()).toBe(sitrus.healLines[1]);
         },
       );
     },

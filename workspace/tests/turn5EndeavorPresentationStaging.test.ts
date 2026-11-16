@@ -44,7 +44,7 @@ describe("turn5EndeavorPresentationStaging: real MOVE_ENDEAVOR chain (docs/prese
     expect(hpChange?.provenance.sourceLabel).toBe("BattleScript_HitFromAtkAnimation");
   });
 
-  it("hp-change carries Onix's real turn-3-settled HP (88, battleScene.ts's anchorPlayerAfterTurn3Hp) as `from` and the real ENDEAVOR settle (1, anchorPlayerAfterTurn5Hp) as `to`, on battler 0 (Onix, the player side)", () => {
+  it("hp-change carries Onix's real turn-3-settled HP (88, battleScene.ts's getAnchorPlayerAfterTurn3Hp()) as `from` and the real ENDEAVOR settle (1, anchorPlayerAfterTurn5Hp) as `to`, on battler 0 (Onix, the player side)", () => {
     const { events } = stageTurn5EndeavorHitChain();
     const hpChange = events.find((e) => e.kind === "hp-change");
     expect(hpChange).toMatchObject({ battler: 0, from: 88, to: 1 });

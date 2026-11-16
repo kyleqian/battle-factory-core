@@ -64,7 +64,7 @@ import {
   CANONICAL_FORCED_SWITCH_PARTY,
   CANONICAL_FORCED_SWITCH_RENTAL_RECORDS,
 } from "../src/engine/partySelect.ts";
-import { CANONICAL_OPPONENT_FLY_RESOLUTION } from "../src/engine/turn15FlyResolutionAdapter.ts";
+import { canonicalOpponentFlyResolution } from "../src/engine/turn15FlyResolutionAdapter.ts";
 import { resolveTurn13LatestCompletedCommandHandoff } from "../src/engine/turn13ResolutionAdapter.ts";
 import {
   createOpponentFaintPresentationOwner,
@@ -104,7 +104,7 @@ import {
   withNextCommandReopenGuard,
   type LatestCompletedCommandHandoff,
 } from "../src/engine/nextCommandHandoff.ts";
-import { CANONICAL_FIRE_PUNCH_RESOLUTION } from "../src/engine/turn16FirePunchResolutionAdapter.ts";
+import { canonicalFirePunchResolution } from "../src/engine/turn16FirePunchResolutionAdapter.ts";
 import {
   beginBattleSceneForcedPartySelect,
   createBattleSceneResolutionOwner,
@@ -322,13 +322,13 @@ describe("battleMenu: FIGHT submenu wired through core.ts's tick() (JOY_NEW gati
     const onix = rentalMoveset("ONIX");
     expect(currentPPForActiveMon(onix, latest)[2]).toBe(18);
 
-    const locked = CANONICAL_OPPONENT_FLY_RESOLUTION.chargeResolution;
+    const locked = canonicalOpponentFlyResolution().chargeResolution;
     const genericLocked = currentPPForActiveMon(onix, latest, locked);
     expect(genericLocked[2]).toBe(
       locked.segments[0]!.afterRules.rulesContext.battlers[0]!.pp[2],
     );
 
-    const following = CANONICAL_FIRE_PUNCH_RESOLUTION.resolution;
+    const following = canonicalFirePunchResolution().resolution;
     const magby = rentalMoveset("MAGBY");
     const genericFollowing = currentPPForActiveMon(magby, latest, locked, following);
     expect(genericFollowing).toEqual(
@@ -341,7 +341,7 @@ describe("battleMenu: FIGHT submenu wired through core.ts's tick() (JOY_NEW gati
     const staleTurn15Choice = confirmFightMove(openFightSubmenu(19000, ONIX_MOVESET, 2), 19030);
     const resolutionOwner = beginBattleSceneForcedPartySelect(
       createBattleSceneResolutionOwner(
-        CANONICAL_OPPONENT_FLY_RESOLUTION.strikeResolution,
+        canonicalOpponentFlyResolution().strikeResolution,
       ),
       CANONICAL_FORCED_SWITCH_RENTAL_RECORDS,
       CANONICAL_FORCED_SWITCH_PARTY,
@@ -404,7 +404,7 @@ describe("battleMenu: FIGHT submenu wired through core.ts's tick() (JOY_NEW gati
       terminalResolution: null,
       resolutionOwner: {
         followingPresentation: {
-          resolution: CANONICAL_FIRE_PUNCH_RESOLUTION.resolution,
+          resolution: canonicalFirePunchResolution().resolution,
           confirmElapsed: 20774 - SCENE_TICK0,
           menuRedrawElapsed: 21725 - SCENE_TICK0,
         },
@@ -430,7 +430,7 @@ describe("battleMenu: FIGHT submenu wired through core.ts's tick() (JOY_NEW gati
       magby,
       null,
       null,
-      CANONICAL_FIRE_PUNCH_RESOLUTION.resolution,
+      canonicalFirePunchResolution().resolution,
     )[0]).toBe(14);
   });
 

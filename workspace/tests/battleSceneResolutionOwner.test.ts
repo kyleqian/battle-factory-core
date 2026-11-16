@@ -11,12 +11,12 @@ import {
   CANONICAL_FORCED_SWITCH_RENTAL_RECORDS,
   PARTY_ENTRY_FADE_OUT_START,
 } from "../src/engine/partySelect.ts";
-import { CANONICAL_OPPONENT_FLY_RESOLUTION } from "../src/engine/turn15FlyResolutionAdapter.ts";
-import { CANONICAL_FIRE_PUNCH_RESOLUTION } from "../src/engine/turn16FirePunchResolutionAdapter.ts";
+import { canonicalOpponentFlyResolution } from "../src/engine/turn15FlyResolutionAdapter.ts";
+import { canonicalFirePunchResolution } from "../src/engine/turn16FirePunchResolutionAdapter.ts";
 
 describe("exact battle-scene semantic resolution owner", () => {
   it("keeps the retained charge identity and owns only its published forced request", () => {
-    const resolution = CANONICAL_OPPONENT_FLY_RESOLUTION.strikeResolution;
+    const resolution = canonicalOpponentFlyResolution().strikeResolution;
     const owner = beginBattleSceneForcedPartySelect(
       createBattleSceneResolutionOwner(resolution),
       CANONICAL_FORCED_SWITCH_RENTAL_RECORDS,
@@ -24,7 +24,7 @@ describe("exact battle-scene semantic resolution owner", () => {
     );
     expect(owner.resolution).toBe(resolution);
     expect(owner.resolution.resolutionId)
-      .toBe(CANONICAL_OPPONENT_FLY_RESOLUTION.chargeResolution.resolutionId);
+      .toBe(canonicalOpponentFlyResolution().chargeResolution.resolutionId);
     expect(owner.forcedPartySelect?.request).toEqual(resolution.forcedRequest);
     expect(Object.isFrozen(owner)).toBe(true);
   });
@@ -32,7 +32,7 @@ describe("exact battle-scene semantic resolution owner", () => {
   it("anchors selector presentation to the dismiss edge, independent of prior idle time", () => {
     const create = () => beginBattleSceneForcedPartySelect(
       createBattleSceneResolutionOwner(
-        CANONICAL_OPPONENT_FLY_RESOLUTION.strikeResolution,
+        canonicalOpponentFlyResolution().strikeResolution,
       ),
       CANONICAL_FORCED_SWITCH_RENTAL_RECORDS,
       CANONICAL_FORCED_SWITCH_PARTY,
@@ -52,7 +52,7 @@ describe("exact battle-scene semantic resolution owner", () => {
   it("owns an immutable following resolution and its relative redraw edge without replacing the forced request owner", () => {
     let owner = beginBattleSceneForcedPartySelect(
       createBattleSceneResolutionOwner(
-        CANONICAL_OPPONENT_FLY_RESOLUTION.strikeResolution,
+        canonicalOpponentFlyResolution().strikeResolution,
       ),
       CANONICAL_FORCED_SWITCH_RENTAL_RECORDS,
       CANONICAL_FORCED_SWITCH_PARTY,
@@ -66,12 +66,12 @@ describe("exact battle-scene semantic resolution owner", () => {
     };
     owner = beginBattleSceneFollowingResolution(
       owner,
-      CANONICAL_FIRE_PUNCH_RESOLUTION.resolution,
+      canonicalFirePunchResolution().resolution,
       20_774 - 1_750,
     );
     const resolution = owner.followingPresentation!.resolution;
-    expect(resolution).toBe(CANONICAL_FIRE_PUNCH_RESOLUTION.resolution);
-    expect(owner.resolution).toBe(CANONICAL_OPPONENT_FLY_RESOLUTION.strikeResolution);
+    expect(resolution).toBe(canonicalFirePunchResolution().resolution);
+    expect(owner.resolution).toBe(canonicalOpponentFlyResolution().strikeResolution);
     expect(owner.forcedPartySelect?.request).toEqual(owner.resolution.forcedRequest);
     expect(owner.followingPresentation).toMatchObject({
       confirmElapsed: 20_774 - 1_750,
