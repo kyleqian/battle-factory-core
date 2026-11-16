@@ -45,14 +45,42 @@ Derivation of `t` and of the release, per path (all in the Lobby terminal branch
 
 ## Unproven / by shared rule
 
-- **Not measured on the ROM:** the player standing inside the woman's range or in her way (the collision follows `GetCollisionAtCoords`,
-  and the replay traces only have the player at the counter / door); the other collision inputs (directional-impassable metatile
+- **Measured since (lbw4, below):** the player in the woman's way. **Not measured on the ROM:** the other collision inputs (directional-impassable metatile
   behaviours, `ObjectEventIsTrainerAndCloseToPlayer`, `TryGetTrainerEncounterDirection` for the fat man) are inert here; elevation is
   always 0.
 - **Entry paths:** loss, forfeit, retire, 7-win no / yes / attendant are measured (the six traces). Retire after a won battle (hand-off to the
   loss terminal), the staged terminals the tests inject and the attendant return use the same rule (`t` from the terminal's own clock);
   their ROM behaviour is unmeasured. The new-challenge Lobby return after `start: "after-save"` re-seeds like any entry.
-- **Still static:** the player-vs-NPC collision in free roam uses the hard-coded `LOBBY_NPC_CELLS` (spawn tiles), and the depth sort uses
-  the spawn tiles: a walking woman is not an obstacle for the player and does not re-sort. Out of scope here.
 - Moved pins (deliberate, all Lobby new-challenge deals): `tests/lbrd.test.ts` `WIN_TWO_SEED` 35 -> 13; `tests/randomRoundSoak.test.ts`
   ISSUES #89 Baton Pass seed 1 -> 0. `tests/factoryLobbyTerminal.test.ts`: fat man frames 1 -> 3.
+
+## lbw4 -- the player <-> Lobby NPC interaction (free roam)
+
+Trace `tools/compare/traces/lbw4-woman-block-off.json` (Battle Scene OFF, lbra-loss-off's route + `appRngRebase`, DOWN held 5761..5875, capture
+5700..6200); ROM dump `tools/probe/lbw1-lobby-wander-rom.py` (player events also carry `anim` and `sx` / `sy`). The player walks into the woman's ring
+(grid x 9..11, y 17..18) and is blocked by her tile and by her previous tile, and she is blocked by the player's current / previous tile.
+
+- **Frame order (source):** CB1 `DoCB1_Overworld` runs the player's step / collision check first and sees the NPC state at the END of the previous frame;
+  then `AnimateSprites` runs the object-event callbacks in slot order (player slot 0 before the woman, slot 2), so the woman sees the player's
+  already-updated current / previous tile. Engine ticks: continuation steps decide at T = ROM frame R against the live NPC state; a buffered press
+  or a turn commit starts at T = R + 1 against the renderer's lagged state (`shownWoman` / `shownFatMan`, end of T-2).
+- **Collision (`factoryLobbyFreeRoam.ts`):** `isFactoryLobbyCellWalkable` rejects a wanderer's current OR previous tile (`DoesObjectCollideWithObjectAt`);
+  the static NPCs (attendants, camper, picnicker) stay in `LOBBY_STATIC_NPC_CELLS`. `lobbyFreeRoamRomObject` is the player's ROM object for the
+  woman's step: moving (rem >= 2) cur = destination, prv = origin; the last step frame cur = prv = destination; at rest cur = prv, except a
+  pending press / turn commit with a free target is already moving.
+- **Bump (`TryInterruptObjectEventSpecialAnim`):** while the walk-in-place-slow bump runs, a held SAME direction with a clear static target clears
+  the bump and starts the step in that frame (a wall never does; a released direction keeps the bump). The bump pose follows the GO anim
+  command index (2, 3, 0, 1 per 16-frame cycle = walk-2, stand, walk-1, stand; the rendered pose lags the index by a frame), and the step after the
+  interrupt starts at that index run through `SetStepAnimHandleAlternation` (1 -> 2, 3 -> 0). An idle same-direction press starts its step one
+  tick earlier than before (`pressStart`, step remaining 15; the old one-tick-late start was never ROM-exact; `tests/factoryLobbyFreeRoam.test.ts` pinned it as `TILE_FRAMES - 1` at 3 advances, now `- 2`).
+- **Depth sort (`factoryTerminalRender.ts`):** `SetObjectSubpriorityByElevation` puts the sprite lower on the screen in front (16 px buckets, then OAM y
+  as the tie), so the draw order is the drawn top y of each object (player fixed at 56 under the follow camera), not the spawn tile. Pinned by a render
+  test from source; the ROM trace never overlaps the two sprites (the compare is exact with both the old and the new order).
+- **Talking to a moving woman / fat man:** nothing wired. `BattleFrontier_BattleFactoryLobby_Text_NeedKnowledgeOfMonsMoves` / `_SwappedForWeakMon` (MSGBOX_NPC) exist
+  as map scripts, but the engine keeps these NPCs silent (A on an NPC is a no-op, user decision 2026-08-05), so there is no talk target and no turn-to-player on A.
+- **Proof:** engine NPC state and cursor equal the ROM on every frame of the trace (max |offset| 0, `lbw3-engine-compare.py`); `npm run compare` on the free-roam window
+  501 / 501 (5700..6200); no regression on lbra-loss-off 2258 / 2258, loss-beyond-boundary 183 / 183, loss-lobby-walk 177 / 177, won-no 9580-9633 54 / 54, won-yes 9660-9713 54 / 54,
+  won-attendant 17 / 17 + 6 / 6 + 44 / 44. Tier-1: `tests/lbw4LobbyNpcPlayer.test.ts` + `tests/fixtures/lbw4/woman-block.json.gz` (generator `tools/probe/lbw4-make-fixture.py`) replay 440 frames
+  of player cur / prv, both wanderers and the cursor.
+- **Unproven:** a same-frame race for one tile (the ordering is from source and slot order, not from a racing trace), a turn-commit refusal by the woman (bump one tick earlier), a direction change during a bump
+  (the ROM interrupts at once, the engine at the cycle end; pre-existing), the fat man in the player's way.

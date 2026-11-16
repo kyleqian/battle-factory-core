@@ -5,6 +5,18 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 2026-11-16 — lbw4 (ts lane worker): player <-> Lobby NPC interaction in free roam (ISSUES #221 E4 remainder)
+
+- **State:** on master, committed (`e6c46d86e` engine + trace, `562f916bd` depth sort + Tier-1, docs after). Battle rules untouched.
+- **Did:** player collision against the woman / fat man's live current OR previous tile; the woman sees the player's ROM cur / prv (player slot runs first);
+  held-same-direction bump interrupt, 4-cycle bump pose and post-bump walk pose; idle press starts its step a tick earlier (ROM-exact); depth sort from drawn y.
+  Talk targets: none (the NPC scripts exist, the engine keeps NPCs silent by decision). `docs/lbw3-lobby-npc-port.md` lbw4 section.
+- **Proof:** new ROM trace `lbw4-woman-block-off` (player blocked by her current and previous tile): NPC state + cursor max |offset| 0, compare 501 / 501. No regression:
+  lbra-loss 2258, beyond-boundary 183, lobby-walk 177, won-no 54, won-yes 54, won-attendant 17 + 6 + 44, six lbw3 traces offset 0. Tier-1 `tests/lbw4LobbyNpcPlayer.test.ts`.
+- **Next:** unproven: same-frame race for one tile, turn-commit refusal, fat man in the way, direction change during a bump (docs). Evidence `.integration/evidence/lbw4/`.
+
+---
+
 ## 2026-11-15 — lbw3 (ts lane worker): the Lobby NPC wander port (ISSUES #221 E4)
 
 - **State:** on master, committed (`d57c76a6e` pure module + Tier-1 replay, `fa1ed06de` engine wiring / renderer / traces, `7ee9d8bbc` soak re-pin, docs after). Battle rules untouched.
@@ -37,18 +49,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Next:** Run start: the 0:60 / varied-RNG soaks on master (lbr-g landed after them). #221 E4 = the Lobby NPC wander port (lbw1 simulator is the test oracle; `docs/lbw1-lobby-wander-evidence.md`); cry-task
   audio modes (cry-task-scout step 2); #220 residuals (cure berry ages 1-11, +1 Shell Bell / Leftovers, post-heal tail ~18); the second
   `Status_*` play +14; move-body SE lifetimes (aud242 family); then aud246 (S11 close). Nightly replay at run start as usual.
-
----
-
-## 2026-11-15 — cry1 (ts lane worker): cries inside move-animation tasks (ISSUES #219 family 3, step 1)
-
-- **State:** on master, committed (`28272f3f8` first cries + fixtures, `6bcc6705a` second cries / stops / restore + length model, docs after). Sound only: frame hashes identical (differential vs `029d0943b`, `--harness-from-head`: cry1-roar-jynx-player-on, cry1-hypervoice-jynx-player-on,
-  cry1-howl-jynx-player-on 1823 captures each); census seeds 0..99 Scene ON: only `sound` / `soundDigest` move (9 seeds, 12 Roars = 48 rows), `eventsDigest` / `commands` / `soundAnim` identical, 0 errors.
-- **Did:** `moveAnimSounds.ts` plays the cry tasks in Scene ON: Roar ROAR_1 at script frame 6 (ducks), ROAR_2 +11, restore ROAR_2 + D_R2; Howl HIGH_PITCH at 34, restore + D_HP; Hyper Voice ES at 5 (DuckNoRestore), stop at D_ES, EE +1, round-2 stop at +53 (species independent), ES2 +55, stop, EE2, restore at the earlier of
-  EE2 + D_EE and first ES + 98 (scheduled from the first cry: it falls after the engine's presented animation). Lengths: `cryTaskLengths.ts`, D = min(cap, ceil(K t) + 1), t = native cry frames (`genCryNativeFrames.py` -> `cryNativeFrames.ts`), one K per mode (ES .94996 cap 26, EE .970325 cap 141, R2 .944111 cap 61, HP .919943 cap 51):
-  zero residual on 41 / 41 / 32 / 35 ROM species, and 32 / 32 pre-registered held-out edge species exact. 6 step-mode ROM windows (`tools/audio/fixtures/cry1-*-on.json`) pin every effective row (`tests/cry1CryTasks.test.ts`, 23 tests); engine = ROM + lab drift (+13 / +13 / +1 Roar, +4 Howl, 0 / 0 Hyper Voice).
-- **Rescore:** T1 `missing-cry-task` 371 -> 0 (ROAR 336, HYPER VOICE 27, HOWL 8 sites; `soundCensusDelta.py` now counts a site emitted when its window holds a cry-task cry); T2 (seed 2: two Roars, ROM 4 cry rows + duck / restore all matched, missing 0 / extra 0; seeds 165 / 499 / 830 / 1028 use none).
-- **Gates:** typecheck 0; test:gate 362 files / 2,843; 29 importer / aud24x / aud25x / hie3 / cry1 files green; build / build:lib 0. Full `npm test` not run (the supervisor runs it).
-- **Next:** the cry-task audio modes (ROAR / HIGH_PITCH / ECHO fall back to NORMAL; scout step 2); Howl +4 / Roar +13 lab drifts unexplained. Evidence: `.integration/evidence/cry1/`.
-
----

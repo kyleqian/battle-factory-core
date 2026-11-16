@@ -18,7 +18,7 @@ exclusions are superseded. Unrelated expansions stay parked.
 - E1-E3 (battle-exit VBlank hold, Pokerus + save-block draws, Lobby map-load draws) fixed by lbr-g (`src/engine/battleExitRng.ts`,
   `tests/battleExitRng.test.ts`), E4 (the woman / fat man wander draws) by lbw3 (`docs/lbw3-lobby-npc-port.md`; offset 0 on 6 ROM traces from the rebase to the end). Open:
   - **Harness:** every lbra / lbrd `appStage` injects a non-ROM `rngValue`; the traces now carry an `appRngRebase` (values in `docs/lbw1-lobby-wander-evidence.md` and the trace files).
-  - **Unproven in the wander port:** the player inside the woman's range / in her way, and retire-after-won / injected / attendant-return entries (shared rule); free-roam player-vs-NPC collision and depth sort still use the static spawn tiles.
+  - **Unproven in the wander port:** retire-after-won / injected / attendant-return entries (shared rule); lbw4 measured the player in the woman's way (`docs/lbw3-lobby-npc-port.md`), still open there: a same-frame race for one tile, a turn-commit refusal by the woman, the fat man in the player's way, a direction change during a bump.
   - **Unmeasured:** the won route's real battle exit (reuses the loss rule), the non-terminal win's PreBattleRoom entry, a full
     boot -> draft -> battle -> forfeit route.
 
