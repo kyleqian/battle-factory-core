@@ -136,6 +136,55 @@ cheaply; left uncovered. See `STATUS.md`, "Box hunt 2026-11-14 (rrh2)".
   Synchronize or Serene Grace status forced onto an Immunity / Water Veil / Limber holder, R108 a forced Struggle with a self-KO), and
   need hand-built Mechanic Lab parties.
 
+**Box hunt rrh4 (2026-11-16): 53 of the 110 covered (50 before), R065 now class (b), R069 now class (a), 51 left (four others already class (b)).** Three more rules have a
+staged battle in `stages/coverage/` that ran the piece and matched the ROM to the end (clean re-drive, `match True`, `stage.ok True`):
+
+- **R108 (Torment on a Choice Band holder, forced Struggle that is cancelled):** `R108-torment-choice-band-explosion` (lab seed 90000).
+- **R105 (a Traced Water Veil blocks a Synchronize burn):** `R105-trace-water-veil-synchronize-burn` (seed 90002).
+- **R077 (Sleep Talk calls Thunderbolt against a Lightning Rod foe):** `R077-sleep-talk-thunderbolt-lightning-rod` (seed 90004). The marker is the
+  Lightning Rod test of `GetMoveTarget` (`battle_util.c:3854-3856`) in the Sleep Talk handler; in singles the drawn target is the holder itself,
+  so the result is always "no redirect" and the test only has to run.
+
+Class moves, each read against the decomp:
+
+- **R065 (Eruption / Water Spout keep an already-set base power): class (b), dead branch.** `BattleScript_EffectEruption`
+  (`data/battle_scripts_1.s:2493-2495`) starts with `scaledamagebyhealthratio` and no command runs before it in that script. `gDynamicBasePower`
+  is cleared at every turn start (`battle_main.c:4928`) and after every action (`HandleAction_ActionFinished`, `battle_util.c:678`); the AI
+  clears it after each damage estimate (`battle_script_commands.c:1312`, `battle_ai_script_commands.c:1188`, `:1472`, `:1519`, `:1751`, `:1780`,
+  `battle_ai_switch_items.c:748`); the other writers (`battle_script_commands.c:8314`, `:8559-8706`, `:8905`, `:9477`, and the Triple Kick
+  `copyhword` at `battle_scripts_1.s:1401`) belong to their own effect scripts. A called Eruption (Metronome, Sleep Talk, Assist, Mirror Move)
+  jumps into Eruption's own script and so also meets 0. `Cmd_scaledamagebyhealthratio` (`battle_script_commands.c:9379-9388`) therefore always
+  sees 0, and the engine's "already set" arm (`battleScriptRankedBatch1Opcode.ts:64`) cannot run.
+- **R069 (Ghost-type Curse aimed at the user picks a random foe): class (a), cannot occur.** `BattleScript_GhostCurse` takes `getmovetarget`
+  only when the target is the user (`battle_scripts_1.s:1512-1513`). Only the player menu aims Curse at the user, and only when the user is not
+  Ghost-type at selection (`battle_controller_player.c:485-498`); the opponent controller uses the move table's `MOVE_TARGET_SELECTED`
+  (`battle_moves.h:2273`; `battle_controller_opponent.c:1581`, `:1603` aim only `MOVE_TARGET_USER` moves at the user). So the user must turn
+  Ghost between selection and move. The only way in the pools is Color Change (`battle_util.c:2752`; Skill Swap / Role Play / Trace can carry it),
+  and the only Color Change sets are Kecleon 220 (challenge 1) and 325 (challenge 2), while every non-Ghost Curse set is 458 or higher
+  (challenge 3 and up, `sets.py "'CURSE' in m.moves"`); Conversion and Transform are Metronome-only and the Curse users do not carry Metronome.
+
+Left in (c), with the reason (none is proven unreachable):
+
+- **R103** (cure berry at the end of the turn on a Pursuit user): the only skipped move-end step is Pursuit on a switching foe
+  (`battle_scripts_1.s:3143`), and `HandleFaintedMonActions` state 6 gives the player's battler 0 an `ItemBattleEffects` pass after every action
+  (`battle_util.c:1958-1962`). No Pursuit set holds a cure berry, no set has both Trick and Pursuit, so the berry would have to arrive on a
+  Pursuit user by a Trick chain across both teams and the AI would have to Pursuit the right switch. Not stageable cheaply.
+- **R083** (Own Tempo after a Thrash lock): no Thrash / Petal Dance / Outrage set has Skill Swap, Role Play or Trace, and no Own Tempo set has
+  Skill Swap, so Own Tempo would have to be swapped in by Alakazam 596 / Gengar 613 (Skill Swap with an Own Tempo foe, then again with the
+  thrasher; Choice Band locks the first Skill Swap, a Trick has to precede it) and the AI would have to pick Thrash. About ten scripted turns of
+  AI luck; not stageable cheaply.
+- **R073** (Hidden Power type index past ???): the only Hidden Power set is Unown 126, and the lab refuses it (`oracle/battle_lab.py`:
+  "player set 126 is Unown, which Factory forbids"); so again Metronome only.
+- **R099** (Uproar keeps a Yawn drowsy), **R090**, **R104**: the only Uproar set in range is Vigoroth 221 (challenge 1). Vital Spirit makes it
+  immune to Yawn, the Yawn user (Wartortle 176) has no Uproar, the Soundproof sets are in challenge 0 (Voltorb 115) or 3 and up, and no Effect
+  Spore set (Parasect 177 / 282, Breloom 382 and up) has Uproar. Only a Metronome Uproar reaches them.
+- **R094, R098, R100, R101** (Thick Club / Metal Coat in Future Sight, Doom Desire, Weather Ball): no set has Doom Desire or Weather Ball, and
+  a Thick Club on a Future Sight user needs a Trick chain; Metronome.
+- The rest (R049-R053, R055-R064, R071, R072, R075, R078, R079, R082, R085, R086, R091, R096, and R068, R081, R106 as read in luck1) need an AI or
+  a player Metronome (Chansey 227, Clefable 389) to draw a particular move: a seed lottery, not a set-up.
+
+See `STATUS.md`, "Box hunt 2026-11-16 (rrh4)".
+
 How the classes were made: the patterns above, then a reading of every other piece against the C source by eleven
 reading passes, each with the same brief (class (a) or (b) only with a reason that can be pointed to, else (c)). Every
 entry of the classes file names its reason. It is a reading of the source, not a test: a wrong (a) or (b) would hide

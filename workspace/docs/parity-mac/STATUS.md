@@ -910,3 +910,52 @@ sleeper at half HP or more the read is reachable (it is what the R054 stage runs
 
 **Brief conflict:** the brief asks for "npm test and npm run build green" and also forbids npm test / typecheck / build. Only `docs/` and
 `tools/replay-hunt/` (Python) changed, so no test or build was run.
+
+## Box hunt 2026-11-16 (rrh4): three set-up rules covered, two class moves, no engine difference
+
+Evidence under `.integration/evidence/rrh4/` (git-ignored; designs in `designs/`, hunt logs in `chunt/`, clean re-drives in `redrive/`).
+No `src/` change, no hunter change. Hunt: `huntq.py` with one job, `nice -n 19`, `--max-seeds` 3 to 12. Each stage was re-driven once more from a
+clean command line (`REPLAY_OUT=<abs> tools/audio/romReplayWide.sh --stage FILE`): `match True`, `stage.ok True`, outcome engine = ROM = 2.
+
+| rule | stage file (lab seed) | lab seeds tried | states matched / decisions | outcome |
+|---|---|---|---|---|
+| R108 Torment on a Choice Band holder: forced Struggle cancelled when the second mover is already dead | R108-torment-choice-band-explosion (90000) | 1 | 6 / 6 | match |
+| R105 a Traced Water Veil blocks a Synchronize burn (`preventionCall` message arm) | R105-trace-water-veil-synchronize-burn (90002) | 3 (90000 and 90001 did not run the marker) | 14 / 14 | match |
+| R077 Sleep Talk calls Thunderbolt against a Lightning Rod foe | R077-sleep-talk-thunderbolt-lightning-rod (90004) | 11 (v1: 6, none; v2: 5, hit on the fifth) | 17 / 17 | match |
+
+**Designs.** R108 (challenge 7, trainer 200): player Mr. Mime 572 (faster) Torments the foe's Choice Band Granbull 664, is knocked out by the
+locked move, Weezing 597 replaces it and Explodes before Granbull, which has no usable move and is forced to Struggle but is already dead
+(`keepNoValidMovesOfCancelledStruggle`). R105: the foe's Gardevoir 813 (Trace) copies Water Veil from the player's lead Wailord 429, the player switches to Alakazam 404
+(Synchronize), Gardevoir burns it and Synchronize tries to pass the burn back (`seteffectprimary`), which Water Veil prevents; the six markers are the `preventionCall` arms in `battleScriptHitChainOpcode.ts`. R077:
+player Regice 839 (Chesto Berry) against Gardevoir 437 (Hypnosis), then Manectric 393 / Rhydon 403 (Lightning Rod): the first Hypnosis is cured and
+uses up the Chesto Berry, the second leaves Regice asleep, Sleep Talk then calls Thunderbolt against the Lightning Rod foe.
+
+**Class moves (read against the decomp, details in `rule-coverage.md`, "Box hunt rrh4").** R065 (Eruption / Water Spout keep an already-set
+base power) is class (b): `BattleScript_EffectEruption` has `scaledamagebyhealthratio` as its first command and `gDynamicBasePower` is 0 at every
+action start (`battle_main.c:4928`, `battle_util.c:678`). R069 (Ghost Curse aimed at the user) is class (a): only the player menu aims Curse at the
+user (`battle_controller_player.c:485-498`), the user must turn Ghost before it moves, and the only route (Color Change, Kecleon 220 / 325 in challenges
+1 and 2) never meets a non-Ghost Curse set (458 and up).
+
+**Not covered.**
+
+| rule | outcome |
+|---|---|
+| R103 cure berry at the end of the turn on a Pursuit user | not stageable cheaply: no Pursuit set holds a cure berry and no set has Trick and Pursuit; needs a Trick chain across both teams plus the AI's Pursuit on the right switch. Stays (c). |
+| R083 Own Tempo after Thrash | not stageable cheaply: Own Tempo would have to come from Alakazam 596 / Gengar 613 Skill Swapping twice (first with an Own Tempo foe, then with the thrasher), the Choice Band needs a Trick first, and the AI has to pick Thrash. Stays (c). |
+| R073 Hidden Power skips ??? | the only Hidden Power set (Unown 126) is refused by the lab ("Factory forbids" Unown, `battle_lab.py:1604`); design failed on every seed (lab setup failed). Metronome only. Stays (c). |
+| R019 (listed in `rule-coverage-c-rules.json`) | already class (b) since rrh1 (`battle_scripts_1.s:889`); a design and three seeds were spent before this was noticed (the marker never ran, as the source says). |
+| R099 / R090 / R104 (Uproar) | not stageable without a Metronome Uproar (Vigoroth 221 is Vital Spirit, the Yawn / Soundproof / Effect Spore users never share a battle with it); same finding as rrh3. |
+| the Metronome rules (R049-R053, R055-R064, R071, R072, R075, R078, R079, R082, R085, R086, R091, R094, R096, R098, R100, R101) | not attempted: a seed lottery, not a set-up; the luck designs of luck1 are the lane for those. |
+
+**No engine / ROM difference was found; no engine error either; there is no `stages/coverage/pending/` and nothing under `.integration/evidence/rrh4/`
+that needs a decision.**
+
+**Counts after rrh4: 53 of the 110 covered; R019, R029, R031, R033, R065 class (b); R069 class (a); 51 left.**
+
+**Design mistakes for the next hunter:** (1) `cover` `at` is a character offset into the snippet and the innermost V8 range decides: a snippet that
+starts at the `?` of a ternary lands in the parent range, so a branch that really ran reads as not run (R019 at offset 0; the other markers here
+start inside the branch). (2) Check `rule-coverage.md` for class moves before picking a rule from `rule-coverage-c-rules.json`: its list is the
+first-pass one (R019, R029, R031, R033 are already class (b)). (3) Rest at full HP fails, and a Chesto Berry cures Rest and any sleep at once: the
+R077 first design (Breloom, Focus Punch killed Regice on turn 1) was dead before the berry mattered; the second used a Hypnosis lead that does
+not kill. (4) `huntq.py` skips a stage whose `name` already has a log ("done before"); rename or delete the log to re-hunt a changed design, and
+the output sits in `<out>/chunt/` when `--out` already ends in `chunt`.
