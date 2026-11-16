@@ -52,20 +52,28 @@ function ourEvents(rom: Fixture): SoundEvent[] {
   return events;
 }
 
-const SPECS: Array<{ name: string; ids: number[]; delta: number; rows: number; extra?: Record<string, number> }> = [
+const SPECS: Array<{ name: string; ids: number[]; delta: number; rows: number; extra?: Record<string, number>; turnDeltas?: number[] }> = [
   { name: "petaldance-player", ids: [202, 141], delta: 2, rows: 2 },
   { name: "dive-player", ids: [162, 233], delta: -7, rows: 2 },
   { name: "rollout-player", ids: [162, 175, 141], delta: 3, rows: 21 },
+  // Five Rollout turns (counters 1..5) behind an opponent Defense Curl: the ROM's turn starts drift from ours by the presentation (not sound) offsets 9 / 22 / 37 / 57 / 86 (each turn ends on its MEGA_KICK2 row), constant inside a turn.
+  { name: "rollout5-player", ids: [162, 175, 141], delta: 0, rows: 111, turnDeltas: [9, 22, 37, 57, 86] },
 ];
 
 describe("move-animation SEs of the aud242o lifetimes", () => {
-  for (const { name, ids, delta, rows, extra = {} } of SPECS) {
-    it(`${name}: ${rows} rows at ROM = ours + ${delta}`, () => {
+  for (const { name, ids, delta, rows, extra = {}, turnDeltas } of SPECS) {
+    it(`${name}: ${rows} rows at ROM = ours + ${turnDeltas?.join(" / ") ?? delta}`, () => {
       const rom = fixture(name);
       const ours = ourEvents(rom).filter((e) => isMoveSe(e) && ids.includes(e.id as number));
       const theirs = rom.events.filter((e) => e.noop !== true && isMoveSe(e) && ids.includes(e.id as number));
       expect(theirs).toHaveLength(rows);
-      expect(ours.map(row)).toEqual(theirs.map((e) => row({ ...e, frame: e.frame - delta - (extra[row(e)] ?? 0) })));
+      let turn = 0;
+      const shifted = theirs.map((e) => {
+        const d = turnDeltas === undefined ? delta : turnDeltas[turn]!;
+        if (e.id === 141) turn++;
+        return row({ ...e, frame: e.frame - d - (extra[row(e)] ?? 0) });
+      });
+      expect(ours.map(row)).toEqual(shifted);
     });
   }
 });
