@@ -3,6 +3,7 @@
 // attacker battler, target battler, first presenting frame, last presenting frame, frame of body age 0 (null: no live body), 1 when the segment is HITMARKER_NO_ANIMATIONS, 1 for the Scene ON action-transition pause (command.actionTransition)] (the T1 attribution input of
 // soundCensusDelta.py). Events come from the same emitters tick() calls (emitTickSounds on the orchestrator before/after each step, battleScene null) between beginScreenSoundTick and runScheduledScreenSounds
 // inside collectSoundTick; menu SEs fire inside the advance functions and are collected too. A tree without those modules writes sound / soundDigest / soundAnim = null. No existing field changes.
+// t1cls: trailing per-seed field `soundCmd` = one row per presenting command of any type [command index, type, battler, first presenting frame, last presenting frame, animation name or null] (soundCensusDelta.py --t1 attributes non-move SEs by it). No existing field changes.
 // apx210 (finish plan Phase 2, liveMovePlayback.ts): trailing field [21] = a move-animation's playback class ("live", "static:<reason>",
 // later "approx:<reason>", "pause" = no body request; null otherwise). Set from (command, field before it) when the segment is seen, then
 // refined on the command's first presenting row from the production render view (the presentation gates). Fields [0..20] are unchanged.
@@ -82,6 +83,7 @@ for (let seed = from!; seed <= to!; seed += 1) {
   let rng = createPresentationRngSession();
   let frame = 0; let ended = false; let error: string | null = null;
   const sound: unknown[][] = []; const animRows = new Map<unknown, number[]>(); const cmdIndex = new Map<unknown, number>();
+  const cmdWin = new Map<unknown, unknown[]>();
   const seen = new Set<unknown>(); const rows = new Map<unknown, unknown[]>(); const classified = new Set<unknown>(); const slotUses = [0, 0, 0, 0]; let lastUsed: string | null = null;
   const owned = () => Boolean(state.battleStartIntro || state.battleResolutionPresentation || state.battleCommandPresentation);
   const step = (buttons: readonly string[] = []) => {
@@ -147,6 +149,12 @@ for (let seed = from!; seed <= to!; seed += 1) {
     }
     if (soundOn && r?.lifecycle.phase === "presenting") {
       const s = r.segments[r.segmentIndex]; const c = s?.commands[r.commandIndex];
+      // t1cls: every command's presenting window [command index, type, battler, first frame, last frame, animation name (general / status animation)].
+      if (c && cmdIndex.has(c)) {
+        let w = cmdWin.get(c);
+        if (!w) { w = [cmdIndex.get(c)!, c.type, c.battler ?? null, frame, frame, typeof c.animation === "string" ? c.animation : null]; cmdWin.set(c, w); }
+        w[4] = frame;
+      }
       if (c?.type === "move-animation") {
         let a = animRows.get(c);
         if (!a) {
@@ -214,8 +222,8 @@ for (let seed = from!; seed <= to!; seed += 1) {
     }
   } catch (e) { error = String(e); }
   const extra = soundOn
-    ? { sound, soundDigest: createHash("sha256").update(JSON.stringify(sound)).digest("hex").slice(0, 16), soundAnim: [...animRows.values()] }
-    : { sound: null, soundDigest: null, soundAnim: null };
+    ? { sound, soundDigest: createHash("sha256").update(JSON.stringify(sound)).digest("hex").slice(0, 16), soundAnim: [...animRows.values()], soundCmd: [...cmdWin.values()] }
+    : { sound: null, soundDigest: null, soundAnim: null, soundCmd: null };
   lines.push(JSON.stringify({ seed, scene, error, eventsDigest: events.digest("hex").slice(0, 16), commands, ...extra }));
 }
 writeFileSync(arg("out")!, lines.join("\n") + "\n");
