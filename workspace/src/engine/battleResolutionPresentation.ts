@@ -5039,7 +5039,7 @@ export function projectBattleResolutionCommands(
         timing: payload.kind === "draw-party-status-summary"
           ? battler === 0
             ? PARTY_SUMMARY_DRAW_TIMING
-            : opponentPartySummaryDrawTiming(lastFaintBattler === 1)
+            : opponentPartySummaryDrawTiming(lastFaintBattler === 1, event.provenance?.sourceLabel === "BattleScript_DoSwitchOut")
           : undefined,
       }));
       continue;

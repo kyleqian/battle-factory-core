@@ -8,6 +8,7 @@
 //   compare: ... compare --seed=N --scene=on|off --engine=engine.json --rom=timeline.json [--out=F]  (aud243c) engine states (hp, rng, last moves) found in order in the ROM timeline.
 //   replay / native take --frame-budget=N (default 200000 engine frames) for very long battles.
 //   native: ... native --seed=N --scene=on|off --out=engine.json  the census orchestrator itself (no ROM), same output shape: the drift check against the census row's sound column.
+//   replay --render=LO:HI --render-dir=DIR (ais2): also writes the engine's 240x160 frame PNGs for replay frames LO..HI (engine-NNNNN.png), for pixel compares against ROM captures.
 //   Frontier Brain battles (parity-mac, docs/parity-mac/brain-replay-seam.md): a census battle whose first opponent is Noland (streak 20; streak 41 with --symbols=1 on
 //     `request` / `native`) gives a `factoryBrain` lab request (no trainer / set ids: the ROM's own FillFactoryBrainParty rolls his party). `replay` then recovers the ROM's
 //     RNG cursor before that roll from the first Brain Pokemon's personality, lets the engine's production generation re-roll the party from it, and checks every member
@@ -51,6 +52,19 @@ const arg = (name: string) => process.argv.find((a) => a.startsWith(`--${name}=`
 const stage: any = arg("stage") === undefined ? null : JSON.parse(readFileSync(arg("stage")!, "utf8"));
 const seed = stage === null ? Number(arg("seed")) : Number(stage.seed);
 const scene = (arg("scene") ?? "on") as "on" | "off";
+// ais2: --render=FROM:TO --render-dir=DIR (replay / native) writes the engine's frame0-relative frames FROM..TO as DIR/engine-NNNNN.png (the app's own render(), the orchestrator wrapped in a core state).
+const renderRange = arg("render") === undefined ? null : arg("render")!.split(":").map(Number) as [number, number];
+const renderDir = arg("render-dir");
+const renderer = renderRange === null ? null : await (async () => {
+  const [core, { PNG }, { mkdirSync }] = await Promise.all([import("../../src/engine/core.ts"), import("pngjs"), import("node:fs")]);
+  mkdirSync(renderDir!, { recursive: true });
+  const base = core.createInitialState({ appRoute: "generated-orchestrator", battleScene: scene });
+  return (orchestrator: any, f: number) => {
+    const rgba = core.render({ ...base, factoryRoundBattleOrchestrator: orchestrator, rngMode: "frontierBattle" } as never);
+    const png = new PNG({ width: 240, height: 160 }); png.data = Buffer.from(rgba);
+    writeFileSync(`${renderDir}/engine-${String(f).padStart(5, "0")}.png`, PNG.sync.write(png));
+  };
+})();
 // parity-mac fourth pass: the census mapping (seed * 11) % 49 only reaches challenges 1 to 7 (sets 110..755). --challenge=N / ROM_REPLAY_CHALLENGE=N (N = the
 // game's 0-based challengeNum; 7 = the eighth challenge, sets 372..849) puts the seed's battle into that challenge: streak N * 7 + (seed * 11) % 7. Unset = the
 // census mapping, so every older list keeps its battles.
@@ -260,6 +274,7 @@ function play(initial: any, record: boolean, patchRng: number | null = null) {
       emitTickSounds({ battleScene: null, factoryRoundBattleOrchestrator: before } as never, { battleScene: null, factoryRoundBattleOrchestrator: state } as never);
       runScheduledScreenSounds();
     });
+    if (renderer !== null && record && frame0 !== null && frame - frame0 >= renderRange![0] && frame - frame0 <= renderRange![1]) renderer(state, frame - frame0);
     for (const e of events) sound.push(e.mode === undefined ? [e.frame, e.kind, e.id, e.pan] : [e.frame, e.kind, e.id, e.pan, e.mode]);
     if (frame0 !== null && state.battle) {
       const rc = state.battle.rules.rulesContext; lastRules = rc;

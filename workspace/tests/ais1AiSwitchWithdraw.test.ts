@@ -27,7 +27,7 @@ describe("AI switch withdraw (ais1)", () => {
       for (const t of turns) expect(t.commands.filter((c) => c.type === "switch-out" && c.battler === 1)).toHaveLength(1);
       const cmds = turns[0]!.commands;
       const at = cmds.findIndex((c) => c.type === "switch-out" && c.battler === 1);
-      expect(cmds.slice(at - 1, at + 3).map((c) => [c.type, c.battler ?? null, c.frames])).toEqual([["message", null, 24], ["switch-out", 1, 32], ["sprite-visibility", 1, 1], ["party-summary", 1, 100]]);
+      expect(cmds.slice(at - 1, at + 3).map((c) => [c.type, c.battler ?? null, c.frames])).toEqual([["message", null, 24], ["switch-out", 1, 32], ["sprite-visibility", 1, 1], ["party-summary", 1, 101]]);
       expect(cmds[at - 1]!.seq).toBeLessThan(0);
       expect(cmds[at]!.seq).toBeLessThan(0);
     });
