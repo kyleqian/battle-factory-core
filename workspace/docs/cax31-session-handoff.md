@@ -52,6 +52,47 @@ as a priority." So:
   to `stages/coverage/` (the nightly replay then guards it) and count the rule covered in the tally.
 - **The other rare rules** (about 38, each needs a hand-built set-up) stay a side job after sound, one step per run at most.
 
+## Website load time: the engine's start-up and download size (Kyle, 2026-11-16 ~12:50 UTC: "Yes, brief the box")
+
+The top layer measured the live site (Chromium with network and 4x CPU throttling for a phone) and fixed the site side
+(factory-web `2c4e1d9`): the page no longer waits for the engine, the files are prefetched and cached, the Start screen
+shows in ~0.4 s. What is left is the library's. Sound stays the main program; this is **one bounded worker step in
+this run** (step A), and step B only as a measured proposal.
+
+- **Where the time goes (game build `eb-c26961a07ff6b07b`, the site's):**
+  - Unpacking on a phone CPU: the `lib` chunk's module evaluation **~1.9 s**. Each data chunk ~30 ms, the sprite
+    chunk 0.18 s.
+  - Node profile of `import('<abs>/dist-lib/index.js')`: **~770 ms** unthrottled (headless 627 ms; the Worker's replay
+    check pays this too).
+    - The lib top level is ~550 ms.
+    - `createBattleScriptStatusRulesHandlers` / `createBattleScriptStatusRulesExecution` (~450 ms) build the
+      battle-script rule tables at import.
+    - Fixed sample battle turns run at import (~250 ms inclusive): `stagePlayerHitChainToTerminalMachineState`,
+      `submitFactoryFullTurnDecision`, `resolveTurn15FlyResolutionAdapter`, `stageFeatherDanceKickoff`,
+      `resolveBattle1PresentationHpValues`, `stageTurn13DragonBreathHitChain`, `stageTurn2EndeavorHitChain`,
+      `stageRockSlideTail`, `stageTurn8Bind` ... (old precomputed tables, it looks like).
+    - Compile ~150 ms.
+    - Reproduce: `node --cpu-prof --cpu-prof-interval 200 --input-type=module -e "await import('<abs>/dist-lib/index.js')"`,
+      then rank by inclusive time.
+  - Download, brotli, 3.26 MB in all: `assets-sprites` ~1.0 MB, `lib` 0.81 MB, `assets-gen` 0.42, `animation-assets`
+    0.36, `data-gen` 0.26, `data-battle-script` 0.24. On a 1.6 Mbps phone network that is ~18 s before the first
+    battle, whatever the site does.
+- **Step A (this run): make import-time work lazy.**
+  - The rule tables: build them on first use, or once per session.
+  - The sample-battle code that runs at import: make it lazy, or delete it if nothing reads it (say which, per table).
+  - Target: Node `import()` of `index.js` under ~200 ms; report before / after ms for `index.js` and `headless.js`
+    in PROGRESS.
+  - **No behaviour change.** A differential like every presentation slice (digests, kernel events and frame hashes
+    identical on the soak / census seeds), full suite, build / build:lib, the usual soaks, and the nightly replay set.
+  - `ENGINE_BUILD` moves: name it in PROGRESS for the website. Keep the library contract as it is:
+    `mountFactoryGame` returns synchronously, and `ready` / input behaviour is unchanged (`docs/library-package.md`).
+- **Step B (measure and propose; build only if A is in and a run has room): download size.**
+  - Load battle pictures per battle (the species on screen) through the existing pixel provider
+    (`src/engine/monPicPixels.ts`) instead of the whole 11.8 MB sheet.
+  - Find dead code in `lib` (the legacy sample-turn adapters above).
+  - Pack the big number-array tables tighter.
+  - Estimate bytes saved per idea, and the risk. Any API change is additive and named for the website.
+
 ## State at restart (written at the 2026-11-13 wind-down; PROGRESS.md top entry has details)
 
 - Phases 1 and 2 met (finish plan). Core library package folded (`062a82a3f`, `docs/library-package.md`). The Mac's
