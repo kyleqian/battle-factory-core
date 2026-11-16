@@ -37,12 +37,13 @@ function ourStatSes(rom: Fixture, scene: "on" | "off"): SoundEvent[] {
 // ROM frame minus our frame, per fixture window (null = we emit no stat SE there). The stat-change command starts after the move body, whose
 // presentation length is not yet ROM-exact in these windows (the clock K = STATS_CHANGE_SE_AGE is exact in the ROM-aligned census seeds, docs/aud248-s11-scoreboard.md);
 // the metalclaw / steelwing / silverwind / ancientpower rows come from a move's secondary effect that our presentation does not run as a stats-change command (named gap).
-const RESIDUAL: Record<string, number | null> = {
+// A list: one residual per stat SE row (the aud242o five-turn Rollout window, whose turn starts drift, docs/aud242-move-anim-sounds.md section 19.2).
+const RESIDUAL: Record<string, number | number[] | null> = {
   "aud242a-agility-player.json": -2, "aud242a-swordsdance-opponent.json": -2, "aud242c-cosmicpower-player.json": 2, "aud242c-flatter-player.json": 5,
   "aud242c-metalsound-opponent.json": 0, "aud242c-superpower-player.json": 17, "aud242c-sweetscent-player.json": -1, "aud242d-calmmind-player.json": 0,
   "aud242d-metalclaw-player.json": null, "aud242d-steelwing-player.json": null, "aud242e-overheat-player.json": 17, "aud242f-growth-player.json": 23, "aud242f-swagger-player.json": 6,
   "aud242j-silverwind-player.json": null,
-  "aud242k-ancientpower-player.json": null, "aud242k-scaryface-player.json": 14, "aud242k-smokescreen-player.json": 0,
+  "aud242k-ancientpower-player.json": null, "aud242o-rollout5-player.json": [2, 16, 31, 51, 80], "aud242k-scaryface-player.json": 14, "aud242k-smokescreen-player.json": 0,
 };
 
 const names = readdirSync(dir).filter((n) => /^aud242.*\.json$/.test(n));
@@ -68,7 +69,7 @@ describe("stat-change SEs (aud248)", () => {
         expect(ours).toEqual([]);
         return;
       }
-      expect(ours.map((e) => `${e.frame + residual}:${e.id}:${e.pan}`)).toEqual(theirs.map((e) => `${e.frame}:${e.id}:${e.pan}`));
+      expect(ours.map((e, i) => `${e.frame + (Array.isArray(residual) ? residual[i]! : residual)}:${e.id}:${e.pan}`)).toEqual(theirs.map((e) => `${e.frame}:${e.id}:${e.pan}`));
     });
   }
 
