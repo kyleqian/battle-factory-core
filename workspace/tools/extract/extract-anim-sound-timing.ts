@@ -138,6 +138,35 @@ function simplePaletteBlendLength(delay: number, startY: number, targetY: number
 function complexPaletteBlendLength(delay: number, numBlends: number): number {
   return (numBlends + 1) * (delay + 1);
 }
+// ---- aud242h: AnimTask_BlendColorCycle / ...Exclude / ...ByTag (battle_anim_normal.c:447-560): a chain of BeginNormalPaletteFade fades. The entry runs fade 1 (0 -> targetY)
+// inside the script step (palette.c:156-206: Begin runs UpdatePaletteFade once, update call 1, iteration F); every later call is UpdatePaletteFade in CB2 before RunTasks
+// (battle_main.c:1863-1869), so fade-1 call c >= 2 is iteration F + c - 2 (the aud242e rule). The loop (RunTasks) starts the next fade in the iteration the previous one
+// cleared `active`: its call 1 is in that RunTasks, call c >= 2 is iteration G + c - 1. Fade i >= 2 goes start = (i even ? targetY : initialY), target = (i even ? initialY : targetY),
+// except the last fade (tNumBlends == 1 in the loop) targets 0. One fade over y steps of deltaY (2, or 2 - delay for a negative delay) costs 2 calls per y value plus `delay` waiting
+// calls between y values (palette.c:406-455) and 5 finishing calls (IsSoftwarePaletteFadeFinishing, palette.c:807-828). The task destroys itself in the RunTasks of the iteration the
+// last fade clears (AnimTask_BlendColorCycleLoop, `!active` and tNumBlends 0): gone (that iteration - F) ticks after the creation tick.
+function paletteFadeCalls(delay: number, startY: number, targetY: number): number {
+  const deltaY = delay < 0 ? 2 - delay : 2;
+  const wait = delay < 0 ? 0 : delay;
+  let [y, calls] = [startY, 0];
+  for (;;) {
+    calls += 2;
+    if (y === targetY) break;
+    y = startY < targetY ? Math.min(y + deltaY, targetY) : Math.max(y - deltaY, targetY);
+    calls += wait;
+  }
+  return calls + 5;
+}
+function blendColorCycleLength(delay: number, numBlends: number, initialY: number, targetY: number): number {
+  if (numBlends < 1) return -1;
+  let exact = 0;
+  for (let fade = 1; fade <= numBlends; fade += 1) {
+    const last = fade === numBlends;
+    const [start, end] = fade === 1 ? [0, targetY] : fade % 2 === 0 ? [targetY, last ? 0 : initialY] : [initialY, last ? 0 : targetY];
+    exact += fade === 1 ? paletteFadeCalls(delay, start, end) - 2 : paletteFadeCalls(delay, start, end) - 1;
+  }
+  return exact;
+}
 const METALLIC_SHINE_LENGTH = 95;
 // Measured on two moves, both agreeing (docs section 8): 4 wall-clock frames between the shine's creation and the first op after its wait. The first 2 are
 // localised (Metal Claw's SE_M_HARDEN loop task, counted in iterations, plays its second SE exactly 2 wall frames late: 28 -> 30); the other 2 are not
@@ -209,6 +238,12 @@ function lifetimeOf(cmd: Command): Lifetime {
     const [delay, numBlends] = op === "complex_palette_blend" ? [intArg(named("delay")), intArg(named("num_blends"))] : [intArg(args[4]), intArg(args[5])];
     if (delay === null || numBlends === null || delay < 0 || numBlends < 0) return null;
     return { exact: complexPaletteBlendLength(delay, numBlends) };
+  }
+  if (op === "blend_color_cycle" || op === "blend_color_cycleexclude" || op === "blend_color_cyclebytag" || (op === "createvisualtask" && /^AnimTask_BlendColorCycle(Exclude|ByTag)?$/.test(args[0] ?? ""))) {
+    const key = (k: string, positional: number): number | null => intArg(op === "createvisualtask" ? args[positional] : args.find((a) => a.startsWith(`${k}=`)));
+    const [delay, numBlends, initialY, targetY] = [key("delay", 3), key("num_blends", 4), key("initial_blend_y", 5), key("target_blend_y", 6)];
+    if (delay === null || numBlends === null || initialY === null || targetY === null) return null;
+    return { exact: blendColorCycleLength(delay, numBlends, initialY, targetY) };
   }
   // AnimTask_MetallicShine (battle_anim_dark.c:822-882, step :896-935): the step adds 4 to data[10] per call; every 128 (32 calls) data[11]++, and the third
   // wrap (96 calls) runs DestroyAnimVisualTask. Call 0 is the script step, call k >= 1 is RunTasks of iteration F + k - 1: gone 95 ticks after the creation tick.
@@ -387,6 +422,11 @@ const BG_LOAD_LAG: Readonly<Record<string, number>> = { BG_IMPACT_OPPONENT: 1, B
 const bgLoadLag = (bg: string | undefined): number => BG_LOAD_LAG[bg ?? ""] ?? 0;
 
 const blockers: Record<string, number> = {};
+const blockersByLabel = new Map<string, Set<string>>();
+// ANIM_SOUND_WHATIF=file: continue past every unmodelled lifetime as if it were gone at once and write every distinct blocker per body (ranking aid, no table effect).
+const whatIf = process.env.ANIM_SOUND_WHATIF !== undefined;
+const allBlockers = new Map<string, Set<string>>();
+const noteAll = (label: string, what: string): void => { const set = allBlockers.get(label) ?? new Set<string>(); set.add(what); allBlockers.set(label, set); };
 function walk(bodyLabel: string, turn: number, attackerSide: number): Walk {
   const events: SoundOp[] = [];
   const reasons: Record<string, number> = {};
@@ -397,6 +437,9 @@ function walk(bodyLabel: string, turn: number, attackerSide: number): Walk {
   let pending: Array<{ at: number; life: Lifetime; name: string }> = [];
   let ret: number | null = null;
   let fade: number | null = null;
+  // gPaletteFade is one shared object: a BeginNormalPaletteFade while another normal / hardware fade is active returns FALSE (palette.c:156-163), so a color cycle that
+  // overlaps another fade is left unmodelled. `fadeBusy` = the last iteration a normal fade (simple_palette_blend / color cycle) of this walk may be active.
+  let fadeBusy = -1;
   // Wall-clock frames the ROM spends in a VBlank-overrun lag (no main-loop iteration): ops at iteration > `after` play `frames` later.
   const lags: Array<{ after: number; frames: number }> = [];  // `after`: first affected iteration - 1 (fractional .5 = from the same iteration)
   const shiftAt = (iteration: number): number => lags.reduce((n, l) => (iteration > l.after ? n + l.frames : n), 0);
@@ -422,7 +465,13 @@ function walk(bodyLabel: string, turn: number, attackerSide: number): Walk {
       // AnimTask_MetallicShine decompresses its tilemap and image and loads a palette in the creating step (battle_anim_dark.c:866-870): a measured
       // VBlank overrun (METALLIC_SHINE_LOAD_LAG; Metal Claw and Steel Wing, aud242d), like BG_LOAD_LAG.
       if ((op === "metallic_shine" || (op === "createvisualtask" && args[0] === "AnimTask_MetallicShine")) && frame !== null) lags.push({ after: frame, frames: METALLIC_SHINE_LOAD_LAG });
-      if (frame !== null) pending.push({ at: frame, life: lifetimeOf(cmd), name: op === "createsprite" || op === "createvisualtask" ? args[0] ?? op : op });
+      let life = lifetimeOf(cmd);
+      const colorCycle = op === "blend_color_cycle" || op === "blend_color_cycleexclude" || op === "blend_color_cyclebytag" || (op === "createvisualtask" && /^AnimTask_BlendColorCycle/.test(args[0] ?? ""));
+      if (frame !== null && life !== null && "exact" in life && (colorCycle || op === "simple_palette_blend" || (op === "createsprite" && args[0] === "gSimplePaletteBlendSpriteTemplate"))) {
+        if (colorCycle && (frame <= fadeBusy || (fade !== null && frame < fade + FADE_IN_DONE))) life = null;
+        else fadeBusy = Math.max(fadeBusy, frame + life.exact);
+      }
+      if (frame !== null) pending.push({ at: frame, life, name: op === "createsprite" || op === "createvisualtask" ? args[0] ?? op : op });
       const known = returnValue(args[0] ?? "", attackerSide);
       ret = op === "createvisualtask" ? known : ret;
       if (op === "createvisualtask" && known === null && /^AnimTask_(Is|Get)\w*(Side|Contest|Environment|Partner|Power|Count|Hit|Right)/.test(args[0] ?? "")) ret = null;
@@ -439,7 +488,17 @@ function walk(bodyLabel: string, turn: number, attackerSide: number): Walk {
         if (pending.length === 0) break;
         const exact = pending.filter((p) => p.life !== null && "exact" in p.life).map((p) => p.at + (p.life as { exact: number }).exact);
         const bounds = pending.filter((p) => p.life !== null && "bound" in p.life).map((p) => p.at + (p.life as { bound: number }).bound);
-        if (pending.some((p) => p.life === null)) { if (turn === 0 && attackerSide === 0 && why === null) for (const p of pending) if (p.life === null) blockers[p.name] = (blockers[p.name] ?? 0) + 1; unresolved("unmodelled-lifetime"); pending = []; break; }
+        if (whatIf && pending.some((p) => p.life === null)) {
+          for (const p of pending) if (p.life === null) noteAll(bodyLabel, p.name);
+          pending = pending.map((p) => (p.life === null ? { ...p, life: { exact: 0 } } : p));
+        }
+        if (pending.some((p) => p.life === null)) {
+          if (why === null) for (const p of pending) if (p.life === null) {
+            if (turn === 0 && attackerSide === 0) blockers[p.name] = (blockers[p.name] ?? 0) + 1;
+            const set = blockersByLabel.get(bodyLabel) ?? new Set<string>(); set.add(`${p.name}@${p.at}`); blockersByLabel.set(bodyLabel, set);
+          }
+          unresolved("unmodelled-lifetime"); pending = []; break;
+        }
         const gone = exact.length === 0 ? -1 : Math.max(...exact);
         if (bounds.some((b) => b > gone)) { unresolved("unmodelled-lifetime"); pending = []; break; }
         if (frame <= gone) frame = gone + 1;
@@ -476,7 +535,7 @@ function walk(bodyLabel: string, turn: number, attackerSide: number): Walk {
         if (frame === null) break;
         if (fade !== null && frame < fade + FADE_IN_DONE) frame = fade + FADE_IN_DONE;
         break;
-      case "waitsound": unresolved("waitsound"); pending = []; break;
+      case "waitsound": if (whatIf) { noteAll(bodyLabel, "!waitsound"); pending = []; break; } unresolved("waitsound"); pending = []; break;
       case "jumpifmoveturn": if (value(args[0]!) === turn) pc = [args[1]!, 0]; break;
       case "choosetwoturnanim": pc = [args[(turn & 1) === 1 ? 1 : 0]!, 0]; break;
       case "jumpifcontest": break;
@@ -603,6 +662,8 @@ writeFileSync(join(outDir, "anim-sound-timing.json"), `${JSON.stringify(out)}\n`
     for (const [reason, n] of Object.entries(m.reasons[0]!)) tally[reason] = (tally[reason] ?? 0) + n;
   }
   if (process.env.ANIM_SOUND_BLOCKERS) console.log(Object.entries(blockers).sort((a, b) => b[1] - a[1]).slice(0, 25).map(([k, v]) => `${k}:${v}`).join(" "));
+  if (whatIf) writeFileSync(process.env.ANIM_SOUND_WHATIF!, JSON.stringify(Object.fromEntries([...allBlockers].map(([k, v]) => [k, [...v]]))));
+  if (process.env.ANIM_SOUND_BLOCKERS_BY_MOVE) writeFileSync(process.env.ANIM_SOUND_BLOCKERS_BY_MOVE, JSON.stringify(Object.fromEntries([...blockersByLabel].map(([k, v]) => [k, [...v]]))));
   console.log(`turn 0 / player attacker: ${emitted} resolved ops, ${gatedTotal} unresolved ops by reason ${JSON.stringify(tally)}`);
 }
 console.log(`general: ${general.map((g) => `${g.label}:${g.variants[0]}/${g.ends[0]}/${g.gated[0]}`).join(" ")}`);

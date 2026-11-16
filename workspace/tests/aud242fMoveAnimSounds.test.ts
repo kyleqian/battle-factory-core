@@ -72,7 +72,8 @@ const SPECS: Record<string, Spec> = {
   "icebeam-player": { delta: 2 },
   "swagger-player": { delta: -3, romOnlyFrom: 300 },
   "hiddenpower-player": { delta: 2 },
-  "growth-player": { delta: -4, romOnly: ["90:152:-64"], romOnlyFrom: 300 },
+  // aud242h: the second SE152 (after the blend_color_cycle wait) is emitted now and exact at the same -4.
+  "growth-player": { delta: -4, romOnlyFrom: 300 },
 };
 
 describe("move-animation SEs after the aud242f sprite lifetime waits", () => {
