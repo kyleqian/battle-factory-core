@@ -48,6 +48,12 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Next:** the opponent send-in ball starts 2 frames / ends 1 frame early vs the ROM (shared with faint replacements, SE 15 -1 pinned); player anchor still hardcodes y_offset 13; Pursuit / Focus Punch AI switches unprobed (ISSUES #222).
 - **Notes:** full `npm test` NOT run (supervisor does). The player's own recall effect not generalised (keeps the voluntary-switch clock).
 
+## 2026-11-16 — pin1 (ts lane worker): randomRoundSoak re-pins after ais1 / ais2, Baton Pass scanner restored
+
+- **State:** committed (`19d683750`), test-only + tooling; `npx vitest run tests/randomRoundSoak.test.ts` 64/64, typecheck 0. `tools/soak/batonPassSearch.ts` (`--seeds A:B --parallel N`, the pin's options by default; usage in its header) replaces the cln237-removed scanner; `--seeds 0:80 --parallel 8` takes ~50 s.
+- **Did:** "full" seed 0 re-pinned 18523 / battle 1 / turn 23 / depth 0 -> 38094 / battle 2 / turn 22 / depth 1 (ais1; ais2 does not move it; seed 1 unmoved); vanilla / winning pins did NOT move. #89 Baton Pass pin seed 32 -> 3 (hits 3, 8, 14, 15, 17, 19, 31, 33, 44, 55, 71, 77), history lines added.
+- **Next:** none; re-pins after the next presentation change are one scanner command.
+
 ## 2026-11-16 night run (CAX31 supervisor, Opus 5.5, 13:30 -> 05:30 UTC): in progress
 
 - **State:** folded: lazy1, luck1, aud242k / l / m / n, dl1, dl2, rrh4, aud251 (entries above / below). Running: aud242o (integration), lbw5 (side).
