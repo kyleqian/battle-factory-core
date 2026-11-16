@@ -64,3 +64,43 @@ because it absorbed the drift; that metric is not the criterion here).
 
 typecheck 0; `test:gate` 362 files / 2843 tests green; direct importers of the changed modules + hie1 / hie2 (now incl. the epoch test) / icePunch /
 animationBoundaryRatchet / factoryAnimationInventory: 252 files, 3191 passed (1 skipped); `build` and `build:lib` 0; Scene OFF differential vs 3250873e3: 2152 captures byte-identical (turn5-sitrus-a..d, hie1-{sitrus,shellbell}-off).
+
+## hie4: the post-heal tail (ISSUES #220; both scenes, presentation timing only)
+
+After `ItemHealHP_Ret`'s HP update (Leftovers / Shell Bell) the app's next text started ~17 - 21 frames after the ROM's. Source-first cause (`data/battle_scripts_1.s`
+`BattleScript_ItemHealHP_Ret`: `printstring; waitmessage B_WAIT_TIME_LONG; orword; healthbarupdate; datahpupdate; return`; `battle_script_commands.c`
+`Cmd_healthbarupdate` / `Cmd_datahpupdate` / `CompleteOnHealthbarDone` add no minimum): the engine's `hp` command kept the **28-row floor** (`HP_TIMING`) that
+lsd194 section 2.1 had already named as belonging to the ordinary hit's `attackanimation; waitanimation; healthbarupdate`, not to `healthbarupdate`, and listed
+Leftovers / Wish as "still carry the floor" (next action there). A Leftovers / Shell Bell heal is 5 - 6 HP = a 5 - 6 row bar (+ 1), so the floor over-held it by
+`28 - (bar + 1)` = 21 / 22 rows. Sitrus' 30 HP bar (> 27 rows) was never affected, which is why that path was exact.
+
+Fix (`battleResolutionPresentation.ts hpPrintTailTiming`, shared by both scenes):
+
+- `ITEM_HEAL_HP_TIMING` (`minimumFrames 0`): a `datahpupdate` preceded by `healthbarupdate; orword; waitmessage; printstring` (Leftovers / Shell Bell `_Ret`, `_RemoveItem`,
+  `BerryConfuseHealEnd2`, Wish's heal): the bar's own `battleHealthBarAnimationFrames + 1`. The ordinary hit and every other shape keep the 28 floor. Bars > 27 rows are unchanged.
+- `SHELL_BELL_HP_TIMING` (`tailFrames 3`) + `SHELL_BELL_TURN_END_TIMING` (turn-end 9): Shell Bell reaches `ItemHealHP_Ret` by `call` out of `moveend` (the heal's
+  script run continues the move script: `healContinuesMoveScript`), so `return; moveend; end` and the turn-action machine run before the prompt instead of Leftovers'
+  `return; end2`. Measured +3 rows on the text run and +1 on the blank run before the prompt, identically in both scenes (two independent labs). Only one lab per scene backs the
+  3 / 1 split; no other continuation-shaped `ItemHealHP_Ret` caller exists.
+
+## hie4 measured (`.integration/evidence/hie4/`, ROM = the lab's own scene oracle; `runs.py` = text-box (y >= 112) run lengths, `offs.py` = exact-hash offsets)
+
+Scene OFF is aligned to +2 before the segment (40 / 40 exact windows), Scene ON +17 (56 / 56). Post-heal text start ROM-minus-ours, at the pre-segment offset:
+
+| lab | pre-segment | heal text run (ROM / app, before -> after) | next text start offset before -> after | post-heal exact frames at the pre offset (after) | residual |
+|---|---|---|---|---|---|
+| hie1-leftovers-off | +2 | 80 / 101 -> 80 | -19 -> +2 | 261 / 263 at +2 | 0 |
+| hie1-shellbell-off | +2 | 82 / 101 -> 82 | -16 -> +2 (+3 before the turn-end 9) | 291 / 293 at +2 (last: 260 / 263 at +3) | 0 |
+| hie1-leftovers-on | +17 | 80 / 101 -> 80 | -4 (-21 vs pre) -> +17 | 201 / 201 at +17 | 0 |
+| hie1-shellbell-on | +17 | 82 / 101 -> 82 | -18 -> +17 (before turn-end 9: +18) | 711 / 711 at +17 | 0 |
+| hie1-sitrus-off / -on, hie1-cheri-off / -on, hie2-sitrus-opp-on | | | unchanged (same-frame matched 503 / 176 / 431 / 211 / 169 before and after) | | 0 |
+
+The 2 / 263 and 3 / 293 non-matching frames are the idle player-sprite bounce phase (pre-existing). Same-frame `compare --summary` scores: leftovers-off 301 -> 527, shellbell-off 280 -> 510;
+leftovers-on 547 -> 142 and shellbell-on 782 -> 136 *fall* because the drifted lab (app +17 ahead of the ROM before the segment) used to coincide with the old +21-late tail (same-frame metric,
+not the criterion; the drift-aware rows above are exact).
+
+## hie4 gates
+
+`tests/hie4ItemHealTail.test.ts` (Leftovers / Shell Bell / Sitrus, both scenes; the ordinary hit keeps its 28 floor). Census seeds 0..99, both scenes, base 2cdf86ba3 vs the change (`lsd194Census.sh` + `rst197CensusDelta.py`):
+100 battles, 0 digest / error / command-type-sequence differences in each scene (`eventsDigest` excludes frame timing); 66 / 100 battles changed, all timing fields of item-heal `hp` commands (28 -> 0 floor, -13 .. -25 frames each, plus the dependent totals);
+nothing else moved. No pin keyed on absolute frames moved in the touched tests.
