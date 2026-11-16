@@ -662,3 +662,11 @@ Census T1 (seeds 0..99 Scene ON, arm baseline `on-f205895b4`, the old table read
 - Sludge Bomb (198), Blizzard (88), Faint Attack (62), Confuse Ray (47), Dig (37), Spark (32), Struggle (30), Attract (28) remain the top gated census moves. Sludge Bomb needs the SE-length table (`waitsound` must keep `pending`, `Cmd_waitsound` `battle_anim.c:1635-1658`), the hit-particle and poison-bubble lifetimes; Blizzard needs a target-species resolver.
 - Faint Attack needs `AnimTask_SetAttackerInvisibleWaitForSignal`; Struggle `gMovementWavesSpriteTemplate`; Shadow Ball a Ghost-able target in the harness for a ROM window.
 - Per-window offsets are recorded, not fixed (ISSUES #198).
+
+### 12.5 Acceptance receipt (aud242h)
+
+Tested code commit `dbc3f7178` (later commits are docs only).
+
+- `npm run typecheck`, `npm run build`, `npm run build:lib`: each exit 0. `npm run test:gate`: 362 files, 2,843 passed. aud24x / aud25x / moveAnimSounds / tickSounds importer tests: 26 files, 282 passed. `npm test` run as shards 1-6 of 6 (the unsharded run exceeds the foreground cap): all green.
+- `npm run compare:differential` (`--harness-from-head`, base `f205895b4`) over 3 Scene ON traces (Psychic, Growth, Body Slam; frames 60..692 step 8): 240 / 240 captures byte-identical.
+- Census (seeds 0..99 Scene ON, `soundCensusDelta.py --t1`, arm baseline `on-f205895b4`; "before" = the base-commit table): exact 23,547 -> 23,795, missing-gated 1,066 -> 950, extra 0, unclassified 11,093 -> 11,093 (unchanged). `rst197CensusDelta.py`: 100 / 100 battles identical (`commands`, `eventsDigest`).
