@@ -127,7 +127,7 @@ tools and the rare-rule hunt are the box's.
 - **Item 0 (sound):** cry2 DONE (the five cry-task modes recorded for the 46 species that can use Roar / Howl / Hyper Voice or call them, 112 sounds,
   played from their own files; `docs/cry1-cry-tasks.md` "cry2"). Move-body SE lifetimes: aud242h / i / j DONE (docs sections 12-14; T1 census 0..99 ON
   missing-gated 1,066 -> 570). Next, by size (ISSUES #219 / #198): the next lifetime slices (Blizzard 88 needs a per-species off-screen resolver,
-  Confuse Ray 47, Spark 32, Tri Attack 24, Dig turn-0 offsets); Status_Poison's 6th SE 148 (7 frames after the command; ROM window, t1cls finding); the second `Status_*` play +14 frames; hear a task cry live once. aud246 (S11 close) waits.
+  Confuse Ray 47, Spark 32, Tri Attack 24, Dig turn-0 offsets); the second `Status_*` play +14 frames; hear a task cry live once. aud246 (S11 close) waits.
 - **Item 0b (Lobby):** #221 E4 DONE: lbw3 (the woman / fat man wander on the shared cursor, cursor == ROM on 6 traces) and lbw4 (player <-> NPC
   collision from live tiles, depth sort; `lbw4-woman-block-off` 501 / 501), `docs/lbw3-lobby-npc-port.md`. Open (ISSUES #221): same-frame tile race,
   turn-commit refusal, the fat man in the way, unmeasured entry routes; the retire-off dialog text pacing residual (78 frames, `lbra-retire-off`
@@ -142,7 +142,7 @@ the next server challenge with `start: "after-save"` and mounts it (server colum
 Lobby -> attendant -> new challenge -> a few turns -> forfeit, verified; the same trace replayed with `start` "draft" reaches no battle. So keep
 `challenge-request` / `start` stable, and name any change to them in PROGRESS. Games already open on `eb-adfdcfdc91f4247f`
 or `eb-9d34d28f1b19ef3d` finish on those builds (checked live: an `eb-adfd` game resumed after the deploy, ended, replay-verified on its own build).
-Later builds reach the site only when Kyle asks again. The 2026-11-16 wind-down build is `eb-4f7e2a7803523e94` (`3564a9712`; no API change; it adds 112 `cry-NNN-task` audio files + AAC twins that the site must serve with the rest of the audio). Cleanup 5's "< 15 min" suite target: measured non-goal on this box (cln277); the 670 s render lever in
+Later builds reach the site only when Kyle asks again. The 2026-11-16 wind-down build is `eb-b17e87a4a52c33ad` (`36e9335ab`; no API change; it adds 112 `cry-NNN-task` audio files + AAC twins that the site must serve with the rest of the audio). Cleanup 5's "< 15 min" suite target: measured non-goal on this box (cln277); the 670 s render lever in
 `tools/integration/generatedCommandAnimationReplay.ts` would trade render-crash coverage (not taken).
 
 0. **User decision 2026-11-11 (Kyle, "Yes, start sound"): start sound PLAYBACK now, alongside the ROM-driver gameplay
