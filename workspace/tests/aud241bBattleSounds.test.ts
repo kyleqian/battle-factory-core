@@ -5,7 +5,7 @@
 import { readFileSync, readdirSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { collectSoundTick, type SoundEvent } from "../src/audio/soundEvents.ts";
-import { FAINT_CRY_RESTORE_FRAMES } from "../src/data/faintCryFrames.ts";
+import { CRY_FAINT_FRAMES } from "../src/data/cryModeFrames.ts";
 import { createInitialState, tick } from "../src/engine/core.ts";
 import { beginScreenSoundTick, handleLowHpMusicChange } from "../src/engine/screenSounds.ts";
 import { traceAdvances } from "../tools/compare/traceReplay.ts";
@@ -169,21 +169,21 @@ describe("effectiveness, faint and low-HP sounds match the ROM (aud241b)", () =>
 describe("faint cry restore delay (aud241b)", () => {
   const lengthFixtures = readdirSync(new URL("../tools/audio/fixtures/", import.meta.url)).filter((f) => f.startsWith("faint-cry-length-"));
 
-  it("is exact on every species measured on the ROM (the generator's fit inputs)", () => {
+  it("is exact on every species measured on the ROM (the aud241b fit's inputs; the table is now cry3's derivation)", () => {
     expect(lengthFixtures.length).toBe(14);
     for (const file of lengthFixtures) {
       const rom = fixture(file.replace(/\.json$/, ""));
       const cry = rom.events.find((e) => e.kind === "cry" && e.mode === "FAINT")!;
       const restore = rom.events.find((e) => e.kind === "duck" && e.via === "IsCryPlaying" && e.frame > cry.frame)!;
-      expect(restore.frame - cry.frame, file).toBe(FAINT_CRY_RESTORE_FRAMES[cry.id as number]);
+      expect(restore.frame - cry.frame, file).toBe(CRY_FAINT_FRAMES[cry.id as number]! + 1);
     }
     const rattata = fixture("faint-opponent-window");
     const cry = rattata.events.find((e) => e.kind === "cry")!;
-    expect(rattata.events.find((e) => e.kind === "duck" && e.via === "IsCryPlaying")!.frame - cry.frame).toBe(FAINT_CRY_RESTORE_FRAMES[19]);
+    expect(rattata.events.find((e) => e.kind === "duck" && e.via === "IsCryPlaying")!.frame - cry.frame).toBe(CRY_FAINT_FRAMES[19]! + 1);
   });
 
   it("covers all 376 Factory species", () => {
-    expect(Object.keys(FAINT_CRY_RESTORE_FRAMES)).toHaveLength(376);
+    expect(Object.keys(CRY_FAINT_FRAMES)).toHaveLength(376);
   });
 });
 

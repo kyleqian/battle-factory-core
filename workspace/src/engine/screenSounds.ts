@@ -2,8 +2,7 @@
 // nothing here reads engine state or changes a branch's outcome.
 import { emitSound, soundCollecting } from "../audio/soundEvents.ts";
 import speciesStatsData from "../data/gen/species-stats.json" with { type: "json" };
-import { FAINT_CRY_RESTORE_FRAMES } from "../data/faintCryFrames.ts";
-import { CRY_NORMAL_FRAMES, CRY_WEAK_FRAMES } from "../data/cryModeFrames.ts";
+import { CRY_FAINT_FRAMES, CRY_NORMAL_FRAMES, CRY_WEAK_FRAMES } from "../data/cryModeFrames.ts";
 
 /** SE_SELECT (include/constants/songs.h), pan-less `PlaySE`. */
 export const SE_SELECT = 5;
@@ -162,9 +161,10 @@ export function playSendOutCry(bgm: number, species: number, mode: number, pan: 
   startCry(bgm, species, mode, pan, undefined, onRestore);
 }
 
-/** aud241b: `PlayCry_ByMode(species, CRY_MODE_FAINT)` (`playfaintcry`): the BGM duck, the cry, the restore when the cry ends (fitted per species). */
+/** aud241b: `PlayCry_ByMode(species, CRY_MODE_FAINT)` (`playfaintcry`): the BGM duck, the cry, the restore when the cry ends (cryModeFrames.ts, one frame after the last sample frame). */
 export function playFaintCry(bgm: number, species: number, pan: number): void {
-  startCry(bgm, species, CRY_MODE_FAINT, pan, FAINT_CRY_RESTORE_FRAMES[species]);
+  const length = CRY_FAINT_FRAMES[species];
+  startCry(bgm, species, CRY_MODE_FAINT, pan, length === undefined ? undefined : length + 1);
 }
 
 /** include/constants/songs.h: Cmd_effectivenesssound's SEs, dofaintanimation's SE_FAINT and the low-HP loop. */
