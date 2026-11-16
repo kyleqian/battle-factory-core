@@ -127,7 +127,7 @@ tools and the rare-rule hunt are the box's.
 - **Item 0 (sound):** cry2 DONE (the five cry-task modes recorded for the 46 species that can use Roar / Howl / Hyper Voice or call them, 112 sounds,
   played from their own files; `docs/cry1-cry-tasks.md` "cry2"). Move-body SE lifetimes: aud242h / i / j DONE (docs sections 12-14; T1 census 0..99 ON
   missing-gated 1,066 -> 570). Next, by size (ISSUES #219 / #198): the next lifetime slices (Blizzard 88 needs a per-species off-screen resolver,
-  Confuse Ray 47, Spark 32, Tri Attack 24, Dig turn-0 offsets); the second `Status_*` play +14 frames; hear a task cry live once. aud246 (S11 close) waits.
+  Confuse Ray 47, Spark 32, Tri Attack 24, Dig turn-0 offsets); the second `Status_*` play +14 frames (sta2: the message section between the plays is short, not the script); hear a task cry live once. aud246 (S11 close) waits.
 - **Item 0b (Lobby):** #221 E4 DONE: lbw3 (the woman / fat man wander on the shared cursor, cursor == ROM on 6 traces) and lbw4 (player <-> NPC
   collision from live tiles, depth sort; `lbw4-woman-block-off` 501 / 501), `docs/lbw3-lobby-npc-port.md`. Open (ISSUES #221): same-frame tile race,
   turn-commit refusal, the fat man in the way, unmeasured entry routes; the retire-off dialog text pacing residual (78 frames, `lbra-retire-off`
