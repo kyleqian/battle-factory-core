@@ -726,7 +726,13 @@ function lifetimeOf(cmd: Command, attackerSide: number, pic: PicContext, rollout
   }
   // gConfuseRayBallSpiralSpriteTemplate (:313-341): the init installs the step and runs it at once (call 0: data[7] 0 -> 1), so call k has data[7] = k + 1 and call 60 (61) destroys: gone 59 ticks after F.
   if (sprite("gConfuseRayBallSpiralSpriteTemplate")) return { exact: 59 };
-  if (op === "create_basic_hitsplat_sprite") return { bound: 10 };
+  // AnimHitSplatBasic (battle_anim_normal.c:1006-1018): affine anim `animation` (sAffineAnim_HitSplat_0..3, :134-163), RunStoredCallbackWhenAffineAnimEnds (sprite.c:729-733) with
+  // DestroyAnimSprite stored. Anims 1..3 are one shape (a 0 frame, then the 8 frame): exact 10, ROM-measured on anim 2 (aud242p Poison Sting window: the wait ends 10 ticks after the
+  // hit splat, the Shake task there is 8; Spark / Poison Tail agree). Anim 0 (the 8 frame alone) and a non-literal animation stay the bound.
+  if (op === "create_basic_hitsplat_sprite" || sprite("gBasicHitSplatSpriteTemplate")) {
+    const a = op === "create_basic_hitsplat_sprite" ? intNamed("animation") : intArg(args[6]);
+    return a !== null && a >= 1 && a <= 3 ? { exact: 10 } : { bound: 10 };
+  }
   // ---- aud242o (docs section 19). AnimPetalDanceBigFlower / SmallFlower (battle_anim_effects_1.c:2482-2548; D = duration): the init sets data[0] = D, runs InitAnimLinearTranslation
   // (battle_anim_mons.c:1065-1091, data[0] unchanged) and calls the step at once. The step is AnimTranslateLinear (:1111-1139, data[0]-- per call while non-zero): calls 0..D - 1 translate,
   // call D finds data[0] == 0 and DestroyAnimSprite: gone D - 1 ticks after F (the sway only moves x2 / y2 / the oam flip bit).
@@ -793,6 +799,23 @@ function lifetimeOf(cmd: Command, attackerSide: number, pic: PicContext, rollout
   // AnimTauntFinger (:5606-5651): the init starts a 1-frame anim and installs Step1; ++data[1] > 10 first holds in call 11, which starts the 7 x 4 = 28 tick gTauntFingerAnimCmds3 / 4 (:2144-2172,
   // BeginAnim call 11, END call 39) with Step2 stored (RunStored: call 40 installs it, call 41 runs it); Step2 destroys once ++data[1] > 5, the 6th run: call 46 = gone 45 ticks after F.
   if (sprite("gTauntFingerSpriteTemplate")) return { exact: 45 };
+  // ---- aud242p slice 4. AnimSlideHandOrFootToTarget / AnimJumpKick (battle_anim_fight.c:421-443) -> AnimTravelDiagonally (battle_anim_mons.c:1591-1624; D = gBattleAnimArgs[4] = script
+  // args[7]): data[0] = D and StartAnimLinearTranslation with DestroyAnimSprite stored in the init (the AnimPowerAbsorptionOrb shape): D + 1. AnimRockBlastRock (battle_anim_rock.c:800-806) ->
+  // TranslateAnimSpriteToTargetMonLocation (battle_anim_mons.c:1546-1570, D = args[7]) in the init: D + 1; AnimThrowMistBall (battle_anim_ice.c:1090-1095) only installs that function, which
+  // runs in call 1: D + 2. D = 0 divides by zero (declined).
+  if (sprite("gKarateChopSpriteTemplate") || sprite("gJumpKickSpriteTemplate") || sprite("gRockBlastRockSpriteTemplate") || sprite("gMistBallSpriteTemplate")) {
+    const d = intArg(args[7]);
+    return d === null || d < 1 ? null : { exact: d + (sprite("gMistBallSpriteTemplate") ? 2 : 1) };
+  }
+  // AnimRevengeScratch (battle_anim_fight.c:964-982): the init installs RunStoredCallbackWhenAnimEnds (battle_anim_mons.c:735) with DestroyAnimSprite stored; sAnim_RevengeSmallScratch is
+  // 3 x 4 = 12 frames (:308-314), sAnim_RevengeBigScratch 2 x 6 = 12 (:350-355): the anim ends at call 12, the stored callback is installed at 13 and destroys at 14 = 13.
+  if (sprite("gRevengeSmallScratchSpriteTemplate") || sprite("gRevengeBigScratchSpriteTemplate")) return { exact: 13 };
+  // ---- aud242p slice 3. AnimLeechLifeNeedle (battle_anim_bug.c:229-251) and AnimTranslateStinger (:366-398; duration D = script args[5] / args[7]): data[0] = D, the init installs
+  // StartAnimLinearTranslation with DestroyAnimSprite in data[6]: the AnimPowerAbsorptionOrb shape (calls 1..D translate, D + 1 installs the stored callback, D + 2 destroys) = D + 1.
+  if (op === "create_leech_life_needle_sprite" || op === "create_linear_stinger_sprite" || sprite("gLeechLifeNeedleSpriteTemplate") || sprite("gLinearStingerSpriteTemplate")) {
+    const d = op.startsWith("create_") ? intNamed("duration") : intArg(args[op === "createsprite" && args[0] === "gLeechLifeNeedleSpriteTemplate" ? 5 : 7]);
+    return d === null || d < 1 ? null : { exact: d + 1 };
+  }
   // AnimTask_InvertScreenColor (battle_anim_normal.c:759-778) inverts the palette buffer and destroys itself in the creating step: net 0 in gAnimVisualTaskCount (exact -1).
   if (op === "invert_screen_color" || (op === "createvisualtask" && args[0] === "AnimTask_InvertScreenColor")) return { exact: -1 };
 

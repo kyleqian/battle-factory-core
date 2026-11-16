@@ -80,8 +80,8 @@ const SPECS: Record<string, Spec> = {
   "dragonrage-player": { delta: 3 },
   "megapunch-player": { delta: 0 },
   "megapunch-opponent": { delta: 0 },
-  "hijumpkick-player": { delta: 0, romOnly: ["113:123:63"] },
-  "hijumpkick-opponent": { delta: 0, romOnly: ["117:123:-63"] },
+  "hijumpkick-player": { delta: 0 },
+  "hijumpkick-opponent": { delta: 0 },
   "haze-player": { delta: -6, romOnly: ["555:214:-63", "573:131:-63"], rowDelta: { "433:238:0": 2 } },
   "hyperfang-player": { delta: 2 },
 };
