@@ -1,0 +1,80 @@
+{
+ "name": "R105-trace-water-veil-synchronize-burn",
+ "rules": [
+  "R105"
+ ],
+ "why": "Challenge 7, trainer 200. The opponent's Gardevoir (813: Trace, Will-O-Wisp) copies Water Veil from the player's lead Wailord (429); the player switches to Alakazam (404, Synchronize); when Gardevoir burns it, Synchronize passes the burn back by seteffectprimary and Water Veil prevents it (the 'prevents' message arm).",
+ "seed": 90002,
+ "challengeNum": 7,
+ "battleNum": 0,
+ "trainerId": 200,
+ "playerSetIds": [
+  429,
+  404,
+  735
+ ],
+ "opponentSetIds": [
+  813,
+  716,
+  721
+ ],
+ "script": {
+  "actions": [
+   {
+    "switch": 1
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   }
+  ],
+  "then": "census"
+ },
+ "expect": [],
+ "cover": [
+  {
+   "file": "src/engine/battleScriptHitChainOpcode.ts",
+   "text": "? (abilityEf",
+   "at": 0
+  },
+  {
+   "file": "src/engine/battleScriptHitChainOpcode.ts",
+   "text": "&& abilityEffectHitmarkerSet\n      ?",
+   "at": 0
+  },
+  {
+   "file": "src/engine/battleScriptHitChainOpcode.ts",
+   "text": "? (hitMarker & ~HITMARKER_STATUS_ABILITY_EFFECT) >>> 0\n ",
+   "at": 0
+  },
+  {
+   "file": "src/engine/battleScriptHitChainOpcode.ts",
+   "text": ": { lastUsedAbil",
+   "at": 0
+  },
+  {
+   "file": "src/engine/battleScriptHitChainOpcode.ts",
+   "text": "{\n      nextRule",
+   "at": 0
+  },
+  {
+   "file": "src/engine/battleScriptHitChainOpcode.ts",
+   "text": "{\n        return preventionCall(\"BattleScript_BRNPrevention\", tr",
+   "at": 0
+  }
+ ],
+ "coverAny": false,
+ "chance": 0.1,
+ "seeds": 40
+}
