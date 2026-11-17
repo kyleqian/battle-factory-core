@@ -1051,6 +1051,19 @@ function aud242lBlizzardStage(state: EngineState, id: string, side: "player" | "
   });
 }
 
+// aud261: the Swallow user (Lv50 Rattata, moves Stockpile / Swallow x3) on `side` against a Lv12 Seismic Toss Rattata.
+function aud261StockpileStage(state: EngineState, id: string, side: "player" | "opponent"): EngineState {
+  const attacker = Object.freeze({ ...rattataAtLevel(50, 254), moves: [254, 256, 256, 256] as const });
+  const target = rattataAtLevel(12, 69);
+  return midBattleSwitchStage(state, id, [RATTATA_LV50_BENCH, RATTATA_LV50_BENCH], [105, 105], {
+    battleScene: "on",
+    player: side === "player" ? attacker : target,
+    trainer: side === "player" ? target : attacker,
+    usedMessageHoldFrames: 0,
+    sceneOffNoAnimations: false,
+  });
+}
+
 // hie1: held-item effect windows (tools/battle-lab/hie1-*.json): the player's Rattata holds `playerItem`; the opponent's move / level is
 // chosen per site so the item fires (Leftovers end-turn, Sitrus after the hit, Shell Bell on the player's hit, Cheri cures Thunder Wave).
 function hie1Stage(
@@ -2150,6 +2163,36 @@ export const APP_STAGES: Readonly<Record<string, AppStage>> = {
   "aud259-dynamicpunch-player-on": (state) => aud241bStage(state, "aud259-dynamicpunch-player-on", "on", 50, 12, 223, undefined, false, 69, 2),
   "aud259-fakeout-player-on": (state) => aud241bStage(state, "aud259-fakeout-player-on", "on", 50, 12, 252, undefined, false, 69, 1, true),
   "aud259-crabhammer-player-on": (state) => aud241bStage(state, "aud259-crabhammer-player-on", "on", 50, 12, 152, undefined, false, 69),
+  "aud261-extremespeed-player-on": (state) => aud242lBlizzardStage(state, "aud261-extremespeed-player-on", "player", 19, 143, 245),
+  "aud261-extremespeed-opponent-on": (state) => aud241bStage(state, "aud261-extremespeed-opponent-on", "on", 12, 50, 69, undefined, false, 245),
+  "aud261-milkdrink-player-on": (state) => aud242lBlizzardStage(state, "aud261-milkdrink-player-on", "player", 19, 143, 208),
+  "aud261-milkdrink-opponent-on": (state) => aud241bStage(state, "aud261-milkdrink-opponent-on", "on", 12, 50, 69, undefined, false, 208),
+  "aud261-painsplit-player-on": (state) => aud242lBlizzardStage(state, "aud261-painsplit-player-on", "player", 19, 143, 220),
+  "aud261-painsplit-opponent-on": (state) => aud241bStage(state, "aud261-painsplit-opponent-on", "on", 12, 50, 69, undefined, false, 220),
+  "aud261-razorwind-player-on": (state) => aud242lBlizzardStage(state, "aud261-razorwind-player-on", "player", 19, 143, 13),
+  "aud261-razorwind-opponent-on": (state) => aud241bStage(state, "aud261-razorwind-opponent-on", "on", 12, 50, 69, undefined, false, 13),
+  "aud261-covet-player-on": (state) => aud242lBlizzardStage(state, "aud261-covet-player-on", "player", 19, 143, 343),
+  "aud261-covet-opponent-on": (state) => aud241bStage(state, "aud261-covet-opponent-on", "on", 12, 50, 69, undefined, false, 343),
+  "aud261-needlearm-player-on": (state) => aud242lBlizzardStage(state, "aud261-needlearm-player-on", "player", 19, 143, 302),
+  "aud261-needlearm-opponent-on": (state) => aud241bStage(state, "aud261-needlearm-opponent-on", "on", 12, 50, 69, undefined, false, 302),
+  "aud261-aromatherapy-player-on": (state) => aud242lBlizzardStage(state, "aud261-aromatherapy-player-on", "player", 19, 143, 312),
+  "aud261-aromatherapy-opponent-on": (state) => aud241bStage(state, "aud261-aromatherapy-opponent-on", "on", 12, 50, 69, undefined, false, 312),
+  "aud261-refresh-player-on": (state) => aud241bStage(state, "aud261-refresh-player-on", "on", 50, 12, 287, undefined, false, 86),
+  "aud261-refresh-opponent-on": (state) => aud241bStage(state, "aud261-refresh-opponent-on", "on", 12, 50, 86, undefined, false, 287),
+  "aud261-smellingsalt-player-on": (state) => aud242lBlizzardStage(state, "aud261-smellingsalt-player-on", "player", 19, 143, 265),
+  "aud261-smellingsalt-opponent-on": (state) => aud241bStage(state, "aud261-smellingsalt-opponent-on", "on", 12, 50, 69, undefined, false, 265),
+  "aud261-gust-player-on": (state) => aud242lBlizzardStage(state, "aud261-gust-player-on", "player", 19, 143, 16),
+  "aud261-gust-opponent-on": (state) => aud241bStage(state, "aud261-gust-opponent-on", "on", 12, 50, 69, undefined, false, 16),
+  "aud261-spiderweb-player-on": (state) => aud242lBlizzardStage(state, "aud261-spiderweb-player-on", "player", 19, 143, 169),
+  "aud261-spiderweb-opponent-on": (state) => aud241bStage(state, "aud261-spiderweb-opponent-on", "on", 12, 50, 69, undefined, false, 169),
+  "aud261-flamewheel-player-on": (state) => aud242lBlizzardStage(state, "aud261-flamewheel-player-on", "player", 19, 143, 172),
+  "aud261-flamewheel-opponent-on": (state) => aud241bStage(state, "aud261-flamewheel-opponent-on", "on", 12, 50, 69, undefined, false, 172),
+  "aud261-swallow-player-on": (state) => aud261StockpileStage(state, "aud261-swallow-player-on", "player"),
+  "aud261-swallow-opponent-on": (state) => aud261StockpileStage(state, "aud261-swallow-opponent-on", "opponent"),
+  "aud261-octazooka-player-on": (state) => aud242lBlizzardStage(state, "aud261-octazooka-player-on", "player", 19, 143, 190),
+  "aud261-octazooka-opponent-on": (state) => aud241bStage(state, "aud261-octazooka-opponent-on", "on", 12, 50, 69, undefined, false, 190),
+  "aud261-zapcannon-player-on": (state) => aud241bStage(state, "aud261-zapcannon-player-on", "on", 50, 12, 192, undefined, false, 69, 2),
+  "aud261-zapcannon-opponent-on": (state) => aud241bStage(state, "aud261-zapcannon-opponent-on", "on", 12, 50, 69, undefined, false, 192, 10),
   "aud260-aircutter-player-on": (state) => aud241bStage(state, "aud260-aircutter-player-on", "on", 50, 12, 314, undefined, false, 69),
   "aud260-aircutter-opponent-on": (state) => aud241bStage(state, "aud260-aircutter-opponent-on", "on", 12, 50, 69, undefined, false, 314),
   "aud260-brickbreak-player-on": (state) => aud241bStage(state, "aud260-brickbreak-player-on", "on", 55, 50, 280, undefined, false, 115),

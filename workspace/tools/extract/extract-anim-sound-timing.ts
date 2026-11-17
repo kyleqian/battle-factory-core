@@ -379,6 +379,66 @@ function moveParticleBeyondTargetLifetime(attackerSide: number, pic: PicContext,
   }
   return null;
 }
+// aud261: AnimTask_ExtremeSpeedImpact (battle_anim_effects_2.c:2812-2873): the entry only sets func (calls 1..). Case 0 moves the target's x2 by data[14] (+8 for a player target, -8 else), case 1 shakes it +6 / -6 every
+// 2nd call (the 5th shake, data[3] > 4, undoes the odd one and advances), case 2 repeats the round while --data[12] != 0 (3 rounds), case 3 steps x2 back by data[13] (-1 / +1) per call and destroys when it is 0.
+function extremeSpeedImpactDestroyCall(targetIsPlayer: boolean): number {
+  let [state, d1, d2, d3, d12, x2] = [0, 0, 0, 0, 3, 0];
+  const [d13, d14] = targetIsPlayer ? [-1, 8] : [1, -8];
+  for (let call = 1; call < 100000; call += 1) {
+    if (state === 0) { x2 += d14; [d1, d2, d3] = [0, 0, 0]; state = 1; }
+    else if (state === 1) {
+      d1 += 1;
+      if (d1 > 1) {
+        d1 = 0; d2 += 1;
+        x2 += d2 & 1 ? 6 : -6;
+        d3 += 1;
+        if (d3 > 4) { if (d2 & 1) x2 -= 6; state = 2; }
+      }
+    } else if (state === 2) { d12 -= 1; state = d12 !== 0 ? 0 : 3; }
+    else { x2 += d13; if (x2 === 0) return call; }
+  }
+  throw new Error("ExtremeSpeedImpact does not terminate");
+}
+// AnimMilkBottle_Step1 (battle_anim_effects_1.c:4003-4062); the init (:3987-4001) leaves data[6] = 0, data[7] = 16 and runs in the script step (call 0), the callback first runs on call 1.
+// Returns the call that DestroyAnimSprite runs on (case 4).
+function milkBottleDestroyCall(): number {
+  let [state, d1, d2, d6, d7] = [0, 0, 0, 0, 16];
+  for (let call = 1; call < 100000; call += 1) {
+    if (state === 0) {
+      d2 += 1;
+      if (d2 > 0) {
+        d2 = 0; d1 += 1;
+        if (d1 & 1) { if (d6 <= 15) d6 += 1; } else if (d7 > 0) d7 -= 1;
+        if (d6 === 16 && d7 === 0) { d1 = 0; state = 1; }
+      }
+    } else if (state === 1) {
+      d1 += 1;
+      if (d1 > 8) { d1 = 0; state = 2; }
+    } else if (state === 2) {
+      d1 += 1;
+      if (d1 > 2) d1 = 0;
+      d2 += 1;
+      if (d2 > 29) {
+        if (d2 & 1) { if (d6 > 0) d6 -= 1; } else if (d7 <= 15) d7 += 1;
+        if (d6 === 0 && d7 === 16) { d1 = 0; d2 = 0; state = 3; }
+      }
+    } else if (state === 3) state = 4;
+    else return call;
+  }
+  throw new Error("MilkBottle does not terminate");
+}
+// AnimSwallowBlueOrb case 1 (battle_anim_effects_3.c:2217-2234): the init (call 0) puts the sprite at the attacker's BATTLER_COORD_Y (sBattlerCoords[0], battle_anim_mons.c: player 80, opponent 40) + arg1,
+// data[1] = 0x900 and data[2] = the pic-offset Y; call k >= 1 does y2 -= data[1] >> 8, data[1] -= 96 and destroys once y + y2 > data[2]. Returns the destroy call.
+function swallowOrbDestroyCall(attackerSide: number, picY: number, arg1: number): number {
+  const threshold = picY - ((attackerSide === 0 ? 80 : 40) + arg1);
+  let [y2, d1] = [0, 0x900];
+  for (let call = 1; call < 100000; call += 1) {
+    y2 -= d1 >> 8;
+    d1 -= 96;
+    if (y2 > threshold) return call;
+  }
+  throw new Error("SwallowBlueOrb does not terminate");
+}
 function flailMovementLength(): number {
   let [state, count, angle, shrinks, amplitude] = [0, 0, 0, 0x20, 0x800];
   const s16 = (v: number): number => ((v + 0x8000) & 0xffff) - 0x8000;
@@ -799,6 +859,11 @@ function lifetimeOf(cmd: Command, attackerSide: number, pic: PicContext, rollout
   // AnimTask_GrowAndShrink (battle_anim_effects_2.c:2235-2248 with gGrowAndShrinkAffineAnimCmds :543-549, RunAffineAnimFromTaskData battle_anim_mons.c:1800-1862): the entry
   // only sets func; frames of duration 12, 24, 12 take calls 1..48 and the END command on call 49 returns FALSE and destroys: gone 48 ticks after F.
   if (op === "createvisualtask" && args[0] === "AnimTask_GrowAndShrink") return { exact: 48 };
+  // aud261: AnimTask_AttackerStretchAndDisappear (battle_anim_effects_2.c:2792-2810; gStretchAttackerAffineAnimCmds :809-813 = one 8-tick frame then END): the entry only sets func; the step
+  // (RunAffineAnimFromTaskData, battle_anim_mons.c:1800-1862) takes calls 1..8 for the frame and the END on call 9 returns FALSE and destroys: gone 8 ticks after F (the AnimTask_GrowAndShrink shape).
+  if (op === "createvisualtask" && args[0] === "AnimTask_AttackerStretchAndDisappear") return { exact: 8 };
+  // aud261: the target's side is the opposite of the attacker's; the task is destroyed on call K (gone K - 1 ticks after F).
+  if (op === "createvisualtask" && args[0] === "AnimTask_ExtremeSpeedImpact") return { exact: extremeSpeedImpactDestroyCall(attackerSide !== 0) - 1 };
   // AnimBreathPuff (battle_anim_effects_2.c:2250-2272): call 0 sets data[0] = 52 and installs TranslateSpriteLinearFixedPoint; calls 1..52 decrement (battle_anim_mons.c:607-621),
   // call 53 stores DestroyAnimSprite (SetCallbackToStoredInData6), call 54 destroys: gone 53 ticks after F.
   if (sprite("gBreathPuffSpriteTemplate")) return { exact: 53 };
@@ -881,7 +946,8 @@ function lifetimeOf(cmd: Command, attackerSide: number, pic: PicContext, rollout
   // AnimFlyingParticle (battle_anim_effects_1.c:3517-3590; script args[6] = x step s = gBattleAnimArgs[3], args[9] = unk6: 0 = attacker's side, else the target's): call 0 places
   // the sprite at x = -16 (opponent side, moving right) or 256 (player side, moving left); call k >= 1 has a = k - 1 and destroys once x + x2 leaves the screen:
   // opponent side s * a >= 264, player side s * a >= 272 (AnimFlyingParticle_Step :3580-3590). Gone ceil(threshold / s) ticks after F.
-  if (sprite("gSilverWindBigSparkSpriteTemplate") || sprite("gSilverWindMediumSparkSpriteTemplate") || sprite("gSilverWindSmallSparkSpriteTemplate")) {
+  // aud261: gAromatherapySmallFlowerSpriteTemplate / gAromatherapyBigFlowerSpriteTemplate (battle_anim_effects_1.c:962-983) use the same AnimFlyingParticle callback (same argument layout).
+  if (sprite("gSilverWindBigSparkSpriteTemplate") || sprite("gSilverWindMediumSparkSpriteTemplate") || sprite("gSilverWindSmallSparkSpriteTemplate") || sprite("gAromatherapySmallFlowerSpriteTemplate") || sprite("gAromatherapyBigFlowerSpriteTemplate")) {
     const [speed, anchor] = [intArg(args[6]), intArg(args[9])];
     if (speed === null || anchor === null || speed < 1) return null;
     const side = anchor === 0 ? attackerSide : 1 - attackerSide;
@@ -957,6 +1023,11 @@ function lifetimeOf(cmd: Command, attackerSide: number, pic: PicContext, rollout
   // hit splat, the Shake task there is 8; Spark / Poison Tail agree). Anim 0 (the 8 frame alone) and a non-literal animation stay the bound.
   // aud242r: the handle-invert splat (battle_anim_normal.c:1036-1047) only picks the palette / flip and then runs AnimHitSplatBasic's init: same lifetime.
   if (op === "create_basic_hitsplat_sprite" || op === "create_handle_invert_hitsplat_sprite" || sprite("gBasicHitSplatSpriteTemplate") || sprite("gHandleInvertHitSplatSpriteTemplate") || sprite("gWaterHitSplatSpriteTemplate")) {
+    const a = op.startsWith("create_") ? intNamed("animation") : intArg(args[6]);
+    return a !== null && a >= 0 && a <= 3 ? { exact: 10 } : { bound: 10 };
+  }
+  // aud261: AnimHitSplatOnMonEdge (battle_anim_normal.c:1068-1081): the same affine anim (sAffineAnims_HitSplat, animation = args[6]) with RunStoredCallbackWhenAffineAnimEnds / DestroySpriteAndMatrix stored: the AnimHitSplatBasic shape.
+  if (op === "create_mon_edge_hitsplat_sprite" || sprite("gMonEdgeHitSplatSpriteTemplate")) {
     const a = op.startsWith("create_") ? intNamed("animation") : intArg(args[6]);
     return a !== null && a >= 0 && a <= 3 ? { exact: 10 } : { bound: 10 };
   }
@@ -1094,8 +1165,8 @@ function lifetimeOf(cmd: Command, attackerSide: number, pic: PicContext, rollout
   // ---- aud242p slice 4. AnimSlideHandOrFootToTarget / AnimJumpKick (battle_anim_fight.c:421-443) -> AnimTravelDiagonally (battle_anim_mons.c:1591-1624; D = gBattleAnimArgs[4] = script
   // args[7]): data[0] = D and StartAnimLinearTranslation with DestroyAnimSprite stored in the init (the AnimPowerAbsorptionOrb shape): D + 1. AnimRockBlastRock (battle_anim_rock.c:800-806) ->
   // TranslateAnimSpriteToTargetMonLocation (battle_anim_mons.c:1546-1570, D = args[7]) in the init: D + 1; AnimThrowMistBall (battle_anim_ice.c:1090-1095) only installs that function, which
-  // runs in call 1: D + 2. D = 0 divides by zero (declined).
-  if (sprite("gKarateChopSpriteTemplate") || sprite("gJumpKickSpriteTemplate") || sprite("gRockBlastRockSpriteTemplate") || sprite("gMistBallSpriteTemplate")) {
+  // runs in call 1: D + 2. D = 0 divides by zero (declined). aud261: gOctazookaBallSpriteTemplate (battle_anim_effects_1.c:1691-1700) has TranslateAnimSpriteToTargetMonLocation as its own callback: D + 1 (gZapCannonBallSpriteTemplate, battle_anim_electric.c:130-139, the same).
+  if (sprite("gKarateChopSpriteTemplate") || sprite("gJumpKickSpriteTemplate") || sprite("gRockBlastRockSpriteTemplate") || sprite("gMistBallSpriteTemplate") || sprite("gOctazookaBallSpriteTemplate") || sprite("gZapCannonBallSpriteTemplate")) {
     const d = intArg(args[7]);
     return d === null || d < 1 ? null : { exact: d + (sprite("gMistBallSpriteTemplate") ? 2 : 1) };
   }
@@ -1115,6 +1186,60 @@ function lifetimeOf(cmd: Command, attackerSide: number, pic: PicContext, rollout
   // AnimSpriteOnMonPos (battle_anim_mons.c:1515-1536) destroys itself in the first call after `animEnded || affineAnimEnded` (a sprite on gDummySpriteAnimTable never ends its anim: sprite.c:173-175,
   // 909-922 keep animBeginning set). gBellAnimCmds (battle_anim_effects_2.c:848-862) are 6 6 15 6 6 6 15 6 6 6 15 6 6 = 105 ticks: END at call 105, destroyed at 106 = 105.
   if (sprite("gBellSpriteTemplate")) return { exact: 105 };
+  // AnimFireSpiralOutward (battle_anim_fire.c:738-760; W = gBattleAnimArgs[2] = script args[5], D = gBattleAnimArgs[3] = args[6]): the init (call 0) stores D, W and installs WaitAnimForDuration
+  // (battle_anim_mons.c:551-557): calls 1..D count D down, call D + 1 installs Step1 (SetCallbackToStoredInData6 does not run it), call D + 2 runs Step1, which runs Step2 (:762-772) at once
+  // (--data[0] = W - 1); the call that makes --data[0] == -1 is D + 2 + W and destroys: gone D + W + 1 ticks after F.
+  if (sprite("gFireSpiralOutwardSpriteTemplate")) { const [w, d] = [intArg(args[5]), intArg(args[6])]; return w === null || d === null || w < 0 || d < 0 ? null : { exact: d + w + 1 }; }
+  // AnimTask_SwallowDeformMon (battle_anim_effects_3.c:2236-2248 with gSwallowDeformMonAffineAnimCmds :580-588 = 20 + 20 + 6 + 20 + 20 = 86 ticks): the first run prepares the affine anim, calls 1..86 run
+  // the frames and the END on call 87 destroys: gone 86 ticks after F (RunAffineAnimFromTaskData, battle_anim_mons.c:1800-1862). gSwallowBlueOrbSpriteTemplate: swallowOrbDestroyCall - 1 (pic Y dependent).
+  if (op === "createvisualtask" && args[0] === "AnimTask_SwallowDeformMon") return { exact: 86 };
+  if (sprite("gSwallowBlueOrbSpriteTemplate")) { const a1 = intArg(args[4]); if (a1 === null) return null; picUsed = true; return { exact: swallowOrbDestroyCall(attackerSide, pic.attackerY, a1) - 1 }; }
+  // AnimZapCannonSpark (battle_anim_electric.c:572-603; D = gBattleAnimArgs[3] = script args[6]): the init (call 0) runs AnimZapCannonSpark_Step once, whose AnimTranslateLinear (battle_anim_mons.c:1111-1139) counts D down
+  // (call 0 .. D - 1) and returns TRUE on call D, which destroys: gone D - 1 ticks after F.
+  if (sprite("gZapCannonSparkSpriteTemplate")) { const d = intArg(args[6]); return d === null || d < 1 ? null : { exact: d - 1 }; }
+  // AnimRazorWindTornado (battle_anim_effects_2.c:1883-1897; D = sDuration = data[3] = gBattleAnimArgs[6] = script args[9]) runs TranslateSpriteInCircle (battle_anim_mons.c:449-466) once in the
+  // init: calls 0..D - 1 step, call D installs the stored DestroyAnimSprite, call D + 1 destroys: gone D ticks after F. AnimAirWaveCrescent (battle_anim_flying.c:430-465; D = data[0] =
+  // gBattleAnimArgs[4] = script args[7]) installs StartAnimLinearTranslation with DestroyAnimSprite stored (the AnimPowerAbsorptionOrb shape): D + 1.
+  if (sprite("gRazorWindTornadoSpriteTemplate")) { const d = intArg(args[9]); return d === null || d < 0 ? null : { exact: d }; }
+  if (sprite("gAirWaveCrescentSpriteTemplate")) { const d = intArg(args[7]); return d === null || d < 1 ? null : { exact: d + 1 }; }
+  // AnimTask_StatusClearedEffect (battle_anim_effects_3.c:3904-3918) = StartMonScrollingBgMask with 10 fade steps, delay 2, duration 30 (battle_anim_utility_funcs.c:812-877, UpdateMonScrollingBgMask :879-936):
+  // the entry (call 0) installs the step, which runs from call 1. Case 0 fades in on every third call (data[11]++ >= 2: calls 3, 6 .. 30, data[12] = 10 at call 30), case 1 holds 30 calls (31..60),
+  // case 2 fades out the same way (calls 63, 66 .. 90, data[12] = 0 at call 90) and destroys: exact 89.
+  if (op === "createvisualtask" && args[0] === "AnimTask_StatusClearedEffect") return { exact: 89 };
+  // AnimSmellingSaltsHand (battle_anim_effects_3.c:4232-4297; n = data[6] = gBattleAnimArgs[2] = script args[5]) installs the step in the init: calls 1..24 case 0 (every second call, 12 times), 25..32 case 1,
+  // 33..38 case 2 and 39..46 case 3; each further squish repeats case 2 + 3 (14 calls) and the n-th end of case 3 destroys: call 46 + 14 (n - 1), exact 45 + 14 (n - 1). AnimTask_SmellingSaltsSquish
+  // (:4301-4343; n = args[3], target only: the attacker case destroys in the entry) runs gSmellingSaltsSquishAffineAnimCmds (:1023-1028, 6 + 6 = 12 ticks) n times: the entry prepares (call 0), calls 1..12
+  // run the frames and call 13 sees END and prepares the next squish (RunAffineAnimFromTaskData, battle_anim_mons.c:1800-1862), the last END destroys: exact 13 n - 1.
+  if (sprite("gSmellingSaltsHandSpriteTemplate")) { const n = intArg(args[5]); return n === null || n < 1 ? null : { exact: 45 + 14 * (n - 1) }; }
+  if (op === "createvisualtask" && args[0] === "AnimTask_SmellingSaltsSquish" && args[2] === "ANIM_TARGET") { const n = intArg(args[3]); return n === null || n < 1 ? null : { exact: 13 * n - 1 }; }
+  // AnimMagentaHeart (battle_anim_effects_2.c:3067-3078) counts data[0] from call 0 and destroys when it reaches 60 (call 59): gone 58 ticks after F. AnimTask_RockMonBackAndForth
+  // (battle_anim_effects_3.c:2702-2800; n = gBattleAnimArgs[1] = script args[3], intensity i = clamp(gBattleAnimArgs[2], 0, 2) = args[4]): d = 8 - 2 i, each of the n rounds runs d + 2 d + d calls
+  // (steps start at call 1), call 4 d n + 1 runs case 3 and destroys: exact 4 d n. AnimNeedleArmSpike (battle_anim_effects_1.c:3623-3694; D = gBattleAnimArgs[4] = args[7]) installs the step in
+  // call 0, calls 1..D count D down and call D + 1 destroys: exact D (D = 0 destroys in the init, declined).
+  if (sprite("gMagentaHeartSpriteTemplate")) return { exact: 58 };
+  if (op === "createvisualtask" && args[0] === "AnimTask_RockMonBackAndForth") {
+    const [n, i] = [intArg(args[3]), intArg(args[4])];
+    return n === null || i === null || n < 1 ? null : { exact: 4 * (8 - 2 * Math.min(2, Math.max(0, i))) * n };
+  }
+  if (sprite("gNeedleArmSpikeSpriteTemplate")) { const d = intArg(args[7]); return d === null || d < 1 ? null : { exact: d }; }
+  // AnimEllipticalGust (battle_anim_flying.c:353-370) runs its step once in the init (++data[0] = 1 at call 0) and destroys on ++data[0] == 71 (call 70): exact 69.
+  // AnimTask_AnimateGustTornadoPalette (:373-405; n = gBattleAnimArgs[1] = script args[3]) installs the step in the entry (call 0), calls 1..n each count data[0] down and call n destroys: exact n - 1.
+  // AnimTranslateWebThread (battle_anim_bug.c:258-298; unk2 = args[5], targetsBoth = args[7]) sets data[0] = (|targetX - x| << 8) / unk2 (InitAnimLinearTranslationWithSpeed, battle_anim_mons.c:1155-1160) from
+  // the attacker X_2 +- 20 to the target X_2 (singles, both sides: |104 - 20| = 84) and AnimTranslateLinear (:1111) counts it down from call 1, destroying in the call that sees 0: exact data[0] (42 at unk2 = 512).
+  // AnimSpiderWeb (:318-355) counts data[2] to 20 (calls 1..20), then decrements data[0] 16 -> 0 on every second call (calls 22, 24 .. 52), and AnimSpiderWeb_End destroys in call 53: exact 52.
+  if (sprite("gEllipticalGustSpriteTemplate")) return { exact: 69 };
+  if (op === "createvisualtask" && args[0] === "AnimTask_AnimateGustTornadoPalette") { const n = intArg(args[3]); return n === null || n < 1 ? null : { exact: n - 1 }; }
+  if (op === "create_web_thread_sprite" || sprite("gWebThreadSpriteTemplate")) {
+    const [unk2, both] = op.startsWith("create_") ? [intNamed("unk2"), intNamed("targets_both")] : [intArg(args[5]), intArg(args[7])];
+    return unk2 === null || unk2 < 1 || both !== 0 ? null : { exact: Math.floor((84 * 256) / unk2) };
+  }
+  if (sprite("gSpiderWebSpriteTemplate")) return { exact: 52 };
+  // AnimPainSplitProjectile (battle_anim_effects_3.c:2937-2970) keeps its callback and destroys in the first call after animEnded: gPainSplitAnimCmds (:723-729) are 5 + 9 + 5 = 19 ticks, exact 19.
+  // AnimTask_PainSplitMovement (:2974-3033): the entry (call 0) sets the rot/scale and data[0] = 1, step calls 1..13 count data[1], call 13 (== 13) destroys: exact 12.
+  if (sprite("gPainSplitProjectileSpriteTemplate")) return { exact: 19 };
+  if (op === "createvisualtask" && args[0] === "AnimTask_PainSplitMovement") return { exact: 12 };
+  // gMilkBottleSpriteTemplate: AnimMilkBottle_Step1 (battle_anim_effects_1.c:4003-4062), destroyed on call K, gone K - 1 ticks after F.
+  if (sprite("gMilkBottleSpriteTemplate")) return { exact: milkBottleDestroyCall() - 1 };
   // gThinRingExpanding / gBlendThinRingExpanding (AnimBlendThinRing, :2551-2575, calls AnimSpriteOnMonPos at once) run affine anim 0 (gThinRingExpandingAffineAnimCmds1, :710-716): a duration-0 frame
   // (BeginAffineAnim in call 0, delayCounter 0), then in call 1 the 30-tick frame (ApplyAffineAnimFrame, sprite.c:1330-1345, leaves delayCounter 29: calls 2..30 count it down) and END in call 31
   // (sprite.c:1055-1112, 1165-1178); AnimSpriteOnMonPos sees affineAnimEnded in call 32: gone 31 ticks after F.
