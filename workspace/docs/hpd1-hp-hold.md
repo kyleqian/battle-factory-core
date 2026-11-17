@@ -155,3 +155,63 @@ lead, then `e01bfd249`. Until then the sound fixtures are the ones that fail, wh
 No census / soak / gate run: production is unchanged at the end of the step.
 
 PAPERCUT: `tools/compare/out` keeps only the last ~3 runs, so a ROM frame set cannot be re-used across a long session; `npm run compare` per trace (~47 s) is the only way back to it (the receipts above are the per-stage numbers).
+
+## hpd4: the audited script lead lands (Sonic Boom, Dragon Rage, Defense Curl, Rollout) with the floor-free hold
+
+Presentation only (gameplay, RNG and kernel event order untouched: census 0..99 `eventsDigest` identical, below). Tooling: `tools/integration/hpd4Cmds.ts <trace.json> [maxFrame]` prints the command starts with the
+move-animation breakdown (`bodyLead`, `pre`, `idle`, `live`, `post`); the ROM windows are `tools/integration/hpd2Probe.py` (`attackanimation` exec `ex`, `gAnimScriptActive` rise `A = ex + 3`, `len` active rows, hit controller exec `H ~ A + len + 4`).
+
+### Body audit (ROM window vs the app's rows; app columns from `hpd4Cmds.ts` on the lab traces)
+
+| body | ROM release R -> ex / A / len / H | app command start | app `bodyLead` + `pre` + `idle` + `live` + `post` (+ hit tail) | app hit-animation start | verdict: does `live` contain the lead? |
+|---|---|---|---|---|---|
+| Defense Curl (111) | 59 -> 64 / 67 / 99 / (status) | 61 | 3 + 3 + 0 + 100 + 2 (+3) | next command (stats-change) 172 vs ROM stat anim A 171 | No: the 100-row window is the 99 active rows + 1; the lead (R -> A 8) is missing at the start. Lead added, tail +3 |
+| Sonic Boom (49) | 373 -> 382 / 385 / 51 / 440 | 373 | 9 + 3 + 0 + 52 + 2 (+3) | 442 (ROM H + 2, the same constant offset as Dragon Rage) | No (window = len + 1) |
+| Dragon Rage (82) | 375 -> 384 / 387 / 177 / 568 | 375 | 9 + 3 + 7 + 150 + 0 (+26) | 570 (ROM H + 2) | No: 150 live + the 7-row idle lead + the 26-row tail stand in for the 177 active rows (the tail is empirical, the body's tail loops are not modelled) |
+| Rollout (205), turns 1..5 | 370 -> H 553 (len 166), 967 -> 1149 (166), 1565 -> 1741 (160), 2162 -> 2330 (152), turn 5 len 144 | 370 | 10 + 3 + 0 + 167 + 0 (+3) | 553 on turn 1 (= ROM H) | No |
+| Seismic Toss (69), level 0 / 1 / 2 | 376 -> 382 / 385 / 220 / 609; 227 / 616; 231 / 620 | 376 | 0 + 3 + 0 + 228 + 2 | 609 / 609 / 609 (ROM 609 / 616 / 620) | Partly: the 228-row window is the medium (33..65) level's 227 + 1 while ROM len is damage dependent (220 / 227 / 231); the lead (6) cancels against the long low-level body at the hit. **Not landed** (below) |
+
+The tail numbers (`HPD4_BODY_TAIL_ROWS`: Sonic Boom 3, Dragon Rage 26, Defense Curl 3, Rollout 3) are empirical: the value giving the most exact-frame matches against the ROM frames of the lab traces
+(`rol1-rollout5-on`, `hpd1-sonicboom-on`, `hpd1-dragonrage-on`), with the hit flicker aligned by first-change lists. They run ~2 above the formula `len - live + 4`.
+
+### What landed
+
+- `BattleMoveAnimationTiming.bodyLeadFrames`: only for the audited move ids (`BODY_LEAD_AUDITED_MOVE_IDS` = 49, 82, 111, 205) the ROM lead (`attackanimation` exec - `used` print - the rows already presented) is
+  presented as the command's first rows and is no longer counted in `scriptTailRows`. Every unaudited body keeps the lead in its tail exactly as before (so the whole old model is bit-identical for them, including
+  `hie1-sitrus-on` 176 / 1823 and `obr251-opponent-faint-on` 0 / 306 before and after).
+- Sound clock (`battleHitSounds.ts`, `moveBodyExtraRows`): sound ages inside the body read the command without the lead (`withoutBodyLead`, AGE_TO_SOUND_ROWS = 7 already absorbs the typical lead), and the controller-side sounds
+  anchored to a later command (effectiveness SE, HealthbarDone / SetMonData low-HP, faint cry / SE) subtract the extra rows; the effectiveness SE and the HP handlers that would precede their anchor are scheduled from the
+  earlier command. `aud241b` is green unchanged.
+- The Rollout / Defense Curl +7 sound-vs-visual gap: the ROM window (aud242o: stats SE at 175, stat anim A 171, command 172) shows the stats-change SE is 4 rows earlier than the generic age once the command starts on the ROM edge, so
+  a stats-change command that follows an audited body reads age + 4 (`STATS_CHANGE_AFTER_BODY_AGE_SHIFT`); other stats-change windows keep the old age (their pins are unchanged).
+- `e01bfd249` (foe-hit hp command is floor-free, bar + 1 + the measured tail) re-applied on top.
+
+### Trace windows (`npm run compare -- <trace> --summary`, matched frames before -> after; before = master `5dd239c57`)
+
+- `rol1-rollout5-on` 459 -> **502** / 3001. `hie1-sitrus-on` 176 -> 176, `hie1-sitrus-off` 503 -> 503, `obr251-opponent-faint-on` 0 -> 0, `-off` 6 -> 6, `wsh1-*` / `wsh1b-*` 0 / 1 -> 0 / 1 (the wsh compare windows are a single
+  frame, bit-identical app frames; `wsh2-fb-opp-on`, `wsh2-fs-opp-on`, `wsh2-wish-opp-on` ran only in the first pass, before == after at 0 / 1).
+- hpd1 set (ON): `hpd1-dragonrage` 183 -> 950, `-sonicboom` 151 -> 938, `-toss10` 455 -> 711, `-toss30` 174 -> 715, `-toss50` 149 -> 393, `-toss80` 147 -> 378, `-a-dragonrage` 165 -> 605, `-a-sonicboom` 116 -> 674,
+  `-a-toss60` 122 -> 143, `-a-toss90` 94 -> 105 (/ 1023 each).
+- hpd1 set (OFF): `dragonrage` 416 -> 865, `sonicboom` 880 -> 880, `toss10` 474 -> 876, `toss30` 422 -> 880, `toss50` 442 -> 885, `toss80` 472 -> 891, `a-dragonrage` 554 -> 626, `a-sonicboom` 630 -> 649, `a-toss60` 570 -> 640, `a-toss90` 568 -> 635.
+- The 12 other hpd1-set traces (`turn1..15-*`, `turn5-resolve-off-a/-b`, `turn5-rockslide`, `turn6/7-rockslide-a`, `turn8-bind-a`) are identical before / after (e.g. 256 / 256, 196 / 196, `turn5-rockslide` 7 / 256, `turn14-fly-miss` 2 / 213).
+  No trace is worse. The hpd3 all-bodies experiment reached 873 on rol1; this audited subset reaches 502: the rest of that experiment's gain came from bodies that are not audited and stay unchanged here (not diagnosed further).
+
+### Sound fixture re-pins (each row toward its ROM fixture; ROM - ours)
+
+- `aud242o` rollout5-player turn deltas 9 / 14 / 21 / 33 / 54 -> **3 / 2 / 2 / 0 / -1**.
+- `aud242q` iceball5-player 9 / 9, 13 / 13, 22 / 22, 40 / 40, 63 / 63 -> **3 / 3, 15 / 15, 27 / 27, 36 / 36, 46 / 46**: turns 1, 4, 5 toward the ROM, **turns 2 and 3 are 2 / 5 frames away** (sum |ROM - ours| 147 -> 127).
+  Named reason: the Ice Ball body (301) is not audited (its lead stays in its tail) and the floor-free hold shortens its short-bar hits; it needs its own ROM window (hpd2Probe.py) and is the next audit row.
+- `aud248` stat SE residuals: rollout5 2 / 8 / 15 / 27 / 48 -> **0 / 0 / 0 / -2 / -3**; iceball5 2 / 7 / 16 / 34 / 57 -> **0 / 13 / 25 / 34 / 44** (rows 2 and 3 away by 6 / 9 for the same Ice Ball reason; rows 1, 5 toward; row 4 equal).
+- `hie3` sitrus-opp / leftovers / cheri drift 9 / 17 / 20 -> **8 / 16 / 19**, command start 722 / 732 / 731 -> 723 / 733 / 732 (the held-item command starts 1 row later, toward the ROM). `hie4` "keeps its 28-row floor" -> floor-free hp with the measured tail (e01's intended change).
+
+### Census 0..99, both scenes (`lsd194Census.sh` + `rst197CensusDelta.py`, base `5dd239c57` vs `ef94a58af`)
+
+0 digest / error / type-sequence diffs in both scenes (100 / 100 `eventsDigest` equal). ON 75 / 100 battles have a command-length change, OFF 74 / 100; the moved classes are the foe-hit `hp` command (28 -> the
+bar's frames + tail, per-case -20 .. +4) and, ON only, the Rollout move-animation (+12 / +13: the presented lead 10 and tail, 8 + 5 cases). No other command moves.
+
+### Not landed / open
+
+- **Seismic Toss** is held out: the damage-level tails fit well (toss30 908, toss50 952, toss80 864 of 1023) but with the Toss lead the follow-up sounds anchored on general-animation / start commands
+  (counter-player, leechseed x2, recycle, razorwind fixtures) drift away from their ROM rows (leechseed exact -> +2, recycle |4| -> |5|). Those emitters need the same sound clock as the hit SEs; until then Toss keeps its old model (hpd1-toss ON numbers above come from the hold alone).
+- The remaining unaudited bodies keep the lead in their tail; each needs its hpd2Probe window (Ice Ball first).
+- Gates not run in this step (time): T2 Scene ON 6 seeds, the winning / winning-swap 0:60 soaks (re-pin of `randomRoundSoak` / `lbrd` not checked).
