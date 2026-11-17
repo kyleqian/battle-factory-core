@@ -1583,7 +1583,7 @@ export function liveMoveScriptTailFrames(
  */
 export function liveMoveSourceAge(
   state: BattleResolutionPresentationState,
-): Readonly<{ request: BattleMoveAnimationRequest; age: number; lastAge: number; attackerSpecies: number; attackerElevation: number; attackerHpQuarter: number; picOffsetY: (battler: 0 | 1) => number }> | null {
+): Readonly<{ request: BattleMoveAnimationRequest; age: number; lastAge: number; attackerSpecies: number; attackerElevation: number; attackerHpQuarter: number; picOffsetY: (battler: 0 | 1) => number; topY: (battler: 0 | 1) => number }> | null {
   const segment = state.segments[state.segmentIndex];
   const command = segment?.commands[state.commandIndex];
   if (command === undefined || command.type !== "move-animation" || command.animation === undefined) return null;
@@ -1597,6 +1597,8 @@ export function liveMoveSourceAge(
   const lastAge = duration - 1 - seGate - pre;
   // aud242l: BATTLER_COORD_Y_PIC_OFFSET (GetBattlerSpriteFinal_Y(..., TRUE)) of the live battler, read only by the pic-dependent sprite lifetimes of the sound timing table.
   const picOffsetY = (battler: 0 | 1): number => liveBattlerAnchors(battler === 0 ? "player" : "opponent", createBattleCommandFieldArtView(field)).picOffsetPoint.y;
+  // aud262: BATTLER_COORD_ATTR_TOP (GetBattlerSpriteCoordAttr, battle_anim_mons.c): the pic Y minus half the species' pic height (the Memento shadow tasks).
+  const topY = (battler: 0 | 1): number => picOffsetY(battler) - Math.trunc(createBattleCommandFieldArtView(field)[battler === 0 ? "player" : "opponent"].coords.height / 2);
   // aud262: GetBattlerYCoordWithElevation reads the species (a Substitute doll does not hide it): the attacker's gEnemyMonElevation / sCastformElevations, 0 for the player.
   const attackerSide = command.animation.attacker === 0 ? "player" : "opponent";
   const attackerArt = createBattleCommandFieldArtView(field)[attackerSide];
@@ -1605,7 +1607,7 @@ export function liveMoveSourceAge(
   const attackerMon = fieldBattler(field, command.animation.attacker);
   const quarterHp = Math.trunc(attackerMon.maxHP / 4);
   const attackerHpQuarter = [0, 1, 2].find((i) => attackerMon.hp < quarterHp * (i + 1)) ?? 3;
-  return Object.freeze({ request: command.animation, age, lastAge, attackerSpecies: attackerMon.species, attackerElevation, attackerHpQuarter, picOffsetY });
+  return Object.freeze({ request: command.animation, age, lastAge, attackerSpecies: attackerMon.species, attackerElevation, attackerHpQuarter, picOffsetY, topY });
 }
 
 /**

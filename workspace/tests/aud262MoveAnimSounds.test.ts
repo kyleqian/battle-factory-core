@@ -107,3 +107,32 @@ describe("Water Spout (aud262)", () => {
     });
   }
 });
+
+// Memento: the first wait ends with AnimTask_MoveAttackerMementoShadow (battle_anim_dark.c:408-535), 46 half-rate calls + (TOP - 7 - d8) / 8 + 1 window-lowering calls + 8 closing + 2, where
+// TOP = BATTLER_COORD_ATTR_TOP of the attacker (pic Y - height / 2, battle_anim_mons.c:2277). The ROM's third SE (SE_M_PSYBEAM at the target) follows it by 25 + n frames; the table carries one
+// variant per attacker TOP class. (The ROM's start frame is 108 earlier than ours in all five windows: a constant, the #198 lead class, not a lifetime error.)
+describe("Memento (aud262)", () => {
+  const entry = timing.moves[262]! as unknown as { label: string; gated: number[]; top: number[] };
+  const grids = timing as unknown as { topYs: number[][]; topGrids: number[][] };
+  const gap = (side: 0 | 1, top: number) => {
+    const ops = timing.variants[grids.topGrids[entry.top[side]!]![grids.topYs[side]!.indexOf(top)]!]!;
+    return ops[2]!.frame - ops[1]!.frame;
+  };
+  it("the table entry: ungated, one TOP grid per attacker side", () => {
+    expect(entry.label).toBe("Move_MEMENTO");
+    expect(entry.gated.every((g) => g === 0)).toBe(true);
+    expect(entry.top.every((g) => g >= 0)).toBe(true);
+    expect([gap(0, 56), gap(0, 81), gap(1, 3), gap(1, 16), gap(1, 10)]).toEqual([33, 36, 33, 35, 34]);
+  });
+  const windows = [["memento", "player", 0, 81, 36], ["mementoonix", "player", 0, 56, 33], ["memento", "opponent", 1, 3, 33], ["mementogyarados", "opponent", 1, 16, 35], ["mementoonix", "opponent", 1, 10, 34]] as const;
+  for (const [name, side, slot, top, romGap] of windows) {
+    it(`aud262-${name}-${side}: SE gaps 50 / ${romGap} equal the ROM's (attacker TOP ${top}), offset constant`, () => {
+      const rom = fixture(`aud262-${name}-${side}`);
+      const rows = rom.events.filter((e) => e.noop !== true && e.kind === "se" && [189, 200].includes(e.id as number));
+      expect(rows.map((e) => e.id)).toEqual([189, 200, 189]);
+      expect([rows[1]!.frame - rows[0]!.frame, rows[2]!.frame - rows[1]!.frame]).toEqual([50, romGap]);
+      expect(gap(slot, top)).toBe(romGap);
+      expect(expectConstantOffset(rom, [189, 200], 3, "first")).toBe(-108);
+    });
+  }
+});

@@ -89,7 +89,7 @@ interface SoundOp {
   line: number;
 }
 type Reason = "bg-fade" | "unmodelled-lifetime" | "waitsound" | "unresolved-branch" | "after-unresolved-branch";
-interface Walk { events: SoundOp[]; end: string; frame: number | null; gated: number; reasons: Record<string, number>; usedPic: boolean; usedCounter: boolean; usedDamage: boolean; usedFlag: FlagKind | null; usedElevation: boolean; usedHp: boolean }
+interface Walk { events: SoundOp[]; end: string; frame: number | null; gated: number; reasons: Record<string, number>; usedPic: boolean; usedCounter: boolean; usedDamage: boolean; usedFlag: FlagKind | null; usedElevation: boolean; usedHp: boolean; usedTop: boolean }
 
 // ---- Lifetimes of the creation ops (ticks after the creation tick at which the visual task / sprite is gone). Exact entries are the
 // source-derived or RAM-probed lifetimes src/animation already uses (shakeMon.ts, slideMon.ts, dragonRage.ts); a bound is an upper
@@ -268,10 +268,11 @@ const gbaCos = (index: number, amplitude: number): number => (amplitude * sineTa
 /** Singles sBattlerCoords x (player, opponent). */
 const BATTLER_X = [72, 176] as const;
 // aud262: attackerElevation = GetBattlerElevation of the attacker (gEnemyMonElevation / sCastformElevations: opponent side only, 0 for the player).
-interface PicContext { readonly attackerY: number; readonly targetY: number; readonly attackerElevation?: number; readonly hpQuarter?: number }
+interface PicContext { readonly attackerY: number; readonly targetY: number; readonly attackerElevation?: number; readonly hpQuarter?: number; readonly attackerTop?: number }
 let picUsed = false;
 let elevationUsed = false;
 let hpUsed = false;
+let topUsed = false;
 let counterUsed = false;
 let damageUsed = false;
 type FlagKind = "power" | "heal";
@@ -731,6 +732,18 @@ function lifetimeOf(cmd: Command, attackerSide: number, pic: PicContext, rollout
     }
     return { exact: Math.max(74, 46 + slowest) - 1 };
   }
+  // aud262: AnimTask_MoveAttackerMementoShadow (battle_anim_dark.c:408-535). Entry = call 0; Step case 0 (calls 1..46) steps every second call (23 steps: data[11] 0 -> 12 on odd, data[12] 16 -> 8 on even), case 1 lowers data[4] = TOP - 7 by
+  // 8 per call until it is below data[8] (-12 player / -64 opponent), case 2 closes the window in 8 calls (64 wide, 8 per call), case 3 and case 4 (destroy) one call each. TOP = BATTLER_COORD_ATTR_TOP of the attacker.
+  if (op === "createvisualtask" && args[0] === "AnimTask_MoveAttackerMementoShadow") {
+    topUsed = true;
+    const d8 = attackerSide === 0 ? -12 : -64;
+    const n = Math.max(1, Math.floor((((pic.attackerTop ?? 0) - 7) - d8) / 8) + 1);
+    return { exact: 46 + n + 8 + 2 + 2 - 1 };
+  }
+  // aud262: AnimTask_MoveTargetMementoShadow (battle_anim_dark.c:537-775) ends the script and no sound op follows its wait, so its length (A + max(8, B) + 46 + 2 calls, B from the target's TOP) never moves a sound: modelled with the
+  // reference class, not ROM-checked (only the move's end frame, which the table does not carry, depends on it).
+  if (op === "createvisualtask" && args[0] === "AnimTask_MoveTargetMementoShadow") return { exact: 4 + 21 + 10 + 46 + 2 - 1 };
+  if (op === "createvisualtask" && (args[0] === "AnimTask_InitMementoShadow" || args[0] === "AnimTask_MementoHandleBg")) return { exact: -1 };
   // aud262: gRapidSpinSpriteTemplate (battle_anim_effects_3.c:1708-1745; script args a0..a5 = args[3..8]): y2 starts at a2 and moves by a5 per call; destroyed on the first call whose y2 has passed a3 (data[0] = y2 > a3 picks the side).
   if (op === "createsprite" && args[0] === "gRapidSpinSpriteTemplate") {
     const [a2, a3, a5] = [intArg(args[5]), intArg(args[6]), intArg(args[8])];
@@ -1493,8 +1506,14 @@ const picYs: number[][] = [
   [...new Set(Object.entries(picCoords.front).map(([name, c]) => Math.min(c.yOffset - (elevations[name] ?? 0) + 40, 104)))].sort((a, b) => a - b),
 ];
 const middle = (values: number[]): number => values[Math.floor(values.length / 2)]!;
+// aud262: BATTLER_COORD_ATTR_TOP (battle_anim_mons.c:2151-2284) = the pic Y above minus half the pic's height (GET_MON_COORDS_HEIGHT of the species' back / front coords); topYs[side] = the sorted distinct values.
+const picHeights = JSON.parse(readFileSync(join(RUN_ROOT, "src", "data", "gen", "mon-pic-coords.json"), "utf8")) as { back: Record<string, { height: number }>; front: Record<string, { height: number }> };
+const topYs: number[][] = [
+  [...new Set(Object.entries(picCoords.back).map(([name, c]) => Math.min(c.yOffset + 80 + 8, 104) - Math.trunc(picHeights.back[name]!.height / 2)))].sort((a, b) => a - b),
+  [...new Set(Object.entries(picCoords.front).map(([name, c]) => Math.min(c.yOffset - (elevations[name] ?? 0) + 40, 104) - Math.trunc(picHeights.front[name]!.height / 2)))].sort((a, b) => a - b),
+];
 /** The walk's default class (and the runtime fallback): the middle value of each side's pic Y. */
-const referencePic = (attackerSide: number): PicContext => ({ attackerY: middle(picYs[attackerSide]!), targetY: middle(picYs[1 - attackerSide]!), attackerElevation: attackerSide === 1 ? REFERENCE_OPPONENT_ELEVATION : 0, hpQuarter: REFERENCE_HP_QUARTER });
+const referencePic = (attackerSide: number): PicContext => ({ attackerY: middle(picYs[attackerSide]!), targetY: middle(picYs[1 - attackerSide]!), attackerElevation: attackerSide === 1 ? REFERENCE_OPPONENT_ELEVATION : 0, hpQuarter: REFERENCE_HP_QUARTER, attackerTop: middle(topYs[attackerSide]!) });
 // aud262: the sorted distinct elevations a battler can have (0 = player / unelevated; enemy-mon-elevations.json, Castform 13 / 14 are in the set).
 const REFERENCE_OPPONENT_ELEVATION = 8;
 const REFERENCE_HP_QUARTER = 3;
@@ -1538,10 +1557,11 @@ function walk(bodyLabel: string, turn: number, attackerSide: number, pic: PicCon
   picUsed = false;
   elevationUsed = false;
   hpUsed = false;
+  topUsed = false;
   counterUsed = false;
   damageUsed = false;
   flagUsed = null;
-  const finish = (end: string): Walk => ({ events, end, frame, gated, reasons, usedPic: picUsed, usedCounter: counterUsed, usedDamage: damageUsed, usedFlag: flagUsed, usedElevation: elevationUsed, usedHp: hpUsed });
+  const finish = (end: string): Walk => ({ events, end, frame, gated, reasons, usedPic: picUsed, usedCounter: counterUsed, usedDamage: damageUsed, usedFlag: flagUsed, usedElevation: elevationUsed, usedHp: hpUsed, usedTop: topUsed });
   const unresolved = (reason: Reason): void => { frame = null; why ??= reason; };
   const gate = (): void => { gated += 1; const reason = why ?? "unresolved-branch"; reasons[reason] = (reasons[reason] ?? 0) + 1; };
   let pc: [string, number] = [bodyLabel, 0];
@@ -1840,10 +1860,13 @@ const flagIndex = new Map<string, number>();
 // aud262: a walk that reads GetBattlerYCoordWithElevation (Rapid Spin's AnimTask_RapinSpinMonElevation) is repeated for every elevation class; the move's `elevation` slot points at the grid (one cell per elevationClasses entry).
 const elevationGrids: number[][] = [];
 const elevationIndex = new Map<string, number>();
+// aud262: a walk that reads BATTLER_COORD_ATTR_TOP of a battler (Memento's shadow tasks) is repeated for every attacker TOP class; the move's `top` slot points at the grid (indexed by the attacker's class in topYs order).
+const topGrids: number[][] = [];
+const topIndex = new Map<string, number>();
 const counterIndex = new Map<string, number>();
 const gridIndex = new Map<string, number>();
 moveTable.forEach((label, move) => {
-  const entry = { move, label, variants: [] as number[], ends: [] as string[], gated: [] as number[], reasons: [] as Array<Record<string, number>>, pic: [] as number[], counter: [] as number[], damage: [] as number[], flag: [] as number[], elevation: [] as number[], hp: [] as number[], flagKind: undefined as FlagKind | undefined };
+  const entry = { move, label, variants: [] as number[], ends: [] as string[], gated: [] as number[], reasons: [] as Array<Record<string, number>>, pic: [] as number[], counter: [] as number[], damage: [] as number[], flag: [] as number[], elevation: [] as number[], hp: [] as number[], top: [] as number[], flagKind: undefined as FlagKind | undefined };
   for (let turn = 0; turn < TURNS; turn += 1) {
     for (let side = 0; side < SIDES; side += 1) {
       const result = walk(label, turn, side);
@@ -1857,6 +1880,17 @@ moveTable.forEach((label, move) => {
           grid = gridIndex.get(key)!;
         }
       }
+      let topGrid = -1;
+      if (result.usedTop) {
+        const cells: number[] = [];
+        for (const attackerTop of topYs[side]!) cells.push(poolOf(walk(label, turn, side, { ...referencePic(side), attackerTop }).events));
+        if (cells.some((c) => c !== cells[0])) {
+          const key = JSON.stringify(cells);
+          if (!topIndex.has(key)) { topIndex.set(key, topGrids.length); topGrids.push(cells); }
+          topGrid = topIndex.get(key)!;
+        }
+      }
+      entry.top.push(topGrid);
       let counterGrid = -1;
       if (result.usedCounter) {
         const cells = [1, 2, 3, 4, 5].map((counter) => poolOf(walk(label, turn, side, referencePic(side), counter).events));
@@ -1952,7 +1986,9 @@ const out = {
   flagGrids,
   elevationClasses,
   elevationGrids,
-  moves: moves.map((m) => ({ move: m.move, label: m.label, variants: m.variants, ends: m.ends, gated: m.gated, ...(m.pic.some((g) => g >= 0) ? { pic: m.pic } : {}), ...(m.hp.some((g) => g >= 0) ? { hp: m.hp } : {}), ...(m.counter.some((g) => g >= 0) ? { counter: m.counter } : {}), ...(m.damage.some((g) => g >= 0) ? { damage: m.damage } : {}), ...(m.flag.some((g) => g >= 0) ? { flag: m.flag, flagKind: m.flagKind } : {}), ...(m.elevation.some((g) => g >= 0) ? { elevation: m.elevation } : {}) })),
+  topYs,
+  topGrids,
+  moves: moves.map((m) => ({ move: m.move, label: m.label, variants: m.variants, ends: m.ends, gated: m.gated, ...(m.pic.some((g) => g >= 0) ? { pic: m.pic } : {}), ...(m.hp.some((g) => g >= 0) ? { hp: m.hp } : {}), ...(m.counter.some((g) => g >= 0) ? { counter: m.counter } : {}), ...(m.damage.some((g) => g >= 0) ? { damage: m.damage } : {}), ...(m.flag.some((g) => g >= 0) ? { flag: m.flag, flagKind: m.flagKind } : {}), ...(m.elevation.some((g) => g >= 0) ? { elevation: m.elevation } : {}), ...(m.top.some((g) => g >= 0) ? { top: m.top } : {}) })),
   general,
 };
 mkdirSync(outDir, { recursive: true });
