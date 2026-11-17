@@ -52,7 +52,7 @@ describe("rol1: the five-turn Rollout window (ROM, Scene ON)", () => {
     expect(stat.map((f) => first("SE_M_HEADBUTT", f) - f)).toEqual([221, 220, 220, 220, 220]);
   });
 
-  it("the model's hp command is flat for the small damages (floor 28) and only grows once the bar frames exceed it", () => {
+  it("a floor-28 hp command (the pre-hpd1 Rollout hit; hpd1: the foe hit now carries bar + 1 + tail, tests/hpd1HpHold.test.ts) is flat for the small damages", () => {
     // Lv100 Rattata (max HP 201): ROM drain starts +104 after the hit sound and clears at drain + bar + ~15 (measured per counter: 23 / 24 / 30 / 37).
     const maxHp = 201;
     const duration = (damage: number) => battleResolutionCommandDuration(hpCommand(maxHp, maxHp - damage), field(maxHp));
