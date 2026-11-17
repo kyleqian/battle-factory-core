@@ -1222,6 +1222,18 @@ function lifetimeOf(cmd: Command, attackerSide: number, pic: PicContext, rollout
     return n === null || i === null || n < 1 ? null : { exact: 4 * (8 - 2 * Math.min(2, Math.max(0, i))) * n };
   }
   if (sprite("gNeedleArmSpikeSpriteTemplate")) { const d = intArg(args[7]); return d === null || d < 1 ? null : { exact: d }; }
+  // AnimEllipticalGust (battle_anim_flying.c:353-370) runs its step once in the init (++data[0] = 1 at call 0) and destroys on ++data[0] == 71 (call 70): exact 69.
+  // AnimTask_AnimateGustTornadoPalette (:373-405; n = gBattleAnimArgs[1] = script args[3]) installs the step in the entry (call 0), calls 1..n each count data[0] down and call n destroys: exact n - 1.
+  // AnimTranslateWebThread (battle_anim_bug.c:258-298; unk2 = args[5], targetsBoth = args[7]) sets data[0] = (|targetX - x| << 8) / unk2 (InitAnimLinearTranslationWithSpeed, battle_anim_mons.c:1155-1160) from
+  // the attacker X_2 +- 20 to the target X_2 (singles, both sides: |104 - 20| = 84) and AnimTranslateLinear (:1111) counts it down from call 1, destroying in the call that sees 0: exact data[0] (42 at unk2 = 512).
+  // AnimSpiderWeb (:318-355) counts data[2] to 20 (calls 1..20), then decrements data[0] 16 -> 0 on every second call (calls 22, 24 .. 52), and AnimSpiderWeb_End destroys in call 53: exact 52.
+  if (sprite("gEllipticalGustSpriteTemplate")) return { exact: 69 };
+  if (op === "createvisualtask" && args[0] === "AnimTask_AnimateGustTornadoPalette") { const n = intArg(args[3]); return n === null || n < 1 ? null : { exact: n - 1 }; }
+  if (op === "create_web_thread_sprite" || sprite("gWebThreadSpriteTemplate")) {
+    const [unk2, both] = op.startsWith("create_") ? [intNamed("unk2"), intNamed("targets_both")] : [intArg(args[5]), intArg(args[7])];
+    return unk2 === null || unk2 < 1 || both !== 0 ? null : { exact: Math.floor((84 * 256) / unk2) };
+  }
+  if (sprite("gSpiderWebSpriteTemplate")) return { exact: 52 };
   // AnimPainSplitProjectile (battle_anim_effects_3.c:2937-2970) keeps its callback and destroys in the first call after animEnded: gPainSplitAnimCmds (:723-729) are 5 + 9 + 5 = 19 ticks, exact 19.
   // AnimTask_PainSplitMovement (:2974-3033): the entry (call 0) sets the rot/scale and data[0] = 1, step calls 1..13 count data[1], call 13 (== 13) destroys: exact 12.
   if (sprite("gPainSplitProjectileSpriteTemplate")) return { exact: 19 };

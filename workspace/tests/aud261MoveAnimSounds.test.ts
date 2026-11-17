@@ -305,3 +305,40 @@ describe("Smelling Salt (aud261)", () => {
     });
   }
 });
+
+// AnimEllipticalGust (battle_anim_flying.c:353-370: init runs the step once, destroyed on ++data[0] == 71 at call 70, exact 69) and AnimTask_AnimateGustTornadoPalette (:373-405, n = 70, exact 69) gate the
+// SE_M_GUST2 after the first GUST: ROM gap 70.
+describe("Gust (aud261)", () => {
+  it("the table entry: GUST at 9 and GUST2 at 79, ungated", () => {
+    expect(timing.moves[16]!.label).toBe("Move_GUST");
+    expect(timing.moves[16]!.gated.every((g) => g === 0)).toBe(true);
+    expect(tableRows(16, 0)).toEqual(["9:132", "79:133"]);
+  });
+  for (const side of ["player", "opponent"] as const) {
+    it(`aud261-gust-${side}: the GUST to GUST2 gap is the table's 70, offset constant`, () => {
+      const rom = fixture(`aud261-gust-${side}`);
+      const romRows = rom.events.filter((e) => e.kind === "se" && !e.noop && [132, 133].includes(e.id as number));
+      expect(romRows.map((e) => e.frame - romRows[0]!.frame)).toEqual([0, 70]);
+      expect(expectConstantOffset(rom, [132, 133], 2)).toBe(1);
+    });
+  }
+});
+
+// AnimTranslateWebThread (battle_anim_bug.c:258-298; D = (|84| << 8) / 512 = 42, AnimTranslateLinear) x 14 gates the first wait: the loop ends 82 ticks before STRING_SHOT2 on the ROM;
+// AnimSpiderWeb (:318-355, 20 + 32 calls, destroyed in call 53) gates the final wait.
+describe("Spider Web (aud261)", () => {
+  it("the table entry: STRING_SHOT loop at 38 and STRING_SHOT2 at 120, ungated", () => {
+    expect(timing.moves[169]!.label).toBe("Move_SPIDER_WEB");
+    expect(timing.moves[169]!.gated.every((g) => g === 0)).toBe(true);
+    expect(tableRows(169, 0)).toEqual(["38:129", "120:130"]);
+  });
+  for (const side of ["player", "opponent"] as const) {
+    it(`aud261-spiderweb-${side}: the loop-to-STRING_SHOT2 gap is the table's 82, offset constant`, () => {
+      const rom = fixture(`aud261-spiderweb-${side}`);
+      const romRows = rom.events.filter((e) => e.kind === "se" && !e.noop && [129, 130].includes(e.id as number));
+      expect(romRows.length).toBe(7);
+      expect(romRows[6]!.frame - romRows[0]!.frame).toBe(82);
+      expect(expectConstantOffset(rom, [129, 130], 7)).toBe(-3);
+    });
+  }
+});
