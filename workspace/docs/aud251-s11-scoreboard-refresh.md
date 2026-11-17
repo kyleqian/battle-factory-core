@@ -292,24 +292,24 @@ Consequence: the t2cls "Eruption: ungated complete entry emits only its first op
 
 Tested tree: `ce04ab20e` (includes aud242q / aud242r / t1dt and the Heal Bell, Spike Cannon, Eruption, Moonlight, Curse timings that aud255's `57bb082ac` lacked). Scene ON seeds only (the ROM ON oracle half); OFF was not re-run. Evidence (ignored dir): `.integration/evidence/aud256/` = `chain/<seed>-on.*`, `chain/summary.log`, `jobs.txt`, `scoreboard.{txt,json}`. Commands: the aud255 ON job list, `xargs -P 4`, `nice -n 10 tools/audio/aud248RunSeed.sh SEED on .integration/evidence/aud256/chain`, then `python3 tools/audio/soundScoreboard.py .integration/evidence/aud256/chain --out .integration/evidence/aud256/scoreboard.json`.
 
-**Seeds not finished: 2 of 21 (5063, 8108).** The session cap came first: their chain stage finished (engine / drive / frozen / tl / cmp present, aligned to battle end like the others) but the ROM sound pass (`.snd.json`) did not. The table below is therefore **19 aligned seeds** (2 6 165 499 830 1028 1415 1914 2230 2741 3158 3738 4235 4686 5569 6079 6912 7295 8612), 0 chain FAIL, every `summary.log` row `engineError null`, `frozenTimelineEqualsDrive true`, `divergence null`. The aud255 numbers for 5063 / 8108 are not subtracted, so the aud255 column is the 21-seed figure; the only known 8108 / 5063 rows in aud255 were Cosmic Power 228 x6 (8108); 5063 had none.
+**All 21 seeds finished** (the two slowest, 5063 and 8108, completed their ROM sound pass late; the first table pass over 19 seeds read 57 missing, the final 21-seed pass reads 63). 0 chain FAIL, every `summary.log` row `engineError null`, `frozenTimelineEqualsDrive true`, `divergence null`, all 21 aligned to battle end.
 
-### ON family table, aud255 (21 seeds) -> aud256 (19 seeds)
+### ON family table, aud255 -> aud256 (21 seeds both)
 
 | family | exact+offset | missing | extra |
 |---|---|---|---|
-| move-animation SE | 3915 -> 3209 (fewer seeds) | 76 -> **57** | 0 -> 0 |
-| stat-change SE | 85 -> 74 | 0 -> 0 | 0 -> 0 |
-| cries | 171 -> 157 | 0 -> 0 | 0 -> 0 |
-| battle-controller SE | 643 -> 546 | 0 -> 0 | 0 -> 0 |
-| BGM | 5 -> 4 | 0 -> 0 | 0 -> 0 |
+| move-animation SE | 3915 -> 3928 | 76 -> **63** | 0 -> 0 |
+| stat-change SE | 85 -> 85 | 0 -> 0 | 0 -> 0 |
+| cries | 171 -> 171 | 0 -> 0 | 0 -> 0 |
+| battle-controller SE | 643 -> 643 | 0 -> 0 | 0 -> 0 |
+| BGM | 5 -> 5 | 0 -> 0 | 0 -> 0 |
 | fanfare / screen SE | 0 | 0 | 0 |
 
-Exact / offset split: move-animation 256 exact / 2953 offset, stat 12 / 62, cry 3 / 154, controller 59 / 487, bgm 0 / 4. Matched-row delta (engine minus ROM): move-animation median -2 (p10 -21, p90 +5), controller -6: same character as aud255. **0 engine-only rows.**
+Exact / offset split: move-animation 287 exact / 3641 offset (aud255 total 3915), stat 13 / 72, cry 4 / 167, controller 66 / 577, bgm 0 / 5. Matched-row delta (engine minus ROM): move-animation median -2 (p10 -20, p90 +6), controller -5: same character as aud255. **0 engine-only rows.**
 
-### Remaining ROM-only rows (57) by move, with the t2cls class
+### Remaining ROM-only rows (63) by move, with the t2cls class
 
-57 = aud255's 76 minus Eruption (13, now matched: the missing 178 / 131 rows are gone; eru2's "stale evidence" conclusion is confirmed by the ROM run) minus Cosmic Power (6, seed 8108, **not measured**, unfinished) = 57. Every other t2cls row reproduces with the same ids and counts, so no other t2cls class changed.
+63 = aud255's 76 minus Eruption (13, now matched: the missing 178 / 131 rows are gone; eru2's "stale evidence" conclusion is confirmed by the ROM run). Cosmic Power (8108) still has its 6 rows. Every other t2cls row reproduces with the same ids and counts, so no other t2cls class changed.
 
 | move | seeds | ROM-only ids | rows | t2cls class |
 |---|---|---|---|---|
@@ -320,9 +320,10 @@ Exact / offset split: move-animation 256 exact / 2953 offset, stat 12 / 62, cry 
 | Future Sight hit | 6079 | 189, 184 x2 | 3 | (b) |
 | unresolved (res17 window) | 165 | 205 x2, 192 | 3 | (e) |
 | Soft-Boiled | 1028 | 179 x2 | 2 | (a) |
+| Cosmic Power | 8108 | 228 x6 | 6 | (a) |
 | Sweet Kiss | 830 | 226 | 1 | (a) |
 | Focus Band | 4235 | 171 | 1 | (b) |
 
-Class totals: (a) 38 (Shock Wave 18, Seismic Toss 9 incl. its (c) branch, Torment 8, Soft-Boiled 2, Sweet Kiss 1), (b) 16, (e) 3 (Cosmic Power's 6 (a) rows are unmeasured, Eruption's 13 (e) rows are closed). The other moves timed after `57bb082ac` (Heal Bell, Spike Cannon, Moonlight, Curse) had no ROM-only row in aud255 and have none now, so that part of eru2's "scan not done" caveat is closed for these 19 seeds.
+Class totals: (a) 44 (Shock Wave 18, Seismic Toss 9 incl. its (c) branch, Torment 8, Cosmic Power 6, Soft-Boiled 2, Sweet Kiss 1), (b) 16, (e) 3; 44 + 16 + 3 = 63 = the t2cls 76 minus the 13 Eruption rows. The other moves timed after `57bb082ac` (Heal Bell, Spike Cannon, Moonlight, Curse) had no ROM-only row in aud255 and have none now, so that part of eru2's "scan not done" caveat is closed for these 19 seeds.
 
-Next: the ranked steps of t2cls stand with rank 3 (Eruption) removed; rank 1 (the three general-animation emitters, 16 rows) is now the largest ungated-table item after Shock Wave (18). To finish the measurement, run `tools/audio/aud248RunSeed.sh 5063 on .integration/evidence/aud256/chain` and the same for 8108 (the chain stage is cached, only the sound pass reruns, ~3 min each) and re-run `soundScoreboard.py`.
+Next: the ranked steps of t2cls stand with rank 3 (Eruption) removed; rank 1 (the three general-animation emitters, 16 rows) is now the largest ungated-table item after Shock Wave (18). Not measured here: Scene OFF (aud255: 0 / 0 on 20 seeds), the census.
