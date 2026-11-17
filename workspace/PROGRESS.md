@@ -52,7 +52,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 - **State:** committed (`19d683750`), test-only + tooling; `npx vitest run tests/randomRoundSoak.test.ts` 64/64, typecheck 0. `tools/soak/batonPassSearch.ts` (`--seeds A:B --parallel N`, the pin's options by default; usage in its header) replaces the cln237-removed scanner; `--seeds 0:80 --parallel 8` takes ~50 s.
 - **Did:** "full" seed 0 re-pinned 18523 / battle 1 / turn 23 / depth 0 -> 38094 / battle 2 / turn 22 / depth 1 (ais1; ais2 does not move it; seed 1 unmoved); vanilla / winning pins did NOT move. #89 Baton Pass pin seed 32 -> 3 (hits 3, 8, 14, 15, 17, 19, 31, 33, 44, 55, 71, 77), history lines added.
-- **Next:** none; re-pins after the next presentation change are one scanner command.
+- **Next:** none; re-pins after the next presentation change are one scanner command. Verified: `test:gate` 362 / 2843, build 0, full `npm test` 1833 files passed + 1 failure (iss215: the scanner lacked the pixel-install import; fixed in the next commit, test re-run green, the full suite itself NOT re-run after the fix).
 
 ## 2026-11-16 night run (CAX31 supervisor, Opus 5.5, 13:30 -> 05:30 UTC): in progress
 
