@@ -1379,3 +1379,61 @@ Window notes: the Swallow opponent window is absent because the engine's opponen
 - Luster Purge has 6 gated L50 rows but no 0..999 census row.
 
 T1 census 0..999 Scene ON: missing-gated 467 -> 64 (Magnitude 23, Rapid Spin 20, Water Spout 8, Memento 6, Present 4, Odor Sleuth 1, False Swipe 1, Pay Day 1), extra 0, unclassified 0. Scoreboard: docs/aud251-s11-scoreboard-refresh.md (aud261).
+
+## 28. aud262: the variant dimensions of section 27.1, Odor Sleuth, False Swipe, Pay Day, Luster Purge
+
+Closes every T1 0..999 Scene ON missing-gated row (64 -> 0) and the Luster Purge L50 rows. Lifetimes are ported from the C (file:line in the `lifetimeOf` comments of `tools/extract/extract-anim-sound-timing.ts`); each new variant class has a ROM window (probe step mode, Scene ON, labs `tools/battle-lab/aud262-*.json`, stages `aud262-<move>-<side>-on` in `tools/compare/appTrace.ts`, fixtures `tools/audio/fixtures/aud262-*.json`) and a Tier-1 pin in `tests/aud262MoveAnimSounds.test.ts`. Call numbering as in the earlier sections.
+
+New variant dimensions (every key is a value the engine has at the request, derived as the C does):
+
+| Dimension | Move | Key | Source |
+| --- | --- | --- | --- |
+| `flag` | Magnitude, Present | `AnimTask_IsPowerOver99` (`gAnimMovePower > 99`), `AnimTask_IsHealingMove` (`gAnimMoveDmg > 0` -> FALSE); Magnitude's two branches start the same SE loop, so its cells are equal; Present picks `damage > 0 ? 0 : 1` | battle_anim_ground.c:734-742, battle_anim_effects_3.c:1531-1539 |
+| `elevation` | Rapid Spin | the attacker's `GetBattlerElevation` (`gEnemyMonElevation` / `sCastformElevations`, 0 for the player) | battle_anim_effects_3.c:1749-1883, battle_anim_mons.c:258-259 |
+| `hp` (quarter-major pic grid) | Water Spout | `GetWaterSpoutPowerForAnim`: first `i < 3` with `hp < (maxHP / 4) * (i + 1)`, else 3 | battle_anim_water.c:1139-1170 |
+| `top` | Memento | the attacker's `BATTLER_COORD_ATTR_TOP` = pic Y - trunc(pic height / 2) | battle_anim_mons.c:2151-2284, battle_anim_dark.c:408-535 |
+
+Runtime plumbing (sound side only): `liveMoveSourceAge` (`battleResolutionPresentationRender.ts`) additionally returns `attackerElevation`, `attackerHpQuarter`, `topY`; `variantOf` (now exported with `VariantInputs`) takes them with the request damage. Priority: counter, damage, flag (heal kind), elevation, top, pic (quarter-major when `hp`), plain.
+
+Lifetimes added:
+
+| Move | Object | Lifetime | Source |
+| --- | --- | --- | --- |
+| Magnitude | `AnimTask_ShakeTargetBasedOnMovePowerOrDmg`, ground-shake tasks | delay / count, per branch | battle_anim_mon_movement.c:971-1023 |
+| Rapid Spin | `gRapidSpinSpriteTemplate`, `AnimTask_RapinSpinMonElevation` | y2 walk, elevation-dependent length | battle_anim_effects_3.c:1708-1883 |
+| Water Spout | `AnimTask_WaterSpoutLaunch` + droplet flight | 46 + HP-quarter droplet count (modelled) | battle_anim_water.c:1054-1180 |
+| Memento | `AnimTask_MoveAttackerMementoShadow` | 46 + n + 8 + 2 (+2, below), n = floor((TOP - 7 - d8) / 8) + 1, d8 = -12 / -64 | battle_anim_dark.c:408-535 |
+| Present | `AnimPresent` bag, heal particle | 110, 16 | battle_anim_effects_1.c:3016-3040 |
+| Odor Sleuth | `AnimTask_OdorSleuthMovement` (two clones) | 72 | battle_anim_effects_3.c:4955-5055 |
+| False Swipe | slice, positioned slices | 57 (the animEnded callback acts one call after the END: T + 1), 17 | battle_anim_effects_1.c:4717-4765 |
+| Pay Day | `gCoinThrowSpriteTemplate` | 19 ((84 << 8) / 1152 = 18 translation calls, the stored destroy one call later) | battle_anim_effects_2.c:1776-1797 |
+| Luster Purge | `gLusterPurgeCircleSpriteTemplate` (AnimSpriteOnMonPos on a 0 + 120-tick affine anim), `AnimTask_FadeScreenToWhite` (decrements `gAnimVisualTaskCount` in its entry: net 0), random-position hit splats (AnimHitSplatBasic shape) | 121, -1, 10 | battle_anim_psychic.c:361-382, battle_anim_effects_3.c:1398-1402, battle_anim_normal.c:1049-1066 |
+
+| Window | ROM minus ours |
+| --- | --- |
+| Magnitude, both sides (`aud262-magnitude-*`, SE 214 loop, 9-frame spacing) | +3 |
+| Rapid Spin, four elevation classes (player 0, opponent Moltres 5 / Voltorb 10 / Pidgey 16; second-loop gaps 73 / 73 / 72 / 69) | +2 |
+| Water Spout (SE gaps 46 / 49-51): HP quarter 0 / 1 / 2 / 3 (player) | +11 / +7 / +7 / +2 |
+| Water Spout, Snorlax target (player) / opponent | +2 / +2 |
+| Memento, five pic heights (gaps 50 / 33-36) | -108 (constant) |
+| Present damage branch / heal branch (seed 5) | +1 / +2 |
+| Odor Sleuth (193, 193 +8, 192 +44), both sides | -4 |
+| False Swipe (122, 135 x3 +8 apart, 139), both sides | 0 |
+| Pay Day (160, 174 +20), both sides | +2 |
+| Luster Purge (201, 215 +122, five more +5), player / opponent | +2 / +5 |
+
+The ROM gaps equal the table's in every window; the constant offsets are the idle-lead / action-transition class (#198).
+
+Named residuals:
+
+- **Memento +2 calls**: the C-derived attacker-task count is two calls short of the ROM in all five windows (constant, so the +2 is kept in the lifetime). The ROM's start is 108 frames earlier than ours (#198 class), and the later SE_M_STAT_DECREASE gap differs by about 8 frames (presentation side).
+- **Memento target task** (`AnimTask_MoveTargetMementoShadow`): no sound follows its wait, so its length is source-derived only (not ROM-checkable).
+- **Present, opponent attacker**: the engine's AI does not choose Present in the lab, so only the player window exists. The ROM and the engine share the seed notion only partially (ROM seeds 3 and 5 heal, ours 1, 5, 10); seed 5 agrees.
+
+### 28.1 The census scorer
+
+`soundCensusExpected.ts` used to pick only the pic and counter variants, so a damage-keyed move (Seismic Toss) was always expected on the Medium branch. Seismic Toss seed 567 command 530 hits a target with fewer than 33 HP left, so the engine (correctly, `gAnimMoveDmg` is the damage dealt) plays the Weak branch (SE 214, 131 +18, no third SE): the scorer reported that as known-offset +2 and missing-other 1. `lsd194Census.ts` now records the request damage class (`soundAnim` element 12: z / 0 / 1 / 2) and the attacker's [elevation, HP quarter, TOP] (element 13), `soundCensusDelta.py` adds them to the key and `soundCensusExpected.ts` calls the emitter's own `variantOf`. Seed 567 scores 314 exact, 0 known-offset, 0 missing-other.
+
+The five missing-declined rows (Rock Smash 2, Beat Up 2, Withdraw 1) are moves with no live presentation adapter (`liveMoveAnimationDuration` null, section 20 note): adding one is presentation work, out of scope here.
+
+T1 census 0..999 Scene ON: missing-gated 64 -> **0**, known-offset 1 -> 0, missing-other 1 -> 0, missing-declined 5, extra 0, unclassified 0. Scoreboard: docs/aud251-s11-scoreboard-refresh.md (aud262).

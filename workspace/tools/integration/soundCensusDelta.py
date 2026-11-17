@@ -181,8 +181,15 @@ def counter_key(a):
     return str(a[11]) if len(a) > 11 and a[11] else ""
 
 
+# aud262: soundAnim row elements 12 (damage class) and 13 (attacker [elevation, HP quarter, TOP]) pick the damage / flag / elevation / HP-quarter / TOP variants of the table (absent in older arms).
+def dim_key(a):
+    d = str(a[12]) if len(a) > 12 and a[12] is not None else ""
+    t = ",".join(str(v) for v in a[13]) if len(a) > 13 and a[13] else ""
+    return f"{d}|{t}" if d or t else ""
+
+
 def exp_key(a):
-    return f"{a[1]},{a[2]},{a[3]},{a[4]},{pic_key(a)}" + (f",{counter_key(a)}" if counter_key(a) else "")
+    return f"{a[1]},{a[2]},{a[3]},{a[4]},{pic_key(a)}" + (f",{counter_key(a)}" if counter_key(a) else "") + (f"#{dim_key(a)}" if dim_key(a) else "")
 
 
 def t1(arm, json_out):
@@ -190,7 +197,7 @@ def t1(arm, json_out):
     timing = json.load(open("src/data/gen/anim-sound-timing.json"))
     label_of = {m["move"]: m["label"] for m in timing["moves"]}
     cry = cry_sites()
-    keys = sorted({(a[1], a[2], a[3], a[4], pic_key(a), counter_key(a)) for r in A.values() for a in r["soundAnim"] if a[1] is not None})
+    keys = sorted({(a[1], a[2], a[3], a[4], pic_key(a), counter_key(a), dim_key(a)) for r in A.values() for a in r["soundAnim"] if a[1] is not None})
     with tempfile.TemporaryDirectory() as td:
         kp, ep = os.path.join(td, "keys.json"), os.path.join(td, "expected.json")
         json.dump(keys, open(kp, "w"))

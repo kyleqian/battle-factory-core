@@ -89,7 +89,7 @@ interface SoundOp {
   line: number;
 }
 type Reason = "bg-fade" | "unmodelled-lifetime" | "waitsound" | "unresolved-branch" | "after-unresolved-branch";
-interface Walk { events: SoundOp[]; end: string; frame: number | null; gated: number; reasons: Record<string, number>; usedPic: boolean; usedCounter: boolean; usedDamage: boolean }
+interface Walk { events: SoundOp[]; end: string; frame: number | null; gated: number; reasons: Record<string, number>; usedPic: boolean; usedCounter: boolean; usedDamage: boolean; usedFlag: FlagKind | null; usedElevation: boolean; usedHp: boolean; usedTop: boolean }
 
 // ---- Lifetimes of the creation ops (ticks after the creation tick at which the visual task / sprite is gone). Exact entries are the
 // source-derived or RAM-probed lifetimes src/animation already uses (shakeMon.ts, slideMon.ts, dragonRage.ts); a bound is an upper
@@ -267,10 +267,16 @@ const gbaSin = (index: number, amplitude: number): number => (amplitude * sineTa
 const gbaCos = (index: number, amplitude: number): number => (amplitude * sineTable[(((index + 64) % 256) + 256) % 256]!) >> 8;
 /** Singles sBattlerCoords x (player, opponent). */
 const BATTLER_X = [72, 176] as const;
-interface PicContext { readonly attackerY: number; readonly targetY: number }
+// aud262: attackerElevation = GetBattlerElevation of the attacker (gEnemyMonElevation / sCastformElevations: opponent side only, 0 for the player).
+interface PicContext { readonly attackerY: number; readonly targetY: number; readonly attackerElevation?: number; readonly hpQuarter?: number; readonly attackerTop?: number }
 let picUsed = false;
+let elevationUsed = false;
+let hpUsed = false;
+let topUsed = false;
 let counterUsed = false;
 let damageUsed = false;
+type FlagKind = "power" | "heal";
+let flagUsed: FlagKind | null = null;
 interface FastSprite { x: number; y: number; x2: number; y2: number; d: number[]; callback: string; destroyed: boolean }
 // InitAnimFastLinearTranslationWithSpeed + InitAnimFastLinearTranslation (battle_anim_mons.c:1171-1197, 1244-1249); a zero duration is a division by zero (declined).
 function fastInit(s: FastSprite): boolean {
@@ -695,6 +701,77 @@ function lifetimeOf(cmd: Command, attackerSide: number, pic: PicContext, rollout
   if (op === "createvisualtask" && args[0] === "AnimTask_ExtrasensoryDistortion") return { exact: 25 };
   // AnimTask_TransparentCloneGrowAndShrink (battle_anim_psychic.c:1052-1117): func-only entry; data[1] += 4 to 48 (calls 1..12), -= 4 to 0 (13..24), case 2 at 25, destroy at 26.
   if (op === "createvisualtask" && args[0] === "AnimTask_TransparentCloneGrowAndShrink") return { exact: 25 };
+  // aud262: AnimTask_WaterSpoutLaunch (battle_anim_water.c:1054-1180). The entry installs the step; calls 1..32 (Erupt duration 32), 33..37 (++data[3] > 4), 38..45 (Erupt duration 8), call 46 creates the droplets (case 4)
+  // and runs one case 5 call; case 5 toggles every 2nd call (47, 49, .., the 10th at call 65 starts the last Erupt), calls 66..73 (duration 8), call 74 is case 7 (destroys once data[2] == 0). Droplets (gSmallWaterOrbSpriteTemplate,
+  // AnimSmallWaterOrb :1214-1236): count = ceil(20 / max(4 - hpQuarter, 1)) (GetWaterSpoutPowerForAnim :1139-1170, hp < maxhp / 4 * (i + 1)), spawned at (battler X, pic Y) with Cos / Sin (172 + 2 * increment * n, 64) plus
+  // (i % 6) * 3 / (i % 3) * 3; every second one (data[2] odd) is also stepped once in its creation call. A droplet's call j is iteration 46 + j (AnimateSprites before RunTasks) and it dies on the first call off the
+  // screen (x < -8 or > 248, y < -8 or > 120): the task dies at max(74, 46 + the slowest droplet's call). Pic Y and HP quarter dependent.
+  if (op === "createvisualtask" && args[0] === "AnimTask_WaterSpoutLaunch") {
+    picUsed = true;
+    hpUsed = true;
+    const quarter = pic.hpQuarter ?? REFERENCE_HP_QUARTER;
+    const increment = Math.max(4 - quarter, 1);
+    let slowest = 0;
+    let trig = 172;
+    let created = 0;
+    for (let i = 0; i < 20; i += increment) {
+      let [sx, sy] = [BATTLER_X[attackerSide]! * 16, pic.attackerY * 16];
+      const speedX = gbaCos(trig, 64) + (i % 6) * 3;
+      const speedY = gbaSin(trig, 64) + (i % 3) * 3;
+      if ((created & 1) === 1) { sx += speedX; sy += speedY; }
+      created += 1;
+      let call = 0;
+      for (;;) {
+        call += 1;
+        sx += speedX;
+        sy += speedY;
+        if (sx >> 4 < -8 || sx >> 4 > 248 || sy >> 4 < -8 || sy >> 4 > 120) break;
+      }
+      slowest = Math.max(slowest, call);
+      trig = (trig + increment * 2) & 0xFF;
+    }
+    return { exact: Math.max(74, 46 + slowest) - 1 };
+  }
+  // aud262: AnimTask_MoveAttackerMementoShadow (battle_anim_dark.c:408-535). Entry = call 0; Step case 0 (calls 1..46) steps every second call (23 steps: data[11] 0 -> 12 on odd, data[12] 16 -> 8 on even), case 1 lowers data[4] = TOP - 7 by
+  // 8 per call until it is below data[8] (-12 player / -64 opponent), case 2 closes the window in 8 calls (64 wide, 8 per call), case 3 and case 4 (destroy) one call each. TOP = BATTLER_COORD_ATTR_TOP of the attacker.
+  if (op === "createvisualtask" && args[0] === "AnimTask_MoveAttackerMementoShadow") {
+    topUsed = true;
+    const d8 = attackerSide === 0 ? -12 : -64;
+    const n = Math.max(1, Math.floor((((pic.attackerTop ?? 0) - 7) - d8) / 8) + 1);
+    return { exact: 46 + n + 8 + 2 + 2 - 1 };
+  }
+  // aud262: AnimTask_MoveTargetMementoShadow (battle_anim_dark.c:537-775) ends the script and no sound op follows its wait, so its length (A + max(8, B) + 46 + 2 calls, B from the target's TOP) never moves a sound: modelled with the
+  // reference class, not ROM-checked (only the move's end frame, which the table does not carry, depends on it).
+  if (op === "createvisualtask" && args[0] === "AnimTask_MoveTargetMementoShadow") return { exact: 4 + 21 + 10 + 46 + 2 - 1 };
+  if (op === "createvisualtask" && (args[0] === "AnimTask_InitMementoShadow" || args[0] === "AnimTask_MementoHandleBg")) return { exact: -1 };
+  // aud262: gRapidSpinSpriteTemplate (battle_anim_effects_3.c:1708-1745; script args a0..a5 = args[3..8]): y2 starts at a2 and moves by a5 per call; destroyed on the first call whose y2 has passed a3 (data[0] = y2 > a3 picks the side).
+  if (op === "createsprite" && args[0] === "gRapidSpinSpriteTemplate") {
+    const [a2, a3, a5] = [intArg(args[5]), intArg(args[6]), intArg(args[8])];
+    if (a2 === null || a3 === null || a5 === null || a5 === 0) return null;
+    let y2 = a2;
+    for (let call = 1; call < 1000; call += 1) {
+      y2 += a5;
+      if (a2 > a3 ? y2 < a3 : y2 > a3) return { exact: call - 1 };
+    }
+    return null;
+  }
+  // aud262: AnimTask_RapinSpinMonElevation (battle_anim_effects_3.c:1749-1831, Step :1833-1883): var0 = GetBattlerYCoordWithElevation = sBattlerCoords y (80 player / 40 opponent, :38-45) - the opponent's elevation
+  // (battle_anim_mons.c:342-370); data[0] = var0 + 36, data[2] = max(var0 - 33, 0), data[4] = 8 (calls 1..8 only count it down), then data[1] -= data[5] (= script arg 1) per call; the task ends on the call
+  // whose subtraction takes data[1] below data[2] (data[15]).
+  if (op === "createvisualtask" && args[0] === "AnimTask_RapinSpinMonElevation") {
+    const [which, step] = [intArg(args[2]), intArg(args[3])];
+    if (which !== 0 || step === null || step < 1) return null;
+    elevationUsed = true;
+    const var0 = attackerSide === 0 ? 80 : 40 - (pic.attackerElevation ?? 0);
+    const distance = var0 + 36 - Math.max(var0 - 33, 0);
+    return { exact: 8 + Math.floor(distance / step) + 1 - 1 };
+  }
+  // aud262: AnimTask_ShakeTargetBasedOnMovePowerOrDmg (battle_anim_mon_movement.c:971-1023; script args a1 = delay, a2 = count): the entry is call 0; every (delay + 1)th call is a shake step and the count-th one destroys it.
+  if (op === "createvisualtask" && args[0] === "AnimTask_ShakeTargetBasedOnMovePowerOrDmg") {
+    const [delay, count] = [intArg(args[3]), intArg(args[4])];
+    if (delay === null || count === null || delay < 0 || count < 1) return null;
+    return { exact: count * (delay + 1) - 1 };
+  }
   if (op === "createvisualtask" && (args[0] === "AnimTask_ShakeMon" || args[0] === "AnimTask_ShakeMon2")) {
     const [x, y, numTimes, delay] = [intArg(args[3]), intArg(args[4]), intArg(args[5]), intArg(args[6])];
     if (x === null || y === null || numTimes === null || delay === null || numTimes < 1) return null;
@@ -832,6 +909,23 @@ function lifetimeOf(cmd: Command, attackerSide: number, pic: PicContext, rollout
   // call from the begin call on), the callback sees it in call 17, installs the destroy, which runs in call 18: gone 17 ticks after F (the ROM-validated visual port
   // src/animation/swagger.ts draws the mark for exactly 17 ticks, ages 0..16).
   if (sprite("gAngerMarkSpriteTemplate")) return { exact: 17 };
+  // aud262: AnimTask_OdorSleuthMovement (battle_anim_effects_3.c:4955-5016): the entry (call 0) clones the target twice and sets task data[0] = 2; each clone's MoveOdorSleuthClone (:5023-5055, first callback on the
+  // next iteration) counts case 0 to 60, then case 1 lowers data[5] from 24 by 2 per call until it is < 0 (13 calls) and destroys itself (callback 73), decrementing data[0]; the task's WaitFinish sees 0 in the
+  // RunTasks of that same iteration (call 73): exact 72.
+  if (op === "createvisualtask" && args[0] === "AnimTask_OdorSleuthMovement") return { exact: 72 };
+  // AnimFalseSwipeSlice (battle_anim_effects_1.c:4717-4765): the init installs RunStoredCallbackWhenAnimEnds (gSlashSliceAnimCmds1 :1577-1584 = 4 x 4 = 16 ticks; animEnded is seen at call 16 and the stored Step1 is
+  // installed in call 17, as the other animEnded callbacks above), Step1 counts ++data[0] > 8 (call 26, installs TranslateSpriteLinear), 12 translation calls (27..38) and the call that sees 0 (39, installs Step2),
+  // Step2 (40) installs Step3, which destroys on the ninth visibility toggle (every second call from 41: call 58): exact 57. AnimFalseSwipePositionedSlice installs Step3 in the init: the ninth toggle is call 18: exact 17.
+  if (sprite("gFalseSwipeSliceSpriteTemplate")) return { exact: 57 };
+  if (sprite("gFalseSwipePositionedSliceSpriteTemplate")) return { exact: 17 };
+  // AnimCoinThrow (battle_anim_effects_2.c:1776-1797): call 1 runs InitAnimLinearTranslationWithSpeedAndPos (battle_anim_mons.c:1162-1169; data[0] = (|X_2 target - X_2 attacker +- 20| << 8) / 1152 =
+  // (84 << 8) / 1152 = 18 in singles, both sides, as the web thread) and the first AnimTranslateLinear step; calls 1..18 count down, call 19 sees 0 and installs the stored DestroyAnimSprite, call 20 destroys: exact 19.
+  if (sprite("gCoinThrowSpriteTemplate")) return { exact: 19 };
+  // aud262: AnimPresent (battle_anim_effects_1.c:3016-3040, gPresentSpriteTemplate :781): the init sets data[7] = 60 << 8 (InitItemBagData) and installs AnimItemSteal_Step1, whose moveAlongLinearPath
+  // (:2957-2986) counts currentTime from 0 and returns TRUE on call 60 (position-independent); AnimItemSteal_Step2 (:2988-2996) then destroys when data[0] (reset to 0) exceeds 50: call 61 + 50 = 111.
+  if (op === "create_present_sprite") return { exact: 110 };
+  // AnimPresentHealParticle (:3089-3104) destroys on animEnded of gPresentHealParticleAnimCmds (:810-816, 4 x 4 = 16 ticks): destroy at call 17.
+  if (op === "create_present_heal_particle_sprite") return { exact: 16 };
   // AnimTask_FlailMovement (battle_anim_effects_3.c:2845-2931): the entry only sets func; the step (call 1..) integrates data[2] by 0x200 per call and every call past the ninth
   // shrinks the amplitude data[14] by 0x40 (down to 16) for 0x20 calls, then sets data[0] = 2; the next call destroys the task (call K, gone K - 1 ticks after F).
   if (op === "createvisualtask" && args[0] === "AnimTask_FlailMovement") return { exact: flailMovementLength() };
@@ -1027,6 +1121,17 @@ function lifetimeOf(cmd: Command, attackerSide: number, pic: PicContext, rollout
     return a !== null && a >= 0 && a <= 3 ? { exact: 10 } : { bound: 10 };
   }
   // aud261: AnimHitSplatOnMonEdge (battle_anim_normal.c:1068-1081): the same affine anim (sAffineAnims_HitSplat, animation = args[6]) with RunStoredCallbackWhenAffineAnimEnds / DestroySpriteAndMatrix stored: the AnimHitSplatBasic shape.
+  // aud262: AnimHitSplatRandom (battle_anim_normal.c:1049-1066) starts the same affine anim (animation, or Random2() & 3 for -1) and stores DestroySpriteAndMatrix for RunStoredCallbackWhenAffineAnimEnds: the
+  // AnimHitSplatBasic shape (exact 10 for a literal animation 1..3).
+  if (op === "create_random_pos_hitsplat_sprite" || sprite("gRandomPosHitSplatSpriteTemplate")) {
+    const a = op.startsWith("create_") ? intNamed("animation") : intArg(args[4]);
+    return a !== null && a >= 1 && a <= 3 ? { exact: 10 } : { bound: 10 };
+  }
+  // aud262: AnimTask_FadeScreenToWhite (battle_anim_effects_3.c:1398-1402) decrements gAnimVisualTaskCount in its entry: not counted by waitforvisualfinish (net 0, exact -1).
+  if (op === "createvisualtask" && args[0] === "AnimTask_FadeScreenToWhite") return { exact: -1 };
+  // aud262: gLusterPurgeCircleSpriteTemplate (battle_anim_psychic.c:361-382) is AnimSpriteOnMonPos on sAffineAnim_LusterPurgeCircle: a duration-0 frame (call 0), a 120-tick frame (calls 1..120), END in call 121,
+  // destroyed in call 122: gone 121 ticks after F (the gThinRingExpanding shape with 120 for 30).
+  if (sprite("gLusterPurgeCircleSpriteTemplate")) return { exact: 121 };
   if (op === "create_mon_edge_hitsplat_sprite" || sprite("gMonEdgeHitSplatSpriteTemplate")) {
     const a = op.startsWith("create_") ? intNamed("animation") : intArg(args[6]);
     return a !== null && a >= 0 && a <= 3 ? { exact: 10 } : { bound: 10 };
@@ -1429,8 +1534,18 @@ const picYs: number[][] = [
   [...new Set(Object.entries(picCoords.front).map(([name, c]) => Math.min(c.yOffset - (elevations[name] ?? 0) + 40, 104)))].sort((a, b) => a - b),
 ];
 const middle = (values: number[]): number => values[Math.floor(values.length / 2)]!;
+// aud262: BATTLER_COORD_ATTR_TOP (battle_anim_mons.c:2151-2284) = the pic Y above minus half the pic's height (GET_MON_COORDS_HEIGHT of the species' back / front coords); topYs[side] = the sorted distinct values.
+const picHeights = JSON.parse(readFileSync(join(RUN_ROOT, "src", "data", "gen", "mon-pic-coords.json"), "utf8")) as { back: Record<string, { height: number }>; front: Record<string, { height: number }> };
+const topYs: number[][] = [
+  [...new Set(Object.entries(picCoords.back).map(([name, c]) => Math.min(c.yOffset + 80 + 8, 104) - Math.trunc(picHeights.back[name]!.height / 2)))].sort((a, b) => a - b),
+  [...new Set(Object.entries(picCoords.front).map(([name, c]) => Math.min(c.yOffset - (elevations[name] ?? 0) + 40, 104) - Math.trunc(picHeights.front[name]!.height / 2)))].sort((a, b) => a - b),
+];
 /** The walk's default class (and the runtime fallback): the middle value of each side's pic Y. */
-const referencePic = (attackerSide: number): PicContext => ({ attackerY: middle(picYs[attackerSide]!), targetY: middle(picYs[1 - attackerSide]!) });
+const referencePic = (attackerSide: number): PicContext => ({ attackerY: middle(picYs[attackerSide]!), targetY: middle(picYs[1 - attackerSide]!), attackerElevation: attackerSide === 1 ? REFERENCE_OPPONENT_ELEVATION : 0, hpQuarter: REFERENCE_HP_QUARTER, attackerTop: middle(topYs[attackerSide]!) });
+// aud262: the sorted distinct elevations a battler can have (0 = player / unelevated; enemy-mon-elevations.json, Castform 13 / 14 are in the set).
+const REFERENCE_OPPONENT_ELEVATION = 8;
+const REFERENCE_HP_QUARTER = 3;
+const elevationClasses: number[] = [...new Set([0, ...Object.values(elevations)])].sort((a, b) => a - b);
 // aud258: a representative gAnimMoveDmg per AnimTask_GetSeismicTossDamageLevel level (battle_anim_rock.c:836-846: < 33 -> 0, 33..65 -> 1, > 65 -> 2). The reference walk is level 1 (the Factory's
 // Lv 50 attacker: BattleScript_EffectLevelDamage runs `dmgtolevel` after `typecalc`, so gBattleMoveDamage = 50 when the animation starts, unless adjustsetdamage clamps it to hp - 1).
 const SHOCK_WAVE_CHARGING_ARGS = ["20", "0", "2"] as const;
@@ -1438,7 +1553,7 @@ const TORMENT_SE_CALLS = [1, 26, 51, 66, 81, 96] as const;
 const SEISMIC_TOSS_LEVELS = [0, 1, 2] as const;
 const SEISMIC_TOSS_REFERENCE_LEVEL = 1;
 const SEISMIC_TOSS_BG_TASKS = new Set(["AnimTask_MoveSeismicTossBg", "AnimTask_SeismicTossBgAccelerateDownAtEnd"]);
-function walk(bodyLabel: string, turn: number, attackerSide: number, pic: PicContext = referencePic(attackerSide), rolloutCounter = 1, damageLevel = SEISMIC_TOSS_REFERENCE_LEVEL): Walk {
+function walk(bodyLabel: string, turn: number, attackerSide: number, pic: PicContext = referencePic(attackerSide), rolloutCounter = 1, damageLevel = SEISMIC_TOSS_REFERENCE_LEVEL, flag = 0): Walk {
   const events: SoundOp[] = [];
   const reasons: Record<string, number> = {};
   const stack: Array<[string, number]> = [];
@@ -1468,9 +1583,13 @@ function walk(bodyLabel: string, turn: number, attackerSide: number, pic: PicCon
   const lags: Array<{ after: number; frames: number }> = [];  // `after`: first affected iteration - 1 (fractional .5 = from the same iteration)
   const shiftAt = (iteration: number): number => lags.reduce((n, l) => (iteration > l.after ? n + l.frames : n), 0);
   picUsed = false;
+  elevationUsed = false;
+  hpUsed = false;
+  topUsed = false;
   counterUsed = false;
   damageUsed = false;
-  const finish = (end: string): Walk => ({ events, end, frame, gated, reasons, usedPic: picUsed, usedCounter: counterUsed, usedDamage: damageUsed });
+  flagUsed = null;
+  const finish = (end: string): Walk => ({ events, end, frame, gated, reasons, usedPic: picUsed, usedCounter: counterUsed, usedDamage: damageUsed, usedFlag: flagUsed, usedElevation: elevationUsed, usedHp: hpUsed, usedTop: topUsed });
   const unresolved = (reason: Reason): void => { frame = null; why ??= reason; };
   const gate = (): void => { gated += 1; const reason = why ?? "unresolved-branch"; reasons[reason] = (reasons[reason] ?? 0) + 1; };
   let pc: [string, number] = [bodyLabel, 0];
@@ -1527,6 +1646,8 @@ function walk(bodyLabel: string, turn: number, attackerSide: number, pic: PicCon
       if (op === "createvisualtask" && !keepsRet) retIndex = 7;
       if (op === "createvisualtask" && args[0] === "AnimTask_GetSeismicTossDamageLevel") { ret = damageLevel; retIndex = 7; damageUsed = true; }
       if (op === "createvisualtask" && known === null && /^AnimTask_(Is|Get)\w*(Side|Contest|Environment|Partner|Power|Count|Hit|Right)/.test(args[0] ?? "")) ret = null;
+      // aud262: AnimTask_IsPowerOver99 (battle_anim_ground.c:734-742, gAnimMovePower > 99) and AnimTask_IsHealingMove (battle_anim_effects_3.c:1531-1539, gAnimMoveDmg > 0 -> FALSE) write ARG_RET_ID.
+      if (op === "createvisualtask" && (args[0] === "AnimTask_IsPowerOver99" || args[0] === "AnimTask_IsHealingMove")) { ret = flag; retIndex = 7; flagUsed = args[0] === "AnimTask_IsPowerOver99" ? "power" : "heal"; }
       // aud242q: tasks that write gBattleAnimArgs[0] (GetBattleEnvironment) or an indexed arg (GetIceBallCounter) or read the per-battle counter (Fury Cutter).
       const written = op === "createvisualtask" ? counterReturn(args, rolloutCounter) : null;
       if (written !== null) { ret = written.value; retIndex = written.index; counterUsed ||= written.counter; }
@@ -1742,7 +1863,7 @@ function walk(bodyLabel: string, turn: number, attackerSide: number, pic: PicCon
 
 const TURNS = 6;
 const SIDES = 2;
-const moves: Array<{ move: number; label: string; variants: number[]; ends: string[]; gated: number[]; reasons: Array<Record<string, number>>; pic: number[] }> = [];
+const moves: Array<{ move: number; label: string; variants: number[]; ends: string[]; gated: number[]; reasons: Array<Record<string, number>>; pic: number[]; counter: number[]; damage: number[]; flag: number[]; flagKind: FlagKind | undefined }> = [];
 const variantPool: SoundOp[][] = [];
 const poolIndex = new Map<string, number>();
 const stripLines = (events: SoundOp[]): SoundOp[] => events.map(({ line: _line, ...rest }) => rest as SoundOp);
@@ -1752,6 +1873,7 @@ const poolOf = (events: SoundOp[]): number => {
   if (!poolIndex.has(key)) { poolIndex.set(key, variantPool.length); variantPool.push(ops); }
   return poolIndex.get(key)!;
 };
+// aud262: a walk that reads the attacker's HP quarter (Water Spout) makes its pic grid quarter-major (4 x rows x columns; the move's `hp` slot is 1).
 // aud242l: a (turn, side) walk whose lifetimes depend on the two battlers' pic Y is repeated for every (attackerY, targetY) class; the grid of pooled variant indices (row = attacker
 // class, column = target class, both in picYs order) goes to picGrids and the move's `pic` slot points at it (-1 = pic-independent). An all-equal grid collapses to the plain variant.
 const picGrids: number[][] = [];
@@ -1760,23 +1882,43 @@ const counterGrids: number[][] = [];
 // aud258: a walk that reads gAnimMoveDmg (Seismic Toss) is repeated for the three damage levels; the move's `damage` slot points at [weak, medium, strong] in damageGrids.
 const damageGrids: number[][] = [];
 const damageIndex = new Map<string, number>();
+// aud262: a walk that branches on AnimTask_IsPowerOver99 (Magnitude) / AnimTask_IsHealingMove (Present) is repeated for flag 0 / 1; the move's `flag` slot points at [0, 1] in flagGrids and `flagKind` names the request value.
+const flagGrids: number[][] = [];
+const flagIndex = new Map<string, number>();
+// aud262: a walk that reads GetBattlerYCoordWithElevation (Rapid Spin's AnimTask_RapinSpinMonElevation) is repeated for every elevation class; the move's `elevation` slot points at the grid (one cell per elevationClasses entry).
+const elevationGrids: number[][] = [];
+const elevationIndex = new Map<string, number>();
+// aud262: a walk that reads BATTLER_COORD_ATTR_TOP of a battler (Memento's shadow tasks) is repeated for every attacker TOP class; the move's `top` slot points at the grid (indexed by the attacker's class in topYs order).
+const topGrids: number[][] = [];
+const topIndex = new Map<string, number>();
 const counterIndex = new Map<string, number>();
 const gridIndex = new Map<string, number>();
 moveTable.forEach((label, move) => {
-  const entry = { move, label, variants: [] as number[], ends: [] as string[], gated: [] as number[], reasons: [] as Array<Record<string, number>>, pic: [] as number[], counter: [] as number[], damage: [] as number[] };
+  const entry = { move, label, variants: [] as number[], ends: [] as string[], gated: [] as number[], reasons: [] as Array<Record<string, number>>, pic: [] as number[], counter: [] as number[], damage: [] as number[], flag: [] as number[], elevation: [] as number[], hp: [] as number[], top: [] as number[], flagKind: undefined as FlagKind | undefined };
   for (let turn = 0; turn < TURNS; turn += 1) {
     for (let side = 0; side < SIDES; side += 1) {
       const result = walk(label, turn, side);
       let grid = -1;
-      if (result.usedPic) {
+      if (result.usedPic || result.usedHp) {
         const cells: number[] = [];
-        for (const attackerY of picYs[side]!) for (const targetY of picYs[1 - side]!) cells.push(poolOf(walk(label, turn, side, { attackerY, targetY }).events));
+        for (const hpQuarter of result.usedHp ? [0, 1, 2, 3] : [REFERENCE_HP_QUARTER]) for (const attackerY of picYs[side]!) for (const targetY of picYs[1 - side]!) cells.push(poolOf(walk(label, turn, side, { ...referencePic(side), attackerY, targetY, hpQuarter }).events));
         if (cells.some((c) => c !== cells[0])) {
           const key = JSON.stringify(cells);
           if (!gridIndex.has(key)) { gridIndex.set(key, picGrids.length); picGrids.push(cells); }
           grid = gridIndex.get(key)!;
         }
       }
+      let topGrid = -1;
+      if (result.usedTop) {
+        const cells: number[] = [];
+        for (const attackerTop of topYs[side]!) cells.push(poolOf(walk(label, turn, side, { ...referencePic(side), attackerTop }).events));
+        if (cells.some((c) => c !== cells[0])) {
+          const key = JSON.stringify(cells);
+          if (!topIndex.has(key)) { topIndex.set(key, topGrids.length); topGrids.push(cells); }
+          topGrid = topIndex.get(key)!;
+        }
+      }
+      entry.top.push(topGrid);
       let counterGrid = -1;
       if (result.usedCounter) {
         const cells = [1, 2, 3, 4, 5].map((counter) => poolOf(walk(label, turn, side, referencePic(side), counter).events));
@@ -1795,6 +1937,27 @@ moveTable.forEach((label, move) => {
           damageGrid = damageIndex.get(key)!;
         }
       }
+      let flagGrid = -1;
+      if (result.usedFlag !== null) {
+        const cells = [0, 1].map((flag) => poolOf(walk(label, turn, side, referencePic(side), 1, SEISMIC_TOSS_REFERENCE_LEVEL, flag).events));
+        if (cells.some((c) => c !== cells[0])) {
+          const key = JSON.stringify(cells);
+          if (!flagIndex.has(key)) { flagIndex.set(key, flagGrids.length); flagGrids.push(cells); }
+          flagGrid = flagIndex.get(key)!;
+          entry.flagKind = result.usedFlag;
+        }
+      }
+      let elevationGrid = -1;
+      if (result.usedElevation) {
+        const cells = elevationClasses.map((attackerElevation) => poolOf(walk(label, turn, side, { ...referencePic(side), attackerElevation }).events));
+        if (cells.some((c) => c !== cells[0])) {
+          const key = JSON.stringify(cells);
+          if (!elevationIndex.has(key)) { elevationIndex.set(key, elevationGrids.length); elevationGrids.push(cells); }
+          elevationGrid = elevationIndex.get(key)!;
+        }
+      }
+      entry.elevation.push(elevationGrid);
+      entry.flag.push(flagGrid);
       entry.damage.push(damageGrid);
       entry.counter.push(counterGrid);
       entry.variants.push(poolOf(result.events));
@@ -1802,6 +1965,7 @@ moveTable.forEach((label, move) => {
       entry.gated.push(result.gated);
       entry.reasons.push(result.reasons);
       entry.pic.push(grid);
+      entry.hp.push(grid >= 0 && result.usedHp ? 1 : -1);
     }
   }
   moves.push(entry);
@@ -1847,7 +2011,12 @@ const out = {
   picGrids,
   counterGrids,
   damageGrids,
-  moves: moves.map((m) => ({ move: m.move, label: m.label, variants: m.variants, ends: m.ends, gated: m.gated, ...(m.pic.some((g) => g >= 0) ? { pic: m.pic } : {}), ...(m.counter.some((g) => g >= 0) ? { counter: m.counter } : {}), ...(m.damage.some((g) => g >= 0) ? { damage: m.damage } : {}) })),
+  flagGrids,
+  elevationClasses,
+  elevationGrids,
+  topYs,
+  topGrids,
+  moves: moves.map((m) => ({ move: m.move, label: m.label, variants: m.variants, ends: m.ends, gated: m.gated, ...(m.pic.some((g) => g >= 0) ? { pic: m.pic } : {}), ...(m.hp.some((g) => g >= 0) ? { hp: m.hp } : {}), ...(m.counter.some((g) => g >= 0) ? { counter: m.counter } : {}), ...(m.damage.some((g) => g >= 0) ? { damage: m.damage } : {}), ...(m.flag.some((g) => g >= 0) ? { flag: m.flag, flagKind: m.flagKind } : {}), ...(m.elevation.some((g) => g >= 0) ? { elevation: m.elevation } : {}), ...(m.top.some((g) => g >= 0) ? { top: m.top } : {}) })),
   general,
 };
 mkdirSync(outDir, { recursive: true });

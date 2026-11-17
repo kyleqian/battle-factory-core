@@ -4,7 +4,7 @@
 // with the request's attacker / target sides), independently of the age clock emitMoveAnimSounds runs on. Frame of a row = (frame of body age 0) + 8 + offset (1 + 7, moveAnimSounds.ts).
 import { readFileSync, writeFileSync } from "node:fs";
 import timing from "../../src/data/gen/anim-sound-timing.json" with { type: "json" };
-import { moveAnimOpRows, STATUS_ANIMATION_SCRIPT_AGE, type TimedOp } from "../../src/engine/moveAnimSounds.ts";
+import { moveAnimOpRows, STATUS_ANIMATION_SCRIPT_AGE, variantOf, type TimedOp } from "../../src/engine/moveAnimSounds.ts";
 import { STATUS_ANIMATION_ADDED_ROWS } from "../../src/engine/battleResolutionPresentation.ts";
 import { animSoundPan2 } from "../../src/audio/soundEvents.ts";
 
@@ -53,27 +53,27 @@ if (nonMove) {
   writeFileSync(process.argv[3]!, JSON.stringify(out));
   process.exit(0);
 }
-for (const [move, turn, attacker, target, pic, counter] of keys) {
-  const outKey = `${move},${turn},${attacker},${target},${pic ?? ""}` + (counter ? `,${counter}` : "");
+for (const [move, turn, attacker, target, pic, counter, dim] of keys) {
+  const outKey = `${move},${turn},${attacker},${target},${pic ?? ""}` + (counter ? `,${counter}` : "") + (dim ? `#${dim}` : "");
   const entry = (timing as any).moves[move!];
   if (entry === undefined) { out[outKey] = null; continue; }
   const turnIndex = turn! < timing.turns ? turn! : timing.turns - 2 + (turn! & 1);
   const slot = turnIndex * timing.sides + (attacker === 0 ? 0 : 1);
   const context = { attackerSide: attacker === 0 ? "player" : "opponent", targetSide: target === 0 ? "player" : "opponent" } as const;
   const rows: unknown[] = [];
-  // aud242l: a pic-dependent slot picks its grid cell from the battlers' pic Y ("player,opponent"); an unknown / absent class keeps the reference walk.
-  let variant = entry.variants[slot];
-  const grid = entry.pic === undefined ? undefined : (timing as any).picGrids[entry.pic[slot]];
-  if (grid !== undefined && pic) {
-    const [playerY, opponentY] = String(pic).split(",").map(Number);
-    const side = attacker === 0 ? 0 : 1;
-    const row = (timing as any).picYs[side].indexOf(side === 0 ? playerY : opponentY);
-    const column = (timing as any).picYs[1 - side].indexOf(side === 0 ? opponentY : playerY);
-    if (row >= 0 && column >= 0) variant = grid[row * (timing as any).picYs[1 - side].length + column];
-  }
-  const counterGrid = entry.counter === undefined ? undefined : (timing as any).counterGrids[entry.counter[slot]];
-  if (counterGrid !== undefined) variant = counterGrid[Number(counter) >= 1 && Number(counter) <= 5 ? Number(counter) - 1 : 0];
-  for (const op of (timing as any).variants[variant]) {
+  // aud262: the same picker the emitter runs (variantOf), fed from the recorded inputs: pic Y "player,opponent", rollout counter, damage class "z|0|1|2" (a representative damage), attacker "elevation,HP quarter,TOP".
+  const [playerY, opponentY] = pic ? String(pic).split(",").map(Number) : [];
+  const [damageClass, attackerDims] = dim ? String(dim).split("|") : [undefined, undefined];
+  const [elevation, hpQuarter, top] = attackerDims ? attackerDims.split(",").map(Number) : [];
+  const side = attacker === 0 ? 0 : 1;
+  const variantOps = variantOf(move!, turn!, side, {
+    picY: pic ? (b) => (b === 0 ? playerY! : opponentY!) : undefined,
+    topY: top !== undefined ? () => top : undefined,
+    rolloutCounter: counter ? Number(counter) : undefined,
+    damage: damageClass === undefined || damageClass === "" ? undefined : { z: 0, "0": 1, "1": 50, "2": 100 }[damageClass],
+    attackerElevation: elevation, attackerHpQuarter: hpQuarter,
+  });
+  for (const op of variantOps) {
     for (const row of moveAnimOpRows(op, context)) rows.push([op.frame + row.offset, row.emission.kind, row.emission.id, row.emission.pan, row.task === true ? 1 : 0]);
   }
   // t1dt (aud252): Scene ON Double Team's STATS_CHANGE SE is outside the table; emitDoubleTeamStatsChangeSound plays it at script row DOUBLE_TEAM_STAT_SE_SCRIPT_ROW with the attacker's pan.
