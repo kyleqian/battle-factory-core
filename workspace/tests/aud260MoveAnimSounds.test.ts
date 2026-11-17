@@ -67,3 +67,23 @@ describe("Glare (aud260)", () => {
     expect(romRows[1]!.frame - romRows[0]!.frame).toBe(107);
   });
 });
+
+// AnimWillOWispOrb (battle_anim_fire.c:1101-1164) lives 32 + |target X - x| ticks (x = the attacker's X plus the call-32 sine fold, the player's -4 / the opponent's +4 amplitude), so the first wait ends
+// 153 (player) / 152 (opponent) ticks after the first SE_M_EMBER and SE_M_FLAME_WHEEL2 follows. The orbs' own SE_M_FLAME_WHEEL rows (gAnimCustomPanning sweep) stay unmodelled: ROM-only rows.
+describe("Will-O-Wisp (aud260)", () => {
+  it("the table entry: EMBER 9 / 19, FLAME_WHEEL2 at 162 (player attacker) / 161 (opponent attacker), ungated", () => {
+    expect(timing.moves[261]!.label).toBe("Move_WILL_O_WISP");
+    expect(timing.moves[261]!.gated.every((g) => g === 0)).toBe(true);
+    expect(tableRows(261, 0)).toEqual(["9:151", "19:151", "162:145"]);
+    expect(tableRows(261, 1)).toEqual(["9:151", "19:151", "161:145"]);
+  });
+  for (const [side, gap] of [["player", 153], ["opponent", 152]] as const) {
+    it(`aud260-willowisp-${side}: the EMBER / EMBER / FLAME_WHEEL2 ids, pans and the +10 / +${gap} gaps equal the ROM's, offset constant`, () => {
+      const rom = fixture(`aud260-willowisp-${side}`);
+      const ids = [151, 145];
+      const romRows = rom.events.filter((e) => e.kind === "se" && ids.includes(e.id as number));
+      expect(romRows.map((e) => e.frame - romRows[0]!.frame)).toEqual([0, 10, gap]);
+      expect(expectConstantOffset(rom, ids, 3)).toBe(1);
+    });
+  }
+});

@@ -672,6 +672,14 @@ function lifetimeOf(cmd: Command, attackerSide: number, pic: PicContext, rollout
     const [a3, a4] = [intArg(args[6]), intArg(args[7])];
     return a3 === null || a4 === null || a3 < 1 || a4 < 0 ? null : { exact: (a4 === 0 ? a3 : a3 + a4) - 1 };
   }
+  // aud260: AnimWillOWispOrb (battle_anim_fire.c:1101-1164; Move_WILL_O_WISP orbs, args 0 / 0 / n). Call 0 is the init (case 0), call 1 case 1 (data[3] 1 -> reset), case 2 from call 2: x2 = Sin(data[2], +-4) with data[2]
+  // = 4 * (call - 1), the 31st case-2 call (call 32, data[2] 124) folds x2 into x, reads the target's X_2 and runs InitAnimLinearTranslationWithSpeed with speed 256 (duration D = |target X - x|, singles
+  // sBattlerCoords) and installs the Step (calls 33..32 + D translate, AnimTranslateLinear returns TRUE on call 33 + D, which destroys): gone 32 + D ticks after F. data[4] is +4 for an opponent attacker, -4 for the player.
+  if (sprite("gWillOWispOrbSpriteTemplate")) {
+    const x = BATTLER_X[attackerSide === 0 ? 0 : 1] + gbaSin(124, attackerSide === 0 ? -4 : 4);
+    const duration = Math.abs(BATTLER_X[attackerSide === 0 ? 1 : 0] - x);
+    return duration < 1 ? null : { exact: 32 + duration };
+  }
   // AnimFang (battle_anim_effects_3.c:1515-1519): gFangAnimCmds (:321-328) 8 + 16 + 4 + 4 = 32.
   if (sprite("gFangSpriteTemplate")) return { exact: 32 };
   // Arc sprites (InitAnimArcTranslation + TranslateAnimHorizontalArc, battle_anim_mons.c:785-801, AnimTranslateLinear :1111): data[0] = duration D; D calls
