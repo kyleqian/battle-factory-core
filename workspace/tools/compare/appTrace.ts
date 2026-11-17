@@ -2082,6 +2082,7 @@ export const APP_STAGES: Readonly<Record<string, AppStage>> = {
   "aud259-block-opponent-on": (state) => aud241bStage(state, "aud259-block-opponent-on", "on", 12, 50, 69, undefined, false, 335),
   "aud259-dynamicpunch-player-on": (state) => aud241bStage(state, "aud259-dynamicpunch-player-on", "on", 50, 12, 223, undefined, false, 69, 2),
   "aud259-fakeout-player-on": (state) => aud241bStage(state, "aud259-fakeout-player-on", "on", 50, 12, 252, undefined, false, 69, 1, true),
+  "aud259-crabhammer-player-on": (state) => aud241bStage(state, "aud259-crabhammer-player-on", "on", 50, 12, 152, undefined, false, 69),
   "aud258-torment-player-on": (state) => aud241bStage(state, "aud258-torment-player-on", "on", 50, 12, 259, undefined, false, 69),
   "aud258-seismictoss-player-on": (state) => aud241bStage(state, "aud258-seismictoss-player-on", "on", 50, 12, 69, undefined, false, 69),
   "aud258-seismictossstrong-player-on": (state) => aud241bStage(state, "aud258-seismictossstrong-player-on", "on", 100, 12, 69, undefined, false, 69),

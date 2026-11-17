@@ -122,3 +122,27 @@ describe("Fake Out (aud259)", () => {
     console.info("aud259-fakeout-player ROM minus ours", offsets[0]);
   });
 });
+
+// Crabhammer: its first wait is on gWaterHitSplatSpriteTemplate (battle_anim_normal.c:191-200), AnimHitSplatBasic with animation 0 = sAffineAnim_HitSplat_0 (:134-138), one 8-tick frame:
+// the zero-duration first frame of anims 1..3 adds no tick, so it is the same exact 10 as the ROM-measured anims.
+describe("Crabhammer (aud259)", () => {
+  const entry = timing.moves[152]!;
+  it("the table entry: SE 123 at 9, then the CRABHAMMER loop (SE 142 x3, 20 apart) at 36, ungated", () => {
+    expect(entry.label).toBe("Move_CRABHAMMER");
+    expect(entry.gated.every((g) => g === 0)).toBe(true);
+    const rows = timing.variants[entry.variants[0]!]!.map((o) => `${o.op}:${o.frame}:${(o as { id?: number }).id}:${o.pan}`);
+    expect(rows).toEqual(["playsewithpan:9:123:63", "loopsewithpan:36:142:63"]);
+  });
+  it("aud259-crabhammer-player: ids, pans and the 27-frame gap equal the ROM's; ROM minus ours is constant", () => {
+    const rom = fixture("aud259-crabhammer-player");
+    const pick = (events: FixtureEvent[]) => events.filter((e) => e.noop !== true && e.kind === "se" && [123, 142].includes(e.id as number));
+    const romRows = pick(rom.events);
+    const ours = pick(ourEvents(rom) as unknown as FixtureEvent[]);
+    expect(romRows.map((e) => `${e.id}:${e.pan}`)).toEqual(["123:63", "142:63", "142:63", "142:63"]);
+    expect(romRows.map((e) => e.frame - romRows[0]!.frame).slice(0, 2)).toEqual([0, 27]);
+    expect(ours.map((e) => `${e.id}:${e.pan}`)).toEqual(romRows.map((e) => `${e.id}:${e.pan}`));
+    const offsets = romRows.slice(0, 2).map((e, i) => e.frame - ours[i]!.frame);
+    expect(new Set(offsets).size).toBe(1);
+    console.info("aud259-crabhammer-player ROM minus ours", offsets[0]);
+  });
+});

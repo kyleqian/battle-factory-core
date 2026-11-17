@@ -905,9 +905,9 @@ function lifetimeOf(cmd: Command, attackerSide: number, pic: PicContext, rollout
   // DestroyAnimSprite stored. Anims 1..3 are one shape (a 0 frame, then the 8 frame): exact 10, ROM-measured on anim 2 (aud242p Poison Sting window: the wait ends 10 ticks after the
   // hit splat, the Shake task there is 8; Spark / Poison Tail agree). Anim 0 (the 8 frame alone) and a non-literal animation stay the bound.
   // aud242r: the handle-invert splat (battle_anim_normal.c:1036-1047) only picks the palette / flip and then runs AnimHitSplatBasic's init: same lifetime.
-  if (op === "create_basic_hitsplat_sprite" || op === "create_handle_invert_hitsplat_sprite" || sprite("gBasicHitSplatSpriteTemplate") || sprite("gHandleInvertHitSplatSpriteTemplate")) {
+  if (op === "create_basic_hitsplat_sprite" || op === "create_handle_invert_hitsplat_sprite" || sprite("gBasicHitSplatSpriteTemplate") || sprite("gHandleInvertHitSplatSpriteTemplate") || sprite("gWaterHitSplatSpriteTemplate")) {
     const a = op.startsWith("create_") ? intNamed("animation") : intArg(args[6]);
-    return a !== null && a >= 1 && a <= 3 ? { exact: 10 } : { bound: 10 };
+    return a !== null && a >= 0 && a <= 3 ? { exact: 10 } : { bound: 10 };
   }
   // aud242r: AnimTask_AlphaFadeIn (battle_anim_mons.c:1654-1715; args a0..a4 = script args[2..6]). The entry only installs the step: every (a4 + 1)-th call is a step (data[0] > a4), odd steps move the
   // first coefficient one toward a2, even steps the second toward a3, and the step on which both are there destroys the task: call (a4 + 1) * step, gone that - 1 ticks after F.
