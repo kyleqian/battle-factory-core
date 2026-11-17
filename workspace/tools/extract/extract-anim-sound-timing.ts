@@ -427,6 +427,18 @@ function milkBottleDestroyCall(): number {
   }
   throw new Error("MilkBottle does not terminate");
 }
+// AnimSwallowBlueOrb case 1 (battle_anim_effects_3.c:2217-2234): the init (call 0) puts the sprite at the attacker's BATTLER_COORD_Y (sBattlerCoords[0], battle_anim_mons.c: player 80, opponent 40) + arg1,
+// data[1] = 0x900 and data[2] = the pic-offset Y; call k >= 1 does y2 -= data[1] >> 8, data[1] -= 96 and destroys once y + y2 > data[2]. Returns the destroy call.
+function swallowOrbDestroyCall(attackerSide: number, picY: number, arg1: number): number {
+  const threshold = picY - ((attackerSide === 0 ? 80 : 40) + arg1);
+  let [y2, d1] = [0, 0x900];
+  for (let call = 1; call < 100000; call += 1) {
+    y2 -= d1 >> 8;
+    d1 -= 96;
+    if (y2 > threshold) return call;
+  }
+  throw new Error("SwallowBlueOrb does not terminate");
+}
 function flailMovementLength(): number {
   let [state, count, angle, shrinks, amplitude] = [0, 0, 0, 0x20, 0x800];
   const s16 = (v: number): number => ((v + 0x8000) & 0xffff) - 0x8000;
@@ -1177,6 +1189,10 @@ function lifetimeOf(cmd: Command, attackerSide: number, pic: PicContext, rollout
   // (battle_anim_mons.c:551-557): calls 1..D count D down, call D + 1 installs Step1 (SetCallbackToStoredInData6 does not run it), call D + 2 runs Step1, which runs Step2 (:762-772) at once
   // (--data[0] = W - 1); the call that makes --data[0] == -1 is D + 2 + W and destroys: gone D + W + 1 ticks after F.
   if (sprite("gFireSpiralOutwardSpriteTemplate")) { const [w, d] = [intArg(args[5]), intArg(args[6])]; return w === null || d === null || w < 0 || d < 0 ? null : { exact: d + w + 1 }; }
+  // AnimTask_SwallowDeformMon (battle_anim_effects_3.c:2236-2248 with gSwallowDeformMonAffineAnimCmds :580-588 = 20 + 20 + 6 + 20 + 20 = 86 ticks): the first run prepares the affine anim, calls 1..86 run
+  // the frames and the END on call 87 destroys: gone 86 ticks after F (RunAffineAnimFromTaskData, battle_anim_mons.c:1800-1862). gSwallowBlueOrbSpriteTemplate: swallowOrbDestroyCall - 1 (pic Y dependent).
+  if (op === "createvisualtask" && args[0] === "AnimTask_SwallowDeformMon") return { exact: 86 };
+  if (sprite("gSwallowBlueOrbSpriteTemplate")) { const a1 = intArg(args[4]); if (a1 === null) return null; picUsed = true; return { exact: swallowOrbDestroyCall(attackerSide, pic.attackerY, a1) - 1 }; }
   // AnimPainSplitProjectile (battle_anim_effects_3.c:2937-2970) keeps its callback and destroys in the first call after animEnded: gPainSplitAnimCmds (:723-729) are 5 + 9 + 5 = 19 ticks, exact 19.
   // AnimTask_PainSplitMovement (:2974-3033): the entry (call 0) sets the rot/scale and data[0] = 1, step calls 1..13 count data[1], call 13 (== 13) destroys: exact 12.
   if (sprite("gPainSplitProjectileSpriteTemplate")) return { exact: 19 };

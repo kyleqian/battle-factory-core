@@ -1051,6 +1051,19 @@ function aud242lBlizzardStage(state: EngineState, id: string, side: "player" | "
   });
 }
 
+// aud261: the Swallow user (Lv50 Rattata, moves Stockpile / Swallow x3) on `side` against a Lv12 Seismic Toss Rattata.
+function aud261StockpileStage(state: EngineState, id: string, side: "player" | "opponent"): EngineState {
+  const attacker = Object.freeze({ ...rattataAtLevel(50, 254), moves: [254, 256, 256, 256] as const });
+  const target = rattataAtLevel(12, 69);
+  return midBattleSwitchStage(state, id, [RATTATA_LV50_BENCH, RATTATA_LV50_BENCH], [105, 105], {
+    battleScene: "on",
+    player: side === "player" ? attacker : target,
+    trainer: side === "player" ? target : attacker,
+    usedMessageHoldFrames: 0,
+    sceneOffNoAnimations: false,
+  });
+}
+
 // hie1: held-item effect windows (tools/battle-lab/hie1-*.json): the player's Rattata holds `playerItem`; the opponent's move / level is
 // chosen per site so the item fires (Leftovers end-turn, Sitrus after the hit, Shell Bell on the player's hit, Cheri cures Thunder Wave).
 function hie1Stage(
@@ -2135,6 +2148,8 @@ export const APP_STAGES: Readonly<Record<string, AppStage>> = {
   "aud261-painsplit-opponent-on": (state) => aud241bStage(state, "aud261-painsplit-opponent-on", "on", 12, 50, 69, undefined, false, 220),
   "aud261-flamewheel-player-on": (state) => aud242lBlizzardStage(state, "aud261-flamewheel-player-on", "player", 19, 143, 172),
   "aud261-flamewheel-opponent-on": (state) => aud241bStage(state, "aud261-flamewheel-opponent-on", "on", 12, 50, 69, undefined, false, 172),
+  "aud261-swallow-player-on": (state) => aud261StockpileStage(state, "aud261-swallow-player-on", "player"),
+  "aud261-swallow-opponent-on": (state) => aud261StockpileStage(state, "aud261-swallow-opponent-on", "opponent"),
   "aud260-aircutter-player-on": (state) => aud241bStage(state, "aud260-aircutter-player-on", "on", 50, 12, 314, undefined, false, 69),
   "aud260-aircutter-opponent-on": (state) => aud241bStage(state, "aud260-aircutter-opponent-on", "on", 12, 50, 69, undefined, false, 314),
   "aud260-brickbreak-player-on": (state) => aud241bStage(state, "aud260-brickbreak-player-on", "on", 55, 50, 280, undefined, false, 115),
