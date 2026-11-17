@@ -424,7 +424,8 @@ describe("random round soak driver (green milestone pin)", () => {
       // renderCalls 2_895 -> 2_899, terminalRecordChoice null -> "no" (the mashed A answers the default NO); same battle 7, turn 3, end state.
       // hie1 (ISSUES #220 step 1; the held-item effect presented, here Scene OFF's `playanimation B_ANIM_HELD_ITEM_EFFECT` Pausex20 hold):
       // frames only + render calls, 41_068 -> 41_099, renderCalls 2_899 -> 2_907; same battle 7, turn 3, end state, diagnostics.
-      frames: 41_099,
+      // wsh1 (the Wish heal / Future Sight hit / Focus Band general-animation commands, 201 / 172 / 129 frames in Scene ON): frames only + render calls, 41_099 -> 41_221, renderCalls 2_907 -> 2_913; same battle 7, turn 3, end state, diagnostics.
+      frames: 41_221,
       battle: 7,
       turn: 3,
       diagnostics: {
@@ -436,7 +437,7 @@ describe("random round soak driver (green milestone pin)", () => {
         terminalOutcome: "roundWon",
         terminalRecordMenuInputReadyReached: true,
         terminalRecordChoice: "no",
-        renderCalls: 2_907,
+        renderCalls: 2_913,
       },
     });
     expect(second).toEqual(first);
@@ -941,7 +942,8 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // and the "vanilla" / "winning" pins did not move (only the exploring policy presses during the new messages).
       // sta3 (the action transition into a pre-move confusion / sleep print and its 3 launch rows; the exploring policy's presses land on
       // new phases again): 38094 / turn 22 -> 37771 / turn 20; same battle 2 / depth 1 / roundLost.
-      frames: 37771,
+      // wsh1 (Wish / Future Sight / Focus Band presented as commands): frames only, 37771 -> 37806; same battle 2 / depth 1 / roundLost / turn 20.
+      frames: 37806,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 1,
