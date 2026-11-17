@@ -704,7 +704,7 @@ function lifetimeOf(cmd: Command, attackerSide: number, pic: PicContext, rollout
   // call D + 1 installs DestroyAnimSprite, call D + 2 destroys = D + 1.
   if (sprite("gFireSpiralInwardSpriteTemplate")) return { exact: 30 };
   if (sprite("gFireSpreadSpriteTemplate")) { const d = intArg(args[7]); return d === null || d < 0 ? null : { exact: d + 1 }; }
-  if (sprite("gGrantingStarsSpriteTemplate")) { const d = intArg(args[8]); return d === null || d < 0 ? null : { exact: d + 1 }; }
+  if (sprite("gGrantingStarsSpriteTemplate") || sprite("gSparklingStarsSpriteTemplate")) { const d = intArg(args[8]); return d === null || d < 0 ? null : { exact: d + 1 }; }
   // AnimTask_DeepInhale (battle_anim_effects_3.c:3474-3510): the entry only sets func; the step's RunAffineAnimFromTaskData (battle_anim_mons.c:1800-1862) runs the frames of
   // gDeepInhaleAffineAnimCmds (:780-788: 4 + 16 + 4 + 24 + 16 = 64) over calls 1..64 and the END command on call 65 returns FALSE and destroys: gone 64 ticks after F.
   // AnimYawnCloud (:3532-3563): data[0] counts calls from 1; from call 59 on every 2nd call advances data[2] and the call that makes it 4 destroys: call 66, gone 65 ticks after F.
@@ -854,6 +854,17 @@ function lifetimeOf(cmd: Command, attackerSide: number, pic: PicContext, rollout
     const d = op.startsWith("create_") ? intNamed("duration") : intArg(args[op === "createsprite" && args[0] === "gLeechLifeNeedleSpriteTemplate" ? 5 : 7]);
     return d === null || d < 1 ? null : { exact: d + 1 };
   }
+  // ---- aud242r (docs section 22). AnimSparklingStars (battle_anim_effects_1.c:4115-4150; D = gBattleAnimArgs[5] = script args[8]) stores DestroyAnimSprite and installs
+  // TranslateSpriteLinearFixedPoint: the AnimGrantingStars shape above, D + 1. AnimHealBellMusicNote (battle_anim_effects_2.c:3053-3065; D = gBattleAnimArgs[4] = args[7]) stores
+  // DestroyAnimSprite and installs StartAnimLinearTranslation: the AnimPowerAbsorptionOrb shape, D + 1.
+  if (sprite("gHealBellMusicNoteSpriteTemplate")) { const d = intArg(args[7]); return d === null || d < 1 ? null : { exact: d + 1 }; }
+  // AnimSpriteOnMonPos (battle_anim_mons.c:1515-1536) destroys itself in the first call after `animEnded || affineAnimEnded` (a sprite on gDummySpriteAnimTable never ends its anim: sprite.c:173-175,
+  // 909-922 keep animBeginning set). gBellAnimCmds (battle_anim_effects_2.c:848-862) are 6 6 15 6 6 6 15 6 6 6 15 6 6 = 105 ticks: END at call 105, destroyed at 106 = 105.
+  if (sprite("gBellSpriteTemplate")) return { exact: 105 };
+  // gThinRingExpanding / gBlendThinRingExpanding (AnimBlendThinRing, :2551-2575, calls AnimSpriteOnMonPos at once) run affine anim 0 (gThinRingExpandingAffineAnimCmds1, :710-716): a duration-0 frame
+  // (BeginAffineAnim in call 0, delayCounter 0), then in call 1 the 30-tick frame (ApplyAffineAnimFrame, sprite.c:1330-1345, leaves delayCounter 29: calls 2..30 count it down) and END in call 31
+  // (sprite.c:1055-1112, 1165-1178); AnimSpriteOnMonPos sees affineAnimEnded in call 32: gone 31 ticks after F.
+  if (sprite("gThinRingExpandingSpriteTemplate") || sprite("gBlendThinRingExpandingSpriteTemplate")) return { exact: 31 };
   // AnimTask_InvertScreenColor (battle_anim_normal.c:759-778) inverts the palette buffer and destroys itself in the creating step: net 0 in gAnimVisualTaskCount (exact -1).
   if (op === "invert_screen_color" || (op === "createvisualtask" && args[0] === "AnimTask_InvertScreenColor")) return { exact: -1 };
 
