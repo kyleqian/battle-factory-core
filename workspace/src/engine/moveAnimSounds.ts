@@ -28,7 +28,7 @@ interface TimingTable {
   readonly turns: number;
   readonly sides: number;
   readonly variants: readonly (readonly TimedOp[])[];
-  readonly moves: readonly Readonly<{ move: number; variants: readonly number[]; pic?: readonly number[]; counter?: readonly number[]; damage?: readonly number[]; flag?: readonly number[]; flagKind?: "power" | "heal"; elevation?: readonly number[] }>[];
+  readonly moves: readonly Readonly<{ move: number; variants: readonly number[]; pic?: readonly number[]; counter?: readonly number[]; damage?: readonly number[]; hp?: readonly number[]; flag?: readonly number[]; flagKind?: "power" | "heal"; elevation?: readonly number[] }>[];
   /** aud242o: per Rollout counter 1..5, the variant index (the walk reads AnimTask_Rollout's length from GetRolloutCounter). */
   readonly counterGrids: readonly (readonly number[])[];
   /** aud258: per Seismic Toss damage level 0..2 (AnimTask_GetSeismicTossDamageLevel: gAnimMoveDmg < 33 / 33..65 / > 65), the variant index. */
@@ -250,8 +250,10 @@ interface VariantInputs {
   readonly damage?: number;
   /** GetBattlerElevation of the attacker (gEnemyMonElevation / sCastformElevations; 0 for the player). */
   readonly attackerElevation?: number;
+  /** GetWaterSpoutPowerForAnim of the attacker (0..3): which quarter of max HP its current HP is in. */
+  readonly attackerHpQuarter?: number;
 }
-function variantOf(move: number, turn: number, attackerSide: 0 | 1, { picY, rolloutCounter, damage, attackerElevation }: VariantInputs = {}): readonly TimedOp[] {
+function variantOf(move: number, turn: number, attackerSide: 0 | 1, { picY, rolloutCounter, damage, attackerElevation, attackerHpQuarter }: VariantInputs = {}): readonly TimedOp[] {
   const entry = timing.moves[move];
   if (entry === undefined) return [];
   const turnIndex = turn < timing.turns ? turn : timing.turns - 2 + (turn & 1);
@@ -269,7 +271,8 @@ function variantOf(move: number, turn: number, attackerSide: 0 | 1, { picY, roll
   if (grid !== undefined) {
     const row = timing.picYs[attackerSide]!.indexOf(picY!(attackerSide));
     const column = timing.picYs[1 - attackerSide]!.indexOf(picY!(attackerSide === 0 ? 1 : 0));
-    if (row >= 0 && column >= 0) return timing.variants[grid[row * timing.picYs[1 - attackerSide]!.length + column]!]!;
+    const quarterBase = entry.hp?.[slot] === 1 && attackerHpQuarter !== undefined ? attackerHpQuarter * timing.picYs[attackerSide]!.length * timing.picYs[1 - attackerSide]!.length : 0;
+    if (row >= 0 && column >= 0) return timing.variants[grid[quarterBase + row * timing.picYs[1 - attackerSide]!.length + column]!]!;
   }
   return timing.variants[entry.variants[slot]!]!;
 }
@@ -400,7 +403,7 @@ export function emitMoveAnimSounds(after: BattleResolutionPresentationState | nu
     targetSide: request.target === 0 ? "player" : "opponent",
   } as const;
   const scriptRow = age - FIRST_COMMAND_AGE - AGE_TO_SOUND_ROWS;
-  const ops = variantOf(request.moveId, request.turn, request.attacker === 0 ? 0 : 1, { picY: source.picOffsetY, rolloutCounter: request.rolloutCounter, damage: request.damage, attackerElevation: source.attackerElevation });
+  const ops = variantOf(request.moveId, request.turn, request.attacker === 0 ? 0 : 1, { picY: source.picOffsetY, rolloutCounter: request.rolloutCounter, damage: request.damage, attackerElevation: source.attackerElevation, attackerHpQuarter: source.attackerHpQuarter });
   emitOpsAt(ops, context, scriptRow);
   if (scriptRow === 0) scheduleMoveAnimationTail(ops, context, lastAge - FIRST_COMMAND_AGE - AGE_TO_SOUND_ROWS);
   emitCryTaskRows(request.moveId, source.attackerSpecies, context.attackerSide, scriptRow, frontierBrain);

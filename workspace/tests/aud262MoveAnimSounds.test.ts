@@ -86,3 +86,24 @@ describe("Rapid Spin (aud262)", () => {
     });
   }
 });
+
+// Water Spout: AnimTask_WaterSpoutLaunch waits for its droplets (battle_anim_water.c:1054-1250): count by the attacker's HP quarter (GetWaterSpoutPowerForAnim), flight time by the attacker's pic Y.
+// The quarter windows stage the HP through a real earlier hit (the faster Lv80 / 60 / 52 Rattata's Seismic Toss: 105 -> 25 / 45 / 53), not an injected value.
+describe("Water Spout (aud262)", () => {
+  it("the table entry: ungated, pic Y x HP quarter grid for the player, one constant variant for the opponent", () => {
+    const entry = timing.moves[323]! as unknown as { label: string; gated: number[]; pic: number[]; hp: number[] };
+    expect(entry.label).toBe("Move_WATER_SPOUT");
+    expect(entry.gated.every((g) => g === 0)).toBe(true);
+    expect(entry.hp.map((g) => g >= 0)).toEqual(Array.from({ length: 12 }, (_, i) => i % 2 === 0));
+  });
+  const windows = [["waterspout-q0", "player", 49, 11], ["waterspout-q1", "player", 49, 7], ["waterspout-q2", "player", 50, 7], ["waterspout-q3", "player", 51, 2], ["waterspoutsnorlax", "player", 51, 2], ["waterspout", "opponent", 46, 2]] as const;
+  for (const [name, side, lastGap, offset] of windows) {
+    it(`aud262-${name}-${side}: SE gaps 46 / ${lastGap} equal the ROM's, offset ${offset} constant`, () => {
+      const rom = fixture(`aud262-${name}-${side}`);
+      const rows = rom.events.filter((e) => e.noop !== true && e.kind === "se" && [162, 233, 163].includes(e.id as number));
+      expect(rows.map((e) => e.id)).toEqual([162, 233, 163]);
+      expect([rows[1]!.frame - rows[0]!.frame, rows[2]!.frame - rows[1]!.frame]).toEqual([46, lastGap]);
+      expect(expectConstantOffset(rom, [162, 233, 163], 3, "first")).toBe(offset);
+    });
+  }
+});
