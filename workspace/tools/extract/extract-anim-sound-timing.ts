@@ -1169,6 +1169,56 @@ function seBound(token: string): { frames: number; player: string } | null {
   seBoundCache.set(name, result);
   return result;
 }
+// aud259: the EXACT iteration count from a PlaySE to IsSEPlaying() turning FALSE, ported from MPlayMain (m4a_1.s:1150-1370) for songs whose tracks hold only W / TEMPO / FINE-ended note data.
+// MPlayStart: tempoC 0, tempoI 150 (m4a.c:634-637). Each VBlank: tempoC += tempoI, then one tick per 150 (tempoC -= 150, no re-add inside the loop). A track reads commands in tick 1 + (sum of the
+// Ws before them) (a W n sets wait = n and decrements it in the same tick, m4a_1.s:1268-1290); ply_tempo sets tempoI = 2 * byte * tempoU / 256 = the BPM (m4a_1.s:920-930); ply_fine clears the
+// track flags. `status` (the TRACK bits ORed while walking the tracks that still EXIST at the start of the tick) goes to PAUSE in the first tick that starts with no track (m4a_1.s:1250-1262), so
+// the tick after the last FINE. The script iteration after VBlank v is the first to see IsSEPlaying FALSE: the SE started in iteration i resumes a waitsound in iteration i + v. Patterns /
+// loops / songs without FINE are null (the aud242i upper bound stays in use).
+const seExactCache = new Map<string, number | null>();
+function seExact(token: string): number | null {
+  const name = token.trim().toLowerCase();
+  if (!/^se_\w+$/.test(name)) return null;
+  if (seExactCache.has(name)) return seExactCache.get(name)!;
+  let result: number | null = null;
+  try {
+    const src = readFileSync(join(REF, "sound", "songs", "midi", `${name}.s`), "utf8");
+    const tbs = Number(new RegExp(`\\.equ\\s+${name}_tbs,\\s*(\\d+)`).exec(src)?.[1] ?? NaN);
+    let ok = Number.isFinite(tbs) && songPlayers.has(name);
+    const tempos: Array<{ tick: number; bpm: number }> = [];
+    let lastTick = 0;
+    for (const track of src.split(/^@\*+ Track \d+[^\n]*\n/m).slice(1)) {
+      let t = 0;
+      let fine: number | null = null;
+      for (const raw of track.split("@****")[0]!.split("\n")) {
+        const line = raw.split("@")[0]!;
+        if (/\b(PATT|PEND|REPT|GOTO)\b/.test(line)) ok = false;
+        const tempo = new RegExp(`\\.byte\\s+TEMPO\\s*,\\s*(\\d+)\\*${name}_tbs/2`).exec(line);
+        if (/\.byte\s+TEMPO/.test(line)) { if (tempo === null) ok = false; else if (fine === null) tempos.push({ tick: t + 1, bpm: Number(tempo[1]) * tbs }); }
+        const w = /\.byte\s+W(\d+)\b/.exec(line);
+        if (w !== null && fine === null) t += Number(w[1]);
+        if (/\.byte\s+FINE\b/.test(line) && fine === null) fine = t + 1;
+      }
+      if (fine === null) ok = false; else lastTick = Math.max(lastTick, fine + 1);
+    }
+    if (ok && lastTick > 0) {
+      let tempoC = 0;
+      let tempoI = 150;
+      let tick = 0;
+      for (let v = 1; v <= 4000 && result === null; v += 1) {
+        tempoC += tempoI;
+        while (tempoC >= 150) {
+          tick += 1;
+          for (const e of tempos) if (e.tick === tick) tempoI = e.bpm;
+          if (tick === lastTick) { result = v; break; }
+          tempoC -= 150;
+        }
+      }
+    }
+  } catch { result = null; }
+  seExactCache.set(name, result);
+  return result;
+}
 // A script sprite / task whose callback chain contains a PlaySE (battle_anim*.c, audio-sound-sources.json cAnimSites) can start an SE the script does not list: a waitsound
 // after such a creation is left unresolved (the callback is matched by name prefix against the site functions).
 const cSoundSiteFunctions: string[] = (JSON.parse(readFileSync(join(RUN_ROOT, "tests", "fixtures", "data", "audio-sound-sources.json"), "utf8")) as { cAnimSites: { rows: Array<{ fn: string }> } }).cAnimSites.rows
@@ -1230,6 +1280,7 @@ function walk(bodyLabel: string, turn: number, attackerSide: number, pic: PicCon
   let soundWait: number | null = null;
   let monBgActive = false;
   let seEnd = -1;
+  let seExactEnd: number | null = null;
   let seUnknown = false;
   // aud242o: the last SoundTask_AdjustPanningVar of this walk (its creation iteration and arguments as written): the Confuse Ray ball reads its gAnimCustomPanning.
   let panVarTask: { at: number; args: number[] } | null = null;
@@ -1380,6 +1431,7 @@ function walk(bodyLabel: string, turn: number, attackerSide: number, pic: PicCon
         if (whatIf) { noteAll(bodyLabel, "!waitsound"); pending = []; break; }
         if (frame === null) break;
         if (seUnknown) { unresolved("waitsound"); pending = []; break; }
+        if (seExactEnd !== null) { frame = Math.max(frame, seExactEnd); break; }
         soundWait = seEnd;
         break;
       case "jumpifmoveturn": if (value(args[0]!) === turn) pc = [args[1]!, 0]; break;
@@ -1398,6 +1450,8 @@ function walk(bodyLabel: string, turn: number, attackerSide: number, pic: PicCon
         {
           const bound = seBound(args[0]!);
           const last = op === "loopsewithpan" ? at + Math.max(value(args[3]!) - 1, 0) * (value(args[2]!) + 1) : at;
+          const exactV = seExact(args[0]!);
+          seExactEnd = exactV !== null && seEnd <= at && op !== "loopsewithpan" ? last + exactV : null;
           if (bound === null) seUnknown = true; else seEnd = Math.max(seEnd, last + bound.frames);
         }
         const base = { op, frame: at + shiftAt(at), id: value(args[0]!), pan: op === "playse" ? null : value(args[1]!), line };

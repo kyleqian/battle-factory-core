@@ -1021,8 +1021,10 @@ function aud241bStage(
   lastFaint?: "opponent" | "player",
   frontierBrain = false,
   opponentMoveId = 69,
+  rngSeed = 1,
 ): EngineState {
   return midBattleSwitchStage(state, id, [RATTATA_LV50_BENCH, RATTATA_LV50_BENCH], [105, 105], {
+    rngSeed,
     ...(lastFaint === "opponent" ? { trainerBenchHp: null } : {}),
     ...(lastFaint === "player" ? { playerBenchNone: true } : {}),
     ...(frontierBrain ? { frontierBrain } : {}),
@@ -1123,6 +1125,8 @@ type MidBattleSwitchStageOptions = Readonly<{
   playerBenchNone?: boolean;
   /** Stage the 21st battle of the run: the Silver Factory Head round (`currentOpponent.frontierBrain`). */
   frontierBrain?: boolean;
+  /** aud259: the staged battle's RNG seed (default 1); a sub-100 accuracy move can miss in the engine while the ROM lab hits. */
+  rngSeed?: number;
 }>;
 
 function midBattleSwitchStage(
@@ -1169,7 +1173,7 @@ function midBattleSwitchStage(
   }
   const stagedOn = createFactoryFullTurnBattleState({
     requestId: 1,
-    rngSeed: 1,
+    rngSeed: options.rngSeed ?? 1,
     player: options.player ?? RATTATA_LV50,
     trainer: options.trainer ?? RATTATA_LV50,
     ...(options.playerBenchNone === true
@@ -1187,7 +1191,7 @@ function midBattleSwitchStage(
     ? stagedOn
     : createFactoryFullTurnBattleStateFromRulesContext({
       requestId: 1,
-      rngSeed: 1,
+      rngSeed: options.rngSeed ?? 1,
       rulesContext: Object.freeze({
         ...stagedOn.rules.rulesContext,
         hitMarker: (stagedOn.rules.rulesContext.hitMarker | BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) >>> 0,
@@ -2067,6 +2071,7 @@ export const APP_STAGES: Readonly<Record<string, AppStage>> = {
   "aud242r-softboiled-player-on": (state) => aud241bStage(state, "aud242r-softboiled-player-on", "on", 50, 12, 135, undefined, false, 69),
   "aud259-block-player-on": (state) => aud241bStage(state, "aud259-block-player-on", "on", 50, 12, 335, undefined, false, 69),
   "aud259-block-opponent-on": (state) => aud241bStage(state, "aud259-block-opponent-on", "on", 12, 50, 69, undefined, false, 335),
+  "aud259-dynamicpunch-player-on": (state) => aud241bStage(state, "aud259-dynamicpunch-player-on", "on", 50, 12, 223, undefined, false, 69, 2),
   "aud258-torment-player-on": (state) => aud241bStage(state, "aud258-torment-player-on", "on", 50, 12, 259, undefined, false, 69),
   "aud258-seismictoss-player-on": (state) => aud241bStage(state, "aud258-seismictoss-player-on", "on", 50, 12, 69, undefined, false, 69),
   "aud258-seismictossstrong-player-on": (state) => aud241bStage(state, "aud258-seismictossstrong-player-on", "on", 100, 12, 69, undefined, false, 69),
