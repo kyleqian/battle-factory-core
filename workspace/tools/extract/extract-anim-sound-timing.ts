@@ -89,7 +89,7 @@ interface SoundOp {
   line: number;
 }
 type Reason = "bg-fade" | "unmodelled-lifetime" | "waitsound" | "unresolved-branch" | "after-unresolved-branch";
-interface Walk { events: SoundOp[]; end: string; frame: number | null; gated: number; reasons: Record<string, number>; usedPic: boolean; usedCounter: boolean; usedDamage: boolean }
+interface Walk { events: SoundOp[]; end: string; frame: number | null; gated: number; reasons: Record<string, number>; usedPic: boolean; usedCounter: boolean; usedDamage: boolean; usedFlag: FlagKind | null }
 
 // ---- Lifetimes of the creation ops (ticks after the creation tick at which the visual task / sprite is gone). Exact entries are the
 // source-derived or RAM-probed lifetimes src/animation already uses (shakeMon.ts, slideMon.ts, dragonRage.ts); a bound is an upper
@@ -271,6 +271,8 @@ interface PicContext { readonly attackerY: number; readonly targetY: number }
 let picUsed = false;
 let counterUsed = false;
 let damageUsed = false;
+type FlagKind = "power" | "heal";
+let flagUsed: FlagKind | null = null;
 interface FastSprite { x: number; y: number; x2: number; y2: number; d: number[]; callback: string; destroyed: boolean }
 // InitAnimFastLinearTranslationWithSpeed + InitAnimFastLinearTranslation (battle_anim_mons.c:1171-1197, 1244-1249); a zero duration is a division by zero (declined).
 function fastInit(s: FastSprite): boolean {
@@ -1438,7 +1440,7 @@ const TORMENT_SE_CALLS = [1, 26, 51, 66, 81, 96] as const;
 const SEISMIC_TOSS_LEVELS = [0, 1, 2] as const;
 const SEISMIC_TOSS_REFERENCE_LEVEL = 1;
 const SEISMIC_TOSS_BG_TASKS = new Set(["AnimTask_MoveSeismicTossBg", "AnimTask_SeismicTossBgAccelerateDownAtEnd"]);
-function walk(bodyLabel: string, turn: number, attackerSide: number, pic: PicContext = referencePic(attackerSide), rolloutCounter = 1, damageLevel = SEISMIC_TOSS_REFERENCE_LEVEL): Walk {
+function walk(bodyLabel: string, turn: number, attackerSide: number, pic: PicContext = referencePic(attackerSide), rolloutCounter = 1, damageLevel = SEISMIC_TOSS_REFERENCE_LEVEL, flag = 0): Walk {
   const events: SoundOp[] = [];
   const reasons: Record<string, number> = {};
   const stack: Array<[string, number]> = [];
@@ -1470,7 +1472,8 @@ function walk(bodyLabel: string, turn: number, attackerSide: number, pic: PicCon
   picUsed = false;
   counterUsed = false;
   damageUsed = false;
-  const finish = (end: string): Walk => ({ events, end, frame, gated, reasons, usedPic: picUsed, usedCounter: counterUsed, usedDamage: damageUsed });
+  flagUsed = null;
+  const finish = (end: string): Walk => ({ events, end, frame, gated, reasons, usedPic: picUsed, usedCounter: counterUsed, usedDamage: damageUsed, usedFlag: flagUsed });
   const unresolved = (reason: Reason): void => { frame = null; why ??= reason; };
   const gate = (): void => { gated += 1; const reason = why ?? "unresolved-branch"; reasons[reason] = (reasons[reason] ?? 0) + 1; };
   let pc: [string, number] = [bodyLabel, 0];
@@ -1527,6 +1530,8 @@ function walk(bodyLabel: string, turn: number, attackerSide: number, pic: PicCon
       if (op === "createvisualtask" && !keepsRet) retIndex = 7;
       if (op === "createvisualtask" && args[0] === "AnimTask_GetSeismicTossDamageLevel") { ret = damageLevel; retIndex = 7; damageUsed = true; }
       if (op === "createvisualtask" && known === null && /^AnimTask_(Is|Get)\w*(Side|Contest|Environment|Partner|Power|Count|Hit|Right)/.test(args[0] ?? "")) ret = null;
+      // aud262: AnimTask_IsPowerOver99 (battle_anim_ground.c:734-742, gAnimMovePower > 99) and AnimTask_IsHealingMove (battle_anim_effects_3.c:1531-1539, gAnimMoveDmg > 0 -> FALSE) write ARG_RET_ID.
+      if (op === "createvisualtask" && (args[0] === "AnimTask_IsPowerOver99" || args[0] === "AnimTask_IsHealingMove")) { ret = flag; retIndex = 7; flagUsed = args[0] === "AnimTask_IsPowerOver99" ? "power" : "heal"; }
       // aud242q: tasks that write gBattleAnimArgs[0] (GetBattleEnvironment) or an indexed arg (GetIceBallCounter) or read the per-battle counter (Fury Cutter).
       const written = op === "createvisualtask" ? counterReturn(args, rolloutCounter) : null;
       if (written !== null) { ret = written.value; retIndex = written.index; counterUsed ||= written.counter; }
@@ -1742,7 +1747,7 @@ function walk(bodyLabel: string, turn: number, attackerSide: number, pic: PicCon
 
 const TURNS = 6;
 const SIDES = 2;
-const moves: Array<{ move: number; label: string; variants: number[]; ends: string[]; gated: number[]; reasons: Array<Record<string, number>>; pic: number[] }> = [];
+const moves: Array<{ move: number; label: string; variants: number[]; ends: string[]; gated: number[]; reasons: Array<Record<string, number>>; pic: number[]; counter: number[]; damage: number[]; flag: number[]; flagKind: FlagKind | undefined }> = [];
 const variantPool: SoundOp[][] = [];
 const poolIndex = new Map<string, number>();
 const stripLines = (events: SoundOp[]): SoundOp[] => events.map(({ line: _line, ...rest }) => rest as SoundOp);
@@ -1760,10 +1765,13 @@ const counterGrids: number[][] = [];
 // aud258: a walk that reads gAnimMoveDmg (Seismic Toss) is repeated for the three damage levels; the move's `damage` slot points at [weak, medium, strong] in damageGrids.
 const damageGrids: number[][] = [];
 const damageIndex = new Map<string, number>();
+// aud262: a walk that branches on AnimTask_IsPowerOver99 (Magnitude) / AnimTask_IsHealingMove (Present) is repeated for flag 0 / 1; the move's `flag` slot points at [0, 1] in flagGrids and `flagKind` names the request value.
+const flagGrids: number[][] = [];
+const flagIndex = new Map<string, number>();
 const counterIndex = new Map<string, number>();
 const gridIndex = new Map<string, number>();
 moveTable.forEach((label, move) => {
-  const entry = { move, label, variants: [] as number[], ends: [] as string[], gated: [] as number[], reasons: [] as Array<Record<string, number>>, pic: [] as number[], counter: [] as number[], damage: [] as number[] };
+  const entry = { move, label, variants: [] as number[], ends: [] as string[], gated: [] as number[], reasons: [] as Array<Record<string, number>>, pic: [] as number[], counter: [] as number[], damage: [] as number[], flag: [] as number[], flagKind: undefined as FlagKind | undefined };
   for (let turn = 0; turn < TURNS; turn += 1) {
     for (let side = 0; side < SIDES; side += 1) {
       const result = walk(label, turn, side);
@@ -1795,6 +1803,17 @@ moveTable.forEach((label, move) => {
           damageGrid = damageIndex.get(key)!;
         }
       }
+      let flagGrid = -1;
+      if (result.usedFlag !== null) {
+        const cells = [0, 1].map((flag) => poolOf(walk(label, turn, side, referencePic(side), 1, SEISMIC_TOSS_REFERENCE_LEVEL, flag).events));
+        if (cells.some((c) => c !== cells[0])) {
+          const key = JSON.stringify(cells);
+          if (!flagIndex.has(key)) { flagIndex.set(key, flagGrids.length); flagGrids.push(cells); }
+          flagGrid = flagIndex.get(key)!;
+          entry.flagKind = result.usedFlag;
+        }
+      }
+      entry.flag.push(flagGrid);
       entry.damage.push(damageGrid);
       entry.counter.push(counterGrid);
       entry.variants.push(poolOf(result.events));
@@ -1847,7 +1866,8 @@ const out = {
   picGrids,
   counterGrids,
   damageGrids,
-  moves: moves.map((m) => ({ move: m.move, label: m.label, variants: m.variants, ends: m.ends, gated: m.gated, ...(m.pic.some((g) => g >= 0) ? { pic: m.pic } : {}), ...(m.counter.some((g) => g >= 0) ? { counter: m.counter } : {}), ...(m.damage.some((g) => g >= 0) ? { damage: m.damage } : {}) })),
+  flagGrids,
+  moves: moves.map((m) => ({ move: m.move, label: m.label, variants: m.variants, ends: m.ends, gated: m.gated, ...(m.pic.some((g) => g >= 0) ? { pic: m.pic } : {}), ...(m.counter.some((g) => g >= 0) ? { counter: m.counter } : {}), ...(m.damage.some((g) => g >= 0) ? { damage: m.damage } : {}), ...(m.flag.some((g) => g >= 0) ? { flag: m.flag, flagKind: m.flagKind } : {}) })),
   general,
 };
 mkdirSync(outDir, { recursive: true });
