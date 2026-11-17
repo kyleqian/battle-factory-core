@@ -698,6 +698,9 @@ function lifetimeOf(cmd: Command, attackerSide: number, pic: PicContext, rollout
   // AnimTask_ElectricBolt (battle_anim_electric.c:685-724): the entry only sets func; the step's data[10] counts calls 1.. and call 11 (data[10] == 10) destroys.
   // The five segment sprites are CreateSprite'd by the task, which gAnimVisualTaskCount does not count.
   if (op === "createvisualtask" && args[0] === "AnimTask_ElectricBolt") return { exact: 10 };
+  // aud259: AnimTask_FakeOut (battle_anim_effects_2.c:3080-3131): the entry only sets Step1 (calls 1..): data[0] += 13 / data[1] -= 13 from 0 / DISPLAY_WIDTH (240) until data[0] >= data[1] (13k >= 240 - 13k:
+  // k = 10, call 10 installs Step2); Step2 counts data[10] from call 11, the BlendPalettes at 5 (call 15), and destroys in the next call, 16: gone 15 ticks after F.
+  if (op === "createvisualtask" && args[0] === "AnimTask_FakeOut") return { exact: 15 };
   // ---- aud258: AnimTask_TormentAttacker (battle_anim_effects_3.c:1892-2004, sAffineAnims_Torment :435-441, gThoughtBubbleSpriteTemplate battle_anim_effects_1.c:2044-2079). The entry only sets `func`
   // (RunTasks calls 1..). State 0 (call c) plays the SE, creates a bubble and starts the affine anim (3 frames x 4 ticks = calls c + 1..c + 12, END seen at c + 13); the 1st and 2nd cycles (data[1] <= 2)
   // then wait data[6] = 10 (state 2: calls c + 14..c + 24, next state 0 at c + 25), the 3rd..5th wait 0 (next at c + 15); the 6th (data[1] == 6) waits 8 in state 3 (c + 14..c + 22) and state 4 at c + 23

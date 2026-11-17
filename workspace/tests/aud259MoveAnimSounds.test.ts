@@ -99,3 +99,26 @@ describe("Dynamic Punch (aud259)", () => {
     console.info("aud259-dynamicpunch-player ROM minus ours", offsets[0]);
   });
 });
+
+// Fake Out: AnimTask_FakeOut (battle_anim_effects_2.c:3080-3131) is destroyed 15 calls after its creation, so the SKETCH after `waitforvisualfinish` is 16 frames after the FLATTER.
+describe("Fake Out (aud259)", () => {
+  const entry = timing.moves[252]!;
+  it("the table entry: SE 229 at 0, SE 205 at 16, ungated", () => {
+    expect(entry.label).toBe("Move_FAKE_OUT");
+    expect(entry.gated.every((g) => g === 0)).toBe(true);
+    const rows = timing.variants[entry.variants[0]!]!.map((o) => `${o.frame}:${(o as { id?: number }).id}:${o.pan}`);
+    expect(rows).toEqual(["0:229:0", "16:205:63"]);
+  });
+  it("aud259-fakeout-player: ids, pans and the 16-frame gap equal the ROM's; ROM minus ours is constant", () => {
+    const rom = fixture("aud259-fakeout-player");
+    const pick = (events: FixtureEvent[]) => events.filter((e) => e.noop !== true && e.kind === "se" && [229, 205].includes(e.id as number));
+    const romRows = pick(rom.events);
+    const ours = pick(ourEvents(rom) as unknown as FixtureEvent[]);
+    expect(romRows.map((e) => `${e.id}:${e.pan}`)).toEqual(["229:0", "205:63"]);
+    expect(romRows.map((e) => e.frame - romRows[0]!.frame)).toEqual([0, 16]);
+    expect(ours.map((e) => `${e.id}:${e.pan}`)).toEqual(romRows.map((e) => `${e.id}:${e.pan}`));
+    const offsets = romRows.map((e, i) => e.frame - ours[i]!.frame);
+    expect(new Set(offsets).size).toBe(1);
+    console.info("aud259-fakeout-player ROM minus ours", offsets[0]);
+  });
+});

@@ -1022,9 +1022,11 @@ function aud241bStage(
   frontierBrain = false,
   opponentMoveId = 69,
   rngSeed = 1,
+  firstTurn = false,
 ): EngineState {
   return midBattleSwitchStage(state, id, [RATTATA_LV50_BENCH, RATTATA_LV50_BENCH], [105, 105], {
     rngSeed,
+    ...(firstTurn ? { firstTurn } : {}),
     ...(lastFaint === "opponent" ? { trainerBenchHp: null } : {}),
     ...(lastFaint === "player" ? { playerBenchNone: true } : {}),
     ...(frontierBrain ? { frontierBrain } : {}),
@@ -1127,6 +1129,8 @@ type MidBattleSwitchStageOptions = Readonly<{
   frontierBrain?: boolean;
   /** aud259: the staged battle's RNG seed (default 1); a sub-100 accuracy move can miss in the engine while the ROM lab hits. */
   rngSeed?: number;
+  /** aud259: both staged battlers start with isFirstTurn 1 (a fresh battle's first selection), as the ROM lab's Fake Out needs. */
+  firstTurn?: boolean;
 }>;
 
 function midBattleSwitchStage(
@@ -1187,14 +1191,19 @@ function midBattleSwitchStage(
         }),
   });
   // Scene OFF: factoryBattleStart.ts sets HITMARKER_NO_ANIMATIONS for the whole battle; the staged state starts with hitMarker 0.
-  const staged = options.sceneOffNoAnimations !== true
+  const staged = options.sceneOffNoAnimations !== true && options.firstTurn !== true
     ? stagedOn
     : createFactoryFullTurnBattleStateFromRulesContext({
       requestId: 1,
       rngSeed: options.rngSeed ?? 1,
       rulesContext: Object.freeze({
         ...stagedOn.rules.rulesContext,
-        hitMarker: (stagedOn.rules.rulesContext.hitMarker | BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) >>> 0,
+        ...(options.sceneOffNoAnimations === true
+          ? { hitMarker: (stagedOn.rules.rulesContext.hitMarker | BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) >>> 0 }
+          : {}),
+        ...(options.firstTurn === true
+          ? { battlers: Object.freeze(stagedOn.rules.rulesContext.battlers.map((b) => Object.freeze({ ...b, isFirstTurn: 1 }))) as typeof stagedOn.rules.rulesContext.battlers }
+          : {}),
       }),
     });
   if (
@@ -2072,6 +2081,7 @@ export const APP_STAGES: Readonly<Record<string, AppStage>> = {
   "aud259-block-player-on": (state) => aud241bStage(state, "aud259-block-player-on", "on", 50, 12, 335, undefined, false, 69),
   "aud259-block-opponent-on": (state) => aud241bStage(state, "aud259-block-opponent-on", "on", 12, 50, 69, undefined, false, 335),
   "aud259-dynamicpunch-player-on": (state) => aud241bStage(state, "aud259-dynamicpunch-player-on", "on", 50, 12, 223, undefined, false, 69, 2),
+  "aud259-fakeout-player-on": (state) => aud241bStage(state, "aud259-fakeout-player-on", "on", 50, 12, 252, undefined, false, 69, 1, true),
   "aud258-torment-player-on": (state) => aud241bStage(state, "aud258-torment-player-on", "on", 50, 12, 259, undefined, false, 69),
   "aud258-seismictoss-player-on": (state) => aud241bStage(state, "aud258-seismictoss-player-on", "on", 50, 12, 69, undefined, false, 69),
   "aud258-seismictossstrong-player-on": (state) => aud241bStage(state, "aud258-seismictossstrong-player-on", "on", 100, 12, 69, undefined, false, 69),
