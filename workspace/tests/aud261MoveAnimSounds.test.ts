@@ -94,3 +94,21 @@ describe("Pain Split (aud261)", () => {
     });
   }
 });
+
+// AnimFireSpiralOutward (battle_anim_fire.c:738-772: D + W + 1 ticks, W = 56, D = 0..24) gates the wait before the slide / shake / FLAME_WHEEL2: ROM 144 x7 four apart, 145 +88 after the last.
+describe("Flame Wheel (aud261)", () => {
+  it("the table entry: FLAME_WHEEL (pan attacker) at 6..30 by 4, FLAME_WHEEL2 at 118, ungated", () => {
+    expect(timing.moves[172]!.label).toBe("Move_FLAME_WHEEL");
+    expect(timing.moves[172]!.gated.every((g) => g === 0)).toBe(true);
+    expect(timing.variants[timing.moves[172]!.variants[0]!]!.map((o) => `${o.frame}:${(o as { id?: number }).id}`)).toEqual(["6:144", "10:144", "14:144", "18:144", "22:144", "26:144", "30:144", "118:145"]);
+  });
+  for (const [side, pan] of [["player", [-64, 63]], ["opponent", [63, -63]]] as const) {
+    it(`aud261-flamewheel-${side}: ids, pans and the 4 x 6 / +88 gaps equal the ROM's, offset constant`, () => {
+      const rom = fixture(`aud261-flamewheel-${side}`);
+      const romRows = rom.events.filter((e) => e.kind === "se" && (e.id === 144 || e.id === 145));
+      expect(romRows.map((e) => e.frame - romRows[0]!.frame)).toEqual([0, 4, 8, 12, 16, 20, 24, 112]);
+      expect(romRows.map((e) => e.pan)).toEqual([...Array(7).fill(pan[0]), pan[1]]);
+      expect(expectConstantOffset(rom, [144, 145], 8)).toBe(2);
+    });
+  }
+});

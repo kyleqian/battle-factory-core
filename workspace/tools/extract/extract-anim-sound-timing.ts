@@ -1173,6 +1173,10 @@ function lifetimeOf(cmd: Command, attackerSide: number, pic: PicContext, rollout
   // AnimSpriteOnMonPos (battle_anim_mons.c:1515-1536) destroys itself in the first call after `animEnded || affineAnimEnded` (a sprite on gDummySpriteAnimTable never ends its anim: sprite.c:173-175,
   // 909-922 keep animBeginning set). gBellAnimCmds (battle_anim_effects_2.c:848-862) are 6 6 15 6 6 6 15 6 6 6 15 6 6 = 105 ticks: END at call 105, destroyed at 106 = 105.
   if (sprite("gBellSpriteTemplate")) return { exact: 105 };
+  // AnimFireSpiralOutward (battle_anim_fire.c:738-760; W = gBattleAnimArgs[2] = script args[5], D = gBattleAnimArgs[3] = args[6]): the init (call 0) stores D, W and installs WaitAnimForDuration
+  // (battle_anim_mons.c:551-557): calls 1..D count D down, call D + 1 installs Step1 (SetCallbackToStoredInData6 does not run it), call D + 2 runs Step1, which runs Step2 (:762-772) at once
+  // (--data[0] = W - 1); the call that makes --data[0] == -1 is D + 2 + W and destroys: gone D + W + 1 ticks after F.
+  if (sprite("gFireSpiralOutwardSpriteTemplate")) { const [w, d] = [intArg(args[5]), intArg(args[6])]; return w === null || d === null || w < 0 || d < 0 ? null : { exact: d + w + 1 }; }
   // AnimPainSplitProjectile (battle_anim_effects_3.c:2937-2970) keeps its callback and destroys in the first call after animEnded: gPainSplitAnimCmds (:723-729) are 5 + 9 + 5 = 19 ticks, exact 19.
   // AnimTask_PainSplitMovement (:2974-3033): the entry (call 0) sets the rot/scale and data[0] = 1, step calls 1..13 count data[1], call 13 (== 13) destroys: exact 12.
   if (sprite("gPainSplitProjectileSpriteTemplate")) return { exact: 19 };
