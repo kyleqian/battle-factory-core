@@ -176,6 +176,8 @@ export const HELD_ITEM_EFFECT_COMMAND_FRAMES = 214;
  * previous command's end to the next command's first frame, measured on the ROM (docs/wsh1-general-anim-commands.md).
  */
 export const WISH_HEAL_COMMAND_FRAMES = 201;
+export const FUTURE_SIGHT_HIT_COMMAND_FRAMES = 172;
+export const FOCUS_BAND_COMMAND_FRAMES = 129;
 export const HELD_ITEM_EFFECT_RESTART_LEAD_FRAMES = 15;
 export const HELD_ITEM_EFFECT_CONTINUE_LEAD_FRAMES = 9;
 /**
@@ -651,7 +653,7 @@ export type BattleResolutionPresentationCommand =
       type: "general-animation";
       eventSequence: number;
       battler: 0 | 1;
-      animation: "FOCUS_PUNCH_SETUP" | "HELD_ITEM_EFFECT" | "LEECH_SEED_DRAIN" | "CASTFORM_CHANGE" | "WISH_HEAL" | WeatherContinuesAnimation;
+      animation: "FOCUS_PUNCH_SETUP" | "HELD_ITEM_EFFECT" | "LEECH_SEED_DRAIN" | "CASTFORM_CHANGE" | "WISH_HEAL" | "FUTURE_SIGHT_HIT" | "FOCUS_BAND" | WeatherContinuesAnimation;
       /** cff230: a CASTFORM_CHANGE's target form (the event's argument & ~CASTFORM_SUBSTITUTE; 0 = normal). */
       castformForm?: number;
       /** cff232 / snd233: extra rows before the morph's lead (a weather-loop change at battler 1, both scenes); absent = 0. */
@@ -4512,7 +4514,7 @@ export function projectBattleResolutionCommands(
   let currentField: BattleResolutionDisplayedField = field;
   const substituteFades: { at: number; battler: 0 | 1; sequence: number }[] = [];
   const statsChanges: { at: number; battler: 0 | 1; sequence: number; argument: number; frames: number; seGate: number }[] = [];
-  const heldItemEffects: { at: number; battler: 0 | 1; sequence: number; frames: number; afterStatus: boolean; animation: "HELD_ITEM_EFFECT" | "WISH_HEAL" }[] = [];
+  const heldItemEffects: { at: number; battler: 0 | 1; sequence: number; frames: number; afterStatus: boolean; animation: "HELD_ITEM_EFFECT" | "WISH_HEAL" | "FUTURE_SIGHT_HIT" | "FOCUS_BAND" }[] = [];
 
   for (let index = 0; index < events.length; index += 1) {
     const event = events[index]!;
@@ -4744,10 +4746,12 @@ export function projectBattleResolutionCommands(
       });
       continue;
     }
-    if (payload.kind === "animation" && payload.animationId === "WISH_HEAL") {
+    if (payload.kind === "animation" && (payload.animationId === "WISH_HEAL" || payload.animationId === "FUTURE_SIGHT_HIT" || payload.animationId === "FOCUS_BAND")) {
       heldItemEffects.push({
-        at: commands.length, battler: singlesBattler(payload.battler ?? -1, "wish heal animation"), sequence: event.sequence,
-        frames: WISH_HEAL_COMMAND_FRAMES, afterStatus: false, animation: "WISH_HEAL",
+        at: commands.length, battler: singlesBattler(payload.battler ?? -1, "general animation"), sequence: event.sequence,
+        frames: payload.animationId === "WISH_HEAL" ? WISH_HEAL_COMMAND_FRAMES
+          : payload.animationId === "FUTURE_SIGHT_HIT" ? FUTURE_SIGHT_HIT_COMMAND_FRAMES : FOCUS_BAND_COMMAND_FRAMES,
+        afterStatus: false, animation: payload.animationId,
       });
       continue;
     }
