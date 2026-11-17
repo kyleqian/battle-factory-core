@@ -588,6 +588,13 @@ function lifetimeOf(cmd: Command, attackerSide: number, pic: PicContext, rollout
   // AnimTask_ElectricBolt (battle_anim_electric.c:685-724): the entry only sets func; the step's data[10] counts calls 1.. and call 11 (data[10] == 10) destroys.
   // The five segment sprites are CreateSprite'd by the task, which gAnimVisualTaskCount does not count.
   if (op === "createvisualtask" && args[0] === "AnimTask_ElectricBolt") return { exact: 10 };
+  // ---- aud258: AnimTask_TormentAttacker (battle_anim_effects_3.c:1892-2004, sAffineAnims_Torment :435-441, gThoughtBubbleSpriteTemplate battle_anim_effects_1.c:2044-2079). The entry only sets `func`
+  // (RunTasks calls 1..). State 0 (call c) plays the SE, creates a bubble and starts the affine anim (3 frames x 4 ticks = calls c + 1..c + 12, END seen at c + 13); the 1st and 2nd cycles (data[1] <= 2)
+  // then wait data[6] = 10 (state 2: calls c + 14..c + 24, next state 0 at c + 25), the 3rd..5th wait 0 (next at c + 15); the 6th (data[1] == 6) waits 8 in state 3 (c + 14..c + 22) and state 4 at c + 23
+  // starts anim 2 of the six bubbles (gMetronomeThroughtBubbleAnimCmds3 :2035-2042: 4 x 2 = 8 ticks; AnimateSprites runs before RunTasks, BattleMainCB2 battle_main.c:1863-1869: BeginAnim at call c + 24,
+  // animEnded at c + 32, the callback decrements data[6] and destroys at c + 33) and state 5 destroys the task in that same call c + 33. The state-0 calls are TORMENT_SE_CALLS (1, 26, 51, 66, 81, 96),
+  // so the task is destroyed at call 96 + 33 = 129: gone 128 ticks after F.
+  if (op === "createvisualtask" && args[0] === "AnimTask_TormentAttacker") return { exact: TORMENT_SE_CALLS[5] + 33 - 1 };
   // ---- aud258: AnimTask_MoveSeismicTossBg (battle_anim_rock.c:848-868; createvisualtask runs the entry, which IS the step, in the script step = call 0). data[0] counts calls 0, 1, ...;
   // the call with data[0] == 120 (call 120) runs DestroyAnimVisualTask: gone 119 ticks after F. AnimTask_SeismicTossBgAccelerateDownAtEnd (:870-889) lives until the script's `setarg 7, 0xFFF`
   // after the last wait, so nothing in the script waits for it.
@@ -1079,6 +1086,7 @@ const middle = (values: number[]): number => values[Math.floor(values.length / 2
 const referencePic = (attackerSide: number): PicContext => ({ attackerY: middle(picYs[attackerSide]!), targetY: middle(picYs[1 - attackerSide]!) });
 // aud258: a representative gAnimMoveDmg per AnimTask_GetSeismicTossDamageLevel level (battle_anim_rock.c:836-846: < 33 -> 0, 33..65 -> 1, > 65 -> 2). The reference walk is level 1 (the Factory's
 // Lv 50 attacker: BattleScript_EffectLevelDamage runs `dmgtolevel` after `typecalc`, so gBattleMoveDamage = 50 when the animation starts, unless adjustsetdamage clamps it to hp - 1).
+const TORMENT_SE_CALLS = [1, 26, 51, 66, 81, 96] as const;
 const SEISMIC_TOSS_LEVELS = [0, 1, 2] as const;
 const SEISMIC_TOSS_REFERENCE_LEVEL = 1;
 const SEISMIC_TOSS_BG_TASKS = new Set(["AnimTask_MoveSeismicTossBg", "AnimTask_SeismicTossBgAccelerateDownAtEnd"]);
@@ -1301,6 +1309,12 @@ function walk(bodyLabel: string, turn: number, attackerSide: number, pic: PicCon
         if (args[0] === "AnimTask_Rollout") {
           if (frame === null) { gate(); break; }
           events.push({ op: "task_rollout", frame: frame + shiftAt(frame), id: value("SE_M_HEADBUTT"), id2: value("SE_M_DIG"), pan: -64, target: 63, times: rolloutShape(rolloutCounter).length, line });
+          break;
+        }
+        // aud258: AnimTask_TormentAttacker plays SE_M_METRONOME (PlaySE12WithPanning, BattleAnimAdjustPanning(SOUND_PAN_ATTACKER)) from its step; the calls are TORMENT_SE_CALLS (offset call - 1).
+        if (args[0] === "AnimTask_TormentAttacker") {
+          if (frame === null) { gate(); break; }
+          for (const call of TORMENT_SE_CALLS) events.push({ op: "playsewithpan", frame: frame + shiftAt(frame) + call - 1, id: value("SE_M_METRONOME"), pan: value("SOUND_PAN_ATTACKER"), line });
           break;
         }
         if (args[0] !== "SoundTask_PlaySE1WithPanning" && args[0] !== "SoundTask_PlaySE2WithPanning") break;

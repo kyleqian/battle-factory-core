@@ -59,4 +59,40 @@ describe("Seismic Toss (aud258)", () => {
       expect(romRows.map((e, i) => e.frame - ours[i]!.frame)).toEqual([spec.offset, spec.offset, spec.offset]);
     });
   }
+
+  // Own windows (tools/battle-lab/aud258-*-player-on.json): a Lv50 / Lv100 player Seismic Toss against a Lv12 Rattata (Medium: damage 50, Strong: 100), the engine's damage picks the level.
+  const WINDOWS: Array<{ file: string; ids: number[]; gaps: number[]; offset: number }> = [
+    { file: "aud258-seismictoss-player", ids: [238, 214, 131, 214], gaps: [0, 120, 136, 152], offset: 0 },
+    { file: "aud258-seismictossstrong-player", ids: [238, 131, 214, 131, 214], gaps: [0, 120, 132, 144, 156], offset: 0 },
+  ];
+  for (const w of WINDOWS) {
+    it(`${w.file}: the Medium / Strong rows follow the table's gaps in the ROM and the engine; ROM minus ours is ${w.offset} on every row`, () => {
+      const rom = fixture(w.file);
+      const romRows = seismic(rom.events);
+      const ours = seismic(ourEvents(rom));
+      expect(romRows.map((e) => e.id)).toEqual(w.ids);
+      expect(romRows.map((e) => e.frame - romRows[0]!.frame)).toEqual(w.gaps);
+      expect(ours.map((e) => `${e.id}:${e.pan}`)).toEqual(romRows.map((e) => `${e.id}:${e.pan}`));
+      expect(romRows.map((e, i) => e.frame - ours[i]!.frame)).toEqual(romRows.map(() => w.offset));
+    });
+  }
+});
+
+describe("Torment (aud258)", () => {
+  const entry = timing.moves.find((m) => m.move === 259)!;
+  it("the table entry: SE 186 x6 from the task's steps (calls 1, 26, 51, 66, 81, 96), then SE 194 twice 129 after the first (the task's 128-tick lifetime) and 22 apart, all ungated", () => {
+    expect(entry.variants.every((v) => v === entry.variants[0])).toBe(true);
+    const rows = timing.variants[entry.variants[0]!]!.map((o) => `${o.op}:${o.frame}:${o.id}:${o.pan}`);
+    expect(rows).toEqual([6, 31, 56, 71, 86, 101].map((f) => `playsewithpan:${f}:186:-64`).concat(["playsewithpan:135:194:63", "playsewithpan:157:194:63"]));
+    expect((entry as unknown as { move: number }).move).toBe(259);
+  });
+  it("aud258-torment-player: the engine's eight rows have the ROM's ids / pans and gaps (25 / 25 / 15 / 15 / 15, 129 to the first SE 194, 22 between them)", () => {
+    const rom = fixture("aud258-torment-player");
+    const pick = (events: Array<{ frame: number; kind: string; id: number | null; pan: number | null; noop?: boolean }>) => events.filter((e) => e.noop !== true && e.kind === "se" && (e.id === 186 || e.id === 194));
+    const romRows = pick(rom.events);
+    const ours = pick(ourEvents(rom));
+    expect(romRows.map((e) => e.frame - romRows[0]!.frame)).toEqual([0, 25, 50, 65, 80, 95, 129, 151]);
+    expect(ours.map((e) => `${e.id}:${e.pan}`)).toEqual(romRows.map((e) => `${e.id}:${e.pan}`));
+    expect(romRows.map((e, i) => e.frame - ours[i]!.frame)).toEqual(romRows.map(() => -4));
+  });
 });
