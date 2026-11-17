@@ -27,6 +27,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import type { EngineState } from "../../src/engine/core.ts";
+import "../../src/engine/monPicPixelsInstall.ts"; // iss215: standalone node run must install the sprite pixel provider
 import { runSeed } from "./randomRoundSoakDriver.ts";
 
 const BATON_PASS = 226;
