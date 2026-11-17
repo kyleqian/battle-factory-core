@@ -36,6 +36,13 @@ def write(move, side, body, turn):
         "attackerPersonality": (p if side == "player" else o)["personality"],
     }
     if turn: fixture["requestFields"] = {"turn": turn}
+    if move == "beat-up":
+        if body: fixture["precedingX2Events"] = [{"kind": "send-in", "side": "player"}, {"kind": "send-in", "side": "opponent"}] + [{"kind": "move-body", "moveId": 251, "attackerSide": side, "turn": k} for k in range(body)]
+        # the controller prints "<party member>'s attack!" for hit k = body index (lab parties: tools/battle-lab/adp1-beat-up-*.json)
+        party = {"player": {"player": ["PRIMEAPE", "MACHOKE", "CROCONAW"], "opponent": ["SHUCKLE", "WOBBUFFET"]},
+                 "opponent": {"player": ["MACHOKE", "CROCONAW"], "opponent": ["PRIMEAPE", "SHUCKLE", "WOBBUFFET"]}}
+        name = party[side][side][body % len(party[side][side])]
+        fixture["messageLines"] = [("Foe " if side == "opponent" else "") + name + "\u2019s attack!", ""]
     name = f"{key}" + (f"-b{body}" if body else "")
     (ROOT / f"tools/integration/fixtures/adp1/{name}.json").write_text(json.dumps(fixture, indent=1) + "\n")
     rows_path = ROOT / "tools/integration/fixtures/adp1/rom-rows.json"

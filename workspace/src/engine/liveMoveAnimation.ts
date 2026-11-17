@@ -1616,6 +1616,7 @@ function liveMoveAnimationDurationOf(
       return approxScriptDuration(APPROX_SCRIPT_MOVE_BODY[request.moveId]!);
     // adp1: the ROM-accepted script bodies of approxScript.ts (ADP1_MOVE_BODY): Withdraw.
     case 110: case 249: return approxScriptDuration(ADP1_MOVE_BODY[request.moveId]!);
+    case 251: return approxScriptDuration((request.turn & 1) === 1 ? "BEAT_UP_RIGHT" : "BEAT_UP_LEFT");
     default:
       if (noCase) noCase.hit = true;
       return null;
@@ -4676,6 +4677,11 @@ export function liveMoveAnimationPresentationProven(
     }
     case 249: {
       config = { move: "APPROX_SCRIPT", body: ADP1_MOVE_BODY[request.moveId]!, attacker, target, fieldProfile };
+      break;
+    }
+    case 251: {
+      // choosetwoturnanim BeatUpLeft, BeatUpRight: odd turns take the second branch.
+      config = { move: "APPROX_SCRIPT", body: (request.turn & 1) === 1 ? "BEAT_UP_RIGHT" : "BEAT_UP_LEFT", attacker, target, fieldProfile };
       break;
     }
     default: return null;

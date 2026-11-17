@@ -9,7 +9,7 @@ import { shakeMonSequence } from "./shakeMon.ts";
 import { shakeMon2Sequence } from "./shakeMon2.ts";
 
 export type ApproxScriptBody =
-  | "PECK" | "ODOR_SLEUTH" | "FALSE_SWIPE" | "GUST" | "PAY_DAY" | "BARRAGE" | "CONVERSION_2" | "CURSE_GHOST" | "WITHDRAW" | "ROCK_SMASH" | "BEAT_UP";
+  | "PECK" | "ODOR_SLEUTH" | "FALSE_SWIPE" | "GUST" | "PAY_DAY" | "BARRAGE" | "CONVERSION_2" | "CURSE_GHOST" | "WITHDRAW" | "ROCK_SMASH" | "BEAT_UP_LEFT" | "BEAT_UP_RIGHT";
 export type ApproxScriptSheet = "impact" | "slash2" | "gust" | "coin" | "conversion" | "redBall" | "ghostlySpirit" | "nail" | "nailFlip"
   | "handsAndFeet" | "rocks";
 export type ApproxScriptSide = "player" | "opponent";
@@ -400,9 +400,58 @@ function rockSmash(age: number, ctx: ApproxScriptContext): ApproxScriptFrame {
   return frameOf(age, ROCK_SMASH_LAST, { targetOffset: { x2: one.x2 + two.x2, y2: one.y2 + two.y2 }, targetRestReset: age - ROCK_SMASH_C1 >= 1, sprites });
 }
 
+/** AnimTask_ShakeMon tasks sharing one sprite: x2/y2 after each frame's task pass, before that frame's script creates tasks (the creation frame shows the rest). */
+function shakeMonStates(creations: readonly { frame: number; x: number; y: number; times: number; delay: number }[], rows: number): ApproxScriptOffset[] {
+  const tasks: { x: number; y: number; left: number; delay: number; counter: number }[] = [];
+  let x2 = 0;
+  let y2 = 0;
+  const step = (task: (typeof tasks)[number]) => {
+    if (task.counter !== 0) { task.counter -= 1; return; }
+    x2 = x2 === 0 ? task.x : 0;
+    y2 = y2 === 0 ? task.y : 0;
+    task.counter = task.delay;
+    task.left -= 1;
+    if (task.left === 0) { x2 = 0; y2 = 0; tasks.splice(tasks.indexOf(task), 1); }
+  };
+  const out: ApproxScriptOffset[] = [];
+  for (let frame = 0; frame < rows; frame += 1) {
+    for (const task of [...tasks]) step(task);
+    out.push({ x2, y2 });
+    for (const c of creations) {
+      if (c.frame !== frame) continue;
+      x2 = c.x;
+      y2 = c.y;
+      const task = { x: c.x, y: c.y, left: c.times, delay: c.delay, counter: c.delay };
+      tasks.push(task);
+      step(task);
+    }
+  }
+  return out;
+}
+const BEAT_UP_FIRST = 10;
+const BEAT_UP_GAP = 10;
+const BEAT_UP_LAST = 38;
+const BEAT_UP_SHAKES = shakeMonStates([BEAT_UP_FIRST, BEAT_UP_FIRST + BEAT_UP_GAP].map((frame) => ({ frame, x: 3, y: 0, times: 6, delay: 1 })), BEAT_UP_LAST + 2);
+/** BeatUpLeft / BeatUpRight: [splat x, splat y, fist x, fist y] of the first and the second hit (x mirrored by the attacker side). */
+const BEAT_UP_LEFT_HITS = [[-20, -20, -20, -12], [8, 0, 8, 8]] as const;
+const BEAT_UP_RIGHT_HITS = [[12, -20, 12, -12], [-12, 0, -12, 8]] as const;
+function beatUp(age: number, ctx: ApproxScriptContext, hits: readonly (readonly [number, number, number, number])[]): ApproxScriptFrame {
+  const sprites: ApproxScriptSprite[] = [];
+  hits.forEach(([splatX, splatY, fistX, fistY], i) => {
+    const age1 = age - (BEAT_UP_FIRST + i * BEAT_UP_GAP) - 1;
+    const side = towardTarget(ctx);
+    if (age1 >= 0 && age1 <= 9) sprites.push(sprite("impact", ctx.targetCenter.x + side * splatX, ctx.targetCenter.y + splatY, SPLAT_MATRIX[2], null, 12, { b: 8, over: "backdrop" }));
+    if (age1 >= 0 && age1 <= 8) sprites.push(sprite("handsAndFeet", ctx.targetCenter.x + side * fistX, ctx.targetCenter.y + fistY, null, FIST_FRAME));
+  });
+  const shake = BEAT_UP_SHAKES[age] ?? ZERO;
+  return frameOf(age, BEAT_UP_LAST, { targetOffset: shake, targetRestReset: age > BEAT_UP_FIRST, sprites });
+}
+const beatUpLeft = (age: number, ctx: ApproxScriptContext) => beatUp(age, ctx, BEAT_UP_LEFT_HITS);
+const beatUpRight = (age: number, ctx: ApproxScriptContext) => beatUp(age, ctx, BEAT_UP_RIGHT_HITS);
+
 type BodyFn = (age: number, ctx: ApproxScriptContext) => ApproxScriptFrame;
 const BODIES: Readonly<Record<ApproxScriptBody, BodyFn>> = {
-  PECK: peck, ODOR_SLEUTH: odorSleuth, FALSE_SWIPE: falseSwipe, GUST: gust, PAY_DAY: payDay, BARRAGE: barrage, CONVERSION_2: conversion2, CURSE_GHOST: curseGhost, WITHDRAW: withdraw, ROCK_SMASH: rockSmash, BEAT_UP: rockSmash,
+  PECK: peck, ODOR_SLEUTH: odorSleuth, FALSE_SWIPE: falseSwipe, GUST: gust, PAY_DAY: payDay, BARRAGE: barrage, CONVERSION_2: conversion2, CURSE_GHOST: curseGhost, WITHDRAW: withdraw, ROCK_SMASH: rockSmash, BEAT_UP_LEFT: beatUpLeft, BEAT_UP_RIGHT: beatUpRight,
 };
 
 /** The move ids drawn by these bodies, classified `approx:no-adapter` (Curse's Ghost branch is `approx:turn-0`). */
@@ -411,7 +460,7 @@ export const APPROX_SCRIPT_MOVE_BODY: Readonly<Record<number, Exclude<ApproxScri
 });
 
 /** adp1: moves drawn by a ROM-accepted script body (a live adapter, not approximate): Withdraw. */
-export const ADP1_MOVE_BODY: Readonly<Record<number, Extract<ApproxScriptBody, "WITHDRAW" | "ROCK_SMASH" | "BEAT_UP">>> = Object.freeze({ 110: "WITHDRAW", 249: "ROCK_SMASH", 251: "BEAT_UP" });
+export const ADP1_MOVE_BODY: Readonly<Record<number, Extract<ApproxScriptBody, "WITHDRAW" | "ROCK_SMASH" | "BEAT_UP_LEFT">>> = Object.freeze({ 110: "WITHDRAW", 249: "ROCK_SMASH", 251: "BEAT_UP_LEFT" });
 
 export function approxScriptAtAge(body: ApproxScriptBody, age: number, ctx: ApproxScriptContext): ApproxScriptFrame {
   return BODIES[body](age, ctx);

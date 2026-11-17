@@ -1,0 +1,36 @@
+{
+ "schema": "s10a-live-adapter-fixture/v1",
+ "move": "BEAT_UP",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/battle-lab/adp1-beat-up-opponent.json",
+ "denseWindow": {
+  "startFrame": 134,
+  "endFrame": 173
+ },
+ "windowSource": "window = [activation, first inactive row] of body 0 of Move_BEAT_UP from adp1Probes.sh (trf174Probe.py)",
+ "attacker": {
+  "species": "PRIMEAPE",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "ONIX",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "fieldProfile": {
+  "playerHp": 142,
+  "playerMaxHp": 142,
+  "opponentHp": 172,
+  "opponentMaxHp": 172,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "attackerPersonality": 1793700000,
+ "messageLines": [
+  "Foe PRIMEAPE\u2019s attack!",
+  ""
+ ]
+}
