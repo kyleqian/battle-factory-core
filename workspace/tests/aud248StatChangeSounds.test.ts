@@ -43,8 +43,8 @@ const RESIDUAL: Record<string, number | number[] | null> = {
   "aud242c-metalsound-opponent.json": 0, "aud242c-superpower-player.json": 17, "aud242c-sweetscent-player.json": -1, "aud242d-calmmind-player.json": 0,
   "aud242d-metalclaw-player.json": null, "aud242d-steelwing-player.json": null, "aud242e-overheat-player.json": 17, "aud242f-growth-player.json": 23, "aud242f-swagger-player.json": 6,
   "aud242j-silverwind-player.json": null,
-  "aud242k-ancientpower-player.json": null, "aud242o-rollout5-player.json": [2, 8, 15, 27, 48], "aud242k-scaryface-player.json": 14, "aud242k-smokescreen-player.json": 0,
-  "aud242p-flatter-player.json": 5, "aud242q-iceball5-player.json": [2, 7, 16, 34, 57], // hpd2: -8 per chained turn (was 2 / 15 / 32 / 58 / 89)
+  "aud242k-ancientpower-player.json": null, "aud242o-rollout5-player.json": [0, 0, 0, -2, -3], "aud242k-scaryface-player.json": 14, "aud242k-smokescreen-player.json": 0,
+  "aud242p-flatter-player.json": 5, "aud242q-iceball5-player.json": [0, 13, 25, 34, 44], // hpd2: -8 per chained turn (was 2 / 15 / 32 / 58 / 89); hpd4: rollout5 2/8/15/27/48 -> 0/0/0/-2/-3, iceball5 2/7/16/34/57 -> 0/13/25/34/44 (rows 2-3 away, same unaudited Ice Ball body as aud242q)
 };
 
 const names = readdirSync(dir).filter((n) => /^aud242.*\.json$/.test(n));

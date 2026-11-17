@@ -14,7 +14,7 @@ import {
 } from "./screenSounds.ts";
 import { factoryBattleBgm } from "./battleStartSounds.ts";
 import { animSoundPan2, emitSound } from "../audio/soundEvents.ts";
-import { liveMoveSourceAge } from "./battleResolutionPresentationRender.ts";
+import { battleResolutionCommandDuration, currentCommandField, liveMoveSourceAge, moveBodyExtraRows, presentedMoveDurationOnSoundClock } from "./battleResolutionPresentationRender.ts";
 import type { BattleKernelSemanticEvent } from "./battleDecisionBoundary.ts";
 import { BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS } from "./battleScriptSourceConstants.ts";
 import type {
@@ -78,21 +78,36 @@ export function emitBattleHitSounds(
   const prior = currentCommand(before);
   const now = currentCommand(after);
   const bgm = factoryBattleBgm(frontierBrain);
-  if (prior !== null && prior.command.type === "hp" && prior.command.battler === 0 && (now === null || now.command !== prior.command)) {
-    const lag = sceneLag(prior.segment);
-    const { from, to } = prior.command;
-    const maxHp = prior.segment.field.player.maxHP;
-    scheduleAfter(HEALTHBAR_DONE_AFTER_HP_END + lag, () => handleLowHpMusicChange(from, maxHp));
-    scheduleAfter(HEALTHBAR_DONE_AFTER_HP_END + SET_MON_DATA_AFTER_HEALTHBAR_DONE + lag, () => handleLowHpMusicChange(to, maxHp));
-  }
   if (now === null || (prior !== null && prior.command === now.command)) return;
   const { command, segment } = now;
-  const lag = sceneLag(segment);
+  // hpd4: a move body's script lead and hit tail are presented rows the ROM-calibrated controller sounds (SCENE_ON_LAG) already carry; a sound anchored to
+  // a later command start subtracts them, and one that would then precede its anchor is scheduled from the earlier command (hit SE, HP bar).
+  const lag = sceneLag(segment) - (after === null ? 0 : moveBodyExtraRows(after, false));
+  if (command.type === "move-animation") {
+    const next = segment.commands[segment.commands.indexOf(command) + 1];
+    const duration = after === null ? null : presentedMoveDurationOnSoundClock(after);
+    if (next === undefined || next.type !== "hit-animation" || duration === null || (command.timing.bodyLeadFrames ?? 0) === 0) return;
+    const song = effectivenessSong(segment, next.eventSequence);
+    if (song === null) return;
+    const panBattler = song.weatherLoop ? 0 : next.battler;
+    scheduleAfter(Math.max(0, duration + sceneLag(segment) - moveBodyExtraRows(after!, false)), () => playPannedSe(song.song, panBattler === 0 ? SE_PAN_PLAYER : SE_PAN_OPPONENT));
+    return;
+  }
+  if (command.type === "hp" && command.battler === 0 && after !== null) {
+    const { from, to } = command;
+    const maxHp = segment.field.player.maxHP;
+    const end = battleResolutionCommandDuration(command, currentCommandField(after), "first") + HEALTHBAR_DONE_AFTER_HP_END + lag;
+    scheduleAfter(Math.max(0, end), () => handleLowHpMusicChange(from, maxHp));
+    scheduleAfter(Math.max(0, end + SET_MON_DATA_AFTER_HEALTHBAR_DONE), () => handleLowHpMusicChange(to, maxHp));
+    return;
+  }
   if (command.type === "hit-animation") {
+    const previous = segment.commands[segment.commands.indexOf(command) - 1];
+    if (previous?.type === "move-animation" && (previous.timing.bodyLeadFrames ?? 0) > 0) return;
     const song = effectivenessSong(segment, command.eventSequence);
     if (song !== null) {
       const panBattler = song.weatherLoop ? 0 : command.battler;
-      scheduleAfter(lag, () => playPannedSe(song.song, panBattler === 0 ? SE_PAN_PLAYER : SE_PAN_OPPONENT));
+      scheduleAfter(Math.max(0, lag), () => playPannedSe(song.song, panBattler === 0 ? SE_PAN_PLAYER : SE_PAN_OPPONENT));
     }
     return;
   }
@@ -101,8 +116,8 @@ export function emitBattleHitSounds(
   if (lead === undefined) return;
   const side = command.battler === 0 ? segment.field.player : segment.field.opponent;
   const pan = command.battler === 0 ? FAINT_CRY_PAN_PLAYER : FAINT_CRY_PAN_OPPONENT;
-  scheduleAfter(lead - FAINT_CRY_BEFORE_SE + FAINT_SOUND_OFFSET + lag, () => playFaintCry(bgm, side.species, pan));
-  scheduleAfter(lead + FAINT_SOUND_OFFSET + lag, () => {
+  scheduleAfter(Math.max(0, lead - FAINT_CRY_BEFORE_SE + FAINT_SOUND_OFFSET + lag), () => playFaintCry(bgm, side.species, pan));
+  scheduleAfter(Math.max(0, lead + FAINT_SOUND_OFFSET + lag), () => {
     if (command.battler === 0) handleLowHpMusicChange(0, segment.field.player.maxHP);
     playPannedSe(SE_FAINT, command.battler === 0 ? SE_PAN_PLAYER : SE_PAN_OPPONENT);
   });

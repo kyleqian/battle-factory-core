@@ -116,7 +116,7 @@ export type BattleMessageTiming =
  * the adapter's trail to get the rows the live body presents after its last row (the held last body row).
  */
 export type BattleMoveAnimationTiming = Readonly<{
-  minimumFrames: number; seGateFrames?: number; scriptLeadFrames?: number; scriptTailRows?: number;
+  minimumFrames: number; seGateFrames?: number; scriptLeadFrames?: number; bodyLeadFrames?: number; scriptTailRows?: number;
 }>;
 export type BattleHitAnimationTiming = Readonly<{
   minimumFrames: 35;
@@ -1581,7 +1581,19 @@ function moveAnimationSeGateTiming(events: readonly BattleKernelSemanticEvent[],
  * An ordinary script runs its post-attackstring instructions while the print types, so `attackanimation` is the release row itself
  * (production's body starts there) and the lead is 0. The lead is the kernel's instructionExecution(MOVE_ANIMATION) - (waitstate's).
  */
-function moveAnimationScriptLeadTiming(events: readonly BattleKernelSemanticEvent[], index: number): { scriptLeadFrames?: number } {
+/**
+ * hpd4: the live bodies whose ROM windows (attackanimation exec -> gAnimScriptActive -> hit controller, tools/integration/hpd2Probe.py) show the
+ * accepted live window does not contain the script lead: Sonic Boom, Dragon Rage, Defense Curl, Rollout. Seismic Toss is audited but held out (docs/hpd1-hp-hold.md, hpd4). Their lead is presented as
+ * the command's first rows (`bodyLeadFrames`); every other body keeps the lead in its script tail (its accepted window was fitted without an audit).
+ */
+export const BODY_LEAD_AUDITED_MOVE_IDS: ReadonlySet<number> = new Set([49, 82, 111, 205]);
+
+function moveAnimationScriptLeadTiming(
+  events: readonly BattleKernelSemanticEvent[],
+  index: number,
+  presentedSinceUsed: number | null,
+  moveId: number,
+): { scriptLeadFrames?: number; bodyLeadFrames?: number } {
   const animation = instructionExecutionOf(events[index]!);
   for (let i = index - 1; i >= 0; i -= 1) {
     const candidate = events[i]!;
@@ -1590,9 +1602,13 @@ function moveAnimationScriptLeadTiming(events: readonly BattleKernelSemanticEven
     const used = instructionExecutionOf(candidate);
     const programCounter = candidate.provenance?.programCounter;
     if (programCounter === undefined || animation <= used) return {};
-    const lead = animation - (used + 1);
-    return BATTLE_SCRIPT_PROGRAM.instructions[programCounter + 1]?.opcodeName === "B_SCR_OP_WAITSTATE" && lead > 0
-      ? { scriptLeadFrames: lead } : {};
+    if (BATTLE_SCRIPT_PROGRAM.instructions[programCounter + 1]?.opcodeName === "B_SCR_OP_WAITSTATE") {
+      const waitLead = animation - (used + 1);
+      return waitLead > 0 ? { scriptLeadFrames: waitLead } : {};
+    }
+    if (presentedSinceUsed === null || !BODY_LEAD_AUDITED_MOVE_IDS.has(moveId)) return {};
+    const lead = animation - (used + 1) - presentedSinceUsed;
+    return lead > 0 ? { bodyLeadFrames: lead } : {};
   }
   return {};
 }
@@ -1614,6 +1630,7 @@ function moveAnimationScriptTailTiming(
   index: number,
   usedExecution: number | null,
   presentedSinceUsed: number | null,
+  moveId: number,
 ): { scriptTailRows?: number } {
   const attack = events[index]!;
   const attackExecution = attack.provenance?.instructionExecution;
@@ -1641,7 +1658,7 @@ function moveAnimationScriptTailTiming(
   }
   const lead = attackExecution - usedExecution - 1 - presentedSinceUsed;
   if (lead < 0) return {};
-  return { scriptTailRows: nextExecution - attackExecution + 1 + lead + 1 };
+  return { scriptTailRows: nextExecution - attackExecution + 1 + 1 + (BODY_LEAD_AUDITED_MOVE_IDS.has(moveId) ? 0 : lead) };
 }
 
 /** ont193: the rows presented since the used print's release (only silent-RAM `stat` commands are accepted), else null. */
@@ -1714,6 +1731,46 @@ const ITEM_HEAL_HP_TIMING = Object.freeze({ minimumFrames: 0 } as const);
 const SHELL_BELL_HP_TIMING = Object.freeze({ minimumFrames: 0, tailFrames: 3 } as const);
 /** hie4: ... and the blank box run before the prompt is 1 row longer than the end2 path's (ROM 7 vs 6, both scenes): turn-end 9 after a Shell Bell heal. */
 const SHELL_BELL_TURN_END_TIMING = Object.freeze({ minimumFrames: 9 } as const);
+/**
+ * hpd1 (docs/hpd1-hp-hold.md): the ordinary hit's `hp` command has NO 28-frame floor where the shape is measured. The ROM's hold after `healthbarupdate` is the
+ * bar's frames + 2 (Cmd_datahpupdate blocks on the controller, battle_script_commands.c:1932-1960) and then the script rows to the
+ * next presented event, so the command is the bar's frames + 1 plus `tailFrames`, measured in 14 / 12 ROM windows (7 damages, both
+ * scenes; 0 frames ROM - app across bars of 9..90 frames):
+ *   - hit -> next action's USEDMOVE (the action-transition pause below already presents the d rows after `datahpupdate`): +1, the
+ *     `datahpupdate` row itself;
+ *   - hit -> only MoveEnd receipts then the turn end (nothing else presented): + d = the rows from `datahpupdate` to the first
+ *     MoveEnd receipt (`critmessage`, `waitmessage`, `resultmessage`, `waitmessage`, `seteffectwithchance`, `tryfaintmon`, `moveendall`).
+ * Any other shape (an effectiveness / crit print, a faint, a heal, a held item next) and every hit ON THE PLAYER (all 20 ROM labs hit the foe; the off108
+ * Rest window's foe-Tackle-on-player anchor moves -3 -> -14 without the floor) has no ROM window yet: it keeps the legacy 28-frame floor.
+ */
+const HP_DATAHPUPDATE_ROW_FRAMES = 1;
+/** The rows between this `datahpupdate` and the next event when that is a MoveEnd receipt (d), or null. */
+function hpMoveEndLeadRows(events: readonly BattleKernelSemanticEvent[], index: number): number | null {
+  const event = events[index]!;
+  const programCounter = event.provenance?.programCounter;
+  if (programCounter === undefined || BATTLE_SCRIPT_PROGRAM.instructions[programCounter]?.opcodeName !== "B_SCR_OP_DATAHPUPDATE") return null;
+  const next = events[index + 1];
+  if (next?.payload.kind !== "set-battler-sprite-visibility" || next.provenance?.opcodeName !== "B_SCR_OP_MOVEEND") return null;
+  const hpExecution = event.provenance?.instructionExecution;
+  const receiptExecution = next.provenance.instructionExecution;
+  return hpExecution === undefined || receiptExecution === undefined || receiptExecution <= hpExecution ? null : receiptExecution - hpExecution - 1;
+}
+/** Applies the hpd1 tail to the plain hp commands of a finished command list (see hpMoveEndLeadRows). */
+function applyHpHitTails(
+  commands: BattleResolutionPresentationCommand[],
+  leadRows: ReadonlyMap<number, number>,
+): void {
+  for (let index = 0; index < commands.length; index += 1) {
+    const command = commands[index]!;
+    const lead = command.type === "hp" ? leadRows.get(command.eventSequence) : undefined;
+    if (command.type !== "hp" || lead === undefined || command.timing !== HP_TIMING) continue;
+    const rest = commands.slice(index + 1);
+    const transition = rest[0]?.type === "move-animation" && rest[1]?.type === "sprite-visibility";
+    const endsTurn = rest.length > 0 && rest.every((c) => c.type === "sprite-visibility" || c.type === "turn-end");
+    const tailFrames = transition ? HP_DATAHPUPDATE_ROW_FRAMES : endsTurn ? lead : 0;
+    if (tailFrames > 0) commands[index] = Object.freeze({ ...command, timing: Object.freeze({ minimumFrames: 0, tailFrames }) });
+  }
+}
 /**
  * lsd194 (docs/lsd194-print-floor-and-drain.md; lsd186 receipts, 6 ROM cases: 3 scenarios x both scenes, twice-fresh): the turn-end Leech
  * Seed drain, `BattleScript_LeechSeedTurnDrain` (`playanimation; orword; healthbarupdate; datahpupdate; copyword; jumpifability;
@@ -4482,6 +4539,7 @@ export function projectBattleResolutionCommands(
 ): readonly BattleResolutionPresentationCommand[] {
   const commands: BattleResolutionPresentationCommand[] = [];
   const pendingHealth = new Map<0 | 1, { eventSequence: number; healthValue: number; instructionExecution: number | undefined }>();
+  const hpLeadRows = new Map<number, number>();
   let leechDrainAnimated = false;
   const pendingSwitch = new Map<
     0 | 1,
@@ -4777,6 +4835,7 @@ export function projectBattleResolutionCommands(
       if (payload.animationId === "MOVE_ANIMATION") {
         const animation = battleMoveAnimationRequest(battler, payload.target, payload.arguments);
         sceneOnMoveTarget = animation.target === battler ? null : animation.target;
+        const presentedSinceUsedAtAttack = commandsPresentedSinceUsedPrint(events, pauseOpenerIndex, commands.slice(pauseOpenerCommands), field);
         commands.push(Object.freeze({
           type: "move-animation",
           eventSequence: event.sequence,
@@ -4785,11 +4844,8 @@ export function projectBattleResolutionCommands(
           // An unadapted move retains a bounded pause, explicitly reported by
           // the readiness registry. No substitute effect receives exact credit.
           timing: Object.freeze({
-            minimumFrames: SCENE_OFF_MOVE_PAUSE_FRAMES, ...moveAnimationSeGateTiming(events, index), ...moveAnimationScriptLeadTiming(events, index),
-            ...moveAnimationScriptTailTiming(
-              events, index, usedMoveInstructionExecution,
-              commandsPresentedSinceUsedPrint(events, pauseOpenerIndex, commands.slice(pauseOpenerCommands), field),
-            ),
+            minimumFrames: SCENE_OFF_MOVE_PAUSE_FRAMES, ...moveAnimationSeGateTiming(events, index), ...moveAnimationScriptLeadTiming(events, index, presentedSinceUsedAtAttack, animation.moveId),
+            ...moveAnimationScriptTailTiming(events, index, usedMoveInstructionExecution, presentedSinceUsedAtAttack, animation.moveId),
           }),
         }));
         continue;
@@ -4898,6 +4954,8 @@ export function projectBattleResolutionCommands(
         }));
       }
       leechDrainAnimated = false;
+      const moveEndLead = drainRole === null && battler === 1 ? hpMoveEndLeadRows(events, index) : null;
+      if (moveEndLead !== null) hpLeadRows.set(health.eventSequence, moveEndLead);
       commands.push(Object.freeze({
         type: "hp",
         eventSequence: health.eventSequence,
@@ -5312,6 +5370,7 @@ export function projectBattleResolutionCommands(
       timing: lastHp?.type === "hp" && lastHp.timing === SHELL_BELL_HP_TIMING ? SHELL_BELL_TURN_END_TIMING : TURN_END_TIMING,
     }));
   }
+  applyHpHitTails(commands, hpLeadRows);
   return Object.freeze(commands);
 }
 

@@ -34,14 +34,13 @@ function replay(rom: Fixture): { rows: string[]; commandStart: number } {
   return { rows, commandStart };
 }
 const romRows = (rom: Fixture, drift: number) => rom.events.filter((e) => e.kind === "se" && e.id !== null && HELD_IDS.includes(e.id)).map((e) => `${e.id}@${e.frame - drift}(${e.pan})`);
-
-// ROM first SE frame (script frame 8), the lab's pre-segment drift (app ahead of the ROM), engine command start, pan.
+// ROM first SE frame (script frame 8), the lab's pre-segment drift (app ahead of the ROM), engine command start, pan. hpd4: the floor-free foe-hit hold starts the held-item command 1 row later in sitrus-opp / leftovers / cheri (drift 9 / 17 / 20 -> 8 / 16 / 19, toward the ROM).
 const SITES = [
   { name: "hie3-sitrus-on", first: 754, drift: 9, commandStart: 722, pan: -64 },
-  { name: "hie3-sitrus-opp-on", first: 754, drift: 9, commandStart: 722, pan: 63 },
+  { name: "hie3-sitrus-opp-on", first: 754, drift: 8, commandStart: 723, pan: 63 },
   { name: "hie3-shellbell-on", first: 766, drift: 17, commandStart: 732, pan: -64 },
-  { name: "hie3-leftovers-on", first: 772, drift: 17, commandStart: 732, pan: -64 },
-  { name: "hie3-cheri-on", first: 737, drift: 20, commandStart: 731, pan: -64 },
+  { name: "hie3-leftovers-on", first: 772, drift: 16, commandStart: 733, pan: -64 },
+  { name: "hie3-cheri-on", first: 737, drift: 19, commandStart: 732, pan: -64 },
 ] as const;
 const SPACING: ReadonlyArray<readonly [number, number]> = [[152, 0], [152, 32], [152, 64], [228, 96], [102, 168]];
 

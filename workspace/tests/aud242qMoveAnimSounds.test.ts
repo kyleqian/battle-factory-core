@@ -59,8 +59,10 @@ const SPECS: Array<{ name: string; ids: number[]; deltas: number[] }> = [
   { name: "secretpower-player", ids: [152, 141], deltas: [2, 2, 2, 2] },
   { name: "extrasensory-player", ids: [170, 192], deltas: [3, 3, 3] },
   { name: "superfang-player", ids: [171, 161], deltas: [-1, -1] },
+  // hpd4: 9 / 13 / 22 / 40 / 63 -> 3 / 15 / 27 / 36 / 46 (turns 1, 4, 5 toward the ROM; turns 2 and 3 are +2 / +5 away: the Ice Ball body (301) is not audited, its lead stays in its tail,
+  // and the foe-hit floor-free hold (docs/hpd1-hp-hold.md) shortens its short-bar hits; sum |ROM - ours| 147 -> 127).
   // hpd2 (the locked continuation waits the foe's selection, +8 per chained turn): 9 / 21 / 38 / 64 / 95 -> 9 / 13 / 22 / 40 / 63.
-  { name: "iceball5-player", ids: [137, 198], deltas: [9, 9, 13, 13, 22, 22, 40, 40, 63, 63] },
+  { name: "iceball5-player", ids: [137, 198], deltas: [3, 3, 15, 15, 27, 27, 36, 36, 46, 46] },
 ];
 
 describe("move-animation SEs of the aud242q lifetimes", () => {
