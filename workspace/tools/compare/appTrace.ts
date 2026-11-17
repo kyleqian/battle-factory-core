@@ -2064,6 +2064,7 @@ export const APP_STAGES: Readonly<Record<string, AppStage>> = {
   "aud242o-dive-player-on": (state) => aud241bStage(state, "aud242o-dive-player-on", "on", 50, 12, 291, undefined, false, 69),
   "aud257-cosmicpower-player-on": (state) => aud241bStage(state, "aud257-cosmicpower-player-on", "on", 50, 12, 322, undefined, false, 69),
   "aud257-sweetkiss-player-on": (state) => aud241bStage(state, "aud257-sweetkiss-player-on", "on", 50, 12, 186, undefined, false, 69),
+  "aud242r-softboiled-player-on": (state) => aud241bStage(state, "aud242r-softboiled-player-on", "on", 50, 12, 135, undefined, false, 69),
   "aud258-torment-player-on": (state) => aud241bStage(state, "aud258-torment-player-on", "on", 50, 12, 259, undefined, false, 69),
   "aud258-seismictoss-player-on": (state) => aud241bStage(state, "aud258-seismictoss-player-on", "on", 50, 12, 69, undefined, false, 69),
   "aud258-seismictossstrong-player-on": (state) => aud241bStage(state, "aud258-seismictossstrong-player-on", "on", 100, 12, 69, undefined, false, 69),

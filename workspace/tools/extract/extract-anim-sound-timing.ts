@@ -443,6 +443,44 @@ function electricChargingParticlesDestroyCall(count: number, interval: number, p
   return lastExpiry;
 }
 /**
+ * aud259: the call (0 = the creating script step's CreateSpriteAndAnimate, call n >= 1 = the AnimateSprites of iteration F + n - 1: callback, then the affine step) at which a Soft-Boiled egg
+ * (AnimSoftBoiledEgg, battle_anim_effects_2.c:2689-2778) first runs AnimSoftBoiledEgg_Step4, the poll for `setarg 7, 0xFFFF`. `kind` is gBattleAnimArgs[2] (data[7]: 0 = fades out first).
+ * Step1 lifts the egg by data[0] >> 8 (data[0] 0x380, -32 a call, arithmetic shift) until y2 > 0; Step2 waits for data[0]++ > 19 (21 calls); Step3 waits for the end of
+ * gSoftBoiledEggAffineAnimCmds3 (sprite.c:1055-1178, 1330-1345: a frame of duration d > 0 takes d calls, a duration-0 frame one; LOOP(0) falls through, LOOP(1) repeats the two frames above it once);
+ * kind 0 then runs Callback1 (++data[0] == 9) and Callback2 (a step every third call, 16 steps), kind 1 goes straight to Step4.
+ */
+function softBoiledEggArrivalCall(kind: number | null): number | null {
+  if (kind === null || (kind !== 0 && kind !== 1)) return null;
+  let data0 = 0x380;
+  let y2 = 0;
+  let land = 0;
+  for (let call = 1; call < 400; call += 1) {
+    y2 -= data0 >> 8;
+    data0 -= 32;
+    if (y2 > 0) { land = call; break; }
+  }
+  if (land === 0) return null;
+  // Step2 installed at the landing call: its call j = land + j; the 21st (data[0] 20 -> ++ > 19) starts affine anim 2 (Begin in the same call) and installs Step3.
+  const anim2Start = land + 21;
+  // gSoftBoiledEggAffineAnimCmds3 (:680-690): frame 8, LOOP(0), frame 8, frame 8, LOOP(1), frame 0, frame 15, END.
+  const anim: Array<{ t: "frame" | "loop" | "end"; n: number }> = [{ t: "frame", n: 8 }, { t: "loop", n: 0 }, { t: "frame", n: 8 }, { t: "frame", n: 8 }, { t: "loop", n: 1 }, { t: "frame", n: 0 }, { t: "frame", n: 15 }, { t: "end", n: 0 }];
+  let index = 0;
+  let call = anim2Start;
+  let loopCounter = 0;
+  for (let guard = 0; guard < 200; guard += 1) {
+    const cmd = anim[index]!;
+    if (cmd.t === "end") break;
+    if (cmd.t === "frame") { call += Math.max(cmd.n, 1); index += 1; continue; }
+    if (loopCounter === 0) loopCounter = cmd.n; else loopCounter -= 1;
+    if (loopCounter > 0) { index -= 1; while (index > 0 && anim[index - 1]!.t !== "loop") index -= 1; } else index += 1;
+  }
+  const step3Sees = call + 1;
+  if (kind === 1) return step3Sees + 1;
+  const callback2Start = step3Sees + 9 + 1;
+  return callback2Start + 45 + 1;
+}
+
+/**
  * AnimTask_ShockWaveProgressingBolt: call 0 inits (data[7] = the attacker's BATTLER_COORD_Y_PIC_OFFSET, sweeping up to y 4 in steps of 8), case 1 creates one bolt sprite per call (each lives 13 ticks: sprite call 12 destroys,
  * AnimShockWaveProgressingBolt) and moves y; the call that reaches the end of the sweep goes to case 2 (5 calls, the 5th flips the direction: odd sweep count goes down 4 -> 68 with data[4] 0.. 7, even goes up) or, after the 5th
  * sweep, to case 3, which destroys when the last bolt sprite is gone. data[11] = 12 counts down on every call of cases 1, 2 and 4 and makes case 2 wait (case 4) until it is 0. The SE_M_THUNDERBOLT plays when a down
@@ -1178,7 +1216,7 @@ function walk(bodyLabel: string, turn: number, attackerSide: number, pic: PicCon
   let frame: number | null = 0;
   let why: Reason | null = null;
   let gated = 0;
-  let pending: Array<{ at: number; life: Lifetime; name: string; deferred?: "moonlight" }> = [];
+  let pending: Array<{ at: number; life: Lifetime; name: string; deferred?: "moonlight" | "setarg7"; arrive?: number }> = [];
   let ret: number | null = null;
   let retIndex = 7;
   let fade: number | null = null;
@@ -1243,8 +1281,10 @@ function walk(bodyLabel: string, turn: number, attackerSide: number, pic: PicCon
         }
       }
       if (frame !== null) {
-        const deferred = op === "createsprite" && (args[0] === "gMoonSpriteTemplate" || args[0] === "gMoonlightSparkleSpriteTemplate") ? ("moonlight" as const) : undefined;
-        pending.push({ at: frame, life, name: op === "createsprite" || op === "createvisualtask" ? args[0] ?? op : op, ...(deferred === undefined ? {} : { deferred }) });
+        // aud259: the Soft-Boiled egg waits in Step4 for the script's `setarg 7, 0xFFFF` (resolved at that command, `softBoiledEggArrivalCall` is the first call it can see it).
+        const egg = op === "createsprite" && args[0] === "gSoftBoiledEggSpriteTemplate" ? softBoiledEggArrivalCall(intArg(args[5])) : null;
+        const deferred = egg !== null ? ("setarg7" as const) : op === "createsprite" && (args[0] === "gMoonSpriteTemplate" || args[0] === "gMoonlightSparkleSpriteTemplate") ? ("moonlight" as const) : undefined;
+        pending.push({ at: frame, life, name: op === "createsprite" || op === "createvisualtask" ? args[0] ?? op : op, ...(deferred === undefined ? {} : { deferred }), ...(egg === null ? {} : { arrive: egg }) });
         if (op === "createvisualtask" && args[0] === "AnimTask_MoonlightEndFade") for (const p of pending) if (p.deferred === "moonlight" && p.life === null) p.life = { exact: frame + 22 - p.at };
       }
       const known = returnValue(args[0] ?? "", attackerSide);
@@ -1264,6 +1304,12 @@ function walk(bodyLabel: string, turn: number, attackerSide: number, pic: PicCon
       case "call": stack.push(pc); pc = [args[0]!, 0]; break;
       case "goto": pc = [args[0]!, 0]; break;
       case "delay": if (frame !== null) frame += Math.max(value(args[0]!), 0) + 2; break;
+      // aud259: Cmd_setarg runs in the script step of iteration `frame`; AnimSoftBoiledEgg_Step4 (battle_anim_effects_2.c:2767-2778) sees it in that iteration's AnimateSprites (call frame - at + 1),
+      // installs DestroyAnimSprite (or Step4_Callback, which destroys at once) and the sprite is gone in the next call: life = frame + 1 - at. An egg that has not reached Step4 by then keeps the wait open.
+      case "setarg":
+        if (frame !== null && value(args[0]!) === 7 && value(args[1]!) === 0xFFFF)
+          for (const p of pending) if (p.deferred === "setarg7" && p.life === null && p.arrive !== undefined && p.arrive <= frame - p.at + 1) p.life = { exact: frame + 1 - p.at };
+        break;
       case "loadspritegfx": if (frame !== null) frame += 3; break;
       case "monbg": if (frame !== null) frame += 3; monBgActive = true; break;
       // Cmd_clearmonbg (battle_anim.c:852-883) creates Task_ClearMonBg (priority 5): its first run only counts, the second (the iteration after the script step) calls
