@@ -84,4 +84,32 @@ Future Sight = player Lv50 FUTURE SIGHT vs Lv25 Rattata, lab seed 2; Focus Band 
 
 ## wsh1b
 
-(filled in below as the step lands)
+### 1. Source skips (Cmd_playanimation semi-invulnerable, Substitute)
+
+Both already existed (kernel `PLAYANIMATION` in `battleScriptStatbuffchangeOpcode.ts` emits nothing for a `STATUS3_SEMI_INVULNERABLE` battler; the
+projection insert loop skips behind `substituteDoll`). New Tier-1 coverage in `tests/wsh1GeneralAnimCommands.test.ts` (stages `wsh1b-wishdig-{on,off}`,
+`wsh1b-wishsub-on` in `tools/compare/appTrace.ts`, labs/traces of the same names): control Wish heals once; Wish on a Dig user and Wish behind a
+Substitute heal 0 times, the wish still comes true. A mutation (`if (true || ...)` on the Substitute check) fails the Substitute test.
+ROM window (Wish heal on a Dig battler): no ~+200 jump; heal message at +20 (pre-turn +8), heal HP +22, next message +25, i.e. the same +2/+5
+post-heal residual as the grounded control.
+
+### 2. T2 (Scene ON, 21 aligned seeds: 3738 / 6079 / 4235 re-run + the 18 from the aud259 chain)
+
+Move-animation SE exact 308, offset 3683, ROM-only (missing) 0, engine-only (extra) 0. Other families missing 0 / extra 0: stat-change 13/72,
+cry 4/167, battle-controller 66/577, bgm 0/5, fanfare 0/0, screen 0/0 (exact/total).
+
+### 3. Future Sight residuals: cause
+
+* **+14 (both scenes)** is not Future Sight: it is the 28-frame `HP_TIMING` floor after the *foe's* Seismic Toss hit on the player (damage 25): ROM
+  bar-drain start -> next text 43 frames, app 29. Bar-drain frames match. hpd1's floor-free rule covered only hits on the foe.
+* **+8 end-of-turn** is the post-bar tail after the Future Sight hit's `datahpupdate`: ROM drain end -> text box clear 18 frames (script rows
+  `gBattlescriptCurrInstr` advance about one instruction per frame, then action-finish transitions, probe `hpd2Probe.py`), app 10 (`TURN_END_TIMING`).
+  Same mechanism as hpd1's unlanded tail; the only rule available (hpd1 `hpMoveEndLeadRows` / `applyHpHitTails`, e01bfd249) was reverted because
+  rol1-rollout5-on got worse, and re-applying it for one script was not source-proven, so **no production change**.
+* **Second SE 184 early**: not reproduced. Engine rows match the ROM spacing exactly (38, +9) in 3/3 FS instances of seed 6079.
+
+Because nothing frame-moving changed, no census / soak re-run was needed.
+
+### 4. Drawing the three animations in Scene ON
+
+Not started (time cap). Still the ISSUES #219 remainder.
