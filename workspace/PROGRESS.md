@@ -7,15 +7,20 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ## 2026-11-17 — CAX31 daily run (supervisor, Opus 5.5, 2026-11-17 13:30 -> 2026-11-18 05:30 UTC): IN PROGRESS
 
-- **State:** master `299debeac` + docs; workers: wsh1 (integration), next aud258 (side). **No DEFERRED items.** Evidence `.integration/validation/sv-20261117/`.
+- **State:** master `c81db4870`; workers: wsh1b (integration), aud260 (side). **No DEFERRED items.** Evidence `.integration/validation/sv-20261117/`.
 - **Run start:** oracles current; baseline = last run's full suite (only tooling changed since `4e4c51880`). Disk 63 % -> 36 % (43 old census `tree/` dirs + `/tmp` scratch;
   list `.integration/evidence/TREES-PRUNED-20261117.txt`). No Mac fold (`mac/parity-mac` still `165548c4b`).
 - **Gameplay (replay, item 0d):** nightly check on `e06cac9fc`: pool **44 / 44** (1,287 states), staged battles **72 / 72** (`docs/replay-ledger.md`).
-- **Luck hunt day 1 (20261117):** 5,000 seeds, 6 marker hits, **6 ROM match, 0 differ**. luck2 promoted R032 R037 R038 R097 R107 R109 to `docs/parity-mac/stages/coverage/`
-  (supervisor re-drove all 6: full match); rare rules **53 -> 59 / 110**; the hunter now skips covered rules. Open designs R067 / R039 / R095 cannot hit as built, R030 unexplained (luck3).
-- **Sound (S11):** aud257: Cosmic Power + Sweet Kiss lifetimes ported; Scene ON T2 move-SE missing **63 -> 56**, engine-only 0; frames identical (differential 1,724 / 1,724, census
-  100 / 100). Wish heal / Future Sight hit / Focus Band are not presented as commands at all (seed 3738 segment 894 vs ROM 1,119 frames): wsh1 adds them (hie1 pattern).
-- **Next:** wsh1, aud258 (Shock Wave, Seismic Toss, Torment), luck3.
+- **Luck hunt day 1 (20261117):** 5,000 seeds, 6 marker hits, **6 ROM match, 0 differ**. luck2 promoted R032 R037 R038 R097 R107 R109; luck3 redesigned R030 (2 / 40 hits, promoted)
+  and retired R039 / R067 / R095 (no practical design; reasons in `docs/parity-mac/rule-coverage.md`). Supervisor re-drove all 7 promotions: full ROM match. Rare rules **53 -> 60 / 110**;
+  the hunter skips covered rules; 7 designs left for tomorrow (R035 R040 R080 R110 + ...).
+- **Sound (S11), Scene ON T2 move-animation SE missing 63 -> 16 (sound-only, frames identical by differential + census 100 / 100):** aud257 Cosmic Power, Sweet Kiss; aud258 Seismic Toss
+  (damage-level branch from the request's damage), Torment, Shock Wave (bolt task pans); aud259 Soft-Boiled, Block (the unidentified seed-165 window), Dynamic Punch, Fake Out, Crabhammer.
+  T1 0..99 ON missing-gated 41 -> 15. L50 table emitted / gated 807 / 51 -> 832 / 39.
+- **wsh1 (presentation, frames move by design):** WISH_HEAL / FUTURE_SIGHT_HIT / FOCUS_BAND now play as Scene ON commands (201 / 172 / 129 frames, ROM-measured) with their SEs,
+  Scene OFF holds 36 / 42 / 40; census 0..99 both scenes `eventsDigest` identical (9 seeds gain the commands); vanilla 0:20 both scenes 20 / 20, winning 0:60 60 / 60 (supervisor);
+  test:gate / build / build:lib 0; two soak frame pins re-pinned. Worker hit its cap before its doc: wsh1b writes it. These close the last 16 T2 ON rows (to confirm in wsh1b).
+- **Next:** wsh1b (doc, semi-invulnerable / Substitute skip, Future Sight +14 / +8 residuals, T2 confirm, drawing), aud260 (T1 tail + census 0..999 both scenes for S11 acceptance).
 
 ---
 
