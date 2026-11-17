@@ -952,6 +952,8 @@ that needs a decision.**
 
 **Counts after rrh4: 53 of the 110 covered; R019, R029, R031, R033, R065 class (b); R069 class (a); 51 left.**
 
+**Counts after luck2 (2026-11-17, the luck-hunt day job, day 1): 59 of the 110 covered (+ R032, R037, R038, R097, R107, R109; stage files in `stages/coverage/`, each re-driven to a full ROM match); 45 left (`rule-coverage.md` "Luck hunt day 1 (luck2)").**
+
 **Design mistakes for the next hunter:** (1) `cover` `at` is a character offset into the snippet and the innermost V8 range decides: a snippet that
 starts at the `?` of a ternary lands in the parent range, so a branch that really ran reads as not run (R019 at offset 0; the other markers here
 start inside the branch). (2) Check `rule-coverage.md` for class moves before picking a rule from `rule-coverage-c-rules.json`: its list is the
