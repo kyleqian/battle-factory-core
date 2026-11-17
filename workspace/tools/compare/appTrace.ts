@@ -1035,8 +1035,8 @@ function aud241bStage(
 }
 
 // aud242l: aud241bStage with the Blizzard user (Lv50) and a Seismic Toss target (Lv12) of the given species (attacker side `side`).
-function aud242lBlizzardStage(state: EngineState, id: string, side: "player" | "opponent", attackerSpecies: number, targetSpecies: number): EngineState {
-  const attacker = Object.freeze({ ...rattataAtLevel(50, 59), species: attackerSpecies });
+function aud242lBlizzardStage(state: EngineState, id: string, side: "player" | "opponent", attackerSpecies: number, targetSpecies: number, attackerMove = 59, attackerTypes?: readonly [string, string]): EngineState {
+  const attacker = Object.freeze({ ...rattataAtLevel(50, attackerMove), species: attackerSpecies, ...(attackerTypes === undefined ? {} : { types: attackerTypes }) });
   const target = Object.freeze({ ...rattataAtLevel(12, 69), species: targetSpecies });
   return midBattleSwitchStage(state, id, [RATTATA_LV50_BENCH, RATTATA_LV50_BENCH], [105, 105], {
     battleScene: "on",
@@ -2076,6 +2076,13 @@ export const APP_STAGES: Readonly<Record<string, AppStage>> = {
   "aud242q-extrasensory-player-on": (state) => aud241bStage(state, "aud242q-extrasensory-player-on", "on", 50, 12, 326, undefined, false, 69),
   "aud242q-superfang-player-on": (state) => aud241bStage(state, "aud242q-superfang-player-on", "on", 50, 12, 162, undefined, false, 69),
   "aud242q-iceball5-player-on": (state) => aud241bStage(state, "aud242q-iceball5-player-on", "on", 50, 100, 301, undefined, false, 111),
+  // aud242r: Heal Bell (player attacker, Scene ON).
+  "aud242r-healbell-player-on": (state) => aud241bStage(state, "aud242r-healbell-player-on", "on", 50, 12, 215, undefined, false, 69),
+  "aud242r-spikecannon-player-on": (state) => aud241bStage(state, "aud242r-spikecannon-player-on", "on", 50, 12, 131, undefined, false, 69),
+  "aud242r-eruption-player-on": (state) => aud241bStage(state, "aud242r-eruption-player-on", "on", 50, 12, 284, undefined, false, 69),
+  "aud242r-moonlight-player-on": (state) => aud241bStage(state, "aud242r-moonlight-player-on", "on", 50, 12, 236, undefined, false, 69),
+  // aud242r: Ghost-type Curse (Misdreavus, species 200) on a Lv12 Rattata: the CurseGhost branch (BIND x3 behind the stretching black bg, NIGHTMARE behind the nail).
+  "aud242r-curse-player-on": (state) => aud242lBlizzardStage(state, "aud242r-curse-player-on", "player", 200, 19, 174, ["TYPE_GHOST", "TYPE_GHOST"]),
   // aud242l: Blizzard (snowball / ice crystal lifetimes depend on both battlers' pic Y): the species only differ in the staged battlers' `species` (the ICY_WIND rows come before any damage).
   "aud242l-blizzard-fearow-bulbasaur-opponent-on": (state) => aud242lBlizzardStage(state, "aud242l-blizzard-fearow-bulbasaur-opponent-on", "opponent", 22, 1),
   "aud242l-blizzard-bulbasaur-charizard-opponent-on": (state) => aud242lBlizzardStage(state, "aud242l-blizzard-bulbasaur-charizard-opponent-on", "opponent", 1, 6),

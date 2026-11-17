@@ -704,7 +704,7 @@ function lifetimeOf(cmd: Command, attackerSide: number, pic: PicContext, rollout
   // call D + 1 installs DestroyAnimSprite, call D + 2 destroys = D + 1.
   if (sprite("gFireSpiralInwardSpriteTemplate")) return { exact: 30 };
   if (sprite("gFireSpreadSpriteTemplate")) { const d = intArg(args[7]); return d === null || d < 0 ? null : { exact: d + 1 }; }
-  if (sprite("gGrantingStarsSpriteTemplate")) { const d = intArg(args[8]); return d === null || d < 0 ? null : { exact: d + 1 }; }
+  if (sprite("gGrantingStarsSpriteTemplate") || sprite("gSparklingStarsSpriteTemplate")) { const d = intArg(args[8]); return d === null || d < 0 ? null : { exact: d + 1 }; }
   // AnimTask_DeepInhale (battle_anim_effects_3.c:3474-3510): the entry only sets func; the step's RunAffineAnimFromTaskData (battle_anim_mons.c:1800-1862) runs the frames of
   // gDeepInhaleAffineAnimCmds (:780-788: 4 + 16 + 4 + 24 + 16 = 64) over calls 1..64 and the END command on call 65 returns FALSE and destroys: gone 64 ticks after F.
   // AnimYawnCloud (:3532-3563): data[0] counts calls from 1; from call 59 on every 2nd call advances data[2] and the call that makes it 4 destroys: call 66, gone 65 ticks after F.
@@ -761,9 +761,69 @@ function lifetimeOf(cmd: Command, attackerSide: number, pic: PicContext, rollout
   // AnimHitSplatBasic (battle_anim_normal.c:1006-1018): affine anim `animation` (sAffineAnim_HitSplat_0..3, :134-163), RunStoredCallbackWhenAffineAnimEnds (sprite.c:729-733) with
   // DestroyAnimSprite stored. Anims 1..3 are one shape (a 0 frame, then the 8 frame): exact 10, ROM-measured on anim 2 (aud242p Poison Sting window: the wait ends 10 ticks after the
   // hit splat, the Shake task there is 8; Spark / Poison Tail agree). Anim 0 (the 8 frame alone) and a non-literal animation stay the bound.
-  if (op === "create_basic_hitsplat_sprite" || sprite("gBasicHitSplatSpriteTemplate")) {
-    const a = op === "create_basic_hitsplat_sprite" ? intNamed("animation") : intArg(args[6]);
+  // aud242r: the handle-invert splat (battle_anim_normal.c:1036-1047) only picks the palette / flip and then runs AnimHitSplatBasic's init: same lifetime.
+  if (op === "create_basic_hitsplat_sprite" || op === "create_handle_invert_hitsplat_sprite" || sprite("gBasicHitSplatSpriteTemplate") || sprite("gHandleInvertHitSplatSpriteTemplate")) {
+    const a = op.startsWith("create_") ? intNamed("animation") : intArg(args[6]);
     return a !== null && a >= 1 && a <= 3 ? { exact: 10 } : { bound: 10 };
+  }
+  // aud242r: AnimTask_AlphaFadeIn (battle_anim_mons.c:1654-1715; args a0..a4 = script args[2..6]). The entry only installs the step: every (a4 + 1)-th call is a step (data[0] > a4), odd steps move the
+  // first coefficient one toward a2, even steps the second toward a3, and the step on which both are there destroys the task: call (a4 + 1) * step, gone that - 1 ticks after F.
+  if (op === "createvisualtask" && args[0] === "AnimTask_AlphaFadeIn") {
+    const [a0, a1, a2, a3, a4] = [2, 3, 4, 5, 6].map((i) => intArg(args[i]));
+    if ([a0, a1, a2, a3, a4].some((v) => v === null) || a4! < 0) return null;
+    const [v2, v1] = [Math.sign(a2! - a0!), Math.sign(a3! - a1!)];
+    let [first, second] = [a0!, a1!];
+    for (let step = 1; step < 4096; step += 1) {
+      if (step & 1) { if (first !== a2!) first += v2; } else if (second !== a3!) second += v1;
+      if (first === a2! && second === a3!) return { exact: (a4! + 1) * step - 1 };
+    }
+    return null;
+  }
+  // aud242r: AnimTask_MoonlightEndFade (battle_anim_effects_1.c:5003-5115). The entry runs BeginNormalPaletteFade (palette.c:156-203: y 0 -> 16, deltaY 2, delay 0) and its step once (call 0). UpdatePaletteFade
+  // (palette.c:406-489) does one pass per main-loop iteration, BG then OBJ (the first in the Begin itself, the OBJ pass in the iteration's CB2) and steps y after each OBJ pass: 9 OBJ passes
+  // (y 0, 2, .., 16), the one at y == targetY sets softwareFadeFinishing, IsSoftwarePaletteFadeFinishing (:491-509) counts 4 iterations and clears `active` on the next: iteration F + 21, the
+  // same RunTasks sees it (state 1 passes, state 2 counts 31 calls, F + 22 .. F + 52) and starts the second fade (y 16 -> 0, 18 passes from F + 52, finishing F + 70 .. F + 73, clear F + 74), state 3
+  // destroys in that RunTasks: gone 74 ticks after F (ROM-measured, probe hooks: entry 1303, BlendPalette y 0..16 on 1303..1319, second Begin 1355, destroy 1377). The Moon / sparkle sprites wait
+  // for the state-1 call (data[0] = 1, :5078-5090) and are destroyed by AnimateSprites of F + 22 (ROM 1325): the creating walk resolves them when this task is created (`deferred`).
+  if (op === "createvisualtask" && args[0] === "AnimTask_MoonlightEndFade") return { exact: 74 };
+  // aud242r: AnimTask_CurseStretchingBlackBg (battle_anim_ghost.c:945-1042). The entry only sets Step1; Step1 call 1 is iteration F, steps 0..15 grow the window (calls 1..16) and call 17 (iteration F + 16)
+  // runs BeginNormalPaletteFade(mask, 0, 16, 16): y == targetY from the start, so its BG pass (in the Begin) is followed by the OBJ pass in the CB2 of F + 17, which sets softwareFadeFinishing; the counter
+  // runs F + 18 .. F + 21 and the pass of F + 22 clears `active` (palette.c:414-470, 807-826) before the RunTasks of that iteration, where Step2 sees it and destroys the task: gone 22 ticks after F.
+  if (op === "createvisualtask" && args[0] === "AnimTask_CurseStretchingBlackBg") return { exact: 22 };
+  // aud242r: AnimCurseNail (battle_anim_ghost.c:1044-1120). Call 0 inits, calls 1..60 count data[0] down, a move step is 4 calls (x2 += +-2 until |x2| 8: the u16 range check x2 + 7 > 14) and arms data[0] = 40 twice
+  // (calls 61..64, 65..104, 105..108, 109..148), the third move (149..152) arms WaitAnimForDuration with 30 (calls 153..182), call 183 swaps in Step2 (SetCallbackToStoredInData6 runs no step), Step2 call 184
+  // arms its counter and 16 blend steps of 3 calls follow (187, 190, .. 232, the last makes the sprite invisible and installs End), call 233 destroys: gone 232 ticks after F.
+  if (sprite("gCurseNailSpriteTemplate")) return { exact: 232 };
+  // aud242r: AnimTask_EruptionLaunchRocks (battle_anim_fire.c:796-1013, PrepareEruptAnimTaskData / UpdateEruptAnimTask battle_anim_mons.c:1958-1991). The entry only installs the step: state 0/1 takes
+  // calls 1..32 (duration 32), state 2 calls 33..37 (++timer1 > 4), state 3 calls 38..43 (duration 6; call 43 creates the 7 rocks, y = sprite y + y2 (0) + centerToCornerVecY + 74 / 44, x = battler x - 12 / + 16), state 4
+  // calls 44..68 (++timer3 > 24), state 5 calls 69..76 (duration 8), state 6 destroys once tActiveSprites is 0. A rock's first callback is the next iteration (call j = iteration F + 42 + j) and it
+  // destroys itself on the call it leaves the screen (UpdateEruptionLaunchRockPos :991-1013, sEruptionLaunchRockSpeeds :359-368): the task dies at call max(77, 43 + the slowest rock's call).
+  // Pic Y dependent (the player sprite y = pic Y - 8, the opponent's = pic Y + 6 after the six ++y of state 1; PrepareBattlerSpriteForRotScale :1295-1307 makes the 64x64 battler a double-size affine sprite, so CalcCenterToCornerVec sprite.c:687-700 doubles -32 to -64).
+  // ROM-measured (Rattata, probe hooks): rocks created at call 43 at y 103, the last one destroyed on call 39, the task on call 82.
+  if (op === "createvisualtask" && args[0] === "AnimTask_EruptionLaunchRocks") {
+    picUsed = true;
+    const player = attackerSide === 0;
+    const y0 = (player ? pic.attackerY - 8 : pic.attackerY + 6) - 64 + (player ? 74 : 44);
+    const sign = player ? 1 : -1;
+    let slowest = 0;
+    for (const [speedX, speedY] of [[-2, -5], [-1, -1], [3, -6], [4, -2], [2, -8], [-5, -5], [4, -7]] as const) {
+      let [sx, sy, delay, stage, call] = [(BATTLER_X[attackerSide]! + (player ? -12 : 16)) * 8, y0 * 8, 0, 0, 0];
+      for (;;) {
+        call += 1;
+        if (++delay > 2) { delay = 0; stage += 1; sy += stage * stage; }
+        sx += speedX * sign * 8;
+        sy += speedY * 8;
+        if (sx >> 3 < -8 || sx >> 3 > 248 || sy >> 3 < -8 || sy >> 3 > 120) break;
+      }
+      slowest = Math.max(slowest, call);
+    }
+    return { exact: Math.max(77, 43 + slowest) - 1 };
+  }
+  // aud242r: AnimTask_WindUpLunge (battle_anim_mon_movement.c:637-690; args a3 = first duration, a4 = delay, a6 = lunge duration). The entry only installs Step1: calls 1..a3 wind up (--data[3] == 0 on
+  // call a3), Step2 burns the delay on the next a4 calls (data[4] > 0) and the following a6 calls lunge; the last (--data[6] == 0) destroys the task: call K = a3 + a4 + a6, gone K - 1 ticks after F.
+  if (op === "createvisualtask" && args[0] === "AnimTask_WindUpLunge") {
+    const [a3, a4, a6] = [intArg(args[5]), intArg(args[6]), intArg(args[8])];
+    return a3 === null || a4 === null || a6 === null || a3 < 1 || a4 < 0 || a6 < 1 ? null : { exact: a3 + a4 + a6 - 1 };
   }
   // ---- aud242o (docs section 19). AnimPetalDanceBigFlower / SmallFlower (battle_anim_effects_1.c:2482-2548; D = duration): the init sets data[0] = D, runs InitAnimLinearTranslation
   // (battle_anim_mons.c:1065-1091, data[0] unchanged) and calls the step at once. The step is AnimTranslateLinear (:1111-1139, data[0]-- per call while non-zero): calls 0..D - 1 translate,
@@ -854,6 +914,17 @@ function lifetimeOf(cmd: Command, attackerSide: number, pic: PicContext, rollout
     const d = op.startsWith("create_") ? intNamed("duration") : intArg(args[op === "createsprite" && args[0] === "gLeechLifeNeedleSpriteTemplate" ? 5 : 7]);
     return d === null || d < 1 ? null : { exact: d + 1 };
   }
+  // ---- aud242r (docs section 22). AnimSparklingStars (battle_anim_effects_1.c:4115-4150; D = gBattleAnimArgs[5] = script args[8]) stores DestroyAnimSprite and installs
+  // TranslateSpriteLinearFixedPoint: the AnimGrantingStars shape above, D + 1. AnimHealBellMusicNote (battle_anim_effects_2.c:3053-3065; D = gBattleAnimArgs[4] = args[7]) stores
+  // DestroyAnimSprite and installs StartAnimLinearTranslation: the AnimPowerAbsorptionOrb shape, D + 1.
+  if (sprite("gHealBellMusicNoteSpriteTemplate")) { const d = intArg(args[7]); return d === null || d < 1 ? null : { exact: d + 1 }; }
+  // AnimSpriteOnMonPos (battle_anim_mons.c:1515-1536) destroys itself in the first call after `animEnded || affineAnimEnded` (a sprite on gDummySpriteAnimTable never ends its anim: sprite.c:173-175,
+  // 909-922 keep animBeginning set). gBellAnimCmds (battle_anim_effects_2.c:848-862) are 6 6 15 6 6 6 15 6 6 6 15 6 6 = 105 ticks: END at call 105, destroyed at 106 = 105.
+  if (sprite("gBellSpriteTemplate")) return { exact: 105 };
+  // gThinRingExpanding / gBlendThinRingExpanding (AnimBlendThinRing, :2551-2575, calls AnimSpriteOnMonPos at once) run affine anim 0 (gThinRingExpandingAffineAnimCmds1, :710-716): a duration-0 frame
+  // (BeginAffineAnim in call 0, delayCounter 0), then in call 1 the 30-tick frame (ApplyAffineAnimFrame, sprite.c:1330-1345, leaves delayCounter 29: calls 2..30 count it down) and END in call 31
+  // (sprite.c:1055-1112, 1165-1178); AnimSpriteOnMonPos sees affineAnimEnded in call 32: gone 31 ticks after F.
+  if (sprite("gThinRingExpandingSpriteTemplate") || sprite("gBlendThinRingExpandingSpriteTemplate")) return { exact: 31 };
   // AnimTask_InvertScreenColor (battle_anim_normal.c:759-778) inverts the palette buffer and destroys itself in the creating step: net 0 in gAnimVisualTaskCount (exact -1).
   if (op === "invert_screen_color" || (op === "createvisualtask" && args[0] === "AnimTask_InvertScreenColor")) return { exact: -1 };
 
@@ -998,7 +1069,7 @@ function walk(bodyLabel: string, turn: number, attackerSide: number, pic: PicCon
   let frame: number | null = 0;
   let why: Reason | null = null;
   let gated = 0;
-  let pending: Array<{ at: number; life: Lifetime; name: string }> = [];
+  let pending: Array<{ at: number; life: Lifetime; name: string; deferred?: "moonlight" }> = [];
   let ret: number | null = null;
   let retIndex = 7;
   let fade: number | null = null;
@@ -1061,7 +1132,11 @@ function walk(bodyLabel: string, turn: number, attackerSide: number, pic: PicCon
           fadeChain = cycleBlends !== null && cycleBlends > 1;
         }
       }
-      if (frame !== null) pending.push({ at: frame, life, name: op === "createsprite" || op === "createvisualtask" ? args[0] ?? op : op });
+      if (frame !== null) {
+        const deferred = op === "createsprite" && (args[0] === "gMoonSpriteTemplate" || args[0] === "gMoonlightSparkleSpriteTemplate") ? ("moonlight" as const) : undefined;
+        pending.push({ at: frame, life, name: op === "createsprite" || op === "createvisualtask" ? args[0] ?? op : op, ...(deferred === undefined ? {} : { deferred }) });
+        if (op === "createvisualtask" && args[0] === "AnimTask_MoonlightEndFade") for (const p of pending) if (p.deferred === "moonlight" && p.life === null) p.life = { exact: frame + 22 - p.at };
+      }
       const known = returnValue(args[0] ?? "", attackerSide);
       ret = op === "createvisualtask" ? known : ret;
       if (op === "createvisualtask") retIndex = 7;
