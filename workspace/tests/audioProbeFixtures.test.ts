@@ -36,6 +36,9 @@ const fixtures = files.map((f) => [f, JSON.parse(readFileSync(new URL(f, fixture
 describe("audio probe fixtures", () => {
   it("covers the draft, swap, decline and summary windows and both scene profiles of the battle windows", () => {
     expect(files).toEqual([
+      "adp1s-beatup-player.json",
+      "adp1s-rocksmash-player.json",
+      "adp1s-withdraw-player.json",
       "aud241c-brain-off-window.json",
       "aud241c-brain-on-window.json",
       "aud241c-loss-off-window.json",
