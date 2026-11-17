@@ -94,3 +94,21 @@ LSD194_SHARDS=0 LSD194_SPLIT=4 LSD194_CENSUS_JOBS=4 sh tools/integration/lsd194C
 python3 tools/integration/soundCensusDelta.py --t1 <root>/on-<sha> --json t1.json                              # move table + "non-move families" table
 ```
 Evidence: `.integration/evidence/t1cls/` (arm + `t1-after.json`). No test exists for the tool; the table above is the acceptance reading.
+
+## t1dt: the T1 rules for Double Team's stat SE and the Poison tail (2026-11-17, tooling only, `src/` untouched)
+
+Since aud252 / psn2 the engine plays two rows the aud242 table does not hold, so T1 read `extra` 109 and `unclassified` 128 on seeds 0..99 Scene ON with nothing wrong in the engine. `soundCensusExpected.ts` now carries both rules, `soundCensusDelta.py --t1` scores them (rows carry a flag in element 5):
+- **Double Team stat SE** (aud252): move 104 gets one optional row, SE 239, script row `DOUBLE_TEAM_STAT_SE_SCRIPT_ROW` (165), pan `animSoundPan2(-64, attacker / target sides)`. Optional = the engine plays it only when the segment presents the evasion rise (`emitDoubleTeamStatsChangeSound`), so a matched row is `exact` and an absent one is not `missing-other`. The constants `MOVE_DOUBLE_TEAM` / `DOUBLE_TEAM_STAT_SE_SCRIPT_ROW` / `SE_M_STAT_INCREASE` are module-private in `src/engine/battleHitSounds.ts` and `src/` is out of scope, so the tool reads them from that file's source text (a rename throws), not a copy.
+- **Status tail** (psn2): a `status-animation` table row with `script row + STATUS_ANIMATION_SCRIPT_AGE >= STATUS_ANIMATION_ADDED_ROWS[animation]` (both imported) is flagged tail. The classifier claims the SE it finds past the command window (the message / HP window) at the command's own frame offset (the votes of its in-window rows) + the row's script row, before counting the residual, so the 6th SE 148 matches instead of being `missing` + `unclassified`.
+
+T1 seeds 0..99 Scene ON, base `4e4c51880` (arm `on-4e4c51880`, same arm before and after):
+
+| | before | after |
+|---|---|---|
+| exact (move table) | 25,948 | **26,057** (+109 = the Double Team rows) |
+| missing-gated / missing-declined / missing-other / known-offset / missing-cry-task | 41 / 1 / 51 / 0 / 0 | **41 / 1 / 51 / 0 / 0** |
+| extra | 109 | **0** |
+| unclassified | 128 | **0** |
+| non-move exact / missing | 11,093 / 128 | **11,221 / 0** (+128 = the PSN tail rows; PSN 768 of 768) |
+
+No Double Team stat SE was absent (0 optional rows absent), so the optional flag is not hiding a gap on these seeds. Nothing else moved; the engine and the census arm are unchanged.

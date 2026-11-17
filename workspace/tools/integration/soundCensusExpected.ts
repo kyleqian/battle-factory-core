@@ -4,8 +4,20 @@
 // with the request's attacker / target sides), independently of the age clock emitMoveAnimSounds runs on. Frame of a row = (frame of body age 0) + 8 + offset (1 + 7, moveAnimSounds.ts).
 import { readFileSync, writeFileSync } from "node:fs";
 import timing from "../../src/data/gen/anim-sound-timing.json" with { type: "json" };
-import { moveAnimOpRows, type TimedOp } from "../../src/engine/moveAnimSounds.ts";
+import { moveAnimOpRows, STATUS_ANIMATION_SCRIPT_AGE, type TimedOp } from "../../src/engine/moveAnimSounds.ts";
+import { STATUS_ANIMATION_ADDED_ROWS } from "../../src/engine/battleResolutionPresentation.ts";
 import { animSoundPan2 } from "../../src/audio/soundEvents.ts";
+
+// t1dt: battleHitSounds.ts keeps Double Team's stat-SE constants module-private (src/ is out of scope for tooling steps), so they are read from its source text, not copied; a rename fails loudly.
+const hitSoundsSource = readFileSync(new URL("../../src/engine/battleHitSounds.ts", import.meta.url), "utf8");
+const hitSoundsConst = (name: string): number => {
+  const match = new RegExp(`^const ${name} = (\\d+);`, "m").exec(hitSoundsSource);
+  if (match === null) throw new Error(`soundCensusExpected: battleHitSounds.ts no longer declares const ${name}`);
+  return Number(match[1]);
+};
+const MOVE_DOUBLE_TEAM = hitSoundsConst("MOVE_DOUBLE_TEAM"), DOUBLE_TEAM_STAT_SE_SCRIPT_ROW = hitSoundsConst("DOUBLE_TEAM_STAT_SE_SCRIPT_ROW"), SE_M_STAT_INCREASE = hitSoundsConst("SE_M_STAT_INCREASE");
+// Row flags (element 5 of a row, absent = none): ROW_OPTIONAL = emitted only when the segment presents the rise, so its absence is not `missing`; ROW_TAIL = scheduled past the status window (psn2), emitted outside the command's presenting window.
+const ROW_OPTIONAL = 1, ROW_TAIL = 2;
 
 const nonMove = process.argv[4] === "--nonmove";
 const keys: any[][] = JSON.parse(readFileSync(process.argv[2]!, "utf8"));
@@ -30,7 +42,12 @@ if (nonMove) {
     else if (type === "general-animation" && animation === "HELD_ITEM_EFFECT") ops = [...variant("General_HeldItemEffect", battler), ...HELD_LATER];
     const rows: unknown[] = [];
     if (type === "stats-change") for (const id of [239, 245]) rows.push([0, "se", id, animSoundPan2(-64, context), 0]);
-    for (const op of ops) for (const row of moveAnimOpRows(op, context, true)) rows.push([op.frame + row.offset, row.emission.kind, row.emission.id, row.emission.pan, row.task === true ? 1 : 0]);
+    // psn2 scheduleStatusAnimationTail: a row whose command age (script row + STATUS_ANIMATION_SCRIPT_AGE) is at or after the window end (STATUS_ANIMATION_ADDED_ROWS) plays after the window.
+    const windowRows = type === "status-animation" ? (STATUS_ANIMATION_ADDED_ROWS as Record<string, number>)[animation] : undefined;
+    for (const op of ops) for (const row of moveAnimOpRows(op, context, true)) {
+      const scriptRow = op.frame + row.offset;
+      rows.push([scriptRow, row.emission.kind, row.emission.id, row.emission.pan, row.task === true ? 1 : 0, ...(windowRows !== undefined && scriptRow + STATUS_ANIMATION_SCRIPT_AGE >= windowRows ? [ROW_TAIL] : [])]);
+    }
     out[`${type},${battler},${animation}`] = { rows };
   }
   writeFileSync(process.argv[3]!, JSON.stringify(out));
@@ -59,6 +76,8 @@ for (const [move, turn, attacker, target, pic, counter] of keys) {
   for (const op of (timing as any).variants[variant]) {
     for (const row of moveAnimOpRows(op, context)) rows.push([op.frame + row.offset, row.emission.kind, row.emission.id, row.emission.pan, row.task === true ? 1 : 0]);
   }
+  // t1dt (aud252): Scene ON Double Team's STATS_CHANGE SE is outside the table; emitDoubleTeamStatsChangeSound plays it at script row DOUBLE_TEAM_STAT_SE_SCRIPT_ROW with the attacker's pan.
+  if (move === MOVE_DOUBLE_TEAM) rows.push([DOUBLE_TEAM_STAT_SE_SCRIPT_ROW, "se", SE_M_STAT_INCREASE, animSoundPan2(-64, context), 0, ROW_OPTIONAL]);
   out[outKey] = { rows, gated: entry.gated[slot], ends: entry.ends[slot] };
 }
 writeFileSync(process.argv[3]!, JSON.stringify(out));

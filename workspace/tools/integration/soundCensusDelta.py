@@ -15,6 +15,7 @@ from collections import Counter, defaultdict
 
 # Sounds of the other emitter families (battleHitSounds / screenSounds / battleStartSounds / battleEndSounds); no aud242 table op uses these ids (min 20).
 CONTROLLER_IDS = {5, 9, 12, 13, 14, 15, 16, 32, 55, 79, 90, 114, 115, 116}
+ROW_OPTIONAL, ROW_TAIL = 1, 2  # row flags of soundCensusExpected.ts (element 5)
 CLASSES = ["exact", "known-offset", "missing-gated", "missing-declined", "missing-cry-task", "missing-other", "extra", "unclassified"]
 
 
@@ -108,21 +109,34 @@ def nonmove_expected(wins):
 
 def t1_nonmove(A):
     """Per non-move command: its emitted SEs / pans (the window, plus the cure-berry lead window) against the table's rows of its family. Returns (per-family Counter, lead histogram, residual Counter, examples)."""
+    tail_rows = [0]
     fam = defaultdict(Counter); lead = defaultdict(Counter); resid = Counter(); noemit = defaultdict(Counter); ex = defaultdict(list)
     E = nonmove_expected([w for r in A.values() for w in (r.get("soundCmd") or [])])
     for s in sorted(A):
         r = A[s]; wins = r.get("soundCmd")
         if wins is None: sys.exit("arm has no soundCmd column (regenerate with tools/integration/lsd194Census.sh at a tree >= t1cls)")
         by_idx = {w[0]: w for w in wins}
-        owned = defaultdict(list)
+        owned = defaultdict(list); unowned = []
         for e in r["sound"]:
             if e[1] not in ("se", "pan") or (e[1] == "se" and e[2] in CONTROLLER_IDS): continue
             if any(w[5] <= e[0] <= w[6] for w in r["soundAnim"]): continue
             cand = [w for w in wins if w[3] <= e[0] <= w[4]]
-            if not cand: resid[("outside any presenting window", e[1], e[2])] += 1; continue
+            if not cand: unowned.append((e, ("outside any presenting window", e[1], e[2]))); continue
             w = cand[0]; f, lead_of_next = family_of(w, by_idx.get(w[0] + 1))
-            if f is None: resid[(f"in {w[1]} window", e[1], e[2])] += 1; continue
+            if f is None: unowned.append((e, (f"in {w[1]} window", e[1], e[2]))); continue
             owned[w[0] + 1 if lead_of_next else w[0]].append(e)
+        # t1dt: a status-animation command's tail rows (psn2: scheduled past the window) are emitted after it, in the message / HP window that follows; claim them by the command's own
+        # frame offset (the votes of its in-window rows) and the table row's exact script row, before the residual is counted.
+        for w in wins:
+            if w[1] != "status-animation" or w[0] not in owned: continue
+            rows = [tuple(x) for x in E[nkey(w)]["rows"]]; tail = [r_ for r_ in rows if len(r_) > 5 and r_[5] == ROW_TAIL]
+            votes = Counter(e[0] - r_[0] for e in owned[w[0]] for r_ in rows if r_ not in tail and (e[1], e[2], e[3]) == (r_[1], r_[2], r_[3]))
+            if not tail or not votes: continue
+            d0 = votes.most_common(1)[0][0]
+            for r_ in tail:
+                hit = next((u for u in unowned if u[0][0] == d0 + r_[0] and tuple(u[0][1:4]) == (r_[1], r_[2], r_[3])), None)
+                if hit is not None: unowned.remove(hit); owned[w[0]].append(hit[0]); tail_rows[0] += 1
+        for _, key in unowned: resid[key] += 1
         # a family command that emitted nothing still counts (its table rows are then missing only when the table says the command animates: see `noemit`)
         for w in wins:
             f, _ = family_of(w, None)
@@ -153,7 +167,7 @@ def t1_nonmove(A):
             fam[f]["missing"] += len(left)
             if len(ex[f]) < 4 and left: ex[f].append((s, w[0], "missing " + json.dumps(left[:2])))
             if d0 is not None: lead[f][d0 - w[3]] += 1
-    return fam, lead, resid, noemit, ex
+    return fam, lead, resid, noemit, ex, tail_rows[0]
 
 
 # aud242l: soundAnim row element 10 = the battlers' pic Y [player, opponent] (absent in older arms): picks the Blizzard pic class of the table.
@@ -230,13 +244,16 @@ def t1(arm, json_out):
             for row in exp["rows"]:
                 frame = zero + 8 + row[0]; want = (row[1], row[2], row[3])
                 hit = next((e for e in left if e[0] == frame and (e[1], e[2], e[3]) == want), None)
-                if hit is not None: left.remove(hit); put("exact", 1, s, move)
-                else: pending.append((frame, want))
-            for frame, want in pending:
+                if hit is not None:
+                    left.remove(hit); put("exact", 1, s, move)
+                    if len(row) > 5 and row[5] == ROW_OPTIONAL: cmds["optional rows emitted (t1dt Double Team stat SE; counted in exact)"] += 1
+                else: pending.append((frame, want, row))
+            for frame, want, row in pending:
                 cand = [e for e in left if (e[1], e[2], e[3]) == want]
                 if cand:
                     hit = min(cand, key=lambda e: abs(e[0] - frame)); left.remove(hit)
                     offsets[(label_of.get(move, move), hit[0] - frame)] += 1; put("known-offset", 1, s, move, hit[0] - frame)
+                elif len(row) > 5 and row[5] == ROW_OPTIONAL: cmds["optional rows absent (not missing)"] += 1; continue  # t1dt: the Double Team stat SE is played only when the segment presents the rise; absent is not missing
                 else:
                     put("missing-other", 1, s, move, [frame, *want]); after_end["after the command's last presenting frame" if frame > last else "inside the command"] += 1
             for e in left: put("extra", 1, s, move, e)
@@ -255,7 +272,7 @@ def t1(arm, json_out):
     print("gated ops by table `ends` reason:", dict(gated_by_end))
     print("known-offset by (move, delta) top:", offsets.most_common(12))
     if nm:
-        fam, lead, resid, noemit, ex = nm
+        fam, lead, resid, noemit, ex, tail_rows = nm
         print("non-move families (t1cls; emitted SEs / pans in the command's window vs the table's general variant; NOT part of the move table above except `unclassified` = the residual):")
         print("%-40s %8s %8s %6s %7s %6s %7s  lead (first-frame -> table frame 0) | known-offset deltas" % ("family", "commands", "emitted", "exact", "offset", "extra", "missing"))
         for f in sorted(fam):
@@ -264,6 +281,7 @@ def t1(arm, json_out):
                   dict(Counter({k: v for k, v in l.items() if not isinstance(k, tuple)}).most_common(3)) | ({"off": dict(Counter({k[1]: v for k, v in l.items() if isinstance(k, tuple)}).most_common(3))} if any(isinstance(k, tuple) for k in l) else {})))
         for key in ("exact", "known-offset", "extra", "missing", "emitted"): print("non-move total %-12s %d" % (key, sum(fam[f][key] for f in fam)))
         print("non-move commands that emitted nothing:", {f: dict(v) for f, v in noemit.items()})
+        print("status-animation tail rows claimed past their window (t1dt; counted in exact above):", tail_rows)
         print("residual unclassified (id, source):", dict(nm[2]))
         for f in sorted(ex):
             if ex[f]: print("non-move examples", f, ex[f][:3])
