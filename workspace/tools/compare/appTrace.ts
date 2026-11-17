@@ -2025,6 +2025,7 @@ export const APP_STAGES: Readonly<Record<string, AppStage>> = {
   "aud242k-smokescreen-player-on": (state) => aud241bStage(state, "aud242k-smokescreen-player-on", "on", 50, 12, 108, undefined, false, 69),
   "aud242k-scaryface-player-on": (state) => aud241bStage(state, "aud242k-scaryface-player-on", "on", 50, 12, 184, undefined, false, 69),
   "aud242k-wish-player-on": (state) => aud241bStage(state, "aud242k-wish-player-on", "on", 50, 12, 273, undefined, false, 69),
+  "wsh1-wish-on": (state) => aud241bStage(state, "wsh1-wish-on", "on", 50, 12, 273, undefined, false, 69),
   "aud242k-safeguard-player-on": (state) => aud241bStage(state, "aud242k-safeguard-player-on", "on", 50, 12, 219, undefined, false, 69),
   "aud242k-lovelykiss-player-on": (state) => aud241bStage(state, "aud242k-lovelykiss-player-on", "on", 50, 12, 142, undefined, false, 69),
   "aud242k-crunch-player-on": (state) => aud241bStage(state, "aud242k-crunch-player-on", "on", 50, 12, 242, undefined, false, 69),
