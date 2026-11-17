@@ -247,7 +247,7 @@ function seismicTossDamageLevel(damage: number): 0 | 1 | 2 {
  * A move whose sprite lifetimes depend on the two battlers' pic Y (Blizzard, aud242l) carries a grid per slot; `picY` reads the live values and an unknown class keeps
  * the reference walk.
  */
-interface VariantInputs {
+export interface VariantInputs {
   readonly picY?: (battler: 0 | 1) => number;
   readonly topY?: (battler: 0 | 1) => number;
   readonly rolloutCounter?: number;
@@ -257,7 +257,7 @@ interface VariantInputs {
   /** GetWaterSpoutPowerForAnim of the attacker (0..3): which quarter of max HP its current HP is in. */
   readonly attackerHpQuarter?: number;
 }
-function variantOf(move: number, turn: number, attackerSide: 0 | 1, { picY, topY, rolloutCounter, damage, attackerElevation, attackerHpQuarter }: VariantInputs = {}): readonly TimedOp[] {
+export function variantOf(move: number, turn: number, attackerSide: 0 | 1, { picY, topY, rolloutCounter, damage, attackerElevation, attackerHpQuarter }: VariantInputs = {}): readonly TimedOp[] {
   const entry = timing.moves[move];
   if (entry === undefined) return [];
   const turnIndex = turn < timing.turns ? turn : timing.turns - 2 + (turn & 1);

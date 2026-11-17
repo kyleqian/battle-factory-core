@@ -169,6 +169,9 @@ for (let seed = from!; seed <= to!; seed += 1) {
         if (a[10] === undefined && render?.liveMoveSourceAge) { const src = render.liveMoveSourceAge(r); if (src?.picOffsetY) a[10] = [src.picOffsetY(0), src.picOffsetY(1)]; }
         // aud242o: the live rollout counter (1..5) of the Rollout sound variants; absent in an older arm.
         if (a[11] === undefined && c.animation?.rolloutCounter !== undefined) a[11] = c.animation.rolloutCounter;
+        // aud262: the request damage class (12: z = 0 / 0 = 1..32 / 1 = 33..65 / 2 = above; Seismic Toss level, heal kind) and the attacker's [elevation, HP quarter, TOP] (13) of the table's variant dimensions.
+        if (a[12] === undefined && typeof c.animation?.damage === "number") { const d = c.animation.damage; a[12] = d <= 0 ? "z" : d < 33 ? "0" : d <= 65 ? "1" : "2"; }
+        if (a[13] === undefined && render?.liveMoveSourceAge) { const src = render.liveMoveSourceAge(r); if (src?.topY && src.attackerElevation !== undefined) a[13] = [src.attackerElevation, src.attackerHpQuarter, src.topY(c.animation?.attacker === 0 ? 0 : 1)]; }
       }
     }
     if (!owned()) ended = true;
