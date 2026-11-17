@@ -1615,7 +1615,7 @@ function liveMoveAnimationDurationOf(
     case 64: case 316: case 206: case 16: case 6: case 140: case 176:
       return approxScriptDuration(APPROX_SCRIPT_MOVE_BODY[request.moveId]!);
     // adp1: the ROM-accepted script bodies of approxScript.ts (ADP1_MOVE_BODY): Withdraw.
-    case 110: return approxScriptDuration(ADP1_MOVE_BODY[request.moveId]!);
+    case 110: case 249: return approxScriptDuration(ADP1_MOVE_BODY[request.moveId]!);
     default:
       if (noCase) noCase.hit = true;
       return null;
@@ -4672,6 +4672,10 @@ export function liveMoveAnimationPresentationProven(
     case 110: {
       // adp1: Withdraw rotates the attacker about its unshifted sprite center (approxScript.ts WITHDRAW).
       config = { move: "APPROX_SCRIPT", body: ADP1_MOVE_BODY[request.moveId]!, attacker: affineCenterBattler(attacker), target, fieldProfile };
+      break;
+    }
+    case 249: {
+      config = { move: "APPROX_SCRIPT", body: ADP1_MOVE_BODY[request.moveId]!, attacker, target, fieldProfile };
       break;
     }
     default: return null;

@@ -9,8 +9,9 @@ import { shakeMonSequence } from "./shakeMon.ts";
 import { shakeMon2Sequence } from "./shakeMon2.ts";
 
 export type ApproxScriptBody =
-  | "PECK" | "ODOR_SLEUTH" | "FALSE_SWIPE" | "GUST" | "PAY_DAY" | "BARRAGE" | "CONVERSION_2" | "CURSE_GHOST" | "WITHDRAW";
-export type ApproxScriptSheet = "impact" | "slash2" | "gust" | "coin" | "conversion" | "redBall" | "ghostlySpirit" | "nail" | "nailFlip";
+  | "PECK" | "ODOR_SLEUTH" | "FALSE_SWIPE" | "GUST" | "PAY_DAY" | "BARRAGE" | "CONVERSION_2" | "CURSE_GHOST" | "WITHDRAW" | "ROCK_SMASH" | "BEAT_UP";
+export type ApproxScriptSheet = "impact" | "slash2" | "gust" | "coin" | "conversion" | "redBall" | "ghostlySpirit" | "nail" | "nailFlip"
+  | "handsAndFeet" | "rocks";
 export type ApproxScriptSide = "player" | "opponent";
 export interface ApproxScriptPoint { readonly x: number; readonly y: number }
 export interface ApproxScriptMatrix { readonly a: number; readonly b: number; readonly c: number; readonly d: number }
@@ -37,6 +38,10 @@ export interface ApproxScriptSprite {
   readonly matrix: ApproxScriptMatrix | null;
   /** BLDALPHA first-target coefficient (0..16) blended over what is drawn below; null: opaque. */
   readonly blend: number | null;
+  /** BLDALPHA second coefficient when it is not 16 - blend (a `setalpha 12, 8` splat). */
+  readonly blendB?: number;
+  /** What a semi-transparent affine sprite blends with: "static" the battle background alone (the target is an OBJ), "backdrop" the field before any sprite (the target is on the monbg). */
+  readonly blendOver?: "static" | "backdrop" | "live";
 }
 
 export interface ApproxScriptFrame {
@@ -44,6 +49,8 @@ export interface ApproxScriptFrame {
   readonly attackerOffset: ApproxScriptOffset;
   readonly attackerMatrix: ApproxScriptMatrix | null;
   readonly targetOffset: ApproxScriptOffset;
+  /** ShakeMon wrote x2/y2 (an overwrite, not an add): the opponent target's settled idle rest no longer applies. */
+  readonly targetRestReset?: boolean;
   readonly targetMatrix: ApproxScriptMatrix | null;
   /** Extra copies of the target battler (Odor Sleuth's clones), drawn over the target. */
   readonly targetClones: readonly ApproxScriptOffset[];
@@ -73,9 +80,10 @@ const SPLAT_MATRIX: Readonly<Record<1 | 2 | 3, ApproxScriptMatrix>> = Object.fre
 const SHEET_FRAME = { impact: [0, 4, 4], gust: [0, 4, 8], redBall: [0, 4, 4], ghostlySpirit: [0, 4, 4] } as const;
 
 function sprite(sheet: ApproxScriptSheet, x: number, y: number, matrix: ApproxScriptMatrix | null = null,
-  frame: readonly [number, number, number] | null = null, blend: number | null = null): ApproxScriptSprite {
+  frame: readonly [number, number, number] | null = null, blend: number | null = null,
+  alpha?: { b: number; over: "static" | "backdrop" | "live" }): ApproxScriptSprite {
   const [tile, columns, rows] = frame ?? (SHEET_FRAME as Record<string, readonly [number, number, number]>)[sheet]!;
-  return { sheet, tile, columns, rows, x, y, matrix, blend };
+  return alpha ? { sheet, tile, columns, rows, x, y, matrix, blend, blendB: alpha.b, blendOver: alpha.over } : { sheet, tile, columns, rows, x, y, matrix, blend };
 }
 
 /** SetAnimSpriteInitialXOffset: the x argument points toward the opponent for a player attacker. */
@@ -347,9 +355,54 @@ function withdraw(age: number, ctx: ApproxScriptContext): ApproxScriptFrame {
   return frameOf(age, WITHDRAW_TICKS - 1, { attackerMatrix: matrixOf(step), attackerOffset: { x2: 0, y2: Math.abs(matrixOf(yFrom).c) >> 3 } });
 }
 
+// ---- Move_ROCK_SMASH (adp1): hit splat + fist (8 ticks) + ShakeMon(3,0,5,1), then 8 rock fragments + ShakeMon(0,3,7,1) ------------
+// monbg ANIM_DEF_PARTNER names a battler that does not exist in a single battle, so the target stays an OBJ and the splat (setalpha 12, 8)
+// blends with the battle background alone.
+const ROCK_SMASH_C1 = 16;
+const ROCK_SMASH_C2 = 27;
+const ROCK_SMASH_FIST_FIRST = 17;
+const ROCK_SMASH_FIST_LAST = 25;
+const ROCK_SMASH_FRAG_FIRST = 27;
+const ROCK_SMASH_LAST = 76;
+const FIST_FRAME = [0, 4, 4] as const;
+const ROCK_FRAME = [[32, 4, 4], [48, 4, 4], [64, 4, 4]] as const;
+/** gRockFragmentSpriteTemplate args: x, y (x mirrored by the attacker side), dx, dy (not mirrored), duration, anim. */
+const ROCK_SMASH_FRAGMENTS: readonly (readonly [number, number, number, number, number, 0 | 1 | 2])[] = [
+  [0, 0, 20, 24, 14, 2], [5, 0, -20, 24, 14, 1], [0, 5, 20, -24, 14, 2], [-5, 0, -20, -24, 14, 2],
+  [0, -5, 30, 18, 8, 2], [0, 0, 30, -18, 8, 2], [0, 0, -30, 18, 8, 2], [0, 0, -30, -18, 8, 2],
+];
+const ROCK_SMASH_SHAKE_1 = shakeMonSequence(3, 0, 5, 1);
+const ROCK_SMASH_SHAKE_2 = shakeMonSequence(0, 3, 7, 1);
+/** Draw order among fragments of equal y (back to front); SortSprites keeps the previous frame's order for ties. */
+const ROCK_TIE_RANK = [1, 0, 2, 3, 4, 5, 6, 7] as const;
+function rockFragments(age: number, spawn: number, ctx: ApproxScriptContext, fragments: typeof ROCK_SMASH_FRAGMENTS): ApproxScriptSprite[] {
+  const callbacks = age - spawn;
+  if (callbacks < 1) return [];
+  const out: { part: ApproxScriptSprite; rank: number }[] = [];
+  fragments.forEach(([x, y, dx, dy, duration, anim], i) => {
+    if (callbacks > duration + 1) return;
+    const k = Math.min(callbacks, duration);
+    const stepX = Math.trunc((dx << 8) / duration);
+    const stepY = Math.trunc((dy << 8) / duration);
+    out.push({ part: sprite("rocks", ctx.targetCenter.x + towardTarget(ctx) * x + (k * stepX >> 8), ctx.targetCenter.y + y + (k * stepY >> 8), null, ROCK_FRAME[anim]), rank: ROCK_TIE_RANK[i]! });
+  });
+  // SortSprites: equal subpriority, the sprite lower on screen is in front.
+  return out.sort((a, b) => a.part.y - b.part.y || a.rank - b.rank).map((entry) => entry.part);
+}
+function rockSmash(age: number, ctx: ApproxScriptContext): ApproxScriptFrame {
+  const sprites: ApproxScriptSprite[] = [];
+  const fistAge = age - ROCK_SMASH_FIST_FIRST;
+  if (fistAge >= 0 && fistAge <= ROCK_SMASH_FIST_LAST - ROCK_SMASH_FIST_FIRST) sprites.push(sprite("handsAndFeet", ctx.targetCenter.x, ctx.targetCenter.y, null, FIST_FRAME));
+  if (fistAge >= 0 && fistAge <= 9) sprites.push(sprite("impact", ctx.targetCenter.x, ctx.targetCenter.y, SPLAT_MATRIX[1], null, 12, { b: 8, over: "backdrop" }));
+  sprites.push(...rockFragments(age, ROCK_SMASH_FRAG_FIRST, ctx, ROCK_SMASH_FRAGMENTS));
+  const one = age - ROCK_SMASH_C1 >= 1 ? atTick(ROCK_SMASH_SHAKE_1, age - ROCK_SMASH_C1) : ZERO;
+  const two = age - ROCK_SMASH_C2 >= 1 ? atTick(ROCK_SMASH_SHAKE_2, age - ROCK_SMASH_C2) : ZERO;
+  return frameOf(age, ROCK_SMASH_LAST, { targetOffset: { x2: one.x2 + two.x2, y2: one.y2 + two.y2 }, targetRestReset: age - ROCK_SMASH_C1 >= 1, sprites });
+}
+
 type BodyFn = (age: number, ctx: ApproxScriptContext) => ApproxScriptFrame;
 const BODIES: Readonly<Record<ApproxScriptBody, BodyFn>> = {
-  PECK: peck, ODOR_SLEUTH: odorSleuth, FALSE_SWIPE: falseSwipe, GUST: gust, PAY_DAY: payDay, BARRAGE: barrage, CONVERSION_2: conversion2, CURSE_GHOST: curseGhost, WITHDRAW: withdraw,
+  PECK: peck, ODOR_SLEUTH: odorSleuth, FALSE_SWIPE: falseSwipe, GUST: gust, PAY_DAY: payDay, BARRAGE: barrage, CONVERSION_2: conversion2, CURSE_GHOST: curseGhost, WITHDRAW: withdraw, ROCK_SMASH: rockSmash, BEAT_UP: rockSmash,
 };
 
 /** The move ids drawn by these bodies, classified `approx:no-adapter` (Curse's Ghost branch is `approx:turn-0`). */
@@ -358,7 +411,7 @@ export const APPROX_SCRIPT_MOVE_BODY: Readonly<Record<number, Exclude<ApproxScri
 });
 
 /** adp1: moves drawn by a ROM-accepted script body (a live adapter, not approximate): Withdraw. */
-export const ADP1_MOVE_BODY: Readonly<Record<number, Extract<ApproxScriptBody, "WITHDRAW">>> = Object.freeze({ 110: "WITHDRAW" });
+export const ADP1_MOVE_BODY: Readonly<Record<number, Extract<ApproxScriptBody, "WITHDRAW" | "ROCK_SMASH" | "BEAT_UP">>> = Object.freeze({ 110: "WITHDRAW", 249: "ROCK_SMASH", 251: "BEAT_UP" });
 
 export function approxScriptAtAge(body: ApproxScriptBody, age: number, ctx: ApproxScriptContext): ApproxScriptFrame {
   return BODIES[body](age, ctx);

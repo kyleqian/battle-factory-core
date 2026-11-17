@@ -2534,7 +2534,8 @@ const battleAnimApx222 = battleAnimApx222Asset as unknown as Record<"coin" | "co
   { tileset: Tileset; palette: RgbColor[] }>;
 /** apx222: the sprite sheet of an approximate script body sprite (src/animation/approxScript.ts). */
 function approxScriptSheet(sheet: ApproxScriptSheet): { tileset: Tileset; palette: RgbColor[] } {
-  return sheet === "impact" ? battleAnimHitsplat : sheet === "gust" ? razorWindArt.gust : battleAnimApx222[sheet];
+  return sheet === "impact" ? battleAnimHitsplat : sheet === "gust" ? razorWindArt.gust : sheet === "handsAndFeet" ? battleAnimHandsAndFeet
+    : sheet === "rocks" ? battleAnimRocks : battleAnimApx222[sheet];
 }
 const battleAnimCuttingSlice = battleAnimCuttingSliceAsset as BattleAnimCuttingSliceAsset;
 const battleAnimSlashSlice = battleAnimSlashSliceAsset as BattleAnimCuttingSliceAsset;
@@ -20795,7 +20796,7 @@ export function renderSceneOnMovePresentation(
       }
     }
     const idle = (battler: typeof view.target) =>
-      battler.geometry.side === "opponent" ? sceneOnBattlerFrontIdleRest(battler) : { x2: 0, y2: 0 };
+      battler.geometry.side === "opponent" && !(view.targetRestReset && battler === view.target) ? sceneOnBattlerFrontIdleRest(battler) : { x2: 0, y2: 0 };
     const drawBattler = (
       battler: typeof view.target, art: typeof targetArt, offset: { x2: number; y2: number },
       matrix: { a: number; b: number; c: number; d: number } | null,
@@ -20819,15 +20820,7 @@ export function renderSceneOnMovePresentation(
       for (const clone of view.targetClones) drawBattler(view.target, targetArt, { x2: view.targetOffset.x2 + clone.x2, y2: view.targetOffset.y2 + clone.y2 }, null);
     };
     const drawAttackerBattler = () => drawBattler(view.attacker, attackerArt, view.attackerOffset, view.attackerMatrix);
-    // Both battlers use OBJ priority 2; the opponent's front sprite sits below the player's back sprite.
-    if (view.target.geometry.side === "opponent") {
-      drawTargetBattler();
-      drawAttackerBattler();
-    } else {
-      drawAttackerBattler();
-      drawTargetBattler();
-    }
-    for (const part of view.sprites) {
+    const drawPart = (part: (typeof view.sprites)[number]) => {
       const sheet = approxScriptSheet(part.sheet);
       const frame: Tileset = {
         columns: part.columns, rows: part.rows, tiles: sheet.tileset.tiles.slice(part.tile, part.tile + part.columns * part.rows),
@@ -20835,7 +20828,7 @@ export function renderSceneOnMovePresentation(
       if (part.matrix && part.blend !== null) {
         drawSpriteSheetAffineStretchBlendedOverFb(
           fb, frame, sheet.palette, part.x - part.columns * 4, part.y - part.rows * 4, part.matrix.a, part.matrix.d,
-          part.blend, 16 - part.blend, true, "live",
+          part.blend, part.blendB ?? 16 - part.blend, true, part.blendOver === "static" ? "static" : part.blendOver === "backdrop" ? backdrop : "live",
         );
       } else if (part.matrix) {
         drawSpriteSheetAffineRotate(
@@ -20846,7 +20839,17 @@ export function renderSceneOnMovePresentation(
       } else {
         drawSpriteSheet(fb, frame, sheet.palette, part.x - part.columns * 4, part.y - part.rows * 4);
       }
+    };
+    // Both battlers use OBJ priority 2; the opponent's front sprite sits below the player's back sprite.
+    if (view.target.geometry.side === "opponent") {
+      drawTargetBattler();
+      drawAttackerBattler();
+    } else {
+      drawAttackerBattler();
+      drawTargetBattler();
     }
+    const backdrop = fb.slice();
+    for (const part of view.sprites) drawPart(part);
     return;
   }
 
