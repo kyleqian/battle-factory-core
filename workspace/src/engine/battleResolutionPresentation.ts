@@ -172,7 +172,7 @@ export const HELD_ITEM_EFFECT_COMMAND_FRAMES = 214;
 /**
  * wsh1 (ISSUES #219): the three `playanimation` sites the held-item work did not cover. Scene ON runs the General_* script through
  * the controller and the next print / hit waits for it (Cmd_playanimation, battle_script_commands.c:4033-4038; skipped for a
- * STATS3_SEMI_INVULNERABLE battler, and for a battler behind a Substitute by TryHandleLaunchBattleTableAnimation). The command lasts from the
+ * STATUS3_SEMI_INVULNERABLE battler, and for a battler behind a Substitute by TryHandleLaunchBattleTableAnimation). The command lasts from the
  * previous command's end to the next command's first frame, measured on the ROM (docs/wsh1-general-anim-commands.md).
  */
 export const WISH_HEAL_COMMAND_FRAMES = 201;

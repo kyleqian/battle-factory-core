@@ -1092,6 +1092,18 @@ function wsh1Stage(
   });
 }
 
+// wsh1b: the Wisher's second move (slot 2) is DIG (the heal's `playanimation` meets a STATUS3_SEMI_INVULNERABLE battler) or SUBSTITUTE
+// (the heal meets the displayed doll, TryHandleLaunchBattleTableAnimation); Scene ON skips the animation either way.
+function wsh1bWishDigStage(state: EngineState, id: string, scene: "on" | "off", secondMove = 91): EngineState {
+  return midBattleSwitchStage(state, id, [RATTATA_LV50_BENCH, RATTATA_LV50_BENCH], [105, 105], {
+    battleScene: scene,
+    player: Object.freeze({ ...rattataAtLevel(50, 273), moves: [273, secondMove, 273, 273] as const }),
+    trainer: rattataAtLevel(12, 69),
+    usedMessageHoldFrames: 0,
+    sceneOffNoAnimations: scene === "off",
+  });
+}
+
 // cry1: cry-task windows (tools/battle-lab/cry1-*.json): the attacker's species is staged over the Rattata stats (the cry follows the species; levels 50 / 12 as aud241b,
 // the other side uses SEISMIC TOSS, a modelled move, as the filler: Roar's -6 priority makes it move first).
 function cry1Stage(state: EngineState, id: string, species: number, attackerSide: "player" | "opponent", moveId: number): EngineState {
@@ -2063,6 +2075,9 @@ export const APP_STAGES: Readonly<Record<string, AppStage>> = {
   "aud242k-wish-player-on": (state) => aud241bStage(state, "aud242k-wish-player-on", "on", 50, 12, 273, undefined, false, 69),
   "wsh1-wish-on": (state) => aud241bStage(state, "wsh1-wish-on", "on", 50, 12, 273, undefined, false, 69),
   "wsh1-wish-off": (state) => aud241bStage(state, "wsh1-wish-off", "off", 50, 12, 273, undefined, false, 69),
+  "wsh1b-wishdig-on": (state) => wsh1bWishDigStage(state, "wsh1b-wishdig-on", "on"),
+  "wsh1b-wishdig-off": (state) => wsh1bWishDigStage(state, "wsh1b-wishdig-off", "off"),
+  "wsh1b-wishsub-on": (state) => wsh1bWishDigStage(state, "wsh1b-wishsub-on", "on", 164),
   "wsh1-fb-on": (state) => wsh1Stage(state, "wsh1-fb-on", "on", 20, 50, 69, 196, 2),
   "wsh1-fs-on": (state) => wsh1Stage(state, "wsh1-fs-on", "on", 50, 25, 248, 0, 2),
   "wsh1-fs-off": (state) => wsh1Stage(state, "wsh1-fs-off", "off", 50, 25, 248, 0, 2),
