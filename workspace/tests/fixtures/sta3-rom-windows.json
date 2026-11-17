@@ -1,0 +1,21 @@
+{
+ "_doc": "sta3: ROM step-mode milestones (probe frame domain, Scene ON; gBattlescriptCurrInstr per frame, tools/audio/sta3RomWindow.py) of the second Status_* play's pre-move print. anchorPrint = the preceding print's instruction row, moveEnd = BattleScript_MoveEnd's first row, print = BattleScript_MoveUsedIsConfused / IsAsleep's printstring row, waitDone = its waitmessage completion row, launch = the status(2)animation execution row (gAnimScriptActive 1).",
+ "windows": {
+  "aud242f-swagger-player": {
+   "lab": "tools/battle-lab/aud242f-swagger-player-on.json",
+   "anchorPrint": 525,
+   "moveEnd": 621,
+   "print": 630,
+   "waitDone": 719,
+   "launch": 720
+  },
+  "aud242g-dreameater-player": {
+   "lab": "tools/battle-lab/aud242g-dreameater-sleep-player-on.json",
+   "anchorPrint": 365,
+   "moveEnd": 460,
+   "print": 469,
+   "waitDone": 561,
+   "launch": 562
+  }
+ }
+}
