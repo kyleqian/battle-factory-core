@@ -36,8 +36,12 @@ interface WonLobby {
  * lbr-g (#221 E1-E3: the Lobby cursor is now the ROM's after a battle exit and map load) moved the deal again: seed 2's continuation lost; a scan of 0..60 on the
  * mutated sequence (hand-off test, then continuation) found 0, 35 and 47; 0 is WIN_THEN_LOSE_SEED, so 35 (all 15 tests pass).
  * lbw3 (#221 E4: the Lobby NPC wander draws from the shared stream) moved it once more: 35's and 47's continuations lose; scanning 1..13 found 13 (all 15 pass).
+ * wsh1 (Wish heal / Future Sight hit / Focus Band holds, Scene OFF 36 / 42 / 40 frames) moved the OFF deal: 13's OFF continuation loses. A scan of 14..60 found no seed
+ * that passes every case; 19 wins the continuation in both scenes but its continued challenge loses before a retire prompt, while 13 still reaches the retire, so the
+ * retire case keeps 13 (RETIRE_SEED).
  */
-const WIN_TWO_SEED = 13;
+const WIN_TWO_SEED = 19;
+const RETIRE_SEED = 13;
 const WIN_THEN_LOSE_SEED = 0;
 
 function newPlayer(seed: number): RandomPlayer {
@@ -180,8 +184,8 @@ for (const scene of ["off", "on"] as const) {
 describe("lbrd: a later retire or loss in the continued challenge still ends it (Scene OFF)", () => {
   it("a retire after the continuation emits challenge-end retire exactly once, on its own Lobby-entry frame", () => {
     // hie1 (held-item effect hold) moved the deal: seed 0's continuation now loses its first battle before any retire prompt, so the
-    // retire case uses the seed that wins its continuation.
-    const run = playToWonLobby(WIN_TWO_SEED, "off");
+    // retire case uses a seed that wins its continuation's first battles (wsh1: RETIRE_SEED, see the seed note above).
+    const run = playToWonLobby(RETIRE_SEED, "off");
     expect(run.session.ended).toBeNull();
     run.player.retireRate = 1;
     const more = playOn(run, (_events, state) => state.lobbyFreeRoam !== null && run.session.ended !== null);
