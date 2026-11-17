@@ -204,3 +204,45 @@ describe("Razor Wind (aud261)", () => {
     });
   }
 });
+
+// AnimTask_RockMonBackAndForth (battle_anim_effects_3.c:2702-2800, n = 2 rounds of 8 + 16 + 8 calls: gone 64 ticks after F) and AnimMagentaHeart (battle_anim_effects_2.c:3067-3078: 58 ticks) gate the
+// DIZZY_PUNCH loop after the three hearts (CHARM at 6 / 23 / 40, the third heart's 58 ticks end at 98).
+describe("Covet (aud261)", () => {
+  it("the table entry: CHARM x3 at 6 / 23 / 40 and the DIZZY_PUNCH loop at 99, ungated", () => {
+    expect(timing.moves[343]!.label).toBe("Move_COVET");
+    expect(timing.moves[343]!.gated.every((g) => g === 0)).toBe(true);
+    expect(tableRows(343, 0)).toEqual(["6:212", "23:212", "40:212", "99:176"]);
+  });
+  for (const [side, pan] of [["player", -64], ["opponent", 63]] as const) {
+    it(`aud261-covet-${side}: ids, pans and the +17 / +17 / +59 gaps equal the ROM's, offset constant`, () => {
+      const rom = fixture(`aud261-covet-${side}`);
+      const ids = [212, 176];
+      const romRows = rom.events.filter((e) => e.kind === "se" && ids.includes(e.id as number));
+      expect(romRows.slice(0, 3).map((e) => e.frame - romRows[0]!.frame)).toEqual([0, 17, 34]);
+      expect(romRows[3]!.frame - romRows[2]!.frame).toBe(59);
+      expect(romRows.slice(0, 3).every((e) => e.pan === pan)).toBe(true);
+      expect(expectConstantOffset(rom, ids, 6)).toBe(2);
+    });
+  }
+});
+
+// AnimNeedleArmSpike (battle_anim_effects_1.c:3623-3694: D = 16 / 10, destroyed D + 1 calls after the init: exact D) gates the VITAL_THROW2 after the twelve spikes (the HORN_ATTACK loop is 16 x 2..3
+// ticks, the last spike is created at +22, gone 16 ticks later: the table's +61 from the loop).
+describe("Needle Arm (aud261)", () => {
+  it("the table entry: HORN_ATTACK loop at 9 and VITAL_THROW2 at 70, ungated", () => {
+    expect(timing.moves[302]!.label).toBe("Move_NEEDLE_ARM");
+    expect(timing.moves[302]!.gated.every((g) => g === 0)).toBe(true);
+    expect(tableRows(302, 0)).toEqual(["9:166", "70:123"]);
+  });
+  for (const [side, pan] of [["player", 63], ["opponent", -63]] as const) {
+    it(`aud261-needlearm-${side}: the loop-to-VITAL_THROW2 gap is the table's +61, offset constant`, () => {
+      const rom = fixture(`aud261-needlearm-${side}`);
+      const ids = [166, 123];
+      const romRows = rom.events.filter((e) => e.kind === "se" && ids.includes(e.id as number));
+      expect(romRows.length).toBe(17);
+      expect(romRows[16]!.frame - romRows[0]!.frame).toBe(61);
+      expect(romRows.every((e) => e.pan === pan)).toBe(true);
+      expect(expectConstantOffset(rom, ids, 17)).toBe(3);
+    });
+  }
+});

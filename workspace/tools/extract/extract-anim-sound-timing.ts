@@ -1201,6 +1201,16 @@ function lifetimeOf(cmd: Command, attackerSide: number, pic: PicContext, rollout
   // gBattleAnimArgs[4] = script args[7]) installs StartAnimLinearTranslation with DestroyAnimSprite stored (the AnimPowerAbsorptionOrb shape): D + 1.
   if (sprite("gRazorWindTornadoSpriteTemplate")) { const d = intArg(args[9]); return d === null || d < 0 ? null : { exact: d }; }
   if (sprite("gAirWaveCrescentSpriteTemplate")) { const d = intArg(args[7]); return d === null || d < 1 ? null : { exact: d + 1 }; }
+  // AnimMagentaHeart (battle_anim_effects_2.c:3067-3078) counts data[0] from call 0 and destroys when it reaches 60 (call 59): gone 58 ticks after F. AnimTask_RockMonBackAndForth
+  // (battle_anim_effects_3.c:2702-2800; n = gBattleAnimArgs[1] = script args[3], intensity i = clamp(gBattleAnimArgs[2], 0, 2) = args[4]): d = 8 - 2 i, each of the n rounds runs d + 2 d + d calls
+  // (steps start at call 1), call 4 d n + 1 runs case 3 and destroys: exact 4 d n. AnimNeedleArmSpike (battle_anim_effects_1.c:3623-3694; D = gBattleAnimArgs[4] = args[7]) installs the step in
+  // call 0, calls 1..D count D down and call D + 1 destroys: exact D (D = 0 destroys in the init, declined).
+  if (sprite("gMagentaHeartSpriteTemplate")) return { exact: 58 };
+  if (op === "createvisualtask" && args[0] === "AnimTask_RockMonBackAndForth") {
+    const [n, i] = [intArg(args[3]), intArg(args[4])];
+    return n === null || i === null || n < 1 ? null : { exact: 4 * (8 - 2 * Math.min(2, Math.max(0, i))) * n };
+  }
+  if (sprite("gNeedleArmSpikeSpriteTemplate")) { const d = intArg(args[7]); return d === null || d < 1 ? null : { exact: d }; }
   // AnimPainSplitProjectile (battle_anim_effects_3.c:2937-2970) keeps its callback and destroys in the first call after animEnded: gPainSplitAnimCmds (:723-729) are 5 + 9 + 5 = 19 ticks, exact 19.
   // AnimTask_PainSplitMovement (:2974-3033): the entry (call 0) sets the rot/scale and data[0] = 1, step calls 1..13 count data[1], call 13 (== 13) destroys: exact 12.
   if (sprite("gPainSplitProjectileSpriteTemplate")) return { exact: 19 };
