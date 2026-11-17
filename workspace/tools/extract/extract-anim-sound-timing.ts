@@ -766,6 +766,31 @@ function lifetimeOf(cmd: Command, attackerSide: number, pic: PicContext, rollout
     const a = op.startsWith("create_") ? intNamed("animation") : intArg(args[6]);
     return a !== null && a >= 1 && a <= 3 ? { exact: 10 } : { bound: 10 };
   }
+  // aud242r: AnimTask_EruptionLaunchRocks (battle_anim_fire.c:796-1013, PrepareEruptAnimTaskData / UpdateEruptAnimTask battle_anim_mons.c:1958-1991). The entry only installs the step: state 0/1 takes
+  // calls 1..32 (duration 32), state 2 calls 33..37 (++timer1 > 4), state 3 calls 38..43 (duration 6; call 43 creates the 7 rocks, y = sprite y + y2 (0) + centerToCornerVecY + 74 / 44, x = battler x - 12 / + 16), state 4
+  // calls 44..68 (++timer3 > 24), state 5 calls 69..76 (duration 8), state 6 destroys once tActiveSprites is 0. A rock's first callback is the next iteration (call j = iteration F + 42 + j) and it
+  // destroys itself on the call it leaves the screen (UpdateEruptionLaunchRockPos :991-1013, sEruptionLaunchRockSpeeds :359-368): the task dies at call max(77, 43 + the slowest rock's call).
+  // Pic Y dependent (the player sprite y = pic Y - 8, the opponent's = pic Y + 6 after the six ++y of state 1; PrepareBattlerSpriteForRotScale :1295-1307 makes the 64x64 battler a double-size affine sprite, so CalcCenterToCornerVec sprite.c:687-700 doubles -32 to -64).
+  // ROM-measured (Rattata, probe hooks): rocks created at call 43 at y 103, the last one destroyed on call 39, the task on call 82.
+  if (op === "createvisualtask" && args[0] === "AnimTask_EruptionLaunchRocks") {
+    picUsed = true;
+    const player = attackerSide === 0;
+    const y0 = (player ? pic.attackerY - 8 : pic.attackerY + 6) - 64 + (player ? 74 : 44);
+    const sign = player ? 1 : -1;
+    let slowest = 0;
+    for (const [speedX, speedY] of [[-2, -5], [-1, -1], [3, -6], [4, -2], [2, -8], [-5, -5], [4, -7]] as const) {
+      let [sx, sy, delay, stage, call] = [(BATTLER_X[attackerSide]! + (player ? -12 : 16)) * 8, y0 * 8, 0, 0, 0];
+      for (;;) {
+        call += 1;
+        if (++delay > 2) { delay = 0; stage += 1; sy += stage * stage; }
+        sx += speedX * sign * 8;
+        sy += speedY * 8;
+        if (sx >> 3 < -8 || sx >> 3 > 248 || sy >> 3 < -8 || sy >> 3 > 120) break;
+      }
+      slowest = Math.max(slowest, call);
+    }
+    return { exact: Math.max(77, 43 + slowest) - 1 };
+  }
   // aud242r: AnimTask_WindUpLunge (battle_anim_mon_movement.c:637-690; args a3 = first duration, a4 = delay, a6 = lunge duration). The entry only installs Step1: calls 1..a3 wind up (--data[3] == 0 on
   // call a3), Step2 burns the delay on the next a4 calls (data[4] > 0) and the following a6 calls lunge; the last (--data[6] == 0) destroys the task: call K = a3 + a4 + a6, gone K - 1 ticks after F.
   if (op === "createvisualtask" && args[0] === "AnimTask_WindUpLunge") {
