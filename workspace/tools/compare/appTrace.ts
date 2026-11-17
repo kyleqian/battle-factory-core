@@ -1092,6 +1092,26 @@ function wsh1Stage(
   });
 }
 
+// wsh2: wsh1Stage with the sides swapped (tools/battle-lab/wsh2-*-opp-on.json): the OPPONENT Wishes / Future Sights / holds the Focus Band,
+// the player's Rattata uses Seismic Toss.
+function wsh2OppStage(
+  state: EngineState,
+  id: string,
+  playerLevel: number,
+  opponentLevel: number,
+  opponentMoveId: number,
+  opponentItem = 0,
+  rngSeed = 1,
+): EngineState {
+  return midBattleSwitchStage(state, id, [RATTATA_LV50_BENCH, RATTATA_LV50_BENCH], [105, 105], {
+    battleScene: "on",
+    player: rattataAtLevel(playerLevel, 69),
+    trainer: rattataAtLevel(opponentLevel, opponentMoveId, opponentItem),
+    usedMessageHoldFrames: 0,
+    rngSeed,
+  });
+}
+
 // wsh1b: the Wisher's second move (slot 2) is DIG (the heal's `playanimation` meets a STATUS3_SEMI_INVULNERABLE battler) or SUBSTITUTE
 // (the heal meets the displayed doll, TryHandleLaunchBattleTableAnimation); Scene ON skips the animation either way.
 function wsh1bWishDigStage(state: EngineState, id: string, scene: "on" | "off", secondMove = 91): EngineState {
@@ -2078,6 +2098,9 @@ export const APP_STAGES: Readonly<Record<string, AppStage>> = {
   "wsh1b-wishdig-on": (state) => wsh1bWishDigStage(state, "wsh1b-wishdig-on", "on"),
   "wsh1b-wishdig-off": (state) => wsh1bWishDigStage(state, "wsh1b-wishdig-off", "off"),
   "wsh1b-wishsub-on": (state) => wsh1bWishDigStage(state, "wsh1b-wishsub-on", "on", 164),
+  "wsh2-fb-opp-on": (state) => wsh2OppStage(state, "wsh2-fb-opp-on", 50, 20, 69, 196, 2),
+  "wsh2-fs-opp-on": (state) => wsh2OppStage(state, "wsh2-fs-opp-on", 25, 50, 248, 0, 2),
+  "wsh2-wish-opp-on": (state) => aud241bStage(state, "wsh2-wish-opp-on", "on", 12, 50, 69, undefined, false, 273),
   "wsh1-fb-on": (state) => wsh1Stage(state, "wsh1-fb-on", "on", 20, 50, 69, 196, 2),
   "wsh1-fs-on": (state) => wsh1Stage(state, "wsh1-fs-on", "on", 50, 25, 248, 0, 2),
   "wsh1-fs-off": (state) => wsh1Stage(state, "wsh1-fs-off", "off", 50, 25, 248, 0, 2),
