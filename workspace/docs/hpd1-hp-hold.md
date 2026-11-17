@@ -93,3 +93,65 @@ timeline (`romseq`-style dump of `hpd2Probe.py` output, `.integration/evidence/h
 Verified (ANIMATION_VERIFICATION.md): code commit `4c90747ce`, `workspace/src` tree `eae87492b`; full `npm test` (15293 passed; the 2 `tests/randomRoundSoak.test.ts` failures — seed 32 Baton Pass,
 "leaves full byte-identical" — are identical on the base source), `npm run test:gate` 2843/2843, `npm run build` and `build:lib` 0, typecheck 0, census seeds 0..99 both scenes identical (commands 31285 / 30601; the
 census drives the orchestrator without `tick()`, so the handoff is not in it), soaks winning 0:20 both scenes 20/20 + 20/20, vanilla OFF 0:20 20/20.
+
+# hpd3: the Scene ON script lead (source rule found and verified; NOT landed, production unchanged; the hold stays unlanded)
+
+Presentation only. Scene ON (8012) / OFF (8014). Production at the end of the step is byte-identical to the base (`034306eb7`); the experiment is kept as
+`tools/integration/fixtures/hpd3/script-lead-experiment.patch` and the ROM receipts as
+`tools/integration/fixtures/hpd3/rom-script-leads.json`. Evidence (ignored): `.integration/evidence/hpd3/` (`match.mjs` exact-frame matcher, `shift.mjs` per-stage shift runs, `chg2.mjs` first-change frames, `renderset.sh` app-only render of the 51-trace set).
+
+## What the A / B / C / D constants are: one rule (the script lead), verified in the ROM
+
+The app starts every Scene ON move body on the used print's release row (`msg175`: the print occupies L rows, the next event is G + 1). The ROM does not reach
+`attackanimation` there: the interpreter is blocked while the print's controller `exec` flag is set (`gBattleControllerExecFlags`), and only after the release does it
+run the remaining instructions (one per frame) up to `attackanimation`. `hpd2Probe.py` (ptr / exec / anim per frame), release row -> the frame `attackanimation` executes
+-> `gAnimScriptActive` rises:
+
+| window | release | attackanimation executed | anim active from | lead (executed - release) |
+| --- | --- | --- | --- | --- |
+| foe Defense Curl (`aud242o-rollout5-player-on`) | 59 | 64 | 67 | 5 |
+| Rollout counter 1 (same window) | 370 | 380 | 383 | 10 |
+| Seismic Toss (`hpd1-toss30-on`) | 376 | 382 | 385 | 6 |
+| player move (`aud241b-opponent-faint-on`) | 56 | 62 | 65 | 6 |
+
+The kernel already counts these instructions: lead = `instructionExecution(MOVE_ANIMATION) - (instructionExecution(used print) + 1)` less the rows the app presents in between
+(Defense Curl's 2-row `stat` command: 5 - 2 = 3). That is the `sub183` `scriptLeadFrames` rule, which production applies only when the next instruction is `waitstate`
+(Substitute); the experiment generalises `moveAnimationScriptLeadTiming` to every body (`commandsPresentedSinceUsedPrint` supplies the presented rows) and drops `lead` from
+`moveAnimationScriptTailTiming`'s no-hit tail (the total of a no-hit body is unchanged). Pixel-shift runs against the ROM confirm each stage: `rol1-rollout5-on` text / stat
+animation / Rollout animation were +6 / +6 / +16 (ROM later); with the rule they are +3 / +3 / +3 (uniform: the lead is the whole in-turn error of the Rollout body, A and B
+are the Defense Curl 3 and Rollout 10 leads); `hpd1-toss30-on` text / animation +6 / +12 -> +3 / +3.
+
+## Numbers of the experiment (`script-lead-experiment.patch`), exact-frame matches (`npm run compare` metric; "before" = the base app frames against the same ROM frames)
+
+- Changed app frames: 13 of the 51 traces, all Scene ON; every OFF trace, `wsh1-fs-on/off`, `wsh1-wish-*`, `wsh1-fb-*`, `wsh1b-*` and the other hpd1-set traces (38 of the 51) are **bit-identical**
+  (hash over every frame): the Future Sight / Wish windows are not ordinary move scripts here, so the Future Sight +14 / +8 floors are untouched.
+- Matched frames before -> after: `rol1-rollout5-on` 459 -> **873** / 3001 (with the hold re-applied on top: 682), `hpd1-toss30-on` 174 -> 404, toss50 149 -> 284, toss80 147 -> 285,
+  dragonrage 183 -> 620, sonicboom 151 -> 455, a-toss60 122 -> 222, a-toss90 94 -> 147, a-dragonrage 165 -> 257, a-sonicboom 116 -> 636, `hie1-sitrus-on` 176 -> 718 / 1823,
+  `obr251-opponent-faint-on` 0 -> 5 / 306; **`hpd1-toss10-on` 455 -> 292 (worse)**.
+- Why it is not landed (the named, source-backed reasons):
+  1. **The ROM-calibrated absolute sound frames move.** The sounds follow the body's age, so the lead moves every body SE by the lead. The old model's absolute sound frames equal
+     the ROM's to the pinned residuals in dozens of fixtures: `aud241b` hit SEs frame for frame (delta 0 -> +6, 5 tests fail), `aud242c` / `e` / `o` / `259` named residuals (+2 -> -4 .. -8;
+     more than 40 tests fail, output truncated), `aud242o` petal dance +2 -> -6, rollout-player +3 -> -7. Re-pinning them would encode a larger sound error; the sound table is not
+     the part that is wrong.
+  2. **The old model's bodies are 6-14 rows too long and that hides the lead.** For Seismic Toss the app's release -> hit-animation start is 233 rows (move-animation 370 -> 603) = the ROM's
+     233 (376 -> 609, the lead 6 + attackanimation -> hit 227); the app's `live` is 228 (`liveMoveAnimationDuration` case 69, "81..308" window rows) against the ROM's `gAnimScriptActive`
+     window of 220 rows (385..604) + 3 pre + 4 post (the app's post is 2). So the lead is missing at the start and the body is long at the end, cancelling at the hit. After the
+     rule the toss body's content is +3 at the start, but its fade-out is 11 rows late (ROM 577..592, app 588..603) and the hit blink 3 late (ROM 610, app 613). Rollout (the
+     rol1 body) is the opposite case: its content is uniformly +3 after the rule and only its sound is wrong (ROM first SE 396, first visible change 398; app 400 / 395: the app's
+     SE is 5 rows after its first visible change, the ROM's 2 rows before; the sound-to-visual gap of the body is 7 rows off, independent of the lead). The tables were measured
+     from the print's release, so whether a body's `live` already contains its lead is per body, not a rule.
+  3. `hpd1-toss10-on` worsens only because the old model's 14-row body excess happened to match its 9-row bar window (the same masking as hpd1's floor).
+- With the hold (`e01bfd249`, cherry-picked on top for the measurement only; its aud242o pin conflicted and was not re-pinned) on top of the lead, `rol1-rollout5-on` is 682 and the
+  per-turn drift is a constant +3 (ROM minus app per turn start: +3 / +6 / +9 / +12..15 / +16..19): the Rollout turn's remaining in-turn constant is **3 per turn** (hit -> hold end -> next
+  Defense Curl text), not the 26 of hpd1 or the 18 of hpd2. The hold is therefore ready to land the moment the lead lands; it did not land because the lead did not.
+
+## Next step (named)
+
+A body audit, not a rule: for each live body class compare the app's `pre + idle lead + live + post` (and its SE ages) with the ROM's `attackanimation` execution -> `gAnimScriptActive` window
+-> hit controller exec from `hpd2Probe.py` (the four rows above are the first), move the lead to the start of every body whose `live` includes it (Seismic Toss: 6 of its 228 rows are the
+lead; the post rows 2 vs 4), shift the body SE ages by the same amount where the ROM sound is on the ROM's own script (the Rollout / Defense Curl +7 sound-vs-visual gap), then re-apply the
+lead, then `e01bfd249`. Until then the sound fixtures are the ones that fail, which is why the lead is not landed alone.
+
+No census / soak / gate run: production is unchanged at the end of the step.
+
+PAPERCUT: `tools/compare/out` keeps only the last ~3 runs, so a ROM frame set cannot be re-used across a long session; `npm run compare` per trace (~47 s) is the only way back to it (the receipts above are the per-stage numbers).

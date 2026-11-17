@@ -1,0 +1,65 @@
+diff --git a/workspace/src/engine/battleResolutionPresentation.ts b/workspace/src/engine/battleResolutionPresentation.ts
+index f9a209169..860d1ecbc 100644
+--- a/workspace/src/engine/battleResolutionPresentation.ts
++++ b/workspace/src/engine/battleResolutionPresentation.ts
+@@ -1581,7 +1581,11 @@ function moveAnimationSeGateTiming(events: readonly BattleKernelSemanticEvent[],
+  * An ordinary script runs its post-attackstring instructions while the print types, so `attackanimation` is the release row itself
+  * (production's body starts there) and the lead is 0. The lead is the kernel's instructionExecution(MOVE_ANIMATION) - (waitstate's).
+  */
+-function moveAnimationScriptLeadTiming(events: readonly BattleKernelSemanticEvent[], index: number): { scriptLeadFrames?: number } {
++function moveAnimationScriptLeadTiming(
++  events: readonly BattleKernelSemanticEvent[],
++  index: number,
++  presentedSinceUsed: number | null,
++): { scriptLeadFrames?: number } {
+   const animation = instructionExecutionOf(events[index]!);
+   for (let i = index - 1; i >= 0; i -= 1) {
+     const candidate = events[i]!;
+@@ -1590,9 +1594,13 @@ function moveAnimationScriptLeadTiming(events: readonly BattleKernelSemanticEven
+     const used = instructionExecutionOf(candidate);
+     const programCounter = candidate.provenance?.programCounter;
+     if (programCounter === undefined || animation <= used) return {};
+-    const lead = animation - (used + 1);
+-    return BATTLE_SCRIPT_PROGRAM.instructions[programCounter + 1]?.opcodeName === "B_SCR_OP_WAITSTATE" && lead > 0
+-      ? { scriptLeadFrames: lead } : {};
++    if (BATTLE_SCRIPT_PROGRAM.instructions[programCounter + 1]?.opcodeName === "B_SCR_OP_WAITSTATE") {
++      const waitLead = animation - (used + 1);
++      return waitLead > 0 ? { scriptLeadFrames: waitLead } : {};
++    }
++    if (presentedSinceUsed === null) return {};
++    const lead = animation - (used + 1) - presentedSinceUsed;
++    return lead > 0 ? { scriptLeadFrames: lead } : {};
+   }
+   return {};
+ }
+@@ -1641,7 +1649,7 @@ function moveAnimationScriptTailTiming(
+   }
+   const lead = attackExecution - usedExecution - 1 - presentedSinceUsed;
+   if (lead < 0) return {};
+-  return { scriptTailRows: nextExecution - attackExecution + 1 + lead + 1 };
++  return { scriptTailRows: nextExecution - attackExecution + 1 + 1 };
+ }
+ 
+ /** ont193: the rows presented since the used print's release (only silent-RAM `stat` commands are accepted), else null. */
+@@ -4777,6 +4785,7 @@ export function projectBattleResolutionCommands(
+       if (payload.animationId === "MOVE_ANIMATION") {
+         const animation = battleMoveAnimationRequest(battler, payload.target, payload.arguments);
+         sceneOnMoveTarget = animation.target === battler ? null : animation.target;
++        const presentedSinceUsedAtAttack = commandsPresentedSinceUsedPrint(events, pauseOpenerIndex, commands.slice(pauseOpenerCommands), field);
+         commands.push(Object.freeze({
+           type: "move-animation",
+           eventSequence: event.sequence,
+@@ -4785,11 +4794,8 @@ export function projectBattleResolutionCommands(
+           // An unadapted move retains a bounded pause, explicitly reported by
+           // the readiness registry. No substitute effect receives exact credit.
+           timing: Object.freeze({
+-            minimumFrames: SCENE_OFF_MOVE_PAUSE_FRAMES, ...moveAnimationSeGateTiming(events, index), ...moveAnimationScriptLeadTiming(events, index),
+-            ...moveAnimationScriptTailTiming(
+-              events, index, usedMoveInstructionExecution,
+-              commandsPresentedSinceUsedPrint(events, pauseOpenerIndex, commands.slice(pauseOpenerCommands), field),
+-            ),
++            minimumFrames: SCENE_OFF_MOVE_PAUSE_FRAMES, ...moveAnimationSeGateTiming(events, index), ...moveAnimationScriptLeadTiming(events, index, presentedSinceUsedAtAttack),
++            ...moveAnimationScriptTailTiming(events, index, usedMoveInstructionExecution, presentedSinceUsedAtAttack),
+           }),
+         }));
+         continue;
