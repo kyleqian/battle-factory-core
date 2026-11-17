@@ -85,7 +85,7 @@ const SPECS: Record<string, Spec> = {
   "toxic-player": { delta: 3, romOnlyFrom: 280 },
   "rocktomb-player": { delta: 2 },
   "overheat-player": { delta: 2, extra: { "165:147:63": 3, "173:147:63": 3, "183:147:63": 3, "193:147:63": 3 } },
-  "counter-player": { delta: -16, romOnly: ["221:214:-63", "239:131:-63"], extra: { "101:238:0": 16 } },
+  "counter-player": { delta: -16, extra: { "101:238:0": 16, "221:214:-63": 16, "239:131:-63": 16 } },
   "gigadrain-player": { delta: -1 },
   "thunderbolt-player": { delta: 2, extra: { "169:215:63": 1, "236:119:63": 1, "255:119:63": 1 } },
   "sludge-player": { delta: 2 },

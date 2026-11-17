@@ -79,7 +79,7 @@ const SPECS: Record<string, Spec> = {
   "ember-player": { delta: 2 },
   "psybeam-player": { delta: 2 },
   "agility-player": { delta: -4, romOnly: ["391:139:-63"] },
-  "swordsdance-opponent": { delta: -4, romOnly: ["527:214:63", "545:131:63"], rowDelta: { "406:238:0": 1 } },
+  "swordsdance-opponent": { delta: -4, rowDelta: { "406:238:0": 1, "526:214:63": 1, "544:131:63": 1 } },
 };
 
 describe("move-animation script SEs (aud242a)", () => {

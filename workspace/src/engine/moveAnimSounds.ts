@@ -28,9 +28,11 @@ interface TimingTable {
   readonly turns: number;
   readonly sides: number;
   readonly variants: readonly (readonly TimedOp[])[];
-  readonly moves: readonly Readonly<{ move: number; variants: readonly number[]; pic?: readonly number[]; counter?: readonly number[] }>[];
+  readonly moves: readonly Readonly<{ move: number; variants: readonly number[]; pic?: readonly number[]; counter?: readonly number[]; damage?: readonly number[] }>[];
   /** aud242o: per Rollout counter 1..5, the variant index (the walk reads AnimTask_Rollout's length from GetRolloutCounter). */
   readonly counterGrids: readonly (readonly number[])[];
+  /** aud258: per Seismic Toss damage level 0..2 (AnimTask_GetSeismicTossDamageLevel: gAnimMoveDmg < 33 / 33..65 / > 65), the variant index. */
+  readonly damageGrids: readonly (readonly number[])[];
   /** aud242l: per side, the sorted distinct pic Y (GetBattlerSpriteFinal_Y(..., TRUE)) a battler on that side can have. */
   readonly picYs: readonly (readonly number[])[];
   /** aud242l: grids of variant indices, row = attacker pic Y class, column = target pic Y class (both in picYs order). */
@@ -214,18 +216,26 @@ export function moveAnimOpRows(op: TimedOp, context: AnimPanContext, uniformLoop
   }
 }
 
+/** AnimTask_GetSeismicTossDamageLevel (battle_anim_rock.c:836-846): gAnimMoveDmg < 33 -> 0, 33..65 -> 1, > 65 -> 2 (signed compares; a negative value is level 0). */
+function seismicTossDamageLevel(damage: number): 0 | 1 | 2 {
+  if (damage > 65) return 2;
+  return damage < 33 ? 0 : 1;
+}
+
 /**
  * The resolved ops of the move's (turn, attacker side) walk: variant index = turn * sides + side (the side-dependent jumpret* branches resolve from the request).
  * A move whose sprite lifetimes depend on the two battlers' pic Y (Blizzard, aud242l) carries a grid per slot; `picY` reads the live values and an unknown class keeps
  * the reference walk.
  */
-function variantOf(move: number, turn: number, attackerSide: 0 | 1, picY?: (battler: 0 | 1) => number, rolloutCounter?: number): readonly TimedOp[] {
+function variantOf(move: number, turn: number, attackerSide: 0 | 1, picY?: (battler: 0 | 1) => number, rolloutCounter?: number, damage?: number): readonly TimedOp[] {
   const entry = timing.moves[move];
   if (entry === undefined) return [];
   const turnIndex = turn < timing.turns ? turn : timing.turns - 2 + (turn & 1);
   const slot = turnIndex * timing.sides + attackerSide;
   const counterGrid = entry.counter === undefined ? undefined : timing.counterGrids[entry.counter[slot]!];
   if (counterGrid !== undefined) return timing.variants[counterGrid[rolloutCounter !== undefined && rolloutCounter >= 1 && rolloutCounter <= 5 ? rolloutCounter - 1 : 0]!]!;
+  const damageGrid = entry.damage === undefined ? undefined : timing.damageGrids[entry.damage[slot]!];
+  if (damageGrid !== undefined && damage !== undefined) return timing.variants[damageGrid[seismicTossDamageLevel(damage)]!]!;
   const grid = entry.pic === undefined || picY === undefined ? undefined : timing.picGrids[entry.pic[slot]!];
   if (grid !== undefined) {
     const row = timing.picYs[attackerSide]!.indexOf(picY!(attackerSide));
@@ -351,7 +361,7 @@ export function emitMoveAnimSounds(after: BattleResolutionPresentationState | nu
     targetSide: request.target === 0 ? "player" : "opponent",
   } as const;
   const scriptRow = age - FIRST_COMMAND_AGE - AGE_TO_SOUND_ROWS;
-  emitOpsAt(variantOf(request.moveId, request.turn, request.attacker === 0 ? 0 : 1, source.picOffsetY, request.rolloutCounter), context, scriptRow);
+  emitOpsAt(variantOf(request.moveId, request.turn, request.attacker === 0 ? 0 : 1, source.picOffsetY, request.rolloutCounter, request.damage), context, scriptRow);
   emitCryTaskRows(request.moveId, source.attackerSpecies, context.attackerSide, scriptRow, frontierBrain);
 }
 
