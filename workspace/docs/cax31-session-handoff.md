@@ -203,7 +203,7 @@ never brief those here. One worker at a time; each run folds the next audio step
 tools and the rare-rule hunt are the box's.
 - **Item 0 (sound):** T2 scoreboard (aud255, 41 ROM seeds, `docs/aud251-s11-scoreboard-refresh.md`): Scene OFF **0 missing / 0 extra**; Scene ON move-animation SE
   **76 missing** (Rock Throw 15, Thunderbolt 12, Absorb 8, ...), every other family 0 / 0. T1 0..99 ON missing-gated **41** (aud242r; Dynamic Punch, Soft-Boiled, Memento,
-  Air Cutter, Torment ...; ISSUES #219). Next: the T2 ON top rows (find their class per move), the T1 tail, then the census 0..999 both scenes for the S11 acceptance
+  Air Cutter, Torment ...; ISSUES #219). Next: the T2 ON rows in the t2cls order (same doc: general-animation emitters for Wish heal / Future Sight hit / Focus Band 16, Eruption stops after its first SE 13, Cosmic Power 6, then Shock Wave 18, Seismic Toss 9, Torment 8), the T1 tail, then the census 0..999 both scenes for the S11 acceptance
   (aud246). T1 `extra` 109 = aud252's Double Team SE239 (emitted outside the table; teach the T1 classifier).
 - **Presentation timing (item 6, but it moves sound offsets):** hpd1 measured the ROM post-hit hold (`damage + 17 / 18`, no floor, 20 windows); its implementation
   `e01bfd249` stays out until the 18 in-turn frames of a Defense Curl + Rollout turn are modelled (`docs/hpd1-hp-hold.md` "hpd2"). #222 AI switch: one 1-frame send-in

@@ -25,7 +25,8 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   carry 0 / 14 / 28 + winning-swap carry 0 **100 / 100** each. Full suite on `74e657c03` (2 workers, 58 min, beside the soaks): **15,384 passed, 0 failed**, one file
   (`tests/animation/signalBeamEvidenceCheckpoint.test.ts`) lost to a vitest worker exit under load, re-run alone 2 / 2 green (t1dt's suite on `4e4c51880`, same engine: 1,838 files /
   15,386 passed); build / build:lib 0. Mid-run full suite on `f52ab720a` found the two ais1 soak-pin moves (fixed by pin1). Log backup not run (`rclone` not installed).
-- **Next:** S11: the Scene ON T2 top rows (Rock Throw 15, Thunderbolt 12, Absorb 8, ...; find each one's class), the T1 tail (Dynamic Punch, Soft-Boiled, Memento ...),
+- **Next:** S11: the Scene ON T2 rows, ranked by t2cls (`docs/aud251-s11-scoreboard-refresh.md` "t2cls"): emitters for the Wish heal / Future Sight hit / Focus Band general
+  animations (16 rows), why Eruption stops after its first SE (13), Cosmic Power (6) -> 76 to ~41; then Shock Wave (18), Seismic Toss (9), Torment (8); the T1 tail (Dynamic Punch, Memento ...),
   then census 0..999 both scenes for acceptance (aud246). Timing: the 18 in-turn frames of a Defense Curl + Rollout turn, then re-apply the floor-free hold `e01bfd249`
   (`docs/hpd1-hp-hold.md`). #222 / #221 residuals. Prune old census trees at run start (disk). Luck-hunt summary + nightly replay at run start as usual.
 
