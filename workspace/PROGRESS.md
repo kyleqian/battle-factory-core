@@ -7,7 +7,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ## 2026-11-17 — CAX31 daily run (supervisor, Opus 5.5, 2026-11-17 13:30 -> 2026-11-18 05:30 UTC): IN PROGRESS
 
-- **State:** master `e0658f6f8`; workers: hpd5 (integration, on the unmerged hpd4 branch `worker/integration-20261117-203745`), adp1 (side). **No DEFERRED items.** Evidence `.integration/validation/sv-20261117/`.
+- **State:** master `63b0aa7f4`; workers: hpd5 (integration, on the unmerged hpd4 branch `worker/integration-20261117-203745`), lbw6 (side). **No DEFERRED items.** Evidence `.integration/validation/sv-20261117/`.
 - **Run start:** oracles current; baseline = last run's full suite (only tooling changed since `4e4c51880`). Disk 63 % -> 36 % (43 old census `tree/` dirs + `/tmp` scratch;
   list `.integration/evidence/TREES-PRUNED-20261117.txt`). No Mac fold (`mac/parity-mac` still `165548c4b`).
 - **Gameplay (replay, item 0d):** nightly check on `e06cac9fc`: pool **44 / 44** (1,287 states), staged battles **72 / 72** (`docs/replay-ledger.md`).
@@ -42,10 +42,13 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   not landed: some bodies' `live` already holds the lead, so hits / sounds would move. hpd4 does the per-body audit, then the lead, then the floor-free hold.
 - **Crash check (item 5):** `play:random --minutes 10 --scene both --lobby-new-challenge` on `357cae402`: ON 41 battles / 15 swaps / 13 new challenges, OFF 72 / 24 / 24; **0 page /
   console errors, 0 overlays, 0 divergences**.
+- **adp1:** live Scene ON adapters for Withdraw (76 rows), Rock Smash (78), Beat Up (40 per hit): **0 px vs the ROM on every row, both sides**; their SE windows (Withdraw -4, Rock Smash
+  +2). **T1 0..999 Scene ON missing-declined 5 -> 0: the sound census now has 0 missing / 0 extra in both scenes, every family.** Beat Up's hit-to-hit gap is 132 vs the ROM's 193 frames
+  (multi-hit message timing; Beat Up is unreachable in Factory Lv 50 singles: 0 of 882 carriers). vanilla ON 0:20 20 / 20, winning 0:60 60 / 60; census eventsDigest identical.
 - **hpd4 (NOT merged yet):** body audit + the script lead for Sonic Boom / Dragon Rage / Defense Curl / Rollout + the floor-free hold `e01bfd249`; hpd1 windows ON dragonrage 183 -> 950,
   sonicboom 151 -> 938, toss30 174 -> 715, rol1 459 -> 502; census both scenes eventsDigest identical. Held back: it re-pinned the Ice Ball sound fixtures away from the ROM (2 / 5 and
   6 / 9 frames) and skipped the soaks / T2. hpd5 continues on its branch (Ice Ball audit + the gates).
-- **Next:** hpd5, adp1 (the three missing adapters), then the aud246 close.
+- **Next:** hpd5, lbw6 (Lobby #221: held direction change mid-step), then wind-down + the aud246 close (the three missing adapters), then the aud246 close.
 
 ---
 
