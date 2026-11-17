@@ -142,7 +142,8 @@ export default defineConfig(async ({ command, mode }) => ({
     // scratch directories that macOS only sweeps on reboot. See the file
     // header for the measurement behind this.
     setupFiles: ["tests/setup/scratchSandbox.ts", "tests/setup/monPicPixels.ts"],
-    globalSetup: ["tests/setup/scratchSandboxGlobal.ts"],
+    // decompCheck only prints a notice when reference/pokeemerald is missing (a fresh clone).
+    globalSetup: ["tests/setup/scratchSandboxGlobal.ts", "tests/setup/decompCheck.ts"],
     // See resolveMaxWorkers() above — solo runs stay full-width, concurrent
     // ones back off so 4 sessions cannot each claim the whole machine.
     minWorkers: 1,

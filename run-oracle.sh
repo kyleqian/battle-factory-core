@@ -45,7 +45,7 @@ fi
 "$VENV/bin/python" -c "import cffi, PIL" 2>/dev/null || "$VENV/bin/pip" -q install cffi pillow
 
 if [[ ! -f "$VENDOR/libmgba-py/mgba/_pylib.abi3.so" ]]; then
-  echo "error: vendor/libmgba-py is missing — see vendor/README.md for how to restore it" >&2
+  echo "error: vendor/libmgba-py is missing — see oracle/SETUP.md for how to set it up" >&2
   exit 1
 fi
 if [[ ! -f reference/pokeemerald/pokeemerald.gba ]]; then
