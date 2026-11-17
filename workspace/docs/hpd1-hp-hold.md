@@ -214,4 +214,7 @@ bar's frames + tail, per-case -20 .. +4) and, ON only, the Rollout move-animatio
 - **Seismic Toss** is held out: the damage-level tails fit well (toss30 908, toss50 952, toss80 864 of 1023) but with the Toss lead the follow-up sounds anchored on general-animation / start commands
   (counter-player, leechseed x2, recycle, razorwind fixtures) drift away from their ROM rows (leechseed exact -> +2, recycle |4| -> |5|). Those emitters need the same sound clock as the hit SEs; until then Toss keeps its old model (hpd1-toss ON numbers above come from the hold alone).
 - The remaining unaudited bodies keep the lead in their tail; each needs its hpd2Probe window (Ice Ball first).
-- Gates not run in this step (time): T2 Scene ON 6 seeds, the winning / winning-swap 0:60 soaks (re-pin of `randomRoundSoak` / `lbrd` not checked).
+- Gates run on the tested code (`src` tree of `ef94a58af`, unchanged by the later test-only and doc commits): `npm run typecheck` 0; `npm run test:gate` 362 / 362 files, 2843 tests; the sound fixtures
+  (`aud24*`, `aud25*`, `aud26*`, `audioProbeFixtures`, `hie*`, `hpd*`, `rol1*`, `wsh*`) 57 / 57 files; `npm run build` and `build:lib` 0; census 0..99 above; vanilla soak Scene OFF 0:20 **20 / 20 OK** (budget).
+- **Not run (time cap, named):** vanilla soak Scene ON 0:20 (a 6-way run did not finish in 560 s; not resumable), the winning / winning-swap 0:60 soaks, T2 Scene ON on 6 seeds (matched-delta median / p10 / p90 and missing / extra),
+  and so no `randomRoundSoak` / `lbrd` pin check. The Scene ON sound-clock change is covered by the fixtures above and the census (events identical), not by T2.
