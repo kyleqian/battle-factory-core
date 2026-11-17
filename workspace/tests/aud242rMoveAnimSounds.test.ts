@@ -55,6 +55,7 @@ function ourEvents(rom: Fixture): SoundEvent[] {
 // deltas = ROM frame - our frame per row (aud242r, section 22).
 const SPECS: Array<{ name: string; ids: number[]; deltas: number[] }> = [
   { name: "healbell-player", ids: [195, 228, 102], deltas: [-4, -4, -4, -4, -4] },
+  { name: "spikecannon-player", ids: [160, 166], deltas: [9, 9, 9, 9, 9, 9] },
 ];
 
 describe("move-animation SEs of the aud242r lifetimes", () => {

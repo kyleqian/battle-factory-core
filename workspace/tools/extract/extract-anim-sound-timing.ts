@@ -761,9 +761,16 @@ function lifetimeOf(cmd: Command, attackerSide: number, pic: PicContext, rollout
   // AnimHitSplatBasic (battle_anim_normal.c:1006-1018): affine anim `animation` (sAffineAnim_HitSplat_0..3, :134-163), RunStoredCallbackWhenAffineAnimEnds (sprite.c:729-733) with
   // DestroyAnimSprite stored. Anims 1..3 are one shape (a 0 frame, then the 8 frame): exact 10, ROM-measured on anim 2 (aud242p Poison Sting window: the wait ends 10 ticks after the
   // hit splat, the Shake task there is 8; Spark / Poison Tail agree). Anim 0 (the 8 frame alone) and a non-literal animation stay the bound.
-  if (op === "create_basic_hitsplat_sprite" || sprite("gBasicHitSplatSpriteTemplate")) {
-    const a = op === "create_basic_hitsplat_sprite" ? intNamed("animation") : intArg(args[6]);
+  // aud242r: the handle-invert splat (battle_anim_normal.c:1036-1047) only picks the palette / flip and then runs AnimHitSplatBasic's init: same lifetime.
+  if (op === "create_basic_hitsplat_sprite" || op === "create_handle_invert_hitsplat_sprite" || sprite("gBasicHitSplatSpriteTemplate") || sprite("gHandleInvertHitSplatSpriteTemplate")) {
+    const a = op.startsWith("create_") ? intNamed("animation") : intArg(args[6]);
     return a !== null && a >= 1 && a <= 3 ? { exact: 10 } : { bound: 10 };
+  }
+  // aud242r: AnimTask_WindUpLunge (battle_anim_mon_movement.c:637-690; args a3 = first duration, a4 = delay, a6 = lunge duration). The entry only installs Step1: calls 1..a3 wind up (--data[3] == 0 on
+  // call a3), Step2 burns the delay on the next a4 calls (data[4] > 0) and the following a6 calls lunge; the last (--data[6] == 0) destroys the task: call K = a3 + a4 + a6, gone K - 1 ticks after F.
+  if (op === "createvisualtask" && args[0] === "AnimTask_WindUpLunge") {
+    const [a3, a4, a6] = [intArg(args[5]), intArg(args[6]), intArg(args[8])];
+    return a3 === null || a4 === null || a6 === null || a3 < 1 || a4 < 0 || a6 < 1 ? null : { exact: a3 + a4 + a6 - 1 };
   }
   // ---- aud242o (docs section 19). AnimPetalDanceBigFlower / SmallFlower (battle_anim_effects_1.c:2482-2548; D = duration): the init sets data[0] = D, runs InitAnimLinearTranslation
   // (battle_anim_mons.c:1065-1091, data[0] unchanged) and calls the step at once. The step is AnimTranslateLinear (:1111-1139, data[0]-- per call while non-zero): calls 0..D - 1 translate,
