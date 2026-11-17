@@ -2062,6 +2062,7 @@ export const APP_STAGES: Readonly<Record<string, AppStage>> = {
   "hpd1-a-toss90-off": (state) => aud241bStage(state, "hpd1-a-toss90-off", "off", 90, 50, 69, undefined, false, 111),
   "aud242o-rollout5-player-on": (state) => aud241bStage(state, "aud242o-rollout5-player-on", "on", 50, 100, 205, undefined, false, 111),
   "aud242o-dive-player-on": (state) => aud241bStage(state, "aud242o-dive-player-on", "on", 50, 12, 291, undefined, false, 69),
+  "aud257-cosmicpower-player-on": (state) => aud241bStage(state, "aud257-cosmicpower-player-on", "on", 50, 12, 322, undefined, false, 69),
   "aud242p-encore-player-on": (state) => aud241bStage(state, "aud242p-encore-player-on", "on", 50, 12, 227, undefined, false, 69),
   "aud242p-flatter-player-on": (state) => aud241bStage(state, "aud242p-flatter-player-on", "on", 50, 12, 260, undefined, false, 69),
   "aud242p-reversal-player-on": (state) => aud241bStage(state, "aud242p-reversal-player-on", "on", 50, 12, 179, undefined, false, 69),

@@ -456,6 +456,13 @@ function lifetimeOf(cmd: Command, attackerSide: number, pic: PicContext, rollout
     if (delay === null || startY === null || targetY === null || delay < 0) return null;
     return { exact: blendAnimPalLength(delay, startY, targetY) };
   }
+  // aud257: AnimTask_BlendNonAttackerPalettes (battle_anim_utility_funcs.c:725-739) shifts gBattleAnimArgs up by one (:735-736) and runs StartBlendAnimSpriteColor, so the script's
+  // (delay, initial_y, target_y) are the same Step2 inputs as AnimTask_BlendBattleAnimPal's, one script slot earlier (args[2..4], no palette-mask slot): same blendAnimPalLength.
+  if (op === "createvisualtask" && args[0] === "AnimTask_BlendNonAttackerPalettes") {
+    const [delay, startY, targetY] = [intArg(args[2]), intArg(args[3]), intArg(args[4])];
+    if (delay === null || startY === null || targetY === null || delay < 0) return null;
+    return { exact: blendAnimPalLength(delay, startY, targetY) };
+  }
   if (op === "complex_palette_blend" || (op === "createsprite" && args[0] === "gComplexPaletteBlendSpriteTemplate")) {
     const named = (key: string): string | undefined => args.find((a) => a.startsWith(`${key}=`));
     const [delay, numBlends] = op === "complex_palette_blend" ? [intArg(named("delay")), intArg(named("num_blends"))] : [intArg(args[4]), intArg(args[5])];
