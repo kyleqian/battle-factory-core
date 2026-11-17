@@ -163,6 +163,36 @@ Class moves, each read against the decomp:
   and the only Color Change sets are Kecleon 220 (challenge 1) and 325 (challenge 2), while every non-Ghost Curse set is 458 or higher
   (challenge 3 and up, `sets.py "'CURSE' in m.moves"`); Conversion and Transform are Metronome-only and the Curse users do not carry Metronome.
 
+**Luck hunt day 1 (luck2, 2026-11-17): 59 of the 110 covered (53 before), 45 left (the six class (a) / (b) rules not counted).** The first day of the luck hunt
+(`tools/replay-hunt/luckHunt.sh`, evidence `.integration/evidence/luck-hunt/20261117/`: 5000 lab seeds 1,020,000 up, 6 marker hits, ROM match 6, differ 0) found a
+battle for six rules. Each stage file is promoted to `stages/coverage/` (so the nightly replay guards it) and was re-driven once from a worktree on the Scene OFF
+oracle (`romReplayWide.sh --stage`, `match True`, `stage.ok True`) and once through `prehunt.py` with its own seed, which showed the `cover` piece run:
+**R032** Rage after a Metronome miss (`R032-metronome-rage-miss`, seed 1020122, 20 of 20 states), **R037** (Cloyster Dive in a sandstorm, seed 1020059, 24 of 24),
+**R038** (Foresight against a Ghost user, seed 1020099, 14 of 14), **R097** (Trick with both Pokemon itemless, seed 1023669, 20 of 20), **R107** (Baton Pass onto
+AI Spikes, seed 1020548, 38 of 38), **R109** (Curse by the last Pokemon, seed 1022589, 19 of 19). The hunter now skips a design whose rule has a stage file here, so
+the next day's seeds go to the eight rules still open. Why the eight had no marker hit in about 538 seeds each (from `logs/<design>.log`, and one engine-only
+seed of each design re-run in luck2; "flawed" = the marker cannot or hardly can run in that set-up, "rare" = it can, the odds are small):
+
+- **R030 (AI replacement scored with Curse as the last move): set-up runs, marker never reached, cause not pinned down.** In a seed re-run Toxic kills Dugtrio and Dewgong
+  comes in as designed, but the marker `damage = 0` (TYPE_MYSTERY) ran in 0 of 539 seeds. Dugtrio's King's Rock flinch and Dugtrio's own move can leave a move
+  other than Curse as `gCurrentMove` at the faint (turns 3 and 5 of that seed have no Skarmory move). Needs a look at the replacement choice before more seeds.
+- **R035, R040 (Counter / Mirror Coat scored up under Taunt): rare, as the design says.** Clefable has to call Taunt out of Metronome (about 1 in 340) and Snorlax
+  has to knock it out the same turn; a battle holds only a few Metronome calls (3 in the first 3 turns of the seed re-run), so about 2000 calls over 538 seeds give
+  a handful of Taunts and well under one with the timing. Both stay open; they need roughly ten times the seeds.
+- **R039 (AI Memento against a target at minimum Sp. Atk): flawed set-up.** Arcanine's Overheat does about 126 of Weezing's 172 HP, so Weezing is dead after the second
+  or third hit (seed re-run: 172, 172, 46, dead) while the −6 needs four uses even with the White Herb. Only misses and low rolls let it live. Needs a bulkier target
+  or a weaker Overheat user.
+- **R067 (Skill Swap Truant, Focus Punch set-up pre-pass): flawed set-up.** Slaking 659 has Shadow Ball and Aerial Ace, which do hurt Gengar: in the seed re-run Gengar
+  is knocked out on turn 0, and 317 of 538 seeds end after 5 decisions. The design's premise ("cannot hurt Gengar") holds only for Earthquake and Brick Break. Needs a
+  foe that cannot touch Gengar, or a Gengar that survives the first Shadow Ball.
+- **R080 (Marvel Scale in the stored Future Sight damage): reachable but nearly so.** Milotic needs to be paralysed by Spark before Whiscash uses Future Sight; the AI used
+  Future Sight on turn 0 in the seed re-run and Milotic dies within 5 turns, so the window is one or two turns. Rare, not shown impossible.
+- **R095 (Trace waiting with no foe): flawed set-up, cannot run as built.** Spikes land on the side of the Pokemon that switches in, and the AI's Skarmory lays them on
+  the player's side; for the foe to faint on entry the Spikes must be on the AI's side, and none of the player sets in the design (532, 556, 529) has Spikes. Needs a
+  player Spikes user (Skarmory 482 as the lead) beside the Trace holder.
+- **R110 (Roar drags a wounded Pokemon onto Spikes and it faints): reachable, rare.** Battles run 60 to 70 decisions and the AI does Spikes and Roar in them, but the
+  dragged-in Pokemon must be below 1/8 of its HP; a random player rarely arrives there. More seeds, or a scripted player that keeps one Pokemon low.
+
 Left in (c), with the reason (none is proven unreachable):
 
 - **R103** (cure berry at the end of the turn on a Pursuit user): the only skipped move-end step is Pursuit on a switching foe
