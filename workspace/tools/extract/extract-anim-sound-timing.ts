@@ -786,6 +786,14 @@ function lifetimeOf(cmd: Command, attackerSide: number, pic: PicContext, rollout
   // destroys in that RunTasks: gone 74 ticks after F (ROM-measured, probe hooks: entry 1303, BlendPalette y 0..16 on 1303..1319, second Begin 1355, destroy 1377). The Moon / sparkle sprites wait
   // for the state-1 call (data[0] = 1, :5078-5090) and are destroyed by AnimateSprites of F + 22 (ROM 1325): the creating walk resolves them when this task is created (`deferred`).
   if (op === "createvisualtask" && args[0] === "AnimTask_MoonlightEndFade") return { exact: 74 };
+  // aud242r: AnimTask_CurseStretchingBlackBg (battle_anim_ghost.c:945-1042). The entry only sets Step1; Step1 call 1 is iteration F, steps 0..15 grow the window (calls 1..16) and call 17 (iteration F + 16)
+  // runs BeginNormalPaletteFade(mask, 0, 16, 16): y == targetY from the start, so its BG pass (in the Begin) is followed by the OBJ pass in the CB2 of F + 17, which sets softwareFadeFinishing; the counter
+  // runs F + 18 .. F + 21 and the pass of F + 22 clears `active` (palette.c:414-470, 807-826) before the RunTasks of that iteration, where Step2 sees it and destroys the task: gone 22 ticks after F.
+  if (op === "createvisualtask" && args[0] === "AnimTask_CurseStretchingBlackBg") return { exact: 22 };
+  // aud242r: AnimCurseNail (battle_anim_ghost.c:1044-1120). Call 0 inits, calls 1..60 count data[0] down, a move step is 4 calls (x2 += +-2 until |x2| 8: the u16 range check x2 + 7 > 14) and arms data[0] = 40 twice
+  // (calls 61..64, 65..104, 105..108, 109..148), the third move (149..152) arms WaitAnimForDuration with 30 (calls 153..182), call 183 swaps in Step2 (SetCallbackToStoredInData6 runs no step), Step2 call 184
+  // arms its counter and 16 blend steps of 3 calls follow (187, 190, .. 232, the last makes the sprite invisible and installs End), call 233 destroys: gone 232 ticks after F.
+  if (sprite("gCurseNailSpriteTemplate")) return { exact: 232 };
   // aud242r: AnimTask_EruptionLaunchRocks (battle_anim_fire.c:796-1013, PrepareEruptAnimTaskData / UpdateEruptAnimTask battle_anim_mons.c:1958-1991). The entry only installs the step: state 0/1 takes
   // calls 1..32 (duration 32), state 2 calls 33..37 (++timer1 > 4), state 3 calls 38..43 (duration 6; call 43 creates the 7 rocks, y = sprite y + y2 (0) + centerToCornerVecY + 74 / 44, x = battler x - 12 / + 16), state 4
   // calls 44..68 (++timer3 > 24), state 5 calls 69..76 (duration 8), state 6 destroys once tActiveSprites is 0. A rock's first callback is the next iteration (call j = iteration F + 42 + j) and it

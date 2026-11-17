@@ -1,4 +1,4 @@
-// aud242r: the move-animation SEs behind the Heal Bell (BellSprite / thin ring / music note / sparkling stars), Moonlight (AnimTask_MoonlightEndFade palette fades, AlphaFadeIn), Spike Cannon (AnimTask_WindUpLunge, handle-invert hit splat) and Eruption (AnimTask_EruptionLaunchRocks, pic-Y dependent rock flight) lifetimes (tools/extract/extract-anim-sound-timing.ts).
+// aud242r: the move-animation SEs behind the Heal Bell (BellSprite / thin ring / music note / sparkling stars), Moonlight (AnimTask_MoonlightEndFade palette fades, AlphaFadeIn), Curse (CurseStretchingBlackBg, curse nail), Spike Cannon (AnimTask_WindUpLunge, handle-invert hit splat) and Eruption (AnimTask_EruptionLaunchRocks, pic-Y dependent rock flight) lifetimes (tools/extract/extract-anim-sound-timing.ts).
 // Fixtures are committed oracle output of tools/audio/soundEventProbe.py (stepping mode, call log + BlendPalette hook) and carry the replay trace; no emulator is needed.
 // See docs/aud242-move-anim-sounds.md section 22.
 import { readFileSync } from "node:fs";
@@ -52,12 +52,13 @@ function ourEvents(rom: Fixture): SoundEvent[] {
   return events;
 }
 
-// deltas = ROM frame - our frame per row (aud242r, section 22). Heal Bell and Moonlight -4 (status-move class), Spike Cannon +9 (multi-hit class, section 3), Eruption +2 (idle-lead class); inter-row gaps are exact.
+// deltas = ROM frame - our frame per row (aud242r, section 22). Heal Bell and Moonlight -4 (status-move class), Curse +1 (Ghost-type CurseGhost body), Spike Cannon +9 (multi-hit class, section 3), Eruption +2 (idle-lead class); inter-row gaps are exact.
 const SPECS: Array<{ name: string; ids: number[]; deltas: number[] }> = [
   { name: "healbell-player", ids: [195, 228, 102], deltas: [-4, -4, -4, -4, -4] },
   { name: "spikecannon-player", ids: [160, 166], deltas: [9, 9, 9, 9, 9, 9] },
   { name: "eruption-player", ids: [178, 131], deltas: Array(14).fill(2) },
   { name: "moonlight-player", ids: [211, 179], deltas: [-4, -4] },
+  { name: "curse-player", ids: [170, 121], deltas: [1, 1, 1, 1] },
 ];
 
 describe("move-animation SEs of the aud242r lifetimes", () => {
