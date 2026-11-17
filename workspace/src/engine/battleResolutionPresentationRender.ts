@@ -90,6 +90,14 @@ import { statsChangeParams } from "../animation/statsChange.ts";
 export const BATTLE_RESOLUTION_NEXT_COMMAND_HANDOFF_FRAMES =
   BATTLE_COMMAND_ACTION_ENTER_DELAY;
 /**
+ * hpd2 (docs/hpd1-hp-hold.md): the handoff into a LOCKED player action's next turn (Rollout / Thrash / a charge move's strike: `HandleTurnActionSelectionState`
+ * auto-confirms the player, so no action menu follows and the foe's choice is on the critical path). ROM, Rollout window (aud242o), Scene ON and OFF alike:
+ * `BattleTurnPassed` -> `HandleTurnActionSelectionState` (9 frames: the foe's EmitChooseAction / AI ChooseMove / confirm states) -> `SetActionsAndBattlersTurnOrder`
+ * / `RunTurnActionsFunctions` (3) -> the script's first instruction = 13 frames (13 / 13 / 13 / 12 at the four chained turns), the box clearing 2 frames after
+ * `BattleTurnPassed`: the blank box lasts 15 frames before the next "used" print (15 / 15 / 15 / 14), the menu's 7 (6 + 1) elsewhere.
+ */
+export const BATTLE_RESOLUTION_LOCKED_CONTINUATION_HANDOFF_FRAMES = BATTLE_RESOLUTION_NEXT_COMMAND_HANDOFF_FRAMES + 8;
+/**
  * pfr192: the keyed clock of the player's faint-replacement send-in a segment owns (the forced party selector's presenting-switch-in
  * span), from its typed switch-in command (species / nickname / nature), the segment's scene and its "Go!" message.  When the segment
  * continues with exactly `turn-end`, that command's frames and the next-command handoff are inside the ROM's B + D + 17, so the span

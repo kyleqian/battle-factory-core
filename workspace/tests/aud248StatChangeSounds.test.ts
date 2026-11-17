@@ -43,7 +43,7 @@ const RESIDUAL: Record<string, number | number[] | null> = {
   "aud242c-metalsound-opponent.json": 0, "aud242c-superpower-player.json": 17, "aud242c-sweetscent-player.json": -1, "aud242d-calmmind-player.json": 0,
   "aud242d-metalclaw-player.json": null, "aud242d-steelwing-player.json": null, "aud242e-overheat-player.json": 17, "aud242f-growth-player.json": 23, "aud242f-swagger-player.json": 6,
   "aud242j-silverwind-player.json": null,
-  "aud242k-ancientpower-player.json": null, "aud242o-rollout5-player.json": [2, 16, 31, 51, 80], "aud242k-scaryface-player.json": 14, "aud242k-smokescreen-player.json": 0,
+  "aud242k-ancientpower-player.json": null, "aud242o-rollout5-player.json": [2, 8, 15, 27, 48], "aud242k-scaryface-player.json": 14, "aud242k-smokescreen-player.json": 0,
   "aud242p-flatter-player.json": 5,
 };
 

@@ -5,7 +5,9 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import type { BattleMoveAnimationRequest } from "../src/engine/battleMoveAnimation.ts";
 import type { BattleResolutionDisplayedField, BattleResolutionPresentationCommand } from "../src/engine/battleResolutionPresentation.ts";
-import { battleResolutionCommandDuration } from "../src/engine/battleResolutionPresentationRender.ts";
+import {
+  BATTLE_RESOLUTION_LOCKED_CONTINUATION_HANDOFF_FRAMES, BATTLE_RESOLUTION_NEXT_COMMAND_HANDOFF_FRAMES, battleResolutionCommandDuration,
+} from "../src/engine/battleResolutionPresentationRender.ts";
 import { battleHealthBarAnimationFrames } from "../src/engine/healthboxAssembly.ts";
 import { liveMoveAnimationDuration } from "../src/engine/liveMoveAnimation.ts";
 import speciesStats from "../src/data/gen/species-stats.json" with { type: "json" };
@@ -61,5 +63,12 @@ describe("rol1: the five-turn Rollout window (ROM, Scene ON)", () => {
     const big = 38;
     expect(duration(big)).toBe(battleHealthBarAnimationFrames({ maxHp, from: maxHp, to: maxHp - big }) + 1);
     expect(duration(big)).toBeGreaterThan(28);
+  });
+
+  it("hpd2: a locked player's chained turn waits 8 frames longer than the menu handoff (ROM: BattleTurnPassed -> script start 13 / 13 / 13 / 12, box blank 15 vs 7)", () => {
+    // tools/integration/hpd2Probe.py (per-frame gBattleMainFunc / gBattlescriptCurrInstr, Scene ON and OFF): the player is auto-confirmed, so the foe's
+    // selection (HandleTurnActionSelectionState, 9 frames) and SetActionsAndBattlersTurnOrder / RunTurnActionsFunctions (3) sit between the turn end and the next print.
+    expect(BATTLE_RESOLUTION_LOCKED_CONTINUATION_HANDOFF_FRAMES - BATTLE_RESOLUTION_NEXT_COMMAND_HANDOFF_FRAMES).toBe(8);
+    expect(BATTLE_RESOLUTION_LOCKED_CONTINUATION_HANDOFF_FRAMES).toBe(14);
   });
 });

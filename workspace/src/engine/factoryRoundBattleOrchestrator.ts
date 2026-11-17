@@ -117,6 +117,7 @@ import {
   type LiveCastformForms,
   applySubstituteDollCommand,
   battleResolutionMoveAnimationField,
+  BATTLE_RESOLUTION_LOCKED_CONTINUATION_HANDOFF_FRAMES,
   BATTLE_RESOLUTION_NEXT_COMMAND_HANDOFF_FRAMES,
   containedBattleResolutionDisplayedField,
   LEECH_SEED_DRAIN_ABSORB_MOVE_ID,
@@ -3088,9 +3089,14 @@ function advanceFactoryRoundBattleResolutionCore(
   // BATTLE_RESOLUTION_NEXT_COMMAND_HANDOFF_FRAMES clock and every other seam
   // stay untouched (the menu seam's blank box is the resolution render's
   // own `bottom === "blank"`, which is not lengthened by this).
-  const handoffFrames = resolution.sourceDecision.kind === "switch"
-    ? BATTLE_RESOLUTION_NEXT_COMMAND_HANDOFF_FRAMES - 1
-    : BATTLE_RESOLUTION_NEXT_COMMAND_HANDOFF_FRAMES;
+  const lockedContinuation = resolution.pendingBoundary.kind === "decision-required"
+    && resolution.pendingBoundary.request.kind === "command"
+    && resolution.pendingBoundary.request.side === "trainer";
+  const handoffFrames = lockedContinuation
+    ? BATTLE_RESOLUTION_LOCKED_CONTINUATION_HANDOFF_FRAMES
+    : resolution.sourceDecision.kind === "switch"
+      ? BATTLE_RESOLUTION_NEXT_COMMAND_HANDOFF_FRAMES - 1
+      : BATTLE_RESOLUTION_NEXT_COMMAND_HANDOFF_FRAMES;
   if (advanced.lifecycle.phaseElapsed < handoffFrames) {
     return Object.freeze({
       ...state,
