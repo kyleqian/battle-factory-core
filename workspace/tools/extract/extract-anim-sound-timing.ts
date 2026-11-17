@@ -379,6 +379,26 @@ function moveParticleBeyondTargetLifetime(attackerSide: number, pic: PicContext,
   }
   return null;
 }
+// aud261: AnimTask_ExtremeSpeedImpact (battle_anim_effects_2.c:2812-2873): the entry only sets func (calls 1..). Case 0 moves the target's x2 by data[14] (+8 for a player target, -8 else), case 1 shakes it +6 / -6 every
+// 2nd call (the 5th shake, data[3] > 4, undoes the odd one and advances), case 2 repeats the round while --data[12] != 0 (3 rounds), case 3 steps x2 back by data[13] (-1 / +1) per call and destroys when it is 0.
+function extremeSpeedImpactDestroyCall(targetIsPlayer: boolean): number {
+  let [state, d1, d2, d3, d12, x2] = [0, 0, 0, 0, 3, 0];
+  const [d13, d14] = targetIsPlayer ? [-1, 8] : [1, -8];
+  for (let call = 1; call < 100000; call += 1) {
+    if (state === 0) { x2 += d14; [d1, d2, d3] = [0, 0, 0]; state = 1; }
+    else if (state === 1) {
+      d1 += 1;
+      if (d1 > 1) {
+        d1 = 0; d2 += 1;
+        x2 += d2 & 1 ? 6 : -6;
+        d3 += 1;
+        if (d3 > 4) { if (d2 & 1) x2 -= 6; state = 2; }
+      }
+    } else if (state === 2) { d12 -= 1; state = d12 !== 0 ? 0 : 3; }
+    else { x2 += d13; if (x2 === 0) return call; }
+  }
+  throw new Error("ExtremeSpeedImpact does not terminate");
+}
 function flailMovementLength(): number {
   let [state, count, angle, shrinks, amplitude] = [0, 0, 0, 0x20, 0x800];
   const s16 = (v: number): number => ((v + 0x8000) & 0xffff) - 0x8000;
@@ -799,6 +819,11 @@ function lifetimeOf(cmd: Command, attackerSide: number, pic: PicContext, rollout
   // AnimTask_GrowAndShrink (battle_anim_effects_2.c:2235-2248 with gGrowAndShrinkAffineAnimCmds :543-549, RunAffineAnimFromTaskData battle_anim_mons.c:1800-1862): the entry
   // only sets func; frames of duration 12, 24, 12 take calls 1..48 and the END command on call 49 returns FALSE and destroys: gone 48 ticks after F.
   if (op === "createvisualtask" && args[0] === "AnimTask_GrowAndShrink") return { exact: 48 };
+  // aud261: AnimTask_AttackerStretchAndDisappear (battle_anim_effects_2.c:2792-2810; gStretchAttackerAffineAnimCmds :809-813 = one 8-tick frame then END): the entry only sets func; the step
+  // (RunAffineAnimFromTaskData, battle_anim_mons.c:1800-1862) takes calls 1..8 for the frame and the END on call 9 returns FALSE and destroys: gone 8 ticks after F (the AnimTask_GrowAndShrink shape).
+  if (op === "createvisualtask" && args[0] === "AnimTask_AttackerStretchAndDisappear") return { exact: 8 };
+  // aud261: the target's side is the opposite of the attacker's; the task is destroyed on call K (gone K - 1 ticks after F).
+  if (op === "createvisualtask" && args[0] === "AnimTask_ExtremeSpeedImpact") return { exact: extremeSpeedImpactDestroyCall(attackerSide !== 0) - 1 };
   // AnimBreathPuff (battle_anim_effects_2.c:2250-2272): call 0 sets data[0] = 52 and installs TranslateSpriteLinearFixedPoint; calls 1..52 decrement (battle_anim_mons.c:607-621),
   // call 53 stores DestroyAnimSprite (SetCallbackToStoredInData6), call 54 destroys: gone 53 ticks after F.
   if (sprite("gBreathPuffSpriteTemplate")) return { exact: 53 };
@@ -957,6 +982,11 @@ function lifetimeOf(cmd: Command, attackerSide: number, pic: PicContext, rollout
   // hit splat, the Shake task there is 8; Spark / Poison Tail agree). Anim 0 (the 8 frame alone) and a non-literal animation stay the bound.
   // aud242r: the handle-invert splat (battle_anim_normal.c:1036-1047) only picks the palette / flip and then runs AnimHitSplatBasic's init: same lifetime.
   if (op === "create_basic_hitsplat_sprite" || op === "create_handle_invert_hitsplat_sprite" || sprite("gBasicHitSplatSpriteTemplate") || sprite("gHandleInvertHitSplatSpriteTemplate") || sprite("gWaterHitSplatSpriteTemplate")) {
+    const a = op.startsWith("create_") ? intNamed("animation") : intArg(args[6]);
+    return a !== null && a >= 0 && a <= 3 ? { exact: 10 } : { bound: 10 };
+  }
+  // aud261: AnimHitSplatOnMonEdge (battle_anim_normal.c:1068-1081): the same affine anim (sAffineAnims_HitSplat, animation = args[6]) with RunStoredCallbackWhenAffineAnimEnds / DestroySpriteAndMatrix stored: the AnimHitSplatBasic shape.
+  if (op === "create_mon_edge_hitsplat_sprite" || sprite("gMonEdgeHitSplatSpriteTemplate")) {
     const a = op.startsWith("create_") ? intNamed("animation") : intArg(args[6]);
     return a !== null && a >= 0 && a <= 3 ? { exact: 10 } : { bound: 10 };
   }
