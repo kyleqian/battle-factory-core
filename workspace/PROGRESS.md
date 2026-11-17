@@ -7,7 +7,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ## 2026-11-17 — CAX31 daily run (supervisor, Opus 5.5, 2026-11-17 13:30 -> 2026-11-18 05:30 UTC): IN PROGRESS
 
-- **State:** master `276aff82b`; workers: wsh2 (integration), aud261 (side); full suite running on `276aff82b`. **No DEFERRED items.** Evidence `.integration/validation/sv-20261117/`.
+- **State:** master `034306eb7`; workers: hpd3 (integration), aud261 (side). **No DEFERRED items.** Evidence `.integration/validation/sv-20261117/`.
 - **Run start:** oracles current; baseline = last run's full suite (only tooling changed since `4e4c51880`). Disk 63 % -> 36 % (43 old census `tree/` dirs + `/tmp` scratch;
   list `.integration/evidence/TREES-PRUNED-20261117.txt`). No Mac fold (`mac/parity-mac` still `165548c4b`).
 - **Gameplay (replay, item 0d):** nightly check on `e06cac9fc`: pool **44 / 44** (1,287 states), staged battles **72 / 72** (`docs/replay-ledger.md`).
@@ -24,8 +24,12 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   Scene OFF holds 36 / 42 / 40; census 0..99 both scenes `eventsDigest` identical (9 seeds gain the commands); vanilla 0:20 both scenes 20 / 20, winning 0:60 60 / 60 (supervisor);
   test:gate / build / build:lib 0; two soak frame pins re-pinned. wsh1b: doc `docs/wsh1-general-anim-commands.md`, Tier-1 pins for the semi-invulnerable / Substitute skips
   (already in the engine), Wish-on-Dig ROM window. **T2 ROM scoreboard: Scene ON 0 missing / 0 extra in every family (21 seeds; supervisor re-scored the 3 re-run seeds), Scene OFF
-  0 / 0 (aud255, 20 seeds).** Future Sight +14 / +8 are the hpd HP-hold family (not fixed). The three animations are still undrawn (wsh2).
-- **Next:** wsh2 (draw the three), aud261 (T1 0..999 ON gated rows, largest first).
+  0 / 0 (aud255, 20 seeds).** Future Sight +14 / +8 are the hpd HP-hold family (hpd3). wsh2 draws all three in Scene ON, both sides: in-window frames vs the ROM at the
+  pre-segment offset Focus Band 131 / 131 + 130 / 130, Wish 200 / 202 + 201 / 202 (a star hand-over frame), Future Sight 172 / 172 + 173 / 173 (masked idle bounce); census both
+  scenes identical incl. command lengths; phase anchors listed as fitted in `docs/wsh1-general-anim-commands.md` "wsh2".
+- **Full suite on `276aff82b`** (3 workers, 20 min): 15,531 passed, 2 failed: `tests/lbrd.test.ts` (wsh1's Scene OFF holds moved the Lobby deal). Re-pinned by the supervisor
+  (`f58f6bb02`: WIN_TWO_SEED 13 -> 19, the retire case keeps 13; scan 14..60 found no single seed for every case).
+- **Next:** hpd3 (post-hit HP hold + the Rollout turn's in-turn constants), aud261 (T1 0..999 ON gated rows, largest first).
 
 ---
 
