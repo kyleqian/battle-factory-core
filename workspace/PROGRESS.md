@@ -77,6 +77,9 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **hpd2 (integration):** a locked player's chained turn (Rollout continues: no action menu) now waits 14 frames for the foe's selection (was 6; ROM 13 / 13 / 13 / 12, both scenes);
   `rol1-rollout5-on` 383 -> 459 / 3001; 23 representative traces bit-identical; the floor-free hp hold (`e01bfd249`) stays out until the 18 in-turn frames of the Defense Curl + Rollout
   turn are modelled (`docs/hpd1-hp-hold.md` "hpd2"). pin1 (ts): soak pins re-pinned (#89 seed 32 -> 3), `tools/soak/batonPassSearch.ts` restored; hpd2 moved no soak pin.
+- **sta3 (side; cap-killed after committing, gate green; supervisor verified):** the second `Status_*` play now lands on the ROM frame (flatter 7 / 7, swagger 8 / 8, dreameater 0 / 0; was +14 / +15):
+  the action transition into a pre-move confusion / sleep print plus 3 launch rows (`PRE_MOVE_STATUS_ANIMATION_LEAD_ROWS`); census eventsDigest 100 / 100 both scenes. Supervisor re-pinned
+  `randomRoundSoak` full seeds 0 / 1 (exploring trajectory) and checked the touched sound tests.
 - **lbw5 (side):** Lobby player <-> NPC cases proven on the ROM; bump direction change and turn-commit refusal fixed (`factoryLobbyFreeRoam.ts`, `idleIdx` pose state); forfeit window 109 -> 113 / 113; lbw4 / lbra / won-* windows unchanged; supervisor `npm run compare` lbw5-bump-turn-off 269 / 269.
 - **aud242o / p (integration, sound only):** Petal Dance, Confuse Ray ball bounce, Tri Attack, Dive, Rollout counter, Encore, Flatter, Reversal, Taunt, Karate Chop, Revenge, Mist Ball, Leaf Blade;
   T1 missing-gated 195 -> **95**; T2 ON move-SE missing (21 seeds) **76** (aud251: 206); differentials 320 / 320, 240 / 240.
