@@ -186,6 +186,15 @@ offsets (Wish 1423 - 1445 22 / 23 as wsh1; Future Sight 2233 - 2290 23 / 23 at +
   (the opponent-side lab's target is the player's Rattata: proved), Focus Band / Wish on a different species, Doom Desire's own script.
 * Future Sight's +14 / +8 HP-hold residuals and the Wish post-heal +2 / +5 are the hpd-family timing items listed above; untouched.
 
-### Gates (code: see the final report for the commit / tree)
+### Gates (tested code: commit 08b9f85a1 (docs-only over code commit 3dc1a87bb), `workspace/src` tree 30fe44c1d3ab, `workspace/tools` tree dce829516f0e, base 334becd9a)
 
-Filled by the final report of the wsh2 session; this file records the measurements above.
+* `npm run typecheck` 0; `npm run test:gate` 362 files / 2843 tests green; `npm run build` and `npm run build:lib` 0.
+* Tests touching the changed files (every `tests/` file naming battleScene / battleResolutionPresentationRender / focusBand / wishHeal / futureSightHit / normalPaletteFade /
+  appTrace) + `tests/wsh1GeneralAnimCommands.test.ts` + `tests/animation/animationBoundaryRatchet.test.ts` + hie* + the new `tests/wsh2FocusBand.test.ts` (7 tests): 284 files,
+  3772 passed, 1 skipped, 2 failed. The 2 are `tests/lbrd.test.ts` (Scene OFF Lobby streak continuation) and fail identically on base 334becd9a (git-archive copy: 2 failed, 13 passed):
+  not caused by wsh2 (Scene OFF lobby play, untouched; another session is scanning that test's seeds).
+* Scene OFF differential (`compare:differential` wsh1-{wish,fs,fb}-off vs 334becd9a, `--harness-from-head`): 3 captures byte-identical across 3 traces. Note each trace holds one capture.
+* Census seeds 0..99, both scenes, base 334becd9a vs HEAD (`lsd194Census.sh` + `rst197CensusDelta.py`): ON 100 battles / 31487 commands, OFF 100 / 30710, every battle identical (0 digest /
+  error / type-sequence / command differences: command lengths unchanged).
+* Sound census (`soundCensusDelta.py`): per-seed sound digest identical 100 / 100 in both scenes; T1 ON tables identical (exact 26153, missing-gated 15, missing-declined 1, 0 unclassified, 0 extra).
+* Vanilla soak `--policy vanilla --seeds 0:20 --scene on --parallel 3`: 20 / 20 OK.
