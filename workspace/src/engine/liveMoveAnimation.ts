@@ -1478,7 +1478,8 @@ function liveMoveAnimationDurationOf(
     case 220: return 81; // Pain Split 445 / 446 .. +80 (81 accepted rows; the live window ends at the script's last active row).
     case 179: return 173; // Reversal 404..577 / 451..624: activation..first inactive row (reducer 174 displays, ages 0..173).
     case 218: return 229; // Frustration 80..308 / 76..304.
-    case 69: return 228; // Seismic Toss 81..308 / 77..304.
+    // Seismic Toss 81..308 / 77..304 (medium 33..65); hpd5: the ROM's gAnimScriptActive window by AnimTask_GetSeismicTossDamageLevel (hpd2Probe.py): 220 / 227 / 231 rows + the first inactive row.
+    case 69: return request.damage < 33 ? 221 : request.damage > 65 ? 232 : 228;
     case 32: return request.attacker === 1 ? 192 : 193; // Horn Drill 214..405 / 213..405 (after a Tackle body).
     case 62: return 216; // Aurora Beam 216..431 / 215..430 (after a Tackle body).
     case 253: return 73; // Uproar 79..151 / 75..147.

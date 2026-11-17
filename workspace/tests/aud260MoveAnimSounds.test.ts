@@ -102,7 +102,8 @@ describe("Recycle (aud260)", () => {
     const romRows = pick(rom.events);
     expect(romRows.map((e) => e.frame)).toEqual([1466, 1490, 1515, 1605]);
     const ours = pick(ourEvents(rom));
-    expect(ours.map((e) => e.frame)).toEqual(romRows.map((e) => e.frame - 4));
+    // hpd5: Seismic Toss joins the audited leads; the player's recycle rows moved from ROM - 4 (hpd4) to ROM + 3 (the turn's Toss bodies are now ROM-length; the held-item rows follow the next unaudited command).
+    expect(ours.map((e) => e.frame)).toEqual(romRows.map((e) => e.frame + 3));
   });
 });
 

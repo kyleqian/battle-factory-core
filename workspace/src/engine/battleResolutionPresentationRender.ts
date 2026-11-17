@@ -1578,7 +1578,7 @@ export function liveMoveScriptTailFrames(
 
 // hpd4: rows the command presents after its live body (+ post) so the next command (hit controller, next script step) starts on the ROM row
 // (R -> H = lead + 3 + len + 4 against the accepted live window), tuned by exact-frame matches against the ROM frames (docs/hpd1-hp-hold.md).
-const HPD4_BODY_TAIL_ROWS: ReadonlyMap<number, number> = new Map([[49, 3], [82, 26], [111, 3], [205, 3], [301, 3]]);
+const HPD4_BODY_TAIL_ROWS: ReadonlyMap<number, number> = new Map([[49, 3], [82, 26], [111, 3], [205, 3], [301, 3], [69, 1]]);
 function liveMoveHitTailRows(command: Extract<BattleResolutionPresentationCommand, { type: "move-animation" }>): number {
   if ((command.timing.bodyLeadFrames ?? 0) === 0 || command.animation === undefined) return 0;
   return HPD4_BODY_TAIL_ROWS.get(command.animation.moveId) ?? 0;
@@ -1593,7 +1593,9 @@ function withoutBodyLead(command: Extract<BattleResolutionPresentationCommand, {
   const lead = command.timing.bodyLeadFrames ?? 0;
   if (lead === 0) return command;
   const { bodyLeadFrames: _lead, ...timing } = command.timing;
-  return Object.freeze({ ...command, timing: Object.freeze(timing.scriptTailRows === undefined ? timing : { ...timing, scriptTailRows: timing.scriptTailRows + lead }) });
+  // hpd5: the pre-lead clock is level-flat for Seismic Toss (its body was one 228-row window before the damage levels were measured).
+  const animation = command.animation?.moveId === 69 ? { ...command.animation, damage: 50 } : command.animation;
+  return Object.freeze({ ...command, animation, timing: Object.freeze(timing.scriptTailRows === undefined ? timing : { ...timing, scriptTailRows: timing.scriptTailRows + lead }) });
 }
 
 /**
