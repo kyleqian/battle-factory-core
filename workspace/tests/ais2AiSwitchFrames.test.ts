@@ -16,7 +16,7 @@ const script = new URL("../tools/integration/soundCensusRomReplay.ts", import.me
 
 describe("AI mid-battle switch frames (ais2)", () => {
   for (const scene of ["off", "on"] as const) {
-    it(`seed 2741 Scene ${scene.toUpperCase()}: the withdraw, return-to-ball, recall ball effect and opponent tray are the ROM's frames`, { timeout: 180_000 }, () => {
+    it(`seed 2741 Scene ${scene.toUpperCase()}: the withdraw, return-to-ball, recall ball effect, opponent tray and send-in ball are the ROM's frames`, { timeout: 180_000 }, () => {
       const w = fixture.scenes[scene];
       const dir = mkdtempSync(join(tmpdir(), "ais2-"));
       writeFileSync(join(dir, "setup.json"), JSON.stringify(w.setup));

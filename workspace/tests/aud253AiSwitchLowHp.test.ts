@@ -12,7 +12,8 @@ const fixture = JSON.parse(readFileSync(new URL("./fixtures/aud253-ai-switch-low
   seeds: Record<string, { scene: "on" | "off"; kinds: string[]; anchor: { kind: string; id: number; index: number }; setup: unknown; rom: Row[] }>;
 };
 // engine minus ROM frame offsets, relative to the anchor row. ais1: 2741's recall ball open is now the synthesized RETURNMON + return-to-ball switch-out command's (was the tray-draw stop-gap, 31 frames late), so it is exact; ais2: the opponent tray span is 101 (switchhandleorder), so the send-in ball open and cry are 1 short (a faint replacement shares that 1: the ROM opens the ball 1 later)
-const DELTAS: Record<string, number[]> = { "2741": [0, 0, -1, -1], "2": [0, 0, 0, 0, 0] };
+// ais3: the AI send-in runs 2 frames late as a whole (the ROM throws its ball at send-in elapsed 4; pixel-exact in both scenes), so the send-in ball open and cry go -1 -> +1 (the emitters keep their per-ball offsets, so the sound rows overshoot by 1)
+const DELTAS: Record<string, number[]> = { "2741": [0, 0, 1, 1], "2": [0, 0, 0, 0, 0] };
 const script = new URL("../tools/integration/soundCensusRomReplay.ts", import.meta.url).pathname;
 
 function engineRows(seed: string): Row[] {

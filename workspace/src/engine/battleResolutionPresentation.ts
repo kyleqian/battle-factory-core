@@ -236,6 +236,12 @@ export const FOCUS_PUNCH_SETUP_SCRIPT = "BattleScript_FocusPunchSetUp";
 const FOCUS_PUNCH_STATUS2_SUBSTITUTE = 1 << 24;
 const SYNTHESIZED_SWITCH_DISPATCHER = "synthesized-voluntary-switch";
 const SYNTHESIZED_AI_SWITCH_DISPATCHER = "synthesized-ai-switch";
+/**
+ * ais3: an AI voluntary switch's send-in (BattleScript_DoSwitchOut's `switchinanim`) throws its ball 2 frames after a faint
+ * replacement's (seed 2741 ROM frames, both scenes: ball first drawn at send-in elapsed 4, not 2; open and everything after it
+ * 2 later), so the whole send-in runs 2 frames late (`sendInVisualDelay`) and the command is 2 longer.
+ */
+const AI_SWITCH_SEND_IN_LEAD_FRAMES = 2;
 
 /**
  * fpo187 (docs/fpo187-focus-punch-on-prepass-row.md, ont193): Scene ON only, the pre-pass `playanimation` launch
@@ -5126,8 +5132,9 @@ export function projectBattleResolutionCommands(
       const speciesTail = battler === 1 && sceneOn;
       const forcedPlayer = battler === 0 && forcedDraggedOut.has(0);
       forcedDraggedOut.delete(battler);
-      commands.push(Object.freeze({
-        type: "switch-in",
+      const aiSwitchLead = battler === 1 && event.provenance?.sourceLabel === "BattleScript_DoSwitchOut" ? AI_SWITCH_SEND_IN_LEAD_FRAMES : 0;
+      const sendIn: Extract<BattleResolutionPresentationCommand, { type: "switch-in" }> = Object.freeze({
+        type: "switch-in" as const,
         eventSequence: event.sequence,
         battler,
         fromPartyIndex: switched.fromPartyIndex,
@@ -5158,6 +5165,13 @@ export function projectBattleResolutionCommands(
             return lag === null ? {} : { sendInLagElapsed: lag };
           })(),
         } : {}),
+      });
+      commands.push(aiSwitchLead === 0 ? sendIn : Object.freeze({
+        ...sendIn,
+        timing: Object.freeze({ ...sendIn.timing, minimumFrames: sendIn.timing.minimumFrames + aiSwitchLead }),
+        sendInVisualDelay: (sendIn.sendInVisualDelay ?? 0) + aiSwitchLead,
+        healthboxSlideElapsed: (sendIn.healthboxSlideElapsed ?? 0) + aiSwitchLead,
+        ...(sendIn.sendInLagElapsed === undefined ? {} : { sendInLagElapsed: sendIn.sendInLagElapsed + aiSwitchLead }),
       }));
     }
   }
