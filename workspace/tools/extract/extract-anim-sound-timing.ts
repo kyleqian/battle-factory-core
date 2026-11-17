@@ -535,6 +535,9 @@ function lifetimeOf(cmd: Command, attackerSide: number, pic: PicContext, rollout
   if (sprite("gToxicBubbleSpriteTemplate")) return { exact: 20 };
   // AnimSpriteOnMonPos again, gHealingBlueStarAnimCmds (battle_anim_effects_1.c:1825-1836): 2 + 2 + 2 + 3 + 5 + 3 + 2 + 2 = 21 frames.
   if (sprite("gHealingBlueStarSpriteTemplate")) return { exact: 21 };
+  // aud257: AnimAngel (battle_anim_effects_2.c:3516-3540) is the template callback itself (no init stage, gDummySpriteAffineAnimTable): data[0] counts every call and DestroyAnimSprite runs at
+  // data[0] > 100. Cross-checked against the ROM Sweet Kiss rows: SE 226 (Attract) lands 50 frames after the third Heal Bell, i.e. gone = F + 99 (exact 99).
+  if (sprite("gAngelSpriteTemplate")) return { exact: 99 };
   // AnimPowerAbsorptionOrb (battle_anim_effects_1.c:2230-2240): data[0] = duration, the init installs StartAnimLinearTranslation with DestroySpriteAndMatrix in data[6]: the
   // AnimRaiseSprite shape below, D + 1 (D = 0 divides by zero: declined).
   if (op === "create_power_absorption_orb_sprite" || sprite("gPowerAbsorptionOrbSpriteTemplate")) { const d = op === "create_power_absorption_orb_sprite" ? intNamed("duration") : intArg(args[5]); return d === null || d < 1 ? null : { exact: d + 1 }; }

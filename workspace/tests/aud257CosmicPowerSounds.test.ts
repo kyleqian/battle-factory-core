@@ -45,4 +45,13 @@ describe("Cosmic Power SE rows (aud257)", () => {
     expect(ours[2]!.frame - ours[0]!.frame).toBe(125);
     expect(ours.map((e, i) => e.frame - romRows[i]!.frame)).toEqual([5, 5, 5]);
   });
+  it("Sweet Kiss (rank 7): gAngelSpriteTemplate lifetime 99 resolves the waitforvisualfinish, so the Attract SE 226 lands 50 frames after the third Heal Bell (ROM T2 rows)", () => {
+    const entry = timing.moves[186]!;
+    expect(entry.label).toBe("Move_SWEET_KISS");
+    expect(entry.gated[0]).toBe(0);
+    expect(timing.variants[entry.variants[0]!]).toEqual([
+      { op: "playsewithpan", frame: 6, id: 195, pan: 63 }, { op: "playsewithpan", frame: 31, id: 195, pan: 63 },
+      { op: "playsewithpan", frame: 56, id: 195, pan: 63 }, { op: "playsewithpan", frame: 106, id: 226, pan: 63 },
+    ]);
+  });
 });
