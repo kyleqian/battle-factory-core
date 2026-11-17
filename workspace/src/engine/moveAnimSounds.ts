@@ -28,11 +28,16 @@ interface TimingTable {
   readonly turns: number;
   readonly sides: number;
   readonly variants: readonly (readonly TimedOp[])[];
-  readonly moves: readonly Readonly<{ move: number; variants: readonly number[]; pic?: readonly number[]; counter?: readonly number[]; damage?: readonly number[] }>[];
+  readonly moves: readonly Readonly<{ move: number; variants: readonly number[]; pic?: readonly number[]; counter?: readonly number[]; damage?: readonly number[]; flag?: readonly number[]; flagKind?: "power" | "heal"; elevation?: readonly number[] }>[];
   /** aud242o: per Rollout counter 1..5, the variant index (the walk reads AnimTask_Rollout's length from GetRolloutCounter). */
   readonly counterGrids: readonly (readonly number[])[];
   /** aud258: per Seismic Toss damage level 0..2 (AnimTask_GetSeismicTossDamageLevel: gAnimMoveDmg < 33 / 33..65 / > 65), the variant index. */
   readonly damageGrids: readonly (readonly number[])[];
+  /** aud262: per AnimTask_IsHealingMove result (gAnimMoveDmg > 0 -> 0, else 1), the variant index. */
+  readonly flagGrids: readonly (readonly number[])[];
+  /** aud262: the sorted distinct GetBattlerElevation values (0 = player / unelevated) and, per class, the variant index (Rapid Spin's AnimTask_RapinSpinMonElevation). */
+  readonly elevationClasses: readonly number[];
+  readonly elevationGrids: readonly (readonly number[])[];
   /** aud242l: per side, the sorted distinct pic Y (GetBattlerSpriteFinal_Y(..., TRUE)) a battler on that side can have. */
   readonly picYs: readonly (readonly number[])[];
   /** aud242l: grids of variant indices, row = attacker pic Y class, column = target pic Y class (both in picYs order). */
@@ -239,7 +244,14 @@ function seismicTossDamageLevel(damage: number): 0 | 1 | 2 {
  * A move whose sprite lifetimes depend on the two battlers' pic Y (Blizzard, aud242l) carries a grid per slot; `picY` reads the live values and an unknown class keeps
  * the reference walk.
  */
-function variantOf(move: number, turn: number, attackerSide: 0 | 1, picY?: (battler: 0 | 1) => number, rolloutCounter?: number, damage?: number): readonly TimedOp[] {
+interface VariantInputs {
+  readonly picY?: (battler: 0 | 1) => number;
+  readonly rolloutCounter?: number;
+  readonly damage?: number;
+  /** GetBattlerElevation of the attacker (gEnemyMonElevation / sCastformElevations; 0 for the player). */
+  readonly attackerElevation?: number;
+}
+function variantOf(move: number, turn: number, attackerSide: 0 | 1, { picY, rolloutCounter, damage, attackerElevation }: VariantInputs = {}): readonly TimedOp[] {
   const entry = timing.moves[move];
   if (entry === undefined) return [];
   const turnIndex = turn < timing.turns ? turn : timing.turns - 2 + (turn & 1);
@@ -248,6 +260,11 @@ function variantOf(move: number, turn: number, attackerSide: 0 | 1, picY?: (batt
   if (counterGrid !== undefined) return timing.variants[counterGrid[rolloutCounter !== undefined && rolloutCounter >= 1 && rolloutCounter <= 5 ? rolloutCounter - 1 : 0]!]!;
   const damageGrid = entry.damage === undefined ? undefined : timing.damageGrids[entry.damage[slot]!];
   if (damageGrid !== undefined && damage !== undefined) return timing.variants[damageGrid[seismicTossDamageLevel(damage)]!]!;
+  const flagGrid = entry.flag === undefined || entry.flagKind !== "heal" || damage === undefined ? undefined : timing.flagGrids[entry.flag[slot]!];
+  if (flagGrid !== undefined) return timing.variants[flagGrid[damage > 0 ? 0 : 1]!]!;
+  const elevationGrid = entry.elevation === undefined || attackerElevation === undefined ? undefined : timing.elevationGrids[entry.elevation[slot]!];
+  const elevationClass = timing.elevationClasses.indexOf(attackerElevation ?? -1);
+  if (elevationGrid !== undefined && elevationClass >= 0) return timing.variants[elevationGrid[elevationClass]!]!;
   const grid = entry.pic === undefined || picY === undefined ? undefined : timing.picGrids[entry.pic[slot]!];
   if (grid !== undefined) {
     const row = timing.picYs[attackerSide]!.indexOf(picY!(attackerSide));
@@ -383,7 +400,7 @@ export function emitMoveAnimSounds(after: BattleResolutionPresentationState | nu
     targetSide: request.target === 0 ? "player" : "opponent",
   } as const;
   const scriptRow = age - FIRST_COMMAND_AGE - AGE_TO_SOUND_ROWS;
-  const ops = variantOf(request.moveId, request.turn, request.attacker === 0 ? 0 : 1, source.picOffsetY, request.rolloutCounter, request.damage);
+  const ops = variantOf(request.moveId, request.turn, request.attacker === 0 ? 0 : 1, { picY: source.picOffsetY, rolloutCounter: request.rolloutCounter, damage: request.damage, attackerElevation: source.attackerElevation });
   emitOpsAt(ops, context, scriptRow);
   if (scriptRow === 0) scheduleMoveAnimationTail(ops, context, lastAge - FIRST_COMMAND_AGE - AGE_TO_SOUND_ROWS);
   emitCryTaskRows(request.moveId, source.attackerSpecies, context.attackerSide, scriptRow, frontierBrain);

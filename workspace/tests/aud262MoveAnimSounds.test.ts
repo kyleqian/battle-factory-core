@@ -56,3 +56,33 @@ describe("Magnitude (aud262)", () => {
     });
   }
 });
+
+// Rapid Spin: the second SE_M_RAZOR_WIND2 loop starts after the first waitforvisualfinish + hit + delay; the first wait ends with AnimTask_RapinSpinMonElevation, whose length is set by the attacker's
+// GetBattlerYCoordWithElevation (battle_anim_mons.c:342-370: 40 - gEnemyMonElevation for an opponent, 80 for the player; battle_anim_effects_3.c:1749-1883). Keyed on the attacker's elevation.
+describe("Rapid Spin (aud262)", () => {
+  const entry = timing.moves[229]!;
+  const secondLoop = (elevation: number) => {
+    const grid = (timing as unknown as { elevationGrids: number[][]; elevationClasses: number[] });
+    const cells = grid.elevationGrids[(entry as unknown as { elevation: number[] }).elevation[1]!]!;
+    const ops = timing.variants[cells[grid.elevationClasses.indexOf(elevation)]!]!;
+    return ops.filter((o) => o.op === "loopsewithpan")[1]!.frame - ops.filter((o) => o.op === "loopsewithpan")[0]!.frame;
+  };
+  it("the table entry: ungated, keyed on the opponent attacker's elevation only", () => {
+    expect(entry.label).toBe("Move_RAPID_SPIN");
+    expect(entry.gated.every((g) => g === 0)).toBe(true);
+    expect((entry as unknown as { elevation: number[] }).elevation.map((g) => g >= 0)).toEqual(Array.from({ length: 12 }, (_, i) => i % 2 === 1));
+    expect([0, 5, 8].map(secondLoop)).toEqual([73, 73, 73]);
+    expect([10, 13, 16].map(secondLoop)).toEqual([72, 70, 69]);
+  });
+  const windows = [["rapidspin", "player", 0, 73], ["rapidspinmoltres", "opponent", 5, 73], ["rapidspinvoltorb", "opponent", 10, 72], ["rapidspinpidgey", "opponent", 16, 69]] as const;
+  for (const [name, side, elevation, gap] of windows) {
+    it(`aud262-${name}-${side}: second loop ${gap} frames after the first (elevation ${elevation}); ids, pans, offset constant`, () => {
+      const rom = fixture(`aud262-${name}-${side}`);
+      const rows = rom.events.filter((e) => e.noop !== true && e.kind === "se" && (e.id === 160 || e.id === 134));
+      expect(rows.length).toBe(9);
+      expect(rows[5]!.frame - rows[0]!.frame).toBe(gap);
+      expect(secondLoop(elevation)).toBe(gap);
+      expect(expectConstantOffset(rom, [160, 134], 9, "first")).toBe(2);
+    });
+  }
+});
