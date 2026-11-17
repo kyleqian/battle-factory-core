@@ -47,8 +47,14 @@ def say(msg):
         print(line, file=log_fh, flush=True)
 
 
+def covered_rules():
+    """Rule ids that already have a promoted stage file (stages/coverage/R<id>-*.json): the nightly replay guards them, the hunt need not."""
+    return {os.path.basename(f).split("-")[0] for f in glob.glob(W + "/docs/parity-mac/stages/coverage/R*-*.json")}
+
+
 def load_designs():
-    designs, rejected = [], []
+    designs, rejected, covered = [], [], []
+    done = covered_rules()
     for f in sorted({f for g in globs for f in glob.glob(g)}):
         try:
             d = json.load(open(f))
@@ -57,9 +63,11 @@ def load_designs():
             d, bad = {"name": os.path.basename(f), "rules": []}, [f"unreadable: {e}"]
         if bad:
             rejected.append({"design": d.get("name", f), "file": f, "problems": bad})
+        elif d.get("rules") and all(r in done for r in d["rules"]):
+            covered.append({"design": d["name"], "rules": d["rules"]})
         else:
             designs.append({"name": d["name"], "rules": d.get("rules", []), "file": f, "stage": d})
-    return designs, rejected
+    return designs, rejected, covered
 
 
 def read_state():
@@ -80,7 +88,7 @@ def read_results():
     return rows
 
 
-def write_summary(designs, rejected, status):
+def write_summary(designs, rejected, covered, status):
     rows = read_results()
     per = {}
     for d in designs:
@@ -117,7 +125,7 @@ def write_summary(designs, rejected, status):
             q["stageFilesReady"] += p["stageFilesReady"]
     summary = {"status": status, "day": DAY, "start": datetime.datetime.fromtimestamp(START, datetime.timezone.utc).isoformat(),
                "end": datetime.datetime.now(datetime.timezone.utc).isoformat(), "deadlineEpoch": DEADLINE, "jobs": JOBS, "romDriveSlots": ROM_SLOTS,
-               "seedBase": SEED_BASE, "out": OUT, "designsRun": len(designs), "rejectedDesigns": rejected,
+               "seedBase": SEED_BASE, "out": OUT, "designsRun": len(designs), "rejectedDesigns": rejected, "coveredDesigns": covered,
                "totals": {"seeds": sum(p["seeds"] for p in per.values()), "markerHits": sum(p["markerHits"] for p in per.values()),
                           "romMatch": sum(p["romMatch"] for p in per.values()), "romDiffer": sum(p["romDiffer"] for p in per.values()),
                           "stageFilesReady": sum(len(p["stageFilesReady"]) for p in per.values())},
@@ -127,7 +135,7 @@ def write_summary(designs, rejected, status):
     t = summary["totals"]
     md = [f"# Luck hunt {DAY} ({status})", "",
           f"seeds {t['seeds']}, marker hits {t['markerHits']}, ROM match {t['romMatch']}, ROM differ {t['romDiffer']}, stage files ready to promote {t['stageFilesReady']}; "
-          f"designs run {len(designs)}, rejected {len(rejected)}; jobs {JOBS} (ROM drives at most {ROM_SLOTS}); seeds {SEED_BASE}+k.", "",
+          f"designs run {len(designs)}, covered (skipped) {len(covered)}, rejected {len(rejected)}; jobs {JOBS} (ROM drives at most {ROM_SLOTS}); seeds {SEED_BASE}+k.", "",
           "| rule | designs | seeds | marker hits | ROM match | ROM differ | drive stopped | stage files ready |", "|---|---|---|---|---|---|---|---|"]
     for q in summary["byRule"]:
         md.append(f"| {q['rule']} | {', '.join(q['designs'])} | {q['seeds']} | {q['markerHits']} | {q['romMatch']} | {q['romDiffer']} | {q['romStopped']} | "
@@ -135,6 +143,8 @@ def write_summary(designs, rejected, status):
     dis = [p for p in per.values() if p["disabled"]]
     if dis:
         md += ["", "Designs switched off during the run (the design is broken, fix it):", *[f"- {p['design']}: {p['disabled']}" for p in dis]]
+    if covered:
+        md += ["", "Designs skipped, their rule already has a stage file in stages/coverage/:", *[f"- {c['design']} ({', '.join(c['rules'])})" for c in covered]]
     if rejected:
         md += ["", "Designs refused by designcheck.py:", *[f"- {r['design']}: {'; '.join(r['problems'])}" for r in rejected]]
     differ = [(p["design"], h) for p in per.values() for h in p["hits"] if h.get("rom") == "differ"]
@@ -234,13 +244,15 @@ def on_signal(signum, _frame):
 def main():
     signal.signal(signal.SIGTERM, on_signal)
     signal.signal(signal.SIGINT, on_signal)
-    designs, rejected = load_designs()
+    designs, rejected, covered = load_designs()
     state = read_state()
     if state.get("day") != DAY:  # the same OUT reused on another day: the seed base moved, so start the counter again
         state = {"k": 0, "day": DAY}
-    say(f"start day {DAY} seeds {SEED_BASE}+k from k={state['k']}, {len(designs)} designs ({len(rejected)} rejected), jobs {JOBS}, deadline "
+    for c in covered:
+        say(f"covered {c['design']}: {', '.join(c['rules'])} already has a stage file in stages/coverage/, not hunted")
+    say(f"start day {DAY} seeds {SEED_BASE}+k from k={state['k']}, {len(designs)} designs ({len(covered)} covered, {len(rejected)} rejected), jobs {JOBS}, deadline "
         f"{datetime.datetime.fromtimestamp(DEADLINE, datetime.timezone.utc).strftime('%H:%M:%S')}Z")
-    write_summary(designs, rejected, "running")
+    write_summary(designs, rejected, covered, "running")
     dstate = {d["name"]: {"done": False, "fails": 0} for d in designs}
     cursor = {"i": 0}
 
@@ -285,7 +297,7 @@ def main():
                     print(f"{time.strftime('%H:%M:%S')} DISABLED {d['name']}: {row['disabled']}", file=log_fh, flush=True)
                 with open(OUT + "/seeds.jsonl", "a") as fh:
                     fh.write(json.dumps(row) + "\n")
-            write_summary(designs, rejected, "running")
+            write_summary(designs, rejected, covered, "running")
 
     threads = [threading.Thread(target=worker, daemon=True) for _ in range(JOBS)]
     for t in threads:
@@ -293,7 +305,7 @@ def main():
     for t in threads:
         while t.is_alive():
             t.join(timeout=5)
-    write_summary(designs, rejected, "stopped by signal" if stop.is_set() else "finished at the deadline" if time.time() >= DEADLINE else "finished: every design done")
+    write_summary(designs, rejected, covered, "stopped by signal" if stop.is_set() else "finished at the deadline" if time.time() >= DEADLINE else "finished: every design done")
     say(f"end: {len(read_results())} seeds")
 
 

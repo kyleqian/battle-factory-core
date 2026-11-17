@@ -31,6 +31,9 @@ All commands run with cwd = `workspace/`; outputs go under `.integration/evidenc
 `prehunt.py DESIGN WORK SEED 1` (engine first; the ROM drive only when a `cover` marker ran), and on a marker hit the ROM drive
 (`romReplayWide.sh --stage`) is recorded as match, stopped (the drive ended before a real difference; not an engine difference) or differ.
 A design that has matched or differed is done and leaves the round; a design with 6 lab or engine failures in a row is disabled.
+A design whose rule ids all have a stage file in `docs/parity-mac/stages/coverage/` (`R<id>-*.json`, the promoted hits, guarded by the nightly replay)
+is not hunted: it is logged once as `covered` in `hunt.log`, listed under "Designs skipped" in `summary.md` and in `summary.json` `coveredDesigns`.
+(Promote a hit's stage file and the next day's seeds go to the rules still open.) Never mind the file names of the designs: the check is the rule id.
 It is started from `workspace/` (the day job does this under `nice -n 19`) and needs no git: it writes nothing outside `LUCK_HUNT_OUT`.
 
 | env | meaning |
@@ -53,4 +56,5 @@ seeds of the other hunts (below 1,000,000) are never reused. Do not pass a diffe
 use `LUCK_HUNT_DAY` only in tests.
 
 Test (no ROM drive): `tools/replay-hunt/test-luckHunt.sh` (a deadline in the past exits 0 at once with a valid summary and no seed; a
-deadline 15 s ahead ends within one seed's time).
+deadline 15 s ahead ends within one seed's time; a design whose rule already has a coverage stage file is skipped and logged once, and a run with only
+covered designs ends at once with no seed).
