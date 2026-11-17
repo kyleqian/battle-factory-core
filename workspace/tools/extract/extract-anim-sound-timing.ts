@@ -195,6 +195,10 @@ const METALLIC_SHINE_LENGTH = 95;
 const METALLIC_SHINE_LOAD_LAG = 4;
 // AnimTask_ScaryFace loads its BG tilemap, image and palette in the creating step like AnimTask_MetallicShine: the ROM window (aud242k Scary Face) puts the first op after its wait 6 wall frames later than the 77-call count.
 const SCARY_FACE_LOAD_LAG = 6;
+// aud260: how much of that lag a command in the SAME script step as the creating createvisualtask already pays (Cmd_createvisualtask runs the entry, whose decompress / palette load stalls the main loop, then the
+// script loop continues into the next command): the Glare window plays its SE_M_LEER, created right after the task, 2 wall frames after the pre-lag count. The other 4 reach only later iterations (measured,
+// the same decomposition as METALLIC_SHINE_LOAD_LAG's "2 localised + 2 not").
+const SCARY_FACE_SAME_STEP_LAG = 2;
 // ---- Instant visual tasks (aud242d). Cmd_createvisualtask runs `taskFunc(taskId)` BEFORE `gAnimVisualTaskCount++` (battle_anim.c:437-439), and an
 // entry function whose every path is straight-line code ending in `DestroyAnimVisualTask(taskId)` (-> `gAnimVisualTaskCount--`, battle_anim.c:274-277)
 // nets to 0 in the creating step: a following waitforvisualfinish never waits for it (lifetime -1, like the PlaySE1/2WithPanning tasks). Sprites a task
@@ -879,6 +883,10 @@ function lifetimeOf(cmd: Command, attackerSide: number, pic: PicContext, rollout
   // AnimTask_ScaryFace (battle_anim_effects_2.c:3324-3410): the entry loads the BG and sets func; the step's case 0 ends on its 14th blend (every 2nd call: call 28), case 1 takes 21
   // calls (29..49), case 2 ends on its 14th decrement (calls 51, 53, ..., 77), and case 3 / 4 clear the BG and destroy in the next call: call 78, gone 77 ticks after F.
   if (op === "createvisualtask" && args[0] === "AnimTask_ScaryFace") return { exact: 77 };
+  // aud260: AnimTask_GlareEyeDots (battle_anim_effects_3.c:3989-4087): the entry only sets func (tPairMax 12); the step (calls 1..) fires a dot pair every 4th call (++tTimer > 3: calls 4, 8, ..., 52, 13 pairs,
+  // tState 1 after pairNum 12), each dot lives 37 callbacks (AnimGlareEyeDot), and state 1 destroys the task in the call that sees tActiveSprites == 0: gone 88 ticks after F (docs section 25.1: the ROM's first
+  // wait agrees, the blend task created 89 ticks after the SE).
+  if (op === "createvisualtask" && args[0] === "AnimTask_GlareEyeDots") return { exact: 88 };
   // AnimTask_ShakeTargetInPattern (battle_anim_fire.c:1344-1375; maxShakes = gBattleAnimArgs[0] = script args[2] (aud242o: was read from args[3], the shake offset)): the entry is the step (call 0 stores the args); every call counts tShakeNum and the
   // call where it equals maxShakes (call maxShakes - 1) destroys: gone maxShakes - 2 ticks after F.
   if (op === "createvisualtask" && args[0] === "AnimTask_ShakeTargetInPattern") { const n = intArg(args[2]); return n === null || n < 1 ? null : { exact: n - 2 }; }
@@ -1324,7 +1332,10 @@ function walk(bodyLabel: string, turn: number, attackerSide: number, pic: PicCon
       // AnimTask_MetallicShine decompresses its tilemap and image and loads a palette in the creating step (battle_anim_dark.c:866-870): a measured
       // VBlank overrun (METALLIC_SHINE_LOAD_LAG; Metal Claw and Steel Wing, aud242d), like BG_LOAD_LAG.
       if ((op === "metallic_shine" || (op === "createvisualtask" && args[0] === "AnimTask_MetallicShine")) && frame !== null) lags.push({ after: frame, frames: METALLIC_SHINE_LOAD_LAG });
-      if (op === "createvisualtask" && args[0] === "AnimTask_ScaryFace" && frame !== null) lags.push({ after: frame, frames: SCARY_FACE_LOAD_LAG });
+      if (op === "createvisualtask" && args[0] === "AnimTask_ScaryFace" && frame !== null) {
+        lags.push({ after: frame - 0.5, frames: SCARY_FACE_SAME_STEP_LAG });
+        lags.push({ after: frame, frames: SCARY_FACE_LOAD_LAG - SCARY_FACE_SAME_STEP_LAG });
+      }
       let life = lifetimeOf(cmd, attackerSide, pic, rolloutCounter);
       const colorCycle = op === "blend_color_cycle" || op === "blend_color_cycleexclude" || op === "blend_color_cyclebytag" || (op === "createvisualtask" && /^AnimTask_BlendColorCycle/.test(args[0] ?? ""));
       if (frame !== null && life !== null && "exact" in life && (colorCycle || op === "simple_palette_blend" || (op === "createsprite" && args[0] === "gSimplePaletteBlendSpriteTemplate"))) {

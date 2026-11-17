@@ -51,3 +51,19 @@ describe("Brick Break turn 2 (aud260)", () => {
     expect(expectConstantOffset(rom, [122, 123, 198], 4)).toBe(2);
   });
 });
+
+// AnimTask_GlareEyeDots lives 88 ticks (battle_anim_effects_3.c:3989-4087); the SE_M_LEER sits in the script step of AnimTask_ScaryFace's creation and pays the part of the BG load stall that precedes it
+// (SCARY_FACE_SAME_STEP_LAG 2 of the 6): ROM 200 @67, 192 @174 (+107).
+describe("Glare (aud260)", () => {
+  it("the table entry: PSYBEAM2 at 6, LEER at 113 (the 107-frame gap), ungated", () => {
+    expect(timing.moves[137]!.label).toBe("Move_GLARE");
+    expect(timing.moves[137]!.gated.every((g) => g === 0)).toBe(true);
+    expect(tableRows(137, 0)).toEqual(["6:200", "113:192"]);
+  });
+  it("aud260-glare-player: ids, pans and the 107-frame gap equal the ROM's, offset constant", () => {
+    const rom = fixture("aud260-glare-player");
+    expect(expectConstantOffset(rom, [200, 192], 2)).toBe(2);
+    const romRows = rom.events.filter((e) => e.kind === "se" && [200, 192].includes(e.id as number));
+    expect(romRows[1]!.frame - romRows[0]!.frame).toBe(107);
+  });
+});
