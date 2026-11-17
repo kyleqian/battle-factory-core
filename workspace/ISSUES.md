@@ -165,6 +165,8 @@ aud252's Double Team SE239 rows (emitted outside the timing table; T1 classifier
 **aud242r (2026-11-17)** Heal Bell -4, Spike Cannon +9 (multi-hit class), Eruption +2, Moonlight -4, Curse (Ghost) +1 (L50 805 emitted, 53 gated; section 22). T1 0..99 ON missing-gated 65 -> **41**.
 **aud255 (2026-11-17, T2 on `57bb082ac`, 41 ROM seeds):** Scene OFF 0 missing / 0 extra in every family; Scene ON move-animation SE missing **76** (aud251: 206; Rock Throw 131 x15, Thunderbolt 118 x12,
 Absorb 179 x8, 214 / 186 / 140 / 221 / 228 x6 each), every other family 0 / 0, no engine-only rows.
+**t2cls / aud256 (2026-11-17, HEAD `ce04ab20e`):** ON missing **63**: Shock Wave 18, Seismic Toss 9 (+ damage branch), Torment 8, Cosmic Power 6, Soft-Boiled 2, Sweet Kiss 1 (table-gated);
+Wish heal 12, Future Sight hit 3, Focus Band 1 (general animations with no emitter branch in `emitGeneralAnimSounds`); seed 165 res17 3 (unidentified). Eruption's 13 were stale (eru1 / eru2).
 Open (census gated): Dynamic Punch 10 (SE-length bound, 50 % accuracy), Soft-Boiled 5 (`setarg` + affine loop; lab committed), Memento 4, Air Cutter 4, Torment 4, Cosmic Power 3, Fake Out 2, Recycle 2.
 
 ## #194 — Opponent RATTATA Quick Attack differs above the clip row (qak247, 2026-11-04)
