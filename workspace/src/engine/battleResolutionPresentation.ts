@@ -546,6 +546,8 @@ export type BattleResolutionPresentationCommand =
       skipFrontAnimation?: true;
       /** offs152: Scene OFF long-nickname lag frame -- from this elapsed on the send-in visuals run one frame late. */
       sendInLagElapsed?: number;
+      /** ais3: an AI voluntary switch's send-in (2 frames late as a whole; its Scene OFF release tint ramp starts like Scene ON's). */
+      aiSwitch?: true;
     }>
   | Readonly<{
       type: "switch-out";
@@ -5168,6 +5170,7 @@ export function projectBattleResolutionCommands(
       });
       commands.push(aiSwitchLead === 0 ? sendIn : Object.freeze({
         ...sendIn,
+        aiSwitch: true as const,
         timing: Object.freeze({ ...sendIn.timing, minimumFrames: sendIn.timing.minimumFrames + aiSwitchLead }),
         sendInVisualDelay: (sendIn.sendInVisualDelay ?? 0) + aiSwitchLead,
         healthboxSlideElapsed: (sendIn.healthboxSlideElapsed ?? 0) + aiSwitchLead,

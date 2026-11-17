@@ -681,6 +681,8 @@ export function midBattleSwitchInAt(
   backAnimMon?: Readonly<{ species: string; nature: string }>,
   /** pfb229: the Scene ON player send-in's mon sprite y (`fieldArt.player.origin.y + 32`) keying the ball arc (omitted = the fitted 93). */
   playerMonY: number = MID_BATTLE_SWITCH_BALL_MON_Y,
+  /** ais3: the release tint ramp's hold (default 23 Scene OFF, 22 with a front animation); an AI switch's Scene OFF send-in uses 22 (seed 2741). */
+  tintHoldOverride?: number,
 ): MidBattleSwitchInView {
   const side = battler === 0 ? "player" : "opponent";
   // DoPokeballSendOutAnimation routes by GetBattlerSide. Player send-outs
@@ -734,7 +736,7 @@ export function midBattleSwitchInAt(
   // source-derived generated-opponent release cadence in battleScene.ts.
   // fra151: on a Scene ON opponent send-in (front animation launched) the ROM's ramp starts one frame earlier (dense snd145 windows,
   // 6 species: coefficient 15 at local 22); the Scene OFF windows show the same 16 rows but stay with the OFF owner.
-  const tintHold = frontAnimSpecies !== undefined ? 22 : 23;
+  const tintHold = tintHoldOverride ?? (frontAnimSpecies !== undefined ? 22 : 23);
   const monTintCoefficient = side === "opponent"
     ? opponentMaterializeLocal < tintHold
       ? 16
@@ -2544,6 +2546,7 @@ export function createBattleResolutionPresentationRenderView(
           ? Object.freeze({ species: createBattleCommandFieldArtView(field).player.speciesSymbol, nature: backAnimNatureName(command.incoming.personality) })
           : undefined,
         playerMonY,
+        command.aiSwitch === true ? 22 : undefined,
       );
       midBattleSwitchFade = midBattleSwitchSendInFadeAt(sendInElapsed, command.battler) ?? midBattleSwitchFade;
       midBattleSwitchParticles = midBattleSwitchSendInParticlesAt(sendInElapsed, command.battler, playerMonY) ?? midBattleSwitchParticles;
