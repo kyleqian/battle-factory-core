@@ -1164,8 +1164,8 @@ function lifetimeOf(cmd: Command, attackerSide: number, pic: PicContext, rollout
   // ---- aud242p slice 4. AnimSlideHandOrFootToTarget / AnimJumpKick (battle_anim_fight.c:421-443) -> AnimTravelDiagonally (battle_anim_mons.c:1591-1624; D = gBattleAnimArgs[4] = script
   // args[7]): data[0] = D and StartAnimLinearTranslation with DestroyAnimSprite stored in the init (the AnimPowerAbsorptionOrb shape): D + 1. AnimRockBlastRock (battle_anim_rock.c:800-806) ->
   // TranslateAnimSpriteToTargetMonLocation (battle_anim_mons.c:1546-1570, D = args[7]) in the init: D + 1; AnimThrowMistBall (battle_anim_ice.c:1090-1095) only installs that function, which
-  // runs in call 1: D + 2. D = 0 divides by zero (declined).
-  if (sprite("gKarateChopSpriteTemplate") || sprite("gJumpKickSpriteTemplate") || sprite("gRockBlastRockSpriteTemplate") || sprite("gMistBallSpriteTemplate")) {
+  // runs in call 1: D + 2. D = 0 divides by zero (declined). aud261: gOctazookaBallSpriteTemplate (battle_anim_effects_1.c:1691-1700) has TranslateAnimSpriteToTargetMonLocation as its own callback: D + 1.
+  if (sprite("gKarateChopSpriteTemplate") || sprite("gJumpKickSpriteTemplate") || sprite("gRockBlastRockSpriteTemplate") || sprite("gMistBallSpriteTemplate") || sprite("gOctazookaBallSpriteTemplate")) {
     const d = intArg(args[7]);
     return d === null || d < 1 ? null : { exact: d + (sprite("gMistBallSpriteTemplate") ? 2 : 1) };
   }

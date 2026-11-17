@@ -137,3 +137,21 @@ describe("Swallow (aud261)", () => {
     expect(romRows.every((e) => e.pan === 63)).toBe(true);
   });
 });
+
+// gOctazookaBallSpriteTemplate (battle_anim_effects_1.c:1691-1700, callback TranslateAnimSpriteToTargetMonLocation, D = 20: 21 ticks) gates the wait before the smoke: ROM MEGA_KICK2 141, SELF_DESTRUCT 177 22 later.
+describe("Octazooka (aud261)", () => {
+  it("the table entry: MEGA_KICK2 at 6, SELF_DESTRUCT at 28, ungated", () => {
+    expect(timing.moves[190]!.label).toBe("Move_OCTAZOOKA");
+    expect(timing.moves[190]!.gated.every((g) => g === 0)).toBe(true);
+    expect(timing.variants[timing.moves[190]!.variants[0]!]!.map((o) => `${o.frame}:${(o as { id?: number }).id}`)).toEqual(["6:141", "28:177"]);
+  });
+  for (const [side, pans] of [["player", [-64, 63]], ["opponent", [63, -63]]] as const) {
+    it(`aud261-octazooka-${side}: ids, pans and the +22 gap equal the ROM's, offset constant`, () => {
+      const rom = fixture(`aud261-octazooka-${side}`);
+      const romRows = rom.events.filter((e) => e.kind === "se" && (e.id === 141 || e.id === 177));
+      expect(romRows.map((e) => e.frame - romRows[0]!.frame)).toEqual([0, 22]);
+      expect(romRows.map((e) => e.pan)).toEqual(pans);
+      expect(expectConstantOffset(rom, [141, 177], 2)).toBe(2);
+    });
+  }
+});

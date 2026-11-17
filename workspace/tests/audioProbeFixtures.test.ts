@@ -207,6 +207,8 @@ describe("audio probe fixtures", () => {
       "aud261-flamewheel-player.json",
       "aud261-milkdrink-opponent.json",
       "aud261-milkdrink-player.json",
+      "aud261-octazooka-opponent.json",
+      "aud261-octazooka-player.json",
       "aud261-painsplit-opponent.json",
       "aud261-painsplit-player.json",
       "aud261-swallow-opponent.json",
