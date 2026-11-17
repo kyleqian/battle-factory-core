@@ -115,7 +115,7 @@ Chansey 227) can call it, about 0.1% of lab seeds, and a Mechanic Lab stage is R
 cheaply; left uncovered. See `STATUS.md`, "Box hunt 2026-11-14 (rrh2)".
 
 **Luck step luck1 (2026-11-16): lab designs for the luck-only rules, and the ones left out.** Fourteen designs are in
-`tools/replay-hunt/luck-designs/` (R030 R032 R035 R037 R038 R039 R040 R067 R080 R095 R097 R107 R109 R110), driven by
+`tools/replay-hunt/luck-designs/` (R030 R032 R035 R037 R038 R039 R040 R067 R080 R095 R097 R107 R109 R110; since luck3 R039 R067 R095 are retired and R030 is promoted, see "Luck hunt day 2" below), driven by
 `tools/replay-hunt/luckHunt.sh`. Left out, with the reason:
 
 - **R106 (bad poison counter stopping at 15): no design, the counter cannot get that far in the pools.** The tick is `maxHP / 16` times
