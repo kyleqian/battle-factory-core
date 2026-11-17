@@ -2,6 +2,7 @@
 // general-animation commands, from the staged labs tools/battle-lab/wsh1-*.json (ROM windows tools/compare/traces/wsh1-*.json).
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
+import { collectSoundTick } from "../src/audio/soundEvents.ts";
 import { createInitialState, tick } from "../src/engine/core.ts";
 import { traceAdvances } from "../tools/compare/traceReplay.ts";
 import {
@@ -90,4 +91,36 @@ describe("wsh1 general-animation commands (Scene ON)", () => {
       expect(commands[0]).toMatchObject({ timing: { minimumFrames: frames } });
     });
   }
+});
+
+// Sounds (Scene ON): the table SEs at command age = script frame + the calibrated script age (docs/wsh1-general-anim-commands.md; the T2 seeds 3738 / 6079 / 4235 pin the ROM rows).
+describe("wsh1 General_* SEs (Scene ON)", () => {
+  function seRows(id: string, animation: string, seIds: number[]): { start: number; rows: Array<[number, number]> } {
+    const trace = JSON.parse(readFileSync(new URL(`../tools/compare/traces/${id}.json`, import.meta.url), "utf8")) as {
+      appRoute: "generated-orchestrator"; segments: Array<{ frames: number; buttons?: string[] }>;
+    };
+    let state = createInitialState({ appRoute: trace.appRoute, battleScene: "on" });
+    state = APP_STAGES[id]!(state);
+    let start = -1;
+    const rows: Array<[number, number]> = [];
+    for (const advance of traceAdvances(trace.segments)) {
+      const result = collectSoundTick(state.frame + 1, () => tick(state, advance.buttons));
+      state = result.result;
+      const res = (state as any).factoryRoundBattleOrchestrator?.battleResolutionPresentation;
+      const command = res?.segments[res.segmentIndex]?.commands[res.commandIndex];
+      if (start < 0 && command?.type === "general-animation" && command.animation === animation && res.lifecycle.phase === "presenting") start = advance.frame;
+      if (start >= 0) for (const e of result.events) if (e.kind === "se" && e.id !== null && seIds.includes(e.id)) rows.push([e.id, advance.frame - start]);
+    }
+    return { start, rows };
+  }
+
+  it.each([
+    ["wsh1-wish-on", "WISH_HEAL", [140, 179], [[140, 41], [179, 116]]],
+    ["wsh1-fs-on", "FUTURE_SIGHT_HIT", [189, 184], [[189, 3], [184, 41], [184, 50]]],
+    ["wsh1-fb-on", "FOCUS_BAND", [171], [[171, 0]]],
+  ] as const)("%s: SE rows at command age", (id, animation, seIds, expected) => {
+    const { start, rows } = seRows(id, animation, [...seIds]);
+    expect(start).toBeGreaterThan(0);
+    expect(rows.slice(0, expected.length)).toEqual(expected.map(([se, age]) => [se, age]));
+  });
 });
