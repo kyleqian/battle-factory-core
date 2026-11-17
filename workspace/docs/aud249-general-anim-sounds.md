@@ -159,7 +159,7 @@ node --experimental-strip-types --no-warnings .integration/evidence/sta2/rows.ts
 
 ## sta3: the second Status_* play (action transition into a pre-move print, 3 launch rows)
 
-ROM step-mode windows (Scene ON, `gBattlescriptCurrInstr` + controller state per frame; `tools/audio/sta3RomWindow.py`, committed milestones in `tools/audio/fixtures/sta3-rom-windows.json`, labs `tools/battle-lab/aud242f-swagger-player-on.json` / `aud242g-dreameater-sleep-player-on.json`):
+ROM step-mode windows (Scene ON, `gBattlescriptCurrInstr` + controller state per frame; `tools/audio/sta3RomWindow.py`, committed milestones in `tests/fixtures/sta3-rom-windows.json`, labs `tools/battle-lab/aud242f-swagger-player-on.json` / `aud242g-dreameater-sleep-player-on.json`):
 
 | window | MoveEnd row | pre-move print row | waitmessage done | `status(2)animation` exec row | print -> launch |
 |---|---|---|---|---|---|

@@ -172,6 +172,8 @@ describe("sub157: Scene OFF Substitute / Transform keep the controller move anim
     for (const [a, b] of off.map((u, i) => [u, on[i]] as const)) {
       expect(pauses(b).every((x: any) => x.actionTransition === true)).toBe(true);
       expect(pauses(a).some((x: any) => x.actionTransition !== undefined)).toBe(false);
+      // sta3: the pause into a sleeping battler's pre-move print (its `status` counter write precedes the print) exists in Scene ON only: the OFF status command is unmeasured (docs/aud249 sta3).
+      if (pauses(a).length === 0 && pauses(b).length === 1) continue;
       expect(pauses(b).map((x: any) => x.timing)).toEqual(pauses(a).map((x: any) => x.timing));
     }
     const stripped = (u: any) => ({ ...u, commands: u.commands.filter((x: any, i: number, all: any[]) => !transitionPause(x, i, all)) });

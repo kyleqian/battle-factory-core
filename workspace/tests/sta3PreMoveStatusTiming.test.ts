@@ -1,4 +1,4 @@
-// sta3: a pre-move print (confusion / sleep) after an action. ROM milestones come from tools/audio/fixtures/sta3-rom-windows.json (step-mode
+// sta3: a pre-move print (confusion / sleep) after an action. ROM milestones come from tests/fixtures/sta3-rom-windows.json (step-mode
 // gBattlescriptCurrInstr, tools/audio/sta3RomWindow.py); the engine side is the production command timeline of the aud242f / aud242g windows.
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
@@ -11,7 +11,7 @@ const { APP_STAGES } = (await import(/* @vite-ignore */ appTracePath)) as {
   APP_STAGES: Record<string, (state: ReturnType<typeof createInitialState>) => ReturnType<typeof createInitialState>>;
 };
 interface Window { anchorPrint: number; moveEnd: number; print: number; waitDone: number; launch: number }
-const windows = JSON.parse(readFileSync(new URL("../tools/audio/fixtures/sta3-rom-windows.json", import.meta.url), "utf8")).windows as Record<string, Window>;
+const windows = JSON.parse(readFileSync(new URL("./fixtures/sta3-rom-windows.json", import.meta.url), "utf8")).windows as Record<string, Window>;
 
 interface Row { frame: number; type: string; hold: number | undefined; animation?: string }
 // Every command the presentation shows, with the frame it starts on (Scene ON).

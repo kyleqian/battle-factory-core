@@ -1,4 +1,4 @@
-# sta3: per-frame gBattlescriptCurrInstr + controller state of a battle-lab request (Scene ON/OFF), for tools/audio/fixtures/sta3-rom-windows.json.
+# sta3: per-frame gBattlescriptCurrInstr + controller state of a battle-lab request (Scene ON/OFF), for tests/fixtures/sta3-rom-windows.json.
 # python3 tools/run-mgba-probe.py OUT.json -- /srv/pokebench/vendor/mgba-venv/bin/python tools/audio/sta3RomWindow.py OUT.json tools/battle-lab/<lab>.json on|off
 import json, sys
 from pathlib import Path
