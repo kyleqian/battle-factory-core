@@ -323,6 +323,6 @@ Exact / offset split: move-animation 256 exact / 2953 offset, stat 12 / 62, cry 
 | Sweet Kiss | 830 | 226 | 1 | (a) |
 | Focus Band | 4235 | 171 | 1 | (b) |
 
-Class totals: (a) 31 + the (a)+(c) Seismic Toss 9 = 40 in (a), (b) 16, (e) 3 (Cosmic Power's 6 (a) rows are unmeasured, Eruption's 13 (e) rows are closed). The other moves timed after `57bb082ac` (Heal Bell, Spike Cannon, Moonlight, Curse) had no ROM-only row in aud255 and have none now, so that part of eru2's "scan not done" caveat is closed for these 19 seeds.
+Class totals: (a) 38 (Shock Wave 18, Seismic Toss 9 incl. its (c) branch, Torment 8, Soft-Boiled 2, Sweet Kiss 1), (b) 16, (e) 3 (Cosmic Power's 6 (a) rows are unmeasured, Eruption's 13 (e) rows are closed). The other moves timed after `57bb082ac` (Heal Bell, Spike Cannon, Moonlight, Curse) had no ROM-only row in aud255 and have none now, so that part of eru2's "scan not done" caveat is closed for these 19 seeds.
 
 Next: the ranked steps of t2cls stand with rank 3 (Eruption) removed; rank 1 (the three general-animation emitters, 16 rows) is now the largest ungated-table item after Shock Wave (18). To finish the measurement, run `tools/audio/aud248RunSeed.sh 5063 on .integration/evidence/aud256/chain` and the same for 8108 (the chain stage is cached, only the sound pass reruns, ~3 min each) and re-run `soundScoreboard.py`.
