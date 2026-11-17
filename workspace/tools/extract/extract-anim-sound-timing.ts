@@ -399,6 +399,34 @@ function extremeSpeedImpactDestroyCall(targetIsPlayer: boolean): number {
   }
   throw new Error("ExtremeSpeedImpact does not terminate");
 }
+// AnimMilkBottle_Step1 (battle_anim_effects_1.c:4003-4062); the init (:3987-4001) leaves data[6] = 0, data[7] = 16 and runs in the script step (call 0), the callback first runs on call 1.
+// Returns the call that DestroyAnimSprite runs on (case 4).
+function milkBottleDestroyCall(): number {
+  let [state, d1, d2, d6, d7] = [0, 0, 0, 0, 16];
+  for (let call = 1; call < 100000; call += 1) {
+    if (state === 0) {
+      d2 += 1;
+      if (d2 > 0) {
+        d2 = 0; d1 += 1;
+        if (d1 & 1) { if (d6 <= 15) d6 += 1; } else if (d7 > 0) d7 -= 1;
+        if (d6 === 16 && d7 === 0) { d1 = 0; state = 1; }
+      }
+    } else if (state === 1) {
+      d1 += 1;
+      if (d1 > 8) { d1 = 0; state = 2; }
+    } else if (state === 2) {
+      d1 += 1;
+      if (d1 > 2) d1 = 0;
+      d2 += 1;
+      if (d2 > 29) {
+        if (d2 & 1) { if (d6 > 0) d6 -= 1; } else if (d7 <= 15) d7 += 1;
+        if (d6 === 0 && d7 === 16) { d1 = 0; d2 = 0; state = 3; }
+      }
+    } else if (state === 3) state = 4;
+    else return call;
+  }
+  throw new Error("MilkBottle does not terminate");
+}
 function flailMovementLength(): number {
   let [state, count, angle, shrinks, amplitude] = [0, 0, 0, 0x20, 0x800];
   const s16 = (v: number): number => ((v + 0x8000) & 0xffff) - 0x8000;
@@ -1145,6 +1173,8 @@ function lifetimeOf(cmd: Command, attackerSide: number, pic: PicContext, rollout
   // AnimSpriteOnMonPos (battle_anim_mons.c:1515-1536) destroys itself in the first call after `animEnded || affineAnimEnded` (a sprite on gDummySpriteAnimTable never ends its anim: sprite.c:173-175,
   // 909-922 keep animBeginning set). gBellAnimCmds (battle_anim_effects_2.c:848-862) are 6 6 15 6 6 6 15 6 6 6 15 6 6 = 105 ticks: END at call 105, destroyed at 106 = 105.
   if (sprite("gBellSpriteTemplate")) return { exact: 105 };
+  // gMilkBottleSpriteTemplate: AnimMilkBottle_Step1 (battle_anim_effects_1.c:4003-4062), destroyed on call K, gone K - 1 ticks after F.
+  if (sprite("gMilkBottleSpriteTemplate")) return { exact: milkBottleDestroyCall() - 1 };
   // gThinRingExpanding / gBlendThinRingExpanding (AnimBlendThinRing, :2551-2575, calls AnimSpriteOnMonPos at once) run affine anim 0 (gThinRingExpandingAffineAnimCmds1, :710-716): a duration-0 frame
   // (BeginAffineAnim in call 0, delayCounter 0), then in call 1 the 30-tick frame (ApplyAffineAnimFrame, sprite.c:1330-1345, leaves delayCounter 29: calls 2..30 count it down) and END in call 31
   // (sprite.c:1055-1112, 1165-1178); AnimSpriteOnMonPos sees affineAnimEnded in call 32: gone 31 ticks after F.

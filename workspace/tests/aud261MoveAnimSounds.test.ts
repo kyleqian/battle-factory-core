@@ -57,3 +57,22 @@ describe("Extreme Speed (aud261)", () => {
     });
   }
 });
+
+// AnimMilkBottle_Step1 (battle_anim_effects_1.c:4003-4062, simulated by milkBottleDestroyCall) gates the wait before the thin ring: ROM 142 x3 (+14, +36), 225 +62, 179 +94 (the Healing blue stars); ROM minus ours -2 on both sides (status-move class). The window is the second turn: the first fails at full HP.
+describe("Milk Drink (aud261)", () => {
+  it("the table entry: CRABHAMMER SEs at 54 / 68 / 90, MILK_DRINK at 116, ABSORB_2 at 148, ungated", () => {
+    expect(timing.moves[208]!.label).toBe("Move_MILK_DRINK");
+    expect(timing.moves[208]!.gated.every((g) => g === 0)).toBe(true);
+    expect(timing.variants[timing.moves[208]!.variants[0]!]!.map((o) => `${o.frame}:${(o as { id?: number }).id}`)).toEqual(["54:142", "68:142", "90:142", "116:225", "148:179"]);
+  });
+  for (const [side, pan] of [["player", -64], ["opponent", 63]] as const) {
+    it(`aud261-milkdrink-${side}: ids, pans and the +14 / +36 / +62 / +94 gaps equal the ROM's, offset constant`, () => {
+      const rom = fixture(`aud261-milkdrink-${side}`);
+      const ids = [142, 225, 179];
+      const romRows = rom.events.filter((e) => e.kind === "se" && ids.includes(e.id as number));
+      expect(romRows.map((e) => e.frame - romRows[0]!.frame)).toEqual([0, 14, 36, 62, 94]);
+      expect(romRows.every((e) => e.pan === pan)).toBe(true);
+      expect(expectConstantOffset(rom, ids, 5)).toBe(-2);
+    });
+  }
+});
