@@ -2032,7 +2032,7 @@ current app stage should be rejected before replay.
 - **Concurrent `npm run typecheck` in two lanes OOM-kills one (exit 137)** (aud242o, lbw5, lazy1, supervisor; ~4-10 min each): each `tsc -b` peaks at ~6 GB on a 15 GB box.
   `typecheck` now takes `flock /tmp/pokebench-typecheck.lock` (supervisor, 2026-11-16 night), so lanes queue instead; worktrees based on older commits do not have it yet.
 - **Workers read "foreground only" into the rules and refuse `nohup` gates, then chunk 20-seed soaks into 5-seed calls** (ais1 ~45 min of soak chunks, aud242k / aud242l / lazy1
-  / hie4 / cry3 lost 5-15 min each to the 10-minute tool cap). Briefs now say explicitly that `nohup ... &` + polling is allowed. A worker also read the launcher's closing
+  / hie4 / cry3 lost 5-15 min each to the 10-minute tool cap). Briefs now say explicitly that `nohup ... &` + polling is allowed. **Still biting 2026-11-17:** aud257 ran T2 seed pairs in the foreground (~25 min, citing an "execution discipline forbids backgrounding" rule), wsh1 ran its soaks in foreground chunks and hit its 150-min cap before writing its doc or final report (supervisor finished its gates). Briefs now say long gates MUST be nohup'd and the doc is written first. A worker also read the launcher's closing
   "npm test green" line as conflicting with "the supervisor runs the full suite" (ais1, ~2 min).
 - **`npm run test:gate` does not run several sound tests** (`aud252LossBallOpen`, `aud248StatChangeSounds`): hie4's timing fix broke the aud252 pin unseen until cry3's
   importer sweep (supervisor re-pinned). Briefs touching timing should name `tests/aud2*` + `tests/cry*` explicitly.
@@ -2040,3 +2040,5 @@ current app stage should be rejected before replay.
   earlier days) and `.integration/evidence` 87 GB, 68 GB of it census `tree/` snapshots (~840 MB each, `lsd194Census.sh` copies src / tools / node_modules per arm).
   Supervisor removed `/tmp` entries older than a day (not open) and the 32 tree snapshots older than a day (list in `.integration/evidence/TREES-PRUNED-20261116.txt`;
   rebuildable from the arm's commit): 62 % used after. Census tooling could symlink node_modules and delete the tree after scoring.
+- **The probe's `via` names only the nearest preceding global symbol** (aud259, ~10 min): a local static such as `AnimBlockX_Step` shows as `AnimTask_MonToSubstitute`, which made t2cls call the seed-165 window "unidentified". Read `via` as a hint, confirm by the script pointer.
+- **Supervisor briefs quoted T1 "missing-gated" bases that the tool does not print** (aud257, ~5 min): `soundCensusDelta.py --t1` splits gated / other, and a row can move between them; quote both numbers from the tool's own output.
