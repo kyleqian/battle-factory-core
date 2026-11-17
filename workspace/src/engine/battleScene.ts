@@ -8,6 +8,7 @@ import { LIVE_TRANSFORM_MOVE_ID, LIVE_TRANSFORM_ROWS, LIVE_TRANSFORM_SWAP_ROW, l
 import { statsChangeParams, statsChangeRow } from "../animation/statsChange.ts";
 import { liveStatusAnimationRow, type LiveStatusAnimationSprite } from "../animation/statusAnimation.ts";
 import { focusPunchSetUpDisplayRow } from "../animation/focusPunchSetUp.ts";
+import { focusBandRowAtAge } from "../animation/focusBand.ts";
 import { liveSubstituteSwapView } from "./liveSubstituteSwap.ts";
 import { substituteFadeRenderView, substituteFadeWhiteBgr555, type SubstituteFadeBgCopy } from "./liveSubstituteFade.ts";
 // S6 scene-assembly + send-out engine slices: the BATTLE-SCENE ASSEMBLY
@@ -7988,6 +7989,7 @@ const FOCUS_PUNCH_SETUP_PARTICLE_DRAW_SLOTS = Object.freeze([9, 7, 5, 4, 3]);
 export function generalAnimationRenderView(view: BattleResolutionPresentationRenderView): GeneralAnimationRenderView | null {
   const effect = view.effect;
   if (effect?.type === "general-animation" && effect.animation === "HELD_ITEM_EFFECT") return heldItemEffectRenderView(view, effect);
+  if (effect?.type === "general-animation" && effect.animation === "FOCUS_BAND") return focusBandRenderView(view, effect);
   if (effect?.type !== "general-animation" || effect.animation !== "FOCUS_PUNCH_SETUP") return null;
   if (effect.age < 0) return null;
   const side = effect.battler === 0 ? "player" as const : "opponent" as const;
@@ -8066,6 +8068,44 @@ function heldItemEffectRenderView(
     view: Object.freeze({ ...view, fieldArt, postBodyShadowHidden: view.postBodyShadowHidden || (opponentSide && effect.age <= HELD_ITEM_EFFECT_SCRIPT_LAST_AGE) }),
     sprites: Object.freeze([]),
     heldItem: Object.freeze({ side, rotation, center: liveBattlerAnchors(side, view.fieldArt).picOffsetPoint, age: effect.age }),
+  });
+}
+
+/**
+ * wsh2: B_ANIM_FOCUS_BAND's General_FocusBand over the field as it is, either side: the survivor's OBJ palette blends toward RGB_RED
+ * and the sprite slides / shakes (src/animation/focusBand.ts). The opponent stands at its tracked front idle rest as in the
+ * other general-animation views, and an elevated opponent's shadow hides while the script runs.
+ */
+function focusBandRenderView(
+  view: BattleResolutionPresentationRenderView,
+  effect: Extract<NonNullable<BattleResolutionPresentationRenderView["effect"]>, { type: "general-animation" }>,
+): GeneralAnimationRenderView | null {
+  if (effect.age < 0) return null;
+  const side = effect.battler === 0 ? "player" as const : "opponent" as const;
+  const row = focusBandRowAtAge(effect.age, side);
+  const rest = effect.battlerX2Input === undefined
+    ? { x2: 0, y2: 0 }
+    : liveBattlerAnchors("opponent", view.fieldArt, effect.battlerX2Input).frontIdleRest;
+  const place = (at: "player" | "opponent") => {
+    const art = view.fieldArt[at];
+    const base = at === "opponent" ? rest : { x2: 0, y2: 0 };
+    const x2 = base.x2 + (at === side ? row.x2 : 0);
+    const blend = at === side && row.paletteY > 0;
+    if (x2 === 0 && base.y2 === 0 && !blend) return art;
+    return Object.freeze({
+      ...art,
+      origin: Object.freeze({ x: art.origin.x + x2, y: art.origin.y + base.y2 }),
+      ...(blend ? {
+        pic: Object.freeze({ ...art.pic, palette: blendPaletteToward(art.pic.palette as RgbColor[], { r: 255, g: 0, b: 0 }, row.paletteY) }),
+      } : {}),
+    });
+  };
+  const player = place("player"), opponent = place("opponent");
+  const fieldArt = player === view.fieldArt.player && opponent === view.fieldArt.opponent
+    ? view.fieldArt : Object.freeze({ ...view.fieldArt, player, opponent });
+  return Object.freeze({
+    view: Object.freeze({ ...view, fieldArt, postBodyShadowHidden: view.postBodyShadowHidden || (side === "opponent" && effect.age >= 0) }),
+    sprites: Object.freeze([]),
   });
 }
 
