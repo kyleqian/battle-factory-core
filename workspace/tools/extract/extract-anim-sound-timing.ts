@@ -1121,6 +1121,17 @@ function lifetimeOf(cmd: Command, attackerSide: number, pic: PicContext, rollout
     return a !== null && a >= 0 && a <= 3 ? { exact: 10 } : { bound: 10 };
   }
   // aud261: AnimHitSplatOnMonEdge (battle_anim_normal.c:1068-1081): the same affine anim (sAffineAnims_HitSplat, animation = args[6]) with RunStoredCallbackWhenAffineAnimEnds / DestroySpriteAndMatrix stored: the AnimHitSplatBasic shape.
+  // aud262: AnimHitSplatRandom (battle_anim_normal.c:1049-1066) starts the same affine anim (animation, or Random2() & 3 for -1) and stores DestroySpriteAndMatrix for RunStoredCallbackWhenAffineAnimEnds: the
+  // AnimHitSplatBasic shape (exact 10 for a literal animation 1..3).
+  if (op === "create_random_pos_hitsplat_sprite" || sprite("gRandomPosHitSplatSpriteTemplate")) {
+    const a = op.startsWith("create_") ? intNamed("animation") : intArg(args[4]);
+    return a !== null && a >= 1 && a <= 3 ? { exact: 10 } : { bound: 10 };
+  }
+  // aud262: AnimTask_FadeScreenToWhite (battle_anim_effects_3.c:1398-1402) decrements gAnimVisualTaskCount in its entry: not counted by waitforvisualfinish (net 0, exact -1).
+  if (op === "createvisualtask" && args[0] === "AnimTask_FadeScreenToWhite") return { exact: -1 };
+  // aud262: gLusterPurgeCircleSpriteTemplate (battle_anim_psychic.c:361-382) is AnimSpriteOnMonPos on sAffineAnim_LusterPurgeCircle: a duration-0 frame (call 0), a 120-tick frame (calls 1..120), END in call 121,
+  // destroyed in call 122: gone 121 ticks after F (the gThinRingExpanding shape with 120 for 30).
+  if (sprite("gLusterPurgeCircleSpriteTemplate")) return { exact: 121 };
   if (op === "create_mon_edge_hitsplat_sprite" || sprite("gMonEdgeHitSplatSpriteTemplate")) {
     const a = op.startsWith("create_") ? intNamed("animation") : intArg(args[6]);
     return a !== null && a >= 0 && a <= 3 ? { exact: 10 } : { bound: 10 };

@@ -196,3 +196,23 @@ describe("Odor Sleuth / False Swipe / Pay Day (aud262)", () => {
     }
   }
 });
+
+// Luster Purge (aud262): the circle (AnimSpriteOnMonPos on a 120-tick affine frame, exact 121), the uncounted AnimTask_FadeScreenToWhite and the random-position hit splats (AnimHitSplatBasic shape, exact 10)
+// ungate the six SE_M_HYPER_BEAM after the first waits.
+describe("Luster Purge (aud262)", () => {
+  it("the table entry is ungated: SOLAR_BEAM at 47, six HYPER_BEAM 5 apart from 169", () => {
+    const entry = timing.moves[295]! as unknown as { label: string; gated: number[]; variants: number[] };
+    expect(entry.label).toBe("Move_LUSTER_PURGE");
+    expect(entry.gated.every((g) => g === 0)).toBe(true);
+    expect(timing.variants[entry.variants[0]!]!.map((o) => `${o.frame}:${(o as { id?: number }).id}`)).toEqual(["47:201", "169:215", "174:215", "179:215", "184:215", "189:215", "194:215"]);
+  });
+  for (const side of ["player", "opponent"] as const) {
+    it(`aud262-lusterpurge-${side}: SE spacing equals the ROM's (122, then 5 x 5), offset constant`, () => {
+      const rom = fixture(`aud262-lusterpurge-${side}`);
+      const picked = rom.events.filter((e) => e.noop !== true && e.kind === "se" && [201, 215].includes(e.id as number));
+      expect(picked.length).toBe(7);
+      expect(picked.map((e) => e.frame - picked[0]!.frame)).toEqual([0, 122, 127, 132, 137, 142, 147]);
+      expect(expectConstantOffset(rom, [201, 215], 7, "first")).toBe(side === "player" ? 2 : 5);
+    });
+  }
+});
