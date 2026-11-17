@@ -177,15 +177,15 @@ seed of each design re-run in luck2; "flawed" = the marker cannot or hardly can 
 - **R035, R040 (Counter / Mirror Coat scored up under Taunt): rare, as the design says.** Clefable has to call Taunt out of Metronome (about 1 in 340) and Snorlax
   has to knock it out the same turn; a battle holds only a few Metronome calls (3 in the first 3 turns of the seed re-run), so about 2000 calls over 538 seeds give
   a handful of Taunts and well under one with the timing. Both stay open; they need roughly ten times the seeds.
-- **R039 (AI Memento against a target at minimum Sp. Atk): flawed set-up.** Arcanine's Overheat does about 126 of Weezing's 172 HP, so Weezing is dead after the second
+- **R039 (AI Memento against a target at minimum Sp. Atk) (day-1 reading; retired in luck3, see Luck hunt day 2): flawed set-up.** Arcanine's Overheat does about 126 of Weezing's 172 HP, so Weezing is dead after the second
   or third hit (seed re-run: 172, 172, 46, dead) while the −6 needs four uses even with the White Herb. Only misses and low rolls let it live. Needs a bulkier target
   or a weaker Overheat user.
-- **R067 (Skill Swap Truant, Focus Punch set-up pre-pass): flawed set-up.** Slaking 659 has Shadow Ball and Aerial Ace, which do hurt Gengar: in the seed re-run Gengar
+- **R067 (Skill Swap Truant, Focus Punch set-up pre-pass) (day-1 reading; retired in luck3, see Luck hunt day 2): flawed set-up.** Slaking 659 has Shadow Ball and Aerial Ace, which do hurt Gengar: in the seed re-run Gengar
   is knocked out on turn 0, and 317 of 538 seeds end after 5 decisions. The design's premise ("cannot hurt Gengar") holds only for Earthquake and Brick Break. Needs a
   foe that cannot touch Gengar, or a Gengar that survives the first Shadow Ball.
 - **R080 (Marvel Scale in the stored Future Sight damage): reachable but nearly so.** Milotic needs to be paralysed by Spark before Whiscash uses Future Sight; the AI used
   Future Sight on turn 0 in the seed re-run and Milotic dies within 5 turns, so the window is one or two turns. Rare, not shown impossible.
-- **R095 (Trace waiting with no foe): flawed set-up, cannot run as built.** Spikes land on the side of the Pokemon that switches in, and the AI's Skarmory lays them on
+- **R095 (Trace waiting with no foe) (day-1 reading; retired in luck3, see Luck hunt day 2): flawed set-up, cannot run as built.** Spikes land on the side of the Pokemon that switches in, and the AI's Skarmory lays them on
   the player's side; for the foe to faint on entry the Spikes must be on the AI's side, and none of the player sets in the design (532, 556, 529) has Spikes. Needs a
   player Spikes user (Skarmory 482 as the lead) beside the Trace holder.
 - **R110 (Roar drags a wounded Pokemon onto Spikes and it faints): reachable, rare.** Battles run 60 to 70 decisions and the AI does Spikes and Roar in them, but the
