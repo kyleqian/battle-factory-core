@@ -1115,7 +1115,7 @@ Base `df38eca58` (the aud242p table). Code: `tools/extract/extract-anim-sound-ti
 | `AnimTask_BlendMonInAndOut` | `battle_anim_mons.c:1714-1768` | func-only entry; a step fires every max(delay, 1) calls, coeff up-fires then coeff down-fires per repeat, the last down-fire destroys: exact 2 * coeff * times * delay - 1 (Extrasensory 23, Super Fang 95) |
 | `AnimTask_ExtrasensoryDistortion` | `battle_anim_psychic.c:954-1050` | 24 case-0 calls, case 1, destroy in call 26: exact 25 |
 | `AnimTask_TransparentCloneGrowAndShrink` | `battle_anim_psychic.c:1052-1117` | 12 + 12 step calls, two cleanup states, destroy in call 26: exact 25 |
-| argument splitting | the extractor's `splitArgs` | a plain `split(",")` cut `RGB(27, 27, 0)` into three arguments and shifted every later argument of the command (BlendMonInAndOut's coeff / delay / times). Splitting on top-level commas fixes it, and also resolves Super Fang (`RGB(31, 6, 1)`); Rage resolves through the same Strength body. Only the commands that carry an `RGB(...)` change |
+| argument splitting | the extractor's `splitArgs` | a plain `split(",")` cut `RGB(27, 27, 0)` into three arguments and shifted every later argument of the command (BlendMonInAndOut's coeff / delay / times). Splitting on top-level commas fixes it, and also resolves Super Fang (`RGB(31, 6, 1)`); Rage resolves through the BlendMonInAndOut lifetime (delay 0 fires every call, like delay 1; not ROM-windowed). Only the commands that carry an `RGB(...)` change |
 
 Ice Ball and Fury Cutter produce identical events for all five counters, so no counter grid is emitted for them (`counterGrids` still has the Rollout entry only); Fury Cutter's SE136 row sits at frame 6 on every hit count, Ice Ball's SE137 / SE198 at 6 / 36.
 
@@ -1129,8 +1129,8 @@ Fixtures `tools/audio/fixtures/aud242q-*-player.json`, labs `tools/battle-lab/au
 |---|---|---|---|
 | Fury Cutter | 136 | +2 | the aud242a idle-lead class (#198); the branch-resolved row is timed |
 | Secret Power | 152, 141 x3 | +2 on all four | the idle-lead class; the ROM plays the Strength body (SE152, three SE141 at +47 / +53 / +59), which verifies `BATTLE_ENVIRONMENT_BUILDING` in the lab and the ShakeAndSink lifetime |
-| Extrasensory | 170, 170, 192 | +3 on all three | idle-lead class; the 26-tick gaps between the rows are exact (BlendMonInAndOut 23 + 1 + the next creation, ExtrasensoryDistortion 25, TransparentClone 25) |
-| Super Fang | 171, 161 | -1, -1 | the 162-tick gap is exact (ShakeMonInPlace 48 + BlendMonInAndOut 95 ...); the flat -1 is the presentation offset |
+| Extrasensory | 170, 170, 192 | +3 on all three | idle-lead class; the 26-tick gaps between the three rows are exact in the ROM (the BlendMonInAndOut / ExtrasensoryDistortion / TransparentClone lifetimes above) |
+| Super Fang | 171, 161 | -1, -1 | the 162-tick gap between the two rows is exact in the ROM; the flat -1 is not diagnosed further |
 | Ice Ball x 5 turns (Lv100 Defense Curl target) | 137, 198 on each turn | turn starts 9 / 21 / 38 / 64 / 95, gap 30 on every counter | SE137 -> SE198 is 30 in the ROM on all five counters (counter 5's BG_ICE load lag does not change it), so the table needs no counter dimension; the turn-start drift is presentation, not sound (same class as the aud242o Rollout five-turn drift 9 / 22 / 37 / 57 / 86) |
 
 Strength itself (move 70) has no live presentation adapter (`liveMoveAnimationDuration` null), so it never reaches `emitMoveAnimSounds`: its window produced no engine row and was removed; the Secret Power window is the Strength-body proof.
