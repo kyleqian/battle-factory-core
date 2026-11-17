@@ -1164,8 +1164,8 @@ function lifetimeOf(cmd: Command, attackerSide: number, pic: PicContext, rollout
   // ---- aud242p slice 4. AnimSlideHandOrFootToTarget / AnimJumpKick (battle_anim_fight.c:421-443) -> AnimTravelDiagonally (battle_anim_mons.c:1591-1624; D = gBattleAnimArgs[4] = script
   // args[7]): data[0] = D and StartAnimLinearTranslation with DestroyAnimSprite stored in the init (the AnimPowerAbsorptionOrb shape): D + 1. AnimRockBlastRock (battle_anim_rock.c:800-806) ->
   // TranslateAnimSpriteToTargetMonLocation (battle_anim_mons.c:1546-1570, D = args[7]) in the init: D + 1; AnimThrowMistBall (battle_anim_ice.c:1090-1095) only installs that function, which
-  // runs in call 1: D + 2. D = 0 divides by zero (declined). aud261: gOctazookaBallSpriteTemplate (battle_anim_effects_1.c:1691-1700) has TranslateAnimSpriteToTargetMonLocation as its own callback: D + 1.
-  if (sprite("gKarateChopSpriteTemplate") || sprite("gJumpKickSpriteTemplate") || sprite("gRockBlastRockSpriteTemplate") || sprite("gMistBallSpriteTemplate") || sprite("gOctazookaBallSpriteTemplate")) {
+  // runs in call 1: D + 2. D = 0 divides by zero (declined). aud261: gOctazookaBallSpriteTemplate (battle_anim_effects_1.c:1691-1700) has TranslateAnimSpriteToTargetMonLocation as its own callback: D + 1 (gZapCannonBallSpriteTemplate, battle_anim_electric.c:130-139, the same).
+  if (sprite("gKarateChopSpriteTemplate") || sprite("gJumpKickSpriteTemplate") || sprite("gRockBlastRockSpriteTemplate") || sprite("gMistBallSpriteTemplate") || sprite("gOctazookaBallSpriteTemplate") || sprite("gZapCannonBallSpriteTemplate")) {
     const d = intArg(args[7]);
     return d === null || d < 1 ? null : { exact: d + (sprite("gMistBallSpriteTemplate") ? 2 : 1) };
   }
@@ -1193,6 +1193,9 @@ function lifetimeOf(cmd: Command, attackerSide: number, pic: PicContext, rollout
   // the frames and the END on call 87 destroys: gone 86 ticks after F (RunAffineAnimFromTaskData, battle_anim_mons.c:1800-1862). gSwallowBlueOrbSpriteTemplate: swallowOrbDestroyCall - 1 (pic Y dependent).
   if (op === "createvisualtask" && args[0] === "AnimTask_SwallowDeformMon") return { exact: 86 };
   if (sprite("gSwallowBlueOrbSpriteTemplate")) { const a1 = intArg(args[4]); if (a1 === null) return null; picUsed = true; return { exact: swallowOrbDestroyCall(attackerSide, pic.attackerY, a1) - 1 }; }
+  // AnimZapCannonSpark (battle_anim_electric.c:572-603; D = gBattleAnimArgs[3] = script args[6]): the init (call 0) runs AnimZapCannonSpark_Step once, whose AnimTranslateLinear (battle_anim_mons.c:1111-1139) counts D down
+  // (call 0 .. D - 1) and returns TRUE on call D, which destroys: gone D - 1 ticks after F.
+  if (sprite("gZapCannonSparkSpriteTemplate")) { const d = intArg(args[6]); return d === null || d < 1 ? null : { exact: d - 1 }; }
   // AnimPainSplitProjectile (battle_anim_effects_3.c:2937-2970) keeps its callback and destroys in the first call after animEnded: gPainSplitAnimCmds (:723-729) are 5 + 9 + 5 = 19 ticks, exact 19.
   // AnimTask_PainSplitMovement (:2974-3033): the entry (call 0) sets the rot/scale and data[0] = 1, step calls 1..13 count data[1], call 13 (== 13) destroys: exact 12.
   if (sprite("gPainSplitProjectileSpriteTemplate")) return { exact: 19 };

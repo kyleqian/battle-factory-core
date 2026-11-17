@@ -155,3 +155,26 @@ describe("Octazooka (aud261)", () => {
     });
   }
 });
+
+// gZapCannonBallSpriteTemplate (battle_anim_electric.c:130-139, TranslateAnimSpriteToTargetMonLocation, D = 30: 31 ticks) and AnimZapCannonSpark (:572-603, D = 30: 29 ticks) gate the wait before the shake / ELECTRICITY rows:
+// the table has THUNDERBOLT2 / the electricity SE at 55 / 74 after the SE138 at 6 (49 / 68 later). The ROM's gaps are 50 / 69: the ball's last of eight sparks is created one frame late (a CreateSpriteAndAnimate
+// hook shows 7 sparks at the SE frame and the 8th one frame after, candidate: a VBlank overrun by nine sprite inits in one script step, like the BG_LOAD_LAG class; not attributed), so the offset steps by +1 across the wait. Zap Cannon is 50% accurate: the engine stages use rngSeed 2 (player) / 10 (opponent), the first seeds whose engine draw hits (the ROM lab's seed 1 hit).
+describe("Zap Cannon (aud261)", () => {
+  it("the table entry: THUNDER_WAVE at 6, the electricity SE at 55 and 74, ungated", () => {
+    expect(timing.moves[192]!.label).toBe("Move_ZAP_CANNON");
+    expect(timing.moves[192]!.gated.every((g) => g === 0)).toBe(true);
+    expect(timing.variants[timing.moves[192]!.variants[0]!]!.map((o) => `${o.frame}:${(o as { id?: number }).id}`).sort()).toEqual(["55:119", "6:138", "74:119"]);
+  });
+  for (const [side, pan] of [["player", [-64, 63, 63]], ["opponent", [63, -63, -63]]] as const) {
+    it(`aud261-zapcannon-${side}: ids, pans and the +50 / +19 ROM gaps; ROM minus ours 2 then 3 after the overrun`, () => {
+      const rom = fixture(`aud261-zapcannon-${side}`);
+      const pick = (events: FixtureEvent[]) => events.filter((e) => e.noop !== true && e.kind === "se" && (e.id === 138 || e.id === 119)).slice(-3);
+      const romRows = pick(rom.events);
+      const ours = pick(ourEvents(rom));
+      expect(romRows.map((e) => e.frame - romRows[0]!.frame)).toEqual([0, 50, 69]);
+      expect(romRows.map((e) => e.pan)).toEqual(pan);
+      expect(ours.map((e) => `${e.id}:${e.pan}`)).toEqual(romRows.map((e) => `${e.id}:${e.pan}`));
+      expect(romRows.map((e, i) => e.frame - ours[i]!.frame)).toEqual([2, 3, 3]);
+    });
+  }
+});
