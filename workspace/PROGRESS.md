@@ -7,7 +7,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ## 2026-11-17 — CAX31 daily run (supervisor, Opus 5.5, 2026-11-17 13:30 -> 2026-11-18 05:30 UTC): IN PROGRESS
 
-- **State:** master `3d0c7ad41`; workers: hpd3 (integration), aud262 (side). **No DEFERRED items.** Evidence `.integration/validation/sv-20261117/`.
+- **State:** master `5dd239c57`; workers: hpd4 (integration), aud262 (side). **No DEFERRED items.** Evidence `.integration/validation/sv-20261117/`.
 - **Run start:** oracles current; baseline = last run's full suite (only tooling changed since `4e4c51880`). Disk 63 % -> 36 % (43 old census `tree/` dirs + `/tmp` scratch;
   list `.integration/evidence/TREES-PRUNED-20261117.txt`). No Mac fold (`mac/parity-mac` still `165548c4b`).
 - **Gameplay (replay, item 0d):** nightly check on `e06cac9fc`: pool **44 / 44** (1,287 states), staged battles **72 / 72** (`docs/replay-ledger.md`).
@@ -31,7 +31,12 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   scenes identical incl. command lengths; phase anchors listed as fitted in `docs/wsh1-general-anim-commands.md` "wsh2".
 - **Full suite on `276aff82b`** (3 workers, 20 min): 15,531 passed, 2 failed: `tests/lbrd.test.ts` (wsh1's Scene OFF holds moved the Lobby deal). Re-pinned by the supervisor
   (`f58f6bb02`: WIN_TWO_SEED 13 -> 19, the retire case keeps 13; scan 14..60 found no single seed for every case).
-- **Next:** hpd3 (post-hit HP hold + the Rollout turn's in-turn constants), aud262 (the last 64 gated rows: new variant dimensions).
+- **hpd3 (evidence, production unchanged):** the hpd2 in-turn constants are one ROM-verified source rule, the Scene ON script lead (script instructions after the "used" print run one
+  per frame before `attackanimation`; receipts `tools/integration/fixtures/hpd3/`). Lead alone: rol1-rollout5-on 459 -> 873, hie1-sitrus-on 176 -> 718, 10 more windows up, hpd1-toss10-on down;
+  not landed: some bodies' `live` already holds the lead, so hits / sounds would move. hpd4 does the per-body audit, then the lead, then the floor-free hold.
+- **Crash check (item 5):** `play:random --minutes 10 --scene both --lobby-new-challenge` on `357cae402`: ON 41 battles / 15 swaps / 13 new challenges, OFF 72 / 24 / 24; **0 page /
+  console errors, 0 overlays, 0 divergences**.
+- **Next:** hpd4 (body audit + the script lead + the hold), aud262 (the last 64 gated rows: new variant dimensions).
 
 ---
 
