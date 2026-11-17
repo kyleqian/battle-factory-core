@@ -9,7 +9,7 @@ import { shakeMonSequence } from "./shakeMon.ts";
 import { shakeMon2Sequence } from "./shakeMon2.ts";
 
 export type ApproxScriptBody =
-  | "PECK" | "ODOR_SLEUTH" | "FALSE_SWIPE" | "GUST" | "PAY_DAY" | "BARRAGE" | "CONVERSION_2" | "CURSE_GHOST";
+  | "PECK" | "ODOR_SLEUTH" | "FALSE_SWIPE" | "GUST" | "PAY_DAY" | "BARRAGE" | "CONVERSION_2" | "CURSE_GHOST" | "WITHDRAW";
 export type ApproxScriptSheet = "impact" | "slash2" | "gust" | "coin" | "conversion" | "redBall" | "ghostlySpirit" | "nail" | "nailFlip";
 export type ApproxScriptSide = "player" | "opponent";
 export interface ApproxScriptPoint { readonly x: number; readonly y: number }
@@ -324,15 +324,41 @@ function curseGhost(age: number, ctx: ApproxScriptContext): ApproxScriptFrame {
   });
 }
 
+
+// ---- Move_WITHDRAW (adp1): AnimTask_Withdraw rotates the attacker 22 steps of 0xB0, holds 30 steps, and rotates back 22 steps ---------
+// Callback 0 only prepares the sprite for rotation (no matrix yet); each later callback sets the matrix from the rotation BEFORE its
+// own increment, and y2 = |matrix c| >> 3 (SetBattlerSpriteYOffsetFromRotation) except during the hold, which returns before that call.
+const WITHDRAW_STEP = 0xb0;
+const WITHDRAW_PHASE = 22;
+const WITHDRAW_HOLD = 30;
+/** Callbacks of the task (init + 22 + 30 + 22). */
+export const WITHDRAW_TICKS = 1 + WITHDRAW_PHASE + WITHDRAW_HOLD + WITHDRAW_PHASE;
+const WITHDRAW_LEAD = 2;
+/** The rotation each step sets (step 0..73); the last step's matrix is replaced by ResetSpriteRotScale in the same callback. */
+const withdrawRotation = (step: number) => step < WITHDRAW_PHASE ? step * WITHDRAW_STEP
+  : step < WITHDRAW_PHASE + WITHDRAW_HOLD ? WITHDRAW_PHASE * WITHDRAW_STEP
+  : (2 * WITHDRAW_PHASE + WITHDRAW_HOLD - step) * WITHDRAW_STEP;
+function withdraw(age: number, ctx: ApproxScriptContext): ApproxScriptFrame {
+  const step = age - WITHDRAW_LEAD - 1;
+  const sign = ctx.attackerSide === "player" ? -1 : 1;
+  const matrixOf = (n: number) => rotationMatrix(sign * withdrawRotation(n));
+  if (step < 0 || step >= WITHDRAW_TICKS - 2) return frameOf(age, WITHDRAW_TICKS - 1, {});
+  const yFrom = step >= WITHDRAW_PHASE && step < WITHDRAW_PHASE + WITHDRAW_HOLD ? WITHDRAW_PHASE - 1 : step;
+  return frameOf(age, WITHDRAW_TICKS - 1, { attackerMatrix: matrixOf(step), attackerOffset: { x2: 0, y2: Math.abs(matrixOf(yFrom).c) >> 3 } });
+}
+
 type BodyFn = (age: number, ctx: ApproxScriptContext) => ApproxScriptFrame;
 const BODIES: Readonly<Record<ApproxScriptBody, BodyFn>> = {
-  PECK: peck, ODOR_SLEUTH: odorSleuth, FALSE_SWIPE: falseSwipe, GUST: gust, PAY_DAY: payDay, BARRAGE: barrage, CONVERSION_2: conversion2, CURSE_GHOST: curseGhost,
+  PECK: peck, ODOR_SLEUTH: odorSleuth, FALSE_SWIPE: falseSwipe, GUST: gust, PAY_DAY: payDay, BARRAGE: barrage, CONVERSION_2: conversion2, CURSE_GHOST: curseGhost, WITHDRAW: withdraw,
 };
 
 /** The move ids drawn by these bodies, classified `approx:no-adapter` (Curse's Ghost branch is `approx:turn-0`). */
 export const APPROX_SCRIPT_MOVE_BODY: Readonly<Record<number, Exclude<ApproxScriptBody, "CURSE_GHOST">>> = Object.freeze({
   64: "PECK", 316: "ODOR_SLEUTH", 206: "FALSE_SWIPE", 16: "GUST", 6: "PAY_DAY", 140: "BARRAGE", 176: "CONVERSION_2",
 });
+
+/** adp1: moves drawn by a ROM-accepted script body (a live adapter, not approximate): Withdraw. */
+export const ADP1_MOVE_BODY: Readonly<Record<number, Extract<ApproxScriptBody, "WITHDRAW">>> = Object.freeze({ 110: "WITHDRAW" });
 
 export function approxScriptAtAge(body: ApproxScriptBody, age: number, ctx: ApproxScriptContext): ApproxScriptFrame {
   return BODIES[body](age, ctx);
