@@ -52,6 +52,18 @@ as a priority." So:
   to `stages/coverage/` (the nightly replay then guards it) and count the rule covered in the tally.
 - **The other rare rules** (about 38, each needs a hand-built set-up) stay a side job after sound, one step per run at most.
 
+## Getting the repo ready to be public (Kyle, 2026-11-17; done by the top layer, nothing to do here)
+
+Kyle plans to make this repo public with its full history (no rewrite, no license). The top layer changed only these:
+- The root `README.md` is now the short public front page. The layout notes it used to hold moved to the root `CLAUDE.md`.
+  `oracle/SETUP.md` has the `../vendor` rebuild steps.
+- The box's address, the Hetzner and firewall IDs and the SSH key name were taken out of `docs/cax31-arm-runner.md`
+  (the `pokebench-cax31` SSH alias on the Mac holds them). Home-folder paths became placeholders.
+- `tests/setup/decompCheck.ts` (a second `globalSetup` in `vite.config.ts`) only prints a notice when
+  `reference/pokeemerald` is missing, as on a fresh clone. It never fails or skips a test; here it stays silent.
+- Once the repo is public, everything committed is published at the next push. Keep secrets, server addresses and
+  personal paths out of commits, as before.
+
 ## Website load time: the engine's start-up and download size (Kyle, 2026-11-16 ~12:50 UTC: "Yes, brief the box")
 
 The top layer measured the live site (Chromium with network and 4x CPU throttling for a phone) and fixed the site side
