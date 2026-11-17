@@ -105,3 +105,22 @@ describe("Recycle (aud260)", () => {
     expect(ours.map((e) => e.frame)).toEqual(romRows.map((e) => e.frame - 4));
   });
 });
+
+// AnimTask_AirCutterProjectile (battle_anim_effects_2.c:1485-1750) creates an air wave every 3rd call (calls 1 / 4 / 7, each with SE_M_BLIZZARD2, BattleAnimAdjustPanning(SOUND_PAN_ATTACKER + 1)); a wave lives
+// 12 + 9 + 31 = 52 calls (data[0] = data[5] - data[6] = 11 for the 136-pixel span), so the task is gone 58 ticks after its creation and SE_M_CUT follows the wait: ROM 154 @80 / 83 / 86, 128 @139 (player).
+describe("Air Cutter (aud260)", () => {
+  it("the table entry: BLIZZARD2 at 16 / 19 / 22 (pan -63, adjusted at runtime), SE_M_CUT at 75, ungated", () => {
+    expect(timing.moves[314]!.label).toBe("Move_AIR_CUTTER");
+    expect(timing.moves[314]!.gated.every((g) => g === 0)).toBe(true);
+    expect(tableRows(314, 0)).toEqual(["16:154", "19:154", "22:154", "75:128"]);
+  });
+  for (const side of ["player", "opponent"] as const) {
+    it(`aud260-aircutter-${side}: ids, pans and the +3 / +3 / +53 gaps equal the ROM's, offset constant`, () => {
+      const rom = fixture(`aud260-aircutter-${side}`);
+      const ids = [154, 128];
+      const romRows = rom.events.filter((e) => e.kind === "se" && ids.includes(e.id as number));
+      expect(romRows.map((e) => e.frame - romRows[0]!.frame)).toEqual([0, 3, 6, 59]);
+      expect(expectConstantOffset(rom, ids, 4)).toBe(0);
+    });
+  }
+});

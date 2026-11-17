@@ -113,6 +113,11 @@ function intArg(arg: string | undefined): number | null {
   if (arg === undefined) return null;
   try { return value(named(arg)); } catch { return null; }
 }
+/** A script argument that is a constant, a number or a product `a * b` (Move_AIR_CUTTER's `6 * 256`). */
+function productArg(arg: string | undefined): number | null {
+  const m = arg?.trim().match(/^(-?\d+)\s*\*\s*(-?\d+)$/);
+  return m === null || m === undefined ? intArg(arg) : Number(m[1]) * Number(m[2]);
+}
 function shakeMonLength(x: number, y: number, numTimes: number, delay: number): number {
   let [x2, y2, remaining, counter, length] = [x, y, numTimes, delay, 0];
   for (;;) {
@@ -484,6 +489,18 @@ function softBoiledEggArrivalCall(kind: number | null): number | null {
   return callback2Start + 45 + 1;
 }
 
+/** aud260: AnimTask_AirCutterProjectile's creation calls and destroy call (see lifetimeOf); null when the inputs are unresolved or degenerate. */
+function airCutterShape(attackerSide: number, a0: number | null, a2: number | null, a3: number | null): { createCalls: number[]; destroyCall: number } | null {
+  if (a0 === null || a2 === null || a3 === null || (a2 & ~1) === 0 || a3 < 0) return null;
+  const targetX = BATTLER_X[attackerSide === 0 ? 1 : 0] + (attackerSide === 0 ? a0 : -a0);
+  const xDiff = Math.abs(targetX - BATTLER_X[attackerSide === 0 ? 0 : 1]);
+  const speed = Math.trunc((xDiff * Math.trunc(0x10000 / (a2 & ~1))) / 256);
+  const start = speed - Math.trunc((speed * 128) / 256);
+  const life = (start <= 0 ? 1 : start + 1) + 9 + 31;
+  const period = a3 + 1;
+  const createCalls = [1, 1 + period, 1 + 2 * period];
+  return { createCalls, destroyCall: createCalls[2]! + life };
+}
 /**
  * AnimTask_ShockWaveProgressingBolt: call 0 inits (data[7] = the attacker's BATTLER_COORD_Y_PIC_OFFSET, sweeping up to y 4 in steps of 8), case 1 creates one bolt sprite per call (each lives 13 ticks: sprite call 12 destroys,
  * AnimShockWaveProgressingBolt) and moves y; the call that reaches the end of the sweep goes to case 2 (5 calls, the 5th flips the direction: odd sweep count goes down 4 -> 68 with data[4] 0.. 7, even goes up) or, after the 5th
@@ -684,6 +701,14 @@ function lifetimeOf(cmd: Command, attackerSide: number, pic: PicContext, rollout
   // data[6] and 16 lowers of data[7] (32 fires: call 64), case 1 waits ++data[0] == 10 (call 74), case 2 fires every 2nd call for data[6] 16 -> 0 and data[7] 0 -> 16 (32 fires: call 138), case 3 destroys on
   // the next call (139): gone 138 ticks after F.
   if (sprite("gRecycleSpriteTemplate")) return { exact: 138 };
+  // aud260: AnimTask_AirCutterProjectile (battle_anim_effects_2.c:1485-1750; entry = call 0, AirCutterProjectileStep1 from call 1: data[0] starts 0, so a sprite is CreateSprite'd every a3 + 1 calls (calls 1, 1 + p, 1 + 2p;
+  // the third installs Step2) with data[0] = data[5] - data[6], data[5] = xDiff * (0x10000 / (a2 & ~1)) / 256 (xDiff = |target X + a0 - attacker X|, a0 negated and a2's bit 0 flipped for a player target: singles
+  // sBattlerCoords), data[6] = data[5] / 2. AnimAirWaveProjectile (init) runs data[0] + 1 calls, Step1 9 (data[0] = 8), Step2 31 (data[0] = 30) and destroys, so sprite k is gone at task call c_k + 52 (AnimateSprites
+  // before RunTasks) and Step2 destroys the task on the call after the last sprite: call 1 + 2p + life, gone that - 1 ticks after F. The three PlaySE12WithPanning(SE_M_BLIZZARD2) rows are in the task's seRows.
+  if (op === "createvisualtask" && args[0] === "AnimTask_AirCutterProjectile") {
+    const shape = airCutterShape(attackerSide, intArg(args[2]), productArg(args[4]), intArg(args[5]));
+    return shape === null ? null : { exact: shape.destroyCall - 1 };
+  }
   // AnimFang (battle_anim_effects_3.c:1515-1519): gFangAnimCmds (:321-328) 8 + 16 + 4 + 4 = 32.
   if (sprite("gFangSpriteTemplate")) return { exact: 32 };
   // Arc sprites (InitAnimArcTranslation + TranslateAnimHorizontalArc, battle_anim_mons.c:785-801, AnimTranslateLinear :1111): data[0] = duration D; D calls
@@ -1530,6 +1555,14 @@ function walk(bodyLabel: string, turn: number, attackerSide: number, pic: PicCon
           if (frame === null) { gate(); break; }
           picUsed = true;
           shockWaveBoltShape(pic.attackerY).seCalls.forEach((call, i) => events.push({ op: "task_shockwave_bolt", frame: frame! + shiftAt(frame!) + call - 1, id: value("SE_M_THUNDERBOLT"), pan: null, times: i + 1, line }));
+          break;
+        }
+        // aud260: AirCutterProjectileStep1 plays SE_M_BLIZZARD2 (PlaySE12WithPanning, BattleAnimAdjustPanning(SOUND_PAN_ATTACKER + 1)) on each of its three creation calls.
+        if (args[0] === "AnimTask_AirCutterProjectile") {
+          if (frame === null) { gate(); break; }
+          const shape = airCutterShape(attackerSide, intArg(args[2]), productArg(args[4]), intArg(args[5]));
+          if (shape === null) { gate(); break; }
+          for (const call of shape.createCalls) events.push({ op: "playsewithpan", frame: frame + shiftAt(frame) + call - 1, id: value("SE_M_BLIZZARD2"), pan: value("SOUND_PAN_ATTACKER") + 1, line });
           break;
         }
         if (args[0] === "AnimTask_TormentAttacker") {
