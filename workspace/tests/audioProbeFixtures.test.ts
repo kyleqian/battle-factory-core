@@ -194,6 +194,7 @@ describe("audio probe fixtures", () => {
       "aud259-dynamicpunch-player.json",
       "aud259-fakeout-player.json",
       "aud259-softboiled-player.json",
+      "aud260-brickbreak-player.json",
       "battle-intro-window-off.json",
       "battle-intro-window.json",
       "battle-window-off.json",

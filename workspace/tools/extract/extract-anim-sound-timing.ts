@@ -662,6 +662,12 @@ function lifetimeOf(cmd: Command, attackerSide: number, pic: PicContext, rollout
   // the call after sets the stored callback, ReverseVerticalDipDirection runs one call and re-arms, D more calls, one to set DestroyAnimSprite, then it destroys:
   // call 2D + 4, exact 2D + 3.
   if (sprite("gVerticalDipSpriteTemplate")) { const d = intArg(args[3]); return d === null || d < 0 ? null : { exact: 2 * d + 3 }; }
+  // aud260: AnimBrickBreakWall (battle_anim_fight.c:690-742): call 0 is the init (the template callback; data[1] = a3, data[2] = a4, Step installed); Step case 0 counts data[1] down from call 1 (call a3 reaches 0) and
+  // destroys there when a4 is 0, else case 1 destroys on its a4-th call (call a3 + a4): gone a3 + a4 - 1 ticks after F (a4 = 0: a3 - 1; a3 < 1 would underflow the s16 countdown: declined).
+  if (sprite("gBrickBreakWallSpriteTemplate")) {
+    const [a3, a4] = [intArg(args[6]), intArg(args[7])];
+    return a3 === null || a4 === null || a3 < 1 || a4 < 0 ? null : { exact: (a4 === 0 ? a3 : a3 + a4) - 1 };
+  }
   // AnimFang (battle_anim_effects_3.c:1515-1519): gFangAnimCmds (:321-328) 8 + 16 + 4 + 4 = 32.
   if (sprite("gFangSpriteTemplate")) return { exact: 32 };
   // Arc sprites (InitAnimArcTranslation + TranslateAnimHorizontalArc, battle_anim_mons.c:785-801, AnimTranslateLinear :1111): data[0] = duration D; D calls
