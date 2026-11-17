@@ -909,6 +909,18 @@ function lifetimeOf(cmd: Command, attackerSide: number, pic: PicContext, rollout
   // call from the begin call on), the callback sees it in call 17, installs the destroy, which runs in call 18: gone 17 ticks after F (the ROM-validated visual port
   // src/animation/swagger.ts draws the mark for exactly 17 ticks, ages 0..16).
   if (sprite("gAngerMarkSpriteTemplate")) return { exact: 17 };
+  // aud262: AnimTask_OdorSleuthMovement (battle_anim_effects_3.c:4955-5016): the entry (call 0) clones the target twice and sets task data[0] = 2; each clone's MoveOdorSleuthClone (:5023-5055, first callback on the
+  // next iteration) counts case 0 to 60, then case 1 lowers data[5] from 24 by 2 per call until it is < 0 (13 calls) and destroys itself (callback 73), decrementing data[0]; the task's WaitFinish sees 0 in the
+  // RunTasks of that same iteration (call 73): exact 72.
+  if (op === "createvisualtask" && args[0] === "AnimTask_OdorSleuthMovement") return { exact: 72 };
+  // AnimFalseSwipeSlice (battle_anim_effects_1.c:4717-4765): the init installs RunStoredCallbackWhenAnimEnds (gSlashSliceAnimCmds1 :1577-1584 = 4 x 4 = 16 ticks; animEnded is seen at call 16 and the stored Step1 is
+  // installed in call 17, as the other animEnded callbacks above), Step1 counts ++data[0] > 8 (call 26, installs TranslateSpriteLinear), 12 translation calls (27..38) and the call that sees 0 (39, installs Step2),
+  // Step2 (40) installs Step3, which destroys on the ninth visibility toggle (every second call from 41: call 58): exact 57. AnimFalseSwipePositionedSlice installs Step3 in the init: the ninth toggle is call 18: exact 17.
+  if (sprite("gFalseSwipeSliceSpriteTemplate")) return { exact: 57 };
+  if (sprite("gFalseSwipePositionedSliceSpriteTemplate")) return { exact: 17 };
+  // AnimCoinThrow (battle_anim_effects_2.c:1776-1797): call 1 runs InitAnimLinearTranslationWithSpeedAndPos (battle_anim_mons.c:1162-1169; data[0] = (|X_2 target - X_2 attacker +- 20| << 8) / 1152 =
+  // (84 << 8) / 1152 = 18 in singles, both sides, as the web thread) and the first AnimTranslateLinear step; calls 1..18 count down, call 19 sees 0 and installs the stored DestroyAnimSprite, call 20 destroys: exact 19.
+  if (sprite("gCoinThrowSpriteTemplate")) return { exact: 19 };
   // aud262: AnimPresent (battle_anim_effects_1.c:3016-3040, gPresentSpriteTemplate :781): the init sets data[7] = 60 << 8 (InitItemBagData) and installs AnimItemSteal_Step1, whose moveAlongLinearPath
   // (:2957-2986) counts currentTime from 0 and returns TRUE on call 60 (position-independent); AnimItemSteal_Step2 (:2988-2996) then destroys when data[0] (reset to 0) exceeds 50: call 61 + 50 = 111.
   if (op === "create_present_sprite") return { exact: 110 };

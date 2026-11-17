@@ -164,3 +164,35 @@ describe("Present (aud262)", () => {
     expect(expectConstantOffset(rom, [167, 125, 228, 179], 6, "first")).toBe(2);
   });
 });
+
+// Odor Sleuth (AnimTask_OdorSleuthMovement: two clones live 60 + 13 callbacks, battle_anim_effects_3.c:4955-5055), False Swipe (the slice's 16-tick animation + 8 + 12 + 1 + 1 + 18 calls and six
+// positioned slices, battle_anim_effects_1.c:4717-4765) and Pay Day (AnimCoinThrow: (84 << 8) / 1152 = 18 translation calls, battle_anim_effects_2.c:1776-1797): the SE after each first wait.
+describe("Odor Sleuth / False Swipe / Pay Day (aud262)", () => {
+  const rows = (label: string, move: number) => {
+    const entry = timing.moves[move]! as unknown as { label: string; gated: number[]; variants: number[] };
+    expect(entry.label).toBe(label);
+    expect(entry.gated.every((g) => g === 0)).toBe(true);
+    return timing.variants[entry.variants[0]!]!.map((o) => `${o.frame}:${(o as { id?: number }).id}`);
+  };
+  it("the table entries: ungated, the SE after the wait at the ROM's distance", () => {
+    expect(rows("Move_ODOR_SLEUTH", 316)).toEqual(["29:193", "37:193", "81:192"]);
+    expect(rows("Move_FALSE_SWIPE", 206)).toEqual(["6:122", "24:135", "32:135", "40:135", "64:139"]);
+    expect(rows("Move_PAY_DAY", 6)).toEqual(["9:160", "29:174"]);
+  });
+  const windows = [
+    ["odorsleuth", [193, 192], 3, [0, 8, 52], -4],
+    ["falseswipe", [122, 135, 139], 5, [0, 18, 26, 34, 58], 0],
+    ["payday", [160, 174], 2, [0, 20], 2],
+  ] as const;
+  for (const [name, ids, count, rel, offset] of windows) {
+    for (const side of ["player", "opponent"] as const) {
+      it(`aud262-${name}-${side}: SE spacing ${rel.join("/")} equals the ROM's, offset ${offset} constant`, () => {
+        const rom = fixture(`aud262-${name}-${side}`);
+        const picked = rom.events.filter((e) => e.noop !== true && e.kind === "se" && (ids as readonly number[]).includes(e.id as number));
+        expect(picked.length).toBe(count);
+        expect(picked.map((e) => e.frame - picked[0]!.frame)).toEqual(rel);
+        expect(expectConstantOffset(rom, [...ids], count, "first")).toBe(offset);
+      });
+    }
+  }
+});
