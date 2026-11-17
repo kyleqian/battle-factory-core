@@ -1,0 +1,55 @@
+{
+ "schema": "s10a-live-adapter-fixture/v1",
+ "move": "BEAT_UP",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/battle-lab/adp1-beat-up-opponent.json",
+ "denseWindow": {
+  "startFrame": 321,
+  "endFrame": 360
+ },
+ "windowSource": "window = [activation, first inactive row] of body 1 of Move_BEAT_UP from adp1Probes.sh (trf174Probe.py)",
+ "attacker": {
+  "species": "PRIMEAPE",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "ONIX",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "fieldProfile": {
+  "playerHp": 139,
+  "playerMaxHp": 142,
+  "opponentHp": 172,
+  "opponentMaxHp": 172,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "attackerPersonality": 1793700000,
+ "requestFields": {
+  "turn": 1
+ },
+ "precedingX2Events": [
+  {
+   "kind": "send-in",
+   "side": "player"
+  },
+  {
+   "kind": "send-in",
+   "side": "opponent"
+  },
+  {
+   "kind": "move-body",
+   "moveId": 251,
+   "attackerSide": "opponent",
+   "turn": 0
+  }
+ ],
+ "messageLines": [
+  "Foe SHUCKLE\u2019s attack!",
+  ""
+ ]
+}

@@ -1,0 +1,32 @@
+{
+ "schema": "s10a-live-adapter-fixture/v1",
+ "move": "WITHDRAW",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/battle-lab/adp1-withdraw-opponent.json",
+ "denseWindow": {
+  "startFrame": 77,
+  "endFrame": 152
+ },
+ "windowSource": "window = [activation, first inactive row] of body 0 of Move_WITHDRAW from adp1Probes.sh (trf174Probe.py)",
+ "attacker": {
+  "species": "BLASTOISE",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "ONIX",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "fieldProfile": {
+  "playerHp": 142,
+  "playerMaxHp": 142,
+  "opponentHp": 186,
+  "opponentMaxHp": 186,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "attackerPersonality": 1793700000
+}

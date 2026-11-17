@@ -15,7 +15,7 @@ import type {
 } from "../animation/sceneOnPresentation.ts";
 import { GROVYLE_TO_ONIX_ROCK_SLIDE_PROFILE } from "../animation/sceneOnPresentation.ts";
 import { wavyMusicNotesGeometryAtAge } from "../animation/sing.ts";
-import { APPROX_SCRIPT_MOVE_BODY, approxScriptDuration } from "../animation/approxScript.ts";
+import { ADP1_MOVE_BODY, APPROX_SCRIPT_MOVE_BODY, approxScriptDuration } from "../animation/approxScript.ts";
 import { PRESENT_DAMAGE_FRAME_COUNT, PRESENT_HEAL_FRAME_COUNT } from "../animation/present.ts";
 import { SOLAR_BEAM_SETUP_FIRST_INACTIVE_AGE, SOLAR_BEAM_UNLEASH_FIRST_INACTIVE_AGE } from "../animation/solarBeam.ts";
 import { reduceMemento, type MementoBattlerConfig, type MementoConfig } from "../animation/memento.ts";
@@ -1614,6 +1614,9 @@ function liveMoveAnimationDurationOf(
     // apx222 (approximate, "no-adapter"): the script-built bodies of src/animation/approxScript.ts; liveMovePlayback.ts classifies them.
     case 64: case 316: case 206: case 16: case 6: case 140: case 176:
       return approxScriptDuration(APPROX_SCRIPT_MOVE_BODY[request.moveId]!);
+    // adp1: the ROM-accepted script bodies of approxScript.ts (ADP1_MOVE_BODY): Withdraw.
+    case 110: case 249: return approxScriptDuration(ADP1_MOVE_BODY[request.moveId]!);
+    case 251: return approxScriptDuration((request.turn & 1) === 1 ? "BEAT_UP_RIGHT" : "BEAT_UP_LEFT");
     default:
       if (noCase) noCase.hit = true;
       return null;
@@ -4665,6 +4668,20 @@ export function liveMoveAnimationPresentationProven(
       // apx222 (approximate, "no-adapter"): a script-built body (approxScript.ts); Peck's target rotates about its unshifted sprite center.
       const body = APPROX_SCRIPT_MOVE_BODY[request.moveId]!;
       config = { move: "APPROX_SCRIPT", body, attacker, target: body === "PECK" ? affineCenterBattler(target) : target, fieldProfile };
+      break;
+    }
+    case 110: {
+      // adp1: Withdraw rotates the attacker about its unshifted sprite center (approxScript.ts WITHDRAW).
+      config = { move: "APPROX_SCRIPT", body: ADP1_MOVE_BODY[request.moveId]!, attacker: affineCenterBattler(attacker), target, fieldProfile };
+      break;
+    }
+    case 249: {
+      config = { move: "APPROX_SCRIPT", body: ADP1_MOVE_BODY[request.moveId]!, attacker, target, fieldProfile };
+      break;
+    }
+    case 251: {
+      // choosetwoturnanim BeatUpLeft, BeatUpRight: odd turns take the second branch.
+      config = { move: "APPROX_SCRIPT", body: (request.turn & 1) === 1 ? "BEAT_UP_RIGHT" : "BEAT_UP_LEFT", attacker, target, fieldProfile };
       break;
     }
     default: return null;
