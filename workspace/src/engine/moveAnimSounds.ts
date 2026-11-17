@@ -360,6 +360,16 @@ export function emitCryTaskRows(move: number, species: number, attackerSide: "pl
   if (restore !== undefined && first.at === scriptRow) scheduleAnimTaskBgmRestore(bgm, restore.at - first.at);
 }
 
+/**
+ * aud260: the script's `end` waits for its parallel sound tasks and `waitsound` (battle_anim.c:482), so an SE past the command's last presenting row still plays
+ * (the psn2 mechanism, move animations: Dynamic Punch's 5th SE 177). Scheduled from script row 0 for every row after `lastScriptRow`. Sound-only: the window is not lengthened.
+ */
+function scheduleMoveAnimationTail(ops: readonly TimedOp[], context: AnimPanContext, lastScriptRow: number): void {
+  const tailRows = new Set<number>();
+  for (const op of ops) for (const row of moveAnimOpRows(op, context)) if (op.frame + row.offset > lastScriptRow) tailRows.add(op.frame + row.offset);
+  for (const scriptRow of tailRows) scheduleAfter(scriptRow, () => emitOpsAt(ops, context, scriptRow));
+}
+
 /** Called once per collected tick with the round's resolution presentation after the tick; emits the ops whose frame is this tick's. */
 export function emitMoveAnimSounds(after: BattleResolutionPresentationState | null, frontierBrain = false): void {
   if (after === null || after.lifecycle.phase !== "presenting") return;
@@ -367,13 +377,15 @@ export function emitMoveAnimSounds(after: BattleResolutionPresentationState | nu
   if (segment === undefined || (segment.beforeRules.rulesContext.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0) return;
   const source = liveMoveSourceAge(after);
   if (source === null) return;
-  const { request, age } = source;
+  const { request, age, lastAge } = source;
   const context = {
     attackerSide: request.attacker === 0 ? "player" : "opponent",
     targetSide: request.target === 0 ? "player" : "opponent",
   } as const;
   const scriptRow = age - FIRST_COMMAND_AGE - AGE_TO_SOUND_ROWS;
-  emitOpsAt(variantOf(request.moveId, request.turn, request.attacker === 0 ? 0 : 1, source.picOffsetY, request.rolloutCounter, request.damage), context, scriptRow);
+  const ops = variantOf(request.moveId, request.turn, request.attacker === 0 ? 0 : 1, source.picOffsetY, request.rolloutCounter, request.damage);
+  emitOpsAt(ops, context, scriptRow);
+  if (scriptRow === 0) scheduleMoveAnimationTail(ops, context, lastAge - FIRST_COMMAND_AGE - AGE_TO_SOUND_ROWS);
   emitCryTaskRows(request.moveId, source.attackerSpecies, context.attackerSide, scriptRow, frontierBrain);
 }
 
