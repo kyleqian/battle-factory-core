@@ -6,6 +6,13 @@ import {
   FOCUS_BAND_SLIDE_RUNS,
   focusBandRowAtAge,
 } from "../src/animation/focusBand.ts";
+import {
+  FUTURE_SIGHT_HIT_FADE2_START,
+  FUTURE_SIGHT_HIT_PSYCHIC_AGE0,
+  FUTURE_SIGHT_HIT_SHAKE1_START,
+  FUTURE_SIGHT_HIT_SHAKE2_START,
+  futureSightHitRowAtAge,
+} from "../src/animation/futureSightHit.ts";
 import { normalPaletteFadeY } from "../src/animation/normalPaletteFade.ts";
 import {
   WISH_HEAL_BG_DOWN_AGE,
@@ -66,5 +73,36 @@ describe("wsh2 Wish heal rows", () => {
     const p = wishHealRowAtAge(WISH_HEAL_GRANTING_FIRST_VISIBLE_AGE + WISH_HEAL_HEALING_OFFSET + 30, "player", center).blueStars[1]!;
     const o = wishHealRowAtAge(WISH_HEAL_GRANTING_FIRST_VISIBLE_AGE + WISH_HEAL_HEALING_OFFSET + 30, "opponent", center).blueStars[1]!;
     expect(p.x - center.x).toBe(center.x - o.x);
+  });
+});
+
+describe("wsh2 Future Sight hit rows", () => {
+  const rows = Array.from({ length: 172 }, (_, a) => futureSightHitRowAtAge(a));
+  const at = (p: number) => rows[p + FUTURE_SIGHT_HIT_PSYCHIC_AGE0]!;
+  it("the BG fades to black and back twice, BG_PSYCHIC in between", () => {
+    expect(at(0).bgBldy).toBe(0);
+    expect(at(16).bgBldy).toBe(16);
+    expect(at(19).bgBldy).toBe(16);
+    expect(at(35).bgBldy).toBe(0);
+    expect(at(FUTURE_SIGHT_HIT_FADE2_START + 16).bgBldy).toBe(16);
+    expect(at(FUTURE_SIGHT_HIT_FADE2_START + 36).bgBldy).toBe(0);
+    const psychic = rows.map((r, a) => (r.bgIsPsychic ? a : -1)).filter((a) => a >= 0);
+    expect(psychic[0]).toBe(20 + FUTURE_SIGHT_HIT_PSYCHIC_AGE0);
+    expect(psychic[psychic.length - 1]).toBe(FUTURE_SIGHT_HIT_FADE2_START + 18 + FUTURE_SIGHT_HIT_PSYCHIC_AGE0);
+  });
+  it("the target is untouched before the first shake, scales for 29 frames and keeps the monbg copy until the second shake ends", () => {
+    expect(at(FUTURE_SIGHT_HIT_SHAKE1_START - 1).targetTouched).toBe(false);
+    expect(at(FUTURE_SIGHT_HIT_SHAKE1_START).targetTouched).toBe(true);
+    expect(at(FUTURE_SIGHT_HIT_SHAKE1_START).targetX2).toBe(4);
+    expect(at(FUTURE_SIGHT_HIT_SHAKE1_START).targetBlendActive).toBe(false);
+    expect(rows.filter((r) => r.targetScale.active).length).toBe(29);
+    expect(rows.filter((r) => r.targetBlendActive).length).toBe(30);
+    expect(at(FUTURE_SIGHT_HIT_SHAKE2_START).targetX2).toBe(0);
+    expect(at(FUTURE_SIGHT_HIT_SHAKE2_START).monbgX2).toBe(4);
+    expect(at(FUTURE_SIGHT_HIT_SHAKE2_START + 4).targetX2).toBe(4);
+    expect(at(FUTURE_SIGHT_HIT_SHAKE2_START + 10).monbgActive).toBe(true);
+    expect(at(FUTURE_SIGHT_HIT_SHAKE1_START - 1).monbgActive).toBe(false);
+    expect(rows[171]!.targetX2).toBe(0);
+    expect(rows[171]!.targetScale.active).toBe(false);
   });
 });
