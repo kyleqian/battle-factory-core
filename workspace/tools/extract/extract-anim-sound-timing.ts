@@ -946,7 +946,8 @@ function lifetimeOf(cmd: Command, attackerSide: number, pic: PicContext, rollout
   // AnimFlyingParticle (battle_anim_effects_1.c:3517-3590; script args[6] = x step s = gBattleAnimArgs[3], args[9] = unk6: 0 = attacker's side, else the target's): call 0 places
   // the sprite at x = -16 (opponent side, moving right) or 256 (player side, moving left); call k >= 1 has a = k - 1 and destroys once x + x2 leaves the screen:
   // opponent side s * a >= 264, player side s * a >= 272 (AnimFlyingParticle_Step :3580-3590). Gone ceil(threshold / s) ticks after F.
-  if (sprite("gSilverWindBigSparkSpriteTemplate") || sprite("gSilverWindMediumSparkSpriteTemplate") || sprite("gSilverWindSmallSparkSpriteTemplate")) {
+  // aud261: gAromatherapySmallFlowerSpriteTemplate / gAromatherapyBigFlowerSpriteTemplate (battle_anim_effects_1.c:962-983) use the same AnimFlyingParticle callback (same argument layout).
+  if (sprite("gSilverWindBigSparkSpriteTemplate") || sprite("gSilverWindMediumSparkSpriteTemplate") || sprite("gSilverWindSmallSparkSpriteTemplate") || sprite("gAromatherapySmallFlowerSpriteTemplate") || sprite("gAromatherapyBigFlowerSpriteTemplate")) {
     const [speed, anchor] = [intArg(args[6]), intArg(args[9])];
     if (speed === null || anchor === null || speed < 1) return null;
     const side = anchor === 0 ? attackerSide : 1 - attackerSide;
@@ -1201,6 +1202,10 @@ function lifetimeOf(cmd: Command, attackerSide: number, pic: PicContext, rollout
   // gBattleAnimArgs[4] = script args[7]) installs StartAnimLinearTranslation with DestroyAnimSprite stored (the AnimPowerAbsorptionOrb shape): D + 1.
   if (sprite("gRazorWindTornadoSpriteTemplate")) { const d = intArg(args[9]); return d === null || d < 0 ? null : { exact: d }; }
   if (sprite("gAirWaveCrescentSpriteTemplate")) { const d = intArg(args[7]); return d === null || d < 1 ? null : { exact: d + 1 }; }
+  // AnimTask_StatusClearedEffect (battle_anim_effects_3.c:3904-3918) = StartMonScrollingBgMask with 10 fade steps, delay 2, duration 30 (battle_anim_utility_funcs.c:812-877, UpdateMonScrollingBgMask :879-936):
+  // the entry (call 0) installs the step, which runs from call 1. Case 0 fades in on every third call (data[11]++ >= 2: calls 3, 6 .. 30, data[12] = 10 at call 30), case 1 holds 30 calls (31..60),
+  // case 2 fades out the same way (calls 63, 66 .. 90, data[12] = 0 at call 90) and destroys: exact 89.
+  if (op === "createvisualtask" && args[0] === "AnimTask_StatusClearedEffect") return { exact: 89 };
   // AnimMagentaHeart (battle_anim_effects_2.c:3067-3078) counts data[0] from call 0 and destroys when it reaches 60 (call 59): gone 58 ticks after F. AnimTask_RockMonBackAndForth
   // (battle_anim_effects_3.c:2702-2800; n = gBattleAnimArgs[1] = script args[3], intensity i = clamp(gBattleAnimArgs[2], 0, 2) = args[4]): d = 8 - 2 i, each of the n rounds runs d + 2 d + d calls
   // (steps start at call 1), call 4 d n + 1 runs case 3 and destroys: exact 4 d n. AnimNeedleArmSpike (battle_anim_effects_1.c:3623-3694; D = gBattleAnimArgs[4] = args[7]) installs the step in

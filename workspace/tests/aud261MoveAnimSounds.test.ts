@@ -246,3 +246,41 @@ describe("Needle Arm (aud261)", () => {
     });
   }
 });
+
+// AnimFlyingParticle (battle_anim_effects_1.c:3517-3590, ceil(272 / s) ticks on the player side, 264 / s on the opponent side; the flowers share it with Silver Wind) and AnimTask_StatusClearedEffect
+// (battle_anim_effects_3.c:3904-3918 -> StartMonScrollingBgMask / UpdateMonScrollingBgMask, battle_anim_utility_funcs.c:812-936: 30 + 30 + 30 calls, destroyed on call 90 = 89 ticks) gate Aromatherapy's
+// STAT_INCREASE -> MORNING_SUN -> SHINY rows, and Refresh's. The ROM destroys the task 93 ticks after the STAT_INCREASE (Aromatherapy and Refresh, both sides): the creating step decompresses its tilemap and image
+// and loads a palette (like AnimTask_MetallicShine's METALLIC_SHINE_LOAD_LAG) and the stepped probe shows a 4 frame overrun; the table keeps the C's 89, a named +4 residual on the two rows after it.
+describe("Aromatherapy and Refresh (aud261)", () => {
+  it("the table entries: Aromatherapy PETAL_DANCE 0, STAT_INCREASE 197, MORNING_SUN 287, SHINY 359; Refresh STAT_INCREASE 6, MORNING_SUN 96, SHINY 168, ungated", () => {
+    expect(timing.moves[312]!.label).toBe("Move_AROMATHERAPY");
+    expect(timing.moves[287]!.label).toBe("Move_REFRESH");
+    expect(timing.moves[312]!.gated.every((g) => g === 0)).toBe(true);
+    expect(timing.moves[287]!.gated.every((g) => g === 0)).toBe(true);
+    expect(tableRows(312, 0)).toEqual(["0:202", "197:239", "287:228", "359:102"]);
+    expect(tableRows(287, 0)).toEqual(["6:239", "96:228", "168:102"]);
+  });
+  const offsets = (rom: Fixture, ids: number[], last: number) => {
+    const pick = (events: FixtureEvent[]) => events.filter((e) => e.noop !== true && e.kind === "se" && ids.includes(e.id as number)).slice(-last);
+    const romRows = pick(rom.events);
+    const ours = pick(ourEvents(rom));
+    expect(ours.map((e) => `${e.id}:${e.pan}`)).toEqual(romRows.map((e) => `${e.id}:${e.pan}`));
+    return { romRows, offsets: romRows.map((e, i) => e.frame - ours[i]!.frame) };
+  };
+  for (const [side, pan, gaps] of [["player", -64, [0, 197, 291, 363]], ["opponent", 63, [0, 193, 287, 359]]] as const) {
+    it(`aud261-aromatherapy-${side}: gaps ${gaps.join(" / ")} (the flowers' 272 / 264 per step ticks, then the C's 90 / 72 + the 4 frame overrun), offset constant but for it`, () => {
+      const rom = fixture(`aud261-aromatherapy-${side}`);
+      const { romRows, offsets: o } = offsets(rom, [202, 239, 228, 102], 4);
+      expect(romRows.map((e) => e.frame - romRows[0]!.frame)).toEqual(gaps);
+      expect(romRows.slice(1).every((e) => e.pan === pan)).toBe(true);
+      expect(o).toEqual([o[0]!, o[0]!, o[0]! + 4, o[0]! + 4]);
+    });
+    it(`aud261-refresh-${side}: STAT_INCREASE -> MORNING_SUN -> SHINY gaps 94 / 72 (the table's 90 / 72 + the 4 frame overrun)`, () => {
+      const rom = fixture(`aud261-refresh-${side}`);
+      const { romRows, offsets: o } = offsets(rom, [239, 228, 102], 3);
+      expect(romRows.map((e) => e.frame - romRows[0]!.frame)).toEqual([0, 94, 166]);
+      expect(romRows.every((e) => e.pan === pan)).toBe(true);
+      expect(o).toEqual([o[0]!, o[0]! + 4, o[0]! + 4]);
+    });
+  }
+});
