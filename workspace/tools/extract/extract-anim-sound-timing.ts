@@ -1173,6 +1173,10 @@ function lifetimeOf(cmd: Command, attackerSide: number, pic: PicContext, rollout
   // AnimSpriteOnMonPos (battle_anim_mons.c:1515-1536) destroys itself in the first call after `animEnded || affineAnimEnded` (a sprite on gDummySpriteAnimTable never ends its anim: sprite.c:173-175,
   // 909-922 keep animBeginning set). gBellAnimCmds (battle_anim_effects_2.c:848-862) are 6 6 15 6 6 6 15 6 6 6 15 6 6 = 105 ticks: END at call 105, destroyed at 106 = 105.
   if (sprite("gBellSpriteTemplate")) return { exact: 105 };
+  // AnimPainSplitProjectile (battle_anim_effects_3.c:2937-2970) keeps its callback and destroys in the first call after animEnded: gPainSplitAnimCmds (:723-729) are 5 + 9 + 5 = 19 ticks, exact 19.
+  // AnimTask_PainSplitMovement (:2974-3033): the entry (call 0) sets the rot/scale and data[0] = 1, step calls 1..13 count data[1], call 13 (== 13) destroys: exact 12.
+  if (sprite("gPainSplitProjectileSpriteTemplate")) return { exact: 19 };
+  if (op === "createvisualtask" && args[0] === "AnimTask_PainSplitMovement") return { exact: 12 };
   // gMilkBottleSpriteTemplate: AnimMilkBottle_Step1 (battle_anim_effects_1.c:4003-4062), destroyed on call K, gone K - 1 ticks after F.
   if (sprite("gMilkBottleSpriteTemplate")) return { exact: milkBottleDestroyCall() - 1 };
   // gThinRingExpanding / gBlendThinRingExpanding (AnimBlendThinRing, :2551-2575, calls AnimSpriteOnMonPos at once) run affine anim 0 (gThinRingExpandingAffineAnimCmds1, :710-716): a duration-0 frame

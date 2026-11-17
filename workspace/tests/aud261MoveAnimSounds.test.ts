@@ -76,3 +76,21 @@ describe("Milk Drink (aud261)", () => {
     });
   }
 });
+
+// AnimPainSplitProjectile (battle_anim_effects_3.c:2937-2970, 19 ticks to animEnded) and AnimTask_PainSplitMovement (:2974-3033, destroyed on call 13: 12 ticks) gate the two waits after each SWAGGER2: ROM 194 x3, 25 apart.
+describe("Pain Split (aud261)", () => {
+  it("the table entry: SWAGGER2 (pan 0) at 15 / 40 / 65, ungated", () => {
+    expect(timing.moves[220]!.label).toBe("Move_PAIN_SPLIT");
+    expect(timing.moves[220]!.gated.every((g) => g === 0)).toBe(true);
+    expect(timing.variants[timing.moves[220]!.variants[0]!]!.map((o) => `${o.frame}:${(o as { id?: number }).id}:${o.pan}`)).toEqual(["15:194:0", "40:194:0", "65:194:0"]);
+  });
+  for (const side of ["player", "opponent"] as const) {
+    it(`aud261-painsplit-${side}: ids, pans and the +25 / +25 gaps equal the ROM's, offset constant`, () => {
+      const rom = fixture(`aud261-painsplit-${side}`);
+      const romRows = rom.events.filter((e) => e.kind === "se" && e.id === 194);
+      expect(romRows.map((e) => e.frame - romRows[0]!.frame)).toEqual([0, 25, 50]);
+      expect(romRows.every((e) => e.pan === 0)).toBe(true);
+      expect(expectConstantOffset(rom, [194], 3)).toBe(-4);
+    });
+  }
+});
