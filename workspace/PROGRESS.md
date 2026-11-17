@@ -7,7 +7,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ## 2026-11-17 — CAX31 daily run (supervisor, Opus 5.5, 2026-11-17 13:30 -> 2026-11-18 05:30 UTC): IN PROGRESS
 
-- **State:** master `034306eb7`; workers: hpd3 (integration), aud261 (side). **No DEFERRED items.** Evidence `.integration/validation/sv-20261117/`.
+- **State:** master `3d0c7ad41`; workers: hpd3 (integration), aud262 (side). **No DEFERRED items.** Evidence `.integration/validation/sv-20261117/`.
 - **Run start:** oracles current; baseline = last run's full suite (only tooling changed since `4e4c51880`). Disk 63 % -> 36 % (43 old census `tree/` dirs + `/tmp` scratch;
   list `.integration/evidence/TREES-PRUNED-20261117.txt`). No Mac fold (`mac/parity-mac` still `165548c4b`).
 - **Gameplay (replay, item 0d):** nightly check on `e06cac9fc`: pool **44 / 44** (1,287 states), staged battles **72 / 72** (`docs/replay-ledger.md`).
@@ -18,7 +18,9 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   (damage-level branch from the request's damage), Torment, Shock Wave (bolt task pans); aud259 Soft-Boiled, Block (the unidentified seed-165 window), Dynamic Punch, Fake Out, Crabhammer.
   aud260 Brick Break turn 2, Glare, Will-O-Wisp, Recycle, Air Cutter + a sound-only move-animation tail (SEs past the command window, the psn2 mechanism: Dynamic Punch, Signal Beam, Mud Shot).
   T1 0..99 ON missing-gated 41 -> 4 (Memento), missing-other 0. L50 table emitted / gated 807 / 51 -> 839 / 35. **First T1 census 0..999 since aud248 (aud260): Scene ON missing-gated 467,
-  declined 5, other 1, extra 0, unclassified 0; Scene OFF 0 / 0.** Top ON: Extreme Speed 116, Milk Drink 60, Pain Split 58, Flame Wheel 35, Swallow 35 (aud261).
+  declined 5, other 1, extra 0, unclassified 0; Scene OFF 0 / 0.** aud261 (15 moves: Extreme Speed, Milk Drink, Pain Split, Flame Wheel, Swallow, Octazooka, Zap Cannon, Razor Wind,
+  Covet, Needle Arm, Aromatherapy, Refresh, Smelling Salt, Gust, Spider Web; ROM windows both sides): **T1 0..999 ON missing-gated 467 -> 64**, extra 0; L50 862 / 12. Left: Magnitude 23,
+  Rapid Spin 20, Water Spout 8, Memento 6, Present 4 (each needs a new variant dimension) + 3 singles (aud262).
   aud260 committed twice to master by a stray `cd` (`f5c19e4e9`, `98bfa00d7`, before the wsh1 merge); same content as its branch, merge clean.
 - **wsh1 (presentation, frames move by design):** WISH_HEAL / FUTURE_SIGHT_HIT / FOCUS_BAND now play as Scene ON commands (201 / 172 / 129 frames, ROM-measured) with their SEs,
   Scene OFF holds 36 / 42 / 40; census 0..99 both scenes `eventsDigest` identical (9 seeds gain the commands); vanilla 0:20 both scenes 20 / 20, winning 0:60 60 / 60 (supervisor);
@@ -29,7 +31,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   scenes identical incl. command lengths; phase anchors listed as fitted in `docs/wsh1-general-anim-commands.md` "wsh2".
 - **Full suite on `276aff82b`** (3 workers, 20 min): 15,531 passed, 2 failed: `tests/lbrd.test.ts` (wsh1's Scene OFF holds moved the Lobby deal). Re-pinned by the supervisor
   (`f58f6bb02`: WIN_TWO_SEED 13 -> 19, the retire case keeps 13; scan 14..60 found no single seed for every case).
-- **Next:** hpd3 (post-hit HP hold + the Rollout turn's in-turn constants), aud261 (T1 0..999 ON gated rows, largest first).
+- **Next:** hpd3 (post-hit HP hold + the Rollout turn's in-turn constants), aud262 (the last 64 gated rows: new variant dimensions).
 
 ---
 
