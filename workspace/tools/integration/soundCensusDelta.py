@@ -16,6 +16,7 @@ from collections import Counter, defaultdict
 # Sounds of the other emitter families (battleHitSounds / screenSounds / battleStartSounds / battleEndSounds); no aud242 table op uses these ids (min 20).
 CONTROLLER_IDS = {5, 9, 12, 13, 14, 15, 16, 32, 55, 79, 90, 114, 115, 116}
 ROW_OPTIONAL, ROW_TAIL = 1, 2  # row flags of soundCensusExpected.ts (element 5)
+MOVE_TAIL_CLAIMED = set()  # aud260: id() of the events t1() claimed as a move animation's sound-only tail rows; t1_nonmove() does not count them as unowned
 CLASSES = ["exact", "known-offset", "missing-gated", "missing-declined", "missing-cry-task", "missing-other", "extra", "unclassified"]
 
 
@@ -119,7 +120,7 @@ def t1_nonmove(A):
         owned = defaultdict(list); unowned = []
         for e in r["sound"]:
             if e[1] not in ("se", "pan") or (e[1] == "se" and e[2] in CONTROLLER_IDS): continue
-            if any(w[5] <= e[0] <= w[6] for w in r["soundAnim"]): continue
+            if any(w[5] <= e[0] <= w[6] for w in r["soundAnim"]) or id(e) in MOVE_TAIL_CLAIMED: continue
             cand = [w for w in wins if w[3] <= e[0] <= w[4]]
             if not cand: unowned.append((e, ("outside any presenting window", e[1], e[2]))); continue
             w = cand[0]; f, lead_of_next = family_of(w, by_idx.get(w[0] + 1))
@@ -204,11 +205,11 @@ def t1(arm, json_out):
     for s in sorted(A):
         r = A[s]; scene = r["scene"]
         if r["sound"] is None: sys.exit("arm has no sound column")
-        windows = []; inwin = lambda f: any(w[5] <= f <= w[6] for w in r["soundAnim"]); tail_claimed = set()
+        windows = []; inwin = lambda f: any(w[5] <= f <= w[6] for w in r["soundAnim"])
         for a in r["soundAnim"]:
             idx, move, turn, att, tgt, first, last, zero, noanim = a[:9]
             cmds["move-animation commands"] += 1
-            ev = [e for e in r["sound"] if first <= e[0] <= last and e[1] in ("se", "pan") and not (e[1] == "se" and e[2] in CONTROLLER_IDS) and id(e) not in tail_claimed]
+            ev = [e for e in r["sound"] if first <= e[0] <= last and e[1] in ("se", "pan") and not (e[1] == "se" and e[2] in CONTROLLER_IDS) and id(e) not in MOVE_TAIL_CLAIMED]
             if noanim:
                 cmds["Scene OFF (HITMARKER_NO_ANIMATIONS)"] += 1
                 for e in ev: put("extra", 1, s, move, e)
@@ -254,9 +255,9 @@ def t1(arm, json_out):
                     hit = min(cand, key=lambda e: abs(e[0] - frame)); left.remove(hit)
                     offsets[(label_of.get(move, move), hit[0] - frame)] += 1; put("known-offset", 1, s, move, hit[0] - frame)
                 elif len(row) > 5 and row[5] == ROW_OPTIONAL: cmds["optional rows absent (not missing)"] += 1; continue  # t1dt: the Double Team stat SE is played only when the segment presents the rise; absent is not missing
-                elif frame > last and any(e[0] == frame and (e[1], e[2], e[3]) == want and id(e) not in tail_claimed for e in r["sound"]):
+                elif frame > last and any(e[0] == frame and (e[1], e[2], e[3]) == want and id(e) not in MOVE_TAIL_CLAIMED for e in r["sound"]):
                     # aud260: a sound-only tail (scheduleMoveAnimationTail, the psn2 mechanism): the row plays at its table frame past the command's last presenting frame; claimed so a later command's window does not score it extra.
-                    tail_claimed.add(id(next(e for e in r["sound"] if e[0] == frame and (e[1], e[2], e[3]) == want and id(e) not in tail_claimed)))
+                    MOVE_TAIL_CLAIMED.add(id(next(e for e in r["sound"] if e[0] == frame and (e[1], e[2], e[3]) == want and id(e) not in MOVE_TAIL_CLAIMED)))
                     put("exact", 1, s, move); cmds["tail rows past the command's last presenting frame (aud260; counted in exact)"] += 1
                 else:
                     put("missing-other", 1, s, move, [frame, *want]); after_end["after the command's last presenting frame" if frame > last else "inside the command"] += 1
