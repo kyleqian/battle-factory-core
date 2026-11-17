@@ -1158,3 +1158,65 @@ Frame hashes: `npm run compare:differential -- <Fury Cutter, Secret Power, Extra
 | Soft Boiled | 5 | `gSoftBoiledEggSpriteTemplate` (two eggs wait on `gBattleAnimArgs[7] == 0xFFFF`, set by `setarg 7, 0xFFFF` in the script: both die in the iteration after the setarg, the second callback for data[7] == 0) and the two thin rings. The egg chain (about 56 + 21 + 60 + 57 ticks) is only about 9 ticks inside the setarg time (215 - 12 = 203), so it needs an exact affine-loop simulation and a ROM window before it is safe |
 | Eruption | 4 | `AnimTask_EruptionLaunchRocks` (pic-dependent rock state machine) |
 | Memento / Moonlight / Spike Cannon / Curse | 4 each | not examined |
+
+## 22. aud242r: Heal Bell, Spike Cannon, Eruption, Moonlight, Curse (Ghost)
+
+Step aud242r (Audio S11, ISSUES #219 family 1) ports the sprite / visual-task lifetimes behind five more gated census moves into `lifetimeOf` (`tools/extract/extract-anim-sound-timing.ts`). Every number is derived from the C (`reference/pokeemerald`), none is fitted; each move has a committed ROM window (`tools/audio/fixtures/aud242r-<move>-player.json`, `tests/aud242rMoveAnimSounds.test.ts`) that pins the ROM-minus-ours offset as a flat delta. Inter-row gaps are exact in every window.
+
+### 22.1 Lifetimes (ticks after F, section 8 numbering)
+
+| lifetime | C | exact |
+|---|---|---|
+| `gBellSpriteTemplate` (Heal Bell) | `gBellAnimCmds` `battle_anim_effects_2.c:848-862` (6 6 15 6 6 6 15 6 6 6 15 6 6 = 105) under `AnimSpriteOnMonPos` `battle_anim_mons.c:1515-1536` | 105 |
+| `gThinRingExpandingSpriteTemplate` / `gBlendThinRingExpandingSpriteTemplate` | `AnimBlendThinRing` `battle_anim_effects_1.c:2551-2575`, `gThinRingExpandingAffineAnimCmds1` `:710-716` (0-duration frame, then 30), `sprite.c:1055-1112, 1165-1178, 1330-1345` | 31 |
+| `gHealBellMusicNoteSpriteTemplate` | `AnimHealBellMusicNote` `battle_anim_effects_2.c:3053-3065` (D = `gBattleAnimArgs[4]`), `StartAnimLinearTranslation` | D + 1 |
+| `gSparklingStarsSpriteTemplate` | `AnimSparklingStars` `battle_anim_effects_1.c:4115-4150` (D = `gBattleAnimArgs[5]`), the AnimGrantingStars shape | D + 1 |
+| `AnimTask_WindUpLunge` (Spike Cannon) | `battle_anim_mon_movement.c:637-690`, a3 + a4 + a6 - 1 | per args |
+| `gHandleInvertHitSplatSpriteTemplate` / `create_handle_invert_hitsplat_sprite` | `battle_anim_normal.c:1036-1047`, then the AnimHitSplatBasic lifetime | 10 |
+| `AnimTask_EruptionLaunchRocks` (Eruption) | `battle_anim_fire.c:796-1013`, `PrepareEruptAnimTaskData` / `UpdateEruptAnimTask` `battle_anim_mons.c:1958-1991`; `PrepareBattlerSpriteForRotScale` makes the battler double-affine, so `centerToCornerVecY` is -64 (`sprite.c:687-700`); the rocks' flight is simulated per pic-Y class (`PicContext`, same grid mechanism as aud242l) | `max(77, 43 + slowest rock) - 1`, two classes |
+| `AnimTask_AlphaFadeIn` (Moonlight) | `battle_anim_mons.c:1654-1715`: a step every `a4 + 1` calls, odd steps move coefficient 1, even steps coefficient 2, destroy when both reach their targets | `(a4 + 1) * steps - 1` (63 for `0, 16, 16, 0, 1`) |
+| `AnimTask_MoonlightEndFade` | `battle_anim_effects_1.c:5003-5115` with `BeginNormalPaletteFade` / `UpdateNormalPaletteFade` / `IsSoftwarePaletteFadeFinishing` (`palette.c:156-203, 406-489, 807-826`): first fade clears `active` at F + 21, state 2 counts 31 calls, the second fade (18 passes + 4 finishing) ends at F + 74 | 74 |
+| `gMoonSpriteTemplate` / `gMoonlightSparkleSpriteTemplate` | `AnimMoon` / `AnimMoonlightSparkle` `battle_anim_effects_1.c:4946-5100`: wait for the end-fade task's state-1 call (`data[0] = 1`) and are destroyed by `AnimateSprites` of F + 22 of that task | tied to the task: `(taskF + 22) - spriteF` (the creating walk resolves them when `AnimTask_MoonlightEndFade` is created) |
+| `AnimTask_CurseStretchingBlackBg` | `battle_anim_ghost.c:945-1042`: Step1 calls 1..16 grow the window, call 17 runs `BeginNormalPaletteFade(mask, 0, 16, 16, black)` (start == target: BG pass in the Begin, OBJ pass sets `softwareFadeFinishing`, 4 counter iterations, clear on the 5th), Step2 destroys | 22 |
+| `gCurseNailSpriteTemplate` | `AnimCurseNail` `battle_anim_ghost.c:1044-1120`: 60 count-down calls, three 4-call moves separated by 40-call waits (calls 61..152), `WaitAnimForDuration` 30 + the stored-callback swap (153..183), Step2 arm (184) + 16 blend steps of 3 calls (187..232), End destroys at 233 | 232 |
+
+### 22.2 ROM windows (ROM frame - our frame; Scene ON, player attacker, `AUDIO_PROBE_EXTRA_HOOKS=BlendPalette`, stepping probe)
+
+| move | fixture / ids | rows | offset | note |
+|---|---|---|---|---|
+| Heal Bell | `aud242r-healbell-player` SE195 / SE228 / SE102 | 5 | -4 flat | status-move class (ROM earlier than ours) |
+| Spike Cannon | `aud242r-spikecannon-player` SE160 / SE166 | 6 | +9 flat | multi-hit class (section 3) |
+| Eruption | `aud242r-eruption-player` SE178 / SE131 | 14 | +2 flat | idle-lead class (Fury Cutter / Secret Power) |
+| Moonlight | `aud242r-moonlight-player` SE211 / SE179 | 2 | -4 flat | status-move class; the 257-frame gap between the rows is exact (BlendPalette hooks: entry 1303, y 0..16 on 1303..1319, second Begin 1355, destroy 1377) |
+| Curse (Ghost) | `aud242r-curse-player` SE170 x3 / SE121 | 4 | +1 flat | Misdreavus (species 200, `TYPE_GHOST`) on a Lv12 Rattata; the NIGHTMARE row is gated by the nail, its 93-frame gap after the last BIND is exact |
+
+The Heal / Moonlight labs use the aud242k recover lab's two-turn trace (a heal move fails at full HP). The Curse stage (`aud242r-curse-player-on`) overrides the attacker's types to Ghost so the engine takes `BattleScript_GhostCurse` (gAnimMoveTurn 0 = CurseGhost), like the ROM's real Misdreavus.
+
+Two first models were wrong and are recorded: Eruption with `centerToCornerVecY` -32 gave a 5-tick shorter task (the ROM hook showed the rock at y = 103); the double-affine -64 fixed it. Zero-duration affine frames appear to cost one extra call versus the plain "sum of durations" rule (the Thin Ring row above); this may be related to the undiagnosed Flatter SE229 drift, not investigated here.
+
+### 22.3 Counts (before = the `19078a38b` table, after = this step's head)
+
+| | before | after |
+|---|---|---|
+| all moves: ops resolved / unresolved (turn 0, player attacker) | 1021 / 115 | 1032 / 104 |
+| unresolved by reason | unmodelled-lifetime 109, unresolved-branch 1, waitsound 5 | unmodelled-lifetime 98, unresolved-branch 1, waitsound 5 |
+| all-moves ops in the table / distinct variants | 1257 / 372 | 1280 / 378 |
+| L50 (276 moves): emitted / gated | 794 / 64 | 805 / 53 |
+
+T1 census (seeds 0..99 Scene ON, `soundCensusDelta.py --t1`, each arm scored inside its own tree; base arm `on-19078a38b`, final arm `on-161c1958c`): exact 25,894 -> **25,948**, **missing-gated 65 -> 41**, missing-other 51, missing-declined 1, unclassified 128, extra 109 in BOTH arms (the Double Team SE239 rows from aud252, not this step). `rst197CensusDelta.py`: 100 / 100 battles, 31,470 commands, `eventsDigest` identical, bad 0; `soundCensusDelta.py` arm-vs-arm: 8 seeds with added SE rows only (no removed or moved rows). The aud242q census arm `on-44abf84b8` was NOT reusable as the base: master gained engine changes between it and `19078a38b` (commands differ), so a fresh base arm was built.
+
+Frame hashes: `npm run compare:differential -- <Curse, Moonlight, Eruption player Scene ON traces> --base 19078a38b --harness-from-head --summary`: 155 / 155 captures byte-identical (44 + 57 + 54).
+
+### 22.4 Remaining missing-gated moves
+
+| move | gated | blocker |
+|---|---|---|
+| Dynamic Punch | 10 | `waitsound` after SE_M_VITAL_THROW2 (SE length not modelled; 50 % accuracy, no window); declined again |
+| Soft Boiled | 5 | `gSoftBoiledEggSpriteTemplate` (needs `setarg 7, 0xFFFF` plus the exact affine-loop simulation; lab `aud242r-softboiled-player-on.json` is written but there is no probed window, so nothing is ported) |
+| Memento | 4 | `AnimTask_MoveAttackerMementoShadow` (pic-dependent shadow tasks, not derived) |
+| Air Cutter | 4 | not examined |
+| Torment | 4 | not examined |
+| Cosmic Power | 3 | not examined |
+| Fake Out / Recycle | 2 each | not examined |
+
+Census top missing-gated moves after this step (`t1-161c1958c`): Dynamic Punch 10, Soft Boiled 5, Memento 4, Air Cutter 4, Torment 4, Cosmic Power 3, Fake Out 2, Recycle 2 (41 in total). Curse (4) and Moonlight, Heal Bell, Spike Cannon, Eruption (all gone from the list) are resolved. Curse's non-Ghost body (`CurseStats`): `AnimTask_DrawFallingWhiteLinesOnAttacker` is listed as an unmodelled lifetime but no SE follows it, so no census row is gated by it.
