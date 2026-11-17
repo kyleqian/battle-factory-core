@@ -3,6 +3,7 @@
 import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { inflateSync } from "node:zlib";
 import { join, basename } from "node:path";
+import "../../src/engine/monPicPixelsInstall.ts";
 import { renderBattleResolutionLiveView } from "../../src/engine/battleScene.ts";
 import { liveView } from "./liveAdapterFramebuffer.ts";
 
