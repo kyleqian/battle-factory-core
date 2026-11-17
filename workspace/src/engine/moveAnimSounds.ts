@@ -267,12 +267,12 @@ export function variantOf(move: number, turn: number, attackerSide: 0 | 1, { pic
   const damageGrid = entry.damage === undefined ? undefined : timing.damageGrids[entry.damage[slot]!];
   if (damageGrid !== undefined && damage !== undefined) return timing.variants[damageGrid[seismicTossDamageLevel(damage)]!]!;
   const flagGrid = entry.flag === undefined || entry.flagKind !== "heal" || damage === undefined ? undefined : timing.flagGrids[entry.flag[slot]!];
-  if (flagGrid !== undefined) return timing.variants[flagGrid[damage > 0 ? 0 : 1]!]!;
+  if (flagGrid !== undefined && damage !== undefined) return timing.variants[flagGrid[damage > 0 ? 0 : 1]!]!;
   const elevationGrid = entry.elevation === undefined || attackerElevation === undefined ? undefined : timing.elevationGrids[entry.elevation[slot]!];
   const elevationClass = timing.elevationClasses.indexOf(attackerElevation ?? -1);
   if (elevationGrid !== undefined && elevationClass >= 0) return timing.variants[elevationGrid[elevationClass]!]!;
   const topGrid = entry.top === undefined || topY === undefined ? undefined : timing.topGrids[entry.top[slot]!];
-  if (topGrid !== undefined) {
+  if (topGrid !== undefined && topY !== undefined) {
     const row = timing.topYs[attackerSide]!.indexOf(topY(attackerSide));
     if (row >= 0) return timing.variants[topGrid[row]!]!;
   }

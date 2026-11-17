@@ -1602,7 +1602,8 @@ export function liveMoveSourceAge(
   // aud262: GetBattlerYCoordWithElevation reads the species (a Substitute doll does not hide it): the attacker's gEnemyMonElevation / sCastformElevations, 0 for the player.
   const attackerSide = command.animation.attacker === 0 ? "player" : "opponent";
   const attackerArt = createBattleCommandFieldArtView(field)[attackerSide];
-  const attackerElevation = battleCommandFieldArtElevation({ ...attackerArt, substituteDoll: false }, attackerSide);
+  const { substituteDoll: _doll, ...undolledArt } = attackerArt;
+  const attackerElevation = battleCommandFieldArtElevation(undolledArt, attackerSide);
   // aud262: GetWaterSpoutPowerForAnim (battle_anim_water.c:1139-1170): maxhp / 4 (integer), the first i < 3 with hp < maxhp * (i + 1), else 3.
   const attackerMon = fieldBattler(field, command.animation.attacker);
   const quarterHp = Math.trunc(attackerMon.maxHP / 4);

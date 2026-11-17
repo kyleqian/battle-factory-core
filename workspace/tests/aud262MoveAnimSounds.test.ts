@@ -25,9 +25,6 @@ function ourEvents(rom: Fixture): SoundEvent[] {
   return events;
 }
 
-const tableRows = (move: number, variant: number) =>
-  timing.variants[timing.moves[move]!.variants[variant]!]!.map((o) => `${o.frame}:${(o as { id?: number }).id}`);
-
 function expectConstantOffset(rom: Fixture, ids: number[], count: number, from: "first" | "last" = "last"): number {
   const pick = (events: FixtureEvent[]) => { const rows = events.filter((e) => e.noop !== true && e.kind === "se" && ids.includes(e.id as number)); return from === "last" ? rows.slice(-count) : rows.slice(0, count); };
   const romRows = pick(rom.events);
