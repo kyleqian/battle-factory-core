@@ -6,7 +6,7 @@ set -uo pipefail
 RUN_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 # Claude Code slugifies the run's absolute path (non-alphanumerics -> "-")
 # to name its local transcript dir; hardcoded since it won't change per-run.
-CLAUDE_PROJECT_DIR="$HOME/.claude/projects/-Users-kyle-Developer-pokebench-pokeemerald-factory-runs-20260717-004950-warm-bison"
+CLAUDE_PROJECT_DIR="$HOME/.claude/projects/-Users-$USER-Developer-pokebench-pokeemerald-factory-runs-20260717-004950-warm-bison"
 
 RCLONE_REMOTE="${R2_BACKUP_REMOTE:-r2}"
 RCLONE_BUCKET="${R2_BACKUP_BUCKET:-pokebench}"

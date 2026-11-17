@@ -12,19 +12,19 @@ batch. You may run `python3`, `grep`, `sed -n`.
 
 ## Paths
 
-- ENGINE: `/Users/kyle/Developer/pokebench/pokeemerald-factory-core/workspace/.worktrees/parity-mac/workspace/src/engine/`
-- REF (the game's C source): `/Users/kyle/Developer/pokebench/pokeemerald-factory-core/workspace/.worktrees/parity-mac/workspace/reference/pokeemerald/`
+- ENGINE: `<repo>/workspace/.worktrees/parity-mac/workspace/src/engine/`
+- REF (the game's C source): `<repo>/workspace/.worktrees/parity-mac/workspace/reference/pokeemerald/`
   (`src/battle_script_commands.c`, `src/battle_util.c`, `src/battle_main.c`, `data/battle_scripts_1.s`, `data/battle_ai_scripts.s`,
   `src/battle_ai_script_commands.c`, `src/battle_ai_switch_items.c`)
-- Facts about the pool (read first): `/private/tmp/claude-501/-Users-kyle-Developer-pokebench-pokeemerald-factory-core/cab6b818-0241-4551-8c1f-a19009821aaf/scratchpad/p5/cov/pool-facts.md`
-- Sets helper: `cd /private/tmp/claude-501/-Users-kyle-Developer-pokebench-pokeemerald-factory-core/cab6b818-0241-4551-8c1f-a19009821aaf/scratchpad/p4 && python3 sets.py "EXPR over m"`
+- Facts about the pool (read first): `<scratchpad>/p5/cov/pool-facts.md`
+- Sets helper: `cd <scratchpad>/p4 && python3 sets.py "EXPR over m"`
   (m.index, m.sp species, m.moves, m.item, m.ab abilities, m.ty types, m.spe base speed, m.eff move effects, m.he hold effect,
   m.gr gender ratio, m.ch = the 0-based challenge numbers whose range holds the set). Inside the expression `moves` is the move
   table: `moves['MOVE_X']['type']`, `['power']`, `['effect']`.
-- The rules: `/private/tmp/claude-501/-Users-kyle-Developer-pokebench-pokeemerald-factory-core/cab6b818-0241-4551-8c1f-a19009821aaf/scratchpad/p5/cov/crules.json`
+- The rules: `<scratchpad>/p5/cov/crules.json`
   (each: `id`, `rule`, `freq`, `how` = what a battle needs, `reason`, `pieces` = the code: file, function, line, `cover` = the marker
   the hunter checks, `body` = the code text). Read the engine code around each piece and the C it ports before you design.
-- Examples of stage files that worked: `/Users/kyle/Developer/pokebench/pokeemerald-factory-core/workspace/.worktrees/parity-mac/workspace/docs/parity-mac/stages/*.json`
+- Examples of stage files that worked: `<repo>/workspace/.worktrees/parity-mac/workspace/docs/parity-mac/stages/*.json`
   (for instance `metronome-camouflage.json`, `magic-coat-pressure.json`, `noland-foresight-ghost.json`).
 
 ## The stage file

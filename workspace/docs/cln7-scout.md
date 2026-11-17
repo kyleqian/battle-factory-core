@@ -11,7 +11,7 @@ The main finding: step 7 is mostly a policy and ignore-path change. About 590 MB
 - `docs/finish-plan.md:253` says only: "Evidence JSON stops going into git (R2 via `tools/backup-logs-to-r2.sh` or an evidence repo). No history rewrite."
 - `.gitignore` already ignores `/tools/compare/out/`, `/tools/probe/out/`, `/artifacts/`, `/oracle-output/`, `/battle-lab-output/` and `.integration/`. It has no entry for the tracked evidence directories.
 - `tools/backup-logs-to-r2.sh` is not an evidence backup:
-  - It archives only `.codex-logs`, `.opencode-logs` and one hardcoded Claude transcript dir. That dir is a macOS path, `-Users-kyle-Developer-…-warm-bison`.
+  - It archives only `.codex-logs`, `.opencode-logs` and one hardcoded Claude transcript dir. That dir is a macOS path, `-Users-<name>-Developer-…-warm-bison`.
   - It uses BSD `stat -f`, so it won't run on this Linux host as written.
   - It needs a local `r2` rclone remote. `ROADMAP.md:132` documents it as a log backup only.
 - Repo size: 33,431 tracked files. The git pack is 320 MB, which history rewrite is out of scope for. Tracked bytes on disk are about 1.9 GB.

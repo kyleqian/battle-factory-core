@@ -6,14 +6,15 @@ import gzip, json, os, subprocess, sys
 stage_path, out, first, count, snap = sys.argv[1], sys.argv[2], int(sys.argv[3]), int(sys.argv[4]), sys.argv[5]
 S = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 W = f"{S}/snap/{snap}/workspace"
+REPO = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), *[".."] * 5))
 sys.path.insert(0, W + "/tools/audio")
 os.chdir(W)
 import romReplayTally
-sys.path.insert(0, "/Users/kyle/Developer/pokebench/pokeemerald-factory-core/workspace/.worktrees/parity-mac/workspace/tools/audio")
+sys.path.insert(0, f"{REPO}/workspace/.worktrees/parity-mac/workspace/tools/audio")
 import romReplayCoverage, shutil
 os.makedirs(out, exist_ok=True)
 base = json.load(open(stage_path))
-env = {**os.environ, "REPLAY_OUT": out, "REPLAY_KEEP": "0", "POKEBENCH_MGBA_PYTHON": "/Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python3",
+env = {**os.environ, "REPLAY_OUT": out, "REPLAY_KEEP": "0", "POKEBENCH_MGBA_PYTHON": os.path.join(os.path.dirname(REPO), "vendor/mgba-venv/bin/python3"),
        "ROM_REPLAY_POLICY": "script", "ROM_REPLAY_SYMBOLS": "0"}
 env.pop("ROM_REPLAY_CHALLENGE", None)
 NODE = ["nice", "-n", "10", "node", "--experimental-strip-types", "--no-warnings", "tools/integration/soundCensusRomReplay.ts"]

@@ -205,7 +205,7 @@ campaign, rewriting its accepted moves, or promising a particular speedup.
 The user subsequently asked to build this now using spare capacity and clarified
 that execution should be on hcloud. On 2026-09-22 at 05:25 UTC, a separate bounded
 implementation run was launched as `pokebench-animation-runtime.service` on
-95.216.222.140. Its parent branch is `codex/animation-runtime-hcloud`, setup
+the hcloud server. Its parent branch is `codex/animation-runtime-hcloud`, setup
 commit `623fdc52b`, based on this research's `ac3d4243e`.
 
 Remote parent workspace:

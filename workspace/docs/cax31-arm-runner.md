@@ -7,12 +7,12 @@ and stays stopped while the remote main writer runs.
 
 ## Host and access
 
-- Server: `pokebench-cax31-20261013`, Hetzner ID `170228874`, Helsinki `hel1`.
+- Server: `pokebench-cax31-20261013`, Helsinki `hel1`.
 - CAX31: 8 shared ARM vCPUs, 16 GB RAM, 160 GB disk; Ubuntu 24.04 aarch64.
-- IPv4: `2.29.20.119`. Monthly cap quoted at creation: $25.59 including IPv4,
+- Monthly cap quoted at creation: $25.59 including IPv4,
   before tax, optional backups and AI usage; charged while the server exists.
-- User: `pokebench`; existing `pokebench-autonomy-ed25519` SSH key.
-- Firewall `11798520` permits SSH and ICMP only. Oracle/preview ports are not
+- User: `pokebench`; SSH with a key only.
+- A Hetzner firewall permits SSH and ICMP only. Oracle/preview ports are not
   exposed publicly. Password SSH login is disabled.
 - Checkout: `/srv/pokebench/pokeemerald-factory-core/workspace`, branch
   `master` for the assigned session (`codex/cax31-arm-setup` preserves setup);
@@ -28,9 +28,8 @@ and stays stopped while the remote main writer runs.
 ssh pokebench-cax31
 ```
 
-The local SSH alias selects the existing key and the host's dedicated
-known-hosts file. Without the alias, pass
-`-i ~/.ssh/pokebench-autonomy-ed25519` to `ssh pokebench@2.29.20.119`.
+The local SSH alias (in `~/.ssh/config` on the Mac, not in this repo) holds the
+host's address, the key and a dedicated known-hosts file.
 
 ## Native setup and proof
 
