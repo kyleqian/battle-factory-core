@@ -424,9 +424,9 @@ The 7 gated rows that closed are Brick Break 2, Glare 2, Recycle 2, Will-O-Wisp 
 | ON | 41,331 | **268,784** | 1 | **509** | 5 | 1 | 0 | 0 |
 | OFF | 47,199 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
 
-Scene OFF has `HITMARKER_NO_ANIMATIONS` on every command, so no move-animation row is expected or emitted (the non-move families score 4,621 exact, 0 missing / extra there; ON: 118,656 exact, 0 missing / extra, 439 move tail rows + 1,088 status tail rows claimed). The ON arm's one known-offset / one missing-other row are both Seismic Toss seed 567 (+2, SE 214 pan -63), unchanged from aud259. Gated rows by the table's `ends` reason: `end` 482, `unresolved-branch` 27.
+Scene OFF has `HITMARKER_NO_ANIMATIONS` on every command, so no move-animation row is expected or emitted (the non-move families score 4,621 exact, 0 missing / extra there; ON: 118,656 exact, 0 missing / extra, 439 move tail rows + 1,088 status tail rows claimed). The ON arm's one known-offset / one missing-other row are both Seismic Toss seed 567 (+2, SE 214 pan -63). Gated rows by the table's `ends` reason: `end` 482, `unresolved-branch` 27.
 
-Top-20 remaining missing rows, Scene ON (all `missing-gated`, 505 of the 509; the other 4 are Zap Cannon's 2 and two single-row moves; the OFF scene has none): Extreme Speed 116, Milk Drink 60, Pain Split 58, Air Cutter 42, Flame Wheel 35, Swallow 35, Octazooka 26, Magnitude 23, Razor Wind 22, Rapid Spin 20, Covet 14, Aromatherapy 9, Water Spout 8, Needle Arm 8, Smelling Salt 8, Memento 6, Spider Web 5, Present 4, Refresh 4, Zap Cannon 2. Missing-declined: Rock Smash 2, Beat Up 2, Withdraw 1. Non-move families: no missing rows.
+Top-20 remaining missing rows, Scene ON (all `missing-gated`, 505 of the 509; the other 4 are on moves ranked below Zap Cannon; the OFF scene has none): Extreme Speed 116, Milk Drink 60, Pain Split 58, Air Cutter 42, Flame Wheel 35, Swallow 35, Octazooka 26, Magnitude 23, Razor Wind 22, Rapid Spin 20, Covet 14, Aromatherapy 9, Water Spout 8, Needle Arm 8, Smelling Salt 8, Memento 6, Spider Web 5, Present 4, Refresh 4, Zap Cannon 2. Missing-declined: Rock Smash 2, Beat Up 2, Withdraw 1. Non-move families: no missing rows.
 
 ### Sound-only proof
 
