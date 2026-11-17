@@ -3,20 +3,20 @@
  "rules": [
   "R030"
  ],
- "why": "Challenge 5. The player's Skarmory (578: Toxic, Curse, Rest, Fly) badly poisons the opponent's lead Dugtrio (564: fast, frail, only Double-Edge touches a Steel/Flying mon) and then uses Curse every turn, so Curse is the last move of every turn (Skarmory is slower). Skarmory is Steel/Flying and survives Dugtrio's resisted hits. When Dugtrio faints from the poison at turn end, the AI scores its replacements with the last move still Curse (battle_ai_switch_items.c:775-779): Dewgong (584) and Miltank (603) have no Fire/Electric move, so neither is super-effective against Skarmory, the type pass finds nothing and the damage pass runs with Curse as the current move, which gives 0 damage (damageCalc.ts TYPE_MYSTERY).",
+ "why": "Challenge 6. The AI's lead Dusclops (666: Double-Edge, Shadow Ball, Curse, Rest) against the player's Skarmory (674): Drill Peck then Steel Wing (resisted) take it to half HP or less, where a Ghost-type Curse is an ordinary AI pick (AI_CV_Curse4 only scores it down above 80 percent HP). Curse costs half the maximum HP, so Dusclops faints in the middle of its own Curse action, and HandleFaintedMonActions runs with Curse still the current move (battle_util.c:640, before HandleAction_ActionFinished clears gCurrentMove). The AI scores its replacement with that move: Quagsire (676) and Kangaskhan (694) have no Fire/Electric move, so neither is super-effective against Skarmory (Steel/Flying), the type pass finds nothing and the damage pass runs with Curse as the current move, which gives 0 damage (damageCalc.ts TYPE_MYSTERY). luck3: the day-1 Dugtrio design (0 of 539) died of Double-Edge recoil with Double-Edge current; a Toxic design (Sceptile killed by end-turn poison) was tried and cannot hit at all, because an end-turn faint runs after gCurrentMove is cleared to NONE. Fresh lab seeds 900000-900039: 2 of 40 hit, 900002 and 900020, both matched the ROM to the end.",
  "seed": 0,
- "challengeNum": 5,
+ "challengeNum": 6,
  "battleNum": 0,
- "trainerId": 160,
+ "trainerId": 180,
  "playerSetIds": [
-  578,
-  565,
-  628
+  674,
+  730,
+  677
  ],
  "opponentSetIds": [
-  564,
-  584,
-  603
+  666,
+  676,
+  694
  ],
  "script": {
   "actions": [
