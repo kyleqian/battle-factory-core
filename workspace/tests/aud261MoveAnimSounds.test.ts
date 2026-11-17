@@ -324,7 +324,7 @@ describe("Gust (aud261)", () => {
   }
 });
 
-// AnimTranslateWebThread (battle_anim_bug.c:258-298; D = (|84| << 8) / 512 = 42, AnimTranslateLinear) x 14 gates the first wait: the loop ends 82 ticks before STRING_SHOT2 on the ROM;
+// AnimTranslateWebThread (battle_anim_bug.c:258-298; D = (|84| << 8) / 512 = 42, AnimTranslateLinear) x 14 gates the first wait: the ROM plays STRING_SHOT2 82 ticks after the first loop SE;
 // AnimSpiderWeb (:318-355, 20 + 32 calls, destroyed in call 53) gates the final wait.
 describe("Spider Web (aud261)", () => {
   it("the table entry: STRING_SHOT loop at 38 and STRING_SHOT2 at 120, ungated", () => {

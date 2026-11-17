@@ -1313,3 +1313,69 @@ The constant offsets are the idle-lead / action-transition class (#198), not lif
 - **Memento** (4 gated ops in T1 0..99): the attacker shadow task (`AnimTask_MoveAttackerMementoShadow`, battle_anim_dark.c:408-540) steps `data[4]` from `BATTLER_COORD_ATTR_TOP - 7` (the species' sprite height, `GetBattlerSpriteCoordAttr`, battle_anim_mons.c:2277) down by 8 per call, so its lifetime (and the post-wait SE_M_PSYBEAM rows) depend on a per-species sprite size the table's grids do not carry (they key on the pic Y offset, the damage and the counter). It needs a new per-species TOP grid in the extractor and the engine's `variantOf` key, plus `AnimTask_MementoHandleBg` / `AnimTask_MoveTargetMementoShadow` ports; not started.
 
 T1 census 0..99 Scene ON: exact 26,100 -> 26,176, missing-gated 15 -> 4 (Memento), missing-other 53 -> 0 (the tail rows are now emitted and scored exact), extra 0. T1 0..999 and the sound-only proof are in docs/aud251-s11-scoreboard-refresh.md (aud260).
+
+## 27. aud261: T1 0..999 missing-gated tail (14 moves)
+
+Every lifetime is ported from the C (file:line in the `lifetimeOf` comments of `tools/extract/extract-anim-sound-timing.ts`), not fitted. Each move has a ROM window for both attacker sides (probe step mode, Scene ON, labs `tools/battle-lab/aud261-*.json`, stages `aud261-<move>-<side>-on` in `tools/compare/appTrace.ts`, fixtures `tools/audio/fixtures/aud261-*.json`) and a Tier-1 pin in `tests/aud261MoveAnimSounds.test.ts`. L50 emitted / gated (`factory-animation-inventory.json` level50 moves, turn 0, player attacker) 839 / 35 -> **862 / 12** (the 12 are Luster Purge 6, Rapid Spin 2, Present 1, Magnitude 1, Memento 1, Water Spout 1; Luster Purge has no row in the 0..999 census). Extractor (turn 0, player attacker): 1066 -> 1091 resolved ops, 86 -> 61 unresolved; the table gained only rows that were previously gated.
+
+Lifetimes added (call numbering as in the earlier sections: a sprite's init is call 0, destroyed on call K = exact K - 1; a task's entry is call 0):
+
+| Move | Object | Lifetime | Source |
+| --- | --- | --- | --- |
+| Extreme Speed | `AnimTask_AttackerStretchAndDisappear`, `AnimTask_ExtremeSpeedImpact`, mon-edge hit splats | 8, 59, 10 | battle_anim_effects_2.c:2792-2873 |
+| Milk Drink | `AnimMilkBottle_Step1` | simulated by `milkBottleDestroyCall` | battle_anim_effects_1.c:4003-4062 |
+| Pain Split | `AnimPainSplitProjectile`, `AnimTask_PainSplitMovement` | 19, 12 | battle_anim_effects_3.c:2937-3033 |
+| Flame Wheel | `AnimFireSpiralOutward` | D + W + 1 (W = 56) | battle_anim_fire.c:738-772 |
+| Swallow | `AnimTask_SwallowDeformMon`, `AnimSwallowBlueOrb` | 86, pic-Y dependent | battle_anim_effects_3.c:2217-2248 |
+| Octazooka | `gOctazookaBallSpriteTemplate` | D + 1 = 21 | battle_anim_effects_1.c:1691 (`TranslateAnimSpriteToTargetMonLocation`) |
+| Zap Cannon | ball, `AnimZapCannonSpark` | D + 1 = 31, D - 1 = 29 | battle_anim_electric.c:130, 572-603 |
+| Razor Wind | `AnimRazorWindTornado` (`TranslateSpriteInCircle`), `AnimAirWaveCrescent` | D, D + 1 | battle_anim_effects_2.c:1883, battle_anim_flying.c:430 |
+| Covet | `AnimMagentaHeart`, `AnimTask_RockMonBackAndForth` | 58, 4 (8 - 2 i) n | battle_anim_effects_2.c:3067, battle_anim_effects_3.c:2702 |
+| Needle Arm | `AnimNeedleArmSpike` | D | battle_anim_effects_1.c:3623-3694 |
+| Aromatherapy / Refresh | flowers (`AnimFlyingParticle`, shared with Silver Wind), `AnimTask_StatusClearedEffect` | ceil(272 or 264 / s), 89 | battle_anim_effects_1.c:3517, battle_anim_effects_3.c:3904, battle_anim_utility_funcs.c:812-936 |
+| Smelling Salt | `AnimSmellingSaltsHand`, `AnimTask_SmellingSaltsSquish` | 45 + 14 (n - 1), 13 n - 1 | battle_anim_effects_3.c:4232-4343 |
+| Gust | `AnimEllipticalGust`, `AnimTask_AnimateGustTornadoPalette` | 69, n - 1 | battle_anim_flying.c:353-405 |
+| Spider Web | `AnimTranslateWebThread` (x14), `AnimSpiderWeb` | (84 << 8) / unk2 = 42, 52 | battle_anim_bug.c:258-355, battle_anim_mons.c:1111, 1155 |
+
+The web thread's distance is the singles one: the thread starts at the attacker's X_2 +- 20 and ends at the target's X_2, 84 pixels on both sides (the macro `create_web_thread_sprite` carries `unk2=` / `targets_both=` as named arguments, so the extractor reads them with `intNamed`).
+
+| Window | ROM rows | ROM minus ours |
+| --- | --- | --- |
+| Extreme Speed (`aud261-extremespeed-*`, Snorlax target) | 160 x3, 139 +39 / +12, 123 +12, 135 x4 +44 | 0 |
+| Milk Drink (turn 2) | 142 x3, 225 +62, 179 +94 | -2 |
+| Pain Split | 194 x3 25 apart | -4 |
+| Flame Wheel | 144 x7 four apart, 145 +88 | +2 |
+| Swallow (player; after a Stockpile turn) | 152, 232 +40, 179 +102 | -4 |
+| Octazooka | 141, 177 +22 later | +2 |
+| Zap Cannon | 138 @6, shake / electricity rows +50 / +69 | +2, +3, +3 (named residual below) |
+| Razor Wind, turn 1 charge | GUST 132, GUST2 133 | -10 |
+| Razor Wind, turn 2 unleash | 160 @9 / 13 / 17, 136 @36 | +1 (player), +14 (opponent) |
+| Covet | 212 x3, loop 176 | +2 |
+| Needle Arm | 166 loop, 123 | +3 |
+| Aromatherapy | ROM gaps 0 / 197 / 291 / 363 (player), 0 / 193 / 287 / 359 (opponent) | rows 3 / 4 +4 |
+| Refresh | ROM gaps 0 / 94 / 166 | rows 2 / 3 +4 |
+| Smelling Salt | 134 loop, 194 loop +32 | +4 |
+| Gust | 132, 133 +70 | +1 |
+| Spider Web | 129 loop x6, 130 +82 | -3 |
+
+All offsets are constant across their window except where named; the ROM gaps equal the table's. They are the idle-lead / action-transition class (#198), not lifetime errors.
+
+Named residuals (measured, not attributed; the table keeps the C-derived value and the tests pin the residual):
+
+- **Zap Cannon +1 across the wait**: the ROM's gaps are 50 / 69 against the table's 49 / 68. A CreateSpriteAndAnimate hook shows 7 sparks at the SE frame and the eighth one frame later (candidate: a VBlank overrun from nine sprite inits in one script step). Zap Cannon is 50% accurate; the engine stages use rngSeed 2 (player) / 10 (opponent), the first seeds that hit.
+- **AnimTask_StatusClearedEffect +4** (Aromatherapy, Refresh): the C gives 89, the ROM destroys it 93 ticks after the STAT_INCREASE. The creating step decompresses a tilemap and image and loads a palette, so it is the `METALLIC_SHINE_LOAD_LAG` class; a lag constant for this task is a candidate, not added.
+- **Extreme Speed against a Rattata opponent**: x2 = 1 at the task entry shortens the case-3 return by one call (a residual of 1). The windows use a Snorlax target (x2 = 0).
+- **Razor Wind per-turn offsets**: the charge turn is -10 and the unleash turn +1 / +14 on one trace; `expectConstantOffset` does not apply across both turns, the test asserts them per turn.
+
+Window notes: the Swallow opponent window is absent because the engine's opponent AI does not Stockpile (the player window carries the pin). Refresh needs a Thunder Wave from the other side to have a status to clear (opponent-move-86 stages). Razor Wind and Refresh use two-turn traces; Milk Drink's first turn fails at full HP.
+
+### 27.1 Deferred (read, not committed)
+
+- **Rapid Spin** (20 rows): `AnimTask_RapinSpinMonElevation` steps by the opponent-side battler's species elevation (4..16, clamped at 0), which the table's pic-Y grid folds into the pic Y; a lifetime that depends on the elevation alone needs a new elevation dimension in the grid and the engine's `variantOf` key.
+- **Water Spout** (8): the droplet count depends on the attacker's HP quarter (a power / HP variant dimension).
+- **Magnitude** (23): `AnimTask_IsPowerOver99` selects the intense branch from the move's random power (a power variant dimension; the engine knows the power, the table does not key on it).
+- **Memento** (6): a per-species sprite-height grid (see 26.1).
+- **Present** (4): `AnimTask_IsHealingMove` branches on the random power.
+- Luster Purge has 6 gated L50 rows but no 0..999 census row.
+
+T1 census 0..999 Scene ON: missing-gated 467 -> 64 (Magnitude 23, Rapid Spin 20, Water Spout 8, Memento 6, Present 4, Odor Sleuth 1, False Swipe 1, Pay Day 1), extra 0, unclassified 0. Scoreboard: docs/aud251-s11-scoreboard-refresh.md (aud261).
