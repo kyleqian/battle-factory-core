@@ -1196,6 +1196,11 @@ function lifetimeOf(cmd: Command, attackerSide: number, pic: PicContext, rollout
   // AnimZapCannonSpark (battle_anim_electric.c:572-603; D = gBattleAnimArgs[3] = script args[6]): the init (call 0) runs AnimZapCannonSpark_Step once, whose AnimTranslateLinear (battle_anim_mons.c:1111-1139) counts D down
   // (call 0 .. D - 1) and returns TRUE on call D, which destroys: gone D - 1 ticks after F.
   if (sprite("gZapCannonSparkSpriteTemplate")) { const d = intArg(args[6]); return d === null || d < 1 ? null : { exact: d - 1 }; }
+  // AnimRazorWindTornado (battle_anim_effects_2.c:1883-1897; D = sDuration = data[3] = gBattleAnimArgs[6] = script args[9]) runs TranslateSpriteInCircle (battle_anim_mons.c:449-466) once in the
+  // init: calls 0..D - 1 step, call D installs the stored DestroyAnimSprite, call D + 1 destroys: gone D ticks after F. AnimAirWaveCrescent (battle_anim_flying.c:430-465; D = data[0] =
+  // gBattleAnimArgs[4] = script args[7]) installs StartAnimLinearTranslation with DestroyAnimSprite stored (the AnimPowerAbsorptionOrb shape): D + 1.
+  if (sprite("gRazorWindTornadoSpriteTemplate")) { const d = intArg(args[9]); return d === null || d < 0 ? null : { exact: d }; }
+  if (sprite("gAirWaveCrescentSpriteTemplate")) { const d = intArg(args[7]); return d === null || d < 1 ? null : { exact: d + 1 }; }
   // AnimPainSplitProjectile (battle_anim_effects_3.c:2937-2970) keeps its callback and destroys in the first call after animEnded: gPainSplitAnimCmds (:723-729) are 5 + 9 + 5 = 19 ticks, exact 19.
   // AnimTask_PainSplitMovement (:2974-3033): the entry (call 0) sets the rot/scale and data[0] = 1, step calls 1..13 count data[1], call 13 (== 13) destroys: exact 12.
   if (sprite("gPainSplitProjectileSpriteTemplate")) return { exact: 19 };

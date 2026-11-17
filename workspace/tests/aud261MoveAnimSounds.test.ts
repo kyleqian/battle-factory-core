@@ -178,3 +178,29 @@ describe("Zap Cannon (aud261)", () => {
     });
   }
 });
+
+// AnimRazorWindTornado (battle_anim_effects_2.c:1883-1897, TranslateSpriteInCircle D = 40: gone 40 ticks after F) gates the GUST2 after the charge; AnimAirWaveCrescent (battle_anim_flying.c:430-465,
+// StartAnimLinearTranslation D = 22: 23 ticks) is not waited on before the unleash rows (the SE rows are RAZOR_WIND2 x3 at 9 / 13 / 17 and RAZOR_WIND at 36).
+describe("Razor Wind (aud261)", () => {
+  it("the table entry: GUST at 3 and GUST2 at 44 on the charge turn, RAZOR_WIND2 x3 at 9 / 13 / 17 and RAZOR_WIND at 36 on the unleash turn, ungated", () => {
+    expect(timing.moves[13]!.label).toBe("Move_RAZOR_WIND");
+    expect(timing.moves[13]!.gated.every((g) => g === 0)).toBe(true);
+    expect(tableRows(13, 0)).toEqual(["3:132", "44:133"]);
+    expect(tableRows(13, 2)).toEqual(["9:160", "13:160", "17:160", "36:136"]);
+  });
+  for (const [side, pan, unleashOffset] of [["player", -64, 1], ["opponent", 63, 14]] as const) {
+    it(`aud261-razorwind-${side}: the +41 charge gap and the +4 / +4 / +19 unleash gaps equal the table's, offset constant per turn`, () => {
+      const rom = fixture(`aud261-razorwind-${side}`);
+      const ids = [132, 133, 160, 136];
+      const romRows = rom.events.filter((e) => e.kind === "se" && ids.includes(e.id as number));
+      expect(romRows.length).toBe(6);
+      expect(romRows[1]!.frame - romRows[0]!.frame).toBe(41);
+      expect(romRows.slice(2).map((e) => e.frame - romRows[2]!.frame)).toEqual([0, 4, 8, 27]);
+      expect(romRows.slice(0, 3).every((e) => e.pan === pan)).toBe(true);
+      const ours = ourEvents(rom).filter((e) => e.kind === "se" && ids.includes(e.id as number)).slice(-6);
+      expect(ours.map((e) => `${e.id}:${e.pan}`)).toEqual(romRows.map((e) => `${e.id}:${e.pan}`));
+      // Offsets are constant within a turn (the lead is the #198 idle-lead class: charge -10, unleash +1 / +14 by who moves first).
+      expect(romRows.map((e, i) => e.frame - ours[i]!.frame)).toEqual([-10, -10, ...Array<number>(4).fill(unleashOffset)]);
+    });
+  }
+});
