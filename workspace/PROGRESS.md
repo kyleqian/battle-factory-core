@@ -80,6 +80,8 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **sta3 (side; cap-killed after committing, gate green; supervisor verified):** the second `Status_*` play now lands on the ROM frame (flatter 7 / 7, swagger 8 / 8, dreameater 0 / 0; was +14 / +15):
   the action transition into a pre-move confusion / sleep print plus 3 launch rows (`PRE_MOVE_STATUS_ANIMATION_LEAD_ROWS`); census eventsDigest 100 / 100 both scenes. Supervisor re-pinned
   `randomRoundSoak` full seeds 0 / 1 (exploring trajectory) and checked the touched sound tests.
+- **aud242q (integration, sound only):** Ice Ball, Fury Cutter, Secret Power, Extrasensory, Strength, Super Fang, Rage; `RGB()` argument-split fix; T1 missing-gated 95 -> **65**. Supervisor resolved
+  the aud248 residual-table merge conflict and re-pinned the Ice Ball five-turn windows for hpd2 (-8 per chained turn).
 - **lbw5 (side):** Lobby player <-> NPC cases proven on the ROM; bump direction change and turn-commit refusal fixed (`factoryLobbyFreeRoam.ts`, `idleIdx` pose state); forfeit window 109 -> 113 / 113; lbw4 / lbra / won-* windows unchanged; supervisor `npm run compare` lbw5-bump-turn-off 269 / 269.
 - **aud242o / p (integration, sound only):** Petal Dance, Confuse Ray ball bounce, Tri Attack, Dive, Rollout counter, Encore, Flatter, Reversal, Taunt, Karate Chop, Revenge, Mist Ball, Leaf Blade;
   T1 missing-gated 195 -> **95**; T2 ON move-SE missing (21 seeds) **76** (aud251: 206); differentials 320 / 320, 240 / 240.
