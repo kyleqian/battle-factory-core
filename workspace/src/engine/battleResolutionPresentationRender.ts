@@ -1578,7 +1578,7 @@ export function liveMoveScriptTailFrames(
 
 // hpd4: rows the command presents after its live body (+ post) so the next command (hit controller, next script step) starts on the ROM row
 // (R -> H = lead + 3 + len + 4 against the accepted live window), tuned by exact-frame matches against the ROM frames (docs/hpd1-hp-hold.md).
-const HPD4_BODY_TAIL_ROWS: ReadonlyMap<number, number> = new Map([[49, 3], [82, 26], [111, 3], [205, 3]]);
+const HPD4_BODY_TAIL_ROWS: ReadonlyMap<number, number> = new Map([[49, 3], [82, 26], [111, 3], [205, 3], [301, 3]]);
 function liveMoveHitTailRows(command: Extract<BattleResolutionPresentationCommand, { type: "move-animation" }>): number {
   if ((command.timing.bodyLeadFrames ?? 0) === 0 || command.animation === undefined) return 0;
   return HPD4_BODY_TAIL_ROWS.get(command.animation.moveId) ?? 0;

@@ -1586,7 +1586,7 @@ function moveAnimationSeGateTiming(events: readonly BattleKernelSemanticEvent[],
  * accepted live window does not contain the script lead: Sonic Boom, Dragon Rage, Defense Curl, Rollout. Seismic Toss is audited but held out (docs/hpd1-hp-hold.md, hpd4). Their lead is presented as
  * the command's first rows (`bodyLeadFrames`); every other body keeps the lead in its script tail (its accepted window was fitted without an audit).
  */
-export const BODY_LEAD_AUDITED_MOVE_IDS: ReadonlySet<number> = new Set([49, 82, 111, 205]);
+export const BODY_LEAD_AUDITED_MOVE_IDS: ReadonlySet<number> = new Set([49, 82, 111, 205, 301]);
 
 function moveAnimationScriptLeadTiming(
   events: readonly BattleKernelSemanticEvent[],
