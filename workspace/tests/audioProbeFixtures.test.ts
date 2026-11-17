@@ -182,6 +182,7 @@ describe("audio probe fixtures", () => {
       "aud253-lowhp-switchin-2-on.json",
       "aud254-forced-sendin-237-off.json",
       "aud254-forced-sendin-237-on.json",
+      "aud257-cosmicpower-player.json",
       "battle-intro-window-off.json",
       "battle-intro-window.json",
       "battle-window-off.json",
