@@ -7,7 +7,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ## 2026-11-17 — CAX31 daily run (supervisor, Opus 5.5, 2026-11-17 13:30 -> 2026-11-18 05:30 UTC): IN PROGRESS
 
-- **State:** master `c81db4870`; workers: wsh1b (integration), aud260 (side). **No DEFERRED items.** Evidence `.integration/validation/sv-20261117/`.
+- **State:** master `334becd9a`; workers: wsh2 (integration), aud260 (side). **No DEFERRED items.** Evidence `.integration/validation/sv-20261117/`.
 - **Run start:** oracles current; baseline = last run's full suite (only tooling changed since `4e4c51880`). Disk 63 % -> 36 % (43 old census `tree/` dirs + `/tmp` scratch;
   list `.integration/evidence/TREES-PRUNED-20261117.txt`). No Mac fold (`mac/parity-mac` still `165548c4b`).
 - **Gameplay (replay, item 0d):** nightly check on `e06cac9fc`: pool **44 / 44** (1,287 states), staged battles **72 / 72** (`docs/replay-ledger.md`).
@@ -19,8 +19,10 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   T1 0..99 ON missing-gated 41 -> 15. L50 table emitted / gated 807 / 51 -> 832 / 39.
 - **wsh1 (presentation, frames move by design):** WISH_HEAL / FUTURE_SIGHT_HIT / FOCUS_BAND now play as Scene ON commands (201 / 172 / 129 frames, ROM-measured) with their SEs,
   Scene OFF holds 36 / 42 / 40; census 0..99 both scenes `eventsDigest` identical (9 seeds gain the commands); vanilla 0:20 both scenes 20 / 20, winning 0:60 60 / 60 (supervisor);
-  test:gate / build / build:lib 0; two soak frame pins re-pinned. Worker hit its cap before its doc: wsh1b writes it. These close the last 16 T2 ON rows (to confirm in wsh1b).
-- **Next:** wsh1b (doc, semi-invulnerable / Substitute skip, Future Sight +14 / +8 residuals, T2 confirm, drawing), aud260 (T1 tail + census 0..999 both scenes for S11 acceptance).
+  test:gate / build / build:lib 0; two soak frame pins re-pinned. wsh1b: doc `docs/wsh1-general-anim-commands.md`, Tier-1 pins for the semi-invulnerable / Substitute skips
+  (already in the engine), Wish-on-Dig ROM window. **T2 ROM scoreboard: Scene ON 0 missing / 0 extra in every family (21 seeds; supervisor re-scored the 3 re-run seeds), Scene OFF
+  0 / 0 (aud255, 20 seeds).** Future Sight +14 / +8 are the hpd HP-hold family (not fixed). The three animations are still undrawn (wsh2).
+- **Next:** wsh2 (draw the three), aud260 (T1 tail + census 0..999 both scenes for S11 acceptance).
 
 ---
 
