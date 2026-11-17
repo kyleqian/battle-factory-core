@@ -1434,6 +1434,6 @@ Named residuals:
 
 `soundCensusExpected.ts` used to pick only the pic and counter variants, so a damage-keyed move (Seismic Toss) was always expected on the Medium branch. Seismic Toss seed 567 command 530 hits a target with fewer than 33 HP left, so the engine (correctly, `gAnimMoveDmg` is the damage dealt) plays the Weak branch (SE 214, 131 +18, no third SE): the scorer reported that as known-offset +2 and missing-other 1. `lsd194Census.ts` now records the request damage class (`soundAnim` element 12: z / 0 / 1 / 2) and the attacker's [elevation, HP quarter, TOP] (element 13), `soundCensusDelta.py` adds them to the key and `soundCensusExpected.ts` calls the emitter's own `variantOf`. Seed 567 scores 314 exact, 0 known-offset, 0 missing-other.
 
-The five missing-declined rows (Rock Smash 2, Beat Up 2, Withdraw 1) are moves with no live presentation adapter (`liveMoveAnimationDuration` null, section 21 note): adding one is presentation work, out of scope here.
+The five missing-declined rows (Rock Smash 2, Beat Up 2, Withdraw 1) are moves with no live presentation adapter (`liveMoveAnimationDuration` null, section 20 note): adding one is presentation work, out of scope here.
 
 T1 census 0..999 Scene ON: missing-gated 64 -> **0**, known-offset 1 -> 0, missing-other 1 -> 0, missing-declined 5, extra 0, unclassified 0. Scoreboard: docs/aud251-s11-scoreboard-refresh.md (aud262).
