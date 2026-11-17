@@ -162,7 +162,10 @@ T2 ON (21 seeds) move-SE missing 113 (aud242o head) -> **76**, extra 0.
 **aud242q (2026-11-17)** Ice Ball, Fury Cutter, Secret Power (Factory BUILDING environment), Strength, Extrasensory, Super Fang, Rage; extractor fix: `RGB(r, g, b)` arguments were split
 at inner commas (L50 794 emitted, 64 gated; section 21): Fury Cutter / Secret Power +2, Extrasensory +3, Super Fang -1 (undiagnosed). T1 0..99 ON missing-gated 95 -> **65**. T1 `extra` 109 =
 aud252's Double Team SE239 rows (emitted outside the timing table; T1 classifier gap, the T2 ROM rows match). Ice Ball five-turn drift follows the Rollout chain (hpd2 -8 per turn applied).
-Open (census gated): Dynamic Punch 10 (SE-length bound), Heal Bell 8, Soft-Boiled 5 (`setarg` + affine loop), Eruption 4, Memento / Moonlight / Spike Cannon / Curse 4 each.
+**aud242r (2026-11-17)** Heal Bell -4, Spike Cannon +9 (multi-hit class), Eruption +2, Moonlight -4, Curse (Ghost) +1 (L50 805 emitted, 53 gated; section 22). T1 0..99 ON missing-gated 65 -> **41**.
+**aud255 (2026-11-17, T2 on `57bb082ac`, 41 ROM seeds):** Scene OFF 0 missing / 0 extra in every family; Scene ON move-animation SE missing **76** (aud251: 206; Rock Throw 131 x15, Thunderbolt 118 x12,
+Absorb 179 x8, 214 / 186 / 140 / 221 / 228 x6 each), every other family 0 / 0, no engine-only rows.
+Open (census gated): Dynamic Punch 10 (SE-length bound, 50 % accuracy), Soft-Boiled 5 (`setarg` + affine loop; lab committed), Memento 4, Air Cutter 4, Torment 4, Cosmic Power 3, Fake Out 2, Recycle 2.
 
 ## #194 — Opponent RATTATA Quick Attack differs above the clip row (qak247, 2026-11-04)
 

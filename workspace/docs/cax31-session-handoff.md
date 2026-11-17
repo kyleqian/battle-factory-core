@@ -31,7 +31,7 @@ as a priority." So:
   `nice -n 19` until 13:15 UTC and writes `.integration/evidence/luck-hunt/<YYYYMMDD>/` (log `/srv/pokebench/ops/day-hunt.log`; off switch
   `touch /srv/pokebench/ops/day-hunt.off`). It skips while that script does not exist, while a supervisor runs, or when the checkout has changes.
   Do not edit the ops scripts or the crontab; ask in DEFERRED only if the job cannot work as specified.
-- **One worker step in this run (and none later unless it breaks): build `tools/replay-hunt/luckHunt.sh`.** Why: about 18 of the 56 rare
+- **DONE 2026-11-16 night run (luck1): `tools/replay-hunt/luckHunt.sh` + 14 designs in `tools/replay-hunt/luck-designs/` (README "luckHunt"; seeds `1,000,000 + 20,000 x days since 2026-11-16 + k`). Spec kept below for reference.** One worker step in this run (and none later unless it breaks): build `tools/replay-hunt/luckHunt.sh`. Why: about 18 of the 56 rare
   rules left have no steer; they happen only when random events line up (Metronome's pick, an AI's random choice, a faint on an exact
   turn), under 1% of lab seeds at ~15 s a seed (rrh3, `docs/parity-mac/STATUS.md` "Box hunt 2026-11-14"). That is machine time, not
   night time. Spec:
@@ -77,7 +77,7 @@ this run** (step A), and step B only as a measured proposal.
   - Download, brotli, 3.26 MB in all: `assets-sprites` ~1.0 MB, `lib` 0.81 MB, `assets-gen` 0.42, `animation-assets`
     0.36, `data-gen` 0.26, `data-battle-script` 0.24. On a 1.6 Mbps phone network that is ~18 s before the first
     battle, whatever the site does.
-- **Step A (this run): make import-time work lazy.**
+- **Step A: DONE 2026-11-16 night run (lazy1, `docs/lazy1-import-time.md`): Node `import()` of `index.js` ~3x faster at the same load (2,480 -> 810 ms on the loaded box; ~230 ms quiet estimate, the 200 ms target not reached: the rest is compiling the chunks).** Step A (this run): make import-time work lazy.
   - The rule tables: build them on first use, or once per session.
   - The sample-battle code that runs at import: make it lazy, or delete it if nothing reads it (say which, per table).
   - Target: Node `import()` of `index.js` under ~200 ms; report before / after ms for `index.js` and `headless.js`
@@ -86,7 +86,7 @@ this run** (step A), and step B only as a measured proposal.
     identical on the soak / census seeds), full suite, build / build:lib, the usual soaks, and the nightly replay set.
   - `ENGINE_BUILD` moves: name it in PROGRESS for the website. Keep the library contract as it is:
     `mountFactoryGame` returns synchronously, and `ready` / input behaviour is unchanged (`docs/library-package.md`).
-- **Step B (measure and propose; build only if A is in and a run has room): download size.**
+- **Step B: measured (dl1, `docs/dl1-download-size.md`: ranked ideas) and idea 2 built (dl2, `docs/dl2-sprite-repack.md`: sprite sheets as image rows, first-battle download ~2,363 -> ~2,102 KiB brotli-11, frames identical). Not built: per-species pictures (~677 KiB, needs a hold rule + an optional `spriteBase` option), per-move animation assets, the retired canonical march (needs a product decision). The handoff's 3.26 MB matches gzip-9, so check that the CDN serves brotli-11.** Step B (measure and propose; build only if A is in and a run has room): download size.
   - Load battle pictures per battle (the species on screen) through the existing pixel provider
     (`src/engine/monPicPixels.ts`) instead of the whole 11.8 MB sheet.
   - Find dead code in `lib` (the legacy sample-turn adapters above).
@@ -186,6 +186,10 @@ this run** (step A), and step B only as a measured proposal.
   lbw3 / lbw4 (#221 E4: Lobby wander port + player collision; the in-game new-challenge deal now follows the ROM), cry2 (cry-task mode assets + player),
   aud242h / i / j (move-animation SE lifetimes; Sludge Bomb, blend_color_cycle, Faint Attack, Struggle, Silver Wind, Dig). T1 census arm for the next
   slice: `on-bd46a5fbf` (t1cls: same src as aud242j, with the `soundCmd` windows; `unclassified` 0).
+- **2026-11-16 night run (13:30 -> 05:30 UTC): luck hunt built, load time, sound gaps, presentation timing.** Nightly replay 44 / 44 + 69 / 69; luck1, lazy1, dl1 / dl2,
+  aud242k-r (move-SE lifetimes: T1 0..99 ON missing-gated 570 -> 41), aud251 / aud255 (T2 scoreboard: OFF 0 missing / 0 extra on 20 seeds, ON 76 missing), aud252-254, cry3 / cry4 (all cry lengths
+  source-derived), rrh4 (53 / 110 rules), lbw5 (#221 player <-> NPC cases), hie4 (#220 post-heal tail), rol1 / hpd1 / hpd2 (post-hit hold measured; locked-turn handoff 14), sta3 (second
+  `Status_*` play exact), ais1-ais3 (#222 AI switch withdraw + return-to-ball), pin1 (`tools/soak/batonPassSearch.ts`).
 - Census baseline for the next delta: `.integration/evidence/fix274/census/{on,off}-237ee0e5e` (the fix274 fixed arms; src == master's final engine src at the 2026-11-12 wind-down
   except pnm273's name strings, which the pnm273 0..49 census showed digest-neutral).
 - **4b(d) DONE** (frs247, `docs/frs247-faint-replacement-reshow.md`): the faint-replacement return rises from black, no player bar.
@@ -195,19 +199,20 @@ this run** (step A), and step B only as a measured proposal.
 This repo is the **game core library**; the website repo (Mac) owns login, streaks, menus, the on-screen pad and hosting —
 never brief those here. One worker at a time; each run folds the next audio step(s) plus at least one cleanup step.
 
-**Status at the 2026-11-16 wind-down (PROGRESS top entry has the gates):** no Mac fold (the branch no longer moves). Battle rules, the replay
+**Status at the 2026-11-17 wind-down (night run; PROGRESS top entry has the gates):** no Mac fold (the branch no longer moves). Battle rules, the replay
 tools and the rare-rule hunt are the box's.
-- **Item 0 (sound):** cry2 DONE (the five cry-task modes recorded for the 46 species that can use Roar / Howl / Hyper Voice or call them, 112 sounds,
-  played from their own files; `docs/cry1-cry-tasks.md` "cry2"). Move-body SE lifetimes: aud242h / i / j DONE (docs sections 12-14; T1 census 0..99 ON
-  missing-gated 1,066 -> 570). Next, by size (ISSUES #219 / #198): the next lifetime slices (Blizzard 88 needs a per-species off-screen resolver,
-  Confuse Ray 47, Spark 32, Tri Attack 24, Dig turn-0 offsets); the second `Status_*` play +14 frames (sta2: the message section between the plays is short, not the script); hear a task cry live once. aud246 (S11 close) waits.
-- **Item 0b (Lobby):** #221 E4 DONE: lbw3 (the woman / fat man wander on the shared cursor, cursor == ROM on 6 traces) and lbw4 (player <-> NPC
-  collision from live tiles, depth sort; `lbw4-woman-block-off` 501 / 501), `docs/lbw3-lobby-npc-port.md`. Open (ISSUES #221): same-frame tile race,
-  turn-commit refusal, the fat man in the way, unmeasured entry routes; the retire-off dialog text pacing residual (78 frames, `lbra-retire-off`
-  7544-7627); no Scene ON loss / retire ROM lab; no app SE_SAVE on the loss / retire result script.
-- **Item 0d (battle rules):** nightly replay at run start from the pool + all staged battles (now 69: `stages/*.json` + `stages/coverage/*.json`;
-  2026-11-16: 44 / 44, 69 / 69, 50 min at 2 lanes). Rare-rule hunt as before (50 / 110; one step per run at most, needs new team ideas).
-- **Cleanup:** steps 1-7 are done or measured non-goals (cln243 showed the remaining tracked evidence is test-read). Nothing queued.
+- **Item 0 (sound):** T2 scoreboard (aud255, 41 ROM seeds, `docs/aud251-s11-scoreboard-refresh.md`): Scene OFF **0 missing / 0 extra**; Scene ON move-animation SE
+  **76 missing** (Rock Throw 15, Thunderbolt 12, Absorb 8, ...), every other family 0 / 0. T1 0..99 ON missing-gated **41** (aud242r; Dynamic Punch, Soft-Boiled, Memento,
+  Air Cutter, Torment ...; ISSUES #219). Next: the T2 ON top rows (find their class per move), the T1 tail, then the census 0..999 both scenes for the S11 acceptance
+  (aud246). T1 `extra` 109 = aud252's Double Team SE239 (emitted outside the table; teach the T1 classifier).
+- **Presentation timing (item 6, but it moves sound offsets):** hpd1 measured the ROM post-hit hold (`damage + 17 / 18`, no floor, 20 windows); its implementation
+  `e01bfd249` stays out until the 18 in-turn frames of a Defense Curl + Rollout turn are modelled (`docs/hpd1-hp-hold.md` "hpd2"). #222 AI switch: one 1-frame send-in
+  residual class left (ais3). Several timing fixes move the exploring soak trajectories: re-pin `tests/randomRoundSoak.test.ts` with `tools/soak/batonPassSearch.ts` (pin1).
+- **Item 0b (Lobby):** lbw5 proved / fixed the four player <-> NPC cases; open (ISSUES #221): five single-frame pose residuals, a held direction change while a step
+  is in flight, unmeasured entry routes, the retire-off text pacing (78 frames), no Scene ON loss / retire ROM lab, no app SE_SAVE on the loss / retire result script.
+- **Item 0d (battle rules):** nightly replay at run start (2026-11-16 night: 44 / 44, 69 / 69). Luck hunt: day job from 2026-11-17 05:45 (read
+  `.integration/evidence/luck-hunt/<day>/summary.json` at run start). Rare-rule hunt 53 / 110 (rrh4: R108, R105, R077; one step per run at most).
+- **Cleanup:** nothing queued. Disk: census `tree/` snapshots (~850 MB each) and `/tmp` scratch filled the box to 99 % tonight; prune old ones at run start.
 **Website:** the live site runs **`eb-c26961a07ff6b07b`** (your `49287331f`, the 2026-11-15 wind-down build; deployed 2026-11-15 ~13:30 UTC on Kyle's
 word, "Yes, update it"). The site adopted the lazy sprites and sound (a sound switch, off by default), and (same day, Kyle: "Yes, build it")
 **`challenge-request` + `start: "after-save"`**: after a loss / retire the game runs on in the Lobby, the player asks the attendant, and the site opens

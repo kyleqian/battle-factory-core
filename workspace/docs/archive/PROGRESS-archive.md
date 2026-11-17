@@ -1,3 +1,92 @@
+## 2026-11-16 — aud252 (ts lane worker): S11 controller sound gaps (SE_EFFECTIVE pans of end-turn weather, loss-path SE_BALL_OPEN), sound only
+
+- **State:** on master, committed. Sound-only (`battleHitSounds.ts`, `battleEndSounds.ts`, `tickSounds.ts`); doc section "aud252" in `docs/aud251-s11-scoreboard-refresh.md`; evidence `.integration/evidence/aud252/`.
+- **Did:** (1) end-turn weather damage SE_EFFECTIVE pans by `gBattlerTarget` (always the player, -64; `tests/aud252EndTurnSounds.test.ts`, ROM Hail fixture `aud252-hail-damage-player.json`). (2) the loss's SE_BALL_OPEN
+  now follows the ball-return command (22 ticks after its first tick) instead of the faint dismissal + 24, so it comes after an opponent held-item effect as in the ROM (`tests/aud252LossBallOpen.test.ts`, 1914 / 2230 ROM rows; ball-open error -364 / -350 -> +1 / +14).
+  T2 controller rows: ON missing 19 -> 2, extra 17 -> 0; OFF missing 6 -> 2, extra 4 -> 0. Census 0..99 both scenes: commands 100 / 100 identical, sound differs only in SE 15 rows; differential 133 / 133 identical.
+(3) Scene ON Double Team plays SE_M_STAT_INCREASE 34 rows after its last SE inside the live move window (`emitDoubleTeamStatsChangeSound`; `tests/aud252DoubleTeamStatSe.test.ts`): ON stat-change SE missing 15 -> 0 (they were Double Team, not secondary effects); census ON commands identical, only SE 239 rows added.
+- **Next:** AI mid-battle switch (seed 2741 res5: ROM extra SE 15 at the recall, tray / ball open ~75 ticks later than ours), SE_LOW_HEALTH 90 x1 (seed 2); ISSUES #219 trimmed.
+- **NOT run:** full `npm test` (supervisor's); ran typecheck, aud24x / aud25x / tickSounds / audioProbeFixtures tests.
+
+---
+
+## 2026-11-16 — aud253 (ts lane worker): opponent AI-switch recall SE, player switch-in SE_LOW_HEALTH, sound only
+
+- **State:** on master, committed (`7a8b8cec4` + docs). Sound-only (`battleStartSounds.ts`, `midBattleOpponentPartySummary.ts`, `screenSounds.ts`); section "aud253" in `docs/aud251-s11-scoreboard-refresh.md`; evidence `.integration/evidence/aud253/`.
+- **Did:** (1) AI switch (seed 2741 res5): the kernel has no RETURNMON / return-to-ball, so the recall SE_BALL_OPEN is emitted with the opponent's no-lead party-summary draw, ahead of SE 114; the ~75-frame lateness of the tray / ball open / cry is a presentation gap (not fixed).
+  (2) SE_LOW_HEALTH (seed 2) is `HandleLowHpMusicChange` in `SwitchIn_HandleSoundAndEnd`: now called on the player switch-in's BGM restore (Scene ON +71 frames later, one window); measured WEAK cry lengths for species 9 / 83 / 130 / 198 added.
+  `tests/aud253AiSwitchLowHp.test.ts` + 2 ROM windows registered in audioProbeFixtures. Seeds 2 / 2741 both scenes: controller missing / extra 0 / 0. Census 0..99: commands 100 / 100 identical both scenes; sound adds only 11 SE 15 + 1 duck;
+  differential (turn5 / turn13 switch-in) 483 / 483 identical.
+- **Next:** the AI switch's presentation (RETURNMON + ball return), forced party-menu send-out low-HP SE, more WEAK cry lengths, a second Scene ON low-HP window; ISSUES #219 trimmed.
+- **NOT run:** full `npm test` (supervisor's, per the brief); ran typecheck, `test:gate` (362 files / 2,843), aud24x / aud25x / tickSounds / audioProbeFixtures tests, build and build:lib 0. The T2 scoreboard was rescored on seeds 2 and 2741 only.
+
+---
+
+## 2026-11-16 — ais1 (ts lane worker): AI mid-battle switch gets "withdrew" + return-to-ball, recall SE at its ROM frame (presentation only)
+
+- **State:** on master, committed; `docs/ais1-ai-switch-withdraw.md`; evidence `.integration/evidence/ais1/`. Typecheck 0, `build` / `build:lib` 0, `test:gate` 362 files / 2843 tests green, touched tests green, soaks `winning-swap` and `winning` 0:20 20/20 each (run as 4 x 5 seeds, `--parallel 2`).
+- **Did:** the AI switch's RETURNMON message + battler-1 return-to-ball are synthesized in the presentation layer (dispatcher `synthesized-ai-switch`, like the player's recall); the aud253 stop-gap
+  (recall SE on the tray draw, 31 frames late) is removed, the `switch-out` command's SE_BALL_OPEN is now exact (seed 2741: recall / tray rows 0 delta, send-in -2; segment +74 vs ROM 75-77).
+  Census 0..99 both scenes: 7 AI-switch battles gain exactly one message+switch-out+hide triple (21 rows/scene), nothing else; 4 double-faint seeds lose a spurious stop-gap SE 15. ROM chains 15/26/28/71/2741 match to the end.
+  `tests/ais1AiSwitchWithdraw.test.ts`; `aud253` DELTAS 2741 re-pinned 31 -> 0 (stop-gap offset).
+- **Next:** pixel-compare the opponent withdraw against a ROM window; opponent feet-anchor y2 and ball-return particles in Scene ON (ISSUES #222); Pursuit-interception AI switch.
+- **Notes:** full `npm test` NOT run (supervisor does). No `unsupported-branch` barrier added. Pixel comparison NOT done.
+
+---
+
+## 2026-11-16 — ais2 (ts lane worker): AI switch pixels vs the ROM, opponent recall ball effect + anchor, tray +1 (presentation only)
+
+- **State:** on master, committed (`56d40119a`, `335d90c1f`, docs); `docs/ais1-ai-switch-withdraw.md` "ais2"; evidence `.integration/evidence/ais2/`. Typecheck 0, `build` / `build:lib` 0, `test:gate` green, `tests/ais1*` / `aud25*` / `aud24*` green, soaks `winning-swap` and `winning` 0:20 20/20 each (run as 4 x 5 seeds, `--parallel 2`).
+- **Did:** seed 2741 AI switch compared pixel-for-pixel at the pre-segment offsets (OFF 61, ON 91): the residual is the opponent tray span, 101 frames for a voluntary AI switch (`switchhandleorder` in `BattleScript_DoSwitchOut`); fixed, send-in SE 15 / cry -2 -> -1.
+  Opponent switch-out anchor from `gMonFrontPicCoords` y_offset (MURKROW 11). Recall ball effect drawn for the opponent (BG white fade, mon tint, 16 particles at fixed (172,68), no stolen tick), exact in both scenes. `tests/ais2AiSwitchFrames.test.ts`
+  pins 202 (OFF) + 206 (ON) ROM frames. Census 0..99 both scenes: only the 7 AI-switch seeds change, one command (party-summary 100 -> 101); player recall traces unchanged. New `soundCensusRomReplay.ts replay --render=LO:HI --render-dir=DIR`.
+- **Next:** the opponent send-in ball starts 2 frames / ends 1 frame early vs the ROM (shared with faint replacements, SE 15 -1 pinned); player anchor still hardcodes y_offset 13; Pursuit / Focus Punch AI switches unprobed (ISSUES #222).
+- **Notes:** full `npm test` NOT run (supervisor does). The player's own recall effect not generalised (keeps the voluntary-switch clock).
+
+---
+
+## 2026-11-16 — pin1 (ts lane worker): randomRoundSoak re-pins after ais1 / ais2, Baton Pass scanner restored
+
+- **State:** committed (`19d683750`), test-only + tooling; `npx vitest run tests/randomRoundSoak.test.ts` 64/64, typecheck 0. `tools/soak/batonPassSearch.ts` (`--seeds A:B --parallel N`, the pin's options by default; usage in its header) replaces the cln237-removed scanner; `--seeds 0:80 --parallel 8` takes ~50 s.
+- **Did:** "full" seed 0 re-pinned 18523 / battle 1 / turn 23 / depth 0 -> 38094 / battle 2 / turn 22 / depth 1 (ais1; ais2 does not move it; seed 1 unmoved); vanilla / winning pins did NOT move. #89 Baton Pass pin seed 32 -> 3 (hits 3, 8, 14, 15, 17, 19, 31, 33, 44, 55, 71, 77), history lines added.
+- **Next:** none; re-pins after the next presentation change are one scanner command. Verified: `test:gate` 362 / 2843, build 0, full `npm test` 1833 files passed + 1 failure (iss215: the scanner lacked the pixel-install import; fixed in the next commit, test re-run green, the full suite itself NOT re-run after the fix).
+
+---
+
+## 2026-11-17 — ais3 (ts lane worker): player recall anchor from `gMonBackPicCoords`, AI send-in ball 2 frames early (presentation only)
+
+- **State:** on master, committed (`0a3d82624`..`c090a3455`, docs); `docs/ais1-ai-switch-withdraw.md` "ais3"; evidence `.integration/evidence/ais3/`. Typecheck 0, `build` / `build:lib` 0, `test:gate` 362 / 2843 green, every `tests/ais*` / `aud25*` / `aud24*` file green (46 files), `randomRoundSoak` 64/64 (no pin moved), soaks `winning-swap` and `winning` 0:20 20/20 each (4 x 5 seeds, `--parallel 2`).
+- **Did:** (b) the player's recall feet anchor uses `gMonBackPicCoords` y_offset (GRAVELER 12, ROM-pixel exact both scenes) and the recall scale ramp reads the voluntary-switch clock +1; (a) a voluntary AI switch's `switch-in` runs 2 frames late (ROM ball at elapsed 4) and the tint holds 22: seed 2741 exact through the send-in (ON 3793..4043, OFF 2727..3014; ais2 fixture re-baselined 61 -> 58 / 91 -> 88 after sta3 and extended).
+  Faint-replacement and player-switch traces (obr251 off/on, turn5/13 faint, turn5/13-switchin) byte-identical vs base. Census 0..99 both scenes: only the 7 AI-switch seeds change, one `switch-in` command +2 frames each.
+- **Next:** `aud253` 2741 sound rows now +1 (was -1; emitter offset from the ball throw); OFF 3015+ post-switch move body (integration lane); Pursuit / Focus Punch / same-turn player+AI switches unprobed (ISSUES #222).
+- **Notes:** full `npm test` NOT run (supervisor does). The faint-replacement send-in timeline is untouched and unproven at the 2-frame start (obr251-off 6/306 at baseline).
+
+---
+
+## 2026-11-16 — lazy1 (ts lane worker): website load time, step A (import-time work lazy, no behaviour change)
+
+- **State:** on master, committed (`6d9d6ec10` opcode-name index, `ca46797a5` lazy thunks, `c6076ea27` test / tool names + `docs/lazy1-import-time.md`). No API change. ENGINE_BUILD `eb-b17e87a4a52c33ad` -> **`eb-56f55ed08774e7a4`** (dist-lib; tell the website).
+- **Import time (Node `import()`, median of 5, box load 7.8, so about 3.6x the quiet figures):** `index.js` **2743 -> 832 ms**, `headless.js` **2106 -> 380 ms**. Quiet-box `index.js` about 230 ms: not shown below 200.
+  Left: 467 ms of compiling 67 MB of chunks (step B, size), 39 ms `loadBattleScriptProgram` (stays, memoized), about 90 ms of data-chunk bodies, ~30 ms small tables. Per-item table in the doc.
+- **Did:** (1) per-program opcode-name index replaces about 120 full instruction scans per handler build (30 -> 2 ms, also faster every turn at runtime); (2) `lazyValue` memo thunks for the 100 sample-battle constants of the legacy Battle 1/2 march (`battleScene.ts`, `battleSceneCanonical.ts`, Turn 13 / 15 / 16 adapters): no sample battle runs at import. Nothing deleted (all read).
+- **Gates:** census seeds 0..99 ON and OFF vs parent `b5bb454a9`: 100 / 100 identical each (`rst197CensusDelta` bad 0, `soundCensusDelta` identical 100); `compare:differential` 8 traces (draft-menu, battle2-off-turn1-staged, battle2-turn1-rockslide, presentation-rng-playable-live-bodies-seeded-on, battle1-postwin-next-prompt, fight-submenu, battle1-swap-player-picker, lbw4-woman-block-off) **1,488 / 1,488 identical**;
+  typecheck 0; full `npm test` as 4 vitest shards (3 workers) **15,018 passed, 0 failed** (shard 2 first run caught `battlesceneSplitEligibility` keyed on the renamed symbols, fixed, re-run green); `npm run build` and `build:lib` 0; vanilla soak 0:20 **20 / 20**;
+  winning soak **0:24 24 / 24, per-seed lines identical to the parent** (`--parallel 6`).
+- **NOT run:** winning soak 0:60 (only 0:24: two arms x 60 seeds did not fit the cap on a loaded 8-core box, 2.4 min / seed / core); `tools/probe/*` one-off scripts still import the old constant names (not in `tsc -b`, not run by tests).
+- **Next:** step B (download size: 67 MB dist-lib, 467 ms compile); re-time on a quiet box. A supervisor may want the winning soak 6:60 as the closing check. Evidence `.integration/evidence/lazy1/`.
+- PAPERCUT: `npm run typecheck` 5 min on a loaded box, ~5 min lost; the ability-item census pins source line numbers, so any line shift in `battleScript*` files breaks `abilityItemParityCensus.test.ts`, ~10 min lost; the foreground tool limit (5 / 10 min) backgrounded two of my runs, ~15 min lost (re-run sharded).
+
+---
+
+## 2026-11-16 — t1cls (ts lane worker): T1 classifier attributes the non-move SEs
+
+- **State:** on master, committed; tooling only (`lsd194Census.ts` `soundCmd` column, `soundCensusDelta.py --t1`, `soundCensusExpected.ts --nonmove`), nothing under `src/`.
+- **Did:** the 11,093 `unclassified` were SEs / pans inside non-move commands (status animations, weather, held item, leech seed, focus punch, stats-change; Sun's 5,207 pans = its pan task). Attributed by command window, compared per command with the table.
+- **Counts (seeds 0..99 ON, arms `on-4e31b7675` -> `on-bd46a5fbf`, same src):** move family exact / missing-gated / extra **24,175 / 570 / 0 unchanged**; unclassified 11,093 -> **0**; non-move 11,093 exact, extra 0, **missing 128** (Status_Poison plays 5 of 6 SE 148: ISSUES #219).
+- **Gates:** `npm run test:smoke`; no test imports the tool. Command and table in `docs/aud243a-sound-census.md` "T1 classifier (t1cls)". Evidence `.integration/evidence/t1cls/`.
+- **Next:** ROM window for Poison's 6th SE; then the move-SE lifetimes of the wind-down entry.
+
+---
 ## 2026-11-16 — aud251 (ts lane worker): S11 T2 scoreboard refresh + controller "extras" are window-end artifacts (tooling / test only)
 
 - **State:** on master, committed (`bec227124` refresh doc, then the Part 2 commit). No `src/` change: frame hashes, census and gameplay untouched by construction. Doc `docs/aud251-s11-scoreboard-refresh.md`; evidence `.integration/evidence/aud251/`.
