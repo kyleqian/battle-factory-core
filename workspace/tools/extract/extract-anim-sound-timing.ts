@@ -113,6 +113,11 @@ function intArg(arg: string | undefined): number | null {
   if (arg === undefined) return null;
   try { return value(named(arg)); } catch { return null; }
 }
+/** A script argument that is a constant, a number or a product `a * b` (Move_AIR_CUTTER's `6 * 256`). */
+function productArg(arg: string | undefined): number | null {
+  const m = arg?.trim().match(/^(-?\d+)\s*\*\s*(-?\d+)$/);
+  return m === null || m === undefined ? intArg(arg) : Number(m[1]) * Number(m[2]);
+}
 function shakeMonLength(x: number, y: number, numTimes: number, delay: number): number {
   let [x2, y2, remaining, counter, length] = [x, y, numTimes, delay, 0];
   for (;;) {
@@ -195,6 +200,10 @@ const METALLIC_SHINE_LENGTH = 95;
 const METALLIC_SHINE_LOAD_LAG = 4;
 // AnimTask_ScaryFace loads its BG tilemap, image and palette in the creating step like AnimTask_MetallicShine: the ROM window (aud242k Scary Face) puts the first op after its wait 6 wall frames later than the 77-call count.
 const SCARY_FACE_LOAD_LAG = 6;
+// aud260: how much of that lag a command in the SAME script step as the creating createvisualtask already pays (Cmd_createvisualtask runs the entry, whose decompress / palette load stalls the main loop, then the
+// script loop continues into the next command): the Glare window plays its SE_M_LEER, created right after the task, 2 wall frames after the pre-lag count. The other 4 reach only later iterations (measured,
+// the same decomposition as METALLIC_SHINE_LOAD_LAG's "2 localised + 2 not").
+const SCARY_FACE_SAME_STEP_LAG = 2;
 // ---- Instant visual tasks (aud242d). Cmd_createvisualtask runs `taskFunc(taskId)` BEFORE `gAnimVisualTaskCount++` (battle_anim.c:437-439), and an
 // entry function whose every path is straight-line code ending in `DestroyAnimVisualTask(taskId)` (-> `gAnimVisualTaskCount--`, battle_anim.c:274-277)
 // nets to 0 in the creating step: a following waitforvisualfinish never waits for it (lifetime -1, like the PlaySE1/2WithPanning tasks). Sprites a task
@@ -480,6 +489,18 @@ function softBoiledEggArrivalCall(kind: number | null): number | null {
   return callback2Start + 45 + 1;
 }
 
+/** aud260: AnimTask_AirCutterProjectile's creation calls and destroy call (see lifetimeOf); null when the inputs are unresolved or degenerate. */
+function airCutterShape(attackerSide: number, a0: number | null, a2: number | null, a3: number | null): { createCalls: number[]; destroyCall: number } | null {
+  if (a0 === null || a2 === null || a3 === null || (a2 & ~1) === 0 || a3 < 0) return null;
+  const targetX = BATTLER_X[attackerSide === 0 ? 1 : 0] + (attackerSide === 0 ? a0 : -a0);
+  const xDiff = Math.abs(targetX - BATTLER_X[attackerSide === 0 ? 0 : 1]);
+  const speed = Math.trunc((xDiff * Math.trunc(0x10000 / (a2 & ~1))) / 256);
+  const start = speed - Math.trunc((speed * 128) / 256);
+  const life = (start <= 0 ? 1 : start + 1) + 9 + 31;
+  const period = a3 + 1;
+  const createCalls = [1, 1 + period, 1 + 2 * period];
+  return { createCalls, destroyCall: createCalls[2]! + life };
+}
 /**
  * AnimTask_ShockWaveProgressingBolt: call 0 inits (data[7] = the attacker's BATTLER_COORD_Y_PIC_OFFSET, sweeping up to y 4 in steps of 8), case 1 creates one bolt sprite per call (each lives 13 ticks: sprite call 12 destroys,
  * AnimShockWaveProgressingBolt) and moves y; the call that reaches the end of the sweep goes to case 2 (5 calls, the 5th flips the direction: odd sweep count goes down 4 -> 68 with data[4] 0.. 7, even goes up) or, after the 5th
@@ -662,6 +683,32 @@ function lifetimeOf(cmd: Command, attackerSide: number, pic: PicContext, rollout
   // the call after sets the stored callback, ReverseVerticalDipDirection runs one call and re-arms, D more calls, one to set DestroyAnimSprite, then it destroys:
   // call 2D + 4, exact 2D + 3.
   if (sprite("gVerticalDipSpriteTemplate")) { const d = intArg(args[3]); return d === null || d < 0 ? null : { exact: 2 * d + 3 }; }
+  // aud260: AnimBrickBreakWall (battle_anim_fight.c:690-742): call 0 is the init (the template callback; data[1] = a3, data[2] = a4, Step installed); Step case 0 counts data[1] down from call 1 (call a3 reaches 0) and
+  // destroys there when a4 is 0, else case 1 destroys on its a4-th call (call a3 + a4): gone a3 + a4 - 1 ticks after F (a4 = 0: a3 - 1; a3 < 1 would underflow the s16 countdown: declined).
+  if (sprite("gBrickBreakWallSpriteTemplate")) {
+    const [a3, a4] = [intArg(args[6]), intArg(args[7])];
+    return a3 === null || a4 === null || a3 < 1 || a4 < 0 ? null : { exact: (a4 === 0 ? a3 : a3 + a4) - 1 };
+  }
+  // aud260: AnimWillOWispOrb (battle_anim_fire.c:1101-1164; Move_WILL_O_WISP orbs, args 0 / 0 / n). Call 0 is the init (case 0), call 1 case 1 (data[3] 1 -> reset), case 2 from call 2: x2 = Sin(data[2], +-4) with data[2]
+  // = 4 * (call - 1), the 31st case-2 call (call 32, data[2] 124) folds x2 into x, reads the target's X_2 and runs InitAnimLinearTranslationWithSpeed with speed 256 (duration D = |target X - x|, singles
+  // sBattlerCoords) and installs the Step (calls 33..32 + D translate, AnimTranslateLinear returns TRUE on call 33 + D, which destroys): gone 32 + D ticks after F. data[4] is +4 for an opponent attacker, -4 for the player.
+  if (sprite("gWillOWispOrbSpriteTemplate")) {
+    const x = BATTLER_X[attackerSide === 0 ? 0 : 1] + gbaSin(124, attackerSide === 0 ? -4 : 4);
+    const duration = Math.abs(BATTLER_X[attackerSide === 0 ? 1 : 0] - x);
+    return duration < 1 ? null : { exact: 32 + duration };
+  }
+  // aud260: AnimRecycle_Step (battle_anim_effects_3.c:5437-5489; the init is call 0, call n >= 1 runs the step): case 0 fires every 2nd call (data[0] > 1) and ends when data[7] reaches 0 after 16 raises of
+  // data[6] and 16 lowers of data[7] (32 fires: call 64), case 1 waits ++data[0] == 10 (call 74), case 2 fires every 2nd call for data[6] 16 -> 0 and data[7] 0 -> 16 (32 fires: call 138), case 3 destroys on
+  // the next call (139): gone 138 ticks after F.
+  if (sprite("gRecycleSpriteTemplate")) return { exact: 138 };
+  // aud260: AnimTask_AirCutterProjectile (battle_anim_effects_2.c:1485-1750; entry = call 0, AirCutterProjectileStep1 from call 1: data[0] starts 0, so a sprite is CreateSprite'd every a3 + 1 calls (calls 1, 1 + p, 1 + 2p;
+  // the third installs Step2) with data[0] = data[5] - data[6], data[5] = xDiff * (0x10000 / (a2 & ~1)) / 256 (xDiff = |target X + a0 - attacker X|, a0 negated and a2's bit 0 flipped for a player target: singles
+  // sBattlerCoords), data[6] = data[5] / 2. AnimAirWaveProjectile (init) runs data[0] + 1 calls, Step1 9 (data[0] = 8), Step2 31 (data[0] = 30) and destroys, so sprite k is gone at task call c_k + 52 (AnimateSprites
+  // before RunTasks) and Step2 destroys the task on the call after the last sprite: call 1 + 2p + life, gone that - 1 ticks after F. The three PlaySE12WithPanning(SE_M_BLIZZARD2) rows are in the task's seRows.
+  if (op === "createvisualtask" && args[0] === "AnimTask_AirCutterProjectile") {
+    const shape = airCutterShape(attackerSide, intArg(args[2]), productArg(args[4]), intArg(args[5]));
+    return shape === null ? null : { exact: shape.destroyCall - 1 };
+  }
   // AnimFang (battle_anim_effects_3.c:1515-1519): gFangAnimCmds (:321-328) 8 + 16 + 4 + 4 = 32.
   if (sprite("gFangSpriteTemplate")) return { exact: 32 };
   // Arc sprites (InitAnimArcTranslation + TranslateAnimHorizontalArc, battle_anim_mons.c:785-801, AnimTranslateLinear :1111): data[0] = duration D; D calls
@@ -873,6 +920,10 @@ function lifetimeOf(cmd: Command, attackerSide: number, pic: PicContext, rollout
   // AnimTask_ScaryFace (battle_anim_effects_2.c:3324-3410): the entry loads the BG and sets func; the step's case 0 ends on its 14th blend (every 2nd call: call 28), case 1 takes 21
   // calls (29..49), case 2 ends on its 14th decrement (calls 51, 53, ..., 77), and case 3 / 4 clear the BG and destroy in the next call: call 78, gone 77 ticks after F.
   if (op === "createvisualtask" && args[0] === "AnimTask_ScaryFace") return { exact: 77 };
+  // aud260: AnimTask_GlareEyeDots (battle_anim_effects_3.c:3989-4087): the entry only sets func (tPairMax 12); the step (calls 1..) fires a dot pair every 4th call (++tTimer > 3: calls 4, 8, ..., 52, 13 pairs,
+  // tState 1 after pairNum 12), each dot lives 37 callbacks (AnimGlareEyeDot), and state 1 destroys the task in the call that sees tActiveSprites == 0: gone 88 ticks after F (docs section 25.1: the ROM's first
+  // wait agrees, the blend task created 89 ticks after the SE).
+  if (op === "createvisualtask" && args[0] === "AnimTask_GlareEyeDots") return { exact: 88 };
   // AnimTask_ShakeTargetInPattern (battle_anim_fire.c:1344-1375; maxShakes = gBattleAnimArgs[0] = script args[2] (aud242o: was read from args[3], the shake offset)): the entry is the step (call 0 stores the args); every call counts tShakeNum and the
   // call where it equals maxShakes (call maxShakes - 1) destroys: gone maxShakes - 2 ticks after F.
   if (op === "createvisualtask" && args[0] === "AnimTask_ShakeTargetInPattern") { const n = intArg(args[2]); return n === null || n < 1 ? null : { exact: n - 2 }; }
@@ -1318,7 +1369,10 @@ function walk(bodyLabel: string, turn: number, attackerSide: number, pic: PicCon
       // AnimTask_MetallicShine decompresses its tilemap and image and loads a palette in the creating step (battle_anim_dark.c:866-870): a measured
       // VBlank overrun (METALLIC_SHINE_LOAD_LAG; Metal Claw and Steel Wing, aud242d), like BG_LOAD_LAG.
       if ((op === "metallic_shine" || (op === "createvisualtask" && args[0] === "AnimTask_MetallicShine")) && frame !== null) lags.push({ after: frame, frames: METALLIC_SHINE_LOAD_LAG });
-      if (op === "createvisualtask" && args[0] === "AnimTask_ScaryFace" && frame !== null) lags.push({ after: frame, frames: SCARY_FACE_LOAD_LAG });
+      if (op === "createvisualtask" && args[0] === "AnimTask_ScaryFace" && frame !== null) {
+        lags.push({ after: frame - 0.5, frames: SCARY_FACE_SAME_STEP_LAG });
+        lags.push({ after: frame, frames: SCARY_FACE_LOAD_LAG - SCARY_FACE_SAME_STEP_LAG });
+      }
       let life = lifetimeOf(cmd, attackerSide, pic, rolloutCounter);
       const colorCycle = op === "blend_color_cycle" || op === "blend_color_cycleexclude" || op === "blend_color_cyclebytag" || (op === "createvisualtask" && /^AnimTask_BlendColorCycle/.test(args[0] ?? ""));
       if (frame !== null && life !== null && "exact" in life && (colorCycle || op === "simple_palette_blend" || (op === "createsprite" && args[0] === "gSimplePaletteBlendSpriteTemplate"))) {
@@ -1501,6 +1555,14 @@ function walk(bodyLabel: string, turn: number, attackerSide: number, pic: PicCon
           if (frame === null) { gate(); break; }
           picUsed = true;
           shockWaveBoltShape(pic.attackerY).seCalls.forEach((call, i) => events.push({ op: "task_shockwave_bolt", frame: frame! + shiftAt(frame!) + call - 1, id: value("SE_M_THUNDERBOLT"), pan: null, times: i + 1, line }));
+          break;
+        }
+        // aud260: AirCutterProjectileStep1 plays SE_M_BLIZZARD2 (PlaySE12WithPanning, BattleAnimAdjustPanning(SOUND_PAN_ATTACKER + 1)) on each of its three creation calls.
+        if (args[0] === "AnimTask_AirCutterProjectile") {
+          if (frame === null) { gate(); break; }
+          const shape = airCutterShape(attackerSide, intArg(args[2]), productArg(args[4]), intArg(args[5]));
+          if (shape === null) { gate(); break; }
+          for (const call of shape.createCalls) events.push({ op: "playsewithpan", frame: frame + shiftAt(frame) + call - 1, id: value("SE_M_BLIZZARD2"), pan: value("SOUND_PAN_ATTACKER") + 1, line });
           break;
         }
         if (args[0] === "AnimTask_TormentAttacker") {
