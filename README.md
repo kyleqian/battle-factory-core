@@ -24,7 +24,7 @@ Then open <http://localhost:5173>.
 cd workspace && npm test
 ```
 
-About 300 test files read the decompilation's source. Without it they fail, and
+About 500 test files read the decompilation's source. Without it they fail, and
 the run says how to get it:
 
 ```sh

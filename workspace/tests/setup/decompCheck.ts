@@ -1,4 +1,4 @@
-// Says up front why a fresh clone fails so many tests. About 300 test files compare the engine with the
+// Says up front why a fresh clone fails so many tests. About 500 test files compare the engine with the
 // pret/pokeemerald decompilation's own source, read from `reference/pokeemerald` (ignored by git; on the Mac and
 // the box it is a symlink into ../vendor). Without it those files fail with "no such file" errors. This check only
 // prints; it never fails or skips anything, so runs that have the decompilation are unchanged.
@@ -14,7 +14,7 @@ export function setup(): void {
     [
       "",
       "  reference/pokeemerald is missing.",
-      "  About 300 test files compare the engine with the pret/pokeemerald decompilation and will fail",
+      "  About 500 test files compare the engine with the pret/pokeemerald decompilation and will fail",
       '  with "no such file" errors. To fix, run in workspace/:',
       "",
       "    git clone https://github.com/pret/pokeemerald reference/pokeemerald",
