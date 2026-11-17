@@ -39,6 +39,10 @@ if (nonMove) {
     else if (type === "general-animation" && animation === "LEECH_SEED_DRAIN") { ops = variant("General_LeechSeedDrain", battler === 0 ? 1 : 0); context = { attackerSide: other, targetSide: side }; }
     else if (type === "general-animation" && animation === "FOCUS_PUNCH_SETUP") ops = variant("General_FocusPunchSetUp", battler);
     else if (type === "general-animation" && animation === "CASTFORM_CHANGE") ops = variant("General_CastformChange", battler);
+    // aud263 (wsh1): General_WishHeal / FutureSightHit / FocusBand, attacker = the command's battler (the wisher / Future Sight user / survivor), target the other side; table rows, no extra SEs.
+    else if (type === "general-animation" && animation === "WISH_HEAL") ops = variant("General_WishHeal", battler);
+    else if (type === "general-animation" && animation === "FUTURE_SIGHT_HIT") ops = variant("General_FutureSightHit", battler);
+    else if (type === "general-animation" && animation === "FOCUS_BAND") ops = variant("General_FocusBand", battler);
     else if (type === "general-animation" && animation === "HELD_ITEM_EFFECT") ops = [...variant("General_HeldItemEffect", battler), ...HELD_LATER];
     const rows: unknown[] = [];
     if (type === "stats-change") for (const id of [239, 245]) rows.push([0, "se", id, animSoundPan2(-64, context), 0]);
