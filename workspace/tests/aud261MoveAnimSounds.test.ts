@@ -284,3 +284,24 @@ describe("Aromatherapy and Refresh (aud261)", () => {
     });
   }
 });
+
+// AnimSmellingSaltsHand (battle_anim_effects_3.c:4232-4297, two squishes: 46 + 14 calls, gone 59 ticks after F) gates the SWAGGER2 loop after the DOUBLE_SLAP loop: the hands are created 32 ticks before the
+// squish task (13 n - 1 = 25 ticks, AnimTask_SmellingSaltsSquish :4301-4343), so the hands (59) end after the task (32 + 25 = 57).
+describe("Smelling Salt (aud261)", () => {
+  it("the table entry: DOUBLE_SLAP loop at 40 and SWAGGER2 loop at 72, ungated", () => {
+    expect(timing.moves[265]!.label).toBe("Move_SMELLING_SALT");
+    expect(timing.moves[265]!.gated.every((g) => g === 0)).toBe(true);
+    expect(tableRows(265, 0)).toEqual(["40:134", "72:194"]);
+  });
+  for (const [side, pan] of [["player", 63], ["opponent", -63]] as const) {
+    it(`aud261-smellingsalt-${side}: the loop-to-loop gap is the table's +32, offset constant`, () => {
+      const rom = fixture(`aud261-smellingsalt-${side}`);
+      const ids = [134, 194];
+      const romRows = rom.events.filter((e) => e.kind === "se" && ids.includes(e.id as number));
+      expect(romRows.length).toBe(5);
+      expect(romRows[2]!.frame - romRows[0]!.frame).toBe(32);
+      expect(romRows.every((e) => e.pan === pan)).toBe(true);
+      expect(expectConstantOffset(rom, ids, 5)).toBe(4);
+    });
+  }
+});

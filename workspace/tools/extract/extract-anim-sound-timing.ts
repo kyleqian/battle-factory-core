@@ -1206,6 +1206,12 @@ function lifetimeOf(cmd: Command, attackerSide: number, pic: PicContext, rollout
   // the entry (call 0) installs the step, which runs from call 1. Case 0 fades in on every third call (data[11]++ >= 2: calls 3, 6 .. 30, data[12] = 10 at call 30), case 1 holds 30 calls (31..60),
   // case 2 fades out the same way (calls 63, 66 .. 90, data[12] = 0 at call 90) and destroys: exact 89.
   if (op === "createvisualtask" && args[0] === "AnimTask_StatusClearedEffect") return { exact: 89 };
+  // AnimSmellingSaltsHand (battle_anim_effects_3.c:4232-4297; n = data[6] = gBattleAnimArgs[2] = script args[5]) installs the step in the init: calls 1..24 case 0 (every second call, 12 times), 25..32 case 1,
+  // 33..38 case 2 and 39..46 case 3; each further squish repeats case 2 + 3 (14 calls) and the n-th end of case 3 destroys: call 46 + 14 (n - 1), exact 45 + 14 (n - 1). AnimTask_SmellingSaltsSquish
+  // (:4301-4343; n = args[3], target only: the attacker case destroys in the entry) runs gSmellingSaltsSquishAffineAnimCmds (:1023-1028, 6 + 6 = 12 ticks) n times: the entry prepares (call 0), calls 1..12
+  // run the frames and call 13 sees END and prepares the next squish (RunAffineAnimFromTaskData, battle_anim_mons.c:1800-1862), the last END destroys: exact 13 n - 1.
+  if (sprite("gSmellingSaltsHandSpriteTemplate")) { const n = intArg(args[5]); return n === null || n < 1 ? null : { exact: 45 + 14 * (n - 1) }; }
+  if (op === "createvisualtask" && args[0] === "AnimTask_SmellingSaltsSquish" && args[2] === "ANIM_TARGET") { const n = intArg(args[3]); return n === null || n < 1 ? null : { exact: 13 * n - 1 }; }
   // AnimMagentaHeart (battle_anim_effects_2.c:3067-3078) counts data[0] from call 0 and destroys when it reaches 60 (call 59): gone 58 ticks after F. AnimTask_RockMonBackAndForth
   // (battle_anim_effects_3.c:2702-2800; n = gBattleAnimArgs[1] = script args[3], intensity i = clamp(gBattleAnimArgs[2], 0, 2) = args[4]): d = 8 - 2 i, each of the n rounds runs d + 2 d + d calls
   // (steps start at call 1), call 4 d n + 1 runs case 3 and destroys: exact 4 d n. AnimNeedleArmSpike (battle_anim_effects_1.c:3623-3694; D = gBattleAnimArgs[4] = args[7]) installs the step in
