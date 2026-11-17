@@ -1,0 +1,67 @@
+{
+ "name": "R097-alakazam-trick-both-itemless",
+ "rules": [
+  "R097"
+ ],
+ "why": "Challenge 7. The player's Alakazam (596, Choice Band; Trick, Disable, Psychic, Skill Swap) leads against Armaldo (513: Knock Off, Quick Claw). When Armaldo Knocks Off the Band (a quarter of the AI's picks per turn) Alakazam is itemless; after Armaldo falls, Weezing (501, Sitrus Berry) comes in, Psychic brings it under half HP so the Sitrus Berry is eaten, and a Trick then finds neither Pokemon holding an item (battleScriptTryswapitemsOpcode failureControl). Needs Weezing to survive the hit and the AI's Knock Off on one of the first turns.",
+ "seed": 1023669,
+ "challengeNum": 7,
+ "battleNum": 0,
+ "trainerId": 200,
+ "playerSetIds": [
+  596,
+  565,
+  725
+ ],
+ "opponentSetIds": [
+  513,
+  501,
+  840
+ ],
+ "script": {
+  "actions": [
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   }
+  ],
+  "then": "random-v1"
+ },
+ "expect": [],
+ "cover": [
+  {
+   "file": "src/engine/battleScriptTryswapitemsOpcode.ts",
+   "text": "function fai",
+   "at": 0
+  },
+  {
+   "file": "src/engine/battleScriptTryswapitemsOpcode.ts",
+   "text": "() => transi",
+   "at": 0
+  }
+ ],
+ "coverAny": true
+}
