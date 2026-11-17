@@ -405,6 +405,10 @@ const WEATHER_SCRIPT_AGE = FIRST_COMMAND_AGE + AGE_TO_SOUND_ROWS;
 export const FOCUS_PUNCH_SETUP_SCRIPT_AGE = 5;
 export const LEECH_SEED_DRAIN_SCRIPT_AGE = 7;
 export const CASTFORM_CHANGE_SCRIPT_AGE = 5;
+/** wsh1: command age -> script frame of General_WishHeal / General_FutureSightHit / General_FocusBand (calibrated on the T2 ROM rows, docs/wsh1-general-anim-commands.md). */
+export const WISH_HEAL_SCRIPT_AGE = 6;
+export const FUTURE_SIGHT_HIT_SCRIPT_AGE = 0;
+export const FOCUS_BAND_SCRIPT_AGE = 0;
 
 /**
  * hie3: General_HeldItemEffect. The extracted table holds only the first SE (playsewithpan 152 at script frame 8: the rest follow `waitforvisualfinish`, which the
@@ -480,6 +484,12 @@ export function emitGeneralAnimSounds(after: BattleResolutionPresentationState |
         emitOpsAt(generalVariant("General_FocusPunchSetUp", command.battler), { attackerSide: side, targetSide: other }, elapsed - FOCUS_PUNCH_SETUP_SCRIPT_AGE, true);
       } else if (command.animation === "HELD_ITEM_EFFECT") {
         emitOpsAt(heldItemEffectOps(command.battler), { attackerSide: side, targetSide: other }, elapsed - (command.timing.minimumFrames - HELD_ITEM_EFFECT_COMMAND_FRAMES), true);
+      } else if (command.animation === "WISH_HEAL") {
+        emitOpsAt(generalVariant("General_WishHeal", command.battler), { attackerSide: side, targetSide: other }, elapsed - WISH_HEAL_SCRIPT_AGE, true);
+      } else if (command.animation === "FUTURE_SIGHT_HIT") {
+        emitOpsAt(generalVariant("General_FutureSightHit", command.battler), { attackerSide: side, targetSide: other }, elapsed - FUTURE_SIGHT_HIT_SCRIPT_AGE, true);
+      } else if (command.animation === "FOCUS_BAND") {
+        emitOpsAt(generalVariant("General_FocusBand", command.battler), { attackerSide: side, targetSide: other }, elapsed - FOCUS_BAND_SCRIPT_AGE, true);
       } else if (command.animation === "LEECH_SEED_DRAIN" && command.animated === true) {
         // command.battler is the seeded (drained) battler = the animation's target; the seeder is the attacker.
         emitOpsAt(generalVariant("General_LeechSeedDrain", command.battler === 0 ? 1 : 0), { attackerSide: other, targetSide: side }, elapsed - LEECH_SEED_DRAIN_SCRIPT_AGE, true);

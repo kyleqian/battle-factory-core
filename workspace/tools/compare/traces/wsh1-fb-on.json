@@ -1,0 +1,1 @@
+{"appRoute": "generated-orchestrator", "oracleProfile": "battle-scene-on", "appStage": {"id": "wsh1-fb-on", "frame": 0}, "oracleBattleLab": {"scenario": "../../battle-lab/wsh1-fb-on.json"}, "segments": [{"frames": 2, "buttons": ["A"]}, {"frames": 18, "buttons": []}, {"frames": 2, "buttons": ["A"]}, {"frames": 1200, "buttons": []}], "captureFrames": [0]}

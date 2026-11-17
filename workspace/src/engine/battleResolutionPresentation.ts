@@ -169,6 +169,15 @@ export const FOCUS_PUNCH_SETUP_COMMAND_FRAMES = 124;
  * ROM skips the animation (TryHandleLaunchBattleTableAnimation; Scene ON only: the Scene OFF pause is unconditional).
  */
 export const HELD_ITEM_EFFECT_COMMAND_FRAMES = 214;
+/**
+ * wsh1 (ISSUES #219): the three `playanimation` sites the held-item work did not cover. Scene ON runs the General_* script through
+ * the controller and the next print / hit waits for it (Cmd_playanimation, battle_script_commands.c:4033-4038; skipped for a
+ * STATS3_SEMI_INVULNERABLE battler, and for a battler behind a Substitute by TryHandleLaunchBattleTableAnimation). The command lasts from the
+ * previous command's end to the next command's first frame, measured on the ROM (docs/wsh1-general-anim-commands.md).
+ */
+export const WISH_HEAL_COMMAND_FRAMES = 201;
+export const FUTURE_SIGHT_HIT_COMMAND_FRAMES = 172;
+export const FOCUS_BAND_COMMAND_FRAMES = 129;
 export const HELD_ITEM_EFFECT_RESTART_LEAD_FRAMES = 15;
 export const HELD_ITEM_EFFECT_CONTINUE_LEAD_FRAMES = 9;
 /**
@@ -644,7 +653,7 @@ export type BattleResolutionPresentationCommand =
       type: "general-animation";
       eventSequence: number;
       battler: 0 | 1;
-      animation: "FOCUS_PUNCH_SETUP" | "HELD_ITEM_EFFECT" | "LEECH_SEED_DRAIN" | "CASTFORM_CHANGE" | WeatherContinuesAnimation;
+      animation: "FOCUS_PUNCH_SETUP" | "HELD_ITEM_EFFECT" | "LEECH_SEED_DRAIN" | "CASTFORM_CHANGE" | "WISH_HEAL" | "FUTURE_SIGHT_HIT" | "FOCUS_BAND" | WeatherContinuesAnimation;
       /** cff230: a CASTFORM_CHANGE's target form (the event's argument & ~CASTFORM_SUBSTITUTE; 0 = normal). */
       castformForm?: number;
       /** cff232 / snd233: extra rows before the morph's lead (a weather-loop change at battler 1, both scenes); absent = 0. */
@@ -1381,6 +1390,16 @@ function heldItemEffectExecutionsAndLead(
  * (`executionsPresented`: the last command is that `status`), only the lead remains. Null when the print is not preceded by that
  * instruction or has no provenance.
  */
+/** wsh1: the controller lead replacing the held-item leads (15 / 9) for the other two print-after-playanimation sites (ROM-measured: Wish 36 = its 36 executions, Focus Band 40 = 38 + 2). */
+const WSH1_OFF_HOLD_LEAD: Readonly<Record<string, number>> = { B_ANIM_WISH_HEAL: 0, B_ANIM_FOCUS_BAND: 2 };
+/** wsh1: Scene OFF's Pausex20 before the hit, ROM-measured on tools/battle-lab/wsh1-fs-off.json (the previous message's own wait is already presented). */
+const FUTURE_SIGHT_HIT_OFF_HOLD_FRAMES = 42;
+/** BattleScript_DoFutureAttackHit's `effectivenesssound` right after the shared PLAYANIMATION slot (Future Sight's jumps over Doom Desire's; both take Pausex20 in Scene OFF). */
+function futureSightHitPlayanimationBefore(programCounter: number | undefined): boolean {
+  if (programCounter === undefined) return false;
+  return BATTLE_SCRIPT_PROGRAM.instructions[programCounter - 1]?.opcodeName === "B_SCR_OP_EFFECTIVENESSSOUND"
+    && BATTLE_SCRIPT_PROGRAM.instructions[programCounter - 2]?.operands.some((operand) => operand.expression === "B_ANIM_DOOM_DESIRE_HIT") === true;
+}
 function heldItemEffectOffHoldFrames(
   events: readonly BattleKernelSemanticEvent[],
   messageIndex: number,
@@ -1391,10 +1410,11 @@ function heldItemEffectOffHoldFrames(
   const instruction = BATTLE_SCRIPT_PROGRAM.instructions[programCounter - 1];
   if (
     instruction?.opcodeName !== "B_SCR_OP_PLAYANIMATION"
-    || !instruction.operands.some((operand) => operand.expression === "B_ANIM_HELD_ITEM_EFFECT")
+    || !instruction.operands.some((operand) => operand.expression === "B_ANIM_HELD_ITEM_EFFECT" || operand.expression in WSH1_OFF_HOLD_LEAD)
   ) return null;
   const { executions, lead } = heldItemEffectExecutionsAndLead(events, messageIndex);
-  return (executionsPresented ? 0 : executions) + lead;
+  const leadFrames = instruction.operands.map((operand) => WSH1_OFF_HOLD_LEAD[operand.expression]).find((value) => value !== undefined) ?? lead;
+  return (executionsPresented ? 0 : executions) + leadFrames;
 }
 /**
  * off121 (docs/off121-status-command.md): in Scene OFF `Cmd_statusanimation` is skipped (HITMARKER_NO_ANIMATIONS,
@@ -4505,7 +4525,7 @@ export function projectBattleResolutionCommands(
   let currentField: BattleResolutionDisplayedField = field;
   const substituteFades: { at: number; battler: 0 | 1; sequence: number }[] = [];
   const statsChanges: { at: number; battler: 0 | 1; sequence: number; argument: number; frames: number; seGate: number }[] = [];
-  const heldItemEffects: { at: number; battler: 0 | 1; sequence: number; frames: number; afterStatus: boolean }[] = [];
+  const heldItemEffects: { at: number; battler: 0 | 1; sequence: number; frames: number; afterStatus: boolean; animation: "HELD_ITEM_EFFECT" | "WISH_HEAL" | "FUTURE_SIGHT_HIT" | "FOCUS_BAND" }[] = [];
 
   for (let index = 0; index < events.length; index += 1) {
     const event = events[index]!;
@@ -4733,6 +4753,16 @@ export function projectBattleResolutionCommands(
         at: commands.length, battler: pendingHeldItemEffectBattler, sequence: event.sequence,
         frames: HELD_ITEM_EFFECT_COMMAND_FRAMES + lead,
         afterStatus: events[index - 1]?.payload.kind === "set-battler-status-data" && commands[commands.length - 1]?.type === "status",
+        animation: "HELD_ITEM_EFFECT",
+      });
+      continue;
+    }
+    if (payload.kind === "animation" && (payload.animationId === "WISH_HEAL" || payload.animationId === "FUTURE_SIGHT_HIT" || payload.animationId === "FOCUS_BAND")) {
+      heldItemEffects.push({
+        at: commands.length, battler: singlesBattler(payload.battler ?? -1, "general animation"), sequence: event.sequence,
+        frames: payload.animationId === "WISH_HEAL" ? WISH_HEAL_COMMAND_FRAMES
+          : payload.animationId === "FUTURE_SIGHT_HIT" ? FUTURE_SIGHT_HIT_COMMAND_FRAMES : FOCUS_BAND_COMMAND_FRAMES,
+        afterStatus: false, animation: payload.animationId,
       });
       continue;
     }
@@ -4818,6 +4848,14 @@ export function projectBattleResolutionCommands(
       payload.kind === "animation"
       && payload.animationId === "HIT_ANIMATION"
     ) {
+      if ((beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0 && futureSightHitPlayanimationBefore(events[index]!.provenance?.programCounter)) {
+        commands.push(Object.freeze({
+          type: "move-animation",
+          eventSequence: event.sequence,
+          battler: lastMoveAttacker ?? 0,
+          timing: Object.freeze({ minimumFrames: FUTURE_SIGHT_HIT_OFF_HOLD_FRAMES }),
+        }));
+      }
       commands.push(Object.freeze({
         type: "hit-animation",
         eventSequence: event.sequence,
@@ -5213,7 +5251,7 @@ export function projectBattleResolutionCommands(
             const presented = heldItem.afterStatus && statusBefore?.type === "status" ? statusBefore.timing.minimumFrames : 0;
             ordered.push(Object.freeze({
               type: "general-animation" as const, eventSequence: heldItem.sequence, battler: heldItem.battler,
-              animation: "HELD_ITEM_EFFECT" as const,
+              animation: heldItem.animation,
               timing: Object.freeze({
                 minimumFrames: heldItem.frames - presented + (presented > 0 ? HELD_ITEM_EFFECT_AFTER_STATUS_EXTRA_FRAMES : 0),
               }),

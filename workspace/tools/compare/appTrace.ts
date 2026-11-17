@@ -1071,6 +1071,27 @@ function hie1Stage(
   });
 }
 
+// wsh1: Wish / Future Sight / Focus Band windows (tools/battle-lab/wsh1-*.json): Rattata pair, the player's move / item and the lab seed vary.
+function wsh1Stage(
+  state: EngineState,
+  id: string,
+  scene: "on" | "off",
+  playerLevel: number,
+  opponentLevel: number,
+  playerMoveId: number,
+  playerItem = 0,
+  rngSeed = 1,
+): EngineState {
+  return midBattleSwitchStage(state, id, [RATTATA_LV50_BENCH, RATTATA_LV50_BENCH], [105, 105], {
+    battleScene: scene,
+    player: rattataAtLevel(playerLevel, playerMoveId, playerItem),
+    trainer: rattataAtLevel(opponentLevel, 69),
+    usedMessageHoldFrames: 0,
+    sceneOffNoAnimations: scene === "off",
+    rngSeed,
+  });
+}
+
 // cry1: cry-task windows (tools/battle-lab/cry1-*.json): the attacker's species is staged over the Rattata stats (the cry follows the species; levels 50 / 12 as aud241b,
 // the other side uses SEISMIC TOSS, a modelled move, as the filler: Roar's -6 priority makes it move first).
 function cry1Stage(state: EngineState, id: string, species: number, attackerSide: "player" | "opponent", moveId: number): EngineState {
@@ -1122,6 +1143,8 @@ type MidBattleSwitchStageOptions = Readonly<{
   /** The hold for every turn after the staged first one (the SPLASH controller hold belongs to the SPLASH turn only). */
   laterTurnsUsedMessageHoldFrames?: number;
   sceneOffNoAnimations?: boolean;
+  /** wsh1: the staged battle's RNG seed (the lab's `seed`); default 1. */
+  rngSeed?: number;
   /** `null`: no bench for that side (the last faint is a hard terminal, the full-turn reducer's default shape). */
   trainerBenchHp?: readonly [number, number] | null;
   playerBenchNone?: boolean;
@@ -2038,6 +2061,12 @@ export const APP_STAGES: Readonly<Record<string, AppStage>> = {
   "aud242k-smokescreen-player-on": (state) => aud241bStage(state, "aud242k-smokescreen-player-on", "on", 50, 12, 108, undefined, false, 69),
   "aud242k-scaryface-player-on": (state) => aud241bStage(state, "aud242k-scaryface-player-on", "on", 50, 12, 184, undefined, false, 69),
   "aud242k-wish-player-on": (state) => aud241bStage(state, "aud242k-wish-player-on", "on", 50, 12, 273, undefined, false, 69),
+  "wsh1-wish-on": (state) => aud241bStage(state, "wsh1-wish-on", "on", 50, 12, 273, undefined, false, 69),
+  "wsh1-wish-off": (state) => aud241bStage(state, "wsh1-wish-off", "off", 50, 12, 273, undefined, false, 69),
+  "wsh1-fb-on": (state) => wsh1Stage(state, "wsh1-fb-on", "on", 20, 50, 69, 196, 2),
+  "wsh1-fs-on": (state) => wsh1Stage(state, "wsh1-fs-on", "on", 50, 25, 248, 0, 2),
+  "wsh1-fs-off": (state) => wsh1Stage(state, "wsh1-fs-off", "off", 50, 25, 248, 0, 2),
+  "wsh1-fb-off": (state) => wsh1Stage(state, "wsh1-fb-off", "off", 20, 50, 69, 196, 2),
   "aud242k-safeguard-player-on": (state) => aud241bStage(state, "aud242k-safeguard-player-on", "on", 50, 12, 219, undefined, false, 69),
   "aud242k-lovelykiss-player-on": (state) => aud241bStage(state, "aud242k-lovelykiss-player-on", "on", 50, 12, 142, undefined, false, 69),
   "aud242k-crunch-player-on": (state) => aud241bStage(state, "aud242k-crunch-player-on", "on", 50, 12, 242, undefined, false, 69),
