@@ -12,7 +12,7 @@ import { liveMoveSourceAge, statsChangeSourceAge } from "./battleResolutionPrese
 import { FOCUS_PUNCH_SETUP_BEHIND_SUBSTITUTE_COMMAND_FRAMES, HELD_ITEM_EFFECT_COMMAND_FRAMES, WEATHER_CONTINUES_LAUNCH_LEAD_ROWS, isWeatherContinuesAnimation, type BattleStatusAnimationName, type WeatherContinuesAnimation } from "./battleResolutionPresentation.ts";
 
 export interface TimedOp {
-  readonly op: "playsewithpan" | "playse" | "waitplaysewithpan" | "loopsewithpan" | "panse" | "panse_adjustnone" | "panse_adjustall" | "setpan" | "soundtask_loopse" | "soundtask_fireblast" | "soundtask_se1" | "soundtask_se2" | "sprite_confuseray_ball" | "task_rollout";
+  readonly op: "playsewithpan" | "playse" | "waitplaysewithpan" | "loopsewithpan" | "panse" | "panse_adjustnone" | "panse_adjustall" | "setpan" | "soundtask_loopse" | "soundtask_fireblast" | "soundtask_se1" | "soundtask_se2" | "sprite_confuseray_ball" | "task_rollout" | "task_shockwave_bolt";
   readonly frame: number;
   readonly id: number | null;
   readonly pan: number | null;
@@ -200,6 +200,17 @@ function fireBlastRows(op: TimedOp, context: AnimPanContext): readonly OpRow[] {
   return rows;
 }
 
+/**
+ * AnimTask_ShockWaveProgressingBolt (battle_anim_electric.c:1153-1266): data[14] starts at BattleAnimAdjustPanning(SOUND_PAN_ATTACKER) and gains data[15] =
+ * (BattleAnimAdjustPanning(SOUND_PAN_TARGET) - data[14]) / 3 (C integer division) before each SE_M_THUNDERBOLT; `times` is the ordinal of the SE (1 or 2). The call
+ * the SE plays on is in the table (it depends on the attacker's pic Y).
+ */
+function shockWaveBoltRows(op: TimedOp, context: AnimPanContext): readonly OpRow[] {
+  const source = animSoundPan(-64, context);
+  const increment = Math.trunc((animSoundPan(63, context) - source) / 3);
+  return [{ offset: 0, emission: { kind: "se", id: op.id, pan: source + increment * (op.times ?? 1) }, task: true }];
+}
+
 /** Exported for tests/aud242cMoveAnimSounds.test.ts (the panse_adjustnone / _adjustall / framesToWait arithmetic has no ROM window). */
 export function moveAnimOpRows(op: TimedOp, context: AnimPanContext, uniformLoop = false): readonly OpRow[] {
   switch (op.op) {
@@ -212,6 +223,7 @@ export function moveAnimOpRows(op: TimedOp, context: AnimPanContext, uniformLoop
     case "soundtask_fireblast": return fireBlastRows(op, context);
     case "sprite_confuseray_ball": return confuseRayBallRows(op, context);
     case "task_rollout": return rolloutRows(op, context);
+    case "task_shockwave_bolt": return shockWaveBoltRows(op, context);
     default: return [{ offset: uniformLoop && op.op === "waitplaysewithpan" ? 1 : 0, emission: { kind: "se", id: op.id, pan: animSoundPan(op.pan ?? 0, context) } }];
   }
 }

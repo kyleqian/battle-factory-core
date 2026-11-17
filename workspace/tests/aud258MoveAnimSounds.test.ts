@@ -95,4 +95,32 @@ describe("Torment (aud258)", () => {
     expect(ours.map((e) => `${e.id}:${e.pan}`)).toEqual(romRows.map((e) => `${e.id}:${e.pan}`));
     expect(romRows.map((e, i) => e.frame - ours[i]!.frame)).toEqual(romRows.map(() => -4));
   });
+
+  it("Shock Wave table entry: ungated, the pic-Y grid holds three sweep classes (the SE 118 pair at +71 / +99 / +101 ...)", () => {
+    const entry = timing.moves[351]! as unknown as { label: string; gated: number[]; pic: number[] };
+    expect(entry.label).toBe("Move_SHOCK_WAVE");
+    expect(entry.gated[0]).toBe(0);
+    const rows = (v: number) => timing.variants[v]!.map((o) => `${o.op}:${o.frame}:${(o as { id?: number }).id}`);
+    const classes = new Set(timing.picGrids[entry.pic[0]!]!.map((v) => rows(v).join(",")));
+    expect([...classes].sort()).toEqual([
+      "playsewithpan:30:213,task_shockwave_bolt:100:118,task_shockwave_bolt:128:118,playsewithpan:157:221",
+      "playsewithpan:30:213,task_shockwave_bolt:101:118,task_shockwave_bolt:129:118,playsewithpan:158:221",
+      "playsewithpan:30:213,task_shockwave_bolt:102:118,task_shockwave_bolt:130:118,playsewithpan:159:221",
+    ]);
+  });
+
+  // Windows (tools/battle-lab/aud258-shockwave*-player-on.json): a Lv50 player Rattata (back pic Y 101: sweep class 364) and a Lv50 Blaziken (88: class 362) against a Lv12 Rattata. SE 213 (charge), the two
+  // SE_M_THUNDERBOLT rows of AnimTask_ShockWaveProgressingBolt (the pans are the attacker / target pans split in three: -22, 20) and SE_M_TRI_ATTACK2 after the particle / orb / bolt wait.
+  for (const w of [{ file: "aud258-shockwave-player", gaps: [0, 72, 100, 129] }, { file: "aud258-shockwavelow-player", gaps: [0, 70, 98, 127] }]) {
+    it(`${w.file}: ids, pans and gaps equal the ROM's; ROM minus ours is 0 on every row`, () => {
+      const rom = fixture(w.file);
+      const pick = (events: FixtureEvent[]) => events.filter((e) => e.noop !== true && e.kind === "se" && [213, 118, 221].includes(e.id as number));
+      const romRows = pick(rom.events);
+      const ours = pick(ourEvents(rom));
+      expect(romRows.map((e) => `${e.id}:${e.pan}`)).toEqual(["213:-64", "118:-22", "118:20", "221:63"]);
+      expect(romRows.map((e) => e.frame - romRows[0]!.frame)).toEqual(w.gaps);
+      expect(ours.map((e) => `${e.id}:${e.pan}`)).toEqual(romRows.map((e) => `${e.id}:${e.pan}`));
+      expect(romRows.map((e, i) => e.frame - ours[i]!.frame)).toEqual([0, 0, 0, 0]);
+    });
+  }
 });

@@ -185,6 +185,8 @@ describe("audio probe fixtures", () => {
       "aud257-cosmicpower-player.json",
       "aud258-seismictoss-player.json",
       "aud258-seismictossstrong-player.json",
+      "aud258-shockwave-player.json",
+      "aud258-shockwavelow-player.json",
       "aud258-torment-player.json",
       "battle-intro-window-off.json",
       "battle-intro-window.json",

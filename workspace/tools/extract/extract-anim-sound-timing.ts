@@ -71,7 +71,7 @@ const moveTable: string[] = [];
 }
 
 interface SoundOp {
-  op: "playsewithpan" | "playse" | "waitplaysewithpan" | "loopsewithpan" | "panse" | "panse_adjustnone" | "panse_adjustall" | "setpan" | "soundtask_loopse" | "soundtask_fireblast" | "soundtask_se1" | "soundtask_se2" | "sprite_confuseray_ball" | "task_rollout";
+  op: "playsewithpan" | "playse" | "waitplaysewithpan" | "loopsewithpan" | "panse" | "panse_adjustnone" | "panse_adjustall" | "setpan" | "soundtask_loopse" | "soundtask_fireblast" | "soundtask_se1" | "soundtask_se2" | "sprite_confuseray_ball" | "task_rollout" | "task_shockwave_bolt";
   frame: number;
   id: number | null;
   /** The pan argument as written (the starting pan of a panse*; the only one of a setpan). */
@@ -417,6 +417,78 @@ function rolloutShape(counter: number): { length: number; period: number; lastDi
   const lastDirtCall = 40 + period * Math.floor(length / period);
   return { length, period, lastDirtCall, destroyCall: Math.max(41 + length, lastDirtCall + 19) };
 }
+// ---- aud258: Shock Wave (battle_anim_electric.c:805-896, :1135-1266; battle_anim_mons.c:1065-1139). Call numbering as AnimTask_ElectricBolt / Torment: the entry is call 0, RunTasks calls 1.., an SE on call c sits
+// at script frame + c - 1 and a task destroyed on call c is gone c - 1 ticks after the creation. A sprite CreateSprite'd by a task on call c first runs in the next frame (sprite call j = task call c + 1 + j,
+// AnimateSprites before RunTasks, so the task sees the sprite's destruction on that same call).
+/**
+ * AnimTask_ElectricChargingParticles: one particle per call once ++data[12] > interval (count of them), particle k's duration is 40 - 5 * data[8] (data[8] += 1 every `per` particles while <= 5). A particle
+ * (gElectricChargingParticlesSpriteTemplate): anim 0 is 4 x 1 tick (animEnded seen on sprite call 5), SetCallbackToStoredInData6 installs AnimElectricChargingParticles (call 6), which installs the translation (calls 7..6 + D,
+ * AnimTranslateLinear), and the call that finds data[0] == 0 destroys (call 7 + D). The task waits for data[7] == 0 once data[6] == 0.
+ */
+function electricChargingParticlesDestroyCall(count: number, interval: number, per: number): number | null {
+  if (count < 1 || interval < 0 || per < 1) return null;
+  let [created, wait, step, sinceStep, lastExpiry] = [0, 0, 0, 0, 0];
+  for (let call = 1; created < count; call += 1) {
+    wait += 1;
+    if (wait <= interval) continue;
+    wait = 0;
+    lastExpiry = Math.max(lastExpiry, call + 8 + (40 - step * 5));
+    created += 1;
+    sinceStep += 1;
+    if (sinceStep >= per) {
+      sinceStep = 0;
+      if (step <= 5) step += 1;
+    }
+  }
+  return lastExpiry;
+}
+/**
+ * AnimTask_ShockWaveProgressingBolt: call 0 inits (data[7] = the attacker's BATTLER_COORD_Y_PIC_OFFSET, sweeping up to y 4 in steps of 8), case 1 creates one bolt sprite per call (each lives 13 ticks: sprite call 12 destroys,
+ * AnimShockWaveProgressingBolt) and moves y; the call that reaches the end of the sweep goes to case 2 (5 calls, the 5th flips the direction: odd sweep count goes down 4 -> 68 with data[4] 0.. 7, even goes up) or, after the 5th
+ * sweep, to case 3, which destroys when the last bolt sprite is gone. data[11] = 12 counts down on every call of cases 1, 2 and 4 and makes case 2 wait (case 4) until it is 0. The SE_M_THUNDERBOLT plays when a down
+ * sweep's data[4] wraps to 0 (the 8th call of the sweep).
+ */
+function shockWaveBoltShape(attackerY: number): { seCalls: number[]; destroyCall: number } {
+  let [state, wait, sweeps, tile, dir, y, target, counter] = [1, 0, 0, 7, -1, attackerY, 4, 12];
+  const expiries: number[] = [];
+  const seCalls: number[] = [];
+  for (let call = 1; call < 10000; call += 1) {
+    const alive = (): number => expiries.filter((e) => e > call).length;
+    if (state === 1) {
+      wait += 1;
+      if (wait > 0) {
+        wait = 0;
+        expiries.push(call + 13);
+        tile += dir;
+        if (tile < 0) tile = 7;
+        if (tile > 7) tile = 0;
+        if (tile === 0 && dir > 0) seCalls.push(call);
+        if ((dir < 0 && y <= target) || (dir > 0 && y >= target)) {
+          sweeps += 1;
+          state = sweeps === 5 ? 3 : 2;
+        } else {
+          y += dir * 8;
+        }
+      }
+      if (counter > 0) counter -= 1;
+    } else if (state === 2) {
+      if (counter > 0) counter -= 1;
+      wait += 1;
+      if (wait > 4) {
+        wait = 0;
+        if (sweeps & 1) [y, target, tile, dir] = [4, 68, 0, 1];
+        else [y, target, tile, dir] = [68, 4, 7, -1];
+        state = counter > 0 ? 4 : 1;
+      }
+    } else if (state === 4) {
+      if (counter > 0) counter -= 1;
+      else state = 1;
+    } else if (alive() === 0) {
+      return { seCalls, destroyCall: call };
+    }
+  }
+  throw new Error("shock wave bolt task did not end");
+}
 // AnimConfuseRayBallBounce (battle_anim_ghost.c:220-311). Call 0 is the init: the sprite starts at the attacker's x plus the side-signed offset (SetAnimSpriteInitialXOffset,
 // battle_anim_mons.c:763-776), data[0] = |dx| << 8 / speed is the duration (InitAnimLinearTranslationWithSpeed, :1155-1160) and data[6] = 16. Step1 (calls 1..) runs
 // UpdateConfuseRayBallBlend and then AnimTranslateLinear (data[0]-- while > 0); the call that finds data[0] == 0 installs Step2. Step2 sets data[0] = 1, translates, and when
@@ -595,6 +667,14 @@ function lifetimeOf(cmd: Command, attackerSide: number, pic: PicContext, rollout
   // animEnded at c + 32, the callback decrements data[6] and destroys at c + 33) and state 5 destroys the task in that same call c + 33. The state-0 calls are TORMENT_SE_CALLS (1, 26, 51, 66, 81, 96),
   // so the task is destroyed at call 96 + 33 = 129: gone 128 ticks after F.
   if (op === "createvisualtask" && args[0] === "AnimTask_TormentAttacker") return { exact: TORMENT_SE_CALLS[5] + 33 - 1 };
+  // aud258: Shock Wave's charging particles, orb sprite (affine anim 2: a duration-0 frame at call 0, two 30-tick frames, END at call 61) and progressing bolt task (see electricChargingParticlesDestroyCall / shockWaveBoltShape).
+  if (op === "createvisualtask" && args[0] === "AnimTask_ElectricChargingParticles" && SHOCK_WAVE_CHARGING_ARGS.join(",") === args.slice(3, 6).join(",")) {
+    const [count, interval, per] = args.slice(3, 6).map(intArg);
+    const call = electricChargingParticlesDestroyCall(count!, interval!, per!);
+    return call === null ? null : { exact: call - 1 };
+  }
+  if (sprite("gGrowingShockWaveOrbSpriteTemplate")) return { exact: 61 };
+  if (op === "createvisualtask" && args[0] === "AnimTask_ShockWaveProgressingBolt") { picUsed = true; return { exact: shockWaveBoltShape(pic.attackerY).destroyCall - 1 }; }
   // ---- aud258: AnimTask_MoveSeismicTossBg (battle_anim_rock.c:848-868; createvisualtask runs the entry, which IS the step, in the script step = call 0). data[0] counts calls 0, 1, ...;
   // the call with data[0] == 120 (call 120) runs DestroyAnimVisualTask: gone 119 ticks after F. AnimTask_SeismicTossBgAccelerateDownAtEnd (:870-889) lives until the script's `setarg 7, 0xFFF`
   // after the last wait, so nothing in the script waits for it.
@@ -1086,6 +1166,7 @@ const middle = (values: number[]): number => values[Math.floor(values.length / 2
 const referencePic = (attackerSide: number): PicContext => ({ attackerY: middle(picYs[attackerSide]!), targetY: middle(picYs[1 - attackerSide]!) });
 // aud258: a representative gAnimMoveDmg per AnimTask_GetSeismicTossDamageLevel level (battle_anim_rock.c:836-846: < 33 -> 0, 33..65 -> 1, > 65 -> 2). The reference walk is level 1 (the Factory's
 // Lv 50 attacker: BattleScript_EffectLevelDamage runs `dmgtolevel` after `typecalc`, so gBattleMoveDamage = 50 when the animation starts, unless adjustsetdamage clamps it to hp - 1).
+const SHOCK_WAVE_CHARGING_ARGS = ["20", "0", "2"] as const;
 const TORMENT_SE_CALLS = [1, 26, 51, 66, 81, 96] as const;
 const SEISMIC_TOSS_LEVELS = [0, 1, 2] as const;
 const SEISMIC_TOSS_REFERENCE_LEVEL = 1;
@@ -1312,6 +1393,13 @@ function walk(bodyLabel: string, turn: number, attackerSide: number, pic: PicCon
           break;
         }
         // aud258: AnimTask_TormentAttacker plays SE_M_METRONOME (PlaySE12WithPanning, BattleAnimAdjustPanning(SOUND_PAN_ATTACKER)) from its step; the calls are TORMENT_SE_CALLS (offset call - 1).
+        // aud258: AnimTask_ShockWaveProgressingBolt plays SE_M_THUNDERBOLT twice (PlaySE12WithPanning; the pans are runtime rows, shockWaveBoltRows); the calls depend on the attacker's pic Y.
+        if (args[0] === "AnimTask_ShockWaveProgressingBolt") {
+          if (frame === null) { gate(); break; }
+          picUsed = true;
+          shockWaveBoltShape(pic.attackerY).seCalls.forEach((call, i) => events.push({ op: "task_shockwave_bolt", frame: frame! + shiftAt(frame!) + call - 1, id: value("SE_M_THUNDERBOLT"), pan: null, times: i + 1, line }));
+          break;
+        }
         if (args[0] === "AnimTask_TormentAttacker") {
           if (frame === null) { gate(); break; }
           for (const call of TORMENT_SE_CALLS) events.push({ op: "playsewithpan", frame: frame + shiftAt(frame) + call - 1, id: value("SE_M_METRONOME"), pan: value("SOUND_PAN_ATTACKER"), line });
