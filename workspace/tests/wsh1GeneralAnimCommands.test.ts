@@ -124,3 +124,42 @@ describe("wsh1 General_* SEs (Scene ON)", () => {
     expect(rows.slice(0, expected.length)).toEqual(expected.map(([se, age]) => [se, age]));
   });
 });
+
+// wsh1b: Cmd_playanimation skips a STATUS3_SEMI_INVULNERABLE battler (battle_script_commands.c:4033-4038); Scene OFF's Pausex20 is unconditional.
+// The Wisher's second move is DIG: turn 1 Wish, turn 2 Dig charge (the heal fires at the end of that turn with the wisher underground).
+describe("wsh1b semi-invulnerable skip (Wish heal on a Dig user)", () => {
+  function wishHeals(id: string, buttons: Array<{ frames: number; buttons?: string[] }>): { heals: number; wishCameTrue: boolean } {
+    let state = createInitialState({ appRoute: "generated-orchestrator", battleScene: id.endsWith("-on") ? "on" : "off" });
+    state = APP_STAGES[id]!(state);
+    let heals = 0;
+    let wishCameTrue = false;
+    const seen = new Set<number>();
+    for (const advance of traceAdvances(buttons)) {
+      state = tick(state, advance.buttons);
+      for (const segment of state.factoryRoundBattleOrchestrator?.battleResolutionPresentation?.segments ?? []) {
+        for (const command of segment.commands) {
+          if (command.type === "message" && JSON.stringify(command).includes("came true")) wishCameTrue = true;
+          if (command.type === "general-animation" && command.animation === "WISH_HEAL" && !seen.has(command.eventSequence)) {
+            seen.add(command.eventSequence);
+            heals += 1;
+          }
+        }
+      }
+    }
+    return { heals, wishCameTrue };
+  }
+  const trace = (id: string): Array<{ frames: number; buttons?: string[] }> =>
+    (JSON.parse(readFileSync(new URL(`../tools/compare/traces/${id}.json`, import.meta.url), "utf8")) as { segments: Array<{ frames: number; buttons?: string[] }> }).segments;
+
+  it("control: Wish heal on a grounded wisher presents one WISH_HEAL command", () => {
+    expect(wishHeals("wsh1-wish-on", trace("wsh1-wish-on"))).toEqual({ heals: 1, wishCameTrue: true });
+  });
+
+  it("Scene ON: the heal's playanimation on a Dig user presents no WISH_HEAL command", () => {
+    expect(wishHeals("wsh1b-wishdig-on", trace("wsh1b-wishdig-on"))).toEqual({ heals: 0, wishCameTrue: true });
+  });
+
+  it("Scene ON: the heal behind a displayed Substitute doll presents no WISH_HEAL command", () => {
+    expect(wishHeals("wsh1b-wishsub-on", trace("wsh1b-wishsub-on"))).toEqual({ heals: 0, wishCameTrue: true });
+  });
+});
