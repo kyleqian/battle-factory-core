@@ -1099,3 +1099,62 @@ Frame hashes: `npm run compare:differential -- <Encore, Leaf Blade, Revenge play
 | Eruption | 4 | unresolved task | `AnimTask_EruptionLaunchRocks` |
 
 Other single-blocker live moves not yet ported: Recycle, Milk Drink, Pain Split, Air Cutter, Smelling Salt, Will-O-Wisp, Needle Arm, Extreme Speed, Luster Purge. Torment's `AnimTask_TormentAttacker` plays SE_M_METRONOME from inside the task (a task-internal SE op). No pan or id difference was found in any of the windows above: every remaining difference is an offset class (idle-lead +2, Flatter -3, Revenge -10 from the non-live opponent body, Taunt -4, Encore -1) or a missing lifetime.
+
+## 21. aud242q: Fury Cutter, Ice Ball, Secret Power / Strength, Extrasensory, Super Fang, Rage (T1 family 1, slice 16)
+
+Base `df38eca58` (the aud242p table). Code: `tools/extract/extract-anim-sound-timing.ts` only (plus the regenerated `src/data/gen/anim-sound-timing.json`); no sound-side resolver change was needed.
+
+### 21.1 What was ported
+
+| item | C | rule |
+|---|---|---|
+| `BATTLE_ENVIRONMENT_*` constants | `include/constants/battle.h` | now parsed into the script constants |
+| `AnimTask_GetBattleEnvironment` (Secret Power -> Strength / Rock Smash / ... branch) | `battle_anim_mons.c`, `battle_anim_scripts.s` Move_SECRET_POWER 9643 | writes `gBattleAnimArgs[0]`; the Factory's `gBattleEnvironment` is `BATTLE_ENVIRONMENT_BUILDING` (8; the engine's rules context pins it, `factoryBattleScriptDecision.ts:362`), so the Strength branch is taken |
+| `AnimTask_GetIceBallCounter` (arg index = script arg 2), `AnimTask_GetFuryCutterHitCount`, `AnimTask_IsFuryCutterHitRight` | `battle_anim_effects_*.c` | indexed `gBattleAnimArgs` write from the Rollout counter slot (`counterGrids` machinery); `jumpargeq` now compares its first argument against the index the task wrote (it was hard-wired to arg 7) |
+| `AnimTask_ShakeAndSinkMon` | `battle_anim_mon_movement.c:316-348` | the entry runs the step once; destroyed in call D - 1 (D = script arg 6): exact D - 2 |
+| `AnimTask_BlendMonInAndOut` | `battle_anim_mons.c:1714-1768` | func-only entry; a step fires every max(delay, 1) calls, coeff up-fires then coeff down-fires per repeat, the last down-fire destroys: exact 2 * coeff * times * delay - 1 (Extrasensory 23, Super Fang 95) |
+| `AnimTask_ExtrasensoryDistortion` | `battle_anim_psychic.c:954-1050` | 24 case-0 calls, case 1, destroy in call 26: exact 25 |
+| `AnimTask_TransparentCloneGrowAndShrink` | `battle_anim_psychic.c:1052-1117` | 12 + 12 step calls, two cleanup states, destroy in call 26: exact 25 |
+| argument splitting | the extractor's `splitArgs` | a plain `split(",")` cut `RGB(27, 27, 0)` into three arguments and shifted every later argument of the command (BlendMonInAndOut's coeff / delay / times). Splitting on top-level commas fixes it, and also resolves Super Fang (`RGB(31, 6, 1)`); Rage resolves through the same Strength body. Only the commands that carry an `RGB(...)` change |
+
+Ice Ball and Fury Cutter produce identical events for all five counters, so no counter grid is emitted for them (`counterGrids` still has the Rollout entry only); Fury Cutter's SE136 row sits at frame 6 on every hit count, Ice Ball's SE137 / SE198 at 6 / 36.
+
+Moves that resolve (gated 1..3 -> 0 at turn 0, player): Ice Ball, Fury Cutter, Secret Power, Strength, Extrasensory, Super Fang, Rage.
+
+### 21.2 ROM windows (probe step mode, Scene ON, level 50, player attacker, friendship 0)
+
+Fixtures `tools/audio/fixtures/aud242q-*-player.json`, labs `tools/battle-lab/aud242q-*-player-on.json` (`AUD242_FRIENDSHIP=0 AUD242_LAB_PREFIX=aud242q tools/audio/makeAud242bLabs.py name:player:move`; Ice Ball is the aud242o Rollout five-turn lab with the move changed), stages `aud242q-*-player-on` in `tools/compare/appTrace.ts`, test `tests/aud242qMoveAnimSounds.test.ts` (ROM frame minus ours per row; 0 = exact). Recipe as section 14 (`AUDIO_PROBE_EXTRA_HOOKS=BlendPalette`, `--frames 700`, Ice Ball `--frames 3000`).
+
+| window | rows (ids) | ROM - ours | reading |
+|---|---|---|---|
+| Fury Cutter | 136 | +2 | the aud242a idle-lead class (#198); the branch-resolved row is timed |
+| Secret Power | 152, 141 x3 | +2 on all four | the idle-lead class; the ROM plays the Strength body (SE152, three SE141 at +47 / +53 / +59), which verifies `BATTLE_ENVIRONMENT_BUILDING` in the lab and the ShakeAndSink lifetime |
+| Extrasensory | 170, 170, 192 | +3 on all three | idle-lead class; the 26-tick gaps between the rows are exact (BlendMonInAndOut 23 + 1 + the next creation, ExtrasensoryDistortion 25, TransparentClone 25) |
+| Super Fang | 171, 161 | -1, -1 | the 162-tick gap is exact (ShakeMonInPlace 48 + BlendMonInAndOut 95 ...); the flat -1 is the presentation offset |
+| Ice Ball x 5 turns (Lv100 Defense Curl target) | 137, 198 on each turn | turn starts 9 / 21 / 38 / 64 / 95, gap 30 on every counter | SE137 -> SE198 is 30 in the ROM on all five counters (counter 5's BG_ICE load lag does not change it), so the table needs no counter dimension; the turn-start drift is presentation, not sound (same class as the aud242o Rollout five-turn drift 9 / 22 / 37 / 57 / 86) |
+
+Strength itself (move 70) has no live presentation adapter (`liveMoveAnimationDuration` null), so it never reaches `emitMoveAnimSounds`: its window produced no engine row and was removed; the Secret Power window is the Strength-body proof.
+
+### 21.3 Counts, census, T2
+
+| | before (`df38eca58` table) | after |
+|---|---|---|
+| all moves: ops resolved / unresolved (turn 0, player attacker) | 1008 / 125 | 1021 / 115 |
+| all-moves ops in the table / distinct variants | 1247 / 370 | 1257 / 372 |
+| L50 (276 moves): emitted / gated | 785 / 70 | 794 / 64 |
+
+T1 census (seeds 0..99 Scene ON, `soundCensusDelta.py --t1`, each arm scored inside its own tree; base arm `on-df38eca58`, final arm `on-44abf84b8`): exact 25,840 -> **25,894**, **missing-gated 95 -> 65**, missing-other 51, missing-declined 1, unclassified 128 unchanged. `extra` is 109 in BOTH arms (Double Team SE239 rows; first seen at the base commit, not caused by this step: the aud242p arm `on-ffbccb113` had extra 0, so it came in with the ais1 / ais2 / pin1 engine changes between `ffbccb113` and `df38eca58`). `rst197CensusDelta.py`: 100 / 100 battles identical (`commands`, `eventsDigest`).
+
+T2 (Scene ON, the 21 aud251 seeds, fresh `aud248RunSeed.sh` ROM runs at this head, then the base tree re-scored against the same ROM files with `aud249Rescore.sh`): move-animation SE exact / offset / missing / extra **287 / 3628 / 76 / 0 -> 287 / 3628 / 76 / 0**. None of the moves ported here occur in the 21 seeds, so T2 cannot move; the stat-change row is 13 / 72 / 0 / 0 in both (the aud242p numbers 288 / 3627 / 76 / 0 and 14 / 56 / 15 / 0 belong to the engine before the ais changes).
+
+Frame hashes: `npm run compare:differential -- <Fury Cutter, Secret Power, Extrasensory player Scene ON traces> --base df38eca58 --harness-from-head` (captures 60..492 step 8): 165 / 165 byte-identical.
+
+### 21.4 Remaining top missing-gated census moves
+
+| move | gated | blocker |
+|---|---|---|
+| Dynamic Punch | 10 | `waitsound` after SE_M_VITAL_THROW2 (exact SE length not modelled; 50 % accuracy, no window) |
+| Heal Bell | 8 | `gBellSpriteTemplate`, `gHealBellMusicNoteSpriteTemplate` (x12), `gThinRingExpandingSpriteTemplate` (AnimSpriteOnMonPos over a 30-tick affine anim, END_ALT) |
+| Soft Boiled | 5 | `gSoftBoiledEggSpriteTemplate` (two eggs wait on `gBattleAnimArgs[7] == 0xFFFF`, set by `setarg 7, 0xFFFF` in the script: both die in the iteration after the setarg, the second callback for data[7] == 0) and the two thin rings. The egg chain (about 56 + 21 + 60 + 57 ticks) is only about 9 ticks inside the setarg time (215 - 12 = 203), so it needs an exact affine-loop simulation and a ROM window before it is safe |
+| Eruption | 4 | `AnimTask_EruptionLaunchRocks` (pic-dependent rock state machine) |
+| Memento / Moonlight / Spike Cannon / Curse | 4 each | not examined |
