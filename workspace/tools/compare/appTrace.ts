@@ -2053,6 +2053,7 @@ export const APP_STAGES: Readonly<Record<string, AppStage>> = {
   "wsh1-fb-on": (state) => wsh1Stage(state, "wsh1-fb-on", "on", 20, 50, 69, 196, 2),
   "wsh1-fs-on": (state) => wsh1Stage(state, "wsh1-fs-on", "on", 50, 25, 248, 0, 2),
   "wsh1-fs-off": (state) => wsh1Stage(state, "wsh1-fs-off", "off", 50, 25, 248, 0, 2),
+  "wsh1-fb-off": (state) => wsh1Stage(state, "wsh1-fb-off", "off", 20, 50, 69, 196, 2),
   "aud242k-safeguard-player-on": (state) => aud241bStage(state, "aud242k-safeguard-player-on", "on", 50, 12, 219, undefined, false, 69),
   "aud242k-lovelykiss-player-on": (state) => aud241bStage(state, "aud242k-lovelykiss-player-on", "on", 50, 12, 142, undefined, false, 69),
   "aud242k-crunch-player-on": (state) => aud241bStage(state, "aud242k-crunch-player-on", "on", 50, 12, 242, undefined, false, 69),

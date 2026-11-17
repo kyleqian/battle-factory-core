@@ -1390,6 +1390,16 @@ function heldItemEffectExecutionsAndLead(
  * (`executionsPresented`: the last command is that `status`), only the lead remains. Null when the print is not preceded by that
  * instruction or has no provenance.
  */
+/** wsh1: the controller lead replacing the held-item leads (15 / 9) for the other two print-after-playanimation sites (ROM-measured: Wish 36 = its 36 executions, Focus Band 40 = 38 + 2). */
+const WSH1_OFF_HOLD_LEAD: Readonly<Record<string, number>> = { B_ANIM_WISH_HEAL: 0, B_ANIM_FOCUS_BAND: 2 };
+/** wsh1: Scene OFF's Pausex20 before the hit, ROM-measured on tools/battle-lab/wsh1-fs-off.json (the previous message's own wait is already presented). */
+const FUTURE_SIGHT_HIT_OFF_HOLD_FRAMES = 42;
+/** BattleScript_DoFutureAttackHit's `effectivenesssound` right after the shared PLAYANIMATION slot (Future Sight's jumps over Doom Desire's; both take Pausex20 in Scene OFF). */
+function futureSightHitPlayanimationBefore(programCounter: number | undefined): boolean {
+  if (programCounter === undefined) return false;
+  return BATTLE_SCRIPT_PROGRAM.instructions[programCounter - 1]?.opcodeName === "B_SCR_OP_EFFECTIVENESSSOUND"
+    && BATTLE_SCRIPT_PROGRAM.instructions[programCounter - 2]?.operands.some((operand) => operand.expression === "B_ANIM_DOOM_DESIRE_HIT") === true;
+}
 function heldItemEffectOffHoldFrames(
   events: readonly BattleKernelSemanticEvent[],
   messageIndex: number,
@@ -1400,10 +1410,11 @@ function heldItemEffectOffHoldFrames(
   const instruction = BATTLE_SCRIPT_PROGRAM.instructions[programCounter - 1];
   if (
     instruction?.opcodeName !== "B_SCR_OP_PLAYANIMATION"
-    || !instruction.operands.some((operand) => operand.expression === "B_ANIM_HELD_ITEM_EFFECT")
+    || !instruction.operands.some((operand) => operand.expression === "B_ANIM_HELD_ITEM_EFFECT" || operand.expression in WSH1_OFF_HOLD_LEAD)
   ) return null;
   const { executions, lead } = heldItemEffectExecutionsAndLead(events, messageIndex);
-  return (executionsPresented ? 0 : executions) + lead;
+  const leadFrames = instruction.operands.map((operand) => WSH1_OFF_HOLD_LEAD[operand.expression]).find((value) => value !== undefined) ?? lead;
+  return (executionsPresented ? 0 : executions) + leadFrames;
 }
 /**
  * off121 (docs/off121-status-command.md): in Scene OFF `Cmd_statusanimation` is skipped (HITMARKER_NO_ANIMATIONS,
@@ -4837,6 +4848,14 @@ export function projectBattleResolutionCommands(
       payload.kind === "animation"
       && payload.animationId === "HIT_ANIMATION"
     ) {
+      if ((beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0 && futureSightHitPlayanimationBefore(events[index]!.provenance?.programCounter)) {
+        commands.push(Object.freeze({
+          type: "move-animation",
+          eventSequence: event.sequence,
+          battler: lastMoveAttacker ?? 0,
+          timing: Object.freeze({ minimumFrames: FUTURE_SIGHT_HIT_OFF_HOLD_FRAMES }),
+        }));
+      }
       commands.push(Object.freeze({
         type: "hit-animation",
         eventSequence: event.sequence,

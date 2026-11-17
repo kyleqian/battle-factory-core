@@ -40,6 +40,40 @@ function commandsOf(id: string): readonly BattleResolutionPresentationCommand[] 
   return all;
 }
 
+function holdsOf(id: string): number[] {
+  const trace = JSON.parse(readFileSync(new URL(`../tools/compare/traces/${id}.json`, import.meta.url), "utf8")) as {
+    appRoute: "generated-orchestrator";
+    oracleProfile: string;
+    segments: Array<{ frames: number; buttons?: string[] }>;
+  };
+  let state = createInitialState({ appRoute: trace.appRoute, battleScene: "off" });
+  state = APP_STAGES[id]!(state);
+  const holds: number[] = [];
+  const seen = new Set<number>();
+  for (const advance of traceAdvances(trace.segments)) {
+    state = tick(state, advance.buttons);
+    for (const segment of state.factoryRoundBattleOrchestrator?.battleResolutionPresentation?.segments ?? []) {
+      segment.commands.forEach((command, index) => {
+        if (command.type === "general-animation") throw new Error("Scene OFF presents no general animation");
+        const next = segment.commands[index + 1];
+        if (command.type !== "move-animation" || next === undefined || seen.has(command.eventSequence)) return;
+        if (command.timing.minimumFrames >= 36 && command.timing.minimumFrames <= 42 && (next.type === "message" || next.type === "hit-animation")) {
+          seen.add(command.eventSequence);
+          holds.push(command.timing.minimumFrames);
+        }
+      });
+    }
+  }
+  return holds;
+}
+
+describe("wsh1 Scene OFF Pausex20 holds", () => {
+  // Wish: 36 executions (no lead); Future Sight: 42 before the hit; Focus Band: 38 executions + lead 2 (ROM windows wsh1-*-off).
+  it.each([["wsh1-wish-off", 36], ["wsh1-fs-off", 42], ["wsh1-fb-off", 40]] as const)("%s presents a %i-frame hold", (id, frames) => {
+    expect(holdsOf(id)).toContain(frames);
+  });
+});
+
 describe("wsh1 general-animation commands (Scene ON)", () => {
   it("pins the constants", () => {
     expect([WISH_HEAL_COMMAND_FRAMES, FUTURE_SIGHT_HIT_COMMAND_FRAMES, FOCUS_BAND_COMMAND_FRAMES]).toEqual([201, 172, 129]);
