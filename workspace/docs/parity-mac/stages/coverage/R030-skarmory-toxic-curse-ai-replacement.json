@@ -1,0 +1,80 @@
+{
+ "name": "R030-skarmory-toxic-curse-ai-replacement",
+ "rules": [
+  "R030"
+ ],
+ "why": "Challenge 6. The AI's lead Dusclops (666: Double-Edge, Shadow Ball, Curse, Rest) against the player's Skarmory (674): Drill Peck then Steel Wing (resisted) take it to half HP or less, where a Ghost-type Curse is an ordinary AI pick (AI_CV_Curse4 only scores it down above 80 percent HP). Curse costs half the maximum HP, so Dusclops faints in the middle of its own Curse action, and HandleFaintedMonActions runs with Curse still the current move (battle_util.c:640, before HandleAction_ActionFinished clears gCurrentMove). The AI scores its replacement with that move: Quagsire (676) and Kangaskhan (694) have no Fire/Electric move, so neither is super-effective against Skarmory (Steel/Flying), the type pass finds nothing and the damage pass runs with Curse as the current move, which gives 0 damage (damageCalc.ts TYPE_MYSTERY). luck3: the day-1 Dugtrio design (0 of 539) died of Double-Edge recoil with Double-Edge current; a Toxic design (Sceptile killed by end-turn poison) was tried and cannot hit at all, because an end-turn faint runs after gCurrentMove is cleared to NONE. Fresh lab seeds 900000-900039: 2 of 40 hit, 900002 and 900020, both matched the ROM to the end.",
+ "seed": 900002,
+ "challengeNum": 6,
+ "battleNum": 0,
+ "trainerId": 180,
+ "playerSetIds": [
+  674,
+  730,
+  677
+ ],
+ "opponentSetIds": [
+  666,
+  676,
+  694
+ ],
+ "script": {
+  "actions": [
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 1
+   }
+  ],
+  "then": "census"
+ },
+ "expect": [],
+ "cover": [
+  {
+   "file": "src/engine/damageCalc.ts",
+   "text": "{\n    damage = 0",
+   "at": 0
+  }
+ ],
+ "coverAny": true
+}

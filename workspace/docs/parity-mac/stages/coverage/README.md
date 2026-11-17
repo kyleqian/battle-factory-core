@@ -21,6 +21,7 @@ matched the ROM to the end on the engine with fixes 29 to 43, with its piece run
 | R023-pain-split-substitute | 92000 | 64 of 64 |
 | R024-pursuit-ko-on-switch | 93000 | 31 of 31 |
 | R025-shield-dust-kings-rock | 94001 | 16 of 16 |
+| R030-skarmory-toxic-curse-ai-replacement | 900002 | 12 of 12 |
 | R032-metronome-rage-miss | 1020122 | 20 of 20 |
 | R037-noland-cloyster-dive-sandstorm | 1020059 | 24 of 24 |
 | R038-noland-foresight-ghost-user | 1020099 | 14 of 14 |
@@ -32,3 +33,5 @@ The last six came from the luck hunt of 2026-11-17 (luck2; `tools/replay-hunt/lu
 hunt's, their stage file is the hunt's `found.stage.json` without the hunt's `chance` / `seeds` fields, and each was re-driven on the engine at `master` e06cac9fc
 (`romReplayWide.sh --stage`, Scene OFF) to a full match with its `cover` piece run. That makes 59 of the 110 rules of `rule-coverage.md` covered. The luck hunt skips a
 design whose rule has a file here.
+
+R030 came from the luck hunt's second day (luck3, 2026-11-17): the design was rebuilt around the AI Dusclops 666 faint from its own Ghost-Curse cost (an end-of-turn poison faint cannot reach the marker), and its lab seed is from the block 900000-900039 that the day job never uses; found by `prehunt.py` (2 of 40 hit), then re-driven from this file on the Scene OFF oracle to a full match. That makes 60 of the 110 rules of `rule-coverage.md` covered.

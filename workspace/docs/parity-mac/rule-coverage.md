@@ -115,7 +115,7 @@ Chansey 227) can call it, about 0.1% of lab seeds, and a Mechanic Lab stage is R
 cheaply; left uncovered. See `STATUS.md`, "Box hunt 2026-11-14 (rrh2)".
 
 **Luck step luck1 (2026-11-16): lab designs for the luck-only rules, and the ones left out.** Fourteen designs are in
-`tools/replay-hunt/luck-designs/` (R030 R032 R035 R037 R038 R039 R040 R067 R080 R095 R097 R107 R109 R110), driven by
+`tools/replay-hunt/luck-designs/` (R030 R032 R035 R037 R038 R039 R040 R067 R080 R095 R097 R107 R109 R110; since luck3 R039 R067 R095 are retired and R030 is promoted, see "Luck hunt day 2" below), driven by
 `tools/replay-hunt/luckHunt.sh`. Left out, with the reason:
 
 - **R106 (bad poison counter stopping at 15): no design, the counter cannot get that far in the pools.** The tick is `maxHP / 16` times
@@ -170,28 +170,60 @@ oracle (`romReplayWide.sh --stage`, `match True`, `stage.ok True`) and once thro
 **R032** Rage after a Metronome miss (`R032-metronome-rage-miss`, seed 1020122, 20 of 20 states), **R037** (Cloyster Dive in a sandstorm, seed 1020059, 24 of 24),
 **R038** (Foresight against a Ghost user, seed 1020099, 14 of 14), **R097** (Trick with both Pokemon itemless, seed 1023669, 20 of 20), **R107** (Baton Pass onto
 AI Spikes, seed 1020548, 38 of 38), **R109** (Curse by the last Pokemon, seed 1022589, 19 of 19). The hunter now skips a design whose rule has a stage file here, so
-the next day's seeds go to the eight rules still open. Why the eight had no marker hit in about 538 seeds each (from `logs/<design>.log`, and one engine-only
+the next day's seeds go to the rules still open (after luck3: R035 R040 R080 R110). Why the eight had no marker hit in about 538 seeds each (from `logs/<design>.log`, and one engine-only
 seed of each design re-run in luck2; "flawed" = the marker cannot or hardly can run in that set-up, "rare" = it can, the odds are small):
 
-- **R030 (AI replacement scored with Curse as the last move): set-up runs, marker never reached, cause not pinned down.** In a seed re-run Toxic kills Dugtrio and Dewgong
-  comes in as designed, but the marker `damage = 0` (TYPE_MYSTERY) ran in 0 of 539 seeds. Dugtrio's King's Rock flinch and Dugtrio's own move can leave a move
-  other than Curse as `gCurrentMove` at the faint (turns 3 and 5 of that seed have no Skarmory move). Needs a look at the replacement choice before more seeds.
+- **R030 (AI replacement scored with Curse as the last move): fixed in luck3, see "Luck hunt day 2" below.** (Day 1: 0 of 539; the Toxic route cannot hit at all.)
 - **R035, R040 (Counter / Mirror Coat scored up under Taunt): rare, as the design says.** Clefable has to call Taunt out of Metronome (about 1 in 340) and Snorlax
   has to knock it out the same turn; a battle holds only a few Metronome calls (3 in the first 3 turns of the seed re-run), so about 2000 calls over 538 seeds give
   a handful of Taunts and well under one with the timing. Both stay open; they need roughly ten times the seeds.
-- **R039 (AI Memento against a target at minimum Sp. Atk): flawed set-up.** Arcanine's Overheat does about 126 of Weezing's 172 HP, so Weezing is dead after the second
+- **R039 (AI Memento against a target at minimum Sp. Atk) (day-1 reading; retired in luck3, see Luck hunt day 2): flawed set-up.** Arcanine's Overheat does about 126 of Weezing's 172 HP, so Weezing is dead after the second
   or third hit (seed re-run: 172, 172, 46, dead) while the −6 needs four uses even with the White Herb. Only misses and low rolls let it live. Needs a bulkier target
   or a weaker Overheat user.
-- **R067 (Skill Swap Truant, Focus Punch set-up pre-pass): flawed set-up.** Slaking 659 has Shadow Ball and Aerial Ace, which do hurt Gengar: in the seed re-run Gengar
+- **R067 (Skill Swap Truant, Focus Punch set-up pre-pass) (day-1 reading; retired in luck3, see Luck hunt day 2): flawed set-up.** Slaking 659 has Shadow Ball and Aerial Ace, which do hurt Gengar: in the seed re-run Gengar
   is knocked out on turn 0, and 317 of 538 seeds end after 5 decisions. The design's premise ("cannot hurt Gengar") holds only for Earthquake and Brick Break. Needs a
   foe that cannot touch Gengar, or a Gengar that survives the first Shadow Ball.
 - **R080 (Marvel Scale in the stored Future Sight damage): reachable but nearly so.** Milotic needs to be paralysed by Spark before Whiscash uses Future Sight; the AI used
   Future Sight on turn 0 in the seed re-run and Milotic dies within 5 turns, so the window is one or two turns. Rare, not shown impossible.
-- **R095 (Trace waiting with no foe): flawed set-up, cannot run as built.** Spikes land on the side of the Pokemon that switches in, and the AI's Skarmory lays them on
+- **R095 (Trace waiting with no foe) (day-1 reading; retired in luck3, see Luck hunt day 2): flawed set-up, cannot run as built.** Spikes land on the side of the Pokemon that switches in, and the AI's Skarmory lays them on
   the player's side; for the foe to faint on entry the Spikes must be on the AI's side, and none of the player sets in the design (532, 556, 529) has Spikes. Needs a
   player Spikes user (Skarmory 482 as the lead) beside the Trace holder.
 - **R110 (Roar drags a wounded Pokemon onto Spikes and it faints): reachable, rare.** Battles run 60 to 70 decisions and the AI does Spikes and Roar in them, but the
   dragged-in Pokemon must be below 1/8 of its HP; a random player rarely arrives there. More seeds, or a scripted player that keeps one Pokemon low.
+
+**Luck hunt day 2 (luck3, 2026-11-17): 60 of the 110 covered (59 before), 44 left.** The four designs with a marker that never ran were rebuilt or retired. Every number
+below is engine-only `prehunt.py` on 40 fresh lab seeds, 900000-900039, a block the day job (1,020,000 up) never uses; "before" is the day-1 log (0 of about 538 each).
+
+- **R030: hit rate 0/539 -> 2/40 (900002 and 900020), both driven on the ROM to a full match; promoted as `stages/coverage/R030-skarmory-toxic-curse-ai-replacement.json`
+  (seed 900002, 12 of 12 states, `romReplayWide.sh --stage` on the Scene OFF oracle, `match True`, `stage.ok True`).** The day-1 premise was wrong, and no Toxic design can
+  hit: `HandleAction_ActionFinished` clears `gCurrentMove` (`battle_util.c:~670-678`), and a faint from end-of-turn poison is handled after it (`battle_main.c:3968`), so
+  the AI scores its replacement with `gCurrentMove = NONE`, never Curse (a Sceptile-lead Toxic variant ran as designed, Sceptile died of poison on turn 5, Dewgong came in,
+  marker not run; the Fearow-lead variant 0/40). The marker needs a faint handled inside the Curse action (`HandleFaintedMonActions` at `battle_util.c:640`, before
+  `ActionFinished`): the AI's Ghost-type Curse costs half the maximum HP and at or below half HP it faints itself, and Dusclops 666 (challenge 6, the only Ghost
+  Curse set) is the only such AI. The design is now challenge 6: Skarmory 674 (Drill Peck once, then Steel Wing, resisted) against Dusclops 666 with Quagsire 676 and
+  Kangaskhan 694 behind it (no Fire/Electric move, so no super-effective move against Skarmory and the replacement is scored by damage with Curse current, 0 damage,
+  `damageCalc.ts` TYPE_MYSTERY). `AI_CV_Curse4` only scores Curse down above 80 percent HP, so Dusclops picks it among its four moves once Skarmory has taken it under half.
+- **R039: retired, no practical design (0/40 on the best variant; no design found that can).** The marker is the AI scoring Memento against a target at -6 Atk / Sp. Atk,
+  i.e. Weezing 501 must act four turns after the player's Overheat (White Herb undoes only the first drop, so four uses) while the target is still there. Measured, the
+  weakest Overheater, Granbull 474 (Sp. Atk 60), still does about 80 of Weezing's 172 HP per use (172 -> 93 -> 44...), and Weezing's Sludge Bomb does about 60 a turn to
+  Granbull's 210 HP: in 40 seeds Weezing or Granbull was down by turn 3 in every one, and the AI used Memento or Destiny Bond early in most. A bulky lead that Granbull
+  can Overheat four times and then let Weezing come in behind it fails too (Ludicolo 688 as the lead: it uses Double Team and Leech Seed and heals, 0/40). Every other
+  Overheater hits harder; no other set lowers a target's Atk or Sp. Atk to -6 (Superpower has 5 PP, Intimidate is -1 per entry, no AI set has Charm / Feather Dance).
+- **R067: retired, no practical design (0/40 in three variants).** The Focus Punch pre-pass skip needs a Focus Punch user whose `truantCounter` is non-zero, which
+  only a Skill Swap from a Truant holder gives, and the Skill Swapper must hold Truant first (Gengar 613 / Alakazam 596 are the only Skill Swap sets; neither has Focus
+  Punch), so it is two chained swaps with a Slaking that has to leave the field in between. The AI never helps: its Skill Swap is scored -1 unless an encouraged ability is
+  involved (`AI_CV_ChangeSelfAbility`, `battle_ai_scripts.s:2358`; Truant is not in the list), 0 of 40 seeds used it. Slaking 659 (day-1 design) kills Gengar with Shadow Ball
+  on turn 0 in 40 of 40 seeds (Ghost is a physical type in this game); Slaking 755 (specials only) puts Gengar to sleep with Yawn on turn 0 in 18 of 40 and gave two Skill
+  Swaps in 1 of 40, never the marker; the AI does pick Focus Punch (29 of 40) but never with the counter set.
+- **R095: retired, not made to hit (0/40 in four variants).** The day-1 premise (foe faints on Spikes) is not needed and not what the marker is: it is
+  `if (target < 0) continue;` in the Trace pass of `HandleFaintedMonActions` state 6 (`battleScriptFaintedActionsOrchestration.ts:~463`), reached when a Trace holder has Trace
+  pending and no foe is alive, i.e. the player's mon and the AI's last Pokemon faint in the same pass and the Trace holder is the player's replacement (Explosion /
+  Destiny Bond by the player's last mon, Porygon2 behind it). Built as Alakazam 725 (kills two AI Pokemon), Golem 690 (Explosion), Porygon2 436 (Trace) it did reach the
+  two-faint turn but never with the AI's last Pokemon: the AI picks its own replacement (type matchup), the order of the AI Pokemon is not the design's, and the script
+  cannot wait for the right turn (it is per turn, not per event). Not shown impossible; it needs a script step conditional on the foe's remaining Pokemon.
+
+The hunter's `luck-designs` loses R039, R067 and R095; R030 stays (the hunter skips it, a stage file covers it). R035, R040, R080 and R110 were not touched in luck3 (the time
+went to the four above).
 
 Left in (c), with the reason (none is proven unreachable):
 
