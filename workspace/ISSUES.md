@@ -70,11 +70,11 @@ the 15 ON rows missing in the aud251 table were Double Team (fixed by aud252, 0 
 - **cry1 (2026-11-15)** emits the cry-task cries, stops and BGM restores of Roar / Howl / Hyper Voice (`docs/cry1-cry-tasks.md`; first cries frame-exact against ROM windows, the second cries and restores from a fitted per-species length model, 0 residual on 141 measured species-modes). The five cry-task modes are recorded and played from their own assets (cry2: `docs/cry1-cry-tasks.md`). Open: Roar / Howl windows inherit a lab drift (+13 / +13 / +1 / +4) so their script-frame offset is unverified apart from the drift-free Hyper Voice anchor; the model can be off by one for a species near a step edge (none seen in 32 pre-registered edge species).
 - **t1cls (2026-11-16)**: T1 `unclassified` is 0 (non-move SEs are attributed by command window, `docs/aud243a-sound-census.md`); the one non-move T1 gap it exposed was `Status_Poison`'s 6th SE 148 (past the 71-row window). **psn1 / psn2 (2026-11-16):** the ROM plays it (first + 70, both turns of a Toxic lab) and the engine now emits it as a sound-only tail past the window (`docs/aud249-general-anim-sounds.md`); the second-play offset there is +6, not ~14 (inconclusive for the confusion case). Since psn2 the T1 classifier shows `unclassified` **128** again: the tail SE 148 rows fall in the message / HP windows after the command (classifier gap, tooling only).
 
-## #222 — AI switch withdraw presentation: residuals (ais1 / ais2, 2026-11-16)
+## #222 — AI switch withdraw presentation: residuals (ais1 / ais2 / ais3, 2026-11-17)
 
-ais1 / ais2 (`docs/ais1-ai-switch-withdraw.md`) synthesize the withdraw, draw the opponent recall ball effect, use the species y_offset anchor and the 101-frame tray; seed 2741 is pixel-exact through the tray in both scenes.
-Still open: (1) the opponent send-in ball starts 2 frames / ends 1 frame before the ROM's (shared `switch-in` timeline with faint replacements; SE 15 / cry -1 pinned in `aud253`); (2) the player's recall anchor / particle
-origin hardcode the RATTATA y_offset 13 (`gMonBackPicCoords` unused); (3) Pursuit-interception and Focus-Punch-pre-pass AI switches are unsynthesized / unprobed; (4) a same-turn player voluntary switch + AI switch uses the player's recall clock only.
+`docs/ais1-ai-switch-withdraw.md` (ais1 / ais2 / ais3): the AI withdraw, recall ball effect, species anchors (opponent front / player back y_offset), the 101-frame tray and the 2-frame-earlier AI send-in ball are done; seed 2741 is pixel-exact through the send-in in both scenes.
+Still open: (1) `aud253` 2741 send-in SE 15 / cry are now +1 (emitter offset from the ball throw); (2) Pursuit-interception and Focus-Punch-pre-pass AI switches are unsynthesized / unprobed; (3) a same-turn player voluntary switch + AI switch uses the player's recall clock only;
+(4) the faint-replacement send-in (shared timeline) is unproven at the 2-frame start (obr251-off 6/306 at baseline); (5) player recall healthbox-hide intermediate frame and the player send-in ball / emerge (Scene ON 238-250).
 
 ## #214 — Leads from the Mac lane's 2026-11-12 passes (source-read only, no ROM seed)
 

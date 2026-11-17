@@ -99,3 +99,42 @@ Sound: only those 7 rows move, 1 frame each way (the send-in SE 15 / cry and lat
 - The recalled mon's ball is assumed POKE BALL (every Factory set); a different ball would change the tint / particle palette.
 - The player's recall anchor / particle origin are the staged fixture's constants for a non-RATTATA player mon (unchanged).
 - Pursuit-interception and Focus-Punch-pre-pass AI switches stay unprobed (as ais1).
+
+## ais3: the player recall anchor from `gMonBackPicCoords`, the AI send-in ball 2 frames early (presentation only)
+
+Files: `src/engine/battleResolutionPresentationRender.ts` (`playerBattlerYDelta`, `recallElapsed`, `midBattleSwitchInAt` `tintHoldOverride`), `src/engine/battleResolutionPresentation.ts` (`AI_SWITCH_SEND_IN_LEAD_FRAMES`, the `aiSwitch` flag on the `switch-in`
+command). Tests: `tests/ais3PlayerRecallFrames.test.ts` (fixture `tests/fixtures/ais3-player-recall-rom-frames.json`), `tests/ais2AiSwitchFrames.test.ts` (fixture re-baselined and extended), `aud253` DELTAS 2741 re-pinned.
+
+### (b) Player recall anchor
+
+`SetBattlerSpriteYOffsetFromYScale` reads `GetBattlerYDeltaFromSpriteId`: `gMonBackPicCoords[species].y_offset` for the player (the Castform elevation for a Castform), the mirror of the opponent's `gMonFrontPicCoords` read from ais2.
+`midBattleSwitchOutAt` now gets `playerBattlerYDelta(art)` for battler 0 (it was the RATTATA 13 for every species). Pixel-compared against a staged ROM player recall of GRAVELER (back y_offset 12), both scenes, scale-up frames exact.
+A second 1-frame residual surfaced there: the player's recall fade runs on the voluntary-switch clock (trace 1087 at command elapsed 0), so the scale ramp keys off `phaseElapsed + 1` for battler 0 (`recallElapsed`); the opponent's clock is unchanged.
+Player-switch traces `turn5-switchin` (241) and `turn13-switchin` (242) are byte-identical to the base (`compare:differential`, 1346 captures over the six traces below).
+
+### (a) Seed 2741 AI-switch send-in
+
+- **Re-baseline.** The sta3 merge moved the pre-segment drift (OFF 61 -> 58, ON 91 -> 88); the engine is still frame-exact through the tray at the new offsets; the ais2 fixture was re-baselined (offsets 58 / 88).
+- **Cause (attributed, fixed on the AI path).** For a voluntary AI switch the ROM's ball throw is at elapsed 4 of the send-in, 2 frames before the shared `switch-in` timeline's (a faint replacement's `BattleScript_FaintedMonSendOutNew` has no `switchhandleorder`
+  and no healthbox hide before it; its OFF oracle trace `obr251-opponent-faint-off` is not oracle-exact at baseline either, 6/306, so the shared timeline is unproven either way and was left alone). `AI_SWITCH_SEND_IN_LEAD_FRAMES = 2`
+  is applied to the `switch-in` command only when the `switch-in-animation` event carries `BattleScript_DoSwitchOut` provenance for battler 1: `minimumFrames`, `sendInVisualDelay`, `healthboxSlideElapsed` and `sendInLagElapsed` all +2 (sounds follow the delay).
+  Then the mon tint hold is 22 instead of 23 (`tintHoldOverride`, the same value a front-animation send-in already uses): the ROM's fade ends one frame sooner.
+- **Result.** Scene ON 3793..4043 (offset 88) exact for the whole window; Scene OFF 2727..3014 (offset 58) exact (fixture windows). OFF 3015+ is the post-switch move body (the AI's move text and animation after the switch; integration lane), not the send-in: best-fit offsets drift there.
+- **Traces unchanged.** `compare:differential` HEAD vs `aa46e4ab9`: `obr251-opponent-faint-off/on`, `turn5-faint`, `turn13-dragonbreath-faint`, `turn5-switchin`, `turn13-switchin` all byte-identical (1346 / 1346 captures); the frs247 / pfr192 / obr251 tests are green.
+
+### Census 0..99, both scenes (`lsd194Census.sh` + `rst197CensusDelta.py`, base `b1f11b3a4` vs `c090a3455`)
+
+93 battles identical, 7 changed per scene (seeds 15, 26, 28, 41, 52, 61, 99), 0 digest / error / type-sequence diffs. Each changed battle has exactly one command change: the `switch-in` (battler 1) after the opponent `party-summary`, fields duration, `sendInVisualDelay`, healthbox slide and total
+frames, each +2 (e.g. seed 15 OFF 68 -> 70, ON 151 -> 153). No other command moves. Soaks `winning-swap` and `winning` 0:20 are 20 / 20 each (4 x 5 seeds, `--parallel 2`); `randomRoundSoak` 64 / 64 (no pin moved).
+
+### Pins
+
+`tests/aud253AiSwitchLowHp.test.ts` `DELTAS["2741"]` `[0, 0, -1, -1]` -> `[0, 0, 1, 1]`: the send-in SE 15 and the cry are now 1 frame LATE (the visual ball is exact; the sound emitters are out of scope here and were not examined, only re-pinned). Same magnitude as before, opposite sign.
+
+### Residuals / open
+
+- Sound rows send-in SE 15 / cry +1 (above); the emitter's own offset from the ball throw needs its own look.
+- The faint-replacement send-in (shared timeline) is unchanged and unproven against the ROM at the 2-frame start (obr251-off is 6/306 at baseline).
+- Player recall: the ROM's 1-frame healthbox-hide intermediate frame (ROM 238 / engine 230 in the staged window) and the player send-in ball / emerge (frames 238-250, Scene ON) are the player-side open items.
+- The recalled mon's ball is assumed POKE BALL (every Factory set).
+- Pursuit-interception and Focus-Punch-pre-pass AI switches, and a same-turn player + AI switch, stay unprobed.

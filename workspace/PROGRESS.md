@@ -54,6 +54,14 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Did:** "full" seed 0 re-pinned 18523 / battle 1 / turn 23 / depth 0 -> 38094 / battle 2 / turn 22 / depth 1 (ais1; ais2 does not move it; seed 1 unmoved); vanilla / winning pins did NOT move. #89 Baton Pass pin seed 32 -> 3 (hits 3, 8, 14, 15, 17, 19, 31, 33, 44, 55, 71, 77), history lines added.
 - **Next:** none; re-pins after the next presentation change are one scanner command. Verified: `test:gate` 362 / 2843, build 0, full `npm test` 1833 files passed + 1 failure (iss215: the scanner lacked the pixel-install import; fixed in the next commit, test re-run green, the full suite itself NOT re-run after the fix).
 
+## 2026-11-17 — ais3 (ts lane worker): player recall anchor from `gMonBackPicCoords`, AI send-in ball 2 frames early (presentation only)
+
+- **State:** on master, committed (`0a3d82624`..`c090a3455`, docs); `docs/ais1-ai-switch-withdraw.md` "ais3"; evidence `.integration/evidence/ais3/`. Typecheck 0, `build` / `build:lib` 0, `test:gate` 362 / 2843 green, every `tests/ais*` / `aud25*` / `aud24*` file green (46 files), `randomRoundSoak` 64/64 (no pin moved), soaks `winning-swap` and `winning` 0:20 20/20 each (4 x 5 seeds, `--parallel 2`).
+- **Did:** (b) the player's recall feet anchor uses `gMonBackPicCoords` y_offset (GRAVELER 12, ROM-pixel exact both scenes) and the recall scale ramp reads the voluntary-switch clock +1; (a) a voluntary AI switch's `switch-in` runs 2 frames late (ROM ball at elapsed 4) and the tint holds 22: seed 2741 exact through the send-in (ON 3793..4043, OFF 2727..3014; ais2 fixture re-baselined 61 -> 58 / 91 -> 88 after sta3 and extended).
+  Faint-replacement and player-switch traces (obr251 off/on, turn5/13 faint, turn5/13-switchin) byte-identical vs base. Census 0..99 both scenes: only the 7 AI-switch seeds change, one `switch-in` command +2 frames each.
+- **Next:** `aud253` 2741 sound rows now +1 (was -1; emitter offset from the ball throw); OFF 3015+ post-switch move body (integration lane); Pursuit / Focus Punch / same-turn player+AI switches unprobed (ISSUES #222).
+- **Notes:** full `npm test` NOT run (supervisor does). The faint-replacement send-in timeline is untouched and unproven at the 2-frame start (obr251-off 6/306 at baseline).
+
 ## 2026-11-16 night run (CAX31 supervisor, Opus 5.5, 13:30 -> 05:30 UTC): in progress
 
 - **State:** folded: lazy1, luck1, aud242k / l / m / n, dl1, dl2, rrh4, aud251 (entries above / below). Running: aud242o (integration), lbw5 (side).
