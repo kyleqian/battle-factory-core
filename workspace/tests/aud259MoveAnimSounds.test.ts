@@ -85,16 +85,16 @@ describe("Dynamic Punch (aud259)", () => {
     const rows = timing.variants[entry.variants[0]!]!.map((o) => `${o.frame}:${(o as { id?: number }).id}:${o.pan}`);
     expect(rows).toEqual(["18:123:63", "37:177:63", "45:177:63", "53:177:63", "61:177:63", "69:177:63"]);
   });
-  it("aud259-dynamicpunch-player: ids, pans and the 19 / 8 / 8 / 8 / 8-frame gaps equal the ROM's; ROM minus ours is constant (the fifth SE 177 falls after the engine's presented window)", () => {
+  it("aud259-dynamicpunch-player: ids, pans and the 19 / 8 / 8 / 8 / 8-frame gaps equal the ROM's; ROM minus ours is constant (aud260: the fifth SE 177 falls after the engine's presented window and plays as a sound-only tail)", () => {
     const rom = fixture("aud259-dynamicpunch-player");
     const pick = (events: FixtureEvent[]) => events.filter((e) => e.noop !== true && e.kind === "se" && [123, 177].includes(e.id as number));
     const romRows = pick(rom.events);
     const ours = pick(ourEvents(rom) as unknown as FixtureEvent[]);
     expect(romRows.map((e) => `${e.id}:${e.pan}`)).toEqual(["123:63", "177:63", "177:63", "177:63", "177:63", "177:63"]);
     expect(romRows.map((e) => e.frame - romRows[0]!.frame)).toEqual([0, 19, 27, 35, 43, 51]);
-    // The engine's move-animation command ends at body age 74 (DYNAMIC_PUNCH_BODY_LAST_AGE); the last explosion SE is script frame 69, age 77: the census's "after the command's last presenting frame" class.
-    expect(ours.map((e) => `${e.id}:${e.pan}`)).toEqual(romRows.slice(0, 5).map((e) => `${e.id}:${e.pan}`));
-    const offsets = romRows.slice(0, 5).map((e, i) => e.frame - ours[i]!.frame);
+    // The engine's move-animation command ends at body age 74 (DYNAMIC_PUNCH_BODY_LAST_AGE); the last explosion SE is script frame 69, age 77: aud260's tail (scheduleMoveAnimationTail) plays it.
+    expect(ours.map((e) => `${e.id}:${e.pan}`)).toEqual(romRows.map((e) => `${e.id}:${e.pan}`));
+    const offsets = romRows.map((e, i) => e.frame - ours[i]!.frame);
     expect(new Set(offsets).size).toBe(1);
     console.info("aud259-dynamicpunch-player ROM minus ours", offsets[0]);
   });
