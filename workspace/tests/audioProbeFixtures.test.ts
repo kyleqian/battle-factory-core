@@ -170,6 +170,7 @@ describe("audio probe fixtures", () => {
       "aud242q-superfang-player.json",
       "aud242r-eruption-player.json",
       "aud242r-healbell-player.json",
+      "aud242r-moonlight-player.json",
       "aud242r-spikecannon-player.json",
       "aud250-focuspunch-opponent.json",
       "aud250-focuspunch-player.json",

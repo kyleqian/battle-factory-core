@@ -766,6 +766,26 @@ function lifetimeOf(cmd: Command, attackerSide: number, pic: PicContext, rollout
     const a = op.startsWith("create_") ? intNamed("animation") : intArg(args[6]);
     return a !== null && a >= 1 && a <= 3 ? { exact: 10 } : { bound: 10 };
   }
+  // aud242r: AnimTask_AlphaFadeIn (battle_anim_mons.c:1654-1715; args a0..a4 = script args[2..6]). The entry only installs the step: every (a4 + 1)-th call is a step (data[0] > a4), odd steps move the
+  // first coefficient one toward a2, even steps the second toward a3, and the step on which both are there destroys the task: call (a4 + 1) * step, gone that - 1 ticks after F.
+  if (op === "createvisualtask" && args[0] === "AnimTask_AlphaFadeIn") {
+    const [a0, a1, a2, a3, a4] = [2, 3, 4, 5, 6].map((i) => intArg(args[i]));
+    if ([a0, a1, a2, a3, a4].some((v) => v === null) || a4! < 0) return null;
+    const [v2, v1] = [Math.sign(a2! - a0!), Math.sign(a3! - a1!)];
+    let [first, second] = [a0!, a1!];
+    for (let step = 1; step < 4096; step += 1) {
+      if (step & 1) { if (first !== a2!) first += v2; } else if (second !== a3!) second += v1;
+      if (first === a2! && second === a3!) return { exact: (a4! + 1) * step - 1 };
+    }
+    return null;
+  }
+  // aud242r: AnimTask_MoonlightEndFade (battle_anim_effects_1.c:5003-5115). The entry runs BeginNormalPaletteFade (palette.c:156-203: y 0 -> 16, deltaY 2, delay 0) and its step once (call 0). UpdatePaletteFade
+  // (palette.c:406-489) does one pass per main-loop iteration, BG then OBJ (the first in the Begin itself, the OBJ pass in the iteration's CB2) and steps y after each OBJ pass: 9 OBJ passes
+  // (y 0, 2, .., 16), the one at y == targetY sets softwareFadeFinishing, IsSoftwarePaletteFadeFinishing (:491-509) counts 4 iterations and clears `active` on the next: iteration F + 21, the
+  // same RunTasks sees it (state 1 passes, state 2 counts 31 calls, F + 22 .. F + 52) and starts the second fade (y 16 -> 0, 18 passes from F + 52, finishing F + 70 .. F + 73, clear F + 74), state 3
+  // destroys in that RunTasks: gone 74 ticks after F (ROM-measured, probe hooks: entry 1303, BlendPalette y 0..16 on 1303..1319, second Begin 1355, destroy 1377). The Moon / sparkle sprites wait
+  // for the state-1 call (data[0] = 1, :5078-5090) and are destroyed by AnimateSprites of F + 22 (ROM 1325): the creating walk resolves them when this task is created (`deferred`).
+  if (op === "createvisualtask" && args[0] === "AnimTask_MoonlightEndFade") return { exact: 74 };
   // aud242r: AnimTask_EruptionLaunchRocks (battle_anim_fire.c:796-1013, PrepareEruptAnimTaskData / UpdateEruptAnimTask battle_anim_mons.c:1958-1991). The entry only installs the step: state 0/1 takes
   // calls 1..32 (duration 32), state 2 calls 33..37 (++timer1 > 4), state 3 calls 38..43 (duration 6; call 43 creates the 7 rocks, y = sprite y + y2 (0) + centerToCornerVecY + 74 / 44, x = battler x - 12 / + 16), state 4
   // calls 44..68 (++timer3 > 24), state 5 calls 69..76 (duration 8), state 6 destroys once tActiveSprites is 0. A rock's first callback is the next iteration (call j = iteration F + 42 + j) and it
@@ -1041,7 +1061,7 @@ function walk(bodyLabel: string, turn: number, attackerSide: number, pic: PicCon
   let frame: number | null = 0;
   let why: Reason | null = null;
   let gated = 0;
-  let pending: Array<{ at: number; life: Lifetime; name: string }> = [];
+  let pending: Array<{ at: number; life: Lifetime; name: string; deferred?: "moonlight" }> = [];
   let ret: number | null = null;
   let retIndex = 7;
   let fade: number | null = null;
@@ -1104,7 +1124,11 @@ function walk(bodyLabel: string, turn: number, attackerSide: number, pic: PicCon
           fadeChain = cycleBlends !== null && cycleBlends > 1;
         }
       }
-      if (frame !== null) pending.push({ at: frame, life, name: op === "createsprite" || op === "createvisualtask" ? args[0] ?? op : op });
+      if (frame !== null) {
+        const deferred = op === "createsprite" && (args[0] === "gMoonSpriteTemplate" || args[0] === "gMoonlightSparkleSpriteTemplate") ? ("moonlight" as const) : undefined;
+        pending.push({ at: frame, life, name: op === "createsprite" || op === "createvisualtask" ? args[0] ?? op : op, ...(deferred === undefined ? {} : { deferred }) });
+        if (op === "createvisualtask" && args[0] === "AnimTask_MoonlightEndFade") for (const p of pending) if (p.deferred === "moonlight" && p.life === null) p.life = { exact: frame + 22 - p.at };
+      }
       const known = returnValue(args[0] ?? "", attackerSide);
       ret = op === "createvisualtask" ? known : ret;
       if (op === "createvisualtask") retIndex = 7;
