@@ -887,6 +887,14 @@ export function opponentBattlerYDelta(art: BattleCommandFieldArtBattler): number
 }
 
 /**
+ * ais3: `GetBattlerYDeltaFromSpriteId` of the player: `gMonBackPicCoords[species].y_offset` (the transformed species while Transformed),
+ * `sCastformBackSpriteYCoords[form]` (all 0) for a CASTFORM. The recall feet anchor read the staged fixture's RATTATA 13 for any species before.
+ */
+export function playerBattlerYDelta(art: BattleCommandFieldArtBattler): number {
+  return art.speciesSymbol === "CASTFORM" ? 0 : art.coords.yOffset;
+}
+
+/**
  * ISSUES #78 residual (1): the mid-battle switch white ball-fade, ported as a
  * mechanism (`BeginNormalPaletteFade`/`LaunchBallFadeMonTask`,
  * `palette.c:156-200,406-490`, `battle_anim_throw.c:2033-2102`), keyed to the
@@ -2549,14 +2557,19 @@ export function createBattleResolutionPresentationRenderView(
       // Pass attacker hidden by its completed live body (liveSemiInvulnerableHideBattler) is likewise already invisible: its
       // returntoball frees it unseen (prep27 s0.1: no recall scale-up in the ROM), so the span draws nothing either.
       // offs152: the Scene OFF forced hold draws the target at rest (the generic draw) until the recall receipt.
-      const recalledYDelta = command.battler === 1 ? opponentBattlerYDelta(createBattleCommandFieldArtView(field).opponent) : undefined;
+      const recalledArt = createBattleCommandFieldArtView(field);
+      const recalledYDelta = command.battler === 1 ? opponentBattlerYDelta(recalledArt.opponent) : playerBattlerYDelta(recalledArt.player);
+      // ais3: the player's recall effect runs on the voluntary-switch clock, which reads trace 1087 at this command's elapsed 0
+      // (the effect's elapsed 0, trace 1086, is the last message frame); the scale ramp keys off that clock. The opponent's own
+      // clock starts at the command.
+      const recallElapsed = state.lifecycle.phaseElapsed + (command.battler === 0 ? 1 : 0);
       switchOut = command.targetAtRest ? null : command.skipAnimation || semiInvulnerableHidden[command.battler]
         ? Object.freeze({
-            ...midBattleSwitchOutAt(state.lifecycle.phaseElapsed, command.battler, recalledYDelta),
+            ...midBattleSwitchOutAt(recallElapsed, command.battler, recalledYDelta),
             spriteVisible: false,
           })
         : midBattleSwitchOutAt(
-            state.lifecycle.phaseElapsed,
+            recallElapsed,
             command.battler,
             recalledYDelta,
           );
