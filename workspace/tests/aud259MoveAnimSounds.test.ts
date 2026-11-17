@@ -47,3 +47,30 @@ describe("Soft Boiled (aud259)", () => {
     expect(offsets[0]).toBe(-5);
   });
 });
+
+// T2 seed 165 res17: ROM 193, 205 (+9), 205 (+41), 192 (+72). The ROM `via` read AnimTask_MonToSubstitute only because the probe's symbol table lists globals: AnimBlockX_Step is the local
+// function at 0x0815f4f0..0x0815f620, between that task and AnimTask_OdorSleuthMovement. The rows are the Block X sprite's own SEs (battle_anim_effects_3.c:4898-4953).
+describe("Block (aud259)", () => {
+  const entry = timing.moves[335]!;
+  it("the table entry: SE 193 at 3, the X's SKETCH / SKETCH / LEER 9 / 41 / 72 later against an opponent target (14 / 46 / 77 against a player target)", () => {
+    expect(entry.label).toBe("Move_BLOCK");
+    const rows = (side: number) => timing.variants[entry.variants[side]!]!.map((o) => `${o.frame}:${(o as { id?: number }).id}`).sort();
+    const expected = (offsets: number[]) => [`3:193`, `${3 + offsets[0]!}:205`, `${3 + offsets[1]!}:205`, `${3 + offsets[2]!}:192`].sort();
+    expect(rows(0)).toEqual(expected([9, 41, 72]));
+    expect(rows(1)).toEqual(expected([14, 46, 77]));
+  });
+  for (const w of [{ file: "aud259-block-player", gaps: [0, 9, 41, 72], pan: 63 }, { file: "aud259-block-opponent", gaps: [0, 14, 46, 77], pan: -63 }]) {
+    it(`${w.file}: ids, pans and gaps equal the ROM's; ROM minus ours is constant`, () => {
+      const rom = fixture(w.file);
+      const pick = (events: FixtureEvent[]) => events.filter((e) => e.noop !== true && e.kind === "se" && [193, 205, 192].includes(e.id as number));
+      const romRows = pick(rom.events);
+      const ours = pick(ourEvents(rom));
+      expect(romRows.map((e) => `${e.id}:${e.pan}`)).toEqual(["193", "205", "205", "192"].map((id) => `${id}:${w.pan}`));
+      expect(romRows.map((e) => e.frame - romRows[0]!.frame)).toEqual(w.gaps);
+      expect(ours.map((e) => `${e.id}:${e.pan}`)).toEqual(romRows.map((e) => `${e.id}:${e.pan}`));
+      const offsets = romRows.map((e, i) => e.frame - ours[i]!.frame);
+      expect(new Set(offsets).size).toBe(1);
+      console.info(w.file, "ROM minus ours", offsets[0]);
+    });
+  }
+});

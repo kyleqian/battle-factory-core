@@ -1467,6 +1467,16 @@ function walk(bodyLabel: string, turn: number, attackerSide: number, pic: PicCon
           if (n !== null) for (let k = 0; k < n; k += 1) events.push({ op: "soundtask_se1", frame: frame + shiftAt(frame) + 5 + 12 * k, id: value("SE_M_ENCORE"), pan: value("SOUND_PAN_ATTACKER"), line });
           break;
         }
+        // aud259: gBlockXSpriteTemplate (AnimBlockX / AnimBlockX_Step, battle_anim_effects_3.c:4878-4953; call 0 = the creating step's init, call n >= 1 = iteration F + n - 1). The X falls from y2 -96
+        // (target on the opponent side) or -144 (target on the player side) by 10 a call: SE_M_SKETCH on the call y2 >= 0 (10 / 15); case 1 adds 4 to data[1] until > 0x7F (32 calls) and plays
+        // SE_M_SKETCH again; case 2 adds 6 until > 0x7F (22 calls); case 3 waits ++data[1] > 8 (9 calls) and plays SE_M_LEER. The script (Move_BLOCK) has no wait, so the sprite's lifetime is not needed.
+        if (args[0] === "gBlockXSpriteTemplate") {
+          if (frame === null) { gate(); break; }
+          const land = attackerSide === 1 ? Math.ceil(144 / 10) : Math.ceil(96 / 10);
+          const calls = [land, land + Math.ceil(128 / 4), land + Math.ceil(128 / 4) + Math.ceil(128 / 6) + 9];
+          [value("SE_M_SKETCH"), value("SE_M_SKETCH"), value("SE_M_LEER")].forEach((id, i) => events.push({ op: "playsewithpan", frame: frame! + shiftAt(frame!) + calls[i]! - 1, id, pan: value("SOUND_PAN_TARGET"), line }));
+          break;
+        }
         if (args[0] !== "gConfuseRayBallBounceSpriteTemplate" || frame === null) break;
         const [offset, speed] = [intArg(args[3]), intArg(args[5])];
         const ball = offset === null || speed === null || speed < 1 ? null : confuseRayBallBounceLength(attackerSide, offset, speed);
