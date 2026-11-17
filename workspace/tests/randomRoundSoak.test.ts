@@ -939,12 +939,14 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // policy's press timings land on new phases, a new trajectory as at fsw235): 18523 / battle 1 turn 23 / depth 0 -> 38094 / battle 2
       // turn 22 / depth 1; roundLost. ais2 (one more opponent tray frame on AI switches) does not move it again; seed 1 is unmoved by both,
       // and the "vanilla" / "winning" pins did not move (only the exploring policy presses during the new messages).
-      frames: 38094,
+      // sta3 (the action transition into a pre-move confusion / sleep print and its 3 launch rows; the exploring policy's presses land on
+      // new phases again): 38094 / turn 22 -> 37771 / turn 20; same battle 2 / depth 1 / roundLost.
+      frames: 37771,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 1,
       battle: 2,
-      turn: 22,
+      turn: 20,
     });
     expect(runSeed(1, options)).toMatchObject({
       // msg175: 26878 -> 26810 (shorter used prints); trn178 (the Scene OFF action-transition pause): 26810 -> 27058; same battle / turn / end state.
@@ -962,7 +964,8 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // failing full-suite shard (the supervisor should confirm the trajectory change).
       // flw252 (see seed 0): 36610 / battle 2 turn 23 / depth 1 -> 21881 / battle 1 turn 35 / depth 0; roundLost. Pre-flw252 tree gives 36610.
       // lbra: frames only, 21881 -> 21940; the snapshot is now taken when the walkable Lobby opens (the loss's record answer plays the ROM farewell first, +59 frames) instead of at the old chain; same battle / turn / end state.
-      frames: 21940,
+      // sta3 (the action transition into a pre-move print + its 3 launch rows): frames only, 21940 -> 21985; same battle 1 / turn 35 / roundLost.
+      frames: 21985,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 0,
