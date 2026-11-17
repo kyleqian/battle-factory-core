@@ -1,0 +1,87 @@
+# wsh1: Wish heal / Future Sight hit / Focus Band as general-animation commands (ISSUES #219)
+
+Written by wsh1b from the wsh1 commits (`7bfa36da9..cc14d3ee1`; its session ended at the cap before the doc). Measurements below are wsh1's, taken
+from its evidence dir (main tree `.integration/evidence/wsh1/`: `*.hashes.json` = per-frame framebuffer md5 of the app run and the ROM run,
+`offs.py` = best frame offset of a window) and worker log; items marked **wsh1b** were (re)measured in this step. Section "wsh1b" at the end carries
+this step's results.
+
+## Source
+
+Three `playanimation` sites whose animation the engine did not present (Scene ON the controller runs the General_* script and the next print / hit
+waits for it; Scene OFF takes `BattleScript_Pausex20`):
+
+| site | script | animation | battler |
+| --- | --- | --- | --- |
+| Wish comes true | `data/battle_scripts_1.s:3589-3599` `BattleScript_WishComesTrue` | `playanimation BS_TARGET, B_ANIM_WISH_HEAL` (:3591), then the print | the wisher |
+| Future Sight / Doom Desire hit | `BattleScript_FutureAttackAnimate` :3519-3523 | `playanimation BS_ATTACKER, B_ANIM_FUTURE_SIGHT_HIT` (:3519; Doom Desire has its own :3522 and joins at `BattleScript_DoFutureAttackHit`), then `effectivenesssound; hitanimation` | the Future Sight user's slot |
+| Focus Band | `BattleScript_FocusBandActivates` :4390-4394 | `playanimation BS_TARGET, B_ANIM_FOCUS_BAND`, then STRINGID_PKMNHUNGONWITHX | the survivor |
+
+`Cmd_playanimation` (`src/battle_script_commands.c:4004-4038`), in order: STATS_CHANGE / SNATCH_MOVE / SUBSTITUTE_FADE always go to the controller;
+`HITMARKER_NO_ANIMATIONS` (Scene OFF) pushes `BattleScript_Pausex20` (`pause B_WAIT_TIME_SHORT` = 32 frames, unconditional); the four weather
+`*_CONTINUES` go to the controller; **a `STATUS3_SEMI_INVULNERABLE` battler skips the animation** (:4033-4038, advance 7, no controller command, no wait);
+else `BtlController_EmitBattleAnimation`. The controller (`PlayerHandleBattleAnimation`, `battle_controller_player.c:3066-3079`) calls
+`TryHandleLaunchBattleTableAnimation` (`battle_gfx_sfx_util.c:458-495`), which returns TRUE (no animation, `ControllerExecCompleted` at once) when
+the battler is behind a Substitute and the animation is not one of `ShouldAnimBeDoneRegardlessOfSubstitute` (:505-519: SUBSTITUTE_FADE, the four
+weather continues, SNATCH_MOVE), else it launches `gBattleAnims_General[tableId]` and the controller waits (`CompleteOnFinishedBattleAnimation`).
+
+## What the engine does
+
+`src/engine/battleResolutionPresentation.ts`:
+
+* Constants `WISH_HEAL_COMMAND_FRAMES = 201`, `FUTURE_SIGHT_HIT_COMMAND_FRAMES = 172`, `FOCUS_BAND_COMMAND_FRAMES = 129`.
+* `projectBattleResolutionCommands` collects the three `animation` receipts (`WISH_HEAL`, `FUTURE_SIGHT_HIT`, `FOCUS_BAND`) with the held-item inserts and
+  emits a Scene ON `general-animation` command of that length (Scene OFF has no animation receipt in these slots; see holds below). The insert
+  is skipped behind a displayed Substitute doll (`substituteDoll`, the same fact as the Focus Punch / stats-change skip).
+* Scene OFF holds: Wish **36**, Focus Band **40** are `heldItemEffectOffHoldFrames`' executions + a per-animation lead (`WSH1_OFF_HOLD_LEAD`: Wish 0,
+  Focus Band 2; the held-item leads 15 / 9 do not apply); Future Sight's hit **42** (`FUTURE_SIGHT_HIT_OFF_HOLD_FRAMES`, a `move-animation`
+  hold before the `hit-animation`, found by the shared `PLAYANIMATION` slot before `effectivenesssound` with `B_ANIM_DOOM_DESIRE_HIT` two
+  instructions back; Future Sight's `goto` jumps over Doom Desire's own slot, both take Pausex20).
+* `src/engine/moveAnimSounds.ts`: `emitGeneralAnimSounds` emits the table SEs of `General_WishHeal` / `General_FutureSightHit` / `General_FocusBand` at
+  script frame = command age - `*_SCRIPT_AGE` (6 / 0 / 0).
+* Test harness: `tools/compare/appTrace.ts` `wsh1Stage` (+ `rngSeed` option) and the staged labs `tools/battle-lab/wsh1-{wish,fs,fb}-{on,off}.json`, traces
+  `tools/compare/traces/wsh1-*.json`; Tier-1 `tests/wsh1GeneralAnimCommands.test.ts`.
+
+## ROM windows
+
+Offsets are "ROM frame = app frame + offset" over a window (best offset by exact framebuffer md5; `offs.py`). The "pre-segment offset" is the offset the
+rows of the same resolution *before* the command already have, so a command is right when the rows after it return to that same offset.
+Setups: Wish = `aud242k-wish-player-on` base (Rattata Lv50 vs Lv12, the player Wishes, the opponent uses Seismic Toss; the heal is the turn after);
+Future Sight = player Lv50 FUTURE SIGHT vs Lv25 Rattata, lab seed 2; Focus Band = Lv20 Rattata holding FOCUS BAND (196) vs Lv50, oracle lab seed 9
+(the lab seed does not map to the app RNG; oracle seeds 9 / 16 / 29 / 40 trigger the band, app seed 2 does too).
+
+| animation | scene | ROM window | ours | next text / hit at pre-segment offset |
+| --- | --- | --- | --- | --- |
+| Wish heal | ON | 201 frames from the `playanimation` row X to the first glyph of "...wish came true!" | 201 | offset 0 before (1200-1222: 23/23) and after (1423-1445: 22/23; 1446-1510: 65/65) |
+| Wish heal | OFF | `Pausex20` 32 + the script's own rows: first glyph 36 rows after | 36 | offset 0 (window 924-1277 aligned except a 4-frame lead) |
+| Future Sight hit | ON | 172 frames to the `hitanimation` | 172 | pre-segment offset +14 (1990-2060: 71/71 at +14); hit at the same +14 |
+| Future Sight hit | OFF | `Pausex20` + the message wait: 42 before the hit | 42 | pre-segment offset +14 (1800-1960: 161/161 at +14) |
+| Focus Band | ON | ROM +137 after the message start, ours +8 pre-segment offset: 129 | 129 | +8 for the print (500-560: 59/61 at +8), later rows at +14 (Seismic Toss residual, out of scope) |
+| Focus Band | OFF | 38 executions + lead 2 = 40 | 40 | offset 0 for the window (fb-off2 200-224 exact) |
+
+## Measured constants and how they were derived
+
+* **201 / 172 / 129**: step the ROM lab to the `playanimation` row, find the first row whose framebuffer differs from the pre-animation hold and the
+  first row of the next print / hit; the command length is the difference at the pre-segment offset (Focus Band: ROM +137 minus the +8 offset).
+* **36 / 40 / 42** (Scene OFF): measured on the OFF ROM labs. Wish 36 equals the script's own executions (lead 0); Focus Band 38 executions + lead 2;
+  Future Sight's hold cannot be derived from execution counts (the message's own wait is in them), so it is the ROM-measured constant.
+* **Script ages 6 / 0 / 0**: the T2 seeds 3738 (Wish; SE 140 at command age 41, 179 at 116), 6079 (Future Sight; 189 at 3, 184 at 41 and 50),
+  4235 (Focus Band; 171 at 0) scored against the ROM sound rows (`tests/wsh1GeneralAnimCommands.test.ts` "SE rows at command age").
+
+## Census / soak (wsh1, `cc14d3ee1`)
+
+* `tools/integration` sound/command census seeds 0..99, both scenes: `eventsDigest` identical for all 100 seeds (the Scene ON command streams of 9 seeds
+  gain the inserted commands; no gameplay digest moved).
+* vanilla 0:20 both scenes 20/20 OK; winning 0:60 60/60 OK; `npm run test:gate`, `npm run build`, `npm run build:lib` green.
+* Two soak frame pins moved (frames only, same battle / turn / end state): seed 21 strong-route 41_099 -> 41_221, seed 0 full 37_771 -> 37_806.
+* T2 (ON): ROM-only move-animation rows 56 -> 40 on the aud257 chain with seeds 3738 / 6079 / 4235 re-run; engine-only 0.
+
+## Residuals (as wsh1 reported)
+
+* Future Sight hit: the rows of the turn before the command sit at +14 in both scenes, and an end-of-turn residual of +8 after the hit (also in both).
+* The second Future Sight SE (184, at command age 41) lands 1 frame early against the ROM table.
+* Wish ON: after the heal message the HP bar / following print / turn-end rows sit at +2 / +5 / +10 (wish-on2 1511-1622).
+* Focus Band lab: later rows follow a different (unmodelled-here) Seismic Toss timing; not part of the command.
+
+## wsh1b
+
+(filled in below as the step lands)
