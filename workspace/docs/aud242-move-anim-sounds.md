@@ -1256,3 +1256,33 @@ Extractor changes in `tools/extract/extract-anim-sound-timing.ts` (`lifetimeOf`,
 The Shock Wave windows verify the particle / orb / bolt lifetimes and the pic-Y dependence on both ends of the grid. Torment's -4 is a constant over the whole window (the ROM gaps are exact), so it is the idle-lead / action-transition class (#198), not a lifetime error.
 
 T1 census 0..99 Scene ON: exact 26,060 -> 26,079, missing-gated 38 -> 33, missing-other 51, extra 0. T2 numbers and the sound-only proof are in docs/aud251-s11-scoreboard-refresh.md (aud258).
+
+## 25. aud259: Soft-Boiled egg, Block X, Dynamic Punch (`waitsound`), Fake Out, Crabhammer
+
+Every lifetime is ported from the C (file:line below), not fitted; each new row has a ROM window (probe step mode) and a Tier-1 pin in `tests/aud259MoveAnimSounds.test.ts` with its ROM-minus-ours offset. L50 emitted / gated 821 / 47 -> **832 / 39**; all-moves resolved ops (turn 0, player attacker) 1048 -> **1059**.
+
+- **Soft Boiled** (`gSoftBoiledEggSpriteTemplate`): the script's `setarg 7, 0xFFFF` makes the wait follow the egg's own arrival (`AnimSoftBoiledEgg_Step4`, simulated for the lifetime), so SE 179 (the egg landing, pan 63) is resolved at frame 217 after SE 167 (12) and 166 (143). T2 seed 1028 was the ROM window (SE 179 x2).
+- **Block** (T2 seed 165 res17: SE 205 x2 + 192): `gBlockXSpriteTemplate` (`AnimBlockX` / `AnimBlockX_Step`, battle_anim_effects_3.c:4878-4953) is a local static, so the probe's `via` only names the nearest preceding global (`AnimTask_MonToSubstitute`). The X lands on call ceil(144 / 10) = 15 (attacker opponent) or ceil(96 / 10) = 10 (player attacker), SKETCH again 32 calls later (ceil(128 / 4)), LEER ceil(128 / 6) + 9 = 31 calls after that; pan `SOUND_PAN_TARGET`. Variants: player attacker 205 @ 12 / 44, 192 @ 75 (plus the 193 at 3), opponent attacker 17 / 49 / 80.
+- **Dynamic Punch** (`waitsound` after SE_M_VITAL_THROW2): new `seExact` in the extractor resolves `Cmd_waitsound` (battle_anim.c:1635-1661) from the m4a tick loop (`MPlayMain` m4a_1.s:1150-1370, `ply_tempo` :920-930, `ply_fine` :750-777, `MPlayStart` m4a.c:634-637, `IsSEPlaying` sound.c:606-613): both tracks read FINE at tick 25, the tick-26 status goes PAUSE, and at TEMPO 220 (tempoI 150 until the TEMPO read in tick 1) MPlayMain reaches it in VBlank 19, so the script resumes 19 iterations after the SE: SE 123 @ 18, then SE 177 @ 37 / 45 / 53 / 61 / 69 (pan 63). Only a single `playse` with an exact length is resolved; `loopsewithpan` and an unknown song keep the bound.
+- **Fake Out** (`AnimTask_FakeOut`, battle_anim_effects_2.c:3080-3131): the entry only sets Step1; data[0] += 13 / data[1] -= 13 from 0 / 240 until data[0] >= data[1] (13k >= 240 - 13k: k = 10, call 10 installs Step2); Step2 counts data[10] from call 11, the BlendPalettes at 5, and destroys the next call (16): exact 15, so SE 205 (pan 63) follows the FLATTER by 16 frames.
+- **Crabhammer**: the first wait is on `gWaterHitSplatSpriteTemplate` (battle_anim_normal.c:191-200), the same `AnimHitSplatBasic` (:1006-1018) as the basic splat, animation 0 = `sAffineAnim_HitSplat_0` (:134-138, one 8-tick frame). Anims 1..3 (a zero-duration frame, then the same 8-tick frame) were already exact 10; the zero-duration frame adds no tick, so anim 0 is the same exact 10, and the ROM window below confirms the 27-frame gap. This also lets the loop SE 142 (`loopsewithpan`, 3 x 20) resolve at frame 36.
+- Harness (not game code): `midBattleSwitchStage` gained `rngSeed` (default 1; the staged battle's 50%-accuracy Dynamic Punch missed in the engine at seed 1 while the ROM lab hits, so that window uses seed 2) and `firstTurn` (both battlers' `isFirstTurn` 1, else Fake Out fails in the engine's staged mid-battle state).
+
+| Window | ROM rows (frame relative to the first) | ROM minus ours |
+| --- | --- | --- |
+| Soft Boiled (`aud259-softboiled-player`, the second turn's heal) | 167, 166 +131, 179 +205 | -5 |
+| Block, player attacker (`aud259-block-player`) | 193, 205 +9, 205 +41, 192 +72 | -3 |
+| Block, opponent attacker (`aud259-block-opponent`) | 193, 205 +14, 205 +46, 192 +77 | -3 |
+| Dynamic Punch (`aud259-dynamicpunch-player`) | 123, 177 +19 / +27 / +35 / +43 / +51 | +5 (first five rows; the fifth SE 177 falls after the engine's presented window, the census's "after the command's last presenting frame" class) |
+| Fake Out (`aud259-fakeout-player`) | 229, 205 +16 | +4 |
+| Crabhammer (`aud259-crabhammer-player`) | 123, 142 +27 / +47 / +68 | 0 |
+
+The constant offsets are the idle-lead / action-transition class (#198), not lifetime errors (the ROM gaps are exact).
+
+### 25.1 Deferred (measured or read, not committed)
+
+- **Recycle** (`gRecycleSpriteTemplate`, AnimRecycle_Step battle_anim_effects_3.c:5437-5489): the C gives a lifetime of 138 (case 0 fires every 2nd call, 32 fires, call 64; case 1 waits to call 74; case 2 32 fires, call 138; destroy 139). Not committed: Recycle fails without a consumed held item, so the ROM lab shows no animation (the player's Recycle window carried no SE 152 at all) and there is no way to measure the row.
+- **Glare** (`AnimTask_GlareEyeDots`, :3989-4087): the C gives lifetime 88 (13 fires at calls 4..52, the dots' 37th callback, the task's case 1 sees it in the same iteration); the ROM agrees for the first wait (BlendBattleAnimPal created 89 ticks after the SE). The second wait is 2 frames longer in the ROM than the table (SE LEER at +107 against +105) with the BG blend task's BlendPalette calls ending where the model says (y 16 at +15), so something in the script step after the wait is unmodelled; not fitted.
+- **Memento** (needs `BATTLER_COORD_ATTR_TOP`, the species sprite size), **Air Cutter** (a three-sprite task with internal SEs), **Brick Break** turn 2 (`gBrickBreakWallSpriteTemplate`), **Will-O-Wisp** (orb / fire sprites with SoundTask_AdjustPanningVar): untouched.
+
+T1 census 0..99 Scene ON: exact 26,079 -> 26,100, missing-gated 33 -> 15 (Memento 4, Air Cutter 4, Recycle 2, Glare 2, Brick Break 2, Will-O-Wisp 1), missing-other 51 -> 53 (Dynamic Punch's fifth SE 177, after the last presenting frame), extra 0. T2 and the sound-only proof are in docs/aud251-s11-scoreboard-refresh.md (aud259).
