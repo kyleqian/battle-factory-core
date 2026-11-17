@@ -220,7 +220,7 @@ the next server challenge with `start: "after-save"` and mounts it (server colum
 Lobby -> attendant -> new challenge -> a few turns -> forfeit, verified; the same trace replayed with `start` "draft" reaches no battle. So keep
 `challenge-request` / `start` stable, and name any change to them in PROGRESS. Games already open on `eb-adfdcfdc91f4247f`
 or `eb-9d34d28f1b19ef3d` finish on those builds (checked live: an `eb-adfd` game resumed after the deploy, ended, replay-verified on its own build).
-Later builds reach the site only when Kyle asks again. The 2026-11-16 wind-down build is `eb-b17e87a4a52c33ad` (`36e9335ab`; no API change; it adds 112 `cry-NNN-task` audio files + AAC twins that the site must serve with the rest of the audio). Cleanup 5's "< 15 min" suite target: measured non-goal on this box (cln277); the 670 s render lever in
+Later builds reach the site only when Kyle asks again. The 2026-11-17 night-run wind-down build is **`eb-d0136314103d21fb`** (`74e657c03`; no API change, no new audio files; ~3x faster library import, ~260 KiB smaller first-battle download, the AI switch's withdraw text; PROGRESS top entry). The 2026-11-16 wind-down build is `eb-b17e87a4a52c33ad` (`36e9335ab`; no API change; it adds 112 `cry-NNN-task` audio files + AAC twins that the site must serve with the rest of the audio). Cleanup 5's "< 15 min" suite target: measured non-goal on this box (cln277); the 670 s render lever in
 `tools/integration/generatedCommandAnimationReplay.ts` would trade render-crash coverage (not taken).
 
 0. **User decision 2026-11-11 (Kyle, "Yes, start sound"): start sound PLAYBACK now, alongside the ROM-driver gameplay
