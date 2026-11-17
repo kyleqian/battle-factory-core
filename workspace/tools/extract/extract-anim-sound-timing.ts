@@ -909,6 +909,11 @@ function lifetimeOf(cmd: Command, attackerSide: number, pic: PicContext, rollout
   // call from the begin call on), the callback sees it in call 17, installs the destroy, which runs in call 18: gone 17 ticks after F (the ROM-validated visual port
   // src/animation/swagger.ts draws the mark for exactly 17 ticks, ages 0..16).
   if (sprite("gAngerMarkSpriteTemplate")) return { exact: 17 };
+  // aud262: AnimPresent (battle_anim_effects_1.c:3016-3040, gPresentSpriteTemplate :781): the init sets data[7] = 60 << 8 (InitItemBagData) and installs AnimItemSteal_Step1, whose moveAlongLinearPath
+  // (:2957-2986) counts currentTime from 0 and returns TRUE on call 60 (position-independent); AnimItemSteal_Step2 (:2988-2996) then destroys when data[0] (reset to 0) exceeds 50: call 61 + 50 = 111.
+  if (op === "create_present_sprite") return { exact: 110 };
+  // AnimPresentHealParticle (:3089-3104) destroys on animEnded of gPresentHealParticleAnimCmds (:810-816, 4 x 4 = 16 ticks): destroy at call 17.
+  if (op === "create_present_heal_particle_sprite") return { exact: 16 };
   // AnimTask_FlailMovement (battle_anim_effects_3.c:2845-2931): the entry only sets func; the step (call 1..) integrates data[2] by 0x200 per call and every call past the ninth
   // shrinks the amplitude data[14] by 0x40 (down to 16) for 0x20 calls, then sets data[0] = 2; the next call destroys the task (call K, gone K - 1 ticks after F).
   if (op === "createvisualtask" && args[0] === "AnimTask_FlailMovement") return { exact: flailMovementLength() };

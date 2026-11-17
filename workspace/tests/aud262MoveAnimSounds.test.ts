@@ -136,3 +136,31 @@ describe("Memento (aud262)", () => {
     });
   }
 });
+
+// Present: AnimTask_IsHealingMove (battle_anim_effects_3.c:1531-1539) sets ARG_RET_ID from gAnimMoveDmg (> 0 -> damage branch); the bag sprite (AnimPresent, battle_anim_effects_1.c:3016) lives 60 calls of
+// moveAlongLinearPath + 51 of AnimItemSteal_Step2 regardless of positions, and the heal particles end on their 16-tick animation. The heal window heals a target that a faster Belly Drum already halved.
+describe("Present (aud262)", () => {
+  const entry = timing.moves[217]! as unknown as { label: string; gated: number[]; flag: number[]; flagKind: string };
+  const grids = timing as unknown as { flagGrids: number[][] };
+  it("the table entry: ungated, damage / heal variants keyed on the request's damage", () => {
+    expect(entry.label).toBe("Move_PRESENT");
+    expect(entry.gated.every((g) => g === 0)).toBe(true);
+    expect(entry.flagKind).toBe("heal");
+    const [damage, heal] = grids.flagGrids[entry.flag[0]!]!.map((v) => timing.variants[v]!.map((o) => `${o.frame}:${(o as { id?: number }).id}`));
+    expect(damage!.slice(3)).toEqual(["57:125", "117:177", "125:177", "133:177", "141:177", "149:177"]);
+    expect(heal!.slice(3)).toEqual(["57:125", "120:228", "197:179"]);
+  });
+  it("aud262-present-player (damage branch): the five explosion SEs follow the bag by 60 frames, offset 1", () => {
+    const rom = fixture("aud262-present-player");
+    const rows = rom.events.filter((e) => e.noop !== true && e.kind === "se" && [167, 125, 177].includes(e.id as number));
+    expect(rows.map((e) => e.frame - rows[0]!.frame)).toEqual([0, 16, 32, 54, 114, 122, 130, 138, 146]);
+    expect(expectConstantOffset(rom, [167, 125, 177], 9, "first")).toBe(1);
+  });
+  it("aud262-presentheal-player (heal branch): SE_M_MORNING_SUN 63 frames and the second SE 77 frames after the last bag SE, offset 2", () => {
+    const rom = fixture("aud262-presentheal-player");
+    const rows = rom.events.filter((e) => e.noop !== true && e.kind === "se" && [167, 125, 228, 179].includes(e.id as number));
+    expect(rows.map((e) => e.id)).toEqual([167, 125, 125, 125, 228, 179]);
+    expect(rows.map((e) => e.frame - rows[0]!.frame)).toEqual([0, 16, 32, 54, 117, 194]);
+    expect(expectConstantOffset(rom, [167, 125, 228, 179], 6, "first")).toBe(2);
+  });
+});
