@@ -66,7 +66,7 @@ Base `e0658f6f8` (aud263 merge), final = the adp1 sound commit `07905b153` (the 
 - **Census 0..99, both scenes** (`rst197CensusDelta.py`, base vs final): `eventsDigest` identical, bad 0, 100 / 100 battles each. Scene OFF: 100 / 100 battles and 30,710 commands identical. Scene ON: 99 / 100
   battles identical; **the one command whose length moves is Withdraw (move 110), seed 51 (Foe CLEFABLE): 32 -> 79 rows** (`static:other:no-adapter-unscripted` -> `live`). Rock Smash and Beat Up do not occur in seeds 0..99 (the 0..99 T1 had one declined row, Withdraw).
 - **Vanilla soak** 0:20 Scene ON `--parallel 3`: 20 / 20 OK (CRASH 0, HANG 0, budget 20).
-- **Winning soak** 0:60 `--parallel 3`: still running when this commit was made; result in the final report.
+- **Winning soak** 0:60 `--parallel 3`: 60 / 60 OK (CRASH 0, HANG 0, budget 60), deepest battle depth 32.
 - `npm run typecheck` exit 0; `npm run test:gate` green (362 files, 2,843 tests); the 274 test files importing `approxScript` / `liveMoveAnimation` / `battleScene` / `appTrace` green (the one failure, `iss215`, was `adp1Cmp.ts` not importing `monPicPixelsInstall.ts`; fixed); `animationBoundaryRatchet` green; `npm run build` and `npm run build:lib` exit 0.
 - `tests/randomRoundSoak.test.ts` and `tests/lbrd.test.ts` pass unchanged: no re-pin.
 - `npm run animation:coverage`: regenerated, `ANIMATION_COVERAGE.json` has no diff. That file lists the moves proven by the source-audited "exact" evidence pipeline; the live adapters are not entries of it, so it does not move.
