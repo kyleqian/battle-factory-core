@@ -59,7 +59,8 @@ const SPECS: Array<{ name: string; ids: number[]; deltas: number[] }> = [
   { name: "secretpower-player", ids: [152, 141], deltas: [2, 2, 2, 2] },
   { name: "extrasensory-player", ids: [170, 192], deltas: [3, 3, 3] },
   { name: "superfang-player", ids: [171, 161], deltas: [-1, -1] },
-  { name: "iceball5-player", ids: [137, 198], deltas: [9, 9, 21, 21, 38, 38, 64, 64, 95, 95] },
+  // hpd2 (the locked continuation waits the foe's selection, +8 per chained turn): 9 / 21 / 38 / 64 / 95 -> 9 / 13 / 22 / 40 / 63.
+  { name: "iceball5-player", ids: [137, 198], deltas: [9, 9, 13, 13, 22, 22, 40, 40, 63, 63] },
 ];
 
 describe("move-animation SEs of the aud242q lifetimes", () => {
