@@ -680,6 +680,10 @@ function lifetimeOf(cmd: Command, attackerSide: number, pic: PicContext, rollout
     const duration = Math.abs(BATTLER_X[attackerSide === 0 ? 1 : 0] - x);
     return duration < 1 ? null : { exact: 32 + duration };
   }
+  // aud260: AnimRecycle_Step (battle_anim_effects_3.c:5437-5489; the init is call 0, call n >= 1 runs the step): case 0 fires every 2nd call (data[0] > 1) and ends when data[7] reaches 0 after 16 raises of
+  // data[6] and 16 lowers of data[7] (32 fires: call 64), case 1 waits ++data[0] == 10 (call 74), case 2 fires every 2nd call for data[6] 16 -> 0 and data[7] 0 -> 16 (32 fires: call 138), case 3 destroys on
+  // the next call (139): gone 138 ticks after F.
+  if (sprite("gRecycleSpriteTemplate")) return { exact: 138 };
   // AnimFang (battle_anim_effects_3.c:1515-1519): gFangAnimCmds (:321-328) 8 + 16 + 4 + 4 = 32.
   if (sprite("gFangSpriteTemplate")) return { exact: 32 };
   // Arc sprites (InitAnimArcTranslation + TranslateAnimHorizontalArc, battle_anim_mons.c:785-801, AnimTranslateLinear :1111): data[0] = duration D; D calls

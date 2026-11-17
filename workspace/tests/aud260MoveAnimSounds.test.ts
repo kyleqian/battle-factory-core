@@ -87,3 +87,21 @@ describe("Will-O-Wisp (aud260)", () => {
     });
   }
 });
+
+// Recycle (AnimRecycle_Step, battle_anim_effects_3.c:5437-5489) lives 138 ticks, so the post-wait SE_M_TAKE_DOWN follows the loop's first one by 139. The lab's Sitrus Berry is eaten at the end of
+// turn 1 (Recycle fails with no used item), so turn 2 is the animation: ROM 152 @1466 / 1490 / 1515 (loop), 152 @1605; the held-item effect's own SE rows follow at 1774.
+describe("Recycle (aud260)", () => {
+  it("the table entry: the loop at 9 (wait 24, 3 plays), SE_M_TAKE_DOWN at 148 (9 + 139), ungated", () => {
+    expect(timing.moves[278]!.label).toBe("Move_RECYCLE");
+    expect(timing.moves[278]!.gated.every((g) => g === 0)).toBe(true);
+    expect(timing.variants[timing.moves[278]!.variants[0]!]!.map((o) => `${o.op}:${o.frame}`)).toEqual(["loopsewithpan:9", "playsewithpan:148"]);
+  });
+  it("aud260-recycle-player: the turn-2 rows 1466 / 1490 / 1515 / 1605 equal the ROM's, offset constant", () => {
+    const rom = fixture("aud260-recycle-player");
+    const pick = (events: FixtureEvent[]) => events.filter((e) => e.noop !== true && e.kind === "se" && e.id === 152 && e.frame > 1400 && e.frame < 1700);
+    const romRows = pick(rom.events);
+    expect(romRows.map((e) => e.frame)).toEqual([1466, 1490, 1515, 1605]);
+    const ours = pick(ourEvents(rom));
+    expect(ours.map((e) => e.frame)).toEqual(romRows.map((e) => e.frame - 4));
+  });
+});
