@@ -1,3 +1,4 @@
+import { normalPaletteFadeY } from "./normalPaletteFade.ts";
 import { slideMonToOriginalPosAtTick } from "./slideMon.ts";
 
 /**
@@ -18,18 +19,6 @@ export const FOCUS_BAND_RESTORE_DURATION = 15;
 export const FOCUS_BAND_BLEND_DOWN_FRAME = 60;
 export const FOCUS_BAND_RESTORE_FRAME = 104;
 export const FOCUS_BAND_PALETTE_LEAD = 2;
-
-/** BlendPalette y of a normal palette fade at `frame` after its creation frame (see above); `plane` selects the BG or OBJ pass. */
-export function normalPaletteFadeY(
-  frame: number, delay: number, startY: number, targetY: number, plane: "bg" | "obj",
-): number {
-  if (frame < (plane === "bg" ? 0 : 1)) return startY;
-  const period = delay + 2;
-  const passes = Math.floor((frame - (plane === "bg" ? 0 : 1)) / period);
-  const distance = Math.abs(targetY - startY);
-  const moved = Math.min(passes * 2, distance);
-  return targetY > startY ? startY + moved : startY - moved;
-}
 
 function slideRunsX2(opponent: boolean): readonly number[] {
   // Task data indices as in the C: [0] runs left, [1] shake timer (never initialised: 0), [4] shake x, [9] shake offset, [13] shake period, [7] accumulator.

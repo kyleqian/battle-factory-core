@@ -8,6 +8,7 @@ import { LIVE_TRANSFORM_MOVE_ID, LIVE_TRANSFORM_ROWS, LIVE_TRANSFORM_SWAP_ROW, l
 import { statsChangeParams, statsChangeRow } from "../animation/statsChange.ts";
 import { liveStatusAnimationRow, type LiveStatusAnimationSprite } from "../animation/statusAnimation.ts";
 import { focusPunchSetUpDisplayRow } from "../animation/focusPunchSetUp.ts";
+import { wishHealRowAtAge } from "../animation/wishHeal.ts";
 import { focusBandRowAtAge } from "../animation/focusBand.ts";
 import { liveSubstituteSwapView } from "./liveSubstituteSwap.ts";
 import { substituteFadeRenderView, substituteFadeWhiteBgr555, type SubstituteFadeBgCopy } from "./liveSubstituteFade.ts";
@@ -7967,6 +7968,12 @@ export type GeneralAnimationRenderView = Readonly<{
     center: Readonly<{ x: number; y: number }>;
     age: number;
   }>;
+  /** wsh2: General_WishHeal's BG black blend, granting stars (heldItemHeal.ts age) and blue stars at the wisher. */
+  wishHeal?: Readonly<{
+    row: ReturnType<typeof wishHealRowAtAge>;
+    center: Readonly<{ x: number; y: number }>;
+    opponent: boolean;
+  }>;
 }>;
 
 /** General_HeldItemEffect's simple_palette_blend colour (RGB(17, 31, 25), battle_anim_scripts.s) - the script's, not a species'. */
@@ -7990,6 +7997,7 @@ export function generalAnimationRenderView(view: BattleResolutionPresentationRen
   const effect = view.effect;
   if (effect?.type === "general-animation" && effect.animation === "HELD_ITEM_EFFECT") return heldItemEffectRenderView(view, effect);
   if (effect?.type === "general-animation" && effect.animation === "FOCUS_BAND") return focusBandRenderView(view, effect);
+  if (effect?.type === "general-animation" && effect.animation === "WISH_HEAL") return wishHealRenderView(view, effect);
   if (effect?.type !== "general-animation" || effect.animation !== "FOCUS_PUNCH_SETUP") return null;
   if (effect.age < 0) return null;
   const side = effect.battler === 0 ? "player" as const : "opponent" as const;
@@ -8106,6 +8114,34 @@ function focusBandRenderView(
   return Object.freeze({
     view: Object.freeze({ ...view, fieldArt, postBodyShadowHidden: view.postBodyShadowHidden || (side === "opponent" && effect.age >= 0) }),
     sprites: Object.freeze([]),
+  });
+}
+
+/**
+ * wsh2: B_ANIM_WISH_HEAL's General_WishHeal over the field as it is, either side (src/animation/wishHeal.ts): the BG palettes blend toward
+ * black, the wisher's two granting stars and four healing blue stars sit at its GetBattlerSpriteCoord (picOffsetPoint). The opponent
+ * stands at its tracked front idle rest and an elevated opponent's shadow hides while the script runs.
+ */
+function wishHealRenderView(
+  view: BattleResolutionPresentationRenderView,
+  effect: Extract<NonNullable<BattleResolutionPresentationRenderView["effect"]>, { type: "general-animation" }>,
+): GeneralAnimationRenderView | null {
+  if (effect.age < 0) return null;
+  const side = effect.battler === 0 ? "player" as const : "opponent" as const;
+  const center = liveBattlerAnchors(side, view.fieldArt).picOffsetPoint;
+  const row = wishHealRowAtAge(effect.age, side, center);
+  const rest = effect.battlerX2Input === undefined
+    ? { x2: 0, y2: 0 }
+    : liveBattlerAnchors("opponent", view.fieldArt, effect.battlerX2Input).frontIdleRest;
+  const opponent = rest.x2 === 0 && rest.y2 === 0 ? view.fieldArt.opponent : Object.freeze({
+    ...view.fieldArt.opponent,
+    origin: Object.freeze({ x: view.fieldArt.opponent.origin.x + rest.x2, y: view.fieldArt.opponent.origin.y + rest.y2 }),
+  });
+  const fieldArt = opponent === view.fieldArt.opponent ? view.fieldArt : Object.freeze({ ...view.fieldArt, opponent });
+  return Object.freeze({
+    view: Object.freeze({ ...view, fieldArt, postBodyShadowHidden: view.postBodyShadowHidden || side === "opponent" }),
+    sprites: Object.freeze([]),
+    wishHeal: Object.freeze({ row, center, opponent: side === "opponent" }),
   });
 }
 
@@ -55456,7 +55492,9 @@ export function renderBattleResolutionSceneOffView(
   // battleBg.palette row 2 = hardware bank 4 is outside the mask and stays.
   const midBattleFade = view.midBattleSwitchFade;
   const fadedFieldPalette = midBattleFade === null
-    ? battleBg.palette
+    ? generalAnimation?.wishHeal && generalAnimation.wishHeal.row.bgBlackCoeff > 0
+      ? blendPaletteBanksToward(battleBg.palette, { r: 0, g: 0, b: 0 }, generalAnimation.wishHeal.row.bgBlackCoeff)
+      : battleBg.palette
     : whiteFadeFieldPaletteRows(battleBg.palette, midBattleFade.bg);
   drawTileBg(
     fb,
@@ -55611,6 +55649,13 @@ export function renderBattleResolutionSceneOffView(
         fb, battleAnimItemHeal.ring.tileset, battleAnimItemHeal.ring.palette, center.x, center.y,
         ring.pa, ring.pb, ring.pc, ring.pd, PLAYER_BALL_OPEN_VISIBLE_BOTTOM,
       );
+    }
+  }
+  if (generalAnimation?.wishHeal) {
+    const { row, center, opponent } = generalAnimation.wishHeal;
+    if (row.grantingStarAge !== null) drawGrantingStarsAtAge(fb, row.grantingStarAge, center, opponent);
+    for (const star of row.blueStars) {
+      drawSpriteSheet(fb, subTileset(moonlightArt.blueStar.tileset, star.frame * 4, 4), moonlightArt.blueStar.palette, star.x - 16, star.y - 16);
     }
   }
   if (fade?.bgCopy) drawSubstituteFadeBgCopy(fb, fade.bgCopy);
