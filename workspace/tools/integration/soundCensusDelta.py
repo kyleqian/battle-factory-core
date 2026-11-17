@@ -171,6 +171,22 @@ def t1_nonmove(A):
     return fam, lead, resid, noemit, ex, tail_rows[0]
 
 
+def other_families(A):
+    """aud263: the families T1 has NO expected table for (battle-controller SEs, cries, BGM / fanfare, ducks / stops): emitted counts only. T1 cannot judge them (their rows are not derived from the aud242 table); the
+    ROM comparison is T2 and the Tier-1 pins named in docs/aud251-s11-scoreboard-refresh.md. Every se / pan row outside the controller ids is owned by a move / non-move family above (`unclassified` counts the rest)."""
+    kinds = Counter(); ctl = Counter(); cry = Counter(); misc = Counter()
+    for r in A.values():
+        for e in r["sound"]:
+            kinds[e[1]] += 1
+            if e[1] == "se" and e[2] in CONTROLLER_IDS: ctl[e[2]] += 1
+            elif e[1] == "cry": cry[e[4] if len(e) > 4 else 0] += 1
+            elif e[1] not in ("se", "pan"): misc[(e[1], e[2])] += 1
+    print("other families (no T1 table; counts only):", "rows by kind", dict(kinds))
+    print("  battle-controller SE ids", dict(sorted(ctl.items())), "total", sum(ctl.values()))
+    print("  cries by mode", dict(sorted(cry.items())), "total", sum(cry.values()))
+    print("  bgm / duck / stop (kind, id)", dict(sorted(misc.items(), key=str)))
+
+
 # aud242l: soundAnim row element 10 = the battlers' pic Y [player, opponent] (absent in older arms): picks the Blizzard pic class of the table.
 def pic_key(a):
     return ",".join(str(v) for v in a[10]) if len(a) > 10 and a[10] else ""
@@ -297,6 +313,7 @@ def t1(arm, json_out):
         print("residual unclassified (id, source):", dict(nm[2]))
         for f in sorted(ex):
             if ex[f]: print("non-move examples", f, ex[f][:3])
+    other_families(A)
     for c in CLASSES:
         if per_class_moves[c]: print(c, "top moves:", per_class_moves[c].most_common(8), "examples (seed, move, detail):", examples[c][:3])
     if json_out:
