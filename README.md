@@ -24,17 +24,9 @@ Then open <http://localhost:5173>.
 cd workspace && npm test
 ```
 
-About 500 test files read the decompilation's source. Without it they fail, and
-the run says how to get it:
-
-```sh
-cd workspace
-git clone https://github.com/pret/pokeemerald reference/pokeemerald
-git -C reference/pokeemerald checkout 83df84e40
-```
-
-Comparing with the real game also needs mGBA and a ROM built from the
-decompilation; see `oracle/SETUP.md`.
+About 500 test files need the decompilation, built into a ROM, and one needs
+mGBA. Without them those tests fail, and the run says why. `oracle/SETUP.md`
+sets up both; the same setup runs the real game for comparison.
 
 ## Layout
 

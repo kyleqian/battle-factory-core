@@ -60,7 +60,7 @@ Kyle plans to make this repo public with its full history (no rewrite, no licens
 - The box's address, the Hetzner and firewall IDs and the SSH key name were taken out of `docs/cax31-arm-runner.md`
   (the `pokebench-cax31` SSH alias on the Mac holds them). Home-folder paths became placeholders.
 - `tests/setup/decompCheck.ts` (a second `globalSetup` in `vite.config.ts`) only prints a notice when
-  `reference/pokeemerald` is missing, as on a fresh clone. It never fails or skips a test; here it stays silent.
+  `reference/pokeemerald` is missing or not built (no `pokeemerald.elf`), as on a fresh clone. It never fails or skips a test; here it stays silent.
 - Once the repo is public, everything committed is published at the next push. Keep secrets, server addresses and
   personal paths out of commits, as before.
 
