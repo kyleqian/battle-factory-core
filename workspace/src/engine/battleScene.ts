@@ -8,6 +8,10 @@ import { LIVE_TRANSFORM_MOVE_ID, LIVE_TRANSFORM_ROWS, LIVE_TRANSFORM_SWAP_ROW, l
 import { statsChangeParams, statsChangeRow } from "../animation/statsChange.ts";
 import { liveStatusAnimationRow, type LiveStatusAnimationSprite } from "../animation/statusAnimation.ts";
 import { focusPunchSetUpDisplayRow } from "../animation/focusPunchSetUp.ts";
+import { wishHealRowAtAge } from "../animation/wishHeal.ts";
+import { focusBandRowAtAge } from "../animation/focusBand.ts";
+import { futureSightHitRowAtAge } from "../animation/futureSightHit.ts";
+import { psychicBgPaletteRowAtAge as psychicBgRingPaletteAtCount } from "../animation/psychicBackground.ts";
 import { liveSubstituteSwapView } from "./liveSubstituteSwap.ts";
 import { substituteFadeRenderView, substituteFadeWhiteBgr555, type SubstituteFadeBgCopy } from "./liveSubstituteFade.ts";
 // S6 scene-assembly + send-out engine slices: the BATTLE-SCENE ASSEMBLY
@@ -7966,6 +7970,17 @@ export type GeneralAnimationRenderView = Readonly<{
     center: Readonly<{ x: number; y: number }>;
     age: number;
   }>;
+  /** wsh2: General_WishHeal's BG black blend, granting stars (heldItemHeal.ts age) and blue stars at the wisher. */
+  wishHeal?: Readonly<{
+    row: ReturnType<typeof wishHealRowAtAge>;
+    center: Readonly<{ x: number; y: number }>;
+    opponent: boolean;
+  }>;
+  /** wsh2: General_FutureSightHit's psychic BG and the target's alpha-blended scale + shake (futureSightHit.ts). */
+  futureSightHit?: Readonly<{
+    row: ReturnType<typeof futureSightHitRowAtAge>;
+    targetSide: "player" | "opponent";
+  }>;
 }>;
 
 /** General_HeldItemEffect's simple_palette_blend colour (RGB(17, 31, 25), battle_anim_scripts.s) - the script's, not a species'. */
@@ -7988,6 +8003,9 @@ const FOCUS_PUNCH_SETUP_PARTICLE_DRAW_SLOTS = Object.freeze([9, 7, 5, 4, 3]);
 export function generalAnimationRenderView(view: BattleResolutionPresentationRenderView): GeneralAnimationRenderView | null {
   const effect = view.effect;
   if (effect?.type === "general-animation" && effect.animation === "HELD_ITEM_EFFECT") return heldItemEffectRenderView(view, effect);
+  if (effect?.type === "general-animation" && effect.animation === "FOCUS_BAND") return focusBandRenderView(view, effect);
+  if (effect?.type === "general-animation" && effect.animation === "WISH_HEAL") return wishHealRenderView(view, effect);
+  if (effect?.type === "general-animation" && effect.animation === "FUTURE_SIGHT_HIT") return futureSightHitRenderView(view, effect);
   if (effect?.type !== "general-animation" || effect.animation !== "FOCUS_PUNCH_SETUP") return null;
   if (effect.age < 0) return null;
   const side = effect.battler === 0 ? "player" as const : "opponent" as const;
@@ -8066,6 +8084,101 @@ function heldItemEffectRenderView(
     view: Object.freeze({ ...view, fieldArt, postBodyShadowHidden: view.postBodyShadowHidden || (opponentSide && effect.age <= HELD_ITEM_EFFECT_SCRIPT_LAST_AGE) }),
     sprites: Object.freeze([]),
     heldItem: Object.freeze({ side, rotation, center: liveBattlerAnchors(side, view.fieldArt).picOffsetPoint, age: effect.age }),
+  });
+}
+
+/**
+ * wsh2: B_ANIM_FOCUS_BAND's General_FocusBand over the field as it is, either side: the survivor's OBJ palette blends toward RGB_RED
+ * and the sprite slides / shakes (src/animation/focusBand.ts). The opponent stands at its tracked front idle rest as in the
+ * other general-animation views, and an elevated opponent's shadow hides while the script runs.
+ */
+function focusBandRenderView(
+  view: BattleResolutionPresentationRenderView,
+  effect: Extract<NonNullable<BattleResolutionPresentationRenderView["effect"]>, { type: "general-animation" }>,
+): GeneralAnimationRenderView | null {
+  if (effect.age < 0) return null;
+  const side = effect.battler === 0 ? "player" as const : "opponent" as const;
+  const row = focusBandRowAtAge(effect.age, side);
+  const rest = effect.battlerX2Input === undefined
+    ? { x2: 0, y2: 0 }
+    : liveBattlerAnchors("opponent", view.fieldArt, effect.battlerX2Input).frontIdleRest;
+  const place = (at: "player" | "opponent") => {
+    const art = view.fieldArt[at];
+    const base = at === "opponent" ? rest : { x2: 0, y2: 0 };
+    const x2 = base.x2 + (at === side ? row.x2 : 0);
+    const blend = at === side && row.paletteY > 0;
+    if (x2 === 0 && base.y2 === 0 && !blend) return art;
+    return Object.freeze({
+      ...art,
+      origin: Object.freeze({ x: art.origin.x + x2, y: art.origin.y + base.y2 }),
+      ...(blend ? {
+        pic: Object.freeze({ ...art.pic, palette: blendPaletteToward(art.pic.palette as RgbColor[], { r: 255, g: 0, b: 0 }, row.paletteY) }),
+      } : {}),
+    });
+  };
+  const player = place("player"), opponent = place("opponent");
+  const fieldArt = player === view.fieldArt.player && opponent === view.fieldArt.opponent
+    ? view.fieldArt : Object.freeze({ ...view.fieldArt, player, opponent });
+  return Object.freeze({
+    view: Object.freeze({ ...view, fieldArt, postBodyShadowHidden: view.postBodyShadowHidden || (side === "opponent" && effect.age >= 0) }),
+    sprites: Object.freeze([]),
+  });
+}
+
+/**
+ * wsh2: B_ANIM_WISH_HEAL's General_WishHeal over the field as it is, either side (src/animation/wishHeal.ts): the BG palettes blend toward
+ * black, the wisher's two granting stars and four healing blue stars sit at its GetBattlerSpriteCoord (picOffsetPoint). The opponent
+ * stands at its tracked front idle rest and an elevated opponent's shadow hides while the script runs.
+ */
+function wishHealRenderView(
+  view: BattleResolutionPresentationRenderView,
+  effect: Extract<NonNullable<BattleResolutionPresentationRenderView["effect"]>, { type: "general-animation" }>,
+): GeneralAnimationRenderView | null {
+  if (effect.age < 0) return null;
+  const side = effect.battler === 0 ? "player" as const : "opponent" as const;
+  const center = liveBattlerAnchors(side, view.fieldArt).picOffsetPoint;
+  const row = wishHealRowAtAge(effect.age, side, center);
+  const rest = effect.battlerX2Input === undefined
+    ? { x2: 0, y2: 0 }
+    : liveBattlerAnchors("opponent", view.fieldArt, effect.battlerX2Input).frontIdleRest;
+  const opponent = rest.x2 === 0 && rest.y2 === 0 ? view.fieldArt.opponent : Object.freeze({
+    ...view.fieldArt.opponent,
+    origin: Object.freeze({ x: view.fieldArt.opponent.origin.x + rest.x2, y: view.fieldArt.opponent.origin.y + rest.y2 }),
+  });
+  const fieldArt = opponent === view.fieldArt.opponent ? view.fieldArt : Object.freeze({ ...view.fieldArt, opponent });
+  return Object.freeze({
+    view: Object.freeze({ ...view, fieldArt, postBodyShadowHidden: view.postBodyShadowHidden || side === "opponent" }),
+    sprites: Object.freeze([]),
+    wishHeal: Object.freeze({ row, center, opponent: side === "opponent" }),
+  });
+}
+
+/**
+ * wsh2: B_ANIM_FUTURE_SIGHT_HIT's General_FutureSightHit over the field as it is (src/animation/futureSightHit.ts): the psychic BG fades in
+ * and out, the target (the other side from the Future Sight user's slot) scales and shakes in alpha-blend mode over a frozen copy. The
+ * opponent stands at its tracked front idle rest until a shake task owns its x2, and an elevated opponent's shadow hides while it runs.
+ */
+function futureSightHitRenderView(
+  view: BattleResolutionPresentationRenderView,
+  effect: Extract<NonNullable<BattleResolutionPresentationRenderView["effect"]>, { type: "general-animation" }>,
+): GeneralAnimationRenderView | null {
+  if (effect.age < 0) return null;
+  const userSide = effect.battler === 0 ? "player" as const : "opponent" as const;
+  const targetSide = userSide === "player" ? "opponent" as const : "player" as const;
+  const row = futureSightHitRowAtAge(effect.age);
+  const rest = effect.battlerX2Input === undefined
+    ? { x2: 0, y2: 0 }
+    : liveBattlerAnchors("opponent", view.fieldArt, effect.battlerX2Input).frontIdleRest;
+  const restHeld = targetSide === "opponent" && row.targetTouched;
+  const opponent = (rest.x2 === 0 && rest.y2 === 0) || restHeld ? view.fieldArt.opponent : Object.freeze({
+    ...view.fieldArt.opponent,
+    origin: Object.freeze({ x: view.fieldArt.opponent.origin.x + rest.x2, y: view.fieldArt.opponent.origin.y + rest.y2 }),
+  });
+  const fieldArt = opponent === view.fieldArt.opponent ? view.fieldArt : Object.freeze({ ...view.fieldArt, opponent });
+  return Object.freeze({
+    view: Object.freeze({ ...view, fieldArt, postBodyShadowHidden: view.postBodyShadowHidden || userSide === "opponent" || targetSide === "opponent" }),
+    sprites: Object.freeze([]),
+    futureSightHit: Object.freeze({ row, targetSide }),
   });
 }
 
@@ -55416,14 +55529,54 @@ export function renderBattleResolutionSceneOffView(
   // battleBg.palette row 2 = hardware bank 4 is outside the mask and stays.
   const midBattleFade = view.midBattleSwitchFade;
   const fadedFieldPalette = midBattleFade === null
-    ? battleBg.palette
+    ? generalAnimation?.wishHeal && generalAnimation.wishHeal.row.bgBlackCoeff > 0
+      ? blendPaletteBanksToward(battleBg.palette, { r: 0, g: 0, b: 0 }, generalAnimation.wishHeal.row.bgBlackCoeff)
+      : battleBg.palette
     : whiteFadeFieldPaletteRows(battleBg.palette, midBattleFade.bg);
-  drawTileBg(
-    fb,
-    battleBg.static.tileset,
-    battleBg.static.tilemap,
-    fadedFieldPalette,
-  );
+  const futureSightHit = generalAnimation?.futureSightHit;
+  if (futureSightHit) {
+    const { row } = futureSightHit;
+    const gpuDarken = (palette: readonly RgbColor[]) =>
+      palette.map((color) => {
+        const packed = mgbaDarkenColor(color.r | (color.g << 8) | (color.b << 16), row.bgBldy);
+        return { r: packed & 0xff, g: (packed >>> 8) & 0xff, b: (packed >>> 16) & 0xff };
+      });
+    drawExtractedTileBg(fb, row.bgIsPsychic
+      ? {
+          tileset: battleAnimPsychicBg.tileset,
+          tilemap: battleAnimPsychicBg.tilemap,
+          subpalettes: [gpuDarken(psychicBgRingPaletteAtCount(battleAnimPsychicBg.palette, row.rotationCount))],
+        }
+      : { tileset: battleBg.static.tileset, tilemap: battleBg.static.tilemap, subpalettes: battleBg.palette.map(gpuDarken) });
+  } else {
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      fadedFieldPalette,
+    );
+  }
+  const drawFutureSightTarget = (art: BattleCommandFieldArtView["opponent"], y: number) => {
+    const { row } = futureSightHit!;
+    const tileset = art.pic.tileset as Tileset;
+    const palette = art.pic.palette as RgbColor[];
+    const x = art.origin.x;
+    const x2 = row.targetTouched ? row.targetX2 : 0;
+    const monbgX = x + (row.targetTouched ? row.monbgX2 : 0);
+    if (row.targetBlendActive) {
+      drawSpriteSheet(fb, tileset, palette, monbgX, y);
+      drawSpriteSheetAffineStretchTintedBlend(
+        fb, tileset, palette, x, y, row.targetScale.xScale, row.targetScale.yScale,
+        { r: 255, g: 255, b: 255 }, 0, 8, 8, true, x2,
+      );
+    } else {
+      if (row.monbgActive) drawSpriteSheet(fb, tileset, palette, monbgX, y);
+      drawSpriteSheetAffineStretch(
+        fb, tileset, palette, x, y, row.targetScale.xScale, row.targetScale.yScale,
+        0, { r: 255, g: 255, b: 255 }, 0, false, x2,
+      );
+    }
+  };
   // ISSUES #78 residual (1): the player mon's OBJ row ball-blends toward
   // gBallOpenFadeColors[BALL_POKE] (0x7ADF) during the recall/send-in fade.
   // Only the player side -- the opponent sprite's OBJ row is never touched
@@ -55502,7 +55655,12 @@ export function renderBattleResolutionSceneOffView(
       }
       const heldItem = generalAnimation?.heldItem;
       const rotated = heldItem?.side === "opponent" ? heldItem.rotation : null;
-      if (rotated) {
+      if (futureSightHit?.targetSide === "opponent") {
+        drawFutureSightTarget(
+          view.fieldArt.opponent,
+          view.fieldArt.opponent.origin.y - battleCommandFieldArtElevation(view.fieldArt.opponent, "opponent"),
+        );
+      } else if (rotated) {
         drawSpriteSheetAffineRotate(
           fb,
           view.fieldArt.opponent.pic.tileset as Tileset,
@@ -55535,6 +55693,8 @@ export function renderBattleResolutionSceneOffView(
         view.fieldArt.player.origin.y,
         faint.sink.skipPixelRows,
       );
+    } else if (futureSightHit?.targetSide === "player") {
+      drawFutureSightTarget(view.fieldArt.player, view.fieldArt.player.origin.y);
     } else if (generalAnimation?.heldItem?.side === "player" && generalAnimation.heldItem.rotation) {
       const rotated = generalAnimation.heldItem.rotation;
       drawSpriteSheetAffineRotate(
@@ -55571,6 +55731,13 @@ export function renderBattleResolutionSceneOffView(
         fb, battleAnimItemHeal.ring.tileset, battleAnimItemHeal.ring.palette, center.x, center.y,
         ring.pa, ring.pb, ring.pc, ring.pd, PLAYER_BALL_OPEN_VISIBLE_BOTTOM,
       );
+    }
+  }
+  if (generalAnimation?.wishHeal) {
+    const { row, center, opponent } = generalAnimation.wishHeal;
+    if (row.grantingStarAge !== null) drawGrantingStarsAtAge(fb, row.grantingStarAge, center, opponent);
+    for (const star of row.blueStars) {
+      drawSpriteSheet(fb, subTileset(moonlightArt.blueStar.tileset, star.frame * 4, 4), moonlightArt.blueStar.palette, star.x - 16, star.y - 16);
     }
   }
   if (fade?.bgCopy) drawSubstituteFadeBgCopy(fb, fade.bgCopy);

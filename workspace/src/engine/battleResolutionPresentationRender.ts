@@ -1400,6 +1400,9 @@ function applyCompletedCommand(
  * length less that age, on every path (restart 25, continuation 19; docs/hie2-held-item-render.md). Negative for the cure berry (-12):
  * its animation starts that many frames inside the preceding 32-frame status command, so the held-item view starts at age 12.
  */
+/** wsh2: frames after the command starts that the General_* script's first command runs (age 0 of its draw; docs/wsh1-general-anim-commands.md). */
+const GENERAL_SCRIPT_START_FRAMES: Readonly<Record<string, number>> = Object.freeze({ FOCUS_BAND: 8 });
+
 function heldItemEffectAge0Frames(minimumFrames: number): number {
   return minimumFrames - SITRUS_ITEM_HEAL_TEXT_FIRST_AGE;
 }
@@ -2448,7 +2451,7 @@ export function createBattleResolutionPresentationRenderView(
       const castform = command.animation === "CASTFORM_CHANGE";
       effect = Object.freeze({
         type: "general-animation", battler: command.battler, animation: command.animation,
-        age: state.lifecycle.phaseElapsed - (castform ? CASTFORM_CHANGE_LEAD_FRAMES + (command.castformLeadExtra ?? 0) : 1),
+        age: state.lifecycle.phaseElapsed - (castform ? CASTFORM_CHANGE_LEAD_FRAMES + (command.castformLeadExtra ?? 0) : GENERAL_SCRIPT_START_FRAMES[command.animation] ?? 1),
         ...(castform ? { castformForm: command.castformForm ?? 0 } : {}),
         ...(state.liveMoveBattlerX2Input === undefined ? {} : { battlerX2Input: state.liveMoveBattlerX2Input }),
       });
