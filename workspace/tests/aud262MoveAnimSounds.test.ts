@@ -108,7 +108,7 @@ describe("Water Spout (aud262)", () => {
 
 // Memento: the first wait ends with AnimTask_MoveAttackerMementoShadow (battle_anim_dark.c:408-535), 46 half-rate calls + (TOP - 7 - d8) / 8 + 1 window-lowering calls + 8 closing + 2, where
 // TOP = BATTLER_COORD_ATTR_TOP of the attacker (pic Y - height / 2, battle_anim_mons.c:2277). The ROM's third SE (SE_M_PSYBEAM at the target) follows it by 25 + n frames; the table carries one
-// variant per attacker TOP class. (The ROM's start frame is 108 earlier than ours in all five windows: a constant, the #198 lead class, not a lifetime error.)
+// variant per attacker TOP class. (The ROM's start frame is 7 earlier than ours in all five windows: a constant, the body-to-sound row class. It was 108 until mem2 -- the attacker's INSTANT_HP_BAR_DROP was presented as a 106-row drain before the body.)
 describe("Memento (aud262)", () => {
   const entry = timing.moves[262]! as unknown as { label: string; gated: number[]; top: number[] };
   const grids = timing as unknown as { topYs: number[][]; topGrids: number[][] };
@@ -130,7 +130,7 @@ describe("Memento (aud262)", () => {
       expect(rows.map((e) => e.id)).toEqual([189, 200, 189]);
       expect([rows[1]!.frame - rows[0]!.frame, rows[2]!.frame - rows[1]!.frame]).toEqual([50, romGap]);
       expect(gap(slot, top)).toBe(romGap);
-      expect(expectConstantOffset(rom, [189, 200], 3, "first")).toBe(-108);
+      expect(expectConstantOffset(rom, [189, 200], 3, "first")).toBe(-7);
     });
   }
 });

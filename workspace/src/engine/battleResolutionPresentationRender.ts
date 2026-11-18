@@ -1795,6 +1795,7 @@ export function battleResolutionCommandDuration(
     case "hit-animation":
       return command.timing.minimumFrames;
     case "hp": {
+      if (command.timing.instantDrop) return command.timing.tailFrames ?? 0;
       const maxHp = fieldBattler(field, command.battler).maxHP;
       return Math.max(
         command.timing.minimumFrames,
@@ -2438,16 +2439,20 @@ export function createBattleResolutionPresentationRenderView(
           `battle resolution HP controller ${command.healthValue} resolves ${command.from}->${semanticEndpoint}, event endpoint is ${command.to}`,
         );
       }
-      const barProgram = { maxHp: battler.maxHP, from: command.from, to: command.to };
+      // mem2: INSTANT_HP_BAR_DROP -- SetBattleBarStruct(maxHP, 0, 0x7FFF): the HP text empties on timing.instantDrop's row, the bar graphic one row later.
+      const instantRow = command.timing.instantDrop;
+      const elapsed = state.lifecycle.phaseElapsed;
+      const barProgram = { maxHp: battler.maxHP, from: command.from, to: instantRow === undefined ? command.to : command.from };
       field = withDisplayedHp(
         field,
         command.battler,
-        battleHealthBarValueAtFrame(barProgram, state.lifecycle.phaseElapsed),
+        instantRow !== undefined ? (elapsed >= instantRow ? command.to : command.from) : battleHealthBarValueAtFrame(barProgram, elapsed),
       );
       // hpb202: below the bar's 48 pixels the Q_24_8 currValue (not the integer HP text) fills the bar.
       hpTarget = Object.freeze({
         battler: command.battler, to: command.to,
-        ...(battler.maxHP < 48 ? { barFill: battleHealthBarFillValueAtFrame(barProgram, state.lifecycle.phaseElapsed) } : {}),
+        ...(instantRow !== undefined ? { barFill: elapsed > instantRow ? command.to : command.from }
+          : battler.maxHP < 48 ? { barFill: battleHealthBarFillValueAtFrame(barProgram, elapsed) } : {}),
       });
     } else if (command.type === "move-animation" && command.animation) {
       const lead = liveMoveIdleLeadRows(command.animation, field);
