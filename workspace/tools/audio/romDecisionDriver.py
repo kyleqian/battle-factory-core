@@ -134,6 +134,7 @@ class RomDriver:
         self.pending = None  # "real" / "probe": the last decision closed at a menu the player chose at; checked when the next action menu opens
         self.left_selection = False  # gBattleMainFunc left HandleTurnActionSelectionState since that decision closed
         self.party_commit = None  # (frame, "real" | "probe") of the A that picked a party slot
+        self.party_pick = None
         self.switch_open = False  # a real switch's anchor stays open from the first party A until the SEND OUT / SHIFT confirm is seen (bal1)
 
     def classify(self, obs):
@@ -186,6 +187,7 @@ class RomDriver:
             close_task = self.funcs.get(PARTY_CLOSE_TASK_NAME)
             if (close_task is not None and close_task in obs["partyTasks"]) or kind != "party":
                 self.switch_open = False
+                self.current["pickFrame"] = self.party_pick  # the first A (the pre-bal1 commit), kept for before / after scoring
                 self.close_anchor(self.frame)
         if state != self.last_state:
             self.trace.append((self.frame, state))
@@ -268,7 +270,7 @@ class RomDriver:
             if probe:
                 self.close_anchor()
             else:
-                self.switch_open = True
+                self.switch_open, self.party_pick = True, self.frame + 1
             self.block = "party"
             return self.press("A")
         if state == "party-other":
