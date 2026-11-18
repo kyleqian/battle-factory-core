@@ -1355,7 +1355,7 @@ function sourcePauseUsedMoveHoldFrames(
       ) return null;
       if (
         instruction.opcodeName === "B_SCR_OP_PAUSE"
-        && instruction.operands[0]?.expression === "B_WAIT_TIME_SHORT"
+        && (instruction.operands[0]?.expression === "B_WAIT_TIME_SHORT" || instruction.operands[0]?.expression === "B_WAIT_TIME_LONG")
       ) return next - used + 1;
       // fix122 (aud118 DEFECT B): a ROM-proven attackanimation reached with no
       // receipt took Cmd_attackanimation's MOVE_RESULT_NO_EFFECT branch, which
@@ -1366,6 +1366,24 @@ function sourcePauseUsedMoveHoldFrames(
     return null;
   }
   return null;
+}
+/**
+ * pau2 (docs/pau1-script-pauses.md "pau2"): the script labels whose print has NO "X used Y!" anchor (an end-of-turn script
+ * started by BattleScriptExecute), so sourcePauseUsedMoveHoldFrames can never see their pre-print `pause`. Each is a ROM-measured
+ * label: BattleScript_SafeguardEnds = `pause B_WAIT_TIME_SHORT` 32 rows, then the print (psn4, docs/aud249-general-anim-sounds.md,
+ * seeds 3738 / 499 ROM replays). The switch-in ability prints (Drizzle, Trace, Sand Stream, Drought, Intimidate) sit behind the
+ * ability pop-up and are unmeasured, so they are not listed.
+ */
+export const ANCHORLESS_PRE_PRINT_PAUSE_LABELS = Object.freeze(["BattleScript_SafeguardEnds"] as const);
+const WAIT_TIME_FRAMES: Readonly<Record<string, number>> = Object.freeze({ B_WAIT_TIME_SHORT: 32, B_WAIT_TIME_LONG: 64 });
+/** The source `pause`'s length when the print at `messageIndex` is the first print of a listed anchor-less script; else null. */
+export function anchorlessPrePrintPauseFrames(event: BattleKernelSemanticEvent): number | null {
+  const provenance = event.provenance;
+  if (provenance === undefined || provenance.programCounter < 1) return null;
+  if (!(ANCHORLESS_PRE_PRINT_PAUSE_LABELS as readonly string[]).includes(provenance.sourceLabel)) return null;
+  const instruction = BATTLE_SCRIPT_PROGRAM.instructions[provenance.programCounter - 1];
+  if (instruction?.opcodeName !== "B_SCR_OP_PAUSE") return null;
+  return WAIT_TIME_FRAMES[instruction.operands[0]?.expression ?? ""] ?? null;
 }
 /**
  * hie1: the executions the interpreter spent on the way to `events[index]` and the lead the controller adds. A restart (the event's
@@ -4651,6 +4669,16 @@ export function projectBattleResolutionCommands(
             timing: Object.freeze({ minimumFrames: heldItemHold }),
           }));
         }
+      }
+      const prePrintPause = anchorlessPrePrintPauseFrames(event);
+      if (prePrintPause !== null) {
+        commands.push(Object.freeze({
+          type: "move-animation",
+          ...((beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) === 0 ? { actionTransition: true as const } : {}),
+          eventSequence: event.sequence,
+          battler: lastMoveAttacker ?? 0,
+          timing: Object.freeze({ minimumFrames: prePrintPause }),
+        }));
       }
       commands.push(Object.freeze({
         type: "message",

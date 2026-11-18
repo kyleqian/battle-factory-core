@@ -2133,6 +2133,10 @@ export const APP_STAGES: Readonly<Record<string, AppStage>> = {
   "aud242o-triattack-player-on": (state) => aud241bStage(state, "aud242o-triattack-player-on", "on", 50, 12, 161, undefined, false, 69),
   "aud242o-rollout-player-on": (state) => aud241bStage(state, "aud242o-rollout-player-on", "on", 50, 12, 205, undefined, false, 69),
   // hpd1: fixed-damage hit-hold windows (tools/integration/hpd1Labs.py, docs/hpd1-hp-hold.md): the Lv100 foe uses Defense Curl, the player's fixed-damage move follows.
+  "out2-horndrill-on": (state) => aud241bStage(state, "out2-horndrill-on", "on", 10, 100, 32, undefined, false, 111),
+  "out2-horndrill-off": (state) => aud241bStage(state, "out2-horndrill-off", "off", 10, 100, 32, undefined, false, 111),
+  "pau2-toxic-on": (state) => aud241bStage(state, "pau2-toxic-on", "on", 50, 50, 92, undefined, false, 92),
+  "pau2-toxic-off": (state) => aud241bStage(state, "pau2-toxic-off", "off", 50, 50, 92, undefined, false, 92),
   "hpd1-sonicboom-on": (state) => aud241bStage(state, "hpd1-sonicboom-on", "on", 50, 100, 49, undefined, false, 111),
   "hpd1-sonicboom-off": (state) => aud241bStage(state, "hpd1-sonicboom-off", "off", 50, 100, 49, undefined, false, 111),
   "hpd1-dragonrage-on": (state) => aud241bStage(state, "hpd1-dragonrage-on", "on", 50, 100, 82, undefined, false, 111),
