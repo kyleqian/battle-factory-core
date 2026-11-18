@@ -22,7 +22,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   permanent-list drive. Luck hunt day 1: 6 / 6 ROM match; luck2-4 + ice1: rare rules **53 -> 61 / 110** (+2 Rollout / Ice Ball stages); the hunter skips covered rules; open designs R035 / R040 / R110.
 - **Lobby (#221):** lbw6 (`lbw6-*-off` 156 / 156, 183 / 183, 128 / 128; five pose residuals fixed; every Lobby trace equal or better).
 - **Gates (final engine `a7cf4dfdb`):** vanilla 0:20 OFF **20 / 20**, ON **20 / 20**; 0:60 default / winning / winning-swap **60 / 60** each; varied-RNG winning carry 0 / 14 / 28 + winning-swap
-  carry 0 **100 / 100** each. Full suite on `6909b8d6c` (4 workers): **15,935 passed, 0 failed**; build / build:lib 0. PLAYRANDOM. (A first full suite on `a7cf4dfdb` had 14 failures in 9
+  carry 0 **100 / 100** each. Full suite on `6909b8d6c` (4 workers): **15,935 passed, 0 failed**; build / build:lib 0. `play:random --minutes 10 --scene both --lobby-new-challenge` on `6909b8d6c`: ON 36 battles / 16 swaps, OFF 69 / 22; **0 page / console errors, 0 overlays**. (A first full suite on `a7cf4dfdb` had 14 failures in 9
   files from hpd4 / hpd5: fixed test-side by hpd6; a revert of hpd4 / hpd5 was prepared as fallback and not needed.) Log backup not run (`rclone` not installed).
 - **Next:** frame alignment: audit more bodies for the script lead (hpd4 method; each moves frames: census identity + soaks + `randomRoundSoak` / `lbrd` re-pins, see their pin notes),
   Memento's 108-frame SE offset, Water Spout / Status_* second-play residuals (#219); #221 Lobby leftovers; #222. Luck-hunt summary + nightly replay at run start; prune census trees.
