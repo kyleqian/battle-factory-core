@@ -1903,13 +1903,21 @@ function knockoffHpTiming(events: readonly BattleKernelSemanticEvent[], index: n
  * 13 long on a 9-row bar). Returns the tail, or null when the next event is not that print.
  */
 const HP_MESSAGE_SETUP_ROWS = 2;
+/**
+ * hpf2: the hpf1 hp -> print hold (`datahpupdate` row + script rows to the print + 2) also holds for a heal (Rest / Recover / Soft-Boiled / Milk Drink /
+ * Moonlight / Curse), a recoil and a drain's `printfromtable`: all `healthbarupdate; datahpupdate; <print>`, so the rule is the opcode's, not the move's.
+ */
+const HP_HIT_EFFECT_OPCODES: ReadonlySet<string> = new Set(["B_SCR_OP_CRITMESSAGE", "B_SCR_OP_RESULTMESSAGE"]);
+const HP_MESSAGE_OPCODES: ReadonlySet<string> = new Set(["B_SCR_OP_CRITMESSAGE", "B_SCR_OP_RESULTMESSAGE", "B_SCR_OP_PRINTSTRING", "B_SCR_OP_PRINTFROMTABLE"]);
+/** hpf2: a hit's bar then the turn end's first print (hail / sandstorm / poison): the ROM's bar -> print rise is the bar's rows + 17 = MoveEnd rows 7 + 2 sprite rows + 8. */
+const HP_END_TURN_PRINT_LEAD_ROWS = 8;
 function hpMessageLeadRows(events: readonly BattleKernelSemanticEvent[], index: number): number | null {
   const event = events[index]!;
   const programCounter = event.provenance?.programCounter;
   if (programCounter === undefined || BATTLE_SCRIPT_PROGRAM.instructions[programCounter]?.opcodeName !== "B_SCR_OP_DATAHPUPDATE") return null;
   const next = events[index + 1];
   const opcodeName = next?.provenance?.opcodeName;
-  if (next?.payload.kind !== "message" || (opcodeName !== "B_SCR_OP_CRITMESSAGE" && opcodeName !== "B_SCR_OP_RESULTMESSAGE")) return null;
+  if (next?.payload.kind !== "message" || !HP_MESSAGE_OPCODES.has(opcodeName ?? "")) return null;
   const hpExecution = event.provenance?.instructionExecution;
   const messageExecution = next.provenance?.instructionExecution;
   return hpExecution === undefined || messageExecution === undefined || messageExecution <= hpExecution
@@ -1925,7 +1933,13 @@ function hpFaintNext(events: readonly BattleKernelSemanticEvent[], index: number
   return programCounter !== undefined && BATTLE_SCRIPT_PROGRAM.instructions[programCounter]?.opcodeName === "B_SCR_OP_DATAHPUPDATE"
     && events[index + 1]?.payload.kind === "play-faint-cry";
 }
-interface HpLeadRows { readonly moveEndRows: number | null; readonly messageRows: number | null; readonly faintNext: boolean }
+interface HpLeadRows {
+  readonly moveEndRows: number | null; readonly messageRows: number | null; readonly faintNext: boolean;
+  /** The print after `datahpupdate` is the hit's own effect message (critmessage / resultmessage). */
+  readonly hitEffectMessage: boolean;
+  /** The `healthbarupdate` instruction's execution (the bar's own row). */
+  readonly barExecution: number | undefined;
+}
 /** Applies the hpd1 / hpf1 tail to the plain hp commands of a finished command list (see hpMoveEndLeadRows, hpMessageLeadRows). */
 function applyHpHitTails(
   commands: BattleResolutionPresentationCommand[],
@@ -1940,10 +1954,19 @@ function applyHpHitTails(
     const endsTurn = rest.length > 0 && rest.every((c) => c.type === "sprite-visibility" || c.type === "turn-end");
     const previous = commands[index - 1];
     const hit = previous?.type === "hit-animation" && previous.battler === command.battler;
-    if (command.battler === 0 && !hit) continue;
+    const next = rest[0];
+    const nextLeads = next?.type === "hp" && next.timing === HP_TIMING ? leadRows.get(next.eventSequence) : undefined;
+    const bars = hit && leads.barExecution !== undefined && nextLeads?.barExecution !== undefined && nextLeads.barExecution > leads.barExecution
+      ? nextLeads.barExecution - leads.barExecution : 0;
+    const endTurnPrint = hit && leads.moveEndRows !== null && rest[0]?.type === "sprite-visibility" && rest[1]?.type === "sprite-visibility" && rest[2]?.type === "message";
+    const heal = command.to > command.from;
+    const afterHp = previous?.type === "hp";
+    const printHold = next?.type === "message" && leads.messageRows !== null && ((hit && leads.hitEffectMessage) || heal || afterHp);
+    if (!hit && !printHold && command.battler === 0) continue;
     const faint = hit && rest[0]?.type === "faint" && leads.faintNext;
     const tailFrames = transition ? (leads.moveEndRows === null ? 0 : HP_DATAHPUPDATE_ROW_FRAMES)
-      : endsTurn ? leads.moveEndRows ?? 0 : hit && rest[0]?.type === "message" ? leads.messageRows ?? 0 : 0;
+      : endsTurn ? leads.moveEndRows ?? 0 : bars > 0 ? bars : endTurnPrint ? leads.moveEndRows! + HP_END_TURN_PRINT_LEAD_ROWS
+      : printHold ? leads.messageRows! : 0;
     if (faint) commands[index] = Object.freeze({ ...command, timing: Object.freeze({ minimumFrames: 0 }) });
     else if (tailFrames > 0) commands[index] = Object.freeze({ ...command, timing: Object.freeze({ minimumFrames: 0, tailFrames }) });
   }
@@ -5159,7 +5182,8 @@ export function projectBattleResolutionCommands(
       const moveEndRows = drainRole === null ? hpMoveEndLeadRows(events, index) : null;
       const messageRows = drainRole === null ? hpMessageLeadRows(events, index) : null;
       const faintNext = drainRole === null && hpFaintNext(events, index);
-      if (moveEndRows !== null || messageRows !== null || faintNext) hpLeadRows.set(health.eventSequence, { moveEndRows, messageRows, faintNext });
+      const hitEffectMessage = HP_HIT_EFFECT_OPCODES.has(events[index + 1]?.provenance?.opcodeName ?? "");
+      hpLeadRows.set(health.eventSequence, { moveEndRows, messageRows, faintNext, hitEffectMessage, barExecution: health.instructionExecution });
       commands.push(Object.freeze({
         type: "hp",
         eventSequence: health.eventSequence,

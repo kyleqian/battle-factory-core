@@ -431,7 +431,8 @@ describe("random round soak driver (green milestone pin)", () => {
       // frames only + render calls, 41_240 -> 41_376, renderCalls 2_914 -> 2_916; same battle 7, turn 3, end state, diagnostics.
       // ais4 (the opponent faint replacement's send-in runs the AI timeline): frames only + render calls, 41_376 -> 41_369, renderCalls 2_916 -> 2_913; same battle 7, turn 3, end state, diagnostics.
       // hpf1 (floor-free hit -> message / faint-chain / turn-end hp commands): frames + render calls, 41_369 -> 41_351, renderCalls 2_913 -> 2_918; same battle 7, turn 3, end state, diagnostics.
-      frames: 41_351,
+      // hpf2 (heal / recoil / drain hp -> print holds, hit -> end-turn print: ROM-measured): frames + render calls, 41_351 -> 41_048, renderCalls 2_918 -> 2_892; same battle 7, turn 3, end state, diagnostics.
+      frames: 41_048,
       battle: 7,
       turn: 3,
       diagnostics: {
@@ -443,7 +444,7 @@ describe("random round soak driver (green milestone pin)", () => {
         terminalOutcome: "roundWon",
         terminalRecordMenuInputReadyReached: true,
         terminalRecordChoice: "no",
-        renderCalls: 2_918,
+        renderCalls: 2_892,
       },
     });
     expect(second).toEqual(first);
@@ -988,12 +989,13 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // sta3 (the action transition into a pre-move print + its 3 launch rows): frames only, 21940 -> 21985; same battle 1 / turn 35 / roundLost.
       // hpd5 (measured on the hpd4 tip f40209793; the floor-free foe-hit hold changes the exploring policy's press phases): 21985 / turn 35 -> 28708 / turn 46; same battle 1 / depth 0 / roundLost.
       // hpf1: 28708 / turn 46 -> 56022 / turn 15 (battle 1 / depth 0 -> battle 3 / depth 2; the exploring presses land on new phases); still roundLost.
-      frames: 56022,
+      // hpf2: 56022 / turn 15 -> 92558 / turn 27 (battle 3 / depth 2 -> battle 5 / depth 4; the exploring presses land on new phases); still roundLost.
+      frames: 92558,
       outcome: "OK",
       endState: "roundLost",
-      maxBattleDepth: 2,
-      battle: 3,
-      turn: 15,
+      maxBattleDepth: 4,
+      battle: 5,
+      turn: 27,
     });
   });
 
