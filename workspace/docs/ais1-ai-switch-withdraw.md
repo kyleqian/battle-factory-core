@@ -158,6 +158,11 @@ Matched frames (oracle vs app, `npm run compare`): `obr251-opponent-faint-off` 6
 
 100 / 100 battles per scene with identical `eventsDigest`, errors and command-type sequences (0 bad). 91 battles per scene change exactly one command each: the opponent `switch-in` after the party-summary (a faint replacement), fields duration, `sendInVisualDelay`, healthbox slide, total frames, each +2. Nothing else moves.
 
+### Pins
+
+`aud253` `DELTAS["2741"]` `[0, 0, 1, 1]` -> `[0, 0, 0, 0]`. `plr162` Scene ON opponent send-ins add the `aiSwitch` 2 (a faint replacement). Soak-trajectory pins moved by the +2 frames per replacement (outcomes unchanged): `randomRoundSoak` seven-win milestone frames 41376 -> 41369, renderCalls 2916 -> 2913; M-B (c) seed 0 frames 39649 -> 39712 (same battle 2 / turn 24 / roundLost);
+the carry-14 winning seed 4 -> 2 (scan 0..10); `lbrd` seeds 17 -> 4 (scan 1..12 on the full file: 4 passes 15 / 15). `npm run soak -- --policy vanilla --seeds 0:20` 20 / 20 OK (budget). `npm run typecheck` / the `tsc -b` half of `npm run build` exit 1 on the base too: the same 10 errors in `tools/compare/appTrace.ts` (merge debris: duplicate imports / `rngSeed`, two configs without `moveId`) and `oracleClient.ts` (no pngjs types); `vite build` exits 0.
+
 ### Residuals / open (not fixed here)
 
 - Scene OFF: the ROM's `\p` that ends the fainted text clears the box at A+1 (ON does not); the post-send-in text clear is 9 frames early in OFF (app 727 / ROM 736; menu 733 / 742) and 1 frame late in ON (824 / 823).
