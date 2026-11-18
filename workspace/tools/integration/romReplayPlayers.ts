@@ -10,6 +10,8 @@
 //              power x type effectiveness against the opponent's active Pokemon (the type chart, both types) x 1.5 for a move of the user's own type x accuracy;
 //              a move without power (status moves, power 1 like the OHKO moves) scores 0, and when every legal move scores 0 the least-used legal move. Never a
 //              voluntary switch; a forced replacement is the legal Pokemon whose best move scores highest against the opponent's active Pokemon.
+//   power-eps  (round replay, the unbroken run's other tries) power-v1 with a seeded random part: a uniformly random legal move in 3 turns of 10, a
+//              uniformly random legal voluntary switch in 1 of 10 (when the engine offers one), a uniformly random legal replacement in 3 of 10.
 //   script     a staged battle (docs/parity-mac/staged-battles.md): the actions are written down, one per turn; when the list ends another player takes over.
 //              A written action the engine does not offer stops the replay (the staging is wrong), it is never bent into something else.
 // Every player draws from its own generator, seeded from the battle seed and the policy name. None reads or advances the battle RNG, and none touches the state the
@@ -29,7 +31,7 @@ import speciesTypesData from "../../src/data/gen/species-types.json" with { type
 import movesData from "../../src/data/gen/moves.json" with { type: "json" };
 import typeEffectivenessData from "../../src/data/gen/type-effectiveness.json" with { type: "json" };
 
-export const PLAYER_POLICIES = ["census", "ai-v1", "random-v1", "power-v1"] as const;
+export const PLAYER_POLICIES = ["census", "ai-v1", "random-v1", "power-v1", "power-eps"] as const;
 export type PlayerPolicyName = (typeof PLAYER_POLICIES)[number];
 
 /** One written turn of a staged battle: exactly one of move / switch, with optional refusal probes before it. */
@@ -142,7 +144,8 @@ export function createPlayer(name: PlayerPolicyName, seed: number): Player {
     };
   }
 
-  if (name === "power-v1") {
+  if (name === "power-v1" || name === "power-eps") {
+    const eps = name === "power-eps";
     const score = (move: number, userTypes: readonly string[], targetTypes: readonly string[]) => {
       const m = (movesData as any).moves[move];
       if (!m || m.id !== move || m.power <= 1) return 0;
@@ -160,12 +163,18 @@ export function createPlayer(name: PlayerPolicyName, seed: number): Player {
       name, stats,
       chooseTurn: (menu) => {
         const user = menu.rules.battlers[0]; const target = menu.rules.battlers[1];
+        if (eps && !menu.forcedMove) {
+          const roll = rand();
+          if (roll < 0.1 && menu.legalSwitches.length > 0) return done({ probes: [], action: { kind: "switch", partyIndex: pick(rand, menu.legalSwitches) }, source: "eps-switch" });
+          if (roll < 0.4 && menu.legalSlots.length > 0) return done({ probes: [], action: { kind: "move", slot: pick(rand, menu.legalSlots) }, source: "eps-move" });
+        }
         const slot = bestOf(user.moves, user.types, target.types, menu.legalSlots);
         if (menu.legalSlots.length === 0 || score(user.moves[slot], user.types, target.types) === 0) return done({ probes: [], action: { kind: "move", slot: censusMove(menu.legalSlots) }, source: "power-none" });
         return done({ probes: [], action: { kind: "move", slot }, source: "power" });
       },
       chooseReplacement: (rules, legal) => {
         count("replacements");
+        if (eps && rand() < 0.3) return pick(rand, legal);
         const target = rules.battlers[1]; const party = rules.party.player as any[];
         const value = (i: number) => { const m = party[i]; const types = typesOfSpecies(m.species); return Math.max(0, ...[0, 1, 2, 3].map((s) => score(m.moves[s], types, target.types))); };
         return legal.reduce((best, i) => (value(i) > value(best) ? i : best), legal[0]!);
@@ -314,13 +323,16 @@ export function createScriptPlayer(seed: number, script: PlayerScript): Player {
 //   weakest  swaps out the player's Pokemon with the lowest stat total (max HP + the five stats; the lowest party index on a tie) for the beaten trainer's Pokemon
 //            with the highest stat total that the swap screen accepts; NO when none is accepted.
 //   random   NO with probability 1/2; else a uniformly random own Pokemon for a uniformly random accepted one of the beaten trainer's; NO when none is accepted.
+//   upgrade  weakest's swap only when it does not make the team weaker: the incoming Pokemon's stat total is at least the outgoing one's; else NO.
+//   pace     (the unbroken run) weakest after every won battle of the run's first two rounds (battles 1..14: 14 rents with the two drafts, so the
+//            fourth round's draft has a better slot), upgrade from then on.
 //   cancel   YES at the prompt, then backs out of the swap screen and keeps the team: half the time from the player's own list (B, "Quit swapping?" YES),
 //            half the time after choosing a uniformly random own Pokemon and SWAP, from the beaten trainer's list (B, YES). The engine gets the
 //            screen's result, a kept team ({type: "decline"}, factorySwapRoundDecision's keptParty); the script then skips factory_setswapped
 //            (BattleFactoryPreBattleRoom scripts.inc:151-158).
 // The swap screen refuses a Pokemon whose species one of the two kept Pokemon already has ("Can't have the same POKeMON", Swap_AlreadyHasSameSpecies,
 // battle_factory_screen.c:4162-4173); the swapped-out Pokemon's own species is allowed. A policy never picks a refused one.
-export const SWAP_POLICIES = ["never", "weakest", "random", "cancel"] as const;
+export const SWAP_POLICIES = ["never", "weakest", "random", "cancel", "upgrade", "pace"] as const;
 export type SwapPolicyName = (typeof SWAP_POLICIES)[number];
 export type SwapMon = Readonly<{ species: number; statTotal: number }>;
 export type SwapChoice = Readonly<{ type: "decline" } | { type: "accept"; playerPartyIndex: number; opponentPartyIndex: number }
@@ -339,7 +351,8 @@ export function createSwapPolicy(name: SwapPolicyName, seed: number) {
   const rand = generator(seed, `swap-${name}`);
   const stats: Record<string, number> = {};
   const count = (k: string) => { stats[k] = (stats[k] ?? 0) + 1; };
-  const choose = (player: readonly SwapMon[], opponent: readonly SwapMon[]): SwapChoice => {
+  const choose = (player: readonly SwapMon[], opponent: readonly SwapMon[], runBattleIndex = 0): SwapChoice => {
+    if (name === "pace") return (runBattleIndex < 14 ? weakestPolicy : upgradePolicy).choose(player, opponent);
     if (player.length !== 3 || opponent.length !== 3) throw new Error("a swap needs the player's three and the beaten trainer's three");
     if (name === "never") { count("declined"); return { type: "decline" }; }
     if (name === "cancel") {
@@ -347,11 +360,12 @@ export function createSwapPolicy(name: SwapPolicyName, seed: number) {
       count(`cancelled-${at}`);
       return { type: "cancel", at, playerPartyIndex: Math.floor(rand() * 3) };
     }
-    if (name === "weakest") {
+    if (name === "weakest" || name === "upgrade") {
       const p = player.reduce((best, m, i) => (m.statTotal < player[best]!.statTotal ? i : best), 0);
       const accepted = acceptedSwapTargets(player, opponent, p);
       if (accepted.length === 0) { count("noneAccepted"); return { type: "decline" }; }
       const q = accepted.reduce((best, i) => (opponent[i]!.statTotal > opponent[best]!.statTotal ? i : best), accepted[0]!);
+      if (name === "upgrade" && opponent[q]!.statTotal < player[p]!.statTotal) { count("noUpgrade"); return { type: "decline" }; }
       count("swapped");
       return { type: "accept", playerPartyIndex: p, opponentPartyIndex: q };
     }
@@ -364,3 +378,5 @@ export function createSwapPolicy(name: SwapPolicyName, seed: number) {
   };
   return { name, stats, choose };
 }
+const weakestPolicy = createSwapPolicy("weakest", 0);
+const upgradePolicy = createSwapPolicy("upgrade", 0);

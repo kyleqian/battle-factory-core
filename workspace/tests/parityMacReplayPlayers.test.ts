@@ -93,7 +93,15 @@ describe("round replay swap policies and power-v1", () => {
   });
 
   it("never declines, weakest swaps the lowest stat total for the highest accepted one, random is seeded and only picks accepted ones", () => {
-    expect(SWAP_POLICIES).toEqual(["never", "weakest", "random", "cancel"]);
+    expect(SWAP_POLICIES).toEqual(["never", "weakest", "random", "cancel", "upgrade", "pace"]);
+    // pace: weakest in the run's first fourteen battles, upgrade after.
+    const weaker = [{ species: 10, statTotal: 900 }, { species: 40, statTotal: 450 }, { species: 30, statTotal: 499 }];
+    expect(createSwapPolicy("pace", 1).choose(player, weaker, 13)).toEqual({ type: "accept", playerPartyIndex: 1, opponentPartyIndex: 2 });
+    expect(createSwapPolicy("pace", 1).choose(player, weaker, 14)).toEqual({ type: "decline" });
+    // upgrade: the weakest's swap (player 1 for opponent 2, 500 -> 800); declined when the best accepted one is weaker than the outgoing one.
+    expect(createSwapPolicy("upgrade", 1).choose(player, opponent)).toEqual({ type: "accept", playerPartyIndex: 1, opponentPartyIndex: 2 });
+    expect(createSwapPolicy("upgrade", 1).choose(player, [{ species: 10, statTotal: 900 }, { species: 40, statTotal: 450 }, { species: 30, statTotal: 499 }]))
+      .toEqual({ type: "decline" });
     const cancels = (() => { const c = createSwapPolicy("cancel", 5); return Array.from({ length: 20 }, () => c.choose(player, opponent)); })();
     expect(cancels.every((c) => c.type === "cancel")).toBe(true);
     expect(new Set(cancels.map((c: any) => c.at))).toEqual(new Set(["player", "enemy"]));

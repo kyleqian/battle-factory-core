@@ -2,7 +2,7 @@
 
 Usage (cwd = workspace/, through tools/run-mgba-probe.py like every mGBA probe):
   python3 tools/run-mgba-probe.py OUT.json -- python3 tools/audio/romRoundDriver.py OUT.json REQ.json --seed N --profile off|on \
-      --policy census|ai-v1|random-v1|power-v1 --swap never|weakest|random --dir WORKDIR [--challenge C] [--frames CAP] [--frame-budget N] [--prompt-delay K@N] [--symbols 0|1] [--rounds R]
+      --policy census|ai-v1|random-v1|power-v1 --swap never|weakest|random --dir WORKDIR [--challenge C] [--frames CAP] [--frame-budget N] [--prompt-delay K@N] [--symbols 0|1] [--rounds R] [--draft first|strongest] [--search-wins N] [--stop-on-loss] [--stage-rents N]
 
 REQ.json is the factoryLegal request of the round's first battle (`soundCensusRomReplay.ts request --round=1`). The lab stages that battle as for a single
 replay (oracle/battle_lab.py prepare). From then on nothing is staged: the ROM plays the round itself.
@@ -180,6 +180,23 @@ class Rom:
             raise RoundError(f"no three selectable rentals in {set_ids}")
         return picked
 
+    def strongest_positions(self):
+        """The unbroken run's draft rule (soundCensusRomReplay.ts strongestPositions): the three rentals with the highest stat totals (max HP + the five
+        stats, read from the select screen's own Pokemon), no species twice, ties to the lower position, in that order."""
+        ptr = self.u32(self.st["sFactorySelectScreen"])
+        mons = []
+        for i in range(6):
+            base = ptr + SELECT_MONS + i * SELECT_MON_SIZE
+            data = base + 8
+            mons.append((self.u16(base), sum(self.u16(data + off) for off in (88, 90, 92, 94, 96, 98))))
+        order = sorted(range(6), key=lambda i: (-mons[i][1], i))
+        picked = []
+        for i in order:
+            species = self.lab.catalog.mon(mons[i][0]).species
+            if len(picked) < 3 and all(self.lab.catalog.mon(mons[j][0]).species != species for j in picked):
+                picked.append(i)
+        return picked, [m[1] for m in mons]
+
     def select_buttons(self, positions):
         """One frame of the rental select screen: rent `positions` in order (cursor, A, RENT, A), then YES to "Are these three OK?"."""
         ptr = self.u32(self.st["sFactorySelectScreen"])
@@ -249,7 +266,7 @@ class Rom:
         return [], None
 
 
-def drive_between(rom, swap, cap, progress, prompt_delay=0, new_round=False):
+def drive_between(rom, swap, cap, progress, prompt_delay=0, new_round=False, draft_rule="first"):
     """new_round: from the end of a round (a loss, or the seventh win) through the Lobby (the result text, the save, the record prompt), the
     attendant (the player stands facing him: A talks; take the challenge, Level 50, save YES), the walk, the new draft (the rental screen,
     driven by select_buttons with the draft rule) to the next round's first action menu. Every YES/NO there is answered A."""
@@ -280,12 +297,16 @@ def drive_between(rom, swap, cap, progress, prompt_delay=0, new_round=False):
         if select_live:
             if not new_round:
                 raise RoundError("the rental screen opened between two battles of a round")
-            if draft_positions is None:
+            choose_ready = live.get(st["Select_Task_HandleChooseMons"]) == STATE_CHOOSE_MONS_HANDLE_INPUT
+            if draft_positions is None and choose_ready:
                 draft = rom.rental_mon_ids()
-                draft_positions = rom.first_selectable_positions(draft)
-                progress["draft"] = {"rentalMons": draft, "positions": draft_positions}
+                if draft_rule == "strongest":
+                    draft_positions, totals = rom.strongest_positions()
+                else:
+                    draft_positions, totals = rom.first_selectable_positions(draft), None
+                progress["draft"] = {"rentalMons": draft, "positions": draft_positions, "rule": draft_rule, "statTotals": totals}
             phase_pulse = (phase_pulse + 1) % 4
-            pressed, what = rom.select_buttons(draft_positions)
+            pressed, what = rom.select_buttons(draft_positions) if draft_positions is not None else ([], None)
             state = f"select-{what}"
             buttons = pressed if phase_pulse == 0 else []
         elif cb2 == st["Swap_CB2"]:
@@ -350,8 +371,8 @@ def drive_between(rom, swap, cap, progress, prompt_delay=0, new_round=False):
     return progress
 
 
-def run_engine(args, setup_paths, out_path, known_k=()):
-    env = dict(os.environ, ROM_REPLAY_ROUND="1", ROM_REPLAY_SYMBOLS=str(args["symbols"]))
+def run_engine(args, setup_paths, out_path, known_k=(), variants=()):
+    env = dict(os.environ, ROM_REPLAY_ROUND="1", ROM_REPLAY_SYMBOLS=str(args["symbols"]), ROM_REPLAY_DRAFT=args["draft"])
     if args["challenge"] is not None:
         env["ROM_REPLAY_CHALLENGE"] = str(args["challenge"])
     cmd = ["node", "--experimental-strip-types", "--no-warnings", "tools/integration/soundCensusRomReplay.ts", "round", f"--seed={args['seed']}",
@@ -361,6 +382,10 @@ def run_engine(args, setup_paths, out_path, known_k=()):
         cmd.append(f"--frame-budget={args['frameBudget']}")
     if known_k:
         cmd.append("--known-k=" + ",".join(str(k) for k in known_k))
+    if variants:
+        cmd.append("--player-variants=" + ",".join(str(v) for v in variants))
+    if args["searchWins"]:
+        cmd.append(f"--search-wins={args['searchWins']}")
     if out_path.exists():
         out_path.unlink()
     proc = subprocess.run(cmd, cwd=WORKSPACE, env=env, capture_output=True, text=True)
@@ -376,7 +401,8 @@ def main():
     opt = lambda name, default=None: rest[rest.index(name) + 1] if name in rest else default  # noqa: E731
     args = {"seed": int(opt("--seed")), "scene": opt("--profile", "off"), "policy": opt("--policy", "census"), "swap": opt("--swap", "never"),
             "challenge": None if opt("--challenge") in (None, "") else int(opt("--challenge")), "frameBudget": opt("--frame-budget"),
-            "symbols": int(opt("--symbols", "0"))}
+            "symbols": int(opt("--symbols", "0")), "draft": opt("--draft", "first"), "searchWins": int(opt("--search-wins", "0")),
+            "stopOnLoss": "--stop-on-loss" in rest, "stageRents": None if opt("--stage-rents") in (None, "") else int(opt("--stage-rents"))}
     # --prompt-delay K@N: wait K more frames at the swap prompt after battle N (0-based) before answering (genuine input timing: it moves the RNG cursor
     # of everything rolled after it, like a slower player). Battles 0..N are unchanged.
     delay_k, delay_at = (int(x) for x in opt("--prompt-delay", "0@-1").split("@"))
@@ -402,7 +428,10 @@ def main():
                    "rentsCountBefore": rom.u16(s2 + SB2_FACTORY_RENTS), "rentsCount": request["rentalSwapCount"]}
     oracle.write_u16(s2 + SB2_TRAINER_IDS, request["trainerId"])
     # The lab writes rentalSwapCount to the doubles count (see SB2_FACTORY_RENTS): stage the singles count the round goes on with.
-    oracle.write_u16(s2 + SB2_FACTORY_RENTS, request["rentalSwapCount"])
+    # --stage-rents N: start the run from rent count N instead (for a chain whose next draft wraps the count at 256, fix 46); battle 1's draft was
+    # already built by the lab, so N first counts at the next round's draft.
+    staging_fix["rentsCount"] = request["rentalSwapCount"] if args["stageRents"] is None else args["stageRents"]
+    oracle.write_u16(s2 + SB2_FACTORY_RENTS, staging_fix["rentsCount"])
     if args["symbols"]:
         # --symbols 1: the silver Factory symbol (FLAG_SYS_FACTORY_SILVER), as a player has it after beating silver Noland at streak 21; with it the seventh
         # battle of challenge 5 is gold Noland (GetFrontierBrainStatus, frontier_util.c:1656-1693). The lab sets it the same way for a factoryBrain staging.
@@ -419,7 +448,8 @@ def main():
             path = work / f"setup-{n}.json"
             path.write_text(json.dumps(setup, separators=(",", ":")))
             setup_paths.append(path)
-            engine = run_engine(args, setup_paths, work / "engine.json", [] if prior is None else [p["engineDrawsBeforeActionMenu"] for p in prior])
+            engine = run_engine(args, setup_paths, work / "engine.json", [] if prior is None else [p["engineDrawsBeforeActionMenu"] for p in prior],
+                                [] if prior is None else [p.get("playerVariant", 0) for p in prior])
             battles = engine["battles"]
             if prior is not None:
                 for i, (a, b) in enumerate(zip(prior, battles)):
@@ -442,10 +472,10 @@ def main():
                 generation = entry["between"]["generation"]
                 continue
             rounds_done += 1
-            if rounds_done >= rounds:
+            if rounds_done >= rounds or (args["stopOnLoss"] and not (drive["outcome"] == 1 and setup["round"]["battleNum"] == 6)):
                 break
             entry["between"] = {"newRound": True}
-            drive_between(rom, None, BETWEEN_FRAME_CAP, entry["between"], new_round=True)
+            drive_between(rom, None, BETWEEN_FRAME_CAP, entry["between"], new_round=True, draft_rule=args["draft"])
             generation = entry["between"]["generation"]
     except RoundError as e:
         result["error"] = str(e)
