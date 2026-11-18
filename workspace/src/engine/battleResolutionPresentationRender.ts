@@ -9,6 +9,7 @@ import {
   resolveNoMovesLeftMessageLines,
   isWeatherContinuesAnimation, WEATHER_CONTINUES_BODY_ROWS, WEATHER_CONTINUES_LAUNCH_LEAD_ROWS, WEATHER_CONTINUES_MOVE_IDS,
   HPD8_SHAPE_A_MOVE_IDS,
+  STA5_STATUS_BODY_TAIL_ROWS,
 } from "./battleResolutionPresentation.ts";
 import type { LiveMoveSpriteAllocatorInput, LiveMoveSpriteOrderInput } from "./liveMoveSpriteAllocator.ts";
 import type { LiveMoveBattlerX2Input } from "./liveBattlerX2History.ts";
@@ -1592,7 +1593,7 @@ function liveMoveHitTailRows(command: Extract<BattleResolutionPresentationComman
   const request = command.animation;
   if (request === undefined) return 0;
   if ((command.timing.bodyLeadFrames ?? 0) === 0) return liveSubstituteSwapApplies(request, field) === true ? 0 : LIVE_MOVE_LEADLESS_TAIL_ROWS.get(request.moveId) ?? 0;
-  const table = HPD4_BODY_TAIL_ROWS.get(request.moveId);
+  const table = HPD4_BODY_TAIL_ROWS.get(request.moveId) ?? STA5_STATUS_BODY_TAIL_ROWS.get(request.moveId);
   if (table !== undefined) return table;
   if (!HPD8_SHAPE_A_MOVE_IDS.has(request.moveId) || liveSubstituteSwapApplies(request, field) === true) return 0;
   const rows = liveMoveUniversalRows(request, field);
@@ -1679,6 +1680,9 @@ export function liveMoveSourceAge(
 }
 
 const STATS_CHANGE_AFTER_BODY_AGE_SHIFT = 4;
+// sta5: after a Flatter / Swagger body (lead + tail landed) and its 2-row `stat` command the `stats-change` command starts 2 rows (the not yet landed
+// pre-print rows) before the ROM's `playanimation`, whose SE is exec + 4: the generic age (calibrated on the old, earlier start) is shifted by 1.
+const STATS_CHANGE_AFTER_STAT_BODY_AGE_SHIFT = 1;
 
 /**
  * aud248: the presented stats-change command and its age (rows since the animation's rel 0, after the IsBattleSEPlaying gate; the same age as the
@@ -1692,7 +1696,11 @@ export function statsChangeSourceAge(
   const previous = state.segments[state.segmentIndex]!.commands[state.commandIndex - 1];
   // hpd4: after an audited body the command starts on the ROM's gAnimScriptActive edge (+1), so the SE (ROM: edge + 4) is 4 rows earlier than the
   // generic age that absorbed the old early start (aud242o Defense Curl windows: SE 175 vs command 172).
-  const afterBodyLead = previous?.type === "move-animation" && (previous.timing.bodyLeadFrames ?? 0) > 0 ? STATS_CHANGE_AFTER_BODY_AGE_SHIFT : 0;
+  const beforeStat = state.segments[state.segmentIndex]!.commands[state.commandIndex - 2];
+  const afterStatBody = previous?.type === "stat" && beforeStat?.type === "move-animation" && (beforeStat.timing.bodyLeadFrames ?? 0) > 0
+    && beforeStat.animation !== undefined && STA5_STATUS_BODY_TAIL_ROWS.has(beforeStat.animation.moveId);
+  const afterBodyLead = previous?.type === "move-animation" && (previous.timing.bodyLeadFrames ?? 0) > 0 ? STATS_CHANGE_AFTER_BODY_AGE_SHIFT
+    : afterStatBody ? STATS_CHANGE_AFTER_STAT_BODY_AGE_SHIFT : 0;
   const age = state.lifecycle.phaseElapsed - (command.timing.seGateFrames ?? 0) + afterBodyLead;
   if (age < 0 || fieldBattler(currentCommandField(state), command.battler).substituteDoll === true) return null;
   // The pure General_StatsChange reducer's params (null for an argument it rejects: the ROM plays nothing); read here so the sound
@@ -2480,7 +2488,7 @@ export function createBattleResolutionPresentationRenderView(
       effect = Object.freeze({
         type: "move", request: command.animation,
         age: liveMoveUniversalRowAge(state, command.animation, field, seGate, liveMoveScriptTailFrames(command.timing, command.animation, field),
-          (HPD8_SHAPE_A_MOVE_IDS.has(command.animation.moveId) && (command.timing.bodyLeadFrames ?? 0) > 0) || LIVE_MOVE_LEADLESS_TAIL_ROWS.has(command.animation.moveId)),
+          ((HPD8_SHAPE_A_MOVE_IDS.has(command.animation.moveId) || STA5_STATUS_BODY_TAIL_ROWS.has(command.animation.moveId)) && (command.timing.bodyLeadFrames ?? 0) > 0) || LIVE_MOVE_LEADLESS_TAIL_ROWS.has(command.animation.moveId)),
         ...(lead > 0 && state.lifecycle.phaseElapsed <= pre ? { preActivationRow: true as const } : {}),
         paletteInput: state.liveMovePaletteInput,
         spriteAllocatorInput: state.liveMoveSpriteAllocatorInput,

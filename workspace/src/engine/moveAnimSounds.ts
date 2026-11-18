@@ -425,8 +425,11 @@ const STATUS_ANIMATION_LABELS: Readonly<Record<BattleStatusAnimationName, string
 const WEATHER_LABELS: Readonly<Record<WeatherContinuesAnimation, string>> = {
   RAIN_CONTINUES: "General_Rain", SUN_CONTINUES: "General_Sun", SANDSTORM_CONTINUES: "General_Sandstorm", HAIL_CONTINUES: "General_Hail",
 };
-/** Status-animation command age (rows since the launch, after the IsBattleSEPlaying gate) of the script's first command. */
-export const STATUS_ANIMATION_SCRIPT_AGE = 7;
+/**
+ * Status-animation command age (rows since the launch, after the IsBattleSEPlaying gate) of the script's first command. sta5: 0 = the ROM's
+ * `gAnimScriptActive` rise row (the first SE is that row plus the table row's own frame); the earlier 7 compensated the move body's missing script lead + tail.
+ */
+export const STATUS_ANIMATION_SCRIPT_AGE = 0;
 /** Weather-continues body age -> script row: the move-body clock (FIRST_COMMAND_AGE + AGE_TO_SOUND_ROWS). */
 const WEATHER_SCRIPT_AGE = FIRST_COMMAND_AGE + AGE_TO_SOUND_ROWS;
 
@@ -462,7 +465,7 @@ function generalVariant(label: string, attackerSide: 0 | 1): readonly TimedOp[] 
 
 /**
  * psn2: the script's `end` waits for its parallel loopsewithpan task (battle_anim.c:482), so an SE past the command's window still plays. Schedules the rows whose command age
- * (script row + STATUS_ANIMATION_SCRIPT_AGE) falls at or after the window end; only Status_Poison's 6th SE 148 (age 77 of 71) has one. Sound-only: the window is not lengthened.
+ * (script row + STATUS_ANIMATION_SCRIPT_AGE) falls at or after the window end (none at age 0: Status_Poison's 6th SE 148 is age 70 of 71). Sound-only: the window is not lengthened.
  */
 function scheduleStatusAnimationTail(ops: readonly TimedOp[], context: AnimPanContext, windowRows: number): void {
   const tailRows = new Set<number>();

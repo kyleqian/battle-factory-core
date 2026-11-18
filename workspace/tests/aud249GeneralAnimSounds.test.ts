@@ -62,13 +62,12 @@ describe("General / Status animation sound table (aud249)", () => {
     expect(moveAnimOpRows(op, { attackerSide: "opponent", targetSide: "opponent", statusAnimActive: true })[0]!.emission.pan).toBe(63);
   });
 
-  // ROM frame minus ours of the animation's first row, per window and play. STATUS_ANIMATION_SCRIPT_AGE = 7 is calibrated on the one frame-exact window
-  // (aud242g dreameater turn 1: Status_Sleep SE197 at delta 0, tests/aud242gMoveAnimSounds.test.ts). Here the move body before the confusion is not
-  // ROM-exact (the same windows' stat-change SE is +5 / +6 frames early, aud248), so the first play carries that drift +2 more. sta3: the second play
-  // lands on the first play's residual (second == first): the action transition into a pre-move print and the pre-move launch rows are now in the
-  // timing (docs/aud249-general-anim-sounds.md sta3, tests/sta3PreMoveStatusTiming.test.ts).
+  // ROM frame minus ours of the animation's first row, per window and play. sta5: STATUS_ANIMATION_SCRIPT_AGE is 0 (the ROM's gAnimScriptActive rise row)
+  // and the Flatter / Swagger / Spore / Toxic bodies carry their script lead + tail (docs/aud249-general-anim-sounds.md sta4 / sta5). What is left of the
+  // confusion windows is the not yet landed message -> launch rows and the pre-print rows (sta5 steps 2 / 3). sta3: the second play lands on the first play's
+  // residual (second == first), tests/sta3PreMoveStatusTiming.test.ts.
   const WINDOWS: ReadonlyArray<{ name: string; first: number; second: number }> = [
-    { name: "aud242c-flatter-player", first: 7, second: 7 },
+    { name: "aud242c-flatter-player", first: 8, second: 8 },
     { name: "aud242f-swagger-player", first: 8, second: 8 },
   ];
   for (const { name, first, second } of WINDOWS) {
@@ -88,12 +87,12 @@ describe("General / Status animation sound table (aud249)", () => {
 
   // psn2: the script's `end` waits for the loopsewithpan task (battle_anim.c:482), so the 6th Status_Poison SE 148 (command age 77 of a 71-row window) still plays (docs/aud249 psn1 / psn2).
   // The only status animation with an SE past its window (the table scan: Confusion's last SE is age 80 of 100, the rest are earlier still).
-  it("aud242e-toxic-player: the poison tick plays the ROM's six SE 148 rows at the 14-frame spacing (the 6th past the 71-frame window), first row +10 vs ROM", () => {
+  it("aud242e-toxic-player: the poison tick plays the ROM's six SE 148 rows at the 14-frame spacing (the 6th is age 70 of the 71-frame window), exact vs ROM (sta5; was first row +10)", () => {
     const rom = load("aud242e-toxic-player");
     const theirs = rom.events.filter((e) => e.noop !== true && e.kind === "se" && e.id === 148 && e.frame >= 270);
     const ours = ourEvents(rom, "on").filter((e) => e.kind === "se" && e.id === 148 && e.frame >= 270);
     expect(theirs.map((e) => e.frame)).toEqual([296, 310, 324, 338, 352, 366]);
     expect(ours.map((e) => `${e.id}:${e.pan}`)).toEqual(theirs.map((e) => `${e.id}:${e.pan}`));
-    expect(ours.map((e) => e.frame)).toEqual([286, 300, 314, 328, 342, 356]);
+    expect(ours.map((e) => e.frame)).toEqual(theirs.map((e) => e.frame));
   });
 });

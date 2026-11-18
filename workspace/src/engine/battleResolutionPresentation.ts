@@ -1642,7 +1642,12 @@ const HPD4_BODY_LEAD_MOVE_IDS: readonly number[] = [49, 82, 111, 205, 301, 69];
  * Struggle, Rock Slide, Bubble Beam, Fire Blast, Magical Leaf.
  */
 export const HPD8_SHAPE_A_MOVE_IDS: ReadonlySet<number> = new Set([332, 94, 85, 38, 98, 34, 246, 202, 58, 57, 91, 165, 157, 61, 126, 345, 53, 76, 44, 188, 89, 185]);
-export const BODY_LEAD_AUDITED_MOVE_IDS: ReadonlySet<number> = new Set([...HPD4_BODY_LEAD_MOVE_IDS, ...HPD8_SHAPE_A_MOVE_IDS]);
+/**
+ * sta5 (docs/aud249-general-anim-sounds.md): the move-inflicted status bodies of sta4 (Flatter 260, Swagger 207, Spore 147, Toxic 92): the rows after the
+ * body that put the next command (`stat` / `status`, then the stat or status animation) on the ROM row, net of the 2-row `stat` / `status` command.
+ */
+export const STA5_STATUS_BODY_TAIL_ROWS: ReadonlyMap<number, number> = new Map([[260, 4], [207, 5], [147, 0], [92, 7]]);
+export const BODY_LEAD_AUDITED_MOVE_IDS: ReadonlySet<number> = new Set([...HPD4_BODY_LEAD_MOVE_IDS, ...HPD8_SHAPE_A_MOVE_IDS, ...STA5_STATUS_BODY_TAIL_ROWS.keys()]);
 
 function moveAnimationScriptLeadTiming(
   events: readonly BattleKernelSemanticEvent[],
