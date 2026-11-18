@@ -71,7 +71,9 @@ exclusions are superseded. Unrelated expansions stay parked.
   (KOFail 70 rows early in both scenes; Knock Off OFF lacks the 34-row Pausex20, ON the 43 / 94-row animation by target side); hpd7c: Flamethrower `live` 115 -> 210 (a sound-wait hold). Knock Off plan: `docs/kno1-item-knockoff-plan.md` (one sprite, 40-frame arc, +51 off-screen
   frames when the player loses the item; reuse `present.ts` `bagAtAge`). Poison ticks (psn3, docs/aud249 "psn3" / "psn4") inherit earlier drift: Knock Off's missing animation, a failed Toxic
   (`BattleScript_AlreadyPoisoned`: no `pause B_WAIT_TIME_LONG` before the message, confirmed by psn5: `sourcePauseUsedMoveHoldFrames` only covers STRINGID_USEDMOVE), the Safeguard-expired
-  message (`runScreenFieldCase`, battleEndTurnOrchestration.ts:2051-2058, lacks its `pause B_WAIT_TIME_SHORT`); kno2: Knock Off's launch waits for the hit SE (`IsBattleSEPlaying`), length = W + A + 2; change `STATUS_ANIMATION_SCRIPT_AGE` 7 -> 0 only together with the body leads.
+  message (`runScreenFieldCase`, battleEndTurnOrchestration.ts:2051-2058, lacks its `pause B_WAIT_TIME_SHORT`); kno2: Knock Off's launch waits for the hit SE (`IsBattleSEPlaying`), length = W + A + 2; pau1 (`docs/pau1-script-pauses.md`):
+  every message-adjacent `pause B_WAIT_TIME_LONG` is dropped (AlreadyPoisoned, RestCantSleep, KOFail; probably SleepTalkIsAsleep / MoveMissedDoDamage) and anchor-less SHORT pauses
+  (SafeguardEnds) too; proposed general fix in the doc; change `STATUS_ANIMATION_SCRIPT_AGE` 7 -> 0 only together with the body leads.
 - Scene ON seeds 6568 / 7682 stall at the 80,000-frame ROM drive cap (T2 cannot align them); census seeds 796 / 995 end at the frame budget in both scenes.
 
 ## #222 — AI switch withdraw presentation: residuals (ais1 / ais2 / ais3, 2026-11-17)
