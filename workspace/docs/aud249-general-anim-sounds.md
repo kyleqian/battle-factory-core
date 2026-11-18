@@ -390,3 +390,35 @@ export PYTHONPATH=/srv/pokebench/vendor/libmgba-py
 python3 tools/run-mgba-probe.py /tmp/psn4/ram499.json -- /srv/pokebench/vendor/mgba-venv/bin/python tools/integration/hpd2Probe.py /tmp/psn4/f499.json on /tmp/psn4/ram499.json 1560
 python3 /tmp/psn4/an.py /tmp/psn4/ram499.json 1090 1500        # symbolised ptr / anim / exec changes
 ```
+
+### psn5: the engine's command rows for the psn4 windows (2026-11-18, measurement only, `src/` / `tests/` untouched)
+
+Method: engine-only replay (no ROM) `soundCensusRomReplay.ts replay --seed=N --scene=on --events=1 --setup=<main>/.integration/evidence/aud259/chain/N-on.setup.json` (`--events=1` is what fills `turnEvents[].commands`; without it the key is absent). The stock rows carry only `timing.minimumFrames`; message timing lives in `timing.holdFrames` (and the typing time is not a row), so a scratch copy of the tool (deleted, not committed) also dumped `holdFrames` and `lines`. Scratch `/tmp/psn5/{e,h}{3738,499}.json`. Engine sound frames (frame0-relative) in the psn4 table are the `eabs` minus 93 (40544 -> 40451).
+
+**Engine command rows, seed 3738 (turn chunk starting at engine frame 40261 = Encore -> failed Toxic -> Safeguard ends -> tick; chunk 41046 = Slash -> failed Toxic -> tick):**
+
+| chunk | message rows (`frames` / `holdFrames`) | non-message rows |
+|---|---|---|
+| 40261 | USEDMOVE ENCORE 0 / 0; GOT AN ENCORE 0 / 64; **USEDMOVE TOXIC 0 / 0; AlreadyPoisoned "is already poisoned." 0 / 64; SafeguardEnds "no longer protected by SAFEGUARD!" 0 / 64**; HURTBYPOISON 0 / 67 | move-animation 32 + 10, sprite-vis 1 x 4, **no `pause` row of any kind between the Toxic print, the AlreadyPoisoned print and the Safeguard print**, PSN status-animation 71, hp 28, turn-end 8 |
+| 41046 | USEDMOVE SLASH 0 / 0; **USEDMOVE TOXIC 0 / 0; AlreadyPoisoned 0 / 64**; HURTBYPOISON 0 / 67 | move-animation 32, hit-animation 35, hp 28, move-animation 15, sprite-vis, PSN 71, hp 28, turn-end 8 |
+
+**Engine command rows, seed 499 (chunk 592, Toxic -> Knock Off -> tick):** `hit-animation` 35 + `hp` 28 (Knock Off damage, events 32-34), then event 35 `animation ITEM_KNOCKOFF` (BattleScript_KnockedOff) with **no command row at all**, then the KNOCKED OFF message 0 / 64 (event 36) and sprite-visibility.
+
+### psn5 findings
+
+1. **Failed Toxic: the used-print is NOT missing (psn4's "used-print row" is refuted); the `pause LONG` IS.** The engine emits `STRINGID_USEDMOVE TOXIC` and `AlreadyPoisoned` as two message commands (built by the generic `type: "message"` push, `battleResolutionPresentation.ts:4656`; USEDMOVE timing `minimumFrames: 0, holdFrames: usedMessageHoldFrames || sourcePauseUsedMoveHoldFrames` at :4686-4692, i.e. glyph typing time plus a hold of 0 here; AlreadyPoisoned falls to `messageTimingFromSourceProvenance(event)` / `WAITMESSAGE_LONG_MESSAGE_IDS` / `MESSAGE_TIMING` at :4703-4706 and shows `holdFrames` 64). `STRINGID_PKMNALREADYPOISONED` is in neither `WAITMESSAGE_LONG_MESSAGE_IDS` (:1006) nor any pause path, and `sourcePauseUsedMoveHoldFrames` (:1333) is only consulted for USEDMOVE. ROM `AlreadyPoisoned` = `pause LONG` 64 + print 33 + `waitmessage` 64; engine = print + hold 64, **no 64 `pause`**. That is the first 64 of the 82 shortfall in res61 and of the 124 in res60 (confirmed on the engine side: no row carries 64 before the AlreadyPoisoned print). **Residual 18 in res61** (82 - 64) is not a failed-Toxic row: the engine rows between the Slash `hp` and the PSN tick (move-animation 15 + sprite-vis + two messages) show no further missing command; it is plausibly the used-print typing / `MoveEnd` lead (ROM used-print 19, MoveEnd 9 + 6) or the 3-frame message conventions, **unresolved** (needs a per-frame engine text timeline, not command rows).
+2. **Safeguard-expired: no `pause SHORT` row (32 frames).** The engine's SafeguardEnds message is one message command with `holdFrames` 64 and nothing before it; ROM `BattleScript_SafeguardEnds` = `pause SHORT` 32 + print 49 + `waitmessage` 64 = 145. So the engine is **32 short** from the missing `pause B_WAIT_TIME_SHORT`. It is built by `runScreenFieldCase` (`battleEndTurnOrchestration.ts:2051-2058`, label `SAFEGUARD_ENDS_LABEL` :304), whose `BattleScript_SafeguardEnds` receipt reaches the presentation as a plain message, so the pause opcode is dropped like the AlreadyPoisoned one. **The 43 unresolved frames split as 32 (this missing `pause SHORT`) + 11**; with res61's 18 residual unresolved either way, res60 = 64 + 32 + 28 and res61 = 64 + 18 (the shared ~18 would then be a per-failed-Toxic constant and res60 has a further ~10, **inferred, not measured**).
+3. **Knock Off (499 res1): confirmed at row level.** The engine event stream contains `animation ITEM_KNOCKOFF` (seq 35) but `commands` has no row for it between the hit/hp rows and the KNOCKED OFF message; no `animationId` branch for it exists in `battleResolutionPresentation.ts` (grep `ITEM_KNOCKOFF`: no hit in that file; the `kind === "animation"` handler at :4725-4745 only builds weather and FOCUS_PUNCH_SETUP rows). ROM wants launch 23 + animation 43 = 66 there; the psn4 63 shortfall is thus a **missing command row** (the kno1 plan's item), no longer just a number match. The kno1 plan applies unchanged.
+
+### psn5: what to land (not done here)
+
+- A source-derived `pause` (`B_WAIT_TIME_LONG` 64 before `AlreadyPoisoned`, and the already-paralyzed / already-burned / already-asleep / already-confused siblings which share the `jumpifstatus -> printstring` shape: **verify each on the ROM before generalising**; `B_WAIT_TIME_SHORT` 32 before SafeguardEnds, probably also before the Reflect / Light Screen / Mist `WoreOff` siblings, same caveat) as a hold of the preceding box / lead before the message. The psn4 lead rule (USEDMOVE `holdFrames` via `sourcePauseUsedMoveHoldFrames`) is the existing precedent: the pause is a pre-print hold the engine already models for the Scene OFF no-animation path only.
+- Expected effect (poison-tick mass, 6 samples x offset): res61 82 -> 18, res60 124 -> 28, i.e. about (64 + 64 + 32) x 6 = 960 of the 3,600 mass if the residuals hold; plus the Knock Off row (63 x 6 = 378).
+- Open: the ~18 (res61) / ~28 (res60) residual; a ROM-vs-engine per-frame text timeline (`hpd2Probe.py` rows for the used-print glyph typing) for seed 3738 res61 would split it in one probe.
+
+Reproduce:
+```
+S=<main>/.integration/evidence/aud259/chain
+node --experimental-strip-types --no-warnings tools/integration/soundCensusRomReplay.ts replay --seed=3738 --scene=on --events=1 --setup=$S/3738-on.setup.json --out=/tmp/psn5/e3738.json   # 4 s; same for 499
+# python: turnEvents[i].commands for frame in (40261, 41046) / (592); cumulative minimumFrames; message rows carry holdFrames only in the scratch copy
+```
