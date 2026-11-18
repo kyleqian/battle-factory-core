@@ -251,3 +251,87 @@ for p in "flatter aud242b-flatter-player-on 900" "swagger aud242f-swagger-player
 node --experimental-strip-types --no-warnings tools/integration/hpd4Cmds.ts E/traces/<lab>.json 1250     # app rows
 python3 E/hpdan.py ...   # hpd7b's an.py: R / ex / A / len / H per gAnimScriptActive window
 ```
+
+## psn3: the 120 Scene ON T2 rows of `Status_Poison` SE 148 at "-22" are 20 end-of-turn poison ticks, carried drift (2026-11-18, diagnosis only, `src/` / `tests/` untouched)
+
+Evidence: aud263 T2 rescored ON seeds (read-only, main tree `.integration/evidence/aud263/t2/`) re-aligned with the t2off scratch (`/tmp/t2off/an.py`, same `soundScoreboard.py` segments / `difflib` match), plus a fresh Scene ON ROM RAM probe and the app's command rows of the psn1 two-turn Toxic lab (`tools/integration/hpd2Probe.py`, `hpd4Cmds.ts`, scratch `/tmp/psn3/`). No `npm test`.
+
+**Sign convention.** The scoreboard offset is **engine minus ROM** (`soundScoreboard.py`, relative to the segment start): -22 = the engine plays the SE 22 frames *earlier* than the ROM.
+
+### 1. What the rows are
+
+- The t2off class "gCurrentMove 0, SE 148 x120" is **20 windows of 6 SE (14 apart), all end-of-turn poison ticks** (`BattleScript_PoisonTurnDmg`: `printstring`, `waitmessage`, `statusanimation`, `healthbarupdate`; `data/battle_scripts_1.s:3736`). Check: in every one of the 20 the ROM HP of one side falls 83 .. 105 frames after the first SE (6th SE + the animation end + the bar drain, `dt = 75 + HP drained`: 8 / 10 / 16 / 20 / 24 / 30 / 6 / 7 / 14), with no move running (`gCurrentMove` 0). **None is a move-inflicted play**: those carry `gCurrentMove` 92 (Toxic, 120 rows, 20 windows, offsets -3 / -10) or the body's move (Sludge Bomb, 18 rows) and are not in this class.
+- The alignment is sound (ROM and engine have the same SE 148 sequence in the largest windows: 3738 res60 / res61, 499 res1, 165 res22, 6 SE each), so the offsets are real drifts, not a mismatched pair.
+- **The offset is not a constant -22.** -22 is the median of 20 per-window offsets (sorted: -124 -82 -82 -45 -38 -35 -34 -30 -28 **-22 -22** -20 -9 -9 -4 -3 -3 0 +5 +5; sum of abs x 6 = mass 3,600). Only **2 windows (12 rows)** are exactly -22 (499 res19, 3738 res59), both Toxic -> foe's move -> tick. Two windows are +5 (the engine later).
+
+| class (distance from the last matched SE before the tick, `tick - that SE`) | windows | rows | mass |
+|---|---|---|---|
+| tick -2 .. -7 below the preceding body's SE (165 res23, 499 res2 / res3, 3738 res56 / res57) | 5 | 30 | 114 |
+| tick -11 .. -25 below it (165 res11 / res14 / res17 / res22, 499 res13 / res14 / res19, 3738 res55 / res59) | 9 | 54 | 1,470 |
+| tick -63 .. -125 below it (499 res1 after Knock Off, 3738 res60 after Encore, res61 after Slash + Toxic) | 3 | 18 | 1,728 (48 % of the mass) |
+| no matched SE earlier in the segment (+5, +5, -38) | 3 | 18 | 288 |
+
+### 2. Per-window table
+
+| seed / segment | offset (engine - ROM) | poison HP drain after the 6 SE (ROM) | last matched SE before it (id, body, offset) | tick - that SE | moves ROM ran between |
+|---|---|---|---|---|---|
+| 165 res11 | -28 | -16 | 136, Fly, -11 | -17 | Fly |
+| 165 res14 | -35 | -8 | 176, Confuse Ray, -22 | -13 | Confuse Ray |
+| 165 res16 | 5 | -16 | none (first matched row of the segment) | - | Psybeam |
+| 165 res17 | -9 | -24 | 192, Block, 2 | -11 | Block |
+| 165 res22 | -30 | -8 | 131, Rock Slide, -5 | -25 | Rock Slide |
+| 165 res23 | -3 | -16 | 123, Faint Attack, -1 | -2 | Faint Attack |
+| 499 res1 | -82 | -8 | 139, Knock Off, -19 | -63 | Knock Off |
+| 499 res2 | -3 | -16 | 191, Swords Dance, 4 | -7 | Swords Dance |
+| 499 res3 | -9 | -24 | 135, Agility, -2 | -7 | Agility |
+| 499 res12 | 5 | -8 | none (first matched row of the segment) | - | Rock Tomb |
+| 499 res13 | -20 | -16 | 176, Low Kick, 0 | -20 | Low Kick |
+| 499 res14 | -45 | -24 | 176, Low Kick, -27 | -18 | Low Kick |
+| 499 res19 | -22 | -10 | 148, Toxic, -10 | -12 | Toxic, Foresight |
+| 499 res20 | -38 | -6 | none (first matched row of the segment) | - | Safeguard, Foresight |
+| 3738 res55 | -34 | -7 | 136, Slash, -19 | -15 | Slash |
+| 3738 res56 | 0 | -14 | 200, Psybeam, 2 | -2 | Psybeam |
+| 3738 res57 | -4 | -7 | 200, Psybeam, 2 | -6 | Psybeam |
+| 3738 res59 | -22 | -10 | 148, Toxic, -10 | -12 | Toxic, Counter |
+| 3738 res60 | -124 | -20 | 222, Encore, 1 | -125 | Encore, Toxic |
+| 3738 res61 | -82 | -30 | 136, Slash, 0 | -82 | Slash, Toxic |
+
+(HP drain = the poisoned side's HP step after the SE in `tl.json`; `tick - that SE` = the tick's offset minus the offset of the last matched SE of the segment before it. 165 res23 / 3738 res56 / 57: the tick follows the body's own SE with a few frames of extra drift; the big deltas have unmeasured stages between, below.)
+
+### 3. Where the offset comes from: the tick's own stage is ROM-exact, it inherits the drift
+
+ROM RAM vs the app's command rows on the psn1 two-turn Toxic lab (`aud242e-toxic-player-on`, turn 2 = Seismic Toss then the foe's poison tick; ROM - app, positive = the ROM is later; probe frames = app frames):
+
+| stage | ROM | app | ROM - app |
+|---|---|---|---|
+| turn 1 Toxic status launch (`Status_Poison` `gAnimScriptActive` rise = first SE) | 296 | 279 | +17 (sta4: lead 10 + tail 7) |
+| "badly poisoned" print | 368 | 350 | +18 (status window ROM 72 rows after the launch, app 71) |
+| status icon update | 464 | 443 | +21 |
+| Seismic Toss used-print | 481 | 461 | +20 |
+| hit animation | 744 | 723 | +21 |
+| **tick: `PoisonTurnDmg` print exec** (`printstring`, `exec` 809) | 809 | 788 | **+21** |
+| **tick: `DoStatusTurnDmg` -> `gAnimScriptActive` rise (launch)** | 904 | 884 | **+20** |
+| tick: launch -> HP update (`DoTurnDmg`) | 904 -> 975 = 71 | 884 -> 955 = 71 | 0 |
+| tick: first SE (engine = launch + `STATUS_ANIMATION_SCRIPT_AGE` 7) | 904 | 891 | **+13** (psn1 had +16 on `a8c06fb1a`; the tree has since moved the lab by 3) |
+
+- **The tick's own stages are ROM-exact**: print start -> launch ROM 95 (`PoisonTurnDmg+3` exec 809 .. `DoStatusTurnDmg` 903, launch 904), app 96 (788 -> 884) = the one-row message-start convention; launch -> HP 71 = 71 (`STATUS_ANIMATION_ADDED_ROWS.PSN`). `statusAnimationSeGate` is 0 for it (a message between the last play-se and the animation, `seg127StatusSeGate.ts:108`), so `seGateFrames` plays no part. The tick offset is **entirely the carried offset of the commands before it** (+20 at the launch, the same +21 / +20 from the hit on) minus 7 of `STATUS_ANIMATION_SCRIPT_AGE` (`moveAnimSounds.ts:429`), which here only hides 7 of the 20.
+- **Carry in the lab**: Toxic's launch +17 -> +21 at the icon (status rows +1, message -> icon +3) -> +20 at the Toxic -> Seismic Toss print -> the Seismic Toss body (audited, lead 6 modelled) -> +21 at the hit; so the tick starts about 20 rows early in the app **because the Toxic body's 10 + 7 lead / tail rows (hpd7 / sta4) are not landed**, not because the tick is short.
+- **In T2** the carry is the sum of the earlier commands' un-landed lead + tail rows in the segment (the hpd7 table: Slash / Knock Off / Fly / Rock Slide / Low Kick / Confuse Ray / Toxic bodies each hold L 5 .. 10 plus a tail of 2 .. 17 before the next command), plus the stages the table has not measured at all: the 3 windows of -63 .. -125 sit after Knock Off (item-knocked message path), Encore -> Toxic (the Toxic body's own 6-SE play 100+ frames earlier is matched at ~0 / -10, so the whole -125 builds up *between* that play and the tick) and Slash -> Toxic. I did not decompose those three with a ROM probe (mass 1,728, the biggest part).
+- The two exact -22 windows (Toxic, foe's Foresight / Counter, tick): the Toxic play is at -10 (= launch carry 17 - AGE 7), the tick adds -12 more: Toxic's own post-play stages (+1 status rows, +3 message -> icon as in the lab) plus the foe body's lead + tail (Foresight / Counter, not in the hpd7 table; about 8 net is what the -12 requires).
+
+### 4. Proposed fix (not landed)
+
+1. **There is no tick-local constant to change.** The tick's print -> launch -> HP stage is exact; `seGateFrames` = 0; `STATUS_ANIMATION_SCRIPT_AGE` already helps by 7. Do not retune the PSN window (71) or the tick's age for the T2 median.
+2. **The correction is the existing hpd7 / sta4 landing, and ticks are among the rows it moves** (a tick is a status command *after* bodies: the lead + tail `d` shifts the next command, unlike a body SE which `withoutBodyLead` pins): landing Toxic 10 + 7, the other audited / table bodies' lead + tail and then `STATUS_ANIMATION_SCRIPT_AGE` 7 -> 0 (sta4 step 1; for a tick this holds as well because the tick launch is the `gAnimScriptActive` rise, first SE = launch + 0) moves each tick by `sum(d of every earlier command in the segment) - 7`. Predicted: the nine -11 .. -25 windows and the five -2 .. -7 windows approach 0 (each body 5 .. 17 net); the two -22 windows by +17 - 7 = +10 -> about -12 until Foresight / Counter get a lead + tail; the three large windows stay large.
+3. **Order matters:** AGE 7 -> 0 *before* the leads land would move every tick 7 frames earlier (median -22 -> -29, mass up by 7 x 6 x 17 = about 714 for the 17 windows below zero), exactly as the sta4 caveat for body-less status plays said. Land the leads / tails (+ AGE 0) in one change, and re-score the 20 tick windows (this table; 120 rows, mass 3,600) as the acceptance check.
+4. **Next measurement (not done, no time):** ROM RAM probe + app command rows of the three big windows (499 res1 Knock Off, 3738 res60 Encore -> Toxic, res61 Slash -> Toxic) to name the unmodelled stage between the last body SE and the tick (item-knock message, the Toxic play's -> icon path, the turn-end `ENDTURN` order: `MoveEnd` -> `PoisonTurnDmg` is 5 rows in the lab, `MoveEnd+9` 803 -> 808).
+
+Reproduce (no oracle service for the lab part; scratch in `/tmp/t2off/psn3*.py`, `/tmp/psn3/`):
+```
+ln -s /srv/pokebench/vendor/pokeemerald reference/pokeemerald   # worktree only
+export PYTHONPATH=/srv/pokebench/vendor/libmgba-py
+# lab: aud242e-toxic-player-on with the two-turn segments of psn1; trace = {appRoute, oracleProfile battle-scene-on, appStage aud242e-toxic-player-on, same segments}
+python3 tools/run-mgba-probe.py /tmp/psn3/ram.json -- /srv/pokebench/vendor/mgba-venv/bin/python tools/integration/hpd2Probe.py /tmp/psn3/lab2.json on /tmp/psn3/ram.json 1550
+node --experimental-strip-types --no-warnings tools/integration/hpd4Cmds.ts /tmp/psn3/trace.json 1550
+python3 <evidence>/sta4/an.py /tmp/psn3/ram.json 600 1000     # ROM script rows (PoisonTurnDmg 808 / DoStatusTurnDmg 903 / launch 904)
+```
