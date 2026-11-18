@@ -58,8 +58,8 @@ exclusions are superseded. Unrelated expansions stay parked.
   (bgm -71, cry -28 at the tails). The hpd4 / hpd5 script lead removed the drift on six audited bodies (docs/hpd1-hp-hold.md); the other bodies keep the old lead-in-tail.
 - **Coverage:** T2 is 41 of 1000 seeds; controller / cry / BGM have no T1 rule table (counts only); fanfare / screen SEs have no T2 instance.
 - **Per-move:** Memento SEs 108 frames off the ROM with equal gaps (presentation), Water Spout +11 / +7 / +7 / +2 by HP quarter, Beat Up hit-to-hit 132 vs ROM 193 frames
-  (multi-hit message timing; unreachable in Factory Lv 50), Wish heal's star hand-over frame (1 per side), the second `Status_*` play +14 in Scene ON (sta2: needs a per-frame
-  `gBattlescriptCurrInstr` ROM window between the plays), `Status_Freeze` SE 242 +1 unmeasured, Roar / Howl cry windows inherit a lab drift.
+  (multi-hit message timing; unreachable in Factory Lv 50), Wish heal's star hand-over frame (1 per side), the first `Status_*` play +7 / +8 (sta3 fixed the second play; `STATUS_ANIMATION_SCRIPT_AGE` 7
+  vs the source -1 compensates the move body running 8 / 16 rows early: the script-lead audit, hpd7), Solar Beam's unleash body 160 vs ROM 237 rows (hpd7b), `Status_Freeze` SE 242 +1 unmeasured, Roar / Howl cry windows inherit a lab drift.
 - Scene ON seeds 6568 / 7682 stall at the 80,000-frame ROM drive cap (T2 cannot align them); census seeds 796 / 995 end at the frame budget in both scenes.
 
 ## #222 — AI switch withdraw presentation: residuals (ais1 / ais2 / ais3, 2026-11-17)
