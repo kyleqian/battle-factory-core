@@ -292,3 +292,24 @@ vanilla 0:20 **20 / 20 OK**; winning 0:60 **60 / 60 OK**; winning-swap 0:60 **60
 
 - Ice Ball turns 3..5 keep a +-1 .. 5 frame residual that is the ROM-vs-kernel damage difference of that lab (gameplay, out of scope); the other unaudited bodies still keep their lead in the tail (each needs an `hpd2Probe.py` window).
 - Seismic Toss high level (damage > 65) and low level are fitted from the ROM windows (220 / 227 / 231) but only the lowhp (Lv27 low) and hpd1 `toss10..80` traces exercise them.
+
+## ice1 (2026-11-18): the Ice Ball x5 damage question is a harness artifact, not a battle rule
+
+hpd5 saw the ROM's foe damage per turn 6 / 11 / 20 / 40 / 89 against the app's 6 / 11 / 23 / 41 / 82 in the `aud242q` Ice Ball x5 lab. ice1 settles whether that is a rule difference. It is not: the real closed-loop replay matches.
+
+**Source vs kernel.** `Cmd_rolloutdamagecalculation` (`battle_script_commands.c:8536-8569`): NO_EFFECT cancels the multi-turn move; the first hit (no `STATUS2_MULTIPLETURNS`) sets `rolloutTimer` and its start value to 5, sets the bit and `gLockedMoves`; `--rolloutTimer == 0` clears the bit; `gDynamicBasePower = power`, doubled `i = 1 .. 4 - timer` times (i.e. hit n doubles n - 1 times), then doubled once more when `STATUS2_DEFENSE_CURL` is set (the bit is never cleared by the lock; `Cmd_setdefensecurlbit` at :8858 sets it). `src/engine/battleScriptRolloutOpcode.ts:30-123` is the same: timer 5 on the first hit, `power * 2 ** (5 - timer - 1)`, `x2` for the Defense Curl bit, bit and lock cleared at timer 0, miss -> `cancelBattleScriptMultiTurnMoves` + `BattleScript_MoveMissedPause`. No difference found line by line.
+
+**Why the lab numbers differ.** The app side of `aud242q-iceball5-player-on` is `aud241bStage(..., 301, ..., 111)` in `tools/compare/appTrace.ts:2256`, a harness stage (Lv50 Rattata vs a Lv100 Rattata with an injected `rngSeed` 111); the ROM side is the `mechanicLab` fixture `tools/battle-lab/aud242q-iceball5-player-on.json` (Rattata Lv50 with Ice Ball x4, lab seed 1) whose dice are the ROM's own (ISSUES #221 "Harness"). Same species and levels, different dice. Each of the five turn pairs differs by at most 15 % (20 vs 23 is the widest, 82 vs 89 the 5th), inside the 85..100 % damage roll window, and the first two are equal, so different rolls explain all of them (consistent with, not proof of, a rule match; the staged drives below are the proof). The lab cannot prove or refute the rule; only a battle both sides roll the same way can.
+
+**The staged battles** (real Factory sets and trainer, written script, Scene OFF oracle :8014, `romReplayWide.sh --stage`; the tool compares HP, `gRngValue` and last moves per turn plus the wide state, including `status2` and the Rollout timer, at every decision). No Factory set has both Ice Ball and Defense Curl, so the Defense Curl case uses Rollout (Phanpy 120), which shares the one command.
+
+| stage (`stages/coverage/`) | lab seed | turn states | wide states | foe HP before each turn (ROM = engine) |
+|---|---|---|---|---|
+| `ice1-iceball-lock` (Sealeo 196, Ice Ball x5 on Wobbuffet 185, no curl) | 90102 | **10 / 10** | 2 / 2, 0 diff points | 272, 254, 223, 157, 39, then dead (damage 18 / 31 / 66 / 118 / lethal; Charm lowers the user's Attack in between) |
+| `ice1-rollout-defense-curl` (Phanpy 120, Defense Curl then Rollout x5 on Wobbuffet 185) | 90101 | **10 / 10** | 3 / 3, 0 diff points | 272, 212, 147, 85, then dead (60 / 65 / 62 / lethal) |
+
+First divergence: none in either (`stage.ok` true; `expect` = `moveid:MOVE_ICE_BALL`, and `MOVE_DEFENSE_CURL` + `MOVE_ROLLOUT`). Both were driven twice (the second time from the promoted `stages/coverage/` paths) with the same numbers. The files were found with an engine-only hunt (request, ROM setup, engine replay; lab seeds 90100..90105, about 12 s per seed): seed 90100 with Clamperl as the foe broke the lock (Double Team evasion made Ice Ball miss), the Wobbuffet foes did not.
+
+Not covered: the Defense Curl bit on Ice Ball itself (no set has both moves), a lock broken by a miss / flinch / paralysis on the ROM (the staging above does not reach it), and the Scene ON sound / animation numbers of the hpd5 lab (unchanged by this step).
+
+Gates: docs-only plus two stage JSON files; no change under `src/` (`git diff d60fce582 -- src` empty). Evidence under `.integration/evidence/ice1*` (ignored).
