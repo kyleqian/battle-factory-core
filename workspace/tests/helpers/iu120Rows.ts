@@ -61,6 +61,8 @@ export function ont193ScriptTail(id: number): number {
 const HPD8_SHAPE_A_IDS: readonly number[] = [332, 94, 85, 38, 98, 34, 246, 202, 58, 57, 91, 165, 157, 61, 126, 345, 53, 76];
 export const HPD4_BODY_LEAD_ROWS: ReadonlyMap<number, number> = new Map([[49, 9], [82, 9], [111, 3], [205, 10], [301, 10], [69, 6], ...HPD8_SHAPE_A_IDS.map((id): [number, number] => [id, 5])]);
 export const HPD4_BODY_TAIL_ROWS: ReadonlyMap<number, number> = new Map([[49, 3], [82, 26], [111, 3], [205, 3], [301, 3], [69, 1]]);
+// liv2: Self-Destruct has no body lead (its hp command carries it) but a 9-row hit tail after the live window; the age holds the last body row there.
+const LIVE_MOVE_LEADLESS_TAIL_ROWS: ReadonlyMap<number, number> = new Map([[120, 9]]);
 // hpd8: the shape-A bodies (production's HPD8_SHAPE_A_MOVE_IDS) have lead 5 (the EffectHit family's instruction count) and a hit tail of 6 - pre - post.
 // Dig's lead is the attack turn's; a caller that presents the charge turn passes no lead.
 // A shape-A body's lead is the same 5 on both sides and every route, so callers that pass no lead get it; Dig (91) and Solar Beam (76: setup turn 0 has none; the unleash passes lead 5 and counts its 39 idle rows in the duration) are excluded (their charge turns have none).
@@ -72,7 +74,7 @@ function hpd4BodyTail(id: number, side: Iu120Side): number {
 }
 /** The rows an audited body's lead and hit tail add; 0 unless the caller passes the body's lead (Ice Ball: 10 on turn 1, 9 after; the others HPD4_BODY_LEAD_ROWS). */
 export function hpd4BodyRows(id: number, lead = HPD8_DEFAULT_LEAD.get(id) ?? 0, side: Iu120Side = "player"): number {
-  return lead === 0 ? 0 : lead + hpd4BodyTail(id, side);
+  return lead === 0 ? LIVE_MOVE_LEADLESS_TAIL_ROWS.get(id) ?? 0 : lead + hpd4BodyTail(id, side);
 }
 
 /** The per-row phaseElapsed sequence of an ordinary live body whose accepted body lasts `duration` rows: 0 .. P + N + D + T - 1 (+ the audited lead and hit tail). */
@@ -88,8 +90,8 @@ export function iu120Ages(id: number, duration: number, side: Iu120Side = "playe
 export function iu120EffectAges(id: number, duration: number, side: Iu120Side = "player", lead?: number): number[] {
   const hold = iu120Pre(id, side) + (LAND97_LEAD_ROWS.get(id) ?? 0);
   const bodyLead = lead ?? HPD8_DEFAULT_LEAD.get(id) ?? 0;
-  const tail = bodyLead === 0 ? 0 : hpd4BodyTail(id, side);
-  const held = iu120Post(id, side) + ont193ScriptTail(id) > 0;
+  const tail = bodyLead === 0 ? LIVE_MOVE_LEADLESS_TAIL_ROWS.get(id) ?? 0 : hpd4BodyTail(id, side);
+  const held = iu120Post(id, side) + ont193ScriptTail(id) > 0 || LIVE_MOVE_LEADLESS_TAIL_ROWS.has(id);
   return [...Array(hold + bodyLead).fill(0), ...Array.from({ length: duration }, (_, age) => age), ...Array(iu120Post(id, side)).fill(duration - 1), ...Array(ont193ScriptTail(id)).fill(duration - 1),
     ...Array.from({ length: tail }, (_, i) => (held ? duration - 1 : duration + i))];
 }

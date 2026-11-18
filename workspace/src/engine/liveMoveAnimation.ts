@@ -1448,7 +1448,8 @@ function liveMoveAnimationDurationOf(
     // Self-Destruct: 113 rows (82..194 / 86..198) = the whole accepted window, live age 0 = its first row (reducer age 0,
     // selfDestructPortable.ts presentationAge 0), the Taunt/Dragon Rage convention: the window starts 4 frames after
     // the script activation (78/82, row -4, no #142 shadow row) and the script runs 10 frames past it (204/208), uncovered.
-    case 120: return 113;
+    // Self-Destruct: ROM window 126 rows (liv2): the visible blast (113 rows) then the wait for SE_M_SELF_DESTRUCT's song; idle 4 + live 123 = len + 1.
+    case 120: return 123;
     // Knock Off: 59 rows (70..128 / 74..132) at accepted presentation age -11 (ageOffset -11): reducer age 0 = frame 81/85 =
     // activation + 6 (prep6 s2.4), so live age 0 is the reducer's age 0 and the activation is live age -6 (no #142 row).
     // The window ends 4 frames after the script end (124/128); duration = rows + ageOffset (the Dragon Breath convention).

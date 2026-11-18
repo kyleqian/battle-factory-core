@@ -1583,11 +1583,15 @@ export function liveMoveScriptTailFrames(
 // hpd4: rows the command presents after its live body (+ post) so the next command (hit controller, next script step) starts on the ROM row
 // (R -> H = lead + 3 + len + 4 against the accepted live window), tuned by exact-frame matches against the ROM frames (docs/hpd1-hp-hold.md).
 const HPD4_BODY_TAIL_ROWS: ReadonlyMap<number, number> = new Map([[49, 3], [82, 26], [111, 3], [205, 3], [301, 3], [69, 1]]);
+// liv2: Self-Destruct's presented `hp` command already carries the script lead (the window starts at S + pre, ROM A), so it has no body lead; its hit
+// controller runs 10 rows after the window (the explosion script's own instructions, ROM gap 10), so the tail is 9 (3 + 4 + 123 + 9 = A -> H 139 + pre).
+const LIVE_MOVE_LEADLESS_TAIL_ROWS: ReadonlyMap<number, number> = new Map([[120, 9]]);
 // hpd8: the shape-A bodies' tail is whatever the 3 pre + 3 post rows of the ROM span (lead + 3 + len + 4) leave over: 6 - pre - post (T 1 / 3 / 6 in hpd7).
 const HPD8_SHAPE_A_ROWS_AROUND_BODY = 6;
 function liveMoveHitTailRows(command: Extract<BattleResolutionPresentationCommand, { type: "move-animation" }>, field: BattleResolutionDisplayedField): number {
   const request = command.animation;
-  if ((command.timing.bodyLeadFrames ?? 0) === 0 || request === undefined) return 0;
+  if (request === undefined) return 0;
+  if ((command.timing.bodyLeadFrames ?? 0) === 0) return liveSubstituteSwapApplies(request, field) === true ? 0 : LIVE_MOVE_LEADLESS_TAIL_ROWS.get(request.moveId) ?? 0;
   const table = HPD4_BODY_TAIL_ROWS.get(request.moveId);
   if (table !== undefined) return table;
   if (!HPD8_SHAPE_A_MOVE_IDS.has(request.moveId) || liveSubstituteSwapApplies(request, field) === true) return 0;
@@ -2476,7 +2480,7 @@ export function createBattleResolutionPresentationRenderView(
       effect = Object.freeze({
         type: "move", request: command.animation,
         age: liveMoveUniversalRowAge(state, command.animation, field, seGate, liveMoveScriptTailFrames(command.timing, command.animation, field),
-          HPD8_SHAPE_A_MOVE_IDS.has(command.animation.moveId) && (command.timing.bodyLeadFrames ?? 0) > 0),
+          (HPD8_SHAPE_A_MOVE_IDS.has(command.animation.moveId) && (command.timing.bodyLeadFrames ?? 0) > 0) || LIVE_MOVE_LEADLESS_TAIL_ROWS.has(command.animation.moveId)),
         ...(lead > 0 && state.lifecycle.phaseElapsed <= pre ? { preActivationRow: true as const } : {}),
         paletteInput: state.liveMovePaletteInput,
         spriteAllocatorInput: state.liveMoveSpriteAllocatorInput,
