@@ -683,6 +683,7 @@ import { renderFactoryLobbyAttendant, renderFactoryLobbyFreeRoam } from "./facto
 import {
   advanceFactoryLobbyAttendant,
   createFactoryLobbyAttendantState,
+  isFactoryLobbyAttendantNpcsReleased,
   type FactoryLobbyAttendantState,
 } from "./factoryLobbyAttendant.ts";
 import { renderFactoryTerminalPresentation } from "./factoryTerminalRender.ts";
@@ -1313,9 +1314,9 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
     // (nch231, docs/nch231-new-challenge.md).
     if (state.lobbyAttendant) {
       // The attendant script holds lockall: the NPCs neither run nor draw (their snapshot still follows the state).
-      const frozenNpcs = stepLobbyNpcsTick(state.lobbyNpcs, rngValue, true, state.lobbyFreeRoam);
       if (state.attendantRequestHold && state.lobbyAttendant.saveDialogStarted) {
-        return { ...state, frame: state.frame + 1, keyRepeat, lobbyNpcs: frozenNpcs.npcs, rngMode: "vblank", rngValue };
+        const heldNpcs = stepLobbyNpcsTick(state.lobbyNpcs, rngValue, true, state.lobbyFreeRoam);
+        return { ...state, frame: state.frame + 1, keyRepeat, lobbyNpcs: heldNpcs.npcs, rngMode: "vblank", rngValue };
       }
       const attendant = advanceFactoryLobbyAttendant(state.lobbyAttendant, {
         a: newKeys.has("A"),
@@ -1338,14 +1339,15 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
           }
         }
       }
+      const attendantNpcs = stepLobbyNpcsTick(state.lobbyNpcs, rngValue, !isFactoryLobbyAttendantNpcsReleased(attendant), state.lobbyFreeRoam);
       return {
         ...state,
         frame: state.frame + 1,
         keyRepeat,
         lobbyAttendant: attendant.done === "freeRoam" ? null : attendant,
-        lobbyNpcs: frozenNpcs.npcs,
+        lobbyNpcs: attendantNpcs.npcs,
         rngMode: "vblank",
-        rngValue,
+        rngValue: attendantNpcs.rngValue,
       };
     }
     if (
