@@ -206,9 +206,9 @@ never brief those here. One worker at a time; each run folds the next audio step
 tools and the rare-rule hunt are the box's.
 - **Item 0 (sound): S11 event parity is met** (aud263 + adp1, `docs/aud251-s11-scoreboard-refresh.md` "aud263"): T1 census 0..999 both scenes, every family, 0 missing / 0 extra / 0 unclassified;
   T2 ROM replays 41 seeds 0 / 0. Supervisor judgment (reversible, in PROGRESS): the S11 gate is event parity; the constant per-window frame offsets are timing residuals (ISSUES #219 /
-  #198, ROADMAP item 6). ROADMAP S11 is ticked if the wind-down gates passed (see PROGRESS). Remaining sound work = frame alignment: extend the hpd4 / hpd5 audited script lead to more
-  bodies (`docs/hpd1-hp-hold.md`: per-body audit with `tools/integration/hpd2Probe.py` + `tools/integration/hpd4Cmds.ts`), Memento's 108-frame offset, Water Spout's per-HP offsets,
-  the second `Status_*` play +14 (sta2), T2 on more seeds.
+  #198, ROADMAP item 6). **ROADMAP S11 ticked** (gates green). Remaining sound work = frame alignment, ranked by t2off (`docs/aud251-s11-scoreboard-refresh.md` "t2off"): the script
+  lead does not move body SEs; first Status_Poison SE 148 (-22 constant), the Rock Slide / Swagger / Fire Blast outlier windows, then Bubble Beam / Fire Blast / Magical Leaf; T2 on more seeds.
+  Measured presentation fixes ready to land (docs only): mem1 / exp1 (0x7FFF instant HP drop), sdx1 (song-wait tails), liv1 (short live windows), hpd7 / hpd7b (lead rows), sta4.
 - **Presentation timing (item 6):** hpd4 / hpd5 landed the ROM-verified Scene ON script lead on six audited bodies (Sonic Boom, Dragon Rage, Defense Curl, Rollout, Ice Ball, Seismic Toss) and the
   floor-free post-hit hold (`e01bfd249`). Next: audit more bodies the same way (each moves frames: census eventsDigest identity + soaks + re-pins of `tests/randomRoundSoak.test.ts` /
   `tests/lbrd.test.ts`, both pin notes explain how). #222 AI switch residuals unchanged.
