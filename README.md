@@ -28,6 +28,11 @@ About 500 test files need the decompilation, built into a ROM, and one needs
 mGBA. Without them those tests fail, and the run says why. `oracle/SETUP.md`
 sets up both; the same setup runs the real game for comparison.
 
+The full run is long: about an hour on a laptop. Each test process may use up
+to 8 GB of memory. To run a few tests, pass their files:
+`npx vitest run tests/<name>.test.ts`. `npm run typecheck` needs `flock`,
+which macOS does not ship (`brew install flock`).
+
 ## Layout
 
 - `workspace/src`: the game
