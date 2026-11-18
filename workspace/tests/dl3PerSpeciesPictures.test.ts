@@ -147,15 +147,16 @@ describe("dl3: the mount loop holds on a picture that has not arrived", () => {
     queue = [];
     for (const cb of pending) cb(clock);
   }
-  function fakeCanvas(): { canvas: HTMLCanvasElement; draws: () => number } {
+  function fakeCanvas(onDraw?: (data: Uint8ClampedArray) => void): { canvas: HTMLCanvasElement; draws: () => number } {
     let draws = 0;
     const canvas = {
       width: 0,
       height: 0,
       getContext: () => ({
         createImageData: (w: number, h: number) => ({ data: new Uint8ClampedArray(w * h * 4) }),
-        putImageData: () => {
+        putImageData: (image: { data: Uint8ClampedArray }) => {
           draws += 1;
+          onDraw?.(image.data);
         },
       }),
     } as unknown as HTMLCanvasElement;
@@ -171,9 +172,13 @@ describe("dl3: the mount loop holds on a picture that has not arrived", () => {
     sharedMonPicSpriteStore("dl3-hold", () => gate.store);
     installMonPicPixels(gate.store.tables);
     installRaf();
-    const { canvas, draws } = fakeCanvas();
+    // The last drawn frame's hash per session frame: every one must equal what the full tables render for that frame.
+    const drawn = new Map<number, string>();
+    let frameOfGame = (): number => 0;
+    const { canvas, draws } = fakeCanvas((data) => drawn.set(frameOfGame(), createHash("sha1").update(data).digest("hex").slice(0, 16)));
     const events: string[] = [];
     const game = mountFactoryGameInternal({ canvas, battleScene: "on", gameplaySeed: 4, onEvent: (event) => events.push(event.type) });
+    frameOfGame = () => game.frame;
     expect(gate.requested.length).toBeGreaterThanOrEqual(6); // the draft's six are requested at mount
     game.press("A"); // before the pictures: dropped
     for (let step = 0; step < 5; step += 1) {
@@ -211,12 +216,21 @@ describe("dl3: the mount loop holds on a picture that has not arrived", () => {
     const replay = new FactorySession({ battleScene: "on", gameplaySeed: 4 });
     const trace = game.sessionTrace().segments; // trace() leaves the open run out
     let frames = 0;
+    let compared = 0;
+    const mismatched: number[] = [];
     for (const segment of trace) {
       for (let at = 0; at < segment.frames; at += 1) {
         replay.replayStep(new Set(segment.buttons) as never);
         frames += 1;
+        const hash = drawn.get(frames);
+        if (hash !== undefined) {
+          compared += 1;
+          if (frameHash(replay) !== hash) mismatched.push(frames);
+        }
       }
     }
+    expect(compared).toBeGreaterThan(1000);
+    expect(mismatched).toEqual([]);
     expect(frames).toBe(game.frame);
     expect(replay.digest()).toBe(game.session.digest());
     expect(frameHash(replay)).toBe(frameHash(game.session));
