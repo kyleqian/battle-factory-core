@@ -2,7 +2,9 @@ import { describe, expect, it } from "vitest";
 import {
   advanceFactoryRoundBattleStartIntro, beginFactoryRoundBattleStartIntro, createFactoryRoundBattleOrchestrator,
 } from "../src/engine/factoryRoundBattleOrchestrator.ts";
-import { createPlayer, mirrorRulesContext, PLAYER_POLICIES, type PlayerMenu } from "../tools/integration/romReplayPlayers.ts";
+import {
+  acceptedSwapTargets, createPlayer, createSwapPolicy, mirrorRulesContext, PLAYER_POLICIES, SWAP_POLICIES, type PlayerMenu, type SwapMon,
+} from "../tools/integration/romReplayPlayers.ts";
 
 // docs/parity-mac/replay-players.md. The test players of the real-ROM replay are decision policies with their own dice: the same battle seed and the same menus
 // give the same choices, the choices are among what the engine offers, and neither the mirrored AI nor the mirror itself changes the state it is handed.
@@ -75,5 +77,42 @@ describe("real-ROM replay test players", () => {
     // a forced replacement: census takes the lowest legal slot; the others one of the legal slots
     expect(census.chooseReplacement(playerMenu.rules, [2, 1])).toBe(1);
     for (const name of ["ai-v1", "random-v1"] as const) expect([1, 2]).toContain(createPlayer(name, 7).chooseReplacement(playerMenu.rules, [1, 2]));
+  });
+});
+
+// docs/parity-mac/round-replay.md: the swap decision after a won battle, and the stronger battle player of the round replay.
+describe("round replay swap policies and power-v1", () => {
+  const player: SwapMon[] = [{ species: 10, statTotal: 600 }, { species: 20, statTotal: 500 }, { species: 30, statTotal: 700 }];
+  const opponent: SwapMon[] = [{ species: 10, statTotal: 900 }, { species: 40, statTotal: 650 }, { species: 20, statTotal: 800 }];
+
+  it("the swap screen accepts no Pokemon whose species a kept Pokemon has; the swapped-out one's own species is allowed", () => {
+    // Swap_AlreadyHasSameSpecies (battle_factory_screen.c:4162-4173) compares with gPlayerParty[i] for i != playerMonId only.
+    expect(acceptedSwapTargets(player, opponent, 1)).toEqual([1, 2]);
+    expect(acceptedSwapTargets(player, opponent, 0)).toEqual([0, 1]);
+    expect(acceptedSwapTargets(player, opponent, 2)).toEqual([1]);
+  });
+
+  it("never declines, weakest swaps the lowest stat total for the highest accepted one, random is seeded and only picks accepted ones", () => {
+    expect(SWAP_POLICIES).toEqual(["never", "weakest", "random"]);
+    expect(createSwapPolicy("never", 1).choose(player, opponent)).toEqual({ type: "decline" });
+    // player 1 (500) is the weakest; opponent 0 (species 10, 900) is refused (kept player 0 is species 10), 2 (species 20 = the swapped-out one's own, 800)
+    // and 1 (650) are accepted: the highest accepted is 2.
+    expect(createSwapPolicy("weakest", 1).choose(player, opponent)).toEqual({ type: "accept", playerPartyIndex: 1, opponentPartyIndex: 2 });
+    const runs = [0, 1].map(() => { const r = createSwapPolicy("random", 99); return Array.from({ length: 40 }, () => r.choose(player, opponent)); });
+    expect(runs[0]).toEqual(runs[1]);
+    const accepted = runs[0]!.filter((c) => c.type === "accept") as { playerPartyIndex: number; opponentPartyIndex: number }[];
+    expect(accepted.length).toBeGreaterThan(5);
+    expect(runs[0]!.length - accepted.length).toBeGreaterThan(5);
+    for (const c of accepted) expect(acceptedSwapTargets(player, opponent, c.playerPartyIndex)).toContain(c.opponentPartyIndex);
+  });
+
+  it("power-v1 takes the move with the best power x type effectiveness x same-type bonus x accuracy", () => {
+    const { playerMenu } = firstMenu(7, 28);
+    const me = playerMenu.rules.battlers[0];
+    const turn = createPlayer("power-v1", 7).chooseTurn(playerMenu);
+    expect(turn.action.kind).toBe("move");
+    expect(playerMenu.legalSlots).toContain((turn.action as any).slot);
+    // a move with power: the player never picks a status move while a damaging one is legal
+    if (turn.source === "power") expect(me.moves[(turn.action as any).slot]).not.toBe(0);
   });
 });

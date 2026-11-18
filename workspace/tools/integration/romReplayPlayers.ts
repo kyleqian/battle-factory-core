@@ -6,6 +6,10 @@
 //   random-v1  a uniformly random legal move; with probability 0.2 a voluntary switch to a uniformly random legal bench Pokemon (when the engine allows one); a forced
 //              replacement is uniformly random. It also PROBES what the engine says is not allowed: a switch when the engine offers none although the bench has a
 //              healthy Pokemon (a trap), and a move slot the engine says cannot be selected. The ROM must refuse a probe; a probe never changes the battle.
+//   power-v1   (round replay, docs/parity-mac/round-replay.md) a stronger player, so that rounds get past their first battles: the legal move with the highest
+//              power x type effectiveness against the opponent's active Pokemon (the type chart, both types) x 1.5 for a move of the user's own type x accuracy;
+//              a move without power (status moves, power 1 like the OHKO moves) scores 0, and when every legal move scores 0 the least-used legal move. Never a
+//              voluntary switch; a forced replacement is the legal Pokemon whose best move scores highest against the opponent's active Pokemon.
 //   script     a staged battle (docs/parity-mac/staged-battles.md): the actions are written down, one per turn; when the list ends another player takes over.
 //              A written action the engine does not offer stops the replay (the staging is wrong), it is never bent into something else.
 // Every player draws from its own generator, seeded from the battle seed and the policy name. None reads or advances the battle RNG, and none touches the state the
@@ -22,8 +26,10 @@ import { chooseFactoryAiScoredDecision } from "../../src/engine/factoryAiDecisio
 import { createBattleCommandRequest } from "../../src/engine/battleDecisionBoundary.ts";
 import { getMostSuitableMonToSwitchInto } from "../../src/engine/battleAiSwitchInto.ts";
 import speciesTypesData from "../../src/data/gen/species-types.json" with { type: "json" };
+import movesData from "../../src/data/gen/moves.json" with { type: "json" };
+import typeEffectivenessData from "../../src/data/gen/type-effectiveness.json" with { type: "json" };
 
-export const PLAYER_POLICIES = ["census", "ai-v1", "random-v1"] as const;
+export const PLAYER_POLICIES = ["census", "ai-v1", "random-v1", "power-v1"] as const;
 export type PlayerPolicyName = (typeof PLAYER_POLICIES)[number];
 
 /** One written turn of a staged battle: exactly one of move / switch, with optional refusal probes before it. */
@@ -133,6 +139,37 @@ export function createPlayer(name: PlayerPolicyName, seed: number): Player {
       name, stats,
       chooseTurn: (menu) => done({ probes: [], action: { kind: "move", slot: censusMove(menu.legalSlots) }, source: "census" }),
       chooseReplacement: (_rules, legal) => { count("replacements"); return Math.min(...legal); },
+    };
+  }
+
+  if (name === "power-v1") {
+    const score = (move: number, userTypes: readonly string[], targetTypes: readonly string[]) => {
+      const m = (movesData as any).moves[move];
+      if (!m || m.id !== move || m.power <= 1) return 0;
+      let mult = 1;
+      for (const row of (typeEffectivenessData as any).typeEffectiveness as any[]) {
+        if (row.attackingType !== m.type) continue;
+        if (row.defendingType === targetTypes[0]) mult *= row.multiplierTenths / 10;
+        if (targetTypes[1] !== targetTypes[0] && row.defendingType === targetTypes[1]) mult *= row.multiplierTenths / 10;
+      }
+      return m.power * mult * (userTypes.includes(m.type) ? 1.5 : 1) * ((m.accuracy || 100) / 100);
+    };
+    const bestOf = (moves: readonly number[], userTypes: readonly string[], targetTypes: readonly string[], slots: readonly number[]) =>
+      slots.reduce((best, s) => (score(moves[s]!, userTypes, targetTypes) > score(moves[best]!, userTypes, targetTypes) ? s : best), slots[0] ?? 0);
+    return {
+      name, stats,
+      chooseTurn: (menu) => {
+        const user = menu.rules.battlers[0]; const target = menu.rules.battlers[1];
+        const slot = bestOf(user.moves, user.types, target.types, menu.legalSlots);
+        if (menu.legalSlots.length === 0 || score(user.moves[slot], user.types, target.types) === 0) return done({ probes: [], action: { kind: "move", slot: censusMove(menu.legalSlots) }, source: "power-none" });
+        return done({ probes: [], action: { kind: "move", slot }, source: "power" });
+      },
+      chooseReplacement: (rules, legal) => {
+        count("replacements");
+        const target = rules.battlers[1]; const party = rules.party.player as any[];
+        const value = (i: number) => { const m = party[i]; const types = typesOfSpecies(m.species); return Math.max(0, ...[0, 1, 2, 3].map((s) => score(m.moves[s], types, target.types))); };
+        return legal.reduce((best, i) => (value(i) > value(best) ? i : best), legal[0]!);
+      },
     };
   }
 
@@ -269,4 +306,47 @@ export function createScriptPlayer(seed: number, script: PlayerScript): Player {
       return wanted;
     },
   };
+}
+
+// Round replay (docs/parity-mac/round-replay.md): the swap decision after a won battle, made from the engine's state at the swap offer. Like the players, a swap
+// policy draws from its own generator (seeded from the battle seed and the policy name), never from the battle RNG.
+//   never    always answers NO to "Would you like to swap a POKeMON?".
+//   weakest  swaps out the player's Pokemon with the lowest stat total (max HP + the five stats; the lowest party index on a tie) for the beaten trainer's Pokemon
+//            with the highest stat total that the swap screen accepts; NO when none is accepted.
+//   random   NO with probability 1/2; else a uniformly random own Pokemon for a uniformly random accepted one of the beaten trainer's; NO when none is accepted.
+// The swap screen refuses a Pokemon whose species one of the two kept Pokemon already has ("Can't have the same POKeMON", Swap_AlreadyHasSameSpecies,
+// battle_factory_screen.c:4162-4173); the swapped-out Pokemon's own species is allowed. A policy never picks a refused one.
+export const SWAP_POLICIES = ["never", "weakest", "random"] as const;
+export type SwapPolicyName = (typeof SWAP_POLICIES)[number];
+export type SwapMon = Readonly<{ species: number; statTotal: number }>;
+export type SwapChoice = Readonly<{ type: "decline" } | { type: "accept"; playerPartyIndex: number; opponentPartyIndex: number }>;
+
+export function acceptedSwapTargets(player: readonly SwapMon[], opponent: readonly SwapMon[], playerPartyIndex: number): number[] {
+  const kept = player.filter((_, i) => i !== playerPartyIndex).map((m) => m.species);
+  return opponent.map((m, i) => ({ m, i })).filter(({ m }) => !kept.includes(m.species)).map(({ i }) => i);
+}
+
+export function createSwapPolicy(name: SwapPolicyName, seed: number) {
+  const rand = generator(seed, `swap-${name}`);
+  const stats: Record<string, number> = {};
+  const count = (k: string) => { stats[k] = (stats[k] ?? 0) + 1; };
+  const choose = (player: readonly SwapMon[], opponent: readonly SwapMon[]): SwapChoice => {
+    if (player.length !== 3 || opponent.length !== 3) throw new Error("a swap needs the player's three and the beaten trainer's three");
+    if (name === "never") { count("declined"); return { type: "decline" }; }
+    if (name === "weakest") {
+      const p = player.reduce((best, m, i) => (m.statTotal < player[best]!.statTotal ? i : best), 0);
+      const accepted = acceptedSwapTargets(player, opponent, p);
+      if (accepted.length === 0) { count("noneAccepted"); return { type: "decline" }; }
+      const q = accepted.reduce((best, i) => (opponent[i]!.statTotal > opponent[best]!.statTotal ? i : best), accepted[0]!);
+      count("swapped");
+      return { type: "accept", playerPartyIndex: p, opponentPartyIndex: q };
+    }
+    if (rand() < 0.5) { count("declined"); return { type: "decline" }; }
+    const p = Math.floor(rand() * 3);
+    const accepted = acceptedSwapTargets(player, opponent, p);
+    if (accepted.length === 0) { count("noneAccepted"); return { type: "decline" }; }
+    count("swapped");
+    return { type: "accept", playerPartyIndex: p, opponentPartyIndex: pick(rand, accepted) };
+  };
+  return { name, stats, choose };
 }
