@@ -3,14 +3,14 @@
  "rules": [
   "R058"
  ],
- "why": "Challenge 7. The player's Clefable (389, Metronome 10 PP) calls Metronome 10 times in a row opposite Shuckle (528: Sandstorm, Dig, Flash, Double Team; Attack 10, so it cannot knock Clefable out); every call is a draw of one of the 336 callable moves (1 in 336 each). After the tenth call the script switches to Snorlax (826) so the battle ends inside the ROM drive's state budget. Charge called, then within two turns an Electric damaging move (Thunder, Thunderbolt, Thunder Shock, ThunderPunch, Spark, Zap Cannon, Shock Wave, Volt Tackle, ...) doubles its damage (the STATUS3_CHARGED_UP arm). Chance per seed about 9 x 1/336 x 2 x 9/336 = 0.14%.",
+ "why": "Challenge 7. The player's Clefable (389, Metronome 10 PP) calls Metronome 10 times in a row opposite Shuckle (528: Sandstorm, Dig, Flash, Double Team; Attack 10, so it cannot knock Clefable out); every call is a draw of one of the 336 callable moves (1 in 336 each). After the tenth call the script switches to Salamence (753) and plays Aerial Ace (slot 2; it never misses, so a Double Team stack cannot stall the end; luck6). Charge called, then within two turns an Electric damaging move (Thunder, Thunderbolt, Thunder Shock, ThunderPunch, Spark, Zap Cannon, Shock Wave, Volt Tackle, ...) doubles its damage (the STATUS3_CHARGED_UP arm). Chance per seed about 9 x 1/336 x 2 x 9/336 = 0.14%.",
  "seed": 0,
  "challengeNum": 7,
  "battleNum": 0,
  "trainerId": 200,
  "playerSetIds": [
   389,
-  826,
+  753,
   565
  ],
  "opponentSetIds": [
@@ -52,6 +52,30 @@
    },
    {
     "preferSwitch": 1
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
    }
   ],
   "then": "census"
