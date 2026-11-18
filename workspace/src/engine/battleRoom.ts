@@ -235,15 +235,16 @@ export function battleRoomStateForOpponent(
   heardBrainSpeechBefore = false,
 ): BattleRoomState {
   if (opponent?.frontierBrain !== undefined) {
-    // Only "gold" selects the gold speech content; every other status
-    // (silver, and the not-yet-presentation-wired streak/streak-long
-    // repeats) keeps the pre-existing silver default - out of scope for
-    // this step, same non-regression as before B3 touched this seam.
-    const brainSpeechTier: "silver" | "gold" =
-      opponent.frontierBrain.status === "gold" ? "gold" : "silver";
+    // Fix 48 (docs/parity-mac/noland-return-battles.md): BattleNoland's switch (BattleFactoryBattleRoom scripts.inc:113-117). GOLD reads
+    // the gold heard bit (IntroNolandGold, :143-147); SILVER (the default case) the silver bit (:118-121); the return battles with both
+    // symbols go straight to the short lines with no heard-bit check: STREAK (battle 21) to BattleNolandSilver ("ShakeOutKnowledge"),
+    // STREAK_LONG (42, then every 21) to BattleNolandGold ("AllRightBringItOn").
+    const status = opponent.frontierBrain.status;
+    const brainSpeechTier: "silver" | "gold" = status === "gold" || status === "streak-long" ? "gold" : "silver";
+    const returnBattle = status === "streak" || status === "streak-long";
     return createBrainWalkupBattleRoomState(
       trainerPresentation,
-      heardBrainSpeechBefore,
+      returnBattle || heardBrainSpeechBefore,
       brainSpeechTier,
       opponent.frontierBrain.transitionPresentation,
     );

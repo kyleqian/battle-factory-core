@@ -135,11 +135,21 @@ describe("Frontier-Brain BattleRoom entrance (walk-up build step B1)", () => {
     expect(battleRoomStateForOpponent(undefined).frontierBrainWalkup).toBeUndefined();
   });
 
-  it("walk-up build step B3: brainSpeechTier is derived from opponent.frontierBrain.status - only 'gold' selects the gold speech, every other status (including the not-yet-presentation-wired streak/streak-long repeats) keeps the pre-B3 silver default", () => {
+  it("brainSpeechTier follows BattleNoland's switch (scripts.inc:113-117): silver and streak take the silver lines, gold and streak-long the gold lines (fix 48)", () => {
     expect(battleRoomStateForOpponent(brainOpponent("silver")).brainSpeechTier).toBe("silver");
     expect(battleRoomStateForOpponent(brainOpponent("gold")).brainSpeechTier).toBe("gold");
     expect(battleRoomStateForOpponent(brainOpponent("streak")).brainSpeechTier).toBe("silver");
-    expect(battleRoomStateForOpponent(brainOpponent("streak-long")).brainSpeechTier).toBe("silver");
+    expect(battleRoomStateForOpponent(brainOpponent("streak-long")).brainSpeechTier).toBe("gold");
+  });
+
+  it("the return battles (streak, streak-long) never show the first speech, heard or not; silver and gold show it until heard (fix 48)", () => {
+    for (const status of ["streak", "streak-long"] as const) {
+      expect(battleRoomStateForOpponent(brainOpponent(status), undefined, false).brainSpeechFirstEncounter).toBe(false);
+    }
+    for (const status of ["silver", "gold"] as const) {
+      expect(battleRoomStateForOpponent(brainOpponent(status), undefined, false).brainSpeechFirstEncounter).toBe(true);
+      expect(battleRoomStateForOpponent(brainOpponent(status), undefined, true).brainSpeechFirstEncounter).toBe(false);
+    }
   });
 
   it("S3 (docs/brain-transition-wiring-design.md): transitionPresentation is carried directly from opponent.frontierBrain.transitionPresentation onto the constructed room at construction time - never drawn here, and undefined (not defaulted to a fallback family) when the opponent never precomputed one", () => {
