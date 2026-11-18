@@ -100,3 +100,6 @@ pinned in the test, but the engine's Rhydon / Golbat window is not built, so "th
   `factory-round-battle{7-noland,6-lukas}-reveal-off`, `presentation-rng-playable-live-bodies-on`, `factory-arbitrary-intro-magneton-off`,
   `interactive-generated-intro-off`).
 - Full `npm test` is left to the supervisor.
+
+
+hpf1 (2026-11-18): the super-effective windows and the lowhp-faint faint sounds now land on the ROM frame (frameDeltas 0): the hp command drops its 28 floor for hit -> message (tail delta + 2) and hit -> faint chain (tail 0); the second attack's low-HP SE is anchored to the bar end minus the tail. See docs/hpd1-hp-hold.md hpf1.

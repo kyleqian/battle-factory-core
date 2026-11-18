@@ -656,3 +656,22 @@ The end-of-turn drain itself (General_LeechSeedDrain, Absorb's body inside the d
 - **Need `live` / tail changes**: Blizzard 59 (live 372, L 5 + T 2), Calm Mind 347 (L 2 + T 1), Encore 227 (bodyLead 2, pre 3, live 220, post 2), Hypnosis 95 (lead 7, gap 5), Wish 273 (gap 13, cause open), Leech Seed 73 (lead as bodyLead, tail 39 -> ~3, SE anchor -7).
 - Expected effect of the Leech Seed change: the 32 body:73 rows of the t2r ranking (-29 .. -38) close; the other bodies' SE offsets are small (+-3).
 - Open: Wish gap trace, the opponent side of every body above, Charm's e2e +3 and Calm Mind's e2e +4 (more than d).
+
+## hpf1: the 28-frame floor is a fit; hp commands get the ROM's own length for three shapes
+
+Duration of an `hp` command is `max(minimumFrames, bar frames + 1) + tailFrames`. The ROM has no floor: `healthbarupdate` starts the bar controller, `Cmd_datahpupdate` waits for the exec flags to clear, then the script runs one instruction per frame (critmessage, waitmessage, resultmessage ..., tryfaintmon, moveendall). The old 28 floor overshoots small bars (Seismic Toss B=10: 10 frames late) and undershoots large bars whose message follows (5 short). Rules landed (both scenes, no scene difference measured; logical events, RNG and the kernel event order unchanged: census 0..99 both scenes, identical eventsDigest vs base 3bdb6cf11):
+
+| shape | rule | ROM lab before -> after |
+|---|---|---|
+| hit -> MoveEnd receipts, then turn end (now also hits ON THE PLAYER) | `{minimumFrames: 0, tailFrames: d}`, d = rows datahpupdate -> first MoveEnd receipt (7) | pc-toss10 on/off base 10 late -> exact; pa-sonicboom-on 7 late -> exact; pc/pa-dragonrage on/off box change ROM 20 / app 7 short -> exact (8 player-hit labs) |
+| hit -> next action's move transition | tail 1 (0 when no MoveEnd receipt follows) | exact |
+| hit -> `critmessage` / `resultmessage` | tail = delta + 2 (delta = rows datahpupdate -> message instruction), no floor | Rolling Kick delta 3 -> 5, Substitute 1 -> 3; aud241b super-effective windows now on the ROM frame |
+| hit -> faint chain (`play-faint-cry` next) | `{minimumFrames: 0}`, tail 0 | aud241b lowhp-faint 11 -> 0 bar exact (was 16 late); hpf1-pk-dragonrage hp end exact (1-frame residual is the faint's own lead, not hp) |
+
+The low-HP loop SE is anchored to the bar end (HealthbarDone), so `battleHitSounds.ts` subtracts `tailFrames` from the command duration. The player-hit rule applies only when a same-battler hit-animation precedes the hp command (otherwise the shape keeps the floor).
+
+Unproven shapes KEEP the 28 floor (no ROM lab at the time): heals (Rest / Recover / Soft-Boiled), recoil, drain user / target (except Leech Seed's drain body), poison / burn / sandstorm / Curse ticks, Struggle recoil, faint-next at small bars beyond lowhp-faint. The synthetic-route Rest anchor in `tests/ont193SceneOnTails.test.ts` moves -3 -> -14 because the rule now reaches the Rest turn's hit; that pin moved AWAY from its fixture value and is flagged, not a ROM statement.
+
+Re-pins (each toward its ROM fixture): aud241b effectiveness / low-HP / faint deltas -> 0; aud248 superpower 17 -> 12; hie3 sitrus-on / shellbell-on drift; hpd1 player-hit `{minimumFrames: 0, tailFrames: 7}`. New: `tests/hpf1HpHold.test.ts` (4 tests, each fails without the fix). Labs: `tools/battle-lab/hpf1-*.json`, traces `tools/compare/traces/hpf1-*.json`, `tools/integration/hpf1Cmds.ts` (ROM hp command lengths per trace).
+
+T2 sound scoreboard (ROM chain, base 3bdb6cf11 -> new; 0 missing / 0 extra both): Scene ON 8 seeds, battle-controller SE exact 34 -> 43, cry exact 4 -> 14, cry delta median -8 -> -4 (p10 -24 -> -21, p90 14 -> 0), battle-controller median -5 -> -4 (p10 -24 -> -23, p90 3 -> 1), move-animation exact 161 -> 166 (p10 -18 -> -16). Scene OFF 4 seeds, controller exact 10 -> 16, cry exact 3 -> 8, cry median -6 -> -3 (p10 -15 -> -11, p90 15 -> 0), controller p10 -15 -> -11, p90 5 -> 1.
