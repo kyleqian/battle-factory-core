@@ -337,7 +337,9 @@ def drive_between(rom, swap, cap, progress, prompt_delay=0, new_round=False):
                             "draws": lcg_distance(rng_prev, rng), "rentalMonsAfter": rom.rental_mon_ids()})
         rng_prev, watch_prev = rng, watch
     final = list(rom.watch())
-    rolls = [c for c in changes if c["after"] == final and c["before"][0] != final[0]]
+    # The roll is the last change that produced the battle's final trainer and sets (the trainer alone is not enough: factory_init writes trainer 0,
+    # and 0 is a trainer the next roll can pick).
+    rolls = [c for c in changes if c["after"] == final]
     generation = None
     if rolls:
         c = rolls[-1]
