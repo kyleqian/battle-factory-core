@@ -166,7 +166,8 @@ describe("ordinary route: a subbed attacker's Leech Seed with the swaps", () => 
     const off = generatedCommandAnimationReplay(103, "off", [1, 0], 28, true, true);
     // MEGANIUM (player) Leech Seed 141 + the player swaps 85 = 226 rows (the ROM PERSIAN window measures 226 too).
     expect(seen.duration).toBe(226);
-    expect(seen.ages).toBe(226);
+    // lse2: the command also presents Leech Seed's 36 script-lead rows ahead of the window (the ROM's print-release to first-window gap); the window itself stays 226
+    expect(seen.ages).toBe(226 + 36);
     expect([...seen.kinds].sort()).toEqual(["body", "swap"]);
     expect(on.requests.map((q) => `${q.moveId}:${q.attacker}->${q.target}`)).toContain("73:0->1");
     expect(on.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");

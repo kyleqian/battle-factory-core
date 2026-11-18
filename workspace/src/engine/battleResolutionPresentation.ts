@@ -1663,13 +1663,23 @@ const HPD4_BODY_LEAD_MOVE_IDS: readonly number[] = [49, 82, 111, 205, 301, 69];
  * Thunderbolt, Double-Edge, Quick Attack, Body Slam, Ancient Power, Giga Drain, Ice Beam, Surf, Dig (the attack turn only: the charge turn is shape C),
  * Struggle, Rock Slide, Bubble Beam, Fire Blast, Magical Leaf.
  */
-export const HPD8_SHAPE_A_MOVE_IDS: ReadonlySet<number> = new Set([332, 94, 85, 38, 98, 34, 246, 202, 58, 57, 91, 165, 157, 61, 126, 345, 53, 76, 44, 188, 89, 185]);
+export const HPD8_SHAPE_A_MOVE_IDS: ReadonlySet<number> = new Set([332, 94, 85, 38, 98, 34, 246, 202, 58, 57, 91, 165, 157, 61, 126, 345, 53, 76, 44, 188, 89, 185, 56]);
 /**
  * sta5 (docs/aud249-general-anim-sounds.md): the move-inflicted status bodies of sta4 (Flatter 260, Swagger 207, Spore 147, Toxic 92): the rows after the
  * body that put the next command (`stat` / `status`, then the stat or status animation) on the ROM row, net of the 2-row `stat` / `status` command.
  */
 export const STA5_STATUS_BODY_TAIL_ROWS: ReadonlyMap<number, number> = new Map([[260, 4], [207, 5], [147, 0], [92, 7]]);
-export const BODY_LEAD_AUDITED_MOVE_IDS: ReadonlySet<number> = new Set([...HPD4_BODY_LEAD_MOVE_IDS, ...HPD8_SHAPE_A_MOVE_IDS, ...STA5_STATUS_BODY_TAIL_ROWS.keys()]);
+/**
+ * lse2 (docs/hpd1-hp-hold.md): the no-hit status / stat bodies whose script lead (ROM `exec` rise -> `gAnimScriptActive`) is put in front of the body instead of
+ * in the script tail: Leech Seed (lead 36), Cosmic Power (2), Calm Mind (2). Their body SEs keep the move-body sound clock (calibrated on a 7-row lead), so the
+ * sound clock is moved by `bodyLead - LSE2_SOUND_CLOCK_LEAD` (`lse2BodySoundAgeShift`).
+ */
+export const LSE2_BODY_LEAD_MOVE_IDS: ReadonlySet<number> = new Set([73, 322, 347]);
+export const LSE2_SOUND_CLOCK_LEAD = 7;
+export function lse2BodySoundAgeShift(moveId: number, bodyLeadFrames: number | undefined): number {
+  return LSE2_BODY_LEAD_MOVE_IDS.has(moveId) && (bodyLeadFrames ?? 0) > 0 ? bodyLeadFrames! - LSE2_SOUND_CLOCK_LEAD : 0;
+}
+export const BODY_LEAD_AUDITED_MOVE_IDS: ReadonlySet<number> = new Set([...HPD4_BODY_LEAD_MOVE_IDS, ...HPD8_SHAPE_A_MOVE_IDS, ...STA5_STATUS_BODY_TAIL_ROWS.keys(), ...LSE2_BODY_LEAD_MOVE_IDS]);
 
 function moveAnimationScriptLeadTiming(
   events: readonly BattleKernelSemanticEvent[],

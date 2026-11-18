@@ -7,7 +7,7 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import "../../src/engine/monPicPixelsInstall.ts";
 import { MONS, lsd194Production } from "./lsd194Production.ts";
-import { liveMoveScriptTailFrames, liveMoveUniversalRows } from "../../src/engine/battleResolutionPresentationRender.ts";
+import { liveMoveHitTailRows, liveMoveScriptTailFrames, liveMoveUniversalRows } from "../../src/engine/battleResolutionPresentationRender.ts";
 
 export const TL204_MOVES: Record<string, { id: number; self: boolean }> = {
   "double-team": { id: 104, self: true }, "rain-dance": { id: 240, self: true }, "scary-face": { id: 184, self: false }, "light-screen": { id: 113, self: true },
@@ -69,14 +69,16 @@ export function compareCase(r: Rom) {
       // tl205: the body rows exclude the script tail frames the rule now adds (they are the script rows, counted on the script side)
       const c0 = p.commands.find((x: any) => x.type === "move-animation");
       const tailFrames = c0?.animation ? liveMoveScriptTailFrames(c0.timing, c0.animation, p.field) : 0;
-      const prodBody = between.filter((x) => x.type === "move-animation" || x.type === "stats-change").reduce((a, x) => a + x.dur, 0) - tailFrames;
+      // lse2: a body's presented script lead and hit tail are script rows too (the ROM's print-release gap and the rows to the next script step)
+      const leadRows = c0?.timing?.bodyLeadFrames ?? 0, hitTailRows = c0?.animation ? liveMoveHitTailRows(c0, p.field) : 0;
+      const prodBody = between.filter((x) => x.type === "move-animation" || x.type === "stats-change").reduce((a, x) => a + x.dur, 0) - tailFrames - leadRows - hitTailRows;
       const prodStat = between.filter((x) => x.type === "stat").reduce((a, x) => a + x.dur, 0);
       const romWindows = r.segments.filter((s) => s.kind === "window").reduce((a, s) => a + s.len, 0);
       const romScript = r.printF - r.usedF - r.usedGlyphs - romWindows;
       const tailRows = bodyRows[0]?.timing?.scriptTailRows ?? 0;
-      const scriptResidual = prodStat + tailFrames - romScript, bodyResidual = prodBody - romWindows, usedResidual = used.dur - r.usedGlyphs;
+      const scriptResidual = prodStat + tailFrames + leadRows + hitTailRows - romScript, bodyResidual = prodBody - romWindows, usedResidual = used.dur - r.usedGlyphs;
       // the hypothesis the doc proposes: tail frames = scriptTailRows - 1 (trail -1, post 0) on the first body command
-      return { romScriptRows: romScript, productionStatRows: prodStat, productionTailFrames: tailFrames, scriptResidual, romWindowRows: romWindows, productionBodyRows: prodBody, bodyResidual, usedResidual,
+      return { romScriptRows: romScript, productionStatRows: prodStat, productionTailFrames: tailFrames, productionLeadRows: leadRows, productionHitTailRows: hitTailRows, scriptResidual, romWindowRows: romWindows, productionBodyRows: prodBody, bodyResidual, usedResidual,
         hypothesisTailFrames: Math.max(0, tailRows - 1), residualAfterHypothesis: first.start - used.start - (r.printF - r.usedF) - tailFrames + Math.max(0, tailRows - 1) };
     })(),
     romRelease: { releaseRow: r.segments.filter((s) => s.kind === "window").slice(-1)[0]!.end, printRunStart: r.printRunStart },
