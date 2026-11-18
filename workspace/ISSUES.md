@@ -67,7 +67,8 @@ exclusions are superseded. Unrelated expansions stay parked.
 - **Measured presentation-timing bugs behind the largest T2 offsets** (out1, `docs/aud251-s11-scoreboard-refresh.md` "out1"; not landed): (a) Knock Off's item-knocked-off animation
   (`BattleScript_KnockedOff`, `B_ANIM_ITEM_KNOCKOFF`, ~114 frames) is not presented (only the message + a 15-row stub); (b) Flamethrower's body is 115 presented rows vs the ROM's 215 from
   `attackanimation` to `hitanimation` (`liveMoveAnimation.ts:1433`; also seed 1028 res12); (c) Horn Drill's miss (`BattleScript_KOFail`: `pause B_WAIT_TIME_LONG`, 64 rows) holds the used
-  message 28 rows instead of ~99 (`sourcePauseUsedMoveHoldFrames` accepts only `B_WAIT_TIME_SHORT`, `battleResolutionPresentation.ts:1357-1358`). Poison ticks (psn3, docs/aud249 "psn3")
+  message 28 rows instead of ~99 (`sourcePauseUsedMoveHoldFrames` accepts only `B_WAIT_TIME_SHORT`, `battleResolutionPresentation.ts:1357-1358`). out2: both also in Scene OFF
+  (KOFail 70 rows early in both scenes; Knock Off OFF lacks the 34-row Pausex20, ON the 43 / 94-row animation by target side); hpd7c: Flamethrower `live` 115 -> 210 (a sound-wait hold). Poison ticks (psn3, docs/aud249 "psn3")
   inherit the un-landed body drift; change `STATUS_ANIMATION_SCRIPT_AGE` 7 -> 0 only together with the body leads.
 - Scene ON seeds 6568 / 7682 stall at the 80,000-frame ROM drive cap (T2 cannot align them); census seeds 796 / 995 end at the frame budget in both scenes.
 
