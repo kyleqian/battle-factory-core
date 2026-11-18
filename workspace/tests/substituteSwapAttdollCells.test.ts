@@ -161,7 +161,8 @@ describe("ordinary route: a subbed attacker's framed Toxic with the swaps", () =
     const off = generatedCommandAnimationReplay(862, "off", [0, 2], 35, true, true);
     // Toxic's ROM body (activation .. first inactive) 231 rows + the player swaps 85 = 316 (the adapter alone is 219 rows).
     expect(seen.duration).toBe(316);
-    expect(seen.ages).toBe(316);
+    // sta5: the command also holds Toxic's 10 script-lead + 7 script-tail rows (STA5_STATUS_BODY_TAIL_ROWS), so 316 + 17 presented rows (was 316).
+    expect(seen.ages).toBe(333);
     expect([...seen.kinds].sort()).toEqual(["body", "swap"]);
     // Body rows 1..230 show adapter ages -6..223 (shift -7).
     expect(seen.bodyAges[0]).toBe(-6);

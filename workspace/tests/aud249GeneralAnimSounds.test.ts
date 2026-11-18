@@ -63,12 +63,12 @@ describe("General / Status animation sound table (aud249)", () => {
   });
 
   // ROM frame minus ours of the animation's first row, per window and play. sta5: STATUS_ANIMATION_SCRIPT_AGE is 0 (the ROM's gAnimScriptActive rise row)
-  // and the Flatter / Swagger / Spore / Toxic bodies carry their script lead + tail (docs/aud249-general-anim-sounds.md sta4 / sta5). What is left of the
+  // confusion windows is the 2 pre-print rows (sta5 step 3; step 2 landed the 6 message -> launch rows). sta3: the second play lands on the first play's
   // confusion windows is the not yet landed message -> launch rows and the pre-print rows (sta5 steps 2 / 3). sta3: the second play lands on the first play's
   // residual (second == first), tests/sta3PreMoveStatusTiming.test.ts.
   const WINDOWS: ReadonlyArray<{ name: string; first: number; second: number }> = [
-    { name: "aud242c-flatter-player", first: 8, second: 8 },
-    { name: "aud242f-swagger-player", first: 8, second: 8 },
+    { name: "aud242c-flatter-player", first: 2, second: 2 },
+    { name: "aud242f-swagger-player", first: 2, second: 2 },
   ];
   for (const { name, first, second } of WINDOWS) {
     it(`${name}: both confusion plays have the ROM's six rows (id, pan, 14-frame spacing) at ${first} / ${second} frames residual`, () => {
