@@ -522,7 +522,7 @@ describe("random round soak driver (green milestone pin)", () => {
     expect(result.frames).toBeGreaterThan(31_771);
   });
 
-  it("ISSUES #89: seed 3's mid-turn Baton Pass openpartyscreen halt resumes through the forced party selector", () => {
+  it("ISSUES #89: seed 28's mid-turn Baton Pass openpartyscreen halt resumes through the forced party selector", () => {
     // History: seed 27 (full policy) selected Baton Pass mid-turn and used to
     // crash at round 1 battle 1 turn 10, frame 30798, on an unimplemented
     // BattleScript_EffectBatonPass / B_SCR_OP_OPENPARTYSCREEN machine-barrier
@@ -633,7 +633,11 @@ describe("random round soak driver (green milestone pin)", () => {
     // seed 0 no longer commits Baton Pass. Re-scanned full-policy seeds 0..79 (tools/soak/batonPassSearch.ts --seeds 0:80 --parallel 8,
     // 80,000 frames, same options and joint event; ~50 s): hits 3, 8, 14, 15, 17, 19, 31, 33, 44, 55, 71, 77, all candidates. Seed 3 is
     // the lowest (Baton Pass commits 5, first commit 45772, halt 55096 on MAWILE in battleIndex 1, one Lobby new challenge).
-    const result = runSeed(3, {
+    //
+    // pau2 (the used-move hold takes pause LONG; SafeguardEnds' pause row; a new exploring trajectory as at ais1): seed 3 no longer
+    // halts. Re-scanned full-policy seeds 0..79 (tools/soak/batonPassSearch.ts --seeds 0:80 --parallel 8): hits 28, 32, 43, 44, 55, 64, 71, 78.
+    // Seed 28 is the lowest (Baton Pass commits 2, first commit 44638, halt 44677 on AIPOM in battleIndex 0, three Lobby new challenges).
+    const result = runSeed(28, {
       maxFrames: 80_000,
       renderEvery: 0,
       coverage: observer as never,
@@ -946,12 +950,14 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // new phases again): 38094 / turn 22 -> 37771 / turn 20; same battle 2 / depth 1 / roundLost.
       // wsh1 (Wish / Future Sight / Focus Band presented as commands): frames only, 37771 -> 37806; same battle 2 / depth 1 / roundLost / turn 20.
       // hpd5 (measured on the hpd4 tip f40209793; the floor-free foe-hit hold): frames only, 37806 -> 37811; same battle 2 / depth 1 / roundLost / turn 20.
-      frames: 37811,
+      // pau2 (the used-move hold takes pause LONG; SafeguardEnds' pause row; the exploring policy's presses land on new phases, a new trajectory as at fsw235):
+      // 37811 / turn 20 -> 39649 / turn 24; same battle 2 / depth 1 / roundLost (master-at-start 8516a6da1 gives 37811).
+      frames: 39649,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 1,
       battle: 2,
-      turn: 20,
+      turn: 24,
     });
     expect(runSeed(1, options)).toMatchObject({
       // msg175: 26878 -> 26810 (shorter used prints); trn178 (the Scene OFF action-transition pause): 26810 -> 27058; same battle / turn / end state.
