@@ -1437,3 +1437,51 @@ Named residuals:
 The five missing-declined rows (Rock Smash 2, Beat Up 2, Withdraw 1) are moves with no live presentation adapter (`liveMoveAnimationDuration` null, section 20 note): adding one is presentation work, out of scope here.
 
 T1 census 0..999 Scene ON: missing-gated 64 -> **0**, known-offset 1 -> 0, missing-other 1 -> 0, missing-declined 5, extra 0, unclassified 0. Scoreboard: docs/aud251-s11-scoreboard-refresh.md (aud262).
+
+## 29. mem1: where Memento's 108 frames are (diagnosis only; nothing under `src/` or `tests/` changed)
+
+Base `e54a16f31`, Scene ON (8012). Method: `tools/integration/hpd2Probe.py` on the five `tools/battle-lab/aud262-memento*-on.json` labs (ROM RAM timeline: `gBattlescriptCurrInstr`, `gBattleControllerExecFlags`, `gAnimScriptActive`), `tools/integration/hpd4Cmds.ts` on the fixtures' own `trace` objects (app command starts and the move-animation row breakdown), and the app's emitted SEs (`collectSoundTick`, as `tests/aud262MoveAnimSounds.test.ts` does).
+
+**Answer: the 108 frames are not in the body, the sound clock or the pre-roll. They are the attacker's HP-bar drain, presented as its own `hp` command *before* the move-animation command.** Memento's `trymemento` emits `BtlController_EmitHealthBarUpdate(INSTANT_HP_BAR_DROP)` (battle_script_commands.c:9086; `0x7FFF`), which the ROM completes in 2 rows; the app builds an ordinary gradual `hp` command for it (105 -> 0, 105 + 1 = 106 rows) and only then starts the move body.
+
+### Per-stage table (ROM frame = lab frame, app frame = the fixture trace's frame; the lab's attacker has 105 HP in all five windows)
+
+| Window (attacker TOP) | ROM used-print release (ptr leaves `attackstring`) | ROM `trymemento` exec | ROM `attackanimation` exec | ROM `gAnimScriptActive` A .. end (rows) | ROM SE1 | App `hp` cmd start .. move cmd start (rows) | App move cmd: pre + live | App body first row (cmd + 3) | App SE1 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| player Rattata (81) | 52 | 53..54 (2 rows) | 56 | 58 .. 238 (180) | 65 | 50 .. 156 (**106**) | 3 + 181 | 159 | 173 |
+| player Onix (56) | 49 | 50..51 | 53 | 55 .. 230 (175) | 62 | 47 .. 153 (**106**) | 3 + 176 | 156 | 170 |
+| opponent Moltres (3) | 56 | 57..58 | 60 | 62 .. 238 (176) | 69 | 54 .. 160 (**106**) | 3 + 177 | 163 | 177 |
+| opponent Gyarados (16) | 57 | 58..59 | 61 | 63 .. 242 (179) | 70 | 55 .. 161 (**106**) | 3 + 180 | 164 | 178 |
+| opponent Onix (10) | 53 | 54..55 | 57 | 59 .. 234 (175) | 66 | 51 .. 157 (**106**) | 3 + 176 | 160 | 174 |
+
+Stage by stage (identical shape in all five windows):
+
+| Stage | ROM | App | Difference |
+| --- | --- | --- | --- |
+| used message to the `hp` command | message release R | `message` cmd ends, `hp` starts R - 2 | constant (the shared message-end class), not Memento |
+| R to the first body row | `trymemento` 2 rows + `setatkhptozero` + `attackanimation` exec (R + 4), A = R + 6 | `hp` cmd **106 rows**, then move cmd pre 3: first body row R + 107 | **+101** |
+| body length | A .. end = live - 1 (175..180) | `live` 176..181 (`liveMoveAnimationDuration` case 262 = `reduceMemento(...).length`, `liveMoveAnimation.ts:1219`) | 0 (the usual window = active rows + 1, hpd4 audit) |
+| first body row to SE1 | A + 7 (script playse at row ~4 + 3 lag) | body row + 14 (cmd + 17: `FIRST_COMMAND_AGE 1 + AGE_TO_SOUND_ROWS 7 + op frame + pre`, `moveAnimSounds.ts:56,414`) | **+7** (the sound clock reads 7 rows later than the ROM's from the body start) |
+| SE1 to SE2 / SE3 | 50 / 33..36 | equal (section 28 pins) | 0 |
+| body end to SE_M_STAT_DECREASE | end + 9 | stats-change cmd start + 7 | -2 (the ROM's body-to-stat SE is 2 rows longer; this is the "~8 frames" of the section 28 residual, which is really 108 - 100 = 8 between the first-SE and stat-SE offsets: body start +101, body end +102, stat SE +102 - 2 = 100) |
+
+Offsets, opponent Moltres: ROM release R = 56, SE1 69 (R + 13); app `hp` start 54, SE1 177 = 54 + 106 + 17 (R + 121). ROM minus ours = -108 = -(101 visual body start + 7 sound-vs-body-start). Stat SE: ROM 247, ours 347 = -100 (body end +102, then the stat SE sits 2 rows closer to the end in the app).
+
+Source lines:
+
+- `src/engine/battleScriptTrymementoOpcode.ts:24,68` and `src/engine/battleScriptExplosionOpcode.ts:75,143` emit `health-bar-update` with `healthValue: INSTANT_HP_BAR_DROP` (0x7fff).
+- `src/engine/battleResolutionPresentation.ts:4930` (pendingHealth) and `:4953-4966` pair it with the `hp-change` into an `hp` command carrying `healthValue: 0x7fff` with the generic `HP_TIMING = { minimumFrames: 28 }` (`:1686`, `hpPrintTailTiming :1698`); nothing special-cases 0x7fff.
+- `src/engine/battleResolutionPresentationRender.ts:1798-1810` (`battleResolutionCommandDuration`, case "hp") returns `max(28, battleHealthBarAnimationFrames({maxHp, from, to}) + 1)` = 106 for 105 -> 0; `:2425-2447` draws the gradual drain (`battleHealthBarValueAtFrame`), and its check `from - healthValue` clamps to 0 so 0x7fff passes silently.
+- The ROM (battle_controller_opponent.c:1683-1704, player: battle_controller_player.c:2708): `hpVal == INSTANT_HP_BAR_DROP` calls `SetBattleBarStruct(maxHP, 0, hpVal)` (old value 0, the bar is empty on its first `MoveBattleBar` step), so the exec flag is held 2 rows (57..58 in the Moltres window) and the script goes straight to `setatkhptozero` -> `attackanimation`. The healthbox is empty before the body starts; the app shows it draining for 105 rows during the pre-animation `hp` command (a visual error as well as a timing one).
+
+Ruled out: the body is not longer (live 176..181 vs ROM active 175..180 + 1, the audited +1 convention), the pre / idle lead / bodyLead are 3 / 0 / 0, the sound clock starts where the body starts (the SE ages are right once the body is in place), and the ROM's lead is only 6 rows (R -> A).
+
+### Proposed fix (not landed)
+
+1. `battleResolutionPresentation.ts` ~4953: when `health.healthValue === 0x7fff`, build the `hp` command with an instant timing (new `BattleHpTiming` variant, `:126`, e.g. `{ minimumFrames: 0, instant: true, tailFrames: N }`) carrying the ROM's rows from the release to `attackanimation` exec / A: 2 (exec) + the `ppreduce`/`trymemento`/`setatkhptozero` script rows.
+2. `battleResolutionPresentationRender.ts:1798-1810`: duration for an instant command = its timing only (no bar frames); `:2425-2447`: display `to` (0) from the first row (and the barFill for maxHP < 48), matching `SetBattleBarStruct(maxHP, 0, 0x7fff)`.
+3. Choice of N from the ROM: R -> A is 6 rows in all five windows, the app's `pre` is 3 and the hp command starts at R - 2, so the *visual* body aligns at hp length 5 (`54 + 5 + 3 = 62` for Moltres). Then the SE1 offset becomes ROM minus ours = **-7** (the standing +7 body-to-sound row difference; Memento's SE1 sits at A + 7 while the app's age puts it at body + 14), and the stat SE -100 + 101 = ~+1. A length of 1 instead brings SE1 to -3 but puts the visual body 4 rows early. Which of the two to prefer, and whether Memento needs a +7 sound-age shift (the Rollout / Defense Curl class in the hpd4 section of docs/hpd1-hp-hold.md), is the decision for the landing step; the re-pin of `tests/aud262MoveAnimSounds.test.ts` (`expectConstantOffset(... ) === -108`) follows it, then a `npm run compare` of `aud262-memento-opponent-on` for the visual frames.
+4. Same cause expected for Explosion / Self-Destruct (`tryexplosion` uses the same `INSTANT_HP_BAR_DROP` path with a `hp` command before `attackanimation`); not measured here (no ROM window), so check `docs` / the census for an Explosion offset of about the attacker's bar drain length before landing, and keep the rule keyed on `healthValue === 0x7fff` rather than on Memento.
+5. Gameplay is untouched by this (presentation commands only); the aud262 Tier-1 pin, the hpd tables and the T1 census scoreboard need re-running at landing.
+
+Evidence (not committed): `/tmp/mem1/` (`rom-*.json` hpd2Probe timelines of the five labs, `app-*.txt` hpd4Cmds outputs, `hp.ts` printing the segment's commands: `hp {"from":105,"to":0,"hv":32767,"t":{"minimumFrames":28}}` before `move-animation`).
