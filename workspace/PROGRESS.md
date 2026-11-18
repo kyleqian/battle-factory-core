@@ -25,8 +25,8 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   carry 0 **100 / 100** each. Full suite on `6909b8d6c` (4 workers): **15,935 passed, 0 failed**; build / build:lib 0. `play:random --minutes 10 --scene both --lobby-new-challenge` on `6909b8d6c`: ON 36 battles / 16 swaps, OFF 69 / 22; **0 page / console errors, 0 overlays**. (A first full suite on `a7cf4dfdb` had 14 failures in 9
   files from hpd4 / hpd5: fixed test-side by hpd6; a revert of hpd4 / hpd5 was prepared as fallback and not needed.) Log backup not run (`rclone` not installed).
 - **Next:** (1) sound frame alignment, re-ranked by t2off (`docs/aud251-s11-scoreboard-refresh.md` "t2off"): the script lead does NOT move body SEs (the tables use the pre-lead
-  clock), so start with Status_Poison SE 148 (120 T2 rows at a constant -22), the three outlier windows (Rock Slide seed 165 res18 ~-115, Swagger seed 6 res14 ~-110, Fire Blast seed 1028
-  res10 -69: 11 % of the offset mass), then Bubble Beam / Fire Blast / Magical Leaf. (2) Presentation fixes measured at wind-down (docs only, not landed; ISSUES #219): the 0x7FFF instant
+  clock), but the SEs of the NEXT command do move: out1 / psn3 found the three biggest windows' causes (Knock Off's item animation not presented, Flamethrower's body 115 vs 215 rows,
+  Horn Drill's miss pause B_WAIT_TIME_LONG not accepted: ~10 % of the offset mass; ISSUES #219), and the Poison-tick -22 is inherited body drift; then Bubble Beam / Fire Blast / Magical Leaf. (2) Presentation fixes measured at wind-down (docs only, not landed; ISSUES #219): the 0x7FFF instant
   HP drop drawn as a 106-row drain (Memento, Explosion, Self-Destruct: ~100 frames each; mem1 / exp1), the `Cmd_end` song-wait tails (Self-Destruct 113 -> 122, Solar Beam idle 39 + live 199:
   sdx1), the short `live` windows (liv1), the script lead on the hpd7 rows (take the lead from the kernel's instruction counter), the first Status_* play (sta4). Each moves frames:
   census eventsDigest identity + soaks + `randomRoundSoak` / `lbrd` re-pins (their pin notes) + the FULL suite (test:gate missed 14 pins this run). (3) #221 Lobby leftovers, #222.

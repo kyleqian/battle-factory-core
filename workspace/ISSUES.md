@@ -64,6 +64,11 @@ exclusions are superseded. Unrelated expansions stay parked.
   (117 vs 126). Short `live` windows (liv1, docs/hpd1-hp-hold.md): Faint Attack 220 -> 226, Sludge Bomb 160 -> 165, Bite 26 -> 31, Earthquake 198 -> 208, Solar Beam unleash 160 -> 238, Mud-Slap 51 -> 52. The first `Status_*` play: sta4 (docs/aud249 "sta4") splits it into the body lead,
   pre-print rows and 6 message-to-launch rows (`STATUS_ANIMATION_SCRIPT_AGE` -> 0 once the bodies get the lead), Water Spout +11 / +7 / +7 / +2 by HP quarter, Beat Up hit-to-hit 132 vs ROM 193 frames
   (multi-hit message timing; unreachable in Factory Lv 50), Wish heal's star hand-over frame (1 per side), the first `Status_*` play +7 / +8 (sta3 fixed the second play; see sta4 above), Solar Beam's unleash body 160 vs ROM 237 rows (hpd7b), `Status_Freeze` SE 242 +1 unmeasured, Roar / Howl cry windows inherit a lab drift.
+- **Measured presentation-timing bugs behind the largest T2 offsets** (out1, `docs/aud251-s11-scoreboard-refresh.md` "out1"; not landed): (a) Knock Off's item-knocked-off animation
+  (`BattleScript_KnockedOff`, `B_ANIM_ITEM_KNOCKOFF`, ~114 frames) is not presented (only the message + a 15-row stub); (b) Flamethrower's body is 115 presented rows vs the ROM's 215 from
+  `attackanimation` to `hitanimation` (`liveMoveAnimation.ts:1433`; also seed 1028 res12); (c) Horn Drill's miss (`BattleScript_KOFail`: `pause B_WAIT_TIME_LONG`, 64 rows) holds the used
+  message 28 rows instead of ~99 (`sourcePauseUsedMoveHoldFrames` accepts only `B_WAIT_TIME_SHORT`, `battleResolutionPresentation.ts:1357-1358`). Poison ticks (psn3, docs/aud249 "psn3")
+  inherit the un-landed body drift; change `STATUS_ANIMATION_SCRIPT_AGE` 7 -> 0 only together with the body leads.
 - Scene ON seeds 6568 / 7682 stall at the 80,000-frame ROM drive cap (T2 cannot align them); census seeds 796 / 995 end at the frame budget in both scenes.
 
 ## #222 — AI switch withdraw presentation: residuals (ais1 / ais2 / ais3, 2026-11-17)
