@@ -94,7 +94,8 @@ export function driveGeneratedRoundToCompletion(
     playerTrainerId: carry.playerTrainerId,
     battleTowerLevel50WinStreak: 0,
     factorySymbolsCount: carry.factorySymbolsCount,
-    facilityState: { rentsCount: carry.rentsCount },
+    // the heard-speech bits the carry keeps, as core.ts builds a chained round (none for a carry without them)
+    facilityState: { rentsCount: carry.rentsCount, ...(carry.heardBrainSpeech ? { heardBrainSpeech: carry.heardBrainSpeech } : {}) },
     rentals: partyStrength === "strong"
       ? {
         type: "currentRecords",

@@ -1568,8 +1568,11 @@ function finishBattle(
     : state.roundOutcome;
   return Object.freeze({
     ...state,
+    // Fix 49 (docs/parity-mac/heard-speech-kept-at-rent.md): the win writes the rent count only (battle_factory.c:259-265); the
+    // heard-speech bits stay as they are.
     facilityState: persistRentalSwap
       ? Object.freeze({
+        ...state.facilityState,
         rentsCount: state.facilityState.rentsCount + 1,
       })
       : state.facilityState,
