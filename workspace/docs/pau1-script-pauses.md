@@ -76,3 +76,30 @@ Reachability: "F" = reachable in Factory Lv50 singles; "no" = excluded (doubles-
 2. **Pre-print pause row without a USEDMOVE** (SafeguardEnds, ability activations): replace the USEDMOVE-only anchor with a general rule at the `type: "message"` push (:4656): if the message's `programCounter - 1` is `B_SCR_OP_PAUSE` (literal SHORT/LONG), and the previous presented receipt's `instructionExecution` is known, push a `move-animation` hold row (the same shape `heldItemEffectOffHoldFrames` pushes at :4647-4655) of `execution - previousExecution` frames minus the frames already presented, before the message. For end-turn scripts `runTickScript` must carry `instructionExecution` provenance (verify `runScreenFieldCase` events have it; if not, a constant row of 32 before `SAFEGUARD_ENDS_LABEL`'s message is the fallback).
 3. Do (2) for the ability switch-in prints (Drizzle, Sand Stream, Drought, Trace, Intimidate-prevented) only after a ROM probe: they sit behind the ability pop-up animation, whose own rows may already absorb the pause.
 4. Verification order: ROM sample for a LONG print (psn5 seed 3738 / 499 chains already exist), then a per-label test asserting the hold equals the source pause length, then the full suite.
+
+## pau2: items 1, 2 and 4 landed (2026-11-18)
+
+Presentation timing only: logical outcomes, RNG and kernel event order are unchanged (the census eventsDigest check below). Both scenes share the rules.
+
+**Change (`src/engine/battleResolutionPresentation.ts`)**
+
+1. `sourcePauseUsedMoveHoldFrames` accepts `B_WAIT_TIME_LONG` as well as `B_WAIT_TIME_SHORT`. It still returns `next - used + 1` (no constant). Labels it reaches in Factory Lv50 (first presented receipt after USEDMOVE is a message, the `pause` is within 3 straight-line instructions of it, no GOTO / END / RETURN between):
+   - `BattleScript_KOFail` (773): Fissure / Guillotine / Horn Drill / Sheer Cold into an unaffected target. **ROM-proved** (below).
+   - `BattleScript_AlreadyPoisoned` (709): failed Toxic / Poison Powder. Pause length is the psn4 ROM measurement (docs/aud249 "psn4": 64 + print); the seed 3738 engine replay + scoreboard moves toward the ROM (below). No pixel lab: the pau2-toxic lab's ROM turn 1 diverged from the app's (the ROM's Toxic hit, the app's missed), so it was dropped rather than seed-hunted.
+   - `BattleScript_RestCantSleep` (750, Uproar only) and `BattleScript_MoveMissedDoDamage` (856, `resultmessage`): reached by the same rule, **not ROM-measured**.
+   - Not reached: SleepTalkIsAsleep (1325, stopped by a GOTO), SpitUpFailProtect (2113, stopped by `stockpiletobasedamage`); the other LONG pauses (EffectMirrorMove, Memento, Faint*, SturdyPreventsOHKO, DampStopsExplosion, Arena) are not message-adjacent or are handled elsewhere.
+2. `anchorlessPrePrintPauseFrames` + `ANCHORLESS_PRE_PRINT_PAUSE_LABELS`: for a message whose `programCounter - 1` is a literal `B_SCR_OP_PAUSE` and whose label is in the allowlist, a `move-animation` stub row of the source pause (SHORT = 32, LONG = 64) is pushed before the message (the `heldItemEffectOffHoldFrames` shape; `actionTransition: true` in Scene ON so live hosts / hides stay untouched). The allowlist is **`BattleScript_SafeguardEnds` only**: the ability switch-in prints (item 3) sit behind the ability pop-up and were not ROM-probed, and anchored scripts already get their pause from item 1, so a general rule would double-count.
+
+**Numbers (`npm run compare -- <trace> --summary`, `out2-horndrill-{off,on}`, 620 frames, new traces in `tools/compare/traces/`)**
+
+| window | before | after |
+|---|---|---|
+| KOFail OFF, matched frames | 415 / 620 | 558 / 620 |
+| KOFail ON, matched frames | 410 / 620 | 568 / 620 |
+| KOFail USEDMOVE hold (both scenes) | 7 | 71 (pause 64 + 7), print at 375 = ROM 374 + 1, menu 1 frame early |
+
+Seed 3738 poison-tick SE 148 (engine replay + `soundScoreboard.py`, 6 samples each; engine-only, not a pixel compare): res60 -124 -> -20, res61 -82 -> -10 (psn5 estimated 28 / 18 residual). The Scene ON Safeguard stub's pixels are not verified against the ROM.
+
+**Tests**: `tests/pau2ScriptPauses.test.ts` (KOFail hold = 71 in both scenes, AlreadyPoisoned hold >= 64 (engine-only stage `pau2-toxic-*`), the SafeguardEnds row = 32 and only after the pause). Without the LONG acceptance the KOFail / AlreadyPoisoned tests fail (hold 0). `tests/randomRoundSoak.test.ts` re-pinned: seed 0 "full" 37811 / turn 20 -> 39649 / turn 24 (same battle 2 / depth 1 / roundLost), the Baton Pass halt pin moved seed 3 -> 28 (re-scan hits 28, 32, 43, 44, 55, 64, 71, 78).
+
+**Open remainder**: ability switch-in prints (item 3), RestCantSleep / MoveMissedDoDamage ROM samples, the AlreadyPoisoned pixel lab, the Safeguard ON look, the ~10 / ~20 frame residuals of res60 / res61, KOFail's 1-frame early menu.
