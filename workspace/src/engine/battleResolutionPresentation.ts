@@ -1638,7 +1638,7 @@ const HPD4_BODY_LEAD_MOVE_IDS: readonly number[] = [49, 82, 111, 205, 301, 69];
  * Thunderbolt, Double-Edge, Quick Attack, Body Slam, Ancient Power, Giga Drain, Ice Beam, Surf, Dig (the attack turn only: the charge turn is shape C),
  * Struggle, Rock Slide, Bubble Beam, Fire Blast, Magical Leaf.
  */
-export const HPD8_SHAPE_A_MOVE_IDS: ReadonlySet<number> = new Set([332, 94, 85, 38, 98, 34, 246, 202, 58, 57, 91, 165, 157, 61, 126, 345, 53, 76]);
+export const HPD8_SHAPE_A_MOVE_IDS: ReadonlySet<number> = new Set([332, 94, 85, 38, 98, 34, 246, 202, 58, 57, 91, 165, 157, 61, 126, 345, 53, 76, 44, 188, 89, 185]);
 export const BODY_LEAD_AUDITED_MOVE_IDS: ReadonlySet<number> = new Set([...HPD4_BODY_LEAD_MOVE_IDS, ...HPD8_SHAPE_A_MOVE_IDS]);
 
 function moveAnimationScriptLeadTiming(

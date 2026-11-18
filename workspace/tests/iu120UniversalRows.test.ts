@@ -98,7 +98,7 @@ describe("iu120 universal rows: P / T per class", () => {
 });
 
 describe("iu120 composition", () => {
-  it("one hold: duration = P + N + D + T (Bulk Up 3 + 4 + 104 + 2, Bite 3 + 10 + 26, Karate Chop 3 + 49 + 2, Thunder Punch 0 + D)", () => {
+  it("one hold: duration = P + N + D + T (Bulk Up 3 + 4 + 104 + 2, Bite 3 + 10 + 31, Karate Chop 3 + 49 + 2, Thunder Punch 0 + D)", () => {
     const plain = field(false, false);
     for (const attacker of [0, 1] as const) {
       for (const [id, n] of [[339, 4], [44, 10], [2, 0], [9, 0], [89, 0], [325, 8]] as const) {
@@ -109,7 +109,7 @@ describe("iu120 composition", () => {
           .toBe(iu120Pre(id, sideOf(attacker)) + n + d + iu120Post(id, sideOf(attacker)));
       }
       expect(battleResolutionCommandDuration(command(req(339, attacker)), plain)).toBe(113);
-      expect(battleResolutionCommandDuration(command(req(44, attacker)), plain)).toBe(39);
+      expect(battleResolutionCommandDuration(command(req(44, attacker)), plain)).toBe(44);
     }
   });
 
@@ -169,7 +169,15 @@ describe("iu120 routes: pre rows == base row 0, body rows unchanged, post rows =
   }, 120000);
 
   it("shp116 composition (battle 38, opponent CROBAT Bite into an elevated field; P 3, N 10): the pre rows keep the row-0 shadow", () => {
-    expect(check("base-b38-44-opponent", "shadow105RouteRender.ts", 38, 44, "opponent"))
-      .toEqual({ P: 3, T: 0, rows: 39, pre: [...Array(4).fill(true), ...Array(35).fill(false)] });
+    // liv2: Bite's window is the ROM's 40 + 1 (idle 10 + live 31), with the 5 body-lead rows after the pre rows and a 3-row hit tail:
+    // 3 + 5 + 10 + 31 + 3 = 52 rows; the base rows (production at 61e1128ab) are its first 9 + ... prefix: row 0 + 10 lead rows + ages 1..25.
+    const base = baseRows("base-b38-44-opponent").filter((r) => !r.after);
+    const now = routeRows("shadow105RouteRender.ts", 38, 44, "opponent").filter((r) => !r.after);
+    const key = (r: RenderRow) => [r.sha, r.age, r.live, r.pre === true];
+    expect(now).toHaveLength(52);
+    expect(now.map((r) => r.pre === true)).toEqual([...Array(9).fill(true), ...Array(43).fill(false)]);
+    expect(now.map((r) => r.age)).toEqual([...Array(19).fill(0), ...Array.from({ length: 30 }, (_, i) => i + 1), 30, 30, 30]);
+    for (let i = 0; i < 9; i += 1) expect(key(now[i]!), `pre / lead row ${i}`).toEqual(key(base[0]!));
+    for (let k = 1; k < base.length; k += 1) expect(key(now[8 + k]!), `body row ${k}`).toEqual(key(base[k]!));
   }, 120000);
 });

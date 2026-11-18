@@ -4,6 +4,7 @@ import { LIVE_MOVE_OPPONENT_SHADOW_ROW, liveMoveAnimationDuration, liveMoveAnima
 import type { BattleMoveAnimationRequest } from "../../src/engine/battleMoveAnimation.ts";
 import { liveView, type Fixture } from "../../tools/integration/liveAdapterFramebuffer.ts";
 import { generatedCommandAnimationReplay } from "../../tools/integration/generatedCommandAnimationReplay.ts";
+import { iu120Ages } from "../helpers/iu120Rows.ts";
 
 // S10A sides: Faint Attack (185) OPPONENT attacker. Dense windows (activation + 4 .. + 224, the player-attacker convention: row -4) from
 // fresh direct-mGBA prep22Probe runs of tools/battle-lab/s10aside-faint-attack-*.json: accepted-style pair GROVYLE -> ONIX and the
@@ -15,10 +16,10 @@ const fixtureAt = (n: string) => JSON.parse(readFileSync(`${DIR}/${n}`, "utf8"))
 const strip = (v: { rules: any }) => ({ ...v.rules, rulesContext: { ...v.rules.rulesContext, hitMarker: v.rules.rulesContext.hitMarker & ~0x80 } });
 
 describe("S10A sides: Faint Attack (185) opponent attacker", () => {
-  it("is live for both attacker sides (fa185 faithful timing: 220-row player / 221-row opponent window) and no #142 activation row", () => {
+  it("is live for both attacker sides (fa185 faithful timing; liv2: 226-row player / 227-row opponent window = the ROM window + 1) and no #142 activation row", () => {
     for (const attacker of [0, 1] as const) {
       const req = { moveId: 185, attacker, target: (1 - attacker) as 0 | 1, power: 0, damage: 0, friendship: 70, multihit: 0, turn: 0 };
-      expect(liveMoveAnimationDuration(req as BattleMoveAnimationRequest)).toBe(attacker === 0 ? 220 : 221);
+      expect(liveMoveAnimationDuration(req as BattleMoveAnimationRequest)).toBe(attacker === 0 ? 226 : 227);
     }
     expect(LIVE_MOVE_OPPONENT_SHADOW_ROW[185]).toBeUndefined();
   });
@@ -70,7 +71,7 @@ describe("S10A sides: Faint Attack (185) opponent attacker", () => {
     const on = generatedCommandAnimationReplay(186, "on", [0, 0, 0], 0);
     const off = generatedCommandAnimationReplay(186, "off", [0, 0, 0], 0);
     const body = on.animations.find((a) => a.moveId === 185 && a.attacker === 1);
-    expect(body?.ages).toEqual(Array.from({ length: 221 }, (_, age) => age));
+    expect(body?.ages).toEqual(iu120Ages(185, 227, "opponent"));
     expect(body?.adapterActive.every(Boolean)).toBe(true);
     expect(on.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");
     expect(on.stalled).toBe(off.stalled);

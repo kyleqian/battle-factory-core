@@ -1240,7 +1240,7 @@ function liveMoveAnimationDurationOf(
     case 41: return 37; // Twineedle's two stingers through clearmonbg cleanup.
     case 42: return 93; // Pin Missile's complete source pointer body.
     case 43: return 70; // Leer source body through its last ShakeMon2 row.
-    case 44: return 26; // First sharp-teeth row through inactive cleanup.
+    case 44: return 31; // liv2: First sharp-teeth row through inactive cleanup; idle 10 + live 31 = the ROM's gAnimScriptActive length (40) + 1.
     // Full source-script body, including the target-monbg / palette cleanup.
     case 47: return request.attacker === 0 ? 245 : 248;
     case 48: return 51; // First Supersonic ring through the final inactive row.
@@ -1309,7 +1309,7 @@ function liveMoveAnimationDurationOf(
     case 180: return 221; // Spite ghost-bg/target-clone body through cleanup.
     case 208: return 186; // Milk Drink bottle/ring/star body through cleanup.
     case 186: return SWEET_KISS_FRAME_COUNT;
-    case 188: return 160; // Sludge Bomb source body through its final row.
+    case 188: return 165; // Sludge Bomb source body through its final row; liv2: idle 4 + live 165 = the ROM's window length (168) + 1.
     case 56: return 141; // Hydro Pump source body through its final row.
     case 61: return 239; // Bubble Beam source body through its final row.
     case 197: return 110; // Detect source body through its final row.
@@ -1369,7 +1369,7 @@ function liveMoveAnimationDurationOf(
     case 337: return 137; // Dragon Claw palette restoration through cleanup.
     case 342: return 187; // Poison Tail source body through first inactive row.
     case 343: return COVET_FRAME_COUNT;
-    case 89: return 198; // Earthquake accepted window (197 rows from presentation age 1).
+    case 89: return 208; // liv2: Earthquake window = the ROM's gAnimScriptActive length (207) + 1 (no idle lead; was 198, 197 rows from presentation age 1).
     case 90: return FISSURE_FRAME_COUNT;
     case 152: return CRABHAMMER_FRAME_COUNT;
     case 345: return MAGICAL_LEAF_FRAME_COUNT;
@@ -1459,7 +1459,7 @@ function liveMoveAnimationDurationOf(
     // (prep6 s0 player; S10A sides opponent). Faithful timing (fa185): the policy's per-side restore lag (player none: 220 rows, the
     // restore fade-in one row earlier, faintAttackRestoreProfile; opponent lag: 221).
     case 185:
-      return 220 + (liveMoveTimingSidePhase(185, "optional-lag-age", request.attacker === 0 ? "player" : "opponent") === "event" ? 1 : 0);
+      return 226 + (liveMoveTimingSidePhase(185, "optional-lag-age", request.attacker === 0 ? "player" : "opponent") === "event" ? 1 : 0);
     // Swallow: per stockpile branch (request.turn = gBattleScripting.animTurn = stockpileCounter, prep6 s2.1) and side:
     // player 163/178/193 (1247..1409 ...), opponent 161/176/191 (= 148 + 15 turn / 146 + 15 turn), every window end = script end.
     case 256:

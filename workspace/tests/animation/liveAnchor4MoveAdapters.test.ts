@@ -26,7 +26,7 @@ const cases: ReadonlyArray<{
   route: { seed: number; slot: 0 | 1 | 2 | 3; streak: number };
 }> = [
   // earthquakePortable fixtures: ONIX front idle x2 1 (player attacker); DUGTRIO front idle 0 (opponent attacker).
-  { id: 89, move: "EARTHQUAKE", fixture: "earthquake-%s-dugtrio-%s-onix", key: "initialBattlerX2", duration: 198, effectAge: 100,
+  { id: 89, move: "EARTHQUAKE", fixture: "earthquake-%s-dugtrio-%s-onix", key: "initialBattlerX2", duration: 208, effectAge: 100,
     expected: side => ({ player: 0, opponent: side === "player" ? 1 : 0 }),
     route: { seed: 6, slot: 0, streak: 14 } },
   { id: 90, move: "FISSURE", fixture: "fissure-%s-dugtrio-%s-onix", key: "initialTargetX2", duration: 254, effectAge: 120,

@@ -48,13 +48,13 @@ describe("shp116: the elevated opponent's enemy shadow on lead row 0", () => {
     const r = route(38, 44, "opponent");
     expect(r.end).toBe("terminal");
     const target = r.render.filter((row) => row.after !== true);
-    // iu120: P 3 pre rows + 10 lead rows + the 26-row Bite body; the pre and lead rows are all age 0 and live.
-    const P = iu120Pre(44, "opponent");
-    expect(target).toHaveLength(P + 36);
+    // iu120 + liv2: P 3 pre rows + 5 body-lead rows + 10 lead rows + the 31-row Bite body + the 3-row hit tail; the pre, body-lead and lead rows are all age 0 and live.
+    const P = iu120Pre(44, "opponent") + 5;
+    expect(target).toHaveLength(P + 44);
     expect(target.slice(0, P + 11).map((row) => row.age)).toEqual(Array(P + 11).fill(0));
     expect(target.every((row) => row.live)).toBe(true);
     // The pre rows show the activation row's image (idle98: F_att..A-1 == row A), shadow included.
-    expect(target.map((row) => row.pre === true)).toEqual([...Array(P + 1).fill(true), ...Array(35).fill(false)]);
+    expect(target.map((row) => row.pre === true)).toEqual([...Array(P + 1).fill(true), ...Array(43).fill(false)]);
     expect(r.row0VsRow1).toEqual({ px: 200, bbox: [160, 65, 191, 72] });
     // rows P+1..P+9 are the body's age-0 image (the same frame); only rows 0..P (one image) differ from them.
     expect(new Set(target.slice(P + 1, P + 11).map((row) => row.sha)).size).toBe(1);
@@ -67,8 +67,8 @@ describe("shp116: the elevated opponent's enemy shadow on lead row 0", () => {
     const target = r.render.filter((row) => row.after !== true);
     expect(target.slice(0, 4).map((row) => row.age)).toEqual([0, 0, 0, 0]);
     expect(target.map((row) => row.pre === true).indexOf(true)).toBe(0);
-    // iu120: the activation row + the P pre rows before it.
-    expect(target.filter((row) => row.pre === true)).toHaveLength(1 + iu120Pre(188));
+    // iu120 + liv2: the activation row + the P pre rows + the 5 body-lead rows before it.
+    expect(target.filter((row) => row.pre === true)).toHaveLength(1 + iu120Pre(188) + 5);
     expect(r.row0VsRow1).toEqual({ px: 200, bbox: [160, 65, 191, 72] });
   }, 120000);
 });
