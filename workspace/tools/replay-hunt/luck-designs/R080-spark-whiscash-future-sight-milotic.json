@@ -3,7 +3,7 @@
  "rules": [
   "R080"
  ],
- "why": "Challenge 4. The player's Milotic (559, Marvel Scale) fights the opponent's Whiscash (483: Surf, Earthquake, Spark, Future Sight). When Spark paralyses Milotic (30 percent) and the AI later uses Future Sight on the statused Milotic, the stored damage is computed with Marvel Scale's Defense bonus (calculateFutureAttackBaseDamage). Milotic keeps attacking with Ice Beam; the AI picks among its four moves each turn.",
+ "why": "Challenge 4 (luck4 rebuild). The old lead Whiscash alone almost never paralyses Milotic: its AI picks Future Sight, Earthquake, Earthquake, Future Sight (Spark only at turn 4, when Milotic is nearly dead, 0 of 20 seeds paralysed). Now the opponent's lead is Ampharos (518, Thunder Wave): it uses Thunder Wave on turn 0 and the player's Milotic (559, Marvel Scale) is paralysed on turn 1 in 10 of 10 seeds. Milotic's Ice Beam knocks Ampharos out; the next opponent Whiscash (483, Future Sight) uses Future Sight on its first turn, so the stored damage is computed against a paralysed Marvel Scale Milotic (calculateFutureAttackBaseDamage).",
  "seed": 0,
  "challengeNum": 4,
  "battleNum": 0,
@@ -14,12 +14,18 @@
   482
  ],
  "opponentSetIds": [
+  518,
   483,
-  495,
   560
  ],
  "script": {
   "actions": [
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 1
+   },
    {
     "prefer": 1
    },
