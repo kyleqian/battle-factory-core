@@ -12,6 +12,8 @@ from pathlib import Path
 
 FUNC_NAMES = ("HandleInputChooseAction", "HandleInputChooseMove", "WaitForMonSelection", "Task_HandleChooseMonInput")
 END_FUNC_NAMES = ("HandleEndTurn_BattleWon", "HandleEndTurn_BattleLost")
+# bal1: CursorCb_SendMon (the SEND OUT / SHIFT confirm) accepts the switch and starts the party menu's close fade as this task; the engine commits a real switch at that confirm.
+PARTY_CLOSE_TASK_NAME = "Task_ClosePartyMenuAndSetCB2"
 # parity-mac fourth pass: gBattleMainFunc is this function while the ROM collects the turn's actions (battle_main.c HandleTurnActionSelectionState) and another one
 # while a turn runs. A decision the ROM took makes gBattleMainFunc leave it before the next menu; a decision the ROM REFUSED shows a menu again without leaving
 # it: a move that cannot be selected (TrySetCantSelectMoveBattleScript) plays its message and re-opens the MOVE menu (stateIdAfterSelScript =
@@ -62,7 +64,7 @@ def pick_funcs(nm, text_range):
             funcs[name] = inside[0]
         else:
             raise SystemExit(f"romDecisionDriver: cannot resolve {name}: {[hex(a) for a in addrs]} (player range {hex(lo)}-{hex(hi)})")
-    for name in (*END_FUNC_NAMES, SELECTION_FUNC_NAME):  # optional: without them the drive stops at the outcome / cannot tell a refused decision, as before
+    for name in (*END_FUNC_NAMES, SELECTION_FUNC_NAME, PARTY_CLOSE_TASK_NAME):  # optional: without them the drive stops at the outcome / cannot tell a refused decision, as before
         addrs = nm.get(name, [])
         if len(addrs) == 1:
             funcs[name] = addrs[0]
@@ -132,6 +134,7 @@ class RomDriver:
         self.pending = None  # "real" / "probe": the last decision closed at a menu the player chose at; checked when the next action menu opens
         self.left_selection = False  # gBattleMainFunc left HandleTurnActionSelectionState since that decision closed
         self.party_commit = None  # (frame, "real" | "probe") of the A that picked a party slot
+        self.switch_open = False  # a real switch's anchor stays open from the first party A until the SEND OUT / SHIFT confirm is seen (bal1)
 
     def classify(self, obs):
         f = obs["func"] & ~1
@@ -177,6 +180,13 @@ class RomDriver:
             self.block = None
         if kind != "party":
             self.party_commit = None
+        if self.switch_open:
+            # bal1: the ROM's commit of a real switch is the SEND OUT / SHIFT confirm (the close task appears the frame after that A), not the first A that only
+            # opens the submenu; the engine commits at the same event. A menu that closed without the task being seen closes the anchor here too.
+            close_task = self.funcs.get(PARTY_CLOSE_TASK_NAME)
+            if (close_task is not None and close_task in obs["partyTasks"]) or kind != "party":
+                self.switch_open = False
+                self.close_anchor(self.frame)
         if state != self.last_state:
             self.trace.append((self.frame, state))
             self.last_state = state
@@ -253,8 +263,12 @@ class RomDriver:
             slot, target = obs["slotId"], menu_slot_for_party_id(obs.get("partyOrder"), want["partyIndex"])
             if slot != target:
                 return self.press("DOWN" if slot < target else "UP")
-            self.party_commit = (self.frame, "probe" if want["kind"] == "switch-refused" else "real")
-            self.close_anchor()
+            probe = want["kind"] == "switch-refused"
+            self.party_commit = (self.frame, "probe" if probe else "real")
+            if probe:
+                self.close_anchor()
+            else:
+                self.switch_open = True
             self.block = "party"
             return self.press("A")
         if state == "party-other":
@@ -270,9 +284,9 @@ class RomDriver:
             self.current = {"index": self.index, "kind": want["kind"], key: self.frame}
             self.opened += 1
 
-    def close_anchor(self):
+    def close_anchor(self, commit_frame=None):
         want = self.decisions[self.index]
-        self.current["commitFrame"] = self.frame + 1  # the advance that carries the press
+        self.current["commitFrame"] = self.frame + 1 if commit_frame is None else commit_frame  # default: the advance that carries the press
         self.anchors.append(self.current)
         self.current = None
         self.index += 1
