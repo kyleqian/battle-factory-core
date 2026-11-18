@@ -292,9 +292,19 @@ describe("Frontier Brain round shape: real seven-battle rounds (Noland rung 2c)"
     const preWinRng = state.round.rules.rngValue;
     const playerSetIds = state.round.rules.playerRentalRecords!.map((r) => r.setId);
 
+    // Fix 45 (docs/parity-mac/brain-party-after-swap.md): no GO ON roll for the Head; the source rolls his party at the battle's start,
+    // after the swap, so the engine rolls it at the swap's resolution.
     state = preGenerateFactoryRoundNextOpponent(state);
-    const pending = state.pendingNextOpponent;
-    expect(pending).not.toBeNull();
+    expect(state.pendingNextOpponent).toBeNull();
+    state = acknowledgeAndAdvance(state);
+    expect(state.round.rules.phase).toBe("awaitingSwapDecision");
+    const offerId = state.round.presentation?.command.commandId;
+    if (offerId === undefined) throw new Error("expected swap offer");
+    state = completeFactoryRoundPresentation(state, { commandId: offerId });
+    state = chooseFactoryRoundSwap(state, { type: "decline" });
+    expect(state.round.rules.phase).toBe("presentingSwapResult");
+    state = acknowledgeAndAdvance(state);
+    const pending = state.opponentGenerations.at(-1)!;
     expect(pending!.kind).toBe("frontier-brain");
     if (pending!.kind !== "frontier-brain") throw new Error("unreachable: asserted above");
     expect(pending!.status).toBe("silver");
@@ -324,15 +334,6 @@ describe("Frontier Brain round shape: real seven-battle rounds (Noland rung 2c)"
     expect(new Set(brainOpponents.map((o) => o.speciesName)).size).toBe(3);
     expect(new Set(brainOpponents.map((o) => o.itemId)).size).toBe(3);
 
-    // Publish and confirm the round itself carries the brain marker.
-    state = acknowledgeAndAdvance(state);
-    expect(state.round.rules.phase).toBe("awaitingSwapDecision");
-    const offerId = state.round.presentation?.command.commandId;
-    if (offerId === undefined) throw new Error("expected swap offer");
-    state = completeFactoryRoundPresentation(state, { commandId: offerId });
-    state = chooseFactoryRoundSwap(state, { type: "decline" });
-    expect(state.round.rules.phase).toBe("presentingSwapResult");
-    state = acknowledgeAndAdvance(state);
 
     expect(state.round.rules.battleIndex).toBe(6);
     expect(state.round.rules.currentOpponent.id).toBe(`factory-trainer-${TRAINER_FRONTIER_BRAIN}`);
@@ -371,9 +372,19 @@ describe("Frontier Brain round shape: real seven-battle rounds (Noland rung 2c)"
     const preWinRng = state.round.rules.rngValue;
     const playerSetIds = state.round.rules.playerRentalRecords!.map((r) => r.setId);
 
+    // Fix 45 (docs/parity-mac/brain-party-after-swap.md): no GO ON roll for the Head; the source rolls his party at the battle's start,
+    // after the swap, so the engine rolls it at the swap's resolution.
     state = preGenerateFactoryRoundNextOpponent(state);
-    const pending = state.pendingNextOpponent;
-    expect(pending).not.toBeNull();
+    expect(state.pendingNextOpponent).toBeNull();
+    state = acknowledgeAndAdvance(state);
+    expect(state.round.rules.phase).toBe("awaitingSwapDecision");
+    const offerId = state.round.presentation?.command.commandId;
+    if (offerId === undefined) throw new Error("expected swap offer");
+    state = completeFactoryRoundPresentation(state, { commandId: offerId });
+    state = chooseFactoryRoundSwap(state, { type: "decline" });
+    expect(state.round.rules.phase).toBe("presentingSwapResult");
+    state = acknowledgeAndAdvance(state);
+    const pending = state.opponentGenerations.at(-1)!;
     expect(pending!.kind).toBe("frontier-brain");
     if (pending!.kind !== "frontier-brain") throw new Error("unreachable: asserted above");
     expect(pending!.status).toBe("gold");
@@ -398,14 +409,6 @@ describe("Frontier Brain round shape: real seven-battle rounds (Noland rung 2c)"
     expect(new Set(brainOpponents.map((o) => o.speciesName)).size).toBe(3);
     expect(new Set(brainOpponents.map((o) => o.itemId)).size).toBe(3);
 
-    state = acknowledgeAndAdvance(state);
-    expect(state.round.rules.phase).toBe("awaitingSwapDecision");
-    const offerId = state.round.presentation?.command.commandId;
-    if (offerId === undefined) throw new Error("expected swap offer");
-    state = completeFactoryRoundPresentation(state, { commandId: offerId });
-    state = chooseFactoryRoundSwap(state, { type: "decline" });
-    expect(state.round.rules.phase).toBe("presentingSwapResult");
-    state = acknowledgeAndAdvance(state);
 
     expect(state.round.rules.battleIndex).toBe(6);
     expect(state.round.rules.currentOpponent.id).toBe(`factory-trainer-${TRAINER_FRONTIER_BRAIN}`);

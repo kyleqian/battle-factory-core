@@ -2096,20 +2096,21 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
     });
   });
 
-  it("persists rentsCount once per accepted swap paid at its next win, and never on loss", () => {
+  it("persists rentsCount once for the draft and once per accepted swap, each paid at its next win, and never on loss", () => {
     const accepted = driveGeneratedRoundToCompletion(
       17,
       undefined,
       (state) => state.round.rules.battleIndex < 2
         ? { type: "accept", playerPartyIndex: 2, opponentPartyIndex: 0 }
         : { type: "decline" },
-      14,
+      13,
     );
     expect(accepted.round.rules.phase).toBe("roundComplete");
     // Retail pays a swap accepted after battle k at battle k+1's WIN
     // (EventScript_DefeatedOpponent increments unconditionally every win;
     // SetBattleFactoryData commits only while sPerformedRentalSwap == TRUE).
-    // Two accepted swaps (after battles 0 and 1) -> +2, not +1.
+    // Fix 44 (docs/parity-mac/first-draft-counts-as-rent.md): the round's own draft set the flag too, so battle 0's win pays it.
+    // The draft and two accepted swaps (after battles 0 and 1) -> +3.
     expect(accepted.facilityState.rentsCount).toBe(16);
     expect(accepted.performedRentalSwap).toBe(false);
     const completion = {
@@ -2126,7 +2127,8 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
     expect(acknowledged.facilityState.rentsCount).toBe(16);
     expect(acknowledgedAgain.facilityState.rentsCount).toBe(16);
 
-    const declined = driveGeneratedRoundToCompletion(17, undefined, undefined, 14);
+    // No swap: only the draft is paid (ROM round replay: 0 -> 1 at battle 1's win).
+    const declined = driveGeneratedRoundToCompletion(17, undefined, undefined, 13);
     expect(declined.round.rules.phase).toBe("roundComplete");
     expect(declined.facilityState.rentsCount).toBe(14);
 
@@ -2155,11 +2157,12 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
       (state) => state.round.rules.battleIndex === 0
         ? { type: "accept", playerPartyIndex: 2, opponentPartyIndex: 0 }
         : { type: "decline" },
-      14,
+      13,
     );
     expect(lostAfterSwap.round.rules.phase).toBe("roundLost");
     expect(lostAfterSwap.round.rules.battleIndex).toBe(1);
     expect(lostAfterSwap.performedRentalSwap).toBe(true);
+    // battle 0's win paid the draft; the swap after it is lost with battle 1
     expect(lostAfterSwap.facilityState.rentsCount).toBe(14);
     const lostAcknowledged = completeFactoryRoundPresentation(
       lostAfterSwap,
@@ -2188,8 +2191,8 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
     const acceptedNext = createNextChallenge(accepted, "accepted-next-challenge");
     const declinedNext = createNextChallenge(declined, "declined-next-challenge");
 
-    // GetNumPastRentalsRank's first band is <15. Crossing 14 -> 16 makes
-    // exactly rental slot 0 use the next-better source range.
+    // GetNumPastRentalsRank's first band is <15. 13 -> 16 (accepted) crosses it, 13 -> 14 (declined) does not:
+    // exactly rental slot 0 of the accepted round's next draft uses the next-better source range.
     expect(acceptedNext.initialRentalGeneration?.rentalRank).toBe(1);
     expect(declinedNext.initialRentalGeneration?.rentalRank).toBe(0);
     expect(acceptedNext.initialRentalGeneration?.rentals[0]?.setId).not.toBe(
@@ -2197,7 +2200,7 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
     );
   });
 
-  it("pays +1 per accepted swap across all six intermediate wins (+6 total)", () => {
+  it("pays +1 for the draft and +1 per accepted swap across all six intermediate wins (+7 total)", () => {
     const accepted = driveGeneratedRoundToCompletion(
       17,
       undefined,
@@ -2207,11 +2210,12 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
       0,
     );
     expect(accepted.round.rules.phase).toBe("roundComplete");
-    expect(accepted.facilityState.rentsCount).toBe(6);
+    // ROM round replay (swap after every win): 0, 1, 2, 3, 4, 5, 6 at the battle starts, 7 after the seventh win.
+    expect(accepted.facilityState.rentsCount).toBe(7);
     expect(accepted.performedRentalSwap).toBe(false);
   });
 
-  it("pays a single swap accepted only after battle 5 at the seventh (final) win", () => {
+  it("pays the draft at the first win and a single swap accepted only after battle 5 at the seventh (final) win", () => {
     const accepted = driveGeneratedRoundToCompletion(
       17,
       undefined,
@@ -2221,7 +2225,7 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
       0,
     );
     expect(accepted.round.rules.phase).toBe("roundComplete");
-    expect(accepted.facilityState.rentsCount).toBe(1);
+    expect(accepted.facilityState.rentsCount).toBe(2);
     expect(accepted.performedRentalSwap).toBe(false);
   });
 
@@ -3184,7 +3188,7 @@ describe("Frontier Brain opponent scheduling (Noland rung 2)", () => {
     expect(without.opponentGenerations.every((o) => o.kind === "ordinary")).toBe(true);
   });
 
-  it("schedules the silver Frontier Brain battle at the pre-generation seam with a real RNG-cursor handoff", () => {
+  it("schedules the silver Frontier Brain battle at the swap's resolution with a real RNG-cursor handoff (fix 45: no GO ON roll)", () => {
     const playerRecords = [record(664), record(678), record(527)] as const;
     const savedRentalRecords = [...playerRecords, record(1), record(2), record(3)] as const;
     let state = createFactoryRoundBattleOrchestrator({
@@ -3211,37 +3215,13 @@ describe("Frontier Brain opponent scheduling (Noland rung 2)", () => {
     expect(state.round.rules.phase).toBe("presentingBattleWin");
 
     const preWinRng = state.round.rules.rngValue;
+    // Fix 45 (docs/parity-mac/brain-party-after-swap.md): the Head has no GO ON roll; the source rolls his party at the battle's start,
+    // after the swap. The GO ON seam leaves the round alone.
+    const segmentsBefore = state.rngSegments;
     state = preGenerateFactoryRoundNextOpponent(state);
-    const pending = state.pendingNextOpponent;
-    expect(pending).not.toBeNull();
-    expect(pending!.kind).toBe("frontier-brain");
-    if (pending!.kind !== "frontier-brain") throw new Error("unreachable: asserted above");
-    expect(pending!.status).toBe("silver");
-    expect(pending!.trainerId).toBe(1022); // TRAINER_FRONTIER_BRAIN
-    expect(pending!.generation.challengeNum).toBe(2);
-    expect(pending!.generation.fixedIv).toBe(15);
-    expect(pending!.generation.drawLedger.length).toBeGreaterThan(0);
-    for (const draw of pending!.generation.drawLedger) {
-      expect(draw.phase === "set-selection" || draw.phase === "personality").toBe(true);
-    }
+    expect(state.pendingNextOpponent).toBeNull();
+    expect(state.rngSegments).toBe(segmentsBefore);
 
-    // S3 (docs/brain-transition-wiring-design.md): GetSpecialBattleTransition's
-    // draw is precomputed here, once, from the cursor immediately after the
-    // third opponent's personality is accepted - never re-drawn later, and
-    // never touching `state.round.rules.rngValue` (asserted unchanged below,
-    // still exactly the pre-transition-draw `pending!.generation.rngValue`).
-    expect(pending!.transitionPresentation).toEqual(
-      selectFrontierTransition(pending!.generation.rngValue).presentation,
-    );
-
-    const segment = state.rngSegments.at(-1)!;
-    expect(segment.kind).toBe("opponent-generation");
-    expect(segment.battleIndex).toBe(1);
-    expect(segment.rngBefore).toBe(preWinRng);
-    expect(segment.rngBefore).toBe(pending!.generation.drawLedger[0]!.rngBefore);
-
-    // Swap resolution only publishes the already-generated opponent; it must
-    // not re-roll (the pre-generation above already spent this receipt).
     state = acknowledgeAndAdvance(state);
     expect(state.round.rules.phase).toBe("awaitingSwapDecision");
     const offerId = state.round.presentation?.command.commandId;
@@ -3251,18 +3231,46 @@ describe("Frontier Brain opponent scheduling (Noland rung 2)", () => {
     expect(state.round.rules.phase).toBe("presentingSwapResult");
     state = acknowledgeAndAdvance(state);
 
+    const pending = state.opponentGenerations.at(-1)!;
+    expect(pending.kind).toBe("frontier-brain");
+    if (pending.kind !== "frontier-brain") throw new Error("unreachable: asserted above");
+    expect(pending.status).toBe("silver");
+    expect(pending.trainerId).toBe(1022); // TRAINER_FRONTIER_BRAIN
+    expect(pending.generation.challengeNum).toBe(2);
+    expect(pending.generation.fixedIv).toBe(15);
+    expect(pending.generation.drawLedger.length).toBeGreaterThan(0);
+    for (const draw of pending.generation.drawLedger) {
+      expect(draw.phase === "set-selection" || draw.phase === "personality").toBe(true);
+    }
+
+    // S3 (docs/brain-transition-wiring-design.md): GetSpecialBattleTransition's
+    // draw is precomputed once, from the cursor immediately after the
+    // third opponent's personality is accepted - never re-drawn later, and
+    // never touching `state.round.rules.rngValue` (asserted below:
+    // exactly the pre-transition-draw `pending.generation.rngValue`).
+    expect(pending.transitionPresentation).toEqual(
+      selectFrontierTransition(pending.generation.rngValue).presentation,
+    );
+
+    // The roll at the swap's resolution starts from the same post-battle cursor a GO ON roll would have.
+    const segment = state.rngSegments.at(-1)!;
+    expect(segment.kind).toBe("opponent-generation");
+    expect(segment.battleIndex).toBe(1);
+    expect(segment.rngBefore).toBe(preWinRng);
+    expect(segment.rngBefore).toBe(pending.generation.drawLedger[0]!.rngBefore);
+
     expect(state.round.rules.battleIndex).toBe(1);
     expect(state.round.rules.currentOpponent.frontierBrain).toMatchObject({ status: "silver" });
     // generatedOpponent (factoryRoundBattleOrchestrator.ts) threads the same
     // precomputed presentation onto the published BattleOpponent - not
     // re-drawn a second time here.
     expect(state.round.rules.currentOpponent.frontierBrain?.transitionPresentation).toBe(
-      pending!.transitionPresentation,
+      pending.transitionPresentation,
     );
-    expect(state.round.rules.rngValue).toBe(pending!.generation.rngValue);
+    expect(state.round.rules.rngValue).toBe(pending.generation.rngValue);
   });
 
-  it("schedules the gold Frontier Brain battle at the pre-generation seam", () => {
+  it("schedules the gold Frontier Brain battle at the swap's resolution", () => {
     const playerRecords = [record(664), record(678), record(527)] as const;
     const savedRentalRecords = [...playerRecords, record(1), record(2), record(3)] as const;
     // Every assertion below is structural (which battleIndex schedules the
@@ -3295,14 +3303,20 @@ describe("Frontier Brain opponent scheduling (Noland rung 2)", () => {
     expect(state.battle).toBeNull();
     expect(state.round.rules.phase).toBe("presentingBattleWin");
 
+    // Fix 45: no GO ON roll for the Head; he is rolled at the swap's resolution.
     state = preGenerateFactoryRoundNextOpponent(state);
-    const pending = state.pendingNextOpponent;
-    expect(pending).not.toBeNull();
-    expect(pending!.kind).toBe("frontier-brain");
-    if (pending!.kind !== "frontier-brain") throw new Error("unreachable: asserted above");
-    expect(pending!.status).toBe("gold");
-    expect(pending!.generation.challengeNum).toBe(5);
-    expect(pending!.generation.fixedIv).toBe(31);
+    expect(state.pendingNextOpponent).toBeNull();
+    state = acknowledgeAndAdvance(state);
+    const offerId = state.round.presentation?.command.commandId;
+    if (offerId === undefined) throw new Error("expected swap offer");
+    state = chooseFactoryRoundSwap(completeFactoryRoundPresentation(state, { commandId: offerId }), { type: "decline" });
+    state = acknowledgeAndAdvance(state);
+    const pending = state.opponentGenerations.at(-1)!;
+    expect(pending.kind).toBe("frontier-brain");
+    if (pending.kind !== "frontier-brain") throw new Error("unreachable: asserted above");
+    expect(pending.status).toBe("gold");
+    expect(pending.generation.challengeNum).toBe(5);
+    expect(pending.generation.fixedIv).toBe(31);
   });
 
   it("reports STREAK (not gold) once both symbols are held, at the same silver streak threshold", () => {
@@ -3382,6 +3396,13 @@ describe("Frontier Brain opponent scheduling (Noland rung 2)", () => {
     expect(state.battle).toBeNull();
     expect(state.round.rules.phase).toBe("presentingBattleWin");
 
-    expect(() => preGenerateFactoryRoundNextOpponent(state)).toThrow(/[Ff]rontier [Bb]rain/);
+    // Fix 45: the GO ON seam does not roll the Head; the adopted ordinary schedule is refused where he is rolled, at the swap's resolution.
+    state = preGenerateFactoryRoundNextOpponent(state);
+    expect(state.pendingNextOpponent).toBeNull();
+    state = acknowledgeAndAdvance(state);
+    const offerId = state.round.presentation?.command.commandId;
+    if (offerId === undefined) throw new Error("expected swap offer");
+    state = chooseFactoryRoundSwap(completeFactoryRoundPresentation(state, { commandId: offerId }), { type: "decline" });
+    expect(() => acknowledgeAndAdvance(state)).toThrow(/[Ff]rontier [Bb]rain/);
   });
 });
