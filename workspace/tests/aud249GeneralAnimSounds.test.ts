@@ -62,10 +62,10 @@ describe("General / Status animation sound table (aud249)", () => {
     expect(moveAnimOpRows(op, { attackerSide: "opponent", targetSide: "opponent", statusAnimActive: true })[0]!.emission.pan).toBe(63);
   });
 
-  // ROM frame minus ours of the animation's first row, per window and play. sta5: STATUS_ANIMATION_SCRIPT_AGE is 0 (the ROM's gAnimScriptActive rise row)
-  // confusion windows is the 2 pre-print rows (sta5 step 3; step 2 landed the 6 message -> launch rows). sta3: the second play lands on the first play's
-  // confusion windows is the not yet landed message -> launch rows and the pre-print rows (sta5 steps 2 / 3). sta3: the second play lands on the first play's
-  // residual (second == first), tests/sta3PreMoveStatusTiming.test.ts.
+  // ROM frame minus ours of the animation's first row, per window and play. sta5: the status script age is 0 (the ROM's gAnimScriptActive rise row) behind an STA5 body, 7 elsewhere;
+  // the Flatter / Swagger / Spore / Toxic bodies carry their script lead + tail and the stat-print -> launch message holds its 6 rows (docs/aud249-general-anim-sounds.md sta4 / sta5). What is left of the
+  // confusion windows is the 2 pre-print rows (sta5 step 3, deferred: the sound clock must be decoupled first). sta3: the second play lands on the first play's residual (second == first),
+  // tests/sta3PreMoveStatusTiming.test.ts.
   const WINDOWS: ReadonlyArray<{ name: string; first: number; second: number }> = [
     { name: "aud242c-flatter-player", first: 2, second: 2 },
     { name: "aud242f-swagger-player", first: 2, second: 2 },
@@ -85,8 +85,8 @@ describe("General / Status animation sound table (aud249)", () => {
     });
   }
 
-  // psn2: the script's `end` waits for the loopsewithpan task (battle_anim.c:482), so the 6th Status_Poison SE 148 (command age 77 of a 71-row window) still plays (docs/aud249 psn1 / psn2).
-  // The only status animation with an SE past its window (the table scan: Confusion's last SE is age 80 of 100, the rest are earlier still).
+  // psn2: the script's `end` waits for the loopsewithpan task (battle_anim.c:482), so a 6th Status_Poison SE 148 past the 71-row window plays on the age-7 path (docs/aud249 psn1 / psn2);
+  // behind the Toxic body (age 0) it is age 70 of 71, inside the window.
   it("aud242e-toxic-player: the poison tick plays the ROM's six SE 148 rows at the 14-frame spacing (the 6th is age 70 of the 71-frame window), exact vs ROM (sta5; was first row +10)", () => {
     const rom = load("aud242e-toxic-player");
     const theirs = rom.events.filter((e) => e.noop !== true && e.kind === "se" && e.id === 148 && e.frame >= 270);
