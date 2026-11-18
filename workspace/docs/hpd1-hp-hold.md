@@ -600,3 +600,59 @@ Missing **0** / extra **0** on every family, before and after; exact / offset ro
 ### Not landed / open (liv2)
 
 - A general `Cmd_end` IsSEPlaying rule (per-move constants are landed); Solar Beam's unleash FadeToBg picture (timing exact, bldy unmodeled); Self-Destruct's post-hit hp + faint timeline (+6 vs the ROM); the Faint Attack opponent / lag side (+1) is not re-measured (the lab is player-on); shape C bodies, multi-hit second hits, Scene OFF timing.
+
+## lse1: hpd7 table for the t2r-ranked status / stat bodies and the Leech Seed SE offset (measurement only)
+
+Step lse1 changed nothing under `src/` or `tests/` (the temporary appTrace stage lines were removed again); `npm test` was deliberately not run (the step brief overrides the generic gate).
+Labs: Scene ON, Lv50 Rattata (player, 4 x the move) vs Lv12 Rattata (opponent, Seismic Toss), the aud242b Calm Mind scenario with the moves replaced (`tools/integration/lse1Labs.py <out> name=id ...`, stage lines `"lse1-<name>-player-on": (state) => aud241bStage(state, "lse1-<name>-player-on", "on", 50, 12, <id>, undefined, false, 69)` added by hand to `tools/compare/appTrace.ts` for the run; Hypnosis needs rngSeed 5 as the tenth argument, seed 1 misses at 60%).
+ROM = `hpd2Probe.py` (ptr / exec / anim per frame), app = `hpd4Cmds.ts`; the table method is the hpd7 one (R = the used print's release, L = ex - R with ex = A - 3, len = gAnimScriptActive rows, gap = H - (A + len), d = (R->H) - (E - S) = L + T, the 2-row stat / status command that follows the body subtracted for Hypnosis).
+`tools/integration/lse1/an.py` + `join.py` regenerate the table from `<evidence>/ram/*.json` and `<evidence>/app/*.txt` (evidence is git-ignored: `.integration/evidence/lse1/`).
+
+| move (id) | ROM L | R->A | len | H gap | R->H | app bodyLead/pre/idle/live/post (tailRows) | d | e2e R->R'toss ROM-app | shape | proposed |
+|---|---|---|---|---|---|---|---|---|---|---|
+| Agility (97) | 3 | 6 | 86 | 4 | 96 | 0/3/0/87/2 (6) | +1 | +2 | A | as-is; the tail already carries L |
+| Blizzard (59) | 5 | 8 | 370 | 4 | 382 | 0/3/0/372/0 (0) | +7 | n/a | B (live = len + 2) | L 5 + T 2, live 372 |
+| Bulk Up (339) | 2 | 5 | 107 | 4 | 116 | 0/3/4/104/2 (7) | -1 | 0 | A | as-is |
+| Calm Mind (347) | 2 | 5 | 107 | 4 | 116 | 0/3/3/101/0 (7) | +3 | +4 | A | L 2 + T 1 |
+| Charm (204) | 3 | 6 | 97 | 4 | 107 | 0/3/4/93/0 (6) | +2 | +3 | A | as-is within 3; e2e +3 open |
+| Cosmic Power (322) | 2 | 5 | 240 | 4 | 249 | 0/3/0/241/0 (7) | +5 | +6 | A | add to shape A with lead 2 (T 3 = 6 - 3 - 0) |
+| Flash (148) | 3 | 6 | 63 | 4 | 73 | 0/3/0/64/2 (6) | +1 | +2 | A | as-is |
+| Hail (258) | 3 | 6 | 157 | 3 | 166 | 0/3/0/158/0 (7) | -1 | 0 | A, gap 3 | as-is |
+| Hydro Pump (56) | 5 | 8 | 140 | 4 | 152 | 0/3/0/141/2 (0) | +6 | n/a | A | add to shape A with lead 5 (T 1 = 6 - 3 - 2) |
+| Hypnosis (95) | 7 | 10 | 168 | 5 | 183 | 0/3/0/169/2 (0) | +9 (7 net of the 2-row status cmd) | n/a | C (gap 5) | lead 7, live as-is |
+| Leech Seed (73) | 36 | 39 | 140 | 3 | 182 | 0/3/0/141/0 (40) | -1 | 0 | A, L as a tail | length exact; the SE rows are 29 early (below) |
+| Light Screen (113) | 3 | 6 | 85 | 3 | 94 | 0/3/0/88/0 (7) | -3 | -2 | A | as-is (tail 3 too long) |
+| Safeguard (219) | 3 | 6 | 70 | 3 | 79 | 0/3/0/71/2 (7) | -1 | 0 | A | as-is |
+| Wish (273) | 2 | 5 | 270 | 13 | 288 | 0/3/0/271/0 (0) | +14 | +14 | C (gap 13) | L 2 + 12 post rows |
+| Yawn (281) | 8 | 11 | 212 | 3 | 226 | 0/3/0/213/2 (12) | -1 | 0 | A | as-is |
+| Encore (227, turn 2) | 2 | 5 | 219 | 3 | 227 | 0/0/0/215/0 (6) | +12 | +13 | C (gap 3) | bodyLead 2 + pre 3 + live 220 + post 2 (= 227) |
+
+Soft-Boiled (135) has no body in the lab (HP full). Every body above is measured on the player side only; the opponent-side bodies were not re-measured (Leech Seed's two sides are compared by SE below).
+
+### Causes (data/battle_anim_scripts.s, battle_anim.c Cmd_end)
+
+- **Blizzard** (live len + 2): the script ends `delay 20; restorebg; waitbgfadeout; setarg 7, 0xFFFF; waitbgfadein; clearmonbg` with no closing `waitforvisualfinish`. Cmd_end keeps gAnimScriptActive set while the fade / sound tasks run and then through `IsSEPlaying()` (SE_M_BLIZZARD2 tail, up to 90 rows), which is the +1 row over the standard len + 1. L 5 is the usual lead.
+- **Hydro Pump** (+6): shape A with L 5; the script ends `waitforvisualfinish; clearmonbg; blendoff; end`, so nothing beyond the standard len + 1. The shortfall is the lead (5) plus T 1 only.
+- **Cosmic Power** (+5): `waitbgfadein; waitforvisualfinish; end` after `delay 40`; shape A once L 2 is added.
+- **Hypnosis** (+9): BattleScript_EffectSleep runs `attackanimation; waitanimation; setmoveeffect` so the post-window gap is 5, not 4 (the extra instruction). The ROM status-animation windows start at 234 and 527 where the app has 227 and 520: exactly the L 7 the app does not model (the Spore pattern). The status-animation lengths are right (ROM 96, app 97).
+- **Wish** (+14, e2e +14): the battle script is plain `attackanimation; waitanimation; goto MoveEnd`, the anim script ends with `simple_palette_blend; waitforvisualfinish; end` (standard). The 13-row gap (9 over the normal 4) is NOT explained by either script; it is after the animation window and before the next exec rise. Open: needs a per-frame ptr trace of the gap rows (hpd2Probe `ptr`) to see which callback holds exec.
+- **Encore** (+12): the app has pre 0 / live 215 / tail 6, the ROM window is 219 rows from A = R + 5 and the next exec rises at gap 3. The script ends `waitforvisualfinish; createvisualtask AnimTask_RemoveSpotlight; end`; Cmd_end waits on that visual task (the +1 over the plain len). The failed first Encore (no body) is correct.
+- **Calm Mind** (+3), **Charm** (+2), **Flash / Agility** (+1): sub183 tails already model L; the residual is T (rounding of the counter-derived tail), within 3 rows.
+
+### Leech Seed: the T2 offsets -29 / -36 / -38 are the BODY SE rows, not the drain
+
+The t2r attribution rows `body:73` (seeds 310 -38, 319 / 648 -29, 6912 -36; 3 x SE 169 then 8 x SE 167) are the Leech Seed BODY sounds. The aud250 labs (player and opponent) reproduce the same offset in isolation, no emulator needed (`node --experimental-strip-types` over `collectSoundTick`, the aud250 test's `ourEvents`):
+
+- player: ROM 169 @ 96 / 106 / 116, 167 @ 130 .. 206; app 169 @ 67 / 77 / 87, 167 @ 101 .. 177 (8 rows, 29 early; the last 167 is 29 early too).
+- opponent: ROM 169 @ 100, 167 @ 134 .. 210; app 169 @ 71, 167 @ 105 .. 181 (29 early).
+- The drain (SE 180 / 142 x 8 / 179) and the Seismic Toss rows (238 / 214 / 131) match exactly (180 @ 697 / 693 etc.), as the aud250 test pins.
+
+Why: the body window is ROM A = R + 39 (L 36), the first SE is A + 4. The app models the 36-row lead as a 39-row TAIL after the body (`lead=0 bodyLead=0 pre=3 live=141 tail=39 tailRows=40`), so the total length is exact (d -1, e2e 0) but the visible body and its SEs sit at R + 14 instead of R + 43. 36 - 7 = 29: the SE anchor inside the body is 7 rows later than the ROM's A + 4 (row 11 vs 4), which is the calibration against the lead-less body. A landing has to move the lead back in front of the body (bodyLead ~29 for the SE rows, 36 for the window, with the SE anchor -7 if 36 is used) and shrink the tail 39 to ~3. T2 offsets -36 / -38 are other routes of the same body with more earlier drift on top.
+The end-of-turn drain itself (General_LeechSeedDrain, Absorb's body inside the drain command) is correct in the aud250 labs: window ROM A 670 / len 206, app drain 663 + 8 pre + 194 body; no change needed there.
+
+### Proposed landing (not done here)
+
+- **Into `HPD8_SHAPE_A_MOVE_IDS` as-is**: none of the new bodies without their lead; with the lead added (hpd8 rule `bodyLead = L`, T = 6 - pre - post): Hydro Pump 56 (L 5), Cosmic Power 322 (L 2). Agility 97, Bulk Up 339, Charm 204, Flash 148, Hail 258, Light Screen 113, Safeguard 219, Yawn 281 are already within +-3 rows through the sub183 tail and need no change (Light Screen's tail is 3 too long).
+- **Need `live` / tail changes**: Blizzard 59 (live 372, L 5 + T 2), Calm Mind 347 (L 2 + T 1), Encore 227 (bodyLead 2, pre 3, live 220, post 2), Hypnosis 95 (lead 7, gap 5), Wish 273 (gap 13, cause open), Leech Seed 73 (lead as bodyLead, tail 39 -> ~3, SE anchor -7).
+- Expected effect of the Leech Seed change: the 32 body:73 rows of the t2r ranking (-29 .. -38) close; the other bodies' SE offsets are small (+-3).
+- Open: Wish gap trace, the opponent side of every body above, Charm's e2e +3 and Calm Mind's e2e +4 (more than d).
