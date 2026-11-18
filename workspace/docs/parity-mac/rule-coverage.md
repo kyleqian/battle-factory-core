@@ -170,7 +170,7 @@ oracle (`romReplayWide.sh --stage`, `match True`, `stage.ok True`) and once thro
 **R032** Rage after a Metronome miss (`R032-metronome-rage-miss`, seed 1020122, 20 of 20 states), **R037** (Cloyster Dive in a sandstorm, seed 1020059, 24 of 24),
 **R038** (Foresight against a Ghost user, seed 1020099, 14 of 14), **R097** (Trick with both Pokemon itemless, seed 1023669, 20 of 20), **R107** (Baton Pass onto
 AI Spikes, seed 1020548, 38 of 38), **R109** (Curse by the last Pokemon, seed 1022589, 19 of 19). The hunter now skips a design whose rule has a stage file here, so
-the next day's seeds go to the rules still open (after luck3: R035 R040 R080 R110). Why the eight had no marker hit in about 538 seeds each (from `logs/<design>.log`, and one engine-only
+the next day's seeds go to the rules still open (after luck3: R035 R040 R080 R110; after luck4: R035 R040 R110). Why the eight had no marker hit in about 538 seeds each (from `logs/<design>.log`, and one engine-only
 seed of each design re-run in luck2; "flawed" = the marker cannot or hardly can run in that set-up, "rare" = it can, the odds are small):
 
 - **R030 (AI replacement scored with Curse as the last move): fixed in luck3, see "Luck hunt day 2" below.** (Day 1: 0 of 539; the Toxic route cannot hit at all.)
@@ -224,6 +224,38 @@ below is engine-only `prehunt.py` on 40 fresh lab seeds, 900000-900039, a block 
 
 The hunter's `luck-designs` loses R039, R067 and R095; R030 stays (the hunter skips it, a stage file covers it). R035, R040, R080 and R110 were not touched in luck3 (the time
 went to the four above).
+
+## Luck hunt designs (luck4)
+
+**luck4 (2026-11-18, tools / docs only): R080 raised from 0 to a hit and promoted (61 of the 110 covered); R035, R040, R110 measured, not raised.** Every number is engine-only
+`prehunt.py` (`nice -n 15`) on fresh lab seeds 910000-910029 (a block the day job, 1,020,000 up, never uses; luck3 used 900000-900039). Evidence under `.integration/evidence/luck4/`
+(ignored).
+
+| design | before (seeds 910000-910029, unchanged design) | after |
+|---|---|---|
+| R080 | 0/30 (day 1: 0 of about 538) | **2 hits in the 5 seeds run: 910000 and 910023** (each run stops at its first ROM match: 910000-910000 and 910020-910023); both full ROM matches (16 of 16 and 13 of 13 states) |
+| R110 | 0/30 | 0/28 for a 3-turn Surf-first prefix; no better design found |
+| R035 | 0/30 | design not changed (see below) |
+| R040 | not run (same turns as R035) | design not changed |
+
+- **R080 (rebuilt, promoted).** Reading the engine runs showed why 0/538: Whiscash 483's AI is nearly deterministic against Milotic 559, Future Sight on turn 0, Earthquake on turns 1 and 2,
+  Future Sight on turn 3 (20 of 20 seeds); Spark appears only at turn 4 or later, when Milotic is nearly dead, and Milotic was paralysed in 0 of 20 seeds (Surf as the player move, or Mirror Coat all
+  14 turns, lengthened the battle from 9-15 to 14-46 decisions and changed nothing). The marker needs the status to exist at the moment the stored damage is computed, i.e. when Future Sight is
+  cast. New design: the opponent leads with Ampharos 518 (Thunder Wave, Bright Powder) then Whiscash 483, then Arcanine 560; the player is Milotic 559, Snorlax 556, Steelix 529 with Ice Beam every
+  turn. In 10 of 10 seeds Ampharos used Thunder Wave on turn 0 and Milotic was paralysed from turn 1; Ice Beam knocks Ampharos out, Whiscash comes in and casts Future Sight on its first
+  turn (a paralysed Milotic is also slower, so Whiscash casts first). Promoted as `stages/coverage/R080-spark-whiscash-future-sight-milotic.json` (seed 910000, 16 of 16 states,
+  `romReplayWide.sh --stage` on the Scene OFF oracle from the repo file: `match True`, `stage.ok True`); with the promotion the hunter skips R080 (open: R035 R040 R110). Why not the player's own
+  status route: no player set has both a status move and Future Sight (`sets.py "'FUTURE_SIGHT' in m.moves"`: Kirlia 48 and Barboach 55 are in no challenge).
+- **R035 / R040 (Taunt via Clefable's Metronome): measured as already near its ceiling, not changed.** The marker needs a Taunt called on the turn Clefable faints: the timer is 2 and drops by one
+  at every turn end (`battle_script_commands.c:9160`, `battle_util.c:1749`), so a Taunt cast on turn t is still there when the replacement is scored at the start of t+1, and gone at t+2. So
+  only the final turn of each Metronome user counts, once per Clefable: chance = (P the AI picks Metronome that turn, about 0.3-0.5) x (about 1/340) = roughly 0.1 percent a seed, whatever the
+  player does (a longer battle adds Metronome calls that cannot count; a faster player skips Clefable's move). Only one Metronome user can be on the AI team at challenge 7 (Chansey 227 is
+  challenge 1 only). The design already has the player slower than Clefable and Clefable down in two Hyper Beams (seed 910000: Clefable 170 -> 76 -> dead on turn 3), so there is nothing to raise:
+  0/30 is the expected result, and the hunter's day (about 500 seeds a design) gives one hit in two days or so. Left open, not retired. A single battle cannot serve both rules (one replacement).
+- **R110 (Roar drags a wounded Pokemon onto Spikes): not raised.** The marker needs the AI Skarmory to lay Spikes, Roar, and the dragged-in bench Pokemon to be under 1/8 (one layer) to 1/4 (three
+  layers) of its HP, so the bench must be wounded and still alive. A fixed three-turn Surf-first script and a random player gave 0/28 (battles 16-78 decisions). Candidates not tried for lack of
+  time: a bench of mons that Spikes entries plus Drill Peck chip (a switch-heavy script needs a `switch` step that survives fainted slots, which the script format cannot express), or a Substitute /
+  Belly Drum step to put a bench mon low. Not shown impossible.
 
 Left in (c), with the reason (none is proven unreachable):
 
