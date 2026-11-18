@@ -429,7 +429,8 @@ describe("random round soak driver (green milestone pin)", () => {
       // frames only + render calls, 41_221 -> 41_240, renderCalls 2_913 -> 2_914; same battle 7, turn 3, end state, diagnostics.
       // kno3 (Knock Off's item-knocked-off animation: the ON command 71 / 101 frames + the SE gate, the OFF 35-row Pausex20 hold, the floor-free hit bar and the 4 post-print rows):
       // frames only + render calls, 41_240 -> 41_376, renderCalls 2_914 -> 2_916; same battle 7, turn 3, end state, diagnostics.
-      frames: 41_376,
+      // ais4 (the opponent faint replacement's send-in runs the AI timeline): frames only + render calls, 41_376 -> 41_369, renderCalls 2_916 -> 2_913; same battle 7, turn 3, end state, diagnostics.
+      frames: 41_369,
       battle: 7,
       turn: 3,
       diagnostics: {
@@ -441,7 +442,7 @@ describe("random round soak driver (green milestone pin)", () => {
         terminalOutcome: "roundWon",
         terminalRecordMenuInputReadyReached: true,
         terminalRecordChoice: "no",
-        renderCalls: 2_916,
+        renderCalls: 2_913,
       },
     });
     expect(second).toEqual(first);
@@ -954,7 +955,8 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // hpd5 (measured on the hpd4 tip f40209793; the floor-free foe-hit hold): frames only, 37806 -> 37811; same battle 2 / depth 1 / roundLost / turn 20.
       // pau2 (the used-move hold takes pause LONG; SafeguardEnds' pause row; the exploring policy's presses land on new phases, a new trajectory as at fsw235):
       // 37811 / turn 20 -> 39649 / turn 24; same battle 2 / depth 1 / roundLost (master-at-start 8516a6da1 gives 37811).
-      frames: 39649,
+      // ais4 (the opponent faint replacement send-in is 2 frames longer): frames only, 39649 -> 39712; same battle 2 / depth 1 / roundLost / turn 24.
+      frames: 39712,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 1,
@@ -1549,7 +1551,8 @@ describe("ISSUES #104 (driver): continuous-play outcome semantics retuned -- OK 
     // and 40 chain two round wins (carry 14), so the lowest (13) is pinned.
     // hpd5 (measured on the hpd4 tip f40209793: seed 13 carries 7 there too; the floor-free foe-hit hold shifts the soak's press phases): re-scanned seeds 0..31 under the same options
     // (tools/soak/randomRoundSoak.ts --policy winning --max-rounds 3 --render-every 0): only seed 4 chains two round wins (carry 14), so it is pinned.
-    const result = runSeed(4, {
+    // ais4 (the opponent faint replacement's send-in runs the AI timeline, +2 frames per replacement): seed 4 now carries 7; re-scanned seeds 0..10 under the same options: only seed 2 chains two round wins (carry 14), so it is pinned.
+    const result = runSeed(2, {
       policy: "winning",
       maxRounds: 3,
       renderEvery: 0,

@@ -41,6 +41,8 @@ interface WonLobby {
  * retire case keeps 13 (RETIRE_SEED).
  * hpd5 (measured on the hpd4 tip f40209793: the same 3 failures, so hpd4's floor-free foe-hit hold moved the deal, not hpd5's Scene ON-only audited leads): 19's OFF continuation
  * and 13's retire case now lose; a scan of 1..18 on the full file with the seed in both roles found 17 passing every case (13 passes all but the retire), so both use 17.
+ * ais4 (the opponent faint replacement's send-in runs the AI timeline, +2 frames per replacement, so every soak trajectory shifts): 17's continuation loses (13 passes all but the retire);
+ * a scan of 1..12 on the full file with the seed in both roles found 4 passing every case (15 / 15; seed 2 loses only the continuation), so both use 4.
  */
 // hpd8 (shape-A lead + hit tail moved the Scene ON deal): 17 lost the continuation; a scan of 1..24 with the seed in both roles found only 4 passing every case.
 const WIN_TWO_SEED = 4;

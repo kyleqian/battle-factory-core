@@ -138,3 +138,36 @@ frames, each +2 (e.g. seed 15 OFF 68 -> 70, ON 151 -> 153). No other command mov
 - Player recall: the ROM's 1-frame healthbox-hide intermediate frame (ROM 238 / engine 230 in the staged window) and the player send-in ball / emerge (frames 238-250, Scene ON) are the player-side open items.
 - The recalled mon's ball is assumed POKE BALL (every Factory set).
 - Pursuit-interception and Focus-Punch-pre-pass AI switches, and a same-turn player + AI switch, stay unprobed.
+
+## ais4: the opponent faint replacement runs the AI send-in timeline (presentation only)
+
+Files: `src/engine/battleResolutionPresentation.ts` (opponent `switch-in` projection: `faintReplacement`, `aiSwitchLead`, the nickname lag), `src/engine/battleStartSounds.ts` (`SWITCH_IN_BALL_OPEN_ELAPSED_OPPONENT` 18 -> 17),
+`tools/compare/traces/obr251-opponent-faint-{off,on}.json` (`appStage.opponentTrainerId` 110). Tests: `tests/ais4OpponentFaintReplacementSendIn.test.ts`, `tests/aud253AiSwitchLowHp.test.ts` (DELTAS re-pinned).
+
+### Why `obr251-opponent-faint-off` matched 6 / 306
+
+1. **Harness (frame 626, the first differing frame).** The staged orchestrator drew its own opponent trainer name; the lab's ROM trainer is id 110. `appStage.opponentTrainerId: 110` in both traces: OFF 6 -> 58, ON 6 -> 59 (the sent-out text 626-660 now matches).
+2. **Source (frames 626-710).** A faint replacement (`BattleScript_FaintedMonSendOutNew`, battler 1) has the same ROM timeline as an AI voluntary switch: ball throw 2 frames before the shared `switch-in` timeline (`AI_SWITCH_SEND_IN_LEAD_FRAMES`), tint hold 22, and NO
+   nickname lag frame (the offs152 long-nickname lag was measured on forced / Roar send-ins; RATTATA, 7 glyphs, cry 23, has none as a replacement). Both fixed by a provenance test on the `switch-in-animation` event. OFF 58 -> 91, ON 59 -> 178 (of 306).
+3. **Sounds (aud253 seed 2741, the +1 send-in SE 15 / cry).** The emitter opens the ball SE at `17 + sendInVisualDelay` (was 18): with the 2-frame lead the SE and cry now equal the ROM exactly (ROM SE 15 at 681, cry at 697 in obr251; aud253 2741 `[0, 0, 1, 1]` -> `[0, 0, 0, 0]`). The aud241a opponent emitter test pins only spacing 16 / pan / ducks and is unchanged.
+
+Matched frames (oracle vs app, `npm run compare`): `obr251-opponent-faint-off` 6 -> 91 / 306, `obr251-opponent-faint-on` 6 -> 178 / 306. No `ais1-*` / `ais2-*` / `ais3-*` / `vis243a-*` / `go246-*` compare traces exist (ais2 / ais3 are test fixtures; their tests are green).
+`compare:differential` vs `d7e8ec50d`: `turn5-faint` 110 / 110, `turn13-dragonbreath-faint` 141 / 141, `turn5-switchin` 241 / 241, `turn13-switchin` 242 / 242 byte-identical (their opponent send-in goes through the canonical adapter, a different path); the two obr251 traces differ as intended.
+
+### Census 0..99, both scenes (`lsd194Census.sh` + `rst197CensusDelta.py`, base `d7e8ec50d` vs final)
+
+100 / 100 battles per scene with identical `eventsDigest`, errors and command-type sequences (0 bad). 91 battles per scene change exactly one command each: the opponent `switch-in` after the party-summary (a faint replacement), fields duration, `sendInVisualDelay`, healthbox slide, total frames, each +2. Nothing else moves.
+
+### Pins
+
+`aud253` `DELTAS["2741"]` `[0, 0, 1, 1]` -> `[0, 0, 0, 0]`. `plr162` Scene ON opponent send-ins add the `aiSwitch` 2 (a faint replacement). Soak-trajectory pins moved by the +2 frames per replacement (outcomes unchanged): `randomRoundSoak` seven-win milestone frames 41376 -> 41369, renderCalls 2916 -> 2913; M-B (c) seed 0 frames 39649 -> 39712 (same battle 2 / turn 24 / roundLost);
+the carry-14 winning seed 4 -> 2 (scan 0..10); `lbrd` seeds 17 -> 4 (scan 1..12 on the full file: 4 passes 15 / 15). `npm run soak -- --policy vanilla --seeds 0:20` 20 / 20 OK (budget). `npm run typecheck` / the `tsc -b` half of `npm run build` exit 1 on the base too: the same 10 errors in `tools/compare/appTrace.ts` (merge debris: duplicate imports / `rngSeed`, two configs without `moveId`) and `oracleClient.ts` (no pngjs types); `vite build` exits 0.
+
+### Residuals / open (not fixed here)
+
+- Scene OFF: the ROM's `\p` that ends the fainted text clears the box at A+1 (ON does not); the post-send-in text clear is 9 frames early in OFF (app 727 / ROM 736; menu 733 / 742) and 1 frame late in ON (824 / 823).
+- Gender: the ROM replacement is male, the staged bench personality 0 is female (24 px in the sprite): harness only, the lab's personality is not recorded.
+- The canonical-adapter opponent send-in (`turn5-switchin`, PIDGEOTTO) stays 1 frame late (175 / 241): a separate path, untouched.
+- Player side (item 5) not changed. Scene OFF `pmo239-switch-0-to-2-reopen-off` (frames 1140-1400): exact through the recall (1181); from 1182 the player send-in (ball, emerge, fade, particles) is exactly 1 frame late (shift +1 gives 0 px for 1182-1243), the healthbox slide 1245-1266 also 1 late, the next message at ROM 1294 / app 1296. The older RATTATA switch (`mid-battle-switch-dense-a-off`) shows no shift (k0 best; the residual is a static 676 px sprite difference, a harness species / gender issue), so the 1-frame start is
+  one observation on PIDGEY / MACHOP and not proven species-independent: a source change needs a second species. Scene ON player send-in (frames 238-250) has no ON lab / trace yet.
+- A same-turn player voluntary switch + AI switch (item 3) was not started.
