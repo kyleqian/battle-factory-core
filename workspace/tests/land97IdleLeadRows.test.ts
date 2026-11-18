@@ -14,7 +14,7 @@ import { iu120Extra, iu120Post, iu120Pre } from "./helpers/iu120Rows.ts";
 // adapters whose accepted window starts N rows after the ROM activation present N extra rows showing their own age-0 frame.
 const LEAD: ReadonlyArray<readonly [number, number]> = [
   [41, 10], [44, 10], [51, 7], [52, 4], [55, 10], [71, 10], [74, 1], [75, 13], [82, 7], [92, 7], [93, 5], [94, 5], [106, 1], [120, 4],
-  [124, 4], [136, 1], [146, 13], [153, 4], [158, 4], [184, 4], [188, 4], [204, 4], [207, 7], [225, 6], [232, 4], [247, 5], [248, 5],
+  [53, 18], [124, 4], [136, 1], [146, 13], [153, 4], [158, 4], [184, 4], [188, 4], [204, 4], [207, 7], [225, 6], [232, 4], [247, 5], [248, 5],
   [269, 10], [282, 6], [294, 1], [299, 10], [305, 7], [313, 1], [325, 8], [334, 1], [337, 6], [339, 4], [342, 7], [343, 1], [347, 3],
 ];
 const mon = (species: number, battler: 0 | 1, doll = false) => ({
@@ -30,9 +30,9 @@ const command = (animation: BattleMoveAnimationRequest) =>
   ({ type: "move-animation", animation, timing: { minimumFrames: 1 } }) as unknown as Parameters<typeof battleResolutionCommandDuration>[0];
 
 describe("land97 idle lead rows", () => {
-  it("covers the 40 idle94 ids with their N, and nothing else", () => {
-    expect(LEAD).toHaveLength(40);
-    expect(new Set(LEAD.map(([id]) => id)).size).toBe(40);
+  it("covers the 40 idle94 ids and liv2's Flamethrower with their N, and nothing else", () => {
+    expect(LEAD).toHaveLength(41);
+    expect(new Set(LEAD.map(([id]) => id)).size).toBe(41);
     const plain = field(false, false);
     for (const side of [0, 1] as const) {
       for (const [id, n] of LEAD) {

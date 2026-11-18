@@ -1430,7 +1430,9 @@ function liveMoveAnimationDurationOf(
     case 161: return 284; // Tri Attack 81..364 / 77..360 (prep11 s0.2).
     case 73: return 141; // Leech Seed main body 246..386 / 245..385 (prep11 s0.2); the end-turn drain is a separate scene-off body.
     case 215: return 261; // Heal Bell (209..469 / 210..470, no tail).
-    case 53: return 115; // Flamethrower (395..520 / 449..574 incl. 11 negative-age rows, ageOffset -11); script ends 600/654.
+    // Flamethrower: the visible body is 115 rows (395..520 / 449..574 incl. 11 negative-age rows, ageOffset -11); the ROM window is 209 rows + 1 (hpd7c, liv2): Cmd_end keeps the script
+    // active while SE_M_FLAMETHROWER plays, the 95 rows after the last flame draw nothing (the reducer holds the last frame).
+    case 53: return 192;
     case 82: return 150; // Dragon Rage (89..238 / 93..242); the script runs 21 frames past the window (259/263), uncovered.
     case 52: return 63; // Ember (388..450 / 442..504, ageOffset 0); script ends 3 frames later (453/507).
     case 288: return 209; // Grudge (66..274 / 70..278); script end 274/278 (no tail).
