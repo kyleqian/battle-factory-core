@@ -907,3 +907,78 @@ Findings behind the table:
 
 ### 4. Open remainder
 The offset mass of these families is the offset of their anchor commands (move-body tails, HP floor, forced-switch anchor, ball-open species lag). Out of scope here (liv2 / sta5 own the bodies); the next lever is the HP command timing with the off108 anchor re-measured, then the per-species ball-open lag.
+
+## t2o (2026-11-18): Scene OFF T2 re-measured on master `e768c82b4` after pau2 / pau3 / mem2 / kno3 / hpd8 / ais4 / hpf1 (measurement only, no `src/` / `tests/` change)
+
+Method: the aud248 chain (`tools/audio/aud248RunSeed.sh SEED off DIR`: request, ROM setup, engine replay, closed-loop ROM drive, `romStateTimeline`, compare, ROM sound pass) run **fresh** on `e768c82b4` (the worktree's base, pinned; no engine file changed) for **24 Scene OFF seeds**: the **20 aud263 OFF seeds** (2 165 499 830 1028 1415 1914 2230 2741 3158 3738 4235 4686 5063 5569 6079 6568 6912 7295 7682) plus the **4 census seeds t2r added for ON, never T2-driven OFF: 97, 310, 319, 648** (same seeds, so ON / OFF are comparable per seed). OFF oracle `:8014` only, `nice -n 10`, 2 seeds at a time, ~1.6 min per seed. Every drive ended `stop outcome`, `matched == engineStates`, no divergence, `engineError null` (24 / 24). Scoring: `soundScoreboard.py` (unchanged). Attribution: `tools/audio/t2Attribute.py` gained `--scene=off`: Scene OFF has no move bodies, so an OFF row's cause is the **engine presentation command it falls in** (`soundCensusRomReplay.ts replay --cmdtrace=1`, the ctl1 trace), as `ctl:<id>@<command>`, `cry@<command>`, `stat:<id>@<command>`, `bgm@<command>`; the key of a row is its ROM frame, so the same row is followed through every build and takes its cause from the HEAD trace. Step attribution: the engine at each landed step replayed over the **same ROM files** (git worktrees at `f6edfc6b9` aud263, `ef94a58af` hpd4, `a26352df1` hpd5 (Ice Ball `93306ce12` is an ancestor), `ccbf70269` pau2, `652e53159` mem2 (contains the OFF fix `0d229f5ed`), `f047ca4f5` kno3, `2a4fef0b1` hpd8, `87bf77283` pau3, `26477cf4b` ais4, `5675eed7a` hpf1, then HEAD), with HEAD's `soundCensusRomReplay.ts` copied into each so the replay driver is identical (`bal1` changed the driver's switch commit anchor, below). Evidence (ignored): `.integration/evidence/t2o/` (`<seed>-off.*`, `steps/<commit>/`, `t2o-attr.json`, `scoreboard.txt`). No `src/` / `tests/` file touched; `npm test` not run (measurement step, per the assignment). `lbw7` / `lbw8` (Lobby) and `luck6` (designs) are outside the battle sound path and were not replayed as steps; `dl3` / `ctl1` / `bal1` / `lse1` were checked as one build (`d777ff89b`, the hpf1 parent): 0 rows moved vs ais4.
+
+### 1. Missing / extra (the headline): 0 / 0
+
+**0 missing and 0 extra rows in every family, 24 / 24 seeds** (also at every one of the 10 engine builds replayed in section 3, 1,133 matched rows each). `move-animation SE`, `fanfare`, `screen SE`: 0 rows (Scene OFF plays no move body, no fanfare in the compared window). Same (kind, id, pan) in order everywhere; only the frame differs.
+
+### 2. Family table, aud263 vs now (engine minus ROM, frames from the segment start; median / p10 / p90)
+
+Three columns, because `bal1` (T2 driver: a switch is committed at the SEND OUT / SHIFT confirm, not the first party-menu A) moved the **measurement** of 81 send-in rows by +5 .. +12 between aud263 and now: (A) aud263 as scored then, (B) the aud263 **engine** (`f6edfc6b9`) replayed over today's ROM files and driver (the engine-only baseline; 81 of its 971 rows differ from (A), 33 of them the SE 15 + cry pairs after `sprite-visibility`, +9, mass 7,664 -> 6,935), (C) now.
+
+| family (20 aud263 seeds) | A aud263 as scored: exact / offset, med / p10 / p90 | B aud263 engine on today's ROM | C now: exact / offset, med / p10 / p90 | all 24 (4 new seeds in) |
+| --- | --- | --- | --- | --- |
+| battle-controller SE | 22 / 695, -3 / -13 / 8 (n 717) | 40 / 677, -3 / -12 / 8 | **44** / 673, -3 / **-10** / **4** | 67 / 765, -3 / -10 / 2 (n 832) |
+| stat-change SE | 16 / 73, 2 / -7 / 11 (n 89) | 16 / 73, 2 / -7 / 11 | **21** / 68, **0** / -6 / **4** | 24 / 81, 0 / -6 / 4 (n 105) |
+| cry | 2 / 159, -7 / -17 / 15 (n 161) | 20 / 141, -3 / -17 / 15 | **23** / 138, -3 / **-11** / **11** | 32 / 160, -3 / -11 / 11 (n 192) |
+| bgm | 0 / 4, 12 / -19 / 22 (n 4) | 0 / 4, 12 / -19 / 22 | 0 / 4, **-2** / **-13** / 23 | 0 / 4, -2 / -13 / 23 |
+| move-animation SE, fanfare, screen SE | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 |
+
+(aud255's OFF numbers on the same 20 seeds are the same to within a frame: controller -3 / -13 / 8, stat 2 / -8 / 10, cry -7 / -17 / 15; 0 / 0.) Sum of abs(offset) over the 20 seeds' 971 rows: **7,664 (A) / 6,935 (B) -> 5,213 (C) = -32.0 % / -24.8 %** (controller 5,159 -> 3,766, cry 1,931 -> 1,032, stat 519 -> 373, bgm 55 -> 42). All 24 seeds, 1,133 rows: **7,979 (B) -> 6,125 (C), -23.2 %**; exact rows 107 -> 123. The four new seeds alone: 162 rows, mass 912 (controller median -2 / p10 -13 / p90 1, cry -1 / -15 / 12, stat 3 / -11 / 3): same shape as the old seeds. The Scene OFF offsets are already small next to Scene ON (aud263 ON / t2r: median -2 .. -10, p10 -20 .. -28): median -3, p10 -10 .. -12.
+
+**Worse than aud263 (every one a shift toward the next command's offset or a small overshoot, no event moved).** Rows by family worse than the engine-only baseline B: controller 48 rows (+213 mass; better 193 rows, -1,305), cry 22 (+84; better 83, -686), stat 5 (+5; better 24, -152), bgm 1 (+1). Net worse 76 rows / **+303 mass against 302 rows / -2,157**. The p90 of nothing rose against A or B: controller p90 8 -> 4, cry 15 -> 11, stat 11 -> 4; **bgm p90 22 -> 23 (n 4, one frame)**. By cause: `ctl:13@hit-animation` 8 rows +78, `cry@faint` and `ctl:16@faint` 14 rows +62 each, `ctl:15@switch-in` / `cry@switch-in` 8 rows +22 each, `ctl:114@party-summary` 8 rows +16, `ctl:14@hit-animation` 2 rows +15, `ctl:15@trainer-slide` 6 rows +12, `ctl:90@hp` 1 row +7. Which step: **hpf1** 60 rows +241 (its +5 on faint-chain rows that already sat at 0 .. +1: of the 63 cry@faint / SE 16 rows it moved, 12 end worse), **hpd4** 36 rows +100 (16 `ctl:13@hit-animation` rows +1 and a few rows that moved -16 / -17, the post-hit-hold shift t2r saw ON), **pau3** 5 rows +50 (s499 faint / send-in window +7 -> +17: the +10 SafeguardEnds pre-print row lands on a window that pau2 had already brought to +7; the ROM row is measured, the residual is another anchor), ais4 30 rows +30 (the 18 -> 17 send-in elapsed, +/-1), pau2 / kno3 3 rows +3 each. Nothing in the OFF family got worse in total.
+
+### 3. Which step moved which rows (24 seeds, 1,133 matched rows; mass = sum abs(offset); 0 / 0 at every build)
+
+| step (commit) | rows moved (toward 0 / away) | mass | biggest movers (rows, shift) |
+| --- | --- | --- | --- |
+| aud263 engine on today's ROM (`f6edfc6b9`) | | 7,979 (exact 107) | |
+| hpd4 (`ef94a58af`) | 103 (67 / 36) | 7,956 (-23) | 16 `ctl:13@hit-animation` rows +1; away: 2 SE 13 rows -16, SE 245 -17 (post-hit hold shifts) |
+| hpd5 Ice Ball / Seismic Toss | 0 | 7,956 | none (Scene ON bodies) |
+| **pau2** (`ccbf70269`) | 14 (11 / 3) | **7,615 (-341)** | **s1028 res: SE 13 -70 -> +1, the faint / send-in rows after it -49 .. -52 -> +19 .. +22 (+71 / +72 shift)**; s499 faint / send-in window -25 .. -31 -> +1 .. +7 (+32). Both windows are Horn Drill-type KOFail / AlreadyPoisoned used-move holds; the s1028 window now overshoots by +19 .. +22 on its tail rows (s1028 and s165 are the Horn Drill / Knock Off windows t2r found ON) |
+| mem2 (`652e53159`, OFF no-hit pause `0d229f5ed`) | 0 | 7,615 | none: no Memento / Explosion / Self-Destruct in these 24 seeds (`gCurrentMove` 120 / 153 / 262 absent), so no row to move |
+| **kno3** (`f047ca4f5`) | 12 (9 / 3) | **7,377 (-238)** | the 35-row Knock Off Pausex20 hold: s165 window -29 .. -35 -> -1 .. -7 (6 rows, +28), s499 window -25 / -35 -> +14 / +4 (+39: overshoot on the SE 13) |
+| hpd8 (`2a4fef0b1`) | 0 | 7,377 | none (Scene ON lead + tail) |
+| pau3 (`87bf77283`) | 5 (0 / 5) | 7,427 (+50) | s499 window +7 -> +17 (faint cry / SE 16 / party summary / send-in SE + cry), see section 2 |
+| ais4 (`26477cf4b`) | 80 (50 / 30) | 7,405 (-22) | send-in SE 15 + cry elapsed 18 -> 17: 32 pairs +1, 7 pairs -1; exact rows 106 -> 112 |
+| **hpf1** (`5675eed7a`; parent `d777ff89b` = ais4 row for row) | **293 (231 / 60)** | **6,125 (-1,280)** | **the largest step OFF**: hit hp command floor-free on the player: `cry@faint` / `ctl:16@faint` 63 + 63 rows (-315 each), `ctl:15@switch-in` + `cry@switch-in` 24 + 24 (-116), `ctl:114@party-summary` 22 (-108), `ctl:13@hit-animation` 37 (-104), `stat:245@stats-change` 17 (-103); shifts +5 (74 rows), +3 (40), +1 (22), -17 (13: SE 245 rows), -6 (11) |
+| HEAD (`e768c82b4`) | 0 vs hpf1 | **6,125 (exact 123)** | the lbw / luck6 / ctl1 / bal1 / dl3 / lse1 commits after hpf1 move no OFF row |
+| **net aud263 engine -> now** | | **7,979 -> 6,125 (-1,854, -23.2 %)** | |
+
+What this says: **hpf1 (the floor-free hit hp command; bisected: the engine at its parent `d777ff89b` is identical to ais4 on all 1,133 rows, so dl3 / ctl1 / bal1 / lse1 move none) is 69 % of the whole OFF gain** (1,280 of 1,854; mass 7,405 -> 6,125 over 293 rows) and **pau2 + kno3 are the two single windows** (579 together, 26 rows). **hpd8, hpd5, mem2 and adp1 move zero OFF rows**: hpd8's lead + tail is Scene ON only, hpd5 bodies are ON, mem2's OFF fix has no Memento / Explosion in these seeds. The OFF family had no move-animation SE at all, so the ON steps with the largest ON effect (kno3 item animation 2,200 of ON mass) show up here as 238.
+
+### 4. t2off-style table: top 15 causes by rows x abs(offset) now (24 seeds, total mass 6,125 over 1,133 rows)
+
+Cause = `row id @ the engine command the row falls in`; SE 16 (faint) and the faint cry, SE 15 (ball open) and the send-in cry are always a pair (same rows, same offset: their rows are chained 66 / 16 frames apart, ctl1), so each pair is one window counted twice.
+
+| # | cause | rows | median | rows x abs(offset) | share | class | of which new seeds | aud263 engine (B) |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 | `ctl:13@hit-animation` (SE_EFFECTIVE) | 380 | -3 | 1,690 | 27.6 % | controller row after the hit: the message / script pause + hp hold before it; one window dominates the tail (s7682 Struggle 10 rows +20 .. +29 = 243) | 144 | 1,886 |
+| 2 | `ctl:16@faint` (SE_FAINT) | 103 | -3 | 794 | 13.0 % | controller row on the faint command (the hp-end chain; spacing to the cry exact) | 130 | 1,190 |
+| 3 | `cry@faint` | 103 | -3 | 794 | 13.0 % | cry, same rows as 2 (pair) | 130 | 1,190 |
+| 4 | `ctl:12@hit-animation` (SE_NOT_EFFECTIVE) | 117 | -3 | 524 | 8.6 % | controller row after the hit (3738 Aerial Ace window -42 x 2 = 84; 319 Brick Break +63) | 75 | 589 |
+| 5 | `ctl:15@switch-in` (ball open) | 42 | -5.5 | 379 | 6.2 % | controller / send-in (forced and AI switch, anchor + ball-open lag) | 90 | 585 |
+| 6 | `cry@switch-in` | 42 | -5.5 | 379 | 6.2 % | cry, same rows as 5 (pair) | 90 | 585 |
+| 7 | `ctl:114@party-summary` | 34 | -6.5 | 335 | 5.5 % | controller row (party summary tray) | 86 | 519 |
+| 8 | `stat:239@stats-change` (stat up) | 63 | 2 | 247 | 4.0 % | stat-change message / Pausex20 rows | 66 | 271 |
+| 9 | `ctl:14@hit-animation` (SE_SUPER_EFFECTIVE slot) | 51 | -3 | 241 | 3.9 % | controller row after the hit (6568 Brick Break +63) | 34 | 245 |
+| 10 | `ctl:15@trainer-slide` | 20 | -8 | 218 | 3.6 % | send-in at the trainer slide (first send-out) | 38 | 235 |
+| 11 | `stat:245@stats-change` (stat down) | 42 | 0 | 192 | 3.1 % | stat-change rows (s1914 one row -69 = 36 %) | 0 | 315 |
+| 12 | `ctl:90@hp` | 24 | -1 | 79 | 1.3 % | controller row on the hp command | 10 | 99 |
+| 13 | `ctl:15@sprite-visibility` | 43 | 0 | 77 | 1.3 % | send-in ball open (first send-out) | 7 | 77 |
+| 14 | `cry@sprite-visibility` | 43 | 0 | 77 | 1.3 % | cry, same rows as 13 | 7 | 77 |
+| 15 | `bgm@message` (victory BGM) | 4 | -3 | 42 | 0.7 % | BGM after the last message | 0 | 55 |
+
+The top 15 hold 6,068 of 6,125 (99.1 %). By the engine command the row hangs from (rows / mass now / mass B): `hit-animation` 548 / 2,455 / 2,720 (40.1 %), `faint` 206 / 1,588 / 2,380 (25.9 %), `switch-in` 84 / 758 / 1,170, `stats-change` 105 / 439 / 586, `party-summary` 34 / 335 / 519, `trainer-slide` 20 / 218 / 235, `sprite-visibility` 86 / 154 / 154, `hp` 28 / 85 / 105, `message` 13 / 71 / 86, other 9 / 22 / 24. By class: controller / message rows 4,385 (71.6 %), cry 1,259 (20.6 %), stat-change 439 (7.2 %), bgm 42 (0.7 %). **Rows at abs(offset) >= 20: 48 rows hold 1,561 (25.5 %)**; the largest windows are single (seed, cause) groups: **s7682 Struggle (`gCurrentMove` 165) SE 13 +20 .. +29 on 10 consecutive hits = 243, plus its KO faint cry / SE 16 +63 x 2 = 126** (~6 % of all OFF mass, one window, unchanged since aud263: +21 .. +29 then), s3738 Aerial Ace (332) SE 12 -42 x 2 and faint -44 x 2, s2741 one SE 13 -37 (no move set), s1914 SE 245 -69, **s319 Brick Break (280) SE 12 +63 and s6568 Brick Break SE 14 +63** (a Brick Break window the engine is 63 late on, in two seeds), s6568 Struggle faint +37 x 2, s648 Earthquake (89) faint / send-in chain -43 .. -34 (new seed). These are named from the ROM `gCurrentMove` at the row, not yet traced to a script command.
+
+### 5. Verdict and next steps
+
+1. **Event parity unchanged: 0 missing / 0 extra, 24 Scene OFF seeds (20 aud263 + 4 new), at every intermediate build.** Nothing landed this run regressed an OFF event.
+2. The OFF offsets were already small (median -3, p10 -12): the landed steps removed **23.2 % of the OFF mass** (7,979 -> 6,125; 24.8 % on aud263's 20 seeds on the same ROM files), 69 % of it from hpf1, 31 % from pau2 + kno3's two windows. The p10 / p90 tails narrowed in controller (-13 / 8 -> -10 / 4), cry (-17 / 15 -> -11 / 11) and stat (-7 / 11 -> -6 / 4); the medians sit at -3 (controller, cry) and 0 (stat). Nothing family- or cause-level is worse than aud263 beyond the small overshoots listed in section 2.
+3. What is left, by mass: **controller rows after the hit-animation command (40 % of all mass, 380 SE 13 rows median -3: the inherited hit offset, ctl1 section 3)**, the **faint chain (26 %: SE 16 + faint cry, median -3, a few outliers at +63 / -44)**, the send-in chain (switch-in / party-summary / trainer-slide, 18 %), stat-change rows (7 %). Single windows that stand out: **s7682 Struggle (+20 .. +29 x 10, 6 % of the mass)** and **Brick Break +63 (two seeds, 126)**, **Aerial Ace -42**, **Earthquake faint chain -43**: each a candidate for a ROM probe of the script command (OFF has no animation, so these are pauses / message holds). Not measured here: OFF-specific causes inside a move (no OFF body exists, so no per-body table), ON vs OFF per-seed difference, other seeds beyond census 0..999's four.
+4. Suggested order (measurement first; each moves frames: census eventsDigest identity + soaks + pin notes + the full suite): the s7682 Struggle window (one body, 10 rows), the Brick Break +63 window (two seeds), then the send-in anchor (ctl1 / bal1 numbers).
+5. Tooling: `tools/audio/t2Attribute.py --scene=off ROMDIR OUT.json LABEL=ENGINEDIR ...` (engine dirs from `soundCensusRomReplay.ts replay --cmdtrace=1 --scene=off`); the `soundScoreboard.py` subset of 20 seeds needs `cmp` / `drive` / `snd` / `engine` files in one directory (symlinks work).

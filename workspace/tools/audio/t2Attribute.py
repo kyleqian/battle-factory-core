@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """t2r: per-row T2 attribution. Aligns engine vs ROM sound rows exactly as soundScoreboard.py does and keeps every matched row with its cause.
 
-usage: t2Attribute.py ROMDIR OUT.json LABEL=ENGINEDIR [LABEL=ENGINEDIR ...]
+usage: t2Attribute.py [--scene=on|off] ROMDIR OUT.json LABEL=ENGINEDIR [LABEL=ENGINEDIR ...]
+  --scene=off (t2o): files are <seed>-off.*; Scene OFF has no move bodies, so a row is caused by the engine command it falls in (from an engine.json written with `soundCensusRomReplay.ts replay --cmdtrace=1`):
+  "ctl:<id>@<cmd type>", "cry@<cmd type>", "bgm@<cmd type>", "stat:<id>@<cmd type>" (no cmds: no suffix).
   ROMDIR holds <seed>-on.{drive,snd,tl}.json (the ROM side); each ENGINEDIR holds <seed>-on.engine.json from one engine build. Output: {label: {key: [offset, family, cause]}} with
   key "seed|romFrame|kind|id|pan|n" (n = occurrence), offset = engine - ROM relative to the segment start, cause = "body:<move id>" (move-animation SE, ROM gCurrentMove from tl.json at the row),
   "gen:<se id>" (gCurrentMove 0 / 0xFFFF), "ctl:<id>", "stat:<id>", "cry", "bgm", "fanfare".
@@ -35,8 +37,8 @@ def pick(rows, lo, hi):
     return [(r[0] - lo, r[1], r[2], r[3], r[0]) for r in rows if lo <= r[0] < hi and r[1] in KINDS and not (r[1] == "se" and r[2] == 5)]
 
 
-def rows_for(romdir, engdir, seed):
-    stem = f"{seed}-on"
+def rows_for(romdir, engdir, seed, scene="on"):
+    stem = f"{seed}-{scene}"
     eng = json.load(open(engdir / f"{stem}.engine.json"))
     drive, rom = (json.load(open(romdir / f"{stem}.{k}.json")) for k in ("drive", "snd"))
     tl = json.load(open(romdir / f"{stem}.tl.json"))["rows"]
@@ -44,6 +46,8 @@ def rows_for(romdir, engdir, seed):
     eng_a = [{"menuOpenFrame": d["menuOpenFrame"], "commitFrame": d["commitFrame"]} for d in eng["decisions"] if d["commitFrame"] is not None]
     rom_a = drive["drive"]["anchors"]
     n = min(len(eng_a), len(rom_a))
+    ecmd = eng.get("cmds") or []
+    cf = [c[0] for c in ecmd]
     e_rows = [(r[0], r[1], r[2], r[3]) for r in eng["sound"]]
     r_rows = [(e["frame"], e["kind"], e["id"], e["pan"]) for e in rom["events"]]
     e_end = max([r[0] for r in e_rows] + [a["commitFrame"] for a in eng_a]) + 1
@@ -70,6 +74,9 @@ def rows_for(romdir, engdir, seed):
                     cause = f"ctl:{sid}"
                 else:
                     cause = fam
+                if scene == "off" and fam != "move-animation SE" and ecmd:
+                    k = bisect.bisect_right(cf, e[i][4]) - 1
+                    cause += "@" + (ecmd[k][3] if k >= 0 else "pre")
                 base = f"{seed}|{r[j][4]}|{kind}|{sid}|{r[j][3]}"
                 c = seen.get(base, 0)
                 seen[base] = c + 1
@@ -78,16 +85,19 @@ def rows_for(romdir, engdir, seed):
 
 
 def main(argv):
+    scene = "on"
+    if argv and argv[0].startswith("--scene="):
+        scene, argv = argv[0].split("=")[1], argv[1:]
     romdir, outp, specs = Path(argv[0]), argv[1], argv[2:]
-    seeds = sorted(int(p.name.split("-")[0]) for p in romdir.glob("*-on.snd.json"))
+    seeds = sorted(int(p.name.split("-")[0]) for p in romdir.glob(f"*-{scene}.snd.json"))
     res = {}
     for spec in specs:
         label, d = spec.split("=")
         res[label] = {"rows": {}, "missing": 0, "extra": 0}
         for s in seeds:
-            if not (Path(d) / f"{s}-on.engine.json").exists():
+            if not (Path(d) / f"{s}-{scene}.engine.json").exists():
                 continue
-            rows, m, x = rows_for(romdir, Path(d), s)
+            rows, m, x = rows_for(romdir, Path(d), s, scene)
             res[label]["rows"].update(rows)
             res[label]["missing"] += m
             res[label]["extra"] += x
