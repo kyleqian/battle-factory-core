@@ -3,7 +3,8 @@
   "oracleProfile": "battle-scene-off",
   "appStage": {
     "id": "win-terminal-window-off",
-    "frame": 4623
+    "frame": 4623,
+    "opponentTrainerId": 50
   },
   "oracleBattleLab": {
     "scenario": "../../battle-lab/scratch-win-go-on-style-commentary-probe.json"

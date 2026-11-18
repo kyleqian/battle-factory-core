@@ -3,7 +3,8 @@
  "oracleProfile": "battle-scene-on",
  "appStage": {
   "id": "frf250a-bagrun-on",
-  "frame": 0
+  "frame": 0,
+  "opponentTrainerId": 110
  },
  "oracleBattleLab": {
   "scenario": "../../battle-lab/frf250a-run-no-on.json"
