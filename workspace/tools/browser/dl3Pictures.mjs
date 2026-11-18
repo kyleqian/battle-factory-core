@@ -32,13 +32,17 @@ const started = Date.now();
 const problems = [];
 const files = [];
 let bytes = 0;
+let animBytes = 0;
 page.on("pageerror", (error) => problems.push(`pageerror: ${String(error).split("\n")[0]}`));
 page.on("console", (message) => message.type() === "error" && problems.push(`console.error: ${message.text().split("\n")[0]}`));
 page.on("response", async (response) => {
   const url = new URL(response.url());
   if (!url.pathname.includes("/sprites/")) return;
-  files.push({ file: url.pathname.split("/").pop(), at: Date.now() - started, status: response.status() });
-  bytes += (await response.body().catch(() => Buffer.alloc(0))).length;
+  const anim = url.pathname.includes("/sprites/anim/");
+  files.push({ file: url.pathname.split("/").pop(), at: Date.now() - started, status: response.status(), anim });
+  const size = (await response.body().catch(() => Buffer.alloc(0))).length;
+  if (anim) animBytes += size;
+  else bytes += size;
 });
 await page.goto(`http://127.0.0.1:${port}/?battleScene=${scene}&presentationSeed=${presentationSeedHex(seed)}`);
 await page.waitForFunction(() => typeof window.__POKEBENCH_SESSION__ === "function", null, { timeout: 30_000 });
@@ -99,13 +103,20 @@ const final = await page.evaluate(() => window.__POKEBENCH_SESSION__());
 await browser.close();
 server.close();
 const failed = files.filter((entry) => entry.status !== 200);
-const names = new Set(files.map((entry) => entry.file));
+const animNames = new Set(files.filter((entry) => entry.anim).map((entry) => entry.file));
+const names = new Set(files.filter((entry) => !entry.anim).map((entry) => entry.file));
 const containedErrors = final.containedErrors ?? [];
 console.log(
   `dl3 real-time (${scene}, seed ${seed}, ${seconds}s): page frames ${final.frame}, mirror frames ${mirrored}, rounds built ${battles}, picture files ${names.size} ` +
+    `animation asset files ${animNames.size} (${(animBytes / 1024).toFixed(1)} KiB raw), ` +
     `(${files.length} responses, ${(bytes / 1024).toFixed(1)} KiB raw; ${filesAtFirstFrame} before the first frame at ${firstFrameAt} ms), failed ${failed.length}, ` +
     `uniform-colour canvas samples (fades) ${blank}/${samples}, contained errors ${containedErrors.length}, page/console errors ${problems.length}`,
 );
 for (const line of [...new Set(problems)].slice(0, 10)) console.log(`  ${line}`);
 console.log(`  files: ${[...names].join(" ")}`);
+console.log(`  anim files: ${[...animNames].join(" ")}`);
+if (scene === "on" && animNames.size === 0) {
+  console.log("  no animation asset file was loaded under Scene ON");
+  process.exit(1);
+}
 process.exit(problems.length > 0 || failed.length > 0 || containedErrors.length > 0 ? 1 : 0);
