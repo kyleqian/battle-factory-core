@@ -1,6 +1,7 @@
 // cry1 (ISSUES #219 family 3): the cry-task rows (first cries, second cries, stops, BGM restore) of Roar / Howl / Hyper Voice in Scene ON, against step-mode ROM probe windows
 // (tools/audio/fixtures/cry1-*.json, soundEventProbe.py `lab` of tools/battle-lab/cry1-*.json; docs/cry1-cry-tasks.md).
 // The engine's labs differ from the ROM before the move (earlier-turn text / hit timing); the per-lab drift below is engine minus ROM at the first cry.
+// hpd6: cry1-roar-pidgey-opp-on drift 1 -> 2, command start 392 -> 393: the floor-free foe-hit hp hold (hpd4, bar + 1) of the lab's earlier Seismic Toss is 1 row longer; the Toss hit SE -> first cry interval goes 114 -> 115 against the ROM's 120 (hit SE 288 -> cry 408).
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { collectSoundTick, type SoundEvent } from "../src/audio/soundEvents.ts";
@@ -52,7 +53,7 @@ function romFirstCry(rom: Fixture): { duck: number; cry: FixtureEvent } {
 const SITES = [
   { name: "cry1-roar-pidgey-player-on", species: 16, pan: -64, mode: "ROAR_1", rom: 392, drift: 13, commandStart: 388 },
   { name: "cry1-roar-jynx-player-on", species: 124, pan: -64, mode: "ROAR_1", rom: 390, drift: 13, commandStart: 386 },
-  { name: "cry1-roar-pidgey-opp-on", species: 16, pan: 63, mode: "ROAR_1", rom: 408, drift: 1, commandStart: 392 },
+  { name: "cry1-roar-pidgey-opp-on", species: 16, pan: 63, mode: "ROAR_1", rom: 408, drift: 2, commandStart: 393 },
   { name: "cry1-howl-jynx-player-on", species: 124, pan: -64, mode: "HIGH_PITCH", rom: 87, drift: 4, commandStart: 46 },
   { name: "cry1-hypervoice-pidgey-player-on", species: 16, pan: -64, mode: "ECHO_START", rom: 69, drift: 0, commandStart: 53 },
   { name: "cry1-hypervoice-jynx-player-on", species: 124, pan: -64, mode: "ECHO_START", rom: 67, drift: 0, commandStart: 51 },
