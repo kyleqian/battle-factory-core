@@ -7,13 +7,16 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ## 2026-11-18 — CAX31 daily run (supervisor, Opus 5.5, 2026-11-18 13:30 -> 2026-11-19 05:30 UTC): IN PROGRESS
 
-- **State:** in progress; interim entry (rewritten at wind-down). Workers live: hpd8 (integration, Scene ON shape-A script lead), lbw7 (ts, Lobby residuals), luck5 (side, Metronome luck designs).
-- **Run start:** luck hunt day 3: R035 ROM match (seed 1040873, 14 / 14) promoted, rare rules **61 -> 62 / 110**. Nightly replay on `8516a6da1`: pool **44 / 44** (1,427 states), staged **83 / 83** (`docs/replay-ledger.md`).
-- **Folded:** pau2 (`docs/pau1-script-pauses.md` "pau2": pause LONG before KOFail / AlreadyPoisoned messages, SafeguardEnds' SHORT pause; out2-horndrill OFF 415 -> 558 / 620, ON 410 -> 568),
-  mem2 (aud242 section 30: 0x7FFF instant HP drop for Memento / Explosion / Self-Destruct; Explosion player 27 -> 296 / 421, Memento SE1 -108 -> -7), kno3 (Knock Off item animation, both scenes;
-  out2-knockoff ON 32 -> 145 / 256, OFF 88 -> 192), cln8 (129 unread fixture files untracked; `docs/cln8-evidence-out.md`: the 619 MB `tools/compare/evidence` is still read by tests).
-  Census 0..99 both scenes eventsDigest identical for each (workers). Full suite on `2124ec8f0` (pau2) **15,937 / 0 failed**; on `f047ca4f5` (+ mem2 + kno3) **15,963 / 0 failed**.
-- **Next:** fold hpd8 / lbw7 / luck5; then liv2 (shape B bodies + Flamethrower + Solar Beam `live`), sdx1, sta4; wind-down soaks (src changed).
+- **State:** in progress; interim entry (rewritten at wind-down). Workers live: liv2 (integration, long `live` windows), dl4 (side, per-move animation assets), ctl1 (ts, controller SE offsets).
+- **Run start:** luck hunt day 3: R035 ROM match (seed 1040873, 14 / 14) promoted. Nightly replay on `8516a6da1`: pool **44 / 44** (1,427 states), staged **83 / 83** (`docs/replay-ledger.md`).
+- **Folded (each: census 0..99 both scenes eventsDigest identical, by the worker):** pau2 / pau3 (`docs/pau1-script-pauses.md`: pause LONG before KOFail / AlreadyPoisoned, SafeguardEnds pause + 10-frame lead;
+  HJK miss / Rest-under-Uproar already ROM-exact), mem2 (aud242 s30: 0x7FFF instant HP drop), kno3 (Knock Off item animation both scenes), hpd8 (Scene ON script lead + tail on 16 shape-A
+  bodies; Aerial Ace 276 -> 771 / 1023, Thunderbolt 5 -> 352), ais4 (faint-replacement send-in on the AI timeline; obr251 OFF 6 -> 91, ON 6 -> 178 / 306; aud253 2741 SE / cry exact),
+  lbw7 / lbw8 (Lobby: lbra-forfeit / lbra-retire / retire-freeroam and all 8 lbrb-* traces ROM-exact), dl3 (pictures per species: first-battle download ~2,112 -> ~1,700 KiB brotli-11; additive
+  `FactoryGameOptions.spriteBase`), luck5 (7 Metronome luck designs; R073 promoted: rare rules **61 -> 63 / 110**), cln8 (129 unread fixtures untracked), t2r (T2 ON 25 seeds 0 missing / 0 extra;
+  offset mass -15 %; top causes in `docs/aud251-s11-scoreboard-refresh.md` "t2r").
+- **Gates so far:** full suite `2124ec8f0` 15,937 / 0; `f047ca4f5` 15,963 / 0; `2a4fef0b1` 15,970 / 0; `e166a1ace` **15,988 / 0**; build 0. Supervisor re-pinned randomRoundSoak after the ais4 fold (`80c7d08f3`).
+- **Next:** fold liv2 / dl4 / ctl1; sta5 (first Status_* play, `.integration/briefs/sta5.txt`); Leech Seed body (-29 constant, t2r #5); wind-down soaks (src changed) + nightly-style replay of the permanent list (no battle-rule change so far: not required).
 
 ---
 
