@@ -18,9 +18,9 @@ exclusions are superseded. Unrelated expansions stay parked.
 - E1-E3 (battle-exit VBlank hold, Pokerus + save-block draws, Lobby map-load draws) fixed by lbr-g (`src/engine/battleExitRng.ts`,
   `tests/battleExitRng.test.ts`), E4 (the woman / fat man wander draws) by lbw3 (`docs/lbw3-lobby-npc-port.md`; offset 0 on 6 ROM traces from the rebase to the end). Open:
   - **Harness:** every lbra / lbrd `appStage` injects a non-ROM `rngValue`; the traces now carry an `appRngRebase` (values in `docs/lbw1-lobby-wander-evidence.md` and the trace files).
-  - **Unproven in the wander port:** retire-after-won / injected / attendant-return entries (shared rule). lbw5 (2026-11-16) proved the fat man in the way, the same-frame tile race (exact already),
-    a direction change during a bump and a turn-commit refusal (both fixed) on the ROM (`lbw5-*-off` traces, `tests/lbw5LobbyNpcPlayer.test.ts`). Open: five single-frame player-pose residuals
-    (first step after a bump interrupt, bump-cycle boundary, bump settle; listed in `docs/lbw3-lobby-npc-port.md` "lbw5") and a held direction change while a step is in flight (ROM goes straight, the engine turns 8 frames).
+  - **Unproven in the wander port:** retire-after-won / injected / attendant-return entries (shared rule). lbw5 / lbw6 (2026-11-16 / 18) proved every player <-> NPC case and the in-flight
+    held direction change, turn-then-turn and the 9-frame tap on the ROM (`lbw5-*-off`, `lbw6-*-off`). Open Lobby residuals: `lbra-forfeit-off` 41 frames, `lbra-retire-off` dialog text,
+    `retire-yes-lobby-freeroam-off` 157 frames; `lbrb-*` traces lack the `appRngRebase` step (harness).
   - **Unmeasured:** the won route's real battle exit (reuses the loss rule), the non-terminal win's PreBattleRoom entry, a full
     boot -> draft -> battle -> forfeit route.
 
@@ -49,26 +49,18 @@ exclusions are superseded. Unrelated expansions stay parked.
     source shape without a ROM window. The ordinary hit's own floor: rol1 / hpd1 (`docs/rol1-rollout-chain.md`).
   Plan: `docs/hie-scout.md`; `docs/aud250-general-anim-sounds.md`.
 
-## #219 — S11 sound gaps after the aud248 scoreboard (2026-11-14)
+## #219 — S11 sound: event parity met; frame-alignment and coverage remainder (2026-11-14, rewritten 2026-11-18)
 
-`docs/aud248-s11-scoreboard.md` (T1 census 0..999 + T2 ROM replays, ~20 aligned seeds per scene; reproduce with
-`tools/audio/aud248RunSeed.sh` + `tools/audio/soundScoreboard.py`). S11 acceptance is not met. Ranked missing families:
-1. move-animation SE streams (aud256 -> aud259, 2026-11-17: Scene ON T2 ROM-only rows 63 -> 16, the last 16 closed by wsh1's WISH_HEAL / FUTURE_SIGHT_HIT / FOCUS_BAND commands: **T2 0 missing / 0 extra in both scenes**; wsh2 drew the three (residual: Wish's star hand-over frame, 1 per side); T1 0..999 Scene ON (aud262): missing-gated 0, declined 5 (Rock Smash 2, Beat Up 2, Withdraw 1: no live adapter), extra 0; T1 all families 0..999 both scenes: 0 extra, 0 unclassified (aud263); adp1 added the three missing adapters (T1 0..999 both scenes now 0 missing / 0 extra); Beat Up's hit-to-hit gap 132 vs ROM 193 frames (multi-hit message timing, unreachable in Factory Lv 50); Scene OFF 0 / 0; Memento's SEs sit 108 frames off the ROM (gaps equal: presentation), Water Spout +11 / +7 / +7 / +2 by HP quarter (unexplained); per-move constant offsets in #198);
-2. stat-change SE 239 / 245: emitted since aud248 at command age 7, ROM-minus-ours -2..+23 frames per window (pinned in `tests/aud248StatChangeSounds.test.ts`),
-the 15 ON rows missing in the aud251 table were Double Team (fixed by aud252, 0 missing); Metal Claw / Steel Wing secondary effects are unmeasured in T2; 3. declined (static) move bodies
-(BEAT UP / WITHDRAW / ROCK SMASH; T1, not re-measured by aud251). Cries and SE_SHINY closed (aud251 table: 0 missing). Scene ON seeds 6568 / 7682 stall at the 80,000-frame ROM drive cap and cannot be aligned.
-- **aud251 / aud252 (2026-11-16)**: `docs/aud251-s11-scoreboard-refresh.md` (41 seeds, all aligned; ON missing 1679 -> 238, OFF 95 -> 6). The controller "extras" SE_BALL_OPEN 15 / victory BGM 412 were
-  window-end artifacts (`aud248RunSeed.sh` runs the sound pass 500 idle frames longer; `tests/aud251OutcomeTail.test.ts`). aud252 fixed the SE_EFFECTIVE pans of end-turn weather damage and the loss-path SE_BALL_OPEN placement
-  after an opponent held-item effect (controller rows ON missing 2 / extra 0, OFF missing 2 / extra 0). aud253 emitted the AI-switch recall SE_BALL_OPEN and the player switch-in's HandleLowHpMusicChange (seeds 2 / 2741: controller rows 0 / 0 in both scenes). **ais1 (2026-11-16)** synthesized the AI switch's RETURNMON message + return-to-ball (`docs/ais1-ai-switch-withdraw.md`): the recall SE 15 / tray SE 114 are now frame-exact on seed 2741 (the 31-frame stop-gap row is gone), the segment is +74 frames. Open: the forced party-menu send-out's low-HP SE, WEAK cry restore lengths of species not yet measured, the Scene ON +71 low-HP constant (one window).
-- **aud249 (2026-11-14)** emits the nine `Status_*` and the four weather-continues SEs (Scene ON; `docs/aud249-general-anim-sounds.md`). Open:
-  the second `Status_*` play of one animation lands ~14 frames later in the ROM than modelled and the first play +2 over the stat anchor;
-  TurnTrap / Snatch unresolved in the extractor.
-- **aud250 (2026-11-14)** emits FOCUS_PUNCH_SETUP / LEECH_SEED_DRAIN / CASTFORM_CHANGE (anchors 5 / 7 / 5, ROM windows). Open: the second
-  `Status_*` play is 14-15 frames later in the ROM (not a loop error; needs a pixel window of the second play); `Status_Freeze` SE 242 moved +1
-  by the wait+1 rule without a ROM window; held-item effect SEs landed in hie3 (#220).
-  **sta2 (2026-11-16, evidence only):** the +14 is not in any `Status_Confusion` / `ConfusionEffect` op (single straight-line script, no wait the table misses; ROM SE -> script end is the same 96 / 93 frames in both plays, ROM `duck 476` = `Cmd_end`). It is the message section between the plays: ROM script end -> second launch 194 / 194 / 196 vs engine 180 / 180 / 181 (or 8 / 8 / 9 after a 6-frame SE-anchor split: `STATUS_ANIMATION_SCRIPT_AGE` 7 vs the source reading 1). Needs a ROM step-mode window recording `gBattlescriptCurrInstr` between the plays to name the short controller transition (`docs/aud249-general-anim-sounds.md` "sta2").
-- **cry1 (2026-11-15)** emits the cry-task cries, stops and BGM restores of Roar / Howl / Hyper Voice (`docs/cry1-cry-tasks.md`; first cries frame-exact against ROM windows, the second cries and restores from a fitted per-species length model, 0 residual on 141 measured species-modes). The five cry-task modes are recorded and played from their own assets (cry2: `docs/cry1-cry-tasks.md`). Open: Roar / Howl windows inherit a lab drift (+13 / +13 / +1 / +4) so their script-frame offset is unverified apart from the drift-free Hyper Voice anchor; the model can be off by one for a species near a step edge (none seen in 32 pre-registered edge species).
-- **t1cls (2026-11-16)**: T1 `unclassified` is 0 (non-move SEs are attributed by command window, `docs/aud243a-sound-census.md`); the one non-move T1 gap it exposed was `Status_Poison`'s 6th SE 148 (past the 71-row window). **psn1 / psn2 (2026-11-16):** the ROM plays it (first + 70, both turns of a Toxic lab) and the engine now emits it as a sound-only tail past the window (`docs/aud249-general-anim-sounds.md`); the second-play offset there is +6, not ~14 (inconclusive for the confusion case). Since psn2 the T1 classifier shows `unclassified` **128** again: the tail SE 148 rows fall in the message / HP windows after the command (classifier gap, tooling only).
+**Event parity met 2026-11-18** (`docs/aud251-s11-scoreboard-refresh.md` "aud263", `docs/adp1-withdraw-rocksmash-beatup.md`): T1 census 0..999 both scenes, every family,
+0 missing / 0 extra / 0 unclassified; T2 ROM replays (21 ON + 20 OFF seeds) 0 missing / 0 extra. Reproduce: `tools/integration/lsd194Census.sh` + `soundCensusDelta.py --t1`;
+`tools/audio/aud248RunSeed.sh` + `tools/audio/soundScoreboard.py`. Open remainder (timing class, ROADMAP item 6; per-move offsets in #198):
+- **Frame alignment:** T2 Scene ON matches 3,683 of 3,991 move rows with a constant per-window offset (p10 -21, median -2, p90 +5); controller / cry / BGM rows likewise
+  (bgm -71, cry -28 at the tails). The hpd4 / hpd5 script lead removed the drift on six audited bodies (docs/hpd1-hp-hold.md); the other bodies keep the old lead-in-tail.
+- **Coverage:** T2 is 41 of 1000 seeds; controller / cry / BGM have no T1 rule table (counts only); fanfare / screen SEs have no T2 instance.
+- **Per-move:** Memento SEs 108 frames off the ROM with equal gaps (presentation), Water Spout +11 / +7 / +7 / +2 by HP quarter, Beat Up hit-to-hit 132 vs ROM 193 frames
+  (multi-hit message timing; unreachable in Factory Lv 50), Wish heal's star hand-over frame (1 per side), the second `Status_*` play +14 in Scene ON (sta2: needs a per-frame
+  `gBattlescriptCurrInstr` ROM window between the plays), `Status_Freeze` SE 242 +1 unmeasured, Roar / Howl cry windows inherit a lab drift.
+- Scene ON seeds 6568 / 7682 stall at the 80,000-frame ROM drive cap (T2 cannot align them); census seeds 796 / 995 end at the frame budget in both scenes.
 
 ## #222 — AI switch withdraw presentation: residuals (ais1 / ais2 / ais3, 2026-11-17)
 
@@ -155,19 +147,14 @@ Ancient Power / Fire Punch / Crunch +2, Yawn +1, Lovely Kiss 0, Smokescreen / Sc
 multi-blend cycles over another fade.
 **aud242o (2026-11-16)** Petal Dance, Confuse Ray ball-bounce SE196, Tri Attack rest, Dive, Rollout (live rollout counter as a table dimension `counterGrids`); extractor fix:
 `AnimTask_ShakeTargetInPattern` read `args[3]` for `args[2]` (L50 760 emitted, 86 gated; section 19): Petal Dance / Tri Attack +2, Confuse Ray 0, Dive set-up -7, Rollout one cast +3.
-**The five-turn Rollout window drifts per turn (+9 / +22 / +37 / +57 / +86; the Defense Curl stat SEs drift the same): the Scene ON Rollout chain presentation is short (rol1 investigating).**
+The five-turn Rollout / Ice Ball drift is fixed by the hpd4 / hpd5 script lead (Rollout 3 / 2 / 2 / 0 / -1, Ice Ball 3 / 2 / 2 / -1 / -3; docs/hpd1-hp-hold.md).
 **aud242p (2026-11-16)** Encore -1, Flatter -3 / -3 / 0 (3-frame SE229 drift undiagnosed), Reversal +2, Taunt -4, Karate Chop 0, Mist Ball +2, Revenge -10 (opponent Pound body not live), Leaf Blade 0,
-Disable (no window); hit splats 1-3 = 10 ticks (ROM-measured; the affine derivation gave 11) (L50 785 emitted, 70 gated; section 20). T1 0..99 ON missing-gated 195 -> 122 -> **95**;
-T2 ON (21 seeds) move-SE missing 113 (aud242o head) -> **76**, extra 0.
+Disable (no window); hit splats 1-3 = 10 ticks (ROM-measured; the affine derivation gave 11) (L50 785 emitted, 70 gated; section 20). 
 **aud242q (2026-11-17)** Ice Ball, Fury Cutter, Secret Power (Factory BUILDING environment), Strength, Extrasensory, Super Fang, Rage; extractor fix: `RGB(r, g, b)` arguments were split
-at inner commas (L50 794 emitted, 64 gated; section 21): Fury Cutter / Secret Power +2, Extrasensory +3, Super Fang -1 (undiagnosed). T1 0..99 ON missing-gated 95 -> **65**. T1 `extra` 109 =
-aud252's Double Team SE239 rows (emitted outside the timing table; T1 classifier gap, the T2 ROM rows match). Ice Ball five-turn drift follows the Rollout chain (hpd2 -8 per turn applied).
+at inner commas (L50 794 emitted, 64 gated; section 21): Fury Cutter / Secret Power +2, Extrasensory +3, Super Fang -1 (undiagnosed). T1 0..99 ON missing-gated 95 -> **65**.
 **aud242r (2026-11-17)** Heal Bell -4, Spike Cannon +9 (multi-hit class), Eruption +2, Moonlight -4, Curse (Ghost) +1 (L50 805 emitted, 53 gated; section 22). T1 0..99 ON missing-gated 65 -> **41**.
-**aud255 (2026-11-17, T2 on `57bb082ac`, 41 ROM seeds):** Scene OFF 0 missing / 0 extra in every family; Scene ON move-animation SE missing **76** (aud251: 206; Rock Throw 131 x15, Thunderbolt 118 x12,
-Absorb 179 x8, 214 / 186 / 140 / 221 / 228 x6 each), every other family 0 / 0, no engine-only rows.
-**t2cls / aud256 (2026-11-17, HEAD `ce04ab20e`):** ON missing **63**: Shock Wave 18, Seismic Toss 9 (+ damage branch), Torment 8, Cosmic Power 6, Soft-Boiled 2, Sweet Kiss 1 (table-gated);
-Wish heal 12, Future Sight hit 3, Focus Band 1 (general animations with no emitter branch in `emitGeneralAnimSounds`); seed 165 res17 3 (unidentified). Eruption's 13 were stale (eru1 / eru2).
-Open (census gated): Dynamic Punch 10 (SE-length bound, 50 % accuracy), Soft-Boiled 5 (`setarg` + affine loop; lab committed), Memento 4, Air Cutter 4, Torment 4, Cosmic Power 3, Fake Out 2, Recycle 2.
+**2026-11-18:** every missing / gated row of aud255 / t2cls / aud256 is closed (aud257-aud262, wsh1, adp1; T1 0..999 and T2 0 missing / 0 extra, #219). The per-move constant
+ROM-minus-ours offsets of each new window are in docs/aud242-move-anim-sounds.md sections 23-28 and docs/adp1-withdraw-rocksmash-beatup.md.
 
 ## #194 — Opponent RATTATA Quick Attack differs above the clip row (qak247, 2026-11-04)
 
