@@ -182,3 +182,45 @@ The two labs' 70 / 100 are therefore **two samples of one formula**, not two con
 Bag geometry sampled (for the pin test in §9 step 2): player target creation `x = 72, y = 101` (pic coords, = the player mon's pic), foe target `x = 176, y = 56`; the path then runs to x = 0 (-32 in `moveAlongLinearPath`) / 255 (272) with `y2` = -5, -9, -13, -17 .. at +1, +2, +3, +4 rows after creation (wobble `Sin`) on both sides; player bag parked at `x = 65507` (= -29) for the 51 tail rows (`y = 91`, `y2 = 0`), foe bag last row `x = 267, y = 51, y2 = -14`. The foe bag's final row 551 is the last active row; no sprite on row 552.
 
 Verification: measure-only doc, no code / test change. ROM runs: two direct mGBA probes (7.5 s each); raw per-frame dumps were kept in `/tmp/kno2/` (not committed). Tested identity: base `dfd57882b` (see the commit for this file).
+
+## kno3: Knock Off's item-knocked-off animation as a general-animation command (Scene ON bag sprite, Scene OFF Pausex20 hold)
+
+Base `8516a6da1`; commits `173bd72fd` (rows, fixtures, Tier-1 test, one re-pin) and `2e95de37b` (Scene ON bag renderer). Gameplay, RNG, damage, turn order and facility state are untouched: only presentation rows and one new draw.
+
+### What changed
+
+- `B_ANIM_ITEM_KNOCKOFF` (`BattleScript_KnockedOff`) is projected as a general-animation command (the wsh1 / adp1 shape) when Knock Off removes an item; the no-item case presents nothing new.
+- **Scene ON** command length = SE gate W + animation rows A + 3 (2 script rows + the print row's first row), i.e. the kno2 rule E -> print = W + A + 2. A = `ITEM_KNOCKOFF_ANIMATION_ROWS_OPPONENT_TARGET` 43 / `..._PLAYER_TARGET` 94; the gate is the existing `sgs134RequestSeGate` rule with `ITEM_KNOCKOFF_SE_FIXED_ROWS` 44 (clamp(73 - (44 + |from - to|), 0, 29): foe 25, player 4). Command frames: foe 71 (gate 25), player 101 (gate 4) (`itemKnockoffCommandFrames`).
+- **Scene OFF**: the 35-row Pausex20 hold before the print (`ITEM_KNOCKOFF_OFF_HOLD_FRAMES`), no general-animation command.
+- The HP-bar command after the hit is floor-free (`minimumFrames` 0, tail = kernel execution diff - 1 + `ITEM_KNOCKOFF_MOVEEND_BLOCKED_ROWS` 2; OFF: execution diff - 34 - 1): the ROM has 12 rows from the datahpupdate row to the playanimation row where the kernel has 6.
+- The knocked-off message holds `ITEM_KNOCKOFF_PRINT_TAIL_ROWS` 4 longer so MoveEnd / turn-end rows land on the ROM row.
+- **Bag sprite** (`src/animation/itemKnockoff.ts`, `itemKnockoffAtAge`; drawn in `battleScene.ts` with the existing `covetArt.itemBag` tileset / palette and `drawSpriteSheetAffineRotate`): created `ITEM_KNOCKOFF_BAG_CREATE_ROWS` 4 rows after the SE gate; created at the target's sprite coord (foe (176, 56), player (72, 101)); 40-row `moveAlongLinearPath` to x = 272 (foe, then destroyed) / -32 (player, then invisible for the Step2 tail); bounce `y2 = Sin(data0 + 128, 30 - 8 * bounces)` with `data0 += 6`; affine wobble `gFallingBagAffineAnimCmds1` (8 at row 1 .. 40 at row 9, 36 -> -40 rows 10..29, -36 -> 0 rows 30..39). The foe target's shadow hides while the bag is alive.
+
+### Compare (`npm run compare -- tools/compare/traces/out2-<x>.json --capture-range A:B --summary`, 256-frame windows; ROM traces committed under `tools/compare/traces/`, stages `out2-horndrill-*` / `out2-knockoff*` in `tools/compare/appTrace.ts`)
+
+| trace (window) | base 8516a6da1 | after 2e95de37b |
+| --- | --- | --- |
+| knockoff-on (480:735) | 32 / 256 | 145 / 256 |
+| knockoff-off (380:635) | 88 / 256 | 192 / 256 |
+| knockoffrev-on (160:415) | 0 / 256 | 132 / 256 |
+| knockoffrev-off (140:395) | 41 / 256 | 160 / 256 |
+| knockoffnoitem-on (300:555, control) | 136 / 256 | 136 / 256 |
+| knockoffnoitem-off (300:555, control) | 221 / 256 | 221 / 256 |
+
+Residuals (named, not fixed here):
+1. **Pre-existing hit-phase offset**, identical in the no-item control (so it is not Knock Off's rows): ON foe 4 rows / player 8, OFF foe 2 / player 4 -> 6. It shifts every later row of the window by that amount and is the main reason the ON windows do not reach the OFF match rates; it is the damage-hit segment, outside this step.
+2. The Scene ON windows still differ in the Knock Off hit effect's own sprites / background (compare against the control's 136), not in the bag.
+3. The 0x7FFF HP drop, script pauses, Flamethrower and sound-table extraction were out of scope.
+
+### Tests
+
+- `tests/kno3ItemKnockoff.test.ts` (Tier 1): constants pin `[43, 94, 3, 35, 44, 4]`; command frames per side (ON foe 71 / gate 25, player 101 / gate 4); no-item presents no command; OFF holds 35 rows on both sides, no general-animation; no-item OFF has no hold.
+- `tests/animation/itemKnockoff.test.ts` (adp1-style adapter): ROM-pinned `[age, x, y, y2]` rows for both sides, the 40-row life, affine angles.
+- Re-pin (evidence: same battle 7 turn 3, same end state, diagnostics unchanged): `tests/randomRoundSoak.test.ts` seed 21 frames 41_240 -> 41_376, renderCalls 2_914 -> 2_916 (the added Knock Off rows and one bag draw).
+
+### Census and gates
+
+- Census 0..99, both scenes, `eventsDigest` per seed: **identical to base `8516a6da1` for all 100 seeds in ON and OFF** (base census = the same census script run on a clean checkout of `8516a6da1`, not an older run). Command lists differ only on seeds 5, 68, 72, 85, 92 (the Knock Off rows); the only new command type in Scene ON is `general-animation`, no new static-field commands; no errors.
+- `npm run typecheck` exit 0; `npm run build` exit 0; `npm run build:lib` exit 0; `npm run test:gate` 362 files / 2844 tests green.
+- Tests importing the changed files (via the gate) plus `tests/lbrd.test.ts`, `tests/randomRoundSoak.test.ts` and every test grepping KNOCK_OFF / knockoff / Knock Off: 26 files / 1637 tests green.
+- `npm run soak -- --policy vanilla --seeds 0:20 --scene on`: 20 / 20 OK (600000f budget). Run as per-seed foreground runs (seeds 0..3 in one run, 4..19 as single-seed runs; ~115-180 s per seed) because the single command exceeds the 10-minute cap.
