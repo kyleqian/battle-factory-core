@@ -512,7 +512,9 @@ function refuseStagingThatPlayedATurn(setup: any) {
 
 // The battle RNG at the action menu (aud243c, parity-mac). `makeState(fresh)` builds the orchestrator with its fresh battle kernel seeded from `fresh`; the k
 // draws before the engine's menu and the j draws of the ROM opponent's pre-menu AI are found as described in `replay` below. Used for every battle of a round.
-function alignedPlay(makeState: (fresh: number) => any, setup: any, playerSeed: number) {
+// knownK (round replay): the k a full search chose for this battle on an earlier run of the same round (same inputs, deterministic engine). It is tried
+// alone first; only when it no longer qualifies does the full search run.
+function alignedPlay(makeState: (fresh: number) => any, setup: any, playerSeed: number, knownK: number | null = null) {
   const target = setup.snapshot.rngValue >>> 0;
   const turnNumber = setup.randomTurnNumber ?? (arg("turn-number") === undefined ? undefined : Number(arg("turn-number")));
   if (turnNumber === undefined) throw new Error("setup has no randomTurnNumber (re-run soundEventProbe --setup-out) and no --turn-number=N");
@@ -528,14 +530,22 @@ function alignedPlay(makeState: (fresh: number) => any, setup: any, playerSeed: 
     for (let at = 0; at + 4 <= values.length; at += 1) if (sim.every((v, i) => values[at + i] === v)) return true;
     return false;
   };
-  const candidates: { k: number; j: number; fresh: number; verified: boolean }[] = [];
-  for (let tryK = 0; tryK <= 48; tryK += 1) {
+  const tryOne = (tryK: number) => {
     let fresh = target; for (let i = 0; i < tryK; i += 1) fresh = lcgInverse(fresh);
     const probe = play(makeState(fresh), false, null, playerSeed);
-    if (probe.randomTurnNumber === turnNumber && probe.actionMenuRng !== null && behind.has(probe.actionMenuRng)) {
-      const draws = behind.get(probe.actionMenuRng)!;
-      candidates.push({ k: tryK, j: draws, fresh, verified: simVerified(probe.actionMenuRng, draws) });
-      if (candidates.at(-1)!.verified || sim === null) break;
+    if (probe.randomTurnNumber !== turnNumber || probe.actionMenuRng === null || !behind.has(probe.actionMenuRng)) return null;
+    const draws = behind.get(probe.actionMenuRng)!;
+    return { k: tryK, j: draws, fresh, verified: simVerified(probe.actionMenuRng, draws) };
+  };
+  const candidates: { k: number; j: number; fresh: number; verified: boolean }[] = [];
+  const known = knownK === null ? null : tryOne(knownK);
+  if (known !== null && (known.verified || sim === null)) candidates.push(known);
+  else {
+    for (let tryK = 0; tryK <= 48; tryK += 1) {
+      const c = tryOne(tryK);
+      if (c === null) continue;
+      candidates.push(c);
+      if (c.verified || sim === null) break;
     }
   }
   const chosen = candidates.find((c) => c.verified) ?? candidates[0];
@@ -772,6 +782,8 @@ function roundMode() {
   const swapName = (arg("swap") ?? process.env.ROM_REPLAY_SWAP ?? "never") as SwapPolicyName;
   if (!SWAP_POLICIES.includes(swapName)) throw new Error(`--swap / ROM_REPLAY_SWAP must be one of ${SWAP_POLICIES.join(", ")}`);
   const swapper = createSwapPolicy(swapName, seed);
+  // --known-k=K0,K1,...: the k each battle's alignment chose on an earlier run of this round (romRoundDriver.py passes them back); see alignedPlay.
+  const knownKs = (arg("known-k") ?? "").split(",");
   const battles: any[] = []; let terminal: any = null; let roundError: string | null = null;
   for (let n = 0; n < setups.length; n += 1) {
     const setup = setups[n];
@@ -785,7 +797,8 @@ function roundMode() {
         between = engineBetweenBattles(terminal, decision, setup, n);
         makeState = (fresh) => beginFactoryRoundBattleStartIntro(withRoundRng(between.state, fresh));
       }
-      const { attempt, chosen, candidates, target, turnNumber } = alignedPlay(makeState, setup, n === 0 ? seed : roundPlayerSeed(n));
+      const known = knownKs[n] === undefined || knownKs[n] === "" ? null : Number(knownKs[n]);
+      const { attempt, chosen, candidates, target, turnNumber } = alignedPlay(makeState, setup, n === 0 ? seed : roundPlayerSeed(n), known);
       const start = battleStartCheck(attempt, setup, n, between);
       const phase = attempt.state.round.rules.phase;
       const swapAfter = attempt.error === null && phase === "presentingBattleWin" ? (() => {

@@ -256,7 +256,7 @@ def drive_between(rom, swap, cap, progress, prompt_delay=0):
     return progress
 
 
-def run_engine(args, setup_paths, out_path):
+def run_engine(args, setup_paths, out_path, known_k=()):
     env = dict(os.environ, ROM_REPLAY_ROUND="1")
     if args["challenge"] is not None:
         env["ROM_REPLAY_CHALLENGE"] = str(args["challenge"])
@@ -265,6 +265,8 @@ def run_engine(args, setup_paths, out_path):
            f"--out={out_path}", "--events=1"]
     if args["frameBudget"]:
         cmd.append(f"--frame-budget={args['frameBudget']}")
+    if known_k:
+        cmd.append("--known-k=" + ",".join(str(k) for k in known_k))
     if out_path.exists():
         out_path.unlink()
     proc = subprocess.run(cmd, cwd=WORKSPACE, env=env, capture_output=True, text=True)
@@ -314,7 +316,7 @@ def main():
             path = work / f"setup-{n}.json"
             path.write_text(json.dumps(setup, separators=(",", ":")))
             setup_paths.append(path)
-            engine = run_engine(args, setup_paths, work / "engine.json")
+            engine = run_engine(args, setup_paths, work / "engine.json", [] if prior is None else [p["engineDrawsBeforeActionMenu"] for p in prior])
             battles = engine["battles"]
             if prior is not None:
                 for i, (a, b) in enumerate(zip(prior, battles)):
