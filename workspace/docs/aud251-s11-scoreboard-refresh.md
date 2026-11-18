@@ -869,3 +869,41 @@ Best movers aud263 -> now (mass): Rock Slide 3,058 -> 858 (-2,200, kno3), SE 148
 3. What is left, by mass: **unaudited bodies 26 %** (Leech Seed 1,771 is the top single body and a measured constant, -29 .. -38; Swagger's s6 window 1,276; Blizzard, Calm Mind, Toxic, Bulk Up), **status / general anims 21.5 %** (SE 152 / 228 / 102 group -2 and SE 142 -6.5, SE 148 -9.5 at 1,602), **controller / message rows 18 %**, **shape B 4.5 %** (Solar Beam unleash -62), shape C 2.6 %.
 4. Suggested order (measurement first; each moves frames, so census eventsDigest identity + soaks + the pin notes + the FULL suite): Leech Seed (a window per side: one constant, 1,771 mass), Solar Beam unleash length (shape B, hpd7b already measured), Swagger's s6 window (out1 B), then hpd7c-style bodies Blizzard / Calm Mind / Toxic / Bulk Up.
 5. Tooling: `tools/audio/t2Attribute.py ROMDIR OUT.json LABEL=ENGINEDIR ...` replays nothing; it scores engine dirs from `soundCensusRomReplay.ts replay` against one ROM dir, so a step bisect is 4 s per seed per commit (`git worktree` at each commit; an aud249Rescore-style loop). Reusable for any future step.
+
+## ctl1 (2026-11-18): controller / message sound rows (SE 13 / 12 / 16 / 15, cry) split into inherited vs the emitter's own offset (measurement only, no `src/` change)
+
+Tooling added: `soundCensusRomReplay.ts --cmdtrace=1` (adds `cmds` to the engine JSON: frame, segment, command index, type, battler, timing lead / bodyLead of every presented resolution command) and `tools/audio/t2Anchor.py ENGDIR OUT.json [seeds]` (matches the rows the way `soundSegmentDiff` does and adds, per row, the engine / ROM spacing to the neighbouring matched row and the engine command in progress). Engine = master `34563dbd0` (no `src/` change in this step), seeds 2 165 1028 2741 3738 5569 8108 648, Scene ON: **2,359 matched rows, 0 missing, 0 extra.**
+
+### 1. Scoreboard (engine minus ROM, frames from the segment start)
+
+| row | n | exact | median | p10 | p90 | sum abs |
+| --- | --- | --- | --- | --- | --- | --- |
+| SE 13 effective | 145 | 19 | -3 | -18 | 2 | 1,364 |
+| SE 12 not effective | 36 | 5 | -8 | -24 | 0 | 496 |
+| SE 16 faint | 36 | 3 | -4 | -22 | 24 | 484 |
+| SE 15 ball open | 38 | 2 | -11 | -23 | 0 | 504 |
+| cry | 73 | 4 | -8 | -24 | 14 | 960 |
+| all rows | 2,359 | 205 | -2 | -20 | 5 | 19,497 |
+
+### 2. Result of the split: the emitters' own offsets are exact; what is left is inherited
+
+Within a window the emitters' spacings to their anchors equal the ROM's: SE 15 -> cry 16 / 16, faint cry -> SE 16 66 / 66, SE 114 -> SE 15, and the lead-body SE 13 / 12 / 14 sit at 0 from the move-animation end. Every residual offset of these rows is the offset of the whole window at the anchor, i.e. the anchor command itself is early or late; **no emitter constant (`SCENE_ON_LAG`, `FAINT_SOUND_OFFSET`, `FAINT_CRY_BEFORE_SE`, `SWITCH_*_BALL_OPEN_*`) can be moved toward the ROM without moving another row of the same window away from it** (tried: the faint cry own offset against the hp end, which is about 9 early; shifting it only trades one row for the other). So no Tier-1 test or emitter change was made.
+
+### 3. Top inherited sources (rows x |offset|, 8 seeds)
+
+| # | source (command the row hangs from) | rows | sum abs | median | what it is |
+| --- | --- | --- | --- | --- | --- |
+| 1 | SE 13 after `hit-animation` | 132 | 1,308 | -2 | the move-body tails of the bodies still on the old lead-in-tail (hpd4 / hpd5 audited six) and the hp command's 28-frame floor (below); hit start itself is early by the body tail |
+| 2 | faint cry + SE 16 after `faint` | 36 + 36 | 484 + 484 | -4 | the hp end the faint command is chained on (about 9 early) plus the HP floor of the lethal hit; spacings inside are exact |
+| 3 | SE 12 after `hit-animation` | 32 | 431 | -7 | same bodies as 1; not-effective moves are the long-tail bodies |
+| 4 | SE 15 + cry after `switch-in` | 19 | 255 + 255 | -10 | forced-switch anchor artifact (below) |
+| 5 | SE 15 + cry after `sprite-visibility` / `trainer-slide` | 13 + 4 | 148 + 86 | -12 / -19 | species-dependent ball-open lag (0 / 3 / 7 in the ROM, the engine uses one `PARTY_SEND_OUT_BALL_OPEN_RELEASE_CLOCK = 143`) and the trainer-slide window |
+
+Findings behind the table:
+- **Forced-switch anchor artifact.** `romDecisionDriver.py:275` sets the ROM commit frame at the FIRST A in the party menu (`commitFrame = frame + 1`); the engine's commit is when the SEND OUT confirm closes `forcedSelector()`. That shifts the T2 segment start by 9-12 frames for forced-switch windows. Re-anchored on the ROM's own events the switch-in SE 15 / cry offset goes -12 -> -3. A harness anchor, not an engine timing error.
+- **HP 28-frame floor.** `HP_TIMING.minimumFrames = 28` (battleResolutionPresentation.ts) puts the engine's hit start -> hp end about +16 frames over the ROM on non-foe-hit shapes (n about 91 of the SE rows). docs/hpd1-hp-hold.md calls it a fit, not a ROM rule, but player-hit and shape-b hits keep it because removing it moved the off108 anchor -3 -> -14. Moving it is hp / window work, not a controller emitter change; left for a step that owns the HP command.
+- **Weather loop.** SE 13 of `BattleScript_DamagingWeatherLoop` is scheduled from the loop's hit start, which has no move body; a constant lag fits the window it sits in only.
+- **Ball-open lag by species** 0 / 3 / 7 (the Magby-calibrated 143 is the middle); the ROM value depends on the sprite / ball sequence, not a script constant.
+
+### 4. Open remainder
+The offset mass of these families is the offset of their anchor commands (move-body tails, HP floor, forced-switch anchor, ball-open species lag). Out of scope here (liv2 / sta5 own the bodies); the next lever is the HP command timing with the off108 anchor re-measured, then the per-species ball-open lag.

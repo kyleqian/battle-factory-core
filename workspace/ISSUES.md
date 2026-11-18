@@ -157,6 +157,8 @@ Disable (no window); hit splats 1-3 = 10 ticks (ROM-measured; the affine derivat
 **aud242q (2026-11-17)** Ice Ball, Fury Cutter, Secret Power (Factory BUILDING environment), Strength, Extrasensory, Super Fang, Rage; extractor fix: `RGB(r, g, b)` arguments were split
 at inner commas (L50 794 emitted, 64 gated; section 21): Fury Cutter / Secret Power +2, Extrasensory +3, Super Fang -1 (undiagnosed). T1 0..99 ON missing-gated 95 -> **65**.
 **aud242r (2026-11-17)** Heal Bell -4, Spike Cannon +9 (multi-hit class), Eruption +2, Moonlight -4, Curse (Ghost) +1 (L50 805 emitted, 53 gated; section 22). T1 0..99 ON missing-gated 65 -> **41**.
+**2026-11-18 (ctl1):** controller / cry rows (SE 13 / 12 / 16 / 15, cry; 8 seeds, 0 missing / 0 extra) are split into inherited vs own: the emitters' own offsets are exact; the offset is the anchor command's (move-body tails, hp 28-frame floor, forced-switch T2 anchor, species ball-open lag). docs/aud251-s11-scoreboard-refresh.md "ctl1". Open: HP command timing, per-species ball-open lag.
+
 **2026-11-18:** every missing / gated row of aud255 / t2cls / aud256 is closed (aud257-aud262, wsh1, adp1; T1 0..999 and T2 0 missing / 0 extra, #219). The per-move constant
 ROM-minus-ours offsets of each new window are in docs/aud242-move-anim-sounds.md sections 23-28 and docs/adp1-withdraw-rocksmash-beatup.md.
 
@@ -174,6 +176,7 @@ position / ellipse rows first (small sprite, corner row unusual?).
 (b) the second attack of a turn plays its low-HP SE 1 tick early; (c) after a red drain to 0 the faint sounds are 16 ticks late
 (our `hp` command's 28-tick floor; the ROM drains the last 8 px in 12). The same frames move pixels, so these are presentation
 timing residuals (finish plan item 6). A fix re-pins the deltas to 0.
+ctl1 (2026-11-18): the emitters' own offsets are exact (hit SE, faint cry -> SE 16 66 / 66); the residual of (a) / (c) is the hp command's 28-tick floor and the move-body tails, not a controller constant. Open: the hp floor (hpd1 off108 anchor).
 
 ## #196 — aud241a flow mismatches (2026-11-04)
 
@@ -181,6 +184,7 @@ timing residuals (finish plan item 6). A fix re-pins the deltas to 0.
 348 / 359 / 368 / 374 across labs (engine 359); a WEAK send-out cry gets its duck restore only for ONIX (cry length known);
 an opposing switch-in inside the forced-selector prefix gets no sound; a Baton Pass hidden-attacker recall is not
 distinguished from a plain recall. Unproven by ROM window: Brain 471, WEAK send-out cry, Scene ON voluntary / opponent mid-battle.
+ctl1 (2026-11-18): the ball-open -> cry 16 spacing is exact; the remaining send-out offset is the species-dependent ball-open lag (0 / 3 / 7 vs one calibrated 143) and the forced-switch T2 anchor (ROM commit = first A, engine = confirm). Open: per-species lag.
 
 ## #192 — Summary screen flow gaps vs the ROM: swap-summary residuals (aud240b 2026-11-03; (a) / (b) FIXED sum259 2026-11-09)
 
