@@ -166,10 +166,11 @@ export interface FactoryLobbyFreeRoamState {
    */
   readonly idleIdx: 1 | 3;
   /**
-   * lbw6: the facing the sprite still DRAWS on the tick a held direction change starts the next step (the OAM lags the object event by a
-   * frame, the RAM already shows the new anim); cleared by the next advance.
+   * lbw6: what the sprite DRAWS on the one tick a step starts, when it differs from the clock's pose. A held direction change at a step's
+   * end still draws the old facing (the OAM lags the object event by a frame); a step that cuts a bump short draws the new walk pose at
+   * once (and keeps it nine frames). Cleared by the next advance.
    */
-  readonly lagFacing?: LobbyDirection;
+  readonly draw?: { readonly facing: LobbyDirection; readonly phase?: number };
 }
 
 export function createFactoryLobbyFreeRoamState(): FactoryLobbyFreeRoamState {
@@ -196,6 +197,12 @@ function bumpWalkClock(state: FactoryLobbyFreeRoamState): number {
   const bumpIdx = (bumpStartIdx(state) + Math.floor(state.bumpElapsed / LOBBY_FREE_ROAM_BUMP_FRAMES)) % 4;
   const startIdx = bumpIdx === 3 ? 0 : bumpIdx === 1 ? 2 : bumpIdx;
   return (LOBBY_FREE_ROAM_POSE_FRAMES * startIdx + 4 * LOBBY_FREE_ROAM_POSE_FRAMES - 1) % (4 * LOBBY_FREE_ROAM_POSE_FRAMES);
+}
+
+/** The step that cuts a bump short: the walk clock of `bumpWalkClock`; the first frame still draws the bump's own facing and command index. */
+function bumpInterruptStep(started: FactoryLobbyFreeRoamState, bump: FactoryLobbyFreeRoamState): FactoryLobbyFreeRoamState {
+  const drawnIdx = (bumpStartIdx(bump) + Math.floor((bump.bumpElapsed - 1) / LOBBY_FREE_ROAM_BUMP_FRAMES)) % 4;
+  return Object.freeze({ ...started, animClock: bumpWalkClock(bump), draw: { facing: bump.facing, phase: drawnIdx } });
 }
 
 function bumpStartIdx(state: FactoryLobbyFreeRoamState): number {
@@ -263,7 +270,7 @@ export function advanceFactoryLobbyFreeRoam(
   prior: FactoryLobbyFreeRoamState,
   input: LobbyFreeRoamInput,
 ): FactoryLobbyFreeRoamState {
-  let state = prior.lagFacing === undefined ? prior : ({ ...prior, lagFacing: undefined } as FactoryLobbyFreeRoamState);
+  let state = prior.draw === undefined ? prior : ({ ...prior, draw: undefined } as FactoryLobbyFreeRoamState);
   // A single held direction; fixtures never press diagonals.
   const heldDir = input.heldDirs.values().next().value ?? null;
   const live = input.npcs?.live;
@@ -276,7 +283,7 @@ export function advanceFactoryLobbyFreeRoam(
     // is still MOVING, so there is no turn in place: the new direction's step (or bump) starts on that frame, at the GO anim's first pose.
     if (heldDir !== null && heldDir !== state.facing) {
       const started = startStep({ ...state, bumpElapsed: 0, facing: heldDir, heldDir, pendingDir: null }, heldDir, false, live);
-      return Object.freeze({ ...started, animClock: started.stepRemaining > 0 ? bumpWalkClock(state) : started.animClock });
+      return started.stepRemaining > 0 ? bumpInterruptStep(started, state) : started;
     }
     if (heldDir === state.facing) {
       const { dx, dy } = DIR_DELTA[heldDir];
@@ -284,7 +291,7 @@ export function advanceFactoryLobbyFreeRoam(
         // The walk starts at the GO anim command index the bump left (2, 3, 0, 1, ... advancing per 16-frame cycle) run through
         // SetStepAnimHandleAlternation (1 -> 2, 3 -> 0); the rendered pose lags it by one frame.
         const started = startStep({ ...state, bumpElapsed: 0, heldDir, pendingDir: null }, heldDir, false, live);
-        return Object.freeze({ ...started, animClock: bumpWalkClock(state) });
+        return bumpInterruptStep(started, state);
       }
     }
     // Border bump (act 25): the sprite freezes facing the blocked direction
@@ -365,7 +372,7 @@ export function advanceFactoryLobbyFreeRoam(
     // SetStepAnimHandleAlternation (event_object_movement.c:4582) only swaps the anim number and keeps the command index, so the walk
     // cycle runs on like a same-direction continuation.
     const changed = startStep({ ...arrived, facing: heldDir }, heldDir, false, live);
-    return heldDir === state.stepDir ? changed : Object.freeze({ ...changed, lagFacing: state.stepDir });
+    return heldDir === state.stepDir ? changed : Object.freeze({ ...changed, draw: { facing: state.stepDir } });
   }
   if (state.pendingDir !== null) {
     // The buffered press fires the turn/step now (frame two of the measured
@@ -540,8 +547,8 @@ export function lobbyFreeRoamPlayerFrame(state: FactoryLobbyFreeRoamState): numb
     }
   }
   if (state.stepRemaining > 0) {
-    const phase = Math.floor(state.animClock / LOBBY_FREE_ROAM_POSE_FRAMES) % 4;
-    switch (state.lagFacing ?? state.facing) {
+    const phase = state.draw?.phase ?? Math.floor(state.animClock / LOBBY_FREE_ROAM_POSE_FRAMES) % 4;
+    switch (state.draw?.facing ?? state.facing) {
       case "south": return phase === 0 ? 3 : phase === 2 ? 4 : 0;
       case "north": return phase === 0 ? 5 : phase === 2 ? 6 : 1;
       case "west": return phase === 0 ? 7 : phase === 2 ? 8 : 2;
@@ -561,5 +568,5 @@ export function lobbyFreeRoamPlayerFrameHFlipped(
   state: FactoryLobbyFreeRoamState,
 ): boolean {
   if (state.turnRemaining > 0) return state.turnTarget === "east";
-  return (state.lagFacing ?? state.facing) === "east";
+  return (state.draw?.facing ?? state.facing) === "east";
 }
