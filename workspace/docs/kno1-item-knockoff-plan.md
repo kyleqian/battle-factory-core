@@ -209,14 +209,14 @@ Base `8516a6da1`; commits `173bd72fd` (rows, fixtures, Tier-1 test, one re-pin) 
 
 Residuals (named, not fixed here):
 1. **Pre-existing hit-phase offset**, identical in the no-item control (so it is not Knock Off's rows): ON foe 4 rows / player 8, OFF foe 2 / player 4 -> 6. It shifts every later row of the window by that amount and is the main reason the ON windows do not reach the OFF match rates; it is the damage-hit segment, outside this step.
-2. The Scene ON windows still differ in the Knock Off hit effect's own sprites / background (compare against the control's 136), not in the bag.
+2. The Scene ON windows still do not match everywhere (knockoff-on 145 vs the control's 136); the remaining mismatching frames were not attributed beyond residual 1 (not investigated).
 3. The 0x7FFF HP drop, script pauses, Flamethrower and sound-table extraction were out of scope.
 
 ### Tests
 
 - `tests/kno3ItemKnockoff.test.ts` (Tier 1): constants pin `[43, 94, 3, 35, 44, 4]`; command frames per side (ON foe 71 / gate 25, player 101 / gate 4); no-item presents no command; OFF holds 35 rows on both sides, no general-animation; no-item OFF has no hold.
 - `tests/animation/itemKnockoff.test.ts` (adp1-style adapter): ROM-pinned `[age, x, y, y2]` rows for both sides, the 40-row life, affine angles.
-- Re-pin (evidence: same battle 7 turn 3, same end state, diagnostics unchanged): `tests/randomRoundSoak.test.ts` seed 21 frames 41_240 -> 41_376, renderCalls 2_914 -> 2_916 (the added Knock Off rows and one bag draw).
+- Re-pin (evidence: same battle 7 turn 3, same end state, diagnostics unchanged): `tests/randomRoundSoak.test.ts` seed 21 frames 41_240 -> 41_376, renderCalls 2_914 -> 2_916 (the longer Knock Off rows).
 
 ### Census and gates
 
