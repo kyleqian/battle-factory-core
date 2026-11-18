@@ -24,7 +24,8 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Gates (final engine `a7cf4dfdb`):** vanilla 0:20 OFF **20 / 20**, ON **20 / 20**; 0:60 default / winning / winning-swap **60 / 60** each; varied-RNG winning carry 0 / 14 / 28 + winning-swap
   carry 0 **100 / 100** each. Full suite on `6909b8d6c` (4 workers): **15,935 passed, 0 failed**; build / build:lib 0. `play:random --minutes 10 --scene both --lobby-new-challenge` on `6909b8d6c`: ON 36 battles / 16 swaps, OFF 69 / 22; **0 page / console errors, 0 overlays**. (A first full suite on `a7cf4dfdb` had 14 failures in 9
   files from hpd4 / hpd5: fixed test-side by hpd6; a revert of hpd4 / hpd5 was prepared as fallback and not needed.) Log backup not run (`rclone` not installed).
-- **Next:** frame alignment: audit more bodies for the script lead (hpd4 method; each moves frames: census identity + soaks + `randomRoundSoak` / `lbrd` re-pins, see their pin notes),
+- **Next:** frame alignment: land the script lead on the hpd7 rows (`docs/hpd1-hp-hold.md` "hpd7": 25 bodies measured, ranked by census; the lead is the effect script's instruction count, so
+  take it from the kernel's counter, not a table; Faint Attack / Sludge Bomb / Bite / Earthquake need `live` lengthened first) (hpd4 method; each moves frames: census identity + soaks + `randomRoundSoak` / `lbrd` re-pins, see their pin notes),
   Memento's 108-frame SE offset, Water Spout / Status_* second-play residuals (#219); #221 Lobby leftovers; #222. Luck-hunt summary + nightly replay at run start; prune census trees.
 
 ---
