@@ -115,3 +115,36 @@ Tier-1: `tests/lbw7ForfeitReturn.test.ts` (tail boundaries, black / room frames,
 Open remainder (named): `lbrb-bcancel / exit / levelb / levelexit / overwriteno / saveb / savedlgno` still differ in 15-105 frames each, all in the Lobby NPC region
 (bbox about 96,99-157,134, first diffs 5735-6135): the record-battle menu flows press A / B / DOWN in the free Lobby, and the app's NPC cursor leaves the ROM's after those
 inputs (the cursor is rebased only once, at 3233). Not measured further here. Forfeit ON: the Scene ON battle window (155-284) was never pixel-parity.
+
+## lbw8: the attendant release (ISSUES #221, the seven open lbrb-* traces)
+
+Matched frames, `npm run compare -- <trace> --summary`, before (master `7a4d86255`) -> after:
+
+| trace | before | after |
+| --- | --- | --- |
+| `lbrb-bcancel-off` | 179 / 256 (first diff 5735) | **256 / 256** |
+| `lbrb-exit-off` | 159 / 256 (5795) | **256 / 256** |
+| `lbrb-levelb-off` | 147 / 252 (5795) | **252 / 252** |
+| `lbrb-levelexit-off` | 239 / 256 (5895) | **256 / 256** |
+| `lbrb-overwriteno-off` | 209 / 224 (6135) | **224 / 224** |
+| `lbrb-saveb-off` | 187 / 252 (5935) | **252 / 252** |
+| `lbrb-savedlgno-off` | 211 / 256 (6037) | **256 / 256** |
+| `lbrb-saveno-off` (not on the open list) | 247 / 256 | **256 / 256** |
+
+Every other Lobby trace is equal (all full except `lbra-forfeit-on` 805 / 1050, the Scene ON battle window, unchanged): lbra-forfeit-off 1050, lbra-loss-off 2258, lbra-retire-off 1554, lbrb-happy-a..f / info1..3 (256 / 60),
+lbrd-won-attendant / no / yes 1416 / 141 / 201, lbre-prebattle-a..c 255, lbrf-gate-3779 / 3780 58, lbrf-won-record-typing 60, lbw4-woman-block 501, lbw5-* 270 / 255 / 797 / 747, lbw6-* 156 / 128 / 183,
+loss-terminal-decline-continuation 155, -record-cursor 80, -record-yes 133, loss-terminal-window 1943, retire-yes-lobby-freeroam 1482, win-terminal-window 3590.
+
+**Cause (one shared rule, ROM-measured; it was not the record-menu inputs and not a missed menu frame).** ROM dump (`lbw1-lobby-wander-rom.py`) vs engine dump (`lbw3-engine-npcs.ts` + `lbw3-engine-compare.py`) on each trace:
+the first mismatch is the woman's `data[3]` delay 33 (app) vs 32 (ROM) at the farewell release (5702 on bcancel, 5762 on exit / levelb, 5862 levelexit, 5902 saveb, 6002 savedlgno, 6102 overwriteno), 33 frames before the first pixel diff (the woman's first step).
+On all seven routes `sGlobalScriptContextStatus` goes 0 -> 2 (the attendant script's `releaseall`) at ROM frame f and the field NPCs already tick on that frame (delay 33 -> 32, cursor draws from f);
+the app's `done` tick (the box-closed tick, whose image is exact) is f + 1 and it kept the NPCs frozen through it, resuming at f + 2. So the app released the NPCs two ticks late, each wander draw shifted two
+steps down the stream (cursor offset up to 2 draws before the fix, 0 after), and the woman / fat man then walked on another schedule.
+
+**Fix (`src/engine/factoryLobbyAttendant.ts` `isFactoryLobbyAttendantNpcsReleased`, `core.ts` attendant branch).** The NPC step of an attendant tick is unfrozen when the conversation's new state is `closing` toward free roam with
+`closingTick >= boxCloseTick - 1` (the tick before `done` and the `done` tick itself); the walk to the draft keeps the lock. No gameplay RNG outside the Lobby NPC draws moved, no kernel event or battle outcome changed.
+Census 0..99, both scenes: `eventsDigest` identical vs `7a4d86255` (100 / 100 battles each, `rst197CensusDelta.py` bad 0). The Lobby NPC draws after a farewell are the only changed draws; they are now ROM-exact (cursor offset 0 and NPC state identical on every frame of all seven + saveno).
+
+Tier-1: `tests/lbw8AttendantRelease.test.ts` (lbrb-exit-off replay: woman delay 33, 33, 32, 31, 30 on 5760..5764, her step east at 5794 and the cursor 3937092037 there, all ROM values; the release boundary on the closing phase; red with the old `core.ts`).
+
+Open remainder: none for the lbrb-* flows. `lbra-forfeit-on` (Scene ON battle window 155-284) is still unmeasured parity.

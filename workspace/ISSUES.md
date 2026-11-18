@@ -20,8 +20,7 @@ exclusions are superseded. Unrelated expansions stay parked.
   - **Harness:** lbw7 (2026-11-18): every lbra / lbrb / retire trace now carries its `appRngRebase`, and `appStage.opponentTrainerId` names the lab's trainer for the post-battle room
     (`docs/lbra-lobby-return.md` "lbw7"). lbra-forfeit-off, lbra-retire-off, retire-yes-lobby-freeroam-off are exact.
   - **Unproven in the wander port:** retire-after-won / injected / attendant-return entries (shared rule). lbw5 / lbw6 (2026-11-16 / 18) proved every player <-> NPC case and the in-flight
-    held direction change, turn-then-turn and the 9-frame tap on the ROM (`lbw5-*-off`, `lbw6-*-off`). Open Lobby residuals: `lbrb-bcancel / exit / levelb / levelexit / overwriteno / saveb /
-    savedlgno` 15-105 frames each in the NPC region after the record-menu inputs (the app cursor leaves the ROM's; rebased once at 3233); `lbra-forfeit-on` Scene ON battle window (155-284).
+    held direction change, turn-then-turn and the 9-frame tap on the ROM (`lbw5-*-off`, `lbw6-*-off`). Open Lobby residuals: lbw8 (2026-11-18) made `lbrb-bcancel / exit / levelb / levelexit / overwriteno / saveb / savedlgno` exact (the attendant release one tick earlier, `docs/lbra-lobby-return.md` "lbw8"); left: `lbra-forfeit-on` Scene ON battle window (155-284).
     The retire save wait (+6 ticks vs a loss) is a measured constant, its flash-write cause is not proven from source.
   - **Unmeasured:** the won route's real battle exit (reuses the loss rule), the non-terminal win's PreBattleRoom entry, a full
     boot -> draft -> battle -> forfeit route.
