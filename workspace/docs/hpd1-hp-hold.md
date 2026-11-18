@@ -534,3 +534,69 @@ An earlier draft compared against the aud259 master chain; its 12 missing rows (
 ### Not landed / open (hpd8)
 
 - Shape B / C bodies (Flamethrower, Solar Beam unleash, Hyper Beam family, ...) per hpd7 / hpd7b / hpd7c; Giga Drain's drain-message hold (-12) and Ancient Power's residual (the totals above); Scene OFF timing; the Dig charge turn.
+
+## liv2: shape-A lead + tail for seven `live`-window bodies (landed)
+
+Lane: integration, Scene ON (:8012) ROM frames, base `2a4fef0b1`, tested code commit `1d4bbc28d`. Presentation timing only: kernel events, RNG and damage are unchanged. Evidence (ignored): `.integration/evidence/liv2/` (`ram/` the `hpd2Probe.py` timelines of the 7 labs, `an.py` the window analysis, `base/` + `fin/` frames and match counts, `warp2.mjs` best-offset scan, `census/` + `census-delta-*.txt`, `t2base/` + `t2new/` + `score-*.txt`, `soak/`, `*.log` test chunks).
+
+### ROM windows (lab = Lv50 vs Lv12 Rattata, `tools/integration/liv2Labs.py`, `tools/battle-lab/liv2-*-player-on.json`, 7 `appTrace.ts` stages)
+
+R = end of the last exec run before `attackanimation`, lead = exec - R, len = `gAnimScriptActive` rows, gap = rows from the window end to the hit controller, R -> H = release-to-hit span.
+
+| move | lead | len | gap | R -> H | landed (idle + live) | app span after |
+|---|---|---|---|---|---|---|
+| Flamethrower 53 | 5 | 209 | 4 | 221 | 18 + 192 = 210, tail 6 | 221 |
+| Solar Beam unleash 76 | 5 | 237 | 4 | 249 | 39 + 199 = 238, tail 3 | 249 |
+| Self-Destruct 120 | 3 | 126 | **10** | 142 | 4 + 123 = 127, tail 9 (leadless) | hit on the ROM row (200) |
+| Bite 44 | 5 | 40 | 4 | 52 | 10 + 31 = 41, tail 3 | 52 |
+| Sludge Bomb 188 | 5 | 168 | 4 | 180 | 4 + 165 = 169, tail 3 | 180 |
+| Earthquake 89 | **11** | 207 | 4 | 225 | 0 + 208 = 208, tail 3 | 225 |
+| Faint Attack 185 | 5 | 225 | 4 | 237 | 0 + 226 (player) / 227 (opponent, restore lag) = len + 1, tail 6 | 237 |
+
+Each landed window is `live + idle = len + 1` and the whole body is lead + pre + (len + 1) + tail = R -> H (pre 3 / 3 / 3 / 3 / 3 / 3 / 0, post 0, so T = 6 - pre - post = 3 / 3 / 3 / 3 / 3 / 3 / 6; the 9-row Self-Destruct tail is its measured gap 10 less the one hit row).
+
+### What landed
+
+- **Set**: `HPD8_SHAPE_A_MOVE_IDS` gains 53, 76 (unleash turn only: `(request.turn & 1) === 1`), 44, 188, 89, 185. The lead is counter-derived (hpd3 rule, unchanged code): 5 for the EffectHit family, **11 for Earthquake** (no table entry). The `hpd8` tail formula `6 - pre - post` reproduces every row above.
+- **Solar Beam unleash head**: the 39 head rows (the ROM's SetSolarBeamBg FadeToBg, BLDY 0 -> 16 -> 0) are idle age-0 rows (`SOLAR_BEAM_UNLEASH_IDLE_ROWS`); the reducer does not model the fade (bldy stays 0), so the fade picture is a residual, the timing is exact. Constants: `SOLAR_BEAM_UNLEASH_LIVE_ROWS` 199 (was 160).
+- **Self-Destruct** has no derived body lead (its `hp` command carries the lead), so it is NOT in the shape-A set: `LIVE_MOVE_LEADLESS_TAIL_ROWS` (`[120, 9]`) gives the leadless 9-row tail and the age hold.
+- **Faint Attack**: the window opens at the ROM's `anim` rise (A) with live = len + 1 and no idle rows; the pre rows stay 0 (`LIVE_MOVE_NO_PRE_ROW_SIDES` 185 = 3). Best-offset scan of the whole body: one near-constant ROM offset (8..9 rows, 0 px), i.e. the body is not shifted.
+- **Rule used: per-move constants, not the `Cmd_end` IsSEPlaying rule.** `seExact` song lengths (Solar Beam 194, Faint Attack 32, Bite 19, Self-Destruct 50, Flamethrower ~192..194) explain the length of the SE-bound tails only qualitatively and PATT songs (Earthquake) are refused, so the measured len + 1 is used for all seven. A general rule is not derived here.
+- Doll framing (`LIVE_SUBSTITUTE_SWAP_BODY_FRAMING`): the framed adapter figures become 89: 208, 188: 165, 44: 31, 53: 192 (ROM rows 208 / 169 / 41 / 210 are unchanged and now equal idle + adapter exactly, shift unchanged). Scene OFF is unchanged.
+
+### Compare (`hpd1AppOnly.ts` app render vs the stored base ROM frames, exact RGB md5, 1023 frames; Solar Beam lab 1423)
+
+| lab | before | after |
+|---|---|---|
+| Flamethrower 53 | 495 | 448 |
+| Solar Beam 76 | 244 | **301** |
+| Self-Destruct 120 | 602 | 440 |
+| Bite 44 | 353 | **586** |
+| Sludge Bomb 188 | 293 | **490** |
+| Earthquake 89 | 280 | **667** |
+| Faint Attack 185 | 363 | **631** |
+
+`hpd1-dragonrage-on` 950 -> 950 and `rol1-rollout5-on` 2028 / 3001 -> 2028 / 3001 (`npm run compare -- <trace> --summary`; neither move is in the set).
+**Flamethrower and Self-Destruct totals drop although the timing now matches the ROM**: Flamethrower's body is aligned at a constant +4 offset and Self-Destruct's hit lands on the ROM's H row (app 200 = ROM 200); the frames lost are static / periodic post-hit frames (text-cursor blink period 10) that matched the old timing by chance (the hpd8 Giga Drain / Ancient Power precedent). Self-Destruct's post-hit app timeline is ~6 rows longer than the ROM's (hp + faint 143 vs 137), pre-existing and not isolated here.
+
+### Pins (every re-pin moves toward the ROM)
+
+- `liveOrderConsumerMoveAdapters` 53: 115 -> 192; `liveAnchor4` Earthquake 198 -> 208; `liveAnchor` Sludge Bomb 160 -> 165; `liveBasic` Bite 26 -> 31; `livePrep6` Self-Destruct 113 -> 123 and Faint Attack 220 / 221 -> 226 / 227; `liveFa185Timing` / `liveFaintAttackSides` the same (the retained fixture-window receipts stay 220 / 221 rows: they pin the reducer, not the live window); `liveSelectorsMoveAdapters` unleash 160 -> 199; `iu120UniversalRows` Bite 39 -> 44 and the shp116 composition (52 rows: 9 pre / lead + 10 age 0 + ages 1..30 + 3 tail); `shp116ShadowLeadRow0` Bite P + 36 -> P + 44, Sludge Bomb pre rows 1 + P -> 1 + P + 5; `substituteDollDefenderLive` Earthquake 198 -> 208 (+ lead 11 + tail 3); `substituteSwapAttdollCells` framed adapter figures (above); `apx215SubstituteDollApproximate` Solar Beam seed 587 241 -> 285; `land97IdleLeadRows` 40 -> 41 lead ids (+ Flamethrower 18); `iu120UniversalRows` Flamethrower is the one LAND97 no-pre side.
+- Helpers: `tests/helpers/iu120Rows.ts` (`HPD8_SHAPE_A_IDS` + 53 76 44 188 89 185, Earthquake lead 11, Solar Beam unleash lead passed explicitly, `LIVE_MOVE_LEADLESS_TAIL_ROWS`).
+- **No sound re-pin**: every aud242* / aud248 / aud262 / tick / hie / cry fixture passed unchanged (ROM-minus-ours before = after for every pinned sound); `lbrd` and `randomRoundSoak` needed no re-pin.
+
+### Census 0..99 (`lsd194Census.sh`, `LSD194_CENSUS_JOBS=3 LSD194_SPLIT=4 LSD194_SHARDS=0`, arms = `git archive` of `2a4fef0b1` and of `1d4bbc28d`, `rst197CensusDelta.py`)
+
+Scene ON: 100 battles / 31,507 commands, **0 bad** (eventsDigest, error and the type sequence equal in all 100); 65 battles changed, **259 move-animation commands** changed, fields 16 / 18 only (the lead and the minimum frames; no static-field command), +6,749 frames: Faint Attack +17 (lead 5 + 6 + tail 6), Bite / Sludge Bomb +13, Earthquake +24 (11 + 10 + 3), Solar Beam +86, Flamethrower +106. Scene OFF: 100 / 100 identical.
+
+### T2, Scene ON (`aud248RunSeed.sh` seeds 2 165 1028 2741 3738 5569 8108, 2 at a time, `nice -n 10`; `soundScoreboard.py`; base = a detached worktree of `2a4fef0b1` running the same chain)
+
+Missing **0** / extra **0** on every family, before and after; exact / offset rows unchanged (move-animation SE 149 / 1635, stat-change 6 / 34, cry 3 / 63, battle-controller 29 / 261, bgm 0 / 4); the ROM drive frames per seed are identical (18904 / 17322 / 15442 / 14708 / 42837 / 11906 / 39841). Matched-delta median / p10 / p90 (engine - ROM, frames), base -> after: move-animation SE -2 / -20 / 5 -> -2 / -16 / 5 (n 1784); battle-controller -5 / -24 / 2 -> -4 / -22 / 3; stat-change -2 / -16 / 4 -> -2 / -14 / 4; cry -9 / -27 / 13 -> -9 / -22 / 13; bgm 5 / -71 / 18 unchanged.
+
+### Gates (tested code commit `1d4bbc28d`)
+
+`npm run typecheck` 0; every test importing `liveMoveAnimation` / `battleResolutionPresentation*` / `moveAnimSounds` / `tickSounds`, every test naming the seven moves (by name and id), the hpd6 list, `lbrd` and `randomRoundSoak` = a 646-file union (553 + 93), all passing after the pin updates above; vanilla Scene ON soak 0:20 **20 / 20 OK** (4 ranges of 5 seeds; the last seed of each range re-run alone after the tool window). The full `npm test` was not run.
+
+### Not landed / open (liv2)
+
+- A general `Cmd_end` IsSEPlaying rule (per-move constants are landed); Solar Beam's unleash FadeToBg picture (timing exact, bldy unmodeled); Self-Destruct's post-hit hp + faint timeline (+6 vs the ROM); the Faint Attack opponent / lag side (+1) is not re-measured (the lab is player-on); shape C bodies, multi-hit second hits, Scene OFF timing.
