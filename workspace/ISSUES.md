@@ -57,9 +57,11 @@ exclusions are superseded. Unrelated expansions stay parked.
 - **Frame alignment:** T2 Scene ON matches 3,683 of 3,991 move rows with a constant per-window offset (p10 -21, median -2, p90 +5); controller / cry / BGM rows likewise
   (bgm -71, cry -28 at the tails). The hpd4 / hpd5 script lead removed the drift on six audited bodies (docs/hpd1-hp-hold.md); the other bodies keep the old lead-in-tail.
 - **Coverage:** T2 is 41 of 1000 seeds; controller / cry / BGM have no T1 rule table (counts only); fanfare / screen SEs have no T2 instance.
-- **Per-move:** Memento SEs 108 frames off the ROM with equal gaps (presentation), Water Spout +11 / +7 / +7 / +2 by HP quarter, Beat Up hit-to-hit 132 vs ROM 193 frames
-  (multi-hit message timing; unreachable in Factory Lv 50), Wish heal's star hand-over frame (1 per side), the first `Status_*` play +7 / +8 (sta3 fixed the second play; `STATUS_ANIMATION_SCRIPT_AGE` 7
-  vs the source -1 compensates the move body running 8 / 16 rows early: the script-lead audit, hpd7), Solar Beam's unleash body 160 vs ROM 237 rows (hpd7b), `Status_Freeze` SE 242 +1 unmeasured, Roar / Howl cry windows inherit a lab drift.
+- **Per-move:** Memento SEs 108 frames off the ROM: **cause found (mem1, docs/aud242-move-anim-sounds.md section 29)**: `trymemento`'s `INSTANT_HP_BAR_DROP` (0x7FFF,
+  battle_script_commands.c:9086) is presented as an ordinary 106-row `hp` drain (`battleResolutionPresentation.ts:4953-4966`, render `:1798-1810`) where the ROM empties the bar at once (also
+  visible: the healthbox drains); Explosion / Self-Destruct likely share the 0x7FFF path (unmeasured). The first `Status_*` play: sta4 (docs/aud249 "sta4") splits it into the body lead,
+  pre-print rows and 6 message-to-launch rows (`STATUS_ANIMATION_SCRIPT_AGE` -> 0 once the bodies get the lead), Water Spout +11 / +7 / +7 / +2 by HP quarter, Beat Up hit-to-hit 132 vs ROM 193 frames
+  (multi-hit message timing; unreachable in Factory Lv 50), Wish heal's star hand-over frame (1 per side), the first `Status_*` play +7 / +8 (sta3 fixed the second play; see sta4 above), Solar Beam's unleash body 160 vs ROM 237 rows (hpd7b), `Status_Freeze` SE 242 +1 unmeasured, Roar / Howl cry windows inherit a lab drift.
 - Scene ON seeds 6568 / 7682 stall at the 80,000-frame ROM drive cap (T2 cannot align them); census seeds 796 / 995 end at the frame budget in both scenes.
 
 ## #222 — AI switch withdraw presentation: residuals (ais1 / ais2 / ais3, 2026-11-17)
