@@ -10,6 +10,18 @@ from pathlib import Path
 
 d = Path(sys.argv[1])
 rows = []
+
+
+def end_of(d, rid, dr, bs):
+    """How the last round of the run ended on the ROM (the battle number is the round's own, from the last setup)."""
+    if dr.get("error"):
+        return "error"
+    if not bs:
+        return "stopped"
+    last = json.loads((d / f"{rid}.d" / f"setup-{len(bs) - 1}.json").read_text())["round"]["battleNum"]
+    out = bs[-1]["romOutcome"]
+    return ("won" if out == 1 and last == 6 else "lost" if out == 2 else "drew (ends the round)" if out == 3 else "stopped")
+
 for line in (d / "done.txt").read_text().splitlines():
     rid, rc = line.split(" rc=")
     row = {"id": rid, "rc": int(rc)}
@@ -18,9 +30,9 @@ for line in (d / "done.txt").read_text().splitlines():
         c = json.loads(cmp_path.read_text())
         dr = json.loads(drive_path.read_text())
         bs = c["battles"]
-        row.update({"match": c["match"], "battles": len(bs), "romError": c.get("romError"), "roundError": c.get("roundError"),
-                    "end": ("error" if dr.get("error") else "won" if len(bs) == 7 and bs[-1]["romOutcome"] == 1 else "lost" if bs and bs[-1]["romOutcome"] == 2
-                                else "drew (ends the round)" if bs and bs[-1]["romOutcome"] == 3 else "stopped"),
+        row.update({"match": c["match"], "matchExceptKnown": c.get("matchExceptKnown", c["match"]), "battles": len(bs), "romError": c.get("romError"), "roundError": c.get("roundError"),
+                    "knownDifferences": sum(1 for b in bs if b.get("knownDifference")),
+                    "end": end_of(d, rid, dr, bs),
                     "swaps": sum(1 for b in bs if (b.get("swapAfter") or {}).get("type") == "accept")})
         first = next((b for b in bs if not b["match"]), None)
         if first is not None:
@@ -33,15 +45,17 @@ print(f"rounds {len(rows)}; rc {dict(Counter(r['rc'] for r in rows))}")
 print(f"ends {dict(Counter(r.get('end') for r in rows))}")
 print(f"match {sum(1 for r in rows if r.get('match'))}; battles driven {sum(r.get('battles', 0) for r in rows)}; deepest {Counter(r.get('battles', 0) for r in rows)}")
 print(f"rounds with a swap {sum(1 for r in rows if r.get('swaps'))}; swaps {sum(r.get('swaps', 0) for r in rows)}")
+print(f"match except the known first-trainer order of a chained round (fix 47, unfixed): {sum(1 for r in rows if r.get('matchExceptKnown'))}; "
+      f"battles with it: {sum(r.get('knownDifferences', 0) for r in rows)}")
 for r in rows:
-    if not r.get("match"):
+    if not r.get("matchExceptKnown"):
         print(json.dumps({k: r.get(k) for k in ("id", "rc", "battles", "end", "romError", "roundError", "first")})[:900])
 if "--json" in sys.argv:
     Path(sys.argv[sys.argv.index("--json") + 1]).write_text(json.dumps(rows, indent=1))
 
 cov = defaultdict(int)
 for r in rows:
-    if not r.get("match"):
+    if not r.get("matchExceptKnown"):
         continue
     dr = json.loads((d / f"{r['id']}.drive.json").read_text())
     for n, b in enumerate(dr["battles"][:-1]):
@@ -53,8 +67,13 @@ for r in rows:
         rr = start["round"]
         swap = (b.get("between") or {}).get("swap", {}).get("decision") or {}
         swapped = swap.get("type") == "accept"
+        if (b.get("between") or {}).get("newRound"):
+            prev = json.loads((d / f"{r['id']}.d" / f"setup-{n}.json").read_text())["round"]
+            cov["new rounds played by the ROM (Lobby, draft, first trainer)"] += 1
+            cov["new rounds after a " + ("won" if b["drive"]["outcome"] == 1 and prev["battleNum"] == 6 else "lost") + " round"] += 1
+            continue
         cov["battle starts after a won battle"] += 1
-        cov[f"battle {n + 2} starts"] += 1
+        cov[f"battle {rr['battleNum'] + 1} starts"] += 1
         if swapped:
             cov["swaps (the beaten trainer's Pokemon comes in fainted, the next start must show it healed)"] += 1
             q = swap["opponentPartyIndex"]

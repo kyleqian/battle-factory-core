@@ -29,6 +29,8 @@ import {
 import { adoptFactoryOpponentSchedule } from "../../src/engine/factoryOpponentGeneration.ts";
 import { adoptFactoryBrainOpponentSchedule } from "../../src/engine/factoryBrainOpponentGeneration.ts";
 import { getFactoryFrontierBrainStatus } from "../../src/engine/frontierBrainStatus.ts";
+import { advanceFactoryCarry, carryForNewChallengeAfterLobby, type FactoryCarry } from "../../src/engine/factoryRoundChaining.ts";
+import { generateFactoryOpponent } from "../../src/engine/factoryOpponentGeneration.ts";
 import { getLevel50FactoryRentalRange } from "../../src/engine/factoryRentalGeneration.ts";
 import { battlerMoveSelectionIsForced } from "../../src/engine/factoryBattleScriptFullTurnDecision.ts";
 import { createFactoryCorpusPartyMember } from "../../src/engine/factoryCorpusParty.ts";
@@ -693,6 +695,96 @@ function engineBetweenBattles(state: any, decision: any, setup: any, battleIndex
   }
   return { state: s, report };
 }
+// The draft rule of the round replay's player: the first three of the six rentals that the select screen lets a player take together (no species
+// twice, Select_AreSpeciesValid, battle_factory_screen.c:2256-2276), in draft order. romRoundDriver.py picks the same positions on the ROM.
+function firstSelectablePositions(setIds: readonly number[]): number[] {
+  const speciesOfSet = (setId: number): string => (frontierMonsData as any).entries[setId].species;
+  const picked: number[] = [];
+  setIds.forEach((id, i) => { if (picked.length < 3 && !picked.some((j) => speciesOfSet(setIds[j]!) === speciesOfSet(id))) picked.push(i); });
+  if (picked.length !== 3) throw new Error(`no three selectable rentals in ${setIds.join(",")}`);
+  return picked;
+}
+// The first battle of a chained round. In the source the fresh-draft entry rolls the six rentals (factory_generaterentalmons) and the first trainer and
+// his three sets (factory_generateopponentmons) in one script run (BattleFactoryPreBattleRoom scripts.inc:30-31); the rentals' personalities are made
+// later, when the select screen opens (Select_InitMonsData), and the trainer's at the battle's start. The engine's production round construction
+// (createFactoryRoundBattleOrchestrator with generateInitial, as the site's game builds a chained round, core.ts) is run from each cursor of the ROM
+// frame that rolled them, with the carried counters; it must give the ROM's six rentals, trainer and sets. The battle is then played from the engine's
+// own records (set, fixed IV) with the ROM's personality cursors, as battle 1 of a single replay adopts them.
+function engineNewRound(previous: any, carry: FactoryCarry, setup: any, n: number) {
+  const rr = setup.round; const gen = rr.generation;
+  if (!gen || !Array.isArray(gen.rentalMonsAfter)) throw new Error(`battle ${n}: the new round's setup has no draft roll record`);
+  const romDraft = (gen.rentalMonsAfter as number[]).slice(0, 6);
+  const romSetIds = (rr.frontierTempParty as number[]).slice(0, 3);
+  const selected = firstSelectablePositions(romDraft);
+  const config = (rngValue: number) => ({
+    id: `rom-round-${seed}-${n}`, rngValue, battleScene: scene, factoryWinStreak: carry.factoryWinStreak, playerTrainerId: carry.playerTrainerId,
+    battleTowerLevel50WinStreak: previous.config.battleTowerLevel50WinStreak, factorySymbolsCount: carry.factorySymbolsCount,
+    facilityState: { rentsCount: carry.rentsCount },
+  });
+  const report: any = { battleIndex: n, newRound: true, carry, rom: { draft: romDraft, trainerId: rr.trainerId, setIds: romSetIds, generation: gen }, selected };
+  let found: any = null; let draftOnly: any = null; const tried: unknown[] = [];
+  for (let j = 0, cursor = gen.rngBefore >>> 0; j <= gen.draws && found === null; j += 1, cursor = advanceRngValue(cursor)) {
+    const built = createFactoryRoundBattleOrchestrator({ ...config(cursor), rentals: { type: "generateInitial", selectedRentalIndexes: selected as [number, number, number] } });
+    const draft = built.initialRentalGeneration!.rentals.map((r: any) => r.setId);
+    const first = built.opponentGenerations[0]!;
+    const setIds = (first.generation.opponents as any[]).map((o) => o.setId);
+    if (tried.length < 3) tried.push({ offset: j, draft, trainerId: first.trainerId, setIds });
+    if (draft.join() !== romDraft.join()) continue;
+    if (draftOnly === null) {
+      // The draft fits at this cursor. Where would the trainer roll fit: right after the rentals' set selection (the source's order), or after
+      // the engine's own personality draws for the six rentals (initialRentalGeneration.rngValue, what the round construction uses)?
+      const g = built.initialRentalGeneration!;
+      const at = (rngValue: number) => generateFactoryOpponent({ rngValue, factoryWinStreak: carry.factoryWinStreak, battleIndex: 0, storedTrainerIds: [],
+        savedRentalSetIds: draft, playerTrainerId: carry.playerTrainerId, battleTowerLevel50WinStreak: previous.config.battleTowerLevel50WinStreak });
+      const afterSelection = at(g.selectionRngValue); const afterConstruction = at(g.rngValue);
+      draftOnly = { offset: j, rentalDraws: g.drawLedger.length,
+        trainerAfterSelection: { trainerId: afterSelection.trainerId, setIds: afterSelection.opponents.map((o) => o.setId) },
+        trainerAfterConstruction: { trainerId: afterConstruction.trainerId, setIds: afterConstruction.opponents.map((o) => o.setId) } };
+    }
+    if (first.trainerId === rr.trainerId && setIds.join() === romSetIds.join()) found = { offset: j, built, first };
+  }
+  report.selection = found !== null
+    ? { matched: true, offset: found.offset, romFrameDraws: gen.draws }
+    : { matched: false, romFrameDraws: gen.draws, draftFits: draftOnly, engineFirstOffsets: tried };
+  // The battle: the engine's draft records when its draft fits (else the ROM's sets with the engine's IVs), the ROM's personalities.
+  const base = found?.built ?? (draftOnly !== null
+    ? createFactoryRoundBattleOrchestrator({ ...config(advanceRngValue(gen.rngBefore >>> 0)), rentals: { type: "generateInitial", selectedRentalIndexes: selected as [number, number, number] } })
+    : null);
+  const player = setup.snapshot.parties.player as any[]; const opponent = setup.snapshot.parties.opponent as any[];
+  let draftRecords: any[];
+  if (base !== null && base.initialRentalGeneration!.rentals.map((r: any) => r.setId).join() === romDraft.join()) draftRecords = [...base.initialRentalGeneration!.rentals];
+  else {
+    // No cursor of the frame gives the ROM's draft: play the ROM's draft, each record with the ROM's fixed IV, so the battle can still be compared.
+    draftRecords = romDraft.map((setId, i) => {
+      const k = selected.indexOf(i);
+      return { setId, personality: 0, fixedIv: k >= 0 ? player[k].ivs.attack : player[0].ivs.attack, abilitySlot: 0 as const, otId: carry.playerTrainerId };
+    });
+  }
+  // CreateBoxMon's ability slot comes from the personality (personality & 1, a one-ability species keeps slot 0): the ROM's personality, the engine's rule.
+  const withPersonality = (r: any, mon: any) => { const p = mon.personality >>> 0; const rec = { ...r, personality: p, abilitySlot: (p & 1) as 0 | 1 }; return Object.freeze({ ...rec, abilitySlot: createFactoryCorpusPartyMember(rec).abilitySlot }); };
+  const playerRecords = selected.map((pos, k) => withPersonality(draftRecords[pos], player[k]));
+  const savedRentalRecords = draftRecords.map((r, i) => (selected.includes(i) ? playerRecords[selected.indexOf(i)] : Object.freeze({ ...r })));
+  const ledger = found !== null ? (found.first.generation.drawLedger as any[]).filter((e) => e.phase === "trainer-selection" || e.phase === "set-selection") : (() => {
+    let rng = 0x1234_5678; const rows: any[] = []; const draw = (extra: object) => {
+      const rngBefore = rng; rng = advanceRngValue(rng);
+      rows.push({ position: rows.length, rngBefore, rngAfter: rng, randomU16: rng >>> 16, battleIndex: 0, ...extra });
+    };
+    draw({ phase: "trainer-selection", purpose: "trainer-candidate", attempt: 1, trainerId: rr.trainerId, trainerOutcome: "accepted" });
+    romSetIds.forEach((id, opponentIndex) => draw({ phase: "set-selection", purpose: "set-candidate", opponentIndex, candidateSetId: id, selectionOutcome: "accepted" }));
+    return rows;
+  })();
+  const generation = adoptFactoryOpponentSchedule({
+    factoryWinStreak: carry.factoryWinStreak, battleIndex: 0, storedTrainerIds: [], savedRentalSetIds: draftRecords.map((r) => r.setId),
+    playerTrainerId: carry.playerTrainerId, battleTowerLevel50WinStreak: previous.config.battleTowerLevel50WinStreak,
+    trainerId: found !== null ? found.first.trainerId : rr.trainerId, setIds: (found !== null ? found.first.generation.opponents.map((o: any) => o.setId) : romSetIds) as [number, number, number],
+    selectionDrawLedger: ledger, constructionRngValues: opponent.slice(0, 3).map((m) => constructionCursor(m.personality >>> 0)) as [number, number, number],
+  });
+  const makeState = (fresh: number) => beginFactoryRoundBattleStartIntro(createFactoryRoundBattleOrchestrator({
+    ...config(0), rentals: { type: "currentRecords", playerRentalRecords: playerRecords as any, savedRentalRecords: savedRentalRecords as any },
+    adoptedInitialOpponent: { generation, freshBattleRngValue: fresh, preCommandRngCalls: 0 },
+  }));
+  return { report, makeState };
+}
 // Noland as a later battle of the round. The source has no GO ON roll for him: FillFactoryBrainParty rolls his party at the battle's start
 // (battle_tower.c:1857), after the swap, excluding the six rentalMons set ids of that moment (battle_factory.c:786-792), with VBlank draws between the
 // members. The engine (fix 45) rolls him at the swap's resolution with its rentals after the swap. So the round flow runs to the swap's result, and the
@@ -749,12 +841,12 @@ function romMemberFacts(m: any) {
 function battleStartCheck(attempt: any, setup: any, battleIndex: number, between: any = null) {
   const rc = attempt.startRules; const st = attempt.state; const rr = setup.round ?? null;
   if (rc === null) return { checked: false, reason: "the engine reached no action menu", diffs: [] };
-  const scheduled = st.opponentGenerations[battleIndex];
+  const scheduled = st.opponentGenerations[st.round.rules.battleIndex];
   const playerKernel = st.round.rules.playerKernelParty as any[];
   // The facility facts the round carries (fix 44): the streak, the rent count and the swap flag the next win pays (sPerformedRentalSwap).
   const facility = attempt.startFacility;
   const engine = {
-    battleNum: st.round.rules.battleIndex, factoryWinStreak: st.config.factoryWinStreak + st.round.rules.battleIndex,
+    battleNum: st.round.rules.battleIndex, factoryWinStreak: st.config.factoryWinStreak + st.round.rules.battleIndex, factorySymbols: st.config.factorySymbolsCount ?? 0,
     rentsCount: facility?.rentsCount ?? null, performedRentalSwap: facility?.performedRentalSwap === null || facility === null ? null : Number(facility.performedRentalSwap),
     trainerId: scheduled?.trainerId ?? null,
     opponentSetIds: scheduled ? (scheduled.generation.opponents as any[]).map((o) => o.setId) : null,
@@ -763,7 +855,7 @@ function battleStartCheck(attempt: any, setup: any, battleIndex: number, between
     opponent: (rc.party.opponent as any[]).slice(0, 3).map((m, i) => engineMemberFacts(m, scheduled?.generation.party?.[i]?.evs ?? null)),
   };
   const rom = {
-    battleNum: rr?.battleNum ?? null, factoryWinStreak: rr?.factoryWinStreak ?? null, rentsCount: rr?.rentsCount ?? null, performedRentalSwap: rr?.performedRentalSwap ?? null,
+    battleNum: rr?.battleNum ?? null, factoryWinStreak: rr?.factoryWinStreak ?? null, factorySymbols: rr?.factorySymbols ?? null, rentsCount: rr?.rentsCount ?? null, performedRentalSwap: rr?.performedRentalSwap ?? null,
     trainerId: rr?.trainerId ?? null,
     // FillFactoryBrainParty writes no gFrontierTempParty: Noland's sets are the ones his built party fits (brainBetweenBattles).
     opponentSetIds: scheduled?.kind === "frontier-brain" ? (between?.report?.selection?.setIds ?? null) : rr ? rr.frontierTempParty.slice(0, 3) : null,
@@ -788,16 +880,27 @@ function roundMode() {
   // --known-k=K0,K1,...: the k each battle's alignment chose on an earlier run of this round (romRoundDriver.py passes them back); see alignedPlay.
   const knownKs = (arg("known-k") ?? "").split(",");
   const battles: any[] = []; let terminal: any = null; let roundError: string | null = null;
+  // The site's chaining (factoryRoundChaining.ts, core.ts at the Lobby): the counters a round carries into the next one.
+  let carry: FactoryCarry = Object.freeze({ factoryWinStreak: streak, factorySymbolsCount: symbols as 0 | 1, battlePoints: 0, rentsCount: 0, playerTrainerId: 0 });
   for (let n = 0; n < setups.length; n += 1) {
     const setup = setups[n];
     try {
       refuseStagingThatPlayedATurn(setup);
       let makeState: (fresh: number) => any; let between: any = null;
       if (n === 0) makeState = (fresh) => adoptedOrchestrator(setup, fresh);
-      else {
+      else if (setup.round?.battleNum === 0) {
+        // The next round of a chain (romRoundDriver.py --rounds): the ROM played the Lobby, the attendant and the new draft itself.
+        const ended = terminal.round.rules.phase;
+        if (ended !== "roundComplete" && ended !== "roundLost") throw new Error(`battle ${n}: the ROM starts a new round, the engine's round is at ${ended}`);
+        const won = ended === "roundComplete";
+        const advanced = advanceFactoryCarry(carry, won, terminal.roundOutcome, terminal.facilityState.rentsCount);
+        carry = won ? advanced : carryForNewChallengeAfterLobby(advanced);
+        between = engineNewRound(terminal, carry, setup, n);
+        makeState = between.makeState;
+      } else {
         const decision = battles[n - 1].swapAfter;
         if (!decision) throw new Error(`battle ${n}: the engine has no swap decision after battle ${n - 1} (it did not win it on the engine)`);
-        between = engineBetweenBattles(terminal, decision, setup, n);
+        between = engineBetweenBattles(terminal, decision, setup, terminal.round.rules.battleIndex + 1);
         makeState = (fresh) => beginFactoryRoundBattleStartIntro(withRoundRng(between.state, fresh));
       }
       const known = knownKs[n] === undefined || knownKs[n] === "" ? null : Number(knownKs[n]);
@@ -816,9 +919,10 @@ function roundMode() {
         engineDrawsBeforeActionMenu: chosen.k, romOpponentDrawsBeforeActionMenu: chosen.j,
         alignment: { candidates: candidates.map(({ k, j, verified }) => ({ k, j, verified })), simulatedRngVerified: chosen.verified },
         start: { checked: start.checked, diffs: start.diffs, ...(start.diffs.length ? { engine: start.engine, rom: start.rom } : {}) },
-        between: between?.report ?? null, roundPhase: phase, swapAfter,
+        between: between?.report ?? null, roundPhase: phase, swapAfter, carry: setup.round?.battleNum === 0 ? carry : undefined,
       }));
       terminal = attempt.state;
+      if (n === 0) carry = Object.freeze({ ...carry, playerTrainerId: attempt.state.config.playerTrainerId });
       if (attempt.error !== null) break;
     } catch (e) { roundError = `battle ${n}: ${String(e)}`; break; }
   }
@@ -833,16 +937,27 @@ function roundCompareMode() {
     const d = drive.battles?.[n]?.drive ?? null;
     const cmp = d === null ? null : compareBattle(b, d, d.timeline);
     const turnsMatch = cmp !== null && cmp.divergence === null && (cmp.wide === null || (cmp.wide as any).diffPoints === 0) && b.error === null;
+    // The one known, unfixed difference (docs/parity-mac/first-trainer-after-draft-picks.md): the first trainer of a chained round. The engine's
+    // draft fits the ROM's, and its own code rolled right after the draft's set picks gives the ROM's trainer and sets, but the round construction
+    // rolls him after the six rentals' personalities. Named apart so that it can hide nothing else: the battle still has to match in every other way.
+    const sel: any = b.between?.selection ?? null;
+    const rom: any = b.between?.rom ?? null;
+    const knownFirstTrainerOrder = b.between?.newRound === true && sel?.matched === false && sel.draftFits !== null && rom !== null
+      && sel.draftFits.trainerAfterSelection.trainerId === rom.trainerId && sel.draftFits.trainerAfterSelection.setIds.join() === rom.setIds.join();
     return {
       battleIndex: n, engineError: b.error, roundPhase: b.roundPhase, swapAfter: b.swapAfter, romSwap: drive.battles?.[n]?.between?.swap ?? null,
       startDiffs: b.start?.diffs ?? null, selection: b.between?.selection ?? null,
       turns: cmp === null ? null : { matched: cmp.matched, engineStates: cmp.engineRows - 1, divergence: cmp.divergence, wideDiffPoints: (cmp.wide as any)?.diffPoints ?? null, wideFirst: (cmp.wide as any)?.first ?? null, wideFinal: (cmp.wide as any)?.final ?? null },
       romStop: d?.stop ?? null, romOutcome: d?.outcome ?? null,
       match: turnsMatch && (b.start?.diffs?.length ?? 0) === 0 && (n === 0 || b.between?.selection?.matched === true),
+      knownDifference: knownFirstTrainerOrder ? "first-trainer-order" : null,
+      matchExceptKnown: turnsMatch && (b.start?.diffs?.length ?? 0) === 0 && (n === 0 || b.between?.selection?.matched === true || knownFirstTrainerOrder),
     };
   });
   const out = { seed: engine.seed, scene: engine.scene, policy: engine.policy, swapPolicy: engine.swapPolicy, challengeNum: engine.challengeNum, roundError: engine.roundError ?? null,
-    romError: drive.error ?? null, romBattles: drive.battles?.length ?? 0, battles, match: engine.roundError === null && !drive.error && battles.length > 0 && battles.every((b) => b.match) };
+    romError: drive.error ?? null, romBattles: drive.battles?.length ?? 0, battles, match: engine.roundError === null && !drive.error && battles.length > 0 && battles.every((b) => b.match),
+    matchExceptKnown: engine.roundError === null && !drive.error && battles.length > 0 && battles.every((b) => b.matchExceptKnown),
+    rounds: 1 + battles.filter((b) => (b.selection as any)?.newRound === true || b.knownDifference !== null).length };
   console.log(JSON.stringify({ seed: out.seed, match: out.match, battles: battles.length }));
   if (arg("out")) writeFileSync(arg("out")!, JSON.stringify(out));
 }

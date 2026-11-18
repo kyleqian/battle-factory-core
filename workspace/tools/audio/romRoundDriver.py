@@ -2,7 +2,7 @@
 
 Usage (cwd = workspace/, through tools/run-mgba-probe.py like every mGBA probe):
   python3 tools/run-mgba-probe.py OUT.json -- python3 tools/audio/romRoundDriver.py OUT.json REQ.json --seed N --profile off|on \
-      --policy census|ai-v1|random-v1|power-v1 --swap never|weakest|random --dir WORKDIR [--challenge C] [--frames CAP] [--frame-budget N] [--prompt-delay K@N] [--symbols 0|1]
+      --policy census|ai-v1|random-v1|power-v1 --swap never|weakest|random --dir WORKDIR [--challenge C] [--frames CAP] [--frame-budget N] [--prompt-delay K@N] [--symbols 0|1] [--rounds R]
 
 REQ.json is the factoryLegal request of the round's first battle (`soundCensusRomReplay.ts request --round=1`). The lab stages that battle as for a single
 replay (oracle/battle_lab.py prepare). From then on nothing is staged: the ROM plays the round itself.
@@ -41,9 +41,14 @@ TASK_SIZE, TASK_COUNT = 40, 16
 SWAP_MENU_CURSOR, SWAP_CURSOR, SWAP_PLAYER_MON, SWAP_ENEMY_MON, SWAP_IN_ENEMY, SWAP_YESNO_CURSOR, SWAP_MON_SWAPPED = 0, 3, 18, 19, 20, 22, 32
 STATE_CHOOSE_MONS_HANDLE_INPUT, STATE_MENU_HANDLE_INPUT, STATE_YESNO_HANDLE_INPUT = 1, 3, 5  # battle_factory_screen.c:1120-1125
 SWAP_MENU_SWAP = 1  # sSwap_MenuOptionFuncs: SUMMARY, SWAP, RECHOOSE
+# struct FactorySelectScreen (battle_factory_screen.c:102-123): mons[6] at +12, each struct FactorySelectableMon 108 bytes (selectedId at +4)
+SELECT_MENU_CURSOR, SELECT_CURSOR, SELECT_YESNO_CURSOR, SELECT_MONS, SELECT_MON_SIZE, SELECT_MON_SELECTED = 0, 3, 7, 12, 108, 4
+SELECT_MENU_RENT = 1  # sSelect_MenuOptionFuncs: SUMMARY, RENT / DESELECT, OTHERS
+STATE_CHOOSE_MONS_INVALID = 11
 PULSE = 16  # one press every 16 frames (the lab / driver idiom for message waits)
 BETWEEN_FRAME_CAP = 30000
-STATIC_NAMES = ("sFactorySwapScreen", "sGlobalScriptContext", "sPerformedRentalSwap", "Swap_CB2", "Swap_HandleQuitSwappingResponse", "Swap_HandleAcceptMonResponse", "Swap_Task_HandleChooseMons", "Swap_Task_HandleMenu", "Swap_Task_HandleYesNo",
+STATIC_NAMES = ("sFactorySelectScreen", "Select_Task_HandleChooseMons", "Select_Task_HandleMenu", "Select_Task_HandleYesNo", "Select_Task_OpenSummaryScreen",
+                "sFactorySwapScreen", "sGlobalScriptContext", "sPerformedRentalSwap", "Swap_CB2", "Swap_HandleQuitSwappingResponse", "Swap_HandleAcceptMonResponse", "Swap_Task_HandleChooseMons", "Swap_Task_HandleMenu", "Swap_Task_HandleYesNo",
                 "Swap_Task_Exit", "Swap_TaskCantHaveSameMons", "Task_HandleYesNoInput", "CB2_Overworld", "BattleMainCB2")
 # The swap prompt's YES/NO box: before an ordinary trainer (AskSwapMon) and before the Factory Head (AskSwapBeforeHead), as [start, end) label pairs.
 SWAP_PROMPT_LABELS = (("BattleFrontier_BattleFactoryPreBattleRoom_EventScript_AskSwapMon", "BattleFrontier_BattleFactoryPreBattleRoom_EventScript_SwapMons"),
@@ -133,7 +138,7 @@ class Rom:
         s2 = self.save2()
         return {
             "battleNum": self.u16(s2 + SB2_BATTLE_NUM), "factoryWinStreak": self.u16(s2 + SB2_FACTORY_STREAK), "rentsCount": self.u16(s2 + SB2_FACTORY_RENTS),
-            "performedRentalSwap": self.u8(self.st["sPerformedRentalSwap"]),
+            "performedRentalSwap": self.u8(self.st["sPerformedRentalSwap"]), "factorySymbols": self.lab._factory_symbol_count(),
             "trainerId": self.u16(self.sym["gTrainerBattleOpponent_A"]),
             "frontierTempParty": [self.u16(self.sym["gFrontierTempParty"] + 2 * i) for i in range(3)],
             "trainerIds": [self.u16(s2 + SB2_TRAINER_IDS + 2 * i) for i in range(7)],
@@ -159,6 +164,51 @@ class Rom:
                 "opponentAiSimulatedRng": [o.read_u8(o.read_u32(o.read_u32(sym["gBattleResources"]) + 0x14) + 0x18 + i) for i in range(4)],
                 "lastMoves": [o.read_u16(sym["gLastMoves"] + 2 * i) for i in range(2)],
                 "round": self.round_facts(generation)}
+
+    def rental_mon_ids(self):
+        s2 = self.save2()
+        return [self.u16(s2 + SB2_RENTAL_MONS + i * RENTAL_MON_SIZE) for i in range(6)]
+
+    def first_selectable_positions(self, set_ids):
+        """The round replay's draft rule (soundCensusRomReplay.ts firstSelectablePositions): the first three rentals with no species twice."""
+        picked = []
+        for i, set_id in enumerate(set_ids):
+            species = self.lab.catalog.mon(set_id).species
+            if len(picked) < 3 and all(self.lab.catalog.mon(set_ids[j]).species != species for j in picked):
+                picked.append(i)
+        if len(picked) != 3:
+            raise RoundError(f"no three selectable rentals in {set_ids}")
+        return picked
+
+    def select_buttons(self, positions):
+        """One frame of the rental select screen: rent `positions` in order (cursor, A, RENT, A), then YES to "Are these three OK?"."""
+        ptr = self.u32(self.st["sFactorySelectScreen"])
+        if ptr == 0:
+            return [], None
+        live = dict(self.tasks())
+        st = self.st
+        if st["Select_Task_OpenSummaryScreen"] in live:
+            raise RoundError("the rental screen opened a summary")
+        selected = [self.u8(ptr + SELECT_MONS + i * SELECT_MON_SIZE + SELECT_MON_SELECTED) for i in range(6)]
+        todo = [p for p in positions if not selected[p]]
+        if st["Select_Task_HandleChooseMons"] in live:
+            state = live[st["Select_Task_HandleChooseMons"]]
+            if state == STATE_CHOOSE_MONS_INVALID:
+                raise RoundError("the rental screen refused a rental (same species): the draft rule picked an illegal team")
+            if state != STATE_CHOOSE_MONS_HANDLE_INPUT or not todo:
+                return [], None
+            cursor = self.u8(ptr + SELECT_CURSOR)
+            if cursor != todo[0]:
+                return (["RIGHT"] if cursor < todo[0] else ["LEFT"]), "choose"
+            return ["A"], "choose"
+        if st["Select_Task_HandleMenu"] in live and live[st["Select_Task_HandleMenu"]] == STATE_MENU_HANDLE_INPUT:
+            menu = self.u8(ptr + SELECT_MENU_CURSOR)
+            return (["DOWN"] if menu < SELECT_MENU_RENT else ["UP"] if menu > SELECT_MENU_RENT else ["A"]), "menu"
+        if st["Select_Task_HandleYesNo"] in live and live[st["Select_Task_HandleYesNo"]] == STATE_YESNO_HANDLE_INPUT:
+            if todo:
+                raise RoundError(f"the rental screen asks to confirm before rentals {todo} are taken")
+            return (["A"] if self.u8(ptr + SELECT_YESNO_CURSOR) == 0 else ["UP"]), "confirm"
+        return [], None
 
     def swap_buttons(self, want):
         """One frame of the swap screen for decision `want` (accept: playerPartyIndex p, opponentPartyIndex q; cancel: at "player" (B on the own
@@ -199,7 +249,10 @@ class Rom:
         return [], None
 
 
-def drive_between(rom, swap, cap, progress, prompt_delay=0):
+def drive_between(rom, swap, cap, progress, prompt_delay=0, new_round=False):
+    """new_round: from the end of a round (a loss, or the seventh win) through the Lobby (the result text, the save, the record prompt), the
+    attendant (the player stands facing him: A talks; take the challenge, Level 50, save YES), the walk, the new draft (the rental screen,
+    driven by select_buttons with the draft rule) to the next round's first action menu. Every YES/NO there is answered A."""
     """From the end of a won battle to the next battle's first action menu (see the module docstring)."""
     o, st = rom.o, rom.st
     # NO at the prompt for a kept team; YES for a swap and for a cancel (which then backs out of the swap screen).
@@ -207,6 +260,7 @@ def drive_between(rom, swap, cap, progress, prompt_delay=0):
     frames, phase_pulse = 0, 0
     rng_prev, watch_prev = rom.u32(rom.sym["gRngValue"]), rom.watch()
     changes, seen_field, swap_screen, answered, exit_seen, last, prompt_open = [], False, False, None, None, None, 0
+    draft_positions = None
     labels = [(rom.sym[a], rom.sym[b]) for a, b in SWAP_PROMPT_LABELS]
     transitions = []
     swap_trace = progress.setdefault("swapTrace", [])
@@ -221,7 +275,20 @@ def drive_between(rom, swap, cap, progress, prompt_delay=0):
             raise RoundError(f"the screens between battles did not reach the next action menu in {cap} frames (last state {last})")
         live = dict(rom.tasks())
         buttons, state = [], "other"
-        if cb2 == st["Swap_CB2"]:
+        select_live = rom.u32(st["sFactorySelectScreen"]) != 0 and any(f in live for f in (st["Select_Task_HandleChooseMons"], st["Select_Task_HandleMenu"],
+                                                                                         st["Select_Task_HandleYesNo"], st["Select_Task_OpenSummaryScreen"]))
+        if select_live:
+            if not new_round:
+                raise RoundError("the rental screen opened between two battles of a round")
+            if draft_positions is None:
+                draft = rom.rental_mon_ids()
+                draft_positions = rom.first_selectable_positions(draft)
+                progress["draft"] = {"rentalMons": draft, "positions": draft_positions}
+            phase_pulse = (phase_pulse + 1) % 4
+            pressed, what = rom.select_buttons(draft_positions)
+            state = f"select-{what}"
+            buttons = pressed if phase_pulse == 0 else []
+        elif cb2 == st["Swap_CB2"]:
             swap_screen, state = True, "swap"
             if decline:
                 raise RoundError("the swap screen opened although the decision is to keep the team")
@@ -237,6 +304,11 @@ def drive_between(rom, swap, cap, progress, prompt_delay=0):
                 ptr = rom.u32(st["sFactorySwapScreen"])
                 exit_seen = {"playerMonId": rom.u8(ptr + SWAP_PLAYER_MON), "cursorPos": rom.u8(ptr + SWAP_CURSOR), "monSwapped": rom.u8(ptr + SWAP_MON_SWAPPED)}
             buttons = pressed if phase_pulse == 0 else []
+        elif st["Task_HandleYesNoInput"] in live and new_round:
+            # the Lobby's "Okay to save before the challenge?" (and the save's own overwrite question): YES
+            state = "yesno-lobby"
+            phase_pulse = (phase_pulse + 1) % PULSE
+            buttons = ["A"] if phase_pulse == 0 else []
         elif st["Task_HandleYesNoInput"] in live:
             state = "yesno"
             ret = rom.script_return_address()
@@ -262,14 +334,14 @@ def drive_between(rom, swap, cap, progress, prompt_delay=0):
         rng, watch = rom.u32(rom.sym["gRngValue"]), rom.watch()
         if watch != watch_prev:
             changes.append({"frame": frames, "before": list(watch_prev), "after": list(watch), "rngBefore": rng_prev, "rngAfter": rng,
-                            "draws": lcg_distance(rng_prev, rng)})
+                            "draws": lcg_distance(rng_prev, rng), "rentalMonsAfter": rom.rental_mon_ids()})
         rng_prev, watch_prev = rng, watch
     final = list(rom.watch())
     rolls = [c for c in changes if c["after"] == final and c["before"][0] != final[0]]
     generation = None
     if rolls:
         c = rolls[-1]
-        generation = {"frame": c["frame"], "rngBefore": c["rngBefore"], "rngAfter": c["rngAfter"], "draws": c["draws"]}
+        generation = {"frame": c["frame"], "rngBefore": c["rngBefore"], "rngAfter": c["rngAfter"], "draws": c["draws"], "rentalMonsAfter": c["rentalMonsAfter"]}
     progress.update({"frames": frames, "generation": generation, "watchChanges": changes[-6:], "swapPrompt": answered, "swapScreen": swap_screen,
                      "swap": {"decision": swap, "rom": exit_seen}, "transitions": transitions[-40:]})
     del progress["swapTrace"][:-12]
@@ -306,6 +378,8 @@ def main():
     # --prompt-delay K@N: wait K more frames at the swap prompt after battle N (0-based) before answering (genuine input timing: it moves the RNG cursor
     # of everything rolled after it, like a slower player). Battles 0..N are unchanged.
     delay_k, delay_at = (int(x) for x in opt("--prompt-delay", "0@-1").split("@"))
+    # --rounds R: play R rounds back to back; after a round ends (lost, drawn, or won at the seventh battle) the ROM plays the Lobby and the next draft.
+    rounds = int(opt("--rounds", "1"))
     work = Path(opt("--dir"))
     work.mkdir(parents=True, exist_ok=True)
     cap = int(opt("--frames", str(sep.DRIVE_FRAME_CAP)))
@@ -337,7 +411,8 @@ def main():
               "challenge": request["challengeNum"], "request": request, "stagingFix": staging_fix, "battles": [], "error": None}
     setup_paths, generation, prior = [], None, None
     try:
-        for n in range(7):
+        rounds_done = 0
+        for n in range(7 * rounds):
             setup = rom.setup(descriptor, generation)
             path = work / f"setup-{n}.json"
             path.write_text(json.dumps(setup, separators=(",", ":")))
@@ -359,10 +434,16 @@ def main():
                 raise RoundError(f"engine error in battle {n}: {b['error']}")
             if drive["stop"] != "outcome":
                 raise RoundError(f"the ROM drive of battle {n} stopped: {drive['stop']}")
-            if drive["outcome"] != 1 or n == 6:
+            if drive["outcome"] == 1 and setup["round"]["battleNum"] < 6:
+                entry["between"] = {}
+                drive_between(rom, b.get("swapAfter"), BETWEEN_FRAME_CAP, entry["between"], delay_k if n == delay_at else 0)
+                generation = entry["between"]["generation"]
+                continue
+            rounds_done += 1
+            if rounds_done >= rounds:
                 break
-            entry["between"] = {}
-            drive_between(rom, b.get("swapAfter"), BETWEEN_FRAME_CAP, entry["between"], delay_k if n == delay_at else 0)
+            entry["between"] = {"newRound": True}
+            drive_between(rom, None, BETWEEN_FRAME_CAP, entry["between"], new_round=True)
             generation = entry["between"]["generation"]
     except RoundError as e:
         result["error"] = str(e)
