@@ -134,6 +134,8 @@ export interface PostwinState {
    * `createBattleReturnHoldState`) so the ordinary flow stays byte-identical.
    */
   frontierBrain: boolean;
+  /** lbw7: ticks the post-battle black / room / black tail runs ahead of the WIN-measured boundaries (forfeit: 1, one black tick shorter on the ROM). Absent = 0. */
+  tailLead?: number;
   /**
    * Brain-only call-scene box index: 0 = inactive (ordinary path, or the
    * brain path before the heal-dismiss box-clear boundary), 1-5 = the five
@@ -699,8 +701,10 @@ export function createPostwinStateFromRound(
  */
 export function createBattleReturnHoldState(
   frozenSceneView: BattleResolutionPresentationRenderView | null,
+  tailLead = 0,
 ): PostwinState {
   return {
+    ...(tailLead === 0 ? {} : { tailLead }),
     elapsed: GENERATED_ROUTE_INITIAL_ELAPSED,
     challengeBattleNum: 0,
     challengeBattleNumAfterWrite: 0,
@@ -833,6 +837,11 @@ export const POSTWIN_OPPONENT_RENTALS_WRITE_AGE = 137;
 export const POSTWIN_OPPONENT_RENTAL_IDS =
   [188, 184, 135] as const;
 
+/** The age the post-battle tail boundaries are read at: unchanged through the black start, `tailLead` ticks ahead after it. */
+export function postwinTailAge(age: number, tailLead: number | undefined): number {
+  return age >= POSTWIN_BATTLE_BLACK_AGE ? age + (tailLead ?? 0) : age;
+}
+
 export function postwinPhase(age: number): PostwinPhase {
   if (age < POSTWIN_BATTLE_FADE_FIRST_AGE) return "battleHold";
   if (age < POSTWIN_BATTLE_BLACK_AGE) return "battleFade";
@@ -934,6 +943,7 @@ export function advancePostwin(state: PostwinState): PostwinState {
     reAskElapsed !== null &&
     elapsed >= reAskElapsed + postwinQuestionReprintMenuReadyDelay(state);
   return {
+    ...(state.tailLead === undefined ? {} : { tailLead: state.tailLead }),
     elapsed,
     challengeBattleNum:
       elapsed >= POSTWIN_CHALLENGE_BATTLE_WRITE_AGE

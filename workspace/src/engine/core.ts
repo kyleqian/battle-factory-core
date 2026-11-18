@@ -597,6 +597,7 @@ import {
   postwinContinuationInputReady,
   postwinNextVisibleChars,
   postwinPhase,
+  postwinTailAge,
   postwinRightThisWayVisibleChars,
   postwinRightThisWayInputReady,
   postwinRngSteps,
@@ -745,7 +746,7 @@ import {
 } from "./screenSounds.ts";
 import { emitBattleStartBgm } from "./battleStartSounds.ts";
 import { emitTickSounds } from "./tickSounds.ts";
-import { advanceForfeitTerminalAge, disableForfeitRecordQuestion, forfeitFrozenSceneView } from "./battleForfeit.ts";
+import { advanceForfeitTerminalAge, disableForfeitRecordQuestion, FORFEIT_RETURN_TAIL_LEAD, forfeitFrozenSceneView } from "./battleForfeit.ts";
 import { soundCollecting } from "../audio/soundEvents.ts";
 
 /**
@@ -1263,6 +1264,7 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
         ? {
             postwin: createBattleReturnHoldState(
               forfeitFrozenSceneView(preAdvanceCommand),
+              FORFEIT_RETURN_TAIL_LEAD,
             ),
             factoryTerminal: factoryTerminal === null && forfeitTerminalCommand !== null
               ? advanceForfeitTerminalAge(
@@ -3385,7 +3387,7 @@ function renderPostwinState(state: EngineState): Uint8Array {
     if (state.prebattleRoom) return renderPrebattleRoomState(state);
     if (state.battleRoom) return renderBattleRoomState(state);
   }
-  const age = postwin.elapsed;
+  const age = postwinTailAge(postwin.elapsed, postwin.tailLead);
   const phase = postwinPhase(age);
   if (phase === "battleHold" || phase === "battleFade") {
     const fb = createFramebuffer();
@@ -3416,12 +3418,20 @@ function renderPostwinState(state: EngineState): Uint8Array {
       ? age - POSTWIN_BATTLE_ROOM_FADE_OUT_AGE
       : age - POSTWIN_BATTLE_ROOM_FIRST_AGE;
     const timing = fadingOut ? POSTWIN_ROOM_FADE_OUT : FADE_IN;
+    // lbw7: the room redraws the battle's own opponent (a forfeit / loss / win all end here), not the generic sheet.
+    const opponentTrainer = factoryTrainerPresentationForOpponent(
+      state.factoryRoundBattleOrchestrator?.round.rules.currentOpponent,
+    );
     renderBattleRoomEntryScene(
       fb,
       step,
       sceneElapsed,
       bgFadeY(local, timing),
       objFadeY(local, timing),
+      undefined,
+      opponentTrainer === null
+        ? undefined
+        : { ...INITIAL_BATTLE_ROOM_STATE, trainerPresentation: opponentTrainer },
     );
     return fb;
   }
@@ -4290,7 +4300,7 @@ export function render(state: EngineState): Uint8Array {
   // roundLost/roundCompleted) -- so it must render ahead of the
   // factoryTerminal dispatch below, not just postwin's usual (WIN-only)
   // precedence inside renderWithoutFactoryTerminal.
-  if (state.postwin && postwinPhase(state.postwin.elapsed) !== "counterRoom") {
+  if (state.postwin && postwinPhase(postwinTailAge(state.postwin.elapsed, state.postwin.tailLead)) !== "counterRoom") {
     return renderPostwinState(state);
   }
   // Free-roam Lobby owns the screen once the decline chain hands off

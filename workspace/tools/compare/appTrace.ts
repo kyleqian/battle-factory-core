@@ -2326,6 +2326,25 @@ export const APP_STAGES: Readonly<Record<string, AppStage>> = {
   // frf250a: BAG / RUN on the action menu (two Level-50 Rattata, both scenes; tools/battle-lab/frf250a-*.json).
   "frf250a-bagrun-on": (state) => frf250aStage(aud241bStage(state, "frf250a-bagrun-on", "on", 50, 50), 27),
   "frf250a-bagrun-off": (state) => frf250aStage(aud241bStage(state, "frf250a-bagrun-off", "off", 50, 50), 34),
+  // lbw7: the lab's trainerId 110 (SHIZUKA, a Black Belt); the staged orchestrator's own draw is trainer 17, so the post-battle room would draw the wrong class.
+  "lbw7-forfeit-off": (state) => {
+    const staged = frf250aStage(aud241bStage(state, "frf250a-bagrun-off", "off", 50, 50), 34);
+    const o = staged.factoryRoundBattleOrchestrator!;
+    const shizuka = getFactoryTrainerPresentation(110);
+    return {
+      ...staged,
+      factoryRoundBattleOrchestrator: Object.freeze({
+        ...o,
+        round: Object.freeze({
+          ...o.round,
+          rules: Object.freeze({
+            ...o.round.rules,
+            currentOpponent: Object.freeze({ ...o.round.rules.currentOpponent, id: "factory-trainer-110", trainerName: shizuka.name }),
+          }),
+        }),
+      }),
+    };
+  },
   // enc276: a forced turn goes from FIGHT straight into the turn (tools/battle-lab/enc276-*.json): the L50 player's SPLASH is
   // Encored (opponent L40 ENCORE) / Taunted into forced Struggle (opponent L40 TAUNT); turn 2's FIGHT has no move menu.
   "enc276-encore-on": (state) => enc276Stage(state, "enc276-encore-on", "on", 227, 27),
