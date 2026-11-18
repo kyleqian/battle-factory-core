@@ -97,6 +97,9 @@ export type FactoryAnchorSessionInput = Readonly<{
   roomTrainer: FactoryTrainerPresentation;
   constructionRngValues: readonly [number, number, number];
   freshBattleRngValue: number;
+  /** The save's Factory record (symbols, heard-speech bits) the challenge starts with; absent = a fresh save. */
+  factorySymbolsCount?: 0 | 1 | 2;
+  heardBrainSpeech?: Readonly<{ silver: boolean; gold: boolean }>;
 }>;
 
 export function createFactoryAnchorSession(
@@ -143,7 +146,11 @@ export function createFactoryAnchorSession(
     playerTrainerId: ANCHOR_FACTORY_METADATA.playerTrainerId,
     battleTowerLevel50WinStreak:
       ANCHOR_FACTORY_METADATA.battleTowerLevel50WinStreak,
-    facilityState: { rentsCount: ANCHOR_FACTORY_METADATA.rentsCount },
+    ...(input.factorySymbolsCount === undefined ? {} : { factorySymbolsCount: input.factorySymbolsCount }),
+    facilityState: {
+      rentsCount: ANCHOR_FACTORY_METADATA.rentsCount,
+      ...(input.heardBrainSpeech === undefined ? {} : { heardBrainSpeech: input.heardBrainSpeech }),
+    },
     rentals: {
       type: "currentRecords",
       playerRentalRecords: input.playerRentalRecords,

@@ -1435,6 +1435,8 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
           roundWon,
           lobbyEntryOutcome,
           factoryRoundBattleOrchestrator!.facilityState.rentsCount,
+          // the heard-speech bits live in the save (battledBrainFlags): the next challenge keeps them, win or loss
+          factoryRoundBattleOrchestrator!.facilityState.heardBrainSpeech,
         )
       : state.factoryCarry;
     // lbr-g: the return span draws per battleExitRng.ts (E1 + E2 + E3) instead of one draw per tick; a terminal without the span (staged 7th win,
@@ -2737,7 +2739,10 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
                 playerTrainerId: pending.carry.playerTrainerId,
                 battleTowerLevel50WinStreak: ANCHOR_FACTORY_METADATA.battleTowerLevel50WinStreak,
                 factorySymbolsCount: pending.carry.factorySymbolsCount,
-                facilityState: { rentsCount: pending.carry.rentsCount },
+                facilityState: {
+                  rentsCount: pending.carry.rentsCount,
+                  ...(pending.carry.heardBrainSpeech === undefined ? {} : { heardBrainSpeech: pending.carry.heardBrainSpeech }),
+                },
                 rentals: { type: "generateInitial", selectedRentalIndexes },
               }),
               sceneAssemblyDisplayLag,
@@ -2784,6 +2789,9 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
                     number, number, number,
                   ],
                 freshBattleRngValue: ANCHOR_BATTLE_1_BATTLE_INIT_RNG_VALUE,
+                // the save's Factory record (the library's `frontier` start record): the anchor round carries it like any other
+                factorySymbolsCount: state.factoryCarry.factorySymbolsCount,
+                ...(state.factoryCarry.heardBrainSpeech === undefined ? {} : { heardBrainSpeech: state.factoryCarry.heardBrainSpeech }),
               }),
               sceneAssemblyDisplayLag,
             ),

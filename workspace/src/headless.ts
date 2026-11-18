@@ -3,7 +3,7 @@
 import { ENGINE_BUILD, FactorySession } from "./factorySession.ts";
 import type { ReplayOptions, ReplayResult } from "./factoryContract.ts";
 
-export type { BattleScene, GbaButton, ReplayBattle, ReplayOptions, ReplayResult, TraceSegment } from "./factoryContract.ts";
+export type { BattleScene, FactoryFrontierRecord, GbaButton, ReplayBattle, ReplayOptions, ReplayResult, TraceSegment } from "./factoryContract.ts";
 export { ENGINE_BUILD };
 
 export function replayChallenge(options: ReplayOptions): ReplayResult {
@@ -12,6 +12,7 @@ export function replayChallenge(options: ReplayOptions): ReplayResult {
     gameplaySeed: options.gameplaySeed,
     presentationSeed: options.presentationSeed,
     start: options.start,
+    frontier: options.frontier,
   });
   session.resume(options.segments);
   return {
@@ -20,5 +21,6 @@ export function replayChallenge(options: ReplayOptions): ReplayResult {
     ended: session.ended,
     battles: session.battles.map((battle) => ({ ...battle })),
     digest: session.digest(),
+    frontier: session.frontierRecord(),
   };
 }

@@ -18,6 +18,7 @@ export type {
   BattleScene,
   FactoryAudioState,
   FactoryEvent,
+  FactoryFrontierRecord,
   FactoryGame,
   FactoryGameOptions,
   GbaButton,
@@ -95,6 +96,7 @@ export function mountFactoryGameInternal(options: MountInternalOptions): Factory
     presentationSeed: options.presentationSeed,
     challengeRequest: options.challengeRequest,
     start: options.start,
+    frontier: options.frontier,
   };
   let session = new FactorySession(sessionOptions);
   const held = new Set<GbaButton>();

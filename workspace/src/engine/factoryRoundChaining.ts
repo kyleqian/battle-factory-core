@@ -25,6 +25,8 @@ const STAGES_PER_CHALLENGE = factoryEndingPolicy.constants.stagesPerChallenge;
 const MAX_STREAK = factoryEndingPolicy.constants.maxStreak;
 const MAX_BATTLE_POINTS = factoryEndingPolicy.constants.maxBattlePoints;
 
+export type FactoryHeardBrainSpeech = Readonly<{ silver: boolean; gold: boolean }>;
+
 export type FactoryCarry = Readonly<{
   /** `GetCurrentFacilityWinStreak()` entering the next round. */
   factoryWinStreak: number;
@@ -34,16 +36,68 @@ export type FactoryCarry = Readonly<{
   /** Source `factoryRentsCount` for the selected battle/level mode. */
   rentsCount: number;
   playerTrainerId: number;
+  /**
+   * FRONTIER_DATA_HEARD_BRAIN_SPEECH: the Factory's two `battledBrainFlags` bits (`frontier_util.c:596-605`, 1 << 8 silver, 1 << 9 gold), set
+   * when Noland's first speech of that tier is shown (BattleFactoryBattleRoom scripts.inc:118-121, :144-147) and never cleared, so they outlive
+   * a lost challenge, like the symbols. Absent = neither heard (a fresh save).
+   */
+  heardBrainSpeech?: FactoryHeardBrainSpeech;
 }>;
 
-export function createInitialFactoryCarry(playerTrainerId: number): FactoryCarry {
+/**
+ * What a save keeps of the Factory (singles, Level 50) from one challenge to the next, whatever the streak: the symbol count
+ * (FLAG_SYS_FACTORY_SILVER / GOLD) and the two heard-speech bits. Absent = a fresh save. The library takes it as a start record and
+ * reports it at the end of a replay (src/factoryContract.ts `FactoryFrontierRecord`).
+ */
+export type FactoryFrontierRecord = Readonly<{ symbols: 0 | 1 | 2; heardBrainSpeech: FactoryHeardBrainSpeech }>;
+
+/**
+ * The records a save can hold. The silver symbol is given only after the silver battle, whose first meeting sets the silver bit before the
+ * battle (BattleFactoryBattleRoom scripts.inc:118-121); the gold battle is reachable only with the silver symbol (GetFrontierBrainStatus, frontier_util.c:1669-1676)
+ * and its first meeting sets the gold bit before the battle (:144-147), and the gold bit is the one read and written once a symbol is held
+ * (GetFrontierData / SetFrontierData: hasSymbol, frontier_util.c:846-858). So: a symbol needs the silver bit, two symbols need the gold bit,
+ * and the gold bit needs a symbol. Throws on any other record.
+ */
+export function validateFactoryFrontierRecord(record: FactoryFrontierRecord): FactoryFrontierRecord {
+  const { symbols, heardBrainSpeech } = record ?? ({} as FactoryFrontierRecord);
+  if (symbols !== 0 && symbols !== 1 && symbols !== 2) throw new Error(`frontier.symbols must be 0, 1 or 2, got ${String(symbols)}`);
+  if (typeof heardBrainSpeech?.silver !== "boolean" || typeof heardBrainSpeech?.gold !== "boolean") {
+    throw new Error("frontier.heardBrainSpeech must be { silver: boolean, gold: boolean }");
+  }
+  if (symbols >= 1 && !heardBrainSpeech.silver) throw new Error("frontier: a symbol needs the silver speech heard (it is shown before the silver battle)");
+  if (symbols === 2 && !heardBrainSpeech.gold) throw new Error("frontier: two symbols need the gold speech heard (it is shown before the gold battle)");
+  if (symbols === 0 && heardBrainSpeech.gold) throw new Error("frontier: the gold speech is only heard with the silver symbol");
+  return Object.freeze({ symbols, heardBrainSpeech: Object.freeze({ silver: heardBrainSpeech.silver, gold: heardBrainSpeech.gold }) });
+}
+
+export function createInitialFactoryCarry(playerTrainerId: number, frontier?: FactoryFrontierRecord): FactoryCarry {
+  const record = frontier === undefined ? null : validateFactoryFrontierRecord(frontier);
   return Object.freeze({
     factoryWinStreak: 0,
-    factorySymbolsCount: 0,
+    factorySymbolsCount: record?.symbols ?? 0,
     battlePoints: 0,
     rentsCount: 0,
     playerTrainerId,
+    ...(record === null ? {} : { heardBrainSpeech: record.heardBrainSpeech }),
   });
+}
+
+/** The carry's frontier record (absent bits read as not heard). */
+export function factoryFrontierRecordOf(carry: FactoryCarry): FactoryFrontierRecord {
+  return Object.freeze({
+    symbols: carry.factorySymbolsCount,
+    heardBrainSpeech: Object.freeze({ silver: carry.heardBrainSpeech?.silver ?? false, gold: carry.heardBrainSpeech?.gold ?? false }),
+  });
+}
+
+/** Both heard-speech records OR'd: the bits are only ever set (SetFrontierData, frontier_util.c:881-882). */
+export function mergeFactoryHeardBrainSpeech(
+  a: FactoryHeardBrainSpeech | undefined,
+  b: FactoryHeardBrainSpeech | undefined,
+): FactoryHeardBrainSpeech | undefined {
+  if (a === undefined) return b;
+  if (b === undefined) return a;
+  return Object.freeze({ silver: a.silver || b.silver, gold: a.gold || b.gold });
 }
 
 /**
@@ -62,15 +116,20 @@ export function advanceFactoryCarry(
   roundWon: boolean,
   roundOutcome: FactoryBrainRoundOutcomeResult,
   rentsCountAfterRound: number,
+  /** The round's heard-speech bits (its facility state): they stay, win or loss (the save keeps them). */
+  heardBrainSpeechAfterRound?: FactoryHeardBrainSpeech,
 ): FactoryCarry {
+  const heardBrainSpeech = mergeFactoryHeardBrainSpeech(carry.heardBrainSpeech, heardBrainSpeechAfterRound);
   return Object.freeze({
     factoryWinStreak: roundWon
       ? Math.min(MAX_STREAK, carry.factoryWinStreak + STAGES_PER_CHALLENGE)
       : 0,
-    factorySymbolsCount: roundOutcome.newSymbolsCount,
+    // Symbols are flags in the save: never taken back (a round built without the carry's count must not lower it).
+    factorySymbolsCount: Math.max(carry.factorySymbolsCount, roundOutcome.newSymbolsCount) as 0 | 1 | 2,
     battlePoints: Math.min(MAX_BATTLE_POINTS, carry.battlePoints + roundOutcome.battlePointsAwarded),
     rentsCount: roundWon ? rentsCountAfterRound : 0,
     playerTrainerId: carry.playerTrainerId,
+    ...(heardBrainSpeech === undefined ? {} : { heardBrainSpeech }),
   });
 }
 

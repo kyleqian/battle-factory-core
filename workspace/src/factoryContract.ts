@@ -37,6 +37,18 @@ export type FactoryEvent =
   /** A contained presentation throw (the battle went on with that command drawn static). */
   | { type: "contained-error"; message: string; frame: number };
 
+/**
+ * The save's Factory record that outlives a challenge (singles, Level 50; the real save keeps it whatever the streak): the symbol count
+ * (FLAG_SYS_FACTORY_SILVER / GOLD) and whether Noland's first silver / gold speech was heard (FRONTIER_DATA_HEARD_BRAIN_SPEECH, two
+ * `battledBrainFlags` bits). With 1 symbol battle 21 is an ordinary trainer and battle 42 gold Noland; with 2 symbols Noland returns at 21,
+ * 42, 63 (every 21 after 42) with no first speech and no symbol; a heard speech is not shown again. Only the records a save can hold are
+ * accepted: a symbol needs the silver speech heard, two symbols the gold speech, and the gold speech a symbol.
+ */
+export interface FactoryFrontierRecord {
+  symbols: 0 | 1 | 2;
+  heardBrainSpeech: { silver: boolean; gold: boolean };
+}
+
 export interface FactoryGameOptions {
   /** 240x160; the host page scales it with CSS. */
   canvas: HTMLCanvasElement;
@@ -52,6 +64,8 @@ export interface FactoryGameOptions {
    * (not the deal a plain `gameplaySeed` mount makes). A resume trace, and `replayChallenge`, must pass the same `start`.
    */
   start?: "draft" | "after-save";
+  /** The save's Factory record the challenge starts with (both starts); absent = a fresh save. A resume and `replayChallenge` must pass the same. */
+  frontier?: FactoryFrontierRecord;
   /** Fast-forward through these before the player gets control; `ready` follows. */
   resume?: TraceSegment[];
   onEvent?: (event: FactoryEvent) => void;
@@ -116,6 +130,8 @@ export interface ReplayResult {
   battles: ReplayBattle[];
   /** The kernel-events digest the census computes (sha256 hex, 16 chars). */
   digest: string;
+  /** The save's Factory record at the end of the replay (the start record plus what the challenge earned): what the server keeps. */
+  frontier: FactoryFrontierRecord;
 }
 
 export interface ReplayOptions {
@@ -124,5 +140,7 @@ export interface ReplayOptions {
   presentationSeed?: number;
   /** Same as `FactoryGameOptions.start`: the trace replays only with the start it was played from. */
   start?: "draft" | "after-save";
+  /** Same as `FactoryGameOptions.frontier`: the trace replays only with the record it was played from. */
+  frontier?: FactoryFrontierRecord;
   segments: TraceSegment[];
 }

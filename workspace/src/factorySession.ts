@@ -24,7 +24,9 @@ import { createInitialState, tick, type EngineState } from "./engine/core.ts";
 import { ANCHOR_FACTORY_METADATA } from "./engine/factoryAnchorSession.ts";
 import { createFactoryLobbyAttendantState } from "./engine/factoryLobbyAttendant.ts";
 import { createFactoryLobbyFreeRoamState } from "./engine/factoryLobbyFreeRoam.ts";
-import { createInitialFactoryCarry, generateFactoryChallengeDraft } from "./engine/factoryRoundChaining.ts";
+import {
+  createInitialFactoryCarry, factoryFrontierRecordOf, generateFactoryChallengeDraft, mergeFactoryHeardBrainSpeech, validateFactoryFrontierRecord,
+} from "./engine/factoryRoundChaining.ts";
 import {
   clearContainedPresentationErrors,
   containedPresentationErrorCount,
@@ -33,7 +35,7 @@ import {
 import { presentationRngTraceMetadata, type PresentationRngPolicyId } from "./engine/presentationRngHost.ts";
 import { Sha256 } from "./engine/sha256.ts";
 import { collectSoundTick, type SoundSink } from "./audio/soundEvents.ts";
-import type { BattleScene, FactoryEvent, ReplayBattle, TraceSegment } from "./factoryContract.ts";
+import type { BattleScene, FactoryEvent, FactoryFrontierRecord, ReplayBattle, TraceSegment } from "./factoryContract.ts";
 import { normalizeButtons, type GbaButton } from "./input.ts";
 import { SessionRecorder, type SessionContainedError, type SessionTrace } from "./sessionRecorder.ts";
 
@@ -65,6 +67,8 @@ export interface FactorySessionOptions {
    * plain `gameplaySeed` mount makes. See docs/lbrc-challenge-request.md.
    */
   readonly start?: "draft" | "after-save" | undefined;
+  /** The save's Factory record the challenge starts with (symbols, heard-speech bits), both starts; absent = a fresh save. */
+  readonly frontier?: FactoryFrontierRecord | undefined;
 }
 
 /**
@@ -80,13 +84,17 @@ export function createChallengeState(options: FactorySessionOptions): EngineStat
     ...(options.presentationSeed !== undefined ? { presentationSeed: options.presentationSeed } : {}),
     ...(options.presentationRngPolicy !== undefined ? { presentationRngPolicy: options.presentationRngPolicy } : {}),
   });
-  if (options.start === "after-save") return createAfterSaveState(base, options.gameplaySeed);
-  if (options.gameplaySeed === undefined) return base;
+  const frontier = options.frontier === undefined ? undefined : validateFactoryFrontierRecord(options.frontier);
+  if (options.start === "after-save") return createAfterSaveState(base, options.gameplaySeed, frontier);
+  // The anchor draft: its round takes the record from the carry (core.ts createFactoryAnchorSession call).
+  if (options.gameplaySeed === undefined) {
+    return frontier === undefined ? base : { ...base, factoryCarry: createInitialFactoryCarry(ANCHOR_FACTORY_METADATA.playerTrainerId, frontier) };
+  }
   if (!Number.isInteger(options.gameplaySeed) || options.gameplaySeed < 0 || options.gameplaySeed > 0xffffffff) {
     throw new Error(`gameplaySeed must be a u32, got ${options.gameplaySeed}`);
   }
   const bootRngValue = options.gameplaySeed >>> 0;
-  const carry = createInitialFactoryCarry(ANCHOR_FACTORY_METADATA.playerTrainerId);
+  const carry = createInitialFactoryCarry(ANCHOR_FACTORY_METADATA.playerTrainerId, frontier);
   const { generation, draftScreen } = generateFactoryChallengeDraft(carry, bootRngValue);
   return {
     ...base,
@@ -97,7 +105,7 @@ export function createChallengeState(options: FactorySessionOptions): EngineStat
   };
 }
 
-function createAfterSaveState(base: EngineState, gameplaySeed: number | undefined): EngineState {
+function createAfterSaveState(base: EngineState, gameplaySeed: number | undefined, frontier: FactoryFrontierRecord | undefined): EngineState {
   if (gameplaySeed !== undefined && (!Number.isInteger(gameplaySeed) || gameplaySeed < 0 || gameplaySeed > 0xffffffff)) {
     throw new Error(`gameplaySeed must be a u32, got ${gameplaySeed}`);
   }
@@ -108,7 +116,7 @@ function createAfterSaveState(base: EngineState, gameplaySeed: number | undefine
     lobbyAttendant: Object.freeze({ ...attendant, screen: "step" as const, page: 0, age: 0, lead: null }),
     rngMode: "vblank",
     rngValue: (gameplaySeed ?? base.rngValue) >>> 0,
-    factoryCarry: createInitialFactoryCarry(ANCHOR_FACTORY_METADATA.playerTrainerId),
+    factoryCarry: createInitialFactoryCarry(ANCHOR_FACTORY_METADATA.playerTrainerId, frontier),
   };
 }
 
@@ -196,6 +204,21 @@ export class FactorySession {
    */
   trace(fromSegment = 0): TraceSegment[] {
     return this.recorder.finishedSegmentsFrom(fromSegment);
+  }
+
+  /**
+   * The save's Factory record as it stands now: the carry's (the start record plus every finished round) with the live round's own. A symbol
+   * is the round outcome's as soon as the round ends (the ROM gives it in the battle room, before the Lobby); a heard bit as soon as the
+   * speech showed. Both only grow.
+   */
+  frontierRecord(): FactoryFrontierRecord {
+    const carried = factoryFrontierRecordOf(this.state.factoryCarry);
+    const round = this.state.factoryRoundBattleOrchestrator;
+    const symbols = Math.max(carried.symbols, round?.config.factorySymbolsCount ?? 0, round?.roundOutcome?.newSymbolsCount ?? 0) as 0 | 1 | 2;
+    const heard = mergeFactoryHeardBrainSpeech(carried.heardBrainSpeech, round?.facilityState.heardBrainSpeech)!;
+    // A symbol implies its speech was heard (the first meeting sets the bit before the battle, scripts.inc:118-121, :144-147): a round played
+    // without its battle-room scene (a test round, a staged one) still reports a record a save can hold.
+    return Object.freeze({ symbols, heardBrainSpeech: Object.freeze({ silver: heard.silver || symbols >= 1, gold: heard.gold || symbols === 2 }) });
   }
 
   /** The kernel-events digest so far: sha256 over each resolution segment's events, hex, 16 chars (as the census computes it). */

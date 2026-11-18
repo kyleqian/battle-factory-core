@@ -96,7 +96,8 @@ describe("FactorySession events (contract v2)", () => {
 
     // The headless replay of that trace is the same challenge.
     const replay = replayChallenge({ battleScene: "off", segments: trace });
-    expect(replay).toEqual({ frames: end.frame, streak: 1, ended: "retire", battles: session.battles, digest: session.digest() });
+    expect(replay).toEqual({ frames: end.frame, streak: 1, ended: "retire", battles: session.battles, digest: session.digest(),
+      frontier: { symbols: 0, heardBrainSpeech: { silver: false, gold: false } } });
     const untimed = trace.map(({ frames, buttons }) => ({ frames, buttons }));
     expect(replayChallenge({ battleScene: "off", segments: untimed }).digest).toBe(replay.digest);
   });
@@ -226,6 +227,7 @@ describe("resume", () => {
         ended: live.ended,
         battles: live.battles,
         digest: live.digest(),
+        frontier: live.frontierRecord(),
       });
     });
   }
