@@ -1051,6 +1051,28 @@ const PRE_MOVE_STATUS_ANIMATION_TIMING = Object.freeze({
   holdFrames: WAITMESSAGE_LONG_HOLD_FRAMES + PRE_MOVE_STATUS_ANIMATION_LEAD_ROWS,
 } as const);
 /**
+ * sta5 step 2 (docs/aud249-general-anim-sounds.md, ROM windows aud242b Flatter / aud242f Swagger): a stat print whose script goes on to
+ * inflict a status move effect (`printfromtable; waitmessage LONG; jumpifability; jumpifsideaffecting; setmoveeffect; seteffectprimary`,
+ * which runs `chosenstatus2animation`) reaches the launch 6 rows after the message ends: waitmessage's completing row, the four script
+ * rows, and the launch instruction's own row. Scene ON only: the Scene OFF census keeps its commands.
+ */
+export const MOVE_INFLICTED_STATUS_ANIMATION_LEAD_ROWS = 6;
+const MOVE_INFLICTED_STATUS_ANIMATION_TIMING = Object.freeze({
+  minimumFrames: 0,
+  holdFrames: WAITMESSAGE_LONG_HOLD_FRAMES + MOVE_INFLICTED_STATUS_ANIMATION_LEAD_ROWS,
+} as const);
+const MOVE_INFLICTED_STATUS_SHAPE = Object.freeze([
+  "B_SCR_OP_JUMPIFABILITY",
+  "B_SCR_OP_JUMPIFSIDEAFFECTING",
+  "B_SCR_OP_SETBYTE",
+  "B_SCR_OP_SETEFFECTPRIMARY",
+]);
+function isMoveInflictedStatusLaunch(programCounter: number): boolean {
+  const instructions = BATTLE_SCRIPT_PROGRAM.instructions;
+  return instructions[programCounter]?.opcodeName === "B_SCR_OP_PRINTFROMTABLE"
+    && MOVE_INFLICTED_STATUS_SHAPE.every((name, offset) => instructions[programCounter + 2 + offset]?.opcodeName === name);
+}
+/**
  * Executes the cadence expressed immediately after a real source print
  * command. This is keyed by immutable interpreter provenance, not by the
  * rendered string or the move/species that happened to reach it. The legacy
@@ -1059,6 +1081,7 @@ const PRE_MOVE_STATUS_ANIMATION_TIMING = Object.freeze({
  */
 function messageTimingFromSourceProvenance(
   event: BattleKernelSemanticEvent,
+  sceneOnMoveAnimationSeen: boolean,
 ): BattleMessageTiming | null {
   const programCounter = event.provenance?.programCounter;
   if (programCounter === undefined || programCounter < 0) return null;
@@ -1069,9 +1092,8 @@ function messageTimingFromSourceProvenance(
     && following.operands[0]!.expression === "B_WAIT_TIME_LONG"
   ) {
     const launch = BATTLE_SCRIPT_PROGRAM.instructions[programCounter + 2]?.opcodeName;
-    return launch === "B_SCR_OP_STATUS2ANIMATION" || launch === "B_SCR_OP_STATUSANIMATION"
-      ? PRE_MOVE_STATUS_ANIMATION_TIMING
-      : WAITMESSAGE_LONG_TIMING;
+    if (launch === "B_SCR_OP_STATUS2ANIMATION" || launch === "B_SCR_OP_STATUSANIMATION") return PRE_MOVE_STATUS_ANIMATION_TIMING;
+    return sceneOnMoveAnimationSeen && isMoveInflictedStatusLaunch(programCounter) ? MOVE_INFLICTED_STATUS_ANIMATION_TIMING : WAITMESSAGE_LONG_TIMING;
   }
   return null;
 }
@@ -1642,7 +1664,12 @@ const HPD4_BODY_LEAD_MOVE_IDS: readonly number[] = [49, 82, 111, 205, 301, 69];
  * Struggle, Rock Slide, Bubble Beam, Fire Blast, Magical Leaf.
  */
 export const HPD8_SHAPE_A_MOVE_IDS: ReadonlySet<number> = new Set([332, 94, 85, 38, 98, 34, 246, 202, 58, 57, 91, 165, 157, 61, 126, 345, 53, 76, 44, 188, 89, 185]);
-export const BODY_LEAD_AUDITED_MOVE_IDS: ReadonlySet<number> = new Set([...HPD4_BODY_LEAD_MOVE_IDS, ...HPD8_SHAPE_A_MOVE_IDS]);
+/**
+ * sta5 (docs/aud249-general-anim-sounds.md): the move-inflicted status bodies of sta4 (Flatter 260, Swagger 207, Spore 147, Toxic 92): the rows after the
+ * body that put the next command (`stat` / `status`, then the stat or status animation) on the ROM row, net of the 2-row `stat` / `status` command.
+ */
+export const STA5_STATUS_BODY_TAIL_ROWS: ReadonlyMap<number, number> = new Map([[260, 4], [207, 5], [147, 0], [92, 7]]);
+export const BODY_LEAD_AUDITED_MOVE_IDS: ReadonlySet<number> = new Set([...HPD4_BODY_LEAD_MOVE_IDS, ...HPD8_SHAPE_A_MOVE_IDS, ...STA5_STATUS_BODY_TAIL_ROWS.keys()]);
 
 function moveAnimationScriptLeadTiming(
   events: readonly BattleKernelSemanticEvent[],
@@ -4707,6 +4734,8 @@ export function projectBattleResolutionCommands(
   let lastMoveAttacker: 0 | 1 | null = null;
   // Target of the latest Scene ON MOVE_ANIMATION receipt (Scene OFF has none): its `returntoball` is the forced removal.
   let sceneOnMoveTarget: 0 | 1 | null = null;
+  // sta5 step 2 holds are Scene ON rows (the launch follows a Scene ON MOVE_ANIMATION receipt; Scene OFF has none and keeps its commands).
+  let sceneOnMoveAnimationSeen = false;
   // plr162 / snd182: battlers whose forced `returntoball BS_TARGET` (Roar / Whirlwind) removal awaits its send-in (both scenes).
   const forcedDraggedOut = new Set<0 | 1>();
   let pendingHeldItemEffectBattler: 0 | 1 | null = null;
@@ -4859,7 +4888,7 @@ export function projectBattleResolutionCommands(
             : payload.messageId === "STRINGID_SWITCHINMON"
               ? SWITCH_IN_MESSAGE_TIMING
               : (() => {
-                const base = messageTimingFromSourceProvenance(event)
+                const base = messageTimingFromSourceProvenance(event, sceneOnMoveAnimationSeen)
                   ?? (WAITMESSAGE_LONG_MESSAGE_IDS.has(payload.messageId)
                   ? WAITMESSAGE_LONG_TIMING
                   : MESSAGE_TIMING);
@@ -5007,6 +5036,7 @@ export function projectBattleResolutionCommands(
       if (payload.animationId === "MOVE_ANIMATION") {
         const animation = battleMoveAnimationRequest(battler, payload.target, payload.arguments);
         sceneOnMoveTarget = animation.target === battler ? null : animation.target;
+        sceneOnMoveAnimationSeen = true;
         const presentedSinceUsedAtAttack = commandsPresentedSinceUsedPrint(events, pauseOpenerIndex, commands.slice(pauseOpenerCommands), field);
         commands.push(Object.freeze({
           type: "move-animation",

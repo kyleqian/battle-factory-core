@@ -247,7 +247,8 @@ describe("S10A Flatter (260) faithful random", () => {
     const b = random2Route(51, "on", [3], 0, SEED_B), off = random2Route(51, "off", [3], 0, SEED_A);
     const bodies = a.bodies.filter((body) => body.moveId === 260 && body.attacker === 0);
     expect(bodies).toHaveLength(1);
-    expect(bodies[0]!.ages).toEqual(iu120EffectAges(260, 219));
+    // sta5: the Flatter body presents its script lead 2 + tail 4 rows.
+    expect(bodies[0]!.ages).toEqual(iu120EffectAges(260, 219, "player", 2));
     expect(bodies[0]!.active.every(Boolean)).toBe(true);
     expect(bodies[0]!.provenance).toBe("surrogate");
     expect(bodies[0]!.words).toHaveLength(114);

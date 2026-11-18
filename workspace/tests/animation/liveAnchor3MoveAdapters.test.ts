@@ -175,7 +175,9 @@ describe("live anchor3 move adapters", () => {
     const on = generatedCommandAnimationReplay(row.route.seed, "on", [row.route.slot], row.route.streak);
     const off = generatedCommandAnimationReplay(row.route.seed, "off", [row.route.slot], row.route.streak);
     const body = on.animations.find(animation => animation.moveId === row.id && animation.attacker === 0);
-    expect(body?.ages).toEqual(iu120Ages(row.id, row.duration));
+    // sta5: Swagger's body presents its script lead 2 + tail 5 rows around the accepted body (test-side copy of STA5_STATUS_BODY_TAIL_ROWS + the lead).
+    const sta5Rows = row.id === 207 ? 2 + 5 : 0;
+    expect(body?.ages).toEqual(iu120Ages(row.id, row.duration + sta5Rows));
     expect(body?.adapterActive.every(Boolean)).toBe(true);
     expect(on.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");
     expect(on.boundaries).toHaveLength(2);

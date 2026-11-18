@@ -67,8 +67,10 @@ const LIVE_MOVE_LEADLESS_TAIL_ROWS: ReadonlyMap<number, number> = new Map([[120,
 // Dig's lead is the attack turn's; a caller that presents the charge turn passes no lead.
 // A shape-A body's lead is the same 5 on both sides and every route, so callers that pass no lead get it; Dig (91) and Solar Beam (76: setup turn 0 has none; the unleash passes lead 5 and counts its 39 idle rows in the duration) are excluded (their charge turns have none).
 const HPD8_DEFAULT_LEAD: ReadonlyMap<number, number> = new Map(HPD8_SHAPE_A_IDS.filter((id) => id !== 91 && id !== 76).map((id): [number, number] => [id, id === 89 ? 11 : 5]));
+// sta5: the Flatter / Swagger / Spore / Toxic bodies' script tail (test-side copy of STA5_STATUS_BODY_TAIL_ROWS); their lead (Flatter / Swagger 2, Spore 7, Toxic 10) is passed by the caller.
+export const STA5_STATUS_BODY_TAIL_ROWS: ReadonlyMap<number, number> = new Map([[260, 4], [207, 5], [147, 0], [92, 7]]);
 function hpd4BodyTail(id: number, side: Iu120Side): number {
-  const table = HPD4_BODY_TAIL_ROWS.get(id);
+  const table = HPD4_BODY_TAIL_ROWS.get(id) ?? STA5_STATUS_BODY_TAIL_ROWS.get(id);
   if (table !== undefined) return table;
   return HPD8_SHAPE_A_IDS.includes(id) ? Math.max(0, 6 - iu120Pre(id, side) - iu120Post(id, side)) : 0;
 }
@@ -91,7 +93,7 @@ export function iu120EffectAges(id: number, duration: number, side: Iu120Side = 
   const hold = iu120Pre(id, side) + (LAND97_LEAD_ROWS.get(id) ?? 0);
   const bodyLead = lead ?? HPD8_DEFAULT_LEAD.get(id) ?? 0;
   const tail = bodyLead === 0 ? LIVE_MOVE_LEADLESS_TAIL_ROWS.get(id) ?? 0 : hpd4BodyTail(id, side);
-  const held = iu120Post(id, side) + ont193ScriptTail(id) > 0 || LIVE_MOVE_LEADLESS_TAIL_ROWS.has(id);
+  const held = iu120Post(id, side) + ont193ScriptTail(id) > 0 || LIVE_MOVE_LEADLESS_TAIL_ROWS.has(id) || STA5_STATUS_BODY_TAIL_ROWS.has(id);
   return [...Array(hold + bodyLead).fill(0), ...Array.from({ length: duration }, (_, age) => age), ...Array(iu120Post(id, side)).fill(duration - 1), ...Array(ont193ScriptTail(id)).fill(duration - 1),
     ...Array.from({ length: tail }, (_, i) => (held ? duration - 1 : duration + i))];
 }
