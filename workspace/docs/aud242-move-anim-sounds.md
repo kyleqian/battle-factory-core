@@ -1522,3 +1522,59 @@ So exactly two C sites (Explosion/Self-Destruct, Memento) emit the sentinel, and
 3. Re-pin after landing: `tests/aud262MoveAnimSounds.test.ts` Memento offset (-108), any Explosion / Self-Destruct census rows, the hpd tables; then `npm run compare` of the four windows above (user bar empty from the first row, body at A) and of `aud262-memento-opponent-on`.
 4. Self-Destruct's 9-row short body is not covered by this fix; track it separately.
 5. Gameplay is untouched (presentation commands only; the engine events and `gBattleMoveDamage` are unchanged).
+
+### sdx1: the two short windows are both `Cmd_end` waiting for a song (Self-Destruct 9 rows, Solar Beam 78 rows) (measurement only; nothing under `src/` or `tests/` changed)
+
+Base `6d09abdf8`, Scene ON (8012). Method: per-frame ROM RAM sampling in the `hpd2Probe.py` style (`gAnimScriptActive`, `gAnimVisualTaskCount`, `gAnimSoundTaskCount`, the `gMPlayInfo_SE1/SE2/SE3` `songHeader` + `status` words, and for Solar Beam `REG_BLDY` / `REG_BLDCNT`), run on the exp1 `selfdestruct-{player,opponent}-on.json` labs and the hpd7b `hpd7b-solarbeam-player-on.json` lab (trace 1400 frames), plus `tools/audio/soundEventProbe.py ... lab ... --frames 1000 --profile on --fast` on the Solar Beam lab for the SE call log. Song lengths from a port of the extractor's `seExact` (`tools/extract/extract-anim-sound-timing.ts`; tempo 150, one tick per VBlank, length = FINE tick + 1). Evidence (not committed): `/tmp/sdx1/` (`probe.py`, `probe2.py`, `rom-*.json`, `se-solar.json`, `app.ts`). Row = frame - A, A = first frame with `gAnimScriptActive = 1`.
+
+**One rule explains both: `Cmd_end` (`battle_anim.c:476`) keeps `gAnimScriptActive` set until the last started SE's song has ended (`IsSEPlaying`, <= 90 rows), and in both moves the app's window ends at the last *visual* row.**
+
+#### Self-Destruct: the missing 9 rows are the song of the last explosion (`SE_M_SELF_DESTRUCT`, 50 VBlanks)
+
+Script (`battle_anim_scripts.s:1458-1488`, `Move_SELF_DESTRUCT`): setup (blend task + 5 `AnimTask_ShakeMon2`, row 0..3), then `SelfDestructExplode` twice = 10 x (`playsewithpan SE_M_SELF_DESTRUCT` + `createsprite gExplosionSpriteTemplate` + `delay 6`; `delay 6` = 8 rows, `SELF_DESTRUCT_EXPLOSION_INTERVAL` `src/animation/selfDestruct.ts:19`), `waitforvisualfinish`, the 9 -> 0 attacker blend (`delay 1`, 9 steps x 2 rows), `end`. Sprite lifetime 20 rows (`selfDestruct.ts:20`).
+
+ROM (player A = frame 64; opponent A = 68; the two are identical row for row):
+
+| Row | Event |
+| --- | --- |
+| 4, 12, 20, ... 76 | SE1 restarts with `se_m_self_destruct` (songHeader `0x88ffdf8`, status 0 -> 1) - ten starts, 8 apart (each `playsewithpan` replaces the previous on SE1) |
+| 0..96 | `vt` 4 .. 6 while the sprites live, the last explosion (spawn row 76) dies at row 96 (`vt` 0) |
+| 97 | the reverse blend task (`vt` 1) |
+| 115 | `vt` 0: **the last visual object ends** (the app's `selfDestructAtAge` reaches `attackerPaletteY = 0` at age 111; idle 4 + live 113 = 117 = this row + the first-inactive convention) |
+| **126** | **SE1 status -> PAUSE (`0x80000000`) and `gAnimScriptActive` -> 0 on the same frame**: 76 + 50 = 126 |
+
+So the ROM window is `last playsewithpan row 76 + song 50 = 126`; the visuals are over 11 rows earlier (row 115), nothing else is alive in rows 116..125 (`vt` 0, `st` 0). The app's 117 = idle 4 + live 113 is the end of the accepted visual window (`liveMoveAnimation.ts:1440-1444`: "the script runs 10 frames past it (204/208), uncovered"; prep6 s0 table: "10-frame uncovered tail") - the 10 frames that comment calls uncovered are this `Cmd_end` wait (9 vs 10: the comment's window ends one row earlier than the first-inactive row used here). Explosion (153) is exact (4 + 212 = 216) because its last visual, `delay 50` + the white blend, outlasts `SE_M_EXPLOSION` (73 VBlanks from its last start at row ~76), so it is not affected.
+
+**Proposed fix (not landed):** `liveMoveAnimationDuration` case 120 (`liveMoveAnimation.ts:1444`): `113` -> **`122`** (idle 4 + live 122 = 126 = the measured ROM active rows, the Explosion convention; both sides). The extra rows are a hold: `selfDestructAtAge` already returns no explosions and `attackerPaletteY = 0` for ages >= 112, so the picture is unchanged and no renderer work is needed. Sound ages are counted from the window start and the ten SE starts are all inside 4..76, so the existing sound pins do not move. Checks at landing: the `hit-animation` start for Self-Destruct moves from `+91` to `+100` relative to the ROM in the exp1 table (that is, the same +100 as Explosion, i.e. exactly the 0x7FFF drain's share, so the shared drain fix then closes the whole offset); re-run the T1 census Self-Destruct rows and `tests` that pin 113 (grep `113` near 120 in the live-window tests).
+
+#### Solar Beam: the 237-row window is `43 + 194`; the song starts at row 43, not row 4
+
+ROM unleash window (hpd7b lab, player attacker, A = frame 638, `gAnimScriptActive` 638 .. 874, next exec at 879):
+
+| Row (frame) | Event (RAM) |
+| --- | --- |
+| 5 .. 42 (643 .. 680) | `SetSolarBeamBg` = `fadetobg BG_SOLAR_BEAM_PLAYER` + `waitbgfadein` (`battle_anim_scripts.s:10200-10217`): `REG_BLDCNT = 0xE8` (BG3 darken), `BLDY` 0 -> 16 (rows 5..21), held to row 26, 16 -> 0 (rows 26..41), `BLDCNT = 0` at row 42. `vt` 0, no SE, nothing else runs - **the script has not reached `panse` yet** |
+| **43 (681)** | **`panse SE_M_SOLAR_BEAM` runs (`Cmd_panse`, `battle_anim.c:1395`): `PlaySE12WithPanning(201, -64)`**; SE2 songHeader `0x8900b8c` status 0 -> 1 on 681/682; `AnimTask_CreateSmallSolarBeamOrbs` + first big orb (`vt` 2, `st` 1). soundEventProbe: `{frame 681, SE_M_SOLAR_BEAM, id 201, pan -64, PlaySE12WithPanning}` then `CalculatePanIncrement` every frame 681..744 (the 64-step pan task) |
+| 49 / 55 (687 / 693) | `BlendBattleAnimPal` 0 -> 10 task (`vt` 3), `AnimTask_ShakeMon2` (`vt` 5) |
+| 106 (744) | `st` 0: the pan task is done (it never waits longer than 64 rows) |
+| 189 (827) | `vt` 0: `waitforvisualfinish` released |
+| 190 .. 211 (828 .. 849) | `BlendBattleAnimPal 10 -> 0` (`vt` 1) **and** `restorebg` (`UnsetSolarBeamBg`): `BLDCNT = 0xE8`, `BLDY` 0 -> 16 (rows 191..207), held, 16 -> 0 (rows 212..227), `BLDCNT = 0` at row 228 (866) |
+| 229 .. 236 | script is at `SolarBeamEnd: waitforvisualfinish; end`: `vt` 0, `st` 0, **only `IsSEPlaying` keeps it waiting** (8 rows, far below the 90 cap) |
+| **237 (875)** | **SE2 status -> PAUSE and `gAnimScriptActive` -> 0 on the same frame: 681 + 194 = 875** |
+
+Answers to the open liv1 question:
+
+1. **Which sound:** the one `SE_M_SOLAR_BEAM` (id 201), started once, at row 43. No second SE, no loop: SE1 / SE3 never change in the window; the only other SE in the log is `SE_EFFECTIVE` (id 13) at frame 878 (the hit). The song is the flat 194-VBlank `seExact` value, confirmed on hardware: PAUSE appears exactly 194 frames after the start frame.
+2. **Why liv1 got 198, not 237:** it assumed the SE starts at the app's sound age 4 (`src/animation/solarBeam.ts:292-293`, `!setup && age === 4`). The ROM starts it at row 43 because `SetSolarBeamBg`'s 38-row BG fade precedes `panse`. 43 + 194 = 237 exactly.
+3. **liv1's "no sprite, task, BG or palette command exists in rows 160 .. 237" is wrong in the ROM's own rows.** The ROM draws the `restorebg` BG3 darken fade (rows 191..228) and the `BlendBattleAnimPal 10 -> 0` restore (rows 190..211) there; only rows ~229..237 are a pure song wait. What makes the app's 160 look complete is where its age 0 sits: matching the app's own reducer to the ROM rows (target-palette ramp 18 .. 36 against the ROM's `BlendBattleAnimPal` at row 49, shake age 22 against row 55, BG restore age 151 against the ROM's `restorebg` at row 191) puts **app age 0 at about ROM row 40**, i.e. right after the head fade, and its SE age 4 at row 44 (the +1..+7 sound-clock reading, section 29 stage table). The accepted window excludes both BG fades (`solarBeam.ts:251-253`: "BG VRAM maps switch atomically on source ages 4 and 151 ... `bldy` stays at zero"), where the ROM has `BLDY` 0 -> 16 -> 0 at both.
+4. **Consequence for the lead:** the unleash command is `0+3+0+160+0` (hpd7b table), so the live window starts at ROM row ~0 instead of ~40: the beam plays ~40 rows early *and* ends ~38 rows before the ROM's last BG fade row. `78 = 39 (head) + 39 (tail)`, and the SE (age 4 -> row 4) starts ~39 rows before the ROM's row 43.
+
+**Proposed fix (not landed), two parts, both timing (no change to the reducer's pictures):**
+
+- A. Head idle for the unleash body: the window must open at about ROM row 39..40 (the reducer's age 4 = the SE row 43 - the app's +1 sound read) - i.e. an `idle` of **39** rows (the 38-row `fadetobg` + the handoff) for case 76 unleash only (`request.turn & 1 === 1`), the existing `idle` mechanism (Self-Destruct's 4 / Explosion's 4 / Bite's 10 are the same kind of lead). During it the scene is the unmodified battle scene (the ROM's `fadetobg` darkening of BG3 is not drawn today, so this stays a hold; drawing the BLDY fade is renderer work and an accepted-window question, not this fix).
+- B. Tail: `live` = `SOLAR_BEAM_UNLEASH_FIRST_INACTIVE_AGE + 1` (160) -> **199** (`liveMoveAnimation.ts:1325-1326`; idle 39 + live 199 = 238 = ROM active rows 237 + 1, the `len + 1` convention of liv1). Rows 160..198 hold the age-159 picture (the ROM's last 38 rows are the BG3 restore fade, which the accepted window does not draw, and the song wait).
+- Sound: move `SE_M_SOLAR_BEAM` with the window (age 4 stays; it is then the ROM's row 43 give or take the standing +1..+7 sound-clock read). Since the song is 194 VBlanks, the SE ends at row 237 = the window end, as in the ROM; no need to cut or extend it.
+- Not covered: the opponent-attacker side was not run (the fade, `panse` and song do not depend on the side, so the 43 / 194 / 237 constants should hold; verify with one `hpd7b`-shape lab with the sides swapped), nor a second use. The charge turn (107 / 108) is unaffected.
+- After landing: re-measure with the hpd7b `Solar Beam unleash` row (expect `d = 8` = lead 5 + T 3, down from 86), `npm run compare` of a Solar Beam unleash lab (the head idle changes what is on screen in the first 39 rows only if the fade is later drawn), and the aud242 / `moveAnimSounds` pins for move 76.
+
+Gameplay is untouched in both proposals (presentation windows only).
