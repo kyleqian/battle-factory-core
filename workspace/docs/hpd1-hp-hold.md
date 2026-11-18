@@ -374,6 +374,13 @@ the join, `an.py` / `join.py` / `seq.py` the analysis, `appTrace.hpd7.ts` + `hpd
 | 25 | Thunder Wave (86) | 235 | **9** | 12 | 119 | 136 (5; next = the paralysis status anim) | `0+3+0+120+2` | 125 | 11 | 9 + 2 | no | `gen-thunderwave-player-on` |
 | 26 | Curse (174) | 228 | 4 | 7 | 175 | 187 (5; next = the stat command) | `0+3+0+176+0` | 179 | 8 | 4 + 4 | no | `aud242f-curse-player-on` |
 | 27 | Ancient Power (246) | 226 | 5 | 8 | 127 | 139 (4) | `0+3+0+128+2` | 133 | 6 | 5 + 1 | no | `aud242k-ancientpower-player-on` |
+| 50 | Toxic (92) (sta4) | 156 | **10** | 13 | 230 | 248 (5; next = `Status_Poison`) | `0+3+7+219+0` | 229 | 19 (**17** net of the 2-row `status` command that follows) | 10 + 7 (net) | **yes, 5 rows (idle 7 + live 219 = len - 4, shape B)** | `aud242e-toxic-player-on` |
+| 61 | Swagger (207) (sta4) | 128 | 2 | 5 | 168 | 180 (7; next = the stat-change anim) | `0+3+7+161+0` | 171 | 9 (**7** net of the 2-row `stat` command) | 2 + 5 (net) | 1 row short (idle 7 + live 161 = len, not len + 1) | `aud242f-swagger-player-on` |
+| 132 | Dream Eater (138) (sta4), turn 3 of the sleep lab | 55 | 5 | 8 | 265 | 277 (4) | `0+3+0+266+0` | 269 | 8 | 5 + 3 (shape A) | no | `aud242g-dreameater-sleep-player-on` (R 759, A 767, H 1036) |
+| 161 | Flatter (260) (sta4) | 36 | 2 | 5 | 218 | 230 (7; next = the stat-change anim) | `0+3+0+219+0` | 222 | 8 (**6** net of the 2-row `stat` command) | 2 + 4 (net) | no | `aud242b-flatter-player-on` |
+| 218 | Spore (147) (sta4), turn 1 of the sleep lab | 16 | **7** | 10 | 206 | 221 (5; next = `Status_Sleep`) | `0+3+0+207+2` | 212 | 9 (**7** net of the 2-row `status` command) | 7 + 0 (net) | no | `aud242g-dreameater-sleep-player-on` (R 48, A 58) |
+
+Rows 50 / 61 / 132 / 161 / 218 were added by sta4 (`docs/aud249-general-anim-sounds.md`): the bodies in front of the first `Status_*` play of the sta3 labs. For the status-followed rows (Toxic, Swagger, Flatter, Spore) the next command is a 2-row `stat` / `status` command, so `d` is given as measured against the command's end and net of those 2 rows; the net number is the one that puts the following command on the ROM's launch row. Dream Eater's `d` is the plain shape-A hit row (the hit lands 8 rows later than the app's relative span; the lab's print-side offset adds 3 more in absolute frames: 5 script rows before `attackstring` against the app's fixed 2, the `accuracycheck` / `jumpifstatus*` rows of the pre-print family).
 
 Not run (labs exist or are one `aud241bStage` line away): Icy Wind (196, rank 23, `aud242b-icywind-opponent-on`), Solar Beam (76), Water Pulse (352), Rain Dance (240), Mud-Slap (189), Facade (263).
 

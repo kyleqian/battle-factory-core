@@ -175,3 +175,79 @@ ROM step-mode windows (Scene ON, `gBattlescriptCurrInstr` + controller state per
 **SE anchor (`STATUS_ANIMATION_SCRIPT_AGE` 7 vs 1).** The ROM's first SE is at script row X + 3 after the launch row, i.e. command age 2, so the source-true constant is about -1. The 7 compensates an upstream engine-early drift of the move body before the status play (8 rows in dreameater, 16 in swagger); changing it to the true value would worsen every first-play residual by those rows. It stays 7; removing the drift is the move-body presentation lane's work.
 
 **Census (seeds 0..99, both scenes, `rst197CensusDelta.py` / `soundCensusDelta.py`).** eventsDigest and error equal on 100 / 100 in both scenes (outcomes, HP, RNG, decisions). Command sequences differ only by inserted draw-nothing pause `move-animation` commands (185 ON, 92 OFF: the transition into a pre-move print now exists); changed commands move by exactly the 3 launch rows (message holdFrames 64 -> 67). Sound: event sequences identical on 100 / 100; 68 / 100 seeds have frames moved in each scene (cumulative shift after the first pre-move print), 32 identical. `tests/aud252LossBallOpen.test.ts` seed 2230 moves 1 row toward the ROM (a pre-move print follows its held-item effect).
+
+## sta4: what the first Status_* play's +7 / +8 is made of (2026-11-18, measurement only, `src/` / `tests/` untouched)
+
+Scene ON ROM per-frame RAM (`tools/integration/hpd2Probe.py`, `gBattlescriptCurrInstr` / `gBattleControllerExecFlags` / `gAnimScriptActive`, the sta3 labs) against the app's per-command rows (`tools/integration/hpd4Cmds.ts` on a trace with the lab's `appStage`), same method as hpd7 (`docs/hpd1-hp-hold.md`): `R` = the used print's release (last controller-exec fall before the body), `L` = script instructions between `R` and the `attackanimation` execution (`ex = A - 3`), `A` = `gAnimScriptActive` rise, `len` = active rows, launch = the status animation's `A`. Probe frames and app frames are the same domain (frame 0 = after `BattleLab.prepare`; the SE fixtures use it too).
+Evidence (ignored): `.integration/evidence/sta4/` (`ram/` ROM timelines, `app/` command rows, `traces/`, `an.py` the per-frame script-row listing, `hpd4`'s `an.py` copied as `hpdan.py`).
+
+**Naming correction.** The `aud242g-dreameater-sleep-player-on` window is three turns: turn 1 is **Spore** (id 147, `BattleScript_EffectSleep`, then `Status_Sleep`), turn 2 the foe's pre-move "is fast asleep" (the sta3 second play), turn 3 **Dream Eater** (id 138). So the "dreameater first play 0" of sta3 is Spore's body; Dream Eater's own body has no status play and falls past the 822-frame sound window. All four bodies are measured (Toxic, the psn1 / psn2 window, is added as an independent check: it is a move-inflicted status as well).
+
+### ROM rows (probe frames)
+
+| body | script entered | used print exec (`attackstring`) | R | `ppreduce` .. `attackanimation` exec | A | len | window end | next exec (`H`) | R -> H | status launch (A) | first SE |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| Flatter (260), turn 1 | 27 | 31 (4 script rows: canceler, `jumpifstatus2`, `accuracycheck`, `attackstring`) | 52 | 53 `ppreduce`, 54 `jumpifconfusedandstatmaxed`, 55 `attackanimation` (**L = 2**) | 57 | 218 | 275 | 282 (`playanimation` Atk/SpA up, 7 rows after the window: `waitanimation`, `setstatchanger`, `statbuffchange`, `jumpifbyte`, `setgraphicalstatchangevalues`) | 230 | 455 (stat anim 282 + 75 -> print 359 -> release 386 -> `waitmessage` done 450 -> 4 script rows -> `chosenstatus2animation` 455) | 458 |
+| Swagger (207), turn 1 | 27 | 31 | 52 | same 3 rows (**L = 2**) | 57 | 168 | 225 | 232 | 180 | 426 (stat anim 232 + 89 -> print 323 -> release 357 -> done 421 -> 426) | 429 |
+| Spore (147), turn 1 | 27 | 29 (2 script rows) | 48 | 49 .. 55 seven rows (**L = 7**) | 58 | 206 | 264 | 269 (the status launch itself: 5 rows after the window) | 221 | 269 | 272 |
+| Toxic (92), turn 1 | 27 | - | 48 | **L = 10** | 61 | 230 | 291 | 296 (status launch) | 248 | 296 | 296 |
+| Dream Eater (138), turn 3 | 729 | 734 (5 script rows: canceler, `jumpifstatus2`, `jumpifstatus`, `accuracycheck`, `attackstring`) | 759 | 760 .. 764 `ppreduce`, `critcalc`, `damagecalc`, `typecalc`, `adjustnormaldamage`, 765 `attackanimation` (**L = 5**) | 767 | 265 | 1032 | 1036 (`hitanimation`) | 277 | - (no status play) | - |
+
+First SE = launch + 3 for the Confusion (flatter, swagger, both plays), Sleep (Spore, both plays) windows and + 0 for Toxic's `Status_Poison` (first SE row at table frame 0), i.e. **the ROM's SE is the launch row plus the table row's own frame, nothing else** (second plays: 752 = 749 + 3, 723 = 720 + 3, 565 = 562 + 3).
+
+### App rows (app command starts) against the ROM
+
+| body | app: used message / move-animation `S` / `pre+idle+live+post` | next commands | ROM - app: print / R vs `S` | ROM - app at the next command (stats-change start, or the status-animation start) | status-animation start (app) vs ROM launch | ROM - app (SE, age 7) |
+|---|---|---|---|---|---|---|
+| Flatter | 30 / 50 / `3+0+219+0` (222 = len + 1 + 3) | `stat` 272 (2 rows), `stats-change` 274, message 351, `status-animation` 441 (100 rows) | +1 / +2 | **+8** (274 vs 282) | 441 vs 455 = **+14** | +7 |
+| Swagger | 30 / 50 / `3+7+161+0` (171; idle + live = len, **not** len + 1) | `stat` 221, `stats-change` 223, message 314, `status-animation` 411 | +1 / +2 | **+9** (223 vs 232) | 411 vs 426 = **+15** | +8 |
+| Spore | 30 / 48 / `3+0+207+2` (212 = len + 1 + 5) | `status` 260 (2 rows), `status-animation` 262 | -1 / 0 | **+7** (262 vs 269) | 262 vs 269 = **+7** | 0 |
+| Toxic | 30 / 48 / `3+7+219+0` (idle + live = len - 4) | `status` 277, `status-animation` 279 | - / 0 | **+17** (279 vs 296) | **+17** | +10 (psn2) |
+| Dream Eater | 732 / 756 / `3+0+266+0` (269 = len + 1 + 3) | `hit-animation` 1025 | +2 / +3 | +11 (1025 vs 1036) | - | - |
+
+The app's stats-change / message sections are ROM-exact internally (stat animation 77 = 77 flatter, 91 = 91 swagger; message start to next command 8 / 9 equal to the stats-change offset), so the offsets above are carried unchanged from the body to the message. **The first-play residual is `launch offset - 7` in all four windows** (flatter 14 - 7, swagger 15 - 7, Spore 7 - 7, Toxic 17 - 7): the 7 of `STATUS_ANIMATION_SCRIPT_AGE` is exactly a Spore-sized hole in the body, nothing more.
+
+### The decomposition of the launch offset
+
+| window | pre-print rows (`S` - `R` offset) | body: script lead L + tail T (relative, net of the 2-row `stat` / `status` command) | message -> launch (`chosenstatus2animation` path) | sum = launch offset |
+|---|---|---|---|---|
+| Flatter | 2 | 6 = 2 + 4 | 6 | **14** |
+| Swagger | 2 | 7 = 2 + 5 | 6 | **15** |
+| Spore | 0 | 7 = 7 + 0 | none (the status follows the body) | **7** |
+| Toxic | 0 | 17 = 10 + 7 (5 of the 7 = the live window shortfall: idle 7 + live 219 = len - 4, a shape-B body) | none | **17** |
+
+- **Pre-print rows.** The app anchors the used print at one frame (message 30 for every turn-1 lab) and `S` = `R` only for a script with 2 rows before `attackstring` (Spore, Toxic). The ROM print starts at script entry + (rows through `attackstring`): flatter / swagger 4 (`accuracycheck`, `jumpifstatus2` extra), Dream Eater 5 (`jumpifstatus2`, `jumpifstatus`, `accuracycheck` extra); `S - R` = -2 / -2 / -3, equal to (rows - 2) in all three. The same family as the hpd script lead, but **before** the print. (The print's own length is 1 row short in every lab, the message-start convention of sta3, and is the same in Spore: those 0 / -1 offsets are not part of this.)
+- **Body.** L is the instruction count between the used print and `attackanimation` (Flatter / Swagger `ppreduce` + `jumpifconfusedandstatmaxed`), T puts the next command (`stats-change` / `status-animation`) on the ROM row. This is the plain hpd7 row (table in `docs/hpd1-hp-hold.md`).
+- **Message -> launch.** ROM `printfromtable` exec to `chosenstatus2animation` is 96 (flatter) / 103 (swagger), the app's message-to-status is 90 / 97: **+6**. After `waitmessage`'s completion row (450 / 421) the script runs `jumpifability`, `jumpifsideaffecting`, `setmoveeffect`, `seteffectprimary` (4 rows) before the launch row; the sta3 pre-move path (`printstring; waitmessage; status2animation`) has none, which is why its 3 launch rows (`PRE_MOVE_STATUS_ANIMATION_LEAD_ROWS`) do not cover this shape. The move-inflicted `chosenstatus2animation` after a *stat* print is exactly the shape sta3 left unchanged.
+- Launch-to-launch spans (flatter 455 -> 749 = 441 -> 735 = 294, swagger 426 -> 720 = 411 -> 705 = 294) are equal, so a landing moves the second play with the first: the second-play residuals follow the first (Spore's 0 / 0, flatter's 7 / 7).
+- Small separate row: ROM status launch -> the next print is 101 (confusion, both) / 98 (sleep) / 72 (poison) against `STATUS_ANIMATION_ADDED_ROWS` 100 / 97 / 71, one row each in the four windows; it is compensated downstream (the launch-to-launch spans above are equal), so it does not move any SE. Not proposed.
+
+### What `STATUS_ANIMATION_SCRIPT_AGE` becomes
+
+The engine's first SE is `status-animation start + AGE + table row frame` and the ROM's is `launch + table row frame` (above), so with the command start on the ROM launch row the constant is **0** (the sta3 "about -1 / 2" source reading did not count the status launch as the `gAnimScriptActive` rise row; the measured anchor is the rise row itself).
+
+| step (cumulative, SE residual ROM - app at age 0) | Flatter | Swagger | Spore (play 1 / 2) | Toxic |
+|---|---|---|---|---|
+| now (age 7) | 7 | 8 | 0 / 0 | 10 |
+| 1. bodies get lead + tail (Flatter +6, Swagger +7, Spore +7, Toxic +17 rows before the status), **age 7 -> 0** | 8 | 8 | 0 / 0 | **0** |
+| 2. + 6 message -> launch rows (move-inflicted `chosenstatus2animation`) | 2 | 2 | - | - |
+| 3. + the 2 pre-print rows (flatter / swagger: `accuracycheck`, `jumpifstatus2`) | **0** | **0** | - | - |
+
+Step 1 alone moves no window away from the ROM (flatter 7 -> 8, everything else equal or closer) and takes Spore and Toxic to exact; steps 2 and 3 take flatter / swagger to exact. The second plays follow (flatter / swagger second == first, Spore second 0).
+
+### Proposed change (not landed)
+
+1. Add the four bodies to the audited-lead set (`BODY_LEAD_AUDITED_MOVE_IDS` / `HPD4_BODY_TAIL_ROWS` style, `battleResolutionPresentation.ts` / `battleResolutionPresentationRender.ts`): Flatter lead 2 + tail 4, Swagger 2 + 5, Spore 7 + 0, Toxic 10 + 7 (Toxic and Swagger want their live windows checked first: Toxic idle + live = len - 4, Swagger idle + live = len, the shape-A bodies have len + 1). Dream Eater (138) is a plain shape-A row: 5 + 3 (pre 3 + post 0, `live` 266 = len + 1), not part of the status offset, hit 11 rows after the ROM's in the lab (8 body + 3 pre-print).
+2. In the same landing `STATUS_ANIMATION_SCRIPT_AGE` 7 -> 0 (`moveAnimSounds.ts:429`; the `age === STATUS_ANIMATION_SCRIPT_AGE` tail scheduling at line 498 and `scheduleStatusAnimationTail` re-based accordingly), and the Toxic window pin in `tests/aud249GeneralAnimSounds.test.ts` (`[286, 300, ...]` -> ROM `[296, 310, ...]`) and the `WINDOWS` residuals (flatter 7 / 7 -> 8 / 8, swagger 8 / 8 -> 8 / 8) move with it. Every other `Status_*` pin with its own measured residual (end-of-turn burn / poison ticks, paralysis, infatuation) needs its window re-measured: **only the Confusion (both plays), Sleep (both plays) and move-inflicted Poison launches are measured here; a status play with no body in front of it (a tick) would move 7 frames earlier at age 0 without a measurement.**
+3. Then +6 hold rows on the stat-print -> `chosenstatus2animation` message (the sta3 `PRE_MOVE_STATUS_ANIMATION_LEAD_ROWS` analog, kept off the status command so the `seGateFrames` invariants hold), then the pre-print rows (script rows before `attackstring` beyond 2; `accuracycheck`, `jumpifstatus2`, `jumpifstatus`), the print-side family of the lead; those two are Scene ON frame changes, so the usual neutrality census applies, as for sta3.
+
+Reproduce (no `npm test`; scratch scripts in the ignored `.integration/evidence/sta4/`):
+```
+ln -s /srv/pokebench/vendor/pokeemerald reference/pokeemerald   # worktree only
+export PYTHONPATH=/srv/pokebench/vendor/libmgba-py
+for p in "flatter aud242b-flatter-player-on 900" "swagger aud242f-swagger-player-on 900" "dream2 aud242g-dreameater-sleep-player-on 1250" "toxic aud242e-toxic-player-on 500"; do set -- $p
+  python3 tools/run-mgba-probe.py E/ram/$1.json -- /srv/pokebench/vendor/mgba-venv/bin/python tools/integration/hpd2Probe.py tools/battle-lab/$2.json on E/ram/$1.json $3; done
+# trace per lab: {appRoute: generated-orchestrator, oracleProfile: battle-scene-on, appStage: {id: <lab>, frame: 0}, segments: <the lab's trace.segments>}
+node --experimental-strip-types --no-warnings tools/integration/hpd4Cmds.ts E/traces/<lab>.json 1250     # app rows
+python3 E/hpdan.py ...   # hpd7b's an.py: R / ex / A / len / H per gAnimScriptActive window
+```
