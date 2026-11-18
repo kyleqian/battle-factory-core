@@ -1247,7 +1247,8 @@ function sceneOffNoHitPauseFrames(
     if (command.type === "move-animation" || command.type === "hit-animation" || timing === undefined) return null;
     if (command.type === "message" || (timing.holdFrames ?? 0) > 0) held = true;
     if (command.type === "status-icon") iconSequence = command.eventSequence;
-    presented += timing.minimumFrames;
+    // mem2: an instant-drop hp command presents its real rows (tailFrames) and has no floor.
+    presented += command.type === "hp" && command.timing.instantDrop !== undefined ? command.timing.tailFrames ?? 0 : timing.minimumFrames;
   }
   // The held-message path is ROM-anchored only for Rest's shape: trysetrest's
   // status, the held print, the status icon (off108 §1 / off148 R3). Other

@@ -64,4 +64,16 @@ describe("mem2: the 0x7FFF user bar is an instant drop", () => {
     expect(hp.timing.instantDrop).toBeUndefined();
     expect(battleResolutionCommandDuration(hp, field)).toBeGreaterThanOrEqual(hp.from - hp.to > 0 ? 2 : 1);
   });
+
+  it("Scene OFF: the no-hit pause before the body counts the instant hp command's real rows, so hp + pause keeps the kernel-row total (Memento 5 + 37 = 42, Explosion 6 + 48 = 54)", () => {
+    for (const [moveId, total] of [[262, 42], [153, 54], [120, 54]] as const) {
+      for (const side of ["player", "trainer"] as const) {
+        const { commands, field } = production(moveId, side, "off");
+        const i = commands.findIndex((command) => command.type === "hp" && command.healthValue === 0x7fff);
+        const body = commands[i + 1]!;
+        expect([moveId, side, body.type]).toEqual([moveId, side, "move-animation"]);
+        expect([moveId, side, battleResolutionCommandDuration(commands[i]!, field) + body.timing.minimumFrames]).toEqual([moveId, side, total]);
+      }
+    }
+  });
 });
