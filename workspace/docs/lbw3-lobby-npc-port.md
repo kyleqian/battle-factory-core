@@ -115,8 +115,56 @@ Per case a committed compare trace (the lbw4 route to 5254 + the branch; `tools/
   `npm run compare`, capture windows from 5254: `lbw5-fatman-off` 254 / 254, `lbw5-bump-turn-off` (chg-LEFT-d75) 269 / 269, `lbw5-turn-refuse-off` (tdep-P5856) 745 / 745, `lbw5-race-off` (race-P5944) 796 / 796.
   All 64 sweep branches (6 fat man + 20 bump + 44 race / turn) match on player cur / prv, both wanderers and the cursor except the 3 pre-existing no-release-gap `fatN-j*-g0` branches (last bullet); retire-off stays 1476 / 1554 (the dialog-text residual above). No regression: lbw4-woman-block-off 501 / 501, lbra-loss-off 2258 / 2258,
   loss-beyond-boundary 183 / 183, loss-lobby-walk 177 / 177, won-no 54 / 54, won-yes 54 / 54, won-attendant 17 + 6 + 44, lbra-forfeit 113 / 113.
-- **Residuals (pose only, one frame each, excluded from the committed capture lists):** the first step frame after a bump interrupt (5394 in bump-turn, 5866 in turn-refuse: the ROM shows the new walk pose
+- **Residuals (pose only, one frame each, excluded from the committed capture lists; FIXED in lbw6, see below):** the first step frame after a bump interrupt (5394 in bump-turn, 5866 in turn-refuse: the ROM shows the new walk pose
   on that frame and keeps it nine frames, the engine's lagged clock shows stand); a bump-cycle boundary one frame early at 5946 (turn-refuse) and 6009 (race, after a bump settles); the fat-man bump
   settle after a release 5455 (the ROM runs one extra 16-frame cycle). None moves a tile, an NPC or the cursor.
-- **Pre-existing, not changed:** a held direction change while a step is in flight (RIGHT -> DOWN with no release gap: `fatN-j*-g0`, 3 of 6 branches) mismatches: the ROM has no turn in place while MOVING, the engine turns
+- **Fixed in lbw6 (was pre-existing):** a held direction change while a step is in flight (RIGHT -> DOWN with no release gap: `fatN-j*-g0`, 3 of 6 branches) mismatches: the ROM has no turn in place while MOVING, the engine turns
   for 8 frames at the tile center. Not reachable from the lab route in the fixtures (they release first) and out of this step's four cases.
+
+## lbw6 — a held direction change in flight goes straight; the five lbw5 pose residuals
+
+Step lbw6 (handoff item 0b, ISSUES #221). Engine `src/engine/factoryLobbyFreeRoam.ts`; oracle Battle Scene OFF.
+
+### Source (decomp, `reference/pokeemerald/src/field_player_avatar.c`)
+
+- `CheckMovementInputNotOnBike` (588-595): while `runningState` is `MOVING` (a step in flight) a held direction different from `direction` does **not** become `TURN_DIRECTION`; it sets `MOVING` and goes
+  to `PlayerNotOnBikeMoving`, i.e. a walk in the new direction. `TURN_DIRECTION` (the 8-frame turn in place) is only chosen from `NOT_MOVING`.
+- `SetStepAnimHandleAlternation` (`event_object_movement.c:4582`) keeps the GO anim command index across the direction change (1 -> 2, 3 -> 0), so the new walk continues the old cycle's index.
+- The step in flight finishes its tile first (`PlayerStep` only reads input at the tile boundary), so the change takes effect on the step-arrival frame, with no gap and no turn.
+- The OAM image lags the RAM anim state by one frame, so the arrival frame still draws the OLD direction (`draw.facing`).
+
+### Fixes
+
+1. **Held direction change while a step is in flight** (`advanceFactoryLobbyFreeRoam`, step-arrival branch): the old "turn in place at tile center" is replaced by `startStep(... heldDir ...)` on the arrival tick, drawing the previous
+   facing for that one frame (`draw: { facing: state.stepDir }`, a one-tick override cleared at the top of `advanceFactoryLobbyFreeRoam`).
+2. **Turn commit uses the decision frame's input** (turn-commit tick): a 9-frame tap, and turn-then-turn (press A, press B inside the 8-frame turn), used the commit tick's held direction. The commit now uses the direction held on
+   the decision frame (`turnRemaining === 1`): same as the facing -> step; a different one -> another turn; none -> idle. The idle index toggles on every turn commit.
+3. **Residual 1 and 2, first step frame after a bump interrupt** (ROM 5394 in lbw5-bump-turn, 5866 in lbw5-turn-refuse; `bumpInterruptStep`, both interrupt sites): that frame draws the bump's own facing and the command index
+   the bump cycle was on one frame earlier (`draw: { facing: bump.facing, phase: drawnIdx }`). My first hypothesis (draw the new walk pose, "lead") was wrong: the diff grew 134 -> 161 px; the ROM image lags.
+4. **Residual 3, 4, 5, bump settle tick** (5946 in turn-refuse, 6009 in race, 5455 in fatman): the settle tick draws the last cycle's pose (`draw.phase = lastIdx`, an early idle branch in `lobbyFreeRoamPlayerFrame`) and sets `idleIdx`
+   from it. The bump-cycle boundary frame at 5946 / 6009 is the same frame.
+
+### Proof
+
+Raw-emulator branching at frame 5254 (`tools/probe/lbw5-sweep.py`, route = lbw4 to 5254): 195 + 139 = 334 candidate timelines (single and double presses, in-flight changes at every step phase, taps of 1..12 frames, turn-turn,
+no-gap and 1..3-frame gaps, bump interrupts); engine replay (`tests/helpers/lbwPlayerReplay.ts` semantics) matches the ROM on player cur / prv, both wanderers and the RNG cursor on **334 / 334**.
+
+New ROM traces (committed, `tools/compare/traces/`, route = lbw4 to 5254 + the timeline, capture 5254..end), `npm run compare -- <trace> --summary`:
+
+| trace | timeline | before -> after |
+| --- | --- | --- |
+| lbw6-inflight-off | RIGHT step, DOWN pressed mid-flight, held | 17 / 156 -> **156 / 156** |
+| lbw6-turnturn-off | turn, second turn inside the 8 frames, step | 100 / 183 -> **183 / 183** |
+| lbw6-tap9-off | 9-frame tap (turn, then one tile) | 74 / 128 -> **128 / 128** |
+
+The five residual frames are back in the committed capture lists (they were excluded in lbw5): lbw5-bump-turn-off 269 -> **270 / 270**, lbw5-fatman-off 254 -> **255 / 255**, lbw5-race-off 796 -> **797 / 797**,
+lbw5-turn-refuse-off 745 -> **747 / 747** (two frames added: 5866, 5946).
+
+Regression (before -> after, final engine): lbw4-woman-block 501 / 501 -> 501 / 501; lbra-loss 2258 / 2258 -> same; lbrd-won-attendant 1416 / 1416, lbrd-won-no 141 / 141, lbrd-won-yes 201 / 201, loss-lobby-walk 177 / 177,
+loss-beyond-boundary 183 / 183 -> same; lbra-forfeit 1009 / 1050, lbra-retire 1476 / 1554, retire-yes-lobby-freeroam 1325 / 1482 -> same (pre-existing residuals, same frames). lbrb-* are low before AND after
+(ISSUES #221 "Harness": the oracle route lacks the appRngRebase step), lbre-prebattle-* 255 / 255 -> same.
+
+### Tests
+
+`tests/factoryLobbyFreeRoam.test.ts`: the "resets the walk cycle after a turn" pin (the engine's own non-ROM turn while moving, which this step removes) is replaced by ROM-proven pins: an in-flight change goes
+straight (no turn frames), turn-then-turn, a 9-frame tap is one tile, an 8-frame tap only turns. The Lobby RNG cursor is unchanged: lbw3 / lbw5 tests, `tests/lbrd.test.ts` and `tests/randomRoundSoak.test.ts` are green with no re-pin.
