@@ -58,3 +58,12 @@ R073 came from luck5 (2026-11-18, lab seed 920103 of the block 920100-920131 tha
 | file | lab seed | states matched | wide states |
 |---|---|---|---|
 | R073-clefable-metronome-hidden-power-odd-iv | 920103 | 31 of 31 | 29 of 29 |
+
+R052, R051 and R053 came from luck6 (2026-11-18; lab seeds 930003, 936007 and 937010, blocks the day job never uses): the designs `tools/replay-hunt/luck-designs/R05{2,1,3}-ai-clefable-metronome-*.json` without `chance` / `seeds`. Challenge 7, the AI's Clefable 389 against the player's passive Shuckle 528 (Flash 16 turns, then Salamence 753): one of the AI's Metronome calls was Mud Sport (R052), Mist (R051) or Focus Energy (R053), and the AI's next scoring read the matching flag (`factoryAiDecisionPolicy.ts` `mudSportUp` / `mistUp` / `hasFocusEnergy`). Found by `prehunt.py` (union-cover trials), then re-driven from these files on the Scene OFF oracle: full match, `stage.ok` true, 0 diff points, 63 -> 66 of the 110 rules covered.
+
+| file | lab seed | states matched | wide states |
+|---|---|---|---|
+| R052-ai-clefable-metronome-mud-sport | 930003 | 55 of 55 | 55 of 55 |
+| R051-ai-clefable-metronome-mist | 936007 | 35 of 35 | 35 of 35 |
+| R053-ai-clefable-metronome-focus-energy | 937010 | 42 of 42 | 40 of 40 |
+

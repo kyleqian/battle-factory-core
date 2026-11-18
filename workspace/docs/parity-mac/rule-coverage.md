@@ -340,3 +340,32 @@ disables a design only after 6 failures in a row.
   R075, R086, R104. R103, R083, R106 and R081 were not touched (not Metronome-reachable cheaply, see their entries above).
 - **Not written in this step (out of time):** the AI-Clefable family R050-R053 (needs a passive bulky player with a repeatable heal and a move shared with
   Clefable), the Chansey challenge-1 family R063 / R064 / R068 / R091 / R099 and R100. They stay in (c).
+
+**luck6 (2026-11-18, tools / docs / designs only; no `src/` change): 66 of the 110 covered (63 before), R051 R052 R053 promoted.** Nine designs added to `tools/replay-hunt/luck-designs/`
+(written by `tools/replay-hunt/makeLuck6.py`, each passing `designcheck.py`), covering the luck5 leftovers R050-R053, R063, R064, R091, R099 and R100. Two battle shapes:
+(1) challenge 7, **the AI's Clefable 389** (Metronome, Double Team, Reflect, Follow Me) against a player that cannot hurt it and plays one move 16 turns, then Salamence 753 plays Aerial Ace
+(never misses, so no Double Team stack can stall the end): Shuckle 528 (Flash) for R050 / R051 / R052 / R053 (one battle, four markers: Imprison, Mist, Mud Sport, Focus Energy called by the AI's Metronome
+and the flag still up when the AI next scores), Golduck 418 (Light Screen, Cloud Nine) for R100 (Weather Ball under Cloud Nine; no weather needed, `weatherHasEffect` is false); an AI Metronome user needs no survival
+tricks because the AI picks Metronome itself, about 7 calls a battle (30 battles: 212 calls, 126 reaching a move). (2) Challenge 1, **the player's Chansey 227** calls Metronome 14 turns (script) against a foe whose move
+the marker needs: Banette 237 Spite after a called Transform (R091), Minun 187 Encore (R064: Encore locks the Metronome slot because Metronome is the last move used, `battle_script_commands.c:4407`, so a called Transform
+replaces the encored slot), Wigglytuff 207 Disable (R063: one Defense Curl first, so Disable takes a slot Transform can replace), Wartortle 176 Yawn with a called Uproar (R099).
+
+| rule | marker | chance per seed (estimate) | engine-only trial (JOBS 1) |
+|---|---|---|---|
+| R052 Mud Sport flag | AI called Mud Sport (`mudSportUp` arm of the AI scoring) | 0.03 (~7 calls / 336) | **hit at lab seed 930003 (4th seed), promoted** |
+| R051 Mist flag | AI called Mist, still up at the next scoring | 0.02 | **hit at 936007 (8th seed), promoted** |
+| R053 Focus Energy flag | AI called Focus Energy | 0.03 | **hit at 937010 (11th seed), promoted** |
+| R050 Imprison flag | AI called Imprison (status set even with no shared move) | 0.03 | 0 hits in about 55 battles that carried its marker (930000-930005, 931000-931013, 936000-936007, 937000-937010, 938000-~938015); expected ~1.6, p(0) about 0.2, kept as a design |
+| R100 Weather Ball, Cloud Nine | AI called Weather Ball with Golduck on the field | 0.02 | 0 hits in 30 seeds (940000-940029; 212 calls, expected 0.6) |
+| R091 Spite on a transformed user | Transform, then Spite on a copied move | 0.02 | 0 hits in about 30 seeds (933000-933013, 935000-~935015) |
+| R064 Transform ends Encore | Encore on the Metronome slot, then a called Transform | 0.01 | 0 hits in 14 seeds (934000-934013) |
+| R063 Transform ends Disable | Disable on Defense Curl, then a called Transform | 0.003 | 0 hits in 14 seeds (same block); one seed (934006) called Transform with no Disable up |
+| R099 Uproar keeps a Yawn drowsy | Yawn due while a called Uproar runs | 0.003 | 0 hits in up to 16 seeds (935000-935015) |
+
+The R050 / R051 / R053 zero-or-late hits fit the estimate (3 hits in about 35 battles for R051-R053); R091, R064, R063, R099 and R100 are too short to say more than that the marker is reachable in the design (each design's engine battle ran to the end; one stall in 14 for
+R064 / R063: 112 and 239 decisions, and 1 in 14 for the AI-Clefable shape, seed 931008). Expected hits per day (about 5,700 seeds over about 17 open designs, ~330 each): R050 / R100 ~6-10, R091 ~6, R064 ~3, R063 / R099 ~1.
+- **Promotions: 63 -> 66 of 110** (R052 seed 930003: ROM match 55 of 55 states, R051 seed 936007: 35 of 35, R053 seed 937010: 42 of 42, each re-driven from the repo stage file on the Scene OFF oracle, `stage.ok` true, 0 diff points). **No ROM difference was found in luck6.** The hunter skips R051 R052 R053 from the next seed on.
+- **The Double Team stall is fixed (cheaply):** every Clefable design now ends with Salamence 753 (Aerial Ace, slot 2) instead of Snorlax 826 (luck5's seven designs patched the same way): 0 stalls in the 17 seeds where luck5 saw 3.
+- **Not done (and why):** R049 R055 R061 R062 R071 R072 R075 R086 R104 stay skipped (two or more specific calls per battle); R068 (frozen Flame Wheel; needs the foe to freeze a Growlithe / Quilava, an Ice move the AI avoids against Fire),
+  R081, R106, R103 and R083 are as before. Candidates for a later luck step on the same AI-Clefable shape: R085 (Imprison against a Pressure player: a Pressure Pokemon as the passive player), R056 / R057 (Beat Up by Metronome, chance ~3% each with a statused / fragile player).
+
