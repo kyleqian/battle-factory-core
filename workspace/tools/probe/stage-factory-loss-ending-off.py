@@ -142,7 +142,8 @@ def frame(oracle: EmeraldOracle, tick: int, capture_rgb: bool = False) -> dict[s
         "battleNum": u16(oracle, frontier + 0xCB2),
         "activeFlags": u32(oracle, frontier + 0xCDC),
         "factorySingles50Streak": u16(oracle, frontier + 0xDE2),
-        "factorySingles50Rents": u16(oracle, frontier + 0xDF6),
+        # factoryRentsCount[SINGLES][LEVEL_50] is SaveBlock2 +0xDF2 (factoryRecordWinStreaks ends there; global.h's "0xDF6" comment is [DOUBLES][LEVEL_50]).
+        "factorySingles50Rents": u16(oracle, frontier + 0xDF2),
         "battlePoints": u16(oracle, frontier + 0xEB8),
         "callback2": u32(oracle, oracle.symbols["gMain"] + GMAIN_CALLBACK2),
         "mainState": oracle.read_u8(oracle.symbols["gMain"] + GMAIN_STATE),
