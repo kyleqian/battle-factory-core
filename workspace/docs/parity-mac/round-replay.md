@@ -19,6 +19,12 @@ python3 tools/audio/romRoundSummary.py /abs/outdir
 - `REPLAY_SCENE=on` drives Battle Scene ON. `REPLAY_FRAME_BUDGET` / `REPLAY_DRIVE_FRAMES` raise the per-battle caps for very long battles.
 - `REPLAY_SYMBOLS=1`: the player holds the silver Factory symbol (staged after the lab staging, as the lab does for a factoryBrain staging);
   challenge 5's seventh battle is then gold Noland. The ID gets `-gold`.
+- `REPLAY_ROUNDS=R`: R rounds back to back. After a round ends (a loss, a draw, or the seventh win) the ROM plays the Lobby (the result text,
+  the save, the record prompt), talks to the attendant (the player stands facing him), takes the challenge at Level 50, saves, walks in and
+  plays the new draft (the rental screen, driven by RAM state: the first three rentals with no species twice, the rule the engine's player uses).
+  Nothing is staged between rounds. The ID gets `-rR`.
+- `ROM_REPLAY_SWAP_OVERRIDE=N:player|enemy`: after battle N (0-based, over the whole run) cancel the swap instead (YES, then back out at that
+  list). The swap policy `cancel` does this after every win.
 - `REPLAY_PROMPT_DELAY=K@N`: the ROM waits K more frames at the swap prompt after battle N (0-based) before answering, like a slower player.
   Every overworld frame draws one VBlank `Random()`, so this moves the RNG cursor of everything rolled after it (the next trainer, Noland's team)
   without any memory write; battles 0..N are unchanged. The ID gets `-dK@N`.
@@ -44,6 +50,15 @@ python3 tools/audio/romRoundSummary.py /abs/outdir
      next trainer's intro, up to the next first action menu. No A is pressed once the player's controller holds the choose-action command.
 3. `soundCensusRomReplay.ts round-compare`: per battle, the battle-start check, the trainer-roll check and the turn compare (the timeline
    and the wide compare of `wide-compare.md`). A round matches when every battle driven matches in all three.
+
+## Rounds back to back
+
+At the first battle of every later round the engine carries the counters with the site's own chaining (`factoryRoundChaining.ts`:
+`advanceFactoryCarry` at the Lobby, `carryForNewChallengeAfterLobby` when the last round was lost) and runs the production round construction
+(`createFactoryRoundBattleOrchestrator` with `generateInitial`, as `core.ts` builds a chained round) from each cursor of the ROM frame that rolled
+the new draft. It must give the ROM's six rentals and the ROM's first trainer and sets. The battle is then played from the engine's own records
+(set, fixed IV: the rental rank) with the ROM's personality cursors. The battle-start check then covers the carried streak, rent count, swap flag
+and symbol count. One known difference is named apart: the first trainer's roll order (`first-trainer-after-draft-picks.md`, not fixed).
 
 ## What is compared
 
@@ -108,7 +123,7 @@ The drive records the old values (`stagingFix`).
 
 - Noland with both symbols (his later "streak" battles). Gold Noland is covered with `REPLAY_SYMBOLS=1` (the driver stages the silver
   symbol; challenge 5's seventh battle is then gold Noland); without it challenge 5's seventh battle is an ordinary trainer.
-- On the screens: RECORD, REST and RETIRE at the GO ON menu; YES at the swap prompt followed by keeping the team (cancel); the summary
-  screen from the swap screen; the swap screen's same-species refusal. None changes the team except the refusal, which no policy reaches.
+- On the screens: RECORD, REST and RETIRE at the GO ON menu; the summary screen from the swap and rental screens; the swap and rental
+  screens' same-species refusals (no policy picks a refused Pokemon). Cancel after YES is covered (policy `cancel`).
 - Open Level (level 100 sets 372..881): the lab and the replay are Level 50 only.
-- The round end: the Lobby after the seventh win or a loss (Battle Points, symbols) is not compared.
+- The Lobby itself (Battle Points; the site has no use for them). The symbol and the other counters are compared at the next round's start.

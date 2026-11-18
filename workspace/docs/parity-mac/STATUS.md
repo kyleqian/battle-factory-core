@@ -62,6 +62,40 @@ is the doubles count; singles Level 50 is +0xDF2 (the `include/global.h` offset 
   refusal (no policy picks a refused Pokemon). The round's end in the Lobby (Battle Points, symbols) is not compared.
 - The first trainer of a round is staged by the lab from the engine's choice (as for every single replay); its roll is checked from battle 2 on.
 
+### Second part (2026-11-18, Kyle's word through the top layer): cancel after YES, rounds back to back
+
+**Built.** The swap policy `cancel` (YES at the prompt, then back out of the swap screen: from the player's own list, or after choosing an own
+Pokemon and SWAP, from the beaten trainer's list; `ROM_REPLAY_SWAP_OVERRIDE=N:player|enemy` does it after one battle only). `REPLAY_ROUNDS=R`:
+R rounds back to back with nothing staged between them. The ROM plays the Lobby, the attendant, the save, the walk and the new draft (the rental
+screen driven by RAM state), and after a loss a new challenge from streak 0. The engine carries the counters with the site's own chaining
+(`advanceFactoryCarry`, `carryForNewChallengeAfterLobby`) and builds each new round with the production round construction (`generateInitial`,
+as the site's game does), checked against the ROM's draft and first trainer. The battle-start check now also covers the symbol count.
+
+**Cancel after YES.** The source: `SwapMons` skips `factory_setswapped` when the swap screen returns "kept" (BattleFactoryPreBattleRoom
+scripts.inc:151-158), so a cancelled swap is not a rent. The ROM agrees (swap flag 0, rent count unchanged at the next battle start) and so does
+the engine (the site's swap screen sends a kept team as `decline`). 265 cancels in batch 5 (133 from the own list, 132 from the beaten trainer's),
+all matching; before Noland, seed 202 (challenge 2) cancelled from either list and with a 128-frame wait: all three match, Noland's team checked
+against the unchanged team.
+
+**Finding 47 (not fixed; `first-trainer-after-draft-picks.md`).** The game rolls a new round's first trainer right after the six rentals' set
+picks and makes the rentals' personalities later, at the rental screen. The engine makes the personalities first. Same draft, different first
+trainer for the same random state; no player can see it (the trainer is a random pick either way). A prototype fix matched the chains fully but
+re-rolls every census battle (269 failing tests in 103 files), so it waits for a decision. `round-compare` names it apart
+(`knownDifference: "first-trainer-order"`, `matchExceptKnown`).
+
+**Batch 5** (Scene OFF, 245 runs; counts of what was run, not a quality figure): three-round chains of power-v1 with every swap policy
+(challenges 0 and 1), three-round chains of the three test players (challenge 0), single cancel rounds of ai-v1 over challenges 0..7, two-round
+chains of power-v1 from challenge 2. 240 match in every check except finding 47; the other 5 were 4 runs hit by a tool bug (a new round's first
+trainer was trainer 0, the value `factory_init` writes; fixed, re-driven, all 4 match except finding 47) and one endless Struggle stall (re-driven
+with large caps: 2,334 turn states match up to a 2,000,000-frame ROM cap). 2,119 battles; 323 new rounds played by the ROM (248 after a lost
+round, 75 after a won one); 8 chains beat silver Noland and started the next round with the symbol the ROM gave (symbol 1, streak 21, rent count
+1 or 7), the engine's carry agreeing each time; 19 Noland battles after a real round; 674 swaps.
+
+**Not reached:** the stretch chain from silver Noland on to gold Noland with the ROM's own symbol: it needs four won rounds in a row from
+challenge 2 to 5 (about 28 wins), and power-v1 wins a round at challenges 3 to 5 a few times in a hundred at best. It needs a much stronger
+test player. Gold Noland itself is covered with the staged symbol (`REPLAY_SYMBOLS=1`), and the ROM's own silver symbol is covered by the
+eight chains above.
+
 ## Stopped 2026-11-13 (Kyle winds down the Mac)
 
 Sixth pass, stopped at about 20:00 UTC on the top layer's word: the battle-rule work moves to the box.
