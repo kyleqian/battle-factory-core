@@ -1485,3 +1485,40 @@ Ruled out: the body is not longer (live 176..181 vs ROM active 175..180 + 1, the
 5. Gameplay is untouched by this (presentation commands only); the aud262 Tier-1 pin, the hpd tables and the T1 census scoreboard need re-running at landing.
 
 Evidence (not committed): `/tmp/mem1/` (`rom-*.json` hpd2Probe timelines of the five labs, `app-*.txt` hpd4Cmds outputs, `hp.ts` printing the segment's commands: `hp {"from":105,"to":0,"hv":32767,"t":{"minimumFrames":28}}` before `move-animation`).
+
+### exp1: Explosion and Self-Destruct have the same 106-row drain (measurement only; nothing under `src/` or `tests/` changed)
+
+Base `1a5d25553`, Scene ON (8012). Method as mem1: four labs built from `tools/battle-lab/aud262-memento-{player,opponent}-on.json` with the attacker's move 262 replaced by 153 (Explosion) / 120 (Self-Destruct) (attacker Lv50 Rattata 105 HP / Moltres 105 HP, target Lv12 Snorlax; the user's bar is what is measured), ROM timeline by `hpd2Probe.py ... on <out> 420` (`gBattlescriptCurrInstr` resolved against `BattleScript_EffectExplosion+n` in the map), app rows by `tools/integration/hpd4Cmds.ts` on matching trace files (the four `exp1-*` stages were four one-line `APP_STAGES` entries reusing `aud242lBlizzardStage`, applied temporarily and reverted; nothing committed besides this doc). Evidence (not committed): `/tmp/exp1/` (`*-on.json` labs, `rom-*.json`, `app-*.txt`, `an.py`, `hp.ts`).
+
+**Result: confirmed for both moves, both sides.** The app presents the user's `0x7FFF` bar drop as an ordinary 105 -> 0 `hp` command of **106 rows** before `move-animation`; the ROM's `tryexplosion` holds the exec flag for one sample and empties the bar at once. Printed command (`hp.ts`): `hp {"from":105,"to":0,"hv":32767,"t":{"minimumFrames":28}}` then `move-animation`.
+
+Source path: `reference/pokeemerald/src/battle_script_commands.c:6555` (`Cmd_tryexplosion`: `gBattleMoveDamage = hp; BtlController_EmitHealthBarUpdate(INSTANT_HP_BAR_DROP); MarkBattlerForControllerExec`; the user's `hp = 0` is `Cmd_setatkhptozero` `:6577-6587`, no second bar update). Script `BattleScript_EffectExplosion` (`battle_scripts_1.s:374`): `attackcanceler, attackstring, ppreduce, tryexplosion, setatkhptozero, waitstate, jumpifbyte, attackanimation, waitanimation`; Self-Destruct (effect EXPLOSION, `moves.h` 120) uses the same script. The bar itself is `battle_controller_opponent.c:1690` / `battle_controller_player.c:2708` (`hpVal != INSTANT_HP_BAR_DROP` else `SetBattleBarStruct(maxHP, 0, 0x7fff)`, instant). App: `src/engine/battleScriptExplosionOpcode.ts:75,143` emits the `health-bar-update` event, then the same route as Memento: `battleResolutionPresentation.ts:4930,4953-4966` (`hp` command, `timing` = `hpPrintTailTiming`, base `HP_TIMING` `:1686`), `battleResolutionPresentationRender.ts:1797-1810` (`max(28, battleHealthBarAnimationFrames + 1)`).
+
+| Window (attacker) | ROM R (ptr at ppreduce) | ROM tryexplosion exec flag | ROM attackanimation exec | ROM `gAnimScriptActive` A .. end (rows) | App `hp` cmd start .. move start (rows) | App move cmd: pre + idle + live | App body first row (cmd + 3) | App hit-animation start | App body - ROM A | App hit - ROM end |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Explosion, opponent Moltres | 56 | 58 (clear 59) | 63 | 65 .. 281 (216) | 56 .. 162 (**106**) | 3 + 4 + 212 | 165 | 381 | **+100** | +100 |
+| Explosion, player Rattata | 52 | 54 (clear 55) | 59 | 61 .. 277 (216) | 52 .. 158 (**106**) | 3 + 4 + 212 | 161 | 377 | **+100** | +100 |
+| Self-Destruct, opponent Moltres | 59 | 61 (clear 62) | 66 | 68 .. 194 (126) | 59 .. 165 (**106**) | 3 + 4 + 113 | 168 | 285 | **+100** | +91 |
+| Self-Destruct, player Rattata | 55 | 57 (clear 58) | 62 | 64 .. 190 (126) | 55 .. 161 (**106**) | 3 + 4 + 113 | 164 | 281 | **+100** | +91 |
+
+Reading it: the visual body starts 100 rows late in all four windows (106 hp rows + pre 3 - the ROM's R -> A of 9 rows, with the hp command starting at R here). Where the move body starts: ROM A = R + 9 (attackanimation exec R + 7); Memento's A = R + 6 (exec R + 4), because Explosion's script has `waitstate` and `jumpifbyte` between `setatkhptozero` and `attackanimation` (+3 rows). Explosion's body length is exact (app idle 4 + live 212 = 216 = ROM active rows), so its end offset is +100 too. **Separate, not caused by 0x7FFF:** Self-Destruct's app body is 9 rows short (idle 4 + live 113 = 117 vs ROM active 126, both sides), which is why its end offset is +91 instead of +100; the Self-Destruct `liveMoveAnimationDuration` / lead is a different finding and should be checked against the T1 census before the shared fix lands, so the 0x7FFF fix is not credited or blamed for it.
+
+Other `0x7FFF` / `INSTANT_HP_BAR_DROP` sites (grep of `reference/pokeemerald/src`, `include`, `data/battle_scripts_*.s`; the controller files only test `hpVal != INSTANT_HP_BAR_DROP`):
+
+| Site | Source | App routing |
+| --- | --- | --- |
+| Explosion / Self-Destruct (`Cmd_tryexplosion`) | `battle_script_commands.c:6555` | **drain, 106 rows (this section)**: `battleScriptExplosionOpcode.ts:143` |
+| Memento (`Cmd_trymemento`) | `battle_script_commands.c:9086` | **drain, 106 rows (mem1)**: `battleScriptTrymementoOpcode.ts:68` |
+| `Cmd_healthbarupdate` (every damaging hit) | `:1832`, value capped at `maxPossibleDmgValue = 10000` | never 0x7FFF; gradual (correct) |
+| `Cmd_healthbar_update` (`healthbarupdate BS_ATTACKER/TARGET`) | `:3940`, `gBattleMoveDamage` | Pain Split (`painsplitdmgcalc` = difference of HP, <= max HP), Destiny Bond (`BattleScript_DestinyBondTakesLife`, damage = the user's HP), Perish Song (`BattleScript_PerishSongTakesLife`, damage = HP): all are real HP deltas, gradual in the ROM and in the app; 0x7FFF = 32767 is above any possible HP (max 714), so none is an instant drop |
+| `battle_arena.c:390,494`, `battle_transition.c:4297`, `battle_anim_*.c` | palette-fade masks / tile values | not an HP bar |
+
+So exactly two C sites (Explosion/Self-Destruct, Memento) emit the sentinel, and the app routes both through the generic gradual `hp` command (`src/engine` grep of `0x7fff` shows only those two opcode files).
+
+### Shared fix proposal (not landed)
+
+1. Key on `healthValue === 0x7fff` in `battleResolutionPresentation.ts:4953-4966` (not on the move): the `hp` command gets an instant timing (new `BattleHpTiming` variant; no `battleHealthBarAnimationFrames`) and `battleResolutionPresentationRender.ts:1797-1810` returns only its timing length for it; `:2425-2447` shows `to` (0) from its first row (maxHP < 48 bar fill included).
+2. Length of the instant command = the ROM's script rows from the hp command start to the first body row minus the move command's `pre` 3: Explosion / Self-Destruct 9 - 3 = **6** with the command starting at R (R + 6 + 3 = A), Memento **5** with the command starting at R - 2 (mem1). Do not hard-code a per-move constant: the difference is the opcode count between the bar update and `attackanimation` (Memento 3 opcodes, Explosion 5 incl. `waitstate` and `jumpifbyte`), so derive it from the opcode instruction rows (`health.instructionExecution`, used the same way for the Leech Seed drain at `:4950-4953`) or give the two opcode files an explicit `scriptRowsToAttackAnimation` (6 / 9) in their event payload.
+3. Re-pin after landing: `tests/aud262MoveAnimSounds.test.ts` Memento offset (-108), any Explosion / Self-Destruct census rows, the hpd tables; then `npm run compare` of the four windows above (user bar empty from the first row, body at A) and of `aud262-memento-opponent-on`.
+4. Self-Destruct's 9-row short body is not covered by this fix; track it separately.
+5. Gameplay is untouched (presentation commands only; the engine events and `gBattleMoveDamage` are unchanged).
