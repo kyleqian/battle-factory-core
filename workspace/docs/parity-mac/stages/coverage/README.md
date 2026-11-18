@@ -28,6 +28,7 @@ matched the ROM to the end on the engine with fixes 29 to 43, with its piece run
 | R097-alakazam-trick-both-itemless | 1023669 | 20 of 20 |
 | R107-baton-pass-onto-ai-spikes | 1020548 | 38 of 38 |
 | R109-dusclops-curse-last-pokemon | 1022589 | 19 of 19 |
+| R035-clefable-taunt-counter-replacement | 1040873 | 14 of 14 |
 
 The last six came from the luck hunt of 2026-11-17 (luck2; `tools/replay-hunt/luckHunt.sh`, lab seeds 1,020,000 up) instead of the box hunts: their lab seed is the
 hunt's, their stage file is the hunt's `found.stage.json` without the hunt's `chance` / `seeds` fields, and each was re-driven on the engine at `master` e06cac9fc
@@ -48,3 +49,6 @@ R080 came from luck4 (2026-11-18, lab seed 910000 of the block 910000-910039 tha
 | file | lab seed | states matched |
 |---|---|---|
 | R080-spark-whiscash-future-sight-milotic | 910000 | 16 of 16 |
+
+R035 came from the luck hunt's third day (2026-11-18 day job, seeds 1,040,000 up; promoted by the 2026-11-18 daily-run supervisor): the hunt's `found.stage.json`
+without `chance` / `seeds`; the hunt's own ROM drive matched 14 of 14 states with `stage.ok` true, and the nightly replay of the same run re-drives it (`docs/replay-ledger.md`).

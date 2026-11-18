@@ -299,3 +299,8 @@ pool species has Drizzle, Sand Stream or Drought; the jump-command entries cite 
     real difference: the engine lacked that start-of-move redirect, which changes the PP a non-Ghost Curse costs
     against a Pressure Follow Me user: **fix 42** (`follow-me-redirect.md`).
 - **Not done yet:** a staged battle or a steered batch for each (c) group, starting with the uncommon ones.
+
+**Luck hunt day 3 (2026-11-18 day job): 62 of the 110 covered (61 before).** 5,681 seeds over the three open designs (R035 294, R040 2,694, R110 2,693;
+the hunter skipped the 8 covered ones), 1 marker hit: R035 at lab seed 1040873 (Clefable's Metronome called Taunt, then the AI's Machamp scored Counter
+under Taunt), ROM match 14 of 14 states with its `cover` piece run. Promoted to `stages/coverage/R035-clefable-taunt-counter-replacement.json`; the
+hunter now skips R035. Open luck designs: R040, R110 (0 hits each in ~2,700 seeds). Summary: `.integration/evidence/luck-hunt/20261118/summary.md`.
