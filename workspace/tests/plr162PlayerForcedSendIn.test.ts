@@ -181,7 +181,8 @@ describe.each([["Roar", 23], ["Whirlwind", 76]] as const)("plr162: %s on the pla
       }
     }
     for (const { command } of switchIns(seed, "on").filter((s) => s.command.battler === 1)) {
-      expect(command.timing).toEqual({ minimumFrames: opponentSwitchInDuration(command.incoming.species) - SWITCH_IN_WAITSTATE_HOLD_FRAMES });
+      // ais4: an opponent faint replacement (aiSwitch) throws its ball 2 frames early, like an AI voluntary switch (ROM-proven on obr251).
+      expect(command.timing).toEqual({ minimumFrames: opponentSwitchInDuration(command.incoming.species) - SWITCH_IN_WAITSTATE_HOLD_FRAMES + (command.aiSwitch === true ? 2 : 0) });
     }
   }, 120000);
 });
