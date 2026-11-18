@@ -658,6 +658,7 @@ import {
   createFactoryTerminalLossPresentation,
   createFactoryTerminalPresentation,
   FACTORY_LOSS_TERMINAL_PROFILE,
+  FACTORY_RETIRE_TERMINAL_PROFILE,
   factoryTerminalCompletion,
   factoryTerminalDeclineBoxGoneAge,
   isFactoryTerminalRoundWon,
@@ -2055,14 +2056,17 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
       factoryRoundBattleOrchestrator,
       factoryTerminal: retireHandoff
         ? {
-            ...createFactoryTerminalLossPresentation({
-              type: "roundLost",
-              commandId: -1,
-              battleIndex:
-                factoryRoundBattleOrchestrator?.round.rules.battleIndex ??
-                roundController?.rules.battleIndex ??
-                0,
-            }),
+            ...createFactoryTerminalLossPresentation(
+              {
+                type: "roundLost",
+                commandId: -1,
+                battleIndex:
+                  factoryRoundBattleOrchestrator?.round.rules.battleIndex ??
+                  roundController?.rules.battleIndex ??
+                  0,
+              },
+              FACTORY_RETIRE_TERMINAL_PROFILE,
+            ),
             age: FACTORY_LOSS_TERMINAL_PROFILE.fieldFirstAge,
           }
         : state.factoryTerminal,
