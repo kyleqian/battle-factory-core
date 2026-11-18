@@ -109,11 +109,11 @@ wrap run. Two runs start from a staged rent count (14 and 255, written before ba
 engine-side tries, `pace` swaps, the strongest draft). The engine tried other plays of a battle on itself when its first play lost (each run
 needed it for 4 to 12 battles, 9 to 148 extra engine plays); the ROM played each battle once, no retry from a save state was needed, because the
 engine's prediction of every battle came true. Results:
-- 5 runs won all 42 battles: silver Noland at battle 21 (the ROM gave the symbol, the next rounds carried it), round 4's draft rolled at 17 to 20
-  rents (one better slot), round 5's at 20 to 22, gold Noland at battle 42 beaten.
+- 6 runs won all 42 battles: silver Noland at battle 21 (the ROM gave the symbol, the next rounds carried it), round 4's draft rolled at 16 to 20
+  rents (one better slot), round 5's at 18 to 22, gold Noland at battle 42 beaten. One of them (seed 1006) first stopped at battle 26, whose battle
+  needs more frames than the ROM drive's default cap (the engine won it in 189,102 frames); re-driven with a 600,000-frame cap it went on to win.
 - 1 run reached gold Noland and lost to him (none of 300 engine plays of that battle won).
 - 1 run lost in round 5 (battle 33).
-- 1 run stopped at battle 26 because its battle needed more frames than the ROM drive's cap (the engine won it in 189,102 frames): STALL1006.
 All 8 matched in every check but finding 47 (the first trainer of each new round), at every one of their battles. Run 1001 is the fixture.
 
 **Probes.** `tools/probe/stage-factory-{seventh-win-ending,terminal-boundaries,loss-ending}-off.py` read the singles rent count at +0xDF6 (the
