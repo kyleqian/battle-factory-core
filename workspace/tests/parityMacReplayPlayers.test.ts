@@ -96,7 +96,8 @@ describe("round replay swap policies and power-v1", () => {
     expect(SWAP_POLICIES).toEqual(["never", "weakest", "random", "cancel", "upgrade", "pace"]);
     // pace: weakest in the run's first fourteen battles, upgrade after.
     const weaker = [{ species: 10, statTotal: 900 }, { species: 40, statTotal: 450 }, { species: 30, statTotal: 499 }];
-    expect(createSwapPolicy("pace", 1).choose(player, weaker, 13)).toEqual({ type: "accept", playerPartyIndex: 1, opponentPartyIndex: 2 });
+    // (opponent 0 and 2 share a species with a kept Pokemon: only 1 (450) is accepted, weaker than the outgoing 500)
+    expect(createSwapPolicy("pace", 1).choose(player, weaker, 13)).toEqual({ type: "accept", playerPartyIndex: 1, opponentPartyIndex: 1 });
     expect(createSwapPolicy("pace", 1).choose(player, weaker, 14)).toEqual({ type: "decline" });
     // upgrade: the weakest's swap (player 1 for opponent 2, 500 -> 800); declined when the best accepted one is weaker than the outgoing one.
     expect(createSwapPolicy("upgrade", 1).choose(player, opponent)).toEqual({ type: "accept", playerPartyIndex: 1, opponentPartyIndex: 2 });
