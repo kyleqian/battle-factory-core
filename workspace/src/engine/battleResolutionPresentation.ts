@@ -122,8 +122,12 @@ export type BattleHitAnimationTiming = Readonly<{
   minimumFrames: 35;
   firstDisplayedAge: 1;
 }>;
-/** sub183: tailFrames (present only when > 0) = the script rows between the bar's last row and the next print's first glyph (see hpPrintTailTiming). */
-export type BattleHpTiming = Readonly<{ minimumFrames: 28 | 0; tailFrames?: number }>;
+/**
+ * sub183: tailFrames (present only when > 0) = the script rows between the bar's last row and the next print's first glyph (see hpPrintTailTiming).
+ * mem2: instantDrop = `INSTANT_HP_BAR_DROP` (0x7FFF), the row where the HP text empties (the bar follows one row later): the command is its
+ * `tailFrames` rows with no drain.
+ */
+export type BattleHpTiming = Readonly<{ minimumFrames: 28 | 0; tailFrames?: number; instantDrop?: number }>;
 /**
  * The RAM stat write is silent for exactly 2 frames before the message box
  * clears (`docs/issue69-omniboost-off-ground-truth.md` §2: every one of the
@@ -1243,7 +1247,8 @@ function sceneOffNoHitPauseFrames(
     if (command.type === "move-animation" || command.type === "hit-animation" || timing === undefined) return null;
     if (command.type === "message" || (timing.holdFrames ?? 0) > 0) held = true;
     if (command.type === "status-icon") iconSequence = command.eventSequence;
-    presented += timing.minimumFrames;
+    // mem2: an instant-drop hp command presents its real rows (tailFrames) and has no floor.
+    presented += command.type === "hp" && command.timing.instantDrop !== undefined ? command.timing.tailFrames ?? 0 : timing.minimumFrames;
   }
   // The held-message path is ROM-anchored only for Rest's shape: trysetrest's
   // status, the held print, the status icon (off108 §1 / off148 R3). Other
@@ -1702,6 +1707,30 @@ function statusAnimationPresented(isStatus2: number, status: number): BattleStat
   return name !== null && Object.hasOwn(STATUS_ANIMATION_ADDED_ROWS, name) ? name as BattleStatusAnimationName : null;
 }
 const HP_TIMING = Object.freeze({ minimumFrames: 28 } as const);
+
+/**
+ * mem2 (docs/aud242-move-anim-sounds.md section 29, mem1 / exp1): `Cmd_trymemento` (battle_script_commands.c:9086) and `Cmd_tryexplosion` (:6555) emit
+ * `BtlController_EmitHealthBarUpdate(INSTANT_HP_BAR_DROP)`; the controller runs `SetBattleBarStruct(maxHP, 0, 0x7FFF)` and empties the bar at its
+ * first step (battle_controller_player.c:2708, _opponent.c:1690), so the exec flag is held 2 rows and the script moves on to `attackanimation`.
+ * The hp command then spans the rows from its start to the move command's first row: `scriptRows` (the opcode rows from the bar update to
+ * `attackanimation`) + the rows from the command start to the bar update (measured, 4 + 4 ROM windows, both sides: 3 after the shorter
+ * "used MEMENTO!" message, 2 after "used EXPLOSION!" / "used SELF-DESTRUCT!"). The move command's own `pre` 3 follows. The same rows are the HP text's
+ * empty row (the ROM writes `0/105` on the bar update's controller row and empties the bar graphic the row after, both sides).
+ */
+const INSTANT_HP_BAR_DROP = 0x7fff;
+const INSTANT_HP_DROP_LEAD_ROWS = Object.freeze<Record<string, number>>({ B_SCR_OP_TRYMEMENTO: 3, B_SCR_OP_TRYEXPLOSION: 2 });
+function instantHpDropTiming(events: readonly BattleKernelSemanticEvent[], healthEventSequence: number): BattleHpTiming {
+  const healthIndex = events.findIndex((event) => event.sequence === healthEventSequence);
+  const healthEvent = events[healthIndex];
+  const opcodeName = healthEvent?.provenance?.opcodeName ?? "";
+  const lead = INSTANT_HP_DROP_LEAD_ROWS[opcodeName];
+  const bar = healthEvent?.provenance?.instructionExecution;
+  const animation = events.slice(healthIndex + 1).find((event) => event.provenance?.opcodeName === "B_SCR_OP_ATTACKANIMATION")?.provenance?.instructionExecution;
+  if (lead === undefined || bar === undefined || animation === undefined) {
+    throw new Error(`battle resolution INSTANT_HP_BAR_DROP from ${opcodeName || "no opcode"} has no ROM-measured route to attackanimation`);
+  }
+  return Object.freeze({ minimumFrames: 0, tailFrames: lead + animation - bar, instantDrop: lead } as const);
+}
 
 /**
  * sub183 (ISSUES #153): BattleScript_EffectSubstitute's `datahpupdate; printfromtable; waitmessage`. The ROM's datahpupdate run is the
@@ -4991,7 +5020,8 @@ export function projectBattleResolutionCommands(
         from: payload.from,
         to: payload.to,
         healthValue: health.healthValue,
-        timing: drainRole === "seeded" ? LEECH_SEED_DRAIN_SEEDED_HP_TIMING
+        timing: health.healthValue === INSTANT_HP_BAR_DROP ? instantHpDropTiming(events, health.eventSequence)
+          : drainRole === "seeded" ? LEECH_SEED_DRAIN_SEEDED_HP_TIMING
           : drainRole === "receiver" ? LEECH_SEED_DRAIN_RECEIVER_HP_TIMING : hpPrintTailTiming(event, events, index),
       }));
       if (payload.to === 0) zeroHpBattlers.add(battler);
