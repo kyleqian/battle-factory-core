@@ -30,9 +30,9 @@ User decision 2026-11-12 (`docs/cax31-session-handoff.md` "Next work" item 0b, s
 | trace | scene | window | frames matched |
 | --- | --- | --- | --- |
 | `lbra-loss-off` | OFF | last battle frame -> free control (2996-5253) | **2258 / 2258** |
-| `lbra-forfeit-off` | OFF | 150-1199 | 896 / 1050 |
-| `lbra-forfeit-on` | ON | 150-1199 | 766 / 1050 |
-| `lbra-retire-off` | OFF | 6640-8193 | 1315 / 1554 |
+| `lbra-forfeit-off` | OFF | 150-1199 | **1050 / 1050** (lbw7) |
+| `lbra-forfeit-on` | ON | 150-1199 | 805 / 1050 (lbw7; 764 before) |
+| `lbra-retire-off` | OFF | 6640-8193 | **1554 / 1554** (lbw7) |
 
 Residuals (all named; none is in the result-script text / box / cursor path except the retire typing pace):
 
@@ -76,3 +76,42 @@ keeps its OK semantics by walking back to the attendant and pressing A.
 - lbr-d (7-win Lobby return): the round-won terminal still uses the old chain; `isFactoryTerminalRoundWon(factoryTerminal)` is the switch in `core.ts`
   and `recordDisabledFarewellEdgeFromRestore` already exists on the round-won profile (166, copied, unmeasured for the won script). `WonChallenge`
   differs from `LostChallenge` (save with streak, symbol / BP); measure before reusing the loss edge.
+
+## lbw7: forfeit tail, retire save wait, harness rebases (ISSUES #221)
+
+Matched frames, `npm run compare -- <trace> --summary`, before (master `f047ca4f5`) -> after:
+
+| trace | before | after |
+| --- | --- | --- |
+| `lbra-forfeit-off` | 1009 / 1050 | **1050 / 1050** |
+| `lbra-forfeit-on` | 764 / 1050 | 805 / 1050 (the rest is the Scene ON battle window 155-284 and the NPC wander tail, unchanged) |
+| `lbra-retire-off` | 1476 / 1554 | **1554 / 1554** |
+| `retire-yes-lobby-freeroam-off` | 1325 / 1482 | **1482 / 1482** |
+| `lbra-loss-off`, `loss-terminal-window-off`, `win-terminal-window-off` | 2258 / 2258, 1943 / 1943, 3590 / 3590 | same (kept by `appStage.opponentTrainerId`, below) |
+| `lbrb-*` (17) | 0..60 matched, ten at 0 | ten exact (256 / 256 or 60 / 60); none worse (list in the lbw7 commit / step report) |
+
+Causes, each from ROM measurement (no gameplay RNG, kernel event or battle outcome changed; census 0..99 both scenes `eventsDigest` identical vs `f047ca4f5`):
+
+1. **Forfeit room drew the wrong opponent.** The post-battle room (`renderPostwinState`, phase `battleRoom`) always drew the generic Bug Catcher sheet; the ROM draws the battle's
+   own trainer class (`factoryTrainerPresentationForOpponent(round.rules.currentOpponent)`, lab trainer 110 = Black Belt on frf250b). Frames 304-343.
+   Harness side: the traces' staged orchestrator is created with `rngValue: 4` and draws another trainer than the lab's, so `appStage` gained the optional
+   `opponentTrainerId` (`tools/compare/appTrace.ts` `applyTraceStage`, `traceTypes.ts`), set to the lab's `trainerId` on `lbra-forfeit-off` / `-on` (110) and
+   `lbra-loss-off` / `loss-terminal-window-off` / `win-terminal-window-off` (50). Without it the engine change regressed those four (39 frames each).
+2. **Forfeit black / room / black tail runs one tick ahead.** ROM: black 19 frames (not 20), room 56..94 of the post-battle age, the Lobby field one frame earlier (terminal age 114).
+   `PostwinState.tailLead` (`FORFEIT_RETURN_TAIL_LEAD = 1`, set only by the forfeit hand-off; `postwinTailAge` applies it from the black phase on, so the fade stays on the WIN clock).
+   Win / loss postwin phases are unchanged (`tests/factoryBattleReturnPresentation.test.ts`). Frames 343-362.
+3. **Retire's `factory_save` waits 6 ticks longer than a loss's.** The retire hand-off runs the same `LostChallenge` script, but ROM SE_SAVE is at second-page release + 179
+   (`lbra-retire-off` A 7324 -> 7503) vs + 173 on a loss (A 3834 -> 4007); the "event results" page clears 6 ticks later and the record question types from there.
+   `FACTORY_RETIRE_TERMINAL_PROFILE` = loss profile with `statusClearDelayFromSecondRelease` 50 + `RETIRE_SAVE_EXTRA` 6 (swept 6 / 7 / 8 against the ROM: 6 is exact, 7 and 8 are not).
+   **Why the save takes longer is not proven from source**: `factory_save` runs the same `SaveGameFrontier` in both scripts; the extra ticks look like flash-write time
+   that depends on the saved data (mGBA models program / erase cycles). Treated as a measured retire constant.
+4. **Harness: no `appRngRebase`.** `retire-yes-lobby-freeroam-off` has `lbra-retire-off`'s lab and inputs (identical 8194 buttons) and gets its rebase (6700 = 2155949550): its 8094-8172 NPC
+   region (the whole 157-frame residual) was the wrong cursor, not a Lobby rule. The 17 `lbrb-*` traces share `lbra-loss-off`'s lab, stage and input prefix, so they take its rebase
+   (3233 = 1298389302, the ROM cursor of that frame).
+
+Tier-1: `tests/lbw7ForfeitReturn.test.ts` (tail boundaries, black / room frames, the room's opponent; red without the engine change), `tests/lbw7RetireSave.test.ts`
+(the retire terminal restores 56 ticks after the second release, a loss's 50; red with the loss profile).
+
+Open remainder (named): `lbrb-bcancel / exit / levelb / levelexit / overwriteno / saveb / savedlgno` still differ in 15-105 frames each, all in the Lobby NPC region
+(bbox about 96,99-157,134, first diffs 5735-6135): the record-battle menu flows press A / B / DOWN in the free Lobby, and the app's NPC cursor leaves the ROM's after those
+inputs (the cursor is rebased only once, at 3233). Not measured further here. Forfeit ON: the Scene ON battle window (155-284) was never pixel-parity.

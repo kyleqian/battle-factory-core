@@ -12,6 +12,7 @@ import {
   FACTORY_LOSS_TERMINAL_PROFILE,
   FACTORY_RETIRE_TERMINAL_PROFILE,
   RETIRE_SAVE_EXTRA,
+  type FactoryTerminalLossPresentationState,
   factoryTerminalRestoreAge,
 } from "../src/engine/factoryTerminalPresentation.ts";
 
@@ -39,8 +40,8 @@ describe("lbw7 retire save wait", () => {
   });
 
   it("the retire route's terminal restores 56 ticks after the second release, the loss route's 50", () => {
-    const retire = stateAt("lbra-retire-off", 7330).factoryTerminal!;
-    const loss = stateAt("lbra-loss-off", 3840).factoryTerminal!;
+    const retire = stateAt("lbra-retire-off", 7330).factoryTerminal as FactoryTerminalLossPresentationState;
+    const loss = stateAt("lbra-loss-off", 3840).factoryTerminal as FactoryTerminalLossPresentationState;
     expect(retire.secondPageReleaseAge).not.toBeNull();
     expect(factoryTerminalRestoreAge(retire)! - retire.secondPageReleaseAge!).toBe(56);
     expect(loss.secondPageReleaseAge).not.toBeNull();
