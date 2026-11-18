@@ -163,7 +163,8 @@ describe("Battle Scene OFF full-turn kernel portability", () => {
         battler: 0,
         animation: { moveId: 157, attacker: 0, target: 1, turn: 0,
           power: 75, damage: 28, friendship: 0, multihit: 0 },
-        timing: { minimumFrames: 32 },
+        // hpd8: Rock Slide is a measured shape-A body, so its Scene ON script lead (5) rides on the command
+        timing: { minimumFrames: 32, bodyLeadFrames: 5 },
       },
       {
         type: "hit-animation",

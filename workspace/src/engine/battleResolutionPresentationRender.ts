@@ -8,6 +8,7 @@ import type { PresentationRngHost } from "./presentationRngHost.ts";
 import {
   resolveNoMovesLeftMessageLines,
   isWeatherContinuesAnimation, WEATHER_CONTINUES_BODY_ROWS, WEATHER_CONTINUES_LAUNCH_LEAD_ROWS, WEATHER_CONTINUES_MOVE_IDS,
+  HPD8_SHAPE_A_MOVE_IDS,
 } from "./battleResolutionPresentation.ts";
 import type { LiveMoveSpriteAllocatorInput, LiveMoveSpriteOrderInput } from "./liveMoveSpriteAllocator.ts";
 import type { LiveMoveBattlerX2Input } from "./liveBattlerX2History.ts";
@@ -1581,9 +1582,16 @@ export function liveMoveScriptTailFrames(
 // hpd4: rows the command presents after its live body (+ post) so the next command (hit controller, next script step) starts on the ROM row
 // (R -> H = lead + 3 + len + 4 against the accepted live window), tuned by exact-frame matches against the ROM frames (docs/hpd1-hp-hold.md).
 const HPD4_BODY_TAIL_ROWS: ReadonlyMap<number, number> = new Map([[49, 3], [82, 26], [111, 3], [205, 3], [301, 3], [69, 1]]);
-function liveMoveHitTailRows(command: Extract<BattleResolutionPresentationCommand, { type: "move-animation" }>): number {
-  if ((command.timing.bodyLeadFrames ?? 0) === 0 || command.animation === undefined) return 0;
-  return HPD4_BODY_TAIL_ROWS.get(command.animation.moveId) ?? 0;
+// hpd8: the shape-A bodies' tail is whatever the 3 pre + 3 post rows of the ROM span (lead + 3 + len + 4) leave over: 6 - pre - post (T 1 / 3 / 6 in hpd7).
+const HPD8_SHAPE_A_ROWS_AROUND_BODY = 6;
+function liveMoveHitTailRows(command: Extract<BattleResolutionPresentationCommand, { type: "move-animation" }>, field: BattleResolutionDisplayedField): number {
+  const request = command.animation;
+  if ((command.timing.bodyLeadFrames ?? 0) === 0 || request === undefined) return 0;
+  const table = HPD4_BODY_TAIL_ROWS.get(request.moveId);
+  if (table !== undefined) return table;
+  if (!HPD8_SHAPE_A_MOVE_IDS.has(request.moveId) || liveSubstituteSwapApplies(request, field) === true) return 0;
+  const rows = liveMoveUniversalRows(request, field);
+  return Math.max(0, HPD8_SHAPE_A_ROWS_AROUND_BODY - rows.pre - rows.post);
 }
 
 /**
@@ -1697,10 +1705,12 @@ function liveMoveUniversalRowAge(
   // sgs134: HandleMoveAnimation's IsBattleSEPlaying rows (a multi-hit's 2nd+ hit), presented before the pre rows.
   seGate = 0,
   scriptTail = 0,
+  // hpd8: a shape-A body's hit tail holds the last body row (its adapters stop at their last age); Dragon Rage's 26-row tail keeps counting.
+  holdHitTail = false,
 ): number {
   const rows = liveMoveUniversalRows(request, field);
   const age = Math.max(0, state.lifecycle.phaseElapsed - seGate - rows.pre - liveMoveIdleLeadRows(request, field));
-  if (rows.post === 0 && scriptTail === 0) return age;
+  if (rows.post === 0 && scriptTail === 0 && !holdHitTail) return age;
   const live = liveMoveAnimationDuration(request, field, liveMoveTimingBodyOf(state.liveMoveSpriteOrderInput),
     state.liveMoveBattlerX2Input?.moveUse);
   return live === null ? age : Math.min(age, live - 1);
@@ -1792,7 +1802,7 @@ export function battleResolutionCommandDuration(
       const rows = liveMoveUniversalRows(command.animation!, field);
       return seGate + (command.timing.scriptLeadFrames ?? 0) + (command.timing.bodyLeadFrames ?? 0) + rows.pre
         + liveMoveIdleLeadRows(command.animation!, field) + live + rows.post + liveMoveScriptTailFrames(command.timing, command.animation!, field)
-        + liveMoveHitTailRows(command);
+        + liveMoveHitTailRows(command, field);
     }
     case "hit-animation":
       return command.timing.minimumFrames;
@@ -2464,7 +2474,8 @@ export function createBattleResolutionPresentationRenderView(
       const pre = seGate + liveMoveUniversalRows(command.animation, field).pre;
       effect = Object.freeze({
         type: "move", request: command.animation,
-        age: liveMoveUniversalRowAge(state, command.animation, field, seGate, liveMoveScriptTailFrames(command.timing, command.animation, field)),
+        age: liveMoveUniversalRowAge(state, command.animation, field, seGate, liveMoveScriptTailFrames(command.timing, command.animation, field),
+          HPD8_SHAPE_A_MOVE_IDS.has(command.animation.moveId) && (command.timing.bodyLeadFrames ?? 0) > 0),
         ...(lead > 0 && state.lifecycle.phaseElapsed <= pre ? { preActivationRow: true as const } : {}),
         paletteInput: state.liveMovePaletteInput,
         spriteAllocatorInput: state.liveMoveSpriteAllocatorInput,

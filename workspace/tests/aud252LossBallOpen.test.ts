@@ -15,7 +15,8 @@ const fixture = JSON.parse(readFileSync(new URL("./fixtures/aud252-loss-itemeffe
 // hie4 (2026-11-16) dropped the 28-row floor on the item-heal HP command: the loss SE_BALL_OPEN after the held-item heal moved 20 / 21 rows earlier and
 // now sits at the same engine-minus-ROM offset as the item effect's SEs before it (-19 / -19; -7 / -6), where aud252 pinned it over-held (+1 / +14).
 // sta3: seed 2230's turn has a pre-move print (the action transition into it is now the ROM's, trn176 rule extended): the rows after the faint move 1 closer to 0.
-const DELTAS: Record<string, number[]> = { "1914": [-5, -11, -19, -19, -19, -19, -19, -19], "2230": [7, -3, -5, -5, -5, -5, -5, -6] };
+// hpd8: seed 2230's Scene ON turn ends on a shape-A body (the lead + hit tail now sit in the command): rows after the faint, engine minus ROM, -3 / -5 x5 / -6 -> +2 / 0 x5 / -1 (every row toward the ROM).
+const DELTAS: Record<string, number[]> = { "1914": [-5, -11, -19, -19, -19, -19, -19, -19], "2230": [7, 2, 0, 0, 0, 0, 0, -1] };
 const script = new URL("../tools/integration/soundCensusRomReplay.ts", import.meta.url).pathname;
 
 function engineRows(seed: string, scene: string, setup: unknown): Row[] {

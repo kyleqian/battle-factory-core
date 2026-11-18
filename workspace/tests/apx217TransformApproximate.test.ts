@@ -65,7 +65,7 @@ describe("apx217: approximate transform", () => {
 
   it.each([
     // census seed 197: CHANSEY (player) shown transformed into MANTINE; Bubblebeam both ways, Icy Wind from the opponent.
-    ["Bubblebeam 61 player (transformed attacker, census seed 197)", 197, 61, 0, 244],
+    ["Bubblebeam 61 player (transformed attacker, census seed 197)", 197, 61, 0, 250],
     ["Icy Wind 196 opponent (transformed target, census seed 197)", 197, 196, 1, 290],
   ])("%s: draws non-static rows, classifies approx, deterministic on replay", (_name, seed, moveId, attacker, rows) => {
     const first = apx217Strip(seed, moveId, attacker)!;

@@ -15,6 +15,7 @@ import {
 import { liveSubstituteSwapApplies, substituteSwapCompositeDuration } from "../src/engine/liveSubstituteSwap.ts";
 import { prepareLiveMoveSpriteOrder, type LiveMoveSpriteOrderInput } from "../src/engine/liveMoveSpriteAllocator.ts";
 import { knownEntrySpriteOrderState } from "../src/engine/spriteOrderProvider.ts";
+import { iu120Ages } from "./helpers/iu120Rows.ts";
 import speciesStats from "../src/data/gen/species-stats.json" with { type: "json" };
 
 // stl109 (docs/stl109-struggle-live.md): MOVE_STRUGGLE (165) pinned against the stg107 ROM windows
@@ -181,7 +182,7 @@ const rulesWithoutSceneMarker = (v: { rules: any }) => {
 
 describe("stl109: forced Struggle through the kernel (generated rental routes)", () => {
   for (const route of ROUTES) {
-    it(`${route.name}: every Struggle body is live for all 112 rows, the turn reaches the next prompt, Scene ON / OFF logic, damage and RNG are identical`, async () => {
+    it(`${route.name}: every Struggle body is live for all 112 rows plus the hpd8 lead and hit tail (123), the turn reaches the next prompt, Scene ON / OFF logic, damage and RNG are identical`, async () => {
       const { generatedCommandAnimationReplay } = await import("../tools/integration/generatedCommandAnimationReplay.ts");
       // sa125: the turn-58 route crosses 34 Scene ON status animations (+3,298 frames, SA3 -1,044): 27,992 -> 30,246 frames, past
       // the replay's default 30,000-frame budget, so both routes pass 40,000 explicitly.
@@ -190,9 +191,9 @@ describe("stl109: forced Struggle through the kernel (generated rental routes)",
       expect(on.stalled).toBe(false);
       expect(off.stalled).toBe(false);
       const bodies = on.animations.filter((a) => a.moveId === 165);
-      expect(bodies.map((b) => [b.attacker, b.ages.length])).toEqual(route.attackers.map((a) => [a, 112]));
+      expect(bodies.map((b) => [b.attacker, b.ages.length])).toEqual(route.attackers.map((a) => [a, iu120Ages(165, 112).length]));
       for (const body of bodies) {
-        expect(body.ages).toEqual(Array.from({ length: 112 }, (_, age) => age));
+        expect(body.ages).toEqual(iu120Ages(165, 112));
         expect(body.adapterActive.every(Boolean)).toBe(true);
       }
       expect(on.requests.filter((r) => r.moveId === 165).map((r) => r.attacker)).toEqual([...route.attackers]);
