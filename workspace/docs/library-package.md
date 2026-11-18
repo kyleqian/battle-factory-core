@@ -139,8 +139,9 @@ declared in `lib-types/index.d.ts` and `src/factoryContract.ts`. Omit `audio` an
 - Format. Ogg Vorbis where the browser can play it, AAC-in-MP4 where it cannot (Safari / iOS older than 18.4), chosen by `canPlayType` and
   re-chosen on an Ogg decode failure. Mac-side encode command and size impact: `docs/aud245-audio-player.md`.
 - The sink is write-only: frame hashes, digest and trace are identical with audio on or off
-  (`tests/aud245FrameIdentity.test.ts`). Because audio is not in the trace, a `resume` fast-forward is silent and background music
-  starts at the next music event.
+  (`tests/aud245FrameIdentity.test.ts`). Audio is not in the trace, so a `resume` fast-forward plays nothing; when it ends the
+  player restores the music it tracked during the fast-forward, mid-song at the right position (`src/audio/musicTracker.ts`,
+  `audio.restore` in `src/lib.ts`; checked on the live site 2026-11-18 in Chrome, Chromium and WebKit).
 
 ## Tests
 

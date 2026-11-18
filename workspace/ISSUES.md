@@ -13,6 +13,17 @@ defects are all authorized in the finish-up mission (`docs/factory-finish-scope.
 gameplay / RNG when proved against source; use main-lane ownership and gameplay gates. Historical presentation-only
 exclusions are superseded. Unrelated expansions stay parked.
 
+## #223 — The Factory Head battle has no music on the website (Kyle, 2026-11-18)
+
+- The engine emits `bgm` 471 (`MUS_VS_FRONTIER_BRAIN`, `GetBattleBGM` pokemon.c:6473-6480) for the NOLAND battle, but the
+  library ships recordings for only four songs: `dist-lib/audio` holds `bgm-354`, `bgm-412`, `bgm-469`, `bgm-476`. So the player
+  plays nothing until the victory song: a silent Brain battle at battle 21 (and 42) for anyone who gets that far.
+- Fix: record 471 the same way as the other four (`docs/aud245-audio-player.md`: `song-players.json`, the manifest's loop points, Ogg +
+  AAC), and check in a browser that a Brain battle plays it, loops and fades on the result (`docs/aud241c-battle-end-sounds.md` row
+  for a Brain loss). Then rebuild dist-lib and tell the website (new ENGINE_BUILD).
+- Found 11-18 while checking a reload report: music after a page reload is fine (the song comes back mid-song within about
+  1 s, Chrome / Chromium / WebKit, live site); the stale line in `docs/library-package.md` that said otherwise is corrected.
+
 ## #221 — Lobby RNG cursor: harness / unmeasured routes (lbw1 / lbw2 / lbw3, 2026-11-15)
 
 - E1-E3 (battle-exit VBlank hold, Pokerus + save-block draws, Lobby map-load draws) fixed by lbr-g (`src/engine/battleExitRng.ts`,
