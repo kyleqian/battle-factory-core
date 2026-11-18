@@ -35,3 +35,10 @@ hunt's, their stage file is the hunt's `found.stage.json` without the hunt's `ch
 design whose rule has a file here.
 
 R030 came from the luck hunt's second day (luck3, 2026-11-17): the design was rebuilt around the AI Dusclops 666 faint from its own Ghost-Curse cost (an end-of-turn poison faint cannot reach the marker), and its lab seed is from the block 900000-900039 that the day job never uses; found by `prehunt.py` (2 of 40 hit), then re-driven from this file on the Scene OFF oracle to a full match. That makes 60 of the 110 rules of `rule-coverage.md` covered.
+
+ice1 (2026-11-18, `docs/hpd1-hp-hold.md` "ice1"): two stage files without a `rules` / `cover` field (no (c) rule; they guard `Cmd_rolloutdamagecalculation`'s five-hit doubling and the Defense Curl bit). Driven on the Scene OFF oracle at `master` d60fce582:
+
+| file | lab seed | states matched | wide states | what happens |
+|---|---|---|---|---|
+| ice1-iceball-lock | 90102 | 10 of 10 | 2 of 2 | Sealeo 196 locked into Ice Ball, five hits in a row on the opponent's Wobbuffet 185 (foe HP 272 -> 254 -> 223 -> 157 -> 39 -> 0) |
+| ice1-rollout-defense-curl | 90101 | 10 of 10 | 3 of 3 | Phanpy 120 uses Defense Curl, then Rollout, five hits with the curl bit on Wobbuffet (foe HP 272 -> 212 -> 147 -> 85 -> 0) |

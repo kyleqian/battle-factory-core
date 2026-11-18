@@ -1,0 +1,62 @@
+{
+ "name": "ice1-iceball-lock",
+ "why": "Player Sealeo (set 196) leads with Ice Ball and keeps choosing it against the opponent's Wobbuffet (set 185): five Ice Ball hits in a row (Cmd_rolloutdamagecalculation, power doubling per hit), no Defense Curl bit.",
+ "seed": 90102,
+ "challengeNum": 0,
+ "battleNum": 0,
+ "trainerId": 74,
+ "playerSetIds": [
+  196,
+  142,
+  143
+ ],
+ "opponentSetIds": [
+  185,
+  114,
+  117
+ ],
+ "script": {
+  "actions": [
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   }
+  ],
+  "then": "census"
+ },
+ "expect": [
+  "moveid:MOVE_ICE_BALL"
+ ]
+}

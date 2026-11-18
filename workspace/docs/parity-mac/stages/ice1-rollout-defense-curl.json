@@ -1,0 +1,66 @@
+{
+ "name": "ice1-rollout-defense-curl",
+ "why": "Player Phanpy (set 120) uses Defense Curl first, then keeps choosing Rollout against the opponent's Wobbuffet (set 185): the Defense Curl bit doubles Cmd_rolloutdamagecalculation's dynamic power on every hit of the five-turn lock. No Factory set has both Ice Ball and Defense Curl; Ice Ball and Rollout share the one command.",
+ "seed": 90101,
+ "challengeNum": 0,
+ "battleNum": 0,
+ "trainerId": 74,
+ "playerSetIds": [
+  120,
+  142,
+  143
+ ],
+ "opponentSetIds": [
+  185,
+  114,
+  117
+ ],
+ "script": {
+  "actions": [
+   {
+    "move": 1
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   }
+  ],
+  "then": "census"
+ },
+ "expect": [
+  "moveid:MOVE_DEFENSE_CURL",
+  "moveid:MOVE_ROLLOUT"
+ ]
+}
