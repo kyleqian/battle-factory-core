@@ -1,6 +1,6 @@
 """Round replay fixture (docs/parity-mac/round-replay.md, tests/parityMacRoundReplayFixtures.test.ts): one recorded real-ROM run, kept small enough for git.
 
-Usage (cwd = workspace/): python3 tools/audio/romRoundFixture.py RUN NAME --note TEXT [--symbols 0|1] [--draft first|strongest] [--swap-override N:LIST]
+Usage (cwd = workspace/): python3 tools/audio/romRoundFixture.py RUN NAME --note TEXT [--symbols 0|1|2] [--heard S,G] [--draft first|strongest] [--swap-override N:LIST]
   RUN is a tools/audio/romRoundReplay.sh output prefix (RUN.drive.json, RUN.d/setup-N.json, RUN.d/engine.json, RUN.cmp.json).
   Writes tests/fixtures/round-replay/NAME.json.gz.
 
@@ -54,12 +54,12 @@ def main():
         setups.append(kept)
         between = d.get("between") or {}
         rom.append({"drive": {**{k: d["drive"][k] for k in DRIVE_KEYS}, "timeline": matched_rom_rows(b["timeline"], d["drive"]["timeline"])},
-                    "between": {k: between[k] for k in ("newRound", "swap", "swapPrompt") if k in between} or None})
+                    "between": {k: between[k] for k in ("newRound", "swap", "swapPrompt", "brainTexts", "epilogue", "reachedDraft", "afterRound") if k in between} or None})
     fixture = {
         "schema": "round-replay-fixture/v1", "name": name, "note": opt("--note", ""),
         "recordedFrom": {"run": Path(run).name, "engineSeconds": None},
         "options": {"seed": drive["seed"], "scene": drive["scene"], "policy": drive["policy"], "swap": drive["swap"], "challenge": drive["challenge"],
-                    "symbols": int(opt("--symbols", "0")), "draft": opt("--draft", "first"), "swapOverride": opt("--swap-override", "")},
+                    "symbols": int(opt("--symbols", "0")), "heard": opt("--heard", ""), "draft": opt("--draft", "first"), "swapOverride": opt("--swap-override", "")},
         "knownK": [b["engineDrawsBeforeActionMenu"] for b in battles], "playerVariants": [b.get("playerVariant", 0) for b in battles],
         "expect": {"battles": len(battles), "knownDifferences": sum(1 for b in cmp["battles"] if b.get("knownDifference"))},
         "setups": setups, "rom": rom,

@@ -2,7 +2,7 @@
 
 Usage (cwd = workspace/, through tools/run-mgba-probe.py like every mGBA probe):
   python3 tools/run-mgba-probe.py OUT.json -- python3 tools/audio/romRoundDriver.py OUT.json REQ.json --seed N --profile off|on \
-      --policy census|ai-v1|random-v1|power-v1 --swap never|weakest|random --dir WORKDIR [--challenge C] [--frames CAP] [--frame-budget N] [--prompt-delay K@N] [--symbols 0|1] [--rounds R] [--draft first|strongest] [--search-wins N] [--stop-on-loss] [--stage-rents N]
+      --policy census|ai-v1|random-v1|power-v1 --swap never|weakest|random --dir WORKDIR [--challenge C] [--frames CAP] [--frame-budget N] [--prompt-delay K@N] [--symbols 0|1] [--rounds R] [--draft first|strongest] [--search-wins N] [--stop-on-loss] [--stage-rents N] [--heard S,G]
 
 REQ.json is the factoryLegal request of the round's first battle (`soundCensusRomReplay.ts request --round=1`). The lab stages that battle as for a single
 replay (oracle/battle_lab.py prepare). From then on nothing is staged: the ROM plays the round itself.
@@ -34,6 +34,13 @@ WORKSPACE = Path(__file__).resolve().parents[2]
 # include/global.h struct BattleFrontier offsets in SaveBlock2. factoryRentsCount[0][0] (singles, Level 50) is at 0xDF2: factoryRecordWinStreaks[2][2]
 # ends there and factoryRecordRentsCount starts at 0xDFA; the header's "0xDF6" comment (copied by oracle/battle_lab.py) is [1][0], the doubles count.
 SB2_BATTLE_NUM, SB2_TRAINER_IDS, SB2_FACTORY_STREAK, SB2_FACTORY_RENTS, SB2_RENTAL_MONS = 0xCB2, 0xCB4, 0xDE2, 0xDF2, 0xE70
+# battledBrainFlags (global.h 0xD00): the Factory's heard-speech bits, 1 << 8 silver, 1 << 9 gold (frontier_util.c:596-605).
+SB2_BATTLED_BRAIN_FLAGS, HEARD_SILVER_BIT, HEARD_GOLD_BIT = 0xD00, 1 << 8, 1 << 9
+FLAG_SYS_FACTORY_GOLD = 0x8CD
+# Noland's lines in the battle room script (BattleFactoryBattleRoom scripts.inc:113-167), found by their text pointers in the script's bytecode.
+BRAIN_SCRIPT_RANGE = ("BattleFrontier_BattleFactoryBattleRoom_EventScript_BattleNoland", "BattleFrontier_BattleFactoryBattleRoom_Text_NolandImFactoryHead")
+BRAIN_TEXTS = ("NolandImFactoryHead", "ShakeOutKnowledgeBringItOn", "HarderLookThanLastTime", "AllRightBringItOn", "NolandLetsSeeFrontierPass",
+               "ReceivedKnowledgeSymbol", "NextTimeNoHoldsBarred", "OutOfMyLeagueLetsSeePass", "KnowledgeSymbolTookGoldenShine", "LastTimeILoseToYou")
 RENTAL_MON_SIZE = 12  # struct RentalMon: u16 monId, u32 personality (+4), u8 ivs (+8), u8 abilityNum (+9)
 CONTROLLER_CHOOSE_ACTION, PLAYER_CONTROLLER_FLAG = 18, 1
 TASK_SIZE, TASK_COUNT = 40, 16
@@ -95,6 +102,32 @@ def statics():
 class Rom:
     def __init__(self, oracle, lab):
         self.o, self.lab, self.sym, self.st = oracle, lab, oracle.symbols, statics()
+        self.text_sites = self.brain_text_sites()
+
+    def brain_text_sites(self):
+        """{text: [end of each script command that names it]}: the msgbox's loadword / the message command hold the text pointer; while the line
+        shows, the script pointer (message, then waitmessage / waitfanfare: +1, +2) or the callstd's return address (msgbox: +2) sits just past it.
+        A `call` right after a msgbox leaves its return address at +7 on the stack for the whole battle, so a line counts only up to +3."""
+        nm = romDecisionDriver.parse_nm(subprocess.run(["nm", str(sep.REF / "pokeemerald.elf")], check=True, capture_output=True, text=True).stdout)
+        lo, hi = (nm[n][0] for n in BRAIN_SCRIPT_RANGE)
+        code = bytes(self.u8(a) for a in range(lo, hi))
+        sites = {}
+        for text in BRAIN_TEXTS:
+            ptr = nm["BattleFrontier_BattleFactoryBattleRoom_Text_" + text][0].to_bytes(4, "little")
+            at = [lo + i + 4 for i in range(len(code) - 3) if code[i:i + 4] == ptr]
+            if not at:
+                raise SystemExit(f"romRoundDriver: no script command names the text {text}")
+            sites[text] = at
+        return sites
+
+    def script_positions(self):
+        ctx = self.st["sGlobalScriptContext"]
+        depth = min(self.u8(ctx), 20)
+        return [self.u32(ctx + 8)] + [self.u32(ctx + 0x0C + 4 * i) for i in range(depth)]
+
+    def heard_bits(self):
+        flags = self.u16(self.save2() + SB2_BATTLED_BRAIN_FLAGS)
+        return {"silver": int(bool(flags & HEARD_SILVER_BIT)), "gold": int(bool(flags & HEARD_GOLD_BIT))}
 
     def u8(self, a): return self.o.read_u8(a)
     def u16(self, a): return self.o.read_u16(a)
@@ -139,6 +172,7 @@ class Rom:
         return {
             "battleNum": self.u16(s2 + SB2_BATTLE_NUM), "factoryWinStreak": self.u16(s2 + SB2_FACTORY_STREAK), "rentsCount": self.u16(s2 + SB2_FACTORY_RENTS),
             "performedRentalSwap": self.u8(self.st["sPerformedRentalSwap"]), "factorySymbols": self.lab._factory_symbol_count(),
+            "heardBrainSpeech": self.heard_bits(),
             "trainerId": self.u16(self.sym["gTrainerBattleOpponent_A"]),
             "frontierTempParty": [self.u16(self.sym["gFrontierTempParty"] + 2 * i) for i in range(3)],
             "trainerIds": [self.u16(s2 + SB2_TRAINER_IDS + 2 * i) for i in range(7)],
@@ -266,7 +300,7 @@ class Rom:
         return [], None
 
 
-def drive_between(rom, swap, cap, progress, prompt_delay=0, new_round=False, draft_rule="first"):
+def drive_between(rom, swap, cap, progress, prompt_delay=0, new_round=False, draft_rule="first", stop_at_draft=False):
     """new_round: from the end of a round (a loss, or the seventh win) through the Lobby (the result text, the save, the record prompt), the
     attendant (the player stands facing him: A talks; take the challenge, Level 50, save YES), the walk, the new draft (the rental screen,
     driven by select_buttons with the draft rule) to the next round's first action menu. Every YES/NO there is answered A."""
@@ -278,6 +312,7 @@ def drive_between(rom, swap, cap, progress, prompt_delay=0, new_round=False, dra
     rng_prev, watch_prev = rom.u32(rom.sym["gRngValue"]), rom.watch()
     changes, seen_field, swap_screen, answered, exit_seen, last, prompt_open = [], False, False, None, None, None, 0
     draft_positions = None
+    brain_texts = progress.setdefault("brainTexts", [])
     labels = [(rom.sym[a], rom.sym[b]) for a, b in SWAP_PROMPT_LABELS]
     transitions = []
     swap_trace = progress.setdefault("swapTrace", [])
@@ -288,6 +323,10 @@ def drive_between(rom, swap, cap, progress, prompt_delay=0, new_round=False, dra
             seen_field = True
         if seen_field and rom.action_menu_ready():
             break
+        for v in rom.script_positions():
+            for text, ends in rom.text_sites.items():
+                if any(e <= v <= e + 3 for e in ends) and (not brain_texts or brain_texts[-1] != text):
+                    brain_texts.append(text)
         if frames >= cap:
             raise RoundError(f"the screens between battles did not reach the next action menu in {cap} frames (last state {last})")
         live = dict(rom.tasks())
@@ -297,6 +336,10 @@ def drive_between(rom, swap, cap, progress, prompt_delay=0, new_round=False, dra
         if select_live:
             if not new_round:
                 raise RoundError("the rental screen opened between two battles of a round")
+            if stop_at_draft:
+                # the run's end (stop_at_draft): the next challenge's rental screen is open, everything of the last round's end has played
+                progress["reachedDraft"] = True
+                break
             choose_ready = live.get(st["Select_Task_HandleChooseMons"]) == STATE_CHOOSE_MONS_HANDLE_INPUT
             if draft_positions is None and choose_ready:
                 draft = rom.rental_mon_ids()
@@ -372,7 +415,8 @@ def drive_between(rom, swap, cap, progress, prompt_delay=0, new_round=False, dra
 
 
 def run_engine(args, setup_paths, out_path, known_k=(), variants=()):
-    env = dict(os.environ, ROM_REPLAY_ROUND="1", ROM_REPLAY_SYMBOLS=str(args["symbols"]), ROM_REPLAY_DRAFT=args["draft"])
+    env = dict(os.environ, ROM_REPLAY_ROUND="1", ROM_REPLAY_SYMBOLS=str(args["symbols"]), ROM_REPLAY_DRAFT=args["draft"],
+               ROM_REPLAY_HEARD="" if args["heard"] is None else ",".join(map(str, args["heard"])))
     if args["challenge"] is not None:
         env["ROM_REPLAY_CHALLENGE"] = str(args["challenge"])
     cmd = ["node", "--experimental-strip-types", "--no-warnings", "tools/integration/soundCensusRomReplay.ts", "round", f"--seed={args['seed']}",
@@ -402,7 +446,8 @@ def main():
     args = {"seed": int(opt("--seed")), "scene": opt("--profile", "off"), "policy": opt("--policy", "census"), "swap": opt("--swap", "never"),
             "challenge": None if opt("--challenge") in (None, "") else int(opt("--challenge")), "frameBudget": opt("--frame-budget"),
             "symbols": int(opt("--symbols", "0")), "draft": opt("--draft", "first"), "searchWins": int(opt("--search-wins", "0")),
-            "stopOnLoss": "--stop-on-loss" in rest, "stageRents": None if opt("--stage-rents") in (None, "") else int(opt("--stage-rents"))}
+            "stopOnLoss": "--stop-on-loss" in rest, "stageRents": None if opt("--stage-rents") in (None, "") else int(opt("--stage-rents")),
+            "heard": None if opt("--heard") in (None, "") else [int(x) for x in opt("--heard").split(",")]}
     # --prompt-delay K@N: wait K more frames at the swap prompt after battle N (0-based) before answering (genuine input timing: it moves the RNG cursor
     # of everything rolled after it, like a slower player). Battles 0..N are unchanged.
     delay_k, delay_at = (int(x) for x in opt("--prompt-delay", "0@-1").split("@"))
@@ -433,10 +478,18 @@ def main():
     staging_fix["rentsCount"] = request["rentalSwapCount"] if args["stageRents"] is None else args["stageRents"]
     oracle.write_u16(s2 + SB2_FACTORY_RENTS, staging_fix["rentsCount"])
     if args["symbols"]:
-        # --symbols 1: the silver Factory symbol (FLAG_SYS_FACTORY_SILVER), as a player has it after beating silver Noland at streak 21; with it the seventh
-        # battle of challenge 5 is gold Noland (GetFrontierBrainStatus, frontier_util.c:1656-1693). The lab sets it the same way for a factoryBrain staging.
+        # --symbols 1|2: the Factory symbols (FLAG_SYS_FACTORY_SILVER, FLAG_SYS_FACTORY_GOLD) a save holds after beating Noland once / twice; they decide
+        # Noland's battles (GetFrontierBrainStatus, frontier_util.c:1656-1693). The lab sets the silver one the same way for a factoryBrain staging.
         lab._set_factory_symbol_flag(battle_lab.FLAG_SYS_FACTORY_SILVER)
+        if args["symbols"] >= 2:
+            lab._set_factory_symbol_flag(FLAG_SYS_FACTORY_GOLD)
         staging_fix["silverSymbol"] = lab._factory_symbol_count()
+    if args["heard"] is not None:
+        # --heard S,G: the heard-speech bits (battledBrainFlags, FRONTIER_DATA_HEARD_BRAIN_SPEECH) the save starts with.
+        flags = rom.u16(s2 + SB2_BATTLED_BRAIN_FLAGS) & ~(HEARD_SILVER_BIT | HEARD_GOLD_BIT)
+        flags |= (HEARD_SILVER_BIT if args["heard"][0] else 0) | (HEARD_GOLD_BIT if args["heard"][1] else 0)
+        oracle.write_u16(s2 + SB2_BATTLED_BRAIN_FLAGS, flags)
+    staging_fix["frontier"] = {"symbols": lab._factory_symbol_count(), "heardBrainSpeech": rom.heard_bits()}
     funcs = romDecisionDriver.resolve_funcs(sep.REF)
     result = {"schema": "rom-round-drive/v1", "seed": args["seed"], "scene": args["scene"], "policy": args["policy"], "swap": args["swap"], "promptDelay": [delay_k, delay_at],
               "challenge": request["challengeNum"], "request": request, "stagingFix": staging_fix, "battles": [], "error": None}
@@ -473,6 +526,11 @@ def main():
                 continue
             rounds_done += 1
             if rounds_done >= rounds or (args["stopOnLoss"] and not (drive["outcome"] == 1 and setup["round"]["battleNum"] == 6)):
+                # The epilogue: the screens after the run's last battle (Noland's symbol or none, the Lobby, the next challenge's start), driven to
+                # the next draft screen and recorded; then the save's symbols and heard bits.
+                entry["between"] = {"epilogue": True}
+                drive_between(rom, None, BETWEEN_FRAME_CAP, entry["between"], new_round=True, stop_at_draft=True)
+                entry["between"]["afterRound"] = {"factorySymbols": rom.lab._factory_symbol_count(), "heardBrainSpeech": rom.heard_bits()}
                 break
             entry["between"] = {"newRound": True}
             drive_between(rom, None, BETWEEN_FRAME_CAP, entry["between"], new_round=True, draft_rule=args["draft"])

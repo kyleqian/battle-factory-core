@@ -17,8 +17,12 @@ python3 tools/audio/romRoundSummary.py /abs/outdir
 - `CHALLENGE`: the 0-based Level 50 challenge, 0..7 (default: the census mapping's challenge of the seed). The round starts at battle
   number 0 of that challenge (`--round=1` of `soundCensusRomReplay.ts`).
 - `REPLAY_SCENE=on` drives Battle Scene ON. `REPLAY_FRAME_BUDGET` / `REPLAY_DRIVE_FRAMES` raise the per-battle caps for very long battles.
-- `REPLAY_SYMBOLS=1`: the player holds the silver Factory symbol (staged after the lab staging, as the lab does for a factoryBrain staging);
-  challenge 5's seventh battle is then gold Noland. The ID gets `-gold`.
+- `REPLAY_SYMBOLS=1|2`: the player holds the silver (and the gold) Factory symbol (`FLAG_SYS_FACTORY_SILVER` / `GOLD`, staged after the lab
+  staging, as the lab does for a factoryBrain staging). With 1, challenge 5's seventh battle is gold Noland and challenge 2's is ordinary;
+  with 2, Noland's return battles are at 21, 42, 63, ... (`frontier-record.md`). The ID gets `-gold` / `-sym2`.
+- `REPLAY_HEARD=S,G` (0 or 1 each): the heard-speech bits the save starts with (`battledBrainFlags`, Factory bits `1 << 8` silver, `1 << 9`
+  gold), staged with the symbols; the engine's round starts with the same record (`ROM_REPLAY_HEARD`, checked as the library checks a start
+  record). Absent: the bits as the checkpoint holds them (none) and none on the engine. The ID gets `-hS-G`.
 - `REPLAY_ROUNDS=R`: R rounds back to back. After a round ends (a loss, a draw, or the seventh win) the ROM plays the Lobby (the result text,
   the save, the record prompt), talks to the attendant (the player stands facing him), takes the challenge at Level 50, saves, walks in and
   plays the new draft (the rental screen, driven by RAM state: the first three rentals with no species twice, the rule the engine's player uses).
@@ -66,10 +70,16 @@ and symbol count. One known difference is named apart: the first trainer's roll 
 `soundCensusRomReplay.ts round` and `round-compare`, and checks every battle start, every trainer and draft roll and every turn, as the ROM replay
 does; what each run is for is pinned on the ROM's own data. `tools/audio/romRoundFixture.py RUN NAME --note ...` makes a fixture from a run of
 `romRoundReplay.sh`: it keeps the setup fields the engine reads, the ROM drive fields the compare reads, and of the ROM timeline the rows the turn
-compare found the engine's states at (the ROM's state after every turn); it refuses a run that does not match. The fixtures: never swapping,
-swapping every win, cancel after YES, silver Noland holding the swapped-away set (fix 45), gold Noland (staged symbol), a draft rolled at 15 rents,
-a draft rolled at 256 rents (fix 46; the start count staged before battle 1), and the unbroken 42-battle run below. Reverting fix 44 fails all of
-them, fix 45 the three with Noland, fix 46 the wrap run.
+compare found the engine's states at (the ROM's state after every turn) and Noland's lines; it refuses a run that does not match. The fixtures:
+never swapping, swapping every win, cancel after YES, silver Noland holding the swapped-away set (fix 45), gold Noland (staged symbol), a draft
+rolled at 15 rents, a draft rolled at 256 rents (fix 46; the start count staged before battle 1), the unbroken 42-battle run below, and six with
+a staged Factory record: both symbols at battles 21, 42 and 63 (challenges 7 and 8 back to back), one symbol at battle 21, a heard silver speech
+with no symbol, a heard gold speech with one symbol. Reverting fix 44 fails the first eight, fix 45 the three with Noland among them, fix 46 the
+wrap run, fix 48 the 42 and 63 runs, fix 49 the record runs.
+
+At challenge 8 the draft's rentals have rolled IVs (the select screen reads the fixed-IV table one row past its end). The tool then finds each
+picked rental's personality and IV words in the ROM's random stream from the draft roll (VBlank draws can fall between them) and applies the
+engine's rule; the strongest-draft pick is then the ROM player's own (`selectedFrom: "rom-party"`), since it depends on those IVs.
 
 ## The unbroken run
 
@@ -99,6 +109,15 @@ make the team weaker; `strongest` drafts the three strongest rentals.
   and items).
 - **Turn by turn**: as for one battle (`compareBattle`: HP of both sides, `gRngValue` and the last moves after every turn; the wide state at
   every decision).
+- **The save's Factory record** (`frontier-record.md`): at every battle start the two heard-speech bits as well (the ROM's
+  `battledBrainFlags`, the engine's facility state). Noland's lines: the driver finds each of his texts' commands in the battle room script's
+  bytecode (`BattleNoland` .. the first text; the msgbox's `loadword`, the `message` command) and records a line while the script pointer, or a
+  `callstd` return address on the script stack, sits just past one (up to 3 bytes: the `call DoNolandBattle` after a msgbox leaves its return
+  address 7 bytes on, for the whole battle). Before his battle the engine's speech (`battleRoomStateForOpponent` with the tier's heard bit, as
+  `core.ts` builds the battle room; a first speech sets the bit, as `core.ts` does) must be the ROM's lines: the first speech and the short
+  lines, or the short lines only. After a round's last battle the lines of the symbol (`DefeatedNolandSilver` / `Gold`) must be there exactly
+  when the engine's round outcome gives a symbol. After the run's last battle the ROM plays on to the next draft screen (the epilogue) and
+  the save's symbols and heard bits there must be the engine's. The site itself shows no symbol scene (below).
 
 ## What the engine takes from the ROM, and why
 
@@ -140,8 +159,11 @@ The drive records the old values (`stagingFix`).
 
 ## Not covered (yet)
 
-- Noland with both symbols (his later "streak" battles). Gold Noland is covered with `REPLAY_SYMBOLS=1` (the driver stages the silver
-  symbol; challenge 5's seventh battle is then gold Noland); without it challenge 5's seventh battle is an ordinary trainer.
+- The symbol scene after a first win over silver or gold Noland (his lines, the walk to him, `MUS_OBTAIN_SYMBOL`): the site shows none
+  (`aud240d-script-sounds.md`: the symbol script is not reproduced). The ROM's lines are recorded and the engine's outcome (symbol or none)
+  is compared with them, not a screen of the site's.
+- The look and timing of Noland's lines on the site (box by box, frames): the replay compares which lines play, not how they are drawn.
+- Return battles past 63 (84, 105, ...): the lab stages challenges 0..7; battle 63 is reached as the second round of a run from challenge 7.
 - On the screens: RECORD, REST and RETIRE at the GO ON menu; the summary screen from the swap and rental screens; the swap and rental
   screens' same-species refusals (no policy picks a refused Pokemon). Cancel after YES is covered (policy `cancel`).
 - Open Level (level 100 sets 372..881): the lab and the replay are Level 50 only.

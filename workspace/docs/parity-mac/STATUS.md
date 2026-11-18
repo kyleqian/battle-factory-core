@@ -120,6 +120,58 @@ All 8 matched in every check but finding 47 (the first trainer of each new round
 doubles count); now +0xDF2. No saved receipt in git carries that field; two docs quote its value from the old address
 (`factory-seventh-win-ending-off-probe.md:68`, `factory-loss-ending-off-probe.md:65`), not re-run.
 
+### Fourth part (2026-11-18, Kyle's word through the top layer): the save's Factory record, fixes 48 and 49
+
+Kyle: the website should keep the Factory symbols across challenges, as the game does; test that, and battle 63.
+
+**The library** (commit e13d06527, `frontier-record.md`): an optional start record `frontier: { symbols, heardBrainSpeech }` for both starts, a
+resume and a replay; the result reports the record at the end. **Fix 48** (f6b0acd1a, `noland-return-battles.md`): the return battles at 42
+and 63 use Noland's gold lines.
+
+**On the real game.** The round replay stages the record on the ROM (`REPLAY_SYMBOLS=1|2`, `REPLAY_HEARD=S,G`: the symbol flags and the
+heard-speech bits, after the lab staging) and starts the engine's round from the same record. New checks (`round-replay.md`): the heard bits
+at every battle start; Noland's lines before his battle (the driver reads which of his texts the battle room script shows); the symbol's
+lines after a round's last battle against the engine's outcome; and, after the run's last battle, the ROM played on to the next draft screen
+with the save's symbols and heard bits there. Batch (Scene OFF, power-v1 with engine-side tries, the strongest draft, never swapping; counts of
+what was run, not a quality figure):
+
+| Start record | Challenge | Runs | What the ROM showed (every run) | Engine |
+|---|---|---|---|---|
+| 1 symbol, silver heard | 2 | 3 | battle 21 an ordinary trainer, no Noland lines | same |
+| 2 symbols, both heard | 2 | 4 | battle 21 Noland, the short silver lines only, no symbol | same |
+| 2 symbols, both heard | 5 | 4 | battle 42 Noland, the short gold lines only, no symbol | same (fix 48) |
+| 2 symbols, both heard | 7 then 8 | 10 | 6 won through to battle 63: Noland, the short gold lines only, no symbol; 4 lost at battles 57, 57, 60, 61 | same (fix 48) |
+| no symbol, silver heard | 2 | 3 | silver Noland skips his first speech; the silver symbol | same after fix 49 |
+| 1 symbol, both heard | 5 | 3 | gold Noland skips his first speech; the gold symbol | same after fix 49 |
+| no symbol, none heard (control) | 2 | 2 | silver Noland's first speech, then the short lines; the silver symbol | same |
+| 1 symbol, silver heard (control) | 5 | 2 | gold Noland's first speech, then the short lines; the gold symbol | same |
+
+Every battle of all 31 runs matched in every check (start, rolls, turns, the lines, the symbol, the record at the end) except finding 47 (the
+first trainer of each chained round, 10 times). The return battles' "no symbol" is also read on the save after the run: 2 symbols, both bits.
+
+**Fix 49** (`heard-speech-kept-at-rent.md`). A win that pays a rent (every challenge's first win pays the draft, fix 44) rebuilt the engine's
+facility state with the rent count alone and dropped the heard-speech bits. So a player who had heard Noland's first speech (lost to him, say)
+heard it all again at the next battle 21 (or 42 with one symbol); the game skips it. ROM: the bits staged at battle 1 were still on the ROM at
+every later battle start and gone on the engine; on the six heard-speech runs above, the engine without the fix plays the first speech
+("I'm Noland, the Factory Head" / "a harder look than last time") where the ROM goes straight to the short lines.
+
+**Challenge 8.** The draft's rentals there have rolled IVs: the select screen reads the fixed-IV table one row past its end (the engine
+models this, `factoryRentalGeneration.ts`). The round replay took each picked rental's personality from the ROM but kept the engine's IVs; now
+it finds the rental's personality and IV words in the ROM's random stream from the draft roll (up to 3 VBlank draws between any two words; one
+such draw was found in 7 of the 10 runs' drafts) and applies the engine's rule to them; with rolled IVs the strongest-draft pick is the ROM
+player's own. The trainers there keep a fixed 31, as on the engine. A tool change, no engine change.
+
+**Fixtures** (`tests/parityMacRoundReplayFixtures.test.ts`, now 14, 248 KB, about 30 s): both symbols at battles 21, 42 and 63 (the 14-battle
+run through challenge 8), one symbol at battle 21, the two heard-speech runs. Checked by reverting: fix 48 fails the 42 and 63 fixtures (21 has
+the silver lines either way), fix 49 all six new ones (the heard bits at the battle starts, and the first speech in the two heard-speech runs).
+
+Gates on the tip: `tsc -b` clean; full `npm test` 1,857 files / 15,970 tests pass, 0 fail. ENGINE_BUILD `eb-9af610de47298098` (fix 49 changes
+the engine; the library commit alone was `eb-df70eb8b51bae914`).
+
+**Not covered:** the symbol scene itself on the site (it shows none; the ROM's lines are compared with the engine's outcome); how Noland's
+lines are drawn and timed on the site (which lines, not their frames); return battles past 63 (the lab stages challenges 0..7); Open Level;
+RECORD, REST and RETIRE; the summary screens; the Lobby.
+
 ## Stopped 2026-11-13 (Kyle winds down the Mac)
 
 Sixth pass, stopped at about 20:00 UTC on the top layer's word: the battle-rule work moves to the box.

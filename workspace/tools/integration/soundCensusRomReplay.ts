@@ -25,13 +25,15 @@ import {
   advanceFactoryRoundBattleCommand, advanceFactoryRoundBattleResolution, advanceFactoryRoundBattleStartIntro,
   beginFactoryRoundBattleStartIntro, createFactoryRoundBattleOrchestrator,
   advanceFactoryRoundPresentation, chooseFactoryRoundSwap, completeFactoryRoundPresentation, preGenerateFactoryRoundNextOpponent,
+  factoryHeardBrainSpeech, markFactoryBrainSpeechHeard,
 } from "../../src/engine/factoryRoundBattleOrchestrator.ts";
+import { battleRoomStateForOpponent } from "../../src/engine/battleRoom.ts";
 import { adoptFactoryOpponentSchedule } from "../../src/engine/factoryOpponentGeneration.ts";
 import { adoptFactoryBrainOpponentSchedule } from "../../src/engine/factoryBrainOpponentGeneration.ts";
 import { getFactoryFrontierBrainStatus } from "../../src/engine/frontierBrainStatus.ts";
-import { advanceFactoryCarry, carryForNewChallengeAfterLobby, type FactoryCarry } from "../../src/engine/factoryRoundChaining.ts";
+import { advanceFactoryCarry, carryForNewChallengeAfterLobby, validateFactoryFrontierRecord, type FactoryCarry } from "../../src/engine/factoryRoundChaining.ts";
 import { generateFactoryOpponent } from "../../src/engine/factoryOpponentGeneration.ts";
-import { getLevel50FactoryRentalRange } from "../../src/engine/factoryRentalGeneration.ts";
+import { battleScriptIvsFromRandomWords, getLevel50FactoryRentalRange } from "../../src/engine/factoryRentalGeneration.ts";
 import { battlerMoveSelectionIsForced } from "../../src/engine/factoryBattleScriptFullTurnDecision.ts";
 import { createFactoryCorpusPartyMember } from "../../src/engine/factoryCorpusParty.ts";
 import { NO_MOVES_MESSAGE_HOLD_AT } from "../../src/engine/battleCommandPresentation.ts";
@@ -80,6 +82,14 @@ if (challengeOverride !== null && !(Number.isInteger(challengeOverride) && chall
 const roundReplay = (arg("round") ?? process.env.ROM_REPLAY_ROUND ?? "0") === "1";
 // Round replay draft rule (see strongestPositions): first (default) | strongest.
 const draftRule = (arg("draft") ?? process.env.ROM_REPLAY_DRAFT ?? "first") as "first" | "strongest";
+// The battle room's lines after a won Noland battle (DefeatedNolandSilver / DefeatedNolandGold, scripts.inc:128-166): the symbol's three lines when the
+// round's outcome gives a symbol, none otherwise. The site shows no such scene (docs/aud240d-script-sounds.md: the symbol script is not reproduced);
+// what is compared is the outcome the engine computed.
+const SYMBOL_TEXTS = { 1: ["NolandLetsSeeFrontierPass", "ReceivedKnowledgeSymbol", "NextTimeNoHoldsBarred"],
+  2: ["OutOfMyLeagueLetsSeePass", "KnowledgeSymbolTookGoldenShine", "LastTimeILoseToYou"] } as const;
+const SPEECH_TEXTS = ["NolandImFactoryHead", "ShakeOutKnowledgeBringItOn", "HarderLookThanLastTime", "AllRightBringItOn"];
+// The ROM party's set ids of the new round being built (engineNewRound -> draftPositions).
+let pendingRomParty: number[] | null = null;
 const streak = stage !== null ? stage.challengeNum * 7 + stage.battleNum
   : roundReplay ? (challengeOverride ?? Math.floor(((seed * 11) % 49) / 7)) * 7
   : challengeOverride !== null ? challengeOverride * 7 + ((seed * 11) % 7) : (seed * 11) % 49;
@@ -88,8 +98,15 @@ const frameBudget = Number(arg("frame-budget") ?? 200000);
 // parity-mac: the player's Factory symbols for `request` / `native` (GetPlayerSymbolCountForFacility, frontier_util.c:1657-1698). 0 = the census config: streak 20 is the
 // silver Noland battle. 1 = streak 41 is the gold one (the lab sets the silver symbol itself for a challenge-5 factoryBrain request). `replay` reads the tier from the setup.
 // The environment variable ROM_REPLAY_SYMBOLS gives the same through an unchanged chain script (tools/audio/romDriveSeed.sh).
-const symbols = Number(arg("symbols") ?? process.env.ROM_REPLAY_SYMBOLS ?? 0);
-if (symbols !== 0 && symbols !== 1) throw new Error("--symbols / ROM_REPLAY_SYMBOLS must be 0 or 1");
+// Round replay: 2 = both symbols (the return battles at 21, 42, 63, ...; romRoundDriver.py --symbols 2).
+const symbols = Number(arg("symbols") ?? process.env.ROM_REPLAY_SYMBOLS ?? 0) as 0 | 1 | 2;
+if (symbols !== 0 && symbols !== 1 && !(symbols === 2 && roundReplay)) throw new Error("--symbols / ROM_REPLAY_SYMBOLS must be 0 or 1 (2 for a round replay)");
+// Round replay: --heard=S,G / ROM_REPLAY_HEARD=S,G, the heard-speech bits the save starts with (battledBrainFlags; romRoundDriver.py --heard), with the
+// symbols the save's Factory record (the library's start record `frontier`, docs/parity-mac/frontier-record.md), checked as the library checks it.
+// Absent: neither speech heard (the round replay before the record; the save the lab stages has neither bit set).
+const heardArg = arg("heard") ?? process.env.ROM_REPLAY_HEARD ?? "";
+const startHeard = heardArg === "" ? { silver: false, gold: false }
+  : validateFactoryFrontierRecord({ symbols, heardBrainSpeech: { silver: heardArg.split(",")[0] === "1", gold: heardArg.split(",")[1] === "1" } }).heardBrainSpeech;
 // parity-mac fourth pass: the test player (romReplayPlayers.ts). The census player is the default, so every older chain and list keeps its battles.
 const policy = (stage !== null ? "script" : arg("policy") ?? process.env.ROM_REPLAY_POLICY ?? "census") as PlayerPolicyName | "script";
 if (policy !== "script" && !PLAYER_POLICIES.includes(policy)) throw new Error(`--policy / ROM_REPLAY_POLICY must be one of ${PLAYER_POLICIES.join(", ")}`);
@@ -144,6 +161,27 @@ function brainSetId(mon: any, challengeNum: number): number {
 }
 
 const IV_KEYS = ["hp", "attack", "defense", "speed", "spAttack", "spDefense"] as const;
+// A party member's construction cursor. A personality alone fits more than one cursor (constructionCursor takes the first), which is enough
+// while the IVs are one fixed value. A rolled spread (challenge 8: the fixed-IV table read one row past its end) is drawn from the two words
+// right after the personality's (CreateBoxMon, pokemon.c:2277-2293), so there the cursor is the one in the ROM's stream: searched from
+// `from` (a cursor of an earlier ROM frame) for the personality's two words followed by two that give the ROM's spread.
+function memberConstructionCursor(mon: any, from: number | null): number {
+  const want = IV_KEYS.map((k) => mon.ivs[k]);
+  const p = mon.personality >>> 0;
+  if (from !== null && new Set(want).size > 1) {
+    let c = from >>> 0;
+    for (let i = 0; i < 200_000; i += 1) {
+      const w1 = advanceRngValue(c);
+      if ((w1 >>> 16) === (p & 0xffff)) {
+        const w2 = advanceRngValue(w1); const w3 = advanceRngValue(w2); const w4 = advanceRngValue(w3);
+        const iv = battleScriptIvsFromRandomWords(w3 >>> 16, w4 >>> 16) as any;
+        if ((w2 >>> 16) === p >>> 16 && IV_KEYS.map((k) => iv[k]).join() === want.join()) return c;
+      }
+      c = w1;
+    }
+  }
+  return constructionCursor(p);
+}
 // Everything the engine derived for one Brain member, in the ROM read-back's field names (battle_lab._party_mon).
 const brainMemberFacts = (m: any, otId: number) => ({
   species: m.species, level: m.level, personality: m.personality >>> 0, otId: otId >>> 0, nature: m.nature, abilitySlot: m.abilitySlot, ability: m.ability, item: m.item,
@@ -223,9 +261,11 @@ function adoptedOrchestrator(setup: any, freshBattleRngValue: number) {
     id: `rom-replay-${seed}`, rngValue: 0, battleScene: scene, factoryWinStreak: streak, playerTrainerId: playerRecords[0].otId,
     // Round replay: the symbols the round driver stages (romRoundDriver.py --symbols); they decide whether battle 7 is Noland's. A single replay
     // keeps the default (its battle 1 is ordinary here).
-    ...(roundReplay ? { factorySymbolsCount: symbols as 0 | 1 } : {}),
+    ...(roundReplay ? { factorySymbolsCount: symbols } : {}),
     // Round replay: battle 1's rent count as the ROM holds it (romRoundDriver.py --stage-rents writes it after the lab staging); a single replay keeps 0.
-    battleTowerLevel50WinStreak: towerStreak, facilityState: { rentsCount: roundReplay ? (setup.round?.rentsCount ?? 0) : 0 },
+    // The heard-speech bits the save starts with (--heard).
+    battleTowerLevel50WinStreak: towerStreak,
+    facilityState: roundReplay ? { rentsCount: setup.round?.rentsCount ?? 0, heardBrainSpeech: startHeard } : { rentsCount: 0 },
     rentals: { type: "currentRecords", playerRentalRecords: player3, savedRentalRecords: [...player3, ...fillers] as any },
     adoptedInitialOpponent: { generation, freshBattleRngValue, preCommandRngCalls: 0 },
   }));
@@ -344,7 +384,7 @@ function play(initial: any, record: boolean, patchRng: number | null = null, pla
   try {
     until(() => phase() === "action-menu");
     frame0 = frame; actionMenuRng = state.battle?.rng.value ?? null; randomTurnNumber = (state.battle?.rules.rulesContext as any)?.randomTurnNumber ?? null;
-    startRules = state.battle?.rules.rulesContext ?? null; startFacility = { rentsCount: state.facilityState?.rentsCount ?? null, performedRentalSwap: state.performedRentalSwap ?? null };
+    startRules = state.battle?.rules.rulesContext ?? null; startFacility = { rentsCount: state.facilityState?.rentsCount ?? null, performedRentalSwap: state.performedRentalSwap ?? null, heardBrainSpeech: state.facilityState?.heardBrainSpeech ?? { silver: false, gold: false } };
     if (patchRng !== null && state.battle) state = { ...state, battle: { ...state.battle, rng: { ...state.battle.rng, value: patchRng } } };
     if (!record) return { frame0, actionMenuRng, randomTurnNumber, state, sound, inputs, error, frames: frame, timeline, decisions, turnEvents, wide, finalWide: null, playerStats: player.stats, battleOutcome: null, startRules, startFacility };
     // The action cursor: bit 0 = right column, bit 1 = lower row (FIGHT 0, BAG 1, POKEMON 2, RUN 3). The engine keeps it between turns as the ROM does.
@@ -687,7 +727,7 @@ function engineBetweenBattles(state: any, decision: any, setup: any, battleIndex
     savedRentalSetIds: [...rules.playerRentalRecords.map((r: any) => r.setId), ...rules.currentOpponent.rentalRecords.map((r: any) => r.setId)],
     playerTrainerId: state.config.playerTrainerId, battleTowerLevel50WinStreak: state.config.battleTowerLevel50WinStreak,
     trainerId: found !== null ? found.pending.trainerId : rr.trainerId, setIds: (found !== null ? found.pending.generation.opponents.map((o: any) => o.setId) : romSetIds) as [number, number, number],
-    selectionDrawLedger: ledger, constructionRngValues: opponent.slice(0, 3).map((m) => constructionCursor(m.personality >>> 0)) as [number, number, number],
+    selectionDrawLedger: ledger, constructionRngValues: opponent.slice(0, 3).map((m) => memberConstructionCursor(m, gen?.rngBefore ?? null)) as [number, number, number],
   });
   // 3. The round flow: GO ON (pre-generation), the battle-won result, the swap offer, the decision, the swap result, the next battle's start command.
   let s: any = Object.freeze({ ...state, config: Object.freeze({ ...state.config, adoptedNextOpponent: Object.freeze({ generation, battleIndex }) }) });
@@ -721,6 +761,17 @@ function strongestPositions(records: readonly any[]): number[] {
   if (picked.length !== 3) throw new Error("no three selectable rentals");
   return picked;
 }
+// The test player's draft pick. With --draft=strongest the pick depends on the rentals' stats; where the draft's IVs are rolled spreads
+// (challenge 8), those come from the select screen's personality loops, which run at a frame-timed RNG cursor the engine cannot know before
+// the ROM shows them, so the pick is the ROM player's own (the ROM's party, in pick order), not a check. Otherwise the rule's positions.
+function draftPositions(generation: any, fallback: number[]): number[] {
+  if (draftRule !== "strongest") return fallback;
+  if (!(generation.drawLedger as any[]).some((e) => e.phase === "random-ivs")) return strongestPositions(generation.rentals);
+  const draft = (generation.rentals as any[]).map((r) => r.setId);
+  const picked = (pendingRomParty ?? []).map((setId) => draft.indexOf(setId));
+  if (picked.length !== 3 || picked.some((i) => i < 0) || new Set(picked).size !== 3) throw new Error(`the ROM's party ${pendingRomParty} is not three of the draft ${draft}`);
+  return picked;
+}
 // The first battle of a chained round. In the source the fresh-draft entry rolls the six rentals (factory_generaterentalmons) and the first trainer and
 // his three sets (factory_generateopponentmons) in one script run (BattleFactoryPreBattleRoom scripts.inc:30-31); the rentals' personalities are made
 // later, when the select screen opens (Select_InitMonsData), and the trainer's at the battle's start. The engine's production round construction
@@ -732,11 +783,13 @@ function engineNewRound(previous: any, carry: FactoryCarry, setup: any, n: numbe
   if (!gen || !Array.isArray(gen.rentalMonsAfter)) throw new Error(`battle ${n}: the new round's setup has no draft roll record`);
   const romDraft = (gen.rentalMonsAfter as number[]).slice(0, 6);
   const romSetIds = (rr.frontierTempParty as number[]).slice(0, 3);
+  pendingRomParty = (rr.rentalMons as any[]).slice(0, 3).map((r) => r.monId);
   let selected = firstSelectablePositions(romDraft);
   const config = (rngValue: number) => ({
     id: `rom-round-${seed}-${n}`, rngValue, battleScene: scene, factoryWinStreak: carry.factoryWinStreak, playerTrainerId: carry.playerTrainerId,
     battleTowerLevel50WinStreak: previous.config.battleTowerLevel50WinStreak, factorySymbolsCount: carry.factorySymbolsCount,
-    facilityState: { rentsCount: carry.rentsCount },
+    // the heard-speech bits the carry keeps (core.ts builds a chained round the same way)
+    facilityState: { rentsCount: carry.rentsCount, ...(carry.heardBrainSpeech ? { heardBrainSpeech: carry.heardBrainSpeech } : {}) },
   });
   const report: any = { battleIndex: n, newRound: true, carry, rom: { draft: romDraft, trainerId: rr.trainerId, setIds: romSetIds, generation: gen }, selected };
   let found: any = null; let draftOnly: any = null; const tried: unknown[] = [];
@@ -747,7 +800,10 @@ function engineNewRound(previous: any, carry: FactoryCarry, setup: any, n: numbe
     const setIds = (first.generation.opponents as any[]).map((o) => o.setId);
     if (tried.length < 3) tried.push({ offset: j, draft, trainerId: first.trainerId, setIds });
     if (draft.join() !== romDraft.join()) continue;
-    if (draftRule === "strongest" && draftOnly === null) selected = strongestPositions(built.initialRentalGeneration!.rentals);
+    if (draftOnly === null) {
+      selected = draftPositions(built.initialRentalGeneration!, selected);
+      report.selectedFrom = draftRule === "strongest" && (built.initialRentalGeneration!.drawLedger as any[]).some((e) => e.phase === "random-ivs") ? "rom-party" : "rule";
+    }
     if (draftOnly === null) {
       // The draft fits at this cursor. Where would the trainer roll fit: right after the rentals' set selection (the source's order), or after
       // the engine's own personality draws for the six rentals (initialRentalGeneration.rngValue, what the round construction uses)?
@@ -761,6 +817,7 @@ function engineNewRound(previous: any, carry: FactoryCarry, setup: any, n: numbe
     }
     if (first.trainerId === rr.trainerId && setIds.join() === romSetIds.join()) found = { offset: j, built, first };
   }
+  report.selected = selected;
   report.selection = found !== null
     ? { matched: true, offset: found.offset, romFrameDraws: gen.draws }
     : { matched: false, romFrameDraws: gen.draws, draftFits: draftOnly, engineFirstOffsets: tried };
@@ -779,8 +836,39 @@ function engineNewRound(previous: any, carry: FactoryCarry, setup: any, n: numbe
     });
   }
   // CreateBoxMon's ability slot comes from the personality (personality & 1, a one-ability species keeps slot 0): the ROM's personality, the engine's rule.
-  const withPersonality = (r: any, mon: any) => { const p = mon.personality >>> 0; const rec = { ...r, personality: p, abilitySlot: (p & 1) as 0 | 1 }; return Object.freeze({ ...rec, abilitySlot: createFactoryCorpusPartyMember(rec).abilitySlot }); };
-  const playerRecords = selected.map((pos, k) => withPersonality(draftRecords[pos], player[k]));
+  // A rental whose fixed-IV argument rolls a spread (challenge 8: the IV table read one row past its end, factoryRentalGeneration.ts) takes its IVs
+  // from the two Random() words right after its personality's two (Random32, then CreateBoxMon, pokemon.c:2277-2293): the ROM's stream, the
+  // engine's rule. The select screen builds the six rentals in one go, so a VBlank interrupt's Random() (main.c:365-366) can fall between any
+  // of those four words: from the draft roll's cursor, the stream is searched for the personality's low and high words and then two words whose
+  // spread is the ROM's, each up to 3 draws after the one before; none found leaves the engine's own spread, and the difference shows.
+  const rolledSlots = new Set(((base?.initialRentalGeneration?.drawLedger ?? []) as any[]).filter((e) => e.phase === "random-ivs").map((e) => e.rentalIndex));
+  const ivGaps: unknown[] = [];
+  const words: number[] = [];
+  for (let i = 0, c = gen.rngBefore >>> 0; i < 200_000; i += 1) { c = advanceRngValue(c); words.push(c >>> 16); }
+  const withPersonality = (r: any, mon: any, pos: number) => {
+    const p = mon.personality >>> 0;
+    let ivs = r.ivs;
+    if (rolledSlots.has(pos)) {
+      const want = IV_KEYS.map((k) => mon.ivs[k]).join();
+      let hit: any = null;
+      for (let i = 0; i < words.length - 16 && hit === null; i += 1) {
+        if (words[i] !== (p & 0xffff)) continue;
+        for (let g1 = 0; g1 < 4 && hit === null; g1 += 1) {
+          if (words[i + 1 + g1] !== p >>> 16) continue;
+          for (let g2 = 0; g2 < 4 && hit === null; g2 += 1) for (let g3 = 0; g3 < 4 && hit === null; g3 += 1) {
+            const lo = i + 2 + g1 + g2; const spread = battleScriptIvsFromRandomWords(words[lo]!, words[lo + 1 + g3]!) as any;
+            if (IV_KEYS.map((k) => spread[k]).join() === want) hit = { drawsAfterDraftRoll: i, gaps: [g1, g2, g3], spread };
+          }
+        }
+      }
+      ivGaps.push({ position: pos, found: hit === null ? null : { drawsAfterDraftRoll: hit.drawsAfterDraftRoll, gaps: hit.gaps } });
+      if (hit !== null) ivs = hit.spread;
+    }
+    const rec = { ...r, personality: p, abilitySlot: (p & 1) as 0 | 1, ...(ivs ? { ivs, fixedIv: ivs.attack } : {}) };
+    return Object.freeze({ ...rec, abilitySlot: createFactoryCorpusPartyMember(rec).abilitySlot });
+  };
+  const playerRecords = selected.map((pos, k) => withPersonality(draftRecords[pos], player[k], pos));
+  if (ivGaps.length) report.rolledIvGaps = ivGaps;
   const savedRentalRecords = draftRecords.map((r, i) => (selected.includes(i) ? playerRecords[selected.indexOf(i)] : Object.freeze({ ...r })));
   const ledger = found !== null ? (found.first.generation.drawLedger as any[]).filter((e) => e.phase === "trainer-selection" || e.phase === "set-selection") : (() => {
     let rng = 0x1234_5678; const rows: any[] = []; const draw = (extra: object) => {
@@ -795,7 +883,7 @@ function engineNewRound(previous: any, carry: FactoryCarry, setup: any, n: numbe
     factoryWinStreak: carry.factoryWinStreak, battleIndex: 0, storedTrainerIds: [], savedRentalSetIds: draftRecords.map((r) => r.setId),
     playerTrainerId: carry.playerTrainerId, battleTowerLevel50WinStreak: previous.config.battleTowerLevel50WinStreak,
     trainerId: found !== null ? found.first.trainerId : rr.trainerId, setIds: (found !== null ? found.first.generation.opponents.map((o: any) => o.setId) : romSetIds) as [number, number, number],
-    selectionDrawLedger: ledger, constructionRngValues: opponent.slice(0, 3).map((m) => constructionCursor(m.personality >>> 0)) as [number, number, number],
+    selectionDrawLedger: ledger, constructionRngValues: opponent.slice(0, 3).map((m) => memberConstructionCursor(m, gen.rngBefore)) as [number, number, number],
   });
   const makeState = (fresh: number) => beginFactoryRoundBattleStartIntro(createFactoryRoundBattleOrchestrator({
     ...config(0), rentals: { type: "currentRecords", playerRentalRecords: playerRecords as any, savedRentalRecords: savedRentalRecords as any },
@@ -824,7 +912,7 @@ function brainBetweenBattles(state: any, decision: any, setup: any, battleIndex:
   const romList = (rr.rentalMons as any[]).map((r) => r.monId);
   const adopt = (list: number[]) => adoptFactoryBrainOpponentSchedule({
     factoryWinStreak: state.config.factoryWinStreak + battleIndex, playerRentalSetIds: list, playerTrainerId: state.config.playerTrainerId, setIds,
-    constructionRngValues: opponent.slice(0, 3).map((m) => constructionCursor(m.personality >>> 0)) as [number, number, number],
+    constructionRngValues: opponent.slice(0, 3).map((m) => memberConstructionCursor(m, rr.generation?.rngBefore ?? null)) as [number, number, number],
   });
   let generation: any;
   try {
@@ -839,6 +927,15 @@ function brainBetweenBattles(state: any, decision: any, setup: any, battleIndex:
   if (s.round.rules.phase !== "presentingBattleStart" || s.round.rules.battleIndex !== battleIndex) {
     throw new Error(`round flow: after the swap the engine is at ${s.round.rules.phase} battle ${s.round.rules.battleIndex}, not the start of battle ${battleIndex}`);
   }
+  // Noland's lines before the battle, as the site's battle room builds them (core.ts: battleRoomStateForOpponent with the tier's heard bit), in the
+  // ROM's text names (romRoundDriver.py BRAIN_TEXTS). A first speech sets its tier's bit, as core.ts does when its last box is accepted.
+  const opponentNow = s.round.rules.currentOpponent;
+  const tier: "silver" | "gold" = opponentNow.frontierBrain?.status === "gold" ? "gold" : "silver";
+  const room = battleRoomStateForOpponent(opponentNow, undefined, factoryHeardBrainSpeech(s.facilityState, tier));
+  const first = room.brainSpeechFirstEncounter === true;
+  report.brainSpeech = { status: opponentNow.frontierBrain?.status ?? null, tier: room.brainSpeechTier, firstEncounter: first,
+    texts: room.brainSpeechTier === "gold" ? [...(first ? ["HarderLookThanLastTime"] : []), "AllRightBringItOn"] : [...(first ? ["NolandImFactoryHead"] : []), "ShakeOutKnowledgeBringItOn"] };
+  if (first) s = markFactoryBrainSpeechHeard(s, room.brainSpeechTier!);
   return { state: s, report };
 }
 // One party member as the battle has it (the rules context; EVs from the kernel party), in the ROM read-back's terms (oracle/battle_lab.py _party_mon).
@@ -867,6 +964,9 @@ function battleStartCheck(attempt: any, setup: any, battleIndex: number, between
     battleNum: st.round.rules.battleIndex, factoryWinStreak: st.config.factoryWinStreak + st.round.rules.battleIndex, factorySymbols: st.config.factorySymbolsCount ?? 0,
     rentsCount: facility?.rentsCount ?? null, performedRentalSwap: facility?.performedRentalSwap === null || facility === null ? null : Number(facility.performedRentalSwap),
     trainerId: scheduled?.trainerId ?? null,
+    // the heard-speech bits (battledBrainFlags); a recording from before they were read has none, and is not checked for them
+    heardBrainSpeech: rr?.heardBrainSpeech === undefined ? undefined
+      : { silver: Number(facility?.heardBrainSpeech?.silver ?? false), gold: Number(facility?.heardBrainSpeech?.gold ?? false) },
     opponentSetIds: scheduled ? (scheduled.generation.opponents as any[]).map((o) => o.setId) : null,
     playerSetIds: (st.round.rules.playerRentalRecords as any[]).map((r) => r.setId),
     player: (rc.party.player as any[]).slice(0, 3).map((m, i) => engineMemberFacts(m, playerKernel?.[i]?.evs ?? null)),
@@ -874,7 +974,7 @@ function battleStartCheck(attempt: any, setup: any, battleIndex: number, between
   };
   const rom = {
     battleNum: rr?.battleNum ?? null, factoryWinStreak: rr?.factoryWinStreak ?? null, factorySymbols: rr?.factorySymbols ?? null, rentsCount: rr?.rentsCount ?? null, performedRentalSwap: rr?.performedRentalSwap ?? null,
-    trainerId: rr?.trainerId ?? null,
+    trainerId: rr?.trainerId ?? null, heardBrainSpeech: rr?.heardBrainSpeech,
     // FillFactoryBrainParty writes no gFrontierTempParty: Noland's sets are the ones his built party fits (brainBetweenBattles).
     opponentSetIds: scheduled?.kind === "frontier-brain" ? (between?.report?.selection?.setIds ?? null) : rr ? rr.frontierTempParty.slice(0, 3) : null,
     playerSetIds: rr ? rr.rentalMons.slice(0, 3).map((r: any) => r.monId) : null,
@@ -901,8 +1001,8 @@ function roundMode() {
   const searchWins = Number(arg("search-wins") ?? 0);
   const battles: any[] = []; let terminal: any = null; let roundError: string | null = null;
   // The site's chaining (factoryRoundChaining.ts, core.ts at the Lobby): the counters a round carries into the next one.
-  let carry: FactoryCarry = Object.freeze({ factoryWinStreak: streak, factorySymbolsCount: symbols as 0 | 1, battlePoints: 0,
-    rentsCount: setups[0]?.round?.rentsCount ?? 0, playerTrainerId: 0 });
+  let carry: FactoryCarry = Object.freeze({ factoryWinStreak: streak, factorySymbolsCount: symbols, battlePoints: 0,
+    rentsCount: setups[0]?.round?.rentsCount ?? 0, playerTrainerId: 0, heardBrainSpeech: startHeard });
   for (let n = 0; n < setups.length; n += 1) {
     const setup = setups[n];
     try {
@@ -914,7 +1014,7 @@ function roundMode() {
         const ended = terminal.round.rules.phase;
         if (ended !== "roundComplete" && ended !== "roundLost") throw new Error(`battle ${n}: the ROM starts a new round, the engine's round is at ${ended}`);
         const won = ended === "roundComplete";
-        const advanced = advanceFactoryCarry(carry, won, terminal.roundOutcome, terminal.facilityState.rentsCount);
+        const advanced = advanceFactoryCarry(carry, won, terminal.roundOutcome, terminal.facilityState.rentsCount, terminal.facilityState.heardBrainSpeech);
         carry = won ? advanced : carryForNewChallengeAfterLobby(advanced);
         between = engineNewRound(terminal, carry, setup, n);
         makeState = between.makeState;
@@ -957,6 +1057,11 @@ function roundMode() {
         alignment: { candidates: candidates.map(({ k, j, verified }) => ({ k, j, verified })), simulatedRngVerified: chosen.verified },
         start: { checked: start.checked, diffs: start.diffs, ...(start.diffs.length ? { engine: start.engine, rom: start.rom } : {}) },
         between: between?.report ?? null, roundPhase: phase, swapAfter, carry: setup.round?.battleNum === 0 ? carry : undefined, playerVariant, searchTries,
+        // The round's end (a loss, or the seventh win): what it gives (factoryBrainRoundOutcome.ts) and the heard bits it leaves.
+        roundEnd: attempt.error === null && (phase === "roundComplete" || phase === "roundLost") ? {
+          symbolGranted: attempt.state.roundOutcome?.symbolGranted ?? false, newSymbolsCount: attempt.state.roundOutcome?.newSymbolsCount ?? attempt.state.config.factorySymbolsCount ?? 0,
+          heardBrainSpeech: attempt.state.facilityState?.heardBrainSpeech ?? { silver: false, gold: false },
+        } : undefined,
       }));
       terminal = attempt.state;
       if (n === 0) carry = Object.freeze({ ...carry, playerTrainerId: attempt.state.config.playerTrainerId });
@@ -981,14 +1086,31 @@ function roundCompareMode() {
     const rom: any = b.between?.rom ?? null;
     const knownFirstTrainerOrder = b.between?.newRound === true && sel?.matched === false && sel.draftFits !== null && rom !== null
       && sel.draftFits.trainerAfterSelection.trainerId === rom.trainerId && sel.draftFits.trainerAfterSelection.setIds.join() === rom.setIds.join();
+    // The battle room's screens around Noland (romRoundDriver.py records the lines his script shows: brainTexts). Before his battle: the engine's
+    // speech (brainBetweenBattles) against the lines on the ROM between the previous battle and this one. After a round's last battle: the symbol's
+    // lines the engine's outcome implies against the ROM's, read where the ROM went on to the next round or (the run's end) the next draft screen,
+    // and there also the symbols and heard bits the save holds. A recording from before the lines were read is not checked for them.
+    const romBefore = n > 0 ? drive.battles?.[n - 1]?.between ?? null : null;
+    const speech = b.between?.brainSpeech === undefined ? null : {
+      engine: b.between.brainSpeech.texts, rom: romBefore?.brainTexts === undefined ? null : (romBefore.brainTexts as string[]).filter((t) => SPEECH_TEXTS.includes(t)) };
+    const romAfter = drive.battles?.[n]?.between ?? null;
+    const afterChecked = b.roundEnd !== undefined && romAfter?.brainTexts !== undefined && (romAfter.newRound === true || romAfter.reachedDraft === true);
+    const symbolTexts = Object.values(SYMBOL_TEXTS).flat() as string[];
+    const symbol = !afterChecked ? null : {
+      engine: { texts: b.roundEnd.symbolGranted ? [...SYMBOL_TEXTS[b.roundEnd.newSymbolsCount as 1 | 2]] : [], ...(romAfter.afterRound
+        ? { factorySymbols: b.roundEnd.newSymbolsCount, heardBrainSpeech: { silver: Number(b.roundEnd.heardBrainSpeech.silver), gold: Number(b.roundEnd.heardBrainSpeech.gold) } } : {}) },
+      rom: { texts: (romAfter.brainTexts as string[]).filter((t) => symbolTexts.includes(t)), ...(romAfter.afterRound ?? {}) },
+    };
+    const screensMatch = (speech === null || speech.rom === null || JSON.stringify(speech.engine) === JSON.stringify(speech.rom))
+      && (symbol === null || JSON.stringify(symbol.engine) === JSON.stringify(symbol.rom));
     return {
       battleIndex: n, engineError: b.error, roundPhase: b.roundPhase, swapAfter: b.swapAfter, romSwap: drive.battles?.[n]?.between?.swap ?? null,
       startDiffs: b.start?.diffs ?? null, selection: b.between?.selection ?? null,
       turns: cmp === null ? null : { matched: cmp.matched, engineStates: cmp.engineRows - 1, divergence: cmp.divergence, wideDiffPoints: (cmp.wide as any)?.diffPoints ?? null, wideFirst: (cmp.wide as any)?.first ?? null, wideFinal: (cmp.wide as any)?.final ?? null },
-      romStop: d?.stop ?? null, romOutcome: d?.outcome ?? null,
-      match: turnsMatch && (b.start?.diffs?.length ?? 0) === 0 && (n === 0 || b.between?.selection?.matched === true),
+      romStop: d?.stop ?? null, romOutcome: d?.outcome ?? null, speech, symbol, screensMatch,
+      match: turnsMatch && screensMatch && (b.start?.diffs?.length ?? 0) === 0 && (n === 0 || b.between?.selection?.matched === true),
       knownDifference: knownFirstTrainerOrder ? "first-trainer-order" : null,
-      matchExceptKnown: turnsMatch && (b.start?.diffs?.length ?? 0) === 0 && (n === 0 || b.between?.selection?.matched === true || knownFirstTrainerOrder),
+      matchExceptKnown: turnsMatch && screensMatch && (b.start?.diffs?.length ?? 0) === 0 && (n === 0 || b.between?.selection?.matched === true || knownFirstTrainerOrder),
     };
   });
   const out = { seed: engine.seed, scene: engine.scene, policy: engine.policy, swapPolicy: engine.swapPolicy, challengeNum: engine.challengeNum, roundError: engine.roundError ?? null,

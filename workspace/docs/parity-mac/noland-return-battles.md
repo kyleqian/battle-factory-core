@@ -20,4 +20,9 @@ battles; the old test pinned the silver default), `tests/factoryLibraryFrontier.
 
 ## The ROM
 
-Round replay with both symbols staged (phase 2, `round-replay.md`): see STATUS.
+Round replay with both symbols and both heard bits staged (`REPLAY_SYMBOLS=2 REPLAY_HEARD=1,1`, `round-replay.md`; STATUS, fourth part of the
+round replay). The driver reads which of Noland's texts the battle room script shows. Battle 21 (challenge 2, 4 runs): "Shake out your
+knowledge" only. Battle 42 (challenge 5, 4 runs) and battle 63 (challenges 7 and 8 back to back, 6 runs that got there): "All right! Bring it
+on!" only. No symbol lines after any of them, and the save still holds 2 symbols at the next draft screen. The engine before the fix had the
+silver lines at 42 and 63. Fixtures: `two-symbols-battle-21`, `-42`, `-63` in `tests/parityMacRoundReplayFixtures.test.ts` (the 42 and 63 ones
+fail without the fix).

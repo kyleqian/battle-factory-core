@@ -38,4 +38,12 @@ gold bit needs a symbol.
   built from the carry (the anchor round too, which before passed no symbol count). Before, the bits lived only in each round's state and
   were dropped at the next round: within one session, a player who lost to silver Noland heard his first speech again at the next battle 21.
 - Fix 48 (`noland-return-battles.md`): the return battles at 42 and 63 now use the gold lines.
-- Tests: `tests/factoryLibraryFrontier.test.ts`.
+- Fix 49 (`heard-speech-kept-at-rent.md`): inside a round the bits were dropped at the first paid win, so the carried bits never reached
+  Noland's battle; now they do.
+- Tests: `tests/factoryLibraryFrontier.test.ts`, `tests/parityMacHeardSpeechKeptAtRent.test.ts`.
+
+## The real game
+
+The round replay stages the record on the ROM and checks it (`round-replay.md`; STATUS, fourth part of the round replay): 1 symbol, battle
+21 ordinary; 2 symbols, the return battles at 21, 42 and 63 with the short lines and no symbol; a heard speech skipped at 21 (no symbol) and
+at 42 (one symbol), with the symbol given; the first speeches when nothing is heard. Every run matched the engine after fix 49.
