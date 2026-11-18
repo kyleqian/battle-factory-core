@@ -275,23 +275,41 @@ describe("Factory Lobby free-roam (docs/factory-lobby-freeroam-ground-truth.md)"
     expect(lobbyFreeRoamPlayerFrameHFlipped(advance(east, ["east"], 4))).toBe(true);
   });
 
-  it("resets the walk cycle after a turn (source GO anims restart at walk-1)", () => {
-    // After walking (animClock > 0) a held direction change only turns once
-    // the current step reaches its tile center; the next step's first pose is
-    // walk-1 again, not the accumulated phase.
+  it("a held direction change while a step is in flight goes straight, no turn (lbw6, ROM-proven)", () => {
+    // The step is a held movement `runningState` stays MOVING through, so CheckMovementInputNotOnBike (field_player_avatar.c:592-595) never
+    // returns TURN_DIRECTION for the changed direction: the new step starts on the arrival frame and the walk cycle runs on.
     const walked = advance(createFactoryLobbyFreeRoamState(), ["south"], 2 + LOBBY_FREE_ROAM_TURN_FRAMES + 20);
     expect(walked.stepRemaining).toBeGreaterThan(0);
-    expect(walked.animClock).toBeGreaterThan(8);
-    const turning = advance(walked, ["west"], walked.stepRemaining);
-    expect(turning.turnRemaining).toBe(8);
-    expect(turning.animClock).toBe(0);
-    const stepping = advance(turning, ["west"], LOBBY_FREE_ROAM_TURN_FRAMES);
-    expect(stepping.stepRemaining).toBe(LOBBY_FREE_ROAM_TILE_FRAMES - 1);
-    // lbw5: the first pose of a fresh walk follows the GO anim's idle command index (idleIdx), which every turn and tile step toggles:
-    // the walk's tile steps and this turn leave it at 1 -> walk-2 (west frame 8). (The ROM does not turn at all on a direction change while
-    // moving; this pin only documents the engine's own turn path.)
-    expect(stepping.idleIdx).toBe(1);
-    expect(lobbyFreeRoamPlayerFrame(stepping)).toBe(8);
+    const clock = walked.animClock;
+    expect(clock).toBeGreaterThan(8);
+    const changed = advance(walked, ["west"], walked.stepRemaining);
+    expect(changed).toMatchObject({ x: 4, y: 10, facing: "west", stepDir: "west", turnRemaining: 0, stepRemaining: LOBBY_FREE_ROAM_TILE_FRAMES });
+    expect(changed.animClock).toBeGreaterThan(clock);
+    const next = advance(changed, ["west"], LOBBY_FREE_ROAM_TILE_FRAMES);
+    expect(next).toMatchObject({ x: 3, y: 10 });
+  });
+
+  it("a held direction change at the end of a turn turns again at once; a 9-frame tap is one tile (lbw6, ROM-proven)", () => {
+    // RIGHT (east) pressed and released, DOWN (south) held from ROM frame 2: turn east 8 frames (decided on frame 9 with SOUTH held), then a
+    // second 8-frame turn starts that frame and the south step is decided on frame 17.
+    let s: FactoryLobbyFreeRoamState = { ...createFactoryLobbyFreeRoamState(), facing: "north" as const };
+    s = advance(s, ["east"], 1);
+    s = advance(s, ["south"], 8);
+    expect(s).toMatchObject({ turnRemaining: 1, turnTarget: "east" });
+    s = advance(s, ["south"], 1);
+    expect(s).toMatchObject({ turnRemaining: LOBBY_FREE_ROAM_TURN_FRAMES, turnTarget: "south", facing: "east" });
+    s = advance(s, ["south"], LOBBY_FREE_ROAM_TURN_FRAMES);
+    expect(s).toMatchObject({ stepRemaining: LOBBY_FREE_ROAM_TILE_FRAMES - 1, stepDir: "south" });
+    // The turn's decision frame holds the target: released on the very next frame, the step still happens.
+    let tap: FactoryLobbyFreeRoamState = { ...createFactoryLobbyFreeRoamState(), facing: "south" as const };
+    tap = advance(tap, ["east"], 9);
+    tap = advance(tap, [], 1);
+    expect(tap).toMatchObject({ stepRemaining: LOBBY_FREE_ROAM_TILE_FRAMES - 1, stepDir: "east" });
+    // One frame shorter (released before the decision frame) only turns.
+    let short: FactoryLobbyFreeRoamState = { ...createFactoryLobbyFreeRoamState(), facing: "south" as const };
+    short = advance(short, ["east"], 8);
+    short = advance(short, [], 2);
+    expect(short).toMatchObject({ stepRemaining: 0, facing: "east", turnRemaining: 0 });
   });
 
   it("turns in place for 8 frames before stepping a fresh direction (§2)", () => {

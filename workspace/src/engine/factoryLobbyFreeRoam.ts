@@ -165,6 +165,11 @@ export interface FactoryLobbyFreeRoamState {
    * of the next fresh walk (I 3: walk2, I 1: walk1) and of a turn (I 1: walk2 then stand, I 3: walk1 then stand).
    */
   readonly idleIdx: 1 | 3;
+  /**
+   * lbw6: the facing the sprite still DRAWS on the tick a held direction change starts the next step (the OAM lags the object event by a
+   * frame, the RAM already shows the new anim); cleared by the next advance.
+   */
+  readonly lagFacing?: LobbyDirection;
 }
 
 export function createFactoryLobbyFreeRoamState(): FactoryLobbyFreeRoamState {
@@ -255,9 +260,10 @@ export interface LobbyFreeRoamInput {
 }
 
 export function advanceFactoryLobbyFreeRoam(
-  state: FactoryLobbyFreeRoamState,
+  prior: FactoryLobbyFreeRoamState,
   input: LobbyFreeRoamInput,
 ): FactoryLobbyFreeRoamState {
+  let state = prior.lagFacing === undefined ? prior : ({ ...prior, lagFacing: undefined } as FactoryLobbyFreeRoamState);
   // A single held direction; fixtures never press diagonals.
   const heldDir = input.heldDirs.values().next().value ?? null;
   const live = input.npcs?.live;
@@ -319,24 +325,21 @@ export function advanceFactoryLobbyFreeRoam(
       }
       return Object.freeze({ ...state, turnRemaining, heldDir, pendingDir: null });
     }
+    // lbw6: the ROM decides the turn's outcome on its last frame (`CheckMovementInputNotOnBike`, field_player_avatar.c:592-595), the engine's
+    // `turnRemaining === 1` tick, with the direction held THEN (`state.heldDir`, this tick's own input comes one frame later): the held
+    // target steps (a 9-frame tap is one tile), another held direction starts a second turn at once (runningState is still TURN_DIRECTION),
+    // none stands. The input of this tick then falls through to the idle rules below.
     const facing = state.turnTarget;
-    // The turn only commits a step if its direction is STILL HELD when the
-    // turn completes: a 2-frame tap turns in place and stands (oracle-probe:
-    // beyond-boundary fixture's DOWN 5172-5173 turns 5174-5181 then idles at
-    // (4,8) forever, VOFS flat 40), while a hold walks continuously. Holding
-    // through the turn (>= the 8-frame turn) is the one-tile tap.
-    if (heldDir === state.turnTarget) {
+    const decided = state.heldDir;
+    const turned = { ...state, facing, turnRemaining, idleIdx: state.idleIdx === 1 ? 3 : 1 } as FactoryLobbyFreeRoamState;
+    if (decided === facing) {
       // Turn commit: the engine commits one tick after the ROM frame that decided, so it sees the NPC state of two ticks back.
-      return startStep({ ...state, facing, turnRemaining, heldDir, idleIdx: state.idleIdx === 1 ? 3 : 1 }, facing, true, lagged);
+      return startStep({ ...turned, heldDir }, facing, true, lagged);
     }
-    return Object.freeze({
-      ...state,
-      facing,
-      idleIdx: state.idleIdx === 1 ? 3 : 1,
-      turnRemaining,
-      heldDir,
-      pendingDir: null,
-    });
+    if (decided !== null) {
+      return Object.freeze({ ...turned, turnRemaining: LOBBY_FREE_ROAM_TURN_FRAMES, turnTarget: decided, heldDir, pendingDir: null });
+    }
+    state = Object.freeze({ ...turned, pendingDir: null });
   }
   if (state.stepRemaining > 0) {
     const stepRemaining = state.stepRemaining - 1;
@@ -356,20 +359,13 @@ export function advanceFactoryLobbyFreeRoam(
       pendingDir: null,
     });
     if (heldDir === null) return arrived;
-    if (heldDir === state.stepDir) {
-      return startStep(arrived, heldDir, false, live);
-    }
-    // Direction changed at the tile center: turn in place, then the committed
-    // step (mirrors the fresh-press rule). Held-hold continuations do not
-    // re-apply the press latency (the direction was already registered). The
-    // walk-cycle clock resets: the source GO anims restart at their walk-1
-    // pose when the direction changes (animNum + animCmdIndex 0).
-    return Object.freeze({
-      ...arrived,
-      turnRemaining: LOBBY_FREE_ROAM_TURN_FRAMES,
-      turnTarget: heldDir,
-      animClock: 0,
-    });
+    // lbw6: a held direction (the same or a different one) at the step's end continues straight. The step is a held movement the player
+    // cannot interrupt, `runningState` stays MOVING from the frame it started, so `CheckMovementInputNotOnBike` (field_player_avatar.c:592-595)
+    // returns MOVING, not TURN_DIRECTION, for a changed direction and `PlayerNotOnBikeMoving` starts (or bumps) the new direction at once.
+    // SetStepAnimHandleAlternation (event_object_movement.c:4582) only swaps the anim number and keeps the command index, so the walk
+    // cycle runs on like a same-direction continuation.
+    const changed = startStep({ ...arrived, facing: heldDir }, heldDir, false, live);
+    return heldDir === state.stepDir ? changed : Object.freeze({ ...changed, lagFacing: state.stepDir });
   }
   if (state.pendingDir !== null) {
     // The buffered press fires the turn/step now (frame two of the measured
@@ -545,7 +541,7 @@ export function lobbyFreeRoamPlayerFrame(state: FactoryLobbyFreeRoamState): numb
   }
   if (state.stepRemaining > 0) {
     const phase = Math.floor(state.animClock / LOBBY_FREE_ROAM_POSE_FRAMES) % 4;
-    switch (state.facing) {
+    switch (state.lagFacing ?? state.facing) {
       case "south": return phase === 0 ? 3 : phase === 2 ? 4 : 0;
       case "north": return phase === 0 ? 5 : phase === 2 ? 6 : 1;
       case "west": return phase === 0 ? 7 : phase === 2 ? 8 : 2;
@@ -565,5 +561,5 @@ export function lobbyFreeRoamPlayerFrameHFlipped(
   state: FactoryLobbyFreeRoamState,
 ): boolean {
   if (state.turnRemaining > 0) return state.turnTarget === "east";
-  return state.facing === "east";
+  return (state.lagFacing ?? state.facing) === "east";
 }
