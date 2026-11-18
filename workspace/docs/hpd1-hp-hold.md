@@ -553,7 +553,7 @@ R = end of the last exec run before `attackanimation`, lead = exec - R, len = `g
 | Earthquake 89 | **11** | 207 | 4 | 225 | 0 + 208 = 208, tail 3 | 225 |
 | Faint Attack 185 | 5 | 225 | 4 | 237 | 0 + 226 (player) / 227 (opponent, restore lag) = len + 1, tail 6 | 237 |
 
-Each landed window is `live + idle = len + 1` and the whole body is lead + pre + (len + 1) + tail = R -> H (pre 3 / 3 / 3 / 3 / 3 / 3 / 0, post 0, so T = 6 - pre - post = 3 / 3 / 3 / 3 / 3 / 3 / 6; the 9-row Self-Destruct tail is its measured gap 10 less the one hit row).
+Each landed window is `live + idle = len + 1` and the whole body is lead + pre + (len + 1) + tail = R -> H (post 0 everywhere; pre 3 for Solar Beam, Bite, Sludge Bomb and Earthquake and 0 for Flamethrower and Faint Attack (`LIVE_MOVE_NO_PRE_ROW_SIDES`), so T = 6 - pre - post = 3 or 6 as in the table; the 9-row Self-Destruct tail is its measured gap 10 less the one hit row).
 
 ### What landed
 
