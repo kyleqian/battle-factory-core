@@ -35,7 +35,7 @@ import { createFactoryCorpusPartyMember } from "../../src/engine/factoryCorpusPa
 import { NO_MOVES_MESSAGE_HOLD_AT } from "../../src/engine/battleCommandPresentation.ts";
 import { PARTY_LIST_INPUT_ELAPSED } from "../../src/engine/partySelect.ts";
 import { PARTY_SELECT_OPEN_TOTAL_FRAMES } from "../../src/engine/battlePartySelect.ts";
-import { createPlayer, createScriptPlayer, createSwapPolicy, PLAYER_POLICIES, SWAP_POLICIES, type PlayerPolicyName, type SwapMon, type SwapPolicyName } from "./romReplayPlayers.ts";
+import { createPlayer, createScriptPlayer, createSwapPolicy, PLAYER_POLICIES, roundSwapDecision, SWAP_POLICIES, type PlayerPolicyName, type SwapMon, type SwapPolicyName } from "./romReplayPlayers.ts";
 import { collectSoundTick } from "../../src/audio/soundEvents.ts";
 import { beginScreenSoundTick, runScheduledScreenSounds } from "../../src/engine/screenSounds.ts";
 import { emitTickSounds } from "../../src/engine/tickSounds.ts";
@@ -686,7 +686,7 @@ function engineBetweenBattles(state: any, decision: any, setup: any, battleIndex
   let s: any = Object.freeze({ ...state, config: Object.freeze({ ...state.config, adoptedNextOpponent: Object.freeze({ generation, battleIndex }) }) });
   s = preGenerateFactoryRoundNextOpponent(s);
   s = advanceFactoryRoundPresentation(completePending(s, "battleWon"));
-  s = chooseFactoryRoundSwap(completePending(s, "swapOffer"), decision);
+  s = chooseFactoryRoundSwap(completePending(s, "swapOffer"), roundSwapDecision(decision));
   s = advanceFactoryRoundPresentation(completePending(s, "swapResolved"));
   if (s.round.rules.phase !== "presentingBattleStart" || s.round.rules.battleIndex !== battleIndex) {
     throw new Error(`round flow: after the swap the engine is at ${s.round.rules.phase} battle ${s.round.rules.battleIndex}, not the start of battle ${battleIndex}`);
@@ -708,7 +708,7 @@ function brainBetweenBattles(state: any, decision: any, setup: any, battleIndex:
   let s: any = preGenerateFactoryRoundNextOpponent(state);
   if (s.pendingNextOpponent !== null) throw new Error("round flow: the engine pre-generated a Frontier Brain battle at GO ON (the source rolls the Head at battle start)");
   s = advanceFactoryRoundPresentation(completePending(s, "battleWon"));
-  s = chooseFactoryRoundSwap(completePending(s, "swapOffer"), decision);
+  s = chooseFactoryRoundSwap(completePending(s, "swapOffer"), roundSwapDecision(decision));
   const rules = s.round.rules;
   const engineList = [...rules.playerRentalRecords.map((r: any) => r.setId), ...rules.currentOpponent.rentalRecords.map((r: any) => r.setId)];
   const romList = (rr.rentalMons as any[]).map((r) => r.monId);
@@ -805,7 +805,11 @@ function roundMode() {
       const start = battleStartCheck(attempt, setup, n, between);
       const phase = attempt.state.round.rules.phase;
       const swapAfter = attempt.error === null && phase === "presentingBattleWin" ? (() => {
-        const { player, opponent } = swapMonsOf(attempt.state); return swapper.choose(player, opponent);
+        const { player, opponent } = swapMonsOf(attempt.state); const choice = swapper.choose(player, opponent);
+        // --swap-override=N:player|enemy (ROM_REPLAY_SWAP_OVERRIDE): after battle N (0-based, counted over the whole run) cancel the swap instead
+        // (YES, then back out at that list; the own Pokemon is party slot 0). The policy's own choice is still drawn, so later battles are unchanged.
+        const [overrideAt, overrideList] = (arg("swap-override") ?? process.env.ROM_REPLAY_SWAP_OVERRIDE ?? "").split(":");
+        return overrideAt !== "" && Number(overrideAt) === n ? { type: "cancel" as const, at: overrideList as "player" | "enemy", playerPartyIndex: 0 } : choice;
       })() : null;
       battles.push(result(attempt, {
         battleIndex: n, romRngAtActionMenu: target, romRandomTurnNumber: turnNumber, romOpponentReply: setup.opponentReply ?? null,

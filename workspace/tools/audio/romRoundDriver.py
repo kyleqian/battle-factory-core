@@ -43,7 +43,7 @@ STATE_CHOOSE_MONS_HANDLE_INPUT, STATE_MENU_HANDLE_INPUT, STATE_YESNO_HANDLE_INPU
 SWAP_MENU_SWAP = 1  # sSwap_MenuOptionFuncs: SUMMARY, SWAP, RECHOOSE
 PULSE = 16  # one press every 16 frames (the lab / driver idiom for message waits)
 BETWEEN_FRAME_CAP = 30000
-STATIC_NAMES = ("sFactorySwapScreen", "sGlobalScriptContext", "sPerformedRentalSwap", "Swap_CB2", "Swap_Task_HandleChooseMons", "Swap_Task_HandleMenu", "Swap_Task_HandleYesNo",
+STATIC_NAMES = ("sFactorySwapScreen", "sGlobalScriptContext", "sPerformedRentalSwap", "Swap_CB2", "Swap_HandleQuitSwappingResponse", "Swap_HandleAcceptMonResponse", "Swap_Task_HandleChooseMons", "Swap_Task_HandleMenu", "Swap_Task_HandleYesNo",
                 "Swap_Task_Exit", "Swap_TaskCantHaveSameMons", "Task_HandleYesNoInput", "CB2_Overworld", "BattleMainCB2")
 # The swap prompt's YES/NO box: before an ordinary trainer (AskSwapMon) and before the Factory Head (AskSwapBeforeHead), as [start, end) label pairs.
 SWAP_PROMPT_LABELS = (("BattleFrontier_BattleFactoryPreBattleRoom_EventScript_AskSwapMon", "BattleFrontier_BattleFactoryPreBattleRoom_EventScript_SwapMons"),
@@ -105,6 +105,15 @@ class Rom:
         base = self.sym["gTasks"]
         return [(self.u32(base + i * TASK_SIZE) & ~1, self.o.read_u16(base + i * TASK_SIZE + 8)) for i in range(TASK_COUNT) if self.u8(base + i * TASK_SIZE + 4)]
 
+    def task_follow_up(self, func):
+        """tFollowUpTaskPtrHi/Lo (data[6], data[7]) of the live task running `func`: which prompt a swap-screen YES/NO answers."""
+        base = self.sym["gTasks"]
+        for i in range(TASK_COUNT):
+            t = base + i * TASK_SIZE
+            if self.u8(t + 4) and self.u32(t) & ~1 == func:
+                return ((self.o.read_u16(t + 8 + 12) << 16) | self.o.read_u16(t + 8 + 14)) & ~1
+        return None
+
     def watch(self):
         return (self.u16(self.sym["gTrainerBattleOpponent_A"]), *(self.u16(self.sym["gFrontierTempParty"] + 2 * i) for i in range(3)))
 
@@ -152,16 +161,20 @@ class Rom:
                 "round": self.round_facts(generation)}
 
     def swap_buttons(self, want):
-        """One frame of the swap screen for decision `want` (accept: playerPartyIndex p, opponentPartyIndex q). Presses only at an input state."""
+        """One frame of the swap screen for decision `want` (accept: playerPartyIndex p, opponentPartyIndex q; cancel: at "player" (B on the own
+        list) or "enemy" (own Pokemon p, SWAP, then B on the beaten trainer's list), then YES to "Quit swapping?"). Presses only at an input state."""
         ptr = self.u32(self.st["sFactorySwapScreen"])
         if ptr == 0:
             return [], None
         live = dict(self.tasks())
         enemy, cursor = self.u8(ptr + SWAP_IN_ENEMY), self.u8(ptr + SWAP_CURSOR)
         st = self.st
+        cancel = want.get("type") == "cancel"
         if st["Swap_TaskCantHaveSameMons"] in live:
             raise RoundError("the swap screen refused the chosen Pokemon (same species as a kept one): the swap policy picked an illegal swap")
         if st["Swap_Task_HandleChooseMons"] in live and live[st["Swap_Task_HandleChooseMons"]] == STATE_CHOOSE_MONS_HANDLE_INPUT:
+            if cancel and (want["at"] == "player" or enemy):
+                return ["B"], "cancel"
             target = want["opponentPartyIndex"] if enemy else want["playerPartyIndex"]
             if cursor != target:
                 return (["RIGHT"] if cursor < target else ["LEFT"]), "choose"
@@ -172,10 +185,15 @@ class Rom:
             menu = self.u8(ptr + SWAP_MENU_CURSOR)
             return (["DOWN"] if menu < SWAP_MENU_SWAP else ["UP"] if menu > SWAP_MENU_SWAP else ["A"]), "menu"
         if st["Swap_Task_HandleYesNo"] in live and live[st["Swap_Task_HandleYesNo"]] == STATE_YESNO_HANDLE_INPUT:
-            if not enemy:
-                raise RoundError("the swap screen asks to quit swapping: the drive pressed B or CANCEL")
+            follow = self.task_follow_up(st["Swap_Task_HandleYesNo"])
+            quit_prompt = follow == st["Swap_HandleQuitSwappingResponse"]
+            if follow not in (st["Swap_HandleQuitSwappingResponse"], st["Swap_HandleAcceptMonResponse"]):
+                raise RoundError(f"the swap screen's YES/NO answers an unknown prompt ({follow})")
+            if quit_prompt != cancel:
+                raise RoundError("the swap screen asks to quit swapping, but the decision is a swap" if quit_prompt
+                                 else "the swap screen asks to accept a Pokemon, but the decision is to cancel")
             yes = self.u8(ptr + SWAP_YESNO_CURSOR) == 0
-            return (["A"] if yes else ["UP"]), "accept"
+            return (["A"] if yes else ["UP"]), "quit" if quit_prompt else "accept"
         if st["Swap_Task_Exit"] in live:
             return [], "exit"
         return [], None
@@ -184,7 +202,8 @@ class Rom:
 def drive_between(rom, swap, cap, progress, prompt_delay=0):
     """From the end of a won battle to the next battle's first action menu (see the module docstring)."""
     o, st = rom.o, rom.st
-    decline = swap is None or swap.get("type") != "accept"
+    # NO at the prompt for a kept team; YES for a swap and for a cancel (which then backs out of the swap screen).
+    decline = swap is None or swap.get("type") not in ("accept", "cancel")
     frames, phase_pulse = 0, 0
     rng_prev, watch_prev = rom.u32(rom.sym["gRngValue"]), rom.watch()
     changes, seen_field, swap_screen, answered, exit_seen, last, prompt_open = [], False, False, None, None, None, 0

@@ -3,7 +3,7 @@ import {
   advanceFactoryRoundBattleStartIntro, beginFactoryRoundBattleStartIntro, createFactoryRoundBattleOrchestrator,
 } from "../src/engine/factoryRoundBattleOrchestrator.ts";
 import {
-  acceptedSwapTargets, createPlayer, createSwapPolicy, mirrorRulesContext, PLAYER_POLICIES, SWAP_POLICIES, type PlayerMenu, type SwapMon,
+  acceptedSwapTargets, createPlayer, createSwapPolicy, mirrorRulesContext, PLAYER_POLICIES, roundSwapDecision, SWAP_POLICIES, type PlayerMenu, type SwapMon,
 } from "../tools/integration/romReplayPlayers.ts";
 
 // docs/parity-mac/replay-players.md. The test players of the real-ROM replay are decision policies with their own dice: the same battle seed and the same menus
@@ -93,7 +93,11 @@ describe("round replay swap policies and power-v1", () => {
   });
 
   it("never declines, weakest swaps the lowest stat total for the highest accepted one, random is seeded and only picks accepted ones", () => {
-    expect(SWAP_POLICIES).toEqual(["never", "weakest", "random"]);
+    expect(SWAP_POLICIES).toEqual(["never", "weakest", "random", "cancel"]);
+    const cancels = (() => { const c = createSwapPolicy("cancel", 5); return Array.from({ length: 20 }, () => c.choose(player, opponent)); })();
+    expect(cancels.every((c) => c.type === "cancel")).toBe(true);
+    expect(new Set(cancels.map((c: any) => c.at))).toEqual(new Set(["player", "enemy"]));
+    expect(cancels.map(roundSwapDecision).every((d) => d.type === "decline")).toBe(true);
     expect(createSwapPolicy("never", 1).choose(player, opponent)).toEqual({ type: "decline" });
     // player 1 (500) is the weakest; opponent 0 (species 10, 900) is refused (kept player 0 is species 10), 2 (species 20 = the swapped-out one's own, 800)
     // and 1 (650) are accepted: the highest accepted is 2.

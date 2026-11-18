@@ -314,12 +314,21 @@ export function createScriptPlayer(seed: number, script: PlayerScript): Player {
 //   weakest  swaps out the player's Pokemon with the lowest stat total (max HP + the five stats; the lowest party index on a tie) for the beaten trainer's Pokemon
 //            with the highest stat total that the swap screen accepts; NO when none is accepted.
 //   random   NO with probability 1/2; else a uniformly random own Pokemon for a uniformly random accepted one of the beaten trainer's; NO when none is accepted.
+//   cancel   YES at the prompt, then backs out of the swap screen and keeps the team: half the time from the player's own list (B, "Quit swapping?" YES),
+//            half the time after choosing a uniformly random own Pokemon and SWAP, from the beaten trainer's list (B, YES). The engine gets the
+//            screen's result, a kept team ({type: "decline"}, factorySwapRoundDecision's keptParty); the script then skips factory_setswapped
+//            (BattleFactoryPreBattleRoom scripts.inc:151-158).
 // The swap screen refuses a Pokemon whose species one of the two kept Pokemon already has ("Can't have the same POKeMON", Swap_AlreadyHasSameSpecies,
 // battle_factory_screen.c:4162-4173); the swapped-out Pokemon's own species is allowed. A policy never picks a refused one.
-export const SWAP_POLICIES = ["never", "weakest", "random"] as const;
+export const SWAP_POLICIES = ["never", "weakest", "random", "cancel"] as const;
 export type SwapPolicyName = (typeof SWAP_POLICIES)[number];
 export type SwapMon = Readonly<{ species: number; statTotal: number }>;
-export type SwapChoice = Readonly<{ type: "decline" } | { type: "accept"; playerPartyIndex: number; opponentPartyIndex: number }>;
+export type SwapChoice = Readonly<{ type: "decline" } | { type: "accept"; playerPartyIndex: number; opponentPartyIndex: number }
+  | { type: "cancel"; at: "player" | "enemy"; playerPartyIndex: number }>;
+/** What the round orchestrator is given for a choice: a cancelled swap is a kept team. */
+export function roundSwapDecision(choice: SwapChoice): Readonly<{ type: "decline" } | { type: "accept"; playerPartyIndex: number; opponentPartyIndex: number }> {
+  return choice.type === "cancel" ? { type: "decline" } : choice;
+}
 
 export function acceptedSwapTargets(player: readonly SwapMon[], opponent: readonly SwapMon[], playerPartyIndex: number): number[] {
   const kept = player.filter((_, i) => i !== playerPartyIndex).map((m) => m.species);
@@ -333,6 +342,11 @@ export function createSwapPolicy(name: SwapPolicyName, seed: number) {
   const choose = (player: readonly SwapMon[], opponent: readonly SwapMon[]): SwapChoice => {
     if (player.length !== 3 || opponent.length !== 3) throw new Error("a swap needs the player's three and the beaten trainer's three");
     if (name === "never") { count("declined"); return { type: "decline" }; }
+    if (name === "cancel") {
+      const at = rand() < 0.5 ? "player" : "enemy";
+      count(`cancelled-${at}`);
+      return { type: "cancel", at, playerPartyIndex: Math.floor(rand() * 3) };
+    }
     if (name === "weakest") {
       const p = player.reduce((best, m, i) => (m.statTotal < player[best]!.statTotal ? i : best), 0);
       const accepted = acceptedSwapTargets(player, opponent, p);
