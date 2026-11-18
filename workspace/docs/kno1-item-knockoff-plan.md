@@ -142,3 +142,43 @@ assertion that the command emits zero sound rows, plus the sound census (`soundC
 5. Gates: `npm run test:gate`, build, boundary tests (`tests/animation/animationBoundaryRatchet.test.ts`), census 0..99 both scenes, soak, T2 on the Knock Off windows (out1: Rock Slide s165 res18 expected -115 -> ~ -16).
 
 Verification for this doc: docs only; no code, no tests run. Tested identity: base `230f9883e` (see the commit for this file).
+
+## kno2: the 5 vs 26 lead and the 70 / 105 command-length rule (ROM, Scene ON; measure only)
+
+Base `dfd57882b`; nothing under `src/` / `tests/` changed, no `npm test`. Method: a scratch copy of `tools/integration/hpd2Probe.py` (not committed; it adds, per frame, `gMPlayInfo_SE1` / `SE2` `.status` (offset +4), and every in-use `gSprites[i]` with callback, `x/y/x2/y2`, `invisible`, OAM word 0 / `attr2`) run direct (fresh mGBA, `PYTHONPATH=/srv/pokebench/vendor/libmgba-py`, 700 frames) on `tools/battle-lab/out2-knockoff-on.json` (foe target) and `out2-knockoffrev-on.json` (player target). Frames are lab trace frames (the out2 axis). `E` below = the first row with `gBattlescriptCurrInstr == BattleScript_KnockedOff+0x6` (the `playanimation` has executed, `gBattleControllerExecFlags != 0`; the row before, `ptr == BattleScript_KnockedOff`, is the instruction being fetched).
+
+### Measured rows
+
+| | foe target (`knockoff`) | player target (`knockoffrev`) |
+| --- | --- | --- |
+| `BattleScript_KnockedOff` fetched | 483 | 188 |
+| **E** (`+0x6`, exec flag set) | 484 (exec 2) | 189 (exec 1) |
+| `gAnimScriptActive` 1 (first active row) | **509** | **193** |
+| **lead W = active - E** | **25** | **4** |
+| active rows A (`gAnimScriptActive` = 1) | 509 .. 551 = **43** | 193 .. 286 = **94** |
+| bag sprite exists (callback = `AnimKnockOffItem` path) | 512 .. 551 (40 rows) | 196 .. 286 (91 = 40 + 51) |
+| bag first row with built OAM | 513: OAM (160, 35), `y2` -5 | 197: OAM (56, 80), `y2` -5 |
+| last active row -> print exec (`+0xa`, exec set) | 551 -> 554 | 286 -> 289 |
+| E -> print exec | **70** | **100** (101 from `KnockedOff` fetch) |
+| SE1 status 0x3 (playing) | 437 .. 508 | 121 .. 192 |
+| (the existing doc's "first active row" lead, out2 §B counted from `KnockedOff+0`) | 26 | 5 |
+
+Row-count caveat: counting `E -> print exec` the foe target reproduces out2's **70**; the player target gives **100** (101 from the fetch row), not the 105 quoted in out2 §B / §3 above (the 94 active rows and the 188 / 289 anchors are reproduced exactly: 289 - 188 = 101; the "105" in the table is not a row difference of any ptr / active edge in this probe). Use 100 (from E), not 105, for the implementing step's player-target constant and re-derive it against the live app's own command start.
+
+### Why the lead is 4 vs 25 (it is not a property of the item animation)
+
+1. `playanimation` (`Cmd_playanimation`) only emits `CONTROLLER_BATTLEANIMATION` to BS_TARGET's controller (E). The controller handler (`reference/pokeemerald/src/battle_controller_player.c:3066-3079` player, `battle_controller_opponent.c:1990-` opponent, same shape) starts with `if (!IsBattleSEPlaying(gActiveBattler))`: **nothing is launched while SE1 / SE2 is still sounding.**
+2. `IsBattleSEPlaying` (`src/battle_gfx_sfx_util.c:554-575`) returns TRUE while `IsSEPlaying()` and `healthBoxesData[battler].soundTimer++ < 30` (a 30-poll cap after which it `m4aMPlayStop`s both SE players, then FALSE, timer reset).
+3. The sound still playing at `KnockedOff` is the **hit sound** `BattleScript_HitFromAtkAnimation` (`data/battle_scripts_1.s:253`: attackanimation / waitanimation / **effectivenesssound** / hitanimation ...): SE1 goes 0 -> 0x3 at 437 (foe) / 121 (player) (ptr `HitFromAtkAnimation+0x4`) and ends **exactly 72 rows later** in both labs (-> 0x80000000 at 509 / 193, which is the same row `gAnimScriptActive` becomes 1 and `gBattlerControllerFuncs` switches to `CompleteOnFinishedBattleAnimation`, ctl `0x805fee9` foe / `0x8059d91` player).
+4. So the ROM lead is `W = (SE start + 72) - E` (here 509 - 484 = 25 and 193 - 189 = 4), limited to <= 30 poll rows by the soundTimer cap. The script reaches `KnockedOff` 47 rows after the hit SE started in the foe lab and 68 rows after in the player lab: the difference (21) is the **HP bar drain between `hitanimation` and the script's end** (out2: ROM `hp exec` 5 rows foe vs 26 rows player, because the player Rattata is Lv50 and the foe Lv100 hits for a far bigger bar delta). Nothing in the *item* script differs by side.
+5. After the launch, `LaunchBattleAnimation` (`src/battle_anim.c:208-264`) sets `gAnimScriptActive` -> 1 on the launch row; the script then runs `loadspritegfx ANIM_TAG_ITEM_BAG` (`Cmd_loadspritegfx` `battle_anim.c:334-346`: loads, `sAnimFramesToWait = 1`, `gAnimScriptCallback = WaitAnimFrameCount`), then `createsprite`, then `end`. Measured: **3 active rows before the bag exists** (509 -> 512, 193 -> 196) on both sides, and the bag's OAM is first built the row after creation (creation row still shows the template's default OAM word `0x80000100`). So the lead from the launch to the first drawn bag row is constant (4 rows); only W, the SE wait, varies.
+6. The bag is destroyed on the row `gAnimScriptActive` returns to 0 (foe: path end `AnimKnockOffOpponentsItem`; player: `AnimItemSteal_Step2` tail), then 2 more script rows: `gAnimScriptActive` 0 at 552 / 287, `exec` clears at 553 / 288, print `+0xa` executes at 554 / 289.
+
+### Command-length rule
+
+`E -> print exec  =  W + A + 2`, with **A fixed by the target side (43 foe / 94 player = 3 load rows + 40 path rows (+ 51 Step2 tail for the player))** and **W = rows until SE1 / SE2 stops after E, capped at 30** (in the labs W is the remainder of the 72-row hit SE: 25 / 4).
+The two labs' 70 / 100 are therefore **two samples of one formula**, not two constants: 25 + 43 + 2 = 70, 4 + 94 + 2 = 100. For the implementing step this means: (a) a constant per target side is only correct for this lab's HP-bar-drain length; (b) the faithful model is `A_side + 2 + (hit-SE remainder at E)`, where the remainder is `max(0, 72 - rows since the effectivenesssound SE started)` for a hit-sound-only prefix (Knock Off is a damaging move, so the SE is always the 72-row effective / super-effective / not-effective sound: **only the effectivenesssound id of the hit was sampled (Normal-effective); super / not-very-effective rows and the crit / multi-hit prefixes are unmeasured**), and the app already derives the preceding HP drain from the ROM (hpd1 / hpd7) so `E` is known live; (c) if the implementation must stay a constant, the foe-side 70 is the lower bound, the player-side value depends on the drain (100 is the sample, but a 30-row HP drain would be 101 - 4 + 0 .. a 4-row remainder floor of 0 gives 96 = 94 + 2). Cheapest honest implementation: command length = `A_side + 2 + soundTailAtCommandStart` with the tail taken from the same SE-remaining mechanism the other `playanimation` commands (Wish / Focus Band) already need (their leads in wsh1 were of the same order, 5 .. 26, for the same reason, `IsBattleSEPlaying` in front of every `CONTROLLER_BATTLEANIMATION`; **unverified here**, check against the wsh1 lab rows before reusing).
+
+Bag geometry sampled (for the pin test in §9 step 2): player target creation `x = 72, y = 101` (pic coords, = the player mon's pic), foe target `x = 176, y = 56`; the path then runs to x = 0 (-32 in `moveAlongLinearPath`) / 255 (272) with `y2` = -5, -9, -13, -17 .. at +1, +2, +3, +4 rows after creation (wobble `Sin`) on both sides; player bag parked at `x = 65507` (= -29) for the 51 tail rows (`y = 91`, `y2 = 0`), foe bag last row `x = 267, y = 51, y2 = -14`. The foe bag's final row 551 is the last active row; no sprite on row 552.
+
+Verification: measure-only doc, no code / test change. ROM runs: two direct mGBA probes (7.5 s each); raw per-frame dumps were kept in `/tmp/kno2/` (not committed). Tested identity: base `dfd57882b` (see the commit for this file).
