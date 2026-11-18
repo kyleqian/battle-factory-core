@@ -427,7 +427,9 @@ describe("random round soak driver (green milestone pin)", () => {
       // wsh1 (the Wish heal / Future Sight hit / Focus Band general-animation commands, 201 / 172 / 129 frames in Scene ON): frames only + render calls, 41_099 -> 41_221, renderCalls 2_907 -> 2_913; same battle 7, turn 3, end state, diagnostics.
       // hpd5 (measured on the hpd4 tip f40209793, before any hpd5 change; hpd5's Scene ON-only audited leads add 0 here): the hpd4 floor-free foe-hit hold,
       // frames only + render calls, 41_221 -> 41_240, renderCalls 2_913 -> 2_914; same battle 7, turn 3, end state, diagnostics.
-      frames: 41_240,
+      // kno3 (Knock Off's item-knocked-off animation: the ON command 71 / 101 frames + the SE gate, the OFF 35-row Pausex20 hold, the floor-free hit bar and the 4 post-print rows):
+      // frames only + render calls, 41_240 -> 41_376, renderCalls 2_914 -> 2_916; same battle 7, turn 3, end state, diagnostics.
+      frames: 41_376,
       battle: 7,
       turn: 3,
       diagnostics: {
@@ -439,7 +441,7 @@ describe("random round soak driver (green milestone pin)", () => {
         terminalOutcome: "roundWon",
         terminalRecordMenuInputReadyReached: true,
         terminalRecordChoice: "no",
-        renderCalls: 2_914,
+        renderCalls: 2_916,
       },
     });
     expect(second).toEqual(first);

@@ -1011,6 +1011,17 @@ function rattataAtLevel(level: number, moveId = 69, item = 0): FactoryFullTurnBa
   });
 }
 
+function out2Knock(state: EngineState, scene: "on" | "off", item = 200): EngineState {
+  return midBattleSwitchStage(state, `out2-knockoff${item ? "" : "noitem"}-${scene}`, [RATTATA_LV50_BENCH, RATTATA_LV50_BENCH], [105, 105], {
+    rngSeed: 1,
+    battleScene: scene,
+    player: rattataAtLevel(50, 282),
+    trainer: rattataAtLevel(100, 111, item),
+    usedMessageHoldFrames: 0,
+    sceneOffNoAnimations: scene === "off",
+  });
+}
+
 function aud241bStage(
   state: EngineState,
   id: string,
@@ -2133,6 +2144,14 @@ export const APP_STAGES: Readonly<Record<string, AppStage>> = {
   "aud242o-triattack-player-on": (state) => aud241bStage(state, "aud242o-triattack-player-on", "on", 50, 12, 161, undefined, false, 69),
   "aud242o-rollout-player-on": (state) => aud241bStage(state, "aud242o-rollout-player-on", "on", 50, 12, 205, undefined, false, 69),
   // hpd1: fixed-damage hit-hold windows (tools/integration/hpd1Labs.py, docs/hpd1-hp-hold.md): the Lv100 foe uses Defense Curl, the player's fixed-damage move follows.
+  "out2-horndrill-on": (state) => aud241bStage(state, "out2-horndrill-on", "on", 10, 100, 32, undefined, false, 111),
+  "out2-horndrill-off": (state) => aud241bStage(state, "out2-horndrill-off", "off", 10, 100, 32, undefined, false, 111),
+  "out2-knockoffnoitem-on": (state) => out2Knock(state, "on", 0),
+  "out2-knockoffnoitem-off": (state) => out2Knock(state, "off", 0),
+  "out2-knockoffrev-on": (state) => midBattleSwitchStage(state, "out2-knockoffrev-on", [RATTATA_LV50_BENCH, RATTATA_LV50_BENCH], [105, 105], { rngSeed: 1, battleScene: "on", player: rattataAtLevel(50, 111, 200), trainer: rattataAtLevel(100, 282), usedMessageHoldFrames: 0, sceneOffNoAnimations: false }),
+  "out2-knockoffrev-off": (state) => midBattleSwitchStage(state, "out2-knockoffrev-off", [RATTATA_LV50_BENCH, RATTATA_LV50_BENCH], [105, 105], { rngSeed: 1, battleScene: "off", player: rattataAtLevel(50, 111, 200), trainer: rattataAtLevel(100, 282), usedMessageHoldFrames: 0, sceneOffNoAnimations: true }),
+  "out2-knockoff-on": (state) => out2Knock(state, "on"),
+  "out2-knockoff-off": (state) => out2Knock(state, "off"),
   "hpd1-sonicboom-on": (state) => aud241bStage(state, "hpd1-sonicboom-on", "on", 50, 100, 49, undefined, false, 111),
   "hpd1-sonicboom-off": (state) => aud241bStage(state, "hpd1-sonicboom-off", "off", 50, 100, 49, undefined, false, 111),
   "hpd1-dragonrage-on": (state) => aud241bStage(state, "hpd1-dragonrage-on", "on", 50, 100, 82, undefined, false, 111),

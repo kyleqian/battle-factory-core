@@ -178,6 +178,24 @@ export const HELD_ITEM_EFFECT_COMMAND_FRAMES = 214;
 export const WISH_HEAL_COMMAND_FRAMES = 201;
 export const FUTURE_SIGHT_HIT_COMMAND_FRAMES = 172;
 export const FOCUS_BAND_COMMAND_FRAMES = 129;
+/**
+ * kno3 (docs/kno1-item-knockoff-plan.md "kno3"): BattleScript_KnockedOff's `playanimation BS_TARGET, B_ANIM_ITEM_KNOCKOFF` (General_ItemKnockoff:
+ * one ITEM_BAG sprite, 3 load rows, then 40 path rows, + the AnimItemSteal_Step2 tail of 51 rows when the PLAYER's mon is the target). The
+ * rows from the instruction's row E to the next print's first row are W + A + 2 (kno2): W = the controller's IsBattleSEPlaying wait for the
+ * hit's effectivenesssound (sgs134RequestSeGate, fixed rows ITEM_KNOCKOFF_SE_FIXED_ROWS after the hit's SE), A the animation rows, 2 script rows.
+ */
+export const ITEM_KNOCKOFF_ANIMATION_ROWS_OPPONENT_TARGET = 43;
+export const ITEM_KNOCKOFF_ANIMATION_ROWS_PLAYER_TARGET = 94;
+export const ITEM_KNOCKOFF_SCRIPT_TAIL_ROWS = 3;
+/** The Scene OFF twin: `Cmd_playanimation` takes BattleScript_Pausex20 (35 rows from the instruction's row to the print, both sides; out2). */
+export const ITEM_KNOCKOFF_OFF_HOLD_FRAMES = 35;
+/** Script rows after the knocked-off print's waitmessage before MoveEnd's turn-end block (ROM: `+0xc`, `return`, MoveEnd, MoveEnd+0x6 = 6 rows; the sprite-visibility commands present 2). */
+export const ITEM_KNOCKOFF_PRINT_TAIL_ROWS = 4;
+/** The rows from the hit's effectivenesssound to the knocked-off controller launch's first poll, less the HP bar's rows (kno2: SE age at E = 43 + drain, +1 for the first poll; seg127 drain = |from - to|). */
+export const ITEM_KNOCKOFF_SE_FIXED_ROWS = 44;
+export function itemKnockoffCommandFrames(battler: 0 | 1, seGate: number): number {
+  return seGate + (battler === 0 ? ITEM_KNOCKOFF_ANIMATION_ROWS_PLAYER_TARGET : ITEM_KNOCKOFF_ANIMATION_ROWS_OPPONENT_TARGET) + ITEM_KNOCKOFF_SCRIPT_TAIL_ROWS;
+}
 export const HELD_ITEM_EFFECT_RESTART_LEAD_FRAMES = 15;
 export const HELD_ITEM_EFFECT_CONTINUE_LEAD_FRAMES = 9;
 /**
@@ -653,7 +671,7 @@ export type BattleResolutionPresentationCommand =
       type: "general-animation";
       eventSequence: number;
       battler: 0 | 1;
-      animation: "FOCUS_PUNCH_SETUP" | "HELD_ITEM_EFFECT" | "LEECH_SEED_DRAIN" | "CASTFORM_CHANGE" | "WISH_HEAL" | "FUTURE_SIGHT_HIT" | "FOCUS_BAND" | WeatherContinuesAnimation;
+      animation: "FOCUS_PUNCH_SETUP" | "HELD_ITEM_EFFECT" | "LEECH_SEED_DRAIN" | "CASTFORM_CHANGE" | "WISH_HEAL" | "FUTURE_SIGHT_HIT" | "FOCUS_BAND" | "ITEM_KNOCKOFF" | WeatherContinuesAnimation;
       /** cff230: a CASTFORM_CHANGE's target form (the event's argument & ~CASTFORM_SUBSTITUTE; 0 = normal). */
       castformForm?: number;
       /** cff232 / snd233: extra rows before the morph's lead (a weather-loop change at battler 1, both scenes); absent = 0. */
@@ -1410,8 +1428,9 @@ function heldItemEffectOffHoldFrames(
   const instruction = BATTLE_SCRIPT_PROGRAM.instructions[programCounter - 1];
   if (
     instruction?.opcodeName !== "B_SCR_OP_PLAYANIMATION"
-    || !instruction.operands.some((operand) => operand.expression === "B_ANIM_HELD_ITEM_EFFECT" || operand.expression in WSH1_OFF_HOLD_LEAD)
+    || !instruction.operands.some((operand) => operand.expression === "B_ANIM_HELD_ITEM_EFFECT" || operand.expression === "B_ANIM_ITEM_KNOCKOFF" || operand.expression in WSH1_OFF_HOLD_LEAD)
   ) return null;
+  if (instruction.operands.some((operand) => operand.expression === "B_ANIM_ITEM_KNOCKOFF")) return ITEM_KNOCKOFF_OFF_HOLD_FRAMES;
   const { executions, lead } = heldItemEffectExecutionsAndLead(events, messageIndex);
   const leadFrames = instruction.operands.map((operand) => WSH1_OFF_HOLD_LEAD[operand.expression]).find((value) => value !== undefined) ?? lead;
   return (executionsPresented ? 0 : executions) + leadFrames;
@@ -1520,7 +1539,7 @@ function statusAnimationSeGate(events: readonly BattleKernelSemanticEvent[], ind
  * AncientPower — animate before their stat change and are unmeasured: 0) and 62 for a multi-hit move's 2nd+ MOVE_ANIMATION, Scene ON
  * (BattleScript_DoMultiHit: HandleMoveAnimation; Scene OFF skips the attackanimation request). The SE is
  * closed (0) by any print but the multi-hit loop's EMPTYSTRING3 (waitmessage 1) and by any animation script in between (its Cmd_end
- * drains the SE); HIT_ANIMATION is a sprite blink. Every other request (Speed Boost, held items, Knock Off, ...) presents 0.
+ * drains the SE); HIT_ANIMATION is a sprite blink. kno3: B_ANIM_ITEM_KNOCKOFF waits the same way (43 fixed rows, kno2). Every other request (Speed Boost, held items, ...) presents 0.
  */
 function sgs134RequestSeGate(events: readonly BattleKernelSemanticEvent[], index: number): number {
   const payloads = events.map((e) => e.payload);
@@ -1562,6 +1581,8 @@ function sgs134RequestSeGate(events: readonly BattleKernelSemanticEvent[], index
     }
     if (previous?.kind === "stat-stage-change"
       && (nextId === "STRINGID_DEFENDERSSTATFELL" || nextId === "STRINGID_ATTACKERSSTATROSE")) fixedRows = 44;
+  } else if (request.animationId === "ITEM_KNOCKOFF") {
+    fixedRows = ITEM_KNOCKOFF_SE_FIXED_ROWS;
   } else if (request.animationId === "MOVE_ANIMATION") {
     if (emptyBetween && moveId !== null && String(request.arguments[0]) === moveId && !(nextId ?? "").startsWith("STRINGID_PKMN")) {
       fixedRows = 62;
@@ -1754,6 +1775,40 @@ function hpMoveEndLeadRows(events: readonly BattleKernelSemanticEvent[], index: 
   const hpExecution = event.provenance?.instructionExecution;
   const receiptExecution = next.provenance.instructionExecution;
   return hpExecution === undefined || receiptExecution === undefined || receiptExecution <= hpExecution ? null : receiptExecution - hpExecution - 1;
+}
+/**
+ * kno3: the hit's bar is followed by `datahpupdate` and the script rows to BattleScript_KnockedOff's `playanimation` (the move script's
+ * MoveEnd steps; 6 rows from the `datahpupdate` row to the instruction's row, both scenes: Scene ON's ITEM_KNOCKOFF receipt, Scene OFF's
+ * knocked-off print minus its 34-row Pausex20). The bar has no 28-row floor there (out2: the ROM bar is 5 / 26 rows, the floor presented 28):
+ * bar + 1 + (rows to the instruction - 1), then the animation command starts on the instruction's row. Null when anything else follows.
+ */
+function knockoffHpTailRows(events: readonly BattleKernelSemanticEvent[], index: number, sceneOff: boolean): number | null {
+  const event = events[index]!;
+  const hpExecution = event.provenance?.instructionExecution;
+  if (hpExecution === undefined || BATTLE_SCRIPT_PROGRAM.instructions[event.provenance?.programCounter ?? -1]?.opcodeName !== "B_SCR_OP_DATAHPUPDATE") return null;
+  let next: BattleKernelSemanticEvent | undefined;
+  for (let following = index + 1; following < events.length && next === undefined; following += 1) {
+    const kind = events[following]!.payload.kind;
+    if (kind !== "set-battler-pp-data" && kind !== "game-stat-increment") next = events[following]!;
+  }
+  const execution = next?.provenance?.instructionExecution;
+  if (next === undefined || execution === undefined) return null;
+  if (sceneOff) {
+    const programCounter = next.provenance?.programCounter;
+    if (next.payload.kind !== "message" || next.payload.messageId !== "STRINGID_PKMNKNOCKEDOFF" || programCounter === undefined
+      || !BATTLE_SCRIPT_PROGRAM.instructions[programCounter - 1]?.operands.some((operand) => operand.expression === "B_ANIM_ITEM_KNOCKOFF")) return null;
+    const rows = execution - hpExecution - ITEM_KNOCKOFF_OFF_PAUSE_EXECUTIONS;
+    return rows > 0 ? rows - 1 : null;
+  }
+  if (next.payload.kind !== "animation" || next.payload.animationId !== "ITEM_KNOCKOFF" || execution <= hpExecution) return null;
+  return execution - hpExecution - 1 + ITEM_KNOCKOFF_MOVEEND_BLOCKED_ROWS;
+}
+/** `BattleScript_Pausex20`'s executions (`pause B_WAIT_TIME_SHORT` = 32 blocked rows + the instruction and the `return`). */
+const ITEM_KNOCKOFF_OFF_PAUSE_EXECUTIONS = 34;
+const ITEM_KNOCKOFF_MOVEEND_BLOCKED_ROWS = 2;
+function knockoffHpTiming(events: readonly BattleKernelSemanticEvent[], index: number, beforeRules: BattleScriptRulesContext): BattleHpTiming | null {
+  const tailFrames = knockoffHpTailRows(events, index, (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0);
+  return tailFrames === null ? null : Object.freeze({ minimumFrames: 0, tailFrames } as const);
 }
 /** Applies the hpd1 tail to the plain hp commands of a finished command list (see hpMoveEndLeadRows). */
 function applyHpHitTails(
@@ -4583,7 +4638,7 @@ export function projectBattleResolutionCommands(
   let currentField: BattleResolutionDisplayedField = field;
   const substituteFades: { at: number; battler: 0 | 1; sequence: number }[] = [];
   const statsChanges: { at: number; battler: 0 | 1; sequence: number; argument: number; frames: number; seGate: number }[] = [];
-  const heldItemEffects: { at: number; battler: 0 | 1; sequence: number; frames: number; afterStatus: boolean; animation: "HELD_ITEM_EFFECT" | "WISH_HEAL" | "FUTURE_SIGHT_HIT" | "FOCUS_BAND" }[] = [];
+  const heldItemEffects: { at: number; battler: 0 | 1; sequence: number; frames: number; afterStatus: boolean; seGate?: number; animation: "HELD_ITEM_EFFECT" | "WISH_HEAL" | "FUTURE_SIGHT_HIT" | "FOCUS_BAND" | "ITEM_KNOCKOFF" }[] = [];
 
   for (let index = 0; index < events.length; index += 1) {
     const event = events[index]!;
@@ -4703,7 +4758,10 @@ export function projectBattleResolutionCommands(
                   ?? (WAITMESSAGE_LONG_MESSAGE_IDS.has(payload.messageId)
                   ? WAITMESSAGE_LONG_TIMING
                   : MESSAGE_TIMING);
-                return focusPunchPrePassMessageTiming(events, index, base) ?? chargeTurnEmptyBoxTiming(events, index) ?? base;
+                const timing = focusPunchPrePassMessageTiming(events, index, base) ?? chargeTurnEmptyBoxTiming(events, index) ?? base;
+                return payload.messageId === "STRINGID_PKMNKNOCKEDOFF"
+                  ? Object.freeze({ minimumFrames: timing.minimumFrames, holdFrames: timing.holdFrames + ITEM_KNOCKOFF_PRINT_TAIL_ROWS })
+                  : timing;
               })(),
       }));
       if (payload.messageId === "STRINGID_USEDMOVE" || payload.messageId === "STRINGID_EMPTYSTRING3") {
@@ -4812,6 +4870,15 @@ export function projectBattleResolutionCommands(
         frames: HELD_ITEM_EFFECT_COMMAND_FRAMES + lead,
         afterStatus: events[index - 1]?.payload.kind === "set-battler-status-data" && commands[commands.length - 1]?.type === "status",
         animation: "HELD_ITEM_EFFECT",
+      });
+      continue;
+    }
+    if (payload.kind === "animation" && payload.animationId === "ITEM_KNOCKOFF") {
+      const battler = singlesBattler(payload.battler ?? -1, "item knocked off animation");
+      const seGate = sgs134RequestSeGate(events, index);
+      heldItemEffects.push({
+        at: commands.length, battler, sequence: event.sequence, frames: itemKnockoffCommandFrames(battler, seGate),
+        afterStatus: false, animation: "ITEM_KNOCKOFF", ...(seGate > 0 ? { seGate } : {}),
       });
       continue;
     }
@@ -4964,7 +5031,7 @@ export function projectBattleResolutionCommands(
         to: payload.to,
         healthValue: health.healthValue,
         timing: drainRole === "seeded" ? LEECH_SEED_DRAIN_SEEDED_HP_TIMING
-          : drainRole === "receiver" ? LEECH_SEED_DRAIN_RECEIVER_HP_TIMING : hpPrintTailTiming(event, events, index),
+          : drainRole === "receiver" ? LEECH_SEED_DRAIN_RECEIVER_HP_TIMING : knockoffHpTiming(events, index, beforeRules) ?? hpPrintTailTiming(event, events, index),
       }));
       if (payload.to === 0) zeroHpBattlers.add(battler);
       continue;
@@ -5312,6 +5379,7 @@ export function projectBattleResolutionCommands(
               animation: heldItem.animation,
               timing: Object.freeze({
                 minimumFrames: heldItem.frames - presented + (presented > 0 ? HELD_ITEM_EFFECT_AFTER_STATUS_EXTRA_FRAMES : 0),
+                ...(heldItem.seGate === undefined ? {} : { seGateFrames: heldItem.seGate }),
               }),
             }));
           }
