@@ -665,3 +665,78 @@ Two things dominate this ranking and are **not lead effects**:
 1. **The planned lead landing is not the cure for the T2 offsets**: <= 1.6 % of the offset mass of its own bodies even in the naive reading (0 under the sound-clock design), 0.55 % of the total. Its worth is in the hit / HP / status rows after the body (about 48 of the rows here, Spore + Toxic), plus the visual frame alignment, not the SE offsets.
 2. **Largest identifiable mass is outside the lead:** (a) 681 `gCurrentMove` 0 rows (29 %): per-class constants for SE 148 (-22) and the 152 / 228 / 102 group (-3); (b) the three single windows (Rock Slide s165 res18, Swagger s6 res14, Fire Blast s1028 res10, 11 %); (c) 94 bodies without a table row (34 %). Suggested order (measure first, no code): the 120 SE 148 rows (one status anim, 3,600, constant -22, so the likeliest single fix), the three windows (a ROM drive per window, `tl.json` + `snd.json` already hold the frames), then hpd7c on Bubble Beam / Fire Blast / Magical Leaf.
 3. Not measured: per-window attribution of offset to the SE's position inside the body (head vs tail of the animation); which of the 1,553 table rows are body rows versus following-command rows (needs the app command spans per row); whether the engine's `gCurrentMove` equivalent differs from the ROM's at the row frame (the attribution is the ROM's, `tl.json`). `gCurrentMove` stays set after a body, so status / stat animations right after a move are attributed to that move (part of the Toxic / Spore "exact after +L" rows, explained in section 1).
+
+## out1 (2026-11-18): where the ~100 frames of the three single T2 windows come from (diagnosis only, no `src/` / `tests/` change, nothing landed)
+
+Result: **three different causes, no shared one.** In every window the first SE of the segment sits at -2 .. -5 and the offset then jumps by ~65 .. 113 frames inside the *first mover's* script, after its visible body and before the second mover's "used" line; every later SE of the window carries the constant. The three stages are: (A) Rock Slide s165 res18: Knock Off's `BattleScript_KnockedOff` item animation (a general-animation command the app does not present, only a 15-row stub after the message); (B) Swagger s6 res14: the Flamethrower body is presented as its 115 live rows while the ROM waits 215 rows from `attackanimation` to `hitanimation` (a damaging body with no hpd7 lead / tail row); (C) Fire Blast s1028 res10: Horn Drill's `BattleScript_KOFail` starts with `pause B_WAIT_TIME_LONG` (64) which the used-message hold ignores (it knows only `B_WAIT_TIME_SHORT`). None of the three is a faint / send-in / stat change; none is in the SE tables.
+
+Method. ROM side: the aud263 `<seed>-on.frozen.json` traces (the lab request with the engine-driven inputs; `replay` note removed, as `romStateTimeline.py` does) re-run in a fresh direct mGBA process with `tools/integration/hpd2Probe.py <req> on <out> <maxFrame>` (16 s per window; frame numbers equal `tl.json`'s: `gCurrentMove` 157 at 12002 in both for s165): per frame `gBattlescriptCurrInstr`, `gBattleControllerExecFlags`, `gAnimScriptActive`, decoded to battle-script labels with `reference/pokeemerald/pokeemerald.map`; the SE rows come from `snd.json`, `gCurrentMove` from `tl.json`. Engine side: a scratch copy of `soundCensusRomReplay.ts` (untracked, deleted again) that logs every presentation command start (segment.command, type, lines, timing) while replaying `--seed N --scene on --setup <aud263 setup>` on this tree (master `6b2f15b14`; its SE rows are 1 .. 2 frames later than the aud263 engine files, and the windows' offsets are the same: s165 131 rows at 11610.. vs 11608.., s6 193 at 10393 vs 10392, s1028 144 at 7813 both). All frames below are relative to the segment start (ROM: the commit anchor of the segment, engine: the same decision's anchor; s165 res18 ROM 11613 / engine 11287, s6 res14 10311 / 10012, s1028 res10 7786 / 7631). Scratch only; `/tmp/out1/`.
+
+### A. Rock Slide seed 165 res18 (offset -115 on 20 SE 131 rows, mass 2,300)
+
+Turn: foe Sableye Knock Off (Sudowoodo's HARD STONE) then Sudowoodo Rock Slide (the t2off row attribution `gCurrentMove` 157 is right for the SEs; the gap is before it).
+
+| stage | ROM frame (script) | engine frame (command) | engine - ROM |
+|---|---|---|---|
+| Knock Off "used" print | 12 (`HitFromAtkString`, 33 rows) | 2 / 11 (message) | ~0 |
+| Knock Off body | anim active 47 .. 96, SE 122 at 60 | move-animation 37 (SE 122 at 58) | -2 |
+| hit anim | exec 100 | hit-animation 94 | -6 |
+| HP bar | exec 135, datahpupdate 148 | hp 129 .. 157 | ~ -3 |
+| **KnockedOff** | `BattleScript_KnockedOff`: **playanimation `B_ANIM_ITEM_KNOCKOFF` exec 154, anim active 172 .. 266 (94 rows), print exec 268, print done 315, `waitmessage` 64 -> 379, return 380** = 227 rows | **message "knocked off HARD STONE" 157 (110 rows), then a 15-row move-animation stub 267, sprite-visibility 282 / 283** = 125 (+2) rows, animation AFTER the message | **-100** |
+| MoveEnd, Rock Slide set | MoveEnd 381, `gCurrentMove` 157 at 389 | - | |
+| Rock Slide "used" print | exec 395 | 284 | -111 |
+| Rock Slide body | `attackanimation` exec 427, SE 131 at 436 .. 512 | move-animation 309, SE 131 at 321 .. | -115 (SE) |
+
+Cause: `General_ItemKnockoff` (`battle_anim_scripts.s:10356`, a single `createsprite gKnockOffItemSpriteTemplate`) runs 94 rows + a launch lead on the Scene ON controller before `printstring STRINGID_PKMNKNOCKEDOFF` (`battle_scripts_1.s:3643`: `playanimation BS_TARGET, B_ANIM_ITEM_KNOCKOFF; printstring; waitmessage B_WAIT_TIME_LONG; return`). The app presents the message first (110 rows = print 47 + wait 64 - 1, which matches the ROM's 268 .. 379 = 111) and then a 15-row command; the animation is ~114 rows (playanimation exec 154 -> print exec 268). The message text (`battleResolutionPresentation.ts:2990`) and the held-item / Wish / Future Sight / Focus Band general-animation commands (`WISH_HEAL_COMMAND_FRAMES` 201, `FUTURE_SIGHT_HIT_COMMAND_FRAMES` 172, `FOCUS_BAND_COMMAND_FRAMES` 129, `battleResolutionPresentation.ts:178-180`, used at :4821) exist; `B_ANIM_ITEM_KNOCKOFF` is a fourth uncovered `playanimation` site (wsh1 listed three). Other Knock Off windows in T2 (s165 res13 -11, s499 res1 -19, res14 -2) show the SE rows of the body only, not the SEs after it, so they do not measure this.
+
+Proposed fix (not landed): present the ITEM_KNOCKOFF animation as a general-animation command **before** the knocked-off message (frames `playanimation exec -> print exec` = 114 on this window; two fresh ROM runs to confirm), and drop the 15-row stub after the message if that stub is the same site (not traced in this step: the stub is a `move-animation` command without `animation`, 15 rows at 267; check which receipt creates it). Predicted: +99 rows -> the offset -115 -> about -16 (the other Rock Slide windows sit at -5 .. -7, s165 res24 -20), i.e. ~ -2,000 of the 2,300 mass. Scene ON only (`Cmd_playanimation` is `pause B_WAIT_TIME_SHORT` in Scene OFF; the OFF app should be checked before landing).
+
+### B. Swagger seed 6 res14 (offset -110 on 5 SE 193 / 194 rows, -121 on 6 SE 176 rows, mass 1,276)
+
+Turn: Quilava Flamethrower on Politoed ("It's not very effective..."), then foe Politoed Swagger. The SEs measured (193 / 194 / 176) are Swagger's, the Flamethrower SE 146 is at -5.
+
+| stage | ROM frame | engine frame | engine - ROM |
+|---|---|---|---|
+| "QUILAVA used FLAMETHROWER!" print | 12 .. 39 | 1 / 10 | ~ -2 |
+| **Flamethrower body** | **`attackanimation` exec 44, anim active 46 .. 255 (209 rows, release 257), SE 146 at 61, panse to 124** | **move-animation 35, live window 115 rows -> hit-animation 150** | **-9 at the start, -107 at the end: the body is 100 rows short (215 vs 115 from `attackanimation` to `hitanimation`)** |
+| hit anim | exec 259 (34 rows) | 150 (35) | -109 |
+| HP bar | exec 294, datahpupdate 346 | hp 185 (51 rows) | -109 |
+| "not very effective" | resultmessage exec 349, wait done 438 (89 rows) | message 236 (88 rows) | -113 |
+| MoveEnd, Swagger set | MoveEnd 440, `gCurrentMove` 207 at 448 | 13-row stub 324, sprite-visibility 337 / 338 | |
+| Swagger "used" print | exec 452 | 339 | -113 |
+| Swagger SEs | 193 at 490 .. 543, 194 at 619 .. 633, 176 at 893 .. 921 | -110 / -110 / -121 | |
+
+Cause: `liveMoveAnimation.ts:1433` `case 53: return 115; // Flamethrower (395..520 / 449..574 ...); script ends 600/654.` The live window is the visible rows only; the script runs 80 rows past it (`FlamethrowerCreateFlames` x11 then `waitforvisualfinish`, `Move_FLAMETHROWER` at `battle_anim_scripts.s:6311`), and Flamethrower is a **hit body**, so `moveAnimationScriptTailTiming` (`battleResolutionPresentation.ts:1625-1662`: null for "a hit body") gives no `scriptTailRows`, `LIVE_MOVE_SCRIPT_TAIL_TRAIL_ROWS` (`battleResolutionPresentationRender.ts:1536`) has no 53, and the hpd7 / hpd7b / sta4 lead table (`docs/hpd1-hp-hold.md`) has no Flamethrower row. Everything after the body (hit, HP, message, the next mover) therefore starts ~100 rows early. The same cause is visible in a second window outside the three: **s1028 res12** (Flamethrower SE 146 at -5, then SE 144 at -108, Calm Mind SE 184 x3 at -114, SE 144 at -128; mass ~ 580), plus every other Flamethrower that is followed by an SE inside its segment (the Flamethrower row itself is always -5, so the scoreboard only shows it through the next command).
+
+Note on t2off section 1: that section says the lead landing "moves no body SE" and is not the cure of the T2 offsets. Correct for body SEs, but this window's SEs are the *next command's* SEs, and the d = L + T rule (the app's body length from `attackanimation` to the hit) does move them. Window B is exactly what a hpd7 row for Flamethrower removes (R -> H 215 here, i.e. L + T ~ +100 against the app's 115), so the hpd7c measurement list should put Flamethrower first (it is a plain `EffectHit` shape with the longest live-window / script gap seen so far).
+
+Proposed fix (not landed): measure Flamethrower with the hpd7 method (this probe already gives R = 44 (`attackanimation` exec), A = 46, `hitanimation` exec 259 = R + 215 on the Scene ON ROM; confirm on a second fresh run and on the opponent side, `ageOffset -11` is in the live row table), add it to the lead / tail table. Predicted: +100 rows -> the Swagger SEs -110 / -121 -> about -10 / -20 (the -5 start offset plus the usual next-command lead), ~ -1,100 of 1,276 mass (+ ~ -500 of s1028 res12).
+
+### C. Fire Blast seed 1028 res10 (offset -69 on 12 SE 144 / 145 rows, mass 828)
+
+Turn: foe Nidoking Horn Drill (misses) then Blissey Fire Blast. The window's first SE is Fire Blast's.
+
+| stage | ROM frame | engine frame | engine - ROM |
+|---|---|---|---|
+| "Foe NIDOKING used HORN DRILL!" print | `EffectOHKO` +0x2 exec 8, 30 rows -> 38 | message 0 / 9 | ~0 |
+| `tryKO`, jump | 39 .. 41 | - | |
+| **`BattleScript_KOFail` `pause B_WAIT_TIME_LONG`** | **42 .. 106 (64 rows), "used" stays on the box** | **message "used" ends at 37: 28 rows, no hold** | **-70 from here** |
+| `printfromtable` "attack missed!" | exec 107, done 136, `waitmessage` 64 -> 200 (93 rows) | message 37 (92 rows) | -70 |
+| MoveEnd, Fire Blast set | 201 .. 208, `gCurrentMove` 126 at 209 | 13-row stub 129, sprite-visibility 143 / 144 | |
+| Fire Blast "used" print | exec 215 | 145 | -70 |
+| Fire Blast body | `attackanimation` exec 245, SE 144 at 251 .. 350 (10 rows), SE 145 at 362 / 368 | move-animation 168, SE 182 .. | -69 (SE) |
+
+Cause: the used-message hold of the source pause. `sourcePauseUsedMoveHoldFrames` (`battleResolutionPresentation.ts:1333-1376`, called at :4695) holds "X used Y!" for the interpreter executions up to the first print when a `pause` precedes it, but it accepts only `operands[0].expression === "B_WAIT_TIME_SHORT"` (:1357-1358; the fix122 no-effect `Pausex20` list is the other entry). `BattleScript_KOFail` (`battle_scripts_1.s:772`: `pause B_WAIT_TIME_LONG; printfromtable gKOFailedStringIds; waitmessage B_WAIT_TIME_LONG; goto BattleScript_MoveEnd`) pauses for `B_WAIT_TIME_LONG` = 64 (`battle.h:324`), so the used message of an OHKO miss is released 64 + ~6 dispatch rows early (the SHORT constant is 38 = 32 + 6, `USED_MESSAGE_B_WAIT_TIME_SHORT_HOLD_FRAMES` :923). The miss message itself (92 vs ROM 93) is right. The only other Horn Drill window in T2 (s1028 res4, 13 SE rows at offset 0) was not checked for a miss; Guillotine / Fissure / Sheer Cold misses take the same label.
+
+Proposed fix (not landed): accept `B_WAIT_TIME_LONG` in the pause test (hold = executions from the attack string to the print + 1, the kernel's own count, which includes the 64 blocked retries as it does for SHORT; check the `ppreduce` / `jumpifstatus2` / `tryKO` receipts between do not make the "first presented receipt after the attack string" test return null for the OHKO path). Predicted: +70 rows -> -69 -> about +1; ~ -820 of 828 mass. The ROM held "used" for 7794 .. 7893 = 99 rows (30 print + 64 pause + 5), the app 28.
+
+### Totals and caveats
+
+| window | rows | mass now | predicted residual | fix |
+|---|---|---|---|---|
+| Rock Slide s165 res18 | 20 | 2,300 | ~ 5 .. 16 per row -> ~ 300 | A: ITEM_KNOCKOFF general-animation command before the message |
+| Swagger s6 res14 | 11 | 1,276 | ~ 10 .. 20 per row -> ~ 150 | B: Flamethrower row in the hpd7 lead / tail table |
+| Fire Blast s1028 res10 | 12 | 828 | ~ 1 per row -> ~ 10 | C: `B_WAIT_TIME_LONG` in the used-message pause hold |
+| (also B) s1028 res12 | 6 | ~ 580 | ~ 100 | same as B |
+
+Net of the three fixes: about -3,900 of the 39,997 mass (9.8 %), plus ~ -480 from s1028 res12; these are predictions from ROM frame arithmetic, not an engine run. Fix B and the hpd7 landing share the lead / tail machinery (B moves the next command's rows; it should not touch the Flamethrower SEs), fix A is Scene ON only, fix C touches only the pre-print hold of the KOFail path (any other `pause B_WAIT_TIME_LONG` before a first print would also change: grep `pause B_WAIT_TIME_LONG` in `battle_scripts_1.s` before landing; the sound clock of those rows is separate). Not measured: whether the 15-row stub after the Knock Off / Swagger / Horn Drill messages (`move-animation minimumFrames 15 / 13 / 14`, no `animation`, then two sprite-visibility commands) is the same command in all three (it appears at the same place, between the first mover's last message and the second mover's "used" line, and its length varies 13 .. 15; the ROM spends 8 .. 13 rows there: MoveEnd + the next script's canceler / `EffectHit` steps); the Scene OFF twin of any of these (the named OFF service was not used); other Knock Off / Flamethrower / OHKO windows beyond the T2 set. Evidence: the ROM probe JSON / label dumps live only in `/tmp/out1/` (`<seed>.ram.json`, `<seed>.engine.json.cmds`); to regenerate: `hpd2Probe.py /tmp/out1/<seed>.req.json on <out> <maxFrame>` on the aud263 frozen trace with `replay` removed, and the scratch replay logger described above. No `npm test` / build (docs only).
