@@ -39,9 +39,11 @@ interface WonLobby {
  * wsh1 (Wish heal / Future Sight hit / Focus Band holds, Scene OFF 36 / 42 / 40 frames) moved the OFF deal: 13's OFF continuation loses. A scan of 14..60 found no seed
  * that passes every case; 19 wins the continuation in both scenes but its continued challenge loses before a retire prompt, while 13 still reaches the retire, so the
  * retire case keeps 13 (RETIRE_SEED).
+ * hpd5 (measured on the hpd4 tip f40209793: the same 3 failures, so hpd4's floor-free foe-hit hold moved the deal, not hpd5's Scene ON-only audited leads): 19's OFF continuation
+ * and 13's retire case now lose; a scan of 1..18 on the full file with the seed in both roles found 17 passing every case (13 passes all but the retire), so both use 17.
  */
-const WIN_TWO_SEED = 19;
-const RETIRE_SEED = 13;
+const WIN_TWO_SEED = 17;
+const RETIRE_SEED = 17;
 const WIN_THEN_LOSE_SEED = 0;
 
 function newPlayer(seed: number): RandomPlayer {

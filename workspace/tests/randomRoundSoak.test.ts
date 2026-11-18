@@ -425,7 +425,9 @@ describe("random round soak driver (green milestone pin)", () => {
       // hie1 (ISSUES #220 step 1; the held-item effect presented, here Scene OFF's `playanimation B_ANIM_HELD_ITEM_EFFECT` Pausex20 hold):
       // frames only + render calls, 41_068 -> 41_099, renderCalls 2_899 -> 2_907; same battle 7, turn 3, end state, diagnostics.
       // wsh1 (the Wish heal / Future Sight hit / Focus Band general-animation commands, 201 / 172 / 129 frames in Scene ON): frames only + render calls, 41_099 -> 41_221, renderCalls 2_907 -> 2_913; same battle 7, turn 3, end state, diagnostics.
-      frames: 41_221,
+      // hpd5 (measured on the hpd4 tip f40209793, before any hpd5 change; hpd5's Scene ON-only audited leads add 0 here): the hpd4 floor-free foe-hit hold,
+      // frames only + render calls, 41_221 -> 41_240, renderCalls 2_913 -> 2_914; same battle 7, turn 3, end state, diagnostics.
+      frames: 41_240,
       battle: 7,
       turn: 3,
       diagnostics: {
@@ -437,7 +439,7 @@ describe("random round soak driver (green milestone pin)", () => {
         terminalOutcome: "roundWon",
         terminalRecordMenuInputReadyReached: true,
         terminalRecordChoice: "no",
-        renderCalls: 2_913,
+        renderCalls: 2_914,
       },
     });
     expect(second).toEqual(first);
@@ -943,7 +945,8 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // sta3 (the action transition into a pre-move confusion / sleep print and its 3 launch rows; the exploring policy's presses land on
       // new phases again): 38094 / turn 22 -> 37771 / turn 20; same battle 2 / depth 1 / roundLost.
       // wsh1 (Wish / Future Sight / Focus Band presented as commands): frames only, 37771 -> 37806; same battle 2 / depth 1 / roundLost / turn 20.
-      frames: 37806,
+      // hpd5 (measured on the hpd4 tip f40209793; the floor-free foe-hit hold): frames only, 37806 -> 37811; same battle 2 / depth 1 / roundLost / turn 20.
+      frames: 37811,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 1,
@@ -967,12 +970,13 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // flw252 (see seed 0): 36610 / battle 2 turn 23 / depth 1 -> 21881 / battle 1 turn 35 / depth 0; roundLost. Pre-flw252 tree gives 36610.
       // lbra: frames only, 21881 -> 21940; the snapshot is now taken when the walkable Lobby opens (the loss's record answer plays the ROM farewell first, +59 frames) instead of at the old chain; same battle / turn / end state.
       // sta3 (the action transition into a pre-move print + its 3 launch rows): frames only, 21940 -> 21985; same battle 1 / turn 35 / roundLost.
-      frames: 21985,
+      // hpd5 (measured on the hpd4 tip f40209793; the floor-free foe-hit hold changes the exploring policy's press phases): 21985 / turn 35 -> 28708 / turn 46; same battle 1 / depth 0 / roundLost.
+      frames: 28708,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 0,
       battle: 1,
-      turn: 35,
+      turn: 46,
     });
   });
 
@@ -1003,7 +1007,8 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // only, 9140 -> 9134; decision notes identical apart from the menu presses; same battle / turn / end state.
       // lbra: frames only, 9134 -> 9185; the snapshot is now taken when the walkable Lobby opens (the loss's record answer plays the ROM farewell first, +51 frames) instead of at the old chain; same battle / turn / end state.
       // hie1 (the Scene OFF held-item effect hold): frames only, 9185 -> 9212; same battle / turn / end state.
-      frames: 9212,
+      // hpd5 (measured on the hpd4 tip f40209793; the floor-free foe-hit hold): frames only, 9212 -> 9219; same end state.
+      frames: 9219,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 0,
@@ -1534,7 +1539,9 @@ describe("ISSUES #104 (driver): continuous-play outcome semantics retuned -- OK 
     // so the lowest (47) is pinned.
     // lbr-g (#221 E1-E3, the Lobby cursor is the ROM's): seed 47 now carries 7; re-scanned seeds 0..54 under the same options: seeds 13, 16, 36
     // and 40 chain two round wins (carry 14), so the lowest (13) is pinned.
-    const result = runSeed(13, {
+    // hpd5 (measured on the hpd4 tip f40209793: seed 13 carries 7 there too; the floor-free foe-hit hold shifts the soak's press phases): re-scanned seeds 0..31 under the same options
+    // (tools/soak/randomRoundSoak.ts --policy winning --max-rounds 3 --render-every 0): only seed 4 chains two round wins (carry 14), so it is pinned.
+    const result = runSeed(4, {
       policy: "winning",
       maxRounds: 3,
       renderEvery: 0,

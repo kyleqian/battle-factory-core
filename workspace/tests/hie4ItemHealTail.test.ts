@@ -58,9 +58,11 @@ describe("item heal post-print tail (hie4)", () => {
     }
   });
 
-  it("the ordinary hit's HP command keeps its 28-row floor", () => {
+  // hpd1 (docs/hpd1-hp-hold.md): a foe hit followed only by the turn end has no 28-row floor, the ROM's hold after the bar is the measured rows to the MoveEnd receipt.
+  it("the ordinary foe hit's HP command is floor-free with the measured MoveEnd tail", () => {
     const { commands } = tailOf("hie1-leftovers-off");
     const hit = commands.find((command) => command.type === "hp");
-    expect(hit).toMatchObject({ type: "hp", timing: { minimumFrames: 28 } });
+    expect(hit).toMatchObject({ type: "hp", timing: { minimumFrames: 0 } });
+    expect((hit as { timing: { tailFrames?: number } }).timing.tailFrames).toBeGreaterThan(0);
   });
 });

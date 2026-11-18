@@ -1435,7 +1435,7 @@ export function battleResolutionMoveAnimationField(
 }
 
 /** The current command's displayed field: the segment's field after its completed commands (as the duration / completion checks see it). */
-function currentCommandField(state: BattleResolutionPresentationState): BattleResolutionDisplayedField {
+export function currentCommandField(state: BattleResolutionPresentationState): BattleResolutionDisplayedField {
   const segment = currentSegment(state);
   let field = state.field;
   for (let index = 0; index < state.commandIndex; index += 1) {
@@ -1576,6 +1576,58 @@ export function liveMoveScriptTailFrames(
   return Math.max(0, tailRows + trail - rows.post);
 }
 
+// hpd4: rows the command presents after its live body (+ post) so the next command (hit controller, next script step) starts on the ROM row
+// (R -> H = lead + 3 + len + 4 against the accepted live window), tuned by exact-frame matches against the ROM frames (docs/hpd1-hp-hold.md).
+const HPD4_BODY_TAIL_ROWS: ReadonlyMap<number, number> = new Map([[49, 3], [82, 26], [111, 3], [205, 3], [301, 3], [69, 1]]);
+function liveMoveHitTailRows(command: Extract<BattleResolutionPresentationCommand, { type: "move-animation" }>): number {
+  if ((command.timing.bodyLeadFrames ?? 0) === 0 || command.animation === undefined) return 0;
+  return HPD4_BODY_TAIL_ROWS.get(command.animation.moveId) ?? 0;
+}
+
+/**
+ * hpd4: the body lead (`bodyLeadFrames`) is presented as the command's first rows, so the sounds (ROM-calibrated against the release row,
+ * whose tables already carry the typical lead in AGE_TO_SOUND_ROWS) read the command as it was before the lead: no lead rows, and the lead
+ * back in the script tail it left.
+ */
+function withoutBodyLead(command: Extract<BattleResolutionPresentationCommand, { type: "move-animation" }>): BattleResolutionPresentationCommand {
+  const lead = command.timing.bodyLeadFrames ?? 0;
+  if (lead === 0) return command;
+  const { bodyLeadFrames: _lead, ...timing } = command.timing;
+  // hpd5: the pre-lead clock is level-flat for Seismic Toss (its body was one 228-row window before the damage levels were measured).
+  const animation = command.animation?.moveId === 69 ? { ...command.animation, damage: 50 } : command.animation;
+  return Object.freeze({ ...command, animation, timing: Object.freeze(timing.scriptTailRows === undefined ? timing : { ...timing, scriptTailRows: timing.scriptTailRows + lead }) });
+}
+
+/**
+ * hpd4: the rows the presented resolution's earlier move-animation commands (and the current one when `includeCurrent`) present beyond the
+ * pre-lead clock the controller-side sounds (hit SE, HP bar, faint) were calibrated on: their lead rows and hit tail. A sound anchored to a command start
+ * subtracts it to stay on its ROM frame.
+ */
+export function moveBodyExtraRows(state: BattleResolutionPresentationState, includeCurrent: boolean): number {
+  const field = currentCommandField(state);
+  const bodyClass = liveMoveTimingBodyOf(state.liveMoveSpriteOrderInput);
+  const moveUse = state.liveMoveBattlerX2Input?.moveUse;
+  let extra = 0;
+  for (let s = 0; s <= state.segmentIndex; s += 1) {
+    const commands = state.segments[s]!.commands;
+    const end = s === state.segmentIndex ? state.commandIndex + (includeCurrent ? 1 : 0) : commands.length;
+    for (let c = 0; c < end; c += 1) {
+      const command = commands[c]!;
+      if (command.type !== "move-animation" || (command.timing.bodyLeadFrames ?? 0) === 0) continue;
+      extra += battleResolutionCommandDuration(command, field, bodyClass, moveUse)
+        - battleResolutionCommandDuration(withoutBodyLead(command), field, bodyClass, moveUse);
+    }
+  }
+  return extra;
+}
+
+/** hpd4: the presented move-animation command's duration on the pre-lead clock (what liveMoveSourceAge's lastAge reads), for sounds scheduled from its start. */
+export function presentedMoveDurationOnSoundClock(state: BattleResolutionPresentationState): number | null {
+  const command = state.segments[state.segmentIndex]?.commands[state.commandIndex];
+  if (command === undefined || command.type !== "move-animation") return null;
+  return battleResolutionCommandDuration(withoutBodyLead(command), currentCommandField(state), liveMoveTimingBodyOf(state.liveMoveSpriteOrderInput), state.liveMoveBattlerX2Input?.moveUse);
+}
+
 /**
  * The presented live move-animation command and its unclamped body age (aud242a, docs/aud242-move-anim-sounds.md): rows since the body's
  * age 0 (negative over the seGate / script lead / pre / idle lead rows, not held at the last body row). Null when the presented command is
@@ -1593,7 +1645,7 @@ export function liveMoveSourceAge(
   const pre = liveMoveUniversalRows(command.animation, field).pre;
   const age = state.lifecycle.phaseElapsed - seGate - pre;
   // aud260: the age of the command's last presenting row (the command completes when phaseElapsed + 1 >= its duration), for the sound-only tail past the window.
-  const duration = battleResolutionCommandDuration(command, field, liveMoveTimingBodyOf(state.liveMoveSpriteOrderInput), state.liveMoveBattlerX2Input?.moveUse);
+  const duration = battleResolutionCommandDuration(withoutBodyLead(command), field, liveMoveTimingBodyOf(state.liveMoveSpriteOrderInput), state.liveMoveBattlerX2Input?.moveUse);
   const lastAge = duration - 1 - seGate - pre;
   // aud242l: BATTLER_COORD_Y_PIC_OFFSET (GetBattlerSpriteFinal_Y(..., TRUE)) of the live battler, read only by the pic-dependent sprite lifetimes of the sound timing table.
   const picOffsetY = (battler: 0 | 1): number => liveBattlerAnchors(battler === 0 ? "player" : "opponent", createBattleCommandFieldArtView(field)).picOffsetPoint.y;
@@ -1611,6 +1663,8 @@ export function liveMoveSourceAge(
   return Object.freeze({ request: command.animation, age, lastAge, attackerSpecies: attackerMon.species, attackerElevation, attackerHpQuarter, picOffsetY, topY });
 }
 
+const STATS_CHANGE_AFTER_BODY_AGE_SHIFT = 4;
+
 /**
  * aud248: the presented stats-change command and its age (rows since the animation's rel 0, after the IsBattleSEPlaying gate; the same age as the
  * `stats-change` render effect). Null when another command is presented, before the gate, or behind a Substitute (the ROM plays nothing).
@@ -1620,7 +1674,11 @@ export function statsChangeSourceAge(
 ): Readonly<{ battler: 0 | 1; argument: number; age: number; direction: "up" | "down" }> | null {
   const command = state.segments[state.segmentIndex]?.commands[state.commandIndex];
   if (command === undefined || command.type !== "stats-change") return null;
-  const age = state.lifecycle.phaseElapsed - (command.timing.seGateFrames ?? 0);
+  const previous = state.segments[state.segmentIndex]!.commands[state.commandIndex - 1];
+  // hpd4: after an audited body the command starts on the ROM's gAnimScriptActive edge (+1), so the SE (ROM: edge + 4) is 4 rows earlier than the
+  // generic age that absorbed the old early start (aud242o Defense Curl windows: SE 175 vs command 172).
+  const afterBodyLead = previous?.type === "move-animation" && (previous.timing.bodyLeadFrames ?? 0) > 0 ? STATS_CHANGE_AFTER_BODY_AGE_SHIFT : 0;
+  const age = state.lifecycle.phaseElapsed - (command.timing.seGateFrames ?? 0) + afterBodyLead;
   if (age < 0 || fieldBattler(currentCommandField(state), command.battler).substituteDoll === true) return null;
   // The pure General_StatsChange reducer's params (null for an argument it rejects: the ROM plays nothing); read here so the sound
   // emitter stays outside the animation boundary (tests/animation/animationBoundaryRatchet.test.ts).
@@ -1730,8 +1788,9 @@ export function battleResolutionCommandDuration(
       const seGate = command.timing.seGateFrames ?? 0;
       if (live === null) return seGate + command.timing.minimumFrames;
       const rows = liveMoveUniversalRows(command.animation!, field);
-      return seGate + (command.timing.scriptLeadFrames ?? 0) + rows.pre + liveMoveIdleLeadRows(command.animation!, field) + live + rows.post
-        + liveMoveScriptTailFrames(command.timing, command.animation!, field);
+      return seGate + (command.timing.scriptLeadFrames ?? 0) + (command.timing.bodyLeadFrames ?? 0) + rows.pre
+        + liveMoveIdleLeadRows(command.animation!, field) + live + rows.post + liveMoveScriptTailFrames(command.timing, command.animation!, field)
+        + liveMoveHitTailRows(command);
     }
     case "hit-animation":
       return command.timing.minimumFrames;
@@ -2394,7 +2453,7 @@ export function createBattleResolutionPresentationRenderView(
       const lead = liveMoveIdleLeadRows(command.animation, field);
       // iu120: the pre rows show the activation row's image (idle98: F_att..A-1 == row A), so a lead > 0 command's pre rows keep it.
       // sub183: the script lead rows precede the seGate rows and show the same age-0 field.
-      const seGate = (command.timing.seGateFrames ?? 0) + (command.timing.scriptLeadFrames ?? 0);
+      const seGate = (command.timing.seGateFrames ?? 0) + (command.timing.scriptLeadFrames ?? 0) + (command.timing.bodyLeadFrames ?? 0);
       const pre = seGate + liveMoveUniversalRows(command.animation, field).pre;
       effect = Object.freeze({
         type: "move", request: command.animation,
