@@ -110,6 +110,8 @@ const game = mountFactoryGameInternal({
   presentationSeed,
   // The shell plays the in-game new-challenge path (soak / goalPlay / play:random); `?challengeRequest=hold` behaves like a host mount.
   challengeRequest: new URLSearchParams(location.search).get("challengeRequest") === "hold" ? "hold" : "continue",
+  // dl3: the bench ABI's advance() is synchronous and cannot wait for a picture file, so it reads the full tables; real-time play uses the files.
+  ...(benchMode ? { sprites: "all" as const } : {}),
   ...(audioOn ? { audio: { enabled: true } } : {}),
   onCrash: showCrashOverlay,
 });

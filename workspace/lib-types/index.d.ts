@@ -45,6 +45,14 @@ export interface FactoryGameOptions {
   /** An engine throw stops the game (the frame stays on screen); absent = logged only. */
   onError?: (error: { message: string; frame: number }) => void;
   /**
+   * Battle pictures (additive, dl3). The library fetches one small file per species (`<SPECIES>.txt`, the files under `dist-lib/sprites/`)
+   * when a screen needs it, instead of shipping every picture up front. By default the files are the ones the bundler emitted next to
+   * the package (resolved with `new URL(..., import.meta.url)`, like the audio files, so a host bundler serves them with no configuration);
+   * set `spriteBase` to a directory URL that serves a copy of `dist-lib/sprites/` to load them from there (relative URLs resolve against
+   * the page). The game waits (no tick) for a picture that has not arrived, so the trace and replays are unchanged.
+   */
+  spriteBase?: string;
+  /**
    * Sound (additive, aud245). Absent or `enabled` false = muted: no audio file is fetched, no AudioContext is created. The player
    * (WebAudio, a lazily-loaded chunk) plays the session's sound events and has no effect on game frames. Browsers only start audio
    * after a user gesture; the first key press / click on the page resumes it.
