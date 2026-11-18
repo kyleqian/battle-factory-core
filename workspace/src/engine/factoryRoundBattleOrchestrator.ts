@@ -511,7 +511,11 @@ export type FactoryRetainedLockedActionPresentationOwner = Readonly<{
 export type FactoryRoundBattleOrchestratorState = Readonly<{
   config: FactoryRoundBattleOrchestratorConfig;
   facilityState: FactoryFacilityState;
-  /** Source sPerformedRentalSwap: challenge-scoped, persisted once on win 7. */
+  /**
+   * Source sPerformedRentalSwap (battle_factory.c): set by `factory_setswapped` for the round's own draft
+   * (BattleFactoryPreBattleRoom scripts.inc:39-41) and after an accepted swap (:151-158); a won battle pays it into rentsCount and clears it
+   * (BattleFactoryBattleRoom scripts.inc:92-97, SetBattleFactoryData battle_factory.c:259-265). docs/parity-mac/first-draft-counts-as-rent.md.
+   */
   performedRentalSwap: boolean;
   round: RoundControllerState;
   /** Frozen generated intro, installed only by the live room handoff. */
@@ -1086,7 +1090,10 @@ export function createFactoryRoundBattleOrchestrator(
   return Object.freeze({
     config,
     facilityState: Object.freeze({ ...config.facilityState }),
-    performedRentalSwap: false,
+    // Every round of this engine starts from its fresh draft, whose script runs `factory_setswapped` before the rental screen
+    // (BattleFactoryPreBattleRoom scripts.inc:39-41): the first win of the round pays the draft into rentsCount (fix 44, ROM round replay:
+    // never swapping, the count is 0 then 1 from battle 2 on). The engine has no paused-challenge resume (ResumeChallenge, :200-205, sets no flag).
+    performedRentalSwap: true,
     round,
     battleStartIntro: null,
     battle: null,

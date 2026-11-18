@@ -2096,20 +2096,21 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
     });
   });
 
-  it("persists rentsCount once per accepted swap paid at its next win, and never on loss", () => {
+  it("persists rentsCount once for the draft and once per accepted swap, each paid at its next win, and never on loss", () => {
     const accepted = driveGeneratedRoundToCompletion(
       17,
       undefined,
       (state) => state.round.rules.battleIndex < 2
         ? { type: "accept", playerPartyIndex: 2, opponentPartyIndex: 0 }
         : { type: "decline" },
-      14,
+      13,
     );
     expect(accepted.round.rules.phase).toBe("roundComplete");
     // Retail pays a swap accepted after battle k at battle k+1's WIN
     // (EventScript_DefeatedOpponent increments unconditionally every win;
     // SetBattleFactoryData commits only while sPerformedRentalSwap == TRUE).
-    // Two accepted swaps (after battles 0 and 1) -> +2, not +1.
+    // Fix 44 (docs/parity-mac/first-draft-counts-as-rent.md): the round's own draft set the flag too, so battle 0's win pays it.
+    // The draft and two accepted swaps (after battles 0 and 1) -> +3.
     expect(accepted.facilityState.rentsCount).toBe(16);
     expect(accepted.performedRentalSwap).toBe(false);
     const completion = {
@@ -2126,7 +2127,8 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
     expect(acknowledged.facilityState.rentsCount).toBe(16);
     expect(acknowledgedAgain.facilityState.rentsCount).toBe(16);
 
-    const declined = driveGeneratedRoundToCompletion(17, undefined, undefined, 14);
+    // No swap: only the draft is paid (ROM round replay: 0 -> 1 at battle 1's win).
+    const declined = driveGeneratedRoundToCompletion(17, undefined, undefined, 13);
     expect(declined.round.rules.phase).toBe("roundComplete");
     expect(declined.facilityState.rentsCount).toBe(14);
 
@@ -2155,11 +2157,12 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
       (state) => state.round.rules.battleIndex === 0
         ? { type: "accept", playerPartyIndex: 2, opponentPartyIndex: 0 }
         : { type: "decline" },
-      14,
+      13,
     );
     expect(lostAfterSwap.round.rules.phase).toBe("roundLost");
     expect(lostAfterSwap.round.rules.battleIndex).toBe(1);
     expect(lostAfterSwap.performedRentalSwap).toBe(true);
+    // battle 0's win paid the draft; the swap after it is lost with battle 1
     expect(lostAfterSwap.facilityState.rentsCount).toBe(14);
     const lostAcknowledged = completeFactoryRoundPresentation(
       lostAfterSwap,
@@ -2188,8 +2191,8 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
     const acceptedNext = createNextChallenge(accepted, "accepted-next-challenge");
     const declinedNext = createNextChallenge(declined, "declined-next-challenge");
 
-    // GetNumPastRentalsRank's first band is <15. Crossing 14 -> 16 makes
-    // exactly rental slot 0 use the next-better source range.
+    // GetNumPastRentalsRank's first band is <15. 13 -> 16 (accepted) crosses it, 13 -> 14 (declined) does not:
+    // exactly rental slot 0 of the accepted round's next draft uses the next-better source range.
     expect(acceptedNext.initialRentalGeneration?.rentalRank).toBe(1);
     expect(declinedNext.initialRentalGeneration?.rentalRank).toBe(0);
     expect(acceptedNext.initialRentalGeneration?.rentals[0]?.setId).not.toBe(
@@ -2197,7 +2200,7 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
     );
   });
 
-  it("pays +1 per accepted swap across all six intermediate wins (+6 total)", () => {
+  it("pays +1 for the draft and +1 per accepted swap across all six intermediate wins (+7 total)", () => {
     const accepted = driveGeneratedRoundToCompletion(
       17,
       undefined,
@@ -2207,11 +2210,12 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
       0,
     );
     expect(accepted.round.rules.phase).toBe("roundComplete");
-    expect(accepted.facilityState.rentsCount).toBe(6);
+    // ROM round replay (swap after every win): 0, 1, 2, 3, 4, 5, 6 at the battle starts, 7 after the seventh win.
+    expect(accepted.facilityState.rentsCount).toBe(7);
     expect(accepted.performedRentalSwap).toBe(false);
   });
 
-  it("pays a single swap accepted only after battle 5 at the seventh (final) win", () => {
+  it("pays the draft at the first win and a single swap accepted only after battle 5 at the seventh (final) win", () => {
     const accepted = driveGeneratedRoundToCompletion(
       17,
       undefined,
@@ -2221,7 +2225,7 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
       0,
     );
     expect(accepted.round.rules.phase).toBe("roundComplete");
-    expect(accepted.facilityState.rentsCount).toBe(1);
+    expect(accepted.facilityState.rentsCount).toBe(2);
     expect(accepted.performedRentalSwap).toBe(false);
   });
 
