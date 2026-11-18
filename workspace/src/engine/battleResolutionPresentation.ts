@@ -1399,6 +1399,8 @@ function sourcePauseUsedMoveHoldFrames(
  * ability pop-up and are unmeasured, so they are not listed.
  */
 export const ANCHORLESS_PRE_PRINT_PAUSE_LABELS = Object.freeze(["BattleScript_SafeguardEnds"] as const);
+/** pau3: ROM-measured frames the end-turn script start adds before its pause (SafeguardEnds: the print is 10 frames later than the pause alone, Scene OFF and ON, pau3-safeguard-{off,on}). */
+const ANCHORLESS_PRE_PRINT_LEAD_FRAMES: Readonly<Record<string, number>> = Object.freeze({ BattleScript_SafeguardEnds: 10 });
 const WAIT_TIME_FRAMES: Readonly<Record<string, number>> = Object.freeze({ B_WAIT_TIME_SHORT: 32, B_WAIT_TIME_LONG: 64 });
 /** The source `pause`'s length when the print at `messageIndex` is the first print of a listed anchor-less script; else null. */
 export function anchorlessPrePrintPauseFrames(event: BattleKernelSemanticEvent): number | null {
@@ -1407,7 +1409,8 @@ export function anchorlessPrePrintPauseFrames(event: BattleKernelSemanticEvent):
   if (!(ANCHORLESS_PRE_PRINT_PAUSE_LABELS as readonly string[]).includes(provenance.sourceLabel)) return null;
   const instruction = BATTLE_SCRIPT_PROGRAM.instructions[provenance.programCounter - 1];
   if (instruction?.opcodeName !== "B_SCR_OP_PAUSE") return null;
-  return WAIT_TIME_FRAMES[instruction.operands[0]?.expression ?? ""] ?? null;
+  const pause = WAIT_TIME_FRAMES[instruction.operands[0]?.expression ?? ""];
+  return pause === undefined ? null : pause + (ANCHORLESS_PRE_PRINT_LEAD_FRAMES[provenance.sourceLabel] ?? 0);
 }
 /**
  * hie1: the executions the interpreter spent on the way to `events[index]` and the lead the controller adds. A restart (the event's

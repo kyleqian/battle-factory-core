@@ -48,13 +48,13 @@ describe("pau2: the used-move hold takes the source pause (SHORT or LONG)", () =
     expect(used).toBeDefined();
     expect(used!.r.hold).toBeGreaterThanOrEqual(64);
   });
-  it("SafeguardEnds (pause B_WAIT_TIME_SHORT): the anchorless pre-print row is the source pause, 32 frames, and only on the print after it", () => {
+  it("SafeguardEnds (pause B_WAIT_TIME_SHORT): the anchorless pre-print row is the source pause 32 + the pau3 lead 10, and only on the print after it", () => {
     expect(ANCHORLESS_PRE_PRINT_PAUSE_LABELS).toEqual(["BattleScript_SafeguardEnds"]);
     const program = loadBattleScriptProgram();
     const start = program.labelsAtProgramCounter.findIndex((labels) => labels.includes("BattleScript_SafeguardEnds"));
     expect(program.instructions[start]!.opcodeName).toBe("B_SCR_OP_PAUSE");
     const event = (sourceLabel: string, programCounter: number) => ({ provenance: { sourceLabel, programCounter } }) as never;
-    expect(anchorlessPrePrintPauseFrames(event("BattleScript_SafeguardEnds", start + 1))).toBe(32);
+    expect(anchorlessPrePrintPauseFrames(event("BattleScript_SafeguardEnds", start + 1))).toBe(42);
     expect(anchorlessPrePrintPauseFrames(event("BattleScript_SafeguardEnds", start + 2))).toBeNull();
     expect(anchorlessPrePrintPauseFrames(event("BattleScript_AlreadyPoisoned", start + 1))).toBeNull();
   });

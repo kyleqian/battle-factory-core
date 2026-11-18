@@ -2145,6 +2145,12 @@ export const APP_STAGES: Readonly<Record<string, AppStage>> = {
   // hpd1: fixed-damage hit-hold windows (tools/integration/hpd1Labs.py, docs/hpd1-hp-hold.md): the Lv100 foe uses Defense Curl, the player's fixed-damage move follows.
   "out2-horndrill-on": (state) => aud241bStage(state, "out2-horndrill-on", "on", 10, 100, 32, undefined, false, 111),
   "out2-horndrill-off": (state) => aud241bStage(state, "out2-horndrill-off", "off", 10, 100, 32, undefined, false, 111),
+  "pau3-hjk-on": (state) => aud241bStage(state, "pau3-hjk-on", "on", 50, 50, 136, undefined, false, 182, 1160559944),
+  "pau3-hjk-off": (state) => aud241bStage(state, "pau3-hjk-off", "off", 50, 50, 136, undefined, false, 182, 1160559944),
+  "pau3-rest-on": (state) => aud241bStage(state, "pau3-rest-on", "on", 50, 60, 156, undefined, false, 253, 2184965245),
+  "pau3-rest-off": (state) => aud241bStage(state, "pau3-rest-off", "off", 50, 60, 156, undefined, false, 253, 2184965245),
+  "pau3-safeguard-on": (state) => aud241bStage(state, "pau3-safeguard-on", "on", 50, 50, 219, undefined, false, 111, 1160559944),
+  "pau3-safeguard-off": (state) => aud241bStage(state, "pau3-safeguard-off", "off", 50, 50, 219, undefined, false, 111, 1160559944),
   "pau2-toxic-on": (state) => aud241bStage(state, "pau2-toxic-on", "on", 50, 50, 92, undefined, false, 92),
   "pau2-toxic-off": (state) => aud241bStage(state, "pau2-toxic-off", "off", 50, 50, 92, undefined, false, 92),
   "out2-knockoffnoitem-on": (state) => out2Knock(state, "on", 0),
