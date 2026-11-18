@@ -327,3 +327,72 @@ Gates: docs-only plus two stage JSON files; no change under `src/` (`git diff d6
 | `liveFieldfx` SONIC_BOOM, `liveHBufferS1` DEFENSE_CURL, `liveOrderConsumer` DRAGON_RAGE, `livePrep8` SEISMIC_TOSS, `liveIceBall` x2 | self-consistency: the helpers' expected row counts were pre-lead | Measured on the routes: ages stay consecutive 0..n-1 and `adapterActive` is true on every row. Sonic Boom 57 -> 69 (lead 9 + tail 3), Defense Curl 105 -> 111 (3 + 3), Dragon Rage 160 -> 195 (9 + 26), Seismic Toss 233 -> 240 (6 + 1), Ice Ball bodies 79 -> 92 / 91 / 91 / 91 (lead 10 / 9 / 9 / 9 + 3; effect age zeros 4 -> 14 / 13). `tests/helpers/iu120Rows.ts` gains the test-side copy `HPD4_BODY_LEAD_ROWS` / `HPD4_BODY_TAIL_ROWS` and an opt-in `lead` argument (`iu120Ages`, `iu120EffectAges`; the default is unchanged, so no other body's pin moves). |
 
 Adapter check under the new lead (item 5): the lead rows hold the age-0 picture (as the iu120 pre rows), then the body plays every age; the hit-tail rows run past the body. The presentation of an age >= D equals age D - 1 for every audited body (Sonic Boom, Dragon Rage, Defense Curl, Rollout, Ice Ball, Toss, both sides; `liveMoveAnimationPresentation` config identical), and the rendered frames of the tail are identical to the last body row for Sonic Boom, Rollout 1..5, Ice Ball, Toss on the hpd1 / rol1 / hpd5 traces. **Dragon Rage's 26 tail rows draw differently from the last body row** (the age keeps counting; the 177-row ROM body is longer than the 150-row live window). That is intentional: `liveMoveUniversalRowAge` returns the unclamped age when post and script tail are both 0, and clamping it (tried, not kept) lowers `hpd1-dragonrage-on` 950 -> 925 matched frames. So there is no static frame and no change under `src/`.
+
+## hpd7: next audit rows (measured, not landed)
+
+Measurement only: no change under `src/` or `tests/`, production is the base `282e93c62`. Scene ON (8012) RAM probes of existing labs + the app's per-command rows; nothing here is a pin or a landed constant.
+Evidence (ignored): `.integration/evidence/hpd7/` (`census-rank.txt`, `census-on-live.json`, `scen/` the 27 lab scenarios, `ram/` the `hpd2Probe.py` timelines, `app/` the `hpd4Cmds` outputs, `traces/` the app-side traces, `joined.json` / `table.json`
+the join, `an.py` / `join.py` / `seq.py` the analysis, `appTrace.hpd7.ts` + `hpd7Cmds.ts` the temporary stage patch, deleted from `tools/` again).
+
+### Method
+
+- **Census.** `.integration/evidence/aud263/census/on-d8e807b20` (main tree, read-only): 1000 seeds, field [15] = move id, field [21] = `live`; 26 928 `live` move-animation commands over 274 move ids (`census-rank.txt`). **The six audited bodies (49 / 82 / 111 / 205 / 301 / 69) are 455 commands = 1.7 %** (Rollout 190, Seismic Toss 109, Defense Curl 78, Ice Ball 70, Sonic Boom 6, Dragon Rage 2); the 24 bodies below are **10 785 = 40.1 %**.
+- **ROM** (`hpd2Probe.py <lab> on out.json 1000`, 7 s each, 8 in parallel): per `gAnimScriptActive` window `A`, `ex = A - 3`, `R` = the end of the last controller-exec run before `ex` (the used print's release), lead `L = ex - R`, `len` = active rows, `H` = the first exec rise after the window (`gap = H - (A + len)`, 4 normally),
+  `R -> H` = the ROM's release-to-hit/next-controller span. The method reproduces the audited rows exactly (Sonic Boom `373 / 382 / 385 / 51 / 440`, Dragon Rage `375 / 384 / 387 / 177`; `an.py`).
+- **App** (`hpd4Cmds.ts` on a trace with the lab's `appStage`; moves with no existing stage got `aud241bStage(..., 50, 12, moveId, ..., 69)` entries in a temporary copy of `appTrace.ts`, the same Lv50 vs Lv12 Rattata shape as the `aud242*` labs, ROM scenario = `aud242j-struggle-player-on` with the player moves replaced): `S` = the move-animation command's start, `E` = the next command's start; rows `bodyLead + pre + idle + live + post` (+ `tail` / `tailRows`).
+- **Implied correction** `d = (R -> H) - (E - S)` = rows missing between the app's command start and the ROM's next exec. `d = L + T`: **proposed lead L = ROM lead** (the `BODY_LEAD` rule), **tail T = d - L** puts the next command on the ROM's `H` exactly. The landed bodies sit at `H` (Toss, Ice Ball) or `H + 2` (Sonic Boom: T 1 exact, landed 3; Dragon Rage the same +2), the compare-fitted choice
+  needs an exact-frame run, not measured here: **land T .. T + 2**. Calibration of the app side: Sonic Boom `S = 373 = R`, `E - S = 69` = `R -> H` 67 + 2.
+
+### The table (Scene ON, ranked by census count; rank = position among all 274 moves)
+
+| rank | move (id) | census | ROM lead L | ROM R -> A | ROM window len | ROM R -> H (gap) | app `bodyLead + pre + idle + live + post` | app E - S | d | proposed L + T | `live` contains the lead? | evidence lab |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| 1 | Double Team (104) | 926 | 3 | 6 | 158 + 75 (two windows: the move + the evasion stat anim) | 245 (gap 2 between them) | `0+0+0+239+0` (+ tail 5, tailRows 6) | 244 | 1 | already 3 + 3 inside the 6-row `scriptTailRows`; d = 1 | **already modelled** (merged command, tail rows) | `gen-doubleteam-player-on` |
+| 2 | Earthquake (89) | 908 | **11** | 14 | 207 | 225 (4) | `0+3+0+198+0` | 201 | 24 | 11 + 13 | **partly: live is 10 short of `len + 1`** (see shape B) | `gen-earthquake-player-on` |
+| 3 | Aerial Ace (332) | 670 | 5 | 8 | 49 | 61 (4) | `0+3+0+50+2` | 55 | 6 | 5 + 1 | no | `gen-aerialace-player-on` |
+| 4 | Struggle (165) | 631 | 5 | 8 | 111 | 123 (4) | `0+0+0+112+0` | 112 | 11 | 5 + 6 | no (live = len + 1, but pre 0 / post 0) | `aud242j-struggle-player-on` |
+| 5 | Psychic (94) | 615 | 5 | 8 | 144 | 156 (4) | `0+3+5+140+2` | 150 | 6 | 5 + 1 | no (idle 5 + live 140 = len + 1) | `aud242f-psychic-player-on` |
+| 6 | Dig (91), charge turn | 589 | 1 | 4 | 194 | 205 (7) | `0+3+0+195+0` | 198 | 7 | 1 + 6 | no | `aud242j-dig-player-on` |
+| 6 | Dig (91), attack turn | (same) | 5 | 8 | 67 | 79 (4) | `0+3+0+68+0` | 71 | 8 | 5 + 3 | no | same |
+| 7 | Surf (57) | 584 | 5 | 8 | 143 | 155 (4) | `0+3+0+144+0` | 147 | 8 | 5 + 3 | no | `gen-surf-player-on` |
+| 8 | Protect (182) | 560 | 2 | 5 | 122 | 130 (3) | `0+3+0+123+2` (+ tail 3, tailRows 6) | 131 | -1 | none: already lead + tail rows, d = -1 | **already modelled** (`tailRows` 6) | `gen-protect-player-on` |
+| 9 | Confuse Ray (109) | 519 | 6 | 9 | 269 | 283 (5; next = the confusion status anim) | `0+3+0+270+2` | 275 | 8 | 6 + 2 | no | `aud242n-confuseray-player-on` |
+| 10 | Shadow Ball (247) | 458 | - | - | - | - | - | - | - | not measured: the Rattata lab is Normal-type, Shadow Ball has no effect, no body in either side | - | `aud242b-shadowball-player-on` |
+| 11 | Rest (156) | 458 | - | - | - | - | - | - | - | not measured: Rest at full HP fails, no body | - | `gen-rest` (no window) |
+| 12 | Faint Attack (185) | 442 | 5 | 8 | 225 | 237 (4) | `0+0+0+220+0` | 220 | 17 | 5 + 12 | **yes, 6 rows (live = len - 5)** | `aud242i-faintattack-player-on` |
+| 13 | Rock Slide (157) | 427 | 5 | 8 | 137 | 149 (4) | `0+0+0+138+0` | 138 | 11 | 5 + 6 | no | `gen-rockslide-player-on` |
+| 14 | Giga Drain (202) | 391 | 5 | 8 | 229 | 241 (4) | `0+3+0+230+0` | 233 | 8 | 5 + 3 | no | `aud242e-gigadrain-player-on` |
+| 15 | Ice Beam (58) | 388 | 5 | 8 | 202 | 214 (4) | `0+3+0+203+0` | 206 | 8 | 5 + 3 | no | `aud242f-icebeam-player-on` |
+| 16 | Thunderbolt (85) | 357 | 5 | 8 | 236 | 248 (4) | `0+3+0+237+2` | 242 | 6 | 5 + 1 | no | `aud242b-thunderbolt-player-on` |
+| 17 | Bite (44) | 336 | 5 | 8 | 40 | 52 (4) | `0+3+10+26+0` | 39 | 13 | 5 + 8 | **yes, 5 rows (idle 10 + live 26 = len - 4)** | `gen-bite-player-on` |
+| 18 | Double-Edge (38) | 332 | 5 | 8 | 140 | 152 (4) | `0+3+0+141+2` | 146 | 6 | 5 + 1 | no | `aud242b-doubleedge-player-on` |
+| 19 | Brick Break (280) | 316 | **7** | 10 | 150 | 166 (**6**) | `0+3+0+151+2` | 156 | 10 | 7 + 3 | no | `aud260-brickbreak-player-on` |
+| 20 | Quick Attack (98) | 297 | 5 | 8 | 32 | 44 (4) | `0+3+0+33+2` | 38 | 6 | 5 + 1 | no | `gen-quickattack-player-on` |
+| 21 | Sludge Bomb (188) | 294 | 5 | 8 | 168 | 180 (4) | `0+3+4+160+0` | 167 | 13 | 5 + 8 | **yes, 5 rows (idle 4 + live 160 = len - 4)** | `aud242i-sludgebomb-player-on` |
+| 22 | Double Kick (24) | 273 | **16** | 19 | 35 (first hit only) | 58 (4) | `0+3+0+36+0` | 39 | 19 | 16 + 3 (first hit) | no | `gen-doublekick-player-on` |
+| 24 | Body Slam (34) | 241 | 5 | 8 | 106 | 118 (4) | `0+3+0+107+2` | 112 | 6 | 5 + 1 | no | `aud242h-bodyslam-player-on` |
+| 25 | Thunder Wave (86) | 235 | **9** | 12 | 119 | 136 (5; next = the paralysis status anim) | `0+3+0+120+2` | 125 | 11 | 9 + 2 | no | `gen-thunderwave-player-on` |
+| 26 | Curse (174) | 228 | 4 | 7 | 175 | 187 (5; next = the stat command) | `0+3+0+176+0` | 179 | 8 | 4 + 4 | no | `aud242f-curse-player-on` |
+| 27 | Ancient Power (246) | 226 | 5 | 8 | 127 | 139 (4) | `0+3+0+128+2` | 133 | 6 | 5 + 1 | no | `aud242k-ancientpower-player-on` |
+
+Not run (labs exist or are one `aud241bStage` line away): Icy Wind (196, rank 23, `aud242b-icywind-opponent-on`), Solar Beam (76), Water Pulse (352), Rain Dance (240), Mud-Slap (189), Facade (263).
+
+### What the rows say
+
+- **The lead is the instruction count of the move's effect script, not a constant**: 5 for every plain `EffectHit`-family body (Psychic, Ice Beam, Thunderbolt, ...), 11 Earthquake (`HitsAllWithUndergroundBonus*` instructions), 16 Double Kick (`MultiHitLoop`), 9 Thunder Wave (`EffectParalyze+2 .. +68`), 7 Brick Break (`BrickBreakAnim`), 4 Curse, 2 Protect. Where those instructions are one per frame the kernel's instruction counter
+  (`instructionExecution(MOVE_ANIMATION) - (used print + 1)`, the hpd3 rule) should supply them; a per-move table like `HPD4_BODY_LEAD_ROWS` would hard-code 25 more numbers.
+- **Shape A (the common case, 14 of the 25 measured rows, Dig counted per turn): `live` (+ `idle`) = ROM `len + 1`, ROM `gap` 4.** Pre 3 + post 2 -> T = 1 (Aerial Ace, Psychic, Thunderbolt, Double-Edge, Quick Attack, Body Slam, Ancient Power); pre 3 + post 0 -> T = 3 (Giga Drain, Ice Beam, Surf, Dig attack turn, Double Kick first hit); pre 0 + post 0 -> T = 6 (Struggle, Rock Slide). So `L + 3 + (len + 1) + 3` is the whole body and
+  the 'tail' is only the pre / post rows the command does not present. These are the next rows that need no new rule: **Earthquake aside, the top shape-A bodies by census are Aerial Ace 670, Struggle 631, Psychic 615, Dig 589, Surf 584, Rock Slide 427, Giga Drain 391, Ice Beam 388, Thunderbolt 357** (4 652 commands, 17.3 % of Scene ON; Dig's census count mixes its charge turn, shape C, with the attack turn).
+- **Shape B (breaks the lead + tail rule): `live` is `lead` rows short of `len + 1`** - Faint Attack (-6, lead 5), Sludge Bomb (-5, lead 5), Bite (-5, lead 5), Earthquake (-10, lead 11). The live window of these four was cut by about the lead (it starts at the release, not at `A`), so `T` is 12 / 8 / 8 / 13 (Faint Attack / Sludge Bomb / Bite / Earthquake) = the shape-A tail (6 / 3 / 3 / 3) **plus the shortfall** (6 / 5 / 5 / 10): adding lead + the shape-A tail would
+  leave the hit 5-10 rows early and a tail that long would hold the last frame instead of animating it (the Dragon Rage 26-row tail pattern). They want the `live` window lengthened to `len + 1` (the `liveMoveAnimationDuration` case) and then the shape-A lead + tail; the sound ages (`withoutBodyLead`, `AGE_TO_SOUND_ROWS`) were fitted on the short window, so each needs the sound fixture
+  (`aud242b/e/f/i` rows) checked first - not measured.
+- **Shape C (non-standard post-window instructions): Brick Break `gap` 6** (the `BrickBreakAnim` script keeps running 2 rows after the window; T 3 where the shape rule gives 1), **Dig charge turn gap 7** (T 6 where the rule gives 3: the next command is the 'dug a hole' message, not a hit), Confuse Ray / Thunder Wave / Curse `gap` 5 and a next command that is a status / stat command (T 2 / 2 / 4 against 1 / 1 / 3): their `H` is the next controller's exec, not a hit, so the extra row is the status-command start offset; compare against the ROM status frames before choosing T.
+- **Already modelled: Double Team (104, rank 1) and Protect (182, rank 8).** Their commands carry `scriptTailRows` 6 (lead 3 / 2 + 3, the `sub183` rule) and the app span is 244 vs ROM 245 and 131 vs 130: no row to land. Together with Earthquake, these three of the top 8 are therefore the largest census mass (2 394) the audited table does not need or cannot take as a plain row.
+- **Multi-hit (Double Kick): only the first hit was measured** (the Lv12 foe faints on it; lead 16 includes `MultiHitLoop`); a second-hit window and its `hit-animation` repeat are not covered and the row should not be landed from this lab.
+- Scale: the six audited bodies are 1.7 % of the census, a plain shape-A landing of the nine bodies above is ~ 17 %, the full 24 measured rows 40 %; the lead rule is therefore where the remaining Scene ON in-turn drift of most battles sits (the hpd3 finding for Rollout, 3 rows of constant drift per turn after the lead + hold).
+
+### Caveats
+
+- One lab per body (Rattata Lv50 attacker vs a Lv12 Rattata target, player side); `len` of a damage-dependent body (Seismic Toss is the only audited one) was not varied. Foe-side and level variants are expected equal (hpd4: the foe-side Sonic Boom / Dragon Rage match), not measured.
+- `R` and `ex` are RAM frames; the app's `S` differs from the ROM's `R` by 0 .. 4 frames in these labs (print-side offset of `aud241bStage`, not part of the body), so only the relative spans above are used.
+- Hit-frame and sound alignment (the pins that moved with every hpd4 / hpd5 landing) were not re-measured: each row will move the `aud24*` / `hie*` sound fixtures of its move and needs the hpd4 sound-clock treatment (`withoutBodyLead`, `moveBodyExtraRows`).
