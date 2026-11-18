@@ -203,12 +203,16 @@ function requireNonnegativeInteger(value: number, field: string): number {
 
 /**
  * `GetNumPastRentalsRank` (`battle_factory.c:868-886`): thresholds are
- * `<15, <22, <29, <36, <43, otherwise 5`.
+ * `<15, <22, <29, <36, <43, otherwise 5`, on the count read into a `u8`
+ * (`u8 rents = factoryRentsCount[battleMode][lvlMode]`, :871): the u16 count
+ * wraps at 256 (fix 46, docs/parity-mac/rental-rank-count-byte.md; ROM: 256
+ * rents give rank 0, 271 give rank 1).
  */
 export function getFactoryRentalRank(rentsCount: number): number {
   requireNonnegativeInteger(rentsCount, "rentsCount");
+  const rents = rentsCount & 0xff;
   const thresholdIndex = POLICY.rentalSelection.rentalRankThresholds
-    .findIndex((threshold) => rentsCount < threshold);
+    .findIndex((threshold) => rents < threshold);
   return thresholdIndex < 0 ? POLICY.rentalSelection.maximumRentalRank : thresholdIndex;
 }
 
