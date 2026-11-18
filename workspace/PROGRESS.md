@@ -7,7 +7,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ## 2026-11-17 — CAX31 daily run (supervisor, Opus 5.5, 2026-11-17 13:30 -> 2026-11-18 05:30 UTC): IN PROGRESS
 
-- **State:** master `63b0aa7f4`; workers: hpd5 (integration, on the unmerged hpd4 branch `worker/integration-20261117-203745`), lbw6 (side). **No DEFERRED items.** Evidence `.integration/validation/sv-20261117/`.
+- **State:** master `d60fce582`; workers: ice1 (integration, evidence only), lbw6 (side). **No DEFERRED items.** Evidence `.integration/validation/sv-20261117/`.
 - **Run start:** oracles current; baseline = last run's full suite (only tooling changed since `4e4c51880`). Disk 63 % -> 36 % (43 old census `tree/` dirs + `/tmp` scratch;
   list `.integration/evidence/TREES-PRUNED-20261117.txt`). No Mac fold (`mac/parity-mac` still `165548c4b`).
 - **Gameplay (replay, item 0d):** nightly check on `e06cac9fc`: pool **44 / 44** (1,287 states), staged battles **72 / 72** (`docs/replay-ledger.md`).
@@ -45,10 +45,13 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **adp1:** live Scene ON adapters for Withdraw (76 rows), Rock Smash (78), Beat Up (40 per hit): **0 px vs the ROM on every row, both sides**; their SE windows (Withdraw -4, Rock Smash
   +2). **T1 0..999 Scene ON missing-declined 5 -> 0: the sound census now has 0 missing / 0 extra in both scenes, every family.** Beat Up's hit-to-hit gap is 132 vs the ROM's 193 frames
   (multi-hit message timing; Beat Up is unreachable in Factory Lv 50 singles: 0 of 882 carriers). vanilla ON 0:20 20 / 20, winning 0:60 60 / 60; census eventsDigest identical.
-- **hpd4 (NOT merged yet):** body audit + the script lead for Sonic Boom / Dragon Rage / Defense Curl / Rollout + the floor-free hold `e01bfd249`; hpd1 windows ON dragonrage 183 -> 950,
-  sonicboom 151 -> 938, toss30 174 -> 715, rol1 459 -> 502; census both scenes eventsDigest identical. Held back: it re-pinned the Ice Ball sound fixtures away from the ROM (2 / 5 and
-  6 / 9 frames) and skipped the soaks / T2. hpd5 continues on its branch (Ice Ball audit + the gates).
-- **Next:** hpd5, lbw6 (Lobby #221: held direction change mid-step), then wind-down + the aud246 close (the three missing adapters), then the aud246 close.
+- **hpd4 + hpd5 (merged, presentation timing):** the ROM-verified Scene ON script lead (hpd3) now runs on the audited bodies Sonic Boom / Dragon Rage / Defense Curl / Rollout /
+  Ice Ball / Seismic Toss, with per-body tails, plus the floor-free post-hit hold (`e01bfd249`, hpd1). Windows (matched frames of 1023): ON dragonrage 183 -> 950, sonicboom 151 -> 938,
+  toss10 455 -> 861, toss30 174 -> 865, toss50 149 -> 927, toss80 147 -> 863; rol1-rollout5 459 -> 502 / 3001; OFF improves too. Sound pins move onto the ROM (Rollout turns 9/14/21/33/54 ->
+  3/2/2/0/-1, Ice Ball 9/13/22/40/63 -> 3/2/2/-1/-3, hie3 drifts 9/9/17/17/20 -> 2/1/3/2/12). Census 0..99 both scenes eventsDigest identical; Scene ON soaks vanilla 20 / 20, winning /
+  winning-swap 60 / 60; T2 6 ON seeds 0 missing / 0 extra. Re-pins: soak-driver counters, lbrd seeds 17 / 17. Unaudited bodies keep the old lead-in-tail. Ice Ball lab damage ROM 20 / 40 / 89
+  vs app 23 / 41 / 82 on turns 3-5 (probably the harness stage's injected RNG; ice1 checks it on the ROM replay).
+- **Next:** lbw6 (Lobby #221: held direction change mid-step), ice1, then wind-down + the aud246 close (the three missing adapters), then the aud246 close.
 
 ---
 
