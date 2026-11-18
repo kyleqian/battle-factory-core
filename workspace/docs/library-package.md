@@ -132,6 +132,9 @@ candidates when known). First-battle download: ~2112 KiB -> ~1700 KiB brotli (`d
   and every frame are identical to before; only the wall-clock start of a screen can be a little later. A file is retried once; a second
   failure reports `onError` ("sprite pixels failed to load") and stops the game, as a failed sprite chunk did.
 - Node / `dist-lib/headless.js` are untouched (no pictures, no network). `ENGINE_BUILD` moves (see the dl3 doc).
+- dl4 (no new option, no API change): the 140 move-animation asset files are `dist-lib/sprites/anim/<asset>.txt`, fetched the same way and from the
+  same `spriteBase` (`${spriteBase}/anim/<asset>.txt`) when a Scene ON battle's moves need them; the loop holds (no tick) while one is pending.
+  `animation-assets` drops from 237 to 27 KiB brotli; `ENGINE_BUILD` does not move (`docs/dl3-per-species-pictures.md`, dl4).
 
 ## Sound (additive API change, aud245)
 
