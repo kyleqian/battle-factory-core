@@ -956,12 +956,13 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // pau2 (the used-move hold takes pause LONG; SafeguardEnds' pause row; the exploring policy's presses land on new phases, a new trajectory as at fsw235):
       // 37811 / turn 20 -> 39649 / turn 24; same battle 2 / depth 1 / roundLost (master-at-start 8516a6da1 gives 37811).
       // ais4 (the opponent faint replacement send-in is 2 frames longer): frames only, 39649 -> 39712; same battle 2 / depth 1 / roundLost / turn 24.
-      frames: 39712,
+      // hpd8 + ais4 merged (26477cf4b; ais4 was pinned on a base without lbw8's Lobby NPC release and hpd8; together they move the exploring presses): 39712 / turn 24 -> 40342 / turn 20; same battle 2 / depth 1 / roundLost.
+      frames: 40342,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 1,
       battle: 2,
-      turn: 24,
+      turn: 20,
     });
     expect(runSeed(1, options)).toMatchObject({
       // msg175: 26878 -> 26810 (shorter used prints); trn178 (the Scene OFF action-transition pause): 26810 -> 27058; same battle / turn / end state.
@@ -1552,7 +1553,8 @@ describe("ISSUES #104 (driver): continuous-play outcome semantics retuned -- OK 
     // hpd5 (measured on the hpd4 tip f40209793: seed 13 carries 7 there too; the floor-free foe-hit hold shifts the soak's press phases): re-scanned seeds 0..31 under the same options
     // (tools/soak/randomRoundSoak.ts --policy winning --max-rounds 3 --render-every 0): only seed 4 chains two round wins (carry 14), so it is pinned.
     // ais4 (the opponent faint replacement's send-in runs the AI timeline, +2 frames per replacement): seed 4 now carries 7; re-scanned seeds 0..10 under the same options: only seed 2 chains two round wins (carry 14), so it is pinned.
-    const result = runSeed(2, {
+    // ais4 merged onto lbw8 + hpd8 (master 26477cf4b; ais4 was pinned without them): seed 2 now carries 7; re-scanned seeds 0..23 under the same options: only seed 14 chains two round wins (carry 14), so it is pinned.
+    const result = runSeed(14, {
       policy: "winning",
       maxRounds: 3,
       renderEvery: 0,
