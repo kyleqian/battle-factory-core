@@ -19,7 +19,8 @@ for line in (d / "done.txt").read_text().splitlines():
         dr = json.loads(drive_path.read_text())
         bs = c["battles"]
         row.update({"match": c["match"], "battles": len(bs), "romError": c.get("romError"), "roundError": c.get("roundError"),
-                    "end": ("error" if dr.get("error") else "won" if len(bs) == 7 and bs[-1]["romOutcome"] == 1 else "lost" if bs and bs[-1]["romOutcome"] == 2 else "stopped"),
+                    "end": ("error" if dr.get("error") else "won" if len(bs) == 7 and bs[-1]["romOutcome"] == 1 else "lost" if bs and bs[-1]["romOutcome"] == 2
+                                else "drew (ends the round)" if bs and bs[-1]["romOutcome"] == 3 else "stopped"),
                     "swaps": sum(1 for b in bs if (b.get("swapAfter") or {}).get("type") == "accept")})
         first = next((b for b in bs if not b["match"]), None)
         if first is not None:

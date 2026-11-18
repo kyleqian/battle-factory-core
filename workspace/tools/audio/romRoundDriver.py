@@ -2,7 +2,7 @@
 
 Usage (cwd = workspace/, through tools/run-mgba-probe.py like every mGBA probe):
   python3 tools/run-mgba-probe.py OUT.json -- python3 tools/audio/romRoundDriver.py OUT.json REQ.json --seed N --profile off|on \
-      --policy census|ai-v1|random-v1|power-v1 --swap never|weakest|random --dir WORKDIR [--challenge C] [--frames CAP] [--frame-budget N] [--prompt-delay K@N]
+      --policy census|ai-v1|random-v1|power-v1 --swap never|weakest|random --dir WORKDIR [--challenge C] [--frames CAP] [--frame-budget N] [--prompt-delay K@N] [--symbols 0|1]
 
 REQ.json is the factoryLegal request of the round's first battle (`soundCensusRomReplay.ts request --round=1`). The lab stages that battle as for a single
 replay (oracle/battle_lab.py prepare). From then on nothing is staged: the ROM plays the round itself.
@@ -28,6 +28,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import soundEventProbe as sep  # noqa: E402  (EmeraldOracle, BattleLab, validate_request, drive_lab, REF, HARNESS, PROFILES)
 import romDecisionDriver  # noqa: E402
+import battle_lab  # noqa: E402  (on sys.path through soundEventProbe)
 
 WORKSPACE = Path(__file__).resolve().parents[2]
 # include/global.h struct BattleFrontier offsets in SaveBlock2. factoryRentsCount[0][0] (singles, Level 50) is at 0xDF2: factoryRecordWinStreaks[2][2]
@@ -257,7 +258,7 @@ def drive_between(rom, swap, cap, progress, prompt_delay=0):
 
 
 def run_engine(args, setup_paths, out_path, known_k=()):
-    env = dict(os.environ, ROM_REPLAY_ROUND="1")
+    env = dict(os.environ, ROM_REPLAY_ROUND="1", ROM_REPLAY_SYMBOLS=str(args["symbols"]))
     if args["challenge"] is not None:
         env["ROM_REPLAY_CHALLENGE"] = str(args["challenge"])
     cmd = ["node", "--experimental-strip-types", "--no-warnings", "tools/integration/soundCensusRomReplay.ts", "round", f"--seed={args['seed']}",
@@ -281,7 +282,8 @@ def main():
         raise SystemExit(f"romRoundDriver: refusing stale output path (delete it first): {out}")
     opt = lambda name, default=None: rest[rest.index(name) + 1] if name in rest else default  # noqa: E731
     args = {"seed": int(opt("--seed")), "scene": opt("--profile", "off"), "policy": opt("--policy", "census"), "swap": opt("--swap", "never"),
-            "challenge": None if opt("--challenge") in (None, "") else int(opt("--challenge")), "frameBudget": opt("--frame-budget")}
+            "challenge": None if opt("--challenge") in (None, "") else int(opt("--challenge")), "frameBudget": opt("--frame-budget"),
+            "symbols": int(opt("--symbols", "0"))}
     # --prompt-delay K@N: wait K more frames at the swap prompt after battle N (0-based) before answering (genuine input timing: it moves the RNG cursor
     # of everything rolled after it, like a slower player). Battles 0..N are unchanged.
     delay_k, delay_at = (int(x) for x in opt("--prompt-delay", "0@-1").split("@"))
@@ -306,6 +308,11 @@ def main():
     oracle.write_u16(s2 + SB2_TRAINER_IDS, request["trainerId"])
     # The lab writes rentalSwapCount to the doubles count (see SB2_FACTORY_RENTS): stage the singles count the round goes on with.
     oracle.write_u16(s2 + SB2_FACTORY_RENTS, request["rentalSwapCount"])
+    if args["symbols"]:
+        # --symbols 1: the silver Factory symbol (FLAG_SYS_FACTORY_SILVER), as a player has it after beating silver Noland at streak 21; with it the seventh
+        # battle of challenge 5 is gold Noland (GetFrontierBrainStatus, frontier_util.c:1656-1693). The lab sets it the same way for a factoryBrain staging.
+        lab._set_factory_symbol_flag(battle_lab.FLAG_SYS_FACTORY_SILVER)
+        staging_fix["silverSymbol"] = lab._factory_symbol_count()
     funcs = romDecisionDriver.resolve_funcs(sep.REF)
     result = {"schema": "rom-round-drive/v1", "seed": args["seed"], "scene": args["scene"], "policy": args["policy"], "swap": args["swap"], "promptDelay": [delay_k, delay_at],
               "challenge": request["challengeNum"], "request": request, "stagingFix": staging_fix, "battles": [], "error": None}

@@ -217,6 +217,9 @@ function adoptedOrchestrator(setup: any, freshBattleRngValue: number) {
   });
   return beginFactoryRoundBattleStartIntro(createFactoryRoundBattleOrchestrator({
     id: `rom-replay-${seed}`, rngValue: 0, battleScene: scene, factoryWinStreak: streak, playerTrainerId: playerRecords[0].otId,
+    // Round replay: the symbols the round driver stages (romRoundDriver.py --symbols); they decide whether battle 7 is Noland's. A single replay
+    // keeps the default (its battle 1 is ordinary here).
+    ...(roundReplay ? { factorySymbolsCount: symbols as 0 | 1 } : {}),
     battleTowerLevel50WinStreak: towerStreak, facilityState: { rentsCount: 0 },
     rentals: { type: "currentRecords", playerRentalRecords: player3, savedRentalRecords: [...player3, ...fillers] as any },
     adoptedInitialOpponent: { generation, freshBattleRngValue, preCommandRngCalls: 0 },
