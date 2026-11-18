@@ -1,6 +1,7 @@
 // hpd4: per-frame presented-command starts of a compare trace's app side, with each move-animation's row breakdown
 // (seGate, script lead, pre, idle lead, live, post, script tail, total).
 //   node --experimental-strip-types --no-warnings tools/integration/hpd4Cmds.ts <trace.json> [maxFrame]
+import "../../src/engine/monPicPixelsInstall.ts";
 import { createInitialState, tick } from "../../src/engine/core.ts";
 import { liveMoveAnimationDuration } from "../../src/engine/liveMoveAnimation.ts";
 import { currentCommandField, liveMoveIdleLeadRows, liveMoveScriptTailFrames, liveMoveUniversalRows } from "../../src/engine/battleResolutionPresentationRender.ts";
