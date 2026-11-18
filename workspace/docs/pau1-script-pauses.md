@@ -103,3 +103,26 @@ Seed 3738 poison-tick SE 148 (engine replay + `soundScoreboard.py`, 6 samples ea
 **Tests**: `tests/pau2ScriptPauses.test.ts` (KOFail hold = 71 in both scenes, AlreadyPoisoned hold >= 64 (engine-only stage `pau2-toxic-*`), the SafeguardEnds row = 32 and only after the pause). Without the LONG acceptance the KOFail / AlreadyPoisoned tests fail (hold 0). `tests/randomRoundSoak.test.ts` re-pinned: seed 0 "full" 37811 / turn 20 -> 39649 / turn 24 (same battle 2 / depth 1 / roundLost), the Baton Pass halt pin moved seed 3 -> 28 (re-scan hits 28, 32, 43, 44, 55, 64, 71, 78).
 
 **Open remainder**: ability switch-in prints (item 3), RestCantSleep / MoveMissedDoDamage ROM samples, the AlreadyPoisoned pixel lab, the Safeguard ON look, the ~10 / ~20 frame residuals of res60 / res61, KOFail's 1-frame early menu.
+
+## pau3: ROM windows for MoveMissedDoDamage, RestCantSleep, SafeguardEnds (2026-11-18)
+
+Presentation timing only: logical outcomes, RNG and kernel event order are unchanged (census 0..99, both scenes, eventsDigest identical vs `37823d7ba`; only the 8 Safeguard-expiry rows changed). Both scenes share the rule.
+
+**Labs** (`tools/battle-lab/pau3-{hjk,rest,safeguard}-{on,off}.json`, traces `tools/compare/traces/pau3-*.json`, app stages `pau3-*` in `tools/compare/appTrace.ts`). Hi Jump Kick uses an opposing Protect (priority +3) for a deterministic miss. The ROM rng read after a short idle probe, advanced 9 LCG steps (`x * 1103515245 + 24691 mod 2^32`), is the app stage `rngSeed`; it aligns the damage rolls so HP text matches. Message starts were located by decoding PNGs for text-box clears.
+
+| script | ROM | app | verdict |
+|---|---|---|---|
+| MoveMissedDoDamage (HJK miss), OFF | message starts 30 / 93 / 197 / 289; used -> result 92 | identical; 92 | already right (LONG pause, pau2 rule) |
+| MoveMissedDoDamage, ON | 30 / 185 / 289 / 381 | identical | already right |
+| RestCantSleep (Uproar), OFF and ON | used -> "UPROAR kept" 86 | 86 | already right |
+| SafeguardEnds | print 10 frames later than the 32-frame pause (both scenes) | 32 | fixed: 42 |
+
+**Change**: `ANCHORLESS_PRE_PRINT_LEAD_FRAMES` (`{ BattleScript_SafeguardEnds: 10 }`) is added to the pause in `anchorlessPrePrintPauseFrames` (SHORT 32 -> 42 for that label only). The ROM-measured lead is the end-turn script start before its pause; it is label-keyed, extending the pau2 allowlist, not a per-trace constant. `sourcePauseUsedMoveHoldFrames` is unchanged.
+
+**Tests**: `tests/pau3ScriptPauses.test.ts` (7): HJK used hold 67 and result +92 frames, Rest used hold 69 and +86, in both scenes; `anchorlessPrePrintPauseFrames` 42 for SafeguardEnds / null elsewhere; the expiry row `minimumFrames` 42 and the expiry print 121 frames after "But it failed" (OFF and ON). The Safeguard tests fail without the lead. `tests/pau2ScriptPauses.test.ts` expectation 32 -> 42.
+
+**Acceptance**: out2-horndrill OFF 558 / ON 568 of 620 unchanged; typecheck 0, build 0, test:gate green; lbrd, randomRoundSoak (no re-pin), pau2, pau3 and 35 name-matched files green; `npm run soak -- --policy vanilla --seeds 0:20` 20 / 20 OK (4 ranges of 5).
+
+**Not done: item 3 (Intimidate / Trace switch-in prints)**. Staged battles bypass `initializeFreshFactoryBattle`, so no battle-lab stage reaches the switch-in ability script; it needs a real-route or factoryLegal battle-start stage whose leads carry the ability. Unprobed.
+
+**Open remainder**: ability switch-in prints (item 3); the +3 frame residual at the HJK crash print; the 4-frame-early tail after the Safeguard expiry print; the Rest ON +10 / +19 constant offsets (non-pause, PP text 20 vs ROM 10 in the lab); the failed-Toxic pixel lab; the res60 / res61 residuals; KOFail's 1-frame early menu.
