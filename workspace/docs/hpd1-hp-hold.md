@@ -276,9 +276,19 @@ and ON only the Rollout (+12 / +13, 8 + 5 + 2 + 1 + 1 cases) and Ice Ball (+12 /
 
 Missing 0 / extra 0 holds (the 12 missing rows of the older master chain, `se:140` and `se:179` x 6, are rows the adapters that landed after aud259 add). Matched-delta (engine - ROM, frames) median / p10 / p90, before -> after:
 move-animation SE -2 / -21 / 5 -> -2 / -21 / 5 (n 1594 -> 1606); battle-controller SE -4 / -27 / 2 -> -5 / -27 / 2; stat-change SE -1 / -16 / 4 -> -2 / -15 / 4; cry -10 / -28 / 13 -> -9 / -28 / 13; bgm 5 / -71 / 9 -> 5 / -71 / 10.
-The "before" chain is the aud259-era master, so the column also carries hpd4 and the master changes in between; none of these seeds uses Ice Ball or Seismic Toss in a way the medians show (the audited bodies are rare in a random round).
+The "before" chain is the aud259-era master, so the column also carries hpd4 and the master changes in between.
 
 ### Gates (tested code: `src` tree of `6bdfaaa1a` = `a26352df1`'s, later commits are tests and docs only)
 
 `npm run typecheck` exit 0; `npm run test:gate` 362 / 362 files, 2843 tests; the 57-file sound / hie / hpd / rol1 / wsh set + `tests/lbrd.test.ts` + `tests/randomRoundSoak.test.ts` 59 / 59 files, 1913 tests (18 skipped); `npm run build` and `npm run build:lib` exit 0.
 The full `npm test` and its shards were not run (the supervisor does).
+
+### Soaks, Scene ON (`tools/soak/randomRoundSoak.ts --scene on`, a frozen `git archive` of `a26352df1`, whose `src` equals `6bdfaaa1a`'s; 4-seed chunks, up to 8 at a time under `nice -n 10`)
+
+vanilla 0:20 **20 / 20 OK**; winning 0:60 **60 / 60 OK**; winning-swap 0:60 **60 / 60 OK** (all budget outcomes, CRASH 0, HANG 0). The `--parallel 3` form was replaced by independent chunk jobs of the same seeds and options (the one-process form exceeded the tool window, as in hpd4).
+`tests/randomRoundSoak.test.ts` and `tests/lbrd.test.ts` pins moved at the hpd4 tip and were re-pinned above; the seven-win / winning-chain pins hold on the final tree.
+
+### Not landed / open (hpd5)
+
+- Ice Ball turns 3..5 keep a +-1 .. 5 frame residual that is the ROM-vs-kernel damage difference of that lab (gameplay, out of scope); the other unaudited bodies still keep their lead in the tail (each needs an `hpd2Probe.py` window).
+- Seismic Toss high level (damage > 65) and low level are fitted from the ROM windows (220 / 227 / 231) but only the lowhp (Lv27 low) and hpd1 `toss10..80` traces exercise them.
