@@ -1,6 +1,7 @@
 # Finding 47 (not fixed): a round's first trainer is rolled before the rentals' personalities (2026-11-18, chained rounds)
 
-Status: found and proven on the ROM, **not fixed**, waiting for a decision (the cost is below).
+Status: found and proven on the ROM, **not fixed by Kyle's decision** (2026-11-18: "Yeah, let's leave Finding 47"): no player can see it,
+and the fix would re-roll the battles 269 tests pin. Do not fix it without asking Kyle again.
 
 ## What differs
 

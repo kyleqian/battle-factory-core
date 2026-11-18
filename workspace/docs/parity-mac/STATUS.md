@@ -80,7 +80,7 @@ against the unchanged team.
 **Finding 47 (not fixed; `first-trainer-after-draft-picks.md`).** The game rolls a new round's first trainer right after the six rentals' set
 picks and makes the rentals' personalities later, at the rental screen. The engine makes the personalities first. Same draft, different first
 trainer for the same random state; no player can see it (the trainer is a random pick either way). A prototype fix matched the chains fully but
-re-rolls every census battle (269 failing tests in 103 files), so it waits for a decision. `round-compare` names it apart
+re-rolls every census battle (269 failing tests in 103 files), so it is left as it is (Kyle, 2026-11-18: "Yeah, let's leave Finding 47"). `round-compare` names it apart
 (`knownDifference: "first-trainer-order"`, `matchExceptKnown`).
 
 **Batch 5** (Scene OFF, 245 runs; counts of what was run, not a quality figure): three-round chains of power-v1 with every swap policy
