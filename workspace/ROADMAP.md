@@ -43,7 +43,8 @@ longer waits for census parity (handoff "Next work" item 0).
    lib build and `package.json` `exports`; `src/main.ts` becomes a thin shell
    over it (the test ABI, `?battleScene=`, `?pokebench=1` and the crash
    overlay unchanged). One step, with full suite + build + browser play.
-2. **Audio (S11)**, the main program after step 1 (design ACCEPTED 2026-11-01: `docs/s11-audio-design.md`; its section 7 is the step list; steps 1-3 folded by 2026-11-02, step 4 (screens) DONE 2026-11-04, step 5 aud241 (battle controller) DONE 2026-11-05, aud242 / aud243 DONE by 2026-11-10; steps 8-9 (assets aud244a / b, WebAudio player aud245 / aud245b / aud247) DONE 2026-11-13; aud248 scoreboard 2026-11-14 (`docs/aud248-s11-scoreboard.md`: acceptance not met), aud248 / aud249 / aud250 SE families DONE 2026-11-14; next the ISSUES #219 / #220 gaps, then aud246 close): a design step first
+2. **Audio (S11): event parity MET 2026-11-18** (aud257-aud263, wsh1, adp1; supervisor judgment, reversible: the gate is event parity, the constant per-window frame offsets are
+   item 6 timing residuals, ISSUES #219). Next sound work is frame alignment (the hpd4 / hpd5 script-lead audit per body, `docs/hpd1-hp-hold.md`). History: the main program after step 1 (design ACCEPTED 2026-11-01: `docs/s11-audio-design.md`; its section 7 is the step list; steps 1-3 folded by 2026-11-02, step 4 (screens) DONE 2026-11-04, step 5 aud241 (battle controller) DONE 2026-11-05, aud242 / aud243 DONE by 2026-11-10; steps 8-9 (assets aud244a / b, WebAudio player aud245 / aud245b / aud247) DONE 2026-11-13; aud248 scoreboard 2026-11-14 (`docs/aud248-s11-scoreboard.md`: acceptance not met), aud248 / aud249 / aud250 SE families DONE 2026-11-14; next the ISSUES #219 / #220 gaps, then aud246 close): a design step first
    (oracle audio-event log from the ELF symbols for `PlaySE` / `PlayCry*` /
    `PlayBGM` / `PlayFanfare`; our kernel already emits `play-se` /
    `play-fanfare` / `play-faint-cry`), then sound-event parity by census like
@@ -102,7 +103,7 @@ Every stage body (acceptance text, receipts, session narrative) is in `docs/arch
 | S9 | done | deferred interface / breadth workstreams |
 | S10 | closed 2026-08-10 | parameterized battle laboratory + complete Level-50 singles engine (six gates checked) |
 | S10A | **open** | playable animation integration; scope and plan in `docs/finish-plan.md`, library API in `docs/library-package.md` |
-| S11 | **open** (re-opened 2026-10-31) | audio; design `docs/s11-audio-design.md` (section 7 is the step list) |
+| S11 | **event parity met 2026-11-18** (re-opened 2026-10-31) | audio; design `docs/s11-audio-design.md`; T1 census 0..999 both scenes 0 missing / 0 extra, T2 41 ROM seeds 0 / 0, soaks + full suite green (`docs/aud251-s11-scoreboard-refresh.md` "aud263"); frame alignment continues under item 6 (ISSUES #219) |
 
 The 2026-07-24 "Executable-frontier reset" block is also in the archive copy.
 
