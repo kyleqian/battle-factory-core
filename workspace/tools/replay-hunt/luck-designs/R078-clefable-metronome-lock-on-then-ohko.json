@@ -1,0 +1,85 @@
+{
+ "name": "R078-clefable-metronome-lock-on-then-ohko",
+ "rules": [
+  "R078"
+ ],
+ "why": "Challenge 7. The player's Clefable (389, Metronome 10 PP) calls Metronome 10 times in a row opposite Shuckle (528: Sandstorm, Dig, Flash, Double Team; Attack 10, so it cannot knock Clefable out); every call is a draw of one of the 336 callable moves (1 in 336 each). After the tenth call the script switches to Snorlax (826) so the battle ends inside the ROM drive's state budget. Lock-On or Mind Reader called, then on the next turn a one-hit KO move (Fissure, Horn Drill, Guillotine, Sheer Cold) hits without a roll (Cmd_tryKO sure-hit arm). Chance per seed about 9 x 2/336 x 4/336 = 0.06%.",
+ "seed": 0,
+ "challengeNum": 7,
+ "battleNum": 0,
+ "trainerId": 200,
+ "playerSetIds": [
+  389,
+  826,
+  565
+ ],
+ "opponentSetIds": [
+  528,
+  431,
+  836
+ ],
+ "script": {
+  "actions": [
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "preferSwitch": 1
+   }
+  ],
+  "then": "census"
+ },
+ "expect": [],
+ "cover": [
+  {
+   "file": "src/engine/battleScriptTryKOOpcode.ts",
+   "text": "&& targetBat",
+   "at": 0
+  },
+  {
+   "file": "src/engine/battleScriptTryKOOpcode.ts",
+   "text": "&& attackerBattler.level >= targetBattler.level;",
+   "at": 0
+  },
+  {
+   "file": "src/engine/battleScriptTryKOOpcode.ts",
+   "text": "? null\n     ",
+   "at": 0
+  },
+  {
+   "file": "src/engine/battleScriptTryKOOpcode.ts",
+   "text": "?? rng;\n\n   ",
+   "at": 0
+  }
+ ],
+ "coverAny": true,
+ "chance": 0.0006,
+ "seeds": 200
+}

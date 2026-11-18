@@ -58,3 +58,9 @@ use `LUCK_HUNT_DAY` only in tests.
 Test (no ROM drive): `tools/replay-hunt/test-luckHunt.sh` (a deadline in the past exits 0 at once with a valid summary and no seed; a
 deadline 15 s ahead ends within one seed's time; a design whose rule already has a coverage stage file is skipped and logged once, and a run with only
 covered designs ends at once with no seed).
+
+## luck5 changes
+
+- Seven new designs in `luck-designs/` (R058 R073 R078 R079 R082 R096 R101): the player's Clefable 389 calls Metronome ten times against Shuckle 528 in challenge 7. One design per rule, as before; no weighting and no change to the env interface or the seed rule. R073 is now covered (`stages/coverage/R073-*.json`), so the hunter skips it.
+- `PREHUNT_CALLS=1 prehunt.py ...` prints, per seed, the Metronome calls of the engine battle (`[player-side-flag, MOVE_NAME]`; `NONE` = a call that ended without a move). Use it to estimate a chance per seed.
+- A shared-battle trial: write one stage whose `cover` lists the markers of every rule the battle reaches (`coverAny`) and run `prehunt.py` once; the hit's `ran:<i>` key names the rule.

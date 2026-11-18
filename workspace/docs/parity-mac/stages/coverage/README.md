@@ -52,3 +52,9 @@ R080 came from luck4 (2026-11-18, lab seed 910000 of the block 910000-910039 tha
 
 R035 came from the luck hunt's third day (2026-11-18 day job, seeds 1,040,000 up; promoted by the 2026-11-18 daily-run supervisor): the hunt's `found.stage.json`
 without `chance` / `seeds`; the hunt's own ROM drive matched 14 of 14 states with `stage.ok` true, and the nightly replay of the same run re-drives it (`docs/replay-ledger.md`).
+
+R073 came from luck5 (2026-11-18, lab seed 920103 of the block 920100-920131 that the day job never uses): the design `tools/replay-hunt/luck-designs/R073-clefable-metronome-hidden-power-odd-iv.json` without `chance` / `seeds`. The player's Clefable 389 (IVs 31, so Hidden Power is Dark, type index 15 past ???) calls Metronome ten times opposite Shuckle 528; one call was Hidden Power. Found by a union-cover trial of six designs sharing this battle, then re-driven from this file on the Scene OFF oracle: full match, `stage.ok` true, 62 -> 63 of the 110 rules covered.
+
+| file | lab seed | states matched | wide states |
+|---|---|---|---|
+| R073-clefable-metronome-hidden-power-odd-iv | 920103 | 31 of 31 | 29 of 29 |
