@@ -5,6 +5,63 @@ Branch `worker/parity-mac`. Method: every seed is played by the engine and repla
 "matches" when every engine state is found in order on the ROM to battle end. Lists and decision: `docs/cax31-session-handoff.md`
 item 0d, `docs/gameplay-parity-audit-2026-11-12.md` sections 7 and 8. Evidence is kept outside git; every row re-derives from the seed.
 
+## Round replay (2026-11-18): whole rounds on the real ROM, fixes 44 to 46
+
+Session `claude/round-replay-fd7e65` (branch of that name, not pushed, not merged). Tool doc: `round-replay.md`.
+
+### What was built
+
+- `tools/audio/romRoundReplay.sh SEED [POLICY [SWAP [CHALLENGE]]]` replays one whole round: up to seven battles with the screens between them.
+  The lab stages battle 1 as before; then nothing is staged. The ROM plays the round itself: the win text, the heal, GO ON, the swap prompt,
+  the swap screen, the walk and the next trainer's intro (`tools/audio/romRoundDriver.py`, driven by RAM state). At every battle start the
+  engine replays the round on its round orchestrator (`soundCensusRomReplay.ts round`) and gives that battle's decisions and the swap choice.
+- Compared at the start of every battle: the battle number, streak, rent count, swap flag, trainer, the opponent's three sets, the player's
+  three sets, and every field of all six Pokemon (species, level, personality, experience, friendship, ability, item, moves, PP, PP Ups, IVs,
+  EVs, HP, stats, status). The trainer roll: the engine's own production code, run from the RNG cursors of the ROM frame that rolled it, must
+  give the ROM's trainer and sets. Then turn by turn as before.
+- What the engine takes from the ROM: three RNG cursors that depend on frame timing (the overworld draws one `Random()` per frame), each
+  found by search: before the trainer roll, before each personality loop, and at the first action menu. Noland's team (rolled at battle
+  start with VBlank draws between the members) is taken from the ROM and checked against the engine's rules.
+- Test players for rounds: swap policies `never`, `weakest`, `random` (`romReplayPlayers.ts`), and a stronger battle player `power-v1` so
+  rounds reach the later battles. `REPLAY_PROMPT_DELAY=K@N` waits K frames at one swap prompt (genuine timing; moves later rolls).
+- Two staging writes added to the lab's (recorded in each drive): the trainer history's first entry, and the singles rent count (the lab
+  writes the doubles one, below).
+
+### What was found (each: C cite, a test that fails without the fix, ROM proof, a doc)
+
+| # | What was wrong for the game | ROM result | Doc |
+|---|---|---|---|
+| 44 | The game counts the first draft of every challenge as a rental; the engine counted only the swaps. The count decides when drafts start offering better rentals, so on the engine a player who never swaps never got them. | Rent count at each battle start, challenge 0: never swapping 0,1,1,1,1,1,1; swapping after every win 0,1,2,3,4,5,6. Engine: 0 throughout; 0,0,1,2,3,4,5. | `first-draft-counts-as-rent.md` |
+| 45 | Noland's team is chosen when his battle starts, after the swap, so he may get the set the player has just swapped away. The engine chose it earlier, at GO ON, and forbade that set. | Seed 202, challenge 2, swap before battle 7, 128 frames waited at the prompt: Noland has set 361, the one the player swapped away; the engine refused it. | `brain-party-after-swap.md` |
+| 46 | The game reads the rent count as one byte for the rank, so at 256 rents the drafts fall back to the plain ones. The engine kept the best rank forever. Only after 256 rents in one unbroken streak. | Lab staging, rent count written before the select screen: 15 -> rental IVs 6,3,3; 256 -> 3,3,3; 271 -> 6,3,3. | `rental-rank-count-byte.md` |
+
+For the top layer (not fixed here, top-layer file): `oracle/battle_lab.py` writes the request's `rentalSwapCount` to SaveBlock2 +0xDF6, which
+is the doubles count; singles Level 50 is +0xDF2 (the `include/global.h` offset comment is wrong). Single-battle stagings are not affected.
+
+### Batches (Scene OFF unless named; counts of rounds, not a quality figure)
+
+- Batch 1, engine before fixes 44-46 (330 rounds: challenges 0..7; census + never, ai-v1 + weakest, random-v1 + random): 329 match at every
+  battle start, every trainer roll and every turn; 1 stopped at Noland's swap prompt (not handled yet then). Rent count and swap flag were not
+  compared in this batch (fix 44 was found by a separate probe).
+- Batch 2, engine with fixes 44-46 (450 rounds: power-v1 with each swap policy over challenges 0..7, the three test players again at
+  challenge 0, and the three test players at challenge 2 where battle 7 is Noland): all 450 match, now with the rent count and swap flag
+  compared too. 71 rounds reached battle 7 (46 won it), 11 ended against Noland after a real round, 3 ended in a draw; 512 swaps; 848 trainer
+  rolls found by the engine's own code. At the next battle's start the ROM and the engine agreed on 822 fainted Pokemon revived, 1,562 with
+  PP restored, 186 used items restored, 77 statuses cured, 60 swapped-in Pokemon that had used their item.
+- Noland timing hunt (51 rounds of seed 202 at waits 0..400 frames): gave the ROM proof of fix 45; on the fixed engine the same rounds match.
+- Scene ON (60 rounds, challenges 0 and 1, the three test players and power-v1): all 60 match; 22 reached battle 7, 93 swaps.
+- Gold Noland (180 rounds, challenge 5 with the silver symbol staged, power-v1 with each swap policy): 179 match; 6 reached gold Noland
+  (IV 31, his team checked against the engine's rules) and all 6 match (3 won, 3 lost). The other round (seed 643, weakest swaps) is an
+  endless Struggle stall in battle 2 (both sides heal the recoil back with Leftovers and Ingrain): the default caps cut it after 127 matching
+  states; re-driven with a 3,000,000-frame engine budget and a 2,000,000-frame ROM cap, 2,606 turn states match (wide states too), up to the cap.
+
+### Not covered
+
+- Open Level (the lab is Level 50 only). Noland with both symbols (the "streak" Brain battles after the gold symbol).
+- On the screens: RECORD, REST, RETIRE; YES at the swap prompt then keeping the team; the summary screen; the swap screen's same-species
+  refusal (no policy picks a refused Pokemon). The round's end in the Lobby (Battle Points, symbols) is not compared.
+- The first trainer of a round is staged by the lab from the engine's choice (as for every single replay); its roll is checked from battle 2 on.
+
 ## Stopped 2026-11-13 (Kyle winds down the Mac)
 
 Sixth pass, stopped at about 20:00 UTC on the top layer's word: the battle-rule work moves to the box.

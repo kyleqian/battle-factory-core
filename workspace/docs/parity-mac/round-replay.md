@@ -17,6 +17,8 @@ python3 tools/audio/romRoundSummary.py /abs/outdir
 - `CHALLENGE`: the 0-based Level 50 challenge, 0..7 (default: the census mapping's challenge of the seed). The round starts at battle
   number 0 of that challenge (`--round=1` of `soundCensusRomReplay.ts`).
 - `REPLAY_SCENE=on` drives Battle Scene ON. `REPLAY_FRAME_BUDGET` / `REPLAY_DRIVE_FRAMES` raise the per-battle caps for very long battles.
+- `REPLAY_SYMBOLS=1`: the player holds the silver Factory symbol (staged after the lab staging, as the lab does for a factoryBrain staging);
+  challenge 5's seventh battle is then gold Noland. The ID gets `-gold`.
 - `REPLAY_PROMPT_DELAY=K@N`: the ROM waits K more frames at the swap prompt after battle N (0-based) before answering, like a slower player.
   Every overworld frame draws one VBlank `Random()`, so this moves the RNG cursor of everything rolled after it (the next trainer, Noland's team)
   without any memory write; battles 0..N are unchanged. The ID gets `-dK@N`.
@@ -104,8 +106,8 @@ The drive records the old values (`stagingFix`).
 
 ## Not covered (yet)
 
-- Gold Noland (challenge 5 with the silver symbol): the lab stages no symbols for factoryLegal, so challenge 5's seventh battle is an ordinary
-  trainer here.
+- Noland with both symbols (his later "streak" battles). Gold Noland is covered with `REPLAY_SYMBOLS=1` (the driver stages the silver
+  symbol; challenge 5's seventh battle is then gold Noland); without it challenge 5's seventh battle is an ordinary trainer.
 - On the screens: RECORD, REST and RETIRE at the GO ON menu; YES at the swap prompt followed by keeping the team (cancel); the summary
   screen from the swap screen; the swap screen's same-species refusal. None changes the team except the refusal, which no policy reaches.
 - Open Level (level 100 sets 372..881): the lab and the replay are Level 50 only.
