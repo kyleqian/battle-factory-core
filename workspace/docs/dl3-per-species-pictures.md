@@ -70,4 +70,4 @@ files. A full run that meets all 376 species downloads 449.5 KiB of files instea
 
 The website that bundles this package needs no configuration: its bundler emits `dist-lib/sprites/*.txt` the same way it emits the audio files.
 A host that serves the package's files unbundled must serve `dist-lib/sprites/` (plain text; any content type; Brotli/gzip recommended) next to the
-chunks, or copy it elsewhere and pass `spriteBase`. Cloudflare static assets: 376 files, each ~1-5 KiB raw (~12 KiB), well under the limits.
+chunks, or copy it elsewhere and pass `spriteBase`. Cloudflare static assets: 376 files, each ~8-12 KiB raw (1-2 KiB over the wire), well under the limits.
