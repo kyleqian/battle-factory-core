@@ -103,12 +103,12 @@ import { hiddenPowerUnownFormIndex } from "../animation/hiddenPower.ts";
 import type { FlailPower } from "../animation/flail.ts";
 import type { HailProfile } from "../animation/hail.ts";
 import { composeLiveArtPalettes, composeLiveFieldPalettes, liveBattlerIsShiny } from "./liveMovePaletteComposite.ts";
-import lovelyKissAsset from "../animation/assets/lovely-kiss.json" with { type: "json" };
-import octazookaAsset from "../animation/assets/octazooka.json" with { type: "json" };
-import spikesAsset from "../animation/assets/spikes.json" with { type: "json" };
+import type lovelyKissAssetData from "../animation/assets/lovely-kiss.json" with { type: "json" };
+import type octazookaAssetData from "../animation/assets/octazooka.json" with { type: "json" };
+import type spikesAssetData from "../animation/assets/spikes.json" with { type: "json" };
 import paletteResources from "../data/gen/live-animation-palette-resources.json" with { type: "json" };
-import skyAttackAsset from "../animation/assets/sky-attack.json" with { type: "json" };
-import snoreAsset from "../animation/assets/snore.json" with { type: "json" };
+import type skyAttackAssetData from "../animation/assets/sky-attack.json" with { type: "json" };
+import type snoreAssetData from "../animation/assets/snore.json" with { type: "json" };
 import spitUpRedOrbAsset from "../animation/assets/spit-up-red-orb.json" with { type: "json" };
 import superpowerAsset from "../animation/assets/superpower-rock-orb-fire.json" with { type: "json" };
 import { LIVE_MOVE_TIMING_POLICY, liveMoveBgWriteRow, liveMoveCounterTimingParameter, liveMoveOptionalLagAge, liveMovePaletteTransferRow, liveMoveScanoutSplitRow, liveMoveTimingBodyOf, liveMoveTimingBodyRows, liveMoveTimingParameter, liveMoveTimingSidePhase, liveMoveTimingUseOf, type LiveMoveTimingBody } from "./liveMoveTimingPolicy.ts";
@@ -128,8 +128,8 @@ import { liveCurseStatsInputs, liveFuryCutterInputs, liveMegahornInputs, livePur
 import shockWaveAsset from "../animation/assets/shock-wave.json" with { type: "json" };
 import { shockWaveSpriteOrderPlanText, shockWaveTimingFor } from "../animation/shockWave.ts";
 import revengeScratchAsset from "../animation/assets/revenge-purple-scratch-swipe.json" with { type: "json" };
-import hornDrillAsset from "../animation/assets/horn-drill.json" with { type: "json" };
-import megaHornAsset from "../animation/assets/mega-horn-horn-hit-2.json" with { type: "json" };
+import type hornDrillAssetData from "../animation/assets/horn-drill.json" with { type: "json" };
+import type megaHornAssetData from "../animation/assets/mega-horn-horn-hit-2.json" with { type: "json" };
 import {
   CURSE_STATS_ROWS, curseStatsBattleBgAt, curseStatsPaletteAt, curseStatsRegistersAt, curseStatsSpritesAt, curseStatsTasksAt,
 } from "../animation/curseModel.ts";
@@ -137,20 +137,33 @@ import { carryLiveSpriteOrder, FLATTER_ROWS, FURY_CUTTER_ROWS, RETURN_ROWS, RETU
 import { returnPowerLevel } from "./liveSpriteOrderHost.ts";
 import { willOWispSpritesAtAge, willOWispTimeline } from "../animation/willOWisp.ts";
 import { skillSwapAtAge, type SkillSwapLiveInputs } from "../animation/skillSwap.ts";
-import skillSwapOrbAsset from "../animation/assets/skill-swap-bluegreen-orb.json" with { type: "json" };
+import type skillSwapOrbAssetData from "../animation/assets/skill-swap-bluegreen-orb.json" with { type: "json" };
 import { flatterAtAge, type FlatterLiveInputs } from "../animation/flatter.ts";
 import { eruptionLaunchTimeline, type EruptionLaunchProfile } from "../animation/eruptionLaunch.ts";
 import { ERUPTION_FALLING_ROCK_SOURCE_CALLS } from "../animation/eruptionFallingRock.ts";
 import eruptionWarmRockAsset from "../animation/assets/eruption-warm-rock.json" with { type: "json" };
-import flatterAsset from "../animation/assets/flatter.json" with { type: "json" };
+import type flatterAssetData from "../animation/assets/flatter.json" with { type: "json" };
 import { pursuitTargetOffsetAtAge } from "../animation/pursuit.ts";
 import { sortGbaSpriteOrder } from "../animation/gbaObjCompositor.ts";
-import willOWispAsset from "../animation/assets/will-o-wisp.json" with { type: "json" };
-import iceBallAsset from "../animation/assets/ice-ball.json" with { type: "json" };
-import icyWindAsset from "../animation/assets/icy-wind.json" with { type: "json" };
+import type willOWispAssetData from "../animation/assets/will-o-wisp.json" with { type: "json" };
+import type iceBallAssetData from "../animation/assets/ice-ball.json" with { type: "json" };
+import type icyWindAssetData from "../animation/assets/icy-wind.json" with { type: "json" };
 import { liveIceBallEnd, liveIceBallInputs } from "./liveIceBallInputs.ts";
 import { diveAtAge, type DiveGeometry, type DiveProfile } from "../animation/dive.ts";
 import { linearTranslationDeltaQ8, linearTranslationOffsetAfterCallbacks } from "../animation/animLinearTranslation.ts";
+import { lazyAnimAsset } from "./animAssets.ts";
+const lovelyKissAsset = /* @__PURE__ */ lazyAnimAsset<typeof lovelyKissAssetData>("lovely-kiss");
+const octazookaAsset = /* @__PURE__ */ lazyAnimAsset<typeof octazookaAssetData>("octazooka");
+const spikesAsset = /* @__PURE__ */ lazyAnimAsset<typeof spikesAssetData>("spikes");
+const skyAttackAsset = /* @__PURE__ */ lazyAnimAsset<typeof skyAttackAssetData>("sky-attack");
+const snoreAsset = /* @__PURE__ */ lazyAnimAsset<typeof snoreAssetData>("snore");
+const hornDrillAsset = /* @__PURE__ */ lazyAnimAsset<typeof hornDrillAssetData>("horn-drill");
+const megaHornAsset = /* @__PURE__ */ lazyAnimAsset<typeof megaHornAssetData>("mega-horn-horn-hit-2");
+const skillSwapOrbAsset = /* @__PURE__ */ lazyAnimAsset<typeof skillSwapOrbAssetData>("skill-swap-bluegreen-orb");
+const flatterAsset = /* @__PURE__ */ lazyAnimAsset<typeof flatterAssetData>("flatter");
+const willOWispAsset = /* @__PURE__ */ lazyAnimAsset<typeof willOWispAssetData>("will-o-wisp");
+const iceBallAsset = /* @__PURE__ */ lazyAnimAsset<typeof iceBallAssetData>("ice-ball");
+const icyWindAsset = /* @__PURE__ */ lazyAnimAsset<typeof icyWindAssetData>("icy-wind");
 import {
   dirtScatterOffsetFromWord, dirtScatterSlots, hyperBeamOrbFromWords, linearTranslationStep, liveMovePresentationRngWords, miniTwinklingStarFromWords,
   type LiveMovePresentationRngInput,

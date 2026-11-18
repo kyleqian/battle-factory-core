@@ -4,6 +4,7 @@ import backSpriteRows from "../assets/gen/battle-back-sprite-rows.json" with { t
 import frontSpriteRows from "../assets/gen/battle-opponent-front-sprite-rows.json" with { type: "json" };
 import { lazyUnpackMonPicTable } from "./monPicSheetCodec.ts";
 import { installMonPicPixels, type MonPicPixelTables } from "./monPicPixels.ts";
+import { installBundledAnimAssets } from "./animAssetsInstall.ts";
 
 let tables: MonPicPixelTables | undefined;
 
@@ -19,6 +20,7 @@ export function bundledMonPicTables(): MonPicPixelTables {
  */
 export function installBundledMonPicPixels(): void {
   installMonPicPixels(bundledMonPicTables());
+  installBundledAnimAssets(); // dl4: the full animation asset table rides with the full sprite tables
 }
 
 // Unbundled importers (vitest setup, node tools) still install by importing the module.
