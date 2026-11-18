@@ -26,7 +26,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   files from hpd4 / hpd5: fixed test-side by hpd6; a revert of hpd4 / hpd5 was prepared as fallback and not needed.) Log backup not run (`rclone` not installed).
 - **Next:** frame alignment: land the script lead on the hpd7 rows (`docs/hpd1-hp-hold.md` "hpd7": 25 bodies measured, ranked by census; the lead is the effect script's instruction count, so
   take it from the kernel's counter, not a table; Faint Attack / Sludge Bomb / Bite / Earthquake need `live` lengthened first) (hpd4 method; each moves frames: census identity + soaks + `randomRoundSoak` / `lbrd` re-pins, see their pin notes),
-  Memento's 108-frame SE offset, Water Spout / Status_* second-play residuals (#219); #221 Lobby leftovers; #222. Luck-hunt summary + nightly replay at run start; prune census trees.
+  Memento's 108-frame SE offset, the first Status_* play +7 / +8, Solar Beam's short unleash body (#219); #221 Lobby leftovers; #222. Luck-hunt summary + nightly replay at run start; prune census trees.
 
 ---
 
