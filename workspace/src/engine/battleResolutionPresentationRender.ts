@@ -1401,6 +1401,8 @@ function applyCompletedCommand(
  * its animation starts that many frames inside the preceding 32-frame status command, so the held-item view starts at age 12.
  */
 /** wsh2: frames after the command starts that the General_* script's first command runs (age 0 of its draw; docs/wsh1-general-anim-commands.md). */
+/** kno3: rows from the controller's launch to General_ItemKnockoff's createsprite (loadspritegfx + 2 script rows; ROM rows 509 -> 512). */
+const ITEM_KNOCKOFF_BAG_CREATE_ROWS = 4;
 const GENERAL_SCRIPT_START_FRAMES: Readonly<Record<string, number>> = Object.freeze({ FOCUS_BAND: 8 });
 
 function heldItemEffectAge0Frames(minimumFrames: number): number {
@@ -2513,6 +2515,13 @@ export function createBattleResolutionPresentationRenderView(
       effect = Object.freeze({
         type: "general-animation", battler: command.battler, animation: command.animation,
         age: state.lifecycle.phaseElapsed - heldItemEffectAge0Frames(command.timing.minimumFrames),
+        ...(state.liveMoveBattlerX2Input === undefined ? {} : { battlerX2Input: state.liveMoveBattlerX2Input }),
+      });
+    } else if (command.type === "general-animation" && command.animation === "ITEM_KNOCKOFF" && fieldBattler(field, command.battler).substituteDoll !== true) {
+      // kno3: the bag sprite's create row is the SE gate + the script's load rows after the command starts (itemKnockoff.ts age 0).
+      effect = Object.freeze({
+        type: "general-animation", battler: command.battler, animation: command.animation,
+        age: state.lifecycle.phaseElapsed - (command.timing.seGateFrames ?? 0) - ITEM_KNOCKOFF_BAG_CREATE_ROWS,
         ...(state.liveMoveBattlerX2Input === undefined ? {} : { battlerX2Input: state.liveMoveBattlerX2Input }),
       });
     } else if (command.type === "general-animation" && fieldBattler(field, command.battler).substituteDoll !== true) {

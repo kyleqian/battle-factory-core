@@ -681,7 +681,8 @@ export type BattleResolutionPresentationCommand =
        * plays); the render draws it as Move_ABSORB's body (battleResolutionPresentationRender.ts leechSeedDrainAbsorbEffect).
        */
       animated?: true;
-      timing: Readonly<{ minimumFrames: number }>;
+      /** kno3: an ITEM_KNOCKOFF's IsBattleSEPlaying rows before the launch (sgs134RequestSeGate); absent = 0. */
+      timing: Readonly<{ minimumFrames: number; seGateFrames?: number }>;
     }>
   | Readonly<{
       /** `Cmd_trainerslidein`/`Cmd_trainerslideout` -- generic across any trainer/outcome, see `TRAINER_SLIDE_TIMING`. */
