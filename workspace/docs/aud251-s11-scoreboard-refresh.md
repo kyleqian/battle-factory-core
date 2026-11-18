@@ -570,3 +570,98 @@ The 44 skipped files are the CGB4 V1..V44 family, opt-in by design (`POKEBENCH_C
 5. **Frame-budget seeds 796 / 995** end in `frame budget` in both scenes (a battle that never finishes: gameplay, not audio).
 6. **CGB4 V1..V44 receipts** were not re-run (opt-in); the digest pin in the default run holds.
 7. **Playback** (finish-plan item 3) and the assets are out of this step.
+
+## t2off (2026-11-18): per-body attribution of the Scene ON move-animation SE frame offsets vs the hpd7 lead table (measurement / analysis only, no `src/` / `tests/` change)
+
+Method: the aud263 rescored T2 evidence (`.integration/evidence/aud263/t2/<seed>-on.{engine,drive,snd,tl}.json`, main tree, read-only; 21 aligned ON seeds). I re-ran the `soundScoreboard.py` alignment (same segments, same `difflib` match on (kind, id, pan), Menu SE_SELECT left out) in a scratch script and kept every **matched** move-animation SE row (`kind se`, not controller / stat-change) with its offset (engine minus ROM, relative to segment start): **3,991 rows, median -2, 308 exact (offset 0)** = the scoreboard's n 3,991 / median -2 (checked). Each row's body is the ROM `gCurrentMove` (`tl.json` column 2) at the row's ROM frame, as t2cls did. The hpd7 / hpd7b / sta4 lead table (`docs/hpd1-hp-hold.md`, 33 bodies incl. Dig / Solar Beam charge turns) gives the **predicted correction for a body SE** = ROM `R -> A` minus the app's `bodyLead + pre` (= L, or L + 3 where the app has pre 0: Struggle, Rock Slide, Faint Attack = 8; Dig uses its attack turn, 5; Double Team / Protect / Rain Dance and the six audited bodies = 0, already modelled). "Mass" = sum of abs(offset) over rows = **39,997** for all rows. Scratch only (`/tmp/t2off/{an,agg}.py`), nothing under `src/` touched, no ROM run, no `npm test`.
+
+### 1. What the lead landing can and cannot remove
+
+- **By design the planned lead landing moves no body SE.** `withoutBodyLead` (`battleResolutionPresentationRender.ts:1592`) feeds the sounds the pre-lead clock: the lead rows are added to the presentation, and the sound tables already carry the typical lead (`AGE_TO_SOUND_ROWS`). The hpd7 lead + tail therefore moves the *visuals* and the *next command* (hit, HP, status anim, message) by d = L + T, not the move's own SE frames. Under that landing the predicted change of the body-SE offsets is **0 rows / 0 mass**.
+- **If the lead did move the body SE (the naive "+L" reading, an upper bound).** 28 of the table bodies have L > 0 and rows in T2: **1,379 rows, mass 13,809 (34.5 % of all)**. Adding L to each row: mass 13,809 -> 13,588, i.e. **-221 = 1.6 % of those bodies' mass and 0.55 % of the total**; only **57 rows become exact** and 618 of 1,379 (45 %) get closer (the other 55 % move away). The six audited bodies and the three modelled ones (Double Team, Protect, Rain Dance) have 175 rows (Seismic Toss 17, Sonic Boom 6, Double Team 135, Protect 12, Rain Dance 4, ...), median offset -9 ... +7, so they are not at 0 either: the audited lead leaves the same spread.
+- **Why it cannot explain the mass.** The offset is not lead-sized: 579 rows with abs(offset) >= 20 hold **22,132 = 55.3 %** of the mass, 1,406 rows with abs(offset) <= 2 hold 35 % of the rows. L is 2 .. 16. The median offsets of the biggest in-table bodies (-2 .. -4 for Ice Beam / Double Edge / Thunderbolt / Toxic / Confuse Ray) are already smaller than L = 5 .. 10, so a +L shift overshoots them (Double Edge 1,246 -> 1,342, Dig 791 -> 961, Earthquake 527 -> 734, Giga Drain 51 -> 306, Quick Attack 0 -> 60 rows that are exact now).
+- **Where the lead does match (net of the sound clock being unchanged: these are rows that sit *after* the body, attributed to it only because `gCurrentMove` stays set).** Spore (147): all 12 rows exact after +7 (offsets are the status-anim rows following the body, `d` net 7); Toxic (92): 36 of 132 rows exact after +10 (the Status_Poison SE 148 rows, the same "next command" path). That is the part of the lead / tail rule that does show in the offsets: **48 rows**, which is where the +d correction of the following command lands.
+
+### 2. Coverage: whose offsets the hpd7 table covers
+
+| class of rows | rows | mass | share of mass |
+|---|---|---|---|
+| in the hpd7 / hpd7b / sta4 table (33 bodies, incl. modelled / audited with L 0) | 1,553 | 14,544 | 36.4 % |
+| gCurrentMove 0 at the row frame (no move running: status / send-in / shiny anims, see below) | 681 | 11,643 | 29.1 % |
+| other bodies not in the table (94 moves) | 1,757 | 13,810 | 34.5 % |
+
+The "not explained by the lead" set is therefore everything outside the table (63.6 % of the mass) **plus** most of the table's own mass, since the table bodies' median offsets are not L.
+
+**`gCurrentMove` 0 rows (681, mass 11,643, median -4).** These are not a move body: the ROM clears `gCurrentMove` between the move and the next command, so every general / status animation after it reads 0. By SE id: **148 SE_M_TOXIC x120** (poison status anim, median **-22**, mass 3,600), **152 x246 + 228 x82 + 102 SE_SHINY x82 + others** in 82 five-SE groups (152 x3, 228, 102; median -3, mass 5,655 for 152 / 228 / 102), the rest 151 rows (142 / 127 / 219 / 144 / ..., mass 2,388). These have no move lead; they follow whatever command precedes them, so their offset is the d = L + T of the *preceding* body or a status-command start offset (hpd7 "shape C" note: Confuse Ray / Thunder Wave / Curse have `gap` 5 and a status next command). Seeds carrying them: 1415 (171), 5063 (150), 3738, 2230, 499, 165, 2741, 6912.
+
+### 3. Top 10 bodies by rows x abs(offset) (gCurrentMove 0 is the separate class above)
+
+| # | body (gCurrentMove) | rows | median / mean offset | rows x abs(offset) | share of 39,997 | hpd7 lead L | hpd7 table has it |
+|---|---|---|---|---|---|---|---|
+| 1 | Rock Slide (157) | 102 | -7 / -29.8 | 3058 | 7.6% | 8 | yes |
+| 2 | Swagger (207) | 33 | -17 / -43.7 | 1471 | 3.7% | 2 | yes |
+| 3 | Double Edge (38) | 96 | -2 / 5.3 | 1246 | 3.1% | 5 | yes |
+| 4 | Bubble Beam (61) | 264 | -2 / -2.8 | 1224 | 3.1% | - | no |
+| 5 | Ice Beam (58) | 179 | -2 / -6.0 | 1107 | 2.8% | 5 | yes |
+| 6 | Fire Blast (126) | 97 | -2 / -10.7 | 1099 | 2.7% | - | no |
+| 7 | Magical Leaf (345) | 119 | -1 / -7.6 | 1022 | 2.6% | - | no |
+| 8 | Dig (91) | 112 | 6 / 0.7 | 791 | 2.0% | 5 | yes |
+| 9 | Toxic (92) | 132 | -3 / -3.8 | 720 | 1.8% | 10 | yes |
+| 10 | Confuse Ray (109) | 100 | -4 / -7.1 | 712 | 1.8% | 6 | yes |
+
+Two things dominate this ranking and are **not lead effects**:
+
+- **Three single windows hold 4,404 = 11 % of all mass:** Rock Slide seed 165 res18 (100 rows of SE 131, offset about -115, mass 2,300 of Rock Slide's 3,058; its other 2 windows are -5 .. -7), Swagger seed 6 res14 (rows at about -110 .. -121, mass 1,276 of 1,471), Fire Blast seed 1028 res10 (SE 144 rows at -69, mass 828 of 1,099). Their offsets are 8 .. 60 x L. Not diagnosed here; likely a whole-window length difference (a long ROM loop / a window the engine ends or starts much earlier), see "Unexplained by the lead" below.
+- Outside those three windows the top bodies sit at median -1 .. -4 with a long left tail (Bubble Beam -9 / -13 in 2 seeds, Ice Beam -21 in 2 windows, Magical Leaf -24 .. -25 in 1 seed), i.e. a few windows with a constant per-window offset (the t2off premise), not a per-body constant.
+
+### 4. Per-body comparison for every table body with T2 rows (naive +L)
+
+"closer / exact" counts rows whose abs(offset) shrinks / hits 0 when L is added; the mass columns are rows x abs(offset) before -> after.
+
+| body | rows | median offset | exact (0) | naive +L: rows closer / exact | mass now -> after naive +L |
+|---|---|---|---|---|---|
+| Rock Slide (157) | 102 | -7 | 0 | 101 / 0 | 3058 -> 2538 |
+| Swagger (207) | 33 | -17 | 0 | 28 / 0 | 1471 -> 1425 |
+| Double Edge (38) | 96 | -2 | 0 | 32 / 5 | 1246 -> 1342 |
+| Ice Beam (58) | 179 | -2 | 0 | 67 / 0 | 1107 -> 894 |
+| Dig (91) | 112 | 6 | 0 | 35 / 0 | 791 -> 961 |
+| Toxic (92) | 132 | -3 | 0 | 36 / 36 | 720 -> 816 |
+| Confuse Ray (109) | 100 | -4 | 34 | 60 / 0 | 712 -> 660 |
+| Thunderbolt (85) | 84 | -3 | 0 | 48 / 0 | 583 -> 523 |
+| Struggle (165) | 45 | -9 | 0 | 30 / 0 | 575 -> 425 |
+| Ancient Power (246) | 53 | 0 | 4 | 16 / 4 | 543 -> 622 |
+| Earthquake (89) | 33 | 9 | 0 | 5 / 0 | 527 -> 734 |
+| Double Team (104) (audited / modelled, L 0) | 135 | 2 | 0 | - | 468 |
+| Aerial Ace (332) | 27 | 0 | 12 | 11 / 0 | 431 -> 460 |
+| Sludge Bomb (188) | 76 | -4 | 0 | 38 / 0 | 380 -> 304 |
+| Thunder Wave (86) | 47 | -2 | 0 | 17 / 0 | 301 -> 322 |
+| Curse (174) | 33 | 2 | 0 | 14 / 0 | 253 -> 271 |
+| Psychic (94) | 29 | -2 | 6 | 10 / 0 | 219 -> 218 |
+| Surf (57) | 21 | -4 | 0 | 17 / 0 | 163 -> 114 |
+| Bite (44) | 19 | -9 | 1 | 10 / 0 | 151 -> 114 |
+| Seismic Toss (69) (audited / modelled, L 0) | 17 | -9 | 4 | - | 133 |
+| Facade (263) | 34 | -2 | 0 | 10 / 0 | 114 -> 130 |
+| Solar Beam (76) | 5 | -24 | 0 | 5 / 0 | 95 -> 90 |
+| Spore (147) | 12 | -7 | 0 | 12 / 12 | 84 -> 0 |
+| Protect (182) (audited / modelled, L 0) | 12 | 7 | 0 | - | 84 |
+| Brick Break (280) | 22 | -1 | 0 | 7 / 0 | 83 -> 137 |
+| Body Slam (34) | 7 | -14 | 0 | 4 / 0 | 68 -> 51 |
+| Faint Attack (185) | 12 | -3 | 0 | 4 / 0 | 64 -> 64 |
+| Giga Drain (202) | 51 | 1 | 0 | 0 / 0 | 51 -> 306 |
+| Rain Dance (240) (audited / modelled, L 0) | 4 | 5 | 0 | - | 32 |
+| Sonic Boom (49) (audited / modelled, L 0) | 6 | -3 | 0 | - | 18 |
+| Double Kick (24) | 1 | -15 | 0 | 1 / 0 | 15 -> 1 |
+| Mud Slap (189) | 2 | -2 | 0 | 0 / 0 | 4 -> 6 |
+| Quick Attack (98) | 12 | 0 | 12 | 0 / 0 | 0 -> 60 |
+
+### 5. Which bodies the lead does NOT explain
+
+- **Not in the table, ranked by mass:** Bubble Beam 61 (264 rows, 1,224), Fire Blast 126 (97, 1,099), Magical Leaf 345 (119, 1,022), Bulk Up 339 (39, 633, median +9), Yawn 281 (30, 618), Rest 156 (56, 567), Soft-Boiled 135 (6, 483, median -80.5), Calm Mind 347 (18, 465), Leech Seed 73 (11, 462, median -42), Blizzard 59 (52, 442), Hydro Pump 56 (34, 427), Drill Peck 65 (54, 423), Focus Punch 264 (36, 356), Safeguard 219 (21, 340), Follow Me 266 (65, 315). Several are non-attack bodies (Bulk Up, Yawn, Rest, Calm Mind, Safeguard, Follow Me, Wish) with no `EffectHit` lead: they need their own hpd-style measurement, the lead table is attack-shaped. Next candidates by census-weighted mass for a hpd7c measurement: Bubble Beam, Fire Blast, Magical Leaf, Blizzard, Hydro Pump, Drill Peck (all plain `EffectHit` shape, so a shape-A lead of 5 is the prior).
+- **In the table, offset far from -L:** Rock Slide, Swagger, Solar Beam (median -24 on 5 rows), Bite (-9), Body Slam (-14), Struggle (-9), Double Kick (-15, 1 row): the offset is larger than L; Double Edge, Dig (+6), Earthquake (+9), Giga Drain (+1), Ancient Power (0), Aerial Ace (0), Quick Attack (0): the engine is already at or **after** the ROM, so a +L would overshoot.
+- **Mixed-sign bodies:** Double Edge (quartiles -5 / -2 / +24), Dig (median +6, mean 0.7; charge turn L 1 and attack turn L 5 are mixed in one `gCurrentMove`), Earthquake: positive offsets are the next-command rows, not the body.
+
+### 6. Verdict and next steps
+
+1. **The planned lead landing is not the cure for the T2 offsets**: <= 1.6 % of the offset mass of its own bodies even in the naive reading (0 under the sound-clock design), 0.55 % of the total. Its worth is in the hit / HP / status rows after the body (about 48 of the rows here, Spore + Toxic), plus the visual frame alignment, not the SE offsets.
+2. **Largest identifiable mass is outside the lead:** (a) 681 `gCurrentMove` 0 rows (29 %): per-class constants for SE 148 (-22) and the 152 / 228 / 102 group (-3); (b) the three single windows (Rock Slide s165 res18, Swagger s6 res14, Fire Blast s1028 res10, 11 %); (c) 94 bodies without a table row (34 %). Suggested order (measure first, no code): the 120 SE 148 rows (one status anim, 3,600, constant -22, so the likeliest single fix), the three windows (a ROM drive per window, `tl.json` + `snd.json` already hold the frames), then hpd7c on Bubble Beam / Fire Blast / Magical Leaf.
+3. Not measured: per-window attribution of offset to the SE's position inside the body (head vs tail of the animation); which of the 1,553 table rows are body rows versus following-command rows (needs the app command spans per row); whether the engine's `gCurrentMove` equivalent differs from the ROM's at the row frame (the attribution is the ROM's, `tl.json`). `gCurrentMove` stays set after a body, so status / stat animations right after a move are attributed to that move (part of the Toxic / Spore "exact after +L" rows, explained in section 1).
