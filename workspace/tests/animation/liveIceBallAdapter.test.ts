@@ -211,7 +211,7 @@ describe("S10A Ice Ball (301): faithful timing with D3", () => {
     const chain = a.bodies.filter((body) => body.moveId === 301 && body.attacker === 0);
     expect(chain.length).toBeGreaterThanOrEqual(3);
     chain.forEach((body, k) => {
-      expect(body.ages, `body ${k + 1}`).toEqual(iu120EffectAges(301, k === 4 ? 133 : 76));
+      expect(body.ages, `body ${k + 1}`).toEqual(iu120EffectAges(301, k === 4 ? 133 : 76, "player", k === 0 ? 10 : 9));
       expect(body.active.every(Boolean), `body ${k + 1}`).toBe(true);
       expect(body.provenance).toBe("surrogate");
       expect(body.words).toHaveLength(2 * [5, 7, 9, 10, 10][k]!);
@@ -244,7 +244,7 @@ describe("S10A Ice Ball (301): faithful timing with D3", () => {
     const b = random2Route(1, "on", [1, 1, 1], 0, SEED_B), off = random2Route(1, "off", [1, 1, 1], 0, SEED_A);
     const chain = a.bodies.filter((body) => body.moveId === 301 && body.attacker === 0);
     expect(chain.length).toBeGreaterThanOrEqual(4);
-    expect(chain[0]!.ages).toEqual(iu120EffectAges(301, 76));
+    expect(chain[0]!.ages).toEqual(iu120EffectAges(301, 76, "player", 10));
     expect(chain[0]!.provenance).toBe("surrogate");
     expect(chain[0]!.words).toHaveLength(10);
     expect(chain.slice(0, 4).map((body) => body.active.every(Boolean))).toEqual([true, true, true, true]);

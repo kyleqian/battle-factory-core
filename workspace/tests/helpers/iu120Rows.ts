@@ -54,13 +54,32 @@ export function ont193ScriptTail(id: number): number {
   return ONT193_SCRIPT_TAIL_FRAMES.get(id) ?? 0;
 }
 
-/** The per-row phaseElapsed sequence of an ordinary live body whose accepted body lasts `duration` rows: 0 .. P + N + D + T - 1. */
-export function iu120Ages(id: number, duration: number, side: Iu120Side = "player"): number[] {
-  return Array.from({ length: duration + (LAND97_LEAD_ROWS.get(id) ?? 0) + iu120Extra(id, side) + ont193ScriptTail(id) }, (_, row) => row);
+/**
+ * hpd4 / hpd5 (docs/hpd1-hp-hold.md): the audited bodies present the ROM script lead (the rows `attackanimation` runs after the used print) as the command's first
+ * rows and a hit tail after the live body. The test-side copy of production's lead (route-measured, player attacker, first body) and HPD4_BODY_TAIL_ROWS.
+ */
+export const HPD4_BODY_LEAD_ROWS: ReadonlyMap<number, number> = new Map([[49, 9], [82, 9], [111, 3], [205, 10], [301, 10], [69, 6]]);
+export const HPD4_BODY_TAIL_ROWS: ReadonlyMap<number, number> = new Map([[49, 3], [82, 26], [111, 3], [205, 3], [301, 3], [69, 1]]);
+/** The rows an audited body's lead and hit tail add; 0 unless the caller passes the body's lead (Ice Ball: 10 on turn 1, 9 after; the others HPD4_BODY_LEAD_ROWS). */
+export function hpd4BodyRows(id: number, lead = 0): number {
+  return lead === 0 ? 0 : lead + (HPD4_BODY_TAIL_ROWS.get(id) ?? 0);
 }
 
-/** The per-row effect ages of an ordinary live body of `duration` rows: [0 x (P + N + 1), 1 .. D - 1, (D - 1) x T]. */
-export function iu120EffectAges(id: number, duration: number, side: Iu120Side = "player"): number[] {
+/** The per-row phaseElapsed sequence of an ordinary live body whose accepted body lasts `duration` rows: 0 .. P + N + D + T - 1 (+ the audited lead and hit tail). */
+export function iu120Ages(id: number, duration: number, side: Iu120Side = "player", lead?: number): number[] {
+  return Array.from({ length: duration + (LAND97_LEAD_ROWS.get(id) ?? 0) + iu120Extra(id, side) + ont193ScriptTail(id) + hpd4BodyRows(id, lead) }, (_, row) => row);
+}
+
+/**
+ * The per-row effect ages of an ordinary live body of `duration` rows: [0 x (P + N + 1), 1 .. D - 1, (D - 1) x T]. An audited body (hpd4 / hpd5) adds its lead rows
+ * at age 0, and its hit tail rows past the body: held at D - 1 behind post / script-tail rows, otherwise the age keeps counting (D .. D + tail - 1; the adapter holds its
+ * last picture there, and a Dragon Rage tail needs the counting age: clamping it loses 25 matched frames of hpd1-dragonrage-on).
+ */
+export function iu120EffectAges(id: number, duration: number, side: Iu120Side = "player", lead?: number): number[] {
   const hold = iu120Pre(id, side) + (LAND97_LEAD_ROWS.get(id) ?? 0);
-  return [...Array(hold).fill(0), ...Array.from({ length: duration }, (_, age) => age), ...Array(iu120Post(id, side)).fill(duration - 1), ...Array(ont193ScriptTail(id)).fill(duration - 1)];
+  const bodyLead = lead ?? 0;
+  const tail = bodyLead === 0 ? 0 : HPD4_BODY_TAIL_ROWS.get(id) ?? 0;
+  const held = iu120Post(id, side) + ont193ScriptTail(id) > 0;
+  return [...Array(hold + bodyLead).fill(0), ...Array.from({ length: duration }, (_, age) => age), ...Array(iu120Post(id, side)).fill(duration - 1), ...Array(ont193ScriptTail(id)).fill(duration - 1),
+    ...Array.from({ length: tail }, (_, i) => (held ? duration - 1 : duration + i))];
 }

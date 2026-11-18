@@ -11,7 +11,7 @@ import {
   liveMoveAnimationPresentation,
 } from "../../src/engine/liveMoveAnimation.ts";
 import { generatedCommandAnimationReplay } from "../../tools/integration/generatedCommandAnimationReplay.ts";
-import { iu120Ages } from "../helpers/iu120Rows.ts";
+import { HPD4_BODY_LEAD_ROWS, iu120Ages } from "../helpers/iu120Rows.ts";
 
 const cases = [
   { id: 172, move: "FLAME_WHEEL", duration: [170, 170], effectAge: 80,
@@ -87,7 +87,7 @@ describe("live fieldfx move adapters", () => {
     const on = generatedCommandAnimationReplay(row.route.seed, "on", [row.route.slot], row.route.streak);
     const off = generatedCommandAnimationReplay(row.route.seed, "off", [row.route.slot], row.route.streak);
     const body = on.animations.find(animation => animation.moveId === row.id && animation.attacker === 0);
-    expect(body?.ages).toEqual(iu120Ages(row.id, row.duration[0]));
+    expect(body?.ages).toEqual(iu120Ages(row.id, row.duration[0], "player", HPD4_BODY_LEAD_ROWS.get(row.id)));
     expect(body?.adapterActive.every(Boolean)).toBe(true);
     expect(on.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");
     expect(on.boundaries).toHaveLength(2);
