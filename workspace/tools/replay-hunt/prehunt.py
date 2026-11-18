@@ -44,6 +44,28 @@ def drive_on_rom(sp):
     finally:
         if held:
             held.close()
+_MOVE_NAMES = {}
+
+
+def metronome_calls(e):
+    """[[battler, called move name], ...] from the engine's turn events: a Metronome (118) action whose current move then changes."""
+    if not _MOVE_NAMES:
+        for i, x in enumerate(json.load(open(W + "/src/data/gen/moves.json"))["moves"]):
+            _MOVE_NAMES[i] = x["move"][5:]
+    calls = []
+    for t in e.get("turnEvents", []):
+        seen = {}
+        for ev in t.get("events", []):
+            a = ev.get("actionSnapshot") or {}
+            if a.get("attacker") is None:
+                continue
+            seen.setdefault(a["attacker"], []).append(a.get("currentMove"))
+        for b, mv in seen.items():
+            if mv and mv[0] == 118 and any(m != 118 for m in mv):
+                calls.append([b, _MOVE_NAMES.get([m for m in mv if m != 118][-1], "?")])
+    return calls
+
+
 STALL_DECISIONS = int(os.environ.get("PREHUNT_STALL_DECISIONS", "100"))  # the ROM drive stops at about 80000 frames, about 115+ states: a battle with this many engine decisions is likely to be cut short
 env = {**os.environ, "REPLAY_OUT": out, "REPLAY_KEEP": "0", 
        "ROM_REPLAY_POLICY": "script", "ROM_REPLAY_SYMBOLS": "0"}
@@ -82,6 +104,8 @@ for seed in range(first, first + count):
     for i, c in enumerate(cover):
         got[f"ran:{i}:" + c["file"].split("/")[-1] + ":" + c["text"][c.get("at", 0):c.get("at", 0) + 30].strip()] = (romReplayCoverage.count_at(covdir, c["file"], c["text"], root=W, at=c.get("at", 0)) or 0) > 0
     print(seed, "engine", "error" if e.get("error") else "ok", "decisions", len(e["decisions"]), got, watch, flush=True)
+    if os.environ.get("PREHUNT_CALLS"):  # luck5: the moves Metronome called, per battler (0 player, 1 opponent), to measure a design's calls per battle
+        print(seed, "  metronome calls:", json.dumps(metronome_calls(e)), flush=True)
     if e.get("error"):
         json.dump({**stage, "engineError": str(e.get("error"))[:2000]}, open(f"{out}/engine-error-{seed}.json", "w"), indent=1)
         print("ENGINE-ERROR", seed, str(e.get("error"))[:300], flush=True)
