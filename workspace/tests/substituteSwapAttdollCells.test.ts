@@ -64,8 +64,8 @@ describe("attacker-doll swap cells (prep40)", () => {
   it("rung b: framed bodies end at the ROM body's first inactive row and show adapter age row + shift", () => {
     // [move, adapter duration, ROM rows (activation .. first inactive), shift, sides]; prep40 s1: every window 0 px framed this way.
     const framed: [number, number, number, number, ("player" | "opponent")[]][] = [
-      [89, 198, 208, 0, ["player", "opponent"]], [94, 140, 145, -5, ["player"]], [188, 160, 169, -4, ["player", "opponent"]],
-      [53, 115, 210, -15, ["player", "opponent"]], [92, 219, 231, -7, ["player", "opponent"]], [44, 26, 41, -10, ["player", "opponent"]],
+      [89, 208, 208, 0, ["player", "opponent"]], [94, 140, 145, -5, ["player"]], [188, 165, 169, -4, ["player", "opponent"]],
+      [53, 192, 210, -15, ["player", "opponent"]], [92, 219, 231, -7, ["player", "opponent"]], [44, 31, 41, -10, ["player", "opponent"]],
       [7, 101, 102, 0, ["player", "opponent"]], [153, 212, 217, -4, ["player", "opponent"]],
       // land82 (doll81)
       [142, 152, 153, 0, ["player", "opponent"]], [320, 225, 221, 0, ["player", "opponent"]], // ctl95: opponent widened

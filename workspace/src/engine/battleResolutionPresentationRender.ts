@@ -16,6 +16,7 @@ import { liveSubstituteSwapApplies, substituteSwapTailFieldArt } from "./liveSub
 import {
   liveBattlerAnchors, liveDiveSetupSplashBirth, liveMoveAnimationDuration, liveMoveOpponentShadowPostBodyHideRows,
   liveSemiInvulnerableHideBattler,
+  SOLAR_BEAM_UNLEASH_IDLE_ROWS,
 } from "./liveMoveAnimation.ts";
 import { liveMoveTimingBodyOf, type LiveMoveTimingBody } from "./liveMoveTimingPolicy.ts";
 import type { BattleMoveAnimationRequest } from "./battleMoveAnimation.ts";
@@ -1486,7 +1487,7 @@ function currentSegment(state: BattleResolutionPresentationState) {
  */
 const LIVE_MOVE_IDLE_LEAD_ROWS: ReadonlyMap<number, number> = new Map([
   [41, 10], [44, 10], [51, 7], [52, 4], [55, 10], [71, 10], [74, 1], [75, 13], [82, 7], [92, 7], [93, 5], [94, 5], [106, 1], [120, 4],
-  [124, 4], [136, 1], [146, 13], [153, 4], [158, 4], [184, 4], [188, 4], [204, 4], [207, 7], [225, 6], [232, 4], [247, 5], [248, 5],
+  [53, 18], [124, 4], [136, 1], [146, 13], [153, 4], [158, 4], [184, 4], [188, 4], [204, 4], [207, 7], [225, 6], [232, 4], [247, 5], [248, 5],
   [269, 10], [282, 6], [294, 1], [299, 10], [305, 7], [313, 1], [325, 8], [334, 1], [337, 6], [339, 4], [342, 7], [343, 1], [347, 3],
 ]);
 
@@ -1497,7 +1498,7 @@ const LIVE_MOVE_IDLE_LEAD_ROWS: ReadonlyMap<number, number> = new Map([
  * presents that row with `preActivationRow` (the shadow drawn).
  */
 export function liveMoveIdleLeadRows(request: BattleMoveAnimationRequest, field: BattleResolutionDisplayedField): number {
-  const lead = LIVE_MOVE_IDLE_LEAD_ROWS.get(request.moveId) ?? 0;
+  const lead = request.moveId === 76 ? ((request.turn & 1) === 1 ? SOLAR_BEAM_UNLEASH_IDLE_ROWS : 0) : LIVE_MOVE_IDLE_LEAD_ROWS.get(request.moveId) ?? 0;
   if (lead === 0 || liveSubstituteSwapApplies(request, field) === true || liveMoveAnimationDuration(request, field) === null) return 0;
   return lead;
 }
@@ -1582,11 +1583,15 @@ export function liveMoveScriptTailFrames(
 // hpd4: rows the command presents after its live body (+ post) so the next command (hit controller, next script step) starts on the ROM row
 // (R -> H = lead + 3 + len + 4 against the accepted live window), tuned by exact-frame matches against the ROM frames (docs/hpd1-hp-hold.md).
 const HPD4_BODY_TAIL_ROWS: ReadonlyMap<number, number> = new Map([[49, 3], [82, 26], [111, 3], [205, 3], [301, 3], [69, 1]]);
+// liv2: Self-Destruct's presented `hp` command already carries the script lead (the window starts at S + pre, ROM A), so it has no body lead; its hit
+// controller runs 10 rows after the window (the explosion script's own instructions, ROM gap 10), so the tail is 9 (3 + 4 + 123 + 9 = A -> H 139 + pre).
+const LIVE_MOVE_LEADLESS_TAIL_ROWS: ReadonlyMap<number, number> = new Map([[120, 9]]);
 // hpd8: the shape-A bodies' tail is whatever the 3 pre + 3 post rows of the ROM span (lead + 3 + len + 4) leave over: 6 - pre - post (T 1 / 3 / 6 in hpd7).
 const HPD8_SHAPE_A_ROWS_AROUND_BODY = 6;
 function liveMoveHitTailRows(command: Extract<BattleResolutionPresentationCommand, { type: "move-animation" }>, field: BattleResolutionDisplayedField): number {
   const request = command.animation;
-  if ((command.timing.bodyLeadFrames ?? 0) === 0 || request === undefined) return 0;
+  if (request === undefined) return 0;
+  if ((command.timing.bodyLeadFrames ?? 0) === 0) return liveSubstituteSwapApplies(request, field) === true ? 0 : LIVE_MOVE_LEADLESS_TAIL_ROWS.get(request.moveId) ?? 0;
   const table = HPD4_BODY_TAIL_ROWS.get(request.moveId);
   if (table !== undefined) return table;
   if (!HPD8_SHAPE_A_MOVE_IDS.has(request.moveId) || liveSubstituteSwapApplies(request, field) === true) return 0;
@@ -2475,7 +2480,7 @@ export function createBattleResolutionPresentationRenderView(
       effect = Object.freeze({
         type: "move", request: command.animation,
         age: liveMoveUniversalRowAge(state, command.animation, field, seGate, liveMoveScriptTailFrames(command.timing, command.animation, field),
-          HPD8_SHAPE_A_MOVE_IDS.has(command.animation.moveId) && (command.timing.bodyLeadFrames ?? 0) > 0),
+          (HPD8_SHAPE_A_MOVE_IDS.has(command.animation.moveId) && (command.timing.bodyLeadFrames ?? 0) > 0) || LIVE_MOVE_LEADLESS_TAIL_ROWS.has(command.animation.moveId)),
         ...(lead > 0 && state.lifecycle.phaseElapsed <= pre ? { preActivationRow: true as const } : {}),
         paletteInput: state.liveMovePaletteInput,
         spriteAllocatorInput: state.liveMoveSpriteAllocatorInput,

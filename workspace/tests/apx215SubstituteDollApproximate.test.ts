@@ -63,7 +63,8 @@ describe("apx215: approximate substitute-doll", () => {
     // census seed 17: FORRETRESS (player) Explosion at JYNX's doll (defender doll, no proven Explosion defender cell).
     ["Explosion 153 player at a defender doll (census seed 17)", 17, 153, 0, 219],
     // census seed 587: CRADILY (opponent) Solar Beam fire turn from behind its doll (swap composite around the body).
-    ["Solar Beam 76 opponent fire turn from behind the doll (census seed 587)", 587, 76, 1, 241],
+    ["Solar Beam 76 opponent fire turn from behind the doll (census seed 587)", 587, 76, 1, 285],
+    // liv2: 241 -> 285 = the unleash body 160 -> 199 live rows (the ROM window's 39-row SE wait; no idle head under a doll) + the shape-A lead 5.
   ])("%s: draws non-static rows, classifies approx, deterministic on replay", (_name, seed, moveId, attacker, rows) => {
     const first = apx215SubstituteDollStrip(seed, moveId, attacker)!;
     expect(first).not.toBeNull();

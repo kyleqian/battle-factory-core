@@ -98,7 +98,7 @@ describe("live BASIC move adapters", () => {
       liveMoveAnimationDuration(request(97, 0)),
       liveMoveAnimationDuration(request(246, 0)),
       liveMoveAnimationDuration(request(347, 0)),
-    ]).toEqual([70, 26, 87, 128, 101]);
+    ]).toEqual([70, 31, 87, 128, 101]);
     expect(liveMoveAnimationDuration(request(280, 0, 0))).toBe(151);
     expect(liveMoveAnimationDuration(request(280, 0, 1))).toBe(192);
     expect(liveMoveAnimationPresentation(request(280, 0, 0), field, 0)?.config)

@@ -47,9 +47,9 @@ describe("fa185: Faint Attack (185) per-side optional restore lag at 205", () =>
     expect(fa.filter((b) => !b.lagAges.includes(205) && !b.scenario.includes("opponent-delcatty"))).toHaveLength(6);
   });
 
-  it("renders the policy phase: 220 player / 221 opponent rows, the player restore fade-in one row earlier (ages 203..218 only)", () => {
-    expect(liveMoveAnimationDuration(request(0))).toBe(220);
-    expect(liveMoveAnimationDuration(request(1))).toBe(221);
+  it("renders the policy phase: 226 player / 227 opponent rows (liv2: the ROM window 225 + 1, was 220 / 221), the player restore fade-in one row earlier (ages 203..218 only)", () => {
+    expect(liveMoveAnimationDuration(request(0))).toBe(226);
+    expect(liveMoveAnimationDuration(request(1))).toBe(227);
     expect(faintAttackRestoreProfile(true)).toBe(FAINT_ATTACK_ANIMATION_PROFILE);
     const short = faintAttackRestoreProfile(false);
     expect([short.defaultBgSwapAge, short.doneAge]).toEqual([203, 218]);
