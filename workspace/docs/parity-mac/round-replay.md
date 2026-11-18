@@ -60,6 +60,25 @@ the new draft. It must give the ROM's six rentals and the ROM's first trainer an
 (set, fixed IV: the rental rank) with the ROM's personality cursors. The battle-start check then covers the carried streak, rent count, swap flag
 and symbol count. One known difference is named apart: the first trainer's roll order (`first-trainer-after-draft-picks.md`, not fixed).
 
+## The test (no emulator)
+
+`tests/parityMacRoundReplayFixtures.test.ts` replays recorded real-ROM runs (`tests/fixtures/round-replay/*.json.gz`, eight files, about 156 KB in all) through
+`soundCensusRomReplay.ts round` and `round-compare`, and checks every battle start, every trainer and draft roll and every turn, as the ROM replay
+does; what each run is for is pinned on the ROM's own data. `tools/audio/romRoundFixture.py RUN NAME --note ...` makes a fixture from a run of
+`romRoundReplay.sh`: it keeps the setup fields the engine reads, the ROM drive fields the compare reads, and of the ROM timeline the rows the turn
+compare found the engine's states at (the ROM's state after every turn); it refuses a run that does not match. The fixtures: never swapping,
+swapping every win, cancel after YES, silver Noland holding the swapped-away set (fix 45), gold Noland (staged symbol), a draft rolled at 15 rents,
+a draft rolled at 256 rents (fix 46; the start count staged before battle 1), and the unbroken 42-battle run below. Reverting fix 44 fails all of
+them, fix 45 the three with Noland, fix 46 the wrap run.
+
+## The unbroken run
+
+`REPLAY_ROUNDS=6 REPLAY_DRAFT=strongest REPLAY_SEARCH=300 REPLAY_STOP_ON_LOSS=1 tools/audio/romRoundReplay.sh SEED power-v1 pace 0`: one ROM
+play from streak 0, rent count 0 and no symbols, nothing staged after battle 1. The engine predicts each battle (it has matched every turn so
+far), so before the ROM plays a battle the engine tries other plays of it (`power-eps` tries) when its first play loses, and the ROM plays the
+first that wins; the ROM never needs a retry. `pace` swaps after every win of the first two rounds (14 rents), then only when the swap does not
+make the team weaker; `strongest` drafts the three strongest rentals.
+
 ## What is compared
 
 - **At the start of every battle** (the engine at its first action menu against the ROM at its first action menu): the battle number,
