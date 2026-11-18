@@ -17,7 +17,7 @@ import { GROVYLE_TO_ONIX_ROCK_SLIDE_PROFILE } from "../animation/sceneOnPresenta
 import { wavyMusicNotesGeometryAtAge } from "../animation/sing.ts";
 import { ADP1_MOVE_BODY, APPROX_SCRIPT_MOVE_BODY, approxScriptDuration } from "../animation/approxScript.ts";
 import { PRESENT_DAMAGE_FRAME_COUNT, PRESENT_HEAL_FRAME_COUNT } from "../animation/present.ts";
-import { SOLAR_BEAM_SETUP_FIRST_INACTIVE_AGE, SOLAR_BEAM_UNLEASH_FIRST_INACTIVE_AGE } from "../animation/solarBeam.ts";
+import { SOLAR_BEAM_SETUP_FIRST_INACTIVE_AGE } from "../animation/solarBeam.ts";
 import { reduceMemento, type MementoBattlerConfig, type MementoConfig } from "../animation/memento.ts";
 import { HOWL_FRAME_COUNT } from "../animation/howl.ts";
 import { SUBSTITUTE_FRAME_COUNT } from "../animation/substitute.ts";
@@ -155,6 +155,9 @@ import {
   dirtScatterOffsetFromWord, dirtScatterSlots, hyperBeamOrbFromWords, linearTranslationStep, liveMovePresentationRngWords, miniTwinklingStarFromWords,
   type LiveMovePresentationRngInput,
 } from "./liveMovePresentationRng.ts";
+
+export const SOLAR_BEAM_UNLEASH_LIVE_ROWS = 199;
+export const SOLAR_BEAM_UNLEASH_IDLE_ROWS = 39;
 
 
 /** Only adapters with production inputs belong here; exact acceptance is separate. */
@@ -1322,8 +1325,10 @@ function liveMoveAnimationDurationOf(
     case 263: return 81; // Facade accepted source window.
     case 339: return 104; // Bulk Up accepted source window.
     // Cmd_choosetwoturnanim (battle_anim.c:1073): gAnimMoveTurn bit 0 selects the unleash body.
-    case 76: return (request.turn & 1) === 0 
-        ? SOLAR_BEAM_SETUP_FIRST_INACTIVE_AGE + 1 : SOLAR_BEAM_UNLEASH_FIRST_INACTIVE_AGE + 1;
+    // Unleash (liv2): the ROM window is 237 rows = 38 rows of SetSolarBeamBg before the first picture change + the 160-row body, and Cmd_end then
+    // waits for SE_M_SOLAR_BEAM (194 VBlanks from its start, 39 rows in): live + idle = len + 1 = 238, the 39 idle rows come from liveMoveIdleLeadRows.
+    case 76: return (request.turn & 1) === 0
+        ? SOLAR_BEAM_SETUP_FIRST_INACTIVE_AGE + 1 : SOLAR_BEAM_UNLEASH_LIVE_ROWS;
     // AnimTask_IsHealingMove (battle_anim_effects_3.c:1531): heal iff gAnimMoveDmg <= 0.
     case 217: return request.damage > 0 ? PRESENT_DAMAGE_FRAME_COUNT : PRESENT_HEAL_FRAME_COUNT;
     case 250: return 133; // Whirlpool main body (accepted window 78..210); residual is a general animation.

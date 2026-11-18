@@ -58,13 +58,13 @@ export function ont193ScriptTail(id: number): number {
  * hpd4 / hpd5 (docs/hpd1-hp-hold.md): the audited bodies present the ROM script lead (the rows `attackanimation` runs after the used print) as the command's first
  * rows and a hit tail after the live body. The test-side copy of production's lead (route-measured, player attacker, first body) and HPD4_BODY_TAIL_ROWS.
  */
-const HPD8_SHAPE_A_IDS: readonly number[] = [332, 94, 85, 38, 98, 34, 246, 202, 58, 57, 91, 165, 157, 61, 126, 345, 53];
+const HPD8_SHAPE_A_IDS: readonly number[] = [332, 94, 85, 38, 98, 34, 246, 202, 58, 57, 91, 165, 157, 61, 126, 345, 53, 76];
 export const HPD4_BODY_LEAD_ROWS: ReadonlyMap<number, number> = new Map([[49, 9], [82, 9], [111, 3], [205, 10], [301, 10], [69, 6], ...HPD8_SHAPE_A_IDS.map((id): [number, number] => [id, 5])]);
 export const HPD4_BODY_TAIL_ROWS: ReadonlyMap<number, number> = new Map([[49, 3], [82, 26], [111, 3], [205, 3], [301, 3], [69, 1]]);
 // hpd8: the shape-A bodies (production's HPD8_SHAPE_A_MOVE_IDS) have lead 5 (the EffectHit family's instruction count) and a hit tail of 6 - pre - post.
 // Dig's lead is the attack turn's; a caller that presents the charge turn passes no lead.
-// A shape-A body's lead is the same 5 on both sides and every route, so callers that pass no lead get it; Dig (91) is excluded (its charge turn has none).
-const HPD8_DEFAULT_LEAD: ReadonlyMap<number, number> = new Map(HPD8_SHAPE_A_IDS.filter((id) => id !== 91).map((id): [number, number] => [id, 5]));
+// A shape-A body's lead is the same 5 on both sides and every route, so callers that pass no lead get it; Dig (91) and Solar Beam (76: setup turn 0 has none; the unleash passes lead 5 and counts its 39 idle rows in the duration) are excluded (their charge turns have none).
+const HPD8_DEFAULT_LEAD: ReadonlyMap<number, number> = new Map(HPD8_SHAPE_A_IDS.filter((id) => id !== 91 && id !== 76).map((id): [number, number] => [id, 5]));
 function hpd4BodyTail(id: number, side: Iu120Side): number {
   const table = HPD4_BODY_TAIL_ROWS.get(id);
   if (table !== undefined) return table;

@@ -16,6 +16,7 @@ import { liveSubstituteSwapApplies, substituteSwapTailFieldArt } from "./liveSub
 import {
   liveBattlerAnchors, liveDiveSetupSplashBirth, liveMoveAnimationDuration, liveMoveOpponentShadowPostBodyHideRows,
   liveSemiInvulnerableHideBattler,
+  SOLAR_BEAM_UNLEASH_IDLE_ROWS,
 } from "./liveMoveAnimation.ts";
 import { liveMoveTimingBodyOf, type LiveMoveTimingBody } from "./liveMoveTimingPolicy.ts";
 import type { BattleMoveAnimationRequest } from "./battleMoveAnimation.ts";
@@ -1497,7 +1498,7 @@ const LIVE_MOVE_IDLE_LEAD_ROWS: ReadonlyMap<number, number> = new Map([
  * presents that row with `preActivationRow` (the shadow drawn).
  */
 export function liveMoveIdleLeadRows(request: BattleMoveAnimationRequest, field: BattleResolutionDisplayedField): number {
-  const lead = LIVE_MOVE_IDLE_LEAD_ROWS.get(request.moveId) ?? 0;
+  const lead = request.moveId === 76 ? ((request.turn & 1) === 1 ? SOLAR_BEAM_UNLEASH_IDLE_ROWS : 0) : LIVE_MOVE_IDLE_LEAD_ROWS.get(request.moveId) ?? 0;
   if (lead === 0 || liveSubstituteSwapApplies(request, field) === true || liveMoveAnimationDuration(request, field) === null) return 0;
   return lead;
 }
