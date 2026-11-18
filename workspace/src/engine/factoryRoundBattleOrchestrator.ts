@@ -405,6 +405,18 @@ export type FactoryRoundBattleOrchestratorConfig = Readonly<{
     /** Adapter-pinned draws before the fresh battle kernel begins. */
     preCommandRngCalls?: number;
   }>;
+  /**
+   * The Frontier Brain sibling of `adoptedNextOpponent` (the round replay, docs/parity-mac/round-replay.md): a later battle of the round
+   * is Noland's, and the source rolled his party at that battle's start (FillFactoryBrainParty from FillFactoryTrainerParty,
+   * battle_tower.c:1857, with VBlank Random() draws between the members), so the replay adopts the rolled schedule
+   * (`adoptFactoryBrainOpponentSchedule`, which rejects a set the engine's rules would not roll). The battle at `battleIndex` must be
+   * a Brain battle by this config's streak and symbols.
+   */
+  adoptedNextBrainOpponent?: Readonly<{
+    generation: FactoryBrainOpponentGenerationResult;
+    /** Source challenge battle number this schedule is for (6 = battle 7). */
+    battleIndex: number;
+  }>;
 }>;
 
 /**
@@ -933,6 +945,21 @@ function adoptNextOpponentOrGenerate(
   rngBefore: number,
   previous: FactoryScheduledOpponentGeneration,
 ): FactoryScheduledOpponentGeneration {
+  const adoptedNextBrain = state.config.adoptedNextBrainOpponent;
+  if (adoptedNextBrain !== undefined && adoptedNextBrain.battleIndex === battleIndex) {
+    const brainStatus = getFactoryFrontierBrainStatus({
+      battleMode: "singles",
+      winStreak: state.config.factoryWinStreak + battleIndex,
+      symbolsCount: state.config.factorySymbolsCount ?? 0,
+    });
+    if (brainStatus === "not-ready") {
+      return fail(
+        `adoptedNextBrainOpponent for battleIndex ${battleIndex} is a Frontier Brain schedule, `
+        + "but the effective win streak at that battle is an ordinary trainer's",
+      );
+    }
+    return scheduledBrainOpponent(brainStatus, adoptedNextBrain.generation, storedTrainerIdsForNextGeneration(previous));
+  }
   const adoptedNext = state.config.adoptedNextOpponent;
   if (adoptedNext === undefined || adoptedNext.battleIndex !== battleIndex) {
     return generateOpponentFor(
@@ -1358,6 +1385,18 @@ export function preGenerateFactoryRoundNextOpponent(
   if (battleIndex > 6) {
     return fail("a seventh win has no next opponent to pre-generate");
   }
+  // Fix 45 (docs/parity-mac/brain-party-after-swap.md): the Factory Head has no GO ON roll. AskReadyForHead -> AskSwapBeforeHead runs no
+  // factory_generateopponentmons (BattleFactoryPreBattleRoom scripts.inc:349-376); his party is rolled at the battle's start
+  // (FillFactoryTrainerParty -> FillFactoryBrainParty, battle_tower.c:1857), after the swap, excluding the rentalMons of that moment
+  // (battle_factory.c:786-792): the player's three after the swap and the beaten trainer's three. So a Brain battle is generated at the
+  // swap's resolution (advanceFactoryRoundPresentation), never here.
+  if (getFactoryFrontierBrainStatus({
+    battleMode: "singles",
+    winStreak: state.config.factoryWinStreak + battleIndex,
+    symbolsCount: state.config.factorySymbolsCount ?? 0,
+  }) !== "not-ready") {
+    return state;
+  }
   const previous = state.opponentGenerations.at(-1)!;
   const rngBefore = state.round.rules.rngValue;
   const generated = adoptNextOpponentOrGenerate(state, battleIndex, rngBefore, previous);
@@ -1396,19 +1435,13 @@ export function advanceFactoryRoundPresentation(
         pendingNextOpponent: null,
       });
     }
-    // Simplified rounds that never pre-generate (fixture stages, direct
-    // swap-decision tests) still roll at swap resolution, byte-for-byte the
-    // same cursor/spend as a pre-generation would have recorded.
+    // A Frontier Brain battle (fix 45: the source rolls the Head's party at the battle's start, after the swap) and simplified rounds that
+    // never pre-generate (fixture stages, direct swap-decision tests) roll here, at the swap's resolution: the same cursor as a GO ON
+    // pre-generation, with the rentals after the swap (nextSavedRentalRecords: the player's three as swapped, the beaten trainer's three).
     const battleIndex = state.round.rules.battleIndex + 1;
     const previous = state.opponentGenerations.at(-1)!;
     const rngBefore = state.round.rules.rngValue;
-    const generated = generateOpponentFor(
-      state.config,
-      battleIndex,
-      rngBefore,
-      storedTrainerIdsForNextGeneration(previous),
-      nextSavedRentalRecords(state),
-    );
+    const generated = adoptNextOpponentOrGenerate(state, battleIndex, rngBefore, previous);
     const segment = generationSegment(
       "opponent-generation",
       battleIndex,
