@@ -10,10 +10,12 @@ import { cpSync, mkdirSync, readFileSync } from "node:fs";
 import { basename } from "node:path";
 import { defineConfig } from "vite";
 import { assetsInlineLimit, engineBuildDefine, manualChunks } from "./vite.config.ts";
+import { monPicFilesPlugin } from "./tools/build/monPicFiles.ts";
 
 export default defineConfig(async () => ({
   root: ".",
-  define: await engineBuildDefine("build"),
+  // dl3: the library carries the per-species picture files only (no full-table chunk).
+  define: { ...(await engineBuildDefine("build")), __POKEBENCH_SPRITE_FILES__: "true", __POKEBENCH_SPRITE_FULL__: "false" },
   build: {
     outDir: "dist-lib",
     emptyOutDir: true,
@@ -36,6 +38,7 @@ export default defineConfig(async () => ({
     },
   },
   plugins: [
+    monPicFilesPlugin(),
     {
       // Vite inlines every asset in lib mode (the player chunk would carry ~15 MB of base64). The audio files are emitted as
       // real files next to the chunks and referenced with new URL(..., import.meta.url), so the host bundler / CDN serves them.

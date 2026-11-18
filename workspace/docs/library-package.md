@@ -117,6 +117,22 @@ dev shell (`src/main.ts`) opts in; `src/headless.ts` does not import it, so
 `ENGINE_BUILD` is unaffected. Pinned by `tests/bnd255Gamepad.test.ts`, including
 equality of the input stream with direct `press` / `release`.
 
+## Battle pictures per species (additive option, dl3)
+
+**For the website: one optional option, `spriteBase?: string` on `FactoryGameOptions`; nothing else in the API moves.** The battle pictures
+are no longer one 430 KiB (brotli) chunk fetched before the first frame; the package ships 376 small files, `dist-lib/sprites/<SPECIES>.txt`
+(avg 1.2 KiB brotli), and the game fetches the ones a screen needs (the draft's six at mount, each battle's six when the round is built, swap
+candidates when known). First-battle download: ~2112 KiB -> ~1700 KiB brotli (`docs/dl3-per-species-pictures.md`).
+
+- A host bundler (Vite / Rollup / webpack 5) emits the files as assets by itself, exactly like the audio files (`new URL(..., import.meta.url)`
+  in the entry's chunk): no configuration. Serving the package files unbundled works the same.
+- `spriteBase` is for hosts that copy `dist-lib/sprites/` somewhere else (a CDN path): the game then fetches `${spriteBase}/<SPECIES>.txt`
+  (resolved against `document.baseURI`; a trailing slash is optional). Omit it and the files are found next to the chunks.
+- The loop HOLDS (no tick, no draw, the canvas keeps its last frame) while a picture a screen needs has not arrived, so the trace, the events
+  and every frame are identical to before; only the wall-clock start of a screen can be a little later. A file is retried once; a second
+  failure reports `onError` ("sprite pixels failed to load") and stops the game, as a failed sprite chunk did.
+- Node / `dist-lib/headless.js` are untouched (no pictures, no network). `ENGINE_BUILD` moves (see the dl3 doc).
+
 ## Sound (additive API change, aud245)
 
 **For the website: this is an additive change to the contract; nothing existing moves.** `FactoryGameOptions` gains

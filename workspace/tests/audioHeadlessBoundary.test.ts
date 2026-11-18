@@ -5,6 +5,7 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { build, type Rollup } from "vite";
 import { assetsInlineLimit, manualChunks } from "../vite.config.ts";
+import { monPicFilesPlugin } from "../tools/build/monPicFiles.ts";
 
 describe("headless build graph has no audio beyond the SoundEvent type module", () => {
   it("only src/audio/soundEvents.ts, and no audio assets / sound-source data", async () => {
@@ -39,7 +40,8 @@ describe("headless build graph has no audio beyond the SoundEvent type module", 
       root: ".",
       configFile: false,
       logLevel: "silent",
-      define: { __POKEBENCH_ENGINE_BUILD__: JSON.stringify("test") },
+      define: { __POKEBENCH_ENGINE_BUILD__: JSON.stringify("test"), __POKEBENCH_SPRITE_FILES__: "true", __POKEBENCH_SPRITE_FULL__: "false" },
+      plugins: [monPicFilesPlugin()], // dl3
       build: {
         write: false,
         target: "es2022",

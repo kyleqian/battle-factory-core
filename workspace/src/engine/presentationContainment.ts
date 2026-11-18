@@ -38,6 +38,8 @@
 // Contained errors are kept in a bounded module-level list (first CONTAINED_PRESENTATION_ERROR_LIMIT distinct errors, deduped
 // by command type + message) so headless callers (the soak, the bench ABI) and the browser session export can see them.
 
+import { MonPicPending } from "./monPicPending.ts";
+
 export type ContainedPresentationSite = "adapter" | "duration" | "draw" | "field" | "commands" | "order";
 
 export type ContainedPresentationError = Readonly<{
@@ -68,6 +70,8 @@ export function recordContainedPresentationError(
   error: unknown,
   detail: string | null = null,
 ): boolean {
+  // dl3: a picture that has not loaded yet is not a presentation error; the browser loop fetches it and retries the frame.
+  if (error instanceof MonPicPending) throw error;
   const message = error instanceof Error ? `${error.name}: ${error.message}` : String(error);
   const key = `${commandType}|${message}`;
   if (seen.has(key)) return false;
