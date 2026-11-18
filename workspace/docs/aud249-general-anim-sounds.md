@@ -335,3 +335,58 @@ python3 tools/run-mgba-probe.py /tmp/psn3/ram.json -- /srv/pokebench/vendor/mgba
 node --experimental-strip-types --no-warnings tools/integration/hpd4Cmds.ts /tmp/psn3/trace.json 1550
 python3 <evidence>/sta4/an.py /tmp/psn3/ram.json 600 1000     # ROM script rows (PoisonTurnDmg 808 / DoStatusTurnDmg 903 / launch 904)
 ```
+
+## psn4: the three big poison-tick windows (-82 / -124 / -82, mass 1,728) decomposed on the ROM side (2026-11-18, measurement only, `src/` / `tests/` untouched)
+
+Evidence: aud259 chain frozen traces for seeds 499 and 3738 (read-only, main tree `.integration/evidence/aud259/chain/*-on.frozen.json`, `replay` key dropped for `validate_request`), replayed through `hpd2Probe.py` (499 to frame 1560, 3738 to 42400, 8 s / 38 s; ROM frame = the soundScoreboard `rabs` frame). Rows: `gBattlescriptCurrInstr` symbolised from `pokeemerald.map`, `gAnimScriptActive`, `gBattleControllerExecFlags` (scratch `/tmp/psn4/an.py`, `/tmp/psn4/ram*.json`). Engine-side figures are the scoreboard's engine SE frames (`eabs`) only: I did **not** replay the engine's per-command rows for these census runs (`hpd4Cmds.ts` takes a lab trace, not a census seed; `soundCensusRomReplay.ts` would be needed), so which engine command is short is **inferred** from the ROM stage lengths, marked so below.
+
+### 1. ROM timeline between the last matched body SE and the tick's first SE (frames, ROM RAM)
+
+| window | last matched SE (ROM / engine abs) | tick first SE (ROM / engine abs) | ROM gap | engine gap | shortfall |
+|---|---|---|---|---|---|
+| 499 res1 (Knock Off -> tick) | 1117 / 1088 (139) | 1483 / 1391 | 366 | 303 | 63 (offset -82 = -19 carried - 63) |
+| 3738 res60 (Encore, failed Toxic, Safeguard ends, tick) | 41077 / 40544 (222) | 41689 / 41031 | 612 | 487 | 125 (offset -124 = +1 - 125) |
+| 3738 res61 (Slash, failed Toxic, tick) | 41847 / 41191 (136) | 42298 / 41560 | 451 | 369 | 82 (offset -82 = 0 - 82) |
+
+ROM script stages (`BattleScript_*` pointer, frame ranges):
+
+| window | stage | ROM frames |
+|---|---|---|
+| 499 res1 | Knock Off `HitFromAtkAnimation+1` hit anim (`anim` 1) | 1094 .. 1143 |
+| | `BattleScript_KnockedOff+0` .. `+7` **`playanimation B_ANIM_ITEM_KNOCKOFF`**: launch lead | 1196 .. 1219 (23) |
+| | item animation (`gAnimScriptActive` 1) | 1219 .. 1262 (43) |
+| | `printstring PKMNKNOCKEDOFF` (exec 1) | 1264 .. 1313 (49) |
+| | `waitmessage LONG` | 1313 .. 1377 (64) |
+| | `MoveEnd` -> `PoisonTurnDmg` print (96) -> `DoStatusTurnDmg` launch | 1379 / 1389 .. 1482 / 1483 |
+| 3738 res60 | Encore anim ends, `EffectEncore+20` print + wait | 1146 -> 41149 .. 41235 (86) |
+| | **`EffectToxic` used-print** (exec 1) | 41246 .. 41265 (19) |
+| | **`AlreadyPoisoned`: `pause LONG` 41271 .. 41335 (64), print 41336 .. 41369 (33), `waitmessage LONG` 41369 .. 41433 (64)** | 41270 .. 41433 (163) |
+| | `MoveEnd` | 41434 .. 41442 |
+| | **`BattleScript_SafeguardEnds`: `pause SHORT` 41443 .. 41475 (32), print 41476 .. 41525 (49), `waitmessage LONG` 41525 .. 41589 (64)** | 41443 .. 41591 (148) |
+| | `PoisonTurnDmg` print (96) -> launch | 41592 .. 41688 / 41689 |
+| 3738 res61 | Slash hit; `MoveEnd` | 41840 .. 42001 |
+| | `EffectToxic` used-print 19 + **`AlreadyPoisoned`** 64 + 33 + 64 | 42002 .. 42191 (190) |
+| | `MoveEnd`, `PoisonTurnDmg` print (96) -> launch | 42192 .. 42298 |
+
+### 2. Cause per window
+
+| window | shortfall | cause |
+|---|---|---|
+| 499 res1 | 63 | **Known: the missing Knock Off item animation (out1, Scene OFF twin in out2).** ROM `B_ANIM_ITEM_KNOCKOFF`: launch lead 23 + animation 43 = **66** frames (1196 .. 1263) before the 49 + 64 knock-off message, which the engine does not play; 63 of the 66 are seen as shortfall (the 3 left are the one-row message convention). Measured on the ROM; the engine gap 303 = 366 - 63 is measured; the attribution of the 63 to the item animation is a match of numbers (inferred, not a command-row read). |
+| 3738 res61 | 82 | **Failed (already-poisoned) Toxic, new cause: `BattleScript_AlreadyPoisoned`.** ROM between Slash's last SE and the tick: `EffectToxic` used-print 19 + `pause LONG` 64 + print 33 + `waitmessage` 64 = 190. 82 = 64 (the `pause`) + 18 (about the used-print 19) is the arithmetic fit; i.e. the engine plays the failure message path without the `pause LONG` and a used-print row. **Inferred**: the specific missing engine rows need the engine command rows of seed 3738 res61 (not replayed). Same family as out2's Horn Drill KO-fail pause (a `pause LONG` the engine omits on a failure path). |
+| 3738 res60 | 125 | **Failed Toxic (as above, 82 from the same `pause` + used-print arithmetic) + 43 more.** The window has the same `AlreadyPoisoned` 189 (used-print 19 + 163) and, new, a **`BattleScript_SafeguardEnds` end-of-turn message (148 frames) right before the tick** (Safeguard wore off). 125 - 82 = 43 does not equal a whole stage of 148: so either the engine plays SafeguardEnds and is 43 short inside it / in the Encore -> Toxic hand-off, or it half-plays the message. **Not resolved**; needs the engine rows. |
+
+### 3. What this changes
+
+1. The three large windows are **not a drift inherited from lead / tail rows**, they are command-level length gaps: one known (Knock Off item animation, out1 / out2; landing it takes 63 of the 1,728 mass x 6 = ~378 off the 499 res1 window) and two in **failed Toxic (`AlreadyPoisoned`) and the Safeguard-expired message**, which neither out1 / out2 nor hpd7 covers. Together the res60 / res61 offsets are 124 + 82 = 206 x 6 = 1,236 of the 3,600 poison-tick mass (34 %), the biggest single un-assigned item in T2's poison class.
+2. The fix is **not** the psn3 lead / tail landing (which would move these three by about 5 .. 17 only).
+3. **Next (one probe, not done for time):** run the engine's command rows for seeds 3738 (res60 / res61) and 499 (res1) from `soundCensusRomReplay.ts` (command list per turn is already in its `turnEvents[].commands`, line 297) and compare the `frames` of the status-fail command (`AlreadyPoisoned`: want 190 incl. used-print) and the Safeguard-expired message (want 148) with the ROM stages above; both messages are text commands the engine emits (`battleEndTurnOrchestration.ts`, `battleResolutionPresentation.ts` mention SafeguardEnds / already-poisoned), so the gap is probably their `minimumFrames` / a missing `pause`.
+
+Reproduce (scratch `/tmp/psn4/`):
+```
+ln -s /srv/pokebench/vendor/pokeemerald reference/pokeemerald   # worktree only (present here)
+export PYTHONPATH=/srv/pokebench/vendor/libmgba-py
+# drop "replay" from <evidence>/aud259/chain/<seed>-on.frozen.json -> /tmp/psn4/f<seed>.json
+python3 tools/run-mgba-probe.py /tmp/psn4/ram499.json -- /srv/pokebench/vendor/mgba-venv/bin/python tools/integration/hpd2Probe.py /tmp/psn4/f499.json on /tmp/psn4/ram499.json 1560
+python3 /tmp/psn4/an.py /tmp/psn4/ram499.json 1090 1500        # symbolised ptr / anim / exec changes
+```
