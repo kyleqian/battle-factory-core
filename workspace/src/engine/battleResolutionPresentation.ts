@@ -1054,7 +1054,7 @@ const PRE_MOVE_STATUS_ANIMATION_TIMING = Object.freeze({
  * sta5 step 2 (docs/aud249-general-anim-sounds.md, ROM windows aud242b Flatter / aud242f Swagger): a stat print whose script goes on to
  * inflict a status move effect (`printfromtable; waitmessage LONG; jumpifability; jumpifsideaffecting; setmoveeffect; seteffectprimary`,
  * which runs `chosenstatus2animation`) reaches the launch 6 rows after the message ends: waitmessage's completing row, the four script
- * rows, and the launch instruction's own row. Scene-independent script rows, so they are message-box rows in both scenes.
+ * rows, and the launch instruction's own row. Scene ON only: the Scene OFF census keeps its commands.
  */
 export const MOVE_INFLICTED_STATUS_ANIMATION_LEAD_ROWS = 6;
 const MOVE_INFLICTED_STATUS_ANIMATION_TIMING = Object.freeze({
@@ -1081,6 +1081,7 @@ function isMoveInflictedStatusLaunch(programCounter: number): boolean {
  */
 function messageTimingFromSourceProvenance(
   event: BattleKernelSemanticEvent,
+  sceneOnMoveAnimationSeen: boolean,
 ): BattleMessageTiming | null {
   const programCounter = event.provenance?.programCounter;
   if (programCounter === undefined || programCounter < 0) return null;
@@ -1092,7 +1093,7 @@ function messageTimingFromSourceProvenance(
   ) {
     const launch = BATTLE_SCRIPT_PROGRAM.instructions[programCounter + 2]?.opcodeName;
     if (launch === "B_SCR_OP_STATUS2ANIMATION" || launch === "B_SCR_OP_STATUSANIMATION") return PRE_MOVE_STATUS_ANIMATION_TIMING;
-    return isMoveInflictedStatusLaunch(programCounter) ? MOVE_INFLICTED_STATUS_ANIMATION_TIMING : WAITMESSAGE_LONG_TIMING;
+    return sceneOnMoveAnimationSeen && isMoveInflictedStatusLaunch(programCounter) ? MOVE_INFLICTED_STATUS_ANIMATION_TIMING : WAITMESSAGE_LONG_TIMING;
   }
   return null;
 }
@@ -4697,6 +4698,8 @@ export function projectBattleResolutionCommands(
   let lastMoveAttacker: 0 | 1 | null = null;
   // Target of the latest Scene ON MOVE_ANIMATION receipt (Scene OFF has none): its `returntoball` is the forced removal.
   let sceneOnMoveTarget: 0 | 1 | null = null;
+  // sta5 step 2 holds are Scene ON rows (the launch follows a Scene ON MOVE_ANIMATION receipt; Scene OFF has none and keeps its commands).
+  let sceneOnMoveAnimationSeen = false;
   // plr162 / snd182: battlers whose forced `returntoball BS_TARGET` (Roar / Whirlwind) removal awaits its send-in (both scenes).
   const forcedDraggedOut = new Set<0 | 1>();
   let pendingHeldItemEffectBattler: 0 | 1 | null = null;
@@ -4849,7 +4852,7 @@ export function projectBattleResolutionCommands(
             : payload.messageId === "STRINGID_SWITCHINMON"
               ? SWITCH_IN_MESSAGE_TIMING
               : (() => {
-                const base = messageTimingFromSourceProvenance(event)
+                const base = messageTimingFromSourceProvenance(event, sceneOnMoveAnimationSeen)
                   ?? (WAITMESSAGE_LONG_MESSAGE_IDS.has(payload.messageId)
                   ? WAITMESSAGE_LONG_TIMING
                   : MESSAGE_TIMING);
@@ -4997,6 +5000,7 @@ export function projectBattleResolutionCommands(
       if (payload.animationId === "MOVE_ANIMATION") {
         const animation = battleMoveAnimationRequest(battler, payload.target, payload.arguments);
         sceneOnMoveTarget = animation.target === battler ? null : animation.target;
+        sceneOnMoveAnimationSeen = true;
         const presentedSinceUsedAtAttack = commandsPresentedSinceUsedPrint(events, pauseOpenerIndex, commands.slice(pauseOpenerCommands), field);
         commands.push(Object.freeze({
           type: "move-animation",
