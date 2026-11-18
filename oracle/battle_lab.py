@@ -114,7 +114,10 @@ SB2_FRONTIER_LVL_MODE = 0xCA9
 SB2_FRONTIER_BATTLE_NUM = 0xCB2
 SB2_TOWER_WIN_STREAK_SINGLES_50 = 0xCE0
 SB2_FACTORY_WIN_STREAK_SINGLES_50 = 0xDE2
-SB2_FACTORY_RENTS_SINGLES_50 = 0xDF6
+# factoryRentsCount[0][0]: factoryRecordWinStreaks[2][2] at 0xDEA ends here.
+# The header's "0xDF6" comment is wrong: 0xDF6 is [1][0], the doubles
+# count (the ROM writes the singles Level 50 count at 0xDF2 in play).
+SB2_FACTORY_RENTS_SINGLES_50 = 0xDF2
 SB2_RENTAL_MONS = 0xE70
 
 # --- Frontier-Brain walk-up staging (`factoryBrain` + `walkup: true`) -------

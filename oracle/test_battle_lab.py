@@ -2,8 +2,11 @@
 
 from __future__ import annotations
 
+import re
+import struct
 import unittest
 from itertools import permutations
+from pathlib import Path
 
 from battle_lab import (
     ACTION_MENU_MAX_ACKS,
@@ -18,6 +21,7 @@ from battle_lab import (
     FacilityCatalog,
     SELECT_CONFIRM_ACCEPT,
     SELECT_CONFIRM_TO_ACTION_MENU,
+    SB2_FACTORY_RENTS_SINGLES_50,
     SELECT_TO_ACTION_MENU,
     SUBSTRUCT_POSITIONS,
     WALKUP_MAX_ACKS,
@@ -1290,6 +1294,34 @@ class PreviewReportGuardTests(unittest.TestCase):
             self.lab.preview_report(capture_all_frames=True)
         with self.assertRaises(AttributeError):
             self.lab.preview_report()
+
+
+_REFERENCE = Path(__file__).resolve().parent.parent / "reference" / "pokeemerald"
+
+
+class SaveOffsetTests(unittest.TestCase):
+    def test_rents_count_offset_is_the_one_the_rom_reads(self):
+        # include/global.h labels factoryRentsCount "0xDF6", but the built
+        # GetNumPastRentalsRank adds 0xDF2 to gSaveBlock2Ptr (its literal
+        # pool): 0xDF6 is [1][0], the doubles count.
+        rom_path = _REFERENCE / "pokeemerald.gba"
+        map_path = _REFERENCE / "pokeemerald.map"
+        if not (rom_path.is_file() and map_path.is_file()):
+            self.skipTest("the decompilation is not built")
+        found = re.search(
+            r"^\s+0x([0-9a-f]{8})\s+GetNumPastRentalsRank$",
+            map_path.read_text(),
+            re.MULTILINE,
+        )
+        self.assertIsNotNone(found)
+        start = int(found.group(1), 16) - 0x08000000
+        code = rom_path.read_bytes()[start:start + 0x48]
+        words = {
+            struct.unpack_from("<I", code, offset)[0]
+            for offset in range(0, len(code) - 3, 4)
+        }
+        self.assertIn(0xDF2, words)
+        self.assertEqual(SB2_FACTORY_RENTS_SINGLES_50, 0xDF2)
 
 
 if __name__ == "__main__":
