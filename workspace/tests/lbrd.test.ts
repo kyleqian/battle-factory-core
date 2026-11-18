@@ -45,9 +45,11 @@ interface WonLobby {
  * a scan of 1..12 on the full file with the seed in both roles found 4 passing every case (15 / 15; seed 2 loses only the continuation), so both use 4.
  */
 // hpd8 (shape-A lead + hit tail moved the Scene ON deal): 17 lost the continuation; a scan of 1..24 with the seed in both roles found only 4 passing every case.
-const WIN_TWO_SEED = 4;
-const RETIRE_SEED = 4;
-const WIN_THEN_LOSE_SEED = 0;
+// hpf1 (hit -> message / faint-chain / turn-end hp commands are floor-free, ROM-measured): 4 lost the Scene OFF continuation and seed 0 no longer loses its second round; a scan of 13..44
+// with the seed in both win roles found 14, 23 and 36 passing all but the challenge-2 loss; a scan of the loss seed 1..24 (win = 14) found 4, 13, 14, 17, 19 losing it. 14 for all three.
+const WIN_TWO_SEED = 14;
+const RETIRE_SEED = 14;
+const WIN_THEN_LOSE_SEED = 14;
 
 function newPlayer(seed: number): RandomPlayer {
   const player = new RandomPlayer(new Rng(seed), new ActionLog(false), "winning");
