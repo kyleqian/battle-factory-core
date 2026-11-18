@@ -304,3 +304,39 @@ pool species has Drizzle, Sand Stream or Drought; the jump-command entries cite 
 the hunter skipped the 8 covered ones), 1 marker hit: R035 at lab seed 1040873 (Clefable's Metronome called Taunt, then the AI's Machamp scored Counter
 under Taunt), ROM match 14 of 14 states with its `cover` piece run. Promoted to `stages/coverage/R035-clefable-taunt-counter-replacement.json`; the
 hunter now skips R035. Open luck designs: R040, R110 (0 hits each in ~2,700 seeds). Summary: `.integration/evidence/luck-hunt/20261118/summary.md`.
+
+**luck5 (2026-11-18, tools / docs / designs only): 63 of the 110 covered (62 before), R094 and R098 moved to class (a).** Seven Metronome designs added to
+`tools/replay-hunt/luck-designs/`, one per rule, all in one battle shape: challenge 7, the player's Clefable 389 (IVs 31) calls Metronome ten times
+(`prefer` slot 0, 10 PP) opposite Shuckle 528 (Attack 10, cannot knock it out; speed 5 against 60), then `preferSwitch` to Snorlax 826 so the battle ends inside
+the ROM drive's state budget. Each design names its marker as a `cover` piece (from `rule-coverage-c-rules.json`) and passes `designcheck.py`. Because the seven
+share the battle, one trial of a union-cover design (all their markers as `coverAny`) measures all of them at once; the hunter still runs one design per rule.
+Measured: about 6 Metronome calls per battle reach a real move, 86 in the 14 battles that ran to the end of the last trial (the rest are calls that end without a move; `PREHUNT_CALLS=1`, new in `prehunt.py`: prints each seed's Metronome calls and what they became).
+
+| rule | marker (engine) | chance per seed (estimate) | trial (engine only, JOBS 1) |
+|---|---|---|---|
+| R073 Hidden Power type past ??? | Hidden Power with odd IVs (Clefable ch 7, IVs 31 = Dark) | 0.03 (any of ~10 calls: 10/336) | **hit at lab seed 920103, promoted** (below) |
+| R101 Weather Ball in sandstorm | Weather Ball while Shuckle's Sandstorm is up | 0.02 | 0 hits |
+| R082 Mud Sport twice | Mud Sport or Water Sport called twice | 0.0008 | 0 hits |
+| R078 Lock-On then OHKO move | Lock-On / Mind Reader, then Fissure / Guillotine / Horn Drill / Sheer Cold | 0.0006 | 0 hits |
+| R079 Lock-On then a no-accuracy move | Lock-On / Mind Reader, then a move with no accuracy roll (Roar, Yawn, Skill Swap, ...) | 0.002 | 0 hits |
+| R096 Transform fails on a digging target | Transform while Shuckle is in Dig | 0.004 | 0 hits |
+| R058 Charge, then an Electric move | Charge then an Electric move | 0.0014 | 0 hits |
+
+Trial seeds: 920000-920007 (8), 920100-920103 (4, stopped at the hit), 920200-920216 (17; 14 ran to the end and 3 hit the frame budget, then `STALL-ABORT`).
+29 battles in all, JOBS 1. One marker hit, the R073 one, on the first design family's union trial. The expected hits for the others at 29 battles
+are 0.58 (R101), 0.02 to 0.12 for the rest, so the zeros say nothing against them; the hunter's days will (R101 needs about 50 seeds for even odds, the rest
+hundreds to thousands). A stall (Shuckle's Double Team / Dig loop; 3 of 17 in the last trial) shortens a seed; the hunter ends it after the frame budget and
+disables a design only after 6 failures in a row.
+
+- **R073 promoted: 62 -> 63 of 110.** Seed 920103: one Metronome call was Hidden Power; Clefable's IVs 31 are odd, so the type index is 15 (Dark), past the `???` index the
+  marker skips. Stage file `docs/parity-mac/stages/coverage/R073-clefable-metronome-hidden-power-odd-iv.json`; driven again from the repo file on the Scene OFF oracle:
+  match 31 of 31 states, 29 of 29 wide states, 0 diff points, `stage.ok` true. The hunter now skips R073. **No ROM difference was found in luck5.**
+- **R094: class (a), cannot occur.** The Thick Club arm of the Future Sight / Doom Desire damage (`battleScriptTrysetfutureattackOpcode.ts:88`; Thick Club on a
+  Cubone / Marowak) needs a Cubone or Marowak that casts Future Sight or Doom Desire. No Cubone / Marowak set has either, none has Metronome, and the only way to
+  give one a move or item (Trick, Covet, Thief) is forbidden to Metronome and absent from the sets that would hold the item.
+- **R098: class (a), cannot occur.** The Steel arm (`battleScriptTrysetfutureattackOpcode.ts:80`; a Metal Coat holder casting Doom Desire) needs Doom Desire on a Metal
+  Coat holder. No set has Doom Desire; the only Metal Coat holder is Lairon 215 (no Metronome), and Trick / Covet / Thief cannot be called by Metronome.
+- **Skipped as too low-odds for a design** (two or more specific Metronome calls in one battle, under about 1e-4 per seed): R049, R055, R061, R062, R071, R072,
+  R075, R086, R104. R103, R083, R106 and R081 were not touched (not Metronome-reachable cheaply, see their entries above).
+- **Not written in this step (out of time):** the AI-Clefable family R050-R053 (needs a passive bulky player with a repeatable heal and a move shared with
+  Clefable), the Chansey challenge-1 family R063 / R064 / R068 / R091 / R099 and R100. They stay in (c).
