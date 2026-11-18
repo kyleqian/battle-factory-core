@@ -76,8 +76,6 @@ import type {
   FactoryFullTurnDecisionRules,
 } from "../../src/engine/factoryBattleScriptFullTurnDecision.ts";
 import type {
-  FactoryBattleMoveSelectionCursors,
-  FactoryBattlePresentationBoundaries,
   FactoryRoundBattleOrchestratorState,
 } from "../../src/engine/factoryRoundBattleOrchestrator.ts";
 import { BATTLE_SCRIPT_STATUS2_MASKS } from "../../src/engine/battleScriptSourceConstants.ts";
@@ -461,6 +459,7 @@ const TERMINAL_SEAM_RECALL_EVENT_PROVENANCE = Object.freeze({
 function terminalSeamEvent(
   sequence: number,
   payload: BattleKernelSemanticEvent["payload"],
+  _provenanceHint?: { readonly opcodeName: string },
 ): BattleKernelSemanticEvent {
   return Object.freeze({
     sequence,
@@ -1206,8 +1205,6 @@ type MidBattleSwitchStageOptions = Readonly<{
   playerBenchNone?: boolean;
   /** Stage the 21st battle of the run: the Silver Factory Head round (`currentOpponent.frontierBrain`). */
   frontierBrain?: boolean;
-  /** aud259: the staged battle's RNG seed (default 1); a sub-100 accuracy move can miss in the engine while the ROM lab hits. */
-  rngSeed?: number;
   /** aud259: both staged battlers start with isFirstTurn 1 (a fresh battle's first selection), as the ROM lab's Fake Out needs. */
   firstTurn?: boolean;
 }>;
@@ -1502,6 +1499,7 @@ function partyMenuStatusItemOffStage(state: EngineState): EngineState {
 // fixture's verbatim segments from there.
 const BUTTERFREE_TORMENTED_LV50: FactoryFullTurnBattlerConfig = Object.freeze({
   species: 12,
+  moveId: 33,
   moves: [33, 16, 0, 0] as const, // TACKLE, GUST
   // Same staged-gender class as MURKROW: the oracle's BUTTERFREE is male
   // (the ~24px "detail-box type cell" residual at (190-194, 79-87) is the
@@ -1526,6 +1524,7 @@ const BUTTERFREE_TORMENTED_LV50: FactoryFullTurnBattlerConfig = Object.freeze({
 
 const MURKROW_TORMENT_LV50: FactoryFullTurnBattlerConfig = Object.freeze({
   species: 198,
+  moveId: 259,
   // Same staged-gender class as RATTATA_LV50 above: the oracle's ROM-derived
   // MURKROW is male (the ~24px "pink-vs-cyan" cluster at (55,21)-(59,28) in
   // PROGRESS 958's residual list is the opponent healthbox gender glyph, not

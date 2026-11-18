@@ -2,6 +2,7 @@
 // Unlike pokered-pewter, the oracle here is not importable in-process — it is
 // an mGBA-backed Python service — so the compare tooling always talks HTTP.
 
+// @ts-expect-error pngjs ships no type declarations in this repo
 import { PNG } from "pngjs";
 import {
   oracleUrlForProfile,
