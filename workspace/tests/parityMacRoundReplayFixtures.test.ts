@@ -76,6 +76,23 @@ const CASES: Array<{ name: string; covers: (f: Fixture, engine: any) => void }> 
     expect(romRounds(f)[next].rentsCount).toBeLessThan(22);
     expect(engine.battles[next].between.newRound).toBe(true);
   } },
+  { name: "unbroken-run-to-gold", covers: (f, engine) => {
+    // One unbroken ROM play from the very start: streak 0, rent count 0, no symbols; nothing staged after battle 1.
+    const r = romRounds(f);
+    expect(r).toHaveLength(42);
+    const starts = r.map((x, n) => ({ n, x })).filter(({ x }) => x.battleNum === 0);
+    expect(starts.map(({ n }) => n)).toEqual([0, 7, 14, 21, 28, 35]);
+    expect(starts.map(({ x }) => x.factoryWinStreak)).toEqual([0, 7, 14, 21, 28, 35]);
+    expect(starts[0]!.x.rentsCount).toBe(0);
+    // silver Noland at battle 21; the ROM gives the symbol, the next rounds carry it; gold Noland at battle 42
+    expect([r[20].trainerId, r[20].factoryWinStreak, r[20].factorySymbols]).toEqual([1022, 20, 0]);
+    expect(starts.slice(3).every(({ x }) => x.factorySymbols === 1)).toBe(true);
+    expect([r[41].trainerId, r[41].factoryWinStreak, r[41].factorySymbols]).toEqual([1022, 41, 1]);
+    expect(f.rom.at(-1).drive.outcome).toBe(1);
+    // the fourth round's draft is rolled at 15 rents or more: one better slot
+    expect(starts[3]!.x.rentsCount).toBeGreaterThanOrEqual(15);
+    expect(engine.battles.filter((b: any) => b.swapAfter?.type === "accept").length).toBeGreaterThan(12);
+  } },
   { name: "rent-count-wraps", covers: (f, engine) => {
     const next = romRounds(f).findIndex((r, n) => n > 0 && r.battleNum === 0);
     // fix 46: the draft at 256 rents reads the count as one byte
