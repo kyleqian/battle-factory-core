@@ -42,3 +42,9 @@ ice1 (2026-11-18, `docs/hpd1-hp-hold.md` "ice1"): two stage files without a `rul
 |---|---|---|---|---|
 | ice1-iceball-lock | 90102 | 10 of 10 | 2 of 2 | Sealeo 196 locked into Ice Ball, five hits in a row on the opponent's Wobbuffet 185 (foe HP 272 -> 254 -> 223 -> 157 -> 39 -> 0) |
 | ice1-rollout-defense-curl | 90101 | 10 of 10 | 3 of 3 | Phanpy 120 uses Defense Curl, then Rollout, five hits with the curl bit on Wobbuffet (foe HP 272 -> 212 -> 147 -> 85 -> 0) |
+
+R080 came from luck4 (2026-11-18, lab seed 910000 of the block 910000-910039 that the day job never uses): the design was rebuilt with an Ampharos 518 lead (Thunder Wave) so the player's Marvel Scale Milotic is paralysed before the next opponent, Whiscash 483, casts Future Sight. Driven by `prehunt.py` on the Scene OFF oracle (`romReplayWide.sh --stage`): match, 16 of 16 states, `stage.ok`.
+
+| file | lab seed | states matched |
+|---|---|---|
+| R080-spark-whiscash-future-sight-milotic | 910000 | 16 of 16 |
