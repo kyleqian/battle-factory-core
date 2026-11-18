@@ -1631,7 +1631,15 @@ function moveAnimationSeGateTiming(events: readonly BattleKernelSemanticEvent[],
  * accepted live window does not contain the script lead: Sonic Boom, Dragon Rage, Defense Curl, Rollout. Seismic Toss is audited but held out (docs/hpd1-hp-hold.md, hpd4). Their lead is presented as
  * the command's first rows (`bodyLeadFrames`); every other body keeps the lead in its script tail (its accepted window was fitted without an audit).
  */
-export const BODY_LEAD_AUDITED_MOVE_IDS: ReadonlySet<number> = new Set([49, 82, 111, 205, 301, 69]);
+const HPD4_BODY_LEAD_MOVE_IDS: readonly number[] = [49, 82, 111, 205, 301, 69];
+/**
+ * hpd8: the "shape A" bodies of hpd7 / hpd7c (docs/hpd1-hp-hold.md): the accepted live window is the ROM's gAnimScriptActive length + 1, the ROM gap after it is 4.
+ * Their lead is the kernel's instruction count (no table), and the rows after the body are 6 - pre - post (`liveMoveHitTailRows`). Aerial Ace, Psychic,
+ * Thunderbolt, Double-Edge, Quick Attack, Body Slam, Ancient Power, Giga Drain, Ice Beam, Surf, Dig (the attack turn only: the charge turn is shape C),
+ * Struggle, Rock Slide, Bubble Beam, Fire Blast, Magical Leaf.
+ */
+export const HPD8_SHAPE_A_MOVE_IDS: ReadonlySet<number> = new Set([332, 94, 85, 38, 98, 34, 246, 202, 58, 57, 91, 165, 157, 61, 126, 345]);
+export const BODY_LEAD_AUDITED_MOVE_IDS: ReadonlySet<number> = new Set([...HPD4_BODY_LEAD_MOVE_IDS, ...HPD8_SHAPE_A_MOVE_IDS]);
 
 function moveAnimationScriptLeadTiming(
   events: readonly BattleKernelSemanticEvent[],
@@ -1651,7 +1659,7 @@ function moveAnimationScriptLeadTiming(
       const waitLead = animation - (used + 1);
       return waitLead > 0 ? { scriptLeadFrames: waitLead } : {};
     }
-    if (presentedSinceUsed === null || !BODY_LEAD_AUDITED_MOVE_IDS.has(moveId)) return {};
+    if (presentedSinceUsed === null || !BODY_LEAD_AUDITED_MOVE_IDS.has(moveId) || events[index]!.provenance?.sourceLabel === CHARGE_TURN_SCRIPT) return {};
     const lead = animation - (used + 1) - presentedSinceUsed;
     return lead > 0 ? { bodyLeadFrames: lead } : {};
   }

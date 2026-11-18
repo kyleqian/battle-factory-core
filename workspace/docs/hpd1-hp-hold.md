@@ -480,3 +480,57 @@ What the rows say:
 - **Proposed landing = the same two pieces as Solar Beam / the shape-B bodies**: lengthen `case 53` to `len + 1` = **210** and add the shape-A pre-0 / post-0 lead + tail (5 + 6), or leave `live` at 115 and give the command lead 5 + tail 101 (holds the last frame for the 95 dead rows; the rows are dead, so the picture is identical either way, but a long `tail` is the Dragon Rage 26-row-tail pattern and the `live` form keeps the age counting). Either puts the next command (hit-animation) on the ROM's H. Predicted effect (out1 / t2off): the Swagger s6 res14 window (Flamethrower then Swagger, mass ~ 1 276) and the s1028 res12 window (~ 580) lose the ~ -100 row drift, ~ 1 100 + ~ 500 of the T2 mass, plus every later SE in a Flamethrower turn (194 commands = 0.7 % of Scene ON, but each carries a body-length offset of ~ 100 rows, which is why it dominates the T2 table far beyond its census share). Sound ages are the open check: `withoutBodyLead` / `AGE_TO_SOUND_ROWS` for 53 and the `aud242b/c` Flamethrower fixtures (`aud242c-flamethrower-player` SE at frame 82, hit SE 279) were fitted on the 115-row window; extending the end of the window does not move the SE start, but any sound age counted from the window end must be re-checked first.
 - **Cross-check against out1**: out1 had ROM `attackanimation` exec 44, anim 46 .. 255 (209 rows), `hitanimation` exec 259 = 215 from `attackanimation`; this lab has A -> H 213 (= 209 + 4) from the same window length 209, so the two independent probes agree on the 209 / gap 4; the 215 vs 221 R -> H is only the different `R` anchor (out1 R = the `attackanimation` exec, here R = the print's release 8 rows before A).
 - Not measured: the opponent side of any of the four (the aud242b / c Flamethrower opponent fixtures exist; hpd4 / hpd7b found no side asymmetry for the lead rule), Lv / defender variants, burn / flinch secondary effects (one window per lab, so a burn animation is a separate command), Fire Blast's own `SoundTask_FireBlast` sound ages, Magical Leaf's per-leaf sound, the sound / hit-frame alignment after a landing, and the exact `IsSEPlaying` end of Flamethrower (estimate above).
+
+## hpd8: shape-A lead + hit tail for the 16 measured bodies (landed)
+
+Lane: integration, Scene ON (:8012) ROM frames, base `f047ca4f5`. Presentation timing only: kernel events, RNG, damage, turn order and facility state are unchanged (census eventsDigest identical, below). Evidence (ignored): `.integration/evidence/hpd8/` (`base/` + `a2/` frames, `base1.txt` / `base2.txt` / `a2.txt` match counts, `census/`, `census-delta-*.txt`, `t2after/`, `t2master/`, `score-*.json`, `soak*.log`, `t*.log` test chunks, `gate.log`).
+
+### What landed
+
+- **Set** (`src/engine/battleResolutionPresentation.ts`): `HPD8_SHAPE_A_MOVE_IDS` = Aerial Ace 332, Psychic 94, Thunderbolt 85, Double-Edge 38, Quick Attack 98, Body Slam 34, Ancient Power 246, Giga Drain 202, Ice Beam 58, Surf 57, Dig attack turn 91, Struggle 165, Rock Slide 157, Bubble Beam 61, Fire Blast 126, Magical Leaf 345 (all `live` = ROM len + 1, ROM gap 4, hpd7 / hpd7b / hpd7c); `BODY_LEAD_AUDITED_MOVE_IDS` = the hpd4 / hpd5 set + these. The Dig charge turn (`CHARGE_TURN_SCRIPT`) is excluded: only the attack turn is shape A. Shapes B / C are not in the set.
+- **Lead is counter-derived (hpd3 rule), unchanged code**: `moveAnimationScriptLeadTiming` = `instructionExecution(MOVE_ANIMATION) - (instructionExecution(used print) + 1)` = 5 for the EffectHit family, now presented as `bodyLeadFrames` (the first rows) for these ids instead of `scriptTailRows`.
+- **Hit tail is a formula, not a table** (`liveMoveHitTailRows`, `battleResolutionPresentationRender.ts`): the whole body is lead + 3 pre + (len + 1) + 3 in the ROM, so T = 6 - pre - post (pre 3 + post 2 -> 1; 3 + 0 -> 3; 0 + 0 -> 6), taken from the existing `liveMoveUniversalRows`. Why a formula and not the counter: the tail is the measured pre / post wrapper rows around the `live` window (hpd7 / hpd7b / hpd7c ROM windows, whole body = 5 + 3 + (len + 1) + 3 at gap 4), not a kernel instruction count; the measured table was replaced by this derivation so a new shape-A id needs only its set entry. A substitute-swap body gets tail 0 (its composite owns the rows). Post-0 bodies hold their last age through the tail (`holdHitTail` in `liveMoveUniversalRowAge`), which fixed an `iceBeamAtAge` "age out of range" crash found in the first run.
+- **Sound clock**: unchanged code. Body SEs keep their ROM ages (`withoutBodyLead`, `moveBodyExtraRows`; `battleHitSounds.ts` is already generic on `bodyLeadFrames > 0`); the NEXT command's SEs move with the lead + tail. Every aud242* / aud248 / hie / cry fixture passed untouched; only `aud252LossBallOpen` seed 2230 and `ais2` ON moved (below).
+- **Scene OFF unchanged.** Census OFF 0..99: 100 / 100 battles identical (digest, error and every command field).
+
+### Compare (`hpd1AppOnly.ts` app render vs the stored ROM frames, exact RGB md5, 1023 frames; labs: the 7 new `hpd8-*-player-on` stages, the aud242 labs for the other 8)
+
+| lab | before | after | | lab | before | after |
+|---|---|---|---|---|---|---|
+| Aerial Ace 332 | 276 | **771** | | Ice Beam 58 | 161 | **509** |
+| Psychic 94 | 84 | **507** | | Surf 57 | 42 | **508** |
+| Thunderbolt 85 | 5 | **352** | | Struggle 165 | 76 | **550** |
+| Double-Edge 38 | 390 | **684** | | Rock Slide 157 | 241 | **510** |
+| Quick Attack 98 | 263 | **768** | | Bubble Beam 61 | 98 | **459** |
+| Body Slam 34 | 103 | **574** | | Fire Blast 126 | 96 | **485** |
+| Magical Leaf 345 | 255 | **660** | | Giga Drain 202 | 441 | 337 |
+| Ancient Power 246 | 123 | 83 | | | | |
+
+`hpd1-dragonrage-on` 950 -> 950, `rol1-rollout5-on` 2028 -> 2028 / 3001 (identical frames: neither move is in the set). The Dig attack turn has no standalone lab here (covered by the live Dig adapter tests).
+**Giga Drain and Ancient Power totals drop although their pre-hit region improves** (Giga Drain frames 0..hit 45 -> 117, blink 9 early -> 1 early; Ancient Power 68 -> 77): the frames lost are static post-hit frames that matched by chance. Giga Drain's drain-message hold is a pre-existing shape-b / floor residual (ROM barEnd -> boxChange 18, app 30, -12; out of scope) that the old early timing masked. A tail sweep of -3..+2 rows gave no improvement for either (the hpd1 / hpd3 "masking" precedent).
+
+### Pins (every re-pin moves toward the ROM)
+
+- `tests/helpers/iu120Rows.ts`: `HPD8_SHAPE_A_IDS`, `HPD4_BODY_LEAD_ROWS` + 5 for every shape-A id, `hpd4BodyTail`, default lead `HPD8_DEFAULT_LEAD` (Dig 91 has none: charge turn), so ordinary-body row-count expectations add lead 5 + T. `livePrep13MoveAdapters` Ice Beam (206 -> 214), `liveDigAdapter` attack turn (+8), `liveRockSlideSides` (138 -> 149), `stl109Struggle` (112 -> 123), `apx217` Bubble Beam transform (244 -> 250), `battleTurnPortability` Rock Slide timing gains `bodyLeadFrames: 5`.
+- `aud252LossBallOpen` seed 2230 (engine minus ROM, frames): [7, -3, -5, -5, -5, -5, -5, -6] -> **[7, 2, 0, 0, 0, 0, 0, -1]** (|delta| 3 / 5 / 6 -> 2 / 0 / 1; the first row unchanged).
+- `ais2AiSwitchFrames` seed 2741 ON: the window is the same ROM frames, 6 engine frames later (`romFrameOffset` 74 -> 68, `lo` / `hi` + 6, md5s unchanged; a 6-frame (lead 5 + tail 1) shift in the lab's pre-window turns, the individual body not isolated). Same class as the hpd6 re-baseline.
+- `tests/lbrd.test.ts` `WIN_TWO_SEED` / `RETIRE_SEED` 17 -> **4** (the Scene ON deal moved; a scan of 1..24 with the seed in both roles found only 4 passing every case; `WIN_THEN_LOSE_SEED` 0 unchanged). `tests/randomRoundSoak.test.ts` needed no re-pin.
+
+### Census 0..99 (`lsd194Census.sh`, `LSD194_CENSUS_JOBS=3 LSD194_SPLIT=4 LSD194_SHARDS=0`, arms = `git archive` of `f047ca4f5` and of the tested commit, `rst197CensusDelta.py`)
+
+Scene ON: 100 battles / 31,507 commands, **0 bad** (eventsDigest, error and the command type sequence equal in all 100); 91 battles changed, **527 move-animation commands** changed (fields 16 / 18 only = the lead and the minimum frames), +3,852 frames: **+6** x 266 (lead 5 + tail 1), **+8** x 205 (5 + 3), **+11** x 56 (5 + 6: the pre-0 / post-0 bodies, e.g. Struggle and the player's Rock Slide); no other command type moved. Scene OFF: 100 / 100 identical.
+
+### T2, Scene ON (`aud248RunSeed.sh` seeds 2 165 2741 3738 5569 8108, 2 at a time, `nice -n 10`; `soundScoreboard.py`)
+
+Missing **0** / extra **0** hold on every family, before (base `f047ca4f5`, a detached worktree running the same chain: `t2base/`) and after (`t2after/`). Exact / offset rows, base -> after: move-animation SE 138 / 1468 -> 133 / 1473, stat-change 6 / 31 -> 6 / 31, cry 3 / 54 -> 3 / 54, battle-controller 29 / 230 -> 29 / 230, bgm 0 / 4 -> 0 / 4. The ROM drive frames per seed are identical (18904 / 17322 / 14708 / 42837 / 11906 / 39841).
+Matched-delta median / p10 / p90 (engine - ROM, frames), base -> after: move-animation SE -2 / -20 / 5 -> -2 / -20 / 5 (n 1606 both); battle-controller -5 / -24 / 2 -> -5 / -24 / 2; stat-change -2 / -15 / 4 -> -2 / -15 / 4; cry -9 / -27 / 13 -> -9 / -27 / 13; bgm 5 / -71 / 10 -> 5 / -71 / 18 (n = 4).
+Per SE row (all 1902 matched SE rows, engine - ROM): sum |delta| 14,818 -> **14,560** (mean 7.79 -> 7.66, rows with |delta| >= 20: 230 -> 216), so the net movement is toward the ROM, but it is not monotone: the rows after a shape-A body moved by the uniform +6 / +8 / +11, and the groups that were already at -1 / 0 / +1 (se 102 / 119 / 152 / 228 at -1 / 0 / 1 -> 5 / 6 / 7, se 207 16 -> 22, se 219 5 -> 11, se 138 1 -> 7) now overshoot by that amount, while the groups at -9 .. -33 (se 148 -29 -> -19 x 6, se 242 -28 -> -20 x 10, se 15 / 114 / 136 / 195) move toward 0. Cause of the overshoot not isolated (follow-up: a per-row ROM window for those SE groups); no pinned fixture moved away (aud242* / aud248 / hie / cry pass unchanged; `aud252` seed 2230 and `ais2` ON moved toward the ROM).
+An earlier draft compared against the aud259 master chain; its 12 missing rows (`se:140` / `se:179` x 6) were adapters that landed after aud259, not hpd8.
+
+### Gates (tested code commit `b6245066e`, tree `6bec3b68e`)
+
+`npm run typecheck` exit 0; `npm run test:gate` 362 / 362 files, 2844 tests; every test importing `liveMoveAnimation` / `battleResolutionPresentation*` / `moveAnimSounds` / `tickSounds`, every test naming these moves, the hpd6 list, `lbrd` and `randomRoundSoak` = a 532-file union, 5 chunks, all passing (0 failed); `npm run build` and `npm run build:lib` exit 0; vanilla Scene ON soak 0:20 **20 / 20 OK** (budget outcomes, 4 ranges of 5 seeds in parallel; the last seed of each range re-run alone after the tool window). The full `npm test` was not run (the supervisor does).
+
+### Not landed / open (hpd8)
+
+- Shape B / C bodies (Flamethrower, Solar Beam unleash, Hyper Beam family, ...) per hpd7 / hpd7b / hpd7c; Giga Drain's drain-message hold (-12) and Ancient Power's residual (the totals above); Scene OFF timing; the Dig charge turn.

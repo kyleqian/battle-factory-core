@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { LIVE_MOVE_OPPONENT_SHADOW_ROW, liveMoveAnimationDuration, liveMoveAnimationPresentation } from "../../src/engine/liveMoveAnimation.ts";
 import type { BattleMoveAnimationRequest } from "../../src/engine/battleMoveAnimation.ts";
 import { liveView, type Fixture } from "../../tools/integration/liveAdapterFramebuffer.ts";
+import { iu120Ages } from "../helpers/iu120Rows.ts";
 import { generatedCommandAnimationReplay } from "../../tools/integration/generatedCommandAnimationReplay.ts";
 
 // S10A sides: Rock Slide (157) PLAYER attacker. Dense windows (activation .. first inactive script row, 138 rows, row 0) from fresh
@@ -65,7 +66,7 @@ describe("S10A sides: Rock Slide (157) player attacker", () => {
     const on = generatedCommandAnimationReplay(4, "on", [0], 7);
     const off = generatedCommandAnimationReplay(4, "off", [0], 7);
     const body = on.animations.find((a) => a.moveId === 157 && a.attacker === 0);
-    expect(body?.ages).toEqual(Array.from({ length: 138 }, (_, age) => age));
+    expect(body?.ages).toEqual(iu120Ages(157, 138)); // hpd8: + the 5-row script lead and the 6-row hit tail
     expect(body?.adapterActive.every(Boolean)).toBe(true);
     expect(on.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");
     expect(on.stalled).toBe(off.stalled);
