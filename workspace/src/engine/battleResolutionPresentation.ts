@@ -1869,20 +1869,56 @@ function knockoffHpTiming(events: readonly BattleKernelSemanticEvent[], index: n
   const tailFrames = knockoffHpTailRows(events, index, (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0);
   return tailFrames === null ? null : Object.freeze({ minimumFrames: 0, tailFrames } as const);
 }
-/** Applies the hpd1 tail to the plain hp commands of a finished command list (see hpMoveEndLeadRows). */
+/**
+ * hpf1: the hit's own effect print (`critmessage` / `resultmessage`) right after `datahpupdate`. The ROM's hp-to-print hold is the same
+ * `datahpupdate` row + the script rows to the print + 2 (the print's setup before its first glyph; Substitute's `datahpupdate; printfromtable`
+ * is Delta 1 -> 3, Rolling Kick's `critmessage; waitmessage; resultmessage` is Delta 3 -> 5), with no 28-row floor (the floor is 5 short of it on a 32-row bar and
+ * 13 long on a 9-row bar). Returns the tail, or null when the next event is not that print.
+ */
+const HP_MESSAGE_SETUP_ROWS = 2;
+function hpMessageLeadRows(events: readonly BattleKernelSemanticEvent[], index: number): number | null {
+  const event = events[index]!;
+  const programCounter = event.provenance?.programCounter;
+  if (programCounter === undefined || BATTLE_SCRIPT_PROGRAM.instructions[programCounter]?.opcodeName !== "B_SCR_OP_DATAHPUPDATE") return null;
+  const next = events[index + 1];
+  const opcodeName = next?.provenance?.opcodeName;
+  if (next?.payload.kind !== "message" || (opcodeName !== "B_SCR_OP_CRITMESSAGE" && opcodeName !== "B_SCR_OP_RESULTMESSAGE")) return null;
+  const hpExecution = event.provenance?.instructionExecution;
+  const messageExecution = next.provenance?.instructionExecution;
+  return hpExecution === undefined || messageExecution === undefined || messageExecution <= hpExecution
+    ? null : messageExecution - hpExecution + HP_MESSAGE_SETUP_ROWS;
+}
+/**
+ * hpf1: the hit that faints its target runs `datahpupdate; ... tryfaintmon` into the faint chain's `playfaintcry` with nothing presented between: the ROM's hp
+ * command is the bar's own frames + 1 and the chain follows (aud241b lowhp-faint ON / OFF: the 11 -> 0 bar is 12 rows, the 28-row floor put the stop / cry /
+ * faint sounds 16 late; hpf1-pk-dragonrage ON / OFF: a 48-row bar is followed by the faint at +0).
+ */
+function hpFaintNext(events: readonly BattleKernelSemanticEvent[], index: number): boolean {
+  const programCounter = events[index]!.provenance?.programCounter;
+  return programCounter !== undefined && BATTLE_SCRIPT_PROGRAM.instructions[programCounter]?.opcodeName === "B_SCR_OP_DATAHPUPDATE"
+    && events[index + 1]?.payload.kind === "play-faint-cry";
+}
+interface HpLeadRows { readonly moveEndRows: number | null; readonly messageRows: number | null; readonly faintNext: boolean }
+/** Applies the hpd1 / hpf1 tail to the plain hp commands of a finished command list (see hpMoveEndLeadRows, hpMessageLeadRows). */
 function applyHpHitTails(
   commands: BattleResolutionPresentationCommand[],
-  leadRows: ReadonlyMap<number, number>,
+  leadRows: ReadonlyMap<number, HpLeadRows>,
 ): void {
   for (let index = 0; index < commands.length; index += 1) {
     const command = commands[index]!;
-    const lead = command.type === "hp" ? leadRows.get(command.eventSequence) : undefined;
-    if (command.type !== "hp" || lead === undefined || command.timing !== HP_TIMING) continue;
+    const leads = command.type === "hp" ? leadRows.get(command.eventSequence) : undefined;
+    if (command.type !== "hp" || leads === undefined || command.timing !== HP_TIMING) continue;
     const rest = commands.slice(index + 1);
     const transition = rest[0]?.type === "move-animation" && rest[1]?.type === "sprite-visibility";
     const endsTurn = rest.length > 0 && rest.every((c) => c.type === "sprite-visibility" || c.type === "turn-end");
-    const tailFrames = transition ? HP_DATAHPUPDATE_ROW_FRAMES : endsTurn ? lead : 0;
-    if (tailFrames > 0) commands[index] = Object.freeze({ ...command, timing: Object.freeze({ minimumFrames: 0, tailFrames }) });
+    const previous = commands[index - 1];
+    const hit = previous?.type === "hit-animation" && previous.battler === command.battler;
+    if (command.battler === 0 && !hit) continue;
+    const faint = hit && rest[0]?.type === "faint" && leads.faintNext;
+    const tailFrames = transition ? (leads.moveEndRows === null ? 0 : HP_DATAHPUPDATE_ROW_FRAMES)
+      : endsTurn ? leads.moveEndRows ?? 0 : hit && rest[0]?.type === "message" ? leads.messageRows ?? 0 : 0;
+    if (faint) commands[index] = Object.freeze({ ...command, timing: Object.freeze({ minimumFrames: 0 }) });
+    else if (tailFrames > 0) commands[index] = Object.freeze({ ...command, timing: Object.freeze({ minimumFrames: 0, tailFrames }) });
   }
 }
 /**
@@ -4653,7 +4689,7 @@ export function projectBattleResolutionCommands(
 ): readonly BattleResolutionPresentationCommand[] {
   const commands: BattleResolutionPresentationCommand[] = [];
   const pendingHealth = new Map<0 | 1, { eventSequence: number; healthValue: number; instructionExecution: number | undefined }>();
-  const hpLeadRows = new Map<number, number>();
+  const hpLeadRows = new Map<number, HpLeadRows>();
   let leechDrainAnimated = false;
   const pendingSwitch = new Map<
     0 | 1,
@@ -5090,8 +5126,10 @@ export function projectBattleResolutionCommands(
         }));
       }
       leechDrainAnimated = false;
-      const moveEndLead = drainRole === null && battler === 1 ? hpMoveEndLeadRows(events, index) : null;
-      if (moveEndLead !== null) hpLeadRows.set(health.eventSequence, moveEndLead);
+      const moveEndRows = drainRole === null ? hpMoveEndLeadRows(events, index) : null;
+      const messageRows = drainRole === null ? hpMessageLeadRows(events, index) : null;
+      const faintNext = drainRole === null && hpFaintNext(events, index);
+      if (moveEndRows !== null || messageRows !== null || faintNext) hpLeadRows.set(health.eventSequence, { moveEndRows, messageRows, faintNext });
       commands.push(Object.freeze({
         type: "hp",
         eventSequence: health.eventSequence,

@@ -40,7 +40,7 @@ function ourStatSes(rom: Fixture, scene: "on" | "off"): SoundEvent[] {
 // A list: one residual per stat SE row (the aud242o five-turn Rollout window and the aud242q five-turn Ice Ball window, whose turn starts drift, docs/aud242-move-anim-sounds.md sections 19.2 and 21.2).
 const RESIDUAL: Record<string, number | number[] | null> = {
   "aud242a-agility-player.json": -2, "aud242a-swordsdance-opponent.json": -2, "aud242c-cosmicpower-player.json": 2, "aud242c-flatter-player.json": 5,
-  "aud242c-metalsound-opponent.json": 0, "aud242c-superpower-player.json": 17, "aud242c-sweetscent-player.json": -1, "aud242d-calmmind-player.json": 0,
+  "aud242c-metalsound-opponent.json": 0, "aud242c-superpower-player.json": 12, "aud242c-sweetscent-player.json": -1, "aud242d-calmmind-player.json": 0,
   "aud242d-metalclaw-player.json": null, "aud242d-steelwing-player.json": null, "aud242e-overheat-player.json": 17, "aud242f-growth-player.json": 23, "aud242f-swagger-player.json": 6,
   "aud242j-silverwind-player.json": null,
   "aud242k-ancientpower-player.json": null, "aud242o-rollout5-player.json": [0, 0, 0, -2, -3], "aud242k-scaryface-player.json": 14, "aud242k-smokescreen-player.json": 0,

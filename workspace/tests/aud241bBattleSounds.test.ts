@@ -117,36 +117,36 @@ describe("effectiveness, faint and low-HP sounds match the ROM (aud241b)", () =>
     expect(frameDeltas("faint-player-off-window")).toEqual([0, 0, 0, 0, 0]);
   });
 
-  it("super-effective-window.json / -off: SE_SUPER_EFFECTIVE is on the ROM's frame in Scene ON and one early in Scene OFF; the engine's 'It's super effective!' message is 5 ticks short, which moves the faint 5 early", () => {
+  it("super-effective-window.json / -off: SE_SUPER_EFFECTIVE is on the ROM's frame in Scene ON and one early in Scene OFF; the hp -> 'It's super effective!' hold carries the ROM's datahpupdate-to-print rows (hpf1), so the faint is on the ROM's frame", () => {
     const on = fixture("super-effective-window");
     const off = fixture("super-effective-off-window");
     expect(played(on.events).map((e) => `${e.frame}:${e.kind}:${e.id}:${e.pan}`)).toEqual([
       "115:se:14:63", "294:duck:476:null", "294:cry:19:25", "322:duck:476:null", "360:se:16:63",
     ]);
     expect(played(off.events).map((e) => e.frame)).toEqual([97, 276, 276, 304, 342]);
-    expect(frameDeltas("super-effective-window")).toEqual([0, -5, -5, -5, -5]);
-    expect(frameDeltas("super-effective-off-window")).toEqual([-1, -6, -6, -6, -6]);
+    expect(frameDeltas("super-effective-window")).toEqual([0, 0, 0, 0, 0]);
+    expect(frameDeltas("super-effective-off-window")).toEqual([-1, -1, -1, -1, -1]);
   });
 
-  it("lowhp-window.json / lowhp-off-window.json: the player's bar turning red starts SE_LOW_HEALTH one tick after HealthbarDone; the second attack of the turn is one tick early (known mismatch)", () => {
+  it("lowhp-window.json / lowhp-off-window.json: the player's bar turning red starts SE_LOW_HEALTH one tick after HealthbarDone; the second attack of the turn is on the ROM's frame (hpf1: the hit on the player carries the ROM's post-hp hold)", () => {
     const on = fixture("lowhp-window");
     const off = fixture("lowhp-off-window");
     expect(played(on.events).map((e) => `${e.frame}:${e.kind}:${e.id}:${e.pan}`)).toEqual(["299:se:13:-64", "387:se:90:null", "662:se:13:63"]);
     expect(played(off.events).map((e) => e.frame)).toEqual([102, 190, 275]);
-    expect(frameDeltas("lowhp-window")).toEqual([0, 0, -1]);
-    expect(frameDeltas("lowhp-off-window")).toEqual([0, 0, -1]);
+    expect(frameDeltas("lowhp-window")).toEqual([0, 0, 0]);
+    expect(frameDeltas("lowhp-off-window")).toEqual([0, 0, 0]);
   });
 
-  it("lowhp-faint-window.json / lowhp-faint-off-window.json: the faint from a red bar stops the loop (the only real stop-90) and every sound after the 8-pixel drain trails by the engine's 28-tick HP floor", () => {
+  it("lowhp-faint-window.json / lowhp-faint-off-window.json: the faint from a red bar stops the loop (the only real stop-90) and every sound after the 8-pixel drain is on the ROM's frame (hpf1: no 28-tick HP floor before a faint)", () => {
     const on = fixture("lowhp-faint-window");
     const off = fixture("lowhp-faint-off-window");
     const stops = (rom: Fixture) => rom.events.filter((e) => e.kind === "stop" && e.id === 90 && e.noop !== true).map((e) => e.frame);
     expect(stops(on)).toEqual([1110]);
     expect(stops(off)).toEqual([573]);
-    // [first hit, loop start, second hit, third hit, stop, duck, cry, restore, SE_FAINT]; the ROM drains the last 8 pixels in 12 ticks,
-    // the engine's hp command lasts its 28-tick minimum (ISSUES: hp floor), so the stop and the faint sounds are 16 ticks late.
-    expect(frameDeltas("lowhp-faint-window")).toEqual([0, 0, -1, 0, 16, 16, 16, 16, 16]);
-    expect(frameDeltas("lowhp-faint-off-window")).toEqual([0, 0, -1, 0, 16, 16, 16, 16, 16]);
+    // [first hit, loop start, second hit, third hit, stop, duck, cry, restore, SE_FAINT]; the ROM drains the last 8 pixels in 12 ticks and
+    // the faint chain follows (hpf1: floor-free hp command before a faint; the 28-tick floor had the stop and the faint sounds 16 late).
+    expect(frameDeltas("lowhp-faint-window")).toEqual([0, 0, 0, 0, 0, 0, 0, 0, 0]);
+    expect(frameDeltas("lowhp-faint-off-window")).toEqual([0, 0, 0, 0, 0, 0, 0, 0, 0]);
   });
 
   it("collecting sounds does not change the engine state (faint, super effective, low-HP loop, both scenes)", () => {
