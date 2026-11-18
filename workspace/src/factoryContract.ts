@@ -65,7 +65,8 @@ export interface FactoryGameOptions {
    * when a screen needs it, instead of shipping every picture up front. By default the files are the ones the bundler emitted next to
    * the package (resolved with `new URL(..., import.meta.url)`, like the audio files, so a host bundler serves them with no configuration);
    * set `spriteBase` to a directory URL that serves a copy of `dist-lib/sprites/` to load them from there (relative URLs resolve against
-   * the page). The game waits (no tick) for a picture that has not arrived, so the trace and replays are unchanged.
+   * the page). The move-animation files (dl4) are in the `anim/` subdirectory of the same directory (`<spriteBase>/anim/<asset>.txt`). The game
+   * waits (no tick) for a picture or an animation file that has not arrived, so the trace and replays are unchanged.
    */
   spriteBase?: string;
   /**
