@@ -8,6 +8,16 @@ report `PAPERCUT: <what>, ~<minutes lost>` in their final message.
 Delete an entry when its underlying friction is fixed; git preserves its
 history.
 
+## Worker / supervisor friction, 2026-11-18 run
+
+- **`npm run typecheck` covers only `src/` + `tests/`; `tools/compare/appTrace.ts` is checked only by `npm run build` (`tsc -b`) or a test importing it.** A supervisor
+  merge-conflict resolution in appTrace.ts (f047ca4f5: duplicate imports / keys) passed typecheck and broke build until lbw7 fixed it (~15 min). After a merge touching
+  `tools/`, run `npm run build`, not only typecheck.
+- **Soak `--seeds 0:20` (~22-45 min) cannot finish in one 10-min tool call**; workers chunk it by hand (mem2 ~25, kno3, pau2). `npm run soak -- --help` starts a real soak.
+- **`LSD194_SPLIT=3` does not divide a 100-seed shard** (mem2, kno3): briefs should say SPLIT=4.
+- `prehunt.py` prints per-cover results as a raw dict with newlines in the keys (luck5); no PIL / numpy for image analysis (lbw7 used node + pngjs, ~10 min).
+- `appStage` frame semantics (frame 0 vs a mid-trace stage frame) undocumented (lbw7 ~10 min).
+
 ## Worker friction, 2026-11-16 run
 
 - **`npm run compare` takes `--capture-range START:END` (not `--frames`); the usage text shows only after a failed run** (lbw4 ~2 min).
