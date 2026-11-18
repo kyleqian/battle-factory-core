@@ -9,6 +9,7 @@ import { statsChangeParams, statsChangeRow } from "../animation/statsChange.ts";
 import { liveStatusAnimationRow, type LiveStatusAnimationSprite } from "../animation/statusAnimation.ts";
 import { focusPunchSetUpDisplayRow } from "../animation/focusPunchSetUp.ts";
 import { wishHealRowAtAge } from "../animation/wishHeal.ts";
+import { itemKnockoffAtAge } from "../animation/itemKnockoff.ts";
 import { focusBandRowAtAge } from "../animation/focusBand.ts";
 import { futureSightHitRowAtAge } from "../animation/futureSightHit.ts";
 import { psychicBgPaletteRowAtAge as psychicBgRingPaletteAtCount } from "../animation/psychicBackground.ts";
@@ -7977,6 +7978,8 @@ export type GeneralAnimationRenderView = Readonly<{
     center: Readonly<{ x: number; y: number }>;
     opponent: boolean;
   }>;
+  /** kno3: General_ItemKnockoff's ITEM_BAG sprite (src/animation/itemKnockoff.ts), drawn over the battlers. */
+  itemKnockoff?: NonNullable<ReturnType<typeof itemKnockoffAtAge>>;
   /** wsh2: General_FutureSightHit's psychic BG and the target's alpha-blended scale + shake (futureSightHit.ts). */
   futureSightHit?: Readonly<{
     row: ReturnType<typeof futureSightHitRowAtAge>;
@@ -8006,6 +8009,7 @@ export function generalAnimationRenderView(view: BattleResolutionPresentationRen
   if (effect?.type === "general-animation" && effect.animation === "HELD_ITEM_EFFECT") return heldItemEffectRenderView(view, effect);
   if (effect?.type === "general-animation" && effect.animation === "FOCUS_BAND") return focusBandRenderView(view, effect);
   if (effect?.type === "general-animation" && effect.animation === "WISH_HEAL") return wishHealRenderView(view, effect);
+  if (effect?.type === "general-animation" && effect.animation === "ITEM_KNOCKOFF") return itemKnockoffRenderView(view, effect);
   if (effect?.type === "general-animation" && effect.animation === "FUTURE_SIGHT_HIT") return futureSightHitRenderView(view, effect);
   if (effect?.type !== "general-animation" || effect.animation !== "FOCUS_PUNCH_SETUP") return null;
   if (effect.age < 0) return null;
@@ -8151,6 +8155,32 @@ function wishHealRenderView(
     view: Object.freeze({ ...view, fieldArt, postBodyShadowHidden: view.postBodyShadowHidden || side === "opponent" }),
     sprites: Object.freeze([]),
     wishHeal: Object.freeze({ row, center, opponent: side === "opponent" }),
+  });
+}
+
+/**
+ * kno3: B_ANIM_ITEM_KNOCKOFF's General_ItemKnockoff over the field as it is, either target side: the ITEM_BAG sprite flies from the target's
+ * GetBattlerSpriteCoord to the screen edge behind it. The opponent stands at its tracked front idle rest and an elevated opponent's shadow
+ * hides while the script runs.
+ */
+function itemKnockoffRenderView(
+  view: BattleResolutionPresentationRenderView,
+  effect: Extract<NonNullable<BattleResolutionPresentationRenderView["effect"]>, { type: "general-animation" }>,
+): GeneralAnimationRenderView | null {
+  const side = effect.battler === 0 ? "player" as const : "opponent" as const;
+  const rest = effect.battlerX2Input === undefined
+    ? { x2: 0, y2: 0 }
+    : liveBattlerAnchors("opponent", view.fieldArt, effect.battlerX2Input).frontIdleRest;
+  const opponent = rest.x2 === 0 && rest.y2 === 0 ? view.fieldArt.opponent : Object.freeze({
+    ...view.fieldArt.opponent,
+    origin: Object.freeze({ x: view.fieldArt.opponent.origin.x + rest.x2, y: view.fieldArt.opponent.origin.y + rest.y2 }),
+  });
+  const fieldArt = opponent === view.fieldArt.opponent ? view.fieldArt : Object.freeze({ ...view.fieldArt, opponent });
+  const bag = itemKnockoffAtAge(effect.age, side, liveBattlerAnchors(side, view.fieldArt).picOffsetPoint);
+  return Object.freeze({
+    view: Object.freeze({ ...view, fieldArt, postBodyShadowHidden: view.postBodyShadowHidden || (side === "opponent" && effect.age >= 0) }),
+    sprites: Object.freeze([]),
+    ...(bag === null ? {} : { itemKnockoff: bag }),
   });
 }
 
@@ -55742,6 +55772,13 @@ export function renderBattleResolutionSceneOffView(
     for (const star of row.blueStars) {
       drawSpriteSheet(fb, subTileset(moonlightArt.blueStar.tileset, star.frame * 4, 4), moonlightArt.blueStar.palette, star.x - 16, star.y - 16);
     }
+  }
+  if (generalAnimation?.itemKnockoff) {
+    const bag = generalAnimation.itemKnockoff;
+    drawSpriteSheetAffineRotate(
+      fb, covetArt.itemBag.tileset, covetArt.itemBag.palette, bag.x, bag.y + bag.y2,
+      bag.matrix.a, bag.matrix.b, bag.matrix.c, bag.matrix.d, undefined, false,
+    );
   }
   if (fade?.bgCopy) drawSubstituteFadeBgCopy(fb, fade.bgCopy);
   if (view.visibility.opponent.healthbox) {

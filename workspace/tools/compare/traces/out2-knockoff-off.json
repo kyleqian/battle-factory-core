@@ -1,0 +1,1 @@
+{"appRoute": "generated-orchestrator", "oracleProfile": "battle-scene-off", "appStage": {"id": "out2-knockoff-off", "frame": 0}, "oracleBattleLab": {"scenario": "../../battle-lab/out2-knockoff-off.json"}, "segments": [{"frames": 2, "buttons": ["A"]}, {"frames": 18, "buttons": []}, {"frames": 2, "buttons": ["A"]}, {"frames": 1000, "buttons": []}], "captureFrames": [0]}
