@@ -1,0 +1,79 @@
+{
+ "name": "R063-chansey-metronome-transform-ends-disable",
+ "rules": [
+  "R063"
+ ],
+ "why": "Challenge 1. The player's Chansey 227 plays Defense Curl (slot 2) once, then Metronome (slot 0) 12 turns; the foe is Wigglytuff 207 (Sing, Disable, Wish, Secret Power). A Disable on the Defense Curl slot (Disable takes the last move used, battle_script_commands.c:4407) and then a Metronome call of Transform replace the disabled slot: the Disable ends silently (battle_util.c:1700). Chance per seed about 0.3%.",
+ "seed": 0,
+ "challengeNum": 1,
+ "battleNum": 0,
+ "trainerId": 86,
+ "playerSetIds": [
+  227,
+  244,
+  171
+ ],
+ "opponentSetIds": [
+  207,
+  215,
+  204
+ ],
+ "script": {
+  "actions": [
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "preferSwitch": 1
+   }
+  ],
+  "then": "census"
+ },
+ "expect": [],
+ "cover": [
+  {
+   "file": "src/engine/battleEndTurnOrchestration.ts",
+   "text": "{\n    return Object.freeze({\n      kind: \"advance\",\n      state: Object.freeze({\n        ...state,\n        rulesContext: withBattler(state.rulesContext, battler, {\n          di",
+   "at": 0
+  }
+ ],
+ "coverAny": true,
+ "chance": 0.003,
+ "seeds": 200
+}
