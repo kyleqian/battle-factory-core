@@ -5,58 +5,27 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 2026-11-17 — CAX31 daily run (supervisor, Opus 5.5, 2026-11-17 13:30 -> 2026-11-18 05:30 UTC): IN PROGRESS
+## 2026-11-18 — CAX31 daily run (supervisor, Opus 5.5, 2026-11-17 13:30 -> 2026-11-18 05:30 UTC): wind-down: S11 sound event parity met, script lead, three new animations, Lobby
 
-- **State:** master `d60fce582`; workers: ice1 (integration, evidence only), lbw6 (side). **No DEFERRED items.** Evidence `.integration/validation/sv-20261117/`.
-- **Run start:** oracles current; baseline = last run's full suite (only tooling changed since `4e4c51880`). Disk 63 % -> 36 % (43 old census `tree/` dirs + `/tmp` scratch;
-  list `.integration/evidence/TREES-PRUNED-20261117.txt`). No Mac fold (`mac/parity-mac` still `165548c4b`).
-- **Gameplay (replay, item 0d):** nightly check on `e06cac9fc`: pool **44 / 44** (1,287 states), staged battles **72 / 72** (`docs/replay-ledger.md`).
-- **Luck hunt day 1 (20261117):** 5,000 seeds, 6 marker hits, **6 ROM match, 0 differ**. luck2 promoted R032 R037 R038 R097 R107 R109; luck3 redesigned R030 (2 / 40 hits, promoted)
-  and retired R039 / R067 / R095 (no practical design; reasons in `docs/parity-mac/rule-coverage.md`). Supervisor re-drove all 7 promotions: full ROM match. Rare rules **53 -> 60 / 110**;
-  the hunter skips covered rules; 7 designs left for tomorrow (R035 R040 R080 R110 + ...).
-- **Sound (S11), Scene ON T2 move-animation SE missing 63 -> 16 (sound-only, frames identical by differential + census 100 / 100):** aud257 Cosmic Power, Sweet Kiss; aud258 Seismic Toss
-  (damage-level branch from the request's damage), Torment, Shock Wave (bolt task pans); aud259 Soft-Boiled, Block (the unidentified seed-165 window), Dynamic Punch, Fake Out, Crabhammer.
-  aud260 Brick Break turn 2, Glare, Will-O-Wisp, Recycle, Air Cutter + a sound-only move-animation tail (SEs past the command window, the psn2 mechanism: Dynamic Punch, Signal Beam, Mud Shot).
-  T1 0..99 ON missing-gated 41 -> 4 (Memento), missing-other 0. L50 table emitted / gated 807 / 51 -> 839 / 35. **First T1 census 0..999 since aud248 (aud260): Scene ON missing-gated 467,
-  declined 5, other 1, extra 0, unclassified 0; Scene OFF 0 / 0.** aud261 (15 moves: Extreme Speed, Milk Drink, Pain Split, Flame Wheel, Swallow, Octazooka, Zap Cannon, Razor Wind,
-  Covet, Needle Arm, Aromatherapy, Refresh, Smelling Salt, Gust, Spider Web; ROM windows both sides): **T1 0..999 ON missing-gated 467 -> 64**, extra 0; L50 862 / 12. Left: Magnitude 23,
-  Rapid Spin 20, Water Spout 8, Memento 6, Present 4 (each needs a new variant dimension) + 3 singles. aud262 added the flag / elevation / HP-quarter / TOP variant dimensions
-  (each keyed from the C, e.g. GetWaterSpoutPowerForAnim) + Luster Purge, Odor Sleuth, False Swipe, Pay Day: **T1 0..999 Scene ON move family missing-gated 0, extra 0, L50 table 878 / 0
-  gated**; left: 5 declined rows (Rock Smash 2, Beat Up 2, Withdraw 1: no live adapter) and 398 T1 non-move "extras" (wsh1's three commands, unknown to the T1 rules; T2 matches them): aud263.
-- **S11 acceptance table (aud263, `docs/aud251-s11-scoreboard-refresh.md` "aud263"):** T1 0..999 all families: Scene ON 388,855 exact, **missing 5 (declined), extra 0**, unclassified 0;
-  Scene OFF 4,621 exact, 0 / 0 (the 398 rows now scored by the T1 rules). T2 41 ROM seeds: 0 missing / 0 extra both scenes. **Supervisor judgment (reversible):** the S11 gate is event
-  parity; the constant per-window frame offsets (T2 3,683 of 3,991 ON move rows offset, p10 -20) are timing residuals (#198, ROADMAP item 6), not S11 blockers. Left for S11: adp1
-  (Withdraw / Rock Smash / Beat Up have no live adapter at all: a 32-frame static placeholder in Scene ON), then the aud246 close (soaks, full suite, ROADMAP tick).
-  aud260 committed twice to master by a stray `cd` (`f5c19e4e9`, `98bfa00d7`, before the wsh1 merge); same content as its branch, merge clean.
-- **wsh1 (presentation, frames move by design):** WISH_HEAL / FUTURE_SIGHT_HIT / FOCUS_BAND now play as Scene ON commands (201 / 172 / 129 frames, ROM-measured) with their SEs,
-  Scene OFF holds 36 / 42 / 40; census 0..99 both scenes `eventsDigest` identical (9 seeds gain the commands); vanilla 0:20 both scenes 20 / 20, winning 0:60 60 / 60 (supervisor);
-  test:gate / build / build:lib 0; two soak frame pins re-pinned. wsh1b: doc `docs/wsh1-general-anim-commands.md`, Tier-1 pins for the semi-invulnerable / Substitute skips
-  (already in the engine), Wish-on-Dig ROM window. **T2 ROM scoreboard: Scene ON 0 missing / 0 extra in every family (21 seeds; supervisor re-scored the 3 re-run seeds), Scene OFF
-  0 / 0 (aud255, 20 seeds).** Future Sight +14 / +8 are the hpd HP-hold family (hpd3). wsh2 draws all three in Scene ON, both sides: in-window frames vs the ROM at the
-  pre-segment offset Focus Band 131 / 131 + 130 / 130, Wish 200 / 202 + 201 / 202 (a star hand-over frame), Future Sight 172 / 172 + 173 / 173 (masked idle bounce); census both
-  scenes identical incl. command lengths; phase anchors listed as fitted in `docs/wsh1-general-anim-commands.md` "wsh2".
-- **Full suite on `276aff82b`** (3 workers, 20 min): 15,531 passed, 2 failed: `tests/lbrd.test.ts` (wsh1's Scene OFF holds moved the Lobby deal). Re-pinned by the supervisor
-  (`f58f6bb02`: WIN_TWO_SEED 13 -> 19, the retire case keeps 13; scan 14..60 found no single seed for every case).
-- **hpd3 (evidence, production unchanged):** the hpd2 in-turn constants are one ROM-verified source rule, the Scene ON script lead (script instructions after the "used" print run one
-  per frame before `attackanimation`; receipts `tools/integration/fixtures/hpd3/`). Lead alone: rol1-rollout5-on 459 -> 873, hie1-sitrus-on 176 -> 718, 10 more windows up, hpd1-toss10-on down;
-  not landed: some bodies' `live` already holds the lead, so hits / sounds would move. hpd4 does the per-body audit, then the lead, then the floor-free hold.
-- **Crash check (item 5):** `play:random --minutes 10 --scene both --lobby-new-challenge` on `357cae402`: ON 41 battles / 15 swaps / 13 new challenges, OFF 72 / 24 / 24; **0 page /
-  console errors, 0 overlays, 0 divergences**.
-- **adp1:** live Scene ON adapters for Withdraw (76 rows), Rock Smash (78), Beat Up (40 per hit): **0 px vs the ROM on every row, both sides**; their SE windows (Withdraw -4, Rock Smash
-  +2). **T1 0..999 Scene ON missing-declined 5 -> 0: the sound census now has 0 missing / 0 extra in both scenes, every family.** Beat Up's hit-to-hit gap is 132 vs the ROM's 193 frames
-  (multi-hit message timing; Beat Up is unreachable in Factory Lv 50 singles: 0 of 882 carriers). vanilla ON 0:20 20 / 20, winning 0:60 60 / 60; census eventsDigest identical.
-- **hpd4 + hpd5 (merged, presentation timing):** the ROM-verified Scene ON script lead (hpd3) now runs on the audited bodies Sonic Boom / Dragon Rage / Defense Curl / Rollout /
-  Ice Ball / Seismic Toss, with per-body tails, plus the floor-free post-hit hold (`e01bfd249`, hpd1). Windows (matched frames of 1023): ON dragonrage 183 -> 950, sonicboom 151 -> 938,
-  toss10 455 -> 861, toss30 174 -> 865, toss50 149 -> 927, toss80 147 -> 863; rol1-rollout5 459 -> 502 / 3001; OFF improves too. Sound pins move onto the ROM (Rollout turns 9/14/21/33/54 ->
-  3/2/2/0/-1, Ice Ball 9/13/22/40/63 -> 3/2/2/-1/-3, hie3 drifts 9/9/17/17/20 -> 2/1/3/2/12). Census 0..99 both scenes eventsDigest identical; Scene ON soaks vanilla 20 / 20, winning /
-  winning-swap 60 / 60; T2 6 ON seeds 0 missing / 0 extra. Re-pins: soak-driver counters, lbrd seeds 17 / 17. Unaudited bodies keep the old lead-in-tail. Ice Ball lab damage ROM 20 / 40 / 89
-  vs app 23 / 41 / 82 on turns 3-5: **ice1 proved it a harness artifact** (the stage's dice): two staged ROM drives (Ice Ball x5, Defense Curl + Rollout x5) match 10 / 10 states each
-  (promoted to `stages/coverage/`); the kernel's Rollout / Ice Ball code matches `Cmd_rolloutdamagecalculation` line by line.
-- **lbw6 (Lobby, #221):** a held direction change mid-step goes straight (field_player_avatar.c:588-595), the turn commit reads the decision frame's input, the five pose residuals fixed;
-  new traces `lbw6-inflight-off` 17 -> 156 / 156, `lbw6-turnturn-off` 100 -> 183 / 183, `lbw6-tap9-off` 74 -> 128 / 128; every Lobby trace equal or better; RNG cursor ROM-exact.
-- **luck4:** R080 redesigned (the AI's Ampharos paralyses Milotic first) and promoted (seed 910000, supervisor re-drive 16 / 16): rare rules **60 -> 61 / 110**; R035 / R040 near their
-  ceiling (~0.1 % / seed), R110 not raised (the script format cannot express its switch); the day job now hunts R035 / R040 / R110.
-- **Next:** lbw6 (Lobby #221: held direction change mid-step), ice1, then wind-down + the aud246 close (the three missing adapters), then the aud246 close.
+- **State:** master clean, no workers, no worktrees; no push. **No DEFERRED items.** Final engine tree `a7cf4dfdb` (src unchanged since; later commits are tests / docs / luck designs).
+  ENGINE_BUILD `eb-d0136314103d21fb` -> **`eb-f174716c006360f8`** (dist-lib of `6909b8d6c`; tell the website). Evidence `.integration/validation/sv-20261117/`; step ledger in the archive.
+- **Website (Mac):** no API change (`challenge-request` / `start: "after-save"`, `ready`, input untouched); no new audio files. On screen (Scene ON): Wish's heal, Future Sight's hit, Focus Band,
+  Withdraw, Rock Smash and Beat Up now animate with their sounds (they were static); Scene OFF pauses for the first three as in the ROM; HP-bar holds and move starts follow the ROM on six moves
+  (Sonic Boom, Dragon Rage, Defense Curl, Rollout, Ice Ball, Seismic Toss); in the Lobby a held direction change mid-step goes straight.
+- **Sound (S11): event parity met** (aud257-aud263, wsh1, adp1; `docs/aud251-s11-scoreboard-refresh.md` "aud263"): T1 census 0..999 both scenes, every family, **0 missing / 0 extra / 0
+  unclassified** (ON move-SE gated 467 -> 0 this run, L50 table 807 / 51 -> 878 / 0 gated); T2 ROM replays 41 seeds 0 / 0 (ON move-SE missing 63 -> 0). **Supervisor judgment (reversible):**
+  the S11 gate is event parity; constant per-window frame offsets (T2 ON move rows p10 -21 / median -2 / p90 +5) are item 6 timing residuals (ISSUES #219). ROADMAP S11 ticked.
+- **Presentation timing:** hpd3 found the ROM-verified Scene ON script lead; hpd4 / hpd5 landed it on six audited bodies + the floor-free post-hit hold (`docs/hpd1-hp-hold.md`): hpd1 windows ON
+  dragonrage 183 -> 950 / 1023, sonicboom 151 -> 938, toss30 174 -> 865, toss50 149 -> 927; Rollout / Ice Ball sound drift 9..63 -> within 3. hpd6 re-pinned 14 self-consistency / drift pins the
+  suite caught (ais2's window keeps its ROM md5s, shifted +7 / +14). ice1: the Ice Ball lab damage gap was harness dice (two staged ROM drives 10 / 10).
+- **Gameplay (replay, item 0d):** nightly check on `e06cac9fc`: pool **44 / 44**, staged **72 / 72**. No battle-rule change this run (census `eventsDigest` identical every step), so no wind-down
+  permanent-list drive. Luck hunt day 1: 6 / 6 ROM match; luck2-4 + ice1: rare rules **53 -> 61 / 110** (+2 Rollout / Ice Ball stages); the hunter skips covered rules; open designs R035 / R040 / R110.
+- **Lobby (#221):** lbw6 (`lbw6-*-off` 156 / 156, 183 / 183, 128 / 128; five pose residuals fixed; every Lobby trace equal or better).
+- **Gates (final engine `a7cf4dfdb`):** vanilla 0:20 OFF **20 / 20**, ON **20 / 20**; 0:60 default / winning / winning-swap **60 / 60** each; varied-RNG winning carry 0 / 14 / 28 + winning-swap
+  carry 0 **100 / 100** each. Full suite on `6909b8d6c` (4 workers): **15,935 passed, 0 failed**; build / build:lib 0. PLAYRANDOM. (A first full suite on `a7cf4dfdb` had 14 failures in 9
+  files from hpd4 / hpd5: fixed test-side by hpd6; a revert of hpd4 / hpd5 was prepared as fallback and not needed.) Log backup not run (`rclone` not installed).
+- **Next:** frame alignment: audit more bodies for the script lead (hpd4 method; each moves frames: census identity + soaks + `randomRoundSoak` / `lbrd` re-pins, see their pin notes),
+  Memento's 108-frame SE offset, Water Spout / Status_* second-play residuals (#219); #221 Lobby leftovers; #222. Luck-hunt summary + nightly replay at run start; prune census trees.
 
 ---
 
