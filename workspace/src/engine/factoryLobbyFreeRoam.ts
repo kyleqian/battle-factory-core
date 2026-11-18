@@ -309,7 +309,8 @@ export function advanceFactoryLobbyFreeRoam(
       }
       // lbw5: the idle pose settles on the last cycle's command index (the bump anim starts at alt(idleIdx) and advances one per cycle).
       const lastIdx = (bumpStartIdx(state) + state.bumpElapsed / LOBBY_FREE_ROAM_BUMP_FRAMES - 1) % 4;
-      return Object.freeze({ ...state, bumpElapsed: 0, idleIdx: lastIdx <= 1 ? 1 : 3, heldDir, pendingDir: null });
+      // The settle tick still draws the last cycle's pose (the OAM lags the command index by a frame).
+      return Object.freeze({ ...state, bumpElapsed: 0, idleIdx: lastIdx <= 1 ? 1 : 3, heldDir, pendingDir: null, draw: { facing: state.facing, phase: lastIdx } });
     }
     return Object.freeze({
       ...state,
@@ -507,6 +508,15 @@ export function lobbyFreeRoamCameraOrigin(
 
 /** Player overworld frame index for the current pose (walking.png layout). */
 export function lobbyFreeRoamPlayerFrame(state: FactoryLobbyFreeRoamState): number {
+  if (state.draw?.phase !== undefined && state.stepRemaining === 0 && state.turnRemaining === 0 && state.bumpElapsed === 0) {
+    const phase = state.draw.phase;
+    switch (state.draw.facing) {
+      case "south": return phase === 0 ? 3 : phase === 2 ? 4 : 0;
+      case "north": return phase === 0 ? 5 : phase === 2 ? 6 : 1;
+      case "west": return phase === 0 ? 7 : phase === 2 ? 8 : 2;
+      case "east": return phase === 0 ? 7 : phase === 2 ? 8 : 2;
+    }
+  }
   if (state.bumpElapsed > 0) {
     // Border bump (act 25, §7b/§7g item 3): sprite frozen facing the blocked
     // direction. The GO anim command index advances once per 16-frame cycle
