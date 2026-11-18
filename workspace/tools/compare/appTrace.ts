@@ -2326,25 +2326,6 @@ export const APP_STAGES: Readonly<Record<string, AppStage>> = {
   // frf250a: BAG / RUN on the action menu (two Level-50 Rattata, both scenes; tools/battle-lab/frf250a-*.json).
   "frf250a-bagrun-on": (state) => frf250aStage(aud241bStage(state, "frf250a-bagrun-on", "on", 50, 50), 27),
   "frf250a-bagrun-off": (state) => frf250aStage(aud241bStage(state, "frf250a-bagrun-off", "off", 50, 50), 34),
-  // lbw7: the lab's trainerId 110 (SHIZUKA, a Black Belt); the staged orchestrator's own draw is trainer 17, so the post-battle room would draw the wrong class.
-  "lbw7-forfeit-off": (state) => {
-    const staged = frf250aStage(aud241bStage(state, "frf250a-bagrun-off", "off", 50, 50), 34);
-    const o = staged.factoryRoundBattleOrchestrator!;
-    const shizuka = getFactoryTrainerPresentation(110);
-    return {
-      ...staged,
-      factoryRoundBattleOrchestrator: Object.freeze({
-        ...o,
-        round: Object.freeze({
-          ...o.round,
-          rules: Object.freeze({
-            ...o.round.rules,
-            currentOpponent: Object.freeze({ ...o.round.rules.currentOpponent, id: "factory-trainer-110", trainerName: shizuka.name }),
-          }),
-        }),
-      }),
-    };
-  },
   // enc276: a forced turn goes from FIGHT straight into the turn (tools/battle-lab/enc276-*.json): the L50 player's SPLASH is
   // Encored (opponent L40 ENCORE) / Taunted into forced Struggle (opponent L40 TAUNT); turn 2's FIGHT has no move menu.
   "enc276-encore-on": (state) => enc276Stage(state, "enc276-encore-on", "on", 227, 27),
@@ -2355,6 +2336,33 @@ export const APP_STAGES: Readonly<Record<string, AppStage>> = {
   "mechanic-selection-reject-torment-off": tormentSelectionRejectionOffStage,
   "party-menu-status-item-off": partyMenuStatusItemOffStage,
 };
+
+/** lbw7: a staged orchestrator draws its own opponent; `appStage.opponentTrainerId` names the lab's (ROM) trainer so the post-battle room draws the right class. */
+export function applyTraceStage(trace: Trace, state: EngineState): EngineState {
+  const stage = APP_STAGES[trace.appStage!.id];
+  if (!stage) throw new Error(`unknown app stage ${trace.appStage!.id}`);
+  const staged = stage(state);
+  const trainerId = trace.appStage!.opponentTrainerId;
+  const o = staged.factoryRoundBattleOrchestrator;
+  if (trainerId === undefined || o === null) return staged;
+  return {
+    ...staged,
+    factoryRoundBattleOrchestrator: Object.freeze({
+      ...o,
+      round: Object.freeze({
+        ...o.round,
+        rules: Object.freeze({
+          ...o.round.rules,
+          currentOpponent: Object.freeze({
+            ...o.round.rules.currentOpponent,
+            id: `factory-trainer-${trainerId}`,
+            trainerName: getFactoryTrainerPresentation(trainerId).name,
+          }),
+        }),
+      }),
+    }),
+  };
+}
 
 export async function renderAppTrace(trace: Trace): Promise<AppCapture[]> {
   const presentationRng = presentationRngFromTrace(trace);
@@ -2375,9 +2383,7 @@ export async function renderAppTrace(trace: Trace): Promise<AppCapture[]> {
 
   const applyStage = (): void => {
     if (!trace.appStage || trace.appStage.frame !== frame) return;
-    const stage = APP_STAGES[trace.appStage.id];
-    if (!stage) throw new Error(`unknown app stage ${trace.appStage.id}`);
-    state = stage(state);
+    state = applyTraceStage(trace, state);
     const frozenCursorAge = TERMINAL_WINDOW_FROZEN_CURSOR_AGE[trace.appStage.id];
     if (frozenCursorAge !== undefined) {
       heldCursorMask = terminalWindowHeldCursorMask(state, frozenCursorAge);

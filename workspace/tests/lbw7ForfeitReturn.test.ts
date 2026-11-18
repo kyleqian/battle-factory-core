@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 import "../tools/compare/harnessPlayerName.ts";
 import "../src/engine/monPicPixelsInstall.ts";
 import { createInitialState, render, tick, type EngineState } from "../src/engine/core.ts";
-import { APP_STAGES } from "../tools/compare/appTrace.ts";
+import { applyTraceStage } from "../tools/compare/appTrace.ts";
 import { loadCompareTrace } from "../tools/compare/traceFile.ts";
 import { traceAdvances } from "../tools/compare/traceReplay.ts";
 import { postwinPhase, postwinTailAge } from "../src/engine/postwin.ts";
@@ -16,7 +16,7 @@ const trace = loadCompareTrace("tools/compare/traces/lbra-forfeit-off.json");
 function framesAt(frames: readonly number[]): Map<number, EngineState> {
   const want = new Set(frames);
   const out = new Map<number, EngineState>();
-  let state = APP_STAGES[trace.appStage!.id]!(createInitialState({ appRoute: trace.appRoute, battleScene: trace.battleScene }));
+  let state = applyTraceStage(trace, createInitialState({ appRoute: trace.appRoute, battleScene: trace.battleScene }));
   for (const a of traceAdvances(trace.segments)) {
     state = tick(state, a.buttons);
     if (trace.appRngRebase?.frame === a.frame) state = { ...state, rngValue: trace.appRngRebase.rngValue };

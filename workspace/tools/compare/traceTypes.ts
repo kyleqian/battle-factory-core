@@ -38,6 +38,8 @@ export interface Trace {
   appStage?: {
     readonly id: string;
     readonly frame: number;
+    /** The lab's `trainerId` (ROM opponent) when the stage's own orchestrator draw differs; drives the post-battle room sprite. */
+    readonly opponentTrainerId?: number;
   };
   /**
    * Dev-only honest ROM staging fixture consumed by compare/run.ts.

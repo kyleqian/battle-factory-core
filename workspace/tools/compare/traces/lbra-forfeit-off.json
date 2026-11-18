@@ -6,8 +6,9 @@
   "rngValue": 3031698222
  },
  "appStage": {
-  "id": "lbw7-forfeit-off",
-  "frame": 0
+  "id": "frf250a-bagrun-off",
+  "frame": 0,
+  "opponentTrainerId": 110
  },
  "oracleBattleLab": {
   "scenario": "../../battle-lab/frf250b-run-yes-off.json"
