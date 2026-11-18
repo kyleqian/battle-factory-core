@@ -26,8 +26,8 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   files from hpd4 / hpd5: fixed test-side by hpd6; a revert of hpd4 / hpd5 was prepared as fallback and not needed.) Log backup not run (`rclone` not installed).
 - **Next:** frame alignment: land the script lead on the hpd7 rows (`docs/hpd1-hp-hold.md` "hpd7": 25 bodies measured, ranked by census; the lead is the effect script's instruction count, so
   take it from the kernel's counter, not a table; Faint Attack / Sludge Bomb / Bite / Earthquake need `live` lengthened first) (hpd4 method; each moves frames: census identity + soaks + `randomRoundSoak` / `lbrd` re-pins, see their pin notes),
-  the 0x7FFF instant HP-bar drop drawn as a 106-row drain (Memento, likely Explosion / Self-Destruct: mem1), the first Status_* play (sta4: STATUS_ANIMATION_SCRIPT_AGE -> 0 with
-  the lead), Solar Beam's short unleash body (hpd7b) (#219); measurement-only evidence for these landed at wind-down (hpd7 / hpd7b / mem1 / sta4, docs only); #221 Lobby leftovers; #222. Luck-hunt summary + nightly replay at run start; prune census trees.
+  the 0x7FFF instant HP-bar drop drawn as a 106-row drain (Memento, Explosion, Self-Destruct: mem1 / exp1, ~100 frames each), the short `live` windows (liv1), the first Status_* play (sta4: STATUS_ANIMATION_SCRIPT_AGE -> 0 with
+  the lead), Solar Beam's short unleash body (hpd7b) (#219); measurement-only evidence for these landed at wind-down (hpd7 / hpd7b / mem1 / sta4 / exp1 / liv1, docs only); #221 Lobby leftovers; #222. Luck-hunt summary + nightly replay at run start; prune census trees.
 
 ---
 

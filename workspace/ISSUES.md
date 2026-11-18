@@ -59,7 +59,9 @@ exclusions are superseded. Unrelated expansions stay parked.
 - **Coverage:** T2 is 41 of 1000 seeds; controller / cry / BGM have no T1 rule table (counts only); fanfare / screen SEs have no T2 instance.
 - **Per-move:** Memento SEs 108 frames off the ROM: **cause found (mem1, docs/aud242-move-anim-sounds.md section 29)**: `trymemento`'s `INSTANT_HP_BAR_DROP` (0x7FFF,
   battle_script_commands.c:9086) is presented as an ordinary 106-row `hp` drain (`battleResolutionPresentation.ts:4953-4966`, render `:1798-1810`) where the ROM empties the bar at once (also
-  visible: the healthbox drains); Explosion / Self-Destruct likely share the 0x7FFF path (unmeasured). The first `Status_*` play: sta4 (docs/aud249 "sta4") splits it into the body lead,
+  visible: the healthbox drains); Explosion / Self-Destruct share it (exp1: `Cmd_tryexplosion` battle_script_commands.c:6555; app body +100 rows late, both sides);
+  the only two 0x7FFF sources; fix keyed on `healthValue === 0x7fff` (instant hp command, length from the opcode rows before `attackanimation`). Self-Destruct's own body is 9 rows short
+  (117 vs 126). Short `live` windows (liv1, docs/hpd1-hp-hold.md): Faint Attack 220 -> 226, Sludge Bomb 160 -> 165, Bite 26 -> 31, Earthquake 198 -> 208, Solar Beam unleash 160 -> 238, Mud-Slap 51 -> 52. The first `Status_*` play: sta4 (docs/aud249 "sta4") splits it into the body lead,
   pre-print rows and 6 message-to-launch rows (`STATUS_ANIMATION_SCRIPT_AGE` -> 0 once the bodies get the lead), Water Spout +11 / +7 / +7 / +2 by HP quarter, Beat Up hit-to-hit 132 vs ROM 193 frames
   (multi-hit message timing; unreachable in Factory Lv 50), Wish heal's star hand-over frame (1 per side), the first `Status_*` play +7 / +8 (sta3 fixed the second play; see sta4 above), Solar Beam's unleash body 160 vs ROM 237 rows (hpd7b), `Status_Freeze` SE 242 +1 unmeasured, Roar / Howl cry windows inherit a lab drift.
 - Scene ON seeds 6568 / 7682 stall at the 80,000-frame ROM drive cap (T2 cannot align them); census seeds 796 / 995 end at the frame budget in both scenes.
