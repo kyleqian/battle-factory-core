@@ -68,8 +68,9 @@ export function createAnimAssetStore(options: AnimAssetStoreOptions): AnimAssetS
         if (cached !== undefined) return cached;
         const text = texts.get(name);
         if (text === undefined) {
+          if (!known.has(name)) throw new Error(`animation asset ${name} has no file`);
           missed.add(name);
-          if (failure === null && known.has(name)) request(name);
+          if (failure === null) request(name);
           throw new AnimAssetPending(name);
         }
         const value = JSON.parse(text) as object;

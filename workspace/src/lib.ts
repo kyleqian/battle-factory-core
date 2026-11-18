@@ -7,6 +7,10 @@ import { installedMonPicPixels, installMonPicPixels, monPicPixelsInstalled } fro
 import { MonPicPending } from "./engine/monPicPending.ts";
 import { neededMonPics } from "./engine/monPicNeeds.ts";
 import { activeMonPicSpriteStore, createMonPicSpriteStore, sharedMonPicSpriteStore, type MonPicSpriteStore } from "./engine/monPicSpriteStore.ts";
+import { AnimAssetPending, installAnimAssets, installedAnimAssets } from "./engine/animAssets.ts";
+import { neededAnimAssets } from "./engine/animAssetNeeds.ts";
+import { activeAnimAssetStore, createAnimAssetStore, sharedAnimAssetStore, type AnimAssetStore } from "./engine/animAssetStore.ts";
+import animAssetMoves from "./assets/gen/anim-asset-moves.json" with { type: "json" };
 import { render, SCREEN_HEIGHT, SCREEN_WIDTH } from "./engine/core.ts";
 import type { FactoryAudioState, FactoryEvent, FactoryGame, FactoryGameOptions, TraceSegment } from "./factoryContract.ts";
 import type { AudioPlayer, AudioStats } from "./audio/player.ts";
@@ -55,10 +59,32 @@ export interface MountInternalOptions extends FactoryGameOptions {
 const SPRITE_FILES_BUILT = typeof __POKEBENCH_SPRITE_FILES__ === "boolean" && __POKEBENCH_SPRITE_FILES__;
 const SPRITE_FULL_BUILT = typeof __POKEBENCH_SPRITE_FULL__ !== "boolean" || __POKEBENCH_SPRITE_FULL__;
 
+function spriteBaseUrl(spriteBase: string | undefined): URL | undefined {
+  return spriteBase === undefined ? undefined : new URL(spriteBase.endsWith("/") ? spriteBase : `${spriteBase}/`, document.baseURI);
+}
+
+// dl4: the move-animation assets come from `<spriteBase>/anim/<asset>.txt` (the same copied `sprites/` directory), next to the chunks by default.
+async function openAnimAssetStore(spriteBase: string | undefined): Promise<AnimAssetStore> {
+  const files = (await import("virtual:pokebench-anim-asset-files")).default;
+  if (files === null) throw new Error("this build carries no animation asset files");
+  const base = spriteBaseUrl(spriteBase);
+  return sharedAnimAssetStore(base?.href ?? "", () =>
+    createAnimAssetStore({
+      names: Object.keys(files),
+      load: async (name) => {
+        const url = base === undefined ? files[name]! : new URL(`anim/${name}.txt`, base).href;
+        const response = await fetch(url);
+        if (!response.ok) throw new Error(`${response.status} for ${url}`);
+        return response.text();
+      },
+    }),
+  );
+}
+
 async function openSpriteStore(spriteBase: string | undefined): Promise<MonPicSpriteStore> {
   const files = (await import("virtual:pokebench-mon-pic-files")).default;
   if (files === null) throw new Error("this build carries no battle picture files");
-  const base = spriteBase === undefined ? undefined : new URL(spriteBase.endsWith("/") ? spriteBase : `${spriteBase}/`, document.baseURI);
+  const base = spriteBaseUrl(spriteBase);
   return sharedMonPicSpriteStore(base?.href ?? "", () =>
     createMonPicSpriteStore({
       species: Object.keys(files),
@@ -128,11 +154,23 @@ export function mountFactoryGameInternal(options: MountInternalOptions): Factory
   let store: MonPicSpriteStore | undefined = activeMonPicSpriteStore(installedMonPicPixels());
   /** Species a render asked for that the state scan did not name; they stay in the hold's wanted set. */
   const extraWanted = new Set<string>();
+  // dl4: the same for the move-animation asset files (Scene ON only; Scene OFF names none).
+  let animStore: AnimAssetStore | undefined = activeAnimAssetStore(installedAnimAssets());
+  const extraAnim = new Set<string>();
+  function animWanted(): Set<string> {
+    const wanted = neededAnimAssets(session.state, animAssetMoves, animStore!.has);
+    for (const name of extraAnim) wanted.add(name);
+    return wanted;
+  }
   function picturesReady(): boolean {
-    if (store === undefined) return true;
-    const wanted = neededMonPics(session.state, store.has);
-    for (const species of extraWanted) wanted.add(species);
-    return store.pending(wanted).length === 0;
+    let ready = true;
+    if (store !== undefined) {
+      const wanted = neededMonPics(session.state, store.has);
+      for (const species of extraWanted) wanted.add(species);
+      if (store.pending(wanted).length > 0) ready = false;
+    }
+    if (animStore !== undefined && animStore.pending(animWanted()).length > 0) ready = false;
+    return ready;
   }
   const preparePixels = async (): Promise<void> => {
     if (store === undefined && !monPicPixelsInstalled()) {
@@ -143,11 +181,14 @@ export function mountFactoryGameInternal(options: MountInternalOptions): Factory
       }
       store = await openSpriteStore(options.spriteBase);
       installMonPicPixels(store.tables);
+      animStore = await openAnimAssetStore(options.spriteBase);
+      installAnimAssets(animStore.source);
     }
     if (store !== undefined) {
       const wanted = neededMonPics(session.state, store.has);
       await store.whenLoaded(wanted);
     }
+    if (animStore !== undefined) await animStore.whenLoaded(animWanted());
   };
   let pixelsInstalled = monPicPixelsInstalled() && picturesReady();
   const pixelsReady: Promise<void> = pixelsInstalled ? Promise.resolve() : preparePixels();
@@ -203,21 +244,43 @@ export function mountFactoryGameInternal(options: MountInternalOptions): Factory
     if (!destroyed) options.onEvent?.(event);
   };
 
-  function draw(): void {
-    imageData.data.set(render(session.state));
+  /** Renders and presents the frame; false (nothing presented) when it read an animation asset that has not arrived, even if the renderer swallowed the throw. */
+  function drawFrame(): boolean {
+    animStore?.takeMissed(); // reads while pending outside a draw (a swallowed tick-side read) must not hold this frame
+    const pixels = render(session.state);
+    if (animStore !== undefined) {
+      const missed = animStore.takeMissed();
+      if (missed.length > 0) {
+        for (const name of missed) extraAnim.add(name);
+        animStore.pending(missed);
+        return false;
+      }
+    }
+    imageData.data.set(pixels);
     ctx!.putImageData(imageData, 0, 0);
+    return true;
   }
 
-  /** Draws the frame; false (nothing drawn, the canvas keeps the last frame) when it read a picture that has not arrived. */
+  function draw(): void {
+    drawFrame();
+  }
+
+  /** Draws the frame; false (nothing drawn, the canvas keeps the last frame) when it read a picture or an animation asset that has not arrived. */
   function drawOrHold(): boolean {
     try {
-      draw();
-      return true;
+      return drawFrame();
     } catch (error) {
-      if (!(error instanceof MonPicPending) || store === undefined) throw error;
-      extraWanted.add(error.species);
-      store.pending([error.species]);
-      return false;
+      if (error instanceof MonPicPending && store !== undefined) {
+        extraWanted.add(error.species);
+        store.pending([error.species]);
+        return false;
+      }
+      if (error instanceof AnimAssetPending && animStore !== undefined) {
+        for (const name of [error.asset, ...animStore.takeMissed()]) extraAnim.add(name);
+        animStore.pending(extraAnim);
+        return false;
+      }
+      throw error;
     }
   }
 
@@ -290,8 +353,9 @@ export function mountFactoryGameInternal(options: MountInternalOptions): Factory
 
   function loop(time: number): void {
     if (destroyed || crashed) return;
-    if (store?.failure) {
-      failPictures(store.failure);
+    const failure = store?.failure ?? animStore?.failure;
+    if (failure) {
+      failPictures(failure);
       return;
     }
     if (resuming) {
