@@ -5,6 +5,18 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 2026-11-18 — CAX31 daily run (supervisor, Opus 5.5, 2026-11-18 13:30 -> 2026-11-19 05:30 UTC): IN PROGRESS
+
+- **State:** in progress; interim entry (rewritten at wind-down). Workers live: hpd8 (integration, Scene ON shape-A script lead), lbw7 (ts, Lobby residuals), luck5 (side, Metronome luck designs).
+- **Run start:** luck hunt day 3: R035 ROM match (seed 1040873, 14 / 14) promoted, rare rules **61 -> 62 / 110**. Nightly replay on `8516a6da1`: pool **44 / 44** (1,427 states), staged **83 / 83** (`docs/replay-ledger.md`).
+- **Folded:** pau2 (`docs/pau1-script-pauses.md` "pau2": pause LONG before KOFail / AlreadyPoisoned messages, SafeguardEnds' SHORT pause; out2-horndrill OFF 415 -> 558 / 620, ON 410 -> 568),
+  mem2 (aud242 section 30: 0x7FFF instant HP drop for Memento / Explosion / Self-Destruct; Explosion player 27 -> 296 / 421, Memento SE1 -108 -> -7), kno3 (Knock Off item animation, both scenes;
+  out2-knockoff ON 32 -> 145 / 256, OFF 88 -> 192), cln8 (129 unread fixture files untracked; `docs/cln8-evidence-out.md`: the 619 MB `tools/compare/evidence` is still read by tests).
+  Census 0..99 both scenes eventsDigest identical for each (workers). Full suite on `2124ec8f0` (pau2) **15,937 / 0 failed**; on `f047ca4f5` (+ mem2 + kno3) **15,963 / 0 failed**.
+- **Next:** fold hpd8 / lbw7 / luck5; then liv2 (shape B bodies + Flamethrower + Solar Beam `live`), sdx1, sta4; wind-down soaks (src changed).
+
+---
+
 ## 2026-11-18 — CAX31 daily run (supervisor, Opus 5.5, 2026-11-17 13:30 -> 2026-11-18 05:30 UTC): wind-down: S11 sound event parity met, script lead, three new animations, Lobby
 
 - **State:** master clean, no workers, no worktrees; no push. **No DEFERRED items.** Final engine tree `a7cf4dfdb` (src unchanged since; later commits are tests / docs / luck designs).
