@@ -780,3 +780,92 @@ ROM `BattleScript_KnockedOff` (`playanimation BS_TARGET, B_ANIM_ITEM_KNOCKOFF; p
 Fix scope (not landed): (A) scene-independent; add the 64-row KOFail pause (and the 6 script rows) before the miss message, with an OFF and an ON lab above as the checks (`out2-horndrill-*`, expect app - ROM -68 -> ~0 at the menu). (B) Scene dependent: OFF needs a **34-row pause command before the message** (not the 94-row animation) and ON needs the animation (43 rows foe target / 94 rows player target, +2 script rows, before the message), i.e. `B_ANIM_ITEM_KNOCKOFF` is the fourth `playanimation` site after the Wish / Future Sight / Focus Band commands (`WISH_HEAL_COMMAND_FRAMES`, etc., `battleResolutionPresentation.ts:178-180`, :4821); the OFF case shares the `Pausex20`-after-`playanimation` pattern with the other `playanimation` sites in OFF (the app should check the held-item / Wish / Focus Band OFF commands the same way; not measured here). The app's 28-row HP hold before the message overlaps part of the pause, so the OFF insertion should be the pause minus the HP-hold slack, or the HP hold should be derived from the ROM HP drain (ROM hp exec 5 / 26 rows here, app fixed 28).
 
 Reproduce: the labs are committed; `hpd2Probe.py tools/battle-lab/out2-<case>-<on|off>.json <on|off> /tmp/x.json 900` then decode `ptr` with `pokeemerald.map`; the app side needs the temporary `appTrace.ts` stages above plus a compare trace `{"appRoute":"generated-orchestrator","oracleProfile":...,"appStage":{"id":"out2-<case>-<scene>","frame":0},"oracleBattleLab":{"scenario":"../../battle-lab/out2-<case>-<scene>.json"},"segments":<the lab's trace segments>}`. No `npm test` / build (docs and labs only; the lab JSONs are not referenced by any test).
+
+## t2r (2026-11-18): Scene ON T2 re-measured on master `d02f829c8` after pau2 / pau3 / mem2 / kno3 / hpd8 / ais4 (measurement only, no `src/` / `tests/` change)
+
+Method: the aud248 chain (`tools/audio/aud248RunSeed.sh SEED on DIR`: request, ROM setup, engine replay, closed-loop ROM drive, `romStateTimeline`, compare, then the ROM sound pass) run **fresh** for 25 Scene ON seeds on a detached worktree of `d02f829c8` (so a mid-run merge could not mix engines; `nice -n 10`, 2 seeds at a time, 3-4 min per seed). Seeds: the **21 aud263 ON seeds** (2 6 165 499 830 1028 1415 1914 2230 2741 3158 3738 4235 4686 5063 5569 6079 6912 7295 8108 8612) plus **4 new census seeds never T2-driven: 97, 310, 319, 648** (picked from census 0..999 by how many not-yet-T2-sampled bodies they carry: 97 Soft-Boiled / Blizzard / Calm Mind / Fire Blast / Rock Slide; 310 Focus Punch / Leech Seed / Yawn / Calm Mind / Rest / Rock Slide; 319 Leech Seed / Safeguard / Calm Mind / Rest / Fire Blast; 648 Hydro Pump / Leech Seed / Rest / Swagger; the declined-row seeds 51 / 492 / 835 were left out on purpose: adp1 has since landed Withdraw / Rock Smash / Beat Up, but their T2 coverage is a separate question). Every seed's closed-loop drive ended `stop outcome`, `matched == engineStates`, no divergence. Scoring: `soundScoreboard.py` (unchanged). Attribution: new tool `tools/audio/t2Attribute.py` (the t2off scratch scripts, promoted: same `difflib` alignment as the scoreboard, every matched row kept with its offset and cause = ROM `gCurrentMove` at the row frame from `tl.json` for move-animation SEs, as t2cls / t2off did), run once per engine build over the **same ROM files** so only the engine varies. Evidence (ignored): `.integration/evidence/t2r/` (`<seed>-on.*`, `steps/<commit>/` engine replays, `t2r-attr*.json`, `t2r-all.txt`, `t2r-21.txt`). No `src/` / `tests/` file touched; `npm test` not run (measurement step).
+
+**Validation of the method.** The aud263 engine (`f6edfc6b9`) replayed against the NEW ROM files reproduces the aud263 rows exactly (4,895 / 4,895 matched rows, same offset each; ROM frame of every row identical), so aud263 -> now is an engine-only difference and the per-step replays below are exact, not estimates.
+
+### 1. Missing / extra (the headline): 0 / 0
+
+**0 missing and 0 extra rows in every family, 25 / 25 seeds** (also at every one of the 12 intermediate engine builds replayed in section 3). Same (kind, id, pan) in order everywhere; the only thing that differs is the frame.
+
+### 2. Family table, aud263 (21 seeds) vs now (the same 21 seeds, and all 25)
+
+Engine minus ROM, frames, relative to the segment start (median / p10 / p90). aud263 = `t2-scoreboard` ON.
+
+| family | aud263 (21): exact / offset, med / p10 / p90 | now, same 21: exact / offset, med / p10 / p90 | now, all 25 (4 new seeds in) |
+| --- | --- | --- | --- |
+| move-animation SE | 308 / 3,683, -2 / -20 / 7 (n 3,991) | **292** / 3,699, -2 / **-16** / **8** | 334 / 4,477, -2 / -17 / 7 (n 4,811) |
+| stat-change SE | 13 / 72, -1 / -19 / 4 | 13 / 72, -1 / **-16** / 4 | 15 / 86, 0 / -16 / 3 |
+| cry | 4 / 167, -10 / -28 / 7 | 5 / 166, **-9** / **-23** / **13** | 6 / 196, -9 / -24 / 13 |
+| battle-controller SE | 66 / 577, -5 / -28 / 2 | 66 / 577, -5 / **-23** / **3** | 74 / 684, -5 / -23 / 3 |
+| bgm | 0 / 5, -23 / -71 / 9 | 0 / 5, -23 / -71 / **18** | 0 / 5, -23 / -71 / 18 |
+| fanfare, screen SE | 0 / 0 | 0 / 0 | 0 / 0 |
+
+Total sum of abs(offset) over the 21 seeds' 4,895 matched rows: **52,769 -> 44,707 (-15.3 %)**; move-animation SE 39,997 -> 33,401 (-16.5 %), controller 8,842 -> 7,899, cry 2,857 -> 2,387, stat 920 -> 868, bgm 153 -> 152. The p10s moved toward 0 by 3-5 frames in four families; the medians barely moved (they sit on the many small constant per-window offsets, not on the fixed windows). The four new seeds alone (982 rows, mass 11,363; move-animation SE median -2 / p10 -23 / p90 +4, controller -6 / -92 / 0, cry -9 / -102 / +11): same shape as the old seeds, with new open bodies (section 4).
+
+**Got worse, p90 only:** cry p90 7 -> 13 and bgm p90 9 -> 18 (n 5; the bgm rows follow the move-end tail), move-animation p90 7 -> 8. **Exact rows 308 -> 292 in move-animation SE (all families 391 -> 376, -15; over the chain 36 rows lost, 21 gained)**: the move-animation family is the only one where "exact" fell; the rows lost are listed in section 5 (rows that matched at 0 and moved to the next command's real offset).
+
+### 3. Which step moved which rows (25 seeds, 5,877 matched rows, sum abs(offset) 66,137 at `f6edfc6b9` -> 56,070 now; 0 missing / 0 extra at every build)
+
+Each line is the engine commit, replayed over the fixed ROM rows; "moved" = rows whose offset changed; the causes are the ROM `gCurrentMove` at the row (so a following-command row is named after the move that is still set).
+
+| step (commit) | rows moved (toward 0 / away) | mass | biggest movers (rows, shift) |
+| --- | --- | --- | --- |
+| adp1 (Withdraw / Rock Smash / Beat Up bodies, `0c30cdc60`) | 0 | 66,137 | none: no seed here plays those three moves |
+| **hpd4** (`ef94a58af`: Sonic Boom / Dragon Rage / Defense Curl / Rollout leads + floor-free hit hold; landed after aud263) | 424 (358 / 54) | 66,137 -> 66,043 | Bubble Beam 48 rows +1 (-48); **SE 242 (Hail) general anim 10 rows -16 (+160, away)**, Cosmic Power 3 rows -17 (-45), Wish 16 rows -8 .. -4 (+44, away), Charm 3 rows +12 (+36, away) |
+| hpd5 Ice Ball (`93306ce12`) | 0 | 66,043 | none |
+| hpd5 Seismic Toss (`a26352df1`) | 16 (7 / 9) | 66,043 -> 66,003 | Seismic Toss 5 rows +7 (-35), Sand Attack +7 |
+| **pau2** (`ccbf70269`: KOFail / AlreadyPoisoned pause LONG, SafeguardEnds SHORT) | 67 (67 / 0) | 66,003 -> 62,675 (**-3,328**) | **SE 148 (Toxic) general anim 18 rows by +32 / +72 / +104 (-1,248)**, **Fire Blast 12 rows +71 (-804: the s1028 res10 Horn Drill window of out1)**, SE 142 16 rows (-576), Soft-Boiled 3 rows +71 (-183), cry / controller rows of the same windows |
+| mem2 (`652e53159`: 0x7FFF instant HP drop) | 0 | 62,675 | none: none of the 25 seeds plays Memento / Explosion / Self-Destruct (checked: `gCurrentMove` 120 / 153 / 262 absent), so mem2 has no T2 row to move; its evidence is the visual windows (aud242 section 30) |
+| **kno3** (`f047ca4f5`: Knock Off item animation) | 50 (47 / 3) | 62,675 -> 59,112 (**-3,563**) | **"Rock Slide" 20 rows +110 (-2,200: the s165 res18 window of out1; the rows are the Knock Off item animation's, named after the Rock Slide that is still `gCurrentMove`)**, SE 148 12 rows +50 / +59 (-594), cry / controller of that window |
+| **hpd8** (`b6245066e` via `2a4fef0b1`: shape-A lead + hit tail, 16 bodies) | **770 (576 / 183)** | 59,112 -> 56,190 (**-2,922**) | the NEXT command of every shape-A body moves by its +6 / +8 / +11: SE 142 48 rows (-384), Ice Beam 27 (-234), Blizzard 26 (-208, +8), Leech Seed 22 (-154), controller SE 15 28 rows (-153), Psychic 35 (-144), Double Edge 28 (-134); **away: Confuse Ray 20 rows +6 (+108, a shape-C body at gap 5 now overshoots), Hypnosis / Agility / Encore / Light Screen / SE 152 / 228 / 102 group rows already at -1 .. +1 move to +5 .. +8** |
+| pau3 (`87bf77283`: SafeguardEnds pre-print row +10) | 17 (12 / 5) | 56,190 -> 56,168 | SE 148 12 rows +10 (-72), 5 rows away +10 (cry, three controller rows) |
+| ais4 (`047a1a3dd`, plus dl3 which has no sound effect) | 112 (89 / 23) | 56,168 -> **56,070** | send-in SE / cry open elapsed 18 -> 17: controller SE 15 and cry 39 rows each by -1 / +1, SE 242 10 rows +2 (-20); exact rows 425 -> 429 |
+| **net `f6edfc6b9` -> now** | | **66,137 -> 56,070 (-10,067, -15.2 %)** | |
+
+What this says: **kno3 + pau2 landed the two largest single windows** (Rock Slide s165 res18 -2,200 and Fire Blast s1028 res10 -804 are exactly out1's predictions; Horn Drill's pause and Knock Off's item animation removed 6,891 of the 10,067 = 68 % of the net mass between them, in 117 rows). **hpd8 moved the most rows (770) for 2,922 of mass**: it is the only step with a large "away" count (183 rows), because the uniform +6 / +8 / +11 lands on rows that were already at 0 .. +1 (the hpd8 doc names this overshoot; section 5 lists it). mem2 and adp1 move zero rows in these 25 seeds (no Memento / Explosion / Self-Destruct / Rock Smash / Withdraw / Beat Up in them): their wins are not visible to T2 here.
+
+### 4. t2off-style table: top 15 causes by rows x abs(offset) now (25 seeds, total mass 56,070 over 5,877 rows)
+
+| # | cause (ROM `gCurrentMove` at the row, or SE id) | rows | median | rows x abs(offset) | share | class | of which new seeds | aud263 (21 seeds) |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 | SE 152 (Take Down) with no move set | 282 | -2 | 3,675 | 6.6 % | status / general anim (the 152 / 228 / 102 five-SE group; s5063: 27 rows, 1,167) | 309 | 3,393 |
+| 2 | controller SE 13 (effective) | 305 | -3 | 3,572 | 6.4 % | controller / message row | 884 | 2,851 |
+| 3 | cry | 202 | -9 | 3,087 | 5.5 % | cry (modes 0 / 5 / 7 / 8 / 11 mixed) | 700 | 2,857 |
+| 4 | SE 142 (Crabhammer id) with no move set | 160 | -6.5 | 1,856 | 3.3 % | status / general anim | **1,472** | n/a |
+| 5 | **Leech Seed (73)** | 55 | **-29** | 1,771 | 3.2 % | **unaudited body** (constant -29 / -29 / -36 / -38 per window on s648 / s319 / s6912 / s310) | **1,375** | 462 |
+| 6 | controller SE 16 (faint) | 105 | -5 | 1,707 | 3.0 % | controller / message row | 441 | 1,448 |
+| 7 | controller SE 15 (ball open) | 111 | -12 | 1,702 | 3.0 % | controller / message row | 416 | 1,609 |
+| 8 | SE 148 (Toxic) with no move set | 120 | -9.5 | 1,602 | 2.9 % | status play (poison tick); **was 3,600 at median -22**, pau2 / kno3 / pau3 took 1,998 | 0 | 3,600 |
+| 9 | controller SE 12 (not effective) | 102 | -4 | 1,484 | 2.6 % | controller / message row | 84 | 1,404 |
+| 10 | **Swagger (207)** | 33 | -11 | 1,405 | 2.5 % | unaudited body (s6 res14: 11 rows, 1,276; out1 B) | 0 | 1,471 |
+| 11 | Ice Beam (58) | 206 | -2 | 1,239 | 2.2 % | shape-A (hpd8-landed) | 209 | 1,107 |
+| 12 | SE 228 (Morning Sun id) with no move set | 94 | -2 | 1,225 | 2.2 % | status play (same five-SE group as 13) | 103 | 1,131 |
+| 13 | SE 102 (Shiny) with no move set | 94 | -2 | 1,225 | 2.2 % | status / shiny anim | 103 | 1,131 |
+| 14 | Bubble Beam (61) | 264 | -2 | 1,176 | 2.1 % | shape-A (hpd8-landed) | 0 | 1,224 |
+| 15 | **Solar Beam (76)** | 20 | **-62** | 1,145 | 2.0 % | **shape B (open: unleash turn ROM window 237 vs app 160, hpd7b)**; s97: 13 rows at -99 .. -101 = 1,000, s830 -18 | **1,058** | 95 |
+
+Next five: Double Edge 1,112 (shape-A, median +2: the engine is now after the ROM on its next-command rows), Magical Leaf 1,036, Rock Slide 998 (was 3,058; 140 new), Calm Mind 858 (unaudited; 435 new), Blizzard 856 (unaudited; 635 new, median -5).
+
+By class (all 5,877 rows, 56,070): unaudited bodies 1,667 rows / 14,675 (26.2 %), status / general anims with no move running 912 / 12,032 (21.5 %), shape-A bodies already landed 1,561 / 10,192 (18.2 %), controller / message rows 758 / 10,071 (18.0 %), cry 202 / 3,087 (5.5 %), shape B 184 / 2,496 (4.5 %), shape C 232 / 1,480 (2.6 %), stat-change 101 / 1,050, audited / modelled (hpd4 / hpd5 / Double Team / Protect / Rain Dance) 255 / 835, bgm 5 / 152. **Rows at abs(offset) >= 20: 811 rows hold 29,150 (52 %)**; the largest groups are single (seed, cause) windows: s6 Swagger 1,276, s5063 SE 152 1,167, **s97 Solar Beam 1,000 (new)**, s5063 Double Edge 864, s3738 Magical Leaf 840, **s648 Leech Seed 638 (new)**, **s97 Blizzard 546 (new)**, s1415 Bulk Up 489. A "landed shape-A" body keeps 18 % of the mass: the lead landed on the body's *next* command, so its own SEs still carry the audited ROM ages (median -2 .. +2) and the remaining mass is the next-command spread, not the lead.
+
+**New findings from the four new seeds** (not visible in aud263's 21): (1) **Leech Seed (73)** constant -29 .. -38 per window (44 of 55 rows from s310 / s319 / s648; 11 more on s6912): a whole unmeasured body, 1,771 mass, no hpd7-style window; (2) **Solar Beam unleash** -99 .. -101 on s97 is hpd7b's known 237-vs-160-row window, shape B, unlanded: the hpd8 doc lists it as open; (3) the SE 142 no-move rows (1,472 of 1,856 mass from the new seeds, 128 rows); (4) Blizzard (635 new mass), Calm Mind (435), Psychic (634 new: a landed shape-A body whose own rows sit at -5 .. +1; the mass is a few outlier rows after it, -108 on s310, -45 on s5063, +25 on s97, i.e. following-command rows still labelled Psychic).
+
+### 5. What got WORSE than aud263 (the same 21 seeds; every one is a shift toward the ROM's next-command offset or a small overshoot, none changes an event)
+
+By cause, mass up (rows worse of rows): **Encore 50 -> 130 (+80; 10 of 20 rows by +8; hpd8)**, **SE 242 (Hail) general anim 320 -> 380 (+60; 10 rows by -16; hpd4: rows that were exact are now -16)**, **Charm 33 -> 69 (+36; 3 rows by +12; hpd4)**, **Agility 75 -> 105 (+30; 5 rows by +6; hpd8)**, **Wish 152 -> 180 (+28; 8 rows by -6 / -5; hpd4)**, **Hypnosis 113 -> 137 (+24; 4 rows by +6, exact -> +6; hpd8)**, Magical Leaf 1,022 -> 1,036 (+14; 7 rows by -7; a hpd8 body whose next-command rows now sit before the ROM's), Flash 36 -> 44 (+8; -17, hpd4), SE 219 (+6), SE 197 (+5), Light Screen (+2). All are small-mass rows (the biggest, Encore, 80 frames) against -8,062 for the whole set; no family or body of consequence got worse in total. The two steps that cause them are **hpd4** (SE 242 / Charm / Wish / Flash, the post-hit-hold shift of the rows after Sonic Boom / Dragon Rage / Defense Curl / Rollout turns, a few rows already at the ROM jump by 12 .. 17) and **hpd8** (+6 / +8 on rows that already sat at 0 .. +1: Hypnosis, Agility, Encore, Confuse Ray in section 3).
+
+Exact rows (offset 0) lost, by step, 36 in all families: hpd4 22 (SE 242 10, Low Kick 6, Wish 4, controller 13 / 114 one each); hpd8 14 (SE 152 6, SE 228 2, SE 102 2, Hypnosis 4). Gained 21: hpd4 5 (SE 152 3, 228 1, 102 1); hpd8 14 (Double Edge 5, Swagger 5, Calm Mind 3, controller 15 1); ais4 2 (controller 15, cry). pau2 / mem2 / kno3 / pau3 / adp1 / hpd5 lose or gain no exact row.
+
+Best movers aud263 -> now (mass): Rock Slide 3,058 -> 858 (-2,200, kno3), SE 148 3,600 -> 1,602 (-1,998, pau2 / kno3 / pau3), Fire Blast 1,099 -> 271 (-828, pau2), cry 2,857 -> 2,387 (-470), controller SE 15 1,609 -> 1,286 (-323), SE 114 676 -> 425 (-251), Blizzard 442 -> 221 (-221, hpd8), Soft-Boiled 483 -> 300 (-183, pau2), controller SE 16 -182, SE 13 -163.
+
+### 6. Verdict and next steps
+
+1. **Event parity is unchanged: 0 missing / 0 extra, 25 seeds, at every intermediate build.** Nothing landed this run regressed an event.
+2. The landed steps removed **15.2 % of the T2 offset mass** (66,137 -> 56,070; 15.3 % on aud263's own 21 seeds); two thirds of that is the two single-window fixes (kno3 Knock Off item animation, pau2 Horn Drill pause) that out1 / out2 predicted to within a few frames, and hpd8 is a broad small win (-2,922 over 770 rows) with an overshoot on rows already near 0.
+3. What is left, by mass: **unaudited bodies 26 %** (Leech Seed 1,771 is the top single body and a measured constant, -29 .. -38; Swagger's s6 window 1,276; Blizzard, Calm Mind, Toxic, Bulk Up), **status / general anims 21.5 %** (SE 152 / 228 / 102 group -2 and SE 142 -6.5, SE 148 -9.5 at 1,602), **controller / message rows 18 %**, **shape B 4.5 %** (Solar Beam unleash -62), shape C 2.6 %.
+4. Suggested order (measurement first; each moves frames, so census eventsDigest identity + soaks + the pin notes + the FULL suite): Leech Seed (a window per side: one constant, 1,771 mass), Solar Beam unleash length (shape B, hpd7b already measured), Swagger's s6 window (out1 B), then hpd7c-style bodies Blizzard / Calm Mind / Toxic / Bulk Up.
+5. Tooling: `tools/audio/t2Attribute.py ROMDIR OUT.json LABEL=ENGINEDIR ...` replays nothing; it scores engine dirs from `soundCensusRomReplay.ts replay` against one ROM dir, so a step bisect is 4 s per seed per commit (`git worktree` at each commit; an aud249Rescore-style loop). Reusable for any future step.
