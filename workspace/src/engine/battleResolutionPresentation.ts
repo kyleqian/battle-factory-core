@@ -5356,7 +5356,9 @@ export function projectBattleResolutionCommands(
       const speciesTail = battler === 1 && sceneOn;
       const forcedPlayer = battler === 0 && forcedDraggedOut.has(0);
       forcedDraggedOut.delete(battler);
-      const aiSwitchLead = battler === 1 && event.provenance?.sourceLabel === "BattleScript_DoSwitchOut" ? AI_SWITCH_SEND_IN_LEAD_FRAMES : 0;
+      const sendInLabel = event.provenance?.sourceLabel;
+      const faintReplacement = battler === 1 && sendInLabel === "BattleScript_FaintedMonSendOutNew";
+      const aiSwitchLead = battler === 1 && (sendInLabel === "BattleScript_DoSwitchOut" || faintReplacement) ? AI_SWITCH_SEND_IN_LEAD_FRAMES : 0;
       const sendIn: Extract<BattleResolutionPresentationCommand, { type: "switch-in" }> = Object.freeze({
         type: "switch-in" as const,
         eventSequence: event.sequence,
@@ -5385,7 +5387,7 @@ export function projectBattleResolutionCommands(
           sendInVisualDelay: sceneOffOpponentSwitchInVisualDelay(incoming.field.species),
           skipFrontAnimation: true as const,
           ...(() => {
-            const lag = sceneOffOpponentSwitchInLagElapsed(incoming.field.species, incoming.field.name);
+            const lag = faintReplacement ? null : sceneOffOpponentSwitchInLagElapsed(incoming.field.species, incoming.field.name);
             return lag === null ? {} : { sendInLagElapsed: lag };
           })(),
         } : {}),
