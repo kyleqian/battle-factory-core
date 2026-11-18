@@ -50,7 +50,12 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   toss10 455 -> 861, toss30 174 -> 865, toss50 149 -> 927, toss80 147 -> 863; rol1-rollout5 459 -> 502 / 3001; OFF improves too. Sound pins move onto the ROM (Rollout turns 9/14/21/33/54 ->
   3/2/2/0/-1, Ice Ball 9/13/22/40/63 -> 3/2/2/-1/-3, hie3 drifts 9/9/17/17/20 -> 2/1/3/2/12). Census 0..99 both scenes eventsDigest identical; Scene ON soaks vanilla 20 / 20, winning /
   winning-swap 60 / 60; T2 6 ON seeds 0 missing / 0 extra. Re-pins: soak-driver counters, lbrd seeds 17 / 17. Unaudited bodies keep the old lead-in-tail. Ice Ball lab damage ROM 20 / 40 / 89
-  vs app 23 / 41 / 82 on turns 3-5 (probably the harness stage's injected RNG; ice1 checks it on the ROM replay).
+  vs app 23 / 41 / 82 on turns 3-5: **ice1 proved it a harness artifact** (the stage's dice): two staged ROM drives (Ice Ball x5, Defense Curl + Rollout x5) match 10 / 10 states each
+  (promoted to `stages/coverage/`); the kernel's Rollout / Ice Ball code matches `Cmd_rolloutdamagecalculation` line by line.
+- **lbw6 (Lobby, #221):** a held direction change mid-step goes straight (field_player_avatar.c:588-595), the turn commit reads the decision frame's input, the five pose residuals fixed;
+  new traces `lbw6-inflight-off` 17 -> 156 / 156, `lbw6-turnturn-off` 100 -> 183 / 183, `lbw6-tap9-off` 74 -> 128 / 128; every Lobby trace equal or better; RNG cursor ROM-exact.
+- **luck4:** R080 redesigned (the AI's Ampharos paralyses Milotic first) and promoted (seed 910000, supervisor re-drive 16 / 16): rare rules **60 -> 61 / 110**; R035 / R040 near their
+  ceiling (~0.1 % / seed), R110 not raised (the script format cannot express its switch); the day job now hunts R035 / R040 / R110.
 - **Next:** lbw6 (Lobby #221: held direction change mid-step), ice1, then wind-down + the aud246 close (the three missing adapters), then the aud246 close.
 
 ---
