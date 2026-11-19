@@ -1868,8 +1868,8 @@ function instantHpDropTiming(events: readonly BattleKernelSemanticEvent[], healt
  * other `datahpupdate; printfromtable`, Leech Seed's turn-end drain, has no ROM window here).
  */
 const HP_PRINT_TAIL_FRAMES = 3;
-/** hpf5 S1 (hpf4m, both scenes): `healthbarupdate; datahpupdate; printfromtable` is E 27 -> next exec +29 = E + 2; the 28 floor + tail 2 is 30 (ROM + 1, the usual convention). The tail was 3 (fitted on a longer bar). */
-const SUBSTITUTE_COST_HP_TIMING = Object.freeze({ minimumFrames: 28, tailFrames: 2 } as const);
+/** hpf5 S1 (hpf4m, both scenes): E 27 -> next exec +29, but cost bars E >= 28 are ROM-exact at tail 3 (sub183 dense windows, E 44 -> +47), so the tail stays 3 and only the 28 floor goes (a short bar was E 27 -> 31, now 30 = ROM + 1). */
+const SUBSTITUTE_COST_HP_TIMING = Object.freeze({ minimumFrames: 0, tailFrames: HP_PRINT_TAIL_FRAMES } as const);
 function hpPrintTailTiming(event: BattleKernelSemanticEvent, events?: readonly BattleKernelSemanticEvent[], index?: number): BattleHpTiming {
   const programCounter = event.provenance?.programCounter;
   if (programCounter === undefined) return HP_TIMING;

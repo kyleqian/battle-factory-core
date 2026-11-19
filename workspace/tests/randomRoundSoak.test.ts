@@ -436,7 +436,8 @@ describe("random round soak driver (green milestone pin)", () => {
       // 70 / 44): frames only + render calls, 41_240 -> 41_332, renderCalls 2_914 -> 2_920; same battle 7, turn 3, end state, diagnostics.
       // merge of the box's 2026-11-18 run (to cbd64bb34) with the Mac's fixes 44-51 (fix 50: the battle intro's prompt two frames earlier; fix 51: the won
       // Lobby's clock): frames + render calls, 41_048 (box) / 41_332 (Mac) -> 41_151, renderCalls 2_892 / 2_920 -> 2_898; same battle 7, turn 3, end state, diagnostics.
-      frames: 41_151,
+      // hpf5 (tick / wrap / weather / Substitute hp lengths, ROM-measured): frames + render calls, 41_151 -> 41_066, renderCalls 2_898 -> 2_900; same battle 7, turn 3, end state, diagnostics.
+      frames: 41_066,
       battle: 7,
       turn: 3,
       diagnostics: {
@@ -448,7 +449,7 @@ describe("random round soak driver (green milestone pin)", () => {
         terminalOutcome: "roundWon",
         terminalRecordMenuInputReadyReached: true,
         terminalRecordChoice: "no",
-        renderCalls: 2_898,
+        renderCalls: 2_900,
       },
     });
     expect(second).toEqual(first);
@@ -649,7 +650,10 @@ describe("random round soak driver (green milestone pin)", () => {
     //
     // hpf1 (floor-free hit -> message / faint-chain / turn-end hp commands; the exploring presses land on new phases): seed 28 no longer commits Baton Pass.
     // Re-scanned full-policy seeds 0..47 (tools/soak/batonPassSearch.ts --seeds 0:48 --parallel 8): hits 4, 6, 7, 11, 12, 15, 17, 29, all candidates; seed 4 is the lowest.
-    const result = runSeed(4, {
+    //
+    // hpf5 (tick / wrap / weather / Substitute hp lengths, ROM-measured): seed 4 no longer commits Baton Pass. Re-scanned full-policy seeds 0..47
+    // (tools/soak/batonPassSearch.ts --seeds 0:48 --parallel 3): hits 7, 8, 10, 15, 16, all candidates; seed 7 is the lowest (Baton Pass commits 2, first commit 31951, halt 32775 on MAWILE in battleIndex 0, one Lobby new challenge).
+    const result = runSeed(7, {
       maxFrames: 80_000,
       renderEvery: 0,
       coverage: observer as never,
@@ -968,12 +972,13 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // hpd8 + ais4 merged (26477cf4b; ais4 was pinned on a base without lbw8's Lobby NPC release and hpd8; together they move the exploring presses): 39712 / turn 24 -> 40342 / turn 20; same battle 2 / depth 1 / roundLost.
       // hpf1 (hit -> message / faint-chain / turn-end hp commands are floor-free, ROM-measured): 40342 / turn 20 -> 39622 / turn 24 (exploring presses land on new phases); same battle 2 / depth 1 / roundLost.
       // merge of the box's 2026-11-18 run with the Mac's fixes 44-51: frames only, 39622 -> 39365; same battle 2 / depth 1 / roundLost / turn 24.
-      frames: 39365,
+      // hpf5 (tick / wrap / weather / Substitute hp lengths, ROM-measured; the exploring presses land on new phases): 39365 / battle 2 turn 24 / depth 1 -> 18681 / battle 1 turn 23 / depth 0; still roundLost.
+      frames: 18_681,
       outcome: "OK",
       endState: "roundLost",
-      maxBattleDepth: 1,
-      battle: 2,
-      turn: 24,
+      maxBattleDepth: 0,
+      battle: 1,
+      turn: 23,
     });
     expect(runSeed(1, options)).toMatchObject({
       // msg175: 26878 -> 26810 (shorter used prints); trn178 (the Scene OFF action-transition pause): 26810 -> 27058; same battle / turn / end state.
@@ -995,12 +1000,13 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // hpd5 (measured on the hpd4 tip f40209793; the floor-free foe-hit hold changes the exploring policy's press phases): 21985 / turn 35 -> 28708 / turn 46; same battle 1 / depth 0 / roundLost.
       // hpf1: 28708 / turn 46 -> 56022 / turn 15 (battle 1 / depth 0 -> battle 3 / depth 2; the exploring presses land on new phases); still roundLost.
       // hpf2: 56022 / turn 15 -> 92558 / turn 27 (battle 3 / depth 2 -> battle 5 / depth 4; the exploring presses land on new phases); still roundLost.
-      frames: 92558,
+      // hpf5: 92558 / turn 27 -> 95266 / turn 29; same battle 5 / depth 4 / roundLost.
+      frames: 95_266,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 4,
       battle: 5,
-      turn: 27,
+      turn: 29,
     });
   });
 
@@ -1572,7 +1578,8 @@ describe("ISSUES #104 (driver): continuous-play outcome semantics retuned -- OK 
     // ais4 merged onto lbw8 + hpd8 (master 26477cf4b; ais4 was pinned without them): seed 2 now carries 7; re-scanned seeds 0..23 under the same options: only seed 14 chains two round wins (carry 14), so it is pinned.
     // hpf1 (floor-free hit -> message / faint-chain / turn-end hp commands): seed 14 now carries 7; re-scanned seeds 0..39 under the same options: seeds 0, 2, 23, 27 and 36 chain two round wins (carry 14), so the lowest (0) is pinned.
     // merge of the box's 2026-11-18 run with the Mac's fixes 44-51: seed 0 now carries 7; re-scanned seeds 0..39 under the same options: seeds 13, 14 and 19 chain two round wins (carry 14), so the lowest (13) is pinned.
-    const result = runSeed(13, {
+    // hpf5 (tick / wrap / weather / Substitute hp lengths, ROM-measured): seed 13 now carries 7; re-scanned seeds 0..39 under the same options: seeds 2, 14, 17 and 19 chain two round wins (carry 14), so the lowest (2) is pinned.
+    const result = runSeed(2, {
       policy: "winning",
       maxRounds: 3,
       renderEvery: 0,

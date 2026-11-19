@@ -46,7 +46,7 @@ describe("end-turn weather damage SE_EFFECTIVE (aud252)", () => {
   it("we play the same three rows with the same pans", () => {
     const ours = ourEvents(rom).filter(isEffective);
     expect(ours.map((e) => e.pan)).toEqual(theirs.map((e) => e.pan));
-    // frames are the presentation-length residual (not this step): ROM minus ours is -8 / -2 / -10 here
-    expect(ours.map((e, i) => theirs[i]!.frame - e.frame)).toEqual([-8, -2, -10]);
+    // frames are the presentation-length residual (not this step): ROM minus ours is -8 / -2 / 1 here (hpf5 T3: the last tick's tail 4 + turn-end 8 replaces the 28 floor, the third row -10 -> 1)
+    expect(ours.map((e, i) => theirs[i]!.frame - e.frame)).toEqual([-8, -2, 1]);
   });
 });
