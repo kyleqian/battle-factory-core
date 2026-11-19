@@ -426,12 +426,12 @@ ROM windows (`npm run compare -- tools/compare/traces/lead2-<x>-on.json --summar
 
 Census delta B1 vs base (`lsd194Census.sh` + `rst197CensusDelta.py`): Scene ON 0..199: eventsDigest identical on all 200 seeds; 91 battles change, 109 identical; **248 move-animation commands** change, **+2,226 frames** in total, only fields 16 / 18 (lead and minimum frames), no inserted commands, bad 0. Per command: Water Pulse +8 (49), Icy Wind +8 (49), Mega Drain +8 (11), Facade +6 (34), Mega Kick +6 (32), Counter +5 (30; lead 4 + tail 1), Double Kick hit 1 +19 (34), Comet Punch hit 1 +18 (5), Doubleslap hit 1 +18 (4). Scene OFF 0..99: 100 / 100 identical.
 
-Sound: T1 (self-consistency) on both arms 54,005 exact, known-offset 0 / missing 0 / extra 0; non-move 21,973 exact. Arm vs arm: 109 seeds identical, 86 with the same event sequence at moved frames (`se 131` +6 / +8, `duck 476` +6, `se 148` +8, ...), 5 seeds (31, 90, 102, 130, 132) with the same event count but a different order (events that now land on a different frame order relative to the other families; the multiset is unchanged).
+Sound: T1 (self-consistency) on both arms 54,005 exact, known-offset 0 / missing 0 / extra 0; non-move 21,973 exact. Arm vs arm: 109 seeds identical, 86 with the same event sequence at moved frames (`se 131` +6 / +8, `duck 476` +6, `se 148` +8, ...), 5 seeds (31, 90, 102, 130, 132) with the same event count but a different order (not analysed further: the shifted frames reorder events inside the same-count sequence; T1 scores every event exact).
 
 Gates on the B1 tip: `npm run typecheck` 0; `npm run build` 0; `npm run test:gate` 362 files / 2,844 tests green; tests/lbrd.test.ts + tests/randomRoundSoak.test.ts 79 / 79; 7 chunks (604 files = every test importing liveMoveAnimation / battleResolutionPresentation* / moveAnimSounds / tickSounds / iu120Rows plus tests naming the B1 moves) green after the re-pins; `npm run soak -- --policy vanilla --seeds 0:20 --parallel 3 --scene on` (two 10-seed calls) 20 / 20 OK, 0 crash, 0 hang.
 
 Re-pins (each by the lead + T rule):
-- `tests/apx217TransformApproximate.test.ts`: Icy Wind opponent rows 290 -> 298 (+8: lead 4 + tail 4).
+- `tests/apx217TransformApproximate.test.ts`: Icy Wind opponent rows 290 -> 298 (+8).
 - `tests/apx221PresentationGateApproximate.test.ts`: the Castform-form Icy Wind rows 290 -> 298 (+8).
 - `tests/animation/liveMultihitMoveAdapters.test.ts`: the helper call passes lead 0 for hits 2+ (`iu120Ages(row.id, row.ages + row.seGates[hit]!, "player", hit === 0 ? undefined : 0)`): the default lead applies to hit 1 only.
 - `tests/animation/liveRandom2R1MoveAdapters.test.ts`: Double Kick bodies alternate hit 1 / hit 2; the expected lead is 0 on the second.
