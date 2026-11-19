@@ -87,7 +87,7 @@ Hydro Pump / Cosmic Power / Calm Mind / Encore / Hypnosis / Blizzard, ROM hp com
   Intimidate / Trace entry scripts are presented, kernel-row timed, both scenes (ROM: Intimidate 239 rows, Trace 136 in all 12 probed cases). Open: Sand Stream, IntimidatePrevented, Trace copying an
   Intimidate-style ability, a double-faint Intimidate send-in, the opponent personality / ability-slot mismatch (app vs ROM record, pau4m), the Scene ON stat-animation tint sub-phase, residuals faint ON
   54 / 56, switch ON 184 / 301, switch-intimidate OFF 280 / 571.
-- **hp shapes on the floor (hpf4m: ROM lengths measured, landing order T1 / T4 / T3 / T2 / S1 / S2 in docs/hpd1-hp-hold.md "hpf4m").** sta5 step 2 applies in Scene OFF too (sta6m: 7 rows).
+- **hp shapes (hpf5 landed hpf4m T1 / T4 / T3 / T2 / S1 and sta6m; S2 is btn1's button wait; docs/hpd1-hp-hold.md "hpf5"):** open: Substitute cost on short bars (E < 28) runs 1 row over the ROM (tail 3 kept for the E >= 28 bars).
 - **Pauses (pau3 open):** the HJK crash print +3, Safeguard expiry tail 4 early, the failed-Toxic pixel lab, a 1-frame early menu after KOFail.
 - **Coverage:** controller / cry / BGM have no T1 rule table (counts only); fanfare / screen SEs have no T2 instance. Scene ON seeds 6568 / 7682 stall at the 80,000-frame ROM drive cap; census
   seeds 796 / 995 end at the frame budget in both scenes.
