@@ -83,7 +83,10 @@ Hydro Pump / Cosmic Power / Calm Mind / Encore / Hypnosis / Blizzard, ROM hp com
 - **Residuals:** Blizzard body SEs +2 (print glyph-count R), Calm Mind hit SE -4, Self-Destruct post-hit hp + faint +6 rows, Memento `stats-change` 5 rows early, Explosion hit-blink ~2 rows, Knock Off's
   hit phase 2-8 rows (shared with the no-item control), Encore turn 1, Solar Beam unleash FadeToBg picture, Faint Attack opponent lag, the species-dependent ball-open lag (bal1: not in the ROM send-out
   path), shape C bodies (Brick Break, Dig charge, status-command gaps), multi-hit second hits, Water Spout -1, Beat Up multi-hit message timing, `Status_Freeze` SE 242 +1, Roar / Howl lab drift.
-- **Switch-in ability prints (pau4, `docs/pau1-script-pauses.md` "pau4"):** the battle-start Intimidate / Trace entry scripts are presented (kernel-row timed, both scenes). Open: Scene ON stat-animation tint sub-phase (live host inputs not seeded at battle start), the opponent personality / ability caveat (Magnet Pull vs ROM Sturdy text), the mid-battle switch-in / faint-replacement entry prints (Part B: one ROM lab needed, an Intimidate send-in after a faint via overrides.parties).
+- **Switch-in ability prints (pau4 / pau5, `docs/pau1-script-pauses.md` "pau4" / "pau5"):** battle-start and mid-battle (voluntary switch, faint replacement, opponent replacement)
+  Intimidate / Trace entry scripts are presented, kernel-row timed, both scenes (ROM: Intimidate 239 rows, Trace 136 in all 12 probed cases). Open: Sand Stream, IntimidatePrevented, Trace copying an
+  Intimidate-style ability, a double-faint Intimidate send-in, the opponent personality / ability-slot mismatch (app vs ROM record, pau4m), the Scene ON stat-animation tint sub-phase, residuals faint ON
+  54 / 56, switch ON 184 / 301, switch-intimidate OFF 280 / 571.
 - **hp shapes on the floor (hpf4m: ROM lengths measured, landing order T1 / T4 / T3 / T2 / S1 / S2 in docs/hpd1-hp-hold.md "hpf4m").** sta5 step 2 applies in Scene OFF too (sta6m: 7 rows).
 - **Pauses (pau3 open):** the HJK crash print +3, Safeguard expiry tail 4 early, the failed-Toxic pixel lab, a 1-frame early menu after KOFail.
 - **Coverage:** controller / cry / BGM have no T1 rule table (counts only); fanfare / screen SEs have no T2 instance. Scene ON seeds 6568 / 7682 stall at the 80,000-frame ROM drive cap; census
