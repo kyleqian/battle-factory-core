@@ -1846,7 +1846,24 @@ const TERMINAL_WINDOW_FROZEN_CURSOR_AGE: Readonly<Record<string, number>> = {
  * a target boundary while the oracle still replays the untouched anchor
  * trace. Production code never imports this registry.
  */
+// hpf5: the hpf4m labs' shapes (tools/battle-lab/hpf4m-<case>-{on,off}.json): Lv50 Rattata player (move) vs a Rattata foe (move, level) at rngSeed.
+const HPF4M_CASES: Readonly<Record<string, readonly [number, number, number, number?]>> = {
+  poison: [139, 150, 50], toxic: [92, 150, 50], burn: [261, 150, 50], wrap: [35, 150, 50], bind: [20, 150, 50], firespin: [83, 150, 50],
+  whirlpool: [250, 150, 50], sandtomb: [328, 150, 50], clamp: [128, 150, 50], sandstorm: [201, 150, 50], faintpoison: [92, 150, 5], substitute: [164, 33, 50],
+};
+function hpf4mStages(): Record<string, AppStage> {
+  const stages: Record<string, AppStage> = {};
+  for (const [name, [playerMove, foeMove, foeLevel, seed]] of Object.entries(HPF4M_CASES)) {
+    for (const scene of ["on", "off"] as const) {
+      const id = `hpf4m-${name}-${scene}`;
+      stages[id] = (state) => aud241bStage(state, id, scene, 50, foeLevel, playerMove, undefined, false, foeMove, seed ?? 1);
+    }
+  }
+  return stages;
+}
+
 export const APP_STAGES: Readonly<Record<string, AppStage>> = {
+  ...hpf4mStages(),
   // iss216: the anchor deal has no duplicate species; the ROM probe pokes slot 6's monId to slot 1's
   // (tools/probe/stage-draft-same-species-off.py), the engine pokes the same identity (display unchanged).
   "iss216-dup-draft-off": (state) => ({

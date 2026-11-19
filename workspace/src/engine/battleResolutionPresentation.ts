@@ -1992,7 +1992,27 @@ function hpFaintNext(events: readonly BattleKernelSemanticEvent[], index: number
   return programCounter !== undefined && BATTLE_SCRIPT_PROGRAM.instructions[programCounter]?.opcodeName === "B_SCR_OP_DATAHPUPDATE"
     && events[index + 1]?.payload.kind === "play-faint-cry";
 }
+/**
+ * hpf5 (docs/hpd1-hp-hold.md "hpf5", measured in hpf4m): the end-of-turn damage ticks. `BattleScript_DoTurnDmg` (poison / toxic / burn / Curse / Nightmare /
+ * wrap family) and `BattleScript_DamagingWeatherLoop` (sandstorm / hail) run `healthbarupdate; datahpupdate; tryfaintmon` with no 28-row floor: the ROM's
+ * next controller exec after a tick bar is E + 8 (E = bar frames + 1 = the hp command; the 8 rows are TURN_END_TIMING) for every bar length E = 4..27.
+ * T1: the tick is the bar's own frames. T4: a tick that faints starts the faint chain at E + 2. T3: a weather tick's next print sits 10 rows after the bar
+ * (a following battler's damage message), the last battler's tick leaves through `cbf..cc8` 4 rows later than the status ticks before the turn end's 8.
+ */
+const TICK_HP_TIMING = Object.freeze({ minimumFrames: 0 } as const);
+const TURN_DAMAGE_PC = datahpupdatePcAfter("BattleScript_DoTurnDmg");
+const WEATHER_DAMAGE_PC = datahpupdatePcAfter("BattleScript_DamagingWeatherLoop");
+/** hpf5 T2: `BattleScript_MoveEffectWrap`'s `printfromtable` is the wrap hit's secondary message (E + 7 after the hit's bar, E 7..16 by move). */
+const WRAP_SECONDARY_PC = BATTLE_SCRIPT_PROGRAM.labelEntries["BattleScript_MoveEffectWrap"]!.programCounter;
+type HpTick = "turn-damage" | "weather";
+function hpTickKind(event: BattleKernelSemanticEvent): HpTick | null {
+  const programCounter = event.provenance?.programCounter;
+  return programCounter === TURN_DAMAGE_PC ? "turn-damage" : programCounter === WEATHER_DAMAGE_PC ? "weather" : null;
+}
 interface HpLeadRows {
+  readonly tick: HpTick | null;
+  /** The next kernel event is the wrap hit's secondary message (hpf5 T2). */
+  readonly wrapSecondary: boolean;
   readonly moveEndRows: number | null; readonly messageRows: number | null; readonly faintNext: boolean;
   /** The print after `datahpupdate` is the hit's own effect message (critmessage / resultmessage). */
   readonly hitEffectMessage: boolean;
@@ -2009,6 +2029,10 @@ function applyHpHitTails(
     const leads = command.type === "hp" ? leadRows.get(command.eventSequence) : undefined;
     if (command.type !== "hp" || leads === undefined || command.timing !== HP_TIMING) continue;
     const rest = commands.slice(index + 1);
+    if (leads.tick === "turn-damage") {
+      commands[index] = Object.freeze({ ...command, timing: TICK_HP_TIMING });
+      continue;
+    }
     const transition = rest[0]?.type === "move-animation" && rest[1]?.type === "sprite-visibility";
     const endsTurn = rest.length > 0 && rest.every((c) => c.type === "sprite-visibility" || c.type === "turn-end");
     const previous = commands[index - 1];
@@ -5242,7 +5266,7 @@ export function projectBattleResolutionCommands(
       const messageRows = drainRole === null ? hpMessageLeadRows(events, index) : null;
       const faintNext = drainRole === null && hpFaintNext(events, index);
       const hitEffectMessage = HP_HIT_EFFECT_OPCODES.has(events[index + 1]?.provenance?.opcodeName ?? "");
-      hpLeadRows.set(health.eventSequence, { moveEndRows, messageRows, faintNext, hitEffectMessage, barExecution: health.instructionExecution });
+      hpLeadRows.set(health.eventSequence, { tick: hpTickKind(event), wrapSecondary: events[index + 1]?.provenance?.programCounter === WRAP_SECONDARY_PC, moveEndRows, messageRows, faintNext, hitEffectMessage, barExecution: health.instructionExecution });
       commands.push(Object.freeze({
         type: "hp",
         eventSequence: health.eventSequence,
