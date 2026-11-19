@@ -18,6 +18,7 @@ import {
 } from "../../src/engine/factoryRoundBattleOrchestrator.ts";
 import {
   createBattleResolutionPresentationRenderView,
+  liveMoveHitTailRows,
   liveMoveRandom2PlanContextAt,
   renderBattleResolutionPresentation,
 } from "../../src/engine/battleResolutionPresentationRender.ts";
@@ -46,6 +47,8 @@ export type Sgl138Command = {
   seg: string; index: number; type: string; i: number; seq: number | null; frame: number; startElapsed: number;
   minimumFrames: number | null; holdFrames: number; seGate: number; battler: number | null; move: number | null; rows: number | null;
   glyph: number | null; effectStart: number | null; previousSha: string | null; gateShas: string[]; gateEffects: string[];
+  // lfx1: a move-animation's body lead and hit tail rows (the used-print lead and the 6 - pre - post tail of a lead2 / lead3 body's hit 1); not in the ROM's attackanimation controller rows.
+  bodyLead: number; hitTail: number;
 };
 
 const FRAME_BUDGET = 200000;
@@ -91,6 +94,9 @@ export function sgl138Battle(seed: number, scene: "on" | "off"): { commands: Sgl
         glyph: null, effectStart: null,
         previousSha: seGate > 0 && previous.battleResolutionPresentation ? render(previous, previousHost) : null,
         gateShas: [], gateEffects: [],
+        bodyLead: command.type === "move-animation" ? command.timing?.bodyLeadFrames ?? 0 : 0,
+        hitTail: command.type === "move-animation" && command.animation
+          ? liveMoveHitTailRows(command, createBattleResolutionPresentationRenderView(r, rng.host).field) : 0,
       });
     }
     const last = out.at(-1)!;
@@ -172,7 +178,8 @@ export function sgl138Battle(seed: number, scene: "on" | "off"): { commands: Sgl
  * The anchors of one battle: every stats-change command and every 2nd+ move-animation of a multi-hit (a move-animation of the same
  * move by the same battler after one earlier in its segment, Scene ON) — with the span to the next command (`span`), the following print's first glyph relative to
  * the command start (`glyph`; the next message command of the segment), the banner / body start row (`effectStart`) and, for later
- * hits, the 1st hit's span and body start (`first`).
+ * hits, the 1st hit's span and body start (`first`) and its body lead / hit tail rows (lfx1: ctl(hit k) - gate == ctl(hit 1) compares the controller
+ * rows of the request, which the used-print lead and the hit tail of the 1st hit are not part of).
  */
 export function sgl138Anchors(commands: readonly Sgl138Command[]) {
   return commands.flatMap((c, n) => {
@@ -193,6 +200,7 @@ export function sgl138Anchors(commands: readonly Sgl138Command[]) {
       effectStart: c.effectStart,
       first: firstHit === null ? null : {
         span: firstNext === undefined ? null : firstNext.frame - firstHit.frame, effectStart: firstHit.effectStart,
+        lead: firstHit.bodyLead, tail: firstHit.hitTail,
       },
       previousSha: c.previousSha, gateShas: c.gateShas, gateEffects: c.gateEffects,
     }];
@@ -244,7 +252,7 @@ if (process.argv[1]?.endsWith("sgl138Live.ts")) {
       && a.glyph === a.gate + a.rows! + a.holdFrames && a.span === a.glyph).length,
     statsChange: all.filter((a) => a.type === "stats-change").length,
     laterHitShiftEqualsGate: all.filter((a) => a.type === "move-animation" && a.first !== null
-      && a.span! - a.first.span! === a.gate && a.effectStart! - a.first.effectStart! === a.gate).length,
+      && a.span! - (a.first.span! - a.first.lead - a.first.tail) === a.gate && a.effectStart! - (a.first.effectStart! - a.first.lead) === a.gate).length,
     laterHits: all.filter((a) => a.type === "move-animation").length,
     gateRowsEqualPrevious: gated.filter((a) => a.gateRowsEqualPrevious).length,
   };

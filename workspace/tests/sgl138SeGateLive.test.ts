@@ -52,8 +52,9 @@ describe("sgl138: the gate in production (census routes, both scenes)", () => {
             expect([a.effectStart, a.glyph, a.span], where).toEqual([a.gate, a.gate + a.rows! + a.holdFrames, a.gate + a.rows! + a.holdFrames]);
           } else {
             expect(scene, where).toBe("on");
-            // ROM: ctl(hit k) - gate == ctl(hit 1); the body launches `gate` rows late (launch = poll + 2 + gate).
-            expect([a.span! - a.first!.span!, a.effectStart! - a.first!.effectStart!], where).toEqual([a.gate, a.gate]);
+            // ROM: ctl(hit k) - gate == ctl(hit 1); the body launches `gate` rows late (launch = poll + 2 + gate). lfx1: the request's controller rows exclude
+            // hit 1's used-print lead and hit tail (lead2 / lead3 bodies: the rule rows sit before / after the attackanimation; hits 2+ have none).
+            expect([a.span! - (a.first!.span! - a.first!.lead - a.first!.tail), a.effectStart! - (a.first!.effectStart! - a.first!.lead)], where).toEqual([a.gate, a.gate]);
           }
           if (a.gate === 0) continue;
           // The gate rows: production frames == the previous command's last frame (the ROM shows nothing new while it waits).
