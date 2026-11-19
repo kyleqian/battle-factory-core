@@ -43,7 +43,7 @@ import type {
   BattleResolutionPresentationState,
   BattleResolutionSegment,
 } from "./battleResolutionPresentation.ts";
-import { messageCommandTypedRows, messageCommandVisibleCharacters } from "./battleResolutionPresentation.ts";
+import { messageCommandTypedRows, messageCommandVisibleCharacters, SWITCH_IN_WAITSTATE_HOLD_FRAMES } from "./battleResolutionPresentation.ts";
 import { backAnimWaitTick, playerFaintReplacementSendOutTiming, sendInNature } from "./switchInTail.ts";
 import { SEND_IN_TAIL_ANIM_IDS, SEND_IN_TAIL_FRONT_ANIM_DURATION, SEND_IN_TAIL_SPECIES } from "../data/sendInTail.ts";
 import { BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS } from "./battleScriptSourceConstants.ts";
@@ -107,6 +107,8 @@ export const BATTLE_RESOLUTION_LOCKED_CONTINUATION_HANDOFF_FRAMES = BATTLE_RESOL
  * continues with exactly `turn-end`, that command's frames and the next-command handoff are inside the ROM's B + D + 17, so the span
  * ends that much earlier.  Null when the segment has no player switch-in (the party select then keeps its canonical clock).
  */
+/** The ROM's action prompt follows the forced player send-in's duration D by 17 frames (switchInTail.ts playerFaintReplacementSendOutTiming). */
+const PLAYER_FAINT_REPLACEMENT_PROMPT_TAIL_FRAMES = 17;
 export function playerFaintReplacementSendOutTimingOfSegment(segment: BattleResolutionSegment): PartySendOutTiming | null {
   const index = segment.commands.findIndex((candidate) => candidate.type === "switch-in");
   const command = segment.commands[index];
@@ -120,7 +122,10 @@ export function playerFaintReplacementSendOutTimingOfSegment(segment: BattleReso
     nameLength: command.incoming.name.length,
     personality: command.incoming.personality ?? 0,
     sceneOn: (segment.beforeRules.rulesContext.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) === 0,
-    followingFrames: turnEnd?.type === "turn-end" ? turnEnd.timing.minimumFrames + BATTLE_RESOLUTION_NEXT_COMMAND_HANDOFF_FRAMES : 0,
+    // pau5: with an entry script after the send-in the span ends where the script's first row runs (release + the script's leading rows).
+    followingFrames: command.entryScriptHoldFrames !== undefined
+      ? PLAYER_FAINT_REPLACEMENT_PROMPT_TAIL_FRAMES - SWITCH_IN_WAITSTATE_HOLD_FRAMES - command.entryScriptHoldFrames + 1
+      : turnEnd?.type === "turn-end" ? turnEnd.timing.minimumFrames + BATTLE_RESOLUTION_NEXT_COMMAND_HANDOFF_FRAMES : 0,
     goTextChars: battleStringPrintableLength(message.lines),
   });
 }
@@ -1853,7 +1858,7 @@ export function battleResolutionCommandDuration(
     case "switch-out":
     case "sprite-visibility":
       return command.type === "switch-in"
-        ? command.timing.minimumFrames + (command.settleHoldFrames ?? 0)
+        ? command.timing.minimumFrames + (command.settleHoldFrames ?? 0) + (command.entryScriptHoldFrames ?? 0)
         : command.timing.minimumFrames;
     case "party-summary":
       return command.timing?.minimumFrames ?? 1;

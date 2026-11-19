@@ -451,7 +451,7 @@ export type BattleSwitchInTiming = Readonly<{ minimumFrames: number }>;
 export type BattleSpriteVisibilityTiming = Readonly<{
   minimumFrames: 1 | typeof FORCED_RETURN_TO_BALL_SEND_IN_GAP_FRAMES | typeof SCENE_OFF_BATON_PASS_RETURN_TO_BALL_PRINT_GAP_FRAMES;
 }>;
-export type BattleTurnEndTiming = Readonly<{ minimumFrames: 8 | 9 }>;
+export type BattleTurnEndTiming = Readonly<{ minimumFrames: number }>;
 export type BattleTrainerSlideTiming = Readonly<{ minimumFrames: 38 }>;
 
 export type BattleResolutionPresentationCommand =
@@ -575,6 +575,11 @@ export type BattleResolutionPresentationCommand =
        * 91-frame controller span.
        */
       settleHoldFrames?: number;
+      /**
+       * pau5: the entry script (Intimidate / Trace) that follows this send-in starts `entryScriptHoldFrames` after the post-`switchinanim`
+       * release: the "Go! X!" box stays up that long on top of `settleHoldFrames` (the script's leading rows less the release rows it replaces).
+       */
+      entryScriptHoldFrames?: number;
       /**
        * snd145: Scene ON opponent send-in only (src/engine/switchInTail.ts): the species-keyed healthbox slide start (switch-in
        * elapsed) and the frames the whole send-in starts late (CASTFORM 1). Absent = the calibrated constants (player; Scene OFF,
@@ -5718,6 +5723,7 @@ export function projectBattleResolutionCommands(
       commands[index] = Object.freeze({ ...command, timing: Object.freeze({ minimumFrames: rows }) });
     }
   }
+  const entryScriptEndsSegment = applyMidBattleEntryScriptBlocks(events, commands);
   // snd145: an opponent FAINT REPLACEMENT that ends the turn holds its settled send-in through the source's post-`switchinanim`
   // turn-end work (`switchineffects`, the rest of `BattleScript_HandleFaintedMon`, `BattleTurnPassed`) before the action prompt.
   const last = commands[commands.length - 1];
@@ -5736,6 +5742,10 @@ export function projectBattleResolutionCommands(
       type: "turn-end",
       timing: lastHp?.type === "hp" && lastHp.timing === SHELL_BELL_HP_TIMING ? SHELL_BELL_TURN_END_TIMING : TURN_END_TIMING,
     }));
+  }
+  const finalCommand = commands[commands.length - 1];
+  if (entryScriptEndsSegment === 0 && finalCommand?.type === "turn-end") {
+    commands[commands.length - 1] = Object.freeze({ ...finalCommand, timing: Object.freeze({ minimumFrames: finalCommand.timing.minimumFrames - ENTRY_SCRIPT_PLAYER_TURN_END_TRIM_FRAMES }) });
   }
   applyHpHitTails(commands, hpLeadRows);
   return Object.freeze(commands);
@@ -6387,4 +6397,70 @@ export function appendBattleResolutionLockedActionContinuation(
     pendingBattle: transition.state,
     forcedRequest: pendingPlayerForcedSwitchRequest(transition.state.boundary),
   });
+}
+
+/** Rows the last print stays drawn after its wait and the script's remaining rows (BattleTurnPassed's first rows; measured on the ROM, Trace and Intimidate agree). */
+export const ENTRY_SCRIPT_END_HELD_ROWS = 3;
+/**
+ * pau5: the rows an entry script runs after its print's `waitmessage` before its `end3` (instructions only; the `end3` halts and is not
+ * a row): BattleScript_IntimidateActivatesLoopIncrement's addbyte + goto, the loop head's trygetintimidatetarget and the return = 4;
+ * BattleScript_TraceActivates goes straight to end3 = 0. They equal the kernel's whole-script rows minus the print's last row and wait
+ * (the battle-start scripts: 114 and 98 rows), so a mid-battle block lasts as long as pau4's.
+ */
+/** pau5: rows of the send-in's post-`switchinanim` hold (SWITCH_IN_WAITSTATE_HOLD_FRAMES) that follow the script instead of preceding it: the script starts 7 rows into the hold and the next action's load (4 rows) comes after its end (ROM probes: the print / stat row is this many frames late otherwise). */
+const ENTRY_SCRIPT_SETTLE_OVERLAP_FRAMES = 4;
+/** pau5: the opponent's replacement runs its entry script this many rows later than the player's send-in does (ROM probes, a frame-shift scan of all four opponent traces: -12 in both scenes, Intimidate and Trace). */
+const ENTRY_SCRIPT_OPPONENT_RELEASE_EXTRA_FRAMES = 12;
+/** pau5: an opponent replacement whose entry script ends the turn reaches the action prompt this many rows after pau4's end rows (ROM probes: all four opponent traces, the app's prompt was 8 early). */
+const ENTRY_SCRIPT_OPPONENT_TAIL_EXTRA_FRAMES = 8;
+/** pau5: a forced player replacement whose entry script ends the turn: the app's turn-end block was this many rows late (ROM probes, both scenes). */
+const ENTRY_SCRIPT_PLAYER_TURN_END_TRIM_FRAMES = 5;
+const ENTRY_SCRIPT_TRAILING_ROWS: Readonly<Record<string, number>> = Object.freeze({
+  BattleScript_IntimidateActivatesLoop: 4,
+  BattleScript_TraceActivates: 0,
+});
+/**
+ * pau5 (docs/pau1-script-pauses.md "pau5"): a mid-battle switch-in whose ability runs an entry script (Intimidate / Trace; a faint
+ * replacement, a voluntary switch or the opponent's replacement). The script's rows count from its own start exactly like the
+ * battle-start scripts (pau4): the first event's `instructionExecution` is the leading rows (`pause B_WAIT_TIME_SHORT` and the loop
+ * set-up) that the "Go! X!" box stays up for, the stat row lasts up to the STATS_CHANGE animation, and the last print holds
+ * through its wait and the script's closing rows. A battle-start script has no switch-in command before it (pau4 times that one).
+ */
+function applyMidBattleEntryScriptBlocks(
+  events: readonly BattleKernelSemanticEvent[],
+  commands: BattleResolutionPresentationCommand[],
+): 0 | 1 | null {
+  const inScript = (event: BattleKernelSemanticEvent): boolean =>
+    event.provenance !== undefined && event.provenance.sourceLabel in ENTRY_SCRIPT_TRAILING_ROWS;
+  const first = events.findIndex(inScript);
+  if (first < 0) return null;
+  const script = events.filter((event) => inScript(event) && event.provenance!.sourceLabel === events[first]!.provenance!.sourceLabel);
+  const sequences = new Set(script.map((event) => event.sequence));
+  const execution = (sequence: number): number | undefined => script.find((event) => event.sequence === sequence)?.provenance?.instructionExecution;
+  const start = commands.findIndex((command) => "eventSequence" in command && sequences.has(command.eventSequence));
+  const before = commands[start - 1];
+  if (start < 1 || before?.type !== "switch-in") return null;
+  const lead = execution((commands[start] as { eventSequence: number }).eventSequence);
+  if (lead === undefined) return null;
+  commands[start - 1] = Object.freeze({ ...before, entryScriptHoldFrames: lead - ENTRY_SCRIPT_SETTLE_OVERLAP_FRAMES + (before.battler === 1 ? ENTRY_SCRIPT_OPPONENT_RELEASE_EXTRA_FRAMES : 0) });
+  let end = start;
+  while (end + 1 < commands.length && "eventSequence" in commands[end + 1]! && sequences.has((commands[end + 1] as { eventSequence: number }).eventSequence)) end += 1;
+  for (let index = start; index <= end; index += 1) {
+    const command = commands[index]!;
+    const following = commands[index + 1];
+    if (command.type === "stat" && following?.type === "stats-change") {
+      const from = execution(command.eventSequence);
+      const to = execution(following.eventSequence);
+      if (from !== undefined && to !== undefined && to - from > command.timing.minimumFrames) {
+        commands[index] = Object.freeze({ ...command, timing: Object.freeze({ ...command.timing, minimumFrames: to - from }) });
+      }
+    }
+  }
+  const last = [...script].reverse().find((event) => event.payload.kind === "message");
+  const printed = commands[end];
+  if (last === undefined || printed?.type !== "message") return null;
+  const closing = ENTRY_SCRIPT_TRAILING_ROWS[last.provenance!.sourceLabel]! + ENTRY_SCRIPT_END_HELD_ROWS
+    + (end + 1 < commands.length ? ENTRY_SCRIPT_SETTLE_OVERLAP_FRAMES : before.battler === 1 ? ENTRY_SCRIPT_OPPONENT_TAIL_EXTRA_FRAMES : 0);
+  commands[end] = Object.freeze({ ...printed, timing: Object.freeze({ ...printed.timing, holdFrames: (printed.timing.holdFrames ?? 0) + closing }) });
+  return end + 1 < commands.length ? null : before.battler;
 }

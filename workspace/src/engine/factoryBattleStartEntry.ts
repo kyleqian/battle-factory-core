@@ -8,7 +8,7 @@
  * Presentation only: the kernel events, RNG and digests are untouched.
  */
 
-import { projectBattleResolutionCommands } from "./battleResolutionPresentation.ts";
+import { ENTRY_SCRIPT_END_HELD_ROWS, projectBattleResolutionCommands } from "./battleResolutionPresentation.ts";
 import type {
   BattleResolutionPresentationCommand,
   BattleResolutionPresentationState,
@@ -21,8 +21,7 @@ import type { FactoryFullTurnDecisionRules } from "./factoryBattleScriptFullTurn
 
 /** Rows between one entry script's end and the next one's first row (BattleScript_Intimidate end3 -> Trace's dispatch). */
 export const ENTRY_SCRIPT_GAP_ROWS = 2;
-/** Rows the last print stays drawn after its wait and the script's remaining rows (BattleTurnPassed's first rows; measured on the ROM, Trace and Intimidate agree). */
-export const ENTRY_SCRIPT_END_HELD_ROWS = 3;
+export { ENTRY_SCRIPT_END_HELD_ROWS };
 /** Blank-box rows between the last script's wait and the action prompt (BattleTurnPassed's HandleTurnActionSelectionState rows). */
 export const ENTRY_SCRIPT_END_BLANK_ROWS = 6;
 const GO_PRINTED_ELAPSED = 1000;
