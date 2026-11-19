@@ -1592,7 +1592,9 @@ describe("ISSUES #104 (driver): continuous-play outcome semantics retuned -- OK 
     // only seed 13 chains two round wins (carry 14), so it is pinned.
     // pau5 (the mid-battle Intimidate / Trace switch-in scripts presented): seed 13 now carries 7; re-scanned seeds 0..159 under the same options (tools/soak/randomRoundSoak.ts --policy winning --max-rounds 3 --render-every 0 --seeds 0:160 --parallel 3):
     // seeds 47, 63, 70, 97, 102, 106 ... chain two round wins (carry 14; none in 0..39), so the lowest (47) is pinned.
-    const result = runSeed(47, {
+    // merge of pau4 / btn1 / pau5 / hpf5 (pin1; hpf5's tick / wrap / weather / Substitute hp lengths shift the soak's press phases): seed 47 still carries 14, but lower seeds now do too; re-scanned seeds 0..49
+    // under the same options (tools/soak/randomRoundSoak.ts --policy winning --max-rounds 3 --render-every 0 --seeds 0:50 --parallel 3): seeds 14, 17, 27 and 47 chain two round wins (carry 14), so the lowest (14) is pinned.
+    const result = runSeed(14, {
       policy: "winning",
       maxRounds: 3,
       renderEvery: 0,
