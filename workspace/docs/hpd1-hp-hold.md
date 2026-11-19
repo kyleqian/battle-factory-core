@@ -750,3 +750,21 @@ Lab change: the Encore lab (`lse1-encore-player-on`, battle-lab json + compare t
 - Calm Mind hit SE 13 @ 699 is -4 (unchanged from the base).
 - **Wish (273) not landed**: its 13-row gap (shape C) was not traced per frame in this step, so the L 2 + 12 post rows proposal from lse1 stays unproven.
 - The `liveMoveUniversalRowAge` hold-flag condition for the LSE2 ids (render ~2500) was not needed on any lab and was left alone.
+
+## hpf3: the nine full-suite failures of hpf1 / hpf2 (tests only, `src/` unchanged)
+
+Base `26ed71da7`. The supervisor's full suite on `4839b5b80` had 9 tests in 7 files failing (bisected to hpf1 / hpf2); cry1CryTasks / aud262MoveAnimSounds / trn181ActionTransitionOn (seen failing on lse2's base) already pass on this base (hpf2 re-pinned them). Each failure was classified from the test's assertion plus a ROM RAM timeline of the same lab: `tools/integration/hpf2Shape.py <lab> on <dir>` (ROM hp bar rise / exec / next rise vs the app's hp command) and the new `tools/integration/hpf3Cmds.ts <audio fixture>` (the app's command timeline for an audio fixture's trace). Result: no regression of an hp command; 8 windows moved toward the ROM or onto an out-of-scope body offset that the 28-row floor had hidden, 1 is a wash (Razor Wind). `src/` is untouched, so no census / typecheck delta applies.
+
+| test | ROM minus ours, before -> after | class and evidence |
+|---|---|---|
+| `adp1Sounds` beatup-player | hit 2 / 3: +61 / +122 -> -2 / -4 (offsets 89 / 150 -> 26 / 24) | toward ROM. ROM bar rise -> next rise +91 for hits 1 and 2 (`adp1s-beatup-player-on`), the app's hp command is now 91 long; the old comment blamed the multi-hit loop, it was the 28-row floor. The -2 per hit remains (hit-to-hit 195 vs ROM 193), not hp |
+| `aud242e` counter-player | Counter body -16 -> -2 | toward ROM. The opponent's hit on the player: ROM bar rise 328 exec 13, next rise +32 = the Counter ATTACKSTRING at 360; the app hp command 327 len 14, ATTACKSTRING at 360 (exact). The pre-body rows keep ROM = ours |
+| `aud242e` absorb-player (closing SE238) | -1 -> +11 | not a regression of the hp command, flagged: ROM hit bar rise 302 vs app 291 (+11) and the second player hit +12 (764 vs 752), so the closing SE sits at the lab's constant hit offset (the move-body lead, out of scope); the 28-row floors had hidden it. hit -> drain bar ROM 47 vs app 46; the full-HP drain bar is 1 exec frame in the ROM (app 5) |
+| `aud242p` revenge-player | -10 -> +13 | the opponent's Pound hit: ROM bar rise 134 -> next rise +25 vs app +26, ATTACKSTRING -> first Revenge SE 36 vs 37: the hit chain and the Revenge body are exact within 1; the 13 is the opponent body offset (hit rise ROM 134 vs app 119 = +15). The old -10 was the floor overshooting the hit |
+| `aud260` recycle-player | -3 -> -4 | the hit -> next ATTACKSTRING is exact (ROM bar rise 1357 + 73 = 1430 = ours); ATTACKSTRING -> first SE is ROM 36, ours 40: Recycle's own body, not hp |
+| `aud261` razorwind-player (unleash) | +1 -> +9 | a wash, not exact either way: hit -> next (continuation, no menu) turn is ROM +49 (bar 13), ours 44 now, 4 too long (+1) with the floor. The turn-end command's 8 rows are the open remainder: it was fitted with the floor-held hp |
+| `aud252LossBallOpen` 1914 | [-5, -11, -19 x6] -> [0, 1, -7 x6] | toward ROM on every row |
+| `aud252LossBallOpen` 2230 | [7, 2, 0 x5, -1] -> [7, 3, 1 x5, 0] | one frame, mixed: the item-effect rows +1, SE_BALL_OPEN exact; re-pinned, flagged (seed replay, no RAM lab) |
+| `trn178ActionTransition` (Scene ON Rest anchor) | -3 -> -14 | the same re-pin hpf2 made in `trn181ActionTransitionOn` / `ont193SceneOnTails` (model value: bars 15 rows vs the ROM lab's 8); trn178 duplicates that assertion |
+
+Open from this step: the turn-end command's length when the next turn is a locked continuation (Razor Wind: 5 short); Absorb / Revenge / Counter body offsets (move-body leads); a zero-change drain bar costs 5 app frames vs 1 ROM frame (`aud242e-absorb-player-on`: ROM next rise +47 vs app 46 holds the hit -> drain; the drain -> print part was not isolated).
