@@ -1670,6 +1670,12 @@ const HPD8_SHAPE_A_MOVE_IDS: ReadonlySet<number> = new Set([332, 94, 85, 38, 98,
  */
 export const STA5_STATUS_BODY_TAIL_ROWS: ReadonlyMap<number, number> = new Map([[260, 4], [207, 5], [147, 0], [92, 7], [95, 0]]);
 /**
+ * lead2 (B1, docs/lead1m-rule-lead-design.md): the nine unaudited bodies the ROM measured as shape A (live + idle = len + 1, gap 4, counter lead = ROM lead):
+ * Double Kick 24 (hit 1: lead 16; hit 2+ has no used-print anchor, so no lead and no tail), Icy Wind 196, Water Pulse 352, Facade 263, Mega Kick 25, Counter 68 (lead 4),
+ * Comet Punch 4 and Doubleslap 3 (hit 1: lead 15), Mega Drain 72.
+ */
+const LEAD2_SHAPE_A_MOVE_IDS: ReadonlySet<number> = new Set([24, 196, 352, 263, 25, 68, 4, 72, 3]);
+/**
  * lse2 (docs/hpd1-hp-hold.md): the no-hit status / stat bodies whose script lead (ROM `exec` rise -> `gAnimScriptActive`) is put in front of the body instead of
  * in the script tail: Leech Seed (lead 36), Cosmic Power (2), Calm Mind (2), Encore (2, turn 2). Their body SEs keep the move-body sound clock (calibrated on a 7-row lead; Encore 3),
  * so the sound clock is moved by `bodyLead - calibrated lead` (`lse2BodySoundAgeShift`).
@@ -1690,7 +1696,7 @@ export function lse2BodySoundAgeShift(moveId: number, bodyLeadFrames: number | u
 export type BodyLeadRule = "lead-table" | "shape-a" | "status-tail" | "lse2";
 const BODY_LEAD_RULE: ReadonlyMap<number, BodyLeadRule> = new Map<number, BodyLeadRule>([
   ...HPD4_BODY_LEAD_MOVE_IDS.map((id): [number, BodyLeadRule] => [id, "lead-table"]),
-  ...[...HPD8_SHAPE_A_MOVE_IDS].map((id): [number, BodyLeadRule] => [id, "shape-a"]),
+  ...[...HPD8_SHAPE_A_MOVE_IDS, ...LEAD2_SHAPE_A_MOVE_IDS].map((id): [number, BodyLeadRule] => [id, "shape-a"]),
   ...[...STA5_STATUS_BODY_TAIL_ROWS.keys()].map((id): [number, BodyLeadRule] => [id, "status-tail"]),
   ...[...LSE2_BODY_LEAD_MOVE_IDS].map((id): [number, BodyLeadRule] => [id, "lse2"]),
 ]);

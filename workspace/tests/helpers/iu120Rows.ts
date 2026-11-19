@@ -62,8 +62,10 @@ export function ont193ScriptTail(id: number): number {
  * Earthquake's lead is 11, every other EffectHit-family shape-A body's 5 (hpd8).
  */
 interface Iu120BodyRule { readonly lead?: number; readonly defaultLead?: number; readonly tail: number | "shape-a" }
-const SHAPE_A_RULE_IDS: readonly number[] = [332, 94, 85, 38, 98, 34, 246, 202, 58, 57, 91, 165, 157, 61, 126, 345, 53, 76, 44, 188, 89, 185, 56, 59];
-const shapeA = (id: number): Iu120BodyRule => ({ lead: id === 89 ? 11 : 5, defaultLead: id === 91 || id === 76 ? undefined : id === 89 ? 11 : 5, tail: "shape-a" });
+// lead2 B1: Double Kick 24 (hit 1) 16, Icy Wind 196, Water Pulse 352, Facade 263, Mega Kick 25, Counter 68 (4), Comet Punch 4 / Doubleslap 3 (hit 1: 15), Mega Drain 72.
+const SHAPE_A_RULE_IDS: readonly number[] = [24, 196, 352, 263, 25, 68, 4, 72, 3, 332, 94, 85, 38, 98, 34, 246, 202, 58, 57, 91, 165, 157, 61, 126, 345, 53, 76, 44, 188, 89, 185, 56, 59];
+const SHAPE_A_LEADS: ReadonlyMap<number, number> = new Map([[89, 11], [24, 16], [4, 15], [3, 15], [68, 4]]);
+const shapeA = (id: number): Iu120BodyRule => ({ lead: SHAPE_A_LEADS.get(id) ?? 5, defaultLead: id === 91 || id === 76 ? undefined : SHAPE_A_LEADS.get(id) ?? 5, tail: "shape-a" });
 const IU120_BODY_RULES: ReadonlyMap<number, Iu120BodyRule> = new Map<number, Iu120BodyRule>([
   // hpd4 lead-table bodies (explicit tails)
   [49, { lead: 9, tail: 3 }], [82, { lead: 9, tail: 26 }], [111, { lead: 3, tail: 3 }], [205, { lead: 10, tail: 3 }], [301, { lead: 10, tail: 3 }], [69, { lead: 6, tail: 1 }],
@@ -105,7 +107,8 @@ export function iu120EffectAges(id: number, duration: number, side: Iu120Side = 
   const hold = iu120Pre(id, side) + (LAND97_LEAD_ROWS.get(id) ?? 0);
   const bodyLead = lead ?? defaultBodyLead(id);
   const tail = bodyLead === 0 ? LIVE_MOVE_LEADLESS_TAIL_ROWS.get(id) ?? 0 : hpd4BodyTail(id, side);
-  const held = iu120Post(id, side) + ont193ScriptTail(id) > 0 || LIVE_MOVE_LEADLESS_TAIL_ROWS.has(id) || STA5_STATUS_TAIL_IDS.has(id);
+  const held = iu120Post(id, side) + ont193ScriptTail(id) > 0 || LIVE_MOVE_LEADLESS_TAIL_ROWS.has(id) || STA5_STATUS_TAIL_IDS.has(id)
+    || (IU120_BODY_RULES.get(id)?.tail === "shape-a" && bodyLead > 0); // production's holdHitTail: a shape-A hit tail holds the last body row
   return [...Array(hold + bodyLead).fill(0), ...Array.from({ length: duration }, (_, age) => age), ...Array(iu120Post(id, side)).fill(duration - 1), ...Array(ont193ScriptTail(id)).fill(duration - 1),
     ...Array.from({ length: tail }, (_, i) => (held ? duration - 1 : duration + i))];
 }

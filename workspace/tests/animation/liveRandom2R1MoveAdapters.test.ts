@@ -195,8 +195,9 @@ describe("faithful-random live adapters: surrogate ordinary routes", () => {
     const bodies = a.bodies.filter((body) => body.moveId === move.id && body.attacker === 0);
     expect(bodies).toHaveLength(move.route.bodies);
     expect(new Set(bodies.map((body) => body.key)).size).toBe(bodies.length);
-    for (const body of bodies) {
-      expect(body.ages).toEqual(iu120EffectAges(move.id, duration));
+    for (const [index, body] of bodies.entries()) {
+      // lead2 B1: Double Kick's hit 1 carries the lead + hit tail, hit 2 (odd index) none.
+      expect(body.ages).toEqual(iu120EffectAges(move.id, duration, "player", move.id === 24 && index % 2 === 1 ? 0 : undefined));
       expect(body.active.every(Boolean)).toBe(true);
       expect(body.provenance).toBe("surrogate");
       expect(body.words).toHaveLength(LIVE_MOVE_RANDOM2_PLANS[move.id]!.reduce((n, step) => n + step.count, 0));

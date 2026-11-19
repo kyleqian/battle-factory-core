@@ -21,7 +21,7 @@ const PROMOTED_OTHER: string[] = ["other:extrasensory-player-later-target", "oth
 describe("apx221: one staged command per class draws non-static rows, classifies approx, deterministic on replay", () => {
   it.each([
     // [name, census seed, moveId, attacker, code, presented rows (the body's own live duration)]
-    ["castform-form: Icy Wind 196 by the player's rain-form CASTFORM (residual key 196:by:2)", 651, 196, 0, "approx:castform-form", 290],
+    ["castform-form: Icy Wind 196 by the player's rain-form CASTFORM (residual key 196:by:2)", 651, 196, 0, "approx:castform-form", 298],
     // parity-mac (docs/parity-mac/castform-reverts-with-weather.md): the "Fly 19 by the opponent at a hail-form CASTFORM" row (census
     // seed 950) left: CASTFORM now reverts when the hail ends, so that Fly lands on a Normal-form CASTFORM, and no census seed 0..999
     // carries an opponent Fly at a transformed CASTFORM on the fixed engine.
