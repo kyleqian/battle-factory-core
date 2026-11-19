@@ -174,10 +174,12 @@ describe("generated Factory pre-send-out intro lifecycle", () => {
       for (let hold = 0; hold < 1_500; hold += 1) {
         state = advanceFactoryBattleStartIntro(state);
       }
-      state = advanceFactoryBattleStartIntro(state, new Set(["B"]));
+      // The prompt takes A or B (TextPrinterWaitWithDownArrow's JOY_NEW(A_BUTTON | B_BUTTON); ROM: docs/parity-mac/noland-room-scenes.md).
+      // A held button is not a new press.
+      state = advanceFactoryBattleStartIntro(state, new Set(["START"]));
       expect(state.acknowledgedElapsed).toBeNull();
       const acceptedAt = state.elapsed;
-      state = advanceFactoryBattleStartIntro(state, new Set(["A"]));
+      state = advanceFactoryBattleStartIntro(state, new Set([index === 0 ? "A" : "B"]));
       expect(state.acknowledgedElapsed).toBe(acceptedAt);
       expect(generatedBattleStartAcknowledgementVisibleStarted(state)).toBe(false);
       const frozenAcknowledgement = state.acknowledgedElapsed;

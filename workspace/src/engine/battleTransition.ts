@@ -522,6 +522,14 @@ const CIRCLES_MEET_IN_SEQ_SPECS: Record<"top" | "left" | "right", SlideInSeqSpec
 
 /** Each circle's target-init distance is 96px at 4px/tick (doubled from CIRCLE_SLIDE_TICKS' 2px/tick over 48 ticks). */
 const CIRCLES_MEET_IN_SEQ_SLIDE_TICKS = 24;
+/**
+ * WaitForLogoCirclesAnim (battle_transition_frontier.c:420-426) waits for the LAST circle, created on task timer 32 and sliding 24 ticks:
+ * FadeInCenterLogoCircle starts eight ticks later than plain MEET's (whose three circles all start together and slide 48), and the exit fade
+ * (BeginNormalPaletteFade after tFadeTimer 31) with it. ROM (Noland, silver, table index 8): the center logo's blend and the fade to black
+ * both start eight frames after MEET's constants (docs/parity-mac/noland-room-scenes.md).
+ */
+const IN_SEQ_BLEND_START_TE = CIRCLE_ANCHOR_TE + CIRCLES_MEET_IN_SEQ_SPECS.right.createOnTimer + CIRCLES_MEET_IN_SEQ_SLIDE_TICKS + 1;
+const IN_SEQ_EXIT_FADE_START_TE = IN_SEQ_BLEND_START_TE + (EXIT_FADE_START_TE - BLEND_START_TE);
 
 /**
  * Sprite center at settled-elapsed `te`, gated per circle by its own
@@ -553,17 +561,26 @@ export function centerLogoEva(te: number, transition: FrontierCircleTransition =
     ? ASYMMETRIC_SEQ_BLEND_START_TE
     : transition === "circlesCross"
     ? CROSS_BLEND_START_TE
+    : transition === "circlesMeetInSeq"
+    ? IN_SEQ_BLEND_START_TE
     : BLEND_START_TE;
   return Math.max(0, Math.min(te - start, 16));
 }
 
-/** CirclesMeet_End's exit-to-black fade coefficient, 0-16 (module doc: 3-per-2-ticks, no BG/OBJ lag). */
-export function exitFadeY(te: number, transition: FrontierCircleTransition = "circlesMeet"): number {
-  const start = transition === "asymmetricSpiralInSeq"
+/** The circle families' exit fade start (BeginNormalPaletteFade in FadeInCenterLogoCircle, tFadeTimer 31). */
+export function frontierCircleExitFadeStartTe(transition: FrontierCircleTransition): number {
+  return transition === "asymmetricSpiralInSeq"
     ? ASYMMETRIC_SEQ_EXIT_FADE_START_TE
     : transition === "circlesCross"
     ? CROSS_EXIT_FADE_START_TE
+    : transition === "circlesMeetInSeq"
+    ? IN_SEQ_EXIT_FADE_START_TE
     : EXIT_FADE_START_TE;
+}
+
+/** CirclesMeet_End's exit-to-black fade coefficient, 0-16 (module doc: 3-per-2-ticks, no BG/OBJ lag). */
+export function exitFadeY(te: number, transition: FrontierCircleTransition = "circlesMeet"): number {
+  const start = frontierCircleExitFadeStartTe(transition);
   const d = te - start;
   if (d < 0) return 0;
   const step = Math.floor(d / 2) + 1;

@@ -110,21 +110,25 @@ import {
   renderPrebattleRoomSceneWithAttendantOffset,
   renderPrebattleRoomWalkScene,
 } from "./prebattleRoomRender.ts";
+import { SE_EXIT } from "./battleEndSounds.ts";
 import {
   advanceBattleRoom,
   battleRoomAcceptedState,
   battleRoomJustFinishedBrainPersonalitySpeech,
   battleRoomQuoteInputReady,
   battleRoomStateForOpponent,
-  brainSpeechSceneHandoffElapsed,
+  brainBattleIntroHandoffTe,
+  brainBattleTransitionTe,
+  brainSpeechAcceptPlaysSelect,
+  BRAIN_BATTLE_TRANSITION_START_ELAPSED,
   entryStep,
   INITIAL_BATTLE_ROOM_STATE,
   BATTLE_2_SCENE_HANDOFF_ELAPSED,
-  MSGBOX_CLOSE_TICKS,
   msgboxVisual,
   opponentSetupExtraRngSteps,
   SETTLED_SCENE_ELAPSED,
   WARP_FADE_TO_ROOM_ELAPSED,
+  warpFadeToRoomElapsed,
   type BattleRoomState,
 } from "./battleRoom.ts";
 import { renderBattleRoomBrainEntranceScene, renderBattleRoomEntryScene } from "./battleRoomRender.ts";
@@ -132,7 +136,6 @@ import {
   applyBattleTransitionOverlay,
   battleIntroSceneAssemblyDisplayLag,
   frontierTransitionBgFadeY,
-  frontierTransitionFlickerStartTe,
   frontierTransitionObjFadeY,
   frontierTransitionRenderKind,
   selectFrontierTransition,
@@ -735,6 +738,7 @@ import { tickLiveMovePresentationRngSession } from "./liveMovePresentationRng.ts
 import {
   BGM_DRAFT,
   beginScreenSoundTick,
+  playScriptSe,
   playSelectSe,
   runScheduledScreenSounds,
   scheduleHealFanfare,
@@ -1635,9 +1639,12 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
     if (prebattleRoom) {
       const advancedPrebattleRoom = advancePrebattleRoom(prebattleRoom)!;
       prebattleRoom = advancedPrebattleRoom;
+      // EnterBattleRoom's `warp` (pre-battle room scripts.inc:50): DoWarp's PlaySE(SE_EXIT) (field_screen_effect.c:490), on the warp
+      // fade's second frame (ROM: the walk-up to Noland, docs/parity-mac/noland-room-scenes.md).
+      if (advancedPrebattleRoom.phase === "warpFade" && advancedPrebattleRoom.elapsed === 1) playScriptSe(SE_EXIT);
       if (
         advancedPrebattleRoom.phase === "warpFade" &&
-        advancedPrebattleRoom.elapsed === WARP_FADE_TO_ROOM_ELAPSED
+        advancedPrebattleRoom.elapsed === warpFadeToRoomElapsed(currentOpponent)
       ) {
         prebattleRoom = null;
         // Walk-up build step B1: the round state's own opponent.frontierBrain
@@ -1662,8 +1669,11 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
         );
       }
     } else if (battleRoom) {
-      if (battleRoomQuoteInputReady(battleRoom) && newKeys.has("A")) {
+      // The brain room's boxes take A or B (WaitForAorBPress, TextPrinterWaitWithDownArrow); the ordinary opponent's box keeps its A gate.
+      const roomPress = newKeys.has("A") || (battleRoom.frontierBrainWalkup === true && newKeys.has("B"));
+      if (battleRoomQuoteInputReady(battleRoom) && roomPress) {
         const prevBattleRoom = battleRoom;
+        if (brainSpeechAcceptPlaysSelect(prevBattleRoom)) playSelectSe();
         battleRoom = battleRoomAcceptedState(battleRoom);
         // Walk-up build steps B2/B3: the JSON's own frontier_set
         // FRONTIER_DATA_HEARD_BRAIN_SPEECH moment - fires once, between the
@@ -1747,30 +1757,13 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
             postwin = null;
           }
         }
-        // Walk-up build step B2: the speech/cry-box branch's own version of
-        // the handoff immediately above (same target function, same
-        // battleStart precondition) - separate check because the brain
-        // branch settles into "brainSpeechSettled", never "settled".
-        // battleRoom may already be null here (the ordinary-path handoff
-        // just above just nulled it this same tick).
-        //
-        // CLOSE WIPE follow-up (gold-close ground truth, docs/noland-brain-
-        // intro-gold-ground-truth.md §7'): brainSpeechSceneHandoffElapsed
-        // only covers the dialogue-dismissed EMPTY-ARENA PAUSE (26/28
-        // ticks) - the screen-flicker + circle-transition that follows it
-        // still needs to render (renderBattleRoomState's own brain branch
-        // below layers it on starting exactly at this elapsed, same
-        // frontierTransitionBgFadeY/ObjFadeY/applyBattleTransitionOverlay
-        // the ordinary non-brain "settled" phase already uses for the SAME
-        // shared circle-transition art), so battleRoom must stay alive
-        // through the transition's own full run, not just the pause -
-        // BATTLE_2_SCENE_HANDOFF_ELAPSED is that already-calibrated full
-        // duration (same constant the ordinary "settled" phase's own
-        // handoff above already waits out for this shared transition).
+        // The brain branch's own handoff (it settles into "brainSpeechSettled", never "settled"); battleRoom may already be null here.
+        // DoNolandBattle's battle start (BRAIN_BATTLE_TRANSITION_START_ELAPSED): the battle BGM and the transition; the battle intro takes
+        // over when the transition's clock reaches brainBattleIntroHandoffTe.
         if (
           battleRoom !== null &&
           battleRoom.phase === "brainSpeechSettled" &&
-          battleRoom.elapsed === brainSpeechSceneHandoffElapsed(battleRoom) &&
+          battleRoom.elapsed === BRAIN_BATTLE_TRANSITION_START_ELAPSED &&
           soundCollecting()
         ) {
           emitBattleStartBgm(true);
@@ -1778,8 +1771,7 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
         if (
           battleRoom !== null &&
           battleRoom.phase === "brainSpeechSettled" &&
-          battleRoom.elapsed
-            === brainSpeechSceneHandoffElapsed(battleRoom) + BATTLE_2_SCENE_HANDOFF_ELAPSED
+          brainBattleTransitionTe(battleRoom) === brainBattleIntroHandoffTe(battleRoom)
         ) {
           const generatedPending =
             factoryRoundBattleOrchestrator?.round.presentation?.command;
@@ -1820,7 +1812,8 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
       nextPostwin.swapDeclineElapsed !== null &&
       nextPostwin.rightThisWayDismissElapsed === null &&
       postwinRightThisWayInputReady(postwin) &&
-      newKeys.has("A")
+      // MSGBOX_DEFAULT's waitbuttonpress takes A or B (WaitForAorBPress).
+      (newKeys.has("A") || newKeys.has("B"))
     ) {
       nextPostwin = acceptPostwinRightThisWayDismiss(nextPostwin);
       prebattleRoom = { phase: "messageClosing", elapsed: 0 };
@@ -1906,7 +1899,8 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
       nextPostwin.dialoguePage >= 1 &&
       nextPostwin.dialoguePage <= 3 &&
       postwinDialogueInputReady(nextPostwin) &&
-      newKeys.has("A")
+      // The scouting pages and AskSwapBeforeHead's line are MSGBOX_DEFAULT: A or B (WaitForAorBPress).
+      (newKeys.has("A") || newKeys.has("B"))
     ) {
       // Walk-up build step A, Brief 2: brain's AskSwapBeforeHead short path
       // completes the battle win at dialoguePage 1 (its only scouting-page
@@ -1952,12 +1946,15 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
       } else if (newKeys.has("UP")) {
         nextPostwin = movePostwinSwapCursor(nextPostwin, -1);
         if (beforeSwapCursor !== null && nextPostwin.swapCursorPos !== beforeSwapCursor) playSelectSe();
-      } else if (newKeys.has("A")) {
+      } else if (newKeys.has("A") || newKeys.has("B")) {
+        // B is NO wherever the cursor is (Menu_ProcessInputNoWrapClearOnChoose MENU_B_PRESSED, Task_HandleYesNoInput: one SE_SELECT;
+        // ROM: the walk-up to Noland, docs/parity-mac/noland-room-scenes.md).
+        const bPressed = !newKeys.has("A");
         if (beforeSwapCursor !== null) {
           playSelectSe();
-          if (beforeSwapCursor === 1) playSelectSe();
+          if (beforeSwapCursor === 1 && !bPressed) playSelectSe();
         }
-        if (nextPostwin.swapCursorPos === 0) {
+        if (nextPostwin.swapCursorPos === 0 && !bPressed) {
           const liveRound =
             factoryRoundBattleOrchestrator?.round ?? roundController;
           const pendingSwap = liveRound === null
@@ -1974,7 +1971,7 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
           factorySwap =
             pendingSwap ?? createCanonicalFactorySwapPresentation();
         } else {
-          nextPostwin = acceptPostwinSwapDecline(nextPostwin);
+          nextPostwin = bPressed ? beginPostwinNextBattleGuide(nextPostwin) : acceptPostwinSwapDecline(nextPostwin);
           const pending =
             factoryRoundBattleOrchestrator?.round.presentation?.command;
           if (pending?.type === "swapOffer") {
@@ -2009,6 +2006,7 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
       nextPostwin.elapsed,
       nextPostwin.continuationConfirmElapsed,
       nextPostwin.rightThisWayDismissElapsed,
+      nextPostwin.frontierBrain,
     );
     const alreadyAdvanced = rngMode === "vblank" ? 1 : 0;
     // lbr-g E3: RETIRE-YES warps to the Lobby; its map load draws 2 / 3 extra on `entry + 3` / `entry + 4`, i.e. before the hand-off at
@@ -3218,48 +3216,14 @@ function renderBattleRoomState(state: EngineState): Uint8Array {
     // Walk-up build step B1: fade-in during brainEntering, same FADE_IN
     // table/convention as the ordinary path.
     const fadeElapsed = b.phase === "brainEntering" ? b.elapsed : SETTLED_SCENE_ELAPSED;
-    // CLOSE WIPE (§8'/§8" - docs/noland-brain-intro-gold-ground-truth.md):
-    // the SAME shared Frontier circle-transition overlay the ordinary
-    // (non-brain) "settled" phase plays below also layers on top here once
-    // brainSpeechSettled starts. §8' re-based `te` to 0 at
-    // brainSpeechSceneHandoffElapsed (the pause-end tick), which closed most
-    // of the gap but left a periodic phase residual - §8" dense-probed the
-    // oracle's own per-frame gray level (a corner background pixel, inverted
-    // through the shared blend formula) for factory-brain-gold-walkup-
-    // speech-close-off.json's full 126-frame window and found the true
-    // origin: the box's REAL visual dismiss is MSGBOX_CLOSE_TICKS ticks
-    // before brainSpeechSettled's own elapsed=0 (msgboxVisual's
-    // brainSpeechClosing case clears immediately, but the phase transition
-    // itself lags MSGBOX_CLOSE_TICKS ticks behind), and gold's own measured
-    // pause (brainSpeechSceneHandoffElapsed) is 2 ticks shorter than the
-    // shared overlay's own flicker-start tick count - re-basing gold's `te`
-    // to "ticks since the real dismiss, minus gold's own pause, plus the
-    // selected transition's own flicker-start `te`" reproduces the oracle's
-    // per-frame gray-flicker coefficient with 0/126 mismatches (§8" - a
-    // residual in the later swirl-build sub-stage remains, a distinct,
-    // not-yet-derived mechanism). SILVER (docs/silver-flicker-evidence.md,
-    // banked this session): a dense 100-frame per-pixel gray-flicker probe
-    // (factory-brain-silver-walkup-speech-flicker-off.json) shows `y =
-    // grayFlickerY(te)` matches exactly with `te = b.elapsed` DIRECTLY - no
-    // re-basing at all, the same "no re-basing" rule the ordinary non-brain
-    // "settled" path already uses below. This is NOT gold's shape wearing a
-    // 0 coefficient: silver's own pause (brainSpeechSceneHandoffElapsed,28)
-    // happens to already equal the shared FLICKER_START_TE(28), so the
-    // subtract-then-shift the two terms above perform for gold cancels out
-    // to a no-op for silver by coincidence of that pause length, not by a
-    // shared structural formula - applying gold's own correction shape to
-    // silver (`te = b.elapsed - 28 + 32 = b.elapsed + 4`) was tried and
-    // regressed the close-pause guard 28->24/28 (flicker starting 4 ticks
-    // early); silver-flicker-evidence.md's own Verdict (b) has the full
-    // derivation of why the two tiers' corrections don't unify.
+    // The Frontier circle transition the ordinary "settled" phase plays below layers on top once DoNolandBattle starts it
+    // (brainBattleTransitionTe: the same clock, BATTLE_TRANSITION_START_TE on the start frame). Before the speech was timed from the ROM's
+    // own presses, the two tiers each needed a fitted re-basing here (docs/silver-flicker-evidence.md, the gold §8" probe); both came from
+    // the old close model.
     const transitionKind = frontierTransitionRenderKind(b.transitionPresentation, "circlesMeet");
-    const goldRebaseTe = MSGBOX_CLOSE_TICKS + frontierTransitionFlickerStartTe(transitionKind);
-    const transitionElapsed = b.brainSpeechTier === "gold"
-      ? b.elapsed - brainSpeechSceneHandoffElapsed(b) + goldRebaseTe
-      : b.elapsed;
-    const transition = b.phase === "brainSpeechSettled" && transitionElapsed >= 0
-      ? transitionKind
-      : null;
+    // The transition's own clock: BATTLE_TRANSITION_START_TE on the frame DoNolandBattle starts it (brainBattleTransitionTe).
+    const transitionElapsed = b.phase === "brainSpeechSettled" ? brainBattleTransitionTe(b) : -1;
+    const transition = b.phase === "brainSpeechSettled" && b.elapsed >= BRAIN_BATTLE_TRANSITION_START_ELAPSED ? transitionKind : null;
     const bgY = transition !== null ? frontierTransitionBgFadeY(transitionElapsed, transition) : bgFadeY(fadeElapsed, FADE_IN);
     const objY = transition !== null ? frontierTransitionObjFadeY(transitionElapsed, transition) : objFadeY(fadeElapsed, FADE_IN);
     const fb = createFramebuffer();

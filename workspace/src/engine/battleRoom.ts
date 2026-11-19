@@ -67,7 +67,7 @@
 
 import { FADE_IN } from "./paletteFade.ts";
 import type { FactoryTrainerPresentation } from "./factoryTrainerPresentation.ts";
-import type { FrontierTransitionPresentation } from "./battleTransition.ts";
+import { frontierCircleExitFadeStartTe, frontierTransitionRenderKind, type FrontierTransitionPresentation } from "./battleTransition.ts";
 import type { BattleOpponent } from "./battleScenario.ts";
 import walkupScript from "../data/gen/factory-brain-walkup-script.json" with { type: "json" };
 
@@ -82,9 +82,12 @@ export type BattleRoomPhase =
   | "brainMoving"
   | "brainSettled"
   | "brainSpeech"
-  | "brainSpeechIdle"
-  | "brainSpeechClosing"
   | "brainSpeechSettled";
+
+/** brainSpeech's frame modes (see the speech section below): printing a line, waiting for a press, the press frame, the `\l` scroll, the next msgbox's opening frames. */
+export type BrainSpeechMode = "print" | "wait" | "accepted" | "scroll" | "open";
+/** What follows a press: `\p`, `\l`, the next msgbox, or the closemessage before the battle. */
+export type BrainSpeechAfter = "clear" | "scroll" | "message" | "close";
 
 export interface BattleRoomState {
   phase: BattleRoomPhase;
@@ -128,53 +131,15 @@ export interface BattleRoomState {
    * when `frontierBrainWalkup` is set.
    */
   brainSpeechTier?: "silver" | "gold";
-  /**
-   * Index into `brainSpeechBoxes(state)` for the box currently printing/
-   * idle ("brainSpeech"/"brainSpeechIdle") or just dismissed
-   * ("brainSpeechClosing"). Only meaningful during those phases.
-   */
-  speechStep?: number;
-  /**
-   * True only for a box entered via `battleRoomAcceptedState`'s direct
-   * personality-to-personality continuation (`\p`/`\l`, never a real
-   * close+reopen) whose PRIOR box was itself not the window's first box -
-   * i.e. this is the window's 2nd or later accept-driven personality-page
-   * transition. Selects the fast one-tick print model in
-   * `msgboxVisual`/`advanceBattleRoom`'s "brainSpeech" case below instead
-   * of the default clear-then-print one - see those call sites for the rule.
-   *
-   * Derived, not guessed, from four independent dense oracle windows:
-   * `docs/noland-brain-intro-gold-ground-truth.md` §9‴/§9⁗ (gold's page 2→3
-   * and 3→4 edges, both later `\p` transitions, one tick faster than page
-   * 1→2's own first transition - which stayed exact) and
-   * `docs/silver-speech-box2-evidence.md` (silver's box 1→2 edge, a `\p`
-   * that is the window's SECOND accept-driven transition, counting box
-   * 0→1's own `\l` scroll as the first - also one tick faster, plus its
-   * six period-9 cursor-bob blips, the same shift propagated into the idle
-   * phase). Both windows agree: the window's first accept-driven transition
-   * (whether the source used `\l` or `\p` - the two are otherwise handled
-   * identically, see `splitSpeechBoxes`' own doc) still shows the box
-   * cleared for one tick before the first new character
-   * (`battleRoomAcceptedState`'s plain `elapsed: 0` entry, this flag left
-   * false); every later one skips that cleared tick - the accept tick
-   * itself already shows the first new character, this flag set true.
-   *
-   * A box entered via a REAL close+reopen (leaving the last personality
-   * page for the close/cry box, e.g. gold's page 4 -> close box, silver's
-   * page 8 -> cry box) is a structurally different transition, but two more
-   * dense edge fixtures (`docs/speech-close-edge-evidence.md`,
-   * `docs/speech-close-edge-silver-evidence.md`) proved it renders under
-   * the SAME slow/cleared model as the window's first transition (not the
-   * fast one) - unconditionally false there regardless of `speechStep`.
-   * That is unrelated to `battleRoomAcceptedState`'s OWN mechanism change
-   * for this edge (skipping the `brainSpeechClosing` hidden wait entirely -
-   * see that function's own doc): the earlier claim that the pre-existing
-   * `factory-brain-gold-walkup-speech-close-off.json` guard had already
-   * confirmed the slow model on this specific edge was false (that fixture
-   * parks already inside the close box and never drives this transition at
-   * all) - the two new edge fixtures are what actually exercise it.
-   */
-  speechAcceptedFast?: boolean;
+  /** brainSpeech: the printed line (index into `brainSpeechLines(state)`) being printed or waited on. */
+  speechLine?: number;
+  /** brainSpeech: the frame mode; `elapsed` counts frames in it ("print": the visible characters of the line). */
+  speechMode?: BrainSpeechMode;
+  /** brainSpeech "accepted" / "open": what follows the press, and the picture those frames keep showing. */
+  speechAfter?: BrainSpeechAfter;
+  speechPicture?: BrainSpeechPicture;
+  /** brainSpeech "accepted" after a `\p`: whether the cleared box reaches the screen on the frame after the press (see the speech section). */
+  speechClearShown?: boolean;
 }
 
 /** core.ts creates this the tick prebattleRoom's "warpFade" phase reaches the fixed elapsed count matching trace tick 520 (see core.ts's handoff). */
@@ -308,6 +273,18 @@ export function opponentSetupExtraRngSteps(state: BattleRoomState): number {
 export const WARP_FADE_TO_ROOM_ELAPSED = 37;
 
 /**
+ * The Frontier Brain's room shows one frame later than an ordinary opponent's: the map's ON_TRANSITION script sets up Noland's object
+ * (SetUpFactoryHeadObj, scripts.inc:22-25) during the load. ROM (the walk-up from the GO ON menu, both tiers): the last black frame is the
+ * ordinary room's first visible one, the fade-in follows a frame later (docs/parity-mac/noland-room-scenes.md).
+ */
+export const BRAIN_WARP_FADE_TO_ROOM_ELAPSED = WARP_FADE_TO_ROOM_ELAPSED + 1;
+
+/** The prebattleRoom warpFade elapsed core.ts hands the round's next opponent's room over at. */
+export function warpFadeToRoomElapsed(opponent: BattleOpponent | null | undefined): number {
+  return opponent?.frontierBrain !== undefined ? BRAIN_WARP_FADE_TO_ROOM_ELAPSED : WARP_FADE_TO_ROOM_ELAPSED;
+}
+
+/**
  * "entering" covers every deterministic tick (camera pan, scientists' turn,
  * opponent walk-in, msgbox appear+print - all pure functions of `elapsed`,
  * see below) through print-complete (MSGBOX_PRINT_COMPLETE_ELAPSED); from
@@ -345,15 +322,12 @@ export function advanceBattleRoom(state: BattleRoomState): BattleRoomState {
       return { ...state, phase: "brainEntering", elapsed };
     }
     case "brainMsgboxIdle":
-      // Same idiom as "msgboxIdle" above: core.ts detects the A press and
-      // starts "brainMsgboxClosing" directly; this case only covers ticks
-      // with no press yet.
-      return state;
-    case "brainMsgboxClosing": {
-      const elapsed = state.elapsed + 1;
-      if (elapsed >= MSGBOX_CLOSE_TICKS) return { ...state, phase: "brainMoving", elapsed: 0 };
-      return { ...state, phase: "brainMsgboxClosing", elapsed };
-    }
+      // Idle frames count: the escort box takes a press from idle elapsed BRAIN_MSGBOX_ACCEPT_ELAPSED on (core.ts takes it into
+      // brainMoving directly, battleRoomAcceptedState).
+      return { ...state, elapsed: state.elapsed + 1 };
+    case "brainMsgboxClosing":
+      // Not entered any more (the escort box's press goes straight to brainMoving); kept for states saved before the change.
+      return { ...state, phase: "brainMoving", elapsed: 0 };
     case "brainMoving": {
       const elapsed = state.elapsed + 1;
       if (elapsed >= BRAIN_MOVEMENT_SETTLE_ELAPSED) {
@@ -362,142 +336,51 @@ export function advanceBattleRoom(state: BattleRoomState): BattleRoomState {
       return { ...state, phase: "brainMoving", elapsed };
     }
     case "brainSettled": {
-      // Walk-up build step B2: hands off into the speech's first box once
-      // SPEECH_APPEAR_ELAPSED ticks have passed (0 = immediately - see that
-      // constant's own doc for why this is a structural default, not yet
-      // dense-compare-measured).
+      // The first msgbox opens SPEECH_APPEAR_ELAPSED frames after the movement settles: an empty box, then one character a frame.
       if (state.elapsed >= SPEECH_APPEAR_ELAPSED) {
-        // Window opening, not an accept-driven transition - always the slow
-        // (clear-then-print) model, see `speechAcceptedFast`'s own doc.
-        return { ...state, phase: "brainSpeech", elapsed: 0, speechStep: 0, speechAcceptedFast: false };
+        return { ...state, phase: "brainSpeech", elapsed: 0, speechLine: 0, speechMode: "print" };
       }
       return { ...state, phase: "brainSettled", elapsed: state.elapsed + 1 };
     }
-    case "brainSpeech": {
-      const printTicks = brainSpeechPrintTicks(brainSpeechBoxAt(state, state.speechStep ?? 0));
-      // `speechAcceptedFast` boxes finish one tick sooner - see that field's
-      // own doc for the derivation (the accept tick already shows character
-      // 1, so full print is reached at elapsed printTicks-1, not printTicks).
-      const completeElapsed = state.speechAcceptedFast ? printTicks - 1 : printTicks;
-      const elapsed = state.elapsed + 1;
-      if (elapsed >= completeElapsed) return { ...state, phase: "brainSpeechIdle", elapsed: 0 };
-      return { ...state, phase: "brainSpeech", elapsed };
-    }
-    case "brainSpeechIdle":
-      // Same idiom as "brainMsgboxIdle"/"msgboxIdle" above: core.ts detects
-      // the A press and starts "brainSpeechClosing" directly; this case
-      // only covers ticks with no press yet. Unlike those two (fully
-      // static), `elapsed` keeps ticking here - it drives the "waiting for
-      // input, more text follows" cursor's own bob animation
-      // (brainSpeechCursorVisible/brainSpeechCursorYOffset below), which a
-      // non-terminal box's own idle hold shows in every dense fixture this
-      // step spot-checked.
-      return { ...state, elapsed: state.elapsed + 1 };
-    case "brainSpeechClosing": {
-      // Only the window's FINAL box (the close/cry box's own dismiss, no
-      // next box left) ever reaches this phase - `battleRoomAcceptedState`
-      // intercepts every other box boundary (personality-to-personality AND
-      // the real close+reopen into the close/cry box alike) directly into
-      // "brainSpeech" on the accept tick itself, before this phase is ever
-      // entered (see that function's own doc for the two edge fixtures that
-      // proved the real-close-reopen case belongs there too). So there is
-      // always no next box by the time `elapsed` reaches `MSGBOX_CLOSE_TICKS`
-      // here - the hidden wait always ends in "brainSpeechSettled".
-      const elapsed = state.elapsed + 1;
-      if (elapsed >= MSGBOX_CLOSE_TICKS) {
-        return { ...state, phase: "brainSpeechSettled", elapsed: 0, speechStep: (state.speechStep ?? 0) + 1 };
-      }
-      return { ...state, phase: "brainSpeechClosing", elapsed };
-    }
+    case "brainSpeech":
+      return advanceBrainSpeech(state);
     case "brainSpeechSettled":
       return { ...state, phase: "brainSpeechSettled", elapsed: state.elapsed + 1 };
   }
 }
 
+/**
+ * The escort box ("Hey, hey! Get a move on!", EnterRoomFactoryHeadBattle's msgbox, scripts.inc:51): like every MSGBOX_DEFAULT end, a press
+ * is taken from three frames after the last character (idle elapsed 0 is the last character's frame; the press frame sees elapsed 2).
+ * ROM: last character on frame 346, first press taken 349 (docs/parity-mac/noland-room-scenes.md).
+ */
+export const BRAIN_MSGBOX_ACCEPT_ELAPSED = 2;
+
+/** Can a press (A or B: WaitForAorBPress, TextPrinterWaitWithDownArrow) be taken on this frame's pre-state? */
 export function battleRoomQuoteInputReady(state: BattleRoomState): boolean {
-  if (state.phase === "brainMsgboxIdle" || state.phase === "brainSpeechIdle") return true;
+  if (state.phase === "brainMsgboxIdle") return state.elapsed >= BRAIN_MSGBOX_ACCEPT_ELAPSED;
+  if (state.phase === "brainSpeech") return brainSpeechAcceptReady(state);
   if (state.phase !== "msgboxIdle") return false;
   return state.encounter !== "jenson" || state.elapsed >= 2;
 }
 
-/** The phase `battleRoomQuoteInputReady`'s A-press gate transitions to (core.ts's msgbox-close idiom, shared by every branch). */
+/** The phase `battleRoomQuoteInputReady`'s press gate transitions to for the ordinary box (core.ts's msgbox-close idiom). */
 export function battleRoomMsgboxClosingPhase(state: BattleRoomState): BattleRoomPhase {
-  if (state.phase === "brainMsgboxIdle") return "brainMsgboxClosing";
-  if (state.phase === "brainSpeechIdle") return "brainSpeechClosing";
+  if (state.phase === "brainMsgboxIdle") return "brainMoving";
   return "msgboxClosing";
 }
 
 /**
- * The state `battleRoomQuoteInputReady`'s A-press gate transitions to -
- * core.ts's single accept seam for every `battleRoom` branch. Ordinarily a
- * box CLOSE (`battleRoomMsgboxClosingPhase` above, unchanged - entrance-03's
- * `brainMsgboxClosing` span is RAM-calibrated against `MSGBOX_CLOSE_TICKS`
- * already, see `BRAIN_MOVEMENT_CLOCK_OFFSET`'s own doc, so this seam must
- * not perturb it), but a brain personality-speech page that still has more
- * gated pages queued (`\p`, not the terminating `$` that hands off to the
- * close/cry box) never actually closes its window at all: `text.c`'s
- * `RENDER_STATE_CLEAR` clears and reprints the SAME already-open window one
- * tick later (docs/walkup-call-scene-ground-truth.md's own already-landed
- * `\p` mechanism for the call-scene's boxes 3/4/5, PROGRESS 1292/1293) - so
- * this case skips the close phase entirely and lands directly on the next
- * page at elapsed 0, the same "elapsed 0 renders the same tick" shape every
- * other phase entry already uses.
- *
- * The gated speech's LAST page (handing off to the close/cry box, a genuine
- * new `message()` call) turns out to render the SAME way pixel-for-pixel,
- * even though it's a structurally real close+reopen, not a `\p`/`\l` direct
- * continuation: two dense edge fixtures (`docs/speech-close-edge-evidence.md`
- * gold box3->close abs 2397-2450, `docs/speech-close-edge-silver-evidence.md`
- * silver box8->cry abs 3067-3141) both show the accept tick landing straight
- * on the next box's own cleared (0-char) frame, first glyph one tick later -
- * no `MSGBOX_HIDDEN` wait at all, i.e. `closemessage` and the next box's
- * `msgbox` open back-to-back within the same tick the script executes them,
- * same as every other page-turn's `RENDER_STATE_CLEAR`. So this function
- * takes the direct branch for ANY next box, personality-to-personality or
- * personality-to-close/cry alike - only `speechAcceptedFast` (see its own
- * doc) distinguishes the two render models. Only the window's FINAL box
- * (the close/cry box's own dismiss, no next box left) is still a real close
- * via `battleRoomMsgboxClosingPhase` below - that transition's own
- * `MSGBOX_CLOSE_TICKS` hidden wait is unchanged (gold-close/close-pause
- * guards).
- *
- * The accept frame's own visible content is NOT uniform across every
- * direct continuation, though - see `speechAcceptedFast`'s own doc for the
- * full derivation (four independent dense oracle windows:
- * `docs/noland-brain-intro-gold-ground-truth.md` §9‴/§9⁗,
- * `docs/silver-speech-box2-evidence.md`, and the two real-close-edge docs
- * cited above). Summary: the window's FIRST accept-driven transition
- * (`(state.speechStep ?? 0) === 0`, i.e. leaving the window's very first
- * box) and EVERY real close+reopen (leaving the last personality box into
- * the close/cry box) still show the window CLEARED (0 chars) on the accept
- * tick, with the next box's first glyph one tick later - gold's page 1→2
- * and page 4→close edges are both oracle-exact under exactly this model.
- * Every LATER personality-to-personality accept-driven transition
- * (`(state.speechStep ?? 0) >= 1` AND the next box is still personality
- * content) is one tick faster: the accept tick already shows the next box's
- * first character, with no cleared frame ever visible - gold's page 2→3/3→4
- * edges and silver's box 1→2 edge (the window's 2nd accept-driven
- * transition, counting box 0→1's own `\l` scroll as the 1st) are both
- * oracle-exact under this model instead.
+ * The state a press `battleRoomQuoteInputReady` allowed leads to - core.ts's single accept seam for every `battleRoom` branch.
+ * - The escort box: closemessage, then the movement (scripts.inc:52-57). The press frame and the next still show the box; the room moves
+ *   from the frame after (brainMoving's own first two frames hold the box, BRAIN_MSGBOX_CLOSE_WIPE_MOVING_HOLD_TICKS). ROM: press 349,
+ *   box on 349-350, the walk from 351.
+ * - Noland's speech: see the speech section (acceptBrainSpeech).
+ * - The ordinary opponent's box: the MSGBOX_CLOSE_TICKS close.
  */
 export function battleRoomAcceptedState(state: BattleRoomState): BattleRoomState {
-  if (state.phase === "brainSpeechIdle" && state.brainSpeechFirstEncounter === true) {
-    const priorStep = state.speechStep ?? 0;
-    const nextStep = priorStep + 1;
-    if (nextStep < brainSpeechBoxes(state).length) {
-      const isPersonalityContinuation = nextStep < brainSpeechPersonalityBoxCount(state);
-      return {
-        ...state,
-        phase: "brainSpeech",
-        elapsed: 0,
-        speechStep: nextStep,
-        // Real close+reopen (nextStep landed on the close/cry box, past the
-        // last personality page) always uses the slow/cleared model, same as
-        // the window's very first transition - see this function's own doc.
-        speechAcceptedFast: isPersonalityContinuation && priorStep >= 1,
-      };
-    }
-  }
+  if (state.phase === "brainSpeech") return acceptBrainSpeech(state);
+  if (state.phase === "brainMsgboxIdle") return { ...state, phase: "brainMoving", elapsed: 0 };
   return { ...state, phase: battleRoomMsgboxClosingPhase(state), elapsed: 0 };
 }
 
@@ -995,277 +878,257 @@ function enteringBrainMsgboxVisual(elapsed: number): MsgboxVisual {
   return { visible: true, chars: elapsed - BRAIN_MSGBOX_APPEAR_ELAPSED };
 }
 
-// Walk-up build step B2: the silver personality speech (8 `\p` pages, frames
-// 1113-3200 of docs/noland-silver-walkup-presentation-map.md's dense map) +
-// the always-shown battle-cry line, sourced directly from
-// factory-brain-walkup-script.json's silverFirstEncounter/silverRepeat
-// scenes. Modeled as a flat queue of "boxes" (each a 2-line [line1, line2]
-// pair) rather than distinguishing the JSON's own \n/\l/\p control codes at
-// runtime - the rendered box only ever shows 2 lines regardless of which
-// control code produced the break, and this engine always redraws the box
-// fresh from state (never incrementally scrolls pixels), so the difference
-// between a \l scroll and a \p new-page clear is a presentation-only detail
-// with no bearing on WHICH text is shown WHEN. silverFirstEncounter's 8
-// pages flatten to 9 boxes (page 1's internal \l scroll splits into 2, see
-// splitSpeechBoxes); silverRepeat skips the gated personality speech
-// entirely and shows only the always-present cry box (docs/noland-walkup-
-// dialogue-scoping.md §1.5: BattleNoland's STREAK case jumps straight past
-// the gated line) - both variants' cry box is the same text either way.
+// Noland's speech in the battle room (BattleNoland, BattleFrontier_BattleFactoryBattleRoom/scripts.inc:113-153), frame for frame as the ROM's
+// field message box prints it (docs/parity-mac/noland-room-scenes.md, measured on the real ROM with presses on the first frame they are taken
+// and 13 frames later). The box is window 0 with the player's text speed (FAST in the Factory save: no delay, one character a frame;
+// text.c RenderText). Every frame below is a frame the player sees; what the printer does on frame f shows on frame f+1.
 //
-// Per-box timing reuses this module's own established conventions rather
-// than inventing new magic numbers: 1 tick/char printing (matching
-// BRAIN_MSGBOX_PRINT_TICKS/MSGBOX_PRINT_TICKS), MSGBOX_CLOSE_TICKS for the
-// transition between boxes (closing the old one before the next starts
-// printing). Structural defaults, NOT independently dense-compare-measured
-// for this specific window - see SPEECH_APPEAR_ELAPSED's own doc for why
-// (the speech-open boundary sits just past B1b's own not-yet-closed
-// brainMoving cadence residual, battleRoom.ts's module doc above/PROGRESS
-// 1278). The flag itself (`frontier_set FRONTIER_DATA_HEARD_BRAIN_SPEECH`,
-// silverFirstEncounter.events[1]) has no on-screen effect - see
-// battleRoomJustFinishedBrainPersonalitySpeech below for where core.ts hooks
-// it, keyed on ORDER (speech-then-cry) not on a specific pixel/tick.
+// - A line is printed one character a frame; `\n` costs nothing, the next line's first character follows the last one.
+// - `\p` (CHAR_PROMPT_CLEAR) and `\l` (CHAR_PROMPT_SCROLL): after the line's last character (frame L) the printer waits for A or B
+//   (TextPrinterWaitWithDownArrow, text.c). A press is taken from frame L+1 on; the down arrow shows from L+2 if nothing was pressed (drawn on
+//   the first wait frame, then a new position every 9 frames: sDownArrowYCoords 0, 1, 2, 1). The press plays SE_SELECT.
+//   `\p` on a press at p: frame p still shows the page, p+2 the next page's first character on a cleared box. p+1 shows the cleared box
+//   only when the arrow was redrawn on the press frame (the first wait frame, then every 9th): RENDER_STATE_CLEAR fills the window but
+//   returns RENDER_UPDATE without copying it to VRAM, so the clear reaches the screen with the arrow's CopyWindowToVram or else with the
+//   next character's. Otherwise p+1 still shows the page and its arrow.
+//   `\l` on a press at p: p and p+1 show the page (the arrow gone from p+1), p+2..p+5 scroll the window up 4 pixels a frame (16 = one line,
+//   sWindowVerticalScrollSpeeds[FAST]), p+6 holds, p+7 shows the new line's first character on the second row.
+// - The end of a message (MSGBOX_DEFAULT = message, waitmessage, waitbuttonpress): after the last character (frame L) the box is idle; a press
+//   (A or B, WaitForAorBPress, silent) is taken from frame L+3 on (the printer finishes, waitmessage returns, waitbuttonpress starts). On a
+//   press at p, the next msgbox (the first speech's close / battle cry line) starts its printer at p+1: p+1 and p+2 still show the old text,
+//   p+3 the cleared box, p+4 the first character. The last message is followed by DoNolandBattle's closemessage: the box shows on p and p+1
+//   and is gone on p+2.
+// - The first message opens SPEECH_APPEAR_ELAPSED frames after the movement settles: an empty box first, then one character a frame.
 
-/** Splits one JSON page's raw text into 2-line boxes, threading the \l scroll (if any) into a second box whose own line1 is the previous box's line2 - see module doc above for why \n/\l are otherwise handled identically. */
-function splitSpeechBoxes(pageText: string): readonly (readonly [string, string])[] {
-  const parts = pageText.split(/(\\n|\\l)/);
-  const boxes: [string, string][] = [];
-  let line1 = parts[0] ?? "";
-  let line2 = "";
-  for (let i = 1; i < parts.length; i += 2) {
-    const delimiter = parts[i];
-    const text = parts[i + 1] ?? "";
-    if (delimiter === "\\l") {
-      boxes.push([line1, line2]);
-      line1 = line2;
-      line2 = text;
-    } else {
-      line2 = text;
-    }
-  }
-  boxes.push([line1, line2]);
-  // The extraction JSON preserves source spelling with a plain ASCII
-  // apostrophe; the font's own apostrophe glyph is the localized right-
-  // single-quote character (same normalization factoryTrainerPresentation.
-  // ts's displayEasyChatWord already applies for this exact class of
-  // extracted text - a straight apostrophe has no charmap entry and renders
-  // as a blank, dense-compare-caught via the box0 "name's"/"I'm" spot-check
-  // trace this step's own compare work added).
-  return boxes.map(([a, b]) => [a.replaceAll("'", "’"), b.replaceAll("'", "’")]);
+/** How a printed line begins: the first line of a message, `\n`, `\l` or `\p`. */
+export type BrainSpeechLink = "start" | "newline" | "scroll" | "clear";
+
+export interface BrainSpeechLine {
+  readonly text: string;
+  readonly link: BrainSpeechLink;
+  /** The window row the line prints on: 0 after "start" / "clear", 1 after "newline" / "scroll". */
+  readonly row: 0 | 1;
+  /** The msgbox the line belongs to (0 = the first; the first speech and its close line are two msgboxes). */
+  readonly message: number;
 }
 
-const silverFirstEncounterScene = walkupScript.scenes.silverFirstEncounter as {
-  readonly events: readonly { readonly kind: string; readonly pages?: readonly string[] }[];
-};
-const silverRepeatScene = walkupScript.scenes.silverRepeat as {
-  readonly events: readonly { readonly kind: string; readonly pages?: readonly string[] }[];
-};
+type WalkupMessageEvents = { readonly events: readonly { readonly kind: string; readonly pages?: readonly string[] }[] };
 
-function onlyMessageEvents(
-  events: readonly { readonly kind: string; readonly pages?: readonly string[] }[],
-): readonly { readonly pages: readonly string[] }[] {
-  return events.filter(
-    (event): event is { readonly kind: string; readonly pages: readonly string[] } =>
-      event.kind === "message",
-  );
+function messagePages(scene: WalkupMessageEvents): readonly (readonly string[])[] {
+  return scene.events.filter((event) => event.kind === "message").map((event) => event.pages!);
 }
 
-const [silverPersonalityMessage, silverCryMessage] = onlyMessageEvents(silverFirstEncounterScene.events);
-const [silverRepeatCryMessage] = onlyMessageEvents(silverRepeatScene.events);
-
-/** The 8-page gated personality speech, flattened to 9 boxes (page 1's internal \l scroll is 2 boxes). */
-export const SILVER_PERSONALITY_SPEECH_BOXES: readonly (readonly [string, string])[] =
-  silverPersonalityMessage!.pages.flatMap(splitSpeechBoxes);
-
-/** Index one past the personality speech's last box - the cry box (identical text either variant) sits here. */
-export const SILVER_PERSONALITY_BOX_COUNT = SILVER_PERSONALITY_SPEECH_BOXES.length;
-
-const SILVER_CRY_BOX = splitSpeechBoxes(silverCryMessage!.pages[0]!)[0]!;
-
-/** First-encounter box queue: the 9 personality boxes, then the cry. */
-export const SILVER_FIRST_ENCOUNTER_SPEECH_BOXES: readonly (readonly [string, string])[] = [
-  ...SILVER_PERSONALITY_SPEECH_BOXES,
-  SILVER_CRY_BOX,
-];
-
-/** Repeat-encounter box queue (silverRepeat.events: the cry message + the DoNolandBattle call) - just the cry box, same text as the first-encounter variant's own final box. */
-export const SILVER_REPEAT_SPEECH_BOXES: readonly (readonly [string, string])[] = [
-  splitSpeechBoxes(silverRepeatCryMessage!.pages[0]!)[0]!,
-];
-
-// Walk-up build step B3: the gold Noland speech (goldFirstEncounter/
-// goldRepeat), same box-queue idiom as B2's silver machinery above but with
-// two structural differences the dense gold ground truth pins (docs/noland-
-// brain-intro-gold-ground-truth.md §7'): (1) 4 pages, none containing a \l
-// scroll (unlike silver's page 1), so the personality speech flattens 1:1 to
-// 4 boxes rather than 9; (2) no battle-cry message event at all - the gated
-// speech's own `frontier_set` is followed directly by a separate, always-
-// shown "All right!\nBring it on!" close line, structurally the same
-// position (and reuse point in brainSpeechBoxes/brainSpeechCursorVisible/
-// battleRoomJustFinishedBrainPersonalitySpeech below) as silver's cry box,
-// just not called "cry" in the JSON.
-const goldFirstEncounterScene = walkupScript.scenes.goldFirstEncounter as {
-  readonly events: readonly { readonly kind: string; readonly pages?: readonly string[] }[];
-};
-const goldRepeatScene = walkupScript.scenes.goldRepeat as {
-  readonly events: readonly { readonly kind: string; readonly pages?: readonly string[] }[];
-};
-
-const [goldPersonalityMessage, goldCloseMessage] = onlyMessageEvents(goldFirstEncounterScene.events);
-const [goldRepeatCloseMessage] = onlyMessageEvents(goldRepeatScene.events);
-
-/** The 4-page gated personality speech, flattened 1:1 to 4 boxes (no \l scroll in any gold page). */
-export const GOLD_PERSONALITY_SPEECH_BOXES: readonly (readonly [string, string])[] =
-  goldPersonalityMessage!.pages.flatMap(splitSpeechBoxes);
-
-/** Index one past the personality speech's last box - the close box ("All right! Bring it on!") sits here. */
-export const GOLD_PERSONALITY_BOX_COUNT = GOLD_PERSONALITY_SPEECH_BOXES.length;
-
-const GOLD_CLOSE_BOX = splitSpeechBoxes(goldCloseMessage!.pages[0]!)[0]!;
-
-/** First-encounter box queue: the 4 personality boxes, then the close line - no battle-cry box for gold (module doc above). */
-export const GOLD_FIRST_ENCOUNTER_SPEECH_BOXES: readonly (readonly [string, string])[] = [
-  ...GOLD_PERSONALITY_SPEECH_BOXES,
-  GOLD_CLOSE_BOX,
-];
-
-/** Repeat-encounter box queue (goldRepeat.events: the close message + the DoNolandBattle call) - just the close box, same text as the first-encounter variant's own final box. */
-export const GOLD_REPEAT_SPEECH_BOXES: readonly (readonly [string, string])[] = [
-  splitSpeechBoxes(goldRepeatCloseMessage!.pages[0]!)[0]!,
-];
-
-function brainSpeechPersonalityBoxCount(state: BattleRoomState): number {
-  return state.brainSpeechTier === "gold" ? GOLD_PERSONALITY_BOX_COUNT : SILVER_PERSONALITY_BOX_COUNT;
+/** The font's apostrophe is the right single quote (charmap code 180); the extraction keeps the source's plain ASCII one. */
+function speechText(text: string): string {
+  return text.replaceAll("'", "’");
 }
 
-function brainSpeechBoxes(state: BattleRoomState): readonly (readonly [string, string])[] {
+/** The printed lines of a run of msgboxes (each message's pages split at `\p`, each page's lines at `\n` / `\l`). */
+export function brainSpeechLinesOf(messages: readonly (readonly string[])[]): readonly BrainSpeechLine[] {
+  const lines: BrainSpeechLine[] = [];
+  messages.forEach((pages, message) => {
+    pages.forEach((page, pageIndex) => {
+      const parts = page.split(/(\\n|\\l)/);
+      lines.push({ text: speechText(parts[0] ?? ""), link: pageIndex === 0 ? "start" : "clear", row: 0, message });
+      for (let i = 1; i < parts.length; i += 2) {
+        lines.push({ text: speechText(parts[i + 1] ?? ""), link: parts[i] === "\\l" ? "scroll" : "newline", row: 1, message });
+      }
+    });
+  });
+  return Object.freeze(lines.map((line) => Object.freeze(line)));
+}
+
+const scenes = walkupScript.scenes as unknown as Record<"silverFirstEncounter" | "silverRepeat" | "goldFirstEncounter" | "goldRepeat", WalkupMessageEvents>;
+/** Silver, first meeting: NolandImFactoryHead (8 pages), then ShakeOutKnowledgeBringItOn (scripts.inc:118-123). */
+export const SILVER_FIRST_ENCOUNTER_SPEECH_LINES = brainSpeechLinesOf(messagePages(scenes.silverFirstEncounter));
+/** Silver, speech heard or the STREAK return battle: ShakeOutKnowledgeBringItOn only (:116, :119, :122-123). */
+export const SILVER_REPEAT_SPEECH_LINES = brainSpeechLinesOf(messagePages(scenes.silverRepeat));
+/** Gold, first meeting: HarderLookThanLastTime (4 pages), then AllRightBringItOn (:143-149). */
+export const GOLD_FIRST_ENCOUNTER_SPEECH_LINES = brainSpeechLinesOf(messagePages(scenes.goldFirstEncounter));
+/** Gold, speech heard or a STREAK_LONG return battle: AllRightBringItOn only (:117, :145, :148-149). */
+export const GOLD_REPEAT_SPEECH_LINES = brainSpeechLinesOf(messagePages(scenes.goldRepeat));
+
+export function brainSpeechLines(state: BattleRoomState): readonly BrainSpeechLine[] {
   if (state.brainSpeechTier === "gold") {
-    return state.brainSpeechFirstEncounter
-      ? GOLD_FIRST_ENCOUNTER_SPEECH_BOXES
-      : GOLD_REPEAT_SPEECH_BOXES;
+    return state.brainSpeechFirstEncounter ? GOLD_FIRST_ENCOUNTER_SPEECH_LINES : GOLD_REPEAT_SPEECH_LINES;
   }
-  return state.brainSpeechFirstEncounter
-    ? SILVER_FIRST_ENCOUNTER_SPEECH_BOXES
-    : SILVER_REPEAT_SPEECH_BOXES;
-}
-
-function brainSpeechBoxAt(state: BattleRoomState, index: number): readonly [string, string] {
-  const boxes = brainSpeechBoxes(state);
-  return boxes[Math.min(index, boxes.length - 1)]!;
-}
-
-function brainSpeechPrintTicks(box: readonly [string, string]): number {
-  return box[0].length + box[1].length;
+  return state.brainSpeechFirstEncounter ? SILVER_FIRST_ENCOUNTER_SPEECH_LINES : SILVER_REPEAT_SPEECH_LINES;
 }
 
 /**
- * Elapsed tick "brainSettled" hands off into the speech's first box.
- * MEASURED (this step, alongside `BRAIN_MOVEMENT_CLOCK_OFFSET`): dense
- * compare against fixture 03 with the walk/pan cadence corrected showed the
- * app's speech box appearing 5 ticks before oracle's real one (a static
- * empty-box-shaped mismatch, oracle frames matching this module's own
- * `preCheckpointFrameOffset`-relative numbering 1046-1050 - `docs/noland-
- * silver-walkup-presentation-map.md`'s own "~1113" estimate was a rough
- * typewriter-visibility read, not a tick-exact appear boundary); 5 closes it
- * exactly.
+ * brainSpeechSettled elapsed (0 = the first frame without the box, two frames after the last press) of DoNolandBattle's battle start:
+ * DoSpecialTrainerBattle builds Noland's party (FillFactoryBrainParty, battle_tower.c:1857: CreateMon builds each Pokemon's moveset, about
+ * ten frames each on the ROM), then GetSpecialBattleTransition draws the transition, PlayMapChosenOrBattleBGM starts MUS_VS_FRONTIER_BRAIN
+ * and BattleTransition_StartOnField starts the transition (:2096-2099). ROM (silver, first meeting): last press 1016, box gone 1018, the
+ * BGM and the transition 1050.
  */
+export const BRAIN_BATTLE_TRANSITION_START_ELAPSED = 32;
+/**
+ * The transition's own clock (battleTransition.ts `te`) at its start: each family's constants were measured on an ordinary room trace whose
+ * transition started at that trace's last opponentSetupExtraRngSteps draw - elapsed 26 for the "destin" trace (CIRCLES_MEET, and CROSS /
+ * MEET_IN_SEQ derived from it), 23 for the "jenson" Battle 2 trace (ASYMMETRIC_SPIRAL_IN_SEQ).
+ */
+export const BATTLE_TRANSITION_START_TE = 26;
+export const ASYMMETRIC_SPIRAL_IN_SEQ_TRANSITION_START_TE = 23;
+function transitionStartTe(state: BattleRoomState): number {
+  const kind = frontierTransitionRenderKind(state.transitionPresentation, "circlesMeet");
+  return kind === "asymmetricSpiralInSeq" ? ASYMMETRIC_SPIRAL_IN_SEQ_TRANSITION_START_TE : BATTLE_TRANSITION_START_TE;
+}
+/** The brain path's transition clock on a brainSpeechSettled frame (negative before the transition starts). */
+export function brainBattleTransitionTe(state: BattleRoomState): number {
+  return state.elapsed - BRAIN_BATTLE_TRANSITION_START_ELAPSED + transitionStartTe(state);
+}
+
+/**
+ * The transition clock the brain room hands over to the battle intro at: twenty frames after the circle transition's fade to black starts
+ * (the fade ends after eleven, the transition task ends, Task_StartBattleAfterTransition installs CB2_InitBattle six frames later). ROM
+ * (silver, CIRCLES_MEET_IN_SEQ): fade from transition clock 185, black from 196, CB2_InitBattle at 202, the battle intro's first frame 35
+ * frames after this handoff, as the engine's intro draws it. LOGO_WAVE keeps the ordinary path's BATTLE_2_SCENE_HANDOFF_ELAPSED (no
+ * brain run measured it).
+ */
+export const BRAIN_BATTLE_START_AFTER_EXIT_FADE = 20;
+export function brainBattleIntroHandoffTe(state: BattleRoomState): number {
+  const kind = frontierTransitionRenderKind(state.transitionPresentation, "circlesMeet");
+  return kind === "logoWave" ? BATTLE_2_SCENE_HANDOFF_ELAPSED : frontierCircleExitFadeStartTe(kind) + BRAIN_BATTLE_START_AFTER_EXIT_FADE;
+}
+
+/** Frames from the movement settling ("brainSettled" elapsed 0) to the first message's empty box. */
 export const SPEECH_APPEAR_ELAPSED = 5;
+/** `\l`: the scroll frames after the press (one with the arrow gone, four steps of 4 pixels, one hold). */
+const SPEECH_SCROLL_FRAMES = 6;
+const SPEECH_SCROLL_STEP_PX = 4;
+const SPEECH_LINE_HEIGHT_PX = 16;
+/** End of a message: the idle frames after the last character before a press is taken (the press at L+3 sees idle elapsed 1). */
+const SPEECH_END_ACCEPT_ELAPSED = 1;
+/** The next msgbox: frames its printer takes to show the cleared box after the press (p+1, p+2 old text). */
+const SPEECH_NEXT_MESSAGE_OPEN_FRAMES = 2;
+/** The down arrow's first frame in a prompt wait and its period (TextPrinterDrawDownArrow: drawn, then 8 frames of delay). */
+const SPEECH_ARROW_FIRST_ELAPSED = 1;
+const SPEECH_ARROW_PERIOD = 9;
+const SPEECH_ARROW_Y_OFFSETS = [0, 1, 2, 1] as const;
 
-/**
- * Elapsed tick "brainSpeechSettled" (the cry/close box just closed) hands
- * off to the battle-start intro - sourced directly from the already-
- * committed dense map's own pinned frames (docs/noland-silver-walkup-
- * presentation-map.md §3: "box closes; empty arena pause" 3201-3228 (28
- * frames), then "pre-transition flash onset" at 3229) rather than re-derived
- * this step, same reuse discipline as BRAIN_MOVEMENT_SETTLE_ELAPSED's own
- * doc above. Silver-specific value - see `brainSpeechSceneHandoffElapsed`
- * for gold's own (shorter) pause.
- */
-export const BRAIN_SPEECH_SCENE_HANDOFF_ELAPSED = 28;
-
-/**
- * Gold's own version of `BRAIN_SPEECH_SCENE_HANDOFF_ELAPSED` above - NOT the
- * same duration (a route-derived input, not a hardcoded gold branch of the
- * mechanism: both tiers share the identical "free-run brainSpeechSettled
- * until this many ticks, then hand off" rule, just measured against each
- * tier's own dense ground truth). docs/noland-brain-intro-gold-ground-
- * truth.md §7' ("factory-brain-gold-speech-close-off.json", stride-1
- * confirmed for every frame in that section): "2531–2556 | 26f hold
- * (`31aec4d68fe629cb`) | Dialogue box dismissed, empty-arena pause" - 26
- * frames, not silver's 28 (the doc's own §3′ table independently corroborates
- * this: "Dialogue-dismissed pause | 3201–3228 (28f) silver | 2531–~2557
- * (≥27f) gold | Same (±1f)").
- */
-export const BRAIN_SPEECH_SCENE_HANDOFF_ELAPSED_GOLD = 26;
-
-/** Tier-general accessor for the two constants above - see their own docs. */
-export function brainSpeechSceneHandoffElapsed(state: BattleRoomState): number {
-  return state.brainSpeechTier === "gold"
-    ? BRAIN_SPEECH_SCENE_HANDOFF_ELAPSED_GOLD
-    : BRAIN_SPEECH_SCENE_HANDOFF_ELAPSED;
+/** What the box shows: the line being printed (or waited on), its visible characters, the scroll, the arrow's offset (null = no arrow). */
+export interface BrainSpeechPicture {
+  readonly line: number;
+  readonly chars: number;
+  readonly scroll: number;
+  readonly arrow: number | null;
 }
 
-/**
- * True while the currently-shown speech box should draw the "waiting for
- * input, more text follows" cursor - dense-compare-caught (this step's own
- * box0/cry spot-check traces): every box still mid-string (joined to the
- * next by the source `\l`/`\p` control codes) shows it while idle, matching
- * this engine's own existing battle-scene wait-cursor mechanism
- * (battleScene.ts's drawCursor/CURSOR_Y_OFFSETS - same glyph, reused here).
- * The personality speech's LAST box (page 8 silver / page 4 gold, string-
- * terminated by `$` with no further `\p`) and the standalone close/cry box
- * (a separate msgbox call, same shape as the entrance's own cursor-less
- * "Get a move on!" box) do NOT - both close straight to the next scene with
- * no more text pending. Tier-general (`brainSpeechPersonalityBoxCount`):
- * gold's dense ground truth (docs/noland-brain-intro-gold-ground-truth.md
- * §7') independently confirms the same rule - page 4 is static, matching
- * this function's existing "last personality box never shows the cursor"
- * shape rather than needing a gold-specific carve-out.
- */
-/**
- * The cursor does not appear the instant its owning phase's `elapsed` clock
- * starts - MEASURED this session (gold-open-window step): dense pixel diffs
- * of `factory-brain-gold-walkup-speech-open-off.json` (post accept-timing
- * fix, see this file's `battleRoomAcceptedState`/CLOSE-WIPE-adjacent doc
- * history) cross-referenced against a live `state.elapsed` trace
- * (`createInitialState`/`tick` stepped through the same trace) show oracle
- * draws NO cursor pixels at all - not offset-0, absent - for `elapsed` 0 and
- * 1 of every fresh `brainSpeechIdle` entry (frames 167-168 relative to that
- * fixture's own numbering, direct pixel readout: rows 142-148 all background
- * in oracle, full glyph in the app). `factory-brain-silver-walkup-
- * entrance-03-off.json` shows the byte-identical shape at its own box0 entry
- * (frames 471-472) - tier-general, not a gold-only artifact. Every later
- * bob-phase boundary is ALSO shifted exactly 2 ticks later than a raw
- * `elapsed`-indexed table lookup predicts in both fixtures (gold: pairs at
- * elapsed 9/10, 18/19, 27/28, ... every fixture-open bad frame closes under
- * `elapsed - 2`; silver entrance-03: the identical pairs at elapsed 9/10,
- * 18/19, 27/28, 36/37 relative to its own box0 entry close the same way) -
- * i.e. the cursor's own internal timer starts 2 ticks after the box's
- * `elapsed` clock, not concurrently with it.
- */
-export const CURSOR_APPEAR_DELAY_TICKS = 2;
-
-export function brainSpeechCursorVisible(state: BattleRoomState): boolean {
-  return (
-    (state.phase === "brainSpeechIdle" || state.phase === "brainSpeechClosing")
-    && (state.speechStep ?? 0) < brainSpeechPersonalityBoxCount(state) - 1
-    && state.elapsed >= CURSOR_APPEAR_DELAY_TICKS
-  );
+function nextLink(lines: readonly BrainSpeechLine[], index: number): BrainSpeechLine | null {
+  const next = lines[index + 1];
+  return next !== undefined && next.message === lines[index]!.message ? next : null;
 }
 
-/**
- * Bob-animation Y offset for the wait cursor, keyed by the SAME idle
- * `elapsed` clock the box's own idle hold ages on (re-based by
- * `CURSOR_APPEAR_DELAY_TICKS`'s own doc above, since the cursor's own timer
- * starts 2 ticks later) - reuses battleScene.ts's own cycle (0,1,2,1 px, one
- * step every 9 ticks) rather than inventing a fresh one, since it is the
- * same glyph/mechanism. Only called from behind `brainSpeechCursorVisible`
- * (battleRoomRender.ts), which already guarantees `elapsed >=
- * CURSOR_APPEAR_DELAY_TICKS` - the subtraction below never goes negative.
- */
-const CURSOR_Y_BOB_OFFSETS = [0, 1, 2, 1] as const;
-export function brainSpeechCursorYOffset(state: BattleRoomState): number {
-  const cursorElapsed = state.elapsed - CURSOR_APPEAR_DELAY_TICKS;
-  return CURSOR_Y_BOB_OFFSETS[Math.floor(cursorElapsed / 9) % CURSOR_Y_BOB_OFFSETS.length]!;
+function promptFollows(lines: readonly BrainSpeechLine[], index: number): boolean {
+  const next = nextLink(lines, index);
+  return next !== null && (next.link === "scroll" || next.link === "clear");
+}
+
+/** The box's picture on this state's frame. */
+export function brainSpeechPicture(state: BattleRoomState): BrainSpeechPicture {
+  const lines = brainSpeechLines(state);
+  const line = state.speechLine ?? 0;
+  const length = lines[line]?.text.length ?? 0;
+  switch (state.speechMode ?? "print") {
+    case "print":
+      return { line, chars: Math.min(state.elapsed, length), scroll: 0, arrow: null };
+    case "wait": {
+      const arrow = promptFollows(lines, line) && state.elapsed >= SPEECH_ARROW_FIRST_ELAPSED
+        ? SPEECH_ARROW_Y_OFFSETS[Math.floor((state.elapsed - SPEECH_ARROW_FIRST_ELAPSED) / SPEECH_ARROW_PERIOD) % SPEECH_ARROW_Y_OFFSETS.length]!
+        : null;
+      return { line, chars: length, scroll: 0, arrow };
+    }
+    case "scroll":
+      return { line, chars: length, scroll: Math.min(SPEECH_LINE_HEIGHT_PX, state.elapsed * SPEECH_SCROLL_STEP_PX), arrow: null };
+    case "accepted":
+    case "open":
+      return state.speechPicture ?? { line, chars: length, scroll: 0, arrow: null };
+  }
+}
+
+/** The two rows' text for a picture (the row above a second-row line is the line before it: the same page's first line, or the scrolled one). */
+export function brainSpeechRows(state: BattleRoomState, picture: BrainSpeechPicture): readonly [string, string] {
+  const lines = brainSpeechLines(state);
+  const current = lines[picture.line];
+  if (current === undefined) return ["", ""];
+  const shown = current.text.slice(0, picture.chars);
+  return current.row === 0 ? [shown, ""] : [lines[picture.line - 1]?.text ?? "", shown];
+}
+
+/** Can a press (A or B) be taken on this frame's pre-state? */
+export function brainSpeechAcceptReady(state: BattleRoomState): boolean {
+  if (state.phase !== "brainSpeech") return false;
+  const lines = brainSpeechLines(state);
+  const line = state.speechLine ?? 0;
+  const length = lines[line]?.text.length ?? 0;
+  if (promptFollows(lines, line)) {
+    return (state.speechMode === "print" && state.elapsed >= length) || state.speechMode === "wait";
+  }
+  return state.speechMode === "wait" && state.elapsed >= SPEECH_END_ACCEPT_ELAPSED;
+}
+
+/** True when the press just taken was a `\p` / `\l` prompt (SE_SELECT; the end-of-message wait is silent). */
+export function brainSpeechAcceptPlaysSelect(state: BattleRoomState): boolean {
+  return state.phase === "brainSpeech" && promptFollows(brainSpeechLines(state), state.speechLine ?? 0);
+}
+
+function advanceBrainSpeech(state: BattleRoomState): BattleRoomState {
+  const lines = brainSpeechLines(state);
+  const line = state.speechLine ?? 0;
+  const length = lines[line]?.text.length ?? 0;
+  const next = (speechLine: number, speechMode: BrainSpeechMode, elapsed: number): BattleRoomState =>
+    ({ ...state, phase: "brainSpeech", speechLine, speechMode, elapsed, speechPicture: undefined, speechAfter: undefined, speechClearShown: undefined });
+  switch (state.speechMode ?? "print") {
+    case "print":
+      if (state.elapsed < length) return { ...state, elapsed: state.elapsed + 1 };
+      // `\n`: the next line's first character follows on the very next frame.
+      if (nextLink(lines, line)?.link === "newline") return next(line + 1, "print", 1);
+      return next(line, "wait", 0);
+    case "wait":
+      return { ...state, elapsed: state.elapsed + 1 };
+    case "scroll":
+      if (state.elapsed + 1 < SPEECH_SCROLL_FRAMES) return { ...state, elapsed: state.elapsed + 1 };
+      return next(line + 1, "print", 1);
+    case "open":
+      if (state.elapsed + 1 < SPEECH_NEXT_MESSAGE_OPEN_FRAMES) return { ...state, elapsed: state.elapsed + 1 };
+      return next(line + 1, "print", 0);
+    case "accepted":
+      switch (state.speechAfter) {
+        case "clear":
+          // speechClearShown: the arrow was redrawn on the press frame (see the `\p` rule above); else the page holds one more frame.
+          if (state.speechClearShown === true) return next(line + 1, "print", 0);
+          if (state.elapsed < 1) return { ...state, elapsed: state.elapsed + 1 };
+          return next(line + 1, "print", 1);
+        case "scroll":
+          return next(line, "scroll", 0);
+        case "message":
+          return { ...state, speechMode: "open", elapsed: 0 };
+        case "close":
+        default:
+          // closemessage: the box stays on the press frame and the next one.
+          if (state.elapsed < 1) return { ...state, elapsed: state.elapsed + 1 };
+          return { ...state, phase: "brainSpeechSettled", elapsed: 0, speechMode: undefined, speechPicture: undefined, speechAfter: undefined };
+      }
+  }
+}
+
+/** The state after a press the speech takes (brainSpeechAcceptReady): the press frame still shows what it would have shown without it. */
+function acceptBrainSpeech(state: BattleRoomState): BattleRoomState {
+  const lines = brainSpeechLines(state);
+  const line = state.speechLine ?? 0;
+  const following = nextLink(lines, line);
+  const after: BrainSpeechAfter = following !== null
+    ? (following.link === "scroll" ? "scroll" : "clear")
+    : lines[line + 1] !== undefined ? "message" : "close";
+  // `\p`: the press frame is wait frame 0 when the pre-state is the line's last character, else wait elapsed + 1; the arrow redraws on wait
+  // frames 0, 9, 18, ... (TextPrinterDrawDownArrow).
+  const waitFrame = state.speechMode === "wait" ? state.elapsed + 1 : 0;
+  const clearShown = after === "clear" ? waitFrame % SPEECH_ARROW_PERIOD === 0 : undefined;
+  return {
+    ...state, phase: "brainSpeech", speechMode: "accepted", elapsed: 0, speechAfter: after, speechClearShown: clearShown,
+    speechPicture: brainSpeechPicture(advanceBrainSpeech(state)),
+  };
 }
 
 /**
@@ -1277,37 +1140,13 @@ export function brainSpeechCursorYOffset(state: BattleRoomState): number {
  * settled scene behind the message box.
  */
 export function brainEntranceMovementSettled(phase: BattleRoomPhase): boolean {
-  return (
-    phase === "brainSettled"
-    || phase === "brainSpeech"
-    || phase === "brainSpeechIdle"
-    || phase === "brainSpeechClosing"
-    || phase === "brainSpeechSettled"
-  );
+  return phase === "brainSettled" || phase === "brainSpeech" || phase === "brainSpeechSettled";
 }
 
 /**
- * True the exact tick `battleRoomAcceptedState` transitions out of the
- * gated personality speech's LAST box into the always-shown close/cry box -
- * the JSON's own `frontier_set FRONTIER_DATA_HEARD_BRAIN_SPEECH` moment
- * (both tiers' events order: the gated speech, THEN the flag set, THEN the
- * close/cry line). Not independently visible in pixels (the flag has no
- * on-screen effect - docs/noland-silver-walkup-presentation-map.md §1), so
- * exact-tick fidelity only needs to preserve this ORDER, not a specific
- * frame. Repeat encounters (`brainSpeechFirstEncounter` false) never satisfy
- * this - they only ever show the close/cry box, so there is no personality
- * speech to have just finished. Tier-general (`brainSpeechPersonalityBoxCount`):
- * the caller (core.ts) marks the SAME tier's heard flag (markFactoryBrainSpeech
- * Heard, keyed off `prev.brainSpeechTier`) the same tick this returns true.
- *
- * Was keyed off `prev.phase === "brainSpeechClosing"` before the real-close
- * edge fix (`docs/speech-close-edge-evidence.md`,
- * `docs/speech-close-edge-silver-evidence.md`) - that phase is no longer
- * ever entered for this transition (`battleRoomAcceptedState` now lands
- * directly on "brainSpeech", see its own doc), so this checks the new
- * accept-driven transition shape instead: leaving `speechStep ===
- * personalityBoxCount - 1` (the last personality box) via the accept seam
- * straight into "brainSpeech" (the close/cry box).
+ * True on the press that ends the first speech (the first message of a first meeting) and starts its close line: the script's
+ * `frontier_set FRONTIER_DATA_HEARD_BRAIN_SPEECH` (scripts.inc:121, :147) runs between the two msgboxes. No picture of its own; core.ts marks
+ * the tier's heard bit (markFactoryBrainSpeechHeard, keyed off `prev.brainSpeechTier`) on that press.
  */
 export function battleRoomJustFinishedBrainPersonalitySpeech(
   prev: BattleRoomState,
@@ -1316,9 +1155,11 @@ export function battleRoomJustFinishedBrainPersonalitySpeech(
   return (
     prev.frontierBrainWalkup === true
     && prev.brainSpeechFirstEncounter === true
-    && prev.phase === "brainSpeechIdle"
-    && next.phase === "brainSpeech"
-    && (prev.speechStep ?? 0) === brainSpeechPersonalityBoxCount(prev) - 1
+    && prev.phase === "brainSpeech"
+    && prev.speechMode !== "accepted"
+    && next.speechMode === "accepted"
+    && next.speechAfter === "message"
+    && brainSpeechLines(prev)[prev.speechLine ?? 0]?.message === 0
   );
 }
 
@@ -1410,13 +1251,7 @@ export function battleRoomQuote(state: BattleRoomState): readonly [string, strin
   // opponent's battle quote - trainerPresentation.speechBefore is Noland's
   // identity carried forward for the speech step, not this scene's text.
   if (state.frontierBrainWalkup) {
-    if (
-      state.phase === "brainSpeech"
-      || state.phase === "brainSpeechIdle"
-      || state.phase === "brainSpeechClosing"
-    ) {
-      return brainSpeechBoxAt(state, state.speechStep ?? 0);
-    }
+    if (state.phase === "brainSpeech") return brainSpeechRows(state, brainSpeechPicture(state));
     return [BRAIN_MSGBOX_LINE1, BRAIN_MSGBOX_LINE2];
   }
   if (state.trainerPresentation !== undefined) {
@@ -1466,7 +1301,9 @@ function enteringMsgboxVisual(elapsed: number): MsgboxVisual {
  *   hidden. Reproduce: `npm run compare -- factory-brain-silver-walkup-
  *   entrance-03-off.json --summary` (frames 319-320 were the only
  *   msgbox-class residual before this fix).
- * - `brainSpeechClosing`->`brainSpeechSettled` (the close/cry box that
+ * - (History, before the speech was timed from the ROM's own presses: the close line's box was modelled as a `brainSpeechClosing` phase.
+ *   The close now follows acceptBrainSpeech's "close": the box shows on the press frame and the next, gone on the second.)
+ *   `brainSpeechClosing`->`brainSpeechSettled` (the close/cry box that
  *   follows the gated personality speech in BOTH tiers -
  *   `factory-brain-gold-walkup-speech-close-off.json`, press at trace frame
  *   35): oracle clears the box (sha `f0d9bf0629eb...` -> `31aec4d68fe6...`)
@@ -1514,23 +1351,9 @@ export function msgboxVisual(state: BattleRoomState): MsgboxVisual {
         : MSGBOX_HIDDEN;
     case "brainSettled":
       return MSGBOX_HIDDEN;
-    case "brainSpeech": {
-      const box = brainSpeechBoxAt(state, state.speechStep ?? 0);
-      // `speechAcceptedFast` boxes skip the cleared tick - the accept tick
-      // (elapsed 0) already shows character 1, not 0 - see that field's own
-      // doc for the two-window derivation.
-      const printElapsed = state.speechAcceptedFast ? state.elapsed + 1 : state.elapsed;
-      return { visible: true, chars: Math.min(printElapsed, brainSpeechPrintTicks(box)) };
-    }
-    case "brainSpeechIdle":
-      return {
-        visible: true,
-        chars: brainSpeechPrintTicks(brainSpeechBoxAt(state, state.speechStep ?? 0)),
-      };
-    case "brainSpeechClosing":
-      // CLOSE WIPE: the close/cry box clears immediately (see doc above),
-      // well before MSGBOX_CLOSE_TICKS' own state-transition boundary.
-      return MSGBOX_HIDDEN;
+    case "brainSpeech":
+      // Drawn from brainSpeechPicture (battleRoomRender.ts): rows, scroll and arrow.
+      return { visible: true, chars: 0 };
     case "brainSpeechSettled":
       return MSGBOX_HIDDEN;
   }

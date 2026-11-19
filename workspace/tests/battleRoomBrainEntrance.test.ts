@@ -18,7 +18,9 @@ import {
   battleRoomQuote,
   battleRoomQuoteInputReady,
   battleRoomStateForOpponent,
+  battleRoomAcceptedState,
   battleRoomMsgboxClosingPhase,
+  BRAIN_MSGBOX_ACCEPT_ELAPSED,
   BRAIN_MOVEMENT_CLOCK_OFFSET,
   BRAIN_MOVEMENT_SETTLE_ELAPSED,
   BRAIN_MSGBOX_APPEAR_ELAPSED,
@@ -178,23 +180,24 @@ describe("Frontier-Brain BattleRoom entrance (walk-up build step B1)", () => {
     }
     expect(state.phase).toBe("brainMsgboxIdle");
     expect(msgboxVisual(state)).toEqual({ visible: true, chars: BRAIN_MSGBOX_PRINT_TICKS });
+    // MSGBOX_DEFAULT's end: a press is taken from three frames after the last character (ROM: last character 346, first press 349;
+    // docs/parity-mac/noland-room-scenes.md). Idling never moves on by itself; the picture holds.
+    expect(battleRoomQuoteInputReady(state)).toBe(false);
+    for (let i = 0; i < BRAIN_MSGBOX_ACCEPT_ELAPSED; i += 1) state = advanceBattleRoom(state);
     expect(battleRoomQuoteInputReady(state)).toBe(true);
-
-    // Idling holds byte-identical (no timer-driven auto-advance).
     const held = advanceBattleRoom(state);
-    expect(held).toEqual(state);
+    expect(held.phase).toBe("brainMsgboxIdle");
+    expect(msgboxVisual(held)).toEqual(msgboxVisual(state));
   });
 
   it("A press on the idle box starts the close, then the shared movement phase, settling into the named 'brainSettled' seam for B2", () => {
     let state: BattleRoomState = createBrainWalkupBattleRoomState();
-    for (let i = 0; i < BRAIN_MSGBOX_PRINT_COMPLETE_ELAPSED; i += 1) state = advanceBattleRoom(state);
+    for (let i = 0; i < BRAIN_MSGBOX_PRINT_COMPLETE_ELAPSED + BRAIN_MSGBOX_ACCEPT_ELAPSED; i += 1) state = advanceBattleRoom(state);
     expect(battleRoomQuoteInputReady(state)).toBe(true);
 
-    // core.ts's own A-press idiom: transition directly to the closing phase.
-    expect(battleRoomMsgboxClosingPhase(state)).toBe("brainMsgboxClosing");
-    state = { ...state, phase: battleRoomMsgboxClosingPhase(state), elapsed: 0 };
-
-    for (let i = 0; i < MSGBOX_CLOSE_TICKS; i += 1) state = advanceBattleRoom(state);
+    // The press goes straight into the movement (closemessage, then applymovement: ROM press 349, box on 349-350, the walk from 351).
+    expect(battleRoomMsgboxClosingPhase(state)).toBe("brainMoving");
+    state = battleRoomAcceptedState(state);
     expect(state.phase).toBe("brainMoving");
     // CLOSE WIPE (battleRoom.ts's BRAIN_MSGBOX_CLOSE_WIPE_MOVING_HOLD_TICKS
     // doc, oracle-probed against factory-brain-silver-walkup-entrance-03-off
@@ -267,9 +270,8 @@ describe("Frontier-Brain BattleRoom entrance (walk-up build step B1)", () => {
 
   it("walk-up build step B1c mid-ramp fix: the render's own movementElapsed clock is one tick AHEAD of state.elapsed while brainMoving is in progress - RAM-measured (tools/probe/probe-factory-brain-silver-entrance-movement-ram.py's extended OAM/coordOffset fields): the walk/pan stays flat for the FIRST TWO brainMoving ticks (state.elapsed 0 and 1 both RAM-measure camPanY=0), so those two ticks render byte-identical, still-flat frames; the ramp's first real +1px tick is state.elapsed 2, not 1", () => {
     let state: BattleRoomState = createBrainWalkupBattleRoomState();
-    for (let i = 0; i < BRAIN_MSGBOX_PRINT_COMPLETE_ELAPSED; i += 1) state = advanceBattleRoom(state);
-    state = { ...state, phase: battleRoomMsgboxClosingPhase(state), elapsed: 0 };
-    for (let i = 0; i < MSGBOX_CLOSE_TICKS; i += 1) state = advanceBattleRoom(state);
+    for (let i = 0; i < BRAIN_MSGBOX_PRINT_COMPLETE_ELAPSED + BRAIN_MSGBOX_ACCEPT_ELAPSED; i += 1) state = advanceBattleRoom(state);
+    state = battleRoomAcceptedState(state);
     expect(state.phase).toBe("brainMoving");
     expect(state.elapsed).toBe(0);
 

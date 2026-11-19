@@ -56,6 +56,8 @@ export function drawText(
   y: number,
   palette: RgbColor[],
   colors: TextColors,
+  /** Rows outside [min, max) are not drawn (a window's pixel buffer, e.g. a scrolling field message box). */
+  clipY?: { readonly min: number; readonly max: number },
 ): void {
   let cursorX = x;
   for (const ch of text) {
@@ -85,6 +87,7 @@ export function drawText(
           if (colorIndex === 0) continue;
           const color = palette[colorIndex];
           if (!color) continue;
+          if (clipY !== undefined && (y + gy < clipY.min || y + gy >= clipY.max)) continue;
           setPixel(fb, cursorX + gx, y + gy, color.r, color.g, color.b);
         }
       }

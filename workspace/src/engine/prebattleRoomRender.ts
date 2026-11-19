@@ -369,8 +369,8 @@ export const MESSAGE_PALETTE: RgbColor[] = [{ r: 0, g: 0, b: 0 }, msgboxPalette[
 export const MESSAGE_TEXT_COLORS = { fg: 1, bg: 0, shadow: 2 };
 
 /** Draws `text` at the given screen position using the message box's own fg/shadow palette (msgboxPalette indices 2/3) - shared with battleRoomRender.ts's opponent-speech box, which reuses this literal same box asset (docs/battle-room-notes.md §8.1). */
-export function drawMessageBoxText(fb: Uint8Array, text: string, x: number, y: number): void {
-  drawText(fb, font, charmap, text, x, y, MESSAGE_PALETTE, MESSAGE_TEXT_COLORS);
+export function drawMessageBoxText(fb: Uint8Array, text: string, x: number, y: number, clipY?: { readonly min: number; readonly max: number }): void {
+  drawText(fb, font, charmap, text, x, y, MESSAGE_PALETTE, MESSAGE_TEXT_COLORS, clipY);
 }
 
 const MESSAGE_TEXT_LINE2_ORIGIN = { x: 16, y: 137 };

@@ -29,7 +29,7 @@
 import { setPixel } from "./framebuffer.ts";
 import type { RgbColor } from "./bg.ts";
 import { fadeColor } from "./fadeRender.ts";
-import { BRAIN_MOVEMENT_CLOCK_OFFSET, BRAIN_MOVEMENT_SETTLE_ELAPSED, BRAIN_MSGBOX_CLOSE_WIPE_MOVING_HOLD_TICKS, NOLAND_IDLE_FRAME, NOLAND_INITIAL_SCREEN_Y, type BattleRoomState, type EntryStep, type MsgboxVisual, battleRoomQuote, brainEntranceMovementSettled, brainSpeechCursorVisible, brainSpeechCursorYOffset, entryStep, msgboxVisual, nolandStep, opponentStep, scientistTurnFrame } from "./battleRoom.ts";
+import { BRAIN_MOVEMENT_CLOCK_OFFSET, BRAIN_MOVEMENT_SETTLE_ELAPSED, BRAIN_MSGBOX_CLOSE_WIPE_MOVING_HOLD_TICKS, NOLAND_IDLE_FRAME, NOLAND_INITIAL_SCREEN_Y, type BattleRoomState, type EntryStep, type MsgboxVisual, battleRoomQuote, brainEntranceMovementSettled, brainSpeechLines, brainSpeechPicture, brainSpeechRows, entryStep, msgboxVisual, nolandStep, opponentStep, scientistTurnFrame } from "./battleRoom.ts";
 import { drawMessageBoxFrame, drawMessageBoxText, MESSAGE_PALETTE } from "./prebattleRoomRender.ts";
 import { measureText, type FontData } from "./font.ts";
 
@@ -243,7 +243,7 @@ const CURSOR_PALETTE: readonly [RgbColor, RgbColor, RgbColor] = [
 /**
  * The brain speech's own "waiting for input, more text follows" cursor -
  * same glyph/mechanism as battleScene.ts's drawCursor (see
- * brainSpeechCursorVisible's own doc for which boxes show it), positioned
+ * brainSpeechPicture's `arrow` for when it shows), positioned
  * right after the LAST NON-EMPTY line's own last printed glyph, at that
  * line's own fixed Y (dense-compare-caught: coincides with that line's own
  * origin.y, the same window template). Every guard fixture prior to gold's
@@ -281,6 +281,10 @@ function drawOpponentMsgbox(
 ): void {
   if (!msgbox.visible) return;
   drawMessageBoxFrame(fb);
+  if (state.phase === "brainSpeech") {
+    drawBrainSpeechText(fb, state);
+    return;
+  }
   if (msgbox.chars <= 0) return;
   const [messageLine1, messageLine2] = battleRoomQuote(state);
   const line1 = messageLine1.slice(0, Math.min(msgbox.chars, messageLine1.length));
@@ -290,13 +294,20 @@ function drawOpponentMsgbox(
     line2 = messageLine2.slice(0, msgbox.chars - messageLine1.length);
     drawMessageBoxText(fb, line2, MSGBOX_LINE2_ORIGIN.x, MSGBOX_LINE2_ORIGIN.y);
   }
-  if (brainSpeechCursorVisible(state)) {
-    if (line2.length > 0) {
-      drawBrainSpeechCursor(fb, line2, MSGBOX_LINE2_ORIGIN, brainSpeechCursorYOffset(state));
-    } else {
-      drawBrainSpeechCursor(fb, line1, MSGBOX_LINE1_ORIGIN, brainSpeechCursorYOffset(state));
-    }
-  }
+}
+
+/** Window 0's text area (tilemapTop 15, four tiles): ScrollWindow moves its pixels up and fills the bottom, so a scrolled row is clipped here. */
+const MSGBOX_TEXT_CLIP = { min: 120, max: 152 } as const;
+
+/** Noland's speech box: the picture's two rows (scrolled up by `scroll` pixels) and the down arrow after the current line. */
+function drawBrainSpeechText(fb: Uint8Array, state: BattleRoomState): void {
+  const picture = brainSpeechPicture(state);
+  const [row0, row1] = brainSpeechRows(state, picture);
+  drawMessageBoxText(fb, row0, MSGBOX_LINE1_ORIGIN.x, MSGBOX_LINE1_ORIGIN.y - picture.scroll, MSGBOX_TEXT_CLIP);
+  drawMessageBoxText(fb, row1, MSGBOX_LINE2_ORIGIN.x, MSGBOX_LINE2_ORIGIN.y - picture.scroll, MSGBOX_TEXT_CLIP);
+  if (picture.arrow === null) return;
+  const row = brainSpeechLines(state)[picture.line]?.row ?? 0;
+  drawBrainSpeechCursor(fb, row === 0 ? row0 : row1, row === 0 ? MSGBOX_LINE1_ORIGIN : MSGBOX_LINE2_ORIGIN, picture.arrow);
 }
 
 /**

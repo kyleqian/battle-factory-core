@@ -27,9 +27,28 @@ import {
 } from "../../src/engine/battleTransition.ts";
 import {
   battleRoomStateForOpponent,
-  GOLD_FIRST_ENCOUNTER_SPEECH_BOXES,
-  SILVER_FIRST_ENCOUNTER_SPEECH_BOXES,
+  GOLD_FIRST_ENCOUNTER_SPEECH_LINES,
+  SILVER_FIRST_ENCOUNTER_SPEECH_LINES,
+  type BrainSpeechLine,
 } from "../../src/engine/battleRoom.ts";
+
+/**
+ * The August speech stages count "boxes" (a window's two rows, a `\l` scroll starting a new one); the speech is now a list of printed
+ * lines (battleRoom.ts). Box k is the line that ends it: the k-th line not followed by a `\n` line of the same message.
+ */
+function boxEndLines(lines: readonly BrainSpeechLine[]): number[] {
+  const ends: number[] = [];
+  lines.forEach((line, i) => {
+    const next = lines[i + 1];
+    if (next === undefined || next.message !== line.message || next.link !== "newline") ends.push(i);
+  });
+  return ends;
+}
+function boxFirstLine(lines: readonly BrainSpeechLine[], box: number): number {
+  return box === 0 ? 0 : boxEndLines(lines)[box - 1]! + 1;
+}
+const SILVER_FIRST_ENCOUNTER_BOX_COUNT = boxEndLines(SILVER_FIRST_ENCOUNTER_SPEECH_LINES).length;
+const GOLD_FIRST_ENCOUNTER_BOX_COUNT = boxEndLines(GOLD_FIRST_ENCOUNTER_SPEECH_LINES).length;
 import {
   factoryTrainerPresentationForOpponent,
   type FactoryTrainerPresentation,
@@ -437,11 +456,12 @@ export function generatedRoundBattle7NolandSilverSpeechBoxHeldStage(
   return {
     ...ready.state,
     battleRoom: {
-      phase: "brainSpeechIdle",
+      phase: "brainSpeech",
       elapsed: 0,
       frontierBrainWalkup: true,
       brainSpeechFirstEncounter: true,
-      speechStep,
+      speechLine: boxEndLines(SILVER_FIRST_ENCOUNTER_SPEECH_LINES)[speechStep]!,
+      speechMode: "wait",
       trainerPresentation: ready.trainerPresentation,
       transitionPresentation: ready.transitionPresentation,
     },
@@ -477,13 +497,8 @@ export function generatedRoundBattle7NolandSilverSpeechBoxOpeningStage(
       elapsed: 0,
       frontierBrainWalkup: true,
       brainSpeechFirstEncounter: true,
-      speechStep,
-      // Mirrors `battleRoomAcceptedState`'s own derivation (battleRoom.ts,
-      // `speechAcceptedFast`'s doc): this park point represents having just
-      // left box `speechStep - 1` via a direct `\p`/`\l` continuation, so it
-      // is the window's first accept-driven transition (slow, cleared-tick
-      // model) only when that prior box was box 0 itself.
-      speechAcceptedFast: speechStep - 1 >= 1,
+      speechLine: boxFirstLine(SILVER_FIRST_ENCOUNTER_SPEECH_LINES, speechStep),
+      speechMode: "print",
       trainerPresentation: ready.trainerPresentation,
       transitionPresentation: ready.transitionPresentation,
     },
@@ -513,7 +528,7 @@ export function generatedRoundBattle7NolandSilverSpeechBox2OpeningStage(
  */
 export function generatedRoundBattle7NolandSilverSpeechSettledStage(
   state: EngineState,
-  speechBoxCount: number,
+  _speechBoxCount: number,
 ): EngineState {
   const ready = nolandRoundReadyState(state);
   return {
@@ -523,7 +538,6 @@ export function generatedRoundBattle7NolandSilverSpeechSettledStage(
       elapsed: 0,
       frontierBrainWalkup: true,
       brainSpeechFirstEncounter: true,
-      speechStep: speechBoxCount,
       trainerPresentation: ready.trainerPresentation,
       transitionPresentation: ready.transitionPresentation,
     },
@@ -545,7 +559,7 @@ export function generatedRoundBattle7NolandSilverSpeechCryHeldStage(
 ): EngineState {
   return generatedRoundBattle7NolandSilverSpeechBoxHeldStage(
     state,
-    SILVER_FIRST_ENCOUNTER_SPEECH_BOXES.length - 1,
+    SILVER_FIRST_ENCOUNTER_BOX_COUNT - 1,
   );
 }
 export function generatedRoundBattle7NolandSilverSpeechPage8HeldStage(
@@ -553,7 +567,7 @@ export function generatedRoundBattle7NolandSilverSpeechPage8HeldStage(
 ): EngineState {
   return generatedRoundBattle7NolandSilverSpeechBoxHeldStage(
     state,
-    SILVER_FIRST_ENCOUNTER_SPEECH_BOXES.length - 2,
+    SILVER_FIRST_ENCOUNTER_BOX_COUNT - 2,
   );
 }
 export function generatedRoundBattle7NolandSilverSpeechClosePauseStage(
@@ -561,7 +575,7 @@ export function generatedRoundBattle7NolandSilverSpeechClosePauseStage(
 ): EngineState {
   return generatedRoundBattle7NolandSilverSpeechSettledStage(
     state,
-    SILVER_FIRST_ENCOUNTER_SPEECH_BOXES.length,
+    SILVER_FIRST_ENCOUNTER_BOX_COUNT,
   );
 }
 
@@ -760,12 +774,13 @@ export function generatedRoundBattle7NolandGoldSpeechBoxHeldStage(
   return {
     ...ready.state,
     battleRoom: {
-      phase: "brainSpeechIdle",
+      phase: "brainSpeech",
       elapsed,
       frontierBrainWalkup: true,
       brainSpeechFirstEncounter: true,
       brainSpeechTier: "gold",
-      speechStep,
+      speechLine: boxEndLines(GOLD_FIRST_ENCOUNTER_SPEECH_LINES)[speechStep]!,
+      speechMode: "wait",
       trainerPresentation: ready.trainerPresentation,
       transitionPresentation: ready.transitionPresentation,
     },
@@ -776,7 +791,7 @@ export function generatedRoundBattle7NolandGoldSpeechBoxHeldStage(
 /** Gold sibling of `generatedRoundBattle7NolandSilverSpeechSettledStage`. */
 export function generatedRoundBattle7NolandGoldSpeechSettledStage(
   state: EngineState,
-  speechBoxCount: number,
+  _speechBoxCount: number,
 ): EngineState {
   const ready = goldNolandRoundReadyState(state);
   return {
@@ -787,7 +802,6 @@ export function generatedRoundBattle7NolandGoldSpeechSettledStage(
       frontierBrainWalkup: true,
       brainSpeechFirstEncounter: true,
       brainSpeechTier: "gold",
-      speechStep: speechBoxCount,
       trainerPresentation: ready.trainerPresentation,
       transitionPresentation: ready.transitionPresentation,
     },
@@ -833,7 +847,7 @@ export function generatedRoundBattle7NolandGoldSpeechPage4HeldStage(
 ): EngineState {
   return generatedRoundBattle7NolandGoldSpeechBoxHeldStage(
     state,
-    GOLD_FIRST_ENCOUNTER_SPEECH_BOXES.length - 2,
+    GOLD_FIRST_ENCOUNTER_BOX_COUNT - 2,
   );
 }
 export function generatedRoundBattle7NolandGoldSpeechCloseHeldStage(
@@ -841,7 +855,7 @@ export function generatedRoundBattle7NolandGoldSpeechCloseHeldStage(
 ): EngineState {
   return generatedRoundBattle7NolandGoldSpeechBoxHeldStage(
     state,
-    GOLD_FIRST_ENCOUNTER_SPEECH_BOXES.length - 1,
+    GOLD_FIRST_ENCOUNTER_BOX_COUNT - 1,
   );
 }
 export function generatedRoundBattle7NolandGoldSpeechClosePauseStage(
@@ -849,6 +863,6 @@ export function generatedRoundBattle7NolandGoldSpeechClosePauseStage(
 ): EngineState {
   return generatedRoundBattle7NolandGoldSpeechSettledStage(
     state,
-    GOLD_FIRST_ENCOUNTER_SPEECH_BOXES.length,
+    GOLD_FIRST_ENCOUNTER_BOX_COUNT,
   );
 }

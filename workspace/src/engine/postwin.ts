@@ -343,7 +343,9 @@ export const POSTWIN_BRAIN_CANT_TELL_TEXT_TOTAL =
  * Brief 1 already applied to the call-scene boxes.
  */
 export const POSTWIN_BRAIN_CANT_TELL_INPUT_READY_DELAY =
-  POSTWIN_DIALOGUE_TEXT_FIRST_DELAY + POSTWIN_BRAIN_CANT_TELL_TEXT_TOTAL + 1;
+  POSTWIN_DIALOGUE_TEXT_FIRST_DELAY + POSTWIN_BRAIN_CANT_TELL_TEXT_TOTAL + 2;
+// ROM (the walk-up from the GO ON menu, docs/parity-mac/noland-room-scenes.md): the press is taken from three frames after the box's last
+// character (MSGBOX_DEFAULT's waitmessage, then waitbuttonpress), one frame later than the +1 this had.
 
 /**
  * Ticks the just-arrived box's own frame graphic stays hidden past its edge
@@ -847,6 +849,7 @@ export function postwinRngSteps(
   age: number,
   continuationConfirmElapsed: number | null = null,
   rightThisWayDismissElapsed: number | null = null,
+  frontierBrain = false,
 ): number {
   if (age < POSTWIN_IN_BATTLE_CLEAR_AGE) return 0;
   // Baseline outside-battle VBlank call plus source-observed transition
@@ -855,8 +858,12 @@ export function postwinRngSteps(
   if (age === 46 || age === 105) return 3;
   if (age === 106) return 4;
   // `factory_getopponentintro`'s four on-demand draws occur one tick after
-  // GO ON, on top of the ordinary outside-battle VBlank call.
+  // GO ON, on top of the ordinary outside-battle VBlank call. Not before the
+  // Factory Head: AskReadyForHead's GO ON goes to AskSwapBeforeHead, which
+  // rolls nothing and shows no intro (pre-battle room scripts.inc:349-376;
+  // ROM: one draw on that frame, docs/parity-mac/noland-room-scenes.md).
   if (
+    !frontierBrain &&
     continuationConfirmElapsed !== null &&
     age === continuationConfirmElapsed + 1
   ) return 5;

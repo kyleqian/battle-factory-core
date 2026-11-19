@@ -157,7 +157,7 @@ export function advanceFactoryBattleStartIntro(
   const acknowledgedElapsed =
     state.acknowledgedElapsed
     ?? (
-      newKeys.has("A") && isGeneratedBattleIntroInputReady(state)
+      (newKeys.has("A") || newKeys.has("B")) && isGeneratedBattleIntroInputReady(state)
         ? state.elapsed
         : null
     );

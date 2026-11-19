@@ -4964,6 +4964,14 @@ export function generatedBattleIntroVisualPhase(
   return "trainer-message";
 }
 
+/**
+ * The "would like to battle!" prompt takes a press on the text printer's first wait frame (TextPrinterWaitWithDownArrow, text.c: the arrow is
+ * drawn and A / B checked on that frame); the arrow itself shows one frame later. On the engine's pre-state convention (a press on frame p
+ * is tested on the state of frame p-1) that is two frames before the cursor's first visible frame. ROM (Noland, silver): the press is taken
+ * two frames before the engine's old cursor-visible gate (docs/parity-mac/noland-room-scenes.md).
+ */
+export const BATTLE_INTRO_PROMPT_ACCEPT_LEAD = 2;
+
 export function isGeneratedBattleIntroInputReady(
   state: FactoryBattleStartIntroState,
 ): boolean {
@@ -4975,7 +4983,7 @@ export function isGeneratedBattleIntroInputReady(
     "destin",
     state.command.opponentTrainer,
   );
-  return cursorState(t, params.cursorStartTick).visible;
+  return cursorState(t + BATTLE_INTRO_PROMPT_ACCEPT_LEAD, params.cursorStartTick).visible;
 }
 
 /**
