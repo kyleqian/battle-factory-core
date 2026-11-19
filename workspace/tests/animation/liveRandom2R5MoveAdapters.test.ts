@@ -193,16 +193,16 @@ describe("live prep17 Random2 branch coverage (pinned values)", () => {
 describe("live prep17 ordinary routes", () => {
   const SEED_A = 0x1234abcd, SEED_B = 0xfeed0042;
   it.each([
-    ["MUD_SLAP 9/14 POLITOED", 189, 9, 14, 2 as const, 51],
-    ["SAND_ATTACK 3/0 PIDGEOTTO", 28, 3, 0, 3 as const, 58],
+    ["MUD_SLAP 9/14 POLITOED", 189, 9, 14, 2 as const, 51, undefined],
+    ["SAND_ATTACK 3/0 PIDGEOTTO", 28, 3, 0, 3 as const, 58, 1],
   ])("route %s: adapter active every age, surrogate provenance; logical state identical across presentation seeds and Scene ON/OFF",
-    (_name, id, seed, streak, slot, ages) => {
+    (_name, id, seed, streak, slot, ages, lead) => {
       const A = random2Route(seed, "on", [slot], streak, SEED_A), B = random2Route(seed, "on", [slot], streak, SEED_B);
       const off = random2Route(seed, "off", [slot], streak, SEED_A);
       const again = random2Route(seed, "on", [slot], streak, SEED_A);
       const bodies = A.bodies.filter((b) => b.moveId === id && b.attacker === 0);
       expect(bodies).toHaveLength(1);
-      expect(bodies[0]!.ages).toEqual(iu120EffectAges(id, ages));
+      expect(bodies[0]!.ages).toEqual(iu120EffectAges(id, ages, "player", lead)); // lead4: Sand-Attack presents its 1-row script lead before the body
       expect(bodies[0]!.active.every(Boolean)).toBe(true);
       expect(bodies[0]!.provenance).toBe("surrogate");
       expect(B.bodies.filter((b) => b.moveId === id)[0]!.words).not.toEqual(bodies[0]!.words);

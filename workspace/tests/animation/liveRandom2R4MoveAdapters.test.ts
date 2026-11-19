@@ -205,16 +205,16 @@ describe("live prep14 Hail", () => {
 describe("live prep14 ordinary routes", () => {
   const SEED_A = 0x1234abcd, SEED_B = 0xfeed0042;
   it.each([
-    ["RAIN_DANCE 2/21 BLASTOISE", 240, 2, 21, 1 as const, 187],
-    ["WATER_PULSE 7/7 CASTFORM", 352, 7, 7, 1 as const, 160],
+    ["RAIN_DANCE 2/21 BLASTOISE", 240, 2, 21, 1 as const, 187, 2],
+    ["WATER_PULSE 7/7 CASTFORM", 352, 7, 7, 1 as const, 160, undefined],
   ])("route %s: adapter active every age, surrogate provenance; logical state identical across presentation seeds and Scene ON/OFF",
-    (_name, id, seed, streak, slot, ages) => {
+    (_name, id, seed, streak, slot, ages, lead) => {
       const A = random2Route(seed, "on", [slot], streak, SEED_A), B = random2Route(seed, "on", [slot], streak, SEED_B);
       const off = random2Route(seed, "off", [slot], streak, SEED_A);
       const again = random2Route(seed, "on", [slot], streak, SEED_A);
       const bodies = A.bodies.filter((b) => b.moveId === id && b.attacker === 0);
       expect(bodies).toHaveLength(1);
-      expect(bodies[0]!.ages).toEqual(iu120EffectAges(id, ages));
+      expect(bodies[0]!.ages).toEqual(iu120EffectAges(id, ages, "player", lead)); // lead4: Rain Dance presents its 2-row script lead before the body
       expect(bodies[0]!.active.every(Boolean)).toBe(true);
       expect(bodies[0]!.provenance).toBe("surrogate");
       expect(B.bodies.filter((b) => b.moveId === id)[0]!.words).not.toEqual(bodies[0]!.words);
