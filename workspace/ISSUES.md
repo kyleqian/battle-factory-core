@@ -13,6 +13,25 @@ defects are all authorized in the finish-up mission (`docs/factory-finish-scope.
 gameplay / RNG when proved against source; use main-lane ownership and gameplay gates. Historical presentation-only
 exclusions are superseded. Unrelated expansions stay parked.
 
+## #225 — Seven of the twelve Frontier battle transitions are drawn as CIRCLES_MEET (Kyle, 2026-11-19: low priority)
+
+- Every Factory battle (every trainer, not only Noland) plays one of 12 transitions before the battle: `GetSpecialBattleTransition` ->
+  `RANDOM_TRANSITION(sBattleTransitionTable_BattleFrontier)` (battle_setup.c:132-145). The engine draws the right one from the RNG
+  (`selectFrontierTransition`, `src/engine/battleTransition.ts`), but `frontierTransitionRenderKind` (same file) draws only five:
+  LOGO_WAVE, CIRCLES_MEET, CIRCLES_CROSS, CIRCLES_MEET_IN_SEQ, CIRCLES_ASYMMETRIC_SPIRAL_IN_SEQ. The other seven get CIRCLES_MEET's
+  picture and clock: LOGO_WIGGLE, SQUARES, SQUARES_SCROLL (battle_transition.c `Task_FrontierLogoWiggle` / `Task_FrontierSquares` /
+  `Task_FrontierSquaresScroll`), CIRCLES_ASYMMETRIC_SPIRAL, CIRCLES_SYMMETRIC_SPIRAL, CIRCLES_CROSS_IN_SEQ, CIRCLES_SYMMETRIC_SPIRAL_IN_SEQ
+  (battle_transition_frontier.c).
+- Effect: about 7 battles in 12 show the wrong ~3 s animation, and the battle intro starts on CIRCLES_MEET's frame, not the transition's
+  own. Battle RNG and results are not affected (the draw is taken for all 12; drawing cannot advance the RNG).
+- Fix: draw each from source like the five, each with its own start clock and battle-intro handoff (`transitionStartTe` /
+  `brainBattleIntroHandoffTe` in `src/engine/battleRoom.ts` for Noland; the ordinary room's `frontierTransitionRenderKind` call in
+  `src/engine/core.ts`), measured on the ROM per transition, both scenes. Then lift the bound on the Noland room recordings that drew one
+  (`tests/parityMacNolandRoomScenes.test.ts`; `docs/parity-mac/noland-room-scenes.md`: 3 of 10, table rows 6 and 11) and compare them to
+  their end.
+- Priority: low. Kyle 11-19: "Can we queue that up in the box then? ... that's not that important." Sound and the battle rules come first;
+  take it when a run has room. ENGINE_BUILD moves: name it in PROGRESS for the website (it reaches the site only when Kyle asks).
+
 ## #223 — The Factory Head battle has no music on the website (Kyle, 2026-11-18)
 
 - The engine emits `bgm` 471 (`MUS_VS_FRONTIER_BRAIN`, `GetBattleBGM` pokemon.c:6473-6480) for the NOLAND battle, but the
