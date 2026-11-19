@@ -19,7 +19,7 @@ press is taken on (A and B), the sounds, and the RNG draws of every frame.
   takes one, and reported), and compares. The transition the ROM drew is given to the engine (the engine draws the Head's transition from
   its own gameplay stream, see "Not covered"), and the pause before it is the ROM's (it is the time the ROM takes to build Noland's team).
   `--fixture` keeps a recording as a test fixture.
-- The test: `tests/parityMacNolandRoomScenes.test.ts` with `tests/fixtures/noland-room/` (10 recordings, 118 KB). Up to each recording's
+- The test: `tests/parityMacNolandRoomScenes.test.ts` with `tests/fixtures/noland-room/` (10 recordings, 151 KB). Up to each recording's
   compared frame every frame's picture, every gate and every sound must equal the ROM's; the RNG draws of every frame must too, except at the
   battle's start.
 
@@ -64,15 +64,15 @@ press is taken on (A and B), the sounds, and the RNG draws of every frame.
 | Fixture | Record | Presses | Compared through | Result |
 |---|---|---|---|---|
 | silver-first | 0 symbols, nothing heard (challenge 2) | first frame taken | the battle intro's prompt (1,463 frames) | equal |
-| silver-first-slow | same | 13 frames late | 1,239 (transition 11, not drawn) | equal |
-| silver-first-b | same | B on every box, B on the YES/NO | 1,089 (transition 11) | equal |
+| silver-first-slow | same | 13 frames late | 1,622 (transition 3, SQUARES_SCROLL: the draw frame is the one before the BGM's) | equal |
+| silver-first-b | same | B on every box, B on the YES/NO | 1,457 (transition 11, SYMMETRIC_SPIRAL_IN_SEQ) | equal |
 | silver-first-scene-on | same, Scene ON | first frame | 1,463 | equal |
 | silver-heard | 0 symbols, silver heard | first frame | 943 | equal |
 | return-21 | 2 symbols (STREAK, battle 21) | first frame | 943 | equal |
 | gold-first | 1 symbol, silver heard (challenge 5) | first frame | 1,105 (transition 10) | equal |
-| gold-heard | 1 symbol, both heard | first frame | 546 (transition 6, not drawn) | equal |
-| return-42 | 2 symbols (STREAK_LONG, battle 42) | first frame | 546 (transition 6) | equal |
-| gold-heard-scene-on | 1 symbol, both heard, Scene ON | first frame | 546 | equal |
+| gold-heard | 1 symbol, both heard | first frame | 882 (transition 6, ASYMMETRIC_SPIRAL) | equal |
+| return-42 | 2 symbols (STREAK_LONG, battle 42) | first frame | 882 (transition 6) | equal |
+| gold-heard-scene-on | 1 symbol, both heard, Scene ON | first frame | 882 | equal |
 
 Battle 63 runs the same script path as 42 (STREAK_LONG, scripts.inc:117): the lab cannot stage challenge 8's walk-up, so it was not recorded.
 The room does not differ between Scene ON and OFF (two recordings each way agree frame for frame with the same engine).
@@ -146,9 +146,9 @@ deal moved; a scan found 2 for every case) and `tests/randomRoundSoak.test.ts`'s
 - **Battle 84** (both symbols, the fifth return battle): not run. The lab stages challenges 0..7 only and reaching 84 needs four rounds played
   back to back; the engine uses the same rule as 63 (STREAK_LONG).
 
-- **Seven of the twelve Frontier transitions are not drawn by the engine** (LOGO_WIGGLE, SQUARES, SQUARES_SCROLL, CIRCLES_ASYMMETRIC_SPIRAL,
-  CIRCLES_SYMMETRIC_SPIRAL, CIRCLES_CROSS_IN_SEQ, CIRCLES_SYMMETRIC_SPIRAL_IN_SEQ): it shows CIRCLES_MEET instead. Every trainer, not only
-  Noland. 3 of the 10 recordings drew one (6 and 11); they are compared up to it.
+- **The room recordings that drew a transition are compared through it and into the battle intro** (docs/trn225-frontier-transitions.md):
+  to the frame Noland's team first shows differently (the engine rolls his team from its own stream: the party balls, the send-outs). Only
+  LOGO_WIGGLE (id 29) is still not drawn (shown as CIRCLES_MEET); no recording drew it.
 - **The pause before the transition is fixed at 32 frames; the game's varies with Noland's team** (CreateMon builds each Pokemon's moveset,
   about ten frames each: 26, 27, 32 and 37 frames in these recordings).
 - **Noland's team and the transition come from the engine's gameplay RNG, not the room's per-frame cursor.** The game builds his team when

@@ -13,24 +13,15 @@ defects are all authorized in the finish-up mission (`docs/factory-finish-scope.
 gameplay / RNG when proved against source; use main-lane ownership and gameplay gates. Historical presentation-only
 exclusions are superseded. Unrelated expansions stay parked.
 
-## #225 — Seven of the twelve Frontier battle transitions are drawn as CIRCLES_MEET (Kyle, 2026-11-19: low priority)
+## #225 — Frontier battle transitions: open remainder (Kyle, 2026-11-19: low priority)
 
-- Every Factory battle (every trainer, not only Noland) plays one of 12 transitions before the battle: `GetSpecialBattleTransition` ->
-  `RANDOM_TRANSITION(sBattleTransitionTable_BattleFrontier)` (battle_setup.c:132-145). The engine draws the right one from the RNG
-  (`selectFrontierTransition`, `src/engine/battleTransition.ts`), but `frontierTransitionRenderKind` (same file) draws only five:
-  LOGO_WAVE, CIRCLES_MEET, CIRCLES_CROSS, CIRCLES_MEET_IN_SEQ, CIRCLES_ASYMMETRIC_SPIRAL_IN_SEQ. The other seven get CIRCLES_MEET's
-  picture and clock: LOGO_WIGGLE, SQUARES, SQUARES_SCROLL (battle_transition.c `Task_FrontierLogoWiggle` / `Task_FrontierSquares` /
-  `Task_FrontierSquaresScroll`), CIRCLES_ASYMMETRIC_SPIRAL, CIRCLES_SYMMETRIC_SPIRAL, CIRCLES_CROSS_IN_SEQ, CIRCLES_SYMMETRIC_SPIRAL_IN_SEQ
-  (battle_transition_frontier.c).
-- Effect: about 7 battles in 12 show the wrong ~3 s animation, and the battle intro starts on CIRCLES_MEET's frame, not the transition's
-  own. Battle RNG and results are not affected (the draw is taken for all 12; drawing cannot advance the RNG).
-- Fix: draw each from source like the five, each with its own start clock and battle-intro handoff (`transitionStartTe` /
-  `brainBattleIntroHandoffTe` in `src/engine/battleRoom.ts` for Noland; the ordinary room's `frontierTransitionRenderKind` call in
-  `src/engine/core.ts`), measured on the ROM per transition, both scenes. Then lift the bound on the Noland room recordings that drew one
-  (`tests/parityMacNolandRoomScenes.test.ts`; `docs/parity-mac/noland-room-scenes.md`: 3 of 10, table rows 6 and 11) and compare them to
-  their end.
-- Priority: low. Kyle 11-19: "Can we queue that up in the box then? ... that's not that important." Sound and the battle rules come first;
-  take it when a run has room. ENGINE_BUILD moves: name it in PROGRESS for the website (it reaches the site only when Kyle asks).
+Six of the seven undrawn transitions are drawn from source and ROM-checked in both scenes (`docs/trn225-frontier-transitions.md`); the Noland
+room recordings that drew one are compared to the battle intro. Open:
+- LOGO_WIGGLE (id 29) is still drawn as CIRCLES_MEET (163 bad frames of 1,290 on the lab probe).
+- LOGO_WAVE (id 30) has an older mismatch (217 bad frames; its handoff is 209 on the ROM's clock).
+- The ordinary trainer's room runs the new pictures on the engine's existing per-kind clock and handoff (`src/engine/core.ts`): unmeasured, no
+  ordinary-room ROM harness; changing the handoff could move the RNG advance.
+- SQUARES_SCROLL's direction depends on the BGM lag after the draw (0 or 1 frame), unknown to the engine; production assumes 0.
 
 ## #223 — Battle messages ending in `\p` / `\l`: open remainder of btn1 (2026-11-19)
 
