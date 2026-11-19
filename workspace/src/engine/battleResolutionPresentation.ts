@@ -1071,9 +1071,16 @@ const PRE_MOVE_STATUS_ANIMATION_TIMING = Object.freeze({
  * sta5 step 2 (docs/aud249-general-anim-sounds.md, ROM windows aud242b Flatter / aud242f Swagger): a stat print whose script goes on to
  * inflict a status move effect (`printfromtable; waitmessage LONG; jumpifability; jumpifsideaffecting; setmoveeffect; seteffectprimary`,
  * which runs `chosenstatus2animation`) reaches the launch 6 rows after the message ends: waitmessage's completing row, the four script
- * rows, and the launch instruction's own row. Scene ON only: the Scene OFF census keeps its commands.
+ * rows, and the launch instruction's own row. Scene OFF (sta6m, ROM windows sta6m-{flatter,swagger}-off): the script rows are the same but
+ * the animation is skipped, so the next command is the confusion print itself, three rows after the `chosenstatus2animation` row instead of the
+ * launch's one: 7 rows (Flatter print -> print 171 -> 268 = 97, Swagger 185 -> 289 = 104; the app's 90 / 97 was 7 short).
  */
 export const MOVE_INFLICTED_STATUS_ANIMATION_LEAD_ROWS = 6;
+export const MOVE_INFLICTED_STATUS_SCENE_OFF_LEAD_ROWS = MOVE_INFLICTED_STATUS_ANIMATION_LEAD_ROWS + 1;
+const MOVE_INFLICTED_STATUS_SCENE_OFF_TIMING = Object.freeze({
+  minimumFrames: 0,
+  holdFrames: WAITMESSAGE_LONG_HOLD_FRAMES + MOVE_INFLICTED_STATUS_SCENE_OFF_LEAD_ROWS,
+} as const);
 const MOVE_INFLICTED_STATUS_ANIMATION_TIMING = Object.freeze({
   minimumFrames: 0,
   holdFrames: WAITMESSAGE_LONG_HOLD_FRAMES + MOVE_INFLICTED_STATUS_ANIMATION_LEAD_ROWS,
@@ -1099,6 +1106,7 @@ function isMoveInflictedStatusLaunch(programCounter: number): boolean {
 function messageTimingFromSourceProvenance(
   event: BattleKernelSemanticEvent,
   sceneOnMoveAnimationSeen: boolean,
+  sceneOff: boolean,
 ): BattleMessageTiming | null {
   const programCounter = event.provenance?.programCounter;
   if (programCounter === undefined || programCounter < 0) return null;
@@ -1110,7 +1118,8 @@ function messageTimingFromSourceProvenance(
   ) {
     const launch = BATTLE_SCRIPT_PROGRAM.instructions[programCounter + 2]?.opcodeName;
     if (launch === "B_SCR_OP_STATUS2ANIMATION" || launch === "B_SCR_OP_STATUSANIMATION") return PRE_MOVE_STATUS_ANIMATION_TIMING;
-    return sceneOnMoveAnimationSeen && isMoveInflictedStatusLaunch(programCounter) ? MOVE_INFLICTED_STATUS_ANIMATION_TIMING : WAITMESSAGE_LONG_TIMING;
+    if (!isMoveInflictedStatusLaunch(programCounter)) return WAITMESSAGE_LONG_TIMING;
+    return sceneOff ? MOVE_INFLICTED_STATUS_SCENE_OFF_TIMING : sceneOnMoveAnimationSeen ? MOVE_INFLICTED_STATUS_ANIMATION_TIMING : WAITMESSAGE_LONG_TIMING;
   }
   return null;
 }
@@ -1876,13 +1885,15 @@ function instantHpDropTiming(events: readonly BattleKernelSemanticEvent[], healt
  * other `datahpupdate; printfromtable`, Leech Seed's turn-end drain, has no ROM window here).
  */
 const HP_PRINT_TAIL_FRAMES = 3;
+/** hpf5 S1 (hpf4m, both scenes): E 27 -> next exec +29, but cost bars E >= 28 are ROM-exact at tail 3 (sub183 dense windows, E 44 -> +47), so the tail stays 3 and only the 28 floor goes (a short bar was E 27 -> 31, now 30 = ROM + 1). */
+const SUBSTITUTE_COST_HP_TIMING = Object.freeze({ minimumFrames: 0, tailFrames: HP_PRINT_TAIL_FRAMES } as const);
 function hpPrintTailTiming(event: BattleKernelSemanticEvent, events?: readonly BattleKernelSemanticEvent[], index?: number): BattleHpTiming {
   const programCounter = event.provenance?.programCounter;
   if (programCounter === undefined) return HP_TIMING;
   const at = (offset: number) => BATTLE_SCRIPT_PROGRAM.instructions[programCounter + offset]?.opcodeName;
   return at(0) === "B_SCR_OP_DATAHPUPDATE" && at(1) === "B_SCR_OP_PRINTFROMTABLE" && at(-1) === "B_SCR_OP_HEALTHBARUPDATE"
     && at(-2) === "B_SCR_OP_WAITANIMATION" && at(-3) === "B_SCR_OP_ATTACKANIMATION"
-    ? Object.freeze({ minimumFrames: 28, tailFrames: HP_PRINT_TAIL_FRAMES } as const)
+    ? SUBSTITUTE_COST_HP_TIMING
     : at(0) === "B_SCR_OP_DATAHPUPDATE" && at(-1) === "B_SCR_OP_HEALTHBARUPDATE" && at(-2) === "B_SCR_OP_ORWORD"
       && at(-3) === "B_SCR_OP_WAITMESSAGE" && at(-4) === "B_SCR_OP_PRINTSTRING"
       ? (at(1) === "B_SCR_OP_RETURN" && events !== undefined && index !== undefined && healContinuesMoveScript(events, index) ? SHELL_BELL_HP_TIMING : ITEM_HEAL_HP_TIMING) : HP_TIMING;
@@ -2009,7 +2020,31 @@ function hpFaintNext(events: readonly BattleKernelSemanticEvent[], index: number
   return programCounter !== undefined && BATTLE_SCRIPT_PROGRAM.instructions[programCounter]?.opcodeName === "B_SCR_OP_DATAHPUPDATE"
     && events[index + 1]?.payload.kind === "play-faint-cry";
 }
+/**
+ * hpf5 (docs/hpd1-hp-hold.md "hpf5", measured in hpf4m): the end-of-turn damage ticks. `BattleScript_DoTurnDmg` (poison / toxic / burn / Curse / Nightmare /
+ * wrap family) and `BattleScript_DamagingWeatherLoop` (sandstorm / hail) run `healthbarupdate; datahpupdate; tryfaintmon` with no 28-row floor: the ROM's
+ * next controller exec after a tick bar is E + 8 (E = bar frames + 1 = the hp command; the 8 rows are TURN_END_TIMING) for every bar length E = 4..27.
+ * T1: the tick is the bar's own frames. T4: a tick that faints starts the faint chain at E + 2. T3: a weather tick's next print sits 10 rows after the bar
+ * (a following battler's damage message), the last battler's tick leaves through `cbf..cc8` 4 rows later than the status ticks before the turn end's 8.
+ */
+const TICK_HP_TIMING = Object.freeze({ minimumFrames: 0 } as const);
+const TICK_FAINT_TAIL_FRAMES = 2;
+const WEATHER_TICK_MESSAGE_TAIL_FRAMES = 10;
+const WEATHER_TICK_LAST_TAIL_FRAMES = 4;
+const WRAP_SECONDARY_TAIL_FRAMES = 7;
+const TURN_DAMAGE_PC = datahpupdatePcAfter("BattleScript_DoTurnDmg");
+const WEATHER_DAMAGE_PC = datahpupdatePcAfter("BattleScript_DamagingWeatherLoop");
+/** hpf5 T2: `BattleScript_MoveEffectWrap`'s `printfromtable` is the wrap hit's secondary message (E + 7 after the hit's bar, E 7..16 by move). */
+const WRAP_SECONDARY_PC = BATTLE_SCRIPT_PROGRAM.labelEntries["BattleScript_MoveEffectWrap"]!.programCounter;
+type HpTick = "turn-damage" | "weather";
+function hpTickKind(event: BattleKernelSemanticEvent): HpTick | null {
+  const programCounter = event.provenance?.programCounter;
+  return programCounter === TURN_DAMAGE_PC ? "turn-damage" : programCounter === WEATHER_DAMAGE_PC ? "weather" : null;
+}
 interface HpLeadRows {
+  readonly tick: HpTick | null;
+  /** The next kernel event is the wrap hit's secondary message (hpf5 T2). */
+  readonly wrapSecondary: boolean;
   readonly moveEndRows: number | null; readonly messageRows: number | null; readonly faintNext: boolean;
   /** The print after `datahpupdate` is the hit's own effect message (critmessage / resultmessage). */
   readonly hitEffectMessage: boolean;
@@ -2026,6 +2061,23 @@ function applyHpHitTails(
     const leads = command.type === "hp" ? leadRows.get(command.eventSequence) : undefined;
     if (command.type !== "hp" || leads === undefined || command.timing !== HP_TIMING) continue;
     const rest = commands.slice(index + 1);
+    if (leads.tick !== null && rest[0]?.type === "faint" && leads.faintNext) {
+      commands[index] = Object.freeze({ ...command, timing: Object.freeze({ minimumFrames: 0, tailFrames: TICK_FAINT_TAIL_FRAMES }) });
+      continue;
+    }
+    if (leads.tick === "turn-damage") {
+      commands[index] = Object.freeze({ ...command, timing: TICK_HP_TIMING });
+      continue;
+    }
+    if (leads.tick === "weather") {
+      const tailFrames = rest[0]?.type === "message" ? WEATHER_TICK_MESSAGE_TAIL_FRAMES : WEATHER_TICK_LAST_TAIL_FRAMES;
+      commands[index] = Object.freeze({ ...command, timing: Object.freeze({ minimumFrames: 0, tailFrames }) });
+      continue;
+    }
+    if (leads.wrapSecondary && rest[0]?.type === "message") {
+      commands[index] = Object.freeze({ ...command, timing: Object.freeze({ minimumFrames: 0, tailFrames: WRAP_SECONDARY_TAIL_FRAMES }) });
+      continue;
+    }
     const transition = rest[0]?.type === "move-animation" && rest[1]?.type === "sprite-visibility";
     const endsTurn = rest.length > 0 && rest.every((c) => c.type === "sprite-visibility" || c.type === "turn-end");
     const previous = commands[index - 1];
@@ -5061,7 +5113,7 @@ export function projectBattleResolutionCommands(
             : payload.messageId === "STRINGID_SWITCHINMON"
               ? SWITCH_IN_MESSAGE_TIMING
               : (() => {
-                const base = messageTimingFromSourceProvenance(event, sceneOnMoveAnimationSeen)
+                const base = messageTimingFromSourceProvenance(event, sceneOnMoveAnimationSeen, (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0)
                   ?? (WAITMESSAGE_LONG_MESSAGE_IDS.has(payload.messageId)
                   ? WAITMESSAGE_LONG_TIMING
                   : MESSAGE_TIMING);
@@ -5333,7 +5385,7 @@ export function projectBattleResolutionCommands(
       const messageRows = drainRole === null ? hpMessageLeadRows(events, index) : null;
       const faintNext = drainRole === null && hpFaintNext(events, index);
       const hitEffectMessage = HP_HIT_EFFECT_OPCODES.has(events[index + 1]?.provenance?.opcodeName ?? "");
-      hpLeadRows.set(health.eventSequence, { moveEndRows, messageRows, faintNext, hitEffectMessage, barExecution: health.instructionExecution });
+      hpLeadRows.set(health.eventSequence, { tick: hpTickKind(event), wrapSecondary: events[index + 1]?.provenance?.programCounter === WRAP_SECONDARY_PC, moveEndRows, messageRows, faintNext, hitEffectMessage, barExecution: health.instructionExecution });
       commands.push(Object.freeze({
         type: "hp",
         eventSequence: health.eventSequence,

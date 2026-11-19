@@ -897,6 +897,28 @@ Hail is the same script as sandstorm (`BattleScript_DamagingWeatherContinues`, s
 
 Not done: the brief's "npm test green" line was overridden by this step (no tests were run, nothing under `src/` or `tests/` changed, `tools/compare/appTrace.ts` was patched during measurement and reverted); `PROGRESS.md` / `ISSUES.md` untouched.
 
+## hpf5: the hpf4m rules landed (T1 / T4 / T3 / T2 / S1, both scenes; sta6m is in aud249)
+
+`src/engine/battleResolutionPresentation.ts` only (`applyHpHitTails` + `HpLeadRows`, plus `appTrace.ts` stages `hpf4m-<case>-<on|off>` for the shape comparison). Logical outcomes, RNG and kernel event order are untouched: census 0..199 in both scenes has an identical `eventsDigest` / error / command-type sequence on every seed; only `hp` commands change (and, in Scene OFF, the 22 Flatter / Swagger messages of sta6m). One commit per group.
+
+| group | rule landed | commands changed (census 0..199, vs the previous group; ON = OFF) |
+|---|---|---|
+| T1 `081574f4a` | end-of-turn tick hp (`BattleScript_DoTurnDmg`'s `datahpupdate`: poison / toxic / burn / Curse / Nightmare / wrap tick) is `{minimumFrames: 0}`; the 8 turn-end rows stay `TURN_END_TIMING` (ROM next exec = E + 8) | 357 / -3280 frames |
+| T4 `55575eb4c` | a tick whose next command is the faint chain with `faintNext` is `{0, tailFrames 2}` (faint at E + 2); the `hit` / `battler === 0` guards no longer apply to the tick path | 43 / +86 |
+| T3 `754d30a72` | sandstorm / hail tick (`BattleScript_DamagingWeatherLoop`): tail 10 before the next battler's message (E + 10), tail 4 for the last tick, which keeps the 8 turn-end rows (E + 12) | 154 / -1925 |
+| T2 `3d62466aa` | the wrap-family hit whose next kernel event is `BattleScript_MoveEffectWrap`'s printfromtable (secondary message): `{0, tailFrames 7}` (E + 7) | 13 / -149 |
+| S1 `cbcd44e1b`, corrected `0f4d14e3b` | **Deviation from the hpf4m proposal (tail 2).** Tail 2 was landed first and moved 11 census Substitute-cost bars (all E >= 28) one frame off the ROM; the sub183 dense windows (tools/integration/fixtures/sub183, E 44 -> print at +47, 291 / 291 rows, 4 windows) are exact at tail 3, as hpf4m itself notes ("cost bars E >= 28 are exact"). Landed: `{minimumFrames: 0, tailFrames: 3}` (`SUBSTITUTE_COST_HP_TIMING`): long bars unchanged, the short bar E 27 -> +29 now 30 (ROM + 1, was 31) | 0 frames on the long cost bars (timing object only); 2 short bars change: -5 / -7 frames (seeds 177 / 26: the 28 floor was binding) |
+
+Net per scene at the tip (`443d2f87b`, census 0..199 vs `55b49c3f1`, both scenes, 0 `eventsDigest` / error / type-sequence differences): 543 hp commands, -5280 frames (ON 81 / OFF 92 of 200 battles changed); Scene OFF also 22 Flatter / Swagger messages, +154 (sta6m); Scene ON 0 messages. Sound census (ON): sequences identical on all 200 seeds, frames moved on 74; T1 sound (`soundCensusDelta.py --t1`): extra 0 / missing 0 / unclassified {} in both scenes (non-move exact 21973 ON / 901 OFF, same as base).
+
+**Not changed**: S2 (btn1), Curse cost, the confusion self-hit, Leftovers (hie4), the 28 floor of `HP_TIMING` itself.
+
+### Re-pins (all by the rule; none moves a logical outcome)
+- `sub183SubstituteTurnTiming` (4 tests): kept at tail 3 (no re-pin) after the S1 correction; they were the test that showed tail 2 was wrong.
+- `aud252EndTurnSounds` weather SE rows (ROM minus ours): `[-8, -2, -10]` -> `[-8, -2, 1]` (T3: the last tick's tail 4 + turn-end 8 replaces the 28 floor; the third row 10 -> 1 toward the ROM).
+- `aud248StatChangeSounds` overheat-player residual 17 -> 9 and `aud252LossBallOpen` seed 1914 `[0, 1, -7 x6]` -> `[0, 9, 1 x6]`: **pre-existing, red on the lead3 base (`55b49c3f1`) before hpf5** (identical commands base vs head for overheat-player; the 1914 rows are the same on base); re-pinned to the base value (overheat 8 frames toward the ROM; 1914 rows 3..8 toward the ROM, the select row away).
+- `randomRoundSoak` (the exploring / winning policies' presses land on new phases): seed 21 `41_151` / renderCalls 2_898 -> `41_066` / 2_900 (same battle 7, turn 3, end state); M-B (c) full seed 0 `39365` / battle 2 turn 24 / depth 1 -> `18_681` / battle 1 turn 23 / depth 0 (still roundLost), seed 1 `92558` / turn 27 -> `95_266` / turn 29 (same battle 5 / depth 4); the Baton Pass halt pin seed 4 -> seed 7 (batonPassSearch 0:48 hits 7, 8, 10, 15, 16; commits 2, first 31951, halt 32775 on MAWILE); the carry >= 14 pin seed 13 -> seed 2 (winning, max-rounds 3, seeds 0..39: 2, 14, 17, 19).
+
 ## ice950m: why seed 950's Ice Ball is the last static command of the census (measurement only, `src/` / `tests/` unchanged)
 
 Question (docs/aud251 "c1k"): census 0..999 Scene ON leaves one static-field command, `static:other:unattributed-gate-301`, seed 950, Ice Ball. Why does the live adapter decline it, and what is the fix. Measured on `c56ae9e19` (tree `bf121f62e`), Scene ON, read / measure only: temporary `console.error` patches in `liveMoveAnimation.ts`, `factoryRoundBattleOrchestrator.ts`, `spriteOrderEventTransform.ts`, each reverted (`git status` clean, `git diff` empty). Evidence under `/tmp/ice950m/` (`s950.jsonl` = unpatched HEAD, `s950q.jsonl` = the attribution fix below).

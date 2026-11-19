@@ -461,6 +461,8 @@ Rule measured on the three hpd8 labs and the four status labs: the first action'
 
 Question from sta5 step 2: the +6 rows (`MOVE_INFLICTED_STATUS_ANIMATION_LEAD_ROWS`, `src/engine/battleResolutionPresentation.ts` ~1059-1100) are gated on `sceneOnMoveAnimationSeen && isMoveInflictedStatusLaunch(programCounter)`. Do they apply in Scene OFF, and how much would ungating change?
 
+**Landed by hpf5 (2026-11-19, `a3d899ea5`)**: Scene OFF now gets 7 rows (`MOVE_INFLICTED_STATUS_SCENE_OFF_LEAD_ROWS`, the print -> print gaps 97 / 104 of the ROM); Scene ON stays at 6. Gate: `BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS` (OFF) instead of `sceneOnMoveAnimationSeen`. Census 0..199: OFF 22 Flatter / Swagger messages, +154 frames; ON 0 changes.
+
 **Labs / stages / traces (kept)**: `tools/battle-lab/sta6m-{flatter,swagger}-{off,on}.json` (copies of the aud242b / aud242f labs, profile switched), app stages `sta6m-flatter-player-off` / `sta6m-swagger-player-off` (`tools/compare/appTrace.ts`), compare traces `tools/compare/traces/sta6m-{flatter,swagger}-off.json` (520 frames). Probes: `tools/integration/hpd2Probe.py`; app rows: `tools/integration/hpd4Cmds.ts`.
 
 ### ROM script rows (hpd2 probe, frames from the lab start)
