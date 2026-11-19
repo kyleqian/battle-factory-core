@@ -1335,7 +1335,11 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
         && state.battleResolutionPresentation?.lifecycle.phase !== "next-command-handoff";
       budget += 1
     ) {
-      state = advanceFactoryRoundBattleResolution(state);
+      // btn1: the Taunt `\\p` message waits for a new A press.
+      state = advanceFactoryRoundBattleResolution(
+        state,
+        state.battleResolutionPresentation?.lifecycle.phase === "awaiting-message-dismiss" && budget % 2 === 0 ? new Set(["A"]) : undefined,
+      );
     }
     expect(state.battlePresentationBoundaries?.[1]).toMatchObject({
       partyIndex: active.partyIndex,

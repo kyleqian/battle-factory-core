@@ -50,9 +50,11 @@ interface WonLobby {
 // fix 51 (docs/parity-mac/noland-room-scenes.md: the won Lobby's clock starts at the Lobby's map load, ~100 frames later than before, and its award gates are the ROM's) moved the deal again: 17's OFF continuation and 0's loss no longer play out. A scan (win 1..12 on the win / retire cases, loss 1..2 on the loss case) found 2 passing every case in both roles, so all three use 2 (the loss case plays on past the second challenge to the first loss).
 // merge of the box's 2026-11-18 run (to cbd64bb34) with the Mac's fixes 44-51: 14's (and fix 51's 2's) continuation loses; a scan of 0..30 with the seed
 // in all three roles found only 0 passing every case (4 and 19 fail one case, 2 / 14 / 23 the continuation), so all three use 0.
-const WIN_TWO_SEED = 0;
-const RETIRE_SEED = 0;
-const WIN_THEN_LOSE_SEED = 0;
+// btn1 (battle strings with a \p / \l gate wait for a new A / B press: every soak trajectory shifts): 0 lost the Scene OFF first round; a scan of 1..15 with the seed in all three roles
+// found only 2 passing every case (15 / 15; 4 and 13 fail 2 cases, 10 and 14 fail 8), so all three use 2.
+const WIN_TWO_SEED = 2;
+const RETIRE_SEED = 2;
+const WIN_THEN_LOSE_SEED = 2;
 
 function newPlayer(seed: number): RandomPlayer {
   const player = new RandomPlayer(new Rng(seed), new ActionLog(false), "winning");

@@ -280,11 +280,9 @@ describe("presentation-string ISSUES #72 batch 2 -- Intimidate switch-in loop", 
     expect(messageIds).toContain("STRINGID_PREVENTEDFROMWORKING");
     // EKANS (the switched-in Intimidate holder), not the pre-switch
     // `field.opponent` (WOBBUFFET) -- ISSUES #115.
-    expect(lines).toContainEqual([
-      `${field.player.name}’s CLEAR BODY`,
-      `prevented Foe EKANS’s`,
-      "INTIMIDATE from working!",
-    ]);
+    // btn1: the `\\l` scroll splits the string into the lines typed before the gate and the scrolled pair.
+    expect(lines).toContainEqual([`${field.player.name}’s CLEAR BODY`, `prevented Foe EKANS’s`]);
+    expect(lines).toContainEqual([`prevented Foe EKANS’s`, "INTIMIDATE from working!"]);
   });
 });
 
@@ -385,11 +383,8 @@ describe("presentation-string ISSUES #72 batch 2 -- ability-blocks-the-move's-ow
     });
     const { messageIds, lines, field, transition } = runFullTurn(config, AT(0), AT(0));
     expect(messageIds).toContain("STRINGID_PKMNPREVENTSUSAGE");
-    expect(lines).toContainEqual([
-      `${field.player.name}’s DAMP`,
-      `prevents Foe ${field.opponent.name}`,
-      "from using SELFDESTRUCT!",
-    ]);
+    expect(lines).toContainEqual([`${field.player.name}’s DAMP`, `prevents Foe ${field.opponent.name}`]);
+    expect(lines).toContainEqual([`prevents Foe ${field.opponent.name}`, "from using SELFDESTRUCT!"]);
     const dampEvents = transition.events.filter((event) =>
       event.payload.kind === "message" && event.payload.messageId === "STRINGID_PKMNPREVENTSUSAGE");
     expect(dampEvents).toHaveLength(1);
@@ -405,11 +400,8 @@ describe("presentation-string ISSUES #72 batch 2 -- ability-blocks-the-move's-ow
     });
     const { messageIds, lines, field, transition } = runFullTurn(config, AT(1), AT(1));
     expect(messageIds).toContain("STRINGID_PKMNPREVENTSUSAGE");
-    expect(lines).toContainEqual([
-      `${field.player.name}’s DAMP`,
-      `prevents ${field.player.name}`,
-      "from using SELFDESTRUCT!",
-    ]);
+    expect(lines).toContainEqual([`${field.player.name}’s DAMP`, `prevents ${field.player.name}`]);
+    expect(lines).toContainEqual([`prevents ${field.player.name}`, "from using SELFDESTRUCT!"]);
     const dampEvents = transition.events.filter((event) =>
       event.payload.kind === "message" && event.payload.messageId === "STRINGID_PKMNPREVENTSUSAGE");
     expect(dampEvents).toHaveLength(1);

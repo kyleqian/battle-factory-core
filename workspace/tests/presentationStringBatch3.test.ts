@@ -295,11 +295,9 @@ describe("presentation-string batch 3 (ISSUES #70 final 12 ids)", () => {
       "STRINGID_PKMNSXPREVENTSYSZ",
     );
     expect(messageIds).toContain("STRINGID_PKMNSXPREVENTSYSZ");
-    expect(lines).toContainEqual([
-      `${field.player.name}’s IMMUNITY`,
-      `prevents Foe ${field.opponent.name}’s`,
-      "SYNCHRONIZE from working!",
-    ]);
+    // btn1: the `\\l` scroll splits the string into the lines typed before the gate and the scrolled pair.
+    expect(lines).toContainEqual([`${field.player.name}’s IMMUNITY`, `prevents Foe ${field.opponent.name}’s`]);
+    expect(lines).toContainEqual([`prevents Foe ${field.opponent.name}’s`, "SYNCHRONIZE from working!"]);
   });
 
   it("row 8: STRINGID_PKMNSXHADNOEFFECTONY -- Synchronize mirrors Toxic back onto a Poison-type attacker", () => {

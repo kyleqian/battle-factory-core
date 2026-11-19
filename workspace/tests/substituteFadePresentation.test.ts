@@ -159,8 +159,8 @@ describe("ordinary route: a substitute breaks", () => {
     expect(on.requests.map((q) => `${q.moveId}:${q.attacker}`).slice(0, 2)).toEqual(["164:0", "188:1"]);
     expect(seen.fadeRows).toBe(106);
     expect(seen.effectRows).toBe(106);
-    // The queue presents STRINGID_SUBSTITUTEDMG as an automatic message (the ROM's frozen cursor is outside the fade's claim).
-    expect(seen.prevType).toEqual(["message:automatic"]);
+    // The queue presents STRINGID_SUBSTITUTEDMG as a button piece (btn1: its `\\p` waits for a new A / B, subp1m); the ROM's frozen cursor is outside the fade's claim.
+    expect(seen.prevType).toEqual(["message:button"]);
     expect(seen.nextType).toEqual(["message:0"]);
     expect(on.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");
     expect(on.state.battleCommandPresentation?.field.player.substituteDoll).toBeUndefined();

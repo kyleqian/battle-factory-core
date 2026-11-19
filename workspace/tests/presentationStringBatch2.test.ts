@@ -394,12 +394,9 @@ describe("presentation-string batch 2 (ISSUES #70 remaining rows)", () => {
       "STRINGID_PKMNOBTAINEDXYOBTAINEDZ",
     );
     expect(messageIds).toContain("STRINGID_PKMNOBTAINEDXYOBTAINEDZ");
-    expect(lines).toContainEqual([
-      `${field.player.name} obtained`,
-      "KING'S ROCK.",
-      `Foe ${field.opponent.name} obtained`,
-      "ORAN BERRY.",
-    ]);
+    // btn1: the mid-string `\\p` splits the string into two pages, each its own command piece.
+    expect(lines).toContainEqual([`${field.player.name} obtained`, "KING'S ROCK."]);
+    expect(lines).toContainEqual([`Foe ${field.opponent.name} obtained`, "ORAN BERRY."]);
   });
 
   it("row 41: STRINGID_PKMNRAISEDFIREPOWERWITH -- Flash Fire's first activation", () => {

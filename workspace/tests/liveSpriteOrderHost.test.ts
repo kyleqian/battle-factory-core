@@ -47,7 +47,9 @@ const scanRoute = (seed: number, slots: readonly (0 | 1 | 2 | 3)[]) => {
 // shorter in bodies): compared 898 -> 840, hostKnown 798 -> 740, laterAfter 72 -> 65; declines 0 and 0 mismatches unchanged.
 // hie1: + the sweep's 6 Scene ON held-item-effect command edges (5 with a known host), each equal to the pure transform (0 mismatches);
 // without them compared / hostKnown stay 840 / 740, declines and laterAfter unchanged.
-const SWEEP_PIN = { compared: 846, hostKnown: 745, declines: 0, laterAfter: 65 };
+// btn1: one sweep battle's gated message (a `\\p` / `\\l` string split into prompt pieces) adds one known command edge, equal to the pure
+// transform (0 mismatches): compared / hostKnown 846 / 745 -> 847 / 746, declines and laterAfter unchanged.
+const SWEEP_PIN = { compared: 847, hostKnown: 746, declines: 0, laterAfter: 65 };
 const bodies = (run: Replay) => run.commands.filter(row => row.type === "move-animation");
 
 function expectRulesEqual(on: Replay, off: Replay): void {

@@ -651,7 +651,10 @@ describe("random round soak driver (green milestone pin)", () => {
     //
     // hpf1 (floor-free hit -> message / faint-chain / turn-end hp commands; the exploring presses land on new phases): seed 28 no longer commits Baton Pass.
     // Re-scanned full-policy seeds 0..47 (tools/soak/batonPassSearch.ts --seeds 0:48 --parallel 8): hits 4, 6, 7, 11, 12, 15, 17, 29, all candidates; seed 4 is the lowest.
-    const result = runSeed(4, {
+    //
+    // btn1 (battle strings with a `\p` / `\l` gate wait for a new A / B press; the exploring policy's presses land on new phases): seed 4 no longer commits Baton Pass.
+    // Re-scanned full-policy seeds 0..29 (tools/soak/batonPassSearch.ts --seeds 0:30 --parallel 3): only 12 is a candidate (Baton Pass commits 4, first commit 32465, halt 32505 on MAWILE in battleIndex 0, one Lobby new challenge).
+    const result = runSeed(12, {
       maxFrames: 80_000,
       renderEvery: 0,
       coverage: observer as never,
@@ -997,12 +1000,13 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // hpd5 (measured on the hpd4 tip f40209793; the floor-free foe-hit hold changes the exploring policy's press phases): 21985 / turn 35 -> 28708 / turn 46; same battle 1 / depth 0 / roundLost.
       // hpf1: 28708 / turn 46 -> 56022 / turn 15 (battle 1 / depth 0 -> battle 3 / depth 2; the exploring presses land on new phases); still roundLost.
       // hpf2: 56022 / turn 15 -> 92558 / turn 27 (battle 3 / depth 2 -> battle 5 / depth 4; the exploring presses land on new phases); still roundLost.
-      frames: 92558,
+      // btn1 (gated battle strings wait for A / B; the exploring policy presses B at 6%): 92558 / turn 27 -> 95264 / turn 29; same battle 5 / depth 4 / roundLost (seed 0 is unmoved).
+      frames: 95264,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 4,
       battle: 5,
-      turn: 27,
+      turn: 29,
     });
   });
 
@@ -1576,7 +1580,9 @@ describe("ISSUES #104 (driver): continuous-play outcome semantics retuned -- OK 
     // merge of the box's 2026-11-18 run with the Mac's fixes 44-51: seed 0 now carries 7; re-scanned seeds 0..39 under the same options: seeds 13, 14 and 19 chain two round wins (carry 14), so the lowest (13) is pinned.
     // pau4 (the battle-start entry scripts presented, so the soak's random presses land differently): seed 13 now carries 7; re-scanned seeds 0..39 under the same options
     // (tools/soak/randomRoundSoak.ts --policy winning --max-rounds 3 --render-every 0): seeds 4, 14 and 19 chain two round wins (carry 14), so the lowest (4) is pinned.
-    const result = runSeed(4, {
+    // btn1 (gated battle strings wait for a new A / B press): seed 4 now carries 7; re-scanned seeds 0..29 under the same options (tools/soak/randomRoundSoak.ts --policy winning --max-rounds 3 --render-every 0 --seeds 0:30 --parallel 3):
+    // only seed 13 chains two round wins (carry 14), so it is pinned.
+    const result = runSeed(13, {
       policy: "winning",
       maxRounds: 3,
       renderEvery: 0,
