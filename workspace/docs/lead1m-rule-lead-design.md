@@ -398,3 +398,43 @@ Gates per batch: `npm run typecheck`; every test importing `liveMoveAnimation` /
 | 37 | Thrash | 1 | 100.0 | - | 8 | - | - | A? |
 | 16 | Gust | 1 | 100.0 | - | 5 | - | - | A? |
 | 12 | Guillotine | 1 | 100.0 | - | 7 | - | - | A? |
+
+## lead2: B0 + B1 landed (2026-11-19, branch worker/integration-20261119-133344, base 0d2973b40)
+
+**B0 = 65cd7edd9** (no behaviour change). `BODY_LEAD_AUDITED_MOVE_IDS` is gone. `battleResolutionPresentation.ts` holds one table `BODY_LEAD_RULE: id -> "lead-table" | "shape-a" | "status-tail" | "lse2"` (built from the hpd4 / hpd8 / sta5 / lse2 sets: the same 39 ids) and the predicates `bodyLeadRuleApplies`, `bodyHitTailRuleApplies` (shape-a), `bodyLeadTailCompositionApplies` (shape-a with lead > 0: the render effect holds the age at `live - 1` through the tail), `bodyStatusTailRuleApplies`, `bodyLse2RuleApplies`. `moveAnimationScriptLeadTiming`, the render gates, `moveAnimSounds.statusAnimationScriptAge` and `tools/integration/phy1mRank.ts` call the predicates. Membership stays a measured table (the ROM gap / s are per body); the table is the one place a batch widens. `tests/helpers/iu120Rows.ts` computes lead and tail from one `IU120_BODY_RULES` map (`{lead?, defaultLead?, tail}`); `HPD4_BODY_LEAD_ROWS` is derived (30 entries, identical).
+
+| B0 proof | result |
+|---|---|
+| census Scene ON 0..199 vs 0d2973b40 | 200 battles / 62,104 commands identical (eventsDigest and every command field) |
+| census Scene OFF 0..99 | 100 battles / 30,730 commands identical |
+| sound digest ON | identical |
+| `npm run typecheck` | 0 |
+| the 71 `iu120Rows` importers | 997 tests green |
+
+**B1 = 6144d5a00** (tree ad075190dc0249642a4ab7504b15d6328ae446c5). `LEAD2_SHAPE_A_MOVE_IDS = {24, 196, 352, 263, 25, 68, 4, 72, 3}` joins the `shape-a` class: lead (the instruction counter) + `T = 6 - pre - post` as for the hpd8 bodies. Ids: Double Kick 24 (hit 1), Icy Wind 196, Water Pulse 352, Facade 263, Mega Kick 25, Counter 68, Comet Punch 4 (hit 1), Mega Drain 72, Doubleslap 3 (hit 1). Multi-hit hits 2+ have no used-print anchor and get no lead and no tail (left for B6).
+
+ROM windows (`npm run compare -- tools/compare/traces/lead2-<x>-on.json --summary`, new labs `tools/battle-lab/lead2-*-player-on.json`, Scene ON, matched frames of 1023):
+
+| body | before | after |
+|---|---|---|
+| Icy Wind | 73 | 357 |
+| Facade | 22 | 480 |
+| Mega Drain | 232 | 719 |
+| Water Pulse | 157 | 515 |
+| Counter | 229 | 505 |
+| Mega Kick | 250 | 673 |
+
+Census delta B1 vs base (`lsd194Census.sh` + `rst197CensusDelta.py`): Scene ON 0..199: eventsDigest identical on all 200 seeds; 91 battles change, 109 identical; **248 move-animation commands** change, **+2,226 frames** in total, only fields 16 / 18 (lead and minimum frames), no inserted commands, bad 0. Per command: Water Pulse +8 (49), Icy Wind +8 (49), Mega Drain +8 (11), Facade +6 (34), Mega Kick +6 (32), Counter +5 (30; lead 4 + tail 1), Double Kick hit 1 +19 (34), Comet Punch hit 1 +18 (5), Doubleslap hit 1 +18 (4). Scene OFF 0..99: 100 / 100 identical.
+
+Sound: T1 (self-consistency) on both arms 54,005 exact, known-offset 0 / missing 0 / extra 0; non-move 21,973 exact. Arm vs arm: 109 seeds identical, 86 with the same event sequence at moved frames (`se 131` +6 / +8, `duck 476` +6, `se 148` +8, ...), 5 seeds (31, 90, 102, 130, 132) with the same event count but a different order (events that now land on a different frame order relative to the other families; the multiset is unchanged).
+
+Gates on the B1 tip: `npm run typecheck` 0; `npm run build` 0; `npm run test:gate` 362 files / 2,844 tests green; tests/lbrd.test.ts + tests/randomRoundSoak.test.ts 79 / 79; 7 chunks (604 files = every test importing liveMoveAnimation / battleResolutionPresentation* / moveAnimSounds / tickSounds / iu120Rows plus tests naming the B1 moves) green after the re-pins; `npm run soak -- --policy vanilla --seeds 0:20 --parallel 3 --scene on` (two 10-seed calls) 20 / 20 OK, 0 crash, 0 hang.
+
+Re-pins (each by the lead + T rule):
+- `tests/apx217TransformApproximate.test.ts`: Icy Wind opponent rows 290 -> 298 (+8: lead 4 + tail 4).
+- `tests/apx221PresentationGateApproximate.test.ts`: the Castform-form Icy Wind rows 290 -> 298 (+8).
+- `tests/animation/liveMultihitMoveAdapters.test.ts`: the helper call passes lead 0 for hits 2+ (`iu120Ages(row.id, row.ages + row.seGates[hit]!, "player", hit === 0 ? undefined : 0)`): the default lead applies to hit 1 only.
+- `tests/animation/liveRandom2R1MoveAdapters.test.ts`: Double Kick bodies alternate hit 1 / hit 2; the expected lead is 0 on the second.
+- `tests/animation/liveRandom2R4MoveAdapters.test.ts`: no edit; fixed by the helper change (`held` includes shape-a bodies with lead > 0, as production holds the age at `live - 1` through the tail, Water Pulse on Castform).
+
+Limits: hits 2+ of the multi-hit bodies are not covered (no anchor), the residual lead of the adapter windows (s != 0, B5) and the other 93 A? bodies (B2) are unchanged.
