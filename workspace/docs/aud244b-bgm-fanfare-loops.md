@@ -123,7 +123,7 @@ A Factory Head battle plays `MUS_VS_FRONTIER_BRAIN` (`GetBattleBGM`: `TRAINER_FR
 
 Nothing else was missing. `tests/bgm1EmittedSongsHaveAssets.test.ts` pins it (Tier 1): the emitted set is exactly bgm {354, 412, 469, 471, 476} + fanfare {368, 459, 466}; each has a manifest entry, an Ogg, an AAC twin and a `song-players.json` row;
 every exported `BGM_*` / `MUS_*` song constant under `src/engine` has an entry; and the files that may emit `bgm` / `fanfare` events are pinned (a new emitter file fails the test until its ids are added). It failed for 471 before the recording.
-Still unmeasured, as before: the Gold / Silver Brain songs (`MUS_VS_FRONTIER_BRAIN` is the Emerald-side id the engine emits) and the Brain loss end row (`docs/aud241c-battle-end-sounds.md`).
+Still unmeasured, as before: the Gold / Silver Brain songs and the Brain loss end row (`docs/aud241c-battle-end-sounds.md`).
 
 **Recording.** `EXTRA_SONGS` in `tools/audio/audioAssetList.py` adds the song to `aud244a-asset-list.json` (no log reaches it), then the same recorder, loop cut, encoder and AAC step as the other songs (section 6):
 
