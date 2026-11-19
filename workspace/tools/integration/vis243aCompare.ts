@@ -29,7 +29,7 @@ import { createBattleResolutionPresentationRenderView } from "../../src/engine/b
 import {
   FORCED_RETURN_TO_BALL_HOLD_FRAMES, FORCED_RETURN_TO_BALL_SEND_IN_GAP_FRAMES, SWITCH_IN_WAITSTATE_HOLD_FRAMES, switchInTiming,
 } from "../../src/engine/battleResolutionPresentation.ts";
-import { calculateHpStat } from "../../src/engine/stats.ts";
+import { calculateMaxHp } from "../../src/engine/stats.ts";
 import * as tail from "../../src/engine/switchInTail.ts";
 
 const [scenarioPath, romDir, outPath] = process.argv.slice(2).filter((a) => !a.startsWith("--"));
@@ -76,7 +76,7 @@ const parties = scenario.overrides.parties;
 const incomingMon = oppMode ? parties.opponent[1] : parties.player[1];
 const species = incomingMon.species as number;
 const mon = (b: 0 | 1, m: any, partyIndex: 0 | 1) => {
-  const maxHP = calculateHpStat(stats(m.species).baseHp, m.ivs.hp, m.evs.hp, m.level);
+  const maxHP = calculateMaxHp(m.species, stats(m.species).baseHp, m.ivs.hp, m.evs.hp, m.level);
   return Object.freeze({
     species: m.species as number, name: name(m.species), side: b === 0 ? "player" as const : "trainer" as const, battler: b,
     partyIndex, level: m.level as number, hp: maxHP, maxHP, gender: m.gender as "male" | "female", status: "none" as const,

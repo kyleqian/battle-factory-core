@@ -29,7 +29,7 @@ import {
 } from "./battleScriptRulesContext.ts";
 import { getMonGender, type MonGender } from "./monGender.ts";
 import { natureFromPersonality } from "./opponentGen.ts";
-import { calculateHpStat, calculateOtherStat, type NatureModifier } from "./stats.ts";
+import { calculateMaxHp, calculateOtherStat, type NatureModifier } from "./stats.ts";
 
 const FACTORY_LEVEL_50 = 50;
 const MAX_TOTAL_EVS = 510;
@@ -288,7 +288,7 @@ export function createFactoryCorpusPartyMember(
   const experience = growthRate === undefined ? undefined : EXP_DATA.growthRates[growthRate]?.[FACTORY_LEVEL_50];
   if (experience === undefined) throw new Error(`Species ${species.name} has no Level-50 experience entry`);
 
-  const maxHP = calculateHpStat(species.baseHp, ivs.hp, evs.hp, FACTORY_LEVEL_50);
+  const maxHP = calculateMaxHp(species.id, species.baseHp, ivs.hp, evs.hp, FACTORY_LEVEL_50);
   const attack = calculateOtherStat(
     species.baseAttack, ivs.attack, evs.attack, FACTORY_LEVEL_50, setNature.attack,
   );
