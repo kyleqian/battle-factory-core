@@ -1159,3 +1159,17 @@ first-pass one (R019, R029, R031, R033 are already class (b)). (3) Rest at full 
 R077 first design (Breloom, Focus Punch killed Regice on turn 1) was dead before the berry mattered; the second used a Hypnosis lead that does
 not kill. (4) `huntq.py` skips a stage whose `name` already has a log ("done before"); rename or delete the log to re-hunt a changed design, and
 the output sits in `<out>/chunt/` when `--out` already ends in `chunt`.
+
+## Box hunt 2026-11-19 (rrh5): R103 and eight direct-move rules covered, one engine / ROM difference
+
+Evidence under `.integration/evidence/rrh5/` (git-ignored; design generators `mk103.py` and `mk2.py`, designs in `designs/`, hunt logs in `h*/`).
+The stage tool gained a `parties` field (hand-built Mechanic Lab parties; the engine replay rebuilds every member at Level 50, takes EVs as the engine split
+of 510 over the flagged stats, takes items from the Frontier held-item table and searches a cursor-reachable opponent personality for the nature, ability slot and
+gender). Details in `rule-coverage.md`, "Box hunt rrh5". Matched stages (each re-driven from the committed file, N of N, 0 diff points): R103a 6/6, R103b 7/7,
+R103c 6/6, R103g 15/15, R067 5/5, R071 12/12, R072 12/12, R075 13/13, R078 5/5, R082 18/18, R083 8/8, R085 12/12. R103 piece 4 (Mental Herb on infatuation) is class (b).
+
+**ROM difference, fixed in shd1:** the engine gave a Shedinja 88 max HP, the ROM 1 (`CalculateMonStats`, `pokemon.c:2845`). `src/engine/stats.ts` now has `calculateMaxHp`
+(species 303 gives 1), used by `factoryCorpusParty.ts` and three integration tools. `R057-beat-up-shedinja` matches the ROM 7 of 7 (Scene OFF and ON, 0 diff points,
+`stage.ok` true), so R057 is counted: **83 of 110 covered.** Details in `docs/shd1-shedinja-hp.md`. Set 21 is in no Factory range, so no Factory battle changes (census 0..999, both scenes, 0 changed digests).
+
+**Counts after rrh5: 82 of the 110 covered (73 before); R019, R029, R031, R033, R065 and R103 piece 4 class (b); R069 class (a); 22 left (110 - 82 - 6 already classed).**

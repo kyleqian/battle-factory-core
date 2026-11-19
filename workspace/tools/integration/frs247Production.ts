@@ -7,7 +7,7 @@ import { renderBattleResolutionForcedPartySelect, renderBattleResolutionLiveView
 import { createBattleResolutionPresentationRenderView } from "../../src/engine/battleResolutionPresentationRender.ts";
 import { BATTLE_RESOLUTION_NEXT_COMMAND_HANDOFF_FRAMES, playerFaintReplacementSendOutTimingOfSegment } from "../../src/engine/battleResolutionPresentationRender.ts";
 import { SWITCH_IN_WAITSTATE_HOLD_FRAMES, switchInTiming } from "../../src/engine/battleResolutionPresentation.ts";
-import { calculateHpStat } from "../../src/engine/stats.ts";
+import { calculateMaxHp } from "../../src/engine/stats.ts";
 import * as party from "../../src/engine/partySelect.ts";
 
 const stats = (sid: number) => speciesStats.species.find((s) => s.id === sid)!;
@@ -18,7 +18,7 @@ export type Frs247Scenario = { overrides: { parties: { player: any[]; opponent: 
 export function frs247ProductionReturn(scenario: Frs247Scenario, sceneOn: boolean, faintNo: number) {
   const parties = scenario.overrides.parties;
   const mk = (b: 0 | 1, m: any, partyIndex: number) => {
-    const maxHP = calculateHpStat(stats(m.species).baseHp, m.ivs.hp, m.evs.hp, m.level);
+    const maxHP = calculateMaxHp(m.species, stats(m.species).baseHp, m.ivs.hp, m.evs.hp, m.level);
     return Object.freeze({
       species: m.species as number, name: speciesName(m.species), side: b === 0 ? "player" as const : "trainer" as const, battler: b,
       partyIndex, level: m.level as number, hp: maxHP, maxHP, gender: m.gender as "male" | "female", status: "none" as const,

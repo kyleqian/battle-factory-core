@@ -49,6 +49,7 @@ import naturesData from "../../src/data/gen/natures.json" with { type: "json" };
 import frontierHeldItemsData from "../../src/data/gen/battle-frontier-held-items.json" with { type: "json" };
 import movesData from "../../src/data/gen/moves.json" with { type: "json" };
 import speciesNamesData from "../../src/data/gen/species-names.json" with { type: "json" };
+import speciesStatsData from "../../src/data/gen/species-stats.json" with { type: "json" };
 
 const [mode] = process.argv.slice(2);
 const arg = (name: string) => process.argv.find((a) => a.startsWith(`--${name}=`))?.slice(name.length + 3);
@@ -482,6 +483,44 @@ const result = (r: ReturnType<typeof play>, extra: object = {}) => ({
   sound: r.sound.map((e) => [(e[0] as number) - (r.frame0 ?? 0), ...e.slice(1)]), inputs: r.inputs, timeline: r.timeline, ...(r.cmdTrace === null ? {} : { cmds: r.cmdTrace.rows.map((c) => [(c[0] as number) - (r.frame0 ?? 0), ...c.slice(1)]) }), ...extra,
 });
 
+// rrh5: a staged battle may carry `parties` (the Mechanic Lab's overrides.parties: three complete Pokemon per side). The lab writes them before CB2_InitBattle; the
+// engine side still builds each member from its Factory set row, so the base set row at the same index is rewritten here (species, nature, four moves, item, EV flags)
+// to describe the same Pokemon. The IVs are the base battle's; the lab's EV split must equal the engine's (510 over the flagged stats).
+function applyStageParties(st: any): void {
+  const rows = (frontierMonsData as any).entries as any[];
+  const speciesNames = (speciesNamesData as any).species as any[]; const itemRows = (frontierHeldItemsData as any).entries as any[];
+  const moveNameById = new Map<number, string>((movesData as any).moves.map((m: any) => [m.id, m.move]));
+  const flagOf: Record<string, string> = { hp: "F_EV_SPREAD_HP", attack: "F_EV_SPREAD_ATTACK", defense: "F_EV_SPREAD_DEFENSE", speed: "F_EV_SPREAD_SPEED", spAttack: "F_EV_SPREAD_SP_ATTACK", spDefense: "F_EV_SPREAD_SP_DEFENSE" };
+  for (const [side, ids] of [["player", st.playerSetIds], ["opponent", st.opponentSetIds]] as const) {
+    st.parties[side].forEach((p: any, i: number) => {
+      const row = rows[ids[i]]; if (row === undefined) throw new Error(`stage parties.${side}[${i}]: no set id ${ids[i]}`);
+      const itemRow = itemRows.find((r: any) => r.itemId === (p.item ?? 0));
+      if (itemRow === undefined) throw new Error(`stage parties.${side}[${i}]: item ${p.item} is not in the Frontier held-item table`);
+      if ((p.level ?? 50) !== 50) throw new Error(`stage parties.${side}[${i}]: the engine rebuilds every member at level 50`);
+      const evs = p.evs ?? {}; const flagged = Object.keys(flagOf).filter((k) => (evs[k] ?? 0) > 0);
+      if (flagged.length === 0) throw new Error(`stage parties.${side}[${i}]: evs must name at least one stat`);
+      const per = Math.floor(510 / flagged.length);
+      if (flagged.some((k) => evs[k] !== per)) throw new Error(`stage parties.${side}[${i}]: evs must be ${per} on each of ${flagged.join(",")} (the engine's split)`);
+      if (side === "opponent" && p.personality === undefined) {
+        // The engine rebuilds an opponent's personality from an RNG cursor (constructionCursor), so the lab's own pick would have none: choose one that has a cursor, the right nature,
+        // the ability slot in its low bit and, when the stage names a gender, that gender.
+        const ratio = ((speciesStatsData as any).species as any[]).find((r: any) => r.id === p.species)?.genderRatio ?? 127;
+        let c = (Number(st.seed) * 2654435761 + (i + 1) * 40503) >>> 0;
+        for (let tries = 0; ; tries += 1) {
+          if (tries > 400_000) throw new Error(`stage parties.opponent[${i}]: no personality with a cursor, nature ${p.nature ?? 0}, slot ${p.abilitySlot ?? 0}`);
+          c = advanceRngValue(c); const s1 = advanceRngValue(c);
+          const pers = (((s1 >>> 16) | ((advanceRngValue(s1) >>> 16) << 16)) >>> 0);
+          const female = (pers & 0xff) < ratio;
+          if (pers % 25 === (p.nature ?? 0) && (pers & 1) === (p.abilitySlot ?? 0) && (p.gender === undefined || (p.gender === "female") === female)) { p.personality = pers; break; }
+        }
+      }
+      row.species = speciesNames[p.species].species; row.nature = (naturesData as any).natures[p.nature ?? 0].name; row.itemTableId = itemRow.itemTableId;
+      row.moves = (p.moves as number[]).map((m) => (m === 0 ? "MOVE_NONE" : moveNameById.get(m)!)); row.evSpreadStats = flagged.map((k) => flagOf[k]);
+    });
+  }
+}
+if (stage !== null && stage.parties !== undefined) applyStageParties(stage);
+
 if (mode === "request" && stage !== null) {
   // A staged battle: the request is the stage file's own sets and trainer. `mode: "factoryBrain"` (challengeNum 2 or 5, battleNum 6) stages Noland:
   // the player's sets are chosen, his party is rolled by the ROM from the seed.
@@ -492,7 +531,8 @@ if (mode === "request" && stage !== null) {
   };
   writeFileSync(arg("out")!, JSON.stringify(stage.mode === "factoryBrain"
     ? { ...stagedCommon, mode: "factoryBrain" }
-    : { ...stagedCommon, mode: "factoryLegal", battleNum: stage.battleNum, trainerId: stage.trainerId, opponentSetIds: stage.opponentSetIds }, null, 1));
+    : { ...stagedCommon, mode: stage.parties === undefined ? "factoryLegal" : "mechanicLab", ...(stage.parties === undefined ? {} : { overrides: { parties: stage.parties } }),
+        battleNum: stage.battleNum, trainerId: stage.trainerId, opponentSetIds: stage.opponentSetIds }, null, 1));
 } else if (mode === "request") {
   const o = nativeOrchestrator();
   const r = play(o, false);

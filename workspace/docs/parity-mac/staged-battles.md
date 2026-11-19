@@ -78,6 +78,20 @@ How they were found:
 - Why Camouflage needs the detour, and what the game does with the PP when Magic Coat meets Pressure: `tally.md`,
   `party-pp-writes.md`.
 
+## Stage parties (rrh5)
+
+A stage may carry `parties: { player: [3 members], opponent: [3 members] }`, handed to the oracle as Mechanic Lab `overrides.parties` (`mode: "mechanicLab"`).
+Each member is the lab's full record (species, level, nature, ivs, evs, moves, ppUps, item, abilitySlot, friendship, gender, personality). The engine replay
+(`applyStageParties` in `tools/integration/soundCensusRomReplay.ts`) rebuilds the members as Factory-row-shaped records, so:
+
+- `level` must be 50 (the replay throws for any other level; the engine rebuilds every member at Level 50).
+- EVs must be the engine split: `floor(510 / n)` on each of the n flagged stats, 0 elsewhere (otherwise it throws).
+- `item` must be in the Frontier held-item table.
+- An opponent without a `personality` gets a cursor-reachable one with the right nature, ability slot (low bit) and gender (looked up by species id from `species-stats.json`).
+- Species ids are the internal ones (Spinda 308, Slaking 366, Exploud 372, Absol 376, Clefable 36, Snorlax 143, Magikarp 129, Caterpie 10, Shedinja 303).
+- A stall (both sides on Splash) never ends: give the player a damaging move and expect 100+ decisions as the sign of a stall (`prehunt.py` warns).
+- A direct move on a hand-built party is the way to cover a rule no Factory set can reach. Example: `stages/coverage/R057-beat-up-shedinja.json` (a Shedinja, max HP 1 in the ROM; the engine matched only after shd1 gave it max HP 1) and its mirror `stages/shd1-shedinja-player-side.json`.
+
 ## What a staged battle cannot do
 
 Pokemon that are not Factory sets (a level, a move set or an item no set has). Those need the Mechanic Lab with

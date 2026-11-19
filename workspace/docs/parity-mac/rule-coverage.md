@@ -132,7 +132,7 @@ cheaply; left uncovered. See `STATUS.md`, "Box hunt 2026-11-14 (rrh2)".
   AI Fire set without White Herb, on a target that must survive all six turns; the only Memento set is Weezing 501 and the AI does not
   use it at -6 (R039 gate), so the user would be the player's Weezing after a switch. Possible in principle, but the chance per seed is far
   below what a hunter can spend.
-- **R103, R105, R108: not designed in luck1.** Their blockers are a set-up, not luck (R103 needs a cure berry on a Pursuit user, R105 a
+- **R103, R105, R108: not designed in luck1 (R103 covered in rrh5, R105 and R108 in rrh4).** Their blockers are a set-up, not luck (R103 needs a cure berry on a Pursuit user, R105 a
   Synchronize or Serene Grace status forced onto an Immunity / Water Veil / Limber holder, R108 a forced Struggle with a self-KO), and
   need hand-built Mechanic Lab parties.
 
@@ -259,11 +259,11 @@ went to the four above).
 
 Left in (c), with the reason (none is proven unreachable):
 
-- **R103** (cure berry at the end of the turn on a Pursuit user): the only skipped move-end step is Pursuit on a switching foe
+- **R103 (covered in rrh5 with hand-built parties, see "Box hunt rrh5"; the text below is the luck1 reading)** (cure berry at the end of the turn on a Pursuit user): the only skipped move-end step is Pursuit on a switching foe
   (`battle_scripts_1.s:3143`), and `HandleFaintedMonActions` state 6 gives the player's battler 0 an `ItemBattleEffects` pass after every action
   (`battle_util.c:1958-1962`). No Pursuit set holds a cure berry, no set has both Trick and Pursuit, so the berry would have to arrive on a
   Pursuit user by a Trick chain across both teams and the AI would have to Pursuit the right switch. Not stageable cheaply.
-- **R083** (Own Tempo after a Thrash lock): no Thrash / Petal Dance / Outrage set has Skill Swap, Role Play or Trace, and no Own Tempo set has
+- **R083 (covered in rrh5 with a direct Thrash on a hand-built Spinda)** (Own Tempo after a Thrash lock): no Thrash / Petal Dance / Outrage set has Skill Swap, Role Play or Trace, and no Own Tempo set has
   Skill Swap, so Own Tempo would have to be swapped in by Alakazam 596 / Gengar 613 (Skill Swap with an Own Tempo foe, then again with the
   thrasher; Choice Band locks the first Skill Swap, a Trick has to precede it) and the AI would have to pick Thrash. About ten scripted turns of
   AI luck; not stageable cheaply.
@@ -274,7 +274,7 @@ Left in (c), with the reason (none is proven unreachable):
   Spore set (Parasect 177 / 282, Breloom 382 and up) has Uproar. Only a Metronome Uproar reaches them.
 - **R094, R098, R100, R101** (Thick Club / Metal Coat in Future Sight, Doom Desire, Weather Ball): no set has Doom Desire or Weather Ball, and
   a Thick Club on a Future Sight user needs a Trick chain; Metronome.
-- The rest (R049-R053, R055-R064, R071, R072, R075, R078, R079, R082, R085, R086, R091, R096, and R068, R081, R106 as read in luck1) need an AI or
+- The rest (R049-R053, R055-R064, R071, R072, R075, R078, R079, R082, R085, R086, R091, R096 (R071, R072, R075, R078, R082, R085 were covered in rrh5 with direct moves on hand-built parties), and R068, R081, R106 as read in luck1) need an AI or
   a player Metronome (Chansey 227, Clefable 389) to draw a particular move: a seed lottery, not a set-up.
 
 See `STATUS.md`, "Box hunt 2026-11-16 (rrh4)".
@@ -371,3 +371,25 @@ R064 / R063: 112 and 239 decisions, and 1 in 14 for the AI-Clefable shape, seed 
 
 **Luck hunt day 4 (2026-11-19 day job, promoted at the 2026-11-19 run start; stage files only, no `src/` change): 73 of the 110 covered (66 before).** The day job (`.integration/evidence/luck-hunt/20261119/summary.md`) ran 4,024 seeds (1060000+k) over 14 designs: 7 marker hits, 7 ROM match, 0 ROM differ. Promoted to `stages/coverage/` (`0d2973b40`) and re-driven from the repo file by the run-start nightly replay (`docs/replay-ledger.md`, 94 / 94 stages): R050 Imprison flag (seed 1060396, 34 / 34 states), R064 Transform ends Encore (1061615, 46 / 46), R079 Lock-On then a no-accuracy move (1063089, 14 / 14), R091 Spite on a transformed user (1060620, 25 / 25), R099 Uproar keeps a Yawn drowsy (1061592, 32 / 32), R100 AI Weather Ball under Cloud Nine (1060249, 34 / 34), R101 Weather Ball in sandstorm (1060490, 27 / 27). **No ROM difference.** Still hunted with 0 hits: R040, R058, R063, R078, R082, R096, R110 (466 seeds each, R063 / R099-like odds ~0.003).
 
+**Box hunt rrh5 (2026-11-19): 82 of the 110 covered (73 before; 22 left after the 6 already classed), R103 piece 4 class (b), one ROM difference found (Shedinja max HP; fixed in shd1, R057 counted: 83 of 110).** The brief
+named R103, R105 and R108; R105 and R108 were already covered in rrh4 (above), so the step went to R103 and then to the other rules whose only blocker was
+"set-up, not luck". The tool `tools/integration/soundCensusRomReplay.ts` now accepts a `parties` field in a stage (hand-built Mechanic Lab parties for either
+side, so a rule no Factory set can reach becomes a direct-move design). Every stage below ran its marker and matched the ROM to the end (clean re-drive of the
+committed file, `match True`, `stage.ok True`, 0 diff points), all in `stages/coverage/`:
+
+- **R103 (cure berry at the end of the turn on a Pursuit user), five of six pieces.** `R103a-ai-pursuit-cheri-static` (AI Pursuit + Cheri Berry vs Static, 6 of 6),
+  `R103b-ai-pursuit-pecha-poison-point` (7 of 7, seed 90007), `R103c-ai-pursuit-rawst-flame-body` (6 of 6), `R103g-player-pursuit-cheri-ai-switch-static`
+  (15 of 15, seed 90002; the `fired` arm and the `state = cured` piece both ran). Pieces run: arm (0), Cheri/PAR (1), Pecha/PSN (2), Rawst/BRN (3), cured (5).
+  **Piece 4 (Mental Herb cures infatuation at the end-turn tick) is class (b):** `SwitchInClearSetData` clears `STATUS2_INFATUATED_WITH` when the Pursuit target
+  switches out (`battle_main.c:3195-3198`, `3279-3280`) and a Trick hands the herb over and cures inside the Trick script, so the end-turn tick never sees an infatuated
+  holder. R103 counts as covered with that one piece named as unreachable.
+- **Eight direct-move rules, "Metronome only" no longer applies to a direct move on a hand-built party:** R067 Slaking Focus Punch on its Truant turn (5 of 5),
+  R071 Exploud Heal Bell keeps its own status (12 of 12), R072 an all-Soundproof party Heal Bell (12 of 12), R075 Imprison twice (13 of 13), R078 Lock-On then
+  Sheer Cold (5 of 5, all four markers ran), R082 Mud Sport twice (18 of 18), R083 Spinda Thrash end vs Own Tempo (8 of 8), R085 Imprison vs Pressure (12 of 12).
+  All lab seed 90000.
+- **R057 (Beat Up on a 1 HP target): covered after the shd1 fix (83 of 110).** The stage `R057-beat-up-shedinja` first failed the ROM at the first state: the engine built a Shedinja
+  (set 21) with 88 max HP, the ROM with 1 (`CalculateMonStats` forces `newMaxHP = 1` for `SPECIES_SHEDINJA`). shd1 ported it (`docs/shd1-shedinja-hp.md`); the stage now matches 7 of 7,
+  0 diff points, `stage.ok` true (Scene OFF and ON). Correction to the rrh5 text: set 21 is in no Factory range (Level 50 starts at set 110, Open at 372), so a Shedinja cannot
+  appear in a real Factory battle; the rule is staged by a hand-built party only.
+- **Judged not stageable (no design built):** R081 (needs -6 on both stats), R056 (all teammates fainted or statused), R061 and R062, R068, R049 (every Ingrain set also
+  needs Metronome for the lowering move), R106 (the counter cannot reach 15), R055 and R086 (not tried, time), R104 (needs an Uproar and Effect Spore together, not tried).
