@@ -53,7 +53,7 @@ Other strings:
 | faint `\p` (faintpoison) | existing faint labs | stalls until the press (message identity inferred from the script ptr) |
 | Static `\l` (paralysis via ability, seed 4) | `static4*` | stall at `MoveEffectParalysis+0x7` from f332; A at 600 -> exec falls at 633; then 64 rows of `waitmessage`; next command at 697 |
 
-Static `\l`: release at 633 rather than 603 was not re-checked (the `\l` scroll after the press adds its own scroll time before the second line is typed). Open item for Tier-2 calibration.
+Static `\l`: A at 600 released at 633 (not 603). The cause (scroll time after the press) is unverified; open item for Tier-2 calibration.
 
 Raw per-frame outputs are in `/tmp/subp1m/` (scratch, not committed); they are reproducible with the probe and labs above.
 
@@ -71,10 +71,11 @@ GAPS (ROM waits, engine `automatic` with the 24-row floor):
 |---|---|---|
 | `SUBSTITUTEDAMAGED` | `Cmd_healthbarupdate` | the hpf4m S2 case |
 | `PKMNSUBSTITUTEFADED` | `BattleScript_SubstituteFade` | fade animation precedes the print |
-| `PKMNWASDRAGGEDOUT` | `BattleScript_...Roar`/Whirlwind/Dragon Tail/Circle Throw | measured |
+| `PKMNWASDRAGGEDOUT` | `BattleScript_TrainerBattleForceOut` (Roar / Whirlwind in a trainer battle) | measured |
 | `MoveUsedIs*` family (Disabled / Tormented / Taunted / Imprisoned) | `BattleScript_MoveUsedIs*` | button, then 64 rows of `waitmessage` after release |
-| Trick `\p` | `BattleScript_EffectTrick` | mid-string `\p`: two button gates in one message |
-| `\l` ability strings (Static, Cute Charm, Poison Point, etc. `...ByAbility`) | `battle_message.c` templates | mid-string `\l` gate, then `waitmessage` |
+| `PKMNOBTAINEDXYOBTAINEDZ` (Trick/Switcheroo when both mons hold items) | `gItemSwapStringIds[B_MSG_ITEM_SWAP_BOTH]` | mid-string `\p`: first line, then a second after the press; the single-item variants (`PKMNOBTAINEDX`/`X2`) have no `\p` |
+| `PKMNWASPARALYZEDBY` (Static paralysis, `B_MSG_STATUSED_BY_ABILITY`) | `sText_PkmnWasParalyzedBy` (the only `\l` ability string in `battle_message.c`) | mid-string `\l` gate, then 64 rows of `waitmessage` after release; measured |
+| `PKMNPREVENTSUSAGE`, `PREVENTEDFROMWORKING`, `PKMNSXPREVENTSYSZ` | `battle_scripts_1.s:4074`, `:4046`, `battle_message.c` ability-prevention tables | ability-blocking family; `\p` endings were seen in the template grep but their engine advance mode was not individually audited here |
 | A-only dismissal | orchestrator | ROM also accepts B |
 
 Not reachable in the Factory (frontier skips them): EXP / level-up / learn move (`Cmd_getexp`), money and Pay Day (0 sets carry Pay Day), whiteout text, run/escape/FLED, catch/Safari, two-trainer text, `ENEMYABOUTTOSWITCH` prompt.
@@ -84,11 +85,11 @@ The full list of templates with `\p`/`\l` can be regenerated with
 
 ## 4. Proposed landing (separate steps, not done here)
 
-1. In `battleResolutionPresentation.ts` set `advance: "button"` for SUBSTITUTEDAMAGED, SUBSTITUTEFADED, DRAGGEDOUT, the MoveUsedIs* family, Trick, and the `\l` ability strings (a table keyed by string id, next to the existing button ids at ~2170).
+1. In `battleResolutionPresentation.ts` set `advance: "button"` for SUBSTITUTEDAMAGED, SUBSTITUTEFADED, DRAGGEDOUT, the MoveUsedIs* family, `PKMNOBTAINEDXYOBTAINEDZ` (two gates), and `PKMNWASPARALYZEDBY` (`\l`) (a table keyed by string id, next to the existing button ids at ~2170).
 2. Accept A or B in `factoryRoundBattleOrchestrator.ts` (~2792-2830); START must stay a no-op.
 3. Hazard: the turn-end rule (~5609) pushes a `turn-end` command only when the segment has no button message. Flipping SUBSTITUTEDAMAGED to button must not suppress turn-end for the rest of the segment; scope the rule to the button message's own segment position.
 4. Readiness: `L+1` rows from message start versus the ROM's earliest accept at print + 38 (typing-bound) and release at press + 3. Calibrate against the sweep (A at 418/419/420 and +3 release), and account for the text-speed option, which changes typing time.
-5. After release, `MoveUsedIs*` and the `\l` ability strings hold 64 rows (`waitmessage`) before the next command; Substitute-damaged does not (message is followed by the damage script).
+5. After release, `MoveUsedIs*` and the `\l` ability strings hold 64 rows (`waitmessage`) after release before the next command; Substitute-damaged does not (message is followed by the damage script).
 6. `PKMNSUBSTITUTEFADED`: model the ~111-row fade animation before the message becomes ready.
 7. Tier-2 test: replay `subp1mProbe.py` sweeps (never / A@420 / A@500 / B@600 / START@600) against the engine's button flow; assert exec-equivalent hold and `press+3` release.
 
