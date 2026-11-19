@@ -450,3 +450,70 @@ Method: the B1 lab pattern (`lead2-icywind-player-on`, player Rattata Lv50 with 
 | Shadow Ball | 247 | 29 (identical app frames either way) | not measured | the Rattata target is Normal: Ghost has no effect, so no animation plays and the rule cannot act. Two non-Normal-target labs (Pikachu 25, Moltres 146 via `aud242lBlizzardStage`) matched 3 and 0 of 1023 frames both before and after, i.e. the staging does not align with the ROM from the first frames; Shadow Ball needs a lab staged the way the aud262 Memento labs are (a validated target species) before its gap can be read |
 
 Result for B2: Metal Claw and Slash support gap 4 (the A? class prediction). Shadow Ball (the largest A? body, 102 census commands) is still unmeasured. Nothing of B2 is in the rule.
+
+## lead3: B2 landed (2026-11-19, branch worker/integration-20261119-152419, base 238825627)
+
+`LEAD3_MEASURED_MOVE_IDS` (18) + `LEAD3_PREDICTED_MOVE_IDS` (53) join the `shape-a` class (71 ids; `tests/helpers/iu120Rows.ts` `SHAPE_A_RULE_IDS` / `SHAPE_A_LEADS` mirror them). The move-body rule itself is unchanged: lead = kernel counter, tail `T = 6 - pre - post`.
+
+### ROM spot-check (Scene ON, `tools/compare/traces/lead3-<x>-on.json`, labs `tools/battle-lab/lead3-<x>-player-on.json`, Lv50 Rattata x4 of the move vs a Lv12 Seismic Toss opponent; Shadow Ball vs a Lv12 Machop, Fighting, via `lead3MachopTargetStage` in `tools/compare/appTrace.ts`)
+
+Matched frames of 1023 before / with the rule, and the **first opponent-HP-drain frame** (oracle vs app, with the rule; frames = app - oracle, i.e. the residual offset). The HP-drain start is the more objective window than matched frames (a 24 px blink diff every ~9 frames caps matches near 50 %).
+
+| body | id | matched before | with rule | drain oracle / app | offset |
+|---|---|---|---|---|---|
+| Shadow Ball | 247 | 246 | 313 | 263 / 256 | -7 |
+| Rock Tomb | 317 | 111 | 549 | 279 / 275 | -4 |
+| Psybeam | 60 | 90 | 501 | 263 / 259 | -4 |
+| Crunch | 242 | 90 | 519 | 244 / 240 | -4 |
+| Knock Off | 282 | 39 | 103 | 155 / 155 | 0 (low match count: other, non-timing diffs) |
+| Ice Punch | 8 | 162 | 510 | 289 / 285 | -4 |
+| Headbutt | 29 | 85 | 578 | 152 / 148 | -4 |
+| Slam | 21 | 272 | 773 | 152 / 150 | -2 |
+| Flail | 175 | 172 | 580 | 215 / 211 | -4 |
+| Mud-Slap (A~) | 189 | 124 | 409 | 156 / 151 | -5 |
+| Fire Punch (A~) | 7 | 189 | 467 | 208 / 203 | -5 |
+| Metal Claw | 232 | 68 | 406 | 264 / 246 | -18 (the adapter window is ~18 short: a B5-type residual; still 68 -> 406) |
+| Slash | 163 | 261 | 760 | 145 / 143 | -2 |
+| Fury Swipes (hit 1, lead 15) | 154 | 12 (drain 162 / 145, -17) | 71 | 162 / 161 | -1 |
+| Low Kick (lead 8) | 67 | 172 (140 / 127, -13) | 852 | 140 / 136 | -4 |
+| Fury Cutter (lead 9) | 210 | 70 (150 / 138, -12) | 859 | 150 / 150 | 0 |
+| Psywave (lead 6) | 149 | 21 (306 / 296, -10) | 628 | 306 / 305 | -1 |
+| Horn Drill (lead 7) | 32 | 219 (297 / 289, -8) | 864 | 297 / 297 | 0 |
+
+All 18 improve in matched frames and the drain offset falls to 0..-7 (Metal Claw -18). Night Shade (101): no HP drain in either arm to read (matched 34 either way): left out. Bodies whose rule predicts a gap of 4 held up on every one of the 18 (the A? class prediction is supported on a sample of 18).
+
+### Double Kick hit 1 (B1 had no ROM window for the +19 rows)
+
+`lead3-doublekick-on` (Lv50 Rattata x4, Lv30 opponent): first drain frame ROM 151, app 150 with the B1 rule (offset -1); Comet Punch hit 1 and Doubleslap hit 1 matched 19 -> 81 and 44 -> 124. The B1 hit-1 lead + T agrees with the ROM, with a constant -1 frame offset: **no correction needed**. Matched frames for Double Kick itself go the other way (661 without the rule, 429 with it) because hits 2+ (no lead, no tail, the 18-row inter-hit trim) are B6; the first drain frame is the hit-1 read.
+
+### Batch
+
+- **Measured (18):** Shadow Ball 247, Rock Tomb 317, Psybeam 60, Crunch 242, Knock Off 282, Ice Punch 8, Headbutt 29, Slam 21, Flail 175, Metal Claw 232, Slash 163, Mud-Slap 189, Fire Punch 7 (lead 5); Fury Swipes 154 (hit 1, lead 15), Low Kick 67 (8), Fury Cutter 210 (9), Psywave 149 (6), Horn Drill 32 (7).
+- **Predicted (53), the remaining single-hit A? / A~ bodies with the plain counter 5:** Dragon Claw 337, Overheat 315, Sludge 124, Acid 51, Confusion 93, Ember 52, Megahorn 224, Secret Power 290, Swift 129, Iron Tail 231, Meteor Mash 309, Crush Claw 306, Cross Chop 238, Steel Wing 211, Dream Eater 138, Tri Attack 161, Water Gun 55, Leaf Blade 348, Pursuit 228, Air Cutter 314, Mach Punch 183, Thunder 87, Drill Peck 65, Aurora Beam 62, Stomp 23, Water Spout 323, Reversal 179, Flame Wheel 172, Hi Jump Kick 136, Razor Leaf 75, Take Down 36, Extrasensory 326, Rapid Spin 229, Crabhammer 152, Shock Wave 351, Sky Uppercut 327, Astonish 310, Blaze Kick 299, Eruption 284, Octazooka 190, Super Fang 162, Hyper Fang 158, Dizzy Punch 146, Lick 122, Submission 66, Muddy Water 330, Shadow Punch 325, Heat Wave 257, Smog 123, Rolling Kick 27, Poison Fang 305, Extremespeed 245. They join by class (gap 4 by the next-event chain, counter lead 5); a ROM window was measured for none of them one by one.
+- **Held out, with the reason:**
+  - Signal Beam 324 / Mud Shot 341 / Dynamic Punch 223 / Covet 343 / Gust 16: their pan-sweep SE rows score `extra` in the T1 census with the shifted clock (110 extra rows on the first try); not landed until the sound clock of those bodies is read.
+  - Night Shade 101: no HP drain to compare (above).
+  - Focus Punch 264, Fake Out 252, Whirlpool 250, Wrap 35, Fire Spin 83, Bind 20, Sand Tomb 328: charge / flinch-turn / trap bodies, not plain hits (not measured, not in the rule).
+  - Every multi-hit or variant-counter A? body not measured: Rock Blast 350, Triple Kick 167, Spike Cannon 131, Pin Missile 42, Bonemerang 155, Endeavor 283, Mirror Coat 243, Thrash 37, Snore 173, Sheer Cold 329, Fissure 90, Guillotine 12.
+
+### Census delta (`lsd194Census.sh` + `rst197CensusDelta.py`, base 238825627 = src tree of 6144d5a00, final 158f8db94 = the src of the branch tip)
+
+- Scene ON 0..199: eventsDigest identical on all 200 seeds; 179 battles change, 21 identical; **925 move-animation commands** change, **+6,824 frames** in total (an earlier run that still held Signal Beam / Mud Shot / Dynamic Punch / Covet / Gust had 952 commands, +7,024): only fields 16 / 18 (lead and minimum frames), no inserted commands, bad 0. Per-command shifts: +6 (336; lead 5 + T 1), +8 (561; lead 5 + T 3), +9 (Low Kick 6, Psywave 5), +12 (Fury Cutter 10), +16 (Fury Swipes hit 1, 6), +5 (1, a Dream Eater with a different tail).
+- Scene OFF 0..99: 100 / 100 identical (30,730 commands).
+- Sound: T1 on both arms 54,005 exact, known-offset 0 / missing 0 / extra 0 (non-move 21,973 exact). Arm vs arm: 21 seeds identical, 149 with the same event sequence at moved frames, **30 seeds with the same event multiset in a different order**.
+
+Sound-order analysis. (a) The five lead2 seeds (31, 90, 102, 130, 132) are `same-seq-moved` against this base (the B1 base already carries their order); against the pre-B1 base they differ by one adjacent pair each: `duck 476` vs `se 16` (31, 90) or `se 5` (102, 130, 132). In four of the five the two events are at different frames (e.g. seed 31: `duck 476` 11408 vs `se 16` 11410 became `se 16` 11410 and `duck 476` 11424), in one (102) at the same frame 3167 (tie broken the other way). (b) The 30 seeds of this batch: the final list is sorted by frame in all 30; 74 of the 75 positions that differ are at different frames, 1 is a same-frame tie. All are an adjacent swap of `duck 476` / `se 5` / `se 16` / `se 12`-`13` / `se 90` type events, i.e. an event of the shifted move command crossing a neighbour that is anchored to a different clock (the duck marker, the controller hit SE) now that the command is 6..16 rows longer. So they are **cross-event reorders at distinct frames (the order follows the frames), not a same-frame reordering; the multiset is equal**. Whether the new order matches the ROM is a T2 question (not measured here).
+
+### Gates
+
+`npm run typecheck` 0; `npm run build` 0; `npm run test:gate` 362 files / 2,844 tests: 1 failure on the first run (the Headbutt duration, re-pinned below), 2,844 / 2,844 green on the final run; 6 chunks (747 files = every test importing liveMoveAnimation / battleResolutionPresentation* / moveAnimSounds / tickSounds / iu120Rows plus every test naming a batch move or its MOVE_ constant) green after the re-pins; tests/lbrd.test.ts + tests/randomRoundSoak.test.ts 79 / 79; `npm run soak -- --policy vanilla --seeds 0:20 --scene on --parallel 3` (two 10-seed calls) 20 / 20 OK; `npm run test:gate` re-run on the tip: 362 files green.
+
+Re-pins (each by the lead + T rule, `hpd4BodyRows(id)` = lead + `6 - pre - post`):
+- `tests/battleResolutionPresentation.test.ts`: Headbutt duration 48 + P/T -> + `hpd4BodyRows(29, 11)` (+12: this synthetic stream has no used-print rows, counter lead 11; tail 1).
+- `tests/animation/liveOam1MoveAdapters.test.ts`: Pursuit 228 and Fury Cutter 210 body lengths + `hpd4BodyRows(id)` (Pursuit 106 -> 114).
+- `tests/animation/livePrep10MoveAdapters.test.ts`: Reversal 179 (both bodies) + `hpd4BodyRows` (176 -> 184).
+- `tests/animation/livePrep16MoveAdapters.test.ts`: Overheat 315 (both routes) + `hpd4BodyRows`.
+- `tests/apx221PresentationGateApproximate.test.ts`: Extrasensory 326 rows 165 -> 173 (three rows), Fury Cutter 210 rows 46 -> 58; the "more than half of the rows are non-static" guard counts the body rows (without the static lead and tail rows).
+- `tests/apx222LastStaticClassesApproximate.test.ts`: Sky Uppercut 327 rows 191 -> 199.
+- `tests/playableContactAnimationLifecycle.test.ts`: Fury Swipes three bodies: hit 1 carries lead 15 + tail, hits 2+ none.
+- Helpers: `tests/helpers/iu120Rows.ts` `SHAPE_A_RULE_IDS` +71 ids, `SHAPE_A_LEADS` + {154: 15, 67: 8, 210: 9, 149: 6, 32: 7}.

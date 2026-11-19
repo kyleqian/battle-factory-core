@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { generatedCommandAnimationReplay } from "../tools/integration/generatedCommandAnimationReplay.ts";
-import { iu120Ages, iu120Extra } from "./helpers/iu120Rows.ts";
+import { hpd4BodyRows, iu120Ages, iu120Extra } from "./helpers/iu120Rows.ts";
 
 describe("ordinary contact animation command lifecycle", () => {
   it("renders each Twineedle hit, then KO/replacement before the next target's hits", () => {
@@ -21,7 +21,8 @@ describe("ordinary contact animation command lifecycle", () => {
     const replay = generatedCommandAnimationReplay(71, "on", [0]);
     const hits = replay.animations.filter(a => a.moveId === 154);
     expect(hits).toHaveLength(3);
-    expect(hits.every(a => a.ages.length === 48 + iu120Extra(154) && a.ages.at(-1) === 47 + iu120Extra(154))).toBe(true);
+    // lead3 B2: hit 1 carries the shape-A lead and tail (hpd4BodyRows); hits 2+ have no used-print anchor and get none.
+    expect(hits.every((a, i) => { const extra = iu120Extra(154) + (i === 0 ? hpd4BodyRows(154) : 0); return a.ages.length === 48 + extra && a.ages.at(-1) === 47 + extra; })).toBe(true);
     expect(replay.requests.filter(r => r.moveId === 154).map(r => [r.turn, r.multihit])).toEqual([
       [0, 3], [1, 2], [2, 1],
     ]);

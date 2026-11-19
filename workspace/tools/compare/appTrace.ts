@@ -1165,6 +1165,25 @@ function aud242lBlizzardStage(state: EngineState, id: string, side: "player" | "
   });
 }
 
+// lead3: Lv50 Rattata user (move `moveId`) against a Lv12 MACHOP (species 66, Fighting) target with Seismic Toss: the Ghost / non-Normal-target labs of the lead rule
+// (a Rattata target is Normal, so Shadow Ball would have no effect). Stats are the ROM's for nature 0, IV 31, EV 0 (Machop base 70 / 80 / 50 / 35 / 35 / 35).
+function lead3MachopTargetStage(state: EngineState, id: string, moveId: number): EngineState {
+  const level = 12;
+  const stat = (base: number): number => Math.floor(((2 * base + 31) * level) / 100) + 5;
+  const hp = Math.floor(((2 * 70 + 31) * level) / 100) + level + 10;
+  const target = Object.freeze({
+    ...rattataAtLevel(level, 69), species: 66, hp, maxHp: hp, attack: stat(80), defense: stat(50), spAttack: stat(35), spDefense: stat(35), speed: stat(35),
+    types: ["TYPE_FIGHTING", "TYPE_FIGHTING"] as const,
+  });
+  return midBattleSwitchStage(state, id, [RATTATA_LV50_BENCH, RATTATA_LV50_BENCH], [105, 105], {
+    battleScene: "on",
+    player: rattataAtLevel(50, moveId),
+    trainer: target,
+    usedMessageHoldFrames: 0,
+    sceneOffNoAnimations: false,
+  });
+}
+
 // aud261: the Swallow user (Lv50 Rattata, moves Stockpile / Swallow x3) on `side` against a Lv12 Seismic Toss Rattata.
 function aud261StockpileStage(state: EngineState, id: string, side: "player" | "opponent"): EngineState {
   const attacker = Object.freeze({ ...rattataAtLevel(50, 254), moves: [254, 256, 256, 256] as const });
@@ -2318,6 +2337,27 @@ export const APP_STAGES: Readonly<Record<string, AppStage>> = {
   "lead2-waterpulse-player-on": (state) => aud241bStage(state, "lead2-waterpulse-player-on", "on", 50, 12, 352, undefined, false, 69),
   "lead2-counter-player-on": (state) => aud241bStage(state, "lead2-counter-player-on", "on", 50, 12, 68, undefined, false, 69),
   "lead2-megakick-player-on": (state) => aud241bStage(state, "lead2-megakick-player-on", "on", 50, 12, 25, undefined, false, 69),
+  "lead3-rocktomb-player-on": (state) => aud241bStage(state, "lead3-rocktomb-player-on", "on", 50, 12, 317, undefined, false, 69),
+  "lead3-psybeam-player-on": (state) => aud241bStage(state, "lead3-psybeam-player-on", "on", 50, 12, 60, undefined, false, 69),
+  "lead3-crunch-player-on": (state) => aud241bStage(state, "lead3-crunch-player-on", "on", 50, 12, 242, undefined, false, 69),
+  "lead3-knockoff-player-on": (state) => aud241bStage(state, "lead3-knockoff-player-on", "on", 50, 12, 282, undefined, false, 69),
+  "lead3-icepunch-player-on": (state) => aud241bStage(state, "lead3-icepunch-player-on", "on", 50, 12, 8, undefined, false, 69),
+  "lead3-headbutt-player-on": (state) => aud241bStage(state, "lead3-headbutt-player-on", "on", 50, 12, 29, undefined, false, 69),
+  "lead3-slam-player-on": (state) => aud241bStage(state, "lead3-slam-player-on", "on", 50, 12, 21, undefined, false, 69),
+  "lead3-flail-player-on": (state) => aud241bStage(state, "lead3-flail-player-on", "on", 50, 12, 175, undefined, false, 69),
+  "lead3-mudslap-player-on": (state) => aud241bStage(state, "lead3-mudslap-player-on", "on", 50, 12, 189, undefined, false, 69),
+  "lead3-firepunch-player-on": (state) => aud241bStage(state, "lead3-firepunch-player-on", "on", 50, 12, 7, undefined, false, 69),
+  "lead3-metalclaw-player-on": (state) => aud241bStage(state, "lead3-metalclaw-player-on", "on", 50, 12, 232, undefined, false, 69),
+  "lead3-slash-player-on": (state) => aud241bStage(state, "lead3-slash-player-on", "on", 50, 12, 163, undefined, false, 69),
+  "lead3-doublekick-player-on": (state) => aud241bStage(state, "lead3-doublekick-player-on", "on", 50, 30, 24, undefined, false, 69),
+  "lead3-cometpunch-player-on": (state) => aud241bStage(state, "lead3-cometpunch-player-on", "on", 50, 30, 4, undefined, false, 69),
+  "lead3-doubleslap-player-on": (state) => aud241bStage(state, "lead3-doubleslap-player-on", "on", 50, 30, 3, undefined, false, 69),
+  "lead3-furyswipes-player-on": (state) => aud241bStage(state, "lead3-furyswipes-player-on", "on", 50, 30, 154, undefined, false, 69),
+  "lead3-lowkick-player-on": (state) => aud241bStage(state, "lead3-lowkick-player-on", "on", 50, 12, 67, undefined, false, 69),
+  "lead3-furycutter-player-on": (state) => aud241bStage(state, "lead3-furycutter-player-on", "on", 50, 12, 210, undefined, false, 69),
+  "lead3-psywave-player-on": (state) => aud241bStage(state, "lead3-psywave-player-on", "on", 50, 12, 149, undefined, false, 69),
+  "lead3-horndrill-player-on": (state) => aud241bStage(state, "lead3-horndrill-player-on", "on", 50, 12, 32, undefined, false, 69),
+  "lead3-shadowball-player-on": (state) => lead3MachopTargetStage(state, "lead3-shadowball-player-on", 247),
   "liv2-flamethrower-player-on": (state) => aud241bStage(state, "liv2-flamethrower-player-on", "on", 50, 12, 53, undefined, false, 69),
   "liv2-solarbeam-player-on": (state) => aud241bStage(state, "liv2-solarbeam-player-on", "on", 50, 12, 76, undefined, false, 69),
   "liv2-bite-player-on": (state) => aud241bStage(state, "liv2-bite-player-on", "on", 50, 12, 44, undefined, false, 69),

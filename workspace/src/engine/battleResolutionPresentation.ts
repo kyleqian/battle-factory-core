@@ -1693,6 +1693,16 @@ export const STA5_STATUS_BODY_TAIL_ROWS: ReadonlyMap<number, number> = new Map([
  */
 const LEAD2_SHAPE_A_MOVE_IDS: ReadonlySet<number> = new Set([24, 196, 352, 263, 25, 68, 4, 72, 3]);
 /**
+ * lead3 (B2, docs/lead1m-rule-lead-design.md): the unmeasured plain hits ("A?") and +-1 bodies ("A~") of the appendix. LEAD3_MEASURED: the bodies whose ROM window (first HP-drain frame, Scene ON lab)
+ * and matched frames improved with the rule: Shadow Ball 247, Rock Tomb 317, Psybeam 60, Crunch 242, Knock Off 282, Ice Punch 8, Headbutt 29, Slam 21, Flail 175, Metal Claw 232, Slash 163,
+ * Mud-Slap 189, Fire Punch 7, and the non-5 counters Fury Swipes 154 (hit 1, lead 15), Low Kick 67 (8), Fury Cutter 210 (9), Psywave 149 (6), Horn Drill 32 (7).
+ * LEAD3_PREDICTED: the other single-hit A? / A~ bodies with the plain counter 5, joined by the class (gap 4 by the next-event chain), not measured one by one.
+ * Out: Night Shade 101 (no HP drain in either arm to compare), Signal Beam 324 / Mud Shot 341 / Dynamic Punch 223 / Covet 343 / Gust 16 (their pan-sweep SE rows score `extra` in the T1 census with the shifted clock), the trap / charge / flinch-turn bodies (Focus Punch, Fake Out, Whirlpool, Wrap, Fire Spin, Bind, Sand Tomb), and every multi-hit or variant-counter body not measured.
+ */
+const LEAD3_MEASURED_MOVE_IDS: readonly number[] = [247, 317, 60, 242, 282, 8, 29, 21, 175, 232, 163, 189, 7, 154, 67, 210, 149, 32];
+const LEAD3_PREDICTED_MOVE_IDS: readonly number[] = [337, 315, 124, 51, 93, 52, 224, 290, 129, 231, 309, 306, 238, 211, 138, 161, 55, 348, 228, 314, 183, 87, 65, 62, 23, 323, 179, 172, 136, 75, 36, 326, 229, 152, 351, 327, 310, 299, 284, 190, 162, 158, 146, 122, 66, 330, 325, 257, 123, 27, 305, 304, 245];
+const LEAD3_SHAPE_A_MOVE_IDS: ReadonlySet<number> = new Set([...LEAD3_MEASURED_MOVE_IDS, ...LEAD3_PREDICTED_MOVE_IDS]);
+/**
  * lse2 (docs/hpd1-hp-hold.md): the no-hit status / stat bodies whose script lead (ROM `exec` rise -> `gAnimScriptActive`) is put in front of the body instead of
  * in the script tail: Leech Seed (lead 36), Cosmic Power (2), Calm Mind (2), Encore (2, turn 2). Their body SEs keep the move-body sound clock (calibrated on a 7-row lead; Encore 3),
  * so the sound clock is moved by `bodyLead - calibrated lead` (`lse2BodySoundAgeShift`).
@@ -1713,7 +1723,7 @@ export function lse2BodySoundAgeShift(moveId: number, bodyLeadFrames: number | u
 export type BodyLeadRule = "lead-table" | "shape-a" | "status-tail" | "lse2";
 const BODY_LEAD_RULE: ReadonlyMap<number, BodyLeadRule> = new Map<number, BodyLeadRule>([
   ...HPD4_BODY_LEAD_MOVE_IDS.map((id): [number, BodyLeadRule] => [id, "lead-table"]),
-  ...[...HPD8_SHAPE_A_MOVE_IDS, ...LEAD2_SHAPE_A_MOVE_IDS].map((id): [number, BodyLeadRule] => [id, "shape-a"]),
+  ...[...HPD8_SHAPE_A_MOVE_IDS, ...LEAD2_SHAPE_A_MOVE_IDS, ...LEAD3_SHAPE_A_MOVE_IDS].map((id): [number, BodyLeadRule] => [id, "shape-a"]),
   ...[...STA5_STATUS_BODY_TAIL_ROWS.keys()].map((id): [number, BodyLeadRule] => [id, "status-tail"]),
   ...[...LSE2_BODY_LEAD_MOVE_IDS].map((id): [number, BodyLeadRule] => [id, "lse2"]),
 ]);
