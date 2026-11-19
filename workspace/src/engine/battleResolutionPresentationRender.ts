@@ -44,6 +44,7 @@ import type {
   BattleResolutionPresentationState,
   BattleResolutionSegment,
 } from "./battleResolutionPresentation.ts";
+import { messageCommandTypedRows, messageCommandVisibleCharacters } from "./battleResolutionPresentation.ts";
 import { backAnimWaitTick, playerFaintReplacementSendOutTiming, sendInNature } from "./switchInTail.ts";
 import { SEND_IN_TAIL_ANIM_IDS, SEND_IN_TAIL_FRONT_ANIM_DURATION, SEND_IN_TAIL_SPECIES } from "../data/sendInTail.ts";
 import { BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS } from "./battleScriptSourceConstants.ts";
@@ -57,7 +58,6 @@ import {
 } from "./battleScriptSourceConstants.ts";
 import {
   battleStringPrintableLength,
-  battleStringVisibleCharacters,
 } from "./battleStringResolver.ts";
 import {
   battleHealthBarAnimationFrames,
@@ -1814,7 +1814,7 @@ export function battleResolutionCommandDuration(
       // part of the print-speed floor/length term (ISSUES #69).
       return Math.max(
         command.timing.minimumFrames,
-        battleStringPrintableLength(command.lines),
+        messageCommandTypedRows(command),
       ) + command.timing.holdFrames;
     case "move-animation": {
       const live = command.animation ? liveMoveAnimationDuration(command.animation, field, bodyClass, moveUse) : null;
@@ -1949,7 +1949,7 @@ export function isBattleResolutionButtonMessageReady(
   return command?.type === "message"
     && command.advance === "button"
     && state.lifecycle.phaseElapsed
-      >= battleStringPrintableLength(command.lines) + 1;
+      >= messageCommandTypedRows(command) + 1;
 }
 
 export function isBattleResolutionNextCommandHandoffComplete(
@@ -2441,10 +2441,7 @@ export function createBattleResolutionPresentationRenderView(
   ) {
     if (command.type === "message") {
       latestMessage = command.lines;
-      visibleCharacters = battleStringVisibleCharacters(
-        command.lines,
-        state.lifecycle.phaseElapsed,
-      );
+      visibleCharacters = messageCommandVisibleCharacters(command, state.lifecycle.phaseElapsed);
       if (
         command.advance === "button"
         && !command.noCursor
@@ -2453,7 +2450,7 @@ export function createBattleResolutionPresentationRenderView(
         waitCursor = Object.freeze({
           age:
             state.lifecycle.phaseElapsed
-            - battleStringPrintableLength(command.lines)
+            - messageCommandTypedRows(command)
             - 1,
         });
       }

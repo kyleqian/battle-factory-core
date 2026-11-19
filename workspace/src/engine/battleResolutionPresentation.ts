@@ -32,6 +32,9 @@ import type {
 import type { BattleScriptRulesContext } from "./battleScriptRulesContext.ts";
 import type { BattleScriptSelectionRejection } from "./battleScriptActionAdmission.ts";
 import {
+  type BattleStringPromptGate,
+  battleStringPrintableLength,
+  battleStringPromptGates,
   battleStringReferencesToken,
   resolveBattleNameWithPrefix,
   resolveBattleStringLines,
@@ -473,6 +476,15 @@ export type BattleResolutionPresentationCommand =
        * command (liveSubstituteFade.ts); this tag stays the doll clear's fallback.
        */
       substituteFadeBattler?: 0 | 1;
+      /**
+       * btn1: this command is (a piece of) a string the ROM holds on a `\p` / `\l` prompt (text.c:865-882), apart from the faint /
+       * terminal ids whose button messages end the segment.  Such a piece never suppresses the segment's `turn-end`.
+       */
+      promptGate?: true;
+      /** btn1: glyphs of `lines` already on screen when the piece starts (the line a `\l` scroll keeps). Absent = 0. */
+      startChars?: number;
+      /** btn1: rows before the piece's first glyph (the `\l` scroll). Absent = 0. */
+      leadFrames?: number;
     }>
   | Readonly<{
       type: "move-animation";
@@ -2172,6 +2184,85 @@ const TERMINAL_SEAM_BUTTON_MESSAGE_IDS: ReadonlySet<string> = new Set([
   "STRINGID_TRAINER1LOSETEXT",
   "STRINGID_TRAINER1WINTEXT",
 ]);
+
+type MessageCommand = Extract<BattleResolutionPresentationCommand, { type: "message" }>;
+
+/** btn1: rows a message piece spends printing: its scroll lead plus the glyphs not yet on screen. */
+export function messageCommandTypedRows(command: MessageCommand): number {
+  return (command.leadFrames ?? 0) + battleStringPrintableLength(command.lines) - (command.startChars ?? 0);
+}
+
+/** btn1: glyphs of a message piece on screen at its printer age (0 = the first printer callback). */
+export function messageCommandVisibleCharacters(command: MessageCommand, age: number): number {
+  return Math.min(
+    battleStringPrintableLength(command.lines),
+    (command.startChars ?? 0) + Math.max(0, age + 1 - (command.leadFrames ?? 0)),
+  );
+}
+
+/** btn1: rows the `\l` scroll takes after the press (Static's `\l`: press + 33 = the scroll + the 25-glyph second line + 3). */
+export const PROMPT_SCROLL_ROWS = 5;
+
+/**
+ * btn1 (docs/subp1m-battle-text-pause.md): a Factory battle prints with `autoScroll` off, so every `\p` / `\l` in a battle string
+ * holds the printer until a NEW A or B press.  The gates are read from the string's template (`battleStringPromptGates`): the
+ * message becomes one piece per gate -- a piece types its page, then (`advance: "button"`) waits for the press; the page after a
+ * `\p` is cleared, after a `\l` it scrolls (the last line stays, `startChars`, then `PROMPT_SCROLL_ROWS` rows).  A trailing gate
+ * keeps the source's post-print `waitmessage` as a separate hold piece (the source runs it after the printer releases).  The faint
+ * and terminal-seam ids are unchanged: their button message ends the segment (no `turn-end`).
+ */
+export function promptGatedMessageCommands(base: MessageCommand, messageId: string): readonly MessageCommand[] {
+  if (messageId === "STRINGID_TARGETFAINTED" || messageId === "STRINGID_ATTACKERFAINTED" || TERMINAL_SEAM_BUTTON_MESSAGE_IDS.has(messageId)) {
+    return [Object.freeze({ ...base, advance: "button" as const })];
+  }
+  const gates = battleStringPromptGates(messageId);
+  if (gates.length === 0) return [base];
+  const lines = base.lines;
+  const chars = (window: readonly string[]) => battleStringPrintableLength(window);
+  const pieces: MessageCommand[] = [];
+  let start = 0;
+  let previous: BattleStringPromptGate["kind"] | null = null;
+  const windowFrom = (first: number, end: number): readonly string[] => Object.freeze(lines.slice(Math.max(first, end - 2), end));
+  for (const gate of gates) {
+    const end = Math.min(gate.afterLines, lines.length);
+    if (end <= start) continue;
+    const kept = previous === "scroll" ? 1 : 0;
+    const window = windowFrom(start - kept, end);
+    pieces.push(Object.freeze({
+      ...base,
+      lines: window,
+      advance: "button" as const,
+      promptGate: true as const,
+      timing: Object.freeze({ minimumFrames: 0, holdFrames: 0 }),
+      ...(kept === 1 ? { startChars: chars(window.slice(0, 1)), leadFrames: PROMPT_SCROLL_ROWS } : {}),
+    }));
+    start = end;
+    previous = gate.kind;
+  }
+  if (start < lines.length) {
+    const kept = previous === "scroll" ? 1 : 0;
+    const window = windowFrom(start - kept, lines.length);
+    pieces.push(Object.freeze({
+      ...base,
+      lines: window,
+      advance: "automatic" as const,
+      promptGate: true as const,
+      timing: Object.freeze({ minimumFrames: 0, holdFrames: base.timing.holdFrames }),
+      ...(kept === 1 ? { startChars: chars(window.slice(0, 1)), leadFrames: PROMPT_SCROLL_ROWS } : {}),
+    }));
+  } else if (base.timing.holdFrames > 0) {
+    const window = pieces[pieces.length - 1]!.lines;
+    pieces.push(Object.freeze({
+      ...base,
+      lines: window,
+      advance: "automatic" as const,
+      promptGate: true as const,
+      startChars: chars(window),
+      timing: Object.freeze({ minimumFrames: 0, holdFrames: base.timing.holdFrames }),
+    }));
+  }
+  return pieces;
+}
 /**
  * Only 2 of the 3 button ids above are wait-cursor-less -- this is NOT
  * uniform across `TERMINAL_SEAM_BUTTON_MESSAGE_IDS` (source-read for
@@ -4876,7 +4967,7 @@ export function projectBattleResolutionCommands(
           timing: Object.freeze({ minimumFrames: prePrintPause }),
         }));
       }
-      commands.push(Object.freeze({
+      commands.push(...promptGatedMessageCommands(Object.freeze({
         type: "message",
         eventSequence: event.sequence,
         lines: messageLines(
@@ -4895,12 +4986,7 @@ export function projectBattleResolutionCommands(
           actionSnapshot,
           opponentTrainer,
         ),
-        advance:
-          payload.messageId === "STRINGID_TARGETFAINTED"
-          || payload.messageId === "STRINGID_ATTACKERFAINTED"
-          || TERMINAL_SEAM_BUTTON_MESSAGE_IDS.has(payload.messageId)
-            ? "button"
-            : "automatic",
+        advance: "automatic",
         ...(payload.messageId === "STRINGID_TARGETFAINTED"
           || payload.messageId === "STRINGID_ATTACKERFAINTED"
           ? { faintBattler: lastFaintBattler! }
@@ -4932,7 +5018,7 @@ export function projectBattleResolutionCommands(
                   ? Object.freeze({ minimumFrames: timing.minimumFrames, holdFrames: timing.holdFrames + ITEM_KNOCKOFF_PRINT_TAIL_ROWS })
                   : timing;
               })(),
-      }));
+      }), payload.messageId));
       if (payload.messageId === "STRINGID_USEDMOVE" || payload.messageId === "STRINGID_EMPTYSTRING3") {
         pauseOpenerIndex = index;
         pauseOpenerCommands = commands.length;
@@ -5606,7 +5692,7 @@ export function projectBattleResolutionCommands(
     });
   }
   if (!commands.some(
-    (command) => command.type === "message" && command.advance === "button",
+    (command) => command.type === "message" && command.advance === "button" && command.promptGate !== true,
   )) {
     const lastHp = commands[commands.length - 1];
     commands.push(Object.freeze({

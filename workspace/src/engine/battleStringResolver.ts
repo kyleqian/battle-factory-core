@@ -122,6 +122,36 @@ export function battleStringPrintableLength(lines: readonly string[]): number {
 }
 
 /**
+ * btn1 (docs/subp1m-battle-text-pause.md): the ROM prompt gates of a battle string, read from the template's own control codes.
+ * `\p` (CHAR_PROMPT_CLEAR) and `\l` (CHAR_PROMPT_SCROLL) hold the printer on JOY_NEW(A | B) (text.c:865-882; a Factory battle never
+ * sets `autoScroll`), as does `{PAUSE_UNTIL_PRESS}`.  `afterLines` is the number of resolved lines printed before the gate (every
+ * linebreak segment closes one line), so the same index applies to the resolved `lines` of any placeholder substitution.
+ */
+export type BattleStringPromptGate = Readonly<{ afterLines: number; kind: "clear" | "scroll" | "wait" }>;
+
+const PROMPT_GATES: ReadonlyMap<string, readonly BattleStringPromptGate[]> = new Map(
+  [...STRING_TABLE].flatMap((entry): [string, readonly BattleStringPromptGate[]][] => {
+    const gates: BattleStringPromptGate[] = [];
+    let lines = 0;
+    for (const segment of entry.segments) {
+      if (segment.type === "linebreak") {
+        lines += 1;
+        if (segment.code === "\\p") gates.push({ afterLines: lines, kind: "clear" });
+        else if (segment.code === "\\l") gates.push({ afterLines: lines, kind: "scroll" });
+      } else if (segment.type === "control" && segment.name === "PAUSE_UNTIL_PRESS") {
+        gates.push({ afterLines: lines + 1, kind: "wait" });
+      }
+    }
+    return gates.length === 0 ? [] : [[entry.symbol, Object.freeze(gates)]];
+  }),
+);
+
+/** The prompt gates of `messageId`'s template (empty when the print never waits for a button). */
+export function battleStringPromptGates(messageId: string): readonly BattleStringPromptGate[] {
+  return PROMPT_GATES.get(messageId) ?? [];
+}
+
+/**
  * Number of resolved glyphs visible at a command-relative text-printer age.
  * Age 0 is the first printer callback and therefore exposes the first glyph.
  */

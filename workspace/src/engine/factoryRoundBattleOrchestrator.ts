@@ -2877,7 +2877,7 @@ function advanceFactoryRoundBattleResolutionCore(
       && command.advance === "button"
       && isBattleResolutionButtonMessageReady(resolution)
     ) {
-      if (newKeys.has("A")) {
+      if (newKeys.has("A") || newKeys.has("B")) {
         const nextCommandIndex = resolution.commandIndex + 1;
         const reachedSegmentEnd = nextCommandIndex >= segment.commands.length;
         const completion = reachedSegmentEnd
@@ -2942,7 +2942,7 @@ function advanceFactoryRoundBattleResolutionCore(
     });
   }
   if (resolution.lifecycle.phase === "awaiting-message-dismiss") {
-    if (!newKeys.has("A")) {
+    if (!newKeys.has("A") && !newKeys.has("B")) {
       return Object.freeze({
         ...state,
         battleResolutionPresentation: withResolutionLifecycle(
