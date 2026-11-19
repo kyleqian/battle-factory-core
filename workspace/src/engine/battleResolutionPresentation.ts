@@ -1859,13 +1859,15 @@ function instantHpDropTiming(events: readonly BattleKernelSemanticEvent[], healt
  * other `datahpupdate; printfromtable`, Leech Seed's turn-end drain, has no ROM window here).
  */
 const HP_PRINT_TAIL_FRAMES = 3;
+/** hpf5 S1 (hpf4m, both scenes): `healthbarupdate; datahpupdate; printfromtable` is E 27 -> next exec +29 = E + 2; the 28 floor + tail 2 is 30 (ROM + 1, the usual convention). The tail was 3 (fitted on a longer bar). */
+const SUBSTITUTE_COST_HP_TIMING = Object.freeze({ minimumFrames: 28, tailFrames: 2 } as const);
 function hpPrintTailTiming(event: BattleKernelSemanticEvent, events?: readonly BattleKernelSemanticEvent[], index?: number): BattleHpTiming {
   const programCounter = event.provenance?.programCounter;
   if (programCounter === undefined) return HP_TIMING;
   const at = (offset: number) => BATTLE_SCRIPT_PROGRAM.instructions[programCounter + offset]?.opcodeName;
   return at(0) === "B_SCR_OP_DATAHPUPDATE" && at(1) === "B_SCR_OP_PRINTFROMTABLE" && at(-1) === "B_SCR_OP_HEALTHBARUPDATE"
     && at(-2) === "B_SCR_OP_WAITANIMATION" && at(-3) === "B_SCR_OP_ATTACKANIMATION"
-    ? Object.freeze({ minimumFrames: 28, tailFrames: HP_PRINT_TAIL_FRAMES } as const)
+    ? SUBSTITUTE_COST_HP_TIMING
     : at(0) === "B_SCR_OP_DATAHPUPDATE" && at(-1) === "B_SCR_OP_HEALTHBARUPDATE" && at(-2) === "B_SCR_OP_ORWORD"
       && at(-3) === "B_SCR_OP_WAITMESSAGE" && at(-4) === "B_SCR_OP_PRINTSTRING"
       ? (at(1) === "B_SCR_OP_RETURN" && events !== undefined && index !== undefined && healContinuesMoveScript(events, index) ? SHELL_BELL_HP_TIMING : ITEM_HEAL_HP_TIMING) : HP_TIMING;
