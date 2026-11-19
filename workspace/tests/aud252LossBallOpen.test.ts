@@ -16,7 +16,8 @@ const fixture = JSON.parse(readFileSync(new URL("./fixtures/aud252-loss-itemeffe
 // now sits at the same engine-minus-ROM offset as the item effect's SEs before it (-19 / -19; -7 / -6), where aud252 pinned it over-held (+1 / +14).
 // sta3: seed 2230's turn has a pre-move print (the action transition into it is now the ROM's, trn176 rule extended): the rows after the faint move 1 closer to 0.
 // hpd8: seed 2230's Scene ON turn ends on a shape-A body (the lead + hit tail now sit in the command): rows after the faint, engine minus ROM, -3 / -5 x5 / -6 -> +2 / 0 x5 / -1 (every row toward the ROM).
-const DELTAS: Record<string, number[]> = { "1914": [-5, -11, -19, -19, -19, -19, -19, -19], "2230": [7, 2, 0, 0, 0, 0, 0, -1] };
+// hpf3 (hpf1 / hpf2 hp lengths): seed 1914 [-5, -11, -19 x6] -> [0, 1, -7 x6] (every row toward the ROM); seed 2230 [7, 2, 0 x5, -1] -> [7, 3, 1 x5, 0] (the item effect rows +1, the SE_BALL_OPEN row exact; one frame, direction mixed).
+const DELTAS: Record<string, number[]> = { "1914": [0, 1, -7, -7, -7, -7, -7, -7], "2230": [7, 3, 1, 1, 1, 1, 1, 0] };
 const script = new URL("../tools/integration/soundCensusRomReplay.ts", import.meta.url).pathname;
 
 function engineRows(seed: string, scene: string, setup: unknown): Row[] {

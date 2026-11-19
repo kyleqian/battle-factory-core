@@ -31,8 +31,9 @@ describe("adp1 move SEs", () => {
   const windows = [
     ["withdraw", 110, [162], [0], [-4], "Move_WITHDRAW"],
     ["rocksmash", 249, [123, 131], [0, 11], [2, 2], "Move_ROCK_SMASH"],
-    // The in-hit spacing (10) is exact; the hit-to-hit gap is 193 in the ROM (printstring, attack, two waitmessage LONG) and 132 here: the engine's multi-hit loop presentation (out of adp1's scope), so ROM minus ours grows by 61 per hit.
-    ["beatup", 251, [123], [0, 10, 193, 203, 386, 396], [28, 28, 89, 89, 150, 150], "Move_BEAT_UP"],
+    // The in-hit spacing (10) is exact; the hit-to-hit gap is 193 in the ROM (printstring, attack, two waitmessage LONG) and 195 here, so ROM minus ours is -2 per hit.
+    // hpf3: it was 132 (ROM minus ours +61 per hit) while the hp command kept the 28-row floor; the hpf1 / hpf2 length for hit -> print is the ROM's (hpf2Shape on adp1s-beatup-player-on: ROM bar rise -> next rise +91 for hits 1 and 2, the app's hp command is 91 long).
+    ["beatup", 251, [123], [0, 10, 193, 203, 386, 396], [28, 28, 26, 26, 24, 24], "Move_BEAT_UP"],
   ] as const;
   for (const [name, move, ids, rel, expectedOffsets, label] of windows) {
     it(`the table entry of ${label} carries the SE rows`, () => {

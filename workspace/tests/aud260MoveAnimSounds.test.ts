@@ -103,7 +103,8 @@ describe("Recycle (aud260)", () => {
     expect(romRows.map((e) => e.frame)).toEqual([1466, 1490, 1515, 1605]);
     const ours = pick(ourEvents(rom));
     // hpd5: Seismic Toss joins the audited leads; the player's recycle rows moved from ROM - 4 (hpd4) to ROM + 3 (the turn's Toss bodies are now ROM-length; the held-item rows follow the next unaudited command).
-    expect(ours.map((e) => e.frame)).toEqual(romRows.map((e) => e.frame + 3));
+    // hpf3: +3 -> +4. The player's hit -> the next turn's ATTACKSTRING is now the ROM's (hpf2Shape: ROM bar rise 1357 + 73 = 1430 = ours); the +4 is Recycle's own ATTACKSTRING -> first SE gap (ROM 36, ours 40), not hp.
+    expect(ours.map((e) => e.frame)).toEqual(romRows.map((e) => e.frame + 4));
   });
 });
 

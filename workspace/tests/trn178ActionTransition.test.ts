@@ -82,7 +82,7 @@ describe("trn178: the Scene OFF action-transition pause", () => {
     }
     const on = ["off108-bulk-up-ply-primeape-onix", "off108-sand-attack-ply-primeape-snorlax", "off108-protect-ply-primeape-onix",
       "off108-rest-ply-snorlax-onix"].map((name) => evaluate(name, "on").residual);
-    // ont193 (docs/ont193-scene-on-tails.md): the script tail closes Bulk Up, Sand-Attack and Protect to 0; Rest (synthetic route) stays -3.
-    expect(on).toEqual([0, 0, 0, -3]);
+    // ont193 (docs/ont193-scene-on-tails.md): the script tail closes Bulk Up, Sand-Attack and Protect to 0; Rest (synthetic route) -3 -> -14 (hpf2, hpd1-hp-hold.md: the heal / hit hp lengths are the ROM's now, bars 15 rows here vs the ROM lab's 8; a model value, as in trn181ActionTransitionOn).
+    expect(on).toEqual([0, 0, 0, -14]);
   });
 });

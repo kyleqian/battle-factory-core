@@ -188,7 +188,9 @@ describe("Razor Wind (aud261)", () => {
     expect(tableRows(13, 0)).toEqual(["3:132", "44:133"]);
     expect(tableRows(13, 2)).toEqual(["9:160", "13:160", "17:160", "36:136"]);
   });
-  for (const [side, pan, unleashOffset] of [["player", -64, 1], ["opponent", 63, 14]] as const) {
+  // hpf3: the player's unleash offset 1 -> 9: the opponent's hit on the player (ROM bar 13 rows, rise 496; ours hp 491, bar + tail 7) now ends the turn at the ROM's length minus 5 where the 28-row floor had it 4 too long
+// (ROM bar rise -> the continuation turn's first exec 49 vs ours 44; neither was exact: the turn-end command's own 8 rows are the open remainder, hpf3 docs).
+  for (const [side, pan, unleashOffset] of [["player", -64, 9], ["opponent", 63, 14]] as const) {
     it(`aud261-razorwind-${side}: the +41 charge gap and the +4 / +4 / +19 unleash gaps equal the table's, offset constant per turn`, () => {
       const rom = fixture(`aud261-razorwind-${side}`);
       const ids = [132, 133, 160, 136];

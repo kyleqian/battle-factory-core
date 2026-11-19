@@ -79,13 +79,15 @@ interface Spec {
 //  - Overheat's four SE_M_FIRE_PUNCH rows (id 147, after the eight-flame creation step and the flame wait) land 3 later in the ROM than the model; the creation
 //    step makes eight sprites and the ROM loses wall frames there (VBlank overrun; Thunderbolt's nine-sprite step shows +1, same class). Undiagnosed beyond that.
 //  - Poison Tail's SE_M_TOXIC rows after its clearmonbg are +2 like the first rows (aud242i: Task_ClearMonBg's ResetBattleAnimBg overruns 2 frames, modelled as a lag; they were +4 before).
-//  - Counter is used second: the ROM's opponent move body (SE214 / SE131) is not emitted, and our Counter body starts 16 frames after the ROM's; the one
-//    pre-body row (SE238, the status/menu SE before the turn) keeps the ROM's frame.
+//  - Counter is used second: the ROM's opponent move body (SE214 / SE131) is not emitted, and our Counter body starts 2 frames after the ROM's (hpf3: 16 while the opponent's hit on the player kept the
+//    28-row floor; the hit -> next action's ATTACKSTRING is now the ROM's, ROM bar rise + 32 = 360 = ours); the pre-body rows (SE238, SE214, SE131) keep the ROM's frame.
+//  - Absorb's closing SE238 (the next turn's menu SE) is 11 later in the ROM than the -1 window (hpf3: it was -1 only because the 28-row floors of the drain bar hid the
+//    move body's ~11-frame lead: ROM hit bar rise 302 vs ours 291; hit -> drain bar 47 vs 46, the full-HP drain bar is 1 frame exec in the ROM and 5 here).
 const SPECS: Record<string, Spec> = {
   "toxic-player": { delta: 3, romOnlyFrom: 280 },
   "rocktomb-player": { delta: 2 },
   "overheat-player": { delta: 2, extra: { "165:147:63": 3, "173:147:63": 3, "183:147:63": 3, "193:147:63": 3 } },
-  "counter-player": { delta: -16, extra: { "101:238:0": 16, "221:214:-63": 16, "239:131:-63": 16 } },
+  "counter-player": { delta: -2, extra: { "101:238:0": 2, "221:214:-63": 2, "239:131:-63": 2 } },
   "gigadrain-player": { delta: -1 },
   "thunderbolt-player": { delta: 2, extra: { "169:215:63": 1, "236:119:63": 1, "255:119:63": 1 } },
   "sludge-player": { delta: 2 },
@@ -95,7 +97,7 @@ const SPECS: Record<string, Spec> = {
   "doubleedge-player": { delta: 2 },
   "poisontail-player": { delta: 2, extra: { "99:120:-64": 2 } },
   "rollingkick-player": { delta: 2 },
-  "absorb-player": { delta: -1, romOnlyFrom: 600 },
+  "absorb-player": { delta: -1, romOnlyFrom: 600, extra: { "526:238:0": 12 } },
   "megadrain-player": { delta: -1 },
 };
 
