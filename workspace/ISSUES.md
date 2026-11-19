@@ -13,6 +13,15 @@ defects are all authorized in the finish-up mission (`docs/factory-finish-scope.
 gameplay / RNG when proved against source; use main-lane ownership and gameplay gates. Historical presentation-only
 exclusions are superseded. Unrelated expansions stay parked.
 
+## #223 — Battle messages ending in `\p` / `\l` must wait for A or B (subp1m, 2026-11-19)
+
+`docs/subp1m-battle-text-pause.md`: in a Factory (frontier) battle the ROM holds a message ending in `\p`, `\l` or `{PAUSE_UNTIL_PRESS}` until a NEW A or B press (`text.c:865-882`;
+`BattlePutTextOnWindow` auto-advances only link / recorded battles). ROM sweep on the Substitute-hit lab: no press = the battle stalls (>= 2600 rows); release = press + 3 rows; START ignored;
+presses while the text still types are ignored. Our engine moves on after its 24-row floor for: Substitute damaged / faded, Roar's "dragged out", the Disable / Torment / Taunt / Imprison
+"can't use" texts, the Trick / Switcheroo both-items text, Static's paralysis text (`\l`, releases at +33 for an A at 600: unexplained); the orchestrator accepts only A (the ROM: A or B).
+Not audited: the ability-blocking strings (`PKMNPREVENTSUSAGE`, `PREVENTEDFROMWORKING`, `PKMNSXPREVENTSYSZ`). Landing: a button-wait message command for these strings in both scenes
+(the soak / play:random drivers must press A), and mind the turn-end rule near `battleResolutionPresentation.ts:5609`. Changes how the game plays (the player presses A there): name it for the website.
+
 ## #221 — Lobby RNG cursor: harness / unmeasured routes (lbw1 / lbw2 / lbw3, 2026-11-15)
 
 - E1-E3 (battle-exit VBlank hold, Pokerus + save-block draws, Lobby map-load draws) fixed by lbr-g (`src/engine/battleExitRng.ts`,
