@@ -161,6 +161,8 @@ declared in `lib-types/index.d.ts` and `src/factoryContract.ts`. Omit `audio` an
   `bgm-354.ogg`, `aac/bgm-354.m4a`); those files are not in the package, so a CDN setup copies them from the repo.
 - Format. Ogg Vorbis where the browser can play it, AAC-in-MP4 where it cannot (Safari / iOS older than 18.4), chosen by `canPlayType` and
   re-chosen on an Ogg decode failure. Mac-side encode command and size impact: `docs/aud245-audio-player.md`.
+- New audio files (bgm1, ISSUES #224): `bgm-471.ogg` (479.6 KiB) and `aac/bgm-471.m4a` (751.9 KiB), the Factory Head's battle song, hashed as `bgm-471-<hash>.ogg` / `.m4a` in `dist-lib/audio/`. A site that serves the audio files itself (`baseUrl`, a CDN copy, or a
+  static-file allowlist) must add both; before them a Brain battle was silent. Without them the player counts the song as `stats.missing` and carries on. No option, export or `src/` change; the package grows by 1.2 MB.
 - The sink is write-only: frame hashes, digest and trace are identical with audio on or off
   (`tests/aud245FrameIdentity.test.ts`). Audio is not in the trace, so a `resume` fast-forward plays nothing; when it ends the
   player restores the music it tracked during the fast-forward, mid-song at the right position (`src/audio/musicTracker.ts`,
