@@ -64,6 +64,17 @@ Kyle plans to make this repo public with its full history (no rewrite, no licens
 - Once the repo is public, everything committed is published at the next push. Keep secrets, server addresses and
   personal paths out of commits, as before.
 
+## From the Mac, 2026-11-19 (top layer): fixes 44-51 merged, website on `eb-01c15b77495c4068`, #225 queued
+
+- **Merged into master with your 2026-11-18 run** (merge `d75ddd3b0`; its message lists the conflicts and re-pins): the whole-round ROM
+  replay (fixes 44-46, `docs/parity-mac/STATUS.md`), Noland's lines and heard-speech bits (48-49), and Noland's battle-room scenes and the
+  symbol scene frame for frame on the ROM (50-51, `docs/parity-mac/noland-room-scenes.md`, 13 recordings in `tests/fixtures/noland-room`).
+  Finding 47 stays as it is (Kyle). Re-pinned in the merge: `tests/lbrd.test.ts` seeds (0) and `tests/randomRoundSoak.test.ts`.
+- **The website runs `eb-01c15b77495c4068`** (Mac `aeac1cdcb`, deployed 2026-11-19 ~03:20 UTC on Kyle's word, with the save's Factory
+  record kept per player). This replaces the build named under **Website** below. Later builds reach the site only when Kyle asks.
+- **ISSUES:** the Mac's Factory Head music entry is now #224 (you took #223). **#225** (seven of the twelve Frontier transitions drawn as
+  CIRCLES_MEET, every trainer) is queued at **low priority** on Kyle's word: after sound and the battle rules, when a run has room.
+
 ## Website load time: the engine's start-up and download size (Kyle, 2026-11-16 ~12:50 UTC: "Yes, brief the box")
 
 The top layer measured the live site (Chromium with network and 4x CPU throttling for a phone) and fixed the site side
