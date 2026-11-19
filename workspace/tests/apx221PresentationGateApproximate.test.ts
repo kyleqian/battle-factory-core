@@ -6,6 +6,7 @@
 import { describe, expect, it } from "vitest";
 import { LIVE_MOVE_APPROXIMATE_OTHER_REASONS, LIVE_MOVE_APPROXIMATE_POLICY } from "../src/engine/liveMovePlayback.ts";
 import { apx217Strip } from "../tools/integration/apx217TransformStrips.ts";
+import { hpd4BodyRows } from "./helpers/iu120Rows.ts";
 
 describe("apx221: the policy", () => {
   it("promotes castform-form and the named other: reasons on top of apx215 / apx217 / apx219", () => {
@@ -26,20 +27,21 @@ describe("apx221: one staged command per class draws non-static rows, classifies
     // seed 950) left: CASTFORM now reverts when the hail ends, so that Fly lands on a Normal-form CASTFORM, and no census seed 0..999
     // carries an opponent Fly at a transformed CASTFORM on the fixed engine.
     ["extrasensory-player-later-target: Extrasensory 326 by the player's later body (target top line < 27 / scanline history unknown)", 19, 326, 0,
-      "approx:other:extrasensory-player-later-target", 165],
+      "approx:other:extrasensory-player-later-target", 173],
     ["endeavor-power: Endeavor 283 with the stale battleMovePower register unknown (census seed 415)", 415, 283, 0, "approx:endeavor-power", 73],
     ["endeavor-power: Endeavor 283, a second census battle", 419, 283, 0, "approx:endeavor-power", 73],
     ["later-body-idle-rest: Signal Beam 324 by the player's later body at a battler off its rest offset", 312, 324, 0, "approx:other:later-body-idle-rest", 148],
-    ["later-body-idle-rest: Fury Cutter 210 (hardware-row model with zeroed frontIdleRest)", 851, 210, 0, "approx:other:later-body-idle-rest", 46],
-    ["later-body-idle-rest: Extrasensory 326 (later body, idle rest)", 731, 326, 0, "approx:other:later-body-idle-rest", 165],
+    ["later-body-idle-rest: Fury Cutter 210 (hardware-row model with zeroed frontIdleRest)", 851, 210, 0, "approx:other:later-body-idle-rest", 58],
+    ["later-body-idle-rest: Extrasensory 326 (later body, idle rest)", 731, 326, 0, "approx:other:later-body-idle-rest", 173],
     ["seismic-toss-damage-branch: Seismic Toss 69 by the opponent whose damage is outside the proven 33..65 branch", 567, 69, 1, "approx:other:seismic-toss-damage-branch", 233],
-    ["extrasensory-player-later-target: Extrasensory 326, a second census battle", 767, 326, 0, "approx:other:extrasensory-player-later-target", 165],
+    ["extrasensory-player-later-target: Extrasensory 326, a second census battle", 767, 326, 0, "approx:other:extrasensory-player-later-target", 173],
   ] as [string, number, number, number, string, number][])("%s", (_name, seed, moveId, attacker, code, rows) => {
     const first = apx217Strip(seed, moveId, attacker, code)!;
     expect(first).not.toBeNull();
     expect(first.code).toBe(code);
     expect(first.rows).toBe(rows);
-    expect(first.nonStaticRows).toBeGreaterThan(rows * 0.5);
+    // lead3 B2: the shape-A lead and tail rows are static by design; the half-of-the-rows guard is over the rows of the body itself.
+    expect(first.nonStaticRows).toBeGreaterThan((rows - hpd4BodyRows(moveId, undefined, attacker === 0 ? "player" : "opponent")) * 0.5);
     const again = apx217Strip(seed, moveId, attacker, code)!;
     expect(again.rows).toBe(first.rows);
     expect(again.nonStaticRows).toBe(first.nonStaticRows);
