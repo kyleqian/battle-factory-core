@@ -147,21 +147,22 @@ describe("iu120 composition", () => {
 // renderBattleResolutionLiveView by the same tool (tools/integration/fixtures/iu120/base-*.json).
 describe("iu120 routes: pre rows == base row 0, body rows unchanged, post rows == base last row, next command equal", () => {
   // tail: ont193 (docs/ont193-scene-on-tails.md) script-tail rows after the post rows; they repeat the last body row.
-  const check = (name: string, tool: string, seed: number, move: number, side: "player" | "opponent", tail = 0) => {
+  // lead (lead4 B3, S bodies): the script lead rows are presented before the body (age 0, the first body row) and leave the tail.
+  const check = (name: string, tool: string, seed: number, move: number, side: "player" | "opponent", tail = 0, lead = 0) => {
     const base = baseRows(name), now = routeRows(tool, seed, move, side);
     const body = base.filter((r) => !r.after), nowBody = now.filter((r) => !r.after);
     const P = iu120Pre(move, side), T = iu120Post(move, side);
-    expect(nowBody).toHaveLength(body.length + P + T + tail);
+    expect(nowBody).toHaveLength(body.length + P + T + tail + lead);
     const key = (r: RenderRow) => [r.sha, r.age, r.live, r.pre === true];
-    for (let i = 0; i < P; i += 1) expect(key(nowBody[i]!), `pre row ${i}`).toEqual(key(body[0]!));
-    for (let k = 0; k < body.length; k += 1) expect(key(nowBody[P + k]!), `body row ${k}`).toEqual(key(body[k]!));
-    for (let j = 0; j < T + tail; j += 1) expect(key(nowBody[P + body.length + j]!), `post row ${j}`).toEqual(key(body.at(-1)!));
+    for (let i = 0; i < P + lead; i += 1) expect(key(nowBody[i]!), `pre row ${i}`).toEqual(key(body[0]!));
+    for (let k = 0; k < body.length; k += 1) expect(key(nowBody[P + lead + k]!), `body row ${k}`).toEqual(key(body[k]!));
+    for (let j = 0; j < T + tail; j += 1) expect(key(nowBody[P + lead + body.length + j]!), `post row ${j}`).toEqual(key(body.at(-1)!));
     expect(now.find((r) => r.after)!.sha).toBe(base.find((r) => r.after)!.sha);
     return { P, T, rows: nowBody.length, pre: nowBody.map((r) => r.pre === true) };
   };
 
-  it("Bulk Up (battle 154, player; P 3, N 4, T 2): 108 -> 113 rows, + ont193's 4 script-tail rows = 117", () => {
-    expect(check("base-b154-339-player", "idle94RouteRender.ts", 154, 339, "player", 4)).toMatchObject({ P: 3, T: 2, rows: 117 });
+  it("Bulk Up (battle 154, player; P 3, N 4, T 2): 108 -> 113 rows, + ont193's 4 script-tail rows (lead4: 2 of them are the script lead before the body) = 117", () => {
+    expect(check("base-b154-339-player", "idle94RouteRender.ts", 154, 339, "player", 2, 2)).toMatchObject({ P: 3, T: 2, rows: 117 });
   }, 120000);
 
   it("Karate Chop (battle 268, player; P 3, N 0, T 2): 49 -> 54 rows", () => {

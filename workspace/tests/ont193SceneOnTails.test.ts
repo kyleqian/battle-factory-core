@@ -18,9 +18,9 @@ const body = (species: string, move: number, target: string, scene: "on" | "off"
 const evaluate = (name: string, scene: "on" | "off") => trn176Evaluate(trn176Cases(["off108"], [name]).find((c) => c.scene === scene)!) as any;
 
 describe("ont193 A: Scene ON live no-hit bodies carry the source-derived script tail", () => {
-  it("tail frames: Bulk Up 4, Protect 3, Detect 3, Sand-Attack 6; body rows 117 / 131 / 118 / 67", () => {
-    for (const [name, species, move, target, tail, frames] of [["Bulk Up", "PRIMEAPE", 339, "ONIX", 4, 117], ["Protect", "PRIMEAPE", 182, "ONIX", 3, 131],
-      ["Detect", "PRIMEAPE", 197, "ONIX", 3, 118], ["Sand-Attack", "PRIMEAPE", 28, "SNORLAX", 6, 67]] as const) {
+  it("tail frames: Bulk Up 2, Protect 1, Detect 1, Sand-Attack 5 (lead4: the old 4 / 3 / 3 / 6 minus the script lead 2 / 2 / 2 / 1 now before the body); body rows 117 / 131 / 118 / 67", () => {
+    for (const [name, species, move, target, tail, frames] of [["Bulk Up", "PRIMEAPE", 339, "ONIX", 2, 117], ["Protect", "PRIMEAPE", 182, "ONIX", 1, 131],
+      ["Detect", "PRIMEAPE", 197, "ONIX", 1, 118], ["Sand-Attack", "PRIMEAPE", 28, "SNORLAX", 5, 67]] as const) {
       const b = body(species, move, target, "on");
       expect([name, b.tailFrames, b.frames]).toEqual([name, tail, frames]);
     }
@@ -39,7 +39,7 @@ describe("ont193 A: Scene ON live no-hit bodies carry the source-derived script 
 
   // tl205 re-pin (docs/tl204-zero-tail-rows.md): Double Team (masked pre, trail -1 measured by tl204) now carries its 5-row script tail: 239 -> 244 rows, anchors -5 -> 0.
   it("the Double Team window (tl205: 239 + 5 tail rows), Rest (synthetic route) and Scene OFF keep their pre-ont193 values", () => {
-    expect(body("PRIMEAPE", 104, "ONIX", "on")).toMatchObject({ frames: 244, tailFrames: 5 });
+    expect(body("PRIMEAPE", 104, "ONIX", "on")).toMatchObject({ frames: 244, tailFrames: 4 }); // lead4: tail 5 -> 4, the 1-row script lead moved before the body (244 total)
     expect(evaluate("off108-double-team-ply-primeape-onix", "on")).toMatchObject({ anchorStartDelta: 0, anchorEndDelta: 0 });
     // hpf2: the Rest ROM lab (ON / OFF, hp -> printstring: bar 9 rows, next rise +11 = the heal tail 3 on the app's bar + 1, landed) leaves -14: the route's hit and heal bars are 15 rows, the lab's 8 (-7 each); kept.
     // hpf1: -3 -> -14 (the synthetic route's foe Tackle on the player no longer carries the 28-row floor; hpf1-p{c,a}-* ROM labs pin the floor-free hold, the route's -22 start is its own)
