@@ -154,12 +154,12 @@ describe("Present (aud262)", () => {
     expect(rows.map((e) => e.frame - rows[0]!.frame)).toEqual([0, 16, 32, 54, 114, 122, 130, 138, 146]);
     expect(expectConstantOffset(rom, [167, 125, 177], 9, "first")).toBe(1);
   });
-  it("aud262-presentheal-player (heal branch): SE_M_MORNING_SUN 63 frames and the second SE 77 frames after the last bag SE, offset -1 (hpf2: the heal's hp -> printstring hold, 2 -> -1)", () => {
+  it("aud262-presentheal-player (heal branch): SE_M_MORNING_SUN 63 frames and the second SE 77 frames after the last bag SE, offset 2 (hpf2 open: the staging foe hp after a move-animation, no hit-animation, keeps its floor; the heal's own tail lands after these SEs)", () => {
     const rom = fixture("aud262-presentheal-player");
     const rows = rom.events.filter((e) => e.noop !== true && e.kind === "se" && [167, 125, 228, 179].includes(e.id as number));
     expect(rows.map((e) => e.id)).toEqual([167, 125, 125, 125, 228, 179]);
     expect(rows.map((e) => e.frame - rows[0]!.frame)).toEqual([0, 16, 32, 54, 117, 194]);
-    expect(expectConstantOffset(rom, [167, 125, 228, 179], 6, "first")).toBe(-1);
+    expect(expectConstantOffset(rom, [167, 125, 228, 179], 6, "first")).toBe(2);
   });
 });
 
