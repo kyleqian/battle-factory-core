@@ -50,27 +50,33 @@ exclusions are superseded. Unrelated expansions stay parked.
     source shape without a ROM window. The ordinary hit's own floor: rol1 / hpd1 (`docs/rol1-rollout-chain.md`).
   Plan: `docs/hie-scout.md`; `docs/aud250-general-anim-sounds.md`.
 
-## #219 — S11 sound: event parity met; frame-alignment and coverage remainder (2026-11-14, rewritten 2026-11-18)
+## #219 — S11 sound: event parity met; frame-alignment and coverage remainder (2026-11-14, rewritten 2026-11-19)
 
-**Event parity met 2026-11-18** (`docs/aud251-s11-scoreboard-refresh.md` "aud263", `docs/adp1-withdraw-rocksmash-beatup.md`): T1 census 0..999 both scenes, every family,
-0 missing / 0 extra / 0 unclassified; T2 ROM replays (21 ON + 20 OFF seeds) 0 missing / 0 extra. Reproduce: `tools/integration/lsd194Census.sh` + `soundCensusDelta.py --t1`;
-`tools/audio/aud248RunSeed.sh` + `tools/audio/soundScoreboard.py`. Open remainder (timing class, ROADMAP item 6; per-move offsets in #198):
-- **Frame alignment:** T2 Scene ON matches 3,683 of 3,991 move rows with a constant per-window offset (p10 -21, median -2, p90 +5); controller / cry / BGM rows likewise
-  (bgm -71, cry -28 at the tails). The hpd4 / hpd5 script lead removed the drift on six audited bodies (docs/hpd1-hp-hold.md); the other bodies keep the old lead-in-tail.
-- **Coverage:** T2 is 41 of 1000 seeds; controller / cry / BGM have no T1 rule table (counts only); fanfare / screen SEs have no T2 instance.
-- **Per-move:** [fixed by mem2 (`docs/aud242-move-anim-sounds.md` section 30): the 0x7FFF `INSTANT_HP_BAR_DROP` of Memento / Explosion / Self-Destruct is an instant bar drop (5 / 6 rows) in both scenes; Memento SE1 -108 -> -7]. Open: Self-Destruct's body 9 rows short (sdx1, `Cmd_end` song wait), Memento's `stats-change` 5 rows early, Explosion hit-blink phase ~2 rows, no Scene OFF ROM window for the instant hp command. Short `live` windows (liv1, docs/hpd1-hp-hold.md): Faint Attack 220 -> 226, Sludge Bomb 160 -> 165, Bite 26 -> 31, Earthquake 198 -> 208, Solar Beam unleash 160 -> 238, Mud-Slap 51 -> 52. The first `Status_*` play: sta4 (docs/aud249 "sta4") splits it into the body lead,
-  pre-print rows and 6 message-to-launch rows (`STATUS_ANIMATION_SCRIPT_AGE` -> 0 once the bodies get the lead), Water Spout +11 / +7 / +7 / +2 by HP quarter, Beat Up hit-to-hit 132 vs ROM 193 frames
-  (multi-hit message timing; unreachable in Factory Lv 50), Wish heal's star hand-over frame (1 per side), the first `Status_*` play +7 / +8 (sta3 fixed the second play; see sta4 above), Solar Beam's unleash body 160 vs ROM 237 rows (hpd7b), `Status_Freeze` SE 242 +1 unmeasured, Roar / Howl cry windows inherit a lab drift.
-- **Measured presentation-timing bugs behind the largest T2 offsets** (out1, `docs/aud251-s11-scoreboard-refresh.md` "out1"; not landed): (a) [fixed by kno3 (`docs/kno1-item-knockoff-plan.md` "kno3"): Knock Off's `B_ANIM_ITEM_KNOCKOFF` is a general-animation command (bag sprite both sides in Scene ON, the 35-row Pausex20 hold in Scene OFF, launch W + A + 2); out2-knockoff ON 32 -> 145 / 256, OFF 88 -> 192; open: the hit-phase offset of 2-8 rows that the no-item control shares]; (b) Flamethrower's body is 115 presented rows vs the ROM's 215 from
-  `attackanimation` to `hitanimation` (`liveMoveAnimation.ts:1433`; also seed 1028 res12); (c) [fixed by pau2: Horn Drill's miss (`BattleScript_KOFail`, `pause B_WAIT_TIME_LONG`) now holds the used message 71 rows in both scenes, ROM-matched]. out2: Knock Off OFF lacks the 34-row Pausex20, ON the 43 / 94-row animation by target side; hpd7c: Flamethrower `live` 115 -> 210 (a sound-wait hold). Knock Off plan: `docs/kno1-item-knockoff-plan.md` (one sprite, 40-frame arc, +51 off-screen
-  frames when the player loses the item; reuse `present.ts` `bagAtAge`). Poison ticks (psn3, docs/aud249 "psn3" / "psn4") inherited earlier drift; kno2: Knock Off's launch waits for the hit SE (`IsBattleSEPlaying`), length = W + A + 2. pau1 / pau2 / pau3 (`docs/pau1-script-pauses.md`): the LONG used-move pause (AlreadyPoisoned, KOFail, RestCantSleep) and SafeguardEnds' anchor-less pause (+10 ROM lead, pau3) are presented; MoveMissedDoDamage / RestCantSleep are ROM-proved already right. Open remainder: the ability switch-in prints' pauses (Intimidate / Trace; no battle-start lab stage), the HJK crash print +3 frames, the Safeguard expiry tail 4 frames early, the failed-Toxic pixel lab, ~10 / ~20 frame residuals in the seed 3738 res60 / res61 ticks, a 1-frame early menu after KOFail; change `STATUS_ANIMATION_SCRIPT_AGE` 7 -> 0 only together with the body leads.
-- Scene ON seeds 6568 / 7682 stall at the 80,000-frame ROM drive cap (T2 cannot align them); census seeds 796 / 995 end at the frame budget in both scenes.
+**Event parity holds** (T1 census 0..999 both scenes 0 / 0 / 0, `docs/aud251-s11-scoreboard-refresh.md` "aud263"; T2 ON 25 seeds "t2r" and OFF 24 seeds "t2o" 0 missing / 0 extra).
+Reproduce: `tools/integration/lsd194Census.sh` + `soundCensusDelta.py --t1`; `tools/audio/aud248RunSeed.sh` + `soundScoreboard.py` + `t2Attribute.py` / `t2Anchor.py`. Open remainder (timing class,
+ROADMAP item 6; per-move offsets in #198). Landed 2026-11-18/19 (docs/hpd1-hp-hold.md "hpd8" / "liv2" / "lse2" / "hpf1-3", aud249 "sta5", aud242 s30 mem2, kno1 "kno3", pau1 "pau2" / "pau3"):
+16 shape-A bodies, 7 long `live` windows (Flamethrower, Solar Beam unleash, Self-Destruct, Bite, Sludge Bomb, Earthquake, Faint Attack), Flatter / Swagger / Spore / Toxic first status play, Leech Seed /
+Hydro Pump / Cosmic Power / Calm Mind / Encore / Hypnosis / Blizzard, ROM hp command lengths (hits, heals, recoil, drains), the 0x7FFF instant drop, Knock Off's item animation, the LONG / Safeguard pauses.
+- **Bodies measured, not landed (lse3, docs/hpd1-hp-hold.md "lse3"):** Absorb +10, Mega Drain +8, Counter +5, Revenge +8, Recycle +4, Razor Wind charge / unleash +8 / +9 (+ ~5 turn-end rows of a
+  locked continuation), the opponent's Pound / Scratch / Tackle (+13 / +12 / +21: not live adapters), Wish (+14: the generic action-transition rows that `actionTransitionPauseFrames` drops in Scene ON
+  when the anchor is the used print). hpf3 re-pinned Absorb / Revenge / Recycle / Razor Wind windows that these bodies now dominate.
+- **hp shapes still on the 28-row floor (hpf2, no ROM lab):** poison / burn / Curse / Nightmare / wrap ticks, sandstorm / hail damage, faint-next on small bars, confusion self-hit, Substitute printfromtable.
+- **sta5 step 3** (u - 2 pre-print rows at the first action's confirm handoff; patch `.integration/evidence/sta5/step3-handoff-rows.patch`; moves 126 ROM-exact pins until the sound clock is decoupled) and
+  **step 2's Scene OFF** (the +6 message -> launch hold is gated Scene ON only: no OFF ROM window yet).
+- **Residuals:** Blizzard body SEs +2 (print glyph-count R), Calm Mind hit SE -4, Self-Destruct post-hit hp + faint +6 rows, Memento `stats-change` 5 rows early, Explosion hit-blink ~2 rows, Knock Off's
+  hit phase 2-8 rows (shared with the no-item control), Encore turn 1, Solar Beam unleash FadeToBg picture, Faint Attack opponent lag, the species-dependent ball-open lag (bal1: not in the ROM send-out
+  path), shape C bodies (Brick Break, Dig charge, status-command gaps), multi-hit second hits, Water Spout -1, Beat Up multi-hit message timing, `Status_Freeze` SE 242 +1, Roar / Howl lab drift.
+- **Pauses (pau3 open):** ability switch-in prints (Intimidate / Trace; no battle-start lab stage), the HJK crash print +3, Safeguard expiry tail 4 early, the failed-Toxic pixel lab, a 1-frame early menu after KOFail.
+- **Coverage:** controller / cry / BGM have no T1 rule table (counts only); fanfare / screen SEs have no T2 instance. Scene ON seeds 6568 / 7682 stall at the 80,000-frame ROM drive cap; census
+  seeds 796 / 995 end at the frame budget in both scenes.
 
 ## #222 — AI switch withdraw presentation: residuals (ais1 / ais2 / ais3, 2026-11-17)
 
 `docs/ais1-ai-switch-withdraw.md` (ais1 / ais2 / ais3): the AI withdraw, recall ball effect, species anchors (opponent front / player back y_offset), the 101-frame tray and the 2-frame-earlier AI send-in ball are done; seed 2741 is pixel-exact through the send-in in both scenes.
-Still open: (1) `aud253` 2741 send-in SE 15 / cry are now +1 (emitter offset from the ball throw); (2) Pursuit-interception and Focus-Punch-pre-pass AI switches are unsynthesized / unprobed; (3) a same-turn player voluntary switch + AI switch uses the player's recall clock only;
-(4) the faint-replacement send-in (shared timeline) is unproven at the 2-frame start (obr251-off 6/306 at baseline); (5) player recall healthbox-hide intermediate frame and the player send-in ball / emerge (Scene ON 238-250).
+ais4 (2026-11-18, same doc "ais4"): the opponent faint replacement runs the AI send-in timeline (obr251 OFF 6 -> 91, ON 6 -> 178 / 306; aud253 2741 SE 15 / cry exact). Still open: (2) Pursuit-interception
+and Focus-Punch-pre-pass AI switches unsynthesized / unprobed; (3) a same-turn player voluntary switch + AI switch uses the player's recall clock only; (5) player send-in 1 frame late in Scene OFF
+(`pmo239-switch-0-to-2-reopen-off`, one species pair) and no Scene ON lab for the player recall / send-in (238-250); the OFF `\p` box clear at A+1, the post-send-in clear (OFF 9 early, ON 1 late),
+the staged replacement's gender (harness).
 
 ## #214 — Leads from the Mac lane's 2026-11-12 passes (source-read only, no ROM seed)
 

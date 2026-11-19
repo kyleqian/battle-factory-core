@@ -56,7 +56,8 @@ longer waits for census parity (handoff "Next work" item 0).
    of git (steps 1 cln237, 2 cln238a/b, 3 cln239 and 6 DONE by 2026-11-04; 5 first half cln240 `test:gate` and 4 first half `core-rs-archive` branch 2026-11-05). One reversible commit per step, verified by typecheck + full suite
    + build.
 4. **Bundle hygiene** (the rest of Phase 3): test-only data out of `src/`,
-   lazy-loaded sprite sheets and large tables, gamepad input in the library.
+   lazy-loaded sprite sheets and large tables, gamepad input in the library. **2026-11-19:** dl3 / dl4 load
+   battle pictures and move-animation assets per battle (first-battle download ~2,112 -> ~1,541 KiB brotli-11; `docs/dl3-per-species-pictures.md`).
 5. **Crashes, nightly** (unchanged): `npm run play:random` both scenes and the
    Scene ON soaks on the final src. Every overlay / pageerror / CRASH / HANG
    is a fix step before anything else.
