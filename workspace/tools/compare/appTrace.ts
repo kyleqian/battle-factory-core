@@ -2072,6 +2072,8 @@ export const APP_STAGES: Readonly<Record<string, AppStage>> = {
   "aud250-focuspunch-opponent-on": (state) => aud241bStage(state, "aud250-focuspunch-opponent-on", "on", 12, 50, 69, undefined, false, 264),
   "aud250-leechseed-opponent-on": (state) => aud241bStage(state, "aud250-leechseed-opponent-on", "on", 12, 50, 69, undefined, false, 73),
   "aud242b-flatter-player-on": (state) => aud241bStage(state, "aud242b-flatter-player-on", "on", 50, 12, 260, undefined, false, 69),
+  "sta6m-flatter-player-off": (state) => aud241bStage(state, "sta6m-flatter-player-off", "off", 50, 12, 260, undefined, false, 69),
+  "sta6m-swagger-player-off": (state) => aud241bStage(state, "sta6m-swagger-player-off", "off", 50, 12, 207, undefined, false, 69),
   "aud242b-superpower-player-on": (state) => aud241bStage(state, "aud242b-superpower-player-on", "on", 50, 12, 276, undefined, false, 69),
   "aud242b-dragonrage-opponent-off": (state) => aud241bStage(state, "aud242b-dragonrage-opponent-off", "off", 12, 50, 69, undefined, false, 82),
   // aud242e: sprite and mon-task lifetimes (docs/aud242-move-anim-sounds.md section 9).
