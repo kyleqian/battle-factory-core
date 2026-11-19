@@ -675,3 +675,43 @@ Unproven shapes KEEP the 28 floor (no ROM lab at the time): heals (Rest / Recove
 Re-pins (each toward its ROM fixture): aud241b effectiveness / low-HP / faint deltas -> 0; aud248 superpower 17 -> 12; hie3 sitrus-on / shellbell-on drift; hpd1 player-hit `{minimumFrames: 0, tailFrames: 7}`. New: `tests/hpf1HpHold.test.ts` (4 tests, each fails without the fix). Labs: `tools/battle-lab/hpf1-*.json`, traces `tools/compare/traces/hpf1-*.json`, `tools/integration/hpf1Cmds.ts` (ROM hp command lengths per trace).
 
 T2 sound scoreboard (ROM chain, base 3bdb6cf11 -> new; 0 missing / 0 extra both): Scene ON 8 seeds, battle-controller SE exact 34 -> 43, cry exact 4 -> 14, cry delta median -8 -> -4 (p10 -24 -> -21, p90 14 -> 0), battle-controller median -5 -> -4 (p10 -24 -> -23, p90 3 -> 1), move-animation exact 161 -> 166 (p10 -18 -> -16). Scene OFF 4 seeds, controller exact 10 -> 16, cry exact 3 -> 8, cry median -6 -> -3 (p10 -15 -> -11, p90 15 -> 0), controller p10 -15 -> -11, p90 5 -> 1.
+
+## hpf2: heals, recoil, drains and the hit -> end-turn print get the ROM's own hp length (floor-free)
+
+Base `70b797e28` (hpf1 + sta5) -> `d6ef8fb3a` (rules) + `e22a29062` / the aud262 pin commit (tests). Duration is still `max(minimumFrames, bar + 1) + tailFrames`; the 28 floor is a fit and the ROM has none. Measured with `tools/integration/hpd2Probe.py` (+ `hp` / `mhp` per frame) and paired with `tools/integration/hpf2Shape.py <lab> <on|off> <evidence-dir>`, one ROM lab per shape, both scenes where a lab exists (`aud242b/e/g/j/k/r` hail, Double-Edge, Giga Drain, Dream Eater, Struggle, Recover, Soft-Boiled player labs, Rest, Rolling Kick). Convention: the app message command = ROM RISE + 1 for hit / heal -> print (pixel-verified at the per-lab constant offset ROM bar rise - app hp start; same-frame compares are meaningless because of the out-of-scope move-body lead offsets).
+
+Rules (`applyHpHitTails`, `src/engine/battleResolutionPresentation.ts`):
+
+| | shape | rule | ROM numbers |
+|---|---|---|---|
+| R1 | heal hp -> print; hp right after another hp (recoil / drain) -> print; a hit -> print only when the print is the hit-effect message (CRIT / RESULT, the hpf1 rule) | tail = `messageExec - hpExec + 2` (CRITMESSAGE / RESULTMESSAGE / PRINTSTRING / PRINTFROMTABLE), no floor | heal bar 9 / 13 rows prints at bar + 2 (Recover tail 3, Rest next rise +11 = bar 9 + 3 hold); Double-Edge recoil next-rise 60 (recoil tail 3), Struggle 59; Giga Drain drain 61 (tail 4), Dream Eater 58 |
+| R2 | hit -> hp (recoil / drain follows) | tail = difference of the two `healthbarupdate` executions | Double-Edge hit 10, Giga Drain hit 11 |
+| R3 | hit -> `sprite-visibility` x2 -> end-turn print (hail / toxic ON, sandstorm OFF) | tail = MoveEnd rows + 8 (`HP_END_TURN_PRINT_LEAD_ROWS`) | bar -> print +17 |
+
+Scene OFF has no hit-animation command, so `hit` is false there; the rules are restricted (R1 to hitEffectMessage / heal / afterHp) so ON and OFF command shapes stay equal for the unproven shapes (the sag130 hit-secondary anchors compare `minimumFrames + holdFrames`; the first, wider version broke them: ON `hp::28` vs OFF `hp::0`).
+
+Re-pins (each toward its ROM fixture / a constant lab offset): `aud262MoveAnimSounds` Water Spout q0 / q1 / q2 0 -> -1 (this is the pre-existing hpf1 floor-free Toss residual, not an hpf2 effect: ours 1 frame later; root cause not isolated); `ais2` seed 2741 off `romFrameOffset` 51 -> 40, on 68 -> 57 (window lo / hi +11, md5 unchanged); `cry1CryTasks` roar pidgey / jynx drift 13 -> -1; `randomRoundSoak` seed 21 frames 41_048 / renderCalls 2_892 and the "full" seed 1 pin (frames 92558, battle 5, turn 27, maxBattleDepth 4); `trn181ActionTransitionOn` Rest residual -3 -> -14 (below). New: `tests/hpf2HpHold.test.ts` (4 Tier-1 tests: Recover heal tail 3, Double-Edge hit 10 / recoil 3, Giga Drain hit 11 / drain 4, Sandstorm hit -> end-turn print tail 15; each fails on the base source).
+
+### Rolling Kick 313 -> 148 matched frames
+Explained, not a regression of the hp command: a constant 10-frame move-body lead (out of scope: move-body windows) plus chance cursor-blink matches in the old count. The hp command itself is within 1 frame of the ROM.
+
+### Rest and the ont193 synthetic anchor
+Rest ROM lab: heal bar 9 rows, next rise +11 = heal tail 3 (landed). The ont193 synthetic route's anchor moved -3 -> -14 because its bars are 15 rows vs the lab's 8 (-7 each over the two bars); the pin is a measured model value of that route, not the ROM's; `ont193SceneOnTails` stays {anchorStartDelta -22, anchorEndDelta -14}, the trn181 Rest residual is -14.
+
+### Labs (frames matched, before -> after, identical)
+hpd1-dragonrage-on 950 -> 950, out2-horndrill-on / off 568 / 558 -> 568 / 558, rol1-rollout5-on 2028 -> 2028; hpf1 pa-dragonrage on / off 78 / 607, pa-sonicboom 623 / 619, pc-dragonrage 512 / 927, pc-sonicboom 819 / 923, pc-toss10 892 / 922: all unchanged (not worse; these shapes are hits with MoveEnd / faint, not touched by R1..R3). The gains are on the heal / recoil / drain labs: ROM-vs-app pixel match near-exact at the lab offset (hail, Recover, Double-Edge, Giga Drain, Dream Eater, Struggle, Soft-Boiled, Rest).
+
+### Census 0..99, both scenes (`lsd194Census.sh` jobs 3 / split 4 + `rst197CensusDelta.py`, base `70b797e28` vs `e22a29062`)
+0 digest / error / type-sequence diffs in both scenes (100 / 100 `eventsDigest` equal each). Command-length changes: ON 66 / 100 battles (31 507 commands), OFF 66 / 100 (30 730): Rest / Recover / Soft-Boiled / Moonlight / Synthesis heal -> message (+1 .. +3, tail 3), Struggle hit -> recoil (-13 / +9) and recoil -> message (-23 / -16), Giga / Mega Drain and Dream Eater hit -> drain (+8 .. +11), drain -> message (-23 .. -10), hit -> end-turn print (+8 .. +15).
+
+### T2 sound scoreboard (ROM chain, base `70b797e28` tree via git archive vs this tree; 0 missing / 0 extra both, both scenes)
+Scene ON seeds 2 165 1028 2741 5569: move-animation SE exact 116 -> 119 (p10 -12 -> -11), stat-change p10 -11 -> -10, cry exact 10 / 10 (p10 -15 -> -14, median -4 -> -4, p90 0 -> 0), battle-controller exact 28 / 28 (median -3, p10 -15, p90 0 unchanged), bgm p90 18 -> -10. Scene OFF seeds 2 165: controller exact 8 -> 9, cry exact 4 -> 5 (median -1, p10 -8, p90 0 unchanged), bgm 23 -> -5. Not run (time cap): ON 3738 8108 648, OFF 1028 2741 (~40k-frame seeds; 8 seeds ON / 4 OFF were asked for, 5 / 2 were run).
+
+### Gates
+`npm run typecheck` 0 (re-run at the end, below); `npm run build` 0; `npm run test:gate` 362 / 362 files (2844 tests); `npm run soak -- --policy vanilla --seeds 0:20 --parallel 4` 20 / 20 OK; the affected set (every test importing `battleResolutionPresentation*` / `battleHitSounds` / `tickSounds`, hpd* / hpf1 / rol1 / hie* / aud241* / aud253* / aud248* / ont193, lbrd, randomRoundSoak) 157 files passing after the aud262 Present-heal pin was put back to 2 (below). The full `npm test` was not run (the supervisor does).
+
+### Open remainder
+- Tick bars (poison / burn / Curse / Nightmare / wrap), sandstorm / hail damage bars, faint-next on small bars, confusion self-hit (hp -> status-animation -> message) and Substitute `printfromtable` have no ROM lab here; they keep the 28 floor.
+- `aud262-presentheal-player`: the staging foe hp (162 -> 81) follows a `move-animation` with no hit-animation, so it is not a `hit` and keeps its floor; an intermediate (wider) rule had moved that offset 2 -> -1, the final rule leaves it at 2.
+- Water Spout q0 / q1 / q2 -1 (hpf1 Toss, above).
+- The ont193 synthetic Rest anchor (-14) is model-derived (bars 15 vs 8 rows), not a ROM value.
