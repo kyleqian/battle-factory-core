@@ -11,7 +11,7 @@ import frontierHeldItemsData from "../data/gen/battle-frontier-held-items.json" 
 import speciesStatsData from "../data/gen/species-stats.json" with { type: "json" };
 import speciesTypesData from "../data/gen/species-types.json" with { type: "json" };
 import type { BattleKernelSemanticEvent, BattleState } from "./battleDecisionBoundary.ts";
-import type { BattleScriptSemanticEvent } from "./battleScriptEvents.ts";
+import type { BattleScriptSemanticEvent, BattleScriptSemanticEventPayload } from "./battleScriptEvents.ts";
 import {
   acknowledgeBattleScriptMachineController,
   stepBattleScriptMachine,
@@ -35,6 +35,7 @@ import {
 } from "./battleScriptSwitchinOpcode.ts";
 import {
   createFactoryEmptyBattlerState,
+  resolveFactoryAbilityDisplayName,
   createFactoryFullTurnBattleStateFromRulesContext,
   FACTORY_RUN_AWAY_NOOP_INVARIANT,
   type FactoryFullTurnDecisionRules,
@@ -117,6 +118,18 @@ export type FactoryFreshBattleStart = BattleState<FactoryFullTurnDecisionRules>;
 export type FactoryFreshBattleInitialization = Readonly<{
   kind: "started";
   state: BattleState<FactoryFullTurnDecisionRules>;
+  events: readonly BattleKernelSemanticEvent[];
+  /**
+   * One entry per Intimidate / Trace script run, in order: its events with the presentation fields the full-turn path adds at print time
+   * (scriptingBattler, targetBattler, monNickBattler, ability substitutions), at the same sequences as `events`, and the script's total
+   * instruction rows (the kernel steps one row per frame, a `pause` retrying). Presentation-only: `events` stay as they were.
+   */
+  entryScripts: readonly FactoryBattleStartEntryScript[];
+}>;
+
+export type FactoryBattleStartEntryScript = Readonly<{
+  label: string;
+  rows: number;
   events: readonly BattleKernelSemanticEvent[];
 }>;
 
@@ -225,6 +238,7 @@ function runEntryScript(
 ): Readonly<{
   rulesContext: BattleScriptRulesContext;
   events: readonly BattleScriptSemanticEvent[];
+  rows: number;
 }> {
   const execution = createBattleScriptStatusRulesExecution(
     program,
@@ -257,6 +271,7 @@ function runEntryScript(
       return Object.freeze({
         rulesContext: result.state.rulesContext,
         events: result.state.events,
+        rows: result.state.instructionsExecuted,
       });
     }
     if (result.kind === "unsupported") {
@@ -347,6 +362,27 @@ function withStatus3(
     index === battler ? Object.freeze({ ...candidate, status3: status3 >>> 0 }) : candidate
   ) as unknown as BattleScriptRulesBattlers;
   return Object.freeze({ ...rules, battlers: Object.freeze(battlers) });
+}
+
+function presentationEntryPayload(
+  payload: BattleScriptSemanticEventPayload,
+  rules: BattleScriptRulesContext,
+): BattleScriptSemanticEventPayload {
+  if (payload.kind !== "message") return payload;
+  const scriptingBattler = rules.scriptingBattler as 0 | 1;
+  const opposing = scriptingBattler === 0 ? 1 : 0;
+  const abilityOf = (battler: 0 | 1): string => resolveFactoryAbilityDisplayName(rules.battlers[battler].ability);
+  if (payload.messageId === "STRINGID_PKMNCUTSATTACKWITH") {
+    return Object.freeze({ ...payload, substitutions: Object.freeze([abilityOf(scriptingBattler)]), scriptingBattler, targetBattler: opposing });
+  }
+  if (payload.messageId === "STRINGID_PREVENTEDFROMWORKING") {
+    return Object.freeze({ ...payload, substitutions: Object.freeze([abilityOf(opposing)]), scriptingBattler, targetBattler: opposing });
+  }
+  if (payload.messageId === "STRINGID_PKMNTRACED" && rules.battleTextBuff1MonNick !== null) {
+    const tracedFrom = rules.battleTextBuff1MonNick.battler as 0 | 1;
+    return Object.freeze({ ...payload, substitutions: Object.freeze([abilityOf(tracedFrom)]), scriptingBattler, monNickBattler: tracedFrom });
+  }
+  return payload;
 }
 
 function kernelEvents(events: readonly BattleScriptSemanticEvent[]): readonly BattleKernelSemanticEvent[] {
@@ -442,6 +478,25 @@ export function initializeFreshFactoryBattle(
   });
 
   const lifecycleEvents: BattleScriptSemanticEvent[] = [];
+  const entryScripts: FactoryBattleStartEntryScript[] = [];
+  const recordEntryScript = (
+    label: string,
+    resolved: Readonly<{ events: readonly BattleScriptSemanticEvent[]; rows: number }>,
+    rules: BattleScriptRulesContext,
+  ): void => {
+    entryScripts.push(Object.freeze({
+      label,
+      rows: resolved.rows,
+      events: Object.freeze(resolved.events.map((event, index) => {
+        const { sequence: _machineSequence, provenance, ...payload } = event;
+        return Object.freeze({
+          sequence: lifecycleEvents.length + index,
+          payload: Object.freeze(presentationEntryPayload(payload, rules)),
+          provenance,
+        });
+      })),
+    }));
+  };
 
   // battle_main.c:3863-3868 calls ABILITYEFFECT_SWITCH_IN_WEATHER once.
   // The Factory battle room map declares WEATHER_NONE and MAP_TYPE_INDOOR
@@ -501,6 +556,7 @@ export function initializeFreshFactoryBattle(
       rulesContextBeforeB,
       rngBeforeB,
     );
+    recordEntryScript("BattleScript_IntimidateActivatesEnd3", resolved, rulesContextBeforeB);
     rulesContextBeforeB = resolved.rulesContext;
     lifecycleEvents.push(...resolved.events);
   }
@@ -532,6 +588,7 @@ export function initializeFreshFactoryBattle(
     // recorded onto battler 0, not onto the tracer.
     rulesContextBeforeB = recordBattleScriptAbilityReveal(rulesContextBeforeB, 0, copiedAbility);
     const resolved = runEntryScript("BattleScript_TraceActivates", rulesContextBeforeB, rngBeforeB);
+    recordEntryScript("BattleScript_TraceActivates", resolved, rulesContextBeforeB);
     rulesContextBeforeB = resolved.rulesContext;
     lifecycleEvents.push(...resolved.events);
   }
@@ -575,7 +632,7 @@ export function initializeFreshFactoryBattle(
     nextEventSequence: events.length,
     rulesContext,
   });
-  return Object.freeze({ kind: "started", state, events });
+  return Object.freeze({ kind: "started", state, events, entryScripts: Object.freeze(entryScripts) });
 }
 
 /** Backward-compatible state-only seam used by rung 2 and future battle drivers. */

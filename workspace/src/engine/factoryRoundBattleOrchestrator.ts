@@ -142,7 +142,13 @@ import type {
 import { deriveBattleResolutionFromTerminalBoundary } from "./battleResolutionAdapter.ts";
 import { mapStatus1ToBattleStatus } from "./battleResolutionAdapter.ts";
 import {
+  advanceFactoryBattleStartEntry,
+  createFactoryBattleStartEntry,
+  factoryBattleStartEntryComplete,
+} from "./factoryBattleStartEntry.ts";
+import {
   initializeFreshFactoryBattle,
+  type FactoryBattleStartEntryScript,
 } from "./factoryBattleStart.ts";
 import { BATTLE_SCRIPT_STATUS2_MASKS } from "./battleScriptSourceConstants.ts";
 import {
@@ -532,6 +538,8 @@ export type FactoryRoundBattleOrchestratorState = Readonly<{
   round: RoundControllerState;
   /** Frozen generated intro, installed only by the live room handoff. */
   battleStartIntro: FactoryBattleStartIntroState | null;
+  /** The fresh kernel's Intimidate / Trace entry-script runs, kept for the entry-script presentation. */
+  battleStartEntryScripts: readonly FactoryBattleStartEntryScript[];
   battle: BattleState<FactoryFullTurnDecisionRules> | null;
   /** Request-owned player command UI, replaced at each command boundary. */
   battleCommandPresentation: BattleCommandPresentationState | null;
@@ -1123,6 +1131,7 @@ export function createFactoryRoundBattleOrchestrator(
     performedRentalSwap: true,
     round,
     battleStartIntro: null,
+    battleStartEntryScripts: Object.freeze([]),
     battle: null,
     battleCommandPresentation: null,
     battleResolutionPresentation: null,
@@ -1207,6 +1216,21 @@ export function advanceFactoryRoundBattleStartIntro(
   if (state.battleStartIntro === null) {
     return fail("Factory battle-start intro input requires an installed intro");
   }
+  const entry = state.battleStartIntro.entry;
+  if (entry !== undefined) {
+    const advanced = advanceFactoryBattleStartEntry(entry);
+    if (!factoryBattleStartEntryComplete(advanced)) {
+      return Object.freeze({
+        ...state,
+        battleStartIntro: Object.freeze({ ...state.battleStartIntro, entry: advanced }),
+      });
+    }
+    return Object.freeze({
+      ...state,
+      battleStartIntro: null,
+      battleCommandPresentation: settleFactoryBattleStartCommand(state.battleStartIntro, entry.command),
+    });
+  }
   const intro = advanceFactoryBattleStartIntro(
     state.battleStartIntro,
     newKeys,
@@ -1240,6 +1264,21 @@ export function advanceFactoryRoundBattleStartIntro(
   );
   if (started.battleCommandPresentation === null) {
     return fail("Factory battle-start intro did not publish a fresh command");
+  }
+  const entryPhase = started.battle === null
+    ? null
+    : createFactoryBattleStartEntry(
+      started.battleStartEntryScripts,
+      intro.command.text.playerSendOut,
+      started.battle,
+      started.battleCommandPresentation,
+    );
+  if (entryPhase !== null) {
+    return Object.freeze({
+      ...started,
+      battleStartIntro: Object.freeze({ ...intro, entry: entryPhase }),
+      battleCommandPresentation: null,
+    });
   }
   return Object.freeze({
     ...started,
@@ -1290,6 +1329,7 @@ function startCurrentBattle(
   return Object.freeze({
     ...state,
     battle: started,
+    battleStartEntryScripts: initialized.entryScripts,
     partyOrder: bufferBattlePartyOrderBySide(started.rules.rulesContext.battlers[0].partyIndex),
     battleCommandPresentation,
     battleResolutionPresentation: null,

@@ -21,6 +21,7 @@ import {
   generatedBattleIntroVisualPhase,
   isGeneratedBattleIntroInputReady,
 } from "./battleScene.ts";
+import type { FactoryBattleStartEntryState } from "./factoryBattleStartEntry.ts";
 import { factoryBattleStartField } from "./factoryBattleStartPresentation.ts";
 import type {
   FactoryBattleStartPresentationCommand,
@@ -81,6 +82,11 @@ export type FactoryBattleStartIntroState = Readonly<{
    * the species send-out animations (opponent front, player back) that Scene OFF's SKIP_FRONT_ANIM path never launches.
    */
   sceneOn: boolean;
+  /**
+   * pau4: the Intimidate / Trace entry scripts' presentation, running between command-ready and the first action menu (the settled
+   * command waits inside it). Absent for a lead with no entry script and for every frame before command-ready.
+   */
+  entry?: FactoryBattleStartEntryState;
 }>;
 
 export function createFactoryBattleStartIntro(

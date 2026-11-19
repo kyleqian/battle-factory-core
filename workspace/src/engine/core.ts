@@ -1,3 +1,4 @@
+import { factoryBattleStartEntryFrame } from "./factoryBattleStartEntry.ts";
 import { renderBattleResolutionLiveView } from "./battleScene.ts";
 // Pure engine core: no DOM, no timers, no Math.random. tick() advances game
 // state by exactly one frame given the held buttons; render() draws the
@@ -3902,6 +3903,16 @@ function partySelectCloseRenderAssets(
 }
 
 function renderWithoutFactoryTerminal(state: EngineState): Uint8Array {
+  if (state.factoryRoundBattleOrchestrator?.battleStartIntro?.entry) {
+    const fb = createFramebuffer();
+    renderBattleResolutionPresentation(
+      fb,
+      factoryBattleStartEntryFrame(state.factoryRoundBattleOrchestrator.battleStartIntro.entry),
+      { drawScene: renderBattleResolutionLiveView, drawStaticScene: renderBattleResolutionSceneOffView },
+      state.presentationRng?.host ?? null,
+    );
+    return fb;
+  }
   if (state.factoryRoundBattleOrchestrator?.battleStartIntro) {
     const fb = createFramebuffer();
     renderGeneratedBattleStartPreSendOut(
