@@ -93,7 +93,7 @@ describe("Torment (aud258)", () => {
     const ours = pick(ourEvents(rom));
     expect(romRows.map((e) => e.frame - romRows[0]!.frame)).toEqual([0, 25, 50, 65, 80, 95, 129, 151]);
     expect(ours.map((e) => `${e.id}:${e.pan}`)).toEqual(romRows.map((e) => `${e.id}:${e.pan}`));
-    expect(romRows.map((e, i) => e.frame - ours[i]!.frame)).toEqual(romRows.map(() => -4));
+    expect(romRows.map((e, i) => e.frame - ours[i]!.frame)).toEqual(romRows.map(() => 0)); // lead4: -4 before the script lead was presented ahead of the body
   });
 
   it("Shock Wave table entry: ungated, the pic-Y grid holds three sweep classes (the SE 118 pair at +71 / +99 / +101 ...)", () => {

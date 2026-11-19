@@ -65,8 +65,8 @@ interface Spec {
 // Frame-exact: the generic script clock (src/engine/moveAnimSounds.ts) reproduces the ROM. The named residuals:
 //  - idle-lead moves (Ember lead 4): LIVE_MOVE_IDLE_LEAD_ROWS was measured as the visual onset, not the script start (the ROM script runs
 //    from the gAnimScriptActive rising edge, i.e. during the lead), so the SE sits a constant +2 after the generic clock.
-//  - status moves (Agility, Swords Dance) -4 and Psybeam +2: the per-move body offset the live adapters were aligned with differs from the
-//    script start by a constant; named, not fitted (aud242b/c).
+//  - Psybeam +2: the per-move body offset the live adapters were aligned with differs from the script start by a constant; named, not fitted (aud242b/c).
+//  - lead4 (B3): status moves (Agility, Swords Dance) were -4 before their script lead was presented ahead of the body (the sound clock moves by counter lead - 7); now frame-exact.
 //  - Psybeam 104..151 id 200 = SE_M_PSYBEAM2 from SoundTask_LoopSEAdjustPanning (createsoundtask): aud242c emits them, frame-exact at the same +2.
 //  - a later move body of the same round (Tackle 139 after Agility; Seismic Toss 214/131 after Swords Dance): declined bodies
 //    (liveMoveAnimationDuration null) never emit. Seismic Toss's opening SE 238 sits after a background fade (aud242c resolves it): it now
@@ -78,8 +78,8 @@ const SPECS: Record<string, Spec> = {
   "slash-opponent": { delta: 0 },
   "ember-player": { delta: 2 },
   "psybeam-player": { delta: 2 },
-  "agility-player": { delta: -4, romOnly: ["391:139:-63"] },
-  "swordsdance-opponent": { delta: -4, rowDelta: { "406:238:0": 1, "526:214:63": 1, "544:131:63": 1 } },
+  "agility-player": { delta: 0, romOnly: ["391:139:-63"] },
+  "swordsdance-opponent": { delta: 0, rowDelta: { "406:238:0": 1, "526:214:63": 1, "544:131:63": 1 } },
 };
 
 describe("move-animation script SEs (aud242a)", () => {
