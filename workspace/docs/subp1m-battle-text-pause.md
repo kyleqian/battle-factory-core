@@ -89,7 +89,7 @@ The full list of templates with `\p`/`\l` can be regenerated with
 2. Accept A or B in `factoryRoundBattleOrchestrator.ts` (~2792-2830); START must stay a no-op.
 3. Hazard: the turn-end rule (~5609) pushes a `turn-end` command only when the segment has no button message. Flipping SUBSTITUTEDAMAGED to button must not suppress turn-end for the rest of the segment; scope the rule to the button message's own segment position.
 4. Readiness: `L+1` rows from message start versus the ROM's earliest accept at print + 38 (typing-bound) and release at press + 3. Calibrate against the sweep (A at 418/419/420 and +3 release), and account for the text-speed option, which changes typing time.
-5. After release, `MoveUsedIs*` and the `\l` ability strings hold 64 rows (`waitmessage`) after release before the next command; Substitute-damaged does not (message is followed by the damage script).
+5. After release, `MoveUsedIs*` and the `\l` ability strings hold 64 rows (`waitmessage`) before the next command; Substitute-damaged does not (message is followed by the damage script).
 6. `PKMNSUBSTITUTEFADED`: model the ~111-row fade animation before the message becomes ready.
 7. Tier-2 test: replay `subp1mProbe.py` sweeps (never / A@420 / A@500 / B@600 / START@600) against the engine's button flow; assert exec-equivalent hold and `press+3` release.
 
