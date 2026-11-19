@@ -2000,6 +2000,7 @@ function hpFaintNext(events: readonly BattleKernelSemanticEvent[], index: number
  * (a following battler's damage message), the last battler's tick leaves through `cbf..cc8` 4 rows later than the status ticks before the turn end's 8.
  */
 const TICK_HP_TIMING = Object.freeze({ minimumFrames: 0 } as const);
+const TICK_FAINT_TAIL_FRAMES = 2;
 const TURN_DAMAGE_PC = datahpupdatePcAfter("BattleScript_DoTurnDmg");
 const WEATHER_DAMAGE_PC = datahpupdatePcAfter("BattleScript_DamagingWeatherLoop");
 /** hpf5 T2: `BattleScript_MoveEffectWrap`'s `printfromtable` is the wrap hit's secondary message (E + 7 after the hit's bar, E 7..16 by move). */
@@ -2029,6 +2030,10 @@ function applyHpHitTails(
     const leads = command.type === "hp" ? leadRows.get(command.eventSequence) : undefined;
     if (command.type !== "hp" || leads === undefined || command.timing !== HP_TIMING) continue;
     const rest = commands.slice(index + 1);
+    if (leads.tick !== null && rest[0]?.type === "faint" && leads.faintNext) {
+      commands[index] = Object.freeze({ ...command, timing: Object.freeze({ minimumFrames: 0, tailFrames: TICK_FAINT_TAIL_FRAMES }) });
+      continue;
+    }
     if (leads.tick === "turn-damage") {
       commands[index] = Object.freeze({ ...command, timing: TICK_HP_TIMING });
       continue;
