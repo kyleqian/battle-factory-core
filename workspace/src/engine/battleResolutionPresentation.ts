@@ -2001,6 +2001,8 @@ function hpFaintNext(events: readonly BattleKernelSemanticEvent[], index: number
  */
 const TICK_HP_TIMING = Object.freeze({ minimumFrames: 0 } as const);
 const TICK_FAINT_TAIL_FRAMES = 2;
+const WEATHER_TICK_MESSAGE_TAIL_FRAMES = 10;
+const WEATHER_TICK_LAST_TAIL_FRAMES = 4;
 const TURN_DAMAGE_PC = datahpupdatePcAfter("BattleScript_DoTurnDmg");
 const WEATHER_DAMAGE_PC = datahpupdatePcAfter("BattleScript_DamagingWeatherLoop");
 /** hpf5 T2: `BattleScript_MoveEffectWrap`'s `printfromtable` is the wrap hit's secondary message (E + 7 after the hit's bar, E 7..16 by move). */
@@ -2036,6 +2038,11 @@ function applyHpHitTails(
     }
     if (leads.tick === "turn-damage") {
       commands[index] = Object.freeze({ ...command, timing: TICK_HP_TIMING });
+      continue;
+    }
+    if (leads.tick === "weather") {
+      const tailFrames = rest[0]?.type === "message" ? WEATHER_TICK_MESSAGE_TAIL_FRAMES : WEATHER_TICK_LAST_TAIL_FRAMES;
+      commands[index] = Object.freeze({ ...command, timing: Object.freeze({ minimumFrames: 0, tailFrames }) });
       continue;
     }
     const transition = rest[0]?.type === "move-animation" && rest[1]?.type === "sprite-visibility";
