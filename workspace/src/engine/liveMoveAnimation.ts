@@ -4597,7 +4597,8 @@ export function liveMoveAnimationPresentationProven(
       // resolved above by resolveWordsOrderLend with liveIceBallWordsPostFree at the body's words / counter / species, past the ROM-checked
       // battle units, for any consumer); an unresolved marker leaves no lend and the body declines.
       const counter = liveIceBallCounter(request.rolloutCounter);
-      if (counter === null || !spriteOrderInput?.known) return null;
+      if (counter === null) return null;
+      if (!spriteOrderInput?.known) return declined(declineSink, "sprite-order-unknown");
       if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return declined(declineSink, "other:shiny");
       const rng = liveMovePresentationRngWords(presentationRngInput);
       const palettes = composeLiveArtPalettes(art);

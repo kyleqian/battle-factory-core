@@ -12,6 +12,9 @@ import { liveMoveAnimationDuration, liveMoveAnimationPresentation } from "../src
 import {
   LIVE_MOVE_APPROXIMATE_POLICY, LIVE_MOVE_DECLINE_CLASSES, liveMoveDeclineClassOf, liveMovePlaybackClassification, liveMovePlaybackCode,
 } from "../src/engine/liveMovePlayback.ts";
+import { activateLiveMovePresentationRng } from "../src/engine/liveMovePresentationRng.ts";
+import { createPresentationRngState } from "../src/engine/presentationRng.ts";
+import { createPresentationRngHostAt } from "../src/engine/presentationRngHost.ts";
 import speciesStats from "../src/data/gen/species-stats.json" with { type: "json" };
 
 const mon = (name: string, battler: 0 | 1, extra: object = {}) => ({
@@ -60,8 +63,11 @@ describe("apx210: decline reasons", () => {
   it("presentation gates (the render view): apx219 / apx221 / apx222: sprite-order-unknown, castform-form, endeavor-power, hidden-target -> approximate, body drawn", () => {
     const plain = fieldOf();
     const castform = fieldOf({}, { castformForm: 1 }, ["SWELLOW", "CASTFORM"]);
+    const iceBall = req(301, 1, { rolloutCounter: 1 });
+    const iceBallHost = activateLiveMovePresentationRng(createPresentationRngHostAt(createPresentationRngState(0x1234, "pinned")), iceBall, "move:1:0:0");
     const cases: [BattleMoveAnimationRequest, BattleResolutionDisplayedField, BattleResolutionPresentationRenderView, string][] = [
       [req(202), plain, viewOf(req(202), plain), "sprite-order-unknown"], // Giga Drain without an order lend
+      [iceBall, plain, viewOf(iceBall, plain, { presentationRng: { host: iceBallHost, key: "move:1:0:0" } }), "sprite-order-unknown"], // ice2: Ice Ball counter 0, unresolved lend (seed 950 command 264)
       [req(283), plain, viewOf(req(283), plain, { battlerX2Input: { zeroed: [], staleMovePowerUnknown: true } }), "endeavor-power"],
       [req(98), castform, viewOf(req(98), castform), "castform-form"], // Quick Attack at a sun-form CASTFORM: 98:at:1 not proven
       [req(327), plain, viewOf(req(327), plain, {}, false), "hidden-target"], // Sky Uppercut at a hidden (Fly) target
@@ -72,7 +78,7 @@ describe("apx210: decline reasons", () => {
       expect(classify(request, field)).toEqual({ kind: "live" });
       expect(classify(request, field, view)).toEqual({ kind: "approximate", reason });
       const e = (view.effect as { battlerX2Input?: never });
-      const body = liveMoveAnimationPresentation(request, field, 0, undefined, undefined, undefined, undefined, e.battlerX2Input,
+      const body = liveMoveAnimationPresentation(request, field, 0, undefined, undefined, undefined, (view.effect as { presentationRng?: never }).presentationRng, e.battlerX2Input,
         reason === "hidden-target" ? { player: false, opponent: true } : undefined);
       expect(body).not.toBeNull();
     }
