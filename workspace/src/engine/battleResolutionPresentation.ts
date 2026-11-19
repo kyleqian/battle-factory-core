@@ -1054,9 +1054,16 @@ const PRE_MOVE_STATUS_ANIMATION_TIMING = Object.freeze({
  * sta5 step 2 (docs/aud249-general-anim-sounds.md, ROM windows aud242b Flatter / aud242f Swagger): a stat print whose script goes on to
  * inflict a status move effect (`printfromtable; waitmessage LONG; jumpifability; jumpifsideaffecting; setmoveeffect; seteffectprimary`,
  * which runs `chosenstatus2animation`) reaches the launch 6 rows after the message ends: waitmessage's completing row, the four script
- * rows, and the launch instruction's own row. Scene ON only: the Scene OFF census keeps its commands.
+ * rows, and the launch instruction's own row. Scene OFF (sta6m, ROM windows sta6m-{flatter,swagger}-off): the script rows are the same but
+ * the animation is skipped, so the next command is the confusion print itself, three rows after the `chosenstatus2animation` row instead of the
+ * launch's one: 7 rows (Flatter print -> print 171 -> 268 = 97, Swagger 185 -> 289 = 104; the app's 90 / 97 was 7 short).
  */
 export const MOVE_INFLICTED_STATUS_ANIMATION_LEAD_ROWS = 6;
+export const MOVE_INFLICTED_STATUS_SCENE_OFF_LEAD_ROWS = MOVE_INFLICTED_STATUS_ANIMATION_LEAD_ROWS + 1;
+const MOVE_INFLICTED_STATUS_SCENE_OFF_TIMING = Object.freeze({
+  minimumFrames: 0,
+  holdFrames: WAITMESSAGE_LONG_HOLD_FRAMES + MOVE_INFLICTED_STATUS_SCENE_OFF_LEAD_ROWS,
+} as const);
 const MOVE_INFLICTED_STATUS_ANIMATION_TIMING = Object.freeze({
   minimumFrames: 0,
   holdFrames: WAITMESSAGE_LONG_HOLD_FRAMES + MOVE_INFLICTED_STATUS_ANIMATION_LEAD_ROWS,
@@ -1082,6 +1089,7 @@ function isMoveInflictedStatusLaunch(programCounter: number): boolean {
 function messageTimingFromSourceProvenance(
   event: BattleKernelSemanticEvent,
   sceneOnMoveAnimationSeen: boolean,
+  sceneOff: boolean,
 ): BattleMessageTiming | null {
   const programCounter = event.provenance?.programCounter;
   if (programCounter === undefined || programCounter < 0) return null;
@@ -1093,7 +1101,8 @@ function messageTimingFromSourceProvenance(
   ) {
     const launch = BATTLE_SCRIPT_PROGRAM.instructions[programCounter + 2]?.opcodeName;
     if (launch === "B_SCR_OP_STATUS2ANIMATION" || launch === "B_SCR_OP_STATUSANIMATION") return PRE_MOVE_STATUS_ANIMATION_TIMING;
-    return sceneOnMoveAnimationSeen && isMoveInflictedStatusLaunch(programCounter) ? MOVE_INFLICTED_STATUS_ANIMATION_TIMING : WAITMESSAGE_LONG_TIMING;
+    if (!isMoveInflictedStatusLaunch(programCounter)) return WAITMESSAGE_LONG_TIMING;
+    return sceneOff ? MOVE_INFLICTED_STATUS_SCENE_OFF_TIMING : sceneOnMoveAnimationSeen ? MOVE_INFLICTED_STATUS_ANIMATION_TIMING : WAITMESSAGE_LONG_TIMING;
   }
   return null;
 }
@@ -5013,7 +5022,7 @@ export function projectBattleResolutionCommands(
             : payload.messageId === "STRINGID_SWITCHINMON"
               ? SWITCH_IN_MESSAGE_TIMING
               : (() => {
-                const base = messageTimingFromSourceProvenance(event, sceneOnMoveAnimationSeen)
+                const base = messageTimingFromSourceProvenance(event, sceneOnMoveAnimationSeen, (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0)
                   ?? (WAITMESSAGE_LONG_MESSAGE_IDS.has(payload.messageId)
                   ? WAITMESSAGE_LONG_TIMING
                   : MESSAGE_TIMING);
