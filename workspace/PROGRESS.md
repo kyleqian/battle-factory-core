@@ -16,6 +16,10 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   both scenes; census 0..199 identical; Tier-1 27 / 27 fail without src, verified). ENGINE_BUILD moved (btn1: `eb-16a7388b0824ca50` at its tip).
 - **Found:** rrh5 (73 -> 82 / 110 rare rules): the ROM gives Shedinja 1 max HP, ours 88 (Frontier set 21, ordinary play) -> shd1.
 
+- **pin1 (ts worker, tests only, no src): the merge of pau4 / btn1 / pau5 / hpf5 re-pinned.** randomRoundSoak 64 / 64, lbrd 15 / 15, the aud242 / 252 / 260-262, cry1, trn178 / 181, sub183, hpf*, pau*, btn1, sgl138
+  files (37 files, 356 tests) were already green; `test:gate` 362 files / 2,844 green; typecheck 0. Pins: seven-win seed 21 frames 43,437 -> 43,336, renderCalls 3,045 -> 3,042; full seed 0 39,365 / battle 2 / depth 1 / turn 24 ->
+  18,678 / battle 1 / depth 0 / turn 23; full seed 1 95,264 / battle 5 / depth 4 / turn 29 -> 111,059 / battle 6 / depth 5 / turn 19 (both exploring trajectories, still roundLost); Baton Pass seed 12 -> 7 (scan 0..29: 7, 15, 16, 25, 26;
+  title fixed); carry-14 seed 47 -> 14 (scan 0..49: 14, 17, 27, 47); lbrd seeds 2 -> 14 in all three roles (scan 0..15, only 14 passes 15 / 15). Commits 4a5ea70e6, d3e1cc53b, 2f22111e9.
 ---
 
 ## 2026-11-19 — CAX31 daily run (supervisor, Opus 5.5, 2026-11-18 13:30 -> 2026-11-19 05:30 UTC): wind-down: sound timing (hp lengths, script leads, pauses), Knock Off, Lobby exact, lighter download
