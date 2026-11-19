@@ -675,3 +675,38 @@ Unproven shapes KEEP the 28 floor (no ROM lab at the time): heals (Rest / Recove
 Re-pins (each toward its ROM fixture): aud241b effectiveness / low-HP / faint deltas -> 0; aud248 superpower 17 -> 12; hie3 sitrus-on / shellbell-on drift; hpd1 player-hit `{minimumFrames: 0, tailFrames: 7}`. New: `tests/hpf1HpHold.test.ts` (4 tests, each fails without the fix). Labs: `tools/battle-lab/hpf1-*.json`, traces `tools/compare/traces/hpf1-*.json`, `tools/integration/hpf1Cmds.ts` (ROM hp command lengths per trace).
 
 T2 sound scoreboard (ROM chain, base 3bdb6cf11 -> new; 0 missing / 0 extra both): Scene ON 8 seeds, battle-controller SE exact 34 -> 43, cry exact 4 -> 14, cry delta median -8 -> -4 (p10 -24 -> -21, p90 14 -> 0), battle-controller median -5 -> -4 (p10 -24 -> -23, p90 3 -> 1), move-animation exact 161 -> 166 (p10 -18 -> -16). Scene OFF 4 seeds, controller exact 10 -> 16, cry exact 3 -> 8, cry median -6 -> -3 (p10 -15 -> -11, p90 15 -> 0), controller p10 -15 -> -11, p90 5 -> 1.
+
+## lse2: Leech Seed, Hydro Pump, Cosmic Power, Blizzard, Calm Mind, Encore, Hypnosis on the ROM rows (Scene ON presentation timing)
+
+Lane: integration, Scene ON (:8012) ROM frames, base `70b797e28`, tested code commit `5fe920b5a`. Presentation timing only: kernel events, RNG and damage are unchanged (census 0..99, both scenes: eventsDigest identical, see Gates). Evidence (ignored): `.integration/evidence/lse2/` (`ram/` hpd2Probe timelines, `snd/` soundEventProbe labs, `app/` / `app_base/` hpd4Cmds timelines, `cmp.txt` / `cmp-base-*` matched frames, `t2base/` / `t2after/` T2, `census-*.txt`, `run2_*.log`).
+
+### What landed
+| move (id) | rule | ROM d (R->H minus the app's next-command gap), base -> now |
+|---|---|---|
+| Leech Seed (73) | body lead 36, hit tail 3 (`LSE2_BODY_LEAD_MOVE_IDS`, `LSE2_BODY_TAIL_ROWS` absent: the HPD8 `6 - pre - post` path) | -1 -> **0** (SE rows now exact too, the lead moves the body SEs by the ROM's 36) |
+| Hydro Pump (56) | HPD8 shape A (lead 5, tail 1) | +6 -> **0** |
+| Cosmic Power (322) | body lead 2, tail 3 | +5 -> **0** |
+| Calm Mind (347) | body lead 2, tail 3 | +3 -> **0** |
+| Blizzard (59) | HPD8 shape A id (lead 5) + `LSE2_BODY_TAIL_ROWS` 2 | +7 -> **0** |
+| Encore (227, turn 2) | body lead 2, tail 10 (`LSE2_BODY_TAIL_ROWS`) | +12 -> **0** |
+| Hypnosis (95) | STA5 body: lead 7, STA5 tail 0 (added to `BODY_LEAD_AUDITED_MOVE_IDS` through the STA5 key) | +9 (7 net of the status cmd) -> **0**, status-animation windows at 234 / 527 = ROM |
+
+Matched frames on the lse1 labs (`npm run compare -- <trace> --summary`), before -> after: Leech Seed 452 -> 617 / 780, Hydro Pump 216 -> 485, Cosmic Power 218 -> 487, Calm Mind 251 -> 393, Blizzard 22 -> 127, Hypnosis 174 -> 670, Encore 303 -> 336 / 1000.
+
+Sound clock. A body's SEs run on a sound clock calibrated with a K-row lead; a body that now presents lead L must shift its SE ages by `L - K` or the body SEs move with the lead (`lse2BodySoundAgeShift`, `LSE2_SOUND_CLOCK_LEADS`: Leech Seed 7, Cosmic Power 7, Calm Mind 7, Encore 3). Encore's K is 3 (zero crossing of the turn-2 SE rows: K 7 gave +4, none gave -1). The stat-change SE after these bodies uses age shift 3 instead of 4 (`STATS_CHANGE_AFTER_LSE2_BODY_AGE_SHIFT`): it was +1 with 4 after the lead, 0 with 3 (Cosmic Power and Calm Mind labs, SE 239 now +0). Body SEs keep their ROM ages (the hit SEs and the other body SEs are unchanged vs the base except where the table above says otherwise).
+
+Lab change: the Encore lab (`lse1-encore-player-on`, battle-lab json + compare trace) never reached turn 2 (NORES at frame 510), so it got a second A press and 1420 frames (captureFrames range(1000)); `lse1Labs.py` takes a seed, and 7 `lse1-*-player-on` stages are in `tools/compare/appTrace.ts` (the lse1 step left them out).
+
+`tools/integration/tl204Compare.ts` now counts a body's lead and hit tail as script rows (`productionLeadRows` / `productionHitTailRows`); the tl204 pins (Calm Mind -1, Leech Seed) and the substitute-swap pins were re-pinned toward the ROM.
+
+### Gates (tested code commit `5fe920b5a`)
+- Census 0..99 (`lsd194Census.sh`, base vs this tree, `rst197CensusDelta.py`): **Scene OFF 100 / 100 identical** (30730 commands); **Scene ON 78 / 100 identical, 22 changed battles**, eventsDigest identical, no error / type-sequence differences; every changed field is a move-animation timing field (indices 16 / 17 / 18); no new static-field command.
+- T2 Scene ON, 8 seeds (648 319 310 6912 2 165 2741 5569; `aud248RunSeed.sh`, `soundScoreboard.py`; before = the base archive, after = this tree): **missing 0 / extra 0** in every family, both arms. Move-animation SE exact / offset 166 / 1223 -> **208 / 1181**; delta (engine - ROM) median / p10 / p90 -2 / -17 / 4 -> **-2 / -12 / 4** (n 1389 both); stat-change, cry, battle-controller and bgm unchanged (stat-change 8 / 27, cry 22 / 50, battle-controller 54 / 171, bgm 0 / 3).
+- `npm run typecheck` exit 0 (3 m 45 s alone); `npm run test:gate` 362 / 362 files, 2844 tests; `npm run build` and `build:lib` exit 0; vanilla Scene ON soak 0:20 **20 / 20 OK** (4 runs of 5 seeds, `--parallel 4`).
+- Test union (every test importing `liveMoveAnimation` / `battleResolutionPresentation*` / `moveAnimSounds` / `tickSounds`, every test naming the seven moves, the hpd6 list, aud249* / sta3*, `lbrd`, `randomRoundSoak*`): 369 files in 6 chunks; 358 files pass. The 11 failing tests in 6 files fail identically on the base archive (`70b797e28`), so they are not this step's: cry1 x4 (`cry1CryTasks`, ROAR first / second cries), `aud242e` counter-player, `aud242p` revenge-player, `aud260` Recycle, `aud262` Water Spout x3, `trn181` Rest (-3 expected vs -14). The full `npm test` was not run.
+
+### Not landed / open
+- **Blizzard body SEs +2, hit SE +3** (unchanged from the base): the app's print length depends on glyph count (S = 51) while the ROM's R is a fixed 55; shape B, not a lead / tail issue. Its remaining frame diffs are backdrop-palette pixels (127 / 780 matched frames).
+- Calm Mind hit SE 13 @ 699 is -4 (unchanged from the base).
+- **Wish (273) not landed**: its 13-row gap (shape C) was not traced per frame in this step, so the L 2 + 12 post rows proposal from lse1 stays unproven.
+- The `liveMoveUniversalRowAge` hold-flag condition for the LSE2 ids (render ~2500) was not needed on any lab and was left alone.
