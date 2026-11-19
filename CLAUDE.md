@@ -1,6 +1,6 @@
 # Claude Code project instructions
 
-This is the TOP (human/planning) layer of pokeemerald-factory-core.
+This is the TOP (human/planning) layer of battle-factory-core (the folder on the Mac keeps its old name, pokeemerald-factory-core).
 README.md is the public front page; the layout notes for sessions are here.
 
 - Sessions working ON THE GAME belong in `workspace/` — read and follow
@@ -22,8 +22,6 @@ README.md is the public front page; the layout notes for sessions are here.
                        need to read or write above it (workspace/AGENTS.md)
 ```
 
-- `workspace/` was the `runs/20260717-004950_warm-bison` directory of the old
-  harness (`../pokeemerald-factory`), moved wholesale with its history on 2026-08-11.
 - `workspace/bin/oracle` is the agent-facing copy of the oracle CLI, pinned by
   `tests/oracleTooling.test.ts`; the top-level `bin/oracle` is the human copy. They
   have drifted before; the workspace copy is authoritative.

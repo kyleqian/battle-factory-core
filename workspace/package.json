@@ -2,7 +2,7 @@
   "name": "@pokebench/factory",
   "private": true,
   "version": "0.1.0",
-  "description": "Pokémon Emerald's Battle Factory, rebuilt in TypeScript and verified frame-by-frame against the ROM. Browser entry: mountFactoryGame; headless entry: replayChallenge.",
+  "description": "Battle Factory, rebuilt in TypeScript and verified frame-by-frame against the ROM. Browser entry: mountFactoryGame; headless entry: replayChallenge.",
   "type": "module",
   "types": "./dist-lib/index.d.ts",
   "module": "./dist-lib/index.js",

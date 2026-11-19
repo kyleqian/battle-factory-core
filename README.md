@@ -1,7 +1,7 @@
-# pokeemerald-factory-core
+# battle-factory-core
 
-Pokémon Emerald's Battle Factory, rebuilt in TypeScript and checked against the
-real game. Play it at <https://battlefactory.app>.
+The Battle Factory, rebuilt in TypeScript and checked against the real game.
+Play it at <https://battlefactory.app>.
 
 It follows the [pret/pokeemerald](https://github.com/pret/pokeemerald)
 decompilation, and whole battles are replayed in the real game (in mGBA) to check
@@ -42,6 +42,4 @@ which macOS does not ship (`brew install flock`).
 
 ## Legal
 
-A fan project, not affiliated with Nintendo, Creatures, Game Freak or The Pokémon
-Company, who own Pokémon. Like the decompilation, it includes pictures, sounds
-and data from the game. No license is granted; all rights reserved.
+A fan project, not affiliated with the official owners of Pokémon.
