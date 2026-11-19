@@ -506,7 +506,7 @@ Sound-order analysis. (a) The five lead2 seeds (31, 90, 102, 130, 132) are `same
 
 ### Gates
 
-`npm run typecheck` 0; `npm run build` 0; `npm run test:gate` 362 files / 2,844 tests: 1 failure (the Headbutt duration, re-pinned below), green after; 6 chunks (747 files = every test importing liveMoveAnimation / battleResolutionPresentation* / moveAnimSounds / tickSounds / iu120Rows plus every test naming a batch move or its MOVE_ constant) green after the re-pins; tests/lbrd.test.ts + tests/randomRoundSoak.test.ts 79 / 79; vanilla Scene ON soak 0:20: see the final message.
+`npm run typecheck` 0; `npm run build` 0; `npm run test:gate` 362 files / 2,844 tests: 1 failure on the first run (the Headbutt duration, re-pinned below), 2,844 / 2,844 green on the final run; 6 chunks (747 files = every test importing liveMoveAnimation / battleResolutionPresentation* / moveAnimSounds / tickSounds / iu120Rows plus every test naming a batch move or its MOVE_ constant) green after the re-pins; tests/lbrd.test.ts + tests/randomRoundSoak.test.ts 79 / 79; `npm run soak -- --policy vanilla --seeds 0:20 --scene on --parallel 3` (two 10-seed calls) 20 / 20 OK; `npm run test:gate` re-run on the tip: 362 files green.
 
 Re-pins (each by the lead + T rule, `hpd4BodyRows(id)` = lead + `6 - pre - post`):
 - `tests/battleResolutionPresentation.test.ts`: Headbutt duration 48 + P/T -> + `hpd4BodyRows(29, 11)` (+12: this synthetic stream has no used-print rows, counter lead 11; tail 1).
