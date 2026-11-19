@@ -500,7 +500,7 @@ function orderEventOf(
  * body is lent (spriteOrderTrackerLend: entry labels, as the live renderer gets it; Water Spout's plan ties in it, plans54). */
 export type SpriteOrderBodyPlanAt = (
   segmentIndex: number, sequence: number, moveId: number, attackerSide: "player" | "opponent", lentFree?: readonly number[],
-) => string | undefined;
+) => string | Readonly<{ field: object }> | undefined;
 
 interface ResolutionView {
   readonly resolutionId: Readonly<{ requestId: number }>;
@@ -555,11 +555,12 @@ export function advanceLiveSpriteOrderHost(
         && (mapped.event.moveId !== 258 || bothBattlersShown)) {
         const geometryPlan = bodyPlanAt?.(segmentIndex, events[index]!.sequence, mapped.event.moveId, mapped.event.attackerSide,
           spriteOrderTrackerLend(tracker) ?? undefined);
-        if (geometryPlan !== undefined) mapped = { ...mapped, event: Object.freeze({ ...mapped.event, geometryPlan }) };
+        if (typeof geometryPlan === "string") mapped = { ...mapped, event: Object.freeze({ ...mapped.event, geometryPlan }) };
+        else if (geometryPlan !== undefined) mapped = { ...mapped, event: Object.freeze({ ...mapped.event, geometryField: geometryPlan.field }) };
       }
       if (mapped.event?.kind === "general-animation" && SPRITE_ORDER_GEOMETRY_KEYED_ANIMS.has(mapped.event.animation) && bothBattlersShown) {
         const geometryPlan = bodyPlanAt?.(segmentIndex, events[index]!.sequence, 258, "player");
-        if (geometryPlan !== undefined) mapped = { ...mapped, event: Object.freeze({ ...mapped.event, geometryPlan }) };
+        if (typeof geometryPlan === "string") mapped = { ...mapped, event: Object.freeze({ ...mapped.event, geometryPlan }) };
       }
       if (mapped.hidden) hidden = mapped.hidden;
       // RAIN_CONTINUES (General_Rain) is a words-dependent order unit: a marker keyed per event, whose activation is the known lend or

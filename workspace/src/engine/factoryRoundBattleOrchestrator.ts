@@ -296,6 +296,9 @@ function liveSpriteOrderBodyPlanAt(
     const field = battleResolutionMoveAnimationField(segment, sequence);
     const species = field !== null ? { playerSpecies: field.player.species, opponentSpecies: field.opponent.species }
       : moveId === 258 ? liveSpriteOrderSpeciesBefore(segment, sequence) : null;
+    // ice2: Water Spout / Shock Wave key their plan on the lent order; while a words marker is pending there is none, so the unit records the
+    // displayed field and the render seam computes the plan at the replayed lend (resolveSpriteOrderDeferredLend `geometryPlanText`).
+    if (lentFree === undefined && field !== null && (moveId === 323 || moveId === 351)) return { field };
     // plans54: Water Spout also reads the displayed field (the attacker's HP tier) and the lent order.
     return (species === null ? null : liveMoveGeometrySpriteOrderPlanText(moveId, attackerSide, species, field ?? undefined, lentFree))
       ?? undefined;
