@@ -1,0 +1,82 @@
+{
+ "name": "R099-chansey-metronome-uproar-yawn",
+ "rules": [
+  "R099"
+ ],
+ "why": "Challenge 1. The player's Chansey 227 calls Metronome 14 turns; the foe is Wartortle 176 (Water Pulse, Bite, Mud Slap, Yawn). Yawn lands, and its sleep tick falls while a Metronome-called Uproar is running (Uproar keeps the drowsy Pokemon awake, battle_util.c:1759). Chance per seed about 0.3%.",
+ "seed": 1061592,
+ "challengeNum": 1,
+ "battleNum": 0,
+ "trainerId": 86,
+ "playerSetIds": [
+  227,
+  244,
+  171
+ ],
+ "opponentSetIds": [
+  176,
+  215,
+  204
+ ],
+ "script": {
+  "actions": [
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "preferSwitch": 1
+   }
+  ],
+  "then": "census"
+ },
+ "expect": [],
+ "cover": [
+  {
+   "file": "src/engine/battleEndTurnOrchestration.ts",
+   "text": "{\n        bl",
+   "at": 0
+  }
+ ],
+ "coverAny": true,
+ "chance": 0.003,
+ "seeds": 200
+}

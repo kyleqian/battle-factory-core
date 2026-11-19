@@ -1,0 +1,82 @@
+{
+ "name": "R064-chansey-metronome-transform-ends-encore",
+ "rules": [
+  "R064"
+ ],
+ "why": "Challenge 1. The player's Chansey 227 calls Metronome 14 turns (slot 0); the foe is Minun 187 (Spark, Charm, Encore, Helping Hand; Spark does about 7% of Chansey's HP). The game's Encore keeps the Metronome slot (Metronome is the last move used: battle_script_commands.c:4407); while it holds, a Metronome call of Transform replaces slot 0 and the Encore ends silently at the next end-of-turn check (battle_util.c:1724). Chance per seed about 1%.",
+ "seed": 1061615,
+ "challengeNum": 1,
+ "battleNum": 0,
+ "trainerId": 86,
+ "playerSetIds": [
+  227,
+  244,
+  171
+ ],
+ "opponentSetIds": [
+  187,
+  215,
+  204
+ ],
+ "script": {
+  "actions": [
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "preferSwitch": 1
+   }
+  ],
+  "then": "census"
+ },
+ "expect": [],
+ "cover": [
+  {
+   "file": "src/engine/battleEndTurnOrchestration.ts",
+   "text": "{\n        state ",
+   "at": 0
+  }
+ ],
+ "coverAny": true,
+ "chance": 0.01,
+ "seeds": 200
+}

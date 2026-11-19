@@ -1,0 +1,112 @@
+{
+ "name": "R100-ai-clefable-metronome-weather-ball-cloud-nine",
+ "rules": [
+  "R100"
+ ],
+ "why": "Challenge 7. The AI's Clefable (389) opposite the player's Golduck 418 (Cloud Nine; Light Screen, slot 3, played 16 turns; Hydro Pump / Dig are never used) then Salamence 753 (Aerial Ace, never misses). Every AI Metronome call is a draw of one of the 336 callable moves; Weather Ball while Cloud Nine is on the field leaves it a 50-power Normal move (the weather-has-no-effect arm, any weather or none). About 8 AI Metronome calls a battle. Chance per seed about 8/336 = 2.4%.",
+ "seed": 1060249,
+ "challengeNum": 7,
+ "battleNum": 0,
+ "trainerId": 200,
+ "playerSetIds": [
+  418,
+  753,
+  565
+ ],
+ "opponentSetIds": [
+  389,
+  431,
+  836
+ ],
+ "script": {
+  "actions": [
+   {
+    "prefer": 3
+   },
+   {
+    "prefer": 3
+   },
+   {
+    "prefer": 3
+   },
+   {
+    "prefer": 3
+   },
+   {
+    "prefer": 3
+   },
+   {
+    "prefer": 3
+   },
+   {
+    "prefer": 3
+   },
+   {
+    "prefer": 3
+   },
+   {
+    "prefer": 3
+   },
+   {
+    "prefer": 3
+   },
+   {
+    "prefer": 3
+   },
+   {
+    "prefer": 3
+   },
+   {
+    "prefer": 3
+   },
+   {
+    "prefer": 3
+   },
+   {
+    "prefer": 3
+   },
+   {
+    "prefer": 3
+   },
+   {
+    "preferSwitch": 1
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   }
+  ],
+  "then": "census"
+ },
+ "expect": [],
+ "cover": [
+  {
+   "file": "src/engine/battleScriptEnvironmentAttackOpcode.ts",
+   "text": "{\n      retu",
+   "at": 0
+  }
+ ],
+ "coverAny": true,
+ "chance": 0.02,
+ "seeds": 200
+}

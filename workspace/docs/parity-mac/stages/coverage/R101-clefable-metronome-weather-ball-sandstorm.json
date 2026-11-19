@@ -1,0 +1,104 @@
+{
+ "name": "R101-clefable-metronome-weather-ball-sandstorm",
+ "rules": [
+  "R101"
+ ],
+ "why": "Challenge 7. The player's Clefable (389, Metronome 10 PP) calls Metronome 10 times in a row opposite Shuckle (528: Sandstorm, Dig, Flash, Double Team; Attack 10, so it cannot knock Clefable out); every call is a draw of one of the 336 callable moves (1 in 336 each). After the tenth call the script switches to Salamence (753) and plays Aerial Ace (slot 2; it never misses, so a Double Team stack cannot stall the end; luck6). Weather Ball by Metronome while Shuckle's Sandstorm is up (the AI scores Sandstorm up when no weather is set) makes it a Rock move (any of the three weather arms counts). Chance per seed about 10/336 x P(sandstorm up) 0.7 = 2%.",
+ "seed": 1060490,
+ "challengeNum": 7,
+ "battleNum": 0,
+ "trainerId": 200,
+ "playerSetIds": [
+  389,
+  753,
+  565
+ ],
+ "opponentSetIds": [
+  528,
+  431,
+  836
+ ],
+ "script": {
+  "actions": [
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "preferSwitch": 1
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   }
+  ],
+  "then": "census"
+ },
+ "expect": [],
+ "cover": [
+  {
+   "file": "src/engine/battleScriptEnvironmentAttackOpcode.ts",
+   "text": "type = TYPE_WATE",
+   "at": 0
+  },
+  {
+   "file": "src/engine/battleScriptEnvironmentAttackOpcode.ts",
+   "text": "type = TYPE_ROCK",
+   "at": 0
+  },
+  {
+   "file": "src/engine/battleScriptEnvironmentAttackOpcode.ts",
+   "text": "type = TYPE_FIRE",
+   "at": 0
+  }
+ ],
+ "coverAny": true,
+ "chance": 0.02,
+ "seeds": 200
+}
