@@ -58,7 +58,7 @@ ROADMAP item 6; per-move offsets in #198). Landed 2026-11-18/19 (docs/hpd1-hp-ho
 16 shape-A bodies, 7 long `live` windows (Flamethrower, Solar Beam unleash, Self-Destruct, Bite, Sludge Bomb, Earthquake, Faint Attack), Flatter / Swagger / Spore / Toxic first status play, Leech Seed /
 Hydro Pump / Cosmic Power / Calm Mind / Encore / Hypnosis / Blizzard, ROM hp command lengths (hits, heals, recoil, drains), the 0x7FFF instant drop, Knock Off's item animation, the LONG / Safeguard pauses.
 - **Bodies measured, not landed (lse3, docs/hpd1-hp-hold.md "lse3"):** Absorb +10, Mega Drain +8, Counter +5, Revenge +8, Recycle +4, Razor Wind charge / unleash +8 / +9 (+ ~5 turn-end rows of a
-  locked continuation), the opponent's Pound / Scratch / Tackle (+13 / +12 / +21: not live adapters), Wish (+14: the generic action-transition rows that `actionTransitionPauseFrames` drops in Scene ON
+  locked continuation), Pound / Scratch / Tackle (+13 / +12 / +21; phy1m: outsideFactory, reachable only through Metronome; every Factory body is live in play, but 63.6 % of body commands have no audited lead, +6 .. +14 rows: `docs/phy1m-nonlive-bodies.md`), Wish (+14: the generic action-transition rows that `actionTransitionPauseFrames` drops in Scene ON
   when the anchor is the used print). hpf3 re-pinned Absorb / Revenge / Recycle / Razor Wind windows that these bodies now dominate.
 - **sta5 step 3** (u - 2 pre-print rows at the first action's confirm handoff; patch `.integration/evidence/sta5/step3-handoff-rows.patch`; moves 126 ROM-exact pins until the sound clock is decoupled) and
   **step 2's Scene OFF gate** (measured by sta6m: drop it, 7 rows in OFF).

@@ -26,9 +26,8 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   OFF 65 / 23; **0 page / console errors, 0 overlays**. Mid-run full suites: 15,937 / 15,963 / 15,970 / 15,988 / 15,997 all 0 failed; 70b797e28 and 4839b5b80 had 15 / 9 hp-pin failures (hpf1 / hpf2,
   bisected; fixed by hpf2 / hpf3). Disk 64 % -> 47 % (31 census `tree/` dirs, `.integration/evidence/TREES-PRUNED-20261119.txt`). Log backup not run (`rclone` not installed).
 - **Measured for the next run (docs only, after the gates):** pau4m: Intimidate / Trace switch-in prints are NOT presented (Trace ~142, Intimidate ~247 frames missing at battle start, both scenes);
-  hpf4m: ROM hp lengths for every shape still on the floor (landing order in the doc); sta6m: sta5 step 2 applies in Scene OFF too (7 rows); phy1m: non-live Scene ON bodies.
-- **Next:** (0) present the switch-in ability prints (pau4m); land hpf4m T1-S1 and sta6m; (1) land lse3 (`docs/hpd1-hp-hold.md` "lse3": Absorb / Mega Drain / Counter / Revenge / Recycle / Razor Wind, the opponent's Pound / Scratch / Tackle as new live adapters, Wish's
-  generic action-transition rows); (2) hp shapes still on the 28-row floor (ticks, weather damage, confusion self-hit, Substitute: ROM labs first); (3) sta5 step 3 (patch kept; decouple the sound clock)
+  hpf4m: ROM hp lengths for every shape still on the floor (landing order in the doc); sta6m: sta5 step 2 applies in Scene OFF too (7 rows); phy1m: every Factory body is live in play, but 63.6 % of body commands lack the audited lead (+6 .. +14 rows).
+- **Next:** (0) present the switch-in ability prints (pau4m); land hpf4m T1-S1 and sta6m; (1) land lse3 (`docs/hpd1-hp-hold.md` "lse3": Absorb / Mega Drain / Counter / Revenge / Recycle / Razor Wind, Wish's generic action-transition rows) and the rule-based lead for the unaudited bodies (phy1m); (2) hp shapes still on the 28-row floor (ticks, weather damage, confusion self-hit, Substitute: ROM labs first); (3) sta5 step 3 (patch kept; decouple the sound clock)
   and sta5 step 2's Scene OFF ROM check; (4) shape C bodies, multi-hit; (5) #222 player send-in residuals. Run the FULL suite before folding any hp / timing change (test:gate missed hpf1's 15).
   Luck-hunt summary + nightly replay at run start; prune census trees.
 
