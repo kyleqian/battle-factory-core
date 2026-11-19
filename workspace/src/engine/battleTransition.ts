@@ -203,7 +203,15 @@ export function frontierTransitionPresentationForTableIndex(
   });
 }
 
-export type FrontierCircleTransition = "circlesMeet" | "asymmetricSpiralInSeq" | "circlesCross" | "circlesMeetInSeq";
+export type FrontierCircleTransition =
+  | "circlesMeet"
+  | "asymmetricSpiralInSeq"
+  | "circlesCross"
+  | "circlesMeetInSeq"
+  | "circlesCrossInSeq"
+  | "asymmetricSpiral"
+  | "symmetricSpiral"
+  | "symmetricSpiralInSeq";
 export type FrontierTransitionRenderKind = FrontierCircleTransition | "logoWave";
 
 /** te (settled-phase elapsed) at which the corresponding trace tick (843+te) begins - named per the phase they gate. */
@@ -351,6 +359,10 @@ export function frontierTransitionRenderKind(
   if (presentation?.transitionId === 30) return "logoWave";
   if (presentation?.transitionId === 34) return "circlesMeet";
   if (presentation?.transitionId === 35) return "circlesCross";
+  if (presentation?.transitionId === 36) return "asymmetricSpiral";
+  if (presentation?.transitionId === 37) return "symmetricSpiral";
+  if (presentation?.transitionId === 39) return "circlesCrossInSeq";
+  if (presentation?.transitionId === 41) return "symmetricSpiralInSeq";
   if (presentation?.transitionId === 38) return "circlesMeetInSeq";
   if (presentation?.transitionId === 40) return "asymmetricSpiralInSeq";
   return fallback;
@@ -555,9 +567,132 @@ export function circlesMeetInSeqCircleCenter(
   return { x: spec.init[0] + spec.speed[0] * k, y: spec.init[1] + spec.speed[1] * k };
 }
 
+/**
+ * The four circle transitions the engine drew as CIRCLES_MEET before trn225 (docs/trn225-frontier-transitions.md), all on MEET's clock
+ * (CIRCLE_ANCHOR_TE is the frame CreateSprites runs; the sprite first shows one frame later, after its callback ran once):
+ * CROSS_IN_SEQ (id 39), ASYMMETRIC_SPIRAL (36), SYMMETRIC_SPIRAL (37), SYMMETRIC_SPIRAL_IN_SEQ (41). `createOffsets` is each circle's
+ * task-timer creation tick (0/16/32 in the *_IN_SEQ families, all 0 otherwise); `steps` is how many callbacks the last circle moves
+ * before it parks (WaitForLogoCirclesAnim sees the dummy callback one frame after, FadeInCenterLogoCircle one more).
+ */
+type NamedCircle = "top" | "left" | "right";
+type CircleMotion =
+  | { readonly kind: "slide"; readonly init: readonly [number, number]; readonly speed: readonly [number, number] }
+  | { readonly kind: "spiral"; readonly center: readonly [number, number]; readonly angle: number };
+interface MoreCircleKind {
+  readonly createOffsets: Record<NamedCircle, number>;
+  readonly steps: number;
+  readonly motions: Record<NamedCircle, CircleMotion>;
+  /** Spiral parameters shared by the three circles (CreateSpiralingLogoCircleSprite's rotateSpeed/radiusStart/radiusDelta). */
+  readonly spiral?: { readonly rotate: number; readonly radius: number; readonly delta: number };
+}
+const SEQ_CREATE_OFFSETS: Record<NamedCircle, number> = { top: 0, left: 16, right: 32 };
+const SIMULTANEOUS_CREATE_OFFSETS: Record<NamedCircle, number> = { top: 0, left: 0, right: 0 };
+const ASYMMETRIC_SPIRAL_MOTIONS: Record<NamedCircle, CircleMotion> = {
+  top: { kind: "spiral", center: [120, 45], angle: 12 },
+  left: { kind: "spiral", center: [89, 97], angle: 252 },
+  right: { kind: "spiral", center: [151, 97], angle: 132 },
+};
+const SYMMETRIC_SPIRAL_MOTIONS: Record<NamedCircle, CircleMotion> = {
+  top: { kind: "spiral", center: [120, 80], angle: 284 },
+  left: { kind: "spiral", center: [120, 80], angle: 44 },
+  right: { kind: "spiral", center: [121, 80], angle: 164 },
+};
+const MORE_CIRCLE_KINDS: Partial<Record<FrontierCircleTransition, MoreCircleKind>> = {
+  // CirclesCrossInSeq_CreateSprites (battle_transition_frontier.c:534-556): 152px at 8px per call = 19 calls
+  circlesCrossInSeq: {
+    createOffsets: SEQ_CREATE_OFFSETS,
+    steps: 19,
+    motions: {
+      top: { kind: "slide", init: [120, 197], speed: [0, -8] },
+      left: { kind: "slide", init: [241, 78], speed: [-8, 1] },
+      right: { kind: "slide", init: [-1, 78], speed: [8, 1] },
+    },
+  },
+  asymmetricSpiral: {
+    createOffsets: SIMULTANEOUS_CREATE_OFFSETS,
+    steps: 32,
+    motions: ASYMMETRIC_SPIRAL_MOTIONS,
+    spiral: { rotate: 4, radius: 128, delta: -4 },
+  },
+  symmetricSpiral: {
+    createOffsets: SIMULTANEOUS_CREATE_OFFSETS,
+    steps: 32,
+    motions: SYMMETRIC_SPIRAL_MOTIONS,
+    spiral: { rotate: 8, radius: 131, delta: -3 },
+  },
+  symmetricSpiralInSeq: {
+    createOffsets: SEQ_CREATE_OFFSETS,
+    steps: 32,
+    motions: SYMMETRIC_SPIRAL_MOTIONS,
+    spiral: { rotate: 8, radius: 131, delta: -3 },
+  },
+};
+
+/** FadeInCenterLogoCircle's first blend step minus one: the last circle's creation + its callbacks + the Wait state's frame. */
+function moreCircleBlendStartTe(spec: MoreCircleKind): number {
+  return CIRCLE_ANCHOR_TE + spec.createOffsets.right + spec.steps + 1;
+}
+
+/** Center of a circle of the four kinds above at `te`, null before its first drawn frame (creation + 1). */
+export function moreCircleCenter(
+  name: NamedCircle,
+  te: number,
+  transition: FrontierCircleTransition,
+): { x: number; y: number } | null {
+  const spec = MORE_CIRCLE_KINDS[transition];
+  if (!spec) return null;
+  const created = CIRCLE_ANCHOR_TE + spec.createOffsets[name];
+  if (te <= created) return null;
+  const motion = spec.motions[name];
+  if (motion.kind === "slide") {
+    const k = Math.min(te - created, spec.steps);
+    return { x: motion.init[0] + motion.speed[0] * k, y: motion.init[1] + motion.speed[1] * k };
+  }
+  const sp = spec.spiral!;
+  const n = Math.min(te - created - 1, spec.steps);
+  const radius = sp.radius + sp.delta * n;
+  const angle = motion.angle + sp.rotate * n;
+  return {
+    x: motion.center[0] + Math.floor((sineDegreeQ12(angle) * radius) / 4096),
+    y: motion.center[1] + Math.floor((sineDegreeQ12(angle + 90) * radius) / 4096),
+  };
+}
+
+/**
+ * Back-to-front draw order of the three circles at `te`. SortSprites (sprite.c:372) is an insertion sort over the persistent sSpriteOrder,
+ * by priority then by signed OAM y, larger y first, swapping only on a strict inequality - so the order at a frame is the previous frame's,
+ * stably re-sorted by this frame's y (an equal y keeps the earlier order, which starts as creation order: top, left, right, front to back).
+ * A sprite not created yet sorts as y 160 (-96); OAM y is the center minus 32 in 8 bits, read signed past 160 (a circle at center y 192 or
+ * more is sorted behind everything).
+ */
+function persistentCirclePainterOrder(
+  te: number,
+  centerAt: (name: NamedCircle, t: number) => { x: number; y: number } | null,
+): NamedCircle[] {
+  let order: NamedCircle[] = ["top", "left", "right"];
+  const key = (name: NamedCircle, t: number): number => {
+    const center = centerAt(name, t);
+    if (center === null) return -96;
+    const oamY = (center.y - 32) & 255;
+    return oamY >= 160 ? oamY - 256 : oamY;
+  };
+  for (let t = CIRCLE_ANCHOR_TE + 1; t <= te; t += 1) {
+    const keys = new Map(order.map((name) => [name, key(name, t)] as const));
+    order = order.slice().sort((x, y) => keys.get(y)! - keys.get(x)!);
+  }
+  return order.filter((name) => centerAt(name, te) !== null).reverse();
+}
+
+function moreCirclePainterOrder(te: number, transition: FrontierCircleTransition): NamedCircle[] {
+  return persistentCirclePainterOrder(te, (name, t) => moreCircleCenter(name, t, transition));
+}
+
 /** FadeInCenterLogoCircle's BLDALPHA target-1 (BG0) weight, 0-16 (module doc). */
 export function centerLogoEva(te: number, transition: FrontierCircleTransition = "circlesMeet"): number {
-  const start = transition === "asymmetricSpiralInSeq"
+  const more = MORE_CIRCLE_KINDS[transition];
+  const start = more
+    ? moreCircleBlendStartTe(more)
+    : transition === "asymmetricSpiralInSeq"
     ? ASYMMETRIC_SEQ_BLEND_START_TE
     : transition === "circlesCross"
     ? CROSS_BLEND_START_TE
@@ -569,6 +704,8 @@ export function centerLogoEva(te: number, transition: FrontierCircleTransition =
 
 /** The circle families' exit fade start (BeginNormalPaletteFade in FadeInCenterLogoCircle, tFadeTimer 31). */
 export function frontierCircleExitFadeStartTe(transition: FrontierCircleTransition): number {
+  const more = MORE_CIRCLE_KINDS[transition];
+  if (more) return moreCircleBlendStartTe(more) + (EXIT_FADE_START_TE - BLEND_START_TE);
   return transition === "asymmetricSpiralInSeq"
     ? ASYMMETRIC_SEQ_EXIT_FADE_START_TE
     : transition === "circlesCross"
@@ -607,7 +744,9 @@ function drawCircleSprite(
   te: number,
   transition: FrontierCircleTransition,
 ): void {
-  const center = transition === "asymmetricSpiralInSeq"
+  const center = MORE_CIRCLE_KINDS[transition]
+    ? moreCircleCenter(name, te, transition)
+    : transition === "asymmetricSpiralInSeq"
     ? asymmetricSpiralCircleCenter(name, te)
     : transition === "circlesMeetInSeq"
     ? circlesMeetInSeqCircleCenter(name, te)
@@ -661,48 +800,17 @@ export function sequentialCirclePainterOrder(te: number): Array<"top" | "left" |
 }
 
 /**
- * Y-ascending painter order (back to front) for CIRCLES_MEET/CIRCLES_CROSS/
- * CIRCLES_MEET_IN_SEQ - the fixed top/left/right draw order these three
- * families used before S3 (docs/brain-transition-wiring-design.md) only
- * happens to be correct for MEET (and, by the same geometry, MEET_IN_SEQ)
- * because their top circle's Y stays below left/right's Y for the WHOLE
- * slide (init -51..45 vs 193..97, i.e. top < leftRight throughout).
- * CROSS's top circle instead STARTS above left/right in Y (init 197 vs 59)
- * and crosses below them partway through its own 38-tick slide (~k 27-28,
- * derived algebraically from both families' own linear Y formulas) - a
- * real z-order flip a fixed draw order can't reproduce; a dense per-tick
- * silver fixture compare (factory-brain-silver-walkup-speech-flicker-
- * off.json local frames 98-99, right where the circles first begin to
- * visibly overlap) caught exactly this as a ~1px ring-edge mismatch at the
- * top/left and top/right overlap boundaries. Ties (left vs right, which
- * share the same Y formula by mirror-symmetric construction for every one
- * of these three families, so always tie) keep the pre-existing oracle-
- * verified relative order (left drawn before/behind right) via ascending
- * name index - unlike `sequentialCirclePainterOrder`'s own reversed tie
- * convention above, which is specific to that OTHER family's different
- * creation order/task-timer stagger. A circle not yet created
- * (`circlesMeetInSeqCircleCenter`'s own `null` before its `createOnTimer`
- * tick) sorts last; `drawCircleSprite`'s own null-check already no-ops it
- * regardless of position, so this can't reorder anything visible.
+ * Back-to-front paint order for CIRCLES_MEET / CIRCLES_CROSS / CIRCLES_MEET_IN_SEQ: SortSprites' persistent order (see
+ * `persistentCirclePainterOrder`). A fixed top/left/right order only holds for MEET (top's y stays below left/right's for the whole slide);
+ * CROSS's top circle starts below them in y and crosses above partway through, and an equal y keeps whichever order the sprites already had
+ * (ROM, CROSS from silver and Noland: a y-ascending sort with a name tie-break drew 13 frames of the crossing wrong).
  */
 function slidingCirclePainterOrder(
   te: number,
   transition: FrontierCircleTransition,
 ): Array<"top" | "left" | "right"> {
-  const names: Array<"top" | "left" | "right"> = ["top", "left", "right"];
-  const y = (name: "top" | "left" | "right"): number => {
-    if (transition === "circlesMeetInSeq") {
-      const center = circlesMeetInSeqCircleCenter(name, te);
-      return center === null ? Number.POSITIVE_INFINITY : center.y;
-    }
-    return circleCenter(name, te, transition).y;
-  };
-  return names.slice().sort((a, b) => {
-    const ay = y(a);
-    const by = y(b);
-    if (ay !== by) return ay - by;
-    return names.indexOf(a) - names.indexOf(b);
-  });
+  return persistentCirclePainterOrder(te, (name, t) =>
+    transition === "circlesMeetInSeq" ? circlesMeetInSeqCircleCenter(name, t) : t > CIRCLE_ANCHOR_TE ? circleCenter(name, t, transition) : null);
 }
 
 /**
@@ -794,7 +902,11 @@ export function applyBattleTransitionOverlay(
     applyLogoWave(fb, te);
     return;
   }
-  if (transition === "asymmetricSpiralInSeq") {
+  if (MORE_CIRCLE_KINDS[transition as FrontierCircleTransition]) {
+    for (const name of moreCirclePainterOrder(te, transition as FrontierCircleTransition)) {
+      drawCircleSprite(fb, name, te, transition as FrontierCircleTransition);
+    }
+  } else if (transition === "asymmetricSpiralInSeq") {
     for (const name of sequentialCirclePainterOrder(te)) {
       drawCircleSprite(fb, name, te, transition);
     }

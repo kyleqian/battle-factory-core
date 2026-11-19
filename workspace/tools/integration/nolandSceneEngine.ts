@@ -68,6 +68,8 @@ export interface RomRecording {
   win: boolean;
   recordStart: { symbols: 0 | 1 | 2; heardBrainSpeech: { silver: number; gold: number } };
   rngStart: number;
+  /** tools/audio/romFrontierTransition.py: the table id (B_TRANSITION_*) read from the live Task_BattleTransition. */
+  transitionId?: number;
   frames: RomRow[];
 }
 
@@ -293,8 +295,12 @@ function whereOf(s: EngineState): string {
  * The ROM's battle transition (GetSpecialBattleTransition's Random() % 12, battle_setup.c:885): its draw is the last of the frame the battle
  * BGM starts. The engine draws the Head's transition from its own gameplay stream (scheduledBrainOpponent), not the room's per-frame
  * cursor, so the frame compare of the transition itself gives the engine the ROM's (`engineTransition` in the report keeps the engine's).
+ * A recording that carries the table id read from the live task (romFrontierTransition.py) uses it: the BGM frame is not always the frame of the draw.
  */
 export function romTransitionTableIndex(rom: RomRecording): number | null {
+  if (rom.transitionId !== undefined) {
+    for (let i = 0; i < 12; i += 1) if (frontierTransitionPresentationForTableIndex(i).transitionId === rom.transitionId) return i;
+  }
   const start = rom.frames.find((r) => r !== null && (r.sounds ?? []).some((e) => e.kind === "bgm" && e.id === 471));
   return start === undefined ? null : ((start.rng >>> 16) % 12);
 }
