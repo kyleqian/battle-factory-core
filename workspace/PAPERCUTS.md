@@ -17,6 +17,13 @@ history.
 - **`LSD194_SPLIT=3` does not divide a 100-seed shard** (mem2, kno3): briefs should say SPLIT=4.
 - `prehunt.py` prints per-cover results as a raw dict with newlines in the keys (luck5); no PIL / numpy for image analysis (lbw7 used node + pngjs, ~10 min).
 - `appStage` frame semantics (frame 0 vs a mid-trace stage frame) undocumented (lbw7 ~10 min).
+- **An hp / timing change moves pins that `test:gate` does not hold** (hpf1: 15 tests in 9 sound / transition files, none in the gate list; found only by the supervisor's full suite,
+  fixed by hpf2 / hpf3). Briefs for timing steps should name those files (aud24x / aud26x / cry1 / trn178 / trn181 / aud252 / adp1) or the gate list should gain one of each.
+- **Two `tsc -b` builds (5-7 GB each) from parallel workers plus a supervisor full suite push the 15 GB box into swap / OOM** (supervisor typecheck + build exit 137 once at 22:58; hpf2 typecheck 137);
+  workers hit the shared typecheck flock (~8 min waits).
+- **Brief tail contradicts the step rule** ("npm test green" vs "do NOT run npm test"): several workers lost minutes; luck5 / luck6 ran full `npm test` shards anyway (luck6 hit its cap inside one).
+- **The census tool scored a sound clock that starts past age 0 as declined** (`lsd194Census.ts`, fixed by c1k `2f88532bd`): census arms made before it show 876 phantom T1 rows (Calm Mind / Cosmic Power / Encore).
+- `soundScoreboard.py` runs `main()` on import (t2r copied its constants); `pfr185Probe.py` / `pfr185Run.py` deleted by cln237 had to be recovered from git (bal1); `.integration/browser` missing in worktrees (dl3 / dl4 symlinked it).
 
 ## Worker friction, 2026-11-16 run
 
