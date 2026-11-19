@@ -319,7 +319,6 @@ tests/partyMonIconAnim.test.ts	area: large src/engine/battlePartySelect.ts	3
 tests/perf211RenderCaches.test.ts	breadth fill	1755
 tests/prebattleRoomFlow.test.ts	breadth fill	80
 tests/presentationEventWindowBridge.test.ts	breadth fill	2
-tests/presentationRng.test.ts	breadth fill	47
 tests/rockThrowTargetIdleX2.test.ts	breadth fill	1
 tests/roundController.test.ts	test:smoke	14
 tests/roundControllerRentalPersistence.test.ts	named: round/draft/swap controllers	5
@@ -359,4 +358,3 @@ tests/turn8BindPresentationStaging.test.ts	breadth fill	325
 tests/turnOrder.test.ts	breadth fill	2
 tests/turnRng.test.ts	breadth fill	1
 tests/winBattle2LilianaFarSideReceipt.test.ts	breadth fill	11
-tests/words59RainTrailingWords.test.ts	breadth fill	2

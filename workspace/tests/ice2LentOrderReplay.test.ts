@@ -32,7 +32,7 @@ function record(planAtField: boolean) {
   const lends: unknown[] = [];
   events.forEach((event, commandIndex) => {
     host = advanceLiveSpriteOrderHost(host, resolution, event.sequence, true, plans);
-    const payload = event.payload as { battler: number; target: number; arguments: string[] };
+    const payload = event.payload as unknown as { battler: 0 | 1; target: 0 | 1; arguments: string[] };
     const request = battleMoveAnimationRequest(payload.battler, payload.target, payload.arguments);
     const lend = lendLiveSpriteOrder(host, request.moveId);
     lends.push(lend);
