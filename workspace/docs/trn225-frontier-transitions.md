@@ -11,15 +11,14 @@ Battle RNG, kernel events and outcomes are untouched (the draw was already taken
 |---|---|---|---|---|
 | 31 | 2 | SQUARES | `src/engine/battleTransitionSquares.ts` | 1115/1278 -> 1278/1278 / same |
 | 32 | 3 | SQUARES_SCROLL | same | 1123/1317 -> 1317/1317 / same (seed 18; OFF seeds 21 and 23 also 0 bad) |
-| 35 | 6 | CIRCLES_CROSS | `battleTransition.ts` (painter order at the crossings) | 1275/1288 -> 1288/1288 / same |
-| 36 | 7 | CIRCLES_ASYMMETRIC_SPIRAL | `battleTransition.ts` | 1141/1285 -> 1285/1285 / same |
-| 37 | 8 | CIRCLES_SYMMETRIC_SPIRAL | same | 1144/1288 -> 1288/1288 / same |
-| 39 | 10 | CIRCLES_CROSS_IN_SEQ | same | 1168/1305 -> 1305/1305 / same |
+| 35 | 5 | CIRCLES_CROSS | `battleTransition.ts` (painter order at the crossings) | 1275/1288 -> 1288/1288 / same |
+| 36 | 6 | CIRCLES_ASYMMETRIC_SPIRAL | `battleTransition.ts` | 1141/1285 -> 1285/1285 / same |
+| 37 | 7 | CIRCLES_SYMMETRIC_SPIRAL | same | 1144/1288 -> 1288/1288 / same |
+| 39 | 9 | CIRCLES_CROSS_IN_SEQ | same | 1168/1305 -> 1305/1305 / same |
 | 41 | 11 | CIRCLES_SYMMETRIC_SPIRAL_IN_SEQ | same | 1143/1319 -> 1319/1319 / same |
 
-Already right and unchanged (0 bad): 34 CIRCLES_MEET_IN_SEQ, 38 CIRCLES_ASYMMETRIC_SPIRAL_IN_SEQ, 40 CIRCLES_MEET. (The id/table columns are
-`battle_transition.c`'s B_TRANSITION_FRONTIER_* number and this repo's table index; the hashes come from `romFrontierTransition.py` seeds in
-the scan below.) Frames counted are the whole probe recording (about 1,300 frames from the lab checkpoint through the battle intro), compared
+Already right and unchanged (0 bad): 34 CIRCLES_MEET_IN_SEQ, 38 CIRCLES_ASYMMETRIC_SPIRAL_IN_SEQ, 40 CIRCLES_MEET. (The id column is
+`battle_transition.c`'s B_TRANSITION_FRONTIER_* number, the table column this repo's table index; id 33 is not in the Frontier table.) Frames counted are the whole probe recording (about 1,300 frames from the lab checkpoint through the battle intro), compared
 with `nolandSceneEngine.ts` against a ROM recording that forces the transition id.
 
 ## Clocks (all measured on the ROM)
