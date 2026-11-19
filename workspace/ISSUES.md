@@ -60,13 +60,15 @@ Hydro Pump / Cosmic Power / Calm Mind / Encore / Hypnosis / Blizzard, ROM hp com
 - **Bodies measured, not landed (lse3, docs/hpd1-hp-hold.md "lse3"):** Absorb +10, Mega Drain +8, Counter +5, Revenge +8, Recycle +4, Razor Wind charge / unleash +8 / +9 (+ ~5 turn-end rows of a
   locked continuation), the opponent's Pound / Scratch / Tackle (+13 / +12 / +21: not live adapters), Wish (+14: the generic action-transition rows that `actionTransitionPauseFrames` drops in Scene ON
   when the anchor is the used print). hpf3 re-pinned Absorb / Revenge / Recycle / Razor Wind windows that these bodies now dominate.
-- **hp shapes still on the 28-row floor (hpf2, no ROM lab):** poison / burn / Curse / Nightmare / wrap ticks, sandstorm / hail damage, faint-next on small bars, confusion self-hit, Substitute printfromtable.
 - **sta5 step 3** (u - 2 pre-print rows at the first action's confirm handoff; patch `.integration/evidence/sta5/step3-handoff-rows.patch`; moves 126 ROM-exact pins until the sound clock is decoupled) and
-  **step 2's Scene OFF** (the +6 message -> launch hold is gated Scene ON only: no OFF ROM window yet).
+  **step 2's Scene OFF gate** (measured by sta6m: drop it, 7 rows in OFF).
 - **Residuals:** Blizzard body SEs +2 (print glyph-count R), Calm Mind hit SE -4, Self-Destruct post-hit hp + faint +6 rows, Memento `stats-change` 5 rows early, Explosion hit-blink ~2 rows, Knock Off's
   hit phase 2-8 rows (shared with the no-item control), Encore turn 1, Solar Beam unleash FadeToBg picture, Faint Attack opponent lag, the species-dependent ball-open lag (bal1: not in the ROM send-out
   path), shape C bodies (Brick Break, Dig charge, status-command gaps), multi-hit second hits, Water Spout -1, Beat Up multi-hit message timing, `Status_Freeze` SE 242 +1, Roar / Howl lab drift.
-- **Pauses (pau3 open):** ability switch-in prints (Intimidate / Trace; no battle-start lab stage), the HJK crash print +3, Safeguard expiry tail 4 early, the failed-Toxic pixel lab, a 1-frame early menu after KOFail.
+- **Switch-in ability prints not presented (pau4m, `docs/pau1-script-pauses.md` "pau4m"):** the app computes the Intimidate / Trace entry events but goes straight to the command box: Trace ~142,
+  Intimidate ~247, both ~386 frames missing (both scenes; ROM blocks measured). Needs an entry-script presentation phase.
+- **hp shapes on the floor (hpf4m: ROM lengths measured, landing order T1 / T4 / T3 / T2 / S1 / S2 in docs/hpd1-hp-hold.md "hpf4m").** sta5 step 2 applies in Scene OFF too (sta6m: 7 rows).
+- **Pauses (pau3 open):** the HJK crash print +3, Safeguard expiry tail 4 early, the failed-Toxic pixel lab, a 1-frame early menu after KOFail.
 - **Coverage:** controller / cry / BGM have no T1 rule table (counts only); fanfare / screen SEs have no T2 instance. Scene ON seeds 6568 / 7682 stall at the 80,000-frame ROM drive cap; census
   seeds 796 / 995 end at the frame budget in both scenes.
 
