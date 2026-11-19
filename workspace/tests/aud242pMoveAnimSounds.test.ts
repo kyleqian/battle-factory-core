@@ -52,10 +52,10 @@ function ourEvents(rom: Fixture): SoundEvent[] {
   return events;
 }
 
-// deltas = ROM frame - our frame per row (aud242p, section 20). Encore: the nine clap SE222 rows (12 ticks apart) and SE223 sit one frame ahead of ours in the ROM. Flatter:
+// deltas = ROM frame - our frame per row (aud242p, section 20). Encore: the nine clap SE222 rows (12 ticks apart) and SE223 sit on the ROM frame since lse2 (one frame behind ours before). Flatter:
 // SE223 and the first SE229 are -3 (the lead class), the second SE229 (after `delay 5` and 38 confetti sprites) is 0: the ROM spends 3 more frames between the two SE229 rows; undiagnosed.
 const SPECS: Array<{ name: string; ids: number[]; deltas: number[] }> = [
-  { name: "encore-player", ids: [222, 223], deltas: Array(10).fill(-1) },
+  { name: "encore-player", ids: [222, 223], deltas: Array(10).fill(0) }, // lse2: -1 before the body lead was presented
   { name: "flatter-player", ids: [223, 229], deltas: [-3, -3, 0] },
   // Reversal: +2 on all three rows (SE209, SE217 before the five-orb wait, SE123 after the 50-tick orbs + `delay 20` + `delay 8`): the aud242a idle-lead class. Taunt: -4 on all five rows (the rows
   // behind the 63-tick thought bubble / 45-tick finger wait and the anger-mark SEs included).

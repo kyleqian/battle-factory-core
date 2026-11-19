@@ -11,6 +11,7 @@ import {
   HPD8_SHAPE_A_MOVE_IDS,
   STA5_STATUS_BODY_TAIL_ROWS,
   lse2BodySoundAgeShift,
+  LSE2_BODY_LEAD_MOVE_IDS,
 } from "./battleResolutionPresentation.ts";
 import type { LiveMoveSpriteAllocatorInput, LiveMoveSpriteOrderInput } from "./liveMoveSpriteAllocator.ts";
 import type { LiveMoveBattlerX2Input } from "./liveBattlerX2History.ts";
@@ -1588,7 +1589,7 @@ const HPD4_BODY_TAIL_ROWS: ReadonlyMap<number, number> = new Map([[49, 3], [82, 
 // liv2: Self-Destruct's presented `hp` command already carries the script lead (the window starts at S + pre, ROM A), so it has no body lead; its hit
 // controller runs 10 rows after the window (the explosion script's own instructions, ROM gap 10), so the tail is 9 (3 + 4 + 123 + 9 = A -> H 139 + pre).
 // lse2: rows after a lead-first lse2 body (on top of its script tail where it has one) that put the next command on the ROM row (R -> H = lead + 3 + len + 4 less the window the body presents).
-const LSE2_BODY_TAIL_ROWS: ReadonlyMap<number, number> = new Map([[322, 3], [347, 3]]);
+const LSE2_BODY_TAIL_ROWS: ReadonlyMap<number, number> = new Map([[322, 3], [347, 3], [59, 2], [227, 10]]);
 const LIVE_MOVE_LEADLESS_TAIL_ROWS: ReadonlyMap<number, number> = new Map([[120, 9]]);
 // hpd8: the shape-A bodies' tail is whatever the 3 pre + 3 post rows of the ROM span (lead + 3 + len + 4) leave over: 6 - pre - post (T 1 / 3 / 6 in hpd7).
 const HPD8_SHAPE_A_ROWS_AROUND_BODY = 6;
@@ -1685,6 +1686,8 @@ export function liveMoveSourceAge(
 }
 
 const STATS_CHANGE_AFTER_BODY_AGE_SHIFT = 4;
+// lse2: after a lead-first lse2 body (Cosmic Power, Calm Mind) the stat SE sits 1 row later than the generic shift's (ROM - ours +1 in both labs).
+const STATS_CHANGE_AFTER_LSE2_BODY_AGE_SHIFT = 3;
 // sta5: after a Flatter / Swagger body (lead + tail landed) and its 2-row `stat` command the `stats-change` command starts 2 rows (the not yet landed
 // pre-print rows) before the ROM's `playanimation`, whose SE is exec + 4: the generic age (calibrated on the old, earlier start) is shifted by 1.
 const STATS_CHANGE_AFTER_STAT_BODY_AGE_SHIFT = 1;
@@ -1704,7 +1707,8 @@ export function statsChangeSourceAge(
   const beforeStat = state.segments[state.segmentIndex]!.commands[state.commandIndex - 2];
   const afterStatBody = previous?.type === "stat" && beforeStat?.type === "move-animation" && (beforeStat.timing.bodyLeadFrames ?? 0) > 0
     && beforeStat.animation !== undefined && STA5_STATUS_BODY_TAIL_ROWS.has(beforeStat.animation.moveId);
-  const afterBodyLead = previous?.type === "move-animation" && (previous.timing.bodyLeadFrames ?? 0) > 0 ? STATS_CHANGE_AFTER_BODY_AGE_SHIFT
+  const afterBodyLead = previous?.type === "move-animation" && (previous.timing.bodyLeadFrames ?? 0) > 0
+    ? (previous.animation !== undefined && LSE2_BODY_LEAD_MOVE_IDS.has(previous.animation.moveId) ? STATS_CHANGE_AFTER_LSE2_BODY_AGE_SHIFT : STATS_CHANGE_AFTER_BODY_AGE_SHIFT)
     : afterStatBody ? STATS_CHANGE_AFTER_STAT_BODY_AGE_SHIFT : 0;
   const age = state.lifecycle.phaseElapsed - (command.timing.seGateFrames ?? 0) + afterBodyLead;
   if (age < 0 || fieldBattler(currentCommandField(state), command.battler).substituteDoll === true) return null;
