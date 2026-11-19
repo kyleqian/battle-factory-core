@@ -683,7 +683,7 @@ Lane: integration, Scene ON (:8012) ROM frames, base `70b797e28`, tested code co
 ### What landed
 | move (id) | rule | ROM d (R->H minus the app's next-command gap), base -> now |
 |---|---|---|
-| Leech Seed (73) | body lead 36, hit tail 3 (`LSE2_BODY_LEAD_MOVE_IDS`, `LSE2_BODY_TAIL_ROWS` absent: the HPD8 `6 - pre - post` path) | -1 -> **0** (SE rows now exact too, the lead moves the body SEs by the ROM's 36) |
+| Leech Seed (73) | body lead 36, hit tail 3 (`LSE2_BODY_LEAD_MOVE_IDS`) | -1 -> **0** (SE rows now exact too, the lead moves the body SEs by the ROM's 36) |
 | Hydro Pump (56) | HPD8 shape A (lead 5, tail 1) | +6 -> **0** |
 | Cosmic Power (322) | body lead 2, tail 3 | +5 -> **0** |
 | Calm Mind (347) | body lead 2, tail 3 | +3 -> **0** |
@@ -703,7 +703,7 @@ Lab change: the Encore lab (`lse1-encore-player-on`, battle-lab json + compare t
 - Census 0..99 (`lsd194Census.sh`, base vs this tree, `rst197CensusDelta.py`): **Scene OFF 100 / 100 identical** (30730 commands); **Scene ON 78 / 100 identical, 22 changed battles**, eventsDigest identical, no error / type-sequence differences; every changed field is a move-animation timing field (indices 16 / 17 / 18); no new static-field command.
 - T2 Scene ON, 8 seeds (648 319 310 6912 2 165 2741 5569; `aud248RunSeed.sh`, `soundScoreboard.py`; before = the base archive, after = this tree): **missing 0 / extra 0** in every family, both arms. Move-animation SE exact / offset 166 / 1223 -> **208 / 1181**; delta (engine - ROM) median / p10 / p90 -2 / -17 / 4 -> **-2 / -12 / 4** (n 1389 both); stat-change, cry, battle-controller and bgm unchanged (stat-change 8 / 27, cry 22 / 50, battle-controller 54 / 171, bgm 0 / 3).
 - `npm run typecheck` exit 0 (3 m 45 s alone); `npm run test:gate` 362 / 362 files, 2844 tests; `npm run build` and `build:lib` exit 0; vanilla Scene ON soak 0:20 **20 / 20 OK** (4 runs of 5 seeds, `--parallel 4`).
-- Test union (every test importing `liveMoveAnimation` / `battleResolutionPresentation*` / `moveAnimSounds` / `tickSounds`, every test naming the seven moves, the hpd6 list, aud249* / sta3*, `lbrd`, `randomRoundSoak*`): 369 files in 6 chunks; 358 files pass. The 11 failing tests in 6 files fail identically on the base archive (`70b797e28`), so they are not this step's: cry1 x4 (`cry1CryTasks`, ROAR first / second cries), `aud242e` counter-player, `aud242p` revenge-player, `aud260` Recycle, `aud262` Water Spout x3, `trn181` Rest (-3 expected vs -14). The full `npm test` was not run.
+- Test union (every test importing `liveMoveAnimation` / `battleResolutionPresentation*` / `moveAnimSounds` / `tickSounds`, every test naming the seven moves, the hpd6 list, aud249* / sta3*, `lbrd`, `randomRoundSoak*`): 369 files in 6 chunks; 363 files pass. The 11 failing tests in 6 files fail identically on the base archive (`70b797e28`), so they are not this step's: cry1 x4 (`cry1CryTasks`, ROAR first / second cries), `aud242e` counter-player, `aud242p` revenge-player, `aud260` Recycle, `aud262` Water Spout x3, `trn181` Rest (-3 expected vs -14). The full `npm test` was not run.
 
 ### Not landed / open
 - **Blizzard body SEs +2, hit SE +3** (unchanged from the base): the app's print length depends on glyph count (S = 51) while the ROM's R is a fixed 55; shape B, not a lead / tail issue. Its remaining frame diffs are backdrop-palette pixels (127 / 780 matched frames).
