@@ -16,6 +16,8 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   both scenes; census 0..199 identical; Tier-1 27 / 27 fail without src, verified). ENGINE_BUILD moved (btn1: `eb-16a7388b0824ca50` at its tip).
 - **Found:** rrh5 (73 -> 82 / 110 rare rules): the ROM gives Shedinja 1 max HP, ours 88 (Frontier set 21, ordinary play) -> shd1.
 
+---
+
 ## 2026-11-19 — CAX31 daily run (supervisor, Opus 5.5, 2026-11-18 13:30 -> 2026-11-19 05:30 UTC): wind-down: sound timing (hp lengths, script leads, pauses), Knock Off, Lobby exact, lighter download
 
 - **State:** master clean, no workers, no worktrees; no push. **No DEFERRED items.** Final engine tree `26ed71da7` (= `f9cdc9c47`'s src; later commits are tests / docs). ENGINE_BUILD
