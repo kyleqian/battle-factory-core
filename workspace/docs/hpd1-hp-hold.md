@@ -836,3 +836,63 @@ Counter's and Recycle's SE residuals in hpf3 (-2 / -4) are the calibrated K = 7 
 6. Giga Drain: nothing.
 
 Not done: the 75-minute brief's "npm test green" line was overridden by the step brief (no tests were run, nothing under `src/` or `tests/` changed); `PROGRESS.md` / `ISSUES.md` untouched.
+
+## hpf4m: the shapes still on the fitted 28-row floor, measured on the ROM (measurement only, `src/` / `tests/` unchanged)
+
+Every hp command not yet moved by hpf1 / hpf2 / hie4 still has `max(28, bar + 1)` (`HP_TIMING`, `{minimumFrames: 28}`). One lab per shape, both scenes, built with `overrides.parties` (a Lv50 Rattata / Gastly player against a Rattata foe; `tools/integration/hpf4mLabs.py` writes `tools/battle-lab/hpf4m-<case>-{on,off}.json`). ROM side = `tools/integration/hpd2Probe.py` (per-frame `gBattlescriptCurrInstr`, `gBattleControllerExecFlags`, hp), app side = `hpf1Cmds.ts` through `tools/integration/hpf4mShape.py` (the hpf2Shape tool with per-mode profiles); pointers are named with `hpf4mPtrs.py <ram.json> <from> <to>` (linker map). Evidence (gitignored): `.integration/evidence/hpf4m/{ram,trace}/` and `<case>-<scene>.txt`.
+
+Notation: **E** = the ROM's bar exec run (bar rise to fall) = `battleHealthBarAnimationFrames + 1`, checked on every row below. **next** = bar rise to the next controller exec rise (ROM). **app** = our hp command length (`len`) before the next command.
+
+### Result: ON and OFF agree on every row
+
+All 14 shapes give the same E / next in Scene ON and OFF (the scenes only differ in the hit-animation / sprite windows before the bar, never in the bar-to-next rows), so one rule per shape is enough. Rows with E < 27 are the point: the app's 28-row floor makes them (27 - E) rows too long.
+
+### Table
+
+| shape (lab) | ROM E / next | script source | app now | rule |
+|---|---|---|---|---|
+| poison tick (`poison`) | E 14 / +22 (E+8) | `BattleScript_PoisonTurnDmg`: `healthbarupdate; datahpupdate; printfromtable; waitmessage` -> `MoveEnd`; the next controller exec is the action prompt | 28 -> turn-end 8 | **T1** |
+| toxic tick (`toxic`) | E 7 / 13 / 19 (grows with the counter) -> +15 / +21 / +27 (E+8) | same + toxic counter | 28 | T1 |
+| burn tick (`burn`) | E 14 / +22 (E+8) | `BattleScript_BurnTurnDmg` | 28 | T1 |
+| Curse tick (`curse`, Gastly, Ghost) | E 27 / +35 (E+8) | `BattleScript_CurseTurnDmg` | 28 | T1 (E 27: no change) |
+| Nightmare tick (`nightmare`) | E 27 / +35 (E+8) | `BattleScript_NightmareTurnDmg` | 28 | T1 (no change) |
+| Curse cost (`curse`) | E 53 / +55 (E+2) | `EffectCurse` `healthbarupdate; datahpupdate; printstring` | `len 53 -> message` | already exact |
+| wrap-family tick (`wrap`, `bind`, `firespin`, `whirlpool`, `sandtomb`, `clamp`) | E 7 on every tick of all six / +15 (E+8) | `BattleScript_WrapTurnDmg` (`healthbarupdate; datahpupdate; printstring; waitmessage; jumpifword...`) | 28 | T1 |
+| wrap-family first hit -> secondary message | E 16 (Wrap / Bind), 7 (Fire Spin / Whirlpool), 11 (Sand Tomb), 14 (Clamp) / **E+7** | the hit's `healthbarupdate; datahpupdate; critmessage; waitmessage; ...; seteffectwithchance` -> `BattleScript_MoveEffectWrap` printstring | 28 | **T2** |
+| wrap-family later hit (ends in `MoveEnd`, no secondary print) | E 15 / 7 / 10 / 13 / **E+17** | the same bar, but the next exec is the next action's | 28 | already the hpf1 shape (hit -> `MoveEnd`) |
+| sandstorm damage, the player's tick (`sandstorm`) | E 7 / +17 (E+10) | `BattleScript_DamagingWeatherContinues` -> `printfromtable gSandstormHailContinuesStringIds; healthbarupdate ... jumpifword; ...` | 28 -> message | **T3** |
+| sandstorm damage, the foe's (last) tick | E 7 / +19 (E+12) | same, last battler: `BattleScript_DamagingWeatherContinues` -> `cbf cc8` (end) | 28 -> turn-end | **T3** (+2 over the player's) |
+| faint-next tick (`faintpoison`, 5 ticks then faint) | ticks E 4 / 7 / 9 / 12 / 14 -> +12 / 15 / 17 / 20 / 22 (E+8); last tick E 12, next rise **+80** (the `BattleScript_FaintAttacker` chain: `playfaintcry` at E+2, then the 64-row pause) | `BattleScript_PoisonTurnDmg` -> `7aa 7ac 7af 7b1` (faint path) | 28 -> faint | **T4** |
+| confusion self-hit (`confuse` seed 3, `hpf4m-confuse-{on,off}-s3`) | E 26 / 35 / 23 / 32 -> +42 / +52 / +39 / +51 (E+16..+17 to the next action) | `BattleScript_MoveUsedIsConfused` -> `BattleScript_DoSelfConfusionDmg` -> `healthbarupdate; datahpupdate; resultmessage; tryfaintmon; goto MoveEnd` | `{minimumFrames: 0, tailFrames: 5..7}` from hpd1 (len 36 / 38 / 30) | **already exact**; the open-remainder note that lists it is stale |
+| Substitute cost (`substitute`, `subhit`) | E 27 / **+29 (E+2)** | `EffectSubstitute`: `healthbarupdate; datahpupdate; printstring` | `len 31 -> message` (28 + tail 3) | S1 (off by one on short bars) |
+| hit on a Substitute (`subhit`, Lv12 foe) | **no bar**: hit animation 347..379, `datahpupdate` prints `STRINGID_SUBSTITUTEDAMAGED` (`battle_script_commands.c:1818`, string `sText_SubstituteDamaged` ends in `\p`) at 382 | `BattleScript_HitFromAtkAnimation+0x8` | hit-animation 347 -> message 382 `{minimumFrames: 24, holdFrames: 0}`, then sprite-visibility 420 | **S2** (see below) |
+
+Hail is the same script as sandstorm (`BattleScript_DamagingWeatherContinues`, same string table); the hail tick was measured in hpf2 (R3) and not repeated here.
+
+### Rules
+
+- **T1 (end-of-turn status tick: poison / toxic / burn / Curse / Nightmare / wrap family).** The ROM's next controller exec after a tick bar is **E + 8** after the bar rise (the next action prompt, 8 rows of `MoveEnd`), for every bar length from E = 4 to 27, and the app already adds the 8 rows as `TURN_END_TIMING`. So the tick's `hp` is `{minimumFrames: 0}` (the hie4 `ITEM_HEAL_HP_TIMING`, bar + 1 + nothing), not 28. Changes poison / toxic / burn / wrap-family ticks (E < 27); Curse / Nightmare ticks (E 27) stay put. Where it lands: the hp-timing selector next to `ITEM_HEAL_HP_TIMING` for the end-of-turn `B_SCR_OP_HEALTHBARUPDATE` (it is the one that the end2 handlers emit with no preceding hit animation).
+- **T2 (wrap family, the hit that applies the wrap).** E + 7 to the secondary-effect message (E 16 / 7 / 11 / 14 by move). Tail 7 on a floor-free hp. It is not covered by the hpf1 critmessage rule (it is a plain `printstring`). Keep ON and OFF equal (the sag130 note).
+- **T3 (sandstorm / hail tick).** The player's tick: E + 10 to the weather message (a `printfromtable`, hpf2's R1 tail of kernel executions + 2 applies, the message sits 10 rows after the bar); the foe's / last tick: E + 12 (4 more than T1 because the last battler leaves through `cbf..cc8`). So `{minimumFrames: 0, tailFrames: 10}` for the player and `{minimumFrames: 0, tailFrames: 4}` + turn-end 8 for the last tick.
+- **T4 (faint on a small bar).** Every tick except the last is T1. The last tick's faint chain starts at **E + 2** (`playfaintcry`), so `{minimumFrames: 0, tailFrames: 2}`. The current `applyHpHitTails` `faint` rule needs `hit && leads.faintNext` and its `battler === 0` guard skips non-hit commands on the player: drop both for the tick path.
+- **S1 (Substitute cost).** E 27 -> +29. App len 31 is one over (tail 3 was fitted on a longer bar); tail 2 with the 28 floor gives 30 = ROM + 1 (the usual +1). Only short bars are affected (cost bars E >= 28 are exact).
+- **S2 (hit on a Substitute).** There is no bar: the hit animation ends at 379, `datahpupdate` prints the string at 382, i.e. **3 rows after the hit animation**, the string ends in `\p` (a wait-for-A text, unlike every other battle string measured, which auto-advance after `waitmessage`): the ROM holds the exec at `HitFromAtkAnimation+0x8` until the A press (the lab pressed A at 1122; exec fell at 1125, 719 rows after it started). The app presents a 24-row message and moves on (sprite-visibility 420). In a script-driven lab that is a stall; for the player it means the substitute message waits for input. Decide before landing whether the app should hold the message for a button (it has no wait-for-A command) or keep 24.
+
+### Not verified / caveats
+
+- Not pixel-verified: `tools/compare` matched 0 / 201 frames on these labs (no frame-alignment tooling here); every number is the ROM exec / pointer trace against the app command timeline.
+- The app's rng seed does not correspond to the lab seed: app misses / hits can differ from the ROM's (the confusion self-hit needed a ROM seed scan, seed 3). The comparison is the static per-shape timing, not the outcome.
+- The player / foe species are Rattata / Gastly (Curse needs a Ghost) and the foe Lv12 Rattata for the hit on a Substitute; the app's stat for those can differ from the ROM's, so hp values differ while E is read per row.
+- Seed-scan labs `hpf4m-confuse-*-s2 / s4..s7` were deleted; `hpf4m-confuse-{on,off}-s3` are kept.
+
+### Proposed landing for the next run (one commit per group, census after each)
+
+1. **T1** (poison / toxic / burn / wrap-family ticks) -> `{minimumFrames: 0}` at the end-of-turn hp: poison E 14 (-13), toxic E 7 / 13 / 19, burn E 14, wrap-family E 7. Pin the new lengths on the two scenes; this one has the widest effect (every status tick on a small bar).
+2. **T4** faint-next tick (`tailFrames: 2`, drop the `hit` / `battler === 0` guards for the tick path).
+3. **T3** sandstorm / hail tick tails (10 for the player, 4 + turn-end for the last).
+4. **T2** wrap-family first hit tail 7.
+5. **S1** Substitute cost tail 2.
+6. **S2** after a decision on the `\p` wait-for-A string.
+7. Nothing for Curse cost, Curse / Nightmare ticks (E 27), the confusion self-hit, Leftovers (hie4).
+
+Not done: the brief's "npm test green" line was overridden by this step (no tests were run, nothing under `src/` or `tests/` changed, `tools/compare/appTrace.ts` was patched during measurement and reverted); `PROGRESS.md` / `ISSUES.md` untouched.
