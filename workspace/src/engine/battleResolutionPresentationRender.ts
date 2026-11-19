@@ -10,7 +10,7 @@ import {
   isWeatherContinuesAnimation, WEATHER_CONTINUES_BODY_ROWS, WEATHER_CONTINUES_LAUNCH_LEAD_ROWS, WEATHER_CONTINUES_MOVE_IDS,
   STA5_STATUS_BODY_TAIL_ROWS,
   lse2BodySoundAgeShift,
-  bodyHitTailRuleApplies, bodyLeadTailCompositionApplies, bodyStatusTailRuleApplies, bodyLse2RuleApplies,
+  bodyHitTailRuleApplies, bodyLeadTailCompositionApplies, bodyStatusTailRuleApplies, bodyLse2RuleApplies, bodySLeadRuleApplies,
 } from "./battleResolutionPresentation.ts";
 import type { LiveMoveSpriteAllocatorInput, LiveMoveSpriteOrderInput } from "./liveMoveSpriteAllocator.ts";
 import type { LiveMoveBattlerX2Input } from "./liveBattlerX2History.ts";
@@ -1668,7 +1668,9 @@ export function liveMoveSourceAge(
   const seGate = (command.timing.seGateFrames ?? 0) + (command.timing.scriptLeadFrames ?? 0);
   const pre = liveMoveUniversalRows(command.animation, field).pre;
   // lse2: a body whose lead is presented in front of it keeps the sound clock of the ROM script rows (the clock is the pre-lead one, shifted by the lead's difference to its 7-row calibration).
-  const soundShift = lse2BodySoundAgeShift(command.animation.moveId, command.timing.bodyLeadFrames);
+  let precedingStatRows = 0;
+  for (let c = state.commandIndex - 1; c >= 0 && segment!.commands[c]!.type === "stat"; c -= 1) precedingStatRows += battleResolutionCommandDuration(segment!.commands[c]!, field);
+  const soundShift = lse2BodySoundAgeShift(command.animation.moveId, command.timing.bodyLeadFrames, precedingStatRows);
   const age = state.lifecycle.phaseElapsed - seGate - pre - soundShift;
   // aud260: the age of the command's last presenting row (the command completes when phaseElapsed + 1 >= its duration), for the sound-only tail past the window.
   const duration = battleResolutionCommandDuration(withoutBodyLead(command), field, liveMoveTimingBodyOf(state.liveMoveSpriteOrderInput), state.liveMoveBattlerX2Input?.moveUse);
@@ -1711,8 +1713,10 @@ export function statsChangeSourceAge(
   const beforeStat = state.segments[state.segmentIndex]!.commands[state.commandIndex - 2];
   const afterStatBody = previous?.type === "stat" && beforeStat?.type === "move-animation" && (beforeStat.timing.bodyLeadFrames ?? 0) > 0
     && beforeStat.animation !== undefined && bodyStatusTailRuleApplies(beforeStat.animation.moveId);
+  // lead4: an S body's lead moved in front of it and its tail shrank by the same rows, so the stats-change command starts where it did: the generic age is unchanged.
   const afterBodyLead = previous?.type === "move-animation" && (previous.timing.bodyLeadFrames ?? 0) > 0
-    ? (previous.animation !== undefined && bodyLse2RuleApplies(previous.animation.moveId) ? STATS_CHANGE_AFTER_LSE2_BODY_AGE_SHIFT : STATS_CHANGE_AFTER_BODY_AGE_SHIFT)
+    ? (previous.animation !== undefined && bodySLeadRuleApplies(previous.animation.moveId) ? 0
+      : previous.animation !== undefined && bodyLse2RuleApplies(previous.animation.moveId) ? STATS_CHANGE_AFTER_LSE2_BODY_AGE_SHIFT : STATS_CHANGE_AFTER_BODY_AGE_SHIFT)
     : afterStatBody ? STATS_CHANGE_AFTER_STAT_BODY_AGE_SHIFT : 0;
   const age = state.lifecycle.phaseElapsed - (command.timing.seGateFrames ?? 0) + afterBodyLead;
   if (age < 0 || fieldBattler(currentCommandField(state), command.battler).substituteDoll === true) return null;
