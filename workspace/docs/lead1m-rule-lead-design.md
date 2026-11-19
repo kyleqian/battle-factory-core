@@ -438,3 +438,15 @@ Re-pins (each by the lead + T rule):
 - `tests/animation/liveRandom2R4MoveAdapters.test.ts`: no edit; fixed by the helper change (`held` includes shape-a bodies with lead > 0, as production holds the age at `live - 1` through the tail, Water Pulse on Castform).
 
 Limits: hits 2+ of the multi-hit bodies are not covered (no anchor), the residual lead of the adapter windows (s != 0, B5) and the other 93 A? bodies (B2) are unchanged.
+
+### lead2 B2 spot-check (check item 3; NOT landed)
+
+Method: the B1 lab pattern (`lead2-icywind-player-on`, player Rattata Lv50 with the move x4, Seismic Toss Rattata Lv12 opponent, Scene ON, 1023 frames) with the move replaced; `npm run compare -- <trace> --summary` matched frames with the rule off (the committed tip) and with the three ids added to `LEAD2_SHAPE_A_MOVE_IDS` as an uncommitted edit (reverted; the labs and the stage lines are kept under `.integration/evidence/lead2/b2-labs/`, not committed).
+
+| body | id | matched before | matched with the rule | reading |
+|---|---|---|---|---|
+| Metal Claw | 232 | 68 | 406 | gap 4 / lead + T consistent with the ROM (same direction and size as the B1 bodies) |
+| Slash | 163 | 261 | 760 | gap 4 / lead + T consistent with the ROM |
+| Shadow Ball | 247 | 29 (identical app frames either way) | not measured | the Rattata target is Normal: Ghost has no effect, so no animation plays and the rule cannot act. Two non-Normal-target labs (Pikachu 25, Moltres 146 via `aud242lBlizzardStage`) matched 3 and 0 of 1023 frames both before and after, i.e. the staging does not align with the ROM from the first frames; Shadow Ball needs a lab staged the way the aud262 Memento labs are (a validated target species) before its gap can be read |
+
+Result for B2: Metal Claw and Slash support gap 4 (the A? class prediction). Shadow Ball (the largest A? body, 102 census commands) is still unmeasured. Nothing of B2 is in the rule.
