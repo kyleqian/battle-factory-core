@@ -41,10 +41,13 @@ interface WonLobby {
  * retire case keeps 13 (RETIRE_SEED).
  * hpd5 (measured on the hpd4 tip f40209793: the same 3 failures, so hpd4's floor-free foe-hit hold moved the deal, not hpd5's Scene ON-only audited leads): 19's OFF continuation
  * and 13's retire case now lose; a scan of 1..18 on the full file with the seed in both roles found 17 passing every case (13 passes all but the retire), so both use 17.
+ * fix 51 (docs/parity-mac/noland-room-scenes.md: the won Lobby's clock starts at the Lobby's map load, ~100 frames later than before, and its award
+ * gates are the ROM's) moved the deal again: 17's OFF continuation and 0's loss no longer play out. A scan (win 1..12 on the win / retire cases, loss 1..2
+ * on the loss case) found 2 passing every case in both roles, so all three use 2 (the loss case plays on past the second challenge to the first loss).
  */
-const WIN_TWO_SEED = 17;
-const RETIRE_SEED = 17;
-const WIN_THEN_LOSE_SEED = 0;
+const WIN_TWO_SEED = 2;
+const RETIRE_SEED = 2;
+const WIN_THEN_LOSE_SEED = 2;
 
 function newPlayer(seed: number): RandomPlayer {
   const player = new RandomPlayer(new Rng(seed), new ActionLog(false), "winning");

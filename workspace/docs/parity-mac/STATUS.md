@@ -172,6 +172,37 @@ the engine; the library commit alone was `eb-df70eb8b51bae914`).
 lines are drawn and timed on the site (which lines, not their frames); return battles past 63 (the lab stages challenges 0..7); Open Level;
 RECORD, REST and RETIRE; the summary screens; the Lobby.
 
+### Fifth part (2026-11-19, Kyle's word through the top layer): Noland's room scenes frame by frame, and the symbol scene
+
+Kyle: "the timing, let's get that correct" and "The symbol scene ... let's just implement it". Everything in `noland-room-scenes.md`.
+
+**Room scenes (fix 50, commit 64245e750).** A new ROM recorder (`tools/audio/romNolandScene.py`: the lab's walk-up to the Factory Head with the
+save's record staged; every frame's picture hash, RNG draws, sounds and A / B gates) and an engine replay from the same GO ON menu
+(`tools/integration/nolandSceneEngine.ts`). Noland's speech now runs as the game's field message box (a character a frame; `\p` / `\l`
+taken from the frame after the last character, with SE_SELECT; the `\l` scroll; the `\p` clear shown only with the arrow's redraw; the end
+of a message taken three frames after), the room appears a frame later, "Get a move on!" takes its press three frames later and closes at
+once, B works wherever A does, GO ON before the Head draws no intro RNG, SE_EXIT on the warp into the room, the battle intro's prompt two frames
+earlier (every trainer), the battle start on the game's frame with each transition family on its own clock. 10 recordings (silver / gold
+first meeting, speech heard, the return battles at 21 and 42, late presses, B presses, Scene ON): every frame, gate and sound equal up to each
+one's bound (the battle intro's prompt, or a transition the engine does not draw).
+
+**The symbol scene (fix 51).** After a first win over Noland the return to the field holds on the frame its script would warp to the Lobby
+and plays the scene: Noland's line, the step, MUS_OBTAIN_SYMBOL with the symbol's text, his closing lines, the warp. With it: the room after
+Noland's battle drawn as his (it was an ordinary trainer's), SE_EXIT on that warp, the won Lobby's clock started at the Lobby's load (every
+seventh win and win over Noland: its box showed already typed and took A about 100 frames early), the Lobby's award and exchange gates and
+the record question as the game, and the longer save after a new symbol. 3 recordings (silver and gold first wins, a win with both symbols):
+every frame, gate, sound and RNG draw equal from the battle's return to the field to each one's bound; a reload in the middle of the scene
+replays to the same frame and goes on the same. The library's events and the save's record are unchanged.
+
+Gates on the tip: `tsc -b` clean; full `npm test` 1,859 files / 15,974 tests pass, 0 fail. ENGINE_BUILD `eb-01c15b77495c4068` (was
+`eb-9af610de47298098`). Re-pins: `lbrd.test.ts` seeds (the deal moved with the Lobby's clock), the seven-win soak pin (41,240 -> 41,332 frames).
+
+**Not covered** (each listed in `noland-room-scenes.md`): seven of the twelve Frontier transitions (every trainer); the pause before Noland's
+transition (fixed 32 frames; the game's varies with his team, 26-37 here); his team and the transition come from the engine's gameplay RNG,
+not the room's per-frame cursor; the battle intro after its prompt; the pre-battle room before the GO ON menu; the ordinary trainer's room;
+the silver Lobby's one-frame-later load; gold's save varying by up to 6 frames; the Lobby's record question onward; the battle's own end
+before the return; battle 84 (not run); Open Level.
+
 ## Stopped 2026-11-13 (Kyle winds down the Mac)
 
 Sixth pass, stopped at about 20:00 UTC on the top layer's word: the battle-rule work moves to the box.

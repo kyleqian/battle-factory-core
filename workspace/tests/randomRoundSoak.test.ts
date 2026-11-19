@@ -427,7 +427,9 @@ describe("random round soak driver (green milestone pin)", () => {
       // wsh1 (the Wish heal / Future Sight hit / Focus Band general-animation commands, 201 / 172 / 129 frames in Scene ON): frames only + render calls, 41_099 -> 41_221, renderCalls 2_907 -> 2_913; same battle 7, turn 3, end state, diagnostics.
       // hpd5 (measured on the hpd4 tip f40209793, before any hpd5 change; hpd5's Scene ON-only audited leads add 0 here): the hpd4 floor-free foe-hit hold,
       // frames only + render calls, 41_221 -> 41_240, renderCalls 2_913 -> 2_914; same battle 7, turn 3, end state, diagnostics.
-      frames: 41_240,
+      // fix 51 (docs/parity-mac/noland-room-scenes.md: the won Lobby's clock starts at the Lobby's map load, not the battle's end; the award gates
+      // 70 / 44): frames only + render calls, 41_240 -> 41_332, renderCalls 2_914 -> 2_920; same battle 7, turn 3, end state, diagnostics.
+      frames: 41_332,
       battle: 7,
       turn: 3,
       diagnostics: {
@@ -439,7 +441,7 @@ describe("random round soak driver (green milestone pin)", () => {
         terminalOutcome: "roundWon",
         terminalRecordMenuInputReadyReached: true,
         terminalRecordChoice: "no",
-        renderCalls: 2_914,
+        renderCalls: 2_920,
       },
     });
     expect(second).toEqual(first);

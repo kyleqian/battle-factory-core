@@ -118,6 +118,11 @@ import {
   battleRoomQuoteInputReady,
   battleRoomStateForOpponent,
   brainBattleIntroHandoffTe,
+  BRAIN_SYMBOL_SCENE_AGE,
+  brainSymbolSceneFanfareStarts,
+  brainSymbolSceneWarps,
+  createBrainSymbolSceneState,
+  SYMBOL_FANFARE_FRAMES,
   brainBattleTransitionTe,
   brainSpeechAcceptPlaysSelect,
   BRAIN_BATTLE_TRANSITION_START_ELAPSED,
@@ -740,6 +745,7 @@ import {
   beginScreenSoundTick,
   playScriptSe,
   playSelectSe,
+  playSymbolFanfare,
   runScheduledScreenSounds,
   scheduleHealFanfare,
   schedulePostwinRecordYesSave,
@@ -959,7 +965,7 @@ function createTerminalForRound(
   const awarded = orchestrator?.roundOutcome?.battlePointsAwarded;
   return createFactoryTerminalPresentation(
     command,
-    awarded === undefined ? undefined : { before: carry.battlePoints, awarded },
+    awarded === undefined ? undefined : { before: carry.battlePoints, awarded, symbolGranted: orchestrator?.roundOutcome?.symbolGranted === true },
   );
 }
 
@@ -1383,7 +1389,35 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
 
   if (factoryTerminal) {
     const terminalBefore = factoryTerminal;
-    factoryTerminal = advanceFactoryTerminalPresentation(
+    // After a won Noland battle the return span's script either warps to the Lobby on age BRAIN_SYMBOL_SCENE_AGE (SE_EXIT, DoWarp) or, when
+    // the symbol is new, shows the symbol scene there first (battleRoom.ts): the span, and with it the Lobby, holds on that age until the
+    // scene's own warp. Presses go to the scene. ROM: docs/parity-mac/noland-room-scenes.md, "The symbol scene".
+    let symbolScene = state.battleRoom;
+    let holdSpan = false;
+    const brainWin = postwin !== null && isFactoryTerminalRoundWon(factoryTerminal) && currentOpponent?.frontierBrain !== undefined;
+    const symbolGranted = brainWin && factoryRoundBattleOrchestrator?.roundOutcome?.symbolGranted === true;
+    if (brainWin && symbolScene === null && postwin!.elapsed === BRAIN_SYMBOL_SCENE_AGE - 1) {
+      if (symbolGranted) symbolScene = createBrainSymbolSceneState(currentOpponent!.frontierBrain!.status === "gold" ? "gold" : "silver");
+      else playScriptSe(SE_EXIT);
+    } else if (symbolScene !== null && symbolScene.phase === "brainSymbol" && symbolScene.symbolStage !== "done") {
+      if ((newKeys.has("A") || newKeys.has("B")) && battleRoomQuoteInputReady(symbolScene)) {
+        if (brainSpeechAcceptPlaysSelect(symbolScene)) playSelectSe();
+        symbolScene = battleRoomAcceptedState(symbolScene);
+      } else {
+        symbolScene = advanceBattleRoom(symbolScene);
+      }
+      if (brainSymbolSceneFanfareStarts(symbolScene)) playSymbolFanfare(SYMBOL_FANFARE_FRAMES);
+      if (brainSymbolSceneWarps(symbolScene)) playScriptSe(SE_EXIT);
+      holdSpan = true;
+    } else if (symbolScene !== null && symbolScene.phase === "brainSymbol") {
+      symbolScene = advanceBattleRoom(symbolScene);
+    }
+    // The won terminal's clock is the Lobby's (age 0 = the Lobby's map load, FACTORY_ROUND_WON_TERMINAL_PROFILE): on a battle's return
+    // span it starts at that load, not at the round's end (ROM: a won Noland battle's Lobby box types out from the fade-in and takes its
+    // first press 98 frames after the load, docs/parity-mac/noland-room-scenes.md). The loss terminal's clock includes the span.
+    const spanBeforeEntry = postwin !== null && isFactoryTerminalRoundWon(factoryTerminal)
+      && lobbyTicksSinceEntry(holdSpan ? postwin : advancePostwin(postwin), factoryTerminal)! <= 0;
+    factoryTerminal = spanBeforeEntry ? factoryTerminal : advanceFactoryTerminalPresentation(
       factoryTerminal,
       {
         pressedA: newKeys.has("A"),
@@ -1445,7 +1479,7 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
       : state.factoryCarry;
     // lbr-g: the return span draws per battleExitRng.ts (E1 + E2 + E3) instead of one draw per tick; a terminal without the span (staged 7th win,
     // age 0 = the Lobby map load) only owes the E3 draws.
-    const terminalPostwin = postwin ? advancePostwin(postwin) : postwin;
+    const terminalPostwin = postwin ? (holdSpan ? postwin : advancePostwin(postwin)) : postwin;
     let terminalRngValue = rngValue;
     let terminalRngSteps = 1;
     if (terminalPostwin !== null) {
@@ -1486,6 +1520,8 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
       // sibling of that same requirement (render() prefers this state over
       // factoryTerminal until its own phase reaches "counterRoom").
       postwin: terminalPostwin,
+      // the symbol scene keeps its last picture under the span's fade-out; the Lobby's entry clears it
+      battleRoom: terminalPostwin !== null && postwinPhase(terminalPostwin.elapsed) !== "counterRoom" ? symbolScene : null,
       factoryTerminal,
       roundController,
       factoryRoundBattleOrchestrator,
@@ -3351,6 +3387,9 @@ function renderFactorySwapEntryFade(state: EngineState): Uint8Array {
   return fb;
 }
 
+/** The Head's room after his battle, no box (renderPostwinState's battleRoom phase). */
+const BRAIN_ROOM_AFTER_BATTLE: BattleRoomState = Object.freeze({ phase: "brainSpeechSettled", elapsed: 0, frontierBrainWalkup: true });
+
 function renderPostwinState(state: EngineState): Uint8Array {
   const postwin = state.postwin!;
   if (postwin.rightThisWayDismissElapsed !== null) {
@@ -3388,6 +3427,13 @@ function renderPostwinState(state: EngineState): Uint8Array {
       ? age - POSTWIN_BATTLE_ROOM_FADE_OUT_AGE
       : age - POSTWIN_BATTLE_ROOM_FIRST_AGE;
     const timing = fadingOut ? POSTWIN_ROOM_FADE_OUT : FADE_IN;
+    // After the Factory Head's battle the field is his room as the walk-up left it (Noland and the fake player face each other, the
+    // scientists turned), with the symbol scene's step and box when it plays.
+    if (state.factoryRoundBattleOrchestrator?.round.rules.currentOpponent?.frontierBrain !== undefined) {
+      const room = state.battleRoom ?? BRAIN_ROOM_AFTER_BATTLE;
+      renderBattleRoomBrainEntranceScene(fb, room, bgFadeY(local, timing), objFadeY(local, timing));
+      return fb;
+    }
     renderBattleRoomEntryScene(
       fb,
       step,

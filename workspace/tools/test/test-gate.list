@@ -228,7 +228,6 @@ tests/battlePartyOrder.test.ts
 tests/battleResolutionAdapter.test.ts
 tests/battleResolutionAdapterIntegration.test.ts
 tests/battleResolutionPresentation.test.ts
-tests/battleRoom.test.ts
 tests/battleScene.test.ts
 tests/battleSceneResolutionOwner.test.ts
 tests/battleScriptAttackCancelerFrozen.test.ts
@@ -276,7 +275,6 @@ tests/battleStringResolver.test.ts
 tests/battleTransition.test.ts
 tests/battleTurnPortability.test.ts
 tests/cast83CastformForms.test.ts
-tests/confirmReveal.test.ts
 tests/cursorInputGate.test.ts
 tests/destinCanonicalReplacements.test.ts
 tests/dragonRageFireSpitGeometry.test.ts
@@ -296,6 +294,7 @@ tests/factoryLobbyFreeRoam.test.ts
 tests/factoryReturnToFrustration.test.ts
 tests/factorySwapPresentation.test.ts
 tests/factoryTimer0Cadence.test.ts
+tests/factoryTrainerPresentation.test.ts
 tests/factoryTrainerSchedule.test.ts
 tests/fakeTearsControllerPresentation.test.ts
 tests/font.test.ts
@@ -318,6 +317,7 @@ tests/monPic.test.ts
 tests/offs152SendInTailOff.test.ts
 tests/partyMonIconAnim.test.ts
 tests/perf211RenderCaches.test.ts
+tests/prebattleRoomFlow.test.ts
 tests/presentationEventWindowBridge.test.ts
 tests/presentationRng.test.ts
 tests/rockThrowTargetIdleX2.test.ts

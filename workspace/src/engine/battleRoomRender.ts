@@ -29,8 +29,8 @@
 import { setPixel } from "./framebuffer.ts";
 import type { RgbColor } from "./bg.ts";
 import { fadeColor } from "./fadeRender.ts";
-import { BRAIN_MOVEMENT_CLOCK_OFFSET, BRAIN_MOVEMENT_SETTLE_ELAPSED, BRAIN_MSGBOX_CLOSE_WIPE_MOVING_HOLD_TICKS, NOLAND_IDLE_FRAME, NOLAND_INITIAL_SCREEN_Y, type BattleRoomState, type EntryStep, type MsgboxVisual, battleRoomQuote, brainEntranceMovementSettled, brainSpeechLines, brainSpeechPicture, brainSpeechRows, entryStep, msgboxVisual, nolandStep, opponentStep, scientistTurnFrame } from "./battleRoom.ts";
-import { drawMessageBoxFrame, drawMessageBoxText, MESSAGE_PALETTE } from "./prebattleRoomRender.ts";
+import { BRAIN_MOVEMENT_CLOCK_OFFSET, BRAIN_MOVEMENT_SETTLE_ELAPSED, BRAIN_MSGBOX_CLOSE_WIPE_MOVING_HOLD_TICKS, NOLAND_IDLE_FRAME, NOLAND_INITIAL_SCREEN_Y, type BattleRoomState, type EntryStep, type MsgboxVisual, battleRoomQuote, brainEntranceMovementSettled, brainSpeechLines, brainSpeechPicture, brainSpeechRows, brainSymbolStep, entryStep, msgboxVisual, nolandStep, opponentStep, scientistTurnFrame } from "./battleRoom.ts";
+import { drawMessageBoxFrame, drawMessageBoxFrameFaded, drawMessageBoxText, drawMessageBoxTextFaded, MESSAGE_PALETTE } from "./prebattleRoomRender.ts";
 import { measureText, type FontData } from "./font.ts";
 
 import layout from "../data/gen/battle-room-layout.json" with { type: "json" };
@@ -202,6 +202,8 @@ function tileScreenPos(tile: { x: number; y: number }, origin: { x: number; y: n
 const INITIAL_ORIGIN = roomLayout.initialCameraOriginPx;
 const DECOY_POS = { x: 5, y: 11 } satisfies { x: number; y: number };
 const decoyScreenPos = tileScreenPos(DECOY_POS, INITIAL_ORIGIN);
+/** The object event's first side walk frame (sAnim_GoEast: frame 7 mirrored), the symbol scene's step's first half (ROM-matched). */
+const SYMBOL_STEP_WALK_FRAME = 7;
 
 /** Fixed screen X of the opponent's walk-in column (tile x=7, never changes - `walk_down` is vertical-only, battleRoom.ts finding 2). */
 const opponentScreenX = tileScreenPos(roomLayout.objects.opponent.settleTile, INITIAL_ORIGIN).x;
@@ -278,11 +280,13 @@ function drawOpponentMsgbox(
   fb: Uint8Array,
   msgbox: MsgboxVisual,
   state: BattleRoomState,
+  fadeY = 0,
 ): void {
   if (!msgbox.visible) return;
-  drawMessageBoxFrame(fb);
-  if (state.phase === "brainSpeech") {
-    drawBrainSpeechText(fb, state);
+  if (fadeY > 0) drawMessageBoxFrameFaded(fb, fadeY);
+  else drawMessageBoxFrame(fb);
+  if (state.phase === "brainSpeech" || state.phase === "brainSymbol") {
+    drawBrainSpeechText(fb, state, fadeY);
     return;
   }
   if (msgbox.chars <= 0) return;
@@ -300,9 +304,15 @@ function drawOpponentMsgbox(
 const MSGBOX_TEXT_CLIP = { min: 120, max: 152 } as const;
 
 /** Noland's speech box: the picture's two rows (scrolled up by `scroll` pixels) and the down arrow after the current line. */
-function drawBrainSpeechText(fb: Uint8Array, state: BattleRoomState): void {
+function drawBrainSpeechText(fb: Uint8Array, state: BattleRoomState, fadeY = 0): void {
   const picture = brainSpeechPicture(state);
   const [row0, row1] = brainSpeechRows(state, picture);
+  if (fadeY > 0) {
+    // a warp's fade-out (the symbol scene's last box under BeginNormalPaletteFade): no scroll or arrow is ever up then
+    drawMessageBoxTextFaded(fb, row0, MSGBOX_LINE1_ORIGIN.x, MSGBOX_LINE1_ORIGIN.y, fadeY);
+    drawMessageBoxTextFaded(fb, row1, MSGBOX_LINE2_ORIGIN.x, MSGBOX_LINE2_ORIGIN.y, fadeY);
+    return;
+  }
   drawMessageBoxText(fb, row0, MSGBOX_LINE1_ORIGIN.x, MSGBOX_LINE1_ORIGIN.y - picture.scroll, MSGBOX_TEXT_CLIP);
   drawMessageBoxText(fb, row1, MSGBOX_LINE2_ORIGIN.x, MSGBOX_LINE2_ORIGIN.y - picture.scroll, MSGBOX_TEXT_CLIP);
   if (picture.arrow === null) return;
@@ -497,7 +507,11 @@ export function renderBattleRoomBrainEntranceScene(
     const hFlip = turn.turned && scientist.turn === "east";
     drawNpcFrame(fb, roomNpcs.scientist, turn.frame, pos, hFlip, objFadeY);
   }
-  drawNpcFrame(fb, roomNpcs.player, step.decoyFrame, decoyScreenPos, step.decoyHFlip, objFadeY);
+  // The symbol scene's step (Movement_PlayerApproachNoland, walk_right): the fake player one tile right, the walk frame for its first half
+  // (the side walk frame, mirrored east, as ENTRY_STEPS' walk north shows its walk frame then the standing one).
+  const symbolStep = brainSymbolStep(state);
+  const decoyPos = symbolStep.offsetX === 0 ? decoyScreenPos : { x: decoyScreenPos.x + symbolStep.offsetX, y: decoyScreenPos.y };
+  drawNpcFrame(fb, roomNpcs.player, symbolStep.walking ? SYMBOL_STEP_WALK_FRAME : step.decoyFrame, decoyPos, symbolStep.walking ? true : step.decoyHFlip, objFadeY);
   // Noland's own walk (nolandStep) only starts once "brainMoving" begins -
   // before that he holds his resting player-facing pose (NOLAND_IDLE_FRAME),
   // not the decoy's own north-facing idle frame reused during the walk
@@ -514,5 +528,5 @@ export function renderBattleRoomBrainEntranceScene(
     ? nolandStep(historicElapsed)
     : { frame: NOLAND_IDLE_FRAME, hFlip: false, screenY: NOLAND_INITIAL_SCREEN_Y };
   drawNpcFrame(fb, roomNpcs.noland, noland.frame, { x: opponentScreenX, y: noland.screenY }, noland.hFlip, objFadeY);
-  drawOpponentMsgbox(fb, msgboxVisual(state), state);
+  drawOpponentMsgbox(fb, msgboxVisual(state), state, bgFadeY);
 }

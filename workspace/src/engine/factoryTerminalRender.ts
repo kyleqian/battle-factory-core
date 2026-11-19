@@ -693,6 +693,13 @@ function drawRoundWonMessage(
     }
     const page = profile.exchange[1];
     const textAge = release + profile.exchangeNextPageVisualDelay;
+    // `\p` (RENDER_STATE_CLEAR): the cleared box reaches the screen on the press's next frame only when the down arrow was redrawn on the
+    // press frame (its first wait frame, then every 9th); else the page holds one more frame (battleRoom.ts's speech, the same rule).
+    const previousCursorStart = exchangeTextAge + profile.exchange[0][0].length + profile.exchange[0][1].length + 1;
+    if (state.age === release + 1 && (release + 1 - previousCursorStart) % 9 === 0) {
+      drawPageText(fb, page, 0);
+      return;
+    }
     if (state.age < textAge) {
       const previous = profile.exchange[0];
       drawPageText(
@@ -702,12 +709,15 @@ function drawRoundWonMessage(
       );
       const cursorStart =
         exchangeTextAge + previous[0].length + previous[1].length + 1;
-      drawDownArrow(
-        fb,
-        previous[1],
-        MESSAGE_ORIGIN.y2,
-        state.age - cursorStart,
-      );
+      // a press on the wait's first frame comes before the arrow's first visible frame
+      if (state.age >= cursorStart) {
+        drawDownArrow(
+          fb,
+          previous[1],
+          MESSAGE_ORIGIN.y2,
+          state.age - cursorStart,
+        );
+      }
       return;
     }
     const chars = Math.max(0, Math.min(

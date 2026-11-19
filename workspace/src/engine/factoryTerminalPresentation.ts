@@ -94,6 +94,8 @@ export interface FactoryTerminalLossProfile extends FactoryTerminalRecordProfile
 export interface FactoryTerminalRoundWonProfile
   extends FactoryTerminalRecordProfile {
   readonly outcome: "roundWon";
+  /** Extra frames of the save before SE_SAVE (SYMBOL_SAVE_EXTRA_FRAMES after a new symbol). */
+  readonly saveDelayExtra?: number;
   readonly blackFirstAge: number;
   readonly fieldFirstAge: number;
   readonly fadeFirstAge: number;
@@ -243,10 +245,12 @@ export const FACTORY_ROUND_WON_TERMINAL_PROFILE: FactoryTerminalRoundWonProfile 
     congratulationsTextDelay: 41,
     congratulationsInputReadyAge: 102,
     awardTextDelay: 6,
-    awardScrollInputDelay: 69,
+    // ROM (docs/parity-mac/noland-room-scenes.md, the Lobby after a won Noland battle, presses on their first taken frame): the award text's
+    // \l takes a press 70 frames after the congratulations' press, its end 44 after the scroll's (were 69 / 41, from later presses).
+    awardScrollInputDelay: 70,
     awardScrollTicks: 4,
     awardThirdLineTextDelay: 7,
-    awardDefaultInputDelay: 41,
+    awardDefaultInputDelay: 44,
     battlePointMutationDelay: 1,
     getPointsTextDelay: 3,
     fanfareTicks: 312,
@@ -254,7 +258,8 @@ export const FACTORY_ROUND_WON_TERMINAL_PROFILE: FactoryTerminalRoundWonProfile 
     exchangeInputDelay: 51,
     exchangeNextPageVisualDelay: 2,
     restoreDelayFromExchangeRelease: 49,
-    // lbr-f: the won route's record question types / blinks 1 tick earlier than the loss route's (docs/lbrf-won-timing.md).
+    // lbr-f: the won route's record question types / blinks 1 tick earlier than the loss route's (docs/lbrf-won-timing.md). After a win over
+    // the Factory Head it is one frame later again (BRAIN_WIN_RECORD_PROMPT_EXTRA_FRAMES).
     recordPromptDelayFromRestore: 168,
     recordPromptTextDelay: 1,
     recordPromptInputDelay: 63,
@@ -445,14 +450,32 @@ export interface FactoryTerminalBattlePointAward {
   /** The save's BP before the award (the carry's total when the Lobby script runs). */
   readonly before: number;
   readonly awarded: number;
+  /** The round gave a new Factory symbol (the Lobby's save then takes SYMBOL_SAVE_EXTRA_FRAMES longer). */
+  readonly symbolGranted?: boolean;
 }
 
-function wonProfileForAward(awarded: number): FactoryTerminalRoundWonProfile {
-  if (awarded === FACTORY_ROUND_WON_TERMINAL_PROFILE.battlePointAward) return FACTORY_ROUND_WON_TERMINAL_PROFILE;
+/**
+ * The Lobby's save (factory_save, then playse SE_SAVE and the record question) takes this much longer after a round that gave a new
+ * symbol. ROM (docs/parity-mac/noland-room-scenes.md): from the exchange press to the record question 216 frames with no new symbol (two
+ * runs), 347 after the silver symbol (three runs) and 341-347 after the gold one (three runs). The cause in the save was not traced.
+ */
+export const SYMBOL_SAVE_EXTRA_FRAMES = 131;
+/**
+ * The record question after a won Factory Head battle comes a frame later than after an ordinary seventh win (it follows the save, which
+ * writes other data): ROM, two won Noland battles with no new symbol, 169 frames from the party restore (docs/parity-mac/noland-room-scenes.md),
+ * against lbr-f's 168 for the seventh win.
+ */
+export const BRAIN_WIN_RECORD_PROMPT_EXTRA_FRAMES = 1;
+
+function wonProfileForAward(awarded: number, symbolGranted = false, frontierBrain = false): FactoryTerminalRoundWonProfile {
+  if (awarded === FACTORY_ROUND_WON_TERMINAL_PROFILE.battlePointAward && !symbolGranted && !frontierBrain) return FACTORY_ROUND_WON_TERMINAL_PROFILE;
   return Object.freeze({
     ...FACTORY_ROUND_WON_TERMINAL_PROFILE,
     battlePointAward: awarded,
     getPoints: Object.freeze([`${PLAYER_NAME} obtained ${awarded} Battle Point(s).`, ""] as const),
+    ...(symbolGranted ? { saveDelayExtra: SYMBOL_SAVE_EXTRA_FRAMES } : {}),
+    recordPromptDelayFromRestore: FACTORY_ROUND_WON_TERMINAL_PROFILE.recordPromptDelayFromRestore
+      + (frontierBrain ? BRAIN_WIN_RECORD_PROMPT_EXTRA_FRAMES : 0) + (symbolGranted ? SYMBOL_SAVE_EXTRA_FRAMES : 0),
   });
 }
 
@@ -467,7 +490,7 @@ export function createFactoryTerminalRoundWonPresentation(
   return {
     commandId: command.commandId,
     battleIndex: command.battleIndex,
-    profile: wonProfileForAward(award.awarded),
+    profile: wonProfileForAward(award.awarded, award.symbolGranted === true, command.opponent.frontierBrain !== undefined),
     age: 0,
     frontierBrain: command.opponent.frontierBrain !== undefined,
     congratsScrollReleaseAge: null,

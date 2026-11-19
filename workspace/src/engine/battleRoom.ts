@@ -82,7 +82,8 @@ export type BattleRoomPhase =
   | "brainMoving"
   | "brainSettled"
   | "brainSpeech"
-  | "brainSpeechSettled";
+  | "brainSpeechSettled"
+  | "brainSymbol";
 
 /** brainSpeech's frame modes (see the speech section below): printing a line, waiting for a press, the press frame, the `\l` scroll, the next msgbox's opening frames. */
 export type BrainSpeechMode = "print" | "wait" | "accepted" | "scroll" | "open";
@@ -140,6 +141,11 @@ export interface BattleRoomState {
   speechPicture?: BrainSpeechPicture;
   /** brainSpeech "accepted" after a `\p`: whether the cleared box reaches the screen on the frame after the press (see the speech section). */
   speechClearShown?: boolean;
+  /** brainSymbol (the symbol scene after a first win, see its section): the stage, the frames of a message's opening, the fanfare's frames, whether the step is done. */
+  symbolStage?: BrainSymbolStage;
+  symbolOpen?: number;
+  symbolFanfare?: number;
+  symbolStepDone?: boolean;
 }
 
 /** core.ts creates this the tick prebattleRoom's "warpFade" phase reaches the fixed elapsed count matching trace tick 520 (see core.ts's handoff). */
@@ -344,6 +350,8 @@ export function advanceBattleRoom(state: BattleRoomState): BattleRoomState {
     }
     case "brainSpeech":
       return advanceBrainSpeech(state);
+    case "brainSymbol":
+      return advanceBrainSymbolScene(state);
     case "brainSpeechSettled":
       return { ...state, phase: "brainSpeechSettled", elapsed: state.elapsed + 1 };
   }
@@ -360,6 +368,7 @@ export const BRAIN_MSGBOX_ACCEPT_ELAPSED = 2;
 export function battleRoomQuoteInputReady(state: BattleRoomState): boolean {
   if (state.phase === "brainMsgboxIdle") return state.elapsed >= BRAIN_MSGBOX_ACCEPT_ELAPSED;
   if (state.phase === "brainSpeech") return brainSpeechAcceptReady(state);
+  if (state.phase === "brainSymbol") return brainSymbolAcceptReady(state);
   if (state.phase !== "msgboxIdle") return false;
   return state.encounter !== "jenson" || state.elapsed >= 2;
 }
@@ -380,6 +389,7 @@ export function battleRoomMsgboxClosingPhase(state: BattleRoomState): BattleRoom
  */
 export function battleRoomAcceptedState(state: BattleRoomState): BattleRoomState {
   if (state.phase === "brainSpeech") return acceptBrainSpeech(state);
+  if (state.phase === "brainSymbol") return { ...acceptBrainSpeech({ ...state, phase: "brainSpeech" }), phase: "brainSymbol" };
   if (state.phase === "brainMsgboxIdle") return { ...state, phase: "brainMoving", elapsed: 0 };
   return { ...state, phase: battleRoomMsgboxClosingPhase(state), elapsed: 0 };
 }
@@ -949,6 +959,7 @@ export const GOLD_FIRST_ENCOUNTER_SPEECH_LINES = brainSpeechLinesOf(messagePages
 export const GOLD_REPEAT_SPEECH_LINES = brainSpeechLinesOf(messagePages(scenes.goldRepeat));
 
 export function brainSpeechLines(state: BattleRoomState): readonly BrainSpeechLine[] {
+  if (state.symbolStage !== undefined) return state.brainSpeechTier === "gold" ? GOLD_SYMBOL_SCENE_LINES : SILVER_SYMBOL_SCENE_LINES;
   if (state.brainSpeechTier === "gold") {
     return state.brainSpeechFirstEncounter ? GOLD_FIRST_ENCOUNTER_SPEECH_LINES : GOLD_REPEAT_SPEECH_LINES;
   }
@@ -1013,6 +1024,8 @@ export interface BrainSpeechPicture {
   readonly chars: number;
   readonly scroll: number;
   readonly arrow: number | null;
+  /** No box on screen (the symbol scene before its first message, and after silver's closemessage). */
+  readonly hidden?: true;
 }
 
 function nextLink(lines: readonly BrainSpeechLine[], index: number): BrainSpeechLine | null {
@@ -1070,7 +1083,7 @@ export function brainSpeechAcceptReady(state: BattleRoomState): boolean {
 
 /** True when the press just taken was a `\p` / `\l` prompt (SE_SELECT; the end-of-message wait is silent). */
 export function brainSpeechAcceptPlaysSelect(state: BattleRoomState): boolean {
-  return state.phase === "brainSpeech" && promptFollows(brainSpeechLines(state), state.speechLine ?? 0);
+  return (state.phase === "brainSpeech" || state.phase === "brainSymbol") && promptFollows(brainSpeechLines(state), state.speechLine ?? 0);
 }
 
 function advanceBrainSpeech(state: BattleRoomState): BattleRoomState {
@@ -1140,7 +1153,7 @@ function acceptBrainSpeech(state: BattleRoomState): BattleRoomState {
  * settled scene behind the message box.
  */
 export function brainEntranceMovementSettled(phase: BattleRoomPhase): boolean {
-  return phase === "brainSettled" || phase === "brainSpeech" || phase === "brainSpeechSettled";
+  return phase === "brainSettled" || phase === "brainSpeech" || phase === "brainSpeechSettled" || phase === "brainSymbol";
 }
 
 /**
@@ -1161,6 +1174,152 @@ export function battleRoomJustFinishedBrainPersonalitySpeech(
     && next.speechAfter === "message"
     && brainSpeechLines(prev)[prev.speechLine ?? 0]?.message === 0
   );
+}
+
+// The symbol scene after a first win over Noland (DefeatedNolandSilver, scripts.inc:128-141; DefeatedNolandGold, :154-167), when the
+// symbol is new (silver with no symbol, gold with one; FactoryBrainRoundOutcomeResult.symbolGranted). The return to the field after the
+// battle is the ordinary one up to the frame its script would warp to the Lobby (the return span's age BRAIN_SYMBOL_SCENE_AGE); there the
+// script shows the scene instead, and core.ts holds the span (and the Lobby) on that age until the scene's own warp. Measured on the real
+// ROM (docs/parity-mac/noland-room-scenes.md, "The symbol scene"), frames as the player sees them:
+// - Noland's line (msgbox, MSGBOX_DEFAULT) opens on the span's age 79 like the room's first message (an empty box two frames later), and
+//   takes its end press three frames after the last character.
+// - Silver: closemessage, so the box shows on the press frame and the next; gold: `waitmessage` and no close, the box (with its last page)
+//   stays through the step and shows on the press frame and the three after.
+// - The step (Movement_PlayerApproachNoland: walk_right, the fake player LOCALID_FACTORY_BATTLE_PLAYER; the camera stays) starts on the
+//   frame after that: one pixel a frame for 16 frames, then a frame's hold.
+// - playfanfare MUS_OBTAIN_SYMBOL and the symbol's message start on the next frame (the room BGM stops; the message prints like the next
+//   msgbox: two frames of the old picture, the empty box, one character a frame; no press: `waitmessage`, then `waitfanfare`).
+// - The fanfare ends (BGM continue) SYMBOL_FANFARE_FRAMES after it starts; frontier_givesymbol; Noland's closing lines (msgbox) start their
+//   printer two frames later and take their presses as any msgbox.
+// - The last press: the script goes on to the warp to the Lobby on the next frame, the box still up (no closemessage), and the span resumes.
+
+/** The return span's age (postwin.ts, the battle exit is 43) the scene starts on: the age the no-symbol route warps on. */
+export const BRAIN_SYMBOL_SCENE_AGE = 79;
+/** MUS_OBTAIN_SYMBOL's length (sFanfares, sound.c): stop + fanfare on its first frame, the BGM's continue this many frames later. */
+export const SYMBOL_FANFARE_FRAMES = 318;
+/** walk_right at normal speed: one pixel a frame. */
+export const SYMBOL_STEP_FRAMES = 16;
+
+export type BrainSymbolStage = "line" | "step" | "fanfare" | "closing" | "warp" | "done";
+
+const SYMBOL_SCENE_MESSAGES: Record<"silver" | "gold", readonly (readonly string[])[]> = {
+  // scripts.inc: Text_NolandLetsSeeFrontierPass, Text_ReceivedKnowledgeSymbol, Text_NextTimeNoHoldsBarred
+  silver: [
+    ["NOLAND: Smart going!\\nLet's see your FRONTIER PASS."],
+    ["The Knowledge Symbol was embossed\\non the FRONTIER PASS!"],
+    ["Heh…\\nYou're a pretty bright spark…", "Next time, I'll come after you hard.\\nNo holds barred, understand?", "You keep up your studies!"],
+  ],
+  // Text_OutOfMyLeagueLetsSeePass, Text_KnowledgeSymbolTookGoldenShine, Text_LastTimeILoseToYou
+  gold: [
+    ["NOLAND: What the…\\nYou're getting out of my league!", "Sheesh!\\nLet's see that FRONTIER PASS!"],
+    ["The Knowledge Symbol took on\\na golden shine!"],
+    ["Pfft, man!", "That's absolutely the last time\\nI lose to you!", "We have to do this again, hey?"],
+  ],
+};
+export const SILVER_SYMBOL_SCENE_LINES = brainSpeechLinesOf(SYMBOL_SCENE_MESSAGES.silver);
+export const GOLD_SYMBOL_SCENE_LINES = brainSpeechLinesOf(SYMBOL_SCENE_MESSAGES.gold);
+
+/** The scene's state on its first frame (the span's age 79: Noland's line's printer starts; the empty box shows two frames later). */
+export function createBrainSymbolSceneState(tier: "silver" | "gold"): BattleRoomState {
+  return Object.freeze({
+    phase: "brainSymbol",
+    elapsed: 0,
+    frontierBrainWalkup: true,
+    brainSpeechFirstEncounter: true,
+    brainSpeechTier: tier,
+    symbolStage: "line",
+    symbolOpen: 0,
+    speechLine: -1,
+    speechMode: "open",
+    speechPicture: { line: 0, chars: 0, scroll: 0, arrow: null, hidden: true as const },
+  });
+}
+
+function firstLineOfMessage(lines: readonly BrainSpeechLine[], message: number): number {
+  return lines.findIndex((line) => line.message === message);
+}
+
+/** The frames a new msgbox shows the old picture before its empty box (its printer starts on the first). */
+const SYMBOL_MESSAGE_OPEN_FRAMES = SPEECH_NEXT_MESSAGE_OPEN_FRAMES;
+
+/** A new message's printer starting this frame: the old picture for SYMBOL_MESSAGE_OPEN_FRAMES frames, then the empty box. */
+function openSymbolMessage(state: BattleRoomState, message: number, stage: BrainSymbolStage, picture: BrainSpeechPicture): BattleRoomState {
+  const lines = brainSpeechLines(state);
+  return {
+    ...state, phase: "brainSymbol", symbolStage: stage, elapsed: 0, symbolOpen: 0, speechMode: "open",
+    speechLine: firstLineOfMessage(lines, message) - 1, speechPicture: picture, speechAfter: undefined, speechClearShown: undefined,
+  };
+}
+
+/** One frame of the symbol scene without a press it takes (core.ts takes presses through battleRoomAcceptedState). */
+function advanceBrainSymbolScene(state: BattleRoomState): BattleRoomState {
+  const gold = state.brainSpeechTier === "gold";
+  switch (state.symbolStage) {
+    case "line":
+    case "fanfare":
+    case "closing": {
+      if (state.symbolStage === "fanfare") {
+        const fanfare = (state.symbolFanfare ?? 0) + 1;
+        // waitfanfare: the closing lines' printer starts two frames after the fanfare's end
+        if (fanfare >= SYMBOL_FANFARE_FRAMES + SPEECH_NEXT_MESSAGE_OPEN_FRAMES) {
+          return { ...openSymbolMessage(state, 2, "closing", brainSpeechPicture(state)), symbolFanfare: fanfare };
+        }
+        const next = state.speechMode === "open" ? advanceSymbolOpen(state) : advanceBrainSpeech({ ...state, phase: "brainSpeech" });
+        return { ...next, phase: "brainSymbol", symbolFanfare: fanfare };
+      }
+      if (state.speechMode === "open") return advanceSymbolOpen(state);
+      if (state.speechMode === "accepted" && (state.speechAfter === "close" || state.speechAfter === "message")) {
+        // the message's end press: the box shows on the press frame and the next (silver closes it) or the next three (gold's waitmessage)
+        const hold = state.symbolStage === "closing" ? 0 : gold ? 3 : 1;
+        if (state.elapsed < hold) return { ...state, elapsed: state.elapsed + 1 };
+        if (state.symbolStage === "closing") return { ...state, symbolStage: "done", elapsed: 0 };
+        return { ...state, symbolStage: "step", elapsed: 1, speechPicture: gold ? state.speechPicture : { ...state.speechPicture!, hidden: true as const } };
+      }
+      return { ...advanceBrainSpeech({ ...state, phase: "brainSpeech" }), phase: "brainSymbol" };
+    }
+    case "step":
+      if (state.elapsed <= SYMBOL_STEP_FRAMES) return { ...state, elapsed: state.elapsed + 1 };
+      // playfanfare + message: the symbol's text
+      return { ...openSymbolMessage(state, 1, "fanfare", state.speechPicture!), symbolFanfare: 0, symbolStepDone: true };
+    case "warp":
+      return { ...state, symbolStage: "done", elapsed: 0 };
+    case "done":
+    default:
+      return { ...state, elapsed: state.elapsed + 1 };
+  }
+}
+
+function advanceSymbolOpen(state: BattleRoomState): BattleRoomState {
+  const open = (state.symbolOpen ?? 0) + 1;
+  if (open < SYMBOL_MESSAGE_OPEN_FRAMES) return { ...state, symbolOpen: open };
+  return { ...state, symbolOpen: undefined, speechMode: "print", elapsed: 0, speechLine: (state.speechLine ?? -1) + 1, speechPicture: undefined };
+}
+
+/** The symbol scene takes a press: Noland's line's and the closing lines' prompts and ends (the symbol's message waits for none). */
+function brainSymbolAcceptReady(state: BattleRoomState): boolean {
+  if (state.symbolStage !== "line" && state.symbolStage !== "closing") return false;
+  if (state.speechMode === "open" || state.speechMode === "accepted") return false;
+  return brainSpeechAcceptReady({ ...state, phase: "brainSpeech" });
+}
+
+/** The scene is on the frame its script warps to the Lobby (the last press's next frame): core.ts resumes the span (SE_EXIT, DoWarp). */
+export function brainSymbolSceneWarps(state: BattleRoomState | null): boolean {
+  return state?.phase === "brainSymbol" && state.symbolStage === "done" && state.elapsed === 0;
+}
+
+/** The scene has started the fanfare this frame (core.ts plays MUS_OBTAIN_SYMBOL). */
+export function brainSymbolSceneFanfareStarts(state: BattleRoomState | null): boolean {
+  return state?.phase === "brainSymbol" && state.symbolStage === "fanfare" && state.symbolFanfare === 0;
+}
+
+/** The fake player's walk_right offset (0..16 pixels) and walk frame on this frame. */
+export function brainSymbolStep(state: BattleRoomState): { offsetX: number; walking: boolean; walkFrame: number } {
+  if (state.phase !== "brainSymbol") return { offsetX: 0, walking: false, walkFrame: 0 };
+  if (state.symbolStage === "step") {
+    const k = Math.min(state.elapsed, SYMBOL_STEP_FRAMES);
+    return { offsetX: k, walking: k <= SYMBOL_STEP_FRAMES / 2, walkFrame: k };
+  }
+  return { offsetX: state.symbolStepDone === true ? SYMBOL_STEP_FRAMES : 0, walking: false, walkFrame: 0 };
 }
 
 // S6 slice 2c: OPPONENT-SPEECH MSGBOX window (trace ticks 718-843 - elapsed
@@ -1354,6 +1513,8 @@ export function msgboxVisual(state: BattleRoomState): MsgboxVisual {
     case "brainSpeech":
       // Drawn from brainSpeechPicture (battleRoomRender.ts): rows, scroll and arrow.
       return { visible: true, chars: 0 };
+    case "brainSymbol":
+      return brainSpeechPicture(state).hidden === true ? MSGBOX_HIDDEN : { visible: true, chars: 0 };
     case "brainSpeechSettled":
       return MSGBOX_HIDDEN;
   }

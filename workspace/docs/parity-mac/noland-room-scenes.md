@@ -77,7 +77,74 @@ press is taken on (A and B), the sounds, and the RNG draws of every frame.
 Battle 63 runs the same script path as 42 (STREAK_LONG, scripts.inc:117): the lab cannot stage challenge 8's walk-up, so it was not recorded.
 The room does not differ between Scene ON and OFF (two recordings each way agree frame for frame with the same engine).
 
+## The symbol scene (Job 2)
+
+After a first win over Noland (silver with no symbol, gold with one: `FactoryBrainRoundOutcomeResult.symbolGranted`) the game's battle
+room shows Noland's line, the player's step, the fanfare with the symbol's text and his closing lines before the warp to the Lobby
+(DefeatedNolandSilver, scripts.inc:128-141; DefeatedNolandGold, :154-167). The engine went from the battle straight to the Lobby.
+
+The return to the field after the battle is the ordinary one (the return span, `postwin.ts`: the battle exit on its age 43, the room's
+fade-in from 57) up to the frame its script would warp (age 79: SE_EXIT, DoWarp). With a new symbol the script shows the scene there
+instead; the engine now does the same (`battleRoom.ts`, the symbol scene section; `core.ts`, the terminal branch): the scene starts on the
+span's age 79 and the span, and with it the Lobby's clock, holds on that age until the scene's own warp. Measured on the real ROM:
+
+- Noland's line opens like the room's first message (an empty box two frames later, one character a frame) and takes its end press three
+  frames after the last character (A or B). Gold's has two pages (`\p`, SE_SELECT).
+- Silver: `closemessage`, so the box shows on the press frame and the next; gold: `waitmessage` and no close, its last page stays up
+  through the step (the press frame and the three after it, then the step).
+- The step (Movement_PlayerApproachNoland, walk_right of the fake player; the camera stays): one pixel a frame for 16 frames, the first
+  eight on the object's first side walk frame (sAnim_GoEast: frame 7, mirrored), then a frame's hold.
+- `playfanfare MUS_OBTAIN_SYMBOL` and the symbol's text start on the next frame: the room BGM stops, the fanfare plays 318 frames, the BGM
+  continues. The text prints like a new msgbox and waits for no press (`waitmessage`, `waitfanfare`).
+- Noland's closing lines start their printer two frames after the fanfare's end (three pages, two `\p` with SE_SELECT).
+- The last press: the warp to the Lobby on the next frame (SE_EXIT), the box still up under the fade-out (no `closemessage`).
+
+Fixed on the way, each measured on the same recordings:
+
+10. **The room after Noland's battle was drawn as an ordinary trainer's room** (the return span's room frames, every win over Noland, symbol
+    or not): now his room as the walk-up left it.
+11. **No SE_EXIT on the warp after a win over Noland** (the engine left it out for every brain win): now on the warp.
+12. **The won Lobby's clock started at the battle's end instead of the Lobby's map load** (every seventh win and every win over Noland on
+    the website): the congratulation box showed already typed when the Lobby appeared and took A about 100 frames early. The terminal's
+    clock now starts at the load (`FACTORY_ROUND_WON_TERMINAL_PROFILE`'s age 0).
+13. **The Lobby's award text took its presses early** (the `\l` 1 frame, the end 3 frames: `awardScrollInputDelay` 70,
+    `awardDefaultInputDelay` 44), **the exchange page's `\p` drew its arrow on the press frame and showed the cleared box a frame late**
+    (the same rule as Noland's speech), **after a win over Noland the record question came a frame early** (it follows the save; 169
+    frames from the party restore on the ROM, the ordinary seventh win keeps lbr-f's measured 168: `BRAIN_WIN_RECORD_PROMPT_EXTRA_FRAMES`).
+14. **The Lobby's save after a new symbol is longer**: from the exchange press to the record question 216 frames with no new symbol (two
+    runs), 347 after the silver symbol (three runs), 341-347 after the gold one (three runs): `SYMBOL_SAVE_EXTRA_FRAMES` 131. The cause
+    inside the save was not traced.
+
+The library's contract is unchanged: the round-end event still comes at the battle's end (before the scene), the save's record already has
+the symbol then (`frontierRecord`, `ReplayResult.frontier`), and a reload in the middle of the scene replays to the same frame and goes on
+with the same pictures and sounds (lib.ts collects the replayed frames' sounds, so the fanfare's continue still comes). Scene ON and OFF
+share the room; the recordings are Scene OFF.
+
+| Fixture | Run | Compared | Result |
+|---|---|---|---|
+| symbol-silver | first win over silver Noland | from the battle's return to the field through the scene, the warp and the Lobby's load (598 frames) | equal |
+| symbol-gold | first win over gold Noland | the scene, the warp, the Lobby to the save's SE (1,500 frames) | equal |
+| win-no-symbol | a win with both symbols (battle 21) | the warp on age 79, the Lobby to the record question (1,022 frames) | equal |
+
+Test: `tests/parityMacNolandSymbolScene.test.ts` (and the reload in the middle of the scene). Each of the fixes above fails it when undone.
+Under vitest the engine prints its own player name (the harness name is off there), so the Lobby's "<player> obtained N Battle Point(s)."
+frames are the only ones the test lets differ; the tool's own run (`nolandSceneEngine.ts --win`) is exact there too.
+
+Re-pins from the Lobby's clock (both are moves of a scripted player's path, not of a rule): `tests/lbrd.test.ts`'s seeds (the next challenge's
+deal moved; a scan found 2 for every case) and `tests/randomRoundSoak.test.ts`'s seven-win pin (frames 41,240 -> 41,332).
+
 ## Not covered (gaps)
+
+- **The Lobby after the silver symbol scene ran a frame later in the game** (all three silver runs; no gold or plain run): its map load took
+  a frame more, most likely the CPU time of a load step against the music's position; not modelled. The silver fixture stops at the load.
+- **The Lobby's save after a new symbol** varies: gold 341-347 frames (the engine uses 347 for both tiers).
+- **The Lobby's record question and what follows** (its YES/NO with B, the later boxes): the engine takes B there only on some boxes and a
+  press 1-3 frames late; the challenge's end, shared by every route, was not part of this work.
+- **The battle's end before the return** (the defeat text, the victory music, the fade): the recordings end Noland's battle by setting the
+  outcome, so the battle itself is not compared; the scene is compared from the battle's return to the field. The map BGM's return on the
+  span's age 53 is scheduled by the battle's end and is therefore not in the staged comparison.
+- **Battle 84** (both symbols, the fifth return battle): not run. The lab stages challenges 0..7 only and reaching 84 needs four rounds played
+  back to back; the engine uses the same rule as 63 (STREAK_LONG).
 
 - **Seven of the twelve Frontier transitions are not drawn by the engine** (LOGO_WIGGLE, SQUARES, SQUARES_SCROLL, CIRCLES_ASYMMETRIC_SPIRAL,
   CIRCLES_SYMMETRIC_SPIRAL, CIRCLES_CROSS_IN_SEQ, CIRCLES_SYMMETRIC_SPIRAL_IN_SEQ): it shows CIRCLES_MEET instead. Every trainer, not only

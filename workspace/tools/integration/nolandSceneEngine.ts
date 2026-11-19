@@ -24,6 +24,7 @@ import {
   chooseFactoryRoundSwap,
   completeFactoryRoundPresentation,
   createFactoryRoundBattleOrchestrator,
+  factoryRoundOutcomeForResolution,
   preGenerateFactoryRoundNextOpponent,
   type FactoryRoundBattleOrchestratorState,
 } from "../../src/engine/factoryRoundBattleOrchestrator.ts";
@@ -31,17 +32,20 @@ import { advanceRoundController, completeBattlePresentation, resolveRoundBattle 
 import {
   CALL_SCENE_HEAD_MENU_READY_DELAY,
   CALL_SCENE_TRAILING_DELAY,
+  createBattleReturnHoldState,
   createPostwinState,
+  POSTWIN_IN_BATTLE_CLEAR_AGE,
   POSTWIN_NEXT_BOX_CLEAR_DELAY,
 } from "../../src/engine/postwin.ts";
 import { collectSoundTick, type SoundEvent } from "../../src/audio/soundEvents.ts";
 import { frontierTransitionPresentationForTableIndex } from "../../src/engine/battleTransition.ts";
+import { createFactoryTerminalPresentation } from "../../src/engine/factoryTerminalPresentation.ts";
 import { BRAIN_BATTLE_TRANSITION_START_ELAPSED } from "../../src/engine/battleRoom.ts";
 
 const PLAYER_TRAINER_ID = 0x89ab_cdef;
 const natureByName = new Map(naturesData.natures.map((row) => [row.name, row.index]));
 
-interface RomRow {
+export interface RomRow {
   f: number;
   sha: string;
   rng: number;
@@ -55,6 +59,8 @@ interface RomRow {
 }
 
 export interface RomRecording {
+  /** A `--win` fixture keeps its frames from the replay's start: that frame and its RNG cursor (romBattleExitFrame - WIN_STAGE_LEAD). */
+  winStart?: { frame: number; rng: number };
   challenge: number;
   playerSetIds?: number[];
   scene: "on" | "off";
@@ -171,6 +177,58 @@ export function nolandAskReadyStage(rom: RomRecording): EngineState {
   };
 }
 
+/** Frames of the return-to-field span staged before its battle-exit frame (POSTWIN_IN_BATTLE_CLEAR_AGE). */
+export const WIN_STAGE_LEAD = 3;
+
+/**
+ * The ROM's battle exit after a win (`--win` recordings): ReturnFromBattleToOverworld's frame, the first with gMain.inBattle clear
+ * (RandomlyGivePartyPokerus + PartySpreadPokerus: two draws, the main callback CB2_ReturnToFieldContinueScriptPlayMapMusic).
+ */
+export function romBattleExitFrame(rom: RomRecording): number | null {
+  if (rom.winStart !== undefined) return rom.winStart.frame + WIN_STAGE_LEAD;
+  const menu = rom.frames.findIndex((r) => r?.cb2 === "BattleMainCB2");
+  return rom.frames.find((r) => r !== null && r.f > menu && r.cb2 === "CB2_ReturnToFieldContinueScriptPlayMapMusic")?.f ?? null;
+}
+
+/**
+ * The round's seventh battle won, the engine on the return-to-field span WIN_STAGE_LEAD frames before its battle exit (postwin age 43),
+ * the ROM's RNG cursor of that frame: the start of what the battle room shows after Noland's battle (the symbol scene when the symbol is
+ * new, the Lobby). Engine tick t is ROM frame `romBattleExitFrame - WIN_STAGE_LEAD + t`.
+ */
+export function nolandWinReturnStage(rom: RomRecording): EngineState {
+  const ask = nolandAskReadyStage(rom);
+  let orchestrator = ask.factoryRoundBattleOrchestrator!;
+  const offer = orchestrator.round.presentation?.command;
+  if (offer?.type !== "swapOffer") throw new Error("win stage: no swapOffer");
+  orchestrator = chooseFactoryRoundSwap(completeFactoryRoundPresentation(orchestrator, { commandId: offer.commandId }), { type: "decline" });
+  const resolved = orchestrator.round.presentation?.command;
+  if (resolved?.type !== "swapResolved") throw new Error("win stage: no swapResolved");
+  orchestrator = advanceFactoryRoundPresentation(completeFactoryRoundPresentation(orchestrator, { commandId: resolved.commandId }));
+  const start = orchestrator.round.presentation?.command;
+  if (start?.type !== "battleStart") throw new Error("win stage: no Brain battleStart");
+  let round = advanceRoundController(completeBattlePresentation(orchestrator.round, { commandId: start.commandId }));
+  round = resolveRoundBattle(round, {
+    outcome: "win", playerParty: round.rules.playerParty, opponentParty: round.rules.currentOpponent.party, rngValue: round.rules.rngValue,
+  });
+  const roundOutcome = factoryRoundOutcomeForResolution(orchestrator.config, round.rules.battleIndex, "win", round.rules.currentOpponent.frontierBrain);
+  orchestrator = { ...orchestrator, round, roundOutcome, battle: null, battleCommandPresentation: null, battleResolutionPresentation: null, activeBattleCallStart: null };
+  const exit = romBattleExitFrame(rom);
+  if (exit === null) throw new Error("win stage: the recording has no battle exit");
+  const completed = round.presentation?.command;
+  if (completed?.type !== "roundCompleted") throw new Error("win stage: no roundCompleted");
+  const elapsed = POSTWIN_IN_BATTLE_CLEAR_AGE - WIN_STAGE_LEAD;
+  // core.ts creates the return span and the won terminal on the round's last tick; the terminal's clock waits for the Lobby's map load.
+  const terminal = createFactoryTerminalPresentation(completed, { before: ask.factoryCarry.battlePoints, awarded: roundOutcome.battlePointsAwarded, symbolGranted: roundOutcome.symbolGranted });
+  return {
+    ...ask,
+    factoryRoundBattleOrchestrator: orchestrator,
+    factoryTerminal: terminal,
+    postwin: { ...createBattleReturnHoldState(null), elapsed },
+    rngMode: "frontierBattle",
+    rngValue: (rom.winStart?.rng ?? rom.frames[exit - WIN_STAGE_LEAD]!.rng) >>> 0,
+  };
+}
+
 function rgbSha(rgba: Uint8Array): { sha: string; rgb: Buffer } {
   const rgb = Buffer.alloc((rgba.length / 4) * 3);
   for (let i = 0, j = 0; i < rgba.length; i += 4, j += 3) {
@@ -237,7 +295,7 @@ function whereOf(s: EngineState): string {
  * cursor, so the frame compare of the transition itself gives the engine the ROM's (`engineTransition` in the report keeps the engine's).
  */
 export function romTransitionTableIndex(rom: RomRecording): number | null {
-  const start = rom.frames.find((r) => (r.sounds ?? []).some((e) => e.kind === "bgm" && e.id === 471));
+  const start = rom.frames.find((r) => r !== null && (r.sounds ?? []).some((e) => e.kind === "bgm" && e.id === 471));
   return start === undefined ? null : ((start.rng >>> 16) % 12);
 }
 
@@ -246,11 +304,19 @@ export const engineTransitions: { tableIndex: number; name: string }[] = [];
 export const pauses: { rom: number | null; engine: number } = { rom: null, engine: BRAIN_BATTLE_TRANSITION_START_ELAPSED };
 
 export function romBattleBgmFrame(rom: RomRecording): number | null {
-  return rom.frames.find((r) => (r.sounds ?? []).some((e) => e.kind === "bgm" && e.id === 471))?.f ?? null;
+  return rom.frames.find((r) => r !== null && (r.sounds ?? []).some((e) => e.kind === "bgm" && e.id === 471))?.f ?? null;
 }
 
-export function driveEngine(rom: RomRecording, frames: number, gates: boolean, dump?: { dir: string; from: number; to: number }): EngineRow[] {
-  let state = nolandAskReadyStage(rom);
+/** Where the engine replay starts: the GO ON menu (ROM frame 0) or, for a `--win` recording, the battle's return to the field. */
+export type SceneStart = "menu" | "win";
+
+export function sceneStartFrame(rom: RomRecording, start: SceneStart): number {
+  return start === "menu" ? 0 : romBattleExitFrame(rom)! - WIN_STAGE_LEAD;
+}
+
+export function driveEngine(rom: RomRecording, frames: number, gates: boolean, dump?: { dir: string; from: number; to: number }, start: SceneStart = "menu"): EngineRow[] {
+  let state = start === "menu" ? nolandAskReadyStage(rom) : nolandWinReturnStage(rom);
+  const offset = sceneStartFrame(rom, start);
   const romTransition = romTransitionTableIndex(rom);
   engineTransitions.length = 0;
   const romBgm = romBattleBgmFrame(rom);
@@ -259,7 +325,7 @@ export function driveEngine(rom: RomRecording, frames: number, gates: boolean, d
   const rows: EngineRow[] = [];
   let prevRng = state.rngValue;
   let pending: { button: GbaButton; since: number } | null = null;
-  for (let f = 1; f <= frames; f += 1) {
+  for (let f = offset + 1; f <= frames; f += 1) {
     const romRow = rom.frames[f];
     if (romRow === undefined) break;
     const wantsTest = gates && (romRow.adv !== undefined || romRow.press !== undefined || pending !== null);
@@ -357,17 +423,19 @@ export interface SceneFixture {
   recording: RomRecording;
 }
 
-export function writeSceneFixture(rom: RomRecording, path: string, name: string, note: string, through: number): void {
-  const bgm = romBattleBgmFrame(rom);
-  const frames = rom.frames.slice(0, through + 1).map((r) => ({
+export function writeSceneFixture(rom: RomRecording, path: string, name: string, note: string, through: number, start: SceneStart = "menu"): void {
+  const bgm = start === "menu" ? romBattleBgmFrame(rom) : null;
+  const from = sceneStartFrame(rom, start);
+  const winStart = start === "win" ? { frame: from, rng: rom.frames[from]!.rng } : undefined;
+  const frames = rom.frames.slice(from, through + 1).map((r) => ({
     f: r.f, sha: r.sha, draws: r.draws ?? null,
     ...(r.press ? { press: r.press } : {}), ...(r.adv ? { adv: r.adv } : {}),
     ...(r.sounds?.length ? { sounds: r.sounds.map((e) => ({ kind: e.kind, id: e.id, ...(soundKey(e).includes("@") ? { player: soundKey(e).split("@")[1] } : {}) })) } : {}),
     ...(r.f === bgm ? { rng: r.rng } : {}),
   }));
-  const recording = { challenge: rom.challenge, scene: rom.scene, gateK: rom.gateK, win: rom.win, playerSetIds: rom.playerSetIds, recordStart: rom.recordStart,
-    rngStart: rom.rngStart, frames };
-  const next = rom.frames[through + 1];
+  const recording = { ...(winStart ? { winStart } : {}), challenge: rom.challenge, scene: rom.scene, gateK: rom.gateK, win: rom.win,
+    playerSetIds: rom.playerSetIds, recordStart: rom.recordStart, rngStart: rom.rngStart, frames };
+  const next = start === "menu" ? rom.frames[through + 1] : undefined;
   const prompt = next?.press !== undefined && next.adv !== undefined ? { f: next.f, adv: next.adv } : undefined;
   if (prompt !== undefined) frames.push({ f: next!.f, sha: next!.sha, draws: next!.draws ?? null, press: next!.press, adv: next!.adv });
   writeFileSync(path, gzipSync(JSON.stringify({ name, note, through, ...(prompt ? { prompt } : {}), recording })));
@@ -376,6 +444,9 @@ export function writeSceneFixture(rom: RomRecording, path: string, name: string,
 export function loadSceneFixture(path: string | URL): SceneFixture {
   const fixture = JSON.parse(gunzipSync(readFileSync(path)).toString("utf8")) as SceneFixture;
   fixture.recording.frames.forEach((r) => { if (r.rng === undefined) (r as { rng: number }).rng = 0; });
+  // a `--win` fixture's frames start at its replay's start: index them by frame again
+  const first = fixture.recording.frames[0]?.f ?? 0;
+  if (first > 0) fixture.recording.frames = [...Array.from({ length: first }, (_, f): RomRow => ({ f, sha: "", rng: 0 })), ...fixture.recording.frames];
   return fixture;
 }
 
@@ -400,7 +471,7 @@ function main(): void {
   const rom = JSON.parse(readFileSync(romPath, "utf8")) as RomRecording;
   const fixtureOut = opt("--fixture");
   if (fixtureOut !== undefined) {
-    writeSceneFixture(rom, fixtureOut, opt("--name") ?? "", opt("--note") ?? "", Number(opt("--through")));
+    writeSceneFixture(rom, fixtureOut, opt("--name") ?? "", opt("--note") ?? "", Number(opt("--through")), rest.includes("--win") ? "win" : "menu");
     console.log(`wrote ${fixtureOut}`);
     return;
   }
@@ -408,7 +479,9 @@ function main(): void {
   const dumpDir = opt("--dump");
   if (dumpDir) mkdirSync(dumpDir, { recursive: true });
   const dump = dumpDir ? { dir: dumpDir, from: Number(opt("--from") ?? 0), to: Number(opt("--to") ?? frames) } : undefined;
-  const rows = driveEngine(rom, frames, !rest.includes("--no-gates"), dump);
+  const start: SceneStart = rest.includes("--win") ? "win" : "menu";
+  const rows = driveEngine(rom, frames, !rest.includes("--no-gates"), dump, start);
+  const byF = new Map(rows.map((r) => [r.f, r]));
   const shaBad: number[] = [];
   const rngBad: number[] = [];
   const drawsBad: { f: number; rom: number | null; engine: number | null; where: string }[] = [];
@@ -431,9 +504,9 @@ function main(): void {
     rngMismatch: rngBad.length,
     drawsMismatch: drawsBad.length,
     drawsFirst: drawsBad.slice(0, 40),
-    rngFirst: rngBad.slice(0, 10).map((f) => ({ f, rom: rom.frames[f]!.rng, romDraws: rom.frames[f]!.draws, engine: rows[f - 1]!.rng, engineDraws: rows[f - 1]!.draws, where: rows[f - 1]!.where })),
+    rngFirst: rngBad.slice(0, 10).map((f) => ({ f, rom: rom.frames[f]!.rng, romDraws: rom.frames[f]!.draws, engine: byF.get(f)!.rng, engineDraws: byF.get(f)!.draws, where: byF.get(f)!.where })),
     gateMismatch: gateBad.length,
-    gateSpans: spans(gateBad).slice(0, 60).map(([a, b]) => ({ from: a, to: b, rom: rom.frames[a]!.adv, engine: rows[a - 1]!.adv, where: rows[a - 1]!.where })),
+    gateSpans: spans(gateBad).slice(0, 60).map(([a, b]) => ({ from: a, to: b, rom: rom.frames[a]!.adv, engine: byF.get(a)!.adv, where: byF.get(a)!.where })),
     late: rows.filter((r) => r.late !== undefined).map((r) => ({ f: r.f, late: r.late, where: r.where })),
     soundMismatch: soundBad.slice(0, 40),
     romTransition: romTransitionTableIndex(rom),

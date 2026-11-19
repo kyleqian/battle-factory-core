@@ -333,6 +333,11 @@ function playFanfare(fanfare: number, bgm: number, continueDelay: number): void 
   scheduleAfter(continueDelay, () => emitSound({ kind: "continue", id: bgm, pan: null, player: "BGM" }));
 }
 
+/** The symbol scene's `playfanfare MUS_OBTAIN_SYMBOL` (battleRoom.ts): the room BGM stops, the fanfare, the BGM's continue at its end. */
+export function playSymbolFanfare(continueDelay: number): void {
+  playFanfare(MUS_OBTAIN_SYMBOL, BGM_DRAFT, continueDelay);
+}
+
 /** The heal scene's `playfanfare MUS_HEAL` (the postwin heal dismiss), one tick after the accepted A. */
 export function scheduleHealFanfare(frontierBrain = false): void {
   scheduleAfter(1, () => playFanfare(MUS_HEAL, BGM_DRAFT, FANFARE_CONTINUE_DELAY));
@@ -355,6 +360,7 @@ export interface TerminalSoundView {
     readonly outcome: string;
     readonly statusClearDelayFromSecondRelease?: number;
     readonly restoreDelayFromExchangeRelease?: number;
+    readonly saveDelayExtra?: number;
     readonly battlePointMutationDelay?: number;
   };
   readonly secondPageReleaseAge?: number | null;
@@ -391,7 +397,7 @@ export function scheduleTerminalStepSounds(before: TerminalSoundView, after: Ter
     }
     if (newlySet(before.exchangeReleaseAge, after.exchangeReleaseAge)) {
       playSelectSe();
-      scheduleAfter((after.profile.restoreDelayFromExchangeRelease ?? 0) + TERMINAL_SAVE_AFTER_RESTORE, () => playScriptSe(SE_SAVE));
+      scheduleAfter((after.profile.restoreDelayFromExchangeRelease ?? 0) + TERMINAL_SAVE_AFTER_RESTORE + (after.profile.saveDelayExtra ?? 0), () => playScriptSe(SE_SAVE));
     }
   }
   if (newlySet(before.recordPromptReleaseAge, after.recordPromptReleaseAge)) playSelectSe();
