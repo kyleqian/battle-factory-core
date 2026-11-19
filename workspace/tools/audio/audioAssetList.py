@@ -18,6 +18,8 @@ CRY_TASK_MOVES = {"MOVE_ROAR": ["ROAR_1", "ROAR_2"], "MOVE_HOWL": ["HIGH_PITCH"]
 # Moves that run another move with the user's own species (Metronome / Assist / Mimic / Mirror Move): any of the three can come out.
 CRY_TASK_INDIRECT = {"MOVE_METRONOME", "MOVE_ASSIST", "MOVE_MIMIC", "MOVE_MIRROR_MOVE", "MOVE_COPYCAT", "MOVE_SKETCH"}
 ALL_CRY_MODES = CRY_MODES + [m for modes in CRY_TASK_MOVES.values() for m in modes]
+# bgm1: songs the engine emits (GetBattleBGM, pokemon.c:6473-6480) that no ROM sound log contains; recorded like the logged ones.
+EXTRA_SONGS = [("bgm", 471, "PlayBGM")]  # MUS_VS_FRONTIER_BRAIN: the Factory Head's battle
 DEFAULT_EXTRA = [".integration/validation/sv-*/aud243*/**/*.json", ".integration/validation/sv-*/aud243*/*.json",
                  ".integration/evidence/*/rom*/*.json", ".integration/evidence/*/chain/*.json", ".integration/evidence/aud244a/logs/*.json"]
 
@@ -103,6 +105,8 @@ def main():
                              "logPans": sorted(row["pans"]) if row else []})
     wanted = {(r["species"], r["mode"]) for r in cry_rows}
     outside = sorted(k for k in cry if k not in wanted)
+    for kind, sid, via in EXTRA_SONGS:
+        song.setdefault((kind, sid), {"via": {via: 0}, "logs": set()})
     song_rows = [{"kind": k, "id": i, "name": songs.get(i), "via": sorted(r["via"]), "logs": len(r["logs"])} for (k, i), r in sorted(song.items(), key=lambda kv: (kv[0][0], kv[0][1]))]
 
     out = {"schema": "aud244a-asset-list/1",

@@ -368,9 +368,9 @@ describe("BGM: duck, fade, pause / continue, loops", () => {
     expect(out).toBeDefined();
   });
 
-  it("exact loops use the native loop points; the four non-exact wraps are crossfaded 5-10 ms", async () => {
+  it("exact loops use the native loop points; the five non-exact wraps are crossfaded 5-10 ms", async () => {
     const loops = Object.entries(sounds).filter(([, s]) => s.loops === true);
-    expect(loops.map(([k]) => k).sort()).toEqual(["bgm:354", "bgm:412", "bgm:469", "bgm:476", "se:132:63", "se:90:none"]);
+    expect(loops.map(([k]) => k).sort()).toEqual(["bgm:354", "bgm:412", "bgm:469", "bgm:471", "bgm:476", "se:132:63", "se:90:none"]);
     for (const [key, sound] of loops) {
       const h = harness();
       await flush();
