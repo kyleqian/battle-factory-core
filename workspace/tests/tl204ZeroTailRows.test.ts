@@ -22,11 +22,11 @@ const PINS: Record<string, {
   "rain-dance": { romUsedToPrint: 219, productionUsedToPrint: 219, romPrintToNext: 105, productionPrintToNext: 105, tailRows: 6, tailFrames: 5, pre: 3, romScriptRows: 5, productionStatRows: 0, romWindowRows: 190, productionBodyRows: 190, residualAfterHypothesis: 0, residualBefore: -5 },
   "scary-face": { romUsedToPrint: 333, productionUsedToPrint: 319, romPrintToNext: 107, productionPrintToNext: 107, tailRows: 6, tailFrames: 5, pre: 3, romScriptRows: 7, productionStatRows: 2, romWindowRows: 302, productionBodyRows: 288, residualAfterHypothesis: -14, residualBefore: -19 },
   "light-screen": { romUsedToPrint: 121, productionUsedToPrint: 123, romPrintToNext: 111, productionPrintToNext: 111, tailRows: 7, tailFrames: 6, pre: 3, romScriptRows: 6, productionStatRows: 0, romWindowRows: 89, productionBodyRows: 91, residualAfterHypothesis: 2, residualBefore: -4 },
-  "calm-mind": { romUsedToPrint: 220, productionUsedToPrint: 216, romPrintToNext: 100, productionPrintToNext: 100, tailRows: 7, tailFrames: 6, pre: 3, romScriptRows: 9, productionStatRows: 2, romWindowRows: 188, productionBodyRows: 185, residualAfterHypothesis: -4, residualBefore: -10 },
+  "calm-mind": { romUsedToPrint: 220, productionUsedToPrint: 219, romPrintToNext: 100, productionPrintToNext: 100, tailRows: 5, tailFrames: 4, pre: 3, romScriptRows: 9, productionStatRows: 2, romWindowRows: 188, productionBodyRows: 185, residualAfterHypothesis: -1, residualBefore: -10 },
   "sunny-day": { romUsedToPrint: 190, productionUsedToPrint: 190, romPrintToNext: 110, productionPrintToNext: 110, tailRows: 7, tailFrames: 6, pre: 3, romScriptRows: 6, productionStatRows: 0, romWindowRows: 161, productionBodyRows: 161, residualAfterHypothesis: 0, residualBefore: -6 },
   "charm": { romUsedToPrint: 218, productionUsedToPrint: 217, romPrintToNext: 108, productionPrintToNext: 108, tailRows: 6, tailFrames: 5, pre: 3, romScriptRows: 7, productionStatRows: 2, romWindowRows: 192, productionBodyRows: 191, residualAfterHypothesis: -1, residualBefore: -6 },
   "fake-tears": { romUsedToPrint: 209, productionUsedToPrint: 208, romPrintToNext: 109, productionPrintToNext: 109, tailRows: 6, tailFrames: 0, pre: 3, romScriptRows: 7, productionStatRows: 2, romWindowRows: 178, productionBodyRows: 182, residualAfterHypothesis: 4, residualBefore: -1 },
-  "leech-seed": { romUsedToPrint: 207, productionUsedToPrint: 207, romPrintToNext: 98, productionPrintToNext: 98, tailRows: 40, tailFrames: 39, pre: 3, romScriptRows: 39, productionStatRows: 0, romWindowRows: 144, productionBodyRows: 144, residualAfterHypothesis: 0, residualBefore: -39 },
+  "leech-seed": { romUsedToPrint: 207, productionUsedToPrint: 207, romPrintToNext: 98, productionPrintToNext: 98, tailRows: 4, tailFrames: 3, pre: 3, romScriptRows: 39, productionStatRows: 0, romWindowRows: 144, productionBodyRows: 144, residualAfterHypothesis: 0, residualBefore: -39 },
   "hail": { romUsedToPrint: 185, productionUsedToPrint: 185, romPrintToNext: 105, productionPrintToNext: 105, tailRows: 7, tailFrames: 6, pre: 3, romScriptRows: 6, productionStatRows: 0, romWindowRows: 161, productionBodyRows: 161, residualAfterHypothesis: 0, residualBefore: -6 },
 };
 
@@ -92,7 +92,7 @@ describe("tl204: Scene ON zero-tail no-hit moves, ROM rows vs production (residu
     }
     expect(compareCase(byMove.get("fake-tears")!).row.accounting.residualAfterHypothesis).toBe(4);
     // the remaining non-zero residuals are the body-window lengths (data/battle_anim_scripts.s), not tail rules
-    for (const [move, residual] of [["light-screen", 2], ["charm", -1], ["fake-tears", -1], ["calm-mind", -4], ["scary-face", -14]] as const) {
+    for (const [move, residual] of [["light-screen", 2], ["charm", -1], ["fake-tears", -1], ["calm-mind", -1], ["scary-face", -14]] as const) {
       expect([move, compareCase(byMove.get(move)!).row.usedToPrint.residual]).toEqual([move, residual]);
     }
   });
