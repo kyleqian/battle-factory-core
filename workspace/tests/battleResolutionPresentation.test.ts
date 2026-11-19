@@ -49,7 +49,7 @@ import {
   type FactoryFullTurnDecisionRules,
 } from "../src/engine/factoryBattleScriptFullTurnDecision.ts";
 import { sceneOffPlayerForcedSwitchInDuration } from "../src/engine/switchInTail.ts";
-import { iu120Extra } from "./helpers/iu120Rows.ts";
+import { hpd4BodyRows, iu120Extra } from "./helpers/iu120Rows.ts";
 import { clearContainedPresentationErrors, containedPresentationErrors } from "../src/engine/presentationContainment.ts";
 
 function initialBattle() {
@@ -744,8 +744,8 @@ describe("battle resolution presentation receipt ownership", () => {
       { type: "hit-animation", eventSequence: 3 },
       { type: "hp", eventSequence: 4 },
     ]);
-    // iu120: + the universal rows (Headbutt 29 by the player: P 3, T 2).
-    expect(battleResolutionCommandDuration(resolution.segments[0]!.commands[1]!, resolution.field)).toBe(48 + iu120Extra(29));
+    // iu120: + the universal rows (Headbutt 29 by the player: P 3, T 2); lead3 B2: + the shape-A lead and tail (this stream presents no used-print rows, so the counter lead is 11; tail 6 - 3 - 2 = 1).
+    expect(battleResolutionCommandDuration(resolution.segments[0]!.commands[1]!, resolution.field)).toBe(48 + iu120Extra(29) + hpd4BodyRows(29, 11));
   });
 
   it("hides the elevated shadow for the post-body hide rows after a live body (ISSUES #147)", () => {
