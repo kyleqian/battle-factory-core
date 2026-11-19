@@ -78,8 +78,8 @@ const SPECS: Record<string, Spec> = {
   "icywind-opponent": { delta: 2 },
   "doubleedge-player": { delta: 2 },
   "calmmind-player": { delta: 0, romOnlyFrom: 500 }, // lse2: -5 before the body lead was presented
-  "hail-player": { delta: -4, romOnlyFrom: 380 },
-  "sunnyday-player": { delta: -4, romOnlyFrom: 390 },
+  "hail-player": { delta: 0, romOnlyFrom: 380 },
+  "sunnyday-player": { delta: 0, romOnlyFrom: 390 },
   "metalclaw-player": { delta: 2, extra: { "95:120:-64": 2 } },
   "steelwing-player": { delta: 2, extra: { "98:120:-64": 2 } },
 };

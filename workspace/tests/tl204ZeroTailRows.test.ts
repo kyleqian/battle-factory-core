@@ -12,22 +12,24 @@ const FIX = new URL("../tools/integration/fixtures/tl204/", import.meta.url);
 const rom = JSON.parse(readFileSync(new URL("rom-rows.json", FIX), "utf8")) as Record<string, any>;
 const byMove = new Map(Object.values(rom).map((r) => [r.move as string, r]));
 
+// lead4 (B3): the S bodies (Double Team, Rain Dance, Scary Face, Light Screen, Sunny Day, Charm, Hail) present their script lead before the body, so their tailRows / tailFrames
+// pins are the old ones minus the lead (1 / 2 / 1 / 3 / 3 / 1 / 3 rows); every window residual and the used -> print / print -> next rows are unchanged.
 // used -> print = first glyph of "<MON> used <MOVE>!" to the first glyph of the print that follows the body (ROM) / message start (production).
 // print -> next = that print (chain end) to the foe's "used TACKLE!". Production columns are what the code produces today.
 const PINS: Record<string, {
   romUsedToPrint: number; productionUsedToPrint: number; romPrintToNext: number; productionPrintToNext: number; tailRows: number; tailFrames: number; pre: number;
   romScriptRows: number; productionStatRows: number; romWindowRows: number; productionBodyRows: number; residualAfterHypothesis: number; residualBefore: number;
 }> = {
-  "double-team": { romUsedToPrint: 271, productionUsedToPrint: 271, romPrintToNext: 104, productionPrintToNext: 104, tailRows: 6, tailFrames: 5, pre: 0, romScriptRows: 7, productionStatRows: 2, romWindowRows: 239, productionBodyRows: 239, residualAfterHypothesis: 0, residualBefore: -5 },
-  "rain-dance": { romUsedToPrint: 219, productionUsedToPrint: 219, romPrintToNext: 105, productionPrintToNext: 105, tailRows: 6, tailFrames: 5, pre: 3, romScriptRows: 5, productionStatRows: 0, romWindowRows: 190, productionBodyRows: 190, residualAfterHypothesis: 0, residualBefore: -5 },
-  "scary-face": { romUsedToPrint: 333, productionUsedToPrint: 319, romPrintToNext: 107, productionPrintToNext: 107, tailRows: 6, tailFrames: 5, pre: 3, romScriptRows: 7, productionStatRows: 2, romWindowRows: 302, productionBodyRows: 288, residualAfterHypothesis: -14, residualBefore: -19 },
-  "light-screen": { romUsedToPrint: 121, productionUsedToPrint: 123, romPrintToNext: 111, productionPrintToNext: 111, tailRows: 7, tailFrames: 6, pre: 3, romScriptRows: 6, productionStatRows: 0, romWindowRows: 89, productionBodyRows: 91, residualAfterHypothesis: 2, residualBefore: -4 },
+  "double-team": { romUsedToPrint: 271, productionUsedToPrint: 271, romPrintToNext: 104, productionPrintToNext: 104, tailRows: 5, tailFrames: 4, pre: 0, romScriptRows: 7, productionStatRows: 2, romWindowRows: 239, productionBodyRows: 239, residualAfterHypothesis: 0, residualBefore: -5 },
+  "rain-dance": { romUsedToPrint: 219, productionUsedToPrint: 219, romPrintToNext: 105, productionPrintToNext: 105, tailRows: 4, tailFrames: 3, pre: 3, romScriptRows: 5, productionStatRows: 0, romWindowRows: 190, productionBodyRows: 190, residualAfterHypothesis: 0, residualBefore: -5 },
+  "scary-face": { romUsedToPrint: 333, productionUsedToPrint: 319, romPrintToNext: 107, productionPrintToNext: 107, tailRows: 5, tailFrames: 4, pre: 3, romScriptRows: 7, productionStatRows: 2, romWindowRows: 302, productionBodyRows: 288, residualAfterHypothesis: -14, residualBefore: -19 },
+  "light-screen": { romUsedToPrint: 121, productionUsedToPrint: 123, romPrintToNext: 111, productionPrintToNext: 111, tailRows: 4, tailFrames: 3, pre: 3, romScriptRows: 6, productionStatRows: 0, romWindowRows: 89, productionBodyRows: 91, residualAfterHypothesis: 2, residualBefore: -4 },
   "calm-mind": { romUsedToPrint: 220, productionUsedToPrint: 219, romPrintToNext: 100, productionPrintToNext: 100, tailRows: 5, tailFrames: 4, pre: 3, romScriptRows: 9, productionStatRows: 2, romWindowRows: 188, productionBodyRows: 185, residualAfterHypothesis: -1, residualBefore: -10 },
-  "sunny-day": { romUsedToPrint: 190, productionUsedToPrint: 190, romPrintToNext: 110, productionPrintToNext: 110, tailRows: 7, tailFrames: 6, pre: 3, romScriptRows: 6, productionStatRows: 0, romWindowRows: 161, productionBodyRows: 161, residualAfterHypothesis: 0, residualBefore: -6 },
-  "charm": { romUsedToPrint: 218, productionUsedToPrint: 217, romPrintToNext: 108, productionPrintToNext: 108, tailRows: 6, tailFrames: 5, pre: 3, romScriptRows: 7, productionStatRows: 2, romWindowRows: 192, productionBodyRows: 191, residualAfterHypothesis: -1, residualBefore: -6 },
+  "sunny-day": { romUsedToPrint: 190, productionUsedToPrint: 190, romPrintToNext: 110, productionPrintToNext: 110, tailRows: 4, tailFrames: 3, pre: 3, romScriptRows: 6, productionStatRows: 0, romWindowRows: 161, productionBodyRows: 161, residualAfterHypothesis: 0, residualBefore: -6 },
+  "charm": { romUsedToPrint: 218, productionUsedToPrint: 217, romPrintToNext: 108, productionPrintToNext: 108, tailRows: 5, tailFrames: 4, pre: 3, romScriptRows: 7, productionStatRows: 2, romWindowRows: 192, productionBodyRows: 191, residualAfterHypothesis: -1, residualBefore: -6 },
   "fake-tears": { romUsedToPrint: 209, productionUsedToPrint: 208, romPrintToNext: 109, productionPrintToNext: 109, tailRows: 6, tailFrames: 0, pre: 3, romScriptRows: 7, productionStatRows: 2, romWindowRows: 178, productionBodyRows: 182, residualAfterHypothesis: 4, residualBefore: -1 },
   "leech-seed": { romUsedToPrint: 207, productionUsedToPrint: 207, romPrintToNext: 98, productionPrintToNext: 98, tailRows: 4, tailFrames: 3, pre: 3, romScriptRows: 39, productionStatRows: 0, romWindowRows: 144, productionBodyRows: 144, residualAfterHypothesis: 0, residualBefore: -39 },
-  "hail": { romUsedToPrint: 185, productionUsedToPrint: 185, romPrintToNext: 105, productionPrintToNext: 105, tailRows: 7, tailFrames: 6, pre: 3, romScriptRows: 6, productionStatRows: 0, romWindowRows: 161, productionBodyRows: 161, residualAfterHypothesis: 0, residualBefore: -6 },
+  "hail": { romUsedToPrint: 185, productionUsedToPrint: 185, romPrintToNext: 105, productionPrintToNext: 105, tailRows: 4, tailFrames: 3, pre: 3, romScriptRows: 6, productionStatRows: 0, romWindowRows: 161, productionBodyRows: 161, residualAfterHypothesis: 0, residualBefore: -6 },
 };
 
 describe("tl204: Scene ON zero-tail no-hit moves, ROM rows vs production (residuals are data)", () => {

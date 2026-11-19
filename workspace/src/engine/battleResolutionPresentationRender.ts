@@ -10,7 +10,7 @@ import {
   isWeatherContinuesAnimation, WEATHER_CONTINUES_BODY_ROWS, WEATHER_CONTINUES_LAUNCH_LEAD_ROWS, WEATHER_CONTINUES_MOVE_IDS,
   STA5_STATUS_BODY_TAIL_ROWS,
   lse2BodySoundAgeShift,
-  bodyHitTailRuleApplies, bodyLeadTailCompositionApplies, bodyStatusTailRuleApplies, bodyLse2RuleApplies,
+  bodyHitTailRuleApplies, bodyLeadTailCompositionApplies, bodyStatusTailRuleApplies, bodyLse2RuleApplies, bodySLeadRuleApplies,
 } from "./battleResolutionPresentation.ts";
 import type { LiveMoveSpriteAllocatorInput, LiveMoveSpriteOrderInput } from "./liveMoveSpriteAllocator.ts";
 import type { LiveMoveBattlerX2Input } from "./liveBattlerX2History.ts";
@@ -1623,6 +1623,17 @@ function withoutBodyLead(command: Extract<BattleResolutionPresentationCommand, {
 }
 
 /**
+ * lead4: the body lead rows a command presents. An S body's lead is moved out of its script tail, so it is presented only where that tail is (a body whose tail frames are 0,
+ * e.g. the declined default-class window, keeps its lead unpresented: presenting it would add rows). Every other class presents `bodyLeadFrames`.
+ */
+function presentedBodyLead(command: Extract<BattleResolutionPresentationCommand, { type: "move-animation" }>, field: BattleResolutionDisplayedField): number {
+  const lead = command.timing.bodyLeadFrames ?? 0;
+  if (lead === 0 || command.animation === undefined || !bodySLeadRuleApplies(command.animation.moveId)) return lead;
+  const { timing } = withoutBodyLead(command) as Extract<BattleResolutionPresentationCommand, { type: "move-animation" }>;
+  return liveMoveScriptTailFrames(timing, command.animation, field) > 0 ? lead : 0;
+}
+
+/**
  * hpd4: the rows the presented resolution's earlier move-animation commands (and the current one when `includeCurrent`) present beyond the
  * pre-lead clock the controller-side sounds (hit SE, HP bar, faint) were calibrated on: their lead rows and hit tail. A sound anchored to a command start
  * subtracts it to stay on its ROM frame.
@@ -1668,7 +1679,9 @@ export function liveMoveSourceAge(
   const seGate = (command.timing.seGateFrames ?? 0) + (command.timing.scriptLeadFrames ?? 0);
   const pre = liveMoveUniversalRows(command.animation, field).pre;
   // lse2: a body whose lead is presented in front of it keeps the sound clock of the ROM script rows (the clock is the pre-lead one, shifted by the lead's difference to its 7-row calibration).
-  const soundShift = lse2BodySoundAgeShift(command.animation.moveId, command.timing.bodyLeadFrames);
+  let precedingStatRows = 0;
+  for (let c = state.commandIndex - 1; c >= 0 && segment!.commands[c]!.type === "stat"; c -= 1) precedingStatRows += battleResolutionCommandDuration(segment!.commands[c]!, field);
+  const soundShift = lse2BodySoundAgeShift(command.animation.moveId, presentedBodyLead(command, field), precedingStatRows);
   const age = state.lifecycle.phaseElapsed - seGate - pre - soundShift;
   // aud260: the age of the command's last presenting row (the command completes when phaseElapsed + 1 >= its duration), for the sound-only tail past the window.
   const duration = battleResolutionCommandDuration(withoutBodyLead(command), field, liveMoveTimingBodyOf(state.liveMoveSpriteOrderInput), state.liveMoveBattlerX2Input?.moveUse);
@@ -1711,8 +1724,10 @@ export function statsChangeSourceAge(
   const beforeStat = state.segments[state.segmentIndex]!.commands[state.commandIndex - 2];
   const afterStatBody = previous?.type === "stat" && beforeStat?.type === "move-animation" && (beforeStat.timing.bodyLeadFrames ?? 0) > 0
     && beforeStat.animation !== undefined && bodyStatusTailRuleApplies(beforeStat.animation.moveId);
+  // lead4: an S body's lead moved in front of it and its tail shrank by the same rows, so the stats-change command starts where it did: the generic age is unchanged.
   const afterBodyLead = previous?.type === "move-animation" && (previous.timing.bodyLeadFrames ?? 0) > 0
-    ? (previous.animation !== undefined && bodyLse2RuleApplies(previous.animation.moveId) ? STATS_CHANGE_AFTER_LSE2_BODY_AGE_SHIFT : STATS_CHANGE_AFTER_BODY_AGE_SHIFT)
+    ? (previous.animation !== undefined && bodySLeadRuleApplies(previous.animation.moveId) ? 0
+      : previous.animation !== undefined && bodyLse2RuleApplies(previous.animation.moveId) ? STATS_CHANGE_AFTER_LSE2_BODY_AGE_SHIFT : STATS_CHANGE_AFTER_BODY_AGE_SHIFT)
     : afterStatBody ? STATS_CHANGE_AFTER_STAT_BODY_AGE_SHIFT : 0;
   const age = state.lifecycle.phaseElapsed - (command.timing.seGateFrames ?? 0) + afterBodyLead;
   if (age < 0 || fieldBattler(currentCommandField(state), command.battler).substituteDoll === true) return null;
@@ -1826,7 +1841,7 @@ export function battleResolutionCommandDuration(
       const seGate = command.timing.seGateFrames ?? 0;
       if (live === null) return seGate + command.timing.minimumFrames;
       const rows = liveMoveUniversalRows(command.animation!, field);
-      return seGate + (command.timing.scriptLeadFrames ?? 0) + (command.timing.bodyLeadFrames ?? 0) + rows.pre
+      return seGate + (command.timing.scriptLeadFrames ?? 0) + presentedBodyLead(command, field) + rows.pre
         + liveMoveIdleLeadRows(command.animation!, field) + live + rows.post + liveMoveScriptTailFrames(command.timing, command.animation!, field)
         + liveMoveHitTailRows(command, field);
     }
@@ -2493,12 +2508,12 @@ export function createBattleResolutionPresentationRenderView(
       const lead = liveMoveIdleLeadRows(command.animation, field);
       // iu120: the pre rows show the activation row's image (idle98: F_att..A-1 == row A), so a lead > 0 command's pre rows keep it.
       // sub183: the script lead rows precede the seGate rows and show the same age-0 field.
-      const seGate = (command.timing.seGateFrames ?? 0) + (command.timing.scriptLeadFrames ?? 0) + (command.timing.bodyLeadFrames ?? 0);
+      const seGate = (command.timing.seGateFrames ?? 0) + (command.timing.scriptLeadFrames ?? 0) + presentedBodyLead(command, field);
       const pre = seGate + liveMoveUniversalRows(command.animation, field).pre;
       effect = Object.freeze({
         type: "move", request: command.animation,
         age: liveMoveUniversalRowAge(state, command.animation, field, seGate, liveMoveScriptTailFrames(command.timing, command.animation, field),
-          (bodyLeadTailCompositionApplies(command.animation.moveId) && (command.timing.bodyLeadFrames ?? 0) > 0) || LIVE_MOVE_LEADLESS_TAIL_ROWS.has(command.animation.moveId)),
+          (bodyLeadTailCompositionApplies(command.animation.moveId) && presentedBodyLead(command, field) > 0) || LIVE_MOVE_LEADLESS_TAIL_ROWS.has(command.animation.moveId)),
         ...(lead > 0 && state.lifecycle.phaseElapsed <= pre ? { preActivationRow: true as const } : {}),
         paletteInput: state.liveMovePaletteInput,
         spriteAllocatorInput: state.liveMoveSpriteAllocatorInput,

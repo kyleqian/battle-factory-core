@@ -1719,9 +1719,26 @@ const LEAD3_SHAPE_A_MOVE_IDS: ReadonlySet<number> = new Set([...LEAD3_MEASURED_M
 const LSE2_BODY_LEAD_MOVE_IDS: ReadonlySet<number> = new Set([73, 322, 347, 227]);
 /** The lead each lse2 body's sound clock was calibrated on (Encore's 220-row body SEs sit 4 rows closer to the print release). */
 const LSE2_SOUND_CLOCK_LEADS: ReadonlyMap<number, number> = new Map([[73, 7], [322, 7], [347, 7], [227, 3]]);
-export function lse2BodySoundAgeShift(moveId: number, bodyLeadFrames: number | undefined): number {
+/**
+ * lead4 (B3, docs/lead1m-rule-lead-design.md): the "S" status / stat bodies (Double Team, Protect, Light Screen, Rain Dance, Agility, Swords Dance, ...) whose script lead
+ * (ROM `exec` rise -> `gAnimScriptActive`) is put in front of the body instead of after it. The row total is unchanged (the new script tail is the old one less the lead, the lead is
+ * added in front), so only the body position and its sound clock move by `lead`. Only ids whose tail is presented (a post-row side, or a `LIVE_MOVE_SCRIPT_TAIL_TRAIL_ROWS` entry) are in:
+ * for the others the lead would add frames. Held out (no presented tail): Growth 74, Recycle 278, Fake Tears 313, 248, 244, 285, 194, 193, 191, 297, 144, 110.
+ */
+const LEAD4_S_LEAD_MOVE_IDS: ReadonlySet<number> = new Set([
+  104, 182, 113, 240, 184, 108, 201, 204, 219, 266, 28, 241, 213, 97, 334, 230, 151, 133, 258, 14, 203, 197, 349, 254, 215, 107, 281, 180, 288, 195, 115, 103,
+  277, 178, 43, 39, 148, 106, 275, 112, 321, 259, 319, 271, 339, 294, 272, 50, 269, 116,
+]);
+/** The lead the S bodies' sound clock was calibrated on (the generic move-body clock, AGE_TO_SOUND_ROWS = 7). */
+const LEAD4_SOUND_CLOCK_LEAD = 7;
+/** Per-body clock leads (ROM minus ours on the 7 clock: Smokescreen / Scary Face / Metal Sound -2, Sweet Scent -3 in the aud242 fixtures; Double Team, 98 of 190 T2 SEs, +2 before the shift is -4): their SEs sit closer to the print release. */
+const LEAD4_SOUND_CLOCK_LEADS: ReadonlyMap<number, number> = new Map([[108, 5], [184, 5], [319, 5], [230, 6], [104, 5]]);
+/** `precedingRows`: the rows of the `stat` commands presented between the used print and the body (the S bodies' counter lead is those plus `bodyLeadFrames`). */
+export function lse2BodySoundAgeShift(moveId: number, bodyLeadFrames: number | undefined, precedingRows = 0): number {
+  if ((bodyLeadFrames ?? 0) <= 0) return 0;
   const calibrated = LSE2_SOUND_CLOCK_LEADS.get(moveId);
-  return calibrated !== undefined && (bodyLeadFrames ?? 0) > 0 ? bodyLeadFrames! - calibrated : 0;
+  if (calibrated !== undefined) return bodyLeadFrames! - calibrated;
+  return LEAD4_S_LEAD_MOVE_IDS.has(moveId) ? bodyLeadFrames! + precedingRows - (LEAD4_SOUND_CLOCK_LEADS.get(moveId) ?? LEAD4_SOUND_CLOCK_LEAD) : 0;
 }
 /**
  * lead2 (docs/lead1m-rule-lead-design.md): the move-body lead RULE. A body that matches a rule class presents the kernel's instruction-counter lead as its first
@@ -1729,12 +1746,13 @@ export function lse2BodySoundAgeShift(moveId: number, bodyLeadFrames: number | u
  * (`liveMoveHitTailRows`); "status-tail": the sta5 script-tail table; "lse2": the lse2 lead-first status bodies; "lead-table": the hpd4 bodies with explicit tails.
  * Every consumer asks one of the predicates below instead of testing its own id set, so a batch widens one class.
  */
-export type BodyLeadRule = "lead-table" | "shape-a" | "status-tail" | "lse2";
+export type BodyLeadRule = "lead-table" | "shape-a" | "status-tail" | "lse2" | "s-lead";
 const BODY_LEAD_RULE: ReadonlyMap<number, BodyLeadRule> = new Map<number, BodyLeadRule>([
   ...HPD4_BODY_LEAD_MOVE_IDS.map((id): [number, BodyLeadRule] => [id, "lead-table"]),
   ...[...HPD8_SHAPE_A_MOVE_IDS, ...LEAD2_SHAPE_A_MOVE_IDS, ...LEAD3_SHAPE_A_MOVE_IDS].map((id): [number, BodyLeadRule] => [id, "shape-a"]),
   ...[...STA5_STATUS_BODY_TAIL_ROWS.keys()].map((id): [number, BodyLeadRule] => [id, "status-tail"]),
   ...[...LSE2_BODY_LEAD_MOVE_IDS].map((id): [number, BodyLeadRule] => [id, "lse2"]),
+  ...[...LEAD4_S_LEAD_MOVE_IDS].map((id): [number, BodyLeadRule] => [id, "s-lead"]),
 ]);
 /** The body's lead is presented as `bodyLeadFrames` (not carried in `scriptTailRows`). */
 export function bodyLeadRuleApplies(moveId: number): boolean {
@@ -1747,7 +1765,10 @@ export function bodyHitTailRuleApplies(moveId: number): boolean {
 /** The lead-first body keeps the audited hit-tail / status-tail composition (the render effect's age hold). */
 export function bodyLeadTailCompositionApplies(moveId: number): boolean {
   const rule = BODY_LEAD_RULE.get(moveId);
-  return rule === "shape-a" || rule === "status-tail";
+  return rule === "shape-a" || rule === "status-tail" || rule === "s-lead";
+}
+export function bodySLeadRuleApplies(moveId: number): boolean {
+  return BODY_LEAD_RULE.get(moveId) === "s-lead";
 }
 export function bodyStatusTailRuleApplies(moveId: number): boolean {
   return BODY_LEAD_RULE.get(moveId) === "status-tail";

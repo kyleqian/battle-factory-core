@@ -67,6 +67,12 @@ const SHAPE_A_RULE_IDS: readonly number[] = [24, 196, 352, 263, 25, 68, 4, 72, 3
 // lead3 B2 (the trailing ids): the measured bodies Shadow Ball .. Fire Punch (lead 5), Fury Swipes 154 / Low Kick 67 / Fury Cutter 210 / Psywave 149 / Horn Drill 32 (leads below), then the predicted counter-5 A? bodies.
 const SHAPE_A_LEADS: ReadonlyMap<number, number> = new Map([[89, 11], [24, 16], [4, 15], [3, 15], [68, 4], [154, 15], [67, 8], [210, 9], [149, 6], [32, 7]]);
 const shapeA = (id: number): Iu120BodyRule => ({ lead: SHAPE_A_LEADS.get(id) ?? 5, defaultLead: id === 91 || id === 76 ? undefined : SHAPE_A_LEADS.get(id) ?? 5, tail: "shape-a" });
+// lead4 B3: the S status bodies (test-side copy of production's LEAD4_S_LEAD_MOVE_IDS): the script lead (passed by the caller) is presented before the body, and the script tail ONT193_SCRIPT_TAIL_FRAMES
+// holds (lead included) shrinks by it: the row total is unchanged, so `hpd4BodyRows` adds nothing for them.
+const S_LEAD_RULE_IDS: ReadonlySet<number> = new Set([
+  104, 182, 113, 240, 184, 108, 201, 204, 219, 266, 28, 241, 213, 97, 334, 230, 151, 133, 258, 14, 203, 197, 349, 254, 215, 107, 281, 180, 288, 195, 115, 103,
+  277, 178, 43, 39, 148, 106, 275, 112, 321, 259, 319, 271, 339, 294, 272, 50, 269, 116,
+]);
 const IU120_BODY_RULES: ReadonlyMap<number, Iu120BodyRule> = new Map<number, Iu120BodyRule>([
   // hpd4 lead-table bodies (explicit tails)
   [49, { lead: 9, tail: 3 }], [82, { lead: 9, tail: 26 }], [111, { lead: 3, tail: 3 }], [205, { lead: 10, tail: 3 }], [301, { lead: 10, tail: 3 }], [69, { lead: 6, tail: 1 }],
@@ -91,6 +97,7 @@ function hpd4BodyTail(id: number, side: Iu120Side): number {
 const defaultBodyLead = (id: number): number => IU120_BODY_RULES.get(id)?.defaultLead ?? 0;
 /** The rows an audited body's lead and hit tail add; 0 unless the caller passes the body's lead (Ice Ball: 10 on turn 1, 9 after; the others HPD4_BODY_LEAD_ROWS). */
 export function hpd4BodyRows(id: number, lead = defaultBodyLead(id), side: Iu120Side = "player"): number {
+  if (S_LEAD_RULE_IDS.has(id)) return 0;
   return lead === 0 ? LIVE_MOVE_LEADLESS_TAIL_ROWS.get(id) ?? 0 : lead + hpd4BodyTail(id, side);
 }
 
@@ -110,6 +117,7 @@ export function iu120EffectAges(id: number, duration: number, side: Iu120Side = 
   const tail = bodyLead === 0 ? LIVE_MOVE_LEADLESS_TAIL_ROWS.get(id) ?? 0 : hpd4BodyTail(id, side);
   const held = iu120Post(id, side) + ont193ScriptTail(id) > 0 || LIVE_MOVE_LEADLESS_TAIL_ROWS.has(id) || STA5_STATUS_TAIL_IDS.has(id)
     || (IU120_BODY_RULES.get(id)?.tail === "shape-a" && bodyLead > 0); // production's holdHitTail: a shape-A hit tail holds the last body row
-  return [...Array(hold + bodyLead).fill(0), ...Array.from({ length: duration }, (_, age) => age), ...Array(iu120Post(id, side)).fill(duration - 1), ...Array(ont193ScriptTail(id)).fill(duration - 1),
+  const scriptTail = ont193ScriptTail(id) - (S_LEAD_RULE_IDS.has(id) ? bodyLead : 0);
+  return [...Array(hold + bodyLead).fill(0), ...Array.from({ length: duration }, (_, age) => age), ...Array(iu120Post(id, side)).fill(duration - 1), ...Array(scriptTail).fill(duration - 1),
     ...Array.from({ length: tail }, (_, i) => (held ? duration - 1 : duration + i))];
 }

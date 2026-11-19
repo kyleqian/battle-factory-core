@@ -60,7 +60,7 @@ const SPECS: Array<{ name: string; ids: number[]; deltas: number[] }> = [
   // Reversal: +2 on all three rows (SE209, SE217 before the five-orb wait, SE123 after the 50-tick orbs + `delay 20` + `delay 8`): the aud242a idle-lead class. Taunt: -4 on all five rows (the rows
   // behind the 63-tick thought bubble / 45-tick finger wait and the anger-mark SEs included).
   { name: "reversal-player", ids: [209, 217, 123], deltas: [2, 2, 2] },
-  { name: "taunt-player", ids: [186, 167, 194], deltas: [-4, -4, -4, -4, -4] },
+  { name: "taunt-player", ids: [186, 167, 194], deltas: [0, 0, 0, 0, 0] }, // lead4: -4 before the script lead was presented ahead of the body
   // Leaf Blade (AnimTask_LeafBlade, 136 ticks: seven 11-call arcs, six 6-call holds, the last trail sprite; the SE_M_LEER row behind it) 0 on all four rows. Karate Chop (AnimTravelDiagonally, 10 + 1 ticks) 0; Mist Ball (TranslateAnimSpriteToTargetMonLocation behind AnimThrowMistBall, 30 + 2) +2 (the idle-lead class). Revenge (the two 13-tick
   // scratch sprites; the opponent's Pound goes first, its body is not a live adapter in the engine) +13 on all four rows (hpf3: -10 while the opponent's hit on the player kept the 28-row floor; hit -> next ATTACKSTRING is now ROM bar rise + 25 vs ours + 26 and ATTACKSTRING -> first SE 36 vs 37, so the 13 is the opponent's Pound body, which is not a live adapter): the gaps 75 / 17 / 10 are exact.
   { name: "karatechop-player", ids: [135, 139], deltas: [0, 0] },

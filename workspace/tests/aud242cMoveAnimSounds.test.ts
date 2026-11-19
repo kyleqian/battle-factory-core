@@ -87,8 +87,8 @@ const FADE_SPECS: Record<string, Spec> = {
 const PAN_SPECS: Record<string, Spec> = {
   "flamethrower-opponent": { delta: 5 },
   "flamethrower-player": { delta: 5 },
-  "metalsound-opponent": { delta: -2, romOnlyFrom: 121 },
-  "sweetscent-player": { delta: -3, romOnlyFrom: 400 },
+  "metalsound-opponent": { delta: 0, romOnlyFrom: 121 },
+  "sweetscent-player": { delta: 0, romOnlyFrom: 400 },
   "icywind-opponent": { delta: 2, romOnlyFrom: 100 },
 };
 

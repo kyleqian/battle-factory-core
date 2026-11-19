@@ -527,3 +527,44 @@ The supervisor's full suite found three tests `test:gate` does not hold. Verdict
 3. **`tests/aud248StatChangeSounds.test.ts` `aud242e-overheat-player.json`: re-pin 17 -> 9.** The ROM window (Overheat's Sp. Atk fall: SE 245 pan -64 at ROM frame 393). Ours was 376 (residual 17), with Overheat in the lead3 predicted class (lead 5 + tail 3) it is 384: residual 9, i.e. -8 toward the ROM by exactly the rule's rows. First ROM evidence for a predicted-class body (no lab was run for Overheat in lead3); the remaining 9 is the window's presentation-length residual named in the test header (Superpower 12, Growth 23, Scary Face 14 are the same kind).
 
 Other pins: every direct importer of liveMoveAnimation / battleResolutionPresentation* / moveAnimSounds / tickSounds / iu120Rows (265 test files, 2,726 tests) and every test file naming one of the 80 lead2 / lead3 move constants and not in that set (328 files, 2,925 tests) green. The skipped tests of the suite (`it.skipIf` on `reference/`, a built `dist`, an unset `POKEBENCH_CGB4_EVIDENCE`, and the manual `hypnosisEvidence`) do not pin a lead2 / lead3 body (Hypnosis 95 and Sheer Cold 329 are outside both batches). `npm run typecheck` 0, `npm run build` 0, `npm run test:gate` 362 files / 2,844 tests green. Suggestion: the three files above are 7-17 s each and could join `tools/test/test-gate.list` (the generator would drop a hand edit).
+
+## lead4: B3 landed (2026-11-19, branch worker/integration-20261119-211209, base 29fd7cf34)
+
+The "S" status / stat bodies (`BODY_LEAD_RULE` class `"s-lead"`, `LEAD4_S_LEAD_MOVE_IDS`, 50 ids; `tests/helpers/iu120Rows.ts` `S_LEAD_RULE_IDS` mirrors them) used to carry their script lead in `scriptTailRows` after the body. The ROM plays it before the body. Now `bodyLeadFrames` is the counter lead (`instructionExecution(MOVE_ANIMATION) - (used print + 1) - presentedSinceUsed`), it is presented before the body, and `scriptTailRows` is the old value minus the lead (`bodyLeadRuleApplies`). **Every command's total frames is unchanged**; only the body position and its sound clock move by the lead.
+
+### Id set
+- **Landed (50):** Double Team 104, Protect 182, Light Screen 113, Rain Dance 240, Scary Face 184, Smokescreen 108, Sandstorm 201, Charm 204 and the rest of `LEAD4_S_LEAD_MOVE_IDS` (the list in `battleResolutionPresentation.ts` is authoritative). The four lse2 ids (Leech Seed 73, Cosmic Power 322, Calm Mind 347, Encore 227) were already lead bodies (B1) and are unchanged.
+- **Held out (12), no presented tail frames (old `liveMoveScriptTailFrames` = 0, trail undefined): Growth 74, Recycle 278, Fake Tears 313, Future Sight 248, Psych Up 244, Skill Swap 285, Destiny Bond 194, Foresight 193, Spikes 191, Feather Dance 297, Transform 144, Withdraw 110.** The lead could only be added (not moved out of a tail), which would change their command total; they stay in `scriptTailRows` until their trail row is read. `presentedBodyLead` also keeps the invariant per command: the lead is presented only where the old tail frames were > 0 (Double Team on the opponent side x3 and Attract had +1 / +3 total frames before this).
+
+### Sound clock
+The generic SE clock is calibrated on a 7-row counter lead. An S body's SE age therefore shifts by `counterLead - 7` where the counter lead = `bodyLeadFrames + the rows of the preceding stat commands` (the stat rows are part of the counter lead: `lead - 7` alone made Agility / Swords Dance worse). Per-id clocks measured against the ROM: Smokescreen 108 / Scary Face 184 / Metal Sound 319 lead 5, Sweet Scent 230 lead 6, Double Team 104 lead 5 (T2: 98 of 190 Double Team SEs were +2 late with 7). `lse2BodySoundAgeShift` keeps the lse2 calibration as is.
+
+### ROM spot-check (Scene ON, `tools/compare/traces/lead4-<x>-on.json`, labs `tools/battle-lab/lead4-<x>-player-on.json`)
+Matched frames before / with the rule: Double Team 420 -> 422, Protect 753 -> 863, Light Screen 569 -> 641, Rain Dance 549 -> 566. None got worse. Double Team's -80 window disagreement (the 3-animation status body, section above) is an adapter-window problem (B5), not this batch.
+
+### Census delta (`lsd194Census.sh` + `rst197CensusDelta.py`, base 29fd7cf34, final = a4a3c34a6 (src tree identical to c13d7b6eb))
+- Scene ON 0..199: eventsDigest identical on all 200 seeds, type sequences identical, bad 0; 175 battles change, 25 identical; **1,048 move-animation commands** (of 8,073) change, **0 commands change their total frames (0 frames in total)**; the only changed census field is [17] `scriptTailRows`.
+- Scene OFF 0..99: 100 / 100 identical.
+- Sound (`soundCensusDelta.py`): the same event sequence in all 200 seeds, **3,025 SE rows move**, all earlier, on the 1,048 batch commands only (the same 175 battles): -2 x 1,840, -4 x 861, -5 x 324.
+- T1 on the final arm: exact 54,005, known-offset 0, missing 0, extra 0 (0 / 0 / 0, as on the base).
+
+### T2 (Scene ON ROM-aligned scoreboard, `tools/audio/aud248RunSeed.sh`, 10 seeds 12 15 18 64 92 143 148 166 170 198)
+| family | exact before -> after | offset before -> after | missing | extra |
+|---|---|---|---|---|
+| move-animation SE | 225 -> 452 | 1776 -> 1549 | 30 -> 30 | 0 -> 0 |
+| stat-change SE | 9 -> 19 | 85 -> 75 | 2 -> 2 | 2 -> 2 |
+| cry / battle-controller SE / bgm | unchanged | unchanged | 0 | 0 |
+
+Missing / extra are unchanged (the 30 missing `se:144` and the `se:239` pair are in the base). Move-SE offset mass falls 1776 -> 1549 (227 rows become exact); the matched-row delta distribution (median -1, p10 -14, p90 5) is unchanged, the remaining offset is the adapter-window / hp-length residual (B5).
+
+### Gates
+`npm run typecheck` 0; `npm run build` 0; `npm run test:gate` 362 files / 2,844 tests green. 8 chunks (a failing chunk was re-run after its re-pin; every test importing liveMoveAnimation / battleResolutionPresentation* / moveAnimSounds / tickSounds / iu120Rows, or naming a B3 body) green after the re-pins. `tests/randomRoundSoak.test.ts` has 3 failures (the seven-wins pin 43437 -> 43336 frames / renderCalls 3045 -> 3042, ISSUES #89 seed 28 halt, M-B step 2 "full" seed 0 18678 vs 39365) that are **identical on the base 29fd7cf34** (run in a throwaway worktree): pre-existing, not moved by B3, and the file is not edited. `tests/lbrd.test.ts` green.
+
+Re-pins (each by the lead-before-body rule):
+- `tests/aud242aMoveAnimSounds.test.ts`, `aud242c`, `aud242d`, `aud242k`, `aud242p`, `aud242r`, `aud258MoveAnimSounds.test.ts`: the S bodies' sound residuals re-pinned to 0 (frame-exact with the lead presented).
+- `tests/animation/liveRandom2R4MoveAdapters.test.ts` (Rain Dance lead 2) and `liveRandom2R5MoveAdapters.test.ts` (Sand-Attack lead 1): the route rows pass the script lead to `iu120EffectAges`.
+- `tests/helpers/iu120Rows.ts`: `S_LEAD_RULE_IDS`, `hpd4BodyRows` 0 for S ids, `iu120EffectAges` tail minus the lead.
+- `tests/battleTurnPortability.test.ts`: Sand-Attack timing `scriptTailRows` 6 -> 5, `bodyLeadFrames` 1.
+- `tests/ont193SceneOnTails.test.ts`: tail frames Bulk Up 4 -> 2, Protect 3 -> 1, Detect 3 -> 1, Sand-Attack 6 -> 5, Double Team window 5 -> 4 (body rows 117 / 131 / 118 / 67 / 244 unchanged).
+- `tests/land97IdleLeadRows.test.ts` and `tests/iu120UniversalRows.test.ts`: Bulk Up gets 2 lead rows (age 0) before the body and a script tail of 2 (4 - 2); 117 rows total.
+- `tests/tl204ZeroTailRows.test.ts`: tailRows / tailFrames Double Team 6/5 -> 5/4, Rain Dance 6/5 -> 4/3, Scary Face 6/5 -> 5/4, Light Screen 7/6 -> 4/3, Sunny Day 7/6 -> 4/3, Charm 6/5 -> 5/4, Hail 7/6 -> 4/3; every used -> print residual is unchanged.
