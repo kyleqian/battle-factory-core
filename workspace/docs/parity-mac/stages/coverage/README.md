@@ -67,3 +67,25 @@ R052, R051 and R053 came from luck6 (2026-11-18; lab seeds 930003, 936007 and 93
 | R051-ai-clefable-metronome-mist | 936007 | 35 of 35 | 35 of 35 |
 | R053-ai-clefable-metronome-focus-energy | 937010 | 42 of 42 | 40 of 40 |
 
+
+**rrh5 (2026-11-19, box hunt; stage files and a tool extension, no `src/` change).** These stages carry a `parties` field: hand-built Mechanic Lab
+parties for both sides (`staged-battles.md`, "Stage parties"). The ROM and the engine both run the same staged battle; each file below was re-driven
+from the committed file with `match True`, 0 diff points and `stage.ok True`.
+
+| file | lab seed | states matched |
+|---|---|---|
+| R067-slaking-focus-punch-truant | 90000 | 5 of 5 |
+| R071-exploud-heal-bell-soundproof | 90000 | 12 of 12 |
+| R072-soundproof-party-heal-bell | 90000 | 12 of 12 |
+| R075-imprison-twice | 90000 | 13 of 13 |
+| R078-lock-on-sheer-cold | 90000 | 5 of 5 |
+| R082-mud-sport-twice | 90000 | 18 of 18 |
+| R083-spinda-thrash-own-tempo | 90000 | 8 of 8 |
+| R085-imprison-pressure | 90000 | 12 of 12 |
+| R103a-ai-pursuit-cheri-static | 90000 | 6 of 6 |
+| R103b-ai-pursuit-pecha-poison-point | 90007 | 7 of 7 |
+| R103c-ai-pursuit-rawst-flame-body | 90000 | 6 of 6 |
+| R103g-player-pursuit-cheri-ai-switch-static | 90002 | 15 of 15 |
+
+`R057-beat-up-shedinja.json` is also here but it is a **known failing** stage (0 of 19 states, 7 diff points): the engine gives a Factory Shedinja
+88 max HP, the ROM 1. See `tests/factoryCorpusShedinjaHp.test.ts` and `STATUS.md`, "Box hunt rrh5".
