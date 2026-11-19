@@ -90,7 +90,7 @@ Each member is the lab's full record (species, level, nature, ivs, evs, moves, p
 - An opponent without a `personality` gets a cursor-reachable one with the right nature, ability slot (low bit) and gender (looked up by species id from `species-stats.json`).
 - Species ids are the internal ones (Spinda 308, Slaking 366, Exploud 372, Absol 376, Clefable 36, Snorlax 143, Magikarp 129, Caterpie 10, Shedinja 303).
 - A stall (both sides on Splash) never ends: give the player a damaging move and expect 100+ decisions as the sign of a stall (`prehunt.py` warns).
-- A direct move on a hand-built party is the way to cover a rule no Factory set can reach. Known failing example: `stages/coverage/R057-beat-up-shedinja.json` (the engine's Factory Shedinja has 88 max HP, the ROM's 1).
+- A direct move on a hand-built party is the way to cover a rule no Factory set can reach. Example: `stages/coverage/R057-beat-up-shedinja.json` (a Shedinja, max HP 1 in the ROM; the engine matched only after shd1 gave it max HP 1) and its mirror `stages/shd1-shedinja-player-side.json`.
 
 ## What a staged battle cannot do
 

@@ -1168,8 +1168,8 @@ of 510 over the flagged stats, takes items from the Frontier held-item table and
 gender). Details in `rule-coverage.md`, "Box hunt rrh5". Matched stages (each re-driven from the committed file, N of N, 0 diff points): R103a 6/6, R103b 7/7,
 R103c 6/6, R103g 15/15, R067 5/5, R071 12/12, R072 12/12, R075 13/13, R078 5/5, R082 18/18, R083 8/8, R085 12/12. R103 piece 4 (Mental Herb on infatuation) is class (b).
 
-**ROM difference, not fixed (stop rule): a Factory Shedinja has 88 max HP in the engine, 1 in the ROM.** `R057-beat-up-shedinja` fails at the first state;
-`tests/factoryCorpusShedinjaHp.test.ts` fails (94 vs 1). `src/engine/factoryCorpusParty.ts` needs a Shedinja branch in the max-HP calculation (`pokemon.c`,
-`CalculateMonStats`). The fix is for the next step; then R057 can be promoted and counted (83 of 110).
+**ROM difference, fixed in shd1:** the engine gave a Shedinja 88 max HP, the ROM 1 (`CalculateMonStats`, `pokemon.c:2845`). `src/engine/stats.ts` now has `calculateMaxHp`
+(species 303 gives 1), used by `factoryCorpusParty.ts` and three integration tools. `R057-beat-up-shedinja` matches the ROM 7 of 7 (Scene OFF and ON, 0 diff points,
+`stage.ok` true), so R057 is counted: **83 of 110 covered.** Details in `docs/shd1-shedinja-hp.md`. Set 21 is in no Factory range, so no Factory battle changes (census 0..999, both scenes, 0 changed digests).
 
 **Counts after rrh5: 82 of the 110 covered (73 before); R019, R029, R031, R033, R065 and R103 piece 4 class (b); R069 class (a); 22 left (110 - 82 - 6 already classed).**

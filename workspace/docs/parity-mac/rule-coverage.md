@@ -371,7 +371,7 @@ R064 / R063: 112 and 239 decisions, and 1 in 14 for the AI-Clefable shape, seed 
 
 **Luck hunt day 4 (2026-11-19 day job, promoted at the 2026-11-19 run start; stage files only, no `src/` change): 73 of the 110 covered (66 before).** The day job (`.integration/evidence/luck-hunt/20261119/summary.md`) ran 4,024 seeds (1060000+k) over 14 designs: 7 marker hits, 7 ROM match, 0 ROM differ. Promoted to `stages/coverage/` (`0d2973b40`) and re-driven from the repo file by the run-start nightly replay (`docs/replay-ledger.md`, 94 / 94 stages): R050 Imprison flag (seed 1060396, 34 / 34 states), R064 Transform ends Encore (1061615, 46 / 46), R079 Lock-On then a no-accuracy move (1063089, 14 / 14), R091 Spite on a transformed user (1060620, 25 / 25), R099 Uproar keeps a Yawn drowsy (1061592, 32 / 32), R100 AI Weather Ball under Cloud Nine (1060249, 34 / 34), R101 Weather Ball in sandstorm (1060490, 27 / 27). **No ROM difference.** Still hunted with 0 hits: R040, R058, R063, R078, R082, R096, R110 (466 seeds each, R063 / R099-like odds ~0.003).
 
-**Box hunt rrh5 (2026-11-19): 82 of the 110 covered (73 before; 22 left after the 6 already classed), R103 piece 4 class (b), one ROM difference found (Shedinja max HP, R057 not counted).** The brief
+**Box hunt rrh5 (2026-11-19): 82 of the 110 covered (73 before; 22 left after the 6 already classed), R103 piece 4 class (b), one ROM difference found (Shedinja max HP; fixed in shd1, R057 counted: 83 of 110).** The brief
 named R103, R105 and R108; R105 and R108 were already covered in rrh4 (above), so the step went to R103 and then to the other rules whose only blocker was
 "set-up, not luck". The tool `tools/integration/soundCensusRomReplay.ts` now accepts a `parties` field in a stage (hand-built Mechanic Lab parties for either
 side, so a rule no Factory set can reach becomes a direct-move design). Every stage below ran its marker and matched the ROM to the end (clean re-drive of the
@@ -387,9 +387,9 @@ committed file, `match True`, `stage.ok True`, 0 diff points), all in `stages/co
   R071 Exploud Heal Bell keeps its own status (12 of 12), R072 an all-Soundproof party Heal Bell (12 of 12), R075 Imprison twice (13 of 13), R078 Lock-On then
   Sheer Cold (5 of 5, all four markers ran), R082 Mud Sport twice (18 of 18), R083 Spinda Thrash end vs Own Tempo (8 of 8), R085 Imprison vs Pressure (12 of 12).
   All lab seed 90000.
-- **Found, not counted: R057 (Beat Up on a 1 HP target).** The stage `R057-beat-up-shedinja` runs the marker in the engine but fails the ROM at the first state:
-  the engine builds a Factory Shedinja (set 21) with 88 max HP, the ROM with 1 (`CalculateMonStats` forces `newMaxHP = 1` for `SPECIES_SHEDINJA`;
-  `calculateHpStat` in `factoryCorpusParty.ts:291` has no such branch). Set 21 is a real Level-50 set, so this is reachable in a normal run. Not fixed here; the failing stage
-  and `tests/factoryCorpusShedinjaHp.test.ts` (fails with 94 vs 1) are committed. R057 stays open until the engine is fixed.
+- **R057 (Beat Up on a 1 HP target): covered after the shd1 fix (83 of 110).** The stage `R057-beat-up-shedinja` first failed the ROM at the first state: the engine built a Shedinja
+  (set 21) with 88 max HP, the ROM with 1 (`CalculateMonStats` forces `newMaxHP = 1` for `SPECIES_SHEDINJA`). shd1 ported it (`docs/shd1-shedinja-hp.md`); the stage now matches 7 of 7,
+  0 diff points, `stage.ok` true (Scene OFF and ON). Correction to the rrh5 text: set 21 is in no Factory range (Level 50 starts at set 110, Open at 372), so a Shedinja cannot
+  appear in a real Factory battle; the rule is staged by a hand-built party only.
 - **Judged not stageable (no design built):** R081 (needs -6 on both stats), R056 (all teammates fainted or statused), R061 and R062, R068, R049 (every Ingrain set also
   needs Metronome for the lowering move), R106 (the counter cannot reach 15), R055 and R086 (not tried, time), R104 (needs an Uproar and Effect Spore together, not tried).
