@@ -1675,25 +1675,62 @@ const HPD4_BODY_LEAD_MOVE_IDS: readonly number[] = [49, 82, 111, 205, 301, 69];
  * Thunderbolt, Double-Edge, Quick Attack, Body Slam, Ancient Power, Giga Drain, Ice Beam, Surf, Dig (the attack turn only: the charge turn is shape C),
  * Struggle, Rock Slide, Bubble Beam, Fire Blast, Magical Leaf.
  */
-export const HPD8_SHAPE_A_MOVE_IDS: ReadonlySet<number> = new Set([332, 94, 85, 38, 98, 34, 246, 202, 58, 57, 91, 165, 157, 61, 126, 345, 53, 76, 44, 188, 89, 185, 56, 59]);
+const HPD8_SHAPE_A_MOVE_IDS: ReadonlySet<number> = new Set([332, 94, 85, 38, 98, 34, 246, 202, 58, 57, 91, 165, 157, 61, 126, 345, 53, 76, 44, 188, 89, 185, 56, 59]);
 /**
  * sta5 (docs/aud249-general-anim-sounds.md): the move-inflicted status bodies of sta4 (Flatter 260, Swagger 207, Spore 147, Toxic 92): the rows after the
  * body that put the next command (`stat` / `status`, then the stat or status animation) on the ROM row, net of the 2-row `stat` / `status` command.
  */
 export const STA5_STATUS_BODY_TAIL_ROWS: ReadonlyMap<number, number> = new Map([[260, 4], [207, 5], [147, 0], [92, 7], [95, 0]]);
 /**
+ * lead2 (B1, docs/lead1m-rule-lead-design.md): the nine unaudited bodies the ROM measured as shape A (live + idle = len + 1, gap 4, counter lead = ROM lead):
+ * Double Kick 24 (hit 1: lead 16; hit 2+ has no used-print anchor, so no lead and no tail), Icy Wind 196, Water Pulse 352, Facade 263, Mega Kick 25, Counter 68 (lead 4),
+ * Comet Punch 4 and Doubleslap 3 (hit 1: lead 15), Mega Drain 72.
+ */
+const LEAD2_SHAPE_A_MOVE_IDS: ReadonlySet<number> = new Set([24, 196, 352, 263, 25, 68, 4, 72, 3]);
+/**
  * lse2 (docs/hpd1-hp-hold.md): the no-hit status / stat bodies whose script lead (ROM `exec` rise -> `gAnimScriptActive`) is put in front of the body instead of
  * in the script tail: Leech Seed (lead 36), Cosmic Power (2), Calm Mind (2), Encore (2, turn 2). Their body SEs keep the move-body sound clock (calibrated on a 7-row lead; Encore 3),
  * so the sound clock is moved by `bodyLead - calibrated lead` (`lse2BodySoundAgeShift`).
  */
-export const LSE2_BODY_LEAD_MOVE_IDS: ReadonlySet<number> = new Set([73, 322, 347, 227]);
+const LSE2_BODY_LEAD_MOVE_IDS: ReadonlySet<number> = new Set([73, 322, 347, 227]);
 /** The lead each lse2 body's sound clock was calibrated on (Encore's 220-row body SEs sit 4 rows closer to the print release). */
 const LSE2_SOUND_CLOCK_LEADS: ReadonlyMap<number, number> = new Map([[73, 7], [322, 7], [347, 7], [227, 3]]);
 export function lse2BodySoundAgeShift(moveId: number, bodyLeadFrames: number | undefined): number {
   const calibrated = LSE2_SOUND_CLOCK_LEADS.get(moveId);
   return calibrated !== undefined && (bodyLeadFrames ?? 0) > 0 ? bodyLeadFrames! - calibrated : 0;
 }
-export const BODY_LEAD_AUDITED_MOVE_IDS: ReadonlySet<number> = new Set([...HPD4_BODY_LEAD_MOVE_IDS, ...HPD8_SHAPE_A_MOVE_IDS, ...STA5_STATUS_BODY_TAIL_ROWS.keys(), ...LSE2_BODY_LEAD_MOVE_IDS]);
+/**
+ * lead2 (docs/lead1m-rule-lead-design.md): the move-body lead RULE. A body that matches a rule class presents the kernel's instruction-counter lead as its first
+ * rows (`bodyLeadFrames`); the class says where the rows after the body come from. "shape-a": ROM window = live + idle - 1, gap 4, tail `6 - pre - post`
+ * (`liveMoveHitTailRows`); "status-tail": the sta5 script-tail table; "lse2": the lse2 lead-first status bodies; "lead-table": the hpd4 bodies with explicit tails.
+ * Every consumer asks one of the predicates below instead of testing its own id set, so a batch widens one class.
+ */
+export type BodyLeadRule = "lead-table" | "shape-a" | "status-tail" | "lse2";
+const BODY_LEAD_RULE: ReadonlyMap<number, BodyLeadRule> = new Map<number, BodyLeadRule>([
+  ...HPD4_BODY_LEAD_MOVE_IDS.map((id): [number, BodyLeadRule] => [id, "lead-table"]),
+  ...[...HPD8_SHAPE_A_MOVE_IDS, ...LEAD2_SHAPE_A_MOVE_IDS].map((id): [number, BodyLeadRule] => [id, "shape-a"]),
+  ...[...STA5_STATUS_BODY_TAIL_ROWS.keys()].map((id): [number, BodyLeadRule] => [id, "status-tail"]),
+  ...[...LSE2_BODY_LEAD_MOVE_IDS].map((id): [number, BodyLeadRule] => [id, "lse2"]),
+]);
+/** The body's lead is presented as `bodyLeadFrames` (not carried in `scriptTailRows`). */
+export function bodyLeadRuleApplies(moveId: number): boolean {
+  return BODY_LEAD_RULE.has(moveId);
+}
+/** The rows after the body are the shape-A hit tail `6 - pre - post`. */
+export function bodyHitTailRuleApplies(moveId: number): boolean {
+  return BODY_LEAD_RULE.get(moveId) === "shape-a";
+}
+/** The lead-first body keeps the audited hit-tail / status-tail composition (the render effect's age hold). */
+export function bodyLeadTailCompositionApplies(moveId: number): boolean {
+  const rule = BODY_LEAD_RULE.get(moveId);
+  return rule === "shape-a" || rule === "status-tail";
+}
+export function bodyStatusTailRuleApplies(moveId: number): boolean {
+  return BODY_LEAD_RULE.get(moveId) === "status-tail";
+}
+export function bodyLse2RuleApplies(moveId: number): boolean {
+  return BODY_LEAD_RULE.get(moveId) === "lse2";
+}
 
 function moveAnimationScriptLeadTiming(
   events: readonly BattleKernelSemanticEvent[],
@@ -1713,7 +1750,7 @@ function moveAnimationScriptLeadTiming(
       const waitLead = animation - (used + 1);
       return waitLead > 0 ? { scriptLeadFrames: waitLead } : {};
     }
-    if (presentedSinceUsed === null || !BODY_LEAD_AUDITED_MOVE_IDS.has(moveId) || events[index]!.provenance?.sourceLabel === CHARGE_TURN_SCRIPT) return {};
+    if (presentedSinceUsed === null || !bodyLeadRuleApplies(moveId) || events[index]!.provenance?.sourceLabel === CHARGE_TURN_SCRIPT) return {};
     const lead = animation - (used + 1) - presentedSinceUsed;
     return lead > 0 ? { bodyLeadFrames: lead } : {};
   }
@@ -1765,7 +1802,7 @@ function moveAnimationScriptTailTiming(
   }
   const lead = attackExecution - usedExecution - 1 - presentedSinceUsed;
   if (lead < 0) return {};
-  return { scriptTailRows: nextExecution - attackExecution + 1 + 1 + (BODY_LEAD_AUDITED_MOVE_IDS.has(moveId) ? 0 : lead) };
+  return { scriptTailRows: nextExecution - attackExecution + 1 + 1 + (bodyLeadRuleApplies(moveId) ? 0 : lead) };
 }
 
 /** ont193: the rows presented since the used print's release (only silent-RAM `stat` commands are accepted), else null. */

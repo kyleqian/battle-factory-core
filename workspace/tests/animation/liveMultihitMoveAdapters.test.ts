@@ -124,7 +124,8 @@ describe("live multi-hit ordinary routes", () => {
     expect(bodies).toHaveLength(row.hits);
     expect(requests.map(r => r.turn)).toEqual(Array.from({ length: row.hits }, (_, i) => i));
     for (const [hit, body] of bodies.entries()) {
-      expect(body.ages).toEqual(iu120Ages(row.id, row.ages + row.seGates[hit]!));
+      // lead2 B1: hit 1 carries the lead (the used print anchors it) + hit tail; hits 2+ have no anchor, so no lead and no tail (not served yet).
+      expect(body.ages).toEqual(iu120Ages(row.id, row.ages + row.seGates[hit]!, "player", hit === 0 ? undefined : 0));
       expect(body.adapterActive.every(Boolean)).toBe(true);
     }
     expect(on.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");

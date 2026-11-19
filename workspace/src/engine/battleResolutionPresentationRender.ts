@@ -8,10 +8,9 @@ import type { PresentationRngHost } from "./presentationRngHost.ts";
 import {
   resolveNoMovesLeftMessageLines,
   isWeatherContinuesAnimation, WEATHER_CONTINUES_BODY_ROWS, WEATHER_CONTINUES_LAUNCH_LEAD_ROWS, WEATHER_CONTINUES_MOVE_IDS,
-  HPD8_SHAPE_A_MOVE_IDS,
   STA5_STATUS_BODY_TAIL_ROWS,
   lse2BodySoundAgeShift,
-  LSE2_BODY_LEAD_MOVE_IDS,
+  bodyHitTailRuleApplies, bodyLeadTailCompositionApplies, bodyStatusTailRuleApplies, bodyLse2RuleApplies,
 } from "./battleResolutionPresentation.ts";
 import type { LiveMoveSpriteAllocatorInput, LiveMoveSpriteOrderInput } from "./liveMoveSpriteAllocator.ts";
 import type { LiveMoveBattlerX2Input } from "./liveBattlerX2History.ts";
@@ -1599,7 +1598,7 @@ export function liveMoveHitTailRows(command: Extract<BattleResolutionPresentatio
   if ((command.timing.bodyLeadFrames ?? 0) === 0) return liveSubstituteSwapApplies(request, field) === true ? 0 : LIVE_MOVE_LEADLESS_TAIL_ROWS.get(request.moveId) ?? 0;
   const table = HPD4_BODY_TAIL_ROWS.get(request.moveId) ?? STA5_STATUS_BODY_TAIL_ROWS.get(request.moveId) ?? LSE2_BODY_TAIL_ROWS.get(request.moveId);
   if (table !== undefined) return table;
-  if (!HPD8_SHAPE_A_MOVE_IDS.has(request.moveId) || liveSubstituteSwapApplies(request, field) === true) return 0;
+  if (!bodyHitTailRuleApplies(request.moveId) || liveSubstituteSwapApplies(request, field) === true) return 0;
   const rows = liveMoveUniversalRows(request, field);
   return Math.max(0, HPD8_SHAPE_A_ROWS_AROUND_BODY - rows.pre - rows.post);
 }
@@ -1706,9 +1705,9 @@ export function statsChangeSourceAge(
   // generic age that absorbed the old early start (aud242o Defense Curl windows: SE 175 vs command 172).
   const beforeStat = state.segments[state.segmentIndex]!.commands[state.commandIndex - 2];
   const afterStatBody = previous?.type === "stat" && beforeStat?.type === "move-animation" && (beforeStat.timing.bodyLeadFrames ?? 0) > 0
-    && beforeStat.animation !== undefined && STA5_STATUS_BODY_TAIL_ROWS.has(beforeStat.animation.moveId);
+    && beforeStat.animation !== undefined && bodyStatusTailRuleApplies(beforeStat.animation.moveId);
   const afterBodyLead = previous?.type === "move-animation" && (previous.timing.bodyLeadFrames ?? 0) > 0
-    ? (previous.animation !== undefined && LSE2_BODY_LEAD_MOVE_IDS.has(previous.animation.moveId) ? STATS_CHANGE_AFTER_LSE2_BODY_AGE_SHIFT : STATS_CHANGE_AFTER_BODY_AGE_SHIFT)
+    ? (previous.animation !== undefined && bodyLse2RuleApplies(previous.animation.moveId) ? STATS_CHANGE_AFTER_LSE2_BODY_AGE_SHIFT : STATS_CHANGE_AFTER_BODY_AGE_SHIFT)
     : afterStatBody ? STATS_CHANGE_AFTER_STAT_BODY_AGE_SHIFT : 0;
   const age = state.lifecycle.phaseElapsed - (command.timing.seGateFrames ?? 0) + afterBodyLead;
   if (age < 0 || fieldBattler(currentCommandField(state), command.battler).substituteDoll === true) return null;
@@ -2494,7 +2493,7 @@ export function createBattleResolutionPresentationRenderView(
       effect = Object.freeze({
         type: "move", request: command.animation,
         age: liveMoveUniversalRowAge(state, command.animation, field, seGate, liveMoveScriptTailFrames(command.timing, command.animation, field),
-          ((HPD8_SHAPE_A_MOVE_IDS.has(command.animation.moveId) || STA5_STATUS_BODY_TAIL_ROWS.has(command.animation.moveId)) && (command.timing.bodyLeadFrames ?? 0) > 0) || LIVE_MOVE_LEADLESS_TAIL_ROWS.has(command.animation.moveId)),
+          (bodyLeadTailCompositionApplies(command.animation.moveId) && (command.timing.bodyLeadFrames ?? 0) > 0) || LIVE_MOVE_LEADLESS_TAIL_ROWS.has(command.animation.moveId)),
         ...(lead > 0 && state.lifecycle.phaseElapsed <= pre ? { preActivationRow: true as const } : {}),
         paletteInput: state.liveMovePaletteInput,
         spriteAllocatorInput: state.liveMoveSpriteAllocatorInput,
