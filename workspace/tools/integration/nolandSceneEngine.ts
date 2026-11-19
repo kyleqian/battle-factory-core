@@ -302,7 +302,10 @@ export function romTransitionTableIndex(rom: RomRecording): number | null {
     for (let i = 0; i < 12; i += 1) if (frontierTransitionPresentationForTableIndex(i).transitionId === rom.transitionId) return i;
   }
   const start = rom.frames.find((r) => r !== null && (r.sounds ?? []).some((e) => e.kind === "bgm" && e.id === 471));
-  return start === undefined ? null : ((start.rng >>> 16) % 12);
+  if (start === undefined) return null;
+  // The draw is the frame with the VBlank advance and the Random() together; it is the BGM's frame or the one before it.
+  const draw = [rom.frames[start.f - 1], start].find((r) => r !== undefined && r.draws === 2) ?? start;
+  return (draw.rng >>> 16) % 12;
 }
 
 /** gRngValue on the ROM's battle-BGM frame: the engine's own draw tick (its post-draw state, one VBlank step further when the BGM came a frame after the draw). */
@@ -424,7 +427,7 @@ export function compareScene(rom: RomRecording, rows: readonly EngineRow[], from
   return out;
 }
 
-/** A recording kept as a test fixture: what the compare reads, sounds as {kind, id, player}, the RNG value only on the battle start's frame. */
+/** A recording kept as a test fixture: what the compare reads, sounds as {kind, id, player}, the RNG value only on the battle start's frame (and the frame before it when that is the transition's draw frame). */
 export interface SceneFixture {
   name: string;
   note: string;
@@ -443,7 +446,7 @@ export function writeSceneFixture(rom: RomRecording, path: string, name: string,
     f: r.f, sha: r.sha, draws: r.draws ?? null,
     ...(r.press ? { press: r.press } : {}), ...(r.adv ? { adv: r.adv } : {}),
     ...(r.sounds?.length ? { sounds: r.sounds.map((e) => ({ kind: e.kind, id: e.id, ...(soundKey(e).includes("@") ? { player: soundKey(e).split("@")[1] } : {}) })) } : {}),
-    ...(r.f === bgm ? { rng: r.rng } : {}),
+    ...(r.f === bgm || (bgm !== null && r.f === bgm - 1 && r.draws === 2) ? { rng: r.rng } : {}),
   }));
   const recording = { ...(winStart ? { winStart } : {}), challenge: rom.challenge, scene: rom.scene, gateK: rom.gateK, win: rom.win,
     playerSetIds: rom.playerSetIds, recordStart: rom.recordStart, rngStart: rom.rngStart, frames };
