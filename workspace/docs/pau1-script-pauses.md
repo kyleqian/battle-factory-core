@@ -126,3 +126,37 @@ Presentation timing only: logical outcomes, RNG and kernel event order are uncha
 **Not done: item 3 (Intimidate / Trace switch-in prints)**. Staged battles bypass `initializeFreshFactoryBattle`, so no battle-lab stage reaches the switch-in ability script; it needs a real-route or factoryLegal battle-start stage whose leads carry the ability. Unprobed.
 
 **Open remainder**: ability switch-in prints (item 3); the +3 frame residual at the HJK crash print; the 4-frame-early tail after the Safeguard expiry print; the Rest ON +10 / +19 constant offsets (non-pause, PP text 20 vs ROM 10 in the lab); the failed-Toxic pixel lab; the res60 / res61 residuals; KOFail's 1-frame early menu.
+
+## pau4m: switch-in ability prints (Intimidate / Trace), ROM vs ours (2026-11-19, measurement only, nothing landed)
+
+pau3 item 3 was blocked because staged battles bypass `initializeFreshFactoryBattle`. It is reachable: a `factoryLegal` battle-lab runs the real battle-start intro (entry scripts included) inside its pre-checkpoint route, and the app side reaches the same seam with `beginFactoryRoundBattleStartIntro` (the `factory-arbitrary-intro-*` stage pattern).
+
+**Tooling (kept)**: `tools/integration/sta6mIntroProbe.py` records absolute-frame `main` / script pointer / exec / anim per frame through `lab.prepare` plus the real party records (`lab._party`). Labs `tools/battle-lab/sta6m-{trace,intimp,both}-{off,on}.json` (factoryLegal, challengeNum 2, battleNum 0, `preCheckpointCaptureAllFrames`): `trace` = player Porygon (Trace) vs Magneton lead (set 273 vs [349,353,292], seed 70); `intimp` = player Mightyena (Intimidate) vs the same opponent; `both` = Mightyena (Intimidate) vs Porygon (Trace), trainer 133, seed 9. App stages `sta6m-intro-{trace,intimp,both}-{off,on}` (`tools/compare/appTrace.ts`, real ROM personalities for the player party) and traces `tools/compare/traces/sta6m-intro-*.json` (`preCheckpointFrameOffset` 1178: app frame f = ROM absolute frame f + 1178; 362 idle, A, 637 idle). An opponent-side Intimidate lab was tried and dropped (see Caveats).
+
+### ROM (absolute frames; identical script rows in both scenes, ON is shifted +31 by its send-out animations)
+| script | OFF | ON | note |
+|---|---|---|---|
+| `TraceActivates` (trace lab) | start 1862, `pause SHORT` -> 1894 (32), print exec 1895-1932 (37 frames), `waitmessage LONG` -> 1996 | 1893 / 1925 / 1926-1963 / 2027 | start -> command box 142 frames |
+| `IntimidateActivatesEnd3` (intimp lab) | start 1862, 3 rows, `PauseIntimidateActivates` 32 (1863 -> 1895), 11 rows, stat-change anim (exec 2, anim 1) 1906 -> 1981 (75), print exec 1983-2033 (50), wait -> 2097, loop end 2101 | 1893 / anim 1937 / print 2014 / end 2132 | same offsets from start (+44 anim, +121 print, +239 end); start -> command box 247 |
+| both lab (Intimidate then Trace, battler order) | Intimidate 1848 -> 2086, Trace 2088 -> 2227 (pause 32, print 2121-2163 = 42 frames, wait 64) | identical rows | start -> command box about 386 |
+
+The text box keeps "Go! X!" unchanged through the 32-frame pause and the stat animation (box-change detection: ROM first change 806 = print start in the intimp OFF lab). The Trace print length depends on the text (37 vs 42 frames); `waitmessage LONG` is a constant 64.
+
+### Ours at HEAD
+The app computes the entry events (`src/engine/factoryBattleStart.ts` ~478-534 runs `BattleScript_IntimidateActivatesEnd3` / `BattleScript_TraceActivates`) but never presents them. `battleResolutionPresentation` is null at the first command, the intro goes straight from player release to command-ready, and no frame shows "PORYGON TRACED Foe ...". Command box: app frame 685 (OFF) / 715 (ON) in the trace and intimp labs, 672 in the both lab; the ROM has it at 827 / 858 (trace), 932 / 963 (intimp), about 1058 (both; the 1000-frame capture ends before it). Missing time: Trace +142 (OFF) / +143 (ON), Intimidate +247 / +248, Intimidate + Trace about +386. Exact-RGB matches: trace OFF 354 / 829, intimp OFF 334 / 949, both OFF 261 / 1001, trace ON 278 / 949, intimp ON 234 / 949, both ON 241 / 1001; all the loss is after app frame 684.
+
+The existing `ANCHORLESS_PRE_PRINT_PAUSE_LABELS` mechanism cannot land this: it only adjusts a print inside a `battleResolutionPresentation` segment, and these scripts have no segment at all.
+
+### Proposed landing (not done)
+A battle-start entry-script phase between player-release and command-ready in `factoryBattleStartIntro.ts` / `factoryRoundBattleOrchestrator.ts` (`startCurrentBattle`, which already has `initialized.events`), one block per entry event, in the existing order (Intimidate by battler, then Trace), each starting at the current command-ready frame (ROM 1862 = app 684):
+- Intimidate block (239 frames to the loop end, then +8 to the command box): 3 rows, 32-frame pause, 11 rows, 75-frame stat-change animation (Scene OFF too: the stat animation plays in both scenes), the "X's INTIMIDATE cuts Foe Y's attack!" print through the existing text timing, 64-frame wait, 4 closing rows. Message box stays on "Go! X!" until the print.
+- Trace block: 32-frame pause, the print (37-42 frames by text), 64-frame wait; box shows "Go! X!" through the pause.
+- Scene ON shifts the whole intro by +31 already; blocks are scene-independent.
+- Likely also needed: the Intimidate stat animation is a `B_ANIM_STATS_CHANGE`, which the Scene ON live-body path (`liveBattlerX2Host`, `liveSpriteOrderHost`) already seeds from the battle-start events.
+
+Unmeasured: Sand Stream (Tyranitar sets 860-869 are outside challenge 2's rank-0 range, so a factoryLegal lab cannot reach them), Drizzle / Drought (no such mons in the Factory data), `IntimidatePrevented` (needs a Clear Body / Hyper Cutter foe), opponent-side Intimidate / Trace (see below).
+
+### Caveats
+- The app's generated opponent record differs from the ROM's in personality / ability slot for the same set IDs (seed 70: Magneton 247632950 slot 0 vs ROM 1380988875 slot 1; seed 55: Arbok 345751778 slot 0 = Intimidate vs ROM 358929853 slot 1 = Shed Skin). The set IDs match, the personality draw cursors do not (aud243b recovers the ROM cursors by LCG inversion). So an opponent-side Intimidate lab does not trigger in the ROM, and the Trace text in our events would name Magnet Pull where the ROM says Sturdy. The timing blocks above do not depend on it.
+- In the both lab the ON and OFF oracle intros are frame-identical (Go! box at 502 in both) while the trace / intimp labs differ by 31; unexplained, the ROM script rows are the same either way.
+- Part A and B were measurement only; `src/` and `tests/` are untouched.
