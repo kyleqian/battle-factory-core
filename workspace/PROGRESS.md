@@ -5,6 +5,17 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 2026-11-20 — CAX31 daily run (supervisor, Opus 5.5, 2026-11-19 13:30 -> 2026-11-20 05:30 UTC): IN PROGRESS
+
+- **State (mid-run, 17:35 UTC):** master `90e6aaba1` + docs. Workers: pau5 (ts, mid-battle Intimidate / Trace prints), lead3 (integration, lead1m B2), shd1 (side, Shedinja max HP gameplay fix on
+  the unmerged rrh5 branch `worker/side-20261119-142256`, which carries a deliberately failing test: fold rrh5 + shd1 together, never rrh5 alone). Evidence `.integration/validation/sv-20261119/`.
+- **Run start:** oracles were stale (started before `1bb967f37`): restarted. Luck day 4: 7 / 7 ROM match, promoted (`0d2973b40`, rare rules 66 -> 73 / 110). Nightly replay on `0d2973b40`
+  (= the Mac merge `d75ddd3b0` + promotions): pool **44 / 44** (1,346 states), stages **94 / 94**.
+- **Folded:** pau4 (battle-start Intimidate / Trace entry scripts presented, both scenes; sta6m-intro intimp OFF 334 -> 593 / 949 verified; census 0..99 identical), full suite on `41ccb0884`
+  **16,048 / 0 failed**. lead2 (lead1m B0 rule table, no change; B1 nine bodies get lead + T; Facade ON 22 -> 480 / 1023 verified). btn1 (#223: `\p` / `\l` battle messages wait for a new A / B,
+  both scenes; census 0..199 identical; Tier-1 27 / 27 fail without src, verified). ENGINE_BUILD moved (btn1: `eb-16a7388b0824ca50` at its tip).
+- **Found:** rrh5 (73 -> 82 / 110 rare rules): the ROM gives Shedinja 1 max HP, ours 88 (Frontier set 21, ordinary play) -> shd1.
+
 ## 2026-11-19 — CAX31 daily run (supervisor, Opus 5.5, 2026-11-18 13:30 -> 2026-11-19 05:30 UTC): wind-down: sound timing (hp lengths, script leads, pauses), Knock Off, Lobby exact, lighter download
 
 - **State:** master clean, no workers, no worktrees; no push. **No DEFERRED items.** Final engine tree `26ed71da7` (= `f9cdc9c47`'s src; later commits are tests / docs). ENGINE_BUILD
