@@ -1,0 +1,28 @@
+{
+ "schemaVersion": 1,
+ "mode": "factoryLegal",
+ "profile": "battle-scene-on",
+ "level": 50,
+ "challengeNum": 2,
+ "battleNum": 0,
+ "trainerId": 133,
+ "rentalSwapCount": 0,
+ "playerSetIds": [
+  307,
+  267,
+  268
+ ],
+ "opponentSetIds": [
+  273,
+  356,
+  360
+ ],
+ "seed": 9,
+ "trace": {
+  "segments": [],
+  "captureFrames": [
+   0
+  ]
+ },
+ "preCheckpointCaptureAllFrames": true
+}

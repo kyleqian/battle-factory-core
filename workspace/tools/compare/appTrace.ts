@@ -323,6 +323,52 @@ function generatedBattleStartIntroMagnetonStage(state: EngineState, battleScene:
   };
 }
 
+// sta6m: real battle-start intro with an Intimidate / Trace lead (labs
+// tools/battle-lab/sta6m-{trace,intimp,both}-*.json). Personalities are the
+// ROM's own, read off tools/integration/sta6mIntroProbe.py's `parties`.
+function sta6mIntroStage(
+  state: EngineState,
+  battleScene: "on" | "off",
+  rngValue: number,
+  players: readonly (readonly [number, number])[],
+): EngineState {
+  const playerRentalRecords = players.map(([setId, personality]) =>
+    generatedCommandRecord(setId, FACTORY_LEGAL_CHALLENGE2_INITIAL_RENTAL_FIXED_IV, personality)) as unknown as
+    readonly [FactoryRentalRecord, FactoryRentalRecord, FactoryRentalRecord];
+  let orchestrator = createFactoryRoundBattleOrchestrator({
+    id: "sta6m-intro",
+    battleScene,
+    rngValue,
+    factoryWinStreak: 14,
+    playerTrainerId: 0x89ab_cdef,
+    battleTowerLevel50WinStreak: 14,
+    facilityState: { rentsCount: 0 },
+    rentals: {
+      type: "currentRecords",
+      playerRentalRecords,
+      savedRentalRecords: [
+        generatedCommandRecord(110),
+        generatedCommandRecord(130),
+        generatedCommandRecord(150),
+        generatedCommandRecord(115),
+        generatedCommandRecord(135),
+        generatedCommandRecord(145),
+      ],
+    },
+  });
+  orchestrator = beginFactoryRoundBattleStartIntro(orchestrator);
+  return {
+    ...state,
+    factoryRoundBattleOrchestrator: orchestrator,
+    rngMode: "frontierBattle",
+    rngValue: orchestrator.battle?.rng.value ?? state.rngValue,
+  };
+}
+
+const STA6M_TRACE_PLAYERS = [[273, 406636467], [267, 2659182065], [268, 1729349849]] as const;
+const STA6M_INTIMP_PLAYERS = [[307, 1729349849], [267, 768061940], [268, 1226039574]] as const;
+const STA6M_BOTH_PLAYERS = [[307, 1061100374], [267, 1024485265], [268, 90168024]] as const;
+
 // ISSUES #73: edge-relative scaffold for the LOSS terminal window
 // (docs/terminal-seam-loss-path-ground-truth.md). These battler configs only
 // exist to give createFactoryFullTurnBattleState a valid rules/request
@@ -1794,6 +1840,12 @@ export const APP_STAGES: Readonly<Record<string, AppStage>> = {
   }),
   "battle-command-generated-off": generatedBattleCommandStage,
   "factory-arbitrary-intro-yoshi-off": generatedBattleStartIntroArbitraryStage,
+  "sta6m-intro-trace-off": (state) => sta6mIntroStage(state, "off", 70, STA6M_TRACE_PLAYERS),
+  "sta6m-intro-trace-on": (state) => sta6mIntroStage(state, "on", 70, STA6M_TRACE_PLAYERS),
+  "sta6m-intro-intimp-off": (state) => sta6mIntroStage(state, "off", 70, STA6M_INTIMP_PLAYERS),
+  "sta6m-intro-intimp-on": (state) => sta6mIntroStage(state, "on", 70, STA6M_INTIMP_PLAYERS),
+  "sta6m-intro-both-off": (state) => sta6mIntroStage(state, "off", 9, STA6M_BOTH_PLAYERS),
+  "sta6m-intro-both-on": (state) => sta6mIntroStage(state, "on", 9, STA6M_BOTH_PLAYERS),
   "factory-arbitrary-intro-magneton-off": generatedBattleStartIntroMagnetonStage,
   // aud241a: Scene ON siblings (dev-only; same tuples), for the ROM sound windows on the Scene ON oracle.
   "factory-arbitrary-intro-yoshi-on": (state) => generatedBattleStartIntroArbitraryStage(state, "on"),
@@ -2072,6 +2124,8 @@ export const APP_STAGES: Readonly<Record<string, AppStage>> = {
   "aud250-focuspunch-opponent-on": (state) => aud241bStage(state, "aud250-focuspunch-opponent-on", "on", 12, 50, 69, undefined, false, 264),
   "aud250-leechseed-opponent-on": (state) => aud241bStage(state, "aud250-leechseed-opponent-on", "on", 12, 50, 69, undefined, false, 73),
   "aud242b-flatter-player-on": (state) => aud241bStage(state, "aud242b-flatter-player-on", "on", 50, 12, 260, undefined, false, 69),
+  "sta6m-flatter-player-off": (state) => aud241bStage(state, "sta6m-flatter-player-off", "off", 50, 12, 260, undefined, false, 69),
+  "sta6m-swagger-player-off": (state) => aud241bStage(state, "sta6m-swagger-player-off", "off", 50, 12, 207, undefined, false, 69),
   "aud242b-superpower-player-on": (state) => aud241bStage(state, "aud242b-superpower-player-on", "on", 50, 12, 276, undefined, false, 69),
   "aud242b-dragonrage-opponent-off": (state) => aud241bStage(state, "aud242b-dragonrage-opponent-off", "off", 12, 50, 69, undefined, false, 82),
   // aud242e: sprite and mon-task lifetimes (docs/aud242-move-anim-sounds.md section 9).
