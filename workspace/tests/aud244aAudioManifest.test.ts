@@ -11,8 +11,9 @@ const AUDIO = join(ROOT, "src/assets/gen/audio");
 // Pinned budgets (bytes). The design estimate was cries ~3 MB, SEs < 2 MB; cries come in at ~4.5 MB (flat-spectrum 8-bit sample noise
 // costs ~40 kbps even at the lowest Vorbis quality), see docs/aud244a-recorder-assets.md.
 // aud244b adds the BGM / fanfare set (song, ~1.3 MB at 32768 Hz stereo) and the two looping SEs (in `se`).
+// bgm1 adds bgm-471 (MUS_VS_FRONTIER_BRAIN, +491,169 B song; budgets song 1.85 MB, total 8.4 MB).
 // cry2 adds the 112 cry-task cries (46 `cry-NNN-task.ogg`, +369,586 B).
-const BUDGET = { se: 1_700_000, cry: 5_000_000, song: 1_400_000, total: 8_000_000 };
+const BUDGET = { se: 1_700_000, cry: 5_000_000, song: 1_850_000, total: 8_400_000 };
 
 interface Sound {
   file: string; kind: "se" | "cry" | "bgm" | "fanfare"; via: string; sampleRate: number; channels: number; offsetSamples: number; lengthSamples: number;

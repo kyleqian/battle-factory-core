@@ -12,14 +12,14 @@ const sources = JSON.parse(readFileSync(join(ROOT, "tests/fixtures/data/audio-so
   songLoops: { songId: number; loops: boolean; loopStartTick: number; loopEndTick: number; tempoBpm: [number, number][] }[];
 };
 
-const BGM = [354, 412, 469, 476];
+const BGM = [354, 412, 469, 471, 476];
 const FANFARES = [368, 459, 466];
 const LOOP_SES = ["se:132:63", "se:90:none"];
 // One VBlank = 280896 cycles = 548.625 samples of the 32768 Hz (512-cycle) mixer output grid.
 const SAMPLES_PER_FRAME = 280896 / 512;
 
 describe("aud244b loop points", () => {
-  it("loops exactly the four BGMs and the two looping SEs; fanfares are one-shot", () => {
+  it("loops exactly the five BGMs and the two looping SEs; fanfares are one-shot", () => {
     const looping = Object.entries(manifest.sounds).filter(([, s]) => s.loops).map(([k]) => k).sort();
     expect(looping).toEqual([...BGM.map((id) => `bgm:${id}`), ...LOOP_SES].sort());
     for (const id of FANFARES) {
@@ -60,7 +60,7 @@ describe("aud244b loop points", () => {
   });
 
   it("starts the loop where the ROM's loop starts: loopStart sits at the GOTO-target tick (file time = ROM time minus the trimmed mixer onset, +- 2 frames)", () => {
-    for (const key of ["bgm:354", "bgm:412", "bgm:469", "bgm:476", "se:132:63"]) {
+    for (const key of ["bgm:354", "bgm:412", "bgm:469", "bgm:471", "bgm:476", "se:132:63"]) {
       const s = manifest.sounds[key]!;
       const frames = (s.loopStartTick * 150) / s.tempoBpm;
       expect(Math.abs(s.loopStartSamples - (frames * SAMPLES_PER_FRAME - s.onsetSamples)), key).toBeLessThanOrEqual(2 * SAMPLES_PER_FRAME);

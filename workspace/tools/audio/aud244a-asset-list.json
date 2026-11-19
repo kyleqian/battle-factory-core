@@ -10666,6 +10666,15 @@
   },
   {
    "kind": "bgm",
+   "id": 471,
+   "name": "MUS_VS_FRONTIER_BRAIN",
+   "via": [
+    "PlayBGM"
+   ],
+   "logs": 0
+  },
+  {
+   "kind": "bgm",
    "id": 476,
    "name": "MUS_VS_TRAINER",
    "via": [

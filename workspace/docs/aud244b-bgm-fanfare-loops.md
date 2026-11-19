@@ -107,3 +107,45 @@ npx vitest run tests/aud244aAudioManifest.test.ts tests/aud244bAudioLoops.test.t
 * A seam policy for the four non-exact loops (crossfade at the wrap, section 3). A different option, if the crossfade is judged too audible, is to re-cut with a longer window/passes budget (`loopCut.py --window`, `MAX_PASSES_PER_LOOP`); a seam search
   over more passes only helps if the underlying PSG / tempo phase ever recurs, which was not seen within 6 recorded passes.
 * The aud244a cry rate decision (13379 Hz) is unchanged.
+
+## 8. bgm1: MUS_VS_FRONTIER_BRAIN (471) recorded (ISSUES #224)
+
+A Factory Head battle plays `MUS_VS_FRONTIER_BRAIN` (`GetBattleBGM`: `TRAINER_FRONTIER_BRAIN` / the Factory Head's trainer class gives 471, every other Factory trainer 476). The song was missing from the asset list, so a Brain battle was silent
+(`stats.missing`). Sound asset only: no gameplay, RNG, kernel event or frame timing change, and no `src/` file changed.
+
+**Audit.** Every bgm / fanfare id the engine can emit in a Factory challenge, driven through the real emitters (`initialMusic.ts`, `battleStartSounds.ts`, `battleEndSounds.ts`, `screenSounds.ts`) against the shipped manifest:
+
+| kind | ids | state |
+|---|---|---|
+| bgm | 354 (Brain win), 412 (trainer win), 469 (Lobby / room / draft), 476 (trainer battle) | recorded since aud244b |
+| bgm | 471 (Brain battle) | **was missing, recorded here** |
+| fanfare | 368 MUS_HEAL, 459 MUS_OBTAIN_B_POINTS, 466 MUS_OBTAIN_SYMBOL | recorded since aud244b |
+
+Nothing else was missing. `tests/bgm1EmittedSongsHaveAssets.test.ts` pins it (Tier 1): the emitted set is exactly bgm {354, 412, 469, 471, 476} + fanfare {368, 459, 466}; each has a manifest entry, an Ogg, an AAC twin and a `song-players.json` row;
+every exported `BGM_*` / `MUS_*` song constant under `src/engine` has an entry; and the files that may emit `bgm` / `fanfare` events are pinned (a new emitter file fails the test until its ids are added). It failed for 471 before the recording.
+Still unmeasured, as before: the Gold / Silver Brain songs and the Brain loss end row (`docs/aud241c-battle-end-sounds.md`).
+
+**Recording.** `EXTRA_SONGS` in `tools/audio/audioAssetList.py` adds the song to `aud244a-asset-list.json` (no log reaches it), then the same recorder, loop cut, encoder and AAC step as the other songs (section 6):
+
+| | value |
+|---|---|
+| file | `bgm-471.ogg` 491,169 B (479.6 KiB), `aac/bgm-471.m4a` 769,915 B (751.9 KiB), leadSamples 0 |
+| length / intro / loop body | 3,081,046 samples (94.03 s) = 128,895 (3.93 s) + 2,952,151 (90.09 s, 5381 frames); loopEnd = file length |
+| tempo / ticks | 190 BPM, 6816 ticks per loop, recorded 32,600 frames over 6 passes |
+| seam | max 4827, rms 1250, short-window 3808: not exact, like 412 / 469 / 476, so the player gives it the 7 ms crossfaded overlapping passes |
+
+`song-players.json` already covered 471 (unchanged). Budgets in `aud244aAudioManifest.test.ts` moved (songs 1.4 MB to 1.85 MB, total to 8.4 MB; songs 1,282,655 to 1,773,824 B, Ogg total 8,311,054 B); the loop lists in `aud244bAudioLoops.test.ts` / `aud245AudioPlayer.test.ts` are now five BGMs.
+
+**Reproduce 471 alone** (the recorder is deterministic; `extract:audio` wipes the whole audio dir, so rerun the other two steps after it; `FFMPEG` must be an ffmpeg with the native `aac` encoder, the Playwright one has none):
+```
+$PY tools/audio/soundRecorder.py tools/audio/aud244a-asset-list.json <dir> --kinds bgm --rate 32768 --passes 6 --force   # then loopCut.py as in section 6
+npm run extract:audio -- --raw <aud244a raw dir>
+npm run extract:audio-song-players
+FFMPEG=<ffmpeg with aac> npm run extract:audio-aac      # ~3 min, run in the foreground
+```
+Everything except 471 comes back byte-identical.
+
+**Browser check** (`tools/browser/bgmBrainCheck.mjs`, `npm run build` first, `POKEBENCH_BROWSER_DIR` = a dir with Playwright; Ogg and `--format aac`). Headless Chromium cannot be heard, so it reads the audio graph instead: it loads the built `player-*.js` chunk with the shipped files,
+pushes the Brain battle's events as the real emitters produce them (`stop 469`, `bgm 471` at frame P, `fade 471 speed 5`, `bgm 469`) in real time, and taps `AudioContext` (source `start` / `stop` args, gain ramps, an analyser on the destination). Passed in Ogg and AAC:
+the 471 file is fetched and decodes to 94.03 s, plays from file offset 0 (a late file load starts it at the matching offset, `stats.late`), the destination carries signal; at 90.09 s the second pass starts at loopStart - 7 ms, 7 ms before the loop end (crossfade), and the third pass one loop period later, no silent
+analyser window at the wrap; the result fade is one linear ramp to 0 ending 1.305 s after the event (16 x 5 frames = 1.34 s), silent afterwards; with the full forfeit end the 469 song replaces 471 and both 471 sources are stopped by the time 469 starts. This is an audio-graph assertion, not a listening test.

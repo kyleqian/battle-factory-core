@@ -13,12 +13,12 @@
  "cryPackGapSamples": 1024,
  "note": "Cries are packed per species (NORMAL, WEAK, FAINT) in one mono file, and the cry-task modes (ROAR_1, ROAR_2, HIGH_PITCH, ECHO_START, ECHO_END; only species that can use Roar / Howl / Hyper Voice) in a second one, cry-NNN-task.ogg; a sound is samples [offsetSamples, offsetSamples + lengthSamples) of its file. SEs are one stereo file per (id, pan). Leading/trailing near-silence is trimmed; onsetSamples is the trimmed ROM mixer latency at the file's sampleRate. aud244b: BGM (bgm:<song>), fanfares (fanfare:<song>) and the two looping SEs (se:90:none, se:132:63) are stereo at sampleRates.song. A sound with loops=true plays samples [0, loopEndSamples) once and then repeats [loopStartSamples, loopEndSamples) until stopped; lengthSamples === loopEndSamples. Fanfares are one-shot (loops=false). seam.* is the measured sample difference between the audio after the wrap and the audio after the loop start (see docs/aud244b-bgm-fanfare-loops.md).",
  "totals": {
-  "sounds": 1430,
-  "files": 612,
+  "sounds": 1431,
+  "files": 613,
   "seBytes": 1618342,
   "cryBytes": 4918888,
-  "songBytes": 1282655,
-  "bytes": 7819885
+  "songBytes": 1773824,
+  "bytes": 8311054
  },
  "excluded": [],
  "sounds": {
@@ -119,6 +119,39 @@
     "bodyRms": 3048,
     "sourcePass": 2,
     "nominalEndShift": 1
+   }
+  },
+  "bgm:471": {
+   "file": "bgm-471.ogg",
+   "kind": "bgm",
+   "via": "PlayBGM",
+   "sampleRate": 32768,
+   "channels": 2,
+   "offsetSamples": 0,
+   "lengthSamples": 3081046,
+   "lengthFrames": null,
+   "onsetSamples": 1129,
+   "peak": 17756,
+   "rms": 3226.56,
+   "id": 471,
+   "name": "MUS_VS_FRONTIER_BRAIN",
+   "loops": true,
+   "loopStartSamples": 128895,
+   "loopEndSamples": 3081046,
+   "loopPasses": 1,
+   "loopStartTick": 300,
+   "loopEndTick": 7116,
+   "tempoBpm": 190,
+   "seam": {
+    "windowSamples": 8192,
+    "maxAbsDiff": 4827,
+    "rmsDiff": 1250.15,
+    "shortMaxAbsDiff": 3808,
+    "shortRmsDiff": 1417.67,
+    "junctionMaxAbsDiff": 16968,
+    "bodyRms": 3208.2,
+    "sourcePass": 1,
+    "nominalEndShift": -1
    }
   },
   "bgm:476": {
@@ -23020,6 +23053,10 @@
    "bytes": 403728,
    "sha256": "dc7e3fd09f8ccda0fb9ca4b44fb5087c1879b964ce7aab6764446006113ce266"
   },
+  "bgm-471.ogg": {
+   "bytes": 491169,
+   "sha256": "2d7d751548c89c31128abe1f7f59c90b01c78200053db016743684e922abb4b1"
+  },
   "bgm-476.ogg": {
    "bytes": 467847,
    "sha256": "8cbf2b4888b8391a6830902bfd51e67e3097146ab43bae303475b120fe97eed5"
@@ -25475,11 +25512,11 @@
    "song": 64000
   },
   "totals": {
-   "files": 612,
+   "files": 613,
    "seBytes": 1238605,
    "cryBytes": 4553498,
-   "songBytes": 1899681,
-   "bytes": 7691784
+   "songBytes": 2669596,
+   "bytes": 8461699
   },
   "files": {
    "aac/bgm-354.m4a": {
@@ -25495,6 +25532,11 @@
    "aac/bgm-469.m4a": {
     "bytes": 536237,
     "sha256": "d750dcfb052a49c2edb8edf161deb998500223b11962eaeb6c4e348cc1a2a87d",
+    "leadSamples": 0
+   },
+   "aac/bgm-471.m4a": {
+    "bytes": 769915,
+    "sha256": "1be381ee26ae0410d62f3dde03992ffb756b069b7efbf73c5e8bf7c8edd20ecc",
     "leadSamples": 0
    },
    "aac/bgm-476.m4a": {
