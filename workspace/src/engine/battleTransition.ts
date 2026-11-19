@@ -97,6 +97,7 @@ import { blendComponentToBlack } from "./paletteFade.ts";
 import type { RgbColor } from "./bg.ts";
 import { GBA_SINE_TABLE_256 } from "./battleMenu.ts";
 import { pickFrontierTransition } from "./opponentGen.ts";
+import { applySquares, type FrontierSquaresTransition } from "./battleTransitionSquares.ts";
 
 import circlesAsset from "../assets/gen/battle-transition-frontier-circles.json" with { type: "json" };
 import logoAsset from "../assets/gen/battle-transition-frontier-logo.json" with { type: "json" };
@@ -212,7 +213,8 @@ export type FrontierCircleTransition =
   | "asymmetricSpiral"
   | "symmetricSpiral"
   | "symmetricSpiralInSeq";
-export type FrontierTransitionRenderKind = FrontierCircleTransition | "logoWave";
+export type FrontierTransitionRenderKind = FrontierCircleTransition | FrontierSquaresTransition | "logoWave";
+export type { FrontierSquaresTransition };
 
 /** te (settled-phase elapsed) at which the corresponding trace tick (843+te) begins - named per the phase they gate. */
 const FLICKER_START_TE = 28; // trace tick 871
@@ -269,6 +271,7 @@ const LOGO_WAVE_FADE_FIRST_MAIN_AGE = 101;
  */
 export function frontierTransitionFlickerStartTe(transition: FrontierTransitionRenderKind): number {
   if (transition === "logoWave") return LOGO_WAVE_FLICKER_START_TE;
+  if (isSquaresKind(transition)) return FLICKER_START_TE;
   return transition === "asymmetricSpiralInSeq" ? ASYMMETRIC_SEQ_FLICKER_START_TE : FLICKER_START_TE;
 }
 
@@ -357,6 +360,8 @@ export function frontierTransitionRenderKind(
   fallback: FrontierCircleTransition,
 ): FrontierTransitionRenderKind {
   if (presentation?.transitionId === 30) return "logoWave";
+  if (presentation?.transitionId === 31) return "squares";
+  if (presentation?.transitionId === 32) return "squaresScroll";
   if (presentation?.transitionId === 34) return "circlesMeet";
   if (presentation?.transitionId === 35) return "circlesCross";
   if (presentation?.transitionId === 36) return "asymmetricSpiral";
@@ -724,11 +729,18 @@ export function exitFadeY(te: number, transition: FrontierCircleTransition = "ci
   return Math.min(16, 3 * step);
 }
 
+export function isSquaresKind(transition: FrontierTransitionRenderKind): transition is FrontierSquaresTransition {
+  return transition === "squares" || transition === "squaresScroll";
+}
+
+/** The squares families black the room out in their own BlendPalettes (battleTransitionSquares.ts), not through an exit fade. */
 export function frontierTransitionBgFadeY(te: number, transition: FrontierTransitionRenderKind): number {
+  if (isSquaresKind(transition)) return 0;
   return transition === "logoWave" ? logoWaveBgFadeY(te) : exitFadeY(te, transition);
 }
 
 export function frontierTransitionObjFadeY(te: number, transition: FrontierTransitionRenderKind): number {
+  if (isSquaresKind(transition)) return 0;
   return transition === "logoWave" ? logoWaveObjFadeY(te) : exitFadeY(te - 1, transition);
 }
 
@@ -890,7 +902,7 @@ export function applyBattleTransitionOverlay(
 ): void {
   const grayY = transition === "logoWave"
     ? logoWaveGrayFlickerY(te)
-    : grayFlickerY(te, transition);
+    : grayFlickerY(te, isSquaresKind(transition) ? "circlesMeet" : transition);
   if (grayY > 0) {
     for (let i = 0; i < fb.length; i += 4) {
       fb[i] = blendComponentToGray(fb[i]!, grayY);
@@ -900,6 +912,10 @@ export function applyBattleTransitionOverlay(
   }
   if (transition === "logoWave") {
     applyLogoWave(fb, te);
+    return;
+  }
+  if (isSquaresKind(transition)) {
+    applySquares(fb, te, transition);
     return;
   }
   if (MORE_CIRCLE_KINDS[transition as FrontierCircleTransition]) {

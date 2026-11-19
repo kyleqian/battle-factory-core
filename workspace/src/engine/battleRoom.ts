@@ -67,7 +67,8 @@
 
 import { FADE_IN } from "./paletteFade.ts";
 import type { FactoryTrainerPresentation } from "./factoryTrainerPresentation.ts";
-import { frontierCircleExitFadeStartTe, frontierTransitionRenderKind, type FrontierTransitionPresentation } from "./battleTransition.ts";
+import { frontierCircleExitFadeStartTe, frontierTransitionRenderKind, isSquaresKind, type FrontierTransitionPresentation } from "./battleTransition.ts";
+import { squaresIntroHandoffTe } from "./battleTransitionSquares.ts";
 import type { BattleOpponent } from "./battleScenario.ts";
 import walkupScript from "../data/gen/factory-brain-walkup-script.json" with { type: "json" };
 
@@ -1000,7 +1001,9 @@ export function brainBattleTransitionTe(state: BattleRoomState): number {
 export const BRAIN_BATTLE_START_AFTER_EXIT_FADE = 20;
 export function brainBattleIntroHandoffTe(state: BattleRoomState): number {
   const kind = frontierTransitionRenderKind(state.transitionPresentation, "circlesMeet");
-  return kind === "logoWave" ? BATTLE_2_SCENE_HANDOFF_ELAPSED : frontierCircleExitFadeStartTe(kind) + BRAIN_BATTLE_START_AFTER_EXIT_FADE;
+  if (kind === "logoWave") return BATTLE_2_SCENE_HANDOFF_ELAPSED;
+  if (isSquaresKind(kind)) return squaresIntroHandoffTe(kind);
+  return frontierCircleExitFadeStartTe(kind) + BRAIN_BATTLE_START_AFTER_EXIT_FADE;
 }
 
 /** Frames from the movement settling ("brainSettled" elapsed 0) to the first message's empty box. */
