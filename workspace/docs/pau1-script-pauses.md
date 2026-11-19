@@ -160,3 +160,28 @@ Unmeasured: Sand Stream (Tyranitar sets 860-869 are outside challenge 2's rank-0
 - The app's generated opponent record differs from the ROM's in personality / ability slot for the same set IDs (seed 70: Magneton 247632950 slot 0 vs ROM 1380988875 slot 1; seed 55: Arbok 345751778 slot 0 = Intimidate vs ROM 358929853 slot 1 = Shed Skin). The set IDs match, the personality draw cursors do not (aud243b recovers the ROM cursors by LCG inversion). So an opponent-side Intimidate lab does not trigger in the ROM, and the Trace text in our events would name Magnet Pull where the ROM says Sturdy. The timing blocks above do not depend on it.
 - In the both lab the ON and OFF oracle intros are frame-identical (Go! box at 502 in both) while the trace / intimp labs differ by 31; unexplained, the ROM script rows are the same either way.
 - Part A and B were measurement only; `src/` and `tests/` are untouched.
+
+## pau4
+
+Landed: the battle-start entry scripts (Intimidate / Trace, `BattleScript_IntimidateActivatesEnd3` / `BattleScript_TraceActivates`) are presented between the player release and the first action menu, in both scenes. Presentation only: kernel events, RNG and the census `eventsDigest` are unchanged (census seeds 0..99, both scenes, base ab978bbcf vs final: 100 / 100 identical battles, 31,507 ON / 30,730 OFF commands identical; T1 sound extra / missing / known-offset 0 / 0 / 0 in both arms).
+
+### Design
+- `initializeFreshFactoryBattle` returns `entryScripts` (label, kernel `rows`, events) per script, enriched presentation-side (scripting / target battler, ability and traced-mon substitutions).
+- `src/engine/factoryBattleStartEntry.ts` builds a synthetic resolution: the "Go! X!" box, then each script's ordinary `projectBattleResolutionCommands` (no turn-end), and a schedule timed from the kernel rows: a command's lead is its event's `instructionExecution`, a stat row runs to its STATS_CHANGE animation's exec (Intimidate: exec 41 -> 44), the last print is extended by the script's closing rows (`rows - lastMsgExec - 1 - hold`: Trace 0, Intimidate 4) plus `ENTRY_SCRIPT_END_HELD_ROWS` = 3, and `ENTRY_SCRIPT_END_BLANK_ROWS` = 6 (the next-command handoff's blank box) precede the menu. Scripts after the first start `ENTRY_SCRIPT_GAP_ROWS` = 2 rows later. No per-trace constants.
+- The phase lives in `battleStartIntro.entry` (the settled command waits inside it); `core.ts` draws it through `renderBattleResolutionPresentation` (the live view in Scene ON, the static view in Scene OFF), so the stat animation takes the existing path.
+- Tier-1: `tests/pau4EntryScripts.test.ts` (fails without the change).
+
+### Matched frames (exact RGB, `npm run compare -- sta6m-intro-* --summary`)
+| trace | before | after |
+|---|---|---|
+| trace OFF | 354 / 829 | 417 / 829 (497 with the ROM's Sturdy text) |
+| intimp OFF | 334 / 949 | 593 / 949 |
+| both OFF | 261 / 1001 | 444 / 1001 |
+| trace ON | 278 / 949 | 307 / 949 |
+| intimp ON | 234 / 949 | 395 / 1001 |
+| both ON | 241 / 1001 | 424 / 1001 |
+
+Residual: (1) the opponent personality caveat above: the app's Magneton traces Magnet Pull where the ROM prints Sturdy, so the trace text frames differ (about 74 frames in trace OFF, the print is 5 frames different in length); (2) intimp OFF frames 684-932 match exactly, the leftovers are 933-934 / 943 on the opponent sprite right after the menu appears (idle x2 phase); (3) Scene ON: the intro region before 684 differs in ON already (baseline, 28-681), the stat animation plays but its opponent-tint sub-phase is offset (766-822, about 700 px per frame, the live palette / x2 host inputs are not seeded at battle start), and 683-696 are the player sprite settling; (4) the intimp ON capture now shows 1001 frames in the summary line because the ON capture window is longer than the 949 baseline reported earlier.
+
+### Part B (not done): mid-battle switch-in / faint replacement
+The same prints are missing after a faint replacement or a voluntary switch (the switch-in script's events reach the resolution as the existing `switch-in` commands, which present no entry-ability rows). Needed: one ROM lab (an Intimidate send-in after a faint, `overrides.parties`) to measure the rows from the send-in's end to the next menu, then the same row-timed projection appended to the `switch-in` command. Out of scope here: #222 switch / send-in animation timing.
