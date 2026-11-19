@@ -97,7 +97,7 @@ import { blendComponentToBlack } from "./paletteFade.ts";
 import type { RgbColor } from "./bg.ts";
 import { GBA_SINE_TABLE_256 } from "./battleMenu.ts";
 import { pickFrontierTransition } from "./opponentGen.ts";
-import { applySquares, type FrontierSquaresTransition } from "./battleTransitionSquares.ts";
+import { applySquares, SQUARES_SCROLL_DIRECTIONS, squaresScrollDirectionIndex, type FrontierSquaresTransition } from "./battleTransitionSquares.ts";
 
 import circlesAsset from "../assets/gen/battle-transition-frontier-circles.json" with { type: "json" };
 import logoAsset from "../assets/gen/battle-transition-frontier-logo.json" with { type: "json" };
@@ -147,6 +147,8 @@ export interface FrontierTransitionPresentation {
   readonly transitionName: string;
   readonly family: string;
   readonly raw: number;
+  /** gRngValue right after the draw (SQUARES_SCROLL reads its direction from the stream that follows); absent where no draw backs the receipt. */
+  readonly rngAfterDraw?: number;
 }
 
 /**
@@ -168,6 +170,7 @@ export function selectFrontierTransition(rngValue: number): {
       transitionName: entry.name,
       family: entry.family,
       raw: selected.raw,
+      rngAfterDraw: selected.rngValue,
     }),
   };
 }
@@ -190,6 +193,7 @@ export function selectFrontierTransition(rngValue: number): {
  */
 export function frontierTransitionPresentationForTableIndex(
   tableIndex: number,
+  rngAfterDraw?: number,
 ): FrontierTransitionPresentation {
   const entry = transitionMeta.table[tableIndex];
   if (entry === undefined) {
@@ -201,6 +205,7 @@ export function frontierTransitionPresentationForTableIndex(
     transitionName: entry.name,
     family: entry.family,
     raw: entry.id,
+    ...(rngAfterDraw === undefined ? {} : { rngAfterDraw }),
   });
 }
 
@@ -899,6 +904,7 @@ export function applyBattleTransitionOverlay(
   fb: Uint8Array,
   te: number,
   transition: FrontierTransitionRenderKind = "circlesMeet",
+  presentation?: FrontierTransitionPresentation,
 ): void {
   const grayY = transition === "logoWave"
     ? logoWaveGrayFlickerY(te)
@@ -915,7 +921,10 @@ export function applyBattleTransitionOverlay(
     return;
   }
   if (isSquaresKind(transition)) {
-    applySquares(fb, te, transition);
+    const direction = transition === "squaresScroll" && presentation?.rngAfterDraw !== undefined
+      ? SQUARES_SCROLL_DIRECTIONS[squaresScrollDirectionIndex(presentation.rngAfterDraw)]
+      : undefined;
+    applySquares(fb, te, transition, direction);
     return;
   }
   if (MORE_CIRCLE_KINDS[transition as FrontierCircleTransition]) {

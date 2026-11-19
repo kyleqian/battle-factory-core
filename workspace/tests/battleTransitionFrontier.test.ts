@@ -217,6 +217,7 @@ describe("source-owned Frontier transition selection", () => {
         transitionName: "B_TRANSITION_FRONTIER_LOGO_WAVE",
         family: "logoWave",
         raw: 20_473,
+        rngAfterDraw: 1_341_727_304,
       },
     });
     expect(frontierTransitionRenderKind(logoWave.presentation, "circlesMeet"))

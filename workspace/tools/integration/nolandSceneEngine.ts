@@ -305,6 +305,12 @@ export function romTransitionTableIndex(rom: RomRecording): number | null {
   return start === undefined ? null : ((start.rng >>> 16) % 12);
 }
 
+/** gRngValue on the ROM's battle-BGM frame: the engine's own draw tick (its post-draw state, one VBlank step further when the BGM came a frame after the draw). */
+export function romDrawRng(rom: RomRecording): number | undefined {
+  const start = rom.frames.find((r) => r !== null && (r.sounds ?? []).some((e) => e.kind === "bgm" && e.id === 471));
+  return start?.rng;
+}
+
 export const engineTransitions: { tableIndex: number; name: string }[] = [];
 /** The ROM's pause from the box gone to the battle start (Noland's party build) and the engine's, when both reached it. */
 export const pauses: { rom: number | null; engine: number } = { rom: null, engine: BRAIN_BATTLE_TRANSITION_START_ELAPSED };
@@ -372,7 +378,7 @@ export function driveEngine(rom: RomRecording, frames: number, gates: boolean, d
     if (room?.frontierBrainWalkup && room.transitionPresentation !== undefined && romTransition !== null
       && room.transitionPresentation.tableIndex !== romTransition) {
       engineTransitions.push({ tableIndex: room.transitionPresentation.tableIndex, name: room.transitionPresentation.transitionName });
-      state = { ...state, battleRoom: { ...room, transitionPresentation: frontierTransitionPresentationForTableIndex(romTransition) } };
+      state = { ...state, battleRoom: { ...room, transitionPresentation: frontierTransitionPresentationForTableIndex(romTransition, romDrawRng(rom)) } };
     } else if (room?.frontierBrainWalkup && room.transitionPresentation !== undefined && engineTransitions.length === 0) {
       engineTransitions.push({ tableIndex: room.transitionPresentation.tableIndex, name: room.transitionPresentation.transitionName });
     }

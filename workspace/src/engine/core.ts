@@ -3273,7 +3273,7 @@ function renderBattleRoomState(state: EngineState): Uint8Array {
     const objY = transition !== null ? frontierTransitionObjFadeY(transitionElapsed, transition) : objFadeY(fadeElapsed, FADE_IN);
     const fb = createFramebuffer();
     renderBattleRoomBrainEntranceScene(fb, b, bgY, objY);
-    if (transition !== null) applyBattleTransitionOverlay(fb, transitionElapsed, transition);
+    if (transition !== null) applyBattleTransitionOverlay(fb, transitionElapsed, transition, b.transitionPresentation);
     return fb;
   }
   const fallbackTransition = b.encounter === "jenson"
@@ -3302,7 +3302,7 @@ function renderBattleRoomState(state: EngineState): Uint8Array {
   }
   const fb = createFramebuffer();
   renderBattleRoomEntryScene(fb, step, sceneElapsed, bgY, objY, msgboxVisual(b), b);
-  if (b.phase === "settled") applyBattleTransitionOverlay(fb, b.elapsed, transition);
+  if (b.phase === "settled") applyBattleTransitionOverlay(fb, b.elapsed, transition, b.transitionPresentation);
   return fb;
 }
 

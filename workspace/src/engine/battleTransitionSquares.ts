@@ -8,6 +8,7 @@
  * after its last callback. Measured against the ROM (seeds 1 and 18).
  */
 import squaresAsset from "../data/gen/battle-transition-frontier-squares.json" with { type: "json" };
+import { advanceRngValue } from "./rng.ts";
 
 export type FrontierSquaresTransition = "squares" | "squaresScroll";
 
@@ -21,8 +22,13 @@ const SHRINK_DELAY = 10;
 const SHRINK_CALLBACKS = 1 + SHRINK_DELAY + 4 * (SHRINK_DELAY + 1);
 const SQUARES_END_CALLBACK = 1 + NUM_SQUARES + SHRINK_CALLBACKS - 1;
 const SCROLL_POSITIONS = squaresAsset.scrollPositions;
-/** Init, Draw x64, SetBlack, Erase x64, End. */
-const SCROLL_END_CALLBACK = 1 + SCROLL_POSITIONS.length + 1 + SCROLL_POSITIONS.length;
+/** The task's last callback on the ROM-measured clock: the ROM sees it gone on te 207 (Init, Draw x64, SetBlack, Erase x64 is 130; End shows with the last Erase's frame). */
+const SCROLL_END_CALLBACK = 1 + SCROLL_POSITIONS.length + 1 + SCROLL_POSITIONS.length - 1;
+/**
+ * Task_ScrollBg's BG0 offsets are written by the task itself, mid-logic, and on five frames of the ROM's run the write lands a frame late
+ * (the offsets show the previous step for one frame, the next step arrives on time): `done` values measured on both scenes, seed 18.
+ */
+const SCROLL_LATE_STEP_DONE = new Set([37, 65, 75, 113, 129]);
 /** Frames from the task's end to CB2_InitBattle's handoff on the engine's clock (the circle families: BRAIN_BATTLE_START_AFTER_EXIT_FADE less the 17 their fade takes after the task ends). */
 const HANDOFF_AFTER_END = 3;
 /**
@@ -39,6 +45,20 @@ const SHRINK_TILESETS: TilesetKey[] = ["emptyBg", "shrink1", "shrink2"];
 export type SquaresScrollDirection = readonly [dx: number, dy: number];
 /** Random() % 4 in FrontierSquaresScroll_Init (battle_transition.c:4690-4708). */
 export const SQUARES_SCROLL_DIRECTIONS: readonly SquaresScrollDirection[] = [[1, 1], [-1, -1], [1, -1], [-1, 1]];
+
+/**
+ * gRngValue steps from the transition draw's own post-state to the Random() of FrontierSquaresScroll_Init: the draw frame is followed by 49
+ * plain frames (one VBlank advance each, the room is overworld), then the Init frame's VBlank advance and its Random() call (seeds 18/21/23
+ * on the ROM, ids 32). The task clock is anchored to the battle BGM, which came one frame after the draw on some seeds (21, 23): the Init was
+ * then one frame later too, so a caller that knows the BGM lag passes the draw's state advanced by it.
+ */
+const SCROLL_INIT_RNG_STEPS = 51;
+
+export function squaresScrollDirectionIndex(rngAfterDraw: number): number {
+  let v = rngAfterDraw >>> 0;
+  for (let i = 0; i < SCROLL_INIT_RNG_STEPS; i += 1) v = advanceRngValue(v);
+  return (v >>> 16) % 4;
+}
 
 export interface SquaresState {
   /** 32x32 tilemap entries: tile number, palette (0 = the room's palette 0, 15 = the squares' palette). */
@@ -70,11 +90,9 @@ export function squaresIntroHandoffTe(kind: FrontierSquaresTransition): number {
 function fillRect(s: SquaresState, x0: number, y0: number, w: number, h: number, tile: number, pal: number): void {
   for (let y = y0; y < y0 + h; y += 1) {
     for (let x = x0; x < x0 + w; x += 1) {
-      const i = y * 32 + x;
-      if (i >= 0 && i < 1024) {
-        s.tile[i] = tile;
-        s.pal[i] = pal;
-      }
+      const i = (y & 31) * 32 + (x & 31);
+      s.tile[i] = tile;
+      s.pal[i] = pal;
     }
   }
 }
@@ -83,17 +101,15 @@ function drawSquare(s: SquaresState, x0: number, y0: number, pal: number): void 
   const map = squaresAsset.tilemap;
   for (let y = 0; y < SQUARE_SIZE; y += 1) {
     for (let x = 0; x < SQUARE_SIZE; x += 1) {
-      const i = (y0 + y) * 32 + x0 + x;
-      if (i >= 0 && i < 1024) {
-        s.tile[i] = map.entries[y * map.width + x]!.tile;
-        s.pal[i] = pal;
-      }
+      const i = ((y0 + y) & 31) * 32 + ((x0 + x) & 31);
+      s.tile[i] = map.entries[y * map.width + x]!.tile;
+      s.pal[i] = pal;
     }
   }
 }
 
 /** The BG0 state after the task callbacks `0 .. done - 1` have run (done = te - SQUARES_INIT_TE + 1 for the picture shown on `te`). */
-export function squaresState(done: number, kind: FrontierSquaresTransition, direction: SquaresScrollDirection = SQUARES_SCROLL_DIRECTIONS[0]!): SquaresState {
+export function squaresState(done: number, kind: FrontierSquaresTransition, direction: SquaresScrollDirection): SquaresState {
   const s: SquaresState = { tile: new Uint8Array(1024), pal: new Uint8Array(1024), tileset: "filledBg", tilesetAbove: "filledBg", tearRow: 0, innerBlack: false, roomBlack: false, ended: false, scrollV: 0, scrollH: 0 };
   if (done <= 0) return s;
   const finish = () => {
@@ -141,7 +157,7 @@ export function squaresState(done: number, kind: FrontierSquaresTransition, dire
     fillRect(s, SQUARE_SIZE * Math.floor(pos / (PER_ROW + 1)) + MARGIN_SIZE, SQUARE_SIZE * (pos % (PER_ROW + 1)), SQUARE_SIZE, SQUARE_SIZE, 1, 15);
   }
   const scrollUpdates = Math.floor(Math.max(0, Math.min(done, SCROLL_END_CALLBACK) - 1) / 2);
-  const steps = Math.max(0, scrollUpdates - 1);
+  const steps = scrollUpdates - (SCROLL_LATE_STEP_DONE.has(done) ? 1 : 0);
   // gBattle_BG0_X feeds BG0VOFS and gBattle_BG0_Y BG0HOFS (battle_transition.c:4673-4675).
   s.scrollV = steps * direction[0];
   s.scrollH = steps * direction[1];
@@ -154,7 +170,7 @@ export function squaresState(done: number, kind: FrontierSquaresTransition, dire
 }
 
 /** Draws BG0 over the room (already blacked out by the caller's fade when `roomBlack`). */
-export function applySquares(fb: Uint8Array, te: number, kind: FrontierSquaresTransition, direction?: SquaresScrollDirection): void {
+export function applySquares(fb: Uint8Array, te: number, kind: FrontierSquaresTransition, direction: SquaresScrollDirection = SQUARES_SCROLL_DIRECTIONS[0]!): void {
   const s = squaresState(te - SQUARES_INIT_TE + 1, kind, direction);
   if (s.roomBlack) {
     for (let i = 0; i < fb.length; i += 4) {
