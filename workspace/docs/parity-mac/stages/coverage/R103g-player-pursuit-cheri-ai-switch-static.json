@@ -1,0 +1,234 @@
+{
+ "name": "R103g-player-pursuit-cheri-ai-switch-static",
+ "rules": [
+  "R103"
+ ],
+ "why": "Challenge 7, trainer 200, hand-built Mechanic Lab parties. The player's Fearow (Pursuit, Water Gun, Cheri Berry) hits the opponent's Static Manectric with Water Gun in turn 1; the AI, which holds a Water Absorb Vaporeon, may then switch Manectric out (FindMonThatAbsorbsOpponentsMove, battle_ai_switch_items.c:119-215) and the player's Pursuit hits the switch. Static (1 in 3) paralyses Fearow inside Pursuit's moveendfromto, which skips the move-end item step; HandleFaintedMonActions state 6 then runs ItemBattleEffects(ITEMEFFECT_NORMAL, 0, TRUE) for the player's lead (battle_util.c:1958-1962) and the Cheri Berry cures it.",
+ "seed": 90002,
+ "challengeNum": 7,
+ "battleNum": 0,
+ "trainerId": 200,
+ "playerSetIds": [
+  429,
+  404,
+  735
+ ],
+ "opponentSetIds": [
+  813,
+  716,
+  721
+ ],
+ "parties": {
+  "player": [
+   {
+    "species": 22,
+    "level": 50,
+    "nature": 0,
+    "ivs": {
+     "hp": 31,
+     "attack": 31,
+     "defense": 31,
+     "speed": 31,
+     "spAttack": 31,
+     "spDefense": 31
+    },
+    "evs": {
+     "hp": 255,
+     "attack": 255,
+     "defense": 0,
+     "speed": 0,
+     "spAttack": 0,
+     "spDefense": 0
+    },
+    "moves": [
+     228,
+     55,
+     70,
+     70
+    ],
+    "item": 133,
+    "abilitySlot": 0,
+    "friendship": 0
+   },
+   {
+    "species": 143,
+    "level": 50,
+    "nature": 0,
+    "ivs": {
+     "hp": 31,
+     "attack": 31,
+     "defense": 31,
+     "speed": 31,
+     "spAttack": 31,
+     "spDefense": 31
+    },
+    "evs": {
+     "hp": 255,
+     "attack": 255,
+     "defense": 0,
+     "speed": 0,
+     "spAttack": 0,
+     "spDefense": 0
+    },
+    "moves": [
+     70,
+     70,
+     70,
+     70
+    ],
+    "item": 0,
+    "abilitySlot": 0,
+    "friendship": 0
+   },
+   {
+    "species": 129,
+    "level": 50,
+    "nature": 0,
+    "ivs": {
+     "hp": 31,
+     "attack": 31,
+     "defense": 31,
+     "speed": 31,
+     "spAttack": 31,
+     "spDefense": 31
+    },
+    "evs": {
+     "hp": 255,
+     "attack": 255,
+     "defense": 0,
+     "speed": 0,
+     "spAttack": 0,
+     "spDefense": 0
+    },
+    "moves": [
+     150,
+     150,
+     150,
+     150
+    ],
+    "item": 0,
+    "abilitySlot": 0,
+    "friendship": 0
+   }
+  ],
+  "opponent": [
+   {
+    "species": 338,
+    "level": 50,
+    "nature": 0,
+    "ivs": {
+     "hp": 31,
+     "attack": 31,
+     "defense": 31,
+     "speed": 31,
+     "spAttack": 31,
+     "spDefense": 31
+    },
+    "evs": {
+     "hp": 255,
+     "attack": 255,
+     "defense": 0,
+     "speed": 0,
+     "spAttack": 0,
+     "spDefense": 0
+    },
+    "moves": [
+     150,
+     150,
+     150,
+     150
+    ],
+    "item": 0,
+    "abilitySlot": 0,
+    "friendship": 0
+   },
+   {
+    "species": 134,
+    "nature": 0,
+    "ivs": {
+     "hp": 31,
+     "attack": 31,
+     "defense": 31,
+     "speed": 31,
+     "spAttack": 31,
+     "spDefense": 31
+    },
+    "evs": {
+     "hp": 255,
+     "attack": 255,
+     "defense": 0,
+     "speed": 0,
+     "spAttack": 0,
+     "spDefense": 0
+    },
+    "moves": [
+     150,
+     150,
+     150,
+     150
+    ],
+    "item": 0,
+    "abilitySlot": 0,
+    "friendship": 0
+   },
+   {
+    "species": 10,
+    "nature": 0,
+    "ivs": {
+     "hp": 31,
+     "attack": 31,
+     "defense": 31,
+     "speed": 31,
+     "spAttack": 31,
+     "spDefense": 31
+    },
+    "evs": {
+     "hp": 255,
+     "attack": 255,
+     "defense": 0,
+     "speed": 0,
+     "spAttack": 0,
+     "spDefense": 0
+    },
+    "moves": [
+     150,
+     150,
+     150,
+     150
+    ],
+    "item": 0,
+    "abilitySlot": 0,
+    "friendship": 0
+   }
+  ]
+ },
+ "script": {
+  "actions": [
+   {
+    "move": 1
+   },
+   {
+    "move": 0
+   }
+  ],
+  "then": "census",
+  "replacements": [
+   1,
+   2
+  ]
+ },
+ "expect": [],
+ "cover": [
+  {
+   "file": "src/engine/battleEndTurnOrchestration.ts",
+   "text": "\n  if (outcome.kind === \"fir",
+   "at": 0
+  },
+  {
+   "file": "src/engine/battleScriptFaintedActionsOrchestration.ts",
+   "text": "state = cure",
+   "at": 0
+  }
+ ],
+ "coverAny": false
+}

@@ -496,6 +496,7 @@ function applyStageParties(st: any): void {
       const row = rows[ids[i]]; if (row === undefined) throw new Error(`stage parties.${side}[${i}]: no set id ${ids[i]}`);
       const itemRow = itemRows.find((r: any) => r.itemId === (p.item ?? 0));
       if (itemRow === undefined) throw new Error(`stage parties.${side}[${i}]: item ${p.item} is not in the Frontier held-item table`);
+      if ((p.level ?? 50) !== 50) throw new Error(`stage parties.${side}[${i}]: the engine rebuilds every member at level 50`);
       const evs = p.evs ?? {}; const flagged = Object.keys(flagOf).filter((k) => (evs[k] ?? 0) > 0);
       if (flagged.length === 0) throw new Error(`stage parties.${side}[${i}]: evs must name at least one stat`);
       const per = Math.floor(510 / flagged.length);
@@ -503,7 +504,7 @@ function applyStageParties(st: any): void {
       if (side === "opponent" && p.personality === undefined) {
         // The engine rebuilds an opponent's personality from an RNG cursor (constructionCursor), so the lab's own pick would have none: choose one that has a cursor, the right nature,
         // the ability slot in its low bit and, when the stage names a gender, that gender.
-        const ratio = ((speciesStatsData as any).species as any[]).find((r: any) => r.name === row.species)?.genderRatio ?? 127;
+        const ratio = ((speciesStatsData as any).species as any[]).find((r: any) => r.id === p.species)?.genderRatio ?? 127;
         let c = (Number(st.seed) * 2654435761 + (i + 1) * 40503) >>> 0;
         for (let tries = 0; ; tries += 1) {
           if (tries > 400_000) throw new Error(`stage parties.opponent[${i}]: no personality with a cursor, nature ${p.nature ?? 0}, slot ${p.abilitySlot ?? 0}`);
