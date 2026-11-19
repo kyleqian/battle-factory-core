@@ -32,17 +32,6 @@ exclusions are superseded. Unrelated expansions stay parked.
 - Priority: low. Kyle 11-19: "Can we queue that up in the box then? ... that's not that important." Sound and the battle rules come first;
   take it when a run has room. ENGINE_BUILD moves: name it in PROGRESS for the website (it reaches the site only when Kyle asks).
 
-## #224 — The Factory Head battle has no music on the website (Kyle, 2026-11-18)
-
-- The engine emits `bgm` 471 (`MUS_VS_FRONTIER_BRAIN`, `GetBattleBGM` pokemon.c:6473-6480) for the NOLAND battle, but the
-  library ships recordings for only four songs: `dist-lib/audio` holds `bgm-354`, `bgm-412`, `bgm-469`, `bgm-476`. So the player
-  plays nothing until the victory song: a silent Brain battle at battle 21 (and 42) for anyone who gets that far.
-- Fix: record 471 the same way as the other four (`docs/aud245-audio-player.md`: `song-players.json`, the manifest's loop points, Ogg +
-  AAC), and check in a browser that a Brain battle plays it, loops and fades on the result (`docs/aud241c-battle-end-sounds.md` row
-  for a Brain loss). Then rebuild dist-lib and tell the website (new ENGINE_BUILD).
-- Found 11-18 while checking a reload report: music after a page reload is fine (the song comes back mid-song within about
-  1 s, Chrome / Chromium / WebKit, live site); the stale line in `docs/library-package.md` that said otherwise is corrected.
-
 ## #223 — Battle messages ending in `\p` / `\l`: open remainder of btn1 (2026-11-19)
 
 Landed by btn1 (`docs/subp1m-battle-text-pause.md` section 6): every template-derived `\p` / `\l` / `PAUSE_UNTIL_PRESS` gate waits for a new A or B in both scenes (Substitute damaged / faded, dragged out, `MoveUsedIs*`, Trick both items, Static, the ability-blocking strings); START is a no-op. Open:
