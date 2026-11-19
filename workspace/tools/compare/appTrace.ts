@@ -1094,6 +1094,64 @@ function aud241bStage(
   });
 }
 
+// pau5: mid-battle switch-in entry abilities (tools/battle-lab/pau5-*.json, tools/integration/pau5Labs.py). The ability mon is a Lv50 Mightyena
+// (Intimidate) or Porygon (Trace) with the ROM's slot-1 personality; stats are the ROM's for nature 0, IV 31, EV 0.
+function pau5Bench(species: number, base: readonly [number, number, number, number, number, number], personality: number): BattleScriptPartyMemberInput {
+  const stat = (value: number): number => Math.floor(((2 * value + 31) * 50) / 100) + 5;
+  const hp = Math.floor(((2 * base[0] + 31) * 50) / 100) + 60;
+  return Object.freeze({
+    ...RATTATA_LV50_BENCH,
+    species,
+    personality,
+    hp,
+    maxHP: hp,
+    attack: stat(base[1]),
+    defense: stat(base[2]),
+    speed: stat(base[3]),
+    spAttack: stat(base[4]),
+    spDefense: stat(base[5]),
+    moves: [69, 69, 69, 69] as const,
+    pp: [20, 20, 20, 20] as const,
+  });
+}
+const PAU5_MIGHTYENA = (personality: number): BattleScriptPartyMemberInput => pau5Bench(287, [70, 90, 70, 70, 60, 60], personality);
+const PAU5_PORYGON = (personality: number): BattleScriptPartyMemberInput => pau5Bench(137, [65, 60, 70, 40, 85, 75], personality);
+const PAU5_RATTATA_BENCH = (personality: number): BattleScriptPartyMemberInput => Object.freeze({ ...RATTATA_LV50_BENCH, personality, moves: [69, 69, 69, 69] as const, pp: [20, 20, 20, 20] as const });
+
+const PAU5_RECORD_PERSONALITY: Readonly<Record<number, number>> = Object.freeze({ 39: 14, 307: 24, 273: 42, 432: 2 });
+
+function pau5Stage(state: EngineState, scene: "on" | "off", kind: "faint" | "switch" | "opp", ability: "intimidate" | "trace"): EngineState {
+  const mon = ability === "intimidate" ? PAU5_MIGHTYENA : PAU5_PORYGON;
+  const id = `pau5-${kind}-${ability}-${scene}`;
+  const common = { battleScene: scene, usedMessageHoldFrames: 0, sceneOffNoAnimations: scene === "off" } as const;
+  if (kind === "faint") {
+    // Real Factory records (Diglett 39 lead, 85 HP; Mightyena 307 / Porygon 273; Shuckle 432) with the lab's exact personalities, Splash x4, no item.
+    const records = [39, ability === "intimidate" ? 307 : 273, 432].map((setId) => generatedCommandRecord(setId, 31, PAU5_RECORD_PERSONALITY[setId])) as unknown as
+      readonly [FactoryRentalRecord, FactoryRentalRecord, FactoryRentalRecord];
+    const members = records.map((record) => ({ ...createFactoryCorpusPartyMember(record), item: 0, moves: [150, 150, 150, 150] as const, pp: [40, 40, 40, 40] as const }));
+    const lead = members[0]!;
+    return midBattleSwitchStage(state, id, [members[1]!, members[2]!], [members[1]!.maxHP, members[2]!.maxHP], {
+      ...common,
+      playerRecords: records,
+      player: Object.freeze({
+        species: lead.species, moveId: 150, moves: lead.moves, pp: lead.pp, ability: lead.ability, abilityNum: lead.abilitySlot,
+        personality: lead.personality, item: 0, friendship: 0, level: 50, attack: lead.attack, defense: lead.defense, spAttack: lead.spAttack,
+        spDefense: lead.spDefense, speed: lead.speed, hp: lead.maxHP, maxHp: lead.maxHP,
+      }),
+      trainer: rattataAtLevel(50, 69),
+    });
+  }
+  if (kind === "switch") {
+    return midBattleSwitchStage(state, id, [mon(1013904250), PAU5_RATTATA_BENCH(3668340025)], [145, 105], {
+      ...common, player: rattataAtLevel(50, 69), trainer: rattataAtLevel(50, 69),
+    });
+  }
+  return midBattleSwitchStage(state, id, [PAU5_RATTATA_BENCH(1013904250), PAU5_RATTATA_BENCH(3668340025)], [105, 105], {
+    ...common, player: rattataAtLevel(50, 69), trainer: rattataAtLevel(5, 33),
+    trainerBench: [{ ...mon(387276975), moves: [33, 33, 33, 33] as const }, { ...PAU5_RATTATA_BENCH(3041712750), moves: [33, 33, 33, 33] as const }],
+  });
+}
+
 // aud242l: aud241bStage with the Blizzard user (Lv50) and a Seismic Toss target (Lv12) of the given species (attacker side `side`).
 function aud242lBlizzardStage(state: EngineState, id: string, side: "player" | "opponent", attackerSpecies: number, targetSpecies: number, attackerMove = 59, attackerTypes?: readonly [string, string]): EngineState {
   const attacker = Object.freeze({ ...rattataAtLevel(50, attackerMove), species: attackerSpecies, ...(attackerTypes === undefined ? {} : { types: attackerTypes }) });
@@ -1248,6 +1306,10 @@ type MidBattleSwitchStageOptions = Readonly<{
   rngSeed?: number;
   /** `null`: no bench for that side (the last faint is a hard terminal, the full-turn reducer's default shape). */
   trainerBenchHp?: readonly [number, number] | null;
+  /** pau5: the player's three rental records (default 664 / 678 / 527); a forced party menu validates the staged party against them. */
+  playerRecords?: readonly [FactoryRentalRecord, FactoryRentalRecord, FactoryRentalRecord];
+  /** pau5: the opponent's bench records (default two Rattata). */
+  trainerBench?: readonly [BattleScriptPartyMemberInput, BattleScriptPartyMemberInput];
   playerBenchNone?: boolean;
   /** Stage the 21st battle of the run: the Silver Factory Head round (`currentOpponent.frontierBrain`). */
   frontierBrain?: boolean;
@@ -1262,7 +1324,7 @@ function midBattleSwitchStage(
   playerBenchHp: readonly [number, number],
   options: MidBattleSwitchStageOptions = {},
 ): EngineState {
-  const playerRentalRecords = [
+  const playerRentalRecords = options.playerRecords ?? [
     generatedCommandRecord(664),
     generatedCommandRecord(678),
     generatedCommandRecord(527),
@@ -1309,7 +1371,7 @@ function midBattleSwitchStage(
       ? {}
       : {
           trainerBenchHp: [...(options.trainerBenchHp ?? [105, 105])] as [number, number],
-          trainerBenchOverride: [RATTATA_LV50_BENCH, RATTATA_LV50_BENCH] as [BattleScriptPartyMemberInput, BattleScriptPartyMemberInput],
+          trainerBenchOverride: [...(options.trainerBench ?? [RATTATA_LV50_BENCH, RATTATA_LV50_BENCH])] as [BattleScriptPartyMemberInput, BattleScriptPartyMemberInput],
         }),
   });
   // Scene OFF: factoryBattleStart.ts sets HITMARKER_NO_ANIMATIONS for the whole battle; the staged state starts with hitMarker 0.
@@ -2035,6 +2097,18 @@ export const APP_STAGES: Readonly<Record<string, AppStage>> = {
   },
   "win-terminal-window-off": winTerminalWindowStage,
   "mid-battle-switch-dense-off": midBattleSwitchDenseOffStage,
+  "pau5-faint-intimidate-off": (state) => pau5Stage(state, "off", "faint", "intimidate"),
+  "pau5-faint-intimidate-on": (state) => pau5Stage(state, "on", "faint", "intimidate"),
+  "pau5-faint-trace-off": (state) => pau5Stage(state, "off", "faint", "trace"),
+  "pau5-faint-trace-on": (state) => pau5Stage(state, "on", "faint", "trace"),
+  "pau5-switch-intimidate-off": (state) => pau5Stage(state, "off", "switch", "intimidate"),
+  "pau5-switch-intimidate-on": (state) => pau5Stage(state, "on", "switch", "intimidate"),
+  "pau5-switch-trace-off": (state) => pau5Stage(state, "off", "switch", "trace"),
+  "pau5-switch-trace-on": (state) => pau5Stage(state, "on", "switch", "trace"),
+  "pau5-opp-intimidate-off": (state) => pau5Stage(state, "off", "opp", "intimidate"),
+  "pau5-opp-intimidate-on": (state) => pau5Stage(state, "on", "opp", "intimidate"),
+  "pau5-opp-trace-off": (state) => pau5Stage(state, "off", "opp", "trace"),
+  "pau5-opp-trace-on": (state) => pau5Stage(state, "on", "opp", "trace"),
   "aud241b-opponent-faint-on": (state) => aud241bStage(state, "aud241b-opponent-faint-on", "on", 50, 12),
   "aud241b-opponent-faint-off": (state) => aud241bStage(state, "aud241b-opponent-faint-off", "off", 50, 12),
   "aud241b-player-faint-on": (state) => aud241bStage(state, "aud241b-player-faint-on", "on", 12, 50),

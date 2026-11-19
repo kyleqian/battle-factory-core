@@ -1,0 +1,98 @@
+{
+ "appRoute": "generated-orchestrator",
+ "oracleProfile": "battle-scene-on",
+ "appStage": {
+  "id": "pau5-faint-trace-on",
+  "frame": 0,
+  "opponentTrainerId": 110
+ },
+ "oracleBattleLab": {
+  "scenario": "../../battle-lab/pau5-faint-trace-on.json"
+ },
+ "segments": [
+  {
+   "buttons": [
+    "A"
+   ],
+   "frames": 2
+  },
+  {
+   "buttons": [],
+   "frames": 18
+  },
+  {
+   "buttons": [
+    "A"
+   ],
+   "frames": 2
+  },
+  {
+   "buttons": [],
+   "frames": 640
+  },
+  {
+   "buttons": [
+    "A"
+   ],
+   "frames": 2
+  },
+  {
+   "buttons": [],
+   "frames": 18
+  },
+  {
+   "buttons": [
+    "A"
+   ],
+   "frames": 2
+  },
+  {
+   "buttons": [],
+   "frames": 700
+  },
+  {
+   "buttons": [
+    "A"
+   ],
+   "frames": 2
+  },
+  {
+   "buttons": [],
+   "frames": 200
+  },
+  {
+   "buttons": [
+    "DOWN"
+   ],
+   "frames": 2
+  },
+  {
+   "buttons": [],
+   "frames": 20
+  },
+  {
+   "buttons": [
+    "A"
+   ],
+   "frames": 2
+  },
+  {
+   "buttons": [],
+   "frames": 40
+  },
+  {
+   "buttons": [
+    "A"
+   ],
+   "frames": 2
+  },
+  {
+   "buttons": [],
+   "frames": 700
+  }
+ ],
+ "captureWindow": {
+  "start": 1717,
+  "end": 2287
+ }
+}

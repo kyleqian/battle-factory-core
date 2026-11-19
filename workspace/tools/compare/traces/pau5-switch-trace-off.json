@@ -1,0 +1,68 @@
+{
+ "appRoute": "generated-orchestrator",
+ "oracleProfile": "battle-scene-off",
+ "appStage": {
+  "id": "pau5-switch-trace-off",
+  "frame": 0,
+  "opponentTrainerId": 110
+ },
+ "oracleBattleLab": {
+  "scenario": "../../battle-lab/pau5-switch-trace-off.json"
+ },
+ "segments": [
+  {
+   "buttons": [
+    "DOWN"
+   ],
+   "frames": 2
+  },
+  {
+   "buttons": [],
+   "frames": 38
+  },
+  {
+   "buttons": [
+    "A"
+   ],
+   "frames": 2
+  },
+  {
+   "buttons": [],
+   "frames": 80
+  },
+  {
+   "buttons": [
+    "DOWN"
+   ],
+   "frames": 2
+  },
+  {
+   "buttons": [],
+   "frames": 20
+  },
+  {
+   "buttons": [
+    "A"
+   ],
+   "frames": 2
+  },
+  {
+   "buttons": [],
+   "frames": 30
+  },
+  {
+   "buttons": [
+    "A"
+   ],
+   "frames": 2
+  },
+  {
+   "buttons": [],
+   "frames": 1100
+  }
+ ],
+ "captureWindow": {
+  "start": 323,
+  "end": 893
+ }
+}
