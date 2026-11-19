@@ -1,7 +1,7 @@
 // phy1m: rank the move bodies of a liveShareCensus --commands jsonl by presented count / frames, with their adapter / lead-audit status.
 // node --experimental-strip-types --no-warnings tools/integration/phy1mRank.ts <enum.json> <c0.jsonl> [c1.jsonl ...]
 import { readFileSync } from "node:fs";
-import { BODY_LEAD_AUDITED_MOVE_IDS, HPD8_SHAPE_A_MOVE_IDS } from "../../src/engine/battleResolutionPresentation.ts";
+import { bodyLeadRuleApplies, bodyHitTailRuleApplies } from "../../src/engine/battleResolutionPresentation.ts";
 const [enumPath, ...files] = process.argv.slice(2);
 const en = JSON.parse(readFileSync(enumPath!, "utf8")) as { id: number; name: string; weightPct: number; caseMissingPlayer: boolean }[];
 const byId = new Map(en.map((e) => [e.id, e]));
@@ -17,5 +17,5 @@ for (const f of files) for (const line of readFileSync(f!, "utf8").split("\n")) 
   rows.set(r.moveId, x);
 }
 const out = [...rows.entries()].map(([id, x]) => ({ id, name: byId.get(id)?.name ?? `#${id}`, ...x,
-  audited: BODY_LEAD_AUDITED_MOVE_IDS.has(id), shapeA: HPD8_SHAPE_A_MOVE_IDS.has(id) })).sort((a, b) => b.n - a.n);
+  audited: bodyLeadRuleApplies(id), shapeA: bodyHitTailRuleApplies(id) })).sort((a, b) => b.n - a.n);
 console.log(JSON.stringify({ requestCommands: total, noRequestCommands: noReq, moves: out }, null, 1));
