@@ -3,7 +3,14 @@
 // turns button presses into the recorded input trace, fast-forwards a resumed
 // trace, and reports the challenge's events. The dev shell (src/main.ts) uses
 // mountFactoryGameInternal for its test ABI; hosts use mountFactoryGame.
-import { monPicPixelsInstalled } from "./engine/monPicPixels.ts";
+import { installedMonPicPixels, installMonPicPixels, monPicPixelsInstalled } from "./engine/monPicPixels.ts";
+import { MonPicPending } from "./engine/monPicPending.ts";
+import { neededMonPics } from "./engine/monPicNeeds.ts";
+import { activeMonPicSpriteStore, createMonPicSpriteStore, sharedMonPicSpriteStore, type MonPicSpriteStore } from "./engine/monPicSpriteStore.ts";
+import { AnimAssetPending, installAnimAssets, installedAnimAssets } from "./engine/animAssets.ts";
+import { neededAnimAssets } from "./engine/animAssetNeeds.ts";
+import { activeAnimAssetStore, createAnimAssetStore, sharedAnimAssetStore, type AnimAssetStore } from "./engine/animAssetStore.ts";
+import animAssetMoves from "./assets/gen/anim-asset-moves.json" with { type: "json" };
 import { render, SCREEN_HEIGHT, SCREEN_WIDTH } from "./engine/core.ts";
 import type { FactoryAudioState, FactoryEvent, FactoryGame, FactoryGameOptions, TraceSegment } from "./factoryContract.ts";
 import type { AudioPlayer, AudioStats } from "./audio/player.ts";
@@ -41,6 +48,55 @@ export interface MountInternalOptions extends FactoryGameOptions {
   challengeRequest?: "hold" | "continue";
   /** The dev shell's crash overlay: the error and the session it happened in. */
   onCrash?: (error: unknown, session: FactorySession) => void;
+  /**
+   * dl3: where the battle pictures come from. "files" (the default in a build): one small file per species, fetched when a screen needs
+   * it, the loop holding until it arrived. "all": the whole sheets as one chunk, installed before the first frame and readable
+   * synchronously (the dev shell's `?pokebench=1` bench ABI, which cannot wait). Only the app build and the dev server carry "all".
+   */
+  sprites?: "files" | "all";
+}
+
+// dl3: injected by the vite configs; absent when src/ runs straight from source (node tools: the provider is installed up front).
+const SPRITE_FILES_BUILT = typeof __POKEBENCH_SPRITE_FILES__ === "boolean" && __POKEBENCH_SPRITE_FILES__;
+const SPRITE_FULL_BUILT = typeof __POKEBENCH_SPRITE_FULL__ !== "boolean" || __POKEBENCH_SPRITE_FULL__;
+
+function spriteBaseUrl(spriteBase: string | undefined): URL | undefined {
+  return spriteBase === undefined ? undefined : new URL(spriteBase.endsWith("/") ? spriteBase : `${spriteBase}/`, document.baseURI);
+}
+
+// dl4: the move-animation assets come from `<spriteBase>/anim/<asset>.txt` (the same copied `sprites/` directory), next to the chunks by default.
+async function openAnimAssetStore(spriteBase: string | undefined): Promise<AnimAssetStore> {
+  const files = (await import("virtual:pokebench-anim-asset-files")).default;
+  if (files === null) throw new Error("this build carries no animation asset files");
+  const base = spriteBaseUrl(spriteBase);
+  return sharedAnimAssetStore(base?.href ?? "", () =>
+    createAnimAssetStore({
+      names: Object.keys(files),
+      load: async (name) => {
+        const url = base === undefined ? files[name]! : new URL(`anim/${name}.txt`, base).href;
+        const response = await fetch(url);
+        if (!response.ok) throw new Error(`${response.status} for ${url}`);
+        return response.text();
+      },
+    }),
+  );
+}
+
+async function openSpriteStore(spriteBase: string | undefined): Promise<MonPicSpriteStore> {
+  const files = (await import("virtual:pokebench-mon-pic-files")).default;
+  if (files === null) throw new Error("this build carries no battle picture files");
+  const base = spriteBaseUrl(spriteBase);
+  return sharedMonPicSpriteStore(base?.href ?? "", () =>
+    createMonPicSpriteStore({
+      species: Object.keys(files),
+      load: async (species) => {
+        const url = base === undefined ? files[species]! : new URL(`${species}.txt`, base).href;
+        const response = await fetch(url);
+        if (!response.ok) throw new Error(`${response.status} for ${url}`);
+        return response.text();
+      },
+    }),
+  );
 }
 
 export interface FactoryGameInternal extends FactoryGame {
@@ -59,7 +115,7 @@ export interface FactoryGameInternal extends FactoryGame {
 }
 
 export function mountFactoryGame(options: FactoryGameOptions): FactoryGame {
-  const game = mountFactoryGameInternal({ ...options, challengeRequest: "hold" });
+  const game = mountFactoryGameInternal({ ...options, challengeRequest: "hold", sprites: undefined });
   return {
     get engine() {
       return game.engine;
@@ -77,13 +133,6 @@ export function mountFactoryGame(options: FactoryGameOptions): FactoryGame {
 }
 
 export function mountFactoryGameInternal(options: MountInternalOptions): FactoryGameInternal {
-  // bnd257d: the sprite sheets (~12 MB) are a dynamic chunk. mountFactoryGame still returns synchronously; the first draw, the loop and `ready`
-  // wait for the pixels, and press() is dropped until then. An already installed provider (vitest setup, render tools) keeps it all synchronous.
-  let pixelsInstalled = monPicPixelsInstalled();
-  const pixelsReady: Promise<void> = pixelsInstalled
-    ? Promise.resolve()
-    : // A call, not a bare side-effect import: `"sideEffects": false` lets the bundler drop the latter (bnd256c follow-up).
-      import("./engine/monPicPixelsInstall.ts").then((module) => module.installBundledMonPicPixels());
   const { canvas } = options;
   canvas.width = SCREEN_WIDTH;
   canvas.height = SCREEN_HEIGHT;
@@ -99,6 +148,52 @@ export function mountFactoryGameInternal(options: MountInternalOptions): Factory
     frontier: options.frontier,
   };
   let session = new FactorySession(sessionOptions);
+  // bnd257d / dl3: the battle pictures are not in the first chunk. mountFactoryGame still returns synchronously; the first draw, the loop and
+  // `ready` wait for the pictures the first screen shows, and press() is dropped until then. A provider installed before the mount (vitest
+  // setup, render tools) keeps everything synchronous. With per-species files (the library default) the loop also HOLDS (no tick, no draw)
+  // whenever a screen it is about to show names a picture that has not arrived; the trace and every tick are untouched (docs/dl3-per-species-pictures.md).
+  const useFull = SPRITE_FULL_BUILT && (options.sprites ?? (SPRITE_FILES_BUILT ? "files" : "all")) === "all";
+  let store: MonPicSpriteStore | undefined = activeMonPicSpriteStore(installedMonPicPixels());
+  /** Species a render asked for that the state scan did not name; they stay in the hold's wanted set. */
+  const extraWanted = new Set<string>();
+  // dl4: the same for the move-animation asset files (Scene ON only; Scene OFF names none).
+  let animStore: AnimAssetStore | undefined = activeAnimAssetStore(installedAnimAssets());
+  const extraAnim = new Set<string>();
+  function animWanted(): Set<string> {
+    const wanted = neededAnimAssets(session.state, animAssetMoves, animStore!.has);
+    for (const name of extraAnim) wanted.add(name);
+    return wanted;
+  }
+  function picturesReady(): boolean {
+    let ready = true;
+    if (store !== undefined) {
+      const wanted = neededMonPics(session.state, store.has);
+      for (const species of extraWanted) wanted.add(species);
+      if (store.pending(wanted).length > 0) ready = false;
+    }
+    if (animStore !== undefined && animStore.pending(animWanted()).length > 0) ready = false;
+    return ready;
+  }
+  const preparePixels = async (): Promise<void> => {
+    if (store === undefined && !monPicPixelsInstalled()) {
+      if (useFull) {
+        // A call, not a bare side-effect import: `"sideEffects": false` lets the bundler drop the latter (bnd256c follow-up).
+        await import("./engine/monPicPixelsInstall.ts").then((module) => module.installBundledMonPicPixels());
+        return;
+      }
+      store = await openSpriteStore(options.spriteBase);
+      installMonPicPixels(store.tables);
+      animStore = await openAnimAssetStore(options.spriteBase);
+      installAnimAssets(animStore.source);
+    }
+    if (store !== undefined) {
+      const wanted = neededMonPics(session.state, store.has);
+      await store.whenLoaded(wanted);
+    }
+    if (animStore !== undefined) await animStore.whenLoaded(animWanted());
+  };
+  let pixelsInstalled = monPicPixelsInstalled() && picturesReady();
+  const pixelsReady: Promise<void> = pixelsInstalled ? Promise.resolve() : preparePixels();
   const held = new Set<GbaButton>();
   /** Presses released before the next frame sampled them still count for one frame. */
   const latched = new Set<GbaButton>();
@@ -151,9 +246,57 @@ export function mountFactoryGameInternal(options: MountInternalOptions): Factory
     if (!destroyed) options.onEvent?.(event);
   };
 
-  function draw(): void {
-    imageData.data.set(render(session.state));
+  /** Renders and presents the frame; false (nothing presented) when it read an animation asset that has not arrived, even if the renderer swallowed the throw. */
+  function drawFrame(): boolean {
+    animStore?.takeMissed(); // reads while pending outside a draw (a swallowed tick-side read) must not hold this frame
+    const pixels = render(session.state);
+    if (animStore !== undefined) {
+      const missed = animStore.takeMissed();
+      if (missed.length > 0) {
+        for (const name of missed) extraAnim.add(name);
+        animStore.pending(missed);
+        return false;
+      }
+    }
+    imageData.data.set(pixels);
     ctx!.putImageData(imageData, 0, 0);
+    return true;
+  }
+
+  function draw(): void {
+    drawFrame();
+  }
+
+  /** Draws the frame; false (nothing drawn, the canvas keeps the last frame) when it read a picture or an animation asset that has not arrived. */
+  function drawOrHold(): boolean {
+    try {
+      return drawFrame();
+    } catch (error) {
+      if (error instanceof MonPicPending && store !== undefined) {
+        extraWanted.add(error.species);
+        store.pending([error.species]);
+        return false;
+      }
+      if (error instanceof AnimAssetPending && animStore !== undefined) {
+        for (const name of [error.asset, ...animStore.takeMissed()]) extraAnim.add(name);
+        animStore.pending(extraAnim);
+        return false;
+      }
+      throw error;
+    }
+  }
+
+  function failPictures(error: unknown): void {
+    crashed = true;
+    console.error("pokebench: the sprite pixels failed to load; the game did not start", error);
+    options.onError?.({ message: `sprite pixels failed to load: ${error instanceof Error ? error.message : String(error)}`, frame: session.frame });
+  }
+
+  /** The loop waits one animation frame without ticking or drawing; the clock restarts so the wait is never replayed as a burst of ticks. */
+  function hold(time: number): void {
+    last = time;
+    accumulator = 0;
+    raf = requestAnimationFrame(loop);
   }
 
   function sample(): ReadonlySet<GbaButton> {
@@ -212,6 +355,11 @@ export function mountFactoryGameInternal(options: MountInternalOptions): Factory
 
   function loop(time: number): void {
     if (destroyed || crashed) return;
+    const failure = store?.failure ?? animStore?.failure;
+    if (failure) {
+      failPictures(failure);
+      return;
+    }
     if (resuming) {
       try {
         if (!resumeStep(RESUME_BUDGET_MS)) {
@@ -224,8 +372,9 @@ export function mountFactoryGameInternal(options: MountInternalOptions): Factory
       }
       last = time;
       accumulator = 0;
-      draw();
+      if (!drawOrHold()) return hold(time);
     }
+    if (!picturesReady()) return hold(time);
     if (!readySent) {
       readySent = true;
       emit({ type: "ready", frame: session.frame });
@@ -243,8 +392,10 @@ export function mountFactoryGameInternal(options: MountInternalOptions): Factory
         return;
       }
       accumulator -= FRAME_MS;
+      // A tick that put new species on screen (the round's parties, the swap candidates) starts their fetch here, before the next tick.
+      if (!picturesReady()) return hold(time);
     }
-    draw();
+    if (!drawOrHold()) return hold(time);
     raf = requestAnimationFrame(loop);
   }
 
@@ -261,7 +412,7 @@ export function mountFactoryGameInternal(options: MountInternalOptions): Factory
     }
   }
   const startLoop = (): void => {
-    draw();
+    drawOrHold();
     if (!crashed) raf = requestAnimationFrame(loop);
   };
   if (pixelsInstalled) startLoop();
@@ -272,10 +423,7 @@ export function mountFactoryGameInternal(options: MountInternalOptions): Factory
         if (!destroyed) startLoop();
       },
       (error: unknown) => {
-        if (destroyed) return;
-        crashed = true;
-        console.error("pokebench: the sprite pixels failed to load; the game did not start", error);
-        options.onError?.({ message: `sprite pixels failed to load: ${error instanceof Error ? error.message : String(error)}`, frame: session.frame });
+        if (!destroyed) failPictures(error);
       },
     );
   }
@@ -323,7 +471,7 @@ export function mountFactoryGameInternal(options: MountInternalOptions): Factory
           for (const event of session.tick(buttons)) emit(event);
         }
       }
-      draw();
+      drawOrHold();
     },
     reset() {
       session = new FactorySession(sessionOptions);
@@ -334,7 +482,7 @@ export function mountFactoryGameInternal(options: MountInternalOptions): Factory
       latched.clear();
       resuming = null;
       readySent = false;
-      draw();
+      drawOrHold();
     },
     draw,
     sessionTrace: (error) => session.toTrace(error),

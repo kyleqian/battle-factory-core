@@ -1578,3 +1578,38 @@ Answers to the open liv1 question:
 - After landing: re-measure with the hpd7b `Solar Beam unleash` row (expect `d = 8` = lead 5 + T 3, down from 86), `npm run compare` of a Solar Beam unleash lab (the head idle changes what is on screen in the first 39 rows only if the fade is later drawn), and the aud242 / `moveAnimSounds` pins for move 76.
 
 Gameplay is untouched in both proposals (presentation windows only).
+
+## 30. mem2: the 0x7FFF `INSTANT_HP_BAR_DROP` is an instant drop (Memento, Explosion, Self-Destruct)
+
+Lands the shared fix proposed in section 29 (mem1 / exp1). Scope: only the hp command of `Cmd_trymemento` (battle_script_commands.c:9086) and `Cmd_tryexplosion` (:6555); gameplay, RNG and kernel event order are untouched.
+
+**ROM.** Both commands emit `BtlController_EmitHealthBarUpdate(INSTANT_HP_BAR_DROP)`; the controller runs `SetBattleBarStruct(maxHP, 0, 0x7FFF)` (battle_controller_player.c:2708, opponent.c:1690), so the bar is emptied at its first step and the exec flag is held 1-2 rows (not a 106-row drain). Measured (mem1 / exp1 labs): hp start -> first move-body row is 8 rows (Memento) / 9 (Explosion, Self-Destruct); the HP text is empty at hp start + 3 (Memento) / + 2 (Explosion), the bar graphic one row later.
+
+**Model.** `projectBattleResolutionCommands` gives the hp command `timing {minimumFrames: 0, tailFrames: rows, instantDrop: textRow}` (`instantHpDropTiming`, `battleResolutionPresentation.ts`): rows = lead (Memento 3, Explosion 2, the kernel's TRYMEMENTO / TRYEXPLOSION `instructionExecution`) + the next ATTACKANIMATION's execution - the hp's execution; Memento 5, Explosion / Self-Destruct 6 (the move command keeps its own `pre` 3, so hp + pre = 8 / 9). `battleResolutionPresentationRender.ts` holds `from` until the text row, then `to`, and the bar fill goes to `to` one row later. The Scene OFF no-hit pause (`sceneOffNoHitPauseFrames`) counts the instant command's real rows (`tailFrames`) instead of its `minimumFrames` 0, so hp + pause keeps the kernel-row total (Memento 5 + 37 = 42, Explosion 6 + 48 = 54, as in the base build where 28 + 14 = 42 was counted but the command really ran 165 rows).
+
+**Compare before / after** (`npm run compare -- <trace> --summary`; the new `exp1-{explosion,selfdestruct}-{player,opponent}-on` stages in `tools/compare/appTrace.ts` rebuild the exp1 labs; the Memento stages are the aud262 ones; matched frames / summed diff px):
+
+| window | before | after |
+|---|---|---|
+| Memento Rattata, opponent | 0/331, 335985 | 0/331, 201489 |
+| Memento Rattata, player | 34/331, 378078 | 200/331, 220532 |
+| Memento Onix, opponent | 0/331, 482140 | 0/331, 486021 |
+| Memento Onix, player | 0/331, 415534 | 0/331, 268005 |
+| Memento Gyarados, opponent | 31/331, 257460 | 202/331, 142125 |
+| Explosion, opponent | 0/421, 4808535 | 0/421, 129195 |
+| Explosion, player | 27/421, 4883360 | 296/421, 95421 |
+| Self-Destruct, opponent | 0/421, 1151987 | 6/421, 385333 |
+| Self-Destruct, player | 40/421, 989665 | 201/421, 370805 |
+
+Explosion bodies now match the ROM from the first body row to the end of the body. Memento's SE1 body-to-sound offset moves -108 -> -7 on all five windows.
+
+**Census 0..99, both scenes.** `lsd194Census.sh` (LSD194_CENSUS_JOBS=3, LSD194_SPLIT=4: SPLIT=3 does not divide a 100-seed shard) + `rst197CensusDelta.py`; the base arm was built in a git-archive copy of 8516a6da1 (not reused from an earlier run). `eventsDigest` and error are identical for all 100 seeds in both scenes. 9 battles in each scene change presentation commands: the Memento / Explosion / Self-Destruct hp command (floor 28 -> 0, -22..-160 frames, `bad 0`) and, in Scene OFF only, the Memento no-hit move-animation pause (14 -> 37, seeds 7, 61, 83, 92; the pause absorbs the rows the instant command no longer counts).
+
+**Re-pinned** (`tests/aud262MoveAnimSounds.test.ts`): the five Memento SE1 offsets `-108` -> `-7` (the mem1 prediction: the remaining 7 is the body-to-sound row class). New `tests/mem2InstantHpDrop.test.ts` (14 tests: 3 moves x 2 sides x 2 scenes + ordinary hit + OFF pause) fails without the fix.
+
+**Named residuals (not fixed here):**
+- Static art in the stage: the lab's Snorlax (HP 32 vs the stage's 64 bar) and the message glyph rows keep the 0/N windows at 0; the Onix windows and the Memento opponent window differ in static pixels, not timing.
+- Memento body -> stats-change: the app's `stats-change` starts 5 rows early.
+- Explosion hit-blink phase ~2 rows.
+- Self-Destruct: the body is 9 rows short (the `Cmd_end` song wait, sdx1; the proposed 113 -> 122 is not part of this change).
+- Scene OFF: the instant command has no OFF ROM window; its 42 / 54 totals are the kernel exec rows, not a measurement.

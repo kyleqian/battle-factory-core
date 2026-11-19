@@ -1,0 +1,82 @@
+{
+ "name": "R091-chansey-metronome-transform-then-spite",
+ "rules": [
+  "R091"
+ ],
+ "why": "Challenge 1. The player's Chansey 227 calls Metronome 14 turns (slot 0); the foe is Banette 237 (Night Shade, Will-O-Wisp, Spite, Knock Off). A Metronome call of Transform copies Banette's moves (slot 0 becomes Night Shade, still played with prefer 0); Banette's Spite on the transformed Chansey's last move then takes the PP from the copy only (the party record is untouched). Chance per seed about 11/336 x 0.7 = 2%.",
+ "seed": 0,
+ "challengeNum": 1,
+ "battleNum": 0,
+ "trainerId": 86,
+ "playerSetIds": [
+  227,
+  244,
+  171
+ ],
+ "opponentSetIds": [
+  237,
+  215,
+  204
+ ],
+ "script": {
+  "actions": [
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "preferSwitch": 1
+   }
+  ],
+  "then": "census"
+ },
+ "expect": [],
+ "cover": [
+  {
+   "file": "src/engine/battleScriptTryspiteppreduceOpcode.ts",
+   "text": ": Object.fre",
+   "at": 0
+  }
+ ],
+ "coverAny": true,
+ "chance": 0.02,
+ "seeds": 200
+}

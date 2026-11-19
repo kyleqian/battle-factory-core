@@ -311,6 +311,7 @@ function play(initial: any, record: boolean, patchRng: number | null = null, pla
   const player = playerOverride ?? (policy === "script" ? createScriptPlayer(seed, stage.script) : createPlayer(policy, playerSeed));
   let startRules: any = null; let startFacility: any = null;
   const wide: unknown[] = []; let lastRules: any = null;
+  const cmdTrace: { last: string; rows: unknown[][] } | null = arg("cmdtrace") !== undefined ? { last: "", rows: [] } : null;
   let actionMenuRng: number | null = null; let randomTurnNumber: number | null = null; const timeline: number[][] = []; let lastTl = "";
   // aud243d: the engine's DECISIONS (absolute engine frames; result() makes them frame0-relative) for the ROM-side semantic driver (tools/audio/soundEventProbe.py lab --drive).
   const traceEvents = arg("events") !== undefined; const turnEvents: unknown[] = []; let recordedEvents = new WeakSet<object>();
@@ -333,6 +334,16 @@ function play(initial: any, record: boolean, patchRng: number | null = null, pla
     });
     if (renderer !== null && record && frame0 !== null && frame - frame0 >= renderRange![0] && frame - frame0 <= renderRange![1]) renderer(state, frame - frame0);
     for (const e of events) sound.push(e.mode === undefined ? [e.frame, e.kind, e.id, e.pan] : [e.frame, e.kind, e.id, e.pan, e.mode]);
+    if (cmdTrace !== null) {
+      // ctl1 (--cmdtrace): the engine's presentation command changes (frame, segment, command index, type, battler, hp from / to, lead) next to the sound rows.
+      const res: any = state.battleResolutionPresentation;
+      const seg = res?.segments?.[res.segmentIndex]; const cmd = seg?.commands?.[res.commandIndex];
+      const key = cmd === undefined || res.lifecycle?.phase !== "presenting" ? "" : `${res.segmentIndex}.${res.commandIndex}`;
+      if (key !== cmdTrace.last) {
+        cmdTrace.last = key;
+        if (cmd !== undefined && key !== "") cmdTrace.rows.push([frame, res.segmentIndex, res.commandIndex, cmd.type, cmd.battler ?? null, cmd.from ?? null, cmd.to ?? null, cmd.timing?.leadFrames ?? null, cmd.timing?.bodyLeadFrames ?? null, cmd.animation ?? null]);
+      }
+    }
     if (frame0 !== null && state.battle) {
       const rc = state.battle.rules.rulesContext; lastRules = rc;
       const row = [rc.currentMove, rc.battlers[0].hp, rc.battlers[1].hp, state.battle.rng.value, rc.moveHistory.lastMoves[0], rc.moveHistory.lastMoves[1]];
@@ -386,7 +397,7 @@ function play(initial: any, record: boolean, patchRng: number | null = null, pla
     frame0 = frame; actionMenuRng = state.battle?.rng.value ?? null; randomTurnNumber = (state.battle?.rules.rulesContext as any)?.randomTurnNumber ?? null;
     startRules = state.battle?.rules.rulesContext ?? null; startFacility = { rentsCount: state.facilityState?.rentsCount ?? null, performedRentalSwap: state.performedRentalSwap ?? null, heardBrainSpeech: state.facilityState?.heardBrainSpeech ?? { silver: false, gold: false } };
     if (patchRng !== null && state.battle) state = { ...state, battle: { ...state.battle, rng: { ...state.battle.rng, value: patchRng } } };
-    if (!record) return { frame0, actionMenuRng, randomTurnNumber, state, sound, inputs, error, frames: frame, timeline, decisions, turnEvents, wide, finalWide: null, playerStats: player.stats, battleOutcome: null, startRules, startFacility };
+    if (!record) return { frame0, actionMenuRng, randomTurnNumber, state, sound, inputs, error, frames: frame, timeline, decisions, turnEvents, wide, finalWide: null, playerStats: player.stats, battleOutcome: null, startRules, startFacility, cmdTrace };
     // The action cursor: bit 0 = right column, bit 1 = lower row (FIGHT 0, BAG 1, POKEMON 2, RUN 3). The engine keeps it between turns as the ROM does.
     const actionCursorTo = (want: 0 | 2) => {
       for (let i = 0; i < 3 && !ended; i += 1) {
@@ -459,7 +470,7 @@ function play(initial: any, record: boolean, patchRng: number | null = null, pla
       until(() => phase() === "action-menu");
     }
   } catch (e) { error = String(e); }
-  return { frame0, actionMenuRng, randomTurnNumber, state, sound, inputs, error, frames: frame, timeline, decisions, turnEvents, wide, finalWide: lastRules === null ? null : wideOf(lastRules), playerStats: player.stats, battleOutcome: lastRules?.battleOutcome ?? null, startRules, startFacility };
+  return { frame0, actionMenuRng, randomTurnNumber, state, sound, inputs, error, frames: frame, timeline, decisions, turnEvents, wide, finalWide: lastRules === null ? null : wideOf(lastRules), playerStats: player.stats, battleOutcome: lastRules?.battleOutcome ?? null, startRules, startFacility, cmdTrace };
 }
 
 const rel = (r: ReturnType<typeof play>, v: number | null | undefined) => (v === null || v === undefined ? v : v - (r.frame0 ?? 0));
@@ -468,7 +479,7 @@ const result = (r: ReturnType<typeof play>, extra: object = {}) => ({
   decisions: r.decisions.map((d) => ({ ...d, menuOpenFrame: rel(r, d.menuOpenFrame), fightMenuFrame: rel(r, d.fightMenuFrame), commitFrame: rel(r, d.commitFrame) })),
   seed, scene, policy, playerStats: r.playerStats, wide: r.wide, finalWide: r.finalWide, battleOutcome: r.battleOutcome,
   error: r.error, frame0: r.frame0, actionMenuRng: r.actionMenuRng, randomTurnNumber: r.randomTurnNumber, frames: r.frames,
-  sound: r.sound.map((e) => [(e[0] as number) - (r.frame0 ?? 0), ...e.slice(1)]), inputs: r.inputs, timeline: r.timeline, ...extra,
+  sound: r.sound.map((e) => [(e[0] as number) - (r.frame0 ?? 0), ...e.slice(1)]), inputs: r.inputs, timeline: r.timeline, ...(r.cmdTrace === null ? {} : { cmds: r.cmdTrace.rows.map((c) => [(c[0] as number) - (r.frame0 ?? 0), ...c.slice(1)]) }), ...extra,
 });
 
 if (mode === "request" && stage !== null) {

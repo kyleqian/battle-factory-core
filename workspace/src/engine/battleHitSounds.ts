@@ -96,7 +96,7 @@ export function emitBattleHitSounds(
   if (command.type === "hp" && command.battler === 0 && after !== null) {
     const { from, to } = command;
     const maxHp = segment.field.player.maxHP;
-    const end = battleResolutionCommandDuration(command, currentCommandField(after), "first") + HEALTHBAR_DONE_AFTER_HP_END + lag;
+    const end = battleResolutionCommandDuration(command, currentCommandField(after), "first") - (command.timing.tailFrames ?? 0) + HEALTHBAR_DONE_AFTER_HP_END + lag;
     scheduleAfter(Math.max(0, end), () => handleLowHpMusicChange(from, maxHp));
     scheduleAfter(Math.max(0, end + SET_MON_DATA_AFTER_HEALTHBAR_DONE), () => handleLowHpMusicChange(to, maxHp));
     return;

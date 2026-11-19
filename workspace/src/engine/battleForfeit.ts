@@ -7,6 +7,9 @@ import { createBattleCommandPresentationRenderView } from "./battleCommandPresen
 import type { BattleResolutionPresentationRenderView } from "./battleResolutionPresentationRender.ts";
 import type { BattleJsonObject, BattleState } from "./battleDecisionBoundary.ts";
 
+/** lbw7: the forfeit's post-battle black / room / black tail runs one tick ahead of the WIN-measured postwin boundaries (`lbra-forfeit-off` 304-362: room 56..94, Lobby field from terminal age 114). */
+export const FORFEIT_RETURN_TAIL_LEAD = 1;
+
 /** True once the forfeit message has run its ROM span and the battle must end. */
 export function battleForfeitMessageDone(
   presentation: BattleCommandPresentationState,

@@ -2,6 +2,7 @@ import { execSync } from "node:child_process";
 import { availableParallelism } from "node:os";
 import { defineConfig, configDefaults } from "vitest/config";
 import { computeEngineBuild, ENGINE_BUILD_DEFINE } from "./tools/build/engineBuild.ts";
+import { monPicFilesPlugin } from "./tools/build/monPicFiles.ts";
 
 // How many OTHER vitest runs are live right now.
 //
@@ -115,7 +116,12 @@ export default defineConfig(async ({ command, mode }) => ({
   define: {
     __POKEBENCH_BUILD_STAMP__: JSON.stringify(buildStamp()),
     ...(await engineBuildDefine(command)),
+    // dl3: the app build has the per-species picture files AND the full-table chunk (the `?pokebench=1` bench ABI is synchronous); the dev
+    // server and vitest have no files, only the full tables.
+    __POKEBENCH_SPRITE_FILES__: JSON.stringify(command === "build"),
+    __POKEBENCH_SPRITE_FULL__: "true",
   },
+  plugins: [monPicFilesPlugin()],
   build: {
     outDir: "dist",
     target: "es2022",

@@ -22,6 +22,11 @@ export function monPicPixelsInstalled(): boolean {
   return installed !== undefined;
 }
 
+/** The installed tables (dl3: the lib tells a per-species store from the full install by identity). */
+export function installedMonPicPixels(): MonPicPixelTables | undefined {
+  return installed;
+}
+
 function tables(): MonPicPixelTables {
   if (installed === undefined) throw new Error("mon pic pixels not installed");
   return installed;

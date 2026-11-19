@@ -76,8 +76,6 @@ import type {
   FactoryFullTurnDecisionRules,
 } from "../../src/engine/factoryBattleScriptFullTurnDecision.ts";
 import type {
-  FactoryBattleMoveSelectionCursors,
-  FactoryBattlePresentationBoundaries,
   FactoryRoundBattleOrchestratorState,
 } from "../../src/engine/factoryRoundBattleOrchestrator.ts";
 import { BATTLE_SCRIPT_STATUS2_MASKS } from "../../src/engine/battleScriptSourceConstants.ts";
@@ -325,6 +323,52 @@ function generatedBattleStartIntroMagnetonStage(state: EngineState, battleScene:
   };
 }
 
+// sta6m: real battle-start intro with an Intimidate / Trace lead (labs
+// tools/battle-lab/sta6m-{trace,intimp,both}-*.json). Personalities are the
+// ROM's own, read off tools/integration/sta6mIntroProbe.py's `parties`.
+function sta6mIntroStage(
+  state: EngineState,
+  battleScene: "on" | "off",
+  rngValue: number,
+  players: readonly (readonly [number, number])[],
+): EngineState {
+  const playerRentalRecords = players.map(([setId, personality]) =>
+    generatedCommandRecord(setId, FACTORY_LEGAL_CHALLENGE2_INITIAL_RENTAL_FIXED_IV, personality)) as unknown as
+    readonly [FactoryRentalRecord, FactoryRentalRecord, FactoryRentalRecord];
+  let orchestrator = createFactoryRoundBattleOrchestrator({
+    id: "sta6m-intro",
+    battleScene,
+    rngValue,
+    factoryWinStreak: 14,
+    playerTrainerId: 0x89ab_cdef,
+    battleTowerLevel50WinStreak: 14,
+    facilityState: { rentsCount: 0 },
+    rentals: {
+      type: "currentRecords",
+      playerRentalRecords,
+      savedRentalRecords: [
+        generatedCommandRecord(110),
+        generatedCommandRecord(130),
+        generatedCommandRecord(150),
+        generatedCommandRecord(115),
+        generatedCommandRecord(135),
+        generatedCommandRecord(145),
+      ],
+    },
+  });
+  orchestrator = beginFactoryRoundBattleStartIntro(orchestrator);
+  return {
+    ...state,
+    factoryRoundBattleOrchestrator: orchestrator,
+    rngMode: "frontierBattle",
+    rngValue: orchestrator.battle?.rng.value ?? state.rngValue,
+  };
+}
+
+const STA6M_TRACE_PLAYERS = [[273, 406636467], [267, 2659182065], [268, 1729349849]] as const;
+const STA6M_INTIMP_PLAYERS = [[307, 1729349849], [267, 768061940], [268, 1226039574]] as const;
+const STA6M_BOTH_PLAYERS = [[307, 1061100374], [267, 1024485265], [268, 90168024]] as const;
+
 // ISSUES #73: edge-relative scaffold for the LOSS terminal window
 // (docs/terminal-seam-loss-path-ground-truth.md). These battler configs only
 // exist to give createFactoryFullTurnBattleState a valid rules/request
@@ -461,6 +505,7 @@ const TERMINAL_SEAM_RECALL_EVENT_PROVENANCE = Object.freeze({
 function terminalSeamEvent(
   sequence: number,
   payload: BattleKernelSemanticEvent["payload"],
+  _provenanceHint?: { readonly opcodeName: string },
 ): BattleKernelSemanticEvent {
   return Object.freeze({
     sequence,
@@ -1011,6 +1056,17 @@ function rattataAtLevel(level: number, moveId = 69, item = 0): FactoryFullTurnBa
   });
 }
 
+function out2Knock(state: EngineState, scene: "on" | "off", item = 200): EngineState {
+  return midBattleSwitchStage(state, `out2-knockoff${item ? "" : "noitem"}-${scene}`, [RATTATA_LV50_BENCH, RATTATA_LV50_BENCH], [105, 105], {
+    rngSeed: 1,
+    battleScene: scene,
+    player: rattataAtLevel(50, 282),
+    trainer: rattataAtLevel(100, 111, item),
+    usedMessageHoldFrames: 0,
+    sceneOffNoAnimations: scene === "off",
+  });
+}
+
 function aud241bStage(
   state: EngineState,
   id: string,
@@ -1195,8 +1251,6 @@ type MidBattleSwitchStageOptions = Readonly<{
   playerBenchNone?: boolean;
   /** Stage the 21st battle of the run: the Silver Factory Head round (`currentOpponent.frontierBrain`). */
   frontierBrain?: boolean;
-  /** aud259: the staged battle's RNG seed (default 1); a sub-100 accuracy move can miss in the engine while the ROM lab hits. */
-  rngSeed?: number;
   /** aud259: both staged battlers start with isFirstTurn 1 (a fresh battle's first selection), as the ROM lab's Fake Out needs. */
   firstTurn?: boolean;
 }>;
@@ -1491,6 +1545,7 @@ function partyMenuStatusItemOffStage(state: EngineState): EngineState {
 // fixture's verbatim segments from there.
 const BUTTERFREE_TORMENTED_LV50: FactoryFullTurnBattlerConfig = Object.freeze({
   species: 12,
+  moveId: 33,
   moves: [33, 16, 0, 0] as const, // TACKLE, GUST
   // Same staged-gender class as MURKROW: the oracle's BUTTERFREE is male
   // (the ~24px "detail-box type cell" residual at (190-194, 79-87) is the
@@ -1515,6 +1570,7 @@ const BUTTERFREE_TORMENTED_LV50: FactoryFullTurnBattlerConfig = Object.freeze({
 
 const MURKROW_TORMENT_LV50: FactoryFullTurnBattlerConfig = Object.freeze({
   species: 198,
+  moveId: 259,
   // Same staged-gender class as RATTATA_LV50 above: the oracle's ROM-derived
   // MURKROW is male (the ~24px "pink-vs-cyan" cluster at (55,21)-(59,28) in
   // PROGRESS 958's residual list is the opponent healthbox gender glyph, not
@@ -1784,6 +1840,12 @@ export const APP_STAGES: Readonly<Record<string, AppStage>> = {
   }),
   "battle-command-generated-off": generatedBattleCommandStage,
   "factory-arbitrary-intro-yoshi-off": generatedBattleStartIntroArbitraryStage,
+  "sta6m-intro-trace-off": (state) => sta6mIntroStage(state, "off", 70, STA6M_TRACE_PLAYERS),
+  "sta6m-intro-trace-on": (state) => sta6mIntroStage(state, "on", 70, STA6M_TRACE_PLAYERS),
+  "sta6m-intro-intimp-off": (state) => sta6mIntroStage(state, "off", 70, STA6M_INTIMP_PLAYERS),
+  "sta6m-intro-intimp-on": (state) => sta6mIntroStage(state, "on", 70, STA6M_INTIMP_PLAYERS),
+  "sta6m-intro-both-off": (state) => sta6mIntroStage(state, "off", 9, STA6M_BOTH_PLAYERS),
+  "sta6m-intro-both-on": (state) => sta6mIntroStage(state, "on", 9, STA6M_BOTH_PLAYERS),
   "factory-arbitrary-intro-magneton-off": generatedBattleStartIntroMagnetonStage,
   // aud241a: Scene ON siblings (dev-only; same tuples), for the ROM sound windows on the Scene ON oracle.
   "factory-arbitrary-intro-yoshi-on": (state) => generatedBattleStartIntroArbitraryStage(state, "on"),
@@ -2062,6 +2124,8 @@ export const APP_STAGES: Readonly<Record<string, AppStage>> = {
   "aud250-focuspunch-opponent-on": (state) => aud241bStage(state, "aud250-focuspunch-opponent-on", "on", 12, 50, 69, undefined, false, 264),
   "aud250-leechseed-opponent-on": (state) => aud241bStage(state, "aud250-leechseed-opponent-on", "on", 12, 50, 69, undefined, false, 73),
   "aud242b-flatter-player-on": (state) => aud241bStage(state, "aud242b-flatter-player-on", "on", 50, 12, 260, undefined, false, 69),
+  "sta6m-flatter-player-off": (state) => aud241bStage(state, "sta6m-flatter-player-off", "off", 50, 12, 260, undefined, false, 69),
+  "sta6m-swagger-player-off": (state) => aud241bStage(state, "sta6m-swagger-player-off", "off", 50, 12, 207, undefined, false, 69),
   "aud242b-superpower-player-on": (state) => aud241bStage(state, "aud242b-superpower-player-on", "on", 50, 12, 276, undefined, false, 69),
   "aud242b-dragonrage-opponent-off": (state) => aud241bStage(state, "aud242b-dragonrage-opponent-off", "off", 12, 50, 69, undefined, false, 82),
   // aud242e: sprite and mon-task lifetimes (docs/aud242-move-anim-sounds.md section 9).
@@ -2133,6 +2197,34 @@ export const APP_STAGES: Readonly<Record<string, AppStage>> = {
   "aud242o-triattack-player-on": (state) => aud241bStage(state, "aud242o-triattack-player-on", "on", 50, 12, 161, undefined, false, 69),
   "aud242o-rollout-player-on": (state) => aud241bStage(state, "aud242o-rollout-player-on", "on", 50, 12, 205, undefined, false, 69),
   // hpd1: fixed-damage hit-hold windows (tools/integration/hpd1Labs.py, docs/hpd1-hp-hold.md): the Lv100 foe uses Defense Curl, the player's fixed-damage move follows.
+  "out2-horndrill-on": (state) => aud241bStage(state, "out2-horndrill-on", "on", 10, 100, 32, undefined, false, 111),
+  "out2-horndrill-off": (state) => aud241bStage(state, "out2-horndrill-off", "off", 10, 100, 32, undefined, false, 111),
+  "pau3-hjk-on": (state) => aud241bStage(state, "pau3-hjk-on", "on", 50, 50, 136, undefined, false, 182, 1160559944),
+  "pau3-hjk-off": (state) => aud241bStage(state, "pau3-hjk-off", "off", 50, 50, 136, undefined, false, 182, 1160559944),
+  "pau3-rest-on": (state) => aud241bStage(state, "pau3-rest-on", "on", 50, 60, 156, undefined, false, 253, 2184965245),
+  "pau3-rest-off": (state) => aud241bStage(state, "pau3-rest-off", "off", 50, 60, 156, undefined, false, 253, 2184965245),
+  "pau3-safeguard-on": (state) => aud241bStage(state, "pau3-safeguard-on", "on", 50, 50, 219, undefined, false, 111, 1160559944),
+  "pau3-safeguard-off": (state) => aud241bStage(state, "pau3-safeguard-off", "off", 50, 50, 219, undefined, false, 111, 1160559944),
+  "pau2-toxic-on": (state) => aud241bStage(state, "pau2-toxic-on", "on", 50, 50, 92, undefined, false, 92),
+  "pau2-toxic-off": (state) => aud241bStage(state, "pau2-toxic-off", "off", 50, 50, 92, undefined, false, 92),
+  "out2-knockoffnoitem-on": (state) => out2Knock(state, "on", 0),
+  "out2-knockoffnoitem-off": (state) => out2Knock(state, "off", 0),
+  "out2-knockoffrev-on": (state) => midBattleSwitchStage(state, "out2-knockoffrev-on", [RATTATA_LV50_BENCH, RATTATA_LV50_BENCH], [105, 105], { rngSeed: 1, battleScene: "on", player: rattataAtLevel(50, 111, 200), trainer: rattataAtLevel(100, 282), usedMessageHoldFrames: 0, sceneOffNoAnimations: false }),
+  "out2-knockoffrev-off": (state) => midBattleSwitchStage(state, "out2-knockoffrev-off", [RATTATA_LV50_BENCH, RATTATA_LV50_BENCH], [105, 105], { rngSeed: 1, battleScene: "off", player: rattataAtLevel(50, 111, 200), trainer: rattataAtLevel(100, 282), usedMessageHoldFrames: 0, sceneOffNoAnimations: true }),
+  "out2-knockoff-on": (state) => out2Knock(state, "on"),
+  "out2-knockoff-off": (state) => out2Knock(state, "off"),
+  "hpf1-pc-sonicboom-on": (state) => aud241bStage(state, "hpf1-pc-sonicboom-on", "on", 100, 50, 111, undefined, false, 49),
+  "hpf1-pc-sonicboom-off": (state) => aud241bStage(state, "hpf1-pc-sonicboom-off", "off", 100, 50, 111, undefined, false, 49),
+  "hpf1-pc-dragonrage-on": (state) => aud241bStage(state, "hpf1-pc-dragonrage-on", "on", 100, 50, 111, undefined, false, 82),
+  "hpf1-pc-dragonrage-off": (state) => aud241bStage(state, "hpf1-pc-dragonrage-off", "off", 100, 50, 111, undefined, false, 82),
+  "hpf1-pc-toss10-on": (state) => aud241bStage(state, "hpf1-pc-toss10-on", "on", 100, 10, 111, undefined, false, 69),
+  "hpf1-pc-toss10-off": (state) => aud241bStage(state, "hpf1-pc-toss10-off", "off", 100, 10, 111, undefined, false, 69),
+  "hpf1-pa-sonicboom-on": (state) => aud241bStage(state, "hpf1-pa-sonicboom-on", "on", 50, 100, 111, undefined, false, 49),
+  "hpf1-pa-sonicboom-off": (state) => aud241bStage(state, "hpf1-pa-sonicboom-off", "off", 50, 100, 111, undefined, false, 49),
+  "hpf1-pa-dragonrage-on": (state) => aud241bStage(state, "hpf1-pa-dragonrage-on", "on", 50, 100, 111, undefined, false, 82),
+  "hpf1-pa-dragonrage-off": (state) => aud241bStage(state, "hpf1-pa-dragonrage-off", "off", 50, 100, 111, undefined, false, 82),
+  "hpf1-pk-dragonrage-on": (state) => aud241bStage(state, "hpf1-pk-dragonrage-on", "on", 5, 50, 111, undefined, false, 82),
+  "hpf1-pk-dragonrage-off": (state) => aud241bStage(state, "hpf1-pk-dragonrage-off", "off", 5, 50, 111, undefined, false, 82),
   "hpd1-sonicboom-on": (state) => aud241bStage(state, "hpd1-sonicboom-on", "on", 50, 100, 49, undefined, false, 111),
   "hpd1-sonicboom-off": (state) => aud241bStage(state, "hpd1-sonicboom-off", "off", 50, 100, 49, undefined, false, 111),
   "hpd1-dragonrage-on": (state) => aud241bStage(state, "hpd1-dragonrage-on", "on", 50, 100, 82, undefined, false, 111),
@@ -2140,6 +2232,24 @@ export const APP_STAGES: Readonly<Record<string, AppStage>> = {
   "hpd1-toss10-on": (state) => aud241bStage(state, "hpd1-toss10-on", "on", 10, 100, 69, undefined, false, 111),
   "hpd1-toss10-off": (state) => aud241bStage(state, "hpd1-toss10-off", "off", 10, 100, 69, undefined, false, 111),
   "hpd1-toss30-on": (state) => aud241bStage(state, "hpd1-toss30-on", "on", 30, 100, 69, undefined, false, 111),
+  "hpd8-aerialace-player-on": (state) => aud241bStage(state, "hpd8-aerialace-player-on", "on", 50, 12, 332, undefined, false, 69),
+  "hpd8-surf-player-on": (state) => aud241bStage(state, "hpd8-surf-player-on", "on", 50, 12, 57, undefined, false, 69),
+  "hpd8-quickattack-player-on": (state) => aud241bStage(state, "hpd8-quickattack-player-on", "on", 50, 12, 98, undefined, false, 69),
+  "hpd8-rockslide-player-on": (state) => aud241bStage(state, "hpd8-rockslide-player-on", "on", 50, 12, 157, undefined, false, 69),
+  "hpd8-bubblebeam-player-on": (state) => aud241bStage(state, "hpd8-bubblebeam-player-on", "on", 50, 12, 61, undefined, false, 69),
+  "hpd8-fireblast-player-on": (state) => aud241bStage(state, "hpd8-fireblast-player-on", "on", 50, 12, 126, undefined, false, 69),
+  "liv2-flamethrower-player-on": (state) => aud241bStage(state, "liv2-flamethrower-player-on", "on", 50, 12, 53, undefined, false, 69),
+  "liv2-solarbeam-player-on": (state) => aud241bStage(state, "liv2-solarbeam-player-on", "on", 50, 12, 76, undefined, false, 69),
+  "liv2-bite-player-on": (state) => aud241bStage(state, "liv2-bite-player-on", "on", 50, 12, 44, undefined, false, 69),
+  "liv2-earthquake-player-on": (state) => aud241bStage(state, "liv2-earthquake-player-on", "on", 50, 12, 89, undefined, false, 69),
+  "lse1-leechseed-player-on": (state) => aud241bStage(state, "lse1-leechseed-player-on", "on", 50, 12, 73, undefined, false, 69),
+  "lse1-hydropump-player-on": (state) => aud241bStage(state, "lse1-hydropump-player-on", "on", 50, 12, 56, undefined, false, 69),
+  "lse1-cosmicpower-player-on": (state) => aud241bStage(state, "lse1-cosmicpower-player-on", "on", 50, 12, 322, undefined, false, 69),
+  "lse1-blizzard-player-on": (state) => aud241bStage(state, "lse1-blizzard-player-on", "on", 50, 12, 59, undefined, false, 69),
+  "lse1-calmmind-player-on": (state) => aud241bStage(state, "lse1-calmmind-player-on", "on", 50, 12, 347, undefined, false, 69),
+  "lse1-encore-player-on": (state) => aud241bStage(state, "lse1-encore-player-on", "on", 50, 12, 227, undefined, false, 69),
+  "lse1-hypnosis-player-on": (state) => aud241bStage(state, "lse1-hypnosis-player-on", "on", 50, 12, 95, undefined, false, 69, 5),
+  "hpd8-magicalleaf-player-on": (state) => aud241bStage(state, "hpd8-magicalleaf-player-on", "on", 50, 12, 345, undefined, false, 69),
   "hpd1-toss30-off": (state) => aud241bStage(state, "hpd1-toss30-off", "off", 30, 100, 69, undefined, false, 111),
   "hpd1-toss50-on": (state) => aud241bStage(state, "hpd1-toss50-on", "on", 50, 100, 69, undefined, false, 111),
   "hpd1-toss50-off": (state) => aud241bStage(state, "hpd1-toss50-off", "off", 50, 100, 69, undefined, false, 111),
@@ -2170,6 +2280,10 @@ export const APP_STAGES: Readonly<Record<string, AppStage>> = {
   "aud262-memento-opponent-on": (state) => aud242lBlizzardStage(state, "aud262-memento-opponent-on", "opponent", 146, 143, 262),
   "aud262-mementogyarados-opponent-on": (state) => aud242lBlizzardStage(state, "aud262-mementogyarados-opponent-on", "opponent", 130, 19, 262),
   "aud262-mementoonix-opponent-on": (state) => aud242lBlizzardStage(state, "aud262-mementoonix-opponent-on", "opponent", 95, 95, 262),
+  "exp1-explosion-player-on": (state) => aud242lBlizzardStage(state, "exp1-explosion-player-on", "player", 19, 143, 153),
+  "exp1-explosion-opponent-on": (state) => aud242lBlizzardStage(state, "exp1-explosion-opponent-on", "opponent", 146, 143, 153),
+  "exp1-selfdestruct-player-on": (state) => aud242lBlizzardStage(state, "exp1-selfdestruct-player-on", "player", 19, 143, 120),
+  "exp1-selfdestruct-opponent-on": (state) => aud242lBlizzardStage(state, "exp1-selfdestruct-opponent-on", "opponent", 146, 143, 120),
   "aud262-present-player-on": (state) => aud242lBlizzardStage(state, "aud262-present-player-on", "player", 19, 143, 217),
   "aud262-presentheal-player-on": (state) => aud241bStage(state, "aud262-presentheal-player-on", "on", 50, 80, 217, undefined, false, 187, 5),
   "adp1s-withdraw-player-on": (state) => aud242lBlizzardStage(state, "adp1s-withdraw-player-on", "player", 19, 19, 110),
@@ -2312,6 +2426,33 @@ export const APP_STAGES: Readonly<Record<string, AppStage>> = {
   "party-menu-status-item-off": partyMenuStatusItemOffStage,
 };
 
+/** lbw7: a staged orchestrator draws its own opponent; `appStage.opponentTrainerId` names the lab's (ROM) trainer so the post-battle room draws the right class. */
+export function applyTraceStage(trace: Trace, state: EngineState): EngineState {
+  const stage = APP_STAGES[trace.appStage!.id];
+  if (!stage) throw new Error(`unknown app stage ${trace.appStage!.id}`);
+  const staged = stage(state);
+  const trainerId = trace.appStage!.opponentTrainerId;
+  const o = staged.factoryRoundBattleOrchestrator;
+  if (trainerId === undefined || o === null) return staged;
+  return {
+    ...staged,
+    factoryRoundBattleOrchestrator: Object.freeze({
+      ...o,
+      round: Object.freeze({
+        ...o.round,
+        rules: Object.freeze({
+          ...o.round.rules,
+          currentOpponent: Object.freeze({
+            ...o.round.rules.currentOpponent,
+            id: `factory-trainer-${trainerId}`,
+            trainerName: getFactoryTrainerPresentation(trainerId).name,
+          }),
+        }),
+      }),
+    }),
+  };
+}
+
 export async function renderAppTrace(trace: Trace): Promise<AppCapture[]> {
   const presentationRng = presentationRngFromTrace(trace);
   let state = createInitialState({
@@ -2331,9 +2472,7 @@ export async function renderAppTrace(trace: Trace): Promise<AppCapture[]> {
 
   const applyStage = (): void => {
     if (!trace.appStage || trace.appStage.frame !== frame) return;
-    const stage = APP_STAGES[trace.appStage.id];
-    if (!stage) throw new Error(`unknown app stage ${trace.appStage.id}`);
-    state = stage(state);
+    state = applyTraceStage(trace, state);
     const frozenCursorAge = TERMINAL_WINDOW_FROZEN_CURSOR_AGE[trace.appStage.id];
     if (frozenCursorAge !== undefined) {
       heldCursorMask = terminalWindowHeldCursorMask(state, frozenCursorAge);

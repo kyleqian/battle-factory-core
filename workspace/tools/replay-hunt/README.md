@@ -58,3 +58,16 @@ use `LUCK_HUNT_DAY` only in tests.
 Test (no ROM drive): `tools/replay-hunt/test-luckHunt.sh` (a deadline in the past exits 0 at once with a valid summary and no seed; a
 deadline 15 s ahead ends within one seed's time; a design whose rule already has a coverage stage file is skipped and logged once, and a run with only
 covered designs ends at once with no seed).
+
+## luck5 changes
+
+- Seven new designs in `luck-designs/` (R058 R073 R078 R079 R082 R096 R101): the player's Clefable 389 calls Metronome ten times against Shuckle 528 in challenge 7. One design per rule, as before; no weighting and no change to the env interface or the seed rule. R073 is now covered (`stages/coverage/R073-*.json`), so the hunter skips it.
+- `PREHUNT_CALLS=1 prehunt.py ...` prints, per seed, the Metronome calls of the engine battle (`[player-side-flag, MOVE_NAME]`; `NONE` = a call that ended without a move). Use it to estimate a chance per seed.
+- A shared-battle trial: write one stage whose `cover` lists the markers of every rule the battle reaches (`coverAny`) and run `prehunt.py` once; the hit's `ran:<i>` key names the rule.
+
+## luck6 changes
+
+- `makeLuck6.py` writes the luck6 designs (`python3 tools/replay-hunt/makeLuck6.py [OUTDIR]`; the files in `luck-designs/` are its output, markers read from `rule-coverage-c-rules.json`). Designs: R050 R051 R052 R053 (the AI's Clefable 389 against a passive Shuckle 528; one battle, four markers), R100 (the same AI Clefable against Golduck 418, Cloud Nine), R091 R063 R064 R099 (challenge 1: the player's Chansey 227 against Banette 237 / Wigglytuff 207 / Minun 187 / Wartortle 176). R051, R052 and R053 are covered (`stages/coverage/`) so the hunter skips them.
+- Stall fix: every Clefable battle now ends with Salamence 753 playing Aerial Ace (slot 2) instead of Snorlax 826, because Aerial Ace never misses and so a foe's Double Team stack cannot hold the battle until the frame budget. The seven luck5 designs were patched the same way (0 stalls on the 17 seeds 920200-920216 where 3 had stalled; one stall in 14 for the AI-Clefable shape).
+- Order: the round-robin is unchanged (one fresh seed per open design per round), so no design starves; the chances differ by about 10x (see `rule-coverage.md` "luck6"), the hunter does not weight them.
+

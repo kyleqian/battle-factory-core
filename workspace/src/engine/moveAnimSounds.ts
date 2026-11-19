@@ -9,7 +9,7 @@ import { factoryBattleBgm } from "./battleStartSounds.ts";
 import { BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS } from "./battleScriptSourceConstants.ts";
 import type { BattleResolutionPresentationState } from "./battleResolutionPresentation.ts";
 import { liveMoveSourceAge, statsChangeSourceAge } from "./battleResolutionPresentationRender.ts";
-import { FOCUS_PUNCH_SETUP_BEHIND_SUBSTITUTE_COMMAND_FRAMES, HELD_ITEM_EFFECT_COMMAND_FRAMES, WEATHER_CONTINUES_LAUNCH_LEAD_ROWS, isWeatherContinuesAnimation, type BattleStatusAnimationName, type WeatherContinuesAnimation } from "./battleResolutionPresentation.ts";
+import { STA5_STATUS_BODY_TAIL_ROWS, FOCUS_PUNCH_SETUP_BEHIND_SUBSTITUTE_COMMAND_FRAMES, HELD_ITEM_EFFECT_COMMAND_FRAMES, WEATHER_CONTINUES_LAUNCH_LEAD_ROWS, isWeatherContinuesAnimation, type BattleStatusAnimationName, type WeatherContinuesAnimation } from "./battleResolutionPresentation.ts";
 
 export interface TimedOp {
   readonly op: "playsewithpan" | "playse" | "waitplaysewithpan" | "loopsewithpan" | "panse" | "panse_adjustnone" | "panse_adjustall" | "setpan" | "soundtask_loopse" | "soundtask_fireblast" | "soundtask_se1" | "soundtask_se2" | "sprite_confuseray_ball" | "task_rollout" | "task_shockwave_bolt";
@@ -425,8 +425,25 @@ const STATUS_ANIMATION_LABELS: Readonly<Record<BattleStatusAnimationName, string
 const WEATHER_LABELS: Readonly<Record<WeatherContinuesAnimation, string>> = {
   RAIN_CONTINUES: "General_Rain", SUN_CONTINUES: "General_Sun", SANDSTORM_CONTINUES: "General_Sandstorm", HAIL_CONTINUES: "General_Hail",
 };
-/** Status-animation command age (rows since the launch, after the IsBattleSEPlaying gate) of the script's first command. */
+/**
+ * Status-animation command age (rows since the launch, after the IsBattleSEPlaying gate) of the script's first command. sta5: 0 = the ROM's
+ * `gAnimScriptActive` rise row (the first SE is that row plus the table row's own frame), measured where the move body in front of it
+ * carries its script lead + tail (the STA5 bodies: Flatter / Swagger / Spore / Toxic). Everywhere else the 7 stays: the body's lead is not landed
+ * and the 7 compensates it (Love Kiss, Glare, Will-O-Wisp, Refresh, Confuse Ray, a cure berry: ROM minus ours 3 / 4 / 3 / 2 / 1 / 3 at 7, 10 / 11 / 10 / 9 / -6 / 10 at 0).
+ */
 export const STATUS_ANIMATION_SCRIPT_AGE = 7;
+export const STATUS_ANIMATION_AUDITED_BODY_SCRIPT_AGE = 0;
+function statusAnimationScriptAge(state: BattleResolutionPresentationState): number {
+  for (let s = 0; s <= state.segmentIndex; s += 1) {
+    const commands = state.segments[s]!.commands;
+    const end = s === state.segmentIndex ? state.commandIndex : commands.length;
+    for (let c = 0; c < end; c += 1) {
+      const command = commands[c]!;
+      if (command.type === "move-animation" && (command.timing.bodyLeadFrames ?? 0) > 0 && command.animation !== undefined && STA5_STATUS_BODY_TAIL_ROWS.has(command.animation.moveId)) return STATUS_ANIMATION_AUDITED_BODY_SCRIPT_AGE;
+    }
+  }
+  return STATUS_ANIMATION_SCRIPT_AGE;
+}
 /** Weather-continues body age -> script row: the move-body clock (FIRST_COMMAND_AGE + AGE_TO_SOUND_ROWS). */
 const WEATHER_SCRIPT_AGE = FIRST_COMMAND_AGE + AGE_TO_SOUND_ROWS;
 
@@ -462,11 +479,11 @@ function generalVariant(label: string, attackerSide: 0 | 1): readonly TimedOp[] 
 
 /**
  * psn2: the script's `end` waits for its parallel loopsewithpan task (battle_anim.c:482), so an SE past the command's window still plays. Schedules the rows whose command age
- * (script row + STATUS_ANIMATION_SCRIPT_AGE) falls at or after the window end; only Status_Poison's 6th SE 148 (age 77 of 71) has one. Sound-only: the window is not lengthened.
+ * (script row + the script age) falls at or after the window end (none at age 0: Status_Poison's 6th SE 148 is age 70 of 71). Sound-only: the window is not lengthened.
  */
-function scheduleStatusAnimationTail(ops: readonly TimedOp[], context: AnimPanContext, windowRows: number): void {
+function scheduleStatusAnimationTail(ops: readonly TimedOp[], context: AnimPanContext, windowRows: number, scriptAge: number): void {
   const tailRows = new Set<number>();
-  for (const op of ops) for (const row of moveAnimOpRows(op, context, true)) if (op.frame + row.offset + STATUS_ANIMATION_SCRIPT_AGE >= windowRows) tailRows.add(op.frame + row.offset);
+  for (const op of ops) for (const row of moveAnimOpRows(op, context, true)) if (op.frame + row.offset + scriptAge >= windowRows) tailRows.add(op.frame + row.offset);
   for (const scriptRow of tailRows) scheduleAfter(scriptRow, () => emitOpsAt(ops, context, scriptRow, true));
 }
 
@@ -494,8 +511,9 @@ export function emitGeneralAnimSounds(after: BattleResolutionPresentationState |
     const side = command.battler === 0 ? "player" : "opponent";
     const ops = generalVariant(STATUS_ANIMATION_LABELS[command.animation], command.battler);
     const context = { attackerSide: side, targetSide: side, statusAnimActive: true } as const;
-    emitOpsAt(ops, context, age - STATUS_ANIMATION_SCRIPT_AGE, true);
-    if (age === STATUS_ANIMATION_SCRIPT_AGE) scheduleStatusAnimationTail(ops, context, command.timing.minimumFrames - (command.timing.seGateFrames ?? 0));
+    const scriptAge = statusAnimationScriptAge(after);
+    emitOpsAt(ops, context, age - scriptAge, true);
+    if (age === scriptAge) scheduleStatusAnimationTail(ops, context, command.timing.minimumFrames - (command.timing.seGateFrames ?? 0), scriptAge);
   } else if (command.type === "general-animation" && command.animated === true && isWeatherContinuesAnimation(command.animation)) {
     const age = elapsed - WEATHER_CONTINUES_LAUNCH_LEAD_ROWS;
     if (age < 0) return;

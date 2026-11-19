@@ -4,7 +4,7 @@
 usage: hpd2Probe.py <scenario.json> <on|off> <output.json> [maxFrames]
 Per trace frame (frame 0 = after BattleLab.prepare): gBattleMainFunc (`main`), gBattlescriptCurrInstr (`ptr`), gBattleControllerExecFlags (`exec`),
 gBattleCommunication[0..3] (`comm`), gCurrentActionFuncId (`act`), gBattlerControllerFuncs[0..1] (`ctl`), gAnimScriptActive (`anim`),
-gBattleTypeFlags is not recorded.  Derived from sub183RomFrames.py; no screen capture.
+gBattleTypeFlags is not recorded. hpf2: also `hp` / `mhp` = gBattleMons[0..1].hp / maxHP.  Derived from sub183RomFrames.py; no screen capture.
 """
 from __future__ import annotations
 
@@ -44,7 +44,8 @@ def main() -> None:
     def sample() -> None:
         row = {"f": frame, "main": u32(addr("gBattleMainFunc")), "ptr": u32(ptr_a), "exec": u32(exec_a), "anim": u8(act_a),
                "comm": [u8(addr("gBattleCommunication") + i) for i in range(4)], "act": u8(addr("gCurrentActionFuncId")),
-               "ctl": [u32(addr("gBattlerControllerFuncs") + 4 * i) for i in range(2)]}
+               "ctl": [u32(addr("gBattlerControllerFuncs") + 4 * i) for i in range(2)],
+               "hp": [u16(addr("gBattleMons") + 0x58 * i + 0x28) for i in range(2)], "mhp": [u16(addr("gBattleMons") + 0x58 * i + 0x2C) for i in range(2)]}
         rows.append(row)
 
     sample()

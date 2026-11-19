@@ -364,6 +364,15 @@ function menuChoice(state: FactoryLobbyAttendantState, def: AttendantScreenDef, 
   }
 }
 
+/**
+ * lbw8: the ROM's `releaseall` runs on the frame before this conversation's `done` tick: the Lobby NPCs resume (and draw RNG) on the tick that
+ * brings `closingTick` to `boxCloseTick - 1` and on the `done` tick (ROM `sGlobalScriptContextStatus` -> 2 one frame before the app's `done`,
+ * all seven farewell routes of lbrb-*). Walking to the draft keeps the lock.
+ */
+export function isFactoryLobbyAttendantNpcsReleased(state: FactoryLobbyAttendantState): boolean {
+  return state.phase === "closing" && state.closingTo === "freeRoam" && state.closingTick >= ATTENDANT_TIMING.boxCloseTick - 1;
+}
+
 function closeBox(state: FactoryLobbyAttendantState, to: "freeRoam" | "walk"): FactoryLobbyAttendantState {
   return Object.freeze({ ...state, phase: "closing", closingTick: 1, closingTo: to });
 }

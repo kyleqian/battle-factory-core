@@ -48,8 +48,8 @@ export function iu120Extra(id: number, side: Iu120Side = "player"): number {
  * (census 0..999 per-move frame delta; the same tail every Scene ON body of that move carries). 0 for every other move.
  */
 const ONT193_SCRIPT_TAIL_FRAMES: ReadonlyMap<number, number> = new Map(Object.entries({ 14: 3, 28: 6, 39: 3, 43: 3, 50: 4, 97: 3, 103: 3, 106: 3, 107: 3, 108: 3, 112: 3, 115: 3, 116: 4, 133: 3, 148: 3, 151: 3, 178: 3, 180: 4, 182: 3, 195: 3, 197: 3, 201: 4, 203: 3, 213: 4, 215: 4, 219: 4, 230: 3, 254: 3, 259: 4, 266: 3, 269: 4, 271: 5, 272: 4, 275: 3, 277: 2, 281: 9, 288: 3, 294: 3, 312: 4, 319: 3, 321: 5, 334: 3, 336: 3, 339: 4, 349: 4,
-  // tl205 (docs/tl204-zero-tail-rows.md): the tl204-measured zero-tail moves, tail frames = scriptTailRows - 1 (trail -1, post 0): Leech Seed, Double Team, Light Screen, Scary Face, Charm, Rain Dance, Sunny Day, Hail, Calm Mind.
-  73: 39, 104: 5, 113: 6, 184: 5, 204: 5, 240: 5, 241: 6, 258: 6, 347: 6 }).map(([id, frames]) => [Number(id), frames]));
+  // tl205 (docs/tl204-zero-tail-rows.md): the tl204-measured zero-tail moves, tail frames = scriptTailRows - 1 (trail -1, post 0): Leech Seed, Double Team, Light Screen, Scary Face, Charm, Rain Dance, Sunny Day, Hail, Calm Mind (lse2: Leech Seed 3 and Calm Mind 4, their leads are presented in front of the body).
+  73: 3, 104: 5, 113: 6, 184: 5, 204: 5, 240: 5, 241: 6, 258: 6, 347: 4 }).map(([id, frames]) => [Number(id), frames]));
 export function ont193ScriptTail(id: number): number {
   return ONT193_SCRIPT_TAIL_FRAMES.get(id) ?? 0;
 }
@@ -58,16 +58,33 @@ export function ont193ScriptTail(id: number): number {
  * hpd4 / hpd5 (docs/hpd1-hp-hold.md): the audited bodies present the ROM script lead (the rows `attackanimation` runs after the used print) as the command's first
  * rows and a hit tail after the live body. The test-side copy of production's lead (route-measured, player attacker, first body) and HPD4_BODY_TAIL_ROWS.
  */
-export const HPD4_BODY_LEAD_ROWS: ReadonlyMap<number, number> = new Map([[49, 9], [82, 9], [111, 3], [205, 10], [301, 10], [69, 6]]);
+const HPD8_SHAPE_A_IDS: readonly number[] = [332, 94, 85, 38, 98, 34, 246, 202, 58, 57, 91, 165, 157, 61, 126, 345, 53, 76, 44, 188, 89, 185, 56, 59];
+// lse2: test-side copies of production's LSE2_BODY_LEAD_MOVE_IDS leads and LSE2_BODY_TAIL_ROWS; Hypnosis (95) is an STA5 body with lead 7.
+const LSE2_BODY_LEAD_ROWS: ReadonlyMap<number, number> = new Map([[73, 36], [322, 2], [347, 2], [227, 2], [95, 7]]);
+const LSE2_BODY_TAIL_ROWS: ReadonlyMap<number, number> = new Map([[322, 3], [347, 3], [59, 2], [227, 10]]);
+export const HPD4_BODY_LEAD_ROWS: ReadonlyMap<number, number> = new Map([[49, 9], [82, 9], [111, 3], [205, 10], [301, 10], [69, 6], ...HPD8_SHAPE_A_IDS.map((id): [number, number] => [id, id === 89 ? 11 : 5])]);
 export const HPD4_BODY_TAIL_ROWS: ReadonlyMap<number, number> = new Map([[49, 3], [82, 26], [111, 3], [205, 3], [301, 3], [69, 1]]);
+// liv2: Self-Destruct has no body lead (its hp command carries it) but a 9-row hit tail after the live window; the age holds the last body row there.
+const LIVE_MOVE_LEADLESS_TAIL_ROWS: ReadonlyMap<number, number> = new Map([[120, 9]]);
+// hpd8: the shape-A bodies (production's HPD8_SHAPE_A_MOVE_IDS) have lead 5 (the EffectHit family's instruction count) and a hit tail of 6 - pre - post.
+// Dig's lead is the attack turn's; a caller that presents the charge turn passes no lead.
+// A shape-A body's lead is the same 5 on both sides and every route, so callers that pass no lead get it; Dig (91) and Solar Beam (76: setup turn 0 has none; the unleash passes lead 5 and counts its 39 idle rows in the duration) are excluded (their charge turns have none).
+const HPD8_DEFAULT_LEAD: ReadonlyMap<number, number> = new Map([...HPD8_SHAPE_A_IDS.filter((id) => id !== 91 && id !== 76).map((id): [number, number] => [id, id === 89 ? 11 : 5]), ...LSE2_BODY_LEAD_ROWS]);
+// sta5: the Flatter / Swagger / Spore / Toxic bodies' script tail (test-side copy of STA5_STATUS_BODY_TAIL_ROWS); their lead (Flatter / Swagger 2, Spore 7, Toxic 10) is passed by the caller.
+export const STA5_STATUS_BODY_TAIL_ROWS: ReadonlyMap<number, number> = new Map([[260, 4], [207, 5], [147, 0], [92, 7], [95, 0]]);
+function hpd4BodyTail(id: number, side: Iu120Side): number {
+  const table = HPD4_BODY_TAIL_ROWS.get(id) ?? STA5_STATUS_BODY_TAIL_ROWS.get(id) ?? LSE2_BODY_TAIL_ROWS.get(id);
+  if (table !== undefined) return table;
+  return HPD8_SHAPE_A_IDS.includes(id) ? Math.max(0, 6 - iu120Pre(id, side) - iu120Post(id, side)) : 0;
+}
 /** The rows an audited body's lead and hit tail add; 0 unless the caller passes the body's lead (Ice Ball: 10 on turn 1, 9 after; the others HPD4_BODY_LEAD_ROWS). */
-export function hpd4BodyRows(id: number, lead = 0): number {
-  return lead === 0 ? 0 : lead + (HPD4_BODY_TAIL_ROWS.get(id) ?? 0);
+export function hpd4BodyRows(id: number, lead = HPD8_DEFAULT_LEAD.get(id) ?? 0, side: Iu120Side = "player"): number {
+  return lead === 0 ? LIVE_MOVE_LEADLESS_TAIL_ROWS.get(id) ?? 0 : lead + hpd4BodyTail(id, side);
 }
 
 /** The per-row phaseElapsed sequence of an ordinary live body whose accepted body lasts `duration` rows: 0 .. P + N + D + T - 1 (+ the audited lead and hit tail). */
 export function iu120Ages(id: number, duration: number, side: Iu120Side = "player", lead?: number): number[] {
-  return Array.from({ length: duration + (LAND97_LEAD_ROWS.get(id) ?? 0) + iu120Extra(id, side) + ont193ScriptTail(id) + hpd4BodyRows(id, lead) }, (_, row) => row);
+  return Array.from({ length: duration + (LAND97_LEAD_ROWS.get(id) ?? 0) + iu120Extra(id, side) + ont193ScriptTail(id) + hpd4BodyRows(id, lead, side) }, (_, row) => row);
 }
 
 /**
@@ -77,9 +94,9 @@ export function iu120Ages(id: number, duration: number, side: Iu120Side = "playe
  */
 export function iu120EffectAges(id: number, duration: number, side: Iu120Side = "player", lead?: number): number[] {
   const hold = iu120Pre(id, side) + (LAND97_LEAD_ROWS.get(id) ?? 0);
-  const bodyLead = lead ?? 0;
-  const tail = bodyLead === 0 ? 0 : HPD4_BODY_TAIL_ROWS.get(id) ?? 0;
-  const held = iu120Post(id, side) + ont193ScriptTail(id) > 0;
+  const bodyLead = lead ?? HPD8_DEFAULT_LEAD.get(id) ?? 0;
+  const tail = bodyLead === 0 ? LIVE_MOVE_LEADLESS_TAIL_ROWS.get(id) ?? 0 : hpd4BodyTail(id, side);
+  const held = iu120Post(id, side) + ont193ScriptTail(id) > 0 || LIVE_MOVE_LEADLESS_TAIL_ROWS.has(id) || STA5_STATUS_BODY_TAIL_ROWS.has(id);
   return [...Array(hold + bodyLead).fill(0), ...Array.from({ length: duration }, (_, age) => age), ...Array(iu120Post(id, side)).fill(duration - 1), ...Array(ont193ScriptTail(id)).fill(duration - 1),
     ...Array.from({ length: tail }, (_, i) => (held ? duration - 1 : duration + i))];
 }

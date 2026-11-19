@@ -605,6 +605,7 @@ import {
   postwinContinuationInputReady,
   postwinNextVisibleChars,
   postwinPhase,
+  postwinTailAge,
   postwinRightThisWayVisibleChars,
   postwinRightThisWayInputReady,
   postwinRngSteps,
@@ -665,6 +666,7 @@ import {
   createFactoryTerminalLossPresentation,
   createFactoryTerminalPresentation,
   FACTORY_LOSS_TERMINAL_PROFILE,
+  FACTORY_RETIRE_TERMINAL_PROFILE,
   factoryTerminalCompletion,
   factoryTerminalDeclineBoxGoneAge,
   isFactoryTerminalRoundWon,
@@ -689,6 +691,7 @@ import { renderFactoryLobbyAttendant, renderFactoryLobbyFreeRoam } from "./facto
 import {
   advanceFactoryLobbyAttendant,
   createFactoryLobbyAttendantState,
+  isFactoryLobbyAttendantNpcsReleased,
   type FactoryLobbyAttendantState,
 } from "./factoryLobbyAttendant.ts";
 import { renderFactoryTerminalPresentation } from "./factoryTerminalRender.ts";
@@ -755,7 +758,7 @@ import {
 } from "./screenSounds.ts";
 import { emitBattleStartBgm } from "./battleStartSounds.ts";
 import { emitTickSounds } from "./tickSounds.ts";
-import { advanceForfeitTerminalAge, disableForfeitRecordQuestion, forfeitFrozenSceneView } from "./battleForfeit.ts";
+import { advanceForfeitTerminalAge, disableForfeitRecordQuestion, FORFEIT_RETURN_TAIL_LEAD, forfeitFrozenSceneView } from "./battleForfeit.ts";
 import { soundCollecting } from "../audio/soundEvents.ts";
 
 /**
@@ -1273,6 +1276,7 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
         ? {
             postwin: createBattleReturnHoldState(
               forfeitFrozenSceneView(preAdvanceCommand),
+              FORFEIT_RETURN_TAIL_LEAD,
             ),
             factoryTerminal: factoryTerminal === null && forfeitTerminalCommand !== null
               ? advanceForfeitTerminalAge(
@@ -1320,9 +1324,9 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
     // (nch231, docs/nch231-new-challenge.md).
     if (state.lobbyAttendant) {
       // The attendant script holds lockall: the NPCs neither run nor draw (their snapshot still follows the state).
-      const frozenNpcs = stepLobbyNpcsTick(state.lobbyNpcs, rngValue, true, state.lobbyFreeRoam);
       if (state.attendantRequestHold && state.lobbyAttendant.saveDialogStarted) {
-        return { ...state, frame: state.frame + 1, keyRepeat, lobbyNpcs: frozenNpcs.npcs, rngMode: "vblank", rngValue };
+        const heldNpcs = stepLobbyNpcsTick(state.lobbyNpcs, rngValue, true, state.lobbyFreeRoam);
+        return { ...state, frame: state.frame + 1, keyRepeat, lobbyNpcs: heldNpcs.npcs, rngMode: "vblank", rngValue };
       }
       const attendant = advanceFactoryLobbyAttendant(state.lobbyAttendant, {
         a: newKeys.has("A"),
@@ -1345,14 +1349,15 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
           }
         }
       }
+      const attendantNpcs = stepLobbyNpcsTick(state.lobbyNpcs, rngValue, !isFactoryLobbyAttendantNpcsReleased(attendant), state.lobbyFreeRoam);
       return {
         ...state,
         frame: state.frame + 1,
         keyRepeat,
         lobbyAttendant: attendant.done === "freeRoam" ? null : attendant,
-        lobbyNpcs: frozenNpcs.npcs,
+        lobbyNpcs: attendantNpcs.npcs,
         rngMode: "vblank",
-        rngValue,
+        rngValue: attendantNpcs.rngValue,
       };
     }
     if (
@@ -2089,14 +2094,17 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
       factoryRoundBattleOrchestrator,
       factoryTerminal: retireHandoff
         ? {
-            ...createFactoryTerminalLossPresentation({
-              type: "roundLost",
-              commandId: -1,
-              battleIndex:
-                factoryRoundBattleOrchestrator?.round.rules.battleIndex ??
-                roundController?.rules.battleIndex ??
-                0,
-            }),
+            ...createFactoryTerminalLossPresentation(
+              {
+                type: "roundLost",
+                commandId: -1,
+                battleIndex:
+                  factoryRoundBattleOrchestrator?.round.rules.battleIndex ??
+                  roundController?.rules.battleIndex ??
+                  0,
+              },
+              FACTORY_RETIRE_TERMINAL_PROFILE,
+            ),
             age: FACTORY_LOSS_TERMINAL_PROFILE.fieldFirstAge,
           }
         : state.factoryTerminal,
@@ -3396,7 +3404,7 @@ function renderPostwinState(state: EngineState): Uint8Array {
     if (state.prebattleRoom) return renderPrebattleRoomState(state);
     if (state.battleRoom) return renderBattleRoomState(state);
   }
-  const age = postwin.elapsed;
+  const age = postwinTailAge(postwin.elapsed, postwin.tailLead);
   const phase = postwinPhase(age);
   if (phase === "battleHold" || phase === "battleFade") {
     const fb = createFramebuffer();
@@ -3434,12 +3442,20 @@ function renderPostwinState(state: EngineState): Uint8Array {
       renderBattleRoomBrainEntranceScene(fb, room, bgFadeY(local, timing), objFadeY(local, timing));
       return fb;
     }
+    // lbw7: the room redraws the battle's own opponent (a forfeit / loss / win all end here), not the generic sheet.
+    const opponentTrainer = factoryTrainerPresentationForOpponent(
+      state.factoryRoundBattleOrchestrator?.round.rules.currentOpponent,
+    );
     renderBattleRoomEntryScene(
       fb,
       step,
       sceneElapsed,
       bgFadeY(local, timing),
       objFadeY(local, timing),
+      undefined,
+      opponentTrainer === null
+        ? undefined
+        : { ...INITIAL_BATTLE_ROOM_STATE, trainerPresentation: opponentTrainer },
     );
     return fb;
   }
@@ -4308,7 +4324,7 @@ export function render(state: EngineState): Uint8Array {
   // roundLost/roundCompleted) -- so it must render ahead of the
   // factoryTerminal dispatch below, not just postwin's usual (WIN-only)
   // precedence inside renderWithoutFactoryTerminal.
-  if (state.postwin && postwinPhase(state.postwin.elapsed) !== "counterRoom") {
+  if (state.postwin && postwinPhase(postwinTailAge(state.postwin.elapsed, state.postwin.tailLead)) !== "counterRoom") {
     return renderPostwinState(state);
   }
   // Free-roam Lobby owns the screen once the decline chain hands off

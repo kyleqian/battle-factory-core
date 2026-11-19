@@ -3,7 +3,8 @@
  "oracleProfile": "battle-scene-off",
  "appStage": {
   "id": "aud241b-opponent-faint-off",
-  "frame": 0
+  "frame": 0,
+  "opponentTrainerId": 110
  },
  "oracleBattleLab": {
   "scenario": "../../battle-lab/aud241b-opponent-faint-off.json"

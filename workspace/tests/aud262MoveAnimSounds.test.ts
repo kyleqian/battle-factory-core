@@ -86,7 +86,7 @@ describe("Rapid Spin (aud262)", () => {
 
 // Water Spout: AnimTask_WaterSpoutLaunch waits for its droplets (battle_anim_water.c:1054-1250): count by the attacker's HP quarter (GetWaterSpoutPowerForAnim), flight time by the attacker's pic Y.
 // The quarter windows stage the HP through a real earlier hit (the faster Lv80 / 60 / 52 Rattata's Seismic Toss: 105 -> 25 / 45 / 53), not an injected value.
-// hpd6: the q0 / q1 / q2 offsets were 11 / 7 / 7 (the staging Toss ran 11 / 7 / 7 rows short: hpd5 lead 6 + tail 1, +4 for the high-damage level body); the Toss hpd5 audit makes them 0, the ROM frames.
+// hpd6: the q0 / q1 / q2 offsets were 11 / 7 / 7 (the staging Toss ran 11 / 7 / 7 rows short: hpd5 lead 6 + tail 1, +4 for the high-damage level body); the Toss hpd5 audit makes them 0, the ROM frames. hpf1 (the floor-free Toss hit -> the next attack's message) made them -1 (ours 1 frame later, the hpf2 residual in docs/hpd1-hp-hold.md).
 describe("Water Spout (aud262)", () => {
   it("the table entry: ungated, pic Y x HP quarter grid for the player, one constant variant for the opponent", () => {
     const entry = timing.moves[323]! as unknown as { label: string; gated: number[]; pic: number[]; hp: number[] };
@@ -94,7 +94,7 @@ describe("Water Spout (aud262)", () => {
     expect(entry.gated.every((g) => g === 0)).toBe(true);
     expect(entry.hp.map((g) => g >= 0)).toEqual(Array.from({ length: 12 }, (_, i) => i % 2 === 0));
   });
-  const windows = [["waterspout-q0", "player", 49, 0], ["waterspout-q1", "player", 49, 0], ["waterspout-q2", "player", 50, 0], ["waterspout-q3", "player", 51, 2], ["waterspoutsnorlax", "player", 51, 2], ["waterspout", "opponent", 46, 2]] as const;
+  const windows = [["waterspout-q0", "player", 49, -1], ["waterspout-q1", "player", 49, -1], ["waterspout-q2", "player", 50, -1], ["waterspout-q3", "player", 51, 2], ["waterspoutsnorlax", "player", 51, 2], ["waterspout", "opponent", 46, 2]] as const;
   for (const [name, side, lastGap, offset] of windows) {
     it(`aud262-${name}-${side}: SE gaps 46 / ${lastGap} equal the ROM's, offset ${offset} constant`, () => {
       const rom = fixture(`aud262-${name}-${side}`);
@@ -108,7 +108,7 @@ describe("Water Spout (aud262)", () => {
 
 // Memento: the first wait ends with AnimTask_MoveAttackerMementoShadow (battle_anim_dark.c:408-535), 46 half-rate calls + (TOP - 7 - d8) / 8 + 1 window-lowering calls + 8 closing + 2, where
 // TOP = BATTLER_COORD_ATTR_TOP of the attacker (pic Y - height / 2, battle_anim_mons.c:2277). The ROM's third SE (SE_M_PSYBEAM at the target) follows it by 25 + n frames; the table carries one
-// variant per attacker TOP class. (The ROM's start frame is 108 earlier than ours in all five windows: a constant, the #198 lead class, not a lifetime error.)
+// variant per attacker TOP class. (The ROM's start frame is 7 earlier than ours in all five windows: a constant, the body-to-sound row class. It was 108 until mem2 -- the attacker's INSTANT_HP_BAR_DROP was presented as a 106-row drain before the body.)
 describe("Memento (aud262)", () => {
   const entry = timing.moves[262]! as unknown as { label: string; gated: number[]; top: number[] };
   const grids = timing as unknown as { topYs: number[][]; topGrids: number[][] };
@@ -130,7 +130,7 @@ describe("Memento (aud262)", () => {
       expect(rows.map((e) => e.id)).toEqual([189, 200, 189]);
       expect([rows[1]!.frame - rows[0]!.frame, rows[2]!.frame - rows[1]!.frame]).toEqual([50, romGap]);
       expect(gap(slot, top)).toBe(romGap);
-      expect(expectConstantOffset(rom, [189, 200], 3, "first")).toBe(-108);
+      expect(expectConstantOffset(rom, [189, 200], 3, "first")).toBe(-7);
     });
   }
 });
@@ -154,7 +154,7 @@ describe("Present (aud262)", () => {
     expect(rows.map((e) => e.frame - rows[0]!.frame)).toEqual([0, 16, 32, 54, 114, 122, 130, 138, 146]);
     expect(expectConstantOffset(rom, [167, 125, 177], 9, "first")).toBe(1);
   });
-  it("aud262-presentheal-player (heal branch): SE_M_MORNING_SUN 63 frames and the second SE 77 frames after the last bag SE, offset 2", () => {
+  it("aud262-presentheal-player (heal branch): SE_M_MORNING_SUN 63 frames and the second SE 77 frames after the last bag SE, offset 2 (hpf2 open: the staging foe hp after a move-animation, no hit-animation, keeps its floor; the heal's own tail lands after these SEs)", () => {
     const rom = fixture("aud262-presentheal-player");
     const rows = rom.events.filter((e) => e.noop !== true && e.kind === "se" && [167, 125, 228, 179].includes(e.id as number));
     expect(rows.map((e) => e.id)).toEqual([167, 125, 125, 125, 228, 179]);

@@ -15,7 +15,7 @@ import { createBattleResolutionPresentationRenderView } from "../../src/engine/b
 import type { BattleMoveAnimationRequest } from "../../src/engine/battleMoveAnimation.ts";
 import { liveView, type Fixture } from "../../tools/integration/liveAdapterFramebuffer.ts";
 import { generatedCommandAnimationReplay } from "../../tools/integration/generatedCommandAnimationReplay.ts";
-import { iu120Extra } from "../helpers/iu120Rows.ts";
+import { HPD4_BODY_LEAD_ROWS, hpd4BodyRows, iu120Extra } from "../helpers/iu120Rows.ts";
 
 // docs/next-adapters-prep18.md s1.1 (authoritative): Dig exact adapter, setup 195 / unleash 68, body by request.turn bit 0.
 // Dense framebuffer proofs: tools/integration/fixtures/prep18-live/*.json (receipt random2-r5-live-receipt.json).
@@ -116,7 +116,7 @@ describe("live Dig ordinary route", () => {
     });
     const off = generatedCommandAnimationReplay(13, "off", [2, 2], 7);
     const digs = on.animations.filter((a) => a.moveId === 91 && a.attacker === 0);
-    expect(digs.slice(0, 2).map((b) => b.ages.length)).toEqual([195 + iu120Extra(91), 68 + iu120Extra(91)]);
+    expect(digs.slice(0, 2).map((b) => b.ages.length)).toEqual([195 + iu120Extra(91), 68 + iu120Extra(91) + hpd4BodyRows(91, HPD4_BODY_LEAD_ROWS.get(91))]);
     for (const body of digs.slice(0, 2)) {
       expect(body.ages).toEqual(Array.from({ length: body.ages.length }, (_, age) => age));
       expect(body.adapterActive.every(Boolean)).toBe(true);
@@ -146,7 +146,7 @@ describe("live Dig ordinary route", () => {
     const off = generatedCommandAnimationReplay(9, "off", [1, 1], 7);
     const digs = r.animations.filter((a) => a.moveId === 91 && a.attacker === 0);
     expect(digs[0]!.adapterActive.every(Boolean)).toBe(true);
-    const later = digs.slice(1).filter((b) => b.ages.length === 195 + iu120Extra(91));
+    const later = digs.slice(1).filter((b) => b.ages.length === 195 + iu120Extra(91))  // the charge turn: no lead (hpd8);
     expect(later.length).toBeGreaterThan(0);
     expect(later.every((b) => b.adapterActive.every(Boolean))).toBe(true);
     expect(r.stalled).toBe(off.stalled);

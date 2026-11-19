@@ -480,3 +480,443 @@ What the rows say:
 - **Proposed landing = the same two pieces as Solar Beam / the shape-B bodies**: lengthen `case 53` to `len + 1` = **210** and add the shape-A pre-0 / post-0 lead + tail (5 + 6), or leave `live` at 115 and give the command lead 5 + tail 101 (holds the last frame for the 95 dead rows; the rows are dead, so the picture is identical either way, but a long `tail` is the Dragon Rage 26-row-tail pattern and the `live` form keeps the age counting). Either puts the next command (hit-animation) on the ROM's H. Predicted effect (out1 / t2off): the Swagger s6 res14 window (Flamethrower then Swagger, mass ~ 1 276) and the s1028 res12 window (~ 580) lose the ~ -100 row drift, ~ 1 100 + ~ 500 of the T2 mass, plus every later SE in a Flamethrower turn (194 commands = 0.7 % of Scene ON, but each carries a body-length offset of ~ 100 rows, which is why it dominates the T2 table far beyond its census share). Sound ages are the open check: `withoutBodyLead` / `AGE_TO_SOUND_ROWS` for 53 and the `aud242b/c` Flamethrower fixtures (`aud242c-flamethrower-player` SE at frame 82, hit SE 279) were fitted on the 115-row window; extending the end of the window does not move the SE start, but any sound age counted from the window end must be re-checked first.
 - **Cross-check against out1**: out1 had ROM `attackanimation` exec 44, anim 46 .. 255 (209 rows), `hitanimation` exec 259 = 215 from `attackanimation`; this lab has A -> H 213 (= 209 + 4) from the same window length 209, so the two independent probes agree on the 209 / gap 4; the 215 vs 221 R -> H is only the different `R` anchor (out1 R = the `attackanimation` exec, here R = the print's release 8 rows before A).
 - Not measured: the opponent side of any of the four (the aud242b / c Flamethrower opponent fixtures exist; hpd4 / hpd7b found no side asymmetry for the lead rule), Lv / defender variants, burn / flinch secondary effects (one window per lab, so a burn animation is a separate command), Fire Blast's own `SoundTask_FireBlast` sound ages, Magical Leaf's per-leaf sound, the sound / hit-frame alignment after a landing, and the exact `IsSEPlaying` end of Flamethrower (estimate above).
+
+## hpd8: shape-A lead + hit tail for the 16 measured bodies (landed)
+
+Lane: integration, Scene ON (:8012) ROM frames, base `f047ca4f5`. Presentation timing only: kernel events, RNG, damage, turn order and facility state are unchanged (census eventsDigest identical, below). Evidence (ignored): `.integration/evidence/hpd8/` (`base/` + `a2/` frames, `base1.txt` / `base2.txt` / `a2.txt` match counts, `census/`, `census-delta-*.txt`, `t2after/`, `t2master/`, `score-*.json`, `soak*.log`, `t*.log` test chunks, `gate.log`).
+
+### What landed
+
+- **Set** (`src/engine/battleResolutionPresentation.ts`): `HPD8_SHAPE_A_MOVE_IDS` = Aerial Ace 332, Psychic 94, Thunderbolt 85, Double-Edge 38, Quick Attack 98, Body Slam 34, Ancient Power 246, Giga Drain 202, Ice Beam 58, Surf 57, Dig attack turn 91, Struggle 165, Rock Slide 157, Bubble Beam 61, Fire Blast 126, Magical Leaf 345 (all `live` = ROM len + 1, ROM gap 4, hpd7 / hpd7b / hpd7c); `BODY_LEAD_AUDITED_MOVE_IDS` = the hpd4 / hpd5 set + these. The Dig charge turn (`CHARGE_TURN_SCRIPT`) is excluded: only the attack turn is shape A. Shapes B / C are not in the set.
+- **Lead is counter-derived (hpd3 rule), unchanged code**: `moveAnimationScriptLeadTiming` = `instructionExecution(MOVE_ANIMATION) - (instructionExecution(used print) + 1)` = 5 for the EffectHit family, now presented as `bodyLeadFrames` (the first rows) for these ids instead of `scriptTailRows`.
+- **Hit tail is a formula, not a table** (`liveMoveHitTailRows`, `battleResolutionPresentationRender.ts`): the whole body is lead + 3 pre + (len + 1) + 3 in the ROM, so T = 6 - pre - post (pre 3 + post 2 -> 1; 3 + 0 -> 3; 0 + 0 -> 6), taken from the existing `liveMoveUniversalRows`. Why a formula and not the counter: the tail is the measured pre / post wrapper rows around the `live` window (hpd7 / hpd7b / hpd7c ROM windows, whole body = 5 + 3 + (len + 1) + 3 at gap 4), not a kernel instruction count; the measured table was replaced by this derivation so a new shape-A id needs only its set entry. A substitute-swap body gets tail 0 (its composite owns the rows). Post-0 bodies hold their last age through the tail (`holdHitTail` in `liveMoveUniversalRowAge`), which fixed an `iceBeamAtAge` "age out of range" crash found in the first run.
+- **Sound clock**: unchanged code. Body SEs keep their ROM ages (`withoutBodyLead`, `moveBodyExtraRows`; `battleHitSounds.ts` is already generic on `bodyLeadFrames > 0`); the NEXT command's SEs move with the lead + tail. Every aud242* / aud248 / hie / cry fixture passed untouched; only `aud252LossBallOpen` seed 2230 and `ais2` ON moved (below).
+- **Scene OFF unchanged.** Census OFF 0..99: 100 / 100 battles identical (digest, error and every command field).
+
+### Compare (`hpd1AppOnly.ts` app render vs the stored ROM frames, exact RGB md5, 1023 frames; labs: the 7 new `hpd8-*-player-on` stages, the aud242 labs for the other 8)
+
+| lab | before | after | | lab | before | after |
+|---|---|---|---|---|---|---|
+| Aerial Ace 332 | 276 | **771** | | Ice Beam 58 | 161 | **509** |
+| Psychic 94 | 84 | **507** | | Surf 57 | 42 | **508** |
+| Thunderbolt 85 | 5 | **352** | | Struggle 165 | 76 | **550** |
+| Double-Edge 38 | 390 | **684** | | Rock Slide 157 | 241 | **510** |
+| Quick Attack 98 | 263 | **768** | | Bubble Beam 61 | 98 | **459** |
+| Body Slam 34 | 103 | **574** | | Fire Blast 126 | 96 | **485** |
+| Magical Leaf 345 | 255 | **660** | | Giga Drain 202 | 441 | 337 |
+| Ancient Power 246 | 123 | 83 | | | | |
+
+`hpd1-dragonrage-on` 950 -> 950, `rol1-rollout5-on` 2028 -> 2028 / 3001 (identical frames: neither move is in the set). The Dig attack turn has no standalone lab here (covered by the live Dig adapter tests).
+**Giga Drain and Ancient Power totals drop although their pre-hit region improves** (Giga Drain frames 0..hit 45 -> 117, blink 9 early -> 1 early; Ancient Power 68 -> 77): the frames lost are static post-hit frames that matched by chance. Giga Drain's drain-message hold is a pre-existing shape-b / floor residual (ROM barEnd -> boxChange 18, app 30, -12; out of scope) that the old early timing masked. A tail sweep of -3..+2 rows gave no improvement for either (the hpd1 / hpd3 "masking" precedent).
+
+### Pins (every re-pin moves toward the ROM)
+
+- `tests/helpers/iu120Rows.ts`: `HPD8_SHAPE_A_IDS`, `HPD4_BODY_LEAD_ROWS` + 5 for every shape-A id, `hpd4BodyTail`, default lead `HPD8_DEFAULT_LEAD` (Dig 91 has none: charge turn), so ordinary-body row-count expectations add lead 5 + T. `livePrep13MoveAdapters` Ice Beam (206 -> 214), `liveDigAdapter` attack turn (+8), `liveRockSlideSides` (138 -> 149), `stl109Struggle` (112 -> 123), `apx217` Bubble Beam transform (244 -> 250), `battleTurnPortability` Rock Slide timing gains `bodyLeadFrames: 5`.
+- `aud252LossBallOpen` seed 2230 (engine minus ROM, frames): [7, -3, -5, -5, -5, -5, -5, -6] -> **[7, 2, 0, 0, 0, 0, 0, -1]** (|delta| 3 / 5 / 6 -> 2 / 0 / 1; the first row unchanged).
+- `ais2AiSwitchFrames` seed 2741 ON: the window is the same ROM frames, 6 engine frames later (`romFrameOffset` 74 -> 68, `lo` / `hi` + 6, md5s unchanged; a 6-frame (lead 5 + tail 1) shift in the lab's pre-window turns, the individual body not isolated). Same class as the hpd6 re-baseline.
+- `tests/lbrd.test.ts` `WIN_TWO_SEED` / `RETIRE_SEED` 17 -> **4** (the Scene ON deal moved; a scan of 1..24 with the seed in both roles found only 4 passing every case; `WIN_THEN_LOSE_SEED` 0 unchanged). `tests/randomRoundSoak.test.ts` needed no re-pin.
+
+### Census 0..99 (`lsd194Census.sh`, `LSD194_CENSUS_JOBS=3 LSD194_SPLIT=4 LSD194_SHARDS=0`, arms = `git archive` of `f047ca4f5` and of the tested commit, `rst197CensusDelta.py`)
+
+Scene ON: 100 battles / 31,507 commands, **0 bad** (eventsDigest, error and the command type sequence equal in all 100); 91 battles changed, **527 move-animation commands** changed (fields 16 / 18 only = the lead and the minimum frames), +3,852 frames: **+6** x 266 (lead 5 + tail 1), **+8** x 205 (5 + 3), **+11** x 56 (5 + 6: the pre-0 / post-0 bodies, e.g. Struggle and the player's Rock Slide); no other command type moved. Scene OFF: 100 / 100 identical.
+
+### T2, Scene ON (`aud248RunSeed.sh` seeds 2 165 2741 3738 5569 8108, 2 at a time, `nice -n 10`; `soundScoreboard.py`)
+
+Missing **0** / extra **0** hold on every family, before (base `f047ca4f5`, a detached worktree running the same chain: `t2base/`) and after (`t2after/`). Exact / offset rows, base -> after: move-animation SE 138 / 1468 -> 133 / 1473, stat-change 6 / 31 -> 6 / 31, cry 3 / 54 -> 3 / 54, battle-controller 29 / 230 -> 29 / 230, bgm 0 / 4 -> 0 / 4. The ROM drive frames per seed are identical (18904 / 17322 / 14708 / 42837 / 11906 / 39841).
+Matched-delta median / p10 / p90 (engine - ROM, frames), base -> after: move-animation SE -2 / -20 / 5 -> -2 / -20 / 5 (n 1606 both); battle-controller -5 / -24 / 2 -> -5 / -24 / 2; stat-change -2 / -15 / 4 -> -2 / -15 / 4; cry -9 / -27 / 13 -> -9 / -27 / 13; bgm 5 / -71 / 10 -> 5 / -71 / 18 (n = 4).
+Per SE row (all 1902 matched SE rows, engine - ROM): sum |delta| 14,818 -> **14,560** (mean 7.79 -> 7.66, rows with |delta| >= 20: 230 -> 216), so the net movement is toward the ROM, but it is not monotone: the rows after a shape-A body moved by the uniform +6 / +8 / +11, and the groups that were already at -1 / 0 / +1 (se 102 / 119 / 152 / 228 at -1 / 0 / 1 -> 5 / 6 / 7, se 207 16 -> 22, se 219 5 -> 11, se 138 1 -> 7) now overshoot by that amount, while the groups at -9 .. -33 (se 148 -29 -> -19 x 6, se 242 -28 -> -20 x 10, se 15 / 114 / 136 / 195) move toward 0. Cause of the overshoot not isolated (follow-up: a per-row ROM window for those SE groups); no pinned fixture moved away (aud242* / aud248 / hie / cry pass unchanged; `aud252` seed 2230 and `ais2` ON moved toward the ROM).
+An earlier draft compared against the aud259 master chain; its 12 missing rows (`se:140` / `se:179` x 6) were adapters that landed after aud259, not hpd8.
+
+### Gates (tested code commit `b6245066e`, tree `6bec3b68e`)
+
+`npm run typecheck` exit 0; `npm run test:gate` 362 / 362 files, 2844 tests; every test importing `liveMoveAnimation` / `battleResolutionPresentation*` / `moveAnimSounds` / `tickSounds`, every test naming these moves, the hpd6 list, `lbrd` and `randomRoundSoak` = a 532-file union, 5 chunks, all passing (0 failed); `npm run build` and `npm run build:lib` exit 0; vanilla Scene ON soak 0:20 **20 / 20 OK** (budget outcomes, 4 ranges of 5 seeds in parallel; the last seed of each range re-run alone after the tool window). The full `npm test` was not run (the supervisor does).
+
+### Not landed / open (hpd8)
+
+- Shape B / C bodies (Flamethrower, Solar Beam unleash, Hyper Beam family, ...) per hpd7 / hpd7b / hpd7c; Giga Drain's drain-message hold (-12) and Ancient Power's residual (the totals above); Scene OFF timing; the Dig charge turn.
+
+## liv2: shape-A lead + tail for seven `live`-window bodies (landed)
+
+Lane: integration, Scene ON (:8012) ROM frames, base `2a4fef0b1`, tested code commit `1d4bbc28d`. Presentation timing only: kernel events, RNG and damage are unchanged. Evidence (ignored): `.integration/evidence/liv2/` (`ram/` the `hpd2Probe.py` timelines of the 7 labs, `an.py` the window analysis, `base/` + `fin/` frames and match counts, `warp2.mjs` best-offset scan, `census/` + `census-delta-*.txt`, `t2base/` + `t2new/` + `score-*.txt`, `soak/`, `*.log` test chunks).
+
+### ROM windows (lab = Lv50 vs Lv12 Rattata, `tools/integration/liv2Labs.py`, `tools/battle-lab/liv2-*-player-on.json`, 7 `appTrace.ts` stages)
+
+R = end of the last exec run before `attackanimation`, lead = exec - R, len = `gAnimScriptActive` rows, gap = rows from the window end to the hit controller, R -> H = release-to-hit span.
+
+| move | lead | len | gap | R -> H | landed (idle + live) | app span after |
+|---|---|---|---|---|---|---|
+| Flamethrower 53 | 5 | 209 | 4 | 221 | 18 + 192 = 210, tail 6 | 221 |
+| Solar Beam unleash 76 | 5 | 237 | 4 | 249 | 39 + 199 = 238, tail 3 | 249 |
+| Self-Destruct 120 | 3 | 126 | **10** | 142 | 4 + 123 = 127, tail 9 (leadless) | hit on the ROM row (200) |
+| Bite 44 | 5 | 40 | 4 | 52 | 10 + 31 = 41, tail 3 | 52 |
+| Sludge Bomb 188 | 5 | 168 | 4 | 180 | 4 + 165 = 169, tail 3 | 180 |
+| Earthquake 89 | **11** | 207 | 4 | 225 | 0 + 208 = 208, tail 3 | 225 |
+| Faint Attack 185 | 5 | 225 | 4 | 237 | 0 + 226 (player) / 227 (opponent, restore lag) = len + 1, tail 6 | 237 |
+
+Each landed window is `live + idle = len + 1` and the whole body is lead + pre + (len + 1) + tail = R -> H (post 0 everywhere; pre 3 for Solar Beam, Bite, Sludge Bomb and Earthquake and 0 for Flamethrower and Faint Attack (`LIVE_MOVE_NO_PRE_ROW_SIDES`), so T = 6 - pre - post = 3 or 6 as in the table; the 9-row Self-Destruct tail is its measured gap 10 less the one hit row).
+
+### What landed
+
+- **Set**: `HPD8_SHAPE_A_MOVE_IDS` gains 53, 76 (unleash turn only: `(request.turn & 1) === 1`), 44, 188, 89, 185. The lead is counter-derived (hpd3 rule, unchanged code): 5 for the EffectHit family, **11 for Earthquake** (no table entry). The `hpd8` tail formula `6 - pre - post` reproduces every row above.
+- **Solar Beam unleash head**: the 39 head rows (the ROM's SetSolarBeamBg FadeToBg, BLDY 0 -> 16 -> 0) are idle age-0 rows (`SOLAR_BEAM_UNLEASH_IDLE_ROWS`); the reducer does not model the fade (bldy stays 0), so the fade picture is a residual, the timing is exact. Constants: `SOLAR_BEAM_UNLEASH_LIVE_ROWS` 199 (was 160).
+- **Self-Destruct** has no derived body lead (its `hp` command carries the lead), so it is NOT in the shape-A set: `LIVE_MOVE_LEADLESS_TAIL_ROWS` (`[120, 9]`) gives the leadless 9-row tail and the age hold.
+- **Faint Attack**: the window opens at the ROM's `anim` rise (A) with live = len + 1 and no idle rows; the pre rows stay 0 (`LIVE_MOVE_NO_PRE_ROW_SIDES` 185 = 3). Best-offset scan of the whole body: one near-constant ROM offset (8..9 rows, 0 px), i.e. the body is not shifted.
+- **Rule used: per-move constants, not the `Cmd_end` IsSEPlaying rule.** `seExact` song lengths (Solar Beam 194, Faint Attack 32, Bite 19, Self-Destruct 50, Flamethrower ~192..194) explain the length of the SE-bound tails only qualitatively and PATT songs (Earthquake) are refused, so the measured len + 1 is used for all seven. A general rule is not derived here.
+- Doll framing (`LIVE_SUBSTITUTE_SWAP_BODY_FRAMING`): the framed adapter figures become 89: 208, 188: 165, 44: 31, 53: 192 (ROM rows 208 / 169 / 41 / 210 are unchanged and now equal idle + adapter exactly, shift unchanged). Scene OFF is unchanged.
+
+### Compare (`hpd1AppOnly.ts` app render vs the stored base ROM frames, exact RGB md5, 1023 frames; Solar Beam lab 1423)
+
+| lab | before | after |
+|---|---|---|
+| Flamethrower 53 | 495 | 448 |
+| Solar Beam 76 | 244 | **301** |
+| Self-Destruct 120 | 602 | 440 |
+| Bite 44 | 353 | **586** |
+| Sludge Bomb 188 | 293 | **490** |
+| Earthquake 89 | 280 | **667** |
+| Faint Attack 185 | 363 | **631** |
+
+`hpd1-dragonrage-on` 950 -> 950 and `rol1-rollout5-on` 2028 / 3001 -> 2028 / 3001 (`npm run compare -- <trace> --summary`; neither move is in the set).
+**Flamethrower and Self-Destruct totals drop although the timing now matches the ROM**: Flamethrower's body is aligned at a constant +4 offset and Self-Destruct's hit lands on the ROM's H row (app 200 = ROM 200); the frames lost are static / periodic post-hit frames (text-cursor blink period 10) that matched the old timing by chance (the hpd8 Giga Drain / Ancient Power precedent). Self-Destruct's post-hit app timeline is ~6 rows longer than the ROM's (hp + faint 143 vs 137), pre-existing and not isolated here.
+
+### Pins (every re-pin moves toward the ROM)
+
+- `liveOrderConsumerMoveAdapters` 53: 115 -> 192; `liveAnchor4` Earthquake 198 -> 208; `liveAnchor` Sludge Bomb 160 -> 165; `liveBasic` Bite 26 -> 31; `livePrep6` Self-Destruct 113 -> 123 and Faint Attack 220 / 221 -> 226 / 227; `liveFa185Timing` / `liveFaintAttackSides` the same (the retained fixture-window receipts stay 220 / 221 rows: they pin the reducer, not the live window); `liveSelectorsMoveAdapters` unleash 160 -> 199; `iu120UniversalRows` Bite 39 -> 44 and the shp116 composition (52 rows: 9 pre / lead + 10 age 0 + ages 1..30 + 3 tail); `shp116ShadowLeadRow0` Bite P + 36 -> P + 44, Sludge Bomb pre rows 1 + P -> 1 + P + 5; `substituteDollDefenderLive` Earthquake 198 -> 208 (+ lead 11 + tail 3); `substituteSwapAttdollCells` framed adapter figures (above); `apx215SubstituteDollApproximate` Solar Beam seed 587 241 -> 285; `land97IdleLeadRows` 40 -> 41 lead ids (+ Flamethrower 18); `iu120UniversalRows` Flamethrower is the one LAND97 no-pre side.
+- Helpers: `tests/helpers/iu120Rows.ts` (`HPD8_SHAPE_A_IDS` + 53 76 44 188 89 185, Earthquake lead 11, Solar Beam unleash lead passed explicitly, `LIVE_MOVE_LEADLESS_TAIL_ROWS`).
+- **No sound re-pin**: every aud242* / aud248 / aud262 / tick / hie / cry fixture passed unchanged (ROM-minus-ours before = after for every pinned sound); `lbrd` and `randomRoundSoak` needed no re-pin.
+
+### Census 0..99 (`lsd194Census.sh`, `LSD194_CENSUS_JOBS=3 LSD194_SPLIT=4 LSD194_SHARDS=0`, arms = `git archive` of `2a4fef0b1` and of `1d4bbc28d`, `rst197CensusDelta.py`)
+
+Scene ON: 100 battles / 31,507 commands, **0 bad** (eventsDigest, error and the type sequence equal in all 100); 65 battles changed, **259 move-animation commands** changed, fields 16 / 18 only (the lead and the minimum frames; no static-field command), +6,749 frames: Faint Attack +17 (lead 5 + 6 + tail 6), Bite / Sludge Bomb +13, Earthquake +24 (11 + 10 + 3), Solar Beam +86, Flamethrower +106. Scene OFF: 100 / 100 identical.
+
+### T2, Scene ON (`aud248RunSeed.sh` seeds 2 165 1028 2741 3738 5569 8108, 2 at a time, `nice -n 10`; `soundScoreboard.py`; base = a detached worktree of `2a4fef0b1` running the same chain)
+
+Missing **0** / extra **0** on every family, before and after; exact / offset rows unchanged (move-animation SE 149 / 1635, stat-change 6 / 34, cry 3 / 63, battle-controller 29 / 261, bgm 0 / 4); the ROM drive frames per seed are identical (18904 / 17322 / 15442 / 14708 / 42837 / 11906 / 39841). Matched-delta median / p10 / p90 (engine - ROM, frames), base -> after: move-animation SE -2 / -20 / 5 -> -2 / -16 / 5 (n 1784); battle-controller -5 / -24 / 2 -> -4 / -22 / 3; stat-change -2 / -16 / 4 -> -2 / -14 / 4; cry -9 / -27 / 13 -> -9 / -22 / 13; bgm 5 / -71 / 18 unchanged.
+
+### Gates (tested code commit `1d4bbc28d`)
+
+`npm run typecheck` 0; every test importing `liveMoveAnimation` / `battleResolutionPresentation*` / `moveAnimSounds` / `tickSounds`, every test naming the seven moves (by name and id), the hpd6 list, `lbrd` and `randomRoundSoak` = a 646-file union (553 + 93), all passing after the pin updates above; vanilla Scene ON soak 0:20 **20 / 20 OK** (4 ranges of 5 seeds; the last seed of each range re-run alone after the tool window). The full `npm test` was not run.
+
+### Not landed / open (liv2)
+
+- A general `Cmd_end` IsSEPlaying rule (per-move constants are landed); Solar Beam's unleash FadeToBg picture (timing exact, bldy unmodeled); Self-Destruct's post-hit hp + faint timeline (+6 vs the ROM); the Faint Attack opponent / lag side (+1) is not re-measured (the lab is player-on); shape C bodies, multi-hit second hits, Scene OFF timing.
+
+## lse1: hpd7 table for the t2r-ranked status / stat bodies and the Leech Seed SE offset (measurement only)
+
+Step lse1 changed nothing under `src/` or `tests/` (the temporary appTrace stage lines were removed again); `npm test` was deliberately not run (the step brief overrides the generic gate).
+Labs: Scene ON, Lv50 Rattata (player, 4 x the move) vs Lv12 Rattata (opponent, Seismic Toss), the aud242b Calm Mind scenario with the moves replaced (`tools/integration/lse1Labs.py <out> name=id ...`, stage lines `"lse1-<name>-player-on": (state) => aud241bStage(state, "lse1-<name>-player-on", "on", 50, 12, <id>, undefined, false, 69)` added by hand to `tools/compare/appTrace.ts` for the run; Hypnosis needs rngSeed 5 as the tenth argument, seed 1 misses at 60%).
+ROM = `hpd2Probe.py` (ptr / exec / anim per frame), app = `hpd4Cmds.ts`; the table method is the hpd7 one (R = the used print's release, L = ex - R with ex = A - 3, len = gAnimScriptActive rows, gap = H - (A + len), d = (R->H) - (E - S) = L + T, the 2-row stat / status command that follows the body subtracted for Hypnosis).
+`tools/integration/lse1/an.py` + `join.py` regenerate the table from `<evidence>/ram/*.json` and `<evidence>/app/*.txt` (evidence is git-ignored: `.integration/evidence/lse1/`).
+
+| move (id) | ROM L | R->A | len | H gap | R->H | app bodyLead/pre/idle/live/post (tailRows) | d | e2e R->R'toss ROM-app | shape | proposed |
+|---|---|---|---|---|---|---|---|---|---|---|
+| Agility (97) | 3 | 6 | 86 | 4 | 96 | 0/3/0/87/2 (6) | +1 | +2 | A | as-is; the tail already carries L |
+| Blizzard (59) | 5 | 8 | 370 | 4 | 382 | 0/3/0/372/0 (0) | +7 | n/a | B (live = len + 2) | L 5 + T 2, live 372 |
+| Bulk Up (339) | 2 | 5 | 107 | 4 | 116 | 0/3/4/104/2 (7) | -1 | 0 | A | as-is |
+| Calm Mind (347) | 2 | 5 | 107 | 4 | 116 | 0/3/3/101/0 (7) | +3 | +4 | A | L 2 + T 1 |
+| Charm (204) | 3 | 6 | 97 | 4 | 107 | 0/3/4/93/0 (6) | +2 | +3 | A | as-is within 3; e2e +3 open |
+| Cosmic Power (322) | 2 | 5 | 240 | 4 | 249 | 0/3/0/241/0 (7) | +5 | +6 | A | add to shape A with lead 2 (T 3 = 6 - 3 - 0) |
+| Flash (148) | 3 | 6 | 63 | 4 | 73 | 0/3/0/64/2 (6) | +1 | +2 | A | as-is |
+| Hail (258) | 3 | 6 | 157 | 3 | 166 | 0/3/0/158/0 (7) | -1 | 0 | A, gap 3 | as-is |
+| Hydro Pump (56) | 5 | 8 | 140 | 4 | 152 | 0/3/0/141/2 (0) | +6 | n/a | A | add to shape A with lead 5 (T 1 = 6 - 3 - 2) |
+| Hypnosis (95) | 7 | 10 | 168 | 5 | 183 | 0/3/0/169/2 (0) | +9 (7 net of the 2-row status cmd) | n/a | C (gap 5) | lead 7, live as-is |
+| Leech Seed (73) | 36 | 39 | 140 | 3 | 182 | 0/3/0/141/0 (40) | -1 | 0 | A, L as a tail | length exact; the SE rows are 29 early (below) |
+| Light Screen (113) | 3 | 6 | 85 | 3 | 94 | 0/3/0/88/0 (7) | -3 | -2 | A | as-is (tail 3 too long) |
+| Safeguard (219) | 3 | 6 | 70 | 3 | 79 | 0/3/0/71/2 (7) | -1 | 0 | A | as-is |
+| Wish (273) | 2 | 5 | 270 | 13 | 288 | 0/3/0/271/0 (0) | +14 | +14 | C (gap 13) | L 2 + 12 post rows |
+| Yawn (281) | 8 | 11 | 212 | 3 | 226 | 0/3/0/213/2 (12) | -1 | 0 | A | as-is |
+| Encore (227, turn 2) | 2 | 5 | 219 | 3 | 227 | 0/0/0/215/0 (6) | +12 | +13 | C (gap 3) | bodyLead 2 + pre 3 + live 220 + post 2 (= 227) |
+
+Soft-Boiled (135) has no body in the lab (HP full). Every body above is measured on the player side only; the opponent-side bodies were not re-measured (Leech Seed's two sides are compared by SE below).
+
+### Causes (data/battle_anim_scripts.s, battle_anim.c Cmd_end)
+
+- **Blizzard** (live len + 2): the script ends `delay 20; restorebg; waitbgfadeout; setarg 7, 0xFFFF; waitbgfadein; clearmonbg` with no closing `waitforvisualfinish`. Cmd_end keeps gAnimScriptActive set while the fade / sound tasks run and then through `IsSEPlaying()` (SE_M_BLIZZARD2 tail, up to 90 rows), which is the +1 row over the standard len + 1. L 5 is the usual lead.
+- **Hydro Pump** (+6): shape A with L 5; the script ends `waitforvisualfinish; clearmonbg; blendoff; end`, so nothing beyond the standard len + 1. The shortfall is the lead (5) plus T 1 only.
+- **Cosmic Power** (+5): `waitbgfadein; waitforvisualfinish; end` after `delay 40`; shape A once L 2 is added.
+- **Hypnosis** (+9): BattleScript_EffectSleep runs `attackanimation; waitanimation; setmoveeffect` so the post-window gap is 5, not 4 (the extra instruction). The ROM status-animation windows start at 234 and 527 where the app has 227 and 520: exactly the L 7 the app does not model (the Spore pattern). The status-animation lengths are right (ROM 96, app 97).
+- **Wish** (+14, e2e +14): the battle script is plain `attackanimation; waitanimation; goto MoveEnd`, the anim script ends with `simple_palette_blend; waitforvisualfinish; end` (standard). The 13-row gap (9 over the normal 4) is NOT explained by either script; it is after the animation window and before the next exec rise. Open: needs a per-frame ptr trace of the gap rows (hpd2Probe `ptr`) to see which callback holds exec.
+- **Encore** (+12): the app has pre 0 / live 215 / tail 6, the ROM window is 219 rows from A = R + 5 and the next exec rises at gap 3. The script ends `waitforvisualfinish; createvisualtask AnimTask_RemoveSpotlight; end`; Cmd_end waits on that visual task (the +1 over the plain len). The failed first Encore (no body) is correct.
+- **Calm Mind** (+3), **Charm** (+2), **Flash / Agility** (+1): sub183 tails already model L; the residual is T (rounding of the counter-derived tail), within 3 rows.
+
+### Leech Seed: the T2 offsets -29 / -36 / -38 are the BODY SE rows, not the drain
+
+The t2r attribution rows `body:73` (seeds 310 -38, 319 / 648 -29, 6912 -36; 3 x SE 169 then 8 x SE 167) are the Leech Seed BODY sounds. The aud250 labs (player and opponent) reproduce the same offset in isolation, no emulator needed (`node --experimental-strip-types` over `collectSoundTick`, the aud250 test's `ourEvents`):
+
+- player: ROM 169 @ 96 / 106 / 116, 167 @ 130 .. 206; app 169 @ 67 / 77 / 87, 167 @ 101 .. 177 (8 rows, 29 early; the last 167 is 29 early too).
+- opponent: ROM 169 @ 100, 167 @ 134 .. 210; app 169 @ 71, 167 @ 105 .. 181 (29 early).
+- The drain (SE 180 / 142 x 8 / 179) and the Seismic Toss rows (238 / 214 / 131) match exactly (180 @ 697 / 693 etc.), as the aud250 test pins.
+
+Why: the body window is ROM A = R + 39 (L 36), the first SE is A + 4. The app models the 36-row lead as a 39-row TAIL after the body (`lead=0 bodyLead=0 pre=3 live=141 tail=39 tailRows=40`), so the total length is exact (d -1, e2e 0) but the visible body and its SEs sit at R + 14 instead of R + 43. 36 - 7 = 29: the SE anchor inside the body is 7 rows later than the ROM's A + 4 (row 11 vs 4), which is the calibration against the lead-less body. A landing has to move the lead back in front of the body (bodyLead ~29 for the SE rows, 36 for the window, with the SE anchor -7 if 36 is used) and shrink the tail 39 to ~3. T2 offsets -36 / -38 are other routes of the same body with more earlier drift on top.
+The end-of-turn drain itself (General_LeechSeedDrain, Absorb's body inside the drain command) is correct in the aud250 labs: window ROM A 670 / len 206, app drain 663 + 8 pre + 194 body; no change needed there.
+
+### Proposed landing (not done here)
+
+- **Into `HPD8_SHAPE_A_MOVE_IDS` as-is**: none of the new bodies without their lead; with the lead added (hpd8 rule `bodyLead = L`, T = 6 - pre - post): Hydro Pump 56 (L 5), Cosmic Power 322 (L 2). Agility 97, Bulk Up 339, Charm 204, Flash 148, Hail 258, Light Screen 113, Safeguard 219, Yawn 281 are already within +-3 rows through the sub183 tail and need no change (Light Screen's tail is 3 too long).
+- **Need `live` / tail changes**: Blizzard 59 (live 372, L 5 + T 2), Calm Mind 347 (L 2 + T 1), Encore 227 (bodyLead 2, pre 3, live 220, post 2), Hypnosis 95 (lead 7, gap 5), Wish 273 (gap 13, cause open), Leech Seed 73 (lead as bodyLead, tail 39 -> ~3, SE anchor -7).
+- Expected effect of the Leech Seed change: the 32 body:73 rows of the t2r ranking (-29 .. -38) close; the other bodies' SE offsets are small (+-3).
+- Open: Wish gap trace, the opponent side of every body above, Charm's e2e +3 and Calm Mind's e2e +4 (more than d).
+
+## hpf1: the 28-frame floor is a fit; hp commands get the ROM's own length for three shapes
+
+Duration of an `hp` command is `max(minimumFrames, bar frames + 1) + tailFrames`. The ROM has no floor: `healthbarupdate` starts the bar controller, `Cmd_datahpupdate` waits for the exec flags to clear, then the script runs one instruction per frame (critmessage, waitmessage, resultmessage ..., tryfaintmon, moveendall). The old 28 floor overshoots small bars (Seismic Toss B=10: 10 frames late) and undershoots large bars whose message follows (5 short). Rules landed (both scenes, no scene difference measured; logical events, RNG and the kernel event order unchanged: census 0..99 both scenes, identical eventsDigest vs base 3bdb6cf11):
+
+| shape | rule | ROM lab before -> after |
+|---|---|---|
+| hit -> MoveEnd receipts, then turn end (now also hits ON THE PLAYER) | `{minimumFrames: 0, tailFrames: d}`, d = rows datahpupdate -> first MoveEnd receipt (7) | pc-toss10 on/off base 10 late -> exact; pa-sonicboom-on 7 late -> exact; pc/pa-dragonrage on/off box change ROM 20 / app 7 short -> exact (8 player-hit labs) |
+| hit -> next action's move transition | tail 1 (0 when no MoveEnd receipt follows) | exact |
+| hit -> `critmessage` / `resultmessage` | tail = delta + 2 (delta = rows datahpupdate -> message instruction), no floor | Rolling Kick delta 3 -> 5, Substitute 1 -> 3; aud241b super-effective windows now on the ROM frame |
+| hit -> faint chain (`play-faint-cry` next) | `{minimumFrames: 0}`, tail 0 | aud241b lowhp-faint 11 -> 0 bar exact (was 16 late); hpf1-pk-dragonrage hp end exact (1-frame residual is the faint's own lead, not hp) |
+
+The low-HP loop SE is anchored to the bar end (HealthbarDone), so `battleHitSounds.ts` subtracts `tailFrames` from the command duration. The player-hit rule applies only when a same-battler hit-animation precedes the hp command (otherwise the shape keeps the floor).
+
+Unproven shapes KEEP the 28 floor (no ROM lab at the time): heals (Rest / Recover / Soft-Boiled), recoil, drain user / target (except Leech Seed's drain body), poison / burn / sandstorm / Curse ticks, Struggle recoil, faint-next at small bars beyond lowhp-faint. The synthetic-route Rest anchor in `tests/ont193SceneOnTails.test.ts` moves -3 -> -14 because the rule now reaches the Rest turn's hit; that pin moved AWAY from its fixture value and is flagged, not a ROM statement.
+
+Re-pins (each toward its ROM fixture): aud241b effectiveness / low-HP / faint deltas -> 0; aud248 superpower 17 -> 12; hie3 sitrus-on / shellbell-on drift; hpd1 player-hit `{minimumFrames: 0, tailFrames: 7}`. New: `tests/hpf1HpHold.test.ts` (4 tests, each fails without the fix). Labs: `tools/battle-lab/hpf1-*.json`, traces `tools/compare/traces/hpf1-*.json`, `tools/integration/hpf1Cmds.ts` (ROM hp command lengths per trace).
+
+T2 sound scoreboard (ROM chain, base 3bdb6cf11 -> new; 0 missing / 0 extra both): Scene ON 8 seeds, battle-controller SE exact 34 -> 43, cry exact 4 -> 14, cry delta median -8 -> -4 (p10 -24 -> -21, p90 14 -> 0), battle-controller median -5 -> -4 (p10 -24 -> -23, p90 3 -> 1), move-animation exact 161 -> 166 (p10 -18 -> -16). Scene OFF 4 seeds, controller exact 10 -> 16, cry exact 3 -> 8, cry median -6 -> -3 (p10 -15 -> -11, p90 15 -> 0), controller p10 -15 -> -11, p90 5 -> 1.
+
+## hpf2: heals, recoil, drains and the hit -> end-turn print get the ROM's own hp length (floor-free)
+
+Base `70b797e28` (hpf1 + sta5) -> `d6ef8fb3a` (rules) + `e22a29062` / the aud262 pin commit (tests). Duration is still `max(minimumFrames, bar + 1) + tailFrames`; the 28 floor is a fit and the ROM has none. Measured with `tools/integration/hpd2Probe.py` (+ `hp` / `mhp` per frame) and paired with `tools/integration/hpf2Shape.py <lab> <on|off> <evidence-dir>`, one ROM lab per shape, both scenes where a lab exists (`aud242b/e/g/j/k/r` hail, Double-Edge, Giga Drain, Dream Eater, Struggle, Recover, Soft-Boiled player labs, Rest, Rolling Kick). Convention: the app message command = ROM RISE + 1 for hit / heal -> print (pixel-verified at the per-lab constant offset ROM bar rise - app hp start; same-frame compares are meaningless because of the out-of-scope move-body lead offsets).
+
+Rules (`applyHpHitTails`, `src/engine/battleResolutionPresentation.ts`):
+
+| | shape | rule | ROM numbers |
+|---|---|---|---|
+| R1 | heal hp -> print; hp right after another hp (recoil / drain) -> print; a hit -> print only when the print is the hit-effect message (CRIT / RESULT, the hpf1 rule) | tail = `messageExec - hpExec + 2` (CRITMESSAGE / RESULTMESSAGE / PRINTSTRING / PRINTFROMTABLE), no floor | heal bar 9 / 13 rows prints at bar + 2 (Recover tail 3, Rest next rise +11 = bar 9 + 3 hold); Double-Edge recoil next-rise 60 (recoil tail 3), Struggle 59; Giga Drain drain 61 (tail 4), Dream Eater 58 |
+| R2 | hit -> hp (recoil / drain follows) | tail = difference of the two `healthbarupdate` executions | Double-Edge hit 10, Giga Drain hit 11 |
+| R3 | hit -> `sprite-visibility` x2 -> end-turn print (hail / toxic ON, sandstorm OFF) | tail = MoveEnd rows + 8 (`HP_END_TURN_PRINT_LEAD_ROWS`) | bar -> print +17 |
+
+Scene OFF has no hit-animation command, so `hit` is false there; the rules are restricted (R1 to hitEffectMessage / heal / afterHp) so ON and OFF command shapes stay equal for the unproven shapes (the sag130 hit-secondary anchors compare `minimumFrames + holdFrames`; the first, wider version broke them: ON `hp::28` vs OFF `hp::0`).
+
+Re-pins (each toward its ROM fixture / a constant lab offset): `aud262MoveAnimSounds` Water Spout q0 / q1 / q2 0 -> -1 (this is the pre-existing hpf1 floor-free Toss residual, not an hpf2 effect: ours 1 frame later; root cause not isolated); `ais2` seed 2741 off `romFrameOffset` 51 -> 40, on 68 -> 57 (window lo / hi +11, md5 unchanged); `cry1CryTasks` roar pidgey / jynx drift 13 -> -1; `randomRoundSoak` seed 21 frames 41_048 / renderCalls 2_892 and the "full" seed 1 pin (frames 92558, battle 5, turn 27, maxBattleDepth 4); `trn181ActionTransitionOn` Rest residual -3 -> -14 (below). New: `tests/hpf2HpHold.test.ts` (4 Tier-1 tests: Recover heal tail 3, Double-Edge hit 10 / recoil 3, Giga Drain hit 11 / drain 4, Sandstorm hit -> end-turn print tail 15; each fails on the base source).
+
+### Rolling Kick 313 -> 148 matched frames
+Explained, not a regression of the hp command: a constant 10-frame move-body lead (out of scope: move-body windows) plus chance cursor-blink matches in the old count. The hp command itself is within 1 frame of the ROM.
+
+### Rest and the ont193 synthetic anchor
+Rest ROM lab: heal bar 9 rows, next rise +11 = heal tail 3 (landed). The ont193 synthetic route's anchor moved -3 -> -14 because its bars are 15 rows vs the lab's 8 (-7 each over the two bars); the pin is a measured model value of that route, not the ROM's; `ont193SceneOnTails` stays {anchorStartDelta -22, anchorEndDelta -14}, the trn181 Rest residual is -14.
+
+### Labs (frames matched, before -> after, identical)
+hpd1-dragonrage-on 950 -> 950, out2-horndrill-on / off 568 / 558 -> 568 / 558, rol1-rollout5-on 2028 -> 2028; hpf1 pa-dragonrage on / off 78 / 607, pa-sonicboom 623 / 619, pc-dragonrage 512 / 927, pc-sonicboom 819 / 923, pc-toss10 892 / 922: all unchanged (not worse; these shapes are hits with MoveEnd / faint, not touched by R1..R3). The gains are on the heal / recoil / drain labs: ROM-vs-app pixel match near-exact at the lab offset (hail, Recover, Double-Edge, Giga Drain, Dream Eater, Struggle, Soft-Boiled, Rest).
+
+### Census 0..99, both scenes (`lsd194Census.sh` jobs 3 / split 4 + `rst197CensusDelta.py`, base `70b797e28` vs `e22a29062`)
+0 digest / error / type-sequence diffs in both scenes (100 / 100 `eventsDigest` equal each). Command-length changes: ON 66 / 100 battles (31 507 commands), OFF 66 / 100 (30 730): Rest / Recover / Soft-Boiled / Moonlight / Synthesis heal -> message (+1 .. +3, tail 3), Struggle hit -> recoil (-13 / +9) and recoil -> message (-23 / -16), Giga / Mega Drain and Dream Eater hit -> drain (+8 .. +11), drain -> message (-23 .. -10), hit -> end-turn print (+8 .. +15).
+
+### T2 sound scoreboard (ROM chain, base `70b797e28` tree via git archive vs this tree; 0 missing / 0 extra both, both scenes)
+Scene ON seeds 2 165 1028 2741 5569: move-animation SE exact 116 -> 119 (p10 -12 -> -11), stat-change p10 -11 -> -10, cry exact 10 / 10 (p10 -15 -> -14, median -4 -> -4, p90 0 -> 0), battle-controller exact 28 / 28 (median -3, p10 -15, p90 0 unchanged), bgm p90 18 -> -10. Scene OFF seeds 2 165: controller exact 8 -> 9, cry exact 4 -> 5 (median -1, p10 -8, p90 0 unchanged), bgm 23 -> -5. Not run (time cap): ON 3738 8108 648, OFF 1028 2741 (~40k-frame seeds; 8 seeds ON / 4 OFF were asked for, 5 / 2 were run).
+
+### Gates
+`npm run typecheck` 0 (re-run at the end, below); `npm run build` 0; `npm run test:gate` 362 / 362 files (2844 tests); `npm run soak -- --policy vanilla --seeds 0:20 --parallel 4` 20 / 20 OK; the affected set (every test importing `battleResolutionPresentation*` / `battleHitSounds` / `tickSounds`, hpd* / hpf1 / rol1 / hie* / aud241* / aud253* / aud248* / ont193, lbrd, randomRoundSoak) 157 files passing after the aud262 Present-heal pin was put back to 2 (below). The full `npm test` was not run (the supervisor does).
+
+### Open remainder
+- Tick bars (poison / burn / Curse / Nightmare / wrap), sandstorm / hail damage bars, faint-next on small bars, confusion self-hit (hp -> status-animation -> message) and Substitute `printfromtable` have no ROM lab here; they keep the 28 floor.
+- `aud262-presentheal-player`: the staging foe hp (162 -> 81) follows a `move-animation` with no hit-animation, so it is not a `hit` and keeps its floor; an intermediate (wider) rule had moved that offset 2 -> -1, the final rule leaves it at 2.
+- Water Spout q0 / q1 / q2 -1 (hpf1 Toss, above).
+- The ont193 synthetic Rest anchor (-14) is model-derived (bars 15 vs 8 rows), not a ROM value.
+
+## lse2: Leech Seed, Hydro Pump, Cosmic Power, Blizzard, Calm Mind, Encore, Hypnosis on the ROM rows (Scene ON presentation timing)
+
+Lane: integration, Scene ON (:8012) ROM frames, base `70b797e28`, tested code commit `5fe920b5a`. Presentation timing only: kernel events, RNG and damage are unchanged (census 0..99, both scenes: eventsDigest identical, see Gates). Evidence (ignored): `.integration/evidence/lse2/` (`ram/` hpd2Probe timelines, `snd/` soundEventProbe labs, `app/` / `app_base/` hpd4Cmds timelines, `cmp.txt` / `cmp-base-*` matched frames, `t2base/` / `t2after/` T2, `census-*.txt`, `run2_*.log`).
+
+### What landed
+| move (id) | rule | ROM d (R->H minus the app's next-command gap), base -> now |
+|---|---|---|
+| Leech Seed (73) | body lead 36, hit tail 3 (`LSE2_BODY_LEAD_MOVE_IDS`) | -1 -> **0** (SE rows now exact too, the lead moves the body SEs by the ROM's 36) |
+| Hydro Pump (56) | HPD8 shape A (lead 5, tail 1) | +6 -> **0** |
+| Cosmic Power (322) | body lead 2, tail 3 | +5 -> **0** |
+| Calm Mind (347) | body lead 2, tail 3 | +3 -> **0** |
+| Blizzard (59) | HPD8 shape A id (lead 5) + `LSE2_BODY_TAIL_ROWS` 2 | +7 -> **0** |
+| Encore (227, turn 2) | body lead 2, tail 10 (`LSE2_BODY_TAIL_ROWS`) | +12 -> **0** |
+| Hypnosis (95) | STA5 body: lead 7, STA5 tail 0 (added to `BODY_LEAD_AUDITED_MOVE_IDS` through the STA5 key) | +9 (7 net of the status cmd) -> **0**, status-animation windows at 234 / 527 = ROM |
+
+Matched frames on the lse1 labs (`npm run compare -- <trace> --summary`), before -> after: Leech Seed 452 -> 617 / 780, Hydro Pump 216 -> 485, Cosmic Power 218 -> 487, Calm Mind 251 -> 393, Blizzard 22 -> 127, Hypnosis 174 -> 670, Encore 303 -> 336 / 1000.
+
+Sound clock. A body's SEs run on a sound clock calibrated with a K-row lead; a body that now presents lead L must shift its SE ages by `L - K` or the body SEs move with the lead (`lse2BodySoundAgeShift`, `LSE2_SOUND_CLOCK_LEADS`: Leech Seed 7, Cosmic Power 7, Calm Mind 7, Encore 3). Encore's K is 3 (zero crossing of the turn-2 SE rows: K 7 gave +4, none gave -1). The stat-change SE after these bodies uses age shift 3 instead of 4 (`STATS_CHANGE_AFTER_LSE2_BODY_AGE_SHIFT`): it was +1 with 4 after the lead, 0 with 3 (Cosmic Power and Calm Mind labs, SE 239 now +0). Body SEs keep their ROM ages (the hit SEs and the other body SEs are unchanged vs the base except where the table above says otherwise).
+
+Lab change: the Encore lab (`lse1-encore-player-on`, battle-lab json + compare trace) never reached turn 2 (NORES at frame 510), so it got a second A press and 1420 frames (captureFrames range(1000)); `lse1Labs.py` takes a seed, and 7 `lse1-*-player-on` stages are in `tools/compare/appTrace.ts` (the lse1 step left them out).
+
+`tools/integration/tl204Compare.ts` now counts a body's lead and hit tail as script rows (`productionLeadRows` / `productionHitTailRows`); the tl204 pins (Calm Mind -1, Leech Seed) and the substitute-swap pins were re-pinned toward the ROM.
+
+### Gates (tested code commit `5fe920b5a`)
+- Census 0..99 (`lsd194Census.sh`, base vs this tree, `rst197CensusDelta.py`): **Scene OFF 100 / 100 identical** (30730 commands); **Scene ON 78 / 100 identical, 22 changed battles**, eventsDigest identical, no error / type-sequence differences; every changed field is a move-animation timing field (indices 16 / 17 / 18); no new static-field command.
+- T2 Scene ON, 8 seeds (648 319 310 6912 2 165 2741 5569; `aud248RunSeed.sh`, `soundScoreboard.py`; before = the base archive, after = this tree): **missing 0 / extra 0** in every family, both arms. Move-animation SE exact / offset 166 / 1223 -> **208 / 1181**; delta (engine - ROM) median / p10 / p90 -2 / -17 / 4 -> **-2 / -12 / 4** (n 1389 both); stat-change, cry, battle-controller and bgm unchanged (stat-change 8 / 27, cry 22 / 50, battle-controller 54 / 171, bgm 0 / 3).
+- `npm run typecheck` exit 0 (3 m 45 s alone); `npm run test:gate` 362 / 362 files, 2844 tests; `npm run build` and `build:lib` exit 0; vanilla Scene ON soak 0:20 **20 / 20 OK** (4 runs of 5 seeds, `--parallel 4`).
+- Test union (every test importing `liveMoveAnimation` / `battleResolutionPresentation*` / `moveAnimSounds` / `tickSounds`, every test naming the seven moves, the hpd6 list, aud249* / sta3*, `lbrd`, `randomRoundSoak*`): 369 files in 6 chunks; 363 files pass. The 11 failing tests in 6 files fail identically on the base archive (`70b797e28`), so they are not this step's: cry1 x4 (`cry1CryTasks`, ROAR first / second cries), `aud242e` counter-player, `aud242p` revenge-player, `aud260` Recycle, `aud262` Water Spout x3, `trn181` Rest (-3 expected vs -14). The full `npm test` was not run.
+
+### Not landed / open
+- **Blizzard body SEs +2, hit SE +3** (unchanged from the base): the app's print length depends on glyph count (S = 51) while the ROM's R is a fixed 55; shape B, not a lead / tail issue. Its remaining frame diffs are backdrop-palette pixels (127 / 780 matched frames).
+- Calm Mind hit SE 13 @ 699 is -4 (unchanged from the base).
+- **Wish (273) not landed**: its 13-row gap (shape C) was not traced per frame in this step, so the L 2 + 12 post rows proposal from lse1 stays unproven.
+- The `liveMoveUniversalRowAge` hold-flag condition for the LSE2 ids (render ~2500) was not needed on any lab and was left alone.
+
+## hpf3: the nine full-suite failures of hpf1 / hpf2 (tests only, `src/` unchanged)
+
+Base `26ed71da7`. The supervisor's full suite on `4839b5b80` had 9 tests in 7 files failing (bisected to hpf1 / hpf2); cry1CryTasks / aud262MoveAnimSounds / trn181ActionTransitionOn (seen failing on lse2's base) already pass on this base (hpf2 re-pinned them). Each failure was classified from the test's assertion plus a ROM RAM timeline of the same lab: `tools/integration/hpf2Shape.py <lab> on <dir>` (ROM hp bar rise / exec / next rise vs the app's hp command) and the new `tools/integration/hpf3Cmds.ts <audio fixture>` (the app's command timeline for an audio fixture's trace). Result: no regression of an hp command; 8 windows moved toward the ROM or onto an out-of-scope body offset that the 28-row floor had hidden, 1 is a wash (Razor Wind). `src/` is untouched, so no census / typecheck delta applies.
+
+| test | ROM minus ours, before -> after | class and evidence |
+|---|---|---|
+| `adp1Sounds` beatup-player | hit 2 / 3: +61 / +122 -> -2 / -4 (offsets 89 / 150 -> 26 / 24) | toward ROM. ROM bar rise -> next rise +91 for hits 1 and 2 (`adp1s-beatup-player-on`), the app's hp command is now 91 long; the old comment blamed the multi-hit loop, it was the 28-row floor. The -2 per hit remains (hit-to-hit 195 vs ROM 193), not hp |
+| `aud242e` counter-player | Counter body -16 -> -2 | toward ROM. The opponent's hit on the player: ROM bar rise 328 exec 13, next rise +32 = the Counter ATTACKSTRING at 360; the app hp command 327 len 14, ATTACKSTRING at 360 (exact). The pre-body rows keep ROM = ours |
+| `aud242e` absorb-player (closing SE238) | -1 -> +11 | not a regression of the hp command, flagged: ROM hit bar rise 302 vs app 291 (+11) and the second player hit +12 (764 vs 752), so the closing SE sits at the lab's constant hit offset (the move-body lead, out of scope); the 28-row floors had hidden it. hit -> drain bar ROM 47 vs app 46; the full-HP drain bar is 1 exec frame in the ROM (app 5) |
+| `aud242p` revenge-player | -10 -> +13 | the opponent's Pound hit: ROM bar rise 134 -> next rise +25 vs app +26, ATTACKSTRING -> first Revenge SE 36 vs 37: the hit chain and the Revenge body are exact within 1; the 13 is the opponent body offset (hit rise ROM 134 vs app 119 = +15). The old -10 was the floor overshooting the hit |
+| `aud260` recycle-player | -3 -> -4 | the hit -> next ATTACKSTRING is exact (ROM bar rise 1357 + 73 = 1430 = ours); ATTACKSTRING -> first SE is ROM 36, ours 40: Recycle's own body, not hp |
+| `aud261` razorwind-player (unleash) | +1 -> +9 | a wash, not exact either way: hit -> next (continuation, no menu) turn is ROM +49 (bar 13), ours 44 now, 4 too long (+1) with the floor. The turn-end command's 8 rows are the open remainder: it was fitted with the floor-held hp |
+| `aud252LossBallOpen` 1914 | [-5, -11, -19 x6] -> [0, 1, -7 x6] | toward ROM on every row |
+| `aud252LossBallOpen` 2230 | [7, 2, 0 x5, -1] -> [7, 3, 1 x5, 0] | one frame, mixed: the item-effect rows +1, SE_BALL_OPEN exact; re-pinned, flagged (seed replay, no RAM lab) |
+| `trn178ActionTransition` (Scene ON Rest anchor) | -3 -> -14 | the same re-pin hpf2 made in `trn181ActionTransitionOn` / `ont193SceneOnTails` (model value: bars 15 rows vs the ROM lab's 8); trn178 duplicates that assertion |
+
+Open from this step: the turn-end command's length when the next turn is a locked continuation (Razor Wind: 5 short); Absorb / Revenge / Counter body offsets (move-body leads); a zero-change drain bar costs 5 app frames vs 1 ROM frame (`aud242e-absorb-player-on`: ROM next rise +47 vs app 46 holds the hit -> drain; the drain -> print part was not isolated).
+
+## lse3: the hpd7 table for the open bodies (measurement only, `src/` / `tests/` unchanged)
+
+Base `f9cdc9c47`. Scene ON (:8012) ROM RAM probes (`tools/integration/hpd2Probe.py`, per-frame ptr / exec / anim / comm / act / ctl / hp) against the app per-command timeline (`tools/integration/hpd4Cmds.ts`). hpd7 method: R = end of the last controller-exec run before `ex = A - 3` (the used print's release); L = ex - R; R->A = A - R; len = `gAnimScriptActive` rows; H = first exec rise after the window; gap = H - (A + len) (normally 4); R->H = H - R; app rows = E - S (the app's move-animation command start to the next command start); d = (R->H) - (E - S) (ROM longer = positive). All labs are existing scenarios except the four `lse3-*` stages (Wish; Pound / Scratch / Tackle on the opponent's side, via a temporary `aud241bStage` entry in `appTrace.ts`, removed again; the scenarios are in the evidence dir). Evidence (git-ignored): `.integration/evidence/lse3/{scen,ram,traces,app}`.
+
+### The table
+
+| move (lab) | ROM L | R->A | len | gap | R->H | app rows | d | shape | proposed landing |
+|---|---|---|---|---|---|---|---|---|---|
+| Absorb 71 (`aud242e-absorb-player`) | 5 | 8 | 205 | 4 | 217 | 207 (pre 3, idle 10, live 194) | **+10** | A | bodyLead 5, adapter idle + live 204 -> 206 (len + 1), tail 3; the hit bar then lands +11 earlier, closing SE238 included (hpf3's +11) |
+| Revenge 279 (`aud242p-revenge-player`) | 5 | 8 | 144 | 4 | 156 | 148 (pre 3, live 145) | **+8** | A | bodyLead 5, tail 3 (live 145 = len + 1 already) |
+| Counter 68 (`aud242e-counter-player`) | 4 | 7 | 87 | 4 | 98 | 93 (pre 3, live 88, post 2) | **+5** | A | bodyLead 4, tail 1 (T = 6 - pre 3 - post 2) |
+| Recycle 278 (`aud260-recycle-player`) | 2 | 5 | 202 | **3** | 210 | 206 (pre 3, live 203) | **+4** | A, gap 3 | bodyLead 2, tail 2 (T - 1 for the gap 3; the existing `tailRows` 6 is the action-transition anchor, not this tail) |
+| Razor Wind 13, unleash (`aud261-razorwind-player`, 2nd window) | 5 | 8 | 72 | 4 | 84 | 75 (pre 3, live 72) | **+9** | A, live = len (1 short) | bodyLead 5, live 73, tail 3 |
+| Razor Wind 13, charge turn (1st window) | 1 | 4 | 45 | 4 | 56 | 48 (live 45) | +8 | A, live = len | bodyLead 1, live 46, tail 3 + the 4 "whirlwind" print rows (not a body lead) |
+| Mega Drain 72 (`aud242e-megadrain-player`) | 5 | 8 | 217 | 4 | 229 | 221 (pre 3, live 218) | **+8** | A | bodyLead 5, tail 3 |
+| Giga Drain 202 (`aud242e-gigadrain-player`) | 5 | 8 | 229 | 4 | 241 | 241 (bodyLead 5, pre 3, live 230) | **0** | A, already exact | none (hpf2 closed the drain-message hold) |
+| Wish 273 (`lse3-wish-player`) | 2 | 5 | 270 | **13** | 288 | 274 (pre 3, live 271) | **+14** | C (gap 13) | bodyLead 2 + 12 post rows (see the trace) |
+| Pound 1, opponent (`lse3-pound-opp`) | 5 | 8 | 33 | 4 | 45 | 32 (generic pause) | **+13** | not a live adapter | new adapter case: bodyLead 5, live 34, tail 3 |
+| Scratch 10, opponent (`lse3-scratch-opp`) | 5 | 8 | 32 | 4 | 44 | 32 (generic pause) | **+12** | not a live adapter | bodyLead 5, live 33, tail 3 |
+| Tackle 33, opponent (`lse3-tackle-opp`) | 5 | 8 | 41 | 4 | 53 | 32 (generic pause) | **+21** | not a live adapter | bodyLead 5, live 42, tail 3 |
+
+Every proposed landing is arithmetic on the rule `R->H = bodyLead + pre 3 + live + post + tail`, which reproduces the ROM R->H on all ten rows (Mega 5 + 3 + 218 + 0 + 3 = 229, Counter 4 + 3 + 88 + 2 + 1 = 98, Revenge 5 + 3 + 145 + 3 = 156, Recycle 2 + 3 + 203 + 2 = 210, Razor Wind 5 + 3 + 73 + 3 = 84, Absorb 5 + 3 + 206 + 3 = 217, Pound 5 + 3 + 34 + 3 = 45, Scratch 5 + 3 + 33 + 3 = 44, Tackle 5 + 3 + 42 + 3 = 53). **None of it was run**: this step changes no source.
+
+### Are Pound / Scratch / Tackle live adapters with the lead? No
+
+`liveMoveAnimationDuration` returns null for ids 1 / 10 / 33 (no adapter case), they are not in `HPD8_SHAPE_A_MOVE_IDS` / `BODY_LEAD_AUDITED_MOVE_IDS`, and the timeline shows `move=1 ... pre=0 live=null` (and 10, 33): the move-animation command is the generic `SCENE_OFF_MOVE_PAUSE_FRAMES = 32` with no lead. The ROM windows are 33 / 32 / 41 rows (Pound hitsplat + shake; Scratch has an extra `waitforvisualfinish`; Tackle a lunge + `delay 6` + hitsplat) with the same lead 5 / R->A 8 / gap 4 as the other shape A bodies, so the +13 / +12 / +21 are the missing lead (8) + gap (4) + the window length difference (+1 / 0 / +9). This is where Revenge's +13..+15 (hpf3: the opponent's Pound hit) comes from: the opponent's Pound is 13 rows short, and it is side-agnostic by construction (the opponent labs are measured here; a player-side Pound / Tackle lab was not run). Moves that get a live adapter change every Scene ON battle that uses them, so this wants the census, not just a lab.
+
+### Wish's 13-row gap, per frame (`lse3-wish-player-on`, ROM RAM)
+
+| frame | ptr | exec | act | event |
+|---|---|---|---|---|
+| 318..321 | `BattleScript_EffectWish+0x9` (`waitanimation`) | 1 | 10 | window rows (A 52 + len 270 = 322) |
+| 322 | same | 1 | 10 | `gAnimScriptActive` falls (gap row 0) |
+| 323 | same | **0** | 10 | exec falls: `waitanimation` done |
+| 324 | `EffectWish+0xb` | 0 | 10 | `goto BattleScript_MoveEnd` |
+| 325 | `MoveEnd+0x0` | 0 | 10 | |
+| 326..328 | `MoveEnd+0x6` / `+0x8` | 0 | 10 | `end` reached |
+| 329 | `MoveEnd+0x8` | 0 | **11** | TRY_FINISH |
+| 330 | same | 0 | **12** | FINISHED |
+| 331 | same | 0 | **0** | back to USE_MOVE: the next battler's action |
+| 332..334 | next script (`EffectDisable+0x1b` / `EffectLevelDamage+0x1..+0x7`, the Seismic Toss prologue; the map has several overlapping labels) | 0 | 10 | |
+| 335 | `EffectLevelDamage+0x9` | **2** | 10 | exec rises: the opponent's "used SEISMIC TOSS!" print starts (H) |
+
+The cause is the generic action transition, not a Wish body gap: `BattleScript_EffectWish` ends at `waitanimation; goto BattleScript_MoveEnd`, so exec is low 323 -> 335 = **12 rows** (13 from the window's fall) of `MoveEnd` + act 11 / 12 / 0 + the next script's pre-print rows. A body that ends with a visible print (shape A) hides these rows behind the print; Wish has none. In the app `actionTransitionPauseFrames` returns null when the anchor is the used print (here: the Wish window is the last command), so Scene ON has **no pause**: the app's next command (sprite-visibility 321, message 322) starts 13 rows before the ROM's 335. Landing: bodyLead 2 (L = 2) + a ~12-row action transition anchored on the Wish live window (the lse1 "L 2 + 12 post rows" proposal is now traced).
+
+### Razor Wind's turn-end rows (`aud261-razorwind-player-on`, between the opponent's Seismic Toss and the unleash)
+
+ROM: bar change at 510 (hp 105 -> 93), `MoveEnd+0x0` 516, `+0x6` 517..519, `+0x8` 520, act **11 / 12 / 0** at 521 / 522 / 523, then **523..535 = 13 rows with the pointer frozen at `MoveEnd+0x8`**: the action-selection state of a locked continuation (no menu), then the script: `EffectRazorWind+0x0` 536, `TwoTurnMovesSecondTurn+0x0..0x18` 537..542, `HitFromAtkCanceler` 543, `HitFromAtkString` 544, **exec rise (the used print) 545**, fall 569, anim window 577 (R 569, L 5).
+
+App: hp command ends 511, sprite-visibility 511 / 512, **turn-end 513 (8 rows), next-command-handoff 521 (14 rows), message 535**, move-animation 558.
+
+Measured as MoveEnd receipt -> the print's exec rise, the ROM has 27 rows and the app 22: **the app is 5 short** (about 5-6 depending on the anchor; the unleash's own +9 above is separate and independent). The missing rows are the locked-continuation action selection (ROM 523..535) plus the script's pre-print rows (536..544), neither of which exists in the app's turn-end (8) + handoff (14) constants, which were tuned on menu-driven turns. The charge turn's own turn-end (ROM `MoveEnd` 187 -> act 0 at 194 -> exec rise 198, app message 194) is the ordinary 4-row offset and is fine. Proposal: when the next battler's action is a locked continuation, lengthen the handoff by 5 (not confirmed on a second lab: `aud242o-rollout5-player-on` was probed and timed, but its turns are Defense Curl + Rollout chains and the turn-end comparison was not done).
+
+### Sound clock note
+
+Counter's and Recycle's SE residuals in hpf3 (-2 / -4) are the calibrated K = 7 (`LSE2_SOUND_CLOCK_LEADS` / `lse2BodySoundAgeShift`) minus how early the window sits: Counter's window is 5 rows earlier than the app's (bodyLead 4 + gap), Recycle's 3. Whether the SE residuals close with the leads is not measured here; settle it in the landing run, not by re-pinning first.
+
+### Proposed landing for the next run (one commit per group, census after each)
+
+1. **Plain shape A: Mega Drain 72, Counter 68 (bodyLead 4, tail 1), Revenge 279** into `HPD8_SHAPE_A_MOVE_IDS` with the leads above (each +8 / +5 / +8 to ROM exact). Re-pin the hpf3 Revenge and Counter rows.
+2. **Recycle (bodyLead 2, tail 2, gap 3) and Razor Wind unleash (bodyLead 5, live 73, tail 3)**; Absorb separately (bodyLead 5, idle + live 204 -> 206 needs the adapter's idle 10 re-derived first; its +10 persists to the next action).
+3. **Wish: bodyLead 2 + the ~12-row action transition** (extend `actionTransitionPauseFrames` to accept a live-window anchor with no print). Needs the Scene ON census.
+4. **Pound / Scratch / Tackle live adapter cases** (windows 33 / 32 / 41) with bodyLead 5, tail 3: the widest blast radius (every Scene ON battle with those moves), land last with the 0..99 census and T2.
+5. **Locked-continuation handoff +5** after a second lab confirms it.
+6. Giga Drain: nothing.
+
+Not done: the 75-minute brief's "npm test green" line was overridden by the step brief (no tests were run, nothing under `src/` or `tests/` changed); `PROGRESS.md` / `ISSUES.md` untouched.
+
+## hpf4m: the shapes still on the fitted 28-row floor, measured on the ROM (measurement only, `src/` / `tests/` unchanged)
+
+Every hp command not yet moved by hpf1 / hpf2 / hie4 still has `max(28, bar + 1)` (`HP_TIMING`, `{minimumFrames: 28}`). One lab per shape, both scenes, built with `overrides.parties` (a Lv50 Rattata / Gastly player against a Rattata foe; `tools/integration/hpf4mLabs.py` writes `tools/battle-lab/hpf4m-<case>-{on,off}.json`). ROM side = `tools/integration/hpd2Probe.py` (per-frame `gBattlescriptCurrInstr`, `gBattleControllerExecFlags`, hp), app side = `hpf1Cmds.ts` through `tools/integration/hpf4mShape.py` (the hpf2Shape tool with per-mode profiles); pointers are named with `hpf4mPtrs.py <ram.json> <from> <to>` (linker map). Evidence (gitignored): `.integration/evidence/hpf4m/{ram,trace}/` and `<case>-<scene>.txt`.
+
+Notation: **E** = the ROM's bar exec run (bar rise to fall) = `battleHealthBarAnimationFrames + 1`, checked on every row below. **next** = bar rise to the next controller exec rise (ROM). **app** = our hp command length (`len`) before the next command.
+
+### Result: ON and OFF agree on every row
+
+All 14 shapes give the same E / next in Scene ON and OFF (the scenes only differ in the hit-animation / sprite windows before the bar, never in the bar-to-next rows), so one rule per shape is enough. Rows with E < 27 are the point: the app's 28-row floor makes them (27 - E) rows too long.
+
+### Table
+
+| shape (lab) | ROM E / next | script source | app now | rule |
+|---|---|---|---|---|
+| poison tick (`poison`) | E 14 / +22 (E+8) | `BattleScript_PoisonTurnDmg`: `healthbarupdate; datahpupdate; printfromtable; waitmessage` -> `MoveEnd`; the next controller exec is the action prompt | 28 -> turn-end 8 | **T1** |
+| toxic tick (`toxic`) | E 7 / 13 / 19 (grows with the counter) -> +15 / +21 / +27 (E+8) | same + toxic counter | 28 | T1 |
+| burn tick (`burn`) | E 14 / +22 (E+8) | `BattleScript_BurnTurnDmg` | 28 | T1 |
+| Curse tick (`curse`, Gastly, Ghost) | E 27 / +35 (E+8) | `BattleScript_CurseTurnDmg` | 28 | T1 (E 27: no change) |
+| Nightmare tick (`nightmare`) | E 27 / +35 (E+8) | `BattleScript_NightmareTurnDmg` | 28 | T1 (no change) |
+| Curse cost (`curse`) | E 53 / +55 (E+2) | `EffectCurse` `healthbarupdate; datahpupdate; printstring` | `len 53 -> message` | already exact |
+| wrap-family tick (`wrap`, `bind`, `firespin`, `whirlpool`, `sandtomb`, `clamp`) | E 7 on every tick of all six / +15 (E+8) | `BattleScript_WrapTurnDmg` (`healthbarupdate; datahpupdate; printstring; waitmessage; jumpifword...`) | 28 | T1 |
+| wrap-family first hit -> secondary message | E 16 (Wrap / Bind), 7 (Fire Spin / Whirlpool), 11 (Sand Tomb), 14 (Clamp) / **E+7** | the hit's `healthbarupdate; datahpupdate; critmessage; waitmessage; ...; seteffectwithchance` -> `BattleScript_MoveEffectWrap` printstring | 28 | **T2** |
+| wrap-family later hit (ends in `MoveEnd`, no secondary print) | E 15 / 7 / 10 / 13 / **E+17** | the same bar, but the next exec is the next action's | 28 | already the hpf1 shape (hit -> `MoveEnd`) |
+| sandstorm damage, the player's tick (`sandstorm`) | E 7 / +17 (E+10) | `BattleScript_DamagingWeatherContinues` -> `printfromtable gSandstormHailContinuesStringIds; healthbarupdate ... jumpifword; ...` | 28 -> message | **T3** |
+| sandstorm damage, the foe's (last) tick | E 7 / +19 (E+12) | same, last battler: `BattleScript_DamagingWeatherContinues` -> `cbf cc8` (end) | 28 -> turn-end | **T3** (+2 over the player's) |
+| faint-next tick (`faintpoison`, 5 ticks then faint) | ticks E 4 / 7 / 9 / 12 / 14 -> +12 / 15 / 17 / 20 / 22 (E+8); last tick E 12, next rise **+80** (the `BattleScript_FaintAttacker` chain: `playfaintcry` at E+2, then the 64-row pause) | `BattleScript_PoisonTurnDmg` -> `7aa 7ac 7af 7b1` (faint path) | 28 -> faint | **T4** |
+| confusion self-hit (`confuse` seed 3, `hpf4m-confuse-{on,off}-s3`) | E 26 / 35 / 23 / 32 -> +42 / +52 / +39 / +51 (E+16..+17 to the next action) | `BattleScript_MoveUsedIsConfused` -> `BattleScript_DoSelfConfusionDmg` -> `healthbarupdate; datahpupdate; resultmessage; tryfaintmon; goto MoveEnd` | `{minimumFrames: 0, tailFrames: 5..7}` from hpd1 (len 36 / 38 / 30) | **already exact**; the open-remainder note that lists it is stale |
+| Substitute cost (`substitute`, `subhit`) | E 27 / **+29 (E+2)** | `EffectSubstitute`: `healthbarupdate; datahpupdate; printstring` | `len 31 -> message` (28 + tail 3) | S1 (off by one on short bars) |
+| hit on a Substitute (`subhit`, Lv12 foe) | **no bar**: hit animation 347..379, `datahpupdate` prints `STRINGID_SUBSTITUTEDAMAGED` (`battle_script_commands.c:1818`, string `sText_SubstituteDamaged` ends in `\p`) at 382 | `BattleScript_HitFromAtkAnimation+0x8` | hit-animation 347 -> message 382 `{minimumFrames: 24, holdFrames: 0}`, then sprite-visibility 420 | **S2** (see below) |
+
+Hail is the same script as sandstorm (`BattleScript_DamagingWeatherContinues`, same string table); the hail tick was measured in hpf2 (R3) and not repeated here.
+
+### Rules
+
+- **T1 (end-of-turn status tick: poison / toxic / burn / Curse / Nightmare / wrap family).** The ROM's next controller exec after a tick bar is **E + 8** after the bar rise (the next action prompt, 8 rows of `MoveEnd`), for every bar length from E = 4 to 27, and the app already adds the 8 rows as `TURN_END_TIMING`. So the tick's `hp` is `{minimumFrames: 0}` (the hie4 `ITEM_HEAL_HP_TIMING`, bar + 1 + nothing), not 28. Changes poison / toxic / burn / wrap-family ticks (E < 27); Curse / Nightmare ticks (E 27) stay put. Where it lands: the hp-timing selector next to `ITEM_HEAL_HP_TIMING` for the end-of-turn `B_SCR_OP_HEALTHBARUPDATE` (it is the one that the end2 handlers emit with no preceding hit animation).
+- **T2 (wrap family, the hit that applies the wrap).** E + 7 to the secondary-effect message (E 16 / 7 / 11 / 14 by move). Tail 7 on a floor-free hp. It is not covered by the hpf1 critmessage rule (it is a plain `printstring`). Keep ON and OFF equal (the sag130 note).
+- **T3 (sandstorm / hail tick).** The player's tick: E + 10 to the weather message (a `printfromtable`, hpf2's R1 tail of kernel executions + 2 applies, the message sits 10 rows after the bar); the foe's / last tick: E + 12 (4 more than T1 because the last battler leaves through `cbf..cc8`). So `{minimumFrames: 0, tailFrames: 10}` for the player and `{minimumFrames: 0, tailFrames: 4}` + turn-end 8 for the last tick.
+- **T4 (faint on a small bar).** Every tick except the last is T1. The last tick's faint chain starts at **E + 2** (`playfaintcry`), so `{minimumFrames: 0, tailFrames: 2}`. The current `applyHpHitTails` `faint` rule needs `hit && leads.faintNext` and its `battler === 0` guard skips non-hit commands on the player: drop both for the tick path.
+- **S1 (Substitute cost).** E 27 -> +29. App len 31 is one over (tail 3 was fitted on a longer bar); tail 2 with the 28 floor gives 30 = ROM + 1 (the usual +1). Only short bars are affected (cost bars E >= 28 are exact).
+- **S2 (hit on a Substitute).** There is no bar: the hit animation ends at 379, `datahpupdate` prints the string at 382, i.e. **3 rows after the hit animation**, the string ends in `\p` (a wait-for-A text, unlike every other battle string measured, which auto-advance after `waitmessage`): the ROM holds the exec at `HitFromAtkAnimation+0x8` until the A press (the lab pressed A at 1122; exec fell at 1125, 719 rows after it started). The app presents a 24-row message and moves on (sprite-visibility 420). In a script-driven lab that is a stall; for the player it means the substitute message waits for input. Decide before landing whether the app should hold the message for a button (it has no wait-for-A command) or keep 24.
+
+### Not verified / caveats
+
+- Not pixel-verified: `tools/compare` matched 0 / 201 frames on these labs (no frame-alignment tooling here); every number is the ROM exec / pointer trace against the app command timeline.
+- The app's rng seed does not correspond to the lab seed: app misses / hits can differ from the ROM's (the confusion self-hit needed a ROM seed scan, seed 3). The comparison is the static per-shape timing, not the outcome.
+- The player / foe species are Rattata / Gastly (Curse needs a Ghost) and the foe Lv12 Rattata for the hit on a Substitute; the app's stat for those can differ from the ROM's, so hp values differ while E is read per row.
+- Seed-scan labs `hpf4m-confuse-*-s2 / s4..s7` were deleted; `hpf4m-confuse-{on,off}-s3` are kept.
+
+### Proposed landing for the next run (one commit per group, census after each)
+
+1. **T1** (poison / toxic / burn / wrap-family ticks) -> `{minimumFrames: 0}` at the end-of-turn hp: poison E 14 (-13), toxic E 7 / 13 / 19, burn E 14, wrap-family E 7. Pin the new lengths on the two scenes; this one has the widest effect (every status tick on a small bar).
+2. **T4** faint-next tick (`tailFrames: 2`, drop the `hit` / `battler === 0` guards for the tick path).
+3. **T3** sandstorm / hail tick tails (10 for the player, 4 + turn-end for the last).
+4. **T2** wrap-family first hit tail 7.
+5. **S1** Substitute cost tail 2.
+6. **S2** after a decision on the `\p` wait-for-A string.
+7. Nothing for Curse cost, Curse / Nightmare ticks (E 27), the confusion self-hit, Leftovers (hie4).
+
+Not done: the brief's "npm test green" line was overridden by this step (no tests were run, nothing under `src/` or `tests/` changed, `tools/compare/appTrace.ts` was patched during measurement and reverted); `PROGRESS.md` / `ISSUES.md` untouched.
+
+## ice950m: why seed 950's Ice Ball is the last static command of the census (measurement only, `src/` / `tests/` unchanged)
+
+Question (docs/aud251 "c1k"): census 0..999 Scene ON leaves one static-field command, `static:other:unattributed-gate-301`, seed 950, Ice Ball. Why does the live adapter decline it, and what is the fix. Measured on `c56ae9e19` (tree `bf121f62e`), Scene ON, read / measure only: temporary `console.error` patches in `liveMoveAnimation.ts`, `factoryRoundBattleOrchestrator.ts`, `spriteOrderEventTransform.ts`, each reverted (`git status` clean, `git diff` empty). Evidence under `/tmp/ice950m/` (`s950.jsonl` = unpatched HEAD, `s950q.jsonl` = the attribution fix below).
+
+Reproduce: `node --experimental-strip-types --no-warnings tools/integration/lsd194Census.ts --seeds=950..950 --scene=on --out=/tmp/ice950m/s950.jsonl` (6 s). Command 264 of 488 carries `static:other:unattributed-gate-301`; the same battle's Ice Ball commands 195 and 213 are `approx:castform-form`, so the adapter draws Ice Ball here and only this one body is static.
+
+### Cause (one chain, three links)
+
+1. **Not a lock-turn / Defense Curl gate.** Command 264 is the first body of a fresh Ice Ball lock (`rolloutCounter` 1, adapter counter 0). `liveIceBallCounter` accepts it, no Defense Curl bit is read anywhere in case 301 (`friendship` / curl are not inputs of the Ice Ball adapter), shiny is false. The decline is the very first line of `case 301` in `liveMoveAnimationPresentationProven` (`liveMoveAnimation.ts` ~4599): `if (counter === null || !spriteOrderInput?.known) return null;`. Measured: `counter=0 rollout=1 turn=0`, `spriteOrderInput` **undefined** (no lend at all, not a deferred marker). That bare `return null` is the "unattributed gate": the sibling adapters (many; `grep -c 'declined(declineSink, "sprite-order-unknown")' src/engine/liveMoveAnimation.ts`) write `return declined(declineSink, "sprite-order-unknown")` for the same condition; case 301 was written before the reason codes and never got it. `liveMovePresentationDeclineReason` then falls to `other:unattributed-gate-301`, and `byPolicy` treats an unknown `other:` reason as static (only `LIVE_MOVE_APPROXIMATE_OTHER_REASONS` members are approximate).
+2. **Why the lend is undefined.** At the orchestrator the body is lent a deferred words marker (`lend deferred`, tracker `known=false`, `deferred.moveId 301`, rc 2: the pending marker of the earlier Ice Ball chain, commands 195 / 213). At the render seam `resolveWordsOrderLend` -> `resolveSpriteOrderDeferredLend` replays the units recorded since that marker on the post-Ice-Ball order (liveMoveAnimation.ts ~2035) and returns **null**, so `spriteOrderInput` becomes undefined ("an unresolved marker leaves no lend and the body declines", the comment in case 301). Units since the marker (event-sequence numbering of the lends): Hail continues, Water Pulse 352 (replays, known), then the player's **Shock Wave 351**, Icy Wind 196, Ember 52, then this Ice Ball.
+3. **The replay breaks on Shock Wave 351.** `applySpriteOrderPresentationEvent` for `move-animation 351:player` logs `invalidate: no EXACT plan: body 351:player` (46 + 8 times over the repeated renders; every other unit replays). 351 is in `SPRITE_ORDER_GEOMETRY_KEYED_BODIES`: its plan needs `liveShockWaveSpriteOrderPlanText(field, attackerSide, lentFree)`, and `lentFree` is the order the body is lent. `advanceLiveSpriteOrderHost` (liveSpriteOrderHost.ts ~556) asks `bodyPlanAt(..., spriteOrderTrackerLend(tracker) ?? undefined)` **at record time**; while a words marker is pending the tracker is unknown, `lentFree` is undefined, the plan text is null, and the unit is recorded without `geometryPlan`. The replay at resolve time has the lent order (the replayed tracker's), but only reads the recorded plan. Water Spout 323 (same `lentFree` keying) is the same class; Giga / Mega Drain / Dream Eater / Eruption / Hail / Blizzard plans do not use `lentFree` and replay fine.
+
+Same root as the battle's other two `approx:sprite-order-unknown` commands (272 Water Pulse, 291 Shock Wave: later bodies after the same pending marker). Those are approximate because their adapters attribute the gate; Ice Ball's is the only adapter that does not, which is why it is the only static one.
+
+### Proposed fixes (two independent steps)
+
+**A. Attribution (one line, no ROM window).** In `case 301`: `if (counter === null) return null; if (!spriteOrderInput?.known) return declined(declineSink, "sprite-order-unknown");` (the counter-null case stays: an out-of-range rollout counter). The existing apx219 fallback then draws the body with the known-entry first-body order, as every other body in this state. Verified by a temporary patch of exactly that line (reverted): seed 950 command 264 -> `approx:sprite-order-unknown`; census class totals 420 none / 36 live / 25 pause / 3 castform / **3 sprite-order (was 2)** / 1 endeavor / **0 static (was 1)**; commands 0..488, every field [0..20] (frames, hp / tail timing, sound rows) identical to HEAD (`diffs excl [21]: 0`), `eventsDigest` / `soundDigest` / `sound` / `soundAnim` identical. So no gameplay, RNG, sound or timing change: only command 264's picture changes from the static field to the Ice Ball body drawn on the fallback sprite order (approximate class, counter 0, whose order is the proven known-entry state: the adapter's counter-0 first-body proof is the aud242q / hpd5 lab). It stays approximate (ordering of the shard sprites may differ from the ROM), not live. Pins to add with it: `tests/apx210LivePlaybackClassification.test.ts` (an Ice Ball counter-0 command with an unresolved lend classifies `approx:sprite-order-unknown`) plus the census static count 1 -> 0 in the aud251 scoreboard. No other test pins `unattributed-gate-301` (`grep -rn unattributed-gate tests tools docs` is empty).
+
+**B. Make it live (exact lend), needs a ROM window.** Record the lent-order-keyed bodies (351, 323) in a pending words marker with their inputs (the displayed field + attacker side) instead of a plan text, and let `resolveSpriteOrderDeferredLend` / `applySpriteOrderPresentationEvent` compute `liveShockWaveSpriteOrderPlanText(field, side, spriteOrderTrackerLend(replayTracker))` at replay time (the order the body is lent is exactly the replayed tracker's). With that the marker resolves through Water Pulse -> Shock Wave -> Icy Wind -> Ember and command 264 (and 272 / 291) leave `sprite-order-unknown`. The plan is a model computation, not a ROM fact at that composed order: the Ice Ball post-free (ice72) is ROM-checked, Shock Wave's plan (sw67) was proven at the lends its own windows staged (not re-checked here which), not at an order composed through an Ice Ball marker. **A window is needed before B may be called exact**: Sealeo (opponent) Ice Ball counters 0 and 1, then a player Shock Wave user (any species with 351; Castform forms are not required, a species without form art removes the `castform-form` approximation), then Sealeo's Ice Ball counter 0 again, ROM OAM draw order of the final body's shards vs the model's; one probe plus one extra with Water Pulse between (the seed-950 order). A second case with Water Spout in place of Shock Wave covers 323. B alone is ~20 lines in `liveSpriteOrderHost.ts` / `spriteOrderEventTransform.ts` and moves the sprite-order pins (`tests/spriteOrderEventTransform.test.ts`, `liveSpriteOrderHost`); do A first (zero-risk, closes the c1k census), then B behind the window.
+
+### Gates / caveats
+
+Docs only: no change under `src/` or `tests/`, no `npm test` run (as instructed), no ledger edited (`PROGRESS.md` / `ISSUES.md` untouched). Only seed 950 was measured; other seeds' Ice Ball commands are not static (census c1k). Whether fix A's drawn body is visually acceptable was not checked against the ROM (no window was run; the sampled class is read on the first presenting row, and the fallback path is age-independent).

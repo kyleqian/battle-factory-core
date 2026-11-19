@@ -7,7 +7,8 @@
  },
  "appStage": {
   "id": "frf250a-bagrun-off",
-  "frame": 0
+  "frame": 0,
+  "opponentTrainerId": 110
  },
  "oracleBattleLab": {
   "scenario": "../../battle-lab/frf250b-run-yes-off.json"

@@ -422,3 +422,77 @@ S=<main>/.integration/evidence/aud259/chain
 node --experimental-strip-types --no-warnings tools/integration/soundCensusRomReplay.ts replay --seed=3738 --scene=on --events=1 --setup=$S/3738-on.setup.json --out=/tmp/psn5/e3738.json   # 4 s; same for 499
 # python: turnEvents[i].commands for frame in (40261, 41046) / (592); cumulative minimumFrames; message rows carry holdFrames only in the scratch copy
 ```
+
+## sta5: sta4 steps 1 and 2 landed, step 3 measured and deferred (2026-11-18, Scene ON)
+
+Labs: Flatter `aud242b-flatter-player-on`, Swagger `aud242f-swagger-player-on`, Spore / Dream Eater `aud242g-dreameater-sleep-player-on`, Toxic `aud242e-toxic-player-on`; hpd8 controls Aerial Ace / Psychic / Thunderbolt.
+
+### Landed
+1. Step 1: Flatter (260) lead 2 + tail 4, Swagger (207) 2 + 5, Spore (147) 7 + 0, Toxic (92) 10 + 7 join the audited-lead set (`BODY_LEAD_AUDITED_MOVE_IDS`; tails in `STA5_STATUS_BODY_TAIL_ROWS`, read by `liveMoveHitTailRows`). `STATUS_ANIMATION_SCRIPT_AGE` is 0 (the ROM's `gAnimScriptActive` rise row) **only behind such a body earlier in the resolution** (`statusAnimationScriptAge`); everywhere else it stays 7 -- a global 0 moved the no-body plays (Love Kiss / Glare / Will-O-Wisp / Refresh / Confuse Ray / cure berries) 3 -> 10 away from their ROM residuals.
+2. Step 2: a stat print whose script goes on to `chosenstatus2animation` (`printfromtable; waitmessage LONG; jumpifability; jumpifsideaffecting; setbyte(setmoveeffect); seteffectprimary`) holds 6 message -> launch rows (`MOVE_INFLICTED_STATUS_ANIMATION_LEAD_ROWS`, shape matched on the program counter). **Scene ON only** (gated on a Scene ON MOVE_ANIMATION receipt in the resolution): the first census arm changed 11 Scene OFF battles, so it was gated.
+3. Test-side: `tests/helpers/iu120Rows.ts` gains the STA5 tail table (held age); Flatter / Swagger live-body ages re-pinned to lead 2 + held tail; `substituteSwapAttdollCells` Toxic ages 316 -> 333; aud248 stat-change RESIDUAL Flatter 5 -> 0 / Swagger 6 -> 0; aud249 WINDOWS Flatter 7/7 -> 2/2, Swagger 8/8 -> 2/2, Toxic window ROM-exact.
+
+### ROM minus ours, Status_* first SE (frames, 48 windows; 4 changed)
+| window | before | after |
+|---|---|---|
+| Flatter (player), 12 plays | 7 | 2 |
+| Swagger, 12 plays | -6 .. 78 | 2 |
+| p-Flatter, 6 plays | 7 | 2 |
+| Toxic poison tick | -4 x5, 80 | 0 x6 |
+All other windows (Love Kiss 3, Glare 4, Will-O-Wisp 3, Refresh / Cheri 2 / 3, Confuse Ray 1, ...) are unchanged, each on its own ROM residual.
+
+### Compare (exact-RGB matches vs the stored oracle PNGs)
+| lab | base | sta5 |
+|---|---|---|
+| Flatter | 260 | 357 |
+| Swagger | 240 | 331 |
+| Toxic | 90 | 451 |
+| Spore / Dream Eater | 368 | 746 |
+| hpd8 Aerial Ace / Psychic / Thunderbolt | 771 / 507 / 352 | 771 / 507 / 352 |
+
+### T2 Scene ON (seeds 2 165 1028 2741 3738 5569 8108, vs the base chain)
+missing 0 / extra 0 on both arms. Move-animation SE exact 149 -> 173, matched-delta median -2 -> -2, p10 -16 -> -13, p90 5 -> 5; stat-change / cry / controller / bgm rows unchanged.
+Census 0..99: eventsDigest identical both scenes; Scene OFF 100/100 identical commands; Scene ON 21 battles change commands (Flatter / Swagger / Toxic bodies and message holds only).
+
+### Step 3 (not landed): pre-print rows
+Rule measured on the three hpd8 labs and the four status labs: the first action's "used" glyph lands u - 2 rows later in the ROM, u = `provenance.instructionExecution` of the USEDMOVE print (Flatter / Swagger 4 -> +2, Toxic / Spore 2 -> 0, Thunderbolt / Psychic 6 -> +4, Aerial Ace 4). Landing it improves the matches (Flatter 629, Swagger 622, Spore 817, Aerial Ace 918, Psychic 918, Thunderbolt 534) but the per-move sound tables, `liveMoveSourceAge`, `statsChangeSourceAge`, `moveBodyExtraRows` and the hit / HP / faint anchors absorb this early start today, so sounds are ROM-exact; the patch moved 126 ROM-exact sound pins by u - 2 and was reverted rather than re-pinned away from the ROM. Patch: `.integration/evidence/sta5/step3-handoff-rows.patch` (scratch). Follow-up: decouple the sound clock (an `extra` offset) in those emitters, then land the rows.
+
+## sta6m: Flatter / Swagger +6 message -> launch rows in Scene OFF (2026-11-19, measurement only, nothing landed)
+
+Question from sta5 step 2: the +6 rows (`MOVE_INFLICTED_STATUS_ANIMATION_LEAD_ROWS`, `src/engine/battleResolutionPresentation.ts` ~1059-1100) are gated on `sceneOnMoveAnimationSeen && isMoveInflictedStatusLaunch(programCounter)`. Do they apply in Scene OFF, and how much would ungating change?
+
+**Labs / stages / traces (kept)**: `tools/battle-lab/sta6m-{flatter,swagger}-{off,on}.json` (copies of the aud242b / aud242f labs, profile switched), app stages `sta6m-flatter-player-off` / `sta6m-swagger-player-off` (`tools/compare/appTrace.ts`), compare traces `tools/compare/traces/sta6m-{flatter,swagger}-off.json` (520 frames). Probes: `tools/integration/hpd2Probe.py`; app rows: `tools/integration/hpd4Cmds.ts`.
+
+### ROM script rows (hpd2 probe, frames from the lab start)
+| | Flatter ON | Flatter OFF | Swagger ON | Swagger OFF |
+|---|---|---|---|---|
+| stat print exec | 359 | 171 | 323 | 185 |
+| `chosenstatus2animation` row (0x82db3e6) | 454 | 266 | 425 | 287 |
+| confusion print exec | 556 | 268 | 527 | 289 |
+| stat print -> `chosenstatus2animation` row | 95 | 95 | 102 | 102 |
+
+The script rows are identical in both scenes; in OFF only `attackanimation` becomes a 32-frame `BattleScript_Pausex20` and the `chosenstatus2animation` animation is skipped. The ON launch (anim rise) is one row after the `chosenstatus2animation` row (454 -> 455); in OFF the next command is the confusion print itself, three rows on (0x3e6 -> 0x3ed -> print), so OFF's message -> next-message gap is the ON launch gap plus one.
+
+### Ours at HEAD, OFF
+Print -> print gap: Flatter 170 -> 260 = 90 (ROM 171 -> 268 = 97); Swagger 184 -> 281 = 97 (ROM 185 -> 289 = 104). OFF is 7 rows short, ON already matches (96 / 103 launch gaps vs the ROM).
+
+### Experiment (temporary ungate in src, reverted; `git status` shows no src change)
+| lab (520 frames, exact RGB vs the stored oracle) | base | ungated, 6 rows | 7 rows |
+|---|---|---|---|
+| Flatter OFF | 278 | 296 | 299 |
+| Swagger OFF | 249 | 267 | 270 |
+
+With 6 rows the app prints land at ROM - 1 (first) and ROM - 2 (second); 7 rows closes the gap. Remaining diffs are per-glyph text residuals that also exist in unaffected windows (frames 4-50, 170-196); the message-box clear aligns better at +7.
+
+### Census 0..99, Scene OFF (`tools/integration/liveShareCensus.ts --seeds=0..99 --scene=off`)
+`battleDigestExcludingFrames` and `commandDigest` are identical to base (logic and RNG unchanged); only `battleFrames` move.
+| arm | battles changed | total frames | notes |
+|---|---|---|---|
+| 6 rows | 10 of 100 (indexes 3, 6, 20, 27, 30, 61, 68, 86, 94, 98) | +102 | 17 occurrences of +6 |
+| 7 rows | the same 10 | +118 | per-battle +8, 6, 8, 8, 14, 6, 40, 6, 14, 8 |
+(sta5's first arm changed 11 battles on its older tree.)
+
+### Verdict and proposed landing (not done here)
+The rows apply in Scene OFF, so the ON-only gate can go: drop `sceneOnMoveAnimationSeen` for `isMoveInflictedStatusLaunch`, with 6 rows in ON and 7 (6 + 1: the next command is the print, not a launch) in OFF, or equivalently "stat print -> next message = 97 / 104 frames" in OFF. Cost: 10 of 100 census OFF battles gain 6-8 frames per Flatter / Swagger occurrence (the census report carries per-battle frame totals only, not message holds), the Scene OFF Flatter / Swagger live-body tests need re-pinning (expected +7 on the confusion print), and a Scene OFF row in `tests/helpers/iu120Rows.ts`-style tables should be added. Expected compare gain: Flatter 278 -> 299, Swagger 249 -> 270 exact frames.
+
+Side observation (unrelated, not landed): in OFF the pre-move confusion "is confused!" print -> "used SEISMIC TOSS!" print is ROM 372 -> 466 (94 frames) vs ours 370 -> 460 (90). The sta3 3-row rule exists, but 4 more rows are missing in OFF.

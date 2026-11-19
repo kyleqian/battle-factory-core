@@ -82,9 +82,10 @@ describe("hpd1: ROM post-hit hold over 20 fixed-damage windows", () => {
     expect([...diffs]).toEqual([7]);
   });
 
-  it("a hit on the player (no ROM window yet: the off108 Rest anchor moves -3 -> -14 without the floor) keeps the legacy 28-frame floor", () => {
-    const { commands } = production(cases.find((c) => c.shape === "a")!);
-    const onPlayer = commands.find((command) => command.type === "hp" && command.battler === 0);
-    expect(onPlayer?.timing).toEqual({ minimumFrames: 28 });
+  it("hpf1: a hit on the player is floor-free too (tail 7 = rows datahpupdate -> first MoveEnd receipt; ROM labs hpf1-p{c,a}-{sonicboom,dragonrage,toss10}-{on,off}: bar end -> box change equal to ROM)", () => {
+    const { commands, field } = production(cases.find((c) => c.shape === "a")!);
+    const onPlayer = commands.find((command) => command.type === "hp" && command.battler === 0)!;
+    expect(onPlayer.timing).toEqual({ minimumFrames: 0, tailFrames: 7 });
+    expect(battleResolutionCommandDuration(onPlayer, field)).toBe(onPlayer.from - onPlayer.to + 1 + 7);
   });
 });

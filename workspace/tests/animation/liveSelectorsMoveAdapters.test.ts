@@ -60,7 +60,7 @@ const moves: ReadonlyArray<{ id: number; move: string; variants: readonly Varian
   // battle_anim.c:1073 Cmd_choosetwoturnanim: gAnimMoveTurn bit 0 selects the unleash body.
   { id: 76, move: "SOLAR_BEAM", variants: [
     { label: "setup", fields: { turn: 0 }, duration: 108 },
-    { label: "unleash", fields: { turn: 1 }, duration: 160 },
+    { label: "unleash", fields: { turn: 1 }, duration: 199 },
   ] },
   // battle_anim_effects_3.c:1531 AnimTask_IsHealingMove: heal iff gAnimMoveDmg <= 0.
   { id: 217, move: "PRESENT", variants: [
@@ -77,7 +77,7 @@ describe("selectors live adapters: request-field selectors", () => {
   });
 
   it("maps gAnimMoveTurn bit 0 to the Solar Beam body (both bodies, any turn parity)", () => {
-    for (const [turn, body, duration] of [[0, "setup", 108], [1, "unleash", 160], [2, "setup", 108], [3, "unleash", 160]] as const) {
+    for (const [turn, body, duration] of [[0, "setup", 108], [1, "unleash", 199], [2, "setup", 108], [3, "unleash", 199]] as const) {
       for (const attacker of [0, 1] as const) {
         expect(liveMoveAnimationDuration(request(76, attacker, { turn }))).toBe(duration);
         expect(liveMoveAnimationPresentation(request(76, attacker, { turn }), field, 0)?.config)
@@ -155,10 +155,11 @@ describe("live selectors move adapters", () => {
 });
 
 const routes: ReadonlyArray<{ move: string; id: number; seed: number; slots: (0 | 1 | 2 | 3)[]; streak: number;
-  bodies: ReadonlyArray<{ turn?: number; damageSign?: "positive" | "nonpositive"; ages: number }> }> = [
+  bodies: ReadonlyArray<{ turn?: number; damageSign?: "positive" | "nonpositive"; ages: number; lead?: number }> }> = [
   // Solar Beam charge turn then strike turn (animTurn 0 then 1) in one ordinary route.
   { move: "SOLAR_BEAM", id: 76, seed: 73, slots: [0], streak: 14,
-    bodies: [{ turn: 0, ages: 108 }, { turn: 1, ages: 160 }] },
+    // liv2: the unleash is shape A: lead 5, 39 idle rows + the 199-row body (238 = the ROM window + 1), tail 3.
+    bodies: [{ turn: 0, ages: 108 }, { turn: 1, ages: 199 + 39, lead: 5 }] },
   // Present damage roll, then a heal roll once the target is damaged.
   { move: "PRESENT", id: 217, seed: 3303, slots: [0, 0], streak: 0,
     bodies: [{ damageSign: "positive", ages: 201 }, { damageSign: "nonpositive", ages: 252 }] },
@@ -175,7 +176,7 @@ describe("live selectors ordinary routes", () => {
     const requests = on.requests.filter(r => r.moveId === row.id && r.attacker === 0);
     expect(bodies).toHaveLength(row.bodies.length);
     row.bodies.forEach((expected, i) => {
-      expect(bodies[i]?.ages).toEqual(iu120Ages(row.id, expected.ages));
+      expect(bodies[i]?.ages).toEqual(iu120Ages(row.id, expected.ages, "player", expected.lead));
       expect(bodies[i]?.adapterActive.every(Boolean)).toBe(true);
       if (expected.turn !== undefined) expect(requests[i]?.turn).toBe(expected.turn);
       if (expected.damageSign) expect(requests[i]!.damage > 0).toBe(expected.damageSign === "positive");

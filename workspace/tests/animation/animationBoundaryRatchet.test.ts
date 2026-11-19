@@ -99,6 +99,9 @@ describe("animation/engine boundary ratchet", () => {
       // reducers (src/animation/backSendOutAnim.ts selectBackSendOutAnimation, src/animation/sendOutDispatcher.ts BACK_SEND_OUT_REDUCERS)
       // for the first WaitAnimEnd tick; presentation timing only, never battle rules, RNG or AI.
       join("src", "engine", "switchInTail.ts"),
+      // dl4 (docs/dl3-per-species-pictures.md): the generated full table of the animation asset files (every src/animation/assets/*.json
+      // by name) that node tools, vitest and the dev shell install into the animation asset provider; data only, no animation code.
+      join("src", "engine", "animAssetsFull.ts"),
     ]);
     const violations: string[] = [];
     for (const file of collectTsFiles("src")) {

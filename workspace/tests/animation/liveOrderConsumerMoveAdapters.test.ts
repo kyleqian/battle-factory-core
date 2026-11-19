@@ -169,7 +169,7 @@ describe("live order-consumer adapters: Grudge (while the tracked order is known
 // Order-consumer batch 2 (docs/order-consumer-prep.md §0/§4/§5): Ember, Dragon Rage, Flamethrower (order-independent),
 // Heal Bell, Leaf Blade, Perish Song, Rock Throw, Blaze Kick (provider consumers: while the tracked order is known).
 const NEW = { EMBER: 52, DRAGON_RAGE: 82, FLAMETHROWER: 53, HEAL_BELL: 215, LEAF_BLADE: 348, PERISH_SONG: 195, ROCK_THROW: 88, BLAZE_KICK: 299 } as const;
-const DURATION: Record<number, number> = { 52: 63, 82: 150, 53: 115, 215: 261, 348: 224, 195: 259, 88: 87, 299: 78 };
+const DURATION: Record<number, number> = { 52: 63, 82: 150, 53: 192, 215: 261, 348: 224, 195: 259, 88: 87, 299: 78 };
 const NAME: Record<number, string> = { 52: "EMBER", 82: "DRAGON_RAGE", 53: "FLAMETHROWER", 215: "HEAL_BELL", 348: "LEAF_BLADE", 195: "PERISH_SONG", 88: "ROCK_THROW", 299: "BLAZE_KICK" };
 const reqFor = (moveId: number, attacker: 0 | 1): BattleMoveAnimationRequest => ({
   moveId, attacker, target: attacker === 0 ? 1 : 0, turn: 0, power: 0, damage: 0, friendship: 70, multihit: 0,

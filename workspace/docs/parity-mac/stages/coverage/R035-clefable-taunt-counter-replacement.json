@@ -1,0 +1,92 @@
+{
+ "name": "R035-clefable-taunt-counter-replacement",
+ "rules": [
+  "R035"
+ ],
+ "why": "Challenge 7. The opponent's lead Clefable (389: Metronome, Double Team, Reflect, Follow Me) calls Taunt with Metronome (about 1 in 340 per call; Taunt is not forbidden to copy) on the player's Snorlax (826, Hyper Beam, speed 30 so Clefable moves first). Snorlax's Hyper Beam then knocks Clefable out in the same turn. Taunt is still on the player's Pokemon on the next turn, when the AI's replacement Machamp (431, Counter) is scored: AI_CV_Counter takes the extra roll while the target is taunted (factoryAiCheckViability.ts runCvCounter). The player repeats Hyper Beam every turn it is offered so the Metronome calls come as fast as possible.",
+ "seed": 1040873,
+ "challengeNum": 7,
+ "battleNum": 0,
+ "trainerId": 200,
+ "playerSetIds": [
+  826,
+  565,
+  725
+ ],
+ "opponentSetIds": [
+  389,
+  431,
+  836
+ ],
+ "script": {
+  "actions": [
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   }
+  ],
+  "then": "census"
+ },
+ "expect": [],
+ "cover": [
+  {
+   "file": "src/engine/factoryAiCheckViability.ts",
+   "text": "&& !roll(\"counter-taunt-roll\", 100)) score += 1;\n   ",
+   "at": 0
+  },
+  {
+   "file": "src/engine/factoryAiCheckViability.ts",
+   "text": "score += 1;\n    cons",
+   "at": 0
+  },
+  {
+   "file": "src/engine/factoryAiCheckViability.ts",
+   "text": "&& !roll(\"counter-taunt-roll\", 100)) score += 1;\n  c",
+   "at": 0
+  },
+  {
+   "file": "src/engine/factoryAiCheckViability.ts",
+   "text": "score += 1;\n  co",
+   "at": 0
+  }
+ ],
+ "coverAny": true
+}

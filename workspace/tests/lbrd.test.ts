@@ -41,13 +41,18 @@ interface WonLobby {
  * retire case keeps 13 (RETIRE_SEED).
  * hpd5 (measured on the hpd4 tip f40209793: the same 3 failures, so hpd4's floor-free foe-hit hold moved the deal, not hpd5's Scene ON-only audited leads): 19's OFF continuation
  * and 13's retire case now lose; a scan of 1..18 on the full file with the seed in both roles found 17 passing every case (13 passes all but the retire), so both use 17.
- * fix 51 (docs/parity-mac/noland-room-scenes.md: the won Lobby's clock starts at the Lobby's map load, ~100 frames later than before, and its award
- * gates are the ROM's) moved the deal again: 17's OFF continuation and 0's loss no longer play out. A scan (win 1..12 on the win / retire cases, loss 1..2
- * on the loss case) found 2 passing every case in both roles, so all three use 2 (the loss case plays on past the second challenge to the first loss).
+ * ais4 (the opponent faint replacement's send-in runs the AI timeline, +2 frames per replacement, so every soak trajectory shifts): 17's continuation loses (13 passes all but the retire);
+ * a scan of 1..12 on the full file with the seed in both roles found 4 passing every case (15 / 15; seed 2 loses only the continuation), so both use 4.
  */
-const WIN_TWO_SEED = 2;
-const RETIRE_SEED = 2;
-const WIN_THEN_LOSE_SEED = 2;
+// hpd8 (shape-A lead + hit tail moved the Scene ON deal): 17 lost the continuation; a scan of 1..24 with the seed in both roles found only 4 passing every case.
+// hpf1 (hit -> message / faint-chain / turn-end hp commands are floor-free, ROM-measured): 4 lost the Scene OFF continuation and seed 0 no longer loses its second round; a scan of 13..44
+// with the seed in both win roles found 14, 23 and 36 passing all but the challenge-2 loss; a scan of the loss seed 1..24 (win = 14) found 4, 13, 14, 17, 19 losing it. 14 for all three.
+// fix 51 (docs/parity-mac/noland-room-scenes.md: the won Lobby's clock starts at the Lobby's map load, ~100 frames later than before, and its award gates are the ROM's) moved the deal again: 17's OFF continuation and 0's loss no longer play out. A scan (win 1..12 on the win / retire cases, loss 1..2 on the loss case) found 2 passing every case in both roles, so all three use 2 (the loss case plays on past the second challenge to the first loss).
+// merge of the box's 2026-11-18 run (to cbd64bb34) with the Mac's fixes 44-51: 14's (and fix 51's 2's) continuation loses; a scan of 0..30 with the seed
+// in all three roles found only 0 passing every case (4 and 19 fail one case, 2 / 14 / 23 the continuation), so all three use 0.
+const WIN_TWO_SEED = 0;
+const RETIRE_SEED = 0;
+const WIN_THEN_LOSE_SEED = 0;
 
 function newPlayer(seed: number): RandomPlayer {
   const player = new RandomPlayer(new Rng(seed), new ActionLog(false), "winning");

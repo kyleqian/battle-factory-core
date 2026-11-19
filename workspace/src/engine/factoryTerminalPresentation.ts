@@ -415,16 +415,28 @@ export function isFactoryTerminalRoundWon(
   return state.profile.outcome === "roundWon";
 }
 
+/** lbw7: RETIRE-YES reaches the same LostChallenge script; its `factory_save` wait runs RETIRE_SAVE_EXTRA ticks longer than a loss's (ROM SE_SAVE at release + 179 vs 173). */
+export const RETIRE_SAVE_EXTRA = 6;
+
+export const FACTORY_RETIRE_TERMINAL_PROFILE: FactoryTerminalLossProfile =
+  Object.freeze({
+    ...FACTORY_LOSS_TERMINAL_PROFILE,
+    statusClearDelayFromSecondRelease:
+      FACTORY_LOSS_TERMINAL_PROFILE.statusClearDelayFromSecondRelease +
+      RETIRE_SAVE_EXTRA,
+  });
+
 export function createFactoryTerminalLossPresentation(
   command: Pick<
     Extract<BattlePresentationCommand, { readonly type: "roundLost" }>,
     "type" | "commandId" | "battleIndex"
   >,
+  profile: FactoryTerminalLossProfile = FACTORY_LOSS_TERMINAL_PROFILE,
 ): FactoryTerminalLossPresentationState {
   return {
     commandId: command.commandId,
     battleIndex: command.battleIndex,
-    profile: FACTORY_LOSS_TERMINAL_PROFILE,
+    profile,
     age: 0,
     firstPageReleaseAge: null,
     secondPageReleaseAge: null,

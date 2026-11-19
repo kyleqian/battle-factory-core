@@ -136,6 +136,8 @@ class RomDriverTest(unittest.TestCase):
         seq = run(d, [obs("party", slot=0, tasks=True), obs("party", slot=0, tasks=True), obs("party", slot=1, tasks=True),
                       obs("party", slot=1, tasks=True), obs("party", slot=2, tasks=True)])
         self.assertEqual(seq, [["DOWN"], [], ["DOWN"], [], ["A"]])
+        self.assertEqual(d.anchors, [])  # bal1: a real switch's anchor stays open until the SEND OUT confirm (or the menu closing)
+        d.step(obs("other"))
         self.assertEqual(d.anchors[0]["kind"], "switch")
         up = rd.RomDriver([{"kind": "switch", "partyIndex": 1}], FUNCS)
         self.assertEqual(up.step(obs("party", slot=3, tasks=True)), ["UP"])
@@ -149,6 +151,7 @@ class RomDriverTest(unittest.TestCase):
         self.assertEqual(d.step(obs("party", slot=0, tasks=True, order=order)), ["DOWN"])  # not the fainted slot 0
         d.advanced(); d.step(obs("party", slot=0, tasks=True, order=order)); d.advanced()
         self.assertEqual(d.step(obs("party", slot=1, tasks=True, order=order)), ["A"])
+        d.advanced(); d.step(obs("other"))
         self.assertEqual(d.anchors[0]["kind"], "switch")
 
     def test_party_submenu_and_message_waits_pulse_a_with_a_17_frame_period(self):
@@ -202,7 +205,32 @@ class RomDriverTest(unittest.TestCase):
         self.assertEqual(d.step(obs("party", slot=1, tasks=True)), ["DOWN"])
         d.advanced(); d.step(obs("party", slot=2, tasks=True)); d.advanced()
         self.assertEqual(d.step(obs("party", slot=2, tasks=True)), ["A"])
+        d.advanced(); d.step(obs("other"))
         self.assertEqual((d.index, d.pending), (1, "real"))
+
+    CLOSE = {**FUNCS, "Task_ClosePartyMenuAndSetCB2": 0x4800}
+
+    def test_a_real_switch_commits_at_the_send_out_confirm_not_the_first_a(self):
+        # bal1: the first A in the party menu only opens SEND OUT / SHIFT / SUMMARY; CursorCb_SendMon (the confirm) starts Task_ClosePartyMenuAndSetCB2
+        for decision in ({"kind": "switch", "partyIndex": 1}, {"kind": "switch", "partyIndex": 1, "voluntary": True}):
+            d = rd.RomDriver([decision], self.CLOSE)
+            self.assertEqual(d.step(obs("party", slot=1, tasks=True)), ["A"])
+            self.assertEqual(d.anchors, [])
+            for _ in range(40):  # the submenu: the pulse presses A again 16 frames later; the party menu stays up
+                d.advanced()
+                d.step({**obs("party", slot=1, tasks=True), "partyTasks": [0x4000]})
+            self.assertEqual(d.anchors, [])
+            d.advanced(); d.step({**obs("party", slot=1), "partyTasks": [0x4800]})  # the frame after the confirm A
+            frame = d.frame
+            self.assertEqual(len(d.anchors), 1)
+            self.assertEqual(d.anchors[0]["commitFrame"], frame)
+            self.assertGreater(frame, 40)
+            self.assertTrue(d.done())
+
+    def test_a_refusal_probe_still_closes_at_its_first_a(self):
+        d = rd.RomDriver([{"kind": "switch-refused", "partyIndex": 1}], self.CLOSE)
+        self.assertEqual(d.step(obs("party", slot=1, tasks=True)), ["A"])
+        self.assertEqual(d.anchors[0]["commitFrame"], 1)
 
     def test_a_forced_replacement_at_the_action_menu_is_unplanned(self):
         with self.assertRaises(rd.DriverError):

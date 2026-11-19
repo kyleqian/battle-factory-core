@@ -17,7 +17,7 @@ import { GROVYLE_TO_ONIX_ROCK_SLIDE_PROFILE } from "../animation/sceneOnPresenta
 import { wavyMusicNotesGeometryAtAge } from "../animation/sing.ts";
 import { ADP1_MOVE_BODY, APPROX_SCRIPT_MOVE_BODY, approxScriptDuration } from "../animation/approxScript.ts";
 import { PRESENT_DAMAGE_FRAME_COUNT, PRESENT_HEAL_FRAME_COUNT } from "../animation/present.ts";
-import { SOLAR_BEAM_SETUP_FIRST_INACTIVE_AGE, SOLAR_BEAM_UNLEASH_FIRST_INACTIVE_AGE } from "../animation/solarBeam.ts";
+import { SOLAR_BEAM_SETUP_FIRST_INACTIVE_AGE } from "../animation/solarBeam.ts";
 import { reduceMemento, type MementoBattlerConfig, type MementoConfig } from "../animation/memento.ts";
 import { HOWL_FRAME_COUNT } from "../animation/howl.ts";
 import { SUBSTITUTE_FRAME_COUNT } from "../animation/substitute.ts";
@@ -104,11 +104,11 @@ import type { FlailPower } from "../animation/flail.ts";
 import type { HailProfile } from "../animation/hail.ts";
 import { composeLiveArtPalettes, composeLiveFieldPalettes, liveBattlerIsShiny } from "./liveMovePaletteComposite.ts";
 import lovelyKissAsset from "../animation/assets/lovely-kiss.json" with { type: "json" };
-import octazookaAsset from "../animation/assets/octazooka.json" with { type: "json" };
-import spikesAsset from "../animation/assets/spikes.json" with { type: "json" };
+import type octazookaAssetData from "../animation/assets/octazooka.json";
+import type spikesAssetData from "../animation/assets/spikes.json";
 import paletteResources from "../data/gen/live-animation-palette-resources.json" with { type: "json" };
-import skyAttackAsset from "../animation/assets/sky-attack.json" with { type: "json" };
-import snoreAsset from "../animation/assets/snore.json" with { type: "json" };
+import type skyAttackAssetData from "../animation/assets/sky-attack.json";
+import type snoreAssetData from "../animation/assets/snore.json";
 import spitUpRedOrbAsset from "../animation/assets/spit-up-red-orb.json" with { type: "json" };
 import superpowerAsset from "../animation/assets/superpower-rock-orb-fire.json" with { type: "json" };
 import { LIVE_MOVE_TIMING_POLICY, liveMoveBgWriteRow, liveMoveCounterTimingParameter, liveMoveOptionalLagAge, liveMovePaletteTransferRow, liveMoveScanoutSplitRow, liveMoveTimingBodyOf, liveMoveTimingBodyRows, liveMoveTimingParameter, liveMoveTimingSidePhase, liveMoveTimingUseOf, type LiveMoveTimingBody } from "./liveMoveTimingPolicy.ts";
@@ -128,8 +128,8 @@ import { liveCurseStatsInputs, liveFuryCutterInputs, liveMegahornInputs, livePur
 import shockWaveAsset from "../animation/assets/shock-wave.json" with { type: "json" };
 import { shockWaveSpriteOrderPlanText, shockWaveTimingFor } from "../animation/shockWave.ts";
 import revengeScratchAsset from "../animation/assets/revenge-purple-scratch-swipe.json" with { type: "json" };
-import hornDrillAsset from "../animation/assets/horn-drill.json" with { type: "json" };
-import megaHornAsset from "../animation/assets/mega-horn-horn-hit-2.json" with { type: "json" };
+import type hornDrillAssetData from "../animation/assets/horn-drill.json";
+import type megaHornAssetData from "../animation/assets/mega-horn-horn-hit-2.json";
 import {
   CURSE_STATS_ROWS, curseStatsBattleBgAt, curseStatsPaletteAt, curseStatsRegistersAt, curseStatsSpritesAt, curseStatsTasksAt,
 } from "../animation/curseModel.ts";
@@ -137,24 +137,39 @@ import { carryLiveSpriteOrder, FLATTER_ROWS, FURY_CUTTER_ROWS, RETURN_ROWS, RETU
 import { returnPowerLevel } from "./liveSpriteOrderHost.ts";
 import { willOWispSpritesAtAge, willOWispTimeline } from "../animation/willOWisp.ts";
 import { skillSwapAtAge, type SkillSwapLiveInputs } from "../animation/skillSwap.ts";
-import skillSwapOrbAsset from "../animation/assets/skill-swap-bluegreen-orb.json" with { type: "json" };
+import type skillSwapOrbAssetData from "../animation/assets/skill-swap-bluegreen-orb.json";
 import { flatterAtAge, type FlatterLiveInputs } from "../animation/flatter.ts";
 import { eruptionLaunchTimeline, type EruptionLaunchProfile } from "../animation/eruptionLaunch.ts";
 import { ERUPTION_FALLING_ROCK_SOURCE_CALLS } from "../animation/eruptionFallingRock.ts";
 import eruptionWarmRockAsset from "../animation/assets/eruption-warm-rock.json" with { type: "json" };
-import flatterAsset from "../animation/assets/flatter.json" with { type: "json" };
+import type flatterAssetData from "../animation/assets/flatter.json";
 import { pursuitTargetOffsetAtAge } from "../animation/pursuit.ts";
 import { sortGbaSpriteOrder } from "../animation/gbaObjCompositor.ts";
-import willOWispAsset from "../animation/assets/will-o-wisp.json" with { type: "json" };
-import iceBallAsset from "../animation/assets/ice-ball.json" with { type: "json" };
-import icyWindAsset from "../animation/assets/icy-wind.json" with { type: "json" };
+import type willOWispAssetData from "../animation/assets/will-o-wisp.json";
+import type iceBallAssetData from "../animation/assets/ice-ball.json";
+import type icyWindAssetData from "../animation/assets/icy-wind.json";
 import { liveIceBallEnd, liveIceBallInputs } from "./liveIceBallInputs.ts";
 import { diveAtAge, type DiveGeometry, type DiveProfile } from "../animation/dive.ts";
 import { linearTranslationDeltaQ8, linearTranslationOffsetAfterCallbacks } from "../animation/animLinearTranslation.ts";
+import { lazyAnimAsset } from "./animAssets.ts";
+const octazookaAsset = /* @__PURE__ */ lazyAnimAsset<typeof octazookaAssetData>("octazooka");
+const spikesAsset = /* @__PURE__ */ lazyAnimAsset<typeof spikesAssetData>("spikes");
+const skyAttackAsset = /* @__PURE__ */ lazyAnimAsset<typeof skyAttackAssetData>("sky-attack");
+const snoreAsset = /* @__PURE__ */ lazyAnimAsset<typeof snoreAssetData>("snore");
+const hornDrillAsset = /* @__PURE__ */ lazyAnimAsset<typeof hornDrillAssetData>("horn-drill");
+const megaHornAsset = /* @__PURE__ */ lazyAnimAsset<typeof megaHornAssetData>("mega-horn-horn-hit-2");
+const skillSwapOrbAsset = /* @__PURE__ */ lazyAnimAsset<typeof skillSwapOrbAssetData>("skill-swap-bluegreen-orb");
+const flatterAsset = /* @__PURE__ */ lazyAnimAsset<typeof flatterAssetData>("flatter");
+const willOWispAsset = /* @__PURE__ */ lazyAnimAsset<typeof willOWispAssetData>("will-o-wisp");
+const iceBallAsset = /* @__PURE__ */ lazyAnimAsset<typeof iceBallAssetData>("ice-ball");
+const icyWindAsset = /* @__PURE__ */ lazyAnimAsset<typeof icyWindAssetData>("icy-wind");
 import {
   dirtScatterOffsetFromWord, dirtScatterSlots, hyperBeamOrbFromWords, linearTranslationStep, liveMovePresentationRngWords, miniTwinklingStarFromWords,
   type LiveMovePresentationRngInput,
 } from "./liveMovePresentationRng.ts";
+
+export const SOLAR_BEAM_UNLEASH_LIVE_ROWS = 199;
+export const SOLAR_BEAM_UNLEASH_IDLE_ROWS = 39;
 
 
 /** Only adapters with production inputs belong here; exact acceptance is separate. */
@@ -1237,7 +1252,7 @@ function liveMoveAnimationDurationOf(
     case 41: return 37; // Twineedle's two stingers through clearmonbg cleanup.
     case 42: return 93; // Pin Missile's complete source pointer body.
     case 43: return 70; // Leer source body through its last ShakeMon2 row.
-    case 44: return 26; // First sharp-teeth row through inactive cleanup.
+    case 44: return 31; // liv2: First sharp-teeth row through inactive cleanup; idle 10 + live 31 = the ROM's gAnimScriptActive length (40) + 1.
     // Full source-script body, including the target-monbg / palette cleanup.
     case 47: return request.attacker === 0 ? 245 : 248;
     case 48: return 51; // First Supersonic ring through the final inactive row.
@@ -1306,7 +1321,7 @@ function liveMoveAnimationDurationOf(
     case 180: return 221; // Spite ghost-bg/target-clone body through cleanup.
     case 208: return 186; // Milk Drink bottle/ring/star body through cleanup.
     case 186: return SWEET_KISS_FRAME_COUNT;
-    case 188: return 160; // Sludge Bomb source body through its final row.
+    case 188: return 165; // Sludge Bomb source body through its final row; liv2: idle 4 + live 165 = the ROM's window length (168) + 1.
     case 56: return 141; // Hydro Pump source body through its final row.
     case 61: return 239; // Bubble Beam source body through its final row.
     case 197: return 110; // Detect source body through its final row.
@@ -1322,8 +1337,10 @@ function liveMoveAnimationDurationOf(
     case 263: return 81; // Facade accepted source window.
     case 339: return 104; // Bulk Up accepted source window.
     // Cmd_choosetwoturnanim (battle_anim.c:1073): gAnimMoveTurn bit 0 selects the unleash body.
-    case 76: return (request.turn & 1) === 0 
-        ? SOLAR_BEAM_SETUP_FIRST_INACTIVE_AGE + 1 : SOLAR_BEAM_UNLEASH_FIRST_INACTIVE_AGE + 1;
+    // Unleash (liv2): the ROM window is 237 rows = 38 rows of SetSolarBeamBg before the first picture change + the 160-row body, and Cmd_end then
+    // waits for SE_M_SOLAR_BEAM (194 VBlanks from its start, 39 rows in): live + idle = len + 1 = 238, the 39 idle rows come from liveMoveIdleLeadRows.
+    case 76: return (request.turn & 1) === 0
+        ? SOLAR_BEAM_SETUP_FIRST_INACTIVE_AGE + 1 : SOLAR_BEAM_UNLEASH_LIVE_ROWS;
     // AnimTask_IsHealingMove (battle_anim_effects_3.c:1531): heal iff gAnimMoveDmg <= 0.
     case 217: return request.damage > 0 ? PRESENT_DAMAGE_FRAME_COUNT : PRESENT_HEAL_FRAME_COUNT;
     case 250: return 133; // Whirlpool main body (accepted window 78..210); residual is a general animation.
@@ -1364,7 +1381,7 @@ function liveMoveAnimationDurationOf(
     case 337: return 137; // Dragon Claw palette restoration through cleanup.
     case 342: return 187; // Poison Tail source body through first inactive row.
     case 343: return COVET_FRAME_COUNT;
-    case 89: return 198; // Earthquake accepted window (197 rows from presentation age 1).
+    case 89: return 208; // liv2: Earthquake window = the ROM's gAnimScriptActive length (207) + 1 (no idle lead; was 198, 197 rows from presentation age 1).
     case 90: return FISSURE_FRAME_COUNT;
     case 152: return CRABHAMMER_FRAME_COUNT;
     case 345: return MAGICAL_LEAF_FRAME_COUNT;
@@ -1430,7 +1447,9 @@ function liveMoveAnimationDurationOf(
     case 161: return 284; // Tri Attack 81..364 / 77..360 (prep11 s0.2).
     case 73: return 141; // Leech Seed main body 246..386 / 245..385 (prep11 s0.2); the end-turn drain is a separate scene-off body.
     case 215: return 261; // Heal Bell (209..469 / 210..470, no tail).
-    case 53: return 115; // Flamethrower (395..520 / 449..574 incl. 11 negative-age rows, ageOffset -11); script ends 600/654.
+    // Flamethrower: the visible body is 115 rows (395..520 / 449..574 incl. 11 negative-age rows, ageOffset -11); the ROM window is 209 rows + 1 (hpd7c, liv2): Cmd_end keeps the script
+    // active while SE_M_FLAMETHROWER plays, the 95 rows after the last flame draw nothing (the reducer holds the last frame).
+    case 53: return 192;
     case 82: return 150; // Dragon Rage (89..238 / 93..242); the script runs 21 frames past the window (259/263), uncovered.
     case 52: return 63; // Ember (388..450 / 442..504, ageOffset 0); script ends 3 frames later (453/507).
     case 288: return 209; // Grudge (66..274 / 70..278); script end 274/278 (no tail).
@@ -1441,7 +1460,8 @@ function liveMoveAnimationDurationOf(
     // Self-Destruct: 113 rows (82..194 / 86..198) = the whole accepted window, live age 0 = its first row (reducer age 0,
     // selfDestructPortable.ts presentationAge 0), the Taunt/Dragon Rage convention: the window starts 4 frames after
     // the script activation (78/82, row -4, no #142 shadow row) and the script runs 10 frames past it (204/208), uncovered.
-    case 120: return 113;
+    // Self-Destruct: ROM window 126 rows (liv2): the visible blast (113 rows) then the wait for SE_M_SELF_DESTRUCT's song; idle 4 + live 123 = len + 1.
+    case 120: return 123;
     // Knock Off: 59 rows (70..128 / 74..132) at accepted presentation age -11 (ageOffset -11): reducer age 0 = frame 81/85 =
     // activation + 6 (prep6 s2.4), so live age 0 is the reducer's age 0 and the activation is live age -6 (no #142 row).
     // The window ends 4 frames after the script end (124/128); duration = rows + ageOffset (the Dragon Breath convention).
@@ -1451,7 +1471,7 @@ function liveMoveAnimationDurationOf(
     // (prep6 s0 player; S10A sides opponent). Faithful timing (fa185): the policy's per-side restore lag (player none: 220 rows, the
     // restore fade-in one row earlier, faintAttackRestoreProfile; opponent lag: 221).
     case 185:
-      return 220 + (liveMoveTimingSidePhase(185, "optional-lag-age", request.attacker === 0 ? "player" : "opponent") === "event" ? 1 : 0);
+      return 226 + (liveMoveTimingSidePhase(185, "optional-lag-age", request.attacker === 0 ? "player" : "opponent") === "event" ? 1 : 0);
     // Swallow: per stockpile branch (request.turn = gBattleScripting.animTurn = stockpileCounter, prep6 s2.1) and side:
     // player 163/178/193 (1247..1409 ...), opponent 161/176/191 (= 148 + 15 turn / 146 + 15 turn), every window end = script end.
     case 256:

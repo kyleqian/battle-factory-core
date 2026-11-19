@@ -36,14 +36,14 @@ describe("Cosmic Power SE rows (aud257)", () => {
       { op: "soundtask_se2", frame: 3, id: 243, pan: 0 }, { op: "playsewithpan", frame: 3, id: 243, pan: 0 }, { op: "soundtask_se1", frame: 128, id: 228, pan: -64 },
     ]);
   });
-  it("engine rows equal the ROM's rows in id / pan and in the 125-frame gap; every row sits 5 frames after the ROM's (flat presentation offset)", () => {
+  it("engine rows equal the ROM's rows in id / pan and in the 125-frame gap; every row sits on the ROM's frame since lse2 (5 frames after before the body lead was presented)", () => {
     const romRows = moveRows(rom.events);
     const ours = moveRows(ourEvents());
     expect(romRows.map((e) => `${e.id}:${e.pan}`)).toEqual(["243:0", "243:0", "228:-64"]);
     expect(ours.map((e) => `${e.id}:${e.pan}`)).toEqual(romRows.map((e) => `${e.id}:${e.pan}`));
     expect(romRows[2]!.frame - romRows[0]!.frame).toBe(125);
     expect(ours[2]!.frame - ours[0]!.frame).toBe(125);
-    expect(ours.map((e, i) => e.frame - romRows[i]!.frame)).toEqual([5, 5, 5]);
+    expect(ours.map((e, i) => e.frame - romRows[i]!.frame)).toEqual([0, 0, 0]);
   });
   it("Sweet Kiss (rank 7): gAngelSpriteTemplate lifetime 99 resolves the waitforvisualfinish, so the Attract SE 226 lands 50 frames after the third Heal Bell (ROM T2 rows)", () => {
     const entry = timing.moves[186]!;

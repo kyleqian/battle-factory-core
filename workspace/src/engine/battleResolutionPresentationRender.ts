@@ -8,6 +8,10 @@ import type { PresentationRngHost } from "./presentationRngHost.ts";
 import {
   resolveNoMovesLeftMessageLines,
   isWeatherContinuesAnimation, WEATHER_CONTINUES_BODY_ROWS, WEATHER_CONTINUES_LAUNCH_LEAD_ROWS, WEATHER_CONTINUES_MOVE_IDS,
+  HPD8_SHAPE_A_MOVE_IDS,
+  STA5_STATUS_BODY_TAIL_ROWS,
+  lse2BodySoundAgeShift,
+  LSE2_BODY_LEAD_MOVE_IDS,
 } from "./battleResolutionPresentation.ts";
 import type { LiveMoveSpriteAllocatorInput, LiveMoveSpriteOrderInput } from "./liveMoveSpriteAllocator.ts";
 import type { LiveMoveBattlerX2Input } from "./liveBattlerX2History.ts";
@@ -15,6 +19,7 @@ import { liveSubstituteSwapApplies, substituteSwapTailFieldArt } from "./liveSub
 import {
   liveBattlerAnchors, liveDiveSetupSplashBirth, liveMoveAnimationDuration, liveMoveOpponentShadowPostBodyHideRows,
   liveSemiInvulnerableHideBattler,
+  SOLAR_BEAM_UNLEASH_IDLE_ROWS,
 } from "./liveMoveAnimation.ts";
 import { liveMoveTimingBodyOf, type LiveMoveTimingBody } from "./liveMoveTimingPolicy.ts";
 import type { BattleMoveAnimationRequest } from "./battleMoveAnimation.ts";
@@ -1401,6 +1406,8 @@ function applyCompletedCommand(
  * its animation starts that many frames inside the preceding 32-frame status command, so the held-item view starts at age 12.
  */
 /** wsh2: frames after the command starts that the General_* script's first command runs (age 0 of its draw; docs/wsh1-general-anim-commands.md). */
+/** kno3: rows from the controller's launch to General_ItemKnockoff's createsprite (loadspritegfx + 2 script rows; ROM rows 509 -> 512). */
+const ITEM_KNOCKOFF_BAG_CREATE_ROWS = 4;
 const GENERAL_SCRIPT_START_FRAMES: Readonly<Record<string, number>> = Object.freeze({ FOCUS_BAND: 8 });
 
 function heldItemEffectAge0Frames(minimumFrames: number): number {
@@ -1483,7 +1490,7 @@ function currentSegment(state: BattleResolutionPresentationState) {
  */
 const LIVE_MOVE_IDLE_LEAD_ROWS: ReadonlyMap<number, number> = new Map([
   [41, 10], [44, 10], [51, 7], [52, 4], [55, 10], [71, 10], [74, 1], [75, 13], [82, 7], [92, 7], [93, 5], [94, 5], [106, 1], [120, 4],
-  [124, 4], [136, 1], [146, 13], [153, 4], [158, 4], [184, 4], [188, 4], [204, 4], [207, 7], [225, 6], [232, 4], [247, 5], [248, 5],
+  [53, 18], [124, 4], [136, 1], [146, 13], [153, 4], [158, 4], [184, 4], [188, 4], [204, 4], [207, 7], [225, 6], [232, 4], [247, 5], [248, 5],
   [269, 10], [282, 6], [294, 1], [299, 10], [305, 7], [313, 1], [325, 8], [334, 1], [337, 6], [339, 4], [342, 7], [343, 1], [347, 3],
 ]);
 
@@ -1494,7 +1501,7 @@ const LIVE_MOVE_IDLE_LEAD_ROWS: ReadonlyMap<number, number> = new Map([
  * presents that row with `preActivationRow` (the shadow drawn).
  */
 export function liveMoveIdleLeadRows(request: BattleMoveAnimationRequest, field: BattleResolutionDisplayedField): number {
-  const lead = LIVE_MOVE_IDLE_LEAD_ROWS.get(request.moveId) ?? 0;
+  const lead = request.moveId === 76 ? ((request.turn & 1) === 1 ? SOLAR_BEAM_UNLEASH_IDLE_ROWS : 0) : LIVE_MOVE_IDLE_LEAD_ROWS.get(request.moveId) ?? 0;
   if (lead === 0 || liveSubstituteSwapApplies(request, field) === true || liveMoveAnimationDuration(request, field) === null) return 0;
   return lead;
 }
@@ -1579,9 +1586,22 @@ export function liveMoveScriptTailFrames(
 // hpd4: rows the command presents after its live body (+ post) so the next command (hit controller, next script step) starts on the ROM row
 // (R -> H = lead + 3 + len + 4 against the accepted live window), tuned by exact-frame matches against the ROM frames (docs/hpd1-hp-hold.md).
 const HPD4_BODY_TAIL_ROWS: ReadonlyMap<number, number> = new Map([[49, 3], [82, 26], [111, 3], [205, 3], [301, 3], [69, 1]]);
-function liveMoveHitTailRows(command: Extract<BattleResolutionPresentationCommand, { type: "move-animation" }>): number {
-  if ((command.timing.bodyLeadFrames ?? 0) === 0 || command.animation === undefined) return 0;
-  return HPD4_BODY_TAIL_ROWS.get(command.animation.moveId) ?? 0;
+// liv2: Self-Destruct's presented `hp` command already carries the script lead (the window starts at S + pre, ROM A), so it has no body lead; its hit
+// controller runs 10 rows after the window (the explosion script's own instructions, ROM gap 10), so the tail is 9 (3 + 4 + 123 + 9 = A -> H 139 + pre).
+// lse2: rows after a lead-first lse2 body (on top of its script tail where it has one) that put the next command on the ROM row (R -> H = lead + 3 + len + 4 less the window the body presents).
+const LSE2_BODY_TAIL_ROWS: ReadonlyMap<number, number> = new Map([[322, 3], [347, 3], [59, 2], [227, 10]]);
+const LIVE_MOVE_LEADLESS_TAIL_ROWS: ReadonlyMap<number, number> = new Map([[120, 9]]);
+// hpd8: the shape-A bodies' tail is whatever the 3 pre + 3 post rows of the ROM span (lead + 3 + len + 4) leave over: 6 - pre - post (T 1 / 3 / 6 in hpd7).
+const HPD8_SHAPE_A_ROWS_AROUND_BODY = 6;
+export function liveMoveHitTailRows(command: Extract<BattleResolutionPresentationCommand, { type: "move-animation" }>, field: BattleResolutionDisplayedField): number {
+  const request = command.animation;
+  if (request === undefined) return 0;
+  if ((command.timing.bodyLeadFrames ?? 0) === 0) return liveSubstituteSwapApplies(request, field) === true ? 0 : LIVE_MOVE_LEADLESS_TAIL_ROWS.get(request.moveId) ?? 0;
+  const table = HPD4_BODY_TAIL_ROWS.get(request.moveId) ?? STA5_STATUS_BODY_TAIL_ROWS.get(request.moveId) ?? LSE2_BODY_TAIL_ROWS.get(request.moveId);
+  if (table !== undefined) return table;
+  if (!HPD8_SHAPE_A_MOVE_IDS.has(request.moveId) || liveSubstituteSwapApplies(request, field) === true) return 0;
+  const rows = liveMoveUniversalRows(request, field);
+  return Math.max(0, HPD8_SHAPE_A_ROWS_AROUND_BODY - rows.pre - rows.post);
 }
 
 /**
@@ -1643,10 +1663,12 @@ export function liveMoveSourceAge(
   if (liveMoveAnimationDuration(command.animation, field) === null) return null;
   const seGate = (command.timing.seGateFrames ?? 0) + (command.timing.scriptLeadFrames ?? 0);
   const pre = liveMoveUniversalRows(command.animation, field).pre;
-  const age = state.lifecycle.phaseElapsed - seGate - pre;
+  // lse2: a body whose lead is presented in front of it keeps the sound clock of the ROM script rows (the clock is the pre-lead one, shifted by the lead's difference to its 7-row calibration).
+  const soundShift = lse2BodySoundAgeShift(command.animation.moveId, command.timing.bodyLeadFrames);
+  const age = state.lifecycle.phaseElapsed - seGate - pre - soundShift;
   // aud260: the age of the command's last presenting row (the command completes when phaseElapsed + 1 >= its duration), for the sound-only tail past the window.
   const duration = battleResolutionCommandDuration(withoutBodyLead(command), field, liveMoveTimingBodyOf(state.liveMoveSpriteOrderInput), state.liveMoveBattlerX2Input?.moveUse);
-  const lastAge = duration - 1 - seGate - pre;
+  const lastAge = duration - 1 - seGate - pre - soundShift;
   // aud242l: BATTLER_COORD_Y_PIC_OFFSET (GetBattlerSpriteFinal_Y(..., TRUE)) of the live battler, read only by the pic-dependent sprite lifetimes of the sound timing table.
   const picOffsetY = (battler: 0 | 1): number => liveBattlerAnchors(battler === 0 ? "player" : "opponent", createBattleCommandFieldArtView(field)).picOffsetPoint.y;
   // aud262: BATTLER_COORD_ATTR_TOP (GetBattlerSpriteCoordAttr, battle_anim_mons.c): the pic Y minus half the species' pic height (the Memento shadow tasks).
@@ -1664,6 +1686,11 @@ export function liveMoveSourceAge(
 }
 
 const STATS_CHANGE_AFTER_BODY_AGE_SHIFT = 4;
+// lse2: after a lead-first lse2 body (Cosmic Power, Calm Mind) the stat SE sits 1 row later than the generic shift's (ROM - ours +1 in both labs).
+const STATS_CHANGE_AFTER_LSE2_BODY_AGE_SHIFT = 3;
+// sta5: after a Flatter / Swagger body (lead + tail landed) and its 2-row `stat` command the `stats-change` command starts 2 rows (the not yet landed
+// pre-print rows) before the ROM's `playanimation`, whose SE is exec + 4: the generic age (calibrated on the old, earlier start) is shifted by 1.
+const STATS_CHANGE_AFTER_STAT_BODY_AGE_SHIFT = 1;
 
 /**
  * aud248: the presented stats-change command and its age (rows since the animation's rel 0, after the IsBattleSEPlaying gate; the same age as the
@@ -1677,7 +1704,12 @@ export function statsChangeSourceAge(
   const previous = state.segments[state.segmentIndex]!.commands[state.commandIndex - 1];
   // hpd4: after an audited body the command starts on the ROM's gAnimScriptActive edge (+1), so the SE (ROM: edge + 4) is 4 rows earlier than the
   // generic age that absorbed the old early start (aud242o Defense Curl windows: SE 175 vs command 172).
-  const afterBodyLead = previous?.type === "move-animation" && (previous.timing.bodyLeadFrames ?? 0) > 0 ? STATS_CHANGE_AFTER_BODY_AGE_SHIFT : 0;
+  const beforeStat = state.segments[state.segmentIndex]!.commands[state.commandIndex - 2];
+  const afterStatBody = previous?.type === "stat" && beforeStat?.type === "move-animation" && (beforeStat.timing.bodyLeadFrames ?? 0) > 0
+    && beforeStat.animation !== undefined && STA5_STATUS_BODY_TAIL_ROWS.has(beforeStat.animation.moveId);
+  const afterBodyLead = previous?.type === "move-animation" && (previous.timing.bodyLeadFrames ?? 0) > 0
+    ? (previous.animation !== undefined && LSE2_BODY_LEAD_MOVE_IDS.has(previous.animation.moveId) ? STATS_CHANGE_AFTER_LSE2_BODY_AGE_SHIFT : STATS_CHANGE_AFTER_BODY_AGE_SHIFT)
+    : afterStatBody ? STATS_CHANGE_AFTER_STAT_BODY_AGE_SHIFT : 0;
   const age = state.lifecycle.phaseElapsed - (command.timing.seGateFrames ?? 0) + afterBodyLead;
   if (age < 0 || fieldBattler(currentCommandField(state), command.battler).substituteDoll === true) return null;
   // The pure General_StatsChange reducer's params (null for an argument it rejects: the ROM plays nothing); read here so the sound
@@ -1695,10 +1727,12 @@ function liveMoveUniversalRowAge(
   // sgs134: HandleMoveAnimation's IsBattleSEPlaying rows (a multi-hit's 2nd+ hit), presented before the pre rows.
   seGate = 0,
   scriptTail = 0,
+  // hpd8: a shape-A body's hit tail holds the last body row (its adapters stop at their last age); Dragon Rage's 26-row tail keeps counting.
+  holdHitTail = false,
 ): number {
   const rows = liveMoveUniversalRows(request, field);
   const age = Math.max(0, state.lifecycle.phaseElapsed - seGate - rows.pre - liveMoveIdleLeadRows(request, field));
-  if (rows.post === 0 && scriptTail === 0) return age;
+  if (rows.post === 0 && scriptTail === 0 && !holdHitTail) return age;
   const live = liveMoveAnimationDuration(request, field, liveMoveTimingBodyOf(state.liveMoveSpriteOrderInput),
     state.liveMoveBattlerX2Input?.moveUse);
   return live === null ? age : Math.min(age, live - 1);
@@ -1790,11 +1824,12 @@ export function battleResolutionCommandDuration(
       const rows = liveMoveUniversalRows(command.animation!, field);
       return seGate + (command.timing.scriptLeadFrames ?? 0) + (command.timing.bodyLeadFrames ?? 0) + rows.pre
         + liveMoveIdleLeadRows(command.animation!, field) + live + rows.post + liveMoveScriptTailFrames(command.timing, command.animation!, field)
-        + liveMoveHitTailRows(command);
+        + liveMoveHitTailRows(command, field);
     }
     case "hit-animation":
       return command.timing.minimumFrames;
     case "hp": {
+      if (command.timing.instantDrop) return command.timing.tailFrames ?? 0;
       const maxHp = fieldBattler(field, command.battler).maxHP;
       return Math.max(
         command.timing.minimumFrames,
@@ -2438,16 +2473,20 @@ export function createBattleResolutionPresentationRenderView(
           `battle resolution HP controller ${command.healthValue} resolves ${command.from}->${semanticEndpoint}, event endpoint is ${command.to}`,
         );
       }
-      const barProgram = { maxHp: battler.maxHP, from: command.from, to: command.to };
+      // mem2: INSTANT_HP_BAR_DROP -- SetBattleBarStruct(maxHP, 0, 0x7FFF): the HP text empties on timing.instantDrop's row, the bar graphic one row later.
+      const instantRow = command.timing.instantDrop;
+      const elapsed = state.lifecycle.phaseElapsed;
+      const barProgram = { maxHp: battler.maxHP, from: command.from, to: instantRow === undefined ? command.to : command.from };
       field = withDisplayedHp(
         field,
         command.battler,
-        battleHealthBarValueAtFrame(barProgram, state.lifecycle.phaseElapsed),
+        instantRow !== undefined ? (elapsed >= instantRow ? command.to : command.from) : battleHealthBarValueAtFrame(barProgram, elapsed),
       );
       // hpb202: below the bar's 48 pixels the Q_24_8 currValue (not the integer HP text) fills the bar.
       hpTarget = Object.freeze({
         battler: command.battler, to: command.to,
-        ...(battler.maxHP < 48 ? { barFill: battleHealthBarFillValueAtFrame(barProgram, state.lifecycle.phaseElapsed) } : {}),
+        ...(instantRow !== undefined ? { barFill: elapsed > instantRow ? command.to : command.from }
+          : battler.maxHP < 48 ? { barFill: battleHealthBarFillValueAtFrame(barProgram, elapsed) } : {}),
       });
     } else if (command.type === "move-animation" && command.animation) {
       const lead = liveMoveIdleLeadRows(command.animation, field);
@@ -2457,7 +2496,8 @@ export function createBattleResolutionPresentationRenderView(
       const pre = seGate + liveMoveUniversalRows(command.animation, field).pre;
       effect = Object.freeze({
         type: "move", request: command.animation,
-        age: liveMoveUniversalRowAge(state, command.animation, field, seGate, liveMoveScriptTailFrames(command.timing, command.animation, field)),
+        age: liveMoveUniversalRowAge(state, command.animation, field, seGate, liveMoveScriptTailFrames(command.timing, command.animation, field),
+          ((HPD8_SHAPE_A_MOVE_IDS.has(command.animation.moveId) || STA5_STATUS_BODY_TAIL_ROWS.has(command.animation.moveId)) && (command.timing.bodyLeadFrames ?? 0) > 0) || LIVE_MOVE_LEADLESS_TAIL_ROWS.has(command.animation.moveId)),
         ...(lead > 0 && state.lifecycle.phaseElapsed <= pre ? { preActivationRow: true as const } : {}),
         paletteInput: state.liveMovePaletteInput,
         spriteAllocatorInput: state.liveMoveSpriteAllocatorInput,
@@ -2513,6 +2553,13 @@ export function createBattleResolutionPresentationRenderView(
       effect = Object.freeze({
         type: "general-animation", battler: command.battler, animation: command.animation,
         age: state.lifecycle.phaseElapsed - heldItemEffectAge0Frames(command.timing.minimumFrames),
+        ...(state.liveMoveBattlerX2Input === undefined ? {} : { battlerX2Input: state.liveMoveBattlerX2Input }),
+      });
+    } else if (command.type === "general-animation" && command.animation === "ITEM_KNOCKOFF" && fieldBattler(field, command.battler).substituteDoll !== true) {
+      // kno3: the bag sprite's create row is the SE gate + the script's load rows after the command starts (itemKnockoff.ts age 0).
+      effect = Object.freeze({
+        type: "general-animation", battler: command.battler, animation: command.animation,
+        age: state.lifecycle.phaseElapsed - (command.timing.seGateFrames ?? 0) - ITEM_KNOCKOFF_BAG_CREATE_ROWS,
         ...(state.liveMoveBattlerX2Input === undefined ? {} : { battlerX2Input: state.liveMoveBattlerX2Input }),
       });
     } else if (command.type === "general-animation" && fieldBattler(field, command.battler).substituteDoll !== true) {

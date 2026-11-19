@@ -28,6 +28,7 @@ matched the ROM to the end on the engine with fixes 29 to 43, with its piece run
 | R097-alakazam-trick-both-itemless | 1023669 | 20 of 20 |
 | R107-baton-pass-onto-ai-spikes | 1020548 | 38 of 38 |
 | R109-dusclops-curse-last-pokemon | 1022589 | 19 of 19 |
+| R035-clefable-taunt-counter-replacement | 1040873 | 14 of 14 |
 
 The last six came from the luck hunt of 2026-11-17 (luck2; `tools/replay-hunt/luckHunt.sh`, lab seeds 1,020,000 up) instead of the box hunts: their lab seed is the
 hunt's, their stage file is the hunt's `found.stage.json` without the hunt's `chance` / `seeds` fields, and each was re-driven on the engine at `master` e06cac9fc
@@ -48,3 +49,21 @@ R080 came from luck4 (2026-11-18, lab seed 910000 of the block 910000-910039 tha
 | file | lab seed | states matched |
 |---|---|---|
 | R080-spark-whiscash-future-sight-milotic | 910000 | 16 of 16 |
+
+R035 came from the luck hunt's third day (2026-11-18 day job, seeds 1,040,000 up; promoted by the 2026-11-18 daily-run supervisor): the hunt's `found.stage.json`
+without `chance` / `seeds`; the hunt's own ROM drive matched 14 of 14 states with `stage.ok` true, and the nightly replay of the same run re-drives it (`docs/replay-ledger.md`).
+
+R073 came from luck5 (2026-11-18, lab seed 920103 of the block 920100-920131 that the day job never uses): the design `tools/replay-hunt/luck-designs/R073-clefable-metronome-hidden-power-odd-iv.json` without `chance` / `seeds`. The player's Clefable 389 (IVs 31, so Hidden Power is Dark, type index 15 past ???) calls Metronome ten times opposite Shuckle 528; one call was Hidden Power. Found by a union-cover trial of six designs sharing this battle, then re-driven from this file on the Scene OFF oracle: full match, `stage.ok` true, 62 -> 63 of the 110 rules covered.
+
+| file | lab seed | states matched | wide states |
+|---|---|---|---|
+| R073-clefable-metronome-hidden-power-odd-iv | 920103 | 31 of 31 | 29 of 29 |
+
+R052, R051 and R053 came from luck6 (2026-11-18; lab seeds 930003, 936007 and 937010, blocks the day job never uses): the designs `tools/replay-hunt/luck-designs/R05{2,1,3}-ai-clefable-metronome-*.json` without `chance` / `seeds`. Challenge 7, the AI's Clefable 389 against the player's passive Shuckle 528 (Flash 16 turns, then Salamence 753): one of the AI's Metronome calls was Mud Sport (R052), Mist (R051) or Focus Energy (R053), and the AI's next scoring read the matching flag (`factoryAiDecisionPolicy.ts` `mudSportUp` / `mistUp` / `hasFocusEnergy`). Found by `prehunt.py` (union-cover trials), then re-driven from these files on the Scene OFF oracle: full match, `stage.ok` true, 0 diff points, 63 -> 66 of the 110 rules covered.
+
+| file | lab seed | states matched | wide states |
+|---|---|---|---|
+| R052-ai-clefable-metronome-mud-sport | 930003 | 55 of 55 | 55 of 55 |
+| R051-ai-clefable-metronome-mist | 936007 | 35 of 35 | 35 of 35 |
+| R053-ai-clefable-metronome-focus-energy | 937010 | 42 of 42 | 40 of 40 |
+

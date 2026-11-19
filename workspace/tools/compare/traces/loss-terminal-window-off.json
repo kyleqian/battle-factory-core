@@ -3,7 +3,8 @@
   "oracleProfile": "battle-scene-off",
   "appStage": {
     "id": "loss-terminal-window-off",
-    "frame": 2996
+    "frame": 2996,
+    "opponentTrainerId": 50
   },
   "oracleBattleLab": {
     "scenario": "../../battle-lab/loss-terminal-explosion-dusclops-off.json"

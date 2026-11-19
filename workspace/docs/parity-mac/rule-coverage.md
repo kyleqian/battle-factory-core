@@ -299,3 +299,73 @@ pool species has Drizzle, Sand Stream or Drought; the jump-command entries cite 
     real difference: the engine lacked that start-of-move redirect, which changes the PP a non-Ghost Curse costs
     against a Pressure Follow Me user: **fix 42** (`follow-me-redirect.md`).
 - **Not done yet:** a staged battle or a steered batch for each (c) group, starting with the uncommon ones.
+
+**Luck hunt day 3 (2026-11-18 day job): 62 of the 110 covered (61 before).** 5,681 seeds over the three open designs (R035 294, R040 2,694, R110 2,693;
+the hunter skipped the 8 covered ones), 1 marker hit: R035 at lab seed 1040873 (Clefable's Metronome called Taunt, then the AI's Machamp scored Counter
+under Taunt), ROM match 14 of 14 states with its `cover` piece run. Promoted to `stages/coverage/R035-clefable-taunt-counter-replacement.json`; the
+hunter now skips R035. Open luck designs: R040, R110 (0 hits each in ~2,700 seeds). Summary: `.integration/evidence/luck-hunt/20261118/summary.md`.
+
+**luck5 (2026-11-18, tools / docs / designs only): 63 of the 110 covered (62 before), R094 and R098 moved to class (a).** Seven Metronome designs added to
+`tools/replay-hunt/luck-designs/`, one per rule, all in one battle shape: challenge 7, the player's Clefable 389 (IVs 31) calls Metronome ten times
+(`prefer` slot 0, 10 PP) opposite Shuckle 528 (Attack 10, cannot knock it out; speed 5 against 60), then `preferSwitch` to Snorlax 826 so the battle ends inside
+the ROM drive's state budget. Each design names its marker as a `cover` piece (from `rule-coverage-c-rules.json`) and passes `designcheck.py`. Because the seven
+share the battle, one trial of a union-cover design (all their markers as `coverAny`) measures all of them at once; the hunter still runs one design per rule.
+Measured: about 6 Metronome calls per battle reach a real move, 86 in the 14 battles that ran to the end of the last trial (the rest are calls that end without a move; `PREHUNT_CALLS=1`, new in `prehunt.py`: prints each seed's Metronome calls and what they became).
+
+| rule | marker (engine) | chance per seed (estimate) | trial (engine only, JOBS 1) |
+|---|---|---|---|
+| R073 Hidden Power type past ??? | Hidden Power with odd IVs (Clefable ch 7, IVs 31 = Dark) | 0.03 (any of ~10 calls: 10/336) | **hit at lab seed 920103, promoted** (below) |
+| R101 Weather Ball in sandstorm | Weather Ball while Shuckle's Sandstorm is up | 0.02 | 0 hits |
+| R082 Mud Sport twice | Mud Sport or Water Sport called twice | 0.0008 | 0 hits |
+| R078 Lock-On then OHKO move | Lock-On / Mind Reader, then Fissure / Guillotine / Horn Drill / Sheer Cold | 0.0006 | 0 hits |
+| R079 Lock-On then a no-accuracy move | Lock-On / Mind Reader, then a move with no accuracy roll (Roar, Yawn, Skill Swap, ...) | 0.002 | 0 hits |
+| R096 Transform fails on a digging target | Transform while Shuckle is in Dig | 0.004 | 0 hits |
+| R058 Charge, then an Electric move | Charge then an Electric move | 0.0014 | 0 hits |
+
+Trial seeds: 920000-920007 (8), 920100-920103 (4, stopped at the hit), 920200-920216 (17; 14 ran to the end and 3 hit the frame budget, then `STALL-ABORT`).
+29 battles in all, JOBS 1. One marker hit, the R073 one, on the first design family's union trial. The expected hits for the others at 29 battles
+are 0.58 (R101), 0.02 to 0.12 for the rest, so the zeros say nothing against them; the hunter's days will (R101 needs about 50 seeds for even odds, the rest
+hundreds to thousands). A stall (Shuckle's Double Team / Dig loop; 3 of 17 in the last trial) shortens a seed; the hunter ends it after the frame budget and
+disables a design only after 6 failures in a row.
+
+- **R073 promoted: 62 -> 63 of 110.** Seed 920103: one Metronome call was Hidden Power; Clefable's IVs 31 are odd, so the type index is 15 (Dark), past the `???` index the
+  marker skips. Stage file `docs/parity-mac/stages/coverage/R073-clefable-metronome-hidden-power-odd-iv.json`; driven again from the repo file on the Scene OFF oracle:
+  match 31 of 31 states, 29 of 29 wide states, 0 diff points, `stage.ok` true. The hunter now skips R073. **No ROM difference was found in luck5.**
+- **R094: class (a), cannot occur.** The Thick Club arm of the Future Sight / Doom Desire damage (`battleScriptTrysetfutureattackOpcode.ts:88`; Thick Club on a
+  Cubone / Marowak) needs a Cubone or Marowak that casts Future Sight or Doom Desire. No Cubone / Marowak set has either, none has Metronome, and the only way to
+  give one a move or item (Trick, Covet, Thief) is forbidden to Metronome and absent from the sets that would hold the item.
+- **R098: class (a), cannot occur.** The Steel arm (`battleScriptTrysetfutureattackOpcode.ts:80`; a Metal Coat holder casting Doom Desire) needs Doom Desire on a Metal
+  Coat holder. No set has Doom Desire; the only Metal Coat holder is Lairon 215 (no Metronome), and Trick / Covet / Thief cannot be called by Metronome.
+- **Skipped as too low-odds for a design** (two or more specific Metronome calls in one battle, under about 1e-4 per seed): R049, R055, R061, R062, R071, R072,
+  R075, R086, R104. R103, R083, R106 and R081 were not touched (not Metronome-reachable cheaply, see their entries above).
+- **Not written in this step (out of time):** the AI-Clefable family R050-R053 (needs a passive bulky player with a repeatable heal and a move shared with
+  Clefable), the Chansey challenge-1 family R063 / R064 / R068 / R091 / R099 and R100. They stay in (c).
+
+**luck6 (2026-11-18, tools / docs / designs only; no `src/` change): 66 of the 110 covered (63 before), R051 R052 R053 promoted.** Nine designs added to `tools/replay-hunt/luck-designs/`
+(written by `tools/replay-hunt/makeLuck6.py`, each passing `designcheck.py`), covering the luck5 leftovers R050-R053, R063, R064, R091, R099 and R100. Two battle shapes:
+(1) challenge 7, **the AI's Clefable 389** (Metronome, Double Team, Reflect, Follow Me) against a player that cannot hurt it and plays one move 16 turns, then Salamence 753 plays Aerial Ace
+(never misses, so no Double Team stack can stall the end): Shuckle 528 (Flash) for R050 / R051 / R052 / R053 (one battle, four markers: Imprison, Mist, Mud Sport, Focus Energy called by the AI's Metronome
+and the flag still up when the AI next scores), Golduck 418 (Light Screen, Cloud Nine) for R100 (Weather Ball under Cloud Nine; no weather needed, `weatherHasEffect` is false); an AI Metronome user needs no survival
+tricks because the AI picks Metronome itself, about 7 calls a battle (30 battles: 212 calls, 126 reaching a move). (2) Challenge 1, **the player's Chansey 227** calls Metronome 14 turns (script) against a foe whose move
+the marker needs: Banette 237 Spite after a called Transform (R091), Minun 187 Encore (R064: Encore locks the Metronome slot because Metronome is the last move used, `battle_script_commands.c:4407`, so a called Transform
+replaces the encored slot), Wigglytuff 207 Disable (R063: one Defense Curl first, so Disable takes a slot Transform can replace), Wartortle 176 Yawn with a called Uproar (R099).
+
+| rule | marker | chance per seed (estimate) | engine-only trial (JOBS 1) |
+|---|---|---|---|
+| R052 Mud Sport flag | AI called Mud Sport (`mudSportUp` arm of the AI scoring) | 0.03 (~7 calls / 336) | **hit at lab seed 930003 (4th seed), promoted** |
+| R051 Mist flag | AI called Mist, still up at the next scoring | 0.02 | **hit at 936007 (8th seed), promoted** |
+| R053 Focus Energy flag | AI called Focus Energy | 0.03 | **hit at 937010 (11th seed), promoted** |
+| R050 Imprison flag | AI called Imprison (status set even with no shared move) | 0.03 | 0 hits in about 55 battles that carried its marker (930000-930005, 931000-931013, 936000-936007, 937000-937010, 938000-~938015); expected ~1.6, p(0) about 0.2, kept as a design |
+| R100 Weather Ball, Cloud Nine | AI called Weather Ball with Golduck on the field | 0.02 | 0 hits in 30 seeds (940000-940029; 212 calls, expected 0.6) |
+| R091 Spite on a transformed user | Transform, then Spite on a copied move | 0.02 | 0 hits in about 30 seeds (933000-933013, 935000-~935015) |
+| R064 Transform ends Encore | Encore on the Metronome slot, then a called Transform | 0.01 | 0 hits in 14 seeds (934000-934013) |
+| R063 Transform ends Disable | Disable on Defense Curl, then a called Transform | 0.003 | 0 hits in 14 seeds (same block); one seed (934006) called Transform with no Disable up |
+| R099 Uproar keeps a Yawn drowsy | Yawn due while a called Uproar runs | 0.003 | 0 hits in up to 16 seeds (935000-935015) |
+
+The R050 / R051 / R053 zero-or-late hits fit the estimate (3 hits in about 35 battles for R051-R053); R091, R064, R063, R099 and R100 are too short to say more than that the marker is reachable in the design (each design's engine battle ran to the end; one stall in 14 for
+R064 / R063: 112 and 239 decisions, and 1 in 14 for the AI-Clefable shape, seed 931008). Expected hits per day (about 5,700 seeds over about 17 open designs, ~330 each): R050 / R100 ~6-10, R091 ~6, R064 ~3, R063 / R099 ~1.
+- **Promotions: 63 -> 66 of 110** (R052 seed 930003: ROM match 55 of 55 states, R051 seed 936007: 35 of 35, R053 seed 937010: 42 of 42, each re-driven from the repo stage file on the Scene OFF oracle, `stage.ok` true, 0 diff points). **No ROM difference was found in luck6.** The hunter skips R051 R052 R053 from the next seed on.
+- **The Double Team stall is fixed (cheaply):** every Clefable design now ends with Salamence 753 (Aerial Ace, slot 2) instead of Snorlax 826 (luck5's seven designs patched the same way): 0 stalls in the 17 seeds where luck5 saw 3.
+- **Not done (and why):** R049 R055 R061 R062 R071 R072 R075 R086 R104 stay skipped (two or more specific calls per battle); R068 (frozen Flame Wheel; needs the foe to freeze a Growlithe / Quilava, an Ice move the AI avoids against Fire),
+  R081, R106, R103 and R083 are as before. Candidates for a later luck step on the same AI-Clefable shape: R085 (Imprison against a Pressure player: a Pressure Pokemon as the passive player), R056 / R057 (Beat Up by Metronome, chance ~3% each with a statused / fragile player).
+

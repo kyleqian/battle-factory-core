@@ -21,7 +21,7 @@ const cases = [
     route: { seed: 26, slot: 1, streak: 0 } },
   { id: 124, move: "SLUDGE", fixture: "sludge-%s-grimer-%s-onix", anchor: "projectileOrigin", duration: 102, effectAge: 50,
     route: { seed: 4, slot: 0, streak: 0 } },
-  { id: 188, move: "SLUDGE_BOMB", fixture: "sludge-bomb-%s-weepinbell-%s-onix", anchor: "projectileOrigin", duration: 160, effectAge: 70,
+  { id: 188, move: "SLUDGE_BOMB", fixture: "sludge-bomb-%s-weepinbell-%s-onix", anchor: "projectileOrigin", duration: 165, effectAge: 70,
     route: { seed: 8, slot: 2, streak: 14 } },
   { id: 55, move: "WATER_GUN", fixture: "water-gun-%s-horsea-%s-onix", anchor: "projectileOrigin", duration: 111, effectAge: 50,
     route: { seed: 91, slot: 1, streak: 0 } },

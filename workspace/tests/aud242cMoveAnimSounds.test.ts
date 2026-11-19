@@ -98,7 +98,7 @@ const PAN_SPECS: Record<string, Spec> = {
 // ice-crystal sprite lifetimes; they are emitted now at the same +2 (re-pinned in aud242f: the ROM log has the rows, the model now matches them).
 // PlaySE1/2WithPanning visual tasks (createvisualtask, played and destroyed in the creation step): Dragon Claw's two SE_M_SCRATCH rows after the
 // opening SE are frame-exact on an opponent attacker (pan -63, the AdjustPanning flip); Superpower (physical) is the +2 class, the status bodies
-// Flatter / Cosmic Power are -3 / -5 (aud242a's status class -4 +-1: per-move constants). The windows are cut where the other gated rows start.
+// Flatter is -3 and Cosmic Power 0 (lse2: its lead is presented in front of the body) (aud242a's status class -4 +-1: per-move constants). The windows are cut where the other gated rows start.
 const TASK_SPECS: Record<string, Spec> = {
   "hyperbeam-opponent": { delta: 1 },
   "hyperbeam-player": { delta: 1 },
@@ -107,7 +107,7 @@ const TASK_SPECS: Record<string, Spec> = {
   "psybeam-player": { delta: 2 },
   "fireblast-player": { delta: 2 },
   "dragonclaw-opponent": { delta: 0, romOnlyFrom: 200 },
-  "cosmicpower-player": { delta: -5, romOnlyFrom: 150 },
+  "cosmicpower-player": { delta: 0, romOnlyFrom: 150 },
   "flatter-player": { delta: -3, romOnlyFrom: 100 },
   "superpower-player": { delta: 2, romOnlyFrom: 150 },
 };

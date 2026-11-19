@@ -1,0 +1,32 @@
+{
+ "appRoute": "generated-orchestrator",
+ "oracleProfile": "battle-scene-on",
+ "appStage": {
+  "id": "sta6m-intro-both-on",
+  "frame": 0
+ },
+ "oracleBattleLab": {
+  "scenario": "../../battle-lab/sta6m-both-on.json",
+  "preCheckpointFrameOffset": 1178
+ },
+ "segments": [
+  {
+   "frames": 362,
+   "buttons": []
+  },
+  {
+   "frames": 1,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 637,
+   "buttons": []
+  }
+ ],
+ "captureWindow": {
+  "start": 0,
+  "end": 1000
+ }
+}

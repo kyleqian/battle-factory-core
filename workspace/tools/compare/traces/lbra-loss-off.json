@@ -7,7 +7,8 @@
  },
  "appStage": {
   "id": "loss-terminal-window-off",
-  "frame": 2996
+  "frame": 2996,
+  "opponentTrainerId": 50
  },
  "oracleBattleLab": {
   "scenario": "../../battle-lab/scratch-loss-beyond-boundary-probe.json"

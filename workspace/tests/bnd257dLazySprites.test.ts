@@ -199,7 +199,8 @@ describe("bnd257d static ratchets", () => {
     expect(manualChunks("/x/src/assets/gen/battle-opponent-front-sprite-rows.json")).toBe("assets-sprites");
   });
 
-  // Needs `npm run build:lib` (dist-lib is git-ignored): the entry's static import graph never reaches the sprite chunk; the installer chunk does.
+  // Needs `npm run build:lib` (dist-lib is git-ignored): the entry's static import graph never reaches the sprite chunk. dl3: the library
+  // build ships no full-table installer chunk at all; the pictures are the per-species files under dist-lib/sprites/.
   const chunks = resolve(root, "dist-lib/chunks");
   it.skipIf(!existsSync(chunks))("the built browser entry reaches the sprite chunk only through import()", () => {
     const seen = new Set<string>();
@@ -214,8 +215,9 @@ describe("bnd257d static ratchets", () => {
     const names = [...seen].map((file) => file.slice(root.length + 1));
     expect(names.length).toBeGreaterThan(3);
     expect(names.filter((name) => /assets-sprites|monPicPixelsInstall/.test(name))).toEqual([]);
-    const installer = readdirSync(chunks).find((name) => name.startsWith("monPicPixelsInstall-"));
-    expect(installer).toBeDefined();
-    expect(readFileSync(resolve(chunks, installer!), "utf8")).toMatch(/assets-sprites-/);
+    expect(readdirSync(chunks).filter((name) => name.startsWith("monPicPixelsInstall-"))).toEqual([]);
+    const files = readdirSync(resolve(root, "dist-lib/sprites")).filter((name) => name.endsWith(".txt"));
+    expect(files.length).toBeGreaterThan(300);
+    expect(files).toContain("GROVYLE.txt");
   });
 });

@@ -9,6 +9,7 @@ import { statsChangeParams, statsChangeRow } from "../animation/statsChange.ts";
 import { liveStatusAnimationRow, type LiveStatusAnimationSprite } from "../animation/statusAnimation.ts";
 import { focusPunchSetUpDisplayRow } from "../animation/focusPunchSetUp.ts";
 import { wishHealRowAtAge } from "../animation/wishHeal.ts";
+import { itemKnockoffAtAge } from "../animation/itemKnockoff.ts";
 import { focusBandRowAtAge } from "../animation/focusBand.ts";
 import { futureSightHitRowAtAge } from "../animation/futureSightHit.ts";
 import { psychicBgPaletteRowAtAge as psychicBgRingPaletteAtCount } from "../animation/psychicBackground.ts";
@@ -514,7 +515,7 @@ import { healBellNotesInPainterOrder } from "../animation/healBell.ts";
 import { waterSpoutLaunchMatrixSourceAge } from "../animation/waterSpout.ts";
 
 import battleAnimRocksAsset from "../assets/gen/battle-anim-rocks.json" with { type: "json" };
-import swiftYellowStarAsset from "../animation/assets/swift-yellow-star.json" with { type: "json" };
+import type swiftYellowStarAssetData from "../animation/assets/swift-yellow-star.json";
 import battleAnimMudSandAsset from "../assets/gen/battle-anim-mud-sand.json" with { type: "json" };
 import battleAnimWhiteFeatherAsset from "../assets/gen/battle-anim-white-feather.json" with { type: "json" };
 import battleBgAsset from "../assets/gen/battle-bg.json" with { type: "json" };
@@ -528,149 +529,149 @@ import ballDisplayAsset from "../assets/gen/battle-interface-ball-display.json" 
 import battleHealthboxAsset from "../assets/gen/battle-healthbox.json" with { type: "json" };
 import downArrowAsset from "../assets/gen/battle-interface-down-arrow.json" with { type: "json" };
 import { lazyMonPicSheet, lazyMonPicTable } from "./monPicPixels.ts";
-import kadabraFrontSpriteAsset from "../animation/assets/kadabra-front.json" with { type: "json" };
-import knockOffAsset from "../animation/assets/knock-off.json" with { type: "json" };
-import recoverAsset from "../animation/assets/recover.json" with { type: "json" };
-import softBoiledAsset from "../animation/assets/soft-boiled.json" with { type: "json" };
+import type kadabraFrontSpriteAssetData from "../animation/assets/kadabra-front.json";
+import type knockOffAssetData from "../animation/assets/knock-off.json";
+import type recoverAssetData from "../animation/assets/recover.json";
+import type softBoiledAssetData from "../animation/assets/soft-boiled.json";
 import absorbAsset from "../animation/assets/absorb.json" with { type: "json" };
-import leechSeedAsset from "../animation/assets/leech-seed.json" with { type: "json" };
-import painSplitAsset from "../animation/assets/pain-split.json" with { type: "json" };
+import type leechSeedAssetData from "../animation/assets/leech-seed.json";
+import type painSplitAssetData from "../animation/assets/pain-split.json";
 import reflectAsset from "../animation/assets/reflect.json" with { type: "json" };
-import brickBreakAsset from "../animation/assets/brick-break.json" with { type: "json" };
-import lightScreenAsset from "../animation/assets/light-screen.json" with { type: "json" };
-import mirrorCoatAsset from "../animation/assets/mirror-coat.json" with { type: "json" };
-import barrierAsset from "../animation/assets/barrier.json" with { type: "json" };
-import magicCoatAsset from "../animation/assets/magic-coat.json" with { type: "json" };
-import protectAsset from "../animation/assets/protect.json" with { type: "json" };
-import hazeAsset from "../animation/assets/haze.json" with { type: "json" };
-import biteAsset from "../animation/assets/bite.json" with { type: "json" };
+import type brickBreakAssetData from "../animation/assets/brick-break.json";
+import type lightScreenAssetData from "../animation/assets/light-screen.json";
+import type mirrorCoatAssetData from "../animation/assets/mirror-coat.json";
+import type barrierAssetData from "../animation/assets/barrier.json";
+import type magicCoatAssetData from "../animation/assets/magic-coat.json";
+import type protectAssetData from "../animation/assets/protect.json";
+import type hazeAssetData from "../animation/assets/haze.json";
+import type biteAssetData from "../animation/assets/bite.json";
 import substituteAsset from "../animation/assets/substitute.json" with { type: "json" };
-import twineedleAsset from "../animation/assets/twineedle.json" with { type: "json" };
-import poisonStingAsset from "../animation/assets/poisonSting.json" with { type: "json" };
-import spikeCannonAsset from "../animation/assets/spike-cannon.json" with { type: "json" };
-import sonicBoomAsset from "../animation/assets/sonic-boom.json" with { type: "json" };
-import razorWindAsset from "../animation/assets/razor-wind.json" with { type: "json" };
-import hornDrillAsset from "../animation/assets/horn-drill.json" with { type: "json" };
-import auroraBeamAsset from "../animation/assets/aurora-beam.json" with { type: "json" };
-import triAttackAsset from "../animation/assets/tri-attack.json" with { type: "json" };
-import hyperBeamAsset from "../animation/assets/hyper-beam.json" with { type: "json" };
-import thunderboltAsset from "../animation/assets/thunderbolt.json" with { type: "json" };
-import zapCannonAsset from "../animation/assets/zap-cannon.json" with { type: "json" };
-import smokescreenAsset from "../animation/assets/smokescreen.json" with { type: "json" };
-import octazookaAsset from "../animation/assets/octazooka.json" with { type: "json" };
-import hailAsset from "../animation/assets/hail.json" with { type: "json" };
-import spikesAsset from "../animation/assets/spikes.json" with { type: "json" };
-import spiderWebAsset from "../animation/assets/spider-web.json" with { type: "json" };
-import petalDanceAsset from "../animation/assets/petal-dance.json" with { type: "json" };
+import type twineedleAssetData from "../animation/assets/twineedle.json";
+import type poisonStingAssetData from "../animation/assets/poisonSting.json";
+import type spikeCannonAssetData from "../animation/assets/spike-cannon.json";
+import type sonicBoomAssetData from "../animation/assets/sonic-boom.json";
+import type razorWindAssetData from "../animation/assets/razor-wind.json";
+import type hornDrillAssetData from "../animation/assets/horn-drill.json";
+import type auroraBeamAssetData from "../animation/assets/aurora-beam.json";
+import type triAttackAssetData from "../animation/assets/tri-attack.json";
+import type hyperBeamAssetData from "../animation/assets/hyper-beam.json";
+import type thunderboltAssetData from "../animation/assets/thunderbolt.json";
+import type zapCannonAssetData from "../animation/assets/zap-cannon.json";
+import type smokescreenAssetData from "../animation/assets/smokescreen.json";
+import type octazookaAssetData from "../animation/assets/octazooka.json";
+import type hailAssetData from "../animation/assets/hail.json";
+import type spikesAssetData from "../animation/assets/spikes.json";
+import type spiderWebAssetData from "../animation/assets/spider-web.json";
+import type petalDanceAssetData from "../animation/assets/petal-dance.json";
 import destinyBondAsset from "../animation/assets/destiny-bond.json" with { type: "json" };
 import smogAsset from "../animation/assets/smog.json" with { type: "json" };
-import bonemerangAsset from "../animation/assets/bonemerang.json" with { type: "json" };
-import psychUpAsset from "../animation/assets/psych-up.json" with { type: "json" };
-import signalBeamAsset from "../animation/assets/signal-beam.json" with { type: "json" };
+import type bonemerangAssetData from "../animation/assets/bonemerang.json";
+import type psychUpAssetData from "../animation/assets/psych-up.json";
+import type signalBeamAssetData from "../animation/assets/signal-beam.json";
 import shockWaveAsset from "../animation/assets/shock-wave.json" with { type: "json" };
-import silverWindAsset from "../animation/assets/silver-wind.json" with { type: "json" };
-import snoreAsset from "../animation/assets/snore.json" with { type: "json" };
-import skyAttackAsset from "../animation/assets/sky-attack.json" with { type: "json" };
+import type silverWindAssetData from "../animation/assets/silver-wind.json";
+import type snoreAssetData from "../animation/assets/snore.json";
+import type skyAttackAssetData from "../animation/assets/sky-attack.json";
 import waterPulseAsset from "../animation/assets/water-pulse.json" with { type: "json" };
 import digDirtMoundAsset from "../animation/assets/dig-dirt-mound.json" with { type: "json" };
-import mudShotAsset from "../animation/assets/mud-shot.json" with { type: "json" };
-import waterOrbAsset from "../animation/assets/water-orb.json" with { type: "json" };
-import bubbleBeamAsset from "../animation/assets/bubble-beam.json" with { type: "json" };
+import type mudShotAssetData from "../animation/assets/mud-shot.json";
+import type waterOrbAssetData from "../animation/assets/water-orb.json";
+import type bubbleBeamAssetData from "../animation/assets/bubble-beam.json";
 import crossChopAsset from "../animation/assets/cross-chop.json" with { type: "json" };
-import leafBladeAsset from "../animation/assets/leaf-blade.json" with { type: "json" };
-import focusEnergyAsset from "../animation/assets/focus-energy.json" with { type: "json" };
-import endureAsset from "../animation/assets/endure.json" with { type: "json" };
-import reversalAsset from "../animation/assets/reversal.json" with { type: "json" };
-import swallowAsset from "../animation/assets/swallow.json" with { type: "json" };
-import tailGlowAsset from "../animation/assets/tail-glow.json" with { type: "json" };
+import type leafBladeAssetData from "../animation/assets/leaf-blade.json";
+import type focusEnergyAssetData from "../animation/assets/focus-energy.json";
+import type endureAssetData from "../animation/assets/endure.json";
+import type reversalAssetData from "../animation/assets/reversal.json";
+import type swallowAssetData from "../animation/assets/swallow.json";
+import type tailGlowAssetData from "../animation/assets/tail-glow.json";
 import dizzyPunchAsset from "../animation/assets/dizzyPunch.json" with { type: "json" };
-import furySwipesAsset from "../animation/assets/furySwipes.json" with { type: "json" };
-import covetAsset from "../animation/assets/covet.json" with { type: "json" };
-import headbuttAsset from "../animation/assets/headbutt.json" with { type: "json" };
-import whirlwindAsset from "../animation/assets/whirlwind.json" with { type: "json" };
-import blockAsset from "../animation/assets/block.json" with { type: "json" };
-import bodySlamAsset from "../animation/assets/body-slam.json" with { type: "json" };
-import slamAsset from "../animation/assets/slam.json" with { type: "json" };
-import astonishAsset from "../animation/assets/astonish.json" with { type: "json" };
-import aromatherapyAsset from "../animation/assets/aromatherapy.json" with { type: "json" };
-import synthesisAsset from "../animation/assets/synthesis.json" with { type: "json" };
-import moonlightAsset from "../animation/assets/moonlight.json" with { type: "json" };
-import wishAsset from "../animation/assets/wish.json" with { type: "json" };
-import milkDrinkAsset from "../animation/assets/milk-drink.json" with { type: "json" };
-import supersonicAsset from "../animation/assets/supersonic.json" with { type: "json" };
-import metalSoundAsset from "../animation/assets/metal-sound.json" with { type: "json" };
-import screechAsset from "../animation/assets/screech.json" with { type: "json" };
-import safeguardAsset from "../animation/assets/safeguard.json" with { type: "json" };
-import stockpileAsset from "../animation/assets/stockpile-gray-orb.json" with { type: "json" };
+import type furySwipesAssetData from "../animation/assets/furySwipes.json";
+import type covetAssetData from "../animation/assets/covet.json";
+import type headbuttAssetData from "../animation/assets/headbutt.json";
+import type whirlwindAssetData from "../animation/assets/whirlwind.json";
+import type blockAssetData from "../animation/assets/block.json";
+import type bodySlamAssetData from "../animation/assets/body-slam.json";
+import type slamAssetData from "../animation/assets/slam.json";
+import type astonishAssetData from "../animation/assets/astonish.json";
+import type aromatherapyAssetData from "../animation/assets/aromatherapy.json";
+import type synthesisAssetData from "../animation/assets/synthesis.json";
+import type moonlightAssetData from "../animation/assets/moonlight.json";
+import type wishAssetData from "../animation/assets/wish.json";
+import type milkDrinkAssetData from "../animation/assets/milk-drink.json";
+import type supersonicAssetData from "../animation/assets/supersonic.json";
+import type metalSoundAssetData from "../animation/assets/metal-sound.json";
+import type screechAssetData from "../animation/assets/screech.json";
+import type safeguardAssetData from "../animation/assets/safeguard.json";
+import type stockpileAssetData from "../animation/assets/stockpile-gray-orb.json";
 import spitUpAsset from "../animation/assets/spit-up-red-orb.json" with { type: "json" };
 import curseAsset from "../animation/assets/curse.json" with { type: "json" };
-import iceBallAsset from "../animation/assets/ice-ball.json" with { type: "json" };
-import purpleFlameAsset from "../animation/assets/purple-flame.json" with { type: "json" };
-import hiddenPowerRedOrbAsset from "../animation/assets/hidden-power-red-orb.json" with { type: "json" };
-import waterGunAsset from "../animation/assets/water-gun.json" with { type: "json" };
-import diveAsset from "../animation/assets/dive.json" with { type: "json" };
-import waterSpoutOrbAsset from "../animation/assets/water-spout-glowy-blue-orb.json" with { type: "json" };
-import acidAsset from "../animation/assets/acid.json" with { type: "json" };
-import sludgeAsset from "../animation/assets/sludge.json" with { type: "json" };
-import sludgeBombAsset from "../animation/assets/sludgeBomb.json" with { type: "json" };
-import poisonFangAsset from "../animation/assets/poisonFang.json" with { type: "json" };
-import hyperFangAsset from "../animation/assets/hyperFang.json" with { type: "json" };
-import megaPunchAsset from "../animation/assets/megaPunch.json" with { type: "json" };
-import solarBeamAsset from "../animation/assets/solar-beam.json" with { type: "json" };
-import guillotineAsset from "../animation/assets/guillotine.json" with { type: "json" };
-import rollingKickAsset from "../animation/assets/rollingKick.json" with { type: "json" };
-import lowKickAsset from "../animation/assets/lowKick.json" with { type: "json" };
+import type iceBallAssetData from "../animation/assets/ice-ball.json";
+import type purpleFlameAssetData from "../animation/assets/purple-flame.json";
+import type hiddenPowerRedOrbAssetData from "../animation/assets/hidden-power-red-orb.json";
+import type waterGunAssetData from "../animation/assets/water-gun.json";
+import type diveAssetData from "../animation/assets/dive.json";
+import type waterSpoutOrbAssetData from "../animation/assets/water-spout-glowy-blue-orb.json";
+import type acidAssetData from "../animation/assets/acid.json";
+import type sludgeAssetData from "../animation/assets/sludge.json";
+import type sludgeBombAssetData from "../animation/assets/sludgeBomb.json";
+import type poisonFangAssetData from "../animation/assets/poisonFang.json";
+import type hyperFangAssetData from "../animation/assets/hyperFang.json";
+import type megaPunchAssetData from "../animation/assets/megaPunch.json";
+import type solarBeamAssetData from "../animation/assets/solar-beam.json";
+import type guillotineAssetData from "../animation/assets/guillotine.json";
+import type rollingKickAssetData from "../animation/assets/rollingKick.json";
+import type lowKickAssetData from "../animation/assets/lowKick.json";
 import swaggerAsset from "../animation/assets/swagger.json" with { type: "json" };
-import bulkUpAsset from "../animation/assets/bulk-up.json" with { type: "json" };
-import tauntAsset from "../animation/assets/taunt.json" with { type: "json" };
-import scaryFaceAsset from "../animation/assets/scary-face.json" with { type: "json" };
+import type bulkUpAssetData from "../animation/assets/bulk-up.json";
+import type tauntAssetData from "../animation/assets/taunt.json";
+import type scaryFaceAssetData from "../animation/assets/scary-face.json";
 import charmAsset from "../animation/assets/charm.json" with { type: "json" };
-import fakeTearsAsset from "../animation/assets/fake-tears.json" with { type: "json" };
-import tickleAsset from "../animation/assets/tickle.json" with { type: "json" };
-import metronomeAsset from "../animation/assets/metronome.json" with { type: "json" };
+import type fakeTearsAssetData from "../animation/assets/fake-tears.json";
+import type tickleAssetData from "../animation/assets/tickle.json";
+import type metronomeAssetData from "../animation/assets/metronome.json";
 import restAsset from "../animation/assets/rest.json" with { type: "json" };
-import howlAsset from "../animation/assets/howl.json" with { type: "json" };
-import yawnAsset from "../animation/assets/yawn.json" with { type: "json" };
-import sweetKissAsset from "../animation/assets/sweet-kiss.json" with { type: "json" };
+import type howlAssetData from "../animation/assets/howl.json";
+import type yawnAssetData from "../animation/assets/yawn.json";
+import type sweetKissAssetData from "../animation/assets/sweet-kiss.json";
 import lovelyKissAsset from "../animation/assets/lovely-kiss.json" with { type: "json" };
-import attractAsset from "../animation/assets/attract.json" with { type: "json" };
-import sporeAsset from "../animation/assets/spore.json" with { type: "json" };
-import stunSporeAsset from "../animation/assets/stunSpore.json" with { type: "json" };
-import sleepPowderAsset from "../animation/assets/sleepPowder.json" with { type: "json" };
+import type attractAssetData from "../animation/assets/attract.json";
+import type sporeAssetData from "../animation/assets/spore.json";
+import type stunSporeAssetData from "../animation/assets/stunSpore.json";
+import type sleepPowderAssetData from "../animation/assets/sleepPowder.json";
 import hypnosisAsset from "../animation/assets/hypnosis.json" with { type: "json" };
-import perishSongAsset from "../animation/assets/perish-song.json" with { type: "json" };
-import healBellAsset from "../animation/assets/heal-bell.json" with { type: "json" };
-import needleArmAsset from "../animation/assets/needle-arm.json" with { type: "json" };
-import sandstormAsset from "../animation/assets/sandstorm.json" with { type: "json" };
-import mistBallAsset from "../animation/assets/mist-ball.json" with { type: "json" };
-import lusterPurgeAsset from "../animation/assets/luster-purge.json" with { type: "json" };
-import selfDestructAsset from "../animation/assets/selfDestruct.json" with { type: "json" };
-import explosionAsset from "../animation/assets/explosion.json" with { type: "json" };
-import dynamicPunchAsset from "../animation/assets/dynamicPunch.json" with { type: "json" };
-import razorLeafAsset from "../animation/assets/razorLeaf.json" with { type: "json" };
-import poisonTailAsset from "../animation/assets/poisonTail.json" with { type: "json" };
-import steelWingAsset from "../animation/assets/steel-wing.json" with { type: "json" };
-import toxicAsset from "../animation/assets/toxic.json" with { type: "json" };
-import hardenAsset from "../animation/assets/harden.json" with { type: "json" };
-import calmMindAsset from "../animation/assets/calm-mind.json" with { type: "json" };
-import shadowBallAsset from "../animation/assets/shadow-ball.json" with { type: "json" };
-import encoreAsset from "../animation/assets/encore.json" with { type: "json" };
-import flatterAsset from "../animation/assets/flatter.json" with { type: "json" };
-import dragonClawAsset from "../animation/assets/dragon-claw.json" with { type: "json" };
-import singAsset from "../animation/assets/sing.json" with { type: "json" };
-import teeterDanceAsset from "../animation/assets/teeter-dance.json" with { type: "json" };
-import bellyDrumAsset from "../animation/assets/belly-drum.json" with { type: "json" };
-import sweetScentAsset from "../animation/assets/sweet-scent.json" with { type: "json" };
-import defenseCurlAsset from "../animation/assets/defense-curl.json" with { type: "json" };
-import ingrainAsset from "../animation/assets/ingrain.json" with { type: "json" };
+import type perishSongAssetData from "../animation/assets/perish-song.json";
+import type healBellAssetData from "../animation/assets/heal-bell.json";
+import type needleArmAssetData from "../animation/assets/needle-arm.json";
+import type sandstormAssetData from "../animation/assets/sandstorm.json";
+import type mistBallAssetData from "../animation/assets/mist-ball.json";
+import type lusterPurgeAssetData from "../animation/assets/luster-purge.json";
+import type selfDestructAssetData from "../animation/assets/selfDestruct.json";
+import type explosionAssetData from "../animation/assets/explosion.json";
+import type dynamicPunchAssetData from "../animation/assets/dynamicPunch.json";
+import type razorLeafAssetData from "../animation/assets/razorLeaf.json";
+import type poisonTailAssetData from "../animation/assets/poisonTail.json";
+import type steelWingAssetData from "../animation/assets/steel-wing.json";
+import type toxicAssetData from "../animation/assets/toxic.json";
+import type hardenAssetData from "../animation/assets/harden.json";
+import type calmMindAssetData from "../animation/assets/calm-mind.json";
+import type shadowBallAssetData from "../animation/assets/shadow-ball.json";
+import type encoreAssetData from "../animation/assets/encore.json";
+import type flatterAssetData from "../animation/assets/flatter.json";
+import type dragonClawAssetData from "../animation/assets/dragon-claw.json";
+import type singAssetData from "../animation/assets/sing.json";
+import type teeterDanceAssetData from "../animation/assets/teeter-dance.json";
+import type bellyDrumAssetData from "../animation/assets/belly-drum.json";
+import type sweetScentAssetData from "../animation/assets/sweet-scent.json";
+import type defenseCurlAssetData from "../animation/assets/defense-curl.json";
+import type ingrainAssetData from "../animation/assets/ingrain.json";
 import eruptionWarmRockAsset from "../animation/assets/eruption-warm-rock.json" with { type: "json" };
-import seismicTossAsset from "../animation/assets/seismic-toss.json" with { type: "json" };
+import type seismicTossAssetData from "../animation/assets/seismic-toss.json";
 import sandTombMudSandAsset from "../animation/assets/sand-tomb-mud-sand.json" with { type: "json" };
-import meanLookAsset from "../animation/assets/mean-look.json" with { type: "json" };
-import smellingSaltAsset from "../animation/assets/smelling-salt.json" with { type: "json" };
-import recycleAsset from "../animation/assets/recycle.json" with { type: "json" };
-import batonPassAsset from "../animation/assets/baton-pass.json" with { type: "json" };
-import rainDropsAsset from "../animation/assets/rain-drops.json" with { type: "json" };
+import type meanLookAssetData from "../animation/assets/mean-look.json";
+import type smellingSaltAssetData from "../animation/assets/smelling-salt.json";
+import type recycleAssetData from "../animation/assets/recycle.json";
+import type batonPassAssetData from "../animation/assets/baton-pass.json";
+import type rainDropsAssetData from "../animation/assets/rain-drops.json";
 import menuHealthboxPlayerAsset from "../assets/gen/menu-healthbox-player.json" with { type: "json" };
 import summaryBallAsset from "../assets/gen/summary-ball.json" with { type: "json" };
 import battleAnimBallOpenAsset from "../assets/gen/battle-anim-ball-open.json" with { type: "json" };
@@ -695,9 +696,9 @@ import battleAnimSpark2Asset from "../assets/gen/battle-anim-spark-2.json" with 
 import battleAnimSwordAsset from "../assets/gen/battle-anim-sword.json" with { type: "json" };
 import battleAnimLeerAsset from "../assets/gen/battle-anim-leer.json" with { type: "json" };
 import thunderWaveAsset from "../assets/gen/battle-anim-spark.json" with { type: "json" };
-import thunderAsset from "../animation/assets/thunder.json" with { type: "json" };
-import icyWindAsset from "../animation/assets/icy-wind.json" with { type: "json" };
-import surfWaveAsset from "../animation/assets/surf-wave.json" with { type: "json" };
+import type thunderAssetData from "../animation/assets/thunder.json";
+import type icyWindAssetData from "../animation/assets/icy-wind.json";
+import type surfWaveAssetData from "../animation/assets/surf-wave.json";
 import castformFormsAsset from "../assets/gen/castform-forms.json" with { type: "json" };
 import battleAnimItemHealAsset from "../assets/gen/battle-anim-item-heal.json" with { type: "json" };
 import fontNormalData from "../data/gen/font-normal.json" with { type: "json" };
@@ -714,23 +715,23 @@ import turn15FieldPpuAsset from "../assets/gen/turn15-field-ppu-20302.json" with
 import faintAttackDarkBgAsset from "../assets/gen/battle-anim-bg-dark.json" with { type: "json" };
 import extremeSpeedAsset from "../assets/gen/battle-anim-extreme-speed.json" with { type: "json" };
 import battleAnimGhostBgAsset from "../assets/gen/battle-anim-ghost-bg.json" with { type: "json" };
-import confuseRayAsset from "../animation/assets/confuse-ray.json" with { type: "json" };
-import fissureAsset from "../animation/assets/fissure.json" with { type: "json" };
+import type confuseRayAssetData from "../animation/assets/confuse-ray.json";
+import type fissureAssetData from "../animation/assets/fissure.json";
 import { fissureDirtPainterOrder } from "../animation/fissure.ts";
 import battleAnimPsychicBgAsset from "../assets/gen/battle-anim-psychic-bg.json" with { type: "json" };
-import amnesiaAsset from "../animation/assets/amnesia.json" with { type: "json" };
+import type amnesiaAssetData from "../animation/assets/amnesia.json";
 import { amnesiaBgPaletteRowAtAge } from "../animation/amnesia.ts";
-import dragonDanceAsset from "../animation/assets/dragon-dance.json" with { type: "json" };
-import sunnyDayAsset from "../animation/assets/sunny-day.json" with { type: "json" };
-import uproarAsset from "../animation/assets/uproar.json" with { type: "json" };
-import rapidSpinAsset from "../animation/assets/rapid-spin.json" with { type: "json" };
-import foresightAsset from "../animation/assets/foresight.json" with { type: "json" };
-import skillSwapOrbAsset from "../animation/assets/skill-swap-bluegreen-orb.json" with { type: "json" };
-import willOWispAsset from "../animation/assets/will-o-wisp.json" with { type: "json" };
-import megaHornAsset from "../animation/assets/mega-horn-horn-hit-2.json" with { type: "json" };
+import type dragonDanceAssetData from "../animation/assets/dragon-dance.json";
+import type sunnyDayAssetData from "../animation/assets/sunny-day.json";
+import type uproarAssetData from "../animation/assets/uproar.json";
+import type rapidSpinAssetData from "../animation/assets/rapid-spin.json";
+import type foresightAssetData from "../animation/assets/foresight.json";
+import type skillSwapOrbAssetData from "../animation/assets/skill-swap-bluegreen-orb.json";
+import type willOWispAssetData from "../animation/assets/will-o-wisp.json";
+import type megaHornAssetData from "../animation/assets/mega-horn-horn-hit-2.json";
 import superpowerAsset from "../animation/assets/superpower-rock-orb-fire.json" with { type: "json" };
 import revengeAsset from "../animation/assets/revenge-purple-scratch-swipe.json" with { type: "json" };
-import meteorMashAsset from "../animation/assets/meteorMash.json" with { type: "json" };
+import type meteorMashAssetData from "../animation/assets/meteorMash.json";
 import { partyMenuLayers, partySelectEntryPhase, partySendOutBallPhase, partySendOutReleaseClock, partySendOutBattleFadeBldy, partySendOutHealthboxDx, partySendOutMenuBounceTick, partySendOutPhase, partySendOutReleaseLogicalTick, PARTY_ENTRY_FADE_IN_START, PARTY_ENTRY_FADE_OUT_START, PARTY_SENDOUT_BALL_SPIN_START, PARTY_SENDOUT_BALL_VISIBLE_START, PARTY_SENDOUT_FADE_OUT_START, type PartyMenuIconLayer } from "./partySelect.ts";
 import {
   battlePartySelectStateForForcedParty,
@@ -1579,6 +1580,147 @@ import { assertFeatherDanceAttackStatPalette, drawMessageText, drawTurn6StatFall
 export { turn5FaintDismissCursorTick, TURN5_PIDGEOTTO_BG_FADE_Y, turn5BgFadeY, turn5SitrusOffHealTextVisibleChars, turn5OffSitrusOnixHp, TURN5_PIDGEOTTO_HEALTHBOX_SLIDE_START_TICK, turn6ReopenBounceTick, TURN9_FIGHT_SUBMENU_BOUNCE_FREEZE_TICK, TURN9_FIGHT_SUBMENU_BOUNCE_INDEX_OFFSET, turn9FightSubmenuBrowseBounceTick, TURN11_KICKOFF_BOUNCE_INDEX_OFFSET, TURN12_KICKOFF_BOUNCE_INDEX_OFFSET };
 import { drawBattle2FightSubmenuWindow, drawFightSubmenuWindow, drawSendOutHandoff, drawTurn15MagbySettledMenuChrome, drawTurn15PartySelectWindow } from "./battleSceneCanonical.ts";
 import { lazyValue } from "./lazyValue.ts";
+import { lazyAnimAsset, lazyAnimAssetPart } from "./animAssets.ts";
+const swiftYellowStarAsset = /* @__PURE__ */ lazyAnimAsset<typeof swiftYellowStarAssetData>("swift-yellow-star");
+const kadabraFrontSpriteAsset = /* @__PURE__ */ lazyAnimAsset<typeof kadabraFrontSpriteAssetData>("kadabra-front");
+const knockOffAsset = /* @__PURE__ */ lazyAnimAsset<typeof knockOffAssetData>("knock-off");
+const recoverAsset = /* @__PURE__ */ lazyAnimAsset<typeof recoverAssetData>("recover");
+const softBoiledAsset = /* @__PURE__ */ lazyAnimAsset<typeof softBoiledAssetData>("soft-boiled");
+const leechSeedAsset = /* @__PURE__ */ lazyAnimAsset<typeof leechSeedAssetData>("leech-seed");
+const painSplitAsset = /* @__PURE__ */ lazyAnimAsset<typeof painSplitAssetData>("pain-split");
+const brickBreakAsset = /* @__PURE__ */ lazyAnimAsset<typeof brickBreakAssetData>("brick-break");
+const lightScreenAsset = /* @__PURE__ */ lazyAnimAsset<typeof lightScreenAssetData>("light-screen");
+const mirrorCoatAsset = /* @__PURE__ */ lazyAnimAsset<typeof mirrorCoatAssetData>("mirror-coat");
+const barrierAsset = /* @__PURE__ */ lazyAnimAsset<typeof barrierAssetData>("barrier");
+const magicCoatAsset = /* @__PURE__ */ lazyAnimAsset<typeof magicCoatAssetData>("magic-coat");
+const protectAsset = /* @__PURE__ */ lazyAnimAsset<typeof protectAssetData>("protect");
+const hazeAsset = /* @__PURE__ */ lazyAnimAsset<typeof hazeAssetData>("haze");
+const biteAsset = /* @__PURE__ */ lazyAnimAsset<typeof biteAssetData>("bite");
+const twineedleAsset = /* @__PURE__ */ lazyAnimAsset<typeof twineedleAssetData>("twineedle");
+const poisonStingAsset = /* @__PURE__ */ lazyAnimAsset<typeof poisonStingAssetData>("poisonSting");
+const spikeCannonAsset = /* @__PURE__ */ lazyAnimAsset<typeof spikeCannonAssetData>("spike-cannon");
+const sonicBoomAsset = /* @__PURE__ */ lazyAnimAsset<typeof sonicBoomAssetData>("sonic-boom");
+const razorWindAsset = /* @__PURE__ */ lazyAnimAsset<typeof razorWindAssetData>("razor-wind");
+const hornDrillAsset = /* @__PURE__ */ lazyAnimAsset<typeof hornDrillAssetData>("horn-drill");
+const auroraBeamAsset = /* @__PURE__ */ lazyAnimAsset<typeof auroraBeamAssetData>("aurora-beam");
+const triAttackAsset = /* @__PURE__ */ lazyAnimAsset<typeof triAttackAssetData>("tri-attack");
+const hyperBeamAsset = /* @__PURE__ */ lazyAnimAsset<typeof hyperBeamAssetData>("hyper-beam");
+const thunderboltAsset = /* @__PURE__ */ lazyAnimAsset<typeof thunderboltAssetData>("thunderbolt");
+const zapCannonAsset = /* @__PURE__ */ lazyAnimAsset<typeof zapCannonAssetData>("zap-cannon");
+const smokescreenAsset = /* @__PURE__ */ lazyAnimAsset<typeof smokescreenAssetData>("smokescreen");
+const octazookaAsset = /* @__PURE__ */ lazyAnimAsset<typeof octazookaAssetData>("octazooka");
+const hailAsset = /* @__PURE__ */ lazyAnimAsset<typeof hailAssetData>("hail");
+const spikesAsset = /* @__PURE__ */ lazyAnimAsset<typeof spikesAssetData>("spikes");
+const spiderWebAsset = /* @__PURE__ */ lazyAnimAsset<typeof spiderWebAssetData>("spider-web");
+const petalDanceAsset = /* @__PURE__ */ lazyAnimAsset<typeof petalDanceAssetData>("petal-dance");
+const bonemerangAsset = /* @__PURE__ */ lazyAnimAsset<typeof bonemerangAssetData>("bonemerang");
+const psychUpAsset = /* @__PURE__ */ lazyAnimAsset<typeof psychUpAssetData>("psych-up");
+const signalBeamAsset = /* @__PURE__ */ lazyAnimAsset<typeof signalBeamAssetData>("signal-beam");
+const silverWindAsset = /* @__PURE__ */ lazyAnimAsset<typeof silverWindAssetData>("silver-wind");
+const snoreAsset = /* @__PURE__ */ lazyAnimAsset<typeof snoreAssetData>("snore");
+const skyAttackAsset = /* @__PURE__ */ lazyAnimAsset<typeof skyAttackAssetData>("sky-attack");
+const mudShotAsset = /* @__PURE__ */ lazyAnimAsset<typeof mudShotAssetData>("mud-shot");
+const waterOrbAsset = /* @__PURE__ */ lazyAnimAsset<typeof waterOrbAssetData>("water-orb");
+const bubbleBeamAsset = /* @__PURE__ */ lazyAnimAsset<typeof bubbleBeamAssetData>("bubble-beam");
+const leafBladeAsset = /* @__PURE__ */ lazyAnimAsset<typeof leafBladeAssetData>("leaf-blade");
+const focusEnergyAsset = /* @__PURE__ */ lazyAnimAsset<typeof focusEnergyAssetData>("focus-energy");
+const endureAsset = /* @__PURE__ */ lazyAnimAsset<typeof endureAssetData>("endure");
+const reversalAsset = /* @__PURE__ */ lazyAnimAsset<typeof reversalAssetData>("reversal");
+const swallowAsset = /* @__PURE__ */ lazyAnimAsset<typeof swallowAssetData>("swallow");
+const tailGlowAsset = /* @__PURE__ */ lazyAnimAsset<typeof tailGlowAssetData>("tail-glow");
+const furySwipesAsset = /* @__PURE__ */ lazyAnimAsset<typeof furySwipesAssetData>("furySwipes");
+const covetAsset = /* @__PURE__ */ lazyAnimAsset<typeof covetAssetData>("covet");
+const headbuttAsset = /* @__PURE__ */ lazyAnimAsset<typeof headbuttAssetData>("headbutt");
+const whirlwindAsset = /* @__PURE__ */ lazyAnimAsset<typeof whirlwindAssetData>("whirlwind");
+const blockAsset = /* @__PURE__ */ lazyAnimAsset<typeof blockAssetData>("block");
+const bodySlamAsset = /* @__PURE__ */ lazyAnimAsset<typeof bodySlamAssetData>("body-slam");
+const slamAsset = /* @__PURE__ */ lazyAnimAsset<typeof slamAssetData>("slam");
+const astonishAsset = /* @__PURE__ */ lazyAnimAsset<typeof astonishAssetData>("astonish");
+const aromatherapyAsset = /* @__PURE__ */ lazyAnimAsset<typeof aromatherapyAssetData>("aromatherapy");
+const synthesisAsset = /* @__PURE__ */ lazyAnimAsset<typeof synthesisAssetData>("synthesis");
+const moonlightAsset = /* @__PURE__ */ lazyAnimAsset<typeof moonlightAssetData>("moonlight");
+const wishAsset = /* @__PURE__ */ lazyAnimAsset<typeof wishAssetData>("wish");
+const milkDrinkAsset = /* @__PURE__ */ lazyAnimAsset<typeof milkDrinkAssetData>("milk-drink");
+const supersonicAsset = /* @__PURE__ */ lazyAnimAsset<typeof supersonicAssetData>("supersonic");
+const metalSoundAsset = /* @__PURE__ */ lazyAnimAsset<typeof metalSoundAssetData>("metal-sound");
+const screechAsset = /* @__PURE__ */ lazyAnimAsset<typeof screechAssetData>("screech");
+const safeguardAsset = /* @__PURE__ */ lazyAnimAsset<typeof safeguardAssetData>("safeguard");
+const stockpileAsset = /* @__PURE__ */ lazyAnimAsset<typeof stockpileAssetData>("stockpile-gray-orb");
+const iceBallAsset = /* @__PURE__ */ lazyAnimAsset<typeof iceBallAssetData>("ice-ball");
+const purpleFlameAsset = /* @__PURE__ */ lazyAnimAsset<typeof purpleFlameAssetData>("purple-flame");
+const hiddenPowerRedOrbAsset = /* @__PURE__ */ lazyAnimAsset<typeof hiddenPowerRedOrbAssetData>("hidden-power-red-orb");
+const waterGunAsset = /* @__PURE__ */ lazyAnimAsset<typeof waterGunAssetData>("water-gun");
+const diveAsset = /* @__PURE__ */ lazyAnimAsset<typeof diveAssetData>("dive");
+const waterSpoutOrbAsset = /* @__PURE__ */ lazyAnimAsset<typeof waterSpoutOrbAssetData>("water-spout-glowy-blue-orb");
+const acidAsset = /* @__PURE__ */ lazyAnimAsset<typeof acidAssetData>("acid");
+const sludgeAsset = /* @__PURE__ */ lazyAnimAsset<typeof sludgeAssetData>("sludge");
+const sludgeBombAsset = /* @__PURE__ */ lazyAnimAsset<typeof sludgeBombAssetData>("sludgeBomb");
+const poisonFangAsset = /* @__PURE__ */ lazyAnimAsset<typeof poisonFangAssetData>("poisonFang");
+const hyperFangAsset = /* @__PURE__ */ lazyAnimAsset<typeof hyperFangAssetData>("hyperFang");
+const megaPunchAsset = /* @__PURE__ */ lazyAnimAsset<typeof megaPunchAssetData>("megaPunch");
+const solarBeamAsset = /* @__PURE__ */ lazyAnimAsset<typeof solarBeamAssetData>("solar-beam");
+const guillotineAsset = /* @__PURE__ */ lazyAnimAsset<typeof guillotineAssetData>("guillotine");
+const rollingKickAsset = /* @__PURE__ */ lazyAnimAsset<typeof rollingKickAssetData>("rollingKick");
+const lowKickAsset = /* @__PURE__ */ lazyAnimAsset<typeof lowKickAssetData>("lowKick");
+const bulkUpAsset = /* @__PURE__ */ lazyAnimAsset<typeof bulkUpAssetData>("bulk-up");
+const tauntAsset = /* @__PURE__ */ lazyAnimAsset<typeof tauntAssetData>("taunt");
+const scaryFaceAsset = /* @__PURE__ */ lazyAnimAsset<typeof scaryFaceAssetData>("scary-face");
+const fakeTearsAsset = /* @__PURE__ */ lazyAnimAsset<typeof fakeTearsAssetData>("fake-tears");
+const tickleAsset = /* @__PURE__ */ lazyAnimAsset<typeof tickleAssetData>("tickle");
+const metronomeAsset = /* @__PURE__ */ lazyAnimAsset<typeof metronomeAssetData>("metronome");
+const howlAsset = /* @__PURE__ */ lazyAnimAsset<typeof howlAssetData>("howl");
+const yawnAsset = /* @__PURE__ */ lazyAnimAsset<typeof yawnAssetData>("yawn");
+const sweetKissAsset = /* @__PURE__ */ lazyAnimAsset<typeof sweetKissAssetData>("sweet-kiss");
+const attractAsset = /* @__PURE__ */ lazyAnimAsset<typeof attractAssetData>("attract");
+const sporeAsset = /* @__PURE__ */ lazyAnimAsset<typeof sporeAssetData>("spore");
+const stunSporeAsset = /* @__PURE__ */ lazyAnimAsset<typeof stunSporeAssetData>("stunSpore");
+const sleepPowderAsset = /* @__PURE__ */ lazyAnimAsset<typeof sleepPowderAssetData>("sleepPowder");
+const perishSongAsset = /* @__PURE__ */ lazyAnimAsset<typeof perishSongAssetData>("perish-song");
+const healBellAsset = /* @__PURE__ */ lazyAnimAsset<typeof healBellAssetData>("heal-bell");
+const needleArmAsset = /* @__PURE__ */ lazyAnimAsset<typeof needleArmAssetData>("needle-arm");
+const sandstormAsset = /* @__PURE__ */ lazyAnimAsset<typeof sandstormAssetData>("sandstorm");
+const mistBallAsset = /* @__PURE__ */ lazyAnimAsset<typeof mistBallAssetData>("mist-ball");
+const lusterPurgeAsset = /* @__PURE__ */ lazyAnimAsset<typeof lusterPurgeAssetData>("luster-purge");
+const selfDestructAsset = /* @__PURE__ */ lazyAnimAsset<typeof selfDestructAssetData>("selfDestruct");
+const explosionAsset = /* @__PURE__ */ lazyAnimAsset<typeof explosionAssetData>("explosion");
+const dynamicPunchAsset = /* @__PURE__ */ lazyAnimAsset<typeof dynamicPunchAssetData>("dynamicPunch");
+const razorLeafAsset = /* @__PURE__ */ lazyAnimAsset<typeof razorLeafAssetData>("razorLeaf");
+const poisonTailAsset = /* @__PURE__ */ lazyAnimAsset<typeof poisonTailAssetData>("poisonTail");
+const steelWingAsset = /* @__PURE__ */ lazyAnimAsset<typeof steelWingAssetData>("steel-wing");
+const toxicAsset = /* @__PURE__ */ lazyAnimAsset<typeof toxicAssetData>("toxic");
+const hardenAsset = /* @__PURE__ */ lazyAnimAsset<typeof hardenAssetData>("harden");
+const calmMindAsset = /* @__PURE__ */ lazyAnimAsset<typeof calmMindAssetData>("calm-mind");
+const shadowBallAsset = /* @__PURE__ */ lazyAnimAsset<typeof shadowBallAssetData>("shadow-ball");
+const encoreAsset = /* @__PURE__ */ lazyAnimAsset<typeof encoreAssetData>("encore");
+const flatterAsset = /* @__PURE__ */ lazyAnimAsset<typeof flatterAssetData>("flatter");
+const dragonClawAsset = /* @__PURE__ */ lazyAnimAsset<typeof dragonClawAssetData>("dragon-claw");
+const singAsset = /* @__PURE__ */ lazyAnimAsset<typeof singAssetData>("sing");
+const teeterDanceAsset = /* @__PURE__ */ lazyAnimAsset<typeof teeterDanceAssetData>("teeter-dance");
+const bellyDrumAsset = /* @__PURE__ */ lazyAnimAsset<typeof bellyDrumAssetData>("belly-drum");
+const sweetScentAsset = /* @__PURE__ */ lazyAnimAsset<typeof sweetScentAssetData>("sweet-scent");
+const defenseCurlAsset = /* @__PURE__ */ lazyAnimAsset<typeof defenseCurlAssetData>("defense-curl");
+const ingrainAsset = /* @__PURE__ */ lazyAnimAsset<typeof ingrainAssetData>("ingrain");
+const seismicTossAsset = /* @__PURE__ */ lazyAnimAsset<typeof seismicTossAssetData>("seismic-toss");
+const meanLookAsset = /* @__PURE__ */ lazyAnimAsset<typeof meanLookAssetData>("mean-look");
+const smellingSaltAsset = /* @__PURE__ */ lazyAnimAsset<typeof smellingSaltAssetData>("smelling-salt");
+const recycleAsset = /* @__PURE__ */ lazyAnimAsset<typeof recycleAssetData>("recycle");
+const batonPassAsset = /* @__PURE__ */ lazyAnimAsset<typeof batonPassAssetData>("baton-pass");
+const rainDropsAsset = /* @__PURE__ */ lazyAnimAsset<typeof rainDropsAssetData>("rain-drops");
+const thunderAsset = /* @__PURE__ */ lazyAnimAsset<typeof thunderAssetData>("thunder");
+const icyWindAsset = /* @__PURE__ */ lazyAnimAsset<typeof icyWindAssetData>("icy-wind");
+const surfWaveAsset = /* @__PURE__ */ lazyAnimAsset<typeof surfWaveAssetData>("surf-wave");
+const confuseRayAsset = /* @__PURE__ */ lazyAnimAsset<typeof confuseRayAssetData>("confuse-ray");
+const fissureAsset = /* @__PURE__ */ lazyAnimAsset<typeof fissureAssetData>("fissure");
+const amnesiaAsset = /* @__PURE__ */ lazyAnimAsset<typeof amnesiaAssetData>("amnesia");
+const dragonDanceAsset = /* @__PURE__ */ lazyAnimAsset<typeof dragonDanceAssetData>("dragon-dance");
+const sunnyDayAsset = /* @__PURE__ */ lazyAnimAsset<typeof sunnyDayAssetData>("sunny-day");
+const uproarAsset = /* @__PURE__ */ lazyAnimAsset<typeof uproarAssetData>("uproar");
+const rapidSpinAsset = /* @__PURE__ */ lazyAnimAsset<typeof rapidSpinAssetData>("rapid-spin");
+const foresightAsset = /* @__PURE__ */ lazyAnimAsset<typeof foresightAssetData>("foresight");
+const skillSwapOrbAsset = /* @__PURE__ */ lazyAnimAsset<typeof skillSwapOrbAssetData>("skill-swap-bluegreen-orb");
+const willOWispAsset = /* @__PURE__ */ lazyAnimAsset<typeof willOWispAssetData>("will-o-wisp");
+const megaHornAsset = /* @__PURE__ */ lazyAnimAsset<typeof megaHornAssetData>("mega-horn-horn-hit-2");
+const meteorMashAsset = /* @__PURE__ */ lazyAnimAsset<typeof meteorMashAssetData>("meteorMash");
 
 interface Tileset {
   columns: number;
@@ -1977,29 +2119,29 @@ const petalDanceArt = petalDanceAsset as {
 const destinyBondArt = destinyBondAsset as {
   whiteShadow: { tileset: Tileset; palette: RgbColor[] };
 };
-const smogArt = (smogAsset as {
+const smogArt = /* @__PURE__ */ lazyAnimAssetPart(() => (smogAsset as {
   art: { purpleGasCloud: { tileset: Tileset; palette: RgbColor[] } };
-}).art;
-const bonemerangArt = (bonemerangAsset as {
+}).art);
+const bonemerangArt = /* @__PURE__ */ lazyAnimAssetPart(() => (bonemerangAsset as {
   bone: { tileset: Tileset; palette: RgbColor[] };
-}).bone;
-const signalBeamArt = (signalBeamAsset as {
+}).bone);
+const signalBeamArt = /* @__PURE__ */ lazyAnimAssetPart(() => (signalBeamAsset as {
   art: { tileset: Tileset; redPalette: RgbColor[]; greenPalette: RgbColor[] };
-}).art;
+}).art);
 const shockWaveArt = (shockWaveAsset as {
   art: Record<"circleOfLight" | "electricOrbs" | "spark" | "lightning",
     { tileset: Tileset; palette: RgbColor[] }>;
 }).art;
-const silverWindResources = (silverWindAsset as {
+const silverWindResources = /* @__PURE__ */ lazyAnimAssetPart(() => (silverWindAsset as {
   resources: {
     sparkle6: { tileset: Tileset; palette: RgbColor[] };
     bugBackground: { palette: RgbColor[] };
   };
-}).resources;
-const silverWindArt = silverWindResources.sparkle6;
-const snoreArt = (snoreAsset as {
+}).resources);
+const silverWindArt = /* @__PURE__ */ lazyAnimAssetPart(() => silverWindResources.sparkle6);
+const snoreArt = /* @__PURE__ */ lazyAnimAssetPart(() => (snoreAsset as {
   snoreZ: { tileset: Tileset; palette: RgbColor[] };
-}).snoreZ;
+}).snoreZ);
 const skyAttackArt = skyAttackAsset as {
   bird: { tileset: Tileset; palette: RgbColor[] };
   skyPalette: RgbColor[];
@@ -2007,9 +2149,9 @@ const skyAttackArt = skyAttackAsset as {
 const waterPulseArt = waterPulseAsset as {
   blueRing2: { tileset: Tileset; palette: RgbColor[] };
 };
-const digDirtMoundArt = (digDirtMoundAsset as {
+const digDirtMoundArt = /* @__PURE__ */ lazyAnimAssetPart(() => (digDirtMoundAsset as {
   dirtMound: { tileset: Tileset; palette: RgbColor[] };
-}).dirtMound;
+}).dirtMound);
 const mudShotArt = mudShotAsset as {
   brownOrb: { tileset: Tileset; palette: RgbColor[] };
   krabbyBack: { tileset: Tileset; palette: RgbColor[] };
@@ -2519,9 +2661,9 @@ const defenseCurlArt = defenseCurlAsset as {
 const meanLookArt = meanLookAsset as {
   eye: { tileset: Tileset; palette: RgbColor[] };
 };
-const psychUpArt = (psychUpAsset as {
+const psychUpArt = /* @__PURE__ */ lazyAnimAssetPart(() => (psychUpAsset as {
   art: { tileset: Tileset; palette: RgbColor[] };
-}).art;
+}).art);
 
 
 export const menuHealthboxPlayer = menuHealthboxPlayerAsset as SendOutHealthboxContentAsset;
@@ -2656,12 +2798,12 @@ const curseArt = curseAsset as unknown as {
   ghost: { tileset: Tileset; palette: RgbColor[] };
   fallingLines: { tileset: Tileset; palette: RgbColor[]; tilemap: Tilemap };
 };
-const iceBallArt = (iceBallAsset as unknown as {
+const iceBallArt = /* @__PURE__ */ lazyAnimAssetPart(() => (iceBallAsset as unknown as {
   chunk: { tileset: Tileset; palette: RgbColor[]; frames: readonly number[] };
-}).chunk;
-const skillSwapOrbArt = (skillSwapOrbAsset as {
+}).chunk);
+const skillSwapOrbArt = /* @__PURE__ */ lazyAnimAssetPart(() => (skillSwapOrbAsset as {
   orb: { tileset: Tileset; palette: RgbColor[] };
-}).orb;
+}).orb);
 const meteorMashArt = meteorMashAsset as {
   background: { tileset: Tileset; palette: RgbColor[]; tilemap: Tilemap };
   goldStars: { tileset: Tileset; palette: RgbColor[] };
@@ -7985,6 +8127,8 @@ export type GeneralAnimationRenderView = Readonly<{
     center: Readonly<{ x: number; y: number }>;
     opponent: boolean;
   }>;
+  /** kno3: General_ItemKnockoff's ITEM_BAG sprite (src/animation/itemKnockoff.ts), drawn over the battlers. */
+  itemKnockoff?: NonNullable<ReturnType<typeof itemKnockoffAtAge>>;
   /** wsh2: General_FutureSightHit's psychic BG and the target's alpha-blended scale + shake (futureSightHit.ts). */
   futureSightHit?: Readonly<{
     row: ReturnType<typeof futureSightHitRowAtAge>;
@@ -8014,6 +8158,7 @@ export function generalAnimationRenderView(view: BattleResolutionPresentationRen
   if (effect?.type === "general-animation" && effect.animation === "HELD_ITEM_EFFECT") return heldItemEffectRenderView(view, effect);
   if (effect?.type === "general-animation" && effect.animation === "FOCUS_BAND") return focusBandRenderView(view, effect);
   if (effect?.type === "general-animation" && effect.animation === "WISH_HEAL") return wishHealRenderView(view, effect);
+  if (effect?.type === "general-animation" && effect.animation === "ITEM_KNOCKOFF") return itemKnockoffRenderView(view, effect);
   if (effect?.type === "general-animation" && effect.animation === "FUTURE_SIGHT_HIT") return futureSightHitRenderView(view, effect);
   if (effect?.type !== "general-animation" || effect.animation !== "FOCUS_PUNCH_SETUP") return null;
   if (effect.age < 0) return null;
@@ -8159,6 +8304,32 @@ function wishHealRenderView(
     view: Object.freeze({ ...view, fieldArt, postBodyShadowHidden: view.postBodyShadowHidden || side === "opponent" }),
     sprites: Object.freeze([]),
     wishHeal: Object.freeze({ row, center, opponent: side === "opponent" }),
+  });
+}
+
+/**
+ * kno3: B_ANIM_ITEM_KNOCKOFF's General_ItemKnockoff over the field as it is, either target side: the ITEM_BAG sprite flies from the target's
+ * GetBattlerSpriteCoord to the screen edge behind it. The opponent stands at its tracked front idle rest and an elevated opponent's shadow
+ * hides while the script runs.
+ */
+function itemKnockoffRenderView(
+  view: BattleResolutionPresentationRenderView,
+  effect: Extract<NonNullable<BattleResolutionPresentationRenderView["effect"]>, { type: "general-animation" }>,
+): GeneralAnimationRenderView | null {
+  const side = effect.battler === 0 ? "player" as const : "opponent" as const;
+  const rest = effect.battlerX2Input === undefined
+    ? { x2: 0, y2: 0 }
+    : liveBattlerAnchors("opponent", view.fieldArt, effect.battlerX2Input).frontIdleRest;
+  const opponent = rest.x2 === 0 && rest.y2 === 0 ? view.fieldArt.opponent : Object.freeze({
+    ...view.fieldArt.opponent,
+    origin: Object.freeze({ x: view.fieldArt.opponent.origin.x + rest.x2, y: view.fieldArt.opponent.origin.y + rest.y2 }),
+  });
+  const fieldArt = opponent === view.fieldArt.opponent ? view.fieldArt : Object.freeze({ ...view.fieldArt, opponent });
+  const bag = itemKnockoffAtAge(effect.age, side, liveBattlerAnchors(side, view.fieldArt).picOffsetPoint);
+  return Object.freeze({
+    view: Object.freeze({ ...view, fieldArt, postBodyShadowHidden: view.postBodyShadowHidden || (side === "opponent" && effect.age >= 0) }),
+    sprites: Object.freeze([]),
+    ...(bag === null ? {} : { itemKnockoff: bag }),
   });
 }
 
@@ -55750,6 +55921,13 @@ export function renderBattleResolutionSceneOffView(
     for (const star of row.blueStars) {
       drawSpriteSheet(fb, subTileset(moonlightArt.blueStar.tileset, star.frame * 4, 4), moonlightArt.blueStar.palette, star.x - 16, star.y - 16);
     }
+  }
+  if (generalAnimation?.itemKnockoff) {
+    const bag = generalAnimation.itemKnockoff;
+    drawSpriteSheetAffineRotate(
+      fb, covetArt.itemBag.tileset, covetArt.itemBag.palette, bag.x, bag.y + bag.y2,
+      bag.matrix.a, bag.matrix.b, bag.matrix.c, bag.matrix.d, undefined, false,
+    );
   }
   if (fade?.bgCopy) drawSubstituteFadeBgCopy(fb, fade.bgCopy);
   if (view.visibility.opponent.healthbox) {
