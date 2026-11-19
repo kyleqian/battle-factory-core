@@ -982,3 +982,58 @@ The top 15 hold 6,068 of 6,125 (99.1 %). By the engine command the row hangs fro
 3. What is left, by mass: **controller rows after the hit-animation command (40 % of all mass, 380 SE 13 rows median -3: the inherited hit offset, ctl1 section 3)**, the **faint chain (26 %: SE 16 + faint cry, median -3, a few outliers at +63 / -44)**, the send-in chain (switch-in / party-summary / trainer-slide, 18 %), stat-change rows (7 %). Single windows that stand out: **s7682 Struggle (+20 .. +29 x 10, 6 % of the mass)** and **Brick Break +63 (two seeds, 126)**, **Aerial Ace -42**, **Earthquake faint chain -43**: each a candidate for a ROM probe of the script command (OFF has no animation, so these are pauses / message holds). Not measured here: OFF-specific causes inside a move (no OFF body exists, so no per-body table), ON vs OFF per-seed difference, other seeds beyond census 0..999's four.
 4. Suggested order (measurement first; each moves frames: census eventsDigest identity + soaks + pin notes + the full suite): the s7682 Struggle window (one body, 10 rows), the Brick Break +63 window (two seeds), then the send-in anchor (ctl1 / bal1 numbers).
 5. Tooling: `tools/audio/t2Attribute.py --scene=off ROMDIR OUT.json LABEL=ENGINEDIR ...` (engine dirs from `soundCensusRomReplay.ts replay --cmdtrace=1 --scene=off`); the `soundScoreboard.py` subset of 20 seeds needs `cmp` / `drive` / `snd` / `engine` files in one directory (symlinks work).
+
+## c1k (2026-11-19): census 0..999 both scenes on `93dc3201d` vs the aud263 arms (verification only)
+
+Base `93dc3201dcdbb81070d2e7d2f80a441cae6674b0` (`workspace/src` tree `30aab9b15a26d7ba50b6755597177120942cc700`; the last commit before this section). Method of aud263: `LSD194_CENSUS_JOBS=4 LSD194_SPLIT=10 sh tools/integration/lsd194Census.sh <fresh-root> HEAD:on HEAD:off` (10 shards x 10 parts, one `git archive` tree per arm, the HEAD `lsd194Census.ts` copied in), 1000 / 1000 seeds per scene, 9 min 14 s wall for both arms. Compared with the aud263 arms `.integration/evidence/aud263/census/{on,off}-d8e807b20` (main tree). `d8e807b20..HEAD` holds 46 commits that touch `src/`. No `src/` or `tests/` file changed here; no `npm test`; one census-tool fix (section 4). Evidence (ignored): `.integration/evidence/c1k/` (`census/`, `census2/` = the ON arm re-run with the fixed census tool, `t1-*.txt|json`, `bis*/` intermediate-commit arms, `fb/` frame-budget seeds).
+
+### 1. eventsDigest / error per seed vs aud263
+
+| Scene | seeds identical (digest + error) | different | cause |
+| --- | --- | --- | --- |
+| ON | 998 / 1000 | **796, 995** | both end `Error: frame budget` in both arms; the budget cuts the battle at a different point, so the digest of the truncated run differs |
+| OFF | 998 / 1000 | **796, 995** | same |
+
+Not a gameplay change, checked two ways. (a) The aud263 run's sequence of `message` / `faint` / `switch-in` commands (type, battler, text) is an exact **prefix** of this run's in all four arms (ON 796 1,336 -> 1,342 messages, ON 995 1,092 -> 1,097, OFF 796 1,714 -> 1,745, OFF 995 1,593 -> 1,611): the same battle, cut later. (b) Where the cut moved, by census of seeds 796 / 995 on intermediate trees (digest, command count):
+
+| Scene | aud263 `d8e807b20` | after hpd8 `b6245066e` | after hpf2 `d6ef8fb3a` (= HEAD values) |
+| --- | --- | --- | --- |
+| ON 796 | `c9d29127` 3,643 | `32face0d` 3,621 | `efe27c72` 3,661 |
+| ON 995 | `14d7e6e6` 3,311 | `6773bc0e` 3,295 | `3361d459` 3,326 |
+| OFF 796 | `9475af7a` 4,724 | unchanged (also at `2a4fef0b1`, `87bf77283`, `70b797e28`) | `cc877d94` 4,812 |
+| OFF 995 | `0bf40a52` 4,824 | unchanged | `54bc3c76` 4,880 |
+
+ON moved first at `2a4fef0b1` (merge carrying hpd8; `b6245066e` alone, `047a1a3dd` ais4 alone still the aud263 value) and again at hpf2 (`d6ef8fb3a`, a single commit on top of `70b797e28`); OFF moved only at hpf2. Both are presentation-length commits (hp holds), so the frame budget reaches a different turn. The other 998 seeds: eventsDigest and error identical in both scenes, so no gameplay / RNG / damage / order / facility difference; the seed-0..99 shard is also identical to aud263 at nine intermediate commits (`f047ca4f5 2a4fef0b1 26477cf4b d2e439d06 70b797e28 26ed71da7 f9cdc9c47 79cb88491` + HEAD, 0 differences).
+
+**Command sequences** (`rst197CensusDelta.py`: 906 / 1000 battles changed some command's frames in both scenes, expected from the timing commits): **92 seeds per scene (the same 92) have a different command-type sequence**, all pure insertions (no deletion) of a command the aud263 build did not present:
+
+| Scene | inserted | cause (bisected on seeds 0..99 / 0..9 across commits) |
+| --- | --- | --- |
+| ON | 98 `move-animation` (`pause`, 42 rows) | `87bf77283` pau3 (SafeguardEnds pre-print row 32 + 10): `87bf77283^` 0, `87bf77283` 2 on seeds 0..9, both scenes |
+| ON | 65 `general-animation ITEM_KNOCKOFF` | kno3 (`173bd72fd` / `2e95de37b`, in merge `f047ca4f5`): 0 -> 7 on seeds 0..99 at `f047ca4f5` |
+| OFF | 98 `move-animation` (`pause`, 42 rows) | pau3, as above |
+| OFF | 65 `move-animation` (`pause`, 35 rows) | kno3 (`173bd72fd`, Scene OFF 35-row Pausex20 hold) |
+
+The 42-row pause carries the segment's last "used" text (e.g. seed 0 "Foe WOBBUFFET used COUNTER!"), it is not a Counter command. ON `move-animation` commands 41,331 -> 41,430 (+99: pause class 14,225 -> 14,323 = +98, live +4 incl. the three adp1 moves, static -3); OFF 47,402 -> 47,584 (+182 = 98 + 65 + 19 other class-label changes? **not itemised**; the OFF type-sequence diff above accounts for 163 of them, the rest were not traced).
+
+### 2. T1 (`soundCensusDelta.py --t1`)
+
+OFF, `off-93dc3201d`: 47,584 move-animation commands, all `HITMARKER_NO_ANIMATIONS`; exact / known-offset / missing (all classes) / extra / unclassified **0 / 0 / 0 / 0 / 0**; non-move exact 4,621 (same as aud263), 0 / 0 / 0 / 0; Castform 24 + stats-change 4,597.
+
+ON, first reading `on-93dc3201d` (census tool unchanged): exact 268,935, missing-declined **876**, extra **876**, other classes 0, unclassified 0 (non-move exact 119,064 = aud263 119,054 + 10, 0 / 0 / 0 / 0). **Headline, then explained**: the 876 + 876 are Calm Mind (347) 112 commands / 336 rows, Cosmic Power (322) 60 / 180, Encore (227) 36 / 360. A scratch rescoring (`.integration/evidence/c1k/scratch_t1.py`, the scorer with the age-0 frame voted from the emitted rows) shows every one of the 208 commands emits **all** its table rows under one per-command shift, no leftover row: the emission is the table's, the scorer just had no age-0 frame. Cause: `lsd194Census.ts` records the body age-0 frame only on the row where `liveMoveSourceAge(...).age === 0`; lse2 (`8debeebd8` Cosmic Power / Calm Mind, `5fe920b5a` Encore; `lse2BodySoundAgeShift`) starts the sound clock at age 1 / 2 on the first presenting row, so age 0 is never seen, `soundAnim[7]` stays null and the scorer calls the command "declined" and its rows "extra". Bisect (seeds 0..99, ON): `70b797e28` 0 / 0 / 0, `8debeebd8` 11 / 0 / 3, `5fe920b5a` 11 / 1 / 3 (Calm Mind / Encore / Cosmic Power null-age commands), unchanged through HEAD.
+
+### 3. Scene ON static-field commands
+
+`static:*` playback class (census field 21, Scene ON): **1** (`static:other:unattributed-gate-301`, seed 950, "Foe SEALEO used ICE BALL!"), **not 0**. It is not new: aud263 had 4 (the same Ice Ball one + `no-adapter-unscripted` Withdraw 51 / Rock Smash 492 / Beat Up 835, which adp1 then made live). The `approx:*` classes are unchanged (44 + 19 + 9 + 2 + 6 + 10 + 33 + 28 + 3 + 13 + 1 + 6 = 174, same counts as aud263). Scene OFF `live` 51 / `pause` 47,535 (aud263 51 / 47,353).
+
+### 4. Tool fix and final T1
+
+`tools/integration/lsd194Census.ts`: `if (src && src.age === 0) a[7] = frame` -> `if (src && src.age >= 0) a[7] = frame - src.age` (the age-0 frame of a body whose first presenting row is already past age 0; any move that reaches age 0 on its first seen row or later records the same frame as before). Commit `2f88532bd`; `npm run build` exit 0. ON re-run into `census2/` (same HEAD tree, fixed tool, 1000 seeds, 6 min): against the first ON arm **eventsDigest / error 0 differences, commands 0, sound rows 0, soundAnim differences only `[7]` null -> value on exactly those 208 commands** (347: 112, 227: 36, 322: 60). T1 ON then: **exact 269,811 (= 268,935 + 876), known-offset 0, missing 0 (gated 0, declined 0, cry-task 0, other 0), extra 0, unclassified 0**; non-move exact 119,064, 0 / 0 / 0 / 0; the 5 aud263 declined rows (adp1) are gone. OFF needs no re-run (its T1 does not use the age).
+
+### 5. Verdict
+
+1. Gameplay / RNG / events: **identical on 998 / 1000 seeds in both scenes; the two others are the frame-budget seeds, the same battle cut later (hpd8 for ON, hpf2 both scenes)**. No unintended gameplay change.
+2. Presentation: 92 seeds gain commands (pau3 42-row pauses 98 both scenes, kno3 65 both scenes), nothing is removed.
+3. T1 **0 / 0 / 0 in both scenes after the census-tool fix**; before it, ON read 876 declined / 876 extra, a scorer blind spot (age-0 frame) opened by lse2, not a sound defect. Any census arm made with the older `lsd194Census.ts` will show those 876 rows again (the aud263 arms predate lse2).
+4. Static-field commands: 1, not 0 (Ice Ball seed 950, pre-existing).
+5. Not done: no `npm test` (verification step); T1 is self-consistency, not ROM parity (T2 is the scorer, last run in the t2r / t2o sections).
