@@ -185,3 +185,46 @@ Residual: (1) the opponent personality caveat above: the app's Magneton traces M
 
 ### Part B (not done): mid-battle switch-in / faint replacement
 The same prints are missing after a faint replacement or a voluntary switch (the switch-in script's events reach the resolution as the existing `switch-in` commands, which present no entry-ability rows). Needed: one ROM lab (an Intimidate send-in after a faint, `overrides.parties`) to measure the rows from the send-in's end to the next menu, then the same row-timed projection appended to the `switch-in` command. Out of scope here: #222 switch / send-in animation timing.
+
+## pau5
+
+Landed (commit fcef544d8; labs / app stages / traces 739fda0b6): the Intimidate / Trace switch-in scripts that run **mid-battle** are presented with pau4's block timing, in both scenes: a voluntary switch, a forced player replacement after a faint, and the opponent's replacement. Presentation only: the kernel events, RNG and `eventsDigest` are unchanged (census seeds 0..99, 739fda0b6 vs fcef544d8, both scenes: `eventsDigest` 100 / 100 identical per scene; the T1 sound census had no extra / missing / known-offset cues).
+
+### ROM rows (12 probed cases; `tools/integration/pau5Labs.py` + `hpd2Probe.py`, absolute frames after `lab.prepare`)
+Labs `tools/battle-lab/pau5-{faint,switch,opp}-{intimidate,trace}-{off,on}.json` (`overrides.parties`: Mightyena set 307 / Porygon set 273 as the ability mon, Rattata fodder, one-move slots so the Factory AI has one choice). `faint` = the lead faints to Seismic Toss and the benched ability mon is sent in; `switch` = a voluntary SWITCH to the benched mon; `opp` = the opponent's lead faints and the AI replacement is the ability mon.
+
+| case | OFF start -> end | ON start -> end | rows |
+|---|---|---|---|
+| faint-intimidate | 1347 -> 1585 (239) | 1877 -> 2115 (239) | `IntimidateActivatesEnd3` 33, `IntimidateActivates` 11, stat anim 75 (exec 2, anim 1), 2 transition rows, print 49, wait 68, `End3` 1 |
+| faint-trace | 1347 -> 1482 (136) | 1877 -> 2012 (136) | `TraceActivates`: pause row 33, print 38, wait 65 |
+| switch-intimidate | 483 -> 721 (239) | 483 -> 721 (239) | same rows as faint (the print runs at exec 1 not 2) |
+| switch-trace | 483 -> 618 (136) | 483 -> 618 (136) | 33 / 38 / 65 |
+| opp-intimidate | 717 -> 955 (239) | 1008 -> 1246 (239) | same rows |
+| opp-trace | 717 -> 852 (136) | 995 -> 1130 (136) | 33 / 38 / 65 |
+
+The block is 239 frames (Intimidate) or 136 (Trace) in all twelve cases, the same lengths as the battle-start scripts (pau4m: 239 / 142 to the box there, ours counts the script alone), and independent of scene. The scene only shifts where the block starts (faint / opponent replacement ON start later; the voluntary switch is the same absolute frame in both). The opponent's replacement starts its script 12 rows later after the release than the player's send-in does, and its action prompt follows 8 rows later (both from frame-shift scans of the four opponent traces).
+
+### What landed
+- `applyMidBattleEntryScriptBlocks` (`battleResolutionPresentation.ts`): finds a send-in's entry-script events (`BattleScript_IntimidateActivatesLoop` / `BattleScript_TraceActivates`) behind a `switch-in` command and times them from the kernel rows like pau4: the `switch-in` gets `entryScriptHoldFrames` = script lead rows (`instructionExecution` of its first command: 41 / 33) - 4 (`ENTRY_SCRIPT_SETTLE_OVERLAP_FRAMES`, the part of the send-in's post-`switchinanim` hold the script replaces) + 12 for an opponent replacement; the stat row runs to its STATS_CHANGE animation; the last print is extended by the closing rows (`ENTRY_SCRIPT_TRAILING_ROWS`: Intimidate 4, Trace 0) + `ENTRY_SCRIPT_END_HELD_ROWS` (3, now shared with pau4's battle-start phase) + 4 overlap, or +8 on an opponent replacement that ends the turn. A forced player replacement whose script ends the turn trims the turn-end block by 5 (`ENTRY_SCRIPT_PLAYER_TURN_END_TRIM_FRAMES`). No per-trace constants; every constant was fitted on the OFF opponent / faint traces and confirmed in the other cases.
+- `battleResolutionPresentationRender.ts`: the command duration includes `entryScriptHoldFrames`, and the forced-replacement send-out span (`playerFaintReplacementSendOutTimingOfSegment`) ends where the script's first row runs instead of at turn-end + handoff.
+- Tier-1: `tests/pau5SwitchInEntry.test.ts` (fails without the change). `tests/randomRoundSoak.test.ts`: the pinned two-round-win seed of `--policy winning --max-rounds 3` moved from 13 to 47 (seed 13 now carries 7; re-scanned seeds 0..159, none chain two wins in 0..39).
+
+### Matched frames (exact RGB, `npm run compare -- pau5-<case> --summary`, 571-frame windows; before = 739fda0b6, after = fcef544d8 and re-measured at the pau5b tip)
+| case | OFF before / after | ON before / after |
+|---|---|---|
+| faint-intimidate | 216 / 439 | 54 / 54 |
+| faint-trace | 123 / 449 | 56 / 56 |
+| switch-intimidate | 119 / 280 | 93 / 184 |
+| switch-trace | 276 / 432 | 203 / 301 |
+| opp-intimidate | 73 / 445 | 53 / 425 |
+| opp-trace | 61 / 448 | 37 / 424 |
+
+The six `sta6m-intro-*` traces (pau4's battle-start blocks) are unchanged by pau5: OFF 417 / 593 / 444 (trace / intimp / both), ON 307 / 395 / 424.
+
+### Residuals
+- **Opponent personality (the pau4m caveat)**: the app's generated opponent record differs from the ROM's in personality / ability slot for the same set id, so the opponent sprite and any text that names the traced ability can differ. The labs pin the player's mons to the ROM personality (`PERSONALITY` in `pau5Labs.py`) but the opponent side is app-generated. faint ON stays 54 / 56 because a constant 410 px diff at the opponent sprite (bbox 163,41-190,71, every frame from the block on) is that mismatch, not timing; the faint ON block itself starts at the right frame.
+- switch ON (184 / 301) and switch OFF intimidate (280): scattered diffs at the opponent sprite (160,40 box), the stat-animation area and the opponent healthbox; only the bboxes were looked at, no timing offset found, not root-caused. switch-trace-ON frames 649-893 (after the block) differ in the top-left 0..200 x 0..80 region.
+- opp-* ON matches 424-425 against OFF 445-448: the ON window's send-in animations are the #222 domain (out of scope).
+
+### Open remainder
+Sand Stream (no Factory rank-0 reach), Drizzle / Drought (none in the Factory data), `IntimidatePrevented` (needs a Clear Body / Hyper Cutter foe), Trace copying an Intimidate-style ability, an Intimidate switch-in into a double fainted turn, the opponent personality mismatch above, and the switch ON / faint ON residuals; #222 switch / send-in animation timing is untouched.
