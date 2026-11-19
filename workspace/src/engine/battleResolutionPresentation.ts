@@ -1263,9 +1263,17 @@ function actionTransitionPauseFrames(
       anchor = event;
       break;
     }
+    // lse4: a lead-class Scene ON body that prints nothing after its animation (Wish): the release row is the animation's own, one row after its execution.
+    if (kind === "animation" && event.payload.animationId === "MOVE_ANIMATION") {
+      const presentedBody = commands.find((command) => command.type === "move-animation" && command.eventSequence === event.sequence);
+      if (presentedBody?.type !== "move-animation" || (presentedBody.timing.bodyLeadFrames ?? 0) <= 0) return null;
+      anchor = event;
+      break;
+    }
   }
   if (anchor === null) return null;
   let anchorExecution = anchor.provenance!.instructionExecution;
+  if (anchor.payload.kind === "animation") anchorExecution += 1;
   if (anchor.payload.kind === "message") {
     if (anchor.payload.messageId === "STRINGID_USEDMOVE" || anchor.payload.messageId === "STRINGID_EMPTYSTRING3") return null;
     const following = BATTLE_SCRIPT_PROGRAM.instructions[anchor.provenance!.programCounter + 1];
@@ -1729,6 +1737,19 @@ const LEAD4_S_LEAD_MOVE_IDS: ReadonlySet<number> = new Set([
   104, 182, 113, 240, 184, 108, 201, 204, 219, 266, 28, 241, 213, 97, 334, 230, 151, 133, 258, 14, 203, 197, 349, 254, 215, 107, 281, 180, 288, 195, 115, 103,
   277, 178, 43, 39, 148, 106, 275, 112, 321, 259, 319, 271, 339, 294, 272, 50, 269, 116,
 ]);
+/**
+ * lse4 (docs/hpd1-hp-hold.md lse3 table): Revenge 279 and Absorb 71 join the shape-A class (lead 5, gap 4). Absorb's accepted window is 2 rows short of the ROM's len + 1 (`LSE4_WINDOW_SHORT_ROWS`).
+ */
+const LSE4_SHAPE_A_MOVE_IDS: ReadonlySet<number> = new Set([279, 71]);
+/**
+ * lse4 "gap-print": the lead is the kernel counter, the rows after the body are `T = 2 + gap - pre - post + s` with the ROM gap of the next command: a print (`printfromtable` / `printstring`) is
+ * Delta + 1 (Recycle 3, the Razor Wind charge turn 7), any other next command is shape A (gap 4). Recycle 278, Razor Wind 13 (both turns).
+ */
+const LSE4_GAP_PRINT_MOVE_IDS: ReadonlySet<number> = new Set([278, 13]);
+/** lse4 "lead-only": a body with no visible print after it (the ROM's gap is the generic action transition, played by `actionTransitionPauseFrames`): Wish 273. */
+const LSE4_LEAD_ONLY_MOVE_IDS: ReadonlySet<number> = new Set([273]);
+/** lse4: rows the accepted adapter window is short of the ROM's `len + 1` (`s`): Absorb (script runs 2 rows past the window), Razor Wind (len = live, both turns). Added to the rows after the body. */
+export const LSE4_WINDOW_SHORT_ROWS: ReadonlyMap<number, number> = new Map([[71, 2], [13, 1]]);
 /** The lead the S bodies' sound clock was calibrated on (the generic move-body clock, AGE_TO_SOUND_ROWS = 7). */
 const LEAD4_SOUND_CLOCK_LEAD = 7;
 /** Per-body clock leads (ROM minus ours on the 7 clock: Smokescreen / Scary Face / Metal Sound -2, Sweet Scent -3 in the aud242 fixtures; Double Team, 98 of 190 T2 SEs, +2 before the shift is -4): their SEs sit closer to the print release. */
@@ -1746,13 +1767,15 @@ export function lse2BodySoundAgeShift(moveId: number, bodyLeadFrames: number | u
  * (`liveMoveHitTailRows`); "status-tail": the sta5 script-tail table; "lse2": the lse2 lead-first status bodies; "lead-table": the hpd4 bodies with explicit tails.
  * Every consumer asks one of the predicates below instead of testing its own id set, so a batch widens one class.
  */
-export type BodyLeadRule = "lead-table" | "shape-a" | "status-tail" | "lse2" | "s-lead";
+export type BodyLeadRule = "lead-table" | "shape-a" | "status-tail" | "lse2" | "s-lead" | "gap-print" | "lead-only";
 const BODY_LEAD_RULE: ReadonlyMap<number, BodyLeadRule> = new Map<number, BodyLeadRule>([
   ...HPD4_BODY_LEAD_MOVE_IDS.map((id): [number, BodyLeadRule] => [id, "lead-table"]),
-  ...[...HPD8_SHAPE_A_MOVE_IDS, ...LEAD2_SHAPE_A_MOVE_IDS, ...LEAD3_SHAPE_A_MOVE_IDS].map((id): [number, BodyLeadRule] => [id, "shape-a"]),
+  ...[...HPD8_SHAPE_A_MOVE_IDS, ...LEAD2_SHAPE_A_MOVE_IDS, ...LEAD3_SHAPE_A_MOVE_IDS, ...LSE4_SHAPE_A_MOVE_IDS].map((id): [number, BodyLeadRule] => [id, "shape-a"]),
   ...[...STA5_STATUS_BODY_TAIL_ROWS.keys()].map((id): [number, BodyLeadRule] => [id, "status-tail"]),
   ...[...LSE2_BODY_LEAD_MOVE_IDS].map((id): [number, BodyLeadRule] => [id, "lse2"]),
   ...[...LEAD4_S_LEAD_MOVE_IDS].map((id): [number, BodyLeadRule] => [id, "s-lead"]),
+  ...[...LSE4_GAP_PRINT_MOVE_IDS].map((id): [number, BodyLeadRule] => [id, "gap-print"]),
+  ...[...LSE4_LEAD_ONLY_MOVE_IDS].map((id): [number, BodyLeadRule] => [id, "lead-only"]),
 ]);
 /** The body's lead is presented as `bodyLeadFrames` (not carried in `scriptTailRows`). */
 export function bodyLeadRuleApplies(moveId: number): boolean {
@@ -1765,7 +1788,13 @@ export function bodyHitTailRuleApplies(moveId: number): boolean {
 /** The lead-first body keeps the audited hit-tail / status-tail composition (the render effect's age hold). */
 export function bodyLeadTailCompositionApplies(moveId: number): boolean {
   const rule = BODY_LEAD_RULE.get(moveId);
-  return rule === "shape-a" || rule === "status-tail" || rule === "s-lead";
+  return rule === "shape-a" || rule === "status-tail" || rule === "s-lead" || rule === "gap-print";
+}
+export function bodyGapPrintRuleApplies(moveId: number): boolean {
+  return BODY_LEAD_RULE.get(moveId) === "gap-print";
+}
+export function bodyLeadOnlyRuleApplies(moveId: number): boolean {
+  return BODY_LEAD_RULE.get(moveId) === "lead-only";
 }
 export function bodySLeadRuleApplies(moveId: number): boolean {
   return BODY_LEAD_RULE.get(moveId) === "s-lead";
@@ -1787,7 +1816,9 @@ function moveAnimationScriptLeadTiming(
   for (let i = index - 1; i >= 0; i -= 1) {
     const candidate = events[i]!;
     const payload = candidate.payload;
-    if (payload.kind !== "message" || payload.messageId !== "STRINGID_USEDMOVE") continue;
+    const chargeOpener = payload.kind === "message" && payload.messageId === "STRINGID_EMPTYSTRING3"
+      && events[index]!.provenance?.sourceLabel === CHARGE_TURN_SCRIPT && candidate.provenance?.sourceLabel === CHARGE_TURN_SCRIPT;
+    if (payload.kind !== "message" || (payload.messageId !== "STRINGID_USEDMOVE" && !chargeOpener)) continue;
     const used = instructionExecutionOf(candidate);
     const programCounter = candidate.provenance?.programCounter;
     if (programCounter === undefined || animation <= used) return {};
@@ -1795,7 +1826,7 @@ function moveAnimationScriptLeadTiming(
       const waitLead = animation - (used + 1);
       return waitLead > 0 ? { scriptLeadFrames: waitLead } : {};
     }
-    if (presentedSinceUsed === null || !bodyLeadRuleApplies(moveId) || events[index]!.provenance?.sourceLabel === CHARGE_TURN_SCRIPT) return {};
+    if (presentedSinceUsed === null || !bodyLeadRuleApplies(moveId) || (events[index]!.provenance?.sourceLabel === CHARGE_TURN_SCRIPT && !bodyGapPrintRuleApplies(moveId))) return {};
     const lead = animation - (used + 1) - presentedSinceUsed;
     return lead > 0 ? { bodyLeadFrames: lead } : {};
   }
@@ -1803,6 +1834,8 @@ function moveAnimationScriptLeadTiming(
 }
 
 const SCRIPT_TAIL_BETWEEN_OPCODES: ReadonlySet<string> = new Set(["B_SCR_OP_WAITANIMATION", "B_SCR_OP_SETBYTE", "B_SCR_OP_SETGRAPHICALSTATCHANGEVALUES"]);
+// lse4: the first-charging-turn script (orword HITMARKER_CHARGING, setbyte, seteffectprimary, copyarray) between the animation and its print.
+const CHARGE_TURN_BETWEEN_OPCODES: ReadonlySet<string> = new Set([...SCRIPT_TAIL_BETWEEN_OPCODES, "B_SCR_OP_ORWORD", "B_SCR_OP_SETEFFECTPRIMARY", "B_SCR_OP_COPYARRAY"]);
 const SCRIPT_TAIL_NEXT_OPCODES: ReadonlySet<string> = new Set([
   "B_SCR_OP_PLAYSTATCHANGEANIMATION", "B_SCR_OP_PLAYANIMATION", "B_SCR_OP_PRINTFROMTABLE", "B_SCR_OP_PRINTSTRING",
 ]);
@@ -1824,8 +1857,18 @@ function moveAnimationScriptTailTiming(
   const attack = events[index]!;
   const attackExecution = attack.provenance?.instructionExecution;
   const attackPc = attack.provenance?.programCounter;
+  const chargeTurn = attack.provenance?.sourceLabel === CHARGE_TURN_SCRIPT;
+  if (chargeTurn && bodyGapPrintRuleApplies(moveId)) {
+    for (let i = index - 1; i >= 0; i -= 1) {
+      const candidate = events[i]!;
+      if (candidate.payload.kind === "message" && candidate.payload.messageId === "STRINGID_EMPTYSTRING3" && candidate.provenance?.sourceLabel === CHARGE_TURN_SCRIPT) {
+        usedExecution = instructionExecutionOf(candidate);
+        break;
+      }
+    }
+  }
   if (usedExecution === null || presentedSinceUsed === null || attackExecution === undefined || attackPc === undefined
-    || attack.provenance?.sourceLabel === CHARGE_TURN_SCRIPT) return {};
+    || (chargeTurn && !bodyGapPrintRuleApplies(moveId))) return {};
   let next: BattleKernelSemanticEvent | undefined;
   for (let following = index + 1; following < events.length; following += 1) {
     const candidate = events[following]!;
@@ -1843,7 +1886,7 @@ function moveAnimationScriptTailTiming(
   if (nextPc - attackPc !== nextExecution - attackExecution || instructions[attackPc + 1]?.opcodeName !== "B_SCR_OP_WAITANIMATION"
     || !SCRIPT_TAIL_NEXT_OPCODES.has(instructions[nextPc]?.opcodeName ?? "")) return {};
   for (let pc = attackPc + 1; pc < nextPc; pc += 1) {
-    if (!SCRIPT_TAIL_BETWEEN_OPCODES.has(instructions[pc]?.opcodeName ?? "")) return {};
+    if (!(chargeTurn ? CHARGE_TURN_BETWEEN_OPCODES : SCRIPT_TAIL_BETWEEN_OPCODES).has(instructions[pc]?.opcodeName ?? "")) return {};
   }
   const lead = attackExecution - usedExecution - 1 - presentedSinceUsed;
   if (lead < 0) return {};
@@ -1858,7 +1901,9 @@ function commandsPresentedSinceUsedPrint(
   field: BattleResolutionDisplayedField,
 ): number | null {
   const opener = openerIndex === null ? undefined : events[openerIndex];
-  if (opener?.payload.kind !== "message" || opener.payload.messageId !== "STRINGID_USEDMOVE") return null;
+  if (opener?.payload.kind !== "message"
+    || (opener.payload.messageId !== "STRINGID_USEDMOVE"
+      && !(opener.payload.messageId === "STRINGID_EMPTYSTRING3" && opener.provenance?.sourceLabel === CHARGE_TURN_SCRIPT))) return null;
   let rows = 0;
   for (const command of since) {
     if (command.type !== "stat") return null;

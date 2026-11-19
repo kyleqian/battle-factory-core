@@ -10,7 +10,7 @@ import {
   isWeatherContinuesAnimation, WEATHER_CONTINUES_BODY_ROWS, WEATHER_CONTINUES_LAUNCH_LEAD_ROWS, WEATHER_CONTINUES_MOVE_IDS,
   STA5_STATUS_BODY_TAIL_ROWS,
   lse2BodySoundAgeShift,
-  bodyHitTailRuleApplies, bodyLeadTailCompositionApplies, bodyStatusTailRuleApplies, bodyLse2RuleApplies, bodySLeadRuleApplies,
+  bodyHitTailRuleApplies, bodyGapPrintRuleApplies, LSE4_WINDOW_SHORT_ROWS, bodyLeadTailCompositionApplies, bodyStatusTailRuleApplies, bodyLse2RuleApplies, bodySLeadRuleApplies,
 } from "./battleResolutionPresentation.ts";
 import type { LiveMoveSpriteAllocatorInput, LiveMoveSpriteOrderInput } from "./liveMoveSpriteAllocator.ts";
 import type { LiveMoveBattlerX2Input } from "./liveBattlerX2History.ts";
@@ -1603,9 +1603,14 @@ export function liveMoveHitTailRows(command: Extract<BattleResolutionPresentatio
   if ((command.timing.bodyLeadFrames ?? 0) === 0) return liveSubstituteSwapApplies(request, field) === true ? 0 : LIVE_MOVE_LEADLESS_TAIL_ROWS.get(request.moveId) ?? 0;
   const table = HPD4_BODY_TAIL_ROWS.get(request.moveId) ?? STA5_STATUS_BODY_TAIL_ROWS.get(request.moveId) ?? LSE2_BODY_TAIL_ROWS.get(request.moveId);
   if (table !== undefined) return table;
-  if (!bodyHitTailRuleApplies(request.moveId) || liveSubstituteSwapApplies(request, field) === true) return 0;
+  const gapPrint = bodyGapPrintRuleApplies(request.moveId);
+  if (!(bodyHitTailRuleApplies(request.moveId) || gapPrint) || liveSubstituteSwapApplies(request, field) === true) return 0;
   const rows = liveMoveUniversalRows(request, field);
-  return Math.max(0, HPD8_SHAPE_A_ROWS_AROUND_BODY - rows.pre - rows.post);
+  const windowShort = LSE4_WINDOW_SHORT_ROWS.get(request.moveId) ?? 0;
+  // lse4: T = 2 + gap - pre - post + s; the gap of a print is Delta + 1 (`scriptTailRows` = Delta + 2), any other next command is shape A (gap 4).
+  const scriptTailRows = command.timing.scriptTailRows ?? 0;
+  const aroundBody = gapPrint && scriptTailRows > 0 ? scriptTailRows + 1 : HPD8_SHAPE_A_ROWS_AROUND_BODY;
+  return Math.max(0, aroundBody - rows.pre - rows.post) + windowShort;
 }
 
 /**
