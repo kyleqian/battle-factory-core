@@ -768,3 +768,71 @@ Base `26ed71da7`. The supervisor's full suite on `4839b5b80` had 9 tests in 7 fi
 | `trn178ActionTransition` (Scene ON Rest anchor) | -3 -> -14 | the same re-pin hpf2 made in `trn181ActionTransitionOn` / `ont193SceneOnTails` (model value: bars 15 rows vs the ROM lab's 8); trn178 duplicates that assertion |
 
 Open from this step: the turn-end command's length when the next turn is a locked continuation (Razor Wind: 5 short); Absorb / Revenge / Counter body offsets (move-body leads); a zero-change drain bar costs 5 app frames vs 1 ROM frame (`aud242e-absorb-player-on`: ROM next rise +47 vs app 46 holds the hit -> drain; the drain -> print part was not isolated).
+
+## lse3: the hpd7 table for the open bodies (measurement only, `src/` / `tests/` unchanged)
+
+Base `f9cdc9c47`. Scene ON (:8012) ROM RAM probes (`tools/integration/hpd2Probe.py`, per-frame ptr / exec / anim / comm / act / ctl / hp) against the app per-command timeline (`tools/integration/hpd4Cmds.ts`). hpd7 method: R = end of the last controller-exec run before `ex = A - 3` (the used print's release); L = ex - R; R->A = A - R; len = `gAnimScriptActive` rows; H = first exec rise after the window; gap = H - (A + len) (normally 4); R->H = H - R; app rows = E - S (the app's move-animation command start to the next command start); d = (R->H) - (E - S) (ROM longer = positive). All labs are existing scenarios except the four `lse3-*` stages (Wish; Pound / Scratch / Tackle on the opponent's side, via a temporary `aud241bStage` entry in `appTrace.ts`, removed again; the scenarios are in the evidence dir). Evidence (git-ignored): `.integration/evidence/lse3/{scen,ram,traces,app}`.
+
+### The table
+
+| move (lab) | ROM L | R->A | len | gap | R->H | app rows | d | shape | proposed landing |
+|---|---|---|---|---|---|---|---|---|---|
+| Absorb 71 (`aud242e-absorb-player`) | 5 | 8 | 205 | 4 | 217 | 207 (pre 3, idle 10, live 194) | **+10** | A | bodyLead 5, adapter idle + live 204 -> 206 (len + 1), tail 3; the hit bar then lands +11 earlier, closing SE238 included (hpf3's +11) |
+| Revenge 279 (`aud242p-revenge-player`) | 5 | 8 | 144 | 4 | 156 | 148 (pre 3, live 145) | **+8** | A | bodyLead 5, tail 3 (live 145 = len + 1 already) |
+| Counter 68 (`aud242e-counter-player`) | 4 | 7 | 87 | 4 | 98 | 93 (pre 3, live 88, post 2) | **+5** | A | bodyLead 4, tail 1 (T = 6 - pre 3 - post 2) |
+| Recycle 278 (`aud260-recycle-player`) | 2 | 5 | 202 | **3** | 210 | 206 (pre 3, live 203) | **+4** | A, gap 3 | bodyLead 2, tail 2 (T - 1 for the gap 3; the existing `tailRows` 6 is the action-transition anchor, not this tail) |
+| Razor Wind 13, unleash (`aud261-razorwind-player`, 2nd window) | 5 | 8 | 72 | 4 | 84 | 75 (pre 3, live 72) | **+9** | A, live = len (1 short) | bodyLead 5, live 73, tail 3 |
+| Razor Wind 13, charge turn (1st window) | 1 | 4 | 45 | 4 | 56 | 48 (live 45) | +8 | A, live = len | bodyLead 1, live 46, tail 3 + the 4 "whirlwind" print rows (not a body lead) |
+| Mega Drain 72 (`aud242e-megadrain-player`) | 5 | 8 | 217 | 4 | 229 | 221 (pre 3, live 218) | **+8** | A | bodyLead 5, tail 3 |
+| Giga Drain 202 (`aud242e-gigadrain-player`) | 5 | 8 | 229 | 4 | 241 | 241 (bodyLead 5, pre 3, live 230) | **0** | A, already exact | none (hpf2 closed the drain-message hold) |
+| Wish 273 (`lse3-wish-player`) | 2 | 5 | 270 | **13** | 288 | 274 (pre 3, live 271) | **+14** | C (gap 13) | bodyLead 2 + 12 post rows (see the trace) |
+| Pound 1, opponent (`lse3-pound-opp`) | 5 | 8 | 33 | 4 | 45 | 32 (generic pause) | **+13** | not a live adapter | new adapter case: bodyLead 5, live 34, tail 3 |
+| Scratch 10, opponent (`lse3-scratch-opp`) | 5 | 8 | 32 | 4 | 44 | 32 (generic pause) | **+12** | not a live adapter | bodyLead 5, live 33, tail 3 |
+| Tackle 33, opponent (`lse3-tackle-opp`) | 5 | 8 | 41 | 4 | 53 | 32 (generic pause) | **+21** | not a live adapter | bodyLead 5, live 42, tail 3 |
+
+Every proposed landing is arithmetic on the rule `R->H = bodyLead + pre 3 + live + post + tail`, which reproduces the ROM R->H on all ten rows (Mega 5 + 3 + 218 + 0 + 3 = 229, Counter 4 + 3 + 88 + 2 + 1 = 98, Revenge 5 + 3 + 145 + 3 = 156, Recycle 2 + 3 + 203 + 2 = 210, Razor Wind 5 + 3 + 73 + 3 = 84, Absorb 5 + 3 + 206 + 3 = 217, Pound 5 + 3 + 34 + 3 = 45, Scratch 5 + 3 + 33 + 3 = 44, Tackle 5 + 3 + 42 + 3 = 53). **None of it was run**: this step changes no source.
+
+### Are Pound / Scratch / Tackle live adapters with the lead? No
+
+`liveMoveAnimationDuration` returns null for ids 1 / 10 / 33 (no adapter case), they are not in `HPD8_SHAPE_A_MOVE_IDS` / `BODY_LEAD_AUDITED_MOVE_IDS`, and the timeline shows `move=1 ... pre=0 live=null` (and 10, 33): the move-animation command is the generic `SCENE_OFF_MOVE_PAUSE_FRAMES = 32` with no lead. The ROM windows are 33 / 32 / 41 rows (Pound hitsplat + shake; Scratch has an extra `waitforvisualfinish`; Tackle a lunge + `delay 6` + hitsplat) with the same lead 5 / R->A 8 / gap 4 as the other shape A bodies, so the +13 / +12 / +21 are the missing lead (8) + gap (4) + the window length difference (+1 / 0 / +9). This is where Revenge's +13..+15 (hpf3: the opponent's Pound hit) comes from: the opponent's Pound is 13 rows short, and it is side-agnostic by construction (the opponent labs are measured here; a player-side Pound / Tackle lab was not run). Moves that get a live adapter change every Scene ON battle that uses them, so this wants the census, not just a lab.
+
+### Wish's 13-row gap, per frame (`lse3-wish-player-on`, ROM RAM)
+
+| frame | ptr | exec | act | event |
+|---|---|---|---|---|
+| 318..321 | `BattleScript_EffectWish+0x9` (`waitanimation`) | 1 | 10 | window rows (A 52 + len 270 = 322) |
+| 322 | same | 1 | 10 | `gAnimScriptActive` falls (gap row 0) |
+| 323 | same | **0** | 10 | exec falls: `waitanimation` done |
+| 324 | `EffectWish+0xb` | 0 | 10 | `goto BattleScript_MoveEnd` |
+| 325 | `MoveEnd+0x0` | 0 | 10 | |
+| 326..328 | `MoveEnd+0x6` / `+0x8` | 0 | 10 | `end` reached |
+| 329 | `MoveEnd+0x8` | 0 | **11** | TRY_FINISH |
+| 330 | same | 0 | **12** | FINISHED |
+| 331 | same | 0 | **0** | back to USE_MOVE: the next battler's action |
+| 332..334 | next script (`EffectDisable+0x1b` / `EffectLevelDamage+0x1..+0x7`, the Seismic Toss prologue; the map has several overlapping labels) | 0 | 10 | |
+| 335 | `EffectLevelDamage+0x9` | **2** | 10 | exec rises: the opponent's "used SEISMIC TOSS!" print starts (H) |
+
+The cause is the generic action transition, not a Wish body gap: `BattleScript_EffectWish` ends at `waitanimation; goto BattleScript_MoveEnd`, so exec is low 323 -> 335 = **12 rows** (13 from the window's fall) of `MoveEnd` + act 11 / 12 / 0 + the next script's pre-print rows. A body that ends with a visible print (shape A) hides these rows behind the print; Wish has none. In the app `actionTransitionPauseFrames` returns null when the anchor is the used print (here: the Wish window is the last command), so Scene ON has **no pause**: the app's next command (sprite-visibility 321, message 322) starts 13 rows before the ROM's 335. Landing: bodyLead 2 (L = 2) + a ~12-row action transition anchored on the Wish live window (the lse1 "L 2 + 12 post rows" proposal is now traced).
+
+### Razor Wind's turn-end rows (`aud261-razorwind-player-on`, between the opponent's Seismic Toss and the unleash)
+
+ROM: bar change at 510 (hp 105 -> 93), `MoveEnd+0x0` 516, `+0x6` 517..519, `+0x8` 520, act **11 / 12 / 0** at 521 / 522 / 523, then **523..535 = 13 rows with the pointer frozen at `MoveEnd+0x8`**: the action-selection state of a locked continuation (no menu), then the script: `EffectRazorWind+0x0` 536, `TwoTurnMovesSecondTurn+0x0..0x18` 537..542, `HitFromAtkCanceler` 543, `HitFromAtkString` 544, **exec rise (the used print) 545**, fall 569, anim window 577 (R 569, L 5).
+
+App: hp command ends 511, sprite-visibility 511 / 512, **turn-end 513 (8 rows), next-command-handoff 521 (14 rows), message 535**, move-animation 558.
+
+Measured as MoveEnd receipt -> the print's exec rise, the ROM has 27 rows and the app 22: **the app is 5 short** (about 5-6 depending on the anchor; the unleash's own +9 above is separate and independent). The missing rows are the locked-continuation action selection (ROM 523..535) plus the script's pre-print rows (536..544), neither of which exists in the app's turn-end (8) + handoff (14) constants, which were tuned on menu-driven turns. The charge turn's own turn-end (ROM `MoveEnd` 187 -> act 0 at 194 -> exec rise 198, app message 194) is the ordinary 4-row offset and is fine. Proposal: when the next battler's action is a locked continuation, lengthen the handoff by 5 (not measured on a second lab: a Rollout lab, `aud242o-rollout5-player-on`, was captured as a candidate, its ROM Rollout windows show the same `MoveEnd` -> next-script structure, but the continuation turns there are the same battler's own and it was not analysed further).
+
+### Sound clock note
+
+Counter's and Recycle's SE residuals in hpf3 (-2 / -4) are the calibrated K = 7 (`LSE2_SOUND_CLOCK_LEADS` / `lse2BodySoundAgeShift`) minus how early the window sits: Counter's window is 5 rows earlier than the app's (bodyLead 4 + gap), Recycle's 3. After the body leads above land, those residuals should become 7 - 7 = 0 only if the SE shift is applied once per body; settle it in the landing run, not by re-pinning first.
+
+### Proposed landing for the next run (one commit per group, census after each)
+
+1. **Plain shape A: Mega Drain 72, Counter 68 (bodyLead 4, tail 1), Revenge 279** into `HPD8_SHAPE_A_MOVE_IDS` with the leads above (each +8 / +5 / +8 to ROM exact). Re-pin the hpf3 Revenge and Counter rows.
+2. **Recycle (bodyLead 2, tail 2, gap 3) and Razor Wind unleash (bodyLead 5, live 73, tail 3)**; Absorb separately (bodyLead 5, idle + live 204 -> 206 needs the adapter's idle 10 re-derived first; its +10 persists to the next action).
+3. **Wish: bodyLead 2 + the ~12-row action transition** (extend `actionTransitionPauseFrames` to accept a live-window anchor with no print). Needs the Scene ON census.
+4. **Pound / Scratch / Tackle live adapter cases** (windows 33 / 32 / 41) with bodyLead 5, tail 3: the widest blast radius (every Scene ON battle with those moves), land last with the 0..99 census and T2.
+5. **Locked-continuation handoff +5** after a second lab confirms it.
+6. Giga Drain: nothing.
+
+Not done: the 75-minute brief's "npm test green" line was overridden by the step brief (no tests were run, nothing under `src/` or `tests/` changed); `PROGRESS.md` / `ISSUES.md` untouched.
