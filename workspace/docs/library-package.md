@@ -136,6 +136,10 @@ candidates when known). First-battle download: ~2112 KiB -> ~1700 KiB brotli (`d
   same `spriteBase` (`${spriteBase}/anim/<asset>.txt`) when a Scene ON battle's moves need them; the loop holds (no tick) while one is pending.
   `animation-assets` drops from 237 to 27 KiB brotli; `ENGINE_BUILD` does not move (`docs/dl3-per-species-pictures.md`, dl4).
 
+## Battle messages that wait for A or B (btn1, no API change)
+
+**For the website: no option or export changes; what changes is play.** In a Factory battle the game's own text printer holds some messages until the player presses A or B (START does nothing), as the ROM does; before, they moved on by themselves after about 24 frames. Affected messages: "The SUBSTITUTE took damage ..." and "... SUBSTITUTE faded!", "... was dragged out!" (Roar / Whirlwind), the "can't use ... after the TAUNT / is disabled / ..." family, Trick / Switcheroo when both Pokemon hold items (two pages), Static's paralysis text, and the ability-blocking messages ("... prevents ... from working!"). A host that already forwards A and B (keyboard, touch, gamepad) needs nothing; a host that auto-plays battles must press A or B at these prompts. `ENGINE_BUILD` moves, so a trace saved before this build does not resume (`docs/subp1m-battle-text-pause.md` section 6).
+
 ## Sound (additive API change, aud245)
 
 **For the website: this is an additive change to the contract; nothing existing moves.** `FactoryGameOptions` gains

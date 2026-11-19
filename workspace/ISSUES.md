@@ -43,14 +43,13 @@ exclusions are superseded. Unrelated expansions stay parked.
 - Found 11-18 while checking a reload report: music after a page reload is fine (the song comes back mid-song within about
   1 s, Chrome / Chromium / WebKit, live site); the stale line in `docs/library-package.md` that said otherwise is corrected.
 
-## #223 — Battle messages ending in `\p` / `\l` must wait for A or B (subp1m, 2026-11-19)
+## #223 — Battle messages ending in `\p` / `\l`: open remainder of btn1 (2026-11-19)
 
-`docs/subp1m-battle-text-pause.md`: in a Factory (frontier) battle the ROM holds a message ending in `\p`, `\l` or `{PAUSE_UNTIL_PRESS}` until a NEW A or B press (`text.c:865-882`;
-`BattlePutTextOnWindow` auto-advances only link / recorded battles). ROM sweep on the Substitute-hit lab: no press = the battle stalls (>= 2600 rows); release = press + 3 rows; START ignored;
-presses while the text still types are ignored. Our engine moves on after its 24-row floor for: Substitute damaged / faded, Roar's "dragged out", the Disable / Torment / Taunt / Imprison
-"can't use" texts, the Trick / Switcheroo both-items text, Static's paralysis text (`\l`, releases at +33 for an A at 600: unexplained); the orchestrator accepts only A (the ROM: A or B).
-Not audited: the ability-blocking strings (`PKMNPREVENTSUSAGE`, `PREVENTEDFROMWORKING`, `PKMNSXPREVENTSYSZ`). Landing: a button-wait message command for these strings in both scenes
-(the soak / play:random drivers must press A), and mind the turn-end rule near `battleResolutionPresentation.ts:5609`. Changes how the game plays (the player presses A there): name it for the website.
+Landed by btn1 (`docs/subp1m-battle-text-pause.md` section 6): every template-derived `\p` / `\l` / `PAUSE_UNTIL_PRESS` gate waits for a new A or B in both scenes (Substitute damaged / faded, dragged out, `MoveUsedIs*`, Trick both items, Static, the ability-blocking strings); START is a no-op. Open:
+- The scroll after a `\l` (`PROMPT_SCROLL_ROWS = 5`) is fitted to Static's single measurement (A at 600 -> 633) and applied to the ability-blocking strings without a ROM window; the `\p` clear delay between the Trick pages (modelled 0) is unmeasured.
+- Item 6: the Substitute fade (engine 106 rows, ROM observed ~111 on `subp1m-subfade`) is not ROM-measured against the engine.
+- The `typedRows + 1` accept row and the release delay after a press are the existing button-message model; a +/-1 row comparison with the ROM's print + 38 / press + 3 is not separated (no `npm run compare` stage exists for the Substitute-hit / Roar labs).
+- For the website: these messages now need the player's A / B (`docs/library-package.md`, "Battle messages that wait for A or B").
 
 ## #221 — Lobby RNG cursor: harness / unmeasured routes (lbw1 / lbw2 / lbw3, 2026-11-15)
 
