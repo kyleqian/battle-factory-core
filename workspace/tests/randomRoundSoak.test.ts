@@ -438,7 +438,9 @@ describe("random round soak driver (green milestone pin)", () => {
       // Lobby's clock): frames + render calls, 41_048 (box) / 41_332 (Mac) -> 41_151, renderCalls 2_892 / 2_920 -> 2_898; same battle 7, turn 3, end state, diagnostics.
       // pau4 (the battle-start Intimidate / Trace entry scripts presented: the blocks run between the player release and the first menu, per battle with an
       // entry lead): frames + render calls, 41_151 -> 43_437, renderCalls 2_898 -> 3_045; same battle 7, turn 3, end state, diagnostics.
-      frames: 43_437,
+      // merge of pau4 / btn1 / pau5 / hpf5 (pin1; hpf5's tick / wrap / weather / Substitute hp lengths, docs/hpd1-hp-hold.md "hpf5"): frames + render calls,
+      // 43_437 -> 43_336, renderCalls 3_045 -> 3_042; same battle 7, turn 3, end state, diagnostics.
+      frames: 43_336,
       battle: 7,
       turn: 3,
       diagnostics: {
@@ -450,7 +452,7 @@ describe("random round soak driver (green milestone pin)", () => {
         terminalOutcome: "roundWon",
         terminalRecordMenuInputReadyReached: true,
         terminalRecordChoice: "no",
-        renderCalls: 3_045,
+        renderCalls: 3_042,
       },
     });
     expect(second).toEqual(first);
@@ -533,7 +535,7 @@ describe("random round soak driver (green milestone pin)", () => {
     expect(result.frames).toBeGreaterThan(31_771);
   });
 
-  it("ISSUES #89: seed 28's mid-turn Baton Pass openpartyscreen halt resumes through the forced party selector", () => {
+  it("ISSUES #89: seed 7's mid-turn Baton Pass openpartyscreen halt resumes through the forced party selector", () => {
     // History: seed 27 (full policy) selected Baton Pass mid-turn and used to
     // crash at round 1 battle 1 turn 10, frame 30798, on an unimplemented
     // BattleScript_EffectBatonPass / B_SCR_OP_OPENPARTYSCREEN machine-barrier
@@ -654,7 +656,11 @@ describe("random round soak driver (green milestone pin)", () => {
     //
     // btn1 (battle strings with a `\p` / `\l` gate wait for a new A / B press; the exploring policy's presses land on new phases): seed 4 no longer commits Baton Pass.
     // Re-scanned full-policy seeds 0..29 (tools/soak/batonPassSearch.ts --seeds 0:30 --parallel 3): only 12 is a candidate (Baton Pass commits 4, first commit 32465, halt 32505 on MAWILE in battleIndex 0, one Lobby new challenge).
-    const result = runSeed(12, {
+    //
+    // merge of pau4 / btn1 / pau5 / hpf5 (pin1; the exploring presses land on new phases again): seed 12 no longer halts (4 commits, none a halt).
+    // Re-scanned full-policy seeds 0..29 (tools/soak/batonPassSearch.ts --seeds 0:30 --parallel 3): candidates 7, 15, 16, 25, 26. Seed 7 is the lowest
+    // (Baton Pass commits 4, first commit 32227, halt 33039 on MAWILE in battleIndex 0, two Lobby new challenges).
+    const result = runSeed(7, {
       maxFrames: 80_000,
       renderEvery: 0,
       coverage: observer as never,
@@ -973,12 +979,13 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // hpd8 + ais4 merged (26477cf4b; ais4 was pinned on a base without lbw8's Lobby NPC release and hpd8; together they move the exploring presses): 39712 / turn 24 -> 40342 / turn 20; same battle 2 / depth 1 / roundLost.
       // hpf1 (hit -> message / faint-chain / turn-end hp commands are floor-free, ROM-measured): 40342 / turn 20 -> 39622 / turn 24 (exploring presses land on new phases); same battle 2 / depth 1 / roundLost.
       // merge of the box's 2026-11-18 run with the Mac's fixes 44-51: frames only, 39622 -> 39365; same battle 2 / depth 1 / roundLost / turn 24.
-      frames: 39365,
+      // merge of pau4 / btn1 / pau5 / hpf5 (pin1; the exploring presses land on new phases, a new trajectory as at fsw235): 39365 / battle 2 / depth 1 / turn 24 -> 18678 / battle 1 / depth 0 / turn 23; still roundLost.
+      frames: 18678,
       outcome: "OK",
       endState: "roundLost",
-      maxBattleDepth: 1,
-      battle: 2,
-      turn: 24,
+      maxBattleDepth: 0,
+      battle: 1,
+      turn: 23,
     });
     expect(runSeed(1, options)).toMatchObject({
       // msg175: 26878 -> 26810 (shorter used prints); trn178 (the Scene OFF action-transition pause): 26810 -> 27058; same battle / turn / end state.
@@ -1001,12 +1008,13 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // hpf1: 28708 / turn 46 -> 56022 / turn 15 (battle 1 / depth 0 -> battle 3 / depth 2; the exploring presses land on new phases); still roundLost.
       // hpf2: 56022 / turn 15 -> 92558 / turn 27 (battle 3 / depth 2 -> battle 5 / depth 4; the exploring presses land on new phases); still roundLost.
       // btn1 (gated battle strings wait for A / B; the exploring policy presses B at 6%): 92558 / turn 27 -> 95264 / turn 29; same battle 5 / depth 4 / roundLost (seed 0 is unmoved).
-      frames: 95264,
+      // merge of pau4 / btn1 / pau5 / hpf5 (pin1; the exploring presses land on new phases): 95264 / battle 5 / depth 4 / turn 29 -> 111059 / battle 6 / depth 5 / turn 19; still roundLost.
+      frames: 111059,
       outcome: "OK",
       endState: "roundLost",
-      maxBattleDepth: 4,
-      battle: 5,
-      turn: 29,
+      maxBattleDepth: 5,
+      battle: 6,
+      turn: 19,
     });
   });
 
