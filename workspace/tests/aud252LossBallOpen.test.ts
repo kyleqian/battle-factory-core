@@ -21,7 +21,9 @@ const fixture = JSON.parse(readFileSync(new URL("./fixtures/aud252-loss-itemeffe
 // command-start anchors, hpd4) stays on the ROM frame 999 (0), the select SE (the accepted A of the loss message, battleEndSounds, no subtraction) and everything after it follow the command
 // starts: +8, so [0, 1, -7 x6] -> [0, 9, 1 x6] (lead2), then pau5 -1 from the select on (measured by reverting pau5's src: select 1042 -> 1041) -> [0, 8, 0 x6]: the item effect's five SEs and SE_BALL_OPEN land
 // exactly on the ROM (1060 / 1092 / 1124 / 1156 / 1228 / 1410), the select SE is 8 late (ROM 1033, ours 1041; rule off it was exact). Sum |offset| 56 -> 8.
-const DELTAS: Record<string, number[]> = { "1914": [0, 8, 0, 0, 0, 0, 0, 0], "2230": [7, 3, 1, 1, 1, 1, 1, 0] };
+// hcr2c: hcr2's Scene ON action-dispatch hold (u - 2 frames before the first used-move print; seed 1914 u = 6 -> 4, seed 2230 u = 5 -> 3) delays every later row of the turn: seed 1914 [0, 8, 0 x6] -> [3, 12, 4 x6]
+// (the faint SE keeps its 1-tick hit lead, so +3), seed 2230 [7, 3, 1 x5, 0] -> [10, 6, 4 x5, 3] (+3 each). Uniform shifts of rows that were ROM-exact (1914), carried by the presentation hold, not by a sound lead; a general-animation lead of the hold was tried and rejected (T2 mass 24,219 -> 24,863, seed 2230 mixed).
+const DELTAS: Record<string, number[]> = { "1914": [3, 12, 4, 4, 4, 4, 4, 4], "2230": [10, 6, 4, 4, 4, 4, 4, 3] };
 const script = new URL("../tools/integration/soundCensusRomReplay.ts", import.meta.url).pathname;
 
 function engineRows(seed: string, scene: string, setup: unknown): Row[] {
