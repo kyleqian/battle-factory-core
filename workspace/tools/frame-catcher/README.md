@@ -49,7 +49,9 @@ round takes about 2 minutes. Five traces at once (`JOBS=5`) take as long as the 
    - each battle-start transition: the frame that builds the opponent's party is stepped again with a trap at
      `GetSpecialBattleTransition` that sets gRngValue for the engine's transition;
    - each battle's opponent party: personality, IVs, ability bit and stats are patched to the engine's (the ROM builds them with VBlank
-     draws in between, which the engine cannot follow);
+     draws in between, which the engine cannot follow), on the frame the battle transition starts: the build can run over several
+     frames, and a patch on a half-built Pokemon is overwritten when the ROM finishes it. At the first turn the whole record (species,
+     experience, level, HP, stats) is checked against the engine's; a mismatch is logged in the report's set-up list;
    - each battle's first turn: gRngValue and gRandomTurnNumber are written to the engine's on the frame the turn's action selection
      starts. Everything after that in the battle is the ROM's own (Frontier battles draw no VBlank RNG).
 
@@ -69,6 +71,9 @@ round takes about 2 minutes. Five traces at once (`JOBS=5`) take as long as the 
    animation is timing, while a wrong Pokemon, a missing fade or a sprite one tile off is content. The pixels never shown are cut into
    blobs, followed over frames, and grouped across stretches into ranked differences. Sounds: the (kind, id) lists of a stretch are
    aligned in order; an event with no partner is content (an event the other side plays just past the stretch's end is timing).
+
+When a sprite is in a different place on the two sides, check a frame after it has stopped moving: during a walk the two sides pass
+through the same tiles at different moments (the first look at Kyle's Tuber picked a ROM frame mid-walk and missed the one-tile offset).
 
 ## What it cannot compare yet
 

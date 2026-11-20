@@ -436,7 +436,7 @@ def run(engine_dir, out_dir, profile, max_frames):
     patched, rng_written, roll_forced = set(), set(), {}
     transitions = {int(k): v for k, v in (facts.get("transitions") or {}).items()}
     transitions["forced"] = set()
-    sounds, menus, buttons_rle = [], [], []
+    sounds, menus, buttons_rle, action_states = [], [], [], []
     last_menu, last_buttons = None, None
     roll = None  # {battle, value, start}: gRngValue is held at `value` from the GO ON answer until the ROM rolls the trainer
     cap = max_frames if max_frames else int(eng["frames"] * 1.6) + 6000
@@ -485,8 +485,11 @@ def run(engine_dir, out_dir, profile, max_frames):
                 roll = None
             else:
                 o.write_u32(s["gRngValue"], roll["value"])
-        # The opponent party: patched once the ROM has built it (DoSpecialTrainerBattle) and before battle init reads it.
-        if bn in battles and bn not in patched and not rom.in_battle():
+        # The opponent party: patched once the ROM has finished building it and before battle init reads it. DoSpecialTrainerBattle
+        # (battle_tower.c, SPECIAL_BATTLE_FACTORY) builds the three Pokemon and then starts the transition task; the build can run over
+        # several frames (each Pokemon's nature search), so a frame can end with the third one half made (species set, experience and
+        # level not yet): patching then let the ROM finish it on top (t3: Ledian at level-1 stats). The transition task marks the end.
+        if bn in battles and bn not in patched and not rom.in_battle() and transition_task_live(rom) is not None:
             want = battles[bn]
             species = [op["member"]["species"] for op in want["opponents"]]
             if rom.party_species("gEnemyParty") == species and [rom.u16(s["gFrontierTempParty"] + 2 * i) for i in range(3)] == want["opponentSetIds"]:
@@ -507,13 +510,26 @@ def run(engine_dir, out_dir, profile, max_frames):
                                 "engineRng": want["rngAtActionMenu"], "engineTurnNumber": want["randomTurnNumber"], "partyPatched": bn in patched})
                 o.write_u32(s["gRngValue"], want["rngAtActionMenu"])
                 o.write_u16(s["gRandomTurnNumber"], want["randomTurnNumber"])
-                pers = [rom.u32(s["gEnemyParty"] + i * POKEMON_SIZE) for i in range(3)]
-                if pers != [op["personality"] for op in want["opponents"]]:
-                    staging.append({"what": "opponent party is not the engine's at battle start", "battle": bn, "rom": pers,
-                                    "engine": [op["personality"] for op in want["opponents"]]})
+                rom_party, eng_party = [], []
+                for i, op in enumerate(want["opponents"]):
+                    raw = rom.read(s["gEnemyParty"] + i * POKEMON_SIZE, POKEMON_SIZE)
+                    lg, ok = decrypt_mon(raw)
+                    mem = op["member"]
+                    rom_party.append([struct.unpack_from("<I", raw, 0)[0], struct.unpack_from("<H", lg[0], 0)[0] if ok else None,
+                                      struct.unpack_from("<I", lg[0], 4)[0] if ok else None, raw[84], list(struct.unpack_from("<7H", raw, 86))])
+                    eng_party.append([op["personality"], mem["species"], mem["experience"], mem["level"],
+                                      [mem["hp"], mem["maxHP"], mem["attack"], mem["defense"], mem["speed"], mem["spAttack"], mem["spDefense"]]])
+                if rom_party != eng_party:
+                    staging.append({"what": "opponent party is not the engine's at battle start", "battle": bn, "rom": rom_party, "engine": eng_party})
                 rng_written.add(bn)
         m = rom.menu()
         mk = None if m is None else f"{m[0]}|{m[1]}"
+        if mk != last_menu and m is not None and m[0] == "battle.action" and (last_menu or "").split("|")[0] != "battle.action":
+            # the battle state the ROM chooses its turn in (compare: the engine's rulesContext at its action menu)
+            def bm(b):
+                base = s["gBattleMons"] + b * 0x58
+                return [rom.u16(base), rom.u16(base + 0x28), rom.u16(base + 6), [rom.u8(base + 0x18 + i) for i in range(8)], rom.u32(base + 0x4C)]
+            action_states.append([f, bn, rom.u32(s["gRngValue"]), rom.u16(s["gRandomTurnNumber"]), bm(0), bm(1)])
         if mk != last_menu:
             menus.append([f, None if m is None else m[0], None if m is None else m[1]])
             last_menu = mk
@@ -523,7 +539,7 @@ def run(engine_dir, out_dir, profile, max_frames):
     result = {"side": "rom", "profile": profile, "frames": o.frame, "engineFrames": eng["frames"], "seconds": round(time.time() - t0, 1),
               "sound": {"fast": sound.fast, "restepped": sound.restepped}, "staging": staging, "driverLog": log,
               "anchorsMatched": driver.ai, "anchorsTotal": len(plan.anchors), "anchorBinds": driver.binds, "stop": driver.stop_reason,
-              "steerFrames": driver.steer_frames,
+              "steerFrames": driver.steer_frames, "actionMenuStates": action_states,
               "sounds": sounds, "menus": menus, "buttons": buttons_rle}
     (out / "timeline.json").write_text(json.dumps(result))
     print(f"rom: {o.frame} frames, {len(store.index)} distinct pictures, {len(sounds)} sound events, anchors {driver.ai}/{len(plan.anchors)}, "
