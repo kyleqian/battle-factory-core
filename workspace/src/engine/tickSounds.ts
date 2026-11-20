@@ -4,7 +4,8 @@ import { emitBattleEndSounds, emitForfeitEndSounds, emitLossBallOpenSound } from
 import { emitBattleHitSounds, emitDoubleTeamStatsChangeSound } from "./battleHitSounds.ts";
 import { emitBattleStartIntroSounds, emitMidBattleSwitchSounds, emitPartySendOutSounds } from "./battleStartSounds.ts";
 import { playerFaintReplacementSendOutTimingOfSegment } from "./battleResolutionPresentationRender.ts";
-import { emitGeneralAnimSounds, emitMoveAnimSounds, emitStatsChangeSounds } from "./moveAnimSounds.ts";
+import { ENTRY_STATS_CHANGE_SE_AGE, emitGeneralAnimSounds, emitMoveAnimSounds, emitStatsChangeSounds } from "./moveAnimSounds.ts";
+import { factoryBattleStartEntryFrame } from "./factoryBattleStartEntry.ts";
 import type { EngineState } from "./core.ts";
 
 export type TickSoundState = Pick<EngineState, "battleScene" | "factoryRoundBattleOrchestrator">;
@@ -16,6 +17,10 @@ export function emitTickSounds(state: TickSoundState, next: TickSoundState): voi
     emitBattleStartIntroSounds(introBefore, next.factoryRoundBattleOrchestrator?.battleStartIntro ?? null);
   }
   if (soundCollecting()) {
+    // snd3: the battle-start entry scripts (Intimidate's B_ANIM_STATS_CHANGE plays in both scenes) are presented from the intro, not
+    // from battleResolutionPresentation, so their stat SE is emitted from the entry phase's synthetic resolution frame.
+    const entryAfter = next.factoryRoundBattleOrchestrator?.battleStartIntro?.entry;
+    if (entryAfter) emitStatsChangeSounds(factoryBattleStartEntryFrame(entryAfter), ENTRY_STATS_CHANGE_SE_AGE);
     emitPartySendOutSounds(
       state.battleScene?.resolutionOwner?.forcedPartySelect ?? null,
       next.battleScene?.resolutionOwner?.forcedPartySelect ?? null,

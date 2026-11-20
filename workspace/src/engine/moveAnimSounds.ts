@@ -289,15 +289,24 @@ export function variantOf(move: number, turn: number, attackerSide: 0 | 1, { pic
 
 /** StatsChangeAnimation_Step2 plays its SE (battle_anim_utility_funcs.c:561-564) on this stats-change command age. */
 export const STATS_CHANGE_SE_AGE = 7;
+/**
+ * snd3 (docs/snd3-sweep-sounds.md): the battle-start entry script's stats-change command (pau4, BattleScript_IntimidateActivatesEnd3's
+ * `playanimation BS_TARGET, B_ANIM_STATS_CHANGE`) starts on the ROM's gAnimScriptActive edge + 1 and its banner is ROM-exact, so Step2's SE
+ * (edge + 4, three frames before the banner's first frame) is command age 3 (ROM lab sta6m-intimp-off: SE 245 at app frame 732, command 729).
+ */
+export const ENTRY_STATS_CHANGE_SE_AGE = 3;
 const SE_M_STAT_INCREASE = 239;
 const SE_M_STAT_DECREASE = 245;
 const SOUND_PAN_ATTACKER_VALUE = -64;
 
-/** General_StatsChange's SE (both scenes): SE_M_STAT_INCREASE / DECREASE with BattleAnimAdjustPanning2(SOUND_PAN_ATTACKER) for the animated battler. */
-export function emitStatsChangeSounds(after: BattleResolutionPresentationState | null): void {
+/**
+ * General_StatsChange's SE (both scenes): SE_M_STAT_INCREASE / DECREASE with BattleAnimAdjustPanning2(SOUND_PAN_ATTACKER) for the animated battler.
+ * `seAge`: the command age of the SE (the battle-start entry phase passes ENTRY_STATS_CHANGE_SE_AGE).
+ */
+export function emitStatsChangeSounds(after: BattleResolutionPresentationState | null, seAge = STATS_CHANGE_SE_AGE): void {
   if (after === null || after.lifecycle.phase !== "presenting") return;
   const source = statsChangeSourceAge(after);
-  if (source === null || source.age !== STATS_CHANGE_SE_AGE) return;
+  if (source === null || source.age !== seAge) return;
   emitSound({
     kind: "se", id: source.direction === "up" ? SE_M_STAT_INCREASE : SE_M_STAT_DECREASE,
     pan: animSoundPan2(SOUND_PAN_ATTACKER_VALUE, { attackerSide: source.battler === 0 ? "player" : "opponent", targetSide: source.battler === 0 ? "opponent" : "player" }),

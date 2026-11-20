@@ -340,6 +340,8 @@ describe("audio probe fixtures", () => {
       "snd1-torment-reject-off-window.json",
       "snd2-switchin-faint-off-window.json",
       "snd2-switchin-faint-on-window.json",
+      "snd3-intro-intimp-off-setup.json",
+      "snd3-intro-intimp-on-setup.json",
       "summary-close-at-cry.json",
       "summary-close-during-cry.json",
       "summary-draft-window.json",
