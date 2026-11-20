@@ -29,7 +29,7 @@ type Battle = {
   weather: WeatherCommand[];
   weatherEvents: number;
   /** The render effect while the first weather command's body plays (Scene ON). */
-  bodyEffect: { type: string; moveId?: number; age?: number } | null;
+  bodyEffect: { type: string; moveId?: number; age?: number; generalRain?: boolean } | null;
 };
 
 /** One ordinary census battle; the eventsDigest is computed exactly as the census does. */
@@ -77,7 +77,8 @@ function playCensusBattle(seed: number, scene: "on" | "off"): Battle {
         && Object.hasOwn(WEATHER_CONTINUES_BODY_ROWS, command.animation) && r.lifecycle.phaseElapsed === WEATHER_CONTINUES_LAUNCH_LEAD_ROWS + 5) {
         const effect = createBattleResolutionPresentationRenderView(r).effect;
         bodyEffect = effect === null || effect === undefined ? { type: "none" }
-          : effect.type === "move" ? { type: "move", moveId: effect.request.moveId, age: effect.age } : { type: effect.type };
+          : effect.type === "move" ? { type: "move", moveId: effect.request.moveId, age: effect.age, generalRain: effect.request.generalRain === true }
+          : { type: effect.type };
       }
     }
     if (!owned()) ended = true;
@@ -161,7 +162,10 @@ describe("wth236: end-turn weather animations", () => {
       for (const command of sceneOn.weather) {
         expect(command).toEqual({ animation, animated: true, minimumFrames: weatherContinuesCommandFrames(animation), battler: 0 });
       }
-      expect(sceneOn.bodyEffect).toEqual({ type: "move", moveId: WEATHER_CONTINUES_MOVE_IDS[animation], age: 5 });
+      // rnc1: General_Rain is its own script (script row = command row - 2, rainDance.ts generalRainAtAge); the others are the move body.
+      expect(sceneOn.bodyEffect).toEqual(animation === "RAIN_CONTINUES"
+        ? { type: "move", moveId: 240, age: 4, generalRain: true }
+        : { type: "move", moveId: WEATHER_CONTINUES_MOVE_IDS[animation], age: 5, generalRain: false });
 
       const sceneOff = playCensusBattle(seed, "off");
       expect(sceneOff.digest).toBe(off);

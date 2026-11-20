@@ -5,9 +5,11 @@ import {
   liveMovePresentationRngBodyKey, liveMoveRandom2Plan, type LiveMovePresentationRngInput, type LiveMoveRandom2PlanContext,
 } from "./liveMovePresentationRng.ts";
 import type { PresentationRngHost } from "./presentationRngHost.ts";
+import { generalAnimationPresentationRngKey } from "./wordsOrderUnits.ts";
 import {
   resolveNoMovesLeftMessageLines,
   isWeatherContinuesAnimation, WEATHER_CONTINUES_BODY_ROWS, WEATHER_CONTINUES_LAUNCH_LEAD_ROWS, WEATHER_CONTINUES_MOVE_IDS,
+  RAIN_CONTINUES_SCRIPT_START_ROWS,
   STA5_STATUS_BODY_TAIL_ROWS,
   lse2BodySoundAgeShift,
   bodyHitTailRuleApplies, bodyGapPrintRuleApplies, LSE4_WINDOW_SHORT_ROWS, bodyLeadTailCompositionApplies, bodyStatusTailRuleApplies, bodyLse2RuleApplies, bodySLeadRuleApplies,
@@ -1832,10 +1834,13 @@ function turnTrapBodyEffect(
   });
 }
 /**
- * wth236: an end-turn weather animation (General_Rain / Sun / Sandstorm / Hail) over the field: the weather move's own body
- * (Rain Dance 240 / Sunny Day 241 / Sandstorm 201 / Hail 258) launched from the general table, with the ROM's battler 0 as the
+ * wth236: an end-turn weather animation (General_Sun / Sandstorm / Hail) over the field: the weather move's own body
+ * (Sunny Day 241 / Sandstorm 201 / Hail 258) launched from the general table, with the ROM's battler 0 as the
  * attacker. Command age a = ROM row X + 1 + a (X = the playanimation row); the script is active from X + 2, so the body's age is
  * a - 1 for WEATHER_CONTINUES_BODY_ROWS rows; before and after it the field stands as it is (null).
+ * rnc1: General_Rain is its own script (request.generalRain; rainDance.ts generalRainAtAge): script row = command age -
+ * RAIN_CONTINUES_SCRIPT_START_ROWS, its drops from the words the tick seam records for this general-animation event (the
+ * non-consuming sub-stream under generalAnimationPresentationRngKey, liveMovePresentationRng.ts; nothing is drawn from the shared stream).
  */
 function weatherContinuesBodyEffect(
   command: Extract<BattleResolutionPresentationCommand, { type: "general-animation" }>,
@@ -1843,6 +1848,22 @@ function weatherContinuesBodyEffect(
   presentationRngHost: LiveMovePresentationRngInput["host"] | undefined,
 ): BattleResolutionRenderEffect | null {
   if (!isWeatherContinuesAnimation(command.animation)) return null;
+  if (command.animation === "RAIN_CONTINUES") {
+    const age = state.lifecycle.phaseElapsed - RAIN_CONTINUES_SCRIPT_START_ROWS;
+    if (age < 0 || age >= WEATHER_CONTINUES_BODY_ROWS.RAIN_CONTINUES) return null;
+    const request: BattleMoveAnimationRequest = Object.freeze({
+      moveId: WEATHER_CONTINUES_MOVE_IDS.RAIN_CONTINUES, attacker: command.battler, target: command.battler === 0 ? 1 : 0,
+      turn: 0, power: 0, damage: 0, friendship: 0, multihit: 0, generalRain: true,
+    });
+    return Object.freeze({
+      type: "move", request, age,
+      ...(state.liveMoveBattlerX2Input === undefined ? {} : { battlerX2Input: state.liveMoveBattlerX2Input }),
+      presentationRng: Object.freeze({
+        host: presentationRngHost ?? null,
+        key: generalAnimationPresentationRngKey(state.resolutionId.requestId, state.segmentIndex, command.eventSequence),
+      }),
+    });
+  }
   const age = state.lifecycle.phaseElapsed - WEATHER_CONTINUES_LAUNCH_LEAD_ROWS;
   if (age < 0 || age >= WEATHER_CONTINUES_BODY_ROWS[command.animation]) return null;
   const request: BattleMoveAnimationRequest = Object.freeze({
@@ -1855,7 +1876,7 @@ function weatherContinuesBodyEffect(
     spriteAllocatorInput: state.liveMoveSpriteAllocatorInput,
     spriteOrderInput: state.liveMoveSpriteOrderInput,
     ...(state.liveMoveBattlerX2Input === undefined ? {} : { battlerX2Input: state.liveMoveBattlerX2Input }),
-    // General_Rain's raindrops are a Random2 body (liveMovePresentationRng.ts): the session host + this command's key.
+    // A deferred order lend (prep46) reads an earlier words unit's recorded words by its key: the session host + this command's key.
     ...(liveMoveRandom2Plan(request) === null && state.liveMoveSpriteOrderInput?.deferred === undefined ? {} : {
       presentationRng: Object.freeze({ host: presentationRngHost ?? null, key: liveMovePresentationRngBodyKey(state) }),
     }),

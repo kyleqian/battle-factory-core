@@ -10,7 +10,7 @@ import { factoryBattleBgm } from "./battleStartSounds.ts";
 import { BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS } from "./battleScriptSourceConstants.ts";
 import type { BattleResolutionPresentationState } from "./battleResolutionPresentation.ts";
 import { liveMoveSourceAge, statsChangeSourceAge } from "./battleResolutionPresentationRender.ts";
-import { bodyStatusTailRuleApplies, FOCUS_PUNCH_SETUP_BEHIND_SUBSTITUTE_COMMAND_FRAMES, HELD_ITEM_EFFECT_COMMAND_FRAMES, WEATHER_CONTINUES_LAUNCH_LEAD_ROWS, isWeatherContinuesAnimation, type BattleStatusAnimationName, type WeatherContinuesAnimation } from "./battleResolutionPresentation.ts";
+import { bodyStatusTailRuleApplies, FOCUS_PUNCH_SETUP_BEHIND_SUBSTITUTE_COMMAND_FRAMES, HELD_ITEM_EFFECT_COMMAND_FRAMES, RAIN_CONTINUES_SCRIPT_START_ROWS, WEATHER_CONTINUES_LAUNCH_LEAD_ROWS, isWeatherContinuesAnimation, type BattleStatusAnimationName, type WeatherContinuesAnimation } from "./battleResolutionPresentation.ts";
 
 export interface TimedOp {
   readonly op: "playsewithpan" | "playse" | "waitplaysewithpan" | "loopsewithpan" | "panse" | "panse_adjustnone" | "panse_adjustall" | "setpan" | "soundtask_loopse" | "soundtask_fireblast" | "soundtask_se1" | "soundtask_se2" | "sprite_confuseray_ball" | "task_rollout" | "task_shockwave_bolt";
@@ -535,9 +535,12 @@ export function emitGeneralAnimSounds(after: BattleResolutionPresentationState |
   } else if (command.type === "general-animation" && command.animated === true && isWeatherContinuesAnimation(command.animation)) {
     const age = elapsed - WEATHER_CONTINUES_LAUNCH_LEAD_ROWS;
     if (age < 0) return;
+    // rnc1: General_Rain's script row 0 is the command's row RAIN_CONTINUES_SCRIPT_START_ROWS (the playanimation row; RAM-read rows,
+    // docs/rnc1-rain-continues.md), so SE_M_RAIN_DANCE (script row 3) plays at command row 5 as on the ROM; it was 7 rows late.
+    const scriptRow = command.animation === "RAIN_CONTINUES" ? elapsed - RAIN_CONTINUES_SCRIPT_START_ROWS : age - WEATHER_SCRIPT_AGE;
     emitOpsAt(generalVariant(WEATHER_LABELS[command.animation], command.battler), {
       attackerSide: command.battler === 0 ? "player" : "opponent", targetSide: command.battler === 0 ? "opponent" : "player",
-    }, age - WEATHER_SCRIPT_AGE, true);
+    }, scriptRow, true);
   } else if (command.type === "general-animation") {
     const side = command.battler === 0 ? "player" : "opponent";
     const other = command.battler === 0 ? "opponent" : "player";

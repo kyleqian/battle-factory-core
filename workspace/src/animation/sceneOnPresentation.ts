@@ -494,7 +494,10 @@ import {
   type RolloutState,
 } from "./rollout.ts";
 import {
+  generalRainAtAge,
   rainDanceAtAge,
+  type GeneralRainProfile,
+  type GeneralRainState,
   type RainDanceProfile,
   type RainDanceState,
 } from "./rainDance.ts";
@@ -2114,6 +2117,15 @@ export interface SceneOnRainDanceConfig {
   readonly target: SceneOnPresentationBattler;
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
   readonly animationProfile: Readonly<RainDanceProfile>;
+}
+
+/** General_Rain (B_ANIM_RAIN_CONTINUES, rnc1) presentation only; weather and battle outcomes remain battle-owned. */
+export interface SceneOnGeneralRainConfig {
+  readonly move: "GENERAL_RAIN";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  readonly animationProfile: Readonly<GeneralRainProfile>;
 }
 
 /** Hail presentation only; weather and battle outcomes remain battle-owned. */
@@ -4621,6 +4633,7 @@ export type SceneOnMoveConfig =
   | SceneOnPsychicConfig
   | SceneOnKnockOffConfig
   | SceneOnRainDanceConfig
+  | SceneOnGeneralRainConfig
   | SceneOnHailConfig;
 
 export interface SceneOnMovePresentationState<
@@ -6506,6 +6519,11 @@ export interface SceneOnRainDanceView extends RainDanceState {
   readonly target: SceneOnPresentationBattler;
 }
 
+export interface SceneOnGeneralRainView extends GeneralRainState {
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
 export interface SceneOnHailView extends HailState {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -7800,6 +7818,20 @@ export function sceneOnRainDanceView(
     attacker: state.config.attacker,
     target: state.config.target,
     ...rainDanceAtAge(state.age, state.config.animationProfile),
+  };
+}
+
+/** `age=0` is General_Rain's first script row (gAnimScriptActive's rise; rainDance.ts generalRainAtAge). */
+export function sceneOnGeneralRainView(
+  state: SceneOnMovePresentationState<SceneOnGeneralRainConfig>,
+): SceneOnGeneralRainView {
+  if (state.config.move !== "GENERAL_RAIN") {
+    throw new Error(`expected GENERAL_RAIN presentation, got ${state.config.move}`);
+  }
+  return {
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...generalRainAtAge(state.age, state.config.animationProfile),
   };
 }
 

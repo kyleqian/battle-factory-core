@@ -51,6 +51,7 @@ import { loadBattleScriptProgram } from "./battleScriptProgram.ts";
 import { recordContainedPresentationError } from "./presentationContainment.ts";
 import { substituteFadeCommandRows } from "./liveSubstituteFade.ts";
 import { statsChangeParams, statsChangeSpan } from "../animation/statsChange.ts";
+import { GENERAL_RAIN_SCRIPT_ROWS } from "../animation/rainDance.ts";
 import { liveMoveAnimationDuration } from "./liveMoveAnimation.ts";
 import {
   battleResolutionCommandDuration, battleResolutionFieldBeforeCommand, MID_BATTLE_SWITCH_HEALTHBOX_SLIDE_ELAPSED,
@@ -236,21 +237,37 @@ export const HELD_ITEM_EFFECT_AFTER_STATUS_EXTRA_FRAMES = 1;
  * `goto Move_SUNNY_DAY`) play on every continuing turn in Scene ON. Cmd_playanimation(_var) tests HITMARKER_NO_ANIMATIONS before
  * its weather branch (battle_script_commands.c:4046-4076), so Scene OFF plays nothing and presents no command (the kernel's
  * WEATHER_VAR receipt stays in both scenes: the digest does not move). The ROM launches the animation on battler 0 (apx227: the
- * first non-absent battler, whatever the receipt's battler says). The command's rows are the table-animation launch structure
- * fps147 measured for B_ANIM_FOCUS_PUNCH_SETUP (the script active from row X + 2, the next print's first glyph 3 rows after its
- * last row) around each body's own row count (liveMoveAnimation.ts's body row table: Rain Dance 240 = 187, Sunny Day 241 = 158,
- * Sandstorm 201 = 168, Hail 258 = 158). The row counts are not yet pinned by a weather-window receipt.
+ * first non-absent battler, whatever the receipt's battler says). Sun / Sandstorm / Hail: the command's rows are the table-animation
+ * launch structure fps147 measured for B_ANIM_FOCUS_PUNCH_SETUP (the script active from row X + 2, the next print's first glyph 3 rows
+ * after its last row) around each body's own row count (liveMoveAnimation.ts's body row table: Sunny Day 241 = 158, Sandstorm 201 =
+ * 168, Hail 258 = 158); not yet pinned by a weather-window receipt. Rain: rnc1 below (General_Rain is not Rain Dance's body).
  */
 export const WEATHER_CONTINUES_LAUNCH_LEAD_ROWS = 1;
 export const WEATHER_CONTINUES_LAUNCH_TAIL_ROWS = 3;
+/** The script rows of each weather body (RAIN_CONTINUES: General_Rain's own, rainDance.ts GENERAL_RAIN_SCRIPT_ROWS). */
 export const WEATHER_CONTINUES_BODY_ROWS = Object.freeze({
-  RAIN_CONTINUES: 187, SUN_CONTINUES: 158, SANDSTORM_CONTINUES: 168, HAIL_CONTINUES: 158,
+  RAIN_CONTINUES: GENERAL_RAIN_SCRIPT_ROWS, SUN_CONTINUES: 158, SANDSTORM_CONTINUES: 168, HAIL_CONTINUES: 158,
 } as const);
 export type WeatherContinuesAnimation = keyof typeof WEATHER_CONTINUES_BODY_ROWS;
-/** General_Rain / General_Sun / General_Sandstorm / General_Hail draw the weather move's own body (battle_anim_scripts.s:10511-10531). */
+/**
+ * General_Sun / General_Sandstorm / General_Hail draw the weather move's own body (battle_anim_scripts.s:10524-10531); General_Rain is
+ * drawn by the Rain Dance adapter family (move 240's art and drop program) as its own script (request.generalRain, rainDance.ts
+ * generalRainAtAge).
+ */
 export const WEATHER_CONTINUES_MOVE_IDS: Readonly<Record<WeatherContinuesAnimation, number>> = Object.freeze({
   RAIN_CONTINUES: 240, SUN_CONTINUES: 241, SANDSTORM_CONTINUES: 201, HAIL_CONTINUES: 258,
 });
+/**
+ * rnc1 (docs/rnc1-rain-continues.md): B_ANIM_RAIN_CONTINUES rows, from the source and RAM read on all four rain turns of seed 19
+ * Scene ON battle 2. Command elapsed 0 is the row BattleScript_RainContinuesOrEnds' `waitmessage B_WAIT_TIME_LONG` ends; `jumpifbyte`
+ * runs at 1 and `playanimation` at 2, where the player controller launches General_Rain (TryHandleLaunchBattleTableAnimation) and
+ * its task runs the script's first command: script row 0 (rainDance.ts generalRainAtAge). gAnimScriptActive falls at script row
+ * GENERAL_RAIN_SCRIPT_ROWS (Cmd_end waits for SE_M_RAIN_DANCE), the controller completes one row later and `end2` runs one row after
+ * that: 122 rows after the rain-stopped branch's `end2` (`jumpifbyte` jumps to it, elapsed 2). So the command is 122 rows and the
+ * commands after it start as they do after "The rain stopped." (they were 191 rows: Rain Dance's 187-row body + 4, 69 too many).
+ */
+export const RAIN_CONTINUES_SCRIPT_START_ROWS = 2;
+export const RAIN_CONTINUES_COMMAND_FRAMES = RAIN_CONTINUES_SCRIPT_START_ROWS + GENERAL_RAIN_SCRIPT_ROWS;
 export function isWeatherContinuesAnimation(animation: string): animation is WeatherContinuesAnimation {
   return Object.hasOwn(WEATHER_CONTINUES_BODY_ROWS, animation);
 }
@@ -261,6 +278,7 @@ export function weatherContinuesAnimationOf(payload: { readonly animationId: str
   return payload.arguments[0] === "12" ? "SANDSTORM_CONTINUES" : payload.arguments[0] === "13" ? "HAIL_CONTINUES" : null;
 }
 export function weatherContinuesCommandFrames(animation: WeatherContinuesAnimation): number {
+  if (animation === "RAIN_CONTINUES") return RAIN_CONTINUES_COMMAND_FRAMES;
   return WEATHER_CONTINUES_LAUNCH_LEAD_ROWS + WEATHER_CONTINUES_BODY_ROWS[animation] + WEATHER_CONTINUES_LAUNCH_TAIL_ROWS;
 }
 export const FOCUS_PUNCH_SETUP_BEHIND_SUBSTITUTE_COMMAND_FRAMES = 3;
