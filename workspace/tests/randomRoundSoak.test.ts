@@ -442,7 +442,8 @@ describe("random round soak driver (green milestone pin)", () => {
       // 43_437 -> 43_336, renderCalls 3_045 -> 3_042; same battle 7, turn 3, end state, diagnostics.
       // pic8 (the forced party menu's clock starts at the faint message's dismiss edge, 2 frames earlier per forced switch; ROM lab
       // pic7-player-faint-send-in-on): frames + render calls, 43_336 -> 43_334, renderCalls 3_042 -> 3_044; same battle 7, turn 3, end state, diagnostics.
-      frames: 43_334,
+      // hcr1 (the Scene OFF first used-move print at commit + 6 + u, docs/aud251-s11-scoreboard-refresh.md): frames + render calls, 43_334 -> 43_411, renderCalls 3_044 -> 3_043; same battle 7, turn 3, end state, diagnostics.
+      frames: 43_411,
       battle: 7,
       turn: 3,
       diagnostics: {
@@ -454,7 +455,7 @@ describe("random round soak driver (green milestone pin)", () => {
         terminalOutcome: "roundWon",
         terminalRecordMenuInputReadyReached: true,
         terminalRecordChoice: "no",
-        renderCalls: 3_044,
+        renderCalls: 3_043,
       },
     });
     expect(second).toEqual(first);
@@ -993,7 +994,8 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // 2 frames earlier, pic7 lab): frames only, 18678 -> 19042; same battle 1 / depth 0 / turn 23 / roundLost.
       // pic9 (the switch lines follow the foe's HP; new print lengths move the exploring presses): 19042 / turn 23 -> 22844 / turn 30;
       // same battle 1 / depth 0 / roundLost.
-      frames: 22844,
+      // hcr1 (the Scene OFF used-move print lead u - 3): frames only, 22844 -> 22840; same battle 1 / depth 0 / turn 30 / roundLost.
+      frames: 22840,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 0,
@@ -1030,12 +1032,13 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // frame catcher, docs/flow1-menu-cursors-and-locked-switch-recall.md): the exploring policy's fight presses after its switches pick
       // other moves, so a new trajectory: 60400 / turn 19 -> 61456 / turn 22; same battle 3 / depth 2 / roundLost. The cursor fix alone moves
       // it (with it undone the old pin passes; the recall fix alone leaves it). Seed 0 is unmoved.
-      frames: 61456,
+      // hcr1 (the Scene OFF used-move print lead u - 3; the exploring presses land on new phases): 61456 / turn 22 -> 60534 / turn 19; same battle 3 / depth 2 / roundLost.
+      frames: 60534,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 2,
       battle: 3,
-      turn: 22,
+      turn: 19,
     });
   });
 
