@@ -85,7 +85,7 @@ Factory state, SE_SELECT is on SE2: song_table.inc).
 | SE2 `MusicPlayerInfo` (0x30 bytes) and track 0 (0x50 bytes), first frame after the call, press vs register-poke | byte-identical |
 | silenced state (the recorder's own), per-sample RMS of the trimmed sound, press vs poke | 1514.1 vs 1525.5 (0.993); manifest `se:5:none` 1521.08 |
 | BGM playing, muted with `m4aMPlayVolumeControl` (what lds1m used), press minus the run without the press vs the solo press | RMS ratio **1.0017**; per-frame RMS 2059 1815 3053 1803 1606 2947 ... vs solo 2074 1815 3058 1764 1606 2947 ... (the first 3 mixer frames agree within 1%) |
-| the recorder's poke vs the press (same silenced state) | same level; the poke is one mixer frame short in the first frames (2183 3264 ... vs 2074 1815 3058 ...) and the in-game tail is about 0.3 frame longer: the 7-14 frame difference in total energy is +4% in amplitude. This is timing (when in the frame the call lands), not gain |
+| the recorder's poke vs the press (same silenced state) | same level; the poke is one mixer frame short in the first frames (2183 3264 ... vs 2074 1815 3058 ...) and the in-game tail is about 0.3 frame longer: whole-sound energy is +4% in amplitude (8922 vs 8165 samples). This is timing (when in the frame the call lands), not gain |
 
 Why 1.2-1.45 appears: SE_SELECT is 14 frames of non-stationary sound (loud first 8 frames, a decaying tail). In-game RMS over the first k frames from the
 call divided by the manifest RMS of the whole trimmed recording (1521.08, 8319 samples) is 1.42 (k = 8), 1.35 (10), 1.27 (12), **1.19 (14 = `lengthFrames`)**,
