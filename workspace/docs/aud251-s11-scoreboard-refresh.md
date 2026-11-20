@@ -1037,3 +1037,105 @@ ON, first reading `on-93dc3201d` (census tool unchanged): exact 268,935, missing
 3. T1 **0 / 0 / 0 in both scenes after the census-tool fix**; before it, ON read 876 declined / 876 extra, a scorer blind spot (age-0 frame) opened by lse2, not a sound defect. Any census arm made with the older `lsd194Census.ts` will show those 876 rows again (the aud263 arms predate lse2).
 4. Static-field commands: 1, not 0 (Ice Ball seed 950, pre-existing).
 5. Not done: no `npm test` (verification step); T1 is self-consistency, not ROM parity (T2 is the scorer, last run in the t2r / t2o sections).
+
+## t2n (2026-11-20): Scene ON and OFF T2 re-measured on master `29688b8cd` after pau4 / pau5 / btn1 / hpf5 / lead2 / lead3 / lead4 and the lse / hpf1-2 / sta5 steps since t2r / t2o (measurement only, no `src/` / `tests/` change)
+
+Method: the t2r / t2o chain unchanged (`tools/audio/aud248RunSeed.sh SEED on|off DIR`, fresh ROM drive, then `soundScoreboard.py`, `t2Attribute.py`), on this worktree (base `29688b8cd`; this doc's first commit repairs the file, see the end), `nice -n 19`, at most 2 ROM drives at a time. Seeds: **the same 25 Scene ON seeds as t2r** (2 6 165 499 830 1028 1415 1914 2230 2741 3158 3738 4235 4686 5063 5569 6079 6912 7295 8108 8612 97 310 319 648) and **the same 24 Scene OFF seeds as t2o** (2 165 499 830 1028 1415 1914 2230 2741 3158 3738 4235 4686 5063 5569 6079 6568 6912 7295 7682 97 310 319 648). Every one of the 49 drives ended `stop outcome`, `matched == engineStates`, `engineError null`, no divergence. Step attribution: the engine replayed at nine master merge points over the **same ROM files** (git worktrees, each tree's own `soundCensusRomReplay.ts`: HEAD's driver does not run on the old trees, so the step columns include any driver difference between trees; `now` uses HEAD's driver). Evidence (ignored): `.integration/evidence/t2n/` (`<seed>-<scene>.*`, `steps/<commit>/`, `t2n-attr-{on,off}.json`, `t2n-steps-{on,off}.json`, `scoreboard.txt`, `cen/` = rank1mCensus ON 0..999). `npm test` not run (measurement step: the assignment forbids it).
+
+### 1. Missing / extra (the headline): 0 / 0, 49 / 49 seeds, at every build
+
+**0 missing and 0 extra rows in every family in all 25 ON and all 24 OFF seeds, and at all nine replayed intermediate builds in both scenes.** The matched rows are the same count as before: **5,877 ON rows, 1,133 OFF rows** (t2r / t2o: the same). Nothing landed since t2r / t2o changed an event; only frames moved.
+
+### 2. Family tables (engine minus ROM, frames from the segment start)
+
+Scene ON, 25 seeds, 5,877 matched rows. Columns: t2r as published; **B** = the t2r engine (`d02f829c8`) replayed over today's ROM files and driver (the engine-only baseline; t2r's published exact counts differ from B only in cry / controller, the `bal1` driver anchor); now.
+
+| family | t2r published: exact / offset, med / p10 / p90 | B: exact, mass | now: exact / offset, med / p10 / p90 | now mass |
+| --- | --- | --- | --- | --- |
+| move-animation SE | 334 / 4,477, -2 / -17 / 7 | 334, 42,242 | **820** / 3,991, -2 / **-11** / 7 | **26,897** |
+| battle-controller SE | 74 / 684, -5 / -23 / 3 | 99, 9,625 | 111 / 647, -4 / **-19** / **0** | 6,484 |
+| cry | 6 / 196, -9 / -24 / 13 | 31, 2,651 | 40 / 162, -3 / -17 / 0 | 1,638 |
+| stat-change SE | 15 / 86, 0 / -16 / 3 | 15, 1,041 | 36 / 65, 0 / -11 / 4 | 458 |
+| bgm | 0 / 5, -23 / -71 / 18 | 0, 152 | 0 / 5, -12 / -72 / -5 | 115 |
+| fanfare, screen SE | 0 / 0 | 0 | 0 / 0 | 0 |
+| **all** | 429 exact (7.3 %), mass 56,070 | 479, **55,711** | **1,007 exact (17.1 %)**, offset 4,870 | **35,592 (-36.1 % vs B)** |
+
+Move-animation SE exact rows **334 -> 820** (13.9 % -> 17.1 % of all rows overall, 7 % -> 17 % of the family). Rows at abs(offset) >= 20: **414 rows hold 12,001 (33.7 %)**, against 811 rows / 29,150 (52 %) at t2r.
+
+Scene OFF, 24 seeds, 1,133 matched rows (t2o published; B = the t2o engine `e768c82b4` over today's files, identical to the published mass 6,125 / 123 exact):
+
+| family | t2o published: exact / offset, med / p10 / p90 | now: exact / offset, med / p10 / p90 | mass t2o -> now |
+| --- | --- | --- | --- |
+| battle-controller SE | 67 / 765, -3 / -10 / 2 | 67 / 765, -3 / -11 / **1** | 4,385 -> 4,005 |
+| cry | 32 / 160, -3 / -11 / 11 | 34 / 158, -3 / -13 / **1** | 1,259 -> 1,054 |
+| stat-change SE | 24 / 81, 0 / -6 / 4 | 25 / 80, **2** / -6 / 4 | 439 -> 353 |
+| bgm | 0 / 4, -2 / -13 / 23 | 0 / 4, -4 / -13 / -3 | 42 -> 25 |
+| **all** | 123 exact, mass 6,125 | **126 exact**, mass **5,437** | **-11.2 %** |
+
+OFF rows at abs >= 20: 27 rows hold 884 (16 %) against 48 / 1,561 (25.5 %). The OFF family has no move-animation SE (Scene OFF plays no body). The cry p90 11 -> 1 and controller p90 2 -> 1 are the faint / send-in chain anchored on shorter hp holds (hpf2, section 3).
+
+### 3. Which step moved which rows (same ROM files; mass = sum abs(offset); 0 / 0 at every build)
+
+| step (merge point) | what it carries | ON rows moved (toward / away), mass | OFF rows moved (toward / away), mass |
+| --- | --- | --- | --- |
+| `d02f829c8` (t2r) / `e768c82b4` (t2o) baseline | | 55,711 | 6,125 |
+| `3787679f1` (everything between the t2r base and the Mac handoff: lse1 / lse2 / lse3 tables, hpf1-2 heal / recoil / drain holds, sta5, bal1 driver, ais4) | one bulk step; I did not split it | **1,727 (1,397 / 309), 39,379 (-16,332)** | 108 (77 / 31), 5,557 (-568) |
+| `2227c7e66` pau4 + btn1 + lead2 B0 / B1 | entry scripts, `\p` / `\l` gates, nine B1 bodies | 54 (40 / 14), -204 | 7 (7 / 0), -15 |
+| `0d142ab71` shd1 / rrh5 (stages, Shedinja HP) | no sound change | 0 | 0 |
+| `4d68f1456` bgm1 + pau5 mid-battle Intimidate / Trace | stat-decrease SE row 50 frames | 10 (9 / 1), -130 (stat 245 3 rows, -125) | 3, -74 (stat 245 2 rows, -75) |
+| `71eb036f5` **lead3 B2** | 76 shape-A bodies | **488 (437 / 33), -2,562** (Bubble Beam 72 rows -480, Magical Leaf 49 -378, Confuse Ray 20 -180, SE 148 42 -168, SE 152 27 -132; away: body 67 13 rows +90, body 68 6 rows +36) | 0 |
+| `29fd7cf34` **hpf5** | tick / wrap / weather / Substitute hp lengths | 29 (18 / 10), -17 | 18 (10 / 8), -31 |
+| `1e5665469`, `c51ca9044` | no sound change | 0 | 0 |
+| HEAD (**lead4 B3**, trn225) | S-class status bodies' lead | **562 (393 / 122), -874** (body 266 65 rows -275, Double Team 216 -198, Bulk Up 21 -81, bodies 258 / 288 -40 each; away: body 259 8 rows +32, 50 10 rows +30) | 0 |
+| **net** | | **55,711 -> 35,592 (-20,119, -36.1 %)** | **6,125 -> 5,437 (-688, -11.2 %)** |
+
+The single big ON number is the bulk step `3787679f1`: its biggest movers are Leech Seed (body 73) **1,771 -> 66** (55 rows, the lse1 / lse2 landing), Swagger (207) **1,405 -> 85** (lse1 / sta5), Solar Beam (76) **1,145 -> 246** (the hpd7b / lse unleash window), controller SE 13 -1,027, cry -916: the three bodies t2r named as the top single unaudited ones are done. lead2 B1 alone moves nothing measurable here (the nine B1 bodies sit in 2227c7e66 with pau4 / btn1; -204 total: none of the 25 seeds carries many B1 commands at a measurable offset), hpf5 is a ~0 step in T2 (-17 ON, -31 OFF: its windows are the end-of-turn ticks, a few rows), lead3 B2 is the second largest (-2,562 over 488 rows), lead4 B3 -874 (it was predicted to move rows by the +2 lead on S bodies; 98 of 190 Double Team SE were +2 late before it, now 216 Double Team rows still carry mass 351, see section 4). **OFF**: no step is larger than the bulk 568 (hpf2's heal / recoil / drain holds: `ctl:13@hit-animation` -207, `cry@faint` / `ctl:16@faint` -201 each; the same step makes 31 rows worse by +26 on the party-summary / switch-in chain, `ctl:114` / `ctl:15` / `cry@switch-in` at -1) plus pau5's two stat rows (-75).
+
+**Got worse than t2r (same seeds, engine-only B vs now, per cause):** only small groups: body 67 +90 / 13 rows (+6, lead3), body 68 +36 (+6), SE ctl 15 / ctl 114 / ctl 90 about +13 / +3 / +11 in the `29fd7cf34` step (the hpf5 hold lands on rows that already sat at 0 .. -1), body 259 +32, body 50 +30 (lead4, +4 on rows already late). None is above 90 frames; the net of the worse groups is under 400 against -20,119.
+
+### 4. Top 10 remaining offset groups (cause, scene, mass), and where each comes from
+
+Cause = the row's ROM `gCurrentMove` (`body:<id>` move-animation SEs, `gen:<se id>` = general / status-animation SEs with no move running, `ctl:` controller SEs, `cry`), ranked by sum abs(offset). ON total 35,592 over 5,877 rows; OFF 5,437 over 1,133 rows. By class: ON **bodies 3,899 rows / 17,955 (50.4 %)**, **general / status animations (`gen:*`) 912 / 8,942 (25.1 %)**, controller hit rows (SE 12 / 13 / 14) 475 / 3,968 (11.1 %), controller chain rows (SE 15 / 16 / 114) 251 / 2,334 (6.6 %), cry 202 / 1,638 (4.6 %), stat 101 / 458, bgm 5 / 115. OFF: hit rows 548 / 2,255 (41 %), chain rows 248 / 1,624 (30 %), cry 192 / 1,054 (19 %), stat 105 / 353 (6.5 %).
+
+| # | group | scene | rows | mass | share of scene | largest windows | likely cause (existing docs) |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 | **general / status animations with no move: SE 152 + 228 + 102 (one five-SE group, 4,650), SE 142 1,432, SE 148 1,248, SE 242 380, 219 296, 179 229** (`gen:*` total 8,942) | ON | 912 | **8,942** | 25.1 % | s5063 SE 152 1,143 (-18 .. +27 inside one window), s1415 SE 152 699, s2230 405; SE 142: s648 / s310 / s319 / s6912; SE 148 (Toxic tick): s165 552, s499 516 | **not a lead problem**: the offset changes along one battle (-18 .. +27), i.e. spacing of consecutive status / general plays (lead1m B4: C bodies `T = 2 + gap - pre - post`, gap from the next-event chain; sta5 landed only Flatter / Swagger / Spore / Toxic first plays). t2r had these at 12,032 (21.5 %): 3,090 lower, mostly lse1 / lead3 (SE 148 42 rows -168, SE 152 27 -132) |
+| 2 | **controller hit SE 13 / 12 / 14** after `hit-animation` | ON 3,968 (13: 2,553, 12: 832, 14: 583); **OFF 2,255** (13: 1,490, 12: 521, 14: 244) | 475 / 548 | **6,223** | 11.1 % / **41 %** | OFF: s7682 (Struggle) 78 rows now -19 .. +11 (mass 373; was +20 .. +29 x 10 + faint +63 x 2), s3738 Aerial Ace SE 12 -42 x 2 (177), s6568 Brick Break SE 13 / 14 (162 + 72), s2741 one -37; ON: s5063 SE 13 461, s8108 SE 13 449 (-99 .. -76 .. -30 on one move) | inherited hit offset (ctl1 section 3: the move-body tail on old-lead bodies and the hp command's 28-row floor on non-foe-hit shapes, `off108` anchor): hp-command work, both scenes, a few single windows (Brick Break +63 in s319 / s6568 = 126, Aerial Ace -42, Earthquake faint chain, B6 / lse3 residuals) |
+| 3 | **faint / send-in chain: controller SE 16 / 15 / 114 + cry** | ON 2,334 + cry 1,638 = **3,972**; OFF 1,624 + cry 1,054 = **2,678** | 453 / 440 | **6,650** | 11.2 % / 49 % | OFF: `ctl:16@faint` + `cry@faint` 577 x 2 (s3738 -44 x 2, s648 +43 x 2 = 86 each), `ctl:15@switch-in` + cry 391 x 2 (median -7), `ctl:114@party-summary` 348 | #222 / ais1-4 (AI switch, forced-switch anchor: ctl1 found a 9-12 frame harness anchor artifact on forced switches), the species-dependent ball-open lag (0 / 3 / 7; bal1: not in the ROM send-out path), the faint hp end 9 early (ctl1), `\p` box clear (#200 / #222). Median of the pair is -3 .. -7; only s3738 / s648 / s97 / s3158 faint windows are far |
+| 4 | **Double-Edge (38)** body | ON | 96 | **1,181** | 3.3 % | **s5063 48 rows, +24 x 36 (mass 888)**, s2230 36 rows | landed shape A (hpd8): the +24 rows are the commands AFTER the body (recoil hp print / next command), not the body's own SEs (median +1): a single-window ROM probe of recoil, in the lse3 / lead1m B5 family; unattributed |
+| 5 | **Ice Beam (58)** body (+ Bubble Beam 504, Psychic 496, Thunderbolt 433 = the landed shape-A next-command spread) | ON | 206 | **898** | 2.5 % | 132 of 206 rows sit at -2; the mass is a tail of -5 .. -21 on 11 seeds | shape A landed; the residual is the next command's own offset (the t2r finding 'landed shape-A bodies keep 18 % of the mass'); not a lead rule |
+| 6 | **Dig (91)** body (charge turn) | ON | 117 | **760** | 2.1 % | **s8108 78 rows, median +6 (481)**, s3738 28 rows | lead1m B6 charge turns (Dig 107 commands per 200 battles, ROM lead 1 for the charge turn and 5 for the attack turn; `CHARGE_TURN_SCRIPT` excluded from the lead rule); census 596 commands in 120 battles / 1000 |
+| 7 | **Magical Leaf (345)** body | ON | 119 | **616** | 1.7 % | s3738 70 rows (-16 x 35 = 560) | shape A (hpd8 / lead3 `A`); one window of -16 on the second half of a turn: s3738 only (2 seeds in T2: s499 49 rows at 0 .. -2); census only 162 commands in 57 battles |
+| 8 | **Rock Slide (157)** body | ON | 142 | **598** | 1.7 % | s165 60 rows at -5 (the kno3 window's rest), s97 / s310 / s1914 20 rows each | shape A landed; the remaining -5 / -2 / +3 are constant-per-window offsets, small; was 3,058 at aud263, 858 at t2r |
+| 9 | **Bulk Up (339)** + **Yawn (281)** | ON | 39 + 33 | **552 + 510** | 1.6 % + 1.4 % | s1415 Bulk Up 36 rows (+35 x 9, +24 x 6, +9 x 9), s1415 / s2230 / s5063 Yawn +22 / +24 | S / status bodies: lead4 B3 landed Bulk Up's lead; Yawn is an unlanded S shape (lead1m 'Yawn 12 (S)', `lse2` Encore / Yawn turn windows); the +24 / +35 rows are later commands of a status turn |
+| 10 | **Earthquake (89)** + **Aerial Ace (332)** + **Drill Peck (65)** + **Struggle (165)** single windows | ON | 45 + 33 + 54 + 45 | 474 + 362 + 423 + 425 | 1.3 .. 1.2 % each | Drill Peck s1914 36 rows at 0 and **-45 x 9 (405)**; Aerial Ace s3738 -77 / -41 (318); Earthquake s1415 +35 x 6 | lead1m B5 / B6 (adapter windows, multi-hit second hits, `live` long windows landed in liv2: Earthquake); each is one seed, probe-sized |
+
+Of the ON bodies, the lse3 measured-not-landed set (Absorb 71, Mega Drain 72, Revenge, Recycle, Razor Wind, Wish, Pound / Scratch / Tackle, Giga Drain 202) holds only **297 mass in 163 rows** in these 25 seeds (Wish 148, Giga Drain 141), lead1m **B4** C bodies (Confuse Ray, Thunder Wave, Brick Break, Curse, sleep / paralysis moves) **990 in 270 rows** (Confuse Ray 260, Thunder Wave 259, Curse 221, Stun Spore 150), **B5** (Dragonbreath, Silver Wind, Frustration, Spark, Thunderpunch, Toxic, Swagger, Hypnosis) **846 in 222 rows** (Toxic 360, Hypnosis 157, Frustration 144), **B6** (charge / multi-hit / X: Dig 760, Rest 491, Bounce 127, Solar Beam 246) **1,748 in 229 rows**. So the documented-but-unlanded body classes total about **3,900 mass (11 % of ON)**; the larger remainder (landed bodies' next-command spread, status / general plays, controller chains) is not in those lists.
+
+OFF top groups by (command, mass): `ctl:13@hit-animation` 1,490 (27.4 %), `cry@faint` and `ctl:16@faint` 577 each (10.6 %), `ctl:12@hit-animation` 521, `ctl:15@switch-in` / `cry@switch-in` 391 each, `ctl:114@party-summary` 348, `ctl:14@hit-animation` 244, `stat:239@stats-change` 236, `ctl:15@trainer-slide` 222. The t2o headline windows: **s7682 Struggle +20 .. +29 x 10 is gone** (rows now -19 .. +11, 373 over 78 rows; the faint +63 x 2 is gone too); **Brick Break +63 stays in both seeds** (s319 SE 12, s6568 SE 14: 126); Aerial Ace -42 x 2 stays (s3738); Earthquake faint chain s648 is now +43 x 2 (was -43 .. -34); s1914 SE 245 -69 is gone (pau5 stat rows -75).
+
+### 5. Ranked next steps (rank1m-style; impact = T2 mass in these 25 / 24 seeds, breadth = Scene ON census 0..999 of 1,000 battles, count only)
+
+Census breadth (ON `rank1mCensus`, 1,000 battles, 41,430 move-animation commands, 27,107 `soundAnim` animations): `hit-animation` 18,646 commands in 1,000 battles, `faint` 4,332 / 1,000, `switch-in` 3,640 / 1,000, `general-animation` 7,506 in 864, `status-animation` 8,006 in 775, `stats-change` 3,688 in 828. Per body (commands / battles): Earthquake 908 / 382, Aerial Ace 676 / 274, Dig 596 / 120, Rock Slide 427 / 227, Ice Beam 388 / 190, Double-Edge 335 / 172, Solar Beam 227 / 80, Swagger 128 / 74, Yawn 94 / 51, Drill Peck 96 / 49, Magical Leaf 162 / 57, Bulk Up 51 / 21, Leech Seed 72 / 48.
+
+| rank | item | scenes | T2 mass now | breadth | direction | cost / risk |
+| --- | --- | --- | --- | --- | --- | --- |
+| 1 | **general / status-animation spacing** (`gen:152 / 228 / 102 / 142 / 148 / 242`): one ROM window on s5063 (SE 152 -18 .. +27 across one battle) and one on s1415 / s2230 to find which status command pair carries the drift (lead1m B4 gap rule or a missing hold), then a rule | ON | **8,942 (25 %)** | 7,506 general + 8,006 status commands, 864 / 775 battles | both ways (rows -18 .. +27) | M; the largest single class; new rows, so census digest + the soaks |
+| 2 | **hit-controller rows (SE 13 / 12 / 14) = the hp command's remaining shapes** (ctl1 open remainder: the 28-row floor on non-foe-hit shapes with the `off108` anchor re-measured), plus the Brick Break +63 and Aerial Ace -42 windows | both | ON 3,968 + **OFF 2,255** (the largest OFF class, 41 %) | 18,646 `hit-animation` commands in 1,000 battles | mostly toward 0 (median -3) | M-L; touches the pins of many hit tests (hpf1 precedent: -1,280 OFF in one step) |
+| 3 | **faint / send-in chain** (ctl 15 / 16 / 114 + cry): the forced-switch harness anchor (a driver fix, not an engine one: -12 -> -3), then the ball-open species lag | both | ON 3,972, OFF 2,678 | 4,332 faint, 3,640 switch-in per 1,000 | mixed | S for the anchor in `romDecisionDriver.py` (measurement side; changes no frames of the app); M for the engine |
+| 4 | **single windows >= 20** (414 rows, 12,001 mass in ON; the biggest: s5063 Double-Edge +24 x 36 888, s1415 Bulk Up 459, s1914 Drill Peck -45 x 9 405, s165 SE 148 330, s3738 Aerial Ace 318, s8108 SE 13 288, s5063 SE 13 300; OFF s3738 / s2741 / s319 / s6568 / s648) | both | about **3,000** in the top 8 | per window one seed | toward 0 | S each, out1 style (one ROM window per cause); do these before a rule |
+| 5 | **lead1m B6 charge turns** (Dig 760, Solar Beam 246, Fly / Dive / Bounce 127) | ON | 1,200 | 596 Dig / 120 battles, 227 Solar Beam / 80, + Fly / Dive / Bounce | toward 0 (Dig +6, others -13) | M (ROM lead for the charge turn is already measured: 1) |
+| 6 | **lead1m B4 C bodies** (Confuse Ray 260, Thunder Wave 259, Curse 221, Stun Spore 150) | ON | 990 | per census table (B4 172 + 80 + 135 commands in 200 battles) | toward 0 | M (gaps measured except the C? ones) |
+| 7 | **lead1m B5 adapter windows** (Toxic 360, Hypnosis 157, Frustration 144) | ON | 846 | | | M, separate defect (adapter duration) |
+| 8 | lse3 landing (Wish 148, Giga Drain 141, Absorb / Mega Drain / Counter) | ON | 297 | Absorb 0 .. in T2 | | S, small: lowest mass of the documented items |
+
+What not to chase: the landed shape-A bodies' own next-command spread (Ice Beam 898, Bubble Beam 504, Psychic 496, Thunderbolt 433 = about 2,300): the lead moved rows toward the ROM's next-command offset there already; the remainder is the next command's own offset, closed by 1-3 above, not by a per-body rule.
+
+### 6. Findings
+
+1. **0 missing / 0 extra everywhere**, 25 ON + 24 OFF seeds and nine intermediate builds each: no event regressed since t2r / t2o. Offset mass **ON 55,711 -> 35,592 (-36.1 %; exact rows 479 -> 1,007), OFF 6,125 -> 5,437 (-11.2 %; exact 123 -> 126)**; ON move-animation SE exact 334 -> 820.
+2. **Top three single bodies of t2r are closed**: Leech Seed 1,771 -> 66, Swagger 1,405 -> 85, Solar Beam 1,145 -> 246.
+3. The biggest ON class left is not a body: **general / status-animation rows with no move running, 8,942 (25 %)**, followed by the hit-controller rows (both scenes) and the faint / send-in chain.
+4. Scene OFF is already near the floor: median -3, 16 % of mass at |offset| >= 20; the next OFF gain is the hit-controller rows (41 %).
+5. **Doc repair (finding, not a measurement):** commit `b0e4cf53d` ("c1k: itemise the move-animation command count delta") turned this file into **62 MB / 1,040 lines** (a replacement with an empty pattern inserted its text between every pair of characters). Master's copy of this doc was unusable (every `grep` / `Read` returned the sentence). The first commit of this branch restores `85570820a`'s text (157,494 bytes) with the intended itemised sentence applied in the one place it belonged (the ON / OFF move-animation command-count delta in the c1k section 2). The wording of that sentence is `b0e4cf53d`'s; nothing else changed.
+6. Tooling: nothing new under `tools/`. `step.sh` / `stream.sh` / `runq.sh` (resumable per-seed queues with a time cutoff, per-commit replays over fixed ROM files) are in `.integration/evidence/t2n/` (ignored).
