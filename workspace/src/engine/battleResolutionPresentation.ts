@@ -844,6 +844,8 @@ export type BattleResolutionConfirmHandoff = Readonly<{
    * stages' rows (the action prologue) are carried by the pre-pass's last print (FOCUS_PUNCH_PRE_PASS_ACTION_LEAD_FRAMES).
    */
   focusPunchPrePass?: true;
+  /** hcr1: Scene OFF used-move print lead, frames of `action-dispatch` hold still to run (see `usedMovePrintLeadAdjust`). */
+  usedMoveLeadHold?: number;
 }>;
 
 /**
@@ -6316,6 +6318,28 @@ function withSynthesizedAiSwitchRecallEvents(
   ]);
 }
 
+/**
+ * hcr1 (docs/aud251-s11-scoreboard-refresh.md hcr1m): Scene OFF, a plain `use-move` turn's first used-move print (`attackstring`) runs at
+ * commit + 6 + u, u = the USEDMOVE print's `instructionExecution` (commands from the effect-script entry: `setmoveeffect` / `goto` /
+ * `jumpifnotmove` / `incrementgamestat` are one frame each before `attackcanceler`, `accuracycheck`, `attackstring`). The fixed
+ * stage walk prints at commit + 9, exact for u = 3; the adjustment is `u - 3` (-1 skips `accuracy-check`, + n holds `action-dispatch`).
+ * Forced (Encore / Struggle) and Focus Punch pre-pass handoffs keep their own leads; a turn that opens with anything but a USEDMOVE
+ * print (status / ability / wake-up / confusion head) is not covered. Scene ON absorbs u downstream and is left on the fixed walk.
+ */
+const USED_MOVE_LEAD_MIN_U = 2;
+const USED_MOVE_LEAD_MAX_U = 20;
+function usedMovePrintLeadAdjust(state: BattleResolutionPresentationState, handoff: BattleResolutionConfirmHandoff): number {
+  if (handoff.forced !== undefined || handoff.focusPunchPrePass === true) return 0;
+  const segment = state.segments[0];
+  if (segment === undefined || state.sourceDecision.kind !== "use-move") return 0;
+  if ((segment.beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) === 0) return 0;
+  const first = segment.events[0];
+  if (first === undefined || first.payload.kind !== "message" || first.payload.messageId !== "STRINGID_USEDMOVE") return 0;
+  const u = first.provenance?.instructionExecution;
+  if (u === undefined || u < USED_MOVE_LEAD_MIN_U || u > USED_MOVE_LEAD_MAX_U) return 0;
+  return u - 3;
+}
+
 const CONFIRM_HANDOFF_NEXT = Object.freeze({
   "move-selection-response": "selection-accepted",
   "selection-accepted": "stop-bounce-request",
@@ -6396,9 +6420,22 @@ export function advanceBattleResolutionConfirmHandoff(
       fadeTick: state.fadeTick + 1,
     });
   }
+  if (handoff.stage === "action-dispatch") {
+    const hold = handoff.usedMoveLeadHold ?? Math.max(0, usedMovePrintLeadAdjust(state, handoff));
+    if (hold > 0) {
+      return Object.freeze({
+        ...state,
+        lifecycle: Object.freeze({ phase: "confirm-handoff" as const, phaseElapsed: 0 }),
+        confirmHandoff: Object.freeze({ ...handoff, usedMoveLeadHold: hold - 1 }),
+        fadeTick: state.fadeTick + 1,
+      });
+    }
+  }
   const nextStage = handoff.focusPunchPrePass === true && handoff.stage === "stop-bounce-request"
     ? null
-    : CONFIRM_HANDOFF_NEXT[handoff.stage];
+    : handoff.stage === "attack-canceler" && usedMovePrintLeadAdjust(state, handoff) < 0
+      ? null
+      : CONFIRM_HANDOFF_NEXT[handoff.stage];
   if (nextStage === null) {
     return Object.freeze({
       ...state,
