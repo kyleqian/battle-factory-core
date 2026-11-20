@@ -14009,19 +14009,24 @@ function isTurn15CanonicalPartyState(state: import("./partySelect.ts").PartySele
     && bayleef.hp === bayleef.maxHp && bayleef.legal;
 }
 
+/**
+ * The harvested canonical chrome covers the anchor's two cursor positions (slot 0 / 1); slot 2 and CANCEL draw through the
+ * source-composed renderer like every non-canonical party.
+ * sum241: the harvested "submenu" chrome is the anchor's own frame -- MAGBY (slot 1) selected, action cursor on SEND OUT. The
+ * window opened on slot 0 (the fainted ONIX, refused on A), any other action row, and the summary screen's own frames (the
+ * composition root draws the summary over this menu) take the composed renderer.
+ * pic3: the list and its fade's OBJ mask (drawTurn15PartyListObjMask) take the same decision.
+ */
+function turn15PartyListDrawsSnapshot(state: import("./partySelect.ts").PartySelectState): boolean {
+  return isTurn15CanonicalPartyState(state)
+    && (state.cursor === 0 || state.cursor === 1)
+    && (!state.submenuOpen || state.cursor === 1)
+    && state.actionCursor === 0
+    && state.summary === null;
+}
+
 export function drawTurn15PartySelectList(fb: Uint8Array, state: import("./partySelect.ts").PartySelectState): void {
-  // The harvested canonical chrome covers the anchor's two cursor positions (slot 0 / 1); slot 2 and CANCEL draw through the
-  // source-composed renderer like every non-canonical party.
-  // sum241: the harvested "submenu" chrome is the anchor's own frame -- MAGBY (slot 1) selected, action cursor on SEND OUT. The
-  // window opened on slot 0 (the fainted ONIX, refused on A), any other action row, and the summary screen's own frames (the
-  // composition root draws the summary over this menu) take the composed renderer.
-  if (
-    !isTurn15CanonicalPartyState(state)
-    || (state.cursor !== 0 && state.cursor !== 1)
-    || (state.submenuOpen && state.cursor !== 1)
-    || state.actionCursor !== 0
-    || state.summary !== null
-  ) {
+  if (!turn15PartyListDrawsSnapshot(state)) {
     renderBattlePartySelect(fb, battlePartySelectStateForForcedParty(state));
     return;
   }
@@ -14252,9 +14257,7 @@ function drawPartyMenuSourceMask(mask: Uint8Array, encoded: string, width: numbe
 
 /** Live OBJ ownership for the party list (three icons plus two status OBJ instances). */
 export function drawTurn15PartyListObjMask(mask: Uint8Array, state: import("./partySelect.ts").PartySelectState): void {
-  if (state.party.some((member, index) =>
-    member.partyIndex !== index || member.species !== TURN15_CANONICAL_PARTY_SPECIES[index]
-  )) {
+  if (!turn15PartyListDrawsSnapshot(state)) {
     renderBattlePartySelect(mask, battlePartySelectStateForForcedParty(state));
     return;
   }

@@ -729,6 +729,7 @@ import {
 } from "./factoryAnchorSession.ts";
 import { CANONICAL_DESTIN_PRESENTATION, type FactoryTrainerPresentation } from "./factoryTrainerPresentation.ts";
 import { withLiveRender } from "./drawRecord.ts";
+import { createFactoryRentalPresentation, type FactoryRentalPresentation } from "./factoryRentalPresentation.ts";
 import {
   containedBattleResolutionRenderView,
   createBattleResolutionPresentationRenderView,
@@ -3933,6 +3934,23 @@ function pendingRoundFirstTrainer(
   return trainer;
 }
 
+/**
+ * pic5 (docs/pic1-live-field-pictures.md): the rentals the swap screen's SUMMARY pages through. A generated round's swap is built from
+ * `round.rules.playerRentalRecords` (createPendingFactorySwapPresentation), and its player cursor indexes those records; the summary
+ * used to read `draftScreen.rentals` (the opening draft's six), which only match for the canonical sample draft's picks 0, 1, 2.
+ */
+function factorySwapSummaryRentals(state: EngineState): readonly FactoryRentalPresentation[] {
+  const records = state.factoryRoundBattleOrchestrator?.round.rules.playerRentalRecords ?? null;
+  if (records === null) return state.draftScreen.rentals;
+  let rentals = swapSummaryRentalsByRecords.get(records);
+  if (rentals === undefined) {
+    rentals = Object.freeze(records.map((record) => createFactoryRentalPresentation(record)));
+    swapSummaryRentalsByRecords.set(records, rentals);
+  }
+  return rentals;
+}
+const swapSummaryRentalsByRecords = new WeakMap<object, readonly FactoryRentalPresentation[]>();
+
 function renderWithoutFactoryTerminal(state: EngineState): Uint8Array {
   if (state.factoryRoundBattleOrchestrator?.battleStartIntro?.entry) {
     const fb = createFramebuffer();
@@ -4049,6 +4067,9 @@ function renderWithoutFactoryTerminal(state: EngineState): Uint8Array {
               ? null
               : factorySwapPlayerOptionBallTile(swap.selectedBallClock),
         });
+      // pic5: the swap screen's SUMMARY shows the party being swapped from (Swap_ShowSummaryScreen: gPlayerParty), i.e. the
+      // round's own rental records, not the opening draft's first three rentals.
+      const summaryRentals = factorySwapSummaryRentals(state);
       const summary = state.summaryScreen;
       const transition = summary.transition;
       const summaryMonAnimClock = summary.monAnimClock ?? summary.openElapsed + 1;
@@ -4056,7 +4077,7 @@ function renderWithoutFactoryTerminal(state: EngineState): Uint8Array {
       if (!transition) {
         if (summary.monTransition) {
           return renderSummaryMonTransition(
-            state.draftScreen.rentals,
+            summaryRentals,
             summary.monTransition,
             summaryMonAnimClock,
             animateSwitchedMon,
@@ -4064,7 +4085,7 @@ function renderWithoutFactoryTerminal(state: EngineState): Uint8Array {
           );
         }
         return summary.onInfoPage
-          ? renderSummaryInfoPage(state.draftScreen.rentals, summary.selectedSlot, summaryMonAnimClock, animateSwitchedMon)
+          ? renderSummaryInfoPage(summaryRentals, summary.selectedSlot, summaryMonAnimClock, animateSwitchedMon)
           : renderPopup(0, 0);
       }
       const isEntry = transition.direction === "toSummary";
@@ -4074,7 +4095,7 @@ function renderWithoutFactoryTerminal(state: EngineState): Uint8Array {
         const bgY = bgFadeY(0, FADE_IN);
         const objY = objFadeY(0, FADE_IN);
         return isEntry
-          ? renderSummaryInfoPageFaded(state.draftScreen.rentals, summary.selectedSlot, bgY, objY)
+          ? renderSummaryInfoPageFaded(summaryRentals, summary.selectedSlot, bgY, objY)
           : renderPopup(bgY, objY);
       }
       const timing =
@@ -4090,7 +4111,7 @@ function renderWithoutFactoryTerminal(state: EngineState): Uint8Array {
       return showingPopup
         ? renderPopup(bgY, objY)
         : renderSummaryInfoPageFaded(
-            state.draftScreen.rentals,
+            summaryRentals,
             summary.selectedSlot,
             bgY,
             objY,
