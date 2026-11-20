@@ -7,6 +7,7 @@ SIG_CHECKED = {"battle.action", "battle.fight", "draft.cursor", "draft.menu", "d
 ENGINE_SIG_TO_ROM = {("battle.party", "cancel"): "7"}  # the party menu's CANCEL is slot PARTY_SIZE + 1 (party_menu.c)
 PARTY_ORDER = ["0", "1", "2", "7"]
 STEER_MAX = 10  # cursor presses at most to bring the ROM's cursor to the engine's before one replayed press
+MENU_PRESS_SES = {5, 32}  # SE_SELECT, SE_FAILURE (include/constants/songs.h)
 
 
 def rom_sig(kind, engine_sig):
@@ -43,6 +44,29 @@ def lcg_back(x):
     return ((x - 0x6073) * 0xEEB9EB65) & 0xFFFFFFFF  # 0xEEB9EB65 = inverse of 0x41C64E6D mod 2^32
 
 
+def m4a_restarted(pre, post, players, info_size=0x40, track_size=0x50):
+    """True when a song was started again on this frame though the m4a RAM looks unchanged: a sound restarted on every frame
+    (AnimTask_Rollout_Step's PlaySE12WithPanning(SE_M_HEADBUTT) on 10 frames in a row, battle_anim_rock.c:638-651) ends each frame in
+    the same just-started state, which the hybrid stepping's signature cannot tell from a frame without sound calls, so the ROM side
+    logged one SE_M_HEADBUTT where the ROM plays ten. A live track of an unpaused player always moves something in a frame (the clock
+    and the track's wait / cmdPtr on a tick, tempoC between ticks); a player whose clock, tempo counters and tracks did not change at
+    all while a track still EXISTs was restarted. `pre` / `post`: (address, length) -> bytes readers of the frame's start and end
+    (soundEventProbe.py restarted_every_frame is the same test)."""
+    for addr in players:
+        info0, info1 = pre(addr, info_size), post(addr, info_size)
+        # clock (0x0C), tempoD / tempoU / tempoI / tempoC (0x1C-0x23); MUSICPLAYER_STATUS_PAUSE in status (0x04)
+        if info0[0xC:0x10] != info1[0xC:0x10] or info0[0x1C:0x24] != info1[0x1C:0x24] or int.from_bytes(info1[4:8], "little") & 0x80000000:
+            continue
+        tracks = int.from_bytes(info1[0x2C:0x30], "little")
+        if not 0x3000000 <= tracks < 0x3008000 - track_size * 16:
+            continue
+        n = min(info1[8], 16) * track_size
+        t0, t1 = pre(tracks, n), post(tracks, n)
+        if t0 == t1 and any(t1[i] & 0x80 for i in range(0, n, track_size)):  # MPT_FLG_EXIST
+            return True
+    return False
+
+
 def new_buttons(before, now):
     """The buttons that start being pressed at `now` (the game reads JOY_NEW): a chord like LEFT+DOWN after LEFT is a DOWN press."""
     b = set(before.split("+")) if before else set()
@@ -55,6 +79,8 @@ class Plan:
 
     anchor: a run of frames in which the engine waits at one menu kind. Its `effects` are the frames whose (kind, cursor) differ from the
     frame before, with the buttons held then (the press that moved the cursor or left the menu); `offset` counts from the anchor's first frame.
+    An effect with `still` is a press that changed nothing but played a sound on its frame (B in the forced party menu: SE_FAILURE,
+    party_menu.c:1382-1384): the ROM gets it once, with no effect to wait for.
     free presses: the press starts outside every menu, with `offset` counted from the end of the anchor before them (or from frame 0)."""
 
     def __init__(self, eng):
@@ -71,6 +97,8 @@ class Plan:
             for x in range(f, min(end, n + 1)):
                 held[x] = b
         self.n = n
+        # menu sounds of a press (SE_SELECT, SE_FAILURE): another sound that happens to start on a press frame is no reason to press
+        sound_frames = {f for f, ev in eng.get("sounds", []) if ev.get("kind") in ("se", "direct") and ev.get("id") in MENU_PRESS_SES}
         self.anchors, self.free = [], {}  # free[k] = presses after anchor k-1 (k = 0: from frame 0)
         f = 1
         gap_start, gap_index, frees = 0, 0, []
@@ -101,6 +129,11 @@ class Plan:
                     while onset > start and held[onset - 1] == b:
                         onset -= 1
                     effects.append({"offset": onset - start, "engineFrame": x, "buttons": new_buttons(held[onset - 1], b), "from": sig[x - 1], "to": [kind[x], sig[x]], "leaves": kind[x] != k})
+                elif x <= end and x in sound_frames and set(held[x].split("+")) - set(held[x - 1].split("+")) - {""}:
+                    effects.append({"offset": x - start, "engineFrame": x, "buttons": new_buttons(held[x - 1], held[x]), "from": sig[x], "to": [kind[x], sig[x]], "leaves": False, "still": True})
+            # a press whose effect shows a frame or more after its sound is that effect, not a sound-only press as well
+            onsets = {e["offset"] for e in effects if not e.get("still")}
+            effects = sorted((e for e in effects if not (e.get("still") and e["offset"] in onsets)), key=lambda e: e["offset"])
             self.anchors.append({"kind": k, "start": start, "end": end, "sig": sig[start], "effects": effects})
             gap_index = len(self.anchors)
             gap_start, frees = end + 1, []
@@ -240,6 +273,13 @@ class Driver:
                 return self.hold[0]
             if d is not None:
                 self.note("steer-failed", anchor=b["index"], kind=a["kind"], rom=menu[1], engine=e["from"])
+        if e.get("still") or (not e["leaves"] and menu[1] == "?"):
+            # a press that only plays a sound on the engine, or one whose effect the ROM side cannot read (the summary's move-select
+            # cursor: the ROM sig is "?", so opening move select looked like nothing and was pressed six times): made once
+            b["i"] += 1
+            b["pressed"], b["tries"] = None, 0
+            self.press(e["buttons"], self.TAP, f)
+            return self.hold[0]
         b["sigBefore"] = menu[1]
         b["pressed"] = f
         b["tries"] += 1

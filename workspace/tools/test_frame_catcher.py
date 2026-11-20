@@ -125,6 +125,129 @@ class DriverTest(unittest.TestCase):
         self.assertFalse([p for p in presses[3:] if p])
         self.assertTrue([n for n in notes if n[0] == "unplanned-rom-menu"])
 
+    def test_a_sound_only_press_in_a_menu_is_made_once(self):
+        # the forced party menu 10-29: RIGHT at 14 moves the cursor; B at 20 changes nothing and plays SE_FAILURE (party_menu.c:1382-1384);
+        # A at 26 leaves. Without the sound the B would not be in the plan (the ROM never got it and played no SE_FAILURE).
+        eng = engine(40, [[0, None, None], [10, "battle.party", "0"], [15, "battle.party", "1"], [27, None, None]],
+                     [[14, "RIGHT"], [16, ""], [20, "B"], [22, ""], [26, "A"], [28, ""]])
+        eng["sounds"] = [[15, {"kind": "se", "id": 5}], [20, {"kind": "se", "id": 32}], [27, {"kind": "se", "id": 5}]]
+        a = fc.Plan(eng).anchors[0]
+        self.assertEqual([(e["offset"], e["buttons"], e.get("still", False)) for e in a["effects"]],
+                         [(4, "RIGHT", False), (10, "B", True), (16, "A", False)])
+        self.assertEqual([e["buttons"] for e in fc.Plan({**eng, "sounds": []}).anchors[0]["effects"]], ["RIGHT", "A"])
+        state = {"slot": 0, "open": True, "last": [], "b": 0}
+
+        def rom(f, presses):
+            if not state["open"] or f < 10:
+                return None
+            p = presses[-1] if presses else []
+            if p != state["last"] and p:
+                if p == ["RIGHT"]:
+                    state["slot"] = 1
+                elif p == ["B"]:
+                    state["b"] += 1
+                elif p == ["A"]:
+                    state["open"] = False
+                    return None
+            state["last"] = p
+            return ("battle.party", str(state["slot"]))
+        presses, notes, d = self.run_driver(eng, rom, 80)
+        self.assertEqual(state["b"], 1)  # pressed once, not retried for an effect it cannot have
+        self.assertFalse(state["open"])
+        self.assertFalse([n for n in notes if n[0] in ("press-without-effect", "anchor-left-early")])
+
+
+class M4aRestartTest(unittest.TestCase):
+    """Rollout's SE_M_HEADBUTT is started again on 10 frames in a row; the frame-end m4a RAM of frames 2-10 is the same."""
+    PLAYER, TRACKS = 0x3007000, 0x3006000
+
+    def ram(self, clock=0, tempo_c=0, status=0, flags=0x83, wait=0):
+        info = bytearray(0x40)
+        info[4:8] = status.to_bytes(4, "little")
+        info[8] = 1  # one track
+        info[0xC:0x10] = clock.to_bytes(4, "little")
+        info[0x22:0x24] = tempo_c.to_bytes(2, "little")
+        info[0x2C:0x30] = self.TRACKS.to_bytes(4, "little")
+        track = bytearray(0x50)
+        track[0] = flags
+        track[1] = wait
+        mem = {self.PLAYER: bytes(info), self.TRACKS: bytes(track)}
+        return lambda a, n: mem[a][:n]
+
+    def test_a_live_track_that_did_not_move_was_restarted(self):
+        self.assertTrue(fc.m4a_restarted(self.ram(), self.ram(), [self.PLAYER]))
+        self.assertTrue(fc.m4a_restarted(self.ram(), self.ram(), {self.PLAYER: "SE1"}))  # romRun passes its {address: name} map
+
+    def test_a_playing_or_finished_or_paused_song_was_not(self):
+        self.assertFalse(fc.m4a_restarted(self.ram(clock=1), self.ram(clock=2), [self.PLAYER]))  # a tick
+        self.assertFalse(fc.m4a_restarted(self.ram(tempo_c=75), self.ram(tempo_c=0), [self.PLAYER]))  # between ticks
+        self.assertFalse(fc.m4a_restarted(self.ram(wait=3), self.ram(wait=2), [self.PLAYER]))
+        self.assertFalse(fc.m4a_restarted(self.ram(flags=0), self.ram(flags=0), [self.PLAYER]))  # every track ended
+        self.assertFalse(fc.m4a_restarted(self.ram(status=0x80000000), self.ram(status=0x80000000), [self.PLAYER]))  # stopped
+
+
+class SoundAttributionTest(unittest.TestCase):
+    def test_press_frames(self):
+        import compare as cmp
+        self.assertEqual(cmp.press_frames([[1, "LEFT"], [2, ""], [5, "LEFT"], [6, "LEFT+DOWN"], [7, "DOWN"], [9, ""]]), {1, 5, 6})
+
+    def test_a_press_sound_on_the_frame_its_menu_opened_counts_for_the_menu_that_took_the_press(self):
+        import compare as cmp
+        # ours: A at 100 opens the next menu on 100 (a stretch boundary); its SE_SELECT goes to the stretch before. A cry there stays.
+        sounds = [[100, {"kind": "se", "id": 5}], [100, {"kind": "cry", "id": 16}], [104, {"kind": "se", "id": 5}], [200, {"kind": "se", "id": 5}]]
+        out = cmp.attribute_press_sounds(sounds, {100, 104}, {100, 200})
+        self.assertEqual([f for f, _ in out], [99, 100, 104, 200])
+
+    def test_only_a_steer_press_s_own_select_is_left_out(self):
+        import compare as cmp
+        # seed 3's fight menu: the ROM driver steers RIGHT (7793) and DOWN (7799); the player's own B follows at 7804
+        sounds = [[7782, {"kind": "se", "id": 5}], [7793, {"kind": "se", "id": 5}], [7799, {"kind": "se", "id": 5}], [7804, {"kind": "se", "id": 5}]]
+        self.assertEqual(cmp.steer_sounds(sounds, [7793, 7799]), {1, 2})
+
+    def test_the_same_sound_twice_on_one_frame_counts_once(self):
+        import compare as cmp
+        se = {"kind": "se", "id": 5, "pan": None}
+        # ours logs both SE_SELECTs of the YES / NO's NO; the ROM log has one (its second MPlayStart is a no-op)
+        out = cmp.sound_compare([[15173, se], [15181, se], [15181, se]], [[15962, se], [15970, se]], 15165, 15200, 15953, 15990)
+        self.assertEqual((out["class"], out["missingInOurs"], out["extraInOurs"]), ("timing", [], []))  # one frame apart, nothing unmatched
+
+    def test_a_volume_set_to_the_volume_it_has_is_dropped(self):
+        import compare as cmp
+        duck = lambda v: {"kind": "duck", "id": 469, "volume": v}
+        # the summary's cry ducks and restores; CloseSummaryScreen restores again (a no-op the ROM log leaves out); a new BGM is at full volume
+        sounds = [[10, duck(85)], [40, duck(256)], [62, duck(256)], [70, {"kind": "bgm", "id": 476}], [80, duck(256)], [90, duck(85)]]
+        self.assertEqual([f for f, _ in cmp.drop_unchanged_volume(sounds)], [10, 40, 70, 90])
+
+    def test_a_cry_stop_after_the_cry_is_over_is_dropped(self):
+        import compare as cmp
+        cry, stop = {"kind": "cry", "id": 240}, {"kind": "stop", "id": None, "player": "cry"}
+        duck = lambda v: {"kind": "duck", "id": 469, "volume": v}
+        # the cry (ducked, restored once over); a close long after: its stop cuts nothing. A stop during a cry stays.
+        sounds = [[3707, duck(85)], [3707, cry], [3749, duck(256)], [3953, stop], [4100, duck(85)], [4100, cry], [4120, stop], [4120, duck(256)]]
+        self.assertEqual([f for f, _ in cmp.drop_silent_cry_stops(sounds)], [3707, 3707, 3749, 4100, 4100, 4120, 4120])
+
+    def test_a_press_the_rom_side_cannot_read_is_made_once(self):
+        # the summary's contest-moves page: A opens move select (the engine's sig changes, the ROM's stays "?"), then B leaves
+        eng = engine(30, [[0, None, None], [10, "summary", "contestMoves:0:-"], [14, "summary", "contestMoves:0:0"], [24, None, None]],
+                     [[13, "A"], [15, ""], [23, "B"], [25, ""]])
+        state = {"a": 0, "open": True, "last": []}
+
+        def rom(f, presses):
+            if not state["open"] or f < 10:
+                return None
+            p = presses[-1] if presses else []
+            if p != state["last"] and p:
+                if p == ["A"]:
+                    state["a"] += 1
+                elif p == ["B"]:
+                    state["open"] = False
+                    return None
+            state["last"] = p
+            return ("summary", "?")
+        presses, notes, d = DriverTest.run_driver(DriverTest(), eng, rom, 80)
+        self.assertEqual(state["a"], 1)
+        self.assertFalse(state["open"])
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -348,6 +348,26 @@ def main():
         sig.append(iw(oracle.symbols["gPokemonCrySong"], 0x40))
         return sig, clocks
 
+    def restarted_every_frame(pre_iw, post_iw):
+        """A song started again on every frame (AnimTask_Rollout_Step's PlaySE12WithPanning(SE_M_HEADBUTT) on 10 frames in a
+        row, battle_anim_rock.c:638-651) ends each frame in the same just-started state, so the signature cannot see it. A live
+        track of an unpaused player always moves something in a frame (clock and the track's wait / cmdPtr on a tick, tempoC
+        between ticks); a player whose clock, tempo counters and tracks did not change at all over a frame while a track still
+        EXISTs was restarted on it."""
+        for addr in players:
+            info0, info1 = pre_iw(addr, MPLAY_INFO_SIZE), post_iw(addr, MPLAY_INFO_SIZE)
+            # clock (0x0C) and tempoD / tempoU / tempoI / tempoC (0x1C-0x23); MUSICPLAYER_STATUS_PAUSE in status (0x04)
+            if info0[0xC:0x10] != info1[0xC:0x10] or info0[0x1C:0x24] != info1[0x1C:0x24] or int.from_bytes(info1[4:8], "little") & 0x80000000:
+                continue
+            tracks = int.from_bytes(info1[0x2C:0x30], "little")
+            if not 0x3000000 <= tracks < 0x3008000 - MPLAY_TRACK_SIZE * 16:
+                continue
+            n = min(info1[8], 16) * MPLAY_TRACK_SIZE
+            t0, t1 = pre_iw(tracks, n), post_iw(tracks, n)
+            if t0 == t1 and any(t1[i] & 0x80 for i in range(0, n, MPLAY_TRACK_SIZE)):  # MPT_FLG_EXIST
+                return True
+        return False
+
     def hybrid_advance(buttons):
         oracle._set_buttons(list(buttons))
         pre = snapshot()
@@ -355,7 +375,8 @@ def main():
         core.run_frame()
         post = snapshot()
         sig1, clk1 = signature(blob_reader(post))
-        if sig0 == sig1 and all(b >= a for a, b in zip(clk0, clk1)):
+        if (sig0 == sig1 and all(b >= a for a, b in zip(clk0, clk1))
+                and not restarted_every_frame(blob_reader(pre), blob_reader(post))):
             state["frame"] += 1
             state["fast"] += 1
             oracle._screen_stale = False
