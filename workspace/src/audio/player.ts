@@ -16,9 +16,22 @@ const MAX_PASSES_AHEAD = 48;
 const PUMP_MS = 250;
 /** The volume the cries were recorded at (tools/audio/soundRecorder.py CRY_VOLUME; sound.c PlayCry_ByMode(.., volume 120)). */
 const CRY_RECORDED_VOLUME = 120;
+/**
+ * snd1: an SE that a new song takes the player from keeps sounding one frame past the start event and then fades over one more frame. m4a acts
+ * on its state on the frame of the call, but the mixer's buffer for that frame plays out over the next one, and MPlayStart's TrackStop releases
+ * the old notes (envelope release) rather than cutting them. ROM, isolated (soundRecorder's clean state, register-poked PlaySE1WithPanning):
+ * SE_BALL_TRAY_BALL pan 63 preempted 2 frames after its call plays its whole first audible frame (RMS 2133, alone 2133) and about half of
+ * the next (583 vs 1123); the new one is heard from its own onset. Cutting at the event instead lost every tray ball that the next one
+ * followed within 2 frames (the onset is 924 samples, so it had not started yet). docs/snd1-playtest-sounds.md.
+ */
+export const SE_STOP_LAG_S = 1 / FRAME_HZ;
+export const SE_STOP_RELEASE_S = 1 / FRAME_HZ;
+/** The default cut ramp of a stopped voice (BGM / cry replacement, mute). */
+const CUT_RAMP_S = 0.003;
 /** Files fetched once audio is live so the first sounds are not late; everything else is fetched on first use. */
 const PREFETCH_BGM = [469];
-const PREFETCH_SE = [5, 32, 9, 15];
+// snd1: plus the battle-start burst (the ball tray: 14 SEs in one second, five files) so the first battle's tray is not lost to first-use loads.
+const PREFETCH_SE = [5, 32, 9, 15, 114, 115, 116];
 
 export type AudioState = "off" | "loading" | "suspended" | "running" | "closed" | "unsupported";
 
@@ -616,7 +629,7 @@ class Player implements AudioPlayer {
     }
     if (current) {
       this.counters.preempted += 1;
-      this.killVoice(current, t);
+      this.releaseVoice(current, t);
     }
     this.begin({ slot, kind, id, priority, sound, t, pan: event.pan });
   }
@@ -697,9 +710,12 @@ class Player implements AudioPlayer {
     if (event.id === null) return;
     const row = this.assets.songPlayers.songs[String(event.id)];
     const name = this.assets.songPlayers.players[row?.[0] ?? 1] ?? "SE1";
-    // m4aSongNumStop: only if that player is currently playing that song.
+    // m4aSongNumStop: only if that player is currently playing that song (m4aMPlayStop -> TrackStop: the same lag and release as a preemption).
     const voice = this.live(name as Slot, t);
-    if (voice && voice.id === event.id) this.killVoice(voice, t);
+    if (voice && voice.id === event.id) {
+      if (voice.kind === "se") this.releaseVoice(voice, t);
+      else this.killVoice(voice, t);
+    }
   }
 
   private resumeBgm(t: number): void {
@@ -767,7 +783,15 @@ class Player implements AudioPlayer {
     this.dropSources(voice, this.c(t));
   }
 
-  private dropSources(voice: Voice, ctxTime: number): void {
+  /** snd1: an SE stopped by m4a (a preempting start, m4aSongNumStop): heard until one frame after `t`, then released over one frame. */
+  private releaseVoice(voice: Voice, t: number): void {
+    const at = t + SE_STOP_LAG_S;
+    voice.end = Math.min(voice.end, at + SE_STOP_RELEASE_S);
+    voice.dead = true;
+    this.dropSources(voice, this.c(at), SE_STOP_RELEASE_S);
+  }
+
+  private dropSources(voice: Voice, ctxTime: number, ramp = CUT_RAMP_S): void {
     if (this.ctx === null) {
       voice.sources = [];
       return;
@@ -776,9 +800,9 @@ class Player implements AudioPlayer {
     if (voice.out) {
       voice.out.gain.cancelScheduledValues(at);
       voice.out.gain.setValueAtTime(this.fadeValue(voice, at - this.ctxOffset), at);
-      voice.out.gain.linearRampToValueAtTime(0, at + 0.003);
+      voice.out.gain.linearRampToValueAtTime(0, at + ramp);
     }
-    for (const { src } of voice.sources) src.stop(at + 0.004);
+    for (const { src } of voice.sources) src.stop(at + ramp + 0.001);
     voice.sources = [];
     voice.out = null;
   }

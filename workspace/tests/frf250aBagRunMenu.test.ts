@@ -57,16 +57,14 @@ function replay(rom: Fixture): { ses: string[]; timeline: string[] } {
   }
   return { ses, timeline };
 }
-// The ROM also plays SE_SELECT for every action-menu cursor move (the app has no emitter there yet; separate gap), so only the
-// BAG/RUN family is compared: the A that opens BAG / RUN, the yes/no cursor moves and the closing A / B.
-const romSes = (rom: Fixture, skip: readonly number[]): string[] =>
-  rom.events.filter((e) => !e.noop && e.kind === "se" && !skip.includes(e.frame)).map((e) => `${e.frame}:${e.kind}:${e.id}`);
+// Every ROM SE of the window is compared, the action-menu cursor moves included (snd1 added that emitter; tests/snd1BattleMenuSounds.test.ts).
+const romSes = (rom: Fixture): string[] =>
+  rom.events.filter((e) => !e.noop && e.kind === "se").map((e) => `${e.frame}:${e.kind}:${e.id}`);
 
 const LABS = [
-  { lab: "bag", skip: [1, 133], timeline: ["1:action-menu/1/1", "33:bag-message/1/1", "132:action-menu/1/1", "133:action-menu/3/1"] },
+  { lab: "bag", timeline: ["1:action-menu/1/1", "33:bag-message/1/1", "132:action-menu/1/1", "133:action-menu/3/1"] },
   {
     lab: "run-no",
-    skip: [1, 33, 179],
     timeline: [
       "1:action-menu/1/1", "33:action-menu/3/1", "65:forfeit-question/3/1", "131:forfeit-question/3/0", "151:forfeit-question/3/1",
       "171:forfeit-closing/3/1", "178:action-menu/3/1", "179:action-menu/1/1",
@@ -74,7 +72,6 @@ const LABS = [
   },
   {
     lab: "run-b",
-    skip: [1, 33, 149],
     timeline: [
       "1:action-menu/1/1", "33:action-menu/3/1", "65:forfeit-question/3/1", "131:forfeit-question/3/0", "141:forfeit-closing/3/0",
       "148:action-menu/3/1", "149:action-menu/1/1",
@@ -84,13 +81,13 @@ const LABS = [
 
 describe("BAG / RUN state machine and SE_SELECT frames equal the ROM (both scenes)", () => {
   for (const scene of ["on", "off"] as const) {
-    for (const { lab, skip, timeline } of LABS) {
+    for (const { lab, timeline } of LABS) {
       it(`frf250a-${lab}-${scene}: phases, cursors and SE_SELECT frames`, () => {
         const rom = fixture(lab, scene);
         expect(rom.profile).toBe(scene === "on" ? "battle-scene-on" : "battle-scene-off");
         const { ses, timeline: ours } = replay(rom);
         expect(ours).toEqual(timeline);
-        expect(ses).toEqual(romSes(rom, skip));
+        expect(ses).toEqual(romSes(rom));
         expect(ses.every((s) => s.endsWith(":se:5"))).toBe(true);
       });
     }

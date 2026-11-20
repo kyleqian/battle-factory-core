@@ -112,6 +112,7 @@ import {
   renderPrebattleRoomWalkScene,
 } from "./prebattleRoomRender.ts";
 import { SE_EXIT } from "./battleEndSounds.ts";
+import { emitLobbyAttendantOpenSound, emitLobbyAttendantSounds, emitPrebattleEntrySounds } from "./lobbySounds.ts";
 import {
   advanceBattleRoom,
   battleRoomAcceptedState,
@@ -1293,6 +1294,7 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
   }
 
   if (state.prebattleEntry) {
+    emitPrebattleEntrySounds(state.prebattleEntry, newKeys.has("A")); // snd1, write-only
     const advance = advancePrebattleEntry(state.prebattleEntry, { a: newKeys.has("A") });
     let entryNext: EngineState = state;
     if (advance.state !== null && advance.state.phase === "draftFadeIn") {
@@ -1329,12 +1331,14 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
         const heldNpcs = stepLobbyNpcsTick(state.lobbyNpcs, rngValue, true, state.lobbyFreeRoam);
         return { ...state, frame: state.frame + 1, keyRepeat, lobbyNpcs: heldNpcs.npcs, rngMode: "vblank", rngValue };
       }
-      const attendant = advanceFactoryLobbyAttendant(state.lobbyAttendant, {
+      const attendantInput = {
         a: newKeys.has("A"),
         b: newKeys.has("B"),
         up: newAndRepeatedKeys.has("UP"),
         down: newAndRepeatedKeys.has("DOWN"),
-      });
+      };
+      const attendant = advanceFactoryLobbyAttendant(state.lobbyAttendant, attendantInput);
+      emitLobbyAttendantSounds(state.lobbyAttendant, attendant, attendantInput); // snd1, write-only
       if (attendant.done === "draft") {
         return enterPrebattleEntry(
           state,
@@ -1367,6 +1371,7 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
       isFactoryLobbyFacingSinglesAttendant(state.lobbyFreeRoam)
     ) {
       const lockedNpcs = stepLobbyNpcsTick(state.lobbyNpcs, rngValue, true, state.lobbyFreeRoam);
+      emitLobbyAttendantOpenSound(); // snd1, write-only
       return {
         ...state,
         frame: state.frame + 1,
@@ -2892,6 +2897,9 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
       prebattleRoom = { phase: "messageClosing", elapsed: 0 };
     } else {
       prebattleRoom = advancePrebattleRoom(prebattleRoom);
+      // snd1: the first walk's EnterBattleRoom warp plays DoWarp's SE_EXIT too (field_screen_effect.c:490), on the warp fade's
+      // second frame like the later walks (ROM: battle1-swapyes-b frame 484, tools/audio/fixtures/snd1-first-walk-window.json).
+      if (prebattleRoom?.phase === "warpFade" && prebattleRoom.elapsed === 1) playScriptSe(SE_EXIT);
       // S6 slice 2a handoff (battleRoom.ts doc): the warp fade holds solid
       // black indefinitely on its own (WARP_FADE_OUT clamps once fully
       // faded) - this is the one fixed elapsed count at which the

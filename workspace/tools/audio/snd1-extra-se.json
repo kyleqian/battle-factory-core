@@ -1,0 +1,1502 @@
+{
+ "schema": "snd1-extra-se/1",
+ "note": "SE (id, pan) tuples the engine emits (move animations: src/data/gen/anim-sound-timing.json through animSoundPan, both attacker sides) that no ROM sound log contains and that had no recording, or only one on the opposite side. Recorded like the logged ones (soundRecorder.py, PlaySE / PlaySE12WithPanning). docs/snd1-playtest-sounds.md.",
+ "se": [
+  {
+   "id": 15,
+   "name": "SE_BALL_OPEN",
+   "pan": -63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 15,
+   "name": "SE_BALL_OPEN",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 118,
+   "name": "SE_M_THUNDERBOLT",
+   "pan": -63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 119,
+   "name": "SE_M_THUNDERBOLT2",
+   "pan": -64,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 119,
+   "name": "SE_M_THUNDERBOLT2",
+   "pan": -63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 120,
+   "name": "SE_M_HARDEN",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 121,
+   "name": "SE_M_NIGHTMARE",
+   "pan": -63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 121,
+   "name": "SE_M_NIGHTMARE",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 122,
+   "name": "SE_M_VITAL_THROW",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 124,
+   "name": "SE_M_BUBBLE",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 125,
+   "name": "SE_M_BUBBLE2",
+   "pan": -64,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 125,
+   "name": "SE_M_BUBBLE2",
+   "pan": -63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 125,
+   "name": "SE_M_BUBBLE2",
+   "pan": 0,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 125,
+   "name": "SE_M_BUBBLE2",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 127,
+   "name": "SE_M_RAIN_DANCE",
+   "pan": -64,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 127,
+   "name": "SE_M_RAIN_DANCE",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 128,
+   "name": "SE_M_CUT",
+   "pan": -63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 128,
+   "name": "SE_M_CUT",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 129,
+   "name": "SE_M_STRING_SHOT",
+   "pan": -64,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 129,
+   "name": "SE_M_STRING_SHOT",
+   "pan": -63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 130,
+   "name": "SE_M_STRING_SHOT2",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 133,
+   "name": "SE_M_GUST2",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 134,
+   "name": "SE_M_DOUBLE_SLAP",
+   "pan": -63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 134,
+   "name": "SE_M_DOUBLE_SLAP",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 138,
+   "name": "SE_M_THUNDER_WAVE",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 141,
+   "name": "SE_M_MEGA_KICK2",
+   "pan": -64,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 141,
+   "name": "SE_M_MEGA_KICK2",
+   "pan": -63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 142,
+   "name": "SE_M_CRABHAMMER",
+   "pan": -64,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 142,
+   "name": "SE_M_CRABHAMMER",
+   "pan": -63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 147,
+   "name": "SE_M_FIRE_PUNCH",
+   "pan": -63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 148,
+   "name": "SE_M_TOXIC",
+   "pan": -63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 149,
+   "name": "SE_M_SACRED_FIRE",
+   "pan": -64,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 149,
+   "name": "SE_M_SACRED_FIRE",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 150,
+   "name": "SE_M_SACRED_FIRE2",
+   "pan": -64,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 150,
+   "name": "SE_M_SACRED_FIRE2",
+   "pan": -63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 151,
+   "name": "SE_M_EMBER",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 154,
+   "name": "SE_M_BLIZZARD2",
+   "pan": -63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 154,
+   "name": "SE_M_BLIZZARD2",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 155,
+   "name": "SE_M_SCRATCH",
+   "pan": -64,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 155,
+   "name": "SE_M_SCRATCH",
+   "pan": -63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 155,
+   "name": "SE_M_SCRATCH",
+   "pan": -43,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 155,
+   "name": "SE_M_SCRATCH",
+   "pan": -42,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 155,
+   "name": "SE_M_SCRATCH",
+   "pan": -22,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 155,
+   "name": "SE_M_SCRATCH",
+   "pan": -21,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 155,
+   "name": "SE_M_SCRATCH",
+   "pan": 0,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 155,
+   "name": "SE_M_SCRATCH",
+   "pan": 21,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 155,
+   "name": "SE_M_SCRATCH",
+   "pan": 22,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 155,
+   "name": "SE_M_SCRATCH",
+   "pan": 42,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 155,
+   "name": "SE_M_SCRATCH",
+   "pan": 43,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 155,
+   "name": "SE_M_SCRATCH",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 157,
+   "name": "SE_M_WING_ATTACK",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 158,
+   "name": "SE_M_FLY",
+   "pan": -64,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 158,
+   "name": "SE_M_FLY",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 159,
+   "name": "SE_M_SAND_ATTACK",
+   "pan": -64,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 159,
+   "name": "SE_M_SAND_ATTACK",
+   "pan": -63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 159,
+   "name": "SE_M_SAND_ATTACK",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 161,
+   "name": "SE_M_BITE",
+   "pan": -63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 162,
+   "name": "SE_M_HEADBUTT",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 163,
+   "name": "SE_M_SURF",
+   "pan": -64,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 163,
+   "name": "SE_M_SURF",
+   "pan": -63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 163,
+   "name": "SE_M_SURF",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 164,
+   "name": "SE_M_HYDRO_PUMP",
+   "pan": -64,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 164,
+   "name": "SE_M_HYDRO_PUMP",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 165,
+   "name": "SE_M_WHIRLPOOL",
+   "pan": -64,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 165,
+   "name": "SE_M_WHIRLPOOL",
+   "pan": -63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 165,
+   "name": "SE_M_WHIRLPOOL",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 166,
+   "name": "SE_M_HORN_ATTACK",
+   "pan": -64,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 166,
+   "name": "SE_M_HORN_ATTACK",
+   "pan": -63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 167,
+   "name": "SE_M_TAIL_WHIP",
+   "pan": -64,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 167,
+   "name": "SE_M_TAIL_WHIP",
+   "pan": -63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 167,
+   "name": "SE_M_TAIL_WHIP",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 168,
+   "name": "SE_M_MIST",
+   "pan": -64,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 168,
+   "name": "SE_M_MIST",
+   "pan": -63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 168,
+   "name": "SE_M_MIST",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 170,
+   "name": "SE_M_BIND",
+   "pan": -64,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 170,
+   "name": "SE_M_BIND",
+   "pan": -63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 170,
+   "name": "SE_M_BIND",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 172,
+   "name": "SE_M_SING",
+   "pan": -64,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 172,
+   "name": "SE_M_SING",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 173,
+   "name": "SE_M_PERISH_SONG",
+   "pan": -64,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 173,
+   "name": "SE_M_PERISH_SONG",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 174,
+   "name": "SE_M_PAY_DAY",
+   "pan": -63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 174,
+   "name": "SE_M_PAY_DAY",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 175,
+   "name": "SE_M_DIG",
+   "pan": -64,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 175,
+   "name": "SE_M_DIG",
+   "pan": -63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 176,
+   "name": "SE_M_DIZZY_PUNCH",
+   "pan": -64,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 176,
+   "name": "SE_M_DIZZY_PUNCH",
+   "pan": -63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 177,
+   "name": "SE_M_SELF_DESTRUCT",
+   "pan": -64,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 177,
+   "name": "SE_M_SELF_DESTRUCT",
+   "pan": -63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 177,
+   "name": "SE_M_SELF_DESTRUCT",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 178,
+   "name": "SE_M_EXPLOSION",
+   "pan": -64,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 178,
+   "name": "SE_M_EXPLOSION",
+   "pan": -63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 179,
+   "name": "SE_M_ABSORB_2",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 180,
+   "name": "SE_M_ABSORB",
+   "pan": -63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 181,
+   "name": "SE_M_SCREECH",
+   "pan": -64,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 182,
+   "name": "SE_M_BUBBLE_BEAM",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 184,
+   "name": "SE_M_SUPERSONIC",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 185,
+   "name": "SE_M_BELLY_DRUM",
+   "pan": -64,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 185,
+   "name": "SE_M_BELLY_DRUM",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 186,
+   "name": "SE_M_METRONOME",
+   "pan": -64,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 186,
+   "name": "SE_M_METRONOME",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 187,
+   "name": "SE_M_BONEMERANG",
+   "pan": -64,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 187,
+   "name": "SE_M_BONEMERANG",
+   "pan": -63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 187,
+   "name": "SE_M_BONEMERANG",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 188,
+   "name": "SE_M_LICK",
+   "pan": -63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 188,
+   "name": "SE_M_LICK",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 190,
+   "name": "SE_M_FAINT_ATTACK",
+   "pan": -64,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 190,
+   "name": "SE_M_FAINT_ATTACK",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 192,
+   "name": "SE_M_LEER",
+   "pan": -64,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 192,
+   "name": "SE_M_LEER",
+   "pan": -63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 194,
+   "name": "SE_M_SWAGGER2",
+   "pan": -64,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 194,
+   "name": "SE_M_SWAGGER2",
+   "pan": -63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 195,
+   "name": "SE_M_HEAL_BELL",
+   "pan": -64,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 195,
+   "name": "SE_M_HEAL_BELL",
+   "pan": -63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 195,
+   "name": "SE_M_HEAL_BELL",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 196,
+   "name": "SE_M_CONFUSE_RAY",
+   "pan": -64,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 196,
+   "name": "SE_M_CONFUSE_RAY",
+   "pan": -63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 196,
+   "name": "SE_M_CONFUSE_RAY",
+   "pan": 0,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 196,
+   "name": "SE_M_CONFUSE_RAY",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 197,
+   "name": "SE_M_SNORE",
+   "pan": -64,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 198,
+   "name": "SE_M_BRICK_BREAK",
+   "pan": -63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 198,
+   "name": "SE_M_BRICK_BREAK",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 201,
+   "name": "SE_M_SOLAR_BEAM",
+   "pan": -64,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 201,
+   "name": "SE_M_SOLAR_BEAM",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 202,
+   "name": "SE_M_PETAL_DANCE",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 203,
+   "name": "SE_M_TELEPORT",
+   "pan": -64,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 203,
+   "name": "SE_M_TELEPORT",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 204,
+   "name": "SE_M_MINIMIZE",
+   "pan": -64,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 204,
+   "name": "SE_M_MINIMIZE",
+   "pan": -63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 205,
+   "name": "SE_M_SKETCH",
+   "pan": -63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 205,
+   "name": "SE_M_SKETCH",
+   "pan": 0,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 205,
+   "name": "SE_M_SKETCH",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 207,
+   "name": "SE_M_REFLECT",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 208,
+   "name": "SE_M_BARRIER",
+   "pan": -64,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 208,
+   "name": "SE_M_BARRIER",
+   "pan": -63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 208,
+   "name": "SE_M_BARRIER",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 209,
+   "name": "SE_M_DETECT",
+   "pan": -64,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 209,
+   "name": "SE_M_DETECT",
+   "pan": -63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 211,
+   "name": "SE_M_MOONLIGHT",
+   "pan": 0,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 212,
+   "name": "SE_M_CHARM",
+   "pan": -64,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 212,
+   "name": "SE_M_CHARM",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 213,
+   "name": "SE_M_CHARGE",
+   "pan": -64,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 213,
+   "name": "SE_M_CHARGE",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 216,
+   "name": "SE_M_WATERFALL",
+   "pan": -63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 216,
+   "name": "SE_M_WATERFALL",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 218,
+   "name": "SE_M_ACID_ARMOR",
+   "pan": -64,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 218,
+   "name": "SE_M_ACID_ARMOR",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 219,
+   "name": "SE_M_SANDSTORM",
+   "pan": 0,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 222,
+   "name": "SE_M_ENCORE",
+   "pan": -64,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 222,
+   "name": "SE_M_ENCORE",
+   "pan": 0,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 222,
+   "name": "SE_M_ENCORE",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 223,
+   "name": "SE_M_ENCORE2",
+   "pan": -63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 224,
+   "name": "SE_M_BATON_PASS",
+   "pan": -64,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 224,
+   "name": "SE_M_BATON_PASS",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 225,
+   "name": "SE_M_MILK_DRINK",
+   "pan": -64,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 225,
+   "name": "SE_M_MILK_DRINK",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 226,
+   "name": "SE_M_ATTRACT",
+   "pan": -64,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 226,
+   "name": "SE_M_ATTRACT",
+   "pan": -63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 226,
+   "name": "SE_M_ATTRACT",
+   "pan": 0,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 226,
+   "name": "SE_M_ATTRACT",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 227,
+   "name": "SE_M_ATTRACT2",
+   "pan": 0,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 230,
+   "name": "SE_M_SAND_TOMB",
+   "pan": -63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 230,
+   "name": "SE_M_SAND_TOMB",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 231,
+   "name": "SE_M_GRASSWHISTLE",
+   "pan": -64,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 231,
+   "name": "SE_M_GRASSWHISTLE",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 232,
+   "name": "SE_M_SPIT_UP",
+   "pan": -64,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 232,
+   "name": "SE_M_SPIT_UP",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 233,
+   "name": "SE_M_DIVE",
+   "pan": -64,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 233,
+   "name": "SE_M_DIVE",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 234,
+   "name": "SE_M_EARTHQUAKE",
+   "pan": -63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 234,
+   "name": "SE_M_EARTHQUAKE",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 235,
+   "name": "SE_M_TWISTER",
+   "pan": -63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 235,
+   "name": "SE_M_TWISTER",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 236,
+   "name": "SE_M_SWEET_SCENT",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 237,
+   "name": "SE_M_YAWN",
+   "pan": -64,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 237,
+   "name": "SE_M_YAWN",
+   "pan": -63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 237,
+   "name": "SE_M_YAWN",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 238,
+   "name": "SE_M_SKY_UPPERCUT",
+   "pan": -64,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 238,
+   "name": "SE_M_SKY_UPPERCUT",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 240,
+   "name": "SE_M_HEAT_WAVE",
+   "pan": -64,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 240,
+   "name": "SE_M_HEAT_WAVE",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 241,
+   "name": "SE_M_UPROAR",
+   "pan": -64,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 241,
+   "name": "SE_M_UPROAR",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 242,
+   "name": "SE_M_HAIL",
+   "pan": -63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 242,
+   "name": "SE_M_HAIL",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 244,
+   "name": "SE_M_TEETER_DANCE",
+   "pan": -64,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 244,
+   "name": "SE_M_TEETER_DANCE",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  }
+ ]
+}

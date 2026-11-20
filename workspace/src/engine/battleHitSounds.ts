@@ -90,7 +90,14 @@ export function emitBattleHitSounds(
     const song = effectivenessSong(segment, next.eventSequence);
     if (song === null) return;
     const panBattler = song.weatherLoop ? 0 : next.battler;
-    scheduleAfter(Math.max(0, duration + sceneLag(segment) - moveBodyExtraRows(after!, false)), () => playPannedSe(song.song, panBattler === 0 ? SE_PAN_PLAYER : SE_PAN_OPPONENT));
+    // snd1: the SE starts with the hit: this body's presented end (the pre-lead duration plus its own lead / tail rows), where hpd4 / hpd5 put the
+    // ROM's hit. ROM aud242q-iceball5: SE 462 / 967 / 1477 / 1996 / 2589 (the frame before the hits 463 / 968 / 1478 / 1997 / 2590); ours now
+    // 463 / 968 / 1478 / 2000 / 2597 (the last two follow our hit drift), the aud241b Seismic Toss windows stay exact. The old anchor
+    // subtracted every earlier lead body of the whole presentation (moveBodyExtraRows), so the SE moved earlier turn after turn: Ice Ball's
+    // came 12 / 30 / 48 / 63 / 77 frames early, on top of the impact SE from roll 3 on (Kyle's 2026-11-20 Delibird: 39, then 26 frames
+    // after the impact instead of 41).
+    const ownExtraRows = moveBodyExtraRows(after!, true) - moveBodyExtraRows(after!, false);
+    scheduleAfter(Math.max(0, duration + ownExtraRows), () => playPannedSe(song.song, panBattler === 0 ? SE_PAN_PLAYER : SE_PAN_OPPONENT));
     return;
   }
   if (command.type === "hp" && command.battler === 0 && after !== null) {

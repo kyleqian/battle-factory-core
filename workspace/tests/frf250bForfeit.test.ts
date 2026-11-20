@@ -79,11 +79,12 @@ describe("RUN -> YES on the ROM-measured lab window (Scene OFF)", () => {
   });
 
   it("emits the ROM's sounds: SE_SELECT on A, then the loss tail (BGM fade, factory BGM, SE_EXIT)", () => {
+    // snd1: the action-menu cursor moves (RIGHT @1, DOWN @33) sound too, so the whole window is compared.
     const romSounds = rom.events
-      .filter((e) => !e.noop && e.frame > 33 && e.kind !== "stop")
+      .filter((e) => !e.noop && e.kind !== "stop")
       .map((e) => `${e.frame}:${e.kind}:${e.id}`);
     expect(run.sounds).toEqual(romSounds);
-    expect(run.sounds).toEqual(["65:se:5", "131:se:5", "151:se:5", "254:fade:476", "300:bgm:469", "326:se:9"]);
+    expect(run.sounds).toEqual(["1:se:5", "33:se:5", "65:se:5", "131:se:5", "151:se:5", "254:fade:476", "300:bgm:469", "326:se:9"]);
   });
 
   it("ends the round as roundLost and consumes no RNG for the forfeit", () => {
