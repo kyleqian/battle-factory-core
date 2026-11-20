@@ -9,7 +9,9 @@
 //   - sample: a canonical sample-battle helper reached during a live render is an error (drawRecord.ts throws it; reported here as a
 //     finding with the error message).
 // Used by tools/soak/randomRoundSoakDriver.ts (`drawCheck`) and tools/integration/soundCensusRomReplay.ts (`--draw-check`).
+import "../../src/engine/monPicPixelsInstall.ts";
 import { recordDraws, setCanonicalSampleStrict, type DrawRecord } from "../../src/engine/drawRecord.ts";
+import { containedPresentationErrorCount, containedPresentationErrors } from "../../src/engine/presentationContainment.ts";
 import { render, type EngineState } from "../../src/engine/core.ts";
 import { factoryTrainerPresentationForOpponent, type FactoryTrainerPresentation } from "../../src/engine/factoryTrainerPresentation.ts";
 import { facilityTrainerGfxIdForClass } from "../../src/engine/factoryTrainerOverworldGfx.ts";
@@ -150,12 +152,22 @@ type PendingRoom = { frame: number; sheet: string };
 /** Renders `state` with recording on and compares; a render throw is a finding (the frame is still counted). */
 export function checkDrawnFrame(state: EngineState, frame: number, pendingRooms?: PendingRoom[]): DrawCheckFinding[] {
   let record: DrawRecord;
+  const containedBefore = containedPresentationErrorCount();
   try {
     record = recordDraws(() => render(state)).record;
   } catch (error) {
     return [{ frame, kind: error instanceof Error && error.name === "CanonicalSampleInLiveRenderError" ? "sample" : "render", detail: error instanceof Error ? `${error.name}: ${error.message}` : String(error) }];
   }
   const findings = compareDrawRecord(state, record, frame);
+  // A throw the presentation containment caught (contain209: the frame drew the static field instead) is a finding too: a sample
+  // reached inside a contained draw, or any other degraded command. Distinct errors are recorded once, so this reports the first.
+  if (containedPresentationErrorCount() > containedBefore) {
+    const fresh = containedPresentationErrors().slice(containedBefore);
+    if (fresh.length === 0) findings.push({ frame, kind: "render", detail: "contained presentation error (past the containment list's limit)" });
+    for (const error of fresh) {
+      findings.push({ frame, kind: error.message.startsWith("CanonicalSampleInLiveRenderError") ? "sample" : "render", detail: `contained ${error.site} ${error.commandType}: ${error.message}` });
+    }
+  }
   if (pendingRooms !== undefined) {
     const trainer = roundTrainer(state);
     if (trainer === null) {

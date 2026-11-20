@@ -2872,13 +2872,15 @@ const healthboxAssemblyAssets: HealthboxAssets = {
  * before wiring this in: every cell the old heuristic called "real content"
  * the compositor also paints, with the identical RGB.
  */
-export const getOpponentHealthboxContent = canonicalSampleAccessor("anchor opponent healthbox", lazyValue(() => composeOpponentHealthbox(healthboxAssemblyAssets, {
+// pic3: not a noted canonical sample: it is the default content of the staged bodies' opponent healthbox draws
+// (drawSendOutHealthbox / drawOpponentHealthboxWobble), which the live seam always paints over (renderBattleResolutionLiveView).
+export const getOpponentHealthboxContent = lazyValue(() => composeOpponentHealthbox(healthboxAssemblyAssets, {
   name: getAnchorOpponentName(),
   level: getAnchorOpponentBattler().level,
   gender: ANCHOR_OPPONENT_GENDER,
   hpFraction: getAnchorOpponentBattler().hp / getAnchorOpponentBattler().maxHP,
   status: "none",
-})));
+}));
 export const KABUTO_SENDOUT_BATTLER = BATTLE2_ACTION_MENU_MODEL.opponent;
 export const kabutoHealthboxContent = composeOpponentHealthbox(healthboxAssemblyAssets, {
   name: KABUTO_SENDOUT_BATTLER.name,
