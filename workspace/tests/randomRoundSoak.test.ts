@@ -440,7 +440,9 @@ describe("random round soak driver (green milestone pin)", () => {
       // entry lead): frames + render calls, 41_151 -> 43_437, renderCalls 2_898 -> 3_045; same battle 7, turn 3, end state, diagnostics.
       // merge of pau4 / btn1 / pau5 / hpf5 (pin1; hpf5's tick / wrap / weather / Substitute hp lengths, docs/hpd1-hp-hold.md "hpf5"): frames + render calls,
       // 43_437 -> 43_336, renderCalls 3_045 -> 3_042; same battle 7, turn 3, end state, diagnostics.
-      frames: 43_336,
+      // pic8 (the forced party menu's clock starts at the faint message's dismiss edge, 2 frames earlier per forced switch; ROM lab
+      // pic7-player-faint-send-in-on): frames + render calls, 43_336 -> 43_334, renderCalls 3_042 -> 3_044; same battle 7, turn 3, end state, diagnostics.
+      frames: 43_334,
       battle: 7,
       turn: 3,
       diagnostics: {
@@ -452,7 +454,7 @@ describe("random round soak driver (green milestone pin)", () => {
         terminalOutcome: "roundWon",
         terminalRecordMenuInputReadyReached: true,
         terminalRecordChoice: "no",
-        renderCalls: 3_042,
+        renderCalls: 3_044,
       },
     });
     expect(second).toEqual(first);
@@ -980,7 +982,9 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // hpf1 (hit -> message / faint-chain / turn-end hp commands are floor-free, ROM-measured): 40342 / turn 20 -> 39622 / turn 24 (exploring presses land on new phases); same battle 2 / depth 1 / roundLost.
       // merge of the box's 2026-11-18 run with the Mac's fixes 44-51: frames only, 39622 -> 39365; same battle 2 / depth 1 / roundLost / turn 24.
       // merge of pau4 / btn1 / pau5 / hpf5 (pin1; the exploring presses land on new phases, a new trajectory as at fsw235): 39365 / battle 2 / depth 1 / turn 24 -> 18678 / battle 1 / depth 0 / turn 23; still roundLost.
-      frames: 18678,
+      // pic6 + pic8 (B in the battle party menu fades out and in over 78 frames, ROM lab pic6-party-cancel; the forced menu's clock starts
+      // 2 frames earlier, pic7 lab): frames only, 18678 -> 19042; same battle 1 / depth 0 / turn 23 / roundLost.
+      frames: 19042,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 0,
@@ -1010,7 +1014,8 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // btn1 (gated battle strings wait for A / B; the exploring policy presses B at 6%): 92558 / turn 27 -> 95264 / turn 29; same battle 5 / depth 4 / roundLost (seed 0 is unmoved).
       // merge of pau4 / btn1 / pau5 / hpf5 (pin1; the exploring presses land on new phases): 95264 / battle 5 / depth 4 / turn 29 -> 111059 / battle 6 / depth 5 / turn 19; still roundLost.
       // btn2 (Substitute fade lead / release-to-moveendall rows / the gate accepts 2 rows earlier; presentation timing): frames only, 111059 -> 111140; same battle 6 / depth 5 / turn 19 / roundLost.
-      frames: 111140,
+      // pic6 + pic8 (the party-menu cancel fade, the forced menu's earlier clock; see seed 0): frames only, 111140 -> 113091; same battle 6 / depth 5 / turn 19 / roundLost.
+      frames: 113091,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 5,
@@ -1049,7 +1054,8 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // hpd5 (measured on the hpd4 tip f40209793; the floor-free foe-hit hold): frames only, 9212 -> 9219; same end state.
       // hpf1: frames only, 9219 -> 9228; same end state.
       // merge of the box's 2026-11-18 run with the Mac's fixes 44-51: frames only, 9228 -> 9209; same end state.
-      frames: 9209,
+      // pic8 (the forced party menu's clock starts at the faint message's dismiss edge: 2 frames earlier per forced switch, ROM lab pic7): frames only, 9209 -> 9205; same end state.
+      frames: 9205,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 0,
@@ -1074,7 +1080,8 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // lbra: frames only, 9186 -> 9233; the snapshot is now taken when the walkable Lobby opens (the loss's record answer plays the ROM farewell first, +47 frames) instead of at the old chain; same battle / turn / end state.
       // hie1 (the Scene OFF held-item effect hold): frames only, 9233 -> 9271; same battle / turn / end state.
       // hpf1: frames only, 9271 -> 9404; same end state.
-      frames: 9404,
+      // pic8 (the forced party menu's clock starts at the faint message's dismiss edge, ROM lab pic7): frames only, 9404 -> 9400; same end state.
+      frames: 9400,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 0,
@@ -1595,7 +1602,9 @@ describe("ISSUES #104 (driver): continuous-play outcome semantics retuned -- OK 
     // seeds 47, 63, 70, 97, 102, 106 ... chain two round wins (carry 14; none in 0..39), so the lowest (47) is pinned.
     // merge of pau4 / btn1 / pau5 / hpf5 (pin1; hpf5's tick / wrap / weather / Substitute hp lengths shift the soak's press phases): seed 47 still carries 14, but lower seeds now do too; re-scanned seeds 0..49
     // under the same options (tools/soak/randomRoundSoak.ts --policy winning --max-rounds 3 --render-every 0 --seeds 0:50 --parallel 3): seeds 14, 17, 27 and 47 chain two round wins (carry 14), so the lowest (14) is pinned.
-    const result = runSeed(14, {
+    // pic6 + pic8 (the battle party menu's cancel fade and the forced menu's earlier clock shift the soak's press phases): seed 14 now carries 7; re-scanned seeds
+    // 0..49 under the same options: seeds 10, 17, 27 and 47 chain two round wins (carry 14), so the lowest (10) is pinned.
+    const result = runSeed(10, {
       policy: "winning",
       maxRounds: 3,
       renderEvery: 0,

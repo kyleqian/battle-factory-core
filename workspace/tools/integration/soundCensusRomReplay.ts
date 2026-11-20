@@ -72,6 +72,23 @@ const renderer = renderRange === null ? null : await (async () => {
     writeFileSync(`${renderDir}/engine-${String(f).padStart(5, "0")}.png`, PNG.sync.write(png));
   };
 })();
+// pic3 (docs/pic1-live-field-pictures.md): ROM_REPLAY_DRAW_CHECK=N renders every Nth frame of every battle through the drawn-field
+// check (tools/integration/drawnFieldCheck.ts: drawn pictures / healthbox names / HP vs the rules state); `round` / `native` / `replay`
+// outputs then carry `drawCheck: { framesChecked, rows }`. Presentation-only and opt-in: no tick or RNG change.
+const drawCheckEvery = Number(process.env.ROM_REPLAY_DRAW_CHECK ?? "0");
+const drawChecker = !(drawCheckEvery > 0) ? null : await (async () => {
+  const [core, check] = await Promise.all([import("../../src/engine/core.ts"), import("./drawnFieldCheck.ts")]);
+  const base = core.createInitialState({ appRoute: "generated-orchestrator", battleScene: scene });
+  const log = new check.DrawCheckLog();
+  return {
+    log,
+    check(orchestrator: any, f: number): void {
+      log.add(check.checkDrawnFrame({ ...base, factoryRoundBattleOrchestrator: orchestrator, rngMode: "frontierBattle" } as never, f));
+    },
+  };
+})();
+const withDrawCheck = <T extends object>(out: T): T => drawChecker === null ? out
+  : ({ ...out, drawCheck: { every: drawCheckEvery, framesChecked: drawChecker.log.framesChecked, rows: drawChecker.log.rows() } });
 // parity-mac fourth pass: the census mapping (seed * 11) % 49 only reaches challenges 1 to 7 (sets 110..755). --challenge=N / ROM_REPLAY_CHALLENGE=N (N = the
 // game's 0-based challengeNum; 7 = the eighth challenge, sets 372..849) puts the seed's battle into that challenge: streak N * 7 + (seed * 11) % 7. Unset = the
 // census mapping, so every older list keeps its battles.
@@ -334,6 +351,7 @@ function play(initial: any, record: boolean, patchRng: number | null = null, pla
       runScheduledScreenSounds();
     });
     if (renderer !== null && record && frame0 !== null && frame - frame0 >= renderRange![0] && frame - frame0 <= renderRange![1]) renderer(state, frame - frame0);
+    if (drawChecker !== null && frame % drawCheckEvery === 0 && owned()) drawChecker.check(state, frame);
     for (const e of events) sound.push(e.mode === undefined ? [e.frame, e.kind, e.id, e.pan] : [e.frame, e.kind, e.id, e.pan, e.mode]);
     if (cmdTrace !== null) {
       // ctl1 (--cmdtrace): the engine's presentation command changes (frame, segment, command index, type, battler, hp from / to, lead) next to the sound rows.
@@ -560,7 +578,7 @@ if (mode === "request" && stage !== null) {
     trace: { segments: [{ frames: 1, buttons: [] }], captureFrames: [0] },
   }, null, 1));
 } else if (mode === "native") {
-  writeFileSync(arg("out")!, JSON.stringify(result(play(nativeOrchestrator(), true))));
+  writeFileSync(arg("out")!, JSON.stringify(withDrawCheck(result(play(nativeOrchestrator(), true)))));
 } else if (mode === "replay") {
   // aud243c: the ROM's menu gRngValue is POST-AI. The opponent controller answers CHOOSE_ACTION (AI_TrySwitchOrUseItem, battle_controller_opponent.c:1540) and CHOOSE_MOVE
   // (BattleAI_SetupAIData + BattleAI_ChooseMoveOrAction, :1566) while the player's action menu is still up, so its draws precede the menu; the engine spends them at the
@@ -1119,7 +1137,7 @@ function roundMode() {
       if (attempt.error !== null) break;
     } catch (e) { roundError = `battle ${n}: ${String(e)}`; break; }
   }
-  writeFileSync(arg("out")!, JSON.stringify({ seed, scene, policy, swapPolicy: swapName, challengeNum: Math.floor(streak / 7), roundError, battles, swapStats: swapper.stats }));
+  writeFileSync(arg("out")!, JSON.stringify(withDrawCheck({ seed, scene, policy, swapPolicy: swapName, challengeNum: Math.floor(streak / 7), roundError, battles, swapStats: swapper.stats })));
 }
 // `round-compare --engine=round-engine.json --drive=round-drive.json`: each battle's turn compare (compareBattle) on the ROM drive of that battle, with the
 // battle-start check and the trainer-roll check the engine wrote.

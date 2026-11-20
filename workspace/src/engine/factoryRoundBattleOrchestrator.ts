@@ -2382,13 +2382,38 @@ function createForcedPartySelect(
   if (request === null || records === null) {
     return fail("forced-party handoff requires a genuine request and rental records");
   }
-  return createPartySelectStateFromForcedSwitch(
+  const selector = createPartySelectStateFromForcedSwitch(
     request,
     records,
     forcedPartyForResolution(state, resolution),
     state.partyOrder,
     resolution.pendingBattle.rules.rulesContext.party.player,
   );
+  const sinceDismiss = framesSinceFaintMessageDismiss(resolution);
+  return sinceDismiss === 0 ? selector : Object.freeze({ ...selector, elapsed: sinceDismiss });
+}
+
+/**
+ * pic8 (2026-11-20 playtest, docs/pic1-live-field-pictures.md): the forced selector's `elapsed` is "frames since the actual
+ * faint-message dismiss edge" (partySelect.ts), but the live segment can still run bookkeeping commands after the player's faint
+ * message (the faint script's sprite-visibility restores, one frame each) before it hands off, so the selector used to start two
+ * frames late. ROM lab tools/battle-lab/pic7-player-faint-send-in-on.json: A on "RATTATA fainted!" at trace frame 560, the field
+ * holds through capture 581 and its first fade step is capture 582, i.e. 21 held frames from the dismiss edge as
+ * PARTY_ENTRY_FADE_OUT_START says (the live route faded at +23). Only a tail of such draw-nothing commands is counted; anything else
+ * after the message keeps the old start.
+ */
+function framesSinceFaintMessageDismiss(resolution: BattleResolutionPresentationState): number {
+  const commands = resolution.segments[resolution.segmentIndex]?.commands ?? [];
+  let index = commands.length - 1;
+  let frames = 0;
+  for (; index >= 0; index -= 1) {
+    const command = commands[index]!;
+    if (command.type !== "sprite-visibility" || command.visible !== true || command.recall === true) break;
+    frames += command.timing?.minimumFrames ?? 1;
+  }
+  const message = commands[index];
+  if (message === undefined || message.type !== "message" || message.faintBattler !== 0) return 0;
+  return frames;
 }
 
 function settledCommandForResolutionHandoff(
