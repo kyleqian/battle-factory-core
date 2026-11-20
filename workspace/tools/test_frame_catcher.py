@@ -59,6 +59,14 @@ class PlanTest(unittest.TestCase):
         self.assertEqual(p.tail, 60 - 45)
 
 
+    def test_a_menu_on_the_mount_frame_is_an_anchor(self):
+        # the draft cursor is up on frame 0 and the A on frame 1 opens the menu: that press is the first anchor's effect
+        eng = engine(40, [[0, "draft.cursor", "0"], [1, "draft.menu", "0"], [20, "draft.cursor", "0"]], [[1, "A"], [2, ""], [20, "A"], [21, ""]])
+        p = fc.Plan(eng)
+        self.assertEqual([(a["kind"], a["start"]) for a in p.anchors], [("draft.cursor", 0), ("draft.menu", 1), ("draft.cursor", 20)])
+        self.assertEqual([(e["offset"], e["buttons"], e["leaves"]) for e in p.anchors[0]["effects"]], [(1, "A", True)])
+
+
 class DriverTest(unittest.TestCase):
     def run_driver(self, eng, rom_menu_at, frames=80):
         """rom_menu_at(frame, pressed buttons so far) -> (kind, sig) | None. Returns the presses per frame."""

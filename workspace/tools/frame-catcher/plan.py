@@ -100,11 +100,14 @@ class Plan:
         # menu sounds of a press (SE_SELECT, SE_FAILURE): another sound that happens to start on a press frame is no reason to press
         sound_frames = {f for f, ev in eng.get("sounds", []) if ev.get("kind") in ("se", "direct") and ev.get("id") in MENU_PRESS_SES}
         self.anchors, self.free = [], {}  # free[k] = presses after anchor k-1 (k = 0: from frame 0)
-        f = 1
+        # from frame 0, the mount's picture: a draft cursor there whose A is on frame 1 (the test player can press at once) is the
+        # round's first anchor; started at frame 1, the plan dropped it, the ROM never rented that Pokemon and stopped in the draft
+        # (seed 15, Scene OFF: "anchors-skipped draft.menu", then stuck at the third rental)
+        f = 0
         gap_start, gap_index, frees = 0, 0, []
         while f <= n:
             if kind[f] is None:
-                if held[f] and held[f] != held[f - 1]:
+                if held[f] and (f == 0 or held[f] != held[f - 1]):
                     length = 1
                     while f + length <= n and held[f + length] == held[f]:
                         length += 1

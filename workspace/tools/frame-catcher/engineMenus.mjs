@@ -9,6 +9,19 @@ function summaryReady(s) {
   return s && s.isOpen && !s.transition && !s.pageTransition && !s.monTransition && !(s.inputLockTicks > 0);
 }
 
+// The RECORD / RETIRE question (postwin.ts) is a menu only once its YES/NO box is drawn: the ROM prints the question first
+// (`message` + `waitmessage`, then `multichoicedefault ... MULTI_YESNO`, BattleFrontier_BattleFactoryPreBattleRoom/scripts.inc:108-115),
+// so the ROM's YES/NO opens about 70 frames after the A on RECORD. Counted from the A, the GO ON menu and the question were one
+// anchor on the engine side, and the ROM's YES/NO was bound to the next GO ON menu and answered YES (seed 19, Scene OFF, after
+// battle 2). engineRun.mjs passes the game's own postwinQuestionWindowVisible; without it (an older build) the question counts from the A.
+// The Lobby's "record your last BATTLE FACTORY match?" YES/NO after a round ends, won or lost (BattleFrontier_BattleFactoryLobby/
+// scripts.inc:76-85, `multichoicedefault 20, 8, MULTI_YESNO, 1`): a menu from the frame its box is drawn until it is answered. Without it
+// the ROM's YES/NO was an unplanned menu and the run stopped there (seed 9, Scene OFF, after battle 7).
+let questionWindowVisible = null;
+let terminalRecordMenuDrawn = null;
+export function setQuestionWindowVisible(fn) { questionWindowVisible = fn; }
+export function setTerminalRecordMenuDrawn(fn) { terminalRecordMenuDrawn = fn; }
+
 export function menuOf(st) {
   const orch = st.factoryRoundBattleOrchestrator;
   if (orch) {
@@ -39,9 +52,17 @@ export function menuOf(st) {
     if (sw.phase === "summaryFade") return summaryReady(st.summaryScreen) ? { kind: "summary", sig: summarySig(st.summaryScreen) } : null;
     return null;
   }
+  // before the postwin: the Lobby terminal keeps a postwin state
+  const term = st.factoryTerminal;
+  if (term && terminalRecordMenuDrawn && !term.recordDisabled && term.recordChoice === null && terminalRecordMenuDrawn(term)) {
+    return { kind: "field.multichoice", sig: String(term.recordMenuCursor) };
+  }
   const pw = st.postwin;
   if (pw) {
-    if (pw.question && pw.questionYesElapsed === null && pw.questionDismissElapsed === null) return { kind: "field.multichoice", sig: `q${pw.questionCursorPos}` };
+    if (pw.question && pw.questionYesElapsed === null && pw.questionDismissElapsed === null) {
+      if (questionWindowVisible && !questionWindowVisible(pw)) return null;
+      return { kind: "field.multichoice", sig: `q${pw.questionCursorPos}` };
+    }
     if (pw.dialoguePage === 0 && pw.continuationCursorPos !== null && pw.continuationConfirmElapsed === null && !pw.question) {
       return { kind: "field.multichoice", sig: String(pw.continuationCursorPos) };
     }

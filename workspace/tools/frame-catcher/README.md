@@ -82,6 +82,11 @@ round takes about 2 minutes. Five traces at once (`JOBS=5`) take as long as the 
    menu it opened counts for the menu that took the press, the same sound twice on one frame counts once, and a volume change to the
    volume the music has and a cry stop after the cry is over are left out (docs/snd2-catcher-sounds.md).
 
+Menus that open only after a printed question: the after-battle RECORD / RETIRE question and the Lobby's "record your last match?"
+after a round are menus from the frame their YES/NO box is drawn (the game's own `postwinQuestionWindowVisible` /
+`factoryTerminalRecordMenuDrawn`, handed to `engineMenus.mjs` by `engineRun.mjs`), as on the ROM, where `message` + `waitmessage` come
+before `multichoicedefault`. The plan starts at the mount frame (frame 0), so a press on the round's very first frame is replayed.
+
 When a sprite is in a different place on the two sides, check a frame after it has stopped moving: during a walk the two sides pass
 through the same tiles at different moments (the first look at Kyle's Tuber picked a ROM frame mid-walk and missed the one-tile offset).
 

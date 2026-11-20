@@ -26,7 +26,13 @@ const { FactorySession } = await import(`${GAME}/src/factorySession.ts`);
 const { render } = await import(`${GAME}/src/engine/core.ts`);
 const { installBundledMonPicPixels } = await import(`${GAME}/src/engine/monPicPixelsInstall.ts`);
 installBundledMonPicPixels();
-const { menuOf, surfaceOf } = await import(path.join(here, "engineMenus.mjs"));
+const { menuOf, surfaceOf, setQuestionWindowVisible, setTerminalRecordMenuDrawn } = await import(path.join(here, "engineMenus.mjs"));
+{
+  const postwin = await import(`${GAME}/src/engine/postwin.ts`).catch(() => ({}));
+  if (postwin.postwinQuestionWindowVisible) setQuestionWindowVisible(postwin.postwinQuestionWindowVisible);
+  const terminal = await import(`${GAME}/src/engine/factoryTerminalPresentation.ts`).catch(() => ({}));
+  if (terminal.factoryTerminalRecordMenuDrawn) setTerminalRecordMenuDrawn(terminal.factoryTerminalRecordMenuDrawn);
+}
 
 const trace = JSON.parse(fs.readFileSync(tracePath, "utf8"));
 const c = trace.challenge;
