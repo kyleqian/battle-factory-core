@@ -10,6 +10,8 @@ import { liveStatusAnimationRow, type LiveStatusAnimationSprite } from "../anima
 import { focusPunchSetUpDisplayRow } from "../animation/focusPunchSetUp.ts";
 import { wishHealRowAtAge } from "../animation/wishHeal.ts";
 import { ingrainHealAtCommandAge } from "../animation/ingrainHeal.ts";
+import { turnTrapBindWrapAtAge } from "../animation/turnTrapBindWrap.ts";
+import { turnTrapBranchOf } from "./turnTrapBranch.ts";
 import { itemKnockoffAtAge } from "../animation/itemKnockoff.ts";
 import { focusBandRowAtAge } from "../animation/focusBand.ts";
 import { futureSightHitRowAtAge } from "../animation/futureSightHit.ts";
@@ -582,6 +584,7 @@ import type bubbleBeamAssetData from "../animation/assets/bubble-beam.json";
 import crossChopAsset from "../animation/assets/cross-chop.json" with { type: "json" };
 import type leafBladeAssetData from "../animation/assets/leaf-blade.json";
 import type focusEnergyAssetData from "../animation/assets/focus-energy.json";
+import type tendrilsAssetData from "../animation/assets/tendrils.json";
 import type endureAssetData from "../animation/assets/endure.json";
 import type reversalAssetData from "../animation/assets/reversal.json";
 import type swallowAssetData from "../animation/assets/swallow.json";
@@ -1626,6 +1629,8 @@ const waterOrbAsset = /* @__PURE__ */ lazyAnimAsset<typeof waterOrbAssetData>("w
 const bubbleBeamAsset = /* @__PURE__ */ lazyAnimAsset<typeof bubbleBeamAssetData>("bubble-beam");
 const leafBladeAsset = /* @__PURE__ */ lazyAnimAsset<typeof leafBladeAssetData>("leaf-blade");
 const focusEnergyAsset = /* @__PURE__ */ lazyAnimAsset<typeof focusEnergyAssetData>("focus-energy");
+/** trp1: Status_BindWrap's ANIM_TAG_TENDRILS (gConstrictBindingSpriteTemplate; tools/extract/extract-turn-trap-tendrils.ts). */
+const tendrilsAsset = /* @__PURE__ */ lazyAnimAsset<typeof tendrilsAssetData>("tendrils");
 const endureAsset = /* @__PURE__ */ lazyAnimAsset<typeof endureAssetData>("endure");
 const reversalAsset = /* @__PURE__ */ lazyAnimAsset<typeof reversalAssetData>("reversal");
 const swallowAsset = /* @__PURE__ */ lazyAnimAsset<typeof swallowAssetData>("swallow");
@@ -2188,6 +2193,7 @@ const leafBladeArt = leafBladeAsset as {
   leaf: { tileset: Tileset; palette: RgbColor[] };
   crossImpact: { tileset: Tileset; palette: RgbColor[] };
 };
+const tendrilsArt = tendrilsAsset as { tendrils: { tileset: Tileset; palette: RgbColor[] } };
 const focusEnergyArt = focusEnergyAsset as {
   focusEnergy: { tileset: Tileset; palette: RgbColor[] };
   taillowBack: { tileset: Tileset; palette: RgbColor[] };
@@ -8138,6 +8144,8 @@ export type GeneralAnimationRenderView = Readonly<{
   itemKnockoff?: NonNullable<ReturnType<typeof itemKnockoffAtAge>>;
   /** ing1: General_IngrainHeal's displayed state (src/animation/ingrainHeal.ts): the green BG blend, absorption orbs and blue stars. */
   ingrainHeal?: NonNullable<ReturnType<typeof ingrainHealAtCommandAge>>;
+  /** trp1: General_TurnTrap's Status_BindWrap tendrils (src/animation/turnTrapBindWrap.ts), drawn over the battlers. */
+  turnTrapBindWrap?: ReturnType<typeof turnTrapBindWrapAtAge>;
   /** wsh2: General_FutureSightHit's psychic BG and the target's alpha-blended scale + shake (futureSightHit.ts). */
   futureSightHit?: Readonly<{
     row: ReturnType<typeof futureSightHitRowAtAge>;
@@ -8168,6 +8176,7 @@ export function generalAnimationRenderView(view: BattleResolutionPresentationRen
   if (effect?.type === "general-animation" && effect.animation === "FOCUS_BAND") return focusBandRenderView(view, effect);
   if (effect?.type === "general-animation" && effect.animation === "WISH_HEAL") return wishHealRenderView(view, effect);
   if (effect?.type === "general-animation" && effect.animation === "INGRAIN_HEAL") return ingrainHealRenderView(view, effect);
+  if (effect?.type === "general-animation" && effect.animation === "TURN_TRAP") return turnTrapRenderView(view, effect);
   if (effect?.type === "general-animation" && effect.animation === "ITEM_KNOCKOFF") return itemKnockoffRenderView(view, effect);
   if (effect?.type === "general-animation" && effect.animation === "FUTURE_SIGHT_HIT") return futureSightHitRenderView(view, effect);
   if (effect?.type !== "general-animation" || effect.animation !== "FOCUS_PUNCH_SETUP") return null;
@@ -8346,6 +8355,45 @@ function ingrainHealRenderView(
     view: Object.freeze({ ...view, fieldArt, postBodyShadowHidden: view.postBodyShadowHidden || side === "opponent" }),
     sprites: Object.freeze([]),
     ...(state === null ? {} : { ingrainHeal: state }),
+  });
+}
+
+/**
+ * trp1 (docs/trp1-turn-trap-animation.md): a TURN_TRAP the live move body does not draw (battleResolutionPresentationRender.ts
+ * turnTrapBodyEffect). Status_BindWrap: the two tendrils at the trapped battler's GetBattlerSpriteCoord(X / Y) (battlePositionCenter) and its
+ * ShakeMon2 x2 (absolute once shown; before that the opponent stands at its tracked front idle rest); SpriteCB_EnemyShadow hides an
+ * elevated opponent's shadow while gAnimScriptActive (the script's rows, 1 .. 54; not ROM-checked: the labs' Rattata has no shadow).
+ * Status_Clamp (Clamp is in no Factory set) and a doll target leave the field as it is (null).
+ */
+const TURN_TRAP_BIND_WRAP_SCRIPT_LAST_AGE = 54;
+function turnTrapRenderView(
+  view: BattleResolutionPresentationRenderView,
+  effect: Extract<NonNullable<BattleResolutionPresentationRenderView["effect"]>, { type: "general-animation" }>,
+): GeneralAnimationRenderView | null {
+  if (turnTrapBranchOf(effect.trapMove ?? 0) !== "BIND_WRAP") return null;
+  const side = effect.battler === 0 ? "player" as const : "opponent" as const;
+  if (view.fieldArt[side].substituteDoll === true) return null;
+  const age = effect.age + 1;
+  const state = turnTrapBindWrapAtAge(age, liveBattlerAnchors(side, view.fieldArt).battlePositionCenter);
+  const rest = effect.battlerX2Input === undefined
+    ? { x2: 0, y2: 0 }
+    : liveBattlerAnchors("opponent", view.fieldArt, effect.battlerX2Input).frontIdleRest;
+  const place = (at: "player" | "opponent") => {
+    const art = view.fieldArt[at];
+    const shaken = at === side && state.targetX2 !== null;
+    const base = at === "opponent" && !shaken ? rest : { x2: 0, y2: 0 };
+    const x2 = shaken ? state.targetX2! : base.x2;
+    if (x2 === 0 && base.y2 === 0) return art;
+    return Object.freeze({ ...art, origin: Object.freeze({ x: art.origin.x + x2, y: art.origin.y + base.y2 }) });
+  };
+  const player = place("player"), opponent = place("opponent");
+  const fieldArt = player === view.fieldArt.player && opponent === view.fieldArt.opponent
+    ? view.fieldArt : Object.freeze({ ...view.fieldArt, player, opponent });
+  const scriptActive = age >= 1 && age <= TURN_TRAP_BIND_WRAP_SCRIPT_LAST_AGE;
+  return Object.freeze({
+    view: Object.freeze({ ...view, fieldArt, postBodyShadowHidden: view.postBodyShadowHidden || scriptActive }),
+    sprites: Object.freeze([]),
+    turnTrapBindWrap: state,
   });
 }
 
@@ -55988,6 +56036,13 @@ export function renderBattleResolutionSceneOffView(
         );
       }
     }
+  }
+  for (const tendril of generalAnimation?.turnTrapBindWrap?.tendrils ?? []) {
+    // trp1: gConstrictBindingSpriteTemplate, a 64x32 affine (not double-size) OBJ in front of its target (subpriority target - 4 / - 2).
+    drawSpriteSheetAffineRotate(
+      fb, subTileset(tendrilsArt.tendrils.tileset, tendril.frame * 4, 4), tendrilsArt.tendrils.palette, tendril.x, tendril.y,
+      tendril.pa, 0, 0, tendril.pd, undefined, false,
+    );
   }
   if (generalAnimation?.wishHeal) {
     const { row, center, opponent } = generalAnimation.wishHeal;

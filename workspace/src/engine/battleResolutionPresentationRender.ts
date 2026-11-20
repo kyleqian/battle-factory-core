@@ -17,7 +17,7 @@ import type { LiveMoveBattlerX2Input } from "./liveBattlerX2History.ts";
 import { liveSubstituteSwapApplies, substituteSwapTailFieldArt } from "./liveSubstituteSwap.ts";
 import {
   liveBattlerAnchors, liveDiveSetupSplashBirth, liveMoveAnimationDuration, liveMoveOpponentShadowPostBodyHideRows,
-  liveSemiInvulnerableHideBattler,
+  liveSemiInvulnerableHideBattler, LIVE_TURN_TRAP_BODY_ROWS,
   SOLAR_BEAM_UNLEASH_IDLE_ROWS,
 } from "./liveMoveAnimation.ts";
 import { liveMoveTimingBodyOf, type LiveMoveTimingBody } from "./liveMoveTimingPolicy.ts";
@@ -1082,6 +1082,8 @@ export type BattleResolutionRenderEffect =
       type: "general-animation"; battler: 0 | 1; animation: string; age: number; battlerX2Input?: LiveMoveBattlerX2Input;
       /** cff230: a CASTFORM_CHANGE's target form; its `age` is the morph body row (negative before the body starts). */
       castformForm?: number;
+      /** trp1: a TURN_TRAP's wrapped move (General_TurnTrap's branch). */
+      trapMove?: number;
     }>
   | Readonly<{
       type: "hit";
@@ -1782,6 +1784,35 @@ function leechSeedDrainAbsorbEffect(
     moveId: LEECH_SEED_DRAIN_ABSORB_MOVE_ID, attacker: owner, target: command.battler, turn: 0, power: 0, damage: 0, friendship: 0, multihit: 0,
     // TryHandleLaunchBattleTableAnimation runs the script from Task_ClearBitWhenBattleTableAnimDone (absorbAtAge `taskHostedScript`).
     taskHostedScript: true,
+  });
+  return Object.freeze({
+    type: "move", request, age,
+    spriteOrderInput: state.liveMoveSpriteOrderInput,
+    ...(state.liveMoveBattlerX2Input === undefined ? {} : { battlerX2Input: state.liveMoveBattlerX2Input }),
+  });
+}
+/**
+ * trp1 (docs/trp1-turn-trap-animation.md): General_TurnTrap's Status_FireSpin / Status_Whirlpool / Status_SandTomb are the trapping
+ * move's own body with fewer vortex calls and a shorter ShakeMon, launched from the general table with gBattleAnimAttacker =
+ * gBattleAnimTarget = the trapped battler (the command's `battler`). Every sprite, task and SE of those branches is ANIM_TARGET-relative,
+ * so the body is the live move adapter's (liveMoveAnimation.ts, request.turnTrapBody) with the trapped battler as its target and the other
+ * battler, which the script never touches, as its attacker. Command age a = body age a - TURN_TRAP_BODY_START_AGE. Null where the branch
+ * has no move body here (Status_BindWrap, Status_Clamp: battleScene.ts general-animation views) or the other battler shows a doll.
+ */
+export const TURN_TRAP_BODY_START_AGE = 0;
+function turnTrapBodyEffect(
+  command: Extract<BattleResolutionPresentationCommand, { type: "general-animation" }>,
+  state: BattleResolutionPresentationState,
+  field: BattleResolutionDisplayedField,
+): BattleResolutionRenderEffect | null {
+  const moveId = command.trapMove ?? 0;
+  if (LIVE_TURN_TRAP_BODY_ROWS[moveId] === undefined) return null;
+  const other = command.battler === 0 ? 1 : 0;
+  if (fieldBattler(field, other).substituteDoll === true) return null;
+  const age = state.lifecycle.phaseElapsed - TURN_TRAP_BODY_START_AGE;
+  if (age < 0 || age >= LIVE_TURN_TRAP_BODY_ROWS[moveId]!) return null;
+  const request: BattleMoveAnimationRequest = Object.freeze({
+    moveId, attacker: other, target: command.battler, turn: 0, power: 0, damage: 0, friendship: 0, multihit: 0, turnTrapBody: true,
   });
   return Object.freeze({
     type: "move", request, age,
@@ -2623,6 +2654,13 @@ export function createBattleResolutionPresentationRenderView(
         type: "general-animation", battler: command.battler, animation: command.animation, age: state.lifecycle.phaseElapsed - 1,
         ...(state.liveMoveBattlerX2Input === undefined ? {} : { battlerX2Input: state.liveMoveBattlerX2Input }),
       }));
+    } else if (command.type === "general-animation" && command.animation === "TURN_TRAP") {
+      // trp1: the branch's move body, else the general-animation view (battleScene.ts: Status_BindWrap / Status_Clamp, or the field as it is).
+      effect = turnTrapBodyEffect(command, state, field) ?? Object.freeze({
+        type: "general-animation", battler: command.battler, animation: command.animation, age: state.lifecycle.phaseElapsed - 1,
+        ...(command.trapMove === undefined ? {} : { trapMove: command.trapMove }),
+        ...(state.liveMoveBattlerX2Input === undefined ? {} : { battlerX2Input: state.liveMoveBattlerX2Input }),
+      });
     } else if (command.type === "general-animation" && command.animation === "HELD_ITEM_EFFECT" && fieldBattler(field, command.battler).substituteDoll !== true) {
       // hie2: the age is relative to the ROM's first identity rotation display (heldItemEffectAge0Frames).
       effect = Object.freeze({

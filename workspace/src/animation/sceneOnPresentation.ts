@@ -1179,6 +1179,7 @@ import {
 } from "./dragonClaw.ts";
 import {
   fireSpinAtAge,
+  type FireSpinBody,
   type FireSpinState,
 } from "./fireSpin.ts";
 import {
@@ -4134,6 +4135,8 @@ export interface SceneOnFireSpinConfig {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  /** trp1: General_TurnTrap's Status_FireSpin (fireSpin.ts `turn-trap`); absent = MOVE_FIRE_SPIN. */
+  readonly body?: FireSpinBody;
 }
 
 export interface SceneOnMetalClawConfig {
@@ -12159,7 +12162,7 @@ export function sceneOnFireSpinView(
     target: state.config.target,
     ...fireSpinAtAge(state.age, {
       targetCenter: state.config.target.geometry.battlePositionCenter,
-    }, state.config.target.geometry.side),
+    }, state.config.target.geometry.side, (state.config as SceneOnFireSpinConfig).body),
   };
 }
 

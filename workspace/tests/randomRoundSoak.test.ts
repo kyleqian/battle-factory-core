@@ -1619,7 +1619,9 @@ describe("ISSUES #104 (driver): continuous-play outcome semantics retuned -- OK 
     // under the same options (tools/soak/randomRoundSoak.ts --policy winning --max-rounds 3 --render-every 0 --seeds 0:50 --parallel 3): seeds 14, 17, 27 and 47 chain two round wins (carry 14), so the lowest (14) is pinned.
     // pic6 + pic8 (the battle party menu's cancel fade and the forced menu's earlier clock shift the soak's press phases): seed 14 now carries 7; re-scanned seeds
     // 0..49 under the same options: seeds 10, 17, 27 and 47 chain two round wins (carry 14), so the lowest (10) is pinned.
-    const result = runSeed(10, {
+    // trp1 (the end-of-turn trap animation's 68 .. 110 Scene ON / 35 Scene OFF rows shift the soak's press phases): seed 10 now carries 7;
+    // re-scanned seeds 0..49 under the same options: seeds 13, 27 and 47 chain two round wins (carry 14), so the lowest (13) is pinned.
+    const result = runSeed(13, {
       policy: "winning",
       maxRounds: 3,
       renderEvery: 0,

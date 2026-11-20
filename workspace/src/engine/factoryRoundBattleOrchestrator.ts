@@ -2795,6 +2795,11 @@ export function prepareResolutionPalette(
     // lsd198: Move_ABSORB's body inside General_LeechSeedDrain reads the same lend as the ordinary ABSORB (liveMoveAnimation.ts case 71).
     spriteOrderInput = retainedSprites?.commandKey === commandKey
       ? resolution.liveMoveSpriteOrderInput : lendLiveSpriteOrder(orderHost, LEECH_SEED_DRAIN_ABSORB_MOVE_ID);
+  } else if (command?.type === "general-animation" && command.animation === "TURN_TRAP" && command.trapMove !== undefined && orderHost) {
+    // trp1: General_TurnTrap's move-body branches (Status_SandTomb reads it; battleResolutionPresentationRender.ts turnTrapBodyEffect)
+    // take the lend before the command's own animation receipt, as the trapping move's body would (its plan applies after).
+    spriteOrderInput = retainedSprites?.commandKey === commandKey
+      ? resolution.liveMoveSpriteOrderInput : lendLiveSpriteOrder(orderHost, command.trapMove);
   } else if (command !== undefined && !(command.type === "move-animation" && command.actionTransition)
     && (command.type === "move-animation"
     || command.type === "switch-out" || command.type === "switch-in"

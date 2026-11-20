@@ -1938,6 +1938,32 @@ function hpf4mStages(): Record<string, AppStage> {
   return stages;
 }
 
+// trp1 (docs/trp1-turn-trap-animation.md): the end-of-turn trap animation, one lab per trapping move, trapped side and scene
+// (tools/battle-lab/trp1-<move>-<side>-<scene>.json, tools/integration/trp1Labs.py): a Lv50 Rattata with the trapping move x4 against a
+// Lv25 Rattata with Seismic Toss x4 (`player` = the player's Rattata is the trapped one). The kernel seed is one whose turns are the ROM's
+// (the same hits, damage and trap length: HP and status2 at trace frames 1000 / 2200 equal the lab's capture states), found by stepping
+// the ROM's gRngValue at trace frame 0 (3034451114 player side, 2210656548 opp side) back k LCG draws: opp k = 4 for every move; player
+// k = 78 (Fire Spin, Whirlpool, Sand Tomb, Clamp) and 567 (Wrap, Bind).
+const TRP1_TRAP_MOVES: Readonly<Record<string, readonly [move: number, playerSeed: number]>> = {
+  wrap: [35, 4032327997], bind: [20, 4032327997], firespin: [83, 3716349652], whirlpool: [250, 3716349652], sandtomb: [328, 3716349652],
+  clamp: [128, 3716349652],
+};
+const TRP1_OPP_SEED = 1250713408;
+function trp1Stages(): Record<string, AppStage> {
+  const stages: Record<string, AppStage> = {};
+  for (const [name, [move, playerSeed]] of Object.entries(TRP1_TRAP_MOVES)) {
+    for (const side of ["player", "opp"] as const) {
+      for (const scene of ["on", "off"] as const) {
+        const id = `trp1-${name}-${side}-${scene}`;
+        stages[id] = side === "player"
+          ? (state) => aud241bStage(state, id, scene, 25, 50, 69, undefined, false, move, playerSeed)
+          : (state) => aud241bStage(state, id, scene, 50, 25, move, undefined, false, 69, TRP1_OPP_SEED);
+      }
+    }
+  }
+  return stages;
+}
+
 // btn2: the subp1m labs (tools/battle-lab/subp1m-<case>-{on,off}.json, hpf4m-subhit-{on,off}.json): Lv50 Rattata player (move) vs a Rattata foe (move, level), seed 1.
 const SUBP1M_CASES: Readonly<Record<string, readonly [string, number, number, number]>> = {
   subfade: ["subp1m-subfade", 164, 163, 45], roar: ["subp1m-roar", 46, 33, 30], subhit: ["hpf4m-subhit", 164, 33, 12],
@@ -1955,6 +1981,7 @@ function subp1mStages(): Record<string, AppStage> {
 
 export const APP_STAGES: Readonly<Record<string, AppStage>> = {
   ...hpf4mStages(),
+  ...trp1Stages(),
   ...subp1mStages(),
   // iss216: the anchor deal has no duplicate species; the ROM probe pokes slot 6's monId to slot 1's
   // (tools/probe/stage-draft-same-species-off.py), the engine pokes the same identity (display unchanged).

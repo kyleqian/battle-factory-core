@@ -1985,6 +1985,9 @@ const generalLabels: string[] = [];
     if (table && word !== null) generalLabels.push(word[1]!);
   }
 }
+// trp1 (docs/trp1-turn-trap-animation.md): General_TurnTrap's `jumpargeq 0, TRAP_ANIM_*` branches on the trapped battler's wrapped move
+// (AnimTask_GetTrappedMoveAnimId), which the walk cannot resolve; each branch is walked as its own entry instead.
+generalLabels.push("Status_BindWrap", "Status_FireSpin", "Status_Whirlpool", "Status_Clamp", "Status_SandTomb");
 const general = generalLabels.map((label) => {
   const variants = [0, 1].map((side) => {
     const result = walk(label, 0, side);

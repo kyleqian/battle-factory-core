@@ -12,6 +12,12 @@ export interface BattleMoveAnimationRequest {
   readonly rolloutCounter?: number;
   /** Presentation-only: the body runs from Task_ClearBitWhenBattleTableAnimDone (a general animation that jumps into a move body), not the controller. */
   readonly taskHostedScript?: true;
+  /**
+   * Presentation-only (trp1, docs/trp1-turn-trap-animation.md): the body is General_TurnTrap's branch for this trapping move (Status_FireSpin /
+   * Status_Whirlpool / Status_SandTomb), launched from the general table with the trapped battler as the script's target; `attacker` is the
+   * other battler, drawn as it stands.
+   */
+  readonly turnTrapBody?: true;
 }
 
 export function battleMoveAnimationRequest(

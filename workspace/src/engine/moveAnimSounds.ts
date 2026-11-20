@@ -1,6 +1,7 @@
 // S11 aud242a/b/c: the script-level move-animation SEs (playsewithpan / playse / waitplaysewithpan / loopsewithpan / panse* / setpan) of a live Scene ON move
 // animation, at the frame the decoded script command executes. Write-only presentation (src/audio/soundEvents.ts): reads the resolution
 // presentation, never changes it. Data: src/data/gen/anim-sound-timing.json (tools/extract/extract-anim-sound-timing.ts). docs/aud242-move-anim-sounds.md.
+import { TURN_TRAP_SCRIPT_LABEL, turnTrapBranchOf, type TurnTrapBranch } from "./turnTrapBranch.ts";
 import timingData from "../data/gen/anim-sound-timing.json" with { type: "json" };
 import { animSoundPan, animSoundPan2, calculatePanIncrement, emitSound, keepPanInRange, type AnimPanContext, type SoundEmission } from "../audio/soundEvents.ts";
 import { scheduleAfter, CRY_MODE_ECHO_END, CRY_MODE_ECHO_START, CRY_MODE_HIGH_PITCH, CRY_MODE_ROAR_1, CRY_MODE_ROAR_2, playAnimTaskCry, scheduleAnimTaskBgmRestore, stopAnimTaskCry } from "./screenSounds.ts";
@@ -461,6 +462,17 @@ export const FOCUS_BAND_SCRIPT_AGE = 0;
  * table's 27 .. 69 and 122 + 7. The rooted battler is the script's attacker and target (both pans follow its side).
  */
 export const INGRAIN_HEAL_SCRIPT_AGE = 7;
+/**
+ * trp1 (docs/trp1-turn-trap-animation.md): General_TurnTrap's branches (TURN_TRAP_SCRIPT_LABEL; the anim-sound-timing table walks each as
+ * its own entry). ROM (soundEventProbe lab on tools/battle-lab/trp1-<move>-{player,opp}-on.json): every SE row is at command age = the
+ * table's script frame (Status_BindWrap SE_M_SCRATCH 3 / 10 and SE_M_BIND 39, Status_FireSpin / Status_SandTomb 3, Status_Whirlpool 8,
+ * Status_Clamp 9), panned to the trapped battler's side (it is the script's attacker and target), and the `stopsound` after
+ * `waitforvisualfinish` stops the still-playing SE at TURN_TRAP_STOP's age.
+ */
+export const TURN_TRAP_SCRIPT_AGE = 0;
+export const TURN_TRAP_STOP: Readonly<Partial<Record<TurnTrapBranch, Readonly<{ age: number; id: number; player: "SE1" | "SE2" }>>>> = Object.freeze({
+  FIRE_SPIN: { age: 78, id: 150, player: "SE2" }, SAND_TOMB: { age: 98, id: 230, player: "SE1" }, WHIRLPOOL: { age: 103, id: 165, player: "SE1" },
+});
 
 /**
  * hie3: General_HeldItemEffect. The extracted table holds only the first SE (playsewithpan 152 at script frame 8: the rest follow `waitforvisualfinish`, which the
@@ -545,6 +557,11 @@ export function emitGeneralAnimSounds(after: BattleResolutionPresentationState |
         emitOpsAt(generalVariant("General_FocusBand", command.battler), { attackerSide: side, targetSide: other }, elapsed - FOCUS_BAND_SCRIPT_AGE, true);
       } else if (command.animation === "INGRAIN_HEAL") {
         emitOpsAt(generalVariant("General_IngrainHeal", command.battler), { attackerSide: side, targetSide: side }, elapsed - INGRAIN_HEAL_SCRIPT_AGE, true);
+      } else if (command.animation === "TURN_TRAP") {
+        const branch = turnTrapBranchOf(command.trapMove ?? 0);
+        emitOpsAt(generalVariant(TURN_TRAP_SCRIPT_LABEL[branch], command.battler), { attackerSide: side, targetSide: side }, elapsed - TURN_TRAP_SCRIPT_AGE, true);
+        const stop = TURN_TRAP_STOP[branch];
+        if (stop !== undefined && elapsed === stop.age + TURN_TRAP_SCRIPT_AGE) emitSound({ kind: "stop", id: stop.id, pan: null, player: stop.player });
       } else if (command.animation === "LEECH_SEED_DRAIN" && command.animated === true) {
         // command.battler is the seeded (drained) battler = the animation's target; the seeder is the attacker.
         emitOpsAt(generalVariant("General_LeechSeedDrain", command.battler === 0 ? 1 : 0), { attackerSide: other, targetSide: side }, elapsed - LEECH_SEED_DRAIN_SCRIPT_AGE, true);
