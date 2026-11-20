@@ -87,6 +87,10 @@ export function setSoundTickLead(ticks: number): void {
   if (active !== null) active.lead = ticks;
 }
 
+export function getSoundTickLead(): number {
+  return active === null ? 0 : active.lead;
+}
+
 /** True while a sink wants this tick's events (lets an emitter skip building the event). */
 export function soundCollecting(): boolean {
   return active !== null;

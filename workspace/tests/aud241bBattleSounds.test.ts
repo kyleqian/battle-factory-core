@@ -117,7 +117,7 @@ describe("effectiveness, faint and low-HP sounds match the ROM (aud241b)", () =>
     expect(frameDeltas("faint-player-off-window")).toEqual([0, 0, 0, 0, 0]);
   });
 
-  it("super-effective-window.json / -off: SE_SUPER_EFFECTIVE is on the ROM's frame in Scene ON and one early in Scene OFF; the hp -> 'It's super effective!' hold carries the ROM's datahpupdate-to-print rows (hpf1), so the faint is on the ROM's frame", () => {
+  it("super-effective-window.json / -off: SE_SUPER_EFFECTIVE is on the ROM's frame in both scenes (Scene OFF carries the hcr1b ruled-turn sound lead); the hp -> 'It's super effective!' hold carries the ROM's datahpupdate-to-print rows (hpf1), so the faint is on the ROM's frame", () => {
     const on = fixture("super-effective-window");
     const off = fixture("super-effective-off-window");
     expect(played(on.events).map((e) => `${e.frame}:${e.kind}:${e.id}:${e.pan}`)).toEqual([
@@ -125,7 +125,7 @@ describe("effectiveness, faint and low-HP sounds match the ROM (aud241b)", () =>
     ]);
     expect(played(off.events).map((e) => e.frame)).toEqual([97, 276, 276, 304, 342]);
     expect(frameDeltas("super-effective-window")).toEqual([0, 0, 0, 0, 0]);
-    expect(frameDeltas("super-effective-off-window")).toEqual([-1, -1, -1, -1, -1]);
+    expect(frameDeltas("super-effective-off-window")).toEqual([0, 0, 0, 0, 0]);
   });
 
   it("lowhp-window.json / lowhp-off-window.json: the player's bar turning red starts SE_LOW_HEALTH one tick after HealthbarDone; the second attack of the turn is on the ROM's frame (hpf1: the hit on the player carries the ROM's post-hp hold)", () => {

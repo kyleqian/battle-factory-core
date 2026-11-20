@@ -23,7 +23,6 @@ export function emitTickSounds(state: TickSoundState, next: TickSoundState): voi
       false,
     );
     const orchestratorAfter = next.factoryRoundBattleOrchestrator;
-    setSoundTickLead(orchestratorAfter?.battleResolutionPresentation?.usedMoveSoundLead ?? 0);
     if (orchestratorAfter?.battleForcedPartySelect) {
       const resolution = orchestratorAfter.battleResolutionPresentation;
       emitPartySendOutSounds(
@@ -40,6 +39,7 @@ export function emitTickSounds(state: TickSoundState, next: TickSoundState): voi
         orchestratorAfter.round.rules.currentOpponent.frontierBrain !== undefined,
       );
     }
+    setSoundTickLead(orchestratorAfter?.battleResolutionPresentation?.usedMoveSoundLead ?? 0);
     if (orchestratorAfter?.battleResolutionPresentation) {
       emitBattleHitSounds(
         state.factoryRoundBattleOrchestrator?.battleResolutionPresentation ?? null,
@@ -51,6 +51,7 @@ export function emitTickSounds(state: TickSoundState, next: TickSoundState): voi
     if (orchestratorAfter?.battleResolutionPresentation) emitStatsChangeSounds(orchestratorAfter.battleResolutionPresentation);
     if (orchestratorAfter?.battleResolutionPresentation) emitDoubleTeamStatsChangeSound(orchestratorAfter.battleResolutionPresentation);
     if (orchestratorAfter?.battleResolutionPresentation) emitGeneralAnimSounds(orchestratorAfter.battleResolutionPresentation);
+    setSoundTickLead(0);
     emitForfeitEndSounds(
       state.factoryRoundBattleOrchestrator?.battleCommandPresentation?.lifecycle.phase ?? null,
       orchestratorAfter !== null && orchestratorAfter !== undefined && orchestratorAfter.battle === null,
