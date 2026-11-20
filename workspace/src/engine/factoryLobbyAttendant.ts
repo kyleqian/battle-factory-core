@@ -13,7 +13,8 @@
 //                    game. Is that okay?" YES/NO (NO / B = the farewell)
 //         YES     -> the save dialog (start_menu.c SaveGame: info window,
 //                    "Would you like to save the game?", overwrite question,
-//                    SAVING..., "<player> saved the game."; NO / B anywhere =
+//                    SAVING..., "<player> saved the game." (no A: the SE, then a
+//                    60-frame timer, or a held A ends it, lbw9; NO / B anywhere =
 //                    the farewell), "Please step this way.", the door walk
 //                    (attendant 3 tiles, player 4), the fade and the warp.
 // Every timing constant below is ROM-measured (docs/lbrb-attendant-conversation.md)
@@ -174,8 +175,21 @@ export const ATTENDANT_TIMING = Object.freeze({
   saveDialogMenuDelay: 1,
   /** Ticks after the final A that the box closes over the bare field. */
   boxCloseTick: 3,
-  /** Menu input is accepted from this many ticks after the menu appears. */
+  /**
+   * Menu input is accepted from the tick after the menu first draws (ROM-measured, lbw9: DOWN at that frame moves the cursor, one
+   * frame earlier does not). script_menu.c InitMultichoiceCheckWrap's sProcessInputDelay of 2 task runs is already inside
+   * `menuDelayAfterText` (the menu draws one frame after its task is created), so no further delay applies.
+   */
   menuInputDelay: 0,
+  /** lbw9: the save message's printer goes idle and SaveSuccessCallback plays SE_SAVE at this page age (ROM-measured, lbrb-happy-a). */
+  saveSeAge: 15,
+  /**
+   * lbw9: frames from that PlaySE until IsSEPlaying() reads FALSE (ROM-measured on lbrd-won-attendant-off with A held: the next message
+   * clears 3 frames after the held-A frame at age 65; se_save is 42 song ticks at one tick per frame plus the player's start / stop latency).
+   */
+  saveSeIdleDelay: 50,
+  /** lbw9: start_menu.c SaveStartTimer / SaveSuccesTimer: the timer counts only the frames after the SE has ended. */
+  saveSuccessTimer: 60,
   /** Frames the bare field shows between the YES and the save window. */
   saveWindowOpenDelay: 10,
   /** Door walk: attendant 3 tiles then player 4 tiles at 16 frames/tile, then the fade and warp. */
@@ -210,7 +224,7 @@ export interface FactoryLobbyAttendantState {
   readonly age: number;
   readonly lead: AttendantLead | null;
   readonly cursor: number;
-  /** A cursor move the ROM draws one frame later (level / YES-NO menus); applied on the next tick. */
+  /** A cursor move the ROM draws one frame after the press (every Lobby menu, lbw9); applied on the next tick. */
   readonly pendingCursor?: number;
   /** Menu choices already shown (INFO returns to the question). */
   readonly closingTick: number;
@@ -225,6 +239,8 @@ export interface FactoryLobbyAttendantState {
 
 export interface AttendantInput {
   readonly a: boolean;
+  /** A is down this frame (JOY_HELD): the save message's timer is skipped by a held A, not only by a new press. Defaults to `a`. */
+  readonly aHeld?: boolean;
   readonly b: boolean;
   readonly up: boolean;
   readonly down: boolean;
@@ -311,13 +327,30 @@ export function attendantAcceptsInput(state: FactoryLobbyAttendantState): boolea
   const last = def.pages.length - 1;
   const typed = attendantLastGlyphAge(state.screen, state.page);
   if (def.menu !== null && state.page === last) return state.age >= (attendantMenuAppearAge(state.screen) ?? Infinity);
-  if (def.autoHold !== null) return false;
+  if (def.autoHold !== null || state.screen === "saved") return false;
   return state.age > typed;
 }
 
 /** Tick of the post-choice lead at which the old page clears; a YES/NO declined to the farewell clears one frame later. */
 export function attendantMenuClearTick(prevMenu: AttendantMenuKind, next: AttendantScreenId): number {
   return ATTENDANT_TIMING.menuChoiceClearTick[prevMenu] + (next === "farewell" && prevMenu === "yesNo" ? 1 : 0);
+}
+
+/** script_menu.c InitMultichoiceCheckWrap: a multichoice wraps its cursor only with more than 3 entries; every other menu stops at its ends. */
+export function attendantMenuWraps(count: number): boolean {
+  return count > 3;
+}
+
+/** Page age at which start_menu.c SaveReturnSuccessCallback first sees the SE finished (IsSEPlaying FALSE) and starts counting its timer. */
+export const ATTENDANT_SAVED_SE_IDLE_AGE = ATTENDANT_TIMING.saveSeAge + ATTENDANT_TIMING.saveSeIdleDelay;
+
+/**
+ * start_menu.c SaveReturnSuccessCallback: once the SE is over, a held A ends the "saved the game." message at once; otherwise the 60th frame
+ * after the SE ends does. `age` is the page age after this tick.
+ */
+export function attendantSavedMessageEnds(age: number, aHeld: boolean): boolean {
+  if (age < ATTENDANT_SAVED_SE_IDLE_AGE) return false;
+  return aHeld || age >= ATTENDANT_SAVED_SE_IDLE_AGE + ATTENDANT_TIMING.saveSuccessTimer - 1;
 }
 
 function menuChoice(state: FactoryLobbyAttendantState, def: AttendantScreenDef, input: AttendantInput): FactoryLobbyAttendantState {
@@ -333,13 +366,17 @@ function menuChoice(state: FactoryLobbyAttendantState, def: AttendantScreenDef, 
       : ATTENDANT_TIMING.menuToMessageFirstGlyph[def.menu!] + (screen === "farewell" && def.menu === "yesNo" ? 1 : 0);
     return startScreen(state, screen, "menuChoice", lead, cursor);
   };
-  if (input.up || input.down) {
-    const delta = input.down ? 1 : -1;
-    const cursor = (state.cursor + delta + items.length) % items.length;
-    if (def.menu !== "challenge") return Object.freeze({ ...state, pendingCursor: cursor });
-    return Object.freeze({ ...state, cursor });
+  // menu.c Menu_ProcessInputNoWrap / Menu_ProcessInput: A, then B, then UP, then DOWN.
+  const b = input.b && !input.a;
+  if (!input.a && !b && (input.up || input.down)) {
+    const delta = input.up ? -1 : 1;
+    const moved = state.cursor + delta;
+    const cursor = attendantMenuWraps(items.length)
+      ? (moved + items.length) % items.length
+      : Math.max(0, Math.min(items.length - 1, moved));
+    if (cursor === state.cursor) return state;
+    return Object.freeze({ ...state, pendingCursor: cursor });
   }
-  const b = input.b;
   if (!input.a && !b) return state;
   switch (state.screen) {
     case "ask":
@@ -413,6 +450,12 @@ export function advanceFactoryLobbyAttendant(
   }
   const age = state.age + 1;
   const ticked: FactoryLobbyAttendantState = Object.freeze({ ...state, age });
+  if (state.screen === "saved") {
+    if (attendantSavedMessageEnds(age, input.aHeld ?? input.a)) {
+      return startScreen(ticked, "step", "message", ATTENDANT_TIMING.messageToMessageFirstGlyph);
+    }
+    return ticked;
+  }
   if (!attendantAcceptsInput(state)) {
     if (def.autoHold !== null && state.page === def.pages.length - 1) {
       const typed = attendantLastGlyphAge(state.screen, state.page);
@@ -464,8 +507,6 @@ export function advanceFactoryLobbyAttendant(
       return startScreen(ticked, "ask", "message", ATTENDANT_TIMING.messageToMessageFirstGlyph);
     case "farewell":
       return closeBox(ticked, "freeRoam");
-    case "saved":
-      return startScreen(ticked, "step", "message", ATTENDANT_TIMING.messageToMessageFirstGlyph);
     case "step":
       return closeBox(ticked, "walk");
     default:
