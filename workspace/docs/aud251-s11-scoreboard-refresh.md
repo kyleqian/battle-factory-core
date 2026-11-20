@@ -1139,3 +1139,236 @@ What not to chase: the landed shape-A bodies' own next-command spread (Ice Beam 
 4. Scene OFF is already near the floor: median -3, 16 % of mass at |offset| >= 20; the next OFF gain is the hit-controller rows (41 %).
 5. **Doc repair (finding, not a measurement):** commit `b0e4cf53d` ("c1k: itemise the move-animation command count delta") turned this file into **62 MB / 1,040 lines** (a replacement with an empty pattern inserted its text between every pair of characters). Master's copy of this doc was unusable (every `grep` / `Read` returned the sentence). The first commit of this branch restores `85570820a`'s text (157,494 bytes) with the intended itemised sentence applied in the one place it belonged (the ON / OFF move-animation command-count delta in the c1k section 2). The wording of that sentence is `b0e4cf53d`'s; nothing else changed.
 6. Tooling: nothing new under `tools/`. `step.sh` / `stream.sh` / `runq.sh` (resumable per-seed queues with a time cutoff, per-commit replays over fixed ROM files) are in `.integration/evidence/t2n/` (ignored).
+
+## gsp1m (2026-11-20): general / status animations with no move running, ROM vs app per command (measurement only)
+
+Step gsp1m answers the t2n section 4 group 1 / section 5 rank 1 item: why the five-SE group `gen:152 / 152 / 152 / 228 / 102` (4,650 mass in the 25 ON seeds, 94 groups) and the other no-move general rows drift by -18 .. +27 inside one battle. Measurement only: no `src/` or `tests/` change is committed (a temporary probe patch to the `status` command timing was applied, run and reverted; `git status` is clean of src / tests). Scene ON, seeds 5063 (main), 1415 (check), 2230 / s310 / s8612 (sweep only). ROM side: per-frame `hpd2Probe.py` probe (`gBattlescriptCurrInstr`, `gBattleControllerExecFlags`, `gAnimScriptActive`, hp) on `reference/pokeemerald/pokeemerald.map`, opcode name = the NEXT instruction at an exec rise. App side: `soundCensusRomReplay.ts replay --scene=on --cmdtrace=1`. Frames are relative to the segment's commit frame (R = ROM, E = app).
+
+### 1. What the five-SE group is
+
+`B_ANIM_HELD_ITEM_EFFECT` = `General_HeldItemEffect` (`data/battle_anim_scripts.s:10440-10460`): three `playsewithpan SE_M_TAKE_DOWN` (152) each followed by `AnimTask_RotateMonToSideAndRestore` + `waitforvisualfinish`, then SE_M_MORNING_SUN (228), then SE_SHINY (102). It is started by Leftovers (`src/battle_util.c:3400-3413`, `BattleScript_ItemHealHP_Ret` -> `ItemHealHP_End2`, `data/battle_scripts_1.s:4373-4384`) and by the cure berries (`RemoveItem`, `:4356-4364`). The group is **not** where the drift is made: its internal intervals are within +1 of the ROM, constant over turns and seeds (the per-SE offsets inside a group are flat, e.g. +27 x5 in the s5063 res16 table below). The group's own contribution (offset of its SE1 minus the offset of the previous matched row) is small and constant: lead +4 after a message, +2 after a recoil message, +3 after a `HitFromAtkAnimation` print, -1 after an hp row, +8 / +9 after a `status-icon`; the animation tail +1; message -> hp -3. Over the 94 groups the mass would be **4,205 if the group's own jump were zero (4,650 now)**, so a group-only lead rule would gain about 10 % of the class. The mass is inherited from earlier commands of the same turn.
+
+### 2. Per-command table, seed 5063 (ROM vs app, frames after commit)
+
+Turn res16 (also res8 / 12 / 20 / 24 / 28 / 32 / 36 / 40: the same wake-up turn shape, 36 Double-Edge rows at +24 = t2n group 4 "+24 x 36", 888 mass). ROM script rows are from the probe, app rows from `cmds`.
+
+| command | ROM row (source) | ROM frame | app frame | app - ROM | note |
+| --- | --- | --- | --- | --- | --- |
+| wake-up print | `BattleScript_MoveUsedWokeUp+14` waitmessage (`data/battle_scripts_1.s`) | 12 | status 9, message 41 | **+29** | the app's leading `status` command is the 32-frame `STATUS_TIMING.minimumFrames` default (`battleResolutionPresentation.ts:2220`; `sceneOnStatusFrames` returns null for a wake-up, 1574-1612); ROM prints the wake-up message at commit + 9 .. 12 and returns at +94 |
+| Double-Edge string / status-icon | `BattleScript_HitFromAtkString+1` ppreduce | 99 | status-icon 121, message 122 | +22 | follows the wake-up shift |
+| Double-Edge animation | `HitFromAtkAnimation+1` waitanimation, SE 206 / 193 / 193 / 141 / 13 | 130, SE1 136 | move-animation 146, SE1 160 | **+24** | all five SEs of the move at +24 / +24 / +24 / +24 / +24 |
+| hit + hp | `datahpupdate` after `HitFromAtkAnimation+8` | 311 | hp 333 | +22 | |
+| recoil | `DoRecoil+11` datahpupdate / waitmessage | 338 / 346 | hp 360 / message 369 | +22 / +23 | |
+| Yawn | `EffectYawn+2` ppreduce, SE 237 / 232 / 237 | 450, SE 488 | move-animation 459, message 473, SE1 510 | +22 (SE) | Yawn's own lead +0 .. -2 |
+| Yawn tail -> held item | `EffectYawn+57` waitmessage, `ItemHealHP_Ret+7` printstring | 699, 808 | message 722, general-animation 820 | +23, +12 | group SE1 816 vs 843: **+27** (the group's lead is +4 after the Yawn message) |
+| held-item group | SE 152 x3, 228, 102 | 816, 848, 880, 912, 984 | 843, 875, 907, 939, 1011 | +27 x 5 | flat inside the group |
+| held-item message / hp | `ItemHealHP_Ret+10` waitmessage / datahpupdate +24 / `End2+5` | 1021 / 1137 / 1155 | message 1049, hp 1162, turn-end 1173 | +28 / +25 / +18 | |
+
+The turn's offset trajectory (all SEs): +24 x5 (Double-Edge), +22 x3 (Yawn), +27 x5 (group). So **24 of the 27 is the wake-up `status` command, +3 .. +5 is Yawn's tail / held-item lead (the group's own +4)**.
+
+Turn res0 (no wake-up; Double-Edge + Curse + Leftovers): ROM Double-Edge `ppreduce` 12, hit `waitstate` 189, `datahpupdate` 224 / recoil 277; app hit-animation 185 (+0 .. +4 vs ROM `ANIM-` 185), hp 220, recoil hp 273. Curse (body 174): ROM `EffectCurse+9` ppreduce 399, `CurseTrySpeed+17` waitanimation 428, SE1 +10 late in the app (move-animation 419, hit rows `stat` 598 / 689 / 783 vs ROM `waitmessage` 610 / 703 / 797: the app's stat-change message arrives 12 .. 14 earlier than the ROM's, the tail to the first message is 9 short). Group at ROM printstring 900 vs app general-animation 879 + the SE lead; group SE offsets in this turn are -3 .. +4 (Curse 221 mass, lead1m B4 C-body).
+
+Turn res40 (wake-up + Double-Edge + Struggle + Leftovers): ROM Double-Edge hp `datahpupdate` 311 vs app hp 333 (+22, the wake-up shift); Struggle (body 165) `datahpupdate` 642 / recoil 720 / waitmessage 740 vs app hp 664 / 742 / message 763: +22 / +22 / +23 = the same +22 carried (no new Struggle error beyond +1); group printstring 850 vs app 858.
+
+### 3. Seed 1415 check
+
+Same shape. res10: wake-up (status 9 -> message 41 vs ROM waitmessage 9 -> return 91) -> infatuation (`BattleScript_MoveUsedIsInLove+3` waitmessage 95 vs app status-icon 121 / message 122; ROM `ANIM+` 197, SE 212 at 200 / 217 / 234, app status-animation 225 INFATUATION, SE 235 / 252 / 269) -> Bulk Up (ppreduce 297, SE 193 / 193 / 193 / 239) -> Yawn (701 ppreduce, SE 739) -> held-item group. Offsets per SE: **+35 x3 (infatuation: 32 from the wake-up `status` + 3 from the infatuation message order), +24 x3 (Bulk Up SE 193: the status-animation tail is 11 short), +28 (Bulk Up SE 239: a 4-frame move-animation lead), +24 x3, +29 x5 (the group)**. res1 (Yawn -> asleep -> Chesto berry cure): the `status-icon` -> group lead is 25 vs the ROM's 16 (+9, the +8 / +9 "after a status-icon" jump of section 1). res17 (infatuation + wake-up): +29 .. +34 like res10. Seed 2230 (11 groups, 675 mass) was not decomposed per command; it only appears in the section 5 probe sweep (-138 at N = 6, -168 at N = 12).
+
+### 4. Causes, ranked by mass
+
+| rank | cause | rows / turns | where | measured size |
+| --- | --- | --- | --- | --- |
+| 1 | **wake-up `status` command default 32 frames** | all wake-up turns (s5063 res8 / 12 / 16 / 20 / 24 / 28 / 32 / 36 / 40, s1415 res10 / 14 / 17 ...) | `status` emission for `set-battler-status-data` ~5530-5540, `STATUS_TIMING` 2220 | +24 .. +29 per turn at every following SE, inherited by every later command in the turn, incl. the five-SE group; wake-up message ROM +9 .. +12, app +41 |
+| 2 | held-item restart / continue lead after a message / status-icon (`HELD_ITEM_EFFECT_RESTART_LEAD_FRAMES = 15`, `..._CONTINUE_LEAD_FRAMES = 9`, `..._AFTER_STATUS_EXTRA_FRAMES = 1`, lines 160-214) | 94 groups | | +4 after a message, +8 / +9 after a status-icon (the group's own jump, 4,650 -> 4,205 if zero) |
+| 3 | status-animation (infatuation / Yawn) tail + Bulk Up lead | s1415 res10 / 14 / 17 | | +3 .. +5 each |
+| 4 | Curse lead / tail (body 174) | s5063 res0 and 5 more | `lead1m` B4 C-body | lead +10, tail to the first message -9 |
+| 5 | Rest (156) / Struggle (165) hit / recoil hp bars | s5063 res40, s1415 | | +22 .. +23 late (in res40 this is the wake-up shift carried; the "body:156" label on the first group of s5063 seg 1 is a Rest berry-cure group, not a Rest hp row) |
+| 6 | faint / cry chain before a group | s5063 / s1415 | ctl 15 / 16 + cry | +18 / +21 |
+
+Over the 25 seeds: 94 groups, 4,650 mass; by seed s5063 30 groups 1,905, s1415 31 / 1,165, s2230 11 / 675, s310 10 / 325, s2 1 / 220, s6 2 / 125, s8108 3 / 105, s3738 2 / 100, s648 2 / 25.
+
+### 5. Probe: what the wake-up fix would move (temporary patch, reverted)
+
+Patch (not committed): in the `status` command emission, when the update clears the sleep bits (`(before.status1 & 7) != 0 && (after.status1 & 7) == 0`) and `sceneOnStatusFrames` is null, use `minimumFrames = N` instead of 32. Replayed all 25 ON seeds with N = 0 / 3 / 6 / 12 and aligned the app's SE rows to the ROM's per segment (ordered sequence match on SE id; metric = sum of |app - ROM offset| over the matched rows, the same 5,830 rows in every run; this is a proxy and does not equal the scoreboard's mass, which is rank-based on a different alignment):
+
+| N | all-seed sum of \|offset\| | s5063 | s1415 | s2230 | s8612 | s310 | s499 |
+| --- | --- | --- | --- | --- | --- | --- |
+| 32 (now) | 35,239 | 4,546 | 3,784 | 2,315 | 1,382 | 1,489 | 1,785 |
+| 0 | 31,926 | 2,681 | 2,394 | 2,241 | 1,321 | 1,568 | 1,783 |
+| 3 | 31,588 | 2,465 | 2,354 | 2,213 | 1,287 | 1,548 | 1,783 |
+| 6 | **31,265** | **2,200** | 2,410 | 2,177 | 1,236 | 1,519 | 1,785 |
+| 12 | 31,565 | 2,408 | 2,638 | 2,147 | 1,190 | 1,459 | 1,785 |
+
+All other 19 seeds are unchanged (no regression elsewhere; one segment, s5063 res44, +1). At N = 6 the whole-class change is -3,974 (-11.3 % of the matched-row mass); restricted to SE ids 152 / 228 / 102 (all uses) it is 5,812 -> 4,276 (-1,536, -26 %), and for the eight ids of this class (152 228 102 142 148 242 219 179) 9,786 -> 8,250 (-1,536, -16 %). The s5063 res16 offsets go +24 x5 / +22 x3 / +27 x5 -> **-2 x5 / -4 x3 / +1 x5** (N = 6), -5 / -7 / -2 (N = 3); s1415 res10 +35 x3 / +24 x3 / +28 / +24 x3 / +29 x5 -> +9 x3 / -2 x3 / +2 / -2 x3 / +3 x5 (the +9 left is the infatuation message order, section 3). The best N differs per seed (s5063 6, s1415 3, s2230 / s8612 / s310 12): the wake-up print's lead is not constant in the ROM (it follows the preceding command), so the per-seed spread of 3 .. 12 is the residual to measure before landing, not a precise constant.
+
+### 6. Proposed landing (not done: out of scope for gsp1m)
+
+1. **Wake-up `status` duration** (rule, `src/engine/battleResolutionPresentation.ts`, the `status` emission for `set-battler-status-data` ~5530-5540, or an entry in `sceneOnStatusFrames` 1574-1612 for a sleep-clearing update): replace the 32-frame default with a ROM-measured head (the ROM prints the wake-up message at commit + 9 .. 12, so the head is 0 .. 12 frames; start from 6, then split by what precedes it). Expected: **about -4,000 of 35,239 matched-row mass on the 25 ON seeds (-11 %), about -1,500 on the five-SE group ids and the t2n group 4 "+24 x 36" 888 rows to ~0**. Pins it will move: `status` command timing tests in the wake-up / sta / off121 family (grep `STATUS_TIMING` / `minimumFrames: 32` in `tests/`), the hie1 / sa125 held-item-effect pins that carry the +1 `AFTER_STATUS_EXTRA_FRAMES` and the restart / continue leads, and the Scene ON census digest. Scene OFF: unaffected if the rule is Scene ON only (`sceneOnStatusFrames` is the ON entry).
+2. **Held-item lead after a message / status-icon** (hie1 constants, lines 160-214): trim `RESTART_LEAD_FRAMES` 15 -> about 11 (the group's +4 after a message) and the after-status-icon extra +8 .. +9 -> about 0. Expected: **about -(4,650 - 4,205) = -445 on the five-SE group alone** (about -1,200 if the +4 is applied to all ~60 groups after a message, an estimate not measured). Do this after item 1, since the lead measure must be taken on turns without the wake-up shift.
+3. **Infatuation / status-animation tail + Bulk Up lead** (s1415 +9 / +4): small, s1415 only in these seeds; measure after item 1.
+4. **Curse C-body lead / tail** (lead1m B4: +10 lead, tail -9) and **Struggle / Rest hp** (already inside the +22 of the wake-up turns; recheck after item 1).
+
+No new defect found in the group's own script (General_HeldItemEffect): its intervals are correct. The `-18 .. +27` is one 32-frame wake-up `status` default (rank 1) and a handful of 3 .. 5 frame command leads.
+
+Tooling note: the probe and the per-turn comparison scripts live in `/tmp/gsp1m` (not committed); the engine replay command is `node --experimental-strip-types --no-warnings tools/integration/soundCensusRomReplay.ts replay --seed=<s> --scene=on --setup=.integration/evidence/t2n/<s>-on.setup.json --cmdtrace=1 --out=<f>` (4 s per seed).
+
+## hcr1m (2026-11-20)
+
+Scene OFF controller hit SEs 13 / 12 / 14 (after `hit-animation`; OFF 2,255 = 41 % of the OFF mass) lined up ROM vs app per command, classified by cause, and probed with a temporary patch (reverted; `src/`, `tests/` and `tools/` are unchanged by this step; nothing else was edited; `npm test` was not run, measurement step).
+
+### 1. Method
+
+- Evidence: `.integration/evidence/t2n/<seed>-off.{setup,drive,snd,cmp,engine,frozen-tail}.json` for the 24 OFF seeds (copied to the git-ignored `.integration/evidence/hcr1m/`). ROM per-frame probe `tools/integration/hpd2Probe.py` (main, gBattlescriptCurrInstr, exec flags, anim, hp); app side `soundCensusRomReplay.ts replay --scene=off --setup=... --cmdtrace=1`.
+- Alignment per decision segment k: both sides start at the segment's commitFrame (engine decision vs ROM drive anchor); SE / cry rows are matched by ordered id (SequenceMatcher). This reproduces the scoreboard's OFF numbers exactly: hit rows mass **2,255**, matched-row mass of the remaining families 3,155, all-row 5,410 (the proxy for the probe table below).
+- To read each turn's command stream the cmdtrace rows were given the USEDMOVE print's `provenance.instructionExecution` (u = commands executed from the effect script entry up to the first used-move print), temporarily, via a tooling patch (reverted).
+
+### 2. Where the frames go (per command, seed 7682, segments 58 / 59)
+
+ROM costs: GetWhoStrikesFirst at commit +3, SpecialStatusesClear +4 .. 5, then each battlescript command is one frame, so the first `attackstring` (`BattleScript_HitFromAtkString+1`, `data/battle_scripts_1.s:245`) runs at **commit + 6 + u**. The app emits the first message at a fixed **commit + 9** (the confirm-handoff stage walk, `advanceBattleResolutionConfirmHandoff`, `src/engine/battleResolutionPresentation.ts` ~6231-6345). It is exact for u = 3 only.
+
+| seg | move (effect script) | u | ROM first print | app first message | ROM hit SE (13 / 12) | app hit SE | offset |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 58 | Struggle (`EffectRecoil` 897 -> `EffectHit` 236; recoil + Struggle counter before the hit) | 8 | 14 | 9 | 80 | 75 | **-5** |
+| 59 | SpeedDownHit (`EffectSpeedDownHit` 1048: `setmoveeffect` + `goto EffectHit`) | 6 | 12 | 9 | 76 (12) / 295 (13) | 72 / 291 | **-3 / -4** |
+
+The interval print -> hit SE is identical in ROM and app (71 / 71 rows checked), so the whole offset is the commit -> first-print lead, inherited by every later row of the turn (the row count after the first row is why the mass is large). The ROM rows that gain frames are the commands before the first print that the app collapses into its 9-frame walk: `setmoveeffect` / `goto` / `jumpifnotmove` / `incrementgamestat` (1 frame each), then `attackcanceler` (241), `accuracycheck` (243), `attackstring` (245).
+
+### 3. Classification of the OFF hit mass (2,255)
+
+Cause: the first-print lead, by effect-script class (u = commands from the effect entry to the first used-move print; segment count over the 24 seeds in brackets, u None = no used-move first print):
+
+| u | effect classes | first print (ROM) | vs app 9 | segs |
+| --- | --- | --- | --- | --- |
+| 2 | Earthquake, status moves, RestoreHp, FollowMe, Confuse, Toxic, Yawn, Attract, LowKick, OHKO | +8 | -1 | 188 |
+| 3 | Absorb, Curse, BrickBreak, Sonicboom, LevelDamage | +9 | 0 | 54 |
+| 4 | plain EffectHit | +10 | +1 | 68 |
+| 5 | | +11 | +2 | 12 |
+| 6 | secondary-effect hits (`setmoveeffect` + `goto EffectHit`) | +12 | +3 | 157 |
+| 7 | | +13 | +4 | 1 |
+| 8 | Struggle, EffectRecoil | +14 | +5 | 44 |
+| 12, 16 | SemiInvulnerable charge turn (u 12 x1, 16 x2; rise 16 .. 18) | +18, +22 | +9, +13 | 3 |
+| None | no used-move first print (turn starts with a status / ability / wake-up / confusion message, forced / flinch / NoMovesLeft Struggle) | | | 158 |
+
+By hp shape / hold: hit rows with the target hp bar moving make the bulk of the 2,255; holds (Brick Break +63 x2, charge turns) are the long tail, see section 5.
+
+### 4. Probe: used-move print lead = 6 + u (temporary patch, reverted)
+
+Patch (not committed), in `advanceBattleResolutionConfirmHandoff` before the `nextStage` lookup: on the `action-dispatch` stage of a plain `use-move` decision (not forced, not the Focus Punch pre-pass), read u from `state.segments[0].events[0]` when it is a `STRINGID_USEDMOVE` message with `provenance.instructionExecution` in 2 .. 20, then hold the walk for u - 3 extra frames (u > 3) or skip `accuracy-check` for one frame (u = 2). Replayed the 24 OFF seeds, same alignment and metric as section 1 (matched rows 1,128 in both runs: no event added or lost):
+
+| metric | HEAD | patched | change |
+| --- | --- | --- | --- |
+| hit rows summed \|offset\| | 2,255 | 1,458 | **-797 (-35 %)** |
+| all-row summed \|offset\| | 5,410 | 4,154 | **-1,256 (-23 %)** |
+| exact-offset rows (all families) | 126 | 560 | +434 |
+| rows improved / worse | | 643 (-1,426) / 94 (+170) | |
+
+The 94 worse rows are mostly stat SE 245 / 239 rows that were already at a positive offset (the shift moves them further; the lead there is a different cause). Per seed (all before -> after, hit before -> after): 7682 642 -> 419, 484 -> 300; 3738 526 -> 388, 319 -> 201; 6568 366 -> 317, 241 -> 212; 97 343 -> 257, 94 -> 54; 2741 316 -> 260, 157 -> 131; 1415 285 -> 267, 62 -> 54; 648 253 -> 237; 5063 244 -> 165, 128 -> 88; 2230 203 -> 168, 100 -> 80; no seed gets worse in the hit family.
+
+### 5. Residual hit mass after the patch (1,458)
+
+97 rows with |offset| >= 6 hold 1,200 of it. They are not the lead:
+
+- Brick Break +63 x2 (126): screen-break message chain, separate hold.
+- s3738 -39 x2 and -30 after `EffectSpeedDown2` / stat-down; s2741 -33 / -26 / -23 / -20; s7682 -19 x2 (Confuse / Attract turns); s2230 -14; s6568 NoMovesLeft Struggle -14.
+- Charge turns: s310 SolarBeam turn 2 -18; semi-invulnerable -16 / -14 (u 10 .. 17, rise 16 .. 18; the probe cap u <= 20 covers them but the rise is the charge animation, not the print).
+- Turns with no used-move first print (mass 213 + 221 + 15 + 38 + 4): the lead there is whatever message comes first (wake-up, confusion, flinch, ability). Out of the rule below; the Scene ON wake-up section (gsp1m) already covers the 32-frame wake-up default.
+
+### 6. Proposed landing (not done: out of scope for hcr1m)
+
+1. **Rule**: the first used-move message of a plain `use-move` turn appears at commit + 6 + u, u = `provenance.instructionExecution` of the USEDMOVE print (the engine already carries it; `FOCUS_PUNCH_PRE_PASS_ACTION_LEAD_BASE_FRAMES = 5` + u at ~265 / 336 is the same idea for the Focus Punch pre-pass).
+2. **File**: `src/engine/battleResolutionPresentation.ts`, the confirm-handoff stage walk (`CONFIRM_HANDOFF_NEXT`, `advanceBattleResolutionConfirmHandoff` ~6231-6345): either hold `action-dispatch` for u - 3 frames, or replace the fixed walk with the 6 + u lead; keep forced / Focus Punch / no-used-move paths as they are (the Struggle forced path enc276 carries its own +19).
+3. **Expected change**: Scene OFF on the 24 T2 seeds, hit-row mass **2,255 -> about 1,458 (-797)**, all-row **5,410 -> 4,154 (-1,256)**, exact rows 126 -> 560. Scene ON uses the same walk: not measured here (the ON census must be re-run; expect the same sign).
+4. **Pins it will move**: the `confirm-handoff` first-message timing pins in `tests/battleResolutionPresentation.test.ts`, `tests/factoryRoundBattleOrchestrator.test.ts`, `tests/factoryVoluntarySwitchSeam.test.ts`, `tests/presentationStringIssue72Batch2.test.ts` (grep `confirmHandoff` / first message frame 9), the Scene OFF and ON census digests, and any T2 frozen-tail expectation that bakes a first-SE frame. u = 3 turns (Absorb / Curse) are unchanged.
+5. **After it**: re-measure the 94 worse rows (stat 245 / 239 lead), then the residuals of section 5 one by one (Brick Break chain first, 126).
+
+Not measured: Scene ON; the u = 10 .. 17 charge-turn rise split; seeds with no used-move print. Tooling note: scripts live in `/tmp/hcr1m` (`lib.py`, `cmp.py <seed> <k>`, `mass.py`, `first.py`), not committed; evidence copies in the ignored `.integration/evidence/hcr1m/`.
+
+**hcr2m (2026-11-20): Scene ON, same stage walk (measurement only: no change under `src/`, `tests/`, `tools/`; the two temporary probe patches were reverted, `git status` clean; `npm test` not run).** The ON T2 seeds (the 25 of t2n), evidence `.integration/evidence/t2n/<seed>-on.{setup,drive,snd}.json`; ROM per-frame probe re-run for all 25 (`tools/run-mgba-probe.py ... tools/integration/hpd2Probe.py <req> on <out>`; the `-on.req.json` carries a `replay` field the probe rejects, so the probe request is the same descriptor with `trace.segments` = the drive's segments, `overrides {}`); app side `soundCensusRomReplay.ts replay --scene=on --cmdtrace=1` on HEAD `0dfdeb140` (the cmdtrace rows temporarily carried the first event's message id and `provenance.instructionExecution`). Alignment, metric and u as in sections 1 and 4 (scripts in `/tmp/hcr2m`: `lib.py`, `tab.py`, `iv.py`, not committed).
+
+- **The rule holds in ON: first used-move print = commit + 6 + u, the app prints at a fixed 9.** 605 decision segments over the 25 seeds; 418 start with a plain `use-move` USEDMOVE print at segment 0 / command 0 and u in 2 .. 7 (u: 2 x156, 3 x41, 4 x69, 5 x12, 6 x139, 7 x1; same classes as the OFF table). ROM exec rise - 6 equals u in **417 of 418** (the one exception: s2230 res20, u 6, ROM rise 31 = another earlier ROM event, not the rule). The app first message is 9 in all 418. No u >= 8 (charge turn) occurs in these 418. Not covered by the rule (first row is something else): `status` command 65, EMPTYSTRING3 26, in-love 13, confusion 12, healed-confusion 3, return-mon 2, switch-decision turns 47, 15 `move` segments whose first cmdtrace row is a later-segment USEDMOVE.
+- **The temporary probe (hold `action-dispatch` for u - 3 frames when u > 3, skip `accuracy-check` when u = 2; the OFF patch, only `sourceDecision.kind "use-move"` / first event USEDMOVE / u 2 .. 20)** moves the app first print to exactly the ROM's (emsg - rise: 0 in 415, -1 in 2, the s2230 outlier -22), but it does **not** carry the OFF gain. Same alignment, matched rows 5,871 in both runs (no event added or lost):
+
+| metric (25 ON seeds) | HEAD | patched | change |
+| --- | --- | --- | --- |
+| all-row summed \|offset\| | 35,288 | 33,116 | **-2,172 (-6.2 %)** (OFF: -23 %) |
+| hit rows (SE 12 / 13 / 14, 475 rows) | 3,954 | 3,613 | **-341 (-8.6 %)** (OFF: -35 %) |
+| exact-offset rows | 1,007 | **402** | **-605** (OFF: +434) |
+| stat 239 / 245 rows | 458 | 453 | -5 |
+| seeds worse | | all rows: only s5569 (651 -> 733); hit rows: s1415 165 -> 167, s6912 16 -> 21, s5569 74 -> 71 better | |
+
+- **Why not: in ON the rows after the first print already absorb part of u, so the shift only helps where the absorption is incomplete.** Per u (segments / all-row mass before -> after / exact rows before -> after): **u 2** (156): 7,380 -> 7,876 (**+496, worse**), exact 360 -> 74; **u 3** (41): 1,474 -> 1,475 (unchanged, as predicted); **u 4** (69): 2,042 -> 2,182 (**+140, worse**), exact 371 -> 19; **u 5** (12): 444 -> 310 (-134); **u 6** (139): 10,398 -> 7,725 (**-2,673**), exact 61 -> 75. Baseline offset histograms by u (all matched rows): u 2: 0 x360, +2 x171, -2 x145; u 4: 0 x371, -2 x94; **u 6: -2 x841** of 1,833, -4 x134, -5 x130. So at HEAD the ON u = 2 and u = 4 turns already land their hit / stat / cry rows at offset 0 although the first print is +1 (u 2: ROM 8, app 9) or -1 (u 4: ROM 10, app 9): the print -> first-hit interval in the app is about -1 (u 2) / +1 (u 4, and u 6: +1 while the lead error is -3) against the ROM's (mode of ROM vs app rise -> hit by u, `iv.py`: u 4 (222, 223) (303, 302) (91, 92) (75, 76); u 6 (234, 233) (235, 234) (180, 181); the u 2 sample is noisy: 76 turns, (254, 247) x8, mean app - ROM -7). I.e. the ON downstream chain is not the "identical in ROM and app" interval of OFF section 2 (71 / 71 rows): ON carries other per-turn constants (the Scene ON move-animation / message leads) that were tuned against rows at the fixed 9 and cancel the lead for u = 2 and u = 4. Moving the print alone therefore breaks 605 exact rows; only u 5 / u 6 (secondary-effect hits, 151 segments, 10,842 mass before) gain, and there -2,807.
+- **Verdict for the ON landing.** The 6 + u rule is right for the first print, but in ON it cannot be landed as the OFF patch (-23 % all / -35 % hit) without also re-deriving the downstream interval; as is, it is **-6.2 % all rows** (all of it from the u 5 / 6 secondary-effect turns), exact rows 1,007 -> 402. Expect a Scene-ON-gated version (`u >= 5` only: hold u - 3 frames) to keep about **-2,807** and drop the +636 of u 2 / u 4; not run (cheap but out of the 25-minute cap). Open follow-up: measure the ON print -> hit interval per u from the per-command probe (`/tmp/gsp1m`-style `cmp.py`) on one u 2 turn and one u 4 turn (e.g. s2 res0 u 4, s2 res1 u 2) to find which ON constant absorbs the lead; until that is known the OFF section 6 landing must stay Scene OFF only, and the pins listed there move only for OFF.
+
+## fsc1m (2026-11-20): Scene OFF faint / send-in chain, ROM vs app per command, split into lead / harness anchor / engine rows (measurement only)
+
+Scene OFF, the 24 T2 seeds of t2n. Measurement only: no change under `src/`, `tests/` or `tools/`, no probe patch this time (everything below is read from the t2n evidence plus the hcr1m per-frame ROM probe rows; `npm test` not run, as assigned). Evidence: `.integration/evidence/t2n/` (`t2n-attr-off.json`, per-seed `-off.{engine,drive,snd,cmp}.json`), the hcr1m copies of the per-frame ROM probe (`<seed>-rom.json`: gBattlescriptCurrInstr, exec flags, anim, hp) and `first.json` (per-segment first-print lead); scripts in `/tmp/fsc1m` (`lib.py`, `cmp.py <seed> <k>`, `chain.py`, `agg.py`, not committed). Alignment as in hcr1m: per decision segment both sides start at the commit frame, SE / cry rows matched by ordered id.
+
+### 1. Which seed, and what the chain is
+
+Chain rows = `ctl:16@faint` + `cry@faint` (faint), `ctl:114@party-summary` + `ctl:15@switch-in` + `cry@switch-in` (AI replacement send-in), `ctl:15` / `cry` `@sprite-visibility` (forced switch send-in), `ctl:15@trainer-slide`. 430 of the 440 rows, 2,660 of 2,678 mass are reproduced by the segment mapping (the 10 rows / 18 mass left are the zero rows booked under `@switch-out`).
+
+| seed | chain mass | seed | chain mass |
+| --- | --- | --- | --- |
+| **648** | **225** | 2741 | 136 |
+| 97 | 202 | 1914 | 134 |
+| 3738 | 180 | 3158 | 126 |
+| 1415 | 172 | 7682 | 121 |
+| 830 | 150 | (15 others) | 21 .. 118 |
+
+**Seed 648** is the one analysed per command (it also carries the Earthquake faint chain +43 x 2 of t2n section 4 group 3). Its 225 = seg 0 **196** (cry@faint +43, ctl:16 +43, ctl:114 +34, ctl:15 +38, cry@switch-in +38) + 29 (seg 2 / 8 -1 x 4, seg 12 -4 x 2, trainer-slide -17).
+
+### 2. Per command, seed 648 segment 0 (ROM vs app, frames after the segment's commit; ROM = the probe, app = `cmds`)
+
+The turn: the foe uses Dig (charge turn), the player's Earthquake hits the underground foe (`BattleScript_DoHitAllWithUndergroundBonus`, `data/battle_scripts_1.s:1848`), the foe (Golduck, cry 55) faints, the AI sends in the next mon.
+
+| command | ROM (source) | ROM frame | app frame | app - ROM |
+| --- | --- | --- | --- | --- |
+| first print (charge turn) | exec rise at `BattleScriptFirstChargingTurn+4` | 16 | message 9 | **-7** (the hcr1m first-print lead, here u = 10: 6 + u) |
+| hit SE 13 | `effectivenesssound` (+13) then `hitanimation` (+14) | 232 | hit-animation 225, SE 225 | -7 (inherited) |
+| hit blink | `OpponentHandleHitAnimation`, `src/battle_controller_opponent.c:1804-1817`: **sprite `invisible` (Dig underground) -> `OpponentBufferExecCompleted()` at once**, no blink | bar starts 235 (SE + 3) | hp 260 (SE + **35**) | **+25** (app 35-frame `HIT_ANIMATION_TIMING`, `battleResolutionPresentation.ts:1139`, emitted at 5430-5447, is unconditional; ROM blink is 33 frames when the target is visible: SE + 1 .. + 34, bar + 36, checked on 7 other segments) |
+| hp bar 187 -> 0 | `healthbarupdate` / `datahpupdate` (+19 / +21) | 235 .. 383 (148) | 260 .. 407 (147) | +24 (-1 own) |
+| empty box | `printstring STRINGID_EMPTYSTRING3` + `waitmessage 1` (`:1865-1866`) then `tryfaintmon` (+35) | 388 (hp end + 5), FaintTarget at 391 | message 407 -> faint cmd 431 (**24**) | +43 at the faint cmd: **+19 own** |
+| faint cry (`playfaintcry`, `:2818`) | `BattleScript_FaintTarget+2` | 392 | cry 435 (faint cmd 431 + 4) | **+43** |
+| `pause B_WAIT_TIME_LONG` + `dofaintanimation` -> SE 16 | `:2819-2820`, `OpponentHandleFaintAnimation` (`PlaySE12WithPanning(SE_FAINT)`) | 458 (cry + 66) | 501 (cry + 66) | **+43** (interval exact) |
+| faint message (`printstring STRINGID_TARGETFAINTED`, `:2822`) | exec 478 .. 509 (31) | 478 | status 520 / message 521 | +43 |
+| rest of the faint script, `BattleScript_GiveExp` (517), `HandleFaintedMon` (523), `FaintedMonTryChoose` (526 .. 532; the AI's `openpartyscreen` choice: no sound, 7 frames here) | `:2830-2847` | 534 = SE 114 (`drawpartystatussummary` rise) | sprite-visibility 543 / 544, party-summary 545, SE 114 at **568** (lead 23) | **+34** (-9 against the faint) |
+| `SWITCHINMON` print (`printstring`, +11) | `:2888` | 633 | message 668 | +35 |
+| `switchinanim` (+16): ball SE 15 / new mon cry 279 | `:2890`; SE 15 at exec + 18, cry at + 34 | 689 / 705 | switch-in cmd 708; SE 15 727 / cry 743 | **+38 / +38** (the SE 114 -> SE 15 interval is +4: print +1, print -> switchinanim +2, SE +1) |
+| `end2` | `BattleScript_FaintedMonEnd` | 794 | next menu 836 (segment 827 vs 798) | +29 |
+
+Arithmetic of the faint rows: **+43 = -7 (lead) + 32 (invisible-target blink: app 35 vs ROM 3) - 1 (hp bar 147 vs 148) + 19 (empty box 24 vs 5)**. Then the faint -> send-in step is **-9** (ROM 76 frames SE 16 -> SE 114, app 67), and the send-in's own SE 114 -> SE 15 / cry is **+4**.
+
+The forced-switch segments of this seed (segs 3 and 9, after the player's mon faints in segs 2 and 8): SE 15 / cry 217 / cry 200 at **0 / 0** (ROM and app both at commit + 146 / 162 and 148 / 164); the faint rows of the preceding player-side faints are -1 (seg 2, 8) and -4 (seg 13): inherited, no own offset.
+
+### 3. The split (a) / (b) / (c)
+
+**(a) Inherited from the turn's first-print lead (hcr1m).** The app's first message is at a fixed commit + 9, ROM at 6 + u. Using `emsg - rise` per segment (first.json) as the carried lead, over the faint rows of 190 matched rows in segments with a known lead: sum of the lead |a| = 429. If the lead were exact everywhere (an **upper bound**: the hcr1m rule only covers plain `use-move` turns, u = 2 .. 20; the charge-turn first print of 648 seg 0 may be outside it), the chain mass would move as: faint rows 1,017 -> 724 (-293), AI send-in 1,097 -> 983 (-114), trainer-slide 222 -> 187 (-35): **-435 of the 2,387 mass in segments with a known lead (-18 %), -16 % of the 2,660 total**. In 648 seg 0 the lead is -7 and **moves the 5 chain rows the wrong way** (43 -> 50, 34 -> 41, 38 -> 45: +35 mass) because the own rows are +50: on the top seed the lead fix alone makes the chain worse; the (c) rows have to land with it. 78 of the 99 `cry@faint` rows equal the hit-row offset of their segment exactly (own = 0; mass 234): these are pure inheritance.
+
+**(b) The driver's forced-switch anchor.** 47 forced-switch segments (decision kind `switch`, the replacement after the player's mon faints): the engine's menu-open -> commit is a fixed 8 / 11 frames, the ROM's 32 .. 41 (27 .. 28 more), and the harness anchors on the commit. The SE 15 / cry send-in lands exactly (offset 0) in **25 of 47**, at **-3 in 17, -7 in 5** (ROM commit -> SE 15 is 144 .. 153, app 144 .. 148: the quantum is the ROM driver's party-menu confirm input phase, 3 .. 4 frames, not an engine row). Mass: SE 15 86, cry the same, **about 170** by direct count (t2n books 83 of it under `@sprite-visibility`, the rest under other labels): **6 % of the chain**. This is smaller than ctl1's 9 .. 12 frame anchor artifact (now at most 7, median 0): the t2n "-12 -> -3" driver fix is already in. On seed 648 this is **0** (both forced switches at 0). It is measurement side; it does not move any app frame.
+
+**(c) The engine's own faint / send-in rows** (rows and source lines; these are what is left after (a) and (b)):
+
+| # | row | own offset | rows / mass | ROM source | app source |
+| --- | --- | --- | --- | --- | --- |
+| c1 | **hit-animation on an invisible (Dig / Fly / Dive underground) target is 35 frames; ROM skips it (0 frames)** | +25 .. +32 on every later row of the turn (648 seg 0: +32 on the five chain rows plus the hp / message rows) | 648: 5 chain rows, 196; other seeds: s6912 seg 7 (+26 own) likely, not decomposed | `src/battle_controller_opponent.c:1804-1817` (and the player controller's twin), `OpponentHandleHitAnimation` | `HIT_ANIMATION_TIMING` 35 (`battleResolutionPresentation.ts:1139`), hit-animation emission 5430-5447, no invisibility test |
+| c2 | **`printstring STRINGID_EMPTYSTRING3` + `waitmessage 1` in the hit-all loop is a default 24-frame message; ROM spends ~5 frames hp end -> cry** | **+17 .. +20 own** on the faint rows of every Earthquake KO: 6 segments (s648 +19, s1415 +19 / s3158 +19 x 2 / s5063 +17 / s6912 +19 .. +26 / s97 seg 20 +20, own = faint - hit) | 6 segments x 2 faint rows + the send-in rows behind them; about 200 mass | `data/battle_scripts_1.s:1865-1866` (`BattleScript_DoHitAllWithUndergroundBonus`; same print in `BattleScript_HitAllNoUndergroundBonus`) | `MESSAGE_TIMING` 24 (`:956`); the empty-box timing exists only for the Focus Punch pre-pass (`focusPunchPrePassMessageTiming`, `:297-330`), where it is `kernel instruction count + 1` |
+| c3 | **faint message -> party-summary SE: the app interval SE 16 -> SE 114 is 64 .. 70 (median 67), ROM 66 .. 83 (median 75)** | **-8 median (-1 .. -15)** on SE 114 / SE 15 / cry@switch-in of every AI replacement (30 of 30 faints with a send-in in the same segment at -15 .. -1 except 3) | 118 rows, 1,130 mass (81 rows with their faint in the segment: own sum 614 of 921) | ROM: faint print `printstring STRINGID_TARGETFAINTED` (`:2822`, exec 31 frames in 648) + `GiveExp` / `HandleFaintedMon` (a constant +6, +3) + the AI `openpartyscreen` choice (`FaintedMonTryChoose`, `:2843-2847`, **6 .. 10 frames before `FaintedMonSendOutNew`**) + 1; the SE 16 -> GiveExp part alone ranges 48 .. 65 | app: `faint` command lead 68 (exact), then the faint message (22 frames) + 2 sprite-visibility + party-summary lead 23 (648) |
+| c4 | send-in tail: print -> `switchinanim` -> SE 15 / cry | **+1 .. +4** (648 +4) | small | `:2888-2893` | |
+| c5 | attacker faint (`BattleScript_FaintAttacker`: confusion, Perish Song, turn damage, recoil) and the battle-ending faint (`BattleScript_LocalBattleLostPrintTrainersWinText`) | -6 .. -12 own (s499 seg 14 -11, s1028 seg 16 -12, s97 seg 14 -10, s3738 seg 62 -8, s2741 seg 5 -3, s7295 seg 1 -10) | ~10 faint rows, ~110 mass | `BattleScript_FaintAttacker`, `LocalBattleLost...` | not examined per command |
+| c6 | trainer-slide after the last faint (battle end -> next battle) | -4 .. -29 | 20 rows, 222 mass (lead explains 35) | | not examined (not a send-in path; unmeasured) |
+
+Mass accounting of the 2,660: **faint rows 1,154** (own part 502 over 190 rows: 78 of 99 `cry@faint` rows are 0 own, 21 carry 277 / own 252: 6 Earthquake rows +17 .. +50, 8 attacker-faint rows -6 .. -12, a few +9 / +13 / -1 .. -3), **AI send-in 1,130** (own c3 614 of the 921 in segments with the faint, 209 in segments where no faint row is attributed: 37 rows, 14 of them at -7 .. -15), **forced switch ~170 (b)**, trainer-slide 222, other 71. The pieces cancel in sign (faint -3 plus send-in own -7 = -10), so |a| + |own| exceeds the mass.
+
+### 4. Answer
+
+1. **Seed 648 is dominated by c1 + c2, not by (a) or (b)**: +50 of the +43 faint offset is the engine (c1 32 + c2 19 - 1), the lead is -7 against it, the forced switch is 0. Fixing the hcr1m lead alone would **worsen** this seed's chain by 35.
+2. **Across the 24 seeds the chain is mostly inherited on the faint rows** (78 / 99 faint cry rows own 0, offset = the turn's hit offset -1 .. -9) and engine-own on the send-in rows: **c3 (the faint -> party-summary interval, median -8) is the biggest single engine row: 118 rows, 1,130 mass**, then c2 (Earthquake empty box, +17 .. +20), c1 (invisible target blink, 648 only in these seeds), c5 / c6 (attacker-faint and battle-end, ~330).
+3. The part the lead (a) would clear is **about 435 of 2,660 (16 %)**, the harness anchor (b) is **~170 (6 %), measurement side, already down to 0 / -3 / -7**, the engine's own rows (c) are **about 1,200 (45 %)**; the rest is the hit chain carried (hp bar lengths, other turns' earlier commands).
+
+### 5. Proposed landing (not done: out of scope for fsc1m)
+
+1. **c1**: skip the 35-frame hit-animation when the target is semi-invulnerable-invisible (the engine knows STATUS3_UNDERGROUND / ON_AIR / UNDERWATER; ROM test is the sprite `invisible` flag): -32 on every later row of those turns (Dig / Fly / Dive hits on Earthquake / Surf / Gust / Thunder / Twister; 6 EQ KOs in these seeds, only 648 has the blink skip).
+2. **c2**: time the hit-all loop's EMPTYSTRING3 box like the Focus Punch pre-pass one (kernel instruction count + 1, about 5 frames): -17 .. -19 on the 6 Earthquake KO chains (about -200 mass).
+3. **c3**: model the faint message -> party-summary interval: ROM = faint print length (48 .. 65 from SE 16 to GiveExp; suspected to depend on the fainted mon's name / text length, **not tested**) + 6 + 3 + AI choice 6 .. 10 + 1. This needs the AI choice's frame cost (a ROM probe on `FaintedMonTryChoose`) and the text-length rule; expected -614 own mass on 81 rows.
+4. Land the hcr1m lead together with c1 / c2 (on the top seed they cancel; on the rest the lead alone is -435).
+5. Not measured: Scene ON (the same scripts run, the chain should carry the same c1 / c2 / c3 rows); c5 and c6 per command; what drives the 6 .. 10 frame AI choice; the 10 chain rows under `@switch-out` (zero offset).

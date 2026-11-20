@@ -22,13 +22,19 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   (e.g. silver-first-slow 1,239 -> 1,622). Open: LOGO_WIGGLE, LOGO_WAVE's older mismatch.
 - **Gameplay (item 0d):** run-start replay on `0d2973b40`: pool **44 / 44** (1,346 states), stages **94 / 94**. Luck day 4: 7 / 7 ROM match promoted (`0d2973b40`); rrh5 (hand-built set-ups) +9;
   shd1: **Shedinja max HP 1** (CalculateMonStats; `src/engine/stats.ts` `calculateMaxHp`): the only engine rule change, census 0..999 both scenes 0 changed (set 21 is outside every Factory rental
-  range, battle_factory.c:169: lab parties only). Rare rules **66 -> 83 / 110**. WIND-DOWN REPLAY: see Gates.
-- **Gates (final engine `17f2a47e8`):** GATES_PENDING
+  range, battle_factory.c:169: lab parties only). Rare rules **66 -> 83 / 110**. Wind-down replay: see Gates.
+- **Gates (final engine `17f2a47e8`):** vanilla 0:20 OFF **20 / 20**, ON **20 / 20**; 0:60 default / winning / winning-swap **60 / 60** each; varied-RNG winning carry 0 / 14 / 28 + winning-swap
+  carry 0 **100 / 100** each (0 crash / 0 hang everywhere). Full suite on `17f2a47e8` (2 workers, beside the soaks): **16,112 passed, 3 failed**, all three fixed test / tool-side after it and re-run
+  green: `liveIceBallAdapter` x2 (ice2 A now draws an unknown lend approximately; `1d304ea6e`) and `iss215ToolPixelInstall` (btn2's new tool lacked the pixel installer; `452e5415d`). Earlier full
+  suites: `41ccb0884` 16,048 / 0; `90e6aaba1` 16,073 / 2 (lead2 pins, fixed by lfx1); `29fd7cf34` 16,090 / 5 (merge pins, fixed by pin1); `29688b8cd` **16,099 / 0**. typecheck / build / build:lib 0.
+  **Wind-down replay** on `17f2a47e8` (shd1 is an engine rule change): pool **44 / 44** (1,312 states), stages **108 / 108** (`docs/replay-ledger.md`). `play:random --minutes 10 --scene both --lobby-new-challenge`: ON 40 battles / 19 swaps,
+  OFF 62 / 23; **0 page / console errors, 0 overlays**.
 - **Cleanup:** cln9 (5 unread scratch JSONs; 109 one-off scripts kept: tracked receipts name / hash them as their generator, `docs/cln9-oneoff-scripts.md`). The aud251 doc's 62 MB sed corruption
   (`b0e4cf53d`, last run) undone by t2n (177 KB). Disk: ~33 GB of census `tree/` dirs pruned (`.integration/evidence/TREES-PRUNED-20261120.txt`).
 - **Lapse:** lead3's worktree was removed before its `.integration` evidence was copied (census arms lost; numbers are in `docs/lead1m-rule-lead-design.md` "lead3", log kept).
-- **Next** (ranked by t2n section 5): (1) general / status-animation spacing (ON 25 % of the mass: SE 152 / 228 / 102 / 142 / 148, one ROM window on census seed 5063 first); (2) hit-controller rows
-  SE 13 / 12 / 14 (OFF 41 %: the remaining hp-command shapes); (3) faint / send-in chain (driver anchor first, then ball-open lag); (4) lead1m B6 charge turns (Dig / Solar Beam / Fly), B4 C bodies,
+- **Next** (ranked by t2n section 5): (1) general / status-animation spacing (ON 25 % of the mass): **gsp1m measured the cause** (`docs/aud251-s11-scoreboard-refresh.md` "gsp1m"): the wake-up `status` command takes the 32-frame `STATUS_TIMING` default (ROM prints the wake-up at commit +9..12, ours +41), so every later SE of that turn runs +24..+29 late; a 6-frame probe cut matched |offset| 35,239 -> 31,265 (-11 %) over 25 ON seeds; the ROM head varies by the preceding command (3 / 6 / 12): measure it, then land, then the held-item restart lead (15 -> ~11), infatuation tail, Curse; (2) hit-controller rows SE 13 / 12 / 14 (OFF 41 %): **hcr1m measured the cause** (same doc, "hcr1m"): the first used-move print sits at a fixed commit + 9, the ROM at commit + 6 + u (u = script
+  commands before the print: EffectHit 4, secondary hits 6, Struggle / recoil 8, Earthquake / status 2); a probe cut OFF hit-row |offset| 2,255 -> 1,458 (-35 %), all rows -23 %, exact rows 126 -> 560 (land in
+  `advanceBattleResolutionConfirmHandoff`; Scene ON: hcr2m, the rule holds there too (417 / 418 turns) but moving the print alone gains only -6 %: land OFF first, find the ON constant on one u 2 / u 4 turn); (3) faint / send-in chain (fsc1m, same doc "fsc1m", OFF s648: 45 % of its mass is engine rows: the faint-message -> party-summary interval (median -8 on 118 rows; ROM AI choice 6..10 frames), the hit blink played on an invisible (Dig) target (+25..+32), Earthquake's EMPTYSTRING3 box held 24 vs ~5 frames; the first-print lead 16 %, the driver anchor 6 %: land with hcr1m); (4) lead1m B6 charge turns (Dig / Solar Beam / Fly), B4 C bodies,
   B5 adapter windows; (5) Recycle's heal-animation start (lse4), LOGO_WIGGLE / LOGO_WAVE (#225), #223 remainder (box clear 1 row late). Run the FULL suite before folding any timing change.
 
 ---
