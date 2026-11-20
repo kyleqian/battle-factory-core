@@ -42,7 +42,17 @@ describe("cff232: the committed Scene OFF ROM receipts replay at 0 px through th
       const anchor = segment.frames.findIndex((f) => f.command === klass.anchorCommand);
       const rows = receipt.romBoxHashes.map((_, k) => segment.frames[anchor + k]!.rgba);
       expect(rows.map((r) => boxHash(r, klass.box))).toEqual(receipt.romBoxHashes);
-      expect(rows.map((r) => boxHash(r, TEXT_BOX))).toEqual(receipt.romTextHashes);
+      if (klass.name === "player-water-send-in") {
+        // pic9: the send-in line stays on screen through the first 117 morph rows. Its words come from Cmd_hpthresholds (the foe's HP
+        // percent): the receipt's lab sent CASTFORM in against a full-HP MANTINE ("Go! CASTFORM!"), census seed 603 against HUNTAIL
+        // at 74 / 148 (50 %: "Do it! CASTFORM!"), so those rows are compared from the line's replacement on.
+        const lineRows = receipt.romTextHashes.findIndex((h) => h !== receipt.romTextHashes[0]);
+        expect(lineRows).toBe(117);
+        expect(segment.commands.find((c: any) => c.type === "message")?.lines).toEqual(["Do it! CASTFORM!"]);
+        expect(rows.slice(lineRows).map((r) => boxHash(r, TEXT_BOX))).toEqual(receipt.romTextHashes.slice(lineRows));
+      } else {
+        expect(rows.map((r) => boxHash(r, TEXT_BOX))).toEqual(receipt.romTextHashes);
+      }
       const command = segment.commands.findIndex((c: any) => c.type === "general-animation" && c.animation === "CASTFORM_CHANGE");
       expect(segment.frames.filter((f) => f.command === command)).toHaveLength(CASTFORM_CHANGE_COMMAND_FRAMES + (klass.leadRows === 86 ? CASTFORM_CHANGE_WEATHER_LOOP_FRAMES : 0));
     }, 120000);

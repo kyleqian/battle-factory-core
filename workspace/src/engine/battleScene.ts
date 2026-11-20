@@ -529,6 +529,7 @@ import ballDisplayAsset from "../assets/gen/battle-interface-ball-display.json" 
 import battleHealthboxAsset from "../assets/gen/battle-healthbox.json" with { type: "json" };
 import downArrowAsset from "../assets/gen/battle-interface-down-arrow.json" with { type: "json" };
 import { lazyMonPicSheet, lazyMonPicTable } from "./monPicPixels.ts";
+import { canonicalSampleAccessor, noteCanonicalSample } from "./drawRecord.ts";
 import type kadabraFrontSpriteAssetData from "../animation/assets/kadabra-front.json";
 import type knockOffAssetData from "../animation/assets/knock-off.json";
 import type recoverAssetData from "../animation/assets/recover.json";
@@ -732,7 +733,7 @@ import type megaHornAssetData from "../animation/assets/mega-horn-horn-hit-2.jso
 import superpowerAsset from "../animation/assets/superpower-rock-orb-fire.json" with { type: "json" };
 import revengeAsset from "../animation/assets/revenge-purple-scratch-swipe.json" with { type: "json" };
 import type meteorMashAssetData from "../animation/assets/meteorMash.json";
-import { partyMenuLayers, partySelectEntryPhase, partySendOutBallPhase, partySendOutReleaseClock, partySendOutBattleFadeBldy, partySendOutHealthboxDx, partySendOutMenuBounceTick, partySendOutPhase, partySendOutReleaseLogicalTick, PARTY_ENTRY_FADE_IN_START, PARTY_ENTRY_FADE_OUT_START, PARTY_SENDOUT_BALL_SPIN_START, PARTY_SENDOUT_BALL_VISIBLE_START, PARTY_SENDOUT_FADE_OUT_START, type PartyMenuIconLayer } from "./partySelect.ts";
+import { INITIAL_PARTY_SELECT_STATE, partyMenuLayers, partySelectEntryPhase, partySendOutBallPhase, partySendOutReleaseClock, partySendOutBattleFadeBldy, partySendOutHealthboxDx, partySendOutMenuBounceTick, partySendOutPhase, partySendOutReleaseLogicalTick, PARTY_ENTRY_FADE_IN_START, PARTY_ENTRY_FADE_OUT_START, PARTY_SENDOUT_BALL_SPIN_START, PARTY_SENDOUT_BALL_VISIBLE_START, PARTY_SENDOUT_FADE_OUT_START, type PartyMenuIconLayer } from "./partySelect.ts";
 import {
   battlePartySelectStateForForcedParty,
   PARTY_SELECT_OPEN_BACK_SPRITE_Y2_START,
@@ -2871,6 +2872,8 @@ const healthboxAssemblyAssets: HealthboxAssets = {
  * before wiring this in: every cell the old heuristic called "real content"
  * the compositor also paints, with the identical RGB.
  */
+// pic3: not a noted canonical sample: it is the default content of the staged bodies' opponent healthbox draws
+// (drawSendOutHealthbox / drawOpponentHealthboxWobble), which the live seam always paints over (renderBattleResolutionLiveView).
 export const getOpponentHealthboxContent = lazyValue(() => composeOpponentHealthbox(healthboxAssemblyAssets, {
   name: getAnchorOpponentName(),
   level: getAnchorOpponentBattler().level,
@@ -10682,13 +10685,13 @@ export const turn5PidgeottoSettleTick = lazyValue(() => turn5Switchin().material
  * independently re-stated.
  */
 const pidgeottoLevel = lazyValue(() => turn5Switchin().replacementLevel);
-export const getPidgeottoHealthboxContent = lazyValue(() => composeOpponentHealthbox(healthboxAssemblyAssets, {
+export const getPidgeottoHealthboxContent = canonicalSampleAccessor("PIDGEOTTO healthbox", lazyValue(() => composeOpponentHealthbox(healthboxAssemblyAssets, {
   name: turn5Switchin().replacementSpecies,
   level: pidgeottoLevel(),
   gender: "male",
   hpFraction: turn5Switchin().replacementHp.current / turn5Switchin().replacementHp.max,
   status: "none",
-}));
+})));
 
 /** S7 slice N-4 rung (b) (docs/turn6-notes.md §4, RAM-confirmed via `dump-battler-full.py`): Pidgeotto's own max HP - the ROCK_SLIDE HP-drain window's own `hpFraction` denominator, now literally derived from `TURN5_SWITCHIN` (156) rather than independently re-stated. */
 export const pidgeottoMaxHp = lazyValue(() => turn5Switchin().replacementHp.max);
@@ -10884,6 +10887,7 @@ export const TURN13_MURKROW_BG_FADE_START_AFTER_DISMISS =
 
 /** MURKROW's settled front sprite, no affine transform after the local settle edge. */
 export function drawTurn13MurkrowSettled(fb: Uint8Array): void {
+  noteCanonicalSample("MURKROW settled sprite");
   const idle = speciesFrontIdleRestOffset("MURKROW") ?? { x2: 0, y2: 0 };
   drawSpriteSheet(fb, murkrowFrontSprite.tileset, murkrowFrontSprite.palette, MURKROW_CORNER.x + idle.x2, MURKROW_CORNER.y + idle.y2);
 }
@@ -10899,13 +10903,13 @@ export function drawTurn13MurkrowSettled(fb: Uint8Array): void {
 const turn13Switchin = lazyValue(resolveTurn13SwitchInAdapter);
 /** S7/S8 turn 13 rung 4 (docs/turn13-notes.md §6): MURKROW's own opponent healthbox, Lv50 (docs/turn15-notes.md §own re-confirmation, unchanged across the whole battle), full HP (142/142 switch-in, `pickHpBarBand` green per `verify-turn13.ts`'s own check) -- now literally derived from `TURN13_SWITCHIN`, not independently re-stated. */
 const murkrowLevel = lazyValue(() => turn13Switchin().replacementLevel);
-export const getMurkrowHealthboxContent = lazyValue(() => composeOpponentHealthbox(healthboxAssemblyAssets, {
+export const getMurkrowHealthboxContent = canonicalSampleAccessor("MURKROW healthbox", lazyValue(() => composeOpponentHealthbox(healthboxAssemblyAssets, {
   name: turn13Switchin().replacementSpecies,
   level: murkrowLevel(),
   gender: "male",
   hpFraction: turn13Switchin().replacementHp.current / turn13Switchin().replacementHp.max,
   status: "none",
-}));
+})));
 const murkrowHealthboxContentByHp = new Map<string, ReturnType<typeof composeOpponentHealthbox>>();
 function murkrowHealthboxContentForHp(
   hp: number,
@@ -13994,26 +13998,37 @@ const TURN15_CANONICAL_PARTY_SPECIES = ["ONIX", "MAGBY", "BAYLEEF"] as const;
  */
 function isTurn15CanonicalPartyState(state: import("./partySelect.ts").PartySelectState): boolean {
   const [onix, magby, bayleef] = state.party;
-  return state.party.every((member, index) => member.partyIndex === index && member.species === TURN15_CANONICAL_PARTY_SPECIES[index])
+  // pic3: the snapshot also prints each row's level, HP digits, gender and held-item icon, so a live party of the same three species
+  // with other sets (another max HP, personality or item) takes the composed renderer too; only the anchor's own rows match.
+  const anchorRows = INITIAL_PARTY_SELECT_STATE.party;
+  return state.party.every((member, index) => member.partyIndex === index && member.species === TURN15_CANONICAL_PARTY_SPECIES[index]
+    && member.level === anchorRows[index]!.level && member.maxHp === anchorRows[index]!.maxHp
+    && member.personality === anchorRows[index]!.personality && member.item === anchorRows[index]!.item
+    && member.status === "none")
     && state.request.faintedPartyIndex === 0
     && onix.hp === 0 && !onix.legal
     && magby.hp === magby.maxHp && magby.legal
     && bayleef.hp === bayleef.maxHp && bayleef.legal;
 }
 
+/**
+ * The harvested canonical chrome covers the anchor's two cursor positions (slot 0 / 1); slot 2 and CANCEL draw through the
+ * source-composed renderer like every non-canonical party.
+ * sum241: the harvested "submenu" chrome is the anchor's own frame -- MAGBY (slot 1) selected, action cursor on SEND OUT. The
+ * window opened on slot 0 (the fainted ONIX, refused on A), any other action row, and the summary screen's own frames (the
+ * composition root draws the summary over this menu) take the composed renderer.
+ * pic3: the list and its fade's OBJ mask (drawTurn15PartyListObjMask) take the same decision.
+ */
+function turn15PartyListDrawsSnapshot(state: import("./partySelect.ts").PartySelectState): boolean {
+  return isTurn15CanonicalPartyState(state)
+    && (state.cursor === 0 || state.cursor === 1)
+    && (!state.submenuOpen || state.cursor === 1)
+    && state.actionCursor === 0
+    && state.summary === null;
+}
+
 export function drawTurn15PartySelectList(fb: Uint8Array, state: import("./partySelect.ts").PartySelectState): void {
-  // The harvested canonical chrome covers the anchor's two cursor positions (slot 0 / 1); slot 2 and CANCEL draw through the
-  // source-composed renderer like every non-canonical party.
-  // sum241: the harvested "submenu" chrome is the anchor's own frame -- MAGBY (slot 1) selected, action cursor on SEND OUT. The
-  // window opened on slot 0 (the fainted ONIX, refused on A), any other action row, and the summary screen's own frames (the
-  // composition root draws the summary over this menu) take the composed renderer.
-  if (
-    !isTurn15CanonicalPartyState(state)
-    || (state.cursor !== 0 && state.cursor !== 1)
-    || (state.submenuOpen && state.cursor !== 1)
-    || state.actionCursor !== 0
-    || state.summary !== null
-  ) {
+  if (!turn15PartyListDrawsSnapshot(state)) {
     renderBattlePartySelect(fb, battlePartySelectStateForForcedParty(state));
     return;
   }
@@ -14244,9 +14259,7 @@ function drawPartyMenuSourceMask(mask: Uint8Array, encoded: string, width: numbe
 
 /** Live OBJ ownership for the party list (three icons plus two status OBJ instances). */
 export function drawTurn15PartyListObjMask(mask: Uint8Array, state: import("./partySelect.ts").PartySelectState): void {
-  if (state.party.some((member, index) =>
-    member.partyIndex !== index || member.species !== TURN15_CANONICAL_PARTY_SPECIES[index]
-  )) {
+  if (!turn15PartyListDrawsSnapshot(state)) {
     renderBattlePartySelect(mask, battlePartySelectStateForForcedParty(state));
     return;
   }
@@ -14424,6 +14437,7 @@ export function drawTurn15ForcedSwitchRelease(fb: Uint8Array, logicalTick: numbe
 }
 
 export function drawTurn15MagbyHealthbox(fb: Uint8Array, dx: number, dy: number = 0, hp: number = 138): void {
+  noteCanonicalSample("MAGBY 138 healthbox");
   const { width, height, pixels } = magbyPlayerHealthboxContentForHp(hp, "MAGBY", 50, 138, "female");
   for (let py = 0; py < height; py += 1) {
     for (let px = 0; px < width; px += 1) {
@@ -17704,12 +17718,12 @@ export function renderSceneOnMovePresentation(
         `unsupported staged BLIZZARD pair ${view.attacker.species}->${view.target.species}`,
       );
     }
-    const pelipperSource = playerToOpponent
+    const pelipperSource = () => (playerToOpponent
       ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).PELIPPER!
-      : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).PELIPPER!;
+      : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).PELIPPER!);
     const pelipper = liveField ? liveSceneOnBattlerArt(view.attacker) : playerToOpponent
-      ? pelipperSource
-      : { ...pelipperSource, tileset: subTileset(pelipperSource.tileset, 0, 8) };
+      ? pelipperSource()
+      : { ...pelipperSource(), tileset: subTileset(pelipperSource().tileset, 0, 8) };
     const onixSource = playerToOpponent ? onixFrontSprite : onixBackSprite;
     const onix = liveField ? liveSceneOnBattlerArt(view.target) : playerToOpponent
       ? { ...onixSource, tileset: subTileset(onixSource.tileset, 0, 8) }
@@ -17965,12 +17979,12 @@ export function renderSceneOnMovePresentation(
     if (!playerToOpponent && !opponentToPlayer) {
       throw new Error(`unsupported staged ICY_WIND pair ${view.attacker.species}->${view.target.species}`);
     }
-    const swinubSource = playerToOpponent
+    const swinubSource = () => (playerToOpponent
       ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).SWINUB!
-      : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).SWINUB!;
+      : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).SWINUB!);
     const swinub = liveField ? liveSceneOnBattlerArt(view.attacker) : playerToOpponent
-      ? swinubSource
-      : { ...swinubSource, tileset: subTileset(swinubSource.tileset, 0, 8) };
+      ? swinubSource()
+      : { ...swinubSource(), tileset: subTileset(swinubSource().tileset, 0, 8) };
     const onixSource = playerToOpponent ? onixFrontSprite : onixBackSprite;
     const onix = liveField ? liveSceneOnBattlerArt(view.target) : playerToOpponent
       ? { ...onixSource, tileset: subTileset(onixSource.tileset, 0, 8) }
@@ -19401,20 +19415,20 @@ export function renderSceneOnMovePresentation(
       );
     }
 
-    const golemSource = playerToOpponent
+    const golemSource = () => (playerToOpponent
       ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).GOLEM!
-      : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).GOLEM!;
-    const golem = liveField ? liveSceneOnBattlerArt(view.attacker) : playerToOpponent ? golemSource : {
-      ...golemSource,
-      tileset: subTileset(golemSource.tileset, 0, 8),
+      : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).GOLEM!);
+    const golem = liveField ? liveSceneOnBattlerArt(view.attacker) : playerToOpponent ? golemSource() : {
+      ...golemSource(),
+      tileset: subTileset(golemSource().tileset, 0, 8),
     };
-    const onixSource = playerToOpponent
+    const onixSource = () => (playerToOpponent
       ? (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).ONIX!
-      : (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).ONIX!;
+      : (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).ONIX!);
     const onix = liveField ? liveSceneOnBattlerArt(view.target) : playerToOpponent ? {
-      ...onixSource,
-      tileset: subTileset(onixSource.tileset, 0, 8),
-    } : onixSource;
+      ...onixSource(),
+      tileset: subTileset(onixSource().tileset, 0, 8),
+    } : onixSource();
     // The mon is drawn at its front-idle rest; the doll's x2 is the task's own
     // write (200, then 0), so the doll never carries the rest.
     const liveIdle = (battler: typeof view.attacker) => liveField && battler.geometry.side === "opponent"
@@ -19538,20 +19552,20 @@ export function renderSceneOnMovePresentation(
       );
     }
 
-    const makuhitaSource = playerToOpponent
+    const makuhitaSource = () => (playerToOpponent
       ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).MAKUHITA!
-      : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).MAKUHITA!;
-    const makuhita = liveField ? liveSceneOnBattlerArt(view.attacker) : playerToOpponent ? makuhitaSource : {
-      ...makuhitaSource,
-      tileset: subTileset(makuhitaSource.tileset, 0, 8),
+      : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).MAKUHITA!);
+    const makuhita = liveField ? liveSceneOnBattlerArt(view.attacker) : playerToOpponent ? makuhitaSource() : {
+      ...makuhitaSource(),
+      tileset: subTileset(makuhitaSource().tileset, 0, 8),
     };
-    const shuckleSource = playerToOpponent
+    const shuckleSource = () => (playerToOpponent
       ? (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).SHUCKLE!
-      : (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).SHUCKLE!;
+      : (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).SHUCKLE!);
     const shuckle = liveField ? liveSceneOnBattlerArt(view.targetBattler) : playerToOpponent ? {
-      ...shuckleSource,
-      tileset: subTileset(shuckleSource.tileset, 0, 8),
-    } : shuckleSource;
+      ...shuckleSource(),
+      tileset: subTileset(shuckleSource().tileset, 0, 8),
+    } : shuckleSource();
     const liveIdle = (battler: typeof view.attacker) => liveField && battler.geometry.side === "opponent"
       ? sceneOnBattlerFrontIdleRest(battler) : { x2: 0, y2: 0 };
     const white = { r: 255, g: 255, b: 255 };
@@ -29474,24 +29488,24 @@ export function renderSceneOnMovePresentation(
         + `${view.attacker.species}->${view.target.species}`,
       );
     }
-    const qwilfishSource = playerToOpponent
+    const qwilfishSource = () => (playerToOpponent
       ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).QWILFISH!
-      : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).QWILFISH!;
+      : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).QWILFISH!);
     const qwilfish = liveField
       ? liveSceneOnBattlerArt(view.attacker)
-      : playerToOpponent ? qwilfishSource : {
-          ...qwilfishSource,
-          tileset: subTileset(qwilfishSource.tileset, 0, 8),
+      : playerToOpponent ? qwilfishSource() : {
+          ...qwilfishSource(),
+          tileset: subTileset(qwilfishSource().tileset, 0, 8),
         };
-    const onixSource = playerToOpponent
+    const onixSource = () => (playerToOpponent
       ? (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).ONIX!
-      : (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).ONIX!;
+      : (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).ONIX!);
     const onix = liveField
       ? liveSceneOnBattlerArt(view.target)
       : playerToOpponent ? {
-          ...onixSource,
-          tileset: subTileset(onixSource.tileset, 0, 8),
-        } : onixSource;
+          ...onixSource(),
+          tileset: subTileset(onixSource().tileset, 0, 8),
+        } : onixSource();
 
     drawTileBg(
       fb,
@@ -30373,14 +30387,14 @@ export function renderSceneOnMovePresentation(
     if (!playerToOpponent && !opponentToPlayer) {
       throw new Error(`unsupported staged MEMENTO pair ${view.attacker.species}->${view.target.species}`);
     }
-    const weezingSource = playerToOpponent
+    const weezingSource = () => (playerToOpponent
       ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).WEEZING!
-      : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).WEEZING!;
+      : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).WEEZING!);
     // Live: the field's battler art (an opponent front sheet's frame 0) and the opponent battler's front idle rest; staged: the accepted
     // WEEZING / ONIX sheets (the attacker's rest is not drawn there).
     const weezing = liveField ? liveSceneOnBattlerArt(view.attacker) : playerToOpponent
-      ? weezingSource
-      : { ...weezingSource, tileset: subTileset(weezingSource.tileset, 0, 8) };
+      ? weezingSource()
+      : { ...weezingSource(), tileset: subTileset(weezingSource().tileset, 0, 8) };
     const onixSource = playerToOpponent ? onixFrontSprite : onixBackSprite;
     const onix = liveField ? liveSceneOnBattlerArt(view.target) : playerToOpponent
       ? { ...onixSource, tileset: subTileset(onixSource.tileset, 0, 8) }
@@ -34484,20 +34498,20 @@ export function renderSceneOnMovePresentation(
       );
     }
 
-    const dunsparceSource = playerToOpponent
+    const dunsparceSource = () => (playerToOpponent
       ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).DUNSPARCE!
-      : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).DUNSPARCE!;
-    const dunsparce = liveField ? liveSceneOnBattlerArt(view.attacker) : playerToOpponent ? dunsparceSource : {
-      ...dunsparceSource,
-      tileset: subTileset(dunsparceSource.tileset, 0, 8),
+      : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).DUNSPARCE!);
+    const dunsparce = liveField ? liveSceneOnBattlerArt(view.attacker) : playerToOpponent ? dunsparceSource() : {
+      ...dunsparceSource(),
+      tileset: subTileset(dunsparceSource().tileset, 0, 8),
     };
-    const shuckleSource = playerToOpponent
+    const shuckleSource = () => (playerToOpponent
       ? (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).SHUCKLE!
-      : (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).SHUCKLE!;
+      : (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).SHUCKLE!);
     const shuckle = liveField ? liveSceneOnBattlerArt(view.target) : playerToOpponent ? {
-      ...shuckleSource,
-      tileset: subTileset(shuckleSource.tileset, 0, 8),
-    } : shuckleSource;
+      ...shuckleSource(),
+      tileset: subTileset(shuckleSource().tileset, 0, 8),
+    } : shuckleSource();
     const black = { r: 0, g: 0, b: 0 };
     drawTileBg(
       fb,
@@ -40282,20 +40296,20 @@ export function renderSceneOnMovePresentation(
       );
     }
 
-    const magnetonSource = playerToOpponent
+    const magnetonSource = () => (playerToOpponent
       ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).MAGNETON!
-      : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).MAGNETON!;
-    const magneton = liveField ? liveSceneOnBattlerArt(view.attacker) : playerToOpponent ? magnetonSource : {
-      ...magnetonSource,
-      tileset: subTileset(magnetonSource.tileset, 0, 8),
+      : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).MAGNETON!);
+    const magneton = liveField ? liveSceneOnBattlerArt(view.attacker) : playerToOpponent ? magnetonSource() : {
+      ...magnetonSource(),
+      tileset: subTileset(magnetonSource().tileset, 0, 8),
     };
-    const shuckleSource = playerToOpponent
+    const shuckleSource = () => (playerToOpponent
       ? (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).SHUCKLE!
-      : (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).SHUCKLE!;
+      : (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).SHUCKLE!);
     const shuckle = liveField ? liveSceneOnBattlerArt(view.target) : playerToOpponent ? {
-      ...shuckleSource,
-      tileset: subTileset(shuckleSource.tileset, 0, 8),
-    } : shuckleSource;
+      ...shuckleSource(),
+      tileset: subTileset(shuckleSource().tileset, 0, 8),
+    } : shuckleSource();
 
     const black = { r: 0, g: 0, b: 0 };
     // The first scenery inversion is overwritten on the next tick by the
@@ -41930,17 +41944,17 @@ export function renderSceneOnMovePresentation(
         `unsupported staged DETECT pair ${view.attacker.species}->${view.target.species}`,
       );
     }
-    const yanmaSource = playerToOpponent
+    const yanmaSource = () => (playerToOpponent
       ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).YANMA!
-      : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).YANMA!;
+      : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).YANMA!);
     const yanma = liveField ? liveSceneOnBattlerArt(view.attacker) : playerToOpponent
-      ? yanmaSource
+      ? yanmaSource()
       : {
-          ...yanmaSource,
+          ...yanmaSource(),
           tileset: {
             columns: 8,
             rows: 8,
-            tiles: yanmaSource.tileset.tiles.slice(0, 64),
+            tiles: yanmaSource().tileset.tiles.slice(0, 64),
           },
         };
     const onix = liveField ? liveSceneOnBattlerArt(view.target) : playerToOpponent ? onixFrontSprite : onixBackSprite;
@@ -45948,12 +45962,12 @@ export function renderSceneOnMovePresentation(
         `unsupported staged GIGA_DRAIN pair ${view.attacker.species}->${view.target.species}`,
       );
     }
-    const roseliaSource = playerToOpponent
+    const roseliaSource = () => (playerToOpponent
       ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).ROSELIA!
-      : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).ROSELIA!;
+      : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).ROSELIA!);
     const roselia = liveField ? liveSceneOnBattlerArt(view.attacker) : playerToOpponent
-      ? roseliaSource
-      : { ...roseliaSource, tileset: subTileset(roseliaSource.tileset, 0, 8) };
+      ? roseliaSource()
+      : { ...roseliaSource(), tileset: subTileset(roseliaSource().tileset, 0, 8) };
     const onix = liveField ? liveSceneOnBattlerArt(view.target)
       : playerToOpponent ? onixFrontSprite : onixBackSprite;
     const green = { r: 107, g: 255, b: 99 };
@@ -46108,20 +46122,20 @@ export function renderSceneOnMovePresentation(
     if (!playerToOpponent && !opponentToPlayer) {
       throw new Error("PAIN_SPLIT requires opposite battle sides");
     }
-    const misdreavusSource = playerToOpponent
+    const misdreavusSource = () => (playerToOpponent
       ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).MISDREAVUS!
-      : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).MISDREAVUS!;
-    const gengarSource = playerToOpponent
+      : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).MISDREAVUS!);
+    const gengarSource = () => (playerToOpponent
       ? (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).GENGAR!
-      : (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).GENGAR!;
-    const misdreavus = liveField ? liveSceneOnBattlerArt(view.attacker) : playerToOpponent ? misdreavusSource : {
-      ...misdreavusSource,
-      tileset: subTileset(misdreavusSource.tileset, 0, 8),
+      : (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).GENGAR!);
+    const misdreavus = liveField ? liveSceneOnBattlerArt(view.attacker) : playerToOpponent ? misdreavusSource() : {
+      ...misdreavusSource(),
+      tileset: subTileset(misdreavusSource().tileset, 0, 8),
     };
     const gengar = liveField ? liveSceneOnBattlerArt(view.target) : playerToOpponent ? {
-      ...gengarSource,
-      tileset: subTileset(gengarSource.tileset, 0, 8),
-    } : gengarSource;
+      ...gengarSource(),
+      tileset: subTileset(gengarSource().tileset, 0, 8),
+    } : gengarSource();
 
     drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
     if (!liveField && opponentToPlayer && painState.age === 0) {
@@ -46244,12 +46258,12 @@ export function renderSceneOnMovePresentation(
       );
     }
 
-    const wigglytuffSource = playerToOpponent
+    const wigglytuffSource = () => (playerToOpponent
       ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).WIGGLYTUFF!
-      : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).WIGGLYTUFF!;
+      : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).WIGGLYTUFF!);
     const wigglytuff = liveField ? liveSceneOnBattlerArt(view.attacker) : playerToOpponent
-      ? wigglytuffSource
-      : { ...wigglytuffSource, tileset: subTileset(wigglytuffSource.tileset, 0, 8) };
+      ? wigglytuffSource()
+      : { ...wigglytuffSource(), tileset: subTileset(wigglytuffSource().tileset, 0, 8) };
     const onix = liveField ? liveSceneOnBattlerArt(view.target)
       : playerToOpponent ? onixFrontSprite : onixBackSprite;
     const gpuDarken = (palette: readonly RgbColor[]) =>
@@ -56162,51 +56176,37 @@ export function renderBattleResolutionForcedPartySelect(
     }
     if (phase === "black") return;
 
-    const canonicalIncoming =
-      view.field.player.name === "MAGBY"
-      && view.field.player.species === 240;
+    // pic1 (2026-11-20 playtest): the field, the incoming mon and its healthbox always come from the live view. A name test
+    // (`name === "MAGBY" && species === 240`) used to draw the canonical sample battle's recorded field (MURKROW) and its full-HP
+    // MAGBY healthbox for any live MAGBY send-in; the legacy canonical party menu draws its own window (battleSceneCanonical.ts).
     const sendOutTiming = view.switchIn.timing ?? undefined;
     const releaseClock = partySendOutReleaseClock(elapsed, sendOutTiming);
     const releaseTick = partySendOutReleaseLogicalTick(releaseClock);
-    let pathASendIn = false;
-    if (canonicalIncoming) {
-      drawMode0Ppu(fb, {
-        ...turn15FieldPpuAsset,
-        bldy: partySendOutBattleFadeBldy(elapsed),
-        paletteBgr555:
-          releaseTick === null
-            ? turn15FieldPpuAsset.paletteBgr555
-            : turn15ReleaseFieldPalette(releaseTick),
-      });
-    } else {
-      // pfb229: once the view carries the path-A send-in (Scene ON, non-MAGBY), that composition owns the ball, release, emerge,
-      // back animation, particles and healthbox slide; the generic release below is Scene OFF's.
-      pathASendIn = view.midBattleSwitchIn !== null && view.midBattleSwitchIn.battler === 0;
-      renderBattleResolutionSceneOffView(fb, {
-        ...view,
-        visibility: Object.freeze({
-          ...view.visibility,
-          player: Object.freeze({ sprite: false, healthbox: false }),
-        }),
-      });
-      // frs247: the reshow's BeginHardwarePaletteFade(0xFF, 0, 16, 0, 1) is a brightness DECREASE (rises from black), and the ROM draws no player ball bar.
-      const bldy = partySendOutBattleFadeBldy(elapsed);
-      if (bldy > 0) {
-        for (let p = 0; p < 240 * 160; p += 1) {
-          const o = p * 4;
-          const packed = mgbaDarkenColor(fb[o]! | (fb[o + 1]! << 8) | (fb[o + 2]! << 16), bldy);
-          fb[o] = packed & 0xff;
-          fb[o + 1] = (packed >>> 8) & 0xff;
-          fb[o + 2] = (packed >>> 16) & 0xff;
-        }
+    // pfb229: once the view carries the path-A send-in (Scene ON), that composition owns the ball, release, emerge,
+    // back animation, particles and healthbox slide; the generic release below is Scene OFF's.
+    const pathASendIn = view.midBattleSwitchIn !== null && view.midBattleSwitchIn.battler === 0;
+    renderBattleResolutionSceneOffView(fb, {
+      ...view,
+      visibility: Object.freeze({
+        ...view.visibility,
+        player: Object.freeze({ sprite: false, healthbox: false }),
+      }),
+    });
+    // frs247: the reshow's BeginHardwarePaletteFade(0xFF, 0, 16, 0, 1) is a brightness DECREASE (rises from black), and the ROM draws no player ball bar.
+    const bldy = partySendOutBattleFadeBldy(elapsed);
+    if (bldy > 0) {
+      for (let p = 0; p < 240 * 160; p += 1) {
+        const o = p * 4;
+        const packed = mgbaDarkenColor(fb[o]! | (fb[o + 1]! << 8) | (fb[o + 2]! << 16), bldy);
+        fb[o] = packed & 0xff;
+        fb[o + 1] = (packed >>> 8) & 0xff;
+        fb[o + 2] = (packed >>> 16) & 0xff;
       }
     }
 
     if (!pathASendIn) drawTurn15ForcedSwitchBall(fb, releaseClock);
     if (releaseTick !== null && !pathASendIn) {
-      if (canonicalIncoming) {
-        drawTurn15ForcedSwitchRelease(fb, releaseTick, view.field.player.name);
-      } else if (releaseTick <= 16) {
+      if (releaseTick <= 16) {
         drawPlayerSideAffineMaterialize(
           fb,
           view.fieldArt.player.pic.tileset as Tileset,
@@ -56241,15 +56241,11 @@ export function renderBattleResolutionForcedPartySelect(
     }
     const healthboxDx = pathASendIn ? null : partySendOutHealthboxDx(releaseClock);
     if (healthboxDx !== null) {
-      if (canonicalIncoming) {
-        drawTurn15MagbyHealthbox(fb, healthboxDx);
-      } else {
-        drawComposedPlayerHealthbox(
-          fb,
-          composePlayerHealthbox(playerHealthboxAssets, view.healthboxes.player),
-          healthboxDx,
-        );
-      }
+      drawComposedPlayerHealthbox(
+        fb,
+        composePlayerHealthbox(playerHealthboxAssets, view.healthboxes.player),
+        healthboxDx,
+      );
     }
     if (
       phase !== "blankMessage"

@@ -22,6 +22,7 @@
 // oracle-validated across turn16-rung4's whole 155-frame window.
 
 import type { RgbColor } from "./bg.ts";
+import { noteHealthboxComposed } from "./drawRecord.ts";
 import fontSmallData from "../data/gen/font-small.json" with { type: "json" };
 import charmapData from "../data/gen/charmap.json" with { type: "json" };
 
@@ -618,6 +619,10 @@ function memoizedCompose(
 }
 
 export function composeOpponentHealthbox(assets: HealthboxAssets, params: HealthboxContentParams): ComposedHealthbox {
+  noteHealthboxComposed({
+    side: "opponent", name: params.name, level: params.level, gender: params.gender ?? null,
+    currentHp: null, maxHp: null, hpFraction: params.hpFraction,
+  });
   if (!(params.hpFraction >= 0 && params.hpFraction <= 1)) {
     throw new Error(`composeOpponentHealthbox: hpFraction must be in [0,1], got ${params.hpFraction}`);
   }
@@ -874,6 +879,10 @@ export function composePlayerHealthbox(
   assets: PlayerHealthboxAssets,
   params: HealthboxContentParams & { currentHp: number; maxHp: number },
 ): ComposedHealthbox {
+  noteHealthboxComposed({
+    side: "player", name: params.name, level: params.level, gender: params.gender ?? null,
+    currentHp: params.currentHp, maxHp: params.maxHp, hpFraction: null,
+  });
   if (!(params.currentHp >= 0 && params.currentHp <= params.maxHp) || params.maxHp <= 0) {
     throw new Error(`composePlayerHealthbox: invalid HP ${params.currentHp}/${params.maxHp}`);
   }

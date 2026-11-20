@@ -9,7 +9,7 @@ import {
   type BattleSubmittedDecision,
 } from "../src/engine/battleDecisionBoundary.ts";
 import { createBattleCommandPresentation } from "../src/engine/battleCommandPresentation.ts";
-import { PARTY_SELECT_CLOSE_MENU_FRAMES, PARTY_SELECT_OPEN_TOTAL_FRAMES } from "../src/engine/battlePartySelect.ts";
+import { PARTY_SELECT_CANCEL_CLOSE_TOTAL_FRAMES, PARTY_SELECT_CLOSE_MENU_FRAMES, PARTY_SELECT_OPEN_TOTAL_FRAMES, battlePartySelectClosePhase } from "../src/engine/battlePartySelect.ts";
 import { createFactoryAiBattleHistory } from "../src/engine/factoryAiLiveDriver.ts";
 import {
   createBattleResolutionPresentation,
@@ -1780,7 +1780,22 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
     // flw252: the party menu ignores input until its open palette fade settles (party_menu.c:1259-1261).
     state = settlePartyOpenFade(state);
     state = advanceFactoryRoundBattleCommand(state, new Set(["B"]));
-    expect(state.battlePartySelect).toBeNull();
+    // pic6: B closes through the ROM's fade (party_menu.c:1227 Task_ClosePartyMenu) instead of cutting: the menu stays the
+    // selector's until the field has faded back in and held 6 frames (PARTY_SELECT_CANCEL_CLOSE_TOTAL_FRAMES, ROM lab pic6).
+    expect(state.battlePartySelect?.outcome).toEqual({ kind: "cancel" });
+    expect(state.battlePartySelect?.closeElapsed).toBe(0);
+    const phases: string[] = [];
+    while (state.battlePartySelect !== null) {
+      phases.push(battlePartySelectClosePhase(state.battlePartySelect.closeElapsed!));
+      // input during the close is ignored (the ROM's party menu reads no keys while its fade runs)
+      state = advanceFactoryRoundBattleCommand(state, new Set(phases.length === 30 ? ["A"] : []));
+    }
+    expect(phases.length).toBe(PARTY_SELECT_CANCEL_CLOSE_TOTAL_FRAMES);
+    const runs = phases.reduce<[string, number][]>((out, phase) => {
+      if (out.length > 0 && out.at(-1)![0] === phase) out.at(-1)![1] += 1; else out.push([phase, 1]);
+      return out;
+    }, []);
+    expect(runs).toEqual([["menu-hold", 2], ["menu-fade", 15], ["black-hold", 39], ["field-reveal", 16], ["field-hold", 6]]);
     expect(state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");
     expect(state.battleCommandPresentation?.actionCursor).toBe(2);
     expect(state.battleCommandPresentation?.request.requestId).toBe(requestId);

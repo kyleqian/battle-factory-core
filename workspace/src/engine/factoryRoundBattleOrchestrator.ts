@@ -78,6 +78,7 @@ import {
 import {
   advanceBattlePartySelect,
   battlePartySelectClosePhase,
+  PARTY_SELECT_CANCEL_CLOSE_TOTAL_FRAMES,
   createBattlePartySelectState,
   type BattlePartySelectState,
 } from "./battlePartySelect.ts";
@@ -510,6 +511,12 @@ export type FactoryBattlePresentationBattlerBoundary = Readonly<{
    * faints like the ROM's per-slot array (cleared only at battle setup). Absent = 0. Never read by rules, RNG or the queue.
    */
   liveCastformForm?: number;
+  /**
+   * pic9: presentation-only source `gBattleStruct->hpOnSwitchout[side]` of this battler's side: its HP when the last switch-in of either
+   * battler completed (Cmd_switchineffects, battle_script_commands.c:5276-5280). Absent = its battle-start HP (full in the Factory).
+   * Read only by the voluntary switch's "Come back!" line (Cmd_hpthresholds2); never by rules, RNG or the queue.
+   */
+  hpOnSwitchout?: number;
   idleEpoch: number;
   moveCursor: 0 | 1 | 2 | 3;
 }>;
@@ -1682,6 +1689,8 @@ function createBattlePresentationBoundaries(
       ...(prior !== undefined && !switched && prior.liveSemiInvulnerableHidden
         ? { liveSemiInvulnerableHidden: true } : {}),
       ...(prior?.liveCastformForm ? { liveCastformForm: prior.liveCastformForm } : {}),
+      // pic9: the side's hpOnSwitchout lives until the next switch-in (set at that switch-in's commit), across action menus.
+      ...(prior?.hpOnSwitchout !== undefined ? { hpOnSwitchout: prior.hpOnSwitchout } : {}),
       idleEpoch: prior === undefined || switched ? 0 : prior.idleEpoch,
       moveCursor: switched ? 0 : cursors[battler]!,
     });
@@ -2027,6 +2036,7 @@ function beginCommandResolution(
       opponentTrainer: factoryTrainerPresentationForOpponent(
         state.round.rules.currentOpponent,
       ),
+      opponentHpOnSwitchout: opponentHpOnSwitchout(state.battlePresentationBoundaries!),
     });
   let resolution: BattleResolutionPresentationState;
   if (retained === null) {
@@ -2242,6 +2252,22 @@ function commitCompletedResolutionCommandDisplay(
   resolution: BattleResolutionPresentationState,
   command: BattleResolutionPresentationCommand,
 ): FactoryBattlePresentationBoundaries {
+  const committed = commitCompletedResolutionCommandDisplayFields(boundaries, resolution, command);
+  // pic9: a completed switch-in (either side) stores both sides' HP as their hpOnSwitchout, as Cmd_switchineffects does.
+  if (command.type !== "switch-in") return committed;
+  return Object.freeze(committed.map((boundary) => Object.freeze({ ...boundary, hpOnSwitchout: boundary.displayedHp }))) as unknown as FactoryBattlePresentationBoundaries;
+}
+
+/** pic9: the foe side's hpOnSwitchout for the "Come back!" line (absent = its battle-start HP: full). */
+function opponentHpOnSwitchout(boundaries: FactoryBattlePresentationBoundaries): number {
+  return boundaries[1].hpOnSwitchout ?? boundaries[1].field.maxHP;
+}
+
+function commitCompletedResolutionCommandDisplayFields(
+  boundaries: FactoryBattlePresentationBoundaries,
+  resolution: BattleResolutionPresentationState,
+  command: BattleResolutionPresentationCommand,
+): FactoryBattlePresentationBoundaries {
   if (command.type === "turn-end") {
     const segment = resolution.segments[resolution.segmentIndex];
     if (segment === undefined) {
@@ -2384,13 +2410,38 @@ function createForcedPartySelect(
   if (request === null || records === null) {
     return fail("forced-party handoff requires a genuine request and rental records");
   }
-  return createPartySelectStateFromForcedSwitch(
+  const selector = createPartySelectStateFromForcedSwitch(
     request,
     records,
     forcedPartyForResolution(state, resolution),
     state.partyOrder,
     resolution.pendingBattle.rules.rulesContext.party.player,
   );
+  const sinceDismiss = framesSinceFaintMessageDismiss(resolution);
+  return sinceDismiss === 0 ? selector : Object.freeze({ ...selector, elapsed: sinceDismiss });
+}
+
+/**
+ * pic8 (2026-11-20 playtest, docs/pic1-live-field-pictures.md): the forced selector's `elapsed` is "frames since the actual
+ * faint-message dismiss edge" (partySelect.ts), but the live segment can still run bookkeeping commands after the player's faint
+ * message (the faint script's sprite-visibility restores, one frame each) before it hands off, so the selector used to start two
+ * frames late. ROM lab tools/battle-lab/pic7-player-faint-send-in-on.json: A on "RATTATA fainted!" at trace frame 560, the field
+ * holds through capture 581 and its first fade step is capture 582, i.e. 21 held frames from the dismiss edge as
+ * PARTY_ENTRY_FADE_OUT_START says (the live route faded at +23). Only a tail of such draw-nothing commands is counted; anything else
+ * after the message keeps the old start.
+ */
+function framesSinceFaintMessageDismiss(resolution: BattleResolutionPresentationState): number {
+  const commands = resolution.segments[resolution.segmentIndex]?.commands ?? [];
+  let index = commands.length - 1;
+  let frames = 0;
+  for (; index >= 0; index -= 1) {
+    const command = commands[index]!;
+    if (command.type !== "sprite-visibility" || command.visible !== true || command.recall === true) break;
+    frames += command.timing?.minimumFrames ?? 1;
+  }
+  const message = commands[index];
+  if (message === undefined || message.type !== "message" || message.faintBattler !== 0) return 0;
+  return frames;
 }
 
 function settledCommandForResolutionHandoff(
@@ -3281,6 +3332,11 @@ export function advanceFactoryRoundBattleCommand(
       return Object.freeze({ ...state, battlePartySelect: selector });
     }
     if (selector.outcome.kind === "cancel") {
+      // pic6: the menu fades out, the field fades back in and holds before the action menu returns (ROM-measured,
+      // PARTY_SELECT_CANCEL_CLOSE_TOTAL_FRAMES); it used to cut straight back to the action menu on the B edge.
+      if (selector.closeElapsed !== null && selector.closeElapsed < PARTY_SELECT_CANCEL_CLOSE_TOTAL_FRAMES) {
+        return Object.freeze({ ...state, battlePartySelect: selector });
+      }
       const retained = state.liveMovePaletteHost;
       let liveMovePaletteHost = retained;
       if (retained?.pendingPartyCancelEntryHost !== undefined) {

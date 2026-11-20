@@ -107,7 +107,9 @@ describe("battleScene.ts split eligibility (decision (a))", () => {
     // remaining CANONICAL function-kind symbol is hazard-blocked. If a
     // future scanner/topology change makes one eligible again, update
     // this pin rather than loosening it back to a floor.
-    expect(result.eligibleFunctions.length).toBe(0);
+    // pic1 (docs/pic1-live-field-pictures.md): the live forced send-out no longer draws the canonical turn-15 field, so its palette
+    // helpers became CANONICAL-only and eligible to move; moving them is ISSUES #39 split work, left to that lane.
+    expect([...result.eligibleFunctions].sort()).toEqual(["blendBgr555TowardWhite", "cleanSwitchinBgFadeY", "turn15ReleaseFieldPalette"]);
   });
 
   it("already-moved batch-6 symbols are gone from the CANONICAL bucket, not re-flagged", () => {

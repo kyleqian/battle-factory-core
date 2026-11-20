@@ -941,6 +941,12 @@ export type CreateBattleResolutionPresentationInput = Readonly<{
   }>;
   opponentTrainer?: BattleResolutionOpponentTrainer | null;
   /**
+   * pic9: source `gBattleStruct->hpOnSwitchout[foe side]` -- the foe's HP at the last switch-in of either battler (Cmd_switchineffects,
+   * battle_script_commands.c:5276-5280) or at battle start (battle_main.c:3421); the voluntary switch's "Come back!" line reads it
+   * (Cmd_hpthresholds2). The orchestrator's display ledger keeps it; absent = the foe's max HP (every Factory battle starts at full HP).
+   */
+  opponentHpOnSwitchout?: number;
+  /**
    * Route-scoped post-print hold for `STRINGID_USEDMOVE` on the
    * failed/no-anim path (ISSUES #81 remainder 4b). The source runs a
    * `pause B_WAIT_TIME_SHORT` / an animation controller span after the
@@ -2820,6 +2826,8 @@ function messageLines(
   heldItems: readonly [number, number],
   actionSnapshot: BattleScriptActionMessageSnapshot | null,
   opponentTrainer: BattleResolutionOpponentTrainer | null,
+  /** pic9: the opponent battler's HP as the kernel's events stand at this print (Cmd_hpthresholds reads gBattleMons). */
+  opposingHp: Readonly<{ hp: number; maxHP: number }> = { hp: field.opponent.hp, maxHP: field.opponent.maxHP },
 ): readonly string[] {
   if (event.payload.kind !== "message") {
     throw new Error("battle resolution message resolver received a non-message event");
@@ -4128,7 +4136,14 @@ function messageLines(
     }
     const incoming = switchInIncoming;
     if (switchInBattler === 0) {
-      return Object.freeze([`Go! ${incoming.name}!`]);
+      // pic9: `hpthresholds` before the print scales the OPPOSING battler's HP at that moment (it used to be "Go!" always).
+      const lines = [
+        [`Go! ${incoming.name}!`],
+        [`Do it! ${incoming.name}!`],
+        [`Go for it, ${incoming.name}!`],
+        ["Your foe’s weak!", `Get ’em, ${incoming.name}!`],
+      ] as const;
+      return Object.freeze([...lines[switchInMonHpScale(opposingHp.hp, opposingHp.maxHP)]]);
     }
     if (opponentTrainer === null) {
       throw new Error(
@@ -5089,6 +5104,8 @@ export function projectBattleResolutionCommands(
   // the battler slot's CURRENT occupant, never a stale pre-switch one
   // (ISSUES #115).
   let currentField: BattleResolutionDisplayedField = field;
+  // pic9: each battler's HP as the kernel's hp-change events stand (the switch-in line's hpthresholds reads the foe's).
+  const liveHp: [number, number] = [field.player.hp, field.opponent.hp];
   const substituteFades: { at: number; battler: 0 | 1; sequence: number }[] = [];
   const statsChanges: { at: number; battler: 0 | 1; sequence: number; argument: number; frames: number; seGate: number }[] = [];
   const heldItemEffects: { at: number; battler: 0 | 1; sequence: number; frames: number; afterStatus: boolean; seGate?: number; animation: "HELD_ITEM_EFFECT" | "WISH_HEAL" | "FUTURE_SIGHT_HIT" | "FOCUS_BAND" | "ITEM_KNOCKOFF" }[] = [];
@@ -5188,6 +5205,7 @@ export function projectBattleResolutionCommands(
           heldItems,
           actionSnapshot,
           opponentTrainer,
+          { hp: liveHp[1], maxHP: currentField.opponent.maxHP },
         ),
         advance: "automatic",
         ...(payload.messageId === "STRINGID_TARGETFAINTED"
@@ -5460,6 +5478,7 @@ export function projectBattleResolutionCommands(
     }
     if (payload.kind === "hp-change") {
       const battler = singlesBattler(payload.battler, "HP change");
+      liveHp[battler] = payload.to;
       const health = pendingHealth.get(battler);
       if (!health) {
         throw new Error(`battle resolution HP change for battler ${battler} has no health-bar update`);
@@ -5756,6 +5775,7 @@ export function projectBattleResolutionCommands(
       currentField = battler === 0
         ? Object.freeze({ ...currentField, player: incoming.field })
         : Object.freeze({ ...currentField, opponent: incoming.field });
+      liveHp[battler] = incoming.field.hp;
       const sceneOn = (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) === 0;
       const speciesTail = battler === 1 && sceneOn;
       const forcedPlayer = battler === 0 && forcedDraggedOut.has(0);
@@ -6052,7 +6072,7 @@ export function createBattleResolutionPresentation(
     opponent: input.fieldBoundary.opponent,
   });
   const playerEvents = input.sourceDecision.kind === "switch"
-    ? withSynthesizedSwitchRecallEvents(input.transition.events, field)
+    ? withSynthesizedSwitchRecallEvents(input.transition.events, field, input.opponentHpOnSwitchout ?? field.opponent.maxHP)
     : input.transition.events;
   const events = input.opponentTrainer === undefined || input.opponentTrainer === null
     ? playerEvents
@@ -6112,6 +6132,30 @@ export function createBattleResolutionPresentation(
 }
 
 /**
+ * pic9: Cmd_hpthresholds2 (battle_script_commands.c:6286-6306), the hpScale of STRINGID_RETURNMON's player branch
+ * (battle_message.c:2081-2090: 0 "that's enough!", 1 "come back!", 2 "OK!", 3 "good!"). `hpSwitchout` is a u8 local, so the stored
+ * HP is truncated to its low 8 bits (a foe above 255 HP compares against hp & 0xFF), as on the ROM.
+ */
+export function returnMonHpScale(opponentHpOnSwitchout: number, opponentHp: number): 0 | 1 | 2 | 3 {
+  const hpSwitchout = opponentHpOnSwitchout & 0xff;
+  if (opponentHp >= hpSwitchout) return 0;
+  const result = Math.trunc(((hpSwitchout - opponentHp) * 100) / hpSwitchout);
+  return result <= 29 ? 1 : result <= 69 ? 2 : 3;
+}
+
+/**
+ * pic9: Cmd_hpthresholds (battle_script_commands.c:6258-6283), the hpScale of STRINGID_SWITCHINMON's player branch
+ * (battle_message.c:2100-2110: 0 "Go! X!", 1 "Do it! X!", 2 "Go for it, X!", 3 "Your foe's weak! Get 'em, X!") from the opposing
+ * battler's current HP percent; a fainted foe reads 0.
+ */
+export function switchInMonHpScale(opponentHp: number, opponentMaxHp: number): 0 | 1 | 2 | 3 {
+  let result = Math.trunc((opponentHp * 100) / opponentMaxHp);
+  if (result === 0) result = 1;
+  if (result > 69 || opponentHp === 0) return 0;
+  return result > 39 ? 1 : result > 9 ? 2 : 3;
+}
+
+/**
  * ISSUES #78 seam: the kernel deliberately treats the voluntary-switch
  * `BattleScript_ActionSwitch` prelude as "presentation bookkeeping"
  * (`factoryBattleScriptFullTurnDecision.ts`'s `runVoluntarySwitchAction`
@@ -6127,12 +6171,12 @@ export function createBattleResolutionPresentation(
 function withSynthesizedSwitchRecallEvents(
   events: readonly BattleKernelSemanticEvent[],
   field: BattleResolutionDisplayedField,
+  opponentHpOnSwitchout: number,
 ): readonly BattleKernelSemanticEvent[] {
-  const outgoing = field.player;
-  const hpScale: 0 | 1 | 2 | 3 = (() => {
-    const ratio = (outgoing.hp * 4) / outgoing.maxHP;
-    return ratio >= 3 ? 0 : ratio >= 2 ? 1 : ratio >= 1 ? 2 : 3;
-  })();
+  // pic9: BattleScript_ActionSwitch runs `hpthresholds2 BS_ATTACKER` before STRINGID_RETURNMON, which scales the damage dealt to the
+  // OPPOSING battler since its hpOnSwitchout (the switch runs first in the turn, so the foe's HP is the turn's start HP). It used to
+  // read the outgoing mon's own HP: Kyle's MAGBY said "OK! Come back!" where the ROM said "good! Come back!".
+  const hpScale = returnMonHpScale(opponentHpOnSwitchout, field.opponent.hp);
   // fpc180: CheckFocusPunch_ClearVarsBeforeTurnStarts runs the pre-pass before BattleScript_ActionSwitch, so the recall follows
   // the last FocusPunchSetUp event (the synthesized receipts keep their negative sequences; the sequence order check skips them).
   let recallAt = 0;

@@ -2899,6 +2899,11 @@ export type RunOptions = {
    * decision, the RNG walk, or the frame budget.
    */
   coverage?: SoakCoverageCollector;
+  /**
+   * pic3 (docs/pic1-live-field-pictures.md): renders through the drawn-field check (tools/integration/drawnFieldCheck.ts) instead of a
+   * plain render() and logs what it finds. Purely observational: the frames rendered are the same `renderEvery` frames.
+   */
+  drawCheck?: { check: (state: EngineState, frame: number) => void };
 };
 
 export const DEFAULT_RUN_OPTIONS: RunOptions = {
@@ -3110,7 +3115,8 @@ export function runSeed(seed: number, optionsIn: Partial<RunOptions> = {}): Seed
         && (surfaceChangedThisTick || frame % options.renderEvery === 0 || player.rendersEveryFrame(state))
       ) {
         phase = "render";
-        render(state);
+        if (options.drawCheck !== undefined) options.drawCheck.check(state, frame);
+        else render(state);
         renderCalls += 1;
       }
     } catch (error) {
