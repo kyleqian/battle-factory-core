@@ -1313,6 +1313,20 @@ function pmo239SwitchReopenOffStage(state: EngineState): EngineState {
   return midBattleSwitchStage(state, "pmo239-switch-0-to-2-off", [PMO239_PIDGEY_BENCH, PMO239_MACHOP_BENCH], [115, 145]);
 }
 
+// snd2: a mon sent in and knocked out in the same turn (tools/battle-lab/snd2-switchin-faint-{on,off}.json): pmo239's party with the PIDGEY at
+// Level 5 (the ROM lab's stats: 20 HP), the foe's SEISMIC TOSS x4 (50 damage) knocks it out the turn it comes in.
+const SND2_PIDGEY_LV5_BENCH: BattleScriptPartyMemberInput = Object.freeze({
+  ...PMO239_PIDGEY_BENCH, level: 5, hp: 20, maxHP: 20, attack: 11, defense: 10, speed: 12, spAttack: 10, spDefense: 10,
+});
+function snd2SwitchInFaintStage(state: EngineState, scene: "on" | "off"): EngineState {
+  return midBattleSwitchStage(state, `snd2-switchin-faint-${scene}`, [SND2_PIDGEY_LV5_BENCH, PMO239_MACHOP_BENCH], [20, 145], {
+    battleScene: scene,
+    trainer: rattataAtLevel(50, 69),
+    usedMessageHoldFrames: 0,
+    sceneOffNoAnimations: scene === "off",
+  });
+}
+
 type MidBattleSwitchStageOptions = Readonly<{
   battleScene?: "on" | "off";
   player?: FactoryFullTurnBattlerConfig;
@@ -2580,6 +2594,8 @@ export const APP_STAGES: Readonly<Record<string, AppStage>> = {
   "enc276-struggle-on": (state) => enc276Stage(state, "enc276-struggle-on", "on", 269, 27),
   "enc276-struggle-off": (state) => enc276Stage(state, "enc276-struggle-off", "off", 269, 30),
   "pmo239-switch-0-to-2-off": pmo239SwitchReopenOffStage,
+  "snd2-switchin-faint-on": (state) => snd2SwitchInFaintStage(state, "on"),
+  "snd2-switchin-faint-off": (state) => snd2SwitchInFaintStage(state, "off"),
   "mechanic-selection-reject-torment-off": tormentSelectionRejectionOffStage,
   "party-menu-status-item-off": partyMenuStatusItemOffStage,
 };

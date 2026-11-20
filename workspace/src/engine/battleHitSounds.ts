@@ -102,8 +102,11 @@ export function emitBattleHitSounds(
   }
   if (command.type === "hp" && command.battler === 0 && after !== null) {
     const { from, to } = command;
-    const maxHp = segment.field.player.maxHP;
-    const end = battleResolutionCommandDuration(command, currentCommandField(after), "first") - (command.timing.tailFrames ?? 0) + HEALTHBAR_DONE_AFTER_HP_END + lag;
+    // snd2: HandleLowHpMusicChange reads the mon on the field now (gBattlerPartyIndexes), not the one the turn started with: a switch-in
+    // earlier in this segment is already in the command field.
+    const field = currentCommandField(after);
+    const maxHp = field.player.maxHP;
+    const end = battleResolutionCommandDuration(command, field, "first") - (command.timing.tailFrames ?? 0) + HEALTHBAR_DONE_AFTER_HP_END + lag;
     scheduleAfter(Math.max(0, end), () => handleLowHpMusicChange(from, maxHp));
     scheduleAfter(Math.max(0, end + SET_MON_DATA_AFTER_HEALTHBAR_DONE), () => handleLowHpMusicChange(to, maxHp));
     return;
@@ -121,11 +124,16 @@ export function emitBattleHitSounds(
   if (command.type !== "faint") return;
   const lead = command.timing.leadFrames;
   if (lead === undefined) return;
-  const side = command.battler === 0 ? segment.field.player : segment.field.opponent;
+  // snd2: {Player,Opponent}HandleFaintingCry cry the party mon at gBattlerPartyIndexes[battler] (battle_controller_player.c /
+  // battle_controller_opponent.c): the mon on the field at the faint. segment.field is the field the segment opened with, so a mon
+  // sent in earlier in the same segment and knocked out there cried as the one it replaced (frame catcher, seed 3: "Go! PHANPY!" ...
+  // "PHANPY fainted!" cried CHARMELEON). The command field has every completed switch-in; Transform keeps `species` (the party's).
+  const field = after === null ? segment.field : currentCommandField(after);
+  const side = command.battler === 0 ? field.player : field.opponent;
   const pan = command.battler === 0 ? FAINT_CRY_PAN_PLAYER : FAINT_CRY_PAN_OPPONENT;
   scheduleAfter(Math.max(0, lead - FAINT_CRY_BEFORE_SE + FAINT_SOUND_OFFSET + lag), () => playFaintCry(bgm, side.species, pan));
   scheduleAfter(Math.max(0, lead + FAINT_SOUND_OFFSET + lag), () => {
-    if (command.battler === 0) handleLowHpMusicChange(0, segment.field.player.maxHP);
+    if (command.battler === 0) handleLowHpMusicChange(0, field.player.maxHP);
     playPannedSe(SE_FAINT, command.battler === 0 ? SE_PAN_PLAYER : SE_PAN_OPPONENT);
   });
 }
