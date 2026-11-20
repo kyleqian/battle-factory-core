@@ -1481,3 +1481,23 @@ Trimming leads (gsp1m's hypothesis) **worsens** mass everywhere (restart -2 +332
 ### Oracle compare trace
 
 Not obtained: no existing lab keeps the engine's sleep duration in step with the oracle past the first turn. A 3-turn extension of `lse1-hypnosis-player-on` is in step at frame ~1690 (0.6 % diff) but the oracle foe wakes on turn 2 and the engine's on turn 3 (oracle player HP 93 / 105 against the engine's 105 / 105 at the wake-up frame), so the frames cannot be paired.
+
+## hcr1c (2026-11-20): the ruled-turn sound lead limited to the move-script sounds; the other seven failing pins restored or re-pinned by rule
+
+Fix-forward of hcr1b (full suite on fold-a `9a12931d7`: 8 failed in 6 files). Scene OFF presentation / sound timing only: no logical outcome, RNG, kernel event order or presented pixel changes; Scene ON byte-identical.
+
+**Cause, per test** (lead zeroed locally, rerun):
+
+| failing pin | cause | action |
+| --- | --- | --- |
+| `aud241c` win / brain / loss OFF end windows | the lead: SE_SELECT dismiss, victory / return BGM, fade, SE_EXIT, SE_BALL_OPEN scheduled in the same ruled turn were stamped one frame early (relative deltas `0, -1, -1, -1, -1, 0..`) | lead restricted (below); pins unchanged, all `0` again |
+| `ais4` SE_BALL_OPEN + cry (680 vs 681), `obr251` SE_BALL_TRAY_ENTER (525 vs 526) | the lead, same leak (send-in / tray scheduled in a ruled turn) | lead restricted; pins unchanged |
+| `aud241b` super-effective OFF | not a leak: the pin was a stale `-1` ("one early in Scene OFF"); with the lead the SE, cry and SE_FAINT are **ROM-exact (0)**. With the lead zeroed every aud241b OFF window is `+1` (pixel rule moved the presentation, the ROM plays the script-row sound one frame earlier), so the lead is ROM-supported for hit / faint / cry sounds | pin updated `[-1 x5]` -> `[0 x5]` (a ROM frame) |
+| `ais2` seed 2741 OFF | **not the lead** (it hashes rendered pixels; fails with the lead zeroed, passes with `u - 2` forced to 0). The hcr1b hold makes the ruled turns before the window longer (ROM-exact in the lab), so the window is the same ROM frames 2 engine frames later | the hpd1 precedent: `romFrameOffset` 40 -> 38, `lo` / `hi` 2745 / 3032 -> 2747 / 3034, md5s unchanged (same ROM frames; Scene ON untouched) |
+| `pic9SwitchLines` | trajectory / coverage pin: every line still follows the foe's HP, but seeds 0 and 1 now reach come-back scales `[0, 2, 3]` (not `1`) | soak seeds `[0, 1]` -> `[0, 1, 4]` (seed 4 alone: back 0/1/3, in 0/1/2; scan 2..7), expectation `[0,1,2,3]` unchanged |
+
+**Rule.** `usedMoveSoundLead` still marks the ruled turn, but the lead is now applied to the move-script rows only. `emitTickSounds` sets `setSoundTickLead` just around `emitBattleHitSounds` / `emitMoveAnimSounds` / `emitStatsChangeSounds` / `emitDoubleTeamStatsChangeSound` / `emitGeneralAnimSounds` and clears it after; `scheduleAfter` (`screenSounds.ts`) records the lead in force when a sound is scheduled (`getSoundTickLead`) and `runScheduledScreenSounds` restores it around that callback. Hit SE, effectiveness SE, faint cry and SE_FAINT (scheduled by `battleHitSounds`) keep the lead; everything scheduled by the battle-end, mid-battle switch, party send-out, loss-ball and forfeit emitters (all after the lead is cleared) is stamped on its own tick. Only event stamps move.
+
+**Acceptance.** All 8 listed tests green; every test file grepping `usedMoveSoundLead` / `confirmHandoff` / `tickSounds` / `scheduleAfter` plus `aud241*`, `ais*`, `obr251*`, `pic9*` (66 files, 550 tests) green. Pixels unchanged: `battle-command-generated-off` 128/128, `hcr1b-absorb-foe-off` and `hcr1b-doubleedge-foe-off` 109/109, `hpd1-sonicboom-off` 880/1023. **T2 OFF, 24 t2n seeds, missing / extra 0 / 0: mass 4,083, exact rows 571** (hcr1b 4,257 / 533, hcr1 4,182 / 561, base 94c2a6da6 5,438 / 126; of 1,133 matched rows: controller 832 rows mass 2,836, cry 192 / 832, stat SE 105 / 397, bgm 4 / 18). Method: `tools/audio/aud249Rescore.sh .integration/evidence/t2n TO SEED off` over the same ROM files, then `soundScoreboard.py`; mass is the sum of abs(engine - ROM) over matched rows. **Census** (`lsd194Census.sh`, seeds 0..99, one shard): Scene OFF `eventsDigest` identical vs `94c2a6da6` (100 / 100, 0 errors, commands equal); Scene ON `r0.jsonl` byte-identical vs fold-a `9a12931d7`. `npm run typecheck` 0, `npm run build` 0, `npm run test:gate` 360 files / 2,834 tests green.
+
+**Left.** The same two-way split holds for the rest of the T2 residual: stat SE (105 rows, median +3) and cries on non-faint anchors are not script-row sounds of the ruled segment. Papercut: `lsd194CensusDelta.py` named in `lsd194Census.sh`'s header does not exist; the digests were compared with a 5-line script over `r0.jsonl`.
