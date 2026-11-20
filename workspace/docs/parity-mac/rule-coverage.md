@@ -393,3 +393,5 @@ committed file, `match True`, `stage.ok True`, 0 diff points), all in `stages/co
   appear in a real Factory battle; the rule is staged by a hand-built party only.
 - **Judged not stageable (no design built):** R081 (needs -6 on both stats), R056 (all teammates fainted or statused), R061 and R062, R068, R049 (every Ingrain set also
   needs Metronome for the lowering move), R106 (the counter cannot reach 15), R055 and R086 (not tried, time), R104 (needs an Uproar and Effect Spore together, not tried).
+
+**Luck hunt day 5 (2026-11-20 day job, promoted at the 2026-11-20 run start; stage files only, no `src/` change): 85 of the 110 covered (83 before).** The day job (`.integration/evidence/luck-hunt/20261120/summary.md`) ran 5,788 seeds (1080000+k) over the 5 open designs: 2 marker hits, 2 ROM match, 0 ROM differ. Promoted to `stages/coverage/` and re-driven from the repo file by the run-start nightly replay (`docs/replay-ledger.md`): R058 Charge, then an Electric move (seed 1084832, 24 / 24 states), R096 Transform fails on a digging target (1081748, 30 / 30). **No ROM difference.** Still hunted with 0 hits: R040, R063, R110.
