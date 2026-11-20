@@ -64,6 +64,37 @@ Kyle plans to make this repo public with its full history (no rewrite, no licens
 - Once the repo is public, everything committed is published at the next push. Keep secrets, server addresses and
   personal paths out of commits, as before.
 
+## From the Mac, 2026-11-20 (top layer): Kyle's live-play fixes merged, website on `eb-c3f7c43f5c1a9e62`, frame catcher
+
+- **Kyle played the website on 11-20 and reported gaps.** The Mac fixed them, and they are merged into master with your
+  11-19/20 run (merge `f384faa7d`, no conflicts: your side changed notes only). Merged-tree full suite: 16,247 passed, 0 failed.
+  - Sound: cursor and A sounds in the battle action menu and move list; the ball-tray sounds no longer cut each other off
+    (voice release + prefetch in `src/audio/player.ts`); SE_EXIT on the first walk into the battle room; the Ice Ball impact
+    and effectiveness sound anchor; 187 move sound recordings that were missing; Lobby and briefing sounds.
+  - Pictures: a live route never draws the canonical sample battle any more (`noteCanonicalSample` in `src/engine/drawRecord.ts`
+    throws under tests and records a contained error in the browser; Kyle saw Murkrow at a send-in, and a Bug Catcher in the
+    room after a win). The first room draws its trainer; 16x16 overworld sprites stand with their feet on the tile bottom (the
+    Tuber was a tile high); B in the battle party menu fades out and in (`party_menu.c`); the Scene OFF send-in fade; the forced
+    party menu clock; the switch lines come from the foe's HP (`Cmd_hpthresholds2`).
+  - Not a bug: Petal Dance ended with no confusion because Protect blocked it (`battle_script_commands.c` cancels a blocked
+    rampage without confusion). Kyle's three battles match the ROM on rules (battle-only ROM replay).
+- **Frame catcher** (`tools/frame-catcher/`, see its README): one whole round, engine against ROM, every frame and every sound.
+  It is a bug catcher to run now and then on different battles, not a gate. Its README lists its traps (judge a sprite position
+  on a frame after the sprite stops; patch the ROM's foe party only after the ROM has built it).
+- **Two Mac sessions are working on the catcher's open findings now** (they come to you in a later delivery; do not start
+  them): pictures (player HP box missing ~1,000 frames after a re-sent mon, the Ingrain heal animation, Spinda's spots, the
+  room dark after the swap screen, the rental name colour, a party slot colour) and sounds (Rollout's sound x10 per hit, the
+  swap-screen and prompt sounds, an extra SE_FAILURE in the party menu, a party sub-menu sound, the summary cry species, the
+  summary music ducking).
+- **Leads from the Mac sessions, not fixed, not filed** (reports, not all checked on the ROM; yours to check and file, or fold
+  into #219): our sound recordings play 1.2-1.45x quieter than the game; A does not speed up text; the attendant menu wrap
+  and the save wait; the left pans of Blizzard and sound 132; Ice Ball's 4th and 5th rolls hit late; SELECT move swap;
+  Elekid's Thunder Punch lead +18 / tail +25 frames (your hit-sound lead work covers this).
+- **The website runs `eb-c3f7c43f5c1a9e62`** (Mac `dfd34c432`, same `src/` as master; deployed 2026-11-20 ~06:55 UTC, Worker `040bab81`, on
+  Kyle's word). Site fix with it: the site's bundler no longer inlines the game's small files as data: URLs, which the
+  content security policy refused (Safari lost 33 sounds on the live site). A host with a content security policy must do
+  the same (`docs/library-package.md`).
+
 ## From the Mac, 2026-11-19 (top layer): fixes 44-51 merged, website on `eb-01c15b77495c4068`, #225 queued
 
 - **Merged into master with your 2026-11-18 run** (merge `d75ddd3b0`; its message lists the conflicts and re-pins): the whole-round ROM
