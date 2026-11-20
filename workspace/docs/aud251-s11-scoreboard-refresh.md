@@ -1534,3 +1534,45 @@ The ROM plays script-row SEs ahead of the pixels. Measured on the labs (engine -
 ### Gates
 
 `npm run build` 0 and `npm run test:gate` 360 files / 2,835 tests green on a4bd32997; the 66 `confirmHandoff` test files / 638 tests green; `randomRoundSoak` + `lbrd` green after the re-pins; `npm run typecheck` 0 on a63e1ee58 (a4bd32997 only deletes a constant; re-run on the final tip below).
+
+## hcr2b: Scene ON sound lead per emitter (ROM-measured), T1 in emission ticks
+
+Question: why do the ROM's Scene ON sounds lead the pixels, by what, and can the lead ride hcr1c's scoped mechanism (per scheduled sound, no global stamp shift)?
+
+### Measurement (hold-only labs, `tools/battle-lab/hcr2-*.json`, ROM sound log vs engine stamps at a4bd32997)
+
+- Move-body table SEs (`playMoveAnimSound` rows): ROM leads the pixels by **2 for u > 2**, by **0 for u = 2** (u = the USEDMOVE print's `instructionExecution`). Adapted bodies (absorb, megadrain, bite, doubleedge, ember, takedown, thunderbolt, harden) land on the ROM frame exactly.
+- Hit / effectiveness / faint-chain SEs and the faint cry: **1** (the aud241b faint / low-HP windows: 4 of the 5 tests that were red at base go green at a uniform lead 1; `super-effective-window` goes 2 -> 1, see residuals).
+- Stat-change SEs and the Double Team stat SE: same lead as the move body (2 for u > 2). `aud252DoubleTeamStatSe` (gap 34 -> 36) pins this.
+- General-animation (status / weather-continues) rows: **0**. A lead of 2 there was worse (T2 mass 25,442 vs 25,108) and was not kept.
+- Not constant: Curse (-3) and Seismic Toss (-1) sit off the two-tick rule on the labs; they are residuals, not a second rule. The reason the lead depends on u (a link to seGate / bodyLeadFrames / the sound shift) is not established; the rule is stated as measured.
+
+### Rule
+
+- `usedMoveSoundLeadsOf(state, u)` (`battleResolutionPresentation.ts`) is set once at confirm-handoff end. Scene OFF: `{hit 1, script 1, anim 1}` (unchanged). Scene ON: `{hit 1, script 0, anim u > USED_MOVE_LEAD_MIN_U ? 2 : 0}`. State fields `usedMoveSoundLead` (hit / effectiveness / faint), `usedMoveScriptSoundLead` (general animation, ON 0), `usedMoveAnimSoundLead` (move body, stat change, Double Team stat SE).
+- `tickSounds.ts` calls `setSoundTickLead` per emitter; `scheduleAfter` (`screenSounds.ts`) records the lead per scheduled sound and `runScheduledScreenSounds` restores it, so a lead set at one emission survives a later flush. The collector (`soundEvents.ts`) stamps unstamped events `frame - lead` and now also returns `leads` (what was subtracted). Battle-end, send-in, tray and screen sounds carry no lead and keep their frames.
+- T1 follows the lead without loosening: `lsd194Census.ts` records a `soundLead` array parallel to `sound`; `soundCensusDelta.py --t1` converts each row back to its emission tick (`frame + lead`) before the window / classifier, so the class table is unchanged and the tolerance is untouched. Arm-vs-arm mode is untouched.
+- Considered and not kept: faint cry at lead 0 with SE_FAINT at lead 0 (T2 exact 1,988, mass 25,068) breaks 4 aud241b faint windows; cry 0 / SE_FAINT 1 gives the same T2 as the uniform lead and also breaks the windows. The uniform hit lead is what the ROM labs pin.
+
+### Results (tested commit 0b4bdda63 = tree of the tip before the doc commit; base 0a63934b2)
+
+- **T2 Scene ON, 25 t2n seeds: missing / extra 0 / 0.** Exact rows 722 -> **1,960** (move-animation 1,614, stat-change 16, cry 29, battle-controller 300, bgm 1), offset mass 26,893 -> **25,090** (5,670 rows, 1,930 at delta 0). Matched-row delta (engine - ROM): move-animation median 0 (p10 -10, p90 5), battle-controller median 0, stat-change median 0, cry median -3. For reference the global two-tick stamp (hcr2) gave 1,707 / 25,927.
+- **T1 Scene ON 0..199: exact 54,005, known-offset 0, missing 0, extra 0, unclassified 0**, class table byte-identical to the base arm (`sed 1d` diff empty). Known-offset count is 0, so there is nothing to explain; the tick-space conversion is what keeps it 0.
+- Census: Scene ON 0..199 eventsDigest identical and command frames unchanged (`rst197CensusDelta.py`: 200 / 200 battles, 62,327 commands, bad 0); Scene OFF 0..99 identical (100 / 100, 30,813 commands, bad 0).
+- Pixels: `npm run compare -- <trace> --summary` equal to base on hcr2-tackle-plr-on 38/229, hcr2-ember-plr-on 105/229, hcr2-absorb-plr-on 229/229, hcr2-takedown-foe-on 229/229, hcr2-toss-foe-on 198/229, hcr2-harden-foe-on 229/229 (hcr2-doubleedge-foe-on 228/229 and hcr2-bite-foe-on 187/229 also equal on the pre-commit tree). Sounds never feed pixels.
+- Gates on 0b4bdda63: `npm run typecheck` 0, `npm run build` 0, `npm run test:gate` 360 files / 2,835 tests green. The full `npm test` was not run (not asked for).
+
+### Re-pins (tests moved TO the ROM; `delta` = ROM - ours, every other field unchanged)
+
+- aud242a..m (13 files): per-body Scene ON `delta` pins updated to the measured values (most go to 0 or toward it).
+- aud248 (stat-change SE residuals, six rows), aud249 (flatter / swagger first and second SE 0), aud261 (six pins to 0), aud262 (waterspout windows 0, odorsleuth -4 -> -3, payday 2 -> 0, lusterpurge player 2 -> 0, Memento -7 -> -6).
+- aud241b `super-effective-window` 2 -> 1 (residual of one tick; the same turn's faint windows are 0). Also `audioSinkPlumbing` (`leads: [0]`) and `aud252EndTurnSounds` ([-1, -2, 1] -> [0, -1, 2] on the lead split) at the first commit 2a374b683.
+
+### Not re-pinned (moved away from the ROM or unmeasured; red, flagged)
+
+The sound set (`tests/aud24*`, `aud25*`, `aud26*`, `snd*`, `*Sound*`, `adp*`, `hie*`; 75 files, 615 tests) has 41 failures at 0b4bdda63 against 177 at the hold-only base. 33 of the 41 were green at base and moved: adp1 beatup / rocksmash; aud242b dragonrage x2; aud242c flamethrower x2; aud242d thunderbolt / metalclaw / steelwing; aud242n spark x2; aud242o petaldance; aud242p encore / mistball / reversal; aud242q extrasensory / secretpower / superfang; aud242r eruption / spikecannon; aud258 counter / seismictoss / seismictossstrong; aud260 brickbreak / recycle; aud261 zapcannon x2; aud262 present; hie3 cheri / leftovers / shellbell / sitrus x2 (ours 731 vs the pinned 730 and the like). The two-tick body rule moves these bodies 1..2 ticks away from where their old pin sat (dragonrage, flamethrower, spark, petaldance, brickbreak, superfang, spikecannon, present and lusterpurge opponent were measured as moving away from the ROM; the rest were not attributed in this step). They are the residual the next step has to attribute with per-body ROM labs, not a bigger constant. The other 8 (aud242e x5, aud252LossBallOpen x2, snd1RoomSounds) were red at base too and were not re-pinned. None of these is in the gate.
+
+### Papercuts
+
+- `lsd194Census.sh` archives a tree-ish only, so the uncommitted tree was measured through a throwaway tree object (`GIT_INDEX_FILE=... git add -u; git write-tree`).
+- A first-row-only shift estimate misjudges multi-row bodies (flamethrower, spark): the pins were taken per row.
