@@ -12,6 +12,7 @@ import {
   type FactoryCorpusPartyInstance,
 } from "./factoryCorpusParty.ts";
 import type { MonGender } from "./monGender.ts";
+import { expandRomGlyphCodes } from "./font.ts";
 
 import draftPoolHeaderData from "../data/gen/draft-pool-header.json" with { type: "json" };
 import summaryInfoData from "../data/gen/summary-info.json" with { type: "json" };
@@ -173,7 +174,8 @@ const ITEMS_BY_ID = new Map(
 );
 const ITEM_NAMES = new Map(
   (itemNamesData as { items: Array<{ item: string; name: string }> }).items
-    .map(({ item, name }) => [item, name]),
+    // item_names: "{POKEBLOCK} CASE" is the one name spelled with a named glyph run (pkm1, docs/pkm1-pkmn-glyphs.md).
+    .map(({ item, name }) => [item, expandRomGlyphCodes(name)]),
 );
 const EXP_TABLES = expTablesData as {
   growthRates: Record<string, number[]>;

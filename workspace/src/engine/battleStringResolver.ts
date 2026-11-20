@@ -15,6 +15,7 @@
  */
 import battleMessageTemplates from "../data/gen/battle-message-templates.json" with { type: "json" };
 import movesAsset from "../data/gen/moves.json" with { type: "json" };
+import { expandRomGlyphCodes, ROM_NAMED_GLYPH_CODES } from "./font.ts";
 
 const MOVES = movesAsset.moves as readonly { id: number; name: string }[];
 
@@ -208,6 +209,9 @@ export function resolveBattleStringLines(
       }
       lines.push(current);
       current = "";
+    } else if (segment.args.length === 0 && ROM_NAMED_GLYPH_CODES[segment.name] !== undefined) {
+      // A named glyph run (`{POKEBLOCK}`, charmap.txt:52) prints its glyphs, one character each (pkm1, docs/pkm1-pkmn-glyphs.md).
+      current += expandRomGlyphCodes(`{${segment.name}}`);
     } else {
       // `B_EFF_NAME_WITH_PREFIX` is a source nickname substitution encoded
       // as its own zero-argument text control (charmap.txt:368), not a
