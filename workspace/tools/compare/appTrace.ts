@@ -2008,9 +2008,34 @@ function hcr1bStages(): Record<string, AppStage> {
   return stages;
 }
 
+// chg1 (tools/integration/chg1Labs.py): two-turn moves. The Lv100 side charges on turn 1 (the Lv50 side answers with Seismic Toss) and unleashes on turn 2.
+const CHG1_MOVES: Readonly<Record<string, readonly [number, number]>> = {
+  dig: [91, 10], fly: [19, 15], bounce: [340, 5], dive: [291, 10], solarbeam: [76, 10], razorwind: [13, 10], skullbash: [130, 15], skyattack: [143, 5],
+};
+function chg1Stages(): Record<string, AppStage> {
+  const stages: Record<string, AppStage> = {};
+  for (const [name, [move, pp]] of Object.entries(CHG1_MOVES)) {
+    for (const side of ["foe", "plr"] as const) {
+      const id = `chg1-${name}-${side}-off`;
+      stages[id] = side === "foe"
+        ? (state) => aud241bStage(state, id, "off", 50, 100, 69, undefined, false, move, 1)
+        : (state) => midBattleSwitchStage(state, id, [RATTATA_LV50_BENCH, RATTATA_LV50_BENCH], [105, 105], {
+          rngSeed: 1,
+          battleScene: "off",
+          player: Object.freeze({ ...rattataAtLevel(100, move), pp: [pp, pp, pp, pp] as const }),
+          trainer: rattataAtLevel(50, 69),
+          usedMessageHoldFrames: 0,
+          sceneOffNoAnimations: true,
+        });
+    }
+  }
+  return stages;
+}
+
 export const APP_STAGES: Readonly<Record<string, AppStage>> = {
   ...hpf4mStages(),
   ...hcr1bStages(),
+  ...chg1Stages(),
   ...trp1Stages(),
   ...subp1mStages(),
   // iss216: the anchor deal has no duplicate species; the ROM probe pokes slot 6's monId to slot 1's

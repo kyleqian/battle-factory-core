@@ -2151,6 +2151,9 @@ function beginCommandResolution(
           // flow1: a voluntary switch here keeps its recall line and recall (the foe underground after Dig, seed 6).
           sourceDecision: presentation.pendingDecision,
           opponentHpOnSwitchout: opponentHpOnSwitchout(state.battlePresentationBoundaries!),
+          ...(presentation.pendingDecision.kind === "use-move" && presentation.forcedMove === null
+            ? { confirmHandoff: Object.freeze({ fightDisplayCursor: presentation.fightDisplayCursor, idleBounceElapsed: presentation.idleBounceElapsed }) }
+            : {}),
         })
       : freshResolution();
   }
