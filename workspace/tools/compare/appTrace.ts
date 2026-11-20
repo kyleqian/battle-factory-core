@@ -1979,10 +1979,27 @@ function subp1mStages(): Record<string, AppStage> {
   return stages;
 }
 
+// snd3 (docs/snd3-sweep-sounds.md): the quiet-BGM moves in Scene ON (tools/battle-lab/snd3-<move>-<side>-on.json,
+// tools/integration/snd3Labs.py): a Lv50 Rattata with the move x4 against a Lv25 Rattata with Seismic Toss x4 (`opp` = the foe's
+// Rattata uses the move). [move, kernel seed for the player side, for the opp side]: a seed whose turn hits like the ROM lab's (Sing and
+// GrassWhistle are 55 % moves; the ROM labs hit on both sides).
+const SND3_MOVES: Readonly<Record<string, readonly [move: number, playerSeed: number, oppSeed: number]>> = {
+  sing: [47, 2, 10], perishsong: [195, 1, 1], grasswhistle: [320, 2, 10],
+};
+function snd3Stages(): Record<string, AppStage> {
+  const stages: Record<string, AppStage> = {};
+  for (const [name, [move, playerSeed, oppSeed]] of Object.entries(SND3_MOVES)) {
+    stages[`snd3-${name}-player-on`] = (state) => aud241bStage(state, `snd3-${name}-player-on`, "on", 50, 25, move, undefined, false, 69, playerSeed);
+    stages[`snd3-${name}-opp-on`] = (state) => aud241bStage(state, `snd3-${name}-opp-on`, "on", 25, 50, 69, undefined, false, move, oppSeed);
+  }
+  return stages;
+}
+
 export const APP_STAGES: Readonly<Record<string, AppStage>> = {
   ...hpf4mStages(),
   ...trp1Stages(),
   ...subp1mStages(),
+  ...snd3Stages(),
   // iss216: the anchor deal has no duplicate species; the ROM probe pokes slot 6's monId to slot 1's
   // (tools/probe/stage-draft-same-species-off.py), the engine pokes the same identity (display unchanged).
   "iss216-dup-draft-off": (state) => ({

@@ -1,12 +1,13 @@
 // snd3 (docs/snd3-sweep-sounds.md): sound bugs of the frame catcher sweep (docs/fcs1-catcher-sweep.md findings 4-6), pinned against
 // committed ROM windows (tools/audio/fixtures/snd3-*.json: soundEventProbe.py stepping mode; the --fast logs were the same rows). No emulator.
 //  4. A battle-start Intimidate plays SE_M_STAT_DECREASE (its B_ANIM_STATS_CHANGE runs in both scenes), 3 frames before the banner.
+//  6. Sing / Perish Song / GrassWhistle (gMovesWithQuietBGM) set the BGM to volume 128 at LaunchBattleAnimation and back to 256 at Cmd_end.
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { collectSoundTick, type SoundEvent } from "../src/audio/soundEvents.ts";
 import { createInitialState, tick } from "../src/engine/core.ts";
 import { factoryBattleStartEntryFrame } from "../src/engine/factoryBattleStartEntry.ts";
-import { ENTRY_STATS_CHANGE_SE_AGE } from "../src/engine/moveAnimSounds.ts";
+import { ENTRY_STATS_CHANGE_SE_AGE, QUIET_BGM_LAUNCH_ROW, QUIET_BGM_VOLUME, quietBgmRestore } from "../src/engine/moveAnimSounds.ts";
 import { traceAdvances } from "../tools/compare/traceReplay.ts";
 
 interface Row { frame: number; kind: string; id: number | null; pan: number | null; volume?: number; player?: string; via?: string; noop?: boolean }
@@ -65,4 +66,36 @@ describe("snd3 bug 4: the battle-start Intimidate's stat SE (both scenes)", () =
       expect(ball(ours).map((f) => f - OURS_MINUS_ROM[scene]).slice(-1)).toEqual(ball(romRows).slice(-1));
     });
   }
+});
+
+describe("snd3 bug 6: the quiet BGM of Sing / Perish Song / GrassWhistle (Scene ON)", () => {
+  // ROM: tools/battle-lab/snd3-<move>-<side>-on.json. duck = LaunchBattleAnimation's m4aMPlayVolumeControl(BGM, 128); restore = Cmd_end's
+  // m4aMPlayVolumeControl(BGM, 256) (logged via DestroyAnimSoundTask, Cmd_end is static); Sing's Cmd_end also stops SE_M_SING (SE1).
+  const LABS = ["sing-player", "sing-opp", "perishsong-player", "perishsong-opp", "grasswhistle-player", "grasswhistle-opp"] as const;
+  const WINDOW = 400;
+  const quiet = (rows: readonly (Row | SoundEvent)[]): [number, string, number | null, number | string | undefined][] => rows
+    .filter((e) => e.frame <= WINDOW && (e.kind === "duck" || e.kind === "stop"))
+    .map((e) => [e.frame, e.kind, e.id, e.kind === "duck" ? e.volume : e.player]);
+  const firstMoveSe = (rows: readonly (Row | SoundEvent)[]) => rows.find((e) => e.kind === "se" && e.id !== 5)!.frame;
+  for (const lab of LABS) {
+    it(`${lab}: the duck and the restore on the ROM's frames`, () => {
+      const rom = fixture(`snd3-${lab}-on-window.json`);
+      const romRows = played(rom.events);
+      const ours = played(replay(rom.trace!.appStage.id, "on", rom.trace!.segments, WINDOW));
+      expect(romRows.filter((e) => e.kind === "duck").map((e) => e.via)).toEqual(["LaunchBattleAnimation", "DestroyAnimSoundTask"]);
+      expect(quiet(ours)).toEqual(quiet(romRows));
+      expect(quiet(ours)[0]![3]).toBe(QUIET_BGM_VOLUME);
+      // the duck is the launch row, one row before the first command (Perish Song: our panse is 1 frame early, the duck is not)
+      const launchToSe = firstMoveSe(romRows) - quiet(romRows)[0]![0];
+      expect(launchToSe).toBe({ sing: 7, perishsong: 27, grasswhistle: 19 }[lab.split("-")[0] as "sing"]);
+    });
+  }
+
+  it("only gMovesWithQuietBGM (MOVE_SING, MOVE_PERISH_SONG, MOVE_GRASS_WHISTLE) duck; restore rows from the launch row", () => {
+    expect(QUIET_BGM_LAUNCH_ROW).toBe(-1);
+    expect(quietBgmRestore(320, () => null)).toEqual({ row: 219 });
+    expect(quietBgmRestore(195, () => null)).toEqual({ row: 257 });
+    expect(quietBgmRestore(47, () => 246)).toEqual({ row: 244, stopSe: 172 });
+    for (const move of [45, 46, 48, 186, 215, 253, 336]) expect(quietBgmRestore(move, () => 246)).toBeNull();
+  });
 });

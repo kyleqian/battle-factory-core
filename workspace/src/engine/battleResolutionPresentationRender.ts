@@ -17,7 +17,7 @@ import type { LiveMoveBattlerX2Input } from "./liveBattlerX2History.ts";
 import { liveSubstituteSwapApplies, substituteSwapTailFieldArt } from "./liveSubstituteSwap.ts";
 import {
   liveBattlerAnchors, liveDiveSetupSplashBirth, liveMoveAnimationDuration, liveMoveOpponentShadowPostBodyHideRows,
-  liveSemiInvulnerableHideBattler, LIVE_TURN_TRAP_BODY_ROWS,
+  liveSemiInvulnerableHideBattler, liveSingBodyRows, LIVE_TURN_TRAP_BODY_ROWS,
   SOLAR_BEAM_UNLEASH_IDLE_ROWS,
 } from "./liveMoveAnimation.ts";
 import { liveMoveTimingBodyOf, type LiveMoveTimingBody } from "./liveMoveTimingPolicy.ts";
@@ -1674,7 +1674,7 @@ export function presentedMoveDurationOnSoundClock(state: BattleResolutionPresent
  */
 export function liveMoveSourceAge(
   state: BattleResolutionPresentationState,
-): Readonly<{ request: BattleMoveAnimationRequest; age: number; lastAge: number; attackerSpecies: number; attackerElevation: number; attackerHpQuarter: number; picOffsetY: (battler: 0 | 1) => number; topY: (battler: 0 | 1) => number }> | null {
+): Readonly<{ request: BattleMoveAnimationRequest; age: number; lastAge: number; attackerSpecies: number; attackerElevation: number; attackerHpQuarter: number; picOffsetY: (battler: 0 | 1) => number; topY: (battler: 0 | 1) => number; singBodyRows: () => number | null }> | null {
   const segment = state.segments[state.segmentIndex];
   const command = segment?.commands[state.commandIndex];
   if (command === undefined || command.type !== "move-animation" || command.animation === undefined) return null;
@@ -1703,7 +1703,10 @@ export function liveMoveSourceAge(
   const attackerMon = fieldBattler(field, command.animation.attacker);
   const quarterHp = Math.trunc(attackerMon.maxHP / 4);
   const attackerHpQuarter = [0, 1, 2].find((i) => attackerMon.hp < quarterHp * (i + 1)) ?? 3;
-  return Object.freeze({ request: command.animation, age, lastAge, attackerSpecies: attackerMon.species, attackerElevation, attackerHpQuarter, picOffsetY, topY });
+  // snd3: Sing's geometry-derived ROM body (gAnimScriptActive rise .. first inactive row, liveSingBodyRows), read only by the quiet-BGM restore row.
+  const request = command.animation;
+  const singBodyRows = (): number | null => liveSingBodyRows(request, field);
+  return Object.freeze({ request, age, lastAge, attackerSpecies: attackerMon.species, attackerElevation, attackerHpQuarter, picOffsetY, topY, singBodyRows });
 }
 
 const STATS_CHANGE_AFTER_BODY_AGE_SHIFT = 4;

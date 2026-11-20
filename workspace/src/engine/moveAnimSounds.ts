@@ -409,6 +409,49 @@ function scheduleMoveAnimationTail(ops: readonly TimedOp[], context: AnimPanCont
   for (const scriptRow of tailRows) scheduleAfter(scriptRow, () => emitOpsAt(ops, context, scriptRow));
 }
 
+/**
+ * snd3 (docs/snd3-sweep-sounds.md): gMovesWithQuietBGM (battle_anim_scripts.s:14-15: Sing, Perish Song, GrassWhistle). LaunchBattleAnimation
+ * (battle_anim.c:248-256) sets the BGM to volume 128 on the launch row, the row before the script's first command (script row -1); Cmd_end
+ * (battle_anim.c:520) sets it back to 256 on the row gAnimScriptActive falls. ROM (soundEventProbe on tools/battle-lab/snd3-<move>-<side>-on.json,
+ * tools/audio/fixtures/snd3-*-window.json, and the frame catcher's seed 15 GrassWhistle, ROSELIA -> FURRET): the duck is 1 row before each
+ * move's first SE's script row in all seven windows; the restore row is GrassWhistle 219 (SE-bound: SE_M_GRASSWHISTLE ends 201 rows after its
+ * panse at 18, both sides and both species pairs), Perish Song 257 (both sides: its fixed 259-row body - 2) and Sing its geometry-derived ROM
+ * body - 2 (liveSingBodyRows: the notes fly off the screen, then Cmd_end's 90-frame IsSEPlaying wait runs out, stops SE_M_SING on SE1,
+ * battle_anim.c:493-501, and restores the BGM on the same row).
+ */
+export const QUIET_BGM_VOLUME = 128;
+export const QUIET_BGM_LAUNCH_ROW = -1;
+const MOVE_SING = 47;
+const MOVE_PERISH_SONG = 195;
+const MOVE_GRASS_WHISTLE = 320;
+const SE_M_SING = 172;
+const QUIET_BGM_FIXED_RESTORE_ROWS: Readonly<Partial<Record<number, number>>> = Object.freeze({ [MOVE_PERISH_SONG]: 257, [MOVE_GRASS_WHISTLE]: 219 });
+const SING_RESTORE_ROWS_BEFORE_BODY_END = 2;
+
+/** The script row of the quiet-BGM restore (and the SE Cmd_end stops on that row), or null for a move outside gMovesWithQuietBGM. */
+export function quietBgmRestore(moveId: number, singBodyRows: () => number | null): Readonly<{ row: number; stopSe?: number }> | null {
+  const fixed = QUIET_BGM_FIXED_RESTORE_ROWS[moveId];
+  if (fixed !== undefined) return { row: fixed };
+  if (moveId !== MOVE_SING) return null;
+  const rows = singBodyRows();
+  return rows === null ? null : { row: rows - SING_RESTORE_ROWS_BEFORE_BODY_END, stopSe: SE_M_SING };
+}
+
+function emitQuietBgmRows(moveId: number, singBodyRows: () => number | null, scriptRow: number, frontierBrain: boolean): void {
+  if (scriptRow !== QUIET_BGM_LAUNCH_ROW) return;
+  const restore = quietBgmRestore(moveId, singBodyRows);
+  if (restore === null) return;
+  const bgm = factoryBattleBgm(frontierBrain);
+  emitSound({ kind: "duck", id: bgm, pan: null, volume: QUIET_BGM_VOLUME });
+  // The restore can fall after the engine's presented animation has ended (the next command's frames), so it is scheduled from the launch row.
+  const delay = restore.row - QUIET_BGM_LAUNCH_ROW;
+  if (restore.stopSe !== undefined) {
+    const id = restore.stopSe;
+    scheduleAfter(delay, () => emitSound({ kind: "stop", id, pan: null, player: "SE1" }));
+  }
+  scheduleAnimTaskBgmRestore(bgm, delay);
+}
+
 /** Called once per collected tick with the round's resolution presentation after the tick; emits the ops whose frame is this tick's. */
 export function emitMoveAnimSounds(after: BattleResolutionPresentationState | null, frontierBrain = false): void {
   if (after === null || after.lifecycle.phase !== "presenting") return;
@@ -423,6 +466,7 @@ export function emitMoveAnimSounds(after: BattleResolutionPresentationState | nu
   } as const;
   const scriptRow = age - FIRST_COMMAND_AGE - AGE_TO_SOUND_ROWS;
   const ops = variantOf(request.moveId, request.turn, request.attacker === 0 ? 0 : 1, { picY: source.picOffsetY, topY: source.topY, rolloutCounter: request.rolloutCounter, damage: request.damage, attackerElevation: source.attackerElevation, attackerHpQuarter: source.attackerHpQuarter });
+  emitQuietBgmRows(request.moveId, source.singBodyRows, scriptRow, frontierBrain);
   emitOpsAt(ops, context, scriptRow);
   if (scriptRow === 0) scheduleMoveAnimationTail(ops, context, lastAge - FIRST_COMMAND_AGE - AGE_TO_SOUND_ROWS);
   emitCryTaskRows(request.moveId, source.attackerSpecies, context.attackerSide, scriptRow, frontierBrain);
