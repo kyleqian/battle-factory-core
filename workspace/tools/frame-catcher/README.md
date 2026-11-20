@@ -40,10 +40,17 @@ round takes about 2 minutes. Five traces at once (`JOBS=5`) take as long as the 
    event (the engine's sound sink), the screen owner, and which menu waits for the player with its cursor (`engineMenus.mjs`: battle
    action / move / party menus and the party submenu, the summary, the draft cursor / menu / YES-NO, the swap screen, the GO ON
    multichoice and the swap YES/NO). It also writes what the ROM needs to play the same round: the six rentals, and per battle the
-   trainer, the opponent's records, the transition, the RNG before the trainer roll and the battle RNG at the first action menu.
+   trainer, the opponent's records, the player's three, the transition, the RNG before the trainer roll and the battle RNG at the first
+   action menu.
 2. `romRun.py` (mGBA in process, no oracle server) sets the ROM up as the engine's round and drives it:
    - the draft: the six rental records and the first trainer and sets are written, and the select screen is entered again (the lab's
-     own staging, `oracle/battle_lab.py`);
+     own staging, `oracle/battle_lab.py`). The re-entered screen builds its six afresh from the set ids alone, with personalities of its
+     own (CreateFrontierFactorySelectableMons), and the three rented become the party; so once the cursor task runs (the six were built
+     one step earlier, none is half made) each is re-stored with the engine's personality and OT id as CreateMon would have built it
+     (`mons.py`): gender, the ability for a species with two, shininess and Spinda's spots follow; stats, moves and item are the ROM's own
+     (the nature is the same). At each battle's first turn the player's three are checked against the engine's (personality, species,
+     ability bit, gender, level, HP, stats) in the set-up list. Before this, seed 6's GROWLITHE was female without Intimidate on the
+     ROM and the battle drifted from its first switch-in (docs/snd2-catcher-sounds.md);
    - each later trainer roll: from the GO ON answer, gRngValue is held at the value that makes the ROM's own roll give the engine's
      trainer and sets (found by trying from a saved state), so the attendant's comments are the ROM's own;
    - each battle-start transition: the frame that builds the opponent's party is stepped again with a trap at
@@ -91,6 +98,3 @@ through the same tiles at different moments (the first look at Kyle's Tuber pick
 - The test player's `full` policy browses the summary's move-select mode and other corners the driver has no cursor model for
   (`steer_button`); a press there is replayed but not steered.
 - Pan changes of a running sound (`pan` events) are not compared; cry pitch / length details are not checked.
-- The player's Pokemon are not exactly the engine's: the re-entered select screen builds its six with new personalities
-  (CreateFrontierFactorySelectableMons), so gender and, for species with two abilities, the ability can differ (seed 6's GROWLITHE has
-  no Intimidate on the ROM). Patching them to the engine's is still to do (docs/snd2-catcher-sounds.md).

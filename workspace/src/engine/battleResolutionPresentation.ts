@@ -1,3 +1,4 @@
+import { turnTrapBranchOf, type TurnTrapBranch } from "./turnTrapBranch.ts";
 import type { LiveMovePaletteInput } from "./liveMoveAnimationPalette.ts";
 import type { LiveMoveSpriteAllocatorInput, LiveMoveSpriteOrderInput } from "./liveMoveSpriteAllocator.ts";
 import type { LiveBattlerX2History, LiveMoveBattlerX2Input } from "./liveBattlerX2History.ts";
@@ -191,6 +192,16 @@ export const FOCUS_BAND_COMMAND_FRAMES = 129;
  * rows before the command sit at offset 0, "X absorbed nutrients with its roots!" at +198 (the same pattern as the Wish heal above).
  */
 export const INGRAIN_HEAL_COMMAND_FRAMES = 198;
+/**
+ * trp1 (docs/trp1-turn-trap-animation.md): BattleScript_WrapTurnDmg's `playanimation BS_ATTACKER, B_ANIM_TURN_TRAP, sB_ANIM_ARG1`
+ * (data/battle_scripts_1.s:3829-3833). General_TurnTrap (data/battle_anim_scripts.s:10361-10439) branches on the trapped battler's
+ * wrapped move (AnimTask_GetTrappedMoveAnimId, battle_anim_throw.c:2486-2500): Status_FireSpin, Status_Whirlpool, Status_Clamp,
+ * Status_SandTomb, else Status_BindWrap (Bind and Wrap). ROM (tools/battle-lab/trp1-<move>-<side>-on.json, both sides): the rows before
+ * the command sit at a constant offset and "X is hurt by Y!" starts this many rows after the previous command's end.
+ */
+export const TURN_TRAP_COMMAND_FRAMES: Readonly<Record<TurnTrapBranch, number>> = Object.freeze({
+  BIND_WRAP: 68, FIRE_SPIN: 81, WHIRLPOOL: 110, CLAMP: 39, SAND_TOMB: 101,
+});
 /**
  * kno3 (docs/kno1-item-knockoff-plan.md "kno3"): BattleScript_KnockedOff's `playanimation BS_TARGET, B_ANIM_ITEM_KNOCKOFF` (General_ItemKnockoff:
  * one ITEM_BAG sprite, 3 load rows, then 40 path rows, + the AnimItemSteal_Step2 tail of 51 rows when the PLAYER's mon is the target). The
@@ -497,6 +508,8 @@ export type BattleResolutionPresentationCommand =
       animation?: BattleMoveAnimationRequest;
       /** trn181: the Scene ON action-transition pause (draw-nothing; leaves hides and live hosts untouched). */
       actionTransition?: true;
+      /** trp1: Scene OFF's BattleScript_Pausex20 for B_ANIM_TURN_TRAP before "X is hurt by Y!" (draw-nothing, as every OFF hold). */
+      turnTrapHold?: true;
       eventSequence: number;
       battler: 0 | 1;
       timing: BattleMoveAnimationTiming;
@@ -698,7 +711,9 @@ export type BattleResolutionPresentationCommand =
       type: "general-animation";
       eventSequence: number;
       battler: 0 | 1;
-      animation: "FOCUS_PUNCH_SETUP" | "HELD_ITEM_EFFECT" | "LEECH_SEED_DRAIN" | "CASTFORM_CHANGE" | "WISH_HEAL" | "FUTURE_SIGHT_HIT" | "FOCUS_BAND" | "ITEM_KNOCKOFF" | "INGRAIN_HEAL" | WeatherContinuesAnimation;
+      animation: "FOCUS_PUNCH_SETUP" | "HELD_ITEM_EFFECT" | "LEECH_SEED_DRAIN" | "CASTFORM_CHANGE" | "WISH_HEAL" | "FUTURE_SIGHT_HIT" | "FOCUS_BAND" | "ITEM_KNOCKOFF" | "INGRAIN_HEAL" | "TURN_TRAP" | WeatherContinuesAnimation;
+      /** trp1: a TURN_TRAP's wrapped move (the animation event's argument; General_TurnTrap's branch follows it, turnTrapBranchOf). */
+      trapMove?: number;
       /** cff230: a CASTFORM_CHANGE's target form (the event's argument & ~CASTFORM_SUBSTITUTE; 0 = normal). */
       castformForm?: number;
       /** cff232 / snd233: extra rows before the morph's lead (a weather-loop change at battler 1, both scenes); absent = 0. */
@@ -1511,7 +1526,7 @@ function heldItemEffectExecutionsAndLead(
  * instruction or has no provenance.
  */
 /** wsh1: the controller lead replacing the held-item leads (15 / 9) for the other two print-after-playanimation sites (ROM-measured: Wish 36 = its 36 executions, Focus Band 40 = 38 + 2). */
-const WSH1_OFF_HOLD_LEAD: Readonly<Record<string, number>> = { B_ANIM_WISH_HEAL: 0, B_ANIM_FOCUS_BAND: 2, B_ANIM_INGRAIN_HEAL: 0 };
+const WSH1_OFF_HOLD_LEAD: Readonly<Record<string, number>> = { B_ANIM_WISH_HEAL: 0, B_ANIM_FOCUS_BAND: 2, B_ANIM_INGRAIN_HEAL: 0, B_ANIM_TURN_TRAP: 0 };
 /** wsh1: Scene OFF's Pausex20 before the hit, ROM-measured on tools/battle-lab/wsh1-fs-off.json (the previous message's own wait is already presented). */
 const FUTURE_SIGHT_HIT_OFF_HOLD_FRAMES = 42;
 /** BattleScript_DoFutureAttackHit's `effectivenesssound` right after the shared PLAYANIMATION slot (Future Sight's jumps over Doom Desire's; both take Pausex20 in Scene OFF). */
@@ -1519,6 +1534,13 @@ function futureSightHitPlayanimationBefore(programCounter: number | undefined): 
   if (programCounter === undefined) return false;
   return BATTLE_SCRIPT_PROGRAM.instructions[programCounter - 1]?.opcodeName === "B_SCR_OP_EFFECTIVENESSSOUND"
     && BATTLE_SCRIPT_PROGRAM.instructions[programCounter - 2]?.operands.some((operand) => operand.expression === "B_ANIM_DOOM_DESIRE_HIT") === true;
+}
+/** trp1: the animType operand of the `playanimation` right before the print at `messageIndex` (null when the print does not follow one). */
+function playanimationBeforePrint(events: readonly BattleKernelSemanticEvent[], messageIndex: number): string | null {
+  const programCounter = events[messageIndex]!.provenance?.programCounter;
+  if (programCounter === undefined || programCounter < 1) return null;
+  const instruction = BATTLE_SCRIPT_PROGRAM.instructions[programCounter - 1];
+  return instruction?.opcodeName === "B_SCR_OP_PLAYANIMATION" ? instruction.operands[1]?.expression ?? null : null;
 }
 function heldItemEffectOffHoldFrames(
   events: readonly BattleKernelSemanticEvent[],
@@ -2147,7 +2169,10 @@ function applyHpHitTails(
     const command = commands[index]!;
     const leads = command.type === "hp" ? leadRows.get(command.eventSequence) : undefined;
     if (command.type !== "hp" || leads === undefined || command.timing !== HP_TIMING) continue;
-    const rest = commands.slice(index + 1);
+    // trp1: a TURN_TRAP animation (Scene ON) or its Pausex20 hold (Scene OFF) sits right before its "X is hurt by Y!" print and is the
+    // next controller exec the tails measured (their lead ends where the print's command used to start); the rules read past it.
+    const rest = commands.slice(index + 1).filter((next) => !(next.type === "general-animation" && next.animation === "TURN_TRAP")
+      && !(next.type === "move-animation" && next.turnTrapHold === true));
     if (leads.tick !== null && rest[0]?.type === "faint" && leads.faintNext) {
       commands[index] = Object.freeze({ ...command, timing: Object.freeze({ minimumFrames: 0, tailFrames: TICK_FAINT_TAIL_FRAMES }) });
       continue;
@@ -5114,7 +5139,7 @@ export function projectBattleResolutionCommands(
   const liveHp: [number, number] = [field.player.hp, field.opponent.hp];
   const substituteFades: { at: number; battler: 0 | 1; sequence: number }[] = [];
   const statsChanges: { at: number; battler: 0 | 1; sequence: number; argument: number; frames: number; seGate: number }[] = [];
-  const heldItemEffects: { at: number; battler: 0 | 1; sequence: number; frames: number; afterStatus: boolean; seGate?: number; animation: "HELD_ITEM_EFFECT" | "WISH_HEAL" | "FUTURE_SIGHT_HIT" | "FOCUS_BAND" | "ITEM_KNOCKOFF" | "INGRAIN_HEAL" }[] = [];
+  const heldItemEffects: { at: number; battler: 0 | 1; sequence: number; frames: number; afterStatus: boolean; seGate?: number; trapMove?: number; animation: "HELD_ITEM_EFFECT" | "WISH_HEAL" | "FUTURE_SIGHT_HIT" | "FOCUS_BAND" | "ITEM_KNOCKOFF" | "INGRAIN_HEAL" | "TURN_TRAP" }[] = [];
 
   for (let index = 0; index < events.length; index += 1) {
     const event = events[index]!;
@@ -5177,6 +5202,7 @@ export function projectBattleResolutionCommands(
         if (heldItemHold !== null) {
           commands.push(Object.freeze({
             type: "move-animation",
+            ...(playanimationBeforePrint(events, index) === "B_ANIM_TURN_TRAP" ? { turnTrapHold: true as const } : {}),
             eventSequence: event.sequence,
             battler: lastMoveAttacker ?? 0,
             timing: Object.freeze({ minimumFrames: heldItemHold }),
@@ -5371,6 +5397,16 @@ export function projectBattleResolutionCommands(
           : payload.animationId === "INGRAIN_HEAL" ? INGRAIN_HEAL_COMMAND_FRAMES
           : payload.animationId === "FUTURE_SIGHT_HIT" ? FUTURE_SIGHT_HIT_COMMAND_FRAMES : FOCUS_BAND_COMMAND_FRAMES,
         afterStatus: false, animation: payload.animationId,
+      });
+      continue;
+    }
+    if (payload.kind === "animation" && payload.animationId === "TURN_TRAP") {
+      // trp1: Scene ON only (the kernel emits the receipt past Cmd_playanimation's HITMARKER_NO_ANIMATIONS / semi-invulnerable branches;
+      // Scene OFF's Pausex20 is the WSH1_OFF_HOLD_LEAD hold on the print). Behind a Substitute the ROM skips it (the insert below).
+      const trapMove = Number(payload.arguments[0] ?? 0);
+      heldItemEffects.push({
+        at: commands.length, battler: singlesBattler(payload.battler ?? -1, "turn trap animation"), sequence: event.sequence,
+        frames: TURN_TRAP_COMMAND_FRAMES[turnTrapBranchOf(trapMove)], afterStatus: false, animation: "TURN_TRAP", trapMove,
       });
       continue;
     }
@@ -5869,6 +5905,7 @@ export function projectBattleResolutionCommands(
             ordered.push(Object.freeze({
               type: "general-animation" as const, eventSequence: heldItem.sequence, battler: heldItem.battler,
               animation: heldItem.animation,
+              ...(heldItem.trapMove === undefined ? {} : { trapMove: heldItem.trapMove }),
               timing: Object.freeze({
                 minimumFrames: heldItem.frames - presented + (presented > 0 ? HELD_ITEM_EFFECT_AFTER_STATUS_EXTRA_FRAMES : 0),
                 ...(heldItem.seGate === undefined ? {} : { seGateFrames: heldItem.seGate }),
@@ -6422,6 +6459,13 @@ export type AppendBattleResolutionLockedActionContinuationInput = Readonly<{
   /** The completed charge segment's frozen display field. */
   fieldBoundary: BattleResolutionDisplayedField;
   lockedAction: BattleResolutionLockedActionIdentity;
+  /**
+   * flow1: the player's own decision at the intervening command. A voluntary switch is presented as a fresh switch resolution's is
+   * (the recall line, the return to the ball, the party-menu close hold); absent or a move = the segment as the kernel emits it.
+   */
+  sourceDecision?: BattleCommandDecision;
+  /** flow1: as `CreateBattleResolutionPresentationInput.opponentHpOnSwitchout`, for the switch's "Come back!" line. */
+  opponentHpOnSwitchout?: number;
 }>;
 
 /**
@@ -6465,6 +6509,7 @@ function appendResolutionSegment(
   resolution: BattleResolutionPresentationState,
   transition: BattleDecisionTransitionResult<FactoryFullTurnDecisionRules>,
   fieldBoundary: BattleResolutionDisplayedField,
+  events: readonly BattleKernelSemanticEvent[] = transition.events,
 ): BattleResolutionSegment {
   const priorSequence = resolution.segments
     .flatMap((segment) => segment.events)
@@ -6479,9 +6524,9 @@ function appendResolutionSegment(
     field: fieldBoundary,
     beforeRules: resolution.pendingBattle.rules,
     afterRules: transition.state.rules,
-    events: transition.events,
+    events,
     commands: projectResolutionSegmentCommands(
-      transition.events,
+      events,
       resolution.pendingBattle.rules.rulesContext,
       transition,
       fieldBoundary,
@@ -6554,7 +6599,15 @@ export function appendBattleResolutionActionContinuation(
   ) {
     throw new Error("automatic action continuation requires a genuine trainer command boundary");
   }
-  const segment = appendResolutionSegment(resolution, transition, fieldBoundary);
+  // flow1: the trainer's command here can be a voluntary switch (seed 18: the player's AZUMARILL underground after Dig, the AI
+  // switches to BAYLEEF). The ROM runs BattleScript_ActionSwitch's prelude for it ("<TRAINER> withdrew <MON>!" and the recall,
+  // SE_BALL_OPEN) as for any AI switch; the kernel skips it and only the fresh resolution re-made it.
+  const segment = appendResolutionSegment(
+    resolution,
+    transition,
+    fieldBoundary,
+    resolution.opponentTrainer === null ? transition.events : withSynthesizedAiSwitchRecallEvents(transition.events),
+  );
   return Object.freeze({
     ...resolution,
     segments: Object.freeze([...resolution.segments, segment]),
@@ -6598,13 +6651,39 @@ export function appendBattleResolutionLockedActionContinuation(
       "locked action continuation receipt has no immutable matching action snapshot",
     );
   }
-  const segment = appendResolutionSegment(resolution, transition, fieldBoundary);
+  // flow1: the player switching while the foe is locked into a two-turn move (Dig, Fly, Bide, Thrash, recharge, ...) runs the
+  // same BattleScript_ActionSwitch prelude on the ROM as any voluntary switch (hpthresholds2, STRINGID_RETURNMON, returnatktoball:
+  // "GROWLITHE, that's enough! Come back!", the recall and its SE_BALL_OPEN). The kernel skips that prelude for presentation to
+  // re-make (withSynthesizedSwitchRecallEvents), which only the fresh resolution did: this segment started at "Go! VOLBEAT!". The
+  // segment now gets the recall receipts, the switch's own decision and the fresh switch's party-menu close hold + recall clock.
+  const switching = input.sourceDecision?.kind === "switch";
+  const segment = appendResolutionSegment(
+    resolution,
+    transition,
+    fieldBoundary,
+    switching
+      ? withSynthesizedSwitchRecallEvents(
+        transition.events,
+        fieldBoundary,
+        input.opponentHpOnSwitchout ?? fieldBoundary.opponent.maxHP,
+      )
+      : transition.events,
+  );
   return Object.freeze({
     ...resolution,
+    ...(switching
+      ? {
+        sourceDecision: Object.freeze({ ...input.sourceDecision! }),
+        confirmHandoff: null,
+        fadeTick: 0,
+      }
+      : {}),
     segments: Object.freeze([...resolution.segments, segment]),
     segmentIndex: resolution.segments.length,
     commandIndex: 0,
-    lifecycle: Object.freeze({ phase: "presenting" as const, phaseElapsed: 0 }),
+    lifecycle: Object.freeze(switching
+      ? { phase: "confirm-handoff" as const, phaseElapsed: 0 }
+      : { phase: "presenting" as const, phaseElapsed: 0 }),
     field: fieldBoundary,
     pendingBoundary: transition.state.boundary,
     pendingBattle: transition.state,

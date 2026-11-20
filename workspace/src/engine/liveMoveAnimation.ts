@@ -18,6 +18,8 @@ import { wavyMusicNotesGeometryAtAge } from "../animation/sing.ts";
 import { ADP1_MOVE_BODY, APPROX_SCRIPT_MOVE_BODY, approxScriptDuration } from "../animation/approxScript.ts";
 import { PRESENT_DAMAGE_FRAME_COUNT, PRESENT_HEAL_FRAME_COUNT } from "../animation/present.ts";
 import { SOLAR_BEAM_SETUP_FIRST_INACTIVE_AGE } from "../animation/solarBeam.ts";
+import { FIRE_SPIN_TURN_TRAP_END_AGE } from "../animation/fireSpin.ts";
+import { WHIRLPOOL_RESIDUAL_FRAME_COUNT } from "../animation/whirlpool.ts";
 import { reduceMemento, type MementoBattlerConfig, type MementoConfig } from "../animation/memento.ts";
 import { HOWL_FRAME_COUNT } from "../animation/howl.ts";
 import { SUBSTITUTE_FRAME_COUNT } from "../animation/substitute.ts";
@@ -1156,6 +1158,15 @@ export function liveSmokescreenAheadFromAge(moveUse: number | undefined): number
 export const LIVE_DOUBLE_TEAM_STATS_CHANGE_TAIL_ROWS = 9;
 
 /**
+ * trp1 (docs/trp1-turn-trap-animation.md): the drawn rows of General_TurnTrap's branches that reuse a move body (age 0 = the command's
+ * first frame), by wrapped move. Status_FireSpin: two FireSpinEffect calls (fireSpin.ts `turn-trap`: the last vortex is gone at 78, the
+ * row after it the field stands as it is); Status_Whirlpool: whirlpool.ts `residual`; Status_SandTomb: sandTomb.ts `turn-trap` (end age 99).
+ */
+export const LIVE_TURN_TRAP_BODY_ROWS: Readonly<Record<number, number>> = Object.freeze({
+  83: FIRE_SPIN_TURN_TRAP_END_AGE + 1, 250: WHIRLPOOL_RESIDUAL_FRAME_COUNT, 328: 99,
+});
+
+/**
  * The presented body rows of a live move body (null: no live duration). `bodyClass` is the order host lend's body class
  * (liveMoveTimingBodyOf; default "first"): d4later's body-keyed D4 parameters (Sheer Cold 329 / Extrasensory 326 opponent later bodies).
  */
@@ -1198,6 +1209,12 @@ function liveMoveAnimationDurationOf(
   // apx210: set when the move switch falls through to `default` (liveMoveAnimationDurationCaseMissing).
   noCase?: { hit: boolean },
 ): number | null {
+  // trp1: a General_TurnTrap branch body. No substitute swap (the general table never runs SUBSTITUTE_TO_MON; with a doll on either side
+  // there is no body, battleResolutionPresentationRender.ts turnTrapBodyEffect); a transformed battler declines as for every body.
+  if (request.turnTrapBody === true) {
+    if (field !== undefined && liveTransformedBattlerDeclines(request, field)) return null;
+    return LIVE_TURN_TRAP_BODY_ROWS[request.moveId] ?? null;
+  }
   if (field !== undefined && liveSubstituteSwapApplies(request, field) === true) {
     const bodyField = substituteSwapBodyField(field, request.attacker === 0 ? 0 : 1);
     const body = liveMoveAnimationDurationOf(request, bodyField, bodyClass, moveUse, noCase);
@@ -2202,7 +2219,7 @@ export function liveMoveAnimationPresentationProven(
       config = { move: "BULK_UP", attacker, target, fieldProfile,
         breathOrigin: attackerAnchors.picOffsetPoint, battlerHeight: attackerAnchors.pictureHeight };
       break;
-    case 250: config = { move: "WHIRLPOOL", attacker, target, fieldProfile, body: "main" }; break;
+    case 250: config = { move: "WHIRLPOOL", attacker, target, fieldProfile, body: request.turnTrapBody === true ? "residual" : "main" }; break;
     case 76: {
       // sourceOrbOrigin adds 10 to the "resolved animation center" to reach
       // GetBattlerSpriteCoord(Y_PIC_OFFSET), so battlers carry that point minus 10.
@@ -2262,7 +2279,7 @@ export function liveMoveAnimationPresentationProven(
     case 68: config = { move: "COUNTER", attacker, target, fieldProfile }; break;
     case 78: config = { move: "STUN_SPORE", attacker, target, fieldProfile }; break;
     case 79: config = { move: "SLEEP_POWDER", attacker, target, fieldProfile }; break;
-    case 83: config = { move: "FIRE_SPIN", attacker, target, fieldProfile }; break;
+    case 83: config = { move: "FIRE_SPIN", attacker, target, fieldProfile, ...(request.turnTrapBody === true ? { body: "turn-trap" as const } : {}) }; break;
     case 92: config = { move: "TOXIC", attacker, target, fieldProfile }; break;
     case 93: config = { move: "CONFUSION", attacker, target, fieldProfile }; break;
     case 94: config = { move: "PSYCHIC", attacker, target, fieldProfile }; break;
@@ -3866,7 +3883,7 @@ export function liveMoveAnimationPresentationProven(
       const targetAnchors = liveBattlerAnchors(target.geometry.side, art, battlerX2Input);
       config = { move: "SAND_TOMB", attacker, target, fieldProfile, animationProfile: liveSandTombProfile({
         attackerSide: attacker.geometry.side, attacker: attackerAnchors, target: targetAnchors, spriteOrder: lentOrder,
-        freeSpriteSlots: KNOWN_ENTRY_FREE_SPRITE_SLOTS }) as never, attackerIdleRest: attackerAnchors.frontIdleRest };
+        freeSpriteSlots: KNOWN_ENTRY_FREE_SPRITE_SLOTS, turnTrap: request.turnTrapBody === true }) as never, attackerIdleRest: attackerAnchors.frontIdleRest };
       break;
     }
     case 123: {

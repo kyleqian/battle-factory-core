@@ -147,22 +147,23 @@ import a143 from "../animation/assets/synthesis.json" with { type: "json" };
 import a144 from "../animation/assets/tail-glow.json" with { type: "json" };
 import a145 from "../animation/assets/taunt.json" with { type: "json" };
 import a146 from "../animation/assets/teeter-dance.json" with { type: "json" };
-import a147 from "../animation/assets/thunder.json" with { type: "json" };
-import a148 from "../animation/assets/thunderbolt.json" with { type: "json" };
-import a149 from "../animation/assets/tickle.json" with { type: "json" };
-import a150 from "../animation/assets/toxic.json" with { type: "json" };
-import a151 from "../animation/assets/tri-attack.json" with { type: "json" };
-import a152 from "../animation/assets/twineedle.json" with { type: "json" };
-import a153 from "../animation/assets/uproar.json" with { type: "json" };
-import a154 from "../animation/assets/water-gun.json" with { type: "json" };
-import a155 from "../animation/assets/water-orb.json" with { type: "json" };
-import a156 from "../animation/assets/water-pulse.json" with { type: "json" };
-import a157 from "../animation/assets/water-spout-glowy-blue-orb.json" with { type: "json" };
-import a158 from "../animation/assets/whirlwind.json" with { type: "json" };
-import a159 from "../animation/assets/will-o-wisp.json" with { type: "json" };
-import a160 from "../animation/assets/wish.json" with { type: "json" };
-import a161 from "../animation/assets/yawn.json" with { type: "json" };
-import a162 from "../animation/assets/zap-cannon.json" with { type: "json" };
+import a147 from "../animation/assets/tendrils.json" with { type: "json" };
+import a148 from "../animation/assets/thunder.json" with { type: "json" };
+import a149 from "../animation/assets/thunderbolt.json" with { type: "json" };
+import a150 from "../animation/assets/tickle.json" with { type: "json" };
+import a151 from "../animation/assets/toxic.json" with { type: "json" };
+import a152 from "../animation/assets/tri-attack.json" with { type: "json" };
+import a153 from "../animation/assets/twineedle.json" with { type: "json" };
+import a154 from "../animation/assets/uproar.json" with { type: "json" };
+import a155 from "../animation/assets/water-gun.json" with { type: "json" };
+import a156 from "../animation/assets/water-orb.json" with { type: "json" };
+import a157 from "../animation/assets/water-pulse.json" with { type: "json" };
+import a158 from "../animation/assets/water-spout-glowy-blue-orb.json" with { type: "json" };
+import a159 from "../animation/assets/whirlwind.json" with { type: "json" };
+import a160 from "../animation/assets/will-o-wisp.json" with { type: "json" };
+import a161 from "../animation/assets/wish.json" with { type: "json" };
+import a162 from "../animation/assets/yawn.json" with { type: "json" };
+import a163 from "../animation/assets/zap-cannon.json" with { type: "json" };
 
 export const FULL_ANIM_ASSETS: Readonly<Record<string, object>> = {
   "absorb": a0,
@@ -312,20 +313,21 @@ export const FULL_ANIM_ASSETS: Readonly<Record<string, object>> = {
   "tail-glow": a144,
   "taunt": a145,
   "teeter-dance": a146,
-  "thunder": a147,
-  "thunderbolt": a148,
-  "tickle": a149,
-  "toxic": a150,
-  "tri-attack": a151,
-  "twineedle": a152,
-  "uproar": a153,
-  "water-gun": a154,
-  "water-orb": a155,
-  "water-pulse": a156,
-  "water-spout-glowy-blue-orb": a157,
-  "whirlwind": a158,
-  "will-o-wisp": a159,
-  "wish": a160,
-  "yawn": a161,
-  "zap-cannon": a162,
+  "tendrils": a147,
+  "thunder": a148,
+  "thunderbolt": a149,
+  "tickle": a150,
+  "toxic": a151,
+  "tri-attack": a152,
+  "twineedle": a153,
+  "uproar": a154,
+  "water-gun": a155,
+  "water-orb": a156,
+  "water-pulse": a157,
+  "water-spout-glowy-blue-orb": a158,
+  "whirlwind": a159,
+  "will-o-wisp": a160,
+  "wish": a161,
+  "yawn": a162,
+  "zap-cannon": a163,
 };
