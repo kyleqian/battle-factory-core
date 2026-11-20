@@ -79,7 +79,7 @@ describe("Rapid Spin (aud262)", () => {
       expect(rows.length).toBe(9);
       expect(rows[5]!.frame - rows[0]!.frame).toBe(gap);
       expect(secondLoop(elevation)).toBe(gap);
-      expect(expectConstantOffset(rom, [160, 134], 9, "first")).toBe(2);
+      expect(expectConstantOffset(rom, [160, 134], 9, "first")).toBe(0);
     });
   }
 });
@@ -94,7 +94,7 @@ describe("Water Spout (aud262)", () => {
     expect(entry.gated.every((g) => g === 0)).toBe(true);
     expect(entry.hp.map((g) => g >= 0)).toEqual(Array.from({ length: 12 }, (_, i) => i % 2 === 0));
   });
-  const windows = [["waterspout-q0", "player", 49, -1], ["waterspout-q1", "player", 49, -1], ["waterspout-q2", "player", 50, -1], ["waterspout-q3", "player", 51, 2], ["waterspoutsnorlax", "player", 51, 2], ["waterspout", "opponent", 46, 2]] as const;
+  const windows = [["waterspout-q0", "player", 49, 0], ["waterspout-q1", "player", 49, 0], ["waterspout-q2", "player", 50, 0], ["waterspout-q3", "player", 51, 0], ["waterspoutsnorlax", "player", 51, 0], ["waterspout", "opponent", 46, 0]] as const;
   for (const [name, side, lastGap, offset] of windows) {
     it(`aud262-${name}-${side}: SE gaps 46 / ${lastGap} equal the ROM's, offset ${offset} constant`, () => {
       const rom = fixture(`aud262-${name}-${side}`);
@@ -180,7 +180,7 @@ describe("Odor Sleuth / False Swipe / Pay Day (aud262)", () => {
   const windows = [
     ["odorsleuth", [193, 192], 3, [0, 8, 52], -4],
     ["falseswipe", [122, 135, 139], 5, [0, 18, 26, 34, 58], 0],
-    ["payday", [160, 174], 2, [0, 20], 2],
+    ["payday", [160, 174], 2, [0, 20], 0],
   ] as const;
   for (const [name, ids, count, rel, offset] of windows) {
     for (const side of ["player", "opponent"] as const) {
@@ -210,7 +210,7 @@ describe("Luster Purge (aud262)", () => {
       const picked = rom.events.filter((e) => e.noop !== true && e.kind === "se" && [201, 215].includes(e.id as number));
       expect(picked.length).toBe(7);
       expect(picked.map((e) => e.frame - picked[0]!.frame)).toEqual([0, 122, 127, 132, 137, 142, 147]);
-      expect(expectConstantOffset(rom, [201, 215], 7, "first")).toBe(side === "player" ? 2 : 5);
+      expect(expectConstantOffset(rom, [201, 215], 7, "first")).toBe(side === "player" ? 0 : 3);
     });
   }
 });

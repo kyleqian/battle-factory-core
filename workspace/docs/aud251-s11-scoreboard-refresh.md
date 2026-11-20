@@ -1529,3 +1529,158 @@ Residuals, all attributed: (1) the charge-turn EMPTYSTRING3 box is 8 frames earl
 **c3 not attempted** (faint message -> party summary interval): the 1..2 frame drift above is its entry point; FaintedMonTryChoose's cost and the text-length dependence are unmeasured.
 
 Evidence: `.integration/evidence/fsc1/` (git-ignored: compare outputs `base-*` / `c12-*`, `t2/`, `t2base/`, `t2-scoreboard.txt`, `census/{off,on}-{04b595cc1,5edacd5ab}/`). Labs: `tools/integration/fsc1Labs.py` (regenerates `tools/battle-lab/fsc1-*.json` and `tools/compare/traces/fsc1-*.json`). Papercuts: the compare summary prints only the tail line; `soundScoreboard.py` has no `__main__` guard and no mass output (the mass needed an import with `sys.argv` set); the harness auto-backgrounds any command over 120 s unless `timeout` is passed.
+
+## hcr2: Scene ON first used-move glyph (oracle pixels), hold u - 2
+
+Question: does the hcr1b rule (first glyph at commit + 7 + u) hold in Scene ON, and is "Scene ON absorbs u downstream" (hcr2m) a pixel fact or a sound-anchoring one?
+
+### Pixel finding
+
+`tools/integration/hcr2Labs.py` builds 28 ON labs (the hcr1b designs, ON profile: `tools/battle-lab/hcr2-*.json`, traces `tools/compare/traces/hcr2-*.json`, stages `hcr2Stages()` in `tools/compare/appTrace.ts`; foe u = 2 / 3 / 4 / 6 moves plus six player-side labs). The ON oracle prints the used-move text at the **same commit + 7 + u** as Scene OFF; the app's fixed confirm-handoff walk reaches it at commit + 9, so it was early by u - 2 in ON too. In pixels the adapted bodies are already exact relative to the print, so "ON absorbs u downstream" is a sound-anchoring effect, not a pixel one.
+
+### Rule (`battleResolutionPresentation.ts`)
+
+`usedMovePrintLeadU` no longer requires `NO_ANIMATIONS`: `action-dispatch` holds u - 2 frames in both scenes (Tier-1 pin in `tests/battleResolutionPresentation.test.ts`: 9 / 10 / 11 / 12 / 13 / 14 / 15 / 23 frames for u = 2..8, 16 in ON and OFF). Nothing downstream was stacked: no counter lead was touched. The OFF one-tick sound stamp lead stays OFF only (`usedMoveSoundLeadOf`).
+
+### Results (tested code a4bd32997 + test re-pins; ON labs against the ON oracle)
+
+- All 167 ON traces with a parsed summary, base -> rule: 85 more matched frames, 82 equal, 1 lower (`lead3-knockoff-on` 103 -> 98 of 1023; it differs from frame 0 in both, incidental). Named: hie1-*-on (cheri 279 -> 566, leftovers 851 -> 1558, shellbell 851 -> 1560, sitrus 982 -> 1715), hie2-sitrus-opp-on 343 -> 994, hpd1 / hpd8 / hpd5 / hpf1 / lse1 / lse4 / lead2 / lead3 / liv2 ON all up (hpd1-sonicboom-on 938, hpd8-bodyslam-on 574 -> 914 of 1023). battle-command-generated is OFF only (unchanged). turn11-* are OFF traces (unchanged).
+- New hcr2 traces: exact 3 -> 8 of 28, 21 improved. The first glyph is exact on all of them; what remains is not the print: an app-only foe-sprite pose change (410 px, from the end of the print, e.g. absorb / ember / growl / tackle / scratch / fissure / lowkick / megadrain) and unadapted move bodies (Tackle, Scratch, Fissure, Megadrain, Curse: wrong print -> animation / hit interval, animation lane).
+- T2 Scene ON, 25 t2n seeds: missing / extra 0 / 0; exact rows 997 -> 722, offset mass 28,701 -> 26,893 (the exact count drops while mass improves: the pixel-exact bodies now sit at a constant sound offset instead of an accidental zero).
+- Census (`lsd194Census.sh`, base 6968cc666 vs a4bd32997): Scene ON 0..199 eventsDigest identical (200 / 200 battles, 62,327 commands, `rst197CensusDelta.py` bad 0); Scene OFF 0..99 `r0.jsonl` byte-identical to base. T1 (`soundCensusDelta.py --t1`, ON 0..199): exact 54,005, known-offset 0, missing 0, extra 0, unclassified 0 (= base).
+
+### Sound: not landed
+
+The ROM plays script-row SEs ahead of the pixels. Measured on the labs (engine - ROM, frames): with the hold and no lead, move SEs sit at +2 (u = 3), +2 (u = 4), +2 (u = 6), 0 (u = 2); a **two-tick** stamp lead for u > 2 (zero for u = 2) makes them 0 on adapted bodies (absorb, megadrain, bite, doubleedge, ember, takedown, thunderbolt, harden), T2 ON exact 997 -> **1707**, mass 25,927, missing / extra 0 / 0 (commit a63e1ee58). It was **not** kept: the T1 census windows then shift (known-offset -2 on 35,590 commands, 61 missing after the last presenting frame, 103 unclassified), because the scorer anchors rows to the command's presenting frames. To land it, the T1 window must follow the lead (as the SE rows already do); that scorer change was out of the time box. Other leftovers: dragonrage / sonicboom / earthquake / toxic / lowkick SEs (-3 .. -5, u = 2 / 3 bodies with their own table lead), defensecurl +4.
+
+### Re-pins (`tests/randomRoundSoak.test.ts`)
+
+- ISSUES #89 Baton Pass pin: seed 6 -> seed 3 (`batonPassSearch.ts --seeds 0:40 --parallel 6`: candidates 3, 10, 16, 17, 20, 23, 24, 26, 36; seed 3 commits 2, first 49232, halt 49444 MAWILE battleIndex 0, three Lobby new challenges).
+- M-B step 2 (c) "full" pin, seed 1: frames 64,227 -> 64,299 (same turn 19 / battle 3 / depth 2 / roundLost).
+- `tests/lbrd.test.ts`: unchanged (passes).
+
+### Gates
+
+`npm run build` 0 and `npm run test:gate` 360 files / 2,835 tests green on a4bd32997; the 66 `confirmHandoff` test files / 638 tests green; `randomRoundSoak` + `lbrd` green after the re-pins; `npm run typecheck` 0 on a63e1ee58 (a4bd32997 only deletes a constant; re-run on the final tip below).
+
+## hcr2b: Scene ON sound lead per emitter (ROM-measured), T1 in emission ticks
+
+Question: why do the ROM's Scene ON sounds lead the pixels, by what, and can the lead ride hcr1c's scoped mechanism (per scheduled sound, no global stamp shift)?
+
+### Measurement (hold-only labs, `tools/battle-lab/hcr2-*.json`, ROM sound log vs engine stamps at a4bd32997)
+
+- Move-body table SEs (`playMoveAnimSound` rows): ROM leads the pixels by **2 for u > 2**, by **0 for u = 2** (u = the USEDMOVE print's `instructionExecution`). Adapted bodies (absorb, megadrain, bite, doubleedge, ember, takedown, thunderbolt, harden) land on the ROM frame exactly.
+- Hit / effectiveness / faint-chain SEs and the faint cry: **1** (the aud241b faint / low-HP windows: 4 of the 5 tests that were red at base go green at a uniform lead 1; `super-effective-window` goes 2 -> 1, see residuals).
+- Stat-change SEs and the Double Team stat SE: same lead as the move body (2 for u > 2). `aud252DoubleTeamStatSe` (gap 34 -> 36) pins this.
+- General-animation (status / weather-continues) rows: **0**. A lead of 2 there was worse (T2 mass 25,442 vs 25,108) and was not kept.
+- Not constant: Curse (-3) and Seismic Toss (-1) sit off the two-tick rule on the labs; they are residuals, not a second rule. The reason the lead depends on u (a link to seGate / bodyLeadFrames / the sound shift) is not established; the rule is stated as measured.
+
+### Rule
+
+- `usedMoveSoundLeadsOf(state, u)` (`battleResolutionPresentation.ts`) is set once at confirm-handoff end. Scene OFF: `{hit 1, script 1, anim 1}` (unchanged). Scene ON: `{hit 1, script 0, anim u > USED_MOVE_LEAD_MIN_U ? 2 : 0}`. State fields `usedMoveSoundLead` (hit / effectiveness / faint), `usedMoveScriptSoundLead` (general animation, ON 0), `usedMoveAnimSoundLead` (move body, stat change, Double Team stat SE).
+- `tickSounds.ts` calls `setSoundTickLead` per emitter; `scheduleAfter` (`screenSounds.ts`) records the lead per scheduled sound and `runScheduledScreenSounds` restores it, so a lead set at one emission survives a later flush. The collector (`soundEvents.ts`) stamps unstamped events `frame - lead` and now also returns `leads` (what was subtracted). Battle-end, send-in, tray and screen sounds carry no lead and keep their frames.
+- T1 follows the lead without loosening: `lsd194Census.ts` records a `soundLead` array parallel to `sound`; `soundCensusDelta.py --t1` converts each row back to its emission tick (`frame + lead`) before the window / classifier, so the class table is unchanged and the tolerance is untouched. Arm-vs-arm mode is untouched.
+- Considered and not kept: faint cry at lead 0 with SE_FAINT at lead 0 (T2 exact 1,988, mass 25,068) breaks 4 aud241b faint windows; cry 0 / SE_FAINT 1 gives the same T2 as the uniform lead and also breaks the windows. The uniform hit lead is what the ROM labs pin.
+
+### Results (tested commit 0b4bdda63 = tree of the tip before the doc commit; base 0a63934b2)
+
+- **T2 Scene ON, 25 t2n seeds: missing / extra 0 / 0.** Exact rows 722 -> **1,960** (move-animation 1,614, stat-change 16, cry 29, battle-controller 300, bgm 1), offset mass 26,893 -> **25,090** (5,670 rows, 1,930 at delta 0). Matched-row delta (engine - ROM): move-animation median 0 (p10 -10, p90 5), battle-controller median 0, stat-change median 0, cry median -3. For reference the global two-tick stamp (hcr2) gave 1,707 / 25,927.
+- **T1 Scene ON 0..199: exact 54,005, known-offset 0, missing 0, extra 0, unclassified 0**, class table byte-identical to the base arm (`sed 1d` diff empty). Known-offset count is 0, so there is nothing to explain; the tick-space conversion is what keeps it 0.
+- Census: Scene ON 0..199 eventsDigest identical and command frames unchanged (`rst197CensusDelta.py`: 200 / 200 battles, 62,327 commands, bad 0); Scene OFF 0..99 identical (100 / 100, 30,813 commands, bad 0).
+- Pixels: `npm run compare -- <trace> --summary` equal to base on hcr2-tackle-plr-on 38/229, hcr2-ember-plr-on 105/229, hcr2-absorb-plr-on 229/229, hcr2-takedown-foe-on 229/229, hcr2-toss-foe-on 198/229, hcr2-harden-foe-on 229/229 (hcr2-doubleedge-foe-on 228/229 and hcr2-bite-foe-on 187/229 also equal on the pre-commit tree). Sounds never feed pixels.
+- Gates on 0b4bdda63: `npm run typecheck` 0, `npm run build` 0, `npm run test:gate` 360 files / 2,835 tests green. The full `npm test` was not run (not asked for).
+
+### Re-pins (tests moved TO the ROM; `delta` = ROM - ours, every other field unchanged)
+
+- aud242a..m (13 files): per-body Scene ON `delta` pins updated to the measured values (most go to 0 or toward it).
+- aud248 (stat-change SE residuals, six rows), aud249 (flatter / swagger first and second SE 0), aud261 (six pins to 0), aud262 (waterspout windows 0, odorsleuth -4 -> -3, payday 2 -> 0, lusterpurge player 2 -> 0, Memento -7 -> -6).
+- aud241b `super-effective-window` 2 -> 1 (residual of one tick; the same turn's faint windows are 0). Also `audioSinkPlumbing` (`leads: [0]`) and `aud252EndTurnSounds` ([-1, -2, 1] -> [0, -1, 2] on the lead split) at the first commit 2a374b683.
+
+### Not re-pinned (moved away from the ROM or unmeasured; red, flagged)
+
+The sound set (`tests/aud24*`, `aud25*`, `aud26*`, `snd*`, `*Sound*`, `adp*`, `hie*`; 75 files, 615 tests) has 41 failures at 0b4bdda63 against 177 at the hold-only base. 33 of the 41 were green at base and moved: adp1 beatup / rocksmash; aud242b dragonrage x2; aud242c flamethrower x2; aud242d thunderbolt / metalclaw / steelwing; aud242n spark x2; aud242o petaldance; aud242p encore / mistball / reversal; aud242q extrasensory / secretpower / superfang; aud242r eruption / spikecannon; aud258 counter / seismictoss / seismictossstrong; aud260 brickbreak / recycle; aud261 zapcannon x2; aud262 present; hie3 cheri / leftovers / shellbell / sitrus x2 (ours 731 vs the pinned 730 and the like). The two-tick body rule moves these bodies 1..2 ticks away from where their old pin sat (dragonrage, flamethrower, spark, petaldance, brickbreak, superfang, spikecannon, present and lusterpurge opponent were measured as moving away from the ROM; the rest were not attributed in this step). They are the residual the next step has to attribute with per-body ROM labs, not a bigger constant. The other 8 (aud242e x5, aud252LossBallOpen x2, snd1RoomSounds) were red at base too and were not re-pinned. None of these is in the gate.
+
+### Papercuts
+
+- `lsd194Census.sh` archives a tree-ish only, so the uncommitted tree was measured through a throwaway tree object (`GIT_INDEX_FILE=... git add -u; git write-tree`).
+- A first-row-only shift estimate misjudges multi-row bodies (flamethrower, spark): the pins were taken per row.
+
+## hcr2c: Scene ON move-body sound lead per body (fix-forward of hcr2 / hcr2b)
+
+Scene ON sound timing only; logical outcomes, RNG, kernel event order and presented frames unchanged; Scene OFF untouched. Base `f555ba685`.
+
+### Cause
+
+hcr2 holds action-dispatch u - 2 frames (u = the first used-move print's `instructionExecution`), so every later body of the turn runs u - 2 ticks later than the sound tables expect. hcr2b answered with one flat lead (2 for u > 2) for all move bodies. Pins that were ROM-exact on master (delta 0) therefore moved by (u - 2) - 2: `pin_new = pin_master - (u - 2) + lead`, i.e. the ROM-exact lead of a body is `c = (u - 2) - pin_master`, and it is not one constant. The sound tables are calibrated at a script lead of 7 frames; the kernel's presented script lead of a body is `bodyLeadFrames` (L). For every audited plain body (L >= 4) c = 7 - L at every u (L 5 -> 2, Seismic Toss L 6 -> 1, Counter L 4 -> 3, Dragon Rage L 9 -> -2).
+
+### Rule (`usedMoveBodySoundLeadOf`, `tickSounds.ts` before `emitMoveAnimSounds`)
+
+- Audited plain body (`bodyLeadFrames` >= 4, `lse2BodySoundAgeShift` = 0): lead = 7 - L (the table's clock minus the body's presented lead). No per-move list.
+- Everything else (L < 4 or no body: Present, Memento, Double Team, ...): `min(u - 2, 2)`. The unaudited bodies' c varies per body (Present 0, Memento 8, Double Team 2 at u = 3); the cap is the best T2 compromise. Tried and rejected: flat 2 (moves Present / Brick Break away), 2 for 1 <= L < 4 (T2 exact 1,883 / mass 24,340).
+- LSE2 / LEAD4 "S" bodies (Leech Seed L 36 ...) already carry the difference in `lse2BodySoundAgeShift`; applying 7 - L to them raised T2 mass by 594, so they keep the cap.
+- Stat-change / Double Team stat SEs, general-animation and hit leads as in hcr2b (the stat / Double Team lead is `min(u - 2, 2)`, Scene OFF 1 for everything). `usedMovePrintU` is stored at confirm-handoff end.
+
+### Results (tested commit `0af7d2016`)
+
+- **T2 Scene ON, 25 t2n seeds: missing / extra 0 / 0.** Exact rows 1,960 -> **2,359** (move-animation 2,001, stat-change 28, cry 29, battle-controller 300, bgm 1), offset mass 25,090 -> **24,219** (5,670 rows, 2,329 at delta 0).
+- **T1 Scene ON 0..199: exact 54,005, known-offset 0, missing 0, extra 0, unclassified 0**; class table byte-identical to the base arm.
+- Census (`lsd194Census.sh`, base `f555ba685` vs `0af7d2016`, `rst197CensusDelta.py`): Scene ON 0..199 200 / 200 battles, 62,327 commands identical, bad 0 (`eventsDigest` identical); Scene OFF 0..99 100 / 100, 30,813 commands, bad 0.
+- Pixels equal to base: hcr2-tackle-plr-on 38/229, ember-plr-on 105/229, absorb-plr-on 229/229, takedown-foe-on 229/229, toss-foe-on 198/229, harden-foe-on 229/229.
+- Gates: `npm run typecheck` 0, `npm run build` 0, `npm run test:gate` 360 files / 2,835 tests. The 71 sound files (aud2*, snd*, cry1*, hie*, adp1*, ais2*) all green; the full `npm test` was not run.
+
+### Pins moved
+
+Moved to the ROM (the old pin was a hold artefact): aud242b dragonrage 3 -> 0; aud242c flamethrower 5 -> 3; aud242d thunderbolt / metalclaw / steelwing (engine-frame keys re-keyed); aud242e toxic 3 -> 0, overheat 3, counter 0 (no extras), poisontail / thunderbolt keys, absorb extra 2 -> 1; aud242n spark 5 -> 3; aud242o rollout 3 -> 0; aud242p reversal / mistball 0; aud242q furycutter 0, secretpower 0 x4, extrasensory 0 x3, superfang 0 x2; aud242r eruption 0; aud258 swordsdance 1 -> 0; aud261 zapcannon [2, 3, 3] -> [0, 1, 1]; adp1 rocksmash [2, 2] -> [0, 0]; aud262 Memento -6 -> -7 and Odor Sleuth -3 -> -4 (back to the master values); cry1 command starts +1 / +2 (offsets 16 / 16 / 16 / 43 / 14 / 14, drifts unchanged); hie3 commandStart +1 (drifts 1 / 2 / 12 -> 0 / 1 / 11).
+
+Moved away from the ROM (known non-ROM residuals, named in each test): Haze / Seismic Toss second-mover row 2 -> 3 (aud242b rowDelta, aud258 haze offset); rollout5 turns 4 / 5 [-2, -3] (was 0, -1); iceball5 turns 5 / 6 [-3, -3, -5, -5] (was -1, -1, -3, -3). Cause: the hold and the lead are set once per presentation from the first print's u, so a later turn / second mover keeps that u. Fixing it needs a per-print u, which is hcr2's presentation, not a sound lead.
+
+Pixel / presentation re-pins (not sound leads; pure uniform shifts carried by the hcr2 hold):
+- `ais2AiSwitchFrames` Scene ON: all 251 md5s identical at engine frames +2 (offset 57 -> 55, window 3824..4074 -> 3826..4076; the sweep found 0 mismatches at +2 and >= 147 at every other shift). The AI switch's turn starts with a u = 4 print, so the hold delays it by 2. The window was ROM-exact at base: hcr2's hold made this downstream pixel window 2 frames late relative to the ROM lab.
+- `aud252LossBallOpen`: seed 1914 [0, 8, 0 x6] -> [3, 12, 4 x6] (Icy Wind, u = 6, hold 4; the faint SE keeps its 1-tick hit lead), seed 2230 [7, 3, 1 x5, 0] -> [10, 6, 4 x5, 3] (u = 5, hold 3). These rows were ROM-exact at base (1914). A general-animation / end-sound lead of the hold fixes the select SE and ball open but moves the item-effect rows of 2230 the wrong way and costs T2 (mass 24,219 -> 24,863), so it was not kept.
+- `snd1RoomSounds` reads the stamped event frame (the ROM clock) instead of the tick frame; no pin moved (SE 135 = Double Team at 1967, the ROM frame).
+
+### Unreconciled
+
+- aud252 seeds 1914 / 2230 and the ais2 Scene ON window: the hold itself leaves the turn's later rows / pixels late by u - 2 against the ROM lab. A sound lead cannot repair pixels; if the ROM has no such delay downstream, the hold of hcr2 needs a matching shortening of a later command (presentation change, out of this step's scope).
+- Unaudited bodies (L < 4, Present / Memento / Double Team): c varies per body; kept on min(u - 2, 2).
+- Second-mover / later-turn bodies (Haze, rollout5, iceball5): stale u as above.
+
+### Papercuts
+
+- The `aud242*` `rowDelta` / `extra` keys are raw engine frames, so every engine-frame move needs a re-key; a key relative to the body's start would survive.
+- `snd1RoomSounds` pinned the tick frame, which silently differs from the stamped frame the scoreboards use once a lead is set.
+
+## hcr2d (2026-11-20): per-print u and the hold's downstream absorption, fix-forward of hcr2 / hcr2b / hcr2c (no engine change; the pins are back at master and RED)
+
+Scene ON only; Scene OFF untouched. Source `src/` is byte-identical to the base `65d40ffa6` (tip commits touch `tests/` and this doc only), so T1 / T2 / census / the six hcr2-*-on traces are the hcr2c numbers by construction: T1 ON 0..199 0 / 0 / 0 / 0, T2 ON 25 seeds missing / extra 0 / 0 with 2,359 exact rows / mass 24,219 (id-row sum, same script), the six traces 38 / 105 / 229 / 229 / 198 / 229 of 229. `npm run typecheck` 0, `npm run build` 0, `npm run test:gate` 360 files / 2,835 tests green (none of the listed pins is in the gate list). The `aud2* / snd* / cry1* / hie* / adp1* / ais* / obr251* / pic9* / flow1* / rol* / ice*` files are green except the seven pins below, which are left RED on purpose.
+
+### 1. Per-print u for the sound lead: built, measured, dropped
+
+`usedMoveBodySoundLeadOf` reads `state.usedMovePrintU`, set once from the segment's first print. Per-print version (commit 44e680a77, reverted): the lead of a body is taken from the USEDMOVE print that precedes its own animation event. The Haze row (Seismic Toss, the second mover: first print u 2, own print u 3, L 6) needs lead 0 to reach the master offset 2; the hcr2c rule gives it `7 - L` = 1 (offset 3). Data of the four second-mover bodies in the sound pins (first u, own u, L, lead the pin needs): Swords Dance -> Seismic Toss (4, 3, 6, **1**), Haze -> Seismic Toss (2, 3, 6, **0**), Defense Curl / foe -> Counter (3, 4, 4, **3**), foe -> Revenge (4, 6, 5, **2**). No function of the own u alone fits both Seismic Toss rows (same own u 3 and L 6, leads 1 and 0); the only separating feature is that the first print had no hold (u 2). The rule "a second print behind a u = 2 first print carries no lead" restores Haze 3 -> 2, rollout5 [0, 0, 0, -2, -3] -> [3, 2, 2, 0, -1] and iceball5 -> [3, 3, 2, 2, 2, 2, -1, -1, -3, -3] (all three ROM-better only in the sense of the master pins), every other sound file stays green, **but** T2 ON drops: exact rows 2,359 -> 2,210 (move-animation 2,001 -> 1,852), mass 24,219 -> 24,567 (SE 124 162 -> 108 exact, 126 84 -> 56, 137 148 -> 137, 144 93 -> 82, 193 50 -> 39, 200 24 -> 16). Narrowing it to a first mover that dealt no damage barely changes that (2,212 / 24,521): the second movers behind a u = 2 print in the T2 population (Facade u 4 / L 5, Flamethrower u 6 / L 5, Knock Off u 6 / L 5, Counter-class bodies) are ROM-exact with the `7 - L` lead. The rule would be a compensating constant that fits three lab fixtures at the cost of the population, so it was not kept.
+
+rollout5 / iceball5 need no per-print u: every print of those locks is u 2 (hold 0), so their turn deltas never depended on the hold or a first-print lead. The hcr2c values [0, 0, 0, -2, -3] / [0 x6, -3, -3, -5, -5] come from the `7 - L` lead of the player's body behind the foe's u 2 print (hcr2c turned turns 1..4 exact with it), and turns 4 / 5 drift by the HP-bar / turn-start differences the aud242o / aud242q comments already name (ROM foe damage 6 / 11 / 20 / 40 / 89 vs the kernel's 6 / 11 / 23 / 41 / 82). With the lead the early turns are ROM-exact and the late turns are 2 off; without it the master residuals return.
+
+### 2. The hold's downstream absorption: there is none in the engine
+
+Hold on / off (temporary `NOHOLD` switch in the action-dispatch stage, removed) on the two seeds of the pins, per-command start frames of the whole drive (`--cmdtrace=1`), difference between the runs by command index: seed 1914 (195 commands) the difference only changes at the turn-start `message` commands (+4, +8, +11, +10, +14, +16, +18, +20, +24, +28, +30, +34 at turns 1..12), seed 2741 (266 commands) the same (+1, +2, +6, +10, +13, +12, ...). Inside a turn the difference is constant but for three one-frame drops (1914 cmd 50, 2741 cmds 162 / 224, sprite-visibility commands). So the hold shifts every later row of its turn rigidly: no downstream constant divides u, and the hcr2m "ON absorbs part of u" is the engine chain after the print having been **fitted to the ROM's absolute frames at the old fixed print** (print at commit + 9). The ROM print is at commit + 6 + u, so a chain that is exact at the old fixed print is longer than the ROM's print -> row interval by u - 3 (hcr2m's mode intervals: u 2 -1, u 4 +1, u 6 +1 with its -2 offset) and the hold exposes it. Seed 1914's final turn (Icy Wind, u 6): the engine's hit SE -> stat SE interval is 89, the ROM's 77 (the lead2 Icy Wind "lead 5 + tail 3 = +8 rows" and the hp-command 28-frame floor are the fitted constants in that chain); the ROM tl rows of that turn show HP changing only at +380 / +385 after the commit. Shortening those by the hold is an interval re-derivation per body (Icy Wind, the AI-switch window, the 28-frame floor), not one constant, and each is fitted against T2 rows, so it was not attempted inside this step.
+
+### 3. Pins: back at master, RED (not re-pinned away from the ROM)
+
+| pin | master (restored) | at the hcr2c engine (actual) |
+| --- | --- | --- |
+| aud242b haze-player rowDelta (keys 433 / 553 / 571) | 2 | engine frames 432 / 552 / 570 at 3 |
+| aud258 aud242b-haze-player offset | 2 | 3 |
+| aud242o rollout5-player turnDeltas | [3, 2, 2, 0, -1] | [0, 0, 0, -2, -3] |
+| aud242q iceball5-player deltas | [3, 3, 2, 2, 2, 2, -1, -1, -3, -3] | [0 x6, -3, -3, -5, -5] |
+| aud252LossBallOpen seed 1914 | [0, 8, 0 x6] | [3, 12, 4 x6] |
+| aud252LossBallOpen seed 2230 | [7, 3, 1 x5, 0] | [10, 6, 4 x5, 3] |
+| ais2 Scene ON (seed 2741) | window 3824..4074, romFrameOffset 57 | the 251 md5s match only at 3826..4076 / 55 (156 mismatching frames at the master window) |
+
+All seven failing tests (the aud258 haze row counts once) carry a comment pointing here. The still-green hcr2c re-pins that were not on the list (swordsdance 1 -> 0, the aud24x / 25x / 26x leads that moved to the ROM, cry1, hie3, adp1) are unchanged.
+
+### 4. What would close them
+
+- Haze second mover: a ROM probe of the Haze -> Seismic Toss turn against the Swords Dance -> Seismic Toss turn (same second print u 3 and L 6, leads 0 vs 1); the separating variable is either the first body's tail or the hold, and T2 needs a second-mover-behind-u-2 population with a known ROM lead to test it.
+- aud252 / ais2: re-derive the Icy Wind engine hit -> stat interval (89 vs 77) and the AI-switch turn's chain from the ROM per-command probe (`hpd2Probe.py`) with the hold on, so the fitted constants drop by u - 3 where they were tuned at the fixed print; one body at a time, each validated against its T1 lab, T2 and the hcr2 pixel labs.
+
+**Supervisor decision (2026-11-20 23:30, reversible):** the hcr2 chain is folded at the hcr2c tip (`65d40ffa6`) with hcr2c's re-pins. The seven checks above keep hcr2c's values (named residuals in ISSUES #219), not the RED master values: hcr2d showed the master values were fitted to the old fixed first print (every command of the turn shifts by the hold), while the hold itself is pixel-exact on the 28 hcr2-*-on labs; closing them needs per-body interval re-derivation (e.g. the Icy Wind hit -> stat SE interval 89 vs ROM 77), not a compensating lead.

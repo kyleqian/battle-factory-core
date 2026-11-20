@@ -955,8 +955,14 @@ export type BattleResolutionPresentationState = Readonly<{
    * projection only reports nonzero work inside the two windows).
    */
   fadeTick: number;
-  /** hcr1b: ticks the Scene OFF controller / script sounds of this turn are stamped ahead of the presentation clock (a ruled used-move turn: 1). */
+  /** hcr1b / hcr2b: ticks the hit / effectiveness / faint sounds of a ruled used-move turn are stamped ahead of the presentation clock (1, both scenes). */
   usedMoveSoundLead?: number;
+  /** hcr1b: the same for the general-animation sounds (Scene OFF only: 1). */
+  usedMoveScriptSoundLead?: number;
+  /** hcr2b: the same for the move-animation table SEs and the stat-change / Double Team stat SEs that follow them (Scene ON: min(u - 2, 2); Scene OFF: 1). */
+  usedMoveAnimSoundLead?: number;
+  /** hcr2c: Scene ON used-move print u, for the per-body move-animation sound lead (`usedMoveBodySoundLeadOf`). */
+  usedMovePrintU?: number;
   confirmHandoff: BattleResolutionConfirmHandoff | null;
   field: BattleResolutionDisplayedField;
   pendingBoundary: BattleBoundary;
@@ -6455,26 +6461,55 @@ function withSynthesizedAiSwitchRecallEvents(
 }
 
 /**
- * hcr1 / hcr1b (docs/aud251-s11-scoreboard-refresh.md): Scene OFF, a plain `use-move` turn's first used-move print (`attackstring`) is the ROM
+ * hcr1 / hcr1b / hcr2 (docs/aud251-s11-scoreboard-refresh.md): a plain `use-move` turn's first used-move print (`attackstring`) is the ROM
  * `printstring` row at commit + 6 + u, u = the USEDMOVE print's `instructionExecution` (commands from the effect-script entry: `setmoveeffect` /
  * `goto` / `jumpifnotmove` / `incrementgamestat` are one frame each before `attackcanceler`, `accuracycheck`, `attackstring`); the oracle swaps
- * the text box one frame later, so the first glyph is at commit + 7 + u (hcr1b pixel traces, u = 2 / 3 / 4 / 6 / 8, exact). The fixed stage walk
- * puts it at commit + 9, exact for u = 2; the adjustment is `u - 2` (a hold on `action-dispatch`).
+ * the text box one frame later, so the first glyph is at commit + 7 + u (hcr1b Scene OFF and hcr2 Scene ON pixel traces, u = 2 / 3 / 4 / 6 / 8,
+ * exact). The fixed stage walk puts it at commit + 9, exact for u = 2; the adjustment is `u - 2` (a hold on `action-dispatch`), the same in both scenes.
+ * The ROM plays the script-row sounds ahead of the frame the pixels reach them (the hcr2 labs / ROM sound log, ROM - engine with the hold only):
+ * hit / effectiveness SE, faint cry and SE_FAINT one tick early at every u (hcr2b: both scenes); a Scene ON move body's table SEs min(u - 2, 2) ticks early
+ * (hcr2c: the hold's own frames, capped at 2; the table clock is calibrated at a script lead of 7, so a body whose kernel lead L >= 4 is presented with
+ * its own lead takes 7 - L instead: L = 5 -> 2, Seismic Toss 6 -> 1, Counter 4 -> 3, Dragon Rage 9 -> -2 at every u; the LSE2 / LEAD4 "S" bodies already carry that
+ * difference in their sound-age shift and keep the cap); Scene OFF
+ * stamps its stats-change / general-animation sounds one early as well (hcr1b). Scene ON's stat-change SEs (aud248 labs, T2 mass 25,108 -> 25,090) and Double Team stat SE
+ * (34 frames after the body's last SE, aud252) take the body's lead; its general-animation sounds get none (a one-tick lead was worse). The lead is captured
+ * per scheduled sound (`setSoundTickLead`), so battle-end, send-in and tray sounds keep their frames and the T1 census reads the emission tick back.
  * Forced (Encore / Struggle) and Focus Punch pre-pass handoffs keep their own leads; a turn that opens with anything but a USEDMOVE
- * print (status / ability / wake-up / confusion head) is not covered. Scene ON absorbs u downstream and is left on the fixed walk.
+ * print (status / ability / wake-up / confusion head) is not covered.
  */
 const USED_MOVE_LEAD_MIN_U = 2;
 const USED_MOVE_LEAD_MAX_U = 20;
 const USED_MOVE_SOUND_LEAD = 1;
+const USED_MOVE_ANIM_SOUND_LEAD_SCENE_ON = 2;
+const PLAIN_BODY_SOUND_LEAD_MIN_L = 4;
+const MOVE_BODY_SOUND_CLOCK_LEAD = 7;
 function usedMovePrintLeadU(state: BattleResolutionPresentationState, handoff: BattleResolutionConfirmHandoff): number | null {
   if (handoff.forced !== undefined || handoff.focusPunchPrePass === true) return null;
   const segment = state.segments[0];
   if (segment === undefined || state.sourceDecision.kind !== "use-move") return null;
-  if ((segment.beforeRules.rulesContext.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) === 0) return null;
   const first = segment.events[0];
   if (first === undefined || first.payload.kind !== "message" || first.payload.messageId !== "STRINGID_USEDMOVE") return null;
   const u = first.provenance?.instructionExecution;
   return u === undefined || u < USED_MOVE_LEAD_MIN_U || u > USED_MOVE_LEAD_MAX_U ? null : u;
+}
+function sceneOffOf(state: BattleResolutionPresentationState): boolean {
+  return ((state.segments[0]?.beforeRules.rulesContext.hitMarker ?? 0) & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0;
+}
+function usedMoveSoundLeadsOf(state: BattleResolutionPresentationState, u: number): Readonly<{ hit: number; script: number; anim: number }> {
+  return sceneOffOf(state)
+    ? { hit: USED_MOVE_SOUND_LEAD, script: USED_MOVE_SOUND_LEAD, anim: USED_MOVE_SOUND_LEAD }
+    : { hit: USED_MOVE_SOUND_LEAD, script: 0, anim: Math.min(u - USED_MOVE_LEAD_MIN_U, USED_MOVE_ANIM_SOUND_LEAD_SCENE_ON) };
+}
+export function usedMoveBodySoundLeadOf(state: BattleResolutionPresentationState): number {
+  const u = state.usedMovePrintU;
+  if (u === undefined) return state.usedMoveAnimSoundLead ?? 0;
+  const base = Math.min(u - USED_MOVE_LEAD_MIN_U, USED_MOVE_ANIM_SOUND_LEAD_SCENE_ON);
+  const commands = state.segments[state.segmentIndex]?.commands ?? [];
+  const command = commands[state.commandIndex];
+  if (command?.type !== "move-animation" || command.animation === undefined) return base;
+  const lead = command.timing.bodyLeadFrames ?? 0;
+  if (lead < PLAIN_BODY_SOUND_LEAD_MIN_L || lse2BodySoundAgeShift(command.animation.moveId, lead) !== 0) return base;
+  return MOVE_BODY_SOUND_CLOCK_LEAD - lead;
 }
 function usedMovePrintLeadAdjust(state: BattleResolutionPresentationState, handoff: BattleResolutionConfirmHandoff): number {
   const u = usedMovePrintLeadU(state, handoff);
@@ -6576,6 +6611,8 @@ export function advanceBattleResolutionConfirmHandoff(
     ? null
     : CONFIRM_HANDOFF_NEXT[handoff.stage];
   if (nextStage === null) {
+    const printU = usedMovePrintLeadU(state, handoff);
+    const lead = printU === null ? { hit: 0, script: 0, anim: 0 } : usedMoveSoundLeadsOf(state, printU);
     return Object.freeze({
       ...state,
       lifecycle: Object.freeze({
@@ -6584,7 +6621,10 @@ export function advanceBattleResolutionConfirmHandoff(
       }),
       confirmHandoff: null,
       fadeTick: state.fadeTick + 1,
-      ...(usedMovePrintLeadU(state, handoff) !== null ? { usedMoveSoundLead: USED_MOVE_SOUND_LEAD } : {}),
+      ...(lead.hit > 0 ? { usedMoveSoundLead: lead.hit } : {}),
+      ...(lead.script > 0 ? { usedMoveScriptSoundLead: lead.script } : {}),
+      ...(lead.anim > 0 ? { usedMoveAnimSoundLead: lead.anim } : {}),
+      ...(printU !== null && !sceneOffOf(state) ? { usedMovePrintU: printU } : {}),
     });
   }
   const bounceRuns =

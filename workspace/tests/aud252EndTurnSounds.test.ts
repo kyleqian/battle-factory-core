@@ -48,6 +48,7 @@ describe("end-turn weather damage SE_EFFECTIVE (aud252)", () => {
     expect(ours.map((e) => e.pan)).toEqual(theirs.map((e) => e.pan));
     // frames are the presentation-length residual (not this step): ROM minus ours is -1 / -2 / 1 here (hpf5 T3: the last tick's tail 4 + turn-end 8 replaces the 28 floor, the third row -10 -> 1;
     // snd1: the first row, a lead body's hit SE, now starts on the hit command instead of 7 rows after the pre-lead body, -8 -> -1)
-    expect(ours.map((e, i) => theirs[i]!.frame - e.frame)).toEqual([-1, -2, 1]);
+    // hcr2b: the Scene ON hit-SE lead (1 tick) moves the first two rows to -1 -> 0 and -2 -> -1 and the third 1 -> 2 (mass 4 -> 3).
+    expect(ours.map((e, i) => theirs[i]!.frame - e.frame)).toEqual([0, -1, 2]);
   });
 });

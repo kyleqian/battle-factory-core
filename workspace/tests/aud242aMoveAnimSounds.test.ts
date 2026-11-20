@@ -76,8 +76,8 @@ const SPECS: Record<string, Spec> = {
   "razorleaf-player": { delta: 0 },
   "swift-opponent": { delta: 0 },
   "slash-opponent": { delta: 0 },
-  "ember-player": { delta: 2 },
-  "psybeam-player": { delta: 2 },
+  "ember-player": { delta: 0 },
+  "psybeam-player": { delta: 0 },
   "agility-player": { delta: 0, romOnly: ["391:139:-63"] },
   "swordsdance-opponent": { delta: 0, rowDelta: { "406:238:0": 1, "526:214:63": 1, "544:131:63": 1 } },
 };
