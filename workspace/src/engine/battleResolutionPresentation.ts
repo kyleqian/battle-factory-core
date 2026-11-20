@@ -6422,6 +6422,13 @@ export type AppendBattleResolutionLockedActionContinuationInput = Readonly<{
   /** The completed charge segment's frozen display field. */
   fieldBoundary: BattleResolutionDisplayedField;
   lockedAction: BattleResolutionLockedActionIdentity;
+  /**
+   * flow1: the player's own decision at the intervening command. A voluntary switch is presented as a fresh switch resolution's is
+   * (the recall line, the return to the ball, the party-menu close hold); absent or a move = the segment as the kernel emits it.
+   */
+  sourceDecision?: BattleCommandDecision;
+  /** flow1: as `CreateBattleResolutionPresentationInput.opponentHpOnSwitchout`, for the switch's "Come back!" line. */
+  opponentHpOnSwitchout?: number;
 }>;
 
 /**
@@ -6465,6 +6472,7 @@ function appendResolutionSegment(
   resolution: BattleResolutionPresentationState,
   transition: BattleDecisionTransitionResult<FactoryFullTurnDecisionRules>,
   fieldBoundary: BattleResolutionDisplayedField,
+  events: readonly BattleKernelSemanticEvent[] = transition.events,
 ): BattleResolutionSegment {
   const priorSequence = resolution.segments
     .flatMap((segment) => segment.events)
@@ -6479,9 +6487,9 @@ function appendResolutionSegment(
     field: fieldBoundary,
     beforeRules: resolution.pendingBattle.rules,
     afterRules: transition.state.rules,
-    events: transition.events,
+    events,
     commands: projectResolutionSegmentCommands(
-      transition.events,
+      events,
       resolution.pendingBattle.rules.rulesContext,
       transition,
       fieldBoundary,
@@ -6554,7 +6562,15 @@ export function appendBattleResolutionActionContinuation(
   ) {
     throw new Error("automatic action continuation requires a genuine trainer command boundary");
   }
-  const segment = appendResolutionSegment(resolution, transition, fieldBoundary);
+  // flow1: the trainer's command here can be a voluntary switch (seed 18: the player's AZUMARILL underground after Dig, the AI
+  // switches to BAYLEEF). The ROM runs BattleScript_ActionSwitch's prelude for it ("<TRAINER> withdrew <MON>!" and the recall,
+  // SE_BALL_OPEN) as for any AI switch; the kernel skips it and only the fresh resolution re-made it.
+  const segment = appendResolutionSegment(
+    resolution,
+    transition,
+    fieldBoundary,
+    resolution.opponentTrainer === null ? transition.events : withSynthesizedAiSwitchRecallEvents(transition.events),
+  );
   return Object.freeze({
     ...resolution,
     segments: Object.freeze([...resolution.segments, segment]),
@@ -6598,13 +6614,39 @@ export function appendBattleResolutionLockedActionContinuation(
       "locked action continuation receipt has no immutable matching action snapshot",
     );
   }
-  const segment = appendResolutionSegment(resolution, transition, fieldBoundary);
+  // flow1: the player switching while the foe is locked into a two-turn move (Dig, Fly, Bide, Thrash, recharge, ...) runs the
+  // same BattleScript_ActionSwitch prelude on the ROM as any voluntary switch (hpthresholds2, STRINGID_RETURNMON, returnatktoball:
+  // "GROWLITHE, that's enough! Come back!", the recall and its SE_BALL_OPEN). The kernel skips that prelude for presentation to
+  // re-make (withSynthesizedSwitchRecallEvents), which only the fresh resolution did: this segment started at "Go! VOLBEAT!". The
+  // segment now gets the recall receipts, the switch's own decision and the fresh switch's party-menu close hold + recall clock.
+  const switching = input.sourceDecision?.kind === "switch";
+  const segment = appendResolutionSegment(
+    resolution,
+    transition,
+    fieldBoundary,
+    switching
+      ? withSynthesizedSwitchRecallEvents(
+        transition.events,
+        fieldBoundary,
+        input.opponentHpOnSwitchout ?? fieldBoundary.opponent.maxHP,
+      )
+      : transition.events,
+  );
   return Object.freeze({
     ...resolution,
+    ...(switching
+      ? {
+        sourceDecision: Object.freeze({ ...input.sourceDecision! }),
+        confirmHandoff: null,
+        fadeTick: 0,
+      }
+      : {}),
     segments: Object.freeze([...resolution.segments, segment]),
     segmentIndex: resolution.segments.length,
     commandIndex: 0,
-    lifecycle: Object.freeze({ phase: "presenting" as const, phaseElapsed: 0 }),
+    lifecycle: Object.freeze(switching
+      ? { phase: "confirm-handoff" as const, phaseElapsed: 0 }
+      : { phase: "presenting" as const, phaseElapsed: 0 }),
     field: fieldBoundary,
     pendingBoundary: transition.state.boundary,
     pendingBattle: transition.state,

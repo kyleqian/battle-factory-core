@@ -1648,22 +1648,42 @@ function finishBattle(
   });
 }
 
-function resetMoveSelectionCursorsForSwitchIns(
+/**
+ * flow1: the ROM's gMoveSelectionCursor[battler] (and gActionSelectionCursor, which ours already opens at 0 on every request) goes
+ * back to the first entry whenever that battler takes in a Pokemon: HandleAction_Switch (battle_util.c:299-300) for a voluntary
+ * switch, SwitchInClearSetData (battle_main.c:3203-3204) and PlayerHandleSwitchInAnim (battle_controller_player.c:2190-2191) for
+ * every switch-in (voluntary, faint replacement, Baton Pass, Roar / Whirlwind), FaintClearSetData (battle_main.c:3285-3286) on a
+ * faint, and Transform's RESET_MOVE_SELECTION (battle_script_commands.c:7802). Every switch-in runs Cmd_switchinanim, so the
+ * receipt's `switch-in-animation` event is the switch-in mark; it also catches a switch that brings the same slot back within one
+ * receipt (CHARMELEON -> PHANPY, PHANPY fainted, CHARMELEON again), which a party-slot comparison misses. The party-slot comparison
+ * stays as a second mark.
+ */
+export function resetMoveSelectionCursorsForSwitchIns(
   cursors: FactoryBattleMoveSelectionCursors,
   before: BattleState<FactoryFullTurnDecisionRules>,
   after: BattleState<FactoryFullTurnDecisionRules>,
+  events: readonly BattleKernelSemanticEvent[],
 ): FactoryBattleMoveSelectionCursors {
   let next: [0 | 1 | 2 | 3, 0 | 1 | 2 | 3, 0 | 1 | 2 | 3, 0 | 1 | 2 | 3]
     | null = null;
+  const reset = (battler: number): void => {
+    if (battler < 0 || battler > 3 || (next ?? cursors)[battler] === 0) return;
+    next ??= [...cursors];
+    next[battler] = 0;
+  };
   const battlersCount = after.rules.rulesContext.battleTopology.battlersCount;
   for (let battler = 0; battler < battlersCount; battler += 1) {
     if (
       before.rules.rulesContext.battlers[battler]!.partyIndex
       !== after.rules.rulesContext.battlers[battler]!.partyIndex
-    ) {
-      next ??= [...cursors];
-      next[battler] = 0;
-    }
+    ) reset(battler);
+  }
+  for (const event of events) {
+    const payload = event.payload;
+    if (
+      payload.kind === "switch-in-animation"
+      || (payload.kind === "reset-action-move-selection" && payload.reset === "move-selection")
+    ) reset(payload.battler);
   }
   return next === null ? cursors : Object.freeze(next);
 }
@@ -1814,6 +1834,7 @@ function installDriveReceiptImmediately(
       state.moveSelectionCursors,
       state.battle,
       receipt.battle,
+      receipt.events,
     );
   const battleCommandPresentation = commandPresentationForBoundary(
     receipt.battle,
@@ -2081,6 +2102,9 @@ function beginCommandResolution(
           transition: drivenTransition,
           fieldBoundary: presentation.field,
           lockedAction: action,
+          // flow1: a voluntary switch here keeps its recall line and recall (the foe underground after Dig, seed 6).
+          sourceDecision: presentation.pendingDecision,
+          opponentHpOnSwitchout: opponentHpOnSwitchout(state.battlePresentationBoundaries!),
         })
       : freshResolution();
   }
@@ -2114,6 +2138,13 @@ function beginCommandResolution(
     retainedLockedActionPresentationOwner: null,
     battlePartySelect: null,
     battleForcedPartySelect: null,
+    // flow1: the turn's own switch-ins (a voluntary switch, Baton Pass, Roar) and Transform reset the move cursor too.
+    moveSelectionCursors: resetMoveSelectionCursorsForSwitchIns(
+      state.moveSelectionCursors,
+      state.battle,
+      receipt.battle,
+      receipt.events,
+    ),
     battlePresentationBoundaries: applyReceiptPpToBoundaries(
       state.battlePresentationBoundaries,
       receipt.events,
@@ -3097,6 +3128,7 @@ function advanceFactoryRoundBattleResolutionCore(
         state.moveSelectionCursors,
         resolution.pendingBattle,
         receipt.battle,
+        receipt.events,
       ),
       aiHistory: receipt.history,
       facilityRngCalls:
@@ -3289,6 +3321,7 @@ function advanceFactoryRoundBattleResolutionCore(
         state.moveSelectionCursors,
         resolution.pendingBattle,
         receipt.battle,
+        receipt.events,
       ),
       aiHistory: receipt.history,
       facilityRngCalls: state.activeBattleCallStart! + receipt.battle.rng.calls,
