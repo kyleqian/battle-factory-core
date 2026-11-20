@@ -1644,7 +1644,9 @@ describe("ISSUES #104 (driver): continuous-play outcome semantics retuned -- OK 
     // re-scanned seeds 0..49 under the same options (--seeds 0:50 --parallel 4): seeds 19 and 47 chain two round wins (carry 14), so the lowest (19) is pinned.
     // hcr1b (the Scene OFF used-move glyph at commit + 7 + u): seed 19 now carries 7; re-scanned seeds 0..49 under the same options (--seeds 0:50 --parallel 4):
     // seeds 0, 10, 14 and 47 chain two round wins (carry 14), so the lowest (0) is pinned.
-    const result = runSeed(0, {
+    // lbw9 (the Lobby save wait is a timer / held A, the menus clamp: every in-game new challenge is dealt from a later cursor): seed 0 now carries 7;
+    // re-scanned seeds 0..49 under the same options (--seeds 0:50 --parallel 3): seeds 13, 19, 23 and 40 chain two round wins (carry 14), so the lowest (13) is pinned.
+    const result = runSeed(13, {
       policy: "winning",
       maxRounds: 3,
       renderEvery: 0,
