@@ -53,6 +53,7 @@ FUNCS = {  # name -> object file of the copy we want (None = the only one)
     "GenerateInitialRentalMons": "src/battle_factory.o", "GenerateOpponentMons": "src/battle_factory.o",
     "SaveGameTask": None, "SaveConfirmInputCallback": None, "SaveOverwriteInputCallback": None,
     "FillFactoryBrainParty": None,  # the Factory Head's party (battle 21 / 42), built at battle start
+    "VBlankIntr": None,
 }
 DATA = {"sFactorySelectScreen": None, "sFactorySwapScreen": None, "sMenu": "src/menu.o", "sSaveDialogCallback": None}
 TASK_MENUS = (  # live task function -> menu kind (first match wins: a summary opened from a menu keeps the menu's task alive)
@@ -295,6 +296,7 @@ class Rom:
         starts = sorted({a & ~1 for addrs in nm.values() for a in addrs})
         gst = self.f["GetSpecialBattleTransition"]
         self.gst_end = next(a for a in starts if a > gst)
+        self.vblank_end = next(a for a in starts if a > self.f["VBlankIntr"])
 
     def u8(self, a): return self.o.read_u8(a)
     def u16(self, a): return self.o.read_u16(a)
@@ -481,9 +483,15 @@ def run(engine_dir, out_dir, profile, max_frames):
             brain["enemyBefore"] = rom.read(s["gEnemyParty"], 8)
 
         def traps(g=g):
-            out = transition_traps(rom, battles, transitions, g, staging, live_before) or {}
-            out.update(deal_traps(rom, deal, o.frame) or {})
-            out.update(brain_traps(rom, brain, o.frame) or {})
+            out = {}
+            for part in (transition_traps(rom, battles, transitions, g, staging, live_before), deal_traps(rom, deal, o.frame), brain_traps(rom, brain, o.frame)):
+                for pc, fn in (part or {}).items():
+                    if pc in out:  # two traps on one address (Random): both run
+                        out[pc] = (lambda a, b: lambda: (a(), b()))(out[pc], fn)
+                    else:
+                        out[pc] = fn
+            # a trap may add a one-shot trap at a return address (brain_traps' VBlank undo): the stepping loop reads this same dict
+            BRAIN_TRAPS[0] = out
             return out or None
         new = sound.advance(buttons, restep_with=traps)
         store.add(o.screen_rgb())
@@ -519,11 +527,13 @@ def run(engine_dir, out_dir, profile, max_frames):
         if deal is not None:
             finish_deal(rom, deal, staging, f, sound)
         if brain is not None and brain["fired"] is not None and g not in brains_done:
-            brains_done.add(g)
             species = [op["member"]["species"] for op in battles[g]["opponents"]]
             got = rom.party_species("gEnemyParty")
-            staging.append({"what": "Factory Head party", "battle": g, "frame": f, "romRngAtEntry": brain["fired"]["romRng"], "engineRng": brain["fired"]["engineRng"],
-                            "rom": got, "engine": species, "same": got == species})
+            if all(got) or f - brain["fired"]["frame"] > 20:
+                brain["built"] = True
+                brains_done.add(g)
+                staging.append({"what": "Factory Head party", "battle": g, "frame": f, "builtFrom": brain["fired"]["frame"], "romRngAtEntry": brain["fired"]["romRng"],
+                                "engineRng": brain["fired"]["engineRng"], "vblankDrawsUndone": brain["fired"]["vblankDrawsUndone"], "rom": got, "engine": species, "same": got == species})
         elif brain is not None and brain["armedAt"] is not None and brain["fired"] is None and f - brain["armedAt"] > 10:
             # gEnemyParty changed for another reason (the swap screen): wait for the next change
             staging.append({"what": "Factory Head party: armed without FillFactoryBrainParty, re-armed", "battle": g, "frame": f, "armedAt": brain["armedAt"]})
@@ -537,7 +547,8 @@ def run(engine_dir, out_dir, profile, max_frames):
         if g in battles and g not in patched and not rom.in_battle() and transition_task_live(rom) is not None:
             want = battles[g]
             species = [op["member"]["species"] for op in want["opponents"]]
-            if rom.party_species("gEnemyParty") == species and [rom.u16(s["gFrontierTempParty"] + 2 * i) for i in range(3)] == want["opponentSetIds"]:
+            # (the Factory Head's three are built by FillFactoryBrainParty, which does not use gFrontierTempParty)
+            if rom.party_species("gEnemyParty") == species and (is_brain or [rom.u16(s["gFrontierTempParty"] + 2 * i) for i in range(3)] == want["opponentSetIds"]):
                 patch_enemy_party(rom, want, staging, f)
                 patched.add(g)
         # The transition the ROM started (Task_BattleTransition's tTransitionId) against the engine's.
@@ -685,17 +696,23 @@ def deal_traps(rom, deal, frame):
     return out
 
 
+BRAIN_TRAPS = [None]  # the trap dict of the frame being stepped (brain_traps adds return traps to it)
+
+
 def brain_traps(rom, brain, frame):
     """The Factory Head's party (FillFactoryBrainParty, battle_factory.c:759, from DoSpecialTrainerBattle via FillFactoryTrainerParty, which
     zeroes gEnemyParty first): when a frame's fast run changed gEnemyParty's first record, it is stepped again with a trap at
     FillFactoryBrainParty's entry that sets gRngValue to the cursor the engine drew the Head's three from (its first set draw), so the
     ROM builds the engine's three itself; the party patch at the transition then gives them the engine's personalities. Armed until it
     fires (the zeroing and the build can fall on two frames); a change of gEnemyParty that is not the build re-arms after 10 frames."""
-    arm, armed = brain_trap_wanted(brain, rom.read(rom.s["gEnemyParty"], 8) if brain is not None else None, frame)
-    if not armed:
+    if brain is None or brain.get("built"):
         return None
-    if arm:
-        brain["armedAt"] = frame
+    if brain["fired"] is None:
+        arm, armed = brain_trap_wanted(brain, rom.read(rom.s["gEnemyParty"], 8), frame)
+        if not armed:
+            return None
+        if arm:
+            brain["armedAt"] = frame
     value = brain["want"].get("rollRngBefore")
     if value is None:
         return None
@@ -704,9 +721,31 @@ def brain_traps(rom, brain, frame):
     def at_brain():
         if brain["fired"] is not None:
             return
-        brain["fired"] = {"frame": frame, "romRng": rom.u32(s["gRngValue"]), "engineRng": value}
+        brain["fired"] = {"frame": frame, "romRng": rom.u32(s["gRngValue"]), "engineRng": value, "vblankDrawsUndone": 0}
         o.write_u32(s["gRngValue"], value)
-    return {rom.f["FillFactoryBrainParty"] + 2: at_brain}
+    out = {rom.f["FillFactoryBrainParty"] + 2: at_brain}
+    if True:
+        # The build runs over several frames, and the overworld VBlankIntr draws Random() once per frame (main.c:366) between its draws;
+        # the engine draws the Head's three back to back (#55, parked: distribution parity). While the build runs, a VBlankIntr Random()
+        # is undone: gRngValue is put back at its return, so the ROM's build reads the engine's stream.
+        def at_random():
+            if brain["fired"] is None or brain.get("built"):
+                return
+            lr = int(o.core.cpu.gprs[14]) & 0xFFFFFFFF
+            if not (rom.f["VBlankIntr"] <= (lr & ~1) < rom.vblank_end):
+                return
+            saved = rom.u32(s["gRngValue"])
+            ret = (lr & ~1) + 2
+            table = BRAIN_TRAPS[0]
+
+            def restore():
+                o.write_u32(s["gRngValue"], saved)
+                brain["fired"]["vblankDrawsUndone"] += 1
+                table.pop(ret, None)
+            if table is not None:
+                table[ret] = restore
+        out[rom.f["Random"] + 2] = at_random
+    return out
 
 
 def probe_deal_opponent(rom, sound, deal):
