@@ -55,14 +55,14 @@ function ourEvents(rom: Fixture): SoundEvent[] {
 // deltas = ROM frame - our frame per row (aud242q, section 21). Fury Cutter / Secret Power +2 (the aud242a idle-lead class), Extrasensory +3, Super Fang -1. Ice Ball, five turns behind a Lv100
 // Defense Curl target: SE137 -> SE198 is 30 in the ROM on every counter 1..5 (as in the table); the turn starts drift 9 / 21 / 38 / 64 / 95 (presentation, not sound, as the aud242o Rollout drift).
 const SPECS: Array<{ name: string; ids: number[]; deltas: number[] }> = [
-  { name: "furycutter-player", ids: [136], deltas: [2] },
-  { name: "secretpower-player", ids: [152, 141], deltas: [2, 2, 2, 2] },
-  { name: "extrasensory-player", ids: [170, 192], deltas: [3, 3, 3] },
-  { name: "superfang-player", ids: [171, 161], deltas: [-1, -1] },
+  { name: "furycutter-player", ids: [136], deltas: [0] },
+  { name: "secretpower-player", ids: [152, 141], deltas: [0, 0, 0, 0] },
+  { name: "extrasensory-player", ids: [170, 192], deltas: [0, 0, 0] },
+  { name: "superfang-player", ids: [171, 161], deltas: [0, 0] },
   // hpd5: the Ice Ball body (301) joins the audited script leads (ROM R -> attackanimation 10 / 9 / 9 / 9 / 9 rows, hit controller at R + lead + 3 + len + 4: 463 / 968 / 1478 / 1997 / 2590, len 75 x4 + 130)
   // and the app's hit starts on those rows for turns 1..3 (hpd4 left it 13 early). Turn deltas (ROM - ours) pre-hpd4 9 / 13 / 22 / 40 / 63, hpd4 3 / 15 / 27 / 36 / 46, now 3 / 2 / 2 / -1 / -3:
   // the rest is the ROM's own foe damage in this window (ROM 6 / 11 / 20 / 40 / 89 HP, gBattleMons[1].hp; the kernel's 6 / 11 / 23 / 41 / 82 differ from turn 3 on, so the 1 HP / frame bars are 3 / 1 / 7 frames apart).
-  { name: "iceball5-player", ids: [137, 198], deltas: [3, 3, 2, 2, 2, 2, -1, -1, -3, -3] },
+  { name: "iceball5-player", ids: [137, 198], deltas: [0, 0, 0, 0, 0, 0, -3, -3, -5, -5] },
 ];
 
 describe("move-animation SEs of the aud242q lifetimes", () => {

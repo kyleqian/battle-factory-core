@@ -166,7 +166,7 @@ describe("Zap Cannon (aud261)", () => {
     expect(timing.variants[timing.moves[192]!.variants[0]!]!.map((o) => `${o.frame}:${(o as { id?: number }).id}`).sort()).toEqual(["55:119", "6:138", "74:119"]);
   });
   for (const [side, pan] of [["player", [-64, 63, 63]], ["opponent", [63, -63, -63]]] as const) {
-    it(`aud261-zapcannon-${side}: ids, pans and the +50 / +19 ROM gaps; ROM minus ours 2 then 3 after the overrun`, () => {
+    it(`aud261-zapcannon-${side}: ids, pans and the +50 / +19 ROM gaps; ROM minus ours 0 then 1 after the overrun (hcr2c: was 2 then 3)`, () => {
       const rom = fixture(`aud261-zapcannon-${side}`);
       const pick = (events: FixtureEvent[]) => events.filter((e) => e.noop !== true && e.kind === "se" && (e.id === 138 || e.id === 119)).slice(-3);
       const romRows = pick(rom.events);
@@ -174,7 +174,7 @@ describe("Zap Cannon (aud261)", () => {
       expect(romRows.map((e) => e.frame - romRows[0]!.frame)).toEqual([0, 50, 69]);
       expect(romRows.map((e) => e.pan)).toEqual(pan);
       expect(ours.map((e) => `${e.id}:${e.pan}`)).toEqual(romRows.map((e) => `${e.id}:${e.pan}`));
-      expect(romRows.map((e, i) => e.frame - ours[i]!.frame)).toEqual([2, 3, 3]);
+      expect(romRows.map((e, i) => e.frame - ours[i]!.frame)).toEqual([0, 1, 1]);
     });
   }
 });

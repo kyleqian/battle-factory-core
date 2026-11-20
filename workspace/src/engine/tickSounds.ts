@@ -3,6 +3,7 @@ import { setSoundTickLead, soundCollecting } from "../audio/soundEvents.ts";
 import { emitBattleEndSounds, emitForfeitEndSounds, emitLossBallOpenSound } from "./battleEndSounds.ts";
 import { emitBattleHitSounds, emitDoubleTeamStatsChangeSound } from "./battleHitSounds.ts";
 import { emitBattleStartIntroSounds, emitMidBattleSwitchSounds, emitPartySendOutSounds } from "./battleStartSounds.ts";
+import { usedMoveBodySoundLeadOf } from "./battleResolutionPresentation.ts";
 import { playerFaintReplacementSendOutTimingOfSegment } from "./battleResolutionPresentationRender.ts";
 import { emitGeneralAnimSounds, emitMoveAnimSounds, emitStatsChangeSounds } from "./moveAnimSounds.ts";
 import type { EngineState } from "./core.ts";
@@ -48,7 +49,7 @@ export function emitTickSounds(state: TickSoundState, next: TickSoundState): voi
         orchestratorAfter.round.rules.currentOpponent.frontierBrain !== undefined,
       );
     }
-    setSoundTickLead(presentationAfter?.usedMoveAnimSoundLead ?? 0);
+    setSoundTickLead(presentationAfter ? usedMoveBodySoundLeadOf(presentationAfter) : 0);
     if (presentationAfter) emitMoveAnimSounds(presentationAfter, orchestratorAfter.round.rules.currentOpponent.frontierBrain !== undefined);
     setSoundTickLead(presentationAfter?.usedMoveAnimSoundLead ?? 0);
     if (presentationAfter) emitStatsChangeSounds(presentationAfter);

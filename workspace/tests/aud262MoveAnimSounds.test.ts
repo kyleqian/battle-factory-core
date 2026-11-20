@@ -130,7 +130,7 @@ describe("Memento (aud262)", () => {
       expect(rows.map((e) => e.id)).toEqual([189, 200, 189]);
       expect([rows[1]!.frame - rows[0]!.frame, rows[2]!.frame - rows[1]!.frame]).toEqual([50, romGap]);
       expect(gap(slot, top)).toBe(romGap);
-      expect(expectConstantOffset(rom, [189, 200], 3, "first")).toBe(-6);
+      expect(expectConstantOffset(rom, [189, 200], 3, "first")).toBe(-7);
     });
   }
 });
@@ -178,7 +178,7 @@ describe("Odor Sleuth / False Swipe / Pay Day (aud262)", () => {
     expect(rows("Move_PAY_DAY", 6)).toEqual(["9:160", "29:174"]);
   });
   const windows = [
-    ["odorsleuth", [193, 192], 3, [0, 8, 52], -3],
+    ["odorsleuth", [193, 192], 3, [0, 8, 52], -4],
     ["falseswipe", [122, 135, 139], 5, [0, 18, 26, 34, 58], 0],
     ["payday", [160, 174], 2, [0, 20], 0],
   ] as const;

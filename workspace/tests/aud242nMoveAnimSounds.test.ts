@@ -58,8 +58,8 @@ const SPECS: Array<{ name: string; ids: number[]; delta: number; rows: number; e
   { name: "confuseray-opponent", ids: [130, 196], delta: 0, rows: 14 },
   // Spark: +5 on the three opening SE_M_THUNDERBOLT2 rows (two loadspritegfx, the aud242a idle-lead class) and one more frame behind the first wait (`extra`): in the ROM the
   // 8-sprite step at script frame 50 pushes the fade's second call one frame late (BlendPalette log: BG y0 at 111, OBJ y0 at 112, against 69 / 69 for the first cycle). Recorded, not modelled.
-  { name: "spark-player", ids: [119, 215], delta: 5, rows: 5, extra: { "138:215:63": 1, "149:119:63": 1 } },
-  { name: "spark-opponent", ids: [119, 215], delta: 5, rows: 5, extra: { "142:215:-63": 1, "153:119:-63": 1 } },
+  { name: "spark-player", ids: [119, 215], delta: 3, rows: 5, extra: { "138:215:63": 1, "149:119:63": 1 } },
+  { name: "spark-opponent", ids: [119, 215], delta: 3, rows: 5, extra: { "142:215:-63": 1, "153:119:-63": 1 } },
 ];
 
 describe("move-animation SEs of the aud242n lifetimes", () => {

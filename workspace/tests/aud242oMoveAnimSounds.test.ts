@@ -55,9 +55,9 @@ function ourEvents(rom: Fixture): SoundEvent[] {
 const SPECS: Array<{ name: string; ids: number[]; delta: number; rows: number; extra?: Record<string, number>; turnDeltas?: number[] }> = [
   { name: "petaldance-player", ids: [202, 141], delta: 2, rows: 2 },
   { name: "dive-player", ids: [162, 233], delta: -7, rows: 2 },
-  { name: "rollout-player", ids: [162, 175, 141], delta: 3, rows: 21 },
+  { name: "rollout-player", ids: [162, 175, 141], delta: 0, rows: 21 },
   // Five Rollout turns (counters 1..5) behind an opponent Defense Curl: the ROM's turn starts drift from ours by the presentation (not sound) offsets 9 / 14 / 21 / 33 / 54 (each turn ends on its MEGA_KICK2 row), constant inside a turn. hpd4: the foe Defense Curl and the Rollout body present their ROM script lead (bodyLeadFrames: ROM windows R->H 166 + lead) and the floor-free hit hold: 9 / 14 / 21 / 33 / 54 -> 3 / 2 / 2 / 0 / -1 (every turn toward the ROM). hpd2: the locked player's chained turn waits the foe's AI selection before the next `used` print (14-frame handoff, was 6): 8 frames per chained turn off the old 9 / 22 / 37 / 57 / 86.
-  { name: "rollout5-player", ids: [162, 175, 141], delta: 0, rows: 111, turnDeltas: [3, 2, 2, 0, -1] },
+  { name: "rollout5-player", ids: [162, 175, 141], delta: 0, rows: 111, turnDeltas: [0, 0, 0, -2, -3] },
 ];
 
 describe("move-animation SEs of the aud242o lifetimes", () => {

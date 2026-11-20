@@ -85,8 +85,8 @@ const FADE_SPECS: Record<string, Spec> = {
 // The later gated rows (Icy Wind's panse after sprite waits; the next move's SEs) are the ROM-only part. Metal Sound is cut at ROM frame 121: the ROM
 // loses two wall-clock frames there (121 / 122 have no pan call, a VBlank overrun like the BG load lag; its rows after 111 are noop calls anyway).
 const PAN_SPECS: Record<string, Spec> = {
-  "flamethrower-opponent": { delta: 5 },
-  "flamethrower-player": { delta: 5 },
+  "flamethrower-opponent": { delta: 3 },
+  "flamethrower-player": { delta: 3 },
   "metalsound-opponent": { delta: -2, romOnlyFrom: 121 },
   "sweetscent-player": { delta: -1, romOnlyFrom: 400 },
   "icywind-opponent": { delta: 0, romOnlyFrom: 100 },

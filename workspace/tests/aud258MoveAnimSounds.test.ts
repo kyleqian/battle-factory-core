@@ -43,8 +43,8 @@ describe("Seismic Toss (aud258)", () => {
     expect(rows[2]).toEqual([rock(31, 238), rock(151, 131), rock(163, 214), rock(175, 131), rock(187, 214)]);
   });
   const SPECS: Array<{ file: string; opening: number; offset: number }> = [
-    { file: "aud242a-swordsdance-opponent", opening: 407, offset: 1 },
-    { file: "aud242b-haze-player", opening: 435, offset: 2 },
+    { file: "aud242a-swordsdance-opponent", opening: 407, offset: 0 },
+    { file: "aud242b-haze-player", opening: 435, offset: 3 },
     { file: "aud242e-counter-player", opening: 101, offset: 0 },
   ];
   for (const spec of SPECS) {

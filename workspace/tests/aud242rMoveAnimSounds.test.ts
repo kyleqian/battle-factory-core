@@ -56,7 +56,7 @@ function ourEvents(rom: Fixture): SoundEvent[] {
 const SPECS: Array<{ name: string; ids: number[]; deltas: number[] }> = [
   { name: "healbell-player", ids: [195, 228, 102], deltas: [0, 0, 0, 0, 0] },
   { name: "spikecannon-player", ids: [160, 166], deltas: [9, 9, 9, 9, 9, 9] },
-  { name: "eruption-player", ids: [178, 131], deltas: Array(14).fill(2) },
+  { name: "eruption-player", ids: [178, 131], deltas: Array(14).fill(0) },
   { name: "moonlight-player", ids: [211, 179], deltas: [-4, -4] },
   { name: "curse-player", ids: [170, 121], deltas: [1, 1, 1, 1] },
 ];
