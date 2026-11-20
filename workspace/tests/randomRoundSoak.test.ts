@@ -537,7 +537,7 @@ describe("random round soak driver (green milestone pin)", () => {
     expect(result.frames).toBeGreaterThan(31_771);
   });
 
-  it("ISSUES #89: seed 12's mid-turn Baton Pass openpartyscreen halt resumes through the forced party selector", () => {
+  it("ISSUES #89: seed 6's mid-turn Baton Pass openpartyscreen halt resumes through the forced party selector", () => {
     // History: seed 27 (full policy) selected Baton Pass mid-turn and used to
     // crash at round 1 battle 1 turn 10, frame 30798, on an unimplemented
     // BattleScript_EffectBatonPass / B_SCR_OP_OPENPARTYSCREEN machine-barrier
@@ -669,7 +669,11 @@ describe("random round soak driver (green milestone pin)", () => {
     // moves): seed 15 no longer commits Baton Pass (with the cursor fix undone it hits again with the numbers above). Re-scanned full-policy
     // seeds 0..39 (tools/soak/batonPassSearch.ts --seeds 0:40 --parallel 4): candidates 12, 13, 16, 27, 31, 36. Seed 12 is the lowest
     // (Baton Pass commits 1, first commit 74877, halt 75141 on MAWILE in battleIndex 0, two Lobby new challenges).
-    const result = runSeed(12, {
+    // gsp2 (Scene ON wake-up presentation rule: the turn-start status head, the wake-up print / icon timing; the exploring presses land
+    // on new phases): seed 12 no longer commits Baton Pass (0 commits, 80,000 frames in battle 1). Re-scanned full-policy seeds 0..39
+    // (tools/soak/batonPassSearch.ts --seeds 0:40 --parallel 3, same options): candidates 6, 16, 35, 38. Seed 6 is the lowest
+    // (Baton Pass commits 4, first commit 61360, halt 61558 on LEDIAN in battleIndex 0, three Lobby new challenges). Pin 12 -> 6.
+    const result = runSeed(6, {
       maxFrames: 80_000,
       renderEvery: 0,
       coverage: observer as never,
