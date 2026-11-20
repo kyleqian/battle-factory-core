@@ -1,0 +1,56 @@
+{
+ "appRoute": "generated-orchestrator",
+ "oracleProfile": "battle-scene-on",
+ "appStage": {
+  "id": "ing1-opp-on",
+  "frame": 0
+ },
+ "oracleBattleLab": {
+  "scenario": "../../battle-lab/ing1-opp-on.json"
+ },
+ "segments": [
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 18,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 700,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 18,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 1500,
+   "buttons": []
+  }
+ ],
+ "captureFrames": [
+  0
+ ]
+}
