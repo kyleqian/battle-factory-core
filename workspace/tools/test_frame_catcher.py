@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Emulator-free tests for the frame catcher's plan and ROM driver (tools/frame-catcher/plan.py; run: python3 -m unittest tools.test_frame_catcher)."""
+"""Emulator-free tests for the frame catcher's plan, ROM driver and Pokemon records (tools/frame-catcher/plan.py, mons.py; run: python3 -m
+unittest tools.test_frame_catcher)."""
 
 from __future__ import annotations
 
@@ -10,6 +11,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent / "frame-catcher"))
 
 import plan as fc  # noqa: E402
+import mons  # noqa: E402
+import struct  # noqa: E402
 
 
 def engine(frames, menus, buttons):
@@ -247,6 +250,52 @@ class SoundAttributionTest(unittest.TestCase):
         presses, notes, d = DriverTest.run_driver(DriverTest(), eng, rom, 80)
         self.assertEqual(state["a"], 1)
         self.assertFalse(state["open"])
+
+
+class MonRecordTest(unittest.TestCase):
+    """mons.with_personality: a select-screen rental re-stored with the engine's personality (romRun.patch_select_mons). Seed 6's GROWLITHE
+    (set 136, nature 6, genderRatio 63, abilities Intimidate / Flash Fire): the ROM drew 2844908581 (female, Flash Fire), ours 347824006
+    (male, Intimidate)."""
+    ROM_P, ENGINE_P, OT = 2844908581, 347824006, 416049562
+
+    def record(self, personality, ability_bit, species=58):
+        growth = struct.pack("<HHIBBH", species, 0, 156250, 0, 0, 0)
+        attacks = struct.pack("<4H4B", 52, 53, 44, 36, 25, 15, 25, 20)
+        evs = bytes([0, 255, 0, 255, 0, 0]) + bytes(6)
+        ivs = sum(3 << (5 * k) for k in range(6)) | (ability_bit << 31)
+        misc = struct.pack("<BBHII", 0, 0, 0, ivs, 0)
+        raw = bytearray(mons.POKEMON_SIZE)
+        struct.pack_into("<7H", raw, 86, 148, 148, 97, 66, 81, 92, 71)
+        raw[84] = 50
+        return mons.encrypt_mon(bytes(raw), [growth, attacks, evs, misc], personality, self.OT), [growth, attacks, evs, misc]
+
+    def test_the_engine_personality_is_stored_with_the_rom_record_kept(self):
+        raw, logical = self.record(self.ROM_P, self.ROM_P & 1)
+        new = mons.with_personality(raw, self.ENGINE_P, self.OT, two_abilities=True)
+        self.assertEqual(struct.unpack_from("<II", new, 0), (self.ENGINE_P, self.OT))
+        out, ok = mons.decrypt_mon(new)
+        self.assertTrue(ok)
+        self.assertEqual(out[:3], logical[:3])  # species, experience, moves, PP, EVs untouched
+        self.assertNotEqual(self.ROM_P % 24, self.ENGINE_P % 24)  # the substructures moved
+        self.assertEqual(struct.unpack_from("<I", out[3], 4)[0] & 0x7FFFFFFF, struct.unpack_from("<I", logical[3], 4)[0] & 0x7FFFFFFF)  # IVs
+        self.assertEqual((mons.ability_num(raw), mons.ability_num(new)), (1, 0))  # Flash Fire -> Intimidate
+        self.assertEqual(new[80:], raw[80:])  # level, HP and stats: the nature is the same
+        self.assertEqual((mons.gender(self.ROM_P, 63), mons.gender(self.ENGINE_P, 63)), ("female", "male"))
+
+    def test_a_one_ability_species_keeps_its_ability_bit(self):
+        raw, _ = self.record(self.ROM_P, 0, species=292)
+        new = mons.with_personality(raw, self.ENGINE_P + 25, self.OT, two_abilities=False)  # odd personality, same nature
+        self.assertEqual(mons.ability_num(new), 0)
+        self.assertEqual(mons.species_of(new), 292)
+
+    def test_another_nature_is_refused(self):
+        raw, _ = self.record(self.ROM_P, 1)
+        with self.assertRaises(ValueError):
+            mons.with_personality(raw, self.ENGINE_P + 1, self.OT, two_abilities=True)
+
+    def test_gender_ratios(self):
+        self.assertEqual([mons.gender(0x12345600 | b, 63) for b in (0, 62, 63, 255)], ["female", "female", "male", "male"])
+        self.assertEqual([mons.gender(7, r) for r in (0, 0xFE, 0xFF)], ["male", "female", "genderless"])
 
 
 if __name__ == "__main__":

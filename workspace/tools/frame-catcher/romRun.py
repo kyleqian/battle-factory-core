@@ -4,7 +4,8 @@ Usage (cwd = workspace/, through tools/run-mgba-probe.py like every mGBA probe):
   python3 tools/run-mgba-probe.py OUTDIR/rom/done.json -- python3 tools/frame-catcher/romRun.py ENGINE_DIR OUTDIR/rom [--profile on|off] [--max-frames N]
 
 ENGINE_DIR is an engineRun.mjs output. The ROM is set up as the engine's round (nothing else is written into the ROM):
-  * at the draft: the six rentals (set, personality, IV, ability) and the first trainer and sets, then the select screen is entered again;
+  * at the draft: the six rentals (set, personality, IV, ability) and the first trainer and sets, then the select screen is entered again,
+    and once it has built its six Pokemon (with personalities of its own) each is given the engine's personality;
   * before each later battle's trainer roll (the GO ON answer): gRngValue, so the ROM's own roll gives the engine's trainer and sets;
   * before each battle: the opponent's personality, IVs, ability bit and stats (the ROM builds that party with VBlank draws between members);
   * at each battle's first turn: gRngValue and gRandomTurnNumber, the engine's (the ROM's later draws in battle are its own).
@@ -20,10 +21,10 @@ WORKSPACE = Path(__file__).resolve().parents[2]
 HARNESS = next(p for p in (WORKSPACE, *WORKSPACE.parents) if (p / "oracle/emerald_core.py").is_file())
 sys.path.insert(0, str(HARNESS / "oracle"))
 from emerald_core import EmeraldOracle  # noqa: E402
-from battle_lab import SUBSTRUCT_POSITIONS  # noqa: E402
 from mgba import ffi  # noqa: E402
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from plan import Plan, Driver, lcg, lcg_back, m4a_restarted  # noqa: E402
+from mons import POKEMON_SIZE, STAT_ORDER, ability_num, decrypt_mon, encrypt_mon, gender, species_of, with_personality  # noqa: E402
 
 REF = (WORKSPACE / "reference/pokeemerald").resolve()
 PROFILES = {"on": "factory.json", "off": "factory-battle-scene-off.json"}
@@ -31,10 +32,12 @@ PROFILES = {"on": "factory.json", "off": "factory-battle-scene-off.json"}
 # SaveBlock2 (include/global.h struct BattleFrontier offsets; oracle/battle_lab.py uses the same)
 SB2_TRAINER_ID, SB2_LVL_MODE, SB2_BATTLE_NUM, SB2_TRAINER_IDS = 0x0A, 0xCA9, 0xCB2, 0xCB4
 SB2_TOWER_STREAK, SB2_FACTORY_STREAK, SB2_FACTORY_RENTS, SB2_RENTAL_MONS = 0xCE0, 0xDE2, 0xDF2, 0xE70
-RENTAL_MON_SIZE, POKEMON_SIZE, TASK_SIZE, TASK_COUNT = 12, 100, 40, 16
+RENTAL_MON_SIZE, TASK_SIZE, TASK_COUNT = 12, 40, 16
 # struct FactorySelectScreen / FactorySwapScreen fields (battle_factory_screen.c:102-159; tools/audio/romRoundDriver.py has the same)
 SELECT_MENU_CURSOR, SELECT_CURSOR, SELECT_YESNO_CURSOR = 0, 3, 7
 SWAP_MENU_CURSOR, SWAP_CURSOR, SWAP_YESNO_CURSOR = 0, 3, 22
+SELECT_MONS, SELECT_MON_SIZE, SELECT_MON_DATA = 12, 108, 8  # mons[6] at +12; struct FactorySelectableMon: monId, ballSpriteId, selectedId, monData at +8
+SPECIES_INFO_SIZE, SPECIES_GENDER_RATIO, SPECIES_ABILITY_2 = 28, 0x10, 0x17  # struct SpeciesInfo (include/pokemon.h): genderRatio, abilities[1]
 
 FUNCS = {  # name -> object file of the copy we want (None = the only one)
     "HandleInputChooseAction": "src/battle_controller_player.o", "HandleInputChooseMove": "src/battle_controller_player.o",
@@ -274,35 +277,6 @@ class SoundLog:
         return new
 
 
-def decrypt_mon(raw):
-    personality, ot_id = struct.unpack_from("<II", raw, 0)
-    key = personality ^ ot_id
-    data = raw[32:80]
-    plain = b"".join(struct.pack("<I", struct.unpack_from("<I", data, o)[0] ^ key) for o in range(0, 48, 4))
-    order = SUBSTRUCT_POSITIONS[personality % 24]
-    logical = [plain[order[i] * 12:order[i] * 12 + 12] for i in range(4)]
-    ok = sum(struct.unpack("<24H", plain)) & 0xFFFF == struct.unpack_from("<H", raw, 28)[0]
-    return logical, ok
-
-
-def encrypt_mon(raw, logical, personality, ot_id):
-    order = SUBSTRUCT_POSITIONS[personality % 24]
-    phys = [None] * 4
-    for i in range(4):
-        phys[order[i]] = logical[i]
-    plain = b"".join(phys)
-    key = personality ^ ot_id
-    enc = b"".join(struct.pack("<I", struct.unpack_from("<I", plain, o)[0] ^ key) for o in range(0, 48, 4))
-    out = bytearray(raw)
-    struct.pack_into("<II", out, 0, personality, ot_id)
-    struct.pack_into("<H", out, 28, sum(struct.unpack("<24H", plain)) & 0xFFFF)
-    out[32:80] = enc
-    return bytes(out)
-
-
-STAT_ORDER = ("hp", "attack", "defense", "speed", "spAttack", "spDefense")
-
-
 class Rom:
     def __init__(self, profile):
         self.o = EmeraldOracle(REF / "pokeemerald.gba", REF / "pokeemerald.map", HARNESS / "oracle/bootstrap" / PROFILES[profile])
@@ -418,6 +392,9 @@ def run(engine_dir, out_dir, profile, max_frames):
         sel = rom.u32(rom.d["sFactorySelectScreen"])
         if ready_at is None and lead > 8 and sel and rom.f["Select_Task_HandleChooseMons"] in rom.live_tasks():
             ready_at = lead
+            # The six are built by one call (Select_InitMonsData in CB2_InitSelectScreen's case 5) that can run over many frames (53 for the
+            # anchor draft, ISSUES.md), and the cursor task is created in case 10, after it returned: none is half made now.
+            patch_select_mons(rom, facts["rentals"], staging)
         if ready_at is not None and hashlib.sha1(o.screen_rgb()).hexdigest() == first_pic:
             same = True
             break
@@ -521,6 +498,7 @@ def run(engine_dir, out_dir, profile, max_frames):
                                       [mem["hp"], mem["maxHP"], mem["attack"], mem["defense"], mem["speed"], mem["spAttack"], mem["spDefense"]]])
                 if rom_party != eng_party:
                     staging.append({"what": "opponent party is not the engine's at battle start", "battle": bn, "rom": rom_party, "engine": eng_party})
+                check_player_party(rom, want, staging, bn)
                 rng_written.add(bn)
         m = rom.menu()
         mk = None if m is None else f"{m[0]}|{m[1]}"
@@ -611,6 +589,67 @@ def probe_roll(rom, buttons, want):
     o.core.load_raw_state(saved)
     o._set_buttons([])
     return found
+
+
+def species_info(rom, species):
+    base = rom.s["gSpeciesInfo"] + species * SPECIES_INFO_SIZE
+    return {"genderRatio": rom.u8(base + SPECIES_GENDER_RATIO), "twoAbilities": rom.u8(base + SPECIES_ABILITY_2) != 0}
+
+
+def patch_select_mons(rom, rentals, staging):
+    """The select screen's six Pokemon given the engine's personalities. The ROM builds them afresh from the rentals' set ids alone
+    (CreateFrontierFactorySelectableMons: CreateMonWithEVSpreadNatureOTID draws a personality of the set's nature), and the three rented
+    become the party (Select_CopyMonsToPlayerParty), so gender and, for a species with two abilities, the ability were the ROM's draw.
+    Each is re-stored with the engine's personality and OT id as CreateMon would have built it (mons.with_personality); the rest of the
+    record (stats, moves, item, IVs, EVs) is the ROM's own."""
+    sel = rom.u32(rom.d["sFactorySelectScreen"])
+    for i, r in enumerate(rentals):
+        slot = sel + SELECT_MONS + i * SELECT_MON_SIZE
+        base = slot + SELECT_MON_DATA
+        raw = rom.read(base, POKEMON_SIZE)
+        rec = {"what": "rental", "index": i, "setId": r["setId"]}
+        species = species_of(raw)
+        if rom.u16(slot) != r["setId"] or species is None:
+            staging.append({**rec, "what": "rental not patched (not the engine's set, or unreadable)", "romSetId": rom.u16(slot)})
+            continue
+        info = species_info(rom, species)
+        before, ot_before = struct.unpack_from("<II", raw, 0)
+        ot_id = r.get("otId", ot_before)
+        try:
+            new = with_personality(raw, r["personality"], ot_id, info["twoAbilities"])
+        except ValueError as err:
+            staging.append({**rec, "what": "rental not patched", "why": str(err)})
+            continue
+        rom.write(base, new)
+        rec.update(species=species, personality=[before, r["personality"]], gender=[gender(before, info["genderRatio"]), gender(r["personality"], info["genderRatio"])],
+                   abilityNum=[ability_num(raw), ability_num(new)])
+        if ot_id != ot_before:
+            rec["otId"] = [ot_before, ot_id]
+        if ability_num(new) != r.get("abilitySlot", ability_num(new)):
+            rec["engineAbilitySlot"] = r["abilitySlot"]  # the engine's slot is not the one the ROM gives this personality
+        staging.append(rec)
+
+
+def check_player_party(rom, want, staging, bn):
+    """At the battle's first turn: the player's three against the engine's (personality, species, ability bit, gender, level, HP, stats)."""
+    if not want.get("playerParty") or "member" not in want["playerParty"][0]:
+        return
+    rom_party, eng_party = [], []
+    for i, r in enumerate(want["playerParty"]):
+        raw = rom.read(rom.s["gPlayerParty"] + i * POKEMON_SIZE, POKEMON_SIZE)
+        species = species_of(raw)
+        personality = struct.unpack_from("<I", raw, 0)[0]
+        ratio = species_info(rom, species)["genderRatio"] if species is not None else None
+        rom_party.append([personality, species, ability_num(raw), gender(personality, ratio) if ratio is not None else None, raw[84],
+                          list(struct.unpack_from("<7H", raw, 86))])
+        mem = r["member"]
+        eng_party.append([r["personality"], mem["species"], mem["abilityNum"], mem["gender"], mem["level"],
+                          [mem["hp"], mem["maxHP"], mem["attack"], mem["defense"], mem["speed"], mem["spAttack"], mem["spDefense"]]])
+    if rom_party != eng_party:
+        staging.append({"what": "player party is not the engine's at battle start", "battle": bn, "rom": rom_party, "engine": eng_party})
+    else:
+        staging.append({"what": "player party is the engine's at battle start", "battle": bn, "personality": [p[0] for p in rom_party],
+                        "gender": [p[3] for p in rom_party], "abilityNum": [p[2] for p in rom_party]})
 
 
 def patch_enemy_party(rom, want, staging, frame):

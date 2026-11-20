@@ -88,7 +88,8 @@ function noteFacts(st, f) {
       selectionRngValue: gen?.generation?.selectionRngValue ?? null, rollRngBefore: gen?.generation?.drawLedger?.[0]?.rngBefore ?? null, generationKind: gen?.kind ?? null,
       opponentSetIds: sched.rentalRecords.map((r) => r.setId),
       opponents: sched.rentalRecords.map((r) => ({ setId: r.setId, personality: r.personality >>> 0, otId: r.otId >>> 0, abilitySlot: r.abilitySlot, fixedIv: r.fixedIv, member: r.member })),
-      playerParty: orch.round.rules.playerRentalRecords?.map((r) => ({ setId: r.setId, personality: r.personality >>> 0 })) ?? null,
+      // the player's three as the battle starts them (round.rules.playerKernelParty: species, ability bit, gender, level, HP, stats)
+      playerParty: orch.round.rules.playerRentalRecords?.map((r, i) => ({ setId: r.setId, personality: r.personality >>> 0, otId: r.otId >>> 0, abilitySlot: r.abilitySlot, fixedIv: r.fixedIv, member: orch.round.rules.playerKernelParty?.[i] })) ?? null,
     });
   }
 }
