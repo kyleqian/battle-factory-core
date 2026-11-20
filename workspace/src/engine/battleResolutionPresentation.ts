@@ -57,7 +57,7 @@ import {
 } from "./battleResolutionPresentationRender.ts";
 import { SEND_IN_TAIL_CASTFORM } from "../data/sendInTail.ts";
 import { CASTFORM_CHANGE_COMMAND_FRAMES, CASTFORM_CHANGE_WEATHER_LOOP_FRAMES } from "./liveTransform.ts";
-import { BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS } from "./battleScriptSourceConstants.ts";
+import { BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS, BATTLE_SCRIPT_STATUS3_SEMI_INVULNERABLE } from "./battleScriptSourceConstants.ts";
 import { spriteOrderStatusAnimationName } from "./spriteOrderEventTransform.ts";
 import { seg127StatusSeGateFromEvents, seg127StatusSeGateRows } from "./seg127StatusSeGate.ts";
 import {
@@ -2462,7 +2462,8 @@ export const RELEASE_TO_MOVEEND_ROWS: Readonly<Record<string, number>> = Object.
 
 /**
  * chg1: Scene OFF, a turn that ends on the `resultmessage` "attack missed!" print (BattleScript_MoveMissed: resultmessage, waitmessage,
- * `goto BattleScript_MoveEnd`, moveendall) clears its box one row after the generic 8-frame turn end (Dig lab, ROM 340 vs 339).
+ * `goto BattleScript_MoveEnd`, moveendall) clears its box one row after the generic 8-frame turn end (Dig lab, ROM 340 vs 339). Only a
+ * turn with a semi-invulnerable battler (at its start, or hidden by a MoveEnd receipt in it; the unleash turn's miss): a plain accuracy miss (ais2 seed 2741) stays on the generic 8.
  */
 const SCENE_OFF_MISS_TURN_END_ROWS = 1;
 function sceneOffMissTurnEnd(
@@ -2471,6 +2472,9 @@ function sceneOffMissTurnEnd(
   beforeRules: BattleScriptRulesContext,
 ): boolean {
   if ((beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) === 0) return false;
+  const semiInvulnerable = beforeRules.battlers.some((battler) => (battler.status3 & BATTLE_SCRIPT_STATUS3_SEMI_INVULNERABLE) !== 0)
+    || events.some((event) => event.payload.kind === "set-battler-sprite-visibility" && event.payload.invisible);
+  if (!semiInvulnerable) return false;
   let index = commands.length - 1;
   while (index >= 0 && commands[index]!.type === "sprite-visibility") index -= 1;
   const printed = commands[index];
