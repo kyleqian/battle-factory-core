@@ -60,7 +60,9 @@ for (let f = 0; f < maxFrames; f += 1) {
   const postwin = st.postwin !== null || st.factoryTerminal !== null;
   if (postwin && !wasPostwin) {
     battlesEnded += 1;
-    lines.push(`${session.frame} :: -- battle ${battlesEnded} ended (${st.postwin ? "won" : "round over"})`);
+    // (the outcome from the round's last battle: a lost battle's return hold is a postwin state too)
+    const outcome = o?.round?.rules?.lastBattle?.outcome;
+    lines.push(`${session.frame} :: -- battle ${battlesEnded} ended (${outcome === "win" ? "won" : outcome ? "lost" : st.postwin ? "won" : "round over"})`);
   }
   wasPostwin = postwin;
   // a new round: the attendant's door walk dealt a new draft (prebattleEntry), the draft screen is up again

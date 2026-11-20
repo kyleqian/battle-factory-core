@@ -28,6 +28,9 @@ node --experimental-strip-types --no-warnings tools/frame-catcher/makeTrace.mjs 
 ```
 
 `t5.lines.txt` next to it holds the battle text, to pick traces that show what you want (faints, Protect, berries, weather, ...).
+For round 2 and later, play on through the Lobby and stop a little into it after the last wanted battle (fcr2,
+`docs/fcr2-catcher-round2.md`): `--policy winning-swap --battles 14 --lobby-tail 120 --max-frames 260000` (21 reaches the Factory Head when
+the seed wins that far; seed 2 Scene OFF does).
 
 Look at any frames of a kept run: `python3 tools/frame-catcher/peek.py RUNDIR out.png engine:17480-17740/52 rom:18420-18680/52`.
 
@@ -62,6 +65,14 @@ round takes about 2 minutes. Five traces at once (`JOBS=5`) take as long as the 
    - each battle's first turn: gRngValue and gRandomTurnNumber are written to the engine's on the frame the turn's action selection
      starts. Everything after that in the battle is the ROM's own (Frontier battles draw no VBlank RNG).
 
+   - round 2 and later (fcr2): the ROM plays the Lobby and the attendant's new challenge itself; its round steps when
+     `curChallengeBattleNum` goes back to 0 and stays there (it reads 0 or garbage for a frame or two at each battle start, while
+     `MoveSaveBlocks_ResetHeap` copies the save, so only +1 or 0, held a few frames, is taken). Battles are keyed round × 7 + number on
+     both sides. The new round's deal is stepped with traps at `GenerateInitialRentalMons` and `GenerateOpponentMons` (the engine's
+     cursors: the ROM draws the engine's six and first trainer itself), and the new select screen's six get the engine's personalities.
+     The Factory Head's party (`FillFactoryBrainParty`, at battle start) is trapped with the engine's cursor, the overworld VBlank's
+     `Random()` undone while it is built.
+
    Then the ROM is driven by the engine's choices. Every menu where the engine waited for the player is an anchor: when the ROM opens
    the same kind of menu, the engine's presses there are made again at the same frame offset from the menu's first frame, each
    checked against the engine's cursor (a press without effect is repeated; a cursor elsewhere is first steered to the engine's
@@ -82,6 +93,10 @@ round takes about 2 minutes. Five traces at once (`JOBS=5`) take as long as the 
    menu it opened counts for the menu that took the press, the same sound twice on one frame counts once, and a volume change to the
    volume the music has and a cry stop after the cry is over are left out (docs/snd2-catcher-sounds.md).
 
+The Lobby attendant's CHALLENGE / INFO / EXIT and level multichoices and its YES/NOs are menus once drawn (the game's own
+`attendantAcceptsInput`); on the ROM the save dialog's YES/NO is `SaveGameTask` with `SaveConfirmInputCallback` /
+`SaveOverwriteInputCallback`. The engine side prints the oracle save's player name (MEMORY), as `tools/compare/harnessPlayerName.ts` does.
+
 Menus that open only after a printed question: the after-battle RECORD / RETIRE question and the Lobby's "record your last match?"
 after a round are menus from the frame their YES/NO box is drawn (the game's own `postwinQuestionWindowVisible` /
 `factoryTerminalRecordMenuDrawn`, handed to `engineMenus.mjs` by `engineRun.mjs`), as on the ROM, where `message` + `waitmessage` come
@@ -93,8 +108,9 @@ through the same tiles at different moments (the first look at Kyle's Tuber pick
 ## What it cannot compare yet
 
 - The ROM's re-entered draft screen fades in; the engine's starts settled. The first stretch (up to the first draft menu) is skipped.
-- A start other than `draft` (`after-save`, the Lobby) and a non-fresh Factory record (symbols, heard speech) are not staged on the
-  ROM; Noland's battles are not staged.
+- A start other than `draft` (`after-save`, the Lobby) and a non-fresh Factory record (symbols, heard speech, a streak) are not staged on
+  the ROM: round 2 and the Factory Head are reached by playing the rounds before them (`docs/fcr2-catcher-round2.md`, "Still not staged").
+- The Lobby's overworld RNG and NPC timers are not synced, so the Lobby NPCs' random turns differ (not a game difference).
 - After a divergence the ROM cannot follow the engine's choices (an unplanned ROM menu, a battle that went differently): the run stops
   there ("stuck-at-unplanned-menu") and the report covers the stretches before it. A battle that goes differently on the ROM is an
   engine bug (or a set-up gap); it shows as content differences from that point on.
@@ -103,8 +119,6 @@ through the same tiles at different moments (the first look at Kyle's Tuber pick
 - The test player's `full` policy browses the summary's move-select mode and other corners the driver has no cursor model for
   (`steer_button`); a press there is replayed but not steered.
 - Pan changes of a running sound (`pan` events) are not compared; cry pitch / length details are not checked.
-- Round 2 and later: the ROM plays round 1 itself, but round 2's draft builds the ROM's own rentals; traces are best cut in the Lobby
-  after the round (docs/fcs1-catcher-sweep.md, "Catcher limits left", says what staging round 2 would take).
 - The draft's YES/NO: the ROM's `Select_Task_HandleYesNo` is live about 43 frames before the cursor is set to YES
   (`battle_factory_screen.c:1850`), so the driver reads NO, steers, and the comparator then drops the ROM's A click as a steer press
   (a false "ours plays SE_SELECT" in the draft). The engine's swap-screen picker counts as a menu while it still fades in, so the
