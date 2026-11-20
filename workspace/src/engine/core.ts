@@ -112,6 +112,7 @@ import {
   renderPrebattleRoomWalkScene,
 } from "./prebattleRoomRender.ts";
 import { SE_EXIT } from "./battleEndSounds.ts";
+import { emitLobbyAttendantOpenSound, emitLobbyAttendantSounds, emitPrebattleEntrySounds } from "./lobbySounds.ts";
 import {
   advanceBattleRoom,
   battleRoomAcceptedState,
@@ -1293,6 +1294,7 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
   }
 
   if (state.prebattleEntry) {
+    emitPrebattleEntrySounds(state.prebattleEntry, newKeys.has("A")); // snd1, write-only
     const advance = advancePrebattleEntry(state.prebattleEntry, { a: newKeys.has("A") });
     let entryNext: EngineState = state;
     if (advance.state !== null && advance.state.phase === "draftFadeIn") {
@@ -1329,12 +1331,14 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
         const heldNpcs = stepLobbyNpcsTick(state.lobbyNpcs, rngValue, true, state.lobbyFreeRoam);
         return { ...state, frame: state.frame + 1, keyRepeat, lobbyNpcs: heldNpcs.npcs, rngMode: "vblank", rngValue };
       }
-      const attendant = advanceFactoryLobbyAttendant(state.lobbyAttendant, {
+      const attendantInput = {
         a: newKeys.has("A"),
         b: newKeys.has("B"),
         up: newAndRepeatedKeys.has("UP"),
         down: newAndRepeatedKeys.has("DOWN"),
-      });
+      };
+      const attendant = advanceFactoryLobbyAttendant(state.lobbyAttendant, attendantInput);
+      emitLobbyAttendantSounds(state.lobbyAttendant, attendant, attendantInput); // snd1, write-only
       if (attendant.done === "draft") {
         return enterPrebattleEntry(
           state,
@@ -1367,6 +1371,7 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
       isFactoryLobbyFacingSinglesAttendant(state.lobbyFreeRoam)
     ) {
       const lockedNpcs = stepLobbyNpcsTick(state.lobbyNpcs, rngValue, true, state.lobbyFreeRoam);
+      emitLobbyAttendantOpenSound(); // snd1, write-only
       return {
         ...state,
         frame: state.frame + 1,
