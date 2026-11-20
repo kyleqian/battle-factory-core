@@ -78,6 +78,7 @@ import {
 import {
   advanceBattlePartySelect,
   battlePartySelectClosePhase,
+  PARTY_SELECT_CANCEL_CLOSE_TOTAL_FRAMES,
   createBattlePartySelectState,
   type BattlePartySelectState,
 } from "./battlePartySelect.ts";
@@ -3278,6 +3279,11 @@ export function advanceFactoryRoundBattleCommand(
       return Object.freeze({ ...state, battlePartySelect: selector });
     }
     if (selector.outcome.kind === "cancel") {
+      // pic6: the menu fades out, the field fades back in and holds before the action menu returns (ROM-measured,
+      // PARTY_SELECT_CANCEL_CLOSE_TOTAL_FRAMES); it used to cut straight back to the action menu on the B edge.
+      if (selector.closeElapsed !== null && selector.closeElapsed < PARTY_SELECT_CANCEL_CLOSE_TOTAL_FRAMES) {
+        return Object.freeze({ ...state, battlePartySelect: selector });
+      }
       const retained = state.liveMovePaletteHost;
       let liveMovePaletteHost = retained;
       if (retained?.pendingPartyCancelEntryHost !== undefined) {

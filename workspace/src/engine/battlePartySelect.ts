@@ -390,6 +390,21 @@ export const PARTY_SELECT_CLOSE_TOTAL_FRAMES =
   PARTY_SELECT_CLOSE_MENU_FRAMES
   + PARTY_SELECT_CLOSE_FIELD_HOLD_FRAMES;
 
+/**
+ * pic6 (2026-11-20 playtest, docs/pic1-live-field-pictures.md): B / CANCEL on the voluntary in-battle menu closes through the same
+ * fade as SHIFT. HandleChooseMonCancel's default action (party_menu.c:1394-1403: SE_SELECT, then Task_ClosePartyMenu) runs
+ * BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK) (party_menu.c:1227) and, once black, the battle's exit callback rebuilds
+ * the field and fades it in. ROM lab (tools/battle-lab/pic6-party-cancel-{on,off}.json, B first held at trace frame 160; both scenes
+ * frame-identical): menu fade 163-177, black 178-216, field fade-in 217-232, field with the empty message box 233-238, "What will
+ * RATTATA do?" and the action menu at 239. The SHIFT run of the same lab (A at 206) reaches black at press + 18 and starts the field
+ * fade-in at press + 57 too, so the cancel shares PARTY_SELECT_CLOSE_MENU_FRAMES; it then holds the field 6 frames (SHIFT holds 10
+ * before the recall text: the engine's 9 + its confirm-edge convention) and the action menu returns.
+ */
+export const PARTY_SELECT_CANCEL_FIELD_HOLD_FRAMES = 6;
+export const PARTY_SELECT_CANCEL_CLOSE_TOTAL_FRAMES =
+  PARTY_SELECT_CLOSE_MENU_FRAMES
+  + PARTY_SELECT_CANCEL_FIELD_HOLD_FRAMES;
+
 export function battlePartySelectClosePhase(
   closeElapsed: number,
 ): BattlePartySelectClosePhase {
@@ -1727,6 +1742,10 @@ function renderPartySelectClose(
         + PARTY_SELECT_CLOSE_BLACK_HOLD_FRAMES)
       + 1;
     applyFadeFromBlack(fb, k);
+  } else if (phase === "field-hold" && state.outcome?.kind === "cancel" && close !== undefined) {
+    // pic6: a cancelled menu holds the settled field (empty message box) until the action menu returns; a SEND OUT hands the
+    // field-hold frames to the resolution presentation instead (factoryRoundBattleOrchestrator.ts).
+    close.drawField(fb);
   }
 }
 
