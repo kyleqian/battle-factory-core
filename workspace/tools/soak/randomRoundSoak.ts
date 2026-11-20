@@ -121,7 +121,7 @@
 //                      byte-identical to today (see
 //                      tools/soak/randomRoundSoakCoverage.ts).
 
-import { spawn } from "node:child_process";
+import { spawn, type ChildProcess } from "node:child_process";
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -144,6 +144,37 @@ import {
   type SoakPolicy,
   type SoakScene,
 } from "./randomRoundSoakDriver.ts";
+
+// ---------------------------------------------------------------------------
+// --help and SIGTERM/SIGINT (cln10)
+// ---------------------------------------------------------------------------
+
+const USAGE = `usage: npm run soak -- [options]   (full option notes: header of tools/soak/randomRoundSoak.ts)
+  --seeds A:B | --seed N     seed range (default 0:50) or one seed
+  --policy P                 full|vanilla|winning|winning-swap|oracle-strength|winning-coverage|winning-combined|coverage-fight
+  --scene on|off|both        Battle Scene mode (absent = Scene OFF, untagged)
+  --max-frames N  --stall-frames N  --max-rounds N  --render-every N
+  --first-round | --milestone   stop at the first round decision / first action menu
+  --start-carry N  --vary-rng  --no-lobby-new-challenge  --no-summary-explore
+  --parallel N               N child processes over contiguous seed slices
+  --json PATH  --coverage-json PATH  --verbose
+  -h, --help                 print this and exit 0
+SIGTERM/SIGINT (e.g. timeout): the seed in progress finishes, then the per-seed summary of the
+seeds done so far is printed after an "INTERRUPTED after N of M seeds" line; exit 143/130.`;
+
+/** Set by SIGTERM/SIGINT; the seed loop checks it between seeds (runSeed is synchronous). */
+let interruptSignal: "SIGTERM" | "SIGINT" | null = null;
+const interruptExitCode = (): number => (interruptSignal === "SIGINT" ? 130 : 143);
+const activeChildren = new Set<ChildProcess>();
+
+function installInterruptHandlers(): void {
+  for (const signal of ["SIGTERM", "SIGINT"] as const) {
+    process.on(signal, () => {
+      interruptSignal ??= signal;
+      for (const child of activeChildren) child.kill(signal);
+    });
+  }
+}
 
 // ---------------------------------------------------------------------------
 // --parallel fan-out (parent side)
@@ -215,11 +246,15 @@ function runChild(childArgv: readonly string[]): Promise<{ code: number; stdout:
       // stderr as they happen instead of being buffered and reordered.
       { stdio: ["ignore", "pipe", "inherit"] },
     );
+    activeChildren.add(child);
     const chunks: string[] = [];
     child.stdout.setEncoding("utf8");
     child.stdout.on("data", (chunk: string) => chunks.push(chunk));
     child.on("error", reject);
-    child.on("close", (code) => resolve({ code: code ?? 1, stdout: chunks.join("") }));
+    child.on("close", (code) => {
+      activeChildren.delete(child);
+      resolve({ code: code ?? 1, stdout: chunks.join("") });
+    });
   });
 }
 
@@ -282,7 +317,7 @@ async function runParallelFanOut(options: {
     for (const [index, plan] of plans.entries()) {
       const run = runs[index]!;
       const label = `slice ${plan.slice.start}:${plan.slice.end}`;
-      if (run.code !== 0) {
+      if (run.code !== 0 && !(interruptSignal !== null && run.code === interruptExitCode())) {
         failed = true;
         console.error(`soak --parallel: ${label} exited ${run.code}`);
       }
@@ -305,6 +340,9 @@ async function runParallelFanOut(options: {
       }
     }
 
+    if (interruptSignal !== null) {
+      console.log(`\n=== soak INTERRUPTED by ${interruptSignal} after ${results.length} of ${seeds.length} seeds (parallel slices) ===`);
+    }
     const counts = printSoakSummary(results, policy, ((Date.now() - startedAt) / 1000).toFixed(1), scene);
 
     if (jsonPath) {
@@ -322,6 +360,7 @@ async function runParallelFanOut(options: {
     rmSync(temporaryDirectory, { recursive: true, force: true });
   }
   if (failed) process.exitCode = 1;
+  else if (interruptSignal !== null) process.exitCode = interruptExitCode();
 }
 
 /**
@@ -440,6 +479,11 @@ function printSoakSummary(
 
 async function main(): Promise<void> {
   const args = process.argv.slice(2);
+  if (args.includes("--help") || args.includes("-h")) {
+    console.log(USAGE);
+    return;
+  }
+  installInterruptHandlers();
   const getFlag = (name: string): string | null => {
     const index = args.indexOf(name);
     return index >= 0 && index + 1 < args.length ? args[index + 1]! : null;
@@ -549,7 +593,11 @@ async function main(): Promise<void> {
   const results: SeedResult[] = [];
   const startedAt = Date.now();
 
-  for (const seed of seeds) for (const sceneName of scenes) {
+  const plannedRuns = seeds.length * scenes.length;
+  seedLoop: for (const seed of seeds) for (const sceneName of scenes) {
+    // runSeed is synchronous: yield so a pending SIGTERM/SIGINT handler can run between seeds.
+    await new Promise<void>((resolve) => setImmediate(resolve));
+    if (interruptSignal !== null) break seedLoop;
     const seedStart = Date.now();
     const result = runSeed(seed, optionsFor(sceneName));
     results.push(result);
@@ -577,6 +625,9 @@ async function main(): Promise<void> {
     }
   }
 
+  if (interruptSignal !== null) {
+    console.log(`\n=== soak INTERRUPTED by ${interruptSignal} after ${results.length} of ${plannedRuns} ${scene === "both" ? "runs" : "seeds"} ===`);
+  }
   const counts = printSoakSummary(results, policy, ((Date.now() - startedAt) / 1000).toFixed(1), scene);
 
   if (jsonPath) {
@@ -590,6 +641,7 @@ async function main(): Promise<void> {
     writeFileSync(coverageJsonPath, JSON.stringify(coverage.report(), null, 2));
     console.log(`wrote ${coverageJsonPath}`);
   }
+  if (interruptSignal !== null) process.exitCode = interruptExitCode();
 }
 
 main().catch((error: unknown) => {
