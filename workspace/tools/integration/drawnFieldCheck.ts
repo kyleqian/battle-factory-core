@@ -9,12 +9,15 @@
 //   - sample: a canonical sample-battle helper reached during a live render is an error (drawRecord.ts throws it; reported here as a
 //     finding with the error message).
 // Used by tools/soak/randomRoundSoakDriver.ts (`drawCheck`) and tools/integration/soundCensusRomReplay.ts (`--draw-check`).
-import { recordDraws, type DrawRecord } from "../../src/engine/drawRecord.ts";
+import { recordDraws, setCanonicalSampleStrict, type DrawRecord } from "../../src/engine/drawRecord.ts";
 import { render, type EngineState } from "../../src/engine/core.ts";
 import { factoryTrainerPresentationForOpponent, type FactoryTrainerPresentation } from "../../src/engine/factoryTrainerPresentation.ts";
 import { facilityTrainerGfxIdForClass } from "../../src/engine/factoryTrainerOverworldGfx.ts";
 import { opponentSheetNameForGfx } from "../../src/engine/battleRoomRender.ts";
 import speciesNamesData from "../../src/data/gen/species-names.json" with { type: "json" };
+
+// a live-route canonical sample throws here (the browser only records it), so checkDrawnFrame reports it as a finding
+setCanonicalSampleStrict(true);
 
 export type DrawCheckFinding = Readonly<{ frame: number; kind: "pic" | "healthbox" | "room" | "sample" | "render"; detail: string }>;
 

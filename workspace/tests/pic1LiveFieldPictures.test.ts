@@ -9,7 +9,8 @@ import { BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS } from "../src/engine/battleScrip
 import { SWITCH_IN_WAITSTATE_HOLD_FRAMES, switchInTiming } from "../src/engine/battleResolutionPresentation";
 import { createBattleResolutionPresentationRenderView, playerFaintReplacementSendOutTimingOfSegment } from "../src/engine/battleResolutionPresentationRender";
 import { renderBattleResolutionForcedPartySelect } from "../src/engine/battleScene";
-import { recordDraws, withLiveRender } from "../src/engine/drawRecord";
+import { recordDraws, setCanonicalSampleStrict, withLiveRender } from "../src/engine/drawRecord";
+import { clearContainedPresentationErrors, containedPresentationErrors } from "../src/engine/presentationContainment";
 
 const mon = (side: "player" | "trainer", battler: 0 | 1, species: number, name: string, partyIndex: number, hp: number, maxHP: number) => Object.freeze({
   species, name, side, battler, partyIndex, level: 50, hp, maxHP, gender: "male" as const, status: "none" as const,
@@ -69,5 +70,20 @@ describe("pic1: a live MAGBY send-in draws the live field, not the canonical sam
     // outside a live render (the legacy canonical party menu) it still draws and is recorded
     const { record } = recordDraws(() => drawTurn15MagbyHealthbox(new Uint8Array(240 * 160 * 4), 0));
     expect(record.canonicalSamples).toEqual(["MAGBY 138 healthbox"]);
+  });
+
+  it("outside strict mode (the browser) a live-route sample is a contained presentation error, not a crash", async () => {
+    const { drawTurn15MagbyHealthbox } = await import("../src/engine/battleScene");
+    clearContainedPresentationErrors();
+    setCanonicalSampleStrict(false);
+    try {
+      expect(() => withLiveRender(() => drawTurn15MagbyHealthbox(new Uint8Array(240 * 160 * 4), 0))).not.toThrow();
+    } finally {
+      setCanonicalSampleStrict(true);
+    }
+    expect(containedPresentationErrors().map((e) => [e.site, e.commandType, e.message])).toEqual([
+      ["draw", "canonical-sample", "CanonicalSampleInLiveRenderError: live render reached the canonical sample battle's MAGBY 138 healthbox"],
+    ]);
+    clearContainedPresentationErrors();
   });
 });

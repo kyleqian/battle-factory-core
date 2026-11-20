@@ -9,10 +9,13 @@
 //     they are asked to draw, before their memo.
 //   - canonical samples: the legacy sample-battle helpers (the recorded BUG CATCHER DESTIN battle's MURKROW / MAGBY art and its fixed
 //     healthboxes, battleScene.ts) and the room's generic opponent sheet call `noteCanonicalSample`. Inside `withLiveRender` (the live
-//     Factory routes of core.ts's render) that is an error: the live path must draw from the live record, never from the sample.
+//     Factory routes of core.ts's render) that is an error: the live path must draw from the live record, never from the sample
+//     (thrown in strict mode, a contained presentation error in the browser; see `setCanonicalSampleStrict`).
 //
 // Overworld trainer sprites (battle room, lobby) are recorded by `noteOverworldSprite` so the room's opponent can be compared with the
 // round's trainer.
+
+import { recordContainedPresentationError } from "./presentationContainment.ts";
 
 export type DrawnMonPic = Readonly<{ side: "front" | "back"; species: string }>;
 export type DrawnHealthbox = Readonly<{
@@ -90,9 +93,23 @@ export function noteOverworldSprite(role: string, graphicsId: string, x: number,
   active.overworldSprites.push({ role, graphicsId, x, y, width, height });
 }
 
+/**
+ * Strict mode throws a live-route sample; it is on under vitest and in the checking tools (drawnFieldCheck.ts). The browser records the
+ * sample as a contained presentation error (presentationContainment.ts: visible to the soak, the bench ABI and the session export) and
+ * keeps drawing, so a sample the checks have not reached degrades a picture instead of stopping the game.
+ */
+let strict = typeof process !== "undefined" && process.env?.VITEST === "true";
+export function setCanonicalSampleStrict(on: boolean): void {
+  strict = on;
+}
+
 /** A legacy sample-battle helper is drawing; an error inside a live route. */
 export function noteCanonicalSample(sample: string): void {
-  if (liveDepth > 0) throw new CanonicalSampleInLiveRenderError(sample);
+  if (liveDepth > 0) {
+    const error = new CanonicalSampleInLiveRenderError(sample);
+    if (strict) throw error;
+    recordContainedPresentationError("draw", "canonical-sample", error);
+  }
   if (active !== null) active.canonicalSamples.push(sample);
 }
 
