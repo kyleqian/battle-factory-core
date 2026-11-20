@@ -588,6 +588,7 @@ import {
   POSTWIN_RETIRE_FADE_IN_DELAY,
   acceptPostwinSwapDecline,
   beginPostwinNextBattleGuide,
+  beginPostwinSwapReturnGuide,
   acceptPostwinRightThisWayDismiss,
   postwinDialogueDelay,
   postwinDialogueInputReady,
@@ -662,6 +663,16 @@ import {
   type FactorySwapPresentationState,
 } from "./factorySwapPresentation.ts";
 import { factorySwapRoundDecision } from "./factorySwap.ts";
+import {
+  SWAP_COMPLETE_LINES,
+  SWAP_RETURN_BOX_TICK,
+  SWAP_RETURN_FADE_FIRST_TICK,
+  createSwapReturn,
+  swapReturnExtraRngSteps,
+  swapReturnThanksInputReady,
+  swapReturnThanksVisibleChars,
+  type SwapReturnState,
+} from "./swapReturn.ts";
 import { renderFactorySwapPicker } from "./factorySwapRender.ts";
 import {
   advanceFactoryTerminalPresentation,
@@ -897,6 +908,8 @@ export interface EngineState {
   sceneOnPresentation: SceneOnMovePresentationState | null;
   /** Live Factory swap-YES controller + presentation adapter. */
   factorySwap: FactorySwapPresentationState | null;
+  /** The room after the swap screen: black, fade-in, "Thank you!" (rsw1). */
+  swapReturn: SwapReturnState | null;
   /** Source-relative Factory lobby terminal adapter for roundLost. */
   factoryTerminal: FactoryTerminalPresentationState | null;
   /** App-visible generated battle-command route; production installs it after draft. */
@@ -1044,6 +1057,7 @@ function enterPrebattleEntry(
     stagedBattleTurn: null,
     sceneOnPresentation: null,
     factorySwap: null,
+    swapReturn: null,
     factoryTerminal: null,
     factoryRoundBattleOrchestrator: null,
     lobbyFreeRoam: null,
@@ -1082,6 +1096,7 @@ export function createInitialState(
     stagedBattleTurn: null,
     sceneOnPresentation: null,
     factorySwap: null,
+    swapReturn: null,
     factoryTerminal: null,
     factoryRoundBattleOrchestrator: null,
     lobbyFreeRoam: null,
@@ -1181,6 +1196,7 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
     state.battle1OpponentConstructionRngValues ?? [];
   let roundController = state.roundController;
   let factorySwap = state.factorySwap ?? null;
+  const swapReturn = state.swapReturn ?? null;
   let factoryTerminal = state.factoryTerminal;
   let factoryRoundBattleOrchestrator =
     state.factoryRoundBattleOrchestrator;
@@ -1621,20 +1637,11 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
           nextFactorySwap,
         );
       }
-      if (
-        returnedToField &&
-        factoryRoundBattleOrchestrator?.round.presentation?.command.type
-          === "swapResolved"
-      ) {
-        const pending =
-          factoryRoundBattleOrchestrator.round.presentation.command;
-        factoryRoundBattleOrchestrator = advanceFactoryRoundPresentation(
-          completeFactoryRoundPresentation(
-            factoryRoundBattleOrchestrator,
-            { commandId: pending.commandId },
-          ),
+      let nextSwapReturn: SwapReturnState | null = null;
+      if (!returnedToField && nextFactorySwap.fieldHandoff === "CB2_ReturnToFieldContinueScript") {
+        nextSwapReturn = createSwapReturn(
+          nextFactorySwap.controller.scriptResult === false ? "swapped" : "kept",
         );
-        nextPostwin = beginPostwinNextBattleGuide(nextPostwin);
         nextFactorySwap = null;
       }
       if (nextFactorySwap?.controller.phase === "summaryFade") {
@@ -1687,9 +1694,43 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
         keyRepeat,
         postwin: nextPostwin,
         factorySwap: nextFactorySwap,
+        swapReturn: nextSwapReturn ?? swapReturn,
         roundController,
         factoryRoundBattleOrchestrator,
         summaryScreen,
+        rngMode,
+        rngValue,
+      };
+    }
+    if (swapReturn !== null && swapReturn.guideElapsed === null) {
+      const elapsed = swapReturn.elapsed + 1;
+      const pending = factoryRoundBattleOrchestrator?.round.presentation?.command;
+      if (factoryRoundBattleOrchestrator !== null && pending?.type === "swapResolved") {
+        factoryRoundBattleOrchestrator = advanceFactoryRoundPresentation(
+          completeFactoryRoundPresentation(factoryRoundBattleOrchestrator, { commandId: pending.commandId }),
+        );
+      }
+      for (let i = swapReturnExtraRngSteps(elapsed); i > 0; i -= 1) rngValue = advanceRngValue(rngValue);
+      let guideElapsed: number | null = null;
+      if (swapReturn.kind === "kept") {
+        if (elapsed >= SWAP_RETURN_BOX_TICK) {
+          nextPostwin = beginPostwinSwapReturnGuide(nextPostwin, elapsed - SWAP_RETURN_BOX_TICK + 3);
+        }
+      } else if (
+        swapReturnThanksInputReady(swapReturn.elapsed) &&
+        (newKeys.has("A") || newKeys.has("B"))
+      ) {
+        nextPostwin = beginPostwinSwapReturnGuide(nextPostwin, 0);
+      }
+      if (nextPostwin.swapDeclineElapsed !== null) guideElapsed = nextPostwin.swapDeclineElapsed;
+      return {
+        ...state,
+        frame: state.frame + 1,
+        keyRepeat,
+        postwin: nextPostwin,
+        swapReturn: { ...swapReturn, elapsed, guideElapsed },
+        roundController,
+        factoryRoundBattleOrchestrator,
         rngMode,
         rngValue,
       };
@@ -2107,6 +2148,7 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
       rngMode,
       rngValue,
       factorySwap,
+      swapReturn: nextPostwin.rightThisWayDismissElapsed !== null ? null : swapReturn,
       roundController,
       factoryRoundBattleOrchestrator,
       factoryTerminal: retireHandoff
@@ -3402,6 +3444,34 @@ function renderFactorySwapEntryFade(state: EngineState): Uint8Array {
   return fb;
 }
 
+/** The room after the swap screen (swapReturn.ts): black, the fade-in, the settled room, then the box with "Thank you!" on a real swap. */
+function renderSwapReturnState(state: EngineState): Uint8Array {
+  const swapReturn = state.swapReturn!;
+  const r = swapReturn.elapsed;
+  if (r < SWAP_RETURN_FADE_FIRST_TICK) return blackFrame();
+  const fb = createFramebuffer();
+  const ticks = r - SWAP_RETURN_FADE_FIRST_TICK;
+  const attendantVisual = callSceneAttendantVisual(state.postwin!);
+  renderPrebattleRoomSceneWithAttendantOffset(
+    fb,
+    attendantVisual.dx,
+    attendantVisual.frame,
+    attendantVisual.hFlip,
+    bgFadeY(ticks, FADE_IN),
+    objFadeY(ticks, FADE_IN),
+  );
+  if (r >= SWAP_RETURN_BOX_TICK) {
+    drawMessageBoxFrame(fb);
+    if (swapReturn.kind === "swapped") {
+      const chars = swapReturnThanksVisibleChars(r);
+      const [line1, line2] = SWAP_COMPLETE_LINES;
+      if (chars > 0) drawMessageBoxText(fb, line1.slice(0, chars), 16, 121);
+      if (chars > line1.length) drawMessageBoxText(fb, line2.slice(0, chars - line1.length), 16, 137);
+    }
+  }
+  return fb;
+}
+
 /** The Head's room after his battle, no box (renderPostwinState's battleRoom phase). */
 const BRAIN_ROOM_AFTER_BATTLE: BattleRoomState = Object.freeze({ phase: "brainSpeechSettled", elapsed: 0, frontierBrainWalkup: true });
 
@@ -3646,7 +3716,7 @@ function renderPostwinState(state: EngineState): Uint8Array {
     } else if (postwin.swapDeclineElapsed !== null) {
       const declineDelay = age - postwin.swapDeclineElapsed;
       if (declineDelay <= POSTWIN_DIALOGUE_OLD_TEXT_END_DELAY) {
-        const previous = postwin.scoutingLines[3];
+        const previous = state.swapReturn?.kind === "swapped" ? SWAP_COMPLETE_LINES : postwin.scoutingLines[3];
         drawLines(
           previous[0],
           previous[1],
@@ -3765,6 +3835,7 @@ function renderPostwinState(state: EngineState): Uint8Array {
       postwin.dialoguePage === 4 &&
       dialogueDelay !== null &&
       dialogueDelay >= POSTWIN_SWAP_MENU_VISIBLE_DELAY &&
+      state.swapReturn === null &&
       (
         postwin.swapDeclineElapsed === null ||
         age === postwin.swapDeclineElapsed
@@ -4173,6 +4244,9 @@ function renderWithoutFactoryTerminal(state: EngineState): Uint8Array {
       loadedDisplaySpecies: swap.loadedDisplaySpecies,
       duplicateDisplayCopied: swap.returnedFromDuplicate ?? false,
     });
+  }
+  if (state.swapReturn && state.swapReturn.guideElapsed === null && state.postwin) {
+    return renderSwapReturnState(state);
   }
   if (state.postwin) return renderPostwinState(state);
   if (state.sceneOnPresentation) {

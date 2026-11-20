@@ -1751,6 +1751,15 @@ export function beginPostwinNextBattleGuide(
   return { ...state, swapDeclineElapsed: state.elapsed };
 }
 
+/** The swap screen's return to the room (swapReturn.ts) starts "Right this way" `delay` frames ago (the room's own box clock). */
+export function beginPostwinSwapReturnGuide(
+  state: PostwinState,
+  delay: number,
+): PostwinState {
+  if (state.swapDeclineElapsed !== null) return state;
+  return { ...state, swapDeclineElapsed: state.elapsed - delay };
+}
+
 export function postwinRightThisWayVisibleChars(state: PostwinState): number {
   if (state.swapDeclineElapsed === null) return 0;
   const delay = state.elapsed - state.swapDeclineElapsed;
