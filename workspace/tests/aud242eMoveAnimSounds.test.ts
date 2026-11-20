@@ -83,6 +83,7 @@ interface Spec {
 //    28-row floor; the hit -> next action's ATTACKSTRING is now the ROM's, ROM bar rise + 32 = 360 = ours); the pre-body rows (SE238, SE214, SE131) keep the ROM's frame.
 //  - Absorb's closing SE238 (the next turn's menu SE) is 11 later in the ROM than the -1 window (hpf3: it was -1 only because the 28-row floors of the drain bar hid the
 //    move body's ~11-frame lead: ROM hit bar rise 302 vs ours 291; hit -> drain bar 47 vs 46, the full-HP drain bar is 1 frame exec in the ROM and 5 here).
+//    lse4: Absorb's body now carries its lead 5, adapter window +2 and tail 3 (+10 rows); the closing SE238 moves 526 -> 536 and the named extra falls 12 -> 2.
 const SPECS: Record<string, Spec> = {
   "toxic-player": { delta: 3, romOnlyFrom: 280 },
   "rocktomb-player": { delta: 2 },
@@ -97,7 +98,7 @@ const SPECS: Record<string, Spec> = {
   "doubleedge-player": { delta: 2 },
   "poisontail-player": { delta: 2, extra: { "99:120:-64": 2 } },
   "rollingkick-player": { delta: 2 },
-  "absorb-player": { delta: -1, romOnlyFrom: 600, extra: { "526:238:0": 12 } },
+  "absorb-player": { delta: -1, romOnlyFrom: 600, extra: { "536:238:0": 2 } },
   "megadrain-player": { delta: -1 },
 };
 

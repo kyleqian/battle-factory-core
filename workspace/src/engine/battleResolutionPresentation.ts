@@ -1836,6 +1836,7 @@ function moveAnimationScriptLeadTiming(
 const SCRIPT_TAIL_BETWEEN_OPCODES: ReadonlySet<string> = new Set(["B_SCR_OP_WAITANIMATION", "B_SCR_OP_SETBYTE", "B_SCR_OP_SETGRAPHICALSTATCHANGEVALUES"]);
 // lse4: the first-charging-turn script (orword HITMARKER_CHARGING, setbyte, seteffectprimary, copyarray) between the animation and its print.
 const CHARGE_TURN_BETWEEN_OPCODES: ReadonlySet<string> = new Set([...SCRIPT_TAIL_BETWEEN_OPCODES, "B_SCR_OP_ORWORD", "B_SCR_OP_SETEFFECTPRIMARY", "B_SCR_OP_COPYARRAY"]);
+const CHARGE_TURN_PRINT_ROWS = 3;
 const SCRIPT_TAIL_NEXT_OPCODES: ReadonlySet<string> = new Set([
   "B_SCR_OP_PLAYSTATCHANGEANIMATION", "B_SCR_OP_PLAYANIMATION", "B_SCR_OP_PRINTFROMTABLE", "B_SCR_OP_PRINTSTRING",
 ]);
@@ -1890,7 +1891,8 @@ function moveAnimationScriptTailTiming(
   }
   const lead = attackExecution - usedExecution - 1 - presentedSinceUsed;
   if (lead < 0) return {};
-  return { scriptTailRows: nextExecution - attackExecution + 1 + 1 + (bodyLeadRuleApplies(moveId) ? 0 : lead) };
+  // lse4: a charge turn's print rows (measured against the ROM glyph row, 3 rows) belong to the message, not to the body tail.
+  return { scriptTailRows: nextExecution - attackExecution + 1 + 1 + (bodyLeadRuleApplies(moveId) ? 0 : lead) - (chargeTurn ? CHARGE_TURN_PRINT_ROWS : 0) };
 }
 
 /** ont193: the rows presented since the used print's release (only silent-RAM `stat` commands are accepted), else null. */

@@ -22,8 +22,8 @@ describe("trn181: the action-transition pause in Scene ON", () => {
 
   it("controls: no USEDMOVE next adds nothing; Wish keeps msg175's pause; Thunder Wave (next action opens elsewhere) is skipped", () => {
     expect(pauses(prod("PRIMEAPE", MOVE.TOXIC, "on").rows)).toEqual([16]);
-    // Wish: the anchor is the used print itself, so no transition pause; ON's only move-animation before a visibility row is the live body.
-    expect(prod("PRIMEAPE", MOVE.WISH, "on").rows.slice(0, 3).map((row) => [row.type, row.frames])).toEqual([["message", 18], ["move-animation", 274], ["sprite-visibility", 1]]);
+    // Wish: the anchor was the used print itself (no transition pause); lse4 anchors a lead-class body on its own animation row (x + 1): lead 2 before the body (276) and the pause (12 here, 11 on the aud242k lab) before the receipt.
+    expect(prod("PRIMEAPE", MOVE.WISH, "on").rows.slice(0, 4).map((row) => [row.type, row.frames])).toEqual([["message", 18], ["move-animation", 276], ["move-animation", 12], ["sprite-visibility", 1]]);
     expect(pauses(prod("PRIMEAPE", MOVE.WISH, "off").rows)).toEqual([49]);
     const tw = trn176Cases(["off108"], ["off108-thunder-wave-ply-primeape-snorlax"]).find((c) => c.scene === "on")!;
     expect((trn176Evaluate(tw) as any).skipped).toBeTruthy();
