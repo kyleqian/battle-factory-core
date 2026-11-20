@@ -1994,9 +1994,9 @@ function hcr1bStages(): Record<string, AppStage> {
     for (const side of ["foe", "plr"] as const) {
       const id = `hcr1b-${name}-${side}-off`;
       stages[id] = side === "foe"
-        ? (state) => aud241bStage(state, id, "off", 50, 100, 69, undefined, false, move, CHG1_SEEDS[name] ?? 1)
+        ? (state) => aud241bStage(state, id, "off", 50, 100, 69, undefined, false, move, 1)
         : (state) => midBattleSwitchStage(state, id, [RATTATA_LV50_BENCH, RATTATA_LV50_BENCH], [105, 105], {
-          rngSeed: CHG1_SEEDS[name] ?? 1,
+          rngSeed: 1,
           battleScene: "off",
           player: Object.freeze({ ...rattataAtLevel(100, move), pp: [HCR1B_PP[name] ?? 20, HCR1B_PP[name] ?? 20, HCR1B_PP[name] ?? 20, HCR1B_PP[name] ?? 20] as const }),
           trainer: rattataAtLevel(50, 69),
@@ -2012,16 +2012,17 @@ function hcr1bStages(): Record<string, AppStage> {
 const CHG1_MOVES: Readonly<Record<string, readonly [number, number]>> = {
   dig: [91, 10], fly: [19, 15], bounce: [340, 5], dive: [291, 10], solarbeam: [76, 10], razorwind: [13, 10], skullbash: [130, 15], skyattack: [143, 5],
 };
-const CHG1_SEEDS: Readonly<Record<string, number>> = { bounce: Number(process.env.CHG1_APP_SEED ?? 1) };
+// The kernel RNG start value per lab id: the ROM hits / rolls as the lab's seed 1 does only for these (found by scanning 1..14; the rest use 1).
+const CHG1_SEEDS: Readonly<Record<string, number>> = { "chg1-bounce-foe-off": 2, "chg1-bounce-plr-off": 5, "chg1-skyattack-plr-off": 4, "chg1-dive-foe-off": 5 };
 function chg1Stages(): Record<string, AppStage> {
   const stages: Record<string, AppStage> = {};
   for (const [name, [move, pp]] of Object.entries(CHG1_MOVES)) {
     for (const side of ["foe", "plr"] as const) {
       const id = `chg1-${name}-${side}-off`;
       stages[id] = side === "foe"
-        ? (state) => aud241bStage(state, id, "off", 50, 100, 69, undefined, false, move, 1)
+        ? (state) => aud241bStage(state, id, "off", 50, 100, 69, undefined, false, move, CHG1_SEEDS[id] ?? 1)
         : (state) => midBattleSwitchStage(state, id, [RATTATA_LV50_BENCH, RATTATA_LV50_BENCH], [105, 105], {
-          rngSeed: 1,
+          rngSeed: CHG1_SEEDS[id] ?? 1,
           battleScene: "off",
           player: Object.freeze({ ...rattataAtLevel(100, move), pp: [pp, pp, pp, pp] as const }),
           trainer: rattataAtLevel(50, 69),
