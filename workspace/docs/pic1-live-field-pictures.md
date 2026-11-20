@@ -35,6 +35,20 @@ trace: A at 962, `closeElapsed` 0 at 963), which is how the lab rows above map o
   lazy sample lookups); the two healthbox HP rows were the checker's own gap (a hit then a berry heal inside one segment), closed by
   counting the segment's hp-command endpoints. 0 findings after.
 
+## Pins moved (presentation only)
+
+- `tests/randomRoundSoak.test.ts`, frames / render calls only (same battles, turns and outcomes): seven-win seed 21 43_336 -> 43_334
+  (renderCalls 3_042 -> 3_044); full seed 0 18678 -> 19042, seed 1 111140 -> 113091; vanilla seed 0 9209 -> 9205, seed 1 9404 -> 9400;
+  the carry-14 pin seed 14 -> 10 (re-scan 0..49: 10, 17, 27, 47). Cause: pic6's 78-frame cancel close and pic8's 2-frame earlier clock.
+- `tests/factoryRoundBattleOrchestrator.test.ts` "cancels POKéMON": walks the 78-frame close instead of the instant cut.
+- `tests/pfb229FaintReplacementSendIn.test.ts`: MAGBY and Scene OFF now carry the path-A view (Scene OFF without the back animation).
+- `tests/battlesceneSplitEligibility.test.ts`: three canonical-only palette helpers pinned by name (pic1 removed their live caller).
+- Round replay fixtures (`parityMacRoundReplayFixtures`): unchanged and passing.
+
+Full suite on the branch (once, at the end): 16,125 passed, 5 failed; 3 were this branch's and are fixed (contain213 x2: the sample
+guard on placeholder chrome; split eligibility), 2 fail identically on the base 2cd8b3039 (`iss215ToolPixelInstall`:
+`tools/integration/btn2EngineRows.ts` lacks the installer import; `liveSpeciesAudit14Fixes` Substitute fade "player fade" rows).
+
 ## Measured, not fixed here (open)
 
 - **Thunder Punch's lead and tail (Kyle's 6c).** ROM replay of his battle 1 turn 1 (the planning session's rom-drive with frame
