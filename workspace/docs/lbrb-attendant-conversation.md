@@ -31,7 +31,7 @@ press). Soak / goalPlay / `play:random` seeds therefore deal differently from be
 All constants were read off dense oracle captures (every frame 5140..7351 of the happy path, plus a window per branch), not from the
 decomp's script ticks: box opens 5 frames after A; 1 glyph per frame; `\p` first glyph 3 frames after A; `\l` scroll holds the arrow 1 frame, then 4
 ticks x 4 px, third-line glyph 8 frames after A; multichoice windows appear 4 (CHALLENGE / LEVEL) or 3 (YES/NO) frames after the last glyph; per-menu
-clear / first-glyph delays; the LEVEL and YES/NO cursors move one frame after the press (CHALLENGE moves on the press frame); a YES/NO declined to the
+clear / first-glyph delays; every menu's cursor (CHALLENGE too, lbw9) moves one frame after the press; a YES/NO declined to the
 farewell clears one frame later than any other choice; the save-info window opens 10 frames after YES.
 
 ## Consumers
