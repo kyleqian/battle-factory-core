@@ -67,7 +67,7 @@ Kyle plans to make this repo public with its full history (no rewrite, no licens
 ## From the Mac, 2026-11-20 (top layer): Kyle's live-play fixes merged, website on `eb-c3f7c43f5c1a9e62`, frame catcher
 
 - **Kyle played the website on 11-20 and reported gaps.** The Mac fixed them, and they are merged into master with your
-  11-19/20 run (merge `f384faa7d`, no conflicts: your side changed notes only). Merged-tree full suite: 16,247 passed, 0 failed.
+  11-19/20 run (merge `f384faa7d`, no conflicts: your side changed notes only). Merged Mac master `aa4cc49ce` (with snd2 + fcp1 below): `tsc -b` clean; full suite 16,279 passed, 2 failed only from old untracked files in the Mac's main folder (a stale `dist-lib/`, a July scratch file under the ignored `tools/compare/out/`), both pass on a fresh build / clean tree.
   - Sound: cursor and A sounds in the battle action menu and move list; the ball-tray sounds no longer cut each other off
     (voice release + prefetch in `src/audio/player.ts`); SE_EXIT on the first walk into the battle room; the Ice Ball impact
     and effectiveness sound anchor; 187 move sound recordings that were missing; Lobby and briefing sounds.
@@ -81,11 +81,23 @@ Kyle plans to make this repo public with its full history (no rewrite, no licens
 - **Frame catcher** (`tools/frame-catcher/`, see its README): one whole round, engine against ROM, every frame and every sound.
   It is a bug catcher to run now and then on different battles, not a gate. Its README lists its traps (judge a sprite position
   on a frame after the sprite stops; patch the ROM's foe party only after the ROM has built it).
-- **Two Mac sessions are working on the catcher's open findings now** (they come to you in a later delivery; do not start
-  them): pictures (player HP box missing ~1,000 frames after a re-sent mon, the Ingrain heal animation, Spinda's spots, the
-  room dark after the swap screen, the rental name colour, a party slot colour) and sounds (Rollout's sound x10 per hit, the
-  swap-screen and prompt sounds, an extra SE_FAILURE in the party menu, a party sub-menu sound, the summary cry species, the
-  summary music ducking).
+- **The catcher's open findings, fixed and merged too** (merges `fce4577b7` snd2 and `aa4cc49ce` fcp1, Kyle's word; write-ups
+  `docs/snd2-catcher-sounds.md`, `docs/fcp1-frame-catcher-pictures.md`):
+  - Sound: a Pokémon sent in and knocked out in the same turn cries as itself; the swap screen's SUMMARY cries the party
+    Pokémon it shows; the same sound started twice on one frame is one sound. Four sound findings were the catcher's own
+    mistakes (Rollout x10, swap and party menu sounds, SE_FAILURE in the party menu, summary music calls); fixed in the catcher.
+  - Pictures: the player's HP box after a re-sent Pokémon; Ingrain's end-of-turn heal animation and its sounds
+    (`INGRAIN_HEAL`); the foe Spinda's spots; the draft's name red after a summary visit; the party menu's message box while
+    it closes, and "Choose POKéMON or CANCEL." with one Pokémon left.
+  - Confirmed on the ROM, NOT fixed (yours, with the room timing work): the room after the swap screen. The ROM holds black
+    15 frames, fades in over 15, then "Thank you! Your POKéMON swap is complete." (waits for A) before "Right this way,
+    please!"; ours shows the room at once and skips the message. It moves the room's per-frame RNG for every later battle.
+    Details: `docs/fcp1-frame-catcher-pictures.md` "Not fixed" item 4.
+- **Three Mac sessions are working now** (Kyle's word, 11-20; they come to you in a later delivery; do not start them):
+  (1) the battle menus' cursors back on the first entry after a switch-in (`HandleAction_Switch`, `PlayerHandleSwitchInAnim`),
+  and the missing "that's enough! Come back!" recall on a voluntary switch with the foe underground; (2) the trapping moves'
+  end-of-turn animation (`General_TurnTrap`: Fire Spin, Whirlpool, Clamp, Sand Tomb, Wrap/Bind); (3) the catcher's ROM side
+  gets the engine's own player Pokémon (personality, so gender and ability match).
 - **Leads from the Mac sessions, not fixed, not filed** (reports, not all checked on the ROM; yours to check and file, or fold
   into #219): our sound recordings play 1.2-1.45x quieter than the game; A does not speed up text; the attendant menu wrap
   and the save wait; the left pans of Blizzard and sound 132; Ice Ball's 4th and 5th rolls hit late; SELECT move swap;
