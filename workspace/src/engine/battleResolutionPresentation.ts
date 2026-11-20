@@ -1237,7 +1237,9 @@ const SCENE_OFF_MOVEEND_NEXT_USED_GLYPH_ROWS = 1 + ACTION_TRANSITION_ROWS;
  * sta3 (docs/aud249-general-anim-sounds.md): the next action's first print after the MoveEnd receipts. STRINGID_PKMNISCONFUSED is
  * BattleScript_MoveUsedIsConfused's first instruction (attackcanceler jumps there: u = 2), ROM-measured as the same E + 1 + d + n + 6 + u.
  */
-const ACTION_TRANSITION_NEXT_PRINTS: ReadonlySet<string> = new Set(["STRINGID_USEDMOVE", "STRINGID_PKMNISCONFUSED", "STRINGID_PKMNFASTASLEEP", "STRINGID_PKMNWOKEUP"]);
+const ACTION_TRANSITION_NEXT_PRINTS: ReadonlySet<string> = new Set(["STRINGID_USEDMOVE", "STRINGID_PKMNISCONFUSED", "STRINGID_PKMNFASTASLEEP"]);
+/** gsp2: the wake-up print is a transition print in Scene ON only (Scene OFF output is unchanged). */
+const SCENE_ON_ACTION_TRANSITION_NEXT_PRINT = "STRINGID_PKMNWOKEUP";
 
 const ACTION_TRANSITION_WAIT_ROWS: Readonly<Record<string, number>> = Object.freeze({ B_WAIT_TIME_LONG: WAITMESSAGE_LONG_HOLD_FRAMES });
 
@@ -1256,6 +1258,7 @@ function actionTransitionPauseFrames(
   events: readonly BattleKernelSemanticEvent[],
   receiptIndex: number,
   commands: readonly BattleResolutionPresentationCommand[],
+  sceneOn: boolean,
 ): number | null {
   const isMoveEndReceipt = (event: BattleKernelSemanticEvent) =>
     event.payload.kind === "set-battler-sprite-visibility" && event.provenance?.opcodeName === "B_SCR_OP_MOVEEND";
@@ -1280,7 +1283,10 @@ function actionTransitionPauseFrames(
       statusFramesAfter += frames;
       continue;
     }
-    if (next >= e1 || event.payload.kind !== "message" || !ACTION_TRANSITION_NEXT_PRINTS.has(event.payload.messageId)) return null;
+    if (
+      next >= e1 || event.payload.kind !== "message"
+      || !(ACTION_TRANSITION_NEXT_PRINTS.has(event.payload.messageId) || (sceneOn && event.payload.messageId === SCENE_ON_ACTION_TRANSITION_NEXT_PRINT))
+    ) return null;
     used = next;
     usedIsPreMove = event.payload.messageId !== "STRINGID_USEDMOVE";
     break;
@@ -5732,7 +5738,7 @@ export function projectBattleResolutionCommands(
         }));
       }
       const transitionPause = event.provenance?.opcodeName === "B_SCR_OP_MOVEEND"
-        ? actionTransitionPauseFrames(events, index, commands)
+        ? actionTransitionPauseFrames(events, index, commands, (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) === 0)
         : null;
       if (transitionPause !== null) {
         commands.push(Object.freeze({
