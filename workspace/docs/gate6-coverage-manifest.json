@@ -92649,6 +92649,10 @@
           {
             "path": "tests/battleScriptTransformOpcode.test.ts",
             "kind": "tier-1-test"
+          },
+          {
+            "path": "tests/msw1SelectMoveSwap.test.ts",
+            "kind": "tier-1-test"
           }
         ],
         "notes": "State-family coverage is reported independently from move/effect reachability and oracle receipts."
