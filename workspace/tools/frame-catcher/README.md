@@ -49,7 +49,9 @@ round takes about 2 minutes. Five traces at once (`JOBS=5`) take as long as the 
    - each battle-start transition: the frame that builds the opponent's party is stepped again with a trap at
      `GetSpecialBattleTransition` that sets gRngValue for the engine's transition;
    - each battle's opponent party: personality, IVs, ability bit and stats are patched to the engine's (the ROM builds them with VBlank
-     draws in between, which the engine cannot follow);
+     draws in between, which the engine cannot follow), on the frame the battle transition starts: the build can run over several
+     frames, and a patch on a half-built Pokemon is overwritten when the ROM finishes it. At the first turn the whole record (species,
+     experience, level, HP, stats) is checked against the engine's; a mismatch is logged in the report's set-up list;
    - each battle's first turn: gRngValue and gRandomTurnNumber are written to the engine's on the frame the turn's action selection
      starts. Everything after that in the battle is the ROM's own (Frontier battles draw no VBlank RNG).
 
