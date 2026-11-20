@@ -90,6 +90,7 @@ import { natureFromPersonality } from "./opponentGen.ts";
 import { OPPONENT_SUMMARY_FADE_DELAY_FRAMES, OPPONENT_SUMMARY_FADE_FRAMES } from "./midBattleOpponentPartySummaryTiming.ts";
 import { frontSendOutSpriteFrameAtTick } from "../animation/sendOutSpriteFrame.ts";
 import { statsChangeParams } from "../animation/statsChange.ts";
+import { SUBSTITUTE_FADE_LEAD_ROWS } from "./liveSubstituteFade.ts";
 
 export const BATTLE_RESOLUTION_NEXT_COMMAND_HANDOFF_FRAMES =
   BATTLE_COMMAND_ACTION_ENTER_DELAY;
@@ -2388,6 +2389,8 @@ export function createBattleResolutionPresentationRenderView(
     field = applyCompletedCommand(field, completed);
     semiInvulnerableHidden = applyLiveSemiInvulnerableCommand(semiInvulnerableHidden, completed);
     if (completed.type === "message") latestMessage = completed.lines;
+    // btn2: the fade's script clears the box at its start; the next print (FADED) types into the empty box.
+    if (completed.type === "substitute-fade") latestMessage = null;
     if (completed.type === "faint") fainted.add(completed.battler);
     if (completed.type === "switch-in") {
       // The recall receipt hid the outgoing mon's sprite+healthbox; the
@@ -2458,6 +2461,10 @@ export function createBattleResolutionPresentationRenderView(
     && command
     && !withoutCurrentCommand
   ) {
+    if (command.type === "substitute-fade") {
+      latestMessage = null;
+      visibleCharacters = 0;
+    }
     if (command.type === "message") {
       latestMessage = command.lines;
       visibleCharacters = messageCommandVisibleCharacters(command, state.lifecycle.phaseElapsed);
@@ -2527,7 +2534,7 @@ export function createBattleResolutionPresentationRenderView(
       });
     } else if (command.type === "substitute-fade" && fadePresented) {
       effect = Object.freeze({
-        type: "substitute-fade", battler: command.battler, age: state.lifecycle.phaseElapsed,
+        type: "substitute-fade", battler: command.battler, age: Math.max(0, state.lifecycle.phaseElapsed - SUBSTITUTE_FADE_LEAD_ROWS),
         ...(state.liveMoveBattlerX2Input === undefined ? {} : { battlerX2Input: state.liveMoveBattlerX2Input }),
       });
     } else if (command.type === "stats-change" && fieldBattler(field, command.battler).substituteDoll !== true

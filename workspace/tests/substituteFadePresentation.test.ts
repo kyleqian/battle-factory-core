@@ -8,7 +8,8 @@ import {
 import { renderBattleResolutionLiveView, renderBattleResolutionSceneOffView } from "../src/engine/battleScene.ts";
 import { applyLiveBattlerX2Event, LIVE_BATTLER_X2_IDLE, liveBattlerX2EventsOf } from "../src/engine/liveBattlerX2History.ts";
 import {
-  substituteFadeDuration, substituteFadeLayerAt, substituteFadeRenderView, substituteFadeScriptRows,
+  substituteFadeCommandRows, substituteFadeDuration, substituteFadeLayerAt, substituteFadeRenderView, substituteFadeScriptRows,
+  SUBSTITUTE_FADE_LEAD_ROWS,
 } from "../src/engine/liveSubstituteFade.ts";
 import { dominantLiveMoveTimingPhase, LIVE_FAITHFUL_TIMING_MOVE_ANIMATION_IDS, LIVE_MOVE_TIMING_POLICY, LIVE_STATUS_ANIMATION_TIMING_POLICY } from "../src/engine/liveMoveTimingPolicy.ts";
 import { generatedCommandAnimationReplay } from "../tools/integration/generatedCommandAnimationReplay.ts";
@@ -23,7 +24,7 @@ const field = (playerDoll: boolean, opponentDoll: boolean): BattleResolutionDisp
   player: mon("player", 0, 53, playerDoll), opponent: mon("trainer", 1, 42, opponentDoll),
 });
 const fadeCommand = (battler: 0 | 1) => Object.freeze({
-  type: "substitute-fade", eventSequence: 2, battler, timing: { minimumFrames: substituteFadeDuration(battler === 0 ? "player" : "opponent") },
+  type: "substitute-fade", eventSequence: 2, battler, timing: { minimumFrames: substituteFadeCommandRows(battler === 0 ? "player" : "opponent") },
 }) as never;
 const message = (advance: "button" | "automatic") => Object.freeze({ type: "message", eventSequence: 1, lines: ["a", "b"], advance,
   noCursor: false, timing: { minimumFrames: 1, holdFrames: 0 } });
@@ -34,9 +35,11 @@ const stateAt = (f: BattleResolutionDisplayedField, battler: 0 | 1, age: number,
 }) as never;
 
 describe("General_SubstituteFade source rows (prep39 model, dominant VBlank phase)", () => {
-  it("script rows 103 / 101; the command adds the first inactive row and the 2-row OAM tail", () => {
+  it("script rows 103 / 101; the body adds the first inactive row and the 2-row OAM tail; btn2: the command leads it by 11 rows", () => {
     expect([substituteFadeScriptRows("player"), substituteFadeScriptRows("opponent")]).toEqual([103, 101]);
     expect([substituteFadeDuration("player"), substituteFadeDuration("opponent")]).toEqual([106, 104]);
+    expect(SUBSTITUTE_FADE_LEAD_ROWS).toBe(11);
+    expect([substituteFadeCommandRows("player"), substituteFadeCommandRows("opponent")]).toEqual([117, 115]);
   });
 
   it("doll latch, BG copy (alpha every 3 rows, white per row two rows late), invisible, slide back from swap row 0", () => {
@@ -63,9 +66,9 @@ describe("the fade command in the presentation queue (rung a)", () => {
   it("clears the doll at its own start, lasts its duration and draws the fade effect only over a shown doll", () => {
     const subbed = field(true, false);
     expect(substituteDollAtCommandStart(subbed, fadeCommand(0)).player.substituteDoll).toBeUndefined();
-    expect(battleResolutionCommandDuration(fadeCommand(0), subbed)).toBe(106);
-    expect(battleResolutionCommandDuration(fadeCommand(1), subbed)).toBe(104);
-    const view = createBattleResolutionPresentationRenderView(stateAt(subbed, 0, 30));
+    expect(battleResolutionCommandDuration(fadeCommand(0), subbed)).toBe(117);
+    expect(battleResolutionCommandDuration(fadeCommand(1), subbed)).toBe(115);
+    const view = createBattleResolutionPresentationRenderView(stateAt(subbed, 0, 30 + SUBSTITUTE_FADE_LEAD_ROWS));
     expect(view.effect).toMatchObject({ type: "substitute-fade", battler: 0, age: 30 });
     expect(view.field.player.substituteDoll).toBeUndefined();
     // No doll shown at the fade's start (e.g. Scene OFF before the next prompt): the ordinary field for its rows.
@@ -76,18 +79,18 @@ describe("the fade command in the presentation queue (rung a)", () => {
     const subbed = field(false, true);
     const fb = (age: number, live: boolean) => {
       const out = new Uint8Array(240 * 160 * 4);
-      (live ? renderBattleResolutionLiveView : renderBattleResolutionSceneOffView)(out, createBattleResolutionPresentationRenderView(stateAt(subbed, 1, age)));
+      (live ? renderBattleResolutionLiveView : renderBattleResolutionSceneOffView)(out, createBattleResolutionPresentationRenderView(stateAt(subbed, 1, age + SUBSTITUTE_FADE_LEAD_ROWS)));
       return Buffer.from(out).toString("base64");
     };
     for (const age of [0, 10, 40, 60, 90, 103]) expect(fb(age, true)).toBe(fb(age, false));
-    const frames = [0, 10, 40, 60, 90].map((age) => fb(age, false));
+    const frames = [0, 10, 40, 60, 90].map((age) => fb(age + SUBSTITUTE_FADE_LEAD_ROWS, false));
     expect(new Set(frames).size).toBe(5);
     // Elevated GOLBAT: the shadow stays hidden through script rows + 1, back on the command's last row.
-    const viewAt = (age: number) => substituteFadeRenderView(createBattleResolutionPresentationRenderView(stateAt(subbed, 1, age)))!.view;
+    const viewAt = (age: number) => substituteFadeRenderView(createBattleResolutionPresentationRenderView(stateAt(subbed, 1, age + SUBSTITUTE_FADE_LEAD_ROWS)))!.view;
     expect(viewAt(102).postBodyShadowHidden).toBe(true);
     expect(viewAt(103).postBodyShadowHidden).toBe(false);
     expect(viewAt(60).visibility.opponent.sprite).toBe(false);
-    expect(viewAt(90).fieldArt.opponent.origin.x).toBe(createBattleResolutionPresentationRenderView(stateAt(subbed, 1, 90)).fieldArt.opponent.origin.x + 65);
+    expect(viewAt(90).fieldArt.opponent.origin.x).toBe(createBattleResolutionPresentationRenderView(stateAt(subbed, 1, 90 + SUBSTITUTE_FADE_LEAD_ROWS)).fieldArt.opponent.origin.x + 65);
   });
 
   it("x2 history: the fade leaves the fading battler at x2 0 (RATTATA's idle rest does not return)", () => {
@@ -136,8 +139,8 @@ const rulesWithoutSceneMarker = (v: { rules: any }) => {
 };
 
 describe("ordinary route: a substitute breaks", () => {
-  it("JYNX 11/35 [Substitute, ...]: the opponent's Sludge Bomb breaks the player's doll; the fade plays 106 rows before the faded message, next prompt with the mon, Scene ON/OFF parity", () => {
-    const seen = { fadeRows: 0, effectRows: 0, prevType: [] as string[], nextType: [] as string[], dollAfter: [] as boolean[] };
+  it("JYNX 11/35 [Substitute, ...]: the opponent's Sludge Bomb breaks the player's doll; the fade plays 11 + 106 rows before the faded message, next prompt with the mon, Scene ON/OFF parity", () => {
+    const seen = { fadeRows: 0, effectRows: 0, boxRows: [] as number[], afterFade: [] as string[], prevType: [] as string[], nextType: [] as string[], dollAfter: [] as boolean[] };
     const on = generatedCommandAnimationReplay(11, "on", [3, 0, 0], 35, true, true, (state) => {
       const r = state.battleResolutionPresentation;
       if (r?.lifecycle.phase !== "presenting") return;
@@ -146,19 +149,26 @@ describe("ordinary route: a substitute breaks", () => {
       if (command?.type !== "substitute-fade") return;
       const view = createBattleResolutionPresentationRenderView(r);
       seen.fadeRows += 1;
+      if (view.message !== null) seen.boxRows.push(r.lifecycle.phaseElapsed);
       if (view.effect?.type === "substitute-fade") seen.effectRows += 1;
       if (r.lifecycle.phaseElapsed === 0) {
         seen.prevType.push(`${commands[r.commandIndex - 1]?.type}:${(commands[r.commandIndex - 1] as { advance?: string }).advance}`);
         const next = commands[r.commandIndex + 1] as { type: string; substituteFadeBattler?: number };
         seen.nextType.push(`${next.type}:${next.substituteFadeBattler}`);
+        for (const piece of commands.slice(r.commandIndex + 1, r.commandIndex + 3) as unknown as { advance: string; promptGate?: boolean; timing: { holdFrames: number } }[]) {
+          seen.afterFade.push(`${piece.advance}:${piece.promptGate === true}:${piece.timing.holdFrames}`);
+        }
       }
       const fb = new Uint8Array(240 * 160 * 4);
       renderBattleResolutionLiveView(fb, view);
     });
     const off = generatedCommandAnimationReplay(11, "off", [3, 0, 0], 35, true, true);
     expect(on.requests.map((q) => `${q.moveId}:${q.attacker}`).slice(0, 2)).toEqual(["164:0", "188:1"]);
-    expect(seen.fadeRows).toBe(106);
-    expect(seen.effectRows).toBe(106);
+    expect(seen.fadeRows).toBe(117);
+    expect(seen.effectRows).toBe(117);
+    // btn2: the box is empty through the whole fade; the faded print's trailing `waitmessage B_WAIT_TIME_LONG` is a 64-row hold piece.
+    expect(seen.boxRows).toEqual([]);
+    expect(seen.afterFade).toEqual(["button:true:0", "automatic:true:64"]);
     // The queue presents STRINGID_SUBSTITUTEDMG as a button piece (btn1: its `\\p` waits for a new A / B, subp1m); the ROM's frozen cursor is outside the fade's claim.
     expect(seen.prevType).toEqual(["message:button"]);
     expect(seen.nextType).toEqual(["message:0"]);

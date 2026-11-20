@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
-"""subp1m: hpd2Probe variant. usage: subp1mProbe.py <scenario.json> <on|off> <output.json> <totalFrames> <pressFrame|never> [button A|B|START|RIGHT]
+"""subp1m: hpd2Probe variant. usage: subp1mProbe.py <scenario.json> <on|off> <output.json> <totalFrames> <pressFrame[,pressFrame...]|never> [button A|B|START|RIGHT]
+(btn2: pressFrame may be a comma list, each press held 2 frames; every row also carries `tp` = message text printer 0 [active, state, delayCounter,
+scrollDistance, currentX, currentY, currentChar low 16 bits] -- sTextPrinters[0] at 0x020201b0, text.c RENDER_STATE_*.)
 Keeps the scenario's first three trace segments (A, idle 18, A: Fight -> first move), then idles to pressFrame, holds <button> 2 frames, then idles to totalFrames.
 Adds gBattleTypeFlags (`btf`, first row) and gTextFlags bytes (`tf`) to every row.
 (hpd2: per-frame battle-engine RAM of a battle-lab scenario in a fresh direct mGBA process (docs/hpd1-hp-hold.md, hpd2 section).
@@ -28,15 +30,18 @@ PROFILE = {"on": "battle-scene-on", "off": "battle-scene-off"}[MODE]
 BOOT = {"on": "factory.json", "off": "factory-battle-scene-off.json"}[MODE]
 
 
+TP = 0x020201B0
+
+
 def main() -> None:
     raw_req = json.loads(SCENARIO.read_text())
     raw_req["profile"] = PROFILE
     total = int(sys.argv[4])
-    press = None if sys.argv[5] == "never" else int(sys.argv[5])
+    presses = [] if sys.argv[5] == "never" else [int(x) for x in sys.argv[5].split(",")]
     button = sys.argv[6] if len(sys.argv) == 7 else "A"
     segs = raw_req["trace"]["segments"][:3]
     used = sum(x["frames"] for x in segs)
-    if press is not None:
+    for press in presses:
         segs.append({"frames": press - used, "buttons": []})
         segs.append({"frames": 2, "buttons": [button]})
         used = press + 2
@@ -59,7 +64,8 @@ def main() -> None:
         row = {"f": frame, "main": u32(addr("gBattleMainFunc")), "ptr": u32(ptr_a), "exec": u32(exec_a), "anim": u8(act_a),
                "comm": [u8(addr("gBattleCommunication") + i) for i in range(4)], "act": u8(addr("gCurrentActionFuncId")),
                "ctl": [u32(addr("gBattlerControllerFuncs") + 4 * i) for i in range(2)],
-               "tf": [u8(0x03003014 + i) for i in range(4)], "hp": [u16(addr("gBattleMons") + 0x58 * i + 0x28) for i in range(2)], "mhp": [u16(addr("gBattleMons") + 0x58 * i + 0x2C) for i in range(2)]}
+               "tf": [u8(0x03003014 + i) for i in range(4)], "hp": [u16(addr("gBattleMons") + 0x58 * i + 0x28) for i in range(2)], "mhp": [u16(addr("gBattleMons") + 0x58 * i + 0x2C) for i in range(2)],
+               "tp": [u8(TP + 0x1B), u8(TP + 0x1C), u8(TP + 0x1E), u8(TP + 0x1F), u8(TP + 8), u8(TP + 9), u32(TP) & 0xFFFF]}
         rows.append(row)
 
     sample()

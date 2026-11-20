@@ -42,9 +42,17 @@ export function substituteFadeScriptRows(side: Side): number {
   return SWAP_ROW + substituteSwapRows(side, true).length - 1;
 }
 
-/** The presented command's length: script rows + first inactive row + 2-row OAM tail (106 player / 104 opponent). */
+/** btn2: rows from the FADED-less press that released the damaged print to the fade's first script row (ROM: press F -> anim start F + 11). */
+export const SUBSTITUTE_FADE_LEAD_ROWS = 11;
+
+/** The presented command's body length (after the lead): script rows + first inactive row + 2-row OAM tail (106 player / 104 opponent). */
 export function substituteFadeDuration(side: Side): number {
   return substituteFadeScriptRows(side) + TAIL_ROWS;
+}
+
+/** The command's whole length: the lead (the box is blank, the doll still shown) + the body (117 player / 115 opponent). */
+export function substituteFadeCommandRows(side: Side): number {
+  return SUBSTITUTE_FADE_LEAD_ROWS + substituteFadeDuration(side);
 }
 
 /** k of BLDALPHA(16 - k, k) written on RAM row r (null = none written yet). */

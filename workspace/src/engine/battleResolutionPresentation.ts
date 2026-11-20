@@ -48,7 +48,7 @@ import {
 } from "../data/battleIntroStrings.ts";
 import { loadBattleScriptProgram } from "./battleScriptProgram.ts";
 import { recordContainedPresentationError } from "./presentationContainment.ts";
-import { substituteFadeDuration } from "./liveSubstituteFade.ts";
+import { substituteFadeCommandRows } from "./liveSubstituteFade.ts";
 import { statsChangeParams, statsChangeSpan } from "../animation/statsChange.ts";
 import { liveMoveAnimationDuration } from "./liveMoveAnimation.ts";
 import {
@@ -1043,6 +1043,8 @@ const STAT_CHANGE_MESSAGE_IDS: ReadonlySet<string> = new Set([
  * compatibility fallback for older synthetic fixtures without a real program
  * counter; synthetic additions join the family here, never at a render site.
  */
+/** btn2: BattleScript_SubstituteFade returns into the caller's critmessage `waitmessage B_WAIT_TIME_LONG` (the FADED print sets MSG_DISPLAY). */
+const SUBSTITUTE_FADED_MESSAGE_ID = "STRINGID_PKMNSUBSTITUTEFADED";
 export const WAITMESSAGE_LONG_MESSAGE_IDS: ReadonlySet<string> = new Set([
   ...STAT_CHANGE_MESSAGE_IDS,
   "STRINGID_SUPEREFFECTIVE",
@@ -5135,7 +5137,7 @@ export function projectBattleResolutionCommands(
               ? SWITCH_IN_MESSAGE_TIMING
               : (() => {
                 const base = messageTimingFromSourceProvenance(event, sceneOnMoveAnimationSeen, (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0)
-                  ?? (WAITMESSAGE_LONG_MESSAGE_IDS.has(payload.messageId)
+                  ?? (WAITMESSAGE_LONG_MESSAGE_IDS.has(payload.messageId) || payload.messageId === SUBSTITUTE_FADED_MESSAGE_ID
                   ? WAITMESSAGE_LONG_TIMING
                   : MESSAGE_TIMING);
                 const timing = focusPunchPrePassMessageTiming(events, index, base) ?? chargeTurnEmptyBoxTiming(events, index) ?? base;
@@ -5773,7 +5775,7 @@ export function projectBattleResolutionCommands(
         } else if (fade !== null) {
           ordered.push(Object.freeze({
             type: "substitute-fade" as const, eventSequence: fade.sequence, battler: fade.battler,
-            timing: Object.freeze({ minimumFrames: substituteFadeDuration(fade.battler === 0 ? "player" : "opponent") }),
+            timing: Object.freeze({ minimumFrames: substituteFadeCommandRows(fade.battler === 0 ? "player" : "opponent") }),
           }));
         } else if (statsChange !== null && statsChangePresented(field, ordered, statsChange.battler)) {
           ordered.push(Object.freeze({

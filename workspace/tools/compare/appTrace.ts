@@ -1924,8 +1924,24 @@ function hpf4mStages(): Record<string, AppStage> {
   return stages;
 }
 
+// btn2: the subp1m labs (tools/battle-lab/subp1m-<case>-{on,off}.json, hpf4m-subhit-{on,off}.json): Lv50 Rattata player (move) vs a Rattata foe (move, level), seed 1.
+const SUBP1M_CASES: Readonly<Record<string, readonly [string, number, number, number]>> = {
+  subfade: ["subp1m-subfade", 164, 163, 45], roar: ["subp1m-roar", 46, 33, 30], subhit: ["hpf4m-subhit", 164, 33, 12],
+};
+function subp1mStages(): Record<string, AppStage> {
+  const stages: Record<string, AppStage> = {};
+  for (const [labName, playerMove, foeMove, foeLevel] of Object.values(SUBP1M_CASES)) {
+    for (const scene of ["on", "off"] as const) {
+      const id = `${labName}-${scene}`;
+      stages[id] = (state) => aud241bStage(state, id, scene, 50, foeLevel, playerMove, undefined, false, foeMove, 1);
+    }
+  }
+  return stages;
+}
+
 export const APP_STAGES: Readonly<Record<string, AppStage>> = {
   ...hpf4mStages(),
+  ...subp1mStages(),
   // iss216: the anchor deal has no duplicate species; the ROM probe pokes slot 6's monId to slot 1's
   // (tools/probe/stage-draft-same-species-off.py), the engine pokes the same identity (display unchanged).
   "iss216-dup-draft-off": (state) => ({
