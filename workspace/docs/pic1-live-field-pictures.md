@@ -27,9 +27,9 @@ trace: A at 962, `closeElapsed` 0 at 963), which is how the lab rows above map o
 
 ## What the check found (frames checked, findings)
 
-- Round replay fixtures, every frame, all 14 (`ROM_REPLAY_DRAW_CHECK=1`, all Scene OFF): 1,333,000+ frames, **0 findings**.
-- Census battles (`soundCensusRomReplay native`, every frame): seeds 0-24 both scenes - see the step report; 0 findings in the
-  seeds finished at writing.
+- Round replay fixtures, every frame, all 14 (`ROM_REPLAY_DRAW_CHECK=1`, all Scene OFF, 154 battles): 1,434,618 frames, **0 findings**.
+- Census battles (`soundCensusRomReplay native`, every frame): seeds 0-24 in each scene, 50 battles: 448,133 Scene ON + 320,137
+  Scene OFF frames, **0 findings**.
 - Soak, every frame (vary-rng seeds 0-5 both scenes, anchor seeds 0-2): the findings before the fixes were the first room's BUG
   CATCHER (pic2) and SWINUB read by the staged Icy Wind body on the live route (a read the live view did not draw: fixed by the
   lazy sample lookups); the two healthbox HP rows were the checker's own gap (a hit then a berry heal inside one segment), closed by
