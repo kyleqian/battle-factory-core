@@ -1211,3 +1211,73 @@ All other 19 seeds are unchanged (no regression elsewhere; one segment, s5063 re
 No new defect found in the group's own script (General_HeldItemEffect): its intervals are correct. The `-18 .. +27` is one 32-frame wake-up `status` default (rank 1) and a handful of 3 .. 5 frame command leads.
 
 Tooling note: the probe and the per-turn comparison scripts live in `/tmp/gsp1m` (not committed); the engine replay command is `node --experimental-strip-types --no-warnings tools/integration/soundCensusRomReplay.ts replay --seed=<s> --scene=on --setup=.integration/evidence/t2n/<s>-on.setup.json --cmdtrace=1 --out=<f>` (4 s per seed).
+
+## hcr1m (2026-11-20)
+
+Scene OFF controller hit SEs 13 / 12 / 14 (after `hit-animation`; OFF 2,255 = 41 % of the OFF mass) lined up ROM vs app per command, classified by cause, and probed with a temporary patch (reverted; `src/`, `tests/` and `tools/` are unchanged by this step; nothing else was edited; `npm test` was not run, measurement step).
+
+### 1. Method
+
+- Evidence: `.integration/evidence/t2n/<seed>-off.{setup,drive,snd,cmp,engine,frozen-tail}.json` for the 24 OFF seeds (copied to the git-ignored `.integration/evidence/hcr1m/`). ROM per-frame probe `tools/integration/hpd2Probe.py` (main, gBattlescriptCurrInstr, exec flags, anim, hp); app side `soundCensusRomReplay.ts replay --scene=off --setup=... --cmdtrace=1`.
+- Alignment per decision segment k: both sides start at the segment's commitFrame (engine decision vs ROM drive anchor); SE / cry rows are matched by ordered id (SequenceMatcher). This reproduces the scoreboard's OFF numbers exactly: hit rows mass **2,255**, matched-row mass of the remaining families 3,155, all-row 5,410 (the proxy for the probe table below).
+- To read each turn's command stream the cmdtrace rows were given the USEDMOVE print's `provenance.instructionExecution` (u = commands executed from the effect script entry up to the first used-move print), temporarily, via a tooling patch (reverted).
+
+### 2. Where the frames go (per command, seed 7682, segments 58 / 59)
+
+ROM costs: GetWhoStrikesFirst at commit +3, SpecialStatusesClear +4 .. 5, then each battlescript command is one frame, so the first `attackstring` (`BattleScript_HitFromAtkString+1`, `data/battle_scripts_1.s:245`) runs at **commit + 6 + u**. The app emits the first message at a fixed **commit + 9** (the confirm-handoff stage walk, `advanceBattleResolutionConfirmHandoff`, `src/engine/battleResolutionPresentation.ts` ~6231-6345). It is exact for u = 3 only.
+
+| seg | move (effect script) | u | ROM first print | app first message | ROM hit SE (13 / 12) | app hit SE | offset |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 58 | Struggle (`EffectRecoil` 897 -> `EffectHit` 236; recoil + Struggle counter before the hit) | 8 | 14 | 9 | 80 | 75 | **-5** |
+| 59 | SpeedDownHit (`EffectSpeedDownHit` 1048: `setmoveeffect` + `goto EffectHit`) | 6 | 12 | 9 | 76 (12) / 295 (13) | 72 / 291 | **-3 / -4** |
+
+The interval print -> hit SE is identical in ROM and app (71 / 71 rows checked), so the whole offset is the commit -> first-print lead, inherited by every later row of the turn (the row count after the first row is why the mass is large). The ROM rows that gain frames are the commands before the first print that the app collapses into its 9-frame walk: `setmoveeffect` / `goto` / `jumpifnotmove` / `incrementgamestat` (1 frame each), then `attackcanceler` (241), `accuracycheck` (243), `attackstring` (245).
+
+### 3. Classification of the OFF hit mass (2,255)
+
+Cause: the first-print lead, by effect-script class (u = commands from the effect entry to the first used-move print; segment count over the 24 seeds in brackets, u None = no used-move first print):
+
+| u | effect classes | first print (ROM) | vs app 9 | segs |
+| --- | --- | --- | --- | --- |
+| 2 | Earthquake, status moves, RestoreHp, FollowMe, Confuse, Toxic, Yawn, Attract, LowKick, OHKO | +8 | -1 | 188 |
+| 3 | Absorb, Curse, BrickBreak, Sonicboom, LevelDamage | +9 | 0 | 54 |
+| 4 | plain EffectHit | +10 | +1 | 68 |
+| 5 | | +11 | +2 | 12 |
+| 6 | secondary-effect hits (`setmoveeffect` + `goto EffectHit`) | +12 | +3 | 157 |
+| 8 | Struggle, EffectRecoil | +14 | +5 | 44 |
+| 10 .. 17 | SemiInvulnerable charge turn, SolarBeam charge turn (rise 16 .. 18) | +16 .. 23 | +7 .. +14 | 4 |
+| None | no used-move first print (turn starts with a status / ability / wake-up / confusion message, forced / flinch / NoMovesLeft Struggle) | | | 158 |
+
+By hp shape / hold: hit rows with the target hp bar moving make the bulk of the 2,255; holds (Brick Break +63 x2, charge turns) are the long tail, see section 5.
+
+### 4. Probe: used-move print lead = 6 + u (temporary patch, reverted)
+
+Patch (not committed), in `advanceBattleResolutionConfirmHandoff` before the `nextStage` lookup: on the `action-dispatch` stage of a plain `use-move` decision (not forced, not the Focus Punch pre-pass), read u from `state.segments[0].events[0]` when it is a `STRINGID_USEDMOVE` message with `provenance.instructionExecution` in 2 .. 20, then hold the walk for u - 3 extra frames (u > 3) or skip `accuracy-check` for one frame (u = 2). Replayed the 24 OFF seeds, same alignment and metric as section 1 (matched rows 1,128 in both runs: no event added or lost):
+
+| metric | HEAD | patched | change |
+| --- | --- | --- | --- |
+| hit rows summed \|offset\| | 2,255 | 1,458 | **-797 (-35 %)** |
+| all-row summed \|offset\| | 5,410 | 4,154 | **-1,256 (-23 %)** |
+| exact-offset rows (all families) | 126 | 560 | +434 |
+| rows improved / worse | | 643 (-1,426) / 94 (+170) | |
+
+The 94 worse rows are mostly stat SE 245 / 239 rows that were already at a positive offset (the shift moves them further; the lead there is a different cause). Per seed (all before -> after, hit before -> after): 7682 642 -> 419, 484 -> 300; 3738 526 -> 388, 319 -> 201; 6568 366 -> 317, 241 -> 212; 97 343 -> 257, 94 -> 54; 2741 316 -> 260, 157 -> 131; 1415 285 -> 267, 62 -> 54; 648 253 -> 237; 5063 244 -> 165, 128 -> 88; 2230 203 -> 168, 100 -> 80; no seed gets worse in the hit family.
+
+### 5. Residual hit mass after the patch (1,458)
+
+97 rows with |offset| >= 6 hold 1,200 of it. They are not the lead:
+
+- Brick Break +63 x2 (126): screen-break message chain, separate hold.
+- s3738 -39 x2 and -30 after `EffectSpeedDown2` / stat-down; s2741 -33 / -26 / -23 / -20; s7682 -19 x2 (Confuse / Attract turns); s2230 -14; s6568 NoMovesLeft Struggle -14.
+- Charge turns: s310 SolarBeam turn 2 -18; semi-invulnerable -16 / -14 (u 10 .. 17, rise 16 .. 18; the probe cap u <= 20 covers them but the rise is the charge animation, not the print).
+- Turns with no used-move first print (mass 213 + 221 + 15 + 38 + 4): the lead there is whatever message comes first (wake-up, confusion, flinch, ability). Out of the rule below; the Scene ON wake-up section (gsp1m) already covers the 32-frame wake-up default.
+
+### 6. Proposed landing (not done: out of scope for hcr1m)
+
+1. **Rule**: the first used-move message of a plain `use-move` turn appears at commit + 6 + u, u = `provenance.instructionExecution` of the USEDMOVE print (the engine already carries it; `FOCUS_PUNCH_PRE_PASS_ACTION_LEAD_BASE_FRAMES = 5` + u at ~265 / 336 is the same idea for the Focus Punch pre-pass).
+2. **File**: `src/engine/battleResolutionPresentation.ts`, the confirm-handoff stage walk (`CONFIRM_HANDOFF_NEXT`, `advanceBattleResolutionConfirmHandoff` ~6231-6345): either hold `action-dispatch` for u - 3 frames, or replace the fixed walk with the 6 + u lead; keep forced / Focus Punch / no-used-move paths as they are (the Struggle forced path enc276 carries its own +19).
+3. **Expected change**: Scene OFF on the 24 T2 seeds, hit-row mass **2,255 -> about 1,458 (-797)**, all-row **5,410 -> 4,154 (-1,256)**, exact rows 126 -> 560. Scene ON uses the same walk: not measured here (the ON census must be re-run; expect the same sign).
+4. **Pins it will move**: the `confirm-handoff` first-message timing pins in `tests/battleResolutionPresentation.test.ts`, `tests/factoryRoundBattleOrchestrator.test.ts`, `tests/factoryVoluntarySwitchSeam.test.ts`, `tests/presentationStringIssue72Batch2.test.ts` (grep `confirmHandoff` / first message frame 9), the Scene OFF and ON census digests, and any T2 frozen-tail expectation that bakes a first-SE frame. u = 3 turns (Absorb / Curse) are unchanged.
+5. **After it**: re-measure the 94 worse rows (stat 245 / 239 lead), then the residuals of section 5 one by one (Brick Break chain first, 126).
+
+Not measured: Scene ON; the u = 10 .. 17 charge-turn rise split; seeds with no used-move print. Tooling note: scripts live in `/tmp/hcr1m` (`lib.py`, `cmp.py <seed> <k>`, `mass.py`, `first.py`), not committed; evidence copies in the ignored `.integration/evidence/hcr1m/`.
