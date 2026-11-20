@@ -36,6 +36,7 @@ export interface Trace {
   };
   /** Dev-only named state injection consumed by appTrace and stripped here. */
   appStage?: {
+    /** An APP_STAGES key, or "lab" (cln10): derive the staged battle from `oracleBattleLab.scenario` (Rattata-pair labs; see appTrace.ts labBackedStage). */
     readonly id: string;
     readonly frame: number;
     /** The lab's `trainerId` (ROM opponent) when the stage's own orchestrator draw differs; drives the post-battle room sprite. */
