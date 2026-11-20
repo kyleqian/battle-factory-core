@@ -402,7 +402,7 @@ const CHARGE_TURN_EMPTY_BOX_ROW_TIMING = Object.freeze({ minimumFrames: 1, holdF
 export function battleResolutionOpensWithFocusPunchPrePass(events: readonly BattleKernelSemanticEvent[]): boolean {
   return events.find((event) => event.sequence >= 0)?.provenance?.sourceLabel === FOCUS_PUNCH_SETUP_SCRIPT;
 }
-export type BattleStatusIconTiming = Readonly<{ minimumFrames: 1 }>;
+export type BattleStatusIconTiming = Readonly<{ minimumFrames: number }>;
 /**
  * fnt201: BattleScript_FaintTarget / BattleScript_FaintAttacker (data/battle_scripts_1.s:2809-2823) run
  * `playfaintcry` (1 row), `pause B_WAIT_TIME_LONG` (64 rows) and the `dofaintanimation` dispatch (1 row) before the
@@ -1148,6 +1148,7 @@ function messageTimingFromSourceProvenance(
 ): BattleMessageTiming | null {
   const programCounter = event.provenance?.programCounter;
   if (programCounter === undefined || programCounter < 0) return null;
+  if (!sceneOff && event.provenance?.sourceLabel === WAKE_UP_SCRIPT) return WAKE_UP_MESSAGE_TIMING;
   const following = BATTLE_SCRIPT_PROGRAM.instructions[programCounter + 1];
   if (
     following?.opcodeName === "B_SCR_OP_WAITMESSAGE"
@@ -1241,6 +1242,8 @@ const SCENE_OFF_MOVEEND_NEXT_USED_GLYPH_ROWS = 1 + ACTION_TRANSITION_ROWS;
  * BattleScript_MoveUsedIsConfused's first instruction (attackcanceler jumps there: u = 2), ROM-measured as the same E + 1 + d + n + 6 + u.
  */
 const ACTION_TRANSITION_NEXT_PRINTS: ReadonlySet<string> = new Set(["STRINGID_USEDMOVE", "STRINGID_PKMNISCONFUSED", "STRINGID_PKMNFASTASLEEP"]);
+/** gsp2: the wake-up print is a transition print in Scene ON only (Scene OFF output is unchanged). */
+const SCENE_ON_ACTION_TRANSITION_NEXT_PRINT = "STRINGID_PKMNWOKEUP";
 
 const ACTION_TRANSITION_WAIT_ROWS: Readonly<Record<string, number>> = Object.freeze({ B_WAIT_TIME_LONG: WAITMESSAGE_LONG_HOLD_FRAMES });
 
@@ -1259,6 +1262,7 @@ function actionTransitionPauseFrames(
   events: readonly BattleKernelSemanticEvent[],
   receiptIndex: number,
   commands: readonly BattleResolutionPresentationCommand[],
+  sceneOn: boolean,
 ): number | null {
   const isMoveEndReceipt = (event: BattleKernelSemanticEvent) =>
     event.payload.kind === "set-battler-sprite-visibility" && event.provenance?.opcodeName === "B_SCR_OP_MOVEEND";
@@ -1283,7 +1287,10 @@ function actionTransitionPauseFrames(
       statusFramesAfter += frames;
       continue;
     }
-    if (next >= e1 || event.payload.kind !== "message" || !ACTION_TRANSITION_NEXT_PRINTS.has(event.payload.messageId)) return null;
+    if (
+      next >= e1 || event.payload.kind !== "message"
+      || !(ACTION_TRANSITION_NEXT_PRINTS.has(event.payload.messageId) || (sceneOn && event.payload.messageId === SCENE_ON_ACTION_TRANSITION_NEXT_PRINT))
+    ) return null;
     used = next;
     usedIsPreMove = event.payload.messageId !== "STRINGID_USEDMOVE";
     break;
@@ -1610,6 +1617,55 @@ function sceneOffStatusFrames(
   return print - used + 1;
 }
 /**
+ * gsp2 (docs/aud251-s11-scoreboard-refresh.md "gsp2"; ROM per-frame probe on the 25 Scene ON seeds): `BattleScript_MoveUsedWokeUp`
+ * (`bicword; printfromtable gWokeUpStringIds; waitmessage B_WAIT_TIME_LONG; updatestatusicon BS_ATTACKER; return`) is entered by
+ * attackcanceler's sleep check, which writes the cleared status (the `status` receipt) and prints two rows later. The status write
+ * draws nothing in Scene ON (no status animation follows).
+ */
+const WAKE_UP_SCRIPT = "BattleScript_MoveUsedWokeUp";
+/** The wake-up print's instructionExecution when `events[statusIndex]` is attackcanceler's sleep-clearing status write, else null. */
+function wakeUpPrintExecution(events: readonly BattleKernelSemanticEvent[], statusIndex: number): number | null {
+  const status = events[statusIndex]!;
+  if (status.payload.kind !== "set-battler-status-data" || status.provenance?.opcodeName !== "B_SCR_OP_ATTACKCANCELER") return null;
+  const print = events[statusIndex + 1];
+  const icon = events[statusIndex + 2];
+  if (
+    print === undefined || icon === undefined || print.payload.kind !== "message" || print.provenance?.sourceLabel !== WAKE_UP_SCRIPT
+    || icon.payload.kind !== "status-icon-update" || icon.provenance?.sourceLabel !== WAKE_UP_SCRIPT
+  ) return null;
+  return print.provenance.instructionExecution ?? null;
+}
+/**
+ * gsp2: rows from commit to the first action's first print: the action dispatch (`SpecialStatusesClear` ...: the script starts on row 6)
+ * plus the print's instructionExecution u (one row each, the first print on 6 + u: ROM 9 / 12 / 17 for u = 3 / 6 / 11). The turn's
+ * first command starts on commit + 9 (u = 3), so a wake-up's status command lasts u - 3 and its print starts on the ROM's row.
+ */
+const TURN_START_PRINT_BASE_U = 3;
+/**
+ * gsp2: the wake-up print's `waitmessage B_WAIT_TIME_LONG` completes, `updatestatusicon` executes and the box returns two rows after
+ * the 64-row hold (ROM print -> icon rows 82 against the 80 of the plain `WAITMESSAGE_LONG_TIMING` for every wake-up, both prints'
+ * glyph counts alike).
+ */
+const WAKE_UP_MESSAGE_TAIL_ROWS = 2;
+const WAKE_UP_MESSAGE_TIMING = Object.freeze({
+  minimumFrames: 0,
+  holdFrames: WAITMESSAGE_LONG_HOLD_FRAMES + WAKE_UP_MESSAGE_TAIL_ROWS,
+} as const);
+/**
+ * gsp2: the wake-up's `updatestatusicon` row to the next print: `return` and the move script's rows up to its first print run one per
+ * frame (ROM icon -> next print = instructionExecution delta + 1 on 22 of 23 wake-ups; the icon command's own 1 frame is that +1).
+ */
+function wakeUpStatusIconFrames(events: readonly BattleKernelSemanticEvent[], iconIndex: number): number | null {
+  const icon = events[iconIndex]!;
+  if (icon.provenance?.sourceLabel !== WAKE_UP_SCRIPT || icon.payload.kind !== "status-icon-update") return null;
+  const next = events[iconIndex + 1];
+  const from = icon.provenance.instructionExecution;
+  const to = next?.provenance?.instructionExecution;
+  if (next === undefined || next.payload.kind !== "message" || from === undefined || to === undefined || to <= from) return null;
+  return to - from + 1;
+}
+
+/**
  * sa125 SA3 (docs/sa125-status-animation-command.md): in Scene ON a status-data receipt whose battler's statusanimation runs
  * in the same execution -- right before the print (move / ability infliction: status, statusanimation, print) or right
  * after it (sleep / frozen turns: status, print, waitmessage, statusanimation) -- draws nothing itself either: the ROM
@@ -1622,6 +1678,8 @@ function sceneOnStatusFrames(events: readonly BattleKernelSemanticEvent[], statu
   const status = statusEvent.provenance?.instructionExecution;
   if (status === undefined || statusEvent.payload.kind !== "set-battler-status-data") return null;
   const battler = statusEvent.payload.battler;
+  const wakeUpPrint = wakeUpPrintExecution(events, statusIndex);
+  if (wakeUpPrint !== null) return wakeUpPrint - status;
   let print: number | null = null;
   let animated = false;
   let execution = status;
@@ -2268,6 +2326,10 @@ const STATUS_TIMING = Object.freeze({ minimumFrames: 32 } as const);
  * one callback, independent of any skipped Scene-OFF status animation.
  */
 const STATUS_ICON_TIMING = Object.freeze({ minimumFrames: 1 } as const);
+function wakeUpIconTiming(events: readonly BattleKernelSemanticEvent[], iconIndex: number) {
+  const frames = wakeUpStatusIconFrames(events, iconIndex);
+  return frames === null ? null : Object.freeze({ minimumFrames: frames });
+}
 /**
  * ISSUES #78: the mid-battle voluntary switch-in span. `Cmd_switchinanim`
  * (`reference/pokeemerald/data/battle_scripts_1.s:3122`) starts the
@@ -5597,7 +5659,9 @@ export function projectBattleResolutionCommands(
       const sceneOffStatus = (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0
         || event.provenance?.opcodeName === "B_SCR_OP_CLEAREFFECTSONFAINT"
         ? sceneOffStatusFrames(events, index, pauseOpenerIndex, commands.length - pauseOpenerCommands)
-        : sceneOnStatusFrames(events, index);
+        : index === 0 && wakeUpPrintExecution(events, index) !== null
+          ? Math.max(0, wakeUpPrintExecution(events, index)! - TURN_START_PRINT_BASE_U)
+          : sceneOnStatusFrames(events, index);
       commands.push(Object.freeze({
         type: "status",
         eventSequence: event.sequence,
@@ -5637,7 +5701,9 @@ export function projectBattleResolutionCommands(
         battler: singlesBattler(payload.battler, "status icon update"),
         status1: payload.status1,
         status2: payload.status2,
-        timing: STATUS_ICON_TIMING,
+        timing: (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) === 0
+          ? wakeUpIconTiming(events, index) ?? STATUS_ICON_TIMING
+          : STATUS_ICON_TIMING,
       }));
       continue;
     }
@@ -5676,7 +5742,7 @@ export function projectBattleResolutionCommands(
         }));
       }
       const transitionPause = event.provenance?.opcodeName === "B_SCR_OP_MOVEEND"
-        ? actionTransitionPauseFrames(events, index, commands)
+        ? actionTransitionPauseFrames(events, index, commands, (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) === 0)
         : null;
       if (transitionPause !== null) {
         commands.push(Object.freeze({

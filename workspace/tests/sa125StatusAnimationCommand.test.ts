@@ -278,6 +278,7 @@ describe("sa125: production routes (census seeds, Scene ON vs OFF, same gameplay
   it("SA3: a Scene ON status command followed by its battler's status animation lasts the Scene OFF frames; the rest keep 32", () => {
     const table = new Map<string, Set<string>>();
     let faintClears = 0;
+    const wakeUps: string[] = [];
     for (const seed of SEEDS) {
       const on = battleSegments(seed, "on").flatMap((s) => s.commands.map((c: any, i: number) => ({ c, next: s.commands[i + 1], events: s.events })));
       const off = battleSegments(seed, "off").flatMap((s) => s.commands);
@@ -292,7 +293,14 @@ describe("sa125: production routes (census seeds, Scene ON vs OFF, same gameplay
           || (following[0]?.payload.kind === "message" && following[1]?.payload.kind === "status-animation" && following[1].payload.battler === x.c.battler);
         // rep203 (fnt201, docs/fnt201-faint-timing.md): the faint script's `cleareffectsonfaint` status is one instruction row in both scenes (pinned, not hidden).
         const faintClear = x.events[at].provenance?.opcodeName === "B_SCR_OP_CLEAREFFECTSONFAINT";
-        const want = faintClear ? 1 : animated ? offStatus[k].timing.minimumFrames : 32;
+        // gsp2 (docs/aud251-s11-scoreboard-refresh.md "gsp2"): attackcanceler's sleep-clearing status write draws nothing in Scene ON. Mid-turn it lasts the
+        // rows to the wake-up print; as the turn's first event it lasts u - 3 (u = the print's instructionExecution: the ROM's first print is on 6 + u and
+        // the turn's first command starts on commit + 9).
+        const wakeUp = x.events[at].provenance?.opcodeName === "B_SCR_OP_ATTACKCANCELER" && print === "STRINGID_PKMNWOKEUP";
+        const wakeUpExec = wakeUp ? x.events[at + 1].provenance.instructionExecution : 0;
+        const wakeUpRows = wakeUp ? wakeUpExec - x.events[at].provenance.instructionExecution : 0;
+        const want = faintClear ? 1 : animated ? offStatus[k].timing.minimumFrames : wakeUp ? (at === 0 ? Math.max(0, wakeUpExec - 3) : wakeUpRows) : 32;
+        if (wakeUp) wakeUps.push(`${at === 0 ? `head u${wakeUpExec}` : `mid ${wakeUpRows}`}->${x.c.timing.minimumFrames}`);
         expect(x.c.timing.minimumFrames, `seed ${seed} status ${k} ${print}`).toBe(want);
         if (faintClear) faintClears += 1;
         const key = `${print}|${animated}`;
@@ -306,7 +314,9 @@ describe("sa125: production routes (census seeds, Scene ON vs OFF, same gameplay
     expect(t["STRINGID_PKMNBADLYPOISONED|true"]).toEqual(["32->2"]);
     expect(t["STRINGID_PKMNFASTASLEEP|true"]).toEqual(["32->1"]);
     expect(t["STRINGID_TARGETFAINTED|false"]).toEqual(["32->1"]); // rep203: fnt201's cleareffectsonfaint row (was 32->32)
-    for (const k of ["STRINGID_PKMNWOKEUP|false", "STRINGID_PKMNWENTTOSLEEP|false"]) expect(t[k], k).toEqual(["32->32"]);
+    expect(t["STRINGID_PKMNWENTTOSLEEP|false"]).toEqual(["32->32"]);
+    // gsp2: the table was 32->32 for every wake-up; now the rule's frames (head: u - 3; mid-turn: the rows to the print).
+    expect([...new Set(wakeUps)].sort()).toEqual(["head u3->0", "head u6->3", "head u8->5", "mid 2->2"]);
   });
 });
 

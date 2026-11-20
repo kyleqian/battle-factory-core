@@ -360,7 +360,7 @@ function play(initial: any, record: boolean, patchRng: number | null = null, pla
       const key = cmd === undefined || res.lifecycle?.phase !== "presenting" ? "" : `${res.segmentIndex}.${res.commandIndex}`;
       if (key !== cmdTrace.last) {
         cmdTrace.last = key;
-        if (cmd !== undefined && key !== "") cmdTrace.rows.push([frame, res.segmentIndex, res.commandIndex, cmd.type, cmd.battler ?? null, cmd.from ?? null, cmd.to ?? null, cmd.timing?.leadFrames ?? null, cmd.timing?.bodyLeadFrames ?? null, cmd.animation ?? null]);
+        if (cmd !== undefined && key !== "") cmdTrace.rows.push([frame, res.segmentIndex, res.commandIndex, cmd.type, cmd.battler ?? null, cmd.from ?? null, cmd.to ?? null, cmd.timing?.leadFrames ?? null, cmd.timing?.bodyLeadFrames ?? null, cmd.animation ?? null, cmd.timing?.minimumFrames ?? null, cmd.before ?? null, cmd.after ?? null]);
       }
     }
     if (frame0 !== null && state.battle) {

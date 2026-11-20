@@ -1408,3 +1408,76 @@ So the fixed commit + 9 is pixel-exact for the first glyph on these u = 2 turns,
 **Gates**: `npm run typecheck` 0, `npm run build` 0, `npm run test:gate` 360 files / 2,834 tests green, the 67 files grepping `confirmHandoff` green (642 tests), `tests/lbrd.test.ts` and `tests/randomRoundSoak.test.ts` green after the re-pins.
 
 **Papercuts**: the compare-trace app stages are a hard-coded registry in `tools/compare/appTrace.ts` (`APP_STAGES`; `hcr1bStages()` added), so a new lab trace needs a code change; PIL exists only in `vendor/mgba-venv`'s python.
+
+## gsp2 / gsp2b: Scene ON wake-up presentation rule, re-pins, census (2026-11-20)
+
+Branch `worker/integration-20261120-140843`; base `94c2a6da6`, rule commit `66ade13b6` (gsp2), final fix `27acadfce` (gsp2b).
+
+### The rule (Scene ON only)
+
+`BattleScript_MoveUsedWokeUp` is entered by attackcanceler's sleep check: the cleared status write (the `status` receipt), then `STRINGID_PKMNWOKEUP`, then `updatestatusicon`. ROM per-frame probe on the 25 t2n Scene ON seeds:
+
+| piece | rule | constant |
+|---|---|---|
+| turn-start status head | the status command lasts `print instructionExecution u - 3` | `TURN_START_PRINT_BASE_U = 3` |
+| mid-turn wake | the status command lasts `print - status` executions | none |
+| transition into the wake-up print | `STRINGID_PKMNWOKEUP` is a transition print of `actionTransitionPauseFrames`, **Scene ON only** | `SCENE_ON_ACTION_TRANSITION_NEXT_PRINT` |
+| wake-up message tail | 64 + 2 hold | `WAKE_UP_MESSAGE_TAIL_ROWS = 2` |
+| wake-up `status-icon` | instructionExecution delta to the next print + 1 | `wakeUpStatusIconFrames` |
+
+### Defect found and fixed in gsp2b
+
+The first census of `66ade13b6` against `94c2a6da6` showed Scene OFF **not** identical: 11 of 100 battles (seeds 13, 17, 19, 46, 48, 52, 60, 64, 65, 87 ...) gained an inserted `move-animation` pause (9 .. 18 frames, `eventsDigest` equal). Cause: `ACTION_TRANSITION_NEXT_PRINTS` is the one rule for both scene modes, so adding `STRINGID_PKMNWOKEUP` to it inserted the transition pause in Scene OFF too. `27acadfce` moves it to a Scene ON only constant (the caller passes `(hitMarker & NO_ANIMATIONS) === 0`). Scene OFF 0..99 after the fix: 100 / 100 battles identical to base (`rst197CensusDelta.py`: bad 0).
+
+### Re-pins (old -> new)
+
+| test | old | new |
+|---|---|---|
+| `tests/randomRoundSoak.test.ts` "ISSUES #89 ... Baton Pass" | `runSeed(12, ...)`: seed 12 no longer commits Baton Pass (0 commits in 80,000 frames) | `runSeed(6, ...)`: `tools/soak/batonPassSearch.ts --seeds 0:40 --parallel 3` candidates 6, 16, 35, 38; seed 6 lowest (4 commits, first 61360, halt 61558, LEDIAN, battleIndex 0) |
+| `tests/sa125StatusAnimationCommand.test.ts` SA3 seed 19 `STRINGID_PKMNWOKEUP` status command | 32 | the rule: head `u - 3` (`head u3->0, u6->3, u8->5`), mid-turn `mid 2->2`; `STRINGID_PKMNWENTTOSLEEP|false` stays `32->32` |
+
+No other soak / lbrd pin moved (every test grepping STATUS_TIMING / minimumFrames / HELD_ITEM_EFFECT / hie1 / sa125 / wake / WOKEUP: 95 files, 2,155 tests, green).
+
+### Census 0..199 Scene ON (base `94c2a6da6` vs `27acadfce`)
+
+- `eventsDigest` and `error` identical on 200 / 200 battles; 162 battles identical command lists, 38 changed (all wake-up turns).
+- Command types: the only type-sequence change is **76 inserted action-transition `move-animation` pauses** (27 battles; 9 x18, 10 x10, 11 x10, 12 x21, 13 x1, 14 x12, 15 x2, 18 x2 frames), each directly before a `sprite-visibility` MoveEnd run, none anywhere else.
+- Changed commands per rule in the 11 type-aligned changed battles (24 wake-ups): head / mid `status` 32 -> rule (-32 x11, -31 x2, -30 x8, -29 x1, -24 x2); wake-up `message` +2 x24; wake-up `status-icon` 1 -> 4 / 5 / 6 (+3 x17, +4 x6, +5 x1). The 27 battles with inserted pauses were checked for type sequence only, not histogrammed.
+- Sound (`soundCensusDelta.py` arm vs arm): 162 identical, 38 seeds with the same event sequence and moved frames. T1 (`--t1` on both arms): exact 54,005, known-offset 0, missing 0 (gated / declined / cry-task / other), extra 0, unclassified 0, identical on both arms; only the "action-transition pause" command count rises 2,827 -> 2,903 (+76).
+
+### T2 (25 t2n Scene ON seeds, `soundScoreboard.py`)
+
+| arm | offset mass | exact rows | offset rows | missing / extra |
+|---|---|---|---|---|
+| base `94c2a6da6` | 32,966 | 980 | 4,897 | 0 / 0 |
+| wake-up rule | **28,701** | **997** | 4,880 | 0 / 0 |
+| wake-up rule + held-item item 2 | not landed (below) | | | |
+
+The scoreboard ran on `66ade13b6`; `27acadfce` only gates a Scene ON constant behind the Scene ON flag, and the Scene ON census numbers above are the same on both tips.
+
+### Six rows the rule made worse (seeds 2230 / 8612)
+
+Report only, not changed. Before the rule, every wake-up interval defaulted to 32 frames, and on these turns that default happened to land close to two short non-wake intervals: seed 2230's charging-turn gap and seed 8612's Rest turn. The rule shortens the wake-up interval correctly, which exposes the two other intervals as the real offset; they are not wake-up rows and are outside this rule.
+
+### gsp1m landing item 2 (held-item restart / after-status-icon leads): measured, **not landed**
+
+Env-knob sweep over the held-item lead (T2 mass, 25 seeds; wake-up rule baseline 28,701):
+
+| variant | mass | exact |
+|---|---|---|
+| restart lead -2 / +2 / +4 / +6 | 29,033 / 28,549 / 28,631 / 28,929 | 997 / 1,017 / 997 / 1,002 |
+| continue lead -3 / +3 / +6 / +9 | 29,218 / 28,312 / 28,195 / 28,218 | 995 / 995 / 989 / 989 |
+| after-status extra -4 / +4 / -8 / +8 | 28,841 / 28,561 / 28,541 / 28,541 | 997 / 1,012 / 997 / 997 |
+| lead after a `message` command -4 / -6 (restart and continue) | 29,541 / 30,361 | 1,020 / 970 |
+| restart lead after `sprite-visibility` +3 | 28,471 | 1,014 |
+| continue lead after `sprite-visibility` +3 / after `message` +6 | 28,422 / 28,701 | 995 / 997 |
+
+Trimming leads (gsp1m's hypothesis) **worsens** mass everywhere (restart -2 +332, continue -3 +517, message -4 +840). The variants that lower mass add frames (continue +3 .. +9, restart +2), which contradicts the hie1 ROM labs (leftovers / sitrus 229, shellbell 223, cheri 192, `tests/hie1HeldItemEffect.test.ts`); the held-item group offset is inherited from other commands (hp bar / turn-end intervals). hie1 constants (214 / 15 / 9 / +1) are unchanged; `heldItemEffectExecutionsAndLead` is shared with Scene OFF, so any later change must be Scene ON only. Item 3 not started.
+
+### Gates
+
+`npm run typecheck` 0; `npm run build` 0; `npm run test:gate` 360 files / 2,832 tests green; grep-matched tests 95 files / 2,155 tests green; `npm run soak -- --policy vanilla --seeds 0:20` 20 / 20 OK and `--scene on --parallel 4` 20 / 20 OK.
+
+### Oracle compare trace
+
+Not obtained: no existing lab keeps the engine's sleep duration in step with the oracle past the first turn. A 3-turn extension of `lse1-hypnosis-player-on` is in step at frame ~1690 (0.6 % diff) but the oracle foe wakes on turn 2 and the engine's on turn 3 (oracle player HP 93 / 105 against the engine's 105 / 105 at the wake-up frame), so the frames cannot be paired.
