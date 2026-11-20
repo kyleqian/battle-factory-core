@@ -2059,3 +2059,20 @@ current app stage should be rejected before replay.
   rebuildable from the arm's commit): 62 % used after. Census tooling could symlink node_modules and delete the tree after scoring.
 - **The probe's `via` names only the nearest preceding global symbol** (aud259, ~10 min): a local static such as `AnimBlockX_Step` shows as `AnimTask_MonToSubstitute`, which made t2cls call the seed-165 window "unidentified". Read `via` as a hint, confirm by the script pointer.
 - **Supervisor briefs quoted T1 "missing-gated" bases that the tool does not print** (aud257, ~5 min): `soundCensusDelta.py --t1` splits gated / other, and a row can move between them; quote both numbers from the tool's own output.
+
+## 2026-11-20 run (CAX31 supervisor + workers)
+
+- **`randomRoundSoak.ts` has no `--help`: asking for it starts a real default soak** (lead2), and it prints per-seed lines only at the end, so a run cut by a timeout leaves an empty log
+  (hpf5, shd1 ~50 min waiting, t2n). Briefs now warn; a `--help` and incremental per-seed output would remove both.
+- **Two `tsc -b` in parallel still OOM-kill each other (exit 137) when a worktree predates the typecheck `flock`, or via `npm run build`** (bgm1 ~25 min, hpf5 one rerun): build's tsc is not
+  behind the lock. Supervisor kept to two workers + one suite after it.
+- **Timing changes keep moving pins outside `test:gate`**: lead2 (sgl138 / aud252 / aud248), ice2 (`liveIceBallAdapter`), btn2 (`iss215ToolPixelInstall`, a new tool without the pixel
+  installer) were all found only by the supervisor's full suite. Adding a test file also reshuffles `tools/test/test-gate.list` (ice2: two files left the gate) until `generateTestGate.ts` is rerun.
+- **A supervisor merge into the main tree while a main-tree worker was editing failed with "Unable to write index"** and left `MERGE_HEAD` with nothing applied (supervisor removed the
+  merge state files by hand). Do not merge into the main tree while a ts worker runs; merge worktree branches between main-lane steps.
+- **`lsd194Census.sh` archives committed trees only** (ice2 ~5 min) and has no documented ON 0..199 + OFF 0..99 pair command (lead4 ~10 min); `soundCensusDelta.py --t1` opens
+  `src/data/gen/anim-sound-timing.json` by relative path (run it from `workspace/`, btn2).
+- **Exact Ice Ball lend checks need the ice72 / prep46 ROM probes deleted in cln237** (ice2 ~40 min): recover from `git show 54c5686f0^` if a later step needs them.
+- **The T2 sound scoreboard does not fit a 10-minute tool call above 2 seeds** (lse4, t2n): run it under `nohup` with a per-seed result file.
+- **`prehunt.py` swallows a failed lab request's stderr and reuses a stale `su.json`**, and a stage file's `level` is ignored by the engine rebuild unless the new guard throws (rrh5).
+- **A run's own sed slip bloated `docs/aud251-s11-scoreboard-refresh.md` to 62 MB** (`b0e4cf53d`, 2026-11-19, text repeated at every character; t2n restored it): check `git diff --stat` size on doc edits made by scripts.

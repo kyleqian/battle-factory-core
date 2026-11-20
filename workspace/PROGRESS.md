@@ -22,8 +22,13 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   (e.g. silver-first-slow 1,239 -> 1,622). Open: LOGO_WIGGLE, LOGO_WAVE's older mismatch.
 - **Gameplay (item 0d):** run-start replay on `0d2973b40`: pool **44 / 44** (1,346 states), stages **94 / 94**. Luck day 4: 7 / 7 ROM match promoted (`0d2973b40`); rrh5 (hand-built set-ups) +9;
   shd1: **Shedinja max HP 1** (CalculateMonStats; `src/engine/stats.ts` `calculateMaxHp`): the only engine rule change, census 0..999 both scenes 0 changed (set 21 is outside every Factory rental
-  range, battle_factory.c:169: lab parties only). Rare rules **66 -> 83 / 110**. WIND-DOWN REPLAY: see Gates.
-- **Gates (final engine `17f2a47e8`):** GATES_PENDING
+  range, battle_factory.c:169: lab parties only). Rare rules **66 -> 83 / 110**. Wind-down replay: see Gates.
+- **Gates (final engine `17f2a47e8`):** vanilla 0:20 OFF **20 / 20**, ON **20 / 20**; 0:60 default / winning / winning-swap **60 / 60** each; varied-RNG winning carry 0 / 14 / 28 + winning-swap
+  carry 0 **100 / 100** each (0 crash / 0 hang everywhere). Full suite on `17f2a47e8` (2 workers, beside the soaks): **16,112 passed, 3 failed**, all three fixed test / tool-side after it and re-run
+  green: `liveIceBallAdapter` x2 (ice2 A now draws an unknown lend approximately; `1d304ea6e`) and `iss215ToolPixelInstall` (btn2's new tool lacked the pixel installer; `452e5415d`). Earlier full
+  suites: `41ccb0884` 16,048 / 0; `90e6aaba1` 16,073 / 2 (lead2 pins, fixed by lfx1); `29fd7cf34` 16,090 / 5 (merge pins, fixed by pin1); `29688b8cd` **16,099 / 0**. typecheck / build / build:lib 0.
+  **Wind-down replay** on `17f2a47e8` (shd1 is an engine rule change): pool **44 / 44** (1,312 states), stages **108 / 108** (`docs/replay-ledger.md`). `play:random --minutes 10 --scene both --lobby-new-challenge`: ON 40 battles / 19 swaps,
+  OFF 62 / 23; **0 page / console errors, 0 overlays**.
 - **Cleanup:** cln9 (5 unread scratch JSONs; 109 one-off scripts kept: tracked receipts name / hash them as their generator, `docs/cln9-oneoff-scripts.md`). The aud251 doc's 62 MB sed corruption
   (`b0e4cf53d`, last run) undone by t2n (177 KB). Disk: ~33 GB of census `tree/` dirs pruned (`.integration/evidence/TREES-PRUNED-20261120.txt`).
 - **Lapse:** lead3's worktree was removed before its `.integration` evidence was copied (census arms lost; numbers are in `docs/lead1m-rule-lead-design.md` "lead3", log kept).
