@@ -264,24 +264,38 @@ class RoundTest(unittest.TestCase):
     """Round 2 and later (fcr2): the ROM's round from curChallengeBattleNum, the GO ON roll guard, the deal traps' arming."""
 
     def test_the_round_steps_when_the_battle_number_goes_back_to_0_and_stays(self):
-        rc = fc.RoundCounter(settle=3)
+        rc = fc.RoundCounter(settle=3, settle_step=1)
         seen = []
-        # round 1: 0..6, the Lobby after the 7th win (7), factory_init at the save (0, settles after 3 frames), round 2: 0, 1, 6, 7
-        for bn in [0, 0, 1, 2, 3, 4, 5, 6, 7, 7, 0, 0, 0, 0, 1, 6, 7]:
+        # round 1: 0..6, the Lobby after the 7th win (7), factory_init at the save (0, settles after 3 frames), round 2: 0, 1, 2, 3
+        for bn in [0, 0, 1, 2, 3, 4, 5, 6, 7, 7, 0, 0, 0, 0, 1, 2, 3]:
             stepped = rc.update(bn)
             seen.append((rc.round, rc.g(), stepped))
         self.assertEqual([r for r, _, _ in seen], [0] * 12 + [1] * 5)
-        self.assertEqual([x for _, x, _ in seen], [0, 0, 1, 2, 3, 4, 5, 6, 7, 7, 7, 7, 7, 7, 8, 13, 14])
+        self.assertEqual([x for _, x, _ in seen], [0, 0, 1, 2, 3, 4, 5, 6, 7, 7, 7, 7, 7, 7, 8, 9, 10])
         self.assertEqual([i for i, (_, _, st) in enumerate(seen) if st], [12])
         self.assertEqual(rc.blips, [])
 
+    def test_a_new_challenge_after_a_loss_is_a_round_too(self):
+        rc = fc.RoundCounter(settle=2, settle_step=1)
+        for bn in [0, 1, 2, 2, 0, 0, 0]:  # lost battle 3, a new challenge from the Lobby
+            rc.update(bn)
+        self.assertEqual((rc.round, rc.g()), (1, 7))
+
     def test_a_blip_of_the_battle_number_is_not_a_round(self):
-        # seed 23 Scene OFF: battle number 4, a lower value for a frame or two while battle 5 is set up, then 4 again
-        rc = fc.RoundCounter(settle=3)
-        for bn in [3, 4, 4, 2, 4, 0, 0, 4, 5]:
+        # seed 23 Scene OFF: battle number 4, 0 for a frame while battle 5 is set up (the save blocks being moved), then 4 again
+        rc = fc.RoundCounter(settle=3, settle_step=2)
+        for bn in [3, 3, 4, 4, 4, 2, 4, 0, 0, 4, 5, 5, 5]:
             rc.update(bn)
         self.assertEqual((rc.round, rc.g()), (0, 5))
-        self.assertEqual(rc.blips, [(4, 4, 2), (6, 4, 0)])
+        self.assertEqual(rc.blips, [(6, 4, 2), (8, 4, 0)])
+
+    def test_a_garbage_number_is_not_taken(self):
+        # seed 8 Scene OFF: 60 read at a battle start (half-copied save block); taken as a higher number, it keyed battle 4 wrongly
+        rc = fc.RoundCounter(settle=30, settle_step=3)
+        for bn in [3] * 5 + [60] + [3] * 5 + [4] * 5:
+            rc.update(bn)
+        self.assertEqual((rc.round, rc.g()), (0, 4))
+        self.assertEqual(rc.blips, [(6, 3, 60)])
 
     def test_the_lobby_multichoices_are_not_a_go_on_roll(self):
         self.assertEqual([fc.go_on_roll(bn) for bn in range(8)], [False, True, True, True, True, True, True, False])

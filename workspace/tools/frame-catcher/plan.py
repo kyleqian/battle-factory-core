@@ -322,14 +322,16 @@ class RoundCounter:
     InitFactoryChallenge (factory_init, at the save before the next challenge) sets it back to 0. A battle is keyed g = round * 7 + battle
     number on both sides (engineRun.mjs `g`).
 
-    The number read can blip for a frame or a few (seed 23 Scene OFF, round 1: 4, then lower at ROM frame 46444 while battle 5 was being
-    set up, then 4 again), so a round steps only when it reads 0 below a higher number and stays 0 for `settle` frames (a real factory_init
-    is followed by the save dialog, the walk and the briefing: hundreds of frames). Until then the old round and number are kept. A blip is
-    kept in `blips` (frame index, the number before, the value read)."""
+    The number read is not always the save's: every battle start moves the save blocks to a new random address and copies them back
+    (CB2_InitBattle -> MoveSaveBlocks_ResetHeap, battle_main.c:590, load_save.c:84-120), and a frame boundary inside that copy leaves
+    gSaveBlock2Ptr on half-copied memory for a frame or two (seed 23 Scene OFF: 4, then 0 at ROM frame 46445, then 4 again; seed 8
+    Scene OFF: 60 at a battle start, which, taken as a higher number, keyed battle 4's set-up wrongly and the ROM played it differently).
+    So a new number is taken only when it is the next one (+1, at most 7) and holds for `settle_step` frames, or 0 (a new challenge)
+    holding for `settle` frames; anything else is a blip, kept in `blips` (frame index, the number in force, the value read)."""
 
-    def __init__(self, settle=30):
-        self.round, self.last, self.settle = 0, None, settle
-        self.pending = 0
+    def __init__(self, settle=30, settle_step=3):
+        self.round, self.last, self.settle, self.settle_step = 0, None, settle, settle_step
+        self.pending, self.pending_value = 0, None
         self.blips = []
         self.n = 0
 
@@ -339,25 +341,30 @@ class RoundCounter:
         if self.last is None:
             self.last = bn
             return False
-        if bn >= self.last:
+        if bn == self.last:
             if self.pending:
-                self.blips.append((self.n - self.pending, self.last, 0))
-                self.pending = 0
-            self.last = bn
+                self.blips.append((self.n - self.pending, self.last, self.pending_value))
+            self.pending, self.pending_value = 0, None
             return False
-        if bn != 0:
+        if not ((bn == self.last + 1 and bn <= STAGES) or bn == 0):
             self.blips.append((self.n, self.last, bn))
             return False
+        if self.pending_value != bn:
+            if self.pending:
+                self.blips.append((self.n - self.pending, self.last, self.pending_value))
+            self.pending, self.pending_value = 0, bn
         self.pending += 1
-        if self.pending < self.settle:
+        if self.pending < (self.settle if bn == 0 else self.settle_step):
             return False
-        self.pending = 0
-        self.round += 1
-        self.last = 0
-        return True
+        self.pending, self.pending_value = 0, None
+        self.last = bn
+        if bn == 0:
+            self.round += 1
+            return True
+        return False
 
     def g(self, bn=None):
-        """The key of the battle in force (the number fed last, unless it is a blip or a 0 not yet settled)."""
+        """The key of the battle in force (the number taken last, not a blip or a number not yet settled)."""
         return self.round * STAGES + self.last
 
 

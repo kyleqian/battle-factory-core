@@ -455,7 +455,7 @@ def run(engine_dir, out_dir, profile, max_frames):
         bn_before, blips = rounds_seen.last, len(rounds_seen.blips)
         if rounds_seen.update(bn):
             staging.append({"what": "round", "round": rounds_seen.round + 1, "frame": o.frame, "battleNumBefore": bn_before})
-        if len(rounds_seen.blips) > blips:
+        if len(rounds_seen.blips) > blips and len(rounds_seen.blips) <= 50:  # (the save blocks moved at a battle start; RoundCounter)
             staging.append({"what": "battle number blip (not a new round)", "frame": o.frame, "number": bn_before, "read": rounds_seen.blips[-1][2]})
         bn = rounds_seen.last
         rom_round, g = rounds_seen.round, rounds_seen.g()
@@ -585,7 +585,7 @@ def run(engine_dir, out_dir, profile, max_frames):
     result = {"side": "rom", "profile": profile, "frames": o.frame, "engineFrames": eng["frames"], "seconds": round(time.time() - t0, 1),
               "sound": {"fast": sound.fast, "restepped": sound.restepped}, "staging": staging, "driverLog": log,
               "anchorsMatched": driver.ai, "anchorsTotal": len(plan.anchors), "anchorBinds": driver.binds, "stop": driver.stop_reason,
-              "steerFrames": driver.steer_frames, "actionMenuStates": action_states, "rounds": rom_round + 1,
+              "steerFrames": driver.steer_frames, "actionMenuStates": action_states, "rounds": rom_round + 1, "battleNumberBlips": len(rounds_seen.blips),
               "deals": [{k: v for k, v in d.items() if k not in ("want", "first", "idsBefore")} for d in deals.values()],
               "sounds": sounds, "menus": menus, "buttons": buttons_rle}
     (out / "timeline.json").write_text(json.dumps(result))
