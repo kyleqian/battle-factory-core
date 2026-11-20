@@ -67,8 +67,8 @@ describe("General / Status animation sound table (aud249)", () => {
   // confusion windows is the 2 pre-print rows (sta5 step 3, deferred: the sound clock must be decoupled first). sta3: the second play lands on the first play's residual (second == first),
   // tests/sta3PreMoveStatusTiming.test.ts.
   const WINDOWS: ReadonlyArray<{ name: string; first: number; second: number }> = [
-    { name: "aud242c-flatter-player", first: 2, second: 2 },
-    { name: "aud242f-swagger-player", first: 2, second: 2 },
+    { name: "aud242c-flatter-player", first: 0, second: 0 },
+    { name: "aud242f-swagger-player", first: 0, second: 0 },
   ];
   for (const { name, first, second } of WINDOWS) {
     it(`${name}: both confusion plays have the ROM's six rows (id, pan, 14-frame spacing) at ${first} / ${second} frames residual`, () => {

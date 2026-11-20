@@ -83,7 +83,7 @@ const SPECS: Record<string, Spec> = {
   "hijumpkick-player": { delta: 0 },
   "hijumpkick-opponent": { delta: 0 },
   "haze-player": { delta: -6, rowDelta: { "433:238:0": 2, "553:214:-63": 2, "571:131:-63": 2 } },
-  "hyperfang-player": { delta: 2 },
+  "hyperfang-player": { delta: 0 },
 };
 
 describe("move-animation SEs after waits / inside branches (aud242b)", () => {

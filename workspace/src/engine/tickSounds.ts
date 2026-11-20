@@ -50,7 +50,7 @@ export function emitTickSounds(state: TickSoundState, next: TickSoundState): voi
     }
     setSoundTickLead(presentationAfter?.usedMoveAnimSoundLead ?? 0);
     if (presentationAfter) emitMoveAnimSounds(presentationAfter, orchestratorAfter.round.rules.currentOpponent.frontierBrain !== undefined);
-    setSoundTickLead(presentationAfter?.usedMoveScriptSoundLead ?? 0);
+    setSoundTickLead(presentationAfter?.usedMoveAnimSoundLead ?? 0);
     if (presentationAfter) emitStatsChangeSounds(presentationAfter);
     setSoundTickLead(presentationAfter?.usedMoveAnimSoundLead ?? 0);
     if (presentationAfter) emitDoubleTeamStatsChangeSound(presentationAfter);

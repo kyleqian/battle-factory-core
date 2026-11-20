@@ -67,11 +67,11 @@ interface Spec {
 // Per-move offsets (ISSUES #198: ROM script start vs the live adapter's body clock; shape, ids, pans and relative frames are exact). ROM minus ours.
 const SPECS: Record<string, Spec> = {
   "horndrill-player": { delta: 0 },
-  "headbutt-player": { delta: 2, romOnlyFrom: 120 },
-  "icepunch-player": { delta: 2 },
-  "icebeam-player": { delta: 2 },
+  "headbutt-player": { delta: 0, romOnlyFrom: 120 },
+  "icepunch-player": { delta: 0 },
+  "icebeam-player": { delta: 0 },
   "swagger-player": { delta: -3, romOnlyFrom: 300 },
-  "hiddenpower-player": { delta: 2 },
+  "hiddenpower-player": { delta: 0 },
   // aud242h: the second SE152 (after the blend_color_cycle wait) is emitted now and exact at the same -4.
   "growth-player": { delta: -4, romOnlyFrom: 300 },
 };

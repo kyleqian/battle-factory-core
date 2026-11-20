@@ -54,15 +54,15 @@ function ourEvents(rom: Fixture): SoundEvent[] {
 
 // delta = ROM frame - our frame. ids selects the rows the aud242k lifetimes time (the first row of each window is older work with its own lead class: the idle +2 or the status -2..-5).
 const SPECS: Array<{ name: string; ids: number[]; delta: number; rows: number }> = [
-  { name: "ancientpower-player", ids: [171, 177], delta: 2, rows: 2 },
-  { name: "firepunch-player", ids: [144, 147], delta: 2, rows: 2 },
+  { name: "ancientpower-player", ids: [171, 177], delta: 0, rows: 2 },
+  { name: "firepunch-player", ids: [144, 147], delta: 0, rows: 2 },
   { name: "yawn-player", ids: [237, 232], delta: 0, rows: 3 },
-  { name: "smokescreen-player", ids: [135, 159], delta: 0, rows: 2 },
-  { name: "scaryface-player", ids: [189, 192, 130], delta: 0, rows: 3 },
+  { name: "smokescreen-player", ids: [135, 159], delta: -2, rows: 2 },
+  { name: "scaryface-player", ids: [189, 192, 130], delta: -2, rows: 3 },
   { name: "wish-player", ids: [207, 195], delta: -5, rows: 4 },
   { name: "safeguard-player", ids: [225, 102], delta: 0, rows: 2 },
   { name: "lovelykiss-player", ids: [200, 226], delta: 0, rows: 2 },
-  { name: "crunch-player", ids: [161], delta: 2, rows: 2 },
+  { name: "crunch-player", ids: [161], delta: 0, rows: 2 },
   { name: "recover-player", ids: [140, 179], delta: -2, rows: 4 },
 ];
 

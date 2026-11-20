@@ -936,9 +936,9 @@ export type BattleResolutionPresentationState = Readonly<{
   fadeTick: number;
   /** hcr1b / hcr2b: ticks the hit / effectiveness / faint sounds of a ruled used-move turn are stamped ahead of the presentation clock (1, both scenes). */
   usedMoveSoundLead?: number;
-  /** hcr1b: the same for the stats-change / general-animation sounds (Scene OFF only: 1). */
+  /** hcr1b: the same for the general-animation sounds (Scene OFF only: 1). */
   usedMoveScriptSoundLead?: number;
-  /** hcr2b: the same for the move-animation table SEs and the Double Team stat SE that follows them (Scene ON: 2 once the print's u > 2, absent at u = 2; Scene OFF: 1). */
+  /** hcr2b: the same for the move-animation table SEs and the stat-change / Double Team stat SEs that follow them (Scene ON: 2 once the print's u > 2, absent at u = 2; Scene OFF: 1). */
   usedMoveAnimSoundLead?: number;
   confirmHandoff: BattleResolutionConfirmHandoff | null;
   field: BattleResolutionDisplayedField;
@@ -6399,8 +6399,8 @@ function withSynthesizedAiSwitchRecallEvents(
  * The ROM plays the script-row sounds ahead of the frame the pixels reach them (the hcr2 labs / ROM sound log, ROM - engine with the hold only):
  * hit / effectiveness SE, faint cry and SE_FAINT one tick early at every u (hcr2b: both scenes); a Scene ON move body's table SEs two ticks early
  * once u > 2 (adapted u = 3 / 4 / 6 bodies: absorb, megadrain, bite, doubleedge, ember, takedown, thunderbolt, harden all -2) and not at u = 2; Scene OFF
- * stamps its stats-change / general-animation sounds one early as well (hcr1b), Scene ON does not (no gain measured); the Double Team stat SE keeps its 34-frame
- * gap to the last body SE (aud252) so it takes the body's lead. The lead is captured
+ * stamps its stats-change / general-animation sounds one early as well (hcr1b). Scene ON's stat-change SEs (aud248 labs, T2 mass 25,108 -> 25,090) and Double Team stat SE
+ * (34 frames after the body's last SE, aud252) take the body's lead; its general-animation sounds get none (a one-tick lead was worse). The lead is captured
  * per scheduled sound (`setSoundTickLead`), so battle-end, send-in and tray sounds keep their frames and the T1 census reads the emission tick back.
  * Forced (Encore / Struggle) and Focus Punch pre-pass handoffs keep their own leads; a turn that opens with anything but a USEDMOVE
  * print (status / ability / wake-up / confusion head) is not covered.
