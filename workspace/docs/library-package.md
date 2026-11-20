@@ -126,6 +126,9 @@ candidates when known). First-battle download: ~2112 KiB -> ~1700 KiB brotli (`d
 
 - A host bundler (Vite / Rollup / webpack 5) emits the files as assets by itself, exactly like the audio files (`new URL(..., import.meta.url)`
   in the entry's chunk): no configuration. Serving the package files unbundled works the same.
+- A host with a content security policy must keep the bundler from inlining small files: Vite inlines assets under 4 KiB as `data:` URLs,
+  which the game then `fetch`es, and `connect-src 'self'` refuses them (2026-11-20: 17 move-animation files stopped the game at start; the
+  smallest AAC sounds, Safari's copies, were refused on the live site). factory-web sets `build.assetsInlineLimit` to `false` for `dist-lib/`.
 - `spriteBase` is for hosts that copy `dist-lib/sprites/` somewhere else (a CDN path): the game then fetches `${spriteBase}/<SPECIES>.txt`
   (resolved against `document.baseURI`; a trailing slash is optional). Omit it and the files are found next to the chunks.
 - The loop HOLDS (no tick, no draw, the canvas keeps its last frame) while a picture a screen needs has not arrived, so the trace, the events
