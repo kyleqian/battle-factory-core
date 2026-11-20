@@ -15,6 +15,7 @@ import {
   buildFightMoveset,
   type FightMoveset,
 } from "./fightSubmenuText.ts";
+import type { FightSwitchView } from "./battleMoveSwitching.ts";
 import { setPixel } from "./framebuffer.ts";
 import { drawText, type FontData } from "./font.ts";
 import type { HealthboxContentParams } from "./healthboxAssembly.ts";
@@ -90,8 +91,8 @@ export type BattleCommandPresentationRenderView = Readonly<{
   fightMenu: Readonly<{
     moveset: FightMoveset;
     displayCursor: 0 | 1 | 2 | 3;
-    /** msw1: the displayed "Switch which?" target slot; `null` outside SELECT move switching. */
-    moveSwitchTarget: 0 | 1 | 2 | 3 | null;
+    /** msw1: the SELECT move-switching overlay (prompt, arrows); `null` outside it. */
+    moveSwitch: FightSwitchView | null;
   }>;
   /**
    * ISSUES #81: the selection-rejection message currently on the box (typed
@@ -259,17 +260,57 @@ export function createBattleCommandPresentationRenderView(
       options: Object.freeze(["FIGHT", "BAG", "POKéMON", "RUN"] as const),
       cursor: presentation.actionCursor,
     }),
-    fightMenu: Object.freeze({
-      moveset: buildFightMoveset(
-        presentation.field.player.moveIds,
-        presentation.field.player.currentPP,
-        presentation.field.player.ppBonuses,
-      ),
-      displayCursor: presentation.fightDisplayCursor,
-      moveSwitchTarget: presentation.moveSwitchDisplay,
-    }),
+    fightMenu: fightMenuView(presentation),
     rejectionMessage,
     forfeitBox,
+  });
+}
+
+function fightMenuView(
+  presentation: BattleCommandPresentationState,
+): BattleCommandPresentationRenderView["fightMenu"] {
+  const movesetOf = (field: BattleCommandPresentationState["field"]): FightMoveset =>
+    buildFightMoveset(field.player.moveIds, field.player.currentPP, field.player.ppBonuses);
+  const settle = presentation.moveSwitchSettle;
+  if (settle === null) {
+    const target = presentation.moveSwitchDisplay;
+    return Object.freeze({
+      moveset: movesetOf(presentation.field),
+      displayCursor: presentation.fightDisplayCursor,
+      moveSwitch: target === null
+        ? null
+        : target === presentation.fightDisplayCursor
+          ? Object.freeze({ gray: null, arrow: target, arrowKind: "normal" as const })
+          : Object.freeze({ gray: presentation.fightDisplayCursor, arrow: target, arrowKind: "target" as const }),
+    });
+  }
+  const { elapsed, source, target } = settle;
+  if (elapsed === 0) {
+    return Object.freeze({
+      moveset: movesetOf(settle.previousField),
+      displayCursor: source,
+      moveSwitch: Object.freeze({ gray: source, arrow: target, arrowKind: "target" as const }),
+    });
+  }
+  // The name rows land one per frame (row 0 then row 1); a window redraw wipes the arrow in its rows, and the new arrow
+  // is written the frame after the last row that changed.
+  const before = movesetOf(settle.previousField);
+  const after = movesetOf(presentation.field);
+  const rowsDone = elapsed;
+  const moveset = before.map((entry, slot) => (rowsDone > (slot >> 1) ? after[slot]! : entry)) as unknown as FightMoveset;
+  const lastChangedRow = Math.max(source >> 1, target >> 1);
+  const targetRowRedrawn = rowsDone > (target >> 1);
+  const newArrowShown = elapsed >= lastChangedRow + 2;
+  return Object.freeze({
+    moveset,
+    displayCursor: target,
+    moveSwitch: newArrowShown
+      ? Object.freeze({ gray: null, arrow: target, arrowKind: "normal" as const })
+      : Object.freeze({
+        gray: null,
+        arrow: targetRowRedrawn ? null : target,
+        arrowKind: "target" as const,
+      }),
   });
 }
 

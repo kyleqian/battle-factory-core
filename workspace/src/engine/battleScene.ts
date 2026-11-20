@@ -832,6 +832,7 @@ import type {
 import {
   battleCommandBounceAgeOffset,
 } from "./battleCommandPresentation.ts";
+import type { FightSwitchView } from "./battleMoveSwitching.ts";
 import {
   createBattleCommandFieldRenderView,
   drawBattleCommandActionChrome,
@@ -9192,7 +9193,7 @@ const fightCursorArrowPixels: readonly (readonly number[])[] = /* @__PURE__ */ (
     const pixels: number[] = [];
     for (let py = 0; py < height; py += 1) {
       for (let px = 0; px < width; px += 1) {
-        if ((px >= 40) !== ((slot & 1) === 1) || (py >= 16 + 4) !== ((slot & 2) === 2)) continue;
+        if ((px >= 40) !== ((slot & 1) === 1) || (py >= 24) !== ((slot & 2) === 2)) continue;
         const i = (py * width + px) * 3;
         if (patch[i] !== other[i] || patch[i + 1] !== other[i + 1] || patch[i + 2] !== other[i + 2]) pixels.push(py * width + px);
       }
@@ -9210,24 +9211,27 @@ const FIGHT_SWITCH_SOURCE_ARROW_ROW_WIDTHS = [2, 3, 4, 5, 5, 5, 4, 3, 2] as cons
 const FIGHT_SWITCH_SOURCE_ARROW = { r: 214, g: 206, b: 214 };
 const FIGHT_CURSOR_BLACK = [74, 66, 82] as const;
 
-function drawMoveSwitchArrows(fb: Uint8Array, source: FightSubmenuSlot, target: FightSubmenuSlot): void {
-  if (target === source) return;
+function drawMoveSwitchArrows(fb: Uint8Array, displayCursor: FightSubmenuSlot, view: FightSwitchView): void {
   const { x, y, width, slots } = fightSubmenuWindow;
-  for (const index of fightCursorArrowPixels[source]!) {
+  for (const index of fightCursorArrowPixels[displayCursor]!) {
     setPixel(fb, x + (index % width), y + Math.floor(index / width), { r: 255, g: 255, b: 255 });
   }
-  const baseX = 10 + 72 * (source & 1);
-  const baseY = 125 + 16 * (source >> 1);
-  FIGHT_SWITCH_SOURCE_ARROW_ROW_WIDTHS.forEach((rowWidth, row) => {
-    for (let column = 0; column < rowWidth; column += 1) {
-      setPixel(fb, baseX + column, baseY + row, FIGHT_SWITCH_SOURCE_ARROW);
-    }
-  });
-  const patch = slots[FIGHT_SUBMENU_SLOT_NAMES[target]!]!;
-  for (const index of fightCursorArrowPixels[target]!) {
+  if (view.gray !== null) {
+    const baseX = 10 + 72 * (view.gray & 1);
+    const baseY = 125 + 16 * (view.gray >> 1);
+    FIGHT_SWITCH_SOURCE_ARROW_ROW_WIDTHS.forEach((rowWidth, row) => {
+      for (let column = 0; column < rowWidth; column += 1) {
+        setPixel(fb, baseX + column, baseY + row, FIGHT_SWITCH_SOURCE_ARROW);
+      }
+    });
+  }
+  if (view.arrow === null) return;
+  const patch = slots[FIGHT_SUBMENU_SLOT_NAMES[view.arrow]!]!;
+  for (const index of fightCursorArrowPixels[view.arrow]!) {
     const at = index * 3;
-    if (patch[at] === FIGHT_CURSOR_BLACK[0] && patch[at + 1] === FIGHT_CURSOR_BLACK[1] && patch[at + 2] === FIGHT_CURSOR_BLACK[2]) {
-      setPixel(fb, x + (index % width), y + Math.floor(index / width), { r: FIGHT_CURSOR_BLACK[0], g: FIGHT_CURSOR_BLACK[1], b: FIGHT_CURSOR_BLACK[2] });
+    const black = patch[at] === FIGHT_CURSOR_BLACK[0] && patch[at + 1] === FIGHT_CURSOR_BLACK[1] && patch[at + 2] === FIGHT_CURSOR_BLACK[2];
+    if (black || view.arrowKind === "normal") {
+      setPixel(fb, x + (index % width), y + Math.floor(index / width), { r: patch[at]!, g: patch[at + 1]!, b: patch[at + 2]! });
     }
   }
 }
@@ -9236,13 +9240,13 @@ export function drawFightSubmenuChromeFromLiveState(
   fb: Uint8Array,
   displayCursor: FightSubmenuSlot,
   moveset: ReturnType<typeof buildFightMoveset>,
-  moveSwitchTarget: FightSubmenuSlot | null = null,
+  moveSwitch: FightSwitchView | null = null,
 ): void {
   const slotName = FIGHT_SUBMENU_SLOT_NAMES[displayCursor];
   const patch = fightSubmenuWindow.slots[slotName]!;
   drawRect(fb, { x: fightSubmenuWindow.x, y: fightSubmenuWindow.y, width: fightSubmenuWindow.width, height: fightSubmenuWindow.height, pixels: patch });
-  if (moveSwitchTarget !== null) drawMoveSwitchArrows(fb, displayCursor, moveSwitchTarget);
-  drawFightSubmenuText(fb, fightSubmenuWindow.x, fightSubmenuWindow.y, moveset, displayCursor, moveSwitchTarget !== null);
+  if (moveSwitch !== null) drawMoveSwitchArrows(fb, displayCursor, moveSwitch);
+  drawFightSubmenuText(fb, fightSubmenuWindow.x, fightSubmenuWindow.y, moveset, displayCursor, moveSwitch !== null);
 }
 
 /** The onix/healthbox bounce overlay alone (`drawActionMenuIdleContent`'s own second half, factored out so `drawFightSubmenuWindow`'s frozen-bounce branch can reuse it without redrawing `menuIdleBase`). */
@@ -15737,7 +15741,7 @@ export function renderGeneratedBattleCommandPresentation(
           framebuffer,
           view.fightMenu.displayCursor,
           view.fightMenu.moveset,
-          view.fightMenu.moveSwitchTarget,
+          view.fightMenu.moveSwitch,
         );
       }
     },

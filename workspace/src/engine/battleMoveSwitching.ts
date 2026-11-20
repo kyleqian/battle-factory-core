@@ -11,6 +11,16 @@ import { BATTLE_SCRIPT_STATUS2_TRANSFORMED } from "./battleScriptSourceConstants
 
 export type MoveSlot = 0 | 1 | 2 | 3;
 
+/**
+ * What the move box draws while SELECT switching: the "Switch which?" prompt, the light-gray source arrow (tile 29),
+ * and the one remaining arrow (`target`: tile 27, no shadow; `normal`: the ordinary black arrow). `null` slots draw none.
+ */
+export type FightSwitchView = Readonly<{
+  gray: MoveSlot | null;
+  arrow: MoveSlot | null;
+  arrowKind: "target" | "normal";
+}>;
+
 /** `gMultiUsePlayerCursor` on entry: slot 0 unless the cursor is already there, then slot 1 (:603-606). */
 export function initialMoveSwitchTarget(cursor: MoveSlot): MoveSlot {
   return cursor !== 0 ? 0 : 1;

@@ -225,6 +225,18 @@ export type BattleCommandPresentationState = Readonly<{
   moveSwitch: Readonly<{ target: MoveSlot }> | null;
   /** msw1: the target the box draws; it trails `moveSwitch` by one tick (like `fightDisplayCursor`) on entry and exit. */
   moveSwitchDisplay: MoveSlot | null;
+  /** msw1: bit k set = the idle bounce skips the (k+1)th tick from now (the oracle loses frames to the VRAM copies of a SELECT-state window redraw). */
+  bounceHold: number;
+  /**
+   * msw1: the oracle's redraw pipeline after a confirmed swap (`elapsed` ticks since the confirm): the move-name
+   * rows reach the screen one per frame, and `previousField` keeps the pre-swap names for the rows still waiting.
+   */
+  moveSwitchSettle: Readonly<{
+    elapsed: number;
+    source: MoveSlot;
+    target: MoveSlot;
+    previousField: BattleCommandPresentationState["field"];
+  }> | null;
   /**
    * msw1: a confirmed swap the owner has not applied yet. The presentation never edits rules; the orchestrator applies
    * `switchFactoryCommandMoves` and returns the new surface through `applyBattleCommandMoveSwitch`.
@@ -649,6 +661,8 @@ export function createBattleCommandPresentation(
     fightDisplayCursor: initialFightCursor,
     moveSwitch: null,
     moveSwitchDisplay: null,
+    bounceHold: 0,
+    moveSwitchSettle: null,
     pendingMoveSwitch: null,
     legalMoveBySlot: surface.legalMoveBySlot,
     rejectionReasonBySlot: surface.rejectionReasonBySlot,
@@ -686,12 +700,12 @@ export function advanceBattleCommandPresentation(
       )
       || stateInput.lifecycle.phaseElapsed >= FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT
     );
-  let state = !bounceCallbackRuns
-    ? stateInput
-    : Object.freeze({
-      ...stateInput,
-      idleBounceElapsed: stateInput.idleBounceElapsed + 1,
-    });
+  const bounceHeld = (stateInput.bounceHold & 1) === 1;
+  let state = Object.freeze({
+    ...stateInput,
+    bounceHold: stateInput.bounceHold >> 1,
+    idleBounceElapsed: stateInput.idleBounceElapsed + (bounceCallbackRuns && !bounceHeld ? 1 : 0),
+  });
 
   switch (state.lifecycle.phase) {
     case "action-enter": {
@@ -723,6 +737,9 @@ export function advanceBattleCommandPresentation(
         {
           fightDisplayCursor: state.fightCursor,
           moveSwitchDisplay: state.moveSwitch?.target ?? null,
+          moveSwitchSettle: state.moveSwitchSettle === null || state.moveSwitchSettle.elapsed >= MOVE_SWITCH_SETTLE_TICKS
+            ? null
+            : Object.freeze({ ...state.moveSwitchSettle, elapsed: state.moveSwitchSettle.elapsed + 1 }),
         },
       );
       break;
@@ -900,6 +917,9 @@ export function advanceBattleCommandPresentation(
   return Object.freeze({ ...state, fightCursor });
 }
 
+/** Ticks after a confirmed swap before the box is back to the normal PP window (settle elapsed 0, 1, 2 then done). */
+const MOVE_SWITCH_SETTLE_TICKS = 2;
+
 function advanceMoveSwitch(
   state: BattleCommandPresentationState,
   moveSwitch: NonNullable<BattleCommandPresentationState["moveSwitch"]>,
@@ -909,7 +929,7 @@ function advanceMoveSwitch(
   if (newKeys.has("A") || newKeys.has("SELECT")) {
     playSelectSe();
     if (moveSwitch.target === state.fightCursor) {
-      return Object.freeze({ ...state, moveSwitch: null });
+      return Object.freeze({ ...state, moveSwitch: null, bounceHold: 1 });
     }
     return Object.freeze({
       ...state,
@@ -919,7 +939,7 @@ function advanceMoveSwitch(
   }
   if (newKeys.has("B")) {
     playSelectSe();
-    return Object.freeze({ ...state, moveSwitch: null });
+    return Object.freeze({ ...state, moveSwitch: null, bounceHold: 1 });
   }
   const direction = (["LEFT", "RIGHT", "UP", "DOWN"] as const)
     .find((button) => newKeys.has(button));
@@ -951,6 +971,13 @@ export function applyBattleCommandMoveSwitch(
     fightCursor: pending.target,
     fightDisplayCursor: pending.target,
     pendingMoveSwitch: null,
+    bounceHold: 7,
+    moveSwitchSettle: Object.freeze({
+      elapsed: 0,
+      source: pending.source,
+      target: pending.target,
+      previousField: state.field,
+    }),
   });
 }
 
