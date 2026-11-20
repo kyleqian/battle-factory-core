@@ -2,11 +2,12 @@
 // plays General_IngrainHeal (green BG blend, absorption orbs, blue stars) before "Foe LILEEP absorbed nutrients with its roots!"; ours
 // went straight to the text. Staged labs tools/battle-lab/ing1-{player-on,opp-on,player-off}.json (the wsh1 / wsh2 Wish windows with
 // INGRAIN): ROM frames below (sha256 of the RGB framebuffer, the oracle's PNGs of tools/compare/traces/ing1-*.json) from the first green
-// row to the first row after the blend.
+// row to the first row after the blend, and the ROM's SE rows (tools/audio/soundEventProbe.py on the same labs).
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import "../src/engine/monPicPixelsInstall.ts";
+import { collectSoundTick } from "../src/audio/soundEvents.ts";
 import { createInitialState, render, tick } from "../src/engine/core.ts";
 import { traceAdvances } from "../tools/compare/traceReplay.ts";
 import { INGRAIN_HEAL_COMMAND_FRAMES, type BattleResolutionPresentationCommand } from "../src/engine/battleResolutionPresentation.ts";
@@ -33,14 +34,28 @@ type Trace = { appRoute: "generated-orchestrator"; oracleProfile: string; segmen
 const traceOf = (id: string): Trace =>
   JSON.parse(readFileSync(new URL(`../tools/compare/traces/${id}.json`, import.meta.url), "utf8")) as Trace;
 
+/** ROM SE rows of the heal ([frame, id, pan], tools/audio/soundEventProbe.py lab on the same labs, --fast): AbsorbEffect's eight
+ * SE_M_CRABHAMMER (142) and HealingEffect's SE_M_ABSORB_2 (179), both panned to the rooted battler's side. */
+const ROM_SE_ROWS: Readonly<Record<string, readonly (readonly [number, number, number])[]>> = {
+  "ing1-player-on": [[685, 142, -64], [691, 142, -64], [697, 142, -64], [703, 142, -64], [709, 142, -64], [715, 142, -64], [721, 142, -64],
+    [727, 142, -64], [780, 179, -64]],
+  "ing1-opp-on": [[689, 142, 63], [695, 142, 63], [701, 142, 63], [707, 142, 63], [713, 142, 63], [719, 142, 63], [725, 142, 63],
+    [731, 142, 63], [784, 179, 63]],
+};
+
 function run(id: string, capture: ReadonlySet<number> = new Set()) {
   const trace = traceOf(id);
   let state = createInitialState({ appRoute: trace.appRoute, battleScene: trace.oracleProfile === "battle-scene-on" ? "on" : "off" });
   state = APP_STAGES[id]!(state);
   const frames = new Map<number, string>();
   const commands: BattleResolutionPresentationCommand[][] = [];
+  const se: [number, number, number][] = [];
   for (const advance of traceAdvances(trace.segments)) {
-    state = tick(state, advance.buttons);
+    const ticked = collectSoundTick(state.frame + 1, () => tick(state, advance.buttons));
+    state = ticked.result;
+    for (const event of ticked.events) {
+      if (event.kind === "se" && (event.id === 142 || event.id === 179)) se.push([advance.frame, event.id, event.pan ?? 0]);
+    }
     if (capture.has(advance.frame)) {
       const rgba = render(state);
       const rgb = Buffer.alloc(240 * 160 * 3);
@@ -51,7 +66,7 @@ function run(id: string, capture: ReadonlySet<number> = new Set()) {
       if (!commands.includes(segment.commands as BattleResolutionPresentationCommand[])) commands.push(segment.commands as BattleResolutionPresentationCommand[]);
     }
   }
-  return { frames, commands };
+  return { frames, commands, se };
 }
 
 /** The command right before "X absorbed nutrients with its roots!" in each segment that prints it. */
@@ -84,6 +99,12 @@ describe("ing1: the Ingrain heal animation (B_ANIM_INGRAIN_HEAL) before the heal
     expect(before.length).toBeGreaterThan(0);
     for (const command of before) expect(command).toMatchObject({ type: "move-animation", timing: { minimumFrames: 35 } });
   });
+
+  for (const id of Object.keys(ROM_SE_ROWS)) {
+    it(`${id}: the heal's SEs are the ROM's (frame, id, pan)`, () => {
+      expect(run(id).se.filter(([frame]) => frame > 600 && frame < 900)).toEqual(ROM_SE_ROWS[id]);
+    });
+  }
 
   for (const id of Object.keys(ROM_FRAMES)) {
     it(`${id}: the heal's frames are the ROM's (green blend up, orbs, blue stars, blend down)`, () => {
