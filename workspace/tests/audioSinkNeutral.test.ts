@@ -42,8 +42,9 @@ function play(scene: BattleScene, seed: number, policy: SoakPolicy, frames: numb
 
 // aud240a: screens emit SE_SELECT (kind se, id 5, pan null); aud241a: the battle start adds the battle BGM, the ball tray,
 // the ball opens and the send-out cries with their BGM duck; aud241b adds the effectiveness SEs (12-14), SE_FAINT (16) and
-// SE_LOW_HEALTH (90); aud242a adds the Scene ON move-animation script SEs (the ids of anim-sound-timing.json). Nothing else is emitted yet.
-const BATTLE_START_SE_IDS = new Set([5, 15, 114, 115, 116, 12, 13, 14, 16, 90]);
+// SE_LOW_HEALTH (90); aud242a adds the Scene ON move-animation script SEs (the ids of anim-sound-timing.json); snd1 adds the first walk's
+// SE_EXIT (9) into the battle room (tests/snd1RoomSounds.test.ts). Nothing else is emitted yet.
+const BATTLE_START_SE_IDS = new Set([5, 9, 15, 114, 115, 116, 12, 13, 14, 16, 90]);
 const MOVE_ANIM_SE_IDS = new Set((timingData as { variants: { id: number }[][] }).variants.flat().map((op) => op.id));
 function expectScreenSoundsOnly(events: readonly SoundEvent[], frames: number, moveAnimations: boolean): void {
   let last = 0;

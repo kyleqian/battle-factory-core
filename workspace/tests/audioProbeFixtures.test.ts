@@ -324,6 +324,7 @@ describe("audio probe fixtures", () => {
       "seventh-win-window.json",
       "snd1-fight-menu-off-window.json",
       "snd1-fight-menu-on-window.json",
+      "snd1-first-walk-window.json",
       "snd1-forfeit-menu-off-window.json",
       "snd1-forfeit-menu-on-window.json",
       "snd1-struggle-off-window.json",

@@ -2892,6 +2892,9 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
       prebattleRoom = { phase: "messageClosing", elapsed: 0 };
     } else {
       prebattleRoom = advancePrebattleRoom(prebattleRoom);
+      // snd1: the first walk's EnterBattleRoom warp plays DoWarp's SE_EXIT too (field_screen_effect.c:490), on the warp fade's
+      // second frame like the later walks (ROM: battle1-swapyes-b frame 484, tools/audio/fixtures/snd1-first-walk-window.json).
+      if (prebattleRoom?.phase === "warpFade" && prebattleRoom.elapsed === 1) playScriptSe(SE_EXIT);
       // S6 slice 2a handoff (battleRoom.ts doc): the warp fade holds solid
       // black indefinitely on its own (WARP_FADE_OUT clamps once fully
       // faded) - this is the one fixed elapsed count at which the
