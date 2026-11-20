@@ -1,6 +1,7 @@
-// snd3 (docs/snd3-sweep-sounds.md): sound bugs of the frame catcher sweep (docs/fcs1-catcher-sweep.md findings 4-6), pinned against
+// snd3 (docs/snd3-sweep-sounds.md): the three sound bugs of the frame catcher sweep (docs/fcs1-catcher-sweep.md findings 4-6), pinned against
 // committed ROM windows (tools/audio/fixtures/snd3-*.json: soundEventProbe.py stepping mode; the --fast logs were the same rows). No emulator.
 //  4. A battle-start Intimidate plays SE_M_STAT_DECREASE (its B_ANIM_STATS_CHANGE runs in both scenes), 3 frames before the banner.
+//  5. Baton Pass's `returntoball BS_ATTACKER` is the instant removal in Scene ON too: no SE_BALL_OPEN when the user leaves.
 //  6. Sing / Perish Song / GrassWhistle (gMovesWithQuietBGM) set the BGM to volume 128 at LaunchBattleAnimation and back to 256 at Cmd_end.
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
@@ -35,6 +36,7 @@ function replay(stage: string, scene: "on" | "off", segments: readonly Segment[]
 }
 
 const SE_BALL_OPEN = 15;
+const SE_M_BATON_PASS = 224;
 const SE_M_STAT_DECREASE = 245;
 
 describe("snd3 bug 4: the battle-start Intimidate's stat SE (both scenes)", () => {
@@ -66,6 +68,35 @@ describe("snd3 bug 4: the battle-start Intimidate's stat SE (both scenes)", () =
       expect(ball(ours).map((f) => f - OURS_MINUS_ROM[scene]).slice(-1)).toEqual(ball(romRows).slice(-1));
     });
   }
+});
+
+describe("snd3 bug 5: Baton Pass's returntoball plays no SE_BALL_OPEN (Scene ON)", () => {
+  // ROM: tools/battle-lab/snd3-batonpass-{opp,player}-on.json. The only SE_BALL_OPEN is the send-in's (switchinanim), none when the user leaves
+  // (Cmd_returntoball -> {Opponent,Player}HandleReturnMonToBall with skipAnim TRUE: the sprite is destroyed, no DoSwitchOutAnimation).
+  it("the foe's Baton Pass: one ball sound, the send-in's, on both sides; the instant removal's rows", () => {
+    const rom = fixture("snd3-batonpass-opp-on-window.json");
+    const commands = new Map<string, string>();
+    const ours = played(replay(rom.trace!.appStage.id, "on", rom.trace!.segments, rom.frames, (state) => {
+      const res = state.factoryRoundBattleOrchestrator?.battleResolutionPresentation;
+      const command = res?.segments[res.segmentIndex]?.commands[res.commandIndex];
+      const key = `${res?.segmentIndex}:${res?.commandIndex}`;
+      if (command !== undefined && !commands.has(key)) commands.set(key, `${command.type}:${command.timing?.minimumFrames}${"skipAnimation" in command && command.skipAnimation ? ":skip" : ""}`);
+    }));
+    const order = (rows: readonly (Row | SoundEvent)[]) => rows.filter((e) => e.kind === "se" && (e.id === SE_BALL_OPEN || e.id === SE_M_BATON_PASS)).map((e) => e.id);
+    expect(order(played(rom.events))).toEqual([SE_M_BATON_PASS, SE_BALL_OPEN]);
+    expect(order(ours)).toEqual([SE_M_BATON_PASS, SE_BALL_OPEN]);
+    // the Baton Pass body, the 4-row hold with no recall animation, the recall receipt 5 rows before the SWITCHINMON print, the send-in
+    expect([...commands.values()].slice(1, 6)).toEqual(["move-animation:32", "switch-out:4:skip", "sprite-visibility:5", "message:13", "switch-in:138"]);
+  });
+
+  it("the player's Baton Pass (after the party menu): one ball sound, the send-in's, on both sides", () => {
+    const rom = fixture("snd3-batonpass-player-on-window.json");
+    const ours = played(replay(rom.trace!.appStage.id, "on", rom.trace!.segments, rom.frames));
+    const balls = (rows: readonly (Row | SoundEvent)[]) => rows.filter((e) => e.kind === "se" && e.id === SE_BALL_OPEN).map((e) => e.frame);
+    expect(balls(played(rom.events))).toEqual([550]);
+    // ours 4 frames later: our party-menu return to the SWITCHINMON print is 3 rows longer (pre-existing, docs/snd3-sweep-sounds.md)
+    expect(balls(ours)).toEqual([554]);
+  });
 });
 
 describe("snd3 bug 6: the quiet BGM of Sing / Perish Song / GrassWhistle (Scene ON)", () => {

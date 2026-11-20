@@ -1979,19 +1979,39 @@ function subp1mStages(): Record<string, AppStage> {
   return stages;
 }
 
-// snd3 (docs/snd3-sweep-sounds.md): the quiet-BGM moves in Scene ON (tools/battle-lab/snd3-<move>-<side>-on.json,
+// snd3 (docs/snd3-sweep-sounds.md): the quiet-BGM moves and Baton Pass in Scene ON (tools/battle-lab/snd3-<move>-<side>-on.json,
 // tools/integration/snd3Labs.py): a Lv50 Rattata with the move x4 against a Lv25 Rattata with Seismic Toss x4 (`opp` = the foe's
 // Rattata uses the move). [move, kernel seed for the player side, for the opp side]: a seed whose turn hits like the ROM lab's (Sing and
-// GrassWhistle are 55 % moves; the ROM labs hit on both sides).
+// GrassWhistle are 55 % moves; the ROM labs hit on both sides). The player's Baton Pass opens the forced party menu, which needs real
+// rental records: pau5's faint party (Diglett 39 lead with Baton Pass x4, Porygon 273, Shuckle 432, the ROM lab's personalities).
 const SND3_MOVES: Readonly<Record<string, readonly [move: number, playerSeed: number, oppSeed: number]>> = {
-  sing: [47, 2, 10], perishsong: [195, 1, 1], grasswhistle: [320, 2, 10],
+  sing: [47, 2, 10], perishsong: [195, 1, 1], grasswhistle: [320, 2, 10], batonpass: [226, 1, 1],
 };
+const MOVE_BATON_PASS = 226;
+function snd3BatonPassPlayerStage(state: EngineState): EngineState {
+  const id = "snd3-batonpass-player-on";
+  const records = [39, 273, 432].map((setId) => generatedCommandRecord(setId, 31, PAU5_RECORD_PERSONALITY[setId])) as unknown as
+    readonly [FactoryRentalRecord, FactoryRentalRecord, FactoryRentalRecord];
+  const members = records.map((record) => ({ ...createFactoryCorpusPartyMember(record), item: 0, moves: [150, 150, 150, 150] as const, pp: [40, 40, 40, 40] as const }));
+  const lead = members[0]!;
+  return midBattleSwitchStage(state, id, [members[1]!, members[2]!], [members[1]!.maxHP, members[2]!.maxHP], {
+    battleScene: "on", usedMessageHoldFrames: 0,
+    playerRecords: records,
+    player: Object.freeze({
+      species: lead.species, moveId: MOVE_BATON_PASS, moves: [MOVE_BATON_PASS, MOVE_BATON_PASS, MOVE_BATON_PASS, MOVE_BATON_PASS] as const,
+      pp: [40, 40, 40, 40] as const, ability: lead.ability, abilityNum: lead.abilitySlot, personality: lead.personality, item: 0, friendship: 0,
+      level: 50, attack: lead.attack, defense: lead.defense, spAttack: lead.spAttack, spDefense: lead.spDefense, speed: lead.speed, hp: lead.maxHP, maxHp: lead.maxHP,
+    }),
+    trainer: rattataAtLevel(50, 69),
+  });
+}
 function snd3Stages(): Record<string, AppStage> {
   const stages: Record<string, AppStage> = {};
   for (const [name, [move, playerSeed, oppSeed]] of Object.entries(SND3_MOVES)) {
     stages[`snd3-${name}-player-on`] = (state) => aud241bStage(state, `snd3-${name}-player-on`, "on", 50, 25, move, undefined, false, 69, playerSeed);
     stages[`snd3-${name}-opp-on`] = (state) => aud241bStage(state, `snd3-${name}-opp-on`, "on", 25, 50, 69, undefined, false, move, oppSeed);
   }
+  stages["snd3-batonpass-player-on"] = snd3BatonPassPlayerStage;
   return stages;
 }
 

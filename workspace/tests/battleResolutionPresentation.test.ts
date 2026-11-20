@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { createFramebuffer } from "../src/engine/framebuffer.ts";
+import { loadBattleScriptProgram } from "../src/engine/battleScriptProgram.ts";
 import { createBattleCommandPresentation } from "../src/engine/battleCommandPresentation.ts";
 import {
   advanceBattleResolutionConfirmHandoff,
@@ -10,6 +11,7 @@ import {
   storeBattleTerminalPresentationDismiss,
   FORCED_RETURN_TO_BALL_HOLD_FRAMES,
   FORCED_RETURN_TO_BALL_SEND_IN_GAP_FRAMES,
+  SCENE_OFF_BATON_PASS_RETURN_TO_BALL_PRINT_GAP_FRAMES,
   SWITCH_IN_WAITSTATE_HOLD_FRAMES,
   WAITMESSAGE_LONG_MESSAGE_IDS,
   WAITMESSAGE_LONG_TIMING,
@@ -1032,7 +1034,7 @@ describe("battle resolution presentation receipt ownership", () => {
     });
   });
 
-  it("Scene ON forced switch-out after a live Whirlwind body: no recall animation, hide at E+5, send-in at E+11 (Baton Pass/OFF unchanged)", () => {
+  it("Scene ON forced switch-out after a live Whirlwind body: no recall animation, hide at E+5, send-in at E+11; Baton Pass the same instant removal (snd3)", () => {
     // docs/forced-switch-continuation.md §6: `returntoball` passes skipAnim = TRUE. The body's last dense row is E; ROM RAM
     // E+4 / E+10 reach the framebuffer one latch later: the hold covers E+1..E+4, the recall receipt hides sprite +
     // healthbox E+5..E+10 and `switch-in` starts at E+11 (forcedSwitchContinuationCompare.ts, zero residual through emerge).
@@ -1111,26 +1113,32 @@ describe("battle resolution presentation receipt ownership", () => {
       { type: "sprite-visibility", battler: 1, recall: true, timing: { minimumFrames: 1 } },
     ]);
     expect(off[1]).not.toHaveProperty("skipAnimation");
-    // Baton Pass shape (`returntoball BS_ATTACKER`: the hidden battler is the body's attacker) keeps the span.
+    // snd3 (docs/snd3-sweep-sounds.md): Baton Pass's `returntoball BS_ATTACKER` (battle_scripts_1.s:1706) is the same instant removal in
+    // Scene ON (Cmd_returntoball's skipAnim = TRUE; the live body already hid the attacker): the 4-row hold, then the recall receipt 5 rows
+    // before the SWITCHINMON print (the Scene OFF gap), no recall animation and so no SE_BALL_OPEN (emitMidBattleSwitchSounds).
+    const programCounter = loadBattleScriptProgram().instructions.findIndex((instruction) =>
+      instruction.opcodeName === "B_SCR_OP_RETURNTOBALL" && instruction.operands[0]?.expression === "BS_ATTACKER");
+    expect(programCounter).toBeGreaterThan(0);
     const batonResolution = createBattleResolutionPresentation(inputFor([
       event(0, { kind: "message", messageId: "STRINGID_USEDMOVE", substitutions: [] }, 2),
       event(1, { kind: "set-battler-pp-data", battler: 0, movePosition: 0, pp: 9 }, 3),
       event(2, { kind: "animation", animationId: "MOVE_ANIMATION", battler: 0, target: 1,
         arguments: ["226", "0", "0", "0", "70", "0"] }, 14),
-      opcodeEvent(3, { kind: "set-battler-sprite-visibility", battler: 0, invisible: true }, "B_SCR_OP_RETURNTOBALL"),
+      Object.freeze({ ...opcodeEvent(3, { kind: "set-battler-sprite-visibility", battler: 0, invisible: true }, "B_SCR_OP_RETURNTOBALL"),
+        provenance: Object.freeze({ ...PROVENANCE, opcodeName: "B_SCR_OP_RETURNTOBALL", programCounter }) }),
     ], NEXT_COMMAND));
     const baton = batonResolution.segments[0]!.commands;
-    // The live Baton Pass body (226) hid its attacker from age 9; the span keeps it hidden (no recall scale-up redraw).
-    for (const elapsed of [0, 14, 20, 31]) {
+    // The live Baton Pass body (226) hid its attacker from age 9; the hold draws no attacker either.
+    for (let elapsed = 0; elapsed < FORCED_RETURN_TO_BALL_HOLD_FRAMES; elapsed += 1) {
       const view = createBattleResolutionPresentationRenderView(atRenderClock(batonResolution, 2, elapsed));
       expect(view.switchOut).toMatchObject({ battler: 0, spriteVisible: false });
       expect(view.visibility.player.sprite).toBe(false);
     }
     expect(baton.slice(2, 4)).toMatchObject([
-      { type: "switch-out", battler: 0, timing: { minimumFrames: 32 } },
-      { type: "sprite-visibility", battler: 0, recall: true, timing: { minimumFrames: 1 } },
+      { type: "switch-out", battler: 0, skipAnimation: true, timing: { minimumFrames: FORCED_RETURN_TO_BALL_HOLD_FRAMES } },
+      { type: "sprite-visibility", battler: 0, recall: true, timing: { minimumFrames: SCENE_OFF_BATON_PASS_RETURN_TO_BALL_PRINT_GAP_FRAMES } },
     ]);
-    expect(baton[2]).not.toHaveProperty("skipAnimation");
+    expect(baton[2]).not.toHaveProperty("targetAtRest");
   });
 
   it("presents a forced opponent recall, send-in, then dragged-out message without an ordinary trainer send-out message", () => {
