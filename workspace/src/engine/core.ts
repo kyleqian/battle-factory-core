@@ -1607,8 +1607,6 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
   if (postwin) {
     let nextPostwin = advancePostwin(postwin);
     if (factorySwap) {
-      const returnedToField =
-        factorySwap.fieldHandoff === "CB2_ReturnToFieldContinueScript";
       const advancedFactorySwap = advanceFactorySwapPresentation(
         factorySwap,
         rngValue,
@@ -1638,7 +1636,7 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
         );
       }
       let nextSwapReturn: SwapReturnState | null = null;
-      if (!returnedToField && nextFactorySwap.fieldHandoff === "CB2_ReturnToFieldContinueScript") {
+      if (nextFactorySwap.fieldHandoff === "CB2_ReturnToFieldContinueScript") {
         nextSwapReturn = createSwapReturn(
           nextFactorySwap.controller.scriptResult === false ? "swapped" : "kept",
         );
