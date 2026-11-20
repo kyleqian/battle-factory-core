@@ -55640,6 +55640,8 @@ function drawMidBattleSwitchOutSprite(
   art: BattleCommandFieldArtBattler,
   state: MidBattleSwitchOutView,
   paletteOverride?: RgbColor[],
+  // lrc1: the opponent's gEnemyMonElevation (GetBattlerSpriteDefault_Y): an elevated mon shrinks where it hovers.
+  elevation = 0,
 ): void {
   const palette = paletteOverride ?? (art.pic.palette as RgbColor[]);
   if (state.scale === MID_BATTLE_SWITCH_OUT_SCALE_START) {
@@ -55648,7 +55650,7 @@ function drawMidBattleSwitchOutSprite(
       art.pic.tileset as Tileset,
       palette,
       art.origin.x,
-      art.origin.y,
+      art.origin.y - elevation,
     );
     return;
   }
@@ -55664,7 +55666,7 @@ function drawMidBattleSwitchOutSprite(
     art.pic.tileset as Tileset,
     palette,
     art.origin.x,
-    art.origin.y,
+    art.origin.y - elevation,
     state.scale,
     state.scale,
     state.y2,
@@ -55889,9 +55891,11 @@ export function renderBattleResolutionSceneOffView(
   // scale-up, then freed -- the field stays empty until the send-in).
   const switchOut = view.switchOut;
   if (switchOut !== null && switchOut.battler === 1 && switchOut.spriteVisible) {
+    // lrc1: an elevated opponent keeps its shadow for the recall's first rows (MidBattleSwitchOutView.shadowVisible).
+    if (switchOut.shadowVisible && view.field.opponent.hp > 0) drawGeneratedOpponentShadow(fb, view.fieldArt);
     drawMidBattleSwitchOutSprite(fb, view.fieldArt.opponent, switchOut, midBattleFade?.objBattler === 1
       ? blendPaletteToward(view.fieldArt.opponent.pic.palette as RgbColor[], BALL_OPEN_FADE_POKE_COLOR, midBattleFade.obj)
-      : undefined);
+      : undefined, battleCommandFieldArtElevation(view.fieldArt.opponent, "opponent"));
   }
   if (switchOut !== null && switchOut.battler === 0 && switchOut.spriteVisible) {
     drawMidBattleSwitchOutSprite(fb, view.fieldArt.player, switchOut, playerMonPalette);

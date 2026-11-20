@@ -537,7 +537,7 @@ describe("random round soak driver (green milestone pin)", () => {
     expect(result.frames).toBeGreaterThan(31_771);
   });
 
-  it("ISSUES #89: seed 12's mid-turn Baton Pass openpartyscreen halt resumes through the forced party selector", () => {
+  it("ISSUES #89: seed 3's mid-turn Baton Pass openpartyscreen halt resumes through the forced party selector", () => {
     // History: seed 27 (full policy) selected Baton Pass mid-turn and used to
     // crash at round 1 battle 1 turn 10, frame 30798, on an unimplemented
     // BattleScript_EffectBatonPass / B_SCR_OP_OPENPARTYSCREEN machine-barrier
@@ -669,7 +669,11 @@ describe("random round soak driver (green milestone pin)", () => {
     // moves): seed 15 no longer commits Baton Pass (with the cursor fix undone it hits again with the numbers above). Re-scanned full-policy
     // seeds 0..39 (tools/soak/batonPassSearch.ts --seeds 0:40 --parallel 4): candidates 12, 13, 16, 27, 31, 36. Seed 12 is the lowest
     // (Baton Pass commits 1, first commit 74877, halt 75141 on MAWILE in battleIndex 0, two Lobby new challenges).
-    const result = runSeed(12, {
+    // lrc1 (the loss tail runs the opponent's animated return to ball and the win text prints 67 frames later; the exploring policy's presses
+    // after every loss land on new phases, and the Lobby deals from a later cursor): seed 12 no longer commits Baton Pass. Re-scanned full-policy
+    // seeds 0..39 (tools/soak/batonPassSearch.ts --seeds 0:40 --parallel 8): candidates 3, 6, 14, 28, 32, 36. Seed 3 is the lowest
+    // (Baton Pass commits 1, first commit 23967, halt 24569 on MAWILE in battleIndex 0, three Lobby new challenges).
+    const result = runSeed(3, {
       maxFrames: 80_000,
       renderEvery: 0,
       coverage: observer as never,
@@ -993,7 +997,8 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // 2 frames earlier, pic7 lab): frames only, 18678 -> 19042; same battle 1 / depth 0 / turn 23 / roundLost.
       // pic9 (the switch lines follow the foe's HP; new print lengths move the exploring presses): 19042 / turn 23 -> 22844 / turn 30;
       // same battle 1 / depth 0 / roundLost.
-      frames: 22844,
+      // lrc1 (the loss tail's opponent recall plays the ROM's animated return to ball, its recall receipt holds to the trainer slide and the slide's printstring is 3 rows later: the win text prints 67 frames later): frames only, 22844 -> 22897; same battle 1 / depth 0 / turn 30 / roundLost.
+      frames: 22897,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 0,
@@ -1030,7 +1035,8 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // frame catcher, docs/flow1-menu-cursors-and-locked-switch-recall.md): the exploring policy's fight presses after its switches pick
       // other moves, so a new trajectory: 60400 / turn 19 -> 61456 / turn 22; same battle 3 / depth 2 / roundLost. The cursor fix alone moves
       // it (with it undone the old pin passes; the recall fix alone leaves it). Seed 0 is unmoved.
-      frames: 61456,
+      // lrc1 (the loss tail runs the opponent's animated recall, see seed 0): frames only, 61456 -> 61504; same battle 3 / depth 2 / turn 22 / roundLost.
+      frames: 61504,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 2,
@@ -1070,7 +1076,8 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // hpf1: frames only, 9219 -> 9228; same end state.
       // merge of the box's 2026-11-18 run with the Mac's fixes 44-51: frames only, 9228 -> 9209; same end state.
       // pic8 (the forced party menu's clock starts at the faint message's dismiss edge: 2 frames earlier per forced switch, ROM lab pic7): frames only, 9209 -> 9205; same end state.
-      frames: 9205,
+      // lrc1 (the loss tail's opponent recall plays the ROM's animated return to ball, its recall receipt holds to the trainer slide and the slide's printstring is 3 rows later: the win text prints 67 frames later): frames only, 9205 -> 9319; same battle 1 / turn 16 / end state (the terminal presses land on new phases after the longer tail).
+      frames: 9319,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 0,
@@ -1096,7 +1103,8 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // hie1 (the Scene OFF held-item effect hold): frames only, 9233 -> 9271; same battle / turn / end state.
       // hpf1: frames only, 9271 -> 9404; same end state.
       // pic8 (the forced party menu's clock starts at the faint message's dismiss edge, ROM lab pic7): frames only, 9404 -> 9400; same end state.
-      frames: 9400,
+      // lrc1 (see seed 0): frames only, 9400 -> 9350 (the random terminal presses after the 67-frame-longer loss tail answer the record prompt sooner); same battle 1 / turn 16 / end state.
+      frames: 9350,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 0,

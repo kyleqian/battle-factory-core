@@ -43,7 +43,9 @@ import type {
   BattleResolutionPresentationState,
   BattleResolutionSegment,
 } from "./battleResolutionPresentation.ts";
-import { messageCommandTypedRows, messageCommandVisibleCharacters, SWITCH_IN_WAITSTATE_HOLD_FRAMES } from "./battleResolutionPresentation.ts";
+import {
+  messageCommandTypedRows, messageCommandVisibleCharacters, SWITCH_IN_WAITSTATE_HOLD_FRAMES, switchOutRecallElapsed,
+} from "./battleResolutionPresentation.ts";
 import { backAnimWaitTick, playerFaintReplacementSendOutTiming, sendInNature } from "./switchInTail.ts";
 import { SEND_IN_TAIL_ANIM_IDS, SEND_IN_TAIL_FRONT_ANIM_DURATION, SEND_IN_TAIL_SPECIES } from "../data/sendInTail.ts";
 import { BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS } from "./battleScriptSourceConstants.ts";
@@ -270,6 +272,8 @@ export const MID_BATTLE_SWITCH_OUT_SCALE_UP_END_ELAPSED = 24;
 export const MID_BATTLE_SWITCH_OUT_SPRITE_FREED_ELAPSED = 25;
 export const MID_BATTLE_SWITCH_OUT_SCALE_START = 256;
 export const MID_BATTLE_SWITCH_OUT_SCALE_STEP = 48;
+/** lrc1: the recall rows that still draw an elevated opponent's shadow (MidBattleSwitchOutView.shadowVisible). */
+export const MID_BATTLE_SWITCH_OUT_SHADOW_ROWS = 3;
 /**
  * `SetBattlerSpriteYOffsetFromYScale` (`battle_anim_mons.c:1873-1883`):
  * `var = MON_PIC_HEIGHT(64) - GetBattlerYDeltaFromSpriteId*2`, for RATTATA
@@ -300,6 +304,12 @@ export type MidBattleSwitchOutView = Readonly<{
   y2: number;
   /** False from relative frame 25 (the real sprite is freed ~1111-1117). */
   spriteVisible: boolean;
+  /**
+   * lrc1: `SpriteCB_EnemyShadow` (battle_gfx_sfx_util.c) hides an elevated opponent's shadow while `gAnimScriptActive`;
+   * B_ANIM_SWITCH_OUT_OPPONENT_MON launches on the controller's second row (DoSwitchOutAnimation state 1), so the shadow is still
+   * drawn on the recall's elapsed 0-2 (ROM, seed 23 Scene ON DUSTOX: shadow in 210929-210931, gone from 210932 = elapsed 3).
+   */
+  shadowVisible: boolean;
 }>;
 
 /**
@@ -336,6 +346,7 @@ export function midBattleSwitchOutAt(
     scale,
     y2: midBattleSwitchOutFeetAnchorY2(scale, yOffset),
     spriteVisible: renderedElapsed < MID_BATTLE_SWITCH_OUT_SPRITE_FREED_ELAPSED,
+    shadowVisible: elapsed < MID_BATTLE_SWITCH_OUT_SHADOW_ROWS,
   });
 }
 
@@ -1912,7 +1923,9 @@ export function battleResolutionCommandDuration(
       return command.timing?.minimumFrames ?? 1;
     case "turn-end":
       return command.timing.minimumFrames;
+    // lrc1: a slide's holdFrames are rows after it settles, before the next command (the loss tail's printstring).
     case "trainer-slide":
+      return command.timing.minimumFrames + (command.timing.holdFrames ?? 0);
     case "substitute-fade":
       return command.timing.minimumFrames;
     // sc106: General_StatsChange's added rows (76 / 90, statsChangeSpan); scd112 draws the banner over the field (stats-change effect).
@@ -1978,6 +1991,7 @@ function substituteFadeClearsBox(segment: BattleResolutionSegment): boolean {
  */
 export function battleResolutionCommandFallbackDuration(command: BattleResolutionPresentationCommand): number {
   if (command.type === "move-animation") return Math.max(1, (command.timing.seGateFrames ?? 0) + command.timing.minimumFrames);
+  if (command.type === "trainer-slide") return command.timing.minimumFrames + (command.timing.holdFrames ?? 0);
   const timing = (command as { timing?: { minimumFrames?: number } }).timing;
   return Math.max(1, timing?.minimumFrames ?? 1);
 }
@@ -2459,7 +2473,7 @@ export function createBattleResolutionPresentationRenderView(
       } catch {
         frames = battleResolutionCommandFallbackDuration(completed);
       }
-      opponentRecallSince = frames;
+      opponentRecallSince = switchOutRecallElapsed(completed, frames);
     }
     field = applyCompletedCommand(field, completed);
     semiInvulnerableHidden = applyLiveSemiInvulnerableCommand(semiInvulnerableHidden, completed);
@@ -2525,6 +2539,8 @@ export function createBattleResolutionPresentationRenderView(
     && (state.lifecycle.phase === "presenting"
       || state.lifecycle.phase === "awaiting-message-dismiss"
       || state.lifecycle.phase === "forced-party-handoff")
+    // lrc1: a lead switch-out swaps the doll back at its dispatch, not through the script rows before it.
+    && !(command.type === "switch-out" && switchOutRecallElapsed(command, state.lifecycle.phaseElapsed) < 0)
   ) {
     field = substituteDollAtCommandStart(field, command);
   }
@@ -2802,8 +2818,9 @@ export function createBattleResolutionPresentationRenderView(
       // ais3: the player's recall effect runs on the voluntary-switch clock, which reads trace 1087 at this command's elapsed 0
       // (the effect's elapsed 0, trace 1086, is the last message frame); the scale ramp keys off that clock. The opponent's own
       // clock starts at the command.
-      const recallElapsed = state.lifecycle.phaseElapsed + (command.battler === 0 ? 1 : 0);
-      switchOut = command.targetAtRest ? null : command.skipAnimation || semiInvulnerableHidden[command.battler]
+      // lrc1: a lead switch-out (the loss tail's recall) leaves the battler to the generic draw, at rest, until its dispatch.
+      const recallElapsed = switchOutRecallElapsed(command, state.lifecycle.phaseElapsed) + (command.battler === 0 ? 1 : 0);
+      switchOut = command.targetAtRest || recallElapsed < 0 ? null : command.skipAnimation || semiInvulnerableHidden[command.battler]
         ? Object.freeze({
             ...midBattleSwitchOutAt(recallElapsed, command.battler, recalledYDelta),
             spriteVisible: false,
@@ -2872,7 +2889,9 @@ export function createBattleResolutionPresentationRenderView(
   const ordinaryRest = state.liveOrdinaryBattlerX2History?.opponent === "idle"
       && (effect === null || effect.type === "hit" || effect.type === "stat" || effect.type === "status")
       && !(command !== null && state.lifecycle.phase !== "next-command-handoff" && state.lifecycle.phase !== "confirm-handoff"
-        && (command.type === "switch-in" || command.type === "switch-out" || command.type === "party-summary"
+        && (command.type === "switch-in" || command.type === "party-summary"
+          // lrc1: a lead switch-out's script rows before its dispatch are ordinary rows.
+          || (command.type === "switch-out" && switchOutRecallElapsed(command, state.lifecycle.phaseElapsed) >= 0)
           || command.type === "trainer-slide" || (command.type === "move-animation" && !command.actionTransition)))
       && switchIn === null && midBattleSwitchIn === null && switchOut === null && partySummary === null
       && field.opponent.substituteDoll !== true
@@ -2885,9 +2904,10 @@ export function createBattleResolutionPresentationRenderView(
     }),
   });
   // ais2: the opponent's recall ball effect (AnimTask_SwitchOutBallEffect): the player's recall windows on the opponent's own switch-out clock.
+  // lrc1: on the recall clock (switchOutRecallElapsed); nothing before a lead switch-out's dispatch.
   const opponentRecallElapsed = command?.type === "switch-out" && command.battler === 1 && !command.targetAtRest && !command.skipAnimation
       && !semiInvulnerableHidden[1]
-    ? state.lifecycle.phaseElapsed
+    ? (switchOutRecallElapsed(command, state.lifecycle.phaseElapsed) < 0 ? null : switchOutRecallElapsed(command, state.lifecycle.phaseElapsed))
     : opponentRecallSince === null ? null : opponentRecallSince + state.lifecycle.phaseElapsed;
   if (opponentRecallElapsed !== null && MID_BATTLE_SWITCH_OUT_TRACE + opponentRecallElapsed < MID_BATTLE_SWITCH_RECALL_END_TRACE && midBattleSwitchFade === null && midBattleSwitchParticles === null) {
     const traceFrame = MID_BATTLE_SWITCH_OUT_TRACE + opponentRecallElapsed;

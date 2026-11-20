@@ -678,7 +678,11 @@ describe("ISSUES #78 voluntary-switch source decision", () => {
       scale: 256,
       y2: 0,
       spriteVisible: true,
+      // lrc1: an elevated opponent's shadow is drawn on the recall's elapsed 0-2 only (gAnimScriptActive, SpriteCB_EnemyShadow).
+      shadowVisible: false,
     });
+    expect(viewAt(2).shadowVisible).toBe(true);
+    expect(viewAt(3).shadowVisible).toBe(false);
     expect(viewAt(14).scale).toBe(256);
     expect(viewAt(15).scale).toBe(256);
     expect(viewAt(17).scale).toBe(304); // rendered one tick into the ramp
