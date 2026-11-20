@@ -45,6 +45,10 @@ Stretch 51 (seed 8, the swap accept prompt to the next menu) was 1221 engine vs 
 - `tests/randomRoundSoak.test.ts`, "full" policy seed 1: frames 61456 -> 61528 (+72), same battle 3 / depth 2 / turn 22 / roundLost; the player's presses land on the new room wait.
 - `tests/lbrd.test.ts`, the vanilla pins and every other soak pin: re-run, unchanged.
 
+## Gates
+
+`npm run typecheck` 0, `npm run build` 0, `npm run build:lib` 0, `npm run test:gate` 360/360 files (2832 tests), the 84 other tests importing room / swap / postwin / factory flow modules all pass after the one re-pin. Soaks: `--policy vanilla --seeds 0:20 --scene off` 20/20 (OK 20, CRASH 0, HANG 0); `--policy vanilla --seeds 0:5 --scene on` 5/5 (ON run limited to 5 seeds by time); `--policy winning-swap --seeds 0:60 --scene off` 60/60 (run as 0:6, 6:18, 18:32, 32:46, 46:60, 0:6 repeated on the tip).
+
 ## Test players
 
 The soak driver (`RandomPlayer.onPostwin`) presses A once `swapReturnThanksInputReady` and holds no buttons before it; the frame catcher's menu model returns null while `swapReturn` is active and names the surface `swapReturn:<kind>`. play:random and the catcher's driver use these.
