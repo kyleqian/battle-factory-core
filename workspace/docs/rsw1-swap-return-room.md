@@ -57,3 +57,23 @@ The soak driver (`RandomPlayer.onPostwin`) presses A once `swapReturnThanksInput
 
 - The ROM's A-held text speed-up (`canABSpeedUpPrint`) is not modelled for "Thank you!" (same as the existing "Right this way").
 - Website note: games recorded on older builds replay on their own build only; the swap return room frame count and RNG changed.
+
+## rsw2: the room's frame count after the swap, walk, warp, battle start
+
+Question: is the engine 42 frames late on the "Right this way" walk (catcher seed 8, offset 684 vs 618), or is the catcher wrong? Settled with direct oracle traces (Scene OFF :8014), not the catcher: base route = `rsw1-swap-return-room-off`'s first 165 segments (accept at 30182), then appended segments.
+
+- `rsw2-walk-coarse-off`: accept -> Thank you! -> Right this way -> walk -> warp -> battle start, stride 3 over 30190-31098: 267/267 exact.
+- `rsw2-ready-spam-off` / `-odd-off`: A pressed every other frame (even / odd phase) through the room, dense (256 captures each): exact after the fix below. `rsw2-guide-spam0/1-off`: the same through the "Right this way" box and the walk, 256/256.
+- `rsw2-catcher-presses-off`: the ROM's own press schedule from catcher seed 8 (A at +66, +71, +188, B +208, A +216, A +222, B +235, A +245 from the accept) replayed densely: 256/256.
+
+Finding (the only engine difference): the "Thank you!" waitbuttonpress takes A / B two frames after the last glyph shows, not one (the "Right this way" box's gap, postwin.ts). `swapReturnThanksInputReady` was `+1`, now `+2` (ROM ready 30305 vs engine 30304 on the odd-phase spam). `tests/rsw1SwapReturnRoom.test.ts` pins `full + 1` not ready (an A there leaves `guideElapsed` null) and `full + 2` ready; it fails without the src change.
+
+RNG: per-frame `Random()` steps exact through the warp (bursts at 30225/30226 and 30569/30570); raw gRngValue equals the ROM's through 31093 after rebasing at 30190 (the engine's absolute rng on this route differs from the ROM's from 30180, known). Not equal after the battle-room entry (31094): the engine's fixed opponent-party-build draw counts (`opponentSetupExtraRngSteps`, battleRoom.ts) leave it 78 steps behind the ROM by 31121 because the ROM's CreateFacilityMon nature loops are value-dependent; the battle transition then starts 1 frame later with a different type. This is outside the swap return room and is NOT fixed here (follow-up: model the nature loops).
+
+Attribution of the catcher's 42: with the ROM's own presses the engine is exact, so the offset is catcher-side. Its ROM side re-presses the engine's presses at the same offset from the last matched menu and repeats a press with no effect, so each text-tap lands about 2 frames later on the ROM than on the engine and the room window grows by +2..+4 over the menu offset. The 1-frame ready fix above removed 23 of the 37 frames in stretch 51 (+37 -> +14); the rest is catcher press placement, plus the battle-start black (53 vs 44 frames) and a later 14-frame difference in the battle-start / intro presentation (out of scope). The catcher itself was not changed.
+
+Swap-entry fade frames 30182-30190 (6 diffs on the swapped traces, 482/488): not addressed, no time; unchanged.
+
+Re-pins: none moved. `tests/randomRoundSoak.test.ts` (and the coverage / combined soak tests), `interactiveRouting`, `prebattleRoomFlow`, `postwin`, `battleRoom` etc. all green unchanged. Compare: `rsw1-swap-return-room-off` 482/488 and `-on` 482/488 (unchanged), `rsw1-swap-kept-return-room-off` 360/360.
+
+Gates: typecheck 0, build 0, build:lib 0, `npm run test:gate` 360/360 files (2835 tests), `winning-swap --seeds 0:60 --parallel 3` OK 60/60 (run as 0:3, 3:12, 12:21, 21:30, 30:39, 39:48, 48:57, 57:60 because one 60-seed run exceeds the 10-minute tool cap).
