@@ -20,6 +20,7 @@ request files committed under `tools/battle-lab/pic*.json`; frames stayed out of
 | pic5 | (found by the agent sweep) the swap screen's SUMMARY | it paged through `draftScreen.rentals`, the opening draft's six, so after any draft not renting slots 0-2 it showed another Pokemon (soak seed 0: ANORITH for the party's PONYTA) | `factorySwapSummaryRentals` reads the round's own `playerRentalRecords` | battle_factory_screen.c:2404 `ShowPokemonSummaryScreen(SUMMARY_MODE_NORMAL, gPlayerParty, cursorPos, ...)` | `pic5SwapSummaryParty.test.ts` |
 | pic6 | B in the battle POKéMON menu cut straight back to the battle | the orchestrator dropped the selector on the B edge | B keeps the selector through the measured SEND OUT close, then 6 frames of the field before the action menu (`PARTY_SELECT_CANCEL_CLOSE_TOTAL_FRAMES` 78) | party_menu.c:1394-1403 + :1227; lab `pic6-party-cancel-{on,off}` (B at 160): fade 163-177, black 178-216, fade-in 217-232, empty box 233-238, menu 239; `pic6-party-shift-off` (A at 206) shares the schedule to the fade-in | `pic6PartyCancelFade.test.ts`, re-pinned `factoryRoundBattleOrchestrator.test.ts` |
 | pic7 | the background went fully white for ~8 frames at the send-out | that frame on his build was the sample battle's recorded palette (pic1); the ROM does whiten BG palettes 1-3 at every send-out, and Scene ON path A already drew it exactly. Scene OFF drew no white fade and MAGBY's ball arc for every species | Scene OFF takes path A without the back animation | pokeball.c:758 `LaunchBallFadeMonTask(TRUE, battler, 14, ...)`, battle_anim_throw.c:2058 `BeginNormalPaletteFade(14, 0, 0, 16, RGB_WHITE)`; lab `pic7-player-faint-send-in-{on,off}`: 0 px through e 171 in both scenes (before: Scene OFF 80-110 px at e 105-141 and up to 18.9k px at e 147-183) | `pic7SendInWhiteFade.test.ts` |
+| pic9 | (planning session's ROM replay) switching MAGBY for IVYSAUR printed "MAGBY, OK! Come back!" / "Go! IVYSAUR!"; the ROM: "MAGBY, good! Come back!" / "Go for it, IVYSAUR!" | the come-back line read the outgoing mon's own HP, the send-in line was always "Go!" | both from the foe's HP: the come-back line from the damage dealt since the side's `hpOnSwitchout` (kept in the display ledger, reset for both sides at every committed switch-in, carried across action menus; the stored HP is truncated to 8 bits as the ROM's u8 local), the send-in line (voluntary and after a faint) from the foe's current HP percent | battle_script_commands.c:6258-6306 (`Cmd_hpthresholds` / `Cmd_hpthresholds2`), :5276-5280, battle_main.c:3421, battle_message.c:2081-2110; ROM replay of Kyle's battle 1 (ELEKID 26 / 138: 81 % dealt, 18 % left); Castform lab (full-HP foe: "that's enough!" / "Go!") | `pic9SwitchLines.test.ts` (decomp tables, Kyle's numbers, every switch of two full soak games) |
 | pic8 | the fade into the party menu after a faint looked like "to white" | the colours are the ROM's (it fades to black; the near-white field passes through light greys); the start was 2 frames late: two one-frame sprite-visibility restores after the faint message ran before the selector's "frames since the dismiss edge" clock started | the selector starts at the frames of that bookkeeping tail | lab `pic7-player-faint-send-in-on`: A at 560, first fade step 582 (21 held frames, `PARTY_ENTRY_FADE_OUT_START`) | `pic8FaintPartyFadeStart.test.ts` |
 
 Engine frame N shows ROM capture N; a button first held at trace (segment) index P is read on engine frame P + 1 (the dense SEND OUT
@@ -43,10 +44,14 @@ trace: A at 962, `closeElapsed` 0 at 963), which is how the lab rows above map o
 - `tests/factoryRoundBattleOrchestrator.test.ts` "cancels POKéMON": walks the 78-frame close instead of the instant cut.
 - `tests/pfb229FaintReplacementSendIn.test.ts`: MAGBY and Scene OFF now carry the path-A view (Scene OFF without the back animation).
 - `tests/battlesceneSplitEligibility.test.ts`: three canonical-only palette helpers pinned by name (pic1 removed their live caller).
+- pic9: `cff232CastformOff.test.ts` player-water-send-in compares its text rows from the send-in line's replacement on (its lab's foe was at
+  full HP, census seed 603's HUNTAIL at 50 %: "Do it! CASTFORM!"; the Castform rows stay 202 / 202); soak full seed 0 19042 / turn 23 ->
+  22844 / turn 30, seed 1 113091 / battle 6 / depth 5 -> 60400 / battle 3 / depth 2; Baton Pass pin seed 7 -> 15 (re-scan 0..39: 15,
+  16, 27, 39).
 - Round replay fixtures (`parityMacRoundReplayFixtures`): unchanged and passing.
 
-Full suite on the branch (once, at the end): 16,125 passed, 5 failed; 3 were this branch's and are fixed (contain213 x2: the sample
-guard on placeholder chrome; split eligibility), 2 fail identically on the base 2cd8b3039 (`iss215ToolPixelInstall`:
+Full suite on the branch: 16,125 passed, 5 failed; 3 were this branch's and are fixed (contain213 x2: the sample guard on placeholder
+chrome; split eligibility). Final run after pic9: 16,132 passed, 2 failed, both failing identically on the base 2cd8b3039 (`iss215ToolPixelInstall`:
 `tools/integration/btn2EngineRows.ts` lacks the installer import; `liveSpeciesAudit14Fixes` Substitute fade "player fade" rows).
 
 ## Measured, not fixed here (open)
@@ -68,5 +73,3 @@ guard on placeholder chrome; split eligibility), 2 fail identically on the base 
 - Sound (for the sound session): the swap SUMMARY's open cry still comes from `draftSummarySoundContext(state.draftScreen)`, i.e.
   the draft slot's species; the forced party menu's clock now starts 2 frames earlier (pic8), so any sound keyed on its `elapsed`
   moves with it; the B close (pic6) carries no new sound (the ROM's SE_SELECT on the press is unchanged).
-- From the planning session's ROM text compare (not done here): the switch-out / send-in lines ("good!" / "OK!" / "that's enough",
-  "Go for it" / "Do it" / "Your foe's weak") are picked from the foe's HP in the ROM (Cmd_hpthresholds/2).
