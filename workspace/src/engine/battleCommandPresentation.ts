@@ -700,6 +700,8 @@ export function advanceBattleCommandPresentation(
         elapsed >= REJECTION_MESSAGE_HOLD_AT
         && (newKeys.has("A") || newKeys.has("B"))
       ) {
+        // snd1: the `\p` wait is text.c TextPrinterWaitWithDownArrow, which plays SE_SELECT on the accepted A / B.
+        playSelectSe();
         return withLifecycle(state, "rejection-reopen", 0, {
           rejectionWaitCursorAge: elapsed - REJECTION_MESSAGE_HOLD_AT,
         });
@@ -719,6 +721,7 @@ export function advanceBattleCommandPresentation(
         && (newKeys.has("A") || newKeys.has("B"))
         && state.forcedMove !== null
       ) {
+        playSelectSe(); // snd1: "has no moves left!\p", the same text.c page wait
         const forcedMove = Object.freeze({ ...state.forcedMove, dismissedWaitCursorAge: elapsed - 1 - NO_MOVES_MESSAGE_HOLD_AT });
         return withLifecycle(state, "submitting", 0, {
           forcedMove,
@@ -744,10 +747,10 @@ export function advanceBattleCommandPresentation(
       const direction = (["UP", "DOWN"] as const)
         .find((button) => newKeys.has(button));
       if (direction !== undefined) {
-        playSelectSe();
-        return withLifecycle(state, "forfeit-question", elapsed, {
-          forfeitCursor: direction === "UP" ? 0 : 1,
-        });
+        const forfeitCursor = direction === "UP" ? 0 : 1;
+        // snd1: PlayerHandleYesNoInput (battle_controller_player.c:1420-1435) sounds UP only off YES and DOWN only off NO.
+        if (forfeitCursor !== state.forfeitCursor) playSelectSe();
+        return withLifecycle(state, "forfeit-question", elapsed, { forfeitCursor });
       }
       return withLifecycle(state, "forfeit-question", elapsed);
     }
@@ -782,6 +785,8 @@ export function advanceBattleCommandPresentation(
 
   if (state.lifecycle.phase === "action-menu") {
     if (newKeys.has("A")) {
+      // snd1: HandleInputChooseAction (battle_controller_player.c:245-247) plays SE_SELECT on every A, before the cursor switch.
+      playSelectSe();
       if (state.actionCursor === 0) {
         if (state.forcedMove !== null) {
           return state.forcedMove.kind === "struggle"
@@ -797,7 +802,6 @@ export function advanceBattleCommandPresentation(
       if (state.actionCursor === 2) {
         return withLifecycle(state, "party-handoff", 0);
       }
-      playSelectSe();
       return withLifecycle(
         state,
         state.actionCursor === 1 ? "bag-message" : "forfeit-question",
@@ -808,10 +812,10 @@ export function advanceBattleCommandPresentation(
     const direction = (["LEFT", "RIGHT", "UP", "DOWN"] as const)
       .find((button) => newKeys.has(button));
     if (direction !== undefined) {
-      return Object.freeze({
-        ...state,
-        actionCursor: moveBattleCommandActionCursor(state.actionCursor, direction),
-      });
+      const actionCursor = moveBattleCommandActionCursor(state.actionCursor, direction);
+      // snd1: each D-pad branch (:265-302) plays SE_SELECT only when the cursor moves; a press toward the menu edge is silent.
+      if (actionCursor !== state.actionCursor) playSelectSe();
+      return Object.freeze({ ...state, actionCursor });
     }
     return state;
   }
@@ -821,6 +825,8 @@ export function advanceBattleCommandPresentation(
   if (newKeys.has("A")) {
     const decision = state.legalMoveBySlot[state.fightCursor];
     if (decision !== null) {
+      // snd1: HandleInputChooseMove's A (battle_controller_player.c:480-484) plays SE_SELECT before it looks at the move.
+      playSelectSe();
       return withLifecycle(state, "submitting", 0, { pendingDecision: decision });
     }
     // ISSUES #81: a slot that `rejectionReasonBySlot` flags (Torment et al.)
@@ -828,6 +834,7 @@ export function advanceBattleCommandPresentation(
     // the resolver's two lines, holds button-gated, and reopens the menu.
     const rejection = state.rejectionReasonBySlot[state.fightCursor];
     if (rejection !== null) {
+      playSelectSe();
       return withLifecycle(state, "rejection-message", 0, {
         rejectedSlot: state.fightCursor,
       });
@@ -835,16 +842,17 @@ export function advanceBattleCommandPresentation(
     return state;
   }
   if (newKeys.has("B")) {
+    playSelectSe(); // :543-545
     return withLifecycle(state, "fight-closing", 0);
   }
 
   const direction = (["LEFT", "RIGHT", "UP", "DOWN"] as const)
     .find((button) => newKeys.has(button));
   if (direction === undefined) return state;
-  return Object.freeze({
-    ...state,
-    fightCursor: moveFightCursor(state.fightCursor, direction),
-  });
+  const fightCursor = moveFightCursor(state.fightCursor, direction);
+  // snd1: :547-597, SE_SELECT only when the cursor moves (a Factory mon always has four moves, so gNumberOfMovesToChoose never blocks).
+  if (fightCursor !== state.fightCursor) playSelectSe();
+  return Object.freeze({ ...state, fightCursor });
 }
 
 /**
