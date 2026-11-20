@@ -60,6 +60,7 @@ interface WonLobby {
 // cases, the rest 8 .. 12. Roles are independent cases, so WIN_TWO and WIN_THEN_LOSE use 10 (passes all but the retire) and RETIRE uses 0 (passes the retire and the loss case).
 // hcr1b (the first used-move glyph at commit + 7 + u, pixel-exact): 10 / 0 / 10 fail 3 cases. A scan of 0..47 with the seed in all three roles (scratch copies of this file) found 23, 33, 44 and 47
 // passing every case (0..15 all fail at least the two WIN_TWO-role continuation cases; 17 and 40 fail only those two, 36 only the retire case), so all three use 23.
+// merge of rsw1 + hcr1b + gsp2b (pin2): 23 still passes every case. A scan of 0..22 with the seed in all three roles on the merged tree (scratch copies of this file) found no seed passing all 15 (17 loses only the two WIN_TWO continuation cases), so all three stay 23.
 const WIN_TWO_SEED = 23;
 const RETIRE_SEED = 23;
 const WIN_THEN_LOSE_SEED = 23;
