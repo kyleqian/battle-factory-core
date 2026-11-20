@@ -1139,3 +1139,75 @@ What not to chase: the landed shape-A bodies' own next-command spread (Ice Beam 
 4. Scene OFF is already near the floor: median -3, 16 % of mass at |offset| >= 20; the next OFF gain is the hit-controller rows (41 %).
 5. **Doc repair (finding, not a measurement):** commit `b0e4cf53d` ("c1k: itemise the move-animation command count delta") turned this file into **62 MB / 1,040 lines** (a replacement with an empty pattern inserted its text between every pair of characters). Master's copy of this doc was unusable (every `grep` / `Read` returned the sentence). The first commit of this branch restores `85570820a`'s text (157,494 bytes) with the intended itemised sentence applied in the one place it belonged (the ON / OFF move-animation command-count delta in the c1k section 2). The wording of that sentence is `b0e4cf53d`'s; nothing else changed.
 6. Tooling: nothing new under `tools/`. `step.sh` / `stream.sh` / `runq.sh` (resumable per-seed queues with a time cutoff, per-commit replays over fixed ROM files) are in `.integration/evidence/t2n/` (ignored).
+
+## gsp1m (2026-11-20): general / status animations with no move running, ROM vs app per command (measurement only)
+
+Step gsp1m answers the t2n section 4 group 1 / section 5 rank 1 item: why the five-SE group `gen:152 / 152 / 152 / 228 / 102` (4,650 mass in the 25 ON seeds, 94 groups) and the other no-move general rows drift by -18 .. +27 inside one battle. Measurement only: no `src/` or `tests/` change is committed (a temporary probe patch to the `status` command timing was applied, run and reverted; `git status` is clean of src / tests). Scene ON, seeds 5063 (main), 1415 (check), 2230 / s310 / s8612 (sweep only). ROM side: per-frame `hpd2Probe.py` probe (`gBattlescriptCurrInstr`, `gBattleControllerExecFlags`, `gAnimScriptActive`, hp) on `reference/pokeemerald/pokeemerald.map`, opcode name = the NEXT instruction at an exec rise. App side: `soundCensusRomReplay.ts replay --scene=on --cmdtrace=1`. Frames are relative to the segment's commit frame (R = ROM, E = app).
+
+### 1. What the five-SE group is
+
+`B_ANIM_HELD_ITEM_EFFECT` = `General_HeldItemEffect` (`data/battle_anim_scripts.s:10440-10460`): three `playsewithpan SE_M_TAKE_DOWN` (152) each followed by `AnimTask_RotateMonToSideAndRestore` + `waitforvisualfinish`, then SE_M_MORNING_SUN (228), then SE_SHINY (102). It is started by Leftovers (`src/battle_util.c:3400-3413`, `BattleScript_ItemHealHP_Ret` -> `ItemHealHP_End2`, `data/battle_scripts_1.s:4373-4384`) and by the cure berries (`RemoveItem`, `:4356-4364`). The group is **not** where the drift is made: its internal intervals are within +1 of the ROM, constant over turns and seeds (app 32, 32, 32, 27 vs ROM 32, 32, 32, 72 .. 6 are the same script lengths; the per-SE offsets inside a group are flat, e.g. 27 27 27 27 27 below). The group's own contribution (offset of its SE1 minus the offset of the previous matched row) is small and constant: lead +4 after a message, +2 after a recoil message, +3 after a `HitFromAtkAnimation` print, -1 after an hp row, +8 / +9 after a `status-icon`; the animation tail +1; message -> hp -3. Over the 94 groups the mass would be **4,205 if the group's own jump were zero (4,650 now)**, so a group-only lead rule would gain about 10 % of the class. The mass is inherited from earlier commands of the same turn.
+
+### 2. Per-command table, seed 5063 (ROM vs app, frames after commit)
+
+Turn res16 (also res8 / 12 / 20 / 24 / 28 / 32 / 36 / 40: the same wake-up turn shape, 36 Double-Edge rows at +24 = t2n group 4 "+24 x 36", 888 mass). ROM script rows are from the probe, app rows from `cmds`.
+
+| command | ROM row (source) | ROM frame | app frame | app - ROM | note |
+| --- | --- | --- | --- | --- | --- |
+| wake-up print | `BattleScript_MoveUsedWokeUp+14` waitmessage (`data/battle_scripts_1.s`) | 12 | status 9, message 41 | **+29** | the app's leading `status` command is the 32-frame `STATUS_TIMING.minimumFrames` default (`battleResolutionPresentation.ts:2220`; `sceneOnStatusFrames` returns null for a wake-up, 1574-1612); ROM prints the wake-up message at commit + 9 .. 12 and returns at +94 |
+| Double-Edge string / status-icon | `BattleScript_HitFromAtkString+1` ppreduce | 99 | status-icon 121, message 122 | +22 | follows the wake-up shift |
+| Double-Edge animation | `HitFromAtkAnimation+1` waitanimation, SE 206 / 193 / 193 / 141 / 13 | 130, SE1 136 | move-animation 146, SE1 160 | **+24** | all five SEs of the move at +24 / +24 / +24 / +24 / +24 |
+| hit + hp | `datahpupdate` after `HitFromAtkAnimation+8` | 311 | hp 333 | +22 | |
+| recoil | `DoRecoil+11` datahpupdate / waitmessage | 338 / 346 | hp 360 / message 369 | +22 / +23 | |
+| Yawn | `EffectYawn+2` ppreduce, SE 237 / 232 / 237 | 450, SE 488 | move-animation 459, message 473, SE1 510 | +22 (SE) | Yawn's own lead +0 .. -2 |
+| Yawn tail -> held item | `EffectYawn+57` waitmessage, `ItemHealHP_Ret+7` printstring | 699, 808 | message 722, general-animation 820 | +23, +12 | group SE1 816 vs 843: **+27** (the group's lead is +4 after the Yawn message) |
+| held-item group | SE 152 x3, 228, 102 | 816, 848, 880, 912, 984 | 843, 875, 907, 939, 1011 | +27 x 5 | flat inside the group |
+| held-item message / hp | `ItemHealHP_Ret+10` waitmessage / datahpupdate +24 / `End2+5` | 1021 / 1137 / 1155 | message 1049, hp 1162, turn-end 1173 | +28 / +25 / +18 | |
+
+The turn's offset trajectory (all SEs): +24 x5 (Double-Edge), +22 x3 (Yawn), +27 x5 (group). So **24 of the 27 is the wake-up `status` command, +3 .. +5 is Yawn's tail / held-item lead (the group's own +4)**.
+
+Turn res0 (no wake-up; Double-Edge + Curse + Leftovers): ROM Double-Edge `ppreduce` 12, hit `waitstate` 189, `datahpupdate` 224 / recoil 277; app hit-animation 185 (+0 .. +4 vs ROM `ANIM-` 185), hp 220, recoil hp 273. Curse (body 174): ROM `EffectCurse+9` ppreduce 399, `CurseTrySpeed+17` waitanimation 428, SE1 +10 late in the app (move-animation 419, hit rows `stat` 598 / 689 / 783 vs ROM `waitmessage` 610 / 703 / 797: the app's stat-change message arrives 12 .. 14 earlier than the ROM's, the tail to the first message is 9 short). Group at ROM printstring 900 vs app general-animation 879 + the SE lead; group SE offsets in this turn are -3 .. +4 (Curse 221 mass, lead1m B4 C-body).
+
+Turn res40 (wake-up + Double-Edge + Struggle + Leftovers): ROM Double-Edge hp `datahpupdate` 311 vs app hp 333 (+22, the wake-up shift); Struggle (body 165) `datahpupdate` 642 / recoil 720 / waitmessage 740 vs app hp 664 / 742 / message 763: +22 / +22 / +23 = the same +22 carried (no new Struggle error beyond +1); group printstring 850 vs app 858.
+
+### 3. Seed 1415 check
+
+Same shape. res10: wake-up (status 9 -> message 41 vs ROM waitmessage 9 -> return 91) -> infatuation (`BattleScript_MoveUsedIsInLove+3` waitmessage 95 vs app status-icon 121 / message 122; ROM `ANIM+` 197, SE 212 at 200 / 217 / 234, app status-animation 225 INFATUATION, SE 235 / 252 / 269) -> Bulk Up (ppreduce 297, SE 193 / 193 / 193 / 239) -> Yawn (701 ppreduce, SE 739) -> held-item group. Offsets per SE: **+35 x3 (infatuation: 32 from the wake-up `status` + 3 from the infatuation message order), +24 x3 (Bulk Up SE 193: the status-animation tail is 11 short), +28 (Bulk Up SE 239: a 4-frame move-animation lead), +24 x3, +29 x5 (the group)**. res1 (Yawn -> asleep -> Chesto berry cure): the `status-icon` -> group lead is 25 vs the ROM's 16 (+9, the +8 / +9 "after a status-icon" jump of section 1). res17 (infatuation + wake-up): +29 .. +34 like res10. Seed 2230 (11 groups, 675 mass) is the same set (wake-up + Yawn + Leftovers): 2 of its 4 drift turns carry the wake-up `status`.
+
+### 4. Causes, ranked by mass
+
+| rank | cause | rows / turns | where | measured size |
+| --- | --- | --- | --- | --- |
+| 1 | **wake-up `status` command default 32 frames** | all wake-up turns (s5063 res8 / 12 / 16 / 20 / 24 / 28 / 32 / 36 / 40, s1415 res10 / 14 / 17 ...) | `status` emission for `set-battler-status-data` ~5530-5540, `STATUS_TIMING` 2220 | +24 .. +29 per turn at every following SE, inherited by every later command in the turn, incl. the five-SE group; wake-up message ROM +9 .. +12, app +41 |
+| 2 | held-item restart / continue lead after a message / status-icon (`HELD_ITEM_EFFECT_RESTART_LEAD_FRAMES = 15`, `..._CONTINUE_LEAD_FRAMES = 9`, `..._AFTER_STATUS_EXTRA_FRAMES = 1`, lines 160-214) | 94 groups | | +4 after a message, +8 / +9 after a status-icon (the group's own jump, 4,650 -> 4,205 if zero) |
+| 3 | status-animation (infatuation / Yawn) tail + Bulk Up lead | s1415 res10 / 14 / 17 | | +3 .. +5 each |
+| 4 | Curse lead / tail (body 174) | s5063 res0 and 5 more | `lead1m` B4 C-body | lead +10, tail to the first message -9 |
+| 5 | Rest (156) / Struggle (165) hit / recoil hp bars | s5063 res40, s1415 | | +22 .. +23 late (probably the wake-up shift in res40; Rest in res0 of the first group, ignore the "body:156" label) |
+| 6 | faint / cry chain before a group | s5063 / s1415 | ctl 15 / 16 + cry | +18 / +21 |
+
+Over the 25 seeds: 94 groups, 4,650 mass; by seed s5063 30 groups 1,905, s1415 31 / 1,165, s2230 11 / 675, s310 10 / 325, s2 1 / 220, s6 2 / 125, s8108 3 / 105, s3738 2 / 100, s648 2 / 25.
+
+### 5. Probe: what the wake-up fix would move (temporary patch, reverted)
+
+Patch (not committed): in the `status` command emission, when the update clears the sleep bits (`(before.status1 & 7) != 0 && (after.status1 & 7) == 0`) and `sceneOnStatusFrames` is null, use `minimumFrames = N` instead of 32. Replayed all 25 ON seeds with N = 0 / 3 / 6 / 12 and aligned the app's SE rows to the ROM's per segment (ordered sequence match on SE id; metric = sum of |app - ROM offset| over the matched rows, the same 5,830 rows in every run; this is a proxy and does not equal the scoreboard's mass, which is rank-based on a different alignment):
+
+| N | all-seed sum of \|offset\| | s5063 | s1415 | s2230 | s8612 | s310 | s499 |
+| --- | --- | --- | --- | --- | --- | --- |
+| 32 (now) | 35,239 | 4,546 | 3,784 | 2,315 | 1,382 | 1,489 | 1,785 |
+| 0 | 31,926 | 2,681 | 2,394 | 2,241 | 1,321 | 1,568 | 1,783 |
+| 3 | 31,588 | 2,465 | 2,354 | 2,213 | 1,287 | 1,548 | 1,783 |
+| 6 | **31,265** | **2,200** | 2,410 | 2,177 | 1,236 | 1,519 | 1,785 |
+| 12 | 31,565 | 2,408 | 2,638 | 2,147 | 1,190 | 1,459 | 1,785 |
+
+All other 19 seeds are unchanged (no regression elsewhere; one segment, s5063 res44, +1). At N = 6 the whole-class change is -3,974 (-11.3 % of the matched-row mass); restricted to SE ids 152 / 228 / 102 (all uses) it is 5,812 -> 4,276 (-1,536, -26 %), and for the eight ids of this class (152 228 102 142 148 242 219 179) 9,786 -> 8,250 (-1,536, -16 %). The s5063 res16 offsets go +24 x5 / +22 x3 / +27 x5 -> **-2 x5 / -4 x3 / +1 x5** (N = 6), -5 / -7 / -2 (N = 3); s1415 res10 +35 x3 / +24 x3 / +28 / +24 x3 / +29 x5 -> +9 x3 / -2 x3 / +2 / -2 x3 / +3 x5 (the +9 left is the infatuation message order, section 3). The best N differs per seed (s5063 6, s1415 3, s2230 / s8612 / s310 12): the wake-up print's lead is not constant in the ROM (it follows the preceding command), so the per-seed spread of 3 .. 12 is the residual to measure before landing, not a precise constant.
+
+### 6. Proposed landing (not done: out of scope for gsp1m)
+
+1. **Wake-up `status` duration** (rule, `src/engine/battleResolutionPresentation.ts`, the `status` emission for `set-battler-status-data` ~5530-5540, or an entry in `sceneOnStatusFrames` 1574-1612 for a sleep-clearing update): replace the 32-frame default with a ROM-measured head (the ROM prints the wake-up message at commit + 9 .. 12, so the head is 0 .. 12 frames; start from 6, then split by what precedes it). Expected: **about -4,000 of 35,239 matched-row mass on the 25 ON seeds (-11 %), about -1,500 on the five-SE group ids and the t2n group 4 "+24 x 36" 888 rows to ~0**. Pins it will move: `status` command timing tests in the wake-up / sta / off121 family (grep `STATUS_TIMING` / `minimumFrames: 32` in `tests/`), the hie1 / sa125 held-item-effect pins that carry the +1 `AFTER_STATUS_EXTRA_FRAMES` and the restart / continue leads, and the Scene ON census digest. Scene OFF: unaffected if the rule is Scene ON only (`sceneOnStatusFrames` is the ON entry).
+2. **Held-item lead after a message / status-icon** (hie1 constants, lines 160-214): trim `RESTART_LEAD_FRAMES` 15 -> about 11 (the group's +4 after a message) and the after-status-icon extra +8 .. +9 -> about 0. Expected: **about -(4,650 - 4,205) = -445 on the five-SE group alone** (about -1,200 if the +4 is applied to all ~60 groups after a message, an estimate not measured). Do this after item 1, since the lead measure must be taken on turns without the wake-up shift.
+3. **Infatuation / status-animation tail + Bulk Up lead** (s1415 +9 / +4): small, s1415 only in these seeds; measure after item 1.
+4. **Curse C-body lead / tail** (lead1m B4: +10 lead, tail -9) and **Struggle / Rest hp** (already inside the +22 of the wake-up turns; recheck after item 1).
+
+No new defect found in the group's own script (General_HeldItemEffect): its intervals are correct. The `-18 .. +27` is one 32-frame wake-up `status` default (rank 1) and a handful of 3 .. 5 frame command leads.
+
+Tooling note: the probe and the per-turn comparison scripts live in `/tmp/gsp1m` (not committed); the engine replay command is `node --experimental-strip-types --no-warnings tools/integration/soundCensusRomReplay.ts replay --seed=<s> --scene=on --setup=.integration/evidence/t2n/<s>-on.setup.json --cmdtrace=1 --out=<f>` (4 s per seed).
