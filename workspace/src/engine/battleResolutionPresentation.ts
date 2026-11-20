@@ -2318,6 +2318,26 @@ function leechSeedDrainRole(events: readonly BattleKernelSemanticEvent[], index:
 const LEECH_SEED_DRAIN_SEEDED_HP_TIMING = Object.freeze({ minimumFrames: 0, tailFrames: LEECH_SEED_DRAIN_SEEDED_TAIL } as const);
 const LEECH_SEED_DRAIN_RECEIVER_HP_TIMING = Object.freeze({ minimumFrames: 0, tailFrames: HP_PRINT_TAIL_FRAMES } as const);
 const STAT_TIMING = Object.freeze({ minimumFrames: 2 } as const);
+/**
+ * chg1: Skull Bash's Defense boost after its charge box (Scene OFF): STATS_CHANGE's `playanimation` executes on row A, the box's
+ * print on row P with its waitmessage's 64 rows after it; the animation's first drawn frame is A - P - 63 frames after the held box (fitted on
+ * the Skull Bash lab, 7 frames; the generic 2-frame stat command is 5 short: setstatchanger .. playanimation).
+ */
+function chargeTurnStatTiming(
+  events: readonly BattleKernelSemanticEvent[],
+  index: number,
+  beforeRules: BattleScriptRulesContext,
+): Readonly<{ minimumFrames: number }> | null {
+  if ((beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) === 0) return null;
+  const box = events[index - 1];
+  const animation = events[index + 1];
+  if (box === undefined || animation === undefined || box.payload.kind !== "message" || box.provenance?.sourceLabel !== CHARGE_TURN_SCRIPT) return null;
+  if (animation.payload.kind !== "animation" || animation.payload.animationId !== "STATS_CHANGE") return null;
+  const printExecution = box.provenance?.instructionExecution;
+  const animationExecution = animation.provenance?.instructionExecution;
+  if (printExecution === undefined || animationExecution === undefined) return null;
+  return Object.freeze({ minimumFrames: Math.max(STAT_TIMING.minimumFrames, animationExecution - printExecution - WAITMESSAGE_LONG_HOLD_FRAMES + 1) });
+}
 const STATUS_TIMING = Object.freeze({ minimumFrames: 32 } as const);
 /**
  * Cmd_updatestatusicon emits one controller request and waits for it
@@ -5667,7 +5687,7 @@ export function projectBattleResolutionCommands(
           stat: payload.stat,
           from: payload.from,
           to: payload.to,
-          timing: STAT_TIMING,
+          timing: chargeTurnStatTiming(events, index, beforeRules) ?? STAT_TIMING,
         }));
       }
       continue;
