@@ -1244,8 +1244,9 @@ Cause: the first-print lead, by effect-script class (u = commands from the effec
 | 4 | plain EffectHit | +10 | +1 | 68 |
 | 5 | | +11 | +2 | 12 |
 | 6 | secondary-effect hits (`setmoveeffect` + `goto EffectHit`) | +12 | +3 | 157 |
+| 7 | | +13 | +4 | 1 |
 | 8 | Struggle, EffectRecoil | +14 | +5 | 44 |
-| 10 .. 17 | SemiInvulnerable charge turn, SolarBeam charge turn (rise 16 .. 18) | +16 .. 23 | +7 .. +14 | 4 |
+| 12, 16 | SemiInvulnerable charge turn (u 12 x1, 16 x2; rise 16 .. 18) | +18, +22 | +9, +13 | 3 |
 | None | no used-move first print (turn starts with a status / ability / wake-up / confusion message, forced / flinch / NoMovesLeft Struggle) | | | 158 |
 
 By hp shape / hold: hit rows with the target hp bar moving make the bulk of the 2,255; holds (Brick Break +63 x2, charge turns) are the long tail, see section 5.
