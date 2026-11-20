@@ -226,6 +226,11 @@ export type BattlePartySelectState = Readonly<{
    * resolution presentation -- see `battlePartySelectClosePhase`.
    */
   closeElapsed: number | null;
+  /**
+   * pmw1: the forced send-out's SEND OUT was confirmed (its own close runs on PartySelectState.sendOutElapsed, not `closeElapsed`):
+   * the submenu's "Do what with this {PKMN}?" message window stays through the fade-out (messageWindowSwappedFor).
+   */
+  sendOutConfirmed?: true;
 }>;
 
 export type BattlePartySelectClosePhase =
@@ -486,6 +491,7 @@ export function battlePartySelectStateForForcedParty(
     openElapsed: 0,
     selectedSinceElapsed: -MON_ICON_CREATION_ELAPSED_OFFSET,
     closeElapsed: null,
+    ...(forced.sendOutElapsed !== null && forced.sendOutElapsed > 0 ? { sendOutConfirmed: true as const } : {}),
   });
 }
 
@@ -1390,11 +1396,17 @@ function submenuWindowVisible(state: BattlePartySelectState): boolean {
  * The message window stays the wide "Choose a POKéMON." sDefaultPartyMsgWindowTemplate
  * (21x2, frame to x182) through the submenu's 3-frame pre-open hold and only
  * swaps to sDoWhatWithMonMsgWindowTemplate (16x2, frame to x141) together with
- * the submenu window at the 926 pop edge; from the close it stays swapped.
+ * the submenu window at the 926 pop edge; from a confirm's close it stays swapped.
+ *
+ * pmw1 (frame catcher 2026-11-20, docs/fcp1-frame-catcher-pictures.md): only a close that the submenu confirmed. A cancel from the
+ * party list (B, or A on CANCEL: HandleChooseMonCancel -> Task_ClosePartyMenu, party_menu.c) never opened the submenu, so the ROM fades
+ * out with "Choose a POKéMON." in the wide window (seed 1: 8 of 8 cancels); and the forced send-out's SEND OUT confirm
+ * (CursorCb_SendMon) keeps the narrow window through its own fade-out (sendOutConfirmed).
  */
 function messageWindowSwappedFor(state: BattlePartySelectState): boolean {
   return submenuWindowVisible(state)
-    || state.closeElapsed !== null;
+    || (state.closeElapsed !== null && state.outcome?.kind !== "cancel")
+    || state.sendOutConfirmed === true;
 }
 
 /**
