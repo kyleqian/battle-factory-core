@@ -13,31 +13,10 @@ defects are all authorized in the finish-up mission (`docs/factory-finish-scope.
 gameplay / RNG when proved against source; use main-lane ownership and gameplay gates. Historical presentation-only
 exclusions are superseded. Unrelated expansions stay parked.
 
-## #228 — Lobby attendant: save wait, menu wrap, input delay (lds1m scout, 2026-11-20; Mac leads)
+## #227 — SELECT move swap: Mimic edge (msw1, 2026-11-20)
 
-Source-read and ROM-measured by lds1m (`.integration/evidence/lds1m/`), not fixed:
-- **Save wait:** after the save SE the ROM runs a 60-frame timer, or a held A skips it (`start_menu.c:925-1135` via `field_specials.c`); ROM next message
-  at frame 10820-10822 with no A, 10761-10762 with A held. Ours waits for a new A / B and never auto-advances (`factoryLobbyAttendant.ts:119-135`, 261,
-  419, 467). Moves the Lobby's frame count (NPC wandering RNG; `docs/lbrf-won-timing.md` shows tick shifts re-deal challenges).
-- **Menu wrap:** `InitMultichoiceCheckWrap` wraps only when the menu has more than 3 items (`script_menu.c:39-194`); `Menu_ProcessInputNoWrap` plays the SE
-  only if the cursor moved. Ours always wraps (`factoryLobbyAttendant.ts:336-340`).
-- **Input delay (read, not traced):** ROM `sProcessInputDelay` 2 for multichoice input; ours `menuInputDelay` 0.
-
-## #227 — Battle move menu: SELECT move swap missing (lds1m scout, 2026-11-20; Mac lead)
-
-ROM `HandleMoveSwitching` (`battle_controller_player.c:599-790`): SELECT in the fight menu opens "Switch which?", A swaps the two moves with PP, max PP,
-ppBonuses and mimicked bits in the controller buffer and `gBattleMons`, and writes the party mon (persists across battles unless transformed).
-Oracle-confirmed (A, SELECT, A swaps slots 0 / 1, cursor on slot 1). Ours: the fight menu reads only A / B / D-pad (`battleCommandPresentation.ts`
-~825-855); `input.ts` maps Shift to SELECT but the engine never reads it. Gameplay: input contract + per-mon move order.
-
-## #226 — Missing pan recordings: SE_M_BLIZZARD (153), SE 132 left pan (lds1m scout, 2026-11-20; Mac lead)
-
-Blizzard and SE_M_GUST sweep -64 -> 63 at +2 per frame (`battle_anim.c:1263-1450`, `Cmd_panse`); `moveAnimSounds.ts` emits the sweep, but
-`manifest.json` has only `se:132:63` and no `se:153` at all, so `player.ts` `sfxSound` falls back or drops the sound; `tests/snd1EmittedSesHaveAssets.test.ts`
-`LOOP_EXCEPTIONS` hides the gap. Fix: record the missing pan endpoints with the aud244b pass and empty the exceptions. Related, unsettled: the Mac's
-"recordings 1.2-1.45x quieter" (not a master-volume gain: m4a master 12 matches; lds1m proposes dumping `gSoundInfo` / channel volumes after the in-game
-vs recorder call). "A does not speed up text" is NOT a bug at FAST text speed (ROM forks none / A / B / mash identical); `docs/snd1-playtest-sounds.md`
-52-56 needs that correction.
+SELECT move switching is ported (msw1, `docs/msw1-select-move-swap.md`; ROM `HandleMoveSwitching`). Open: a swap combined with Mimic writing the party in the same battle can
+lose the swap record (`moveOrder` on the rental records); not staged on the ROM.
 
 ## #225 — Frontier battle transitions: open remainder (Kyle, 2026-11-19: low priority)
 

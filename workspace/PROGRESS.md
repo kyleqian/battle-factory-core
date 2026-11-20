@@ -5,6 +5,20 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 2026-11-21 — CAX31 daily run (supervisor, Opus 5.5, 2026-11-20 13:30 -> 2026-11-21 05:30 UTC): IN PROGRESS (interim entry, 21:15 UTC)
+
+- **State:** master `4fc84e424` green (full suite **16,362 passed / 0 failed**, typecheck / build 0). Workers: hcr2c (integration, Scene ON sound-lead fix-forward on
+  `f555ba685`), rsw2 (side, swap-room walk timing). Unmerged and NOT on master: hcr2 + hcr2b (Scene ON first used-move glyph + sound lead; 41 ROM sound pins red until hcr2c).
+  Supervisor ledger `.integration/briefs/supervisor-notes.txt`; evidence `.integration/validation/sv-20261120/`.
+- **Folded:** rsw1 (swap -> room return: black hold, fade, "Thank you!" A wait; RNG per frame; `docs/rsw1-swap-return-room.md`), hcr1b + hcr1c (Scene OFF used-move glyph at commit + 7 + u,
+  pixel-exact on 28 labs; scoped sound lead; T2 OFF mass 5,438 -> 4,083, exact 126 -> 571), gsp2 / gsp2b (Scene ON wake-up head; T2 ON mass 32,966 -> 28,701), snd3 (10 missing SE
+  recordings, #226), msw1 (SELECT move swap, #227), lbw9 (Lobby save wait 60 frames / held A, no menu wrap at <= 3 items, #228). Run start: luck day 5 R058 / R096 promoted (85 / 110),
+  nightly replay 44 / 44 + 110 / 110 stages.
+- **Website:** play changes (rsw1 A wait after a swap, lbw9 save wait, SELECT swap): games recorded on older builds replay on their own build only. New audio files (snd3 list in
+  `docs/snd3-pan-recordings.md`). No API change.
+
+---
+
 ## 2026-11-20 — CAX31 daily run (supervisor, Opus 5.5, 2026-11-19 13:30 -> 2026-11-20 05:30 UTC): wind-down: sound timing -36 % (Scene ON), switch-in ability prints, button-wait messages, Brain music, 6 transitions, Shedinja HP
 
 - **State:** master clean, no workers, no worktrees; no push. **No DEFERRED items.** Final engine tree `17f2a47e8` (later commits are tests / docs). ENGINE_BUILD **`eb-ffe38fb0b685bbe6`**
