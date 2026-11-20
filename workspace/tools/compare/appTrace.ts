@@ -2007,9 +2007,31 @@ function hcr1bStages(): Record<string, AppStage> {
   return stages;
 }
 
+// hcr2 (tools/integration/hcr2Labs.py): the hcr1b labs on the Scene ON profile (same moves, same sides, `-on` ids, 230 frames after the confirm).
+function hcr2Stages(): Record<string, AppStage> {
+  const stages: Record<string, AppStage> = {};
+  for (const [name, move] of Object.entries(HCR1B_MOVES)) {
+    for (const side of ["foe", "plr"] as const) {
+      const id = `hcr2-${name}-${side}-on`;
+      stages[id] = side === "foe"
+        ? (state) => aud241bStage(state, id, "on", 50, 100, 69, undefined, false, move, 1)
+        : (state) => midBattleSwitchStage(state, id, [RATTATA_LV50_BENCH, RATTATA_LV50_BENCH], [105, 105], {
+          rngSeed: 1,
+          battleScene: "on",
+          player: Object.freeze({ ...rattataAtLevel(100, move), pp: [HCR1B_PP[name] ?? 20, HCR1B_PP[name] ?? 20, HCR1B_PP[name] ?? 20, HCR1B_PP[name] ?? 20] as const }),
+          trainer: rattataAtLevel(50, 69),
+          usedMessageHoldFrames: 0,
+          sceneOffNoAnimations: false,
+        });
+    }
+  }
+  return stages;
+}
+
 export const APP_STAGES: Readonly<Record<string, AppStage>> = {
   ...hpf4mStages(),
   ...hcr1bStages(),
+  ...hcr2Stages(),
   ...trp1Stages(),
   ...subp1mStages(),
   // iss216: the anchor deal has no duplicate species; the ROM probe pokes slot 6's monId to slot 1's
