@@ -83,14 +83,17 @@ describe("rsw1 the room after a real swap", () => {
   it("waits for A after \"Thank you!\" and only then starts \"Right this way\"", () => {
     const { states } = replay;
     const full = SWAP_RETURN_BOX_TICK + SWAP_COMPLETE_CHARS;
-    expect(swapReturnThanksInputReady(full)).toBe(false);
-    expect(swapReturnThanksInputReady(full + 1)).toBe(true);
+    expect(swapReturnThanksInputReady(full + 1)).toBe(false);
+    expect(swapReturnThanksInputReady(full + 2)).toBe(true);
     // The recorded idle presses nothing: the wait holds.
     expect(states[110]!.swapReturn?.guideElapsed).toBeNull();
     expect(states[110]!.postwin?.swapDeclineElapsed).toBeNull();
     // An A before the text is complete is ignored; one after it is taken.
     const early = tick(states[full - 5]!, pressA);
     expect(early.swapReturn?.guideElapsed).toBeNull();
+    // rsw2: the ROM takes the A the frame after (oracle trace rsw2-ready-spam-odd-off: A at 30305 taken, 30304 ignored).
+    const justEarly = tick(states[full + 1]!, pressA);
+    expect(justEarly.swapReturn?.guideElapsed).toBeNull();
     const ready = tick(states[full + 2]!, pressA);
     expect(ready.swapReturn?.guideElapsed).not.toBeNull();
     expect(ready.postwin?.swapDeclineElapsed).toBe(ready.postwin?.elapsed);

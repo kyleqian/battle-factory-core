@@ -40,7 +40,7 @@ export function swapReturnThanksVisibleChars(elapsed: number): number {
   return Math.max(0, Math.min(SWAP_COMPLETE_CHARS, elapsed - SWAP_RETURN_BOX_TICK));
 }
 
-/** The waitbuttonpress takes A / B once the whole text has printed (as the "Right this way" box does, postwin.ts). */
+/** The waitbuttonpress takes A / B two frames after the last glyph shows (ROM-measured, rsw2; the "Right this way" box's gap, postwin.ts). */
 export function swapReturnThanksInputReady(elapsed: number): boolean {
-  return elapsed >= SWAP_RETURN_BOX_TICK + SWAP_COMPLETE_CHARS + 1;
+  return elapsed >= SWAP_RETURN_BOX_TICK + SWAP_COMPLETE_CHARS + 2;
 }
