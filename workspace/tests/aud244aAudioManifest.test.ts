@@ -14,7 +14,8 @@ const AUDIO = join(ROOT, "src/assets/gen/audio");
 // bgm1 adds bgm-471 (MUS_VS_FRONTIER_BRAIN, +491,169 B song; budgets song 1.85 MB, total 8.4 MB).
 // cry2 adds the 112 cry-task cries (46 `cry-NNN-task.ogg`, +369,586 B).
 // snd1: + 187 SE recordings the move animations emitted without an asset (tools/audio/snd1-extra-se.json, +1.9 MB Ogg; fetched on first use).
-const BUDGET = { se: 3_600_000, cry: 5_000_000, song: 1_850_000, total: 10_300_000 };
+// snd3: + 10 SE recordings (tools/audio/snd3-extra-se.json: SE_M_BLIZZARD x2 and SE_M_GUST -64 loops, seven centred one-shots; +126,591 B Ogg).
+const BUDGET = { se: 3_700_000, cry: 5_000_000, song: 1_850_000, total: 10_400_000 };
 
 interface Sound {
   file: string; kind: "se" | "cry" | "bgm" | "fanfare"; via: string; sampleRate: number; channels: number; offsetSamples: number; lengthSamples: number;

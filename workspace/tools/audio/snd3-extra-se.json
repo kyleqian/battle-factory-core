@@ -1,0 +1,86 @@
+{
+ "schema": "snd3-extra-se/1",
+ "note": "SE (id, pan) tuples the engine emits (move animations: src/data/gen/anim-sound-timing.json through animSoundPan, both attacker sides) whose only recordings were more than 2 pan units away (SE_M_BLIZZARD had none, SE_M_GUST only the +63 side, seven centred ones only at +-63). The looping ones (153, 132) go through the recorder's seloop kind and tools/audio/loopCut.py. docs/snd3-pan-recordings.md.",
+ "se": [
+  {
+   "id": 153,
+   "name": "SE_M_BLIZZARD",
+   "pan": -64,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 153,
+   "name": "SE_M_BLIZZARD",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 132,
+   "name": "SE_M_GUST",
+   "pan": -64,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 194,
+   "name": "SE_M_SWAGGER2",
+   "pan": 0,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 229,
+   "name": "SE_M_FLATTER",
+   "pan": 0,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 135,
+   "name": "SE_M_DOUBLE_TEAM",
+   "pan": 0,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 202,
+   "name": "SE_M_PETAL_DANCE",
+   "pan": 0,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 228,
+   "name": "SE_M_MORNING_SUN",
+   "pan": 0,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 118,
+   "name": "SE_M_THUNDERBOLT",
+   "pan": 0,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  },
+  {
+   "id": 145,
+   "name": "SE_M_FLAME_WHEEL2",
+   "pan": 0,
+   "vias": [
+    "PlaySE12WithPanning"
+   ]
+  }
+ ]
+}

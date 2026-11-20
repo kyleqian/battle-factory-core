@@ -262,6 +262,17 @@
   {
    "id": 118,
    "name": "SE_M_THUNDERBOLT",
+   "pan": 0,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 0,
+   "logs": 0,
+   "source": "snd3-extra-se.json"
+  },
+  {
+   "id": 118,
+   "name": "SE_M_THUNDERBOLT",
    "pan": 63,
    "vias": [
     "PlaySE12WithPanning"
@@ -590,6 +601,17 @@
   {
    "id": 132,
    "name": "SE_M_GUST",
+   "pan": -64,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 0,
+   "logs": 0,
+   "source": "snd3-extra-se.json"
+  },
+  {
+   "id": 132,
+   "name": "SE_M_GUST",
    "pan": 63,
    "vias": [
     "PlaySE12WithPanning"
@@ -649,6 +671,17 @@
    ],
    "uses": 7,
    "logs": 2
+  },
+  {
+   "id": 135,
+   "name": "SE_M_DOUBLE_TEAM",
+   "pan": 0,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 0,
+   "logs": 0,
+   "source": "snd3-extra-se.json"
   },
   {
    "id": 135,
@@ -979,6 +1012,17 @@
   {
    "id": 145,
    "name": "SE_M_FLAME_WHEEL2",
+   "pan": 0,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 0,
+   "logs": 0,
+   "source": "snd3-extra-se.json"
+  },
+  {
+   "id": 145,
+   "name": "SE_M_FLAME_WHEEL2",
    "pan": 63,
    "vias": [
     "PlaySE12WithPanning"
@@ -1142,6 +1186,28 @@
    ],
    "uses": 3,
    "logs": 1
+  },
+  {
+   "id": 153,
+   "name": "SE_M_BLIZZARD",
+   "pan": -64,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 0,
+   "logs": 0,
+   "source": "snd3-extra-se.json"
+  },
+  {
+   "id": 153,
+   "name": "SE_M_BLIZZARD",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 0,
+   "logs": 0,
+   "source": "snd3-extra-se.json"
   },
   {
    "id": 154,
@@ -2342,6 +2408,17 @@
   {
    "id": 194,
    "name": "SE_M_SWAGGER2",
+   "pan": 0,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 0,
+   "logs": 0,
+   "source": "snd3-extra-se.json"
+  },
+  {
+   "id": 194,
+   "name": "SE_M_SWAGGER2",
    "pan": 63,
    "vias": [
     "PlaySE12WithPanning"
@@ -2560,6 +2637,17 @@
    ],
    "uses": 2,
    "logs": 1
+  },
+  {
+   "id": 202,
+   "name": "SE_M_PETAL_DANCE",
+   "pan": 0,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 0,
+   "logs": 0,
+   "source": "snd3-extra-se.json"
   },
   {
    "id": 202,
@@ -3172,6 +3260,17 @@
   {
    "id": 228,
    "name": "SE_M_MORNING_SUN",
+   "pan": 0,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 0,
+   "logs": 0,
+   "source": "snd3-extra-se.json"
+  },
+  {
+   "id": 228,
+   "name": "SE_M_MORNING_SUN",
    "pan": 63,
    "vias": [
     "PlaySE12WithPanning"
@@ -3188,6 +3287,17 @@
    ],
    "uses": 1,
    "logs": 1
+  },
+  {
+   "id": 229,
+   "name": "SE_M_FLATTER",
+   "pan": 0,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 0,
+   "logs": 0,
+   "source": "snd3-extra-se.json"
   },
   {
    "id": 229,
