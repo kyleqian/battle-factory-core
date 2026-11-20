@@ -23,7 +23,7 @@ sys.path.insert(0, str(HARNESS / "oracle"))
 from emerald_core import EmeraldOracle  # noqa: E402
 from mgba import ffi  # noqa: E402
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from plan import Plan, Driver, lcg, lcg_back, m4a_restarted  # noqa: E402
+from plan import Plan, Driver, RoundCounter, deal_opponent_check, deal_traps_wanted, go_on_roll, lcg, lcg_back, m4a_restarted  # noqa: E402
 from mons import POKEMON_SIZE, STAT_ORDER, ability_num, decrypt_mon, encrypt_mon, gender, species_of, with_personality  # noqa: E402
 
 REF = (WORKSPACE / "reference/pokeemerald").resolve()
@@ -49,8 +49,11 @@ FUNCS = {  # name -> object file of the copy we want (None = the only one)
     "Task_HandleMultichoiceInput": "src/script_menu.o", "Task_HandleYesNoInput": "src/script_menu.o",
     "Select_Task_HandleChooseMons": None, "Select_Task_HandleMenu": None, "Select_Task_HandleYesNo": None,
     "Swap_Task_HandleChooseMons": None, "Swap_Task_HandleMenu": None, "Swap_Task_HandleYesNo": None,
+    # round 2 and later (fcr2): the PreBattleRoom deal, and the Lobby save dialog's YES/NO (start_menu.c)
+    "GenerateInitialRentalMons": "src/battle_factory.o", "GenerateOpponentMons": "src/battle_factory.o",
+    "SaveGameTask": None, "SaveConfirmInputCallback": None, "SaveOverwriteInputCallback": None,
 }
-DATA = {"sFactorySelectScreen": None, "sFactorySwapScreen": None, "sMenu": "src/menu.o"}
+DATA = {"sFactorySelectScreen": None, "sFactorySwapScreen": None, "sMenu": "src/menu.o", "sSaveDialogCallback": None}
 TASK_MENUS = (  # live task function -> menu kind (first match wins: a summary opened from a menu keeps the menu's task alive)
     ("Task_HandleInput", "summary"), ("Task_HandleInput_MoveSelect", "summary"),
     ("Task_HandleSelectionMenuInput", "battle.partySub"), ("Task_HandleChooseMonInput", "battle.party"),
@@ -261,6 +264,7 @@ class SoundLog:
         n0 = len(self.events)
         self.o._set_buttons(list(buttons))
         pre = bytes(ffi.buffer(self.core.save_raw_state()))
+        self.last_pre, self.last_buttons = pre, list(buttons)
         sig0, clk0 = self.signature(self.blob(pre))
         self.core.run_frame()
         post = bytes(ffi.buffer(self.core.save_raw_state()))
@@ -316,6 +320,10 @@ class Rom:
         for func, kind in self.task_menu:
             if func in tasks:
                 return kind, self.menu_sig(kind)
+        # the Lobby save dialog before a new challenge (Common_EventScript_SaveGame -> SaveGame): its "Would you like to save the game?" and
+        # "There is already a saved file." YES/NO run under SaveGameTask, not a script menu task (start_menu.c:996-1075)
+        if self.f["SaveGameTask"] in tasks and (self.u32(self.d["sSaveDialogCallback"]) & ~1) in (self.f["SaveConfirmInputCallback"], self.f["SaveOverwriteInputCallback"]):
+            return "field.yesno", self.menu_sig("field.yesno")
         if self.in_battle():
             func = self.u32(self.s["gBattlerControllerFuncs"]) & ~1
             if func == self.f["HandleInputChooseAction"]:
@@ -339,6 +347,10 @@ class Rom:
             return str(v - 256 if v & 0x80 else v)
         return "?"
 
+    def rental_ids(self):
+        base = self.save2() + SB2_RENTAL_MONS
+        return [self.u16(base + i * RENTAL_MON_SIZE) for i in range(6)]
+
     def party_species(self, symbol):
         out = []
         for i in range(3):
@@ -355,7 +367,9 @@ def run(engine_dir, out_dir, profile, max_frames):
     rom = Rom(profile)
     o, s = rom.o, rom.s
     facts = eng["facts"]
-    battles = {b["battleIndex"]: b for b in facts["battles"]}
+    # battles by g = round * 7 + battle index (engineRun.mjs; an older engine run has round 1 only, keyed by its battle index)
+    battles = {b.get("g", b["battleIndex"]): b for b in facts["battles"]}
+    rounds = facts.get("rounds") or []
     log, staging = [], []
 
     def note(what, **kw):
@@ -416,6 +430,11 @@ def run(engine_dir, out_dir, profile, max_frames):
     plan = Plan(eng)
     driver = Driver(plan, note)
     patched, rng_written, roll_forced = set(), set(), {}
+    # Rounds (fcr2): round 1 is staged above; the ROM plays its Lobby and the attendant's new challenge itself, and InitFactoryChallenge
+    # (factory_init, at the save before the challenge) sets curChallengeBattleNum back to 0: the round counter steps there. The deal of round
+    # r >= 1 (PreBattleRoom EnterRoom: factory_generaterentalmons, factory_generateopponentmons) is trapped (deal_traps), and the new select
+    # screen's six get the engine's personalities as in round 1.
+    rounds_seen, select_patched, deals = RoundCounter(), {0}, {}
     transitions = {int(k): v for k, v in (facts.get("transitions") or {}).items()}
     transitions["forced"] = set()
     sounds, menus, buttons_rle, action_states = [], [], [], []
@@ -431,16 +450,32 @@ def run(engine_dir, out_dir, profile, max_frames):
         # The trainer roll of battle n >= 1 runs a few frames after the GO ON answer (BattleFactoryPreBattleRoom AskSwapMon: factory_generateopponentmons
         # first): from the answer until the roll, gRngValue is held so that the frame's VBlank draw leaves the engine's pre-roll value.
         bn = rom.u16(rom.save2() + SB2_BATTLE_NUM)
-        if driver.just_answered == "field.multichoice" and bn in battles and bn > 0 and bn not in roll_forced and battles[bn].get("rollRngBefore") is not None:
-            back = probe_roll(rom, buttons, battles[bn])
-            roll = {"battle": bn, "value": back if back is not None else lcg_back(battles[bn]["rollRngBefore"]), "start": o.frame,
+        bn_before, blips = rounds_seen.last, len(rounds_seen.blips)
+        if rounds_seen.update(bn):
+            staging.append({"what": "round", "round": rounds_seen.round + 1, "frame": o.frame, "battleNumBefore": bn_before})
+        if len(rounds_seen.blips) > blips:
+            staging.append({"what": "battle number blip (not a new round)", "frame": o.frame, "number": bn_before, "read": rounds_seen.blips[-1][2]})
+        bn = rounds_seen.last
+        rom_round, g = rounds_seen.round, rounds_seen.g()
+        if driver.just_answered == "field.multichoice" and g in battles and go_on_roll(bn) and g not in roll_forced and battles[g].get("rollRngBefore") is not None:
+            back = probe_roll(rom, buttons, battles[g])
+            roll = {"battle": g, "slot": bn, "value": back if back is not None else lcg_back(battles[g]["rollRngBefore"]), "start": o.frame,
                     "trainerBefore": rom.u16(s["gTrainerBattleOpponent_A"]), "probed": back is not None}
-            roll_forced[bn] = "pending"
+            roll_forced[g] = "pending"
         driver.just_answered = None
         if roll is not None:
             o.write_u32(s["gRngValue"], roll["value"])
         live_before = transition_task_live(rom) is not None
-        new = sound.advance(buttons, restep_with=lambda: transition_traps(rom, battles, transitions, bn, staging, live_before))
+        deal = None
+        if rom_round >= 1 and rom_round < len(rounds):
+            deal = deals.setdefault(rom_round, {"round": rom_round, "want": rounds[rom_round], "first": battles.get(rom_round * 7), "rentals": None, "opponent": None, "armedAt": None})
+            deal["idsBefore"] = rom.rental_ids()
+
+        def traps(g=g):
+            out = transition_traps(rom, battles, transitions, g, staging, live_before) or {}
+            out.update(deal_traps(rom, deal, o.frame) or {})
+            return out or None
+        new = sound.advance(buttons, restep_with=traps)
         store.add(o.screen_rgb())
         f = o.frame
         b = "+".join(buttons)
@@ -461,7 +496,7 @@ def run(engine_dir, out_dir, profile, max_frames):
                 o.write_u16(s["gTrainerBattleOpponent_A"], want["trainerId"])
                 for i, set_id in enumerate(want["opponentSetIds"]):
                     o.write_u16(s["gFrontierTempParty"] + i * 2, set_id)
-                o.write_u16(rom.save2() + SB2_TRAINER_IDS + 2 * roll["battle"], want["trainerId"])
+                o.write_u16(rom.save2() + SB2_TRAINER_IDS + 2 * roll["slot"], want["trainerId"])
                 roll_forced[roll["battle"]] = "written"
                 staging.append({"what": "trainer roll missed; trainer and sets written", "battle": roll["battle"], "frame": f, "romTrainer": rom.u16(s["gTrainerBattleOpponent_A"]), "romSets": tp})
                 roll = None
@@ -471,24 +506,32 @@ def run(engine_dir, out_dir, profile, max_frames):
         # (battle_tower.c, SPECIAL_BATTLE_FACTORY) builds the three Pokemon and then starts the transition task; the build can run over
         # several frames (each Pokemon's nature search), so a frame can end with the third one half made (species set, experience and
         # level not yet): patching then let the ROM finish it on top (t3: Ledian at level-1 stats). The transition task marks the end.
-        if bn in battles and bn not in patched and not rom.in_battle() and transition_task_live(rom) is not None:
-            want = battles[bn]
+        if deal is not None:
+            finish_deal(rom, deal, staging, f, sound)
+        # the new round's select screen: once its cursor task runs, the six get the engine's personalities (as round 1's, patch_select_mons)
+        if rom_round not in select_patched and rom_round < len(rounds) and rom.u32(rom.d["sFactorySelectScreen"]) and task_live(rom, rom.f["Select_Task_HandleChooseMons"]):
+            select_patched.add(rom_round)
+            staging.append({"what": "select screen", "round": rom_round + 1, "frame": f, "romSetIds": [rom.u16(rom.u32(rom.d["sFactorySelectScreen"]) + SELECT_MONS + i * SELECT_MON_SIZE) for i in range(6)],
+                            "engineSetIds": [r["setId"] for r in rounds[rom_round]["rentals"]]})
+            patch_select_mons(rom, rounds[rom_round]["rentals"], staging)
+        if g in battles and g not in patched and not rom.in_battle() and transition_task_live(rom) is not None:
+            want = battles[g]
             species = [op["member"]["species"] for op in want["opponents"]]
             if rom.party_species("gEnemyParty") == species and [rom.u16(s["gFrontierTempParty"] + 2 * i) for i in range(3)] == want["opponentSetIds"]:
                 patch_enemy_party(rom, want, staging, f)
-                patched.add(bn)
+                patched.add(g)
         # The transition the ROM started (Task_BattleTransition's tTransitionId) against the engine's.
-        if bn in transitions and ("seen", bn) not in transitions["forced"]:
+        if g in transitions and ("seen", g) not in transitions["forced"]:
             rom_id = transition_task_live(rom)
             if rom_id is not None:
-                staging.append({"what": "transition started", "battle": bn, "frame": f, "rom": rom_id, "engine": transitions[bn]["transitionId"],
-                                "same": rom_id == transitions[bn]["transitionId"]})
-                transitions["forced"].add(("seen", bn))
+                staging.append({"what": "transition started", "battle": g, "frame": f, "rom": rom_id, "engine": transitions[g]["transitionId"],
+                                "same": rom_id == transitions[g]["transitionId"]})
+                transitions["forced"].add(("seen", g))
         # The battle RNG: written on the frame TryDoEventsBeforeFirstTurn hands over to the action selection (its last draw is gRandomTurnNumber).
-        if rom.in_battle() and bn in battles and bn not in rng_written:
+        if rom.in_battle() and g in battles and g not in rng_written:
             if (rom.u32(s["gBattleMainFunc"]) & ~1) == rom.f["HandleTurnActionSelectionState"]:
-                want = battles[bn]
-                staging.append({"what": "battle rng", "battle": bn, "frame": f, "romRng": rom.u32(s["gRngValue"]), "romTurnNumber": rom.u16(s["gRandomTurnNumber"]),
+                want = battles[g]
+                staging.append({"what": "battle rng", "battle": g, "frame": f, "romRng": rom.u32(s["gRngValue"]), "romTurnNumber": rom.u16(s["gRandomTurnNumber"]),
                                 "engineRng": want["rngAtActionMenu"], "engineTurnNumber": want["randomTurnNumber"], "partyPatched": bn in patched})
                 o.write_u32(s["gRngValue"], want["rngAtActionMenu"])
                 o.write_u16(s["gRandomTurnNumber"], want["randomTurnNumber"])
@@ -502,9 +545,9 @@ def run(engine_dir, out_dir, profile, max_frames):
                     eng_party.append([op["personality"], mem["species"], mem["experience"], mem["level"],
                                       [mem["hp"], mem["maxHP"], mem["attack"], mem["defense"], mem["speed"], mem["spAttack"], mem["spDefense"]]])
                 if rom_party != eng_party:
-                    staging.append({"what": "opponent party is not the engine's at battle start", "battle": bn, "rom": rom_party, "engine": eng_party})
-                check_player_party(rom, want, staging, bn)
-                rng_written.add(bn)
+                    staging.append({"what": "opponent party is not the engine's at battle start", "battle": g, "rom": rom_party, "engine": eng_party})
+                check_player_party(rom, want, staging, g)
+                rng_written.add(g)
         m = rom.menu()
         mk = None if m is None else f"{m[0]}|{m[1]}"
         if mk != last_menu and m is not None and m[0] == "battle.action" and (last_menu or "").split("|")[0] != "battle.action":
@@ -512,7 +555,7 @@ def run(engine_dir, out_dir, profile, max_frames):
             def bm(b):
                 base = s["gBattleMons"] + b * 0x58
                 return [rom.u16(base), rom.u16(base + 0x28), rom.u16(base + 6), [rom.u8(base + 0x18 + i) for i in range(8)], rom.u32(base + 0x4C)]
-            action_states.append([f, bn, rom.u32(s["gRngValue"]), rom.u16(s["gRandomTurnNumber"]), bm(0), bm(1)])
+            action_states.append([f, g, rom.u32(s["gRngValue"]), rom.u16(s["gRandomTurnNumber"]), bm(0), bm(1)])
         if mk != last_menu:
             menus.append([f, None if m is None else m[0], None if m is None else m[1]])
             last_menu = mk
@@ -522,7 +565,8 @@ def run(engine_dir, out_dir, profile, max_frames):
     result = {"side": "rom", "profile": profile, "frames": o.frame, "engineFrames": eng["frames"], "seconds": round(time.time() - t0, 1),
               "sound": {"fast": sound.fast, "restepped": sound.restepped}, "staging": staging, "driverLog": log,
               "anchorsMatched": driver.ai, "anchorsTotal": len(plan.anchors), "anchorBinds": driver.binds, "stop": driver.stop_reason,
-              "steerFrames": driver.steer_frames, "actionMenuStates": action_states,
+              "steerFrames": driver.steer_frames, "actionMenuStates": action_states, "rounds": rom_round + 1,
+              "deals": [{k: v for k, v in d.items() if k not in ("want", "first", "idsBefore")} for d in deals.values()],
               "sounds": sounds, "menus": menus, "buttons": buttons_rle}
     (out / "timeline.json").write_text(json.dumps(result))
     print(f"rom: {o.frame} frames, {len(store.index)} distinct pictures, {len(sounds)} sound events, anchors {driver.ai}/{len(plan.anchors)}, "
@@ -580,6 +624,106 @@ def transition_traps(rom, battles, transitions, bn, staging, live_before):
         o.write_u32(s["gRngValue"], value)
         staging.append({"what": "transition", "battle": bn, "engine": t.get("transitionName"), "tableIndex": t["tableIndex"], "rng": value})
     return {rom.f["Random"] + 2: at_random}
+
+
+def deal_traps(rom, deal, frame):
+    """Round r >= 1's deal (PreBattleRoom EnterRoom, scripts.inc:30-31): factory_generaterentalmons then factory_generateopponentmons, one
+    script run at the end of the walk (prebattleEntry.ts, the deal tick). When a frame's fast run changed rentalMons' set ids, it is stepped
+    again with two traps: at GenerateInitialRentalMons' entry gRngValue is set to the engine's deal cursor (so the ROM draws the engine's six
+    set ids itself), and at GenerateOpponentMons' entry to the cursor the engine rolled round r's first opponent from (so the trainer, its
+    sets and the attendant's comments on them are the ROM's own roll of the engine's opponent). The ROM's own cursor at each entry is kept:
+    with the engine's deal cursor, the ROM reaches GenerateOpponentMons right after the six set ids. When the opponent roll falls in the
+    next frame (a frame boundary inside the script run), its trap stays armed for a few frames."""
+    wanted = deal_traps_wanted(deal, rom.rental_ids() if deal is not None else None, frame)
+    if "give-up" in wanted:
+        deal["opponent"] = {"frame": frame, "missed": True}
+        return None
+    if not wanted:
+        return None
+    o, s = rom.o, rom.s
+    want, first = deal["want"], deal["first"]
+    out = {}
+    if "rentals" in wanted:
+
+        def at_rentals():
+            if deal["rentals"] is not None:
+                return
+            deal["rentals"] = {"frame": frame, "romRng": rom.u32(s["gRngValue"]), "engineRng": want["dealRngBefore"]}
+            o.write_u32(s["gRngValue"], want["dealRngBefore"])
+        out[rom.f["GenerateInitialRentalMons"] + 2] = at_rentals
+    value = (first or {}).get("rollRngBefore")
+    if value is None:
+        value = want.get("rentalRngAfter")
+
+    def at_opponent():
+        if deal["opponent"] is not None or deal["rentals"] is None:
+            return
+        deal["opponent"] = {"frame": frame, "romRng": rom.u32(s["gRngValue"]), "engineRng": value, "engineSelectionRng": want.get("selectionRngValue")}
+        if value is not None:
+            o.write_u32(s["gRngValue"], value)
+    out[rom.f["GenerateOpponentMons"] + 2] = at_opponent
+    return out
+
+
+def probe_deal_opponent(rom, sound, deal):
+    """Which trainer and sets the ROM's own order rolls from the engine's deal cursor: the deal frame is stepped again from its saved start
+    with only the GenerateInitialRentalMons trap (its opponent roll then reads the ROM's cursor right after the six set ids), and run on
+    until the trainer is rolled. The state is put back afterwards."""
+    o, s = rom.o, rom.s
+    post = bytes(ffi.buffer(o.core.save_raw_state()))
+    o.core.load_raw_state(sound.last_pre)
+    o._set_buttons(sound.last_buttons)
+    native, gpr = sound.native, sound.gpr
+    start = sound.frame_counter(native)
+    girm = rom.f["GenerateInitialRentalMons"] + 2
+    trainer0 = rom.u16(s["gTrainerBattleOpponent_A"])
+    while sound.frame_counter(native) == start:
+        if gpr[15] == girm:
+            o.write_u32(s["gRngValue"], deal["want"]["dealRngBefore"])
+        sound.native_step(native)
+    for _ in range(4):
+        if rom.u16(s["gTrainerBattleOpponent_A"]) != trainer0:
+            break
+        o.core.run_frame()
+    got = {"trainer": rom.u16(s["gTrainerBattleOpponent_A"]), "sets": [rom.u16(s["gFrontierTempParty"] + 2 * i) for i in range(3)], "ids": rom.rental_ids()}
+    o.core.load_raw_state(post)
+    o._set_buttons([])
+    return got
+
+
+def finish_deal(rom, deal, staging, frame, sound=None):
+    """After the trapped deal: the ROM's six set ids and first opponent against the engine's round. A different opponent is written (the
+    engine's trainer and sets, trainerIds[0]); the attendant's comments, read in the same script run, are then the ROM's own."""
+    o, s = rom.o, rom.s
+    if deal["rentals"] is not None and "idsChecked" not in deal:
+        deal["idsChecked"] = True
+        ids = rom.rental_ids()
+        want_ids = [r["setId"] for r in deal["want"]["rentals"]]
+        staging.append({"what": "deal: rentals", "round": deal["round"] + 1, "frame": frame, "romRngAtEntry": deal["rentals"]["romRng"],
+                        "engineRng": deal["rentals"]["engineRng"], "rom": ids, "engine": want_ids, "same": ids == want_ids})
+        if sound is not None and deal["want"].get("dealRngBefore") is not None and deal["first"] is not None:
+            deal["romOrder"] = probe_deal_opponent(rom, sound, deal)
+    if deal["opponent"] is not None and "oppChecked" not in deal and not deal["opponent"].get("missed"):
+        first = deal["first"]
+        if first is None:
+            return
+        deal["oppChecked"] = True
+        same, rom_opp, eng_opp = deal_opponent_check(rom.u16(s["gTrainerBattleOpponent_A"]), [rom.u16(s["gFrontierTempParty"] + 2 * i) for i in range(3)], first)
+        rec = {"what": "deal: first opponent", "round": deal["round"] + 1, "frame": frame, "romRngAtEntry": deal["opponent"]["romRng"],
+               "engineRng": deal["opponent"]["engineRng"], "engineSelectionRng": deal["opponent"]["engineSelectionRng"],
+               "rom": rom_opp, "engine": eng_opp, "same": same}
+        if "romOrder" in deal:
+            rec["romOwnOrder"] = deal["romOrder"]
+        staging.append(rec)
+        if not same:
+            o.write_u16(s["gTrainerBattleOpponent_A"], first["trainerId"])
+            for i, set_id in enumerate(first["opponentSetIds"]):
+                o.write_u16(s["gFrontierTempParty"] + i * 2, set_id)
+            o.write_u16(rom.save2() + SB2_TRAINER_IDS, first["trainerId"])
+            staging.append({"what": "deal: first opponent written", "round": deal["round"] + 1, "frame": frame})
+    elif deal["opponent"] is not None and deal["opponent"].get("missed") and "oppChecked" not in deal:
+        deal["oppChecked"] = True
+        staging.append({"what": "deal: the opponent roll was not trapped", "round": deal["round"] + 1, "frame": frame})
 
 
 def rolled(rom, want):
@@ -647,6 +791,13 @@ def patch_select_mons(rom, rentals, staging):
         rom.write(base, new)
         rec.update(species=species, personality=[before, r["personality"]], gender=[gender(before, info["genderRatio"]), gender(r["personality"], info["genderRatio"])],
                    abilityNum=[ability_num(raw), ability_num(new)])
+        logical, ok = decrypt_mon(raw)
+        if ok and r.get("fixedIv") is not None:
+            # the rental's IVs (one fixed value per challenge for all six stats, GetFactoryMonFixedIV) against the engine's
+            iv_word = struct.unpack_from("<I", logical[3], 4)[0]
+            rom_ivs = sorted({(iv_word >> (5 * k)) & 31 for k in range(6)})
+            rec["ivs"] = [rom_ivs, r["fixedIv"]]
+            rec["sameIvs"] = rom_ivs == [r["fixedIv"]]
         if ot_id != ot_before:
             rec["otId"] = [ot_before, ot_id]
         if ability_num(new) != r.get("abilitySlot", ability_num(new)):
@@ -691,6 +842,9 @@ def patch_enemy_party(rom, want, staging, frame):
         misc = bytearray(logical[3])
         iv_word = struct.unpack_from("<I", misc, 4)[0]
         ivs = mem["ivs"]
+        # the ROM's own IVs before the patch (fixed per challenge, GetFactoryMonFixedIV: they rise in round 2): a difference is the engine's
+        rom_ivs = [(iv_word >> (5 * k)) & 31 for k in range(6)]
+        eng_ivs = [ivs[n] for n in STAT_ORDER]
         new_word = (iv_word & 0x40000000) | sum(ivs[n] << (5 * k) for k, n in enumerate(STAT_ORDER)) | ((mem["abilityNum"] & 1) << 31)
         struct.pack_into("<I", misc, 4, new_word)
         logical = [logical[0], logical[1], logical[2], bytes(misc)]
@@ -698,7 +852,7 @@ def patch_enemy_party(rom, want, staging, frame):
         struct.pack_into("<7H", rec, 86, mem["hp"], mem["maxHP"], mem["attack"], mem["defense"], mem["speed"], mem["spAttack"], mem["spDefense"])
         rom.write(base, rec)
         staging.append({"what": "enemy party member", "index": i, "frame": frame, "species": mem["species"], "personality": [before, op["personality"]],
-                        "otId": [ot_id, op.get("otId", ot_id)]})
+                        "otId": [ot_id, op.get("otId", ot_id)], "ivs": [rom_ivs, eng_ivs], "sameIvs": rom_ivs == eng_ivs})
 
 
 def main():

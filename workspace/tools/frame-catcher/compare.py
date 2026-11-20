@@ -347,6 +347,15 @@ def phase_labels(eng):
             marks.append((f, "walk to battle 1"))
         elif s.startswith("battleRoom") and (not marks or not marks[-1][1].startswith("battle room")):
             marks.append((f, f"battle room before battle {battle + 1}"))
+        # between rounds (fcr2): the Lobby after a round, the attendant's new challenge, the PreBattleRoom walk and the next draft
+        elif s in ("factoryTerminal", "lobbyFreeRoam") and (not marks or not marks[-1][1].startswith("Lobby")):
+            marks.append((f, f"Lobby after battle {battle}"))
+        elif s.startswith("lobbyAttendant") and (not marks or marks[-1][1] != "Lobby attendant"):
+            marks.append((f, "Lobby attendant"))
+        elif s.startswith("prebattleEntry") and (not marks or not marks[-1][1].startswith("PreBattleRoom")):
+            marks.append((f, f"PreBattleRoom before round {battle // 7 + 1}"))
+        elif s.startswith("draft:") and battle > 0 and marks and marks[-1][1].startswith("PreBattleRoom"):
+            marks.append((f, f"draft of round {battle // 7 + 1}"))
 
     def label(f):
         cur = "draft"

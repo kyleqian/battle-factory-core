@@ -310,3 +310,81 @@ class Driver:
             self.press("A", 2, f)
             return self.hold[0]
         return []
+
+
+# ---- round 2 and later (fcr2, docs/fcr2-catcher-round2.md) ----
+
+STAGES = 7  # FRONTIER_STAGES_PER_CHALLENGE
+
+
+class RoundCounter:
+    """The ROM's round, from curChallengeBattleNum alone: it counts 0..6 through a round, is 7 in the Lobby after a won round, and
+    InitFactoryChallenge (factory_init, at the save before the next challenge) sets it back to 0. A battle is keyed g = round * 7 + battle
+    number on both sides (engineRun.mjs `g`).
+
+    The number read can blip for a frame or a few (seed 23 Scene OFF, round 1: 4, then lower at ROM frame 46444 while battle 5 was being
+    set up, then 4 again), so a round steps only when it reads 0 below a higher number and stays 0 for `settle` frames (a real factory_init
+    is followed by the save dialog, the walk and the briefing: hundreds of frames). Until then the old round and number are kept. A blip is
+    kept in `blips` (frame index, the number before, the value read)."""
+
+    def __init__(self, settle=30):
+        self.round, self.last, self.settle = 0, None, settle
+        self.pending = 0
+        self.blips = []
+        self.n = 0
+
+    def update(self, bn):
+        """Feed this frame's battle number; True on the frame a new round starts. `self.last` is the number in force."""
+        self.n += 1
+        if self.last is None:
+            self.last = bn
+            return False
+        if bn >= self.last:
+            if self.pending:
+                self.blips.append((self.n - self.pending, self.last, 0))
+                self.pending = 0
+            self.last = bn
+            return False
+        if bn != 0:
+            self.blips.append((self.n, self.last, bn))
+            return False
+        self.pending += 1
+        if self.pending < self.settle:
+            return False
+        self.pending = 0
+        self.round += 1
+        self.last = 0
+        return True
+
+    def g(self, bn=None):
+        """The key of the battle in force (the number fed last, unless it is a blip or a 0 not yet settled)."""
+        return self.round * STAGES + self.last
+
+
+def go_on_roll(bn):
+    """A field.multichoice answer that starts a later battle's trainer roll (the GO ON menu): battles 2 to 7 of a round. The Lobby's
+    multichoices after a won round (record your last match?, CHALLENGE / INFO / EXIT, the level) run with the battle number still 7."""
+    return 0 < bn < STAGES
+
+
+def deal_traps_wanted(deal, ids_now, frame, rearm_frames=5):
+    """Which deal traps a frame is stepped again with, after its fast run (romRun.deal_traps): both ("rentals", "opponent") when the fast
+    run changed rentalMons' set ids (factory_generaterentalmons ran in it), the opponent's alone in the next `rearm_frames` frames when the
+    rental trap fired but the opponent roll fell past a frame boundary, else none. `deal`: {"rentals": None | {"frame"}, "opponent": None |
+    {...}, "idsBefore": [...], "want": {"dealRngBefore"}}; a deal whose opponent trap fired (or was given up) wants nothing."""
+    if deal is None or deal.get("opponent") is not None:
+        return ()
+    if deal.get("rentals") is None:
+        if ids_now == deal.get("idsBefore") or deal.get("want", {}).get("dealRngBefore") is None:
+            return ()
+        return ("rentals", "opponent")
+    if frame - deal["rentals"]["frame"] > rearm_frames:
+        return ("give-up",)
+    return ("opponent",)
+
+
+def deal_opponent_check(rom_trainer, rom_sets, first):
+    """The ROM's first opponent of a new round against the engine's battle record (`first`: trainerId, opponentSetIds): (same, rom, engine)."""
+    engine = [first["trainerId"], list(first["opponentSetIds"])]
+    rom = [rom_trainer, list(rom_sets)]
+    return rom == engine, rom, engine

@@ -22,16 +22,22 @@ if (!tracePath || !outDir) { console.error("usage: engineRun.mjs TRACE.json OUTD
 const GAME = path.resolve(opt("--game", path.resolve(here, "../..")));
 const maxFrame = Number(opt("--max-frame", Infinity));
 
+// The ROM's save is the oracle's, whose player is "MEMORY"; the game prints "PLAYER" (src/engine/playerName.ts). The comparison harness's
+// override (tools/compare/harnessPlayerName.ts) is set before the game is loaded, so the Lobby's save dialog ("MEMORY saved the game.")
+// and the info window compare (fcr2). Same length, so a trace made with "PLAYER" replays the same.
+globalThis.__POKEBENCH_PLAYER_NAME__ = process.env.POKEBENCH_HARNESS_PLAYER_NAME ?? "MEMORY";
 const { FactorySession } = await import(`${GAME}/src/factorySession.ts`);
 const { render } = await import(`${GAME}/src/engine/core.ts`);
 const { installBundledMonPicPixels } = await import(`${GAME}/src/engine/monPicPixelsInstall.ts`);
 installBundledMonPicPixels();
-const { menuOf, surfaceOf, setQuestionWindowVisible, setTerminalRecordMenuDrawn } = await import(path.join(here, "engineMenus.mjs"));
+const { menuOf, surfaceOf, setQuestionWindowVisible, setTerminalRecordMenuDrawn, setAttendantModule } = await import(path.join(here, "engineMenus.mjs"));
 {
   const postwin = await import(`${GAME}/src/engine/postwin.ts`).catch(() => ({}));
   if (postwin.postwinQuestionWindowVisible) setQuestionWindowVisible(postwin.postwinQuestionWindowVisible);
   const terminal = await import(`${GAME}/src/engine/factoryTerminalPresentation.ts`).catch(() => ({}));
   if (terminal.factoryTerminalRecordMenuDrawn) setTerminalRecordMenuDrawn(terminal.factoryTerminalRecordMenuDrawn);
+  const attendant = await import(`${GAME}/src/engine/factoryLobbyAttendant.ts`).catch(() => ({}));
+  if (attendant.attendantAcceptsInput && attendant.ATTENDANT_SCREENS) setAttendantModule(attendant);
 }
 
 const trace = JSON.parse(fs.readFileSync(tracePath, "utf8"));
@@ -69,8 +75,35 @@ let lastMenu = null; let lastSurface = null; let lastButtons = null;
   menus.push([0, m0 === null ? null : m0.kind, m0 === null ? null : m0.sig]);
   lastMenu = m0 === null ? null : `${m0.kind}|${m0.sig}`;
 }
-const battles = []; const facts = { rentals: null, frontier: c.frontier ?? null, battleScene: c.battleScene, transitions: {} };
+const battles = []; const facts = { rentals: null, frontier: c.frontier ?? null, battleScene: c.battleScene, transitions: {}, rounds: [], deals: [] };
+// Rounds (fcr2): a challenge that wins its 7 battles goes back to the Lobby, and the attendant's new challenge deals round 2's draft
+// (prebattleEntry.ts, the deal at the end of the PreBattleRoom walk). Each round's orchestrator brings its own initialRentalGeneration;
+// `battles` are keyed by `g` = round * 7 + battleIndex (the ROM side counts rounds by curChallengeBattleNum going back to 0).
+let lastGeneration = null; let lastPending = null;
+function noteRound(st, f) {
+  const pend = st.pendingGeneratedRound;
+  if (pend && pend !== lastPending) {
+    facts.deals.push({ frame: f, rngValueBefore: pend.rngValueBefore >>> 0, factoryWinStreak: pend.carry.factoryWinStreak, rentsCount: pend.carry.rentsCount,
+      symbols: pend.carry.factorySymbolsCount ?? null, prebattleEntry: !!st.prebattleEntry });
+  }
+  lastPending = pend ?? lastPending;
+  const orch = st.factoryRoundBattleOrchestrator;
+  const gen = orch?.initialRentalGeneration;
+  if (!gen || gen === lastGeneration) return;
+  lastGeneration = gen;
+  const deal = facts.deals.at(-1) ?? null;
+  facts.rounds.push({
+    round: facts.rounds.length, firstOrchestratorFrame: f,
+    rentals: gen.rentals.map((r) => ({ setId: r.setId, personality: r.personality >>> 0, fixedIv: r.fixedIv, abilitySlot: r.abilitySlot, otId: r.otId >>> 0, species: r.speciesName })),
+    playerTrainerId: orch.config.playerTrainerId >>> 0,
+    selectedRentalIndexes: orch.config.rentals?.selectedRentalIndexes ?? null,
+    factoryWinStreak: orch.config.factoryWinStreak ?? null,
+    // the deal's cursors: before GenerateInitialRentalMons, after the six set ids, after the six personalities (the first opponent's roll)
+    dealRngBefore: deal?.rngValueBefore ?? null, selectionRngValue: gen.selectionRngValue >>> 0, rentalRngAfter: gen.rngValue >>> 0,
+  });
+}
 function noteFacts(st, f) {
+  noteRound(st, f);
   // the battle-start transition the engine shows before the next battle (GetSpecialBattleTransition's one Random() draw)
   const tp = st.battleRoom?.transitionPresentation;
   // (the last one shown before the battle's first action menu wins: an after-win room may still hold the last battle's)
@@ -83,12 +116,14 @@ function noteFacts(st, f) {
     facts.selectedRentalIndexes = orch.config.rentals?.selectedRentalIndexes ?? null;
   }
   const bi = orch.round.rules.battleIndex;
+  const round = Math.max(0, facts.rounds.length - 1);
+  const g = round * 7 + bi;
   const cmd = orch.battleCommandPresentation;
-  if (cmd && cmd.lifecycle.phase === "action-menu" && !battles.some((b) => b.battleIndex === bi)) {
+  if (cmd && cmd.lifecycle.phase === "action-menu" && !battles.some((b) => b.g === g)) {
     const sched = orch.round.opponentSchedule[bi];
     const gen = orch.opponentGenerations?.[bi];
     battles.push({
-      battleIndex: bi, firstActionMenuFrame: f,
+      battleIndex: bi, round, g, firstActionMenuFrame: f,
       rngAtActionMenu: orch.battle.rng.value >>> 0, randomTurnNumber: orch.battle.rules.rulesContext.randomTurnNumber,
       trainerId: Number(String(sched.id).replace(/^factory-trainer-/, "")), trainerName: sched.trainerName,
       selectionRngValue: gen?.generation?.selectionRngValue ?? null, rollRngBefore: gen?.generation?.drawLedger?.[0]?.rngBefore ?? null, generationKind: gen?.kind ?? null,

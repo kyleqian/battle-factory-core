@@ -3,10 +3,13 @@
 // written in the site's trace shape, so engineRun.mjs and romRun.py replay it like a live player's trace.
 //
 //   node --experimental-strip-types --no-warnings tools/frame-catcher/makeTrace.mjs OUT.json --seed N [--scene on|off]
-//        [--policy full|winning|winning-swap|vanilla|coverage-fight] [--battles B] [--max-frames N] [--game GAME_WORKSPACE]
+//        [--policy full|winning|winning-swap|vanilla|coverage-fight] [--battles B] [--lobby-tail N] [--max-frames N] [--game GAME_WORKSPACE]
 //
-// Stops after B battles have ended (default 2), at the end of the challenge, or at --max-frames (default 60000). OUT.lines.txt gets
-// the battle text (each resolution's lines, with its first frame), to pick traces that show the situations wanted.
+// Stops after B battles have ended (default 2), at the end of the challenge, or at --max-frames (default 60000). With --lobby-tail N,
+// a trace whose B-th battle ends a round (7, 14, ...) stops N frames after the Lobby's free roam starts (the attendant's "record your
+// last match?" answered and the farewell read), instead of playing on to the next round's first battle. B = 14 plays round 1, the
+// Lobby, the attendant's new challenge and round 2 (fcr2, docs/fcr2-catcher-round2.md). OUT.lines.txt gets the battle text (each
+// resolution's lines, with its first frame) and each battle's and round's end, to pick traces that show the situations wanted.
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -20,6 +23,7 @@ const scene = opt("--scene", "on");
 const policy = opt("--policy", "full");
 const battlesWanted = Number(opt("--battles", "2"));
 const maxFrames = Number(opt("--max-frames", "60000"));
+const lobbyTail = args.includes("--lobby-tail") ? Number(opt("--lobby-tail", "120")) : null;
 const GAME = path.resolve(opt("--game", path.resolve(here, "../..")));
 
 const { FactorySession } = await import(`${GAME}/src/factorySession.ts`);
@@ -34,6 +38,7 @@ const segments = [];
 const lines = [];
 let prevRes = null, prevKey = null, battlesEnded = 0, wasPostwin = false, stop = "max-frames";
 let challengeRequest = false;
+let lobbyAt = null, round = 1, wasDraft = true;
 for (let f = 0; f < maxFrames; f += 1) {
   const buttons = player.decide(session.state);
   const b = [...buttons].sort();
@@ -41,7 +46,7 @@ for (let f = 0; f < maxFrames; f += 1) {
   if (last && last.buttons.join("+") === b.join("+") && last.frames < 600) last.frames += 1;
   else segments.push({ frames: 1, buttons: b });
   const events = session.tick(buttons);
-  if (events.some((e) => e.kind === "challenge-request")) challengeRequest = true;
+  if (events.some((e) => e.type === "challenge-request" || e.kind === "challenge-request")) challengeRequest = true; // (FactorySession events carry `type`)
   const st = session.state;
   const o = st.factoryRoundBattleOrchestrator;
   const res = o?.battleResolutionPresentation ?? null;
@@ -58,10 +63,16 @@ for (let f = 0; f < maxFrames; f += 1) {
     lines.push(`${session.frame} :: -- battle ${battlesEnded} ended (${st.postwin ? "won" : "round over"})`);
   }
   wasPostwin = postwin;
+  // a new round: the attendant's door walk dealt a new draft (prebattleEntry), the draft screen is up again
+  const inDraft = o === undefined || o === null ? st.prebattleEntry !== null : false;
+  if (inDraft && !wasDraft && battlesEnded > 0) { round += 1; lines.push(`${session.frame} :: -- round ${round} starts (after ${battlesEnded} battles)`); }
+  wasDraft = inDraft;
+  if (lobbyTail !== null && battlesEnded >= battlesWanted && st.lobbyFreeRoam && lobbyAt === null) lobbyAt = session.frame;
+  if (lobbyAt !== null && session.frame >= lobbyAt + lobbyTail) { stop = "lobby"; break; }
   // after the last wanted battle: play on to the next battle's first menu (the rooms, the swap), then stop
   if (battlesEnded >= battlesWanted && o?.battleCommandPresentation?.lifecycle.phase === "action-menu") { stop = "battles"; break; }
   if (challengeRequest) { stop = "round-over"; break; }
 }
-fs.writeFileSync(out, JSON.stringify({ challenge, maker: { seed, scene, policy, battlesWanted, stop, frames: session.frame }, segments }));
+fs.writeFileSync(out, JSON.stringify({ challenge, maker: { seed, scene, policy, battlesWanted, stop, frames: session.frame, battlesEnded, rounds: round, lobbyAt }, segments }));
 fs.writeFileSync(out.replace(/\.json$/, "") + ".lines.txt", lines.join("\n") + "\n");
-console.log(`makeTrace: seed ${seed} ${scene} ${policy}: ${session.frame} frames, ${battlesEnded} battles ended, stop ${stop}`);
+console.log(`makeTrace: seed ${seed} ${scene} ${policy}: ${session.frame} frames, ${battlesEnded} battles ended, round ${round}, stop ${stop}`);

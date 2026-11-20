@@ -22,7 +22,26 @@ let terminalRecordMenuDrawn = null;
 export function setQuestionWindowVisible(fn) { questionWindowVisible = fn; }
 export function setTerminalRecordMenuDrawn(fn) { terminalRecordMenuDrawn = fn; }
 
+// The Lobby attendant's menus between two rounds (fcr2, factoryLobbyAttendant.ts): "take the challenge?" CHALLENGE / INFO / EXIT and the
+// level choice are the ROM's `multichoice` (Task_HandleMultichoiceInput, BattleFrontier_BattleFactoryLobby/scripts.inc:125, 134); "I need
+// to save the game. Is that okay?" is MSGBOX_YESNO (Task_HandleYesNoInput, :138); the save dialog's "Would you like to save the game?" and
+// "There is already a saved file." YES/NO are start_menu.c's own (SaveConfirmInputCallback / SaveOverwriteInputCallback under
+// SaveGameTask). Each is a menu from the frame its box is drawn (`attendantAcceptsInput` on the menu's page) until it is answered.
+// engineRun.mjs passes the game's module; without it (an older build) the Lobby has no menus, as before.
+let attendantModule = null;
+export function setAttendantModule(mod) { attendantModule = mod; }
+const ATTENDANT_MENU_KIND = { challenge: "field.multichoice", level: "field.multichoice", yesNo: "field.yesno" };
+
+export function attendantMenuOf(att, mod = attendantModule) {
+  if (!att || !mod || att.phase !== "talk") return null;
+  const def = mod.ATTENDANT_SCREENS[att.screen];
+  if (!def || def.menu === null || att.page !== def.pages.length - 1 || !mod.attendantAcceptsInput(att)) return null;
+  return { kind: ATTENDANT_MENU_KIND[def.menu], sig: String(att.cursor) };
+}
+
 export function menuOf(st) {
+  // first: the Lobby attendant owns the input, while the last round's orchestrator, postwin and terminal states are still kept
+  if (st.lobbyAttendant) return attendantMenuOf(st.lobbyAttendant);
   const orch = st.factoryRoundBattleOrchestrator;
   if (orch) {
     const cmd = orch.battleCommandPresentation;
@@ -86,6 +105,7 @@ export function surfaceOf(state) {
   if (orch?.battleResolutionPresentation) return `resolution:${orch.battleResolutionPresentation.lifecycle.phase}`;
   if (orch?.battleStartIntro) return "battleStartIntro";
   if (orch?.battleCommandPresentation) return `command:${orch.battleCommandPresentation.lifecycle.phase}`;
+  if (state.lobbyAttendant) return `lobbyAttendant:${state.lobbyAttendant.phase}:${state.lobbyAttendant.screen}`;
   if (state.lobbyFreeRoam) return "lobbyFreeRoam";
   if (state.factoryTerminal) return "factoryTerminal";
   if (state.factorySwap) return `factorySwap:${state.factorySwap.controller.phase}`;

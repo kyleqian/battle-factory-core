@@ -260,6 +260,81 @@ class SoundAttributionTest(unittest.TestCase):
         self.assertFalse(state["open"])
 
 
+class RoundTest(unittest.TestCase):
+    """Round 2 and later (fcr2): the ROM's round from curChallengeBattleNum, the GO ON roll guard, the deal traps' arming."""
+
+    def test_the_round_steps_when_the_battle_number_goes_back_to_0_and_stays(self):
+        rc = fc.RoundCounter(settle=3)
+        seen = []
+        # round 1: 0..6, the Lobby after the 7th win (7), factory_init at the save (0, settles after 3 frames), round 2: 0, 1, 6, 7
+        for bn in [0, 0, 1, 2, 3, 4, 5, 6, 7, 7, 0, 0, 0, 0, 1, 6, 7]:
+            stepped = rc.update(bn)
+            seen.append((rc.round, rc.g(), stepped))
+        self.assertEqual([r for r, _, _ in seen], [0] * 12 + [1] * 5)
+        self.assertEqual([x for _, x, _ in seen], [0, 0, 1, 2, 3, 4, 5, 6, 7, 7, 7, 7, 7, 7, 8, 13, 14])
+        self.assertEqual([i for i, (_, _, st) in enumerate(seen) if st], [12])
+        self.assertEqual(rc.blips, [])
+
+    def test_a_blip_of_the_battle_number_is_not_a_round(self):
+        # seed 23 Scene OFF: battle number 4, a lower value for a frame or two while battle 5 is set up, then 4 again
+        rc = fc.RoundCounter(settle=3)
+        for bn in [3, 4, 4, 2, 4, 0, 0, 4, 5]:
+            rc.update(bn)
+        self.assertEqual((rc.round, rc.g()), (0, 5))
+        self.assertEqual(rc.blips, [(4, 4, 2), (6, 4, 0)])
+
+    def test_the_lobby_multichoices_are_not_a_go_on_roll(self):
+        self.assertEqual([fc.go_on_roll(bn) for bn in range(8)], [False, True, True, True, True, True, True, False])
+
+    def test_deal_traps(self):
+        want = {"dealRngBefore": 4127159961}
+        deal = {"rentals": None, "opponent": None, "idsBefore": [183, 186, 129, 166, 156, 127], "want": want}
+        self.assertEqual(fc.deal_traps_wanted(deal, [183, 186, 129, 166, 156, 127], 100), ())  # the ids did not change: no deal ran
+        self.assertEqual(fc.deal_traps_wanted(deal, [233, 186, 129, 166, 156, 127], 100), ("rentals", "opponent"))  # partly written counts
+        deal["rentals"] = {"frame": 100}
+        self.assertEqual(fc.deal_traps_wanted(deal, [233, 210, 179, 252, 178, 237], 101), ("opponent",))  # the roll past a frame boundary
+        self.assertEqual(fc.deal_traps_wanted(deal, [233, 210, 179, 252, 178, 237], 106), ("give-up",))
+        deal["opponent"] = {"frame": 101}
+        self.assertEqual(fc.deal_traps_wanted(deal, [1, 2, 3, 4, 5, 6], 101), ())
+        self.assertEqual(fc.deal_traps_wanted(None, None, 1), ())
+        self.assertEqual(fc.deal_traps_wanted({"rentals": None, "opponent": None, "idsBefore": [1], "want": {}}, [2], 1), ())  # no engine cursor
+
+    def test_deal_opponent_check(self):
+        first = {"trainerId": 83, "opponentSetIds": [215, 258, 190]}
+        self.assertEqual(fc.deal_opponent_check(83, [215, 258, 190], first), (True, [83, [215, 258, 190]], [83, [215, 258, 190]]))
+        self.assertFalse(fc.deal_opponent_check(83, [215, 190, 258], first)[0])
+
+
+class EngineMenusTest(unittest.TestCase):
+    """engineMenus.mjs attendantMenuOf against the game's own attendant module (node, no emulator)."""
+
+    def test_the_attendant_menus_are_menus_once_drawn(self):
+        import json
+        import subprocess
+        ws = Path(__file__).resolve().parents[1]
+        script = """
+const att = await import(%r);
+const em = await import(%r);
+let st = att.createFactoryLobbyAttendantState(0);
+const out = [];
+const none = { a: false, b: false, up: false, down: false };
+const a = { ...none, a: true };
+for (let f = 0; f < 2000 && out.length < 6; f += 1) {
+  const m = em.attendantMenuOf(st, att);
+  const key = m === null ? null : `${st.screen}:${m.kind}:${m.sig}`;
+  if (m !== null && !out.includes(key)) out.push(key);
+  st = att.advanceFactoryLobbyAttendant(st, att.attendantAcceptsInput(st) ? a : none);
+}
+console.log(JSON.stringify({ out, noModule: em.attendantMenuOf(st, null) }));
+""" % (str(ws / "src/engine/factoryLobbyAttendant.ts"), str(ws / "tools/frame-catcher/engineMenus.mjs"))
+        r = subprocess.run(["node", "--experimental-strip-types", "--no-warnings", "--input-type=module", "-e", script], capture_output=True, text=True, cwd=ws)
+        self.assertEqual(r.returncode, 0, r.stderr)
+        got = json.loads(r.stdout.strip().splitlines()[-1])
+        self.assertEqual(got["out"], ["ask:field.multichoice:0", "level:field.multichoice:0", "saveQuestion:field.yesno:0", "saveInfo:field.yesno:0",
+                                      "overwrite:field.yesno:0"])
+        self.assertIsNone(got["noModule"])
+
+
 class MonRecordTest(unittest.TestCase):
     """mons.with_personality: a select-screen rental re-stored with the engine's personality (romRun.patch_select_mons). Seed 6's GROWLITHE
     (set 136, nature 6, genderRatio 63, abilities Intimidate / Flash Fire): the ROM drew 2844908581 (female, Flash Fire), ours 347824006
