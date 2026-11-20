@@ -74,6 +74,8 @@ export interface BattleResolution {
   readonly opponentParty: BattleParty;
   /** Optional full kernel snapshots; omitted by legacy fixture adapters. */
   readonly playerKernelParty?: FactoryKernelParty;
+  /** msw1: the player's records carrying the move order SELECT switching left in the party (see FactoryCorpusPartyInstance.moveOrder). */
+  readonly playerRentalRecords?: FactoryRentalParty;
   readonly opponentKernelParty?: FactoryKernelParty;
   /** Explicit battle-core output; presentation never consumes or changes it. */
   readonly rngValue: number;
@@ -482,6 +484,9 @@ export function resolveRoundBattle(
     ...state.rules,
     playerParty,
     playerKernelParty,
+    ...(resolution.playerRentalRecords !== undefined && state.rules.playerRentalRecords !== null
+      ? { playerRentalRecords: resolution.playerRentalRecords }
+      : {}),
     rngValue: resolution.rngValue >>> 0,
     lastBattle,
     lastSwap: null,

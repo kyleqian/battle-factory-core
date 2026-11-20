@@ -17,6 +17,7 @@ import {
   type BattleState,
 } from "./battleDecisionBoundary.ts";
 import { playSelectSe } from "./screenSounds.ts";
+import { initialMoveSwitchTarget, moveSwitchTargetAfter, type MoveSlot } from "./battleMoveSwitching.ts";
 import {
   battleScriptForcedMoveSelection,
   describeIllegalMoveSelection,
@@ -216,6 +217,31 @@ export type BattleCommandPresentationState = Readonly<{
   actionCursor: 0 | 1 | 2 | 3;
   fightCursor: 0 | 1 | 2 | 3;
   fightDisplayCursor: 0 | 1 | 2 | 3;
+  /**
+   * msw1: the SELECT "Switch which?" state (`HandleMoveSwitching`): `fightCursor` is the source slot, `target` the
+   * `gMultiUsePlayerCursor`.
+   * `null` outside the state.
+   */
+  moveSwitch: Readonly<{ target: MoveSlot }> | null;
+  /** msw1: the target the box draws; it trails `moveSwitch` by one tick (like `fightDisplayCursor`) on entry and exit. */
+  moveSwitchDisplay: MoveSlot | null;
+  /** msw1: bit k set = the idle bounce skips the (k+1)th tick from now (the oracle loses frames to the VRAM copies of a SELECT-state window redraw). */
+  bounceHold: number;
+  /**
+   * msw1: the oracle's redraw pipeline after a confirmed swap (`elapsed` ticks since the confirm): the move-name
+   * rows reach the screen one per frame, and `previousField` keeps the pre-swap names for the rows still waiting.
+   */
+  moveSwitchSettle: Readonly<{
+    elapsed: number;
+    source: MoveSlot;
+    target: MoveSlot;
+    previousField: BattleCommandPresentationState["field"];
+  }> | null;
+  /**
+   * msw1: a confirmed swap the owner has not applied yet. The presentation never edits rules; the orchestrator applies
+   * `switchFactoryCommandMoves` and returns the new surface through `applyBattleCommandMoveSwitch`.
+   */
+  pendingMoveSwitch: Readonly<{ source: MoveSlot; target: MoveSlot }> | null;
   legalMoveBySlot: readonly [
     BattleMoveDecision | null,
     BattleMoveDecision | null,
@@ -534,34 +560,13 @@ export function createBattleCommandDisplayedField(
   });
 }
 
-/**
- * Snapshots one live player-side singles command boundary into immutable,
- * render-owned state. Lifecycle input and decision submission are deliberately
- * owned by later slices of the battle-command seam.
- */
-export function createBattleCommandPresentation(
-  requestInput: BattleCommandRequest,
+function deriveMoveSurface(
+  request: BattleCommandRequest,
   rules: BattleScriptRulesContext,
-  initialFightCursor: 0 | 1 | 2 | 3 = 0,
-  bounceSchedule: BattleCommandBounceSchedule = BATTLE_COMMAND_BOUNCE_SCHEDULE_DEFAULT,
-  /**
-   * Route-scoped post-print hold for the confirmed move's STRINGID_USEDMOVE
-   * on the failed/no-anim path (ISSUES #81 remainder 4b) -- the source runs
-   * a `pause B_WAIT_TIME_SHORT` / animation controller span after the
-   * attackstring with no `waitmessage`. Defaults to 0 (no hold), which the
-   * standard hit chain keeps; only a route's staging context (the torment /
-   * switch pacing fixtures) supplies 38/39.
-   */
-  usedMessageHoldFrames = 0,
-): BattleCommandPresentationState {
-  const request = createBattleCommandRequest(requestInput);
-  if (request.side !== "player" || request.battler !== 0) {
-    throw new BattleCommandPresentationError(
-      "battle-command presentation accepts player-side singles requests only",
-    );
-  }
-  const field = createBattleCommandDisplayedField(rules);
-
+): Pick<
+  BattleCommandPresentationState,
+  "legalMoveBySlot" | "rejectionReasonBySlot" | "legalSwitchPartyIndexes" | "forcedMove"
+> {
   const legalMoveBySlot: [
     BattleMoveDecision | null,
     BattleMoveDecision | null,
@@ -606,6 +611,44 @@ export function createBattleCommandPresentation(
     : null;
 
   return Object.freeze({
+    legalMoveBySlot: Object.freeze(legalMoveBySlot),
+    rejectionReasonBySlot: Object.freeze(rejectionReasonBySlot),
+    legalSwitchPartyIndexes: Object.freeze(legalSwitchPartyIndexes),
+    forcedMove,
+  });
+}
+
+/**
+ * Snapshots one live player-side singles command boundary into immutable,
+ * render-owned state. Lifecycle input and decision submission are deliberately
+ * owned by later slices of the battle-command seam.
+ */
+export function createBattleCommandPresentation(
+  requestInput: BattleCommandRequest,
+  rules: BattleScriptRulesContext,
+  initialFightCursor: 0 | 1 | 2 | 3 = 0,
+  bounceSchedule: BattleCommandBounceSchedule = BATTLE_COMMAND_BOUNCE_SCHEDULE_DEFAULT,
+  /**
+   * Route-scoped post-print hold for the confirmed move's STRINGID_USEDMOVE
+   * on the failed/no-anim path (ISSUES #81 remainder 4b) -- the source runs
+   * a `pause B_WAIT_TIME_SHORT` / animation controller span after the
+   * attackstring with no `waitmessage`. Defaults to 0 (no hold), which the
+   * standard hit chain keeps; only a route's staging context (the torment /
+   * switch pacing fixtures) supplies 38/39.
+   */
+  usedMessageHoldFrames = 0,
+): BattleCommandPresentationState {
+  const request = createBattleCommandRequest(requestInput);
+  if (request.side !== "player" || request.battler !== 0) {
+    throw new BattleCommandPresentationError(
+      "battle-command presentation accepts player-side singles requests only",
+    );
+  }
+  const field = createBattleCommandDisplayedField(rules);
+
+  const surface = deriveMoveSurface(request, rules);
+
+  return Object.freeze({
     request,
     lifecycle: Object.freeze({ phase: "action-enter", phaseElapsed: 0 }),
     idleBounceElapsed: 0,
@@ -616,14 +659,19 @@ export function createBattleCommandPresentation(
     actionCursor: 0,
     fightCursor: initialFightCursor,
     fightDisplayCursor: initialFightCursor,
-    legalMoveBySlot: Object.freeze(legalMoveBySlot),
-    rejectionReasonBySlot: Object.freeze(rejectionReasonBySlot),
-    legalSwitchPartyIndexes: Object.freeze(legalSwitchPartyIndexes),
+    moveSwitch: null,
+    moveSwitchDisplay: null,
+    bounceHold: 0,
+    moveSwitchSettle: null,
+    pendingMoveSwitch: null,
+    legalMoveBySlot: surface.legalMoveBySlot,
+    rejectionReasonBySlot: surface.rejectionReasonBySlot,
+    legalSwitchPartyIndexes: surface.legalSwitchPartyIndexes,
   rejectedSlot: null,
   rejectionWaitCursorAge: 0,
   forfeitCursor: 1,
   forfeitDisplayCursor: 1,
-  forcedMove,
+  forcedMove: surface.forcedMove,
   pendingDecision: null,
   usedMessageHoldFrames,
 });
@@ -652,12 +700,12 @@ export function advanceBattleCommandPresentation(
       )
       || stateInput.lifecycle.phaseElapsed >= FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT
     );
-  let state = !bounceCallbackRuns
-    ? stateInput
-    : Object.freeze({
-      ...stateInput,
-      idleBounceElapsed: stateInput.idleBounceElapsed + 1,
-    });
+  const bounceHeld = (stateInput.bounceHold & 1) === 1;
+  let state = Object.freeze({
+    ...stateInput,
+    bounceHold: stateInput.bounceHold >> 1,
+    idleBounceElapsed: stateInput.idleBounceElapsed + (bounceCallbackRuns && !bounceHeld ? 1 : 0),
+  });
 
   switch (state.lifecycle.phase) {
     case "action-enter": {
@@ -686,7 +734,13 @@ export function advanceBattleCommandPresentation(
         state,
         "fight-menu",
         state.lifecycle.phaseElapsed + 1,
-        { fightDisplayCursor: state.fightCursor },
+        {
+          fightDisplayCursor: state.fightCursor,
+          moveSwitchDisplay: state.moveSwitch?.target ?? null,
+          moveSwitchSettle: state.moveSwitchSettle === null || state.moveSwitchSettle.elapsed >= MOVE_SWITCH_SETTLE_TICKS
+            ? null
+            : Object.freeze({ ...state.moveSwitchSettle, elapsed: state.moveSwitchSettle.elapsed + 1 }),
+        },
       );
       break;
     case "rejection-message": {
@@ -822,6 +876,8 @@ export function advanceBattleCommandPresentation(
 
   if (state.lifecycle.phase !== "fight-menu") return state;
 
+  if (state.moveSwitch !== null) return advanceMoveSwitch(state, state.moveSwitch, newKeys);
+
   if (newKeys.has("A")) {
     const decision = state.legalMoveBySlot[state.fightCursor];
     if (decision !== null) {
@@ -848,11 +904,81 @@ export function advanceBattleCommandPresentation(
 
   const direction = (["LEFT", "RIGHT", "UP", "DOWN"] as const)
     .find((button) => newKeys.has(button));
-  if (direction === undefined) return state;
+  if (direction === undefined) {
+    // msw1: the SELECT branch is last in the HandleInputChooseMove chain (:599-612); no sound on entry. Factory mons
+    // always have four moves, so gNumberOfMovesToChoose > 1 holds, and link battles do not exist here.
+    if (!newKeys.has("SELECT")) return state;
+    const target = initialMoveSwitchTarget(state.fightCursor);
+    return Object.freeze({ ...state, moveSwitch: Object.freeze({ target }) });
+  }
   const fightCursor = moveFightCursor(state.fightCursor, direction);
   // snd1: :547-597, SE_SELECT only when the cursor moves (a Factory mon always has four moves, so gNumberOfMovesToChoose never blocks).
   if (fightCursor !== state.fightCursor) playSelectSe();
   return Object.freeze({ ...state, fightCursor });
+}
+
+/** Ticks after a confirmed swap before the box is back to the normal PP window (settle elapsed 0, 1, 2 then done). */
+const MOVE_SWITCH_SETTLE_TICKS = 2;
+
+function advanceMoveSwitch(
+  state: BattleCommandPresentationState,
+  moveSwitch: NonNullable<BattleCommandPresentationState["moveSwitch"]>,
+  newKeys: ReadonlySet<GbaButton>,
+): BattleCommandPresentationState {
+  // HandleMoveSwitching's chain: A|SELECT confirm, B cancel, then the four D-pad branches (:668-840).
+  if (newKeys.has("A") || newKeys.has("SELECT")) {
+    playSelectSe();
+    if (moveSwitch.target === state.fightCursor) {
+      return Object.freeze({ ...state, moveSwitch: null, bounceHold: 1 });
+    }
+    return Object.freeze({
+      ...state,
+      moveSwitch: null,
+      pendingMoveSwitch: Object.freeze({ source: state.fightCursor, target: moveSwitch.target }),
+    });
+  }
+  if (newKeys.has("B")) {
+    playSelectSe();
+    return Object.freeze({ ...state, moveSwitch: null, bounceHold: 1 });
+  }
+  const direction = (["LEFT", "RIGHT", "UP", "DOWN"] as const)
+    .find((button) => newKeys.has(button));
+  if (direction === undefined) return state;
+  const target = moveSwitchTargetAfter(moveSwitch.target, direction);
+  if (target === moveSwitch.target) return state;
+  playSelectSe();
+  return Object.freeze({ ...state, moveSwitch: Object.freeze({ ...moveSwitch, target }) });
+}
+
+/**
+ * Installs the swapped command surface after the owner applied `pendingMoveSwitch` to the battle (msw1): the move
+ * names, PP, legal slots and rejection reasons are re-derived from the new request, and the cursor lands on the
+ * target slot (`gMoveSelectionCursor = gMultiUsePlayerCursor`, :738).
+ */
+export function applyBattleCommandMoveSwitch(
+  state: BattleCommandPresentationState,
+  request: BattleCommandRequest,
+  rules: BattleScriptRulesContext,
+): BattleCommandPresentationState {
+  const pending = state.pendingMoveSwitch;
+  if (pending === null) return state;
+  const surface = deriveMoveSurface(request, rules);
+  return Object.freeze({
+    ...state,
+    ...surface,
+    request,
+    field: createBattleCommandDisplayedField(rules),
+    fightCursor: pending.target,
+    fightDisplayCursor: pending.target,
+    pendingMoveSwitch: null,
+    bounceHold: 7,
+    moveSwitchSettle: Object.freeze({
+      elapsed: 0,
+      source: pending.source,
+      target: pending.target,
+      previousField: state.field,
+    }),
+  });
 }
 
 /**

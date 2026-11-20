@@ -168,14 +168,15 @@ function generatedCommandRecord(setId: number, fixedIv: number = 31, exactPerson
   });
 }
 
-function generatedBattleCommandStage(state: EngineState): EngineState {
+function generatedBattleCommandStage(state: EngineState, battleScene: "on" | "off" = "off"): EngineState {
   const playerRentalRecords = [
     generatedCommandRecord(664),
     generatedCommandRecord(678),
     generatedCommandRecord(527),
   ] as const;
   let orchestrator = createFactoryRoundBattleOrchestrator({
-    id: "battle-command-generated-off",
+    id: `battle-command-generated-${battleScene}`,
+    battleScene,
     rngValue: 4,
     factoryWinStreak: 0,
     playerTrainerId: 0x89ab_cdef,
@@ -2022,7 +2023,8 @@ export const APP_STAGES: Readonly<Record<string, AppStage>> = {
         i === 5 ? { ...rental, species: state.draftScreen.rentals[0]!.species } : rental),
     },
   }),
-  "battle-command-generated-off": generatedBattleCommandStage,
+  "battle-command-generated-off": (state) => generatedBattleCommandStage(state, "off"),
+  "battle-command-generated-on": (state) => generatedBattleCommandStage(state, "on"),
   "factory-arbitrary-intro-yoshi-off": generatedBattleStartIntroArbitraryStage,
   "sta6m-intro-trace-off": (state) => sta6mIntroStage(state, "off", 70, STA6M_TRACE_PLAYERS),
   "sta6m-intro-trace-on": (state) => sta6mIntroStage(state, "on", 70, STA6M_TRACE_PLAYERS),

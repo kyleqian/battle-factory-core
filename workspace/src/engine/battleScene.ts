@@ -832,6 +832,7 @@ import type {
 import {
   battleCommandBounceAgeOffset,
 } from "./battleCommandPresentation.ts";
+import type { FightSwitchView } from "./battleMoveSwitching.ts";
 import {
   createBattleCommandFieldRenderView,
   drawBattleCommandActionChrome,
@@ -9180,15 +9181,72 @@ export function drawFightSubmenuChromeFromLatest(
   );
 }
 
+/**
+ * msw1: the harvested slot patches bake the black cursor arrow into one cell per slot. The arrow pixels of slot `k` are
+ * the pixels of its quadrant where patch `k` differs from another slot's patch (which has no arrow in that cell).
+ */
+const fightCursorArrowPixels: readonly (readonly number[])[] = /* @__PURE__ */ (() => {
+  const { width, height, slots } = fightSubmenuWindow;
+  const patches = FIGHT_SUBMENU_SLOT_NAMES.map((name) => slots[name]!);
+  return patches.map((patch, slot) => {
+    const other = patches[(slot + 1) & 3]!;
+    const pixels: number[] = [];
+    for (let py = 0; py < height; py += 1) {
+      for (let px = 0; px < width; px += 1) {
+        if ((px >= 40) !== ((slot & 1) === 1) || (py >= 24) !== ((slot & 2) === 2)) continue;
+        const i = (py * width + px) * 3;
+        if (patch[i] !== other[i] || patch[i + 1] !== other[i + 1] || patch[i + 2] !== other[i + 2]) pixels.push(py * width + px);
+      }
+    }
+    return pixels;
+  });
+})();
+
+/**
+ * Cursor tile 29 (the source slot while "Switch which?" is up) is a different, smaller light-gray arrow than the
+ * normal black one: nine rows from the cell's (10, 125) with these widths, no shadow pixels. Cursor tile 27 (the
+ * target) is the black arrow without its light shadow.
+ */
+const FIGHT_SWITCH_SOURCE_ARROW_ROW_WIDTHS = [2, 3, 4, 5, 5, 5, 4, 3, 2] as const;
+const FIGHT_SWITCH_SOURCE_ARROW = { r: 214, g: 206, b: 214 };
+const FIGHT_CURSOR_BLACK = [74, 66, 82] as const;
+
+function drawMoveSwitchArrows(fb: Uint8Array, displayCursor: FightSubmenuSlot, view: FightSwitchView): void {
+  const { x, y, width, slots } = fightSubmenuWindow;
+  for (const index of fightCursorArrowPixels[displayCursor]!) {
+    setPixel(fb, x + (index % width), y + Math.floor(index / width), { r: 255, g: 255, b: 255 });
+  }
+  if (view.gray !== null) {
+    const baseX = 10 + 72 * (view.gray & 1);
+    const baseY = 125 + 16 * (view.gray >> 1);
+    FIGHT_SWITCH_SOURCE_ARROW_ROW_WIDTHS.forEach((rowWidth, row) => {
+      for (let column = 0; column < rowWidth; column += 1) {
+        setPixel(fb, baseX + column, baseY + row, FIGHT_SWITCH_SOURCE_ARROW);
+      }
+    });
+  }
+  if (view.arrow === null) return;
+  const patch = slots[FIGHT_SUBMENU_SLOT_NAMES[view.arrow]!]!;
+  for (const index of fightCursorArrowPixels[view.arrow]!) {
+    const at = index * 3;
+    const black = patch[at] === FIGHT_CURSOR_BLACK[0] && patch[at + 1] === FIGHT_CURSOR_BLACK[1] && patch[at + 2] === FIGHT_CURSOR_BLACK[2];
+    if (black || view.arrowKind === "normal") {
+      setPixel(fb, x + (index % width), y + Math.floor(index / width), { r: patch[at]!, g: patch[at + 1]!, b: patch[at + 2]! });
+    }
+  }
+}
+
 export function drawFightSubmenuChromeFromLiveState(
   fb: Uint8Array,
   displayCursor: FightSubmenuSlot,
   moveset: ReturnType<typeof buildFightMoveset>,
+  moveSwitch: FightSwitchView | null = null,
 ): void {
   const slotName = FIGHT_SUBMENU_SLOT_NAMES[displayCursor];
   const patch = fightSubmenuWindow.slots[slotName]!;
   drawRect(fb, { x: fightSubmenuWindow.x, y: fightSubmenuWindow.y, width: fightSubmenuWindow.width, height: fightSubmenuWindow.height, pixels: patch });
-  drawFightSubmenuText(fb, fightSubmenuWindow.x, fightSubmenuWindow.y, moveset, displayCursor);
+  if (moveSwitch !== null) drawMoveSwitchArrows(fb, displayCursor, moveSwitch);
+  drawFightSubmenuText(fb, fightSubmenuWindow.x, fightSubmenuWindow.y, moveset, displayCursor, moveSwitch !== null);
 }
 
 /** The onix/healthbox bounce overlay alone (`drawActionMenuIdleContent`'s own second half, factored out so `drawFightSubmenuWindow`'s frozen-bounce branch can reuse it without redrawing `menuIdleBase`). */
@@ -15683,6 +15741,7 @@ export function renderGeneratedBattleCommandPresentation(
           framebuffer,
           view.fightMenu.displayCursor,
           view.fightMenu.moveset,
+          view.fightMenu.moveSwitch,
         );
       }
     },

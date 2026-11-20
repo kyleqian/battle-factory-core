@@ -75,6 +75,7 @@ import {
   type BattleState,
 } from "./battleDecisionBoundary.ts";
 import { handleBattleActionFinished } from "./battleActionFinished.ts";
+import { swapBattleScriptBattlerMoves } from "./battleMoveSwitching.ts";
 import {
   battleScriptForcedMoveSelection,
   checkBattleScriptMoveLimitations,
@@ -684,6 +685,30 @@ export function createFactoryFullTurnBattleStateFromRulesContext(
   return input.nextEventSequence === undefined
     ? state
     : Object.freeze({ ...state, nextEventSequence: input.nextEventSequence });
+}
+
+/**
+ * SELECT move switching at the player's command boundary (battle_controller_player.c HandleMoveSwitching): swaps the
+ * battler's and party mon's move slots and republishes the same request id's legal decisions for the new order.
+ */
+export function switchFactoryCommandMoves(
+  state: BattleState<FactoryFullTurnDecisionRules>,
+  source: 0 | 1 | 2 | 3,
+  target: 0 | 1 | 2 | 3,
+): BattleState<FactoryFullTurnDecisionRules> {
+  const request = state.boundary.kind === "decision-required" ? state.boundary.request : null;
+  if (request === null || request.kind !== "command" || request.side !== "player") {
+    throw new Error("move switching requires the player's command boundary");
+  }
+  const rulesContext = swapBattleScriptBattlerMoves(state.rules.rulesContext, 0, source, target);
+  return Object.freeze({
+    ...state,
+    rules: buildRules(rulesContext, state.rules.phase, state.rules.pendingPlayerDecision),
+    boundary: Object.freeze({
+      ...state.boundary,
+      request: Object.freeze({ ...request, legalDecisions: legalCommandDecisions(rulesContext, 0) }),
+    }),
+  }) as BattleState<FactoryFullTurnDecisionRules>;
 }
 
 function rulesAt(input: FactoryFullTurnDecisionRules): FactoryFullTurnDecisionRules {
