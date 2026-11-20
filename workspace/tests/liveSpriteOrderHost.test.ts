@@ -49,7 +49,9 @@ const scanRoute = (seed: number, slots: readonly (0 | 1 | 2 | 3)[]) => {
 // without them compared / hostKnown stay 840 / 740, declines and laterAfter unchanged.
 // btn1: one sweep battle's gated message (a `\\p` / `\\l` string split into prompt pieces) adds one known command edge, equal to the pure
 // transform (0 mismatches): compared / hostKnown 846 / 745 -> 847 / 746, declines and laterAfter unchanged.
-const SWEEP_PIN = { compared: 847, hostKnown: 746, declines: 0, laterAfter: 65 };
+// trp1: + the sweep's 2 Scene ON TURN_TRAP general-animation command edges (both with a known host), each equal to the pure transform
+// (0 mismatches): compared / hostKnown 847 / 746 -> 849 / 748, declines and laterAfter unchanged.
+const SWEEP_PIN = { compared: 849, hostKnown: 748, declines: 0, laterAfter: 65 };
 const bodies = (run: Replay) => run.commands.filter(row => row.type === "move-animation");
 
 function expectRulesEqual(on: Replay, off: Replay): void {

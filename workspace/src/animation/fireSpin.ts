@@ -79,6 +79,19 @@ export const FIRE_SPIN_EFFECT_FIRST_AGE = 4;
 export const FIRE_SPIN_EFFECT_START_AGES = [4, 28, 52] as const;
 export const FIRE_SPIN_END_AGE = 102;
 
+/**
+ * trp1 (docs/trp1-turn-trap-animation.md): `main` is MOVE_FIRE_SPIN; `turn-trap` is General_TurnTrap's Status_FireSpin
+ * (battle_anim_scripts.s:10382-10390), the same script with `AnimTask_ShakeMon, 5, ANIM_TARGET, 0, 2, 30, 1` and two FireSpinEffect
+ * calls (then `waitforvisualfinish; stopsound`). The trapped battler is the script's target.
+ */
+export type FireSpinBody = "main" | "turn-trap";
+const FIRE_SPIN_BODY = {
+  main: { effectStartAges: FIRE_SPIN_EFFECT_START_AGES, shakeTimes: 47 },
+  "turn-trap": { effectStartAges: [4, 28] as const, shakeTimes: 30 },
+} as const;
+/** Status_FireSpin's last vortex (spawned at 48, 30 callbacks) leaves at age 78, as Move_FIRE_SPIN's (72 + 30) at 102. */
+export const FIRE_SPIN_TURN_TRAP_END_AGE = 78;
+
 export interface FireSpinGeometry {
   /** `GetBattlerSpriteCoord(ANIM_TARGET, BATTLER_COORD_X/Y)`. */
   readonly targetCenter: Readonly<{ x: number; y: number }>;
@@ -97,12 +110,12 @@ export interface FireSpinState {
   readonly soundEvents: readonly FireSpinSoundEvent[];
 }
 
-export function fireSpinTargetOffsetAtAge(age: number): ShakeMonOffset {
+export function fireSpinTargetOffsetAtAge(age: number, body: FireSpinBody = "main"): ShakeMonOffset {
   if (age < FIRE_SPIN_EFFECT_FIRST_AGE) return { x2: 0, y2: 0 };
   return shakeMonOffsetAtTick(
     FIRE_SPIN_TARGET_SHAKE.xOffset,
     FIRE_SPIN_TARGET_SHAKE.yOffset,
-    FIRE_SPIN_TARGET_SHAKE.numTimes,
+    FIRE_SPIN_BODY[body].shakeTimes,
     FIRE_SPIN_TARGET_SHAKE.frameDelay,
     age - FIRE_SPIN_EFFECT_FIRST_AGE + 1,
   );
@@ -114,9 +127,9 @@ export function fireSpinTargetOffsetAtAge(age: number): ShakeMonOffset {
  * That creation write alone survives to the next photographed OAM epoch;
  * later task writes use the normal two-frame display lag.
  */
-export function fireSpinDisplayedTargetOffsetAtAge(age: number): ShakeMonOffset {
+export function fireSpinDisplayedTargetOffsetAtAge(age: number, body: FireSpinBody = "main"): ShakeMonOffset {
   if (age === FIRE_SPIN_EFFECT_FIRST_AGE + 1) return { x2: 0, y2: 2 };
-  return fireSpinTargetOffsetAtAge(age - 2);
+  return fireSpinTargetOffsetAtAge(age - 2, body);
 }
 
 /**
@@ -128,16 +141,17 @@ export function fireSpinAtAge(
   age: number,
   geometry: FireSpinGeometry,
   targetSide: "player" | "opponent",
+  body: FireSpinBody = "main",
 ): FireSpinState {
-  const targetOffset = fireSpinTargetOffsetAtAge(age);
+  const targetOffset = fireSpinTargetOffsetAtAge(age, body);
   return {
     fireSpin: fireSpinVortexSpritesAtAge(
       age,
       geometry.targetCenter,
-      FIRE_SPIN_EFFECT_START_AGES,
+      FIRE_SPIN_BODY[body].effectStartAges,
     ),
     targetOffset,
-    displayedTargetOffset: fireSpinDisplayedTargetOffsetAtAge(age),
+    displayedTargetOffset: fireSpinDisplayedTargetOffsetAtAge(age, body),
     soundEvents: age === 1
       ? [{
           age,

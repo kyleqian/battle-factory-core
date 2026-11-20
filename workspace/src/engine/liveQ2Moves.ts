@@ -129,13 +129,16 @@ const signedOamY = (y: number): number => ((y & 0xff) >= 160 ? (y & 0xff) - 256 
  * sentinel the target's picture offset point; mud sand in OBJ bank 7 tile 305; the shake task takes slot 0 (priority 254); the free list is the
  * known-entry free set. The painter keys are the healthbox constants plus the two battlers (OAM y = sprite centre - 32 + idle rest).
  */
-export function liveSandTombProfile(args: Omit<LiveQ2Args, "firstBody" | "target" | "palettes"> & { target: PositionAnchors; freeSpriteSlots: readonly number[] }): Inputs {
+export function liveSandTombProfile(args: Omit<LiveQ2Args, "firstBody" | "target" | "palettes"> & { target: PositionAnchors; freeSpriteSlots: readonly number[];
+  /** trp1: Status_SandTomb (sandTomb.ts `turn-trap`); absent = MOVE_SAND_TOMB. */
+  turnTrap?: boolean }): Inputs {
   const { attackerSide, attacker, target } = args, targetSide = opposite(attackerSide), player = attackerSide === "player";
   const attackerSprite = battlerSprite(attackerSide, attacker), targetSprite = battlerSprite(targetSide, target);
   const keys = orderKeys(attackerSide, attackerSprite.attr[0], targetSprite.attr[0])
     .map((k) => ({ slot: k.slot, priority: k.oamPriority, subpriority: k.subpriority, y: signedOamY(k.oamY) }));
   return {
-    orientation: player ? "player-back" : "opponent-front", endAge: 123, attackerSide,
+    orientation: player ? "player-back" : "opponent-front", endAge: args.turnTrap === true ? 99 : 123, attackerSide,
+    ...(args.turnTrap === true ? { body: "turn-trap" } : {}),
     attackerSpriteSlot: player ? 6 : 8, attackerSubpriority: player ? 30 : 40,
     target: {
       vortexCenter: { x: target.battlePositionCenter.x, y: target.battlePositionCenter.y },

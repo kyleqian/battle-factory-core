@@ -55,7 +55,8 @@ export type LiveBattlerX2Event =
   | Readonly<{ kind: "status-animation"; side: LiveBattlerX2Side; animation: string | null }>
   /**
    * fpp150: General_FocusPunchSetUp (B_ANIM_FOCUS_PUNCH_SETUP): AnimTask_ShakeMon2 writes the attacker's x2 absolutely and
-   * ends at 0 (fps147 §1c, 7 / 7 windows); the other battler is untouched.
+   * ends at 0 (fps147 §1c, 7 / 7 windows); the other battler is untouched. trp1: General_TurnTrap's branches the same way for the
+   * trapped battler (docs/trp1-turn-trap-animation.md).
    */
   | Readonly<{ kind: "general-animation"; side: LiveBattlerX2Side }>
   | Readonly<{ kind: "unknown"; side: LiveBattlerX2Side | "both"; reason: string }>;
@@ -246,7 +247,8 @@ export function liveBattlerX2EventsOf(event: BattleKernelSemanticEvent): readonl
     }
     if (KEEP_ANIMATIONS.has(payload.animationId)) return [];
     if (payload.animationId === "SUBSTITUTE_FADE") return [{ kind: "substitute-fade", side }];
-    if (payload.animationId === "FOCUS_PUNCH_SETUP") return [{ kind: "general-animation", side }];
+    // trp1: every General_TurnTrap branch ends on the trapped battler's AnimTask_ShakeMon / ShakeMon2 (absolute x2, 0 at the end).
+    if (payload.animationId === "FOCUS_PUNCH_SETUP" || payload.animationId === "TURN_TRAP") return [{ kind: "general-animation", side }];
     const target = weatherContinues ? null : sideOf(payload.target);
     const unknown = (at: LiveBattlerX2Side): LiveBattlerX2Event => ({ kind: "unknown", side: at, reason: payload.animationId });
     return target === null || target === side ? [unknown(side)] : [unknown(side), unknown(target)];

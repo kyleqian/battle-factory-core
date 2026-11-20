@@ -96,8 +96,11 @@ describe("live battler x2 history (ISSUES #148, presentation-only)", () => {
     for (const animationId of ["HIT_ANIMATION", "STATS_CHANGE", "HAIL_CONTINUES"]) {
       expect(liveBattlerX2EventsOf(event(3, { kind: "animation", animationId, battler: 1, target: 0, arguments: [] }))).toEqual([]);
     }
-    expect(liveBattlerX2EventsOf(event(4, { kind: "animation", animationId: "TURN_TRAP", battler: 1, target: 0, arguments: [] }))
+    expect(liveBattlerX2EventsOf(event(4, { kind: "animation", animationId: "WISH_HEAL", battler: 1, target: 0, arguments: [] }))
       .map((e) => e.kind === "unknown" && e.side)).toEqual(["opponent", "player"]);
+    // trp1: every General_TurnTrap branch ends on the trapped battler's ShakeMon / ShakeMon2 at x2 0 (docs/trp1-turn-trap-animation.md).
+    expect(liveBattlerX2EventsOf(event(4, { kind: "animation", animationId: "TURN_TRAP", battler: 1, arguments: ["83"] })))
+      .toEqual([{ kind: "general-animation", side: "opponent" }]);
     // sar131: B_ANIM_STATUS_* rows are source-derived (LIVE_BATTLER_X2_STATUS_ANIMATION): PSN (status 8) zeroes its battler.
     expect(liveBattlerX2EventsOf(event(5, { kind: "status-animation", battler: 1, isStatus2: 0, status: 8 })))
       .toEqual([{ kind: "status-animation", side: "opponent", animation: "PSN" }]);

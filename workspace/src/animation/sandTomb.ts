@@ -41,9 +41,24 @@ export interface SandTombTargetGeometry {
   readonly sortTopY: number;
 }
 
+/**
+ * trp1 (docs/trp1-turn-trap-animation.md): `main` is MOVE_SAND_TOMB; `turn-trap` is General_TurnTrap's Status_SandTomb
+ * (battle_anim_scripts.s:10427-10439), the same script with `AnimTask_ShakeMon, 5, ANIM_TARGET, 0, 2, 30, 1` and two SandTombSwirlingDirt
+ * calls, so its `delay 22` and closing blend start 24 rows earlier. The cursor keeps MOVE_SAND_TOMB's script offsets (diagnostic only).
+ */
+export type SandTombBody = "main" | "turn-trap";
+const SAND_TOMB_BODY = {
+  main: { calls: 3, shakeTimes: 43, closingAge: 100, endAge: 123 },
+  "turn-trap": { calls: 2, shakeTimes: 30, closingAge: 76, endAge: 99 },
+} as const;
+const bodyOf = (profile: Readonly<SandTombAnimationProfile>) => SAND_TOMB_BODY[profile.body ?? "main"];
+
 export interface SandTombAnimationProfile {
   readonly orientation: SandTombOrientation;
+  /** 123 for MOVE_SAND_TOMB, 99 for the `turn-trap` body. */
   readonly endAge: number;
+  /** trp1: absent = `main`. */
+  readonly body?: SandTombBody;
   readonly attackerSide: SandTombSide;
   readonly attackerSpriteSlot: number;
   readonly attackerSubpriority: number;
@@ -209,7 +224,7 @@ interface SandTombAllocations {
 }
 
 function assertProfile(profile: Readonly<SandTombAnimationProfile>): void {
-  if (!Number.isInteger(profile.endAge) || profile.endAge !== 123
+  if (!Number.isInteger(profile.endAge) || profile.endAge !== bodyOf(profile).endAge
     || profile.attackerSide !== (profile.orientation === "player-back" ? "player" : "opponent")
     || profile.attackerSpriteSlot < 0 || profile.attackerSpriteSlot >= 64
     || profile.target.spriteSlot < 0 || profile.target.spriteSlot >= 64
@@ -232,15 +247,15 @@ function signedY(value: number): number {
   return byte >= 160 ? byte - 256 : byte;
 }
 
-function coefficientAtAge(age: number): number {
+function coefficientAtAge(age: number, closingAge = 100): number {
   if (age < 8) return 0;
   if (age < 12) return 2;
   if (age < 16) return 4;
   if (age < 20) return 6;
-  if (age < 104) return 7;
-  if (age < 108) return 5;
-  if (age < 112) return 3;
-  if (age < 116) return 1;
+  if (age < closingAge + 4) return 7;
+  if (age < closingAge + 8) return 5;
+  if (age < closingAge + 12) return 3;
+  if (age < closingAge + 16) return 1;
   return 0;
 }
 
@@ -249,10 +264,11 @@ function paletteSpriteAtAge(
   profile: Readonly<SandTombAnimationProfile>,
   allocation: Readonly<SandTombAllocations>,
 ): SandTombPaletteSprite | null {
-  if (!((age >= 4 && age <= 25) || (age >= 100 && age <= 121))) return null;
+  const closing = bodyOf(profile).closingAge;
+  if (!((age >= 4 && age <= 25) || (age >= closing && age <= closing + 21))) return null;
   // `gSimplePaletteBlendSpriteTemplate` is invisible but deliberately joins
   // source ordering and visual-task accounting.
-  const slot = age < 100 ? allocation.paletteSlots.opening : allocation.paletteSlots.closing;
+  const slot = age < closing ? allocation.paletteSlots.opening : allocation.paletteSlots.closing;
   return {
     kind: "palette", template: "gSimplePaletteBlendSpriteTemplate", callback: "AnimSimplePaletteBlend_Step",
     slot, x: profile.target.paletteCenter.x, y: profile.target.paletteCenter.y, x2: 0, y2: 0,
@@ -272,7 +288,9 @@ function allocations(profile: Readonly<SandTombAnimationProfile>): SandTombAlloc
   let openingPaletteSlot: number | null = null;
   let closingPaletteSlot: number | null = null;
   let event = 0;
-  for (let age = 0; age <= 122; age += 1) {
+  const { calls, closingAge, endAge } = bodyOf(profile);
+  const lastCreateAge = 4 + 4 * (6 * calls - 1);
+  for (let age = 0; age <= endAge - 1; age += 1) {
     for (let index = active.length - 1; index >= 0; index -= 1) {
       // Script `createsprite` scans before this row's sprite callbacks run.
       // A terminal `data[0] == 0` dirt sprite therefore blocks its slot for
@@ -280,15 +298,15 @@ function allocations(profile: Readonly<SandTombAnimationProfile>): SandTombAlloc
       if (active[index]!.deathAge < age - 1) free.push(active[index]!.slot), active.splice(index, 1);
     }
     free.sort((left, right) => left - right);
-    if (age === 4 || age === 100) {
+    if (age === 4 || age === closingAge) {
       const slot = free.shift();
       if (slot === undefined) throw new Error("Sand Tomb palette sprite allocator exhausted");
-      const deathAge = age === 4 ? 25 : 121;
+      const deathAge = age === 4 ? 25 : closingAge + 21;
       active.push({ slot, deathAge });
       if (age === 4) openingPaletteSlot = slot;
       else closingPaletteSlot = slot;
     }
-    if (age >= 4 && age <= 72 && (age - 4) % 4 === 0) {
+    if (age >= 4 && age <= lastCreateAge && (age - 4) % 4 === 0) {
       const call = SAND_TOMB_VORTEX_CALLS[event % SAND_TOMB_VORTEX_CALLS.length]!;
       const slot = free.shift();
       if (slot === undefined) throw new Error("Sand Tomb dirt allocator exhausted");
@@ -298,7 +316,7 @@ function allocations(profile: Readonly<SandTombAnimationProfile>): SandTombAlloc
       event += 1;
     }
   }
-  if (result.length !== 18 || openingPaletteSlot === null || closingPaletteSlot === null) {
+  if (result.length !== 6 * calls || openingPaletteSlot === null || closingPaletteSlot === null) {
     throw new Error("Sand Tomb source allocation cadence drifted");
   }
   return { dirt: result, paletteSlots: { opening: openingPaletteSlot, closing: closingPaletteSlot } };
@@ -337,9 +355,12 @@ function dirtAtAge(
   }).sort((left, right) => left.slot - right.slot);
 }
 
+/** AnimTask_ShakeMon's last row: 4 + 2 * (numTimes - 1) (88 for MOVE_SAND_TOMB's 43, 62 for Status_SandTomb's 30). */
+const shakeEndAge = (profile: Readonly<SandTombAnimationProfile>): number => 4 + 2 * (bodyOf(profile).shakeTimes - 1);
+
 function targetAtAge(age: number, profile: Readonly<SandTombAnimationProfile>): Readonly<{ x2: number; y2: number }> {
   if (age < 4) return { x2: profile.target.initialX2, y2: profile.target.initialY2 };
-  if (age >= 88) return { x2: 0, y2: 0 };
+  if (age >= shakeEndAge(profile)) return { x2: 0, y2: 0 };
   const phase = Math.floor((age - 4) / 2);
   return { x2: 0, y2: phase % 2 === 1 ? 2 : 0 };
 }
@@ -351,17 +372,17 @@ function targetAtAge(age: number, profile: Readonly<SandTombAnimationProfile>): 
  */
 function targetOamAtAge(age: number, profile: Readonly<SandTombAnimationProfile>): Readonly<{ x2: number; y2: number }> {
   if (age < 4) return { x2: profile.target.initialX2, y2: profile.target.initialY2 };
-  if (age > 88) return { x2: 0, y2: 0 };
+  if (age > shakeEndAge(profile)) return { x2: 0, y2: 0 };
   return { x2: 0, y2: age % 4 === 0 || age % 4 === 3 ? 2 : 0 };
 }
 
 function shakeTaskAtAge(age: number, profile: Readonly<SandTombAnimationProfile>): SandTombShakeTask | null {
-  if (age < 4 || age > 87) return null;
+  if (age < 4 || age > shakeEndAge(profile) - 1) return null;
   const phase = Math.floor((age - 4) / 2);
   return {
     kind: "shake", slot: profile.shakeTaskSlot, priority: profile.shakeTaskPriority,
     callback: "AnimTask_ShakeMon_Step",
-    data: [profile.target.spriteSlot, 42 - phase, 1, age % 2 === 0 ? 1 : 0, 0, 2,
+    data: [profile.target.spriteSlot, bodyOf(profile).shakeTimes - 1 - phase, 1, age % 2 === 0 ? 1 : 0, 0, 2,
       0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
   };
 }
@@ -380,7 +401,8 @@ function cursorAtAge(age: number, profile: Readonly<SandTombAnimationProfile>): 
   };
   if (age === 0) return source("Move_SAND_TOMB", "loadspritegfx", 0, 0, ZERO_ARGS);
   if (age < 4) return source("Move_SAND_TOMB", "script_delay", 3, age === 1 ? 1 : 0, ZERO_ARGS);
-  if (age < 76) {
+  const { calls, closingAge } = bodyOf(profile);
+  if (age < 4 + 24 * calls) {
     const within = (age - 4) % 24;
     const call = SAND_TOMB_VORTEX_CALLS[Math.floor(within / 4)]!;
     return source(
@@ -389,8 +411,8 @@ function cursorAtAge(age: number, profile: Readonly<SandTombAnimationProfile>): 
       [0, call.y, call.rise, call.duration, call.angleStep, call.amplitude, 1, 0],
     );
   }
-  if (age < 100) {
-    return source("Move_SAND_TOMB", "script_delay", 58, Math.max(0, 98 - age),
+  if (age < closingAge) {
+    return source("Move_SAND_TOMB", "script_delay", 58, Math.max(0, closingAge - 2 - age),
       [0, 37, 464, 30, 12, -50, 1, 0]);
   }
   if (age < profile.endAge) return source("Move_SAND_TOMB", "simple_palette_blend", 75, 1, CLOSING_ARGS);
@@ -434,18 +456,21 @@ function frameAtAge(
   const tasks = task ? [task] : [];
   const owned = new Set(sprites.map((sprite) => sprite.slot));
   const sourceOrder = fullOrder.filter((slot) => owned.has(slot));
-  const sourceCoefficient = coefficientAtAge(age);
+  const closing = bodyOf(profile).closingAge;
+  const sourceCoefficient = coefficientAtAge(age, closing);
+  const hardwareCoefficient = coefficientAtAge(Math.max(0, age - 1), closing);
+  const closingActive = age >= closing && age <= closing + 21;
   return {
     age, active: age < profile.endAge, source: cursorAtAge(age, profile),
     targetOamOffset: targetOamAtAge(age, profile), targetOffset: targetAtAge(age, profile),
     sprites, tasks,
     palette: {
       coefficient: sourceCoefficient,
-      hardwareCoefficient: coefficientAtAge(Math.max(0, age - 1)),
+      hardwareCoefficient,
       targetColorBgr555: 563,
       programs: [
-        { name: "opening", active: age >= 4 && age <= 25, slot: age >= 4 && age <= 25 ? paletteSprite?.slot ?? null : null, sourceCoefficient, hardwareCoefficient: coefficientAtAge(Math.max(0, age - 1)) },
-        { name: "closing", active: age >= 100 && age <= 121, slot: age >= 100 && age <= 121 ? paletteSprite?.slot ?? null : null, sourceCoefficient, hardwareCoefficient: coefficientAtAge(Math.max(0, age - 1)) },
+        { name: "opening", active: age >= 4 && age <= 25, slot: age >= 4 && age <= 25 ? paletteSprite?.slot ?? null : null, sourceCoefficient, hardwareCoefficient },
+        { name: "closing", active: closingActive, slot: closingActive ? paletteSprite?.slot ?? null : null, sourceCoefficient, hardwareCoefficient },
       ],
     },
     audio: { event: age === 4 ? { age, channel: "SE1", song: "se_m_sand_tomb", pan: profile.attackerSide === "player" ? 63 : -63 } : null },
