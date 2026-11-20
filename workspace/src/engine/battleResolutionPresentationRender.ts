@@ -2368,12 +2368,17 @@ export function createBattleResolutionPresentationRenderView(
     });
     // pfb229 (docs/pfb228-faint-replacement-emerge.md): a Scene ON faint-replacement send-in runs the path-A ball / release / emerge /
     // back-animation timeline translated by the keyed ball clock: A = partySendOutReleaseClock(e) - 96 = e - B - releaseExtra.
-    // Scene OFF keeps the forced selector's generic release. pic1 (2026-11-20 playtest): every species takes this route, MAGBY included;
-    // a name test used to send any live MAGBY to the canonical sample battle's hand-calibrated window.
+    // pic1 (2026-11-20 playtest): every species takes this route, MAGBY included; a name test used to send any live MAGBY to the
+    // canonical sample battle's hand-calibrated window.
     const sceneOn = segment.beforeRules !== null && segment.beforeRules !== undefined
       && (segment.beforeRules.rulesContext.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) === 0;
     const forcedElapsed = sendOutTiming === null ? -1 : partySendOutReleaseClock(state.lifecycle.phaseElapsed, sendOutTiming) - FORCED_SEND_IN_PATH_A_BALL_SPAWN;
-    if (sceneOn && sendOutTiming !== null && switchCommand.battler === 0 && forcedElapsed >= 0) {
+    // pic7 (2026-11-20 playtest): Scene OFF runs the same send-out (pokeball.c's ball arc keyed on the mon's Y_PIC_OFFSET,
+    // LaunchBallFadeMonTask's BG 1-3 white fade and mon tint, battle_anim_throw.c:2033-2058) without the back animation. ROM lab
+    // tools/battle-lab/pic7-player-faint-send-in-{on,off}.json: the ROM's Scene OFF frames equal this composition's Scene ON frames
+    // through B + 64, where the Scene ON back animation starts; the generic forced-select release drew MAGBY's ball arc and no
+    // white fade for every species.
+    if (sendOutTiming !== null && switchCommand.battler === 0 && forcedElapsed >= 0) {
       const art = createBattleCommandFieldArtView(field);
       const playerMonY = art.player.origin.y + 32;
       midBattleSwitchIn = midBattleSwitchInAt(
@@ -2381,7 +2386,9 @@ export function createBattleResolutionPresentationRenderView(
         0,
         undefined,
         undefined,
-        Object.freeze({ species: art.player.speciesSymbol, nature: backAnimNatureName(switchCommand.incoming.personality) }),
+        sceneOn
+          ? Object.freeze({ species: art.player.speciesSymbol, nature: backAnimNatureName(switchCommand.incoming.personality) })
+          : undefined,
         playerMonY,
       );
       midBattleSwitchFade = midBattleSwitchSendInFadeAt(forcedElapsed, 0) ?? midBattleSwitchFade;

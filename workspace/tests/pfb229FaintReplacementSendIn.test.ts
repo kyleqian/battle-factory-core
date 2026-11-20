@@ -1,5 +1,5 @@
 // pfb229 (docs/pfb228-faint-replacement-emerge.md): the Scene ON player faint-replacement send-in draws the path-A composition (species-keyed
-// ball arc, ball-derived particle origin, bso225 back animation at B + 66); Scene OFF keeps the forced selector's release.
+// ball arc, ball-derived particle origin, bso225 back animation at B + 66); Scene OFF draws the same send-in without the back animation (pic7).
 import { describe, expect, it } from "vitest";
 import { BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS } from "../src/engine/battleScriptSourceConstants";
 import { SWITCH_IN_WAITSTATE_HOLD_FRAMES, switchInTiming } from "../src/engine/battleResolutionPresentation";
@@ -104,9 +104,14 @@ describe("pfb229: the faint-replacement view carries the path-A send-in on Scene
     expect(view(cB + 20).midBattleSwitchIn!.elapsed).toBe(19);
   });
 
-  it("Scene OFF keeps the generic forced-select release (no path-A view); a live MAGBY takes path A like every species (pic1)", () => {
+  it("Scene OFF takes path A without the back animation (pic7); a live MAGBY takes path A like every species (pic1)", () => {
+    // pic7: ROM lab pic7-player-faint-send-in-off: the Scene OFF send-in equals the Scene ON path-A frames until the back animation.
     const off = forcedSegment(skarmory, false);
-    for (let e = 0; e < 200; e += 1) expect(off.view(e).midBattleSwitchIn, `off ${e}`).toBeNull();
+    const offB = off.timing.ballShift + 96;
+    expect(off.view(offB - 1).midBattleSwitchIn).toBeNull();
+    expect(off.view(offB).midBattleSwitchIn!.elapsed).toBe(0);
+    for (let e = offB; e < offB + 120; e += 1) expect(off.view(e).midBattleSwitchIn!.backAnim, `off ${e}`).toBeNull();
+    expect(off.view(offB + 44).midBattleSwitchIn!.ballPosition).toEqual({ x: 24 + 45, y: 68 + 39 });
     // pic1 (2026-11-20 playtest): a name test used to give any MAGBY the canonical sample battle's window (no path-A view).
     const magby = forcedSegment(mon("player", 0, 240, "MAGBY", 1, 6), true);
     const mB = magby.timing.ballShift + 96;
