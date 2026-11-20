@@ -276,7 +276,7 @@ describe("msw1: SELECT move switching (HandleMoveSwitching)", () => {
       views.push(createBattleCommandPresentationRenderView(presentation(state)).fightMenu);
       state = idle(state, 1);
     }
-    const names = (view: (typeof views)[number]) => view!.moveset.map((entry) => entry.moveId ?? entry.name);
+    const names = (view: (typeof views)[number]) => view!.moveset.map((entry) => entry.name);
     const newMoves = [...presentation(state).field.player.moveIds];
     expect(newMoves).toEqual([oldMoves[3], oldMoves[1], oldMoves[2], oldMoves[0]]);
     expect(views[0]!.moveSwitch).toEqual({ gray: 0, arrow: 3, arrowKind: "target" });
@@ -290,8 +290,12 @@ describe("msw1: SELECT move switching (HandleMoveSwitching)", () => {
 
   it("the engine tick carries SELECT to the fight menu and the swap survives the render", () => {
     const orchestrator = toFightMenu(startedBattle(4));
-    let engine = { ...createInitialState(), factoryRoundBattleOrchestrator: orchestrator };
-    engine = tick(engine, new Set(["SELECT"] as const));
+    const engine = tick({
+      ...createInitialState({ appRoute: "generated-orchestrator" }),
+      factoryRoundBattleOrchestrator: orchestrator,
+      rngMode: "frontierBattle",
+      rngValue: orchestrator.battle!.rng.value,
+    }, new Set(["SELECT"] as const));
     expect(engine.factoryRoundBattleOrchestrator?.battleCommandPresentation?.moveSwitch).toEqual({ target: 1 });
   });
 });
