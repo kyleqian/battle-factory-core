@@ -678,7 +678,10 @@ describe("random round soak driver (green milestone pin)", () => {
     // on new phases): seed 12 no longer commits Baton Pass (0 commits, 80,000 frames in battle 1). Re-scanned full-policy seeds 0..39
     // (tools/soak/batonPassSearch.ts --seeds 0:40 --parallel 3, same options): candidates 6, 16, 35, 38. Seed 6 is the lowest
     // (Baton Pass commits 4, first commit 61360, halt 61558 on LEDIAN in battleIndex 0, three Lobby new challenges). Pin 12 -> 6.
-    const result = runSeed(6 /* MERGE-REPIN */, {
+    // hcr2 (Scene ON first used-move glyph at commit + 7 + u, the same hold as Scene OFF; the exploring presses land on new phases): seed 6 no longer
+    // commits Baton Pass. Re-scanned full-policy seeds 0..39 (tools/soak/batonPassSearch.ts --seeds 0:40 --parallel 6, same options): candidates 3, 10, 16, 17,
+    // 20, 23, 24, 26, 36. Seed 3 is the lowest (Baton Pass commits 2, first commit 49232, halt 49444 on MAWILE in battleIndex 0, three Lobby new challenges). Pin 6 -> 3.
+    const result = runSeed(3, {
       maxFrames: 80_000,
       renderEvery: 0,
       coverage: observer as never,
@@ -1045,7 +1048,8 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // 61456 -> 61528 (the player's press lands on the new wait; a rule change, not a bug); same battle 3 / depth 2 / turn 22 / roundLost.
       // hcr1 (the Scene OFF used-move print lead u - 3; the exploring presses land on new phases): 61456 / turn 22 -> 60534 / turn 19; same battle 3 / depth 2 / roundLost.
       // hcr1b (the used-move glyph at commit + 7 + u): frames only, 60534 -> 64227; same turn 19, battle 3 / depth 2 / roundLost.
-      frames: 64227 /* MERGE-REPIN */,
+      // hcr2 (the same hold in Scene ON): frames only, 64227 -> 64299; same turn 19, battle 3 / depth 2 / roundLost.
+      frames: 64299,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 2,

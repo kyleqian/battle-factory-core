@@ -1481,3 +1481,36 @@ Trimming leads (gsp1m's hypothesis) **worsens** mass everywhere (restart -2 +332
 ### Oracle compare trace
 
 Not obtained: no existing lab keeps the engine's sleep duration in step with the oracle past the first turn. A 3-turn extension of `lse1-hypnosis-player-on` is in step at frame ~1690 (0.6 % diff) but the oracle foe wakes on turn 2 and the engine's on turn 3 (oracle player HP 93 / 105 against the engine's 105 / 105 at the wake-up frame), so the frames cannot be paired.
+
+## hcr2: Scene ON first used-move glyph (oracle pixels), hold u - 2
+
+Question: does the hcr1b rule (first glyph at commit + 7 + u) hold in Scene ON, and is "Scene ON absorbs u downstream" (hcr2m) a pixel fact or a sound-anchoring one?
+
+### Pixel finding
+
+`tools/integration/hcr2Labs.py` builds 28 ON labs (the hcr1b designs, ON profile: `tools/battle-lab/hcr2-*.json`, traces `tools/compare/traces/hcr2-*.json`, stages `hcr2Stages()` in `tools/compare/appTrace.ts`; foe u = 2 / 3 / 4 / 6 moves plus six player-side labs). The ON oracle prints the used-move text at the **same commit + 7 + u** as Scene OFF; the app's fixed confirm-handoff walk reaches it at commit + 9, so it was early by u - 2 in ON too. In pixels the adapted bodies are already exact relative to the print, so "ON absorbs u downstream" is a sound-anchoring effect, not a pixel one.
+
+### Rule (`battleResolutionPresentation.ts`)
+
+`usedMovePrintLeadU` no longer requires `NO_ANIMATIONS`: `action-dispatch` holds u - 2 frames in both scenes (Tier-1 pin in `tests/battleResolutionPresentation.test.ts`: 9 / 10 / 11 / 12 / 13 / 14 / 15 / 23 frames for u = 2..8, 16 in ON and OFF). Nothing downstream was stacked: no counter lead was touched. The OFF one-tick sound stamp lead stays OFF only (`usedMoveSoundLeadOf`).
+
+### Results (tested code a4bd32997 + test re-pins; ON labs against the ON oracle)
+
+- All 167 ON traces with a parsed summary, base -> rule: 85 more matched frames, 82 equal, 1 lower (`lead3-knockoff-on` 103 -> 98 of 1023; it differs from frame 0 in both, incidental). Named: hie1-*-on (cheri 279 -> 566, leftovers 851 -> 1558, shellbell 851 -> 1560, sitrus 982 -> 1715), hie2-sitrus-opp-on 343 -> 994, hpd1 / hpd8 / hpd5 / hpf1 / lse1 / lse4 / lead2 / lead3 / liv2 ON all up (hpd1-sonicboom-on 938, hpd8-bodyslam-on 574 -> 914 of 1023). battle-command-generated is OFF only (unchanged). turn11-* are OFF traces (unchanged).
+- New hcr2 traces: exact 3 -> 8 of 28, 21 improved. The first glyph is exact on all of them; what remains is not the print: an app-only foe-sprite pose change (410 px, from the end of the print, e.g. absorb / ember / growl / tackle / scratch / fissure / lowkick / megadrain) and unadapted move bodies (Tackle, Scratch, Fissure, Megadrain, Curse: wrong print -> animation / hit interval, animation lane).
+- T2 Scene ON, 25 t2n seeds: missing / extra 0 / 0; exact rows 997 -> 722, offset mass 28,701 -> 26,893 (the exact count drops while mass improves: the pixel-exact bodies now sit at a constant sound offset instead of an accidental zero).
+- Census (`lsd194Census.sh`, base 6968cc666 vs a4bd32997): Scene ON 0..199 eventsDigest identical (200 / 200 battles, 62,327 commands, `rst197CensusDelta.py` bad 0); Scene OFF 0..99 `r0.jsonl` byte-identical to base. T1 (`soundCensusDelta.py --t1`, ON 0..199): exact 54,005, known-offset 0, missing 0, extra 0, unclassified 0 (= base).
+
+### Sound: not landed
+
+The ROM plays script-row SEs ahead of the pixels. Measured on the labs (engine - ROM, frames): with the hold and no lead, move SEs sit at +2 (u = 3), +2 (u = 4), +2 (u = 6), 0 (u = 2); a **two-tick** stamp lead for u > 2 (zero for u = 2) makes them 0 on adapted bodies (absorb, megadrain, bite, doubleedge, ember, takedown, thunderbolt, harden), T2 ON exact 997 -> **1707**, mass 25,927, missing / extra 0 / 0 (commit a63e1ee58). It was **not** kept: the T1 census windows then shift (known-offset -2 on 35,590 commands, 61 missing after the last presenting frame, 103 unclassified), because the scorer anchors rows to the command's presenting frames. To land it, the T1 window must follow the lead (as the SE rows already do); that scorer change was out of the time box. Other leftovers: dragonrage / sonicboom / earthquake / toxic / lowkick SEs (-3 .. -5, u = 2 / 3 bodies with their own table lead), defensecurl +4.
+
+### Re-pins (`tests/randomRoundSoak.test.ts`)
+
+- ISSUES #89 Baton Pass pin: seed 6 -> seed 3 (`batonPassSearch.ts --seeds 0:40 --parallel 6`: candidates 3, 10, 16, 17, 20, 23, 24, 26, 36; seed 3 commits 2, first 49232, halt 49444 MAWILE battleIndex 0, three Lobby new challenges).
+- M-B step 2 (c) "full" pin, seed 1: frames 64,227 -> 64,299 (same turn 19 / battle 3 / depth 2 / roundLost).
+- `tests/lbrd.test.ts`: unchanged (passes).
+
+### Gates
+
+`npm run build` 0 and `npm run test:gate` 360 files / 2,835 tests green on a4bd32997; the 66 `confirmHandoff` test files / 638 tests green; `randomRoundSoak` + `lbrd` green after the re-pins; `npm run typecheck` 0 on a63e1ee58 (a4bd32997 only deletes a constant; re-run on the final tip below).
