@@ -13,12 +13,12 @@
  "cryPackGapSamples": 1024,
  "note": "Cries are packed per species (NORMAL, WEAK, FAINT) in one mono file, and the cry-task modes (ROAR_1, ROAR_2, HIGH_PITCH, ECHO_START, ECHO_END; only species that can use Roar / Howl / Hyper Voice) in a second one, cry-NNN-task.ogg; a sound is samples [offsetSamples, offsetSamples + lengthSamples) of its file. SEs are one stereo file per (id, pan). Leading/trailing near-silence is trimmed; onsetSamples is the trimmed ROM mixer latency at the file's sampleRate. aud244b: BGM (bgm:<song>), fanfares (fanfare:<song>) and the two looping SEs (se:90:none, se:132:63) are stereo at sampleRates.song. A sound with loops=true plays samples [0, loopEndSamples) once and then repeats [loopStartSamples, loopEndSamples) until stopped; lengthSamples === loopEndSamples. Fanfares are one-shot (loops=false). seam.* is the measured sample difference between the audio after the wrap and the audio after the loop start (see docs/aud244b-bgm-fanfare-loops.md).",
  "totals": {
-  "sounds": 1618,
-  "files": 800,
-  "seBytes": 3532418,
+  "sounds": 1628,
+  "files": 810,
+  "seBytes": 3659009,
   "cryBytes": 4918888,
   "songBytes": 1773824,
-  "bytes": 10225130
+  "bytes": 10351721
  },
  "excluded": [],
  "sounds": {
@@ -20493,6 +20493,22 @@
    "name": "SE_M_THUNDERBOLT",
    "pan": -63
   },
+  "se:118:0": {
+   "file": "se-118-panp00.ogg",
+   "kind": "se",
+   "via": "PlaySE12WithPanning",
+   "sampleRate": 26758,
+   "channels": 2,
+   "offsetSamples": 0,
+   "lengthSamples": 17314,
+   "lengthFrames": 35,
+   "onsetSamples": 456,
+   "peak": 11181,
+   "rms": 1851.67,
+   "id": 118,
+   "name": "SE_M_THUNDERBOLT",
+   "pan": 0
+  },
   "se:118:63": {
    "file": "se-118-panp63.ogg",
    "kind": "se",
@@ -20989,6 +21005,40 @@
    "name": "SE_M_ROCK_THROW",
    "pan": 63
   },
+  "se:132:-64": {
+   "file": "se-132-panm64.ogg",
+   "kind": "se",
+   "via": "PlaySE12WithPanning",
+   "sampleRate": 32768,
+   "channels": 2,
+   "offsetSamples": 0,
+   "lengthSamples": 90492,
+   "lengthFrames": null,
+   "onsetSamples": 1126,
+   "peak": 11862,
+   "rms": 2424.37,
+   "id": 132,
+   "name": "SE_M_GUST",
+   "pan": -64,
+   "loops": true,
+   "loopStartSamples": 11490,
+   "loopEndSamples": 90492,
+   "loopPasses": 3,
+   "loopStartTick": 24,
+   "loopEndTick": 72,
+   "tempoBpm": 150,
+   "seam": {
+    "windowSamples": 8192,
+    "maxAbsDiff": 123,
+    "rmsDiff": 0.78,
+    "shortMaxAbsDiff": 0,
+    "shortRmsDiff": 0,
+    "junctionMaxAbsDiff": 14179,
+    "bodyRms": 2468.7,
+    "sourcePass": 2,
+    "nominalEndShift": -2
+   }
+  },
   "se:132:63": {
    "file": "se-132-panp63.ogg",
    "kind": "se",
@@ -21102,6 +21152,22 @@
    "id": 135,
    "name": "SE_M_DOUBLE_TEAM",
    "pan": -64
+  },
+  "se:135:0": {
+   "file": "se-135-panp00.ogg",
+   "kind": "se",
+   "via": "PlaySE12WithPanning",
+   "sampleRate": 26758,
+   "channels": 2,
+   "offsetSamples": 0,
+   "lengthSamples": 12357,
+   "lengthFrames": 26,
+   "onsetSamples": 922,
+   "peak": 5909,
+   "rms": 1109.23,
+   "id": 135,
+   "name": "SE_M_DOUBLE_TEAM",
+   "pan": 0
   },
   "se:135:63": {
    "file": "se-135-panp63.ogg",
@@ -21615,6 +21681,22 @@
    "name": "SE_M_FLAME_WHEEL2",
    "pan": -64
   },
+  "se:145:0": {
+   "file": "se-145-panp00.ogg",
+   "kind": "se",
+   "via": "PlaySE12WithPanning",
+   "sampleRate": 26758,
+   "channels": 2,
+   "offsetSamples": 0,
+   "lengthSamples": 25812,
+   "lengthFrames": 55,
+   "onsetSamples": 467,
+   "peak": 12270,
+   "rms": 2628.99,
+   "id": 145,
+   "name": "SE_M_FLAME_WHEEL2",
+   "pan": 0
+  },
   "se:145:63": {
    "file": "se-145-panp63.ogg",
    "kind": "se",
@@ -21870,6 +21952,74 @@
    "id": 152,
    "name": "SE_M_TAKE_DOWN",
    "pan": 63
+  },
+  "se:153:-64": {
+   "file": "se-153-panm64.ogg",
+   "kind": "se",
+   "via": "PlaySE12WithPanning",
+   "sampleRate": 32768,
+   "channels": 2,
+   "offsetSamples": 0,
+   "lengthSamples": 90487,
+   "lengthFrames": null,
+   "onsetSamples": 1131,
+   "peak": 12006,
+   "rms": 2324.77,
+   "id": 153,
+   "name": "SE_M_BLIZZARD",
+   "pan": -64,
+   "loops": true,
+   "loopStartSamples": 11485,
+   "loopEndSamples": 90487,
+   "loopPasses": 3,
+   "loopStartTick": 24,
+   "loopEndTick": 72,
+   "tempoBpm": 150,
+   "seam": {
+    "windowSamples": 8192,
+    "maxAbsDiff": 1,
+    "rmsDiff": 0.03,
+    "shortMaxAbsDiff": 0,
+    "shortRmsDiff": 0,
+    "junctionMaxAbsDiff": 15556,
+    "bodyRms": 2336.7,
+    "sourcePass": 3,
+    "nominalEndShift": 2
+   }
+  },
+  "se:153:63": {
+   "file": "se-153-panp63.ogg",
+   "kind": "se",
+   "via": "PlaySE12WithPanning",
+   "sampleRate": 32768,
+   "channels": 2,
+   "offsetSamples": 0,
+   "lengthSamples": 90489,
+   "lengthFrames": null,
+   "onsetSamples": 1133,
+   "peak": 10964,
+   "rms": 2356.68,
+   "id": 153,
+   "name": "SE_M_BLIZZARD",
+   "pan": 63,
+   "loops": true,
+   "loopStartSamples": 11487,
+   "loopEndSamples": 90489,
+   "loopPasses": 3,
+   "loopStartTick": 24,
+   "loopEndTick": 72,
+   "tempoBpm": 150,
+   "seam": {
+    "windowSamples": 8192,
+    "maxAbsDiff": 1,
+    "rmsDiff": 0.03,
+    "shortMaxAbsDiff": 0,
+    "shortRmsDiff": 0,
+    "junctionMaxAbsDiff": 11359,
+    "bodyRms": 2423.9,
+    "sourcePass": 3,
+    "nominalEndShift": -2
+   }
   },
   "se:154:-63": {
    "file": "se-154-panm63.ogg",
@@ -23663,6 +23813,22 @@
    "name": "SE_M_SWAGGER2",
    "pan": -64
   },
+  "se:194:0": {
+   "file": "se-194-panp00.ogg",
+   "kind": "se",
+   "via": "PlaySE12WithPanning",
+   "sampleRate": 26758,
+   "channels": 2,
+   "offsetSamples": 0,
+   "lengthSamples": 10759,
+   "lengthFrames": 16,
+   "onsetSamples": 923,
+   "peak": 4603,
+   "rms": 738.7,
+   "id": 194,
+   "name": "SE_M_SWAGGER2",
+   "pan": 0
+  },
   "se:194:63": {
    "file": "se-194-panp63.ogg",
    "kind": "se",
@@ -23998,6 +24164,22 @@
    "id": 202,
    "name": "SE_M_PETAL_DANCE",
    "pan": -64
+  },
+  "se:202:0": {
+   "file": "se-202-panp00.ogg",
+   "kind": "se",
+   "via": "PlaySE12WithPanning",
+   "sampleRate": 26758,
+   "channels": 2,
+   "offsetSamples": 0,
+   "lengthSamples": 67283,
+   "lengthFrames": 154,
+   "onsetSamples": 455,
+   "peak": 5502,
+   "rms": 945.59,
+   "id": 202,
+   "name": "SE_M_PETAL_DANCE",
+   "pan": 0
   },
   "se:202:63": {
    "file": "se-202-panp63.ogg",
@@ -24911,6 +25093,22 @@
    "name": "SE_M_MORNING_SUN",
    "pan": -64
   },
+  "se:228:0": {
+   "file": "se-228-panp00.ogg",
+   "kind": "se",
+   "via": "PlaySE12WithPanning",
+   "sampleRate": 26758,
+   "channels": 2,
+   "offsetSamples": 0,
+   "lengthSamples": 39795,
+   "lengthFrames": 94,
+   "onsetSamples": 451,
+   "peak": 5397,
+   "rms": 1050.61,
+   "id": 228,
+   "name": "SE_M_MORNING_SUN",
+   "pan": 0
+  },
   "se:228:63": {
    "file": "se-228-panp63.ogg",
    "kind": "se",
@@ -24942,6 +25140,22 @@
    "id": 229,
    "name": "SE_M_FLATTER",
    "pan": -64
+  },
+  "se:229:0": {
+   "file": "se-229-panp00.ogg",
+   "kind": "se",
+   "via": "PlaySE12WithPanning",
+   "sampleRate": 26758,
+   "channels": 2,
+   "offsetSamples": 0,
+   "lengthSamples": 11703,
+   "lengthFrames": 22,
+   "onsetSamples": 926,
+   "peak": 10425,
+   "rms": 1479.81,
+   "id": 229,
+   "name": "SE_M_FLATTER",
+   "pan": 0
   },
   "se:229:63": {
    "file": "se-229-panp63.ogg",
@@ -27853,6 +28067,10 @@
    "bytes": 8189,
    "sha256": "ab12a9817558a2f84b163c9da55d9e5f15f4485d542f12b7a8913653e07a1b39"
   },
+  "se-118-panp00.ogg": {
+   "bytes": 8030,
+   "sha256": "ca23b8402002ef5b6094a1d81ec33ad4abdc93d20f4d5507d2d84bef697da34b"
+  },
   "se-118-panp63.ogg": {
    "bytes": 8229,
    "sha256": "a21edf8b238601aa15dbe1142bd761d3d7f34adb7d8f547d80dbdfb3881d8ec8"
@@ -27977,6 +28195,10 @@
    "bytes": 8403,
    "sha256": "ae91353377b5791d5596dcf4a69e3cde5bd704838d56893ad44170ec1921c72f"
   },
+  "se-132-panm64.ogg": {
+   "bytes": 20123,
+   "sha256": "bad26a23c1a1f855df4c94dd499a359daf4afa409fb558799348a3894756ca67"
+  },
   "se-132-panp63.ogg": {
    "bytes": 20266,
    "sha256": "0ef45ed937602a2c87095133210ce816d079b52d3f2c56f4ef3a4d65f82a7d63"
@@ -28000,6 +28222,10 @@
   "se-135-panm64.ogg": {
    "bytes": 6749,
    "sha256": "4b738b966dc9dca8e747547525c2fa79ec2bb85e25d97e2ae0d09aa8db5eef2a"
+  },
+  "se-135-panp00.ogg": {
+   "bytes": 6642,
+   "sha256": "044a42183bad7bf12a86b5887f66df9b581122c187bbc4b56b7384ed8213be28"
   },
   "se-135-panp63.ogg": {
    "bytes": 6780,
@@ -28129,6 +28355,10 @@
    "bytes": 10377,
    "sha256": "4e66717997f07518155bcbeeebc3f73296478860cf8f6e5b09cec34234018588"
   },
+  "se-145-panp00.ogg": {
+   "bytes": 9978,
+   "sha256": "e51ef94fe520ff2de9da669d0a9f4195b19d27430e3974582465b80fb41164a6"
+  },
   "se-145-panp63.ogg": {
    "bytes": 10390,
    "sha256": "e13d6fd9d77e2b8957b4655b5ede59ef9b97de4e3b87af4f82602ef07670e084"
@@ -28192,6 +28422,14 @@
   "se-152-panp63.ogg": {
    "bytes": 9451,
    "sha256": "12f347b2a1ab9c3c35f8a62f081118812ef1939233fe7f4eaf4ce5fd968fd562"
+  },
+  "se-153-panm64.ogg": {
+   "bytes": 21386,
+   "sha256": "d18194e14e8f63f4b7b71ffe3618bae0eabd4e5a9f26ec2345721c9ba14a4cdd"
+  },
+  "se-153-panp63.ogg": {
+   "bytes": 21544,
+   "sha256": "b84c00b3364a0b7986684c23da65835c1e82bb0bc89ebd487f7db173982257e1"
   },
   "se-154-panm63.ogg": {
    "bytes": 7157,
@@ -28641,6 +28879,10 @@
    "bytes": 6552,
    "sha256": "9e5504b6ea055e5648772fa3474453c19c43e24f8563c5546775bf6c99e4ee89"
   },
+  "se-194-panp00.ogg": {
+   "bytes": 6422,
+   "sha256": "7faee6edc6ca44dc6103eb70f0d87c020596346d3465f81007a2954c93738ee5"
+  },
   "se-194-panp63.ogg": {
    "bytes": 6592,
    "sha256": "029f5a33576875459629fd051ba75763f8a3ddd6baeaf68b9d5b6c3c82e30625"
@@ -28724,6 +28966,10 @@
   "se-202-panm64.ogg": {
    "bytes": 16879,
    "sha256": "0b797175261883d77318b998cf641fe950a9098cf4afff92d973cc004c9db894"
+  },
+  "se-202-panp00.ogg": {
+   "bytes": 15149,
+   "sha256": "763b441109c5f84ce8acc53f307861a76c5b80baa2c5f3af59af1a290f94cf55"
   },
   "se-202-panp63.ogg": {
    "bytes": 16765,
@@ -28953,6 +29199,10 @@
    "bytes": 11510,
    "sha256": "3b4224aef2391bb77637beb93bfcec55ed4d9b27950f64107e29d5164cc4ecda"
   },
+  "se-228-panp00.ogg": {
+   "bytes": 10614,
+   "sha256": "490e44e3973b8f23c0ede1f7877e53ebac048c755596ae4799b2c852e0303880"
+  },
   "se-228-panp63.ogg": {
    "bytes": 10944,
    "sha256": "c1463157e22a7051dc168c9bf7db696bee809ca121a4714655be5ef5e74673c4"
@@ -28960,6 +29210,10 @@
   "se-229-panm64.ogg": {
    "bytes": 6777,
    "sha256": "0ffca7c9466575def6462c70b16ee40cdaca348d5fe6e04f8888b374e47b7264"
+  },
+  "se-229-panp00.ogg": {
+   "bytes": 6703,
+   "sha256": "552e8fb93f5b214bf3c7df817879db93eec79f5f4187ef7d096fc40d1368595b"
   },
   "se-229-panp63.ogg": {
    "bytes": 6715,
@@ -29252,11 +29506,11 @@
    "song": 64000
   },
   "totals": {
-   "files": 800,
-   "seBytes": 2786074,
+   "files": 810,
+   "seBytes": 2904773,
    "cryBytes": 4553498,
    "songBytes": 2669596,
-   "bytes": 10009168
+   "bytes": 10127867
   },
   "files": {
    "aac/bgm-354.m4a": {
@@ -31534,6 +31788,11 @@
     "sha256": "afa793439f16ea4182b542673694857d6882e6613e87bbb031a324cf18038b67",
     "leadSamples": 306
    },
+   "aac/se-118-panp00.m4a": {
+    "bytes": 5305,
+    "sha256": "7e446f5aceb1daf6b8d0691902dcc264dbcb186652173634c3960b91cbf2ee47",
+    "leadSamples": 306
+   },
    "aac/se-118-panp63.m4a": {
     "bytes": 5532,
     "sha256": "2a3fcdfaf02f757d0734004f62aac9755981a8331bb2fe6a35c2c9320799a5d8",
@@ -31689,6 +31948,11 @@
     "sha256": "90a6b6f9285f2d622c395227b45c431fb9815de06b9692c54d4ff5fa1930eb1f",
     "leadSamples": 0
    },
+   "aac/se-132-panm64.m4a": {
+    "bytes": 21162,
+    "sha256": "98dc92e7b6073eae258a584efca3966ab18297d064a3cad3fc1d70d583a5e7b4",
+    "leadSamples": 0
+   },
    "aac/se-132-panp63.m4a": {
     "bytes": 21025,
     "sha256": "d7a2bbcefa69914a9c2c25c03c3c8e5c35b61e61a022bfb6d4a456e0983699d6",
@@ -31717,6 +31981,11 @@
    "aac/se-135-panm64.m4a": {
     "bytes": 4248,
     "sha256": "1d9c7bafe938d34bef83c36148162c89c73d9acdaf620f47ca3b70fc8825a2a8",
+    "leadSamples": 306
+   },
+   "aac/se-135-panp00.m4a": {
+    "bytes": 4227,
+    "sha256": "96f1ff0a8cb4392c2705fde76618f03c5be3d5fe173a24f7a9a01b43bf4076c1",
     "leadSamples": 306
    },
    "aac/se-135-panp63.m4a": {
@@ -31879,6 +32148,11 @@
     "sha256": "7b5b79f2e4b8b1440fa49e96adbe3de6e62a58f66f60a5321d8abb3b38bcbcd9",
     "leadSamples": 0
    },
+   "aac/se-145-panp00.m4a": {
+    "bytes": 7722,
+    "sha256": "125223853eddd89c17af06f6494f4df717f44926ceb1255bb7c5dd11113242ac",
+    "leadSamples": 0
+   },
    "aac/se-145-panp63.m4a": {
     "bytes": 7750,
     "sha256": "403710379ff64ea74a7b9db53a9720d57c43393ea421ca3a17ce2c8159e8a91c",
@@ -31957,6 +32231,16 @@
    "aac/se-152-panp63.m4a": {
     "bytes": 6984,
     "sha256": "ff4d3a942de416b6ef516579348b4b67cf891297ddda8399d49742a6312180e4",
+    "leadSamples": 0
+   },
+   "aac/se-153-panm64.m4a": {
+    "bytes": 20857,
+    "sha256": "24101d9c8406dcd82f41eef117b8291ff969e7bee33d774a43db8f9947833d92",
+    "leadSamples": 0
+   },
+   "aac/se-153-panp63.m4a": {
+    "bytes": 21104,
+    "sha256": "35ac6cf878c98a8c0cda507ac9ceb4e78e5bef5d0087a5cc27b4be48e720cb6f",
     "leadSamples": 0
    },
    "aac/se-154-panm63.m4a": {
@@ -32519,6 +32803,11 @@
     "sha256": "9b997e0e39c063066424b0a0c6e93423512bbc95a8b6ce4d09e74d1a12ead5d1",
     "leadSamples": 306
    },
+   "aac/se-194-panp00.m4a": {
+    "bytes": 3780,
+    "sha256": "2bcffd59a652ec3c49186e704d88ffe59640c00ce946bc9891fe8c19bfd296ba",
+    "leadSamples": 306
+   },
    "aac/se-194-panp63.m4a": {
     "bytes": 3890,
     "sha256": "106d29932780f1bf993014c283cfb707366dce1928cce17f3797c1e29a3b906e",
@@ -32622,6 +32911,11 @@
    "aac/se-202-panm64.m4a": {
     "bytes": 19575,
     "sha256": "6dbd1fa01c0fb0b2465b1a3d695dbd6c01ac3464e91d4f008c3257906e10bb75",
+    "leadSamples": 0
+   },
+   "aac/se-202-panp00.m4a": {
+    "bytes": 18846,
+    "sha256": "aa7ab6d0daa768b998511840a85a873b9d1529ae97123720de75c93927f2cf09",
     "leadSamples": 0
    },
    "aac/se-202-panp63.m4a": {
@@ -32909,6 +33203,11 @@
     "sha256": "5e3d43906a5ee87b9d928ec0ede086d893448769ad1c575bd01ec2ad7b04809b",
     "leadSamples": 0
    },
+   "aac/se-228-panp00.m4a": {
+    "bytes": 11643,
+    "sha256": "24e1e826ba6c87e1193bfffac2bdeea0476cc41dcb4216ad88de4fd4fb74dda0",
+    "leadSamples": 0
+   },
    "aac/se-228-panp63.m4a": {
     "bytes": 12236,
     "sha256": "d4196770b8252e574890caf5a4f08aefe7b2e67562cf039c7ecb62c0fe640ec7",
@@ -32917,6 +33216,11 @@
    "aac/se-229-panm64.m4a": {
     "bytes": 4116,
     "sha256": "e646b94bdd535263fd56e8be3aabee518e0d74a9949a15ffb3b43ebb737a2c07",
+    "leadSamples": 306
+   },
+   "aac/se-229-panp00.m4a": {
+    "bytes": 4053,
+    "sha256": "8470ede7f635a778985ff682ef611b47df0c80c533ba6329d82833a5a0ac9031",
     "leadSamples": 306
    },
    "aac/se-229-panp63.m4a": {

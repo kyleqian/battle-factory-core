@@ -370,16 +370,16 @@ describe("BGM: duck, fade, pause / continue, loops", () => {
 
   it("exact loops use the native loop points; the five non-exact wraps are crossfaded 5-10 ms", async () => {
     const loops = Object.entries(sounds).filter(([, s]) => s.loops === true);
-    expect(loops.map(([k]) => k).sort()).toEqual(["bgm:354", "bgm:412", "bgm:469", "bgm:471", "bgm:476", "se:132:63", "se:90:none"]);
+    expect(loops.map(([k]) => k).sort()).toEqual(["bgm:354", "bgm:412", "bgm:469", "bgm:471", "bgm:476", "se:132:-64", "se:132:63", "se:153:-64", "se:153:63", "se:90:none"]);
     for (const [key, sound] of loops) {
       const h = harness();
       await flush();
       const id = Number(key.split(":")[1]);
-      const pan = key.split(":")[2] === "63" ? 63 : null;
+      const pan = key.split(":")[2] === "none" ? null : Number(key.split(":")[2]);
       h.player.push(ev(key.startsWith("bgm:") ? "bgm" : "se", 1, { id, pan }));
       await flush();
       const rate = sound.sampleRate;
-      const exact = key === "bgm:354" || key === "se:132:63";
+      const exact = key === "bgm:354" || (key.startsWith("se:1") && key !== "se:90:none");
       if (exact) {
         expect(h.ctx.sources.length, key).toBe(1);
         const src = h.ctx.sources[0]!;

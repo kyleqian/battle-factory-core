@@ -89,9 +89,11 @@ def main():
         vias = sorted(row["vias"], key=SE_WRAPPERS.index)
         se_rows.append({"id": sid, "name": songs.get(sid), "pan": pan, "vias": vias, "uses": sum(row["vias"].values()), "logs": len(row["logs"])})
     # snd1: SE tuples the engine emits that no ROM sound log contains (tools/audio/snd1-extra-se.json); recorded like the logged ones.
-    for r in json.loads((ROOT / "tools/audio/snd1-extra-se.json").read_text())["se"]:
-        if (r["id"], r["pan"]) not in se:
-            se_rows.append({"id": r["id"], "name": songs.get(r["id"]), "pan": r["pan"], "vias": r["vias"], "uses": 0, "logs": 0, "source": "snd1-extra-se.json"})
+    # snd3: the same for the tuples whose only recordings were more than 2 pan units away (tools/audio/snd3-extra-se.json).
+    for extra in ("snd1-extra-se.json", "snd3-extra-se.json"):
+        for r in json.loads((ROOT / "tools/audio" / extra).read_text())["se"]:
+            if (r["id"], r["pan"]) not in se and not any(x["id"] == r["id"] and x["pan"] == r["pan"] for x in se_rows):
+                se_rows.append({"id": r["id"], "name": songs.get(r["id"]), "pan": r["pan"], "vias": r["vias"], "uses": 0, "logs": 0, "source": extra})
     se_rows.sort(key=lambda r: (r["id"], -999 if r["pan"] is None else r["pan"]))
 
     task_modes = {}

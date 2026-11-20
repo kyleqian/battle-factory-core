@@ -14,12 +14,13 @@ const sources = JSON.parse(readFileSync(join(ROOT, "tests/fixtures/data/audio-so
 
 const BGM = [354, 412, 469, 471, 476];
 const FANFARES = [368, 459, 466];
-const LOOP_SES = ["se:132:63", "se:90:none"];
+// snd3: SE_M_GUST at -64 and SE_M_BLIZZARD at both pans loop too (the Cmd_panse sweeps start there).
+const LOOP_SES = ["se:132:-64", "se:132:63", "se:153:-64", "se:153:63", "se:90:none"];
 // One VBlank = 280896 cycles = 548.625 samples of the 32768 Hz (512-cycle) mixer output grid.
 const SAMPLES_PER_FRAME = 280896 / 512;
 
 describe("aud244b loop points", () => {
-  it("loops exactly the five BGMs and the two looping SEs; fanfares are one-shot", () => {
+  it("loops exactly the five BGMs and the five looping SEs; fanfares are one-shot", () => {
     const looping = Object.entries(manifest.sounds).filter(([, s]) => s.loops).map(([k]) => k).sort();
     expect(looping).toEqual([...BGM.map((id) => `bgm:${id}`), ...LOOP_SES].sort());
     for (const id of FANFARES) {
