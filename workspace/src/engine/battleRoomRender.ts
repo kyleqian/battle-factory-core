@@ -42,6 +42,7 @@ import downArrowAsset from "../assets/gen/battle-interface-down-arrow.json" with
 import msgboxAssetData from "../assets/gen/prebattle-room-msgbox.json" with { type: "json" };
 
 import { OBJ_EVENT_GFX, type ObjectEventGfxId, facilityTrainerGfxIdForClass } from "./factoryTrainerOverworldGfx.ts";
+import { noteCanonicalSample, noteOverworldSprite } from "./drawRecord.ts";
 import { OpaqueDrawMemo } from "./opaqueDrawMemo.ts";
 
 interface TileEntry {
@@ -158,8 +159,12 @@ function drawNpcFrame(
   pos: { x: number; y: number },
   hFlip: boolean,
   fadeY: number,
-): void {
+): { x: number; y: number; width: number; height: number } {
   const frame = npc.frames[frameIndex]!;
+  // pic4 (2026-11-20 playtest): `pos` is the top of a 16x32 object. The ROM anchors every object event sprite at its tile's bottom
+  // edge (event_object_movement.c:1461-1464: centerToCornerVecY = -(height >> 1); y += 16 + centerToCornerVecY, so the top is
+  // tile * 16 + 16 - height), so a 16x16 sprite (TUBER_M, TUBER_F, NINJA_BOY) stands 16 px lower than a 16x32 one.
+  const top = pos.y + NPC_FULL_HEIGHT - frame.rows * 8;
   for (let ty = 0; ty < frame.rows; ty += 1) {
     for (let tx = 0; tx < frame.columns; tx += 1) {
       const srcTx = hFlip ? frame.columns - 1 - tx : tx;
@@ -173,12 +178,15 @@ function drawNpcFrame(
           const color = npc.palette[colorIndex];
           if (!color) continue;
           const faded = fadeY > 0 ? fadeColor(color, fadeY) : color;
-          setPixel(fb, pos.x + tx * 8 + px, pos.y + ty * 8 + py, faded.r, faded.g, faded.b);
+          setPixel(fb, pos.x + tx * 8 + px, top + ty * 8 + py, faded.r, faded.g, faded.b);
         }
       }
     }
   }
+  return { x: pos.x, y: top, width: frame.columns * 8, height: frame.rows * 8 };
 }
+/** The height of the 16x32 object sprites the room's screen positions are written for. */
+const NPC_FULL_HEIGHT = 32;
 
 /** docs/prebattle-room-notes.md §2 formula, re-used here for every element that follows the standard camera-tracking convention (room tiles, scientists) - NOT the decoy (battleRoom.ts doc point 5). */
 function tileScreenPos(tile: { x: number; y: number }, origin: { x: number; y: number }): { x: number; y: number } {
@@ -413,19 +421,26 @@ export function renderBattleRoomEntryScene(
     const hFlip = turn.turned && scientist.turn === "east";
     drawNpcFrame(fb, roomNpcs.scientist, turn.frame, pos, hFlip, objFadeY);
   }
-  drawNpcFrame(fb, roomNpcs.player, step.decoyFrame, decoyScreenPos, step.decoyHFlip, objFadeY);
+  const decoy = drawNpcFrame(fb, roomNpcs.player, step.decoyFrame, decoyScreenPos, step.decoyHFlip, objFadeY);
+  noteOverworldSprite("room-player", "player", decoy.x, decoy.y, decoy.width, decoy.height);
   const opponent = opponentStep(elapsed);
   if (opponent.visible) {
     // trainerPresentation takes precedence: the generated battle-2 room
     // carries BOTH the legacy "jenson" encounter label and the generated
     // trainer identity (core.ts seeds INITIAL_BATTLE_2_ROOM_STATE +
     // trainerPresentation), and the identity's class must drive the sheet.
-    const npc = state.trainerPresentation !== undefined
-      ? opponentSheetForGfx(facilityTrainerGfxIdForClass(state.trainerPresentation.facilityClassId))
-      : state.encounter === "jenson"
-        ? roomNpcs.opponents.FISHERMAN
-        : roomNpcs.opponents[GENERIC_OPPONENT_SHEET]!;
-    drawNpcFrame(fb, npc, opponent.frame, { x: opponentScreenX, y: opponent.screenY }, false, objFadeY);
+    // pic2: a live room always carries its trainer; the legacy canonical rooms (DESTIN's BUG_CATCHER, JENSON's FISHERMAN) are
+    // sample content and an error inside a live render (drawRecord.ts).
+    let sheetName: string;
+    if (state.trainerPresentation !== undefined) {
+      sheetName = opponentSheetNameForGfx(facilityTrainerGfxIdForClass(state.trainerPresentation.facilityClassId));
+    } else {
+      noteCanonicalSample(state.encounter === "jenson" ? "battle room FISHERMAN (JENSON)" : "battle room generic opponent sheet");
+      sheetName = state.encounter === "jenson" ? "FISHERMAN" : GENERIC_OPPONENT_SHEET;
+    }
+    const npc = roomNpcs.opponents[sheetName] ?? roomNpcs.opponents[GENERIC_OPPONENT_SHEET]!;
+    const drawn = drawNpcFrame(fb, npc, opponent.frame, { x: opponentScreenX, y: opponent.screenY }, false, objFadeY);
+    noteOverworldSprite("room-opponent", sheetName, drawn.x, drawn.y, drawn.width, drawn.height);
   }
   drawOpponentMsgbox(fb, msgbox, state);
 }

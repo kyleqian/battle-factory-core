@@ -1,5 +1,5 @@
 // pfb229 (docs/pfb228-faint-replacement-emerge.md): the Scene ON player faint-replacement send-in draws the path-A composition (species-keyed
-// ball arc, ball-derived particle origin, bso225 back animation at B + 66); Scene OFF and the canonical MAGBY window keep the forced selector's release.
+// ball arc, ball-derived particle origin, bso225 back animation at B + 66); Scene OFF keeps the forced selector's release.
 import { describe, expect, it } from "vitest";
 import { BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS } from "../src/engine/battleScriptSourceConstants";
 import { SWITCH_IN_WAITSTATE_HOLD_FRAMES, switchInTiming } from "../src/engine/battleResolutionPresentation";
@@ -76,7 +76,7 @@ function forcedSegment(incoming: ReturnType<typeof mon>, sceneOn: boolean) {
   return { timing, view: (e: number) => createBattleResolutionPresentationRenderView(resolution(e)) };
 }
 
-describe("pfb229: the faint-replacement view carries the path-A send-in on Scene ON, non-MAGBY", () => {
+describe("pfb229: the faint-replacement view carries the path-A send-in on Scene ON", () => {
   const skarmory = mon("player", 0, 227, "SKARMORY", 1, 6);
   const B = 91 + skarmory.name.length;
 
@@ -104,11 +104,16 @@ describe("pfb229: the faint-replacement view carries the path-A send-in on Scene
     expect(view(cB + 20).midBattleSwitchIn!.elapsed).toBe(19);
   });
 
-  it("Scene OFF and the canonical MAGBY window keep the generic forced-select release (no path-A view)", () => {
+  it("Scene OFF keeps the generic forced-select release (no path-A view); a live MAGBY takes path A like every species (pic1)", () => {
     const off = forcedSegment(skarmory, false);
     for (let e = 0; e < 200; e += 1) expect(off.view(e).midBattleSwitchIn, `off ${e}`).toBeNull();
+    // pic1 (2026-11-20 playtest): a name test used to give any MAGBY the canonical sample battle's window (no path-A view).
     const magby = forcedSegment(mon("player", 0, 240, "MAGBY", 1, 6), true);
-    for (let e = 0; e < 250; e += 1) expect(magby.view(e).midBattleSwitchIn, `magby ${e}`).toBeNull();
+    const mB = magby.timing.ballShift + 96;
+    expect(mB).toBe(91 + "MAGBY".length);
+    expect(magby.view(mB - 1).midBattleSwitchIn).toBeNull();
+    expect(magby.view(mB).midBattleSwitchIn!.elapsed).toBe(0);
+    expect(magby.view(mB + 66).midBattleSwitchIn!.backAnim).not.toBeNull();
   });
 
   it("the forced selector draws the path-A frames (the ball flies and the back animation moves the mon)", () => {

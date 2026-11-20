@@ -1,6 +1,7 @@
 // Sprite pixel provider (bnd256c). The battle back / opponent front sprite sheets are ~12 MB of JSON; the headless graph (tick path, replayChallenge)
 // never reads them, so this module holds no JSON import: a host that renders installs the tables once (monPicPixelsInstall.ts).
 import type { BattleCommandMonPicTileset } from "./battleCommandFieldArt.ts";
+import { noteMonPicRead } from "./drawRecord.ts";
 
 export type MonPicPixelSheet = Readonly<{
   tileset: BattleCommandMonPicTileset;
@@ -33,10 +34,12 @@ function tables(): MonPicPixelTables {
 }
 
 export function backPixels(speciesSymbol: string): MonPicPixelSheet | undefined {
+  noteMonPicRead("back", speciesSymbol);
   return tables().back[speciesSymbol];
 }
 
 export function frontPixels(speciesSymbol: string): MonPicPixelSheet | undefined {
+  noteMonPicRead("front", speciesSymbol);
   return tables().front[speciesSymbol];
 }
 
@@ -48,7 +51,10 @@ export type MonPicSide = "back" | "front";
  * render time see the installed sheet; a read before the install throws "mon pic pixels not installed".
  */
 export function lazyMonPicSheet<T extends MonPicPixelSheet>(side: MonPicSide, speciesSymbol: string): T {
-  const sheet = () => tables()[side][speciesSymbol] as MonPicPixelSheet;
+  const sheet = () => {
+    noteMonPicRead(side, speciesSymbol);
+    return tables()[side][speciesSymbol] as MonPicPixelSheet;
+  };
   return Object.freeze(
     Object.defineProperties(
       {},
@@ -65,7 +71,10 @@ export function lazyMonPicSheet<T extends MonPicPixelSheet>(side: MonPicSide, sp
 export function lazyMonPicTable<T extends object>(side: MonPicSide): T {
   const target = () => tables()[side] as unknown as T;
   return new Proxy({} as T, {
-    get: (_unused, key) => Reflect.get(target(), key),
+    get: (_unused, key) => {
+      if (typeof key === "string") noteMonPicRead(side, key);
+      return Reflect.get(target(), key);
+    },
     has: (_unused, key) => Reflect.has(target(), key),
     ownKeys: () => Reflect.ownKeys(target()),
     getOwnPropertyDescriptor: (_unused, key) => {

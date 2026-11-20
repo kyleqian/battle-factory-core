@@ -727,7 +727,8 @@ import {
   ANCHOR_FACTORY_METADATA,
   createFactoryAnchorSession,
 } from "./factoryAnchorSession.ts";
-import { CANONICAL_DESTIN_PRESENTATION } from "./factoryTrainerPresentation.ts";
+import { CANONICAL_DESTIN_PRESENTATION, type FactoryTrainerPresentation } from "./factoryTrainerPresentation.ts";
+import { withLiveRender } from "./drawRecord.ts";
 import {
   containedBattleResolutionRenderView,
   createBattleResolutionPresentationRenderView,
@@ -2758,7 +2759,6 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
           // (beginFactoryRoundBattleStartIntro's own "every other caller"
           // doc).
           const pending = state.pendingGeneratedRound;
-          const selectedRentalIndexes = selectedRentalSlotIndexes(draftScreen);
           const sceneAssemblyDisplayLag = battleIntroSceneAssemblyDisplayLag(
             battleRoom.transitionPresentation,
           );
@@ -2774,20 +2774,7 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
             battleScene: null,
             battleSetup: null,
             factoryRoundBattleOrchestrator: beginFactoryRoundBattleStartIntro(
-              createFactoryRoundBattleOrchestrator({
-                battleScene: state.battleSceneMode,
-                id: `generated-round-streak-${pending.carry.factoryWinStreak}`,
-                rngValue: pending.rngValueBefore,
-                factoryWinStreak: pending.carry.factoryWinStreak,
-                playerTrainerId: pending.carry.playerTrainerId,
-                battleTowerLevel50WinStreak: ANCHOR_FACTORY_METADATA.battleTowerLevel50WinStreak,
-                factorySymbolsCount: pending.carry.factorySymbolsCount,
-                facilityState: {
-                  rentsCount: pending.carry.rentsCount,
-                  ...(pending.carry.heardBrainSpeech === undefined ? {} : { heardBrainSpeech: pending.carry.heardBrainSpeech }),
-                },
-                rentals: { type: "generateInitial", selectedRentalIndexes },
-              }),
+              createPendingRoundOrchestrator(state.battleSceneMode, pending, draftScreen),
               sceneAssemblyDisplayLag,
             ),
             battle1OpponentConstructionRngValues,
@@ -2903,7 +2890,7 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
           trainerPresentation:
             currentTrainerPresentation
             ?? (state.appRoute === "generated-orchestrator"
-              ? CANONICAL_DESTIN_PRESENTATION
+              ? pendingRoundFirstTrainer(state.battleSceneMode, state.pendingGeneratedRound, draftScreen)
               : undefined),
         };
       }
@@ -3902,6 +3889,50 @@ function partySelectCloseRenderAssets(
   };
 }
 
+/**
+ * The orchestrator a chained / generated round starts its battle 1 with: every construction input is pinned in the pending round
+ * (factoryRoundChaining.ts) and the draft's selection, so this is a pure function of them (no RNG is consumed by calling it).
+ */
+function createPendingRoundOrchestrator(
+  battleScene: EngineState["battleSceneMode"],
+  pending: NonNullable<EngineState["pendingGeneratedRound"]>,
+  draftScreen: EngineState["draftScreen"],
+): FactoryRoundBattleOrchestratorState {
+  return createFactoryRoundBattleOrchestrator({
+    battleScene,
+    id: `generated-round-streak-${pending.carry.factoryWinStreak}`,
+    rngValue: pending.rngValueBefore,
+    factoryWinStreak: pending.carry.factoryWinStreak,
+    playerTrainerId: pending.carry.playerTrainerId,
+    battleTowerLevel50WinStreak: ANCHOR_FACTORY_METADATA.battleTowerLevel50WinStreak,
+    factorySymbolsCount: pending.carry.factorySymbolsCount,
+    facilityState: {
+      rentsCount: pending.carry.rentsCount,
+      ...(pending.carry.heardBrainSpeech === undefined ? {} : { heardBrainSpeech: pending.carry.heardBrainSpeech }),
+    },
+    rentals: { type: "generateInitial", selectedRentalIndexes: selectedRentalSlotIndexes(draftScreen) },
+  });
+}
+
+/**
+ * pic2 (2026-11-20 playtest): the trainer the battle room's opponent walks in as, before battle 1's orchestrator exists. The ROM picks
+ * the round's trainers on the room's map transition (BattleFrontier_BattleFactoryBattleRoom_OnTransition: frontier_settrainers), so the
+ * room already shows battle 1's own trainer; the engine generates that trainer at battle start, so the room derives it here from the
+ * same pure construction (createPendingRoundOrchestrator). The anchor round (no pending round) is the canonical sample battle, whose
+ * opponent is trainer 50 (createFactoryAnchorSession checks it). A generated round used to fall back to DESTIN's BUG CATCHER here.
+ */
+function pendingRoundFirstTrainer(
+  battleScene: EngineState["battleSceneMode"],
+  pending: EngineState["pendingGeneratedRound"],
+  draftScreen: EngineState["draftScreen"],
+): FactoryTrainerPresentation {
+  if (pending === null) return CANONICAL_DESTIN_PRESENTATION;
+  const opponent = createPendingRoundOrchestrator(battleScene, pending, draftScreen).round.rules.currentOpponent;
+  const trainer = factoryTrainerPresentationForOpponent(opponent);
+  if (trainer === null) throw new Error(`battle room: the pending round's first opponent ${opponent?.id ?? "(none)"} has no trainer presentation`);
+  return trainer;
+}
+
 function renderWithoutFactoryTerminal(state: EngineState): Uint8Array {
   if (state.factoryRoundBattleOrchestrator?.battleStartIntro?.entry) {
     const fb = createFramebuffer();
@@ -4327,6 +4358,19 @@ function renderPrebattleEntryState(state: EngineState): Uint8Array {
 }
 
 export function render(state: EngineState): Uint8Array {
+  // pic3: a generated Factory round (an orchestrator, or a pending generated round before its first battle) draws only from its live
+  // record; a canonical sample-battle helper reached from here throws (drawRecord.ts). The anchor round before its first battle is the
+  // canonical sample battle itself and stays outside.
+  if (
+    state.factoryRoundBattleOrchestrator !== null
+    || (state.appRoute === "generated-orchestrator" && state.pendingGeneratedRound !== null)
+  ) {
+    return withLiveRender(() => renderRoutes(state));
+  }
+  return renderRoutes(state);
+}
+
+function renderRoutes(state: EngineState): Uint8Array {
   if (state.prebattleEntry) return renderPrebattleEntryState(state);
   // docs/post-terminal-return-to-lobby-ground-truth.md §3: the 108-tick
   // fade/black/battle-room-flash/black return-to-field span is shared,

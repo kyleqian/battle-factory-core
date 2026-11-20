@@ -442,10 +442,6 @@ function midBattleSwitchInPalette(
 export const MID_BATTLE_SWITCH_BALL_MON_Y = 93;
 /** The MAGBY-calibrated forced-select ball clock's spawn (`switchInTail.ts` ballShift = B - 96): path-A elapsed 0 = release clock 96. */
 const FORCED_SEND_IN_PATH_A_BALL_SPAWN = 96;
-/** The canonical turn-15..17 MAGBY forced send-in, whose forced-selector release is hand-calibrated and stays as is. */
-function isCanonicalMagbyIncoming(mon: Readonly<{ name: string; species: number }>): boolean {
-  return mon.name === "MAGBY" && mon.species === 240;
-}
 const BALL_ARC_BASE_X = 24;
 const BALL_ARC_BASE_Y = 68;
 const BALL_ARC_TARGET_X = 72;
@@ -2370,13 +2366,14 @@ export function createBattleResolutionPresentationRenderView(
       timing: sendOutTiming,
       battler: switchCommand.battler,
     });
-    // pfb229 (docs/pfb228-faint-replacement-emerge.md): a Scene ON non-MAGBY faint-replacement send-in runs the path-A ball / release / emerge /
+    // pfb229 (docs/pfb228-faint-replacement-emerge.md): a Scene ON faint-replacement send-in runs the path-A ball / release / emerge /
     // back-animation timeline translated by the keyed ball clock: A = partySendOutReleaseClock(e) - 96 = e - B - releaseExtra.
-    // Scene OFF and the canonical MAGBY window keep the forced selector's generic release.
+    // Scene OFF keeps the forced selector's generic release. pic1 (2026-11-20 playtest): every species takes this route, MAGBY included;
+    // a name test used to send any live MAGBY to the canonical sample battle's hand-calibrated window.
     const sceneOn = segment.beforeRules !== null && segment.beforeRules !== undefined
       && (segment.beforeRules.rulesContext.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) === 0;
     const forcedElapsed = sendOutTiming === null ? -1 : partySendOutReleaseClock(state.lifecycle.phaseElapsed, sendOutTiming) - FORCED_SEND_IN_PATH_A_BALL_SPAWN;
-    if (sceneOn && sendOutTiming !== null && switchCommand.battler === 0 && !isCanonicalMagbyIncoming(field.player) && forcedElapsed >= 0) {
+    if (sceneOn && sendOutTiming !== null && switchCommand.battler === 0 && forcedElapsed >= 0) {
       const art = createBattleCommandFieldArtView(field);
       const playerMonY = art.player.origin.y + 32;
       midBattleSwitchIn = midBattleSwitchInAt(
