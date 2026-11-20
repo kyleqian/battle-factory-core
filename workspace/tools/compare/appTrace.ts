@@ -1979,8 +1979,37 @@ function subp1mStages(): Record<string, AppStage> {
   return stages;
 }
 
+// hcr1b (tools/integration/hcr1bLabs.py): the commit -> first glyph window per first-print u class. The Lv100 side acts first with `move` x4;
+// the Lv50 side answers with Seismic Toss. `foe` = the Lv100 Rattata is the opponent's, `plr` = the player's.
+const HCR1B_MOVES: Readonly<Record<string, number>> = {
+  defensecurl: 111, growl: 45, harden: 106, recover: 105, toxic: 92, confuseray: 109, earthquake: 89, fissure: 90, sonicboom: 49, dragonrage: 82,
+  toss: 69, lowkick: 67, absorb: 71, megadrain: 72, curse: 174, tackle: 33, scratch: 10, ember: 52, bite: 44, thunderbolt: 85, takedown: 36,
+  doubleedge: 38,
+};
+const HCR1B_PP: Readonly<Record<string, number>> = { growl: 40, tackle: 35, ember: 25, doubleedge: 15 };
+function hcr1bStages(): Record<string, AppStage> {
+  const stages: Record<string, AppStage> = {};
+  for (const [name, move] of Object.entries(HCR1B_MOVES)) {
+    for (const side of ["foe", "plr"] as const) {
+      const id = `hcr1b-${name}-${side}-off`;
+      stages[id] = side === "foe"
+        ? (state) => aud241bStage(state, id, "off", 50, 100, 69, undefined, false, move, 1)
+        : (state) => midBattleSwitchStage(state, id, [RATTATA_LV50_BENCH, RATTATA_LV50_BENCH], [105, 105], {
+          rngSeed: 1,
+          battleScene: "off",
+          player: Object.freeze({ ...rattataAtLevel(100, move), pp: [HCR1B_PP[name] ?? 20, HCR1B_PP[name] ?? 20, HCR1B_PP[name] ?? 20, HCR1B_PP[name] ?? 20] as const }),
+          trainer: rattataAtLevel(50, 69),
+          usedMessageHoldFrames: 0,
+          sceneOffNoAnimations: true,
+        });
+    }
+  }
+  return stages;
+}
+
 export const APP_STAGES: Readonly<Record<string, AppStage>> = {
   ...hpf4mStages(),
+  ...hcr1bStages(),
   ...trp1Stages(),
   ...subp1mStages(),
   // iss216: the anchor deal has no duplicate species; the ROM probe pokes slot 6's monId to slot 1's

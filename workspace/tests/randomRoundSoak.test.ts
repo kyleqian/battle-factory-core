@@ -442,7 +442,9 @@ describe("random round soak driver (green milestone pin)", () => {
       // 43_437 -> 43_336, renderCalls 3_045 -> 3_042; same battle 7, turn 3, end state, diagnostics.
       // pic8 (the forced party menu's clock starts at the faint message's dismiss edge, 2 frames earlier per forced switch; ROM lab
       // pic7-player-faint-send-in-on): frames + render calls, 43_336 -> 43_334, renderCalls 3_042 -> 3_044; same battle 7, turn 3, end state, diagnostics.
-      frames: 43_334,
+      // hcr1 (the Scene OFF first used-move print at commit + 6 + u, docs/aud251-s11-scoreboard-refresh.md): frames + render calls, 43_334 -> 43_411, renderCalls 3_044 -> 3_043; same battle 7, turn 3, end state, diagnostics.
+      // hcr1b (the Scene OFF first used-move glyph at commit + 7 + u, pixel-exact): frames + render calls, 43_411 -> 43_559, renderCalls 3_043 -> 3_056; same battle 7, turn 3, end state, diagnostics.
+      frames: 43_559,
       battle: 7,
       turn: 3,
       diagnostics: {
@@ -454,7 +456,7 @@ describe("random round soak driver (green milestone pin)", () => {
         terminalOutcome: "roundWon",
         terminalRecordMenuInputReadyReached: true,
         terminalRecordChoice: "no",
-        renderCalls: 3_044,
+        renderCalls: 3_056,
       },
     });
     expect(second).toEqual(first);
@@ -669,7 +671,10 @@ describe("random round soak driver (green milestone pin)", () => {
     // moves): seed 15 no longer commits Baton Pass (with the cursor fix undone it hits again with the numbers above). Re-scanned full-policy
     // seeds 0..39 (tools/soak/batonPassSearch.ts --seeds 0:40 --parallel 4): candidates 12, 13, 16, 27, 31, 36. Seed 12 is the lowest
     // (Baton Pass commits 1, first commit 74877, halt 75141 on MAWILE in battleIndex 0, two Lobby new challenges).
-    const result = runSeed(12, {
+    // hcr1b (the Scene OFF used-move glyph at commit + 7 + u; the exploring presses land on new phases): seed 12 no longer commits Baton Pass.
+    // Re-scanned full-policy seeds 0..29 (tools/soak/batonPassSearch.ts --seeds 0:30 --parallel 4): candidates 3, 10, 16, 17, 20, 23, 24, 26. Seed 3 is the lowest
+    // (Baton Pass commits 2, first commit 49232, halt 49444 on MAWILE in battleIndex 0, three Lobby new challenges).
+    const result = runSeed(3, {
       maxFrames: 80_000,
       renderEvery: 0,
       coverage: observer as never,
@@ -993,7 +998,9 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // 2 frames earlier, pic7 lab): frames only, 18678 -> 19042; same battle 1 / depth 0 / turn 23 / roundLost.
       // pic9 (the switch lines follow the foe's HP; new print lengths move the exploring presses): 19042 / turn 23 -> 22844 / turn 30;
       // same battle 1 / depth 0 / roundLost.
-      frames: 22844,
+      // hcr1 (the Scene OFF used-move print lead u - 3): frames only, 22844 -> 22840; same battle 1 / depth 0 / turn 30 / roundLost.
+      // hcr1b (the used-move glyph at commit + 7 + u): frames only, 22840 -> 22858; same battle 1 / depth 0 / turn 30 / roundLost.
+      frames: 22858,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 0,
@@ -1032,12 +1039,14 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // it (with it undone the old pin passes; the recall fix alone leaves it). Seed 0 is unmoved.
       // rsw1 (the room after the swap screen: black hold, fade, "Thank you!" waits for A; docs/rsw1-swap-return-room.md): frames only,
       // 61456 -> 61528 (the player's press lands on the new wait; a rule change, not a bug); same battle 3 / depth 2 / turn 22 / roundLost.
-      frames: 61528,
+      // hcr1 (the Scene OFF used-move print lead u - 3; the exploring presses land on new phases): 61456 / turn 22 -> 60534 / turn 19; same battle 3 / depth 2 / roundLost.
+      // hcr1b (the used-move glyph at commit + 7 + u): frames only, 60534 -> 64227; same turn 19, battle 3 / depth 2 / roundLost.
+      frames: 64227 /* MERGE-REPIN */,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 2,
       battle: 3,
-      turn: 22,
+      turn: 19,
     });
   });
 
@@ -1625,7 +1634,9 @@ describe("ISSUES #104 (driver): continuous-play outcome semantics retuned -- OK 
     // re-scanned seeds 0..49 under the same options: seeds 13, 27 and 47 chain two round wins (carry 14), so the lowest (13) is pinned.
     // merge of flow1 + trp1 (flow1's move cursor reset after a switch-in moves the soak's fight presses as well): seed 13 now carries 7;
     // re-scanned seeds 0..49 under the same options (--seeds 0:50 --parallel 4): seeds 19 and 47 chain two round wins (carry 14), so the lowest (19) is pinned.
-    const result = runSeed(19, {
+    // hcr1b (the Scene OFF used-move glyph at commit + 7 + u): seed 19 now carries 7; re-scanned seeds 0..49 under the same options (--seeds 0:50 --parallel 4):
+    // seeds 0, 10, 14 and 47 chain two round wins (carry 14), so the lowest (0) is pinned.
+    const result = runSeed(0, {
       policy: "winning",
       maxRounds: 3,
       renderEvery: 0,
