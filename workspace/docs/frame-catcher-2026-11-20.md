@@ -7,8 +7,7 @@ battles.
 ## In short
 
 - It finds what Kyle saw in his round: the Murkrow picture after his faint, the Bug Catcher in the room after a win, the silent battle
-  menus and the party-menu cancel that cuts instead of fading. At the Tuber's frames it finds a difference too, but not the one Kyle
-  described: on both sides the Tuber stands on the same tile; ours draws it facing sideways where the ROM shows it facing down.
+  menus, the party-menu cancel that cuts instead of fading, and the Tuber one tile too high in the battle room.
 - It finds new bugs: a wrong HP number after a send-out, a missing Ingrain heal animation, Spinda's spots, the send-out line after a
   switch ("Go!" where the game says "Do it!" or "Go for it,"), a missing HP box after a replacement, Rollout's sound repeating, a
   different turn order in one battle, and more (list below).
@@ -41,7 +40,7 @@ the evidence folder's `traces/`, with each one's battle text).
 | Opponent drawn as Murkrow after his faint | yes: ours draws Murkrow, the ROM Delibird | 17,494-17,734 | 18,436-18,680 | `k02-murkrow-and-hp-138.png` |
 | Bug Catcher in the room after a win | yes: ours draws a Bug Catcher where the ROM keeps the beaten Tuber; the same spot also differs after battle 1's win (ours 21,877-21,915) | 39,588-39,626 | 43,056-43,100 | `k03-bug-catcher-after-win.png` |
 | Party-menu cancel cuts instead of fading | yes: on every cancel the ROM fades the party menu out and the battle back in; ours cuts (133 ROM-only frames over 9 cancels in battle 1) | e.g. 10,508, 12,345 | e.g. 10,756, 13,099 | `k04-party-cancel-no-fade.png` |
-| Tuber one tile too high | a difference, but not this one: same tile on both sides; ours draws the Tuber facing sideways, the ROM facing down (70 pixels) | 32,300-32,480 | 34,396 | `k05-tuber-one-tile-high.png` |
+| Tuber one tile too high | yes: once it has stopped, the ROM has the Tuber on the player's row facing left for 226 frames; ours has it one tile up (difference #65) | from 32,475 | 34,397-34,625 | `k05-tuber-one-tile-high.png` |
 
 ## New findings
 

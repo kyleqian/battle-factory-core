@@ -70,6 +70,9 @@ round takes about 2 minutes. Five traces at once (`JOBS=5`) take as long as the 
    blobs, followed over frames, and grouped across stretches into ranked differences. Sounds: the (kind, id) lists of a stretch are
    aligned in order; an event with no partner is content (an event the other side plays just past the stretch's end is timing).
 
+When a sprite is in a different place on the two sides, check a frame after it has stopped moving: during a walk the two sides pass
+through the same tiles at different moments (the first look at Kyle's Tuber picked a ROM frame mid-walk and missed the one-tile offset).
+
 ## What it cannot compare yet
 
 - The ROM's re-entered draft screen fades in; the engine's starts settled. The first stretch (up to the first draft menu) is skipped.
