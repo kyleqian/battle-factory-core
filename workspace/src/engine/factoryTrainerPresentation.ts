@@ -7,6 +7,7 @@
 import frontierTrainersData from "../data/gen/battle-frontier-trainers.json" with { type: "json" };
 import facilityClassLookupsData from "../data/gen/facility-class-lookups.json" with { type: "json" };
 import { TRAINER_FRONTIER_BRAIN } from "./factoryAiMaskSelection.ts";
+import { expandRomGlyphCodes } from "./font.ts";
 
 type EasyChatWord = Readonly<{
   source: string;
@@ -140,7 +141,9 @@ export function getFactoryTrainerPresentation(
     facilityClass: facilityClass.facilityClass.symbol,
     trainerClassId: facilityClass.trainerClass.id,
     trainerClass: facilityClass.trainerClass.symbol,
-    className: facilityClass.trainerClass.displayName,
+    // trainer_class_names.h spells three classes with the PK MN glyph pair (`_("{PKMN} BREEDER")`, :6; RANGER :54; TRAINER :2):
+    // the display name carries those two glyphs, not the brace code's six letters (pkm1, docs/pkm1-pkmn-glyphs.md).
+    className: expandRomGlyphCodes(facilityClass.trainerClass.displayName),
     trainerPicIndex: facilityClass.trainerPic.id,
     trainerPic: facilityClass.trainerPic.symbol,
     gender: null,

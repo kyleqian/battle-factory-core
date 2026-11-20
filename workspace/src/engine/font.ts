@@ -29,8 +29,58 @@ export interface TextColors {
   shadow: number;
 }
 
+/**
+ * pkm1 (docs/pkm1-pkmn-glyphs.md): a font glyph that charmap.txt names only by a brace code, with no quoted printable character
+ * (`PKMN = 53 54`, charmap.txt:51, the small two-glyph PK MN symbol), is carried in display strings as the private-use character
+ * U+E000 + glyph code (U+E053 U+E054 for `{PKMN}`). One character per glyph keeps every printer's length (one glyph per frame),
+ * `slice` and width right without a per-caller case; `codeForChar` resolves it for every charmap.
+ */
+export const ROM_GLYPH_CHAR_BASE = 0xe000;
+/** Single-byte glyph codes only: 0xF7 and up are control codes (charmap.txt:408+), never drawn glyphs. */
+const ROM_GLYPH_CHAR_LIMIT = ROM_GLYPH_CHAR_BASE + 0xf7;
+
+export function romGlyphChar(code: number): string {
+  if (!Number.isInteger(code) || code < 0 || code >= 0xf7) throw new Error(`romGlyphChar: ${code} is not a glyph code`);
+  return String.fromCharCode(ROM_GLYPH_CHAR_BASE + code);
+}
+
+/**
+ * charmap.txt's named glyph runs (its Latin glyph section, lines 42-67, before `@ Hiragana`): the brace codes a source string
+ * spells that stand for drawn glyphs rather than a control code or a placeholder. Pinned against charmap.txt by
+ * `tests/pkm1PkmnGlyphs.test.ts`.
+ */
+export const ROM_NAMED_GLYPH_CODES: Readonly<Record<string, readonly number[]>> = Object.freeze({
+  SUPER_ER: [0x2c],
+  LV: [0x34],
+  PK: [0x53],
+  PKMN: [0x53, 0x54],
+  POKEBLOCK: [0x55, 0x56, 0x57, 0x58, 0x59],
+  UNK_SPACER: [0x77],
+  UP_ARROW: [0x79],
+  DOWN_ARROW: [0x7a],
+  LEFT_ARROW: [0x7b],
+  RIGHT_ARROW: [0x7c],
+  SUPER_E: [0x84],
+  SUPER_RE: [0xa0],
+});
+
+/**
+ * A ROM source string (`_("{PKMN} BREEDER")`, trainer_class_names.h:6) as display text: each named glyph code becomes its glyph
+ * characters (`romGlyphChar`). Any other brace code (placeholders such as `{B_TRAINER1_NAME}`, control codes) is left as it is,
+ * for the caller's own substitution.
+ */
+export function expandRomGlyphCodes(source: string): string {
+  return source.replace(/\{([A-Z_]+)\}/g, (whole, name: string) => {
+    const codes = ROM_NAMED_GLYPH_CODES[name];
+    return codes === undefined ? whole : codes.map(romGlyphChar).join("");
+  });
+}
+
 export function codeForChar(charmap: Map<string, number>, ch: string): number | undefined {
-  return charmap.get(ch);
+  const code = charmap.get(ch);
+  if (code !== undefined) return code;
+  const point = ch.charCodeAt(0);
+  return ch.length === 1 && point >= ROM_GLYPH_CHAR_BASE && point < ROM_GLYPH_CHAR_LIMIT ? point - ROM_GLYPH_CHAR_BASE : undefined;
 }
 
 export function measureText(font: FontData, charmap: Map<string, number>, text: string): number {

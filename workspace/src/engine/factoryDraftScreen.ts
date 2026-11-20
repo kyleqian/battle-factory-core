@@ -9,7 +9,7 @@
 import { createFramebuffer, setPixel } from "./framebuffer.ts";
 import { drawTileBg, type TileBg } from "./bg.ts";
 import { drawSprite, type SpriteSheet } from "./sprites.ts";
-import { drawText, rightAlignXOffset, type FontData } from "./font.ts";
+import { drawText, expandRomGlyphCodes, rightAlignXOffset, type FontData } from "./font.ts";
 import type { RgbColor } from "./bg.ts";
 import { getMonPicVisual, INITIAL_MON_PIC_STATE, type MonPicState } from "./monPic.ts";
 import { drawChosenMonPic, drawMonPic, drawMonPicFaded } from "./monPicRender.ts";
@@ -56,8 +56,6 @@ const arrow = arrowData as { tileset: { columns: number; rows: number; tiles: nu
 const textPalette = (textPaletteData as { colors: RgbColor[] }).colors;
 const font = fontNormalData as unknown as FontData;
 const charmap = new Map<string, number>((charmapData as { entries: [string, number][] }).entries);
-charmap.set("\uE053", 0x53);
-charmap.set("\uE054", 0x54);
 const menuHighlight = menuHighlightData as {
   left: { tileset: { columns: number; rows: number; tiles: number[][] } };
   right: { tileset: { columns: number; rows: number; tiles: number[][] } };
@@ -104,7 +102,7 @@ const SELECT_MON_MESSAGES = [
 ];
 const CONFIRM_MONS_MESSAGE = "Are these three POKéMON OK?";
 /** gText_CantSelectSamePkmn (strings.c:1623). */
-export const CANT_SELECT_SAME_MESSAGE = "Can't select same \uE053\uE054.";
+export const CANT_SELECT_SAME_MESSAGE = expandRomGlyphCodes("Can't select same {PKMN}.");
 
 /**
  * Select_AreSpeciesValid (:2255-2276): renting `slot` is refused when an

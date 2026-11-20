@@ -1,6 +1,6 @@
 import { createFramebuffer } from "./framebuffer.ts";
 import { drawTileBg, type RgbColor, type TileBg } from "./bg.ts";
-import { drawText, measureText, rightAlignXOffset, type FontData } from "./font.ts";
+import { drawText, expandRomGlyphCodes, measureText, rightAlignXOffset, type FontData } from "./font.ts";
 import { speciesNameColor } from "./speciesNameFade.ts";
 import { drawSpriteFaded, drawTextFaded, drawTileBgFaded } from "./fadeRender.ts";
 import {
@@ -93,10 +93,11 @@ const fontSmall = {
 const charmap = new Map<string, number>(
   (charmapData as { entries: [string, number][] }).entries,
 );
-charmap.set("\uE053", 0x53);
-charmap.set("\uE054", 0x54);
 
 const DEFAULT_TEXT_COLORS = { fg: 2, bg: 1, shadow: 3 };
+/** gText_PkmnForSwap (strings.c:1633) and gText_SamePkmnInPartyAlready (strings.c:1639): `{PKMN}` is the PK MN glyph pair. */
+const PKMN_FOR_SWAP_LABEL = expandRomGlyphCodes("{PKMN} FOR SWAP");
+const SAME_PKMN_IN_PARTY_MESSAGE = expandRomGlyphCodes("Same {PKMN} in party already.");
 const SPECIES_TEXT_COLORS = { fg: 4, bg: 0, shadow: 0 };
 const MENU_TEXT_COLORS = { fg: 2, bg: 0, shadow: 0 };
 const PLAYER_OPTION_LABELS = ["SUMMARY", "SWAP", "RECHOOSE"] as const;
@@ -260,7 +261,7 @@ function drawPkmnForSwapButton(
     );
   }
   if (buttonX <= 160 && labelVisible) {
-    const label = "\uE053\uE054 FOR SWAP";
+    const label = PKMN_FOR_SWAP_LABEL;
     const x = 168 + rightAlignXOffset(fontSmall, charmap, label, 70);
     if (actionFadeY > 0) {
       const target = actionBox.palette[3]!;
@@ -560,7 +561,7 @@ export function renderFactorySwapPicker(view: FactorySwapRenderView): Uint8Array
           (state.phase === "duplicateReturn" &&
             phaseElapsed >= 1 &&
             phaseElapsed < 23)
-        ? "Same \uE053\uE054 in party already."
+        ? SAME_PKMN_IN_PARTY_MESSAGE
       : playerSwitch && phaseElapsed < 108
         ? "Select POKéMON to accept."
       : enemy
