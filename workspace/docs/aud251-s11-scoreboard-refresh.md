@@ -1576,3 +1576,48 @@ The sound set (`tests/aud24*`, `aud25*`, `aud26*`, `snd*`, `*Sound*`, `adp*`, `h
 
 - `lsd194Census.sh` archives a tree-ish only, so the uncommitted tree was measured through a throwaway tree object (`GIT_INDEX_FILE=... git add -u; git write-tree`).
 - A first-row-only shift estimate misjudges multi-row bodies (flamethrower, spark): the pins were taken per row.
+
+## hcr2c: Scene ON move-body sound lead per body (fix-forward of hcr2 / hcr2b)
+
+Scene ON sound timing only; logical outcomes, RNG, kernel event order and presented frames unchanged; Scene OFF untouched. Base `f555ba685`.
+
+### Cause
+
+hcr2 holds action-dispatch u - 2 frames (u = the first used-move print's `instructionExecution`), so every later body of the turn runs u - 2 ticks later than the sound tables expect. hcr2b answered with one flat lead (2 for u > 2) for all move bodies. Pins that were ROM-exact on master (delta 0) therefore moved by (u - 2) - 2: `pin_new = pin_master - (u - 2) + lead`, i.e. the ROM-exact lead of a body is `c = (u - 2) - pin_master`, and it is not one constant. The sound tables are calibrated at a script lead of 7 frames; the kernel's presented script lead of a body is `bodyLeadFrames` (L). For every audited plain body (L >= 4) c = 7 - L at every u (L 5 -> 2, Seismic Toss L 6 -> 1, Counter L 4 -> 3, Dragon Rage L 9 -> -2).
+
+### Rule (`usedMoveBodySoundLeadOf`, `tickSounds.ts` before `emitMoveAnimSounds`)
+
+- Audited plain body (`bodyLeadFrames` >= 4, `lse2BodySoundAgeShift` = 0): lead = 7 - L (the table's clock minus the body's presented lead). No per-move list.
+- Everything else (L < 4 or no body: Present, Memento, Double Team, ...): `min(u - 2, 2)`. The unaudited bodies' c varies per body (Present 0, Memento 8, Double Team 2 at u = 3); the cap is the best T2 compromise. Tried and rejected: flat 2 (moves Present / Brick Break away), 2 for 1 <= L < 4 (T2 exact 1,883 / mass 24,340).
+- LSE2 / LEAD4 "S" bodies (Leech Seed L 36 ...) already carry the difference in `lse2BodySoundAgeShift`; applying 7 - L to them raised T2 mass by 594, so they keep the cap.
+- Stat-change / Double Team stat SEs, general-animation and hit leads as in hcr2b (the stat / Double Team lead is `min(u - 2, 2)`, Scene OFF 1 for everything). `usedMovePrintU` is stored at confirm-handoff end.
+
+### Results (tested commit `0af7d2016`)
+
+- **T2 Scene ON, 25 t2n seeds: missing / extra 0 / 0.** Exact rows 1,960 -> **2,359** (move-animation 2,001, stat-change 28, cry 29, battle-controller 300, bgm 1), offset mass 25,090 -> **24,219** (5,670 rows, 2,329 at delta 0).
+- **T1 Scene ON 0..199: exact 54,005, known-offset 0, missing 0, extra 0, unclassified 0**; class table byte-identical to the base arm.
+- Census (`lsd194Census.sh`, base `f555ba685` vs `0af7d2016`, `rst197CensusDelta.py`): Scene ON 0..199 200 / 200 battles, 62,327 commands identical, bad 0 (`eventsDigest` identical); Scene OFF 0..99 100 / 100, 30,813 commands, bad 0.
+- Pixels equal to base: hcr2-tackle-plr-on 38/229, ember-plr-on 105/229, absorb-plr-on 229/229, takedown-foe-on 229/229, toss-foe-on 198/229, harden-foe-on 229/229.
+- Gates: `npm run typecheck` 0, `npm run build` 0, `npm run test:gate` 360 files / 2,835 tests. The 71 sound files (aud2*, snd*, cry1*, hie*, adp1*, ais2*) all green; the full `npm test` was not run.
+
+### Pins moved
+
+Moved to the ROM (the old pin was a hold artefact): aud242b dragonrage 3 -> 0; aud242c flamethrower 5 -> 3; aud242d thunderbolt / metalclaw / steelwing (engine-frame keys re-keyed); aud242e toxic 3 -> 0, overheat 3, counter 0 (no extras), poisontail / thunderbolt keys, absorb extra 2 -> 1; aud242n spark 5 -> 3; aud242o rollout 3 -> 0; aud242p reversal / mistball 0; aud242q furycutter 0, secretpower 0 x4, extrasensory 0 x3, superfang 0 x2; aud242r eruption 0; aud258 swordsdance 1 -> 0; aud261 zapcannon [2, 3, 3] -> [0, 1, 1]; adp1 rocksmash [2, 2] -> [0, 0]; aud262 Memento -6 -> -7 and Odor Sleuth -3 -> -4 (back to the master values); cry1 command starts +1 / +2 (offsets 16 / 16 / 16 / 43 / 14 / 14, drifts unchanged); hie3 commandStart +1 (drifts 1 / 2 / 12 -> 0 / 1 / 11).
+
+Moved away from the ROM (known non-ROM residuals, named in each test): Haze / Seismic Toss second-mover row 2 -> 3 (aud242b rowDelta, aud258 haze offset); rollout5 turns 4 / 5 [-2, -3] (was 0, -1); iceball5 turns 5 / 6 [-3, -3, -5, -5] (was -1, -1, -3, -3). Cause: the hold and the lead are set once per presentation from the first print's u, so a later turn / second mover keeps that u. Fixing it needs a per-print u, which is hcr2's presentation, not a sound lead.
+
+Pixel / presentation re-pins (not sound leads; pure uniform shifts carried by the hcr2 hold):
+- `ais2AiSwitchFrames` Scene ON: all 251 md5s identical at engine frames +2 (offset 57 -> 55, window 3824..4074 -> 3826..4076; the sweep found 0 mismatches at +2 and >= 147 at every other shift). The AI switch's turn starts with a u = 4 print, so the hold delays it by 2. The window was ROM-exact at base: hcr2's hold made this downstream pixel window 2 frames late relative to the ROM lab.
+- `aud252LossBallOpen`: seed 1914 [0, 8, 0 x6] -> [3, 12, 4 x6] (Icy Wind, u = 6, hold 4; the faint SE keeps its 1-tick hit lead), seed 2230 [7, 3, 1 x5, 0] -> [10, 6, 4 x5, 3] (u = 5, hold 3). These rows were ROM-exact at base (1914). A general-animation / end-sound lead of the hold fixes the select SE and ball open but moves the item-effect rows of 2230 the wrong way and costs T2 (mass 24,219 -> 24,863), so it was not kept.
+- `snd1RoomSounds` reads the stamped event frame (the ROM clock) instead of the tick frame; no pin moved (SE 135 = Double Team at 1967, the ROM frame).
+
+### Unreconciled
+
+- aud252 seeds 1914 / 2230 and the ais2 Scene ON window: the hold itself leaves the turn's later rows / pixels late by u - 2 against the ROM lab. A sound lead cannot repair pixels; if the ROM has no such delay downstream, the hold of hcr2 needs a matching shortening of a later command (presentation change, out of this step's scope).
+- Unaudited bodies (L < 4, Present / Memento / Double Team): c varies per body; kept on min(u - 2, 2).
+- Second-mover / later-turn bodies (Haze, rollout5, iceball5): stale u as above.
+
+### Papercuts
+
+- The `aud242*` `rowDelta` / `extra` keys are raw engine frames, so every engine-frame move needs a re-key; a key relative to the body's start would survive.
+- `snd1RoomSounds` pinned the tick frame, which silently differs from the stamped frame the scoreboards use once a lead is set.

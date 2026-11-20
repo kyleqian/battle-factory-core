@@ -82,6 +82,7 @@ const SPECS: Record<string, Spec> = {
   "megapunch-opponent": { delta: 0 },
   "hijumpkick-player": { delta: 0 },
   "hijumpkick-opponent": { delta: 0 },
+  // hcr2c: Haze rowDelta 2 -> 3 (engine frames re-keyed 433/553/571 -> 432/552/570): the row is the first mover's second body, which keeps the first print's u (known non-ROM residual).
   "haze-player": { delta: -6, rowDelta: { "432:238:0": 3, "552:214:-63": 3, "570:131:-63": 3 } },
   "hyperfang-player": { delta: 0 },
 };

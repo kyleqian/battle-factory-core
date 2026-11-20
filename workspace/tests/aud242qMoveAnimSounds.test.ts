@@ -62,6 +62,7 @@ const SPECS: Array<{ name: string; ids: number[]; deltas: number[] }> = [
   // hpd5: the Ice Ball body (301) joins the audited script leads (ROM R -> attackanimation 10 / 9 / 9 / 9 / 9 rows, hit controller at R + lead + 3 + len + 4: 463 / 968 / 1478 / 1997 / 2590, len 75 x4 + 130)
   // and the app's hit starts on those rows for turns 1..3 (hpd4 left it 13 early). Turn deltas (ROM - ours) pre-hpd4 9 / 13 / 22 / 40 / 63, hpd4 3 / 15 / 27 / 36 / 46, now 3 / 2 / 2 / -1 / -3:
   // the rest is the ROM's own foe damage in this window (ROM 6 / 11 / 20 / 40 / 89 HP, gBattleMons[1].hp; the kernel's 6 / 11 / 23 / 41 / 82 differ from turn 3 on, so the 1 HP / frame bars are 3 / 1 / 7 frames apart).
+  // hcr2c: iceball5 turns 5 / 6 (-1 -> -3, -3 -> -5) are the same stale-u residual as rollout5 (the hold and lead come from the first print only); turns 1..4 are now ROM-exact (3 / 2 -> 0).
   { name: "iceball5-player", ids: [137, 198], deltas: [0, 0, 0, 0, 0, 0, -3, -3, -5, -5] },
 ];
 
