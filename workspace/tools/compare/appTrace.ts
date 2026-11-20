@@ -2318,6 +2318,11 @@ export const APP_STAGES: Readonly<Record<string, AppStage>> = {
   "wsh2-fb-opp-on": (state) => wsh2OppStage(state, "wsh2-fb-opp-on", 50, 20, 69, 196, 2),
   "wsh2-fs-opp-on": (state) => wsh2OppStage(state, "wsh2-fs-opp-on", 25, 50, 248, 0, 2),
   "wsh2-wish-opp-on": (state) => aud241bStage(state, "wsh2-wish-opp-on", "on", 12, 50, 69, undefined, false, 273),
+  // ing1 (docs/fcp1-frame-catcher-pictures.md): the wsh1 / wsh2 Wish windows with INGRAIN (275) in place of Wish: the Lv50 Rattata roots,
+  // the Lv12 one's Seismic Toss hurts it, and the end of the turn heals it (BattleScript_IngrainTurnHeal).
+  "ing1-player-on": (state) => aud241bStage(state, "ing1-player-on", "on", 50, 12, 275, undefined, false, 69),
+  "ing1-player-off": (state) => aud241bStage(state, "ing1-player-off", "off", 50, 12, 275, undefined, false, 69),
+  "ing1-opp-on": (state) => aud241bStage(state, "ing1-opp-on", "on", 12, 50, 69, undefined, false, 275),
   "wsh1-fb-on": (state) => wsh1Stage(state, "wsh1-fb-on", "on", 20, 50, 69, 196, 2),
   "wsh1-fs-on": (state) => wsh1Stage(state, "wsh1-fs-on", "on", 50, 25, 248, 0, 2),
   "wsh1-fs-off": (state) => wsh1Stage(state, "wsh1-fs-off", "off", 50, 25, 248, 0, 2),

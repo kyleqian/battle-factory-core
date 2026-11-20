@@ -49,7 +49,7 @@ import {
 } from "./confirmReveal.ts";
 import { INITIAL_KEY_REPEAT_STATE, readKeys, type KeyRepeatState } from "./keyRepeat.ts";
 import { advanceMonPic, closeMonPic, isCursorInputReady, isMonPicInputReady, openMonPic } from "./monPic.ts";
-import { activateSpeciesNameFade, advanceSpeciesNameFade, deactivateSpeciesNameFade } from "./speciesNameFade.ts";
+import { activateSpeciesNameFade, advanceSpeciesNameFade, deactivateSpeciesNameFade, speciesNameFadeAfterSummary } from "./speciesNameFade.ts";
 import { advanceBallAnim, initialBallAnimState } from "./ballAnim.ts";
 import { ANCHOR_RNG_VALUE, advanceRngValue } from "./rng.ts";
 import { createFramebuffer, fillFramebuffer } from "./framebuffer.ts";
@@ -2947,7 +2947,8 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
     scheduleSummaryStepSounds(summaryBefore, summaryScreen, draftSummarySoundContext(draftScreen));
     if (summaryScreen.transition?.direction === "toDraft" && summaryScreen.returnTarget === "draft") {
       // CloseSummaryScreen stores gLastViewedMonIndex (:1519); CB2_InitSelectScreen restores cursorPos from it (battle_factory_screen.c:1242).
-      draftScreen = { ...draftScreen, cursorPos: summaryScreen.selectedSlot };
+      // nmc1: the return leaves the species name's base red at the message box red (speciesNameFadeAfterSummary).
+      draftScreen = { ...draftScreen, cursorPos: summaryScreen.selectedSlot, speciesNameFade: speciesNameFadeAfterSummary(draftScreen.speciesNameFade) };
     }
   } else {
     let monPic = advanceMonPic(draftScreen.monPic);

@@ -56,7 +56,20 @@ export interface SpeciesNameFadeState {
   delay: number;
   /** BlendPalette's last-applied coeff, held one tick behind `coeff` for rendering - see module doc's render-lag note. */
   renderCoeff: number;
+  /**
+   * nmc1: gPlttBufferUnfaded[PALNUM_FADE_TEXT * 16 + 4], the red the breathe blends from (absent = "text", text.pal's (255,0,0)).
+   * Select screen only: after a summary visit Select_Task_HandleMenu's STATE_MENU_REINIT (battle_factory_screen.c:1654-1657) copies
+   * it from PALNUM_TEXT's entry 4, which Select_InitDisplay never loads (LoadPalette(sSelectText_Pal, BG_PLTT_ID(PALNUM_TEXT),
+   * PLTT_SIZEOF(4)), :1191): the field message box's red left in BG palette 15 (gMessageBox_Pal[4], RGB(28, 1, 1) = (231, 8, 8)).
+   */
+  base?: SpeciesNameBase;
+  /** nmc1: the base of BlendPalettes' last call (Faded keeps the old colour until the breathe blends again). */
+  blendBase?: SpeciesNameBase;
+  /** nmc1: `blendBase` one tick behind, for rendering (the render-lag note). */
+  renderBase?: SpeciesNameBase;
 }
+
+export type SpeciesNameBase = "text" | "messageBoxRed";
 
 /**
  * Anchor state (RAM-probed at the canonical draft-screen snapshot, tick 0):
@@ -79,8 +92,10 @@ export const ANCHOR_SPECIES_NAME_FADE_STATE: SpeciesNameFadeState = {
 };
 
 /** Select_Task_FadeSpeciesName's FADESTATE_RUN/FADESTATE_DELAY, one tick - see module doc. */
-export function advanceSpeciesNameFade(state: SpeciesNameFadeState): SpeciesNameFadeState {
-  const renderCoeff = state.coeff;
+export function advanceSpeciesNameFade(input: SpeciesNameFadeState): SpeciesNameFadeState {
+  const renderCoeff = input.coeff;
+  // nmc1: only a RUN tick while active calls BlendPalettes (below); every other tick keeps the last blend's base on screen.
+  const state = input.blendBase === input.renderBase ? input : { ...input, renderBase: input.blendBase };
 
   if (state.tState === "delay") {
     if (state.delay > 14) {
@@ -110,7 +125,21 @@ export function advanceSpeciesNameFade(state: SpeciesNameFadeState): SpeciesName
     delay = 0;
   }
 
-  return { ...state, coeffDelay, coeff, fadeOut, tState, delay, renderCoeff };
+  return {
+    ...state, coeffDelay, coeff, fadeOut, tState, delay, renderCoeff,
+    ...(state.base === undefined && state.blendBase === undefined ? {} : { blendBase: state.base ?? "text" }),
+  };
+}
+
+/**
+ * nmc1: the select screen's return from a summary (CB2_InitSelectScreen then Select_Task_HandleMenu's STATE_MENU_REINIT,
+ * battle_factory_screen.c:1194-1198 / :1654-1657): from now on the breathe blends from the message box red (SpeciesNameFadeState.base).
+ * The pulse is off while the menu is up, so the screen keeps the colour it had until the breathe next runs.
+ */
+export function speciesNameFadeAfterSummary(state: SpeciesNameFadeState): SpeciesNameFadeState {
+  return state.base === "messageBoxRed" ? state : {
+    ...state, base: "messageBoxRed", blendBase: state.blendBase ?? "text", renderBase: state.renderBase ?? "text",
+  };
 }
 
 export function activateSpeciesNameFade(state: SpeciesNameFadeState): SpeciesNameFadeState {
@@ -123,6 +152,8 @@ export function deactivateSpeciesNameFade(state: SpeciesNameFadeState): SpeciesN
 
 /** text.pal's unfaded TEXT_COLOR_RED (species name fg): (255,0,0). */
 const SPECIES_RED: readonly [number, number, number] = [255, 0, 0];
+/** nmc1: gMessageBox_Pal[4] (graphics/text_window/message_box.png, RGB(28, 1, 1)) as mGBA shows it: (231, 8, 8). */
+const MESSAGE_BOX_RED: readonly [number, number, number] = [231, 8, 8];
 
 /**
  * util.c:264 BlendPalette, target color RGB_BLACK, applied per-channel to
@@ -132,8 +163,8 @@ const SPECIES_RED: readonly [number, number, number] = [255, 0, 0];
  * fadeSpeciesNameCoeff's own state machine only ever drives it 0-6 instead
  * of the screen-fade's 0-16). Oracle-pinned sample: coeff 5 -> (173,0,0).
  */
-export function speciesNameColor(renderCoeff: number): { r: number; g: number; b: number } {
-  const [r, g, b] = SPECIES_RED;
+export function speciesNameColor(renderCoeff: number, base: SpeciesNameBase = "text"): { r: number; g: number; b: number } {
+  const [r, g, b] = base === "messageBoxRed" ? MESSAGE_BOX_RED : SPECIES_RED;
   return {
     r: blendComponentToBlack(r, renderCoeff),
     g: blendComponentToBlack(g, renderCoeff),
