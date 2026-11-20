@@ -537,7 +537,7 @@ describe("random round soak driver (green milestone pin)", () => {
     expect(result.frames).toBeGreaterThan(31_771);
   });
 
-  it("ISSUES #89: seed 7's mid-turn Baton Pass openpartyscreen halt resumes through the forced party selector", () => {
+  it("ISSUES #89: seed 12's mid-turn Baton Pass openpartyscreen halt resumes through the forced party selector", () => {
     // History: seed 27 (full policy) selected Baton Pass mid-turn and used to
     // crash at round 1 battle 1 turn 10, frame 30798, on an unimplemented
     // BattleScript_EffectBatonPass / B_SCR_OP_OPENPARTYSCREEN machine-barrier
@@ -665,7 +665,11 @@ describe("random round soak driver (green milestone pin)", () => {
     // pic9 (the switch-out / send-in lines follow the foe's HP, so their print lengths and the exploring presses moved): seed 7 no longer
     // halts. Re-scanned full-policy seeds 0..39 (tools/soak/batonPassSearch.ts --seeds 0:40 --parallel 4): candidates 15, 16, 27, 39. Seed 15
     // is the lowest (Baton Pass commits 3, first commit 59892, halt 59932 on MAWILE in battleIndex 0, two Lobby new challenges).
-    const result = runSeed(15, {
+    // flow1 (the move menu opens on the first move after a switch-in; the exploring policy's fight presses after a switch pick other
+    // moves): seed 15 no longer commits Baton Pass (with the cursor fix undone it hits again with the numbers above). Re-scanned full-policy
+    // seeds 0..39 (tools/soak/batonPassSearch.ts --seeds 0:40 --parallel 4): candidates 12, 13, 16, 27, 31, 36. Seed 12 is the lowest
+    // (Baton Pass commits 1, first commit 74877, halt 75141 on MAWILE in battleIndex 0, two Lobby new challenges).
+    const result = runSeed(12, {
       maxFrames: 80_000,
       renderEvery: 0,
       coverage: observer as never,
@@ -1022,12 +1026,16 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // pic6 + pic8 (the party-menu cancel fade, the forced menu's earlier clock; see seed 0): frames only, 111140 -> 113091; same battle 6 / depth 5 / turn 19 / roundLost.
       // pic9 (the switch lines follow the foe's HP, so the exploring presses land on new phases): 113091 / battle 6 / depth 5 -> 60400 / battle 3 /
       // depth 2; same turn 19, still roundLost.
-      frames: 60400,
+      // flow1 (the move menu opens on the first move after a switch-in, battle_util.c:299-300 / battle_main.c:3203-3204; ROM-checked by the
+      // frame catcher, docs/flow1-menu-cursors-and-locked-switch-recall.md): the exploring policy's fight presses after its switches pick
+      // other moves, so a new trajectory: 60400 / turn 19 -> 61456 / turn 22; same battle 3 / depth 2 / roundLost. The cursor fix alone moves
+      // it (with it undone the old pin passes; the recall fix alone leaves it). Seed 0 is unmoved.
+      frames: 61456,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 2,
       battle: 3,
-      turn: 19,
+      turn: 22,
     });
   });
 

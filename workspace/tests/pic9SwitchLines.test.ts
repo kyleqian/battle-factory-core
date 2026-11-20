@@ -72,7 +72,9 @@ describe("pic9: every switch line on the real route follows the foe's HP (full-p
       });
     }
     expect(switches).toBeGreaterThan(5);
-    expect([...seenScales.back].sort()).toEqual([0, 2, 3]);
+    // flow1 (the move menu opens on the first move after a switch-in) moved the exploring games: they now also reach scale 1
+    // ("<MON>, come back!"); every line above still follows Cmd_hpthresholds2. Was [0, 2, 3].
+    expect([...seenScales.back].sort()).toEqual([0, 1, 2, 3]);
     expect([...seenScales.in].sort()).toEqual([0, 1, 2, 3]);
   }, 180_000);
 });
