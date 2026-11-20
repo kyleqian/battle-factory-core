@@ -6392,14 +6392,14 @@ function withSynthesizedAiSwitchRecallEvents(
  * `goto` / `jumpifnotmove` / `incrementgamestat` are one frame each before `attackcanceler`, `accuracycheck`, `attackstring`); the oracle swaps
  * the text box one frame later, so the first glyph is at commit + 7 + u (hcr1b Scene OFF and hcr2 Scene ON pixel traces, u = 2 / 3 / 4 / 6 / 8,
  * exact). The fixed stage walk puts it at commit + 9, exact for u = 2; the adjustment is `u - 2` (a hold on `action-dispatch`), the same in both scenes.
- * The ROM plays the script-row sounds ahead of the frame the pixels reach them: one tick in Scene OFF, two ticks in Scene ON once u > 2.
+ * The ROM plays the script-row sounds ahead of the frame the pixels reach them: one tick earlier stamps in Scene OFF. Scene ON would need two ticks once
+ * u > 2 (T2 exact 997 -> 1707), but the T1 census window then shifts (61 missing, 103 unclassified), so Scene ON keeps stamps at the frame (hcr2).
  * Forced (Encore / Struggle) and Focus Punch pre-pass handoffs keep their own leads; a turn that opens with anything but a USEDMOVE
  * print (status / ability / wake-up / confusion head) is not covered.
  */
 const USED_MOVE_LEAD_MIN_U = 2;
 const USED_MOVE_LEAD_MAX_U = 20;
 const USED_MOVE_SOUND_LEAD = 1;
-const USED_MOVE_SOUND_LEAD_SCENE_ON = 2;
 function usedMovePrintLeadU(state: BattleResolutionPresentationState, handoff: BattleResolutionConfirmHandoff): number | null {
   if (handoff.forced !== undefined || handoff.focusPunchPrePass === true) return null;
   const segment = state.segments[0];
@@ -6409,9 +6409,8 @@ function usedMovePrintLeadU(state: BattleResolutionPresentationState, handoff: B
   const u = first.provenance?.instructionExecution;
   return u === undefined || u < USED_MOVE_LEAD_MIN_U || u > USED_MOVE_LEAD_MAX_U ? null : u;
 }
-function usedMoveSoundLeadOf(state: BattleResolutionPresentationState, u: number): number {
-  const sceneOff = ((state.segments[0]?.beforeRules.rulesContext.hitMarker ?? 0) & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0;
-  return sceneOff ? USED_MOVE_SOUND_LEAD : u > USED_MOVE_LEAD_MIN_U ? USED_MOVE_SOUND_LEAD_SCENE_ON : 0;
+function usedMoveSoundLeadOf(state: BattleResolutionPresentationState): number {
+  return ((state.segments[0]?.beforeRules.rulesContext.hitMarker ?? 0) & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0 ? USED_MOVE_SOUND_LEAD : 0;
 }
 function usedMovePrintLeadAdjust(state: BattleResolutionPresentationState, handoff: BattleResolutionConfirmHandoff): number {
   const u = usedMovePrintLeadU(state, handoff);
@@ -6514,7 +6513,7 @@ export function advanceBattleResolutionConfirmHandoff(
     : CONFIRM_HANDOFF_NEXT[handoff.stage];
   if (nextStage === null) {
     const printU = usedMovePrintLeadU(state, handoff);
-    const lead = printU === null ? 0 : usedMoveSoundLeadOf(state, printU);
+    const lead = printU === null ? 0 : usedMoveSoundLeadOf(state);
     return Object.freeze({
       ...state,
       lifecycle: Object.freeze({
