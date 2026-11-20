@@ -854,6 +854,11 @@ export type BattleResolutionOpponentTrainer = Readonly<{
 
 export type BattleResolutionPresentationState = Readonly<{
   /**
+   * btn2 (ROM, both scenes): a button gate's release freezes the wait cursor at its last phase; the box keeps the print and the frozen
+   * cursor until the next print or the box's clear.  The released message's command index + the cursor age at the press.
+   */
+  releasedWaitCursor?: Readonly<{ segmentIndex: number; commandIndex: number; age: number }>;
+  /**
    * Presentation-only Scene ON semi-invulnerable hide carried in from the display ledger at this resolution's start
    * (a live Fly/Bounce charge body in an earlier turn; battleResolutionPresentationRender.ts
    * applyLiveSemiInvulnerableCommand). Absent = nothing hidden.
@@ -2270,6 +2275,30 @@ const SCENE_OFF_FORCED_SWITCH_OUT = Object.freeze({
   timing: FORCED_SWITCH_OUT_TIMING, skipAnimation: true as const, targetAtRest: true as const,
 });
 const TURN_END_TIMING = Object.freeze({ minimumFrames: 8 } as const);
+
+/**
+ * btn2 (ROM, subp1m labs, both scenes): the rows from a button gate's release (the engine's next command starts on press + 1) to the
+ * script's `moveendall`, which the 8-row turn-end follows: the printer's release (resume on press + 3) plus the instructions the
+ * script still runs, one row each.  Dragged out: 2 (press + 5); Substitute damaged: 7 (press + 10); Substitute faded: the instructions
+ * after the 64-row `waitmessage` hold (4) + the 5 before it.  Only a print directly before the turn-end (the fade case has its own lead).
+ */
+export const RELEASE_TO_MOVEEND_ROWS: Readonly<Record<string, number>> = Object.freeze({
+  STRINGID_PKMNWASDRAGGEDOUT: 5,
+  STRINGID_SUBSTITUTEDAMAGED: 10,
+  STRINGID_PKMNSUBSTITUTEFADED: 9,
+});
+
+export function turnEndTimingAfterRelease(
+  commands: readonly BattleResolutionPresentationCommand[], events: readonly BattleKernelSemanticEvent[],
+): BattleTurnEndTiming {
+  let index = commands.length - 1;
+  while (index >= 0 && commands[index]!.type === "sprite-visibility") index -= 1;
+  const printed = commands[index];
+  if (printed?.type !== "message" || printed.promptGate !== true) return TURN_END_TIMING;
+  const payload = events.find((event) => event.sequence === printed.eventSequence)?.payload;
+  const rows = payload?.kind === "message" ? RELEASE_TO_MOVEEND_ROWS[payload.messageId] : undefined;
+  return rows === undefined ? TURN_END_TIMING : Object.freeze({ minimumFrames: TURN_END_TIMING.minimumFrames + rows });
+}
 /**
  * ISSUES #73 rung B correction (2026-08-04): the prior port (53, from
  * `battleScene.ts`'s `TURN17_TRAINER_SLIDE_SETTLE_DELAY` doc comment) had two
@@ -5825,7 +5854,8 @@ export function projectBattleResolutionCommands(
     const lastHp = commands[commands.length - 1];
     commands.push(Object.freeze({
       type: "turn-end",
-      timing: lastHp?.type === "hp" && lastHp.timing === SHELL_BELL_HP_TIMING ? SHELL_BELL_TURN_END_TIMING : TURN_END_TIMING,
+      timing: lastHp?.type === "hp" && lastHp.timing === SHELL_BELL_HP_TIMING ? SHELL_BELL_TURN_END_TIMING
+        : turnEndTimingAfterRelease(commands, events),
     }));
   }
   const finalCommand = commands[commands.length - 1];

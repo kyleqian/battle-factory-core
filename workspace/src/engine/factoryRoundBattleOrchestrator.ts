@@ -106,6 +106,7 @@ import {
   appendBattleResolutionContinuation,
   createBattleResolutionPresentation,
   hasRetainedLockedActionReceipt,
+  messageCommandTypedRows,
   type BattleResolutionPresentationCommand,
   type BattleResolutionLockedActionIdentity,
   type BattleResolutionPresentationState,
@@ -2960,12 +2961,22 @@ function advanceFactoryRoundBattleResolutionCore(
     const completion = reachedSegmentEnd
       ? completedResolutionUpdate(state, resolution)
       : null;
-    const nextResolution = withResolutionLifecycle(
+    const released = withResolutionLifecycle(
       resolution,
       nextCommandIndex,
       completion?.phase ?? "presenting",
       0,
     );
+    const nextResolution = command.type === "message" && !command.noCursor
+      ? Object.freeze({
+        ...released,
+        releasedWaitCursor: Object.freeze({
+          segmentIndex: resolution.segmentIndex,
+          commandIndex: resolution.commandIndex,
+          age: resolution.lifecycle.phaseElapsed - messageCommandTypedRows(command) - 1,
+        }),
+      })
+      : released;
     return Object.freeze({
       ...state,
       battleResolutionPresentation: nextResolution,

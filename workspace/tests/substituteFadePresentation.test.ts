@@ -100,6 +100,43 @@ describe("the fade command in the presentation queue (rung a)", () => {
   });
 });
 
+describe("btn2: the fade's lead and its message box (ROM subp1m-subfade, both scenes)", () => {
+  const withScene = (age: number, hitMarker: number | null) => {
+    const base = stateAt(field(true, false), 0, age) as any;
+    const segment = hitMarker === null ? base.segments[0] : { ...base.segments[0], beforeRules: { rulesContext: { hitMarker } } };
+    return { ...base, segments: [segment] } as never;
+  };
+  const NO_ANIMATIONS = 0x80;
+  it("the doll stays shown (fade age 0) for the 11 lead rows, then the fade body starts", () => {
+    for (const age of [0, 5, SUBSTITUTE_FADE_LEAD_ROWS]) {
+      expect(createBattleResolutionPresentationRenderView(stateAt(field(true, false), 0, age)).effect).toMatchObject({ type: "substitute-fade", age: 0 });
+    }
+    expect(createBattleResolutionPresentationRenderView(stateAt(field(true, false), 0, SUBSTITUTE_FADE_LEAD_ROWS + 7)).effect).toMatchObject({ age: 7 });
+  });
+
+  it("Scene OFF: the box is empty from the fade's first row; Scene ON: the damaged print stays", () => {
+    for (const age of [0, 40, 116]) {
+      expect(createBattleResolutionPresentationRenderView(withScene(age, NO_ANIMATIONS)).message).toBeNull();
+      expect(createBattleResolutionPresentationRenderView(withScene(age, 0)).message).toMatchObject({ lines: ["a", "b"] });
+    }
+  });
+});
+
+describe("btn2: the released print's cursor stays frozen (ROM, both scenes)", () => {
+  const scene = (hitMarker: number, extra: Record<string, unknown>) => {
+    const base = stateAt(field(true, false), 0, 40, extra) as any;
+    return { ...base, segments: [{ ...base.segments[0], beforeRules: { rulesContext: { hitMarker } } }] } as never;
+  };
+  it("Scene ON: the damaged print keeps the cursor at its press-time age through the fade; none without the release record", () => {
+    const released = { releasedWaitCursor: { segmentIndex: 0, commandIndex: 0, age: 4 } };
+    expect(createBattleResolutionPresentationRenderView(scene(0, released)).waitCursor).toEqual({ age: 4 });
+    expect(createBattleResolutionPresentationRenderView(scene(0, {})).waitCursor).toBeNull();
+    expect(createBattleResolutionPresentationRenderView(scene(0, { releasedWaitCursor: { segmentIndex: 0, commandIndex: 3, age: 4 } })).waitCursor).toBeNull();
+    // Scene OFF: the fade cleared the box, so no cursor.
+    expect(createBattleResolutionPresentationRenderView(scene(0x80, released)).waitCursor).toBeNull();
+  });
+});
+
 describe("D4 policy: the fade's documented alternate VBlank phases (rung c)", () => {
   const policy = LIVE_STATUS_ANIMATION_TIMING_POLICY.SUBSTITUTE_FADE!;
   it("ships the dominant phase of each BLDALPHA step and of the blendoff (the later row; 222 / 2 steps, 12 / 2 windows)", () => {
@@ -166,8 +203,9 @@ describe("ordinary route: a substitute breaks", () => {
     expect(on.requests.map((q) => `${q.moveId}:${q.attacker}`).slice(0, 2)).toEqual(["164:0", "188:1"]);
     expect(seen.fadeRows).toBe(117);
     expect(seen.effectRows).toBe(117);
-    // btn2: the box is empty through the whole fade; the faded print's trailing `waitmessage B_WAIT_TIME_LONG` is a 64-row hold piece.
-    expect(seen.boxRows).toEqual([]);
+    // btn2: Scene ON keeps the damaged print through the fade (the ROM's frozen cursor aside); the faded print's trailing
+    // `waitmessage B_WAIT_TIME_LONG` is a 64-row hold piece.
+    expect(seen.boxRows).toHaveLength(117);
     expect(seen.afterFade).toEqual(["button:true:0", "automatic:true:64"]);
     // The queue presents STRINGID_SUBSTITUTEDMG as a button piece (btn1: its `\\p` waits for a new A / B, subp1m); the ROM's frozen cursor is outside the fade's claim.
     expect(seen.prevType).toEqual(["message:button"]);

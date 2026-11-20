@@ -1932,6 +1932,15 @@ export function isBattleResolutionCommandComplete(
 }
 
 /**
+ * btn2 (ROM, subp1m-subfade, both scenes): Scene OFF's fade script clears the message box at its start (the FADED print then types
+ * into the empty box); Scene ON keeps the damaged print and its frozen cursor on screen until the FADED print replaces it.
+ */
+function substituteFadeClearsBox(segment: BattleResolutionSegment): boolean {
+  return segment.beforeRules === null || segment.beforeRules === undefined
+    || (segment.beforeRules.rulesContext.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0;
+}
+
+/**
  * contain209: the length a contained command holds the static field for -- the decline path's: a move-animation without a live
  * duration presents seGate + minimumFrames (battleResolutionCommandDuration), every other command its timing floor.
  */
@@ -2365,6 +2374,7 @@ export function createBattleResolutionPresentationRenderView(
       midBattleSwitchParticles = midBattleSwitchSendInParticlesAt(forcedElapsed, 0, playerMonY) ?? midBattleSwitchParticles;
     }
   }
+  let latestMessageIndex = -1;
   for (let index = 0; index < state.commandIndex; index += 1) {
     const completed = segment.commands[index]!;
     if (summary !== null || opponentRecallSince !== null) {
@@ -2388,9 +2398,11 @@ export function createBattleResolutionPresentationRenderView(
     }
     field = applyCompletedCommand(field, completed);
     semiInvulnerableHidden = applyLiveSemiInvulnerableCommand(semiInvulnerableHidden, completed);
-    if (completed.type === "message") latestMessage = completed.lines;
-    // btn2: the fade's script clears the box at its start; the next print (FADED) types into the empty box.
-    if (completed.type === "substitute-fade") latestMessage = null;
+    if (completed.type === "message") {
+      if (completed.lines !== latestMessage) latestMessageIndex = index;
+      latestMessage = completed.lines;
+    }
+    if (completed.type === "substitute-fade" && substituteFadeClearsBox(segment)) latestMessage = null;
     if (completed.type === "faint") fainted.add(completed.battler);
     if (completed.type === "switch-in") {
       // The recall receipt hid the outgoing mon's sprite+healthbox; the
@@ -2461,9 +2473,15 @@ export function createBattleResolutionPresentationRenderView(
     && command
     && !withoutCurrentCommand
   ) {
-    if (command.type === "substitute-fade") {
+    if (command.type === "substitute-fade" && substituteFadeClearsBox(segment)) {
       latestMessage = null;
       visibleCharacters = 0;
+    }
+    const released = state.releasedWaitCursor;
+    if ((command.type !== "message" || (command.promptGate === true && command.advance === "automatic" && command.lines === latestMessage))
+      && released !== undefined && latestMessage !== null && released.segmentIndex === state.segmentIndex
+      && released.commandIndex === latestMessageIndex) {
+      waitCursor = Object.freeze({ age: released.age });
     }
     if (command.type === "message") {
       latestMessage = command.lines;
