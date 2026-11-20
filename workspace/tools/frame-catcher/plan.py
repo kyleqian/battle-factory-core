@@ -388,3 +388,16 @@ def deal_opponent_check(rom_trainer, rom_sets, first):
     engine = [first["trainerId"], list(first["opponentSetIds"])]
     rom = [rom_trainer, list(rom_sets)]
     return rom == engine, rom, engine
+
+
+def brain_trap_wanted(brain, enemy_now, frame):
+    """The Factory Head's party trap (romRun.brain_traps): armed on the first frame whose fast run changed gEnemyParty's first record
+    (FillFactoryTrainerParty zeroes it, then FillFactoryBrainParty builds the three), kept armed until it fires. Returns (arm now?, armed?).
+    `brain`: {"armedAt": None | frame, "fired": None | {...}, "enemyBefore": bytes}."""
+    if brain is None or brain.get("fired") is not None:
+        return False, False
+    if brain.get("armedAt") is None:
+        if enemy_now == brain.get("enemyBefore"):
+            return False, False
+        return True, True
+    return False, True

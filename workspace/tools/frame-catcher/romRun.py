@@ -23,7 +23,7 @@ sys.path.insert(0, str(HARNESS / "oracle"))
 from emerald_core import EmeraldOracle  # noqa: E402
 from mgba import ffi  # noqa: E402
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from plan import Plan, Driver, RoundCounter, deal_opponent_check, deal_traps_wanted, go_on_roll, lcg, lcg_back, m4a_restarted  # noqa: E402
+from plan import Plan, Driver, RoundCounter, brain_trap_wanted, deal_opponent_check, deal_traps_wanted, go_on_roll, lcg, lcg_back, m4a_restarted  # noqa: E402
 from mons import POKEMON_SIZE, STAT_ORDER, ability_num, decrypt_mon, encrypt_mon, gender, species_of, with_personality  # noqa: E402
 
 REF = (WORKSPACE / "reference/pokeemerald").resolve()
@@ -52,6 +52,7 @@ FUNCS = {  # name -> object file of the copy we want (None = the only one)
     # round 2 and later (fcr2): the PreBattleRoom deal, and the Lobby save dialog's YES/NO (start_menu.c)
     "GenerateInitialRentalMons": "src/battle_factory.o", "GenerateOpponentMons": "src/battle_factory.o",
     "SaveGameTask": None, "SaveConfirmInputCallback": None, "SaveOverwriteInputCallback": None,
+    "FillFactoryBrainParty": None,  # the Factory Head's party (battle 21 / 42), built at battle start
 }
 DATA = {"sFactorySelectScreen": None, "sFactorySwapScreen": None, "sMenu": "src/menu.o", "sSaveDialogCallback": None}
 TASK_MENUS = (  # live task function -> menu kind (first match wins: a summary opened from a menu keeps the menu's task alive)
@@ -435,6 +436,7 @@ def run(engine_dir, out_dir, profile, max_frames):
     # r >= 1 (PreBattleRoom EnterRoom: factory_generaterentalmons, factory_generateopponentmons) is trapped (deal_traps), and the new select
     # screen's six get the engine's personalities as in round 1.
     rounds_seen, select_patched, deals = RoundCounter(), {0}, {}
+    brains, brains_done = {}, set()
     transitions = {int(k): v for k, v in (facts.get("transitions") or {}).items()}
     transitions["forced"] = set()
     sounds, menus, buttons_rle, action_states = [], [], [], []
@@ -457,7 +459,9 @@ def run(engine_dir, out_dir, profile, max_frames):
             staging.append({"what": "battle number blip (not a new round)", "frame": o.frame, "number": bn_before, "read": rounds_seen.blips[-1][2]})
         bn = rounds_seen.last
         rom_round, g = rounds_seen.round, rounds_seen.g()
-        if driver.just_answered == "field.multichoice" and g in battles and go_on_roll(bn) and g not in roll_forced and battles[g].get("rollRngBefore") is not None:
+        # (the Factory Head's GO ON leads to AskSwapBeforeHead: no factory_generateopponentmons; its party is FillFactoryBrainParty's, below)
+        is_brain = g in battles and battles[g].get("generationKind") == "frontier-brain"
+        if driver.just_answered == "field.multichoice" and g in battles and go_on_roll(bn) and not is_brain and g not in roll_forced and battles[g].get("rollRngBefore") is not None:
             back = probe_roll(rom, buttons, battles[g])
             roll = {"battle": g, "slot": bn, "value": back if back is not None else lcg_back(battles[g]["rollRngBefore"]), "start": o.frame,
                     "trainerBefore": rom.u16(s["gTrainerBattleOpponent_A"]), "probed": back is not None}
@@ -471,9 +475,15 @@ def run(engine_dir, out_dir, profile, max_frames):
             deal = deals.setdefault(rom_round, {"round": rom_round, "want": rounds[rom_round], "first": battles.get(rom_round * 7), "rentals": None, "opponent": None, "armedAt": None})
             deal["idsBefore"] = rom.rental_ids()
 
+        brain = None
+        if is_brain and g not in brains_done and not rom.in_battle():
+            brain = brains.setdefault(g, {"battle": g, "armedAt": None, "fired": None, "want": battles[g]})
+            brain["enemyBefore"] = rom.read(s["gEnemyParty"], 8)
+
         def traps(g=g):
             out = transition_traps(rom, battles, transitions, g, staging, live_before) or {}
             out.update(deal_traps(rom, deal, o.frame) or {})
+            out.update(brain_traps(rom, brain, o.frame) or {})
             return out or None
         new = sound.advance(buttons, restep_with=traps)
         store.add(o.screen_rgb())
@@ -508,6 +518,16 @@ def run(engine_dir, out_dir, profile, max_frames):
         # level not yet): patching then let the ROM finish it on top (t3: Ledian at level-1 stats). The transition task marks the end.
         if deal is not None:
             finish_deal(rom, deal, staging, f, sound)
+        if brain is not None and brain["fired"] is not None and g not in brains_done:
+            brains_done.add(g)
+            species = [op["member"]["species"] for op in battles[g]["opponents"]]
+            got = rom.party_species("gEnemyParty")
+            staging.append({"what": "Factory Head party", "battle": g, "frame": f, "romRngAtEntry": brain["fired"]["romRng"], "engineRng": brain["fired"]["engineRng"],
+                            "rom": got, "engine": species, "same": got == species})
+        elif brain is not None and brain["armedAt"] is not None and brain["fired"] is None and f - brain["armedAt"] > 10:
+            # gEnemyParty changed for another reason (the swap screen): wait for the next change
+            staging.append({"what": "Factory Head party: armed without FillFactoryBrainParty, re-armed", "battle": g, "frame": f, "armedAt": brain["armedAt"]})
+            brain["armedAt"] = None
         # the new round's select screen: once its cursor task runs, the six get the engine's personalities (as round 1's, patch_select_mons)
         if rom_round not in select_patched and rom_round < len(rounds) and rom.u32(rom.d["sFactorySelectScreen"]) and task_live(rom, rom.f["Select_Task_HandleChooseMons"]):
             select_patched.add(rom_round)
@@ -663,6 +683,30 @@ def deal_traps(rom, deal, frame):
             o.write_u32(s["gRngValue"], value)
     out[rom.f["GenerateOpponentMons"] + 2] = at_opponent
     return out
+
+
+def brain_traps(rom, brain, frame):
+    """The Factory Head's party (FillFactoryBrainParty, battle_factory.c:759, from DoSpecialTrainerBattle via FillFactoryTrainerParty, which
+    zeroes gEnemyParty first): when a frame's fast run changed gEnemyParty's first record, it is stepped again with a trap at
+    FillFactoryBrainParty's entry that sets gRngValue to the cursor the engine drew the Head's three from (its first set draw), so the
+    ROM builds the engine's three itself; the party patch at the transition then gives them the engine's personalities. Armed until it
+    fires (the zeroing and the build can fall on two frames); a change of gEnemyParty that is not the build re-arms after 10 frames."""
+    arm, armed = brain_trap_wanted(brain, rom.read(rom.s["gEnemyParty"], 8) if brain is not None else None, frame)
+    if not armed:
+        return None
+    if arm:
+        brain["armedAt"] = frame
+    value = brain["want"].get("rollRngBefore")
+    if value is None:
+        return None
+    o, s = rom.o, rom.s
+
+    def at_brain():
+        if brain["fired"] is not None:
+            return
+        brain["fired"] = {"frame": frame, "romRng": rom.u32(s["gRngValue"]), "engineRng": value}
+        o.write_u32(s["gRngValue"], value)
+    return {rom.f["FillFactoryBrainParty"] + 2: at_brain}
 
 
 def probe_deal_opponent(rom, sound, deal):

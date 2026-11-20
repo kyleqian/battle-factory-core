@@ -299,6 +299,16 @@ class RoundTest(unittest.TestCase):
         self.assertEqual(fc.deal_traps_wanted(None, None, 1), ())
         self.assertEqual(fc.deal_traps_wanted({"rentals": None, "opponent": None, "idsBefore": [1], "want": {}}, [2], 1), ())  # no engine cursor
 
+    def test_the_factory_head_trap_arms_on_the_party_build_and_stays_armed(self):
+        b = {"armedAt": None, "fired": None, "enemyBefore": b"\x01" * 8}
+        self.assertEqual(fc.brain_trap_wanted(b, b"\x01" * 8, 10), (False, False))  # nothing built yet
+        self.assertEqual(fc.brain_trap_wanted(b, b"\x00" * 8, 10), (True, True))    # zeroed (or built) this frame
+        b["armedAt"] = 10
+        self.assertEqual(fc.brain_trap_wanted(b, b"\x00" * 8, 11), (False, True))   # the build in the next frame
+        b["fired"] = {"frame": 11}
+        self.assertEqual(fc.brain_trap_wanted(b, b"\x07" * 8, 12), (False, False))
+        self.assertEqual(fc.brain_trap_wanted(None, None, 1), (False, False))
+
     def test_deal_opponent_check(self):
         first = {"trainerId": 83, "opponentSetIds": [215, 258, 190]}
         self.assertEqual(fc.deal_opponent_check(83, [215, 258, 190], first), (True, [83, [215, 258, 190]], [83, [215, 258, 190]]))
