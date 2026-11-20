@@ -1009,7 +1009,8 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // hpf2: 56022 / turn 15 -> 92558 / turn 27 (battle 3 / depth 2 -> battle 5 / depth 4; the exploring presses land on new phases); still roundLost.
       // btn1 (gated battle strings wait for A / B; the exploring policy presses B at 6%): 92558 / turn 27 -> 95264 / turn 29; same battle 5 / depth 4 / roundLost (seed 0 is unmoved).
       // merge of pau4 / btn1 / pau5 / hpf5 (pin1; the exploring presses land on new phases): 95264 / battle 5 / depth 4 / turn 29 -> 111059 / battle 6 / depth 5 / turn 19; still roundLost.
-      frames: 111059,
+      // btn2 (Substitute fade lead / release-to-moveendall rows / the gate accepts 2 rows earlier; presentation timing): frames only, 111059 -> 111140; same battle 6 / depth 5 / turn 19 / roundLost.
+      frames: 111140,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 5,

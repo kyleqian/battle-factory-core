@@ -1981,6 +1981,23 @@ export function isBattleResolutionButtonMessageReady(
       >= messageCommandTypedRows(command) + 1;
 }
 
+/**
+ * btn2: the ROM's `\p` / `\l` printer reaches its wait state the row the last glyph is on screen and a NEW A/B edge is read on the
+ * next advance (A at P accepted iff P >= print row + glyph count: Substitute damaged 420 = 382 + 38, dragged out 319 = 292 + 27,
+ * Static `\l` 240).  The engine's last glyph is visible at phaseElapsed = typedRows - 1, so a gated piece accepts from there; the wait
+ * cursor and the awaiting phase keep `isBattleResolutionButtonMessageReady`.
+ */
+export const GATE_ACCEPT_LEAD_ROWS = 2;
+
+export function isBattleResolutionButtonMessageAcceptable(
+  state: BattleResolutionPresentationState,
+): boolean {
+  const command = currentSegment(state).commands[state.commandIndex];
+  if (command?.type !== "message" || command.advance !== "button") return false;
+  return state.lifecycle.phaseElapsed
+    >= messageCommandTypedRows(command) + 1 - (command.promptGate === true ? GATE_ACCEPT_LEAD_ROWS : 0);
+}
+
 export function isBattleResolutionNextCommandHandoffComplete(
   state: BattleResolutionPresentationState,
 ): boolean {

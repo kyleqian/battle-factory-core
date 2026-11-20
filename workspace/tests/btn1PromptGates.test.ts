@@ -8,6 +8,7 @@ import {
   messageCommandTypedRows,
   promptGatedMessageCommands,
 } from "../src/engine/battleResolutionPresentation";
+import { GATE_ACCEPT_LEAD_ROWS } from "../src/engine/battleResolutionPresentationRender";
 import { battleStringPromptGates } from "../src/engine/battleStringResolver";
 import templates from "../src/data/gen/battle-message-templates.json" with { type: "json" };
 import { currentMessage, playCensusBattleUntil, stopAtGatedMessage } from "./helpers/btn1Battle";
@@ -74,15 +75,15 @@ describe("btn1: a `\\p` message holds until a new A or B press", () => {
     for (const button of ["A", "B"] as const) {
       it(`${name}: ${button} releases at the first accepted row, a press while typing is not remembered`, () => {
         const early = reach(seed, "off", id);
-        // A held for the typing rows is dropped; the first row that can accept is typedRows + 1.
-        for (let row = 0; row < early.typedRows; row += 1) early.cursor.step([button]);
+        // btn2: a press before the last glyph is on screen is dropped; the first row that can accept is typedRows + 1 - GATE_ACCEPT_LEAD_ROWS.
+        for (let row = 0; row < early.typedRows + 1 - GATE_ACCEPT_LEAD_ROWS; row += 1) early.cursor.step([button]);
         const index = indexOf(early);
         expect(stall(early, 60)).toBe(true);
         expect(indexOf(early)).toBe(index);
 
         const ready = reach(seed, "off", id);
-        const row = releaseRow(ready, button, ready.typedRows + 1);
-        expect(row).toBe(ready.typedRows + 1);
+        const row = releaseRow(ready, button, ready.typedRows + 1 - GATE_ACCEPT_LEAD_ROWS);
+        expect(row).toBe(ready.typedRows + 1 - GATE_ACCEPT_LEAD_ROWS);
 
         const late = reach(seed, "off", id);
         expect(releaseRow(late, button, ready.typedRows + 300)).toBe(ready.typedRows + 300);
@@ -129,7 +130,7 @@ describe("btn1: mid-string gates (`\\l` scroll, `\\p` clear)", () => {
     expect(rest.timing.holdFrames).toBe(64);
     const g: Gated = { cursor, typedRows: messageCommandTypedRows(first) };
     expect(stall(g, g.typedRows + HOLD_ROWS)).toBe(true);
-    expect(releaseRow(g, "B", g.typedRows + 1)).toBe(g.typedRows + 1);
+    expect(releaseRow(g, "B", g.typedRows + 1 - GATE_ACCEPT_LEAD_ROWS)).toBe(g.typedRows + 1 - GATE_ACCEPT_LEAD_ROWS);
   });
 
   it("Trick with both items waits on the mid-string `\\p`, then types the second page", () => {

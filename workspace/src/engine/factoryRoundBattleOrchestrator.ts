@@ -124,6 +124,7 @@ import {
   LEECH_SEED_DRAIN_ABSORB_MOVE_ID,
   LIVE_SEMI_INVULNERABLE_NONE,
   type LiveSemiInvulnerableHidden,
+  isBattleResolutionButtonMessageAcceptable,
   isBattleResolutionButtonMessageReady,
   isBattleResolutionCommandComplete,
   playerFaintReplacementSendOutTimingOfSegment,
@@ -2876,7 +2877,7 @@ function advanceFactoryRoundBattleResolutionCore(
     if (
       command.type === "message"
       && command.advance === "button"
-      && isBattleResolutionButtonMessageReady(resolution)
+      && isBattleResolutionButtonMessageAcceptable(resolution)
     ) {
       if (newKeys.has("A") || newKeys.has("B")) {
         const nextCommandIndex = resolution.commandIndex + 1;
@@ -2901,15 +2902,17 @@ function advanceFactoryRoundBattleResolutionCore(
           ...(completion !== null ? { battleForcedPartySelect: completion.battleForcedPartySelect } : {}),
         });
       }
-      return Object.freeze({
-        ...state,
-        battleResolutionPresentation: withResolutionLifecycle(
-          resolution,
-          resolution.commandIndex,
-          "awaiting-message-dismiss",
-          resolution.lifecycle.phaseElapsed,
-        ),
-      });
+      if (isBattleResolutionButtonMessageReady(resolution)) {
+        return Object.freeze({
+          ...state,
+          battleResolutionPresentation: withResolutionLifecycle(
+            resolution,
+            resolution.commandIndex,
+            "awaiting-message-dismiss",
+            resolution.lifecycle.phaseElapsed,
+          ),
+        });
+      }
     }
     if (!isBattleResolutionCommandComplete(resolution)) {
       return Object.freeze({
