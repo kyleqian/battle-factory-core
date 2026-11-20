@@ -219,10 +219,12 @@ export type BattleCommandPresentationState = Readonly<{
   fightDisplayCursor: 0 | 1 | 2 | 3;
   /**
    * msw1: the SELECT "Switch which?" state (`HandleMoveSwitching`): `fightCursor` is the source slot, `target` the
-   * `gMultiUsePlayerCursor`, `displayTarget` the target the box draws (it trails one tick like `fightDisplayCursor`).
+   * `gMultiUsePlayerCursor`.
    * `null` outside the state.
    */
-  moveSwitch: Readonly<{ target: MoveSlot; displayTarget: MoveSlot }> | null;
+  moveSwitch: Readonly<{ target: MoveSlot }> | null;
+  /** msw1: the target the box draws; it trails `moveSwitch` by one tick (like `fightDisplayCursor`) on entry and exit. */
+  moveSwitchDisplay: MoveSlot | null;
   /**
    * msw1: a confirmed swap the owner has not applied yet. The presentation never edits rules; the orchestrator applies
    * `switchFactoryCommandMoves` and returns the new surface through `applyBattleCommandMoveSwitch`.
@@ -646,6 +648,7 @@ export function createBattleCommandPresentation(
     fightCursor: initialFightCursor,
     fightDisplayCursor: initialFightCursor,
     moveSwitch: null,
+    moveSwitchDisplay: null,
     pendingMoveSwitch: null,
     legalMoveBySlot: surface.legalMoveBySlot,
     rejectionReasonBySlot: surface.rejectionReasonBySlot,
@@ -719,9 +722,7 @@ export function advanceBattleCommandPresentation(
         state.lifecycle.phaseElapsed + 1,
         {
           fightDisplayCursor: state.fightCursor,
-          ...(state.moveSwitch === null
-            ? {}
-            : { moveSwitch: Object.freeze({ ...state.moveSwitch, displayTarget: state.moveSwitch.target }) }),
+          moveSwitchDisplay: state.moveSwitch?.target ?? null,
         },
       );
       break;
@@ -891,7 +892,7 @@ export function advanceBattleCommandPresentation(
     // always have four moves, so gNumberOfMovesToChoose > 1 holds, and link battles do not exist here.
     if (!newKeys.has("SELECT")) return state;
     const target = initialMoveSwitchTarget(state.fightCursor);
-    return Object.freeze({ ...state, moveSwitch: Object.freeze({ target, displayTarget: target }) });
+    return Object.freeze({ ...state, moveSwitch: Object.freeze({ target }) });
   }
   const fightCursor = moveFightCursor(state.fightCursor, direction);
   // snd1: :547-597, SE_SELECT only when the cursor moves (a Factory mon always has four moves, so gNumberOfMovesToChoose never blocks).

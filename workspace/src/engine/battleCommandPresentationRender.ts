@@ -90,6 +90,8 @@ export type BattleCommandPresentationRenderView = Readonly<{
   fightMenu: Readonly<{
     moveset: FightMoveset;
     displayCursor: 0 | 1 | 2 | 3;
+    /** msw1: the displayed "Switch which?" target slot; `null` outside SELECT move switching. */
+    moveSwitchTarget: 0 | 1 | 2 | 3 | null;
   }>;
   /**
    * ISSUES #81: the selection-rejection message currently on the box (typed
@@ -264,6 +266,7 @@ export function createBattleCommandPresentationRenderView(
         presentation.field.player.ppBonuses,
       ),
       displayCursor: presentation.fightDisplayCursor,
+      moveSwitchTarget: presentation.moveSwitchDisplay,
     }),
     rejectionMessage,
     forfeitBox,
