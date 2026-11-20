@@ -9,10 +9,12 @@ import json, os, sys
 root = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..")
 tpl = json.load(open(os.path.join(root, "tools/battle-lab/aud242o-rollout5-player-on.json")))
 MOVES = {"dig": 91, "fly": 19, "bounce": 340, "dive": 291, "solarbeam": 76, "razorwind": 13, "skullbash": 130, "skyattack": 143}
+SEEDS = {}  # keep in step with CHG1_SEEDS in appTrace.ts
 W1, W2 = 350, 300
 def build(case, side, move, w1=W1, w2=W2):
     lab = json.loads(json.dumps(tpl))
     lab["profile"] = "battle-scene-off"
+    lab["seed"] = SEEDS.get(case, 1)
     plr, foe = lab["overrides"]["parties"]["player"][0], lab["overrides"]["parties"]["opponent"][0]
     first, second = (foe, plr) if side == "foe" else (plr, foe)
     first["level"], second["level"] = 100, 50

@@ -6740,6 +6740,24 @@ export function appendBattleResolutionContinuation(
 }
 
 /**
+ * chg1: the player's locked action (no command menu) unleashing in Scene OFF: the app's turn start stands for a first print on row
+ * `TURN_START_PRINT_BASE_U` (as a wake-up print's), so a first print on a later row u waits u - 3 frames more (ROM probes, Dig / Fly / ...).
+ */
+function lockedTurnPrintLead(segment: BattleResolutionSegment): BattleResolutionPresentationCommand | null {
+  if ((segment.beforeRules.rulesContext.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) === 0) return null;
+  const first = segment.events[0];
+  if (first === undefined || first.payload.kind !== "message" || first.payload.messageId !== "STRINGID_USEDMOVE") return null;
+  const u = first.provenance?.instructionExecution;
+  if (u === undefined || u <= TURN_START_PRINT_BASE_U || u > USED_MOVE_LEAD_MAX_U) return null;
+  return Object.freeze({
+    type: "move-animation" as const,
+    eventSequence: first.sequence,
+    battler: 0 as const,
+    timing: Object.freeze({ minimumFrames: u - TURN_START_PRINT_BASE_U }),
+  });
+}
+
+/**
  * Groups the automatic follow-up after a multi-turn player action without
  * pretending its two reducer passes were one event list. After the charge
  * turn, HandleTurnActionSelectionState has auto-confirmed the player's locked
@@ -6763,12 +6781,14 @@ export function appendBattleResolutionActionContinuation(
   // flow1: the trainer's command here can be a voluntary switch (seed 18: the player's AZUMARILL underground after Dig, the AI
   // switches to BAYLEEF). The ROM runs BattleScript_ActionSwitch's prelude for it ("<TRAINER> withdrew <MON>!" and the recall,
   // SE_BALL_OPEN) as for any AI switch; the kernel skips it and only the fresh resolution re-made it.
-  const segment = appendResolutionSegment(
+  const baseSegment = appendResolutionSegment(
     resolution,
     transition,
     fieldBoundary,
     resolution.opponentTrainer === null ? transition.events : withSynthesizedAiSwitchRecallEvents(transition.events),
   );
+  const lead = lockedTurnPrintLead(baseSegment);
+  const segment = lead === null ? baseSegment : Object.freeze({ ...baseSegment, commands: Object.freeze([lead, ...baseSegment.commands]) });
   return Object.freeze({
     ...resolution,
     segments: Object.freeze([...resolution.segments, segment]),
