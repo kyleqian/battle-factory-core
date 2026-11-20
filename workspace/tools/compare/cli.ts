@@ -1,6 +1,7 @@
 export const COMPARE_USAGE =
   "usage: npm run compare -- <trace.json> [outDir] " +
   "[--capture-range START:END] [--summary]\n" +
+  "(--summary: first differing frame + diff runs + matched/total instead of per-frame lines)\n" +
   "(default outDir: a fresh tools/compare/out/run-* directory per invocation; " +
   "tools/compare/out/latest symlinks to the newest run)";
 
