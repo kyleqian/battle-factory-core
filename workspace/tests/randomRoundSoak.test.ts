@@ -1030,7 +1030,9 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // frame catcher, docs/flow1-menu-cursors-and-locked-switch-recall.md): the exploring policy's fight presses after its switches pick
       // other moves, so a new trajectory: 60400 / turn 19 -> 61456 / turn 22; same battle 3 / depth 2 / roundLost. The cursor fix alone moves
       // it (with it undone the old pin passes; the recall fix alone leaves it). Seed 0 is unmoved.
-      frames: 61456,
+      // rsw1 (the room after the swap screen: black hold, fade, "Thank you!" waits for A; docs/rsw1-swap-return-room.md): frames only,
+      // 61456 -> 61528 (the player's press lands on the new wait; a rule change, not a bug); same battle 3 / depth 2 / turn 22 / roundLost.
+      frames: 61528,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 2,
