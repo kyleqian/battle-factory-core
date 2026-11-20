@@ -1,0 +1,56 @@
+{
+ "appRoute": "generated-orchestrator",
+ "oracleProfile": "battle-scene-off",
+ "appStage": {
+  "id": "trp1-wrap-opp-off",
+  "frame": 0
+ },
+ "oracleBattleLab": {
+  "scenario": "../../battle-lab/trp1-wrap-opp-off.json"
+ },
+ "segments": [
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 18,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 1100,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 18,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 1100,
+   "buttons": []
+  }
+ ],
+ "captureFrames": [
+  0
+ ]
+}
