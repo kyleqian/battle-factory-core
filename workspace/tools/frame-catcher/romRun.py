@@ -23,7 +23,7 @@ from emerald_core import EmeraldOracle  # noqa: E402
 from battle_lab import SUBSTRUCT_POSITIONS  # noqa: E402
 from mgba import ffi  # noqa: E402
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from plan import Plan, Driver, lcg, lcg_back  # noqa: E402
+from plan import Plan, Driver, lcg, lcg_back, m4a_restarted  # noqa: E402
 
 REF = (WORKSPACE / "reference/pokeemerald").resolve()
 PROFILES = {"on": "factory.json", "off": "factory-battle-scene-off.json"}
@@ -262,7 +262,7 @@ class SoundLog:
         post = bytes(ffi.buffer(self.core.save_raw_state()))
         sig1, clk1 = self.signature(self.blob(post))
         traps = restep_with() if restep_with is not None else None
-        if traps or not (sig0 == sig1 and all(b >= a for a, b in zip(clk0, clk1))):
+        if traps or not (sig0 == sig1 and all(b >= a for a, b in zip(clk0, clk1))) or m4a_restarted(self.blob(pre), self.blob(post), self.players, self.MPLAY_INFO_SIZE, self.MPLAY_TRACK_SIZE):
             self.core.load_raw_state(pre)
             self.stepping(buttons, traps)
             self.restepped += 1

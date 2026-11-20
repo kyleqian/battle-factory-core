@@ -35,6 +35,8 @@ export function menuOf(st) {
     if (sw.phase === "playerPicker" || sw.phase === "enemyPicker") return { kind: "swap.pick", sig: `${sw.cursor}` };
     if (sw.phase === "playerOptions") return { kind: "swap.menu", sig: `${sw.playerOptionCursor}` };
     if (sw.phase === "acceptPrompt" || sw.phase === "quitPrompt") return { kind: "swap.yesno", sig: `${sw.yesNoCursor}` };
+    // the swap screen's SUMMARY (the ROM side sees Task_HandleInput, as for the draft's and the party menu's summaries)
+    if (sw.phase === "summaryFade") return summaryReady(st.summaryScreen) ? { kind: "summary", sig: summarySig(st.summaryScreen) } : null;
     return null;
   }
   const pw = st.postwin;

@@ -70,7 +70,10 @@ round takes about 2 minutes. Five traces at once (`JOBS=5`) take as long as the 
    the stretch (60 frames past its ends included) has that colour at that place. So text printed faster on one side under the same
    animation is timing, while a wrong Pokemon, a missing fade or a sprite one tile off is content. The pixels never shown are cut into
    blobs, followed over frames, and grouped across stretches into ranked differences. Sounds: the (kind, id) lists of a stretch are
-   aligned in order; an event with no partner is content (an event the other side plays just past the stretch's end is timing).
+   aligned in order; an event with no partner is content (an event the other side plays just past the stretch's end is timing). The ROM
+   log keeps only calls that changed the m4a RAM and ours logs every call, so before comparing: a press's sound on the first frame of the
+   menu it opened counts for the menu that took the press, the same sound twice on one frame counts once, and a volume change to the
+   volume the music has and a cry stop after the cry is over are left out (docs/snd2-catcher-sounds.md).
 
 When a sprite is in a different place on the two sides, check a frame after it has stopped moving: during a walk the two sides pass
 through the same tiles at different moments (the first look at Kyle's Tuber picked a ROM frame mid-walk and missed the one-tile offset).
@@ -88,3 +91,6 @@ through the same tiles at different moments (the first look at Kyle's Tuber pick
 - The test player's `full` policy browses the summary's move-select mode and other corners the driver has no cursor model for
   (`steer_button`); a press there is replayed but not steered.
 - Pan changes of a running sound (`pan` events) are not compared; cry pitch / length details are not checked.
+- The player's Pokemon are not exactly the engine's: the re-entered select screen builds its six with new personalities
+  (CreateFrontierFactorySelectableMons), so gender and, for species with two abilities, the ability can differ (seed 6's GROWLITHE has
+  no Intimidate on the ROM). Patching them to the engine's is still to do (docs/snd2-catcher-sounds.md).

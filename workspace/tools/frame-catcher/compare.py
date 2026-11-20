@@ -200,19 +200,98 @@ def picture_compare(eng, rom, e0, e1, r0, r1):
             "episodes": [{k: v for k, v in ep.items() if k != "worst"} | {"worstFrame": ep["worst"]["frame"]} for ep in episodes]}, episodes
 
 
+def press_frames(buttons):
+    """Frames on which a button starts being pressed (the game reads JOY_NEW), from a timeline's run-length [frame, "A+B"] rows."""
+    out, held = set(), set()
+    for f, b in buttons:
+        now = set(b.split("+")) if b else set()
+        if now - held:
+            out.add(f)
+        held = now
+    return out
+
+
+def attribute_press_sounds(sounds, presses, boundaries):
+    """A menu that opens on the very frame of the press that opened it would put that press's own sound (its SE_SELECT) in the new
+    menu's stretch, while the other side, whose next menu opens a few frames after the press, keeps it in the old one: our party menu,
+    its submenu and the swap screen report themselves open on the A frame, the ROM's a few frames later, so every A there showed as
+    "the ROM plays, ours does not" in one stretch and "ours plays, the ROM does not" in the next. An SE on a stretch's first frame
+    with a new press on that frame belongs to the menu that took the press: it is counted on the stretch's last frame before."""
+    return [(f - 1 if f in boundaries and f in presses and ev.get("kind") in ("se", "direct") else f, ev) for f, ev in sounds]
+
+
 def sound_key(ev):
     k = ev.get("kind")
     if k == "direct":
         k = "se"
+    if k == "duck":  # a cry's lowering (85) and the restore (256) are different events: aligned by kind and id alone they paired crosswise
+        return (k, ev.get("id"), ev.get("volume"))
     return (k, ev.get("id"))
 
 
+def steer_sounds(rom_sounds, steer_frames):
+    """The ROM's SE_SELECT of each cursor press the ROM driver added itself (to bring the ROM's cursor to ours): the first one in the 8
+    frames from the press. Only that one: a wider cut also dropped a real press's sound right after a steer (seed 3's fight-menu B)."""
+    sel = sorted((f, i) for i, (f, ev) in enumerate(rom_sounds) if sound_key(ev) == ("se", 5))
+    out = set()
+    for sf in steer_frames:
+        hit = next((i for f, i in sel if sf <= f < sf + 8 and i not in out), None)
+        if hit is not None:
+            out.add(hit)
+    return out
+
+
+def drop_unchanged_volume(sounds):
+    """A BGM volume set to the volume it already has changes nothing (the ROM log drops such an m4aMPlayVolumeControl as `noop`; ours
+    logs every call, e.g. CloseSummaryScreen's restore to 0x100 after the cry's own restore, pokemon_summary_screen.c:1523-1524). A new
+    BGM plays at full volume."""
+    volume, out = 0x100, []
+    for f, ev in sounds:
+        if ev.get("kind") == "bgm":
+            volume = 0x100
+        elif ev.get("kind") == "duck":
+            if ev.get("volume") == volume:
+                continue
+            volume = ev.get("volume")
+        out.append([f, ev])
+    return out
+
+
+def drop_silent_cry_stops(sounds):
+    """A cry stop that cuts no sounding cry changes nothing you hear; the ROM log keeps StopCryAndClearCrySongs only when it changed the
+    m4a RAM (CloseSummaryScreen calls it on every close, pokemon_summary_screen.c:1523), ours logs every call. A cry sounds from its start
+    to the BGM restore after it (Task_DuckBGMForPokemonCry: duck to 256 once the cry is over) or a stop."""
+    sounding, out = False, []
+    for f, ev in sounds:
+        kind = ev.get("kind")
+        if kind == "cry":
+            sounding = True
+        elif kind == "duck" and ev.get("volume") == 0x100:
+            sounding = False
+        elif kind == "stop" and ev.get("player") == "cry":
+            if not sounding:
+                continue
+            sounding = False
+        out.append([f, ev])
+    return out
+
+
+def one_per_frame(events):
+    """The same sound started twice on one frame is one sound: m4a's second MPlayStart changes nothing (the ROM log drops it as `noop`;
+    ours logs both calls, e.g. the YES / NO's NO: menu.c:1020 and script_menu.c:238)."""
+    seen, out = set(), []
+    for f, k, ev in events:
+        key = (f, k, ev.get("pan"))
+        if key not in seen:
+            seen.add(key)
+            out.append((f, k, ev))
+    return out
+
+
 def sound_compare(eng_snd, rom_snd, e0, e1, r0, r1, steered=frozenset()):
-    """`steered`: ROM frames just after a cursor press the ROM driver added itself (to bring the ROM's cursor to ours); the ROM's
-    SE_SELECT there has no press of ours behind it and is left out."""
-    E = [(f - e0, sound_key(ev), ev) for f, ev in eng_snd if e0 <= f < e1 and ev.get("kind") != "pan"]
-    R = [(f - r0, sound_key(ev), ev) for f, ev in rom_snd if r0 <= f < r1 and ev.get("kind") != "pan"
-         and not (f in steered and sound_key(ev) == ("se", 5))]
+    """`steered`: indexes into `rom_snd` of the ROM's own steering presses' SE_SELECTs (steer_sounds), left out: no press of ours is behind them."""
+    E = one_per_frame([(f - e0, sound_key(ev), ev) for f, ev in eng_snd if e0 <= f < e1 and ev.get("kind") != "pan"])
+    R = one_per_frame([(f - r0, sound_key(ev), ev) for i, (f, ev) in enumerate(rom_snd) if r0 <= f < r1 and ev.get("kind") != "pan" and i not in steered])
     if not E and not R:
         return {"class": "identical", "events": [0, 0]}
     sm = difflib.SequenceMatcher(a=[k for _, k, _ in E], b=[k for _, k, _ in R], autojunk=False)
@@ -225,23 +304,32 @@ def sound_compare(eng_snd, rom_snd, e0, e1, r0, r1, steered=frozenset()):
         else:
             missing += [R[j] for j in range(j1, j2)]  # the ROM plays it, ours does not
             extra += [E[i] for i in range(i1, i2)]    # ours plays it, the ROM does not
-    both = Counter(k for _, k, _ in missing) & Counter(k for _, k, _ in extra)
-    moved = sum(both.values())
+    # same-key leftovers inside the stretch (reordered) are settled after the cross-boundary pairing (settle_sounds): settled first, a
+    # sound that belongs to the neighbouring stretch was used up here and left its partner unpaired there
+    cls = "content" if missing or extra else ("timing" if shifts else "identical")
+    return {"class": cls, "events": [len(E), len(R)], "missingInOurs": [[f, *k] for f, k, _ in missing],
+            "extraInOurs": [[f, *k] for f, k, _ in extra], "shifts": shifts[:40], "reordered": 0}
 
-    def drop(lst, c):
-        c = Counter(c)
-        out = []
+
+def settle_sounds(snd):
+    """Leftovers of one key on both sides of a stretch are the same sounds in another order: timing, not content."""
+    if snd["class"] != "content":
+        return snd
+    both = Counter(tuple(x[1:]) for x in snd["missingInOurs"]) & Counter(tuple(x[1:]) for x in snd["extraInOurs"])
+
+    def drop(lst):
+        c, out = Counter(both), []
         for item in lst:
-            if c[item[1]] > 0:
-                c[item[1]] -= 1
+            if c[tuple(item[1:])] > 0:
+                c[tuple(item[1:])] -= 1
             else:
                 out.append(item)
         return out
-    if both:
-        missing, extra = drop(missing, both), drop(extra, both)
-    cls = "content" if missing or extra else ("timing" if shifts or moved else "identical")
-    return {"class": cls, "events": [len(E), len(R)], "missingInOurs": [[f, k[0], k[1]] for f, k, _ in missing],
-            "extraInOurs": [[f, k[0], k[1]] for f, k, _ in extra], "shifts": shifts[:40], "reordered": moved}
+    snd["missingInOurs"], snd["extraInOurs"] = drop(snd["missingInOurs"]), drop(snd["extraInOurs"])
+    snd["reordered"] = sum(both.values())
+    if not snd["missingInOurs"] and not snd["extraInOurs"]:
+        snd["class"] = "timing"
+    return snd
 
 
 def phase_labels(eng):
@@ -336,7 +424,10 @@ def main():
     for old in (run / "images").glob("*.png"):
         old.unlink()
     menu_at = {f: k for f, k, _ in eng.tl["menus"]}
-    steered = frozenset(x for sf in rom.tl.get("steerFrames", []) for x in range(sf, sf + 8))
+    eng_sounds = attribute_press_sounds(drop_silent_cry_stops(drop_unchanged_volume(eng.tl["sounds"])), press_frames(eng.tl["buttons"]), {e for e, _, _ in bounds})
+    rom_list = drop_silent_cry_stops(drop_unchanged_volume(rom.tl["sounds"]))
+    rom_sounds = attribute_press_sounds(rom_list, press_frames(rom.tl["buttons"]), {r for _, r, _ in bounds})
+    steered = frozenset(steer_sounds(rom_list, rom.tl.get("steerFrames", [])))
     for k, (e0, r0, j) in enumerate(bounds):
         e1, r1 = (bounds[k + 1][0], bounds[k + 1][1]) if k + 1 < len(bounds) else (e_end, r_end)
         if e1 <= e0 or r1 <= r0:
@@ -346,7 +437,7 @@ def main():
             snd = {"class": "skipped"}
         else:
             pic, eps = picture_compare(eng, rom, e0, e1, r0, r1)
-            snd = sound_compare(eng.tl["sounds"], rom.tl["sounds"], e0, e1, r0, r1, steered)
+            snd = sound_compare(eng_sounds, rom_sounds, e0, e1, r0, r1, steered)
         cls = "content" if "content" in (pic["class"], snd["class"]) else "timing" if "timing" in (pic["class"], snd["class"]) else pic["class"]
         st = {"index": k, "engine": [e0, e1], "rom": [r0, r1], "startsAt": menu_at.get(e0), "where": label(e0), "surface": surface_at(eng, e0),
               "class": cls, "pictures": pic, "sounds": snd}
@@ -379,6 +470,9 @@ def main():
             if snd["class"] == "content" and not snd["missingInOurs"] and not snd["extraInOurs"]:
                 snd["class"] = "timing"
                 x["class"] = "content" if x["pictures"]["class"] == "content" else "timing"
+    for x in stretches:
+        if x["sounds"]["class"] == "content" and settle_sounds(x["sounds"])["class"] == "timing":
+            x["class"] = "content" if x["pictures"]["class"] == "content" else "timing"
 
     # group episodes of one side at one place, in stretches that start at the same kind of menu, into differences
     stretches_by_index = {st["index"]: st for st in stretches}
@@ -416,7 +510,7 @@ def main():
         if snd["class"] != "content":
             continue
         for key, lst in (("missing", snd["missingInOurs"]), ("extra", snd["extraInOurs"])):
-            for f, kind, sid in lst:
+            for f, kind, sid, *_ in lst:
                 g = sgroups[(key, kind, sid, st["startsAt"] or st["surface"])]
                 g["count"] += 1
                 if st["index"] not in g["stretches"]:
