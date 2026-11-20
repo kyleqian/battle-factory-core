@@ -1,6 +1,7 @@
 // btn2: per-frame presentation rows of an app-staged battle-lab trace (tools/compare/traces/<id>.json): segment / command / phase / elapsed.
 // usage: node --experimental-strip-types --no-warnings tools/integration/btn2EngineRows.ts <trace-id> [out.json]
 import { readFileSync, writeFileSync } from "node:fs";
+import "../../src/engine/monPicPixelsInstall.ts";
 import { applyTraceStage } from "../compare/appTrace.ts";
 import { traceAdvances } from "../compare/traceReplay.ts";
 import { createInitialState, tick } from "../../src/engine/core.ts";
