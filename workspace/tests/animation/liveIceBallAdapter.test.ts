@@ -76,7 +76,7 @@ describe("S10A Ice Ball (301): faithful timing with D3", () => {
     }
   });
 
-  it("declines without a counter, without a lend, without the earlier body's words, and after a KO / send-in / invalidation between the bodies", () => {
+  it("declines without a counter; without a lend, without the earlier body's words, or after a KO / send-in / invalidation between the bodies, it is drawn approximately (ice2 A)", () => {
     for (const counter of [undefined, 0, 6]) for (const attacker of [0, 1] as const) expect(liveMoveAnimationDuration(base(attacker, counter))).toBeNull();
     const f = lendFixtureAt("ice-ball-player-spheal-opponent-registeel-b3");
     const view = liveView(f, 40);
@@ -85,17 +85,25 @@ describe("S10A Ice Ball (301): faithful timing with D3", () => {
       presentationRng: { host: { bodies: { key: string }[] }; key: string } };
     const present = (order: unknown, rng: unknown = e.presentationRng) => liveMoveAnimationPresentation(e.request, view.field, 40, undefined,
       e.spriteAllocatorInput, order as never, rng as never, e.battlerX2Input);
+    // ice2 A (docs/hpd1-hp-hold.md "ice950m" / "ice2"): an unresolved lend is attributed (sprite-order-unknown), so the wrapper draws the body
+    // approximately with the known-entry first-body order instead of a bare decline; the proven render still declines (null) underneath.
+    const unknownLend = (order: unknown, rng: unknown = e.presentationRng) => {
+      const sink: { approximate?: string } = {};
+      const state = liveMoveAnimationPresentation(e.request, view.field, 40, undefined, e.spriteAllocatorInput, order as never, rng as never,
+        e.battlerX2Input, undefined, sink as never);
+      return state === null ? null : sink.approximate;
+    };
     expect(e.spriteOrderInput.free).toEqual([]);
     expect(present(e.spriteOrderInput)?.config.move).toBe("ICE_BALL");
-    expect(present(undefined)).toBeNull();
-    // The host without the earlier bodies' words (only the current body): the carry is unknown.
+    expect(unknownLend(undefined)).toBe("sprite-order-unknown");
+    // The host without the earlier bodies' words (only the current body): the carry, and so the lend, is unknown (ice2 A: drawn approximately).
     const own = { ...e.presentationRng, host: { ...e.presentationRng.host, bodies: e.presentationRng.host.bodies.filter((b) => b.key === e.presentationRng.key) } };
-    expect(present(e.spriteOrderInput, own)).toBeNull();
+    expect(unknownLend(e.spriteOrderInput, own)).toBe("sprite-order-unknown");
     const d = e.spriteOrderInput.deferred;
     for (const unit of [{ kind: "faint", side: "opponent" }, { kind: "next-mon-send-out" }, { kind: "switch-out" }, { kind: "invalidate", reason: "x" }]) {
-      expect(present({ ...e.spriteOrderInput, deferred: { ...d, units: [...d.units, unit] } }), unit.kind).toBeNull();
-      expect(present({ ...e.spriteOrderInput, deferred: { ...d, activation: { deferred: { ...(d.activation as { deferred: { units: object[] } }).deferred,
-        units: [unit] } } } }), `nested ${unit.kind}`).toBeNull();
+      expect(unknownLend({ ...e.spriteOrderInput, deferred: { ...d, units: [...d.units, unit] } }), unit.kind).toBe("sprite-order-unknown");
+      expect(unknownLend({ ...e.spriteOrderInput, deferred: { ...d, activation: { deferred: { ...(d.activation as { deferred: { units: object[] } }).deferred,
+        units: [unit] } } } }), `nested ${unit.kind}`).toBe("sprite-order-unknown");
     }
   });
 
@@ -136,12 +144,16 @@ describe("S10A Ice Ball (301): faithful timing with D3", () => {
     expect(liveMoveRandom2Plan(base(0))).toBeNull();
   });
 
-  it("gates: known lend required; declines with no order / no words and for a shiny battler", () => {
+  it("gates: a known lend is exact, no order is approximate (ice2 A); declines with no words and for a shiny battler", () => {
     const f = fixtureAt("ice-ball-alt-opponent-glalie-golem");
     const view = liveView(f, 40);
     const e = view.effect as unknown as { request: BattleMoveAnimationRequest; spriteAllocatorInput: never; spriteOrderInput: never; presentationRng: never };
     expect(liveMoveAnimationPresentation(e.request, view.field, 40, undefined, e.spriteAllocatorInput, e.spriteOrderInput, e.presentationRng)).not.toBeNull();
-    expect(liveMoveAnimationPresentation(e.request, view.field, 40, undefined, e.spriteAllocatorInput, undefined, e.presentationRng)).toBeNull();
+    // ice2 A: no order is an attributed unknown lend, drawn approximately (sprite-order-unknown), not a bare decline.
+    const noOrderSink: { approximate?: string } = {};
+    expect(liveMoveAnimationPresentation(e.request, view.field, 40, undefined, e.spriteAllocatorInput, undefined, e.presentationRng, undefined, undefined,
+      noOrderSink as never)).not.toBeNull();
+    expect(noOrderSink.approximate).toBe("sprite-order-unknown");
     expect(liveMoveAnimationPresentation(e.request, view.field, 40, undefined, e.spriteAllocatorInput, e.spriteOrderInput, undefined)).toBeNull();
     // A personality whose halves xor to the Factory OT id's halves is shiny (liveBattlerIsShiny).
     const shinyPersonality = [...Array(0x10000).keys()].map((hi) => (hi << 16 | 0) >>> 0).find((p) => liveBattlerIsShiny(p))!;
