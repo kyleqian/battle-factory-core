@@ -5,7 +5,7 @@ import type { BattleCommandFieldBattler } from "../../src/engine/battleCommandPr
 import type { BattleResolutionDisplayedField } from "../../src/engine/battleResolutionPresentation.ts";
 import { createBattleResolutionPresentationRenderView } from "../../src/engine/battleResolutionPresentationRender.ts";
 import { renderBattleResolutionLiveView } from "../../src/engine/battleScene.ts";
-import { substituteFadeDuration, substituteFadeRenderView } from "../../src/engine/liveSubstituteFade.ts";
+import { SUBSTITUTE_FADE_LEAD_ROWS, substituteFadeDuration, substituteFadeRenderView } from "../../src/engine/liveSubstituteFade.ts";
 import { liveView, type Fixture } from "../../tools/integration/liveAdapterFramebuffer.ts";
 
 // Species audit 14 (docs/live-species-audit-14.md) defects fixed in production (d4w rung c). ROM pins: speciesAudit14PlainShift.ts --pins
@@ -53,8 +53,9 @@ describe("Substitute fade: a non-doll elevated opponent OTHER battler's shadow i
       segmentIndex: 0, commandIndex: 1, lifecycle: { phase: "presenting", phaseElapsed: age }, confirmHandoff: null, opponentTrainer: null,
       sourceDecision: { kind: "use-move" }, fadeTick: 0 } as never;
   };
+  // btn2: the fade's effect age starts SUBSTITUTE_FADE_LEAD_ROWS (11, ROM press -> fade start) after the command's first row; `age` is the effect age.
   const viewAt = (f: BattleResolutionDisplayedField, battler: 0 | 1, age: number) =>
-    substituteFadeRenderView(createBattleResolutionPresentationRenderView(stateAt(f, battler, age)))!.view;
+    substituteFadeRenderView(createBattleResolutionPresentationRenderView(stateAt(f, battler, age + SUBSTITUTE_FADE_LEAD_ROWS)))!.view;
   it("player fade: the opponent's shadow shows on age 0 (200 -> 0 px, GOLBAT / FLYGON), hidden from age 1 through script rows + 1", () => {
     const f = Object.freeze({ player: mon("player", 0, 53, true), opponent: mon("trainer", 1, 42, false) });
     expect(viewAt(f, 0, 0).postBodyShadowHidden).toBe(false);

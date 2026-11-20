@@ -95,3 +95,23 @@ describe("btn2: the gate accepts from the row its last glyph is on screen (ROM e
     expect(isBattleResolutionButtonMessageAcceptable(stateAt(false, T + 1))).toBe(true);
   });
 });
+
+describe("btn2: the orchestrator hands the released print's cursor phase to the render (ROM: frozen until the next print / clear)", () => {
+  for (const scene of ["off", "on"] as const) {
+    it(`Substitute damaged (seed 177, Scene ${scene.toUpperCase()}): a press after the cursor showed records its age`, () => {
+      const { cursor, found } = playCensusBattleUntil(177, scene, stopAtGatedMessage("STRINGID_SUBSTITUTEDAMAGED", 0));
+      expect(found).toBe(true);
+      const resolutionOf = () => cursor.state().battleResolutionPresentation as any;
+      const typed = messageCommandTypedRows(currentMessage(cursor.state())!.command);
+      for (let row = 0; row < typed + 7; row += 1) cursor.step([]);
+      expect(resolutionOf().lifecycle.phase).toBe("awaiting-message-dismiss");
+      const before = resolutionOf();
+      const elapsed = before.lifecycle.phaseElapsed as number;
+      cursor.step(["A"]);
+      const after = resolutionOf();
+      expect(after.commandIndex).toBe(before.commandIndex + 1);
+      expect(after.releasedWaitCursor).toEqual({ segmentIndex: before.segmentIndex, commandIndex: before.commandIndex, age: elapsed - typed - 1 });
+      expect(elapsed - typed - 1).toBeGreaterThanOrEqual(5);
+    });
+  }
+});

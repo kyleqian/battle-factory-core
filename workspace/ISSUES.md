@@ -23,12 +23,11 @@ room recordings that drew one are compared to the battle intro. Open:
   ordinary-room ROM harness; changing the handoff could move the RNG advance.
 - SQUARES_SCROLL's direction depends on the BGM lag after the draw (0 or 1 frame), unknown to the engine; production assumes 0.
 
-## #223 — Battle messages ending in `\p` / `\l`: open remainder of btn1 (2026-11-19)
+## #223 — Battle messages ending in `\p` / `\l`: open remainder (2026-11-19; btn2 2026-11-20)
 
-Landed by btn1 (`docs/subp1m-battle-text-pause.md` section 6): every template-derived `\p` / `\l` / `PAUSE_UNTIL_PRESS` gate waits for a new A or B in both scenes (Substitute damaged / faded, dragged out, `MoveUsedIs*`, Trick both items, Static, the ability-blocking strings); START is a no-op. Open:
-- The scroll after a `\l` (`PROMPT_SCROLL_ROWS = 5`) is fitted to Static's single measurement (A at 600 -> 633) and applied to the ability-blocking strings without a ROM window; the `\p` clear delay between the Trick pages (modelled 0) is unmeasured.
-- Item 6: the Substitute fade (engine 106 rows, ROM observed ~111 on `subp1m-subfade`) is not ROM-measured against the engine.
-- The `typedRows + 1` accept row and the release delay after a press are the existing button-message model; a +/-1 row comparison with the ROM's print + 38 / press + 3 is not separated (no `npm run compare` stage exists for the Substitute-hit / Roar labs).
+Landed by btn1 + btn2 (`docs/subp1m-battle-text-pause.md` sections 6 / 7): every template-derived `\p` / `\l` / `PAUSE_UNTIL_PRESS` gate waits for a new A or B in both scenes; the Substitute fade lead (11 rows) and box, the release-to-moveendall rows, the frozen cursor, the accept edge (ROM: print + glyph count) and the Static scroll (5 rows) / Trick clear (0 rows) are ROM-measured. Open:
+- The `\l` scroll of the ability-blocking strings (`PROMPT_SCROLL_ROWS = 5`, measured on Static only) has no ROM window; the intermediate scroll images (rows P+1..P+5) are not compared (no Static / Trick compare stage).
+- The box clear after a release is 1 row late in the app (subhit 521 vs 520, roar 516 vs 515); the release rows apply only to a gated print directly before the turn-end (a mid-turn FADED follow-up is unmeasured).
 - For the website: these messages now need the player's A / B (`docs/library-package.md`, "Battle messages that wait for A or B").
 
 ## #221 — Lobby RNG cursor: harness / unmeasured routes (lbw1 / lbw2 / lbw3, 2026-11-15)
