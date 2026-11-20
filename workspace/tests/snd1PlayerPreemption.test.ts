@@ -135,6 +135,20 @@ describe("an SE preempted on its music player sounds one frame past the new star
     }
   });
 
+  it("snd2: the same SE started twice on one frame is one sound (MPlayStart's second start changes nothing; the ROM probe logs it noop)", async () => {
+    const { ctx, player, at } = await ready();
+    const push = at(640);
+    push(se(640, 5, null)); // the swap question's NO: menu.c's SE_SELECT, then Task_HandleYesNoInput's
+    push(se(640, 5, null));
+    expect(ctx.sources.length).toBe(1);
+    expect(ctx.sources[0]!.stops.length).toBe(0);
+    expect(player.stats().preempted).toBe(0);
+    // a start on the next frame is a restart (Rollout's SE_M_HEADBUTT on 10 frames in a row): the old one is released as before
+    push(se(641, 5, null));
+    expect(ctx.sources.length).toBe(2);
+    expect(player.stats().preempted).toBe(1);
+  });
+
   it("m4aSongNumStop of a playing SE releases it the same way", async () => {
     const { ctx, at } = await ready();
     const push = at(10);
