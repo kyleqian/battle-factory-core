@@ -82,7 +82,7 @@ const IU120_BODY_RULES: ReadonlyMap<number, Iu120BodyRule> = new Map<number, Iu1
   // lse2 lead-first status bodies
   [73, { defaultLead: 36, tail: 0 }], [322, { defaultLead: 2, tail: 3 }], [347, { defaultLead: 2, tail: 3 }], [227, { defaultLead: 2, tail: 10 }],
   // lse4 (production's gap-print / lead-only classes and LSE4_SHAPE_A_MOVE_IDS): Revenge 279 is shape A (lead 5, tail 3); Absorb 71 lead 5, tail 3 + 2 window-short rows; Recycle 278 lead 2, tail 2 (gap 3);
-  // Razor Wind 13 unleash lead 5, tail 4 (its charge turn: lead 1, tail 7, the caller passes the lead); Wish 273 lead 2, no tail (its pause is a separate command).
+  // Razor Wind 13 unleash lead 5, tail 4 (its charge turn: lead 1, tail 4, the caller passes the lead); Wish 273 lead 2, no tail (its pause is a separate command).
   [279, shapeA(279)], [71, { defaultLead: 5, tail: 5 }], [278, { defaultLead: 2, tail: 2 }], [13, { defaultLead: 5, tail: 4 }], [273, { defaultLead: 2, tail: 0 }],
   // lse2 hit tail table wins over the shape-A formula (Blizzard: 2)
   [59, { ...shapeA(59), tail: 2 }],

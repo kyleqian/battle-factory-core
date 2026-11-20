@@ -146,8 +146,8 @@ describe("live prep10 move adapters", () => {
     const on = generatedCommandAnimationReplay(r.seed, "on", r.moves, r.streak);
     const off = generatedCommandAnimationReplay(r.seed, "off", r.moves, r.streak);
     const bodies = on.animations.filter(a => a.moveId === r.id && a.attacker === 0);
-    // lse4: Razor Wind's charge turn presents lead 1 + tail 7 (gap-print class), its unleash lead 5 + tail 4; the helper default is the unleash.
-    expect(bodies.map(b => b.ages.length)).toEqual(r.bodies.map((n, i) => n + iu120Extra(r.id) + (r.id === 13 && i === 0 ? 8 : hpd4BodyRows(r.id))));
+    // lse4: Razor Wind's charge turn presents lead 1 + tail 4 (gap-print class), its unleash lead 5 + tail 4; the helper default is the unleash.
+    expect(bodies.map(b => b.ages.length)).toEqual(r.bodies.map((n, i) => n + iu120Extra(r.id) + (r.id === 13 && i === 0 ? 5 : hpd4BodyRows(r.id))));
     for (const body of bodies) {
       expect(body.ages).toEqual(Array.from({ length: body.ages.length }, (_, age) => age));
       expect(body.adapterActive.every(Boolean)).toBe(true);
