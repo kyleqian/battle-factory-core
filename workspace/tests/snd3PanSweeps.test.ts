@@ -87,7 +87,7 @@ const flush = async (): Promise<void> => {
 function sweepEvents(id: number, attackerSide: "player" | "opponent", at: number): SoundEvent[] {
   const op: TimedOp = { op: "panse", frame: 0, id, pan: -64, target: 63, inc: 2, wait: 0 };
   const targetSide = attackerSide === "player" ? "opponent" : "player";
-  return moveAnimOpRows(op, { attackerSide, targetSide }).map((row) => ({ id: null, pan: null, ...row.emission, frame: at + row.offset }) as SoundEvent);
+  return moveAnimOpRows(op, { attackerSide, targetSide }).map((row): SoundEvent => ({ ...row.emission, frame: at + row.offset }));
 }
 
 describe("panse sweeps (Blizzard 153, Gust 132)", () => {
