@@ -72,3 +72,28 @@ FFMPEG=/path/to/ffmpeg node --experimental-strip-types tools/extract/add-audio-r
 `add-audio-recordings.ts` adds only the named keys (Ogg, AAC with measured lead, manifest entries, totals) and refuses to overwrite an
 existing file, so the existing 800 files are untouched. Method check: re-recorded `se:132:63` decodes within 17 LSB (rms 0.9) of the
 committed file; `se:137:63` and `se:90:none` differ from their committed entries only in metadata / seam statistics.
+
+## 5. lds1m lead 7: "recordings are 1.2-1.45x quieter than the game"
+
+Result: **the recordings are not quieter.** Level in the game and in the recorder is the same; the ratio comes from comparing different windows. No
+gain was changed. Probe: `tools/audio/snd3LevelProbe.py` (read-only; one SE_SELECT, a real RIGHT press on the rental screen of the canonical
+Factory state, SE_SELECT is on SE2: song_table.inc).
+
+| check | result |
+|---|---|
+| `gSoundInfo` at boot and in the probe | masterVolume 12, reverb 50, maxChans 5: the same in the game and in the recorder's snapshot |
+| SE2 `MusicPlayerInfo` (0x30 bytes) and track 0 (0x50 bytes), first frame after the call, press vs register-poke | byte-identical |
+| silenced state (the recorder's own), per-sample RMS of the trimmed sound, press vs poke | 1514.1 vs 1525.5 (0.993); manifest `se:5:none` 1521.08 |
+| BGM playing, muted with `m4aMPlayVolumeControl` (what lds1m used), press minus the run without the press vs the solo press | RMS ratio **1.0017**; per-frame RMS 2059 1815 3053 1803 1606 2947 ... vs solo 2074 1815 3058 1764 1606 2947 ... (the first 3 mixer frames agree within 1%) |
+| the recorder's poke vs the press (same silenced state) | same level; the poke is one mixer frame short in the first frames (2183 3264 ... vs 2074 1815 3058 ...) and the in-game tail is about 0.3 frame longer: the 7-14 frame difference in total energy is +4% in amplitude. This is timing (when in the frame the call lands), not gain |
+
+Why 1.2-1.45 appears: SE_SELECT is 14 frames of non-stationary sound (loud first 8 frames, a decaying tail). In-game RMS over the first k frames from the
+call divided by the manifest RMS of the whole trimmed recording (1521.08, 8319 samples) is 1.42 (k = 8), 1.35 (10), 1.27 (12), **1.19 (14 = `lengthFrames`)**,
+1.11 (16), 1.05 (18), 0.995 (20). So a short in-game window against a whole-file RMS gives the quoted ratios (SE_SELECT 1.22 is k = 13). Which window
+lds1m's / snd1's measurement used is not recorded, so this is the cause that reproduces the numbers, not a proof of the original script. Not measured:
+the ball-tray BALL / EXIT in battle (no battle state in the probe; snd1 already found a register-poked BALL in battle equals its recording).
+
+Unrelated, but it would look the same in a full-mix comparison: with the BGM at full volume the same press changes the BGM itself (`maxChans` is 5, the
+SE takes DirectSound voices from the BGM): press minus no-press RMS 1734 against the SE alone 1055. A recording of the SE alone cannot contain that.
+
+Reproduce: `PYTHONPATH=/srv/pokebench/vendor/libmgba-py /srv/pokebench/vendor/mgba-venv/bin/python tools/audio/snd3LevelProbe.py OUT.json` (about 4 minutes).
