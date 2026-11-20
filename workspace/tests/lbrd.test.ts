@@ -58,9 +58,11 @@ interface WonLobby {
 // hcr1 (Scene OFF first used-move print at commit + 6 + u: presentation timing, every OFF soak trajectory shifts a few frames): 14 lost the OFF continuation and fails 8 cases. A scan of 0..15
 // with the seed in all three roles (scratch copies of this file) found no seed passing every case: 10 and 4 fail only the retire case, 0 / 2 / 13 fail only the two WIN_TWO-role continuation
 // cases, the rest 8 .. 12. Roles are independent cases, so WIN_TWO and WIN_THEN_LOSE use 10 (passes all but the retire) and RETIRE uses 0 (passes the retire and the loss case).
-const WIN_TWO_SEED = 10;
-const RETIRE_SEED = 0;
-const WIN_THEN_LOSE_SEED = 10;
+// hcr1b (the first used-move glyph at commit + 7 + u, pixel-exact): 10 / 0 / 10 fail 3 cases. A scan of 0..47 with the seed in all three roles (scratch copies of this file) found 23, 33, 44 and 47
+// passing every case (0..15 all fail at least the two WIN_TWO-role continuation cases; 17 and 40 fail only those two, 36 only the retire case), so all three use 23.
+const WIN_TWO_SEED = 23;
+const RETIRE_SEED = 23;
+const WIN_THEN_LOSE_SEED = 23;
 
 function newPlayer(seed: number): RandomPlayer {
   const player = new RandomPlayer(new Rng(seed), new ActionLog(false), "winning");
