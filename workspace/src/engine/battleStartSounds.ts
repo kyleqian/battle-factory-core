@@ -211,7 +211,9 @@ export function emitMidBattleSwitchSounds(
   const previous = prior !== null && prior.command === command ? prior.elapsed : -1;
   const crossed = (tick: number): boolean => previous < tick && tick <= elapsed;
   if (command.type === "switch-out") {
-    if (command.skipAnimation !== true && command.targetAtRest !== true && crossed(SWITCH_OUT_BALL_OPEN_ELAPSED)) playBallOpenSe();
+    // lrc1: a lead switch-out (the loss tail's recall) opens the ball at its dispatch + 2, as every other recall.
+    const open = SWITCH_OUT_BALL_OPEN_ELAPSED + (command.leadFrames ?? 0);
+    if (command.skipAnimation !== true && command.targetAtRest !== true && crossed(open)) playBallOpenSe();
     return;
   }
   const open = (command.battler === 0 ? SWITCH_IN_BALL_OPEN_ELAPSED_PLAYER : SWITCH_IN_BALL_OPEN_ELAPSED_OPPONENT)

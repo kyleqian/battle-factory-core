@@ -3,7 +3,7 @@
 // changes it. docs/aud241c-battle-end-sounds.md.
 import { emitSound } from "../audio/soundEvents.ts";
 import { factoryBattleBgm } from "./battleStartSounds.ts";
-import { BGM_DRAFT, playBallOpenSe, playSelectSe, scheduleAfter, stopLowHpSound } from "./screenSounds.ts";
+import { BGM_DRAFT, playSelectSe, scheduleAfter, stopLowHpSound } from "./screenSounds.ts";
 import type {
   BattleResolutionPresentationCommand,
   BattleResolutionPresentationState,
@@ -22,12 +22,8 @@ const END_FADE_SPEED = 5;
 
 /** Ticks from the dismiss (A) of the last "fainted!" box to `PlayBGM(victory)` (attacker-faint path, all four win windows). */
 export const VICTORY_BGM_AFTER_FAINT_DISMISS = 22;
-/**
- * Ticks from the first tick of `returnopponentmon1toball`'s command (BattleScript_LocalBattleLostPrintTrainersWinText, battle_scripts_1.s:2962: the
- * script runs after the turn's remaining commands, e.g. a held-item effect) to its SE_BALL_OPEN.
- */
-export const OPPONENT_BALL_OPEN_AFTER_RETURN_TO_BALL = 22;
-const LOSS_TAIL_SCRIPT = "BattleScript_LocalBattleLostPrintTrainersWinText";
+// The loss's `returnopponentmon1toball` SE_BALL_OPEN (aud241c: 22 ticks after the first tick of its command) is the recall `switch-out`'s own
+// ball open since lrc1 (battleStartSounds.ts emitMidBattleSwitchSounds; LOSS_RECALL_LEAD_FRAMES + 2 = 22, battleResolutionPresentation.ts).
 /** Ticks from P (the A on the trainer's lose / win text) to each end sound. */
 export const END_FADE_AFTER_TEXT_DISMISS = 6;
 export const RETURN_BGM_AFTER_TEXT_DISMISS = 53;
@@ -44,17 +40,6 @@ function currentButtonMessage(
   if (segment === undefined || command === undefined || command.type !== "message" || command.advance !== "button") return null;
   const payload = segment.events.find((event) => event.sequence === command.eventSequence)?.payload;
   return { command, segment, messageId: payload !== undefined && "messageId" in payload ? (payload.messageId as string) : null };
-}
-
-/** The loss's `returnopponentmon1toball` command (a sprite-visibility of the opponent that is hidden): SE_BALL_OPEN on its first tick. */
-export function emitLossBallOpenSound(after: BattleResolutionPresentationState | null): void {
-  if (after === null || after.lifecycle.phase !== "presenting" || after.lifecycle.phaseElapsed !== 0) return;
-  const segment = after.segments[after.segmentIndex];
-  const command = segment?.commands[after.commandIndex];
-  if (command === undefined || command.type !== "sprite-visibility") return;
-  const event = segment!.events.find((candidate) => candidate.sequence === command.eventSequence);
-  if (event?.provenance?.sourceLabel !== LOSS_TAIL_SCRIPT) return;
-  scheduleAfter(OPPONENT_BALL_OPEN_AFTER_RETURN_TO_BALL, playBallOpenSe);
 }
 
 /** Called once per collected tick with the round's resolution presentation before and after the tick; write-only. */

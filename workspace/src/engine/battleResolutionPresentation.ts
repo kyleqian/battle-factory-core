@@ -466,10 +466,12 @@ export type BattleFaintTiming =
     }>;
 export type BattleSwitchInTiming = Readonly<{ minimumFrames: number }>;
 export type BattleSpriteVisibilityTiming = Readonly<{
-  minimumFrames: 1 | typeof FORCED_RETURN_TO_BALL_SEND_IN_GAP_FRAMES | typeof SCENE_OFF_BATON_PASS_RETURN_TO_BALL_PRINT_GAP_FRAMES;
+  minimumFrames: 1 | typeof FORCED_RETURN_TO_BALL_SEND_IN_GAP_FRAMES | typeof SCENE_OFF_BATON_PASS_RETURN_TO_BALL_PRINT_GAP_FRAMES
+    | typeof LOSS_RECALL_TRAINER_SLIDE_GAP_FRAMES;
 }>;
 export type BattleTurnEndTiming = Readonly<{ minimumFrames: number }>;
-export type BattleTrainerSlideTiming = Readonly<{ minimumFrames: 38 }>;
+/** `holdFrames`: rows after the slide settles before the next command (lrc1: the loss tail's printstring, LOSS_TRAINER_SLIDE_PRINT_GAP_FRAMES). */
+export type BattleTrainerSlideTiming = Readonly<{ minimumFrames: 38; holdFrames?: typeof LOSS_TRAINER_SLIDE_PRINT_GAP_FRAMES }>;
 
 export type BattleResolutionPresentationCommand =
   | Readonly<{
@@ -633,6 +635,12 @@ export type BattleResolutionPresentationCommand =
        * receipt removes it in one row (docs/offs152-scene-off-send-in-tail.md §R0).
        */
       targetAtRest?: true;
+      /**
+       * lrc1: script rows before the controller's `CONTROLLER_RETURNMONTOBALL` dispatch, inside `timing.minimumFrames` (the loss
+       * tail's `returnopponentmon1toball`, LOSS_RECALL_LEAD_FRAMES). The battler stays drawn at rest through them; the recall
+       * (ball sound, ball effect, scale-down) runs on `phaseElapsed - leadFrames` (`switchOutRecallElapsed`). Absent = 0.
+       */
+      leadFrames?: number;
     }>
   | Readonly<{
       type: "sprite-visibility";
@@ -2358,6 +2366,40 @@ export const SCENE_OFF_BATON_PASS_RETURN_TO_BALL_PRINT_GAP_FRAMES = 5;
 const SCENE_OFF_FORCED_SWITCH_OUT = Object.freeze({
   timing: FORCED_SWITCH_OUT_TIMING, skipAnimation: true as const, targetAtRest: true as const,
 });
+/**
+ * lrc1 (docs/lrc1-loss-recall.md): the loss tail's `returnopponentmon1toball BS_ATTACKER` + `waitstate`
+ * (BattleScript_LocalBattleLostPrintTrainersWinText, battle_scripts_1.s:2962-2963). `VARIOUS_RETURN_OPPONENT_MON1`
+ * (battle_script_commands.c:6455-6461) sends `BtlController_EmitReturnMonToBall(..., FALSE)` while the opponent has HP, so
+ * `OpponentHandleReturnMonToBall` runs `DoSwitchOutAnimation` -> B_ANIM_SWITCH_OUT_OPPONENT_MON (battle_controller_opponent.c:1200-1235;
+ * Special_SwitchOutOpponentMon: AnimTask_SwitchOutBallEffect, delay 10, AnimTask_SwitchOutShrinkMon) -> FreeMonSpriteAfterSwitchOutAnim,
+ * the same return to ball as an AI switch (ais1 / ais2): a `switch-out` (SE_BALL_OPEN at recall elapsed 2), then the healthbox-hiding
+ * recall receipt. ROM frames (fcs1 sweep, 8 lost battles, both scenes; DUSCLOPS loss lab, docs/terminal-seam-loss-path-ground-truth.md):
+ * dispatch D, SE_BALL_OPEN D + 2, healthbox gone D + 32, trainer slide (this model's el 0) D + 45 (lab: 2951 -> 2996), slide settled D + 83,
+ * the win text's first row D + 86 (every lost battle: SE_BALL_OPEN + 84).
+ * - LOSS_RECALL_LEAD_FRAMES: the script rows from the `switch-out` command's start (the row after the last "fainted!" box's A and the
+ *   turn's remaining commands) to D. Kept from the measured SE_BALL_OPEN of aud241c / aud252 (command start + 22 = lead + 2), so the
+ *   sound frame does not move; the picture now follows it.
+ * - LOSS_RECALL_TRAINER_SLIDE_GAP_FRAMES: D + 32 -> D + 45 (FreeMonSpriteAfterSwitchOutAnim's completion, waitstate,
+ *   returnopponentmon2toball, waitstate, trainerslidein, the slide sprite's off-screen rows before this model's el 0).
+ * - LOSS_TRAINER_SLIDE_PRINT_GAP_FRAMES: the slide settles (el 38) and printstring's first row shows 3 rows later
+ *   (docs/terminal-seam-antecedent-boundary-probe.md §3: exec-flag sampling lag, waitstate's own row, the printer's render lag).
+ */
+export const LOSS_RECALL_LEAD_FRAMES = 20;
+export const LOSS_RECALL_TRAINER_SLIDE_GAP_FRAMES = 13;
+export const LOSS_TRAINER_SLIDE_PRINT_GAP_FRAMES = 3;
+export const LOSS_TAIL_SCRIPT_LABEL = "BattleScript_LocalBattleLostPrintTrainersWinText";
+const LOSS_RECALL_SWITCH_OUT = Object.freeze({
+  timing: Object.freeze({ minimumFrames: LOSS_RECALL_LEAD_FRAMES + RETURN_TO_BALL_SPAN_FRAMES }),
+  leadFrames: LOSS_RECALL_LEAD_FRAMES,
+});
+const LOSS_TAIL_TRAINER_SLIDE_TIMING = Object.freeze({ minimumFrames: 38, holdFrames: LOSS_TRAINER_SLIDE_PRINT_GAP_FRAMES } as const);
+/** The `switch-out` command's recall clock (lrc1 `leadFrames`): negative while the battler still waits at rest for the dispatch. */
+export function switchOutRecallElapsed(
+  command: Extract<BattleResolutionPresentationCommand, { type: "switch-out" }>,
+  phaseElapsed: number,
+): number {
+  return phaseElapsed - (command.leadFrames ?? 0);
+}
 const TURN_END_TIMING = Object.freeze({ minimumFrames: 8 } as const);
 
 /**
@@ -5288,7 +5330,11 @@ export function projectBattleResolutionCommands(
         eventSequence: event.sequence,
         battler: singlesBattler(payload.battler, "trainer slide"),
         direction: payload.kind === "trainer-slide-in" ? "in" as const : "out" as const,
-        timing: TRAINER_SLIDE_TIMING,
+        // lrc1: the loss tail's printstring shows 3 rows after the slide settles (LOSS_TRAINER_SLIDE_PRINT_GAP_FRAMES). The win
+        // tail's slide (BattleScript_FrontierTrainerBattleWon_LoseTexts) has the same 3 rows on the ROM but is not changed here.
+        timing: payload.kind === "trainer-slide-in" && event.provenance?.sourceLabel === LOSS_TAIL_SCRIPT_LABEL
+          ? LOSS_TAIL_TRAINER_SLIDE_TIMING
+          : TRAINER_SLIDE_TIMING,
       }));
       continue;
     }
@@ -5671,6 +5717,14 @@ export function projectBattleResolutionCommands(
               : { timing: SWITCH_OUT_TIMING }),
         }));
       }
+      // lrc1: the loss tail's `returnopponentmon1toball` (VARIOUS_RETURN_OPPONENT_MON1, skipAnim FALSE) is the opponent's animated
+      // return to ball, both scenes: lead + switch-out, then the recall receipt held to the trainer slide (LOSS_RECALL_* above).
+      const lossRecall = payload.invisible && battler === 1
+        && event.provenance?.opcodeName === "B_SCR_OP_VARIOUS"
+        && event.provenance.sourceLabel === LOSS_TAIL_SCRIPT_LABEL;
+      if (lossRecall) {
+        commands.push(Object.freeze({ type: "switch-out", eventSequence: event.sequence, battler, ...LOSS_RECALL_SWITCH_OUT }));
+      }
       const transitionPause = event.provenance?.opcodeName === "B_SCR_OP_MOVEEND"
         ? actionTransitionPauseFrames(events, index, commands)
         : null;
@@ -5692,7 +5746,7 @@ export function projectBattleResolutionCommands(
         // one controller callback; the receipt itself owns the relative
         // display edge. The forced removal holds until `switchinanim`.
         timing: Object.freeze({
-          minimumFrames: forcedRemoval ? removalGap : 1 as const,
+          minimumFrames: forcedRemoval ? removalGap : lossRecall ? LOSS_RECALL_TRAINER_SLIDE_GAP_FRAMES : 1 as const,
         }),
         // See the "sprite-visibility" command type's own doc comment: the
         // real CONTROLLER_RETURNMONTOBALL receipts are Cmd_various's
