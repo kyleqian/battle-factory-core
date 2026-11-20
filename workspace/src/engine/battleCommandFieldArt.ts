@@ -7,6 +7,7 @@ import spritePalettesData from "../assets/gen/battle-sprite-palettes.json" with 
 import picGeometryData from "../assets/gen/battle-pic-geometry.json" with { type: "json" };
 import type { MonPicGeometry } from "./monPicGeometry.ts";
 import { backPixels, frontPixels } from "./monPicPixels.ts";
+import { SPECIES_SPINDA_SYMBOL, spindaSpottedTileset } from "./spindaSpots.ts";
 import type { BattleCommandPresentationState } from "./battleCommandPresentation.ts";
 import type { RgbColor } from "./bg.ts";
 
@@ -106,6 +107,26 @@ function speciesPic(side: "player" | "opponent", speciesSymbol: string): BattleC
 }
 const coords = monPicCoordsData as CoordsAsset;
 
+// spd1: an opponent SPINDA's front picture carries its personality's spots (DrawSpindaSpots, pokemon.c:5808-5812; src/engine/spindaSpots.ts).
+// Same lazy shape as speciesPic (the spotted tileset is built on the first pixel read), cached per personality.
+const spindaPicCache = new Map<number, BattleCommandMonPic>();
+function spindaFrontPic(personality: number): BattleCommandMonPic | undefined {
+  const key = personality >>> 0;
+  let pic = spindaPicCache.get(key);
+  if (pic === undefined) {
+    const base = speciesPic("opponent", SPECIES_SPINDA_SYMBOL);
+    if (base === undefined) return undefined;
+    let spotted: BattleCommandMonPicTileset | undefined;
+    const lazy = { palette: base.palette } as { palette: readonly RgbColor[] };
+    Object.defineProperty(lazy, "tileset", { enumerable: true, get: () => (spotted ??= spindaSpottedTileset(frontPixels(SPECIES_SPINDA_SYMBOL)!.tileset, key)) });
+    Object.defineProperty(lazy, "frame2", { enumerable: true, get: () => frontPixels(SPECIES_SPINDA_SYMBOL)!.frame2 });
+    pic = Object.freeze(lazy) as BattleCommandMonPic;
+    if (spindaPicCache.size > 64) spindaPicCache.clear();
+    spindaPicCache.set(key, pic);
+  }
+  return pic;
+}
+
 /** GetBattlerYDelta (battle_anim_mons.c:208-210) returns sCastformBackSpriteYCoords[gBattleMonForms]
  * (:72-79, all 0, normal form modelled) for a player CASTFORM instead of gMonBackPicCoords y_offset (13). */
 const SOURCE_BACK_Y_DELTA: Readonly<Record<string, number>> = { CASTFORM: 0 };
@@ -174,6 +195,7 @@ function fieldArtBattler(
   doll = false,
   castformForm?: number,
   transform?: Readonly<{ species: number; personality: number }>,
+  personality?: number,
 ): BattleCommandFieldArtBattler {
   if (transform !== undefined && !doll) {
     const own = speciesSymbolById.get(species);
@@ -194,7 +216,9 @@ function fieldArtBattler(
   if (speciesSymbol === undefined) {
     throw new Error(`battle-command field art: unknown species id ${species}`);
   }
-  const pic = speciesPic(side, speciesSymbol);
+  const pic = side === "opponent" && speciesSymbol === SPECIES_SPINDA_SYMBOL && personality !== undefined
+    ? spindaFrontPic(personality)
+    : speciesPic(side, speciesSymbol);
   const geometry = picGeometry[side === "player" ? "back" : "front"][speciesSymbol];
   const picCoords = side === "player"
     ? coords.back[speciesSymbol]
@@ -256,7 +280,7 @@ export function createBattleCommandFieldArtView(
     player: fieldArtBattler(field.player.species, "player", field.player.substituteDoll === true, field.player.castformForm,
       field.player.transform),
     opponent: fieldArtBattler(field.opponent.species, "opponent", field.opponent.substituteDoll === true, field.opponent.castformForm,
-      field.opponent.transform),
+      field.opponent.transform, field.opponent.personality),
   });
 }
 

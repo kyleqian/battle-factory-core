@@ -1313,6 +1313,20 @@ function pmo239SwitchReopenOffStage(state: EngineState): EngineState {
   return midBattleSwitchStage(state, "pmo239-switch-0-to-2-off", [PMO239_PIDGEY_BENCH, PMO239_MACHOP_BENCH], [115, 145]);
 }
 
+// snd2: a mon sent in and knocked out in the same turn (tools/battle-lab/snd2-switchin-faint-{on,off}.json): pmo239's party with the PIDGEY at
+// Level 5 (the ROM lab's stats: 20 HP), the foe's SEISMIC TOSS x4 (50 damage) knocks it out the turn it comes in.
+const SND2_PIDGEY_LV5_BENCH: BattleScriptPartyMemberInput = Object.freeze({
+  ...PMO239_PIDGEY_BENCH, level: 5, hp: 20, maxHP: 20, attack: 11, defense: 10, speed: 12, spAttack: 10, spDefense: 10,
+});
+function snd2SwitchInFaintStage(state: EngineState, scene: "on" | "off"): EngineState {
+  return midBattleSwitchStage(state, `snd2-switchin-faint-${scene}`, [SND2_PIDGEY_LV5_BENCH, PMO239_MACHOP_BENCH], [20, 145], {
+    battleScene: scene,
+    trainer: rattataAtLevel(50, 69),
+    usedMessageHoldFrames: 0,
+    sceneOffNoAnimations: scene === "off",
+  });
+}
+
 type MidBattleSwitchStageOptions = Readonly<{
   battleScene?: "on" | "off";
   player?: FactoryFullTurnBattlerConfig;
@@ -2304,6 +2318,11 @@ export const APP_STAGES: Readonly<Record<string, AppStage>> = {
   "wsh2-fb-opp-on": (state) => wsh2OppStage(state, "wsh2-fb-opp-on", 50, 20, 69, 196, 2),
   "wsh2-fs-opp-on": (state) => wsh2OppStage(state, "wsh2-fs-opp-on", 25, 50, 248, 0, 2),
   "wsh2-wish-opp-on": (state) => aud241bStage(state, "wsh2-wish-opp-on", "on", 12, 50, 69, undefined, false, 273),
+  // ing1 (docs/fcp1-frame-catcher-pictures.md): the wsh1 / wsh2 Wish windows with INGRAIN (275) in place of Wish: the Lv50 Rattata roots,
+  // the Lv12 one's Seismic Toss hurts it, and the end of the turn heals it (BattleScript_IngrainTurnHeal).
+  "ing1-player-on": (state) => aud241bStage(state, "ing1-player-on", "on", 50, 12, 275, undefined, false, 69),
+  "ing1-player-off": (state) => aud241bStage(state, "ing1-player-off", "off", 50, 12, 275, undefined, false, 69),
+  "ing1-opp-on": (state) => aud241bStage(state, "ing1-opp-on", "on", 12, 50, 69, undefined, false, 275),
   "wsh1-fb-on": (state) => wsh1Stage(state, "wsh1-fb-on", "on", 20, 50, 69, 196, 2),
   "wsh1-fs-on": (state) => wsh1Stage(state, "wsh1-fs-on", "on", 50, 25, 248, 0, 2),
   "wsh1-fs-off": (state) => wsh1Stage(state, "wsh1-fs-off", "off", 50, 25, 248, 0, 2),
@@ -2580,6 +2599,8 @@ export const APP_STAGES: Readonly<Record<string, AppStage>> = {
   "enc276-struggle-on": (state) => enc276Stage(state, "enc276-struggle-on", "on", 269, 27),
   "enc276-struggle-off": (state) => enc276Stage(state, "enc276-struggle-off", "off", 269, 30),
   "pmo239-switch-0-to-2-off": pmo239SwitchReopenOffStage,
+  "snd2-switchin-faint-on": (state) => snd2SwitchInFaintStage(state, "on"),
+  "snd2-switchin-faint-off": (state) => snd2SwitchInFaintStage(state, "off"),
   "mechanic-selection-reject-torment-off": tormentSelectionRejectionOffStage,
   "party-menu-status-item-off": partyMenuStatusItemOffStage,
 };

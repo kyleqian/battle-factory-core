@@ -186,6 +186,12 @@ export const WISH_HEAL_COMMAND_FRAMES = 201;
 export const FUTURE_SIGHT_HIT_COMMAND_FRAMES = 172;
 export const FOCUS_BAND_COMMAND_FRAMES = 129;
 /**
+ * ing1 (docs/fcp1-frame-catcher-pictures.md): BattleScript_IngrainTurnHeal's `playanimation BS_ATTACKER, B_ANIM_INGRAIN_HEAL`
+ * (data/battle_scripts_1.s:3609-3610, General_IngrainHeal: src/animation/ingrainHeal.ts). ROM (tools/battle-lab/ing1-player-on.json): the
+ * rows before the command sit at offset 0, "X absorbed nutrients with its roots!" at +198 (the same pattern as the Wish heal above).
+ */
+export const INGRAIN_HEAL_COMMAND_FRAMES = 198;
+/**
  * kno3 (docs/kno1-item-knockoff-plan.md "kno3"): BattleScript_KnockedOff's `playanimation BS_TARGET, B_ANIM_ITEM_KNOCKOFF` (General_ItemKnockoff:
  * one ITEM_BAG sprite, 3 load rows, then 40 path rows, + the AnimItemSteal_Step2 tail of 51 rows when the PLAYER's mon is the target). The
  * rows from the instruction's row E to the next print's first row are W + A + 2 (kno2): W = the controller's IsBattleSEPlaying wait for the
@@ -692,7 +698,7 @@ export type BattleResolutionPresentationCommand =
       type: "general-animation";
       eventSequence: number;
       battler: 0 | 1;
-      animation: "FOCUS_PUNCH_SETUP" | "HELD_ITEM_EFFECT" | "LEECH_SEED_DRAIN" | "CASTFORM_CHANGE" | "WISH_HEAL" | "FUTURE_SIGHT_HIT" | "FOCUS_BAND" | "ITEM_KNOCKOFF" | WeatherContinuesAnimation;
+      animation: "FOCUS_PUNCH_SETUP" | "HELD_ITEM_EFFECT" | "LEECH_SEED_DRAIN" | "CASTFORM_CHANGE" | "WISH_HEAL" | "FUTURE_SIGHT_HIT" | "FOCUS_BAND" | "ITEM_KNOCKOFF" | "INGRAIN_HEAL" | WeatherContinuesAnimation;
       /** cff230: a CASTFORM_CHANGE's target form (the event's argument & ~CASTFORM_SUBSTITUTE; 0 = normal). */
       castformForm?: number;
       /** cff232 / snd233: extra rows before the morph's lead (a weather-loop change at battler 1, both scenes); absent = 0. */
@@ -1505,7 +1511,7 @@ function heldItemEffectExecutionsAndLead(
  * instruction or has no provenance.
  */
 /** wsh1: the controller lead replacing the held-item leads (15 / 9) for the other two print-after-playanimation sites (ROM-measured: Wish 36 = its 36 executions, Focus Band 40 = 38 + 2). */
-const WSH1_OFF_HOLD_LEAD: Readonly<Record<string, number>> = { B_ANIM_WISH_HEAL: 0, B_ANIM_FOCUS_BAND: 2 };
+const WSH1_OFF_HOLD_LEAD: Readonly<Record<string, number>> = { B_ANIM_WISH_HEAL: 0, B_ANIM_FOCUS_BAND: 2, B_ANIM_INGRAIN_HEAL: 0 };
 /** wsh1: Scene OFF's Pausex20 before the hit, ROM-measured on tools/battle-lab/wsh1-fs-off.json (the previous message's own wait is already presented). */
 const FUTURE_SIGHT_HIT_OFF_HOLD_FRAMES = 42;
 /** BattleScript_DoFutureAttackHit's `effectivenesssound` right after the shared PLAYANIMATION slot (Future Sight's jumps over Doom Desire's; both take Pausex20 in Scene OFF). */
@@ -5108,7 +5114,7 @@ export function projectBattleResolutionCommands(
   const liveHp: [number, number] = [field.player.hp, field.opponent.hp];
   const substituteFades: { at: number; battler: 0 | 1; sequence: number }[] = [];
   const statsChanges: { at: number; battler: 0 | 1; sequence: number; argument: number; frames: number; seGate: number }[] = [];
-  const heldItemEffects: { at: number; battler: 0 | 1; sequence: number; frames: number; afterStatus: boolean; seGate?: number; animation: "HELD_ITEM_EFFECT" | "WISH_HEAL" | "FUTURE_SIGHT_HIT" | "FOCUS_BAND" | "ITEM_KNOCKOFF" }[] = [];
+  const heldItemEffects: { at: number; battler: 0 | 1; sequence: number; frames: number; afterStatus: boolean; seGate?: number; animation: "HELD_ITEM_EFFECT" | "WISH_HEAL" | "FUTURE_SIGHT_HIT" | "FOCUS_BAND" | "ITEM_KNOCKOFF" | "INGRAIN_HEAL" }[] = [];
 
   for (let index = 0; index < events.length; index += 1) {
     const event = events[index]!;
@@ -5358,10 +5364,11 @@ export function projectBattleResolutionCommands(
       });
       continue;
     }
-    if (payload.kind === "animation" && (payload.animationId === "WISH_HEAL" || payload.animationId === "FUTURE_SIGHT_HIT" || payload.animationId === "FOCUS_BAND")) {
+    if (payload.kind === "animation" && (payload.animationId === "WISH_HEAL" || payload.animationId === "FUTURE_SIGHT_HIT" || payload.animationId === "FOCUS_BAND" || payload.animationId === "INGRAIN_HEAL")) {
       heldItemEffects.push({
         at: commands.length, battler: singlesBattler(payload.battler ?? -1, "general animation"), sequence: event.sequence,
         frames: payload.animationId === "WISH_HEAL" ? WISH_HEAL_COMMAND_FRAMES
+          : payload.animationId === "INGRAIN_HEAL" ? INGRAIN_HEAL_COMMAND_FRAMES
           : payload.animationId === "FUTURE_SIGHT_HIT" ? FUTURE_SIGHT_HIT_COMMAND_FRAMES : FOCUS_BAND_COMMAND_FRAMES,
         afterStatus: false, animation: payload.animationId,
       });

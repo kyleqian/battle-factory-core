@@ -161,6 +161,8 @@ interface Voice {
   /** Wall time the voice ends (Infinity: loops until stopped). */
   end: number;
   pan: number | null;
+  /** SE / fanfare voices: the game frame of the start (a second start of the same song on that frame is no start: startSong). */
+  frame: number | null;
   /** Cries: the volume factor against the recording (cryVolumeGain). */
   gain: number;
   out: GainNodeLike | null;
@@ -623,6 +625,10 @@ class Player implements AudioPlayer {
     }
     const slot = name as Slot;
     const current = this.live(slot, t);
+    // snd2: the same song started again on the same frame (Task_HandleYesNoInput's NO: menu.c:1020 and script_menu.c:238; the party submenu's
+    // B: Task_HandleSelectionMenuInput + CursorCb_Cancel1) leaves the m4a RAM as the first start left it (the ROM probe logs it `noop`): one
+    // sound. Preempting would sound both copies for the one-frame release lag, a doubled onset the ROM never plays.
+    if (current && current.id === id && current.pan === event.pan && current.sound === sound && current.frame === event.frame) return;
     if (current && this.assets.songPlayers.priorityChecked[name] === true && current.priority > priority) {
       this.counters.blocked += 1;
       return;
@@ -631,7 +637,7 @@ class Player implements AudioPlayer {
       this.counters.preempted += 1;
       this.releaseVoice(current, t);
     }
-    this.begin({ slot, kind, id, priority, sound, t, pan: event.pan });
+    this.begin({ slot, kind, id, priority, sound, t, pan: event.pan, frame: event.frame });
   }
 
   private startBgm(event: SoundEvent, t: number): void {
@@ -745,7 +751,7 @@ class Player implements AudioPlayer {
 
   // ---- voices ----
 
-  private begin(spec: { slot: Slot; kind: Voice["kind"]; id: number; priority: number; sound: PlayerSound; t: number; pan: number | null; gain?: number }): Voice {
+  private begin(spec: { slot: Slot; kind: Voice["kind"]; id: number; priority: number; sound: PlayerSound; t: number; pan: number | null; gain?: number; frame?: number }): Voice {
     const { sound } = spec;
     const t0 = spec.t + sound.onsetSamples / sound.sampleRate;
     const looping = sound.loops === true;
@@ -758,6 +764,7 @@ class Player implements AudioPlayer {
       t0,
       end: looping ? Number.POSITIVE_INFINITY : t0 + sound.lengthSamples / sound.sampleRate,
       pan: spec.pan,
+      frame: spec.frame ?? null,
       gain: spec.gain ?? 1,
       out: null,
       sources: [],

@@ -26,7 +26,7 @@ import {
   type ConfirmRevealState,
 } from "./confirmReveal.ts";
 import { bg3ColorWide, blend8, FLASH_BLENDED_COLOR, target2Color } from "./monPicRender.ts";
-import { ANCHOR_SPECIES_NAME_FADE_STATE, speciesNameColor, type SpeciesNameFadeState } from "./speciesNameFade.ts";
+import { ANCHOR_SPECIES_NAME_FADE_STATE, speciesNameColor, type SpeciesNameBase, type SpeciesNameFadeState } from "./speciesNameFade.ts";
 import {
   type FactoryCorpusPartyInstance,
 } from "./factoryCorpusParty.ts";
@@ -482,10 +482,10 @@ function currentMessage(state: DraftScreenState): string {
  * visible, but the real BlendPalette call touches the whole bank, so this
  * mirrors that rather than special-casing index 4.
  */
-function speciesTextPalette(renderCoeff: number): RgbColor[] {
-  if (renderCoeff === 0) return textPalette;
+function speciesTextPalette(renderCoeff: number, base: SpeciesNameBase = "text"): RgbColor[] {
+  if (renderCoeff === 0 && base === "text") return textPalette;
   const faded = textPalette.slice();
-  faded[4] = speciesNameColor(renderCoeff);
+  faded[4] = speciesNameColor(renderCoeff, base);
   return faded;
 }
 
@@ -629,7 +629,7 @@ export function renderFactoryDraftScreen(state: DraftScreenState): Uint8Array {
   const speciesSlot = state.slots[speciesPos];
   if (speciesSlot) {
     const speciesX = WIN_SPECIES.x + rightAlignXOffset(font, charmap, speciesSlot.species, 86);
-    drawText(fb, font, charmap, speciesSlot.species, speciesX, WIN_SPECIES.y + 1, speciesTextPalette(state.speciesNameFade.renderCoeff), SPECIES_TEXT_COLORS);
+    drawText(fb, font, charmap, speciesSlot.species, speciesX, WIN_SPECIES.y + 1, speciesTextPalette(state.speciesNameFade.renderCoeff, state.speciesNameFade.renderBase), SPECIES_TEXT_COLORS);
   }
 
   drawText(fb, font, charmap, currentMessage(state), WIN_INFO.x + 2, WIN_INFO.y + 5, textPalette, DEFAULT_TEXT_COLORS);
@@ -735,7 +735,7 @@ export function renderFactoryDraftScreenFaded(state: DraftScreenState, bgY: numb
   const speciesSlot = state.slots[speciesPos];
   if (speciesSlot) {
     const speciesX = WIN_SPECIES.x + rightAlignXOffset(font, charmap, speciesSlot.species, 86);
-    drawTextFaded(fb, font, charmap, speciesSlot.species, speciesX, WIN_SPECIES.y + 1, speciesTextPalette(state.speciesNameFade.renderCoeff), SPECIES_TEXT_COLORS, bgY);
+    drawTextFaded(fb, font, charmap, speciesSlot.species, speciesX, WIN_SPECIES.y + 1, speciesTextPalette(state.speciesNameFade.renderCoeff, state.speciesNameFade.renderBase), SPECIES_TEXT_COLORS, bgY);
   }
 
   drawTextFaded(fb, font, charmap, currentMessage(state), WIN_INFO.x + 2, WIN_INFO.y + 5, textPalette, DEFAULT_TEXT_COLORS, bgY);

@@ -9,6 +9,7 @@ import { statsChangeParams, statsChangeRow } from "../animation/statsChange.ts";
 import { liveStatusAnimationRow, type LiveStatusAnimationSprite } from "../animation/statusAnimation.ts";
 import { focusPunchSetUpDisplayRow } from "../animation/focusPunchSetUp.ts";
 import { wishHealRowAtAge } from "../animation/wishHeal.ts";
+import { ingrainHealAtCommandAge } from "../animation/ingrainHeal.ts";
 import { itemKnockoffAtAge } from "../animation/itemKnockoff.ts";
 import { focusBandRowAtAge } from "../animation/focusBand.ts";
 import { futureSightHitRowAtAge } from "../animation/futureSightHit.ts";
@@ -1988,6 +1989,9 @@ const absorbArt = absorbAsset as {
   impact: { tileset: Tileset; palette: RgbColor[] };
   blueStar: { tileset: Tileset; palette: RgbColor[] };
 };
+/** ing1: Move_ABSORB's orb frame (its renderer's orbTileset) and BG blend colour (0x33ED with mGBA's 5-to-8-bit replication). */
+const ABSORB_ORB_TILESET: Tileset = { columns: 2, rows: 2, get tiles() { return absorbArt.orbs.tileset.tiles.slice(8, 12); } };
+const ABSORB_BG_BLEND_GREEN: RgbColor = Object.freeze({ r: 107, g: 255, b: 99 });
 const leechSeedArt = leechSeedAsset as {
   seed: { tileset: Tileset; palette: RgbColor[] };
 };
@@ -8132,6 +8136,8 @@ export type GeneralAnimationRenderView = Readonly<{
   }>;
   /** kno3: General_ItemKnockoff's ITEM_BAG sprite (src/animation/itemKnockoff.ts), drawn over the battlers. */
   itemKnockoff?: NonNullable<ReturnType<typeof itemKnockoffAtAge>>;
+  /** ing1: General_IngrainHeal's displayed state (src/animation/ingrainHeal.ts): the green BG blend, absorption orbs and blue stars. */
+  ingrainHeal?: NonNullable<ReturnType<typeof ingrainHealAtCommandAge>>;
   /** wsh2: General_FutureSightHit's psychic BG and the target's alpha-blended scale + shake (futureSightHit.ts). */
   futureSightHit?: Readonly<{
     row: ReturnType<typeof futureSightHitRowAtAge>;
@@ -8161,6 +8167,7 @@ export function generalAnimationRenderView(view: BattleResolutionPresentationRen
   if (effect?.type === "general-animation" && effect.animation === "HELD_ITEM_EFFECT") return heldItemEffectRenderView(view, effect);
   if (effect?.type === "general-animation" && effect.animation === "FOCUS_BAND") return focusBandRenderView(view, effect);
   if (effect?.type === "general-animation" && effect.animation === "WISH_HEAL") return wishHealRenderView(view, effect);
+  if (effect?.type === "general-animation" && effect.animation === "INGRAIN_HEAL") return ingrainHealRenderView(view, effect);
   if (effect?.type === "general-animation" && effect.animation === "ITEM_KNOCKOFF") return itemKnockoffRenderView(view, effect);
   if (effect?.type === "general-animation" && effect.animation === "FUTURE_SIGHT_HIT") return futureSightHitRenderView(view, effect);
   if (effect?.type !== "general-animation" || effect.animation !== "FOCUS_PUNCH_SETUP") return null;
@@ -8307,6 +8314,38 @@ function wishHealRenderView(
     view: Object.freeze({ ...view, fieldArt, postBodyShadowHidden: view.postBodyShadowHidden || side === "opponent" }),
     sprites: Object.freeze([]),
     wishHeal: Object.freeze({ row, center, opponent: side === "opponent" }),
+  });
+}
+
+/** ing1: the general-animation effect's age is the command's phaseElapsed - 1 (GENERAL_SCRIPT_START_FRAMES' default); ingrainHeal.ts counts from 0. */
+const INGRAIN_HEAL_EFFECT_AGE_TO_COMMAND_AGE = 1;
+
+/**
+ * ing1: B_ANIM_INGRAIN_HEAL's General_IngrainHeal over the field as it is, either side (src/animation/ingrainHeal.ts): the BG palettes blend
+ * toward RGB(13, 31, 12), the absorption orbs fly into the rooted battler and the blue stars rise at its GetBattlerSpriteCoord
+ * (picOffsetPoint). The opponent stands at its tracked front idle rest and an elevated opponent's shadow hides while the script runs.
+ */
+function ingrainHealRenderView(
+  view: BattleResolutionPresentationRenderView,
+  effect: Extract<NonNullable<BattleResolutionPresentationRenderView["effect"]>, { type: "general-animation" }>,
+): GeneralAnimationRenderView | null {
+  const side = effect.battler === 0 ? "player" as const : "opponent" as const;
+  const center = liveBattlerAnchors(side, view.fieldArt).picOffsetPoint;
+  // Before the script's first row and after its last the field stands as it is (the opponent still at its tracked rest), from the
+  // command's first frame (effect age -1) on.
+  const state = ingrainHealAtCommandAge(effect.age + INGRAIN_HEAL_EFFECT_AGE_TO_COMMAND_AGE, side, center);
+  const rest = effect.battlerX2Input === undefined
+    ? { x2: 0, y2: 0 }
+    : liveBattlerAnchors("opponent", view.fieldArt, effect.battlerX2Input).frontIdleRest;
+  const opponent = rest.x2 === 0 && rest.y2 === 0 ? view.fieldArt.opponent : Object.freeze({
+    ...view.fieldArt.opponent,
+    origin: Object.freeze({ x: view.fieldArt.opponent.origin.x + rest.x2, y: view.fieldArt.opponent.origin.y + rest.y2 }),
+  });
+  const fieldArt = opponent === view.fieldArt.opponent ? view.fieldArt : Object.freeze({ ...view.fieldArt, opponent });
+  return Object.freeze({
+    view: Object.freeze({ ...view, fieldArt, postBodyShadowHidden: view.postBodyShadowHidden || side === "opponent" }),
+    sprites: Object.freeze([]),
+    ...(state === null ? {} : { ingrainHeal: state }),
   });
 }
 
@@ -55727,7 +55766,10 @@ export function renderBattleResolutionSceneOffView(
   const fadedFieldPalette = midBattleFade === null
     ? generalAnimation?.wishHeal && generalAnimation.wishHeal.row.bgBlackCoeff > 0
       ? blendPaletteBanksToward(battleBg.palette, { r: 0, g: 0, b: 0 }, generalAnimation.wishHeal.row.bgBlackCoeff)
-      : battleBg.palette
+      // ing1: General_IngrainHeal's simple_palette_blend F_PAL_BG toward RGB(13, 31, 12) (0x33ED -> (107, 255, 99)), as Move_ABSORB's.
+      : generalAnimation?.ingrainHeal && generalAnimation.ingrainHeal.bgPaletteBlendY > 0
+        ? battleBg.palette.map((palette) => blendPaletteToward(palette, ABSORB_BG_BLEND_GREEN, generalAnimation.ingrainHeal!.bgPaletteBlendY))
+        : battleBg.palette
     : whiteFadeFieldPaletteRows(battleBg.palette, midBattleFade.bg);
   const futureSightHit = generalAnimation?.futureSightHit;
   if (futureSightHit) {
@@ -55927,6 +55969,24 @@ export function renderBattleResolutionSceneOffView(
         fb, battleAnimItemHeal.ring.tileset, battleAnimItemHeal.ring.palette, center.x, center.y,
         ring.pa, ring.pb, ring.pc, ring.pd, PLAYER_BALL_OPEN_VISIBLE_BOTTOM,
       );
+    }
+  }
+  if (generalAnimation?.ingrainHeal) {
+    // ing1: the rooted battler is on the monbg layer (a BG), so the semi-transparent ORBS (setalpha 12, 8) blend over everything drawn
+    // so far, as Move_ABSORB's renderer blends them over its monbg target; the blue stars are plain OBJs.
+    const nonObjTarget2 = fb.slice();
+    for (const sprite of generalAnimation.ingrainHeal.sprites) {
+      if (sprite.kind === "orb") {
+        drawSpriteSheetAffineRotateBlendedOverFb(
+          fb, nonObjTarget2, ABSORB_ORB_TILESET, absorbArt.orbs.palette, sprite.x + sprite.x2, sprite.y + sprite.y2,
+          sprite.xScale, 0, 0, sprite.yScale, 12, 8, false,
+        );
+      } else if (sprite.kind === "star") {
+        drawSpriteSheet(
+          fb, { columns: 4, rows: 4, tiles: absorbArt.blueStar.tileset.tiles.slice(sprite.frame * 16, sprite.frame * 16 + 16) },
+          absorbArt.blueStar.palette, sprite.x - 16, sprite.y - 16,
+        );
+      }
     }
   }
   if (generalAnimation?.wishHeal) {

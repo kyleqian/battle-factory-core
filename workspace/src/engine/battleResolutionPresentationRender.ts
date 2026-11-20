@@ -2284,6 +2284,14 @@ export function createBattleResolutionPresentationRenderView(
         spriteVisibility.set(completed.battler, completed.visible);
         if (completed.recall) healthboxVisibility.set(completed.battler, completed.visible);
       }
+      // hpb1: a switch-in in an earlier segment restores the incoming battler's sprite and healthbox, as it does in the current
+      // segment's loop below (SwitchIn_TryShinyAnimShowHealthbox -> SetHealthboxSpriteVisible,
+      // battle_controller_player.c:1098-1112). Without it a recall earlier in the same resolution (a voluntary
+      // switch, then a faint and a replacement) kept the healthbox hidden for the rest of the turn.
+      if (completed.type === "switch-in") {
+        spriteVisibility.set(completed.battler, true);
+        healthboxVisibility.set(completed.battler, true);
+      }
       if (completed.type === "trainer-slide") {
         settledTrainer = completed.direction === "in"
           ? Object.freeze({ battler: completed.battler })

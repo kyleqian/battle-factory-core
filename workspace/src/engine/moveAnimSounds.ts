@@ -455,6 +455,12 @@ export const CASTFORM_CHANGE_SCRIPT_AGE = 5;
 export const WISH_HEAL_SCRIPT_AGE = 6;
 export const FUTURE_SIGHT_HIT_SCRIPT_AGE = 0;
 export const FOCUS_BAND_SCRIPT_AGE = 0;
+/**
+ * ing1 (docs/fcp1-frame-catcher-pictures.md): command age -> script frame of General_IngrainHeal. ROM (soundEventProbe lab on
+ * tools/battle-lab/ing1-player-on.json / ing1-opp-on.json): SE_M_CRABHAMMER x8 at command age 34 .. 76 every 6, SE_M_ABSORB_2 at 129 = the
+ * table's 27 .. 69 and 122 + 7. The rooted battler is the script's attacker and target (both pans follow its side).
+ */
+export const INGRAIN_HEAL_SCRIPT_AGE = 7;
 
 /**
  * hie3: General_HeldItemEffect. The extracted table holds only the first SE (playsewithpan 152 at script frame 8: the rest follow `waitforvisualfinish`, which the
@@ -537,6 +543,8 @@ export function emitGeneralAnimSounds(after: BattleResolutionPresentationState |
         emitOpsAt(generalVariant("General_FutureSightHit", command.battler), { attackerSide: side, targetSide: other }, elapsed - FUTURE_SIGHT_HIT_SCRIPT_AGE, true);
       } else if (command.animation === "FOCUS_BAND") {
         emitOpsAt(generalVariant("General_FocusBand", command.battler), { attackerSide: side, targetSide: other }, elapsed - FOCUS_BAND_SCRIPT_AGE, true);
+      } else if (command.animation === "INGRAIN_HEAL") {
+        emitOpsAt(generalVariant("General_IngrainHeal", command.battler), { attackerSide: side, targetSide: side }, elapsed - INGRAIN_HEAL_SCRIPT_AGE, true);
       } else if (command.animation === "LEECH_SEED_DRAIN" && command.animated === true) {
         // command.battler is the seeded (drained) battler = the animation's target; the seeder is the attacker.
         emitOpsAt(generalVariant("General_LeechSeedDrain", command.battler === 0 ? 1 : 0), { attackerSide: other, targetSide: side }, elapsed - LEECH_SEED_DRAIN_SCRIPT_AGE, true);
