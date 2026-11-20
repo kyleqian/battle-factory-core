@@ -43,6 +43,7 @@ FUNCS = {  # name -> object file of the copy we want (None = the only one)
     "HandleInputChooseAction": "src/battle_controller_player.o", "HandleInputChooseMove": "src/battle_controller_player.o",
     "BattleMainCB2": None, "HandleTurnActionSelectionState": None, "TryDoEventsBeforeFirstTurn": None,
     "Task_BattleTransition": "src/battle_transition.o", "GetSpecialBattleTransition": None, "FillFactoryTrainerParty": None,
+    "Task_StartBattleAfterTransition": None,
     "Task_HandleChooseMonInput": "src/party_menu.o", "Task_HandleSelectionMenuInput": "src/party_menu.o",
     "Task_HandleInput": "src/pokemon_summary_screen.o", "Task_HandleInput_MoveSelect": "src/pokemon_summary_screen.o",
     "Task_HandleMultichoiceInput": "src/script_menu.o", "Task_HandleYesNoInput": "src/script_menu.o",
@@ -525,6 +526,11 @@ def run(engine_dir, out_dir, profile, max_frames):
     return result
 
 
+def task_live(rom, func):
+    t = rom.s["gTasks"]
+    return any(rom.u8(t + i * TASK_SIZE + 4) and (rom.u32(t + i * TASK_SIZE) & ~1) == func for i in range(TASK_COUNT))
+
+
 def transition_task_live(rom):
     t = rom.s["gTasks"]
     for i in range(TASK_COUNT):
@@ -538,13 +544,22 @@ def transition_traps(rom, battles, transitions, bn, staging, live_before):
     the same frame (battle_tower.c, SPECIAL_BATTLE_FACTORY). When the fast run of a frame started the transition task, the frame is
     stepped again with a trap at that function's entry that sets gRngValue so the draw gives the engine's table row (and, when the
     engine recorded it, the engine's RNG after the draw, which the SQUARES transitions read on)."""
+    # Armed from the frame Task_StartBattleAfterTransition is live (DoSpecialTrainerBattle creates it after FillFactoryTrainerParty and
+    # before the draw, battle_tower.c:2096-2099) until the draw has been trapped: the party build can run past a frame boundary, and the
+    # draw then lands in the frame BEFORE the one whose fast run shows the transition task (seed 9, Scene ON, battle 6: draw in ROM
+    # frame 62979, task from 62980). Armed only on the task's frame, the trap was never hit there and the ROM kept its own transition
+    # (9 battles of 26 rounds).
     t = transitions.get(bn)
-    if t is None or bn in transitions["forced"] or live_before or transition_task_live(rom) is None:
+    if t is None or bn in transitions["forced"] or live_before:
+        return None
+    if transition_task_live(rom) is None and not task_live(rom, rom.f["Task_StartBattleAfterTransition"]):
         return None
     o, s = rom.o, rom.s
-    transitions["forced"].add(bn)
 
     def at_entry():
+        if bn in transitions["forced"]:
+            return
+        transitions["forced"].add(bn)
         if t.get("rngAfterDraw") is not None:
             value = lcg_back(t["rngAfterDraw"])
         else:
