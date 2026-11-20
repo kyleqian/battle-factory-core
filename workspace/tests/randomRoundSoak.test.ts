@@ -444,7 +444,8 @@ describe("random round soak driver (green milestone pin)", () => {
       // pic7-player-faint-send-in-on): frames + render calls, 43_336 -> 43_334, renderCalls 3_042 -> 3_044; same battle 7, turn 3, end state, diagnostics.
       // hcr1 (the Scene OFF first used-move print at commit + 6 + u, docs/aud251-s11-scoreboard-refresh.md): frames + render calls, 43_334 -> 43_411, renderCalls 3_044 -> 3_043; same battle 7, turn 3, end state, diagnostics.
       // hcr1b (the Scene OFF first used-move glyph at commit + 7 + u, pixel-exact): frames + render calls, 43_411 -> 43_559, renderCalls 3_043 -> 3_056; same battle 7, turn 3, end state, diagnostics.
-      frames: 43_559,
+      // fsc1 (the Scene OFF invisible-target hit completes in 2 frames; the hit-all loop's EMPTYSTRING3 box is timed by kernel rows): frames + render calls, 43_559 -> 43_550, renderCalls 3_056 -> 3_054; same battle 7, turn 3, end state, diagnostics.
+      frames: 43_550,
       battle: 7,
       turn: 3,
       diagnostics: {
@@ -456,7 +457,7 @@ describe("random round soak driver (green milestone pin)", () => {
         terminalOutcome: "roundWon",
         terminalRecordMenuInputReadyReached: true,
         terminalRecordChoice: "no",
-        renderCalls: 3_056,
+        renderCalls: 3_054,
       },
     });
     expect(second).toEqual(first);
@@ -681,7 +682,10 @@ describe("random round soak driver (green milestone pin)", () => {
     // merge of rsw1 + hcr1b + gsp2b (pin2; the exploring presses land on new phases again, the two rules together): seed 6 no longer commits Baton Pass
     // (0 commits). Re-scanned full-policy seeds 0..39 (tools/soak/batonPassSearch.ts --seeds 0:40 --parallel 3, same options): candidates 3, 10, 16, 17, 20, 23,
     // 24, 26, 36. Seed 3 is the lowest (Baton Pass commits 2, first commit 49232, halt 49444 on MAWILE in battleIndex 0, three Lobby new challenges). Pin 6 -> 3.
-    const result = runSeed(3, {
+    // fsc1 (the Scene OFF invisible-target hit completes in 2 frames, the hit-all loop's EMPTYSTRING3 box is timed by kernel rows: shifts the soak's press phases): seed 3 no longer commits Baton Pass
+    // (0 commits). Re-scanned full-policy seeds 0..29 (tools/soak/batonPassSearch.ts --seeds 0:30 --parallel 3, same options): candidates 6, 27, 28. Seed 6 is the lowest (Baton Pass commits 6,
+    // first commit 47503, halt 47543 on MAWILE in battleIndex 0, one Lobby new challenge). Pin 3 -> 6.
+    const result = runSeed(6, {
       maxFrames: 80_000,
       renderEvery: 0,
       coverage: observer as never,
@@ -1646,7 +1650,9 @@ describe("ISSUES #104 (driver): continuous-play outcome semantics retuned -- OK 
     // seeds 0, 10, 14 and 47 chain two round wins (carry 14), so the lowest (0) is pinned.
     // lbw9 (the Lobby save wait is a timer / held A, the menus clamp: every in-game new challenge is dealt from a later cursor): seed 0 now carries 7;
     // re-scanned seeds 0..49 under the same options (--seeds 0:50 --parallel 3): seeds 13, 19, 23 and 40 chain two round wins (carry 14), so the lowest (13) is pinned.
-    const result = runSeed(13, {
+    // fsc1 (the Scene OFF invisible-target hit completes in 2 frames, the hit-all loop's EMPTYSTRING3 box is timed by kernel rows): seed 13 now carries 7;
+    // re-scanned seeds 0..49 under the same options (--seeds 0:50 --parallel 3): seeds 19, 23 and 40 chain two round wins (carry 14), so the lowest (19) is pinned.
+    const result = runSeed(19, {
       policy: "winning",
       maxRounds: 3,
       renderEvery: 0,
