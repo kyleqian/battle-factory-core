@@ -1,5 +1,5 @@
 // The post-tickEngineState sound block of tick() (core.ts), shared with tools/integration/lsd194Census.ts so the census emits through the same code.
-import { soundCollecting } from "../audio/soundEvents.ts";
+import { setSoundTickLead, soundCollecting } from "../audio/soundEvents.ts";
 import { emitBattleEndSounds, emitForfeitEndSounds, emitLossBallOpenSound } from "./battleEndSounds.ts";
 import { emitBattleHitSounds, emitDoubleTeamStatsChangeSound } from "./battleHitSounds.ts";
 import { emitBattleStartIntroSounds, emitMidBattleSwitchSounds, emitPartySendOutSounds } from "./battleStartSounds.ts";
@@ -23,6 +23,7 @@ export function emitTickSounds(state: TickSoundState, next: TickSoundState): voi
       false,
     );
     const orchestratorAfter = next.factoryRoundBattleOrchestrator;
+    setSoundTickLead(orchestratorAfter?.battleResolutionPresentation?.usedMoveSoundLead ?? 0);
     if (orchestratorAfter?.battleForcedPartySelect) {
       const resolution = orchestratorAfter.battleResolutionPresentation;
       emitPartySendOutSounds(

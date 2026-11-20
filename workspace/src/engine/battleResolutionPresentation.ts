@@ -934,6 +934,8 @@ export type BattleResolutionPresentationState = Readonly<{
    * projection only reports nonzero work inside the two windows).
    */
   fadeTick: number;
+  /** hcr1b: ticks the Scene OFF controller / script sounds of this turn are stamped ahead of the presentation clock (a ruled used-move turn: 1). */
+  usedMoveSoundLead?: number;
   confirmHandoff: BattleResolutionConfirmHandoff | null;
   field: BattleResolutionDisplayedField;
   pendingBoundary: BattleBoundary;
@@ -6319,25 +6321,30 @@ function withSynthesizedAiSwitchRecallEvents(
 }
 
 /**
- * hcr1 (docs/aud251-s11-scoreboard-refresh.md hcr1m): Scene OFF, a plain `use-move` turn's first used-move print (`attackstring`) runs at
- * commit + 6 + u, u = the USEDMOVE print's `instructionExecution` (commands from the effect-script entry: `setmoveeffect` / `goto` /
- * `jumpifnotmove` / `incrementgamestat` are one frame each before `attackcanceler`, `accuracycheck`, `attackstring`). The fixed
- * stage walk prints at commit + 9, exact for u = 3; the adjustment is `u - 3` (-1 skips `accuracy-check`, + n holds `action-dispatch`).
+ * hcr1 / hcr1b (docs/aud251-s11-scoreboard-refresh.md): Scene OFF, a plain `use-move` turn's first used-move print (`attackstring`) is the ROM
+ * `printstring` row at commit + 6 + u, u = the USEDMOVE print's `instructionExecution` (commands from the effect-script entry: `setmoveeffect` /
+ * `goto` / `jumpifnotmove` / `incrementgamestat` are one frame each before `attackcanceler`, `accuracycheck`, `attackstring`); the oracle swaps
+ * the text box one frame later, so the first glyph is at commit + 7 + u (hcr1b pixel traces, u = 2 / 3 / 4 / 6 / 8, exact). The fixed stage walk
+ * puts it at commit + 9, exact for u = 2; the adjustment is `u - 2` (a hold on `action-dispatch`).
  * Forced (Encore / Struggle) and Focus Punch pre-pass handoffs keep their own leads; a turn that opens with anything but a USEDMOVE
  * print (status / ability / wake-up / confusion head) is not covered. Scene ON absorbs u downstream and is left on the fixed walk.
  */
 const USED_MOVE_LEAD_MIN_U = 2;
 const USED_MOVE_LEAD_MAX_U = 20;
-function usedMovePrintLeadAdjust(state: BattleResolutionPresentationState, handoff: BattleResolutionConfirmHandoff): number {
-  if (handoff.forced !== undefined || handoff.focusPunchPrePass === true) return 0;
+const USED_MOVE_SOUND_LEAD = 1;
+function usedMovePrintLeadU(state: BattleResolutionPresentationState, handoff: BattleResolutionConfirmHandoff): number | null {
+  if (handoff.forced !== undefined || handoff.focusPunchPrePass === true) return null;
   const segment = state.segments[0];
-  if (segment === undefined || state.sourceDecision.kind !== "use-move") return 0;
-  if ((segment.beforeRules.rulesContext.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) === 0) return 0;
+  if (segment === undefined || state.sourceDecision.kind !== "use-move") return null;
+  if ((segment.beforeRules.rulesContext.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) === 0) return null;
   const first = segment.events[0];
-  if (first === undefined || first.payload.kind !== "message" || first.payload.messageId !== "STRINGID_USEDMOVE") return 0;
+  if (first === undefined || first.payload.kind !== "message" || first.payload.messageId !== "STRINGID_USEDMOVE") return null;
   const u = first.provenance?.instructionExecution;
-  if (u === undefined || u < USED_MOVE_LEAD_MIN_U || u > USED_MOVE_LEAD_MAX_U) return 0;
-  return u - 3;
+  return u === undefined || u < USED_MOVE_LEAD_MIN_U || u > USED_MOVE_LEAD_MAX_U ? null : u;
+}
+function usedMovePrintLeadAdjust(state: BattleResolutionPresentationState, handoff: BattleResolutionConfirmHandoff): number {
+  const u = usedMovePrintLeadU(state, handoff);
+  return u === null ? 0 : u - 2;
 }
 
 const CONFIRM_HANDOFF_NEXT = Object.freeze({
@@ -6433,9 +6440,7 @@ export function advanceBattleResolutionConfirmHandoff(
   }
   const nextStage = handoff.focusPunchPrePass === true && handoff.stage === "stop-bounce-request"
     ? null
-    : handoff.stage === "attack-canceler" && usedMovePrintLeadAdjust(state, handoff) < 0
-      ? null
-      : CONFIRM_HANDOFF_NEXT[handoff.stage];
+    : CONFIRM_HANDOFF_NEXT[handoff.stage];
   if (nextStage === null) {
     return Object.freeze({
       ...state,
@@ -6445,6 +6450,7 @@ export function advanceBattleResolutionConfirmHandoff(
       }),
       confirmHandoff: null,
       fadeTick: state.fadeTick + 1,
+      ...(usedMovePrintLeadU(state, handoff) !== null ? { usedMoveSoundLead: USED_MOVE_SOUND_LEAD } : {}),
     });
   }
   const bounceRuns =

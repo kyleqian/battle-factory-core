@@ -2292,7 +2292,7 @@ describe("midBattleSwitchFade gate (ISSUES #81: non-switch resolutions never fad
   });
 });
 
-describe("hcr1 -- Scene OFF first used-move print at commit + 6 + u", () => {
+describe("hcr1b -- Scene OFF first used-move glyph at commit + 7 + u", () => {
   const walkFrames = (
     u: number,
     { off = true, forced, firstMessage = "STRINGID_USEDMOVE" }: { off?: boolean; forced?: "encore" | "struggle"; firstMessage?: string } = {},
@@ -2317,9 +2317,9 @@ describe("hcr1 -- Scene OFF first used-move print at commit + 6 + u", () => {
     return frames;
   };
 
-  it("holds action-dispatch u - 3 frames (u = 2 skips accuracy-check): the first print lands at commit + 6 + u", () => {
+  it("holds action-dispatch u - 2 frames on the fixed walk: the first glyph lands at commit + 7 + u (hcr1b oracle traces, u = 2 / 3 / 4 / 6 / 8)", () => {
     const walked = [2, 3, 4, 5, 6, 7, 8, 16].map((u) => walkFrames(u));
-    expect(walked).toEqual([8, 9, 10, 11, 12, 13, 14, 22]);
+    expect(walked).toEqual([9, 10, 11, 12, 13, 14, 15, 23]);
   });
 
   it("outside the 2..20 window, Scene ON, forced Encore / Struggle moves and non-USEDMOVE heads keep the fixed 9-frame walk", () => {
