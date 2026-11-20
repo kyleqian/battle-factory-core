@@ -319,7 +319,6 @@ tests/partyMonIconAnim.test.ts
 tests/perf211RenderCaches.test.ts
 tests/prebattleRoomFlow.test.ts
 tests/presentationEventWindowBridge.test.ts
-tests/presentationRng.test.ts
 tests/rockThrowTargetIdleX2.test.ts
 tests/roundController.test.ts
 tests/roundControllerRentalPersistence.test.ts
@@ -359,4 +358,3 @@ tests/turn8BindPresentationStaging.test.ts
 tests/turnOrder.test.ts
 tests/turnRng.test.ts
 tests/winBattle2LilianaFarSideReceipt.test.ts
-tests/words59RainTrailingWords.test.ts

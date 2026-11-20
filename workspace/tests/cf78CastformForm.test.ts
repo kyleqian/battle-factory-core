@@ -103,7 +103,7 @@ describe("cf78: census route 950 through the production orchestrator, Scene ON /
     // apx221: every other Castform body is drawn approximately with the displayed form's art (castform-form), 19 of 19.
     expect(r.castformLiveBodiesOn).toBe(11); // abl261: 19 -> 20 of 21 (the other Castform body keeps declining; reported in docs/abl261-ability-damage.md)
     // Every other body keeps its decision: the 9 live on 9115d5ec3 (census battle 950, docs/cf78-castform-needle-arm.md).
-    expect(r.liveBodiesOn - r.castformLiveBodiesOn).toBe(31); // abl261: 9 -> 22 (the changed battle is longer, same decisions)
+    expect(r.liveBodiesOn - r.castformLiveBodiesOn).toBe(32); // abl261: 9 -> 22 (the changed battle is longer, same decisions); ice2: 31 -> 32, Ice Ball command 264 (unresolved lend) is now drawn on the fallback order (was the static field)
     // The form at every one of them: hail (3), on the player's slot (SEALEO's Hail from turn 6).
     expect(new Set(r.bodies.flatMap((b) => b.castformForm[0] !== 0 || b.castformForm[1] !== 0 ? [b.castformForm.join(",")] : [])))
       .toEqual(new Set(["3,0"]));

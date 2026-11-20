@@ -1680,7 +1680,15 @@ export function liveSemiInvulnerableHideBattler(request: BattleMoveAnimationRequ
  * the ROM-checked battle units (resolveSpriteOrderDeferredLend DEFERRED_REPLAY_BATTLE_UNITS: an opponent KO + summary + send-out, the
  * Factory AI's recall + summary + send-out, a Roar / Whirlwind forced switch-out + send-in; docs/next-adapters-words57.md).
  */
-export const LIVE_WORDS_ORDER_DEFERRED_REPLAY = Object.freeze({ replayBattleUnits: isWordsOrderDeferredUnit });
+export const LIVE_WORDS_ORDER_DEFERRED_REPLAY = Object.freeze({
+  replayBattleUnits: isWordsOrderDeferredUnit,
+  // ice2: a lent-order-keyed body (Water Spout 323 / Shock Wave 351) recorded under a pending marker plans at the order the replay lends it.
+  geometryPlanText: (unit: { moveId: number; attackerSide: "player" | "opponent"; geometryField?: object }, lentFree: readonly number[]) => {
+    const field = unit.geometryField as BattleResolutionDisplayedField | undefined;
+    return field === undefined ? null : liveMoveGeometrySpriteOrderPlanText(unit.moveId, unit.attackerSide,
+      { playerSpecies: field.player.species, opponentSpecies: field.opponent.species }, field, lentFree);
+  },
+});
 
 /**
  * words57: the words-lend carry (liveWordsUnitPostFree with the unit's words by key). Sand-Attack / Mud-Slap aim the dirt at both battlers'
@@ -4597,7 +4605,8 @@ export function liveMoveAnimationPresentationProven(
       // resolved above by resolveWordsOrderLend with liveIceBallWordsPostFree at the body's words / counter / species, past the ROM-checked
       // battle units, for any consumer); an unresolved marker leaves no lend and the body declines.
       const counter = liveIceBallCounter(request.rolloutCounter);
-      if (counter === null || !spriteOrderInput?.known) return null;
+      if (counter === null) return null;
+      if (!spriteOrderInput?.known) return declined(declineSink, "sprite-order-unknown");
       if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return declined(declineSink, "other:shiny");
       const rng = liveMovePresentationRngWords(presentationRngInput);
       const palettes = composeLiveArtPalettes(art);

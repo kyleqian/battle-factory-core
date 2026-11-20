@@ -66,7 +66,10 @@ export type SpriteOrderPresentationEvent =
   | Readonly<{ kind: "action-prompt" }>
   | Readonly<{ kind: "actions-committed" }>
   | Readonly<{ kind: "move-menu" }>
-  | Readonly<{ kind: "move-animation"; moveId: number; attackerSide: "player" | "opponent"; geometryPlan?: string }>
+  | Readonly<{ kind: "move-animation"; moveId: number; attackerSide: "player" | "opponent"; geometryPlan?: string;
+    /** ice2: the displayed field of a lent-order-keyed body (Water Spout 323 / Shock Wave 351) recorded while the order was unknown (a pending
+     * words marker): the render seam computes the plan at the replayed tracker's lend (`geometryPlanText`) instead of a record-time plan text. */
+    geometryField?: object }>
   | Readonly<{ kind: "hit-animation"; targetVisible: boolean }>
   | Readonly<{ kind: "stat-animation"; argument: number }>
   | Readonly<{ kind: "status-animation"; status: string }>
@@ -621,7 +624,11 @@ export type SpriteOrderDeferredCarry = (
 export function resolveSpriteOrderDeferredLend(
   deferred: SpriteOrderDeferredLend,
   carryBody: SpriteOrderDeferredCarry,
-  options: Readonly<{ replayBattleUnits?: (marker: SpriteOrderDeferredLend) => boolean }> = {},
+  options: Readonly<{
+    replayBattleUnits?: (marker: SpriteOrderDeferredLend) => boolean;
+    /** ice2: the plan text of a lent-order-keyed body unit that carries `geometryField`, at the order it is lent in this replay. */
+    geometryPlanText?: (unit: Extract<SpriteOrderPresentationEvent, { kind: "move-animation" }>, lentFree: readonly number[]) => string | null;
+  }> = {},
   battlerReplacedAfter = false,
 ): readonly number[] | null {
   const battleUnits = options.replayBattleUnits?.(deferred) ?? false;
@@ -633,6 +640,12 @@ export function resolveSpriteOrderDeferredLend(
   const post = carryBody(deferred, activationFree, replaced);
   if (post === null) return null;
   let tracker = createSpriteOrderTracker({ known: true, free: post, pendingDestroyed: [] });
-  for (const unit of deferred.units) tracker = applySpriteOrderPresentationEvent(tracker, unit);
+  for (const unit of deferred.units) {
+    if (unit.kind === "move-animation" && unit.geometryField !== undefined && unit.geometryPlan === undefined && options.geometryPlanText !== undefined) {
+      const lentFree = spriteOrderTrackerLend(tracker);
+      const text = lentFree === null ? null : options.geometryPlanText(unit, lentFree);
+      tracker = applySpriteOrderPresentationEvent(tracker, text === null ? unit : Object.freeze({ ...unit, geometryPlan: text }));
+    } else tracker = applySpriteOrderPresentationEvent(tracker, unit);
+  }
   return spriteOrderTrackerLend(tracker);
 }
