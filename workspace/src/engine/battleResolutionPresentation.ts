@@ -6332,7 +6332,7 @@ function usedMovePrintLeadAdjust(state: BattleResolutionPresentationState, hando
   if (handoff.forced !== undefined || handoff.focusPunchPrePass === true) return 0;
   const segment = state.segments[0];
   if (segment === undefined || state.sourceDecision.kind !== "use-move") return 0;
-  if ((segment.beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) === 0) return 0;
+  if ((segment.beforeRules.rulesContext.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) === 0) return 0;
   const first = segment.events[0];
   if (first === undefined || first.payload.kind !== "message" || first.payload.messageId !== "STRINGID_USEDMOVE") return 0;
   const u = first.provenance?.instructionExecution;
