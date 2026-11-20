@@ -2292,7 +2292,7 @@ describe("midBattleSwitchFade gate (ISSUES #81: non-switch resolutions never fad
   });
 });
 
-describe("hcr1b -- Scene OFF first used-move glyph at commit + 7 + u", () => {
+describe("hcr1b / hcr2 -- first used-move glyph at commit + 7 + u (Scene OFF and ON)", () => {
   const walkFrames = (
     u: number,
     { off = true, forced, firstMessage = "STRINGID_USEDMOVE" }: { off?: boolean; forced?: "encore" | "struggle"; firstMessage?: string } = {},
@@ -2322,9 +2322,14 @@ describe("hcr1b -- Scene OFF first used-move glyph at commit + 7 + u", () => {
     expect(walked).toEqual([9, 10, 11, 12, 13, 14, 15, 23]);
   });
 
-  it("outside the 2..20 window, Scene ON, forced Encore / Struggle moves and non-USEDMOVE heads keep the fixed 9-frame walk", () => {
+  it("Scene ON holds the same u - 2 frames (hcr2 ON oracle traces, u = 2 / 3 / 4 / 6 / 8)", () => {
+    const walked = [2, 3, 4, 5, 6, 7, 8, 16].map((u) => walkFrames(u, { off: false }));
+    expect(walked).toEqual([9, 10, 11, 12, 13, 14, 15, 23]);
+  });
+
+  it("outside the 2..20 window, forced Encore / Struggle moves and non-USEDMOVE heads keep the fixed 9-frame walk", () => {
     expect([1, 21, 40].map((u) => walkFrames(u))).toEqual([9, 9, 9]);
-    expect([2, 4, 6].map((u) => walkFrames(u, { off: false }))).toEqual([9, 9, 9]);
+    expect([1, 21, 40].map((u) => walkFrames(u, { off: false }))).toEqual([9, 9, 9]);
     expect(walkFrames(6, { forced: "encore" })).toBe(9);
     expect(walkFrames(6, { firstMessage: "STRINGID_PKMNWENTTOSLEEP" })).toBe(9);
   });
