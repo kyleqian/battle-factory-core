@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """aud248: S11 T2 scoreboard. Totals exact / offset / missing / extra sound rows by family over the ROM-aligned seeds of a chain directory.
 
-usage: soundScoreboard.py CHAINDIR [--out FILE] [--per-seed]
+usage: soundScoreboard.py CHAINDIR [--out FILE] [--per-seed]     (-h / --help prints this; importing the module runs nothing)
+  cln10: every family row and a TOTAL row carry `mass` = sum of abs(engine - ROM offset) over the matched rows (exact rows add 0), the figure the t2n / hcr1c sections quote;
+  `exact` is the matched rows at offset 0, so TOTAL exact + offset = matched rows. `totals[family].mass` is also in the --out JSON.
   per `<seed>-<scene>` with engine.json (soundCensusRomReplay replay), drive.json (`lab --drive`) and snd.json (`lab` hook run of the frozen trace):
   every decision segment (menu k = [menuOpen_k, commit_k), resolution k = [commit_k, menuOpen_k+1), as soundSegmentDiff.py) is aligned engine vs ROM as an ordered (kind, id, pan) list
   (difflib); matched rows are `exact` when their offset from the segment start is equal, `offset` when it differs; ROM-only rows are `missing`, engine-only rows `extra`.
@@ -50,7 +52,7 @@ def score_run(engine, drive, rom):
     r_rows = [(e["frame"], e["kind"], e["id"], e["pan"]) for e in rom["events"]]
     e_end = max([r[0] for r in e_rows] + [a["commitFrame"] for a in eng_a]) + 1
     r_end = max([r[0] for r in r_rows] + [a["commitFrame"] for a in rom_a]) + 1
-    out = {f: {"exact": 0, "offset": 0, "missing": 0, "extra": 0} for f in FAMILIES}
+    out = {f: {"exact": 0, "offset": 0, "missing": 0, "extra": 0, "mass": 0} for f in FAMILIES}
     detail = []
     for (name, elo, ehi), (_, rlo, rhi) in zip(segments(eng_a[:n], e_end), segments(rom_a[:n], r_end)):
         e, r = pick(e_rows, elo, ehi), pick(r_rows, rlo, rhi)
@@ -61,6 +63,7 @@ def score_run(engine, drive, rom):
                 for i, j in zip(range(i1, i2), range(j1, j2)):
                     fam = family(e[i][1], e[i][2], name)
                     out[fam]["exact" if e[i][0] == r[j][0] else "offset"] += 1
+                    out[fam]["mass"] += abs(e[i][0] - r[j][0])
                     DELTAS.setdefault(fam, []).append(e[i][0] - r[j][0])
                     if e[i][1] == "se":
                         ID_DELTAS.setdefault(e[i][2], []).append(e[i][0] - r[j][0])
@@ -75,6 +78,9 @@ def score_run(engine, drive, rom):
 
 
 def main(argv):
+    if "-h" in argv or "--help" in argv:
+        print(__doc__)
+        return
     args = [a for a in argv if not a.startswith("--")]
     flags = {argv[i]: argv[i + 1] for i in range(len(argv) - 1) if argv[i].startswith("--")}
     if not args:
@@ -84,7 +90,7 @@ def main(argv):
     for scene in ("on", "off"):
         DELTAS.clear()
         ID_DELTAS.clear()
-        tot = {f: {"exact": 0, "offset": 0, "missing": 0, "extra": 0} for f in FAMILIES}
+        tot = {f: {"exact": 0, "offset": 0, "missing": 0, "extra": 0, "mass": 0} for f in FAMILIES}
         seeds, per_seed, miss_ids = [], {}, {}
         for eng_p in sorted(d.glob(f"*-{scene}.engine.json"), key=lambda p: int(p.name.split("-")[0])):
             stem = eng_p.name[: -len(".engine.json")]
@@ -112,14 +118,17 @@ def main(argv):
         result[scene] = {"idDeltas": id_deltas, "deltas": deltas, "seeds": seeds, "totals": tot, "idRows": dict(sorted(miss_ids.items(), key=lambda kv: -kv[1])), "perSeed": per_seed}
     for scene, r in result.items():
         print(f"== Scene {scene.upper()}: {len(r['seeds'])} aligned seeds {r['seeds']}")
-        print(f"{'family':24}{'exact':>8}{'offset':>8}{'missing':>9}{'extra':>7}")
+        print(f"{'family':24}{'exact':>8}{'offset':>8}{'missing':>9}{'extra':>7}{'mass':>9}")
         for f in FAMILIES:
             t = r["totals"][f]
-            print(f"{f:24}{t['exact']:>8}{t['offset']:>8}{t['missing']:>9}{t['extra']:>7}")
+            print(f"{f:24}{t['exact']:>8}{t['offset']:>8}{t['missing']:>9}{t['extra']:>7}{t['mass']:>9}")
+        all_t = {k: sum(r["totals"][f][k] for f in FAMILIES) for k in ("exact", "offset", "missing", "extra", "mass")}
+        print(f"{'TOTAL':24}{all_t['exact']:>8}{all_t['offset']:>8}{all_t['missing']:>9}{all_t['extra']:>7}{all_t['mass']:>9}")
         print("matched-row frame delta (engine - ROM, relative to segment start):", r["deltas"])
         print("top differing rows (kind id:pan, count):", list(r["idRows"].items())[:14])
     if "--out" in flags:
         json.dump(result, open(flags["--out"], "w"), indent=1)
 
 
-main(sys.argv[1:])
+if __name__ == "__main__":
+    main(sys.argv[1:])
