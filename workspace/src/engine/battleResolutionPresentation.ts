@@ -5709,15 +5709,18 @@ export function projectBattleResolutionCommands(
       // command (the outgoing mon's scale-up + teardown, rendered from the
       // switch-out view) ahead of the recall receipt that commits the hidden
       // sprite/healthbox after the span.
-      // Scene ON: Roar/Whirlwind's `returntoball BS_TARGET` after a MOVE_ANIMATION receipt on that target (Baton Pass's
-      // `returntoball BS_ATTACKER` keeps the voluntary-style span below); Scene OFF: every `returntoball` (offs152).
+      // Scene ON: Roar/Whirlwind's `returntoball BS_TARGET` after a MOVE_ANIMATION receipt on that target, and Baton Pass's
+      // `returntoball BS_ATTACKER` (snd3: its body already hid the attacker, AnimBatonPassPokeball; the receipt is the same instant
+      // removal with no recall animation and no SE_BALL_OPEN, OpponentHandleReturnMonToBall / PlayerHandleReturnMonToBall skipAnim);
+      // Scene OFF: every `returntoball` (offs152).
       // offs152: in Scene OFF every `returntoball` receipt is the forced removal (no body; the target is drawn at rest).
       const returnToBall = event.provenance?.opcodeName === "B_SCR_OP_RETURNTOBALL" && payload.invisible;
       const sceneOffRemoval = returnToBall && (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0;
-      const forcedRemoval = returnToBall && (sceneOffRemoval || sceneOnMoveTarget === battler);
+      const batonPassRemoval = returnToBall && returnToBallOperand(event) === "BS_ATTACKER";
+      const forcedRemoval = returnToBall && (sceneOffRemoval || batonPassRemoval || sceneOnMoveTarget === battler);
       if (forcedRemoval) sceneOnMoveTarget = null;
       if (forcedRemoval && returnToBallOperand(event) === "BS_TARGET") forcedDraggedOut.add(battler);
-      const removalGap = sceneOffRemoval && returnToBallOperand(event) === "BS_ATTACKER"
+      const removalGap = batonPassRemoval
         ? SCENE_OFF_BATON_PASS_RETURN_TO_BALL_PRINT_GAP_FRAMES
         : FORCED_RETURN_TO_BALL_SEND_IN_GAP_FRAMES;
       if (

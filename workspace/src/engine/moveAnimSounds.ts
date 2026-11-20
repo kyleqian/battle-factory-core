@@ -289,15 +289,24 @@ export function variantOf(move: number, turn: number, attackerSide: 0 | 1, { pic
 
 /** StatsChangeAnimation_Step2 plays its SE (battle_anim_utility_funcs.c:561-564) on this stats-change command age. */
 export const STATS_CHANGE_SE_AGE = 7;
+/**
+ * snd3 (docs/snd3-sweep-sounds.md): the battle-start entry script's stats-change command (pau4, BattleScript_IntimidateActivatesEnd3's
+ * `playanimation BS_TARGET, B_ANIM_STATS_CHANGE`) starts on the ROM's gAnimScriptActive edge + 1 and its banner is ROM-exact, so Step2's SE
+ * (edge + 4, three frames before the banner's first frame) is command age 3 (ROM lab sta6m-intimp-off: SE 245 at app frame 732, command 729).
+ */
+export const ENTRY_STATS_CHANGE_SE_AGE = 3;
 const SE_M_STAT_INCREASE = 239;
 const SE_M_STAT_DECREASE = 245;
 const SOUND_PAN_ATTACKER_VALUE = -64;
 
-/** General_StatsChange's SE (both scenes): SE_M_STAT_INCREASE / DECREASE with BattleAnimAdjustPanning2(SOUND_PAN_ATTACKER) for the animated battler. */
-export function emitStatsChangeSounds(after: BattleResolutionPresentationState | null): void {
+/**
+ * General_StatsChange's SE (both scenes): SE_M_STAT_INCREASE / DECREASE with BattleAnimAdjustPanning2(SOUND_PAN_ATTACKER) for the animated battler.
+ * `seAge`: the command age of the SE (the battle-start entry phase passes ENTRY_STATS_CHANGE_SE_AGE).
+ */
+export function emitStatsChangeSounds(after: BattleResolutionPresentationState | null, seAge = STATS_CHANGE_SE_AGE): void {
   if (after === null || after.lifecycle.phase !== "presenting") return;
   const source = statsChangeSourceAge(after);
-  if (source === null || source.age !== STATS_CHANGE_SE_AGE) return;
+  if (source === null || source.age !== seAge) return;
   emitSound({
     kind: "se", id: source.direction === "up" ? SE_M_STAT_INCREASE : SE_M_STAT_DECREASE,
     pan: animSoundPan2(SOUND_PAN_ATTACKER_VALUE, { attackerSide: source.battler === 0 ? "player" : "opponent", targetSide: source.battler === 0 ? "opponent" : "player" }),
@@ -400,6 +409,49 @@ function scheduleMoveAnimationTail(ops: readonly TimedOp[], context: AnimPanCont
   for (const scriptRow of tailRows) scheduleAfter(scriptRow, () => emitOpsAt(ops, context, scriptRow));
 }
 
+/**
+ * snd3 (docs/snd3-sweep-sounds.md): gMovesWithQuietBGM (battle_anim_scripts.s:14-15: Sing, Perish Song, GrassWhistle). LaunchBattleAnimation
+ * (battle_anim.c:248-256) sets the BGM to volume 128 on the launch row, the row before the script's first command (script row -1); Cmd_end
+ * (battle_anim.c:520) sets it back to 256 on the row gAnimScriptActive falls. ROM (soundEventProbe on tools/battle-lab/snd3-<move>-<side>-on.json,
+ * tools/audio/fixtures/snd3-*-window.json, and the frame catcher's seed 15 GrassWhistle, ROSELIA -> FURRET): the duck is 1 row before each
+ * move's first SE's script row in all seven windows; the restore row is GrassWhistle 219 (SE-bound: SE_M_GRASSWHISTLE ends 201 rows after its
+ * panse at 18, both sides and both species pairs), Perish Song 257 (both sides: its fixed 259-row body - 2) and Sing its geometry-derived ROM
+ * body - 2 (liveSingBodyRows: the notes fly off the screen, then Cmd_end's 90-frame IsSEPlaying wait runs out, stops SE_M_SING on SE1,
+ * battle_anim.c:493-501, and restores the BGM on the same row).
+ */
+export const QUIET_BGM_VOLUME = 128;
+export const QUIET_BGM_LAUNCH_ROW = -1;
+const MOVE_SING = 47;
+const MOVE_PERISH_SONG = 195;
+const MOVE_GRASS_WHISTLE = 320;
+const SE_M_SING = 172;
+const QUIET_BGM_FIXED_RESTORE_ROWS: Readonly<Partial<Record<number, number>>> = Object.freeze({ [MOVE_PERISH_SONG]: 257, [MOVE_GRASS_WHISTLE]: 219 });
+const SING_RESTORE_ROWS_BEFORE_BODY_END = 2;
+
+/** The script row of the quiet-BGM restore (and the SE Cmd_end stops on that row), or null for a move outside gMovesWithQuietBGM. */
+export function quietBgmRestore(moveId: number, singBodyRows: () => number | null): Readonly<{ row: number; stopSe?: number }> | null {
+  const fixed = QUIET_BGM_FIXED_RESTORE_ROWS[moveId];
+  if (fixed !== undefined) return { row: fixed };
+  if (moveId !== MOVE_SING) return null;
+  const rows = singBodyRows();
+  return rows === null ? null : { row: rows - SING_RESTORE_ROWS_BEFORE_BODY_END, stopSe: SE_M_SING };
+}
+
+function emitQuietBgmRows(moveId: number, singBodyRows: () => number | null, scriptRow: number, frontierBrain: boolean): void {
+  if (scriptRow !== QUIET_BGM_LAUNCH_ROW) return;
+  const restore = quietBgmRestore(moveId, singBodyRows);
+  if (restore === null) return;
+  const bgm = factoryBattleBgm(frontierBrain);
+  emitSound({ kind: "duck", id: bgm, pan: null, volume: QUIET_BGM_VOLUME });
+  // The restore can fall after the engine's presented animation has ended (the next command's frames), so it is scheduled from the launch row.
+  const delay = restore.row - QUIET_BGM_LAUNCH_ROW;
+  if (restore.stopSe !== undefined) {
+    const id = restore.stopSe;
+    scheduleAfter(delay, () => emitSound({ kind: "stop", id, pan: null, player: "SE1" }));
+  }
+  scheduleAnimTaskBgmRestore(bgm, delay);
+}
+
 /** Called once per collected tick with the round's resolution presentation after the tick; emits the ops whose frame is this tick's. */
 export function emitMoveAnimSounds(after: BattleResolutionPresentationState | null, frontierBrain = false): void {
   if (after === null || after.lifecycle.phase !== "presenting") return;
@@ -414,6 +466,7 @@ export function emitMoveAnimSounds(after: BattleResolutionPresentationState | nu
   } as const;
   const scriptRow = age - FIRST_COMMAND_AGE - AGE_TO_SOUND_ROWS;
   const ops = variantOf(request.moveId, request.turn, request.attacker === 0 ? 0 : 1, { picY: source.picOffsetY, topY: source.topY, rolloutCounter: request.rolloutCounter, damage: request.damage, attackerElevation: source.attackerElevation, attackerHpQuarter: source.attackerHpQuarter });
+  emitQuietBgmRows(request.moveId, source.singBodyRows, scriptRow, frontierBrain);
   emitOpsAt(ops, context, scriptRow);
   if (scriptRow === 0) scheduleMoveAnimationTail(ops, context, lastAge - FIRST_COMMAND_AGE - AGE_TO_SOUND_ROWS);
   emitCryTaskRows(request.moveId, source.attackerSpecies, context.attackerSide, scriptRow, frontierBrain);
