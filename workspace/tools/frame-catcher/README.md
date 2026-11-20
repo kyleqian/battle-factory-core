@@ -31,8 +31,8 @@ node --experimental-strip-types --no-warnings tools/frame-catcher/makeTrace.mjs 
 
 Look at any frames of a kept run: `python3 tools/frame-catcher/peek.py RUNDIR out.png engine:17480-17740/52 rom:18420-18680/52`.
 
-Time: about 1 to 2 minutes per two-battle trace (engine 15 to 45 s, ROM 15 to 70 s, compare 20 to 50 s); Kyle's 50,000-frame live
-round takes about 3 minutes.
+Time: about 1 to 2 minutes per two-battle trace (engine 10 to 35 s, ROM 40 to 80 s, compare 10 to 30 s); Kyle's 50,000-frame live
+round takes about 2 minutes. Five traces at once (`JOBS=5`) take as long as the slowest one. First findings: `docs/frame-catcher-2026-11-20.md`.
 
 ## How it works
 
