@@ -1282,3 +1282,77 @@ The 94 worse rows are mostly stat SE 245 / 239 rows that were already at a posit
 5. **After it**: re-measure the 94 worse rows (stat 245 / 239 lead), then the residuals of section 5 one by one (Brick Break chain first, 126).
 
 Not measured: Scene ON; the u = 10 .. 17 charge-turn rise split; seeds with no used-move print. Tooling note: scripts live in `/tmp/hcr1m` (`lib.py`, `cmp.py <seed> <k>`, `mass.py`, `first.py`), not committed; evidence copies in the ignored `.integration/evidence/hcr1m/`.
+
+## fsc1m (2026-11-20): Scene OFF faint / send-in chain, ROM vs app per command, split into lead / harness anchor / engine rows (measurement only)
+
+Scene OFF, the 24 T2 seeds of t2n. Measurement only: no change under `src/`, `tests/` or `tools/`, no probe patch this time (everything below is read from the t2n evidence plus the hcr1m per-frame ROM probe rows; `npm test` not run, as assigned). Evidence: `.integration/evidence/t2n/` (`t2n-attr-off.json`, per-seed `-off.{engine,drive,snd,cmp}.json`), the hcr1m copies of the per-frame ROM probe (`<seed>-rom.json`: gBattlescriptCurrInstr, exec flags, anim, hp) and `first.json` (per-segment first-print lead); scripts in `/tmp/fsc1m` (`lib.py`, `cmp.py <seed> <k>`, `chain.py`, `agg.py`, not committed). Alignment as in hcr1m: per decision segment both sides start at the commit frame, SE / cry rows matched by ordered id.
+
+### 1. Which seed, and what the chain is
+
+Chain rows = `ctl:16@faint` + `cry@faint` (faint), `ctl:114@party-summary` + `ctl:15@switch-in` + `cry@switch-in` (AI replacement send-in), `ctl:15` / `cry` `@sprite-visibility` (forced switch send-in), `ctl:15@trainer-slide`. 430 of the 440 rows, 2,660 of 2,678 mass are reproduced by the segment mapping (the 10 rows / 18 mass left are the zero rows booked under `@switch-out`).
+
+| seed | chain mass | seed | chain mass |
+| --- | --- | --- | --- |
+| **648** | **225** | 2741 | 136 |
+| 97 | 202 | 1914 | 134 |
+| 3738 | 180 | 3158 | 126 |
+| 1415 | 172 | 7682 | 121 |
+| 830 | 150 | (15 others) | 21 .. 118 |
+
+**Seed 648** is the one analysed per command (it also carries the Earthquake faint chain +43 x 2 of t2n section 4 group 3). Its 225 = seg 0 **196** (cry@faint +43, ctl:16 +43, ctl:114 +34, ctl:15 +38, cry@switch-in +38) + 29 (seg 2 / 8 -1 x 4, seg 12 -4 x 2, trainer-slide -17).
+
+### 2. Per command, seed 648 segment 0 (ROM vs app, frames after the segment's commit; ROM = the probe, app = `cmds`)
+
+The turn: the foe uses Dig (charge turn), the player's Earthquake hits the underground foe (`BattleScript_DoHitAllWithUndergroundBonus`, `data/battle_scripts_1.s:1848`), the foe (Golduck, cry 55) faints, the AI sends in the next mon.
+
+| command | ROM (source) | ROM frame | app frame | app - ROM |
+| --- | --- | --- | --- | --- |
+| first print (charge turn) | exec rise at `BattleScriptFirstChargingTurn+4` | 16 | message 9 | **-7** (the hcr1m first-print lead, here u = 10: 6 + u) |
+| hit SE 13 | `effectivenesssound` (+13) then `hitanimation` (+14) | 232 | hit-animation 225, SE 225 | -7 (inherited) |
+| hit blink | `OpponentHandleHitAnimation`, `src/battle_controller_opponent.c:1804-1817`: **sprite `invisible` (Dig underground) -> `OpponentBufferExecCompleted()` at once**, no blink | bar starts 235 (SE + 3) | hp 260 (SE + **35**) | **+25** (app 35-frame `HIT_ANIMATION_TIMING`, `battleResolutionPresentation.ts:1139`, emitted at 5430-5447, is unconditional; ROM blink is 33 frames when the target is visible: SE + 1 .. + 34, bar + 36, checked on 7 other segments) |
+| hp bar 187 -> 0 | `healthbarupdate` / `datahpupdate` (+19 / +21) | 235 .. 383 (148) | 260 .. 407 (147) | +24 (-1 own) |
+| empty box | `printstring STRINGID_EMPTYSTRING3` + `waitmessage 1` (`:1865-1866`) then `tryfaintmon` (+35) | 388 (hp end + 5), FaintTarget at 391 | message 407 -> faint cmd 431 (**24**) | +43 at the faint cmd: **+19 own** |
+| faint cry (`playfaintcry`, `:2818`) | `BattleScript_FaintTarget+2` | 392 | cry 435 (faint cmd 431 + 4) | **+43** |
+| `pause B_WAIT_TIME_LONG` + `dofaintanimation` -> SE 16 | `:2819-2820`, `OpponentHandleFaintAnimation` (`PlaySE12WithPanning(SE_FAINT)`) | 458 (cry + 66) | 501 (cry + 66) | **+43** (interval exact) |
+| faint message (`printstring STRINGID_TARGETFAINTED`, `:2822`) | exec 478 .. 509 (31) | 478 | status 520 / message 521 | +43 |
+| rest of the faint script, `BattleScript_GiveExp` (517), `HandleFaintedMon` (523), `FaintedMonTryChoose` (526 .. 532; the AI's `openpartyscreen` choice: no sound, 7 frames here) | `:2830-2847` | 534 = SE 114 (`drawpartystatussummary` rise) | sprite-visibility 543 / 544, party-summary 545, SE 114 at **568** (lead 23) | **+34** (-9 against the faint) |
+| `SWITCHINMON` print (`printstring`, +11) | `:2888` | 633 | message 668 | +35 |
+| `switchinanim` (+16): ball SE 15 / new mon cry 279 | `:2890`; SE 15 at exec + 18, cry at + 34 | 689 / 705 | switch-in cmd 708; SE 15 727 / cry 743 | **+38 / +38** (the SE 114 -> SE 15 interval is +4: print +1, print -> switchinanim +2, SE +1) |
+| `end2` | `BattleScript_FaintedMonEnd` | 794 | next menu 836 (segment 827 vs 798) | +29 |
+
+Arithmetic of the faint rows: **+43 = -7 (lead) + 32 (invisible-target blink: app 35 vs ROM 3) - 1 (hp bar 147 vs 148) + 19 (empty box 24 vs 5)**. Then the faint -> send-in step is **-9** (ROM 76 frames SE 16 -> SE 114, app 67), and the send-in's own SE 114 -> SE 15 / cry is **+4**.
+
+The forced-switch segments of this seed (segs 3 and 9, after the player's mon faints in segs 2 and 8): SE 15 / cry 217 / cry 200 at **0 / 0** (ROM and app both at commit + 146 / 162 and 148 / 164); the faint rows of the preceding player-side faints are -1 (seg 2, 8) and -4 (seg 13): inherited, no own offset.
+
+### 3. The split (a) / (b) / (c)
+
+**(a) Inherited from the turn's first-print lead (hcr1m).** The app's first message is at a fixed commit + 9, ROM at 6 + u. Using `emsg - rise` per segment (first.json) as the carried lead, over the faint rows of 190 matched rows in segments with a known lead: sum of the lead |a| = 429. If the lead were exact everywhere (an **upper bound**: the hcr1m rule only covers plain `use-move` turns, u = 2 .. 20; the charge-turn first print of 648 seg 0 may be outside it), the chain mass would move as: faint rows 1,017 -> 724 (-293), AI send-in 1,097 -> 983 (-114), trainer-slide 222 -> 187 (-35): **-435 of the 2,387 mass in segments with a known lead (-18 %), -16 % of the 2,660 total**. In 648 seg 0 the lead is -7 and **moves the 5 chain rows the wrong way** (43 -> 50, 34 -> 41, 38 -> 45: +35 mass) because the own rows are +50: on the top seed the lead fix alone makes the chain worse; the (c) rows have to land with it. 78 of the 99 `cry@faint` rows equal the hit-row offset of their segment exactly (own = 0; mass 234): these are pure inheritance.
+
+**(b) The driver's forced-switch anchor.** 47 forced-switch segments (decision kind `switch`, the replacement after the player's mon faints): the engine's menu-open -> commit is a fixed 8 / 11 frames, the ROM's 32 .. 41 (27 .. 28 more), and the harness anchors on the commit. The SE 15 / cry send-in lands exactly (offset 0) in **25 of 47**, at **-3 in 17, -7 in 5** (ROM commit -> SE 15 is 144 .. 153, app 144 .. 148: the quantum is the ROM driver's party-menu confirm input phase, 3 .. 4 frames, not an engine row). Mass: SE 15 86, cry the same, **about 170** by direct count (t2n books 83 of it under `@sprite-visibility`, the rest under other labels): **6 % of the chain**. This is smaller than ctl1's 9 .. 12 frame anchor artifact (now at most 7, median 0): the t2n "-12 -> -3" driver fix is already in. On seed 648 this is **0** (both forced switches at 0). It is measurement side; it does not move any app frame.
+
+**(c) The engine's own faint / send-in rows** (rows and source lines; these are what is left after (a) and (b)):
+
+| # | row | own offset | rows / mass | ROM source | app source |
+| --- | --- | --- | --- | --- | --- |
+| c1 | **hit-animation on an invisible (Dig / Fly / Dive underground) target is 35 frames; ROM skips it (0 frames)** | +25 .. +32 on every later row of the turn (648 seg 0: +32 on the five chain rows plus the hp / message rows) | 648: 5 chain rows, 196; other seeds: s6912 seg 7 (+26 own) likely, not decomposed | `src/battle_controller_opponent.c:1804-1817` (and the player controller's twin), `OpponentHandleHitAnimation` | `HIT_ANIMATION_TIMING` 35 (`battleResolutionPresentation.ts:1139`), hit-animation emission 5430-5447, no invisibility test |
+| c2 | **`printstring STRINGID_EMPTYSTRING3` + `waitmessage 1` in the hit-all loop is a default 24-frame message; ROM spends ~5 frames hp end -> cry** | **+17 .. +20 own** on the faint rows of every Earthquake KO: 6 segments (s648 +19, s1415 +19 / s3158 +19 x 2 / s5063 +17 / s6912 +19 .. +26 / s97 seg 20 +20, own = faint - hit) | 6 segments x 2 faint rows + the send-in rows behind them; about 200 mass | `data/battle_scripts_1.s:1865-1866` (`BattleScript_DoHitAllWithUndergroundBonus`; same print in `BattleScript_HitAllNoUndergroundBonus`) | `MESSAGE_TIMING` 24 (`:956`); the empty-box timing exists only for the Focus Punch pre-pass (`focusPunchPrePassMessageTiming`, `:297-330`), where it is `kernel instruction count + 1` |
+| c3 | **faint message -> party-summary SE: the app interval SE 16 -> SE 114 is 64 .. 70 (median 67), ROM 66 .. 83 (median 75)** | **-8 median (-1 .. -15)** on SE 114 / SE 15 / cry@switch-in of every AI replacement (30 of 30 faints with a send-in in the same segment at -15 .. -1 except 3) | 118 rows, 1,130 mass (81 rows with their faint in the segment: own sum 614 of 921) | ROM: faint print `printstring STRINGID_TARGETFAINTED` (`:2822`, exec 31 frames in 648) + `GiveExp` / `HandleFaintedMon` (a constant +6, +3) + the AI `openpartyscreen` choice (`FaintedMonTryChoose`, `:2843-2847`, **6 .. 10 frames before `FaintedMonSendOutNew`**) + 1; the SE 16 -> GiveExp part alone ranges 48 .. 65 | app: `faint` command lead 68 (exact), then the faint message (22 frames) + 2 sprite-visibility + party-summary lead 23 (648) |
+| c4 | send-in tail: print -> `switchinanim` -> SE 15 / cry | **+1 .. +4** (648 +4) | small | `:2888-2893` | |
+| c5 | attacker faint (`BattleScript_FaintAttacker`: confusion, Perish Song, turn damage, recoil) and the battle-ending faint (`BattleScript_LocalBattleLostPrintTrainersWinText`) | -6 .. -12 own (s499 seg 14 -11, s1028 seg 16 -12, s97 seg 14 -10, s3738 seg 62 -8, s2741 seg 5 -3, s7295 seg 1 -10) | ~10 faint rows, ~110 mass | `BattleScript_FaintAttacker`, `LocalBattleLost...` | not examined per command |
+| c6 | trainer-slide after the last faint (battle end -> next battle) | -4 .. -29 | 20 rows, 222 mass (lead explains 35) | | not examined (not a send-in path; unmeasured) |
+
+Mass accounting of the 2,660: **faint rows 1,154** (own part 502 over 190 rows: 78 of 99 `cry@faint` rows are 0 own, 21 carry 277 / own 252: 6 Earthquake rows +17 .. +50, 8 attacker-faint rows -6 .. -12, a few +9 / +13 / -1 .. -3), **AI send-in 1,130** (own c3 614 of the 921 in segments with the faint, 209 in segments where no faint row is attributed: 37 rows, 14 of them at -7 .. -15), **forced switch ~170 (b)**, trainer-slide 222, other 71. The pieces cancel in sign (faint -3 plus send-in own -7 = -10), so |a| + |own| exceeds the mass.
+
+### 4. Answer
+
+1. **Seed 648 is dominated by c1 + c2, not by (a) or (b)**: +50 of the +43 faint offset is the engine (c1 32 + c2 19 - 1), the lead is -7 against it, the forced switch is 0. Fixing the hcr1m lead alone would **worsen** this seed's chain by 35.
+2. **Across the 24 seeds the chain is mostly inherited on the faint rows** (78 / 99 faint cry rows own 0, offset = the turn's hit offset -1 .. -9) and engine-own on the send-in rows: **c3 (the faint -> party-summary interval, median -8) is the biggest single engine row: 118 rows, 1,130 mass**, then c2 (Earthquake empty box, +17 .. +20), c1 (invisible target blink, 648 only in these seeds), c5 / c6 (attacker-faint and battle-end, ~330).
+3. The part the lead (a) would clear is **about 435 of 2,660 (16 %)**, the harness anchor (b) is **~170 (6 %), measurement side, already down to 0 / -3 / -7**, the engine's own rows (c) are **about 1,200 (45 %)**; the rest is the hit chain carried (hp bar lengths, other turns' earlier commands).
+
+### 5. Proposed landing (not done: out of scope for fsc1m)
+
+1. **c1**: skip the 35-frame hit-animation when the target is semi-invulnerable-invisible (the engine knows STATUS3_UNDERGROUND / ON_AIR / UNDERWATER; ROM test is the sprite `invisible` flag): -32 on every later row of those turns (Dig / Fly / Dive hits on Earthquake / Surf / Gust / Thunder / Twister; 6 EQ KOs in these seeds, only 648 has the blink skip).
+2. **c2**: time the hit-all loop's EMPTYSTRING3 box like the Focus Punch pre-pass one (kernel instruction count + 1, about 5 frames): -17 .. -19 on the 6 Earthquake KO chains (about -200 mass).
+3. **c3**: model the faint message -> party-summary interval: ROM = faint print length (48 .. 65 from SE 16 to GiveExp; suspected to depend on the fainted mon's name / text length, **not tested**) + 6 + 3 + AI choice 6 .. 10 + 1. This needs the AI choice's frame cost (a ROM probe on `FaintedMonTryChoose`) and the text-length rule; expected -614 own mass on 81 rows.
+4. Land the hcr1m lead together with c1 / c2 (on the top seed they cancel; on the rest the lead alone is -435).
+5. Not measured: Scene ON (the same scripts run, the chain should carry the same c1 / c2 / c3 rows); c5 and c6 per command; what drives the 6 .. 10 frame AI choice; the 10 chain rows under `@switch-out` (zero offset).
