@@ -61,9 +61,11 @@ interface WonLobby {
 // hcr1b (the first used-move glyph at commit + 7 + u, pixel-exact): 10 / 0 / 10 fail 3 cases. A scan of 0..47 with the seed in all three roles (scratch copies of this file) found 23, 33, 44 and 47
 // passing every case (0..15 all fail at least the two WIN_TWO-role continuation cases; 17 and 40 fail only those two, 36 only the retire case), so all three use 23.
 // merge of rsw1 + hcr1b + gsp2b (pin2): 23 still passes every case. A scan of 0..22 with the seed in all three roles on the merged tree (scratch copies of this file) found no seed passing all 15 (17 loses only the two WIN_TWO continuation cases), so all three stay 23.
-const WIN_TWO_SEED = 23;
-const RETIRE_SEED = 23;
-const WIN_THEN_LOSE_SEED = 23;
+// lbw9 (the Lobby save wait is a timer / held A, the menus clamp: every in-game new challenge is dealt from a later cursor): 23 loses the continuation and the challenge-2 loss case. A scan of 0..31 with the seed
+// in all three roles (scratch copies of this file, full-file runs) found 0 and 10 passing all 15 cases (13 fails only the challenge-2 loss case; 4, 14 and 17 fail the two continuation cases), so all three use 0.
+const WIN_TWO_SEED = 0;
+const RETIRE_SEED = 0;
+const WIN_THEN_LOSE_SEED = 0;
 
 function newPlayer(seed: number): RandomPlayer {
   const player = new RandomPlayer(new Rng(seed), new ActionLog(false), "winning");

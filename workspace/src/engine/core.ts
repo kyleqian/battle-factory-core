@@ -1360,6 +1360,7 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
       }
       const attendantInput = {
         a: newKeys.has("A"),
+        aHeld: buttons.has("A"),
         b: newKeys.has("B"),
         up: newAndRepeatedKeys.has("UP"),
         down: newAndRepeatedKeys.has("DOWN"),
