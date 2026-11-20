@@ -43,7 +43,7 @@ FUNCS = {  # name -> object file of the copy we want (None = the only one)
     "HandleInputChooseAction": "src/battle_controller_player.o", "HandleInputChooseMove": "src/battle_controller_player.o",
     "BattleMainCB2": None, "HandleTurnActionSelectionState": None, "TryDoEventsBeforeFirstTurn": None,
     "Task_BattleTransition": "src/battle_transition.o", "GetSpecialBattleTransition": None, "FillFactoryTrainerParty": None,
-    "Task_StartBattleAfterTransition": None,
+    "Task_StartBattleAfterTransition": None, "Random": None,
     "Task_HandleChooseMonInput": "src/party_menu.o", "Task_HandleSelectionMenuInput": "src/party_menu.o",
     "Task_HandleInput": "src/pokemon_summary_screen.o", "Task_HandleInput_MoveSelect": "src/pokemon_summary_screen.o",
     "Task_HandleMultichoiceInput": "src/script_menu.o", "Task_HandleYesNoInput": "src/script_menu.o",
@@ -286,6 +286,10 @@ class Rom:
         self.d = resolve(nm, map_text, DATA, (".bss", "ewram_data", ".data", "COMMON"))
         self.s = self.o.symbols
         self.task_menu = [(self.f[n], k) for n, k in TASK_MENUS]
+        # the end of GetSpecialBattleTransition (the next function's start): its Random() call is told apart by the return address
+        starts = sorted({a & ~1 for addrs in nm.values() for a in addrs})
+        gst = self.f["GetSpecialBattleTransition"]
+        self.gst_end = next(a for a in starts if a > gst)
 
     def u8(self, a): return self.o.read_u8(a)
     def u16(self, a): return self.o.read_u16(a)
@@ -555,9 +559,14 @@ def transition_traps(rom, battles, transitions, bn, staging, live_before):
     if transition_task_live(rom) is None and not task_live(rom, rom.f["Task_StartBattleAfterTransition"]):
         return None
     o, s = rom.o, rom.s
+    gst, gst_end = rom.f["GetSpecialBattleTransition"], rom.gst_end
 
-    def at_entry():
-        if bn in transitions["forced"]:
+    # The value is written at the draw itself, Random() called from GetSpecialBattleTransition (RANDOM_TRANSITION, battle_setup.c:863,
+    # 885), not at the function's entry: the overworld VBlank draws Random() once per frame, and when a frame boundary fell between the
+    # entry and the draw (seed 13 Scene ON battle 1, seed 0 Scene ON battle 5, seed 18 Scene ON battle 6) the VBlank's draw took the
+    # written value and the ROM still started its own transition.
+    def at_random():
+        if bn in transitions["forced"] or not (gst <= (int(o.core.cpu.gprs[14]) & ~1) < gst_end):
             return
         transitions["forced"].add(bn)
         if t.get("rngAfterDraw") is not None:
@@ -570,7 +579,7 @@ def transition_traps(rom, battles, transitions, bn, staging, live_before):
                 value = lcg(value)
         o.write_u32(s["gRngValue"], value)
         staging.append({"what": "transition", "battle": bn, "engine": t.get("transitionName"), "tableIndex": t["tableIndex"], "rng": value})
-    return {rom.f["GetSpecialBattleTransition"] + 2: at_entry}
+    return {rom.f["Random"] + 2: at_random}
 
 
 def rolled(rom, want):

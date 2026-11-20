@@ -103,3 +103,9 @@ through the same tiles at different moments (the first look at Kyle's Tuber pick
 - The test player's `full` policy browses the summary's move-select mode and other corners the driver has no cursor model for
   (`steer_button`); a press there is replayed but not steered.
 - Pan changes of a running sound (`pan` events) are not compared; cry pitch / length details are not checked.
+- Round 2 and later: the ROM plays round 1 itself, but round 2's draft builds the ROM's own rentals; traces are best cut in the Lobby
+  after the round (docs/fcs1-catcher-sweep.md, "Catcher limits left", says what staging round 2 would take).
+- The draft's YES/NO: the ROM's `Select_Task_HandleYesNo` is live about 43 frames before the cursor is set to YES
+  (`battle_factory_screen.c:1850`), so the driver reads NO, steers, and the comparator then drops the ROM's A click as a steer press
+  (a false "ours plays SE_SELECT" in the draft). The engine's swap-screen picker counts as a menu while it still fades in, so the
+  stretch lengths around it do not compare.
