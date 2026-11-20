@@ -6387,13 +6387,15 @@ function withSynthesizedAiSwitchRecallEvents(
 }
 
 /**
- * hcr1 / hcr1b (docs/aud251-s11-scoreboard-refresh.md): Scene OFF, a plain `use-move` turn's first used-move print (`attackstring`) is the ROM
+ * hcr1 / hcr1b / hcr2 (docs/aud251-s11-scoreboard-refresh.md): a plain `use-move` turn's first used-move print (`attackstring`) is the ROM
  * `printstring` row at commit + 6 + u, u = the USEDMOVE print's `instructionExecution` (commands from the effect-script entry: `setmoveeffect` /
  * `goto` / `jumpifnotmove` / `incrementgamestat` are one frame each before `attackcanceler`, `accuracycheck`, `attackstring`); the oracle swaps
- * the text box one frame later, so the first glyph is at commit + 7 + u (hcr1b pixel traces, u = 2 / 3 / 4 / 6 / 8, exact). The fixed stage walk
- * puts it at commit + 9, exact for u = 2; the adjustment is `u - 2` (a hold on `action-dispatch`).
+ * the text box one frame later, so the first glyph is at commit + 7 + u (hcr1b Scene OFF and hcr2 Scene ON pixel traces, u = 2 / 3 / 4 / 6 / 8,
+ * exact). The fixed stage walk puts it at commit + 9, exact for u = 2; the adjustment is `u - 2` (a hold on `action-dispatch`), the same in both scenes.
+ * The ROM plays the script-row sounds ahead of the frame the pixels reach them: one tick earlier stamps in Scene OFF. Scene ON would need two ticks once
+ * u > 2 (T2 exact 997 -> 1707), but the T1 census window then shifts (61 missing, 103 unclassified), so Scene ON keeps stamps at the frame (hcr2).
  * Forced (Encore / Struggle) and Focus Punch pre-pass handoffs keep their own leads; a turn that opens with anything but a USEDMOVE
- * print (status / ability / wake-up / confusion head) is not covered. Scene ON absorbs u downstream and is left on the fixed walk.
+ * print (status / ability / wake-up / confusion head) is not covered.
  */
 const USED_MOVE_LEAD_MIN_U = 2;
 const USED_MOVE_LEAD_MAX_U = 20;
@@ -6402,11 +6404,13 @@ function usedMovePrintLeadU(state: BattleResolutionPresentationState, handoff: B
   if (handoff.forced !== undefined || handoff.focusPunchPrePass === true) return null;
   const segment = state.segments[0];
   if (segment === undefined || state.sourceDecision.kind !== "use-move") return null;
-  if ((segment.beforeRules.rulesContext.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) === 0) return null;
   const first = segment.events[0];
   if (first === undefined || first.payload.kind !== "message" || first.payload.messageId !== "STRINGID_USEDMOVE") return null;
   const u = first.provenance?.instructionExecution;
   return u === undefined || u < USED_MOVE_LEAD_MIN_U || u > USED_MOVE_LEAD_MAX_U ? null : u;
+}
+function usedMoveSoundLeadOf(state: BattleResolutionPresentationState): number {
+  return ((state.segments[0]?.beforeRules.rulesContext.hitMarker ?? 0) & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0 ? USED_MOVE_SOUND_LEAD : 0;
 }
 function usedMovePrintLeadAdjust(state: BattleResolutionPresentationState, handoff: BattleResolutionConfirmHandoff): number {
   const u = usedMovePrintLeadU(state, handoff);
@@ -6508,6 +6512,8 @@ export function advanceBattleResolutionConfirmHandoff(
     ? null
     : CONFIRM_HANDOFF_NEXT[handoff.stage];
   if (nextStage === null) {
+    const printU = usedMovePrintLeadU(state, handoff);
+    const lead = printU === null ? 0 : usedMoveSoundLeadOf(state);
     return Object.freeze({
       ...state,
       lifecycle: Object.freeze({
@@ -6516,7 +6522,7 @@ export function advanceBattleResolutionConfirmHandoff(
       }),
       confirmHandoff: null,
       fadeTick: state.fadeTick + 1,
-      ...(usedMovePrintLeadU(state, handoff) !== null ? { usedMoveSoundLead: USED_MOVE_SOUND_LEAD } : {}),
+      ...(lead > 0 ? { usedMoveSoundLead: lead } : {}),
     });
   }
   const bounceRuns =
