@@ -18,6 +18,11 @@ export interface BattleMoveAnimationRequest {
    * other battler, drawn as it stands.
    */
   readonly turnTrapBody?: true;
+  /**
+   * Presentation-only (rnc1, docs/rnc1-rain-continues.md): with moveId 240, the body is General_Rain (B_ANIM_RAIN_CONTINUES), not
+   * Move_RAIN_DANCE: its own blend and drops (rainDance.ts generalRainAtAge) from the general animation's recorded presentation words.
+   */
+  readonly generalRain?: true;
 }
 
 export function battleMoveAnimationRequest(

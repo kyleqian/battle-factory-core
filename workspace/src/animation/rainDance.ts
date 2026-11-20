@@ -344,6 +344,7 @@ export const GENERAL_RAIN_LAST_DROP_AGE = 17 + 3 * 19 + 19;
  * General_Rain's drops alive at `age` from the body's four-word draw rows (plan order: x0, y0, x1, y1 per spawn), with
  * the AnimRainDrop program of Move_RAIN_DANCE (dropAtAge) and CreateSprite's lowest free slot over `occupiedSpriteSlots`
  * and the live drops (as simulate). Presentation only: the words are the general animation's own presentation words.
+ * `age` is the software (RAM) state after the script row `age` (age 0 = the row gAnimScriptActive rises, generalRainAtAge).
  */
 export function generalRainDropsAtAge(
   age: number, draws: readonly (readonly number[])[], occupiedSpriteSlots: readonly number[],
@@ -366,4 +367,68 @@ export function generalRainDropsAtAge(
     const drop = dropAtAge(birth, age);
     return drop === null ? [] : [drop];
   }).sort((a, b) => a.slot - b.slot);
+}
+
+/**
+ * rnc1 (docs/rnc1-rain-continues.md): General_Rain as drawn at the end of a rainy turn ("Rain continues to fall.").
+ * battle_anim_scripts.s:10511-10522: loadspritegfx ANIM_TAG_RAIN_DROPS; playsewithpan SE_M_RAIN_DANCE; blend F_PAL_BG |
+ * F_PAL_BATTLERS_2 to black 0 -> 4 (delay 2); waitforvisualfinish; two AnimTask_CreateRaindrops (0, 3, 60); delay 50;
+ * waitforvisualfinish; blend 4 -> 0; waitforvisualfinish; end. `age` 0 is the row gAnimScriptActive rises (the playanimation
+ * row: the controller launches it and Task_ClearBitWhenBattleTableAnimDone runs loadspritegfx in the same row). ROM rows,
+ * RAM read on every frame of the four rain turns of seed 19 Scene ON battle 2 (.integration/evidence/fix-rain/):
+ *   - SE_M_RAIN_DANCE at age 3 (loadspritegfx waits one row, WaitAnimFrameCount hands back one row later);
+ *   - the blend task's coefficient (gPlttBufferFaded) 1 / 2 / 3 / 4 at ages 7 / 10 / 13 / 16 (Move_RAIN_DANCE's up-ramp, one row
+ *     earlier on this clock), shown one row later (palette DMA at VBlank);
+ *   - the raindrop tasks from age 17 (the 17 + 3k draws, GENERAL_RAIN_SPAWN_AGES); both end at age 76 (timer 60) and the script
+ *     creates the 4 -> 0 blend the same row (the tasks run before the priority-10 host task): 3 / 2 / 1 / 0 at ages 80 / 83 / 86 / 89;
+ *   - `end` waits while IsSEPlaying (Cmd_end, battle_anim.c:476-503): SE_M_RAIN_DANCE is 168 ticks at tempo 220, IsSEPlaying TRUE
+ *     for 117 rows from the SE row, so gAnimScriptActive falls at age 120 = GENERAL_RAIN_SCRIPT_ROWS.
+ */
+export const GENERAL_RAIN_SE_AGE = 3;
+/** Rows IsSEPlaying stays TRUE from the SE_M_RAIN_DANCE row: 1 + the VBlank of m4a tick 169 (ceil(169 * 150 / 220) = 116). */
+export const GENERAL_RAIN_SE_ROWS = 117;
+/** The first row with gAnimScriptActive FALSE (Cmd_end once the SE has stopped). */
+export const GENERAL_RAIN_SCRIPT_ROWS = GENERAL_RAIN_SE_AGE + GENERAL_RAIN_SE_ROWS;
+
+/** The blend task's coefficient after script row `age` (the software palette; displayed one row later). */
+export function generalRainBlendCoefficientAtAge(age: number): number {
+  if (age < 80) return rainDanceBlendCoefficientAtAge(age + 1);
+  if (age < 83) return 3;
+  if (age < 86) return 2;
+  if (age < 89) return 1;
+  return 0;
+}
+
+export interface GeneralRainProfile {
+  /** The 20 spawn rows' words (x0, y0, x1, y1 each; GENERAL_RAIN_RANDOM2_PLAN order). */
+  readonly draws: readonly (readonly number[])[];
+  /** Live non-rain OBJ slots at the script's start; CreateSprite chooses the lowest free slot. */
+  readonly occupiedSpriteSlots: readonly number[];
+}
+
+export interface GeneralRainState {
+  readonly age: number;
+  /** gAnimScriptActive after this row. */
+  readonly active: boolean;
+  /** The blend coefficient of the software palette after this row, and the one the screen shows this row (one row behind). */
+  readonly coefficient: number;
+  readonly hardwareCoefficient: number;
+  /** The drops in RAM after this row, and the drops the screen shows this row (the previous row's OAM build, created ones only). */
+  readonly drops: readonly RainDanceDrop[];
+  readonly displayedDrops: readonly RainDanceDrop[];
+}
+
+/** General_Rain at script row `age` (see GENERAL_RAIN_SE_AGE): presentation only, from the general animation's own words. */
+export function generalRainAtAge(age: number, profile: GeneralRainProfile): GeneralRainState {
+  if (!Number.isInteger(age) || age < 0) throw new Error("General_Rain age must be a nonnegative integer");
+  if (profile.draws.length !== GENERAL_RAIN_SPAWN_AGES.length) throw new Error("General_Rain needs 20 spawn rows of words");
+  return {
+    age,
+    active: age < GENERAL_RAIN_SCRIPT_ROWS,
+    coefficient: generalRainBlendCoefficientAtAge(age),
+    hardwareCoefficient: age === 0 ? 0 : generalRainBlendCoefficientAtAge(age - 1),
+    drops: generalRainDropsAtAge(age, profile.draws, profile.occupiedSpriteSlots),
+    displayedDrops: age === 0 ? []
+      : generalRainDropsAtAge(age - 1, profile.draws, profile.occupiedSpriteSlots).filter((drop) => drop.sourcePass > 0),
+  };
 }

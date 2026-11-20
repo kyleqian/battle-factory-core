@@ -118,7 +118,7 @@ import { decodeSpriteOrderPlan, resolveSpriteOrderDeferredLend, type SpriteOrder
 import type { PresentationRngHost, PresentationRngWords } from "./presentationRngHost.ts";
 import { isWordsOrderDeferredUnit, WORDS_ORDER_GENERAL_ANIMATION } from "./wordsOrderUnits.ts";
 import { mudSlapMudSpriteOrderAtAge, MUD_SLAP_MUD_FIRST_DISPLAY_AGE, type MudSlapAnimationProfile } from "../animation/mudSlap.ts";
-import { generalRainDropsAtAge, GENERAL_RAIN_LAST_DROP_AGE, GENERAL_RAIN_SPAWN_AGES, rainDanceAtAge, rainDropSortKeys, RAIN_DANCE_WINDOW_ROWS } from "../animation/rainDance.ts";
+import { generalRainDropsAtAge, GENERAL_RAIN_LAST_DROP_AGE, GENERAL_RAIN_SCRIPT_ROWS, GENERAL_RAIN_SPAWN_AGES, rainDanceAtAge, rainDropSortKeys, RAIN_DANCE_WINDOW_ROWS } from "../animation/rainDance.ts";
 import { sandAttackDirtSpriteOrderAtAge, SAND_ATTACK_DIRT_FIRST_DISPLAY_AGE, type SandAttackAnimationProfile } from "../animation/sandAttack.ts";
 import { liveSpitUpDuration, liveSpitUpInputs, type SpitUpCounter } from "./liveSpitUpInputs.ts";
 import { SUPERPOWER_ROWS, liveSuperpowerInputs } from "./liveSuperpowerInputs.ts";
@@ -1214,6 +1214,14 @@ function liveMoveAnimationDurationOf(
   if (request.turnTrapBody === true) {
     if (field !== undefined && liveTransformedBattlerDeclines(request, field)) return null;
     return LIVE_TURN_TRAP_BODY_ROWS[request.moveId] ?? null;
+  }
+  // rnc1: General_Rain (B_ANIM_RAIN_CONTINUES) plays regardless of a Substitute (ShouldAnimBeDoneRegardlessOfSubstitute) and never
+  // swaps; its renderer draws the species sheets, so a displayed doll or a transformed battler is not drawn (the field as it is).
+  if (request.generalRain === true) {
+    if (request.moveId !== 240) return null;
+    if (field !== undefined && (field.player.substituteDoll === true || field.opponent.substituteDoll === true
+      || liveTransformedBattlerDeclines(request, field))) return null;
+    return GENERAL_RAIN_SCRIPT_ROWS;
   }
   if (field !== undefined && liveSubstituteSwapApplies(request, field) === true) {
     const bodyField = substituteSwapBodyField(field, request.attacker === 0 ? 0 : 1);
@@ -4006,6 +4014,15 @@ export function liveMoveAnimationPresentationProven(
       break;
     }
     case 240: {
+      // rnc1 (faithful random): General_Rain from its own 80 words, the non-consuming sub-stream the tick seam records for the
+      // general-animation event (presentationRngInput's key is the general key; weatherContinuesBodyEffect). Same art and drop program.
+      if (request.generalRain === true) {
+        const words = liveMovePresentationRngWords(presentationRngInput);
+        if (words === null || words.draws.length !== GENERAL_RAIN_SPAWN_AGES.length) return declined(declineSink, "other:presentation-rng-words");
+        config = { move: "GENERAL_RAIN", attacker, target, fieldProfile,
+          animationProfile: { draws: words.draws, occupiedSpriteSlots: KNOWN_ENTRY_IN_USE_SPRITE_SLOTS } };
+        break;
+      }
       // prep14 s1.1 (faithful random): the reducer replays its own 160 draws from one number, the host state at the body's
       // activation frame; the plan registered with the host (liveMovePresentationRng.ts) consumes them once. The
       // in-use slot set is the known-entry constant; the palette arrays are not consumed by the compositor.

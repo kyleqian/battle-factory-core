@@ -934,6 +934,7 @@ import {
   sceneOnFireBlastView,
   sceneOnRolloutView,
   sceneOnRainDanceView,
+  sceneOnGeneralRainView,
   sceneOnHailView,
   sceneOnFlamethrowerView,
   sceneOnBlazeKickView,
@@ -1279,6 +1280,7 @@ import {
   type SceneOnFireBlastConfig,
   type SceneOnRolloutConfig,
   type SceneOnRainDanceConfig,
+  type SceneOnGeneralRainConfig,
   type SceneOnHailConfig,
   type SceneOnHealBellConfig,
   type SceneOnSoftBoiledConfig,
@@ -38727,14 +38729,19 @@ export function renderSceneOnMovePresentation(
     return;
   }
 
-  if (state.config.move === "RAIN_DANCE") {
+  if (state.config.move === "RAIN_DANCE" || state.config.move === "GENERAL_RAIN") {
+    // rnc1: General_Rain (B_ANIM_RAIN_CONTINUES) is drawn by this compositor from its own reducer (rainDance.ts generalRainAtAge):
+    // the same selector (F_PAL_BG | F_PAL_BATTLERS_2), art and drop program, its own blend rows and drop words.
+    const generalRain = state.config.move === "GENERAL_RAIN"
+      ? sceneOnGeneralRainView(state as SceneOnMovePresentationState<SceneOnGeneralRainConfig>) : null;
     const rainState =
       state as SceneOnMovePresentationState<SceneOnRainDanceConfig>;
-    const view = sceneOnRainDanceView(rainState);
+    const rainDance = generalRain === null ? sceneOnRainDanceView(rainState) : null;
+    const view = generalRain ?? rainDance!;
     // BuildOamBuffer and palette DMA precede callbacks/tasks. The reducer's
     // hardware coefficient already denotes the preceding faded palette;
     // displayed drops likewise come from the preceding software sprite row.
-    const displayed = rainState.age === 0
+    const displayed = rainDance === null || rainState.age === 0
       ? null
       : sceneOnRainDanceView({ ...rainState, age: rainState.age - 1 });
     const attackerIsPlayer = view.attacker.geometry.side === "player";
@@ -38770,7 +38777,7 @@ export function renderSceneOnMovePresentation(
     };
     const attackerArt = battlerArt(view.attacker);
     const targetArt = battlerArt(view.target);
-    const coefficient = view.palette.hardwareCoefficient;
+    const coefficient = generalRain?.hardwareCoefficient ?? rainDance!.palette.hardwareCoefficient;
     // F_PAL_BG resolves to the three live battle BG allocations. The
     // extracted compact asset stores only those live banks, so all entries
     // in this local array participate in the source BlendPalette call.
@@ -38826,7 +38833,7 @@ export function renderSceneOnMovePresentation(
     // its placeholder attributes transfer on the following VBlank, but its
     // requested frame has not reached OBJ VRAM yet. It is therefore blank
     // for this outer row and first paints once sourcePass advances.
-    const drops = (displayed?.drops ?? [])
+    const drops = (generalRain?.displayedDrops ?? displayed?.drops ?? [])
       .filter((drop) => drop.sourcePass > 0)
       .slice().sort((left, right) => {
       const signedY = (drop: typeof left): number => {
@@ -38848,7 +38855,7 @@ export function renderSceneOnMovePresentation(
     }
 
     // The live seam composes the controller-owned healthboxes, window and text itself.
-    if (liveField) return;
+    if (liveField || generalRain !== null) return;
     const profile = rainState.config.fieldProfile;
     const playerBattler = attackerIsPlayer ? view.attacker : view.target;
     const opponentBattler = attackerIsPlayer ? view.target : view.attacker;
