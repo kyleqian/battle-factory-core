@@ -54,9 +54,12 @@ Ranked by how visible they are. "Ours" frames are engine frames of that run; ROM
 2. **Ingrain's heal animation is missing** (Kyle's round, battle 1). At the end of a turn with Ingrain the ROM plays the heal animation
    (green flash, sparkles over Lileep, SE_M_CRABHAMMER eight times then SE_M_ABSORB_2) before "Foe LILEEP absorbed nutrients with its
    roots!"; ours goes straight to the text. Ours about 21,020, ROM 22,056-22,220. `k06-ingrain-heal-animation-missing.png`.
-3. **Mid-battle send-out line** (tip: t4, t8). After a switch the ROM says "Do it! POLIWHIRL!" or "Go for it, CHINCHOU!" (the line
-   depends on how hurt the foe is); ours always says "Go! ...". t4 ours 28,967 vs ROM 28,544; t8 ours 16,409 vs ROM 18,925.
-   `t4-send-out-text-do-it.png`, `t8-send-out-text-go-for-it.png`.
+3. **Switch lines** (Kyle's round and tip: t4, t8). Both lines of a voluntary switch depend on the battle state on the ROM, and ours
+   picks other ones. Send-out: the ROM says "Do it! POLIWHIRL!" or "Go for it, CHINCHOU!" (by how hurt the foe is); ours says "Go! ...".
+   Withdraw: in Kyle's battle 1 the ROM says "MAGBY, good! Come back!" where ours says "MAGBY, OK! Come back!", then "Go for it,
+   IVYSAUR!" vs ours "Go! IVYSAUR!" (ours 13,181-13,420, ROM 13,974-14,226; ranked low in the run's report because text differences
+   are small). t4 ours 28,967 vs ROM 28,544; t8 ours 16,409 vs ROM 18,925. `k09-switch-lines.png`, `t4-send-out-text-do-it.png`,
+   `t8-send-out-text-go-for-it.png`. (The planning session's battle-only ROM replay found the same lines.)
 4. **Player's HP box missing after a replacement** (tip: t3, battle 1). After PHANPY faints and CHARMELEON comes back in, ours does not
    draw CHARMELEON's HP box through "CHARMELEON used AERIAL ACE!" until the foe's Petal Dance; the ROM shows it all the time. Ours
    10,968-11,212 and 11,460-12,188 (1,000 frames). `t3-player-hp-box-missing.png`.
