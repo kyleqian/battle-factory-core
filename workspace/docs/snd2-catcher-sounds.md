@@ -74,6 +74,6 @@ Rows of each run's "Sound differences" table (fresh traces, same seeds; `base/` 
   re-entered select screen builds its six afresh with new personalities (`CreateFrontierFactorySelectableMons` →
   `CreateMonWithEVSpreadNatureOTID`), and those become the party. So gender and, for species with two abilities, the ability can differ:
   seed 6's GROWLITHE is female with no Intimidate on the ROM, male with Intimidate in ours, and the battle drifts from there (its HP 38 on
-  the ROM, 62 in ours, five Intimidate stat drops only on our side). The catcher should patch the select screen's Pokémon (or the party
-  after the draft) to the engine's personalities.
+  the ROM, 62 in ours, five Intimidate stat drops only on our side). *Fixed in the catcher by fcr1
+  (`docs/fcr1-catcher-rental-personalities.md`): the select screen's six now get the engine's personalities; seed 6 matches turn for turn.*
 - Still open from snd1: our recorded sound effects are 1.2-1.45x quieter than in game; text speed-up on A (timing).
