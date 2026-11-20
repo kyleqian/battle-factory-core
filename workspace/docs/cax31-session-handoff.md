@@ -64,7 +64,7 @@ Kyle plans to make this repo public with its full history (no rewrite, no licens
 - Once the repo is public, everything committed is published at the next push. Keep secrets, server addresses and
   personal paths out of commits, as before.
 
-## From the Mac, 2026-11-20 (top layer): Kyle's live-play fixes merged, website on `eb-c3f7c43f5c1a9e62`, frame catcher
+## From the Mac, 2026-11-20 (top layer): Kyle's live-play fixes merged, website on `eb-c3f7c43f5c1a9e62`, frame catcher, menu cursors + trap animation
 
 - **Kyle played the website on 11-20 and reported gaps.** The Mac fixed them, and they are merged into master with your
   11-19/20 run (merge `f384faa7d`, no conflicts: your side changed notes only). Merged Mac master `aa4cc49ce` (with snd2 + fcp1 below): `tsc -b` clean; full suite 16,279 passed, 2 failed only from old untracked files in the Mac's main folder (a stale `dist-lib/`, a July scratch file under the ignored `tools/compare/out/`), both pass on a fresh build / clean tree.
@@ -93,11 +93,21 @@ Kyle plans to make this repo public with its full history (no rewrite, no licens
     15 frames, fades in over 15, then "Thank you! Your POKéMON swap is complete." (waits for A) before "Right this way,
     please!"; ours shows the room at once and skips the message. It moves the room's per-frame RNG for every later battle.
     Details: `docs/fcp1-frame-catcher-pictures.md` "Not fixed" item 4.
-- **Three Mac sessions are working now** (Kyle's word, 11-20; they come to you in a later delivery; do not start them):
-  (1) the battle menus' cursors back on the first entry after a switch-in (`HandleAction_Switch`, `PlayerHandleSwitchInAnim`),
-  and the missing "that's enough! Come back!" recall on a voluntary switch with the foe underground; (2) the trapping moves'
-  end-of-turn animation (`General_TurnTrap`: Fire Spin, Whirlpool, Clamp, Sand Tomb, Wrap/Bind); (3) the catcher's ROM side
-  gets the engine's own player Pokémon (personality, so gender and ability match).
+- **Three more Mac fixes, merged** (Mac master `43669b6f1`, Kyle's word, 11-20; checked against the ROM by the catcher and labs):
+  - flow1 (`docs/flow1-menu-cursors-and-locked-switch-recall.md`): the move menu opens on the first move after every switch-in
+    and after Transform (`HandleAction_Switch`, `SwitchInClearSetData`, `PlayerHandleSwitchInAnim`); ours kept the old cursor
+    after a voluntary switch. A switch while one side is locked into a two-turn move (Dig, Fly, Bounce, Ice Ball, Rollout,
+    Petal Dance, a recharge) now prints the recall line and plays the recall, both for the player ("that's enough! Come back!")
+    and the trainer ("withdrew"). Open: the player's Dig charge turn in Scene OFF ends ~20 frames early (seed 18).
+  - trp1 (`docs/trp1-turn-trap-animation.md`): the end-of-turn trap animation (`General_TurnTrap`) before "X is hurt by Y!":
+    Fire Spin, Whirlpool, Sand Tomb (their move bodies, cut down), Wrap / Bind (Constrict's tendrils, new art), Scene OFF the
+    35-row pause; frame-exact and sound-exact on 24 labs. Clamp is timed and sounded but not drawn (no Factory set has it).
+  - fcr1 (`docs/fcr1-catcher-rental-personalities.md`): the catcher's ROM side gets the engine's rentals' personalities, so
+    gender and ability match; seeds 6, 3, 1 and 8 now match the ROM turn for turn.
+  - Gameplay digests of Kyle's trace and the catcher seeds are unchanged; soak test-player pins moved (each re-checked, no rule
+    change). Merged together: `tsc -b` clean, full suite 16,320 passed + 1 soak pin re-pinned (#104 two-round-wins seed
+    13 -> 19, scan 0..49: seeds 19 and 47 carry 14, 0 crash / 0 hang), then that file and the four other moved files pass.
+    Not on the website yet.
 - **Leads from the Mac sessions, not fixed, not filed** (reports, not all checked on the ROM; yours to check and file, or fold
   into #219): our sound recordings play 1.2-1.45x quieter than the game; A does not speed up text; the attendant menu wrap
   and the save wait; the left pans of Blizzard and sound 132; Ice Ball's 4th and 5th rolls hit late; SELECT move swap;
