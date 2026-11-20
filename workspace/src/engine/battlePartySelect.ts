@@ -1403,6 +1403,18 @@ function submenuWindowVisible(state: BattlePartySelectState): boolean {
  * out with "Choose a POKéMON." in the wide window (seed 1: 8 of 8 cancels); and the forced send-out's SEND OUT confirm
  * (CursorCb_SendMon) keeps the narrow window through its own fade-out (sendOutConfirmed).
  */
+/**
+ * pmw1: DisplayPartyMenuStdMessage's PARTY_MSG_CHOOSE_MON (party_menu.c:2491-2497): ShouldUseChooseMonText (:2505-2522) keeps
+ * "Choose a POKéMON." for a send-out or while more than one party mon has HP; with only one left the in-battle menu asks
+ * "Choose POKéMON or CANCEL." (gText_ChoosePokemonCancel, strings.c:450). ROM: seed 8 `winning-swap`, battle 2 (DUSTOX and CHINCHOU
+ * fainted), 213 frames.
+ */
+function partyChooseMonPrompt(state: BattlePartySelectState): string {
+  return state.actions !== "sendOut" && state.rows.filter((row) => !row.fainted).length <= 1
+    ? "Choose POKéMON or CANCEL."
+    : "Choose a POKéMON.";
+}
+
 function messageWindowSwappedFor(state: BattlePartySelectState): boolean {
   return submenuWindowVisible(state)
     || (state.closeElapsed !== null && state.outcome?.kind !== "cancel")
@@ -1506,7 +1518,7 @@ function drawPartySelectBgLayer(fb: Uint8Array, state: BattlePartySelectState): 
     // (1,17), 21x2 = px (8,136)-(176,152); the frame is one tile around. Uses
     // the party-menu message-window frame style (frame1 tiles, olive corner).
     drawStandardWindowFrame(fb, 0, 128, 21, 2, PARTY_MESSAGE_WINDOW_PALETTE);
-    drawStandardWindowText(fb, "Choose a POKéMON.", 8, 137);
+    drawStandardWindowText(fb, partyChooseMonPrompt(state), 8, 137);
   }
   // The cursor on CANCEL is shown by the button itself (bank 2 + the open ball), nothing is printed in the prompt box.
   if (!submenuVisible) drawCancelWindow(fb, state.cursor === "cancel");

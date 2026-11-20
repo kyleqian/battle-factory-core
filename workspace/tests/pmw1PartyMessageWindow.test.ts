@@ -2,7 +2,8 @@
 // ROM (seed 1 `winning-swap`, the catcher's ROM run): a cancel from the party list (B, or A on CANCEL: HandleChooseMonCancel ->
 // Task_ClosePartyMenu) fades out with "Choose a POKéMON." in the wide sDefaultPartyMsgWindowTemplate (8 of 8 cancels; ours drew the
 // submenu's narrow "Do what with this PKMN?" window, 128 frames); the forced send-out's SEND OUT confirm keeps the narrow window
-// through its fade-out (ours went back to "Choose a POKéMON.").
+// through its fade-out (ours went back to "Choose a POKéMON."). And with one party mon left the ROM's prompt is "Choose POKéMON or
+// CANCEL." (seed 8 `winning-swap`, battle 2, 213 frames; ours said "Choose a POKéMON.").
 import { describe, expect, it } from "vitest";
 import {
   advanceBattlePartySelect,
@@ -82,6 +83,22 @@ describe("pmw1: the party menu's message window through its close", () => {
     const submenu = step(open, "A", null, null, null, null, null);
     expect(submenu.submenuOpen).toBe(true);
     expect(wideWindow(draw(submenu))).toBe(false);
+  });
+
+  it("with one party mon left the list asks \"Choose POKéMON or CANCEL.\" (ShouldUseChooseMonText), but a send-out keeps \"Choose a POKéMON.\"", () => {
+    const open = voluntarySelector();
+    const prompt = (fb: Uint8Array): string => {
+      const out: number[] = [];
+      for (let y = 136; y < 152; y += 1) for (let x = 8; x < 176; x += 1) out.push(fb[(y * 240 + x) * 4]!);
+      return Buffer.from(out).toString("base64");
+    };
+    const lastOne = (state: BattlePartySelectState): BattlePartySelectState => Object.freeze({
+      ...state, rows: state.rows.map((row, slot) => slot === 0 ? row : Object.freeze({ ...row, fainted: true, hp: 0 })) as unknown as BattlePartySelectState["rows"],
+    });
+    const twoLeft = Object.freeze({ ...open, rows: open.rows.map((row, slot) => slot === 2 ? Object.freeze({ ...row, fainted: true, hp: 0 }) : row) as unknown as BattlePartySelectState["rows"] });
+    expect(prompt(draw(twoLeft))).toBe(prompt(draw(open)));
+    expect(prompt(draw(lastOne(open)))).not.toBe(prompt(draw(open)));
+    expect(prompt(draw(lastOne({ ...open, actions: "sendOut" })))).toBe(prompt(draw(open)));
   });
 
   it("the forced send-out: after the SEND OUT confirm the narrow window stays (as while the submenu was open)", () => {
