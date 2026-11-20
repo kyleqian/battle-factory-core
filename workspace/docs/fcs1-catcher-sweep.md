@@ -27,6 +27,23 @@ Pictures (ROM | ours | diff, and contact sheets: ours on one row, the ROM's on t
 `.integration/evidence/fcs1/curated/` (not in git). Each run's ranked report is `.integration/evidence/fcs1/final/<run>/report.md`
 (frames kept, so `peek.py` works on them).
 
+## Fixed since (trial branch `trial-fix-20261120`, 2026-11-20 evening, not merged)
+
+Findings 1 to 6 are fixed on four branches merged together for a trial: `fix/rain-continues` (`docs/rnc1-rain-continues.md`),
+`fix/loss-recall` (`docs/lrc1-loss-recall.md`), `fix/battle-sounds` (`docs/snd3-sweep-sounds.md`: findings 4, 5, 6) and
+`fix/pkmn-glyphs` (`docs/pkm1-pkmn-glyphs.md`). The combined tree: typecheck clean, full suite 1,908 files / 16,401 tests passed, no
+soak re-pin beyond lrc1's own. The catcher on eight fresh traces of the combined build (seeds 19, 2, 10, 13, 15 Scene ON; 0, 9, 3 Scene
+OFF; `.integration/evidence/fix-trial/catcher/`): all 2,843 menus followed, every transition matched, no rain or loss-recall difference
+left, sound tables only the catcher's own artefacts. Timing changes that come with the fixes (presentation, no RNG draw moved): a lost
+battle's end is 67 frames longer (the ROM's), a rainy turn's end 69 frames shorter (122 rows, was 191), Scene ON after a Baton Pass 24
+frames shorter, the {PKMN} line prints in 2 frames instead of 6. Old fixed-frame traces drift after those points; fresh traces were made
+for the check (the test player's choices follow the timing, so seeds 19 and 2 Scene ON play other battles from mid-round on).
+
+Left open by the fix branches (each doc's last section): every in-battle stat-change sound plays 1 frame after its banner where the ROM
+plays it 3 frames before; Baton Pass's own sound 7 frames late; the player's Baton Pass HP box removed 6 frames early; the turn-end tail
+after the rain 3 rows late; Sun / Sandstorm / Hail lengths unchecked (seed 2's hail sound 8 rows late); the ROM blanks the "fainted!" box
+after the A in 4 of 8 losses; the win tail's text 17 frames early; a foe behind a Substitute at a loss.
+
 ## Runs
 
 Traces: `makeTrace.mjs --seed N --scene S --policy P --battles 7 --max-frames 170000` (seed 23: 300000), cut 120 frames into the Lobby
