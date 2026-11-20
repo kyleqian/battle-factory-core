@@ -2471,6 +2471,7 @@ export const APP_STAGES: Readonly<Record<string, AppStage>> = {
   "aud261-painsplit-player-on": (state) => aud242lBlizzardStage(state, "aud261-painsplit-player-on", "player", 19, 143, 220),
   "aud261-painsplit-opponent-on": (state) => aud241bStage(state, "aud261-painsplit-opponent-on", "on", 12, 50, 69, undefined, false, 220),
   "aud261-razorwind-player-on": (state) => aud242lBlizzardStage(state, "aud261-razorwind-player-on", "player", 19, 143, 13),
+  "lse4-razorwind-player-on": (state) => aud241bStage(state, "lse4-razorwind-player-on", "on", 50, 12, 13, undefined, false, 69),
   "aud261-razorwind-opponent-on": (state) => aud241bStage(state, "aud261-razorwind-opponent-on", "on", 12, 50, 69, undefined, false, 13),
   "aud261-covet-player-on": (state) => aud242lBlizzardStage(state, "aud261-covet-player-on", "player", 19, 143, 343),
   "aud261-covet-opponent-on": (state) => aud241bStage(state, "aud261-covet-opponent-on", "on", 12, 50, 69, undefined, false, 343),

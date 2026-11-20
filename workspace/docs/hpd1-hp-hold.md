@@ -942,3 +942,28 @@ Same root as the battle's other two `approx:sprite-order-unknown` commands (272 
 ### Gates / caveats
 
 Docs only: no change under `src/` or `tests/`, no `npm test` run (as instructed), no ledger edited (`PROGRESS.md` / `ISSUES.md` untouched). Only seed 950 was measured; other seeds' Ice Ball commands are not static (census c1k). Whether fix A's drawn body is visually acceptable was not checked against the ROM (no window was run; the sampled class is read on the first presenting row, and the fallback path is age-independent).
+
+## lse4: Absorb / Revenge / Recycle / Razor Wind / Wish through the lead rule (Scene ON only)
+
+Closes the lse3 rows with the existing lead rule (`bodyLead = instructionExecution(MOVE_ANIMATION) - (used print exec + 1) - rows presented since the print`, drawn as `bodyLeadFrames` rows before the body); no per-trace constants. ROM row rule: R->H = bodyLead + pre 3 + live + post + tail; shape A: T = 6 - pre - post; gap-print: T = scriptTailRows + 1 - pre - post (+ window-short).
+
+| Body | Class (`BODY_LEAD_RULE`) | Rule | Rows added |
+| --- | --- | --- | --- |
+| Absorb 71 | shape-a (`LSE4_SHAPE_A_MOVE_IDS`) + `LSE4_WINDOW_SHORT_ROWS[71]=2` | lead 5 + T 5 | +10 |
+| Revenge 279 | shape-a | shape A | +8 |
+| Recycle 278 | gap-print (`LSE4_GAP_PRINT_MOVE_IDS`) | lead 2 + T 2 | +4 |
+| Razor Wind 13 unleash | gap-print, window-short 1 | lead 5 + T 4 | +9 |
+| Razor Wind 13 charge turn | gap-print; opener is `STRINGID_EMPTYSTRING3` of `BattleScriptFirstChargingTurn` | lead 1 + T 4 (3 of the doc's +8 print rows belong to the message, `CHARGE_TURN_PRINT_ROWS`) | +5 |
+| Wish 273 | lead-only (`LSE4_LEAD_ONLY_MOVE_IDS`) | bodyLead 2, tail 0, plus the generic action-transition pause | lead 2 + pause 11 (aud242k lab; 12 on the Primeape lab, 10 / 14 in other census contexts) |
+
+Generic rule: `actionTransitionPauseFrames` (trn176) now accepts a lead-class MOVE_ANIMATION as the anchor with `anchorExecution = x_a + 1`. Scene OFF uses `SCENE_OFF_ATTACK_PAUSE`, so it is unchanged. In the 200-battle census it moved only Wish.
+
+Labs / traces: `tools/compare/traces/lse4-{absorb,revenge,recycle,razorwind,wish}-on.json` on labs aud242e-absorb-player-on, aud242p-revenge-player-on, aud260-recycle-player-on, aud261-razorwind-player-on (new stage `lse4-razorwind-player-on`), aud242k-wish-player-on. Compare before / after summaries are in `.integration/evidence/lse4/` (git-ignored). Recycle's message row is exact (1660), but its post-message heal animation start is mis-timed (ROM 1766, app 1755; 1751 before), so its match count fell 538 -> 508: out of scope.
+
+Re-pins (by the rule): `tests/helpers/iu120Rows.ts` (279, 71, 278, 13, 273 rows); `tests/animation/livePrep10MoveAdapters.test.ts` (Razor Wind charge turn +5); `tests/aud242eMoveAnimSounds.test.ts` (absorb-player extra `536:238:0`: 2); `tests/aud261MoveAnimSounds.test.ts` (player 9 -> 4); `tests/chg161ChargeTurnPrint.test.ts` (Razor Wind residuals -1 -> +4); `tests/trn181ActionTransitionOn.test.ts` (Wish rows); the prep9 / prep11 / aud242e / aud261 / chg161 / trn181 pins moved with `iu120Rows`.
+
+### Gates / caveats
+
+- Census ON 0..199 (eventsDigest identical to base), census OFF 0..99 (identical), T1 0 / 0 / 0 and T2 (10 seeds, missing / extra unchanged) were measured on `da864b948`. The later commits only change the Razor Wind charge-turn tail (`CHARGE_TURN_PRINT_ROWS`) and test pins, and the census / T1 / T2 were NOT re-run on the final tip (time cap).
+- The chg161 Primeape / Snorlax Razor Wind lab now reads +4 (was -1): that lab's ROM body is shorter than the 45-row adapter window. The aud261 opponent unleash SE offset stays 14 (not measured).
+- Pound / Scratch / Tackle (Metronome only) were not attempted.
