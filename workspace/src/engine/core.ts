@@ -1128,6 +1128,15 @@ function draftSummarySoundContext(draftScreen: EngineState["draftScreen"]) {
   return { bgm: BGM_DRAFT, monFor: (slot: number) => draftScreen.rentals[slot] };
 }
 
+/**
+ * snd2: the swap screen's SUMMARY cries the party mon it shows (battle_factory_screen.c:2404 ShowPokemonSummaryScreen over gPlayerParty;
+ * SpriteCB_Pokemon / ChangeSummaryPokemon cry the summary's own mon), the rentals pic5 draws (factorySwapSummaryRentals), not the opening
+ * draft's six. HealPlayerParty runs before the swap question (BattleFactoryPreBattleRoom ReturnToRoomFromBattle), so the cry is the full-HP one.
+ */
+function factorySwapSummarySoundContext(state: EngineState) {
+  return { bgm: BGM_DRAFT, monFor: (slot: number) => factorySwapSummaryRentals(state)[slot] };
+}
+
 function continuationMoveSounds(before: PostwinState, after: PostwinState, direction: 1 | -1): boolean {
   const cursor = before.continuationCursorPos;
   if (cursor === null || after === before || before.dialoguePage !== 0) return false;
@@ -1639,7 +1648,7 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
             nextFactorySwap = beginFactorySwapSummaryReturn(nextFactorySwap, summaryScreen.selectedSlot as 0 | 1 | 2);
           }
         }
-        scheduleSummaryStepSounds(summaryBefore, summaryScreen, draftSummarySoundContext(state.draftScreen));
+        scheduleSummaryStepSounds(summaryBefore, summaryScreen, factorySwapSummarySoundContext(state));
       } else if (
         nextFactorySwap !== null &&
         nextFactorySwap.controller.phase !== "summaryReturn"
@@ -1669,7 +1678,7 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
               returnTarget: "factorySwap",
             },
           );
-          scheduleSummaryOpenCry(draftSummarySoundContext(state.draftScreen), summaryScreen.selectedSlot);
+          scheduleSummaryOpenCry(factorySwapSummarySoundContext(state), summaryScreen.selectedSlot);
         }
       }
       return {
