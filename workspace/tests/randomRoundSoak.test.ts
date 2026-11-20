@@ -1621,7 +1621,9 @@ describe("ISSUES #104 (driver): continuous-play outcome semantics retuned -- OK 
     // 0..49 under the same options: seeds 10, 17, 27 and 47 chain two round wins (carry 14), so the lowest (10) is pinned.
     // trp1 (the end-of-turn trap animation's 68 .. 110 Scene ON / 35 Scene OFF rows shift the soak's press phases): seed 10 now carries 7;
     // re-scanned seeds 0..49 under the same options: seeds 13, 27 and 47 chain two round wins (carry 14), so the lowest (13) is pinned.
-    const result = runSeed(13, {
+    // merge of flow1 + trp1 (flow1's move cursor reset after a switch-in moves the soak's fight presses as well): seed 13 now carries 7;
+    // re-scanned seeds 0..49 under the same options (--seeds 0:50 --parallel 4): seeds 19 and 47 chain two round wins (carry 14), so the lowest (19) is pinned.
+    const result = runSeed(19, {
       policy: "winning",
       maxRounds: 3,
       renderEvery: 0,
