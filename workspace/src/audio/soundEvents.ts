@@ -45,6 +45,7 @@ export class SoundTickCollector {
   /** Ticks the ROM runs the unstamped events ahead of the tick that emits them (see `setSoundTickLead`). */
   lead = 0;
   private readonly events: SoundEvent[] = [];
+  private readonly leads: number[] = [];
 
   constructor(frame: number) {
     this.frame = frame;
@@ -52,6 +53,12 @@ export class SoundTickCollector {
 
   push(emission: SoundEmission): void {
     this.events.push(Object.freeze({ ...emission, frame: emission.frame ?? this.frame - this.lead }));
+    this.leads.push(emission.frame === undefined ? this.lead : 0);
+  }
+
+  /** Per event (same order as `take`): the lead its stamp was shifted by, 0 for an explicitly stamped event. */
+  takeLeads(): readonly number[] {
+    return this.leads;
   }
 
   take(): readonly SoundEvent[] {
@@ -65,13 +72,13 @@ let active: SoundTickCollector | null = null;
  * Run one engine tick with a collector installed (`frame` = the 1-based session frame that tick produces).
  * Returns what the emitters pushed, in call order. Not re-entrant: ticks are synchronous.
  */
-export function collectSoundTick<T>(frame: number, run: () => T): { result: T; events: readonly SoundEvent[] } {
+export function collectSoundTick<T>(frame: number, run: () => T): { result: T; events: readonly SoundEvent[]; leads: readonly number[] } {
   const previous = active;
   const collector = new SoundTickCollector(frame);
   active = collector;
   try {
     const result = run();
-    return { result, events: collector.take() };
+    return { result, events: collector.take(), leads: collector.takeLeads() };
   } finally {
     active = previous;
   }

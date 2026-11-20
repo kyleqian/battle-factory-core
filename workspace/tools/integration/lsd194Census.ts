@@ -2,7 +2,7 @@
 // FactorySession.frame has after the tick) and `soundDigest` (sha256[:16] of `sound`), plus `soundAnim` = one row per move-animation command that presented, [command index into `commands`, moveId, turn,
 // attacker battler, target battler, first presenting frame, last presenting frame, frame of body age 0 (null: no live body), 1 when the segment is HITMARKER_NO_ANIMATIONS, 1 for the Scene ON action-transition pause (command.actionTransition)] (the T1 attribution input of
 // soundCensusDelta.py). Events come from the same emitters tick() calls (emitTickSounds on the orchestrator before/after each step, battleScene null) between beginScreenSoundTick and runScheduledScreenSounds
-// inside collectSoundTick; menu SEs fire inside the advance functions and are collected too. A tree without those modules writes sound / soundDigest / soundAnim = null. No existing field changes.
+// inside collectSoundTick; menu SEs fire inside the advance functions and are collected too. A tree without those modules writes sound / soundDigest / soundAnim = null. No existing field changes. hcr2b: `soundLead` (parallel to `sound`, present only when some event carries a lead) = the ticks each stamp was moved ahead of its emission tick.
 // t1cls: trailing per-seed field `soundCmd` = one row per presenting command of any type [command index, type, battler, first presenting frame, last presenting frame, animation name or null, 1 when the command is `animated`] (soundCensusDelta.py --t1 attributes non-move SEs by it). No existing field changes.
 // apx210 (finish plan Phase 2, liveMovePlayback.ts): trailing field [21] = a move-animation's playback class ("live", "static:<reason>",
 // later "approx:<reason>", "pause" = no body request; null otherwise). Set from (command, field before it) when the segment is seen, then
@@ -82,7 +82,7 @@ for (let seed = from!; seed <= to!; seed += 1) {
   }));
   let rng = createPresentationRngSession();
   let frame = 0; let ended = false; let error: string | null = null;
-  const sound: unknown[][] = []; const animRows = new Map<unknown, number[]>(); const cmdIndex = new Map<unknown, number>();
+  const sound: unknown[][] = []; const soundLead: number[] = []; const animRows = new Map<unknown, number[]>(); const cmdIndex = new Map<unknown, number>();
   const cmdWin = new Map<unknown, unknown[]>();
   const seen = new Set<unknown>(); const rows = new Map<unknown, unknown[]>(); const classified = new Set<unknown>(); const slotUses = [0, 0, 0, 0]; let lastUsed: string | null = null;
   const owned = () => Boolean(state.battleStartIntro || state.battleResolutionPresentation || state.battleCommandPresentation);
@@ -96,13 +96,14 @@ for (let seed = from!; seed <= to!; seed += 1) {
     if (soundOn) {
       // The same order as tick(): begin, advance, the diff emitters (orchestrator before / after, no canonical battleScene), scheduled sounds; one collected tick per step.
       const before = state;
-      const { events } = soundEvents!.collectSoundTick(frame, () => {
+      const { events, leads } = soundEvents!.collectSoundTick(frame, () => {
         screenSounds!.beginScreenSoundTick(frame);
         advance();
         tickSounds!.emitTickSounds({ battleScene: null, factoryRoundBattleOrchestrator: before } as never, { battleScene: null, factoryRoundBattleOrchestrator: state } as never);
         screenSounds!.runScheduledScreenSounds();
       });
       for (const e of events) sound.push(e.mode === undefined ? [e.frame, e.kind, e.id, e.pan] : [e.frame, e.kind, e.id, e.pan, e.mode]);
+      for (const l of leads ?? events.map(() => 0)) soundLead.push(l);
     } else advance();
     rng = tickLiveMovePresentationRngSession(rng, state, liveMoveRandom2PlanContextAt);
     const r = state.battleResolutionPresentation as any;
@@ -229,7 +230,7 @@ for (let seed = from!; seed <= to!; seed += 1) {
     }
   } catch (e) { error = String(e); }
   const extra = soundOn
-    ? { sound, soundDigest: createHash("sha256").update(JSON.stringify(sound)).digest("hex").slice(0, 16), soundAnim: [...animRows.values()], soundCmd: [...cmdWin.values()] }
+    ? { sound, soundDigest: createHash("sha256").update(JSON.stringify(sound)).digest("hex").slice(0, 16), soundAnim: [...animRows.values()], soundCmd: [...cmdWin.values()], ...(soundLead.some((l) => l !== 0) ? { soundLead } : {}) }
     : { sound: null, soundDigest: null, soundAnim: null, soundCmd: null };
   lines.push(JSON.stringify({ seed, scene, error, eventsDigest: events.digest("hex").slice(0, 16), commands, ...extra }));
 }

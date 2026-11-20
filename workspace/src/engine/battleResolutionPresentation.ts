@@ -934,8 +934,12 @@ export type BattleResolutionPresentationState = Readonly<{
    * projection only reports nonzero work inside the two windows).
    */
   fadeTick: number;
-  /** hcr1b: ticks the Scene OFF controller / script sounds of this turn are stamped ahead of the presentation clock (a ruled used-move turn: 1). */
+  /** hcr1b / hcr2b: ticks the hit / effectiveness / faint sounds of a ruled used-move turn are stamped ahead of the presentation clock (1, both scenes). */
   usedMoveSoundLead?: number;
+  /** hcr1b: the same for the stats-change / general-animation sounds (Scene OFF only: 1). */
+  usedMoveScriptSoundLead?: number;
+  /** hcr2b: the same for the move-animation table SEs and the Double Team stat SE that follows them (Scene ON: 2 once the print's u > 2, absent at u = 2; Scene OFF: 1). */
+  usedMoveAnimSoundLead?: number;
   confirmHandoff: BattleResolutionConfirmHandoff | null;
   field: BattleResolutionDisplayedField;
   pendingBoundary: BattleBoundary;
@@ -6392,14 +6396,19 @@ function withSynthesizedAiSwitchRecallEvents(
  * `goto` / `jumpifnotmove` / `incrementgamestat` are one frame each before `attackcanceler`, `accuracycheck`, `attackstring`); the oracle swaps
  * the text box one frame later, so the first glyph is at commit + 7 + u (hcr1b Scene OFF and hcr2 Scene ON pixel traces, u = 2 / 3 / 4 / 6 / 8,
  * exact). The fixed stage walk puts it at commit + 9, exact for u = 2; the adjustment is `u - 2` (a hold on `action-dispatch`), the same in both scenes.
- * The ROM plays the script-row sounds ahead of the frame the pixels reach them: one tick earlier stamps in Scene OFF. Scene ON would need two ticks once
- * u > 2 (T2 exact 997 -> 1707), but the T1 census window then shifts (61 missing, 103 unclassified), so Scene ON keeps stamps at the frame (hcr2).
+ * The ROM plays the script-row sounds ahead of the frame the pixels reach them (the hcr2 labs / ROM sound log, ROM - engine with the hold only):
+ * hit / effectiveness SE, faint cry and SE_FAINT one tick early at every u (hcr2b: both scenes); a Scene ON move body's table SEs two ticks early
+ * once u > 2 (adapted u = 3 / 4 / 6 bodies: absorb, megadrain, bite, doubleedge, ember, takedown, thunderbolt, harden all -2) and not at u = 2; Scene OFF
+ * stamps its stats-change / general-animation sounds one early as well (hcr1b), Scene ON does not (no gain measured); the Double Team stat SE keeps its 34-frame
+ * gap to the last body SE (aud252) so it takes the body's lead. The lead is captured
+ * per scheduled sound (`setSoundTickLead`), so battle-end, send-in and tray sounds keep their frames and the T1 census reads the emission tick back.
  * Forced (Encore / Struggle) and Focus Punch pre-pass handoffs keep their own leads; a turn that opens with anything but a USEDMOVE
  * print (status / ability / wake-up / confusion head) is not covered.
  */
 const USED_MOVE_LEAD_MIN_U = 2;
 const USED_MOVE_LEAD_MAX_U = 20;
 const USED_MOVE_SOUND_LEAD = 1;
+const USED_MOVE_ANIM_SOUND_LEAD_SCENE_ON = 2;
 function usedMovePrintLeadU(state: BattleResolutionPresentationState, handoff: BattleResolutionConfirmHandoff): number | null {
   if (handoff.forced !== undefined || handoff.focusPunchPrePass === true) return null;
   const segment = state.segments[0];
@@ -6409,8 +6418,11 @@ function usedMovePrintLeadU(state: BattleResolutionPresentationState, handoff: B
   const u = first.provenance?.instructionExecution;
   return u === undefined || u < USED_MOVE_LEAD_MIN_U || u > USED_MOVE_LEAD_MAX_U ? null : u;
 }
-function usedMoveSoundLeadOf(state: BattleResolutionPresentationState): number {
-  return ((state.segments[0]?.beforeRules.rulesContext.hitMarker ?? 0) & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0 ? USED_MOVE_SOUND_LEAD : 0;
+function usedMoveSoundLeadsOf(state: BattleResolutionPresentationState, u: number): Readonly<{ hit: number; script: number; anim: number }> {
+  const sceneOff = ((state.segments[0]?.beforeRules.rulesContext.hitMarker ?? 0) & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0;
+  return sceneOff
+    ? { hit: USED_MOVE_SOUND_LEAD, script: USED_MOVE_SOUND_LEAD, anim: USED_MOVE_SOUND_LEAD }
+    : { hit: USED_MOVE_SOUND_LEAD, script: 0, anim: u > USED_MOVE_LEAD_MIN_U ? USED_MOVE_ANIM_SOUND_LEAD_SCENE_ON : 0 };
 }
 function usedMovePrintLeadAdjust(state: BattleResolutionPresentationState, handoff: BattleResolutionConfirmHandoff): number {
   const u = usedMovePrintLeadU(state, handoff);
@@ -6513,7 +6525,7 @@ export function advanceBattleResolutionConfirmHandoff(
     : CONFIRM_HANDOFF_NEXT[handoff.stage];
   if (nextStage === null) {
     const printU = usedMovePrintLeadU(state, handoff);
-    const lead = printU === null ? 0 : usedMoveSoundLeadOf(state);
+    const lead = printU === null ? { hit: 0, script: 0, anim: 0 } : usedMoveSoundLeadsOf(state, printU);
     return Object.freeze({
       ...state,
       lifecycle: Object.freeze({
@@ -6522,7 +6534,9 @@ export function advanceBattleResolutionConfirmHandoff(
       }),
       confirmHandoff: null,
       fadeTick: state.fadeTick + 1,
-      ...(lead > 0 ? { usedMoveSoundLead: lead } : {}),
+      ...(lead.hit > 0 ? { usedMoveSoundLead: lead.hit } : {}),
+      ...(lead.script > 0 ? { usedMoveScriptSoundLead: lead.script } : {}),
+      ...(lead.anim > 0 ? { usedMoveAnimSoundLead: lead.anim } : {}),
     });
   }
   const bounceRuns =

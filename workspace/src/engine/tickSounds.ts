@@ -39,18 +39,23 @@ export function emitTickSounds(state: TickSoundState, next: TickSoundState): voi
         orchestratorAfter.round.rules.currentOpponent.frontierBrain !== undefined,
       );
     }
-    setSoundTickLead(orchestratorAfter?.battleResolutionPresentation?.usedMoveSoundLead ?? 0);
-    if (orchestratorAfter?.battleResolutionPresentation) {
+    const presentationAfter = orchestratorAfter?.battleResolutionPresentation;
+    setSoundTickLead(presentationAfter?.usedMoveSoundLead ?? 0);
+    if (presentationAfter) {
       emitBattleHitSounds(
         state.factoryRoundBattleOrchestrator?.battleResolutionPresentation ?? null,
-        orchestratorAfter.battleResolutionPresentation,
+        presentationAfter,
         orchestratorAfter.round.rules.currentOpponent.frontierBrain !== undefined,
       );
     }
-    if (orchestratorAfter?.battleResolutionPresentation) emitMoveAnimSounds(orchestratorAfter.battleResolutionPresentation, orchestratorAfter.round.rules.currentOpponent.frontierBrain !== undefined);
-    if (orchestratorAfter?.battleResolutionPresentation) emitStatsChangeSounds(orchestratorAfter.battleResolutionPresentation);
-    if (orchestratorAfter?.battleResolutionPresentation) emitDoubleTeamStatsChangeSound(orchestratorAfter.battleResolutionPresentation);
-    if (orchestratorAfter?.battleResolutionPresentation) emitGeneralAnimSounds(orchestratorAfter.battleResolutionPresentation);
+    setSoundTickLead(presentationAfter?.usedMoveAnimSoundLead ?? 0);
+    if (presentationAfter) emitMoveAnimSounds(presentationAfter, orchestratorAfter.round.rules.currentOpponent.frontierBrain !== undefined);
+    setSoundTickLead(presentationAfter?.usedMoveScriptSoundLead ?? 0);
+    if (presentationAfter) emitStatsChangeSounds(presentationAfter);
+    setSoundTickLead(presentationAfter?.usedMoveAnimSoundLead ?? 0);
+    if (presentationAfter) emitDoubleTeamStatsChangeSound(presentationAfter);
+    setSoundTickLead(presentationAfter?.usedMoveScriptSoundLead ?? 0);
+    if (presentationAfter) emitGeneralAnimSounds(presentationAfter);
     setSoundTickLead(0);
     emitForfeitEndSounds(
       state.factoryRoundBattleOrchestrator?.battleCommandPresentation?.lifecycle.phase ?? null,
