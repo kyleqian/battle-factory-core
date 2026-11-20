@@ -24,7 +24,7 @@ build only**; a trace that goes through the Lobby attendant's save dialog (every
 
 Other routes: the save dialog (SAVING..., saved) exists only in the Lobby attendant's script (`BattleFrontier_BattleFactoryLobby`); retire, record and the 7-win route
 use different scripts / screens, and the loss, forfeit and 7-win returns reach the same attendant conversation (lbra / lbrb / lbrd traces below), so there is nothing else to change.
-`make play:random` / the soak players press A on every conversation tick, so a held or tapped A at the saved message ends it as the ROM's would; no player needed a change.
+`npm run play:random` / the soak players press A on every conversation tick, so a held or tapped A at the saved message ends it as the ROM's would; no player needed a change.
 
 ## Compare traces (ROM vs app, frames matched)
 
@@ -53,3 +53,8 @@ The 38 existing Lobby traces (lbra-*, lbrb-*, lbrc-*, lbrd-*, lbre-*, lbw*-*; li
   seed in all three roles on full-file scratch copies: 0 and 10 pass all 15 cases); `tests/randomRoundSoak.test.ts` "(b) a winning seed chains" seed 0 -> 13 (scan of seeds 0..49,
   `--policy winning --max-rounds 3 --render-every 0 --seeds 0:50 --parallel 3`: 13, 19, 23, 40 carry 14).
 * `docs/lbrb-attendant-conversation.md` and `docs/snd1-playtest-sounds.md` lose the statements this note replaces.
+
+## Gates
+
+`npm run typecheck` 0, `npm run build` 0, `npm run build:lib` 0, `npm run test:gate` 360 files / 2834 tests green, `tests/lbra|lbrb|lbrc|lbrd|lbre|lbw8|snd1LobbySounds|newChallengeFromLobby|randomRoundSoak` green.
+Vanilla soak `--policy vanilla --seeds 0:20 --scene off`: 20 / 20 OK (run as 0:10 and 10:20). `--policy winning --seeds 0:60 --parallel 5`: 60 / 60 OK (run in chunks 0:10, 10:25, 25:40, 40:50, 50:60; one 0:60 run exceeds the 10-minute tool limit).
