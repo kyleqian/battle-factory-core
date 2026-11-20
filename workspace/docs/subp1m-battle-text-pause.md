@@ -156,6 +156,12 @@ Measured with `tools/integration/subp1mProbe.py` (multi-press comma list; every 
 
 Tests: `tests/btn2ReleaseTail.test.ts` (table pin, Roar seed 95 live turn-end 13 both scenes, `turnEndTimingAfterRelease` synthetic cases, Static / Trick pins, the accept-edge rows), `tests/substituteFadePresentation.test.ts` (117 / 115 command rows, lead, box per scene, frozen cursor), `tests/btn1PromptGates.test.ts` (re-pinned: the first accepting row is `typedRows + 1 - GATE_ACCEPT_LEAD_ROWS`). App stages / compare traces: `subp1m-{subfade,roar}-{on,off}`, `hpf4m-subhit-{on,off}` (`tools/compare/appTrace.ts` `SUBP1M_CASES`, traces `subp1m-{subfade,subhit,roar}-{on,off}`); `tools/integration/btn2EngineRows.ts` prints the engine's per-frame command / phase rows for such a trace.
 
+### Census / soak (btn2, base 29688b8cd -> 2cd8b3039, seeds 0..199, both scenes)
+
+- eventsDigest and error identical in all 200 battles per scene (kernel events, RNG, outcomes unchanged). 175 battles identical in commands; 19 changed in turn-end rows (Roar / Whirlwind `turn-end` 8 -> 13, 5 rows each); 6 gained one `WAITMESSAGE_LONG` 64-row hold after the Substitute "faded" print (seeds 17, 124, 159, 164, 177, 186).
+- Sound (`soundCensusDelta.py`): no event added or dropped; 25 battles have frames moved by the extra rows. T1 (`--t1`): Scene ON exact 54005, others 0, identical to base; Scene OFF has no animation bodies (0 rows).
+- `npm run soak -- --policy vanilla --seeds 0:20 --parallel 3`: 20/20 OK; Scene ON `--scene on --seeds 0:10`: 10/10 OK. `test:gate` 362 files / 2844 tests green; typecheck 0; build 0.
+
 ### Open
 
 - The box clear after a release is 1 row late in the app (521 vs 520 on subhit, 516 vs 515 on roar).
