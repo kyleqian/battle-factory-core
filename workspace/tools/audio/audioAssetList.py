@@ -88,6 +88,11 @@ def main():
     for (sid, pan), row in sorted(se.items(), key=lambda kv: (kv[0][0], -999 if kv[0][1] is None else kv[0][1])):
         vias = sorted(row["vias"], key=SE_WRAPPERS.index)
         se_rows.append({"id": sid, "name": songs.get(sid), "pan": pan, "vias": vias, "uses": sum(row["vias"].values()), "logs": len(row["logs"])})
+    # snd1: SE tuples the engine emits that no ROM sound log contains (tools/audio/snd1-extra-se.json); recorded like the logged ones.
+    for r in json.loads((ROOT / "tools/audio/snd1-extra-se.json").read_text())["se"]:
+        if (r["id"], r["pan"]) not in se:
+            se_rows.append({"id": r["id"], "name": songs.get(r["id"]), "pan": r["pan"], "vias": r["vias"], "uses": 0, "logs": 0, "source": "snd1-extra-se.json"})
+    se_rows.sort(key=lambda r: (r["id"], -999 if r["pan"] is None else r["pan"]))
 
     task_modes = {}
     for e in frontier["entries"]:

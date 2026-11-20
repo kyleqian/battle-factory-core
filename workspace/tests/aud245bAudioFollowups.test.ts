@@ -350,10 +350,10 @@ describe("fetch on first use (limit 4)", () => {
     // snd1: the five ball-tray files (SE_BALL_TRAY_ENTER / BALL / EXIT pan variants) are fetched ahead too: 14 tray SEs land in the first
     // second of every battle, and a first-use fetch lost the first battle's.
     expect(names).toEqual([
-      "bgm-469.ogg", "se-005-nopan.ogg", "se-009-nopan.ogg", "se-015-nopan.ogg", "se-032-nopan.ogg",
+      "bgm-469.ogg", "se-005-nopan.ogg", "se-009-nopan.ogg", "se-015-nopan.ogg", "se-015-panm63.ogg", "se-015-panp63.ogg", "se-032-nopan.ogg",
       "se-114-panp00.ogg", "se-115-panm64.ogg", "se-115-panp63.ogg", "se-116-panm64.ogg", "se-116-panp63.ogg",
     ]);
-    expect(h.player.stats().prefetched).toBe(10);
+    expect(h.player.stats().prefetched).toBe(12);
   });
 
   it("any other sound is fetched the first time it plays, once, and decoded once", async () => {
