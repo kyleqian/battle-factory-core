@@ -123,8 +123,10 @@ export type BattleMoveAnimationTiming = Readonly<{
   minimumFrames: number; seGateFrames?: number; scriptLeadFrames?: number; bodyLeadFrames?: number; scriptTailRows?: number;
 }>;
 export type BattleHitAnimationTiming = Readonly<{
-  minimumFrames: 35;
+  minimumFrames: 35 | typeof HIT_ANIMATION_INVISIBLE_FRAMES;
   firstDisplayedAge: 1;
+  /** fsc1: the target's sprite is invisible (semi-invulnerable): the controller completes at once, nothing is drawn. */
+  invisibleTarget?: true;
 }>;
 /**
  * sub183: tailFrames (present only when > 0) = the script rows between the bar's last row and the next print's first glyph (see hpPrintTailTiming).
@@ -396,6 +398,25 @@ function chargeTurnEmptyBoxTiming(
   return null;
 }
 const CHARGE_TURN_SCRIPT = "BattleScriptFirstChargingTurn";
+const HIT_ALL_LOOP_KO_BOX_TIMING = Object.freeze({ minimumFrames: 1, holdFrames: 0 });
+const HIT_ALL_LOOP_SCRIPT = "BattleScript_DoHitAllWithUndergroundBonus";
+/**
+ * fsc1 c2: the hit-all loop's `printstring STRINGID_EMPTYSTRING3; waitmessage 1` clears the box on one row and the script runs on, so the box
+ * lasts one frame per interpreter execution to the next presented receipt (+1 for waitmessage 1's controller row), like the Focus Punch pre-pass box,
+ * not the 24-frame text minimum. Null when the next event carries no execution count.
+ */
+function hitAllLoopEmptyBoxTiming(events: readonly BattleKernelSemanticEvent[], index: number): BattleMessageTiming | null {
+  const event = events[index];
+  if (event === undefined || event.provenance?.sourceLabel !== HIT_ALL_LOOP_SCRIPT || event.payload.kind !== "message"
+    || event.payload.messageId !== "STRINGID_EMPTYSTRING3") return null;
+  const from = event.provenance.instructionExecution;
+  const next = events[index + 1];
+  const to = next?.provenance?.instructionExecution;
+  if (from === undefined || to === undefined || to <= from) return null;
+  // A KO: the faint chain's own lead (faintScriptPreCryFrames) already presents the rows from the box to `playfaintcry`.
+  if (next!.payload.kind === "play-faint-cry") return HIT_ALL_LOOP_KO_BOX_TIMING;
+  return Object.freeze({ minimumFrames: Math.max(1, to - from + 1), holdFrames: 0 });
+}
 const CHARGE_TURN_EMPTY_BOX_ROW_TIMING = Object.freeze({ minimumFrames: 1, holdFrames: 0 });
 
 /** fpp150: the turn opens with BattleScript_FocusPunchSetUp (CheckFocusPunch_ClearVarsBeforeTurnStarts runs before action 1). */
@@ -1172,6 +1193,52 @@ const HIT_ANIMATION_TIMING = Object.freeze({
   minimumFrames: 35,
   firstDisplayedAge: 1,
 } as const);
+/**
+ * fsc1: Player/OpponentHandleHitAnimation (battle_controller_opponent.c:1804-1817) calls BufferExecCompleted at once when the target's
+ * sprite is `invisible` (a Dig / Fly / Dive user between its charge turn's MOVEEND_ATTACKER_INVISIBLE / animation and its attack turn): no
+ * DoHitAnimHealthboxEffect, no 32 blink callbacks. The visible blink is 35 command frames (setup, 32 callbacks, completion, release), the
+ * invisible one is 2 (the controller's one callback and its release): the next row (healthbarupdate) runs 33 rows earlier, measured as
+ * ROM SE + 3 against SE + 36 on seed 648 (fsc1m section 2).
+ */
+export const HIT_ANIMATION_INVISIBLE_FRAMES = 2;
+const HIT_ANIMATION_INVISIBLE_TIMING = Object.freeze({
+  minimumFrames: HIT_ANIMATION_INVISIBLE_FRAMES,
+  firstDisplayedAge: 1,
+  invisibleTarget: true,
+} as const);
+const STATUS3_ON_AIR = 1 << 6;
+const STATUS3_UNDERGROUND = 1 << 7;
+const STATUS3_UNDERWATER = 1 << 18;
+const STATUS3_SEMI_INVULNERABLE = STATUS3_ON_AIR | STATUS3_UNDERGROUND | STATUS3_UNDERWATER;
+
+/**
+ * Scene OFF only: the Scene ON ROM windows (fsc1-fly-gust-on: ROM bar starts 358, Gust animation end 312, no hit blink visible because the sprite is
+ * hidden) keep the full 35-row hit step, 24 rows from the skip's prediction; the Scene ON rule is unmeasured, so it stays at the legacy timing.
+ *
+ * fsc1: is the HIT_ANIMATION target's sprite invisible when the controller runs? The sprite is hidden from a semi-invulnerable charge
+ * turn's end (Scene OFF: MOVEEND_ATTACKER_INVISIBLE, an explicit sprite-visibility receipt; Scene ON: the Dig / Fly / Dive animation)
+ * until MOVEEND_ATTACKER_VISIBLE / MOVEEND_TARGET_VISIBLE, which is the span STATUS3_SEMI_INVULNERABLE is set. So: invisible at the
+ * segment start when the status is set then, switched by this segment's visibility receipts, and hidden once the battler's own charge
+ * script (a charge-turn animation / PP receipt on it) ran earlier in the segment and the status stands at the segment's end.
+ */
+function hitTargetSpriteInvisible(
+  events: readonly BattleKernelSemanticEvent[],
+  index: number,
+  beforeRules: BattleScriptRulesContext,
+  afterRules: BattleScriptRulesContext,
+  battler: 0 | 1,
+): boolean {
+  let invisible = (beforeRules.battlers[battler]!.status3 & STATUS3_SEMI_INVULNERABLE) !== 0;
+  const newlyHidden = !invisible && (afterRules.battlers[battler]!.status3 & STATUS3_SEMI_INVULNERABLE) !== 0;
+  for (let before = 0; before < index; before += 1) {
+    const payload = events[before]!.payload;
+    if (payload.kind === "set-battler-sprite-visibility" && payload.battler === battler) {
+      if (events[before]!.provenance?.opcodeName === "B_SCR_OP_MOVEEND") invisible = payload.invisible;
+    } else if (newlyHidden && events[before]!.provenance?.sourceLabel === CHARGE_TURN_SCRIPT
+      && (payload.kind === "animation" || payload.kind === "set-battler-pp-data") && payload.battler === battler) invisible = true;
+  }
+  return invisible;
+}
 /** BattleScript_Pausex20's `pause B_WAIT_TIME_SHORT`. */
 const SCENE_OFF_MOVE_PAUSE_FRAMES = 32;
 
@@ -5332,7 +5399,7 @@ export function projectBattleResolutionCommands(
                   ?? (WAITMESSAGE_LONG_MESSAGE_IDS.has(payload.messageId) || payload.messageId === SUBSTITUTE_FADED_MESSAGE_ID
                   ? WAITMESSAGE_LONG_TIMING
                   : MESSAGE_TIMING);
-                const timing = focusPunchPrePassMessageTiming(events, index, base) ?? chargeTurnEmptyBoxTiming(events, index) ?? base;
+                const timing = focusPunchPrePassMessageTiming(events, index, base) ?? chargeTurnEmptyBoxTiming(events, index) ?? hitAllLoopEmptyBoxTiming(events, index) ?? base;
                 return payload.messageId === "STRINGID_PKMNKNOCKEDOFF"
                   ? Object.freeze({ minimumFrames: timing.minimumFrames, holdFrames: timing.holdFrames + ITEM_KNOCKOFF_PRINT_TAIL_ROWS })
                   : timing;
@@ -5565,11 +5632,12 @@ export function projectBattleResolutionCommands(
           timing: Object.freeze({ minimumFrames: FUTURE_SIGHT_HIT_OFF_HOLD_FRAMES }),
         }));
       }
+      const hitBattler = singlesBattler(payload.battler ?? -1, "hit animation");
       commands.push(Object.freeze({
         type: "hit-animation",
         eventSequence: event.sequence,
-        battler: singlesBattler(payload.battler ?? -1, "hit animation"),
-        timing: HIT_ANIMATION_TIMING,
+        battler: hitBattler,
+        timing: (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0 && hitTargetSpriteInvisible(events, index, beforeRules, afterRules, hitBattler) ? HIT_ANIMATION_INVISIBLE_TIMING : HIT_ANIMATION_TIMING,
       }));
       continue;
     }
@@ -5611,7 +5679,7 @@ export function projectBattleResolutionCommands(
       const moveEndRows = drainRole === null ? hpMoveEndLeadRows(events, index) : null;
       const messageRows = drainRole === null ? hpMessageLeadRows(events, index) : null;
       const faintNext = drainRole === null && hpFaintNext(events, index);
-      const hitEffectMessage = HP_HIT_EFFECT_OPCODES.has(events[index + 1]?.provenance?.opcodeName ?? "");
+      const hitEffectMessage = HP_HIT_EFFECT_OPCODES.has(events[index + 1]?.provenance?.opcodeName ?? "") || hitAllLoopEmptyBoxTiming(events, index + 1) !== null;
       hpLeadRows.set(health.eventSequence, { tick: hpTickKind(event), wrapSecondary: events[index + 1]?.provenance?.programCounter === WRAP_SECONDARY_PC, moveEndRows, messageRows, faintNext, hitEffectMessage, barExecution: health.instructionExecution });
       commands.push(Object.freeze({
         type: "hp",

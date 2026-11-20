@@ -2008,9 +2008,44 @@ function hcr1bStages(): Record<string, AppStage> {
   return stages;
 }
 
+// fsc1 (tools/integration/fsc1Labs.py): a Lv100 foe charges Dig / Fly / Dive, the Lv50 player's Earthquake / Gust / Surf hits the hidden foe.
+const FSC1_CASES: Readonly<Record<string, readonly [number, number, number]>> = {
+  "dig-eq": [91, 89, 10], "fly-gust": [19, 16, 35], "dive-surf": [291, 57, 15],
+};
+function fsc1Stages(): Record<string, AppStage> {
+  const stages: Record<string, AppStage> = {};
+  for (const [name, [charge, hit, hitPp]] of Object.entries(FSC1_CASES)) {
+    for (const scene of ["off", "on"] as const) {
+      const id = `fsc1-${name}-${scene}`;
+      stages[id] = (state) => midBattleSwitchStage(state, id, [RATTATA_LV50_BENCH, RATTATA_LV50_BENCH], [105, 105], {
+        rngSeed: 1,
+        battleScene: scene,
+        player: Object.freeze({ ...rattataAtLevel(50, hit), pp: [hitPp, hitPp, hitPp, hitPp] as const }),
+        trainer: rattataAtLevel(100, charge),
+        usedMessageHoldFrames: 0,
+        sceneOffNoAnimations: scene === "off",
+      });
+    }
+  }
+  // c2: the Lv50 player's Earthquake KOs a Lv5 foe in the hit-all loop.
+  for (const scene of ["off", "on"] as const) {
+    const id = `fsc1-eqko-${scene}`;
+    stages[id] = (state) => midBattleSwitchStage(state, id, [RATTATA_LV50_BENCH, RATTATA_LV50_BENCH], [105, 105], {
+      rngSeed: 1,
+      battleScene: scene,
+      player: Object.freeze({ ...rattataAtLevel(50, 89), pp: [10, 10, 10, 10] as const }),
+      trainer: rattataAtLevel(5, 69),
+      usedMessageHoldFrames: 0,
+      sceneOffNoAnimations: scene === "off",
+    });
+  }
+  return stages;
+}
+
 export const APP_STAGES: Readonly<Record<string, AppStage>> = {
   ...hpf4mStages(),
   ...hcr1bStages(),
+  ...fsc1Stages(),
   ...trp1Stages(),
   ...subp1mStages(),
   // iss216: the anchor deal has no duplicate species; the ROM probe pokes slot 6's monId to slot 1's
