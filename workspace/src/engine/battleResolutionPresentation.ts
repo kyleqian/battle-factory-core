@@ -1503,6 +1503,9 @@ function endTurnChainLeadRows(events: readonly BattleKernelSemanticEvent[], inde
   return 0;
 }
 
+/** etp1 (labs etp1-{toxic3,willowisp3}-{off,on}): the next action's used print after a status print's `updatestatusicon` + `waitstate` comes 2 rows later than the pause rule gives (OFF -2 -> 0, ON -4 -> -2 behind the ON status print's own -2). */
+const STATUS_ICON_USED_PRINT_ROWS = 2;
+
 const ACTION_TRANSITION_WAIT_ROWS: Readonly<Record<string, number>> = Object.freeze({ B_WAIT_TIME_LONG: WAITMESSAGE_LONG_HOLD_FRAMES });
 
 /**
@@ -1610,7 +1613,8 @@ function actionTransitionPauseFrames(
   }
   // sta3 (aud242g dreameater, ROM): before a pre-move print the status icon's second controller row (production presents one frame) is one more row.
   const iconSecondRow = anchor.payload.kind === "status-icon-update" && usedIsPreMove ? 1 : 0;
-  const frames = e1 - anchorExecution - 1 + ACTION_TRANSITION_ROWS + used - presented - statusFramesAfter + iconSecondRow + inLoveRows + endTurnRows;
+  const iconUsedRows = anchor.payload.kind === "status-icon-update" && !usedIsPreMove ? STATUS_ICON_USED_PRINT_ROWS : 0;
+  const frames = e1 - anchorExecution - 1 + ACTION_TRANSITION_ROWS + used - presented - statusFramesAfter + iconSecondRow + iconUsedRows + inLoveRows + endTurnRows;
   return frames > 0 ? { frames, rowsToReceipt: e1 - anchorExecution - 1 - presented } : null;
 }
 
