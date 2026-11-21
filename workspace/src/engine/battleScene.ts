@@ -56671,6 +56671,11 @@ export function renderBattleResolutionLiveView(
   }
   const subbedOpponentAttacker = swap !== null && view.effect?.type === "move" && view.effect.request.attacker === 1;
   if (swap) view = swap.view;
+  // hit1: the rows after a body Cmd_end holds for its SEs: the script is over, the ROM shows the field as it left it.
+  if (view.effect?.type === "move" && view.effect.afterScript === true) {
+    renderBattleResolutionSceneOffView(fb, view);
+    return;
+  }
   // trf174 (liveTransform.ts): the live Move_TRANSFORM body, both scenes.
   if (view.effect?.type === "move" && view.effect.request.moveId === LIVE_TRANSFORM_MOVE_ID
     && liveMoveAnimationDuration(view.effect.request, view.field) !== null) {

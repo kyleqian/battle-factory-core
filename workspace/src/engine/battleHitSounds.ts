@@ -117,7 +117,11 @@ export function emitBattleHitSounds(
     const song = effectivenessSong(segment, command.eventSequence);
     if (song !== null) {
       const panBattler = song.weatherLoop ? 0 : command.battler;
-      scheduleAfter(Math.max(0, lag), () => playPannedSe(song.song, panBattler === 0 ? SE_PAN_PLAYER : SE_PAN_OPPONENT));
+      // hit1 (docs/hit1-move-hit-timing.md): this hit's own body has no lead (a lead body schedules the SE itself, above), so the lead /
+      // tail rows of the resolution's earlier lead bodies (another move, or a multi-hit's first hit) are already in this command's start:
+      // subtracting them (moveBodyExtraRows) put the SE that many rows early (frame catcher: Petal Dance / Spark / Brick Break after a
+      // lead body 8 / 9 early, Double Slap / Fury Swipes hits 2+ 7 to 9 early).
+      scheduleAfter(Math.max(0, sceneLag(segment)), () => playPannedSe(song.song, panBattler === 0 ? SE_PAN_PLAYER : SE_PAN_OPPONENT));
     }
     return;
   }

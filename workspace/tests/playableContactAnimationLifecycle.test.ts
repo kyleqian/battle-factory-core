@@ -1,13 +1,15 @@
 import { describe, expect, it } from "vitest";
 import { generatedCommandAnimationReplay } from "../tools/integration/generatedCommandAnimationReplay.ts";
-import { hpd4BodyRows, iu120Ages, iu120Extra } from "./helpers/iu120Rows.ts";
+import { hit1SeWaitRows, hpd4BodyRows, iu120Ages, iu120Extra } from "./helpers/iu120Rows.ts";
 
 describe("ordinary contact animation command lifecycle", () => {
   it("renders each Twineedle hit, then KO/replacement before the next target's hits", () => {
     const replay = generatedCommandAnimationReplay(52, "on", [0, 0]);
     const hits = replay.animations.filter(a => a.moveId === 41);
     expect(hits.map(a => a.opponent)).toEqual(["CACNEA", "CACNEA", "PONYTA", "PONYTA"]);
-    expect(hits.every(a => a.ages.length === 37 + 10 + iu120Extra(41) && a.ages[0] === 0 && a.ages.at(-1) === 36 + 10 + iu120Extra(41))).toBe(true);
+    // hit1: each hit's command also holds Cmd_end's SE_M_HORN_ATTACK wait (17 rows; ROM: 63 rows from the activation to the fall, every hit).
+    const rows = 37 + 10 + hit1SeWaitRows(41) + iu120Extra(41);
+    expect(hits.every(a => a.ages.length === rows && a.ages[0] === 0 && a.ages.at(-1) === rows - 1)).toBe(true);
     expect(replay.requests.filter(r => r.moveId === 41).map(r => [r.turn, r.multihit])).toEqual([
       [0, 2], [1, 1], [0, 2], [1, 1],
     ]);

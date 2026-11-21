@@ -12,7 +12,7 @@ import { liveMoveAnimationDuration } from "../src/engine/liveMoveAnimation.ts";
 import { LIVE_SUBSTITUTE_SWAP_BODY_IDS, liveSubstituteSwapApplies } from "../src/engine/liveSubstituteSwap.ts";
 import { LAND97_LEAD_ROWS } from "./helpers/land97LeadAges.ts";
 import {
-  IU120_NO_PRE_ROW_SIDES, IU120_POST_ROW_SIDES, IU120_UNMEASURED_IDS, iu120Post, iu120Pre,
+  IU120_NO_PRE_ROW_SIDES, IU120_POST_ROW_SIDES, IU120_UNMEASURED_IDS, hit1SeWaitRows, iu120Post, iu120Pre,
 } from "./helpers/iu120Rows.ts";
 
 // iu120 (docs/iu120-universal-rows.md): idle98's banked universal rows (docs/next-adapters-idle98.md s3.2), folded with land97's idle
@@ -55,8 +55,9 @@ describe("iu120 universal rows: P / T per class", () => {
       expect(rows(44, attacker)).toEqual({ pre: 3, post: 0 }); // Bite (lead 10, trail != -1)
       expect(rows(89, attacker)).toEqual({ pre: 3, post: 0 }); // Earthquake
       expect(rows(24, attacker)).toEqual({ pre: 3, post: 0 }); // Double Kick
-      expect(rows(9, attacker)).toEqual({ pre: 0, post: 0 }); // Thunder Punch (lead unproven)
-      expect(rows(223, attacker)).toEqual({ pre: 0, post: 0 }); // Dynamic Punch (lead unproven)
+      // hit1: Thunder Punch's 10-row lead is static on the ROM (pre 3), and Cmd_end's SE wait makes it a trail -1 body (post 2).
+      expect(rows(9, attacker)).toEqual({ pre: 3, post: 2 });
+      expect(rows(223, attacker)).toEqual({ pre: 0, post: 2 }); // Dynamic Punch (lead unproven; hit1: held for its SE, so post 2)
     }
     // One-sided masks: Rock Slide's player lead is unproven; Fire Blast / Crunch-class post rows on one side only.
     expect(rows(157, 0).pre).toBe(0);
@@ -67,8 +68,8 @@ describe("iu120 universal rows: P / T per class", () => {
     expect(rows(214, 1).post).toBe(2);
   });
 
-  it("the masks: 13 no-pre moves (idle98 s3.2: the leads land97 does not cover), 131 post-row moves / 259 sides", () => {
-    expect(IU120_NO_PRE_ROW_SIDES.size).toBe(13);
+  it("the masks: 12 no-pre moves (idle98 s3.2: the leads land97 does not cover; hit1: Thunder Punch left), 131 post-row moves / 259 sides", () => {
+    expect(IU120_NO_PRE_ROW_SIDES.size).toBe(12);
     // liv2: Flamethrower (53) keeps no pre rows and carries its 18 measured idle rows instead (5 + 18 + 192 + 6 = the ROM's release-to-hit 221).
     for (const id of IU120_NO_PRE_ROW_SIDES.keys()) expect(LAND97_LEAD_ROWS.has(id), `move ${id}`).toBe(id === 53);
     expect(IU120_POST_ROW_SIDES.size).toBe(131);
@@ -98,18 +99,19 @@ describe("iu120 universal rows: P / T per class", () => {
 });
 
 describe("iu120 composition", () => {
-  it("one hold: duration = P + N + D + T (Bulk Up 3 + 4 + 104 + 2, Bite 3 + 10 + 31, Karate Chop 3 + 49 + 2, Thunder Punch 0 + D)", () => {
+  it("one hold: duration = P + N + D + W + T (Bulk Up 3 + 4 + 104 + 2, Bite 3 + 10 + 31, Karate Chop 3 + 49 + 2, Thunder Punch 3 + 10 + 104 + 22 + 2)", () => {
     const plain = field(false, false);
     for (const attacker of [0, 1] as const) {
-      for (const [id, n] of [[339, 4], [44, 10], [2, 0], [9, 0], [89, 0], [325, 8]] as const) {
+      for (const [id, n] of [[339, 4], [44, 10], [2, 0], [9, 10], [89, 0], [325, 8]] as const) {
         const d = liveMoveAnimationDuration(req(id, attacker), plain)!;
         expect(d, `move ${id}`).not.toBeNull();
         expect(liveMoveIdleLeadRows(req(id, attacker), plain)).toBe(n);
         expect(battleResolutionCommandDuration(command(req(id, attacker)), plain), `move ${id}`)
-          .toBe(iu120Pre(id, sideOf(attacker)) + n + d + iu120Post(id, sideOf(attacker)));
+          .toBe(iu120Pre(id, sideOf(attacker)) + n + d + hit1SeWaitRows(id, sideOf(attacker)) + iu120Post(id, sideOf(attacker)));
       }
       expect(battleResolutionCommandDuration(command(req(339, attacker)), plain)).toBe(113);
       expect(battleResolutionCommandDuration(command(req(44, attacker)), plain)).toBe(44);
+      expect(battleResolutionCommandDuration(command(req(9, attacker)), plain)).toBe(141); // hit1
     }
   });
 

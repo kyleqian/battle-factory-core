@@ -1974,6 +1974,12 @@ const LEAD4_S_LEAD_MOVE_IDS: ReadonlySet<number> = new Set([
  */
 const LSE4_SHAPE_A_MOVE_IDS: ReadonlySet<number> = new Set([279, 71]);
 /**
+ * hit1 (docs/hit1-move-hit-timing.md): Thunder Punch, lead1m's class B body (counter lead 5 = the ROM's, gap 4, s = +32: "fix the adapter window
+ * first"). Its window is now the ROM's: the 10 idle lead rows (idle94) + 104 body rows + Cmd_end's 22 SE-wait rows = len 135 + 1 (liveMoveEndSeWaitRows),
+ * so it is shape A: the lead in front, tail 6 - pre - post. ROM (frame catcher, t3 x 33): the body and the hit blink on the ROM's rows.
+ */
+const HIT1_SHAPE_A_MOVE_IDS: ReadonlySet<number> = new Set([9]);
+/**
  * lse4 "gap-print": the lead is the kernel counter, the rows after the body are `T = 2 + gap - pre - post + s` with the ROM gap of the next command: a print (`printfromtable` / `printstring`) is
  * Delta + 1 (Recycle 3, the Razor Wind charge turn 7), any other next command is shape A (gap 4). Recycle 278, Razor Wind 13 (both turns).
  */
@@ -2002,7 +2008,7 @@ export function lse2BodySoundAgeShift(moveId: number, bodyLeadFrames: number | u
 export type BodyLeadRule = "lead-table" | "shape-a" | "status-tail" | "lse2" | "s-lead" | "gap-print" | "lead-only";
 const BODY_LEAD_RULE: ReadonlyMap<number, BodyLeadRule> = new Map<number, BodyLeadRule>([
   ...HPD4_BODY_LEAD_MOVE_IDS.map((id): [number, BodyLeadRule] => [id, "lead-table"]),
-  ...[...HPD8_SHAPE_A_MOVE_IDS, ...LEAD2_SHAPE_A_MOVE_IDS, ...LEAD3_SHAPE_A_MOVE_IDS, ...LSE4_SHAPE_A_MOVE_IDS].map((id): [number, BodyLeadRule] => [id, "shape-a"]),
+  ...[...HPD8_SHAPE_A_MOVE_IDS, ...LEAD2_SHAPE_A_MOVE_IDS, ...LEAD3_SHAPE_A_MOVE_IDS, ...LSE4_SHAPE_A_MOVE_IDS, ...HIT1_SHAPE_A_MOVE_IDS].map((id): [number, BodyLeadRule] => [id, "shape-a"]),
   ...[...STA5_STATUS_BODY_TAIL_ROWS.keys()].map((id): [number, BodyLeadRule] => [id, "status-tail"]),
   ...[...LSE2_BODY_LEAD_MOVE_IDS].map((id): [number, BodyLeadRule] => [id, "lse2"]),
   ...[...LEAD4_S_LEAD_MOVE_IDS].map((id): [number, BodyLeadRule] => [id, "s-lead"]),

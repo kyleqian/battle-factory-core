@@ -49,6 +49,7 @@
     "extract:cry-mode-frames": "python3 tools/audio/genCryModeFrames.py",
     "extract:audio-sound-sources": "node --experimental-strip-types tools/extract/extract-audio-sound-sources.ts",
     "extract:anim-sound-timing": "node --experimental-strip-types tools/extract/extract-anim-sound-timing.ts",
+    "extract:se-song-rows": "node --experimental-strip-types tools/extract/extract-se-song-rows.ts",
     "extract:frontier-trainers": "node --experimental-strip-types tools/extract/extract-battle-frontier-trainers.ts",
     "extract:facility-class-lookups": "node --experimental-strip-types tools/extract/extract-facility-class-lookups.ts",
     "extract:frontier-trainer-pics": "node --experimental-strip-types tools/extract/extract-frontier-trainer-pics.ts",
