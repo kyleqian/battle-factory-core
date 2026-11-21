@@ -2274,3 +2274,62 @@ Sum-check: ON 2,360 + 1,713 + 926 + 1,354 + 1,287 + 957 + 660 + 276 (= 9,533) + 
 - B4 bodies: 298 mass, being landed; no proposal here.
 
 Not applied: no `src/` or `tests/` change; PROGRESS / ISSUES / ROADMAP untouched.
+
+## eqk1: Earthquake hit-all tail, forced Struggle, s1914 Drill Peck window (2026-11-21)
+
+Main/ts lane, Battle Scene OFF oracle; presentation timing only, no gameplay / RNG change. Labs: `tools/integration/eqk1Labs.py` writes `tools/battle-lab/eqk1-*.json` (Earthquake / Magnitude / Explosion / Selfdestruct x player / foe = 8, plus `eqk1-struggle`, `eqk1-eq-imm`, `eqk1-tackle-imm`); `tools/integration/labCompare.sh --scene both`. Evidence `.integration/evidence/eqk1/` (git-ignored).
+
+### Causes landed (all `battleResolutionPresentation.ts`)
+
+1. **Hit-all tail (item 1).** The next mover's action transition returned null for the hit-all loop's `printstring STRINGID_EMPTYSTRING3` box (`BattleScript_DoHitAllWithUndergroundBonus`), so the next used-move box / SE started 8 frames early in both scenes. The box now anchors the transition at the loop's last execution (e1): `P = e1 - E - 1 + 6 + u - presented` with `E = e1`, i.e. `P = 5 + u` (ROM eq-p / eq-imm: next mover 8 rows after the box; 9 after a no-effect hit). Earthquake player: ON 56 -> 0, OFF 16 -> 0.
+2. **No-effect damaging move, Scene ON (item 3 cause).** `Cmd_attackanimation`'s `MOVE_RESULT_NO_EFFECT` branch pushes `BattleScript_Pausex20` in both scenes. Scene OFF already presents it (`SCENE_OFF_ATTACK_PAUSE`); Scene ON emits no kernel event, so its ~53 rows were missing before "It doesn't affect". `sourcePauseUsedMoveHoldFrames` now holds the used-move box through them when a `RESULTMESSAGE` `STRINGID_ITDOESNTAFFECT` follows an `attackanimation` (ROM: eq-imm ON first message hold 55). eq-imm ON 570 -> 20, tackle-imm ON 63 -> 14.
+3. **Magnitude, Scene OFF.** Magnitude's `pause B_WAIT_TIME_SHORT; printstring MAGNITUDESTRENGTH; waitmessage B_WAIT_TIME_LONG` rows (used print -> print + 64) are presented by the message commands but were counted again in the `SCENE_OFF_ATTACK_PAUSE` move command (first SE +100). They are now subtracted (move min 147 -> 47, first SE exact). mag-p OFF 292 -> 8, mag-f 200 -> 8.
+
+### Lab compare, before -> after (exact / offset / missing / extra, mass)
+
+| lab | scene | before | after |
+|---|---|---|---|
+| eqk1-eq-p | ON | 2 / 7 / 0 / 0, 56 | 9 / 0 / 0 / 0, **0** |
+| eqk1-eq-p | OFF | 1 / 2 / 0 / 0, 16 | 3 / 0 / 0 / 0, **0** |
+| eqk1-eq-f | ON | 2 / 5 / 0 / 0, 55 | 2 / 5 / 0 / 0, 15 |
+| eqk1-eq-f | OFF | 1 / 1 / 0 / 0, 11 | 1 / 1 / 0 / 0, 3 |
+| eqk1-eq-imm | ON | 0 / 10 / 0 / 0, 570 | 0 / 10 / 0 / 0, 20 |
+| eqk1-eq-imm | OFF | 0 / 1 / 0 / 0, 2 | 0 / 1 / 0 / 0, 2 |
+| eqk1-tackle-imm | ON | 0 / 1 / 1 / 0, 63 | 0 / 1 / 1 / 0, 14 |
+| eqk1-tackle-imm | OFF | 1 / 0 / 0 / 0, 0 | 1 / 0 / 0 / 0, 0 |
+| eqk1-mag-p | OFF | 0 / 3 / 0 / 0, 292 | 1 / 2 / 0 / 0, 8 |
+| eqk1-mag-f | OFF | 0 / 2 / 0 / 0, 200 | 1 / 1 / 0 / 0, 8 |
+| eqk1-mag-p | ON | 0 / 18 / 0 / 0, 53 | 0 / 18 / 0 / 0, **81** (regression, below) |
+| eqk1-mag-f | ON | 0 / 16 / 0 / 0, 49 | 0 / 16 / 0 / 0, **89** (regression, below) |
+| eqk1-expl-p / -f, eqk1-sd-p / -f | both | unchanged (ON 76-84, OFF 8-10) | unchanged |
+| eqk1-struggle | OFF / ON | 0 / 1 / 0 / 0, 1 / 0 / 11 / 3 / 0, 466 | unchanged |
+
+### Item 2: Struggle (276 ON / 305 OFF)
+
+A forced player Struggle (`eqk1-struggle`, after `BattleScript_NoMovesLeft`) is within +-1 of the ROM in both scenes (OFF +1; ON body -1 / hit +1): there is no Struggle-specific command that differs. EFFECT_RECOIL goes through `BattleScript_EffectHit`, the same rows as a plain hit plus the recoil `hp` command already pinned by hcr3. The T2 s7295 OFF decision 8 window is a Struggle that follows the player's no-effect Earthquake: its -3 is the hit-all / no-effect transition fixed above, not Struggle. A forced **foe** Struggle lab could not be built (the foe never reached Struggle in the ROM window: the player's `NoMovesLeft` ran first); the foe shares the player's commands, so no separate error is expected. The ON `eqk1-struggle` missing 3 / mass 466 is the Splash body SE (167) the engine does not present on the player's turn 1 (a Splash gap, not Struggle).
+
+### Item 3: Drill Peck s1914 single window (660 ON, -66 x 9)
+
+Cause (hcr3mProbe.py + hcr3mCmp.py, seg 21): the player's Earthquake hits a Flying foe ("It doesn't affect ..."), then the foe uses Drill Peck. In Scene ON the NO_EFFECT `Pausex20` rows were unpresented before "It doesn't affect", and the hit-all transition (item 1) was also missing, which made the whole Drill Peck body ~66 early (9 SE rows). General rule (2 above), landed. eq-imm ON Drill Peck body -57 -> -2.
+
+### T2 rescore (25 ON + 24 OFF seeds, drv1 cadence; base `fad9fdfc6`)
+
+| scene | mass before -> after | exact before -> after | missing / extra |
+|---|---|---|---|
+| ON | 19,862 -> 17,764 (-10.6 %) | 2,737 -> 2,780 | 0 / 0 |
+| OFF | 2,640 -> 2,483 (-5.9 %) | 700 -> 707 | 0 / 0 |
+
+(The Magnitude change moved neither scene: no T2 seed plays Magnitude.)
+
+### Census and tests
+
+- census (200 battles, both scenes, base `fad9fdfc6`): eventsDigest + error identical 200 / 200; T1 missing 0 / extra 0 (ON exact 54,127 / known-offset 35; OFF extra 35 / unclassified 13, as the base). 38 type-sequence changes per scene are the new presented commands; command stream changed on 32 ON battles, 0 OFF battles in the fold before the Magnitude commit, OFF digest / T1 re-run at the final HEAD identical.
+- tests: `npm run typecheck` 0; `npm run test:gate` 360 files / 2,835 tests; importers + aud2* + fsc* + animation/live* + randomRoundSoak* + `tests/eqk1HitAllTail.test.ts` 307 files / 3,058 tests; `npm run build` green. New `tests/eqk1HitAllTail.test.ts` pins eq-p next mover 8 rows after the box (both scenes), eq-imm ON hold 55 / next mover 9, Magnitude OFF move min 47. No re-pins; no pins left red. The full `npm test` is the supervisor's.
+
+### Residuals (not landed)
+
+- **Magnitude Scene ON (regression, named).** The hit-all transition is now ROM-correct, but Magnitude's own ON move body is 12 frames too long between the last body SE (-3) and the hit SE (+9; mv222 body tail), which the old 8-row-short transition was hiding: next mover -2 -> +6 (mag-p), mass 53 -> 81 / 49 -> 89. Fix belongs in the mv222 body-length model, not in the transition; not part of eqk1's scope. Net ON mass over all labs and T2 is still down.
+- eq-f (foe Earthquake): ON 15 / OFF 3, the hp-drain phase and the lab's damage roll.
+- Explosion / Selfdestruct (they use `BattleScript_ExplosionLoop`, no EMPTYSTRING3 box): pre-hit +5 OFF / +7 ON body, faint-chain offsets, unchanged.
+- Splash body SE (167) missing in ON on the player's turn 1 (eqk1-struggle ON missing 3); Tackle body SE 139 missing in ON (tackle-imm missing 1).
+- Foe forced-Struggle lab not buildable (see item 2).
