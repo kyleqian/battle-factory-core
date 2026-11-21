@@ -1,5 +1,6 @@
 // hcr3m: the engine's presentation commands and SE rows of a sound-fixture lab (tools/audio/fixtures/<name>.json), for hcr3mLab.py next to the ROM script trace.
 //   node --experimental-strip-types --no-warnings tools/integration/hcr3mLabEngine.ts <fixture-name> <out.json>
+import "../../src/engine/monPicPixelsInstall.ts";
 import { readFileSync, writeFileSync } from "node:fs";
 import { collectSoundTick } from "../../src/audio/soundEvents.ts";
 import { createInitialState, tick } from "../../src/engine/core.ts";

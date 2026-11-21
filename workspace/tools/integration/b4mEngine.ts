@@ -1,6 +1,7 @@
 // b4m: the engine's presentation commands of a battle lab (tools/battle-lab/<name>.json, the file the oracle runs), with each command's full timing and the frame the
 // live move body's ROM-calibrated source clock (liveMoveSourceAge) reaches age 0. A name with an APP_STAGES entry uses it; any other Rattata-pair lab uses the cln10 generic stage.
 //   node --experimental-strip-types --no-warnings tools/integration/b4mEngine.ts <lab-name-without-.json> <out.json>
+import "../../src/engine/monPicPixelsInstall.ts";
 import { readFileSync, writeFileSync } from "node:fs";
 import { collectSoundTick } from "../../src/audio/soundEvents.ts";
 import { createInitialState, tick } from "../../src/engine/core.ts";
