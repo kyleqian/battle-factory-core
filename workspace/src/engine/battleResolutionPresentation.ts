@@ -1982,6 +1982,15 @@ const LSE4_GAP_PRINT_MOVE_IDS: ReadonlySet<number> = new Set([278, 13]);
 const LSE4_LEAD_ONLY_MOVE_IDS: ReadonlySet<number> = new Set([273]);
 /** lse4: rows the accepted adapter window is short of the ROM's `len + 1` (`s`): Absorb (script runs 2 rows past the window), Razor Wind (len = live, both turns). Added to the rows after the body. */
 export const LSE4_WINDOW_SHORT_ROWS: ReadonlyMap<number, number> = new Map([[71, 2], [13, 1]]);
+/**
+ * b4l "c-lead" (docs/aud251-s11-scoreboard-refresh.md b4m / b4l): the B4 status / hit bodies whose kernel lead (the instruction rows from the used print's release to `attackanimation`,
+ * ROM L = A0 - R - 3: 9 / 9 / 7 / 7 / 7 / 7 / 4 / 6 / 8 / 9 / 7) is presented in front of the body, with the lead-only class's tail plus a per-id window adjust: the rows after the body the
+ * ROM's next command (the status animation, stat, or hit animation) is off by once the lead is in (`C_LEAD_WINDOW_ADJUST`, ROM next command - engine next command). Thunder Wave 86, Stun Spore 78,
+ * Sleep Powder 79, Sing 47, Grasswhistle 320, Confuse Ray 109, Curse 174, Lovely Kiss 142, Will-O-Wisp 261, Glare 137, Brick Break 280.
+ */
+export const C_LEAD_WINDOW_ADJUST: ReadonlyMap<number, number> = new Map([[47, 3], [142, 3], [280, 3], [261, 2], [137, 2], [109, 2], [174, 4], [320, -2], [86, 0], [78, 0], [79, 0]]);
+/** The lead a c-lead body's sound table was fitted on when it is not the generic 7 (Confuse Ray's table was fitted on its own L = 6 lab, so its SEs already sit on the ROM frames). */
+const C_LEAD_SOUND_CLOCK_LEADS: ReadonlyMap<number, number> = new Map([[109, 6]]);
 /** The lead the S bodies' sound clock was calibrated on (the generic move-body clock, AGE_TO_SOUND_ROWS = 7). */
 const LEAD4_SOUND_CLOCK_LEAD = 7;
 /** Per-body clock leads (ROM minus ours on the 7 clock: Smokescreen / Scary Face / Metal Sound -2, Sweet Scent -3 in the aud242 fixtures; Double Team, 98 of 190 T2 SEs, +2 before the shift is -4): their SEs sit closer to the print release. */
@@ -1991,6 +2000,7 @@ export function lse2BodySoundAgeShift(moveId: number, bodyLeadFrames: number | u
   if ((bodyLeadFrames ?? 0) <= 0) return 0;
   const calibrated = LSE2_SOUND_CLOCK_LEADS.get(moveId);
   if (calibrated !== undefined) return bodyLeadFrames! - calibrated;
+  if (C_LEAD_WINDOW_ADJUST.has(moveId)) return bodyLeadFrames! - (C_LEAD_SOUND_CLOCK_LEADS.get(moveId) ?? LEAD4_SOUND_CLOCK_LEAD);
   return LEAD4_S_LEAD_MOVE_IDS.has(moveId) ? bodyLeadFrames! + precedingRows - (LEAD4_SOUND_CLOCK_LEADS.get(moveId) ?? LEAD4_SOUND_CLOCK_LEAD) : 0;
 }
 /**
@@ -1999,7 +2009,7 @@ export function lse2BodySoundAgeShift(moveId: number, bodyLeadFrames: number | u
  * (`liveMoveHitTailRows`); "status-tail": the sta5 script-tail table; "lse2": the lse2 lead-first status bodies; "lead-table": the hpd4 bodies with explicit tails.
  * Every consumer asks one of the predicates below instead of testing its own id set, so a batch widens one class.
  */
-export type BodyLeadRule = "lead-table" | "shape-a" | "status-tail" | "lse2" | "s-lead" | "gap-print" | "lead-only";
+export type BodyLeadRule = "lead-table" | "shape-a" | "status-tail" | "lse2" | "s-lead" | "gap-print" | "lead-only" | "c-lead";
 const BODY_LEAD_RULE: ReadonlyMap<number, BodyLeadRule> = new Map<number, BodyLeadRule>([
   ...HPD4_BODY_LEAD_MOVE_IDS.map((id): [number, BodyLeadRule] => [id, "lead-table"]),
   ...[...HPD8_SHAPE_A_MOVE_IDS, ...LEAD2_SHAPE_A_MOVE_IDS, ...LEAD3_SHAPE_A_MOVE_IDS, ...LSE4_SHAPE_A_MOVE_IDS].map((id): [number, BodyLeadRule] => [id, "shape-a"]),
@@ -2008,6 +2018,7 @@ const BODY_LEAD_RULE: ReadonlyMap<number, BodyLeadRule> = new Map<number, BodyLe
   ...[...LEAD4_S_LEAD_MOVE_IDS].map((id): [number, BodyLeadRule] => [id, "s-lead"]),
   ...[...LSE4_GAP_PRINT_MOVE_IDS].map((id): [number, BodyLeadRule] => [id, "gap-print"]),
   ...[...LSE4_LEAD_ONLY_MOVE_IDS].map((id): [number, BodyLeadRule] => [id, "lead-only"]),
+  ...[...C_LEAD_WINDOW_ADJUST.keys()].map((id): [number, BodyLeadRule] => [id, "c-lead"]),
 ]);
 /** The body's lead is presented as `bodyLeadFrames` (not carried in `scriptTailRows`). */
 export function bodyLeadRuleApplies(moveId: number): boolean {
@@ -2020,10 +2031,13 @@ export function bodyHitTailRuleApplies(moveId: number): boolean {
 /** The lead-first body keeps the audited hit-tail / status-tail composition (the render effect's age hold). */
 export function bodyLeadTailCompositionApplies(moveId: number): boolean {
   const rule = BODY_LEAD_RULE.get(moveId);
-  return rule === "shape-a" || rule === "status-tail" || rule === "s-lead" || rule === "gap-print";
+  return rule === "shape-a" || rule === "status-tail" || rule === "s-lead" || rule === "gap-print" || rule === "c-lead";
 }
 export function bodyGapPrintRuleApplies(moveId: number): boolean {
   return BODY_LEAD_RULE.get(moveId) === "gap-print";
+}
+export function bodyCLeadRuleApplies(moveId: number): boolean {
+  return BODY_LEAD_RULE.get(moveId) === "c-lead";
 }
 export function bodyLeadOnlyRuleApplies(moveId: number): boolean {
   return BODY_LEAD_RULE.get(moveId) === "lead-only";
@@ -6687,6 +6701,8 @@ export function usedMoveBodySoundLeadOf(state: BattleResolutionPresentationState
   const command = commands[state.commandIndex];
   if (command?.type !== "move-animation" || command.animation === undefined) return base;
   const lead = command.timing.bodyLeadFrames ?? 0;
+  // b4l: a c-lead body presents its lead for real, so the sound clock follows it (`lse2BodySoundAgeShift`, L - 7) and the 7 - L tick lead is dropped.
+  if (C_LEAD_WINDOW_ADJUST.has(command.animation.moveId)) return 0;
   if (lead < PLAIN_BODY_SOUND_LEAD_MIN_L || lse2BodySoundAgeShift(command.animation.moveId, lead) !== 0) return base;
   return MOVE_BODY_SOUND_CLOCK_LEAD - lead;
 }

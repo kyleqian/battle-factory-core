@@ -12,7 +12,7 @@ import {
   RAIN_CONTINUES_SCRIPT_START_ROWS,
   STA5_STATUS_BODY_TAIL_ROWS,
   lse2BodySoundAgeShift,
-  bodyHitTailRuleApplies, bodyGapPrintRuleApplies, LSE4_WINDOW_SHORT_ROWS, bodyLeadTailCompositionApplies, bodyStatusTailRuleApplies, bodyLse2RuleApplies, bodySLeadRuleApplies,
+  bodyHitTailRuleApplies, bodyGapPrintRuleApplies, LSE4_WINDOW_SHORT_ROWS, C_LEAD_WINDOW_ADJUST, bodyCLeadRuleApplies, bodyLeadTailCompositionApplies, bodyStatusTailRuleApplies, bodyLse2RuleApplies, bodySLeadRuleApplies,
 } from "./battleResolutionPresentation.ts";
 import type { LiveMoveSpriteAllocatorInput, LiveMoveSpriteOrderInput } from "./liveMoveSpriteAllocator.ts";
 import type { LiveMoveBattlerX2Input } from "./liveBattlerX2History.ts";
@@ -1615,6 +1615,7 @@ export function liveMoveHitTailRows(command: Extract<BattleResolutionPresentatio
   if ((command.timing.bodyLeadFrames ?? 0) === 0) return liveSubstituteSwapApplies(request, field) === true ? 0 : LIVE_MOVE_LEADLESS_TAIL_ROWS.get(request.moveId) ?? 0;
   const table = HPD4_BODY_TAIL_ROWS.get(request.moveId) ?? STA5_STATUS_BODY_TAIL_ROWS.get(request.moveId) ?? LSE2_BODY_TAIL_ROWS.get(request.moveId);
   if (table !== undefined) return table;
+  if (bodyCLeadRuleApplies(request.moveId)) return liveSubstituteSwapApplies(request, field) === true ? 0 : C_LEAD_WINDOW_ADJUST.get(request.moveId) ?? 0;
   const gapPrint = bodyGapPrintRuleApplies(request.moveId);
   if (!(bodyHitTailRuleApplies(request.moveId) || gapPrint) || liveSubstituteSwapApplies(request, field) === true) return 0;
   const rows = liveMoveUniversalRows(request, field);
