@@ -22,7 +22,30 @@ export type FactoryEvent =
    * `challenge-end` so the re-mount is instant.
    */
   | { type: "challenge-request"; frame: number }
+  /**
+   * rc1, `lobby: "skip"` only; for the host's eyes (never part of what a server records). The picture has just gone black and the game
+   * holds there, the host's moment to draw its own result card over it. "loss": the lost (or forfeited) battle's fade has ended, after
+   * `challenge-end` (the game stays black until the host destroys the mount). "retire": the RETIRE warp's fade has ended; the
+   * `challenge-end` retire comes on the same frame, just before (and the game stays black). "round": a won round's battle room has faded
+   * out (after `round-end`, and after Noland's symbol scene when there is one); the first A or START from half a second (30 frames) into
+   * the hold deals the next round's draft with the streak carried on, and `round-continue` follows. After a resume that ends inside a
+   * hold, it is reported again right after `ready`.
+   */
+  | { type: "result-screen"; reason: "loss" | "retire" | "round"; streak: number; frame: number }
+  /** rc1, `lobby: "skip"` only, host-only like `result-screen`: the A / START that left a "round" hold; the next round's draft is on screen. */
+  | { type: "round-continue"; frame: number }
   | { type: "contained-error"; message: string; frame: number };
+
+/**
+ * rc1: where a challenge goes after its round ends. "walk" (the default, the ROM's way): a loss, a forfeit or a retire warps to the
+ * walkable Lobby (the attendant's lines, the save, free walking, `challenge-request` at the attendant); a 7-win warps there too and the
+ * attendant continues the streak. "skip": no Lobby. The game holds on a black frame and reports `result-screen` instead: after a loss at
+ * the end of the battle's fade, after a retire at the end of the RETIRE warp's fade (and `challenge-end` retire moves there, from the
+ * Lobby's free walking), after a 7-win once the battle room has faded out; from that last hold, A or START deals the next round's draft
+ * (the streak, symbols, Battle Points and rent count carried as the won Lobby banks them; no PreBattleRoom briefing, as on a "draft"
+ * mount). Changes what the game does after a round, so a resume and `replayChallenge` must pass the same value.
+ */
+export type FactoryLobbyMode = "walk" | "skip";
 
 /**
  * The save's Factory record that outlives a challenge (singles, Level 50; the real save keeps it whatever the streak): the symbol count
@@ -53,6 +76,8 @@ export interface FactoryGameOptions {
   start?: "draft" | "after-save";
   /** The save's Factory record the challenge starts with (both starts); absent = a fresh save. A resume and `replayChallenge` must pass the same. */
   frontier?: FactoryFrontierRecord;
+  /** rc1 (additive): absent / "walk" = the Lobby after a round, "skip" = result holds instead (`FactoryLobbyMode`). A resume and `replayChallenge` must pass the same. */
+  lobby?: FactoryLobbyMode;
   /** Fast-forward through these before the player gets control; `ready` follows. */
   resume?: TraceSegment[];
   onEvent?: (event: FactoryEvent) => void;

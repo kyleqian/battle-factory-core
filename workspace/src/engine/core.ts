@@ -567,6 +567,8 @@ import {
   createPostwinStateFromOpponentRentalRecords,
   createPostwinStateFromRound,
   withPostwinUpcomingOpponentScouting,
+  POSTWIN_BATTLE_BLACK_AGE,
+  POSTWIN_SECOND_BLACK_AGE,
   POSTWIN_BATTLE_ROOM_FADE_OUT_AGE,
   POSTWIN_BATTLE_ROOM_FIRST_AGE,
   POSTWIN_COUNTER_ROOM_FIRST_AGE,
@@ -691,8 +693,15 @@ import {
   advanceFactoryCarry,
   carryForNewChallengeAfterLobby,
   createInitialFactoryCarry,
+  generateFactoryChallengeDraft,
   type FactoryCarry,
 } from "./factoryRoundChaining.ts";
+import {
+  advanceResultHold,
+  createResultHold,
+  releasesRoundHold,
+  type ResultHoldState,
+} from "./resultHold.ts";
 import {
   advanceFactoryLobbyFreeRoam,
   isFactoryLobbyFacingSinglesAttendant,
@@ -956,6 +965,13 @@ export interface EngineState {
    * state, and excluded from battle/RNG snapshots and Scene ON/OFF parity inputs.
    */
   presentationRng: PresentationRngSession;
+  /**
+   * rc1: the challenge was mounted with `lobby: "skip"` (resultHold.ts): no Lobby after a round, black result holds instead. Absent on
+   * the default "walk" path, so its states are exactly what they were before the option.
+   */
+  lobbySkip?: true;
+  /** rc1: the black hold that replaces the Lobby (`lobbySkip` only); absent / null everywhere else. */
+  resultHold?: ResultHoldState | null;
 }
 
 /** battleRoom "settled" phase's own elapsed (0 = trace tick 843, see battleTransition.ts) at which core.ts hands off to battleScene.ts - trace tick 1040 (battleScene.ts's own TICK0), the ground-truth trace's own window start. Ticks 1030-1039 are flat black either way (battleTransition's own exit-fade hold and battleScene's own pre-reveal hold render byte-identical solid black), so the exact handoff point within that range is inconsequential to pixels. */
@@ -974,6 +990,8 @@ export interface InitialEngineStateOptions {
   /** Session presentation seed (u32); absent = DEFAULT_PRESENTATION_RNG_SEED (docs/presentation-rng.md). */
   readonly presentationSeed?: number;
   readonly presentationRngPolicy?: PresentationRngPolicyId;
+  /** rc1: "skip" = black result holds instead of the Lobby after a round (resultHold.ts); absent / "walk" = the ROM's Lobby. */
+  readonly lobby?: "walk" | "skip";
 }
 
 type FactoryTerminalCommand =
@@ -1074,6 +1092,83 @@ function enterPrebattleEntry(
   };
 }
 
+/**
+ * rc1 (`lobby: "skip"`): the release of a round hold. The won Lobby's carry step (`advanceFactoryCarry`, as at its entry: streak + 7,
+ * symbols, BP, rents, heard speeches), then the next round's draft dealt at once from this tick's cursor, as a seeded "draft" mount
+ * deals its first one (`createChallengeState` in factorySession.ts; the pre-lbr-e chain did the same): no Lobby, no PreBattleRoom.
+ */
+function enterNextRoundDraft(
+  state: EngineState,
+  keyRepeat: KeyRepeatState,
+  rngValueBefore: number,
+): EngineState | null {
+  const orchestrator = state.factoryRoundBattleOrchestrator;
+  const outcome = orchestrator?.roundOutcome ?? null;
+  if (orchestrator === null || outcome === null) return null;
+  const nextCarry = advanceFactoryCarry(
+    state.factoryCarry,
+    true,
+    outcome,
+    orchestrator.facilityState.rentsCount,
+    orchestrator.facilityState.heardBrainSpeech,
+  );
+  const { generation, draftScreen } = generateFactoryChallengeDraft(nextCarry, rngValueBefore);
+  return {
+    ...state,
+    frame: state.frame + 1,
+    battle1OpponentConstructionRngValues: Object.freeze([]),
+    draftScreen,
+    keyRepeat,
+    summaryScreen: CLOSED_SUMMARY_SCREEN_STATE,
+    prebattleRoom: null,
+    battleRoom: null,
+    battleScene: null,
+    postwin: null,
+    battleSetup: null,
+    rngMode: "vblank",
+    rngValue: generation.rngValue,
+    battleControllerExecFlags: 0,
+    roundController: null,
+    stagedBattleTurn: null,
+    sceneOnPresentation: null,
+    factorySwap: null,
+    swapReturn: null,
+    factoryTerminal: null,
+    factoryRoundBattleOrchestrator: null,
+    lobbyFreeRoam: null,
+    lobbyNpcs: null,
+    lobbyAttendant: null,
+    attendantRequestHold: false,
+    lobbyStreakKept: false,
+    prebattleEntry: null,
+    factoryCarry: nextCarry,
+    pendingGeneratedRound: Object.freeze({ rngValueBefore, carry: nextCarry }),
+    resultHold: null,
+  };
+}
+
+/** rc1: one tick of a result hold (black, input ignored but a round hold's release). */
+function tickResultHold(state: EngineState, hold: ResultHoldState, newKeys: ReadonlySet<GbaButton>, keyRepeat: KeyRepeatState): EngineState {
+  const rngValue = advanceRngValue(state.rngValue);
+  if (releasesRoundHold(hold, newKeys)) {
+    const next = enterNextRoundDraft(state, keyRepeat, rngValue);
+    if (next !== null) {
+      playSelectSe(); // write-only: the press is heard, as at any box
+      return next;
+    }
+  }
+  return { ...state, frame: state.frame + 1, keyRepeat, rngMode: "vblank", rngValue, resultHold: advanceResultHold(hold) };
+}
+
+/**
+ * rc1: on a `lobbySkip` challenge, the tick at which a return span (or a RETIRE warp) has just turned black starts its result hold.
+ * `next` is the state the tick computed; the hold keeps it (the picture is drawn black from now on, nothing advances).
+ */
+function withResultHold(state: EngineState, next: EngineState, kind: ResultHoldState["kind"]): EngineState {
+  if (state.lobbySkip !== true || state.appRoute !== "generated-orchestrator") return next;
+  return { ...next, rngMode: "vblank", resultHold: createResultHold(kind) };
+}
+
 export function createInitialState(
   options: InitialEngineStateOptions = {},
 ): EngineState {
@@ -1111,6 +1206,7 @@ export function createInitialState(
     factoryCarry: createInitialFactoryCarry(ANCHOR_FACTORY_METADATA.playerTrainerId),
     pendingGeneratedRound: null,
     presentationRng: createPresentationRngSession(options.presentationSeed, options.presentationRngPolicy),
+    ...(options.lobby === "skip" ? { lobbySkip: true as const } : {}),
   };
 }
 
@@ -1180,6 +1276,7 @@ function lobbyTicksSinceEntry(
 
 function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): EngineState {
   const { newKeys, newAndRepeatedKeys, next: keyRepeat } = readKeys(buttons, state.keyRepeat);
+  if (state.resultHold) return tickResultHold(state, state.resultHold, newKeys, keyRepeat);
   let draftScreen = state.draftScreen;
   let summaryScreen = advanceSummaryScreen(state.summaryScreen);
   // main.c:366: frontier battles freeze the per-VBlank call. Postwin handles
@@ -1551,7 +1648,7 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
       lobbyNpcs = stepped.npcs;
       terminalRngValue = stepped.rngValue;
     }
-    return {
+    const terminalNext: EngineState = {
       ...state,
       factoryCarry: lobbyEntryCarry,
       lobbyNpcs,
@@ -1575,6 +1672,15 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
       rngMode: terminalRngSteps === 0 ? "frontierBattle" : "vblank",
       rngValue: terminalRngValue,
     };
+    // rc1 (`lobby: "skip"`): the return span's first black frame after a lost battle's fade, or its first one after a won round's battle
+    // room (and Noland's symbol scene), starts the result hold in place of the Lobby that would follow.
+    if (state.lobbySkip === true && terminalPostwin !== null && !holdSpan && lobbyFreeRoam === null) {
+      const age = postwinTailAge(terminalPostwin.elapsed, terminalPostwin.tailLead);
+      if (age >= (roundWon ? POSTWIN_SECOND_BLACK_AGE : POSTWIN_BATTLE_BLACK_AGE)) {
+        return withResultHold(state, terminalNext, roundWon ? "round" : "end");
+      }
+    }
+    return terminalNext;
   }
 
   if (state.sceneOnPresentation) {
@@ -2161,7 +2267,13 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
       postwin !== null &&
       nextPostwin.question?.kind === "retire" &&
       postwinQuestionYesDelay(nextPostwin) === POSTWIN_RETIRE_FADE_IN_DELAY;
-    return {
+    // rc1 (`lobby: "skip"`): the RETIRE warp's first black frame starts the end hold in place of the Lobby's LostChallenge script.
+    const retireBlack =
+      state.lobbySkip === true &&
+      postwin !== null &&
+      nextPostwin.question?.kind === "retire" &&
+      postwinQuestionYesDelay(nextPostwin) >= POSTWIN_RETIRE_BLACK_AGE_DELAY;
+    const postwinNext: EngineState = {
       ...state,
       frame: state.frame + 1,
       draftScreen,
@@ -2195,6 +2307,7 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
           }
         : state.factoryTerminal,
     };
+    return retireBlack ? withResultHold(state, postwinNext, "end") : postwinNext;
   }
 
   if (battleScene) {
@@ -4500,6 +4613,8 @@ function renderPrebattleEntryState(state: EngineState): Uint8Array {
 }
 
 export function render(state: EngineState): Uint8Array {
+  // rc1: a result hold is black (the host draws its card over it).
+  if (state.resultHold) return blackFrame();
   // pic3: a generated Factory round (an orchestrator, or a pending generated round before its first battle) draws only from its live
   // record; a canonical sample-battle helper reached from here throws (drawRecord.ts). The anchor round before its first battle is the
   // canonical sample battle itself and stays outside.
