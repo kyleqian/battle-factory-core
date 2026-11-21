@@ -6537,11 +6537,13 @@ const PLAIN_BODY_SOUND_LEAD_MIN_L = 4;
 const MOVE_BODY_SOUND_CLOCK_LEAD = 7;
 function usedMovePrintLeadU(state: BattleResolutionPresentationState, handoff: BattleResolutionConfirmHandoff): number | null {
   if (handoff.forced !== undefined || handoff.focusPunchPrePass === true) return null;
-  const segment = state.segments[state.segmentIndex];
+  // chg1's continuation segment and charge-turn box were measured in Scene OFF only (pixel labs); Scene ON keeps hcr2's first-segment USEDMOVE rule.
+  const sceneOff = sceneOffOf(state);
+  const segment = sceneOff ? state.segments[state.segmentIndex] : state.segments[0];
   if (segment === undefined || state.sourceDecision.kind !== "use-move") return null;
   const first = segment.events[0];
   if (first === undefined || first.payload.kind !== "message") return null;
-  const chargeBox = first.payload.messageId === "STRINGID_EMPTYSTRING3" && first.provenance?.sourceLabel === CHARGE_TURN_SCRIPT;
+  const chargeBox = sceneOff && first.payload.messageId === "STRINGID_EMPTYSTRING3" && first.provenance?.sourceLabel === CHARGE_TURN_SCRIPT;
   if (first.payload.messageId !== "STRINGID_USEDMOVE" && !chargeBox) return null;
   const u = first.provenance?.instructionExecution;
   return u === undefined || u < USED_MOVE_LEAD_MIN_U || u > USED_MOVE_LEAD_MAX_U ? null : u;
