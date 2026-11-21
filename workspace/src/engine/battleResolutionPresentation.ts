@@ -1714,6 +1714,28 @@ function heldItemEffectExecutionsAndLead(
     : { executions: execution - previous, lead: HELD_ITEM_EFFECT_CONTINUE_LEAD_FRAMES };
 }
 /**
+ * hie5 (ROM labs hie5-{yawn,curse,swordsdance}-foe-on): an item script that restarts after a move script whose last print is followed by MoveEnd
+ * (`printstring`, `waitmessage`, T more script rows, MoveEnd; Yawn / Curse / Swords Dance T = 1, Recoil T = 3) starts its animation at MoveEnd + 11 rows,
+ * so the controller lead is HELD_ITEM_EFFECT_AFTER_PRINT_LEAD_FRAMES + T (the engine's command starts 2 frames after the print's wait ends). The 15-row
+ * restart lead fitted a hit's tail (hp update, no print). T is the kernel's execution count from the print to MoveEnd less the waitmessage's frames + 2.
+ * Null when the event before the animation is not a print followed by MoveEnd receipts. Scene ON only (the caller).
+ */
+export const HELD_ITEM_EFFECT_AFTER_PRINT_LEAD_FRAMES = 9;
+function heldItemEffectAfterPrintLead(events: readonly BattleKernelSemanticEvent[], index: number): number | null {
+  let print = index - 1;
+  while (print >= 0 && events[print]!.provenance?.sourceLabel === "BattleScript_MoveEnd") print -= 1;
+  if (print < 0 || print === index - 1 || events[print]!.payload.kind !== "message") return null;
+  const programCounter = events[print]!.provenance?.programCounter;
+  const printExecution = events[print]!.provenance?.instructionExecution;
+  const moveEndExecution = events[print + 1]!.provenance?.instructionExecution;
+  if (programCounter === undefined || printExecution === undefined || moveEndExecution === undefined) return null;
+  const wait = BATTLE_SCRIPT_PROGRAM.instructions[programCounter + 1];
+  if (wait?.opcodeName !== "B_SCR_OP_WAITMESSAGE") return null;
+  const waitFrames = WAIT_TIME_FRAMES[wait.operands[0]?.expression ?? ""];
+  if (waitFrames === undefined) return null;
+  return HELD_ITEM_EFFECT_AFTER_PRINT_LEAD_FRAMES + moveEndExecution - printExecution - waitFrames - 2;
+}
+/**
  * hie1: Scene OFF's presented hold for an item print whose source is `playanimation ..., B_ANIM_HELD_ITEM_EFFECT` right before it
  * (battle_script_commands.c:4014-4018 -> BattleScript_Pausex20, `pause B_WAIT_TIME_SHORT` = 32 frames). Every instruction from the
  * previous receipt to the print runs once per frame (the pause's own blocked retries included), so the hold is that execution count
@@ -5798,7 +5820,8 @@ export function projectBattleResolutionCommands(
         payload.battler ?? -1,
         "held-item effect animation",
       );
-      const { lead } = heldItemEffectExecutionsAndLead(events, index);
+      const { lead: baseLead } = heldItemEffectExecutionsAndLead(events, index);
+      const lead = baseLead === HELD_ITEM_EFFECT_RESTART_LEAD_FRAMES ? heldItemEffectAfterPrintLead(events, index) ?? baseLead : baseLead;
       heldItemEffects.push({
         at: commands.length, battler: pendingHeldItemEffectBattler, sequence: event.sequence,
         frames: HELD_ITEM_EFFECT_COMMAND_FRAMES + lead,
