@@ -28,6 +28,11 @@ node --experimental-strip-types --no-warnings tools/frame-catcher/makeTrace.mjs 
 ```
 
 `t5.lines.txt` next to it holds the battle text, to pick traces that show what you want (faints, Protect, berries, weather, ...).
+
+Pick rounds: `pickTraces.py make` plays many seeds on the engine alone (about a second a round; `--battles 21 --lobby-tail 120`
+reaches rounds 2 and 3, whose rental pools hold most of the moves round 1 never deals), and `pickTraces.py pick --seen DIRS` keeps the
+traces that together show the most moves, held items and abilities not in the `.lines.txt` of earlier sweeps (a move counts fully only
+in Scene ON, where it is drawn). fcm1 (`docs/fcm1-catcher-sweep.md`) picked 32 of 1,200 this way.
 For round 2 and later, play on through the Lobby and stop a little into it after the last wanted battle (fcr2,
 `docs/fcr2-catcher-round2.md`): `--policy winning-swap --battles 14 --lobby-tail 120 --max-frames 260000` (21 reaches the Factory Head when
 the seed wins that far; seed 2 Scene OFF does).
