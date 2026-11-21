@@ -411,6 +411,84 @@ console.log(JSON.stringify({ out, noModule: em.attendantMenuOf(st, null) }));
                                       "overwrite:field.yesno:0"])
         self.assertIsNone(got["noModule"])
 
+    REASK_SCRIPT = """
+const pw = await import(%r);
+const em = await import(%r);
+em.setQuestionWindowVisible(pw.postwinQuestionWindowVisible);
+const route = process.argv.at(-1);
+// The postwin's own order (core.ts): advancePostwin, then this tick's press. The test player presses at the first frame each
+// box or menu takes it: the heal message, DOWN to RECORD (or three times to RETIRE), A, then the question's answer (A on NO, B, or
+// UP + A on YES and A on "battle was recorded"), then A on the GO ON menu asked again, on its first frame.
+function run(settled) {
+  em.setQuestionTextSettled(settled ? (s) => pw.postwinQuestionVisibleChars(s) >= pw.POSTWIN_QUESTION_TEXT_TOTAL[s.question.kind] : null);
+  em.setReaskTextSettled(settled ? pw.postwinQuestionReprintSettled : null);
+  let s = pw.createPostwinState();
+  const menus = [[0, null, null]], buttons = [];
+  let last = null, downs = route === "retire" ? 3 : 1, answered = false, up = route === "yes";
+  for (let f = 1; f < 2000; f += 1) {
+    let n = pw.advancePostwin(s), b = "";
+    if (n.healDismissElapsed === null) {
+      if (pw.postwinHealInputReady(n.elapsed)) { b = "A"; n = pw.acceptPostwinHealDismiss(n); }
+    } else if (n.question && n.questionDismissElapsed === null && n.questionYesElapsed === null) {
+      if (n.elapsed >= pw.postwinQuestionInputReadyAge(n)) {
+        if (up) { b = "UP"; n = pw.movePostwinQuestionCursor(n, -1); up = false; }
+        else if (route === "b") { b = "B"; n = pw.acceptPostwinQuestionDismiss(n); answered = true; }
+        else { b = "A"; n = n.questionCursorPos === 0 ? pw.acceptPostwinQuestionYes(n) : pw.acceptPostwinQuestionDismiss(n); answered = true; }
+      }
+    } else if (n.question && n.questionYesElapsed !== null && n.recordedMessageDismissElapsed === null) {
+      if (pw.postwinRecordedInputReady(n)) { b = "A"; n = pw.acceptPostwinRecordedMessageDismiss(n); }
+    } else if (!n.question && pw.postwinContinuationInputReady(n) && n.dialoguePage === 0) {
+      if (downs > 0 && !answered) { b = "DOWN"; n = pw.movePostwinContinuationCursor(n, 1); downs -= 1; }
+      else { b = "A"; n = pw.acceptPostwinContinuation(n); }
+    }
+    s = n;
+    buttons.push([f, b]);
+    const m = em.menuOf({ postwin: s });
+    const key = m === null ? null : `${m.kind}|${m.sig}`;
+    if (key !== last) { menus.push([f, m && m.kind, m && m.sig]); last = key; }
+    if (s.dialoguePage === 1) return { frames: f + 5, menus, buttons, goOnFrame: s.continuationConfirmElapsed !== null ? f : null };
+  }
+  return null;
+}
+console.log(JSON.stringify({ fixed: run(true), old: run(false) }));
+"""
+
+    def reask_run(self, route):
+        import json
+        import subprocess
+        ws = Path(__file__).resolve().parents[1]
+        script = self.REASK_SCRIPT % (str(ws / "src/engine/postwin.ts"), str(ws / "tools/frame-catcher/engineMenus.mjs"))
+        r = subprocess.run(["node", "--experimental-strip-types", "--no-warnings", "--input-type=module", "-e", script, route],
+                           capture_output=True, text=True, cwd=ws)
+        self.assertEqual(r.returncode, 0, r.stderr)
+        return json.loads(r.stdout.strip().splitlines()[-1])
+
+    def test_the_question_and_the_go_on_menu_asked_again_are_menus_before_their_first_press(self):
+        # fcm1 open item 2 (s89-off-ws): RECORD -> NO, then A on the first frame the GO ON menu asked again takes input. The game draws
+        # that menu (and the question's YES/NO) on the frame it takes input, so a press on that frame left no frame with the menu waiting:
+        # no anchor, and the ROM's menu was unplanned. Since lbb1 each is a menu from the frame its text is fully printed; here every
+        # press comes on the first frame the game takes it, for NO, B, YES ("battle was recorded", then the 3-entry menu) and RETIRE -> NO.
+        answers = {"no": [("A", True)], "b": [("B", True)], "yes": [("UP", False), ("A", True)], "retire": [("A", True)]}
+        for route, answer in answers.items():
+            with self.subTest(route=route):
+                got = self.reask_run(route)
+                fixed, old = got["fixed"], got["old"]
+                self.assertIsNotNone(fixed["goOnFrame"])
+                p = fc.Plan({"frames": fixed["frames"], "menus": fixed["menus"], "buttons": fixed["buttons"]})
+                kinds = [(a["kind"], a["sig"]) for a in p.anchors]
+                self.assertEqual(kinds, [("field.multichoice", "0"), ("field.multichoice", "q1"), ("field.multichoice", "0")])
+                question, reask = p.anchors[1], p.anchors[2]
+                self.assertEqual([(e["buttons"], e["leaves"]) for e in question["effects"]], answer)
+                self.assertGreater(question["effects"][-1]["offset"], 0)
+                self.assertEqual([(e["buttons"], e["leaves"]) for e in reask["effects"]], [("A", True)])
+                self.assertEqual(reask["effects"][0]["engineFrame"], fixed["goOnFrame"])
+                self.assertGreater(reask["effects"][0]["offset"], 0)
+                # without the game's predicates (an older build) the menu asked again had no anchor, nor the question when its first press
+                # left it (on YES the first press is UP, which keeps the question: its anchor starts there, without the UP)
+                old_plan = fc.Plan({"frames": old["frames"], "menus": old["menus"], "buttons": old["buttons"]})
+                self.assertEqual([(a["kind"], a["sig"]) for a in old_plan.anchors],
+                                 [("field.multichoice", "0")] + ([("field.multichoice", "q0")] if route == "yes" else []))
+
 
 class MonRecordTest(unittest.TestCase):
     """mons.with_personality: a select-screen rental re-stored with the engine's personality (romRun.patch_select_mons). Seed 6's GROWLITHE

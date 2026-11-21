@@ -30,10 +30,15 @@ const { FactorySession } = await import(`${GAME}/src/factorySession.ts`);
 const { render } = await import(`${GAME}/src/engine/core.ts`);
 const { installBundledMonPicPixels } = await import(`${GAME}/src/engine/monPicPixelsInstall.ts`);
 installBundledMonPicPixels();
-const { menuOf, surfaceOf, setQuestionWindowVisible, setTerminalRecordMenuDrawn, setAttendantModule } = await import(path.join(here, "engineMenus.mjs"));
+const { menuOf, surfaceOf, setQuestionWindowVisible, setQuestionTextSettled, setReaskTextSettled, setTerminalRecordMenuDrawn, setAttendantModule } =
+  await import(path.join(here, "engineMenus.mjs"));
 {
   const postwin = await import(`${GAME}/src/engine/postwin.ts`).catch(() => ({}));
   if (postwin.postwinQuestionWindowVisible) setQuestionWindowVisible(postwin.postwinQuestionWindowVisible);
+  if (postwin.postwinQuestionVisibleChars && postwin.POSTWIN_QUESTION_TEXT_TOTAL) {
+    setQuestionTextSettled((pw) => postwin.postwinQuestionVisibleChars(pw) >= postwin.POSTWIN_QUESTION_TEXT_TOTAL[pw.question.kind]);
+  }
+  if (postwin.postwinQuestionReprintSettled) setReaskTextSettled(postwin.postwinQuestionReprintSettled);
   const terminal = await import(`${GAME}/src/engine/factoryTerminalPresentation.ts`).catch(() => ({}));
   if (terminal.factoryTerminalRecordMenuDrawn) setTerminalRecordMenuDrawn(terminal.factoryTerminalRecordMenuDrawn);
   const attendant = await import(`${GAME}/src/engine/factoryLobbyAttendant.ts`).catch(() => ({}));

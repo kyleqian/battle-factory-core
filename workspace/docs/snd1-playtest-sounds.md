@@ -51,7 +51,7 @@ Windows: `snd1-lbrb-{happy-a,info1,bcancel,levelb,saveno,saveb,savedlgno,overwri
 `tests/snd1LobbySounds.test.ts` requires every ROM sound after the loss terminal's first page on its frame.
 
 Found, not fixed (behaviour): the attendant's three-entry menus wrap the cursor (the ROM's do not, script_menu.c:143-146; the sound follows
-the ROM rule); "saved the game." waits for A where the ROM moves on after 60 frames; **no screen speeds text up on an A / B press**
+the ROM rule; fixed by lbb1, `docs/lbb1-lobby-b-press.md`); "saved the game." waits for A where the ROM moves on after 60 frames; **no screen speeds text up on an A / B press**
 (text.c:944-952 with `canABSpeedUpPrint`, set for field messages by menu.c:194 and for battle messages by battle_message.c:3016), so a player who
 mashes A reaches page waits later than on the ROM.
 

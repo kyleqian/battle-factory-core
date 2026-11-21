@@ -29,7 +29,7 @@ export interface FactoryTerminalRecordProfile {
    * the farewell prints 1 glyph/tick from `declineTextFirstDelay` (dense
    * 1-tick probe: edge+1 multichoice gone, edge+3 box clears, edge+4 first
    * glyph, 35-glyph line -> edge+38 last glyph, held edge+39+), the farewell
-   * message's own A dismiss is accepted from `declineInputDelay` (last
+   * message's own A or B dismiss is accepted from `declineInputDelay` (last
    * glyph + 1, the MSGBOX_DEFAULT waitmessage gate; the real second A lands
    * at edge+102), and the box stays fully drawn through the dismiss for
    * `declineReleaseClearDelay` ticks before closing into the free-roam Lobby
@@ -348,11 +348,11 @@ export interface FactoryTerminalLossPresentationState {
   /** Age the record menu's NO choice was stored -- the decline edge all
    *  EndRecordBattle clocks are relative to; null until the decline branch. */
   readonly declineFarewellReleaseAge: number | null;
-  /** Age the farewell message's own A dismiss is stored. */
+  /** Age the farewell message's own dismiss (A or B, WaitForAorBPress) is stored. */
   readonly declineDismissAge: number | null;
   /**
    * ISSUES #104: age the YES-only "battle was recorded" message's own A
-   * dismiss is stored; null for NO/cancel (never shown) and null for YES
+   * or B dismiss is stored; null for NO/cancel (never shown) and null for YES
    * until that message's dismiss (`declineFarewellReleaseAge` re-arms to
    * this same tick, so the shared farewell mechanics run from there).
    */
@@ -393,11 +393,11 @@ export interface FactoryTerminalRoundWonPresentationState {
   /** Age the record menu's NO choice was stored -- the decline edge all
    *  EndRecordBattle clocks are relative to; null until the decline branch. */
   readonly declineFarewellReleaseAge: number | null;
-  /** Age the farewell message's own A dismiss is stored. */
+  /** Age the farewell message's own dismiss (A or B, WaitForAorBPress) is stored. */
   readonly declineDismissAge: number | null;
   /**
    * ISSUES #104: age the YES-only "battle was recorded" message's own A
-   * dismiss is stored; null for NO/cancel (never shown) and null for YES
+   * or B dismiss is stored; null for NO/cancel (never shown) and null for YES
    * until that message's dismiss (`declineFarewellReleaseAge` re-arms to
    * this same tick, so the shared farewell mechanics run from there).
    */
@@ -640,7 +640,9 @@ function advanceFactoryTerminalLossPresentation(
   let firstPageReleaseAge = state.firstPageReleaseAge;
   let secondPageReleaseAge = state.secondPageReleaseAge;
   const atNextAge = { ...state, age };
-  if (input.pressedA && factoryTerminalPageInputReady(atNextAge)) {
+  // lbb1: pages 0 and 1 end in `\p` (Text_ReturnMonsSaveResults, BattleFrontier_BattleFactoryLobby/scripts.inc:370-375), whose wait is
+  // TextPrinterWaitWithDownArrow: JOY_NEW(A_BUTTON | B_BUTTON) (text.c:865-882), so B turns the page on the same frame A does.
+  if ((input.pressedA || input.pressedB) && factoryTerminalPageInputReady(atNextAge)) {
     if (firstPageReleaseAge === null) firstPageReleaseAge = age;
     else if (secondPageReleaseAge === null) secondPageReleaseAge = age;
   }
@@ -900,10 +902,15 @@ function advanceFactoryTerminalRecordPrompt<
   }
   const awaitingRecordSavedDismiss =
     recordChoice === "yes" && recordSavedDismissAge === null;
+  // lbb1: both boxes below are `msgbox ..., MSGBOX_DEFAULT` (BattleFrontier_BattleTowerLobby/scripts.inc:136 "battle was recorded",
+  // BattleFrontier_BattleFactoryLobby/scripts.inc:90 the farewell), whose `waitbuttonpress` is WaitForAorBPress (scrcmd.c:1323-1330):
+  // A or B, read on the same frame. Taking A only left the ROM's B close unmatched (fcm1 finding 8: the following DOWN presses walked
+  // the ROM's player off the counter while ours still showed the farewell).
+  const dismissPressed = input.pressedA === true || input.pressedB === true;
   if (
     awaitingRecordSavedDismiss &&
     declineFarewellReleaseAge !== null &&
-    input.pressedA &&
+    dismissPressed &&
     age >= declineFarewellReleaseAge + state.profile.recordSavedInputDelay
   ) {
     // Dismiss the YES-only "battle was recorded" message and re-arm
@@ -916,7 +923,7 @@ function advanceFactoryTerminalRecordPrompt<
     !awaitingRecordSavedDismiss &&
     declineFarewellReleaseAge !== null &&
     declineDismissAge === null &&
-    input.pressedA &&
+    dismissPressed &&
     age >= declineFarewellReleaseAge + state.profile.declineInputDelay
   ) {
     declineDismissAge = age;

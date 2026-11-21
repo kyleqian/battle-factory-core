@@ -334,8 +334,12 @@ function menuChoice(state: FactoryLobbyAttendantState, def: AttendantScreenDef, 
     return startScreen(state, screen, "menuChoice", lead, cursor);
   };
   if (input.up || input.down) {
+    // lbb1: none of the attendant's menus wraps: the three-entry multichoices run Menu_ProcessInputNoWrap (script_menu.c:143-146, tDoWrap
+    // only above three entries), MSGBOX_YESNO and the save dialog's YES/NO Menu_ProcessInputNoWrapClearOnChoose (menu.c): a press at an
+    // end leaves the cursor (and plays nothing, lobbySounds.ts).
     const delta = input.down ? 1 : -1;
-    const cursor = (state.cursor + delta + items.length) % items.length;
+    const cursor = Math.min(items.length - 1, Math.max(0, state.cursor + delta));
+    if (cursor === state.cursor) return state;
     if (def.menu !== "challenge") return Object.freeze({ ...state, pendingCursor: cursor });
     return Object.freeze({ ...state, cursor });
   }
