@@ -28,6 +28,8 @@ from pathlib import Path
 import numpy as np
 from PIL import Image, ImageDraw
 
+import timing  # the sound timing report (tdr1), this directory
+
 W, H, TILE = 240, 160, 8
 WINDOW_MIN = 150         # frames either side of the mapped point searched for a matching pixel
 WINDOW_FRACTION = 0.12
@@ -527,16 +529,23 @@ def main():
                 g.setdefault("first", [st["engine"][0] + f if key == "extra" else None, st["rom"][0] + f if key == "missing" else None, st["where"]])
     sound_diffs = sorted(({"direction": k[0], "kind": k[1], "id": k[2], "at": k[3], **v} for k, v in sgroups.items()), key=lambda x: -x["count"])
 
+    # how far each sound drifts from the ROM's (timing.py, docs/tdr1-catcher-timing-report.md)
+    names = songs()
+    last = stretches[-1]["engine"][1] if stretches else 0
+    sound_timing = timing.timing_report(stretches, eng_sounds, rom_sounds, eng.tl["buttons"], rom.tl.get("pressReplays"), steered,
+                                        lambda k: timing.sound_name(names, k), timing.battles_in(eng.tl, last))
+
     content = [s for s in stretches if s["class"] == "content"]
-    timing = [s for s in stretches if s["class"] == "timing"]
+    timing_only = [s for s in stretches if s["class"] == "timing"]
     identical = [s for s in stretches if s["class"] == "identical"]
     out = {"title": title, "engineFrames": e_end - 1, "romFrames": r_end - 1, "stretches": len(stretches), "content": len(content),
-           "timing": len(timing), "identical": len(identical), "pictureDifferences": diffs, "soundDifferences": sound_diffs,
+           "timing": len(timing_only), "identical": len(identical), "pictureDifferences": diffs, "soundDifferences": sound_diffs,
+           "soundTiming": sound_timing,
            "driver": {"anchors": [rom.tl["anchorsMatched"], rom.tl["anchorsTotal"]], "stop": rom.tl["stop"], "log": rom.tl["driverLog"],
                       "staging": rom.tl["staging"], "romSeconds": rom.tl.get("seconds")},
            "list": stretches}
     (run / "findings.json").write_text(json.dumps(out, indent=1))
-    write_report(run, out, songs())
+    write_report(run, out, names)
     eng.close()
     rom.close()
     if not keep:
@@ -544,8 +553,8 @@ def main():
             p = run / side / "frames.bin"
             if p.exists():
                 p.unlink()
-    print(f"{title}: {len(content)} content, {len(timing)} timing, {len(identical)} identical stretches; "
-          f"{len(diffs)} picture differences, {len(sound_diffs)} sound differences; report {run / 'report.md'}")
+    print(f"{title}: {len(content)} content, {len(timing_only)} timing, {len(identical)} identical stretches; "
+          f"{len(diffs)} picture differences, {len(sound_diffs)} sound differences; {timing.headline(sound_timing)}; report {run / 'report.md'}")
 
 
 def songs():
@@ -597,7 +606,8 @@ def write_report(run, out, names):
     for s in sd:
         what = "the ROM plays, ours does not" if s["direction"] == "missing" else "ours plays, the ROM does not"
         L.append(f"| {what} | {sound_name(names, s['kind'], s['id'])} | {s['at']} | {s['count']} | {', '.join(map(str, s['stretches'][:12]))}{' ...' if len(s['stretches']) > 12 else ''} | {s['first']} |")
-    L += ["", "## Stretches", "", "| stretch | where | starts at | engine frames | ROM frames | pictures | sounds |", "|---|---|---|---|---|---|---|"]
+    L += [""] + timing.report_lines(out["soundTiming"])
+    L += ["## Stretches", "", "| stretch | where | starts at | engine frames | ROM frames | pictures | sounds |", "|---|---|---|---|---|---|---|"]
     for s in out["list"]:
         L.append(f"| {s['index']} | {s['where']} | {s['startsAt'] or s['surface']} | {s['engine'][0]}-{s['engine'][1]} | {s['rom'][0]}-{s['rom'][1]} | "
                  f"{s['pictures']['class']} | {s['sounds']['class']} |")

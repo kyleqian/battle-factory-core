@@ -1,0 +1,50 @@
+{
+ "about": "tdr1 (docs/tdr1-catcher-timing-report.md): a hand-made frame catcher run for tools/frame-catcher/timing.py; tests/tdr1CatcherTimingReport.test.ts holds the worked answers",
+ "battles": 1,
+ "stretches": [
+  {"index": 0, "class": "skipped", "engine": [0, 100], "rom": [0, 110], "startsAt": "draft.cursor", "where": "draft"},
+  {"index": 1, "class": "timing", "engine": [100, 200], "rom": [110, 215], "startsAt": "battle.fight", "where": "battle 1"},
+  {"index": 2, "class": "timing", "engine": [200, 300], "rom": [215, 330], "startsAt": null, "surface": "battleRoom:walk", "where": "battle room before battle 2"}
+ ],
+ "engine": {
+  "sounds": [
+   [10, {"kind": "se", "id": 1}],
+   [100, {"kind": "se", "id": 5}],
+   [120, {"kind": "se", "id": 10}],
+   [121, {"kind": "pan", "id": 10, "pan": 63}],
+   [130, {"kind": "duck", "id": null, "volume": 85}],
+   [140, {"kind": "se", "id": 5}],
+   [150, {"kind": "se", "id": 11}],
+   [150, {"kind": "direct", "id": 11}],
+   [160, {"kind": "se", "id": 10}],
+   [170, {"kind": "cry", "id": 5}],
+   [175, {"kind": "stop", "player": "cry"}],
+   [180, {"kind": "se", "id": 99}],
+   [210, {"kind": "se", "id": 20}],
+   [230, {"kind": "se", "id": 5}],
+   [240, {"kind": "se", "id": 21}],
+   [260, {"kind": "se", "id": 5}],
+   [270, {"kind": "bgm", "id": 300}]
+  ],
+  "buttons": [[100, "A"], [102, ""], [140, "A"], [142, ""], [230, "A"], [232, ""], [245, "A"], [247, ""], [260, "A"], [262, ""]]
+ },
+ "rom": {
+  "sounds": [
+   [30, {"kind": "se", "id": 1}],
+   [110, {"kind": "se", "id": 5}],
+   [133, {"kind": "se", "id": 10}],
+   [152, {"kind": "se", "id": 5}],
+   [162, {"kind": "se", "id": 11}],
+   [175, {"kind": "se", "id": 10}],
+   [186, {"kind": "cry", "id": 5}],
+   [225, {"kind": "se", "id": 20}],
+   [228, {"kind": "se", "id": 5}],
+   [260, {"kind": "se", "id": 5}],
+   [272, {"kind": "se", "id": 21}],
+   [300, {"kind": "se", "id": 5}],
+   [312, {"kind": "bgm", "id": 300}]
+  ],
+  "skip": [8],
+  "pressReplays": [[110, 100], [152, 140], [228, "steer"], [245, 230], [260, 245], [275, 260], [300, "rescue"]]
+ }
+}

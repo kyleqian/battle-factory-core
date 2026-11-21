@@ -103,6 +103,9 @@ class DriverTest(unittest.TestCase):
         self.assertIn(["A"], presses[closed + 1:])
         self.assertEqual(d.ai, 1)
         self.assertFalse([n for n in notes if n[0] == "cursor-differs-before-press"])
+        # tdr1: every press started is logged with the engine press it replays (the engine's onset frame), for the timing report: the
+        # free A 11 frames after the menu (ours: menu over at 19, A at 30; the ROM's menu over at 26, A at 37)
+        self.assertEqual(d.replays, [[first_down, 14], [first_a, 18], [closed + 11, 30]])
 
     def test_steers_a_cursor_that_is_elsewhere_before_the_choice(self):
         eng = engine(30, [[0, None, None], [5, "battle.party", "0"], [8, "battle.party", "1"], [10, "battle.party", "2"],

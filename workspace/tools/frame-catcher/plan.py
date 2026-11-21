@@ -168,11 +168,16 @@ class Driver:
         self._unplanned = None
         self.steer_frames = []
         self.hold_free = False
+        # [ROM frame, engine frame of the press replayed | "steer" | "rescue"] for every press the driver starts (tdr1: the timing report
+        # tells a text box press the ROM took from the same press of ours from a later or an earlier one)
+        self.replays = []
 
-    def press(self, buttons, frames, f, free=False):
+    def press(self, buttons, frames, f, free=False, src=None):
         self.hold = [buttons.split("+") if buttons else [], frames]
         self.hold_free = free
         self.last_press = f
+        if src is not None:
+            self.replays.append([f, src])
 
     def step(self, f, menu, rom):
         kind = None if menu is None else menu[0]
@@ -272,7 +277,7 @@ class Driver:
                     return []
                 b["steers"] += 1
                 self.steer_frames.append(f)
-                self.press(d, self.TAP, f)
+                self.press(d, self.TAP, f, src="steer")
                 return self.hold[0]
             if d is not None:
                 self.note("steer-failed", anchor=b["index"], kind=a["kind"], rom=menu[1], engine=e["from"])
@@ -281,14 +286,14 @@ class Driver:
             # cursor: the ROM sig is "?", so opening move select looked like nothing and was pressed six times): made once
             b["i"] += 1
             b["pressed"], b["tries"] = None, 0
-            self.press(e["buttons"], self.TAP, f)
+            self.press(e["buttons"], self.TAP, f, src=a["start"] + e["offset"])
             return self.hold[0]
         b["sigBefore"] = menu[1]
         b["pressed"] = f
         b["tries"] += 1
         if e["leaves"] and a["kind"] == "field.multichoice" and b["tries"] == 1:
             self.just_answered = "field.multichoice"
-        self.press(e["buttons"], self.TAP, f)
+        self.press(e["buttons"], self.TAP, f, src=a["start"] + e["offset"])
         return self.hold[0]
 
     def free_step(self, f):
@@ -298,7 +303,7 @@ class Driver:
         if self.free_i < len(frees) and f - self.gap_start >= frees[self.free_i]["offset"]:
             e = frees[self.free_i]
             self.free_i += 1
-            self.press(e["buttons"], max(1, e["frames"] - 1), f, free=True)
+            self.press(e["buttons"], max(1, e["frames"] - 1), f, free=True, src=e["engineFrame"])
             return self.hold[0]
         # rescue: the ROM waits somewhere the engine's presses did not reach (a text that waits for A)
         next_start = self.p.anchors[self.ai]["start"] if self.ai < len(self.p.anchors) else self.p.n
@@ -307,7 +312,7 @@ class Driver:
         if self.ai < len(self.p.anchors) and f - self.gap_start > engine_gap + self.RESCUE_AFTER and f - self.last_press > 60:
             self.rescues += 1
             self.note("rescue-a", gapIndex=self.gap_index, romFramesInGap=f - self.gap_start, engineGap=engine_gap)
-            self.press("A", 2, f)
+            self.press("A", 2, f, src="rescue")
             return self.hold[0]
         return []
 

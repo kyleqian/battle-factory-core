@@ -511,9 +511,10 @@ def run(engine_dir, out_dir, profile, max_frames):
         f = o.frame
         if watch is not None:
             # hit1: CATCHER_WATCH=1 logs, on each change, gAnimScriptActive, gAnimVisualTaskCount, the SE1 / SE2 player status (IsSEPlaying,
-            # sound.c:606-613) and gBattlescriptCurrInstr after the frame (rom/watch.json: [frame, active, visual tasks, SE1, SE2, instr]).
+            # sound.c:606-613) and gBattlescriptCurrInstr after the frame (rom/watch.json: [frame, active, visual tasks, SE1, SE2, instr]);
+            # tdr1 adds gBattleMainFunc and gBattleControllerExecFlags (where a battle's end spends its frames).
             row = [rom.u8(s["gAnimScriptActive"]), rom.u8(s["gAnimVisualTaskCount"]), rom.u32(s["gMPlayInfo_SE1"] + 4), rom.u32(s["gMPlayInfo_SE2"] + 4),
-                   rom.u32(s["gBattlescriptCurrInstr"])]
+                   rom.u32(s["gBattlescriptCurrInstr"]), rom.u32(s["gBattleMainFunc"]), rom.u32(s["gBattleControllerExecFlags"])]
             if row != watch_last:
                 watch.append([f, *row])
                 watch_last = row
@@ -627,7 +628,7 @@ def run(engine_dir, out_dir, profile, max_frames):
     result = {"side": "rom", "profile": profile, "frames": o.frame, "engineFrames": eng["frames"], "seconds": round(time.time() - t0, 1),
               "sound": {"fast": sound.fast, "restepped": sound.restepped}, "staging": staging, "driverLog": log,
               "anchorsMatched": driver.ai, "anchorsTotal": len(plan.anchors), "anchorBinds": driver.binds, "stop": driver.stop_reason,
-              "steerFrames": driver.steer_frames, "actionMenuStates": action_states, "rounds": rom_round + 1, "battleNumberBlips": len(rounds_seen.blips),
+              "steerFrames": driver.steer_frames, "pressReplays": driver.replays, "actionMenuStates": action_states, "rounds": rom_round + 1, "battleNumberBlips": len(rounds_seen.blips),
               "deals": [{k: v for k, v in d.items() if k not in ("want", "first", "idsBefore")} for d in deals.values()],
               "sounds": sounds, "menus": menus, "buttons": buttons_rle}
     (out / "timeline.json").write_text(json.dumps(result))
