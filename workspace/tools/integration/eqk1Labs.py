@@ -36,3 +36,25 @@ def struggle():
     json.dump(lab, open(os.path.join(root, "tools/battle-lab/eqk1-struggle.json"), "w"))
     print("eqk1-struggle")
 struggle()
+
+def immune():
+    """Earthquake into a Flying foe (the s1914 decision-10 shape: no effect, then the foe's Drill Peck): the player's Lv100 Rattata vs a Lv30 Pidgey using Drill Peck."""
+    lab = json.loads(json.dumps(tpl))
+    lab["profile"] = "battle-scene-on"
+    lab["overrides"]["parties"]["player"][0] = mon(19, 100, 89)
+    lab["overrides"]["parties"]["opponent"][0] = mon(16, 30, 65)
+    lab["trace"]["segments"][3]["frames"] = 900
+    json.dump(lab, open(os.path.join(root, "tools/battle-lab/eqk1-eq-imm.json"), "w"))
+    print("eqk1-eq-imm")
+immune()
+
+def immune_single():
+    """The single-target twin of eq-imm: the player's Lv100 Rattata Tackles a Lv30 Gastly (no effect), then the foe answers with Tackle."""
+    lab = json.loads(json.dumps(tpl))
+    lab["profile"] = "battle-scene-on"
+    lab["overrides"]["parties"]["player"][0] = mon(19, 100, 33)
+    lab["overrides"]["parties"]["opponent"][0] = mon(92, 30, 33)
+    lab["trace"]["segments"][3]["frames"] = 900
+    json.dump(lab, open(os.path.join(root, "tools/battle-lab/eqk1-tackle-imm.json"), "w"))
+    print("eqk1-tackle-imm")
+immune_single()

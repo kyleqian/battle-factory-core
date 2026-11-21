@@ -1703,6 +1703,16 @@ function sourcePauseUsedMoveHoldFrames(
       // 1793-1797): the failed set* / protect-like / stockpile / setseeded print.
       if (NO_EFFECT_ATTACKANIMATION_HOLD_PCS.has(programCounter - back)) return next - used + 1;
     }
+    // eqk1 (s1914 seg21, labs eqk1-eq-imm / eqk1-tackle-imm): a damaging move's `resultmessage` ("It doesn't affect X!") reached with no
+    // animation receipt took the same NO_EFFECT branch (Pausex20 in both scenes) at the `attackanimation` 9 instructions back, behind
+    // waitanimation .. datahpupdate .. critmessage .. waitmessage that run without a receipt: the print comes one row per execution later.
+    if (candidate.provenance!.opcodeName === "B_SCR_OP_RESULTMESSAGE" && candidate.payload.messageId === "STRINGID_ITDOESNTAFFECT") {
+      for (let back = 1; back <= 12 && programCounter - back >= 0; back += 1) {
+        const opcode = BATTLE_SCRIPT_PROGRAM.instructions[programCounter - back]?.opcodeName;
+        if (opcode === "B_SCR_OP_ATTACKANIMATION") return next - used + 1;
+        if (opcode === undefined || opcode === "B_SCR_OP_GOTO" || opcode === "B_SCR_OP_END" || opcode === "B_SCR_OP_RETURN") break;
+      }
+    }
     return null;
   }
   return null;
