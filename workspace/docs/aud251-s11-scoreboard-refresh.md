@@ -1897,7 +1897,7 @@ Scene ON only. Scene OFF is untouched (T2 OFF byte-identical: 600 exact / 533 of
 | aud242k-lovelykiss-player | 2 / 4 | 4 / 4 | aud260-willowisp-player | 18 / 23 | 19 / 23 |
 | aud242k-wish-player (lead-only, out of scope) | 0 / 8 | 0 / 8 | | | |
 
-Per-body r (ROM next - engine next) is 0 for all 11 bodies. Left over: Thunder Wave 1 row (the engine's extra rows are not ROM rows), Stun Spore 1, Glare 1, Brick Break 2 (frames 1369 / 1570 = -2 / -7, a later turn's body), Will-O-Wisp 4 (the later turn's rows, -4).
+Per-body r (ROM next - engine next) is 0 for all 11 bodies. Left over (not analysed further): Thunder Wave 1 row, Stun Spore 1, Glare 1, Brick Break 2 (frames 1369 / 1570, -2 / -7), Will-O-Wisp 4 (frames 499 / 619 / 637 / 690, all -4).
 
 **T2 rescore** (25 ON + 24 OFF seeds over `.integration/evidence/t2n`, `tools/audio/rescoreAll.sh` into `.integration/evidence/b4l/t2-{base,after}`, `soundScoreboard.py`):
 
@@ -1909,7 +1909,7 @@ Per-body r (ROM next - engine next) is 0 for all 11 bodies. Left over: Thunder W
 
 move-animation SE family ON: 2,005 -> 2,110 exact, mass 19,810 -> 17,571. Status SEs after the body: SE 197 -39 %, SE 176 -45 %, SE 212 -73 % of their mass, none worse.
 
-**Census 0..199 both scenes** (`lsd194Census.sh`, base 5fbac1476 vs HEAD d652fc667, JOBS 2, SPLIT 2): `rst197CensusDelta.py --digest` eventsDigest + error identical 200 / 200 on ON (122 battles have changed presentation commands, 0 type-sequence changes) and 200 / 200 on OFF (byte-identical). No gameplay / RNG change. T1 (`soundCensusDelta.py --t1`): ON exact 53,965 -> 54,127, known-offset 197 -> 35 (Will-O-Wisp +1 x162 gone; left: Substitute -7 x33, Transform -5 x2, both non-B4), missing 0, extra 0, unclassified 13 -> 13 (unchanged); OFF unchanged (extra 35 is the OFF arm's note-free SEs in a scene with no move-animation SEs, same on both arms).
+**Census 0..199 both scenes** (`lsd194Census.sh`, base 5fbac1476 vs HEAD d652fc667, JOBS 2, SPLIT 2): `rst197CensusDelta.py --digest` eventsDigest + error identical 200 / 200 on ON (122 battles have changed presentation commands, 0 type-sequence changes) and 200 / 200 on OFF (byte-identical). No gameplay / RNG change. T1 (`soundCensusDelta.py --t1`): ON exact 53,965 -> 54,127, known-offset 197 -> 35 (Will-O-Wisp +1 x162 gone; left: Substitute -7 x33, Transform -5 x2, both non-B4), missing 0, extra 0, unclassified 13 -> 13 (unchanged); OFF identical on both arms (0 exact, 35 extra, 13 unclassified; the OFF arm is not what T1 scores, cause not examined).
 
 **Pins re-pinned toward the ROM** (commit d652fc667): ais2 ON window 3826..4076 / romFrameOffset 55 -> 3835..4085 / 46 (same ROM frames, the engine 9 later; md5 match 0 bad at the +9 shift); hie3 cheri command start 740 -> 749, drift 11 -> 2; aud260 Brick Break / Glare constant offset 2 -> 0; aud242r Curse deltas +1 -> 0. No pin moved away from the ROM; none left red.
 
