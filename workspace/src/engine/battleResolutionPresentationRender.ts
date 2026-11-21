@@ -1703,24 +1703,53 @@ export function liveMoveSourceAge(
   // aud260: the age of the command's last presenting row (the command completes when phaseElapsed + 1 >= its duration), for the sound-only tail past the window.
   const duration = battleResolutionCommandDuration(withoutBodyLead(command), field, liveMoveTimingBodyOf(state.liveMoveSpriteOrderInput), state.liveMoveBattlerX2Input?.moveUse);
   const lastAge = duration - 1 - seGate - pre - soundShift;
+  // snd3: Sing's geometry-derived ROM body (gAnimScriptActive rise .. first inactive row, liveSingBodyRows), read only by the quiet-BGM restore row.
+  const request = command.animation;
+  const singBodyRows = (): number | null => liveSingBodyRows(request, field);
+  return Object.freeze({ request, age, lastAge, ...moveSourceFieldInputs(request, field), singBodyRows });
+}
+
+/** The live battler geometry the sound timing table's variants read (picY / topY grids, elevation, Water Spout's HP quarter) and the attacker's species. */
+function moveSourceFieldInputs(request: BattleMoveAnimationRequest, field: BattleResolutionDisplayedField): Readonly<{
+  attackerSpecies: number; attackerElevation: number; attackerHpQuarter: number; picOffsetY: (battler: 0 | 1) => number; topY: (battler: 0 | 1) => number;
+}> {
   // aud242l: BATTLER_COORD_Y_PIC_OFFSET (GetBattlerSpriteFinal_Y(..., TRUE)) of the live battler, read only by the pic-dependent sprite lifetimes of the sound timing table.
   const picOffsetY = (battler: 0 | 1): number => liveBattlerAnchors(battler === 0 ? "player" : "opponent", createBattleCommandFieldArtView(field)).picOffsetPoint.y;
   // aud262: BATTLER_COORD_ATTR_TOP (GetBattlerSpriteCoordAttr, battle_anim_mons.c): the pic Y minus half the species' pic height (the Memento shadow tasks).
   const topY = (battler: 0 | 1): number => picOffsetY(battler) - Math.trunc(createBattleCommandFieldArtView(field)[battler === 0 ? "player" : "opponent"].coords.height / 2);
   // aud262: GetBattlerYCoordWithElevation reads the species (a Substitute doll does not hide it): the attacker's gEnemyMonElevation / sCastformElevations, 0 for the player.
-  const attackerSide = command.animation.attacker === 0 ? "player" : "opponent";
+  const attackerSide = request.attacker === 0 ? "player" : "opponent";
   const attackerArt = createBattleCommandFieldArtView(field)[attackerSide];
   const { substituteDoll: _doll, ...undolledArt } = attackerArt;
   const attackerElevation = battleCommandFieldArtElevation(undolledArt, attackerSide);
   // aud262: GetWaterSpoutPowerForAnim (battle_anim_water.c:1139-1170): maxhp / 4 (integer), the first i < 3 with hp < maxhp * (i + 1), else 3.
-  const attackerMon = fieldBattler(field, command.animation.attacker);
+  const attackerMon = fieldBattler(field, request.attacker);
   const quarterHp = Math.trunc(attackerMon.maxHP / 4);
   const attackerHpQuarter = [0, 1, 2].find((i) => attackerMon.hp < quarterHp * (i + 1)) ?? 3;
-  // snd3: Sing's geometry-derived ROM body (gAnimScriptActive rise .. first inactive row, liveSingBodyRows), read only by the quiet-BGM restore row.
-  const request = command.animation;
-  const singBodyRows = (): number | null => liveSingBodyRows(request, field);
-  return Object.freeze({ request, age, lastAge, attackerSpecies: attackerMon.species, attackerElevation, attackerHpQuarter, picOffsetY, topY, singBodyRows });
+  return { attackerSpecies: attackerMon.species, attackerElevation, attackerHpQuarter, picOffsetY, topY };
 }
+
+/**
+ * mvs1 (docs/mvs1-called-move-sounds.md): the rows from a move-animation command's first row to its ROM script row 0 past the seGate rows: the kernel
+ * instructions between the used print and `attackanimation` (the script lead) + 4. ROM (frame catcher fcm1 s89-on-wc, the mvs1 labs): Leech Life and
+ * Aeroblast (lead 5, row 9), Substitute (4: row 8), Transform (2: row 6), Will-O-Wisp (8: row 12). Null without a used print in front of the receipt.
+ */
+export const MOVE_SCRIPT_START_ROWS_AFTER_LEAD = 4;
+export function moveAnimationScriptStartRow(segment: BattleResolutionPresentationState["segments"][number], eventSequence: number): number | null {
+  const events = segment.events;
+  const index = events.findIndex((event) => event.sequence === eventSequence);
+  const animation = events[index]?.provenance?.instructionExecution;
+  if (index < 0 || animation === undefined) return null;
+  for (let i = index - 1; i >= 0; i -= 1) {
+    const payload = events[i]!.payload;
+    if (payload.kind !== "message" || payload.messageId !== "STRINGID_USEDMOVE") continue;
+    const used = events[i]!.provenance?.instructionExecution;
+    if (used === undefined || animation <= used) return null;
+    return animation - (used + 1) + MOVE_SCRIPT_START_ROWS_AFTER_LEAD;
+  }
+  return null;
+}
+
 
 const STATS_CHANGE_AFTER_BODY_AGE_SHIFT = 4;
 // lse2: after a lead-first lse2 body (Cosmic Power, Calm Mind) the stat SE sits 1 row later than the generic shift's (ROM - ours +1 in both labs).

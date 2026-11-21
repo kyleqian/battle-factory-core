@@ -69,13 +69,15 @@ describe("Glare (aud260)", () => {
 });
 
 // AnimWillOWispOrb (battle_anim_fire.c:1101-1164) lives 32 + |target X - x| ticks (x = the attacker's X plus the call-32 sine fold, the player's -4 / the opponent's +4 amplitude), so the first wait ends
-// 153 (player) / 152 (opponent) ticks after the first SE_M_EMBER and SE_M_FLAME_WHEEL2 follows. The orbs' own SE_M_FLAME_WHEEL rows (gAnimCustomPanning sweep) stay unmodelled: ROM-only rows.
+// 153 (player) / 152 (opponent) ticks after the first SE_M_EMBER and SE_M_FLAME_WHEEL2 follows. mvs1 (tests/mvs1CalledMoveSounds.test.ts): the orbs' own SE_M_FLAME_WHEEL rows
+// (gAnimCustomPanning sweep) are modelled, and the body's clock is the ROM script's (offset 0; it was 1 row early on the generic clock).
+const WILL_O_WISP_ORB_FRAMES = ["41:144", ...Array.from({ length: 13 }, (_, i) => `${91 + i}:144`), "105:144"];
 describe("Will-O-Wisp (aud260)", () => {
-  it("the table entry: EMBER 9 / 19, FLAME_WHEEL2 at 162 (player attacker) / 161 (opponent attacker), ungated", () => {
+  it("the table entry: EMBER 9 / 19, the orb's 15 FLAME_WHEELs, FLAME_WHEEL2 at 162 (player attacker) / 161 (opponent attacker), ungated", () => {
     expect(timing.moves[261]!.label).toBe("Move_WILL_O_WISP");
     expect(timing.moves[261]!.gated.every((g) => g === 0)).toBe(true);
-    expect(tableRows(261, 0)).toEqual(["9:151", "19:151", "162:145"]);
-    expect(tableRows(261, 1)).toEqual(["9:151", "19:151", "161:145"]);
+    expect(tableRows(261, 0)).toEqual(["9:151", "19:151", ...WILL_O_WISP_ORB_FRAMES, "162:145"]);
+    expect(tableRows(261, 1)).toEqual(["9:151", "19:151", ...WILL_O_WISP_ORB_FRAMES, "161:145"]);
   });
   for (const [side, gap] of [["player", 153], ["opponent", 152]] as const) {
     it(`aud260-willowisp-${side}: the EMBER / EMBER / FLAME_WHEEL2 ids, pans and the +10 / +${gap} gaps equal the ROM's, offset constant`, () => {
@@ -83,7 +85,7 @@ describe("Will-O-Wisp (aud260)", () => {
       const ids = [151, 145];
       const romRows = rom.events.filter((e) => e.kind === "se" && ids.includes(e.id as number));
       expect(romRows.map((e) => e.frame - romRows[0]!.frame)).toEqual([0, 10, gap]);
-      expect(expectConstantOffset(rom, ids, 3)).toBe(1);
+      expect(expectConstantOffset(rom, ids, 3)).toBe(0);
     });
   }
 });
