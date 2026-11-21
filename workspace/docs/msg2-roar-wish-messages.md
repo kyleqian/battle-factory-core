@@ -107,15 +107,16 @@ What does differ, measured on those 35 prints, plus the drag-ins followed by an 
 
 ## Tests
 
-`tests/msg2RoarWishMessages.test.ts` (12, Tier 1, census battles of `tests/helpers/btn1Battle.ts`):
+`tests/msg2RoarWishMessages.test.ts` (13, Tier 1, census battles of `tests/helpers/btn1Battle.ts`; on the combined tree):
 
 - WISH: the wisher is named on both sides and both paths: seed 39 (Foe ESPEON wished, DONPHAN's HP is full; both scenes), 41
   (WIGGLYTUFF / LAIRON), 100 (Foe XATU / Foe RAICHU regained health), 403 (XATU / GYARADOS); the event carries the substitution.
 - WishButFullHp: the 34-row row before "HP is full!" in both scenes (wish start -> HP-full start = glyphs + 64 + 34, the ROM's 127
   for 29 glyphs).
 - ROAR: the release tail 4; seed 95 (HITMONCHAN, both scenes) and seed 15 (Foe TORKOAL, the foe dragged out): press -> box clear
-  14 rows, the print and the frozen arrow up until then; presses at cursor ages -2, -1, 0, 6, 7, 8, 16: blank from the next row
-  exactly at -2, 7, 16, the press row still shows the print.
+  14 rows, the print and the frozen arrow up until then; fnt1's wait on this print: a press on G not taken, the arrow from G + 2,
+  a new phase every 9 frames; presses on wait frames 0, 1, 2, 8, 9, 10, 18: blank from the next frame exactly at 0, 9, 18, the press
+  frame still shows the print, the frozen arrow (age k - 1) otherwise.
 - Intimidate after a drag-in: seed 51 (SALAMENCE, both scenes): hold 41 + 9, stat row 3, press -> "INTIMIDATE cuts" 132 rows
   (the ROM's); seed 116 (Foe MASQUERAIN, the foe dragged out): the same commands (no ROM window for that side).
 
@@ -123,13 +124,17 @@ Re-pinned with the new values: `tests/btn2ReleaseTail.test.ts` (table 5 -> 4, Ro
 `tests/pau2ScriptPauses.test.ts` / `tests/pau3ScriptPauses.test.ts` (the anchorless label list gains WishButFullHp; SafeguardEnds' 42
 unchanged).
 
-Soak re-pin (separate commit): `tests/randomRoundSoak.test.ts` "(c) leaves full byte-identical", seed 1: frames 58,793 -> 58,798, same
-battle 3 / depth 2 / turn 19 / roundLost. Bisected: with the dragged-out tail back at 5 the old pin passes; undoing the WISH name, the
-WISH pause or the entry-script hold instead leaves 58,798.
+Soak re-pin (separate commits): `tests/randomRoundSoak.test.ts` "(c) leaves full byte-identical", seed 1. On msg2's own base: frames
+58,793 -> 58,798. On the combined tree (`trial-fix-20261121` e12015ff1 + msg2, after the merge): 58,758 (lbb1's) -> 58,763, same battle 3 /
+depth 2 / turn 19 / roundLost; with the dragged-out tail back at 5 the old pin passes on both; seed 0 (39,259) and the other 62 soak
+tests unmoved (64 / 64 pass, the seed-21 milestone pin 43,323 / 3,043 included).
 
-Checks on the branch tip: `NODE_OPTIONS=--max-old-space-size=8192 npx tsc -b` clean; the 288 test files that import the changed
-modules (or the census helper) 288 / 288 files, 2,566 tests passed (before the re-pins 3 failed: the two pau label pins and the soak
-pin); `npm run test:gate` 360 files / 2,832 tests passed. The 12 new tests fail on the base commit (6817b6a8c): 12 / 12.
+Checks on the branch tip (`trial-fix-20261121` 154a3eedc merged in): `NODE_OPTIONS=--max-old-space-size=8192 npx tsc -b` clean;
+`npm run test:gate` 360 files / 2,832 tests passed; the 292 test files that import the changed modules (or the census helper) plus the
+soak file: 2,622 passed, 1 failed: `tests/mvs1CalledMoveSounds.test.ts` "s36-off-ws battle 8: METRONOME -> SUBSTITUTE" ("seed 36 no longer
+reaches battle 8's called Substitute: re-pick the case"). It fails the same way on `trial-fix-20261121` 154a3eedc alone (checked in a clean
+worktree), so it comes from the trial's merges (fnt1 / lbb1 move the seeded test player's trajectory), not from msg2; not touched here
+(another engineer's finding). On msg2's own base the 12 new tests failed 12 / 12 on 6817b6a8c.
 
 ## Catcher before / after
 
@@ -154,6 +159,21 @@ stretches; #16, in 85; #55, a 4-frame blob in 4), s102-on-ws b4 (the forfeit YES
 b5; a party submenu blob; the swap picker, a known catcher limit), s118-off-wc b3 (#9 / #93 / #101, in hundreds of stretches). No run
 pressed on an arrow redraw row on our side, so change 2 is covered by the Tier-1 tests only. The ROM's MAGNETON print still waits 255
 frames in the after run: the catcher's press replay is unchanged (the SOLARBEAM charge turn still runs 16 frames later on the ROM).
+
+### On the combined tree
+
+Traces remade once more on `trial-fix-20261121` e12015ff1 + msg2 (`traces-merged/`; fnt1 and lbb1 move the test player's trajectory, so
+these are other rounds again) and run (`catcher-merged/`): s36-off-ws 108,808 frames, 176 / 363 stretches content / timing, 542 / 542
+menus; s89-on-wc 142,538, 203 / 269, 474 / 474; s118-off-wc 193,120, 340 / 514, 858 / 858; sounds: only the known draft YES / NO
+SE_SELECT (catcher limit). The cases, ours = ROM in each:
+
+- 5 dragged-out prints before the turn end (s36 FURRET, s89-on-wc OMANYTE x2, s118-off ANORITH x2): the arrow at L + 2, the box clear
+  at press + 14 on both sides; s118-off's second ANORITH (no press until L + 17 / L + 14) shows fnt1's phase on both: arrow at L + 2,
+  next phase at L + 11, frozen after the press.
+- s36 Intimidate drag-in: press -> print 133 on both; s118-off Trace drag-in: 45 on both.
+- s118-off Foe TOGETIC's wish, KOFFING in, HP full: the name, and 100 frames from the wish print to "HP is full!", on both.
+
+(The last merge, 154a3eedc, adds mvs1's sound changes only; the catcher ran on the build before it.)
 
 ## Still open (seen, not changed)
 
