@@ -539,7 +539,8 @@ export type BattleSpriteVisibilityTiming = Readonly<{
   minimumFrames: 1 | typeof FORCED_RETURN_TO_BALL_SEND_IN_GAP_FRAMES | typeof SCENE_OFF_BATON_PASS_RETURN_TO_BALL_PRINT_GAP_FRAMES
     | typeof LOSS_RECALL_TRAINER_SLIDE_GAP_FRAMES;
 }>;
-export type BattleTurnEndTiming = Readonly<{ minimumFrames: number }>;
+/** `blankTailFrames`: the last rows of the turn-end draw the cleared box (the release tail's box clear, msw2). */
+export type BattleTurnEndTiming = Readonly<{ minimumFrames: number; blankTailFrames?: number }>;
 /** `holdFrames`: rows after the slide settles before the next command (lrc1: the loss tail's printstring, LOSS_TRAINER_SLIDE_PRINT_GAP_FRAMES). */
 export type BattleTrainerSlideTiming = Readonly<{ minimumFrames: 38; holdFrames?: typeof LOSS_TRAINER_SLIDE_PRINT_GAP_FRAMES }>;
 
@@ -2883,12 +2884,12 @@ const TURN_END_TIMING = Object.freeze({ minimumFrames: 8 } as const);
  * script's `moveendall`, which the 8-row turn-end follows: the printer's release (resume on press + 3) plus the instructions the
  * script still runs, one row each.  Dragged out: 2 (press + 5); Substitute damaged: 7 (press + 10); Substitute faded: the instructions
  * after the 64-row `waitmessage` hold (4) + the 5 before it.  Only a print directly before the turn-end (the fade case has its own lead).
- * msg2: those counts start at the probe's press row P, but the engine's release row is P + 1 (the first advance that holds the
- * press): from it, dragged out's `moveendall` is 4 rows on.  ROM pictures agree: after the press the box clears 14 rows later
- * (fcm1 catcher, 33 / 33 Roar / Whirlwind prints before the turn-end, both scenes), the engine's cleared at 15 (btn2's open
- * "1 row late, 516 vs 515 on roar").  Substitute damaged / faded have the same count origin; left as measured (one catcher case,
- * Substitute damaged at 20 vs the ROM's 19, docs/msg2-roar-wish-messages.md).
+ * msw2: after a Substitute release the ROM clears the box one row before the totals below end (subhit lab 520 of a turn-end ending 521 and a
+ * menu on 527, faded 883 / 884 / 890, both scenes), so those two keep their totals and draw the last `RELEASE_TAIL_BLANK_ROWS` row cleared.
+ * Dragged out stays msg2's 4 (ROM catcher: clear press + 14 in 33 / 33, menu press + 20 in 20 of 35; the lab's 7-row gap before the menu is 5 to 8
+ * across catcher runs, so the roar lab's menu stays 1 row early).
  */
+export const RELEASE_TAIL_BLANK_ROWS = 1;
 export const RELEASE_TO_MOVEEND_ROWS: Readonly<Record<string, number>> = Object.freeze({
   STRINGID_PKMNWASDRAGGEDOUT: 4,
   STRINGID_SUBSTITUTEDAMAGED: 10,
@@ -2926,7 +2927,11 @@ export function turnEndTimingAfterRelease(
   if (printed?.type !== "message" || printed.promptGate !== true) return TURN_END_TIMING;
   const payload = events.find((event) => event.sequence === printed.eventSequence)?.payload;
   const rows = payload?.kind === "message" ? RELEASE_TO_MOVEEND_ROWS[payload.messageId] : undefined;
-  return rows === undefined ? TURN_END_TIMING : Object.freeze({ minimumFrames: TURN_END_TIMING.minimumFrames + rows });
+  return rows === undefined ? TURN_END_TIMING
+    : Object.freeze({
+      minimumFrames: TURN_END_TIMING.minimumFrames + rows,
+      ...(payload.messageId === "STRINGID_PKMNWASDRAGGEDOUT" ? {} : { blankTailFrames: RELEASE_TAIL_BLANK_ROWS }),
+    });
 }
 /**
  * ISSUES #73 rung B correction (2026-08-04): the prior port (53, from
@@ -6584,7 +6589,7 @@ export function projectBattleResolutionCommands(
   }
   const finalCommand = commands[commands.length - 1];
   if (entryScriptEndsSegment === 0 && finalCommand?.type === "turn-end") {
-    commands[commands.length - 1] = Object.freeze({ ...finalCommand, timing: Object.freeze({ minimumFrames: finalCommand.timing.minimumFrames - ENTRY_SCRIPT_PLAYER_TURN_END_TRIM_FRAMES }) });
+    commands[commands.length - 1] = Object.freeze({ ...finalCommand, timing: Object.freeze({ ...finalCommand.timing, minimumFrames: finalCommand.timing.minimumFrames - ENTRY_SCRIPT_PLAYER_TURN_END_TRIM_FRAMES }) });
   }
   applyHpHitTails(commands, hpLeadRows);
   return Object.freeze(commands);

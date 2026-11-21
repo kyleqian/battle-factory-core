@@ -1,8 +1,8 @@
 // btn2 (ISSUES #223; docs/subp1m-battle-text-pause.md "btn2"): the rows from a button gate's release to the script's `moveendall` (ROM
 // subp1m labs, both scenes), carried as extra turn-end rows after the print.  Fails without RELEASE_TO_MOVEEND_ROWS.
 import { describe, expect, it } from "vitest";
-import { PROMPT_SCROLL_ROWS, RELEASE_TO_MOVEEND_ROWS, messageCommandTypedRows, turnEndTimingAfterRelease } from "../src/engine/battleResolutionPresentation";
-import { GATE_ACCEPT_LEAD_ROWS, isBattleResolutionButtonMessageAcceptable, isBattleResolutionButtonMessageReady } from "../src/engine/battleResolutionPresentationRender";
+import { PROMPT_SCROLL_ROWS, RELEASE_TAIL_BLANK_ROWS, RELEASE_TO_MOVEEND_ROWS, messageCommandTypedRows, turnEndTimingAfterRelease } from "../src/engine/battleResolutionPresentation";
+import { createBattleResolutionPresentationRenderView, GATE_ACCEPT_LEAD_ROWS, isBattleResolutionButtonMessageAcceptable, isBattleResolutionButtonMessageReady } from "../src/engine/battleResolutionPresentationRender";
 import { currentMessage, playCensusBattleUntil, stopAtGatedMessage } from "./helpers/btn1Battle";
 
 const turnEndRowsAfter = (seed: number, scene: "on" | "off", messageId: string, piece: number): number | null => {
@@ -40,7 +40,10 @@ describe("btn2: release-to-moveendall rows (ROM, both scenes)", () => {
   it("the table rows extend the turn-end only for a gated print directly before it (Substitute damaged 18, faded 17, dragged out 12)", () => {
     for (const [id, minimumFrames] of [["STRINGID_SUBSTITUTEDAMAGED", 18], ["STRINGID_PKMNSUBSTITUTEFADED", 17], ["STRINGID_PKMNWASDRAGGEDOUT", 12]] as const) {
       const { commands, events } = printed(id, true);
-      expect(turnEndTimingAfterRelease(commands, events)).toEqual({ minimumFrames });
+      // msw2: the Substitute prints draw the last turn-end row as the cleared box (ROM subhit 520, subfade 883); dragged out clears at the handoff.
+      expect(turnEndTimingAfterRelease(commands, events)).toEqual(
+        id === "STRINGID_PKMNWASDRAGGEDOUT" ? { minimumFrames } : { minimumFrames, blankTailFrames: RELEASE_TAIL_BLANK_ROWS },
+      );
       expect(turnEndTimingAfterRelease(printed(id, false).commands, events)).toEqual({ minimumFrames: 8 });
       expect(turnEndTimingAfterRelease([...commands, { type: "hp" } as any], events)).toEqual({ minimumFrames: 8 });
     }
@@ -117,6 +120,31 @@ describe("btn2: the orchestrator hands the released print's cursor phase to the 
       // so the print and the arrow stay (a press on wait frame 0, 9, 18, ... would blank this `\p` box from the next frame).
       expect(after.releasedWaitCursor).toEqual({ segmentIndex: before.segmentIndex, commandIndex: before.commandIndex, age: elapsed - typed });
       expect(elapsed - typed).toBe(7);
+    });
+  }
+});
+
+// msw2 (ISSUES #223): ROM subhit / subfade labs, both scenes: a Substitute release clears the box on the turn-end's last row, one before the handoff
+// (subhit 520 of 18 rows from 503; subfade 883 of 17 rows from 866).  The faded print (seed 124, directly before the turn-end) runs the same path.
+describe("msw2: the Substitute release tail draws the cleared box on the turn-end's last row", () => {
+  for (const scene of ["off", "on"] as const) {
+    it(`Substitute faded (seed 124, Scene ${scene.toUpperCase()}): the box is blank exactly on turn-end row ${RELEASE_TO_MOVEEND_ROWS.STRINGID_PKMNSUBSTITUTEFADED + 8 - RELEASE_TAIL_BLANK_ROWS}`, () => {
+      const { cursor, found } = playCensusBattleUntil(124, scene, stopAtGatedMessage("STRINGID_PKMNSUBSTITUTEFADED", 0));
+      expect(found).toBe(true);
+      const resolutionOf = () => cursor.state().battleResolutionPresentation as any;
+      const blankRows: number[] = [];
+      let turnEnd: any = null;
+      for (let guard = 0; guard < 600 && resolutionOf()?.lifecycle.phase !== "next-command-handoff"; guard += 1) {
+        const resolution = resolutionOf();
+        const command = resolution.segments[resolution.segmentIndex].commands[resolution.commandIndex];
+        if (command.type === "turn-end") {
+          turnEnd = command;
+          if (createBattleResolutionPresentationRenderView(resolution).bottom === "blank") blankRows.push(resolution.lifecycle.phaseElapsed);
+        }
+        cursor.step(guard % 2 === 0 ? ["A"] : []);
+      }
+      expect(turnEnd.timing).toEqual({ minimumFrames: 17, blankTailFrames: 1 });
+      expect(blankRows).toEqual([16]);
     });
   }
 });

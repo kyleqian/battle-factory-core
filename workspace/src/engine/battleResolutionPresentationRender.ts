@@ -3169,6 +3169,11 @@ export function createBattleResolutionPresentationRenderView(
         && state.lifecycle.phaseElapsed
           >= command.timing.minimumFrames - 2
       )
+      || (
+        command?.type === "turn-end"
+        && command.timing.blankTailFrames !== undefined
+        && state.lifecycle.phaseElapsed >= command.timing.minimumFrames - command.timing.blankTailFrames
+      )
         ? "blank"
         : "message",
     confirmHandoff,
