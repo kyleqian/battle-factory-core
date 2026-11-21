@@ -17,6 +17,8 @@ Seeds unchanged: ON 21 (`2 6 165 499 830 1028 1415 1914 2230 2741 3158 3738 4235
 (`2 165 499 830 1028 1415 1914 2230 2741 3158 3738 4235 4686 5063 5569 6079 6568 6912 7295 7682`). **All 41 still align to battle end** (every engine state
 matched, drive stop = outcome, 0 chain FAIL), so no seed needed replacing from the pool rule.
 
+Per-lab ROM vs engine timing (the b4m / bdt1 / gsp3 labs): `tools/integration/labCompare.sh LAB.json...` (cln12; `tools/battle-lab/README.md` "Lab compare"), not the per-step `b4mRun.sh` / `bdt1Run.sh` / `gsp3Cmp.py` copies.
+
 ## Family table, before (aud248 Part 1) vs now
 
 Rows: matched `exact` (same offset from the segment start) / `offset` (matched, different offset) / ROM-only `missing` / engine-only `extra`.

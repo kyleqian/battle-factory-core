@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# NOTE: superseded for new work by tools/integration/labCompare.sh (one ROM probe + engine + aligned SE table tool); kept because receipts reference it.
 # bdt1: per battle lab (tools/battle-lab/<name>.json): the ROM's SEs (soundEventProbe lab, hybrid), the ROM script rows (hcr3mProbe) and the engine's commands / SEs (b4mEngine.ts), then bdt1Table.py.
 # Usage: tools/integration/bdt1Run.sh OUTDIR FRAMES lab-name [lab-name ...]   (ROM files are reused when present; ENGINE_ONLY=1 re-runs only the engine side)
 set -uo pipefail

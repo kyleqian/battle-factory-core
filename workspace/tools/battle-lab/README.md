@@ -100,3 +100,27 @@ scouting speech, so none regenerate that earlier dialogue.
 
 The complete schema and source-level implementation live in the umbrella
 harness at `oracle/BATTLE_LAB.md` and `oracle/battle_lab.py`.
+
+## Lab compare (ROM vs engine timing of a lab)
+
+One tool for the sound / presentation timing loop: `tools/integration/labCompare.sh [--scene auto|on|off|both] [--out DIR] [--span A:B] [--rows] [--reuse-rom] LAB.json...`
+(`--help` for the rest). Per lab it runs the ROM probe (`hcr3mProbe.py` script rows with exec flags and `gAnimScriptActive`, `soundEventProbe.py lab` SEs) and the engine
+(`b4mEngine.ts`: presentation commands with timing, sounds), into a fresh `.integration/evidence/labcmp/<timestamp>/` (never `/tmp`), and prints one table per lab:
+the ROM and engine sounds aligned as an ordered (kind, id) list (difflib, as `soundScoreboard.py`; menu SE 5 ignored), `ENG - ROM` per row, the ROM script label / exec flag /
+anim flag at the ROM frame and the engine command (and the next one) around the engine frame. The last line per lab is
+`SUMMARY <lab>.<scene>: exact E / offset O / missing M / extra X, mass N` (mass = sum of |ENG - ROM| over matched rows). A lab must sit in `tools/battle-lab/`
+(the engine stage reads it there) and have `overrides.parties`; `--scene on|off|both` runs the same lab file in that scene (hand-written `APP_STAGES` entries keep their own scene).
+The engine json keeps the commands under `cmds` (`[frame, segment, command, type, battler, move, timing, age0]`), the SEs under `se`, all sound kinds under `sounds`.
+Replaces the per-step copies `b4mRun.sh` / `bdt1Run.sh` / `gsp3Cmp.py` (kept: receipts reference them). Not covered: `hcr3mLab.py` / `hcr3mLabEngine.ts` (sound-fixture labs under `tools/audio/fixtures/`; copy the lab into this directory instead) and `fsc2mProbe.py` (a scripted A-press policy after the commit: the ready-time probes, `fsc2mRun.sh`).
+
+Lab design tips (each cost a re-run before):
+- **No stale files.** `run-mgba-probe.py` refuses an existing output path, so a re-probe needs a fresh name; `labCompare.sh` always writes a fresh run dir and, with an existing `--out`,
+  deletes its own outputs first. A ROM file is reused only with `--reuse-rom` and only while the lab file and the ROM build fingerprint match (`DIR/<lab>.<scene>.fp`).
+  Do not keep regenerated labs' ROM files in a shared dir such as `/tmp`.
+- **Speed ties and RNG decide turn order and the foe's move, and the engine and ROM diverge on them.** Use unequal levels (gsp3: user 50 vs target 12, or 100 vs 50, so the order is fixed)
+  and give the other side a move with no RNG (Seismic Toss, 69, for all four slots: fixed damage, no crit / accuracy surprises). Avoid paralysis / confusion / sleep-length rolls
+  and secondary effects in the window you compare; a ROM-only row followed by engine-only rows (e.g. `b4m-thunderwave`: ROM full paralysis at frame 472, engine attacks) is an RNG
+  divergence, not a timing offset. Do not compare past the first divergence (`--span`).
+- **Compare ordered lists, not zipped ones.** When the SE counts differ the old `bdt1Table.py` zip pairs unrelated SEs; labCompare aligns by (kind, id), so a missing / extra row shows up as such.
+- **Trace shape:** per turn `A` (2), 18 idle, `A` (2), then 800..1000 idle frames so the whole turn plays out; frames are the lab's own clock (ROM probe frame k = engine `state.frame` k).
+- The ROM probes run both at the same time (about 12 s for a one-turn lab, 20 s for three turns).

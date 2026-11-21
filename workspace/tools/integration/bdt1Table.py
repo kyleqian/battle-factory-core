@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# NOTE: superseded for new work by tools/integration/labCompare.sh (one ROM probe + engine + aligned SE table tool); kept because receipts reference it.
 """bdt1: one battle lab's ROM SEs / script edges next to the engine's SEs / commands (frames = the lab's clock).
 usage: bdt1Table.py DIR NAME [--span A:B]   DIR holds NAME.rom.json (hcr3mProbe), NAME.se.json (soundEventProbe lab) and NAME.eng.json (b4mEngine.ts)."""
 import json

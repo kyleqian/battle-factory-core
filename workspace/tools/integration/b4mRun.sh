@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# NOTE: superseded for new work by tools/integration/labCompare.sh (one ROM probe + engine + aligned SE table tool); kept because receipts reference it.
 # b4m: ROM probe + engine commands + table for battle labs (tools/battle-lab/<name>.json). Usage: tools/integration/b4mRun.sh OUTDIR lab-name [lab-name ...]
 set -uo pipefail
 D=$1; shift; mkdir -p "$D"

@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# NOTE: superseded for new work by tools/integration/labCompare.sh (one ROM probe + engine + aligned SE table tool); kept because receipts reference it.
 """b4m: one battle lab's ROM script events next to the engine's presentation commands (frames = the lab's own clock, ROM probe frame k = engine state.frame k).
 
 usage: b4mTable.py DIR NAME [--span A:B] [--rows]

@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# NOTE: superseded for new work by tools/integration/labCompare.sh (one ROM probe + engine + aligned SE table tool); kept because receipts reference it.
 """gsp3: ENG - ROM per sound effect and per script step of a lab probed by bdt1Run.sh.
 usage: gsp3Cmp.py DIR NAME [--labels A,B,...]   prints the ROM / ENG SE sequences aligned by id (LCS), each with the diff and the ROM script label it falls in,
 then, for every ROM label in --labels (substring match), the label's first row, its animation start (A0) and the next ROM label's row against the engine's command starts."""

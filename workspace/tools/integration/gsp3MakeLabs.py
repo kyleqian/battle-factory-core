@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# NOTE: superseded for new work by tools/integration/labCompare.sh (one ROM probe + engine + aligned SE table tool); kept because receipts reference it.
 """gsp3: write the status-script labs (tools/battle-lab/gsp3-*.json): a Rattata pair, one side uses a status move every turn, the other Seismic Toss (69).
 The user is level 50 and the target level 12 (user first) or the user level 100 and the target level 50 (foe uses it, still first); 3 turns of A, 18, A, 1000.
 usage: gsp3MakeLabs.py"""

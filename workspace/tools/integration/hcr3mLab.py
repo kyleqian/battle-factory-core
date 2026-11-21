@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# NOTE: for battle labs in tools/battle-lab/ use tools/integration/labCompare.sh (ROM probe + engine + aligned SE table in one run); this one handles sound-fixture labs.
 """hcr3m: a sound-fixture lab turn table, ROM script rows / ROM SEs (tools/audio/fixtures/NAME.json events) next to the engine's commands / SEs.
 usage: hcr3mLab.py DIR NAME [A:B]   (DIR holds NAME.rom.json from hcr3mProbe.py on tools/battle-lab/NAME-on.json and NAME.eng.json from hcr3mLabEngine.ts)
 Frames are the lab's own clock (ROM probe frame k = fixture event frame k = engine state.frame k)."""
