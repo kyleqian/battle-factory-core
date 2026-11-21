@@ -64,6 +64,14 @@ for tag, order in (("", (FEEBAS, MAGIKARP, SHEDINJA)),):
         [mon(SHARPEDO, [CRUNCH, SPLASH, SPLASH, SPLASH]), mon(PORYGON2, [TACKLE] * 4), four(MACHAMP, SPLASH)],
         opp, [{"move": 0}] * 3 + [{"switch": 1}])
 
+LEECHSEED, RECOVER, LEFTOVERS, TOXIC = 73, 105, 200, 92
+karp = mon(MAGIKARP, [RECOVER, LEECHSEED, SPLASH, SPLASH], item=LEFTOVERS)
+karp["evs"] = {**dict.fromkeys(IV, 0), "attack": 255, "speed": 255}
+D["R106"] = design("R106", ("R106-toxic-counter-capped-at-15", "Challenge 7, trainer 200, hand-built Mechanic Lab parties. The AI's Blissey knows only Toxic (it poisons on turn 1); the player's Magikarp (95 max HP, Leftovers) seeds it with Leech Seed (a fixed heal of the foe's max HP/8; the seed drains the first Blissey dead in 9 turns, so it is cast again on its replacement), and Recovers every turn, so it outheals the Toxic ticks (maxHP/16 times the counter) past the sixteenth: the counter is not raised past TURN(15) (battle_util.c:1542-1543). Machamp then comes in and finishes."),
+    [karp, four(MACHAMP, BODYSLAM), four(HERACROSS, BODYSLAM)],
+    [four(BLISSEY, TOXIC, bulk=True), four(CHANSEY, TOXIC), four(FEEBAS, TOXIC)],
+    [{"move": 1}] + [{"move": 0}] * 8 + [{"move": 1}] + [{"move": 0}] * 6 + [{"switch": 1}])
+
 out = Path(sys.argv[1] if len(sys.argv) > 1 else ROOT / ".integration/evidence/rrh7/designs")
 out.mkdir(parents=True, exist_ok=True)
 for rule, d in D.items():
