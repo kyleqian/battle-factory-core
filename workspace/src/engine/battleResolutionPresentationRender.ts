@@ -18,7 +18,7 @@ import type { LiveMoveSpriteAllocatorInput, LiveMoveSpriteOrderInput } from "./l
 import type { LiveMoveBattlerX2Input } from "./liveBattlerX2History.ts";
 import { liveSubstituteSwapApplies, substituteSwapTailFieldArt } from "./liveSubstituteSwap.ts";
 import {
-  liveBattlerAnchors, liveDiveSetupSplashBirth, liveMoveAnimationDuration, liveMoveOpponentShadowPostBodyHideRows,
+  liveBattlerAnchors, liveDiveSetupSplashBirth, liveMoveAnimationDuration, liveMoveAnimationDurationCaseMissing, liveMoveOpponentShadowPostBodyHideRows,
   liveSemiInvulnerableHideBattler, liveSingBodyRows, LIVE_TURN_TRAP_BODY_ROWS,
   SOLAR_BEAM_UNLEASH_IDLE_ROWS,
 } from "./liveMoveAnimation.ts";
@@ -1750,6 +1750,30 @@ export function moveAnimationScriptStartRow(segment: BattleResolutionPresentatio
   return null;
 }
 
+/**
+ * mvs1 (docs/mvs1-called-move-sounds.md): a Scene ON body with no adapter (liveMoveAnimationDurationCaseMissing: the moves only METRONOME reaches,
+ * docs/phy1m-nonlive-bodies.md) holds the static field for seGate + minimumFrames rows, but the ROM runs its whole script, sounds included. Its script
+ * row on this tick (row 0 = moveAnimationScriptStartRow past the seGate rows) and the script row of the command's last row (the sounds after it are a
+ * sound-only tail). Null for another command, a declined body that has an adapter, or an attacker shown as a Substitute doll (the ROM swaps first).
+ */
+export function staticMoveSourceRow(
+  state: BattleResolutionPresentationState,
+): Readonly<{ request: BattleMoveAnimationRequest; scriptRow: number; lastScriptRow: number; attackerSpecies: number; attackerElevation: number; attackerHpQuarter: number; picOffsetY: (battler: 0 | 1) => number; topY: (battler: 0 | 1) => number }> | null {
+  const segment = state.segments[state.segmentIndex];
+  const command = segment?.commands[state.commandIndex];
+  if (segment === undefined || command === undefined || command.type !== "move-animation" || command.animation === undefined) return null;
+  const request = command.animation;
+  if (request.turnTrapBody === true || request.generalRain === true) return null;
+  const field = currentCommandField(state);
+  if (liveMoveAnimationDuration(request, field) !== null || !liveMoveAnimationDurationCaseMissing(request, field)) return null;
+  if (field[request.attacker === 0 ? "player" : "opponent"].substituteDoll === true) return null;
+  const start = moveAnimationScriptStartRow(segment, command.eventSequence);
+  if (start === null) return null;
+  const seGate = command.timing.seGateFrames ?? 0;
+  const scriptRow = state.lifecycle.phaseElapsed - seGate - start;
+  const lastScriptRow = battleResolutionCommandDuration(command, field) - 1 - seGate - start;
+  return Object.freeze({ request, scriptRow, lastScriptRow, ...moveSourceFieldInputs(request, field) });
+}
 
 const STATS_CHANGE_AFTER_BODY_AGE_SHIFT = 4;
 // lse2: after a lead-first lse2 body (Cosmic Power, Calm Mind) the stat SE sits 1 row later than the generic shift's (ROM - ours +1 in both labs).

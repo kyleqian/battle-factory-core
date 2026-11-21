@@ -1,10 +1,11 @@
 // mvs1 (docs/mvs1-called-move-sounds.md): the frame catcher's fcm1 findings 5-7 (docs/fcm1-catcher-sweep.md).
 //  5. Will-O-Wisp played none of the 15 SE_M_FLAME_WHEELs its first orb plays itself (AnimWillOWispOrb_Step, battle_anim_fire.c:1166-1186).
+//  6. A move METRONOME calls that has no adapter (Aeroblast, Leech Life: only METRONOME reaches them) played nothing: the static field had no sound clock.
 //  7. Scene OFF: a Substitute (or Transform) played no sound: Cmd_attackanimation animates both under HITMARKER_NO_ANIMATIONS (battle_script_commands.c:1748),
 //     and the emitter skipped every body under it. Substitute's AnimTask_MonToSubstituteDoll SE_M_BUBBLE2 rows were missing in both scenes.
-// The Substitute, Transform and Will-O-Wisp bodies use the ROM script's clock: script row 0 on command row seGate + lead + 4.
+// The Substitute, Transform and Will-O-Wisp bodies (and the static bodies) use the ROM script's clock: script row 0 on command row seGate + lead + 4.
 // ROM ground truth: tools/audio/fixtures/aud260-willowisp-*.json, mvs1-{substitute,transform}-*.json (soundEventProbe labs, tools/integration/mvs1Labs.py)
-// and the frame catcher's ROM run s36-off-ws (its engine side is the seeded test player replayed below).
+// and the frame catcher's ROM runs (s36-off-ws, s89-on-wc; their engine side is the seeded test player replayed below).
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { collectSoundTick, type SoundEvent } from "../src/audio/soundEvents.ts";
@@ -205,6 +206,24 @@ describe("the frame catcher's cases (seeded test player, tools/frame-catcher/mak
     expect(body!.scriptStart).toBe(8);
     expect(body!.ses).toEqual(["8:226:-64", "49:125:-64", "74:125:-64"]);
     expect(body!.shrinkRow).toBe(10);
+  });
+  it("s89-on-wc battle 13: METRONOME -> LEECH LIFE and -> AEROBLAST (no adapter: the static field) play their SEs on the ROM's rows", () => {
+    // ROM (fcm1 s89-on-wc): the used print's last glyph 220631 (Leech Life) / 239433 (Aeroblast); SE_M_ABSORB 220676, SE_M_CRABHAMMER 220708 + 6k,
+    // SE_M_ABSORB_2 220803; SE_M_JUMP_KICK 239490 + 5k (x20), SE_M_RAZOR_WIND 239609: script row 0 = the last glyph + 10 = command row 9 (lead 5 + 4).
+    const bodies = catcherBodies(89, "on", "winning-coverage", 226300, [141, 177], 200).filter((b) => b.afterMetronome);
+    const ll = bodies.find((b) => b.moveId === 141);
+    const ab = bodies.find((b) => b.moveId === 177);
+    expect(ll, "seed 89 no longer reaches battle 13's called Leech Life: re-pick the case").toBeDefined();
+    expect(ab, "seed 89 no longer reaches battle 13's called Aeroblast: re-pick the case").toBeDefined();
+    for (const body of [ll!, ab!]) {
+      expect(body.live).toBe(false);
+      expect(body.caseMissing).toBe(true);
+      expect(body.scriptStart).toBe(9);
+    }
+    expect(ll!.ses.filter((s) => /:(180|142|179):/.test(s))).toEqual([
+      "44:180:-63", ...Array.from({ length: 8 }, (_, k) => `${76 + 6 * k}:142:-63`), "171:179:63",
+    ]);
+    expect(ab!.ses.filter((s) => /:(143|136):/.test(s))).toEqual([...Array.from({ length: 20 }, (_, k) => `${56 + 5 * k}:143:63`), "175:136:-63"]);
   });
 });
 

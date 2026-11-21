@@ -9,7 +9,7 @@ import { CRY_ECHO_END_FRAMES, CRY_ECHO_START_FRAMES, CRY_HIGH_PITCH_FRAMES, CRY_
 import { factoryBattleBgm } from "./battleStartSounds.ts";
 import { BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS } from "./battleScriptSourceConstants.ts";
 import type { BattleResolutionPresentationState } from "./battleResolutionPresentation.ts";
-import { liveMoveSourceAge, moveAnimationScriptStartRow, statsChangeSourceAge } from "./battleResolutionPresentationRender.ts";
+import { liveMoveSourceAge, moveAnimationScriptStartRow, staticMoveSourceRow, statsChangeSourceAge } from "./battleResolutionPresentationRender.ts";
 import { bodyStatusTailRuleApplies, FOCUS_PUNCH_SETUP_BEHIND_SUBSTITUTE_COMMAND_FRAMES, HELD_ITEM_EFFECT_COMMAND_FRAMES, RAIN_CONTINUES_SCRIPT_START_ROWS, WEATHER_CONTINUES_LAUNCH_LEAD_ROWS, isWeatherContinuesAnimation, type BattleStatusAnimationName, type WeatherContinuesAnimation } from "./battleResolutionPresentation.ts";
 
 export interface TimedOp {
@@ -496,7 +496,11 @@ export function emitMoveAnimSounds(after: BattleResolutionPresentationState | nu
   const command = segment.commands[after.commandIndex];
   if (command?.type !== "move-animation") return;
   const source = liveMoveSourceAge(after);
-  if (source === null) return;
+  if (source === null) {
+    // Scene OFF carries no request on a body that has no adapter (only Transform / Substitute are animated there).
+    if ((segment.beforeRules.rulesContext.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) === 0) emitStaticMoveAnimSounds(after);
+    return;
+  }
   const { request, age, lastAge } = source;
   if ((segment.beforeRules.rulesContext.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0
     && request.moveId !== MOVE_TRANSFORM && request.moveId !== MOVE_SUBSTITUTE) return;
@@ -512,6 +516,23 @@ export function emitMoveAnimSounds(after: BattleResolutionPresentationState | nu
   emitOpsAt(ops, context, scriptRow);
   if (scriptRow === 0) scheduleMoveAnimationTail(ops, context, lastAge - FIRST_COMMAND_AGE - AGE_TO_SOUND_ROWS + scriptRow - genericRow);
   emitCryTaskRows(request.moveId, source.attackerSpecies, context.attackerSide, scriptRow, frontierBrain);
+}
+
+/**
+ * mvs1: a Scene ON body with no adapter (the moves only METRONOME reaches: Aeroblast, Leech Life, ...) shows the static field, but the ROM plays its
+ * script's SEs: emitted on the ROM script clock (staticMoveSourceRow), the ones after the static command's last row as a sound-only tail.
+ */
+function emitStaticMoveAnimSounds(after: BattleResolutionPresentationState): void {
+  const source = staticMoveSourceRow(after);
+  if (source === null) return;
+  const { request, scriptRow } = source;
+  const context = {
+    attackerSide: request.attacker === 0 ? "player" : "opponent",
+    targetSide: request.target === 0 ? "player" : "opponent",
+  } as const;
+  const ops = variantOf(request.moveId, request.turn, request.attacker === 0 ? 0 : 1, { picY: source.picOffsetY, topY: source.topY, rolloutCounter: request.rolloutCounter, damage: request.damage, attackerElevation: source.attackerElevation, attackerHpQuarter: source.attackerHpQuarter });
+  emitOpsAt(ops, context, scriptRow);
+  if (scriptRow === 0) scheduleMoveAnimationTail(ops, context, source.lastScriptRow);
 }
 
 const STATUS_ANIMATION_LABELS: Readonly<Record<BattleStatusAnimationName, string>> = {
