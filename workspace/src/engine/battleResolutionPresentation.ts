@@ -6029,9 +6029,14 @@ export function projectBattleResolutionCommands(
       // that source pause below, so exclude those callback executions before
       // applying the same attack-string-to-hit formula used by the controller
       // MOVE_ANIMATION receipt.
+      // eqk1: Magnitude's pause SHORT, print and `waitmessage B_WAIT_TIME_LONG` (used print -> print + 64 rows) are presented by the message commands (ROM first SE was +36 OFF otherwise).
+      const magnitudePrint = events[index - 1];
+      const magnitudeWaitRows = magnitudePrint?.payload.kind === "message" && magnitudePrint.payload.messageId === "STRINGID_MAGNITUDESTRENGTH"
+        ? instructionExecutionOf(magnitudePrint) - usedMoveInstructionExecution + WAITMESSAGE_LONG_HOLD_FRAMES
+        : 0;
       const executedPauseCallbacks =
         payload.animationId === "SCENE_OFF_ATTACK_PAUSE"
-          ? SCENE_OFF_MOVE_PAUSE_FRAMES + 1
+          ? SCENE_OFF_MOVE_PAUSE_FRAMES + 1 + magnitudeWaitRows
           : 0;
       const interveningInstructions =
         hitExecution - usedMoveInstructionExecution - executedPauseCallbacks;
