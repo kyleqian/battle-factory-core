@@ -2274,3 +2274,29 @@ Sum-check: ON 2,360 + 1,713 + 926 + 1,354 + 1,287 + 957 + 660 + 276 (= 9,533) + 
 - B4 bodies: 298 mass, being landed; no proposal here.
 
 Not applied: no `src/` or `tests/` change; PROGRESS / ISSUES / ROADMAP untouched.
+
+## hie5: held-item effect after a print-ended script, restore-HP body tails (t2k2 items 1 and 2)
+
+**Item 1 premise corrected.** The hie3 held-item SE clock (SE 152 at script frames 8 / 40 / 72, 228 at 104, 102 at 176) is exact: hie1-leftovers-on -1, hie1-sitrus-on / hie2-sitrus-opp-on 0, Double-Edge lab -1. t2k2's "SE age 23 vs 8" is the command's *start*: after a print-ended status script the engine started the held-item command 5-6 rows after the ROM. ROM: item SE = print end + T + 19 (T = script rows between the print's `waitmessage` and `MoveEnd`: Yawn 1, Curse 1, StatUpPrintString 1, DoRecoil 3); engine: print end + 25. New labs (`tools/integration/hie5MakeLabs.py`, foe Rattata + Leftovers vs Seismic Toss, trace A,18,A,1500): `hie5-{yawn,curse,detect,doubleedge,bubblebeam,swordsdance}-foe-on` (Detect has no heal; Bubble Beam diverges from the ROM by RNG, unused).
+
+**Rule** (`heldItemEffectAfterPrintLead`, Scene ON only; the shared `heldItemEffectExecutionsAndLead` that Scene OFF reads is untouched): a restart held-item event whose previous non-MoveEnd event is a print followed by `waitmessage` gets lead 9 + T (T from the kernel's instruction executions: MoveEnd - print - waitmessage frames - 2) instead of 15. Not per item.
+
+| Lab (foe Leftovers) | held-item SE ENG-ROM before -> after |
+|---|---|
+| hie5-yawn-foe-on | +5 / +6 -> 0 |
+| hie5-curse-foe-on | +6 -> +1 |
+| hie5-swordsdance-foe-on | +5 -> 0 |
+| hie5-doubleedge-foe-on (recoil, T = 3) | -1 -> -4 (mass 5 -> 20; the engine's recoil message ends ~3 rows early upstream, so the ROM-correct lead exposes it) |
+| hie1-leftovers-on, hie1-shellbell-on | -1 unchanged (mass 5) |
+| hie1-sitrus-on, hie2-sitrus-opp-on | 0 unchanged |
+| hie1-cheri-on (cure berry, status command) | -2 unchanged |
+
+Not fixed (reported): the held-item command after a status animation (+4 / +6), after a hit animation (mixed -9 .. +4), and after the faint send-in (cry / sprite-visibility, +21, three groups: faint chain, out of scope).
+
+**Item 2.** The Recover lab (aud242k-recover-player-on) shows the engine's body fine at its start (+2) but the `hp` command 23 rows before the ROM's `healthbarupdate` (EffectRestoreHp+0x16): the ROM's animation script stays active 186 rows from the +0xa exec, the engine's body ends on its last visible row (169). The sub-swap pins (`substituteSwapAttdollCells`) prove the 169-row body is ROM-right, so the durations stay and `HIE5_RESTORE_HP_BODY_TAIL_ROWS` (`battleResolutionPresentationRender.ts`) holds the last row: Recover 25, Soft-Boiled 10, Milk Drink 27, Moonlight 8. Labs, later SEs ENG-ROM before -> after: aud242k-recover-player-on -23 -> +2 (mass 100 -> 16), aud242r-softboiled-player-on -5 -> +5 (35 -> 35, the SE step now uniform), aud242r-moonlight-player-on -4 -> +4 (24 -> 24, uniform), aud261-milkdrink-player-on / -opponent-on -25 -> +2 (110 -> 18). Remaining uniform +2 / +5 / +4 / +2 is the front of the body (command start after the message), not touched. Morning Sun / Synthesis / Slack Off have no body duration case (no live body), so no tail; the Synthesis lab misses the ROM's SE 139 (unrelated).
+
+**T2** (`RESCORE_SCENES=on|off tools/audio/rescoreAll.sh OUT .integration/evidence/t2n`, `soundScoreboard.py`; `.integration/evidence/hie5/t2-{base,after,after2}`; 0 missing / 0 extra everywhere; base = c440fdf4b, after = item 1, after2 = items 1 + 2): Scene ON TOTAL exact / mass 2,731 / 19,949 -> 2,801 / 19,628 (item 1) -> 2,811 / 19,358 (items 1 + 2); move-animation SE 15,401 -> 14,781, stat-change 377 -> 381, cry 953 -> 958, battle-controller 3,166 -> 3,186 (the held-item and recover rows moved other families' attributed windows by a few frames). Scene OFF 700 exact / 2,640 mass unchanged. The 1,713 mass t2k2 booked for item 2 did not reproduce on the labs beyond the 270 above (its rows are mostly the +2 / +5 front and per-seed print-chain offsets).
+
+**Census** (`lsd194Census.sh`, seeds 0..199 both scenes, `LSD194_SHARDS="0 1"`, JOBS 2, SPLIT 2, c440fdf4b vs HEAD; `.integration/evidence/hie5/census`): `rst197CensusDelta.py --digest` eventsDigest + error identical 200 / 200 on ON and OFF (no gameplay / RNG change); ON 129 battles identical / 71 changed commands (timing only, type-sequence changes 0), OFF 200 / 0 byte-identical. `soundCensusDelta.py --t1`: ON exact 54,127 both arms, missing 0 / extra 0; OFF extra 35 (Substitute 33, Transform 2) identical in both arms.
+
+**Tests.** typecheck, `test:gate` (360 files), every `tests/` importer of `battleResolutionPresentation` / `liveMoveAnimation`, aud2* / hie* / lse* / animation live* / randomRoundSoak*, `npm run build` green. No pin moved for item 1. Item 2 moved only the `iu120Rows.ts` mirror of `LIVE_MOVE_LEADLESS_TAIL_ROWS` (the held-row ages of the Milk Drink / Moonlight ordinary-route pins, ROM: the 25 / 10 / 27 / 8 rows above); no trajectory pin was re-pinned.
