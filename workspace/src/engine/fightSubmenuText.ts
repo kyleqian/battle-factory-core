@@ -192,11 +192,21 @@ export function drawFightSubmenuText(
   originY: number,
   moveset: FightMoveset,
   cursor: 0 | 1 | 2 | 3,
+  switchPrompt = false,
 ): void {
   for (let i = 0; i < 4; i += 1) {
     const o = MOVE_NAME_ORIGINS[i]!;
     blankRect(fb, originX + o.x, originY + o.y - 1, 64, 16);
     drawText(fb, fontNarrow, charmap, moveset[i]!.name, originX + o.x, originY + o.y, NAME_PALETTE, NAME_COLORS);
+  }
+
+  if (switchPrompt) {
+    // msw1: B_WIN_SWITCH_PROMPT (tile 21,55, 8x4 tiles = abs 168..231 x 120..151) replaces the PP and TYPE windows
+    // with gText_BattleSwitchWhich "Switch\nwhich?" in the same FONT_NARROW / 13-14-15 colors.
+    blankRect(fb, originX + PP_LABEL_ORIGIN.x, originY + PP_LABEL_ORIGIN.y - 1 - 1, 64, 32);
+    drawText(fb, fontNarrow, charmap, "Switch", originX + PP_LABEL_ORIGIN.x, originY + PP_LABEL_ORIGIN.y, NAME_PALETTE, NAME_COLORS);
+    drawText(fb, fontNarrow, charmap, "which?", originX + TYPE_LABEL_ORIGIN.x, originY + TYPE_LABEL_ORIGIN.y, NAME_PALETTE, NAME_COLORS);
+    return;
   }
 
   const selected = moveset[cursor]!;

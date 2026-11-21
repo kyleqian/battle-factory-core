@@ -641,14 +641,18 @@ describe("interactive battle routing", () => {
     for (let elapsed = 21; elapsed < 41; elapsed += 1) {
       accepted = tick(accepted, new Set());
     }
-    expect(accepted.factorySwap?.fieldHandoff)
-      .toBe("CB2_ReturnToFieldContinueScript");
-    accepted = tick(accepted, new Set());
+    // rsw1: the hand-off starts the room's black hold; "Thank you!" waits for A before "Right this way".
     expect(accepted.factorySwap).toBeNull();
+    expect(accepted.swapReturn).toMatchObject({ kind: "swapped", elapsed: 0 });
+    accepted = tick(accepted, new Set());
     expect(accepted.factoryRoundBattleOrchestrator!.round.rules.battleIndex)
       .toBe(1);
     expect(accepted.factoryRoundBattleOrchestrator!.round.presentation?.command.type)
       .toBe("battleStart");
+    expect(accepted.postwin!.swapDeclineElapsed).toBeNull();
+    for (let i = 0; i < 100; i += 1) accepted = tick(accepted, new Set());
+    expect(accepted.postwin!.swapDeclineElapsed).toBeNull();
+    accepted = tick(accepted, new Set(["A"]));
     expect(accepted.postwin!.swapDeclineElapsed).not.toBeNull();
   });
 
@@ -692,10 +696,12 @@ describe("interactive battle routing", () => {
       factoryRoundBattleOrchestrator: orchestrator,
     };
 
-    const next = tick(state, new Set());
+    let next = tick(state, new Set());
     expect(next.factorySwap).toBeNull();
+    expect(next.swapReturn).toMatchObject({ kind: "kept", elapsed: 0 });
     expect(next.factoryRoundBattleOrchestrator!.round.rules.lastSwap)
       .toEqual({ type: "decline" });
+    next = tick(next, new Set());
     expect(next.factoryRoundBattleOrchestrator!.round.rules.battleIndex)
       .toBe(1);
     expect(next.factoryRoundBattleOrchestrator!.round.presentation?.command.type)
@@ -706,6 +712,8 @@ describe("interactive battle routing", () => {
     expect(next.factoryRoundBattleOrchestrator!.round.rules.playerParty.every(
       ({ hp, maxHp, status }) => hp === maxHp && status === "none",
     )).toBe(true);
+    expect(next.postwin!.swapDeclineElapsed).toBeNull();
+    for (let i = 0; i < 40; i += 1) next = tick(next, new Set());
     expect(next.postwin!.swapDeclineElapsed).not.toBeNull();
   });
 

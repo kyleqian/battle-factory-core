@@ -42,14 +42,23 @@ export type SoundEmission = Omit<SoundEvent, "frame"> & { readonly frame?: numbe
 /** Collects one tick's events. */
 export class SoundTickCollector {
   readonly frame: number;
+  /** Ticks the ROM runs the unstamped events ahead of the tick that emits them (see `setSoundTickLead`). */
+  lead = 0;
   private readonly events: SoundEvent[] = [];
+  private readonly leads: number[] = [];
 
   constructor(frame: number) {
     this.frame = frame;
   }
 
   push(emission: SoundEmission): void {
-    this.events.push(Object.freeze({ ...emission, frame: emission.frame ?? this.frame }));
+    this.events.push(Object.freeze({ ...emission, frame: emission.frame ?? this.frame - this.lead }));
+    this.leads.push(emission.frame === undefined ? this.lead : 0);
+  }
+
+  /** Per event (same order as `take`): the lead its stamp was shifted by, 0 for an explicitly stamped event. */
+  takeLeads(): readonly number[] {
+    return this.leads;
   }
 
   take(): readonly SoundEvent[] {
@@ -63,13 +72,13 @@ let active: SoundTickCollector | null = null;
  * Run one engine tick with a collector installed (`frame` = the 1-based session frame that tick produces).
  * Returns what the emitters pushed, in call order. Not re-entrant: ticks are synchronous.
  */
-export function collectSoundTick<T>(frame: number, run: () => T): { result: T; events: readonly SoundEvent[] } {
+export function collectSoundTick<T>(frame: number, run: () => T): { result: T; events: readonly SoundEvent[]; leads: readonly number[] } {
   const previous = active;
   const collector = new SoundTickCollector(frame);
   active = collector;
   try {
     const result = run();
-    return { result, events: collector.take() };
+    return { result, events: collector.take(), leads: collector.takeLeads() };
   } finally {
     active = previous;
   }
@@ -78,6 +87,15 @@ export function collectSoundTick<T>(frame: number, run: () => T): { result: T; e
 /** What emitters call. A no-op unless a tick is being collected, so tools, soaks and headless pay nothing. */
 export function emitSound(emission: SoundEmission): void {
   if (active !== null) active.push(emission);
+}
+
+/** hcr1b: stamp this tick's unstamped events `ticks` earlier (the ROM plays script-row sounds before the frame the app's pixel-exact presentation reaches that command). */
+export function setSoundTickLead(ticks: number): void {
+  if (active !== null) active.lead = ticks;
+}
+
+export function getSoundTickLead(): number {
+  return active === null ? 0 : active.lead;
 }
 
 /** True while a sink wants this tick's events (lets an emitter skip building the event). */

@@ -27,8 +27,9 @@ function ours(): string[] {
     const result = collectSoundTick(state.frame + 1, () => tick(state, advance.buttons));
     state = result.result;
     if (advance.frame <= rom.from) continue;
+    // hcr2c: rows carry the stamped (ROM-clock) frame, the same basis as the T1/T2 scoreboards; the tick frame runs the hcr2 action-dispatch hold later.
     // ROM duck rows carry the BGM song id and a volume; ours do too (`volume`); the probe's duck pan is null.
-    for (const e of result.events) out.push(`${advance.frame}:${e.kind}:${e.id}:${e.kind === "duck" ? null : e.pan}`);
+    for (const e of result.events) out.push(`${e.frame}:${e.kind}:${e.id}:${e.kind === "duck" ? null : e.pan}`);
   }
   return out;
 }

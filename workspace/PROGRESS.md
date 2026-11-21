@@ -5,6 +5,52 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 2026-11-21 — CAX31 daily run (supervisor, Opus 5.5, 2026-11-20 13:30 -> 2026-11-21 05:30 UTC): wind-down: sound timing ON -25 % / OFF -35 %, swap-return room, SELECT move swap, Lobby save wait, used-move print timing both scenes
+
+- **State:** master clean, no workers, no worktrees; no push. **No DEFERRED items.** Final engine tree `c6117abdc` (later commits are tools / tests / docs; full suite on the tip
+  `e7c1c4d2f` **16,405 passed / 0 failed**). ENGINE_BUILD: see Gates. Evidence
+  `.integration/validation/sv-20261120/`; briefs + supervisor ledger `.integration/briefs/` (`supervisor-notes.txt`).
+- **Website (Mac):** no API change (`challenge-request` / `start`, `ready`, input contract unchanged; SELECT already reaches the engine through `GbaButton` / Shift / gamepad).
+  **Play changes (older recorded games replay on their own build only):** after a post-win swap the room holds black, fades in and says "Thank you! Your POKéMON swap is complete." (waits
+  for A / B; rsw1 / rsw2, `docs/rsw1-swap-return-room.md`); the Lobby save waits 60 frames after the save sound or a held A, and the Lobby menus no longer wrap (lbw9,
+  `docs/lbw9-lobby-save-wait.md`); SELECT in the move menu swaps moves as in the ROM, and the order persists into later battles (msw1, `docs/msw1-select-move-swap.md`). **New audio files:**
+  10 recordings (Blizzard / Gust sweep pans and 7 centred SEs, OGG + AAC, ~240 KB; snd3, `docs/snd3-pan-recordings.md`).
+- **Sound (S11, T2 ROM replays on the final engine, `soundScoreboard.py` over `.integration/evidence/t2final`):** 0 missing / 0 extra both scenes; **Scene ON mass 35,592 -> 26,673
+  (-25 %), exact rows 1,007 -> 2,362; Scene OFF 5,437 -> 3,537 (-35 %), exact 126 -> 584** (vs t2n). Landed (docs/aud251-s11-scoreboard-refresh.md sections): hcr1b / hcr1c (Scene OFF first
+  used-move glyph at commit + 7 + u, pixel-exact on 28 labs; battle-command-generated-off 128 / 128 kept), hcr2 / hcr2b / hcr2c (the same in Scene ON, 28 ON labs; per-emitter sound lead 7 - L),
+  gsp2 / gsp2b (Scene ON wake-up head), fsc1 (Scene OFF hit on a Dig / Fly / Dive target, hit-all box: eqko-off 533 -> 742 / 899), chg1 (Scene OFF two-turn moves, e.g. Skull Bash 671 / 671).
+  Supervisor decision (reversible, recorded in the doc "hcr2d"): 7 Scene ON pins keep hcr2c's values (named residuals in ISSUES #219): master's values were fitted to the old fixed first print.
+- **Gameplay / flow:** rsw1 (swap-return room, RNG per frame through the hold / fade / wait; compare 79 -> 482 / 488, kept path 62 -> 360 / 360), rsw2 ("Thank you!" A ready +1; the walk is exact,
+  267 / 267; the catcher's 42 frames were its own press timing), msw1 (#227: SELECT move switching, OFF trace 115 / 117), lbw9 (#228: 8 new Lobby traces exact, e.g. save wait 134 -> 269 / 269).
+  Run start: luck day 5, R058 / R096 promoted (rare rules 83 -> 85 / 110); nightly replay **44 / 44** (1,755 states) + **110 / 110** stages. Wind-down replay: see Gates.
+- **Found, not fixed:** the room's opponent-setup RNG draws are the canonical trace's fixed nature-loop counts (rsw2; parked #55 class, noted there); fsc2m: the OFF faint -> party-summary
+  offset is mostly the ROM driver's 17-frame A pulse (census-driver fix next run).
+- **Cleanup:** cln10 (soak `--help` / interrupt summary, `soundScoreboard.py` guard + mass column, census `--digest` / WORKTREE arm, compare `--summary` diff runs, generic lab-backed compare
+  stage); cln11 (after the gates: the generic lab stage builds any `overrides.parties` lab from the engine's stat code, `tools/compare/labMon.ts`; `appStage.rngSeed` takes the ROM's
+  gRngValue at the first menu, since the ROM makes ~1,600 Random() calls before it: chg1-bounce-foe 442 -> 663 / 671); branch prune (lib-v2-mac + this run's worker branches).
+- **Lapses:** a branch glob deleted the two kept 2026-10-26 branches; restored at their tips (`worker/integration-20261026-213055` = `ce83513bb`, `-223044` = `fbc7df1db`). Merging b4m /
+  hcr3m tools broke the `iss215ToolPixelInstall` ratchet (not in test:gate); found by cln11, fixed. fsc2m (side lane) committed its docs / tools commit into the main tree, not its worktree (brief named main-tree evidence paths; content kept); two supervisor merge resolutions
+  in `tools/compare/appTrace.ts` / soak pins needed fix-ups (typecheck caught a truncated function; the chg1 + hcr2 merge leaked chg1 into Scene ON, caught by the full suite, gated).
+- **Gates (final engine `c6117abdc`):** vanilla 0:20 OFF **20 / 20**, ON **20 / 20**; 0:60 default / winning / winning-swap **60 / 60** each; varied-RNG winning carry 0 / 14 / 28 + winning-swap
+  carry 0 **100 / 100** each (0 crash / 0 hang everywhere; the OFF gates ran on `f1a8c2881`, whose Scene OFF path is identical to `c6117abdc`; vanilla ON re-run on `c6117abdc`). Full suite on
+  `c6117abdc` **16,387 passed / 0 failed**; typecheck / build / build:lib 0; **ENGINE_BUILD `eb-3c2651248c642b97`** (dist-lib of `c6117abdc`; tell the website). Mid-run full suites: `687c474a0`
+  16,327 / 0; `9a12931d7` 8 failed (fixed by hcr1c); `99fca080c` 16,345 / 0; `0a63934b2` 95 failed (hcr2 alone; fixed by hcr2b / hcr2c); `4fc84e424` 16,362 / 0; `350a094a8` 16,370 / 0;
+  `40e172bd9` 1 failed (test-side, `17fb498e3`); `40fb8a8bd` 3 failed (chg1 leak into Scene ON, gated in `c6117abdc`). **Wind-down replay** on `c6117abdc`: pool **44 / 44** (1,441 states),
+  stages **110 / 110** (`docs/replay-ledger.md`). `play:random --minutes 10 --scene both --lobby-new-challenge`: ON 37 battles / 11 swaps, OFF 61 / 20; **0 page / console errors, 0 overlays**.
+- **After the gates (tools / docs only, engine unchanged):** drv1: the engine replay presses A on the ROM driver's frames (`soundCensusRomReplay.ts --romdrive`, default in
+  `aud249Rescore.sh`): T2 OFF 3,537 -> **3,164**, ON 26,640 -> **25,840** (faint -> party-summary median -7 -> -0.5; the +13 / +15 rows are a real engine term: ready 1-3 frames after the
+  ROM's pulse). hcr3m: the 7 Scene ON residuals traced to commands (Icy Wind hit hp keeps the 28-row floor vs ROM 17; recoil hp floor + 7 unpresented rows; second-mover lead L + 1; Rollout /
+  Ice Ball hp = damage + 8 on the ROM). b4m: ROM leads of the 12 B4 bodies (Thunder Wave / Stun Spore / Glare 9 ... Curse 4); the kernel's own lead already equals them; ais2's ON +2 is two
+  pixel-correct holds in earlier turns (the re-pin stands).
+- **Next** (ranked): (1) land hcr3m (hp floors after a hit / recoil, Rollout / Ice Ball hp = damage + 8, second-mover lead) and b4m (B4 ids into `BODY_LEAD_RULE`, tails, status SE offset +10 -> +3),
+  re-scoring with drv1's ROM-cadence replay; then the AI-choice term (fsc2m: 6, +2 with no super-effective candidate); (2) Scene ON per-body interval
+  re-derivation for the 7 hcr2 residuals (ISSUES #219: Haze / Seismic Toss second mover, rollout5 / iceball5 later turns, aud252 end rows, ais2 ON window; Icy Wind hit -> stat SE 89 vs 77) and the
+  per-print u in Scene ON; (3) the unaudited bodies' Scene ON lead (L < 4: Present 0, Memento 8, Double Team 2) and Curse -3 / Toss -1; (4) lead1m B4 C bodies, B5 adapter windows, multi-hit
+  hits 2+; (5) small: chg1 Dive player unleash +1, the hcr2 labs' foe pose at the print end, #227 Mimic edge, #225 LOGO_WIGGLE / LOGO_WAVE, #223 remainder. Run the FULL suite before folding any
+  timing change, and re-run the soak pins after every merge of two timing branches (they re-pin against their own bases).
+
+---
+
 ## 2026-11-20 — CAX31 daily run (supervisor, Opus 5.5, 2026-11-19 13:30 -> 2026-11-20 05:30 UTC): wind-down: sound timing -36 % (Scene ON), switch-in ability prints, button-wait messages, Brain music, 6 transitions, Shedinja HP
 
 - **State:** master clean, no workers, no worktrees; no push. **No DEFERRED items.** Final engine tree `17f2a47e8` (later commits are tests / docs). ENGINE_BUILD **`eb-ffe38fb0b685bbe6`**

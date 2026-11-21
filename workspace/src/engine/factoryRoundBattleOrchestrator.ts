@@ -59,6 +59,7 @@ import {
 import type { GbaButton } from "../input.ts";
 import {
   advanceBattleCommandPresentation,
+  applyBattleCommandMoveSwitch,
   battleCommandUiStatusFromStatus1,
   cancelBattleCommandPartySelection,
   createBattleCommandDisplayedField,
@@ -156,6 +157,7 @@ import {
 import { BATTLE_SCRIPT_STATUS2_MASKS } from "./battleScriptSourceConstants.ts";
 import {
   reduceFactoryFullTurnDecision,
+  switchFactoryCommandMoves,
   type FactoryFullTurnDecisionRules,
 } from "./factoryBattleScriptFullTurnDecision.ts";
 import {
@@ -163,7 +165,11 @@ import {
   submitLiveFactoryAiDecision,
   type FactoryAiBattleHistory,
 } from "./factoryAiLiveDriver.ts";
-import { createFactoryCorpusPartyMember } from "./factoryCorpusParty.ts";
+import {
+  createFactoryCorpusPartyMember,
+  factoryFacilitySetMoveIds,
+  setMonMoveAvoidReturn,
+} from "./factoryCorpusParty.ts";
 import {
   generateFactoryOpponent,
   type FactoryOpponentGenerationResult,
@@ -730,6 +736,12 @@ function asBattleScriptParty(party: FactoryKernelParty): BattleScriptPartyState 
  * `healFactoryKernelParty`'s source-derived identity guard then rejects at
  * the next swap/advance (ISSUES #73, WIN swap-offer NO decision).
  */
+/** msw1: the terminal party's moves when SELECT switching only reordered `identity`, else `identity` (the old behavior). */
+function permutedMovesOrSame<T extends readonly number[]>(identity: T, terminal: readonly number[]): T {
+  const sorted = (moves: readonly number[]) => [...moves].sort((a, b) => a - b).join();
+  return sorted(identity) === sorted(terminal) ? (terminal as unknown as T) : identity;
+}
+
 function overlayTerminalKernelParty(
   identity: FactoryKernelParty,
   terminal: BattleScriptPartyState,
@@ -740,7 +752,34 @@ function overlayTerminalKernelParty(
     status1: terminal[index]!.status1,
     item: terminal[index]!.item,
     pp: terminal[index]!.pp,
+    moves: permutedMovesOrSame(member.moves, terminal[index]!.moves),
   })) as unknown as FactoryKernelParty;
+}
+
+/**
+ * msw1: SELECT move switching rewrites the party mon's move slots, so the records must remember the order for the
+ * kernel party the next battle rebuilds (`healFactoryKernelParty`). A party whose moves are not a permutation of the
+ * record's set moves (nothing in the Factory route does this) keeps its record unchanged.
+ */
+function recordsWithTerminalMoveOrder(
+  records: FactoryRentalParty,
+  terminal: BattleScriptPartyState,
+): FactoryRentalParty {
+  return records.map((record, index) => {
+    const setMoves = factoryFacilitySetMoveIds(record.setId).map(setMonMoveAvoidReturn);
+    const used = new Set<number>();
+    const order = terminal[index]!.moves.map((move) => {
+      const at = setMoves.findIndex((candidate, slot) => candidate === move && !used.has(slot));
+      used.add(at);
+      return at;
+    });
+    if ([...order].sort().join() !== "0,1,2,3") return record;
+    if (order.every((value, slot) => value === slot)) {
+      const { moveOrder: _identity, ...rest } = record;
+      return Object.freeze(rest) as FactoryRentalRecord;
+    }
+    return Object.freeze({ ...record, moveOrder: order as unknown as [number, number, number, number] });
+  }) as unknown as FactoryRentalParty;
 }
 
 function recordId(record: FactoryRentalRecord): string {
@@ -1715,10 +1754,17 @@ function finishBattle(
     rngBefore: state.round.rules.rngValue,
     rngAfter: battle.rng.value,
   });
+  const playerRentalRecords = state.round.rules.playerRentalRecords === null
+    ? undefined
+    : recordsWithTerminalMoveOrder(
+      state.round.rules.playerRentalRecords,
+      battle.rules.rulesContext.party.player,
+    );
   const round = resolveRoundBattle(state.round, {
     ...adapted,
     playerKernelParty,
     opponentKernelParty,
+    ...(playerRentalRecords === undefined ? {} : { playerRentalRecords }),
   });
   // EventScript_DefeatedOpponent (BattleFrontier_BattleFactoryBattleRoom/
   // scripts.inc:92-97) increments FACTORY_DATA_WIN_STREAK_SWAPS on every
@@ -2230,6 +2276,9 @@ function beginCommandResolution(
           // flow1: a voluntary switch here keeps its recall line and recall (the foe underground after Dig, seed 6).
           sourceDecision: presentation.pendingDecision,
           opponentHpOnSwitchout: opponentHpOnSwitchout(state.battlePresentationBoundaries!),
+          ...(presentation.pendingDecision.kind === "use-move" && presentation.forcedMove === null
+            ? { confirmHandoff: Object.freeze({ fightDisplayCursor: presentation.fightDisplayCursor, idleBounceElapsed: presentation.idleBounceElapsed }) }
+            : {}),
         })
       : freshResolution();
   }
@@ -3578,7 +3627,39 @@ export function advanceFactoryRoundBattleCommand(
     });
     return beginCommandResolution(cleared, returned, transition, history);
   }
-  const advanced = advanceBattleCommandPresentation(presentation, newKeys);
+  const advancedRaw = advanceBattleCommandPresentation(presentation, newKeys);
+  if (advancedRaw.pendingMoveSwitch !== null) {
+    // msw1: HandleMoveSwitching's confirm rewrites gBattleMons and the party mon in the same frame.
+    const switched = switchFactoryCommandMoves(
+      battle,
+      advancedRaw.pendingMoveSwitch.source,
+      advancedRaw.pendingMoveSwitch.target,
+    );
+    if (switched.boundary.kind !== "decision-required" || switched.boundary.request.kind !== "command") {
+      return fail("move switching lost the command boundary");
+    }
+    return Object.freeze({
+      ...state,
+      battle: switched,
+      battleCommandPresentation: applyBattleCommandMoveSwitch(
+        advancedRaw,
+        switched.boundary.request,
+        switched.rules.rulesContext,
+      ),
+      moveSelectionCursors: Object.freeze(
+        state.moveSelectionCursors.map((cursor, battler) =>
+          battler === advancedRaw.request.battler ? advancedRaw.pendingMoveSwitch!.target : cursor),
+      ) as FactoryBattleMoveSelectionCursors,
+      battlePresentationBoundaries: state.battlePresentationBoundaries === null
+        ? null
+        : Object.freeze(state.battlePresentationBoundaries.map((boundary) =>
+          boundary.battler === advancedRaw.request.battler
+            ? Object.freeze({ ...boundary, moveCursor: advancedRaw.pendingMoveSwitch!.target })
+            : boundary
+        )) as unknown as FactoryBattlePresentationBoundaries,
+    });
+  }
+  const advanced = advancedRaw;
   if (battleForfeitMessageDone(advanced)) {
     return finishBattle(state, forfeitTerminalBattle(battle), history);
   }

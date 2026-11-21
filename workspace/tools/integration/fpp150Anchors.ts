@@ -64,6 +64,8 @@ export function fpp150Arm(name: string) {
   // The production handoff from stop-bounce-request to command 0 (the pre-pass turn ends it there).
   let handoff = {
     lifecycle: { phase: "confirm-handoff", phaseElapsed: 0 }, fadeTick: 0,
+    // hcr1: no segments = the fixed stage walk; STOP_BOUNCE_REQUEST_LAG was fitted on it (the Scene OFF used-move lead rule would double-count).
+    segments: [],
     confirmHandoff: { stage: "stop-bounce-request", fightDisplayCursor: slot, idleBounceElapsed: 0, bounceReset: false,
       ...(battleResolutionOpensWithFocusPunchPrePass(events as never) ? { focusPunchPrePass: true } : {}) },
   } as any;

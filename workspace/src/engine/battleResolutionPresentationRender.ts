@@ -2839,7 +2839,8 @@ export function createBattleResolutionPresentationRenderView(
         ...(state.liveMoveBattlerX2Input === undefined ? {} : { battlerX2Input: state.liveMoveBattlerX2Input }),
       });
     } else if (command.type === "hit-animation") {
-      effect = Object.freeze({
+      if (command.timing.invisibleTarget === true) effect = null;
+      else effect = Object.freeze({
         type: "hit",
         battler: command.battler,
         ...genericHitReactionAtAge(

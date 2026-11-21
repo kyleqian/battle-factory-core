@@ -1,6 +1,8 @@
 // hie3 (ISSUES #220 step 3): General_HeldItemEffect SEs 152 x3 / 228 / 102 in Scene ON, against step-mode ROM probe windows
 // (tools/audio/fixtures/hie3-*-on.json, soundEventProbe.py `lab` of tools/battle-lab/hie1-*-on.json / hie2-sitrus-opp-on.json; docs/hie3-held-item-sounds.md).
 // The engine's lab runs ahead of the ROM before the segment (docs/hie2-held-item-render.md); the per-lab drift below is that measured pre-segment offset.
+// hcr2c: the hcr2 used-move hold (u = 3, one row) moves the held-item commands and their general-animation SEs (no sound lead) one frame later with the pixels: command starts +1 (730 / 747 / 739 -> 731 / 748 / 740),
+// labs drift 1 / 2 / 12 -> 0 / 1 / 11 (toward the ROM; sitrus now plays on the ROM frame), the drift-free first-SE offsets unchanged.
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { collectSoundTick } from "../src/audio/soundEvents.ts";
@@ -36,11 +38,11 @@ function replay(rom: Fixture): { rows: string[]; commandStart: number } {
 const romRows = (rom: Fixture, drift: number) => rom.events.filter((e) => e.kind === "se" && e.id !== null && HELD_IDS.includes(e.id)).map((e) => `${e.id}@${e.frame - drift}(${e.pan})`);
 // ROM first SE frame (script frame 8), the lab's pre-segment drift (app ahead of the ROM), engine command start, pan. hpd4: the floor-free foe-hit hold starts the held-item command 1 row later in sitrus-opp / leftovers / cheri (drift 9 / 17 / 20 -> 8 / 16 / 19, toward the ROM). hpd5: Seismic Toss (the lab's attack) joins the audited leads (6-row lead, level-aware 220 / 227 / 231 body, 1-row tail), so the held-item command starts 7 rows later per Toss before it and the drift falls 9 / 8 / 17 / 16 / 19 -> 2 / 1 / 3 / 2 / 12. hpf1: the Seismic Toss on the player carries its ROM post-hp hold (tail rows, no floor), 1 row more before the held-item command in sitrus-on / shellbell-on: drift 2 / 3 -> 1 / 2.
 const SITES = [
-  { name: "hie3-sitrus-on", first: 754, drift: 1, commandStart: 730, pan: -64 },
-  { name: "hie3-sitrus-opp-on", first: 754, drift: 1, commandStart: 730, pan: 63 },
-  { name: "hie3-shellbell-on", first: 766, drift: 2, commandStart: 747, pan: -64 },
-  { name: "hie3-leftovers-on", first: 772, drift: 2, commandStart: 747, pan: -64 },
-  { name: "hie3-cheri-on", first: 737, drift: 12, commandStart: 739, pan: -64 },
+  { name: "hie3-sitrus-on", first: 754, drift: 0, commandStart: 731, pan: -64 },
+  { name: "hie3-sitrus-opp-on", first: 754, drift: 0, commandStart: 731, pan: 63 },
+  { name: "hie3-shellbell-on", first: 766, drift: 1, commandStart: 748, pan: -64 },
+  { name: "hie3-leftovers-on", first: 772, drift: 1, commandStart: 748, pan: -64 },
+  { name: "hie3-cheri-on", first: 737, drift: 11, commandStart: 740, pan: -64 },
 ] as const;
 const SPACING: ReadonlyArray<readonly [number, number]> = [[152, 0], [152, 32], [152, 64], [228, 96], [102, 168]];
 

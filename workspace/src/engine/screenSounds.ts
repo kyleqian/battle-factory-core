@@ -1,6 +1,6 @@
 // S11 aud240a/b: screen sound emitters. Write-only presentation (src/audio/soundEvents.ts):
 // nothing here reads engine state or changes a branch's outcome.
-import { emitSound, soundCollecting } from "../audio/soundEvents.ts";
+import { emitSound, getSoundTickLead, setSoundTickLead, soundCollecting } from "../audio/soundEvents.ts";
 import speciesStatsData from "../data/gen/species-stats.json" with { type: "json" };
 import { CRY_FAINT_FRAMES, CRY_NORMAL_FRAMES, CRY_WEAK_FRAMES } from "../data/cryModeFrames.ts";
 
@@ -79,6 +79,7 @@ interface Scheduled {
   readonly run: () => void;
   readonly openCry?: true;
   readonly task?: true;
+  readonly lead: number;
 }
 
 let currentFrame = 0;
@@ -108,7 +109,9 @@ export function runScheduledScreenSounds(): void {
       if (entry.frame !== currentFrame || (entry.task === true) !== tasks) continue;
       queue.splice(index, 1);
       index -= 1;
+      setSoundTickLead(entry.lead);
       entry.run();
+      setSoundTickLead(0);
     }
   }
 }
@@ -116,7 +119,7 @@ export function runScheduledScreenSounds(): void {
 export function scheduleAfter(delay: number, run: () => void, openCry?: true, task?: true): void {
   if (!soundCollecting()) return;
   if (delay === 0) run();
-  else queue.push({ frame: currentFrame + delay, run, ...(openCry ? { openCry } : {}), ...(task ? { task } : {}) });
+  else queue.push({ frame: currentFrame + delay, run, lead: getSoundTickLead(), ...(openCry ? { openCry } : {}), ...(task ? { task } : {}) });
 }
 
 function restoreBgm(bgm: number): void {

@@ -56,9 +56,9 @@ function ourEvents(rom: Fixture): SoundEvent[] {
 // ROM frame minus ours for every emitted move SE (the idle-lead +2 class, ISSUES #198).
 const SPECS: Record<string, { delta: number }> = {
   // Move_PSYCHIC: blend_color_cycle (AnimTask_BlendColorCycle: 3 fades of PaletteFadeCalls with delay 2) then loopsewithpan SE184 x3 (frames 132 / 142 / 153).
-  "psychic-player": { delta: 2 },
+  "psychic-player": { delta: 0 },
   // Move_BODY_SLAM: SE152 at the start, then the gVerticalDipSpriteTemplate wait (2 x 6 + 3), delay 11 and the SlideMonToOffset / hitsplat rows: SE141 x2 (loopsewithpan).
-  "bodyslam-player": { delta: 2 },
+  "bodyslam-player": { delta: 0 },
 };
 
 describe("move-animation SEs after the aud242h blend_color_cycle / vertical-dip waits", () => {

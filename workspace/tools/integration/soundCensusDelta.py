@@ -30,6 +30,16 @@ def load_arm(d):
     return rows
 
 
+def to_emission_ticks(rows):
+    """hcr2b: T1 attributes sounds to the command windows the engine presents on the tick that emits them. A stamp moved ahead by a lead (arm column `soundLead`,
+    parallel to `sound`) is read back to its emission tick, so T1 does not move with a ROM-grounded lead; tolerance and tables are untouched. An arm without the column is unchanged."""
+    for r in rows.values():
+        lead = r.get("soundLead")
+        if lead and r.get("sound"):
+            r["sound"] = [[e[0] + l] + e[1:] for e, l in zip(r["sound"], lead)]
+    return rows
+
+
 def arm_mode(base, final):
     B, F = load_arm(base), load_arm(final)
     res = Counter(); bad = []; tuples = defaultdict(Counter); deltas = Counter()
@@ -209,7 +219,7 @@ def exp_key(a):
 
 
 def t1(arm, json_out):
-    A = load_arm(arm)
+    A = to_emission_ticks(load_arm(arm))
     timing = json.load(open("src/data/gen/anim-sound-timing.json"))
     label_of = {m["move"]: m["label"] for m in timing["moves"]}
     cry = cry_sites()

@@ -75,8 +75,8 @@ interface Spec {
 const FADE_SPECS: Record<string, Spec> = {
   "machpunch-opponent": { delta: 0 },
   "machpunch-player": { delta: 0 },
-  "hyperfang-player": { delta: 2 },
-  "crunch-player": { delta: 2 },
+  "hyperfang-player": { delta: 0 },
+  "crunch-player": { delta: 0 },
 };
 
 // Every row of a window is shifted by the same named per-move offset (ISSUES #198: the ROM script start vs the live adapter's body clock; the
@@ -85,11 +85,11 @@ const FADE_SPECS: Record<string, Spec> = {
 // The later gated rows (Icy Wind's panse after sprite waits; the next move's SEs) are the ROM-only part. Metal Sound is cut at ROM frame 121: the ROM
 // loses two wall-clock frames there (121 / 122 have no pan call, a VBlank overrun like the BG load lag; its rows after 111 are noop calls anyway).
 const PAN_SPECS: Record<string, Spec> = {
-  "flamethrower-opponent": { delta: 5 },
-  "flamethrower-player": { delta: 5 },
-  "metalsound-opponent": { delta: 0, romOnlyFrom: 121 },
-  "sweetscent-player": { delta: 0, romOnlyFrom: 400 },
-  "icywind-opponent": { delta: 2, romOnlyFrom: 100 },
+  "flamethrower-opponent": { delta: 3 },
+  "flamethrower-player": { delta: 3 },
+  "metalsound-opponent": { delta: -2, romOnlyFrom: 121 },
+  "sweetscent-player": { delta: -1, romOnlyFrom: 400 },
+  "icywind-opponent": { delta: 0, romOnlyFrom: 100 },
 };
 
 // Sound-task family (docs section 7.3): SoundTask_LoopSEAdjustPanning plays and pan steps ported from battle_anim_sound_tasks.c. Hyper Beam waits on a
@@ -100,16 +100,16 @@ const PAN_SPECS: Record<string, Spec> = {
 // opening SE are frame-exact on an opponent attacker (pan -63, the AdjustPanning flip); Superpower (physical) is the +2 class, the status bodies
 // Flatter is -3 and Cosmic Power 0 (lse2: its lead is presented in front of the body) (aud242a's status class -4 +-1: per-move constants). The windows are cut where the other gated rows start.
 const TASK_SPECS: Record<string, Spec> = {
-  "hyperbeam-opponent": { delta: 1 },
-  "hyperbeam-player": { delta: 1 },
-  "aurorabeam-player": { delta: 2 },
-  "icebeam-opponent": { delta: 2 },
-  "psybeam-player": { delta: 2 },
-  "fireblast-player": { delta: 2 },
+  "hyperbeam-opponent": { delta: 0 },
+  "hyperbeam-player": { delta: 0 },
+  "aurorabeam-player": { delta: 0 },
+  "icebeam-opponent": { delta: 0 },
+  "psybeam-player": { delta: 0 },
+  "fireblast-player": { delta: 0 },
   "dragonclaw-opponent": { delta: 0, romOnlyFrom: 200 },
   "cosmicpower-player": { delta: 0, romOnlyFrom: 150 },
   "flatter-player": { delta: -3, romOnlyFrom: 100 },
-  "superpower-player": { delta: 2, romOnlyFrom: 150 },
+  "superpower-player": { delta: 0, romOnlyFrom: 150 },
 };
 
 describe("move-animation SEs after background fades (aud242c)", () => {

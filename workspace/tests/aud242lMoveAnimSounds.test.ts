@@ -54,10 +54,10 @@ function ourEvents(rom: Fixture): SoundEvent[] {
 
 const BLIZZARD_SES = [153, 154, 137];
 const SPECS: Array<{ name: string; delta: number }> = [
-  { name: "blizzard-fearow-bulbasaur-opponent", delta: 2 },
-  { name: "blizzard-bulbasaur-charizard-opponent", delta: 2 },
-  { name: "blizzard-bulbasaur-bulbasaur-opponent", delta: 2 },
-  { name: "blizzard-bulbasaur-fearow-player", delta: 2 },
+  { name: "blizzard-fearow-bulbasaur-opponent", delta: 0 },
+  { name: "blizzard-bulbasaur-charizard-opponent", delta: 0 },
+  { name: "blizzard-bulbasaur-bulbasaur-opponent", delta: 0 },
+  { name: "blizzard-bulbasaur-fearow-player", delta: 0 },
 ];
 
 describe("move-animation SEs of the aud242l Blizzard lifetimes", () => {

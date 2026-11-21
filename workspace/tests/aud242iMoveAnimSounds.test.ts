@@ -56,8 +56,8 @@ function ourEvents(rom: Fixture): SoundEvent[] {
 // ROM frame minus ours for every emitted move SE (the idle-lead +2 class, ISSUES #198).
 const SPECS: Record<string, { delta: number; rows: number }> = {
   // Move_SLUDGE_BOMB: ten SE126 + sludge projectiles, three SE175, `waitsound`, the hit-particle / blend_color_cycle wait, six SE148 (SE_M_TOXIC, PoisonBubblesEffect).
-  "sludge-player": { delta: 2, rows: 19 },
-  "sludge-opponent": { delta: 2, rows: 19 },
+  "sludge-player": { delta: 0, rows: 19 },
+  "sludge-opponent": { delta: 0, rows: 19 },
   // Move_FAINT_ATTACK: SE190 (before the first wait, already emitted), then after attacker_fade_to_invisible + the clearmonbg overrun the SE123 row. +3 on both rows and both sides:
   // the script start of this move is one frame earlier than the usual +2 idle-lead class (constant per move, like the other moves' named deltas), the interval is exact.
   "faint-player": { delta: 3, rows: 2 },

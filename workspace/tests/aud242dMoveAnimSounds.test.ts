@@ -74,14 +74,14 @@ interface Spec {
 // loses 2 wall frames (VBlank overrun of the tilemap / image decompress): the model shifts only ops after the creation step (METALLIC_SHINE_LOAD_LAG),
 // so that one row carries the named +2.
 const SPECS: Record<string, Spec> = {
-  "thunderbolt-player": { delta: 2, extra: { "169:215:63": 1, "236:119:63": 1, "255:119:63": 1 } },
-  "icywind-opponent": { delta: 2 },
-  "doubleedge-player": { delta: 2 },
+  "thunderbolt-player": { delta: 0, extra: { "171:215:63": 1, "238:119:63": 1, "257:119:63": 1 } },
+  "icywind-opponent": { delta: 0 },
+  "doubleedge-player": { delta: 0 },
   "calmmind-player": { delta: 0, romOnlyFrom: 500 }, // lse2: -5 before the body lead was presented
   "hail-player": { delta: 0, romOnlyFrom: 380 },
   "sunnyday-player": { delta: 0, romOnlyFrom: 390 },
-  "metalclaw-player": { delta: 2, extra: { "95:120:-64": 2 } },
-  "steelwing-player": { delta: 2, extra: { "98:120:-64": 2 } },
+  "metalclaw-player": { delta: 0, extra: { "97:120:-64": 2 } },
+  "steelwing-player": { delta: 0, extra: { "100:120:-64": 2 } },
 };
 
 describe("move-animation SEs after palette-family waits (aud242d)", () => {

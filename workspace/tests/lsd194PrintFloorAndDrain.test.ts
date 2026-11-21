@@ -23,9 +23,11 @@ describe("lsd194 A: WAITMESSAGE_LONG print floor", () => {
       expect(printsOf("crit", scene).find((p) => p[0] === "It’s not very effective…")![1]).toBe(88);
     });
   }
-  it("control: MESSAGE_TIMING (the non-print message floor) stays {24, 0}", () => {
+  it("control: the empty box of this lab is Earthquake's hit-all EMPTYSTRING3, timed by kernel rows (fsc1 c2), not the 24-row MESSAGE_TIMING floor", () => {
+    // fsc1 c2 (docs/aud251-s11-scoreboard-refresh.md "fsc1"): BattleScript_DoHitAllWithUndergroundBonus's `printstring STRINGID_EMPTYSTRING3;
+    // waitmessage 1` lasts to the next presented receipt + 1 row (ROM ~5 rows, fsc1m section 2); before fsc1 this box took the 24-row floor.
     const empty = lsd194Production({ scene: "off", seed: 1, ...CLASSES["super-effective"] }).rows.find((r) => r.type === "message" && r.lines!.length === 0)!;
-    expect([empty.dur, empty.timing]).toEqual([24, { minimumFrames: 24, holdFrames: 0 }]);
+    expect([empty.dur, empty.timing]).toEqual([5, { minimumFrames: 5, holdFrames: 0 }]);
   });
 });
 

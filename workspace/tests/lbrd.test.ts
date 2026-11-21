@@ -55,6 +55,14 @@ interface WonLobby {
 // merge of pau4 / btn1 / pau5 / hpf5 (pin1; the presented entry scripts, button waits and hp lengths shift every soak trajectory): 2 lost the Scene OFF continuation and the challenge-2 loss
 // case. A scan of 0..15 with the seed in all three roles (scratch copies of this file) found only 14 passing every case (15 / 15; 2 and 4 fail 2 cases, 13 fails 3, 10 fails 5, 0 fails 8,
 // the rest 12), so all three use 14.
+// hcr1 (Scene OFF first used-move print at commit + 6 + u: presentation timing, every OFF soak trajectory shifts a few frames): 14 lost the OFF continuation and fails 8 cases. A scan of 0..15
+// with the seed in all three roles (scratch copies of this file) found no seed passing every case: 10 and 4 fail only the retire case, 0 / 2 / 13 fail only the two WIN_TWO-role continuation
+// cases, the rest 8 .. 12. Roles are independent cases, so WIN_TWO and WIN_THEN_LOSE use 10 (passes all but the retire) and RETIRE uses 0 (passes the retire and the loss case).
+// hcr1b (the first used-move glyph at commit + 7 + u, pixel-exact): 10 / 0 / 10 fail 3 cases. A scan of 0..47 with the seed in all three roles (scratch copies of this file) found 23, 33, 44 and 47
+// passing every case (0..15 all fail at least the two WIN_TWO-role continuation cases; 17 and 40 fail only those two, 36 only the retire case), so all three use 23.
+// merge of rsw1 + hcr1b + gsp2b (pin2): 23 still passes every case. A scan of 0..22 with the seed in all three roles on the merged tree (scratch copies of this file) found no seed passing all 15 (17 loses only the two WIN_TWO continuation cases), so all three stay 23.
+// lbw9 (the Lobby save wait is a timer / held A, the menus clamp: every in-game new challenge is dealt from a later cursor): 23 loses the continuation and the challenge-2 loss case. A scan of 0..31 with the seed
+// in all three roles (scratch copies of this file, full-file runs) found 0 and 10 passing all 15 cases (13 fails only the challenge-2 loss case; 4, 14 and 17 fail the two continuation cases), so all three use 0.
 // fop1 (docs/fop1-first-opponent-order.md: a new challenge's first opponent is rolled in the ROM's order, so every continuation's first
 // trainer moves): 14 lost the continuation in both scenes. A scan of 0..20 with the seed in all three roles (scratch copies of this file)
 // found none passing every case: 2 fails only the retire (its continued challenge loses a battle before the retire), 13 only the
@@ -66,9 +74,10 @@ interface WonLobby {
 // trial-fix-20261121 (fnt1 + lbb1 + msg2 + wbh1 + mvs1 + hdt1 merged on fop1 / sct1): 2's Scene OFF continued challenge no longer
 // reaches the second round-end. A scan of 0..20 in the continuation role (scratch copies of this file; retire 13, loss 10 unchanged) found
 // 10, 13 and 19 passing every case (15 / 15; 2 and 4 fail the 2 continuation cases, 17 and 20 fail 6, the rest 10), so the continuation uses 10.
-const WIN_TWO_SEED = 10;
-const RETIRE_SEED = 13;
-const WIN_THEN_LOSE_SEED = 10;
+    // (box-merge-20261121: values to re-measure on the combined tree)
+const WIN_TWO_SEED = 0;
+const RETIRE_SEED = 0;
+const WIN_THEN_LOSE_SEED = 0;
 
 function newPlayer(seed: number): RandomPlayer {
   const player = new RandomPlayer(new Rng(seed), new ActionLog(false), "winning");

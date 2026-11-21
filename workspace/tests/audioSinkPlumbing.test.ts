@@ -91,7 +91,7 @@ describe("session sound collection (aud239)", () => {
       expect(inner.events).toEqual([{ frame: 11, kind: "stop", id: 90, pan: null }]);
       return "ok";
     });
-    expect(outer).toEqual({ result: "ok", events: [{ frame: 10, kind: "se", id: 1, pan: 0 }] });
+    expect(outer).toEqual({ result: "ok", events: [{ frame: 10, kind: "se", id: 1, pan: 0 }], leads: [0] });
     expect(soundCollecting()).toBe(false);
     expect(() => collectSoundTick(1, () => { throw new Error("x"); })).toThrow("x");
     expect(soundCollecting()).toBe(false);

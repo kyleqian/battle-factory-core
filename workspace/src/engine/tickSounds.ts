@@ -1,8 +1,9 @@
 // The post-tickEngineState sound block of tick() (core.ts), shared with tools/integration/lsd194Census.ts so the census emits through the same code.
-import { soundCollecting } from "../audio/soundEvents.ts";
+import { setSoundTickLead, soundCollecting } from "../audio/soundEvents.ts";
 import { emitBattleEndSounds, emitForfeitEndSounds } from "./battleEndSounds.ts";
 import { emitBattleHitSounds, emitDoubleTeamStatsChangeSound } from "./battleHitSounds.ts";
 import { emitBattleStartIntroSounds, emitMidBattleSwitchSounds, emitPartySendOutSounds } from "./battleStartSounds.ts";
+import { usedMoveBodySoundLeadOf } from "./battleResolutionPresentation.ts";
 import { playerFaintReplacementSendOutTimingOfSegment } from "./battleResolutionPresentationRender.ts";
 import { ENTRY_STATS_CHANGE_SE_AGE, emitGeneralAnimSounds, emitMoveAnimSounds, emitStatsChangeSounds } from "./moveAnimSounds.ts";
 import { factoryBattleStartEntryFrame } from "./factoryBattleStartEntry.ts";
@@ -49,17 +50,24 @@ export function emitTickSounds(state: TickSoundState, next: TickSoundState): voi
         orchestratorAfter.round.rules.currentOpponent.frontierBrain !== undefined,
       );
     }
-    if (orchestratorAfter?.battleResolutionPresentation) {
+    const presentationAfter = orchestratorAfter?.battleResolutionPresentation;
+    setSoundTickLead(presentationAfter?.usedMoveSoundLead ?? 0);
+    if (presentationAfter) {
       emitBattleHitSounds(
         state.factoryRoundBattleOrchestrator?.battleResolutionPresentation ?? null,
-        orchestratorAfter.battleResolutionPresentation,
+        presentationAfter,
         orchestratorAfter.round.rules.currentOpponent.frontierBrain !== undefined,
       );
     }
-    if (orchestratorAfter?.battleResolutionPresentation) emitMoveAnimSounds(orchestratorAfter.battleResolutionPresentation, orchestratorAfter.round.rules.currentOpponent.frontierBrain !== undefined);
-    if (orchestratorAfter?.battleResolutionPresentation) emitStatsChangeSounds(orchestratorAfter.battleResolutionPresentation);
-    if (orchestratorAfter?.battleResolutionPresentation) emitDoubleTeamStatsChangeSound(orchestratorAfter.battleResolutionPresentation);
-    if (orchestratorAfter?.battleResolutionPresentation) emitGeneralAnimSounds(orchestratorAfter.battleResolutionPresentation);
+    setSoundTickLead(presentationAfter ? usedMoveBodySoundLeadOf(presentationAfter) : 0);
+    if (presentationAfter) emitMoveAnimSounds(presentationAfter, orchestratorAfter.round.rules.currentOpponent.frontierBrain !== undefined);
+    setSoundTickLead(presentationAfter?.usedMoveAnimSoundLead ?? 0);
+    if (presentationAfter) emitStatsChangeSounds(presentationAfter);
+    setSoundTickLead(presentationAfter?.usedMoveAnimSoundLead ?? 0);
+    if (presentationAfter) emitDoubleTeamStatsChangeSound(presentationAfter);
+    setSoundTickLead(presentationAfter?.usedMoveScriptSoundLead ?? 0);
+    if (presentationAfter) emitGeneralAnimSounds(presentationAfter);
+    setSoundTickLead(0);
     emitForfeitEndSounds(
       state.factoryRoundBattleOrchestrator?.battleCommandPresentation?.lifecycle.phase ?? null,
       orchestratorAfter !== null && orchestratorAfter !== undefined && orchestratorAfter.battle === null,

@@ -13,6 +13,11 @@ defects are all authorized in the finish-up mission (`docs/factory-finish-scope.
 gameplay / RNG when proved against source; use main-lane ownership and gameplay gates. Historical presentation-only
 exclusions are superseded. Unrelated expansions stay parked.
 
+## #227 — SELECT move swap: Mimic edge (msw1, 2026-11-20)
+
+SELECT move switching is ported (msw1, `docs/msw1-select-move-swap.md`; ROM `HandleMoveSwitching`). Open: a swap combined with Mimic writing the party in the same battle can
+lose the swap record (`moveOrder` on the rental records); not staged on the ROM.
+
 ## #225 — Frontier battle transitions: open remainder (Kyle, 2026-11-19: low priority)
 
 Six of the seven undrawn transitions are drawn from source and ROM-checked in both scenes (`docs/trn225-frontier-transitions.md`); the Noland
@@ -74,6 +79,15 @@ Reproduce: `tools/integration/lsd194Census.sh` + `soundCensusDelta.py --t1`; `to
 ROADMAP item 6; per-move offsets in #198). Landed 2026-11-18/19 (docs/hpd1-hp-hold.md "hpd8" / "liv2" / "lse2" / "hpf1-3", aud249 "sta5", aud242 s30 mem2, kno1 "kno3", pau1 "pau2" / "pau3"):
 16 shape-A bodies, 7 long `live` windows (Flamethrower, Solar Beam unleash, Self-Destruct, Bite, Sludge Bomb, Earthquake, Faint Attack), Flatter / Swagger / Spore / Toxic first status play, Leech Seed /
 Hydro Pump / Cosmic Power / Calm Mind / Encore / Hypnosis / Blizzard, ROM hp command lengths (hits, heals, recoil, drains), the 0x7FFF instant drop, Knock Off's item animation, the LONG / Safeguard pauses.
+- **2026-11-20/21 run (docs/aud251-s11-scoreboard-refresh.md "hcr1b" .. "fsc2m"):** landed the used-move first glyph at commit + 7 + u in both scenes (hcr1b OFF, hcr2 ON; pixel-exact on
+  28 + 28 labs), the scoped sound leads (hcr1c OFF 1 tick; hcr2b / hcr2c ON per emitter, 7 - L for audited bodies), the Scene ON wake-up head (gsp2b), the OFF invisible-target hit and
+  hit-all box (fsc1), the OFF two-turn moves (chg1). Open, named in the tests: Scene ON Haze / Seismic Toss second mover +1, rollout5 turns 4/5 and iceball5 turns 5/6 (-2 .. -5), ais2
+  seed 2741 ON window +2 engine frames (same ROM md5s), aud252 seeds 1914 / 2230 end rows +3 / +4: hcr2d showed master's values were fitted to the old fixed first print; closing them needs
+  per-body interval re-derivation (Icy Wind hit -> stat SE 89 vs ROM 77), not a lead. Also: the ON hold / lead take the first print's u only; Curse -3 / Seismic Toss -1 off the 7 - L
+  rule; unaudited bodies (L < 4) on min(u - 2, 2); the hcr2 labs' app-only foe pose change at the print end (410 px); held-item restart lead trims made T2 worse (gsp2b sweep); no ON lab
+  stays in step past a wake-up (lab foe wakes turn 2 on the ROM, 3 in the app: lab staging); fsc1 c1 is OFF only (the ON ROM keeps the blink, fly-gust-on); chg1 Dive player unleash first
+  print +1, the miss tail +1 rule only on semi-invulnerable turns. **fsc2m:** the OFF faint -> party-summary offset (median -8) is mostly the drivers' A cadence (ROM driver pulses A every
+  17 frames, the census driver every 2): fix the census driver's pulse first, then the AI-choice term (6 frames, +2 with no super-effective candidate).
 - **Bodies measured, not landed (lse3, docs/hpd1-hp-hold.md "lse3"):** Absorb +10, Mega Drain +8, Counter +5, Revenge +8, Recycle +4, Razor Wind charge / unleash +8 / +9 (+ ~5 turn-end rows of a
   locked continuation), Pound / Scratch / Tackle (+13 / +12 / +21; phy1m: outsideFactory, reachable only through Metronome; every Factory body is live in play, but 63.6 % of body commands have no audited lead, +6 .. +14 rows: `docs/phy1m-nonlive-bodies.md`), Wish (+14: the generic action-transition rows that `actionTransitionPauseFrames` drops in Scene ON
   when the anchor is the used print). hpf3 re-pinned Absorb / Revenge / Recycle / Razor Wind windows that these bodies now dominate.
@@ -454,6 +468,9 @@ Full evidence (77 `docs/issue55-*` docs, CGB4 cycle-pricing receipts through v44
   (`main.c:366`) interleaves into the same `gRngValue` stream. Two-cursor replay of the probed anchor cursors reproduces slots 0/2
   but diverges on slots 1/3/4/5 (first: MAGBY expected `1534575931`, got `431990256`). The terminal scaffold sidesteps this by
   adoption, not by fixing the contract (`docs/anchor-draft-cursor-receipt.md`).
+- **rsw2 (2026-11-20):** the room's opponent-setup draws (`battleRoom.ts` `opponentSetupExtraRngSteps`) are the canonical trace's fixed nature-loop counts (28 / 16 / 95 x2,
+  Jenson 25 / 11 / 2 x2) where FillFactoryFrontierTrainerParty's loops are value-dependent: rebased on the ROM at the swap-return room, the engine is 78 steps behind 27 frames into the battle room.
+  Same parked class (the stream already differs from the draft on); not fixed.
 - **Resume only on a user decision:** the construction clock needs live phase / workload composition and complete VBlank / IRQ /
   audio arbitration (`runFactoryConstructionClock` is unwired).
 

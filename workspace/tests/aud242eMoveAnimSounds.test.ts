@@ -85,21 +85,21 @@ interface Spec {
 //    move body's ~11-frame lead: ROM hit bar rise 302 vs ours 291; hit -> drain bar 47 vs 46, the full-HP drain bar is 1 frame exec in the ROM and 5 here).
 //    lse4: Absorb's body now carries its lead 5, adapter window +2 and tail 3 (+10 rows); the closing SE238 moves 526 -> 536 and the named extra falls 12 -> 2.
 const SPECS: Record<string, Spec> = {
-  "toxic-player": { delta: 3, romOnlyFrom: 280 },
-  "rocktomb-player": { delta: 2 },
-  "overheat-player": { delta: 2, extra: { "165:147:63": 3, "173:147:63": 3, "183:147:63": 3, "193:147:63": 3 } },
-  "counter-player": { delta: -2, extra: { "101:238:0": 2, "221:214:-63": 2, "239:131:-63": 2 } },
-  "gigadrain-player": { delta: -1 },
-  "thunderbolt-player": { delta: 2, extra: { "169:215:63": 1, "236:119:63": 1, "255:119:63": 1 } },
-  "sludge-player": { delta: 2 },
-  "poisonfang-player": { delta: 2 },
+  "toxic-player": { delta: 0, romOnlyFrom: 280 },
+  "rocktomb-player": { delta: 0 },
+  "overheat-player": { delta: 0, extra: { "167:147:63": 3, "175:147:63": 3, "185:147:63": 3, "195:147:63": 3 } },
+  "counter-player": { delta: 0 },
+  "gigadrain-player": { delta: 0 },
+  "thunderbolt-player": { delta: 0, extra: { "171:215:63": 1, "238:119:63": 1, "257:119:63": 1 } },
+  "sludge-player": { delta: 0 },
+  "poisonfang-player": { delta: 0 },
   "watergun-player": { delta: 0 },
-  "waterpulse-player": { delta: 2 },
-  "doubleedge-player": { delta: 2 },
-  "poisontail-player": { delta: 2, extra: { "99:120:-64": 2 } },
-  "rollingkick-player": { delta: 2 },
-  "absorb-player": { delta: -1, romOnlyFrom: 600, extra: { "536:238:0": 2 } },
-  "megadrain-player": { delta: -1 },
+  "waterpulse-player": { delta: 0 },
+  "doubleedge-player": { delta: 0 },
+  "poisontail-player": { delta: 0, extra: { "101:120:-64": 2 } },
+  "rollingkick-player": { delta: 0 },
+  "absorb-player": { delta: 0, romOnlyFrom: 600, extra: { "536:238:0": 1 } },
+  "megadrain-player": { delta: 0 },
 };
 
 describe("move-animation SEs after sprite / mon-task lifetime waits (aud242e)", () => {

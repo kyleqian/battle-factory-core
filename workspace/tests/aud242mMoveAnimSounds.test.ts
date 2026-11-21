@@ -54,9 +54,9 @@ function ourEvents(rom: Fixture): SoundEvent[] {
 
 // delta = ROM frame - our frame. Frustration (friendship 0: Strongest) and Return (Weak) are the Factory branch (every rental mon has friendship 0, battle_factory.c:459, 820); the labs set friendship 0 (AUD242_FRIENDSHIP=0).
 const SPECS: Array<{ name: string; ids: number[]; delta: number; rows: number }> = [
-  { name: "frustration-player", ids: [171, 194, 139], delta: 1, rows: 9 },
-  { name: "flail-player", ids: [162, 141], delta: 2, rows: 3 },
-  { name: "return-player", ids: [167, 139], delta: 1, rows: 3 },
+  { name: "frustration-player", ids: [171, 194, 139], delta: 0, rows: 9 },
+  { name: "flail-player", ids: [162, 141], delta: 0, rows: 3 },
+  { name: "return-player", ids: [167, 139], delta: 0, rows: 3 },
 ];
 
 describe("move-animation SEs of the aud242m lifetimes", () => {

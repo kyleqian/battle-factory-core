@@ -15,7 +15,7 @@ trimmed. Output per sound: OUT_DIR/<key>.wav (16-bit, mono for cries after a cen
 OUT_DIR/<key>.json (lengthFrames = frames from the call to the first all-inactive frame, lengthSamples, onset, peak, rms ...).
 
 aud244b kinds: `bgm` (PlayBGM -> m4aSongNumStart), `fanfare` (m4aSongNumStart, one-shot like an SE) and `seloop`
-(the two SEs that never go inactive, se:90:none / se:132:63). Looping songs are recorded for `--passes` passes of the ROM loop (stop clock from
+(the SEs that never go inactive: se:90, se:132, se:153 (snd3), any pan). Looping songs are recorded for `--passes` passes of the ROM loop (stop clock from
 songTicks.py) with the player's per-frame tick `clock` and `tempoC` logged next to the audio (`clockFrames`, `tempoC`, `frameSamples`), so
 tools/audio/loopCut.py can find the loop boundaries in frames and then in samples. Untrimmed except for the leading near-silence.
 """
@@ -59,7 +59,7 @@ SOUND_CHANNEL_ON = 0xC7
 SOUND_INFO_CHANS, SOUND_CHANNEL_SIZE, SOUND_CHANNELS = 0x50, 0x40, 12
 CGB_CHANNEL_SIZE, CGB_CHANNELS = 0x40, 4
 PLAYER_CLOCK, PLAYER_TEMPO_C = 0x0C, 0x22   # MusicPlayerInfo.clock (u32 ticks) / tempoC (u16 tick accumulator)
-LOOP_SE_IDS = (90, 132)
+LOOP_SE_IDS = (90, 132, 153)
 TAIL_TICKS = 96      # ticks recorded past the last loop boundary (the seam window needs audio after loopEnd)
 
 

@@ -1,0 +1,94 @@
+{
+ "name": "R096-clefable-metronome-transform-fails-digging",
+ "rules": [
+  "R096"
+ ],
+ "why": "Challenge 7. The player's Clefable (389, Metronome 10 PP) calls Metronome 10 times in a row opposite Shuckle (528: Sandstorm, Dig, Flash, Double Team; Attack 10, so it cannot knock Clefable out); every call is a draw of one of the 336 callable moves (1 in 336 each). After the tenth call the script switches to Salamence (753) and plays Aerial Ace (slot 2; it never misses, so a Double Team stack cannot stall the end; luck6). Transform called while Shuckle is underground in its Dig (Clefable is faster, speed 60 against 5, so it acts in the turn after Shuckle's Dig starts): Cmd_transformdataexecution fails against a semi-invulnerable target. Chance per seed about 10/336 x P(Shuckle digging) 0.15 = 0.4%.",
+ "seed": 1081748,
+ "challengeNum": 7,
+ "battleNum": 0,
+ "trainerId": 200,
+ "playerSetIds": [
+  389,
+  753,
+  565
+ ],
+ "opponentSetIds": [
+  528,
+  431,
+  836
+ ],
+ "script": {
+  "actions": [
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "preferSwitch": 1
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   },
+   {
+    "prefer": 2
+   }
+  ],
+  "then": "census"
+ },
+ "expect": [],
+ "cover": [
+  {
+   "file": "src/engine/battleScriptTransformOpcode.ts",
+   "text": "{\n      retu",
+   "at": 0
+  }
+ ],
+ "coverAny": true,
+ "chance": 0.004,
+ "seeds": 200
+}

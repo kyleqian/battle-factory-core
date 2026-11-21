@@ -442,13 +442,18 @@ describe("random round soak driver (green milestone pin)", () => {
       // 43_437 -> 43_336, renderCalls 3_045 -> 3_042; same battle 7, turn 3, end state, diagnostics.
       // pic8 (the forced party menu's clock starts at the faint message's dismiss edge, 2 frames earlier per forced switch; ROM lab
       // pic7-player-faint-send-in-on): frames + render calls, 43_336 -> 43_334, renderCalls 3_042 -> 3_044; same battle 7, turn 3, end state, diagnostics.
+      // hcr1 (the Scene OFF first used-move print at commit + 6 + u, docs/aud251-s11-scoreboard-refresh.md): frames + render calls, 43_334 -> 43_411, renderCalls 3_044 -> 3_043; same battle 7, turn 3, end state, diagnostics.
+      // hcr1b (the Scene OFF first used-move glyph at commit + 7 + u, pixel-exact): frames + render calls, 43_411 -> 43_559, renderCalls 3_043 -> 3_056; same battle 7, turn 3, end state, diagnostics.
+      // fsc1 (the Scene OFF invisible-target hit completes in 2 frames; the hit-all loop's EMPTYSTRING3 box is timed by kernel rows): frames + render calls, 43_559 -> 43_550, renderCalls 3_056 -> 3_054; same battle 7, turn 3, end state, diagnostics.
+      // chg1 (the Scene OFF two-turn move timing: charge box lead, hide split, miss tail, locked continuations): frames + render calls, 43_550 -> 43_557, renderCalls 3_054 -> 3_066; same battle 7, turn 3, end state, diagnostics.
       // wbh1 (docs/wbh1-battle-start-white-herb.md): a later battle-start entry script starts on its own kernel rows after the previous one's
       // pop (2 frames earlier than pau4's ENTRY_SCRIPT_GAP_ROWS; this seed has a two-script battle start, not a White Herb: with the old
       // gap restored the pin holds): render calls only, 3_044 -> 3_043; frames 43_334, battle 7, turn 3, end state, diagnostics unchanged.
       // fnt1 (docs/fnt1-fainted-box-clear.md: a "fainted!" / "Player defeated" box takes the press from the row after its last glyph, 2 rows
       // earlier, as the ROM's `\p` wait): frames only, 43_334 -> 43_323; same battle 7, turn 3, end state, diagnostics, render calls. With the
       // accept edge alone undone (isBattleResolutionButtonMessageAcceptable's promptClear lead) the old pin passes again.
-      frames: 43_323,
+    // (box-merge-20261121: values to re-measure on the combined tree)
+      frames: 43_557,
       battle: 7,
       turn: 3,
       diagnostics: {
@@ -460,7 +465,7 @@ describe("random round soak driver (green milestone pin)", () => {
         terminalOutcome: "roundWon",
         terminalRecordMenuInputReadyReached: true,
         terminalRecordChoice: "no",
-        renderCalls: 3_043,
+        renderCalls: 3_066,
       },
     });
     expect(second).toEqual(first);
@@ -675,11 +680,29 @@ describe("random round soak driver (green milestone pin)", () => {
     // moves): seed 15 no longer commits Baton Pass (with the cursor fix undone it hits again with the numbers above). Re-scanned full-policy
     // seeds 0..39 (tools/soak/batonPassSearch.ts --seeds 0:40 --parallel 4): candidates 12, 13, 16, 27, 31, 36. Seed 12 is the lowest
     // (Baton Pass commits 1, first commit 74877, halt 75141 on MAWILE in battleIndex 0, two Lobby new challenges).
+    // hcr1b (the Scene OFF used-move glyph at commit + 7 + u; the exploring presses land on new phases): seed 12 no longer commits Baton Pass.
+    // Re-scanned full-policy seeds 0..29 (tools/soak/batonPassSearch.ts --seeds 0:30 --parallel 4): candidates 3, 10, 16, 17, 20, 23, 24, 26. Seed 3 is the lowest
+    // (Baton Pass commits 2, first commit 49232, halt 49444 on MAWILE in battleIndex 0, three Lobby new challenges).
+    // gsp2 (Scene ON wake-up presentation rule: the turn-start status head, the wake-up print / icon timing; the exploring presses land
+    // on new phases): seed 12 no longer commits Baton Pass (0 commits, 80,000 frames in battle 1). Re-scanned full-policy seeds 0..39
+    // (tools/soak/batonPassSearch.ts --seeds 0:40 --parallel 3, same options): candidates 6, 16, 35, 38. Seed 6 is the lowest
+    // (Baton Pass commits 4, first commit 61360, halt 61558 on LEDIAN in battleIndex 0, three Lobby new challenges). Pin 12 -> 6.
+    // merge of rsw1 + hcr1b + gsp2b (pin2; the exploring presses land on new phases again, the two rules together): seed 6 no longer commits Baton Pass
+    // (0 commits). Re-scanned full-policy seeds 0..39 (tools/soak/batonPassSearch.ts --seeds 0:40 --parallel 3, same options): candidates 3, 10, 16, 17, 20, 23,
+    // 24, 26, 36. Seed 3 is the lowest (Baton Pass commits 2, first commit 49232, halt 49444 on MAWILE in battleIndex 0, three Lobby new challenges). Pin 6 -> 3.
+    // fsc1 (the Scene OFF invisible-target hit completes in 2 frames, the hit-all loop's EMPTYSTRING3 box is timed by kernel rows: shifts the soak's press phases): seed 3 no longer commits Baton Pass
+    // (0 commits). Re-scanned full-policy seeds 0..29 (tools/soak/batonPassSearch.ts --seeds 0:30 --parallel 3, same options): candidates 6, 27, 28. Seed 6 is the lowest (Baton Pass commits 6,
+    // first commit 47503, halt 47543 on MAWILE in battleIndex 0, one Lobby new challenge). Pin 3 -> 6.
+    // chg1 (the Scene OFF two-turn move timing: charge box lead, hide split, miss tail, locked continuations; the exploring presses land on new phases):
+    // seed 6 no longer commits Baton Pass (0 commits, battle 4 turn 8 at 80,000 frames). Re-scanned full-policy seeds 0..39 (tools/soak/batonPassSearch.ts
+    // --seeds 0:40 --parallel 3, same options; ~48 s): candidates 28, 33, 37, all OK with no openpartyscreen / machine-barrier error. Seed 28 is the lowest
+    // (Baton Pass commits 4, first commit 57044, halt 57248 on MAWILE in battleIndex 1, one Lobby new challenge). Pin 6 -> 28.
     // lrc1 (the loss tail runs the opponent's animated return to ball and the win text prints 67 frames later; the exploring policy's presses
     // after every loss land on new phases, and the Lobby deals from a later cursor): seed 12 no longer commits Baton Pass. Re-scanned full-policy
     // seeds 0..39 (tools/soak/batonPassSearch.ts --seeds 0:40 --parallel 8): candidates 3, 6, 14, 28, 32, 36. Seed 3 is the lowest
     // (Baton Pass commits 1, first commit 23967, halt 24569 on MAWILE in battleIndex 0, three Lobby new challenges).
-    const result = runSeed(3, {
+    // (box-merge-20261121: values to re-measure on the combined tree)
+    const result = runSeed(28, {
       maxFrames: 80_000,
       renderEvery: 0,
       coverage: observer as never,
@@ -1008,6 +1031,10 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // 2 frames earlier, pic7 lab): frames only, 18678 -> 19042; same battle 1 / depth 0 / turn 23 / roundLost.
       // pic9 (the switch lines follow the foe's HP; new print lengths move the exploring presses): 19042 / turn 23 -> 22844 / turn 30;
       // same battle 1 / depth 0 / roundLost.
+      // hcr1 (the Scene OFF used-move print lead u - 3): frames only, 22844 -> 22840; same battle 1 / depth 0 / turn 30 / roundLost.
+      // hcr1b (the used-move glyph at commit + 7 + u): frames only, 22840 -> 22858; same battle 1 / depth 0 / turn 30 / roundLost.
+      // chg1 (the Scene OFF two-turn move timing; the exploring presses land on new phases, a new trajectory as at fsw235): 22858 / battle 1 / depth 0 / turn 30
+      // -> 67929 / battle 3 / depth 2 / turn 20; still OK / roundLost (no errorMessage; the scan above has 40 full-policy seeds OK).
       // lrc1 (the loss tail's opponent recall plays the ROM's animated return to ball, its recall receipt holds to the trainer slide and the slide's printstring is 3 rows later: the win text prints 67 frames later): frames only, 22844 -> 22897; same battle 1 / depth 0 / turn 30 / roundLost.
       // fnt1 (docs/fnt1-fainted-box-clear.md: the "fainted!" box takes the press 2 rows earlier, from the row after its last glyph; the exploring
       // presses land on new phases, a new trajectory as at fsw235): 22897 / battle 1 / depth 0 / turn 30 -> 39277 / battle 2 / depth 1 / turn 22;
@@ -1015,12 +1042,13 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // lbb1 (the boxes of the Lobby terminal, the postwin and the rooms take B as A; the exploring policy presses B there): frames only,
       // 22897 -> 22843; decision notes identical to 6817b6a8c's (press-stream notes aside); same battle 1 / depth 0 / turn 30 / roundLost.
       // trial-fix-20261121 (fnt1 + lbb1 together): frames only, 39277 -> 39259; same battle 2 / depth 1 / turn 22 / roundLost.
-      frames: 39259,
+    // (box-merge-20261121: values to re-measure on the combined tree)
+      frames: 67929,
       outcome: "OK",
       endState: "roundLost",
-      maxBattleDepth: 1,
-      battle: 2,
-      turn: 22,
+      maxBattleDepth: 2,
+      battle: 3,
+      turn: 20,
     });
     expect(runSeed(1, options)).toMatchObject({
       // msg175: 26878 -> 26810 (shorter used prints); trn178 (the Scene OFF action-transition pause): 26810 -> 27058; same battle / turn / end state.
@@ -1052,6 +1080,12 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // frame catcher, docs/flow1-menu-cursors-and-locked-switch-recall.md): the exploring policy's fight presses after its switches pick
       // other moves, so a new trajectory: 60400 / turn 19 -> 61456 / turn 22; same battle 3 / depth 2 / roundLost. The cursor fix alone moves
       // it (with it undone the old pin passes; the recall fix alone leaves it). Seed 0 is unmoved.
+      // rsw1 (the room after the swap screen: black hold, fade, "Thank you!" waits for A; docs/rsw1-swap-return-room.md): frames only,
+      // 61456 -> 61528 (the player's press lands on the new wait; a rule change, not a bug); same battle 3 / depth 2 / turn 22 / roundLost.
+      // hcr1 (the Scene OFF used-move print lead u - 3; the exploring presses land on new phases): 61456 / turn 22 -> 60534 / turn 19; same battle 3 / depth 2 / roundLost.
+      // hcr1b (the used-move glyph at commit + 7 + u): frames only, 60534 -> 64227; same turn 19, battle 3 / depth 2 / roundLost.
+      // merge of rsw1 + hcr1b + gsp2b (pin2): frames only, 64227 -> 64299; same turn 19, battle 3 / depth 2 / roundLost.
+      // chg1 (the Scene OFF two-turn move timing): frames only, 64299 -> 64365; same battle 3 / depth 2 / turn 19 / roundLost.
       // lrc1 (the loss tail runs the opponent's animated recall, see seed 0): frames only, 61456 -> 61504; same battle 3 / depth 2 / turn 22 / roundLost.
       // sct1 (docs/sct1-scouting-next-opponent.md: each scouting page takes A from its own last character + 3, and the pages are the next
       // opponent's, so their lengths and the exploring presses after them move): 61504 / turn 22 -> 58793 / turn 19; same battle 3 /
@@ -1062,7 +1096,8 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // earlier, so the exploring presses after it land 1 row earlier), measured on the combined tree (trial-fix-20261121 e12015ff1 +
       // msg2): frames only, 58758 -> 58763; same battle 3 / depth 2 / turn 19 / roundLost. With RELEASE_TO_MOVEEND_ROWS.STRINGID_PKMNWASDRAGGEDOUT
       // back at 5 the old pin passes again (on msg2's own base the same tail moved 58793 -> 58798); seed 0 is unmoved.
-      frames: 58763,
+    // (box-merge-20261121: values to re-measure on the combined tree)
+      frames: 64365,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 2,
@@ -1659,9 +1694,16 @@ describe("ISSUES #104 (driver): continuous-play outcome semantics retuned -- OK 
     // re-scanned seeds 0..49 under the same options: seeds 13, 27 and 47 chain two round wins (carry 14), so the lowest (13) is pinned.
     // merge of flow1 + trp1 (flow1's move cursor reset after a switch-in moves the soak's fight presses as well): seed 13 now carries 7;
     // re-scanned seeds 0..49 under the same options (--seeds 0:50 --parallel 4): seeds 19 and 47 chain two round wins (carry 14), so the lowest (19) is pinned.
+    // hcr1b (the Scene OFF used-move glyph at commit + 7 + u): seed 19 now carries 7; re-scanned seeds 0..49 under the same options (--seeds 0:50 --parallel 4):
+    // seeds 0, 10, 14 and 47 chain two round wins (carry 14), so the lowest (0) is pinned.
+    // lbw9 (the Lobby save wait is a timer / held A, the menus clamp: every in-game new challenge is dealt from a later cursor): seed 0 now carries 7;
+    // re-scanned seeds 0..49 under the same options (--seeds 0:50 --parallel 3): seeds 13, 19, 23 and 40 chain two round wins (carry 14), so the lowest (13) is pinned.
+    // fsc1 (the Scene OFF invisible-target hit completes in 2 frames, the hit-all loop's EMPTYSTRING3 box is timed by kernel rows): seed 13 now carries 7;
+    // re-scanned seeds 0..49 under the same options (--seeds 0:50 --parallel 3): seeds 19, 23 and 40 chain two round wins (carry 14), so the lowest (19) is pinned.
     // fop1 (a new challenge's first opponent is rolled in the ROM's order, so round 2's first trainer moves): seed 19 now carries 7;
     // re-scanned seeds 0..49 under the same options (--seeds 0:50 --parallel 4): seeds 13, 14 and 23 chain two round wins (carry 14), so the lowest (13) is pinned.
-    const result = runSeed(13, {
+    // (box-merge-20261121: values to re-measure on the combined tree)
+    const result = runSeed(19, {
       policy: "winning",
       maxRounds: 3,
       renderEvery: 0,

@@ -91,6 +91,8 @@ export function menuOf(st) {
     return { kind: "field.multichoice", sig: String(term.recordMenuCursor) };
   }
   const pw = st.postwin;
+  // rsw1: the room after the swap screen (black, fade-in, "Thank you!") is no menu: a press only dismisses a message.
+  if (st.swapReturn && st.swapReturn.guideElapsed === null) return null;
   if (pw) {
     if (pw.question && pw.questionYesElapsed === null && pw.questionDismissElapsed === null) {
       if (questionTextSettled ? !questionTextSettled(pw) : questionWindowVisible && !questionWindowVisible(pw)) return null;
@@ -124,6 +126,7 @@ export function surfaceOf(state) {
   if (state.lobbyFreeRoam) return "lobbyFreeRoam";
   if (state.factoryTerminal) return "factoryTerminal";
   if (state.factorySwap) return `factorySwap:${state.factorySwap.controller.phase}`;
+  if (state.swapReturn && state.swapReturn.guideElapsed === null) return `swapReturn:${state.swapReturn.kind}`;
   if (state.postwin) return `postwin:page${state.postwin.dialoguePage}`;
   if (state.battleScene) return "battleScene";
   if (state.battleRoom) return `battleRoom:${state.battleRoom.phase}`;

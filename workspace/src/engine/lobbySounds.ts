@@ -4,6 +4,7 @@
 import {
   ATTENDANT_MENU_ITEMS,
   ATTENDANT_SCREENS,
+  ATTENDANT_TIMING,
   attendantAcceptsInput,
   type AttendantInput,
   type FactoryLobbyAttendantState,
@@ -11,13 +12,6 @@ import {
 import { briefingAcceptsInput, type PrebattleEntryState } from "./prebattleEntry.ts";
 import { SE_EXIT } from "./battleEndSounds.ts";
 import { playScriptSe, playSelectSe, SE_SAVE } from "./screenSounds.ts";
-
-/**
- * Age of the "<player> saved the game." page (ticks from its first glyph, after the tick) on which SaveSuccessCallback (start_menu.c:1112-1116)
- * plays SE_SAVE: the frame the save message's printer goes idle. ROM-measured (lbrb-happy-a: 6268 = this page's age-0 tick 6254 + 14, so the
- * tick that brings age to 15). The ROM's player name is shorter than our placeholder, so this is not our last-glyph age.
- */
-export const ATTENDANT_SAVE_SE_AGE = 15;
 
 /** A at the attendant opens its script: field_control_avatar.c TryStartInteractionScript plays SE_SELECT for every interaction script. */
 export function emitLobbyAttendantOpenSound(): void {
@@ -29,18 +23,13 @@ export function emitLobbyAttendantSounds(before: FactoryLobbyAttendantState, aft
   // The walk ends in `warp` (BattleFrontier_BattleFactoryLobby scripts.inc): DoWarp's PlaySE(SE_EXIT) (field_screen_effect.c:490) on the
   // warp fade's second frame, as in the pre-battle room (core.ts).
   if (after.phase === "fade" && after.phaseTick === 1) playScriptSe(SE_EXIT);
-  if (after.phase === "talk" && after.screen === "saved" && after.lead === null && after.age === ATTENDANT_SAVE_SE_AGE) playScriptSe(SE_SAVE);
+  if (after.phase === "talk" && after.screen === "saved" && after.lead === null && after.age === ATTENDANT_TIMING.saveSeAge) playScriptSe(SE_SAVE);
+  // "<player> saved the game.": SaveSuccesTimer (start_menu.c:947-953) plays SE_SELECT when a held A ends the message (not when the timer does).
+  if (before.screen === "saved" && after.screen === "step" && (input.aHeld ?? input.a)) playSelectSe();
   if (!attendantAcceptsInput(before)) return;
   const def = ATTENDANT_SCREENS[before.screen];
   if (def.menu !== null && before.page === def.pages.length - 1) {
     const cursor = before.pendingCursor ?? before.cursor;
-    if (input.up || input.down) {
-      // Menu_ProcessInputNoWrap / ...ClearOnChoose (menu.c): SE_SELECT only when the cursor moves. Three entries do not wrap
-      // (script_menu.c:143-146 InitMultichoiceCheckWrap), so a press at an end is silent (and, since lbb1, leaves our cursor too).
-      const next = cursor + (input.down ? 1 : -1);
-      if (next >= 0 && next < ATTENDANT_MENU_ITEMS[def.menu].length) playSelectSe();
-      return;
-    }
     if (input.a) {
       if (before.screen === "level" && cursor === 1) return; // Open Level: A is a no-op here (deliberate divergence), so nothing plays
       playSelectSe(); // the menu's own A (APressMuted FALSE)
@@ -53,6 +42,14 @@ export function emitLobbyAttendantSounds(before: FactoryLobbyAttendantState, aft
       // (start_menu.c SaveConfirmInputCallback / SaveOverwriteInputCallback) takes MENU_B_PRESSED silently (menu.c plays nothing for B).
       if (before.screen === "saveInfo" || before.screen === "overwrite") return;
       playSelectSe();
+      return;
+    }
+    if (input.up || input.down) {
+      // Menu_ProcessInputNoWrap / ...ClearOnChoose (menu.c): SE_SELECT only when the cursor moves, and the menu takes A, B, UP, DOWN in that
+      // order. No Lobby menu wraps (script_menu.c:143-146 InitMultichoiceCheckWrap wraps only above three entries), so a press at an end is silent.
+      const next = cursor + (input.up ? -1 : 1);
+      if (next >= 0 && next < ATTENDANT_MENU_ITEMS[def.menu].length) playSelectSe();
+      return;
     }
     return;
   }
@@ -61,8 +58,6 @@ export function emitLobbyAttendantSounds(before: FactoryLobbyAttendantState, aft
   // text.c TextPrinterWaitWithDownArrow: A or B on a `\p` / `\l` page wait plays SE_SELECT. A message's last page ends in
   // waitbuttonpress (MSGBOX_DEFAULT), which is silent.
   if (end === "p" || end === "l") playSelectSe();
-  // "<player> saved the game.": SaveSuccesTimer (start_menu.c:947-953) plays SE_SELECT when A is held.
-  else if (before.screen === "saved" && input.a) playSelectSe();
 }
 
 /** The pre-battle room briefing: an accepted A or B on a `\p` page plays SE_SELECT (text.c); the message ends (waitbuttonpress) are silent. */

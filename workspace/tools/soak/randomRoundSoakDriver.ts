@@ -68,6 +68,7 @@ import {
 } from "../../src/engine/factoryRoundChaining.ts";
 import { battlerUsesForcedStruggle } from "../../src/engine/factoryBattleScriptFullTurnDecision.ts";
 import { ANCHOR_RNG_VALUE, advanceRngValue } from "../../src/engine/rng.ts";
+import { swapReturnThanksInputReady } from "../../src/engine/swapReturn.ts";
 import { ANCHOR_FACTORY_METADATA } from "../../src/engine/factoryAnchorSession.ts";
 import {
   chooseFactoryAiScoredDecision,
@@ -1752,6 +1753,7 @@ export class RandomPlayer {
     if (state.lobbyFreeRoam) return "lobbyFreeRoam";
     if (state.factoryTerminal) return "factoryTerminal";
     if (state.factorySwap) return `factorySwap:${state.factorySwap.controller.phase}`;
+    if (state.swapReturn && state.swapReturn.guideElapsed === null) return `swapReturn:${state.swapReturn.kind}`;
     if (state.postwin) return `postwin:page${state.postwin.dialoguePage}`;
     if (state.battleScene) return "battleScene";
     if (state.battleRoom) return `battleRoom:${state.battleRoom.phase}`;
@@ -2460,6 +2462,12 @@ export class RandomPlayer {
   private onPostwin(state: EngineState): ReadonlySet<GbaButton> {
     const postwin = state.postwin!;
     if (state.factorySwap) return this.onFactorySwap(state);
+    // rsw1: the room after the swap screen is black, fading in, then a "Thank you!" box that waits for A; nothing else takes input.
+    if (state.swapReturn !== null && state.swapReturn.guideElapsed === null) {
+      return state.swapReturn.kind === "swapped" && swapReturnThanksInputReady(state.swapReturn.elapsed)
+        ? this.pressAdvance(state, "swap return: Thank you!")
+        : NO_BUTTONS;
+    }
     // "winning-swap" only: clear the last swap screen's plan once we're back
     // in ordinary postwin flow, so the next swap occurrence (a later battle)
     // rebuilds it from that battle's own roster instead of reusing this one's.

@@ -29,6 +29,8 @@ import {
 } from "../../src/engine/postwin.ts";
 import frontierMonsData from "../../src/data/gen/battle-frontier-mons.json" with { type: "json" };
 import naturesData from "../../src/data/gen/natures.json" with { type: "json" };
+import { readFileSync } from "node:fs";
+import { buildLabMon, type LabMon } from "./labMon.ts";
 import { createFactoryCorpusPartyMember } from "../../src/engine/factoryCorpusParty.ts";
 import {
   advanceFactoryRoundPresentation,
@@ -168,14 +170,15 @@ function generatedCommandRecord(setId: number, fixedIv: number = 31, exactPerson
   });
 }
 
-function generatedBattleCommandStage(state: EngineState): EngineState {
+function generatedBattleCommandStage(state: EngineState, battleScene: "on" | "off" = "off"): EngineState {
   const playerRentalRecords = [
     generatedCommandRecord(664),
     generatedCommandRecord(678),
     generatedCommandRecord(527),
   ] as const;
   let orchestrator = createFactoryRoundBattleOrchestrator({
-    id: "battle-command-generated-off",
+    id: `battle-command-generated-${battleScene}`,
+    battleScene,
     rngValue: 4,
     factoryWinStreak: 0,
     playerTrainerId: 0x89ab_cdef,
@@ -2060,9 +2063,122 @@ function mvs1Stages(): Record<string, AppStage> {
   return stages;
 }
 
+// hcr1b (tools/integration/hcr1bLabs.py): the commit -> first glyph window per first-print u class. The Lv100 side acts first with `move` x4;
+// the Lv50 side answers with Seismic Toss. `foe` = the Lv100 Rattata is the opponent's, `plr` = the player's.
+const HCR1B_MOVES: Readonly<Record<string, number>> = {
+  defensecurl: 111, growl: 45, harden: 106, recover: 105, toxic: 92, confuseray: 109, earthquake: 89, fissure: 90, sonicboom: 49, dragonrage: 82,
+  toss: 69, lowkick: 67, absorb: 71, megadrain: 72, curse: 174, tackle: 33, scratch: 10, ember: 52, bite: 44, thunderbolt: 85, takedown: 36,
+  doubleedge: 38,
+};
+const HCR1B_PP: Readonly<Record<string, number>> = { growl: 40, tackle: 35, ember: 25, doubleedge: 15 };
+function hcr1bStages(): Record<string, AppStage> {
+  const stages: Record<string, AppStage> = {};
+  for (const [name, move] of Object.entries(HCR1B_MOVES)) {
+    for (const side of ["foe", "plr"] as const) {
+      const id = `hcr1b-${name}-${side}-off`;
+      stages[id] = side === "foe"
+        ? (state) => aud241bStage(state, id, "off", 50, 100, 69, undefined, false, move, 1)
+        : (state) => midBattleSwitchStage(state, id, [RATTATA_LV50_BENCH, RATTATA_LV50_BENCH], [105, 105], {
+          rngSeed: 1,
+          battleScene: "off",
+          player: Object.freeze({ ...rattataAtLevel(100, move), pp: [HCR1B_PP[name] ?? 20, HCR1B_PP[name] ?? 20, HCR1B_PP[name] ?? 20, HCR1B_PP[name] ?? 20] as const }),
+          trainer: rattataAtLevel(50, 69),
+          usedMessageHoldFrames: 0,
+          sceneOffNoAnimations: true,
+        });
+    }
+  }
+  return stages;
+}
+
+// fsc1 (tools/integration/fsc1Labs.py): a Lv100 foe charges Dig / Fly / Dive, the Lv50 player's Earthquake / Gust / Surf hits the hidden foe.
+const FSC1_CASES: Readonly<Record<string, readonly [number, number, number]>> = {
+  "dig-eq": [91, 89, 10], "fly-gust": [19, 16, 35], "dive-surf": [291, 57, 15],
+};
+function fsc1Stages(): Record<string, AppStage> {
+  const stages: Record<string, AppStage> = {};
+  for (const [name, [charge, hit, hitPp]] of Object.entries(FSC1_CASES)) {
+    for (const scene of ["off", "on"] as const) {
+      const id = `fsc1-${name}-${scene}`;
+      stages[id] = (state) => midBattleSwitchStage(state, id, [RATTATA_LV50_BENCH, RATTATA_LV50_BENCH], [105, 105], {
+        rngSeed: 1,
+        battleScene: scene,
+        player: Object.freeze({ ...rattataAtLevel(50, hit), pp: [hitPp, hitPp, hitPp, hitPp] as const }),
+        trainer: rattataAtLevel(100, charge),
+        usedMessageHoldFrames: 0,
+        sceneOffNoAnimations: scene === "off",
+      });
+    }
+  }
+  // c2: the Lv50 player's Earthquake KOs a Lv5 foe in the hit-all loop.
+  for (const scene of ["off", "on"] as const) {
+    const id = `fsc1-eqko-${scene}`;
+    stages[id] = (state) => midBattleSwitchStage(state, id, [RATTATA_LV50_BENCH, RATTATA_LV50_BENCH], [105, 105], {
+      rngSeed: 1,
+      battleScene: scene,
+      player: Object.freeze({ ...rattataAtLevel(50, 89), pp: [10, 10, 10, 10] as const }),
+      trainer: rattataAtLevel(5, 69),
+      usedMessageHoldFrames: 0,
+      sceneOffNoAnimations: scene === "off",
+    });
+  }
+  return stages;
+}
+
+// hcr2 (tools/integration/hcr2Labs.py): the hcr1b labs on the Scene ON profile (same moves, same sides, `-on` ids, 230 frames after the confirm).
+function hcr2Stages(): Record<string, AppStage> {
+  const stages: Record<string, AppStage> = {};
+  for (const [name, move] of Object.entries(HCR1B_MOVES)) {
+    for (const side of ["foe", "plr"] as const) {
+      const id = `hcr2-${name}-${side}-on`;
+      stages[id] = side === "foe"
+        ? (state) => aud241bStage(state, id, "on", 50, 100, 69, undefined, false, move, 1)
+        : (state) => midBattleSwitchStage(state, id, [RATTATA_LV50_BENCH, RATTATA_LV50_BENCH], [105, 105], {
+          rngSeed: 1,
+          battleScene: "on",
+          player: Object.freeze({ ...rattataAtLevel(100, move), pp: [HCR1B_PP[name] ?? 20, HCR1B_PP[name] ?? 20, HCR1B_PP[name] ?? 20, HCR1B_PP[name] ?? 20] as const }),
+          trainer: rattataAtLevel(50, 69),
+          usedMessageHoldFrames: 0,
+          sceneOffNoAnimations: false,
+        });
+    }
+  }
+  return stages;
+}
+
+// chg1 (tools/integration/chg1Labs.py): two-turn moves. The Lv100 side charges on turn 1 (the Lv50 side answers with Seismic Toss) and unleashes on turn 2.
+const CHG1_MOVES: Readonly<Record<string, readonly [number, number]>> = {
+  dig: [91, 10], fly: [19, 15], bounce: [340, 5], dive: [291, 10], solarbeam: [76, 10], razorwind: [13, 10], skullbash: [130, 15], skyattack: [143, 5],
+};
+// The kernel RNG start value per lab id: the ROM hits / rolls as the lab's seed 1 does only for these (found by scanning 1..14; the rest use 1).
+const CHG1_SEEDS: Readonly<Record<string, number>> = { "chg1-bounce-foe-off": 2, "chg1-bounce-plr-off": 5, "chg1-skyattack-plr-off": 4, "chg1-dive-foe-off": 5 };
+function chg1Stages(): Record<string, AppStage> {
+  const stages: Record<string, AppStage> = {};
+  for (const [name, [move, pp]] of Object.entries(CHG1_MOVES)) {
+    for (const side of ["foe", "plr"] as const) {
+      const id = `chg1-${name}-${side}-off`;
+      stages[id] = side === "foe"
+        ? (state) => aud241bStage(state, id, "off", 50, 100, 69, undefined, false, move, CHG1_SEEDS[id] ?? 1)
+        : (state) => midBattleSwitchStage(state, id, [RATTATA_LV50_BENCH, RATTATA_LV50_BENCH], [105, 105], {
+          rngSeed: CHG1_SEEDS[id] ?? 1,
+          battleScene: "off",
+          player: Object.freeze({ ...rattataAtLevel(100, move), pp: [pp, pp, pp, pp] as const }),
+          trainer: rattataAtLevel(50, 69),
+          usedMessageHoldFrames: 0,
+          sceneOffNoAnimations: true,
+        });
+    }
+  }
+  return stages;
+}
+
 export const APP_STAGES: Readonly<Record<string, AppStage>> = {
   ...hpf4mStages(),
   ...mvs1Stages(),
+  ...hcr1bStages(),
+  ...fsc1Stages(),
+  ...hcr2Stages(),
+  ...chg1Stages(),
   ...trp1Stages(),
   ...subp1mStages(),
   ...snd3Stages(),
@@ -2076,7 +2192,8 @@ export const APP_STAGES: Readonly<Record<string, AppStage>> = {
         i === 5 ? { ...rental, species: state.draftScreen.rentals[0]!.species } : rental),
     },
   }),
-  "battle-command-generated-off": generatedBattleCommandStage,
+  "battle-command-generated-off": (state) => generatedBattleCommandStage(state, "off"),
+  "battle-command-generated-on": (state) => generatedBattleCommandStage(state, "on"),
   "factory-arbitrary-intro-yoshi-off": generatedBattleStartIntroArbitraryStage,
   "sta6m-intro-trace-off": (state) => sta6mIntroStage(state, "off", 70, STA6M_TRACE_PLAYERS),
   "sta6m-intro-trace-on": (state) => sta6mIntroStage(state, "on", 70, STA6M_TRACE_PLAYERS),
@@ -2721,10 +2838,66 @@ export const APP_STAGES: Readonly<Record<string, AppStage>> = {
   "party-menu-status-item-off": partyMenuStatusItemOffStage,
 };
 
+// cln10 / cln11: generic lab-backed stage. A trace with `appStage: { id: "lab", frame: 0 }` and an `oracleBattleLab.scenario` needs no APP_STAGES entry: the staged battle is
+// derived from tools/battle-lab/<scenario basename> (the lab JSON the oracle runs). Any `overrides.parties` lab: slot 0 of each side is the active battler, slots 1 / 2 the bench
+// (species, level, nature, six IVs, six EVs, moves + PP Ups, item, abilitySlot, friendship, personality / gender), built by tools/compare/labMon.ts from the engine's own stat code
+// (src/engine/stats.ts + src/data/gen). `rngSeed` = the lab's `seed`, `usedMessageHoldFrames` 0, `sceneOffNoAnimations` on OFF. The player's party keeps the default rental records
+// (the party menu validates the staged party against them, as every hand-written stage does). Anything the seam cannot carry throws naming the lab, side and field.
+interface LabScenario {
+  readonly profile: string; readonly seed: number; readonly level?: number;
+  readonly overrides?: { readonly parties?: { readonly player?: readonly LabMon[]; readonly opponent?: readonly LabMon[] }; readonly battlers?: unknown };
+}
+
+export function labScenarioPath(scenario: string): URL {
+  return new URL(`../battle-lab/${scenario.split("/").pop()}`, import.meta.url);
+}
+
+type LabBenchPair = readonly [BattleScriptPartyMemberInput, BattleScriptPartyMemberInput];
+
+export function labBackedStageOptions(json: LabScenario, lab: string): { options: MidBattleSwitchStageOptions; playerBench: LabBenchPair; playerBenchHp: readonly [number, number] } {
+  const scene = json.profile === "battle-scene-on" ? "on" : json.profile === "battle-scene-off" ? "off" : null;
+  if (scene === null) throw new Error(`lab stage ${lab}: profile ${json.profile} is not battle-scene-on/off`);
+  if (json.overrides?.battlers !== undefined) throw new Error(`lab stage ${lab}: legacy overrides.battlers labs are not supported (add an APP_STAGES entry)`);
+  const parties = json.overrides?.parties;
+  if (parties === undefined) throw new Error(`lab stage ${lab}: no overrides.parties (factoryLegal / set-id labs need a hand-written APP_STAGES entry)`);
+  const build = (side: "player" | "opponent") => {
+    const party = parties[side];
+    if (party === undefined || party.length !== 3) throw new Error(`lab stage ${lab}: overrides.parties.${side} must hold three Pokemon`);
+    return party.map((mon, index) => buildLabMon(mon, { lab, side, index, seed: json.seed, defaultLevel: json.level ?? 50 }));
+  };
+  const [player, opponent] = [build("player"), build("opponent")];
+  const bench = (mons: typeof player): LabBenchPair => [mons[1]!.member, mons[2]!.member];
+  return {
+    playerBench: bench(player),
+    playerBenchHp: [player[1]!.maxHp, player[2]!.maxHp],
+    options: {
+      rngSeed: json.seed,
+      battleScene: scene,
+      player: player[0]!.config,
+      trainer: opponent[0]!.config,
+      trainerBenchHp: [opponent[1]!.maxHp, opponent[2]!.maxHp],
+      trainerBench: bench(opponent),
+      usedMessageHoldFrames: 0,
+      sceneOffNoAnimations: scene === "off",
+    },
+  };
+}
+
+export function labBackedStage(scenario: string, state: EngineState, rngSeed?: number): EngineState {
+  const path = labScenarioPath(scenario);
+  const lab = path.pathname.split("/").pop()!.replace(/\.json$/, "");
+  const json = JSON.parse(readFileSync(path, "utf8")) as LabScenario;
+  const { options, playerBench, playerBenchHp } = labBackedStageOptions(json, lab);
+  return midBattleSwitchStage(state, lab, playerBench, playerBenchHp, rngSeed === undefined ? options : { ...options, rngSeed });
+}
+
 /** lbw7: a staged orchestrator draws its own opponent; `appStage.opponentTrainerId` names the lab's (ROM) trainer so the post-battle room draws the right class. */
 export function applyTraceStage(trace: Trace, state: EngineState): EngineState {
-  const stage = APP_STAGES[trace.appStage!.id];
-  if (!stage) throw new Error(`unknown app stage ${trace.appStage!.id}`);
+  const stageId = trace.appStage!.id;
+  const stage: AppStage | undefined = stageId === "lab" && trace.oracleBattleLab
+    ? (s) => labBackedStage(trace.oracleBattleLab!.scenario, s, trace.appStage!.rngSeed)
+    : APP_STAGES[stageId];
+  if (!stage) throw new Error(`unknown app stage ${stageId}${stageId === "lab" ? " (appStage \"lab\" needs oracleBattleLab.scenario)" : ""}`);
   const staged = stage(state);
   const trainerId = trace.appStage!.opponentTrainerId;
   const o = staged.factoryRoundBattleOrchestrator;

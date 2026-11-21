@@ -146,6 +146,12 @@ export type FactoryCorpusPartyInstance = Readonly<{
    * corpus validation and does not affect kernel mechanics.
    */
   otId?: number;
+  /**
+   * msw1: the party mon's move order after SELECT move switching in a battle: slot `i` holds the set's move
+   * `moveOrder[i]` (a permutation of 0..3). Absent means the set's own order. Persists because `HandleMoveSwitching`
+   * writes the party mon (battle_controller_player.c:714-735) and the Factory party is not rebuilt between battles.
+   */
+  moveOrder?: readonly [number, number, number, number];
 }>;
 
 /**
@@ -260,7 +266,12 @@ export function createFactoryCorpusPartyMember(
   }
   const ivs = instance.ivs ?? uniformBattleScriptIvs(instance.fixedIv);
   const evs = deriveEvs(set);
-  const moves = factoryFacilitySetMoveIds(instance.setId).map(setMonMoveAvoidReturn) as unknown as
+  const setMoves = factoryFacilitySetMoveIds(instance.setId).map(setMonMoveAvoidReturn);
+  const moveOrder = instance.moveOrder;
+  if (moveOrder !== undefined && [...moveOrder].sort().join() !== "0,1,2,3") {
+    throw new Error(`moveOrder must be a permutation of 0..3, got ${JSON.stringify(moveOrder)}`);
+  }
+  const moves = (moveOrder === undefined ? setMoves : moveOrder.map((index) => setMoves[index]!)) as unknown as
     readonly [number, number, number, number];
   // Facility sets carry no PP Ups. SetMonMoveSlot writes base PP and leaves
   // the freshly zeroed packed bonus byte untouched (pokemon.c:2974-2978).

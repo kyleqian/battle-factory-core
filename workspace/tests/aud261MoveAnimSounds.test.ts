@@ -108,7 +108,7 @@ describe("Flame Wheel (aud261)", () => {
       const romRows = rom.events.filter((e) => e.kind === "se" && (e.id === 144 || e.id === 145));
       expect(romRows.map((e) => e.frame - romRows[0]!.frame)).toEqual([0, 4, 8, 12, 16, 20, 24, 112]);
       expect(romRows.map((e) => e.pan)).toEqual([...Array(7).fill(pan[0]), pan[1]]);
-      expect(expectConstantOffset(rom, [144, 145], 8)).toBe(2);
+      expect(expectConstantOffset(rom, [144, 145], 8)).toBe(0);
     });
   }
 });
@@ -151,7 +151,7 @@ describe("Octazooka (aud261)", () => {
       const romRows = rom.events.filter((e) => e.kind === "se" && (e.id === 141 || e.id === 177));
       expect(romRows.map((e) => e.frame - romRows[0]!.frame)).toEqual([0, 22]);
       expect(romRows.map((e) => e.pan)).toEqual(pans);
-      expect(expectConstantOffset(rom, [141, 177], 2)).toBe(2);
+      expect(expectConstantOffset(rom, [141, 177], 2)).toBe(0);
     });
   }
 });
@@ -166,7 +166,7 @@ describe("Zap Cannon (aud261)", () => {
     expect(timing.variants[timing.moves[192]!.variants[0]!]!.map((o) => `${o.frame}:${(o as { id?: number }).id}`).sort()).toEqual(["55:119", "6:138", "74:119"]);
   });
   for (const [side, pan] of [["player", [-64, 63, 63]], ["opponent", [63, -63, -63]]] as const) {
-    it(`aud261-zapcannon-${side}: ids, pans and the +50 / +19 ROM gaps; ROM minus ours 2 then 3 after the overrun`, () => {
+    it(`aud261-zapcannon-${side}: ids, pans and the +50 / +19 ROM gaps; ROM minus ours 0 then 1 after the overrun (hcr2c: was 2 then 3)`, () => {
       const rom = fixture(`aud261-zapcannon-${side}`);
       const pick = (events: FixtureEvent[]) => events.filter((e) => e.noop !== true && e.kind === "se" && (e.id === 138 || e.id === 119)).slice(-3);
       const romRows = pick(rom.events);
@@ -174,7 +174,7 @@ describe("Zap Cannon (aud261)", () => {
       expect(romRows.map((e) => e.frame - romRows[0]!.frame)).toEqual([0, 50, 69]);
       expect(romRows.map((e) => e.pan)).toEqual(pan);
       expect(ours.map((e) => `${e.id}:${e.pan}`)).toEqual(romRows.map((e) => `${e.id}:${e.pan}`));
-      expect(romRows.map((e, i) => e.frame - ours[i]!.frame)).toEqual([2, 3, 3]);
+      expect(romRows.map((e, i) => e.frame - ours[i]!.frame)).toEqual([0, 1, 1]);
     });
   }
 });
@@ -224,7 +224,7 @@ describe("Covet (aud261)", () => {
       expect(romRows.slice(0, 3).map((e) => e.frame - romRows[0]!.frame)).toEqual([0, 17, 34]);
       expect(romRows[3]!.frame - romRows[2]!.frame).toBe(59);
       expect(romRows.slice(0, 3).every((e) => e.pan === pan)).toBe(true);
-      expect(expectConstantOffset(rom, ids, 6)).toBe(2);
+      expect(expectConstantOffset(rom, ids, 6)).toBe(0);
     });
   }
 });
@@ -245,7 +245,7 @@ describe("Needle Arm (aud261)", () => {
       expect(romRows.length).toBe(17);
       expect(romRows[16]!.frame - romRows[0]!.frame).toBe(61);
       expect(romRows.every((e) => e.pan === pan)).toBe(true);
-      expect(expectConstantOffset(rom, ids, 17)).toBe(3);
+      expect(expectConstantOffset(rom, ids, 17)).toBe(0);
     });
   }
 });
@@ -304,7 +304,7 @@ describe("Smelling Salt (aud261)", () => {
       expect(romRows.length).toBe(5);
       expect(romRows[2]!.frame - romRows[0]!.frame).toBe(32);
       expect(romRows.every((e) => e.pan === pan)).toBe(true);
-      expect(expectConstantOffset(rom, ids, 5)).toBe(4);
+      expect(expectConstantOffset(rom, ids, 5)).toBe(0);
     });
   }
 });
@@ -322,7 +322,7 @@ describe("Gust (aud261)", () => {
       const rom = fixture(`aud261-gust-${side}`);
       const romRows = rom.events.filter((e) => e.kind === "se" && !e.noop && [132, 133].includes(e.id as number));
       expect(romRows.map((e) => e.frame - romRows[0]!.frame)).toEqual([0, 70]);
-      expect(expectConstantOffset(rom, [132, 133], 2)).toBe(1);
+      expect(expectConstantOffset(rom, [132, 133], 2)).toBe(0);
     });
   }
 });

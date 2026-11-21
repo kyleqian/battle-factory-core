@@ -52,6 +52,7 @@ import {
 } from "../src/engine/factoryBattleScriptFullTurnDecision.ts";
 import { sceneOffPlayerForcedSwitchInDuration } from "../src/engine/switchInTail.ts";
 import { hpd4BodyRows, iu120Extra } from "./helpers/iu120Rows.ts";
+import { BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS } from "../src/engine/battleScriptSourceConstants.ts";
 import { clearContainedPresentationErrors, containedPresentationErrors } from "../src/engine/presentationContainment.ts";
 
 function initialBattle() {
@@ -2296,5 +2297,48 @@ describe("midBattleSwitchFade gate (ISSUES #81: non-switch resolutions never fad
       fadeTick: 60,
     });
     expect(view.midBattleSwitchFade).toBeNull();
+  });
+});
+
+describe("hcr1b / hcr2 -- first used-move glyph at commit + 7 + u (Scene OFF and ON)", () => {
+  const walkFrames = (
+    u: number,
+    { off = true, forced, firstMessage = "STRINGID_USEDMOVE" }: { off?: boolean; forced?: "encore" | "struggle"; firstMessage?: string } = {},
+  ) => {
+    const base = inputFor([
+      event(0, { kind: "message", messageId: firstMessage, substitutions: [] }, u),
+      event(1, { kind: "set-battler-pp-data", battler: 0, movePosition: 0, pp: 9 }),
+    ], NEXT_COMMAND);
+    const beforeRules = off
+      ? { ...base.beforeRules, rulesContext: { ...base.beforeRules.rulesContext, hitMarker: (base.beforeRules.rulesContext.hitMarker | BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) >>> 0 } }
+      : base.beforeRules;
+    let resolution = createBattleResolutionPresentation({
+      ...base,
+      beforeRules,
+      confirmHandoff: { fightDisplayCursor: 0, idleBounceElapsed: 0, ...(forced === undefined ? {} : { forced }) },
+    } as CreateBattleResolutionPresentationInput);
+    let frames = 0;
+    while (resolution.lifecycle.phase === "confirm-handoff" && frames < 200) {
+      resolution = advanceBattleResolutionConfirmHandoff(resolution);
+      frames += 1;
+    }
+    return frames;
+  };
+
+  it("holds action-dispatch u - 2 frames on the fixed walk: the first glyph lands at commit + 7 + u (hcr1b oracle traces, u = 2 / 3 / 4 / 6 / 8)", () => {
+    const walked = [2, 3, 4, 5, 6, 7, 8, 16].map((u) => walkFrames(u));
+    expect(walked).toEqual([9, 10, 11, 12, 13, 14, 15, 23]);
+  });
+
+  it("Scene ON holds the same u - 2 frames (hcr2 ON oracle traces, u = 2 / 3 / 4 / 6 / 8)", () => {
+    const walked = [2, 3, 4, 5, 6, 7, 8, 16].map((u) => walkFrames(u, { off: false }));
+    expect(walked).toEqual([9, 10, 11, 12, 13, 14, 15, 23]);
+  });
+
+  it("outside the 2..20 window, forced Encore / Struggle moves and non-USEDMOVE heads keep the fixed 9-frame walk", () => {
+    expect([1, 21, 40].map((u) => walkFrames(u))).toEqual([9, 9, 9]);
+    expect([1, 21, 40].map((u) => walkFrames(u, { off: false }))).toEqual([9, 9, 9]);
+    expect(walkFrames(6, { forced: "encore" })).toBe(9);
+    expect(walkFrames(6, { firstMessage: "STRINGID_PKMNWENTTOSLEEP" })).toBe(9);
   });
 });

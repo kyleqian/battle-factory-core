@@ -76,14 +76,15 @@ interface Spec {
 //  - Hyper Fang: SE_M_LEER sits after waitbgfadeout / waitbgfadein (aud242c models the palette fade, docs section 7): it emits at the
 //    same +2 as the opening SE (idle-lead class), the BG_IMPACT LoadMoveBg lag (+1) being in the table.
 const SPECS: Record<string, Spec> = {
-  "dragonrage-opponent": { delta: 3 },
-  "dragonrage-player": { delta: 3 },
+  "dragonrage-opponent": { delta: 0 },
+  "dragonrage-player": { delta: 0 },
   "megapunch-player": { delta: 0 },
   "megapunch-opponent": { delta: 0 },
   "hijumpkick-player": { delta: 0 },
   "hijumpkick-opponent": { delta: 0 },
-  "haze-player": { delta: -6, rowDelta: { "433:238:0": 2, "553:214:-63": 2, "571:131:-63": 2 } },
-  "hyperfang-player": { delta: 2 },
+  // hcr2c: Haze rowDelta 2 -> 3 (engine frames re-keyed 433/553/571 -> 432/552/570): the row is the first mover's second body, which keeps the first print's u (known non-ROM residual).
+  "haze-player": { delta: -6, rowDelta: { "432:238:0": 3, "552:214:-63": 3, "570:131:-63": 3 } },
+  "hyperfang-player": { delta: 0 },
 };
 
 describe("move-animation SEs after waits / inside branches (aud242b)", () => {

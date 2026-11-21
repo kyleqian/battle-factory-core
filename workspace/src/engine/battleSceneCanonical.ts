@@ -5395,6 +5395,7 @@ export function drawBattle2FightSubmenuWindow(
         framebuffer,
         view.fightMenu.displayCursor,
         view.fightMenu.moveset,
+        view.fightMenu.moveSwitch,
       );
     },
     // The retired Battle 2 march never enters a rejection phase; this branch

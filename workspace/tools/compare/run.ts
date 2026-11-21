@@ -2,6 +2,8 @@
 //
 // Usage: npm run compare -- tools/compare/traces/example.json [outDir]
 //          [--capture-range START:END] [--summary]
+// --summary replaces the per-frame lines with the first differing frame, the
+// count per contiguous diff run (max 10 runs) and the matched/total tail line.
 //
 // Replays one trace against both the oracle service and the app engine
 // (tools/compare/appTrace.ts), writes oracle-NNNNN.png / app-NNNNN.png /
@@ -17,6 +19,7 @@ import { diffPngs } from "./diff.ts";
 import { formatPixelBounds } from "./diffBounds.ts";
 import { computeSSIM } from "./ssim.ts";
 import { renderAppTrace } from "./appTrace.ts";
+import { summaryDiffLines, type CaptureDiff } from "./diffRuns.ts";
 import {
   COMPARE_USAGE,
   parseCompareCliArgs,
@@ -102,12 +105,14 @@ const [oracleResult, appCaptures] = await Promise.all([
 const appByFrame = new Map(appCaptures.map((capture) => [capture.frame, capture]));
 let mismatched = 0;
 const manifest: object[] = [];
+const captureDiffs: CaptureDiff[] = [];
 
 for (const oracleCapture of oracleResult.captures) {
   writeFileSync(join(outDir, `oracle-${pad(oracleCapture.frame)}.png`), oracleCapture.png);
   const app = appByFrame.get(oracleCapture.frame);
   if (!app) {
-    console.log(`frame ${oracleCapture.frame}: MISSING from app captures`);
+    if (!summary) console.log(`frame ${oracleCapture.frame}: MISSING from app captures`);
+    captureDiffs.push({ frame: oracleCapture.frame, diffPixels: null });
     mismatched += 1;
     continue;
   }
@@ -119,7 +124,8 @@ for (const oracleCapture of oracleResult.captures) {
   const bounds = diff.bounds
     ? ` bbox=${formatPixelBounds(diff.bounds)}`
     : "";
-  if (!summary || diff.diffPixels > 0) {
+  captureDiffs.push({ frame: oracleCapture.frame, diffPixels: diff.diffPixels });
+  if (!summary) {
     console.log(
       `frame ${oracleCapture.frame}: ${diff.diffPixels === 0 ? "match" : `DIFF ${diff.diffPixels}px (${pct}%)${bounds}`} ` +
         `ssimMean=${ssim.meanSSIM.toFixed(4)} ssimMin=${ssim.minSSIM.toFixed(4)}`,
@@ -149,5 +155,6 @@ writeFileSync(
     frames: manifest,
   }, null, 2),
 );
+if (summary) for (const line of summaryDiffLines(captureDiffs)) console.log(line);
 console.log(`${oracleResult.captures.length - mismatched}/${oracleResult.captures.length} frames matched -> ${outDir}`);
 process.exit(mismatched === 0 ? 0 : 1);

@@ -70,11 +70,11 @@ interface Spec {
 const SPECS: Record<string, Spec> = {
   // Turn 1 Spore puts the target to sleep (Dream Eater fails on an awake target: the ROM never plays its animation); turn 2 is Dream Eater.
   // Both psychic-background rows (SE204 after the fade) and the eight SE193 / SE179 rows behind it are exact at the one +1 residual: BG_PSYCHIC has no measured load lag.
-  "dreameater-player": { delta: 1, romFrom: 700 },
+  "dreameater-player": { delta: 0, romFrom: 700 },
   // Tri Attack: SE221 and the seven ice crystal SE137 rows were ROM-only until aud242o (flame scatter, lightning, invert and the ShakeTargetInPattern max-shakes argument); now exact at +2.
   // 18 SE124 rows (three bubble volleys) then six SE126 rows behind the 18 projectile (D + 23 = 73) and SwayMon (85) waits; the lab is aud242f's.
-  "bubblebeam-player": { delta: 2 },
-  "triattack-player": { delta: 2 },
+  "bubblebeam-player": { delta: 0 },
+  "triattack-player": { delta: 0 },
 };
 
 describe("move-animation SEs after the aud242g sprite lifetime waits", () => {
