@@ -1033,6 +1033,10 @@ function midBattleSwitchDenseOffStage(state: EngineState): EngineState {
   return midBattleSwitchStage(state, "mid-battle-switch-dense-off", [RATTATA_LV50_BENCH, RATTATA_LV50_BENCH], [105, 105]);
 }
 
+// fch1: the aud241b labs' opponent bench (tools/battle-lab/aud241b-*.json, obr251-*.json): Lv50 Rattata with SEISMIC TOSS x4, so the AI's
+// faint-replacement scorer sees a super-effective move on its first read, as on the ROM.
+const RATTATA_LV50_SEISMIC_BENCH: BattleScriptPartyMemberInput = Object.freeze({ ...RATTATA_LV50_BENCH, moves: [69, 69, 69, 69] as const });
+
 // aud241b: hit / faint / low-HP sound windows (tools/battle-lab/aud241b-*.json): both sides are Rattata at
 // the given levels with SEISMIC TOSS x4 (a fixed, RNG-free damage equal to the attacker's level), so the faint
 // and red-HP turns are deterministic. Stats are the ROM's for nature 0, IV 31, EV 0.
@@ -1089,6 +1093,7 @@ function aud241bStage(
     ...(lastFaint === "opponent" ? { trainerBenchHp: null } : {}),
     ...(lastFaint === "player" ? { playerBenchNone: true } : {}),
     ...(frontierBrain ? { frontierBrain } : {}),
+    trainerBench: [RATTATA_LV50_SEISMIC_BENCH, RATTATA_LV50_SEISMIC_BENCH],
     battleScene: scene,
     player: rattataAtLevel(playerLevel, playerMoveId),
     trainer: rattataAtLevel(opponentLevel, opponentMoveId),

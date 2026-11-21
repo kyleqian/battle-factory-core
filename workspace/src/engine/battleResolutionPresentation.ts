@@ -4,6 +4,7 @@ import type { LiveMoveSpriteAllocatorInput, LiveMoveSpriteOrderInput } from "./l
 import type { LiveBattlerX2History, LiveMoveBattlerX2Input } from "./liveBattlerX2History.ts";
 import { battleMoveAnimationRequest, type BattleMoveAnimationRequest } from "./battleMoveAnimation.ts";
 import { opponentPartySummaryDrawTiming } from "./midBattleOpponentPartySummaryTiming.ts";
+import { aiReplacementChoiceWork, speciesTypesOf } from "./battleScriptOpenPartyScreenOpcode.ts";
 import {
   NO_MOVES_BOUNCE_STOP_AFTER,
   NO_MOVES_DISMISS_HOLD_FRAMES,
@@ -31,6 +32,7 @@ import type {
   BattleScriptSemanticEventPayload,
 } from "./battleScriptEvents.ts";
 import type { BattleScriptRulesContext } from "./battleScriptRulesContext.ts";
+import { aiReplacementChoiceExtraFrames, type BattleAiSwitchIntoWork } from "./battleAiSwitchInto.ts";
 import type { BattleScriptSelectionRejection } from "./battleScriptActionAdmission.ts";
 import {
   type BattleStringPromptGate,
@@ -320,6 +322,26 @@ const SYNTHESIZED_AI_SWITCH_DISPATCHER = "synthesized-ai-switch";
  * 2 later), so the whole send-in runs 2 frames late (`sendInVisualDelay`) and the command is 2 longer.
  */
 const AI_SWITCH_SEND_IN_LEAD_FRAMES = 2;
+
+/**
+ * fch1: the opponent's faint replacement choice work (`GetMostSuitableMonToSwitchInto`, run by `OpponentHandleChoosePokemon` inside the script's
+ * `openpartyscreen`) for the FaintedMonSendOutNew replacement that follows event `index`, or null when none follows. The bench is the segment's
+ * starting party minus the fainted slot (`switch.fromPartyIndex`); the opposing mon is the player's displayed battler.
+ */
+function faintReplacementChoiceWork(
+  beforeRules: BattleScriptRulesContext,
+  currentField: BattleResolutionDisplayedField,
+  events: readonly BattleKernelSemanticEvent[],
+  index: number,
+): BattleAiSwitchIntoWork | null {
+  const next = events.slice(index + 1).find(({ payload }) => payload.kind === "switch");
+  if (next === undefined || next.payload.kind !== "switch" || next.payload.side !== "opponent") return null;
+  if (next.provenance?.sourceLabel !== "BattleScript_FaintedMonSendOutNew") return null;
+  const player = beforeRules.battlers[0]!;
+  const types = player.partyIndex === currentField.player.partyIndex ? player.types : speciesTypesOf(currentField.player.species);
+  if (types === null) return null;
+  return aiReplacementChoiceWork(beforeRules, next.payload.fromPartyIndex, { types, ability: player.ability, status2: player.status2 });
+}
 
 /**
  * fpo187 (docs/fpo187-focus-punch-on-prepass-row.md, ont193): Scene ON only, the pre-pass `playanimation` launch
@@ -6122,7 +6144,10 @@ export function projectBattleResolutionCommands(
         timing: payload.kind === "draw-party-status-summary"
           ? battler === 0
             ? PARTY_SUMMARY_DRAW_TIMING
-            : opponentPartySummaryDrawTiming(lastFaintBattler === 1, event.provenance?.sourceLabel === "BattleScript_DoSwitchOut")
+            : opponentPartySummaryDrawTiming(lastFaintBattler === 1, event.provenance?.sourceLabel === "BattleScript_DoSwitchOut", (() => {
+              const work = lastFaintBattler === 1 ? faintReplacementChoiceWork(beforeRules, currentField, events, index) : null;
+              return work === null ? 0 : aiReplacementChoiceExtraFrames(work);
+            })())
           : undefined,
       }));
       continue;

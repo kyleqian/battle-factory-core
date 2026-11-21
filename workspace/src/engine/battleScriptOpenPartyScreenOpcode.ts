@@ -49,6 +49,7 @@ import {
 import {
   getMostSuitableMonToSwitchInto,
   type BattleAiSwitchBench,
+  type BattleAiSwitchIntoWork,
   type BattleAiSwitchTypes,
 } from "./battleAiSwitchInto.ts";
 import { calculateBattleScriptBaseDamageForCurrentMove } from "./battleScriptHitChainOpcode.ts";
@@ -108,6 +109,36 @@ export function calculateAiSwitchIntoBaseDamage(
   }
   if (active.helpingHand === 1) baseDamage = Math.trunc((baseDamage * 15) / 10);
   return baseDamage;
+}
+
+/**
+ * fch1: the work the AI's replacement choice (`OpponentHandleChoosePokemon` -> `GetMostSuitableMonToSwitchInto`) does against an opposing active
+ * battler of the given types / ability / status2, for the presentation's CPU-time model. Same scorer as `Cmd_openpartyscreen`; null when a bench
+ * member has no species types row. `speciesTypes` lets the caller name the opposing mon by species when it is not `rules.battlers[0]`.
+ */
+export function aiReplacementChoiceWork(
+  rules: BattleScriptRulesContext,
+  activePartyIndex: number,
+  opposing: Readonly<{ types: BattleAiSwitchTypes; ability: number; status2: number }>,
+): BattleAiSwitchIntoWork | null {
+  const bench = partyStateToBench(rules.party.opponent);
+  if (!bench) return null;
+  const work: BattleAiSwitchIntoWork = {
+    rounds: 0, speciesReads: 0, candidateScores: 0, moveReads: 0, typeCalcs: 0, damageCalcs: 0, fallback: false,
+  };
+  getMostSuitableMonToSwitchInto(bench, activePartyIndex, opposing.types, Object.freeze({
+    baseDamage: 0,
+    activeTypes: rules.battlers[1].types,
+    opposingTypes: opposing.types,
+    opposingAbility: opposing.ability,
+    opposingStatus2: opposing.status2,
+  }), work);
+  return work;
+}
+
+/** gSpeciesInfo[species].types for a player-side mon named only by species. */
+export function speciesTypesOf(species: number): BattleAiSwitchTypes | null {
+  return resolveSpeciesTypes(species);
 }
 
 function partyStateToBench(party: BattleScriptPartyState): BattleAiSwitchBench | null {
