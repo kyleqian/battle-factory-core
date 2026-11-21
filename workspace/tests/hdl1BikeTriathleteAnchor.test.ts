@@ -7,11 +7,11 @@
 // at (128, 56). The hashes below are those ROM frames' RGB over x 112-159, y 56-87 (the old and new places both inside).
 import { createHash } from "node:crypto";
 import { describe, expect, it } from "vitest";
-import { renderBattleRoomEntryScene, opponentSheetNameForGfx } from "../src/engine/battleRoomRender";
-import { entryStep, INITIAL_BATTLE_ROOM_STATE, SETTLED_SCENE_ELAPSED } from "../src/engine/battleRoom";
-import { getFactoryTrainerPresentation } from "../src/engine/factoryTrainerPresentation";
-import { facilityTrainerGfxIdForClass } from "../src/engine/factoryTrainerOverworldGfx";
-import { recordDraws } from "../src/engine/drawRecord";
+import { renderBattleRoomEntryScene, opponentSheetNameForGfx } from "../src/engine/battleRoomRender.ts";
+import { entryStep, INITIAL_BATTLE_ROOM_STATE, SETTLED_SCENE_ELAPSED } from "../src/engine/battleRoom.ts";
+import { getFactoryTrainerPresentation } from "../src/engine/factoryTrainerPresentation.ts";
+import { facilityTrainerGfxIdForClass } from "../src/engine/factoryTrainerOverworldGfx.ts";
+import { recordDraws } from "../src/engine/drawRecord.ts";
 import npcs from "../src/assets/gen/battle-room-npcs.json" with { type: "json" };
 
 type Sheet = { frames: { columns: number; rows: number; tiles: number[][] }[]; palette: { r: number; g: number; b: number }[] };
