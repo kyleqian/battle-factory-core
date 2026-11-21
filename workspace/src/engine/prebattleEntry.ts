@@ -55,7 +55,7 @@ export const PREBATTLE_ENTRY_BOX_OPEN_AGE = PREBATTLE_ENTRY_DEAL_AGE + T.boxOpen
 
 export interface BriefingPage {
   readonly lines: readonly string[];
-  /** `p`: wait arrow, A clears to the next page. `end`: last page of the message. */
+  /** `p`: wait arrow, A or B clears to the next page. `end`: last page of the message. */
   readonly end: "p" | "end";
 }
 export type BriefingMessage = readonly BriefingPage[];
@@ -148,7 +148,12 @@ export interface PrebattleEntryDeal {
 }
 
 export interface PrebattleEntryInput {
-  readonly a: boolean;
+  /**
+   * A or B was pressed this tick (lbb1): every briefing message is `msgbox ..., MSGBOX_DEFAULT` (pre-battle room scripts.inc:38, :208 and the
+   * type / style comments), whose `waitbuttonpress` is WaitForAorBPress (scrcmd.c:1323-1330), and a `\p` page waits in
+   * TextPrinterWaitWithDownArrow, JOY_NEW(A_BUTTON | B_BUTTON) (text.c:865-882).
+   */
+  readonly press: boolean;
 }
 
 export interface PrebattleEntryAdvance {
@@ -159,7 +164,7 @@ export interface PrebattleEntryAdvance {
   readonly done: boolean;
 }
 
-/** Is the finished page ready to take A (typing done)? Mirrors the attendant's gate: from the tick after the last glyph. */
+/** Is the finished page ready to take A or B (typing done)? Mirrors the attendant's gate: from the tick after the last glyph. */
 export function briefingAcceptsInput(state: PrebattleEntryState): boolean {
   if (state.phase !== "talk" || state.messages === null || state.prev !== null) return false;
   const page = state.messages[state.message]![state.page]!;
@@ -185,7 +190,7 @@ export function advancePrebattleEntry(state: PrebattleEntryState, input: Prebatt
         return { state: Object.freeze({ ...state, age, textAge, prev: next }), deal: false, done: false };
       }
       const ticked: PrebattleEntryState = Object.freeze({ ...state, age, textAge });
-      if (!briefingAcceptsInput(state) || !input.a) return { state: ticked, deal: false, done: false };
+      if (!briefingAcceptsInput(state) || !input.press) return { state: ticked, deal: false, done: false };
       const message = messages[state.message]!;
       const pageDef = message[state.page]!;
       if (pageDef.end === "p") {

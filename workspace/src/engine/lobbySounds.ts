@@ -65,9 +65,9 @@ export function emitLobbyAttendantSounds(before: FactoryLobbyAttendantState, aft
   else if (before.screen === "saved" && input.a) playSelectSe();
 }
 
-/** The pre-battle room briefing: an accepted A on a `\p` page plays SE_SELECT (text.c); the message ends (waitbuttonpress) are silent. */
-export function emitPrebattleEntrySounds(before: PrebattleEntryState, a: boolean): void {
-  if (!a || !briefingAcceptsInput(before)) return;
+/** The pre-battle room briefing: an accepted A or B on a `\p` page plays SE_SELECT (text.c); the message ends (waitbuttonpress) are silent. */
+export function emitPrebattleEntrySounds(before: PrebattleEntryState, press: boolean): void {
+  if (!press || !briefingAcceptsInput(before)) return;
   const page = before.messages![before.message]![before.page]!;
   if (page.end === "p") playSelectSe();
 }
