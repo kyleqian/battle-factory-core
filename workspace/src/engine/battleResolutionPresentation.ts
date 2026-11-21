@@ -516,8 +516,15 @@ export type BattleSpriteVisibilityTiming = Readonly<{
     | typeof LOSS_RECALL_TRAINER_SLIDE_GAP_FRAMES;
 }>;
 export type BattleTurnEndTiming = Readonly<{ minimumFrames: number }>;
-/** `holdFrames`: rows after the slide settles before the next command (lrc1: the loss tail's printstring, LOSS_TRAINER_SLIDE_PRINT_GAP_FRAMES). */
-export type BattleTrainerSlideTiming = Readonly<{ minimumFrames: 38; holdFrames?: typeof LOSS_TRAINER_SLIDE_PRINT_GAP_FRAMES }>;
+/**
+ * `holdFrames`: rows after the slide settles before the next command (lrc1: the loss tail's printstring, LOSS_TRAINER_SLIDE_PRINT_GAP_FRAMES).
+ * `leadFrames`: rows before the slide's el 0, the sprite still off screen (wtl1: the win tail, WIN_TAIL_TRAINER_SLIDE_LEAD_FRAMES).
+ */
+export type BattleTrainerSlideTiming = Readonly<{
+  minimumFrames: 38;
+  leadFrames?: typeof WIN_TAIL_TRAINER_SLIDE_LEAD_FRAMES;
+  holdFrames?: typeof LOSS_TRAINER_SLIDE_PRINT_GAP_FRAMES;
+}>;
 
 export type BattleResolutionPresentationCommand =
   | Readonly<{
@@ -714,6 +721,8 @@ export type BattleResolutionPresentationCommand =
        */
       recall: boolean;
       timing: BattleSpriteVisibilityTiming;
+      /** wtl1: rows after the receipt before the next command (the win print's hold, withWinPrintHold). Absent = 0. */
+      holdFrames?: number;
     }>
   | Readonly<{
       type: "turn-end";
@@ -2606,6 +2615,70 @@ const LOSS_RECALL_SWITCH_OUT = Object.freeze({
   leadFrames: LOSS_RECALL_LEAD_FRAMES,
 });
 const LOSS_TAIL_TRAINER_SLIDE_TIMING = Object.freeze({ minimumFrames: 38, holdFrames: LOSS_TRAINER_SLIDE_PRINT_GAP_FRAMES } as const);
+/**
+ * wtl1 (docs/wtl1-win-tail-timing.md): the win tail, `BattleScript_FrontierTrainerBattleWon` (battle_scripts_1.s:3027-3048).
+ * - WIN_PRINT_AFTER_BGM_ROWS: `HandleEndTurn_BattleWon` (battle_main.c:4960-4982) plays the victory BGM and points the script at the win
+ *   script; its `printstring STRINGID_PLAYERDEFEATEDTRAINER1` shows its first glyph 4 frames later (frame catcher, 22 of 22 wins on the
+ *   ROM, both scenes). Ours printed it on the row after the two moveend receipts, 2 rows after the last "fainted!" press: 24 rows before
+ *   the ROM. The rows go on the last receipt before the print (`holdFrames`), where the released "fainted!" box stays on screen, frozen or
+ *   blank, as on the ROM (fnt1).
+ * - WIN_TAIL_TRAINER_SLIDE_LEAD_FRAMES: from the press on "Player defeated ...!" to the slide model's el 0 (the printer's release, the
+ *   controller's completion, `trainerslidein`'s dispatch, and the slide sprite's off-screen rows, as the loss tail's
+ *   LOSS_RECALL_TRAINER_SLIDE_GAP_FRAMES). Then the 38 rows of the slide and the 3 rows to the lose text's first glyph
+ *   (LOSS_TRAINER_SLIDE_PRINT_GAP_FRAMES; `waitstate`, the printer). ROM: the press to the lose text's first glyph 55 frames in 22 of 22
+ *   wins; ours 38 before.
+ */
+export const WIN_PRINT_AFTER_BGM_ROWS = 4;
+export const WIN_TAIL_TRAINER_SLIDE_LEAD_FRAMES = 14;
+export const WIN_TAIL_SCRIPT_LABEL = "BattleScript_FrontierTrainerBattleWon_LoseTexts";
+const WIN_TAIL_TRAINER_SLIDE_TIMING = Object.freeze({
+  minimumFrames: 38, leadFrames: WIN_TAIL_TRAINER_SLIDE_LEAD_FRAMES, holdFrames: LOSS_TRAINER_SLIDE_PRINT_GAP_FRAMES,
+} as const);
+/**
+ * wtl1: lha1's victory BGM delays (battleEndSounds.ts VICTORY_BGM_AFTER_*, rows from leaving the turn's last command before the win print
+ * to PlayBGM), restated here so the presentation does not import the sound module; tests/wtl1WinTailTiming.test.ts pins them equal.
+ */
+export const WIN_BGM_AFTER_ANCHOR_ROWS = Object.freeze({ button: 22, automatic: 19, controller: 14 } as const);
+const PLAYER_DEFEATED_TRAINER1 = "STRINGID_PLAYERDEFEATEDTRAINER1";
+/**
+ * wtl1: the hold on the last moveend receipt before the win print, so its first glyph shows WIN_PRINT_AFTER_BGM_ROWS after the victory BGM.
+ * The anchor is lha1's (victoryBgmAnchor): the last command before the print that is not a one-row sprite-visibility receipt. The receipts'
+ * own rows count towards the delay. Null when the print has no receipt before it in the segment (none seen; the print stays as it was).
+ */
+function winPrintHold(
+  commands: readonly BattleResolutionPresentationCommand[],
+  events: readonly BattleKernelSemanticEvent[],
+): Readonly<{ receiptIndex: number; holdFrames: number }> | null {
+  const print = commands.findIndex((command) => command.type === "message"
+    && events.find((event) => event.sequence === command.eventSequence)?.payload.kind === "message"
+    && (events.find((event) => event.sequence === command.eventSequence)!.payload as { messageId?: string }).messageId === PLAYER_DEFEATED_TRAINER1);
+  if (print < 1 || commands[print - 1]!.type !== "sprite-visibility") return null;
+  let index = print - 1;
+  let receiptRows = 0;
+  while (index >= 0 && commands[index]!.type === "sprite-visibility") {
+    const receipt = commands[index] as Extract<BattleResolutionPresentationCommand, { type: "sprite-visibility" }>;
+    receiptRows += receipt.timing.minimumFrames;
+    index -= 1;
+  }
+  const anchor = commands[index];
+  if (anchor === undefined) return null;
+  const delay = anchor.type !== "message"
+    ? WIN_BGM_AFTER_ANCHOR_ROWS.controller
+    : anchor.advance === "button" ? WIN_BGM_AFTER_ANCHOR_ROWS.button : WIN_BGM_AFTER_ANCHOR_ROWS.automatic;
+  const holdFrames = delay + WIN_PRINT_AFTER_BGM_ROWS - receiptRows;
+  return holdFrames > 0 ? Object.freeze({ receiptIndex: print - 1, holdFrames }) : null;
+}
+/** wtl1: `commands` with the win print's hold (winPrintHold) on its last receipt. */
+export function withWinPrintHold(
+  commands: readonly BattleResolutionPresentationCommand[],
+  events: readonly BattleKernelSemanticEvent[],
+): readonly BattleResolutionPresentationCommand[] {
+  const hold = winPrintHold(commands, events);
+  if (hold === null) return commands;
+  return commands.map((command, index) => index === hold.receiptIndex
+    ? Object.freeze({ ...(command as Extract<BattleResolutionPresentationCommand, { type: "sprite-visibility" }>), holdFrames: hold.holdFrames })
+    : command);
+}
 /** The `switch-out` command's recall clock (lrc1 `leadFrames`): negative while the battler still waits at rest for the dispatch. */
 export function switchOutRecallElapsed(
   command: Extract<BattleResolutionPresentationCommand, { type: "switch-out" }>,
@@ -5578,11 +5651,13 @@ export function projectBattleResolutionCommands(
         eventSequence: event.sequence,
         battler: singlesBattler(payload.battler, "trainer slide"),
         direction: payload.kind === "trainer-slide-in" ? "in" as const : "out" as const,
-        // lrc1: the loss tail's printstring shows 3 rows after the slide settles (LOSS_TRAINER_SLIDE_PRINT_GAP_FRAMES). The win
-        // tail's slide (BattleScript_FrontierTrainerBattleWon_LoseTexts) has the same 3 rows on the ROM but is not changed here.
+        // lrc1: the loss tail's printstring shows 3 rows after the slide settles (LOSS_TRAINER_SLIDE_PRINT_GAP_FRAMES). wtl1: the win
+        // tail's slide (BattleScript_FrontierTrainerBattleWon_LoseTexts) has the same 3 rows and a 14-row lead from the press.
         timing: payload.kind === "trainer-slide-in" && event.provenance?.sourceLabel === LOSS_TAIL_SCRIPT_LABEL
           ? LOSS_TAIL_TRAINER_SLIDE_TIMING
-          : TRAINER_SLIDE_TIMING,
+          : payload.kind === "trainer-slide-in" && event.provenance?.sourceLabel === WIN_TAIL_SCRIPT_LABEL
+            ? WIN_TAIL_TRAINER_SLIDE_TIMING
+            : TRAINER_SLIDE_TIMING,
       }));
       continue;
     }
@@ -6293,7 +6368,8 @@ export function projectBattleResolutionCommands(
     commands[commands.length - 1] = Object.freeze({ ...finalCommand, timing: Object.freeze({ minimumFrames: finalCommand.timing.minimumFrames - ENTRY_SCRIPT_PLAYER_TURN_END_TRIM_FRAMES }) });
   }
   applyHpHitTails(commands, hpLeadRows);
-  return Object.freeze(commands);
+  // wtl1: the win print waits for HandleEndTurn_BattleWon's victory BGM (withWinPrintHold).
+  return Object.freeze(withWinPrintHold(commands, events));
 }
 
 /**

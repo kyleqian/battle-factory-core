@@ -2031,14 +2031,16 @@ export function battleResolutionCommandDuration(
     case "sprite-visibility":
       return command.type === "switch-in"
         ? command.timing.minimumFrames + (command.settleHoldFrames ?? 0) + (command.entryScriptHoldFrames ?? 0)
-        : command.timing.minimumFrames;
+        // wtl1: the win print's hold on the last moveend receipt (withWinPrintHold).
+        : command.timing.minimumFrames + (command.type === "sprite-visibility" ? command.holdFrames ?? 0 : 0);
     case "party-summary":
       return command.timing?.minimumFrames ?? 1;
     case "turn-end":
       return command.timing.minimumFrames;
-    // lrc1: a slide's holdFrames are rows after it settles, before the next command (the loss tail's printstring).
+    // lrc1: a slide's holdFrames are rows after it settles, before the next command (the loss tail's printstring). wtl1: its leadFrames
+    // are rows before its el 0 (the win tail).
     case "trainer-slide":
-      return command.timing.minimumFrames + (command.timing.holdFrames ?? 0);
+      return (command.timing.leadFrames ?? 0) + command.timing.minimumFrames + (command.timing.holdFrames ?? 0);
     case "substitute-fade":
       return command.timing.minimumFrames;
     // sc106: General_StatsChange's added rows (76 / 90, statsChangeSpan); scd112 draws the banner over the field (stats-change effect).
@@ -2104,7 +2106,8 @@ function substituteFadeClearsBox(segment: BattleResolutionSegment): boolean {
  */
 export function battleResolutionCommandFallbackDuration(command: BattleResolutionPresentationCommand): number {
   if (command.type === "move-animation") return Math.max(1, (command.timing.seGateFrames ?? 0) + command.timing.minimumFrames);
-  if (command.type === "trainer-slide") return command.timing.minimumFrames + (command.timing.holdFrames ?? 0);
+  if (command.type === "trainer-slide") return (command.timing.leadFrames ?? 0) + command.timing.minimumFrames + (command.timing.holdFrames ?? 0);
+  if (command.type === "sprite-visibility") return command.timing.minimumFrames + (command.holdFrames ?? 0);
   const timing = (command as { timing?: { minimumFrames?: number } }).timing;
   return Math.max(1, timing?.minimumFrames ?? 1);
 }
@@ -3045,7 +3048,8 @@ export function createBattleResolutionPresentationRenderView(
       spriteVisibility.set(command.battler, command.visible);
       if (command.recall) healthboxVisibility.set(command.battler, command.visible);
     } else if (command.type === "trainer-slide") {
-      const age = Math.min(state.lifecycle.phaseElapsed, command.timing.minimumFrames);
+      // wtl1: el 0 after the lead rows (the sprite is off screen until then either way).
+      const age = Math.min(Math.max(0, state.lifecycle.phaseElapsed - (command.timing.leadFrames ?? 0)), command.timing.minimumFrames);
       activeTrainerSlide = Object.freeze({
         battler: command.battler,
         offscreenX2: command.direction === "in"
