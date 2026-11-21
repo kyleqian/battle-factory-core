@@ -1340,7 +1340,7 @@ function liveMoveAnimationDurationOf(
     case 211: return 197; // Steel Wing source body through first inactive row.
     case 223: return 75; // Dynamic Punch source body through first inactive row.
     case 231: return 135;
-    case 232: return 140; // Metal Claw source body through its final row. // Iron Tail source body through first inactive row.
+    case 232: return 154; // Metal Claw: the source body through its final row is 140; the ROM script holds 14 more rows (gAnimScriptActive 157 = idle 4 + 154 - 1).
     case 235: return 130; // Synthesis grow/star body through cleanup.
     case 178: return COTTON_SPORE_FRAME_COUNT;
     case 180: return 221; // Spite ghost-bg/target-clone body through cleanup.
