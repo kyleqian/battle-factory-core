@@ -1197,6 +1197,15 @@ const PRE_MOVE_STATUS_ANIMATION_TIMING = Object.freeze({
  */
 export const MOVE_INFLICTED_STATUS_ANIMATION_LEAD_ROWS = 6;
 export const MOVE_INFLICTED_STATUS_SCENE_OFF_LEAD_ROWS = MOVE_INFLICTED_STATUS_ANIMATION_LEAD_ROWS + 1;
+/**
+ * gsp3 (ROM labs gsp3-{toxic,willowisp}-{player,foe}-on, T2 windows): the end-of-turn poison / burn tick (BattleScript_PoisonTurnDmg /
+ * BurnTurnDmg) reaches its `statusanimation` row 2 rows (poison) / 3 rows (burn: the `goto BattleScript_DoStatusTurnDmg` is one more row)
+ * after the print's waitmessage, not the pre-move cadence's 3 / 0 (ROM print -> DoStatusTurnDmg row 95 / 98 against the engine's 96 / 95).
+ */
+const END_TURN_STATUS_DAMAGE_LEAD_ROWS: Readonly<Record<string, number>> = Object.freeze({
+  BattleScript_PoisonTurnDmg: 2,
+  BattleScript_BurnTurnDmg: 3,
+});
 const MOVE_INFLICTED_STATUS_SCENE_OFF_TIMING = Object.freeze({
   minimumFrames: 0,
   holdFrames: WAITMESSAGE_LONG_HOLD_FRAMES + MOVE_INFLICTED_STATUS_SCENE_OFF_LEAD_ROWS,
@@ -1237,6 +1246,8 @@ function messageTimingFromSourceProvenance(
     && following.operands.length === 1
     && following.operands[0]!.expression === "B_WAIT_TIME_LONG"
   ) {
+    const tickLead = END_TURN_STATUS_DAMAGE_LEAD_ROWS[event.provenance?.sourceLabel ?? ""];
+    if (tickLead !== undefined) return Object.freeze({ minimumFrames: 0, holdFrames: WAITMESSAGE_LONG_HOLD_FRAMES + tickLead });
     const launch = BATTLE_SCRIPT_PROGRAM.instructions[programCounter + 2]?.opcodeName;
     if (launch === "B_SCR_OP_STATUS2ANIMATION" || launch === "B_SCR_OP_STATUSANIMATION") return PRE_MOVE_STATUS_ANIMATION_TIMING;
     if (!isMoveInflictedStatusLaunch(programCounter)) return WAITMESSAGE_LONG_TIMING;
@@ -1371,9 +1382,15 @@ const SCENE_OFF_SEMI_INVULNERABLE_HIDE_LEAD = 2;
  * sta3 (docs/aud249-general-anim-sounds.md): the next action's first print after the MoveEnd receipts. STRINGID_PKMNISCONFUSED is
  * BattleScript_MoveUsedIsConfused's first instruction (attackcanceler jumps there: u = 2), ROM-measured as the same E + 1 + d + n + 6 + u.
  */
-const ACTION_TRANSITION_NEXT_PRINTS: ReadonlySet<string> = new Set(["STRINGID_USEDMOVE", "STRINGID_PKMNISCONFUSED", "STRINGID_PKMNFASTASLEEP"]);
+const ACTION_TRANSITION_NEXT_PRINTS: ReadonlySet<string> = new Set(["STRINGID_USEDMOVE", "STRINGID_PKMNISCONFUSED", "STRINGID_PKMNFASTASLEEP", "STRINGID_PKMNINLOVE"]);
 /** gsp2: the wake-up print is a transition print in Scene ON only (Scene OFF output is unchanged). */
 const SCENE_ON_ACTION_TRANSITION_NEXT_PRINT = "STRINGID_PKMNWOKEUP";
+/**
+ * gsp3 (ROM labs gsp3-attract-{player,foe}-on): "X is in love with Y!" (BattleScript_MoveUsedIsInLove, reached from attackcanceler by a `call`) is a transition
+ * print too, 2 rows earlier than the trn176 count: MoveEnd 583 -> print row 592 (ROM) against the rule's 594.
+ */
+const IN_LOVE_TRANSITION_PRINT = "STRINGID_PKMNINLOVE";
+const IN_LOVE_TRANSITION_ROWS = -2;
 
 const ACTION_TRANSITION_WAIT_ROWS: Readonly<Record<string, number>> = Object.freeze({ B_WAIT_TIME_LONG: WAITMESSAGE_LONG_HOLD_FRAMES });
 
@@ -1402,6 +1419,7 @@ function actionTransitionPauseFrames(
   let used: number | null = null;
   let statusFramesAfter = 0;
   let usedIsPreMove = false;
+  let inLoveRows = 0;
   for (let index = receiptIndex + 1; index < events.length; index += 1) {
     const event = events[index]!;
     const next = event.provenance?.instructionExecution;
@@ -1423,6 +1441,7 @@ function actionTransitionPauseFrames(
     ) return null;
     used = next;
     usedIsPreMove = event.payload.messageId !== "STRINGID_USEDMOVE";
+    if (event.payload.messageId === IN_LOVE_TRANSITION_PRINT) inLoveRows = IN_LOVE_TRANSITION_ROWS;
     break;
   }
   if (used === null) return null;
@@ -1438,6 +1457,10 @@ function actionTransitionPauseFrames(
       anchor = event;
       break;
     }
+    if (kind === "status-animation") {
+      anchor = event;
+      break;
+    }
     // lse4: a lead-class Scene ON body that prints nothing after its animation (Wish): the release row is the animation's own, one row after its execution.
     if (kind === "animation" && event.payload.animationId === "MOVE_ANIMATION") {
       const presentedBody = commands.find((command) => command.type === "move-animation" && command.eventSequence === event.sequence);
@@ -1448,7 +1471,7 @@ function actionTransitionPauseFrames(
   }
   if (anchor === null) return null;
   let anchorExecution = anchor.provenance!.instructionExecution;
-  if (anchor.payload.kind === "animation") anchorExecution += 1;
+  if (anchor.payload.kind === "animation" || anchor.payload.kind === "status-animation") anchorExecution += 1;
   if (anchor.payload.kind === "message") {
     if (anchor.payload.messageId === "STRINGID_USEDMOVE" || anchor.payload.messageId === "STRINGID_EMPTYSTRING3") return null;
     const following = BATTLE_SCRIPT_PROGRAM.instructions[anchor.provenance!.programCounter + 1];
@@ -1468,7 +1491,7 @@ function actionTransitionPauseFrames(
   }
   // sta3 (aud242g dreameater, ROM): before a pre-move print the status icon's second controller row (production presents one frame) is one more row.
   const iconSecondRow = anchor.payload.kind === "status-icon-update" && usedIsPreMove ? 1 : 0;
-  const frames = e1 - anchorExecution - 1 + ACTION_TRANSITION_ROWS + used - presented - statusFramesAfter + iconSecondRow;
+  const frames = e1 - anchorExecution - 1 + ACTION_TRANSITION_ROWS + used - presented - statusFramesAfter + iconSecondRow + inLoveRows;
   return frames > 0 ? { frames, rowsToReceipt: e1 - anchorExecution - 1 - presented } : null;
 }
 
@@ -6751,6 +6774,19 @@ function usedMovePrintLeadU(state: BattleResolutionPresentationState, handoff: B
   const u = first.provenance?.instructionExecution;
   return u === undefined || u < USED_MOVE_LEAD_MIN_U || u > USED_MOVE_LEAD_MAX_U ? null : u;
 }
+/**
+ * gsp3 (ROM lab bdt1-rest3-player-on, Scene ON; T2 windows): a plain `use-move` turn whose first action is asleep (the sleep counter's status write, then
+ * BattleScript_MoveUsedIsAsleep's "is fast asleep!" print) prints on the attackcanceler's row + 1: ROM label row 2072 against the engine's 2075, so the
+ * statusanimation / SE 197 and the next action ran 3 rows late. attackcanceler jumps out before the dispatch / accuracy rows the walk holds
+ * (`action-dispatch`, `attack-canceler`, `accuracy-check`), so the walk ends at `before-turn`.
+ */
+function turnOpensWithAsleepPrint(state: BattleResolutionPresentationState): boolean {
+  if (state.sourceDecision?.kind !== "use-move") return false;
+  const events = state.segments[0]?.events;
+  if (events === undefined) return false;
+  const first = events.find((event) => event.payload.kind !== "set-battler-status-data");
+  return first?.payload.kind === "message" && first.payload.messageId === "STRINGID_PKMNFASTASLEEP";
+}
 function sceneOffOf(state: BattleResolutionPresentationState): boolean {
   return ((state.segments[0]?.beforeRules.rulesContext.hitMarker ?? 0) & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0;
 }
@@ -6876,7 +6912,9 @@ export function advanceBattleResolutionConfirmHandoff(
   }
   const nextStage = handoff.focusPunchPrePass === true && handoff.stage === "stop-bounce-request"
     ? null
-    : CONFIRM_HANDOFF_NEXT[handoff.stage];
+    : handoff.stage === "before-turn" && handoff.forced === undefined && turnOpensWithAsleepPrint(state)
+      ? null
+      : CONFIRM_HANDOFF_NEXT[handoff.stage];
   if (nextStage === null) {
     const printU = usedMovePrintLeadU(state, handoff);
     const lead = printU === null ? { hit: 0, script: 0, anim: 0 } : usedMoveSoundLeadsOf(state, printU);

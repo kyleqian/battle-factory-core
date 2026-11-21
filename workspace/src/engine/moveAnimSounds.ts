@@ -528,11 +528,18 @@ const WEATHER_LABELS: Readonly<Record<WeatherContinuesAnimation, string>> = {
  * animation after one of them, and every Sleep / Confusion animation, is at 0 too. Elsewhere the 7 stays (Refresh, a cure berry, Poison / Burn / Paralysis outside a B4 body: ROM minus ours 2 / 3 at 7).
  */
 export const STATUS_ANIMATION_SCRIPT_AGE = 7;
+const END_TURN_STATUS_DAMAGE_LABEL = "BattleScript_DoStatusTurnDmg";
 export const STATUS_ANIMATION_AUDITED_BODY_SCRIPT_AGE = 0;
 function statusAnimationScriptAge(state: BattleResolutionPresentationState, name: BattleStatusAnimationName): number {
   // b4l: the status animation a c-lead B4 body (Thunder Wave, Sing, Will-O-Wisp, Confuse Ray ...) hands over to plays its first SE 3 rows after the command (ROM, the b4m labs), not 10:
   // only the command directly after the body (a `status` command may sit between), so end-of-turn / Toxic / other status animations keep their audited offset.
   const own = state.segments[state.segmentIndex]!.commands;
+  // gsp3: the end-of-turn poison / burn tick (BattleScript_DoStatusTurnDmg, no move body) plays its first SE on the ROM's launch row + 1 (+ the table row), age 0 (labs gsp3-{toxic,willowisp}-*-on, 6 / 6 ticks).
+  const current = own[state.commandIndex];
+  const launched = current !== undefined && "eventSequence" in current
+    ? state.segments[state.segmentIndex]!.events.find((event) => event.sequence === current.eventSequence)
+    : undefined;
+  if (launched?.provenance?.sourceLabel === END_TURN_STATUS_DAMAGE_LABEL) return STATUS_ANIMATION_AUDITED_BODY_SCRIPT_AGE;
   for (let c = state.commandIndex - 1; c >= 0; c -= 1) {
     const previous = own[c]!;
     if (previous.type === "status") continue;
@@ -549,7 +556,7 @@ function statusAnimationScriptAge(state: BattleResolutionPresentationState, name
   }
   // b4l: Sleep and Confusion play their first SE 3 rows after the command wherever they start (T2 ROM rows, 25 Scene ON seeds: SE 197 mass 639 -> 347, 176 1,524 -> 840, 212 516 -> 138; no id worse);
   // Poison / Burn / Paralysis outside a B4 body keep the 10 (the same change moved them away from the ROM: SE 148 +216, 119 +43, 144 +24).
-  return name === "SLP" || name === "CONFUSION" ? STATUS_ANIMATION_AUDITED_BODY_SCRIPT_AGE : STATUS_ANIMATION_SCRIPT_AGE;
+  return name === "SLP" || name === "CONFUSION" || name === "INFATUATION" ? STATUS_ANIMATION_AUDITED_BODY_SCRIPT_AGE : STATUS_ANIMATION_SCRIPT_AGE;
 }
 /** Weather-continues body age -> script row: the move-body clock (FIRST_COMMAND_AGE + AGE_TO_SOUND_ROWS). */
 const WEATHER_SCRIPT_AGE = FIRST_COMMAND_AGE + AGE_TO_SOUND_ROWS;
