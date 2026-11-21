@@ -982,8 +982,11 @@ export const BRAIN_BATTLE_TRANSITION_START_ELAPSED = 32;
  */
 export const BATTLE_TRANSITION_START_TE = 26;
 export const ASYMMETRIC_SPIRAL_IN_SEQ_TRANSITION_START_TE = 23;
+/** LOGO_WAVE's constants (flicker te 34, main te 84, handoff 209) put the task's creation at te 32: the ROM's flicker starts two frames after it (trn226). */
+export const LOGO_WAVE_TRANSITION_START_TE = 32;
 function transitionStartTe(state: BattleRoomState): number {
   const kind = frontierTransitionRenderKind(state.transitionPresentation, "circlesMeet");
+  if (kind === "logoWave") return LOGO_WAVE_TRANSITION_START_TE;
   return kind === "asymmetricSpiralInSeq" ? ASYMMETRIC_SPIRAL_IN_SEQ_TRANSITION_START_TE : BATTLE_TRANSITION_START_TE;
 }
 /** The brain path's transition clock on a brainSpeechSettled frame (negative before the transition starts). */
