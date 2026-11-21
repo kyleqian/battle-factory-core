@@ -36,7 +36,7 @@ export function emitLobbyAttendantSounds(before: FactoryLobbyAttendantState, aft
     const cursor = before.pendingCursor ?? before.cursor;
     if (input.up || input.down) {
       // Menu_ProcessInputNoWrap / ...ClearOnChoose (menu.c): SE_SELECT only when the cursor moves. Three entries do not wrap
-      // (script_menu.c:143-146 InitMultichoiceCheckWrap), so a press at an end is silent in the ROM (ours wraps the cursor; see the doc).
+      // (script_menu.c:143-146 InitMultichoiceCheckWrap), so a press at an end is silent (and, since lbb1, leaves our cursor too).
       const next = cursor + (input.down ? 1 : -1);
       if (next >= 0 && next < ATTENDANT_MENU_ITEMS[def.menu].length) playSelectSe();
       return;

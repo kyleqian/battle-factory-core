@@ -1460,7 +1460,12 @@ export function movePostwinContinuationCursor(
     return state;
   }
   const count = postwinContinuationChoiceCount(state);
-  const next = (state.continuationCursorPos + direction + count) % count;
+  // MULTI_GO_ON_RECORD_REST_RETIRE wraps (four entries: Menu_ProcessInput); lbb1: MULTI_GO_ON_REST_RETIRE does not (three entries:
+  // Menu_ProcessInputNoWrap, script_menu.c:143-146), so a press at its ends leaves the cursor.
+  const next = count === 4
+    ? (state.continuationCursorPos + direction + count) % count
+    : Math.min(count - 1, Math.max(0, state.continuationCursorPos + direction));
+  if (next === state.continuationCursorPos) return state;
   return {
     ...state,
     continuationCursorPos: next as 0 | 1 | 2 | 3,
