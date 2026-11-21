@@ -2129,12 +2129,25 @@ function digSecondTurnPrintLead(event: BattleKernelSemanticEvent, hitMarker: num
   return { leadFrames: DIG_SECOND_TURN_PRINT_LEAD_ROWS };
 }
 /**
- * bdt1 (Scene ON): Dig's charge-turn body (BattleScriptFirstChargingTurn, no body lead) plays its first SE 6 rows after the ROM does on the generic
- * sound clock (SE 175 at 66 / 100 / 134 / 168 / 202 against the ROM's 60 / 94 / 128 / 162 / 196 on both bdt1-dig-{player,opponent}-on labs; 10 T2
- * windows, 4 seeds): the ROM releases the used print and reaches `gAnimScriptActive` 4 rows apart (R -> A0 = 4) where the clock assumes 10. The
- * command's duration is already exact (the next print lands on A1), so only the sound clock moves.
+ * chg2 (Scene ON; generalizes bdt1's Dig value): a charge-turn body (BattleScriptFirstChargingTurn) plays its sounds on the ROM's own script rows, but the
+ * generic sound clock assumes the used print's release reaches `gAnimScriptActive` (A0) 10 rows later (R -> A0 = 10). The presented box command always starts at
+ * the same row while the ROM reaches the charge script's opener (STRINGID_EMPTYSTRING3, kernel instruction execution E) E rows after the effect script's first
+ * row, so R -> A0 = E - 6: bdt1-dig / chg2-{fly,bounce,dive,solarbeam,razorwind,skyattack}-{player,opponent}-on, ROM first SE exactly (E 10 / 7 / 10 / 9 / 9 / 6 / 6
+ * -> R -> A0 4 / 1 / 4 / 3 / 3 / 0 / 0 on the ROM). The sound clock moves by 10 - (E - 6) rows; the command's duration and pixels are untouched (the Fly
+ * charge turn's pixels match the ROM at the present duration, a 3-row earlier body made it worse).
  */
-const DIG_CHARGE_TURN_SOUND_LEAD_ROWS = 6;
+const CHARGE_TURN_SOUND_LEAD_BASE_ROWS = 16;
+function chargeTurnSoundLead(events: readonly BattleKernelSemanticEvent[], index: number): { soundAgeLeadFrames?: number } {
+  if (events[index]!.provenance?.sourceLabel !== CHARGE_TURN_SCRIPT) return {};
+  for (let i = index - 1; i >= 0; i -= 1) {
+    const candidate = events[i]!;
+    if (candidate.provenance?.sourceLabel !== CHARGE_TURN_SCRIPT) return {};
+    if (candidate.payload.kind === "message" && candidate.payload.messageId === "STRINGID_EMPTYSTRING3") {
+      return { soundAgeLeadFrames: CHARGE_TURN_SOUND_LEAD_BASE_ROWS - instructionExecutionOf(candidate) };
+    }
+  }
+  return {};
+}
 /**
  * bdt1 (Scene ON): Rest's body (move 156: its SE_M_SNORE) plays 2 rows before the ROM on the generic sound clock (ROM A0 + 1 = 1200 against 1198 on the
  * bdt1-rest-player-on lab; 17 T2 windows, every one -2). The body's own rows are not short: the clock's 7-row calibration meets Rest's script lead of 9
@@ -2143,8 +2156,8 @@ const DIG_CHARGE_TURN_SOUND_LEAD_ROWS = 6;
 const MOVE_REST = 156;
 const REST_SOUND_LEAD_ROWS = -2;
 const REST_HEAL_PRINT_TAIL_ROWS = 10;
-function bdt1BodySoundLead(event: BattleKernelSemanticEvent, moveId: number): { soundAgeLeadFrames?: number } {
-  if (moveId === MOVE_DIG && event.provenance?.sourceLabel === CHARGE_TURN_SCRIPT) return { soundAgeLeadFrames: DIG_CHARGE_TURN_SOUND_LEAD_ROWS };
+function bdt1BodySoundLead(events: readonly BattleKernelSemanticEvent[], index: number, moveId: number): { soundAgeLeadFrames?: number } {
+  if (events[index]!.provenance?.sourceLabel === CHARGE_TURN_SCRIPT) return chargeTurnSoundLead(events, index);
   return moveId === MOVE_REST ? { soundAgeLeadFrames: REST_SOUND_LEAD_ROWS } : {};
 }
 const SCRIPT_TAIL_BETWEEN_OPCODES: ReadonlySet<string> = new Set(["B_SCR_OP_WAITANIMATION", "B_SCR_OP_SETBYTE", "B_SCR_OP_SETGRAPHICALSTATCHANGEVALUES"]);
@@ -5829,7 +5842,7 @@ export function projectBattleResolutionCommands(
           timing: Object.freeze({
             minimumFrames: SCENE_OFF_MOVE_PAUSE_FRAMES, ...moveAnimationSeGateTiming(events, index), ...moveAnimationScriptLeadTiming(events, index, presentedSinceUsedAtAttack, animation.moveId),
             ...moveAnimationScriptTailTiming(events, index, usedMoveInstructionExecution, presentedSinceUsedAtAttack, animation.moveId),
-            ...bdt1BodySoundLead(event, animation.moveId),
+            ...bdt1BodySoundLead(events, index, animation.moveId),
           }),
         }));
         continue;
