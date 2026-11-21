@@ -1438,6 +1438,14 @@ function winTailHoldRows(events: readonly BattleKernelSemanticEvent[], receiptIn
   });
 }
 
+/**
+ * wtl1 (ROM labs wtl1-rain-{growl,player}-{off,on}): the turn-end weather print (BattleScript_RainContinuesOrEnds, printfromtable at +0, u = 1) after
+ * the last action's MoveEnd. The ROM runs MoveEnd's remaining cases and HandleEndTurn / DoFieldEndTurnEffects before it: its printstring
+ * executes 10 rows after MoveEnd's first row (stat fall 425 -> 435, hit 323 -> 333), 3 rows later than the next action's USEDMOVE chain (n + 6 + u).
+ */
+const END_TURN_WEATHER_PRINT_SCRIPT = "BattleScript_RainContinuesOrEnds";
+const END_TURN_WEATHER_PRINT_EXTRA_ROWS = 1;
+
 const ACTION_TRANSITION_WAIT_ROWS: Readonly<Record<string, number>> = Object.freeze({ B_WAIT_TIME_LONG: WAITMESSAGE_LONG_HOLD_FRAMES });
 
 /**
@@ -1466,6 +1474,7 @@ function actionTransitionPauseFrames(
   let statusFramesAfter = 0;
   let usedIsPreMove = false;
   let inLoveRows = 0;
+  let endTurnRows = 0;
   for (let index = receiptIndex + 1; index < events.length; index += 1) {
     const event = events[index]!;
     const next = event.provenance?.instructionExecution;
@@ -1481,12 +1490,14 @@ function actionTransitionPauseFrames(
       statusFramesAfter += frames;
       continue;
     }
+    const endTurnWeather = event.payload.kind === "message" && event.provenance?.sourceLabel === END_TURN_WEATHER_PRINT_SCRIPT;
     if (
       next >= e1 || event.payload.kind !== "message"
-      || !(ACTION_TRANSITION_NEXT_PRINTS.has(event.payload.messageId) || (sceneOn && event.payload.messageId === SCENE_ON_ACTION_TRANSITION_NEXT_PRINT))
+      || !(endTurnWeather || ACTION_TRANSITION_NEXT_PRINTS.has(event.payload.messageId) || (sceneOn && event.payload.messageId === SCENE_ON_ACTION_TRANSITION_NEXT_PRINT))
     ) return null;
+    if (endTurnWeather) endTurnRows = END_TURN_WEATHER_PRINT_EXTRA_ROWS;
     used = next;
-    usedIsPreMove = event.payload.messageId !== "STRINGID_USEDMOVE";
+    usedIsPreMove = !endTurnWeather && event.payload.messageId !== "STRINGID_USEDMOVE";
     if (event.payload.messageId === IN_LOVE_TRANSITION_PRINT) inLoveRows = IN_LOVE_TRANSITION_ROWS;
     break;
   }
@@ -1537,7 +1548,7 @@ function actionTransitionPauseFrames(
   }
   // sta3 (aud242g dreameater, ROM): before a pre-move print the status icon's second controller row (production presents one frame) is one more row.
   const iconSecondRow = anchor.payload.kind === "status-icon-update" && usedIsPreMove ? 1 : 0;
-  const frames = e1 - anchorExecution - 1 + ACTION_TRANSITION_ROWS + used - presented - statusFramesAfter + iconSecondRow + inLoveRows;
+  const frames = e1 - anchorExecution - 1 + ACTION_TRANSITION_ROWS + used - presented - statusFramesAfter + iconSecondRow + inLoveRows + endTurnRows;
   return frames > 0 ? { frames, rowsToReceipt: e1 - anchorExecution - 1 - presented } : null;
 }
 

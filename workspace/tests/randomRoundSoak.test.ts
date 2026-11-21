@@ -1062,7 +1062,8 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // gsp3 (the end-of-turn poison / burn tick's print -> launch rows 95 / 98 as the ROM, gsp3-{toxic,willowisp}-player-on rows 1576 -> 1671 / 1547 -> 1645;
       // the exploring presses land on new phases): 67984 / turn 20 -> 68529 / turn 21; same battle 3 / depth 2 / OK / roundLost.
       // wtl1 (the win tail's 24 draw-nothing rows before "Player defeated"; the exploring presses land on new phases): 68529 / battle 3 / depth 2 / turn 21 -> 75721 / battle 4 / depth 3 / turn 21; still OK / roundLost.
-      frames: 75721,
+      // wtl1 item 2 (the turn-end weather print's 10 rows after MoveEnd, ROM rain labs: stat fall 425 -> 435, hit 323 -> 333): frames only, 75721 -> 75618; same battle 4 / depth 3 / turn 21 / roundLost. A trajectory pin, not a ROM frame.
+      frames: 75618,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 3,
