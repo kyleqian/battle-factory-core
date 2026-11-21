@@ -130,7 +130,8 @@ import {
   BRAIN_BATTLE_TRANSITION_START_ELAPSED,
   entryStep,
   INITIAL_BATTLE_ROOM_STATE,
-  BATTLE_2_SCENE_HANDOFF_ELAPSED,
+  ordinaryBattleIntroHandoffElapsed,
+  ordinaryBattleTransitionTe,
   msgboxVisual,
   opponentSetupExtraRngSteps,
   SETTLED_SCENE_ELAPSED,
@@ -974,8 +975,6 @@ export interface EngineState {
   resultHold?: ResultHoldState | null;
 }
 
-/** battleRoom "settled" phase's own elapsed (0 = trace tick 843, see battleTransition.ts) at which core.ts hands off to battleScene.ts - trace tick 1040 (battleScene.ts's own TICK0), the ground-truth trace's own window start. Ticks 1030-1039 are flat black either way (battleTransition's own exit-fade hold and battleScene's own pre-reveal hold render byte-identical solid black), so the exact handoff point within that range is inconsequential to pixels. */
-const BATTLE_SCENE_HANDOFF_ELAPSED = SCENE_TICK0 - 843;
 /**
  * CB2_InitBattleInternal sets gMain.inBattle after the field transition has
  * handed off to battleScene. RAM pins the final per-VBlank call to scene age
@@ -1931,9 +1930,10 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
         // not a new battle entry (docs/noland-walkup-dialogue-scoping.md
         // §1.3/1.4: DoNolandBattle's own closemessage/HealPlayerParty/
         // DoSpecialTrainerBattle sequence).
+        // tri1: the handoff frame is the transition's own (ordinaryBattleIntroHandoffElapsed), not ASYMMETRIC_SPIRAL_IN_SEQ's for all.
         if (
           battleRoom.phase === "settled" &&
-          battleRoom.elapsed === BATTLE_2_SCENE_HANDOFF_ELAPSED
+          battleRoom.elapsed === ordinaryBattleIntroHandoffElapsed(battleRoom)
         ) {
           const generatedPending =
             factoryRoundBattleOrchestrator?.round.presentation?.command;
@@ -2947,7 +2947,9 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
       // transition's own post-fade black hold ("settled" phase) is
       // indefinite on its own - this is the fixed elapsed count matching
       // the ground-truth trace's own window start (trace tick 1040).
-      if (battleRoom?.phase === "settled" && battleRoom.elapsed === BATTLE_SCENE_HANDOFF_ELAPSED) {
+      // tri1: the transition's own handoff frame (ordinaryBattleIntroHandoffElapsed). CIRCLES_MEET's (197 = trace tick 1040, battleScene.ts's
+      // TICK0, the ground-truth trace's window start) was the handoff of every transition here before.
+      if (battleRoom?.phase === "settled" && battleRoom.elapsed === ordinaryBattleIntroHandoffElapsed(battleRoom)) {
         if (state.appRoute === "generated-orchestrator" && state.pendingGeneratedRound !== null) {
           // Chained (post-boot) round: every construction input is already
           // pinned in pendingGeneratedRound (factoryRoundChaining.ts) from
@@ -3486,13 +3488,15 @@ function renderBattleRoomState(state: EngineState): Uint8Array {
   // battleTransition.ts's exitFadeY doc for the BG/OBJ 1-tick-lag split);
   // everything else (gray flicker, circle sprites, center-logo blend) is a
   // post-process overlay, no new phase needed.
+  // tri1: the transition's clock runs from the battle BGM (ordinaryBattleTransitionTe), as on the ROM and in the brain room.
+  const te = b.phase === "settled" ? ordinaryBattleTransitionTe(b) : -1;
   if (b.phase === "settled") {
-    bgY = frontierTransitionBgFadeY(b.elapsed, transition);
-    objY = frontierTransitionObjFadeY(b.elapsed, transition);
+    bgY = frontierTransitionBgFadeY(te, transition);
+    objY = frontierTransitionObjFadeY(te, transition);
   }
   const fb = createFramebuffer();
   renderBattleRoomEntryScene(fb, step, sceneElapsed, bgY, objY, msgboxVisual(b), b);
-  if (b.phase === "settled") applyBattleTransitionOverlay(fb, b.elapsed, transition, b.transitionPresentation);
+  if (b.phase === "settled") applyBattleTransitionOverlay(fb, te, transition, b.transitionPresentation);
   return fb;
 }
 
