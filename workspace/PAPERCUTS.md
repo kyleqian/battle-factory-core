@@ -8,6 +8,14 @@ report `PAPERCUT: <what>, ~<minutes lost>` in their final message.
 Delete an entry when its underlying friction is fixed; git preserves its
 history.
 
+## Worker / supervisor friction, 2026-11-21 run
+
+- **Worktree workers `cd` into the main tree** (rrh6, side lane: most Bash calls began with `cd /srv/pokebench/pokeemerald-factory-core/workspace`, so its 8 commits
+  landed on master between the main-lane worker's, and a `git commit -a` swept that worker's uncommitted `src/` edit into a stage-file commit; ~25 min plus a
+  duplicate branch). Hits: 2 (fsc2m 2026-11-21 was the first). Briefs for side / integration workers now say "work only in your worktree (your cwd); never cd into or
+  commit to the main tree", and main-lane briefs say "stage files by name, never commit -a".
+- Bump (typecheck / build vs the 120 s foreground limit and the shared typecheck flock): stc1 ~12 min.
+
 ## Worker / supervisor friction, 2026-11-18 run
 
 - **`npm run typecheck` covers only `src/` + `tests/`; `tools/compare/appTrace.ts` is checked only by `npm run build` (`tsc -b`) or a test importing it.** A supervisor
