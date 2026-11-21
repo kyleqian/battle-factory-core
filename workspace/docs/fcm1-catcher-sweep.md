@@ -162,3 +162,28 @@ draft YES/NO click (fcs1 catcher limits), the party icons' bob phase, one-frame 
 
 56 of the 300 moves (among them EXPLOSION, EXTREME SPEED, FOCUS PUNCH, FISSURE, CALM MIND, DRAGON CLAW, DRILL PECK, ANCIENT POWER):
 their sets are dealt from round 3 on or are rare, and the test player rarely gets there. Open Level is not in the game.
+
+## Fixed since (2026-11-21, trial-fix-20261121)
+
+| finding | fix | doc |
+|---|---|---|
+| 1 WHITE HERB at battle start | its animation, sounds and message presented (ROM rows; Trace after Intimidate 2 frames earlier too) | `docs/wbh1-battle-start-white-herb.md` |
+| 2 ROAR | not a bug: the message prints and waits like the ROM (the 30-frame contact sheet misled it); the box clear after the press +14, the drag-in INTIMIDATE / TRACE wait fixed | `docs/msg2-roar-wish-messages.md` |
+| 3 WISH | names the wisher; the pause before "HP is full!" | `docs/msg2-roar-wish-messages.md` |
+| 4 "fainted!" box | the ROM's rule: the press from G+1, the arrow every 9 frames, a press on a redraw frame blanks the box (1,502 ROM boxes, no exception) | `docs/fnt1-fainted-box-clear.md` |
+| 5 WILL-O-WISP | the orb's 15 SE_M_FLAME_WHEEL | `docs/mvs1-called-move-sounds.md` |
+| 6 METRONOME | called moves with an animation were fine; the 65 METRONOME-only moves have no animation and stay silent (their sounds without a picture ran past the next menu; commit 7236f086e left out) | `docs/mvs1-called-move-sounds.md` |
+| 7 Scene OFF SUBSTITUTE / TRANSFORM | their sounds in Scene OFF, called or not; SUBSTITUTE's doll landings | `docs/mvs1-called-move-sounds.md` |
+| 8 Lobby B | B on every box that waits for A or B (Lobby, rooms, postwin); B = NO on RECORD / RETIRE; 3-entry menus stop wrapping | `docs/lbb1-lobby-b-press.md` |
+| Open 1 the Head's team | the catcher's VBlank undo stopped at frame 20 of a 28-32 frame build; the engine was right | `docs/hdt1-factory-head-team.md` |
+| Open 2 catcher gap | the GO ON menu asked again and the RECORD / RETIRE YES/NO are menus from their first input frame | `docs/lbb1-lobby-b-press.md` |
+
+Combined tree (with sct1, hdl1, lha1, fop1): `tsc -b` clean; full suite 1,920 files / 16,573 tests passed. Re-pins on the combined tree:
+`randomRoundSoak` full seed 0 39,277 -> 39,259 (frames only), `lbrd` continuation seed 2 -> 10 (a scan of 0..20). Catcher on 12 rounds remade on
+this build (`.integration/evidence/fcm1-verify/`): every round followed to its end, 8,073 menus; the Factory Head reached in s44-on-ws with his
+team the engine's; sound rows only the known catcher artefacts (the draft YES/NO click, the Lobby's last free-roam frames, BGM ducks at
+stretch edges).
+
+Left open by the fixes (each doc's last section): the METRONOME-only moves' animations; "fainted!" prints 3-6 frames early in the turn and
+"Player defeated" ~25 frames early after the winning faint; WILL-O-WISP's picture 8 frames early; the mid-battle WHITE HERB frames; the
+attendant's "{PLAYER} saved the game." (the box's lbw9 covers it); end-of-turn lines after a drag-in 13 frames early.
