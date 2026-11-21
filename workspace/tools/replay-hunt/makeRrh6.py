@@ -34,15 +34,16 @@ D["R062"] = design("R062", ("R062-conversion-2-steel-user-dragon-hit", "Challeng
 D["R061"] = design("R061", ("R061-conversion-2-two-turn-charging", "Challenge 7, trainer 200, hand-built Mechanic Lab parties. Pidgeot (faster) uses Fly every turn: turn 1 charges, turn 2 hits the player's Aggron, turn 3 charges again while Aggron's Conversion 2 runs: the last landed move is a two-turn move and its user is still charging, so Conversion 2 fails (battle_script_commands.c:8081-8085)."),
     [mon(AGGRON, [CONV2, ROCKSLIDE, ROCKSLIDE, ROCKSLIDE]), four(HERACROSS, ROCKSLIDE), four(MACHAMP, ROCKSLIDE)],
     [four(PIDGEOT, FLY), four(FEAROW, FLY), four(DODRIO, FLY)], [{"move": 0}, {"move": 0}, {"move": 0}])
-D["R055"] = design("R055", ("R055-baton-pass-carries-lock-on", "Challenge 7, trainer 200, hand-built Mechanic Lab parties. The player's faster Alakazam uses Lock-On on a foe whose only move is Baton Pass: the foe passes while the lock is active, so SwitchInClearSetData resets the lock to its two-turn form (battle_main.c:3178-3186)."),
-    [mon(ALAKAZAM, [LOCKON, PSYCHIC, PSYCHIC, PSYCHIC], True), four(HERACROSS, ROCKSLIDE), four(MACHAMP, ROCKSLIDE)],
-    [four(MACHAMP, BATONPASS), four(PRIMEAPE, BATONPASS), four(HERACROSS, BATONPASS)], [{"move": 0}])
+D["R055"] = design("R055", ("R055-baton-pass-by-lock-on-user", "Challenge 7, trainer 200, hand-built Mechanic Lab parties. The player's Alakazam uses Lock-On on a Splash-only Snorlax, then Baton Pass while the lock is active: SwitchInClearSetData resets the foe's sure-hit lock to its two-turn form when the Lock-On user passes (battle_main.c:3178-3186)."),
+    [mon(ALAKAZAM, [LOCKON, BATONPASS, PSYCHIC, PSYCHIC], True), four(HERACROSS, ROCKSLIDE), four(MACHAMP, ROCKSLIDE)],
+    [four(143, SPLASH), four(PRIMEAPE, SPLASH), four(AGGRON, SPLASH)], [{"move": 0}, {"move": 1}])
+D["R055"]["script"]["replacements"] = [1, 2]
 D["R068"] = design("R068", ("R068-frozen-flame-wheel-thaw-hit", "Challenge 7, trainer 200, hand-built Mechanic Lab parties. A Growlithe whose only move is Flame Wheel resists the Ice Beams of Water / Ice foes (10 percent freeze each); when it is frozen the 1-in-5 thaw roll fails and Flame Wheel (EFFECT_THAW_HIT) is let through (battle_util.c:2059-2070)."),
     [four(GROWLITHE, FLAMEWHEEL), four(QUILAVA, FLAMEWHEEL), four(NINETALES, FLAMEWHEEL)],
     [four(CLOYSTER, ICEBEAM, True), four(LAPRAS, ICEBEAM, True), four(WALREIN, ICEBEAM, True)], [])
-D["R086"] = design("R086", ("R086-skill-swap-lock-on-protect", "Challenge 7, trainer 200, hand-built Mechanic Lab parties. The player's Lock-On on a foe that does not Protect that turn, then Skill Swap on the turn the foe Protects (priority +3): the Protect marks the move missed, Lock-On lets the accuracy check pass, and Cmd_tryswapabilities fails on MOVE_RESULT_NO_EFFECT (battle_script_commands.c:9394-9401)."),
+D["R086"] = design("R086", ("R086-skill-swap-lock-on-protect", "Challenge 7, trainer 200, hand-built Mechanic Lab parties. Foes whose only move is Protect (priority +3): turn 1 Protect blocks the player's Lock-On, turn 2 the second Protect fails (1 in 2) so Lock-On lands, turn 3 Protect works again (the counter was reset) and the Skill Swap is marked missed, Lock-On lets the accuracy check pass, and Cmd_tryswapabilities fails on MOVE_RESULT_NO_EFFECT (battle_script_commands.c:9394-9401)."),
     [mon(ALAKAZAM, [LOCKON, SKILLSWAP, PSYCHIC, PSYCHIC], True), four(HERACROSS, ROCKSLIDE), four(MACHAMP, ROCKSLIDE)],
-    [mon(MACHAMP, [PROTECT, SPLASH, SPLASH, SPLASH]), mon(PRIMEAPE, [PROTECT, SPLASH, SPLASH, SPLASH]), mon(HERACROSS, [PROTECT, SPLASH, SPLASH, SPLASH])], [{"move": 0}, {"move": 1}])
+    [four(MACHAMP, PROTECT), four(PRIMEAPE, PROTECT), four(HERACROSS, PROTECT)], [{"move": 0}, {"move": 0}, {"move": 1}])
 
 out = Path(sys.argv[1] if len(sys.argv) > 1 else ROOT / ".integration/evidence/rrh6/designs")
 out.mkdir(parents=True, exist_ok=True)
