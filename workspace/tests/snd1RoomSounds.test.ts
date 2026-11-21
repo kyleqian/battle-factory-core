@@ -6,8 +6,9 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { collectSoundTick } from "../src/audio/soundEvents.ts";
-import { createInitialState, tick } from "../src/engine/core.ts";
+import { createInitialState, tick, type EngineState } from "../src/engine/core.ts";
 import { traceAdvances } from "../tools/compare/traceReplay.ts";
+import { frontierTransitionPresentationForTableIndex } from "../src/engine/battleTransition.ts";
 
 interface RomEvent { frame: number; kind: string; id: number | null; pan: number | null; noop?: boolean; volume?: number }
 const rom = JSON.parse(readFileSync(new URL("../tools/audio/fixtures/snd1-first-walk-window.json", import.meta.url), "utf8")) as {
@@ -19,13 +20,24 @@ const trace = JSON.parse(readFileSync(new URL("../tools/compare/traces-groundtru
   segments: Array<{ frames: number; buttons?: string[] }>;
 };
 
+/**
+ * tri1 (docs/tri1-transition-intro-handoff.md "Open"): the recording's battle 1 drew CIRCLES_MEET (table index 4); for these inputs the
+ * engine's room draws CIRCLES_ASYMMETRIC_SPIRAL_IN_SEQ (its RNG at the draw is not the recording's). Since tri1 the battle intro starts on
+ * the drawn transition's own frame, so the replay carries the recording's transition (the draw's RNG step is kept).
+ */
+function withRecordedTransition(state: EngineState): EngineState {
+  const drawn = state.battleRoom?.transitionPresentation;
+  if (drawn === undefined || drawn.tableIndex === 4) return state;
+  return { ...state, battleRoom: { ...state.battleRoom!, transitionPresentation: frontierTransitionPresentationForTableIndex(4, drawn.rngAfterDraw) } };
+}
+
 function ours(): string[] {
   let state = createInitialState({ appRoute: "generated-orchestrator", battleScene: "on" });
   const out: string[] = [];
   for (const advance of traceAdvances(trace.segments)) {
     if (advance.frame > rom.from + rom.frames) break;
     const result = collectSoundTick(state.frame + 1, () => tick(state, advance.buttons));
-    state = result.result;
+    state = withRecordedTransition(result.result);
     if (advance.frame <= rom.from) continue;
     // hcr2c: rows carry the stamped (ROM-clock) frame, the same basis as the T1/T2 scoreboards; the tick frame runs the hcr2 action-dispatch hold later.
     // ROM duck rows carry the BGM song id and a volume; ours do too (`volume`); the probe's duck pan is null.

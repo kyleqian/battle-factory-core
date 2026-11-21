@@ -325,11 +325,18 @@ describe("battle start sound rules (aud241a, Tier 1)", () => {
     const events: SoundEvent[] = [];
     session.attachSoundSink({ push: (e) => events.push(e) });
     const player = new RandomPlayer(new Rng(3), new ActionLog(false), "winning");
-    for (let frame = 1; frame <= 1500; frame += 1) session.tick(player.decide(session.state), frame);
+    let transitionId: number | undefined;
+    for (let frame = 1; frame <= 1500; frame += 1) {
+      session.tick(player.decide(session.state), frame);
+      transitionId ??= session.state.battleRoom?.transitionPresentation?.transitionId;
+    }
     const bgm = events.find((e) => e.kind === "bgm")!;
     const stop = events.find((e) => e.kind === "stop")!;
     expect([stop.id, bgm.id, stop.frame]).toEqual([469, 476, bgm.frame]);
-    expect(events.find((e) => e.id === 114)!.frame - bgm.frame).toBe(359);
+    // tri1 (docs/tri1-transition-intro-handoff.md): the gap is the drawn transition's. The canonical trace's CIRCLES_MEET is 359; this
+    // game draws CIRCLES_ASYMMETRIC_SPIRAL, whose ROM gap is 343 (frame catcher, 2 battles; before tri1 every transition took 359 here).
+    expect(transitionId).toBe(36);
+    expect(events.find((e) => e.id === 114)!.frame - bgm.frame).toBe(343);
     // The RandomPlayer's own button presses move the intro clock by a tick mid-tray, so only the first nine tray events are pinned here.
     const ourTray = events.filter((e) => e.id === 114 || e.id === 115 || e.id === 116).slice(0, 9);
     const romTray = rom.filter((e) => e.id === 114 || e.id === 115 || e.id === 116).slice(0, 9);

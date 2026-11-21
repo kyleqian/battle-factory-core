@@ -63,7 +63,12 @@ the ROM each battle), so that is not changed here (see Open).
   transition's frames from the table above less 35 (LOGO_WAVE 36). LOGO_WIGGLE (not drawn yet; the room's fallback picture stands in)
   has its own 160. These equal the brain room's `brainBattleIntroHandoffTe` less the start te for every transition the sweep and trn225
   both cover, except the two IN_SEQ spirals (1 frame earlier here) and LOGO_WAVE (5 earlier; trn225 left LOGO_WAVE's brain handoff on the
-  ordinary room's old value). Both core.ts handoffs (the round's first battle, later battles) use it; `BATTLE_SCENE_HANDOFF_ELAPSED` is gone.
+  ordinary room's old value). CIRCLES_ASYMMETRIC_SPIRAL, not in the baseline, takes CIRCLES_SYMMETRIC_SPIRAL's 155 (as the brain table);
+  the run after the fix has it twice, both on the ROM's frames (343). Both core.ts handoffs (the round's first battle, later battles) use it; `BATTLE_SCENE_HANDOFF_ELAPSED` is gone.
+
+- The canonical-recorded route (the canonical ROM traces' replay) keeps the old clock and handoffs (`perTransition` false): its battle 1
+  was CIRCLES_MEET and its battle 2 ASYMMETRIC_SPIRAL_IN_SEQ on the ROM, the two the old values were measured on, but the engine's own
+  draw for those inputs is ASYMMETRIC_SPIRAL_IN_SEQ in battle 1 (see Open), and its fixtures pin the ROM's ticks.
 
 No kernel event, battle RNG or outcome moves. The overworld per-frame RNG runs through the transition until the battle starts, so it
 now advances the ROM's count per transition, and a later battle can draw another transition than before (seed 3 Scene ON's battle 7:
@@ -91,7 +96,19 @@ measured pairs keep 197 / 209 (and the no-transition fallbacks); every transitio
 battle 1 and later; agreement with the brain table where both are measured; ordinary play (the soak's player, seed 3 Scene ON and seed 2
 Scene OFF, 4 battles each): MUS_VS_TRAINER -> SE_BALL_TRAY_ENTER is the ROM's value for each battle's transition.
 
+Re-pinned, each because the drawn transition now sets the intro's frame:
+- `tests/aud241aBattleStartSounds.test.ts`: the seed-3 session draws CIRCLES_ASYMMETRIC_SPIRAL; its MUS_VS_TRAINER -> SE_BALL_TRAY_ENTER is
+  now 343, the ROM's for that transition (was 359, CIRCLES_MEET's, which the canonical trace in the same test still shows).
+- `tests/snd1RoomSounds.test.ts`, `tests/factoryBattleStartIntro.test.ts` (the live route replaying the canonical battle-1 inputs): the replay
+  now carries the recording's CIRCLES_MEET (`frontierTransitionPresentationForTableIndex(4)`) in place of the engine's draw, and every ROM
+  sound / receipt of the window matches as before.
+
 ## Open
+
+- **The engine's battle-1 draw for the canonical inputs** is CIRCLES_ASYMMETRIC_SPIRAL_IN_SEQ (table index 10, raw 49990) where the ROM
+  recording drew CIRCLES_MEET (index 4): the room's per-frame RNG at the draw is not the recording's. Before tri1 the fixed handoff hid it
+  (the timing was CIRCLES_MEET's whatever was drawn, the pictures the drawn one's). The catcher cannot see this: it writes the engine's
+  transition into the ROM. Worth its own step (the room RNG before the draw), with the canonical traces as the ROM evidence.
 
 - **The battle RNG at the first turn** does not follow the transition: on the ROM it is the transition draw advanced by the VBlanks of the
   transition and the battle start (160 to 200 per transition, measured above); the engine's comes from the facility's RNG plan. The

@@ -6,6 +6,7 @@ import battle1IntroTrace from "../tools/compare/traces-groundtruth/battle1-intro
 import { traceAdvances } from "../tools/compare/traceReplay.ts";
 import type { FactoryRentalRecord } from "../src/engine/battleScenario.ts";
 import { createInitialState, tick } from "../src/engine/core.ts";
+import { frontierTransitionPresentationForTableIndex } from "../src/engine/battleTransition.ts";
 import { createFactoryCorpusPartyMember } from "../src/engine/factoryCorpusParty.ts";
 import { createFactoryBattleStartPresentationCommand } from "../src/engine/factoryBattleStartPresentation.ts";
 import { getLevel50InitialRentalFixedIv } from "../src/engine/factoryRentalGeneration.ts";
@@ -277,6 +278,12 @@ describe("generated Factory pre-send-out intro lifecycle", () => {
     let destroy: { elapsed: number; t: number } | null = null;
     for (const advance of traceAdvances(segments)) {
       state = tick(state, advance.buttons);
+      // tri1 (docs/tri1-transition-intro-handoff.md "Open"): the recording drew CIRCLES_MEET (table index 4); for these inputs the engine's
+      // room draws CIRCLES_ASYMMETRIC_SPIRAL_IN_SEQ, and the intro now starts on the drawn transition's frame: carry the recording's.
+      const drawn = state.battleRoom?.transitionPresentation;
+      if (drawn !== undefined && drawn.tableIndex !== 4) {
+        state = { ...state, battleRoom: { ...state.battleRoom!, transitionPresentation: frontierTransitionPresentationForTableIndex(4, drawn.rngAfterDraw) } };
+      }
       const introState = state.factoryRoundBattleOrchestrator?.battleStartIntro;
       if (introState !== undefined && introState !== null) {
         const t = generatedBattleIntroSourceClock(introState.elapsed);

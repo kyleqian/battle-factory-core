@@ -1019,8 +1019,14 @@ function ordinaryTransitionKind(state: BattleRoomState): FrontierTransitionRende
 export function ordinaryTransitionDrawElapsed(state: BattleRoomState): number {
   return state.encounter === "jenson" ? 23 : 26;
 }
-/** The ordinary room's transition clock on a "settled" frame (te; the transition starts at transitionStartTe on the BGM frame). */
-export function ordinaryBattleTransitionTe(state: BattleRoomState): number {
+/**
+ * The ordinary room's transition clock on a "settled" frame (te; the transition starts at transitionStartTe on the BGM frame).
+ * `perTransition` false (the canonical-recorded route): the settled elapsed, as before tri1. That route replays the canonical ROM traces,
+ * whose battle 1 played CIRCLES_MEET and battle 2 ASYMMETRIC_SPIRAL_IN_SEQ (the two the old fixed clock and handoffs were measured on),
+ * while its own draw picks another transition for battle 1 (ASYMMETRIC_SPIRAL_IN_SEQ): its fixtures pin the ROM's ticks.
+ */
+export function ordinaryBattleTransitionTe(state: BattleRoomState, perTransition = true): number {
+  if (!perTransition) return state.elapsed;
   const startTe = ordinaryTransitionKind(state) === "asymmetricSpiralInSeq" ? ASYMMETRIC_SPIRAL_IN_SEQ_TRANSITION_START_TE : BATTLE_TRANSITION_START_TE;
   return state.elapsed - ordinaryTransitionDrawElapsed(state) + startTe;
 }
@@ -1030,8 +1036,8 @@ export function ordinaryBattleTransitionTe(state: BattleRoomState): number {
  * (tri1: MUS_VS_TRAINER -> the intro's first picture and -> SE_BALL_TRAY_ENTER, which comes 153 frames after that picture on the ROM;
  * the same value in the round's first battle and in later ones). They agree with brainBattleIntroHandoffTe's per-transition ends less the
  * start te for SQUARES, SQUARES_SCROLL and the circle families but the two IN_SEQ spirals (one frame earlier here). LOGO_WIGGLE (not drawn,
- * CIRCLES_MEET's picture stands in) and LOGO_WAVE are the ROM's own values. ASYMMETRIC_SPIRAL is not in the sweep: SYMMETRIC_SPIRAL's,
- * as in brainBattleIntroHandoffTe. Before tri1 every transition handed off after CIRCLES_MEET's 171 in the round's first battle and
+ * CIRCLES_MEET's picture stands in) and LOGO_WAVE are the ROM's own values. ASYMMETRIC_SPIRAL (not in the first sweep) takes
+ * SYMMETRIC_SPIRAL's, as in brainBattleIntroHandoffTe; the catcher's run after tri1 has it twice, both on the ROM's frames. Before tri1 every transition handed off after CIRCLES_MEET's 171 in the round's first battle and
  * ASYMMETRIC_SPIRAL_IN_SEQ's 186 in the later ones: up to 31 frames late (SYMMETRIC_SPIRAL in battles 2+).
  */
 export const ORDINARY_INTRO_HANDOFF_AFTER_BGM: Readonly<Record<FrontierTransitionRenderKind, number>> = {
@@ -1050,8 +1056,11 @@ export const ORDINARY_INTRO_HANDOFF_AFTER_BGM: Readonly<Record<FrontierTransitio
 /** LOGO_WIGGLE (transition id 29) is drawn as CIRCLES_MEET (trn225 open) but hands off at its own ROM-measured frame. */
 const LOGO_WIGGLE_TRANSITION_ID = 29;
 const LOGO_WIGGLE_INTRO_HANDOFF_AFTER_BGM = 160;
-/** The settled elapsed at which the ordinary room hands over to the battle intro (tri1). */
-export function ordinaryBattleIntroHandoffElapsed(state: BattleRoomState): number {
+/** CIRCLES_MEET's handoff in the round's first battle (trace tick 1040, battleScene.ts's TICK0): the canonical route's battle 1. */
+const CANONICAL_BATTLE_1_SCENE_HANDOFF_ELAPSED = 197;
+/** The settled elapsed at which the ordinary room hands over to the battle intro (tri1; `perTransition` as ordinaryBattleTransitionTe). */
+export function ordinaryBattleIntroHandoffElapsed(state: BattleRoomState, perTransition = true): number {
+  if (!perTransition) return state.encounter === "jenson" ? BATTLE_2_SCENE_HANDOFF_ELAPSED : CANONICAL_BATTLE_1_SCENE_HANDOFF_ELAPSED;
   const afterBgm = state.transitionPresentation?.transitionId === LOGO_WIGGLE_TRANSITION_ID
     ? LOGO_WIGGLE_INTRO_HANDOFF_AFTER_BGM
     : ORDINARY_INTRO_HANDOFF_AFTER_BGM[ordinaryTransitionKind(state)];

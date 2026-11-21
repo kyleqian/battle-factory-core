@@ -1933,7 +1933,7 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
         // tri1: the handoff frame is the transition's own (ordinaryBattleIntroHandoffElapsed), not ASYMMETRIC_SPIRAL_IN_SEQ's for all.
         if (
           battleRoom.phase === "settled" &&
-          battleRoom.elapsed === ordinaryBattleIntroHandoffElapsed(battleRoom)
+          battleRoom.elapsed === ordinaryBattleIntroHandoffElapsed(battleRoom, state.appRoute === "generated-orchestrator")
         ) {
           const generatedPending =
             factoryRoundBattleOrchestrator?.round.presentation?.command;
@@ -2949,7 +2949,8 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
       // the ground-truth trace's own window start (trace tick 1040).
       // tri1: the transition's own handoff frame (ordinaryBattleIntroHandoffElapsed). CIRCLES_MEET's (197 = trace tick 1040, battleScene.ts's
       // TICK0, the ground-truth trace's window start) was the handoff of every transition here before.
-      if (battleRoom?.phase === "settled" && battleRoom.elapsed === ordinaryBattleIntroHandoffElapsed(battleRoom)) {
+      if (battleRoom?.phase === "settled"
+        && battleRoom.elapsed === ordinaryBattleIntroHandoffElapsed(battleRoom, state.appRoute === "generated-orchestrator")) {
         if (state.appRoute === "generated-orchestrator" && state.pendingGeneratedRound !== null) {
           // Chained (post-boot) round: every construction input is already
           // pinned in pendingGeneratedRound (factoryRoundChaining.ts) from
@@ -3489,7 +3490,7 @@ function renderBattleRoomState(state: EngineState): Uint8Array {
   // everything else (gray flicker, circle sprites, center-logo blend) is a
   // post-process overlay, no new phase needed.
   // tri1: the transition's clock runs from the battle BGM (ordinaryBattleTransitionTe), as on the ROM and in the brain room.
-  const te = b.phase === "settled" ? ordinaryBattleTransitionTe(b) : -1;
+  const te = b.phase === "settled" ? ordinaryBattleTransitionTe(b, state.appRoute === "generated-orchestrator") : -1;
   if (b.phase === "settled") {
     bgY = frontierTransitionBgFadeY(te, transition);
     objY = frontierTransitionObjFadeY(te, transition);

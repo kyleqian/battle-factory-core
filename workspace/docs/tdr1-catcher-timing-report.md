@@ -92,6 +92,18 @@ than our 22 (wtl1 "Open"), so its "Player defeated" box is ready a frame sooner,
 waits for the test player's next press. The rest of the list is the same gaps as before at sizes of the same order (the rounds played
 differ); SE_EXIT -> MUS_HEAL, which follows the win tail, fell from 135 frames to 28.
 
+## Re-pins (the three fixes together)
+
+The soak's test player presses on its own clock, so any timing change re-rolls its rounds (as fnt1 and chg1 did):
+- `tests/randomRoundSoak.test.ts`: the green milestone (seed 21) frames 43,500 -> 43,633 and render calls 3,043 -> 3,063, the same battle 7 /
+  turn 3 / end state; M-B (c) "full" seed 0 a new trajectory (67,984 / battle 3 -> 143,541 / battle 6, still a loss), seed 1 60,582 / turn 19 ->
+  57,584 / turn 15 (same battle 3); "vanilla" frames only (9,300 -> 9,336, 9,350 -> 9,315); the ISSUES #89 Baton Pass pin 4 -> 2
+  (`tools/soak/batonPassSearch.ts --seeds 0:40`: candidates 2, 5, 8, 10, 24, 27, 28, 33, 36, 39).
+- `tests/lbrd.test.ts`: seed 0 lost the continuation and the challenge-2 loss; a scan of 0..20 in all three roles found none passing every
+  case, so the continuation uses 13 and the retire and the loss 2 (15 / 15).
+- `tests/fnt1FaintedBoxClear.test.ts`: the won box stays blank until "Player defeated" at P + 26 (the test looked 20 frames ahead).
+- `tests/wth236WeatherContinues.test.ts`, `aud241a`, `snd1RoomSounds`, `factoryBattleStartIntro`: in sst1's and tri1's docs.
+
 ## Tests
 
 - `tests/tdr1CatcherTimingReport.test.ts` (3): a hand-made run (`tests/fixtures/tdr1-timing-fixture.json`, the answers worked in the

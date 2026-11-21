@@ -454,7 +454,10 @@ describe("random round soak driver (green milestone pin)", () => {
       // accept edge alone undone (isBattleResolutionButtonMessageAcceptable's promptClear lead) the old pin passes again.
       // merge of the box's 2026-11-20 run with the Mac's 11-21 fixes (box f5274b48a: hcr1 / hcr1b / fsc1 / chg1 ...; Mac ea3220630: wbh1 / fnt1 / lrc1 ...): frames + render calls,
       // 43_557 (box) / 43_323 (Mac) -> 43_500, renderCalls 3_066 / 3_043 -> 3_043; same battle 7, turn 3, end state, diagnostics; both runs identical.
-      frames: 43_500,
+      // tdr1 (tri1: the battle intro at each transition's own frame; wtl1: the win tail waits for the victory BGM and the slide's dispatch;
+      // sst1: the end-turn sandstorm's tail): frames + render calls, 43_500 -> 43_633, renderCalls 3_043 -> 3_063; same battle 7, turn 3,
+      // end state, diagnostics.
+      frames: 43_633,
       battle: 7,
       turn: 3,
       diagnostics: {
@@ -466,7 +469,7 @@ describe("random round soak driver (green milestone pin)", () => {
         terminalOutcome: "roundWon",
         terminalRecordMenuInputReadyReached: true,
         terminalRecordChoice: "no",
-        renderCalls: 3_043,
+        renderCalls: 3_063,
       },
     });
     expect(second).toEqual(first);
@@ -706,7 +709,11 @@ describe("random round soak driver (green milestone pin)", () => {
     // commits Baton Pass on the merged tree (0 commits each). Re-scanned full-policy seeds 0..39 (tools/soak/batonPassSearch.ts --seeds 0:40 --parallel 4,
     // same options): candidates 4, 8, 10, 11, 13, 16, 27, 36, 39, all OK with no openpartyscreen / machine-barrier error. Seed 4 is the lowest
     // (Baton Pass commits 1, first commit 78369, halt 78671 on AIPOM in battleIndex 0, three Lobby new challenges; the halt is 1,329 frames inside the budget).
-    const result = runSeed(4, {
+    // tdr1 (tri1 / wtl1 / sst1: the battle intro, the win tail and the sandstorm tail on the ROM's frames; the exploring presses land on new
+    // phases): seed 4 no longer commits Baton Pass. Re-scanned full-policy seeds 0..39 (tools/soak/batonPassSearch.ts --seeds 0:40 --parallel 8,
+    // same options): candidates 2, 5, 8, 10, 24, 27, 28, 33, 36, 39. Seed 2 is the lowest (Baton Pass commits 2, first commit 51366, halt 51405
+    // on AIPOM in battleIndex 0, three Lobby new challenges). Pin 4 -> 2.
+    const result = runSeed(2, {
       maxFrames: 80_000,
       renderEvery: 0,
       coverage: observer as never,
@@ -1051,12 +1058,14 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // trial-fix-20261121 (fnt1 + lbb1 together): frames only, 39277 -> 39259; same battle 2 / depth 1 / turn 22 / roundLost.
       // merge of the box's 2026-11-20 run with the Mac's 11-21 fixes: the box's chg1 trajectory (67929 / battle 3 / depth 2 / turn 20; the Mac had 39259 / battle 2 / depth 1 / turn 22):
       // frames only against the box, 67929 -> 67984; same battle 3 / depth 2 / turn 20 / roundLost.
-      frames: 67984,
+      // tdr1 (tri1 / wtl1 / sst1: the battle intro, the win tail and the sandstorm tail on the ROM's frames; the exploring presses land on new
+      // phases, a new trajectory as at fsw235): 67984 / battle 3 / depth 2 / turn 20 -> 143541 / battle 6 / depth 5 / turn 25; still OK / roundLost.
+      frames: 143541,
       outcome: "OK",
       endState: "roundLost",
-      maxBattleDepth: 2,
-      battle: 3,
-      turn: 20,
+      maxBattleDepth: 5,
+      battle: 6,
+      turn: 25,
     });
     expect(runSeed(1, options)).toMatchObject({
       // msg175: 26878 -> 26810 (shorter used prints); trn178 (the Scene OFF action-transition pause): 26810 -> 27058; same battle / turn / end state.
@@ -1105,12 +1114,13 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // msg2): frames only, 58758 -> 58763; same battle 3 / depth 2 / turn 19 / roundLost. With RELEASE_TO_MOVEEND_ROWS.STRINGID_PKMNWASDRAGGEDOUT
       // back at 5 the old pin passes again (on msg2's own base the same tail moved 58793 -> 58798); seed 0 is unmoved.
       // merge of the box's 2026-11-20 run with the Mac's 11-21 fixes: frames only, 64365 (box) / 58763 (Mac) -> 60582; same battle 3 / depth 2 / turn 19 / roundLost on all three.
-      frames: 60582,
+      // tdr1 (tri1 / wtl1 / sst1, see seed 0): 60582 / turn 19 -> 57584 / turn 15; same battle 3 / depth 2 / roundLost.
+      frames: 57584,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 2,
       battle: 3,
-      turn: 19,
+      turn: 15,
     });
   });
 
@@ -1148,7 +1158,8 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // lrc1 (the loss tail's opponent recall plays the ROM's animated return to ball, its recall receipt holds to the trainer slide and the slide's printstring is 3 rows later: the win text prints 67 frames later): frames only, 9205 -> 9319; same battle 1 / turn 16 / end state (the terminal presses land on new phases after the longer tail).
       // lbb1 (the loss terminal's pages and farewell take B as A; the driver's terminal presses are 12% B): frames only, 9319 -> 9300;
       // decision notes identical to 6817b6a8c's; same battle 1 / turn 16 / end state. Seed 1 is unmoved.
-      frames: 9300,
+      // tdr1 (tri1: the battle intro at its transition's own frame): frames only, 9300 -> 9336; same battle 1 / turn 16 / end state.
+      frames: 9336,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 0,
@@ -1175,7 +1186,8 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // hpf1: frames only, 9271 -> 9404; same end state.
       // pic8 (the forced party menu's clock starts at the faint message's dismiss edge, ROM lab pic7): frames only, 9404 -> 9400; same end state.
       // lrc1 (see seed 0): frames only, 9400 -> 9350 (the random terminal presses after the 67-frame-longer loss tail answer the record prompt sooner); same battle 1 / turn 16 / end state.
-      frames: 9350,
+      // tdr1 (tri1, see seed 0): frames only, 9350 -> 9315; same battle 1 / turn 16 / end state.
+      frames: 9315,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 0,

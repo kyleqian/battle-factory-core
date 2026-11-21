@@ -52,6 +52,14 @@ describe("tri1: the ordinary room's transition clock and intro handoff", () => {
     expect(ordinaryBattleTransitionTe(room("later", undefined, 50))).toBe(50);
   });
 
+  it("the canonical-recorded route keeps the old clock and handoffs (its ROM traces played CIRCLES_MEET, then ASYMMETRIC_SPIRAL_IN_SEQ)", () => {
+    for (const id of Object.values(ID)) {
+      expect(ordinaryBattleIntroHandoffElapsed(room("first", id), false)).toBe(197);
+      expect(ordinaryBattleIntroHandoffElapsed(room("later", id), false)).toBe(209);
+      expect(ordinaryBattleTransitionTe(room("later", id, 77), false)).toBe(77);
+    }
+  });
+
   it("every transition hands off at its ROM frame after the BGM, the same in battle 1 and in later battles", () => {
     const rom = { squares: 145, symmetricSpiral: 155, logoWiggle: 160, circlesCross: 161, circlesMeet: 171, circlesCrossInSeq: 174,
       logoWave: 177, circlesMeetInSeq: 179, squaresScroll: 184, asymmetricSpiralInSeq: 186, symmetricSpiralInSeq: 186, asymmetricSpiral: 155 };
