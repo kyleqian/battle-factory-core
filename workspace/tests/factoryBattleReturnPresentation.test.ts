@@ -77,7 +77,7 @@ function winRoundPostwin(): PostwinState {
     opponentParty: round.rules.currentOpponent.party,
     rngValue: round.rules.rngValue,
   });
-  return createPostwinStateFromRound(round, FROZEN_VIEW);
+  return createPostwinStateFromRound(round, FROZEN_VIEW, false);
 }
 
 describe("slice 1: shared 108-tick return-to-field span (dismiss+8 -> dismiss+115)", () => {

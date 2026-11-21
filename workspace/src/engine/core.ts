@@ -566,6 +566,7 @@ import {
   postwinContinuationMenuVisibleDelay,
   createPostwinStateFromOpponentRentalRecords,
   createPostwinStateFromRound,
+  withPostwinUpcomingOpponentScouting,
   POSTWIN_BATTLE_ROOM_FADE_OUT_AGE,
   POSTWIN_BATTLE_ROOM_FIRST_AGE,
   POSTWIN_COUNTER_ROOM_FIRST_AGE,
@@ -719,6 +720,7 @@ import {
   factoryHeardBrainSpeech,
   factoryRoundBattleOpponentIdleRest,
   factoryRoundBattleResolutionForRender,
+  factoryRoundNextBattleBrainStatus,
   markFactoryBrainSpeechHeard,
   preGenerateFactoryRoundNextOpponent,
   type FactoryRoundBattleOrchestratorState,
@@ -1218,6 +1220,8 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
               generatedRound,
               // contain213: a presentation throw in the frozen scene degrades it (presentationContainment.ts "field").
               containedBattleResolutionRenderView(preAdvanceResolution, "postwin frozen scene"),
+              // sct1: the Factory Head's call scene is chosen from the next battle's number, as `frontier_getbrainstatus`.
+              factoryRoundNextBattleBrainStatus(factoryRoundBattleOrchestrator) !== "not-ready",
             )
           : generatedCommandType === "roundLost"
               || generatedCommandType === "roundCompleted"
@@ -1950,6 +1954,13 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
           factoryRoundBattleOrchestrator = preGenerateFactoryRoundNextOpponent(
             factoryRoundBattleOrchestrator,
           );
+          // sct1: `factory_getopponentmontype` / `factory_getopponentstyle` read the opponent just rolled (scripts.inc:139-142), so
+          // the scouting pages are that opponent's, not the trainer just beaten. No opponent is rolled before the Factory Head
+          // (AskSwapBeforeHead), whose route shows "I can't tell you anything about the FACTORY HEAD." instead.
+          const upcoming = factoryRoundBattleOrchestrator.pendingNextOpponent;
+          if (upcoming !== null && !nextPostwin.frontierBrain) {
+            nextPostwin = withPostwinUpcomingOpponentScouting(nextPostwin, upcoming.generation.opponents);
+          }
         }
       }
     }

@@ -1420,6 +1420,18 @@ function nextSavedRentalRecords(
  * staged canonical postwin, a mid-battle round, or an already-published
  * pending opponent) is returned unchanged.
  */
+export function factoryRoundNextBattleBrainStatus(
+  state: FactoryRoundBattleOrchestratorState,
+): FrontierBrainStatus {
+  // `frontier_getbrainstatus` for the battle after the current one (pre-battle room scripts.inc:61-62, 80-81): the streak entering it
+  // (the round's streak + the next battle index), never the opponents rolled (sct1, docs/sct1-scouting-next-opponent.md).
+  return getFactoryFrontierBrainStatus({
+    battleMode: "singles",
+    winStreak: state.config.factoryWinStreak + state.round.rules.battleIndex + 1,
+    symbolsCount: state.config.factorySymbolsCount ?? 0,
+  });
+}
+
 export function preGenerateFactoryRoundNextOpponent(
   state: FactoryRoundBattleOrchestratorState,
 ): FactoryRoundBattleOrchestratorState {
@@ -1442,11 +1454,7 @@ export function preGenerateFactoryRoundNextOpponent(
   // (FillFactoryTrainerParty -> FillFactoryBrainParty, battle_tower.c:1857), after the swap, excluding the rentalMons of that moment
   // (battle_factory.c:786-792): the player's three after the swap and the beaten trainer's three. So a Brain battle is generated at the
   // swap's resolution (advanceFactoryRoundPresentation), never here.
-  if (getFactoryFrontierBrainStatus({
-    battleMode: "singles",
-    winStreak: state.config.factoryWinStreak + battleIndex,
-    symbolsCount: state.config.factorySymbolsCount ?? 0,
-  }) !== "not-ready") {
+  if (factoryRoundNextBattleBrainStatus(state) !== "not-ready") {
     return state;
   }
   const previous = state.opponentGenerations.at(-1)!;

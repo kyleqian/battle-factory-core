@@ -505,6 +505,35 @@ export function createPostwinScoutingLines(
 export const POSTWIN_SCOUTING_LINES =
   createPostwinScoutingLines(CANONICAL_POSTWIN_OPPONENT_PARTY);
 
+/**
+ * sct1: the pages a generated postwin holds from the win until the GO ON answer. The upcoming opponent does not exist yet then:
+ * `AskSwapMon` rolls it (`factory_generateopponentmons`) after the GO ON and only then reads its type and style
+ * (`factory_getopponentmontype` / `factory_getopponentstyle`, pre-battle room scripts.inc:137-144), so pages 2 and 3 stay empty until
+ * `withPostwinUpcomingOpponentScouting` fills them at that answer. Nothing shows them before (the pages follow the GO ON).
+ */
+export const POSTWIN_SCOUTING_LINES_BEFORE_ROLL: PostwinScoutingLines = [
+  POSTWIN_SCOUTING_INTRO,
+  ["", ""],
+  ["", ""],
+  POSTWIN_SCOUTING_SWAP_OFFER,
+];
+
+/**
+ * sct1: the attendant's scouting pages from the opponent `AskSwapMon` has just rolled (the orchestrator's pending next opponent, rolled
+ * at the accepted GO ON), as the ROM reads them right after the roll (pre-battle room scripts.inc:137-144; `GetOpponentMostCommonMonType`
+ * / `GetOpponentBattleStyle`, battle_factory.c). Before this the generated postwin held `POSTWIN_SCOUTING_LINES_BEFORE_ROLL`; it used to
+ * hold the pages of the trainer just beaten (docs/sct1-scouting-next-opponent.md).
+ */
+export function withPostwinUpcomingOpponentScouting(
+  state: PostwinState,
+  upcomingOpponentRentalRecords: FactoryPostwinOpponentRentalRecords,
+): PostwinState {
+  return {
+    ...state,
+    scoutingLines: createPostwinScoutingLines(createFactoryCorpusParty(upcomingOpponentRentalRecords)),
+  };
+}
+
 type PostwinSnapshot = Readonly<{
   challengeBattleNum: BattleIndex;
   challengeBattleNumAfterWrite: BattleIndex;
@@ -628,10 +657,17 @@ const GENERATED_ROUTE_INITIAL_ELAPSED = 1;
  * Generated-route adapter. The pending battleWon command and retained
  * last-battle snapshot are the presentation boundary; all mutable-looking
  * rows are frozen from that same typed round before postwin clocks begin.
+ *
+ * `upcomingFrontierBrain` (sct1): `frontier_getbrainstatus` for the NEXT battle, which `ReturnToRoomFromBattle` reads after the heal
+ * from the win streak alone (pre-battle room scripts.inc:61-62; `GetFrontierBrainStatus`, frontier_util.c:1657-1698), before any opponent
+ * is rolled: the caller's `factoryRoundNextBattleBrainStatus`. It selects the Factory Head's call scene and `AskReadyForHead` /
+ * `AskSwapBeforeHead`. It used to be read from the round's current opponent, the trainer just beaten, so it was never set after a
+ * played battle 20. The scouting pages are not known yet (`POSTWIN_SCOUTING_LINES_BEFORE_ROLL`): the GO ON answer fills them.
  */
 export function createPostwinStateFromRound(
   round: RoundControllerState,
   frozenSceneView: BattleResolutionPresentationRenderView | null,
+  upcomingFrontierBrain: boolean,
 ): PostwinState {
   const pending = round.presentation;
   const lastBattle = round.rules.lastBattle;
@@ -681,10 +717,10 @@ export function createPostwinStateFromRound(
       healedPlayerPartyHp: partyHp(lastBattle.playerParty, "maxHp"),
     }),
     elapsed: GENERATED_ROUTE_INITIAL_ELAPSED,
-    // Walk-up build step A (docs/walkup-step-a-design.md §2.2): presence of
-    // the UPCOMING opponent's `frontierBrain` alone selects the call-scene +
-    // AskReadyForHead branch; the `.status` tier is not needed by this step.
-    frontierBrain: round.rules.currentOpponent.frontierBrain !== undefined,
+    scoutingLines: POSTWIN_SCOUTING_LINES_BEFORE_ROLL,
+    // Walk-up build step A (docs/walkup-step-a-design.md §2.2) selects the call-scene + AskReadyForHead branch on this flag; sct1: from
+    // the next battle's brain status (the battle number), as the ROM's `frontier_getbrainstatus`, not from the trainer just beaten.
+    frontierBrain: upcomingFrontierBrain,
     frozenSceneView,
   };
 }
@@ -745,8 +781,24 @@ export function createBattleReturnHoldState(
 }
 
 export const INITIAL_POSTWIN_STATE = createPostwinState();
-/** MSGBOX_DEFAULT: final glyph plus the source's three-frame WAIT handoff. */
-export const POSTWIN_SCOUTING_INPUT_READY_DELAYS = [72, 74, 72] as const;
+/** MSGBOX_DEFAULT's waitbuttonpress takes a press from three frames after the page's last character. */
+export const POSTWIN_SCOUTING_ACCEPT_AFTER_LAST_GLYPH = 3;
+/**
+ * A scouting page's accept delay from its edge: first glyph at +4 (`POSTWIN_DIALOGUE_TEXT_FIRST_DELAY`), one character a frame, the
+ * press from three frames after the last (`POSTWIN_SCOUTING_ACCEPT_AFTER_LAST_GLYPH`). sct1: from the page's own text; the fixed
+ * [72, 74, 72] it replaces were these values for the canonical pages only (66, 68 and 66 characters). ROM, 300 scouting pages of the fcr2
+ * catcher runs (docs/sct1-scouting-next-opponent.md): pages of 55 to 70 characters, every press taken from exactly the last character + 3
+ * on (24 taken at +3), none earlier (21 presses at +2 and 26 at +1 not taken).
+ */
+export function postwinScoutingInputReadyDelay(lines: readonly [string, string]): number {
+  return POSTWIN_DIALOGUE_TEXT_FIRST_DELAY + lines[0].length + lines[1].length - 1 + POSTWIN_SCOUTING_ACCEPT_AFTER_LAST_GLYPH;
+}
+/** The canonical pages' accept delays (`POSTWIN_SCOUTING_LINES`): [72, 74, 72]. */
+export const POSTWIN_SCOUTING_INPUT_READY_DELAYS = [
+  postwinScoutingInputReadyDelay(POSTWIN_SCOUTING_LINES[0]),
+  postwinScoutingInputReadyDelay(POSTWIN_SCOUTING_LINES[1]),
+  postwinScoutingInputReadyDelay(POSTWIN_SCOUTING_LINES[2]),
+] as const;
 /** MSGBOX_YESNO: text settles at +63, menu copies at +66, accepts at +70. */
 export const POSTWIN_SWAP_MENU_VISIBLE_DELAY = 66;
 export const POSTWIN_SWAP_INPUT_READY_DELAY = 70;
@@ -1685,7 +1737,7 @@ export function postwinDialogueInputReady(state: PostwinState): boolean {
     return delay >= POSTWIN_BRAIN_CANT_TELL_INPUT_READY_DELAY;
   }
   if (state.dialoguePage >= 1 && state.dialoguePage <= 3) {
-    return delay >= POSTWIN_SCOUTING_INPUT_READY_DELAYS[state.dialoguePage - 1]!;
+    return delay >= postwinScoutingInputReadyDelay(state.scoutingLines[state.dialoguePage - 1]!);
   }
   if (state.dialoguePage === 4) return delay >= POSTWIN_SWAP_INPUT_READY_DELAY;
   return false;
