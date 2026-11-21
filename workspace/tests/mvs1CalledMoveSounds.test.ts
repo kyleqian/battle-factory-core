@@ -138,7 +138,7 @@ describe("ROM labs: ours equals the ROM's SE rows", () => {
   }
 });
 
-interface BodyRun { readonly moveId: number; readonly start: number; readonly scriptStart: number | null; readonly live: boolean; readonly afterMetronome: boolean; readonly ses: readonly string[]; readonly shrinkRow: number | null }
+interface BodyRun { readonly moveId: number; readonly start: number; readonly scriptStart: number | null; readonly live: boolean; readonly afterMetronome: boolean; readonly ses: readonly string[]; readonly stampedSes: readonly string[]; readonly shrinkRow: number | null }
 
 /**
  * An app stage's one turn (A, A, then idle frames) on our engine. Returns, for each body of `moveId`, the command's first frame, its script start row, whether
@@ -148,7 +148,7 @@ interface BodyRun { readonly moveId: number; readonly start: number; readonly sc
 function stageBodies(stageId: string, scene: "on" | "off", moveId: number, rows: number): BodyRun[] {
   let state = APP_STAGES[stageId]!(createInitialState({ appRoute: "generated-orchestrator", battleScene: scene }));
   const segments = [{ frames: 2, buttons: ["A"] }, { frames: 18, buttons: [] }, { frames: 2, buttons: ["A"] }, { frames: rows + 300, buttons: [] }];
-  type OpenBody = { -readonly [K in keyof BodyRun]: BodyRun[K] } & { ses: string[]; lastCommand: unknown; previous: Uint8ClampedArray | null };
+  type OpenBody = { -readonly [K in keyof BodyRun]: BodyRun[K] } & { ses: string[]; stampedSes: string[]; lastCommand: unknown; previous: Uint8ClampedArray | null };
   const bodies: OpenBody[] = [];
   let open = null as OpenBody | null;
   for (const advance of traceAdvances(segments)) {
@@ -164,14 +164,14 @@ function stageBodies(stageId: string, scene: "on" | "off", moveId: number, rows:
       open = {
         moveId, start: frame, scriptStart: moveAnimationScriptStartRow(segment, command.eventSequence),
         live: liveMoveAnimationDuration(command.animation, currentCommandField(resolution)) !== null,
-        afterMetronome, ses: [], shrinkRow: null, lastCommand: command, previous: null,
+        afterMetronome, ses: [], stampedSes: [], shrinkRow: null, lastCommand: command, previous: null,
       };
       bodies.push(open);
     }
     if (open === null) continue;
     const row = frame - open.start;
     if (row > rows) { open = null; continue; }
-    for (const e of result.events) if (e.kind === "se") open.ses.push(`${row}:${e.id}:${e.pan}`);
+    for (const e of result.events) if (e.kind === "se") { open.ses.push(`${row}:${e.id}:${e.pan}`); open.stampedSes.push(`${e.frame - open.start}:${e.id}:${e.pan}`); }
     if (open.shrinkRow === null) {
       const pixels = (render(state) as unknown as Uint8ClampedArray).slice();
       if (open.previous !== null) {
@@ -199,6 +199,9 @@ describe("METRONOME -> SUBSTITUTE (the frame catcher's s36-off-ws case, staged)"
       expect(body!.live).toBe(true);
       expect(body!.scriptStart).toBe(8);
       expect(body!.ses).toEqual(["8:226:-64", "49:125:-64", "74:125:-64"]);
+      // The stamped frames too (the sound log's clock): METRONOME's print makes this a ruled turn (u = 2), and the box's hcr1b Scene OFF one-tick lead
+      // stamped these SEs on rows 7 / 48 / 73 after the merge; mvs1's script clock is fitted to the ROM's SE rows already (usedMoveBodySoundLeadOf).
+      expect(body!.stampedSes).toEqual(["8:226:-64", "49:125:-64", "74:125:-64"]);
       expect(body!.shrinkRow).toBe(10);
     });
   }

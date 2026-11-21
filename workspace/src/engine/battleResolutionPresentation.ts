@@ -6674,6 +6674,12 @@ function usedMoveSoundLeadsOf(state: BattleResolutionPresentationState, u: numbe
     : { hit: USED_MOVE_SOUND_LEAD, script: 0, anim: Math.min(u - USED_MOVE_LEAD_MIN_U, USED_MOVE_ANIM_SOUND_LEAD_SCENE_ON) };
 }
 export function usedMoveBodySoundLeadOf(state: BattleResolutionPresentationState): number {
+  // mvs1 x hcr1b (merge of the box's 2026-11-20 run with the Mac's 11-21 fixes): Scene OFF plays move-body SEs only for Transform and Substitute
+  // (Cmd_attackanimation's HITMARKER_NO_ANIMATIONS exception), on mvs1's script clock (`moveAnimationScriptStartRow`), whose + 4 was fitted to the ROM's SE log
+  // on a print that is pixel-exact (u = 2), so the one-tick Scene OFF lead of a ruled turn would count the pixel -> script-row tick twice. ROM: the
+  // mvs1-transform-{player,opp}-off labs (SE_M_TELEPORT / SE_M_MINIMIZE 61 / 109, 65 / 113: the lead put them at 60 / 108, 64 / 112) and fcm1 s36-off-ws
+  // METRONOME -> SUBSTITUTE (SE_M_ATTRACT on command row 8; the lead stamped it on row 7). The stat-change / Double Team / hit / general leads stay.
+  if (sceneOffOf(state)) return 0;
   const u = state.usedMovePrintU;
   if (u === undefined) return state.usedMoveAnimSoundLead ?? 0;
   const base = Math.min(u - USED_MOVE_LEAD_MIN_U, USED_MOVE_ANIM_SOUND_LEAD_SCENE_ON);

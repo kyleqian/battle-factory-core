@@ -133,3 +133,19 @@ Aeroblast's split is the static-body problem in Open. Its body is 32 rows on our
 - Substitute's used print is one row early on our side: `BattleScript_EffectSubstitute` runs `ppreduce` before `attackstring`. In the labs, our
   print, body and SEs are all one row before the ROM's. In s36-off-ws the comparison is relative to the print, which is all a catcher run can
   show.
+
+## After the merge with the box's 2026-11-20 run (2026-11-21)
+
+The box's hcr1b / hcr1c give a Scene OFF "ruled" turn (a plain `use-move` turn whose first event is the USEDMOVE print, u in 2..20) a one-tick
+sound lead on the move-script emitters, `emitMoveAnimSounds` included, because the ROM plays a script row one frame before the pixels show it.
+On the box Scene OFF played no move-body SEs, so that lead was never measured on one. After the merge it reached mvs1's Transform and
+Substitute bodies, whose script clock (+ 4) was fitted to the ROM's SE log on a pixel-exact print (u = 2, no hold), and stamped them one
+frame early: `mvs1-transform-{player,opp}-off` 60 / 108 and 64 / 112 (ROM 61 / 109, 65 / 113), and the staged METRONOME -> SUBSTITUTE
+(`mvs1-metronome-substitute-player-off`, the fcm1 s36-off-ws case: METRONOME's print is u = 2, so the turn is ruled) on command rows 7 / 48 / 73
+(ROM 8 / 49 / 74). Scene ON was not affected (its body lead is min(u - 2, 2) = 0 at u = 2). The direct Substitute labs are not ruled turns
+(`ppreduce` runs before `attackstring`) and were not affected.
+
+Change: `usedMoveBodySoundLeadOf` returns 0 in Scene OFF. Only the move-body emitter reads it; the Scene OFF hit, stat-change, Double Team
+and general-animation leads stay 1. Sound stamps only: no presented frame, RNG or kernel event moves. `tests/mvs1CalledMoveSounds.test.ts`
+now also checks the staged METRONOME -> SUBSTITUTE stamps (the old check read the tick frame, so it did not see the lead). Not measured: a
+Transform / Substitute body behind a USEDMOVE print with u > 2 (the hold) on the ROM; in Scene ON such a body keeps hcr2c's min(u - 2, 2).
