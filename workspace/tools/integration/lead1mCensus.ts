@@ -13,6 +13,7 @@
 // --index-from=N (default 0) starts i at N, so parallel shards (--seeds=100..199 --index-from=100, ...) reproduce exactly the battles
 // (ids, streaks) of one --seeds=0..999 run; without it every shard restarts i at 0 and plays a DIFFERENT battle set (hist73 / cf78 /
 // st76 used private copies with this flag, 2026-10-10).
+import { censusDeal } from "./censusRound.ts";
 import { writeFileSync } from "node:fs";
 import "../../src/engine/monPicPixelsInstall.ts";
 import { createHash } from "node:crypto";
@@ -86,10 +87,10 @@ let liveFrameCounter = 0;
 
 function playBattle(battle: number, seed: number, streak: number): void {
   let state = beginFactoryRoundBattleStartIntro(createFactoryRoundBattleOrchestrator({
-    id: `live-share-census-${seed}-${streak}`, rngValue: seed, battleScene,
+    id: `live-share-census-${seed}-${streak}`, battleScene,
     factoryWinStreak: streak, playerTrainerId: 416049562,
     battleTowerLevel50WinStreak: 0, facilityState: { rentsCount: 0 },
-    rentals: { type: "generateInitial", selectedRentalIndexes: [0, 1, 2] },
+    ...censusDeal({ seed, factoryWinStreak: streak }),
   }));
   const fb = new Uint8Array(240 * 160 * 4);
   // core.ts tick's presentation seam (after the logical frame): the default-seed Random2 session, a fresh one per battle (each

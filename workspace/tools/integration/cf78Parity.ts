@@ -7,6 +7,7 @@
 //   battle 950 (seed 950, streak 13): the player's CASTFORM in SEALEO's hail, then against SWELLOW (18 of its 19 bodies live on 9115d5ec3);
 //   battle 603 (seed 603, streak 18): the player's CASTFORM in rain (13 live bodies on 9115d5ec3).
 //   node --experimental-strip-types --no-warnings tools/integration/cf78Parity.ts [--seed=950] [--streak=13] [--out=file.json]
+import { censusDeal } from "./censusRound.ts";
 import assert from "node:assert/strict";
 import "../../src/engine/monPicPixelsInstall.ts";
 import { writeFileSync } from "node:fs";
@@ -32,8 +33,8 @@ export type Cf78Body = { turn: number; moveId: number; side: number; player: str
 
 export function cf78RoutePlay(seed: number, streak: number, scene: "on" | "off") {
   let state: S = beginFactoryRoundBattleStartIntro(createFactoryRoundBattleOrchestrator({
-    id: `cf78-parity-${seed}-${streak}`, rngValue: seed, battleScene: scene, factoryWinStreak: streak, playerTrainerId: 416049562,
-    battleTowerLevel50WinStreak: 0, facilityState: { rentsCount: 0 }, rentals: { type: "generateInitial", selectedRentalIndexes: [0, 1, 2] },
+    id: `cf78-parity-${seed}-${streak}`, battleScene: scene, factoryWinStreak: streak, playerTrainerId: 416049562,
+    battleTowerLevel50WinStreak: 0, facilityState: { rentsCount: 0 }, ...censusDeal({ seed, factoryWinStreak: streak }),
   }));
   let frame = 0, ended = false;
   // The census's presentation seam: the default-seed Random2 session, ticked after every logical frame (liveShareCensus.ts).

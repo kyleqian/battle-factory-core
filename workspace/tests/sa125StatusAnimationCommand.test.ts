@@ -5,6 +5,7 @@
 // sag130: seg127StatusSeGateFromEvents over the segment's events; 0 on every path but a neutral non-crit hit's open SE).
 // SA3: a Scene ON `status` command whose battler's status animation runs in the same execution lasts off121's Scene OFF
 // delta(print) - delta(status); every other status command keeps 32. ROM receipts: tools/integration/fixtures/sta123/receipts/rom-r1.json.
+import { censusDeal } from "../tools/integration/censusRound.ts";
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import {
@@ -41,10 +42,10 @@ function battleSegments(seed: number, scene: "on" | "off"): Seg[] {
   if (hit) return hit;
   const out: Seg[] = [];
   let state = beginFactoryRoundBattleStartIntro(createFactoryRoundBattleOrchestrator({
-    id: `live-share-census-${seed}-${(seed * 11) % 49}`, rngValue: seed, battleScene: scene,
+    id: `live-share-census-${seed}-${(seed * 11) % 49}`, battleScene: scene,
     factoryWinStreak: (seed * 11) % 49, playerTrainerId: 416049562,
     battleTowerLevel50WinStreak: 0, facilityState: { rentsCount: 0 },
-    rentals: { type: "generateInitial", selectedRentalIndexes: [0, 1, 2] },
+    ...censusDeal({ seed, factoryWinStreak: (seed * 11) % 49 }),
   }));
   let rng = createPresentationRngSession();
   let frame = 0, ended = false;

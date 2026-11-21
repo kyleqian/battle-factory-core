@@ -4,6 +4,7 @@
 // command's minimumFrames / holdFrames, and (rel = rows after the ROM's gAnimScriptActive rise A, the command's age 0 = rel 1)
 // the rel of the next command's start and of the first following message's start (its first glyph). Read-only; no oracle.
 //   node --experimental-strip-types --no-warnings tools/integration/scf117Align.ts --seeds=A..B --scene=on|off --out=file.jsonl
+import { censusDeal } from "./censusRound.ts";
 import { writeFileSync } from "node:fs";
 import "../../src/engine/monPicPixelsInstall.ts";
 import {
@@ -70,10 +71,10 @@ export function scf117AlignBattle(seed: number, scene: "on" | "off"): Scf117Alig
   const streak = (seed * 11) % 49;
   const rows: Scf117AlignRow[] = [];
   let state = beginFactoryRoundBattleStartIntro(createFactoryRoundBattleOrchestrator({
-    id: `live-share-census-${seed}-${streak}`, rngValue: seed, battleScene: scene,
+    id: `live-share-census-${seed}-${streak}`, battleScene: scene,
     factoryWinStreak: streak, playerTrainerId: 416049562,
     battleTowerLevel50WinStreak: 0, facilityState: { rentsCount: 0 },
-    rentals: { type: "generateInitial", selectedRentalIndexes: [0, 1, 2] },
+    ...censusDeal({ seed, factoryWinStreak: streak }),
   }));
   let rng = createPresentationRngSession();
   let frame = 0, ended = false;

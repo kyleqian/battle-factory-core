@@ -1,3 +1,4 @@
+import { censusDeal } from "./censusRound.ts";
 import assert from "node:assert/strict";
 import {
  createFactoryRoundBattleOrchestrator, advanceFactoryRoundPresentation, completeFactoryRoundPresentation, submitFactoryRoundPlayerDecision,
@@ -6,7 +7,7 @@ export function verifySceneModeParity(seedCount = 40, steps = 12): number {
 let decisions=0;
 for(let seed=0;seed<seedCount;seed++){
  const setup=(battleScene:"on"|"off")=>{
-  let state=createFactoryRoundBattleOrchestrator({id:"parity",rngValue:seed,battleScene,factoryWinStreak:0,playerTrainerId:416049562,battleTowerLevel50WinStreak:0,facilityState:{rentsCount:0},rentals:{type:"generateInitial",selectedRentalIndexes:[0,1,2]}});
+  let state=createFactoryRoundBattleOrchestrator({id:"parity",battleScene,factoryWinStreak:0,playerTrainerId:416049562,battleTowerLevel50WinStreak:0,facilityState:{rentsCount:0},...censusDeal({ seed, factoryWinStreak: 0 })});
   return advanceFactoryRoundPresentation(completeFactoryRoundPresentation(state,{commandId:state.round.presentation!.command.commandId}));
  };
  let on=setup("on"),off=setup("off");

@@ -3,6 +3,7 @@
 // start (= the aud118 convention's G + 1) to the next hp command and to the next message command, and the x2 input the body read.
 // Read-only use of production; no oracle.
 //   node --experimental-strip-types --no-warnings tools/integration/sub157Timing.ts --seeds=17,74 --scene=on|off
+import { censusDeal } from "./censusRound.ts";
 import {
   advanceFactoryRoundBattleCommand, advanceFactoryRoundBattleResolution, advanceFactoryRoundBattleStartIntro,
   beginFactoryRoundBattleStartIntro, createFactoryRoundBattleOrchestrator,
@@ -23,10 +24,10 @@ const seeds = arg("seeds", "17,74").split(",").map(Number), scene = arg("scene",
 function battleFrames(seed: number, scene: "on" | "off"): Row[] {
   const out: Row[] = [];
   let state = beginFactoryRoundBattleStartIntro(createFactoryRoundBattleOrchestrator({
-    id: `live-share-census-${seed}-${(seed * 11) % 49}`, rngValue: seed, battleScene: scene,
+    id: `live-share-census-${seed}-${(seed * 11) % 49}`, battleScene: scene,
     factoryWinStreak: (seed * 11) % 49, playerTrainerId: 416049562,
     battleTowerLevel50WinStreak: 0, facilityState: { rentsCount: 0 },
-    rentals: { type: "generateInitial", selectedRentalIndexes: [0, 1, 2] },
+    ...censusDeal({ seed, factoryWinStreak: (seed * 11) % 49 }),
   }));
   let rng = createPresentationRngSession();
   let frame = 0, ended = false;

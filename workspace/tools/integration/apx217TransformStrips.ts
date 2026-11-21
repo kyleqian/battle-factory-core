@@ -7,6 +7,7 @@
 // rows, rows that differ from the static hold, a sha256 over every rendered row.
 // --list prints every move-animation command's (index, moveId, attacker, code) of the battle instead.
 //   node --experimental-strip-types --no-warnings tools/integration/apx217TransformStrips.ts --seed=197 --move=61 --attacker=1 --out=x.png
+import { censusDeal } from "./censusRound.ts";
 import { createHash } from "node:crypto";
 import "../../src/engine/monPicPixelsInstall.ts";
 import { writeFileSync } from "node:fs";
@@ -34,10 +35,10 @@ export type Apx217Strip = { seed: number; moveId: number; attacker: number; code
 export function apx217Strip(seed: number, moveId: number, attacker: number, codePrefix = "approx:transform",
   list?: (index: number, moveId: number, attacker: number, code: string) => void): Apx217Strip | null {
   let state = beginFactoryRoundBattleStartIntro(createFactoryRoundBattleOrchestrator({
-    id: `live-share-census-${seed}-${(seed * 11) % 49}`, rngValue: seed, battleScene: "on",
+    id: `live-share-census-${seed}-${(seed * 11) % 49}`, battleScene: "on",
     factoryWinStreak: (seed * 11) % 49, playerTrainerId: 416049562,
     battleTowerLevel50WinStreak: 0, facilityState: { rentsCount: 0 },
-    rentals: { type: "generateInitial", selectedRentalIndexes: [0, 1, 2] },
+    ...censusDeal({ seed, factoryWinStreak: (seed * 11) % 49 }),
   }));
   let rng = createPresentationRngSession();
   let frame = 0, ended = false;

@@ -6,6 +6,7 @@
 // previous command's last row and of every gate row (renderBattleResolutionPresentation + renderBattleResolutionLiveView, core.ts's
 // path). Read-only use of production.
 //   node --experimental-strip-types --no-warnings tools/integration/sgl138Live.ts --out=<receipt.json>
+import { censusDeal } from "./censusRound.ts";
 import { createHash } from "node:crypto";
 import "../../src/engine/monPicPixelsInstall.ts";
 import { readFileSync, writeFileSync } from "node:fs";
@@ -57,10 +58,10 @@ const sha = (b: Uint8Array) => createHash("sha256").update(b).digest("hex").slic
 /** One ordinary census battle in production, scene "on" | "off": every presented command (see the header). */
 export function sgl138Battle(seed: number, scene: "on" | "off"): { commands: Sgl138Command[]; frames: number } {
   let state = beginFactoryRoundBattleStartIntro(createFactoryRoundBattleOrchestrator({
-    id: `live-share-census-${seed}-${(seed * 11) % 49}`, rngValue: seed, battleScene: scene,
+    id: `live-share-census-${seed}-${(seed * 11) % 49}`, battleScene: scene,
     factoryWinStreak: (seed * 11) % 49, playerTrainerId: 416049562,
     battleTowerLevel50WinStreak: 0, facilityState: { rentsCount: 0 },
-    rentals: { type: "generateInitial", selectedRentalIndexes: [0, 1, 2] },
+    ...censusDeal({ seed, factoryWinStreak: (seed * 11) % 49 }),
   }));
   let rng = createPresentationRngSession();
   let frame = 0, ended = false;

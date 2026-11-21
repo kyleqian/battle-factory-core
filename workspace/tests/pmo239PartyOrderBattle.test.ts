@@ -1,6 +1,7 @@
 // pmo239: the orchestrator folds the kernel's player `switch` events into the ROM's gBattlePartyCurrentOrder (SwitchPartyOrder), so on
 // whole census battles (Roar / Whirlwind drag the player out; faints force send-outs) the invariants of the ROM's order hold at every frame:
 // the order permutes the party, the active mon sits at row 0 at each command boundary, and a forced menu shows the fainted mon at row 0.
+import { censusDeal } from "../tools/integration/censusRound.ts";
 import { describe, expect, it } from "vitest";
 import {
   advanceFactoryRoundBattleCommand,
@@ -18,10 +19,10 @@ const FRAME_BUDGET = 200000;
 
 function playBattle(seed: number, scene: "on" | "off") {
   let state = beginFactoryRoundBattleStartIntro(createFactoryRoundBattleOrchestrator({
-    id: `pmo239-${seed}`, rngValue: seed, battleScene: scene,
+    id: `pmo239-${seed}`, battleScene: scene,
     factoryWinStreak: (seed * 11) % 49, playerTrainerId: 416049562,
     battleTowerLevel50WinStreak: 0, facilityState: { rentsCount: 0 },
-    rentals: { type: "generateInitial", selectedRentalIndexes: [0, 1, 2] },
+    ...censusDeal({ seed, factoryWinStreak: (seed * 11) % 49 }),
   }));
   let frame = 0;
   let ended = false;

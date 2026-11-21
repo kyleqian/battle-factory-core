@@ -5,6 +5,7 @@
 //   battle 533 (seed 533, streak 32): the opponent's Fly charger KO'd by Toxic while airborne (a hidden battler's faint);
 //   battle 713 (seed 713, streak 3): the player's forced party menu while the opponent is mid-Bounce (a reshow with a hidden opponent).
 //   node --experimental-strip-types --no-warnings tools/integration/land75Parity.ts [--seed=533] [--streak=32] [--out=file.json]
+import { censusDeal } from "./censusRound.ts";
 import assert from "node:assert/strict";
 import { writeFileSync } from "node:fs";
 import { createHash } from "node:crypto";
@@ -24,8 +25,8 @@ export type Land75Body = { turn: number; moveId: number; moveTurn: number; side:
 
 export function land75RoutePlay(seed: number, streak: number, scene: "on" | "off") {
   let state: S = beginFactoryRoundBattleStartIntro(createFactoryRoundBattleOrchestrator({
-    id: `land75-parity-${seed}-${streak}`, rngValue: seed, battleScene: scene, factoryWinStreak: streak, playerTrainerId: 416049562,
-    battleTowerLevel50WinStreak: 0, facilityState: { rentsCount: 0 }, rentals: { type: "generateInitial", selectedRentalIndexes: [0, 1, 2] },
+    id: `land75-parity-${seed}-${streak}`, battleScene: scene, factoryWinStreak: streak, playerTrainerId: 416049562,
+    battleTowerLevel50WinStreak: 0, facilityState: { rentsCount: 0 }, ...censusDeal({ seed, factoryWinStreak: streak }),
   }));
   let frame = 0, ended = false;
   const marks: unknown[] = [];

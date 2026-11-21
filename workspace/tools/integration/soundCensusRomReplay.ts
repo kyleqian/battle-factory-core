@@ -19,6 +19,7 @@
 //   Wide compare (parity-mac fourth pass, docs/parity-mac/wide-compare.md): `replay` writes `wide`, one state per decision (both active Pokemon: statuses, stat stages,
 //     moves, PP, item, ability, types, the disable-struct counters; both parties; both sides' screens and Spikes; weather; Wish / Future Sight), and `finalWide`.
 //     `compare --drive=drive.json` checks them against the ROM's states at the same decisions (soundEventProbe.py lab --drive writes `drive.wide`).
+import { censusDeal, censusRentals } from "./censusRound.ts";
 import "../../src/engine/monPicPixelsInstall.ts";
 import { writeFileSync, readFileSync } from "node:fs";
 import {
@@ -136,11 +137,13 @@ const lcgInverse = (x: number) => Math.imul((x - 0x6073) >>> 0, LCG_INV | 0) >>>
 const natureByName = new Map(naturesData.natures.map((row) => [row.name, row.index]));
 const heldItemByTableId = new Map<number, number>((frontierHeldItemsData as any).entries.map((row: any) => [row.itemTableId, row.itemId]));
 
+// The census battle of the seed (fop1: censusRound.ts, the battle the census seed has always had; a chained round below is the game's own deal).
+const nativeRentals = () => censusRentals({ seed, factoryWinStreak: streak });
 const nativeOrchestrator = () => beginFactoryRoundBattleStartIntro(createFactoryRoundBattleOrchestrator({
-  id: `live-share-census-${seed}-${streak}`, rngValue: seed, battleScene: scene,
+  id: `live-share-census-${seed}-${streak}`, battleScene: scene,
   factoryWinStreak: streak, playerTrainerId: 416049562, factorySymbolsCount: symbols,
   battleTowerLevel50WinStreak: 0, facilityState: { rentsCount: 0 },
-  rentals: { type: "generateInitial", selectedRentalIndexes: [0, 1, 2] },
+  ...censusDeal({ seed, factoryWinStreak: streak }),
 }));
 
 // The ROM party mon (battle_lab._party_mon) -> the engine record fields; the IV spread must be the uniform one the engine models.
@@ -562,9 +565,9 @@ if (mode === "request" && stage !== null) {
   const speciesOfSet = (setId: number): string => (frontierMonsData as any).entries[setId].species;
   const pickSelectable = (rentalList: any[]) => rentalList.reduce((team: any[], x: any) =>
     (team.length < 3 && !team.some((y) => speciesOfSet(y.setId) === speciesOfSet(x.setId)) ? [...team, x] : team), []);
-  const playerSetIds = r.state.config.rentals.type !== "generateInitial" ? []
-    : roundReplay && draftRule === "strongest" ? strongestPositions(r.state.initialRentalGeneration!.rentals as any[]).map((i) => (r.state.initialRentalGeneration!.rentals as any[])[i].setId)
-    : pickSelectable(r.state.initialRentalGeneration!.rentals as any[]).map((x: any) => x.setId);
+  const nativeSix = nativeRentals().rentals as any[];
+  const playerSetIds = roundReplay && draftRule === "strongest" ? strongestPositions(nativeSix).map((i) => nativeSix[i].setId)
+    : pickSelectable(nativeSix).map((x: any) => x.setId);
   void rentals;
   // `replay` is this tool's own note (the test player and the census seed); soundEventProbe.py / romStateTimeline.py drop it before the lab validates the request.
   const common = { schemaVersion: 1, profile: scene === "on" ? "battle-scene-on" : "battle-scene-off", level: 50, challengeNum: Math.floor(streak / 7), rentalSwapCount: 0, replay: { policy, censusSeed: seed, symbols, ...(challengeOverride !== null ? { challenge: challengeOverride } : {}) } };
