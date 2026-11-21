@@ -2125,9 +2125,13 @@ function moveAnimationScriptLeadTiming(
  * Bounce / Dive 11, Solar Beam 12, Razor Wind 9; ROM labs bdt1-dig-{player,opponent}-on: 1043 press -> 1060 printstring ex2, the glyphs release 1081 ->
  * `attackanimation` 1087, A0 1089). The rows are typed as the message's scroll lead, so the print and the body's sounds start where the ROM's do. A one-turn use
  * (Solar Beam in sun) has no STATUS2_MULTIPLETURNS at the action's start and keeps its menu press.
+ * chg3: a player-charger's turn has no press and its command starts 10 rows later than the ROM's effect-script row (turn-end command + 22 against the ROM's
+ * MoveEnd + 19 / 20, with the charge turn now ending on the ROM): the player lead is 6 + u - 10 (chg2-{fly,dive,solarbeam,razorwind,skyattack,bounce}-player-on and
+ * bdt1-dig-player-on, attack-turn SEs +10 .. +11 before, 0 .. -2 after).
  */
 const TWO_TURN_MOVES: ReadonlySet<number> = new Set([13, 19, 76, 91, 130, 143, 291, 340]);
 const TWO_TURN_SECOND_PRINT_PRESS_ROWS = 6;
+const TWO_TURN_PLAYER_NO_PRESS_ROWS = 10;
 function twoTurnSecondPrintLead(
   event: BattleKernelSemanticEvent,
   beforeRules: BattleScriptRulesContext,
@@ -2138,7 +2142,7 @@ function twoTurnSecondPrintLead(
   if (event.payload.kind !== "message" || event.payload.messageId !== "STRINGID_USEDMOVE"
     || (event.provenance?.sourceLabel !== "BattleScript_HitFromAtkString" && event.provenance?.sourceLabel !== "BattleScript_HitFromAccCheck")) return null;
   if ((beforeRules.battlers[actionSnapshot!.attacker]!.status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_MULTIPLETURNS) === 0) return null;
-  return { leadFrames: TWO_TURN_SECOND_PRINT_PRESS_ROWS + event.provenance.instructionExecution };
+  return { leadFrames: TWO_TURN_SECOND_PRINT_PRESS_ROWS - (actionSnapshot!.attacker === 0 ? TWO_TURN_PLAYER_NO_PRESS_ROWS : 0) + event.provenance.instructionExecution };
 }
 /**
  * chg2 (Scene ON; generalizes bdt1's Dig value): a charge-turn body (BattleScriptFirstChargingTurn) plays its sounds on the ROM's own script rows, but the
@@ -2149,6 +2153,30 @@ function twoTurnSecondPrintLead(
  * charge turn's pixels match the ROM at the present duration, a 3-row earlier body made it worse).
  */
 const CHARGE_TURN_SOUND_LEAD_BASE_ROWS = 16;
+/**
+ * chg3 (Scene ON): after the charge print the ROM's chain to the next action is E - 2 rows longer than the presented one (opener execution E: the next action's SEs
+ * were 4 .. 8 rows early on chg2-{fly,dive,solarbeam,skyattack,bounce}-{player,opponent}-on and bdt1-dig-player-on; E - 2 = 4 + (E - 6), the ROM's A0 lies E - 6 rows
+ * after the command start and the release -> next row gap is 4 more). The charge print's glyph row is exact (chg161), so the rows are the print's hold. Razor Wind
+ * (gap-print class) already carries them before its glyph.
+ */
+const CHARGE_TURN_CHAIN_BASE_ROWS = 2;
+function chargeTurnOpenerExecution(events: readonly BattleKernelSemanticEvent[], index: number): number | null {
+  for (let i = index - 1; i >= 0; i -= 1) {
+    const candidate = events[i]!;
+    if (candidate.provenance?.sourceLabel !== CHARGE_TURN_SCRIPT) return null;
+    if (candidate.payload.kind === "message" && candidate.payload.messageId === "STRINGID_EMPTYSTRING3") {
+      const before = events[i - 1];
+      if (before !== undefined && instructionExecutionOf(before) < instructionExecutionOf(candidate)) return null;
+      return instructionExecutionOf(candidate);
+    }
+  }
+  return null;
+}
+function chargeTurnChainRows(events: readonly BattleKernelSemanticEvent[], index: number, moveId: number | undefined): number {
+  if (moveId === undefined || !TWO_TURN_MOVES.has(moveId) || bodyGapPrintRuleApplies(moveId)) return 0;
+  const opener = chargeTurnOpenerExecution(events, index);
+  return opener === null ? 0 : Math.max(0, opener - CHARGE_TURN_CHAIN_BASE_ROWS);
+}
 function chargeTurnSoundLead(events: readonly BattleKernelSemanticEvent[], index: number): { soundAgeLeadFrames?: number } {
   if (events[index]!.provenance?.sourceLabel !== CHARGE_TURN_SCRIPT) return {};
   for (let i = index - 1; i >= 0; i -= 1) {
@@ -5531,6 +5559,7 @@ export function projectBattleResolutionCommands(
   ] as [number, number];
   let usedMoveInstructionExecution: number | null = null;
   // off108: the opener print's event index and the command count after it.
+  let chargeChainCarry: { rows: number; attacker: number | undefined } | null = null;
   let pauseOpenerIndex: number | null = null;
   let pauseOpenerCommands = 0;
   let pauseOpenerFrames = 0;
@@ -5631,6 +5660,14 @@ export function projectBattleResolutionCommands(
           timing: Object.freeze({ minimumFrames: prePrintPause }),
         }));
       }
+      if (event.provenance?.sourceLabel === CHARGE_TURN_SCRIPT && (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) === 0) {
+        const rows = chargeTurnChainRows(events, index, actionSnapshot?.currentMove);
+        if (rows > 0) chargeChainCarry = { rows, attacker: actionSnapshot?.attacker };
+      }
+      const carriedRows = payload.messageId === "STRINGID_USEDMOVE" ? chargeChainCarry : null;
+      if (carriedRows !== null) chargeChainCarry = null;
+      const carryAfterGlyph = carriedRows !== null && carriedRows.attacker !== actionSnapshot?.attacker ? carriedRows.rows : 0;
+      const carryBeforeGlyph = carriedRows !== null && carryAfterGlyph === 0 ? carriedRows.rows : 0;
       commands.push(...promptGatedMessageCommands(Object.freeze({
         type: "message",
         eventSequence: event.sequence,
@@ -5654,6 +5691,7 @@ export function projectBattleResolutionCommands(
         advance: "automatic",
         ...(selfConfusionOff ? { leadFrames: SELF_CONFUSION_OFF_PRE_PRINT_ROWS } : {}),
         ...(twoTurnSecondPrintLead(event, beforeRules, actionSnapshot) ?? {}),
+        ...(carryBeforeGlyph > 0 ? { leadFrames: (twoTurnSecondPrintLead(event, beforeRules, actionSnapshot)?.leadFrames ?? 0) + carryBeforeGlyph } : {}),
         ...(payload.messageId === "STRINGID_TARGETFAINTED"
           || payload.messageId === "STRINGID_ATTACKERFAINTED"
           ? { faintBattler: lastFaintBattler! }
@@ -5667,9 +5705,9 @@ export function projectBattleResolutionCommands(
         timing: payload.messageId === "STRINGID_USEDMOVE"
           ? Object.freeze({
             minimumFrames: 0,
-            holdFrames: usedMessageHoldFrames > 0
+            holdFrames: (usedMessageHoldFrames > 0
               ? usedMessageHoldFrames
-              : sourcePauseUsedMoveHoldFrames(events, index) ?? 0,
+              : sourcePauseUsedMoveHoldFrames(events, index) ?? 0) + carryAfterGlyph,
           })
           : payload.messageId === "STRINGID_RETURNMON"
             ? RETURN_MON_TIMING
