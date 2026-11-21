@@ -26,3 +26,13 @@ def build(name, who, frames=900):
 for n in MOVES:
     for w in "pf":
         build(n, w)
+
+def struggle():
+    """Forced Struggle: the Lv50 player's only move is Splash (status), the Lv40 foe's Taunt (turn 1) leaves it no legal move; turn 2 auto-selects Struggle (enc276 shape, both scenes)."""
+    lab = json.load(open(os.path.join(root, "tools/battle-lab/enc276-struggle-off.json")))
+    lab["profile"] = "battle-scene-off"
+    lab["trace"] = {"segments": [{"frames": 2, "buttons": ["A"]}, {"frames": 24, "buttons": []}, {"frames": 2, "buttons": ["A"]}, {"frames": 900, "buttons": []},
+                                 {"frames": 2, "buttons": ["A"]}, {"frames": 43, "buttons": []}, {"frames": 2, "buttons": ["A"]}, {"frames": 700, "buttons": []}]}
+    json.dump(lab, open(os.path.join(root, "tools/battle-lab/eqk1-struggle.json"), "w"))
+    print("eqk1-struggle")
+struggle()
