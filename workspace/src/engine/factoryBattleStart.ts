@@ -120,9 +120,10 @@ export type FactoryFreshBattleInitialization = Readonly<{
   state: BattleState<FactoryFullTurnDecisionRules>;
   events: readonly BattleKernelSemanticEvent[];
   /**
-   * One entry per Intimidate / Trace script run, in order: its events with the presentation fields the full-turn path adds at print time
-   * (scriptingBattler, targetBattler, monNickBattler, ability substitutions), at the same sequences as `events`, and the script's total
-   * instruction rows (the kernel steps one row per frame, a `pause` retrying). Presentation-only: `events` stay as they were.
+   * One entry per Intimidate / Trace / White Herb script run, in order: its events with the presentation fields the full-turn path adds
+   * at print time (scriptingBattler, targetBattler, monNickBattler, ability substitutions, lastItem), at the same sequences as `events`,
+   * and the script's total instruction rows (the kernel steps one row per frame, a `pause` retrying). Presentation-only: `events` stay as
+   * they were.
    */
   entryScripts: readonly FactoryBattleStartEntryScript[];
 }>;
@@ -130,6 +131,11 @@ export type FactoryFreshBattleInitialization = Readonly<{
 export type FactoryBattleStartEntryScript = Readonly<{
   label: string;
   rows: number;
+  /**
+   * Frames after the script's last row before the battle loop runs again: 0 for `end3` (Cmd_end3 pops the callback at once), 1 for
+   * `end2` (Cmd_end2 only sets B_ACTION_TRY_FINISH; RunBattleScriptCommands_PopCallbacksStack pops on the next frame; ROM labs wbh1-*).
+   */
+  popRows: number;
   events: readonly BattleKernelSemanticEvent[];
 }>;
 
@@ -239,6 +245,7 @@ function runEntryScript(
   rulesContext: BattleScriptRulesContext;
   events: readonly BattleScriptSemanticEvent[];
   rows: number;
+  popRows: number;
 }> {
   const execution = createBattleScriptStatusRulesExecution(
     program,
@@ -272,6 +279,7 @@ function runEntryScript(
         rulesContext: result.state.rulesContext,
         events: result.state.events,
         rows: result.state.instructionsExecuted,
+        popRows: result.state.haltReason.opcodeName === "B_SCR_OP_END2" ? 1 : 0,
       });
     }
     if (result.kind === "unsupported") {
@@ -382,6 +390,11 @@ function presentationEntryPayload(
     const tracedFrom = rules.battleTextBuff1MonNick.battler as 0 | 1;
     return Object.freeze({ ...payload, substitutions: Object.freeze([abilityOf(tracedFrom)]), scriptingBattler, monNickBattler: tracedFrom });
   }
+  if (payload.messageId === "STRINGID_PKMNSITEMRESTOREDSTATUS") {
+    // "{B_SCR_ACTIVE_NAME_WITH_PREFIX}'s {B_LAST_ITEM} restored its status!": gBattleScripting.battler is the holder
+    // (battle_util.c:3322) and gLastUsedItem its item, read before the effect switch (battle_util.c ItemBattleEffects).
+    return Object.freeze({ ...payload, scriptingBattler, lastItem: rules.battlers[scriptingBattler].item });
+  }
   return payload;
 }
 
@@ -481,12 +494,13 @@ export function initializeFreshFactoryBattle(
   const entryScripts: FactoryBattleStartEntryScript[] = [];
   const recordEntryScript = (
     label: string,
-    resolved: Readonly<{ events: readonly BattleScriptSemanticEvent[]; rows: number }>,
+    resolved: Readonly<{ events: readonly BattleScriptSemanticEvent[]; rows: number; popRows: number }>,
     rules: BattleScriptRulesContext,
   ): void => {
     entryScripts.push(Object.freeze({
       label,
       rows: resolved.rows,
+      popRows: resolved.popRows,
       events: Object.freeze(resolved.events.map((event, index) => {
         const { sequence: _machineSequence, provenance, ...payload } = event;
         return Object.freeze({
@@ -596,7 +610,9 @@ export function initializeFreshFactoryBattle(
   // battle_main.c:3884-3894 / battle_util.c:3303-3329: items use the same
   // speed order. Double Prize only writes unread prize bookkeeping. White
   // Herb resets every lowered stage and consumes itself through the shared
-  // BattleScript_WhiteHerbEnd2 opcode machinery.
+  // BattleScript_WhiteHerbEnd2 opcode machinery; its script is presented
+  // with the other entry scripts (wbh1: the held-item animation and
+  // "X's WHITE HERB restored its status!" before the first action menu).
   for (const battler of turnOrder) {
     const active = rulesContextBeforeB.battlers[battler];
     if (active.item !== ITEM_WHITE_HERB || !active.statStages.some((stage) => stage < 6)) continue;
@@ -614,6 +630,7 @@ export function initializeFreshFactoryBattle(
       scriptingBattler: battler,
     });
     const resolved = runEntryScript("BattleScript_WhiteHerbEnd2", rulesContextBeforeB, rngBeforeB);
+    recordEntryScript("BattleScript_WhiteHerbEnd2", resolved, rulesContextBeforeB);
     rulesContextBeforeB = resolved.rulesContext;
     lifecycleEvents.push(...resolved.events);
   }

@@ -224,6 +224,13 @@ export function itemKnockoffCommandFrames(battler: 0 | 1, seGate: number): numbe
 export const HELD_ITEM_EFFECT_RESTART_LEAD_FRAMES = 15;
 export const HELD_ITEM_EFFECT_CONTINUE_LEAD_FRAMES = 9;
 /**
+ * wbh1 (docs/wbh1-battle-start-white-herb.md): the battle-start entry phase (factoryBattleStartEntry.ts) times a script's rows from the
+ * kernel, so its held-item command starts on the `playanimation` row itself (BattleScript_WhiteHerbRet, ROM labs wbh1-*-on: the anim's
+ * first gAnimScriptActive row) and the print's first glyph follows 213 rows later (211 animation rows, the controller's completion,
+ * printstring), on either side. hie3's script frame 0 (HELD_ITEM_EFFECT_COMMAND_FRAMES before the print) is the row before it.
+ */
+export const HELD_ITEM_EFFECT_ENTRY_LEAD_FRAMES = -1;
+/**
  * A cure berry's script continues from the move's own `set-battler-status-data` receipt, whose `status` command (off121 / the 32-frame
  * default) already presents the frames up to the animation in both scenes (Scene OFF: the 35 executions; Scene ON: the 32 default),
  * so the held-item command presents the rest. Scene ON only: the ROM spends one frame more than the other continuations (224 vs 223);

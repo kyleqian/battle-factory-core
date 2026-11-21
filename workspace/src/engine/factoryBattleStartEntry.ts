@@ -1,14 +1,20 @@
 /**
- * pau4: the battle-start entry scripts' (Intimidate / Trace) presentation, between the player release and the first command prompt.
+ * pau4: the battle-start entry scripts' (Intimidate / Trace, and wbh1's White Herb) presentation, between the player release and the
+ * first command prompt.
  *
  * The kernel runs each entry script as its own machine (one instruction row per frame, a `pause` retrying), so an event's
  * `instructionExecution` is its frame offset from the script start and `rows` the script's whole length. Each script's
- * commands are the ordinary resolution projection of its events (print, stat row, STATS_CHANGE animation); the frames before the
- * first event and after the last print's wait are the script's own rows. The "Go! X!" box stays up through all of it.
+ * commands are the ordinary resolution projection of its events (print, stat row, STATS_CHANGE animation, held-item animation); the
+ * frames before the first event and after the last print's wait are the script's own rows. The "Go! X!" box stays up through all of it.
  * Presentation only: the kernel events, RNG and digests are untouched.
  */
 
-import { ENTRY_SCRIPT_END_HELD_ROWS, projectBattleResolutionCommands } from "./battleResolutionPresentation.ts";
+import {
+  ENTRY_SCRIPT_END_HELD_ROWS,
+  HELD_ITEM_EFFECT_COMMAND_FRAMES,
+  HELD_ITEM_EFFECT_ENTRY_LEAD_FRAMES,
+  projectBattleResolutionCommands,
+} from "./battleResolutionPresentation.ts";
 import type {
   BattleResolutionPresentationCommand,
   BattleResolutionPresentationState,
@@ -19,8 +25,6 @@ import type { BattleState } from "./battleDecisionBoundary.ts";
 import type { FactoryBattleStartEntryScript } from "./factoryBattleStart.ts";
 import type { FactoryFullTurnDecisionRules } from "./factoryBattleScriptFullTurnDecision.ts";
 
-/** Rows between one entry script's end and the next one's first row (BattleScript_Intimidate end3 -> Trace's dispatch). */
-export const ENTRY_SCRIPT_GAP_ROWS = 2;
 export { ENTRY_SCRIPT_END_HELD_ROWS };
 /** Blank-box rows between the last script's wait and the action prompt (BattleTurnPassed's HandleTurnActionSelectionState rows). */
 export const ENTRY_SCRIPT_END_BLANK_ROWS = 6;
@@ -61,18 +65,33 @@ export function createFactoryBattleStartEntry(
   });
   const commands: BattleResolutionPresentationCommand[] = [go];
   const schedule: { commandIndex: number; length: number }[] = [];
-  scripts.forEach((script, index) => {
+  scripts.forEach((script) => {
     if (script.events.length === 0) return;
+    const first = script.events[0]!;
     const projected = projectBattleResolutionCommands(script.events, rules.rulesContext, rules.rulesContext, field, null)
-      .filter((candidate) => candidate.type !== "turn-end");
-    const lead = script.events[0]!.provenance?.instructionExecution ?? 0;
-    // The previous command (the Go! box, or the previous script's last print) is held through this script's leading rows.
-    extend(schedule, commands.length - 1, lead + (index === 0 ? 0 : ENTRY_SCRIPT_GAP_ROWS));
+      .filter((candidate) => candidate.type !== "turn-end")
+      // wbh1: a hold the projection puts before the script's first print (Scene OFF's BattleScript_Pausex20 for B_ANIM_HELD_ITEM_EFFECT,
+      // heldItemEffectOffHoldFrames) counts the script's leading rows, which `lead` below already presents.
+      .filter((candidate) => !(candidate.type === "move-animation" && candidate.eventSequence === first.sequence))
+      // wbh1: the held-item command runs from its `playanimation` row to the print (HELD_ITEM_EFFECT_ENTRY_LEAD_FRAMES), not from a
+      // previous command's end as in a turn.
+      .map((candidate) => candidate.type === "general-animation" && candidate.animation === "HELD_ITEM_EFFECT"
+        ? Object.freeze({
+          ...candidate,
+          timing: Object.freeze({ ...candidate.timing, minimumFrames: HELD_ITEM_EFFECT_COMMAND_FRAMES + HELD_ITEM_EFFECT_ENTRY_LEAD_FRAMES }),
+        })
+        : candidate);
+    const lead = first.provenance?.instructionExecution ?? 0;
+    // The previous command (the Go! box, or the previous script's last print) is held through this script's leading rows. A later
+    // script is set up on the frame after the previous one's last presented frame and runs its row N N frames after that (wbh1: ROM
+    // rows of sta6m-both-off, Intimidate's pop at 2087, TraceActivates set up at 2088, its print at 2088 + 33 = 2121).
+    extend(schedule, commands.length - 1, lead);
     const last = [...script.events].reverse().find((event) => event.payload.kind === "message");
     const printed = [...projected].reverse().find((candidate) => candidate.type === "message");
     const closing = last === undefined || printed === undefined || printed.type !== "message"
       ? 0
-      : Math.max(0, script.rows - (last.provenance?.instructionExecution ?? 0) - 1 - printed.timing.holdFrames) + ENTRY_SCRIPT_END_HELD_ROWS;
+      : Math.max(0, script.rows - (last.provenance?.instructionExecution ?? 0) - 1 - printed.timing.holdFrames)
+        + ENTRY_SCRIPT_END_HELD_ROWS + script.popRows;
     projected.forEach((candidate, at) => {
       commands.push(candidate);
       let length = battleResolutionCommandDuration(candidate, field);
