@@ -1151,9 +1151,9 @@ function roundCompareMode() {
     const d = drive.battles?.[n]?.drive ?? null;
     const cmp = d === null ? null : compareBattle(b, d, d.timeline);
     const turnsMatch = cmp !== null && cmp.divergence === null && (cmp.wide === null || (cmp.wide as any).diffPoints === 0) && b.error === null;
-    // The one known, unfixed difference (docs/parity-mac/first-trainer-after-draft-picks.md): the first trainer of a chained round. The engine's
-    // draft fits the ROM's, and its own code rolled right after the draft's set picks gives the ROM's trainer and sets, but the round construction
-    // rolls him after the six rentals' personalities. Named apart so that it can hide nothing else: the battle still has to match in every other way.
+    // Finding 47 (docs/parity-mac/first-trainer-after-draft-picks.md), fixed by fop1 (docs/fop1-first-opponent-order.md): the first trainer of a
+    // chained round, which the round construction used to roll after the six rentals' personalities instead of right after the draft's set picks.
+    // Still named apart, so a return of it shows as itself (tests/parityMacRoundReplayFixtures.test.ts now requires none).
     const sel: any = b.between?.selection ?? null;
     const rom: any = b.between?.rom ?? null;
     const knownFirstTrainerOrder = b.between?.newRound === true && sel?.matched === false && sel.draftFits !== null && rom !== null

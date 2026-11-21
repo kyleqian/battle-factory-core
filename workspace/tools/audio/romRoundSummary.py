@@ -45,7 +45,7 @@ print(f"rounds {len(rows)}; rc {dict(Counter(r['rc'] for r in rows))}")
 print(f"ends {dict(Counter(r.get('end') for r in rows))}")
 print(f"match {sum(1 for r in rows if r.get('match'))}; battles driven {sum(r.get('battles', 0) for r in rows)}; deepest {Counter(r.get('battles', 0) for r in rows)}")
 print(f"rounds with a swap {sum(1 for r in rows if r.get('swaps'))}; swaps {sum(r.get('swaps', 0) for r in rows)}")
-print(f"match except the known first-trainer order of a chained round (fix 47, unfixed): {sum(1 for r in rows if r.get('matchExceptKnown'))}; "
+print(f"match except the first-trainer order of a chained round (finding 47, fixed by fop1; none expected): {sum(1 for r in rows if r.get('matchExceptKnown'))}; "
       f"battles with it: {sum(r.get('knownDifferences', 0) for r in rows)}")
 for r in rows:
     if not r.get("matchExceptKnown"):

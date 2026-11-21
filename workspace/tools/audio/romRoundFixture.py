@@ -8,7 +8,7 @@ Kept: the run's options; per battle the setup fields the engine reads (`soundCen
 status, both parties, the turn number, the opponent's reply and simulated AI RNG, the last moves, the round facts, battle 1's lab descriptor); per battle
 the ROM drive fields `round-compare` reads (the wide states, the final wide state, the stop reason, the outcome, the swap record) and, of the ROM timeline,
 the rows the recorded engine's turn states were found at (the turn compare looks the engine's states up in order: the ROM's state after every turn);
-the alignment k and the try of every battle (so the replay needs no search). The recording must match in every check but the known one (finding 47).
+the alignment k and the try of every battle (so the replay needs no search). The recording must match in every check but the known one (finding 47, fixed by fop1: none expected now).
 If the engine's timeline ever records finer states than one per turn change, record the fixture again from a fresh run.
 """
 import gzip, json, sys
