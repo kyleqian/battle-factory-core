@@ -17,8 +17,8 @@ export const OPPONENT_SUMMARY_FADE_DELAY_FRAMES = 2;
 export type OpponentPartySummaryTiming = Readonly<{ minimumFrames: number; leadFrames: number }>;
 
 /** The opponent draw command's duration: the optional script lead, then the controller hold to the next print's first glyph. */
-export function opponentPartySummaryDrawTiming(afterFaint: boolean, voluntarySwitch = false): OpponentPartySummaryTiming {
-  const leadFrames = afterFaint ? OPPONENT_SUMMARY_FAINT_LEAD_FRAMES : 0;
+export function opponentPartySummaryDrawTiming(afterFaint: boolean, voluntarySwitch = false, choiceExtraFrames = 0): OpponentPartySummaryTiming {
+  const leadFrames = afterFaint ? OPPONENT_SUMMARY_FAINT_LEAD_FRAMES + choiceExtraFrames : 0;
   const switchOrder = voluntarySwitch ? OPPONENT_SUMMARY_SWITCH_ORDER_FRAMES : 0;
   return Object.freeze({ minimumFrames: leadFrames + OPPONENT_SUMMARY_HOLD_FRAMES + switchOrder, leadFrames });
 }

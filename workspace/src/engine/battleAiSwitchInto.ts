@@ -57,6 +57,33 @@ export type BattleAiSwitchIntoResult =
   | Readonly<{ kind: "resolved"; partyIndex: number }>
   | Readonly<{ kind: "damage-fallback-needed" }>;
 
+/**
+ * fch1: the work `GetMostSuitableMonToSwitchInto` did, for the replacement's CPU-time model (`aiReplacementChoiceExtraFrames`): pass-1 rounds, GetMonData
+ * reads of a species / a move (each decrypts the Pokemon substructures), per-candidate type scores, TypeCalc and AI_CalcDmg calls.
+ */
+export type BattleAiSwitchIntoWork = {
+  rounds: number;
+  speciesReads: number;
+  candidateScores: number;
+  moveReads: number;
+  typeCalcs: number;
+  damageCalcs: number;
+  fallback: boolean;
+};
+
+/**
+ * fch1 (D4 "faithful timing", docs/faithful-timing.md): the frames the ROM script waits on the controller while `OpponentHandleChoosePokemon` runs the
+ * scorer, over the base `openpartyscreen` -> `FaintedMonSendOutNew` chain of 6 (docs/aud251-s11-scoreboard-refresh.md "fsc2m" section 3, "fch1"). The
+ * cost is CPU time, a frame count that also depends on the frame's phase; fitted to the 32 AI choices of the 24 t2n Scene OFF seeds (ROM 6 .. 10 frames) as
+ * round(0.16 * moveReads - 0.3), moveReads = the GetMonData move reads (each decrypts the substructures): 0 when the first type-best candidate
+ * has a super-effective move among its first four slots, 1 for a second candidate, 2 .. 4 in the damage fallback.
+ */
+export const AI_CHOICE_EXTRA_FRAMES_PER_MOVE_READ = 0.16;
+export const AI_CHOICE_EXTRA_FRAMES_OFFSET = 0.3;
+export function aiReplacementChoiceExtraFrames(work: BattleAiSwitchIntoWork): number {
+  return Math.max(0, Math.round(AI_CHOICE_EXTRA_FRAMES_PER_MOVE_READ * work.moveReads - AI_CHOICE_EXTRA_FRAMES_OFFSET));
+}
+
 export type BattleAiSwitchDamageFallback = Readonly<{
   /**
    * `AI_CalcDmg(gActiveBattler, opposingBattler)` before candidate `TypeCalc`.
@@ -209,19 +236,23 @@ export function getMostSuitableMonToSwitchInto(
   activePartyIndex: number,
   opposingTypes: BattleAiSwitchTypes,
   damageFallback?: BattleAiSwitchDamageFallback,
+  work: BattleAiSwitchIntoWork | undefined = undefined,
 ): BattleAiSwitchIntoResult {
   const invalid = new Set<number>();
   while (invalid.size !== PARTY_SIZE) {
+    if (work) work.rounds += 1;
     let bestDmg = TYPE_MUL_NO_EFFECT;
     let bestMonId = -1;
     for (let i = 0; i < PARTY_SIZE; i += 1) {
       const member = bench[i]!;
+      if (work) work.speciesReads += 1;
       if (
         member.species !== 0
         && member.hp !== 0
         && !invalid.has(i)
         && i !== activePartyIndex
       ) {
+        if (work) work.candidateScores += 1;
         const typeDmg = computeTypeMatchupScore(opposingTypes, member.types);
         // Possible source bug, preserved faithfully (battle_ai_switch_items.c:713-715):
         // this picks the type that takes the MOST damage from the opponent, not the least.
@@ -240,17 +271,24 @@ export function getMostSuitableMonToSwitchInto(
     }
 
     const bestMon = bench[bestMonId]!;
-    if (bestMon.moves.some((moveId) => moveIsSuperEffectiveAgainst(
-      moveId,
-      opposingTypes,
-      damageFallback?.opposingAbility,
-      damageFallback?.opposingStatus2,
-    ))) {
+    if (bestMon.moves.some((moveId) => {
+      if (work) {
+        work.moveReads += 1;
+        if (moveId !== MOVE_NONE) work.typeCalcs += 1;
+      }
+      return moveIsSuperEffectiveAgainst(
+        moveId,
+        opposingTypes,
+        damageFallback?.opposingAbility,
+        damageFallback?.opposingStatus2,
+      );
+    })) {
       return Object.freeze({ kind: "resolved", partyIndex: bestMonId });
     }
     invalid.add(bestMonId);
   }
   if (!damageFallback) return Object.freeze({ kind: "damage-fallback-needed" });
+  if (work) work.fallback = true;
 
   // Pinned non-BUGFIX source declares bestDmg as u8. The comparison promotes
   // it, but a successful assignment truncates the signed damage back to u8.
@@ -259,12 +297,18 @@ export function getMostSuitableMonToSwitchInto(
   let baseDamage: number | null = null;
   for (let i = 0; i < PARTY_SIZE; i += 1) {
     const member = bench[i]!;
+    if (work) work.speciesReads += 1;
     if (member.species === 0 || member.hp === 0 || i === activePartyIndex) continue;
     for (let j = 0; j < member.moves.length; j += 1) {
       const moveId = member.moves[j]!;
       const move = MOVES_BY_ID.get(moveId);
       let damage = 0;
+      if (work) work.moveReads += 1;
       if (moveId !== MOVE_NONE && move?.power !== 1) {
+        if (work) {
+          work.damageCalcs += 1;
+          work.typeCalcs += 1;
+        }
         // AI_CalcDmg reads only the active battler and gCurrentMove, so every call returns the same value.
         baseDamage ??= typeof damageFallback.baseDamage === "function"
           ? damageFallback.baseDamage()

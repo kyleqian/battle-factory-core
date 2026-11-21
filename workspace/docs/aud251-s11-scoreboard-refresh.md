@@ -2127,3 +2127,39 @@ Scene ON sound / presentation timing only; no gameplay or RNG change. Scene OFF 
 **Tests.** `npm run typecheck` exit 0; `npm run test:gate` 360 files / 2,835 tests green; `npm run build` exit 0; every `tests/` file importing `battleResolutionPresentation` / `moveAnimSounds`, `tests/aud2*`, `tests/sta*`, `tests/animation/live*`, `tests/randomRoundSoak*` (312 files): all green except the 2 `tests/animation/liveAnchorMoveAdapters.test.ts` Metal Claw failures ("expected 154 to be 140"), which are red at the base 22c58649b too (bdt1's Metal Claw 140 -> 154, not re-pinned; verified by reverting `src` and re-running). There are no `tests/gsp*.test.ts` files. Re-pins (toward the ROM, ROM frame in the commit messages): `tests/randomRoundSoak.test.ts` seed 0 "full" frames 68529 / turn 21 and seed 2 frames 58583 (trajectory re-pins, the sleeping / in-love turns of those seeds moved to the ROM rows).
 
 **Residuals.** (a) The turn-1 tick SEs carry a constant -4 from the previous action: the foe's Seismic Toss hit SEs after a Toxic / Will-O-Wisp body are -4 (the status-body tail, b4l). (b) The Toxic / Will-O-Wisp / Attract move-body SEs (227 / 148) are about -3 (body, not touched). (c) The "immobilized by love" print after the infatuation animation is 1 row early (ON ROM label 792 vs engine 791, OFF 1305 vs 1304). (d) OFF asleep turn: the first action after the sleep animation is about +4 late in OFF (print row exact). (e) `gsp3-attract-player-on` ROM / engine RNG diverge (the aligned SEs 697 / 2325 are +0).
+
+## fch1 (2026-11-21): the AI faint-replacement choice costs 0..4 script frames (term 1 landed; terms 2 and 3 measured, not landed)
+
+Commit `966063f8d` on top of `d2c0f88f5` (src: `battleAiSwitchInto.ts`, `battleScriptOpenPartyScreenOpcode.ts`, `midBattleOpponentPartySummaryTiming.ts`, `battleResolutionPresentation.ts`; tools: `appTrace.ts`, `fch1LabEngine.ts`). Presentation timing only: the choice itself (which mon) is untouched, the work model only counts what the real scorer port reads.
+
+**Term 1 (landed). ROM rule.** TryChoose -> SendOut is 6 script frames plus the CPU time `GetMostSuitableMonToSwitchInto` (`battle_ai_switch_items.c:629`) burns inside one script frame. The ROM extra, probed on 32 (reads, frames) pairs of the Scene OFF labs (`.integration/evidence/fch1/rom-choice.json`), is 0..4 (ROM range 6..10) and tracks the scorer's move reads: `extra = round(0.16 * moveReads - 0.3)`, floored at 0 (21 / 32 exact, sum of |error| 13, max |error| 2; pinned by `tests/fch1AiChoiceTiming.test.ts`). A pass-1 hit on the first read (a super-effective move on the first candidate) costs 0, the damage fallback pass (Splash forces it) costs +2. The extra is the lead of the opponent party-status-summary draw (`opponentPartySummaryDrawTiming(afterFaint, voluntarySwitch, choiceExtraFrames)`: lead 23 + extra).
+
+ROM vs engine, SE 16 / SE 114 / SE 15 (ROM frames; before -> after is engine minus ROM), six fsc2m Scene OFF labs on the ROM probe's button schedule:
+
+| lab | ROM 16 / 114 / 15 | before | after |
+|---|---|---|---|
+| ai-nose-normal | 252 / 315 / 470 | 0, -2, -12 | **0, 0, -10** |
+| ai-nose-mixed | 252 / 315 / 471 | 0, -2, -12 | **0, 0, -10** |
+| ai-four-moves | 252 / 315 / 471 | 0, -2, -12 | **0, 0, -10** |
+| ai-se-first | 252 / 314 / 470 | 0, -1, -11 | **0, 0, -10** |
+| ai-same-se | 252 / 313 / 468 | 0, 0, -10 | **0, 0, -10** |
+| n7-rattata | 252 / 313 / 468 | 0, 0, -10 | **0, 0, -10** |
+
+SE 114 is ROM-exact on all six (the SE 15 -10 is the same in every lab and unchanged by this term: a separate offset after the send-out, not part of the choice). The T2 seeds move with it (SE 16 -> 114 interval, ROM / engine before -> after): 165 res18 70 / 66 -> 68, 1914 res11 83 / 81 -> 83, 2741 res9 82 / 81 -> 82, 3158 res5 76 / 74 -> 76, 5569 res18 72 / 71 -> 72, 2230 res11 79 / 76 -> 78. Rows with a ready-time cliff (term 2) get 2 later, as expected (1028 res10 83 -> 85, 3738 res38 81 -> 83).
+
+T2 (`rescoreAll.sh` over `.integration/evidence/t2n`, `.integration/evidence/fch1/t2-{base,after}`, `soundScoreboard.py`; 0 missing / 0 extra everywhere):
+
+| scene | exact before | exact after | offset | mass before | mass after |
+|---|---|---|---|---|---|
+| ON (25 seeds) | 2,541 | **2,571** | 3,336 -> 3,306 | 22,835 | **22,721** (-0.5 %) |
+| OFF (24 seeds) | 667 | **695** | 466 -> 438 | 2,767 | **2,710** (-2.1 %) |
+
+Census (`lsd194Census.sh`, `d2c0f88f5` vs `966063f8d`, seeds 0..199, JOBS 6, SPLIT 2, `.integration/evidence/fch1/census`): eventsDigest + error identical 200 / 200 in both scenes, 0 type-sequence changes (commands changed in 148 / 200 battles per scene, timing only). T1 (`soundCensusDelta.py --t1`) identical to base: ON exact 54,127, known-offset 35 (Substitute -7 x 33, Transform -5 x 2), missing 0, extra 0, unclassified 13; OFF reads the same 35 Substitute / Transform rows as extra and 13 unclassified in both arms (no new row). The chosen mon is unchanged (digest identical).
+
+**Term 2 (drv1 ready-time cliff): measured, not landed.** The ROM message-ready is `SE16 + 2*steps + 4 + T + 1` (steps = 8 - floor(front-pic yOffset / 8); T = name chars + 12 for `Foe ` + `fainted!`; Rattata starts at 16, Mew / Abra 18, Blastoise / Feraligatr 20; A is accepted on the driver's 17-frame pulse). The engine matches this formula exactly in the labs for seven species (the n4 Abra, n9 Blastoise, n10 Feraligatr labs are copied into `tools/battle-lab/`; `tools/integration/fch1ReadySweep.ts` sweeps the species), so the foe-prefix typing length and the printer start are NOT the differing command: both agree with the ROM in the labs. In situ the engine is ready 1..3 frames later than the ROM. Measured by shifting the census driver's A press (temporary `FCH1_SHIFT`, reverted): the pulse is accepted only when shifted earlier by 3738 res38: 2, 1028 res10: 3, 319 res18: 1, 5063 res47: 2 (with the shift, 3738 collapses to 68 / ROM 66+2, 5063 to 69 / ROM 69, 1028 to 71 / ROM 70, 319 to 71 / ROM 70 + 1). The foe species and preceding messages differ per seed (Nidoking none, Venusaur ONEHITKO, Togetic CRITICALHIT), the segment-start `fieldArt` is not the cause (tested), and SE16 -> awaiting-message-dismiss start is 32..43 across the rows. The remaining candidate is the faint command's `leadFrames` (`faintScriptPreCryFrames`) or the message lead after the sink in the in-situ chain, which the labs (one fixed prefix) cannot show. Not found in the time box, so nothing landed; the four rows stay at +13..+17 (`fsc-a1.txt`: 1028 res10 +15, 3738 res38 +17, 5063 res47 +15, 319 res18 not in the printed set).
+
+**Term 3 (hcr3 item chain): not investigated.** No time was left in the 150-minute cap after terms 1 and 2 and the acceptance runs, so the ROM rule behind first-SE offset 19 (1914) vs 13 (2230) is still open exactly as hcr3 left it; the aud252 item-row pins stay red at +4 (moved away in hcr3, not touched here).
+
+**Tests / pins.** `tests/randomRoundSoak.test.ts` seed 21 `renderCalls` 3,043 -> 3,042 (re-pinned, fch1 comment line; frames pins unchanged). New `tests/fch1AiChoiceTiming.test.ts`: the cost-model pin (>= 21 / 32 exact, total |error| <= 13, max |error| <= 2) and the six lab SE 114 ROM frames (313 / 313 / 314 / 315 / 315 / 315). The trainer bench of `aud241bStage` now uses a Seismic Toss Rattata (Splash would force the damage fallback and add 2); that fixed obr251 / ais4 / aud242j. `tests/stc1*.test.ts` has 3 failures that are present at HEAD before this step (checked with `git stash`), not touched.
+
+PAPERCUT: `npm run typecheck` / `test:gate` queue behind other worktrees' `tsc` flock (`/tmp/pokebench-typecheck.lock`), ~10 min idle wait with no output, ~10.

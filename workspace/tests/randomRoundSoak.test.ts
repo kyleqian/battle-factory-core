@@ -454,6 +454,7 @@ describe("random round soak driver (green milestone pin)", () => {
       // accept edge alone undone (isBattleResolutionButtonMessageAcceptable's promptClear lead) the old pin passes again.
       // merge of the box's 2026-11-20 run with the Mac's 11-21 fixes (box f5274b48a: hcr1 / hcr1b / fsc1 / chg1 ...; Mac ea3220630: wbh1 / fnt1 / lrc1 ...): frames + render calls,
       // 43_557 (box) / 43_323 (Mac) -> 43_500, renderCalls 3_066 / 3_043 -> 3_043; same battle 7, turn 3, end state, diagnostics; both runs identical.
+      // fch1 (the AI faint replacement choice costs 0..4 extra script frames, GetMostSuitableMonToSwitchInto work model; the aud241b stage's opponent bench is now Seismic Toss x4 as in the ROM labs): render calls only (a one-frame trajectory shift), 3_043 -> 3_042; frames 43_500, battle 7, turn 3, end state, diagnostics unchanged. A trajectory pin, not a ROM frame.
       frames: 43_500,
       battle: 7,
       turn: 3,
@@ -466,7 +467,7 @@ describe("random round soak driver (green milestone pin)", () => {
         terminalOutcome: "roundWon",
         terminalRecordMenuInputReadyReached: true,
         terminalRecordChoice: "no",
-        renderCalls: 3_043,
+        renderCalls: 3_042,
       },
     });
     expect(second).toEqual(first);
