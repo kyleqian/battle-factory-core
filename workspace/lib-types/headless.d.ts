@@ -1,7 +1,7 @@
 // @pokebench/factory/headless — no DOM, no canvas, no sprite / tile assets. Mirrors src/factoryContract.ts.
-import type { BattleScene, FactoryFrontierRecord, TraceSegment } from "./index.js";
+import type { BattleScene, FactoryFrontierRecord, FactoryLobbyMode, TraceSegment } from "./index.js";
 
-export type { BattleScene, FactoryFrontierRecord, GbaButton, TraceSegment } from "./index.js";
+export type { BattleScene, FactoryFrontierRecord, FactoryLobbyMode, GbaButton, TraceSegment } from "./index.js";
 
 export interface ReplayBattle {
   result: "win" | "loss";
@@ -28,6 +28,8 @@ export interface ReplayOptions {
   start?: "draft" | "after-save";
   /** Same as `FactoryGameOptions.frontier`: the trace replays only with the record it was played from. */
   frontier?: FactoryFrontierRecord;
+  /** Same as `FactoryGameOptions.lobby`: the trace replays only with the Lobby mode it was played with. */
+  lobby?: FactoryLobbyMode;
   segments: TraceSegment[];
 }
 

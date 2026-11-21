@@ -26,6 +26,7 @@ export type {
   FactoryAudioState,
   FactoryEvent,
   FactoryFrontierRecord,
+  FactoryLobbyMode,
   FactoryGame,
   FactoryGameOptions,
   GbaButton,
@@ -146,6 +147,7 @@ export function mountFactoryGameInternal(options: MountInternalOptions): Factory
     challengeRequest: options.challengeRequest,
     start: options.start,
     frontier: options.frontier,
+    lobby: options.lobby,
   };
   let session = new FactorySession(sessionOptions);
   // bnd257d / dl3: the battle pictures are not in the first chunk. mountFactoryGame still returns synchronously; the first draw, the loop and
@@ -378,6 +380,9 @@ export function mountFactoryGameInternal(options: MountInternalOptions): Factory
     if (!readySent) {
       readySent = true;
       emit({ type: "ready", frame: session.frame });
+      // rc1: a resume that ended inside a result hold reported nothing on the way (the fast-forward is silent): say it now.
+      const screen = session.resultScreen();
+      if (screen !== null) emit({ type: "result-screen", ...screen, frame: session.frame });
     }
     if (last === null) last = time;
     accumulator = Math.min(accumulator + (time - last), FRAME_MS * 8);

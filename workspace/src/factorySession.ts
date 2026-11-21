@@ -20,6 +20,12 @@
 // `challenge-end` / `challenge-request` until a later loss or retire. With `challengeRequest:
 // "hold"` (the default; the library mount and `replayChallenge`) the game then
 // freezes on the save dialog's first frame until the host destroys the mount.
+// rc1, `lobby: "skip"` (src/engine/resultHold.ts): no Lobby. `result-screen` when
+// the picture has gone black and the game holds (loss: the battle's fade ended;
+// retire: the warp's fade ended, and `challenge-end retire` moves there, the same
+// tick; round: a won round's battle room faded out). From a round hold, A / START
+// deals the next round's draft and `round-continue` reports it. `battle-end`,
+// `round-end` and `challenge-end loss` stay where they are.
 import { createInitialState, tick, type EngineState } from "./engine/core.ts";
 import { ANCHOR_FACTORY_METADATA } from "./engine/factoryAnchorSession.ts";
 import { createFactoryLobbyAttendantState } from "./engine/factoryLobbyAttendant.ts";
@@ -35,7 +41,7 @@ import {
 import { presentationRngTraceMetadata, type PresentationRngPolicyId } from "./engine/presentationRngHost.ts";
 import { Sha256 } from "./engine/sha256.ts";
 import { collectSoundTick, type SoundSink } from "./audio/soundEvents.ts";
-import type { BattleScene, FactoryEvent, FactoryFrontierRecord, ReplayBattle, TraceSegment } from "./factoryContract.ts";
+import type { BattleScene, FactoryEvent, FactoryFrontierRecord, FactoryLobbyMode, ReplayBattle, TraceSegment } from "./factoryContract.ts";
 import { normalizeButtons, type GbaButton } from "./input.ts";
 import { SessionRecorder, type SessionContainedError, type SessionTrace } from "./sessionRecorder.ts";
 
@@ -69,6 +75,8 @@ export interface FactorySessionOptions {
   readonly start?: "draft" | "after-save" | undefined;
   /** The save's Factory record the challenge starts with (symbols, heard-speech bits), both starts; absent = a fresh save. */
   readonly frontier?: FactoryFrontierRecord | undefined;
+  /** rc1: "skip" = black result holds instead of the Lobby after a round (`FactoryLobbyMode`); absent / "walk" = the ROM's Lobby. */
+  readonly lobby?: FactoryLobbyMode | undefined;
 }
 
 /**
@@ -83,6 +91,7 @@ export function createChallengeState(options: FactorySessionOptions): EngineStat
     battleScene: options.battleScene,
     ...(options.presentationSeed !== undefined ? { presentationSeed: options.presentationSeed } : {}),
     ...(options.presentationRngPolicy !== undefined ? { presentationRngPolicy: options.presentationRngPolicy } : {}),
+    ...(options.lobby === "skip" ? { lobby: "skip" as const } : {}),
   });
   const frontier = options.frontier === undefined ? undefined : validateFactoryFrontierRecord(options.frontier);
   if (options.start === "after-save") return createAfterSaveState(base, options.gameplaySeed, frontier);
@@ -141,6 +150,8 @@ export class FactorySession {
   /** Set at `round-end`: the next Lobby entry is the ROM's won-script return (lbr-d1), not a retire. */
   private wonLobbyPending = false;
   private requestSent = false;
+  /** rc1: the result hold's kind as of the last tick (`lobby: "skip"` only). */
+  private prevHold: "end" | "round" | null = null;
   private soundSink: SoundSink | null = null;
 
   // No parameter properties: tools import src/ under node --experimental-strip-types, which cannot transform them.
@@ -248,6 +259,7 @@ export class FactorySession {
     this.ended = null;
     this.wonLobbyPending = false;
     this.requestSent = false;
+    this.prevHold = null;
     this.hash = new Sha256();
     this.hashed = new WeakSet();
     this.containedSeen = 0;
@@ -260,6 +272,17 @@ export class FactorySession {
     this.prevLastBattle = round?.lastBattle ?? null;
     this.prevPhase = round?.phase ?? null;
     this.prevLobby = this.state.lobbyFreeRoam !== null;
+    this.prevHold = this.state.resultHold?.kind ?? null;
+  }
+
+  /**
+   * rc1: the result card the host should be showing now (`lobby: "skip"` only): the game holds black after a loss / retire or a won
+   * round. The library mount reports it again after a resume that ends inside a hold (the fast-forward reports no events).
+   */
+  resultScreen(): { reason: "loss" | "retire" | "round"; streak: number } | null {
+    const hold = this.state.resultHold;
+    if (!hold) return null;
+    return { reason: hold.kind === "round" ? "round" : (this.ended ?? "retire"), streak: this.streak };
   }
 
   private step(buttons: ReadonlySet<GbaButton>, sink: SoundSink | null = null): FactoryEvent[] {
@@ -311,6 +334,23 @@ export class FactorySession {
         events.push({ type: "challenge-end", reason: "retire", streak: this.streak, frame });
       }
     }
+    const hold = this.state.resultHold?.kind ?? null;
+    if (hold !== this.prevHold) {
+      if (hold === "end") {
+        // A loss ended the challenge at its battle-end; a hold with no end yet is the RETIRE warp's (it never reaches the Lobby).
+        if (this.ended === null) {
+          this.ended = "retire";
+          events.push({ type: "challenge-end", reason: "retire", streak: this.streak, frame });
+        }
+        events.push({ type: "result-screen", reason: this.ended, streak: this.streak, frame });
+      } else if (hold === "round") {
+        // No won Lobby entry follows: nothing for the retire guard to swallow.
+        this.wonLobbyPending = false;
+        events.push({ type: "result-screen", reason: "round", streak: this.streak, frame });
+      } else if (this.prevHold === "round") {
+        events.push({ type: "round-continue", frame });
+      }
+    }
     if (this.ended !== null && !this.requestSent && this.state.lobbyAttendant?.saveDialogStarted === true) {
       this.requestSent = true;
       events.push({ type: "challenge-request", frame });
@@ -318,6 +358,7 @@ export class FactorySession {
     this.prevLastBattle = lastBattle;
     this.prevPhase = phase;
     this.prevLobby = lobby;
+    this.prevHold = hold;
     this.hashSegments();
     this.collectContained(events, frame);
     // The trace through this frame must be readable (and uploadable) as soon as the host hears the event.
