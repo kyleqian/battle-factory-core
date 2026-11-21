@@ -1,0 +1,277 @@
+{
+ "name": "R106-toxic-counter-capped-at-15",
+ "rules": [
+  "R106"
+ ],
+ "why": "Challenge 7, trainer 200, hand-built Mechanic Lab parties. The AI's Blissey knows only Toxic (it poisons on turn 1); the player's Magikarp (95 max HP, Leftovers) seeds it with Leech Seed (a fixed heal of the foe's max HP/8; the seed drains the first Blissey dead in 9 turns, so it is cast again on its replacement), and Recovers every turn, so it outheals the Toxic ticks (maxHP/16 times the counter) past the sixteenth: the counter is not raised past TURN(15) (battle_util.c:1542-1543). Machamp then comes in and finishes.",
+ "seed": 90000,
+ "challengeNum": 7,
+ "battleNum": 0,
+ "trainerId": 200,
+ "playerSetIds": [
+  429,
+  404,
+  735
+ ],
+ "opponentSetIds": [
+  813,
+  716,
+  721
+ ],
+ "parties": {
+  "player": [
+   {
+    "species": 129,
+    "level": 50,
+    "nature": 0,
+    "ivs": {
+     "hp": 31,
+     "attack": 31,
+     "defense": 31,
+     "speed": 31,
+     "spAttack": 31,
+     "spDefense": 31
+    },
+    "evs": {
+     "hp": 0,
+     "attack": 255,
+     "defense": 0,
+     "speed": 255,
+     "spAttack": 0,
+     "spDefense": 0
+    },
+    "moves": [
+     105,
+     73,
+     150,
+     150
+    ],
+    "item": 200,
+    "abilitySlot": 0,
+    "friendship": 0
+   },
+   {
+    "species": 68,
+    "level": 50,
+    "nature": 0,
+    "ivs": {
+     "hp": 31,
+     "attack": 31,
+     "defense": 31,
+     "speed": 31,
+     "spAttack": 31,
+     "spDefense": 31
+    },
+    "evs": {
+     "hp": 255,
+     "attack": 255,
+     "defense": 0,
+     "speed": 0,
+     "spAttack": 0,
+     "spDefense": 0
+    },
+    "moves": [
+     34,
+     34,
+     34,
+     34
+    ],
+    "item": 0,
+    "abilitySlot": 0,
+    "friendship": 0
+   },
+   {
+    "species": 214,
+    "level": 50,
+    "nature": 0,
+    "ivs": {
+     "hp": 31,
+     "attack": 31,
+     "defense": 31,
+     "speed": 31,
+     "spAttack": 31,
+     "spDefense": 31
+    },
+    "evs": {
+     "hp": 255,
+     "attack": 255,
+     "defense": 0,
+     "speed": 0,
+     "spAttack": 0,
+     "spDefense": 0
+    },
+    "moves": [
+     34,
+     34,
+     34,
+     34
+    ],
+    "item": 0,
+    "abilitySlot": 0,
+    "friendship": 0
+   }
+  ],
+  "opponent": [
+   {
+    "species": 242,
+    "level": 50,
+    "nature": 0,
+    "ivs": {
+     "hp": 31,
+     "attack": 31,
+     "defense": 31,
+     "speed": 31,
+     "spAttack": 31,
+     "spDefense": 31
+    },
+    "evs": {
+     "hp": 255,
+     "attack": 0,
+     "defense": 255,
+     "speed": 0,
+     "spAttack": 0,
+     "spDefense": 0
+    },
+    "moves": [
+     92,
+     92,
+     92,
+     92
+    ],
+    "item": 0,
+    "abilitySlot": 0,
+    "friendship": 0
+   },
+   {
+    "species": 113,
+    "level": 50,
+    "nature": 0,
+    "ivs": {
+     "hp": 31,
+     "attack": 31,
+     "defense": 31,
+     "speed": 31,
+     "spAttack": 31,
+     "spDefense": 31
+    },
+    "evs": {
+     "hp": 255,
+     "attack": 255,
+     "defense": 0,
+     "speed": 0,
+     "spAttack": 0,
+     "spDefense": 0
+    },
+    "moves": [
+     92,
+     92,
+     92,
+     92
+    ],
+    "item": 0,
+    "abilitySlot": 0,
+    "friendship": 0
+   },
+   {
+    "species": 328,
+    "level": 50,
+    "nature": 0,
+    "ivs": {
+     "hp": 31,
+     "attack": 31,
+     "defense": 31,
+     "speed": 31,
+     "spAttack": 31,
+     "spDefense": 31
+    },
+    "evs": {
+     "hp": 255,
+     "attack": 255,
+     "defense": 0,
+     "speed": 0,
+     "spAttack": 0,
+     "spDefense": 0
+    },
+    "moves": [
+     92,
+     92,
+     92,
+     92
+    ],
+    "item": 0,
+    "abilitySlot": 0,
+    "friendship": 0
+   }
+  ]
+ },
+ "script": {
+  "actions": [
+   {
+    "move": 1
+   },
+   {
+    "move": 0
+   },
+   {
+    "move": 0
+   },
+   {
+    "move": 0
+   },
+   {
+    "move": 0
+   },
+   {
+    "move": 0
+   },
+   {
+    "move": 0
+   },
+   {
+    "move": 0
+   },
+   {
+    "move": 0
+   },
+   {
+    "move": 1
+   },
+   {
+    "move": 0
+   },
+   {
+    "move": 0
+   },
+   {
+    "move": 0
+   },
+   {
+    "move": 0
+   },
+   {
+    "move": 0
+   },
+   {
+    "move": 0
+   },
+   {
+    "switch": 1
+   }
+  ],
+  "then": "census"
+ },
+ "expect": [],
+ "cover": [
+  {
+   "file": "src/engine/battleEndTurnOrchestration.ts",
+   "text": "? b.status1 ",
+   "at": 0
+  },
+  {
+   "file": "src/engine/battleEndTurnOrchestration.ts",
+   "text": "return rulesContext;\n  r",
+   "at": 0
+  }
+ ],
+ "coverAny": false
+}

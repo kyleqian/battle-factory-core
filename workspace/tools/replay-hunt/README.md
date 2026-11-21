@@ -71,3 +71,8 @@ covered designs ends at once with no seed).
 - Stall fix: every Clefable battle now ends with Salamence 753 playing Aerial Ace (slot 2) instead of Snorlax 826, because Aerial Ace never misses and so a foe's Double Team stack cannot hold the battle until the frame budget. The seven luck5 designs were patched the same way (0 stalls on the 17 seeds 920200-920216 where 3 had stalled; one stall in 14 for the AI-Clefable shape).
 - Order: the round-robin is unchanged (one fresh seed per open design per round), so no design starves; the chances differ by about 10x (see `rule-coverage.md` "luck6"), the hunter does not weight them.
 
+## rrh7 changes
+
+- `makeRrh7.py` writes the rrh7 designs (`python3 tools/replay-hunt/makeRrh7.py [OUTDIR]`; markers read from `rule-coverage-c-rules.json`): R049 R059 R090 R104 R039a R039b R095 R106, all hand-built Mechanic Lab `parties` with a scripted player. All are promoted (`stages/coverage/`), so the luck hunter does not hunt them.
+- Lab limits met: an EV list must be an even split of 510 over the flagged stats (255 + 255 for two); PP is the move's base PP; an AI party with Drought (Groudon) makes the first-menu RNG unmatchable (`no draw count gives the ROM's gRandomTurnNumber`).
+
