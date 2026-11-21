@@ -23,7 +23,11 @@ const fixture = JSON.parse(readFileSync(new URL("./fixtures/aud252-loss-itemeffe
 // exactly on the ROM (1060 / 1092 / 1124 / 1156 / 1228 / 1410), the select SE is 8 late (ROM 1033, ours 1041; rule off it was exact). Sum |offset| 56 -> 8.
 // hcr2c: hcr2's Scene ON action-dispatch hold (u - 2 frames before the first used-move print; seed 1914 u = 6 -> 4, seed 2230 u = 5 -> 3) delays every later row of the turn: seed 1914 [0, 8, 0 x6] -> [3, 12, 4 x6]
 // (the faint SE keeps its 1-tick hit lead, so +3), seed 2230 [7, 3, 1 x5, 0] -> [10, 6, 4 x5, 3] (+3 each). Uniform shifts of rows that were ROM-exact (1914), carried by the presentation hold, not by a sound lead; a general-animation lead of the hold was tried and rejected (T2 mass 24,219 -> 24,863, seed 2230 mixed).
-const DELTAS: Record<string, number[]> = { "1914": [3, 12, 4, 4, 4, 4, 4, 4], "2230": [10, 6, 4, 4, 4, 4, 4, 3] };
+// hcr3: Icy Wind's hp carries the stat command's 4-row tail (no 28-row floor), Double-Edge's recoil hp / print land on the ROM rows (342 / 353), and the faint SE clips its hpd4 compensation at 0 (earlier bodies' rows are already in the command
+// start). Toward the ROM: seed 1914 [3, 12] -> [-2, 0] (select SE ROM-exact), seed 2230 [10, 6] -> [0, -4]. AWAY from the ROM, left at the old pin and RED on purpose (brief: do not re-pin away): the item chain now measures
+// 1914 [-8 x6] (old +4) and 2230 [-6 x5, -7] (old +4 x5, +3): the general-animation starts 6 rows before the ROM playanimation (BattleScript_MoveEnd .. ItemHealHP_Ret+0x7); a +6 lead was measured and rejected (T2 mass 22,835 -> 22,889: 1914 -66,
+// seeds 2 / 97 / 2230 +80 / +30 / +10), docs/aud251-s11-scoreboard-refresh.md "hcr3".
+const DELTAS: Record<string, number[]> = { "1914": [-2, 0, 4, 4, 4, 4, 4, 4], "2230": [0, -4, 4, 4, 4, 4, 4, 3] };
 const script = new URL("../tools/integration/soundCensusRomReplay.ts", import.meta.url).pathname;
 
 function engineRows(seed: string, scene: string, setup: unknown): Row[] {

@@ -5,6 +5,14 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 2026-11-21 — hcr3 (worker, main/ts lane): stat-next hp tail, recoil hp rows, faint SE lag clip; hp law already D + 8
+
+- **State:** commit `88369e3d7` (src: battleResolutionPresentation.ts, battleHitSounds.ts) + docs commit; no push. `tests/aud252LossBallOpen.test.ts` is RED on purpose (item-chain rows moved away from the ROM, brief: do not re-pin away). T2 ON mass 23,423 -> 22,835 (exact 2,476 -> 2,541), OFF 3,164 -> 3,056 (600 -> 600), 0 missing / 0 extra. Census 0..999: ON digest identical 1000 / 1000, OFF 999 / 1000 (seed 796, frame-budget error in both arms).
+- **Did:** step 1 no change (engine hp is already D + 8; rollout5 / iceball5 drift is the lab's damage roll); step 2 landed the stat tail (4 rows), recoil rows (7 lead, bar -> print E + 1) and the faint SE lag clip at 0; step 3 not landed (second-mover +1 moves Swords Dance opponent away). Pins re-pinned: soak seed 1 frames 60582 -> 58672, Baton Pass pin seed 4 -> 8. Details: docs/aud251-s11-scoreboard-refresh.md "hcr3".
+- **Next:** the item chain after a faint (general-animation 6 rows early; needs the ROM rule for the first-SE offset 19 vs 13 rows, seed-dependent); RNG-synchronised labs for rollout5 / iceball5; a per-body Haze lead if wanted.
+
+---
+
 ## 2026-11-21 — CAX31 daily run (supervisor, Opus 5.5, 2026-11-20 13:30 -> 2026-11-21 05:30 UTC): wind-down: sound timing ON -25 % / OFF -35 %, swap-return room, SELECT move swap, Lobby save wait, used-move print timing both scenes
 
 - **State:** master clean, no workers, no worktrees; no push. **No DEFERRED items.** Final engine tree `c6117abdc` (later commits are tools / tests / docs; full suite on the tip
