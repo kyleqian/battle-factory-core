@@ -165,6 +165,11 @@ function drawNpcFrame(
   // edge (event_object_movement.c:1461-1464: centerToCornerVecY = -(height >> 1); y += 16 + centerToCornerVecY, so the top is
   // tile * 16 + 16 - height), so a 16x16 sprite (TUBER_M, TUBER_F, NINJA_BOY) stands 16 px lower than a 16x32 one.
   const top = pos.y + NPC_FULL_HEIGHT - frame.rows * 8;
+  // hdl1 (docs/hdl1-head-lines-bike-sprite.md): `pos.x` is the left of a 16-wide object. The same lines centre every sprite on its tile
+  // (centerToCornerVecX = -(width >> 1); sprite->x += 8, so the left is tile * 16 + 8 - width / 2): the 32x32 CYCLING_TRIATHLETE_M / _F
+  // (gObjectEventGraphicsInfo_CyclingTriathleteM / F, width 32, the only wide sheets the room draws) stand 8 px left of a 16-wide one.
+  // Drawn at the 16-wide left, ours stood 8 px right of the ROM's (x 128 against 120 in the settled room, the same frame 2).
+  const left = pos.x + NPC_FULL_WIDTH / 2 - frame.columns * 4;
   for (let ty = 0; ty < frame.rows; ty += 1) {
     for (let tx = 0; tx < frame.columns; tx += 1) {
       const srcTx = hFlip ? frame.columns - 1 - tx : tx;
@@ -178,15 +183,16 @@ function drawNpcFrame(
           const color = npc.palette[colorIndex];
           if (!color) continue;
           const faded = fadeY > 0 ? fadeColor(color, fadeY) : color;
-          setPixel(fb, pos.x + tx * 8 + px, top + ty * 8 + py, faded.r, faded.g, faded.b);
+          setPixel(fb, left + tx * 8 + px, top + ty * 8 + py, faded.r, faded.g, faded.b);
         }
       }
     }
   }
-  return { x: pos.x, y: top, width: frame.columns * 8, height: frame.rows * 8 };
+  return { x: left, y: top, width: frame.columns * 8, height: frame.rows * 8 };
 }
-/** The height of the 16x32 object sprites the room's screen positions are written for. */
+/** The height and width of the 16x32 object sprites the room's screen positions are written for. */
 const NPC_FULL_HEIGHT = 32;
+const NPC_FULL_WIDTH = 16;
 
 /** docs/prebattle-room-notes.md §2 formula, re-used here for every element that follows the standard camera-tracking convention (room tiles, scientists) - NOT the decoy (battleRoom.ts doc point 5). */
 function tileScreenPos(tile: { x: number; y: number }, origin: { x: number; y: number }): { x: number; y: number } {
