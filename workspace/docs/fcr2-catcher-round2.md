@@ -182,7 +182,9 @@ challenge: all 1,141 menus, 21 of 21 transitions, the Head's three and the playe
 
 - **The Head's party on the ROM**: built by `FillFactoryBrainParty` at battle start over 21 frames (ROM 261,076-261,097), with the overworld
   VBlank's `Random()` drawn 20 times between its draws. Trapped with the engine's cursor alone, the ROM built the engine's first Pokémon
-  (same BAYLEEF, same personality) and then two others; with the VBlank draws undone during the build it builds the engine's three. So for
+  (same BAYLEEF, same personality) and then two others; with the VBlank draws undone during the build it builds the engine's three.
+  (hdt1, `docs/hdt1-factory-head-team.md`: the build runs to ROM frame 261,104, 28 frames; the 21 were the trap's record window, and the
+  undo now holds until the function returns.) So for
   the same RNG the ROM's Head brings other Pokémon after the first: the engine draws the build back to back, the #55 class (parked on
   2026-08-13, distribution parity). Not a new finding; the catcher stages it.
 - **Before the Head (finding 1, second part)**: ROM 258,909-259,860: SE_POKENAV_CALL, "Excuse me! Excuse me, please! May I get you to

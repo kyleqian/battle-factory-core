@@ -79,7 +79,10 @@ round takes about 2 minutes. Five traces at once (`JOBS=5`) take as long as the 
      whether the ROM reached `GenerateOpponentMons` at the engine's first-opponent cursor (`romCursorIsEngines`); since fop1
      (`docs/fop1-first-opponent-order.md`) both are true.
      The Factory Head's party (`FillFactoryBrainParty`, at battle start) is trapped with the engine's cursor, the overworld VBlank's
-     `Random()` undone while it is built.
+     `Random()` undone from the function's entry until it returns (about 30 frames; before hdt1 only for 20 frames,
+     `docs/hdt1-factory-head-team.md`). Every `Random()` of the build is logged with its caller in `rom/head-build-<g>.json`, and the
+     set-up list's "Factory Head party" says whether the build's own draws were the engine's stream back to back (`chainIsEngines`)
+     and whether `frontier.rentalMons` held the engine's six (`rentalsSame`).
 
    Then the ROM is driven by the engine's choices. Every menu where the engine waited for the player is an anchor: when the ROM opens
    the same kind of menu, the engine's presses there are made again at the same frame offset from the menu's first frame, each
