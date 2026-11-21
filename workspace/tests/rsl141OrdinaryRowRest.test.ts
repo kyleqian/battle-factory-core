@@ -2,6 +2,7 @@
 // the battler sprite's x2 where the last script / send-in left it (ONIX opponent: +1 after every send-in), so a Scene ON ordinary row
 // (battleResolutionPresentationRender.ts) and the command UI (battleScene.ts renderGeneratedBattleCommandPresentation) draw a tracked-`idle`
 // opponent at its species front idle rest; `zeroed` / `unknown` / no history keep x2 0.
+import { censusDeal } from "../tools/integration/censusRound.ts";
 import { describe, expect, it } from "vitest";
 import { createBattleResolutionPresentationRenderView } from "../src/engine/battleResolutionPresentationRender.ts";
 import { renderBattleResolutionLiveView, renderGeneratedBattleCommandPresentation } from "../src/engine/battleScene.ts";
@@ -101,10 +102,10 @@ describe("rsl141 ordinary-row idle rest (landed rst139)", () => {
   // Census battle 134 (streak 4, the rst139 route loop): ONIX leads; the first action menu (frame 530) is a tracked-idle ONIX menu row.
   const firstMenu = (battleScene: "on" | "off") => {
     let state = beginFactoryRoundBattleStartIntro(createFactoryRoundBattleOrchestrator({
-      id: "live-share-census-134-4", rngValue: 134, battleScene,
+      id: "live-share-census-134-4", battleScene,
       factoryWinStreak: 4, playerTrainerId: 416049562,
       battleTowerLevel50WinStreak: 0, facilityState: { rentsCount: 0 },
-      rentals: { type: "generateInitial", selectedRentalIndexes: [0, 1, 2] },
+      ...censusDeal({ seed: 134, factoryWinStreak: 4 }),
     }));
     for (let frame = 1; frame < 4000; frame++) {
       if (state.battleCommandPresentation?.lifecycle.phase === "action-menu") return state;

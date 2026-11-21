@@ -70,6 +70,9 @@ round takes about 2 minutes. Five traces at once (`JOBS=5`) take as long as the 
      `MoveSaveBlocks_ResetHeap` copies the save, so only +1 or 0, held a few frames, is taken). Battles are keyed round × 7 + number on
      both sides. The new round's deal is stepped with traps at `GenerateInitialRentalMons` and `GenerateOpponentMons` (the engine's
      cursors: the ROM draws the engine's six and first trainer itself), and the new select screen's six get the engine's personalities.
+     The deal record also says what the ROM's own order would roll from the engine's deal cursor (`romOwnOrder`, `romOwnOrderSame`) and
+     whether the ROM reached `GenerateOpponentMons` at the engine's first-opponent cursor (`romCursorIsEngines`); since fop1
+     (`docs/fop1-first-opponent-order.md`) both are true.
      The Factory Head's party (`FillFactoryBrainParty`, at battle start) is trapped with the engine's cursor, the overworld VBlank's
      `Random()` undone while it is built.
 

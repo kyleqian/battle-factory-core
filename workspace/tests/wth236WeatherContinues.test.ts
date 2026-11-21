@@ -4,6 +4,7 @@
 // weather branch). The kernel's receipts are untouched: each census battle's eventsDigest equals the pre-fix census arm's.
 // Driver = the census loop (off121StatusCommand.test.ts / tools/integration/lsd194Census.ts): battle i = seed i, streak i * 11 % 49,
 // rentals 0..2, the least-used legal move.
+import { censusDeal } from "../tools/integration/censusRound.ts";
 import { createHash } from "node:crypto";
 import { describe, expect, it } from "vitest";
 import {
@@ -35,10 +36,10 @@ type Battle = {
 /** One ordinary census battle; the eventsDigest is computed exactly as the census does. */
 function playCensusBattle(seed: number, scene: "on" | "off"): Battle {
   let state = beginFactoryRoundBattleStartIntro(createFactoryRoundBattleOrchestrator({
-    id: `live-share-census-${seed}-${(seed * 11) % 49}`, rngValue: seed, battleScene: scene,
+    id: `live-share-census-${seed}-${(seed * 11) % 49}`, battleScene: scene,
     factoryWinStreak: (seed * 11) % 49, playerTrainerId: 416049562,
     battleTowerLevel50WinStreak: 0, facilityState: { rentsCount: 0 },
-    rentals: { type: "generateInitial", selectedRentalIndexes: [0, 1, 2] },
+    ...censusDeal({ seed, factoryWinStreak: (seed * 11) % 49 }),
   }));
   let rng = createPresentationRngSession();
   const events = createHash("sha256");

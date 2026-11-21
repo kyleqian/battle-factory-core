@@ -23,7 +23,7 @@ sys.path.insert(0, str(HARNESS / "oracle"))
 from emerald_core import EmeraldOracle  # noqa: E402
 from mgba import ffi  # noqa: E402
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from plan import Plan, Driver, RoundCounter, brain_trap_wanted, deal_opponent_check, deal_traps_wanted, go_on_roll, lcg, lcg_back, m4a_restarted  # noqa: E402
+from plan import Plan, Driver, RoundCounter, brain_trap_wanted, deal_opponent_check, deal_own_order_check, deal_traps_wanted, go_on_roll, lcg, lcg_back, m4a_restarted  # noqa: E402
 from mons import POKEMON_SIZE, STAT_ORDER, ability_num, decrypt_mon, encrypt_mon, gender, species_of, with_personality  # noqa: E402
 
 REF = (WORKSPACE / "reference/pokeemerald").resolve()
@@ -684,7 +684,8 @@ def deal_traps(rom, deal, frame):
         out[rom.f["GenerateInitialRentalMons"] + 2] = at_rentals
     value = (first or {}).get("rollRngBefore")
     if value is None:
-        value = want.get("rentalRngAfter")
+        # fop1: the engine rolls a round's first opponent right after the six set ids (an engine before fop1: rentalRngAfter)
+        value = want.get("selectionRngValue")
 
     def at_opponent():
         if deal["opponent"] is not None or deal["rentals"] is None:
@@ -797,6 +798,7 @@ def finish_deal(rom, deal, staging, frame, sound=None):
                "rom": rom_opp, "engine": eng_opp, "same": same}
         if "romOrder" in deal:
             rec["romOwnOrder"] = deal["romOrder"]
+            rec.update(deal_own_order_check(deal["romOrder"], first, rec["romRngAtEntry"], rec["engineRng"]))
         staging.append(rec)
         if not same:
             o.write_u16(s["gTrainerBattleOpponent_A"], first["trainerId"])

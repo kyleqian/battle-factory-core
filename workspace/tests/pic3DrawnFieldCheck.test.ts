@@ -27,8 +27,11 @@ function soakDrawCheck(seed: number, scene: "on" | "off") {
 }
 
 describe("pic3: the drawn-field check finds nothing over replayed play", () => {
-  it("a generated round in Scene ON, every frame from the draft through battle 1 and on (soak seed 3)", () => {
-    const { result, log } = soakDrawCheck(3, "on");
+  // fop1 (a new challenge's first opponent is rolled in the ROM's order): soak seed 3's round now ends in battle 1 at 14,112 frames. Scanned
+  // seeds 0..11 (same options): none draws a row; 1 is the lowest above 20,000 checked frames that ends inside the budget (23,869 frames,
+  // battle 2; seed 0 passes too but runs the whole 60,000), so it is pinned.
+  it("a generated round in Scene ON, every frame from the draft through battle 1 and on (soak seed 1)", () => {
+    const { result, log } = soakDrawCheck(1, "on");
     expect(result.outcome).toBe("OK");
     expect(log.framesChecked).toBeGreaterThan(20_000);
     expect(log.rows()).toEqual([]);

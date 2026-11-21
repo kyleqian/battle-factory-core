@@ -4,6 +4,7 @@
 // move-animation commands and the production duration (battleResolutionCommandDuration), so the frames production spends between
 // two shared anchors can be compared ON vs OFF (idle94Compare.py). Read-only use of production; no oracle.
 //   node --experimental-strip-types --no-warnings tools/integration/idle94Route.ts --seed=N --streak=N --scene=on|off --out=file.json
+import { censusDeal } from "./censusRound.ts";
 import { writeFileSync } from "node:fs";
 import "../../src/engine/monPicPixelsInstall.ts";
 import {
@@ -27,10 +28,10 @@ type Row = { frame: number; seg: number; cmd: number; type: string; ev: number |
   live?: boolean; lines?: string };
 const rows: Row[] = [];
 let state = beginFactoryRoundBattleStartIntro(createFactoryRoundBattleOrchestrator({
-  id: `live-share-census-${seed}-${streak}`, rngValue: seed, battleScene: scene,
+  id: `live-share-census-${seed}-${streak}`, battleScene: scene,
   factoryWinStreak: streak, playerTrainerId: 416049562,
   battleTowerLevel50WinStreak: 0, facilityState: { rentsCount: 0 },
-  rentals: { type: "generateInitial", selectedRentalIndexes: [0, 1, 2] },
+  ...censusDeal({ seed, factoryWinStreak: streak }),
 }));
 let rng = createPresentationRngSession();
 let frame = 0, ended = false, key = "";

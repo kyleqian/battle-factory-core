@@ -5,6 +5,7 @@
 // the anchor to the command after the status animation are ON - OFF = gate + STATUS_ANIMATION_ADDED_ROWS = the ROM controllerRows, so
 // the following print's first glyph lands on the ROM row (sa125's anchor pattern; Scene OFF's span is ROM-exact, off121). With gate 0
 // (sa125's rule) every one of these anchors is short by exactly its gate (asserted below; revert experiment in the doc).
+import { censusDeal } from "../tools/integration/censusRound.ts";
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import {
@@ -49,10 +50,10 @@ function battleSegments(seed: number, scene: "on" | "off"): Seg[] {
   if (hit) return hit;
   const out: Seg[] = [];
   let state = beginFactoryRoundBattleStartIntro(createFactoryRoundBattleOrchestrator({
-    id: `live-share-census-${seed}-${(seed * 11) % 49}`, rngValue: seed, battleScene: scene,
+    id: `live-share-census-${seed}-${(seed * 11) % 49}`, battleScene: scene,
     factoryWinStreak: (seed * 11) % 49, playerTrainerId: 416049562,
     battleTowerLevel50WinStreak: 0, facilityState: { rentsCount: 0 },
-    rentals: { type: "generateInitial", selectedRentalIndexes: [0, 1, 2] },
+    ...censusDeal({ seed, factoryWinStreak: (seed * 11) % 49 }),
   }));
   let rng = createPresentationRngSession();
   let frame = 0, ended = false;

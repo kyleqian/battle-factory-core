@@ -31,6 +31,7 @@
 // minimumFrames, holdFrames, settleHoldFrames, healthboxSlideElapsed, sendInVisualDelay, forced-player flag) and a digest of the kernel
 // events (gameplay / RNG). Run the same file on two trees and diff with plr162CensusDelta.py.
 //   node --experimental-strip-types --no-warnings tools/integration/plr162Census.ts --seeds=A..B --scene=on|off --out=file.jsonl (msg175Census.ts)
+import { censusDeal } from "./censusRound.ts";
 import { createHash } from "node:crypto";
 import "../../src/engine/monPicPixelsInstall.ts";
 import { writeFileSync } from "node:fs";
@@ -75,10 +76,10 @@ const lines: string[] = [];
 for (let seed = from!; seed <= to!; seed += 1) {
   const commands: unknown[] = []; const events = createHash("sha256");
   let state = beginFactoryRoundBattleStartIntro(createFactoryRoundBattleOrchestrator({
-    id: `live-share-census-${seed}-${(seed * 11) % 49}`, rngValue: seed, battleScene: scene,
+    id: `live-share-census-${seed}-${(seed * 11) % 49}`, battleScene: scene,
     factoryWinStreak: (seed * 11) % 49, playerTrainerId: 416049562,
     battleTowerLevel50WinStreak: 0, facilityState: { rentsCount: 0 },
-    rentals: { type: "generateInitial", selectedRentalIndexes: [0, 1, 2] },
+    ...censusDeal({ seed, factoryWinStreak: (seed * 11) % 49 }),
   }));
   let rng = createPresentationRngSession();
   let frame = 0; let ended = false; let error: string | null = null;

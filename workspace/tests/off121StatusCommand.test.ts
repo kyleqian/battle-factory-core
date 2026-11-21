@@ -3,6 +3,7 @@
 // interpreter executions up to the print after it, one frame each (lead 1 on both receipts). The status command that is the first
 // command after "X used Y!" (Rest's trysetrest) starts on G + 1 and lasts delta(print) - delta(used) + 1. Scene ON keeps 32.
 // ROM receipts: tools/integration/fixtures/off121/receipts/rom-r1.json (off121Rom.py over direct mGBA probes, r1 == r2).
+import { censusDeal } from "../tools/integration/censusRound.ts";
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import {
@@ -78,10 +79,10 @@ function battleStatuses(seed: number, scene: "on" | "off"): Status[] {
   if (hit) return hit;
   const out: Status[] = [];
   let state = beginFactoryRoundBattleStartIntro(createFactoryRoundBattleOrchestrator({
-    id: `live-share-census-${seed}-${(seed * 11) % 49}`, rngValue: seed, battleScene: scene,
+    id: `live-share-census-${seed}-${(seed * 11) % 49}`, battleScene: scene,
     factoryWinStreak: (seed * 11) % 49, playerTrainerId: 416049562,
     battleTowerLevel50WinStreak: 0, facilityState: { rentsCount: 0 },
-    rentals: { type: "generateInitial", selectedRentalIndexes: [0, 1, 2] },
+    ...censusDeal({ seed, factoryWinStreak: (seed * 11) % 49 }),
   }));
   let rng = createPresentationRngSession();
   let frame = 0, ended = false;

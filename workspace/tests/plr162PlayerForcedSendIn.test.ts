@@ -2,6 +2,7 @@
 // `returntoball BS_TARGET` on the player). offs152 R2's measured model (slide 65, "dragged out!" at max(91, cry + 66); CASTFORM +1)
 // against the twice-fresh direct-mGBA player-target sweep, and production's switch-in commands on census battles: only the forced
 // player send-in moves (both scenes; Scene ON is snd182's); player faint replacements / voluntary switches keep the calibrated 66 / 91 + 11 (ISSUES #78).
+import { censusDeal } from "../tools/integration/censusRound.ts";
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import {
@@ -56,10 +57,10 @@ const FRAME_BUDGET = 200000;
 function switchIns(seed: number, scene: "on" | "off") {
   const out: { command: any; previous: any; switchOut: any }[] = [];
   let state = beginFactoryRoundBattleStartIntro(createFactoryRoundBattleOrchestrator({
-    id: `live-share-census-${seed}-${(seed * 11) % 49}`, rngValue: seed, battleScene: scene,
+    id: `live-share-census-${seed}-${(seed * 11) % 49}`, battleScene: scene,
     factoryWinStreak: (seed * 11) % 49, playerTrainerId: 416049562,
     battleTowerLevel50WinStreak: 0, facilityState: { rentsCount: 0 },
-    rentals: { type: "generateInitial", selectedRentalIndexes: [0, 1, 2] },
+    ...censusDeal({ seed, factoryWinStreak: (seed * 11) % 49 }),
   }));
   let rng = createPresentationRngSession();
   let frame = 0, ended = false;

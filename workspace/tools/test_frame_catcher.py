@@ -328,6 +328,15 @@ class RoundTest(unittest.TestCase):
         self.assertEqual(fc.deal_opponent_check(83, [215, 258, 190], first), (True, [83, [215, 258, 190]], [83, [215, 258, 190]]))
         self.assertFalse(fc.deal_opponent_check(83, [215, 190, 258], first)[0])
 
+    def test_deal_own_order_check(self):
+        first = {"trainerId": 102, "opponentSetIds": [196, 203, 194]}
+        self.assertEqual(fc.deal_own_order_check({"trainer": 102, "sets": [196, 203, 194], "ids": []}, first, 3606079728, 3606079728),
+                         {"romOwnOrderSame": True, "romCursorIsEngines": True})
+        # fcr2 seed 19 Scene ON before fop1: the ROM's own order rolled trainer 119, the engine 94 from the cursor after the personalities
+        self.assertEqual(fc.deal_own_order_check({"trainer": 119, "sets": [207, 261, 227]}, {"trainerId": 94, "opponentSetIds": [254, 230, 218]},
+                                                 1687960854, 1944328230), {"romOwnOrderSame": False, "romCursorIsEngines": False})
+        self.assertEqual(fc.deal_own_order_check(None, first, None, 1), {"romOwnOrderSame": None, "romCursorIsEngines": None})
+
 
 class EngineMenusTest(unittest.TestCase):
     """engineMenus.mjs attendantMenuOf against the game's own attendant module (node, no emulator)."""

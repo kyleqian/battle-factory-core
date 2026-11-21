@@ -3,7 +3,10 @@
 // battle. The test replays it through the engine's round orchestrator (soundCensusRomReplay.ts `round`, the same code the ROM replay runs) and the
 // compare (`round-compare`), and checks what the tool checks: every battle start (battle number, streak, symbols, rent count, swap flag, trainer, both
 // teams' sets and every field of all six Pokemon), every trainer and draft roll from the ROM's RNG cursor, and every turn (the ROM's state after each turn
-// and the wide state at each decision). The one known, unfixed difference (finding 47, a chained round's first trainer) is counted, not hidden.
+// and the wide state at each decision). Finding 47 (a chained round's first trainer, rolled after the rentals' personalities) was the one known
+// difference, counted apart (`knownDifference`); fop1 fixed it (docs/fop1-first-opponent-order.md), so every battle now matches outright: the 8
+// chained rounds' first trainers these recordings held as known differences (draft-better-slot 1, unbroken-run-to-gold 5, two-symbols-battle-63 1,
+// rent-count-wraps 1: the fixtures' `expect.knownDifferences`, recorded before the fix) are the ROM's own rolls now.
 // What each recording is for is pinned on the ROM's own data, so a fixture cannot quietly stop covering it.
 import { execFileSync } from "node:child_process";
 import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
@@ -182,13 +185,14 @@ describe("round replay fixtures: recorded real-ROM runs replayed through the eng
       expect(cmp.battles).toHaveLength(f.expect.battles);
       for (const b of cmp.battles) {
         expect({ battle: b.battleIndex, startDiffs: b.startDiffs, error: b.engineError }).toEqual({ battle: b.battleIndex, startDiffs: [], error: null });
-        if (b.battleIndex > 0 && !b.knownDifference) expect(b.selection?.matched, `battle ${b.battleIndex} roll`).toBe(true);
+        if (b.battleIndex > 0) expect(b.selection?.matched, `battle ${b.battleIndex} roll`).toBe(true);
         expect(b.turns.divergence, `battle ${b.battleIndex} turns`).toBeNull();
         expect(b.turns.wideDiffPoints, `battle ${b.battleIndex} wide states`).toBe(0);
         expect(b.screensMatch, `battle ${b.battleIndex} Noland's lines and the symbol`).toBe(true);
         expect(b.matchExceptKnown, `battle ${b.battleIndex}`).toBe(true);
+        expect({ battle: b.battleIndex, knownDifference: b.knownDifference, match: b.match }).toEqual({ battle: b.battleIndex, knownDifference: null, match: true });
       }
-      expect(cmp.battles.filter((b: any) => b.knownDifference).length).toBe(f.expect.knownDifferences);
+      expect(cmp.battles.filter((b: any) => b.knownDifference).length).toBe(0); // fop1: was f.expect.knownDifferences (finding 47)
       c.covers(f, engine, cmp);
     });
   }

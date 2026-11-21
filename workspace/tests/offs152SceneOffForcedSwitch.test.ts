@@ -4,6 +4,7 @@
 // tools/integration/fixtures/off148/receipts/rom-r1.json) instead of the 32-frame voluntary recall. Production: the no-hit pause
 // (off108's rule, lead -3 for this receipt), the forced hold (4, target at rest), the recall receipt (gap 6 before Roar's
 // switchinanim; 5 before Baton Pass's SWITCHINMON print). Replayed on census battles (off108Route.ts's loop, as off148's test).
+import { censusDeal } from "../tools/integration/censusRound.ts";
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import {
@@ -73,10 +74,10 @@ function battleUses(seed: number, scene: "on" | "off"): Use[] {
   if (hit) return hit;
   const out: Use[] = [];
   let state = beginFactoryRoundBattleStartIntro(createFactoryRoundBattleOrchestrator({
-    id: `live-share-census-${seed}-${(seed * 11) % 49}`, rngValue: seed, battleScene: scene,
+    id: `live-share-census-${seed}-${(seed * 11) % 49}`, battleScene: scene,
     factoryWinStreak: (seed * 11) % 49, playerTrainerId: 416049562,
     battleTowerLevel50WinStreak: 0, facilityState: { rentsCount: 0 },
-    rentals: { type: "generateInitial", selectedRentalIndexes: [0, 1, 2] },
+    ...censusDeal({ seed, factoryWinStreak: (seed * 11) % 49 }),
   }));
   let rng = createPresentationRngSession();
   let frame = 0, ended = false;

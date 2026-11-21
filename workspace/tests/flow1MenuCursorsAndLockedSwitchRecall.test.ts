@@ -236,13 +236,18 @@ function playCatcherSeed(seed: number, scene: "on" | "off", frames: number, onTi
 }
 
 describe("flow1: whole challenges of the frame catcher's seeds", () => {
-  it("opens the action and move menus on the first entry after every switch-in (seed 3, Scene ON)", () => {
+  // fop1 (a new challenge's first opponent is rolled in the ROM's order, so these seeds' challenges moved): seed 3 Scene ON now has 3
+  // switch-in entries in its 34,800 frames; scanned catcher seeds 0..29 (same player, frames): 0 is the lowest with at least 5 checked
+  // entries and 3 carried cursors (6 / 12), so it is pinned. Seed 6 Scene OFF no longer meets a foe underground; scanned seeds 0..199:
+  // 135 is the lowest with at least 5 recalls of which exactly one is a continuation after the foe's Dig (6 recalls, battle 2's
+  // PUPITAR), so it is pinned (seeds 86 and 142 recall after a Dig too, with other counts).
+  it("opens the action and move menus on the first entry after every switch-in (seed 0, Scene ON)", () => {
     let lastRequest: string | null = null;
     let switchedIn = false;
     const seenSegments = new Set<unknown>();
     let checked = 0;
     let carried = 0;
-    playCatcherSeed(3, "on", 34_800, (session) => {
+    playCatcherSeed(0, "on", 34_800, (session) => {
       const orch = session.state.factoryRoundBattleOrchestrator;
       if (!orch) return;
       for (const segment of orch.battleResolutionPresentation?.segments ?? []) {
@@ -261,17 +266,17 @@ describe("flow1: whole challenges of the frame catcher's seeds", () => {
       } else if (cmd.fightCursor !== 0) carried += 1;
       switchedIn = false;
     });
-    // Battles 1 and 2: five voluntary switches (the first, ELEKID -> CHARMELEON, opened CHARMELEON's menu on the fourth move) and
-    // two faint replacements; the cursor still carries over turns without a switch-in.
+    // Seed 3 before fop1: battles 1 and 2 held five voluntary switches (the first, ELEKID -> CHARMELEON, opened CHARMELEON's menu on the
+    // fourth move) and two faint replacements. Seed 0 now: six entries after a switch-in, twelve carried cursors over turns without one.
     expect(checked).toBeGreaterThanOrEqual(5);
     expect(carried).toBeGreaterThanOrEqual(3);
   });
 
-  it("recalls the player's mon with its line and SE_BALL_OPEN when the foe is underground after Dig (seed 6, Scene OFF)", () => {
+  it("recalls the player's mon with its line and SE_BALL_OPEN when the foe is underground after Dig (seed 135, Scene OFF)", () => {
     let partyOpen = false;
     const recalls: { frame: number; lines: string[]; continuation: boolean; ballOpenAfterLine: boolean }[] = [];
     let watching: { frame: number; lines: string[]; continuation: boolean; ballOpenAfterLine: boolean } | null = null;
-    playCatcherSeed(6, "off", 28_400, (session, sounds) => {
+    playCatcherSeed(135, "off", 28_400, (session, sounds) => {
       const orch = session.state.factoryRoundBattleOrchestrator;
       const res = orch?.battleResolutionPresentation ?? null;
       if (partyOpen && res !== null && orch?.battleCommandPresentation === null) {
@@ -295,8 +300,11 @@ describe("flow1: whole challenges of the frame catcher's seeds", () => {
       expect(recall.lines[1], `switch at ${recall.frame}`).toMatch(/!$/);
       expect(recall.ballOpenAfterLine, `switch at ${recall.frame}`).toBe(true);
     }
-    // The ROM-checked case: GROWLITHE -> VOLBEAT while AZUMARILL is underground (a locked continuation of the Dig charge's resolution).
+    // The ROM-checked case (seed 6's before fop1 was GROWLITHE -> VOLBEAT while AZUMARILL was underground,
+    // docs/flow1-menu-cursors-and-locked-switch-recall.md): POLIWHIRL -> GRAVELER while battle 2's PUPITAR is underground (a locked
+    // continuation of the Dig charge's resolution). The frame catcher over this seed's trace (makeTrace --seed 135 --scene off --policy
+    // full --battles 2, docs/fop1-first-opponent-order.md) shows the ROM print the same two lines with PUPITAR hidden, same sounds.
     const underground = recalls.filter((r) => r.continuation);
-    expect(underground.map((r) => r.lines.slice(0, 2))).toEqual([["GROWLITHE, that’s enough! Come back!", "Go! VOLBEAT!"]]);
+    expect(underground.map((r) => r.lines.slice(0, 2))).toEqual([["POLIWHIRL, that’s enough! Come back!", "Go for it, GRAVELER!"]]);
   });
 });

@@ -1,3 +1,4 @@
+import { censusDeal } from '../tools/integration/censusRound.ts';
 import assert from 'node:assert/strict';
 import { it } from 'vitest';
 import type { GbaButton } from '../src/input.ts';
@@ -7,7 +8,7 @@ import {
  advanceFactoryRoundBattleResolution,
 } from '../src/engine/factoryRoundBattleOrchestrator.ts';
 it('keeps current input immutable when an actual status receipt trails the final projected body', () => {
-let state=beginFactoryRoundBattleStartIntro(createFactoryRoundBattleOrchestrator({id:'status-tail',rngValue:549,battleScene:'on',factoryWinStreak:0,playerTrainerId:416049562,battleTowerLevel50WinStreak:0,facilityState:{rentsCount:0},rentals:{type:'generateInitial',selectedRentalIndexes:[0,1,2]}}));
+let state=beginFactoryRoundBattleStartIntro(createFactoryRoundBattleOrchestrator({id:'status-tail',battleScene:'on',factoryWinStreak:0,playerTrainerId:416049562,battleTowerLevel50WinStreak:0,facilityState:{rentsCount:0},...censusDeal({ seed: 549, factoryWinStreak: 0 })}));
 let frame=0;
 const step=(keys:readonly GbaButton[]=[])=>{
  if(++frame>20000)throw new Error('route budget');

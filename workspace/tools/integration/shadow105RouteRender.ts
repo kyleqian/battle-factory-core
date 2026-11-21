@@ -3,6 +3,7 @@
 // the RGBA diff of row 0 against row 1 (px, bbox): on the patched copy row 0 must be row 1 + the 32x8 enemy shadow when the opponent is
 // elevated. Run the SAME file inside a base and a patched archive copy; shadow105RouteCheck.py compares them.
 //   node --experimental-strip-types --no-warnings tools/integration/shadow105RouteRender.ts --seed=N --streak=N --move=M --side=player|opponent --out=f.json
+import { censusDeal } from "./censusRound.ts";
 import { writeFileSync } from "node:fs";
 import "../../src/engine/monPicPixelsInstall.ts";
 import {
@@ -35,10 +36,10 @@ type Row = { frame: number; seg: number; cmd: number; type: string; ev: number |
   live?: boolean; lines?: string };
 const rows: Row[] = [];
 let state = beginFactoryRoundBattleStartIntro(createFactoryRoundBattleOrchestrator({
-  id: `live-share-census-${seed}-${streak}`, rngValue: seed, battleScene: scene,
+  id: `live-share-census-${seed}-${streak}`, battleScene: scene,
   factoryWinStreak: streak, playerTrainerId: 416049562,
   battleTowerLevel50WinStreak: 0, facilityState: { rentsCount: 0 },
-  rentals: { type: "generateInitial", selectedRentalIndexes: [0, 1, 2] },
+  ...censusDeal({ seed, factoryWinStreak: streak }),
 }));
 let rng = createPresentationRngSession();
 let frame = 0, ended = false, key = "";

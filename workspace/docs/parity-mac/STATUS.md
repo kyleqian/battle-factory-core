@@ -77,7 +77,7 @@ the engine (the site's swap screen sends a kept team as `decline`). 265 cancels 
 all matching; before Noland, seed 202 (challenge 2) cancelled from either list and with a 128-frame wait: all three match, Noland's team checked
 against the unchanged team.
 
-**Finding 47 (not fixed; `first-trainer-after-draft-picks.md`).** The game rolls a new round's first trainer right after the six rentals' set
+**Finding 47 (fixed 2026-11-21 by fop1, `docs/fop1-first-opponent-order.md`; was not fixed, `first-trainer-after-draft-picks.md`).** The game rolls a new round's first trainer right after the six rentals' set
 picks and makes the rentals' personalities later, at the rental screen. The engine makes the personalities first. Same draft, different first
 trainer for the same random state; no player can see it (the trainer is a random pick either way). A prototype fix matched the chains fully but
 re-rolls every census battle (269 failing tests in 103 files), so it is left as it is (Kyle, 2026-11-18: "Yeah, let's leave Finding 47"). `round-compare` names it apart

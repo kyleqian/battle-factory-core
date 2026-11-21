@@ -467,7 +467,10 @@ export type FactoryScheduledOpponentGeneration =
 
 export type FactoryFacilityRngSegment = Readonly<{
   kind:
-    | "initial-rentals"
+    // A generated round's deal (generateFactoryRoundDeal): "initial-rental-selection" (the six set ids), its "opponent-generation", then
+    // "initial-rental-construction" (the six personalities), contiguous in that order (a staged Brain first battle: the opponent last).
+    | "initial-rental-selection"
+    | "initial-rental-construction"
     | "opponent-generation"
     | "opponent-selection"
     | "opponent-construction"
@@ -882,7 +885,7 @@ function adoptedBrainOpponentFor(
  * this is a real branch point, not a discarded-then-overwritten draw.
  */
 function generateOpponentFor(
-  config: FactoryRoundBattleOrchestratorConfig,
+  config: FactoryOpponentRollConfig,
   battleIndex: number,
   rngValue: number,
   storedTrainerIds: readonly number[],
@@ -918,6 +921,73 @@ function generateOpponentFor(
     storedTrainerIds: generation.storedTrainerIds,
     generation,
   });
+}
+
+/** The config fields an opponent roll reads (generateOpponentFor). */
+export type FactoryOpponentRollConfig = Pick<
+  FactoryRoundBattleOrchestratorConfig,
+  "factoryWinStreak" | "factorySymbolsCount" | "playerTrainerId" | "battleTowerLevel50WinStreak"
+>;
+
+export type FactoryRoundDealInput = FactoryOpponentRollConfig & Readonly<{
+  /** The cursor at `GenerateInitialRentalMons`' entry (the deal tick's cursor). */
+  rngValue: number;
+  /** Source factoryRentsCount for the selected battle/level mode. */
+  rentsCount: number;
+}>;
+
+export type FactoryRoundDeal = Readonly<{
+  /**
+   * The six rentals: set ids drawn from the deal cursor (`selectionRngValue` after them), personalities drawn from
+   * `firstOpponent.generation.rngValue` (`rngValue` after them: the end of the deal).
+   */
+  rentals: FactoryInitialRentalGenerationResult;
+  /** The round's first opponent, rolled from `rentals.selectionRngValue` (the cursor right after the six set ids). */
+  firstOpponent: FactoryScheduledOpponentGeneration;
+  /**
+   * True for an ordinary first opponent (rolled between the set ids and the personalities). False only for a staged round whose first
+   * battle is the Frontier Brain's (a test-only streak): his party is built at the battle's start (FillFactoryBrainParty from
+   * FillFactoryTrainerParty, battle_tower.c:1857), after the select screen, so it is rolled after the personalities, as before fop1.
+   */
+  opponentBeforePersonalities: boolean;
+}>;
+
+/**
+ * A new challenge's deal in the ROM's order (fop1, docs/fop1-first-opponent-order.md).
+ * `BattleFrontier_BattleFactoryPreBattleRoom_EventScript_EnterRoom` (BattleFrontier_BattleFactoryPreBattleRoom/scripts.inc:30-31) runs
+ * `factory_generaterentalmons` (GenerateInitialRentalMons: the six set ids, battle_factory.c:509-601) and then
+ * `factory_generateopponentmons` (GenerateOpponentMons: the first trainer and its three sets, :303-377) in one script run; the six
+ * personalities are drawn later, when the select screen opens (CreateFrontierFactorySelectableMons, battle_factory_screen.c:1736). So the
+ * first opponent is rolled from the cursor right after the six set ids, and the personalities come after it. Every new challenge takes
+ * this script (round 1 and every later round). ROM receipts: the anchor deal (docs/anchor-draft-cursor-receipt.md section 3: trainer 50's
+ * selection starts at GenerateInitialRentalMons' return cursor) and the Lobby new challenge of tools/compare/traces/lbre-prebattle-c-off.json
+ * (tools/probe/lbre-deal-ram.py: trainer 13 and sets 133, 189, 137 at frame 6660).
+ *
+ * The draws are back to back here: the ROM's overworld VBlank draws between the opponent and the personalities (hundreds of frames) and
+ * during the personality loop are not followed (ISSUES #55, distribution parity, parked 2026-08-13). The opponent's own personalities
+ * stay right after its selection, as for every later opponent (the ROM draws them at the battle's start, FillFactoryTrainerParty, battle_tower.c:1815).
+ */
+export function generateFactoryRoundDeal(input: FactoryRoundDealInput): FactoryRoundDeal {
+  const rentalInput = {
+    rngValue: input.rngValue,
+    factoryWinStreak: input.factoryWinStreak,
+    rentsCount: input.rentsCount,
+    playerTrainerId: input.playerTrainerId,
+  };
+  // The set ids alone (GenerateOpponentMons reads rentalMons' set ids, never a personality); these personalities are not the deal's.
+  const ids = generateInitialFactoryRentals(rentalInput);
+  if (getFactoryFrontierBrainStatus({
+    battleMode: "singles",
+    winStreak: input.factoryWinStreak,
+    symbolsCount: input.factorySymbolsCount ?? 0,
+  }) !== "not-ready") {
+    // A staged Brain first battle (see `opponentBeforePersonalities`): the personalities follow the ids, the Head's party comes after them.
+    // (The ROM's EnterRoom would also run its ordinary factory_generateopponentmons roll here; that test-only case is not modelled.)
+    return Object.freeze({ rentals: ids, firstOpponent: generateOpponentFor(input, 0, ids.rngValue, [], ids.rentals), opponentBeforePersonalities: false });
+  }
+  const firstOpponent = generateOpponentFor(input, 0, ids.selectionRngValue, [], ids.rentals);
+  const rentals = generateInitialFactoryRentals({ ...rentalInput, constructionRngValue: firstOpponent.generation.rngValue });
+  return Object.freeze({ rentals, firstOpponent, opponentBeforePersonalities: true });
 }
 
 /**
@@ -1028,22 +1098,69 @@ export function createFactoryRoundBattleOrchestrator(
   let savedRentalRecords: readonly FactoryRentalRecord[];
   const rngSegments: FactoryFacilityRngSegment[] = [];
 
+  const adopted = config.adoptedInitialOpponent;
+  const adoptedBrain = config.adoptedInitialBrainOpponent;
+  if (adopted !== undefined && adoptedBrain !== undefined) {
+    return fail("adoptedInitialOpponent and adoptedInitialBrainOpponent are mutually exclusive");
+  }
+  // A generated round's first opponent, rolled inside its deal (generateFactoryRoundDeal: the six set ids, this opponent, the six
+  // personalities, the ROM's order). Null for current records (the opponent is rolled below) and for an adopted opponent.
+  let dealtOpponent: FactoryScheduledOpponentGeneration | null = null;
+  let dealtOpponentFirst = true;
+
   if (config.rentals.type === "generateInitial") {
-    initialRentalGeneration = generateInitialFactoryRentals({
+    const rentalInput = {
       rngValue,
       factoryWinStreak: config.factoryWinStreak,
       rentsCount: config.facilityState.rentsCount,
       playerTrainerId: config.playerTrainerId,
-    });
+    };
+    if (adopted === undefined && adoptedBrain === undefined) {
+      const deal = generateFactoryRoundDeal({
+        ...rentalInput,
+        factorySymbolsCount: config.factorySymbolsCount,
+        battleTowerLevel50WinStreak: config.battleTowerLevel50WinStreak,
+      });
+      initialRentalGeneration = deal.rentals;
+      dealtOpponent = deal.firstOpponent;
+      dealtOpponentFirst = deal.opponentBeforePersonalities;
+    } else {
+      // An adopted first opponent's draws are its own recorded ledger, not this stream's: the personalities follow the set ids.
+      initialRentalGeneration = generateInitialFactoryRentals(rentalInput);
+    }
+    const ledger = initialRentalGeneration.drawLedger;
+    const selectionDraws = ledger.filter(({ phase }) => phase === "set-selection").length;
+    const pushOpponent = (opponent: FactoryScheduledOpponentGeneration, rngBefore: number): void => {
+      rngSegments.push(generationSegment(
+        "opponent-generation",
+        0,
+        facilityRngCalls,
+        rngBefore,
+        opponent.generation.rngValue,
+        opponent.generation.drawLedger.length,
+      ));
+      facilityRngCalls += opponent.generation.drawLedger.length;
+    };
     rngSegments.push(generationSegment(
-      "initial-rentals",
+      "initial-rental-selection",
       0,
       facilityRngCalls,
       rngValue,
-      initialRentalGeneration.rngValue,
-      initialRentalGeneration.drawLedger.length,
+      initialRentalGeneration.selectionRngValue,
+      selectionDraws,
     ));
-    facilityRngCalls += initialRentalGeneration.drawLedger.length;
+    facilityRngCalls += selectionDraws;
+    if (dealtOpponent !== null && dealtOpponentFirst) pushOpponent(dealtOpponent, initialRentalGeneration.selectionRngValue);
+    rngSegments.push(generationSegment(
+      "initial-rental-construction",
+      0,
+      facilityRngCalls,
+      ledger[selectionDraws]!.rngBefore,
+      initialRentalGeneration.rngValue,
+      ledger.length - selectionDraws,
+    ));
+    facilityRngCalls += ledger.length - selectionDraws;
+    if (dealtOpponent !== null && !dealtOpponentFirst) pushOpponent(dealtOpponent, initialRentalGeneration.rngValue);
     rngValue = initialRentalGeneration.rngValue;
     playerRentalRecords = selectedInitialRecords(
       initialRentalGeneration,
@@ -1055,11 +1172,6 @@ export function createFactoryRoundBattleOrchestrator(
     savedRentalRecords = config.rentals.savedRentalRecords;
   }
 
-  const adopted = config.adoptedInitialOpponent;
-  const adoptedBrain = config.adoptedInitialBrainOpponent;
-  if (adopted !== undefined && adoptedBrain !== undefined) {
-    return fail("adoptedInitialOpponent and adoptedInitialBrainOpponent are mutually exclusive");
-  }
   const firstOpponent: FactoryScheduledOpponentGeneration = adopted !== undefined
     ? Object.freeze({
       kind: "ordinary",
@@ -1069,7 +1181,7 @@ export function createFactoryRoundBattleOrchestrator(
     })
     : adoptedBrain !== undefined
       ? adoptedBrainOpponentFor(config, adoptedBrain.generation)
-      : generateOpponentFor(config, 0, rngValue, [], savedRentalRecords);
+      : dealtOpponent ?? generateOpponentFor(config, 0, rngValue, [], savedRentalRecords);
   if (adoptedBrain !== undefined) {
     // One construction segment per member: each has its own source cursor.
     for (let opponentIndex = 0; opponentIndex < 3; opponentIndex += 1) {
@@ -1087,15 +1199,18 @@ export function createFactoryRoundBattleOrchestrator(
       facilityRngCalls += construction.length;
     }
   } else if (adopted === undefined) {
-    rngSegments.push(generationSegment(
-      "opponent-generation",
-      0,
-      facilityRngCalls,
-      rngValue,
-      firstOpponent.generation.rngValue,
-      firstOpponent.generation.drawLedger.length,
-    ));
-    facilityRngCalls += firstOpponent.generation.drawLedger.length;
+    // A dealt opponent's segment is already in place, between the set ids and the personalities (above).
+    if (dealtOpponent === null) {
+      rngSegments.push(generationSegment(
+        "opponent-generation",
+        0,
+        facilityRngCalls,
+        rngValue,
+        firstOpponent.generation.rngValue,
+        firstOpponent.generation.drawLedger.length,
+      ));
+      facilityRngCalls += firstOpponent.generation.drawLedger.length;
+    }
   } else {
     const selection = adopted.generation.drawLedger.filter(({ phase }) => phase !== "personality");
     rngSegments.push(generationSegment(
@@ -1123,9 +1238,11 @@ export function createFactoryRoundBattleOrchestrator(
     }
   }
   const opponent = generatedOpponent(firstOpponent);
+  // The cursor after the round's set-up draws: a deal ends with the six personalities (after its opponent; a staged Brain first battle
+  // ends with the Head's party), current records with the opponent's roll.
   rngValue = adopted?.freshBattleRngValue
     ?? adoptedBrain?.freshBattleRngValue
-    ?? firstOpponent.generation.rngValue;
+    ?? (dealtOpponent !== null && dealtOpponentFirst ? initialRentalGeneration!.rngValue : firstOpponent.generation.rngValue);
   const round = createGeneratedFactoryRoundController({
     id: config.id,
     playerParty: asBattleParty(playerRentalRecords),

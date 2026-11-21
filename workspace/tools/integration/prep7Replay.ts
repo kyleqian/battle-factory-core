@@ -1,4 +1,5 @@
 // prep7 copy (adds spriteOrderInput known/free head per move request) of generatedCommandAnimationReplay.ts: records the displayed field (names/HP) at each move-animation command start.
+import { censusDeal } from "./censusRound.ts";
 import {
   createFactoryRoundBattleOrchestrator, beginFactoryRoundBattleStartIntro,
   advanceFactoryRoundBattleStartIntro, advanceFactoryRoundBattleCommand,
@@ -24,10 +25,11 @@ export function prep7Replay(
   allowStall = false,
 ) {
   let state = beginFactoryRoundBattleStartIntro(createFactoryRoundBattleOrchestrator({
-    id: `live-animation-generated-${seed}`, rngValue: seed, battleScene,
+    id: `live-animation-generated-${seed}`, battleScene,
     factoryWinStreak, playerTrainerId: 416049562,
     battleTowerLevel50WinStreak: 0, facilityState: { rentsCount: 0 },
-    rentals: { type: "generateInitial", selectedRentalIndexes: [0, 1, 2] },
+    // fop1: the census battle of the seed (censusRound.ts), the same battle as before the deal's order was fixed.
+    ...censusDeal({ seed, factoryWinStreak }),
   }));
   const animations: Array<{
     moveId: number; attacker: number; player: string; opponent: string;

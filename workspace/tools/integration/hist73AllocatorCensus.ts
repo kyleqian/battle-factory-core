@@ -36,6 +36,7 @@
 //   node --experimental-strip-types --no-warnings tools/integration/liveShareCensus.ts --seeds=<from>..<to> [--seed-step=N]
 //     [--streak-mul=N] [--out=report.json] [--commands=commands.jsonl]
 // Battle i (0-based) uses seed = from + i * seedStep and streak = (i * streakMul) % 49 (streaks 0..48, challenges 0..6).
+import { censusDeal } from "./censusRound.ts";
 import { writeFileSync } from "node:fs";
 import "../../src/engine/monPicPixelsInstall.ts";
 import { createHash } from "node:crypto";
@@ -203,10 +204,10 @@ let lastFailedReseed: string | null = null;
 function playBattle(battle: number, seed: number, streak: number): void {
   lastFailedReseed = null;
   let state = beginFactoryRoundBattleStartIntro(createFactoryRoundBattleOrchestrator({
-    id: `live-share-census-${seed}-${streak}`, rngValue: seed, battleScene: "on",
+    id: `live-share-census-${seed}-${streak}`, battleScene: "on",
     factoryWinStreak: streak, playerTrainerId: 416049562,
     battleTowerLevel50WinStreak: 0, facilityState: { rentsCount: 0 },
-    rentals: { type: "generateInitial", selectedRentalIndexes: [0, 1, 2] },
+    ...censusDeal({ seed, factoryWinStreak: streak }),
   }));
   const fb = new Uint8Array(240 * 160 * 4);
   // core.ts tick's presentation seam (after the logical frame): the default-seed Random2 session, a fresh one per battle (each

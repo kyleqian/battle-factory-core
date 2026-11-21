@@ -5,6 +5,7 @@
 // print + the status icon before the attack receipt): P = delta(N) - delta(icon) + 1 + lead(N) (rst197: the icon command is the
 // `updatestatusicon` row; the ROM's waitstate + goto then precede attackanimation). Each class is replayed on an example
 // census battle (off108Route.ts's battle loop) and N's command start, counted from G + 1, must equal the ROM anchor.
+import { censusDeal } from "../tools/integration/censusRound.ts";
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import {
@@ -72,10 +73,10 @@ function battleUses(seed: number, scene: "on" | "off"): Use[] {
   if (hit) return hit;
   const out: Use[] = [];
   let state = beginFactoryRoundBattleStartIntro(createFactoryRoundBattleOrchestrator({
-    id: `live-share-census-${seed}-${(seed * 11) % 49}`, rngValue: seed, battleScene: scene,
+    id: `live-share-census-${seed}-${(seed * 11) % 49}`, battleScene: scene,
     factoryWinStreak: (seed * 11) % 49, playerTrainerId: 416049562,
     battleTowerLevel50WinStreak: 0, facilityState: { rentsCount: 0 },
-    rentals: { type: "generateInitial", selectedRentalIndexes: [0, 1, 2] },
+    ...censusDeal({ seed, factoryWinStreak: (seed * 11) % 49 }),
   }));
   let rng = createPresentationRngSession();
   let frame = 0, ended = false;

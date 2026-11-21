@@ -3,6 +3,7 @@
 // and log sha256[:16] per row with the effect age and the live decision. Run the SAME file inside a base and a patched archive copy;
 // idle94RenderCheck.py compares them (patched rows 0..N-1 == base row 0; patched row N+k == base row k; next-command rows equal).
 //   node --experimental-strip-types --no-warnings tools/integration/idle94RouteRender.ts --seed=N --streak=N --move=M --side=player|opponent --out=f.json
+import { censusDeal } from "./censusRound.ts";
 import { writeFileSync } from "node:fs";
 import "../../src/engine/monPicPixelsInstall.ts";
 import {
@@ -33,10 +34,10 @@ type Row = { frame: number; seg: number; cmd: number; type: string; ev: number |
   live?: boolean; lines?: string };
 const rows: Row[] = [];
 let state = beginFactoryRoundBattleStartIntro(createFactoryRoundBattleOrchestrator({
-  id: `live-share-census-${seed}-${streak}`, rngValue: seed, battleScene: scene,
+  id: `live-share-census-${seed}-${streak}`, battleScene: scene,
   factoryWinStreak: streak, playerTrainerId: 416049562,
   battleTowerLevel50WinStreak: 0, facilityState: { rentsCount: 0 },
-  rentals: { type: "generateInitial", selectedRentalIndexes: [0, 1, 2] },
+  ...censusDeal({ seed, factoryWinStreak: streak }),
 }));
 let rng = createPresentationRngSession();
 let frame = 0, ended = false, key = "";

@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """lbre: per-frame gRngValue + rentalMons[0..5].monId along a battle-lab-staged compare trace (OFF).
+fop1: also the deal's first opponent (gTrainerBattleOpponent_A, gFrontierTempParty[0..2], trainerIds[0]).
 
 usage: ../../vendor/mgba-venv/bin/python tools/probe/lbre-deal-ram.py TRACE.json OUT.json START END
 Frame numbers match compare-trace capture frames (frames advanced since the lab checkpoint).
@@ -32,7 +33,9 @@ frame = 0
 def snap():
     sb2 = u32(s["gSaveBlock2Ptr"])
     return {"frame": frame, "rng": u32(s["gRngValue"]), "rental": [u16(sb2 + 0xE70 + 12 * i) for i in range(6)],
-            "pers": [u32(sb2 + 0xE70 + 12 * i + 4) for i in range(6)]}
+            "pers": [u32(sb2 + 0xE70 + 12 * i + 4) for i in range(6)],
+            "trainer": u16(s["gTrainerBattleOpponent_A"]), "tempParty": [u16(s["gFrontierTempParty"] + 2 * i) for i in range(3)],
+            "trainerIds0": u16(sb2 + 0xCB4)}
 for seg in trace["segments"]:
     for _ in range(seg["frames"]):
         oracle.advance(seg["buttons"]); frame += 1

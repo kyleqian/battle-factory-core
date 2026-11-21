@@ -1,6 +1,7 @@
 // cff230 (Castform weather forms, Scene ON): census-route driver (lsd194Census.ts' input loop) that records every presented frame of the
 // resolution segments carrying a CASTFORM_CHANGE animation event, with the command index per frame, plus a structure dump.
 //   node --experimental-strip-types --no-warnings tools/integration/cff230Route.ts --seed=950 [--dump] [--out=dir]
+import { censusDeal } from "./censusRound.ts";
 import {
   advanceFactoryRoundBattleCommand, advanceFactoryRoundBattleResolution, advanceFactoryRoundBattleStartIntro,
   beginFactoryRoundBattleStartIntro, createFactoryRoundBattleOrchestrator,
@@ -21,10 +22,10 @@ export type RouteSegment = { index: number; events: any[]; commands: any[]; fram
 /** Plays census seed `seed`; returns the segments whose events hold a CASTFORM_CHANGE (frames rendered when `render`). */
 export function cff230Route(seed: number, render: boolean, stopAfterSegments = 99, scene: "on" | "off" = "on", onStep?: (frame: number, state: any, sounds: readonly SoundEvent[]) => void): { segments: RouteSegment[] } {
   let state = beginFactoryRoundBattleStartIntro(createFactoryRoundBattleOrchestrator({
-    id: `live-share-census-${seed}-${(seed * 11) % 49}`, rngValue: seed, battleScene: scene,
+    id: `live-share-census-${seed}-${(seed * 11) % 49}`, battleScene: scene,
     factoryWinStreak: (seed * 11) % 49, playerTrainerId: 416049562,
     battleTowerLevel50WinStreak: 0, facilityState: { rentsCount: 0 },
-    rentals: { type: "generateInitial", selectedRentalIndexes: [0, 1, 2] },
+    ...censusDeal({ seed, factoryWinStreak: (seed * 11) % 49 }),
   }));
   let rng = createPresentationRngSession();
   let frame = 0, ended = false;

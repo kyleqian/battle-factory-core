@@ -5,6 +5,7 @@
 // other move keeps the OFF BattleScript_Pausex20 receipt (control). The OFF body reads both battlers at x2 {0,0}: BattleAnimateFrontSprite
 // (pokemon.c:6805) skips the front animation under HITMARKER_NO_ANIMATIONS, so no species idle rest exists in Scene OFF (the ONIX
 // rest +1 drew 94,917 px on the GOLEM -> ONIX OFF window; 0 px with the OFF input, tools/integration/fixtures/sub157/receipt.json).
+import { censusDeal } from "../tools/integration/censusRound.ts";
 import { describe, expect, it } from "vitest";
 import {
   advanceFactoryRoundBattleCommand,
@@ -65,10 +66,10 @@ function battleUses(seed: number, scene: "on" | "off"): Use[] {
   const out: Use[] = [];
   const frames: Frame[] = [];
   let state = beginFactoryRoundBattleStartIntro(createFactoryRoundBattleOrchestrator({
-    id: `live-share-census-${seed}-${(seed * 11) % 49}`, rngValue: seed, battleScene: scene,
+    id: `live-share-census-${seed}-${(seed * 11) % 49}`, battleScene: scene,
     factoryWinStreak: (seed * 11) % 49, playerTrainerId: 416049562,
     battleTowerLevel50WinStreak: 0, facilityState: { rentsCount: 0 },
-    rentals: { type: "generateInitial", selectedRentalIndexes: [0, 1, 2] },
+    ...censusDeal({ seed, factoryWinStreak: (seed * 11) % 49 }),
   }));
   let rng = createPresentationRngSession();
   let frame = 0, ended = false;

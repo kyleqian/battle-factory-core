@@ -7,6 +7,7 @@
 // command submission the logical state (round rules minus the Scene-OFF hit-marker bit, gameplay RNG value, facility state) is recorded;
 // they must be identical across all runs; the faithful-random consumer frames (rendered framebuffer digests) must be identical between
 // the two fresh seed-A runs. Exit 1 otherwise.
+import { censusDeal } from "./censusRound.ts";
 import { writeFileSync } from "node:fs";
 import "../../src/engine/monPicPixelsInstall.ts";
 import { createHash } from "node:crypto";
@@ -29,10 +30,10 @@ const hash = (x: unknown) => createHash("sha256").update(typeof x === "string" ?
 function play(battle: number, scene: "on" | "off", presentationSeed: number) {
   const seed = battle, streak = (battle * 11) % 49;
   let state = beginFactoryRoundBattleStartIntro(createFactoryRoundBattleOrchestrator({
-    id: `live-share-census-${seed}-${streak}`, rngValue: seed, battleScene: scene,
+    id: `live-share-census-${seed}-${streak}`, battleScene: scene,
     factoryWinStreak: streak, playerTrainerId: 416049562,
     battleTowerLevel50WinStreak: 0, facilityState: { rentsCount: 0 },
-    rentals: { type: "generateInitial", selectedRentalIndexes: [0, 1, 2] },
+    ...censusDeal({ seed, factoryWinStreak: streak }),
   }));
   const fb = new Uint8Array(240 * 160 * 4);
   let rng = createPresentationRngSession(presentationSeed);

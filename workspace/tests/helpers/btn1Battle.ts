@@ -1,5 +1,6 @@
 // btn1: a census-style battle (battle i = seed i, streak i * 11 % 49, rentals 0..2, least-used legal move: the off108 / sub157 loop) that
 // stops the first frame a presented command satisfies `stop`, so a test can feed its own presses from there.
+import { censusDeal } from "../../tools/integration/censusRound.ts";
 import {
   advanceFactoryRoundBattleCommand,
   advanceFactoryRoundBattleResolution,
@@ -40,10 +41,10 @@ export function playCensusBattleUntil(
   stop: (state: FactoryRoundBattleOrchestratorState) => boolean,
 ): { cursor: { state: () => FactoryRoundBattleOrchestratorState; step: (buttons?: readonly GbaButton[]) => void; ended: () => boolean }; found: boolean } {
   let state = beginFactoryRoundBattleStartIntro(createFactoryRoundBattleOrchestrator({
-    id: `live-share-census-${seed}-${(seed * 11) % 49}`, rngValue: seed, battleScene: scene,
+    id: `live-share-census-${seed}-${(seed * 11) % 49}`, battleScene: scene,
     factoryWinStreak: (seed * 11) % 49, playerTrainerId: 416049562,
     battleTowerLevel50WinStreak: 0, facilityState: { rentsCount: 0 },
-    rentals: { type: "generateInitial", selectedRentalIndexes: [0, 1, 2] },
+    ...censusDeal({ seed, factoryWinStreak: (seed * 11) % 49 }),
   }));
   let rng = createPresentationRngSession();
   let frame = 0;

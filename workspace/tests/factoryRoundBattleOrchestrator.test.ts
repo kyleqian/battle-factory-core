@@ -2341,22 +2341,33 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
     // aiv267 (#207 confusion self-hit hold item): challenge 1 terminal cursor 1188296587 -> 1931463501.
     expect(completed.round.rules.rngValue).toBe(1931463501);
     expect(next.initialRentalGeneration?.rentalRank).toBe(1);
+    // fop1 (docs/fop1-first-opponent-order.md): the deal is the ROM's order, three contiguous segments (the six set ids, the first
+    // opponent from the cursor after them, the six personalities); was [initial-rentals 0..279, opponent-generation 279..459]. The six
+    // set ids are unchanged; the first opponent 87 [245, 212, 248] -> 109 [167, 241, 237]. Regenerated from the engine.
     expect(next.rngSegments).toEqual([
       {
-        kind: "initial-rentals",
+        kind: "initial-rental-selection",
         battleIndex: 0,
         callStart: 0,
-        callEnd: 279,
+        callEnd: 7,
         rngBefore: 1931463501,
-        rngAfter: 827694810,
+        rngAfter: 4097800778,
       },
       {
         kind: "opponent-generation",
         battleIndex: 0,
-        callStart: 279,
-        callEnd: 459,
-        rngBefore: 827694810,
-        rngAfter: 2671237774,
+        callStart: 7,
+        callEnd: 224,
+        rngBefore: 4097800778,
+        rngAfter: 3738453933,
+      },
+      {
+        kind: "initial-rental-construction",
+        battleIndex: 0,
+        callStart: 224,
+        callEnd: 432,
+        rngBefore: 3738453933,
+        rngAfter: 868353469,
       },
     ]);
     expect(next.initialRentalGeneration?.rentals.map((rental) => rental.setId))
@@ -2364,17 +2375,18 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
     expect(next.opponentGenerations[0]).toMatchObject({
       // #140: trainerId 82 -> 113, opponents [248, 221, 163] -> [259, 265, 234].
       // aiv267 (#207): trainerId 113 -> 87, opponents -> [245, 212, 248].
-      trainerId: 87,
+      // fop1: trainerId 87 -> 109, opponents -> [167, 241, 237].
+      trainerId: 109,
       generation: {
         opponents: [
-          { setId: 245 },
-          { setId: 212 },
-          { setId: 248 },
+          { setId: 167 },
+          { setId: 241 },
+          { setId: 237 },
         ],
       },
     });
-    expect(next.facilityRngCalls).toBe(459); // #140: 627 -> 573; aiv267 (#207): -> 459
-    expect(next.round.rules.rngValue).toBe(2671237774); // #140: 1540047030 -> 1344913182; aiv267 (#207): -> 2671237774
+    expect(next.facilityRngCalls).toBe(432); // #140: 627 -> 573; aiv267 (#207): -> 459; fop1: -> 432
+    expect(next.round.rules.rngValue).toBe(868353469); // #140: 1540047030 -> 1344913182; aiv267 (#207): -> 2671237774; fop1: -> 868353469
   });
 
   it("owns battle 0 win through decline and battle 1's fresh command on one RNG cursor", () => {

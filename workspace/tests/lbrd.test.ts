@@ -55,9 +55,13 @@ interface WonLobby {
 // merge of pau4 / btn1 / pau5 / hpf5 (pin1; the presented entry scripts, button waits and hp lengths shift every soak trajectory): 2 lost the Scene OFF continuation and the challenge-2 loss
 // case. A scan of 0..15 with the seed in all three roles (scratch copies of this file) found only 14 passing every case (15 / 15; 2 and 4 fail 2 cases, 13 fails 3, 10 fails 5, 0 fails 8,
 // the rest 12), so all three use 14.
-const WIN_TWO_SEED = 14;
-const RETIRE_SEED = 14;
-const WIN_THEN_LOSE_SEED = 14;
+// fop1 (docs/fop1-first-opponent-order.md: a new challenge's first opponent is rolled in the ROM's order, so every continuation's first
+// trainer moves): 14 lost the continuation in both scenes. A scan of 0..20 with the seed in all three roles (scratch copies of this file)
+// found none passing every case: 2 fails only the retire (its continued challenge loses a battle before the retire), 13 only the
+// challenge-2 loss (it does not lose), 4 / 10 / 14 / 17 the continuation, the rest 5 to 12. So the continuation and the loss use 2, the retire 13.
+const WIN_TWO_SEED = 2;
+const RETIRE_SEED = 13;
+const WIN_THEN_LOSE_SEED = 2;
 
 function newPlayer(seed: number): RandomPlayer {
   const player = new RandomPlayer(new Rng(seed), new ActionLog(false), "winning");
