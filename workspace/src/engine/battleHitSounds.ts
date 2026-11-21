@@ -40,6 +40,12 @@ const SET_MON_DATA_AFTER_HEALTHBAR_DONE = 1;
  * gActiveBattler = gBattlerTarget, which DoFieldEndTurnEffects (battle_util.c:1186-1191) has set to the first present battler (the player), so both ticks pan to the player.
  */
 const DAMAGING_WEATHER_LOOP_SCRIPT = "BattleScript_DamagingWeatherLoop";
+/**
+ * etp2 (ROM labs etp1-hail-{on,off}, aud252 fixture): after the damage print's `waitmessage` the ROM runs orword, effectivenesssound, hitanimation; the SE is the row
+ * before the hit (ON 988 / 1136, OFF 514 / 662). Our hit command starts 3 rows earlier than the ROM's hitanimation row (986 / 1134, OFF 512 / 660), so the SE is
+ * 3 ticks after our command start tick (the etp1Engine frame + 2) in both scenes, not the controller lag (ON 7 less the lead rows, which put it 4-6 rows late once the etp1 print leads moved the loop).
+ */
+const WEATHER_LOOP_HIT_SE_AFTER_COMMAND_ROWS = 3;
 
 function currentCommand(
   resolution: BattleResolutionPresentationState | null,
@@ -117,7 +123,7 @@ export function emitBattleHitSounds(
     const song = effectivenessSong(segment, command.eventSequence);
     if (song !== null) {
       const panBattler = song.weatherLoop ? 0 : command.battler;
-      scheduleAfter(Math.max(0, lag), () => playPannedSe(song.song, panBattler === 0 ? SE_PAN_PLAYER : SE_PAN_OPPONENT));
+      scheduleAfter(song.weatherLoop ? WEATHER_LOOP_HIT_SE_AFTER_COMMAND_ROWS : Math.max(0, lag), () => playPannedSe(song.song, panBattler === 0 ? SE_PAN_PLAYER : SE_PAN_OPPONENT));
     }
     return;
   }
