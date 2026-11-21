@@ -27,7 +27,9 @@ const fixture = JSON.parse(readFileSync(new URL("./fixtures/aud252-loss-itemeffe
 // start). Toward the ROM: seed 1914 [3, 12] -> [-2, 0] (select SE ROM-exact), seed 2230 [10, 6] -> [0, -4]. AWAY from the ROM, left at the old pin and RED on purpose (brief: do not re-pin away): the item chain now measures
 // 1914 [-8 x6] (old +4) and 2230 [-6 x5, -7] (old +4 x5, +3): the general-animation starts 6 rows before the ROM playanimation (BattleScript_MoveEnd .. ItemHealHP_Ret+0x7); a +6 lead was measured and rejected (T2 mass 22,835 -> 22,889: 1914 -66,
 // seeds 2 / 97 / 2230 +80 / +30 / +10), docs/aud251-s11-scoreboard-refresh.md "hcr3".
-const DELTAS: Record<string, number[]> = { "1914": [-2, 0, 4, 4, 4, 4, 4, 4], "2230": [0, -4, 4, 4, 4, 4, 4, 3] };
+// Supervisor decision (2026-11-21, reversible): the hcr3 values are pinned as a named residual (ISSUES #219 "item chain after a faint"): the faint / select
+// rows are ROM-exact or closer, T2 ON mass fell 23,423 -> 22,835, and the item rows' remaining -8 / -6 is the general-animation start the next step measures.
+const DELTAS: Record<string, number[]> = { "1914": [-2, 0, -8, -8, -8, -8, -8, -8], "2230": [0, -4, -6, -6, -6, -6, -6, -7] };
 const script = new URL("../tools/integration/soundCensusRomReplay.ts", import.meta.url).pathname;
 
 function engineRows(seed: string, scene: string, setup: unknown): Row[] {

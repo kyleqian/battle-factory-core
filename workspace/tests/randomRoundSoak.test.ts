@@ -711,7 +711,8 @@ describe("random round soak driver (green milestone pin)", () => {
     // all OK with no openpartyscreen / machine-barrier error. Seed 11 is the lowest (Baton Pass commits 3, first commit 46848, halt 47063 on AIPOM in battleIndex 0, two Lobby new challenges). Pin 4 -> 11.
     // hcr3 (Icy Wind's hp keeps the stat command's 4-row tail instead of the 28-row floor, Double-Edge's recoil hp / print follow the ROM rows, and the faint SE clips its hpd4 compensation at 0; the exploring presses land on new phases): seed 4 no longer commits Baton Pass.
     // Re-scanned full-policy seeds 0..39 (tools/soak/batonPassSearch.ts --seeds 0:40 --parallel 4, same options): candidates 8, 10, 11, 13, 16, 27, 36, 39, all OK. Seed 8 is the lowest.
-    const result = runSeed(8, {
+    // merge stc1 + hcr3 (fold-a): re-scanned seeds 0..39 on the combined tree (batonPassSearch.ts --seeds 0:40 --parallel 4): candidates 11, 13, 27, 36, 39 (stc1's set). Pin 11.
+    const result = runSeed(11, {
       maxFrames: 80_000,
       renderEvery: 0,
       coverage: observer as never,
@@ -1112,7 +1113,8 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // merge of the box's 2026-11-20 run with the Mac's 11-21 fixes: frames only, 64365 (box) / 58763 (Mac) -> 60582; same battle 3 / depth 2 / turn 19 / roundLost on all three.
       // stc1 (Scene OFF confusion self-hit +7 rows to the hit, ROM 204 / 199 after the commit): frames only, 60582 -> 60525; same battle 3 / depth 2 / turn 19 / roundLost.
       // hcr3 (Icy Wind's hp keeps the stat command's 4-row tail, Double-Edge's recoil hp / print follow the ROM rows, the faint SE clips its hpd4 compensation at 0): frames only, 60582 -> 58672; same battle 3 / depth 2 / turn 19 / roundLost.
-      frames: 58672,
+      // merge stc1 + hcr3 (fold-a): frames only, 60525 (stc1) / 58672 (hcr3) -> 58579; same battle / depth / turn / end state.
+      frames: 58579,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 2,
