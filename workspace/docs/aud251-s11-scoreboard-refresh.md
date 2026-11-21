@@ -1873,3 +1873,49 @@ The -8 bias is gone (OFF median -7 -> -0.5, 15 of 30 rows within +-2 now against
 **Gates.** No `src/` change; `npm run build` exit 0; `npm run test:gate` 360 files / 2,835 tests green; the 9 test files importing `soundCensusRomReplay` (ais1 / ais2 / ais3, aud252 x2, aud253, aud254, parityMacRoundReplayFixtures, pic3DrawnFieldCheck): 41 / 41 (they replay without `--romdrive`). `npm test` not run, as assigned.
 
 **Next (not done).** (1) The engine ready-time cliff rows (4 OFF, ~5 ON) are the next measurable engine term; (2) a ROM-clocked cadence for the forced party-menu messages; (3) the AI-choice term (fsc2m item 3). PAPERCUT: `aud249Rescore.sh` over 49 seeds takes about 5 minutes and a foreground command over 2 minutes is moved to the background by the harness (the t2n rescore needed a per-seed loop plus a wait), ~10 minutes lost; a `rescoreAll.sh` wrapper (the `.integration/evidence/drv1/rescore-all.sh` of this step) would help.
+
+## stc1 (2026-11-21): Scene OFF stat-change SE and the confusion self-hit gap (presentation / sound timing only)
+
+Base 5cb0b6acd (b4l landed on it, so the ON baseline is 24,399 mass / 2,465 exact, not t2k's 25,747 / 2,366). Part 1 = e34ecca44, Part 2 = 6eda1a86f. Gameplay, RNG, damage, turn order and facility state are untouched.
+
+**Part 1: stat-change SE, Scene OFF (t2k item 3).** The ROM plays the stat SE at the stats-change `playanimation` exec + 4. The engine's command starts at exec + 1 after the OFF body (`attackanimation` -> `BattleScript_Pausex20` -> `waitanimation` -> `setgraphicalstatchangevalues` -> `playanimation`), so the SE age was 3 frames late (engine start + 6 vs ROM start + 3); after a secondary effect's hit chain it was 2 late (start + 4 vs ROM start + 2). `statsChangeSourceAge` (battleResolutionPresentationRender.ts) now takes `STATS_CHANGE_SCENE_OFF_AFTER_BODY_AGE_SHIFT = 3` / `STATS_CHANGE_SCENE_OFF_SECONDARY_AGE_SHIFT = 2` when the segment's hitMarker has HITMARKER_NO_ANIMATIONS; the entry-phase (battle-start Intimidate) explicit age and every Scene ON age are unchanged. Up and down, move-caused and secondary-effect, both sides (tests/stc1SceneOffStatChangeSe.test.ts, labs tools/battle-lab/stc1-*-off.json + hcr1b-*):
+
+| path (lab) | ROM SE frame | engine before | engine after |
+| --- | --- | --- | --- |
+| Harden, up, foe (hcr1b-harden-foe-off) | 99 | 102 | 99 |
+| Swords Dance, up, foe (stc1-swordsdance-foe-off) | 105 | 108 | 105 |
+| Growl, down, foe (hcr1b-growl-foe-off) | 100 | 103 | 100 |
+| Growl, down, player (hcr1b-growl-plr-off) | 96 | 99 | 96 |
+| Icy Wind secondary Speed drop, foe (stc1-icywind-foe-off) | 210 | 212 | 210 |
+| Rock Tomb secondary, foe (stc1-rocktomb-foe-off) | 246 | 250 (+4) | 248 (+2) |
+| Icy Wind secondary, player (stc1-icywind-plr-off) | 214 | 208 (-6) | 206 (-8) |
+
+The last two rows keep a residual that is not the SE age: the hit chain's hp rows start the stats-change command off the ROM's exec (hcr3m hp floors, out of scope). The 3 and 2 frame rules are exact wherever the command start is. The "37 vs 39" of the t2k note is not a wrong move-animation length: the engine's command starts at exec + 1, so the error was the SE age alone.
+
+**Part 2: the self-confusion hit gap (t2k item 2).** ROM `BattleScript_DoSelfConfusionDmg` (battle_scripts_1.s:3801-3817) runs `status2animation` (3799, from `BattleScript_MoveUsedIsConfused`), `jumpifbyte` (3800), `cancelmultiturnmoves` (3802), `adjustnormaldamage2` (3803) and `printstring STRINGID_ITHURTCONFUSION` (3804) before the first glyph (5 script rows after the "is confused!" wait ends); `waitmessage B_WAIT_TIME_LONG`, then `effectivenesssound` (SE 13) and `hitanimation`. The engine started typing the ITHURTCONFUSION message on the row after the wait, so its hit / SE 13 came 7 rows early (ROM from the decision's commit, Scene OFF: seed 7295 decision 4 = 204 vs 197; seed 7682 decision 2 = 199 vs 192). Landed Scene OFF only: the message gets `leadFrames = 5` (the five rows, first glyph moves 5 later) and a 66-row hold (`SELF_CONFUSION_OFF_HIT_MESSAGE_TIMING`, 64 + 2; the 2 rows are the typed-to-wait term the ROM spends and the engine did not), `SELF_CONFUSION_*` in battleResolutionPresentation.ts. **Scene ON is not changed:** ON seed 7295 decision 4 already plays SE 13 on the ROM's frame (ROM 304, engine 304; the ON self-hit sits behind the 100-row `status2animation` command, which is a different interval), so the OFF rule must not move it. The s5063 Double-Edge-after-wake-up case is untouched.
+
+| path | ROM SE 13 (from commit) | engine before | engine after |
+| --- | --- | --- | --- |
+| OFF seed 7295 decision 4 | 204 | 197 | 204 |
+| OFF seed 7682 decision 2 | 199 | 192 | 199 |
+| ON seed 7295 decision 4 | 304 | 304 | 304 |
+
+Pin: tests/stc1SelfConfusionHit.test.ts (fixture tests/fixtures/stc1-selfconfusion-off.json: the two seeds' setups + the ROM frames).
+
+**T2 rescore** (`RESCORE_SCENES=off|on tools/audio/rescoreAll.sh OUT .integration/evidence/t2n`, `soundScoreboard.py`; 0 missing / 0 extra before and after in every family). Scene OFF, 24 aligned seeds, mass 3,164 -> 2,873 (exact 600 -> 667, offset 533 -> 466):
+
+| family (OFF) | exact before -> after | offset before -> after | mass before -> after |
+| --- | --- | --- | --- |
+| stat-change SE | 2 -> 65 | 103 -> 40 | 403 -> 244 |
+| cry | 97 -> 97 | 95 -> 95 | 517 -> 496 |
+| battle-controller SE | 500 -> 504 | 332 -> 328 | 2,225 -> 2,114 |
+| bgm | 1 -> 1 | 3 -> 3 | 19 -> 19 |
+| TOTAL | 600 -> 667 | 533 -> 466 | 3,164 -> 2,873 |
+
+The stat-change matched-row delta (engine - ROM, relative to the segment start) went median +3 / p10 -4 / p90 +3 to median 0 / p10 -7 / p90 0; the p10 is the hp-floor residual above (and SE 90, +7, unrelated). The cry / battle-controller gain is the self-hit's downstream rows moving with it (the segments after a self-hit start 7 rows later). Scene ON, 25 aligned seeds: 24,399 mass / 2,465 exact / 3,412 offset, byte-identical before and after (every ON family, delta table and top-differing rows identical). Evidence (git-ignored): .integration/evidence/stc1/t2-before, t2-after.
+
+**No gameplay / RNG change.** `tools/integration/lsd194Census.sh` seeds 0..199 (`LSD194_SHARDS="0 1"`), 5cb0b6acd vs 6eda1a86f: `rst197CensusDelta.py --digest` Scene OFF "eventsDigest+error identical 200/200, type-sequence changes 0", 145 battles identical / 55 changed commands (all `message, message, hit-animation` +7 on the self-hit); Scene ON "identical 200/200, type-sequence changes 0, 200 battles identical / 0 changed, byte-identical shards 2/2".
+
+**Tests.** `npm run typecheck` exit 0; `npm run test:gate` 360 files / 2,835 tests green; `npm run build` exit 0. The 232 test files that import the changed files (grep -l battleResolutionPresentation / battleResolutionPresentationRender / moveAnimSounds) + `tests/aud2*.test.ts` + `tests/randomRoundSoak*.test.ts` + the two new stc1 files: all green except five failures that are red on the pre-stc1 base 5cb0b6acd too (not touched, reported): aud260MoveAnimSounds brickbreak-player and glare-player, aud242rMoveAnimSounds curse-player (b4l's ON B4 body pins), ais2AiSwitchFrames seed 2741 Scene ON, hie3HeldItemSounds hie3-cheri-on. Pins moved by this step, all toward the ROM or trajectory-only: tests/randomRoundSoak.test.ts "(c) leaves full byte-identical" seed 1 frames 60,582 -> 60,525 (frames only; same battle 3 / depth 2 / turn 19 / roundLost; the exploring presses land on new phases after the +7 self-hit rows) and the ISSUES #89 Baton Pass pin seed 4 -> 11 (seed 4 no longer commits Baton Pass; re-scanned seeds 0..39 with batonPassSearch.ts, candidates 11, 13, 27, 36, 39). No other randomRoundSoak* pin moved. sa125 / sag130 ("unanchored < total / 5") went red with the first Part 2 shape (a separate hold command before the print changed the OFF command shape against ON); the `leadFrames` form keeps the shape and both are green with unchanged counts.
+
+**Residuals / next.** Rock Tomb +2 and Icy Wind player -8 (hp-row command start, hcr3m), SE 90 +7. The ON self-hit's `status2animation` SE 176 sits 6 rows after the ROM's (engine 112 vs ROM 106 from the commit, seed 7295): a separate, ON-only term, not measured further here.
