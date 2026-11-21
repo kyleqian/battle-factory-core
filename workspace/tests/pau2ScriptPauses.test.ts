@@ -49,7 +49,8 @@ describe("pau2: the used-move hold takes the source pause (SHORT or LONG)", () =
     expect(used!.r.hold).toBeGreaterThanOrEqual(64);
   });
   it("SafeguardEnds (pause B_WAIT_TIME_SHORT): the anchorless pre-print row is the source pause 32 + the pau3 lead 10, and only on the print after it", () => {
-    expect(ANCHORLESS_PRE_PRINT_PAUSE_LABELS).toEqual(["BattleScript_SafeguardEnds"]);
+    // msg2 added BattleScript_WishButFullHp (32 + 2, tests/msg2RoarWishMessages.test.ts); SafeguardEnds is unchanged.
+    expect(ANCHORLESS_PRE_PRINT_PAUSE_LABELS).toEqual(["BattleScript_SafeguardEnds", "BattleScript_WishButFullHp"]);
     const program = loadBattleScriptProgram();
     const start = program.labelsAtProgramCounter.findIndex((labels) => labels.includes("BattleScript_SafeguardEnds"));
     expect(program.instructions[start]!.opcodeName).toBe("B_SCR_OP_PAUSE");

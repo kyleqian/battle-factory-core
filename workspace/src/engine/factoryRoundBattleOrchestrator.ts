@@ -108,6 +108,7 @@ import {
   createBattleResolutionPresentation,
   hasRetainedLockedActionReceipt,
   messageCommandTypedRows,
+  releasedGateClearsBox,
   type BattleResolutionPresentationCommand,
   type BattleResolutionLockedActionIdentity,
   type BattleResolutionPresentationState,
@@ -2300,6 +2301,28 @@ function withResolutionLifecycle(
   });
 }
 
+/**
+ * btn2: a released button message keeps its frozen wait cursor (age = the cursor age of the row before the press); msg2: a `\p`
+ * gate released on a row where the ROM redraws its arrow blanks the box instead (`releasedGateClearsBox`).
+ */
+function releasedWithWaitCursor(
+  released: BattleResolutionPresentationState,
+  resolution: BattleResolutionPresentationState,
+  segment: BattleResolutionPresentationState["segments"][number],
+  command: Extract<BattleResolutionPresentationCommand, { type: "message" }>,
+): BattleResolutionPresentationState {
+  const age = resolution.lifecycle.phaseElapsed - messageCommandTypedRows(command) - 1;
+  return Object.freeze({
+    ...released,
+    releasedWaitCursor: Object.freeze({
+      segmentIndex: resolution.segmentIndex,
+      commandIndex: resolution.commandIndex,
+      age,
+      ...(releasedGateClearsBox(segment, resolution.commandIndex, age) ? { boxCleared: true as const } : {}),
+    }),
+  });
+}
+
 function completedResolutionPhase(
   resolution: BattleResolutionPresentationState,
 ): "next-command-handoff" | "terminal-handoff" {
@@ -3100,12 +3123,17 @@ function advanceFactoryRoundBattleResolutionCore(
         const completion = reachedSegmentEnd
           ? completedResolutionUpdate(state, resolution)
           : null;
-        const nextResolution = withResolutionLifecycle(
+        const released = withResolutionLifecycle(
           resolution,
           nextCommandIndex,
           completion?.phase ?? "presenting",
           0,
         );
+        // msg2: a gate released before its cursor shows (1 or 2 rows after the last glyph) keeps the ROM's frozen arrow or, on the
+        // arrow's first redraw row, blanks the box (releasedGateClearsBox).
+        const nextResolution = command.promptGate === true && !command.noCursor
+          ? releasedWithWaitCursor(released, resolution, segment, command)
+          : released;
         return Object.freeze({
           ...state,
           battleResolutionPresentation: nextResolution,
@@ -3186,14 +3214,7 @@ function advanceFactoryRoundBattleResolutionCore(
       0,
     );
     const nextResolution = command.type === "message" && !command.noCursor
-      ? Object.freeze({
-        ...released,
-        releasedWaitCursor: Object.freeze({
-          segmentIndex: resolution.segmentIndex,
-          commandIndex: resolution.commandIndex,
-          age: resolution.lifecycle.phaseElapsed - messageCommandTypedRows(command) - 1,
-        }),
-      })
+      ? releasedWithWaitCursor(released, resolution, segment, command)
       : released;
     return Object.freeze({
       ...state,

@@ -2583,12 +2583,22 @@ export function createBattleResolutionPresentationRenderView(
       visibleCharacters = 0;
     }
     const released = state.releasedWaitCursor;
+    let releasedBoxCleared = false;
     if ((command.type !== "message" || (command.promptGate === true && command.advance === "automatic" && command.lines === latestMessage))
       && released !== undefined && latestMessage !== null && released.segmentIndex === state.segmentIndex
       && released.commandIndex === latestMessageIndex) {
-      waitCursor = Object.freeze({ age: released.age });
+      // msg2: a `\p` press on a row where the ROM redraws the arrow copies the cleared window: blank from the row after the press.
+      if (released.boxCleared === true
+        && !(state.commandIndex === released.commandIndex + 1 && state.lifecycle.phaseElapsed === 0)) {
+        releasedBoxCleared = true;
+        latestMessage = null;
+        visibleCharacters = 0;
+      } else {
+        // msg2: a press one row after the last glyph froze the arrow the ROM had just drawn (age -1 shows the first phase).
+        waitCursor = Object.freeze({ age: Math.max(0, released.age) });
+      }
     }
-    if (command.type === "message") {
+    if (command.type === "message" && !releasedBoxCleared) {
       latestMessage = command.lines;
       visibleCharacters = messageCommandVisibleCharacters(command, state.lifecycle.phaseElapsed);
       if (
