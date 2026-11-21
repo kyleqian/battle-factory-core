@@ -80,9 +80,13 @@ Lv25 Rattata with Seismic Toss x4). The app stages of the same names are `tools/
   - The table rows and the orb's pans (equal to the ROM's on both sides).
   - The labs: Will-O-Wisp's 18 body SEs on the ROM's frames and pans, Transform equal in both scenes and on both sides, and Substitute's
     three SEs with the one-row stage offset. Our first shrink row is 2 rows after SE_M_ATTRACT, as on the ROM.
-  - The catcher cases, replayed with the seeded test player (the catcher's engine side, 1-5 s each): s36-off-ws METRONOME -> SUBSTITUTE
-    (drawn live, SEs on command rows 8 / 49 / 74, shrink on row 10), and s89-on-wc METRONOME -> LEECH LIFE / AEROBLAST (static, no adapter,
-    script start 9, every SE on the ROM's row).
+  - The s36-off-ws case (METRONOME -> SUBSTITUTE): drawn live, SEs on command rows 8 / 49 / 74 and the shrink on row 10 (the ROM's rows,
+    counted from the command start). First replayed with the seeded test player. On the combined trial tree the player no longer reaches that
+    turn (other fixes moved its press timing), so mvs1-2 stages it instead, in both scenes: `mvs1-metronome-substitute-player-{off,on}`
+    (`tools/compare/appTrace.ts`), a Rattata with METRONOME whose kernel seed 412 calls SUBSTITUTE. That is the only one of seeds 1..3000,
+    and it is engine-only: no ROM lab rolls the same call.
+  - (mvs1 also had s89-on-wc METRONOME -> LEECH LIFE / AEROBLAST, static, script start 9. That test went out with the trial's revert of the
+    no-adapter sound path.)
   - Census seed 197 METRONOME -> TRANSFORM and seed 17's direct Substitute, both scenes.
 - `tests/aud260MoveAnimSounds.test.ts`: the Will-O-Wisp table now has the orb rows, and the lab offset is 0 (was 1).
 - `tests/audioProbeFixtures.test.ts`: the 8 new fixtures listed.

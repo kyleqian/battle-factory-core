@@ -4,7 +4,7 @@
 //     and the emitter skipped every body under it. Substitute's AnimTask_MonToSubstituteDoll SE_M_BUBBLE2 rows were missing in both scenes.
 // The Substitute, Transform and Will-O-Wisp bodies use the ROM script's clock: script row 0 on command row seGate + lead + 4.
 // ROM ground truth: tools/audio/fixtures/aud260-willowisp-*.json, mvs1-{substitute,transform}-*.json (soundEventProbe labs, tools/integration/mvs1Labs.py)
-// and the frame catcher's ROM run s36-off-ws (its engine side is the seeded test player replayed below).
+// and the frame catcher's ROM run s36-off-ws (its METRONOME -> SUBSTITUTE is staged below with a kernel seed that calls SUBSTITUTE).
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { collectSoundTick, type SoundEvent } from "../src/audio/soundEvents.ts";
@@ -12,11 +12,9 @@ import { createInitialState, render, tick } from "../src/engine/core.ts";
 import { moveAnimOpRows, variantOf } from "../src/engine/moveAnimSounds.ts";
 import { installBundledMonPicPixels } from "../src/engine/monPicPixelsInstall.ts";
 import { currentCommandField, moveAnimationScriptStartRow } from "../src/engine/battleResolutionPresentationRender.ts";
-import { liveMoveAnimationDuration, liveMoveAnimationDurationCaseMissing } from "../src/engine/liveMoveAnimation.ts";
-import { FactorySession } from "../src/factorySession.ts";
+import { liveMoveAnimationDuration } from "../src/engine/liveMoveAnimation.ts";
 import timing from "../src/data/gen/anim-sound-timing.json" with { type: "json" };
 import { traceAdvances } from "../tools/compare/traceReplay.ts";
-import { ActionLog, RandomPlayer, Rng, type SoakPolicy } from "../tools/soak/randomRoundSoakDriver.ts";
 import { censusDeal } from "../tools/integration/censusRound.ts";
 import {
   advanceFactoryRoundBattleCommand, advanceFactoryRoundBattleResolution, advanceFactoryRoundBattleStartIntro, beginFactoryRoundBattleStartIntro,
@@ -140,72 +138,70 @@ describe("ROM labs: ours equals the ROM's SE rows", () => {
   }
 });
 
-const mix = (x: number) => { x = Math.imul(x ^ (x >>> 16), 0x45d9f3b) >>> 0; x = Math.imul(x ^ (x >>> 16), 0x45d9f3b) >>> 0; return (x ^ (x >>> 16)) >>> 0; };
-
-interface BodyRun { readonly moveId: number; readonly start: number; readonly scriptStart: number | null; readonly live: boolean; readonly caseMissing: boolean; readonly afterMetronome: boolean; readonly ses: readonly string[]; readonly shrinkRow: number | null }
+interface BodyRun { readonly moveId: number; readonly start: number; readonly scriptStart: number | null; readonly live: boolean; readonly afterMetronome: boolean; readonly ses: readonly string[]; readonly shrinkRow: number | null }
 
 /**
- * The frame catcher's engine side (tools/frame-catcher/makeTrace.mjs): the seeded test player plays a fresh challenge. Returns, for each body of `moveId`, the
- * command's first frame, its script start row, whether METRONOME was used just before it in the same resolution, and the SEs (`row:id:pan`, row = frame - start)
- * up to `rows` rows after its start. `shrinkRow`: the first row the player's battler area changes (when `watchPlayer`).
+ * An app stage's one turn (A, A, then idle frames) on our engine. Returns, for each body of `moveId`, the command's first frame, its script start row, whether
+ * METRONOME was used before it in the same resolution, the SEs (`row:id:pan`, row = frame - start) up to `rows` rows after its start, and the first row the
+ * player's battler area (x 40..103, y 56..111) changes.
  */
-function catcherBodies(seed: number, scene: "on" | "off", policy: SoakPolicy, until: number, moveIds: readonly number[], rows: number, watchPlayer = false): BodyRun[] {
-  const session = new FactorySession({ battleScene: scene, gameplaySeed: mix(seed * 2 + 1), presentationSeed: mix(seed * 2 + 2), start: "draft", challengeRequest: "hold" });
-  const player = new RandomPlayer(new Rng(seed), new ActionLog(false), policy);
-  let pending: SoundEvent[] = [];
-  session.attachSoundSink({ push: (e: SoundEvent) => pending.push(e) });
+function stageBodies(stageId: string, scene: "on" | "off", moveId: number, rows: number): BodyRun[] {
+  let state = APP_STAGES[stageId]!(createInitialState({ appRoute: "generated-orchestrator", battleScene: scene }));
+  const segments = [{ frames: 2, buttons: ["A"] }, { frames: 18, buttons: [] }, { frames: 2, buttons: ["A"] }, { frames: rows + 300, buttons: [] }];
   type OpenBody = { -readonly [K in keyof BodyRun]: BodyRun[K] } & { ses: string[]; lastCommand: unknown; previous: Uint8ClampedArray | null };
   const bodies: OpenBody[] = [];
   let open = null as OpenBody | null;
-  while (session.frame < until) {
-    pending = [];
-    session.tick(player.decide(session.state));
-    const frame = session.frame;
-    const resolution = session.state.factoryRoundBattleOrchestrator?.battleResolutionPresentation ?? null;
+  for (const advance of traceAdvances(segments)) {
+    const result = collectSoundTick(state.frame + 1, () => tick(state, advance.buttons));
+    state = result.result;
+    const frame = advance.frame;
+    const resolution = state.factoryRoundBattleOrchestrator?.battleResolutionPresentation ?? null;
     const segment = resolution?.segments[resolution.segmentIndex];
     const command = segment?.commands[resolution!.commandIndex];
-    if (resolution && segment && command?.type === "move-animation" && command.animation !== undefined && moveIds.includes(command.animation.moveId) && open?.lastCommand !== command) {
-      const commands = segment.commands.slice(0, resolution.commandIndex);
-      const afterMetronome = commands.some((c) => c.type === "message" && (c as { lines?: readonly string[] }).lines?.join(" ").includes("used METRONOME!"));
-      const field = currentCommandField(resolution);
+    if (resolution && segment && command?.type === "move-animation" && command.animation?.moveId === moveId && open?.lastCommand !== command) {
+      const afterMetronome = segment.events.some((event) => event.sequence < command.eventSequence && event.payload.kind === "message"
+        && event.payload.messageId === "STRINGID_USEDMOVE" && (event.payload as { actionSnapshot?: { currentMove?: number } }).actionSnapshot?.currentMove === 118);
       open = {
-        moveId: command.animation.moveId, start: frame, scriptStart: moveAnimationScriptStartRow(segment, command.eventSequence),
-        live: liveMoveAnimationDuration(command.animation, field) !== null, caseMissing: liveMoveAnimationDurationCaseMissing(command.animation, field),
+        moveId, start: frame, scriptStart: moveAnimationScriptStartRow(segment, command.eventSequence),
+        live: liveMoveAnimationDuration(command.animation, currentCommandField(resolution)) !== null,
         afterMetronome, ses: [], shrinkRow: null, lastCommand: command, previous: null,
       };
       bodies.push(open);
     }
-    if (open !== null) {
-      const row = frame - open.start;
-      if (row > rows) { open = null; continue; }
-      for (const e of pending) if (e.kind === "se") open.ses.push(`${row}:${e.id}:${e.pan}`);
-      if (watchPlayer && open.shrinkRow === null) {
-        const pixels = (render(session.state) as unknown as Uint8ClampedArray).slice();
-        if (open.previous !== null) {
-          outer: for (let y = 56; y < 112; y += 1) for (let x = 40; x < 104; x += 1) {
-            const i = (y * 240 + x) * 4;
-            if (pixels[i] !== open.previous[i] || pixels[i + 1] !== open.previous[i + 1] || pixels[i + 2] !== open.previous[i + 2]) { open.shrinkRow = row; break outer; }
-          }
+    if (open === null) continue;
+    const row = frame - open.start;
+    if (row > rows) { open = null; continue; }
+    for (const e of result.events) if (e.kind === "se") open.ses.push(`${row}:${e.id}:${e.pan}`);
+    if (open.shrinkRow === null) {
+      const pixels = (render(state) as unknown as Uint8ClampedArray).slice();
+      if (open.previous !== null) {
+        outer: for (let y = 56; y < 112; y += 1) for (let x = 40; x < 104; x += 1) {
+          const i = (y * 240 + x) * 4;
+          if (pixels[i] !== open.previous[i] || pixels[i + 1] !== open.previous[i + 1] || pixels[i + 2] !== open.previous[i + 2]) { open.shrinkRow = row; break outer; }
         }
-        open.previous = pixels;
       }
+      open.previous = pixels;
     }
   }
   return bodies.map((body) => { const { lastCommand: _c, previous: _p, ...rest } = body as OpenBody; return rest; });
 }
 
-describe("the frame catcher's cases (seeded test player, tools/frame-catcher/makeTrace.mjs)", () => {
-  it("s36-off-ws battle 8: METRONOME -> SUBSTITUTE in Scene OFF is drawn and plays SE_M_ATTRACT and both SE_M_BUBBLE2s on the ROM's rows", () => {
-    const [body] = catcherBodies(36, "off", "winning-swap", 109330, [164], 80, true);
-    expect(body, "seed 36 no longer reaches battle 8's called Substitute: re-pick the case (docs/mvs1-called-move-sounds.md)").toBeDefined();
-    expect(body!.afterMetronome).toBe(true);
-    expect(body!.live).toBe(true);
-    // ROM (fcm1 s36-off-ws): the used print's last glyph 115388, SE_M_ATTRACT 115397, first shrink row 115399, SE_M_BUBBLE2 115438 / 115463.
-    // Ours: the command starts the row after the last glyph (109235 after 109234), so the ROM's rows are command rows 8, 10, 49 and 74.
-    expect(body!.scriptStart).toBe(8);
-    expect(body!.ses).toEqual(["8:226:-64", "49:125:-64", "74:125:-64"]);
-    expect(body!.shrinkRow).toBe(10);
-  });
+describe("METRONOME -> SUBSTITUTE (the frame catcher's s36-off-ws case, staged)", () => {
+  // ROM (fcm1 s36-off-ws battle 8, CHANSEY's METRONOME -> SUBSTITUTE in Scene OFF): the used print's last glyph 115388, SE_M_ATTRACT 115397, first shrink
+  // row 115399, SE_M_BUBBLE2 115438 / 115463. Our command starts the row after the last glyph (109235 after 109234 in that run), so the ROM's rows are
+  // command rows 8, 10, 49 and 74 (ours there after mvs1: 109243 / 109245 / 109284 / 109309). The seeded test player no longer reaches that turn on the
+  // combined tree, so the case is staged: a METRONOME Rattata whose kernel seed calls SUBSTITUTE (tools/compare/appTrace.ts mvs1-metronome-substitute-player-*).
+  for (const scene of ["off", "on"] as const) {
+    it(`Scene ${scene.toUpperCase()}: the called SUBSTITUTE is drawn and plays SE_M_ATTRACT and both SE_M_BUBBLE2s on the ROM's command rows`, () => {
+      const [body] = stageBodies(`mvs1-metronome-substitute-player-${scene}`, scene, 164, 80);
+      expect(body, "the stage's METRONOME no longer calls SUBSTITUTE: re-pick MVS1_METRONOME_SUBSTITUTE_SEED (tools/compare/appTrace.ts)").toBeDefined();
+      expect(body!.afterMetronome).toBe(true);
+      expect(body!.live).toBe(true);
+      expect(body!.scriptStart).toBe(8);
+      expect(body!.ses).toEqual(["8:226:-64", "49:125:-64", "74:125:-64"]);
+      expect(body!.shrinkRow).toBe(10);
+    });
+  }
 });
 
 /**

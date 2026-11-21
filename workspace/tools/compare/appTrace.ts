@@ -2037,8 +2037,20 @@ function snd3Stages(): Record<string, AppStage> {
 const MVS1_MOVES: Readonly<Record<string, readonly [move: number, scenes: readonly ("on" | "off")[], seed: number]>> = {
   substitute: [164, ["on", "off"], 1], transform: [144, ["on", "off"], 1],
 };
+/**
+ * mvs1: the player's Lv50 Rattata with METRONOME x4 against a Lv25 Rattata with Seismic Toss x4; the kernel `seed` picks the called move. An engine-only
+ * stage (no ROM lab rolls the same call): seed 412 calls SUBSTITUTE in both scenes (the only one of seeds 1..3000, found by stepping each seed's turn).
+ */
+export const MVS1_METRONOME_SUBSTITUTE_SEED = 412;
+export function mvs1MetronomeStage(state: EngineState, id: string, scene: "on" | "off", seed: number): EngineState {
+  return aud241bStage(state, id, scene, 50, 25, 118, undefined, false, 69, seed);
+}
 function mvs1Stages(): Record<string, AppStage> {
   const stages: Record<string, AppStage> = {};
+  for (const scene of ["on", "off"] as const) {
+    const id = `mvs1-metronome-substitute-player-${scene}`;
+    stages[id] = (state) => mvs1MetronomeStage(state, id, scene, MVS1_METRONOME_SUBSTITUTE_SEED);
+  }
   for (const [name, [move, scenes, seed]] of Object.entries(MVS1_MOVES)) {
     for (const scene of scenes) {
       stages[`mvs1-${name}-player-${scene}`] = (state) => aud241bStage(state, `mvs1-${name}-player-${scene}`, scene, 50, 25, move, undefined, false, 69, seed);
