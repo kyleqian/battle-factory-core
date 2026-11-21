@@ -18,9 +18,14 @@ export function emitTickSounds(state: TickSoundState, next: TickSoundState): voi
   }
   if (soundCollecting()) {
     // snd3: the battle-start entry scripts (Intimidate's B_ANIM_STATS_CHANGE plays in both scenes) are presented from the intro, not
-    // from battleResolutionPresentation, so their stat SE is emitted from the entry phase's synthetic resolution frame.
+    // from battleResolutionPresentation, so their stat SE is emitted from the entry phase's synthetic resolution frame; wbh1: so are
+    // the White Herb's General_HeldItemEffect SEs (Scene ON only, emitGeneralAnimSounds tests HITMARKER_NO_ANIMATIONS).
     const entryAfter = next.factoryRoundBattleOrchestrator?.battleStartIntro?.entry;
-    if (entryAfter) emitStatsChangeSounds(factoryBattleStartEntryFrame(entryAfter), ENTRY_STATS_CHANGE_SE_AGE);
+    if (entryAfter) {
+      const entryFrame = factoryBattleStartEntryFrame(entryAfter);
+      emitStatsChangeSounds(entryFrame, ENTRY_STATS_CHANGE_SE_AGE);
+      emitGeneralAnimSounds(entryFrame);
+    }
     emitPartySendOutSounds(
       state.battleScene?.resolutionOwner?.forcedPartySelect ?? null,
       next.battleScene?.resolutionOwner?.forcedPartySelect ?? null,

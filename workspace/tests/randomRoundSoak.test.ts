@@ -442,6 +442,9 @@ describe("random round soak driver (green milestone pin)", () => {
       // 43_437 -> 43_336, renderCalls 3_045 -> 3_042; same battle 7, turn 3, end state, diagnostics.
       // pic8 (the forced party menu's clock starts at the faint message's dismiss edge, 2 frames earlier per forced switch; ROM lab
       // pic7-player-faint-send-in-on): frames + render calls, 43_336 -> 43_334, renderCalls 3_042 -> 3_044; same battle 7, turn 3, end state, diagnostics.
+      // wbh1 (docs/wbh1-battle-start-white-herb.md): a later battle-start entry script starts on its own kernel rows after the previous one's
+      // pop (2 frames earlier than pau4's ENTRY_SCRIPT_GAP_ROWS; this seed has a two-script battle start, not a White Herb: with the old
+      // gap restored the pin holds): render calls only, 3_044 -> 3_043; frames 43_334, battle 7, turn 3, end state, diagnostics unchanged.
       frames: 43_334,
       battle: 7,
       turn: 3,
@@ -454,7 +457,7 @@ describe("random round soak driver (green milestone pin)", () => {
         terminalOutcome: "roundWon",
         terminalRecordMenuInputReadyReached: true,
         terminalRecordChoice: "no",
-        renderCalls: 3_044,
+        renderCalls: 3_043,
       },
     });
     expect(second).toEqual(first);
