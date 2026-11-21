@@ -2112,8 +2112,17 @@ function digSecondTurnPrintLead(event: BattleKernelSemanticEvent, hitMarker: num
  * command's duration is already exact (the next print lands on A1), so only the sound clock moves.
  */
 const DIG_CHARGE_TURN_SOUND_LEAD_ROWS = 6;
-function digChargeTurnSoundLead(event: BattleKernelSemanticEvent, moveId: number): { soundAgeLeadFrames?: number } {
-  return moveId === MOVE_DIG && event.provenance?.sourceLabel === CHARGE_TURN_SCRIPT ? { soundAgeLeadFrames: DIG_CHARGE_TURN_SOUND_LEAD_ROWS } : {};
+/**
+ * bdt1 (Scene ON): Rest's body (move 156: its SE_M_SNORE) plays 2 rows before the ROM on the generic sound clock (ROM A0 + 1 = 1200 against 1198 on the
+ * bdt1-rest-player-on lab; 17 T2 windows, every one -2). The body's own rows are not short: the clock's 7-row calibration meets Rest's script lead of 9
+ * (A0 - R - 3), so the clock runs 2 rows late (soundAgeLeadFrames -2).
+ */
+const MOVE_REST = 156;
+const REST_SOUND_LEAD_ROWS = -2;
+const REST_HEAL_PRINT_TAIL_ROWS = 10;
+function bdt1BodySoundLead(event: BattleKernelSemanticEvent, moveId: number): { soundAgeLeadFrames?: number } {
+  if (moveId === MOVE_DIG && event.provenance?.sourceLabel === CHARGE_TURN_SCRIPT) return { soundAgeLeadFrames: DIG_CHARGE_TURN_SOUND_LEAD_ROWS };
+  return moveId === MOVE_REST ? { soundAgeLeadFrames: REST_SOUND_LEAD_ROWS } : {};
 }
 const SCRIPT_TAIL_BETWEEN_OPCODES: ReadonlySet<string> = new Set(["B_SCR_OP_WAITANIMATION", "B_SCR_OP_SETBYTE", "B_SCR_OP_SETGRAPHICALSTATCHANGEVALUES"]);
 // lse4: the first-charging-turn script (orword HITMARKER_CHARGING, setbyte, seteffectprimary, copyarray) between the animation and its print.
@@ -5606,6 +5615,10 @@ export function projectBattleResolutionCommands(
                   ? WAITMESSAGE_LONG_TIMING
                   : MESSAGE_TIMING);
                 const timing = focusPunchPrePassMessageTiming(events, index, base) ?? chargeTurnEmptyBoxTiming(events, index) ?? hitAllLoopEmptyBoxTiming(events, index) ?? base;
+                if (event.provenance?.sourceLabel === "BattleScript_PresentHealTarget" && actionSnapshot?.currentMove === MOVE_REST
+                  && (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) === 0) {
+                  return Object.freeze({ minimumFrames: timing.minimumFrames, holdFrames: timing.holdFrames + REST_HEAL_PRINT_TAIL_ROWS });
+                }
                 return payload.messageId === "STRINGID_PKMNKNOCKEDOFF"
                   ? Object.freeze({ minimumFrames: timing.minimumFrames, holdFrames: timing.holdFrames + ITEM_KNOCKOFF_PRINT_TAIL_ROWS })
                   : timing;
@@ -5776,7 +5789,7 @@ export function projectBattleResolutionCommands(
           timing: Object.freeze({
             minimumFrames: SCENE_OFF_MOVE_PAUSE_FRAMES, ...moveAnimationSeGateTiming(events, index), ...moveAnimationScriptLeadTiming(events, index, presentedSinceUsedAtAttack, animation.moveId),
             ...moveAnimationScriptTailTiming(events, index, usedMoveInstructionExecution, presentedSinceUsedAtAttack, animation.moveId),
-            ...digChargeTurnSoundLead(event, animation.moveId),
+            ...bdt1BodySoundLead(event, animation.moveId),
           }),
         }));
         continue;
