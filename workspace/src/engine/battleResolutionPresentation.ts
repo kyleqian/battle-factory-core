@@ -6373,7 +6373,7 @@ export function projectBattleResolutionCommands(
             : opponentPartySummaryDrawTiming(lastFaintBattler === 1, event.provenance?.sourceLabel === "BattleScript_DoSwitchOut", (() => {
               const work = lastFaintBattler === 1 ? faintReplacementChoiceWork(beforeRules, currentField, events, index) : null;
               return work === null ? 0 : aiReplacementChoiceExtraFrames(work);
-            })())
+            })(), commands[commands.length - 1]?.type === "hp" && commands[commands.length - 1]!.timing === SHELL_BELL_HP_TIMING)
           : undefined,
       }));
       continue;

@@ -10,6 +10,7 @@ tpl = json.load(open(os.path.join(root, "tools/battle-lab/fsc1-eqko-off.json")))
 OUT = sys.argv[1]
 RATTATA, TACKLE, DOUBLE_EDGE, SPLASH, SEISMIC = 19, 33, 38, 150, 69
 ABSORB, MEGA_DRAIN, GEODUDE, QUICK_ATTACK = 71, 72, 74, 98
+SHELL_BELL = 219
 # name -> dict(plr=(species, level, move), foe=(species, level, move) for slot 0, frames)
 CASES = {
     "hit-lv5": dict(plr=(RATTATA, 50, TACKLE), foe=(RATTATA, 5, SPLASH)),
@@ -19,6 +20,7 @@ CASES = {
     "absorb-lv5": dict(plr=(RATTATA, 100, ABSORB), foe=(RATTATA, 5, QUICK_ATTACK)),
     "absorb-lv50": dict(plr=(RATTATA, 100, ABSORB), foe=(RATTATA, 50, QUICK_ATTACK)),
     "absorb-se": dict(plr=(RATTATA, 100, MEGA_DRAIN), foe=(GEODUDE, 5, QUICK_ATTACK)),
+    "shellbell-ko": dict(plr=(RATTATA, 100, TACKLE), foe=(RATTATA, 5, QUICK_ATTACK), plrItem=SHELL_BELL, frames=1100),
     "foeko-lv5": dict(plr=(RATTATA, 5, SPLASH), foe=(RATTATA, 100, TACKLE)),
     "foeko-lv50": dict(plr=(RATTATA, 50, SPLASH), foe=(RATTATA, 100, TACKLE)),
 }
@@ -30,11 +32,13 @@ def build(case, scene):
     lab["profile"] = f"battle-scene-{scene}"
     plr, foes = lab["overrides"]["parties"]["player"], lab["overrides"]["parties"]["opponent"]
     plr[0].update(species=c["plr"][0], level=c["plr"][1], moves=[c["plr"][2]] * 4)
+    if "plrItem" in c:
+        plr[0]["item"] = c["plrItem"]
     foes[0].update(species=c["foe"][0], level=c["foe"][1], moves=[c["foe"][2]] * 4)
     for i in (1, 2):
         plr[i].update(species=RATTATA, level=50, moves=[SPLASH] * 4)
         foes[i].update(species=RATTATA, level=50, moves=[SEISMIC] * 4)
-    lab["trace"]["segments"][3]["frames"] = 700
+    lab["trace"]["segments"][3]["frames"] = c.get("frames", 700)
     json.dump(lab, open(os.path.join(OUT, f"fnt2-{case}-{scene}.json"), "w"))
 os.makedirs(OUT, exist_ok=True)
 for scene in ("off", "on"):
