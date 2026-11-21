@@ -323,6 +323,50 @@ class RoundTest(unittest.TestCase):
         self.assertEqual(fc.brain_trap_wanted(b, b"\x07" * 8, 12), (False, False))
         self.assertEqual(fc.brain_trap_wanted(None, None, 1), (False, False))
 
+    def test_the_factory_head_build_is_held_until_fillfactorybrainparty_returns(self):
+        # hdt1: fcm1 s222-on-wc trapped the entry at ROM frame 274565; 21 frames later (the old fixed window) the second Pokemon was
+        # still being built (party species [345, None, 0]) and the third was then built from a stream the VBlank had moved on
+        self.assertIsNone(fc.brain_build_state(None, 1))
+        b = {"armedAt": 274564, "fired": None, "enemyBefore": b""}
+        self.assertIsNone(fc.brain_build_state(b, 274565))
+        b["fired"] = {"frame": 274565}
+        for f in (274565, 274586, 274587, 274600):
+            self.assertEqual(fc.brain_build_state(b, f), "building")
+        b["returned"] = None
+        self.assertEqual(fc.brain_build_state(b, 274599), "building")
+        self.assertEqual(fc.brain_build_state(b, 274565 + fc.BRAIN_BUILD_TIMEOUT + 1), "timeout")
+        b["returned"] = {"frame": 274598}
+        self.assertEqual(fc.brain_build_state(b, 274599), "returned")
+        self.assertEqual(fc.brain_build_state(b, 274565 + fc.BRAIN_BUILD_TIMEOUT + 1), "returned")
+
+    def test_the_factory_head_build_draws_against_the_engine_stream(self):
+        eng = 3381404268  # fcm1 s222-on-wc: the engine's cursor for the Head's first set draw
+        stream = [eng]
+        for _ in range(8):
+            stream.append(fc.lcg(stream[-1]))
+        # the build's own draws read the engine's stream back to back; each VBlankIntr draw reads the same value and is undone
+        held = [[1, "GetFactoryMonId", stream[0]], [1, "CreateMonWithEVSpreadNatureOTID", stream[1]], [2, "vblank", stream[2]],
+                [2, "CreateMonWithEVSpreadNatureOTID", stream[2]], [2, "CreateMonWithEVSpreadNatureOTID", stream[3]], [3, "vblank", stream[4]],
+                [3, "GetFactoryMonId", stream[4]]]
+        self.assertEqual(fc.brain_build_draws(held, eng), {
+            "buildDraws": 5, "vblankDraws": 2, "callers": {"GetFactoryMonId": 2, "CreateMonWithEVSpreadNatureOTID": 3, "vblank": 2},
+            "chainIsEngines": True, "firstBreak": None})
+        # a VBlank draw not undone (the old window had ended): the next build draw skips one value of the stream
+        moved = held[:5] + [[3, "GetFactoryMonId", stream[5]]]
+        got = fc.brain_build_draws(moved, eng)
+        self.assertEqual((got["chainIsEngines"], got["firstBreak"]), (False, 4))
+        # the ROM's own cursor at the entry (no trap): the first draw already differs
+        self.assertEqual(fc.brain_build_draws([[1, "GetFactoryMonId", 292533852]], eng)["firstBreak"], 0)
+        self.assertFalse(fc.brain_build_draws([], eng)["chainIsEngines"])
+        self.assertIsNone(fc.brain_build_draws([], None)["chainIsEngines"])
+
+    def test_the_factory_head_refuses_the_players_three_and_the_beaten_trainers_three(self):
+        # fcm1 s222-on-wc: battle 20's trainer had sets 270, 329, 362; the player starts the Head battle with 354, 325, 303
+        battles = {19: {"opponentSetIds": [270, 329, 362]}, 20: {"playerParty": [{"setId": 354}, {"setId": 325}, {"setId": 303}], "opponentSetIds": [359, 343, 305]}}
+        self.assertEqual(fc.brain_engine_rentals(battles, 20), [354, 325, 303, 270, 329, 362])
+        self.assertIsNone(fc.brain_engine_rentals(battles, 19))
+        self.assertIsNone(fc.brain_engine_rentals({20: {"playerParty": None}, 19: {"opponentSetIds": []}}, 20))
+
     def test_deal_opponent_check(self):
         first = {"trainerId": 83, "opponentSetIds": [215, 258, 190]}
         self.assertEqual(fc.deal_opponent_check(83, [215, 258, 190], first), (True, [83, [215, 258, 190]], [83, [215, 258, 190]]))
