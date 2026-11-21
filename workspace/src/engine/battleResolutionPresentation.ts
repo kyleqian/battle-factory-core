@@ -2440,7 +2440,7 @@ const TURN_END_TIMING = Object.freeze({ minimumFrames: 8 } as const);
  * after the 64-row `waitmessage` hold (4) + the 5 before it.  Only a print directly before the turn-end (the fade case has its own lead).
  * msg2: those counts start at the probe's press row P, but the engine's release row is P + 1 (the first advance that holds the
  * press): from it, dragged out's `moveendall` is 4 rows on.  ROM pictures agree: after the press the box clears 14 rows later
- * (fcm1 catcher, 19 / 19 Roar / Whirlwind prints before the turn-end, both scenes), the engine's cleared at 15 (btn2's open
+ * (fcm1 catcher, 33 / 33 Roar / Whirlwind prints before the turn-end, both scenes), the engine's cleared at 15 (btn2's open
  * "1 row late, 516 vs 515 on roar").  Substitute damaged / faded have the same count origin; left as measured (one catcher case,
  * Substitute damaged at 20 vs the ROM's 19, docs/msg2-roar-wish-messages.md).
  */
@@ -2590,7 +2590,7 @@ export const DOWN_ARROW_REDRAW_ROWS = 9;
  * then every 9th: `CopyWindowToVram`) and then, on a new A / B, `FillWindowPixelBuffer`s the window without copying it.  So a
  * press on a redraw row sends the cleared window to the screen at once (blank from the next row); on any other row the old text and
  * arrow stay until the next print or box clear.  The first wait row is the first row a press is accepted (age -2 here); ROM: fcm1
- * catcher, a press there blanked the box on the next frame in 2 / 2 Roar prints, a press elsewhere left it 14 rows in 17 / 17.
+ * catcher, a press there blanked the box on the next frame in 2 / 2 Roar prints, a press elsewhere left it 14 rows in 33 / 33.
  * `\l` (the scroll clears the arrow itself) and PAUSE_UNTIL_PRESS (no arrow) never do this.
  */
 export function releasedGateClearsBox(

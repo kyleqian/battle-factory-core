@@ -5,7 +5,7 @@
 // "Foe ILLUMISE's WISH came true!" with DRAGONAIR in (ours named DRAGONAIR). BattleScript_WishButFullHp's `pause B_WAIT_TIME_SHORT`
 // before "X's HP is full!": ROM 100 rows from the wish print's last glyph to the HP-full print, ours 66 (7 / 7 catcher rounds).
 // ROAR: the print and its wait were already the ROM's (25 rows to the arrow, held until a press). After the press the ROM's box clears
-// 14 rows later (19 / 19 catcher prints before the turn end; ours 15), at once when the press lands on an arrow redraw row (2 / 2), and a
+// 14 rows later (33 / 33 catcher prints before the turn end; ours 15), at once when the press lands on an arrow redraw row (2 / 2), and a
 // dragged-in Intimidate / Trace script starts its own rows after the release (ours printed 51 / 42 rows early: s36-off-ws, s89-off-ws,
 // s118-off-wc).  Census seeds (tests/helpers/btn1Battle.ts) stage the same scripts; the kernel's events are not changed.
 import { describe, expect, it } from "vitest";
@@ -113,9 +113,10 @@ describe("msg2: ROAR / WHIRLWIND, after the dragged-out press", () => {
   it("the release tail to moveendall is 4 rows from the engine's release row (btn2 counted 5 from the probe's press row)", () => {
     expect(RELEASE_TO_MOVEEND_ROWS.STRINGID_PKMNWASDRAGGEDOUT).toBe(4);
   });
-  for (const scene of ["off", "on"] as const) {
-    it(`before the turn end the box clears 14 rows after the press (ROM 19 / 19; seed 95, Scene ${scene.toUpperCase()})`, () => {
-      const { cursor, command } = draggedOutBeforePress(95, scene, 3);
+  // seed 95: the player's HITMONCHAN dragged out (the ROM's 33 cases are all this side); seed 15: Foe TORKOAL (no ROM window).
+  for (const [seed, scene] of [[95, "off"], [95, "on"], [15, "off"]] as const) {
+    it(`before the turn end the box clears 14 rows after the press (ROM 33 / 33; seed ${seed}, Scene ${scene.toUpperCase()})`, () => {
+      const { cursor, command } = draggedOutBeforePress(seed, scene, 3);
       cursor.step(["A"]);
       expect(resolutionOf(cursor.state()).releasedWaitCursor).toMatchObject({ age: 3 });
       expect(resolutionOf(cursor.state()).releasedWaitCursor.boxCleared).toBeUndefined();

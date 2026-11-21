@@ -19,7 +19,7 @@ const turnEndRowsAfter = (seed: number, scene: "on" | "off", messageId: string, 
 
 describe("btn2: release-to-moveendall rows (ROM, both scenes)", () => {
   // msg2: dragged out counts from the engine's release row (the probe's press row + 1): 4 (ROM pictures: the box clears 14 rows after
-  // the press, fcm1 catcher 19 / 19; docs/msg2-roar-wish-messages.md).
+  // the press, fcm1 catcher 33 / 33; docs/msg2-roar-wish-messages.md).
   it("pins the measured table (dragged out 4, Substitute damaged 10, Substitute faded 9 after its hold)", () => {
     expect(RELEASE_TO_MOVEEND_ROWS).toEqual({
       STRINGID_PKMNWASDRAGGEDOUT: 4, STRINGID_SUBSTITUTEDAMAGED: 10, STRINGID_PKMNSUBSTITUTEFADED: 9,
