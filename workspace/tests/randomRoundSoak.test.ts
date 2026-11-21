@@ -1121,7 +1121,8 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // hcr3 (Icy Wind's hp keeps the stat command's 4-row tail, Double-Edge's recoil hp / print follow the ROM rows, the faint SE clips its hpd4 compensation at 0): frames only, 60582 -> 58672; same battle 3 / depth 2 / turn 19 / roundLost.
       // merge stc1 + hcr3 (fold-a): frames only, 60525 (stc1) / 58672 (hcr3) -> 58579; same battle / depth / turn / end state.
       // gsp3 (the end-of-turn poison / burn tick's print -> launch rows 95 / 98 as the ROM, gsp3-{toxic,willowisp}-player-on): frames only, 58579 -> 58583; same battle 3 / depth 2 / turn 19 / roundLost.
-      frames: 58583,
+      // fnt2 (a super-effective / crit drain's heal bar waits the ROM's 6 script rows after the print; lab fnt2-absorb-se ROM SE 16 580, both scenes): frames only, 58583 -> 58615; same battle 3 / depth 2 / turn 19 / roundLost.
+      frames: 58615,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 2,

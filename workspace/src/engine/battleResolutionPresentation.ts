@@ -2581,6 +2581,13 @@ const WEATHER_DAMAGE_PC = datahpupdatePcAfter("BattleScript_DamagingWeatherLoop"
  */
 const RECOIL_PC = datahpupdatePcAfter("BattleScript_DoRecoil");
 const HP_RECOIL_LEAD_ROWS = 7;
+/**
+ * fnt2 (ROM lab fnt2-absorb-se, both KO seeds 830 s2 / s6, 1415 s53): the drain's heal bar (`BattleScript_AbsorbUpdateHp`'s `healthbarupdate; datahpupdate`) after the hit's
+ * effectiveness / crit print. The print's `waitmessage` ends and the script runs `resultmessage` 's tail `negativedamage; orword; jumpifability; setbyte; goto` + the
+ * `healthbarupdate` row before the bar: 6 rows the print's box stays up (the recoil's 7 above, same shape). A neutral hit has no print and the target bar's `bars` tail already holds them.
+ */
+const DRAIN_PC = datahpupdatePcAfter("BattleScript_AbsorbUpdateHp");
+const HP_DRAIN_LEAD_ROWS = 6;
 const WRAP_SECONDARY_PC = BATTLE_SCRIPT_PROGRAM.labelEntries["BattleScript_MoveEffectWrap"]!.programCounter;
 type HpTick = "turn-damage" | "weather";
 function hpTickKind(event: BattleKernelSemanticEvent): HpTick | null {
@@ -2598,6 +2605,8 @@ interface HpLeadRows {
   readonly barExecution: number | undefined;
   /** The `datahpupdate` of `BattleScript_DoRecoil` (a recoil bar). */
   readonly recoil: boolean;
+  /** The `datahpupdate` of `BattleScript_AbsorbUpdateHp` (a drain's heal bar). */
+  readonly drain: boolean;
   /** HITMARKER_NO_ANIMATIONS (Scene OFF) when the hp command was projected. */
   readonly sceneOff: boolean;
 }
@@ -2632,6 +2641,9 @@ function applyHpHitTails(
       commands[index - 1] = Object.freeze({ ...recoilPrevious, timing: Object.freeze({ ...recoilPrevious.timing, holdFrames: recoilPrevious.timing.holdFrames + HP_RECOIL_LEAD_ROWS }) });
       commands[index] = Object.freeze({ ...command, timing: Object.freeze({ minimumFrames: 0, tailFrames: leads.messageRows - 1 }) });
       continue;
+    }
+    if (leads.drain && recoilPrevious?.type === "message") {
+      commands[index - 1] = Object.freeze({ ...recoilPrevious, timing: Object.freeze({ ...recoilPrevious.timing, holdFrames: recoilPrevious.timing.holdFrames + HP_DRAIN_LEAD_ROWS }) });
     }
     if (leads.wrapSecondary && rest[0]?.type === "message") {
       commands[index] = Object.freeze({ ...command, timing: Object.freeze({ minimumFrames: 0, tailFrames: WRAP_SECONDARY_TAIL_FRAMES }) });
@@ -6118,7 +6130,7 @@ export function projectBattleResolutionCommands(
       const messageRows = drainRole === null ? hpMessageLeadRows(events, index) : null;
       const faintNext = drainRole === null && hpFaintNext(events, index);
       const hitEffectMessage = HP_HIT_EFFECT_OPCODES.has(events[index + 1]?.provenance?.opcodeName ?? "") || hitAllLoopEmptyBoxTiming(events, index + 1) !== null;
-      hpLeadRows.set(health.eventSequence, { tick: hpTickKind(event), wrapSecondary: events[index + 1]?.provenance?.programCounter === WRAP_SECONDARY_PC, moveEndRows, messageRows, faintNext, hitEffectMessage, barExecution: health.instructionExecution, recoil: event.provenance?.programCounter === RECOIL_PC, sceneOff: (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0 });
+      hpLeadRows.set(health.eventSequence, { tick: hpTickKind(event), wrapSecondary: events[index + 1]?.provenance?.programCounter === WRAP_SECONDARY_PC, moveEndRows, messageRows, faintNext, hitEffectMessage, barExecution: health.instructionExecution, recoil: event.provenance?.programCounter === RECOIL_PC, drain: event.provenance?.programCounter === DRAIN_PC, sceneOff: (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0 });
       commands.push(Object.freeze({
         type: "hp",
         eventSequence: health.eventSequence,
@@ -6366,7 +6378,7 @@ export function projectBattleResolutionCommands(
             : opponentPartySummaryDrawTiming(lastFaintBattler === 1, event.provenance?.sourceLabel === "BattleScript_DoSwitchOut", (() => {
               const work = lastFaintBattler === 1 ? faintReplacementChoiceWork(beforeRules, currentField, events, index) : null;
               return work === null ? 0 : aiReplacementChoiceExtraFrames(work);
-            })())
+            })(), commands[commands.length - 1]?.type === "hp" && commands[commands.length - 1]!.timing === SHELL_BELL_HP_TIMING)
           : undefined,
       }));
       continue;
