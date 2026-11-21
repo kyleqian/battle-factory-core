@@ -40,4 +40,8 @@ describe("eqk1: hit-all tail", () => {
     expect((commands[0] as { timing: { holdFrames: number } }).timing.holdFrames).toBe(55);
     expect(minimumFramesAfterBox(commands)).toBe(9);
   });
+  it("Scene OFF: Magnitude's pause / print / waitmessage rows are not counted again in the move command (first SE +100 -> 0, ROM 211)", () => {
+    const move = commandsOf("eqk1-mag-p", "off").find((command) => command.type === "move-animation") as { timing: { minimumFrames: number } };
+    expect(move.timing.minimumFrames).toBe(47);
+  });
 });
