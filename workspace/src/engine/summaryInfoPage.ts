@@ -56,6 +56,7 @@ import summaryButtonsData from "../assets/gen/summary-buttons.json" with { type:
 import summaryBallData from "../assets/gen/summary-ball.json" with { type: "json" };
 import frontSpritesData from "../assets/gen/front-sprites.json" with { type: "json" };
 import { frontPixels } from "./monPicPixels.ts";
+import { SPECIES_SPINDA_SYMBOL, spindaSpottedTileset } from "./spindaSpots.ts";
 import fontNormalData from "../data/gen/font-normal.json" with { type: "json" };
 import charmapData from "../data/gen/charmap.json" with { type: "json" };
 import summaryMoveEffectBattleData from "../assets/gen/summary-move-effect-battle.json" with { type: "json" };
@@ -103,11 +104,41 @@ const frontSprites = frontSpritesData as unknown as Record<string, { tileset: Ti
  * battle-opponent asset is the same source pic (frame 2 = animation frame 1;
  * byte-identical for the six summary rentals that have both).
  */
-function summaryFrontSprite(species: string): { tileset: TileGrid; animationFrame1: TileGrid; palette: RgbColor[] } | undefined {
+function summaryFrontSprite(species: string, personality: number): { tileset: TileGrid; animationFrame1: TileGrid; palette: RgbColor[] } | undefined {
   const own = frontSprites[species];
   if (own) return own;
   const opponent = frontPixels(species) as { tileset: TileGrid; frame2: TileGrid; palette: RgbColor[] } | undefined;
+  if (opponent && species === SPECIES_SPINDA_SYMBOL) {
+    // LoadMonGfxAndSprite -> LoadSpecialPokePic -> DrawSpindaSpots with summary->pid (spd1's rule; sfa2's ROM receipt for SPINDA).
+    const key = personality >>> 0;
+    let spotted = summarySpindaTilesets.get(key);
+    if (spotted === undefined) {
+      spotted = spindaSpottedTileset(opponent.tileset, key);
+      if (summarySpindaTilesets.size > 64) summarySpindaTilesets.clear();
+      summarySpindaTilesets.set(key, spotted);
+    }
+    return { tileset: spotted, animationFrame1: opponent.frame2, palette: opponent.palette };
+  }
   return opponent && { tileset: opponent.tileset, animationFrame1: opponent.frame2, palette: opponent.palette };
+}
+const summarySpindaTilesets = new Map<number, TileGrid>();
+
+/**
+ * palette.c BlendPalette over the mon's 16 OBJ colours: each BGR555 component moves (target - c) * coefficient >> 4 toward the
+ * target, from the unfaded colour (the 8-bit palette is mGBA's (c << 3) | (c >> 2) expansion, so c = component >> 3).
+ */
+function blendSummaryMonPalette(palette: readonly RgbColor[], coefficient: number, color: number): RgbColor[] {
+  if (coefficient === 0) return palette.slice();
+  const toward = (component8: number, target5: number) => {
+    const c5 = component8 >> 3;
+    const b5 = c5 + (((target5 - c5) * coefficient) >> 4);
+    return (b5 << 3) | (b5 >> 2);
+  };
+  return palette.map((c) => ({
+    r: toward(c.r, color & 31),
+    g: toward(c.g, (color >> 5) & 31),
+    b: toward(c.b, (color >> 10) & 31),
+  }));
 }
 const font = fontNormalData as unknown as FontData;
 const charmap = new Map<string, number>((charmapData as { entries: [string, number][] }).entries);
@@ -474,12 +505,16 @@ function compose(
   // all flipped, unlike the draft screen's unflipped ball-open pic).
   const spriteRental = rentals[spriteSlot]!;
   if (!spriteRental) throw new Error(`summary sprite rental slot ${spriteSlot} is unavailable`);
-  const frontSprite = summaryFrontSprite(spriteRental.frontPicSpecies);
+  const frontSprite = summaryFrontSprite(spriteRental.frontPicSpecies, spriteRental.personality);
   const hFlip = summaryFrontSpriteIsFlipped(spriteRental.frontPicSpecies);
   // Every Battle Frontier species has a front pic (summaryFrontSprite). A
   // generated rental keeps its exact front-pic identity in state and never
   // substitutes anchor art; a species outside those assets only loses the
   // portrait layer while all record-backed text remains visible.
+  // CreateMonSprite sets oam.priority 0: the portrait sits above every BG, BG0's windows included (OBJ beats a BG of equal
+  // priority), so it is drawn last, after the windows below. A motion that lifts it over the "No." / name windows shows it in front
+  // (sfa2 ROM receipts: GRAVELER, KINGLER, ...).
+  const drawMonFrontSprite = () => {
   if (frontSprite) {
     let presentationClock = monAnimClock;
     if (monReplacement.replacementAnimationDelay) {
@@ -498,27 +533,33 @@ function compose(
       frontPresentation.frame === 1 ? frontSprite.animationFrame1 : frontSprite.tileset;
     const monX = 40 + frontPresentation.x2;
     const monY = 64 + frontPresentation.y2;
-    if (
-      monReplacement.showMon !== false &&
-      frontPresentation.affine
-    ) {
+    // BlendPalette (glow / flash motions) rewrites the faded copy of the sprite's 16 colours from the unfaded ones (sfa2).
+    const monPalette = frontPresentation.blend
+      ? blendSummaryMonPalette(frontSprite.palette, frontPresentation.blend.coefficient, frontPresentation.blend.color)
+      : frontSprite.palette;
+    const matrix = frontPresentation.matrix;
+    if (monReplacement.showMon === false || frontPresentation.invisible) {
+      // CreateSprite's slot holds no visible OBJ this frame.
+    } else if (matrix) {
+      // Double-size affine OBJ (HandleStartAffineAnim): the OAM matrix carries the flip (sMonAffineAnims[1], HandleSetAffineData).
       drawSpriteSheetAffineRotate(
         fb,
         monTileset,
-        frontSprite.palette.map((color) => fadeColor(color, objY)),
+        monPalette.map((color) => fadeColor(color, objY)),
         monX,
         monY,
-        hFlip ? -frontPresentation.affine.xScale : frontPresentation.affine.xScale,
-        0,
-        0,
-        frontPresentation.affine.yScale,
+        matrix[0],
+        matrix[1],
+        matrix[2],
+        matrix[3],
         undefined,
         true,
       );
-    } else if (monReplacement.showMon !== false) {
-      sprite({ tileset: monTileset }, frontSprite.palette, monX, monY, 8, 8, 0, hFlip);
+    } else {
+      sprite({ tileset: monTileset }, monPalette, monX, monY, 8, 8, 0, hFlip);
     }
   }
+  };
 
   // CreateSetStatusSprite (pokemon_summary_screen.c:4079-4096): the 32x8 ailment icon centred at (64,152), visible on every page
   // while the shown mon has an ailment (sum241; the mon-change hide / re-create is not modelled).
@@ -885,6 +926,8 @@ function compose(
       }
     }
   }
+
+  drawMonFrontSprite();
 }
 
 export function renderSummaryInfoPage(

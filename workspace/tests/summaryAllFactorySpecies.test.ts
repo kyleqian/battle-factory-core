@@ -101,29 +101,22 @@ describe("Summary screen for every Factory species", () => {
           }
         }
         const end = summaryFrontSpritePresentation(name, 399, replacement);
-        if (!end.motionFinished || end.affine !== null) failures.push(`${name}: motion did not finish`);
+        if (!end.motionFinished || end.matrix !== null) failures.push(`${name}: motion did not finish`);
       }
     }
     expect(failures).toEqual([]);
   }, 600_000);
 
-  it("reports the approximate (frame program only) species explicitly", () => {
+  it("leaves no species on the approximate (frame program only) fallback (sfa2)", () => {
     const approximate = summaryFrontAnimation.species.filter((entry) =>
       summaryFrontMotionIsApproximate(entry.motion.type),
     );
-    const implemented = summaryFrontAnimation.species.length - approximate.length;
-    // 20 transcribed callbacks cover 239 / 376 species; the other 137 hold
-    // still while their source frame program runs (never throw).
-    expect(SUMMARY_FRONT_IMPLEMENTED_MOTIONS.length).toBe(20);
-    expect(implemented).toBe(239);
-    for (const entry of approximate) {
+    // 62 transcribed callbacks cover all 376 species; tests/sfa2SummaryFrontAnimRom.test.ts pins each against the ROM.
+    expect(SUMMARY_FRONT_IMPLEMENTED_MOTIONS.length).toBe(62);
+    expect(approximate).toEqual([]);
+    for (const entry of summaryFrontAnimation.species) {
       const species = entry.species.replace("SPECIES_", "");
-      expect(summaryFrontSpritePresentation(species, SUMMARY_INITIAL_MON_ANIMATION_START + 20, false)).toMatchObject({
-        motionClaim: "approximate-static",
-        x2: 0,
-        y2: 0,
-        affine: null,
-      });
+      expect(summaryFrontSpritePresentation(species, SUMMARY_INITIAL_MON_ANIMATION_START + 20, false).motionClaim).toBe("source");
     }
   });
 
@@ -157,46 +150,3 @@ describe("MOVE_NONE slots (12 Level 50 / Open sets: CATERPIE, DITTO, UNOWN, ...)
     expect(rental(54).moves.map((move) => move.id === 0)).toEqual([false, true, true, true]);
   });
 });
-
-describe("newly transcribed motion golden pins (pokemon_animation.c by hand)", () => {
-  const at = (species: string, elapsed: number) =>
-    summaryFrontSpritePresentation(
-      species,
-      SUMMARY_INITIAL_MON_ANIMATION_START + summaryFrontAnimationDelay(species) + elapsed,
-      false,
-    );
-
-  it("ANIM_V_SHAKE: y2 = Sin(60k % 256, 3) from call k, visible at elapsed k + 1, done after call 39", () => {
-    const species = speciesWith("ANIM_V_SHAKE");
-    // gSineTable[60] = 254, [120] = 49, [180] = -244:
-    // k=0: 0; k=1: 3*254>>8 = 2; k=2: 3*49>>8 = 0; k=3: 3*-244>>8 = -3.
-    expect([1, 2, 3, 4].map((e) => at(species, e).y2)).toEqual([0, 2, 0, -3]);
-    expect(at(species, 39)).toMatchObject({ motionFinished: false });
-    expect(at(species, 40)).toMatchObject({ motionFinished: true, y2: 0 });
-  });
-
-  it("ANIM_V_STRETCH: affine from call k at elapsed k + 2; xScale = Sin(k*128/40, 16) + 256", () => {
-    const species = speciesWith("ANIM_V_STRETCH");
-    expect(at(species, 1).affine).toBeNull();
-    // k=0: index2 0 -> (256, 256), y2 0.
-    expect(at(species, 2)).toMatchObject({ affine: { xScale: 256, yScale: 256 }, y2: 0 });
-    // k=10: index2 = 10*128/40 = 32 (gSineTable[32] = 181): Sin(32,16) = 11;
-    // data[7] += 51 -> index1 51 (gSineTable[51] = 243): Sin(51,8) = 7;
-    // yScale = 256 - Sin(32,40) - 7 = 256 - 28 - 7 = 221; posY = 35/8 = 4.
-    expect(at(species, 12)).toMatchObject({ affine: { xScale: 267, yScale: 221 }, y2: -4 });
-    expect(at(species, 43)).toMatchObject({ affine: null, motionFinished: true });
-  });
-
-  it("ANIM_H_SHAKE: x2 = Sin(60k % 256, 3) with no TryFlipX", () => {
-    const species = speciesWith("ANIM_H_SHAKE");
-    expect([1, 2, 3, 4].map((e) => at(species, e).x2)).toEqual([0, 2, 0, -3]);
-  });
-});
-
-function speciesWith(type: string): string {
-  return summaryFrontAnimation.species.find((entry) => entry.motion.type === type && !entry.noFlip)!.species.replace("SPECIES_", "");
-}
-
-function summaryFrontAnimationDelay(species: string): number {
-  return summaryFrontAnimation.species.find((entry) => entry.species === `SPECIES_${species}`)!.delay;
-}
