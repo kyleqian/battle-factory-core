@@ -29,6 +29,17 @@ def eng_prints(path):
     return [(c[0], c[2], c[3], c[4]) for c in json.load(open(path))["cmds"] if c[1] == "message"]
 
 
+def align(roms, engs):
+    """Pair each engine message with the next ROM print of the same script label (an unmatched one on either side is skipped)."""
+    pairs, j = [], 0
+    for e in engs:
+        k = next((k for k in range(j, len(roms)) if roms[k][1].split("+")[0] == e[2]), None)
+        if k is not None:
+            pairs.append((roms[k], e))
+            j = k + 1
+    return pairs
+
+
 def main():
     d = Path(sys.argv[1])
     prefix = sys.argv[2] if len(sys.argv) > 2 and not sys.argv[2].startswith("--") else ""
@@ -39,8 +50,9 @@ def main():
             continue
         r, e = rom_prints(rom), eng_prints(eng)
         if "--compact" in sys.argv:
-            parts = [f"{ee[1].replace('STRINGID_', '')}{ee[0] - rr[0]:+d}" for rr, ee in zip(r, e)]
-            print(f"{base} [{len(r)}/{len(e)}] " + " ".join(parts))
+            pairs = align(r, e)
+            parts = [f"{ee[1].replace('STRINGID_', '')}{ee[0] - rr[0]:+d}" for rr, ee in pairs]
+            print(f"{base} [{len(pairs)}/{len(r)}/{len(e)}] " + " ".join(parts))
             continue
         print(f"== {base}: ROM prints {len(r)}, engine messages {len(e)}")
         for i in range(max(len(r), len(e))):

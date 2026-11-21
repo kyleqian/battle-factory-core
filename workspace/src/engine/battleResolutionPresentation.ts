@@ -1443,12 +1443,17 @@ function winTailHoldRows(events: readonly BattleKernelSemanticEvent[], receiptIn
  * the last action's MoveEnd. The ROM runs MoveEnd's remaining cases and HandleEndTurn / DoFieldEndTurnEffects before it: its printstring
  * executes 10 rows after MoveEnd's first row (stat fall 425 -> 435, hit 323 -> 333), 3 rows later than the next action's USEDMOVE chain (n + 6 + u).
  */
-const END_TURN_WEATHER_PRINT_SCRIPTS: ReadonlySet<string> = new Set([
+const END_TURN_PRINT_SCRIPTS: ReadonlySet<string> = new Set([
   "BattleScript_RainContinuesOrEnds",
   "BattleScript_DamagingWeatherContinues",
   "BattleScript_SandStormHailEnds",
   "BattleScript_SunlightContinues",
   "BattleScript_SunlightFaded",
+  "BattleScript_PoisonTurnDmg",
+  "BattleScript_BurnTurnDmg",
+  "BattleScript_CurseTurnDmg",
+  "BattleScript_PerishSongCountGoesDown",
+  "BattleScript_MonTookFutureAttack",
 ]);
 const END_TURN_WEATHER_PRINT_EXTRA_ROWS = 1;
 
@@ -1463,10 +1468,25 @@ const END_TURN_WEATHER_PRINT_EXTRA_ROWS = 1;
  */
 const DAMAGING_WEATHER_LOOP_SCRIPT = "BattleScript_DamagingWeatherLoop";
 const DAMAGING_WEATHER_LOOP_AFTER_HP_ROWS = 3;
-function damagingWeatherLoopLeadRows(events: readonly BattleKernelSemanticEvent[], index: number, sceneOn: boolean): number {
+// Perish Song's count for the second battler (a new BattleScriptExecute after the first print's end2) and Wish's heal print after its hp command (ROM labs etp1-perish, etp1-wish: +5 rows, both scenes).
+const PERISH_SONG_SCRIPT = "BattleScript_PerishSongCountGoesDown";
+const WISH_SCRIPT = "BattleScript_WishComesTrue";
+const END_TURN_NEXT_SCRIPT_ROWS = 5;
+function endTurnChainLeadRows(events: readonly BattleKernelSemanticEvent[], index: number, sceneOn: boolean): number {
   const event = events[index]!;
   const executed = event.provenance?.instructionExecution;
-  if (event.payload.kind !== "message" || event.provenance?.sourceLabel !== DAMAGING_WEATHER_LOOP_SCRIPT || executed === undefined) return 0;
+  if (event.payload.kind !== "message" || executed === undefined) return 0;
+  const label = event.provenance?.sourceLabel;
+  if (label === PERISH_SONG_SCRIPT || label === WISH_SCRIPT) {
+    const previous = events[index - 1];
+    if (label === PERISH_SONG_SCRIPT) {
+      return previous?.payload.kind === "message" && previous.provenance?.sourceLabel === label && (previous.provenance.instructionExecution ?? 0) >= executed
+        ? END_TURN_NEXT_SCRIPT_ROWS : 0;
+    }
+    return previous?.payload.kind === "hp-change" && previous.provenance?.sourceLabel === label && event.payload.messageId === "STRINGID_PKMNREGAINEDHEALTH"
+      ? END_TURN_NEXT_SCRIPT_ROWS : 0;
+  }
+  if (label !== DAMAGING_WEATHER_LOOP_SCRIPT) return 0;
   for (let back = index - 1; back >= 0; back -= 1) {
     const previous = events[back]!;
     const previousExecution = previous.provenance?.instructionExecution;
@@ -1527,7 +1547,7 @@ function actionTransitionPauseFrames(
       statusFramesAfter += frames;
       continue;
     }
-    const endTurnWeather = event.payload.kind === "message" && END_TURN_WEATHER_PRINT_SCRIPTS.has(event.provenance?.sourceLabel ?? "");
+    const endTurnWeather = event.payload.kind === "message" && END_TURN_PRINT_SCRIPTS.has(event.provenance?.sourceLabel ?? "");
     if (
       next >= e1 || event.payload.kind !== "message"
       || !(endTurnWeather || ACTION_TRANSITION_NEXT_PRINTS.has(event.payload.messageId) || (sceneOn && event.payload.messageId === SCENE_ON_ACTION_TRANSITION_NEXT_PRINT))
@@ -5809,8 +5829,8 @@ export function projectBattleResolutionCommands(
         ...(selfConfusionOff ? { leadFrames: SELF_CONFUSION_OFF_PRE_PRINT_ROWS } : {}),
         ...(twoTurnSecondPrintLead(event, beforeRules, actionSnapshot) ?? {}),
         ...(carryBeforeGlyph > 0 ? { leadFrames: (twoTurnSecondPrintLead(event, beforeRules, actionSnapshot)?.leadFrames ?? 0) + carryBeforeGlyph } : {}),
-        ...(damagingWeatherLoopLeadRows(events, index, (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) === 0) > 0
-          ? { leadFrames: damagingWeatherLoopLeadRows(events, index, (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) === 0) } : {}),
+        ...(endTurnChainLeadRows(events, index, (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) === 0) > 0
+          ? { leadFrames: endTurnChainLeadRows(events, index, (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) === 0) } : {}),
         ...(payload.messageId === "STRINGID_TARGETFAINTED"
           || payload.messageId === "STRINGID_ATTACKERFAINTED"
           ? { faintBattler: lastFaintBattler! }

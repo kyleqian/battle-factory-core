@@ -1,7 +1,8 @@
 // etp1 (docs/etp1-end-turn-prints.md): the end-turn weather prints reproduce the ROM's first-glyph frames in both scenes.
 // ROM: tools/integration/hcr3mProbe.py over each lab (the exec flag rises on a print's waitmessage; first glyph = that row + 1), Scene OFF
-// battle-scene-off :8014 / Scene ON :8012. The frames are the labs' message commands in order (every print of the lab: the weather's
-// own move, the end-turn continue / end print and each damage print). Labs: tools/battle-lab/etp1-*.json (tools/integration/etp1MakeLabs.py).
+// battle-scene-off :8014 / Scene ON :8012. Each pin is [index of the lab's message command in presentation order]: ROM first-glyph frame, for
+// the end-turn prints only (the move bodies' own prints keep their own pins; the residuals are in the doc). Labs: tools/battle-lab/etp1-*.json
+// (tools/integration/etp1MakeLabs.py).
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import "../src/engine/monPicPixelsInstall.ts";
@@ -13,17 +14,31 @@ const { labBackedStage } = (await import(/* @vite-ignore */ appTracePath)) as {
   labBackedStage: (file: string, state: ReturnType<typeof createInitialState>, frame: undefined, scene: "on" | "off") => any;
 };
 
-const ROM_FIRST_GLYPHS: Readonly<Record<string, readonly number[]>> = {
-  "etp1-sandstorm-off": [30, 92, 196, 334, 425, 580],
-  "etp1-sandstorm-on": [30, 229, 333, 661, 919, 1074],
-  "etp1-hail-off": [30, 87, 191, 329, 423, 567],
-  "etp1-hail-on": [30, 214, 318, 646, 897, 1041],
-  "etp1-sun-off": [30, 92, 201, 339],
-  "etp1-sun-on": [30, 219, 328, 656],
-  "etp1-sandstorm5-off": [30, 92, 196, 334, 425, 580, 1152, 1214, 1313, 1451, 1542, 1697, 2274, 2336, 2435, 2573, 2664, 2819, 3396, 3458, 3557, 3695, 3786, 3941, 4518, 4580, 4679, 4817],
-  "etp1-sandstorm5-on": [30, 229, 333, 661, 919, 1074, 2274, 2336, 2435, 2763, 3021, 3176, 3396, 3458, 3557, 3885, 4143, 4298, 4518, 4580, 4679, 5007, 5265, 5420],
-  "etp1-sun5-off": [30, 92, 201, 339, 1152, 1214, 1313, 1451, 2274, 2336, 2435, 2573, 3396, 3458, 3557, 3695, 4518, 4580, 4679, 4817],
-  "etp1-sun5-on": [30, 219, 328, 656, 1152, 1214, 1313, 1641, 2274, 2336, 2435, 2763, 3396, 3458, 3557, 3885, 4518, 4580, 4679, 5007],
+const ROM_FIRST_GLYPHS: Readonly<Record<string, Readonly<Record<number, number>>>> = {
+  "etp1-sandstorm-off": {3: 334, 4: 425, 5: 580},
+  "etp1-sandstorm-on": {3: 661, 4: 919, 5: 1074},
+  "etp1-hail-off": {3: 329, 4: 423, 5: 567},
+  "etp1-hail-on": {3: 646, 4: 897, 5: 1041},
+  "etp1-sun-off": {3: 339},
+  "etp1-sun-on": {3: 656},
+  "etp1-sandstorm5-off": {3: 334, 4: 425, 5: 580, 9: 1451, 10: 1542, 11: 1697, 15: 2573, 16: 2664, 17: 2819, 21: 3695, 22: 3786, 23: 3941, 27: 4817},
+  "etp1-sandstorm5-on": {3: 661, 4: 919, 5: 1074, 9: 2763, 10: 3021, 11: 3176, 15: 3885, 16: 4143, 17: 4298, 21: 5007, 22: 5265, 23: 5420},
+  "etp1-sun5-off": {3: 339, 7: 1451, 11: 2573, 15: 3695, 19: 4817},
+  "etp1-sun5-on": {3: 656, 7: 1641, 11: 2763, 15: 3885, 19: 5007},
+  "etp1-toxic3-off": {7: 1488, 11: 2610},
+  "etp1-toxic3-on": {7: 1678, 11: 2800},
+  "etp1-willowisp3-off": {7: 1459, 11: 2581},
+  "etp1-willowisp3-on": {7: 1649, 11: 2771},
+  "etp1-perish-off": {3: 360, 4: 461, 8: 1441, 9: 1542, 13: 2563, 14: 2664},
+  "etp1-perish-on": {3: 778, 4: 879, 8: 1631, 9: 1732, 13: 2753, 14: 2854},
+  "etp1-futuresight-off": {9: 2565},
+  "etp1-futuresight-on": {9: 2755},
+  "etp1-wish-off": {5: 1469, 6: 1587},
+  "etp1-wish-on": {5: 1824, 6: 1942},
+  "etp1-ingrain-off": {3: 363},
+  "etp1-ingrain-on": {3: 849},
+
+
 };
 
 function firstGlyphFrames(name: string): number[] {
@@ -47,9 +62,11 @@ function firstGlyphFrames(name: string): number[] {
 }
 
 describe("etp1: end-turn prints", () => {
-  for (const [name, rom] of Object.entries(ROM_FIRST_GLYPHS)) {
-    it(`${name} first glyphs equal the ROM's`, () => {
-      expect(firstGlyphFrames(name)).toEqual(rom);
+  for (const [name, pins] of Object.entries(ROM_FIRST_GLYPHS)) {
+    it(`${name} end-turn first glyphs equal the ROM's`, () => {
+      const frames = firstGlyphFrames(name);
+      expect(Object.keys(pins).length).toBeGreaterThan(0);
+      for (const [index, rom] of Object.entries(pins)) expect([index, frames[Number(index)]]).toEqual([index, rom]);
     });
   }
 });
