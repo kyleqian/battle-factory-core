@@ -1382,9 +1382,15 @@ const SCENE_OFF_SEMI_INVULNERABLE_HIDE_LEAD = 2;
  * sta3 (docs/aud249-general-anim-sounds.md): the next action's first print after the MoveEnd receipts. STRINGID_PKMNISCONFUSED is
  * BattleScript_MoveUsedIsConfused's first instruction (attackcanceler jumps there: u = 2), ROM-measured as the same E + 1 + d + n + 6 + u.
  */
-const ACTION_TRANSITION_NEXT_PRINTS: ReadonlySet<string> = new Set(["STRINGID_USEDMOVE", "STRINGID_PKMNISCONFUSED", "STRINGID_PKMNFASTASLEEP"]);
+const ACTION_TRANSITION_NEXT_PRINTS: ReadonlySet<string> = new Set(["STRINGID_USEDMOVE", "STRINGID_PKMNISCONFUSED", "STRINGID_PKMNFASTASLEEP", "STRINGID_PKMNINLOVE"]);
 /** gsp2: the wake-up print is a transition print in Scene ON only (Scene OFF output is unchanged). */
 const SCENE_ON_ACTION_TRANSITION_NEXT_PRINT = "STRINGID_PKMNWOKEUP";
+/**
+ * gsp3 (ROM labs gsp3-attract-{player,foe}-on): "X is in love with Y!" (BattleScript_MoveUsedIsInLove, reached from attackcanceler by a `call`) is a transition
+ * print too, 2 rows earlier than the trn176 count: MoveEnd 583 -> print row 592 (ROM) against the rule's 594.
+ */
+const IN_LOVE_TRANSITION_PRINT = "STRINGID_PKMNINLOVE";
+const IN_LOVE_TRANSITION_ROWS = -2;
 
 const ACTION_TRANSITION_WAIT_ROWS: Readonly<Record<string, number>> = Object.freeze({ B_WAIT_TIME_LONG: WAITMESSAGE_LONG_HOLD_FRAMES });
 
@@ -1413,6 +1419,7 @@ function actionTransitionPauseFrames(
   let used: number | null = null;
   let statusFramesAfter = 0;
   let usedIsPreMove = false;
+  let inLoveRows = 0;
   for (let index = receiptIndex + 1; index < events.length; index += 1) {
     const event = events[index]!;
     const next = event.provenance?.instructionExecution;
@@ -1434,6 +1441,7 @@ function actionTransitionPauseFrames(
     ) return null;
     used = next;
     usedIsPreMove = event.payload.messageId !== "STRINGID_USEDMOVE";
+    if (event.payload.messageId === IN_LOVE_TRANSITION_PRINT) inLoveRows = IN_LOVE_TRANSITION_ROWS;
     break;
   }
   if (used === null) return null;
@@ -1483,7 +1491,7 @@ function actionTransitionPauseFrames(
   }
   // sta3 (aud242g dreameater, ROM): before a pre-move print the status icon's second controller row (production presents one frame) is one more row.
   const iconSecondRow = anchor.payload.kind === "status-icon-update" && usedIsPreMove ? 1 : 0;
-  const frames = e1 - anchorExecution - 1 + ACTION_TRANSITION_ROWS + used - presented - statusFramesAfter + iconSecondRow;
+  const frames = e1 - anchorExecution - 1 + ACTION_TRANSITION_ROWS + used - presented - statusFramesAfter + iconSecondRow + inLoveRows;
   return frames > 0 ? { frames, rowsToReceipt: e1 - anchorExecution - 1 - presented } : null;
 }
 
@@ -6773,7 +6781,7 @@ function usedMovePrintLeadU(state: BattleResolutionPresentationState, handoff: B
  * (`action-dispatch`, `attack-canceler`, `accuracy-check`), so the walk ends at `before-turn`.
  */
 function turnOpensWithAsleepPrint(state: BattleResolutionPresentationState): boolean {
-  if (state.sourceDecision.kind !== "use-move") return false;
+  if (state.sourceDecision?.kind !== "use-move") return false;
   const events = state.segments[0]?.events;
   if (events === undefined) return false;
   const first = events.find((event) => event.payload.kind !== "set-battler-status-data");
