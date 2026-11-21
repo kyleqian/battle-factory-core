@@ -36,11 +36,13 @@ export interface Trace {
   };
   /** Dev-only named state injection consumed by appTrace and stripped here. */
   appStage?: {
-    /** An APP_STAGES key, or "lab" (cln10): derive the staged battle from `oracleBattleLab.scenario` (Rattata-pair labs; see appTrace.ts labBackedStage). */
+    /** An APP_STAGES key, or "lab" (cln10): derive the staged battle from `oracleBattleLab.scenario` (any overrides.parties lab; see appTrace.ts labBackedStage). */
     readonly id: string;
     readonly frame: number;
     /** The lab's `trainerId` (ROM opponent) when the stage's own orchestrator draw differs; drives the post-battle room sprite. */
     readonly opponentTrainerId?: number;
+    /** "lab" stages only (cln11): the staged battle's RNG value instead of the lab `seed` (the ROM's `gRngValue` at the first menu, `captures[0].state.rngValue`, is the seed advanced by ~1600 LCG steps). */
+    readonly rngSeed?: number;
   };
   /**
    * Dev-only honest ROM staging fixture consumed by compare/run.ts.

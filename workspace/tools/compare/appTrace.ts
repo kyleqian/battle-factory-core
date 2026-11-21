@@ -29,8 +29,8 @@ import {
 } from "../../src/engine/postwin.ts";
 import frontierMonsData from "../../src/data/gen/battle-frontier-mons.json" with { type: "json" };
 import naturesData from "../../src/data/gen/natures.json" with { type: "json" };
-import movesData from "../../src/data/gen/moves.json" with { type: "json" };
 import { readFileSync } from "node:fs";
+import { buildLabMon, type LabMon } from "./labMon.ts";
 import { createFactoryCorpusPartyMember } from "../../src/engine/factoryCorpusParty.ts";
 import {
   advanceFactoryRoundPresentation,
@@ -2749,62 +2749,64 @@ export const APP_STAGES: Readonly<Record<string, AppStage>> = {
   "party-menu-status-item-off": partyMenuStatusItemOffStage,
 };
 
-// cln10: generic lab-backed stage. A trace with `appStage: { id: "lab", frame: 0 }` and an `oracleBattleLab.scenario` needs no APP_STAGES entry: the staged battle is
-// derived from tools/battle-lab/<scenario basename> (the lab JSON the oracle runs). Supported shape = the Rattata-pair labs (the fsc1 / aud241b / hpf4m / btn2 family):
-// active slots species 19, nature 0, IVs 31, EVs 0, no PP Ups, ability slot 0, four identical moves, an optional held item, `seed`, and the scene from `profile`;
-// the stage is exactly fsc1Stages' (rngSeed seed, usedMessageHoldFrames 0, sceneOffNoAnimations on OFF, the standard Rattata bench, the player's PP = the move's base PP, the foe keeps rattataAtLevel's 20 like every hand-written Rattata stage).
-// Anything else throws and names the field, so a lab that needs a different shape still gets a hand-written APP_STAGES entry.
-interface LabMon {
-  readonly species: number; readonly level: number; readonly nature: number; readonly item: number;
-  readonly moves: readonly number[]; readonly ppUps: readonly number[]; readonly abilitySlot: number; readonly friendship: number;
-  readonly ivs: Readonly<Record<string, number>>; readonly evs: Readonly<Record<string, number>>;
-}
+// cln10 / cln11: generic lab-backed stage. A trace with `appStage: { id: "lab", frame: 0 }` and an `oracleBattleLab.scenario` needs no APP_STAGES entry: the staged battle is
+// derived from tools/battle-lab/<scenario basename> (the lab JSON the oracle runs). Any `overrides.parties` lab: slot 0 of each side is the active battler, slots 1 / 2 the bench
+// (species, level, nature, six IVs, six EVs, moves + PP Ups, item, abilitySlot, friendship, personality / gender), built by tools/compare/labMon.ts from the engine's own stat code
+// (src/engine/stats.ts + src/data/gen). `rngSeed` = the lab's `seed`, `usedMessageHoldFrames` 0, `sceneOffNoAnimations` on OFF. The player's party keeps the default rental records
+// (the party menu validates the staged party against them, as every hand-written stage does). Anything the seam cannot carry throws naming the lab, side and field.
 interface LabScenario {
-  readonly profile: string; readonly seed: number;
-  readonly overrides?: { readonly parties?: { readonly player?: readonly LabMon[]; readonly opponent?: readonly LabMon[] } };
+  readonly profile: string; readonly seed: number; readonly level?: number;
+  readonly overrides?: { readonly parties?: { readonly player?: readonly LabMon[]; readonly opponent?: readonly LabMon[] }; readonly battlers?: unknown };
 }
 
 export function labScenarioPath(scenario: string): URL {
   return new URL(`../battle-lab/${scenario.split("/").pop()}`, import.meta.url);
 }
 
-function labActive(side: string, mon: LabMon | undefined, lab: string, basePp: boolean): FactoryFullTurnBattlerConfig {
-  const fail = (what: string): never => { throw new Error(`lab stage ${lab}: ${side}[0] ${what} (generic lab stage supports Rattata-pair labs only; add an APP_STAGES entry)`); };
-  if (mon === undefined) return fail("is missing");
-  if (mon.species !== 19) fail(`species ${mon.species} is not 19`);
-  if (mon.nature !== 0 || mon.abilitySlot !== 0 || mon.friendship !== 0) fail("has a non-default nature / ability slot / friendship");
-  if (!Object.values(mon.ivs).every((v) => v === 31) || !Object.values(mon.evs).every((v) => v === 0)) fail("has non-default IVs / EVs");
-  if (mon.ppUps.some((v) => v !== 0)) fail("has PP Ups");
-  if (mon.moves.some((m) => m !== mon.moves[0])) fail("has differing moves");
-  const moveId = mon.moves[0]!;
-  const pp = (movesData.moves as readonly { id: number; pp: number }[]).find((m) => m.id === moveId)?.pp;
-  if (pp === undefined) return fail(`move ${moveId} is not in moves.json`);
-  const staged = rattataAtLevel(mon.level, moveId, mon.item);
-  return basePp ? Object.freeze({ ...staged, pp: [pp, pp, pp, pp] as const }) : staged;
+type LabBenchPair = readonly [BattleScriptPartyMemberInput, BattleScriptPartyMemberInput];
+
+export function labBackedStageOptions(json: LabScenario, lab: string): { options: MidBattleSwitchStageOptions; playerBench: LabBenchPair; playerBenchHp: readonly [number, number] } {
+  const scene = json.profile === "battle-scene-on" ? "on" : json.profile === "battle-scene-off" ? "off" : null;
+  if (scene === null) throw new Error(`lab stage ${lab}: profile ${json.profile} is not battle-scene-on/off`);
+  if (json.overrides?.battlers !== undefined) throw new Error(`lab stage ${lab}: legacy overrides.battlers labs are not supported (add an APP_STAGES entry)`);
+  const parties = json.overrides?.parties;
+  if (parties === undefined) throw new Error(`lab stage ${lab}: no overrides.parties (factoryLegal / set-id labs need a hand-written APP_STAGES entry)`);
+  const build = (side: "player" | "opponent") => {
+    const party = parties[side];
+    if (party === undefined || party.length !== 3) throw new Error(`lab stage ${lab}: overrides.parties.${side} must hold three Pokemon`);
+    return party.map((mon, index) => buildLabMon(mon, { lab, side, index, seed: json.seed, defaultLevel: json.level ?? 50 }));
+  };
+  const [player, opponent] = [build("player"), build("opponent")];
+  const bench = (mons: typeof player): LabBenchPair => [mons[1]!.member, mons[2]!.member];
+  return {
+    playerBench: bench(player),
+    playerBenchHp: [player[1]!.maxHp, player[2]!.maxHp],
+    options: {
+      rngSeed: json.seed,
+      battleScene: scene,
+      player: player[0]!.config,
+      trainer: opponent[0]!.config,
+      trainerBenchHp: [opponent[1]!.maxHp, opponent[2]!.maxHp],
+      trainerBench: bench(opponent),
+      usedMessageHoldFrames: 0,
+      sceneOffNoAnimations: scene === "off",
+    },
+  };
 }
 
-export function labBackedStage(scenario: string, state: EngineState): EngineState {
+export function labBackedStage(scenario: string, state: EngineState, rngSeed?: number): EngineState {
   const path = labScenarioPath(scenario);
   const lab = path.pathname.split("/").pop()!.replace(/\.json$/, "");
   const json = JSON.parse(readFileSync(path, "utf8")) as LabScenario;
-  const scene = json.profile === "battle-scene-on" ? "on" : json.profile === "battle-scene-off" ? "off" : null;
-  if (scene === null) throw new Error(`lab stage ${lab}: profile ${json.profile} is not battle-scene-on/off`);
-  const parties = json.overrides?.parties;
-  return midBattleSwitchStage(state, lab, [RATTATA_LV50_BENCH, RATTATA_LV50_BENCH], [105, 105], {
-    rngSeed: json.seed,
-    battleScene: scene,
-    player: labActive("player", parties?.player?.[0], lab, true),
-    trainer: labActive("opponent", parties?.opponent?.[0], lab, false),
-    usedMessageHoldFrames: 0,
-    sceneOffNoAnimations: scene === "off",
-  });
+  const { options, playerBench, playerBenchHp } = labBackedStageOptions(json, lab);
+  return midBattleSwitchStage(state, lab, playerBench, playerBenchHp, rngSeed === undefined ? options : { ...options, rngSeed });
 }
 
 /** lbw7: a staged orchestrator draws its own opponent; `appStage.opponentTrainerId` names the lab's (ROM) trainer so the post-battle room draws the right class. */
 export function applyTraceStage(trace: Trace, state: EngineState): EngineState {
   const stageId = trace.appStage!.id;
   const stage: AppStage | undefined = stageId === "lab" && trace.oracleBattleLab
-    ? (s) => labBackedStage(trace.oracleBattleLab!.scenario, s)
+    ? (s) => labBackedStage(trace.oracleBattleLab!.scenario, s, trace.appStage!.rngSeed)
     : APP_STAGES[stageId];
   if (!stage) throw new Error(`unknown app stage ${stageId}${stageId === "lab" ? " (appStage \"lab\" needs oracleBattleLab.scenario)" : ""}`);
   const staged = stage(state);
