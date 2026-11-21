@@ -1,0 +1,240 @@
+{
+ "name": "R056-beat-up-all-poisoned",
+ "rules": [
+  "R056"
+ ],
+ "why": "Challenge 7, trainer 200, hand-built Mechanic Lab parties. Foes whose only move is Toxic poison each player Pokemon in turn as it comes in (turns 1 to 4: Splash, switch, switch, switch back); on turn 5 the Beat Up user is poisoned and so are both teammates, so Cmd_trydobeatup finds no party member that can attack and fails (battle_script_commands.c:9001-9004).",
+ "seed": 90001,
+ "challengeNum": 7,
+ "battleNum": 0,
+ "trainerId": 200,
+ "playerSetIds": [
+  429,
+  404,
+  735
+ ],
+ "opponentSetIds": [
+  813,
+  716,
+  721
+ ],
+ "parties": {
+  "player": [
+   {
+    "species": 68,
+    "level": 50,
+    "nature": 0,
+    "ivs": {
+     "hp": 31,
+     "attack": 31,
+     "defense": 31,
+     "speed": 31,
+     "spAttack": 31,
+     "spDefense": 31
+    },
+    "evs": {
+     "hp": 255,
+     "attack": 255,
+     "defense": 0,
+     "speed": 0,
+     "spAttack": 0,
+     "spDefense": 0
+    },
+    "moves": [
+     251,
+     150,
+     157,
+     157
+    ],
+    "item": 0,
+    "abilitySlot": 0,
+    "friendship": 0
+   },
+   {
+    "species": 214,
+    "level": 50,
+    "nature": 0,
+    "ivs": {
+     "hp": 31,
+     "attack": 31,
+     "defense": 31,
+     "speed": 31,
+     "spAttack": 31,
+     "spDefense": 31
+    },
+    "evs": {
+     "hp": 255,
+     "attack": 255,
+     "defense": 0,
+     "speed": 0,
+     "spAttack": 0,
+     "spDefense": 0
+    },
+    "moves": [
+     157,
+     157,
+     157,
+     157
+    ],
+    "item": 0,
+    "abilitySlot": 0,
+    "friendship": 0
+   },
+   {
+    "species": 57,
+    "level": 50,
+    "nature": 0,
+    "ivs": {
+     "hp": 31,
+     "attack": 31,
+     "defense": 31,
+     "speed": 31,
+     "spAttack": 31,
+     "spDefense": 31
+    },
+    "evs": {
+     "hp": 255,
+     "attack": 255,
+     "defense": 0,
+     "speed": 0,
+     "spAttack": 0,
+     "spDefense": 0
+    },
+    "moves": [
+     157,
+     157,
+     157,
+     157
+    ],
+    "item": 0,
+    "abilitySlot": 0,
+    "friendship": 0
+   }
+  ],
+  "opponent": [
+   {
+    "species": 143,
+    "level": 50,
+    "nature": 0,
+    "ivs": {
+     "hp": 31,
+     "attack": 31,
+     "defense": 31,
+     "speed": 31,
+     "spAttack": 31,
+     "spDefense": 31
+    },
+    "evs": {
+     "hp": 255,
+     "attack": 255,
+     "defense": 0,
+     "speed": 0,
+     "spAttack": 0,
+     "spDefense": 0
+    },
+    "moves": [
+     92,
+     92,
+     92,
+     92
+    ],
+    "item": 0,
+    "abilitySlot": 0,
+    "friendship": 0
+   },
+   {
+    "species": 384,
+    "level": 50,
+    "nature": 0,
+    "ivs": {
+     "hp": 31,
+     "attack": 31,
+     "defense": 31,
+     "speed": 31,
+     "spAttack": 31,
+     "spDefense": 31
+    },
+    "evs": {
+     "hp": 255,
+     "attack": 255,
+     "defense": 0,
+     "speed": 0,
+     "spAttack": 0,
+     "spDefense": 0
+    },
+    "moves": [
+     92,
+     92,
+     92,
+     92
+    ],
+    "item": 0,
+    "abilitySlot": 0,
+    "friendship": 0
+   },
+   {
+    "species": 242,
+    "level": 50,
+    "nature": 0,
+    "ivs": {
+     "hp": 31,
+     "attack": 31,
+     "defense": 31,
+     "speed": 31,
+     "spAttack": 31,
+     "spDefense": 31
+    },
+    "evs": {
+     "hp": 255,
+     "attack": 255,
+     "defense": 0,
+     "speed": 0,
+     "spAttack": 0,
+     "spDefense": 0
+    },
+    "moves": [
+     92,
+     92,
+     92,
+     92
+    ],
+    "item": 0,
+    "abilitySlot": 0,
+    "friendship": 0
+   }
+  ]
+ },
+ "script": {
+  "actions": [
+   {
+    "move": 1
+   },
+   {
+    "switch": 1
+   },
+   {
+    "switch": 2
+   },
+   {
+    "switch": 0
+   },
+   {
+    "move": 0
+   }
+  ],
+  "then": "census",
+  "replacements": [
+   1,
+   2
+  ]
+ },
+ "expect": [],
+ "cover": [
+  {
+   "file": "src/engine/battleScriptBeatUpOpcode.ts",
+   "text": "? initialFai",
+   "at": 0
+  }
+ ],
+ "coverAny": false
+}

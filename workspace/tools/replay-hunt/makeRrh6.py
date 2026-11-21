@@ -45,6 +45,16 @@ D["R086"] = design("R086", ("R086-skill-swap-lock-on-protect", "Challenge 7, tra
     [mon(ALAKAZAM, [LOCKON, SKILLSWAP, PSYCHIC, PSYCHIC], True), four(HERACROSS, ROCKSLIDE), four(MACHAMP, ROCKSLIDE)],
     [four(MACHAMP, PROTECT), four(PRIMEAPE, PROTECT), four(HERACROSS, PROTECT)], [{"move": 0}, {"move": 0}, {"move": 1}])
 
+BEATUP, TOXIC, SPLASH_, CHARM, MEMENTO, OVERHEAT = 251, 92, 150, 204, 262, 315
+BLISSEY, ARCANINE, MAGMAR, SNORLAX = 242, 59, 126, 143
+D["R056"] = design("R056", ("R056-beat-up-all-poisoned", "Challenge 7, trainer 200, hand-built Mechanic Lab parties. Foes whose only move is Toxic poison each player Pokemon in turn as it comes in (turns 1 to 4: Splash, switch, switch, switch back); on turn 5 the Beat Up user is poisoned and so are both teammates, so Cmd_trydobeatup finds no party member that can attack and fails (battle_script_commands.c:9001-9004)."),
+    [mon(MACHAMP, [BEATUP, SPLASH_, ROCKSLIDE, ROCKSLIDE]), four(HERACROSS, ROCKSLIDE), four(PRIMEAPE, ROCKSLIDE)],
+    [four(SNORLAX, TOXIC), four(AGGRON, TOXIC), four(BLISSEY, TOXIC)], [{"move": 1}, {"switch": 1}, {"switch": 2}, {"switch": 0}, {"move": 0}])
+D["R056"]["script"]["replacements"] = [1, 2]
+D["R081"] = design("R081", ("R081-memento-target-at-minimum", "Challenge 7, trainer 200, hand-built Mechanic Lab parties. The player's Blissey Charms Arcanine three times (Attack -6) while Arcanine's only move is Overheat (Sp. Atk -2 per use, -6 after three), then uses Memento: Cmd_trymemento fails against a target at minimum Attack and Sp. Atk (battle_script_commands.c:9074-9080)."),
+    [mon(BLISSEY, [CHARM, MEMENTO, SPLASH_, SPLASH_]), four(HERACROSS, ROCKSLIDE), four(MACHAMP, ROCKSLIDE)],
+    [four(ARCANINE, OVERHEAT, True), four(MAGMAR, OVERHEAT, True), four(NINETALES, OVERHEAT, True)], [{"move": 0}, {"move": 0}, {"move": 0}, {"move": 1}])
+
 out = Path(sys.argv[1] if len(sys.argv) > 1 else ROOT / ".integration/evidence/rrh6/designs")
 out.mkdir(parents=True, exist_ok=True)
 for rule, d in D.items():
