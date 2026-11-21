@@ -14,44 +14,55 @@ const { APP_STAGES, labBackedStage } = (await import(/* @vite-ignore */ appTrace
   labBackedStage: (file: string, state: Engine) => Engine;
 };
 
-function statSeFrame(lab: string): { frame: number; id: number } {
+type HpResolution = { segments: ReadonlyArray<{ commands: ReadonlyArray<{ type: string; from?: number; to?: number }> }>; segmentIndex: number; commandIndex: number };
+
+function statSeFrame(lab: string): { frame: number; id: number; drop: number | null } {
   const request = JSON.parse(readFileSync(new URL(`../tools/battle-lab/${lab}.json`, import.meta.url), "utf8")) as { trace: { segments: Array<{ frames: number }> } };
   let state: Engine = createInitialState({ appRoute: "generated-orchestrator", battleScene: "off" });
   state = APP_STAGES[lab] !== undefined ? APP_STAGES[lab]!(state) : labBackedStage(`${lab}.json`, state);
   const total = request.trace.segments.reduce((n, s) => n + s.frames, 0);
+  let drop: number | null = null;
   for (const advance of traceAdvances(request.trace.segments as never)) {
     if (advance.frame > total) break;
     const result = collectSoundTick(state.frame + 1, () => tick(state, advance.buttons));
     state = result.result;
+    const resolution = (state as unknown as { factoryRoundBattleOrchestrator?: { battleResolutionPresentation?: HpResolution } }).factoryRoundBattleOrchestrator?.battleResolutionPresentation;
+    const command = resolution?.segments[resolution.segmentIndex]?.commands[resolution.commandIndex];
+    if (drop === null && command?.type === "hp") drop = command.from! - command.to!;
     const stat = result.events.find((e) => e.kind === "se" && (e.id === 239 || e.id === 245) && e.frame > 25);
-    if (stat !== undefined) return { frame: stat.frame, id: stat.id as number };
+    if (stat !== undefined) return { frame: stat.frame, id: stat.id as number, drop };
   }
   throw new Error(`${lab}: no stat SE`);
 }
 
 describe("Scene OFF stat-change SE frames (stc1)", () => {
-  // [lab, ROM SE id, ROM frame]: the move-caused paths (Evasion / Defense up, Attack down; both attacker sides) and Icy Wind's secondary Speed drop.
+  // [lab, ROM SE id, ROM frame]: the move-caused paths (Evasion / Defense up, Attack down; both attacker sides), exact.
   const exact: Array<[string, number, number]> = [
     ["hcr1b-harden-foe-off", 239, 99],
     ["stc1-swordsdance-foe-off", 239, 105],
     ["hcr1b-growl-foe-off", 245, 100],
     ["hcr1b-growl-plr-off", 245, 96],
-    ["stc1-icywind-foe-off", 245, 210],
   ];
   for (const [lab, id, frame] of exact) {
     it(`${lab}: SE ${id} at the ROM's frame ${frame}`, { timeout: 120_000 }, () => {
-      expect(statSeFrame(lab)).toEqual({ frame, id });
+      const { frame: at, id: seId } = statSeFrame(lab);
+      expect({ frame: at, id: seId }).toEqual({ frame, id });
     });
   }
 
-  // Residuals outside the SE age (the hit chain's hp rows start the stats-change command off the ROM's exec; hcr3m hp floors): ROM frame, engine - ROM.
-  const residual: Array<[string, number, number]> = [
-    ["stc1-rocktomb-foe-off", 246, 2],
-    ["stc1-icywind-plr-off", 214, -8],
+  // stc2: a secondary stat drop after a hit. The ROM's hp row -> StatDown playanimation is the bar's drop + 8 (both scenes) and the SE is that exec + 4, so the engine's SE is
+  // ROM + (engine drop - ROM drop): these labs' engine rolls a different damage than the ROM (RNG not synchronised in the lab stage), so the frame is pinned through the drop.
+  // [lab, ROM SE frame, ROM drop] (hcr3mProbe rows: Icy Wind foe hp 105 -> 43, player 105 -> 35, Rock Tomb 105 -> 8).
+  const secondary: Array<[string, number, number]> = [
+    ["stc1-icywind-foe-off", 210, 62],
+    ["stc1-icywind-plr-off", 214, 70],
+    ["stc1-rocktomb-foe-off", 246, 97],
   ];
-  for (const [lab, frame, delta] of residual) {
-    it(`${lab}: SE at ROM ${frame}${delta >= 0 ? "+" : ""}${delta} (the command start's residual, not the SE age)`, { timeout: 120_000 }, () => {
-      expect(statSeFrame(lab).frame - frame).toBe(delta);
+  for (const [lab, frame, romDrop] of secondary) {
+    it(`${lab}: SE at ROM ${frame} + (engine bar - ROM bar ${romDrop})`, { timeout: 120_000 }, () => {
+      const { frame: at, drop } = statSeFrame(lab);
+      expect(drop).not.toBeNull();
+      expect(at - frame).toBe(drop! - romDrop);
     });
   }
 });

@@ -2163,3 +2163,40 @@ Census (`lsd194Census.sh`, `d2c0f88f5` vs `966063f8d`, seeds 0..199, JOBS 6, SPL
 **Tests / pins.** `tests/randomRoundSoak.test.ts` seed 21 `renderCalls` 3,043 -> 3,042 (re-pinned, fch1 comment line; frames pins unchanged). New `tests/fch1AiChoiceTiming.test.ts`: the cost-model pin (>= 21 / 32 exact, total |error| <= 13, max |error| <= 2) and the six lab SE 114 ROM frames (313 / 313 / 314 / 315 / 315 / 315). The trainer bench of `aud241bStage` now uses a Seismic Toss Rattata (Splash would force the damage fallback and add 2); that fixed obr251 / ais4 / aud242j. `tests/stc1*.test.ts` has 3 failures that are present at HEAD before this step (checked with `git stash`), not touched.
 
 PAPERCUT: `npm run typecheck` / `test:gate` queue behind other worktrees' `tsc` flock (`/tmp/pokebench-typecheck.lock`), ~10 min idle wait with no output, ~10.
+
+## stc2 (2026-11-21): hcr3's stat-next hp tail vs stc1's Scene OFF stat timing; Metal Claw test pin (presentation / sound timing only)
+
+Base fold-a 22c58649b had five red tests: three `stc1SceneOffStatChangeSe` rows (Icy Wind foe SE 214 vs ROM 210, Rock Tomb +6, Icy Wind player -4) and two `liveAnchorMoveAdapters` Metal Claw rows (140 -> 154). Gameplay, RNG and Scene ON presentation are untouched.
+
+**The ROM interval is scene-free.** ROM labs `stc1-icywind-foe`, `stc1-icywind-plr`, `stc1-rocktomb-foe` (Scene OFF = the committed labs, Scene ON = the same labs with `profile` battle-scene-on and a 700-frame tail), `hcr3mProbe.py` + `soundEventProbe.py lab`; hp row = the `HitFromAtkAnimation+0x8` exec, frames from the lab start:
+
+| lab (drop = hp change) | hp row | hp changes | StatDown+0x7 exec (`playanimation`) | stat SE | hp row -> exec | SE - exec |
+| --- | --- | --- | --- | --- | --- | --- |
+| icywind-foe OFF (105 -> 43, 62) | 136 | 200 | 206 | 210 | 70 = drop + 8 | 4 |
+| icywind-foe ON | 392 | 456 | 462 | 466 | 70 = drop + 8 | 4 |
+| icywind-plr OFF (105 -> 35, 70) | 132 | 204 | 210 | 214 | 78 = drop + 8 | 4 |
+| icywind-plr ON | 388 | 460 | 466 | 470 | 78 = drop + 8 | 4 |
+| rocktomb-foe OFF (105 -> 8, 97) | 137 | 236 | 242 | 246 | 105 = drop + 8 | 4 |
+| rocktomb-foe ON | 280 | 379 | 385 | 389 | 105 = drop + 8 | 4 |
+
+The bar is `drop + 2` rows, then 6 rows to the stat script's `playanimation`; the SE is that exec + 4. The engine's three labs do not roll the ROM's damage (RNG not synchronised in the lab stage: engine drops 67 / 67 / 104 vs ROM 62 / 70 / 97), so the old "exact" icywind-foe row (stc1) was the +5 damage difference cancelling the hcr3-less 5-row tail shortfall by coincidence; the player row (-8) and Rock Tomb (+2) were the same shortfall minus / plus their own damage difference. In the engine the stats-change command starts at hp (bar + 1) + tail + the 2-row `stat` command, and stc1's Scene OFF secondary age (shift 2, SE at command age 4) wants it ON the exec: tail 5. hcr3's tail 4 stays for Scene ON (ROM-exact on aud252 seed 1914 with Scene ON's own stat age; T2 ON is byte-identical).
+
+**Landed.** `HP_STAT_NEXT_TAIL_FRAMES_OFF = 5` (battleResolutionPresentation.ts; `HpLeadRows.sceneOff` = HITMARKER_NO_ANIMATIONS), Scene ON keeps `HP_STAT_NEXT_TAIL_FRAMES = 4`.
+
+| path | ROM | fold-a | stc2 |
+| --- | --- | --- | --- |
+| stc1 icywind-foe OFF, engine SE - ROM | engine drop - 62 = +5 | +4 | +5 |
+| stc1 icywind-plr OFF | engine drop - 70 = -3 | -4 | -3 |
+| stc1 rocktomb-foe OFF | engine drop - 97 = +7 | +6 | +7 |
+
+i.e. exactly the damage difference on every row (a 1-frame step each). `tests/stc1SceneOffStatChangeSe.test.ts`: the three secondary rows are now pinned as `SE - ROM frame == engine hp drop - ROM drop` (the engine drop is read from the presented hp command), the four move-caused rows stay exact (99 / 105 / 100 / 96). `tests/aud252LossBallOpen.test.ts` (Scene ON) is unchanged and green.
+
+**Metal Claw.** `tests/animation/liveAnchorMoveAdapters.test.ts`: `duration: 140 -> 154` (bdt1: the source body is 140 rows, the ROM script holds 14 more; the ages go through `iu120Ages(row.id, row.duration)`, so the ages follow). No src change.
+
+**T2** (`RESCORE_SCENES=off|on tools/audio/rescoreAll.sh OUT .integration/evidence/t2n`, `soundScoreboard.py`; `.integration/evidence/stc2/t2-{base,after}`; 0 missing / 0 extra everywhere). Scene OFF, 24 aligned seeds: exact 667 -> 670, offset 466 -> 463, mass 2,767 -> 2,761; stat-change SE exact 65 -> 68 / offset 40 -> 37 / mass 217 -> 214 (three -1 rows exact; tails 4 -> 5 beat 4 and 6: tail 6 left stat at 65 / 40); cry 480 -> 479, battle-controller 2,051 -> 2,049. Scene ON, 25 aligned seeds: totals, deltas and per-id deltas identical (2,667 exact / 3,210 offset / 21,104 mass).
+
+**Census** (`lsd194Census.sh`, seeds 0..199, `LSD194_SHARDS="0 1"`, 22c58649b vs HEAD, `rst197CensusDelta.py --digest`): Scene OFF eventsDigest + error identical 200 / 200, type-sequence changes 0, 145 battles identical / 55 changed (the only changed commands: the `hp` after a hit followed by `stat`, +1 frame); Scene ON identical 200 / 200, 0 changed, byte-identical shards 2 / 2.
+
+**Tests** (all foreground): the 311 files that import battleResolutionPresentation / `aud2*` / `stc1*` / `randomRoundSoak*` / `animation/live*` / `playableAnimation*` / `apx2*` 3,087 / 3,087 green with no trajectory pin moved (`randomRoundSoak*` unchanged: seed 1 frames, the #89 Baton Pass seed 8); `tests/aud252*` green; `npm run typecheck` ok; `npm run test:gate` 360 files / 2,835 tests; `npm run build` ok. Full `npm test` not run (assignment).
+
+**Residuals.** Scene ON's tail 4 vs the ROM law bar + 8: ON's command start is 1 row before the exec with its own stat age (not re-derived; ROM-exact on seed 1914). The T2 OFF stat rows still at -1 (12) / -3..-22 are not secondary-after-hit rows by this law (move-caused after-body and item chains; not measured here). Evidence (git-ignored): `.integration/evidence/stc2/` (`labs/` ROM rows + SEs for both scenes, `t2-base`, `t2-after`, `cen`).
