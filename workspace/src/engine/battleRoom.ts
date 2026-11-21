@@ -69,6 +69,7 @@ import { FADE_IN } from "./paletteFade.ts";
 import type { FactoryTrainerPresentation } from "./factoryTrainerPresentation.ts";
 import { frontierCircleExitFadeStartTe, frontierTransitionRenderKind, isSquaresKind, type FrontierTransitionPresentation } from "./battleTransition.ts";
 import { squaresIntroHandoffTe } from "./battleTransitionSquares.ts";
+import { logoWiggleIntroHandoffTe } from "./battleTransitionLogoWiggle.ts";
 import type { BattleOpponent } from "./battleScenario.ts";
 import walkupScript from "../data/gen/factory-brain-walkup-script.json" with { type: "json" };
 
@@ -1006,6 +1007,7 @@ export function brainBattleIntroHandoffTe(state: BattleRoomState): number {
   const kind = frontierTransitionRenderKind(state.transitionPresentation, "circlesMeet");
   if (kind === "logoWave") return BATTLE_2_SCENE_HANDOFF_ELAPSED;
   if (isSquaresKind(kind)) return squaresIntroHandoffTe(kind);
+  if (kind === "logoWiggle") return logoWiggleIntroHandoffTe();
   return frontierCircleExitFadeStartTe(kind) + BRAIN_BATTLE_START_AFTER_EXIT_FADE;
 }
 
