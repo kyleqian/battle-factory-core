@@ -456,7 +456,8 @@ describe("random round soak driver (green milestone pin)", () => {
       // 43_557 (box) / 43_323 (Mac) -> 43_500, renderCalls 3_066 / 3_043 -> 3_043; same battle 7, turn 3, end state, diagnostics; both runs identical.
       // fch1 (the AI faint replacement choice costs 0..4 extra script frames, GetMostSuitableMonToSwitchInto work model; the aud241b stage's opponent bench is now Seismic Toss x4 as in the ROM labs): render calls only (a one-frame trajectory shift), 3_043 -> 3_042; frames 43_500, battle 7, turn 3, end state, diagnostics unchanged. A trajectory pin, not a ROM frame.
       // wtl1 (the win tail's 24 draw-nothing rows before "Player defeated", ROM P + 26; seven wins): frames + render calls, 43_500 -> 43_638, renderCalls 3_042 -> 3_059; same battle 7, turn 3, end state, diagnostics. A trajectory pin, not a ROM frame.
-      frames: 43_638,
+      // etp1 (end-turn prints take the ROM end-turn rows, both scenes; labs docs/etp1-end-turn-prints.md): frames + render calls, 43_638 -> 43_732, renderCalls 3_059 -> 3_055; same battle 7, turn 3, end state, diagnostics. A trajectory pin, not a ROM frame.
+      frames: 43_732,
       battle: 7,
       turn: 3,
       diagnostics: {
@@ -468,7 +469,7 @@ describe("random round soak driver (green milestone pin)", () => {
         terminalOutcome: "roundWon",
         terminalRecordMenuInputReadyReached: true,
         terminalRecordChoice: "no",
-        renderCalls: 3_059,
+        renderCalls: 3_055,
       },
     });
     expect(second).toEqual(first);
@@ -714,7 +715,10 @@ describe("random round soak driver (green milestone pin)", () => {
     // hcr3 (Icy Wind's hp keeps the stat command's 4-row tail instead of the 28-row floor, Double-Edge's recoil hp / print follow the ROM rows, and the faint SE clips its hpd4 compensation at 0; the exploring presses land on new phases): seed 4 no longer commits Baton Pass.
     // Re-scanned full-policy seeds 0..39 (tools/soak/batonPassSearch.ts --seeds 0:40 --parallel 4, same options): candidates 8, 10, 11, 13, 16, 27, 36, 39, all OK. Seed 8 is the lowest.
     // merge stc1 + hcr3 (fold-a): re-scanned seeds 0..39 on the combined tree (batonPassSearch.ts --seeds 0:40 --parallel 4): candidates 11, 13, 27, 36, 39 (stc1's set). Pin 11.
-    const result = runSeed(11, {
+    // etp1 (end-turn prints take the ROM end-turn rows, Roar / Whirlwind's dragged-out press; the exploring presses land on new phases): seed 11 no longer commits Baton Pass.
+    // Re-scanned full-policy seeds 0..39 (tools/soak/batonPassSearch.ts --seeds 0:40 --parallel 4, same options): candidates 5, 16, 20, 24, 25. Seed 5 is the lowest
+    // (Baton Pass commits 1, first commit 69217, halt 69257 on MAWILE in battleIndex 0, two Lobby new challenges). Pin 11 -> 5.
+    const result = runSeed(5, {
       maxFrames: 80_000,
       renderEvery: 0,
       coverage: observer as never,
@@ -1063,12 +1067,13 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // the exploring presses land on new phases): 67984 / turn 20 -> 68529 / turn 21; same battle 3 / depth 2 / OK / roundLost.
       // wtl1 (the win tail's 24 draw-nothing rows before "Player defeated"; the exploring presses land on new phases): 68529 / battle 3 / depth 2 / turn 21 -> 75721 / battle 4 / depth 3 / turn 21; still OK / roundLost.
       // wtl1 item 2 (the turn-end weather print's 10 rows after MoveEnd, ROM rain labs: stat fall 425 -> 435, hit 323 -> 333): frames only, 75721 -> 75618; same battle 4 / depth 3 / turn 21 / roundLost. A trajectory pin, not a ROM frame.
-      frames: 75618,
+      // etp1 (end-turn prints take the ROM end-turn rows; the exploring presses land on new phases): 75618 / battle 4 / depth 3 / turn 21 -> 57508 / battle 3 / depth 2 / turn 12; roundLost. A trajectory pin, not a ROM frame.
+      frames: 57508,
       outcome: "OK",
       endState: "roundLost",
-      maxBattleDepth: 3,
-      battle: 4,
-      turn: 21,
+      maxBattleDepth: 2,
+      battle: 3,
+      turn: 12,
     });
     expect(runSeed(1, options)).toMatchObject({
       // msg175: 26878 -> 26810 (shorter used prints); trn178 (the Scene OFF action-transition pause): 26810 -> 27058; same battle / turn / end state.
@@ -1121,12 +1126,13 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // hcr3 (Icy Wind's hp keeps the stat command's 4-row tail, Double-Edge's recoil hp / print follow the ROM rows, the faint SE clips its hpd4 compensation at 0): frames only, 60582 -> 58672; same battle 3 / depth 2 / turn 19 / roundLost.
       // merge stc1 + hcr3 (fold-a): frames only, 60525 (stc1) / 58672 (hcr3) -> 58579; same battle / depth / turn / end state.
       // gsp3 (the end-of-turn poison / burn tick's print -> launch rows 95 / 98 as the ROM, gsp3-{toxic,willowisp}-player-on): frames only, 58579 -> 58583; same battle 3 / depth 2 / turn 19 / roundLost.
-      frames: 58583,
+      // etp1 (end-turn prints take the ROM end-turn rows; the exploring presses land on new phases): 58583 / turn 19 -> 57984 / turn 15; same battle 3 / depth 2 / roundLost. A trajectory pin, not a ROM frame.
+      frames: 57984,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 2,
       battle: 3,
-      turn: 19,
+      turn: 15,
     });
   });
 

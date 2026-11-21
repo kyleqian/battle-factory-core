@@ -1452,7 +1452,6 @@ const END_TURN_PRINT_SCRIPTS: ReadonlySet<string> = new Set([
   "BattleScript_PoisonTurnDmg",
   "BattleScript_BurnTurnDmg",
   "BattleScript_CurseTurnDmg",
-  "BattleScript_PerishSongCountGoesDown",
   "BattleScript_MonTookFutureAttack",
 ]);
 const END_TURN_WEATHER_PRINT_EXTRA_ROWS = 1;
@@ -1468,24 +1467,35 @@ const END_TURN_WEATHER_PRINT_EXTRA_ROWS = 1;
  */
 const DAMAGING_WEATHER_LOOP_SCRIPT = "BattleScript_DamagingWeatherLoop";
 const DAMAGING_WEATHER_LOOP_AFTER_HP_ROWS = 3;
-// Perish Song's count for the second battler (a new BattleScriptExecute after the first print's end2) and Wish's heal print after its hp command (ROM labs etp1-perish, etp1-wish: +5 rows, both scenes).
-const PERISH_SONG_SCRIPT = "BattleScript_PerishSongCountGoesDown";
+// Wish's heal print after its hp command (ROM lab etp1-wish: +5 rows, both scenes). Perish Song's counts are left as before: the etp1-perish lab agrees with a label +1 / second-battler +5 rule, but seed 2741's ROM pictures (ais2) do not.
 const WISH_SCRIPT = "BattleScript_WishComesTrue";
 const END_TURN_NEXT_SCRIPT_ROWS = 5;
+/**
+ * etp1 (labs etp1-{roar,whirlwind}-{on,off}; ROM press P = the A that dismisses "was dragged out!"; s222-on-wc, s94-on-wc, docs/msg2): the turn's
+ * first end-turn print (the MoveEnd receipts only in between) starts its first glyph on P + 15 (the printer's release, BattleScript_TrainerBattleForceOut's
+ * tail, MoveEnd and DoBattlerEndTurnEffects' rows); the receipts' frames put it on P + 2: 13 rows more, both scenes.
+ */
+const DRAGGED_OUT_END_TURN_PRINT_ROWS = 13;
+function endTurnPrintFollowsDraggedOut(events: readonly BattleKernelSemanticEvent[], index: number): boolean {
+  for (let back = index - 1; back >= 0; back -= 1) {
+    const previous = events[back]!;
+    if (previous.payload.kind === "set-battler-sprite-visibility" && previous.provenance?.opcodeName === "B_SCR_OP_MOVEEND") continue;
+    return previous.payload.kind === "message" && previous.payload.messageId === "STRINGID_PKMNWASDRAGGEDOUT";
+  }
+  return false;
+}
+
 function endTurnChainLeadRows(events: readonly BattleKernelSemanticEvent[], index: number, sceneOn: boolean): number {
   const event = events[index]!;
   const executed = event.provenance?.instructionExecution;
   if (event.payload.kind !== "message" || executed === undefined) return 0;
   const label = event.provenance?.sourceLabel;
-  if (label === PERISH_SONG_SCRIPT || label === WISH_SCRIPT) {
+  if (label === WISH_SCRIPT) {
     const previous = events[index - 1];
-    if (label === PERISH_SONG_SCRIPT) {
-      return previous?.payload.kind === "message" && previous.provenance?.sourceLabel === label && (previous.provenance.instructionExecution ?? 0) >= executed
-        ? END_TURN_NEXT_SCRIPT_ROWS : 0;
-    }
     return previous?.payload.kind === "hp-change" && previous.provenance?.sourceLabel === label && event.payload.messageId === "STRINGID_PKMNREGAINEDHEALTH"
       ? END_TURN_NEXT_SCRIPT_ROWS : 0;
   }
+  if (END_TURN_PRINT_SCRIPTS.has(label ?? "") && label !== DAMAGING_WEATHER_LOOP_SCRIPT && endTurnPrintFollowsDraggedOut(events, index)) return DRAGGED_OUT_END_TURN_PRINT_ROWS;
   if (label !== DAMAGING_WEATHER_LOOP_SCRIPT) return 0;
   for (let back = index - 1; back >= 0; back -= 1) {
     const previous = events[back]!;
@@ -1502,9 +1512,6 @@ function endTurnChainLeadRows(events: readonly BattleKernelSemanticEvent[], inde
   }
   return 0;
 }
-
-/** etp1 (labs etp1-{toxic3,willowisp3}-{off,on}): the next action's used print after a status print's `updatestatusicon` + `waitstate` comes 2 rows later than the pause rule gives (OFF -2 -> 0, ON -4 -> -2 behind the ON status print's own -2). */
-const STATUS_ICON_USED_PRINT_ROWS = 2;
 
 const ACTION_TRANSITION_WAIT_ROWS: Readonly<Record<string, number>> = Object.freeze({ B_WAIT_TIME_LONG: WAITMESSAGE_LONG_HOLD_FRAMES });
 
@@ -1613,8 +1620,7 @@ function actionTransitionPauseFrames(
   }
   // sta3 (aud242g dreameater, ROM): before a pre-move print the status icon's second controller row (production presents one frame) is one more row.
   const iconSecondRow = anchor.payload.kind === "status-icon-update" && usedIsPreMove ? 1 : 0;
-  const iconUsedRows = anchor.payload.kind === "status-icon-update" && !usedIsPreMove ? STATUS_ICON_USED_PRINT_ROWS : 0;
-  const frames = e1 - anchorExecution - 1 + ACTION_TRANSITION_ROWS + used - presented - statusFramesAfter + iconSecondRow + iconUsedRows + inLoveRows + endTurnRows;
+  const frames = e1 - anchorExecution - 1 + ACTION_TRANSITION_ROWS + used - presented - statusFramesAfter + iconSecondRow + inLoveRows + endTurnRows;
   return frames > 0 ? { frames, rowsToReceipt: e1 - anchorExecution - 1 - presented } : null;
 }
 

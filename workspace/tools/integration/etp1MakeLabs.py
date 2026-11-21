@@ -46,6 +46,8 @@ S = {
     "firespin": (19, 50, [83], 0, 113, 50, [69], 0, [0, 0, 0]),
     "whirlpool": (19, 50, [250], 0, 113, 50, [69], 0, [0, 0, 0]),
     "twave": (19, 50, [86], 0, 19, 12, [69], 0, [0]),
+    "roar": (19, 50, [201, 46], 0, 19, 12, [69], 0, [0, 2]),
+    "whirlwind": (19, 50, [201, 18], 0, 19, 12, [69], 0, [0, 2]),
     "spore": (19, 50, [147], 0, 19, 12, [69], 0, [0]),
 }
 want = sys.argv[1:] or list(S)
@@ -56,8 +58,16 @@ for name in want:
         lab["profile"] = f"battle-scene-{scene}"
         lab["overrides"]["parties"] = {"player": [mon(us, ul, um, ui)] * 3, "opponent": [mon(ts, tl, tm, ti)] * 3}
         seg = []
-        for _ in slots:
-            seg += [{"frames": 2, "buttons": ["A"]}, {"frames": 18, "buttons": []}, {"frames": 2, "buttons": ["A"]}, {"frames": 1100, "buttons": []}]
+        for slot in slots:
+            if slot and seg:
+                seg[-1]["frames"] += 600
+            seg += [{"frames": 2, "buttons": ["A"]}, {"frames": 18, "buttons": []}]
+            if slot:
+                seg += [{"frames": 2, "buttons": ["RIGHT"]}, {"frames": 10, "buttons": []}]
+            if slot == 2:
+                seg += [{"frames": 2, "buttons": ["A"]}, {"frames": 700, "buttons": []}, {"frames": 2, "buttons": ["A"]}, {"frames": 1100, "buttons": []}]
+            else:
+                seg += [{"frames": 2, "buttons": ["A"]}, {"frames": 1100, "buttons": []}]
         lab["trace"]["segments"] = seg
         json.dump(lab, open(LAB / f"etp1-{name}-{scene}.json", "w"))
     print("etp1-" + name)
