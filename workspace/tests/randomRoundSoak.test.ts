@@ -1014,8 +1014,8 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // still roundLost. With the accept edge undone (isBattleResolutionButtonMessageAcceptable's promptClear lead) the old pin passes again.
       // lbb1 (the boxes of the Lobby terminal, the postwin and the rooms take B as A; the exploring policy presses B there): frames only,
       // 22897 -> 22843; decision notes identical to 6817b6a8c's (press-stream notes aside); same battle 1 / depth 0 / turn 30 / roundLost.
-      // (combined tree: value from the trial soak run, see the trial re-pin commit)
-      frames: 39277,
+      // trial-fix-20261121 (fnt1 + lbb1 together): frames only, 39277 -> 39259; same battle 2 / depth 1 / turn 22 / roundLost.
+      frames: 39259,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 1,
