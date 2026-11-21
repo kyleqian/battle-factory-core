@@ -41,6 +41,12 @@ D["R104"] = design("R104", ("R104-effect-spore-sleep-during-uproar", "Challenge 
     [four(BRELOOM, UPROAR, bulk=True), four(PARASECT, UPROAR, bulk=True), four(EXPLOUD, UPROAR, bulk=True)],
     [])
 
+PERISH, CHARGE, ELECTABUZZ, RAICHU, ELECTRODE = 195, 268, 125, 26, 101
+D["R059"] = design("R059", ("R059-ai-perish-switch-charged-attacker", "Challenge 7, trainer 200, hand-built Mechanic Lab parties. The AI's Electabuzz knows only Charge (so it is Charged every turn); the player's Snorlax casts Perish Song on turn 0, and when its count reaches 0 the AI switches out voluntarily (ShouldSwitchIfPerishSong, battle_ai_switch_items.c:20-33) and scores the bench with AI_CalcDmg for the Charged attacker (battle_script_commands.c:1306-1319). The Electric branch of that test cannot run: gCurrentMove is 0 at every voluntary switch."),
+    [mon(SNORLAX, [PERISH, SPLASH, SPLASH, SPLASH]), four(MACHAMP, BODYSLAM), four(HERACROSS, BODYSLAM)],
+    [four(ELECTABUZZ, CHARGE, bulk=True), four(RAICHU, CHARGE, bulk=True), four(ELECTRODE, CHARGE, bulk=True)],
+    [{"move": 0}], cover=[RULES["R059"]["pieces"][0]["cover"]])
+
 out = Path(sys.argv[1] if len(sys.argv) > 1 else ROOT / ".integration/evidence/rrh7/designs")
 out.mkdir(parents=True, exist_ok=True)
 for rule, d in D.items():
