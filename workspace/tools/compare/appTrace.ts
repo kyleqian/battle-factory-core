@@ -2888,10 +2888,11 @@ export function labBackedStageOptions(json: LabScenario, lab: string): { options
   };
 }
 
-export function labBackedStage(scenario: string, state: EngineState, rngSeed?: number): EngineState {
+export function labBackedStage(scenario: string, state: EngineState, rngSeed?: number, scene?: "on" | "off"): EngineState {
   const path = labScenarioPath(scenario);
   const lab = path.pathname.split("/").pop()!.replace(/\.json$/, "");
-  const json = JSON.parse(readFileSync(path, "utf8")) as LabScenario;
+  const file = JSON.parse(readFileSync(path, "utf8")) as LabScenario;
+  const json = scene === undefined ? file : { ...file, profile: `battle-scene-${scene}` };
   const { options, playerBench, playerBenchHp } = labBackedStageOptions(json, lab);
   return midBattleSwitchStage(state, lab, playerBench, playerBenchHp, rngSeed === undefined ? options : { ...options, rngSeed });
 }
