@@ -1608,6 +1608,7 @@ const NO_EFFECT_ATTACKANIMATION_HOLD_PCS: ReadonlySet<number> = new Set(
  * attack string (the PP receipt is silent) and the source puts that pause
  * within the three straight-line instructions before it.
  */
+const STAT_DOWN_PRINT_LABEL = "BattleScript_StatDownPrintString";
 function sourcePauseUsedMoveHoldFrames(
   events: readonly BattleKernelSemanticEvent[],
   usedIndex: number,
@@ -1620,9 +1621,13 @@ function sourcePauseUsedMoveHoldFrames(
     const next = candidate.provenance?.instructionExecution;
     if (next === undefined || next < execution) return null;
     execution = next;
-    if (candidate.payload.kind === "set-battler-pp-data") continue;
+    if (candidate.payload.kind === "set-battler-pp-data" || candidate.payload.kind === "stat-stage-change") continue;
     if (candidate.payload.kind !== "message") return null;
     const programCounter = candidate.provenance!.programCounter;
+    // chg2 (s3738 Aerial Ace -39 / -79): a stat change that cannot happen (BattleScript_EffectStatDown: `pause B_WAIT_TIME_SHORT; goto BattleScript_StatDownPrintString`) reaches
+    // its print through a goto, which the straight-line look-back below stops at; a print at that label with no animation receipt before it is the pause path (ROM: used print
+    // -> "won't go lower" print 61 rows, the pause's 32 + 6 dispatch steps after the 23-row print).
+    if (candidate.provenance?.sourceLabel === STAT_DOWN_PRINT_LABEL) return next - used + 1;
     for (let back = 1; back <= 3 && programCounter - back >= 0; back += 1) {
       const instruction = BATTLE_SCRIPT_PROGRAM.instructions[programCounter - back];
       if (
@@ -2150,6 +2155,9 @@ function chargeTurnSoundLead(events: readonly BattleKernelSemanticEvent[], index
     const candidate = events[i]!;
     if (candidate.provenance?.sourceLabel !== CHARGE_TURN_SCRIPT) return {};
     if (candidate.payload.kind === "message" && candidate.payload.messageId === "STRINGID_EMPTYSTRING3") {
+      // A charger that woke up / thawed first (s2230 Bounce, E = 79) reaches the opener after a detour presented as its own commands: E is no longer the rows to the animation.
+      const before = events[i - 1];
+      if (before !== undefined && instructionExecutionOf(before) < instructionExecutionOf(candidate)) return {};
       return { soundAgeLeadFrames: CHARGE_TURN_SOUND_LEAD_BASE_ROWS - instructionExecutionOf(candidate) };
     }
   }
