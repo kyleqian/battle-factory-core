@@ -58,7 +58,7 @@ import {
 } from "./battleResolutionPresentationRender.ts";
 import { SEND_IN_TAIL_CASTFORM } from "../data/sendInTail.ts";
 import { CASTFORM_CHANGE_COMMAND_FRAMES, CASTFORM_CHANGE_WEATHER_LOOP_FRAMES } from "./liveTransform.ts";
-import { BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS, BATTLE_SCRIPT_STATUS3_SEMI_INVULNERABLE } from "./battleScriptSourceConstants.ts";
+import { BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS, BATTLE_SCRIPT_STATUS2_MASKS, BATTLE_SCRIPT_STATUS3_SEMI_INVULNERABLE } from "./battleScriptSourceConstants.ts";
 import { spriteOrderStatusAnimationName } from "./spriteOrderEventTransform.ts";
 import { seg127StatusSeGateFromEvents, seg127StatusSeGateRows } from "./seg127StatusSeGate.ts";
 import {
@@ -2114,19 +2114,26 @@ function moveAnimationScriptLeadTiming(
 }
 
 /**
- * bdt1 (Scene ON): a Dig attack turn is a locked continuation with no move menu, so the engine's first command is the print. The ROM runs the
- * effect script first: EffectSemiInvulnerable -> SecondTurnSemiInvulnerable -> TryHit -> HitFromAtkString, its `printstring` row at
- * press + 6 + u (u = 11, the kernel execution count of the print; ROM labs bdt1-dig-{player,opponent}-on: 1043 press -> 1060 printstring ex2,
- * the glyphs release 1081 -> `attackanimation` 1087, A0 1089). The rows are typed as the message's scroll lead, so the print and the body's
- * sounds start where the ROM's do.
+ * bdt1 / chg2 (Scene ON): the attack turn of a two-turn move is a locked continuation with no move menu, so the engine's first command is the print. The ROM
+ * runs the effect script first (EffectSemiInvulnerable -> SecondTurnSemiInvulnerable -> TryHit -> HitFromAtkString, or EffectSolarBeam / EffectRazorWind /
+ * EffectSkyAttack -> TwoTurnMovesSecondTurn -> HitFromAccCheck), its `printstring` row at press + 6 + u (u = the print's kernel execution count: Dig / Fly /
+ * Bounce / Dive 11, Solar Beam 12, Razor Wind 9; ROM labs bdt1-dig-{player,opponent}-on: 1043 press -> 1060 printstring ex2, the glyphs release 1081 ->
+ * `attackanimation` 1087, A0 1089). The rows are typed as the message's scroll lead, so the print and the body's sounds start where the ROM's do. A one-turn use
+ * (Solar Beam in sun) has no STATUS2_MULTIPLETURNS at the action's start and keeps its menu press.
  */
-const MOVE_DIG = 91;
-const DIG_SECOND_TURN_PRINT_LEAD_ROWS = 17;
-function digSecondTurnPrintLead(event: BattleKernelSemanticEvent, hitMarker: number, currentMove: number | undefined): { leadFrames: number } | null {
-  if (currentMove !== MOVE_DIG || (hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0) return null;
+const TWO_TURN_MOVES: ReadonlySet<number> = new Set([13, 19, 76, 91, 130, 143, 291, 340]);
+const TWO_TURN_SECOND_PRINT_PRESS_ROWS = 6;
+function twoTurnSecondPrintLead(
+  event: BattleKernelSemanticEvent,
+  beforeRules: BattleScriptRulesContext,
+  actionSnapshot: BattleScriptActionMessageSnapshot | null | undefined,
+): { leadFrames: number } | null {
+  const currentMove = actionSnapshot?.currentMove;
+  if (currentMove === undefined || !TWO_TURN_MOVES.has(currentMove) || (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0) return null;
   if (event.payload.kind !== "message" || event.payload.messageId !== "STRINGID_USEDMOVE"
-    || event.provenance?.sourceLabel !== "BattleScript_HitFromAtkString") return null;
-  return { leadFrames: DIG_SECOND_TURN_PRINT_LEAD_ROWS };
+    || (event.provenance?.sourceLabel !== "BattleScript_HitFromAtkString" && event.provenance?.sourceLabel !== "BattleScript_HitFromAccCheck")) return null;
+  if ((beforeRules.battlers[actionSnapshot!.attacker]!.status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_MULTIPLETURNS) === 0) return null;
+  return { leadFrames: TWO_TURN_SECOND_PRINT_PRESS_ROWS + event.provenance.instructionExecution };
 }
 /**
  * chg2 (Scene ON; generalizes bdt1's Dig value): a charge-turn body (BattleScriptFirstChargingTurn) plays its sounds on the ROM's own script rows, but the
@@ -5638,7 +5645,7 @@ export function projectBattleResolutionCommands(
         ),
         advance: "automatic",
         ...(selfConfusionOff ? { leadFrames: SELF_CONFUSION_OFF_PRE_PRINT_ROWS } : {}),
-        ...(digSecondTurnPrintLead(event, beforeRules.hitMarker, actionSnapshot?.currentMove) ?? {}),
+        ...(twoTurnSecondPrintLead(event, beforeRules, actionSnapshot) ?? {}),
         ...(payload.messageId === "STRINGID_TARGETFAINTED"
           || payload.messageId === "STRINGID_ATTACKERFAINTED"
           ? { faintBattler: lastFaintBattler! }

@@ -189,9 +189,10 @@ describe("Razor Wind (aud261)", () => {
     expect(tableRows(13, 2)).toEqual(["9:160", "13:160", "17:160", "36:136"]);
   });
   // lse4: the unleash body presents its lead 5 (gap-print class), so the player's unleash offset falls 9 -> 4 (the opponent's 14 does not move: the opponent lab's unleash SE clock is not measured here, open); the charge turn's -10 is the sound clock, unchanged.
+// chg2: the charge turn's sound clock follows the opener's kernel execution (Razor Wind E = 6: ROM SE frames 42 / 83, ours exact, -10 -> 0) and the locked unleash turn's print waits the ROM's press + 6 + u (opponent 14 -> -1, ROM frames 1104 / 1108 / 1112 / 1131). The player pin stays 4: ours is now 11 late (the same lead puts the player lab at ROM -11, away from the ROM; open, chg2 doc).
 // hpf3: the player's unleash offset 1 -> 9: the opponent's hit on the player (ROM bar 13 rows, rise 496; ours hp 491, bar + tail 7) now ends the turn at the ROM's length minus 5 where the 28-row floor had it 4 too long
 // (ROM bar rise -> the continuation turn's first exec 49 vs ours 44; neither was exact: the turn-end command's own 8 rows are the open remainder, hpf3 docs).
-  for (const [side, pan, unleashOffset] of [["player", -64, 4], ["opponent", 63, 14]] as const) {
+  for (const [side, pan, unleashOffset] of [["player", -64, 4], ["opponent", 63, -1]] as const) {
     it(`aud261-razorwind-${side}: the +41 charge gap and the +4 / +4 / +19 unleash gaps equal the table's, offset constant per turn`, () => {
       const rom = fixture(`aud261-razorwind-${side}`);
       const ids = [132, 133, 160, 136];
@@ -203,7 +204,7 @@ describe("Razor Wind (aud261)", () => {
       const ours = ourEvents(rom).filter((e) => e.kind === "se" && ids.includes(e.id as number)).slice(-6);
       expect(ours.map((e) => `${e.id}:${e.pan}`)).toEqual(romRows.map((e) => `${e.id}:${e.pan}`));
       // Offsets are constant within a turn (the lead is the #198 idle-lead class: charge -10, unleash +1 / +14 by who moves first).
-      expect(romRows.map((e, i) => e.frame - ours[i]!.frame)).toEqual([-10, -10, ...Array<number>(4).fill(unleashOffset)]);
+      expect(romRows.map((e, i) => e.frame - ours[i]!.frame)).toEqual([0, 0, ...Array<number>(4).fill(unleashOffset)]);
     });
   }
 });
