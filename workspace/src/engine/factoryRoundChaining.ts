@@ -3,7 +3,8 @@
  * challenge carries from one round's terminal into the next round's draft
  * (win streak, symbol count, cumulative Battle Points, rents count), and the
  * pure construction of that next draft screen from the live generator
- * (`factoryRentalGeneration.ts`'s `generateInitialFactoryRentals`).
+ * (`factoryRoundBattleOrchestrator.ts`'s `generateFactoryRoundDeal`: the six set
+ * ids, the first opponent, the six personalities, the ROM's order).
  *
  * Cross-session persistence (saving) is explicitly out of scope: this carry
  * lives only in `EngineState` for the current app session, exactly like
@@ -16,10 +17,9 @@ import {
   createDraftScreenStateFromRentalRecords,
   type DraftScreenState,
 } from "./factoryDraftScreen.ts";
-import {
-  generateInitialFactoryRentals,
-  type FactoryInitialRentalGenerationResult,
-} from "./factoryRentalGeneration.ts";
+import { ANCHOR_FACTORY_METADATA } from "./factoryAnchorSession.ts";
+import type { FactoryInitialRentalGenerationResult } from "./factoryRentalGeneration.ts";
+import { generateFactoryRoundDeal } from "./factoryRoundBattleOrchestrator.ts";
 
 const STAGES_PER_CHALLENGE = factoryEndingPolicy.constants.stagesPerChallenge;
 const MAX_STREAK = factoryEndingPolicy.constants.maxStreak;
@@ -159,16 +159,25 @@ export type FactoryGeneratedChallengeDraft = Readonly<{
  * or arbitrary seed). Species/record shapes flow into the same draft-screen
  * constructor the canonical anchor boot uses - no anchor-record special
  * casing.
+ *
+ * fop1 (docs/fop1-first-opponent-order.md): the draft's personalities are the
+ * deal's, drawn after the round's first opponent (the ROM rolls it right after
+ * the six set ids, PreBattleRoom scripts.inc:30-31), so the deal is the
+ * round's own (`generateFactoryRoundDeal`, with the same inputs
+ * `createPendingRoundOrchestrator` in core.ts gives the round's
+ * orchestrator). `generation.rngValue` is the cursor at the end of the deal.
  */
 export function generateFactoryChallengeDraft(
   carry: FactoryCarry,
   rngValue: number,
 ): FactoryGeneratedChallengeDraft {
-  const generation = generateInitialFactoryRentals({
+  const { rentals: generation } = generateFactoryRoundDeal({
     rngValue,
     factoryWinStreak: carry.factoryWinStreak,
     rentsCount: carry.rentsCount,
     playerTrainerId: carry.playerTrainerId,
+    factorySymbolsCount: carry.factorySymbolsCount,
+    battleTowerLevel50WinStreak: ANCHOR_FACTORY_METADATA.battleTowerLevel50WinStreak,
   });
   return Object.freeze({
     generation,

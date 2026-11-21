@@ -110,8 +110,8 @@ function wrapLines(lines: readonly string[] | null | undefined): readonly string
 
 /**
  * The four script messages. The type and style lines depend only on the deal (the opponent mons come from the cursor
- * after the rentals), never on the player's later picks, and there is no streak-dependent text: a continued streak
- * changes the opponent set range, not the script.
+ * right after the six rental set ids, before the personalities: the ROM's order, generateFactoryRoundDeal), never on the
+ * player's later picks, and there is no streak-dependent text: a continued streak changes the opponent set range, not the script.
  */
 export function buildBriefingMessages(
   carry: FactoryCarry,
