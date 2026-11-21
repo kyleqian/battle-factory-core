@@ -10,7 +10,7 @@ import { factoryBattleBgm } from "./battleStartSounds.ts";
 import { BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS } from "./battleScriptSourceConstants.ts";
 import type { BattleResolutionPresentationState } from "./battleResolutionPresentation.ts";
 import { liveMoveSourceAge, moveAnimationScriptStartRow, statsChangeSourceAge } from "./battleResolutionPresentationRender.ts";
-import { bodyStatusTailRuleApplies, FOCUS_PUNCH_SETUP_BEHIND_SUBSTITUTE_COMMAND_FRAMES, HELD_ITEM_EFFECT_COMMAND_FRAMES, RAIN_CONTINUES_SCRIPT_START_ROWS, WEATHER_CONTINUES_LAUNCH_LEAD_ROWS, isWeatherContinuesAnimation, type BattleStatusAnimationName, type WeatherContinuesAnimation } from "./battleResolutionPresentation.ts";
+import { bodyCLeadRuleApplies, bodyStatusTailRuleApplies, FOCUS_PUNCH_SETUP_BEHIND_SUBSTITUTE_COMMAND_FRAMES, HELD_ITEM_EFFECT_COMMAND_FRAMES, RAIN_CONTINUES_SCRIPT_START_ROWS, WEATHER_CONTINUES_LAUNCH_LEAD_ROWS, isWeatherContinuesAnimation, type BattleStatusAnimationName, type WeatherContinuesAnimation } from "./battleResolutionPresentation.ts";
 
 export interface TimedOp {
   readonly op: "playsewithpan" | "playse" | "waitplaysewithpan" | "loopsewithpan" | "panse" | "panse_adjustnone" | "panse_adjustall" | "setpan" | "soundtask_loopse" | "soundtask_fireblast" | "soundtask_se1" | "soundtask_se2" | "sprite_confuseray_ball" | "task_rollout" | "task_shockwave_bolt" | "sprite_willowisp_orb";
@@ -530,6 +530,15 @@ const WEATHER_LABELS: Readonly<Record<WeatherContinuesAnimation, string>> = {
 export const STATUS_ANIMATION_SCRIPT_AGE = 7;
 export const STATUS_ANIMATION_AUDITED_BODY_SCRIPT_AGE = 0;
 function statusAnimationScriptAge(state: BattleResolutionPresentationState): number {
+  // b4l: the status animation a c-lead B4 body (Thunder Wave, Sing, Will-O-Wisp, Confuse Ray ...) hands over to plays its first SE 3 rows after the command (ROM, the b4m labs), not 10:
+  // only the command directly after the body (a `status` command may sit between), so end-of-turn / Toxic / other status animations keep their audited offset.
+  const own = state.segments[state.segmentIndex]!.commands;
+  for (let c = state.commandIndex - 1; c >= 0; c -= 1) {
+    const previous = own[c]!;
+    if (previous.type === "status") continue;
+    if (previous.type === "move-animation" && (previous.timing.bodyLeadFrames ?? 0) > 0 && previous.animation !== undefined && bodyCLeadRuleApplies(previous.animation.moveId)) return STATUS_ANIMATION_AUDITED_BODY_SCRIPT_AGE;
+    break;
+  }
   for (let s = 0; s <= state.segmentIndex; s += 1) {
     const commands = state.segments[s]!.commands;
     const end = s === state.segmentIndex ? state.commandIndex : commands.length;
