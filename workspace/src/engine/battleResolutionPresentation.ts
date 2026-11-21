@@ -290,6 +290,29 @@ export function weatherContinuesCommandFrames(animation: WeatherContinuesAnimati
   if (animation === "RAIN_CONTINUES") return RAIN_CONTINUES_COMMAND_FRAMES;
   return WEATHER_CONTINUES_LAUNCH_LEAD_ROWS + WEATHER_CONTINUES_BODY_ROWS[animation] + WEATHER_CONTINUES_LAUNCH_TAIL_ROWS;
 }
+/**
+ * sst1 (docs/sst1-sandstorm-continues.md): after General_Sandstorm, BattleScript_DamagingWeatherContinues (battle_scripts_1.s:3200-3224)
+ * runs `setbyte`, then per battler in turn order `copyarraywithindex`, `weatherdamage`, `jumpifword` and, for a battler the sandstorm
+ * does not hurt, BattleScript_DamagingWeatherLoopIncrement's three commands, before the first "{X} is buffeted by the sandstorm!" print.
+ * The ROM runs one script command a frame, so the rows from the body's last picture to that print's first glyph are those instructions
+ * + 5 (frame catcher, 16 Scene ON end turns: 10 rows when the first battler in turn order is hurt, 5 instructions; 16 when it is not,
+ * 11). The command's tail is those instructions (the kernel's instructionExecution counts; ours had 3, 8 rows to the glyph); without
+ * a "buffeted" print in the script run (neither battler hurt) it keeps WEATHER_CONTINUES_LAUNCH_TAIL_ROWS. Hail runs the same script but
+ * is not in the sweep (hit1 measured its damage SE 4 late with the old tail): unchanged.
+ */
+const SANDSTORM_BUFFETED_MESSAGE_ID = "STRINGID_PKMNBUFFETEDBYSANDSTORM";
+export function sandstormContinuesTailRows(events: readonly BattleKernelSemanticEvent[], index: number): number {
+  const animation = events[index]!;
+  const start = animation.provenance?.instructionExecution;
+  for (let next = index + 1; next < events.length; next += 1) {
+    const payload = events[next]!.payload;
+    if (payload.kind !== "message") continue;
+    const end = events[next]!.provenance?.instructionExecution;
+    if (payload.messageId !== SANDSTORM_BUFFETED_MESSAGE_ID || start === undefined || end === undefined || end <= start) break;
+    return end - start;
+  }
+  return WEATHER_CONTINUES_LAUNCH_TAIL_ROWS;
+}
 export const FOCUS_PUNCH_SETUP_BEHIND_SUBSTITUTE_COMMAND_FRAMES = 3;
 const CASTFORM_CHANGE_SUBSTITUTE = 1 << 7;
 /**
@@ -5673,7 +5696,12 @@ export function projectBattleResolutionCommands(
             battler: 0,
             animation: weather,
             animated: true,
-            timing: Object.freeze({ minimumFrames: weatherContinuesCommandFrames(weather) }),
+            // sst1: the sandstorm's tail is the script's instructions to the first "buffeted" print (sandstormContinuesTailRows).
+            timing: Object.freeze({
+              minimumFrames: weather === "SANDSTORM_CONTINUES"
+                ? weatherContinuesCommandFrames(weather) - WEATHER_CONTINUES_LAUNCH_TAIL_ROWS + sandstormContinuesTailRows(events, index)
+                : weatherContinuesCommandFrames(weather),
+            }),
           }));
         }
         continue;
