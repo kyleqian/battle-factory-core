@@ -17,6 +17,8 @@ tools/frame-catcher/run.sh OUTDIR TRACE.json [TRACE.json ...]
 - `GAME=/path/to/workspace` plays another build's `src/` (for a site build: `git archive <core commit> workspace/src workspace/package.json
   | tar -x -C DIR` and link `node_modules` into `DIR/workspace`). Default: this workspace.
 - `JOBS=N` battles at a time (default 3; each ROM run is one Python process). `KEEP=1` keeps the frame stores (needed by `peek.py`).
+- `CATCHER_WATCH=1` also logs, on each change after a ROM frame, `gAnimScriptActive`, `gAnimVisualTaskCount`, the SE1 / SE2 player
+  status and `gBattlescriptCurrInstr` to `rom/watch.json` (hit1, `docs/hit1-move-hit-timing.md`: when a move's script falls and its SEs end).
 - Writes `OUTDIR/<trace name>/report.md` (ranked differences with ROM | ours | diff pictures), `findings.json`, `images/`, and
   `OUTDIR/summary.md` over all traces. Without `KEEP=1` only the differing frames stay on disk.
 

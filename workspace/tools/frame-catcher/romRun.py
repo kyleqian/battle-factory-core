@@ -453,6 +453,8 @@ def run(engine_dir, out_dir, profile, max_frames):
     last_menu, last_buttons = None, None
     roll = None  # {battle, value, start}: gRngValue is held at `value` from the GO ON answer until the ROM rolls the trainer
     cap = max_frames if max_frames else int(eng["frames"] * 1.6) + 6000
+    watch = [] if os.environ.get("CATCHER_WATCH") == "1" else None
+    watch_last = None
     t0 = time.time()
     m = rom.menu()
     while o.frame < cap:
@@ -507,6 +509,14 @@ def run(engine_dir, out_dir, profile, max_frames):
         new = sound.advance(buttons, restep_with=traps)
         store.add(o.screen_rgb())
         f = o.frame
+        if watch is not None:
+            # hit1: CATCHER_WATCH=1 logs, on each change, gAnimScriptActive, gAnimVisualTaskCount, the SE1 / SE2 player status (IsSEPlaying,
+            # sound.c:606-613) and gBattlescriptCurrInstr after the frame (rom/watch.json: [frame, active, visual tasks, SE1, SE2, instr]).
+            row = [rom.u8(s["gAnimScriptActive"]), rom.u8(s["gAnimVisualTaskCount"]), rom.u32(s["gMPlayInfo_SE1"] + 4), rom.u32(s["gMPlayInfo_SE2"] + 4),
+                   rom.u32(s["gBattlescriptCurrInstr"])]
+            if row != watch_last:
+                watch.append([f, *row])
+                watch_last = row
         b = "+".join(buttons)
         if b != last_buttons:
             buttons_rle.append([f, b])
@@ -621,6 +631,8 @@ def run(engine_dir, out_dir, profile, max_frames):
               "deals": [{k: v for k, v in d.items() if k not in ("want", "first", "idsBefore")} for d in deals.values()],
               "sounds": sounds, "menus": menus, "buttons": buttons_rle}
     (out / "timeline.json").write_text(json.dumps(result))
+    if watch is not None:
+        (out / "watch.json").write_text(json.dumps(watch))
     print(f"rom: {o.frame} frames, {len(store.index)} distinct pictures, {len(sounds)} sound events, anchors {driver.ai}/{len(plan.anchors)}, "
           f"stop {driver.stop_reason}, {result['seconds']} s", flush=True)
     return result

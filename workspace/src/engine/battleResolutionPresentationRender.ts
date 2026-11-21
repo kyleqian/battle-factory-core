@@ -13,7 +13,10 @@ import {
   STA5_STATUS_BODY_TAIL_ROWS,
   lse2BodySoundAgeShift,
   bodyHitTailRuleApplies, bodyGapPrintRuleApplies, LSE4_WINDOW_SHORT_ROWS, bodyLeadTailCompositionApplies, bodyStatusTailRuleApplies, bodyLse2RuleApplies, bodySLeadRuleApplies,
+  bodyLeadRuleApplies,
 } from "./battleResolutionPresentation.ts";
+import { animScriptSeStopRow, cmdEndSeWaitRows } from "./animEndSeWait.ts";
+import { variantOf } from "./animSoundOps.ts";
 import type { LiveMoveSpriteAllocatorInput, LiveMoveSpriteOrderInput } from "./liveMoveSpriteAllocator.ts";
 import type { LiveMoveBattlerX2Input } from "./liveBattlerX2History.ts";
 import { liveSubstituteSwapApplies, substituteSwapTailFieldArt } from "./liveSubstituteSwap.ts";
@@ -1071,7 +1074,12 @@ export function midBattleSwitchSendInParticlesAt(
 export type BattleResolutionRenderEffect =
   | Readonly<{ type: "move"; request: BattleMoveAnimationRequest; age: number; paletteInput?: LiveMovePaletteInput; spriteAllocatorInput?: LiveMoveSpriteAllocatorInput; spriteOrderInput?: LiveMoveSpriteOrderInput; presentationRng?: LiveMovePresentationRngInput; battlerX2Input?: LiveMoveBattlerX2Input;
       /** shadow105: lead row 0 of a lead > 0 command, the ROM's activation row (its OAM still shows the elevated-opponent shadow). */
-      preActivationRow?: true }>
+      preActivationRow?: true;
+      /**
+       * hit1: a row after the body of a command Cmd_end holds for its SEs (liveMoveEndSeWaitRows): every script command, cleanup
+       * included, has run, so the scene draws the field as it is (age stays the body's last row for the sound and history readers).
+       */
+      afterScript?: true }>
   /** S10A Substitute fade (liveSubstituteFade.ts): command age; the other battler's rest from the tracked x2 history. */
   | Readonly<{ type: "substitute-fade"; battler: 0 | 1; age: number; battlerX2Input?: LiveMoveBattlerX2Input }>
   /**
@@ -1505,6 +1513,9 @@ function currentSegment(state: BattleResolutionPresentationState) {
  * rows showing its age-0 frame before the accepted body. Presentation timing only.
  */
 const LIVE_MOVE_IDLE_LEAD_ROWS: ReadonlyMap<number, number> = new Map([
+  // hit1: Thunder Punch 10 (idle94's table measured it, but its template scenario had no body; the frame catcher's ROM runs show the 10
+  // rows as the field before the body, the same picture as production's age-0 frame: docs/hit1-move-hit-timing.md).
+  [9, 10],
   [41, 10], [44, 10], [51, 7], [52, 4], [55, 10], [71, 10], [74, 1], [75, 13], [82, 7], [92, 7], [93, 5], [94, 5], [106, 1], [120, 4],
   [53, 18], [124, 4], [136, 1], [146, 13], [153, 4], [158, 4], [184, 4], [188, 4], [204, 4], [207, 7], [225, 6], [232, 4], [247, 5], [248, 5],
   [269, 10], [282, 6], [294, 1], [299, 10], [305, 7], [313, 1], [325, 8], [334, 1], [337, 6], [339, 4], [342, 7], [343, 1], [347, 3],
@@ -1534,8 +1545,9 @@ export function liveMoveIdleLeadRows(request: BattleMoveAnimationRequest, field:
 const LIVE_MOVE_PRE_ROWS = 3;
 const LIVE_MOVE_POST_ROWS = 2;
 // Sides whose pre rows are NOT proven to be the age-0 frame: idle lead N != 0 outside idle94's 40 static-lead moves, or N unknown.
+// hit1: Thunder Punch (9) left the list with its static lead (LIVE_MOVE_IDLE_LEAD_ROWS).
 const LIVE_MOVE_NO_PRE_ROW_SIDES: ReadonlyMap<number, number> = new Map([
-  [9, 3], [20, 3], [48, 3], [53, 3], [104, 3], [105, 3], [157, 1], [185, 3], [208, 3], [209, 3], [223, 3], [227, 3], [235, 3],
+  [20, 3], [48, 3], [53, 3], [104, 3], [105, 3], [157, 1], [185, 3], [208, 3], [209, 3], [223, 3], [227, 3], [235, 3],
 ]);
 // Sides whose trail is -1 (production's last row is the ROM's first inactive row): the post rows repeat it.
 const LIVE_MOVE_POST_ROW_SIDES: ReadonlyMap<number, number> = new Map([
@@ -1564,6 +1576,52 @@ const LIVE_MOVE_SCRIPT_TAIL_TRAIL_ROWS: ReadonlyMap<number, number> = new Map([
 const LIVE_MOVE_UNMEASURED_UNIVERSAL_ROW_IDS: ReadonlySet<number> = new Set([165]);
 const NO_UNIVERSAL_ROWS = Object.freeze({ pre: 0, post: 0 });
 
+/**
+ * hit1 (docs/hit1-move-hit-timing.md, src/engine/animEndSeWait.ts): the rows Cmd_end's IsSEPlaying wait keeps a live body active after
+ * its window (battle_anim.c:490-503): the body's last row (activation + idle lead + live - 1) is the ROM's first inactive row only when
+ * the script's SEs are over by then; otherwise gAnimScriptActive falls on the row the last SE1 / SE2 song ends (at most 90 rows later),
+ * and the hit, the HP drain and the next print wait for it. The rows hold the body's last row (the field after the script's cleanup).
+ * 0 for a declined body, a Substitute swap composite, a General_TurnTrap / General_Rain body, and the bodies whose rows after the window
+ * are already ROM-measured another way: the lead-rule classes with their own tails (lead-table, status-tail, lse2, s-lead, gap-print,
+ * lead-only), the lse4 window-short bodies, and the bodies whose window models the wait itself (Sing, Solar Beam, Self-Destruct,
+ * Transform).
+ */
+const CMD_END_SE_WAIT_MODELED_MOVE_IDS: ReadonlySet<number> = new Set([47, 76, 120, LIVE_TRANSFORM_MOVE_ID]);
+export function cmdEndSeWaitRuleApplies(request: BattleMoveAnimationRequest): boolean {
+  const id = request.moveId;
+  return request.turnTrapBody !== true && request.generalRain !== true && !CMD_END_SE_WAIT_MODELED_MOVE_IDS.has(id)
+    && (!bodyLeadRuleApplies(id) || bodyHitTailRuleApplies(id)) && !LSE4_WINDOW_SHORT_ROWS.has(id);
+}
+// The duration is read many times per row (moveBodyExtraRows walks every command): cached per (request, field, body class, use).
+const END_SE_WAIT_CACHE = new WeakMap<BattleMoveAnimationRequest, WeakMap<BattleResolutionDisplayedField, Map<string, number>>>();
+export function liveMoveEndSeWaitRows(
+  request: BattleMoveAnimationRequest, field: BattleResolutionDisplayedField, bodyClass: LiveMoveTimingBody = "first", moveUse?: number,
+): number {
+  if (!cmdEndSeWaitRuleApplies(request)) return 0;
+  let byField = END_SE_WAIT_CACHE.get(request);
+  if (byField === undefined) END_SE_WAIT_CACHE.set(request, byField = new WeakMap());
+  let byKey = byField.get(field);
+  if (byKey === undefined) byField.set(field, byKey = new Map());
+  const key = `${bodyClass}|${moveUse ?? ""}`;
+  let rows = byKey.get(key);
+  if (rows === undefined) byKey.set(key, rows = liveMoveEndSeWaitRowsOf(request, field, bodyClass, moveUse));
+  return rows;
+}
+function liveMoveEndSeWaitRowsOf(
+  request: BattleMoveAnimationRequest, field: BattleResolutionDisplayedField, bodyClass: LiveMoveTimingBody, moveUse: number | undefined,
+): number {
+  if (liveSubstituteSwapApplies(request, field) === true) return 0;
+  const live = liveMoveAnimationDuration(request, field, bodyClass, moveUse);
+  if (live === null) return 0;
+  const inputs = moveSourceFieldInputs(request, field);
+  const ops = variantOf(request.moveId, request.turn, request.attacker === 0 ? 0 : 1, {
+    picY: inputs.picOffsetY, topY: inputs.topY, rolloutCounter: request.rolloutCounter, damage: request.damage,
+    attackerElevation: inputs.attackerElevation, attackerHpQuarter: inputs.attackerHpQuarter,
+  });
+  const context = { attackerSide: request.attacker === 0 ? "player" : "opponent", targetSide: request.target === 0 ? "player" : "opponent" } as const;
+  return cmdEndSeWaitRows(liveMoveIdleLeadRows(request, field) + live, animScriptSeStopRow(ops, context));
+}
+
 /** The universal rows a live move-animation command presents around its body (none: declined, a Substitute swap, unmeasured). */
 export function liveMoveUniversalRows(
   request: BattleMoveAnimationRequest,
@@ -1574,7 +1632,8 @@ export function liveMoveUniversalRows(
   const side = request.attacker === 0 ? 1 : 2;
   return Object.freeze({
     pre: ((LIVE_MOVE_NO_PRE_ROW_SIDES.get(request.moveId) ?? 0) & side) === 0 ? LIVE_MOVE_PRE_ROWS : 0,
-    post: ((LIVE_MOVE_POST_ROW_SIDES.get(request.moveId) ?? 0) & side) !== 0 ? LIVE_MOVE_POST_ROWS : 0,
+    // hit1: a body Cmd_end holds for its SEs ends on the ROM's first inactive row (trail -1), so the post rows repeat it.
+    post: ((LIVE_MOVE_POST_ROW_SIDES.get(request.moveId) ?? 0) & side) !== 0 || liveMoveEndSeWaitRows(request, field) > 0 ? LIVE_MOVE_POST_ROWS : 0,
   });
 }
 
@@ -1938,9 +1997,10 @@ export function battleResolutionCommandDuration(
       const seGate = command.timing.seGateFrames ?? 0;
       if (live === null) return seGate + command.timing.minimumFrames;
       const rows = liveMoveUniversalRows(command.animation!, field);
+      // hit1: + Cmd_end's IsSEPlaying rows after the body (liveMoveEndSeWaitRows), before the post rows.
       return seGate + (command.timing.scriptLeadFrames ?? 0) + presentedBodyLead(command, field) + rows.pre
-        + liveMoveIdleLeadRows(command.animation!, field) + live + rows.post + liveMoveScriptTailFrames(command.timing, command.animation!, field)
-        + liveMoveHitTailRows(command, field);
+        + liveMoveIdleLeadRows(command.animation!, field) + live + liveMoveEndSeWaitRows(command.animation!, field, bodyClass, moveUse)
+        + rows.post + liveMoveScriptTailFrames(command.timing, command.animation!, field) + liveMoveHitTailRows(command, field);
     }
     case "hit-animation":
       return command.timing.minimumFrames;
@@ -2658,6 +2718,9 @@ export function createBattleResolutionPresentationRenderView(
 
   const command = segment.commands[state.commandIndex] ?? null;
   let effect: BattleResolutionRenderEffect | null = null;
+  // hit1: a row of Cmd_end's IsSEPlaying wait (liveMoveEndSeWaitRows): gAnimScriptActive is still set, so SpriteCB_EnemyShadow keeps the
+  // enemy shadow hidden; it is shown again one row after the script falls (the first post row).
+  let cmdEndSeWaitRow = false;
   let visibleCharacters = latestMessage === null
     ? 0
     : switchIn === null
@@ -2753,11 +2816,21 @@ export function createBattleResolutionPresentationRenderView(
       // sub183: the script lead rows precede the seGate rows and show the same age-0 field.
       const seGate = (command.timing.seGateFrames ?? 0) + (command.timing.scriptLeadFrames ?? 0) + presentedBodyLead(command, field);
       const pre = seGate + liveMoveUniversalRows(command.animation, field).pre;
+      // hit1: past the body of a command Cmd_end holds for its SEs (the wait rows, then the post / tail rows), every script command has
+      // run, cleanup included: the ROM shows the field as the script left it, not the body's last row (Metal Claw: the ROM's wait rows
+      // are the plain field, its last body row still has the effect). The effect keeps the last body age (`afterScript`).
+      const bodyClass = liveMoveTimingBodyOf(state.liveMoveSpriteOrderInput);
+      const endWait = liveMoveEndSeWaitRows(command.animation, field, bodyClass, state.liveMoveBattlerX2Input?.moveUse);
+      const live = endWait > 0 ? liveMoveAnimationDuration(command.animation, field, bodyClass, state.liveMoveBattlerX2Input?.moveUse) : null;
+      const bodyAge = state.lifecycle.phaseElapsed - pre - lead;
+      const afterScript = live !== null && bodyAge >= live;
+      if (afterScript) cmdEndSeWaitRow = bodyAge < live + endWait;
       effect = Object.freeze({
         type: "move", request: command.animation,
         age: liveMoveUniversalRowAge(state, command.animation, field, seGate, liveMoveScriptTailFrames(command.timing, command.animation, field),
           (bodyLeadTailCompositionApplies(command.animation.moveId) && presentedBodyLead(command, field) > 0) || LIVE_MOVE_LEADLESS_TAIL_ROWS.has(command.animation.moveId)),
         ...(lead > 0 && state.lifecycle.phaseElapsed <= pre ? { preActivationRow: true as const } : {}),
+        ...(afterScript ? { afterScript: true as const } : {}),
         paletteInput: state.liveMovePaletteInput,
         spriteAllocatorInput: state.liveMoveSpriteAllocatorInput,
         spriteOrderInput: state.liveMoveSpriteOrderInput,
@@ -3098,7 +3171,7 @@ export function createBattleResolutionPresentationRenderView(
             visibleCharacters,
           }),
     effect,
-    postBodyShadowHidden: containedHistoryRead("post-body shadow", segment, state, false, () => postBodyShadowHiddenAt(state, segment)),
+    postBodyShadowHidden: cmdEndSeWaitRow || containedHistoryRead("post-body shadow", segment, state, false, () => postBodyShadowHiddenAt(state, segment)),
     visibility: Object.freeze({
       player: Object.freeze({
         sprite: (spriteVisibility.get(0) ?? true)

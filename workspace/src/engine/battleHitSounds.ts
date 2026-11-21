@@ -117,7 +117,13 @@ export function emitBattleHitSounds(
     const song = effectivenessSong(segment, command.eventSequence);
     if (song !== null) {
       const panBattler = song.weatherLoop ? 0 : command.battler;
-      scheduleAfter(Math.max(0, lag), () => playPannedSe(song.song, panBattler === 0 ? SE_PAN_PLAYER : SE_PAN_OPPONENT));
+      // hit1 (docs/hit1-move-hit-timing.md): after a move body without a lead (a lead body schedules the SE itself, above), the lead /
+      // tail rows of the resolution's earlier lead bodies (another move, or a multi-hit's first hit) are already in this command's start:
+      // subtracting them (moveBodyExtraRows) put the SE that many rows early (frame catcher: Petal Dance / Spark / Brick Break after a
+      // lead body 8 / 9 early, Double Slap / Fury Swipes hits 2+ 7 to 9 early). A hit after a general animation (Future Sight's hit,
+      // the end-turn hail / sandstorm loop) keeps the old anchor: its own offset is not ROM-exact either way (open in the doc).
+      const anchor = previous?.type === "move-animation" ? sceneLag(segment) : lag;
+      scheduleAfter(Math.max(0, anchor), () => playPannedSe(song.song, panBattler === 0 ? SE_PAN_PLAYER : SE_PAN_OPPONENT));
     }
     return;
   }

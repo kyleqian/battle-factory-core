@@ -14,7 +14,7 @@ import speciesStats from "../../src/data/gen/species-stats.json" with { type: "j
 import { prepareLiveMoveSpriteOrder, type LiveMoveSpriteOrderInput } from "../../src/engine/liveMoveSpriteAllocator.ts";
 import { knownEntrySpriteOrderState } from "../../src/engine/spriteOrderProvider.ts";
 import { generatedCommandAnimationReplay } from "../../tools/integration/generatedCommandAnimationReplay.ts";
-import { hpd4BodyRows, iu120Extra } from "../helpers/iu120Rows.ts";
+import { hit1SeWaitRows, hpd4BodyRows, iu120Extra } from "../helpers/iu120Rows.ts";
 
 // docs/next-adapters-prep10.md: Magnitude (222), Reversal (179), Pain Split (220), Rock Blast (350), Razor Wind (13),
 // Spark (209; both attackers since spark62). The dense framebuffer proofs are tools/integration/fixtures/prep10-live/*.json
@@ -147,7 +147,8 @@ describe("live prep10 move adapters", () => {
     const off = generatedCommandAnimationReplay(r.seed, "off", r.moves, r.streak);
     const bodies = on.animations.filter(a => a.moveId === r.id && a.attacker === 0);
     // lse4: Razor Wind's charge turn presents lead 1 + tail 4 (gap-print class), its unleash lead 5 + tail 4; the helper default is the unleash.
-    expect(bodies.map(b => b.ages.length)).toEqual(r.bodies.map((n, i) => n + iu120Extra(r.id) + (r.id === 13 && i === 0 ? 5 : hpd4BodyRows(r.id))));
+    // hit1: + Cmd_end's IsSEPlaying rows (Reversal 1, Rock Blast 1 per hit, Spark 9: its SE_M_THUNDERBOLT2 at script row 87 ends on row 123).
+    expect(bodies.map(b => b.ages.length)).toEqual(r.bodies.map((n, i) => n + iu120Extra(r.id) + hit1SeWaitRows(r.id) + (r.id === 13 && i === 0 ? 5 : hpd4BodyRows(r.id))));
     for (const body of bodies) {
       expect(body.ages).toEqual(Array.from({ length: body.ages.length }, (_, age) => age));
       expect(body.adapterActive.every(Boolean)).toBe(true);
