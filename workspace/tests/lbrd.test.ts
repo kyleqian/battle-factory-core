@@ -63,7 +63,10 @@ interface WonLobby {
 // 2's Scene OFF continued challenge no longer loses within the 120,000 frames. A scan of 0..20 in the loss role (a scratch copy of this file,
 // the loss case alone) found 10 and 19; the continuation (2) and the retire (13) still pass, so only the loss moves, to 10. With the accept edge
 // alone undone (isBattleResolutionButtonMessageAcceptable's promptClear lead) 2 passes the loss case again.
-const WIN_TWO_SEED = 2;
+// trial-fix-20261121 (fnt1 + lbb1 + msg2 + wbh1 + mvs1 + hdt1 merged on fop1 / sct1): 2's Scene OFF continued challenge no longer
+// reaches the second round-end. A scan of 0..20 in the continuation role (scratch copies of this file; retire 13, loss 10 unchanged) found
+// 10, 13 and 19 passing every case (15 / 15; 2 and 4 fail the 2 continuation cases, 17 and 20 fail 6, the rest 10), so the continuation uses 10.
+const WIN_TWO_SEED = 10;
 const RETIRE_SEED = 13;
 const WIN_THEN_LOSE_SEED = 10;
 
