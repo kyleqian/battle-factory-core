@@ -74,7 +74,8 @@ interface WonLobby {
 // trial-fix-20261121 (fnt1 + lbb1 + msg2 + wbh1 + mvs1 + hdt1 merged on fop1 / sct1): 2's Scene OFF continued challenge no longer
 // reaches the second round-end. A scan of 0..20 in the continuation role (scratch copies of this file; retire 13, loss 10 unchanged) found
 // 10, 13 and 19 passing every case (15 / 15; 2 and 4 fail the 2 continuation cases, 17 and 20 fail 6, the rest 10), so the continuation uses 10.
-    // (box-merge-20261121: values to re-measure on the combined tree)
+// merge of the box's 2026-11-20 run with the Mac's 11-21 fixes: the merge kept the box's 0 / 0 / 0 (lbw9's re-pin; the Mac had 10 / 13 / 10 after trial-fix-20261121). All 15 cases
+// pass with 0 in all three roles on the merged tree, so they stay.
 const WIN_TWO_SEED = 0;
 const RETIRE_SEED = 0;
 const WIN_THEN_LOSE_SEED = 0;

@@ -78,7 +78,8 @@ describe("pic9: every switch line on the real route follows the foe's HP (full-p
     // ("<MON>, come back!"); every line above still follows Cmd_hpthresholds2. Was [0, 2, 3].
     // sct1 (docs/sct1-scouting-next-opponent.md: the scouting pages take A from their own last character + 3, so seed 1's exploring game
     // is a new trajectory, see randomRoundSoak.test.ts): seeds 0 and 1 reach [0, 2, 3] again; seed 2 reaches scale 1, so the seeds are 0..2.
-    // (box-merge-20261121: values to re-measure on the combined tree)
+    // merge of the box's 2026-11-20 run with the Mac's 11-21 fixes: the merge kept the box's seeds 0, 1 and 4 (hcr1b's re-pin; the Mac had 0..2 after sct1). On the merged tree they
+    // reach every come-back and send-in scale, so they stay.
     expect([...seenScales.back].sort()).toEqual([0, 1, 2, 3]);
     expect([...seenScales.in].sort()).toEqual([0, 1, 2, 3]);
   }, 180_000);

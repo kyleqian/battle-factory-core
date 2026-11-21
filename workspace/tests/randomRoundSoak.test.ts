@@ -452,8 +452,9 @@ describe("random round soak driver (green milestone pin)", () => {
       // fnt1 (docs/fnt1-fainted-box-clear.md: a "fainted!" / "Player defeated" box takes the press from the row after its last glyph, 2 rows
       // earlier, as the ROM's `\p` wait): frames only, 43_334 -> 43_323; same battle 7, turn 3, end state, diagnostics, render calls. With the
       // accept edge alone undone (isBattleResolutionButtonMessageAcceptable's promptClear lead) the old pin passes again.
-    // (box-merge-20261121: values to re-measure on the combined tree)
-      frames: 43_557,
+      // merge of the box's 2026-11-20 run with the Mac's 11-21 fixes (box f5274b48a: hcr1 / hcr1b / fsc1 / chg1 ...; Mac ea3220630: wbh1 / fnt1 / lrc1 ...): frames + render calls,
+      // 43_557 (box) / 43_323 (Mac) -> 43_500, renderCalls 3_066 / 3_043 -> 3_043; same battle 7, turn 3, end state, diagnostics; both runs identical.
+      frames: 43_500,
       battle: 7,
       turn: 3,
       diagnostics: {
@@ -465,7 +466,7 @@ describe("random round soak driver (green milestone pin)", () => {
         terminalOutcome: "roundWon",
         terminalRecordMenuInputReadyReached: true,
         terminalRecordChoice: "no",
-        renderCalls: 3_066,
+        renderCalls: 3_043,
       },
     });
     expect(second).toEqual(first);
@@ -701,8 +702,11 @@ describe("random round soak driver (green milestone pin)", () => {
     // after every loss land on new phases, and the Lobby deals from a later cursor): seed 12 no longer commits Baton Pass. Re-scanned full-policy
     // seeds 0..39 (tools/soak/batonPassSearch.ts --seeds 0:40 --parallel 8): candidates 3, 6, 14, 28, 32, 36. Seed 3 is the lowest
     // (Baton Pass commits 1, first commit 23967, halt 24569 on MAWILE in battleIndex 0, three Lobby new challenges).
-    // (box-merge-20261121: values to re-measure on the combined tree)
-    const result = runSeed(28, {
+    // merge of the box's 2026-11-20 run with the Mac's 11-21 fixes (the box had 28 after chg1, the Mac 3 after lrc1; the exploring presses land on new phases with both sides' rules): neither
+    // commits Baton Pass on the merged tree (0 commits each). Re-scanned full-policy seeds 0..39 (tools/soak/batonPassSearch.ts --seeds 0:40 --parallel 4,
+    // same options): candidates 4, 8, 10, 11, 13, 16, 27, 36, 39, all OK with no openpartyscreen / machine-barrier error. Seed 4 is the lowest
+    // (Baton Pass commits 1, first commit 78369, halt 78671 on AIPOM in battleIndex 0, three Lobby new challenges; the halt is 1,329 frames inside the budget).
+    const result = runSeed(4, {
       maxFrames: 80_000,
       renderEvery: 0,
       coverage: observer as never,
@@ -831,7 +835,10 @@ describe("ISSUES #99 (soak driver swap-offer misroute) — swap offer answered b
     // (80,000 frames): all 12 reach one, every offer "NO", no swap screen; first-offer frames 0: 23,816, 1: 50,093, 2: 21,726,
     // 3: 17,933, 4: 32,470, 5: 17,041, 6: 21,019, 7: 19,422, 8: 22,150, 9: 44,215, 10: 20,581, 11: 22,262. Seed 0 is the lowest
     // inside 32,000, so it is pinned again and the window kept.
-    runSeed(0, {
+    // merge of the box's 2026-11-20 run with the Mac's 11-21 fixes: seed 0's first offer is now at 43,736, past the window. Scan of vanilla seeds 0..11 (80,000 frames): all 12 reach
+    // one, every offer "NO", no swap screen; first-offer frames 0: 43,736, 1: 42,095, 2: 19,289, 3: 19,995, 4: 24,332, 5: 50,195, 6: 17,830,
+    // 7: 19,695, 8: 25,204, 9: 23,902, 10: 25,116, 11: 27,633. Seed 2 is the lowest inside 32,000 with a wide margin, so it is pinned and the window kept.
+    runSeed(2, {
       policy: "vanilla",
       maxFrames: 32_000,
       renderEvery: 0,
@@ -1042,8 +1049,9 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // lbb1 (the boxes of the Lobby terminal, the postwin and the rooms take B as A; the exploring policy presses B there): frames only,
       // 22897 -> 22843; decision notes identical to 6817b6a8c's (press-stream notes aside); same battle 1 / depth 0 / turn 30 / roundLost.
       // trial-fix-20261121 (fnt1 + lbb1 together): frames only, 39277 -> 39259; same battle 2 / depth 1 / turn 22 / roundLost.
-    // (box-merge-20261121: values to re-measure on the combined tree)
-      frames: 67929,
+      // merge of the box's 2026-11-20 run with the Mac's 11-21 fixes: the box's chg1 trajectory (67929 / battle 3 / depth 2 / turn 20; the Mac had 39259 / battle 2 / depth 1 / turn 22):
+      // frames only against the box, 67929 -> 67984; same battle 3 / depth 2 / turn 20 / roundLost.
+      frames: 67984,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 2,
@@ -1096,8 +1104,8 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // earlier, so the exploring presses after it land 1 row earlier), measured on the combined tree (trial-fix-20261121 e12015ff1 +
       // msg2): frames only, 58758 -> 58763; same battle 3 / depth 2 / turn 19 / roundLost. With RELEASE_TO_MOVEEND_ROWS.STRINGID_PKMNWASDRAGGEDOUT
       // back at 5 the old pin passes again (on msg2's own base the same tail moved 58793 -> 58798); seed 0 is unmoved.
-    // (box-merge-20261121: values to re-measure on the combined tree)
-      frames: 64365,
+      // merge of the box's 2026-11-20 run with the Mac's 11-21 fixes: frames only, 64365 (box) / 58763 (Mac) -> 60582; same battle 3 / depth 2 / turn 19 / roundLost on all three.
+      frames: 60582,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 2,
@@ -1702,7 +1710,7 @@ describe("ISSUES #104 (driver): continuous-play outcome semantics retuned -- OK 
     // re-scanned seeds 0..49 under the same options (--seeds 0:50 --parallel 3): seeds 19, 23 and 40 chain two round wins (carry 14), so the lowest (19) is pinned.
     // fop1 (a new challenge's first opponent is rolled in the ROM's order, so round 2's first trainer moves): seed 19 now carries 7;
     // re-scanned seeds 0..49 under the same options (--seeds 0:50 --parallel 4): seeds 13, 14 and 23 chain two round wins (carry 14), so the lowest (13) is pinned.
-    // (box-merge-20261121: values to re-measure on the combined tree)
+    // merge of the box's 2026-11-20 run with the Mac's 11-21 fixes: the merge kept the box's 19 (after fsc1); it chains two round wins on the merged tree (this test passes), so it stays.
     const result = runSeed(19, {
       policy: "winning",
       maxRounds: 3,

@@ -142,7 +142,11 @@ describe("lbr-e: briefing text for a continued streak", () => {
 
   it("a continued streak runs the same entry through the engine (carry kept, same timeline)", () => {
     // The type / style lines come from the dealt opponent set, so the briefing's typing length varies with the deal; this cursor (scanned, lbr-f2) deals both runs the same length.
-    const rng = 0x4ea349da;
+    // Merge of the box's 2026-11-20 run with the Mac's 11-21 fixes: 0x4ea349da -> 0xca70e7db. Both runs still reach the deal on the same frame (conversation 992
+    // frames each; lbw9's save wait made it 952 -> 992, so the deal cursor moved), but fop1 deals the first opponent from that cursor in the ROM's order, so
+    // 0x4ea349da now deals fresh a WATER trainer (546 frames) and kept a no-favourites one (554). Scan of 30 cursors (the Gen 3 LCG from 0x4ea349da): 9 give
+    // equal frames; 0xca70e7db is the one where both runs deal the same briefing text (no clear favourites, free-spirited: 554 frames each).
+    const rng = 0xca70e7db;
     const fresh = driveBriefing(enterEntry("off", 0, rng));
     const kept = driveBriefing(enterEntry("off", 7, rng));
     expect(kept.state.pendingGeneratedRound!.carry.factoryWinStreak).toBe(7);

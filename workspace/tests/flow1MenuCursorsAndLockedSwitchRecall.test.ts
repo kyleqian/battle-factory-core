@@ -241,6 +241,12 @@ describe("flow1: whole challenges of the frame catcher's seeds", () => {
   // entries and 3 carried cursors (6 / 12), so it is pinned. Seed 6 Scene OFF no longer meets a foe underground; scanned seeds 0..199:
   // 135 is the lowest with at least 5 recalls of which exactly one is a continuation after the foe's Dig (6 recalls, battle 2's
   // PUPITAR), so it is pinned (seeds 86 and 142 recall after a Dig too, with other counts).
+  // Merge of the box's 2026-11-20 run with the Mac's 11-21 fixes: seed 135's game moved (7 recalls; its one continuation is now
+  // GRAVELER -> POLIWHIRL after a Rock Throw turn, no foe underground). Re-scanned seeds 0..199 (same player, 28,400 frames, the foe's
+  // STATUS3_UNDERGROUND at the continuation segment's start and a "dug a hole" print before it): 163 is the lowest with at least 5
+  // recalls of which exactly one is a continuation after the foe's Dig (5 recalls, battle 1's PUPITAR; also a hit in fop1's scan, at
+  // frame 4073, now 4084), so it is pinned. 86 (3 continuations), 89 (4 recalls), 142 (3 recalls) and 193 (8 recalls, one Dig
+  // continuation, VIBRAVA) recall after a Dig too.
   it("opens the action and move menus on the first entry after every switch-in (seed 0, Scene ON)", () => {
     let lastRequest: string | null = null;
     let switchedIn = false;
@@ -272,11 +278,11 @@ describe("flow1: whole challenges of the frame catcher's seeds", () => {
     expect(carried).toBeGreaterThanOrEqual(3);
   });
 
-  it("recalls the player's mon with its line and SE_BALL_OPEN when the foe is underground after Dig (seed 135, Scene OFF)", () => {
+  it("recalls the player's mon with its line and SE_BALL_OPEN when the foe is underground after Dig (seed 163, Scene OFF)", () => {
     let partyOpen = false;
     const recalls: { frame: number; lines: string[]; continuation: boolean; ballOpenAfterLine: boolean }[] = [];
     let watching: { frame: number; lines: string[]; continuation: boolean; ballOpenAfterLine: boolean } | null = null;
-    playCatcherSeed(135, "off", 28_400, (session, sounds) => {
+    playCatcherSeed(163, "off", 28_400, (session, sounds) => {
       const orch = session.state.factoryRoundBattleOrchestrator;
       const res = orch?.battleResolutionPresentation ?? null;
       if (partyOpen && res !== null && orch?.battleCommandPresentation === null) {
@@ -304,7 +310,9 @@ describe("flow1: whole challenges of the frame catcher's seeds", () => {
     // docs/flow1-menu-cursors-and-locked-switch-recall.md): POLIWHIRL -> GRAVELER while battle 2's PUPITAR is underground (a locked
     // continuation of the Dig charge's resolution). The frame catcher over this seed's trace (makeTrace --seed 135 --scene off --policy
     // full --battles 2, docs/fop1-first-opponent-order.md) shows the ROM print the same two lines with PUPITAR hidden, same sounds.
+    // Seed 163 (the merge re-pin above): ONIX -> GROWLITHE while battle 1's PUPITAR is underground (ONIX's Dragonbreath missed it first).
+    // Engine-only: no frame catcher run over seed 163's trace yet.
     const underground = recalls.filter((r) => r.continuation);
-    expect(underground.map((r) => r.lines.slice(0, 2))).toEqual([["POLIWHIRL, that’s enough! Come back!", "Go for it, GRAVELER!"]]);
+    expect(underground.map((r) => r.lines.slice(0, 2))).toEqual([["ONIX, come back!", "Go! GROWLITHE!"]]);
   });
 });
