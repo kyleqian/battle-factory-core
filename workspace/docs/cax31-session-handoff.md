@@ -64,6 +64,40 @@ Kyle plans to make this repo public with its full history (no rewrite, no licens
 - Once the repo is public, everything committed is published at the next push. Keep secrets, server addresses and
   personal paths out of commits, as before.
 
+## From the Mac, 2026-11-21 (top layer): the frame catcher over whole challenges, and sixteen fixes
+
+- **The frame catcher** (`tools/frame-catcher/`, README) now follows whole challenges in both scenes: round 1 (fcs1,
+  `docs/fcs1-catcher-sweep.md`), round 2, the Lobby between rounds and the Factory Head (fcr2, `docs/fcr2-catcher-round2.md`; the
+  Head's party trap holds the VBlank undo to the build's return, `docs/hdt1-factory-head-team.md`), and rounds picked for unseen moves,
+  items and abilities (fcm1, `docs/fcm1-catcher-sweep.md`, `tools/frame-catcher/pickTraces.py`): 92 rounds so far, 244 of 300 moves seen.
+- **Game fixes now in master** (Kyle's word, 11-20 and 11-21; each doc has the ROM evidence and tests):
+  - fcs1: rnc1 (rain continues draws General_Rain), lrc1 (the loss's animated return to ball; it replaces aud252's loss SE_BALL_OPEN
+    call: the recall switch-out plays it), snd3 (Intimidate SE, Baton Pass return, quiet BGM), pkm1 (PKMN glyphs).
+  - fcr2: sct1 (the scouting report names the next opponent; the Head's phone call before battle 21 / 42), hdl1 (Noland's end-of-battle
+    lines by tier; the bike TRIATHLETEs centred on their tile), lha1 (victory music after the turn's last command: no low-HP alarm after
+    a SHELL BELL win; a stat-up berry flashes its holder), **fop1 (gameplay: a challenge's first opponent is rolled in the ROM's order,
+    ids -> opponent -> personalities; Kyle reversed the 11-18 "leave Finding 47")**.
+  - fcm1: wbh1 (the battle-start WHITE HERB is presented), msg2 (WISH names the wisher; "HP is full!" pause; the dragged-out release
+    tail), fnt1 (the "fainted!" / "Player defeated" box: press from G+1, arrow every 9 frames, a press on a redraw frame blanks the box,
+    checked on 1,502 ROM boxes), mvs1 (WILL-O-WISP's orb SEs; Scene OFF SUBSTITUTE / TRANSFORM SEs, called or not), lbb1 (B on every
+    box that waits for A or B; B = NO on RECORD / RETIRE; the pre-battle room's three-entry menu no longer wraps).
+- **This merge** (your run f5274b48a + Mac master ea3220630): conflicts resolved in battleResolutionPresentation.ts (lrc1 beside chg1),
+  the Lobby attendant menus (your lbw9 kept: it covers lbb1's Lobby part), tickSounds.ts, appTrace.ts stage tables (both). One code change
+  on the combined tree: bb06468b3 (hcr1b's Scene OFF one-frame sound lead counted twice on mvs1's Transform / Substitute bodies, which
+  were fitted to the ROM's sound log; now 0 on that emitter only). Re-pins (5bd740c44): soak seed 21 / full seeds 0-1 / #89 Baton Pass seed 4
+  (halt 1,329 frames inside its budget) / #99 vanilla seed 2, lbre cursor 0xca70e7db, flow1 Dig recall seed 163 (ROM-checked). Full suite
+  1,929 files / 16,655 tests passed.
+- **For your tools:** since fop1, a census or measurement tool that builds a round from a seed should go through
+  `tools/integration/censusRound.ts` (keeps the old-order battles the census pins were made on); the tools you added on 11-20 / 11-21
+  (b4m, hcr3m, drv1, cln10 / cln11 labs) were not checked against it.
+- **The catcher's findings are fixed on the Mac (Kyle, 11-21).** What they left open is listed in each doc's last section so you know it
+  (the 65 METRONOME-only moves have no animation; "fainted!" prints 3-6 frames early in the turn; "Player defeated" ~25 frames early after
+  the winning faint; WILL-O-WISP's picture 8 frames early; end-of-turn lines after a drag-in 13 frames early; stat-change SE timing). Your
+  own plan is unchanged.
+- Fixed-frame traces recorded on an older build replay only on that build (fop1 moves every challenge's first opponent; fnt1 / lbb1
+  move when presses are taken).
+- Not on the website yet.
+
 ## From the Mac, 2026-11-20 (top layer): Kyle's live-play fixes merged, website on `eb-c3f7c43f5c1a9e62`, frame catcher, menu cursors + trap animation
 
 - **Kyle played the website on 11-20 and reported gaps.** The Mac fixed them, and they are merged into master with your
