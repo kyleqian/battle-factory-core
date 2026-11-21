@@ -1984,3 +1984,44 @@ Sum-check: ON 745 + 1,207 + 551 + 736 + 1,408 + 468 + 1,104 + 863 + 18,665 = 25,
 - Out of scope here, being landed by the parallel worker: the B4 bodies above.
 
 Not applied: no `src/` or `tests/` change; PROGRESS / ISSUES / ROADMAP untouched.
+
+## hcr3 (2026-11-21): stat-next hp tail, recoil hp rows, faint SE lag clip (Scene ON; OFF follows where the rule is scene-free)
+
+Commit `88369e3d7` on top of `006eab809` (src: `battleResolutionPresentation.ts`, `battleHitSounds.ts`). Steps 1 and 3 landed nothing; step 2 landed the safe subset; the item-chain rows stay open.
+
+**Step 1, hp bar law: no engine bug, nothing landed.** The engine's hit `hp` command already lasts exactly D + 8 (`max(minimumFrames, barFrames + 1) + tail`, bar 1 HP / frame for maxHP >= 48). The rollout5 / iceball5 drift comes from the lab engines rolling a different damage D than the ROM (rollout turn 2: engine 16 vs ROM 14; iceball 23 / 41 / 82 vs ROM 20 / 40 / 89, RNG not synchronised) plus hcr2c's stale-u +1. aud242o / aud242q are therefore unchanged (rollout5 [0, 0, 0, -2, -3], iceball5 [0 x 6, -3, -3, -5, -5]); they close only with an RNG-synchronised lab, not a duration change. The Scene OFF check was not run for the same reason (no law to port).
+
+**Step 2 (landed).**
+- hp of a hit followed by a `stat` command (Icy Wind, seed 1914): `HP_STAT_NEXT_TAIL_FRAMES = 4` (ROM: bar 12, then `datahpupdate` .. `BattleScript_StatDown`'s playanimation 6 rows, the stat command takes the last 2; no 28-row floor). The stat SE and the select SE are ROM-exact on 1914.
+- recoil hp (Double-Edge, seed 2230): `HpLeadRows.recoil` (the hp event's PC is `BattleScript_DoRecoil`'s datahpupdate), `HP_RECOIL_LEAD_ROWS = 7` on the previous message (the unpresented `MoveEffectRecoil` / `DoRecoil` orword rows), bar -> recoil print = E + 1 rows (hp tail = `messageRows - 1`). Recoil hp / print frames 342 / 353, ROM-exact in the romdrive cadence.
+- faint SE: `lag = max(0, sceneLag - moveBodyExtraRows)` (battleHitSounds.ts:85): earlier bodies' extra rows are already in the command start, so the hpd4 compensation must not go negative.
+
+| pin | ROM | before | after |
+|---|---|---|---|
+| aud252 1914 faint SE / select SE | 0 / 0 | +3 / +12 | **-2 / 0** |
+| aud252 1914 item chain (5 SEs + SE_BALL_OPEN) | 0 | +4 x 6 | **-8 x 6 (moved away; test pin left at +4, RED)** |
+| aud252 2230 faint SE / select SE | 0 / 0 | +10 / +6 | **0 / -4** |
+| aud252 2230 item chain | 0 | +4 x 5, +3 | **-6 x 5, -7 (moved away; test pin left, RED)** |
+| aud242o rollout5 turnDeltas | 0 | [0, 0, 0, -2, -3] | unchanged (damage-roll difference) |
+| aud242q iceball5 deltas | 0 | [0 x 6, -3, -3, -5, -5] | unchanged |
+| aud242b / aud258 Haze second mover | 0 | 3 | unchanged (see step 3) |
+| ais2 2741 | 0 | not measured | not measured (out of reach) |
+
+**Item chain, open.** After the faint script the general-animation starts 6 rows before the ROM `playanimation` (ROM `FaintTarget+0xc` -> `MoveEnd+0` -> `ItemHealHP_Ret+0` -> `+0x7`: 1035 -> 1041 on 1914, 560 -> 566 on 2230); the engine's message, hp and `SE_BALL_OPEN` that follow are 6 early with it. A +6 lead on the preceding `sprite-visibility` (Scene ON, faint before it) brought the lab pins to 1914 [-2 x 6] / 2230 [0 x 5, -1], but T2 mass 22,835 -> 22,889 (1914 -66, seeds 2 / 97 / 2230 +80 / +30 / +10): the first SE offset after `playanimation` is 19 rows on 1914 and 13 on 2230 in the ROM (engine fixed 11), and seeds 2 / 97 have chains the 6 rows over-shift. Not landed; needs the ROM rule that makes the SE offset 19 vs 13 (script-entry dependent).
+
+**Step 3, second mover: not landed.** Experiment: +1 on `bodyLeadFrames` for any body after an earlier `STRINGID_USEDMOVE` in the segment. aud258 Haze 3 -> 2 (toward the ROM, not 0), but aud242a-swordsdance-opponent 0 -> -1 (a second mover whose L is already right) and aud242b's own rows re-key. A per-body rule would be a new body lead (out of scope). The two pins stay at 3.
+
+**Seen but not changed.** Seed 648 ON regressed +7 mass (550 -> 557); every other of the 25 seeds improved or held.
+
+**T2** (`rescoreAll.sh` over `.integration/evidence/t2n`, `soundScoreboard.py`; `.integration/evidence/hcr3/t2-{base,after}`; 0 missing / 0 extra):
+
+| scene | exact before | exact after | offset | mass before | mass after |
+|---|---|---|---|---|---|
+| ON (25 seeds) | 2,476 | **2,541** | 3,401 -> 3,336 | 23,423 | **22,835** (-2.5 %) |
+| OFF (24 seeds) | 600 | 600 | 533 -> 533 | 3,164 | **3,056** (-3.4 %) |
+
+**Census** (`lsd194Census.sh`, base `006eab809` vs `88369e3d7`, seeds 0..999, JOBS 6, SPLIT 2): Scene ON eventsDigest + error identical 1000 / 1000, 0 type-sequence changes (306 battles with changed command timing). Scene OFF identical 999 / 1000 (305 battles with changed timing): seed 796 differs, a `frame budget` error in both arms, so the digest depends on where the budget cut the run (outside 0..199; 0..199 identical). T1 (`soundCensusDelta.py --t1`, ON): move table exact 270,049, known-offset 152, missing 0, extra 0, unclassified 77 = base; non-move missing 0 -> 4, all one HELD_ITEM_EFFECT command (seed 995, command 3323 of 3330) cut by the same `frame budget` error. No gameplay / RNG change.
+
+**Re-pins** (named in each file): `randomRoundSoak.test.ts` seed 1 frames 60582 -> 58672 (frames only; same battle 3 / depth 2 / turn 19 / roundLost; Icy Wind hits no longer pay the 28-row floor); ISSUES #89 Baton Pass pin seed 4 -> 8 (`tools/soak/batonPassSearch.ts --seeds 0:40 --parallel 4`: candidates 8, 10, 11, 13, 16, 27, 36, 39; seed 8 commits 3, first 25185, halt 25492 on MAWILE). `aud252LossBallOpen.test.ts`: faint / select rows re-pinned toward the ROM, item rows left at the old pin and red (moved away).
+
+**Gates.** `npm run typecheck` ok; `npm run test:gate` 360 files / 2,835 tests; the 207 files importing `battleResolutionPresentation` / `battleHitSounds` plus `aud2*` and `randomRoundSoak*` (3 batches): green except the two `aud252LossBallOpen` item-row pins above; `npm run build` ok. Full `npm test` not run (assignment).
