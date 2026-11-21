@@ -82,7 +82,7 @@ export function emitBattleHitSounds(
   const { command, segment } = now;
   // hpd4: a move body's script lead and hit tail are presented rows the ROM-calibrated controller sounds (SCENE_ON_LAG) already carry; a sound anchored to
   // a later command start subtracts them, and one that would then precede its anchor is scheduled from the earlier command (hit SE, HP bar).
-  const lag = sceneLag(segment) - (after === null ? 0 : moveBodyExtraRows(after, false));
+  const lag = Math.max(0, sceneLag(segment) - (after === null ? 0 : moveBodyExtraRows(after, false)));
   if (command.type === "move-animation") {
     const next = segment.commands[segment.commands.indexOf(command) + 1];
     const duration = after === null ? null : presentedMoveDurationOnSoundClock(after);

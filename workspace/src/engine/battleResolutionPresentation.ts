@@ -2252,6 +2252,8 @@ const SHELL_BELL_TURN_END_TIMING = Object.freeze({ minimumFrames: 9 } as const);
  * Rest window's foe-Tackle-on-player anchor moves -3 -> -14 without the floor) has no ROM window yet: it keeps the legacy 28-frame floor.
  */
 const HP_DATAHPUPDATE_ROW_FRAMES = 1;
+/** hcr3: a hit whose secondary effect is a stat change (Icy Wind, seed 1914, ROM): bar 12, then `datahpupdate` .. `BattleScript_StatDown`'s playanimation 6 rows; the stat command takes the last 2 (no 28-row floor). */
+const HP_STAT_NEXT_TAIL_FRAMES = 4;
 /** The rows between this `datahpupdate` and the next event when that is a MoveEnd receipt (d), or null. */
 function hpMoveEndLeadRows(events: readonly BattleKernelSemanticEvent[], index: number): number | null {
   const event = events[index]!;
@@ -2349,6 +2351,12 @@ const WRAP_SECONDARY_TAIL_FRAMES = 7;
 const TURN_DAMAGE_PC = datahpupdatePcAfter("BattleScript_DoTurnDmg");
 const WEATHER_DAMAGE_PC = datahpupdatePcAfter("BattleScript_DamagingWeatherLoop");
 /** hpf5 T2: `BattleScript_MoveEffectWrap`'s `printfromtable` is the wrap hit's secondary message (E + 7 after the hit's bar, E 7..16 by move). */
+/**
+ * hcr3: `BattleScript_DoRecoil` after the hit's effectiveness / crit print (aud252 seed 2230, Double-Edge, ROM): the print's `waitmessage` ends 7 script rows before the recoil bar
+ * (`MoveEffectRecoil`, `DoRecoil`'s `orword`; the print's box stays up), and the bar's `healthbarupdate` -> the recoil print is E + 1 rows (E = bar + 1; messageRows - 1), with no 28-row floor.
+ */
+const RECOIL_PC = datahpupdatePcAfter("BattleScript_DoRecoil");
+const HP_RECOIL_LEAD_ROWS = 7;
 const WRAP_SECONDARY_PC = BATTLE_SCRIPT_PROGRAM.labelEntries["BattleScript_MoveEffectWrap"]!.programCounter;
 type HpTick = "turn-damage" | "weather";
 function hpTickKind(event: BattleKernelSemanticEvent): HpTick | null {
@@ -2364,6 +2372,8 @@ interface HpLeadRows {
   readonly hitEffectMessage: boolean;
   /** The `healthbarupdate` instruction's execution (the bar's own row). */
   readonly barExecution: number | undefined;
+  /** The `datahpupdate` of `BattleScript_DoRecoil` (a recoil bar). */
+  readonly recoil: boolean;
 }
 /** Applies the hpd1 / hpf1 tail to the plain hp commands of a finished command list (see hpMoveEndLeadRows, hpMessageLeadRows). */
 function applyHpHitTails(
@@ -2391,6 +2401,12 @@ function applyHpHitTails(
       commands[index] = Object.freeze({ ...command, timing: Object.freeze({ minimumFrames: 0, tailFrames }) });
       continue;
     }
+    const recoilPrevious = commands[index - 1];
+    if (leads.recoil && leads.messageRows !== null && rest[0]?.type === "message" && recoilPrevious?.type === "message") {
+      commands[index - 1] = Object.freeze({ ...recoilPrevious, timing: Object.freeze({ ...recoilPrevious.timing, holdFrames: recoilPrevious.timing.holdFrames + HP_RECOIL_LEAD_ROWS }) });
+      commands[index] = Object.freeze({ ...command, timing: Object.freeze({ minimumFrames: 0, tailFrames: leads.messageRows - 1 }) });
+      continue;
+    }
     if (leads.wrapSecondary && rest[0]?.type === "message") {
       commands[index] = Object.freeze({ ...command, timing: Object.freeze({ minimumFrames: 0, tailFrames: WRAP_SECONDARY_TAIL_FRAMES }) });
       continue;
@@ -2409,7 +2425,8 @@ function applyHpHitTails(
     const printHold = next?.type === "message" && leads.messageRows !== null && ((hit && leads.hitEffectMessage) || heal || afterHp);
     if (!hit && !printHold && command.battler === 0) continue;
     const faint = hit && rest[0]?.type === "faint" && leads.faintNext;
-    const tailFrames = transition ? (leads.moveEndRows === null ? 0 : HP_DATAHPUPDATE_ROW_FRAMES)
+    const statNext = hit && rest[0]?.type === "stat";
+    const tailFrames = statNext ? HP_STAT_NEXT_TAIL_FRAMES : transition ? (leads.moveEndRows === null ? 0 : HP_DATAHPUPDATE_ROW_FRAMES)
       : endsTurn ? leads.moveEndRows ?? 0 : bars > 0 ? bars : endTurnPrint ? leads.moveEndRows! + HP_END_TURN_PRINT_LEAD_ROWS
       : printHold ? leads.messageRows! : 0;
     if (faint) commands[index] = Object.freeze({ ...command, timing: Object.freeze({ minimumFrames: 0 }) });
@@ -5849,7 +5866,7 @@ export function projectBattleResolutionCommands(
       const messageRows = drainRole === null ? hpMessageLeadRows(events, index) : null;
       const faintNext = drainRole === null && hpFaintNext(events, index);
       const hitEffectMessage = HP_HIT_EFFECT_OPCODES.has(events[index + 1]?.provenance?.opcodeName ?? "") || hitAllLoopEmptyBoxTiming(events, index + 1) !== null;
-      hpLeadRows.set(health.eventSequence, { tick: hpTickKind(event), wrapSecondary: events[index + 1]?.provenance?.programCounter === WRAP_SECONDARY_PC, moveEndRows, messageRows, faintNext, hitEffectMessage, barExecution: health.instructionExecution });
+      hpLeadRows.set(health.eventSequence, { tick: hpTickKind(event), wrapSecondary: events[index + 1]?.provenance?.programCounter === WRAP_SECONDARY_PC, moveEndRows, messageRows, faintNext, hitEffectMessage, barExecution: health.instructionExecution, recoil: event.provenance?.programCounter === RECOIL_PC });
       commands.push(Object.freeze({
         type: "hp",
         eventSequence: health.eventSequence,
