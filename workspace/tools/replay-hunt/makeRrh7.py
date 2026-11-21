@@ -57,6 +57,13 @@ D["R039b"] = design("R039", ("R039b-ai-memento-target-at-min-sp-atk", "Challenge
     [mon(BLISSEY, [MEMENTO, SPLASH, SPLASH, SPLASH], bulk=True), mon(CHANSEY, [MEMENTO, SPLASH, SPLASH, SPLASH], bulk=True), mon(TROPIUS, [MEMENTO, SPLASH, SPLASH, SPLASH], bulk=True)],
     [{"move": 0}, {"move": 0}, {"move": 0}, {"move": 0}], cover=[RULES["R039"]["pieces"][1]["cover"]])
 
+SHARPEDO, SHEDINJA, PORYGON2, MAGIKARP, FEEBAS, CRUNCH, PURSUIT = 331, 303, 233, 129, 328, 242, 228
+for tag, order in (("", (FEEBAS, MAGIKARP, SHEDINJA)),):
+    opp = [mon(sp, [PURSUIT] * 4) if sp == SHEDINJA else four(sp, SPLASH) for sp in order]
+    D["R095" + tag] = design("R095", (f"R095-trace-pending-no-foe-pursuit-rough-skin", "Challenge 7, trainer 200, hand-built Mechanic Lab parties. The AI's last Pokemon is Shedinja (1 HP, Pursuit only); the player's Sharpedo (Rough Skin) Crunches the two Splashing Pokemon (three Crunches), then switches to Porygon2 (Trace): the AI's Pursuit hits the leaving Sharpedo, Rough Skin faints Shedinja, and Porygon2 enters with Trace pending and no foe alive (HandleFaintedMonActions state 6, battle_util.c:1959-1960)."),
+        [mon(SHARPEDO, [CRUNCH, SPLASH, SPLASH, SPLASH]), mon(PORYGON2, [TACKLE] * 4), four(MACHAMP, SPLASH)],
+        opp, [{"move": 0}] * 3 + [{"switch": 1}])
+
 out = Path(sys.argv[1] if len(sys.argv) > 1 else ROOT / ".integration/evidence/rrh7/designs")
 out.mkdir(parents=True, exist_ok=True)
 for rule, d in D.items():
