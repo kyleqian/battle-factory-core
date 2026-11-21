@@ -1530,13 +1530,18 @@ function actionTransitionPauseFrames(
   let anchorExecution = anchor.provenance!.instructionExecution;
   if (anchor.payload.kind === "animation" || anchor.payload.kind === "status-animation") anchorExecution += 1;
   if (anchor.payload.kind === "message") {
-    if (anchor.payload.messageId === "STRINGID_USEDMOVE" || anchor.payload.messageId === "STRINGID_EMPTYSTRING3") return null;
-    const following = BATTLE_SCRIPT_PROGRAM.instructions[anchor.provenance!.programCounter + 1];
-    const wait = following?.opcodeName === "B_SCR_OP_WAITMESSAGE"
-      ? ACTION_TRANSITION_WAIT_ROWS[following.operands[0]?.expression ?? ""]
-      : undefined;
-    if (wait === undefined) return null;
-    anchorExecution += wait;
+    if (anchor.payload.messageId === "STRINGID_USEDMOVE") return null;
+    if (anchor.payload.messageId === "STRINGID_EMPTYSTRING3") {
+      if (hitAllLoopEmptyBoxTiming(events, events.indexOf(anchor)) === null || events[receiptIndex - 1] !== anchor) return null;
+      anchorExecution = e1;
+    } else {
+      const following = BATTLE_SCRIPT_PROGRAM.instructions[anchor.provenance!.programCounter + 1];
+      const wait = following?.opcodeName === "B_SCR_OP_WAITMESSAGE"
+        ? ACTION_TRANSITION_WAIT_ROWS[following.operands[0]?.expression ?? ""]
+        : undefined;
+      if (wait === undefined) return null;
+      anchorExecution += wait;
+    }
   }
   let presented = 0;
   for (let index = commands.length - 1; index >= 0; index -= 1) {
