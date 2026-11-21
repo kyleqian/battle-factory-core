@@ -300,9 +300,10 @@ describe("flow1: whole challenges of the frame catcher's seeds", () => {
       expect(recall.lines[1], `switch at ${recall.frame}`).toMatch(/!$/);
       expect(recall.ballOpenAfterLine, `switch at ${recall.frame}`).toBe(true);
     }
-    // The case the ROM was checked on was seed 6's before fop1 (GROWLITHE -> VOLBEAT while AZUMARILL was underground,
-    // docs/flow1-menu-cursors-and-locked-switch-recall.md); the same case here: POLIWHIRL -> GRAVELER while battle 2's PUPITAR is
-    // underground (a locked continuation of the Dig charge's resolution).
+    // The ROM-checked case (seed 6's before fop1 was GROWLITHE -> VOLBEAT while AZUMARILL was underground,
+    // docs/flow1-menu-cursors-and-locked-switch-recall.md): POLIWHIRL -> GRAVELER while battle 2's PUPITAR is underground (a locked
+    // continuation of the Dig charge's resolution). The frame catcher over this seed's trace (makeTrace --seed 135 --scene off --policy
+    // full --battles 2, docs/fop1-first-opponent-order.md) shows the ROM print the same two lines with PUPITAR hidden, same sounds.
     const underground = recalls.filter((r) => r.continuation);
     expect(underground.map((r) => r.lines.slice(0, 2))).toEqual([["POLIWHIRL, that’s enough! Come back!", "Go for it, GRAVELER!"]]);
   });

@@ -138,6 +138,8 @@ same on both sides (rentals 3 in round 1, 6 in round 2; foes 3, 6 at battle 7, i
 
 ### 5. Round 2's first opponent comes from another RNG step (every new challenge)
 
+Fixed by fop1 (2026-11-21, `docs/fop1-first-opponent-order.md`).
+
 - **What it means:** at the end of the PreBattleRoom walk the ROM draws the six rental set ids, then the first opponent, then (hundreds
   of frames later, in the draft screen) the six personalities. Ours draws the ids, then the personalities, then the opponent. With the
   same RNG the rentals are the same, the first opponent is not: in all 7 round 2s (and round 3 of the Head trace) the ROM's own order
