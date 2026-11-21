@@ -96,7 +96,7 @@ const IU120_BODY_RULES: ReadonlyMap<number, Iu120BodyRule> = new Map<number, Iu1
 ]);
 export const HPD4_BODY_LEAD_ROWS: ReadonlyMap<number, number> = new Map([...IU120_BODY_RULES].filter(([, r]) => r.lead !== undefined).map(([id, r]): [number, number] => [id, r.lead!]));
 // liv2: Self-Destruct has no body lead (its hp command carries it) but a 9-row hit tail after the live window; the age holds the last body row there.
-const LIVE_MOVE_LEADLESS_TAIL_ROWS: ReadonlyMap<number, number> = new Map([[120, 9]]);
+const LIVE_MOVE_LEADLESS_TAIL_ROWS: ReadonlyMap<number, number> = new Map([[120, 9], [105, 25], [135, 10], [208, 27], [236, 8]]);
 // sta5: ids whose age holds the last body row through the tail (test-side copy of production's STA5 status-tail class).
 const STA5_STATUS_TAIL_IDS: ReadonlySet<number> = new Set([260, 207, 147, 92, 95]);
 function hpd4BodyTail(id: number, side: Iu120Side): number {
