@@ -1197,6 +1197,15 @@ const PRE_MOVE_STATUS_ANIMATION_TIMING = Object.freeze({
  */
 export const MOVE_INFLICTED_STATUS_ANIMATION_LEAD_ROWS = 6;
 export const MOVE_INFLICTED_STATUS_SCENE_OFF_LEAD_ROWS = MOVE_INFLICTED_STATUS_ANIMATION_LEAD_ROWS + 1;
+/**
+ * gsp3 (ROM labs gsp3-{toxic,willowisp}-{player,foe}-on, T2 windows): the end-of-turn poison / burn tick (BattleScript_PoisonTurnDmg /
+ * BurnTurnDmg) reaches its `statusanimation` row 2 rows (poison) / 3 rows (burn: the `goto BattleScript_DoStatusTurnDmg` is one more row)
+ * after the print's waitmessage, not the pre-move cadence's 3 / 0 (ROM print -> DoStatusTurnDmg row 95 / 98 against the engine's 96 / 95).
+ */
+const END_TURN_STATUS_DAMAGE_LEAD_ROWS: Readonly<Record<string, number>> = Object.freeze({
+  BattleScript_PoisonTurnDmg: 2,
+  BattleScript_BurnTurnDmg: 3,
+});
 const MOVE_INFLICTED_STATUS_SCENE_OFF_TIMING = Object.freeze({
   minimumFrames: 0,
   holdFrames: WAITMESSAGE_LONG_HOLD_FRAMES + MOVE_INFLICTED_STATUS_SCENE_OFF_LEAD_ROWS,
@@ -1237,6 +1246,8 @@ function messageTimingFromSourceProvenance(
     && following.operands.length === 1
     && following.operands[0]!.expression === "B_WAIT_TIME_LONG"
   ) {
+    const tickLead = END_TURN_STATUS_DAMAGE_LEAD_ROWS[event.provenance?.sourceLabel ?? ""];
+    if (tickLead !== undefined) return Object.freeze({ minimumFrames: 0, holdFrames: WAITMESSAGE_LONG_HOLD_FRAMES + tickLead });
     const launch = BATTLE_SCRIPT_PROGRAM.instructions[programCounter + 2]?.opcodeName;
     if (launch === "B_SCR_OP_STATUS2ANIMATION" || launch === "B_SCR_OP_STATUSANIMATION") return PRE_MOVE_STATUS_ANIMATION_TIMING;
     if (!isMoveInflictedStatusLaunch(programCounter)) return WAITMESSAGE_LONG_TIMING;

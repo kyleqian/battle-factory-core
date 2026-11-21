@@ -528,11 +528,15 @@ const WEATHER_LABELS: Readonly<Record<WeatherContinuesAnimation, string>> = {
  * animation after one of them, and every Sleep / Confusion animation, is at 0 too. Elsewhere the 7 stays (Refresh, a cure berry, Poison / Burn / Paralysis outside a B4 body: ROM minus ours 2 / 3 at 7).
  */
 export const STATUS_ANIMATION_SCRIPT_AGE = 7;
+const END_TURN_STATUS_DAMAGE_LABEL = "BattleScript_DoStatusTurnDmg";
 export const STATUS_ANIMATION_AUDITED_BODY_SCRIPT_AGE = 0;
 function statusAnimationScriptAge(state: BattleResolutionPresentationState, name: BattleStatusAnimationName): number {
   // b4l: the status animation a c-lead B4 body (Thunder Wave, Sing, Will-O-Wisp, Confuse Ray ...) hands over to plays its first SE 3 rows after the command (ROM, the b4m labs), not 10:
   // only the command directly after the body (a `status` command may sit between), so end-of-turn / Toxic / other status animations keep their audited offset.
   const own = state.segments[state.segmentIndex]!.commands;
+  // gsp3: the end-of-turn poison / burn tick (BattleScript_DoStatusTurnDmg, no move body) plays its first SE on the ROM's launch row + 1 (+ the table row), age 0 (labs gsp3-{toxic,willowisp}-*-on, 6 / 6 ticks).
+  const launched = state.segments[state.segmentIndex]!.events.find((event) => event.sequence === own[state.commandIndex]?.eventSequence);
+  if (launched?.provenance?.sourceLabel === END_TURN_STATUS_DAMAGE_LABEL) return STATUS_ANIMATION_AUDITED_BODY_SCRIPT_AGE;
   for (let c = state.commandIndex - 1; c >= 0; c -= 1) {
     const previous = own[c]!;
     if (previous.type === "status") continue;

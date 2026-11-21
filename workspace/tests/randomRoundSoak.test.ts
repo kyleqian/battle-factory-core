@@ -1057,12 +1057,14 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // trial-fix-20261121 (fnt1 + lbb1 together): frames only, 39277 -> 39259; same battle 2 / depth 1 / turn 22 / roundLost.
       // merge of the box's 2026-11-20 run with the Mac's 11-21 fixes: the box's chg1 trajectory (67929 / battle 3 / depth 2 / turn 20; the Mac had 39259 / battle 2 / depth 1 / turn 22):
       // frames only against the box, 67929 -> 67984; same battle 3 / depth 2 / turn 20 / roundLost.
-      frames: 67984,
+      // gsp3 (the end-of-turn poison / burn tick's print -> launch rows 95 / 98 as the ROM, gsp3-{toxic,willowisp}-player-on rows 1576 -> 1671 / 1547 -> 1645;
+      // the exploring presses land on new phases): 67984 / turn 20 -> 68529 / turn 21; same battle 3 / depth 2 / OK / roundLost.
+      frames: 68529,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 2,
       battle: 3,
-      turn: 20,
+      turn: 21,
     });
     expect(runSeed(1, options)).toMatchObject({
       // msg175: 26878 -> 26810 (shorter used prints); trn178 (the Scene OFF action-transition pause): 26810 -> 27058; same battle / turn / end state.
@@ -1114,7 +1116,8 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // stc1 (Scene OFF confusion self-hit +7 rows to the hit, ROM 204 / 199 after the commit): frames only, 60582 -> 60525; same battle 3 / depth 2 / turn 19 / roundLost.
       // hcr3 (Icy Wind's hp keeps the stat command's 4-row tail, Double-Edge's recoil hp / print follow the ROM rows, the faint SE clips its hpd4 compensation at 0): frames only, 60582 -> 58672; same battle 3 / depth 2 / turn 19 / roundLost.
       // merge stc1 + hcr3 (fold-a): frames only, 60525 (stc1) / 58672 (hcr3) -> 58579; same battle / depth / turn / end state.
-      frames: 58579,
+      // gsp3 (the end-of-turn poison / burn tick's print -> launch rows 95 / 98 as the ROM, gsp3-{toxic,willowisp}-player-on): frames only, 58579 -> 58583; same battle 3 / depth 2 / turn 19 / roundLost.
+      frames: 58583,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 2,
