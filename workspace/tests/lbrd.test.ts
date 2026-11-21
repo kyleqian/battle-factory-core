@@ -78,7 +78,10 @@ interface WonLobby {
 // pass with 0 in all three roles on the merged tree, so they stay.
 // wtl1 (the win tail holds 24 more rows before "Player defeated", ROM P + 26): 0's Scene OFF continuation loses. A scan of 1..28 in the WIN_TWO role (scratch copies of this file) found only 13 passing all 15
 // (2 / 4 / 10 fail the two continuation cases, 19 / 23 fail 2 cases, the rest more); RETIRE and the loss keep 0.
-const WIN_TWO_SEED = 13;
+// merge of this run's eqk1 (the Earthquake hit-all transition, the Pausex20 before "It doesn't affect", Magnitude) with chg2 / chg3 / hie5: 13's Scene OFF
+// continuation loses. A scan of 0..23 in the WIN_TWO role (scratch copies of this file) found 2 and 17 passing all 15 (0 / 4 / 10 / 13 / 19 / 23 fail the two
+// continuation cases, 14 / 18 fail 6, the rest 10); RETIRE and the loss keep 0.
+const WIN_TWO_SEED = 2;
 const RETIRE_SEED = 0;
 const WIN_THEN_LOSE_SEED = 0;
 
