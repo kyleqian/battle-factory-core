@@ -1492,7 +1492,11 @@ function runItemsTick(
       ...scannedRules,
       statChanger: statUpStatId | (1 << 4),
       animArg1: STAT_ANIM_PLUS1 + statUpStatId,
-      effectBattler: battler,
+      // lha1: `gEffectBattler = battler` (battle_util.c:3248 / :3433) is what BattleScript_StatUp's `playanimation BS_EFFECT_BATTLER,
+      // B_ANIM_STATS_CHANGE` (battle_scripts_1.s:510-514) reads: the selector role, as runYawnTick sets it. Before lha1 only a top-level
+      // `effectBattler` key (no rules-context field, read by nothing) was written, so the flash took the role left by the turn's last
+      // action (its target: SKILL SWAP's flashed the player's MASQUERAIN for the foe GIRAFARIG's PETAYA BERRY, fcr2 finding 4).
+      selectorRoles: Object.freeze({ ...scannedRules.selectorRoles, effectBattler: battler }),
       // ISSUES #70 batch 3 (USINGITEMSTATOFPKMNROSE, row 11): B_SCR_ACTIVE_
       // NAME_WITH_PREFIX/{B_LAST_ITEM} both read the berry holder -- not
       // wired anywhere else in this tick, unlike ENDTURN_ABILITIES/other

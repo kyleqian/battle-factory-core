@@ -1816,6 +1816,45 @@ describe("runBattleEndTurnOrchestration (BattleTurnPassed equivalent)", () => {
           expect(result.state.rulesContext.battlers[1]!.statStages[STAT_SPATK]).toBe(12);
           expect(result.state.rulesContext.battlers[1]!.item).toBe(ITEM_PETAYA_BERRY); // not consumed
         });
+
+        // lha1 (docs/lha1-lowhp-alarm-berry-flash.md, fcr2 finding 4): TRY_EAT_STAT_UP_BERRY's `gEffectBattler = battler`
+        // (battle_util.c:3248 / :3433) is what BattleScript_StatUp's `playanimation BS_EFFECT_BATTLER, B_ANIM_STATS_CHANGE` reads
+        // (battle_scripts_1.s:510-514). The effect role the turn's last action left (its target: the foe GIRAFARIG's SKILL SWAP on the
+        // player's MASQUERAIN, seed 9 Scene ON) must not choose the flashed Pokemon.
+        for (const [name, item, stat] of [
+          ["Liechi", ITEM_LIECHI_BERRY, STAT_ATK],
+          ["Salac", ITEM_SALAC_BERRY, STAT_SPEED],
+          ["Petaya", ITEM_PETAYA_BERRY, STAT_SPATK],
+        ] as const) {
+          for (const holder of [0, 1] as const) {
+            const other = holder === 0 ? 1 : 0;
+            it(`${name} Berry held by battler ${holder}: HELD_ITEM_EFFECT and STATS_CHANGE play on the holder, not on the last action's target (${other})`, () => {
+              const rc = context({
+                battlers: [
+                  battler({ side: 0, ...(holder === 0 ? { hp: 25, maxHP: 100, item } : {}) }),
+                  battler({ side: 1, partyIndex: 2, ...(holder === 1 ? { hp: 25, maxHP: 100, item } : {}) }),
+                  battler({ side: 0 }),
+                  battler({ side: 1 }),
+                ],
+                selectorRoles: { attacker: other, target: other, effectBattler: other, fainted: null },
+              });
+              const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(other));
+              const initial = scratchState(rc, other);
+              const result = runBattleEndTurnOrchestration(program, handlers, initial);
+              expect(result.kind).toBe("next-turn");
+              if (result.kind !== "next-turn") throw new Error("expected next-turn");
+              expect(result.state.rulesContext.battlers[holder]!.statStages[stat]).toBe(7);
+              expect(result.state.rulesContext.battlers[other]!.statStages[stat]).toBe(6);
+              const animations = result.state.events
+                .filter((event) => event.kind === "animation" && (event.animationId === "HELD_ITEM_EFFECT" || event.animationId === "STATS_CHANGE"))
+                .map((event) => event.kind === "animation" ? [event.animationId, event.battler] : null);
+              expect(animations).toEqual([["HELD_ITEM_EFFECT", holder], ["STATS_CHANGE", holder]]);
+              // gEffectBattler keeps the holder after the script, as in the ROM.
+              expect(result.state.rulesContext.selectorRoles.effectBattler).toBe(holder);
+              expect(result.state.rng.calls).toBe(initial.rng.calls);
+            });
+          }
+        }
       });
     },
   );
