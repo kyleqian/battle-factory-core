@@ -53,9 +53,38 @@ the draw frame's RNG row (the fixture keeps it on the frame before the BGM when 
 
 ## Open remainder (ISSUES #225)
 
-- LOGO_WIGGLE (29) is not drawn (163 bad frames of 1,290; shown as CIRCLES_MEET).
-- LOGO_WAVE (30), already drawn, has an older mismatch: 217 bad frames, its handoff is 209 on the ROM's clock.
 - The ordinary trainer's room (`core.ts`) uses the new pictures on the engine's existing per-kind clock and handoff; there is no ordinary-room ROM
   harness, so those are unmeasured (changing the handoff could move the RNG advance).
 - SQUARES_SCROLL's direction depends on whether the BGM lagged the draw by a frame (j = 0 or 1); the engine does not know j, so outside the
   Noland harness it assumes 0 and can pick the wrong direction on those seeds.
+
+## trn226: LOGO_WIGGLE (29) and LOGO_WAVE (30)
+
+Bad frames (`shaMismatch` of `nolandSceneEngine.ts` over the whole ROM recording, Scene OFF and ON identical):
+
+| id | seeds | before | after | summary line (OFF; ON is the same numbers) |
+|---|---|---|---|---|
+| 29 LOGO_WIGGLE | 25 | 163 of 1,294 | 0 | `frames 1294 sha-mismatch 0 draws-mismatch 1294 rng-mismatch 277 gate-mismatch 0 sound-mismatch 13 late []` |
+| 29 | 45 | | 0 | `frames 1293 sha-mismatch 0 ... rng-mismatch 276` |
+| 29 | 8 | | 0 | `frames 1290 sha-mismatch 0 ... rng-mismatch 273` |
+| 30 LOGO_WAVE | 13 | 217 of 1,314 | 0 | `frames 1314 sha-mismatch 0` |
+| 30 | 26 / 41 / 54 / 9 | | 0 | frames 1309 / 1307 / 1312 / 1315, `sha-mismatch 0` |
+
+(`draws-mismatch` and `rng-mismatch` are the harness artifact: the engine rolls its own team; they are the same before and after.)
+
+- LOGO_WAVE: the Noland-room path started its clock at te 26 like the circles, but the wave's constants (flicker te 34, main te 84, handoff 209)
+  put the task's creation at te 32 (`LOGO_WAVE_TRANSITION_START_TE`, `battleRoom.ts`); the ROM's flicker starts two frames after it. With the
+  right start all 217 frames match. On the brain path the wave's handoff stays te 209 and so comes 6 frames earlier in elapsed frames; the
+  ordinary room (`core.ts`, `BATTLE_2_SCENE_HANDOFF_ELAPSED = 209`) was not touched.
+- LOGO_WIGGLE (`src/engine/battleTransitionLogoWiggle.ts`): the PatternWeave state machine (battle_transition.c:1375-1745) on the Frontier logo.
+  Init runs on te 77, callback `c` shows on te 78 + c. Blend (BLDALPHA, BG0 as target 1, eva = tBlendTarget2, evb = tBlendTarget1; 8-bit
+  `(top*eva + under*evb) >> 4`) fades the logo in (eva +1 every third callback to 16), then the room out (evb 16 -> 0, c 32..62); the HBlank
+  DMA scrolls BG0 by `SetSinWave` (amplitude 0x4000 - 256 per callback), scanline y uses buffer[y-1] and scanline 0 the previous frame's last
+  write (c = 63 shows -1 there); from c = 64 SetCircularMask closes WIN0H (scanline 0 again the previous frame's last entry, the whole
+  screen before the first mask frame). The task ends on te 184 (c = 106, black from there) and CB2_InitBattle's handoff is te 187 (end + 3).
+  `battleIntroSceneAssemblyDisplayLag` stays 0 for it (post-handoff frames match).
+- Census `tools/integration/lsd194Census.sh` seeds 0..199, base 5819467ba vs HEAD: eventsDigest identical 200/200 in both scenes (61,381 / 62,965
+  commands, byte-identical shards); `tests/randomRoundSoak*.test.ts` pass unpinned-changed (9 files, 120 tests): no gameplay or RNG change.
+- Tests: `tests/battleTransitionFrontierLogo.test.ts` (wave start/handoff, wiggle blend weights, wave, mask, end/handoff, render).
+- Website: only the Noland-room path (battle room started through the brain) changes length: LOGO_WAVE ends 6 frames earlier and LOGO_WIGGLE has its
+  own length (handoff te 187 instead of the circles' ~202); the ordinary room's frame count is unchanged, so the play layer needs no change.

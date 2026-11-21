@@ -20,10 +20,8 @@ lose the swap record (`moveOrder` on the rental records); not staged on the ROM.
 
 ## #225 — Frontier battle transitions: open remainder (Kyle, 2026-11-19: low priority)
 
-Six of the seven undrawn transitions are drawn from source and ROM-checked in both scenes (`docs/trn225-frontier-transitions.md`); the Noland
-room recordings that drew one are compared to the battle intro. Open:
-- LOGO_WIGGLE (id 29) is still drawn as CIRCLES_MEET (163 bad frames of 1,290 on the lab probe).
-- LOGO_WAVE (id 30) has an older mismatch (217 bad frames; its handoff is 209 on the ROM's clock).
+All twelve transitions are drawn from source and ROM-checked in both scenes (`docs/trn225-frontier-transitions.md`, trn226 for LOGO_WIGGLE and
+LOGO_WAVE); the Noland room recordings that drew one are compared to the battle intro. Open:
 - The ordinary trainer's room runs the new pictures on the engine's existing per-kind clock and handoff (`src/engine/core.ts`): unmeasured, no
   ordinary-room ROM harness; changing the handoff could move the RNG advance.
 - SQUARES_SCROLL's direction depends on the BGM lag after the draw (0 or 1 frame), unknown to the engine; production assumes 0.
