@@ -524,12 +524,12 @@ const WEATHER_LABELS: Readonly<Record<WeatherContinuesAnimation, string>> = {
 /**
  * Status-animation command age (rows since the launch, after the IsBattleSEPlaying gate) of the script's first command. sta5: 0 = the ROM's
  * `gAnimScriptActive` rise row (the first SE is that row plus the table row's own frame), measured where the move body in front of it
- * carries its script lead + tail (the STA5 bodies: Flatter / Swagger / Spore / Toxic). Everywhere else the 7 stays: the body's lead is not landed
- * and the 7 compensates it (Love Kiss, Glare, Will-O-Wisp, Refresh, Confuse Ray, a cure berry: ROM minus ours 3 / 4 / 3 / 2 / 1 / 3 at 7, 10 / 11 / 10 / 9 / -6 / 10 at 0).
+ * carries its script lead + tail (the STA5 bodies: Flatter / Swagger / Spore / Toxic). The B4 "C" bodies' lead is landed (b4l), so a status
+ * animation after one of them, and every Sleep / Confusion animation, is at 0 too. Elsewhere the 7 stays (Refresh, a cure berry, Poison / Burn / Paralysis outside a B4 body: ROM minus ours 2 / 3 at 7).
  */
 export const STATUS_ANIMATION_SCRIPT_AGE = 7;
 export const STATUS_ANIMATION_AUDITED_BODY_SCRIPT_AGE = 0;
-function statusAnimationScriptAge(state: BattleResolutionPresentationState): number {
+function statusAnimationScriptAge(state: BattleResolutionPresentationState, name: BattleStatusAnimationName): number {
   // b4l: the status animation a c-lead B4 body (Thunder Wave, Sing, Will-O-Wisp, Confuse Ray ...) hands over to plays its first SE 3 rows after the command (ROM, the b4m labs), not 10:
   // only the command directly after the body (a `status` command may sit between), so end-of-turn / Toxic / other status animations keep their audited offset.
   const own = state.segments[state.segmentIndex]!.commands;
@@ -547,7 +547,9 @@ function statusAnimationScriptAge(state: BattleResolutionPresentationState): num
       if (command.type === "move-animation" && (command.timing.bodyLeadFrames ?? 0) > 0 && command.animation !== undefined && bodyStatusTailRuleApplies(command.animation.moveId)) return STATUS_ANIMATION_AUDITED_BODY_SCRIPT_AGE;
     }
   }
-  return STATUS_ANIMATION_SCRIPT_AGE;
+  // b4l: Sleep and Confusion play their first SE 3 rows after the command wherever they start (T2 ROM rows, 25 Scene ON seeds: SE 197 mass 639 -> 347, 176 1,524 -> 840, 212 516 -> 138; no id worse);
+  // Poison / Burn / Paralysis outside a B4 body keep the 10 (the same change moved them away from the ROM: SE 148 +216, 119 +43, 144 +24).
+  return name === "SLP" || name === "CONFUSION" ? STATUS_ANIMATION_AUDITED_BODY_SCRIPT_AGE : STATUS_ANIMATION_SCRIPT_AGE;
 }
 /** Weather-continues body age -> script row: the move-body clock (FIRST_COMMAND_AGE + AGE_TO_SOUND_ROWS). */
 const WEATHER_SCRIPT_AGE = FIRST_COMMAND_AGE + AGE_TO_SOUND_ROWS;
@@ -633,7 +635,7 @@ export function emitGeneralAnimSounds(after: BattleResolutionPresentationState |
     const side = command.battler === 0 ? "player" : "opponent";
     const ops = generalVariant(STATUS_ANIMATION_LABELS[command.animation], command.battler);
     const context = { attackerSide: side, targetSide: side, statusAnimActive: true } as const;
-    const scriptAge = statusAnimationScriptAge(after);
+    const scriptAge = statusAnimationScriptAge(after, command.animation);
     emitOpsAt(ops, context, age - scriptAge, true);
     if (age === scriptAge) scheduleStatusAnimationTail(ops, context, command.timing.minimumFrames - (command.timing.seGateFrames ?? 0), scriptAge);
   } else if (command.type === "general-animation" && command.animated === true && isWeatherContinuesAnimation(command.animation)) {
