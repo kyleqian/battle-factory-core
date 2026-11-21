@@ -201,3 +201,21 @@ Commit `60336f6e7` (src: `battleResolutionPresentation.ts`, `battleEndSounds.ts`
 **Tests.** `npm run typecheck` exit 0; `npm run test:gate` 360 files / 2,835 tests green; `npm run build` exit 0; every `tests/` file importing `battleResolutionPresentation` / `battleEndSounds` plus `tests/aud2*`, `fnt*`, `lrc*`, `lbr*`, `lbw*`, `randomRoundSoak*` (290 files): green except the 2 `tests/animation/liveAnchorMoveAdapters.test.ts` failures (red at base, not mine; the 3 `stc1SceneOffStatChangeSe` failures were not in this set). Pins moved: toward the ROM, `fnt1FaintedBoxClear` won seed 0 "Player defeated" at row 27 = P + 26 (window 20 -> 40 rows), `lha1VictoryBgmLowHpAlarm` rough-skin anchor = the first hold row (BGM delay 19 unchanged). Trajectory-only (no ROM frame): `lbrd` WIN_TWO_SEED 0 -> 13 (scan 1..28, only 13 passes all 15), `randomRoundSoak` seven wins 43,500 / 3,042 -> 43,638 / 3,059, seed 0 "full" 68,529 -> 75,721 (battle 4, depth 3), chain seed 19 -> 0 (seeds 0, 10, 13, 17, 40, 47, 49 chain two round wins), `pic9SwitchLines` seeds 0, 1, 4 -> 6, 9 (the scale sets of seeds 6 + 9 cover all four).
 
 **Website.** Yes, a play change: the earliest accepted A on "Player defeated" is 24 frames later and every later press of that battle (the trainer's lose text, the terminal boxes) shifts with it, so a recorded game replays on its own build only.
+
+### wtl1 item 2 (same day): the turn-end weather print after a MoveEnd
+
+**ROM** (labs `tools/battle-lab/wtl1-rain-{growl,player}-{off,on}.json`, Rain Dance on turn 1 so turn 2 ends in `BattleScript_RainContinuesOrEnds`; `hcr3mProbe.py --profile on|off`): after any action the chain is `MoveEnd+0` (setbyte), `MoveEnd+6`, `MoveEnd+9` x4 (the remaining cases, HandleEndTurn / DoFieldEndTurnEffects), `RainContinuesOrEnds+0` (printfromtable), and the print's first glyph is MoveEnd's first row + 11. Stat fall (Growl, OFF): `StatDownEnd` 424, MoveEnd 425, printstring 435, glyph 436. Hit (OFF): MoveEnd 323, printstring 333, glyph 334. The two cases are the same 10 rows; the engine's receipts sit at different distances from them (1 before MoveEnd after a stat fall, 8 after it after a hit), so the old engine was 10 and 1 early.
+
+**Rule.** `actionTransitionPauseFrames` (trn176: next first glyph = E + 1 + d + n + 6 + u) now also serves a message printed by `BattleScript_RainContinuesOrEnds` (u = 1, the kernel's count restarted) with `END_TURN_WEATHER_PRINT_EXTRA_ROWS = 1` more row: n + 6 + 1 + 1 reproduces the ROM's 10 (derived from the two ROM cases, no fitted constant, no battle / turn-number branch). Only the Rain script is measured; the other weather end-turn scripts (Sandstorm, Hail, Sun) are not touched.
+
+**Labs, weather first glyph** (ROM / engine before -> after, ENG - ROM): growl OFF 436 / 426 -> 436 (-10 -> 0); hit OFF 334 / 333 -> 334 (-1 -> 0); hit ON 680 / 679 -> 680 (-1 -> 0); growl ON 614 / 575 -> 585 (-39 -> -29): the remaining -29 is the earlier stat-fall print (ROM 517, ours 488, not this step); the stat-fall -> weather delta is 97 on both sides (ROM 614 - 517, ours 585 - 488), i.e. the weather lead itself is exact in Scene ON.
+
+**T2** (`t2-after2`, rescore of commit 8c8fdf162): Scene ON exact 2,731 -> 2,737, mass 19,949 -> 19,862; Scene OFF unchanged (697 / 2,646); missing 0 / extra 0 in both.
+
+**Census 0..199** (12466b0a3 vs 8c8fdf162): eventsDigest + error identical 200 / 200 in ON and OFF (no gameplay / RNG change); T1 missing 0 in both, extra 0 ON and 35 OFF (Substitute / Transform, the same 35 at 12466b0a3).
+
+**Tests.** 290-file set + gate + typecheck + build green except the known `liveAnchorMoveAdapters` x2; one re-pin, `tests/randomRoundSoak.test.ts` seed 0 "full" frames 75,721 -> 75,618 (same battle 4 / depth 3 / turn 21 / roundLost; a trajectory pin, not a ROM frame).
+
+**Not done.** The dragged-out press (ROM +15 vs ours +2/+3, s222-on-wc / s94-on-wc) was not examined; the other end-turn prints (poison / burn tick, Sandstorm / Hail, Leech Seed) were not re-measured here, and item 3 (the "fainted!" print 3-6 frames early) was not started.
+
+**Website.** Yes, the same play change as the win tail: the weather print's box opens later after a stat fall (10 frames) or a hit (1 frame) and its A press moves with it; recorded games replay on their own build only.
