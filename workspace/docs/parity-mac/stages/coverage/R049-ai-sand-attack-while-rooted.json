@@ -1,0 +1,230 @@
+{
+ "name": "R049-ai-sand-attack-while-rooted",
+ "rules": [
+  "R049"
+ ],
+ "why": "Challenge 7, trainer 200, hand-built Mechanic Lab parties. Each AI Pokemon knows Ingrain and three Sand Attacks and the player's Snorlax only Splashes for three turns: after Ingrain the AI's Sand Attack scoring (AI_CV_AccuracyDown, battle_ai_scripts.s:1198) runs its rooted gate (STATUS3_ROOTED, :1217-1219) and the random roll.",
+ "seed": 90000,
+ "challengeNum": 7,
+ "battleNum": 0,
+ "trainerId": 200,
+ "playerSetIds": [
+  429,
+  404,
+  735
+ ],
+ "opponentSetIds": [
+  813,
+  716,
+  721
+ ],
+ "parties": {
+  "player": [
+   {
+    "species": 143,
+    "level": 50,
+    "nature": 0,
+    "ivs": {
+     "hp": 31,
+     "attack": 31,
+     "defense": 31,
+     "speed": 31,
+     "spAttack": 31,
+     "spDefense": 31
+    },
+    "evs": {
+     "hp": 255,
+     "attack": 0,
+     "defense": 0,
+     "speed": 0,
+     "spAttack": 255,
+     "spDefense": 0
+    },
+    "moves": [
+     150,
+     53,
+     53,
+     53
+    ],
+    "item": 0,
+    "abilitySlot": 0,
+    "friendship": 0
+   },
+   {
+    "species": 68,
+    "level": 50,
+    "nature": 0,
+    "ivs": {
+     "hp": 31,
+     "attack": 31,
+     "defense": 31,
+     "speed": 31,
+     "spAttack": 31,
+     "spDefense": 31
+    },
+    "evs": {
+     "hp": 255,
+     "attack": 0,
+     "defense": 0,
+     "speed": 0,
+     "spAttack": 255,
+     "spDefense": 0
+    },
+    "moves": [
+     53,
+     53,
+     53,
+     53
+    ],
+    "item": 0,
+    "abilitySlot": 0,
+    "friendship": 0
+   },
+   {
+    "species": 214,
+    "level": 50,
+    "nature": 0,
+    "ivs": {
+     "hp": 31,
+     "attack": 31,
+     "defense": 31,
+     "speed": 31,
+     "spAttack": 31,
+     "spDefense": 31
+    },
+    "evs": {
+     "hp": 255,
+     "attack": 0,
+     "defense": 0,
+     "speed": 0,
+     "spAttack": 255,
+     "spDefense": 0
+    },
+    "moves": [
+     53,
+     53,
+     53,
+     53
+    ],
+    "item": 0,
+    "abilitySlot": 0,
+    "friendship": 0
+   }
+  ],
+  "opponent": [
+   {
+    "species": 389,
+    "level": 50,
+    "nature": 0,
+    "ivs": {
+     "hp": 31,
+     "attack": 31,
+     "defense": 31,
+     "speed": 31,
+     "spAttack": 31,
+     "spDefense": 31
+    },
+    "evs": {
+     "hp": 255,
+     "attack": 255,
+     "defense": 0,
+     "speed": 0,
+     "spAttack": 0,
+     "spDefense": 0
+    },
+    "moves": [
+     275,
+     28,
+     28,
+     28
+    ],
+    "item": 0,
+    "abilitySlot": 0,
+    "friendship": 0
+   },
+   {
+    "species": 369,
+    "level": 50,
+    "nature": 0,
+    "ivs": {
+     "hp": 31,
+     "attack": 31,
+     "defense": 31,
+     "speed": 31,
+     "spAttack": 31,
+     "spDefense": 31
+    },
+    "evs": {
+     "hp": 255,
+     "attack": 255,
+     "defense": 0,
+     "speed": 0,
+     "spAttack": 0,
+     "spDefense": 0
+    },
+    "moves": [
+     275,
+     28,
+     28,
+     28
+    ],
+    "item": 0,
+    "abilitySlot": 0,
+    "friendship": 0
+   },
+   {
+    "species": 114,
+    "level": 50,
+    "nature": 0,
+    "ivs": {
+     "hp": 31,
+     "attack": 31,
+     "defense": 31,
+     "speed": 31,
+     "spAttack": 31,
+     "spDefense": 31
+    },
+    "evs": {
+     "hp": 255,
+     "attack": 255,
+     "defense": 0,
+     "speed": 0,
+     "spAttack": 0,
+     "spDefense": 0
+    },
+    "moves": [
+     275,
+     28,
+     28,
+     28
+    ],
+    "item": 0,
+    "abilitySlot": 0,
+    "friendship": 0
+   }
+  ]
+ },
+ "script": {
+  "actions": [
+   {
+    "move": 0
+   },
+   {
+    "move": 0
+   },
+   {
+    "move": 0
+   }
+  ],
+  "then": "census"
+ },
+ "expect": [],
+ "cover": [
+  {
+   "file": "src/engine/factoryAiCheckViability.ts",
+   "text": "{\n    const draw5 = nextDraw(rng, ordinal, `${input.reasonPrefix}-draw5`);\n    rng = draw5.after;\n    ordinal += 1;\n    const succeeded5 = draw5.randomValue % 256 >= 12",
+   "at": 0
+  }
+ ],
+ "coverAny": false
+}
