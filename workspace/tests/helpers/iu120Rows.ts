@@ -73,6 +73,11 @@ const S_LEAD_RULE_IDS: ReadonlySet<number> = new Set([
   104, 182, 113, 240, 184, 108, 201, 204, 219, 266, 28, 241, 213, 97, 334, 230, 151, 133, 258, 14, 203, 197, 349, 254, 215, 107, 281, 180, 288, 195, 115, 103,
   277, 178, 43, 39, 148, 106, 275, 112, 321, 259, 319, 271, 339, 294, 272, 50, 269, 116,
 ]);
+// b4l c-lead (test-side copy of production's C_LEAD_WINDOW_ADJUST + the kernel lead L = A0 - R - 3, ROM-measured by b4m / b4l): the lead rows are presented in front of the body, the window adjust
+// (ROM next command - engine next command) after it. Thunder Wave 86 / Stun Spore 78 / Sleep Powder 79 (9 / 9 / 7, +0), Sing 47 (7, +3), Grasswhistle 320 (7, -2), Confuse Ray 109 (6, +2),
+// Curse 174 (4, +4; its Ghost branch 6 / +4: ROM A1 430 -> first command 433 is the engine's 433), Lovely Kiss 142 (7, +3), Will-O-Wisp 261 (8, +2), Glare 137 (9, +2), Brick Break 280 (7, +3).
+const C_LEAD_RULE_IDS: ReadonlySet<number> = new Set([86, 78, 79, 47, 320, 109, 174, 142, 261, 137, 280]);
+const cLead = (lead: number, tail: number): Iu120BodyRule => ({ defaultLead: lead, tail });
 const IU120_BODY_RULES: ReadonlyMap<number, Iu120BodyRule> = new Map<number, Iu120BodyRule>([
   // hpd4 lead-table bodies (explicit tails)
   [49, { lead: 9, tail: 3 }], [82, { lead: 9, tail: 26 }], [111, { lead: 3, tail: 3 }], [205, { lead: 10, tail: 3 }], [301, { lead: 10, tail: 3 }], [69, { lead: 6, tail: 1 }],
@@ -86,6 +91,8 @@ const IU120_BODY_RULES: ReadonlyMap<number, Iu120BodyRule> = new Map<number, Iu1
   [279, shapeA(279)], [71, { defaultLead: 5, tail: 5 }], [278, { defaultLead: 2, tail: 2 }], [13, { defaultLead: 5, tail: 4 }], [273, { defaultLead: 2, tail: 0 }],
   // lse2 hit tail table wins over the shape-A formula (Blizzard: 2)
   [59, { ...shapeA(59), tail: 2 }],
+  // b4l c-lead
+  [86, cLead(9, 0)], [78, cLead(9, 0)], [79, cLead(7, 0)], [47, cLead(7, 3)], [320, cLead(7, 0)], [109, cLead(6, 2)], [174, cLead(4, 4)], [142, cLead(7, 3)], [261, cLead(8, 2)], [137, cLead(9, 2)], [280, cLead(7, 3)],
 ]);
 export const HPD4_BODY_LEAD_ROWS: ReadonlyMap<number, number> = new Map([...IU120_BODY_RULES].filter(([, r]) => r.lead !== undefined).map(([id, r]): [number, number] => [id, r.lead!]));
 // liv2: Self-Destruct has no body lead (its hp command carries it) but a 9-row hit tail after the live window; the age holds the last body row there.
@@ -118,7 +125,7 @@ export function iu120EffectAges(id: number, duration: number, side: Iu120Side = 
   const hold = iu120Pre(id, side) + (LAND97_LEAD_ROWS.get(id) ?? 0);
   const bodyLead = lead ?? defaultBodyLead(id);
   const tail = bodyLead === 0 ? LIVE_MOVE_LEADLESS_TAIL_ROWS.get(id) ?? 0 : hpd4BodyTail(id, side);
-  const held = iu120Post(id, side) + ont193ScriptTail(id) > 0 || LIVE_MOVE_LEADLESS_TAIL_ROWS.has(id) || STA5_STATUS_TAIL_IDS.has(id)
+  const held = iu120Post(id, side) + ont193ScriptTail(id) > 0 || LIVE_MOVE_LEADLESS_TAIL_ROWS.has(id) || STA5_STATUS_TAIL_IDS.has(id) || C_LEAD_RULE_IDS.has(id)
     || (IU120_BODY_RULES.get(id)?.tail === "shape-a" && bodyLead > 0); // production's holdHitTail: a shape-A hit tail holds the last body row
   const scriptTail = ont193ScriptTail(id) - (S_LEAD_RULE_IDS.has(id) ? bodyLead : 0);
   return [...Array(hold + bodyLead).fill(0), ...Array.from({ length: duration }, (_, age) => age), ...Array(iu120Post(id, side)).fill(duration - 1), ...Array(scriptTail).fill(duration - 1),

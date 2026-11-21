@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { generatedCommandAnimationReplay } from "../tools/integration/generatedCommandAnimationReplay.ts";
 import { verifySceneModeParity } from "../tools/integration/sceneModeParity.ts";
-import { iu120Extra } from "./helpers/iu120Rows.ts";
+import { hpd4BodyRows, iu120Extra } from "./helpers/iu120Rows.ts";
 
 describe("generated Scene ON queue lifecycle and rule isolation", () => {
   it("preserves rules and RNG across 40 generated matchups including forced replacement", () => {
@@ -31,7 +31,7 @@ describe("generated Scene ON queue lifecycle and rule isolation", () => {
     const effect = replay.animations.find(a => a.moveId === 109)!;
     expect(effect.player).not.toBe("WAILMER");
     expect(effect.opponent).toBe("HAUNTER");
-    expect(effect.ages).toHaveLength(270 + iu120Extra(109, effect.attacker === 0 ? "player" : "opponent"));
+    expect(effect.ages).toHaveLength(270 + iu120Extra(109, effect.attacker === 0 ? "player" : "opponent") + hpd4BodyRows(109));
   }, 60000);
 
   it("resumes repeated locked actions, KO/faint and automatic replacement in order", () => {
