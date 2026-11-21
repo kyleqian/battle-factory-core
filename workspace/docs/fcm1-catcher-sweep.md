@@ -146,7 +146,8 @@ item 1; the catcher gap below).
    it did in s94-on-wc and fcr2's seed 2 Scene OFF. Either the engine's rule (`src/engine/factoryBrainOpponentGeneration.ts`: the six
    `frontier.rentalMons` checked, the species and item checks, the personality loop) or the catcher's VBlank undo
    (`tools/frame-catcher/romRun.py` `brain_traps`) differs; not settled. If the engine's, the Head brings another team than the ROM for
-   the same RNG (gameplay).
+   the same RNG (gameplay). **Settled by hdt1** (`docs/hdt1-factory-head-team.md`): the catcher's; its undo stopped 20 frames after the
+   entry while the build runs about 30; the engine's rule is the ROM's (no gameplay change).
 2. **Catcher gap:** after RECORD -> NO in the after-battle menu, the GO ON menu shown again (one frame before the test player's A) is not a
    menu to `engineMenus.mjs` (s89-off-ws: ours 137,134), so the ROM's menu there is unplanned.
 
