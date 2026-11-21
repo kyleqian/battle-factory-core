@@ -1449,6 +1449,10 @@ function actionTransitionPauseFrames(
       anchor = event;
       break;
     }
+    if (kind === "status-animation") {
+      anchor = event;
+      break;
+    }
     // lse4: a lead-class Scene ON body that prints nothing after its animation (Wish): the release row is the animation's own, one row after its execution.
     if (kind === "animation" && event.payload.animationId === "MOVE_ANIMATION") {
       const presentedBody = commands.find((command) => command.type === "move-animation" && command.eventSequence === event.sequence);
@@ -1459,7 +1463,7 @@ function actionTransitionPauseFrames(
   }
   if (anchor === null) return null;
   let anchorExecution = anchor.provenance!.instructionExecution;
-  if (anchor.payload.kind === "animation") anchorExecution += 1;
+  if (anchor.payload.kind === "animation" || anchor.payload.kind === "status-animation") anchorExecution += 1;
   if (anchor.payload.kind === "message") {
     if (anchor.payload.messageId === "STRINGID_USEDMOVE" || anchor.payload.messageId === "STRINGID_EMPTYSTRING3") return null;
     const following = BATTLE_SCRIPT_PROGRAM.instructions[anchor.provenance!.programCounter + 1];
@@ -6762,6 +6766,19 @@ function usedMovePrintLeadU(state: BattleResolutionPresentationState, handoff: B
   const u = first.provenance?.instructionExecution;
   return u === undefined || u < USED_MOVE_LEAD_MIN_U || u > USED_MOVE_LEAD_MAX_U ? null : u;
 }
+/**
+ * gsp3 (ROM lab bdt1-rest3-player-on, Scene ON; T2 windows): a plain `use-move` turn whose first action is asleep (the sleep counter's status write, then
+ * BattleScript_MoveUsedIsAsleep's "is fast asleep!" print) prints on the attackcanceler's row + 1: ROM label row 2072 against the engine's 2075, so the
+ * statusanimation / SE 197 and the next action ran 3 rows late. attackcanceler jumps out before the dispatch / accuracy rows the walk holds
+ * (`action-dispatch`, `attack-canceler`, `accuracy-check`), so the walk ends at `before-turn`.
+ */
+function turnOpensWithAsleepPrint(state: BattleResolutionPresentationState): boolean {
+  if (state.sourceDecision.kind !== "use-move") return false;
+  const events = state.segments[0]?.events;
+  if (events === undefined) return false;
+  const first = events.find((event) => event.payload.kind !== "set-battler-status-data");
+  return first?.payload.kind === "message" && first.payload.messageId === "STRINGID_PKMNFASTASLEEP";
+}
 function sceneOffOf(state: BattleResolutionPresentationState): boolean {
   return ((state.segments[0]?.beforeRules.rulesContext.hitMarker ?? 0) & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0;
 }
@@ -6887,7 +6904,9 @@ export function advanceBattleResolutionConfirmHandoff(
   }
   const nextStage = handoff.focusPunchPrePass === true && handoff.stage === "stop-bounce-request"
     ? null
-    : CONFIRM_HANDOFF_NEXT[handoff.stage];
+    : handoff.stage === "before-turn" && handoff.forced === undefined && turnOpensWithAsleepPrint(state)
+      ? null
+      : CONFIRM_HANDOFF_NEXT[handoff.stage];
   if (nextStage === null) {
     const printU = usedMovePrintLeadU(state, handoff);
     const lead = printU === null ? { hit: 0, script: 0, anim: 0 } : usedMoveSoundLeadsOf(state, printU);
