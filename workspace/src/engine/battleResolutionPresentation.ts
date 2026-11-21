@@ -60,7 +60,7 @@ import {
 } from "./battleResolutionPresentationRender.ts";
 import { SEND_IN_TAIL_CASTFORM } from "../data/sendInTail.ts";
 import { CASTFORM_CHANGE_COMMAND_FRAMES, CASTFORM_CHANGE_WEATHER_LOOP_FRAMES } from "./liveTransform.ts";
-import { BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS, BATTLE_SCRIPT_STATUS3_SEMI_INVULNERABLE } from "./battleScriptSourceConstants.ts";
+import { BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS, BATTLE_SCRIPT_STATUS2_MASKS, BATTLE_SCRIPT_STATUS3_SEMI_INVULNERABLE } from "./battleScriptSourceConstants.ts";
 import { spriteOrderStatusAnimationName } from "./spriteOrderEventTransform.ts";
 import { seg127StatusSeGateFromEvents, seg127StatusSeGateRows } from "./seg127StatusSeGate.ts";
 import {
@@ -1670,6 +1670,7 @@ const NO_EFFECT_ATTACKANIMATION_HOLD_PCS: ReadonlySet<number> = new Set(
  * attack string (the PP receipt is silent) and the source puts that pause
  * within the three straight-line instructions before it.
  */
+const STAT_DOWN_PRINT_LABEL = "BattleScript_StatDownPrintString";
 function sourcePauseUsedMoveHoldFrames(
   events: readonly BattleKernelSemanticEvent[],
   usedIndex: number,
@@ -1682,9 +1683,13 @@ function sourcePauseUsedMoveHoldFrames(
     const next = candidate.provenance?.instructionExecution;
     if (next === undefined || next < execution) return null;
     execution = next;
-    if (candidate.payload.kind === "set-battler-pp-data") continue;
+    if (candidate.payload.kind === "set-battler-pp-data" || candidate.payload.kind === "stat-stage-change") continue;
     if (candidate.payload.kind !== "message") return null;
     const programCounter = candidate.provenance!.programCounter;
+    // chg2 (s3738 Aerial Ace -39 / -79): a stat change that cannot happen (BattleScript_EffectStatDown: `pause B_WAIT_TIME_SHORT; goto BattleScript_StatDownPrintString`) reaches
+    // its print through a goto, which the straight-line look-back below stops at; a print at that label with no animation receipt before it is the pause path (ROM: used print
+    // -> "won't go lower" print 61 rows, the pause's 32 + 6 dispatch steps after the 23-row print).
+    if (candidate.provenance?.sourceLabel === STAT_DOWN_PRINT_LABEL) return next - used + 1;
     for (let back = 1; back <= 3 && programCounter - back >= 0; back += 1) {
       const instruction = BATTLE_SCRIPT_PROGRAM.instructions[programCounter - back];
       if (
@@ -2186,27 +2191,78 @@ function moveAnimationScriptLeadTiming(
 }
 
 /**
- * bdt1 (Scene ON): a Dig attack turn is a locked continuation with no move menu, so the engine's first command is the print. The ROM runs the
- * effect script first: EffectSemiInvulnerable -> SecondTurnSemiInvulnerable -> TryHit -> HitFromAtkString, its `printstring` row at
- * press + 6 + u (u = 11, the kernel execution count of the print; ROM labs bdt1-dig-{player,opponent}-on: 1043 press -> 1060 printstring ex2,
- * the glyphs release 1081 -> `attackanimation` 1087, A0 1089). The rows are typed as the message's scroll lead, so the print and the body's
- * sounds start where the ROM's do.
+ * bdt1 / chg2 (Scene ON): the attack turn of a two-turn move is a locked continuation with no move menu, so the engine's first command is the print. The ROM
+ * runs the effect script first (EffectSemiInvulnerable -> SecondTurnSemiInvulnerable -> TryHit -> HitFromAtkString, or EffectSolarBeam / EffectRazorWind /
+ * EffectSkyAttack -> TwoTurnMovesSecondTurn -> HitFromAccCheck), its `printstring` row at press + 6 + u (u = the print's kernel execution count: Dig / Fly /
+ * Bounce / Dive 11, Solar Beam 12, Razor Wind 9; ROM labs bdt1-dig-{player,opponent}-on: 1043 press -> 1060 printstring ex2, the glyphs release 1081 ->
+ * `attackanimation` 1087, A0 1089). The rows are typed as the message's scroll lead, so the print and the body's sounds start where the ROM's do. A one-turn use
+ * (Solar Beam in sun) has no STATUS2_MULTIPLETURNS at the action's start and keeps its menu press.
+ * chg3: a player-charger's turn has no press and its command starts 10 rows later than the ROM's effect-script row (turn-end command + 22 against the ROM's
+ * MoveEnd + 19 / 20, with the charge turn now ending on the ROM): the player lead is 6 + u - 10 (chg2-{fly,dive,solarbeam,razorwind,skyattack,bounce}-player-on and
+ * bdt1-dig-player-on, attack-turn SEs +10 .. +11 before, 0 .. -2 after).
  */
-const MOVE_DIG = 91;
-const DIG_SECOND_TURN_PRINT_LEAD_ROWS = 17;
-function digSecondTurnPrintLead(event: BattleKernelSemanticEvent, hitMarker: number, currentMove: number | undefined): { leadFrames: number } | null {
-  if (currentMove !== MOVE_DIG || (hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0) return null;
+const TWO_TURN_MOVES: ReadonlySet<number> = new Set([13, 19, 76, 91, 130, 143, 291, 340]);
+const TWO_TURN_SECOND_PRINT_PRESS_ROWS = 6;
+const TWO_TURN_PLAYER_NO_PRESS_ROWS = 10;
+function twoTurnSecondPrintLead(
+  event: BattleKernelSemanticEvent,
+  beforeRules: BattleScriptRulesContext,
+  actionSnapshot: BattleScriptActionMessageSnapshot | null | undefined,
+): { leadFrames: number } | null {
+  const currentMove = actionSnapshot?.currentMove;
+  if (currentMove === undefined || !TWO_TURN_MOVES.has(currentMove) || (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0) return null;
   if (event.payload.kind !== "message" || event.payload.messageId !== "STRINGID_USEDMOVE"
-    || event.provenance?.sourceLabel !== "BattleScript_HitFromAtkString") return null;
-  return { leadFrames: DIG_SECOND_TURN_PRINT_LEAD_ROWS };
+    || (event.provenance?.sourceLabel !== "BattleScript_HitFromAtkString" && event.provenance?.sourceLabel !== "BattleScript_HitFromAccCheck")) return null;
+  if ((beforeRules.battlers[actionSnapshot!.attacker]!.status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_MULTIPLETURNS) === 0) return null;
+  return { leadFrames: TWO_TURN_SECOND_PRINT_PRESS_ROWS - (actionSnapshot!.attacker === 0 ? TWO_TURN_PLAYER_NO_PRESS_ROWS : 0) + event.provenance.instructionExecution };
 }
 /**
- * bdt1 (Scene ON): Dig's charge-turn body (BattleScriptFirstChargingTurn, no body lead) plays its first SE 6 rows after the ROM does on the generic
- * sound clock (SE 175 at 66 / 100 / 134 / 168 / 202 against the ROM's 60 / 94 / 128 / 162 / 196 on both bdt1-dig-{player,opponent}-on labs; 10 T2
- * windows, 4 seeds): the ROM releases the used print and reaches `gAnimScriptActive` 4 rows apart (R -> A0 = 4) where the clock assumes 10. The
- * command's duration is already exact (the next print lands on A1), so only the sound clock moves.
+ * chg2 (Scene ON; generalizes bdt1's Dig value): a charge-turn body (BattleScriptFirstChargingTurn) plays its sounds on the ROM's own script rows, but the
+ * generic sound clock assumes the used print's release reaches `gAnimScriptActive` (A0) 10 rows later (R -> A0 = 10). The presented box command always starts at
+ * the same row while the ROM reaches the charge script's opener (STRINGID_EMPTYSTRING3, kernel instruction execution E) E rows after the effect script's first
+ * row, so R -> A0 = E - 6: bdt1-dig / chg2-{fly,bounce,dive,solarbeam,razorwind,skyattack}-{player,opponent}-on, ROM first SE exactly (E 10 / 7 / 10 / 9 / 9 / 6 / 6
+ * -> R -> A0 4 / 1 / 4 / 3 / 3 / 0 / 0 on the ROM). The sound clock moves by 10 - (E - 6) rows; the command's duration and pixels are untouched (the Fly
+ * charge turn's pixels match the ROM at the present duration, a 3-row earlier body made it worse).
  */
-const DIG_CHARGE_TURN_SOUND_LEAD_ROWS = 6;
+const CHARGE_TURN_SOUND_LEAD_BASE_ROWS = 16;
+/**
+ * chg3 (Scene ON): after the charge print the ROM's chain to the next action is E - 2 rows longer than the presented one (opener execution E: the next action's SEs
+ * were 4 .. 8 rows early on chg2-{fly,dive,solarbeam,skyattack,bounce}-{player,opponent}-on and bdt1-dig-player-on; E - 2 = 4 + (E - 6), the ROM's A0 lies E - 6 rows
+ * after the command start and the release -> next row gap is 4 more). The charge print's glyph row is exact (chg161), so the rows are the print's hold. Razor Wind
+ * (gap-print class) already carries them before its glyph.
+ */
+const CHARGE_TURN_CHAIN_BASE_ROWS = 2;
+function chargeTurnOpenerExecution(events: readonly BattleKernelSemanticEvent[], index: number): number | null {
+  for (let i = index - 1; i >= 0; i -= 1) {
+    const candidate = events[i]!;
+    if (candidate.provenance?.sourceLabel !== CHARGE_TURN_SCRIPT) return null;
+    if (candidate.payload.kind === "message" && candidate.payload.messageId === "STRINGID_EMPTYSTRING3") {
+      const before = events[i - 1];
+      if (before !== undefined && instructionExecutionOf(before) < instructionExecutionOf(candidate)) return null;
+      return instructionExecutionOf(candidate);
+    }
+  }
+  return null;
+}
+function chargeTurnChainRows(events: readonly BattleKernelSemanticEvent[], index: number, moveId: number | undefined): number {
+  if (moveId === undefined || !TWO_TURN_MOVES.has(moveId) || bodyGapPrintRuleApplies(moveId)) return 0;
+  const opener = chargeTurnOpenerExecution(events, index);
+  return opener === null ? 0 : Math.max(0, opener - CHARGE_TURN_CHAIN_BASE_ROWS);
+}
+function chargeTurnSoundLead(events: readonly BattleKernelSemanticEvent[], index: number): { soundAgeLeadFrames?: number } {
+  if (events[index]!.provenance?.sourceLabel !== CHARGE_TURN_SCRIPT) return {};
+  for (let i = index - 1; i >= 0; i -= 1) {
+    const candidate = events[i]!;
+    if (candidate.provenance?.sourceLabel !== CHARGE_TURN_SCRIPT) return {};
+    if (candidate.payload.kind === "message" && candidate.payload.messageId === "STRINGID_EMPTYSTRING3") {
+      // A charger that woke up / thawed first (s2230 Bounce, E = 79) reaches the opener after a detour presented as its own commands: E is no longer the rows to the animation.
+      const before = events[i - 1];
+      if (before !== undefined && instructionExecutionOf(before) < instructionExecutionOf(candidate)) return {};
+      return { soundAgeLeadFrames: CHARGE_TURN_SOUND_LEAD_BASE_ROWS - instructionExecutionOf(candidate) };
+    }
+  }
+  return {};
+}
 /**
  * bdt1 (Scene ON): Rest's body (move 156: its SE_M_SNORE) plays 2 rows before the ROM on the generic sound clock (ROM A0 + 1 = 1200 against 1198 on the
  * bdt1-rest-player-on lab; 17 T2 windows, every one -2). The body's own rows are not short: the clock's 7-row calibration meets Rest's script lead of 9
@@ -2215,8 +2271,8 @@ const DIG_CHARGE_TURN_SOUND_LEAD_ROWS = 6;
 const MOVE_REST = 156;
 const REST_SOUND_LEAD_ROWS = -2;
 const REST_HEAL_PRINT_TAIL_ROWS = 10;
-function bdt1BodySoundLead(event: BattleKernelSemanticEvent, moveId: number): { soundAgeLeadFrames?: number } {
-  if (moveId === MOVE_DIG && event.provenance?.sourceLabel === CHARGE_TURN_SCRIPT) return { soundAgeLeadFrames: DIG_CHARGE_TURN_SOUND_LEAD_ROWS };
+function bdt1BodySoundLead(events: readonly BattleKernelSemanticEvent[], index: number, moveId: number): { soundAgeLeadFrames?: number } {
+  if (events[index]!.provenance?.sourceLabel === CHARGE_TURN_SCRIPT) return chargeTurnSoundLead(events, index);
   return moveId === MOVE_REST ? { soundAgeLeadFrames: REST_SOUND_LEAD_ROWS } : {};
 }
 const SCRIPT_TAIL_BETWEEN_OPCODES: ReadonlySet<string> = new Set(["B_SCR_OP_WAITANIMATION", "B_SCR_OP_SETBYTE", "B_SCR_OP_SETGRAPHICALSTATCHANGEVALUES"]);
@@ -5583,6 +5639,7 @@ export function projectBattleResolutionCommands(
   ] as [number, number];
   let usedMoveInstructionExecution: number | null = null;
   // off108: the opener print's event index and the command count after it.
+  let chargeChainCarry: { rows: number; attacker: number | undefined } | null = null;
   let pauseOpenerIndex: number | null = null;
   let pauseOpenerCommands = 0;
   let pauseOpenerFrames = 0;
@@ -5683,6 +5740,14 @@ export function projectBattleResolutionCommands(
           timing: Object.freeze({ minimumFrames: prePrintPause }),
         }));
       }
+      if (event.provenance?.sourceLabel === CHARGE_TURN_SCRIPT && (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) === 0) {
+        const rows = chargeTurnChainRows(events, index, actionSnapshot?.currentMove);
+        if (rows > 0) chargeChainCarry = { rows, attacker: actionSnapshot?.attacker };
+      }
+      const carriedRows = payload.messageId === "STRINGID_USEDMOVE" ? chargeChainCarry : null;
+      if (carriedRows !== null) chargeChainCarry = null;
+      const carryAfterGlyph = carriedRows !== null && carriedRows.attacker !== actionSnapshot?.attacker ? carriedRows.rows : 0;
+      const carryBeforeGlyph = carriedRows !== null && carryAfterGlyph === 0 ? carriedRows.rows : 0;
       commands.push(...promptGatedMessageCommands(Object.freeze({
         type: "message",
         eventSequence: event.sequence,
@@ -5705,7 +5770,8 @@ export function projectBattleResolutionCommands(
         ),
         advance: "automatic",
         ...(selfConfusionOff ? { leadFrames: SELF_CONFUSION_OFF_PRE_PRINT_ROWS } : {}),
-        ...(digSecondTurnPrintLead(event, beforeRules.hitMarker, actionSnapshot?.currentMove) ?? {}),
+        ...(twoTurnSecondPrintLead(event, beforeRules, actionSnapshot) ?? {}),
+        ...(carryBeforeGlyph > 0 ? { leadFrames: (twoTurnSecondPrintLead(event, beforeRules, actionSnapshot)?.leadFrames ?? 0) + carryBeforeGlyph } : {}),
         ...(payload.messageId === "STRINGID_TARGETFAINTED"
           || payload.messageId === "STRINGID_ATTACKERFAINTED"
           ? { faintBattler: lastFaintBattler! }
@@ -5719,9 +5785,9 @@ export function projectBattleResolutionCommands(
         timing: payload.messageId === "STRINGID_USEDMOVE"
           ? Object.freeze({
             minimumFrames: 0,
-            holdFrames: usedMessageHoldFrames > 0
+            holdFrames: (usedMessageHoldFrames > 0
               ? usedMessageHoldFrames
-              : sourcePauseUsedMoveHoldFrames(events, index) ?? 0,
+              : sourcePauseUsedMoveHoldFrames(events, index) ?? 0) + carryAfterGlyph,
           })
           : payload.messageId === "STRINGID_RETURNMON"
             ? RETURN_MON_TIMING
@@ -5909,7 +5975,7 @@ export function projectBattleResolutionCommands(
           timing: Object.freeze({
             minimumFrames: SCENE_OFF_MOVE_PAUSE_FRAMES, ...moveAnimationSeGateTiming(events, index), ...moveAnimationScriptLeadTiming(events, index, presentedSinceUsedAtAttack, animation.moveId),
             ...moveAnimationScriptTailTiming(events, index, usedMoveInstructionExecution, presentedSinceUsedAtAttack, animation.moveId),
-            ...bdt1BodySoundLead(event, animation.moveId),
+            ...bdt1BodySoundLead(events, index, animation.moveId),
           }),
         }));
         continue;

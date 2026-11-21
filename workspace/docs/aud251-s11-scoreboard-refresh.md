@@ -2274,3 +2274,68 @@ Sum-check: ON 2,360 + 1,713 + 926 + 1,354 + 1,287 + 957 + 660 + 276 (= 9,533) + 
 - B4 bodies: 298 mass, being landed; no proposal here.
 
 Not applied: no `src/` or `tests/` change; PROGRESS / ISSUES / ROADMAP untouched.
+
+## chg2 (2026-11-21): two-turn move family, Scene ON sound / print timing; Aerial Ace s3738 named and landed
+
+Base `ad09bdf9d`. Scope: ISSUES #219, S11 frame alignment; no gameplay / RNG change (census below). Item 1: Fly 19, Bounce 340, Dive 291, Solar Beam 76, Razor Wind 13, Sky Attack 143 on both sides, Scene ON; item 2: Aerial Ace s3738 -39 / -79.
+
+**Labs.** `tools/integration/chg2MakeLabs.py` writes `tools/battle-lab/chg2-<move>-{player,opponent}-on.json` (the bdt1 Dig labs with move 91 replaced), `chg2Trace.py` the compare traces (`tools/compare/traces/chg2-<lab>.json`); ROM rows / SEs / engine commands through `tools/integration/bdt1Run.sh OUT FRAMES lab` (`ENGINE_ONLY=1 SPAN=0:0` re-measures the engine only). `b4mEngine.ts` gained `ENGINE_RNG_SEED` (the engine kernel RNG start value of a lab; the ROM lab keeps seed 1): Bounce player 5 and Sky Attack player 4 are the first seeds whose accuracy rolls agree with the ROM (at the default seed the engine's Bounce / Sky Attack missed and the attack turn had no SEs). Evidence (ignored): `.integration/evidence/chg2/{labs0,labs-base,t2-base,t2-after,census,s3738off}`.
+
+**Rule 1: charge-turn sound lead from the opener's kernel execution** (`chargeTurnSoundLead`, `8fff17edb`; bdt1's Dig +6 generalized). The generic sound clock assumes R -> A0 = 10 rows after the used print's release (Dig). On the ROM, R -> A0 = E - 6, where E is the kernel `instructionExecution` of the charge opener (`STRINGID_EMPTYSTRING3`, label `BattleScriptFirstChargingTurn`); the engine clock therefore moves by 16 - E rows (`CHARGE_TURN_SOUND_LEAD_BASE_ROWS = 16`). E on these labs: Dig 10, Fly 7, Bounce 10, Dive 9, Solar Beam 9, Razor Wind 6, Sky Attack 6; the value is read from the kernel event, not tabled. The command duration and the body pixels are untouched (a 3-row earlier Fly body was measured and made the pixels worse). Guard (`713d684c8`): when the opener continues an earlier script run (the preceding event has a lower execution count: the charger woke up / thawed first, s2230 Bounce E = 79) there is no lead; without the guard T2 ON lost SE 203 (missing 1).
+
+**Rule 2: locked second-turn used print waits press + 6 + u** (`twoTurnSecondPrintLead`, `b1d59791a`; bdt1's Dig constant 17 generalized to the ids 13 / 19 / 76 / 91 / 130 / 143 / 291 / 340 with STATUS2_MULTIPLETURNS, `BattleScript_HitFromAtkString` and `HitFromAccCheck`). ROM: print row = press + 6 + u, u = the print's kernel `instructionExecution` (Dig u = 11 -> 17, the old constant). A foe-charger's second turn needs the player's menu press (SE 5 at 1023 / 1043); a player-charger's second turn auto-continues with no press.
+
+**Dig rules hold** (item 1): the charge-turn R -> A0 lead (Dig E = 10, 0 change) and the attack-turn used print typed after the effect-script rows (17 = 6 + 11) both fall out of rules 1 / 2 unchanged; `bdt1-dig-player-on` identical before / after (175 x5 +0, 141 +2, 13 / 16 +1).
+
+**Labs, ENG - ROM per SE (frames), before -> after** (before = base `ad09bdf9d` source on the same ROM files):
+
+| Lab | Charge SEs | Attack-turn SEs |
+|---|---|---|
+| Fly foe / player | 158: +9 -> 0 / +9 -> 0 | foe 135 / 136: -16 -> +1, 13 / 16: -18 -> -1; player 135 / 136: -12 -> +5, 13 / 16: -14 -> +3 |
+| Dive foe / player | 162 / 233: +7 -> 0 / +7 -> 0 | foe 178 / 216: -16 -> +1, 13 / 16: -18 -> -1; player 178 / 216: -14 -> +3, 13 / 16: -16 -> +1 |
+| Solar Beam foe / player | 140: +7 -> 0 / +7 -> 0 | foe 201 / 13 / 16: -18 -> 0; player: -15 -> +3 |
+| Razor Wind foe / player | 132 / 133: +10 -> 0 / +10 -> 0 | foe 160 x3 / 136: -14 -> +1, 13 / 16: -15 -> 0; player 160 x3 / 136: -4 -> **+11**, 13 / 16: -5 -> **+10** |
+| Sky Attack foe / player (seed 4) | 239 x8: +10 -> 0 / +10 -> 0 | foe 238 / 141: -16 -> +1, 13 / 16: -20 -> -3; player 238 / 141: -11 -> +6, 13 / 16: -14 -> +3 |
+| Bounce foe / player (seed 5) | 203: +6 -> 0 / +6 -> 0 | foe: no attack-turn SEs in the ROM window; player 203: +6 -> 0, 193 / 141: -16 -> +2, 13: -18 -> 0 (the faint SE 16 +61 -> +79 is the faint chain, out of scope) |
+
+Every charge-turn SE is on the ROM frame (14 labs-sides, 0 residual). Foe-charger attack turns are within +-3 of the ROM (were -14 .. -20, the print the engine did not wait for). Player-charger attack turns carry +2 .. +6 (Dig +2 / +1; Razor Wind +10 / +11).
+
+**Not landed (measured, rejected).** A signed charge-turn duration adjustment E - 10 (the player-charger attack-turn residual equals the charge-turn body's error: Fly +5 -> +2, Dive +3 -> +2) moves the SEs of the other side's action between the two turns the wrong way on three moves (Razor Wind +1 -> -3, Sky Attack -4 -> -8, Solar Beam -6 -> -7), so the charge body's end error is per body (`liveMoveAnimation.ts` turn-0 windows: 19 43, 340 64, 76, 13 45, 143, 291), not an E rule. Left: (a) the other side's action SEs between the charge and the attack turn: Solar Beam -6, Razor Wind +1, Sky Attack -4, Bounce -17 (Bounce player 238 / 214 / 131 / 13 at 623 .. 814, ENG 606 .. 797), unchanged; (b) player-charger attack turn +2 .. +6 (the charge body's end), Razor Wind player +10 / +11 (before: -4 / -5; one lead for every move overshoots here: the base engine's Razor Wind player gap was already within 4); (c) Skull Bash not measured (0 Factory uses). Pixels: the Fly charge turn matches the ROM (S11 compare); the attack-turn pixels were not re-compared.
+
+**Item 2: Aerial Ace s3738 -39 / -79 is not an Aerial Ace interval.** Windows: Scene OFF decision 15 (ROM commit 6364, engine 6283) and decision 27 (ROM 11354, engine 11130), opened with `hcr3mProbe.py` / `hcr3mCmp.py` (OFF files copied as `-on`) and the engine `soundCensusRomReplay.ts --cmdtrace=1`. Both windows: the player's String Shot (move 184, `BattleScript_EffectStatDown`) against a foe whose Speed cannot fall, then the foe's Aerial Ace (SE 12). The can't-change path is `pause B_WAIT_TIME_SHORT; goto BattleScript_StatDownPrintString`. ROM: String Shot used print at row 12, "won't go lower" print at 73 (61 rows later); engine: message -> message 22 rows. Everything after is 38 .. 39 early: Aerial Ace used print ROM row 185 vs engine 147, SE 12 ROM 254 vs engine 215. The engine command whose interval differs is the used-print `message` command's hold (`holdFrames` via `sourcePauseUsedMoveHoldFrames`, off108): it looks back from the print for a `pause B_WAIT_TIME_SHORT`, stopped at the `goto`, and the `stat-stage-change` receipt ended its scan. `713d684c8`: that receipt is skipped and a print at `BattleScript_StatDownPrintString` is the pause path (hold = executions + 1 = 38, the Splash hold value). Result: SE 12 is on ROM frame 254 in both windows (the engine's decision-27 commit moved 11130 -> 11208, 2 x 39). It is a general rule for every stat change that cannot happen, in both scenes, not an Aerial Ace one.
+
+**T2** (`tools/audio/rescoreAll.sh`, 25 ON + 24 OFF t2n seeds, `soundScoreboard.py`; base = the base source file swapped in on the same ROM files): **ON TOTAL exact 2,701 -> 2,715, offset 3,176 -> 3,162, mass 20,063 -> 19,196 (-867), missing 0 / extra 0** (move-animation SE 15,443 -> 14,909, battle-controller 3,215 -> 2,941, cry 977 -> 918); **OFF exact 669 -> 671, offset 464 -> 462, mass 2,703 -> 2,547 (-156), missing 0 / extra 0** (battle-controller 1,999 -> 1,882, cry 474 -> 435; the s3738 Aerial Ace -42 x 2 and the faint -44 x 2 rows are the stat-print interval above). A first "after" ON run had missing 1 (s2230 Bounce SE 203: the woke-up charge, E = 79); the guard in rule 1 removed it.
+
+**Census 0..199** (`lsd194Census.sh`, `LSD194_SHARDS="0 1"`, `ad09bdf9d` vs `713d684c8`): `rst197CensusDelta.py --digest` eventsDigest + error identical 200 / 200 on ON (37 battles changed command timing, 0 type-sequence changes) and 200 / 200 on OFF (8 battles changed). No gameplay / RNG change. T1 (`soundCensusDelta.py --t1`, ON) identical on both arms: exact 54,127, known-offset 35, missing 0, extra 0, unclassified 13.
+
+**Tests.** `npm run typecheck` exit 0; `npm run test:gate` 360 files / 2,835 tests green; `npm run build` exit 0; the 346 `tests/` files importing `battleResolutionPresentation` / `liveMoveAnimation` plus `tests/aud2*`, `tests/chg*`, `tests/animation/live*`, `tests/randomRoundSoak*`: green except (i) the 2 `tests/animation/liveAnchorMoveAdapters.test.ts` Metal Claw failures (red at base, not mine; `tests/stc1SceneOffStatChangeSe.test.ts` was not in the set), and (ii) `tests/aud261MoveAnimSounds.test.ts` "aud261-razorwind-player" unleash offset (pin 4, now -11: moved away from the ROM, left red, the Razor Wind player residual above). Re-pins toward the ROM: `tests/aud242oMoveAnimSounds.test.ts` dive-player delta -7 -> 0 (ROM SE 162 / 233 at 51 / 109); `tests/aud261MoveAnimSounds.test.ts` Razor Wind charge offsets -10 -> 0 (ROM SE 42 / 83) and the opponent unleash 14 -> -1 (ROM SE 1104 / 1108 / 1112 / 1131). No `randomRoundSoak` pin moved.
+
+**Papercuts.** `hcr3mCmp.py` reads `<seed>-on.*` only (Scene OFF windows need the files copied under that name); `hcr3mProbe.py --from` must be below the decision's commit frame (the first run used 6560 > 6364 and the window had no ROM rows until the first change), ~10 min; `run-mgba-probe.py` refuses an existing output path.
+
+### chg3 (2026-11-21): the player-charger attack turn follows the ROM (Scene ON sound / print timing only)
+
+chg2 left the Razor Wind PLAYER unleash pin (`tests/aud261MoveAnimSounds.test.ts`) red (4 -> -11). chg3 labbed the player attack turn of all seven two-turn bodies (13 labs, engine vs the chg2 ROM captures; `chg2-{razorwind,skyattack,solarbeam,fly,dive,bounce}-{player,opponent}-on`, `bdt1-dig-player-on`; evidence `.integration/evidence/chg3/{before,exp6}`).
+
+**Two rules.** (1) A player-charger's second turn has no press: the locked unleash print waits the ROM's `6 + u` less `TWO_TURN_PLAYER_NO_PRESS_ROWS` = 10 (the engine's message command for a no-press player turn starts at turn-end + 22, the ROM's MoveEnd + 19 / 20, 3 - 4 rows after the effect-script row; with the press term's +7 the lead was uniformly ~10 rows long once the chain before it was exact). (2) After the charge print the ROM's chain to the next action is E - 2 rows longer than the presented one (E = the opener's `instructionExecution`: Sky 6, Fly 7, Solar 9, Dive 9, Dig 10, Bounce 10; the gap-print class, Razor Wind, already carries it before its glyph). The rows are carried (`chargeChainCarry`) to the next STRINGID_USEDMOVE print: onto its hold (after its glyph) when the other side acts, onto its lead when the charger itself does. A hold on the charge print or a lead on the foe's print moved the foe's used glyph +7 / +8 off `tests/chg161ChargeTurnPrint.test.ts`' off108 pins (exact 0 there); carrying it after the glyph keeps those pins at `[0, 4, 0]` and still lands the foe's SEs (the off108 probe and the bdt1 trace measure the foe print's glyph and command rows differently by about E - 2; the SE rows, which T2 scores, follow bdt1).
+
+**Lab table (player attack turn, ENG - ROM per SE; before -> after).**
+
+| Move | before | after |
+|---|---|---|
+| Razor Wind | +11 (13/16 +10) | +1 (13/16 0) |
+| Sky Attack (seed 4) | +6 (13/16 +3) | 0 (13/16 -3) |
+| Solar Beam | +3 | 0 |
+| Fly | +5 (13/16 +3) | 0 (13/16 -2) |
+| Dive | +3 (13/16 +1) | 0 (13/16 -2) |
+| Bounce (seed 5) | +2 | 0 (13 -2) |
+| Dig | +2 (13/16 +1) | 0 (13/16 -1) |
+
+The foe-acts-between SEs: Razor +1 -> +1, Sky -4 -> +1, Solar -6 -> +1, Bounce -17 -> -9; the opponent-charger labs' attack turns went +1 / 0 (Solar 0), 13/16 -1 .. -3. Aud261 pin: Razor Wind player `[-64, 4]` -> `[-64, -1]` (opponent `63, -1`).
+
+**Residuals.** Bounce's foe action between the turns is still -9; its faint SE 16 is +77 (a different cause, out of scope); Sky 13/16 -3; Skull Bash has no lab; the Sky player lab shows extra engine SEs after the ROM window ends (a probe-window artifact).
+
+**T2** (`rescoreAll.sh` over `.integration/evidence/t2n` into `.integration/evidence/chg3/t2-after`, `soundScoreboard.py`; base = chg2 after): **ON TOTAL exact 2,715 -> 2,727, offset 3,162 -> 3,150, mass 19,196 -> 19,125 (-71), missing 0 / extra 0**; OFF unchanged (671 exact, mass 2,547, 0 / 0).
+
+**Census 0..199** (`lsd194Census.sh`, `LSD194_SHARDS="0 1"`, JOBS 2, SPLIT 2, `26dbd479f` vs `ada6a6cba`): `rst197CensusDelta.py --digest` eventsDigest + error identical 200 / 200 on ON (40 battles changed command timing, 0 type-sequence changes) and 200 / 200 on OFF (0 changed). No gameplay / RNG change.
+
+**Tests.** `aud261MoveAnimSounds` (44) + `aud242oMoveAnimSounds` (4) green; the 281 files of `tests/chg*`, `tests/aud2*`, `tests/randomRoundSoak*` and every `tests/` file importing `battleResolutionPresentation` green except the two known-red `tests/animation/liveAnchorMoveAdapters.test.ts` cases (not from this change); `npm run typecheck` exit 0; `npm run test:gate` 360 files / 2,835 tests green; `npm run build` exit 0. `tests/chg161ChargeTurnPrint.test.ts` keeps its `[0, 4, 0]` pins. The one re-pin is Razor Wind's player unleash 4 -> -1 (toward the ROM). New lab `tools/battle-lab/chg3-solarbeam-tackle-player-on.json` (Solar Beam player vs a Tackle foe; ROM foe print row 258 vs the engine's 259 after the fix, 252 before).
