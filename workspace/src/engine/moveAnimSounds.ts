@@ -9,11 +9,11 @@ import { CRY_ECHO_END_FRAMES, CRY_ECHO_START_FRAMES, CRY_HIGH_PITCH_FRAMES, CRY_
 import { factoryBattleBgm } from "./battleStartSounds.ts";
 import { BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS } from "./battleScriptSourceConstants.ts";
 import type { BattleResolutionPresentationState } from "./battleResolutionPresentation.ts";
-import { liveMoveSourceAge, statsChangeSourceAge } from "./battleResolutionPresentationRender.ts";
+import { liveMoveSourceAge, moveAnimationScriptStartRow, statsChangeSourceAge } from "./battleResolutionPresentationRender.ts";
 import { bodyStatusTailRuleApplies, FOCUS_PUNCH_SETUP_BEHIND_SUBSTITUTE_COMMAND_FRAMES, HELD_ITEM_EFFECT_COMMAND_FRAMES, RAIN_CONTINUES_SCRIPT_START_ROWS, WEATHER_CONTINUES_LAUNCH_LEAD_ROWS, isWeatherContinuesAnimation, type BattleStatusAnimationName, type WeatherContinuesAnimation } from "./battleResolutionPresentation.ts";
 
 export interface TimedOp {
-  readonly op: "playsewithpan" | "playse" | "waitplaysewithpan" | "loopsewithpan" | "panse" | "panse_adjustnone" | "panse_adjustall" | "setpan" | "soundtask_loopse" | "soundtask_fireblast" | "soundtask_se1" | "soundtask_se2" | "sprite_confuseray_ball" | "task_rollout" | "task_shockwave_bolt";
+  readonly op: "playsewithpan" | "playse" | "waitplaysewithpan" | "loopsewithpan" | "panse" | "panse_adjustnone" | "panse_adjustall" | "setpan" | "soundtask_loopse" | "soundtask_fireblast" | "soundtask_se1" | "soundtask_se2" | "sprite_confuseray_ball" | "task_rollout" | "task_shockwave_bolt" | "sprite_willowisp_orb";
   readonly frame: number;
   readonly id: number | null;
   readonly pan: number | null;
@@ -220,6 +220,26 @@ function shockWaveBoltRows(op: TimedOp, context: AnimPanContext): readonly OpRow
   return [{ offset: 0, emission: { kind: "se", id: op.id, pan: source + increment * (op.times ?? 1) }, task: true }];
 }
 
+/**
+ * mvs1 (docs/mvs1-called-move-sounds.md): AnimWillOWispOrb_Step (battle_anim_fire.c:1166-1186) plays SE_M_FLAME_WHEEL with gAnimCustomPanning. `times` = 0: the
+ * orb's own constant pan task (SOUND_PAN_ATTACKER -> SOUND_PAN_ATTACKER) wrote it; else the later SoundTask_AdjustPanningVar (pan / target / inc / wait as written,
+ * battle_anim_sound_tasks.c:370-407) has run `times` calls: each call whose counter reaches `wait` adds the increment (KeepPanInRange), and it ends on the target.
+ * ROM (frame catcher fcm1, an opponent attacker): pans 63 at script frame 41, then 11, 9, ..., -13 at 91..103 and -17 at 105.
+ */
+function willOWispOrbRows(op: TimedOp, context: AnimPanContext): readonly OpRow[] {
+  let pan = animSoundPan(op.pan ?? 0, context);
+  const calls = op.times ?? 0;
+  if (calls > 0) {
+    const target = animSoundPan(op.target ?? 0, context);
+    const increment = calculatePanIncrement(pan, target, op.inc ?? 0);
+    let counter = 0;
+    for (let call = 0; call < calls && pan !== target; call += 1) {
+      if (counter++ === (op.wait ?? 0)) { counter = 0; pan = keepPanInRange(pan + increment); }
+    }
+  }
+  return [{ offset: 0, emission: { kind: "se", id: op.id, pan } }];
+}
+
 /** Exported for tests/aud242cMoveAnimSounds.test.ts (the panse_adjustnone / _adjustall / framesToWait arithmetic has no ROM window). */
 export function moveAnimOpRows(op: TimedOp, context: AnimPanContext, uniformLoop = false): readonly OpRow[] {
   switch (op.op) {
@@ -233,6 +253,7 @@ export function moveAnimOpRows(op: TimedOp, context: AnimPanContext, uniformLoop
     case "sprite_confuseray_ball": return confuseRayBallRows(op, context);
     case "task_rollout": return rolloutRows(op, context);
     case "task_shockwave_bolt": return shockWaveBoltRows(op, context);
+    case "sprite_willowisp_orb": return willOWispOrbRows(op, context);
     default: return [{ offset: uniformLoop && op.op === "waitplaysewithpan" ? 1 : 0, emission: { kind: "se", id: op.id, pan: animSoundPan(op.pan ?? 0, context) } }];
   }
 }
@@ -452,23 +473,44 @@ function emitQuietBgmRows(moveId: number, singBodyRows: () => number | null, scr
   scheduleAnimTaskBgmRestore(bgm, delay);
 }
 
+/**
+ * mvs1 (docs/mvs1-called-move-sounds.md): the two moves Cmd_attackanimation animates under HITMARKER_NO_ANIMATIONS (battle_script_commands.c:1748, tested on
+ * gCurrentMove: the called move under METRONOME). The controller then runs the whole script (DoMoveAnim, no scene test), sounds included: Scene OFF plays them.
+ */
+const MOVE_TRANSFORM = 144;
+const MOVE_SUBSTITUTE = 164;
+const MOVE_WILL_O_WISP = 261;
+/**
+ * mvs1: the bodies whose sound clock is the ROM script's own: script row 0 on the command row seGate + moveAnimationScriptStartRow (the script lead + 4),
+ * not the generic clock (age - FIRST_COMMAND_AGE - AGE_TO_SOUND_ROWS) the other bodies were calibrated on. ROM (the mvs1 labs, both sides; Substitute and
+ * Transform in both scenes; the frame catcher fcm1 runs): the generic clock put Substitute's SEs 7 rows late (its lead is presented as scriptLeadFrames, so the
+ * body is drawn on the ROM's rows: SE_M_ATTRACT 2 rows before the first shrink row on the ROM, 5 after on ours), Transform's 5 late and Will-O-Wisp's 1 early.
+ */
+const SCRIPT_START_CLOCK_MOVE_IDS: ReadonlySet<number> = new Set([MOVE_TRANSFORM, MOVE_SUBSTITUTE, MOVE_WILL_O_WISP]);
+
 /** Called once per collected tick with the round's resolution presentation after the tick; emits the ops whose frame is this tick's. */
 export function emitMoveAnimSounds(after: BattleResolutionPresentationState | null, frontierBrain = false): void {
   if (after === null || after.lifecycle.phase !== "presenting") return;
   const segment = after.segments[after.segmentIndex];
-  if (segment === undefined || (segment.beforeRules.rulesContext.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0) return;
+  if (segment === undefined) return;
+  const command = segment.commands[after.commandIndex];
+  if (command?.type !== "move-animation") return;
   const source = liveMoveSourceAge(after);
   if (source === null) return;
   const { request, age, lastAge } = source;
+  if ((segment.beforeRules.rulesContext.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0
+    && request.moveId !== MOVE_TRANSFORM && request.moveId !== MOVE_SUBSTITUTE) return;
   const context = {
     attackerSide: request.attacker === 0 ? "player" : "opponent",
     targetSide: request.target === 0 ? "player" : "opponent",
   } as const;
-  const scriptRow = age - FIRST_COMMAND_AGE - AGE_TO_SOUND_ROWS;
+  const genericRow = age - FIRST_COMMAND_AGE - AGE_TO_SOUND_ROWS;
+  const start = SCRIPT_START_CLOCK_MOVE_IDS.has(request.moveId) ? moveAnimationScriptStartRow(segment, command.eventSequence) : null;
+  const scriptRow = start === null ? genericRow : after.lifecycle.phaseElapsed - (command.timing.seGateFrames ?? 0) - start;
   const ops = variantOf(request.moveId, request.turn, request.attacker === 0 ? 0 : 1, { picY: source.picOffsetY, topY: source.topY, rolloutCounter: request.rolloutCounter, damage: request.damage, attackerElevation: source.attackerElevation, attackerHpQuarter: source.attackerHpQuarter });
   emitQuietBgmRows(request.moveId, source.singBodyRows, scriptRow, frontierBrain);
   emitOpsAt(ops, context, scriptRow);
-  if (scriptRow === 0) scheduleMoveAnimationTail(ops, context, lastAge - FIRST_COMMAND_AGE - AGE_TO_SOUND_ROWS);
+  if (scriptRow === 0) scheduleMoveAnimationTail(ops, context, lastAge - FIRST_COMMAND_AGE - AGE_TO_SOUND_ROWS + scriptRow - genericRow);
   emitCryTaskRows(request.moveId, source.attackerSpecies, context.attackerSide, scriptRow, frontierBrain);
 }
 

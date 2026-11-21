@@ -71,7 +71,7 @@ const moveTable: string[] = [];
 }
 
 interface SoundOp {
-  op: "playsewithpan" | "playse" | "waitplaysewithpan" | "loopsewithpan" | "panse" | "panse_adjustnone" | "panse_adjustall" | "setpan" | "soundtask_loopse" | "soundtask_fireblast" | "soundtask_se1" | "soundtask_se2" | "sprite_confuseray_ball" | "task_rollout" | "task_shockwave_bolt";
+  op: "playsewithpan" | "playse" | "waitplaysewithpan" | "loopsewithpan" | "panse" | "panse_adjustnone" | "panse_adjustall" | "setpan" | "soundtask_loopse" | "soundtask_fireblast" | "soundtask_se1" | "soundtask_se2" | "sprite_confuseray_ball" | "task_rollout" | "task_shockwave_bolt" | "sprite_willowisp_orb";
   frame: number;
   id: number | null;
   /** The pan argument as written (the starting pan of a panse*; the only one of a setpan). */
@@ -86,6 +86,8 @@ interface SoundOp {
   gap?: number;
   id2?: number;
   /** sprite_confuseray_ball: `times` is the Step1 translate count D (data[0]), `gap` the sprite's last call n; pan / target / inc / wait are the creating SoundTask_AdjustPanningVar's arguments as written. */
+  /** sprite_willowisp_orb (mvs1): one SE at `frame`; `times` = the calls the later SoundTask_AdjustPanningVar (pan / target / inc / wait as written) has run before it (0: the
+   * constant pan of the orb's own pan task, `pan`). */
   line: number;
 }
 type Reason = "bg-fade" | "unmodelled-lifetime" | "waitsound" | "unresolved-branch" | "after-unresolved-branch";
@@ -830,8 +832,7 @@ function lifetimeOf(cmd: Command, attackerSide: number, pic: PicContext, rollout
   // = 4 * (call - 1), the 31st case-2 call (call 32, data[2] 124) folds x2 into x, reads the target's X_2 and runs InitAnimLinearTranslationWithSpeed with speed 256 (duration D = |target X - x|, singles
   // sBattlerCoords) and installs the Step (calls 33..32 + D translate, AnimTranslateLinear returns TRUE on call 33 + D, which destroys): gone 32 + D ticks after F. data[4] is +4 for an opponent attacker, -4 for the player.
   if (sprite("gWillOWispOrbSpriteTemplate")) {
-    const x = BATTLER_X[attackerSide === 0 ? 0 : 1] + gbaSin(124, attackerSide === 0 ? -4 : 4);
-    const duration = Math.abs(BATTLER_X[attackerSide === 0 ? 1 : 0] - x);
+    const duration = willOWispOrbDuration(attackerSide);
     return duration < 1 ? null : { exact: 32 + duration };
   }
   // aud260: AnimRecycle_Step (battle_anim_effects_3.c:5437-5489; the init is call 0, call n >= 1 runs the step): case 0 fires every 2nd call (data[0] > 1) and ends when data[7] reaches 0 after 16 raises of
@@ -1550,6 +1551,52 @@ const elevationClasses: number[] = [...new Set([0, ...Object.values(elevations)]
 // Lv 50 attacker: BattleScript_EffectLevelDamage runs `dmgtolevel` after `typecalc`, so gBattleMoveDamage = 50 when the animation starts, unless adjustsetdamage clamps it to hp - 1).
 const SHOCK_WAVE_CHARGING_ARGS = ["20", "0", "2"] as const;
 const TORMENT_SE_CALLS = [1, 26, 51, 66, 81, 96] as const;
+/** AnimWillOWispOrb's Step translate count D (battle_anim_fire.c:1145-1160): |target X_2 - x|, x = the attacker's X plus the call-32 fold of Sin(124, +-4) (singles sBattlerCoords). */
+function willOWispOrbDuration(attackerSide: number): number {
+  const x = BATTLER_X[attackerSide === 0 ? 0 : 1] + gbaSin(124, attackerSide === 0 ? -4 : 4);
+  return Math.abs(BATTLER_X[attackerSide === 0 ? 1 : 0] - x);
+}
+/**
+ * mvs1: AnimWillOWispOrb_Step (battle_anim_fire.c:1166-1186) plays SE_M_FLAME_WHEEL with gAnimCustomPanning on the Step calls whose data[5] (0 at the Step's
+ * entry, + 4 & 0xFF per call) was 0 or above 196 and is now above 0, for the orb with data[7] = gBattleAnimArgs[2] = 0 only. The Step is sprite calls 33..32 + D
+ * (call 0 = the init in the creating step, call n >= 1 = AnimateSprites of iteration F + n - 1). Returns the sprite calls: 33, 83..95, 97 for D = 104.
+ */
+function willOWispOrbSeCalls(duration: number): number[] {
+  const calls: number[] = [];
+  let data5 = 0;
+  for (let step = 1; step <= duration; step += 1) {
+    const before = data5;
+    data5 = (data5 + 4) & 0xff;
+    if ((before === 0 || before > 196) && data5 > 0) calls.push(32 + step);
+  }
+  return calls;
+}
+/**
+ * mvs1: AnimTask_MonToSubstitute / AnimTask_MonToSubstituteDoll (battle_anim_effects_3.c:4782-4865): call 0 (the creating step) arms the rot-scale, calls 1..9
+ * shrink (call 9 hides the sprite), call 10 loads the doll, call 11 (Doll case 0) puts it at y2 -200, then case 1 adds 112 to data[10] and data[10] >> 8 to y2
+ * until y2 reaches 0 (SE_M_BUBBLE2, BattleAnimAdjustPanning(SOUND_PAN_ATTACKER); data[10] -= 0x800), case 2 bounces it up until data[10] is 0, case 3 falls
+ * back and plays SE_M_BUBBLE2 again on landing. The fall never reads the sprite's y (only x2 does), so the calls are side independent: 42 and 67.
+ */
+function monToSubstituteSeCalls(): number[] {
+  const calls: number[] = [];
+  let [y2, velocity, phase] = [-200, 0, 1];
+  for (let call = 12; call < 1000 && calls.length < 2; call += 1) {
+    if (phase === 1) {
+      velocity += 112;
+      y2 = Math.min(y2 + (velocity >> 8), 0);
+      if (y2 === 0) { calls.push(call); velocity -= 0x800; phase = 2; }
+    } else if (phase === 2) {
+      velocity = Math.max(velocity - 112, 0);
+      y2 -= velocity >> 8;
+      if (velocity === 0) phase = 3;
+    } else {
+      velocity += 112;
+      y2 = Math.min(y2 + (velocity >> 8), 0);
+      if (y2 === 0) calls.push(call);
+    }
+  }
+  return calls;
+}
 const SEISMIC_TOSS_LEVELS = [0, 1, 2] as const;
 const SEISMIC_TOSS_REFERENCE_LEVEL = 1;
 const SEISMIC_TOSS_BG_TASKS = new Set(["AnimTask_MoveSeismicTossBg", "AnimTask_SeismicTossBgAccelerateDownAtEnd"]);
@@ -1578,6 +1625,8 @@ function walk(bodyLabel: string, turn: number, attackerSide: number, pic: PicCon
   let seUnknown = false;
   // aud242o: the last SoundTask_AdjustPanningVar of this walk (its creation iteration and arguments as written): the Confuse Ray ball reads its gAnimCustomPanning.
   let panVarTask: { at: number; args: number[] } | null = null;
+  // mvs1: the Will-O-Wisp orb's SE rows (their creation iteration and the pan task they read until a later SoundTask_AdjustPanningVar takes gAnimCustomPanning over).
+  let wispOrb: { at: number; source: number; rows: Array<{ iteration: number; event: SoundOp }> } | null = null;
   const TIMED = new Set(["delay", "loadspritegfx", "monbg", "fadetobg", "fadetobgfromset", "restorebg", "changebg", "waitbgfadeout", "waitbgfadein", "waitsound", "playsewithpan", "playse", "waitplaysewithpan", "loopsewithpan", "panse", "panse_adjustnone", "panse_adjustall", "setpan", "createsoundtask"]);
   // Wall-clock frames the ROM spends in a VBlank-overrun lag (no main-loop iteration): ops at iteration > `after` play `frames` later.
   const lags: Array<{ after: number; frames: number }> = [];  // `after`: first affected iteration - 1 (fractional .5 = from the same iteration)
@@ -1788,6 +1837,23 @@ function walk(bodyLabel: string, turn: number, attackerSide: number, pic: PicCon
         if (args[0] === "SoundTask_AdjustPanningVar") {
           const a = [2, 3, 4, 5].map((i) => intArg(args[i]));
           panVarTask = frame === null || a.some((v) => v === null) ? null : { at: frame, args: a as number[] };
+          // mvs1: Move_WILL_O_WISP's second pan task (SOUND_PAN_ATTACKER -> SOUND_PAN_TARGET) takes gAnimCustomPanning over while the orb still plays: an orb SE at
+          // iteration I reads it after its calls 0 (this script step) .. I - at (RunTasks, after AnimateSprites), i.e. I - at + 1 calls. Its source must be the first task's.
+          if (wispOrb !== null && panVarTask !== null && panVarTask.at > wispOrb.at) {
+            const [pan, target, inc, wait] = panVarTask.args as [number, number, number, number];
+            if (pan !== wispOrb.source) throw new Error(`${bodyLabel}: Will-O-Wisp orb pan tasks start from ${wispOrb.source} and ${pan}`);
+            for (const row of wispOrb.rows) {
+              if (row.iteration < panVarTask.at) continue;
+              Object.assign(row.event, { target, inc, wait, times: row.iteration - panVarTask.at + 1 });
+            }
+            wispOrb = null;
+          }
+          break;
+        }
+        // mvs1: AnimTask_MonToSubstituteDoll plays SE_M_BUBBLE2 (PlaySE12WithPanning, BattleAnimAdjustPanning(SOUND_PAN_ATTACKER)) when the doll lands, twice (monToSubstituteSeCalls).
+        if (args[0] === "AnimTask_MonToSubstitute") {
+          if (frame === null) { gate(); break; }
+          for (const call of monToSubstituteSeCalls()) events.push({ op: "playsewithpan", frame: frame + shiftAt(frame) + call - 1, id: value("SE_M_BUBBLE2"), pan: value("SOUND_PAN_ATTACKER"), line });
           break;
         }
         if (args[0] === "AnimTask_Rollout") {
@@ -1840,6 +1906,21 @@ function walk(bodyLabel: string, turn: number, attackerSide: number, pic: PicCon
           const land = attackerSide === 1 ? Math.ceil(144 / 10) : Math.ceil(96 / 10);
           const calls = [land, land + Math.ceil(128 / 4), land + Math.ceil(128 / 4) + Math.ceil(128 / 6) + 9];
           [value("SE_M_SKETCH"), value("SE_M_SKETCH"), value("SE_M_LEER")].forEach((id, i) => events.push({ op: "playsewithpan", frame: frame! + shiftAt(frame!) + calls[i]! - 1, id, pan: value("SOUND_PAN_TARGET"), line }));
+          break;
+        }
+        // mvs1: the first Will-O-Wisp orb (gBattleAnimArgs[2] = 0) plays SE_M_FLAME_WHEEL itself (willOWispOrbSeCalls) with gAnimCustomPanning, written first by the constant
+        // SoundTask_AdjustPanningVar created in the same step (SOUND_PAN_ATTACKER -> SOUND_PAN_ATTACKER: its call 0 writes the source and ends).
+        if (args[0] === "gWillOWispOrbSpriteTemplate" && intArg(args[5]) === 0) {
+          if (frame === null) { gate(); break; }
+          const duration = willOWispOrbDuration(attackerSide);
+          if (panVarTask === null || panVarTask.at !== frame || panVarTask.args[0] !== panVarTask.args[1]) throw new Error(`${bodyLabel}: Will-O-Wisp orb without its constant pan task`);
+          const source = panVarTask.args[0]!;
+          wispOrb = { at: frame, source, rows: [] };
+          for (const call of willOWispOrbSeCalls(duration)) {
+            const event: SoundOp = { op: "sprite_willowisp_orb", frame: frame + shiftAt(frame) + call - 1, id: value("SE_M_FLAME_WHEEL"), pan: source, times: 0, line };
+            events.push(event);
+            wispOrb.rows.push({ iteration: frame + call - 1, event });
+          }
           break;
         }
         if (args[0] !== "gConfuseRayBallBounceSpriteTemplate" || frame === null) break;

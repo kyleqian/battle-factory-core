@@ -2031,8 +2031,26 @@ function snd3Stages(): Record<string, AppStage> {
   return stages;
 }
 
+// mvs1 (docs/mvs1-called-move-sounds.md): the Substitute and Transform bodies in both scenes (tools/battle-lab/mvs1-<move>-<side>-<scene>.json,
+// tools/integration/mvs1Labs.py): a Lv50 Rattata with the move x4 against a Lv25 Rattata with Seismic Toss x4 (`opp` = the foe's Rattata uses
+// the move). [move, scenes, kernel seed] (neither move draws on the kernel RNG before its body).
+const MVS1_MOVES: Readonly<Record<string, readonly [move: number, scenes: readonly ("on" | "off")[], seed: number]>> = {
+  substitute: [164, ["on", "off"], 1], transform: [144, ["on", "off"], 1],
+};
+function mvs1Stages(): Record<string, AppStage> {
+  const stages: Record<string, AppStage> = {};
+  for (const [name, [move, scenes, seed]] of Object.entries(MVS1_MOVES)) {
+    for (const scene of scenes) {
+      stages[`mvs1-${name}-player-${scene}`] = (state) => aud241bStage(state, `mvs1-${name}-player-${scene}`, scene, 50, 25, move, undefined, false, 69, seed);
+      stages[`mvs1-${name}-opp-${scene}`] = (state) => aud241bStage(state, `mvs1-${name}-opp-${scene}`, scene, 25, 50, 69, undefined, false, move, seed);
+    }
+  }
+  return stages;
+}
+
 export const APP_STAGES: Readonly<Record<string, AppStage>> = {
   ...hpf4mStages(),
+  ...mvs1Stages(),
   ...trp1Stages(),
   ...subp1mStages(),
   ...snd3Stages(),
