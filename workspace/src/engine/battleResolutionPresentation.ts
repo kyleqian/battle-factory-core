@@ -518,6 +518,13 @@ export type BattleResolutionPresentationCommand =
        * terminal ids whose button messages end the segment.  Such a piece never suppresses the segment's `turn-end`.
        */
       promptGate?: true;
+      /**
+       * fnt1 (docs/fnt1-fainted-box-clear.md): this button piece ends its string on `\p` (CHAR_PROMPT_CLEAR, nothing printed
+       * after it): "{X} fainted!", "Player defeated ...!", a gated string's last page.  The press is taken from the printer's
+       * first wait frame (as every `promptGate` piece), and the press clears the box when it lands on a down-arrow redraw frame
+       * (`promptClearPressBlanksBox`).
+       */
+      promptClear?: true;
       /** btn1: glyphs of `lines` already on screen when the piece starts (the line a `\l` scroll keeps). Absent = 0. */
       startChars?: number;
       /** btn1: rows before the piece's first glyph (the `\l` scroll). Absent = 0. */
@@ -902,9 +909,13 @@ export type BattleResolutionOpponentTrainer = Readonly<{
 export type BattleResolutionPresentationState = Readonly<{
   /**
    * btn2 (ROM, both scenes): a button gate's release freezes the wait cursor at its last phase; the box keeps the print and the frozen
-   * cursor until the next print or the box's clear.  The released message's command index + the cursor age at the press.
+   * cursor until the next print or the box's clear.  The released message's command index + the cursor age shown on the release
+   * frame (fnt1: the phase the printer drew on the frame before the press; < 0 = no arrow drawn yet).
+   * fnt1 (docs/fnt1-fainted-box-clear.md): `clear` is set when a `promptClear` piece was released on a down-arrow redraw frame:
+   * the box still shows the print on the release frame ("pending") and is blank from the next frame ("done", set by the
+   * orchestrator's next tick) until the next print.
    */
-  releasedWaitCursor?: Readonly<{ segmentIndex: number; commandIndex: number; age: number }>;
+  releasedWaitCursor?: Readonly<{ segmentIndex: number; commandIndex: number; age: number; clear?: "pending" | "done" }>;
   /**
    * Presentation-only Scene ON semi-invulnerable hide carried in from the display ledger at this resolution's start
    * (a live Fly/Bounce charge body in an earlier turn; battleResolutionPresentationRender.ts
@@ -2512,10 +2523,13 @@ export const PROMPT_SCROLL_ROWS = 5;
  * and terminal-seam ids are unchanged: their button message ends the segment (no `turn-end`).
  */
 export function promptGatedMessageCommands(base: MessageCommand, messageId: string): readonly MessageCommand[] {
-  if (messageId === "STRINGID_TARGETFAINTED" || messageId === "STRINGID_ATTACKERFAINTED" || TERMINAL_SEAM_BUTTON_MESSAGE_IDS.has(messageId)) {
-    return [Object.freeze({ ...base, advance: "button" as const })];
-  }
   const gates = battleStringPromptGates(messageId);
+  if (messageId === "STRINGID_TARGETFAINTED" || messageId === "STRINGID_ATTACKERFAINTED" || TERMINAL_SEAM_BUTTON_MESSAGE_IDS.has(messageId)) {
+    // fnt1: "{X} fainted!\p" / "Player defeated ...!\p" end on a `\p`; the two quote ids wait on PAUSE_UNTIL_PRESS (no gate here).
+    const last = gates[gates.length - 1];
+    const promptClear = !base.noCursor && last?.kind === "clear" && last.afterLines >= base.lines.length;
+    return [Object.freeze({ ...base, advance: "button" as const, ...(promptClear ? { promptClear: true as const } : {}) })];
+  }
   if (gates.length === 0) return [base];
   const lines = base.lines;
   const chars = (window: readonly string[]) => battleStringPrintableLength(window);
@@ -2538,6 +2552,10 @@ export function promptGatedMessageCommands(base: MessageCommand, messageId: stri
     }));
     start = end;
     previous = gate.kind;
+  }
+  if (start >= lines.length && previous === "clear" && pieces.length > 0) {
+    // fnt1: the string's last marker is a `\p` with nothing after it: its last page is a `promptClear` piece.
+    pieces[pieces.length - 1] = Object.freeze({ ...pieces[pieces.length - 1]!, promptClear: true as const });
   }
   if (start < lines.length) {
     const kept = previous === "scroll" ? 1 : 0;

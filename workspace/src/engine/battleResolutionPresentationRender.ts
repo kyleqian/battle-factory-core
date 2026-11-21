@@ -2064,8 +2064,58 @@ export function isBattleResolutionButtonMessageAcceptable(
 ): boolean {
   const command = currentSegment(state).commands[state.commandIndex];
   if (command?.type !== "message" || command.advance !== "button") return false;
+  // fnt1: a `\p`-ended faint / "Player defeated" box is the same RENDER_STATE_CLEAR wait: taken from the same row (catcher: the
+  // first accepted press is G + 1, G = the frame its last glyph shows, in all 1,502 ROM "fainted!" boxes of fcm1; G + 0 never).
   return state.lifecycle.phaseElapsed
-    >= messageCommandTypedRows(command) + 1 - (command.promptGate === true ? GATE_ACCEPT_LEAD_ROWS : 0);
+    >= messageCommandTypedRows(command) + 1
+      - (command.promptGate === true || command.promptClear === true ? GATE_ACCEPT_LEAD_ROWS : 0);
+}
+
+/**
+ * fnt1 (docs/fnt1-fainted-box-clear.md): text.c TextPrinterDrawDownArrow redraws the arrow (and CopyWindowToVram's the window)
+ * when `downArrowDelay` is 0 and then sets it to 8, so on wait frames 0, 9, 18, ... of RENDER_STATE_CLEAR / SCROLL_START.
+ */
+export const DOWN_ARROW_REDRAW_PERIOD = 9;
+
+/**
+ * fnt1: the ROM printer's wait frame (0 = its first RENDER_STATE_CLEAR frame, the frame after its last glyph shows) on which a
+ * press read on the tick after a button message at `phaseElapsed` lands.  The message's last glyph shows at phaseElapsed
+ * typedRows - 1, the arrow first at typedRows + 1, and phaseElapsed counts every frame of the wait (presenting and awaiting).
+ */
+export function buttonMessagePressWaitFrame(
+  command: Extract<BattleResolutionPresentationCommand, { type: "message" }>,
+  phaseElapsed: number,
+): number {
+  return phaseElapsed - messageCommandTypedRows(command) + 1;
+}
+
+/**
+ * fnt1: a press on a `\p` wait (text.c:1171-1179 RENDER_STATE_CLEAR) runs FillWindowPixelBuffer on the window's buffer and
+ * nothing copies it: the screen shows the cleared box only when the same frame's TextPrinterDrawDownArrow queued a
+ * CopyWindowToVram (text.c:830; the DMA3 request is serviced at that frame's VBlank, dma3_manager.c ProcessDma3Requests,
+ * main.c:358, from the buffer as it is then).  On any other frame the box keeps the print and the arrow as last drawn.
+ */
+export function promptClearPressBlanksBox(waitFrame: number): boolean {
+  return waitFrame >= 0 && waitFrame % DOWN_ARROW_REDRAW_PERIOD === 0;
+}
+
+/**
+ * fnt1: the released-cursor record of a press read on the tick after `state` (the current command a non-`noCursor` button
+ * message).  `age` = the arrow phase the release frame shows (the printer drew it on the frame before: wait frame - 1); a
+ * `promptClear` piece released on a redraw frame blanks the box from the next frame.
+ */
+export function releasedWaitCursorOnPress(
+  state: BattleResolutionPresentationState,
+): NonNullable<BattleResolutionPresentationState["releasedWaitCursor"]> | null {
+  const command = currentSegment(state).commands[state.commandIndex];
+  if (command?.type !== "message" || command.advance !== "button" || command.noCursor) return null;
+  const waitFrame = buttonMessagePressWaitFrame(command, state.lifecycle.phaseElapsed);
+  return Object.freeze({
+    segmentIndex: state.segmentIndex,
+    commandIndex: state.commandIndex,
+    age: waitFrame - 1,
+    ...(command.promptClear === true && promptClearPressBlanksBox(waitFrame) ? { clear: "pending" as const } : {}),
+  });
 }
 
 export function isBattleResolutionNextCommandHandoffComplete(
@@ -2312,6 +2362,37 @@ function opponentSummaryView(
   const fadeAge = summary.sinceHide === null ? null : summary.sinceHide + elapsed;
   if (fadeAge !== null && fadeAge >= OPPONENT_SUMMARY_FADE_DELAY_FRAMES + OPPONENT_SUMMARY_FADE_FRAMES) return null;
   return Object.freeze({ battler: 1, states: summary.states, createAge: summary.sinceDraw + elapsed - summary.lead, fadeAge });
+}
+
+/** btn2: the automatic hold piece (`waitmessage` after a trailing gate) that keeps the released print on screen. */
+function isReleasedHoldPiece(
+  command: Extract<BattleResolutionPresentationCommand, { type: "message" }>,
+  state: BattleResolutionPresentationState,
+): boolean {
+  const released = state.releasedWaitCursor;
+  if (released === undefined || released.segmentIndex !== state.segmentIndex) return false;
+  const releasedCommand = currentSegment(state).commands[released.commandIndex];
+  return command.promptGate === true && command.advance === "automatic"
+    && releasedCommand?.type === "message" && command.lines === releasedCommand.lines;
+}
+
+/**
+ * btn2 / fnt1: what the box shows after a button message's release until the next print: the print with the arrow frozen at the
+ * release frame's phase, or (fnt1, a `\p` release on a redraw frame, from the frame after the release) nothing.  Null = the
+ * release does not own the box (another message is current, or no arrow was drawn yet).
+ */
+function releasedPromptBox(
+  state: BattleResolutionPresentationState,
+  command: BattleResolutionPresentationCommand | null,
+  latestMessage: readonly string[] | null,
+  latestMessageIndex: number,
+): Readonly<{ age: number }> | "cleared" | null {
+  const released = state.releasedWaitCursor;
+  if (released === undefined || latestMessage === null || released.segmentIndex !== state.segmentIndex
+    || released.commandIndex !== latestMessageIndex) return null;
+  if (command !== null && command.type === "message" && !isReleasedHoldPiece(command, state)) return null;
+  if (released.clear === "done") return "cleared";
+  return released.age >= 0 ? Object.freeze({ age: released.age }) : null;
 }
 
 export function createBattleResolutionPresentationRenderView(
@@ -2582,13 +2663,14 @@ export function createBattleResolutionPresentationRenderView(
       latestMessage = null;
       visibleCharacters = 0;
     }
-    const released = state.releasedWaitCursor;
-    if ((command.type !== "message" || (command.promptGate === true && command.advance === "automatic" && command.lines === latestMessage))
-      && released !== undefined && latestMessage !== null && released.segmentIndex === state.segmentIndex
-      && released.commandIndex === latestMessageIndex) {
-      waitCursor = Object.freeze({ age: released.age });
+    const releasedBox = releasedPromptBox(state, command, latestMessage, latestMessageIndex);
+    if (releasedBox === "cleared") {
+      latestMessage = null;
+      visibleCharacters = 0;
+    } else if (releasedBox !== null) {
+      waitCursor = releasedBox;
     }
-    if (command.type === "message") {
+    if (command.type === "message" && !(releasedBox === "cleared" && isReleasedHoldPiece(command, state))) {
       latestMessage = command.lines;
       visibleCharacters = messageCommandVisibleCharacters(command, state.lifecycle.phaseElapsed);
       if (
@@ -2596,6 +2678,8 @@ export function createBattleResolutionPresentationRenderView(
         && !command.noCursor
         && isBattleResolutionButtonMessageReady(state)
       ) {
+        // fnt1: phaseElapsed counts every frame of the wait (the awaiting phase starts one row on), so the arrow redraws every
+        // 9 frames from its first one (ROM: G + 2, G + 11, G + 20, ...), not 10 then 9.
         waitCursor = Object.freeze({
           age:
             state.lifecycle.phaseElapsed
@@ -2884,6 +2968,22 @@ export function createBattleResolutionPresentationRenderView(
     throw new Error(
       `battle resolution non-KO renderer cannot render ${state.lifecycle.phase}`,
     );
+  }
+  if (
+    command === null
+    && !withoutCurrentCommand
+    && (state.lifecycle.phase === "forced-party-handoff" || state.lifecycle.phase === "terminal-handoff"
+      || state.lifecycle.phase === "presenting")
+  ) {
+    // fnt1: a box released as its segment's last command (your Pokemon's "fainted!": the 21 held frames before the party
+    // menu's fade-out) keeps its frozen arrow, or is blank after a press on a redraw frame, as on the presenting rows.
+    const releasedBox = releasedPromptBox(state, null, latestMessage, latestMessageIndex);
+    if (releasedBox === "cleared") {
+      latestMessage = null;
+      visibleCharacters = 0;
+    } else if (releasedBox !== null) {
+      waitCursor = releasedBox;
+    }
   }
 
   const playerTarget =
