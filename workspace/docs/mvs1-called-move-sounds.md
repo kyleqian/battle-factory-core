@@ -10,8 +10,8 @@ Evidence (not in git): `.integration/evidence/fix-called-moves/`.
    `PlaySE12WithPanning(SE_M_FLAME_WHEEL, gAnimCustomPanning)` on each translate call whose `data[5]` (0 at the Step's entry, +4 & 0xFF a call) was 0
    or above 196 and is now above 0, for the orb with `data[7] = gBattleAnimArgs[2] = 0` only. The Step runs |target X - x| = 104 calls in singles,
    so the SE plays on Step calls 1, 51..63 and 65: 15 times. The sound timing extractor only knew the script's own `playsewithpan`s; aud260 had
-   left the orb's rows "unmodelled: ROM-only rows". The picture was already drawn (s17-on-wc: every frame of the body equals the ROM's at a 7-row
-   shift; see Open).
+   left the orb's rows "unmodelled: ROM-only rows". The picture was already drawn (s17-on-wc: nine body rows sampled from 20 to 180 equal the
+   ROM's at 0 px, shifted; see Open).
 2. **A move METRONOME calls (finding 6)**: the general path is right. The called move's MOVE_ANIMATION carries `gCurrentMove` (the called move),
    and every called move with an adapter is drawn and plays its sounds (fcm1: s89-on-wc FALSE SWIPE, RECOVER, OCTAZOOKA, ABSORB, SMELLINGSALT;
    s100-on-wc SHADOW PUNCH, FLAME WHEEL, WATER PULSE, FACADE, SMOG, DYNAMICPUNCH; s94-on-wc HOWL, HYPER VOICE, RETURN, SECRET POWER, CURSE,
@@ -121,8 +121,9 @@ Aeroblast's split is the static-body problem in Open. Its body is 32 rows on our
   field for the ROM's body length instead would line the timing up but changes frames (soak pins) and was not done. If the overlap sounds
   worse than silence, revert the second commit alone.
 - The lead + 4 clock is applied to the five measured bodies only. The other bodies keep the generic clock their aud242+ ROM windows pinned.
-- Will-O-Wisp's body picture is drawn 7 rows before the ROM's, relative to its sounds and print (s17-on-wc: 0 px at +7). This is the unaudited
-  body lead class (`docs/phy1m-nonlive-bodies.md` section 5). Transform's mosaic starts 2 rows early in the lab (ours 62, ROM 64 with the print
+- Will-O-Wisp's body picture is drawn 8 rows before the ROM's, relative to its print and its sounds, which now match the ROM's. In s17-on-wc
+  engine frame e equals ROM frame e + 4140 at 0 px, while the two prints end 4132 apart (the 7-row shift in "What was wrong" was measured
+  against the old, one-row-early sounds). This is the unaudited body lead class (`docs/phy1m-nonlive-bodies.md` section 5). Transform's mosaic starts 2 rows early in the lab (ours 62, ROM 64 with the print
   aligned).
 - Will-O-Wisp's Status_Burn SE (a separate status animation) stays 3 rows early (`STATUS_ANIMATION_SCRIPT_AGE` comment, known).
 - Substitute's used print is one row early on our side: `BattleScript_EffectSubstitute` runs `ppreduce` before `attackstring`. In the labs, our
