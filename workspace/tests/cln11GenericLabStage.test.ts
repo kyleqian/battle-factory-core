@@ -2,7 +2,7 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { createInitialState } from "../src/engine/core.ts";
-import { APP_STAGES, labBackedStage } from "../tools/compare/appTrace.ts";
+import { APP_STAGES, applyTraceStage, labBackedStage } from "../tools/compare/appTrace.ts";
 import { buildLabMon, labPersonality, labStageEquivalenceView, type LabMonContext } from "../tools/compare/labMon.ts";
 
 const initial = (scene: "on" | "off") => createInitialState({ appRoute: "generated-orchestrator", battleScene: scene });
@@ -35,6 +35,18 @@ describe("generic lab stage reproduces hand-written stages", () => {
 
   it("the lab's seed is the staged battle's RNG seed", () => {
     expect(labBackedStage("../../battle-lab/chg1-dig-plr-off.json", initial("off")).factoryRoundBattleOrchestrator!.battle!.rng.value).toBe(1);
+  });
+});
+
+describe("appStage.rngSeed (the ROM's gRngValue at the first menu)", () => {
+  const trace = (rngSeed?: number) => ({
+    appRoute: "generated-orchestrator", oracleProfile: "battle-scene-off", segments: [], captureFrames: [0],
+    appStage: { id: "lab", frame: 0, ...(rngSeed === undefined ? {} : { rngSeed }) },
+    oracleBattleLab: { scenario: "../../battle-lab/chg1-bounce-foe-off.json" },
+  }) as unknown as Parameters<typeof applyTraceStage>[0];
+  it("overrides the lab seed; absent, the lab seed stays", () => {
+    expect(applyTraceStage(trace(530917129), initial("off")).factoryRoundBattleOrchestrator!.battle!.rng.value).toBe(530917129);
+    expect(applyTraceStage(trace(), initial("off")).factoryRoundBattleOrchestrator!.battle!.rng.value).toBe(1);
   });
 });
 

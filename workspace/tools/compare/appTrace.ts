@@ -2794,19 +2794,19 @@ export function labBackedStageOptions(json: LabScenario, lab: string): { options
   };
 }
 
-export function labBackedStage(scenario: string, state: EngineState): EngineState {
+export function labBackedStage(scenario: string, state: EngineState, rngSeed?: number): EngineState {
   const path = labScenarioPath(scenario);
   const lab = path.pathname.split("/").pop()!.replace(/\.json$/, "");
   const json = JSON.parse(readFileSync(path, "utf8")) as LabScenario;
   const { options, playerBench, playerBenchHp } = labBackedStageOptions(json, lab);
-  return midBattleSwitchStage(state, lab, playerBench, playerBenchHp, options);
+  return midBattleSwitchStage(state, lab, playerBench, playerBenchHp, rngSeed === undefined ? options : { ...options, rngSeed });
 }
 
 /** lbw7: a staged orchestrator draws its own opponent; `appStage.opponentTrainerId` names the lab's (ROM) trainer so the post-battle room draws the right class. */
 export function applyTraceStage(trace: Trace, state: EngineState): EngineState {
   const stageId = trace.appStage!.id;
   const stage: AppStage | undefined = stageId === "lab" && trace.oracleBattleLab
-    ? (s) => labBackedStage(trace.oracleBattleLab!.scenario, s)
+    ? (s) => labBackedStage(trace.oracleBattleLab!.scenario, s, trace.appStage!.rngSeed)
     : APP_STAGES[stageId];
   if (!stage) throw new Error(`unknown app stage ${stageId}${stageId === "lab" ? " (appStage \"lab\" needs oracleBattleLab.scenario)" : ""}`);
   const staged = stage(state);
