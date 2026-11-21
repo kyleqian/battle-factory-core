@@ -1094,6 +1094,22 @@ function aud241bStage(
   });
 }
 
+// lha1 (docs/lha1-lowhp-alarm-berry-flash.md): a winning blow from a player in the red. The Lv60 foe moves first (Seismic Toss: 70 -> 10 of
+// 105, a red bar and SE_LOW_HEALTH), then the player's Seismic Toss knocks out its last Pokemon (40 HP, no bench). `item` 219 = SHELL BELL
+// (BattleScript_ItemHealHP_Ret after the faint: 40 / 8 = 5, still red); `foeAbility` 24 = ROUGH SKIN (BattleScript_RoughSkinActivates after
+// the faint: 105 / 16 = 6, 10 -> 4, still red). Neither: the ordinary win, "fainted!" the turn's last box.
+function lha1Stage(state: EngineState, id: string, scene: "on" | "off", item: number, foeAbility?: number): EngineState {
+  return midBattleSwitchStage(state, id, [RATTATA_LV50_BENCH, RATTATA_LV50_BENCH], [105, 105], {
+    rngSeed: 1,
+    trainerBenchHp: null,
+    battleScene: scene,
+    player: Object.freeze({ ...rattataAtLevel(50, 69, item), hp: 70 }),
+    trainer: Object.freeze({ ...rattataAtLevel(60, 69), hp: 40, ...(foeAbility === undefined ? {} : { ability: foeAbility }) }),
+    usedMessageHoldFrames: 0,
+    sceneOffNoAnimations: scene === "off",
+  });
+}
+
 // pau5: mid-battle switch-in entry abilities (tools/battle-lab/pau5-*.json, tools/integration/pau5Labs.py). The ability mon is a Lv50 Mightyena
 // (Intimidate) or Porygon (Trace) with the ROM's slot-1 personality; stats are the ROM's for nature 0, IV 31, EV 0.
 function pau5Bench(species: number, base: readonly [number, number, number, number, number, number], personality: number): BattleScriptPartyMemberInput {
@@ -2253,6 +2269,12 @@ export const APP_STAGES: Readonly<Record<string, AppStage>> = {
   "aud241c-brain-off": (state) => aud241bStage(state, "aud241c-brain-off", "off", 50, 12, 69, "opponent", true),
   "aud241c-loss-on": (state) => aud241bStage(state, "aud241c-loss-on", "on", 12, 50, 69, "player"),
   "aud241c-loss-off": (state) => aud241bStage(state, "aud241c-loss-off", "off", 12, 50, 69, "player"),
+  "lha1-red-win-on": (state) => lha1Stage(state, "lha1-red-win-on", "on", 0),
+  "lha1-red-win-off": (state) => lha1Stage(state, "lha1-red-win-off", "off", 0),
+  "lha1-shellbell-win-on": (state) => lha1Stage(state, "lha1-shellbell-win-on", "on", 219),
+  "lha1-shellbell-win-off": (state) => lha1Stage(state, "lha1-shellbell-win-off", "off", 219),
+  "lha1-roughskin-win-on": (state) => lha1Stage(state, "lha1-roughskin-win-on", "on", 0, 24),
+  "lha1-roughskin-win-off": (state) => lha1Stage(state, "lha1-roughskin-win-off", "off", 0, 24),
   "aud241b-super-effective-on": (state) => aud241bStage(state, "aud241b-super-effective-on", "on", 50, 12, 2),
   "aud241b-super-effective-off": (state) => aud241bStage(state, "aud241b-super-effective-off", "off", 50, 12, 2),
   // aud242a: Scene ON move-animation sound windows (one Level-50 attacker side each; docs/aud242-move-anim-sounds.md).
