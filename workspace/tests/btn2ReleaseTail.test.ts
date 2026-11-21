@@ -110,8 +110,11 @@ describe("btn2: the orchestrator hands the released print's cursor phase to the 
       cursor.step(["A"]);
       const after = resolutionOf();
       expect(after.commandIndex).toBe(before.commandIndex + 1);
-      expect(after.releasedWaitCursor).toEqual({ segmentIndex: before.segmentIndex, commandIndex: before.commandIndex, age: elapsed - typed - 1 });
-      expect(elapsed - typed - 1).toBeGreaterThanOrEqual(5);
+      // fnt1 (docs/fnt1-fainted-box-clear.md): the frozen phase is the one the release frame shows (the arrow the printer drew on the
+      // frame before the press), age elapsed - typed with the wait counted without a repeated row; wait frame 8, not a redraw frame,
+      // so the print and the arrow stay (a press on wait frame 0, 9, 18, ... would blank this `\p` box from the next frame).
+      expect(after.releasedWaitCursor).toEqual({ segmentIndex: before.segmentIndex, commandIndex: before.commandIndex, age: elapsed - typed });
+      expect(elapsed - typed).toBe(7);
     });
   }
 });

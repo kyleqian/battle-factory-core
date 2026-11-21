@@ -445,7 +445,10 @@ describe("random round soak driver (green milestone pin)", () => {
       // wbh1 (docs/wbh1-battle-start-white-herb.md): a later battle-start entry script starts on its own kernel rows after the previous one's
       // pop (2 frames earlier than pau4's ENTRY_SCRIPT_GAP_ROWS; this seed has a two-script battle start, not a White Herb: with the old
       // gap restored the pin holds): render calls only, 3_044 -> 3_043; frames 43_334, battle 7, turn 3, end state, diagnostics unchanged.
-      frames: 43_334,
+      // fnt1 (docs/fnt1-fainted-box-clear.md: a "fainted!" / "Player defeated" box takes the press from the row after its last glyph, 2 rows
+      // earlier, as the ROM's `\p` wait): frames only, 43_334 -> 43_323; same battle 7, turn 3, end state, diagnostics, render calls. With the
+      // accept edge alone undone (isBattleResolutionButtonMessageAcceptable's promptClear lead) the old pin passes again.
+      frames: 43_323,
       battle: 7,
       turn: 3,
       diagnostics: {
@@ -1001,12 +1004,15 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // pic9 (the switch lines follow the foe's HP; new print lengths move the exploring presses): 19042 / turn 23 -> 22844 / turn 30;
       // same battle 1 / depth 0 / roundLost.
       // lrc1 (the loss tail's opponent recall plays the ROM's animated return to ball, its recall receipt holds to the trainer slide and the slide's printstring is 3 rows later: the win text prints 67 frames later): frames only, 22844 -> 22897; same battle 1 / depth 0 / turn 30 / roundLost.
-      frames: 22897,
+      // fnt1 (docs/fnt1-fainted-box-clear.md: the "fainted!" box takes the press 2 rows earlier, from the row after its last glyph; the exploring
+      // presses land on new phases, a new trajectory as at fsw235): 22897 / battle 1 / depth 0 / turn 30 -> 39277 / battle 2 / depth 1 / turn 22;
+      // still roundLost. With the accept edge undone (isBattleResolutionButtonMessageAcceptable's promptClear lead) the old pin passes again.
+      frames: 39277,
       outcome: "OK",
       endState: "roundLost",
-      maxBattleDepth: 0,
-      battle: 1,
-      turn: 30,
+      maxBattleDepth: 1,
+      battle: 2,
+      turn: 22,
     });
     expect(runSeed(1, options)).toMatchObject({
       // msg175: 26878 -> 26810 (shorter used prints); trn178 (the Scene OFF action-transition pause): 26810 -> 27058; same battle / turn / end state.

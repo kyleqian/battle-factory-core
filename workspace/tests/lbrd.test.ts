@@ -59,9 +59,13 @@ interface WonLobby {
 // trainer moves): 14 lost the continuation in both scenes. A scan of 0..20 with the seed in all three roles (scratch copies of this file)
 // found none passing every case: 2 fails only the retire (its continued challenge loses a battle before the retire), 13 only the
 // challenge-2 loss (it does not lose), 4 / 10 / 14 / 17 the continuation, the rest 5 to 12. So the continuation and the loss use 2, the retire 13.
+// fnt1 (docs/fnt1-fainted-box-clear.md: a "fainted!" box takes the press 2 rows earlier, so the soak player's presses land on new phases):
+// 2's Scene OFF continued challenge no longer loses within the 120,000 frames. A scan of 0..20 in the loss role (a scratch copy of this file,
+// the loss case alone) found 10 and 19; the continuation (2) and the retire (13) still pass, so only the loss moves, to 10. With the accept edge
+// alone undone (isBattleResolutionButtonMessageAcceptable's promptClear lead) 2 passes the loss case again.
 const WIN_TWO_SEED = 2;
 const RETIRE_SEED = 13;
-const WIN_THEN_LOSE_SEED = 2;
+const WIN_THEN_LOSE_SEED = 10;
 
 function newPlayer(seed: number): RandomPlayer {
   const player = new RandomPlayer(new Rng(seed), new ActionLog(false), "winning");
