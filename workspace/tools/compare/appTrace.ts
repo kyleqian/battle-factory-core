@@ -2059,6 +2059,9 @@ function hcr2Stages(): Record<string, AppStage> {
           trainer: rattataAtLevel(50, 69),
           usedMessageHoldFrames: 0,
           sceneOffNoAnimations: false,
+        });
+    }
+  }
   return stages;
 }
 
