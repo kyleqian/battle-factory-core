@@ -1873,3 +1873,46 @@ The -8 bias is gone (OFF median -7 -> -0.5, 15 of 30 rows within +-2 now against
 **Gates.** No `src/` change; `npm run build` exit 0; `npm run test:gate` 360 files / 2,835 tests green; the 9 test files importing `soundCensusRomReplay` (ais1 / ais2 / ais3, aud252 x2, aud253, aud254, parityMacRoundReplayFixtures, pic3DrawnFieldCheck): 41 / 41 (they replay without `--romdrive`). `npm test` not run, as assigned.
 
 **Next (not done).** (1) The engine ready-time cliff rows (4 OFF, ~5 ON) are the next measurable engine term; (2) a ROM-clocked cadence for the forced party-menu messages; (3) the AI-choice term (fsc2m item 3). PAPERCUT: `aud249Rescore.sh` over 49 seeds takes about 5 minutes and a foreground command over 2 minutes is moved to the background by the harness (the t2n rescore needed a per-seed loop plus a wait), ~10 minutes lost; a `rescoreAll.sh` wrapper (the `.integration/evidence/drv1/rescore-all.sh` of this step) would help.
+
+## b4l (2026-11-21): the B4 "C" bodies land (c-lead), the status-animation SE offset re-fitted to the ROM (S11, ISSUES #219)
+
+Scene ON only. Scene OFF is untouched (T2 OFF byte-identical: 600 exact / 533 offset / mass 3,164, missing / extra 0 / 0; census OFF arm byte-identical shards 2 / 2).
+
+**Changes (`src/` 3 files, +37 / -9).**
+1. `BodyLeadRule` `c-lead` for ids 86 78 79 47 320 109 174 142 261 137 280 (Wish 273 stays `lead-only`): `bodyLeadFrames` = the kernel lead (ROM L = A0 - R - 3), the `tail-composition` of lse4 kept, and a per-id window adjust added after the body through `liveMoveHitTailRows` (`C_LEAD_WINDOW_ADJUST`: 47 / 142 / 280 +3, 261 / 137 / 109 +2, 174 +4, 320 -2, 86 / 78 / 79 0; the b4m table, re-derived on the ROM below). A substitute-swap move takes no adjust (same exemption as the lse4 window rows).
+2. The hcr2c sound lead 7 - L (`usedMoveBodySoundLeadOf`) is 0 for these ids, and the sound clock follows the presented lead for real: `lse2BodySoundAgeShift` = L - 7 (the sound table is calibrated at lead 7). Confuse Ray (109) was fitted on its own L = 6 lab, so its clock lead is 6 (`C_LEAD_SOUND_CLOCK_LEADS`); with 7 it went 1 early on all 25 rows.
+3. Status-animation SE offset (`statusAnimationScriptAge`, moveAnimSounds.ts): the ROM's script age is **0** after a c-lead body (the +10 offset was +7 late there and hid an early command) and 0 everywhere for Sleep / Confusion (`STATUS_ANIMATION_AUDITED_BODY_SCRIPT_AGE`); Poison / Burn / Paralysis keep 7 outside a B4 body (T2 variants A / B / C were scored per id; C kept: every id that improved did so on a ROM row, no id got worse; no pin was fitted).
+
+**ROM re-derivation.** `b4mRun.sh` on the 14 labs: the ROM's next-command frame equals the engine's for every body with the b4m adjust table, so the table is unchanged; the ROM wins and there is no difference to report. Ghost Curse (`b4m-curseghost-player-on`) runs on the generic lab stage: ROM R 49 / A0 58 / A1 430 (L 6), the engine's first command after the body (hp, 433) is the ROM's 433; its second row (message 486 vs ROM 488) is 2 early, not pinned.
+
+**b4m labs, ROM-exact SEs of the lab (before -> after; matched rows are unchanged).**
+
+| Lab | before | after | Lab | before | after |
+|---|---|---|---|---|---|
+| b4m-thunderwave | 0 / 7 | 6 / 7 | aud242n-confuseray-player | 14 / 25 | 25 / 25 |
+| b4m-stunspore | 0 / 8 | 7 / 8 | aud242n-confuseray-opponent | 14 / 25 | 25 / 25 |
+| b4m-sleeppowder | 8 / 8 | 8 / 8 | aud242r-curse-player | 0 / 4 | 4 / 4 |
+| b4m-sing-s2 | 1 / 3 | 3 / 3 | aud260-brickbreak-player | 0 / 11 | 9 / 11 |
+| b4m-grasswhistle-s2 | 1 / 3 | 3 / 3 | aud260-glare-player | 0 / 4 | 3 / 4 |
+| aud242k-lovelykiss-player | 2 / 4 | 4 / 4 | aud260-willowisp-player | 18 / 23 | 19 / 23 |
+| aud242k-wish-player (lead-only, out of scope) | 0 / 8 | 0 / 8 | | | |
+
+Per-body r (ROM next - engine next) is 0 for all 11 bodies. Left over: Thunder Wave 1 row (the engine's extra rows are not ROM rows), Stun Spore 1, Glare 1, Brick Break 2 (frames 1369 / 1570 = -2 / -7, a later turn's body), Will-O-Wisp 4 (the later turn's rows, -4).
+
+**T2 rescore** (25 ON + 24 OFF seeds over `.integration/evidence/t2n`, `tools/audio/rescoreAll.sh` into `.integration/evidence/b4l/t2-{base,after}`, `soundScoreboard.py`):
+
+| | exact | offset | missing | extra | mass |
+|---|---|---|---|---|---|
+| ON before | 2,366 | 3,511 | 0 | 0 | 25,747 |
+| ON after | **2,476** | 3,401 | 0 | 0 | **23,423** (-9.0 %) |
+| OFF before = after | 600 | 533 | 0 | 0 | 3,164 |
+
+move-animation SE family ON: 2,005 -> 2,110 exact, mass 19,810 -> 17,571. Status SEs after the body: SE 197 -39 %, SE 176 -45 %, SE 212 -73 % of their mass, none worse.
+
+**Census 0..199 both scenes** (`lsd194Census.sh`, base 5fbac1476 vs HEAD d652fc667, JOBS 2, SPLIT 2): `rst197CensusDelta.py --digest` eventsDigest + error identical 200 / 200 on ON (122 battles have changed presentation commands, 0 type-sequence changes) and 200 / 200 on OFF (byte-identical). No gameplay / RNG change. T1 (`soundCensusDelta.py --t1`): ON exact 53,965 -> 54,127, known-offset 197 -> 35 (Will-O-Wisp +1 x162 gone; left: Substitute -7 x33, Transform -5 x2, both non-B4), missing 0, extra 0, unclassified 13 -> 13 (unchanged); OFF unchanged (extra 35 is the OFF arm's note-free SEs in a scene with no move-animation SEs, same on both arms).
+
+**Pins re-pinned toward the ROM** (commit d652fc667): ais2 ON window 3826..4076 / romFrameOffset 55 -> 3835..4085 / 46 (same ROM frames, the engine 9 later; md5 match 0 bad at the +9 shift); hie3 cheri command start 740 -> 749, drift 11 -> 2; aud260 Brick Break / Glare constant offset 2 -> 0; aud242r Curse deltas +1 -> 0. No pin moved away from the ROM; none left red.
+
+**Gates.** `npm run typecheck` ok; `npm run test:gate` 360 files / 2,835 tests; the 228 files importing `battleResolutionPresentation.ts` / `tickSounds.ts` plus `aud2*` and `randomRoundSoak*` (3 batches: 77 / 79 / 72 files, 710 / 770 / 581 tests) green; `npm run build` ok. Full `npm test` not run (brief).
+
+**Residuals.** Wish (273) lead-only: SE rows 0 / 8, hp floors / Rollout / second-mover lead (hcr3m), AI choice (fsc2m) and non-B4 body leads are out of scope. The Scene OFF timing is unchanged. PAPERCUT: a concurrent side-lane session committed my uncommitted `moveAnimSounds.ts` edit (5cb0b6acd) in the shared tree, so stage by file name, never `git add -A`.
