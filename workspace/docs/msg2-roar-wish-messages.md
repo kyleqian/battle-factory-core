@@ -111,8 +111,8 @@ What does differ, measured on those 35 prints, plus the drag-ins followed by an 
 - WishButFullHp: the 34-row row before "HP is full!" in both scenes (wish start -> HP-full start = glyphs + 64 + 34, the ROM's 127
   for 29 glyphs).
 - ROAR: the release tail 4; seed 95 (HITMONCHAN, both scenes) and seed 15 (Foe TORKOAL, the foe dragged out): press -> box clear
-  14 rows, the print and the frozen arrow up until then;
-  presses at cursor ages -2, -1, 0, 6, 7, 8, 16: blank from the next row exactly at -2, 7, 16, the press row still shows the print.
+  14 rows, the print and the frozen arrow up until then; presses at cursor ages -2, -1, 0, 6, 7, 8, 16: blank from the next row
+  exactly at -2, 7, 16, the press row still shows the print.
 - Intimidate after a drag-in: seed 51 (SALAMENCE, both scenes): hold 41 + 9, stat row 3, press -> "INTIMIDATE cuts" 132 rows
   (the ROM's); seed 116 (Foe MASQUERAIN, the foe dragged out): the same commands (no ROM window for that side).
 
@@ -124,13 +124,33 @@ Soak re-pin (separate commit): `tests/randomRoundSoak.test.ts` "(c) leaves full 
 battle 3 / depth 2 / turn 19 / roundLost. Bisected: with the dragged-out tail back at 5 the old pin passes; undoing the WISH name, the
 WISH pause or the entry-script hold instead leaves 58,798.
 
-Checks: `NODE_OPTIONS=--max-old-space-size=8192 npx tsc -b` clean; the 288 test files that import the changed modules (or the census
-helper) passed after the re-pins above (2,565 tests; before the re-pins 3 failed: the two pau label pins and the soak pin); `npm run
-test:gate` 360 files / 2,832 tests passed.
+Checks on the branch tip: `NODE_OPTIONS=--max-old-space-size=8192 npx tsc -b` clean; the 288 test files that import the changed
+modules (or the census helper) 288 / 288 files, 2,566 tests passed (before the re-pins 3 failed: the two pau label pins and the soak
+pin); `npm run test:gate` 360 files / 2,832 tests passed. The 12 new tests fail on the base commit (6817b6a8c): 12 / 12.
 
 ## Catcher before / after
 
-CATCHER_PLACEHOLDER
+Traces remade on this build with their `maker` arguments (`makeTrace.mjs --seed N --scene S --policy P --battles 21 --lobby-tail 120
+--max-frames 400000`; `.integration/evidence/fix-roar-wish/traces/`), run with `KEEP=1 JOBS=3 tools/frame-catcher/run.sh`
+(`.integration/evidence/fix-roar-wish/catcher/`). The remade s89-on-wc no longer reaches the ILLUMISE / DRAGONAIR wish (the test player
+lost in battle 9; it shows five Scene ON ROARs instead), so s102-on-ws (Foe ILLUMISE wished, LUVDISC's HP is full, Scene ON) and
+s118-off-wc (Foe TOGETIC wished, KOFFING's HP is full, Scene OFF; also the Trace drag-in) carry the moved wish; s36-off-ws carries an
+Intimidate drag-in.
+
+| run | stretches content / timing, before (fcm1) -> after | sounds | the cases |
+|---|---|---|---|
+| s186-on-ws | 402 / 570 -> 403 / 569 | 3 -> 3, the same | b15 wish: "Foe MINUN's WISH" on both, its stretch content -> timing; 4 ROARs (b4, b20 x3): press -> box clear ours 14 = ROM 14 (CAMERUPT: the ROM's press on the first wait row, clear +1; ours pressed 14 rows later, +14) |
+| s89-on-wc (remade, a different trajectory) | 547 / 858 (17 battles) -> 262 / 380 (9 battles) | 5 -> 0 | 5 ROARs: press -> clear ours 14, ROM 14 (one ROM press on the first wait row: +1) |
+| s118-off-wc | 428 / 604 -> 430 / 602 | 1 -> 1 | TOGETIC / KOFFING wish: name and the 100-row gap to "HP is full!" equal; Trace drag-in: press -> TRACED print ours 45 = ROM 45 (turn end: ours 160, ROM 158); 2 ROARs: clear 14 = 14 |
+| s36-off-ws | 180 / 377 -> 179 / 378 | 3 -> 3 | Intimidate drag-in: press -> print ours 133 = ROM 133 (turn end ours 252, ROM 254); WHIRLWIND: clear 14 = 14 |
+| s102-on-ws | 106 / 106 -> 109 / 103 | 0 -> 0 | ILLUMISE / LUVDISC wish: "Foe ILLUMISE's WISH" on both (the name blobs #42 / #100 of the fcm1 report are gone), the gap to "HP is full!" 100 = 100 |
+
+The stretches that turned content are presses landing on new phases next to the changed rows, each holding blobs the same run
+shows elsewhere: s186-on-ws b20's two action-menu stretches after the MAGNETON ROAR (#7, the forfeit YES / NO window, in 87
+stretches; #16, in 85; #55, a 4-frame blob in 4), s102-on-ws b4 (the forfeit YES / NO window drawn 2 frames before the ROM's, also in
+b5; a party submenu blob; the swap picker, a known catcher limit), s118-off-wc b3 (#9 / #93 / #101, in hundreds of stretches). No run
+pressed on an arrow redraw row on our side, so change 2 is covered by the Tier-1 tests only. The ROM's MAGNETON print still waits 255
+frames in the after run: the catcher's press replay is unchanged (the SOLARBEAM charge turn still runs 16 frames later on the ROM).
 
 ## Still open (seen, not changed)
 
