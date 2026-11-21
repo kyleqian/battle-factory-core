@@ -1758,6 +1758,10 @@ const STATS_CHANGE_AFTER_LSE2_BODY_AGE_SHIFT = 3;
 // sta5: after a Flatter / Swagger body (lead + tail landed) and its 2-row `stat` command the `stats-change` command starts 2 rows (the not yet landed
 // pre-print rows) before the ROM's `playanimation`, whose SE is exec + 4: the generic age (calibrated on the old, earlier start) is shifted by 1.
 const STATS_CHANGE_AFTER_STAT_BODY_AGE_SHIFT = 1;
+// stc1 (ROM labs stc1-* / hcr1b-*-off, 61 of 105 OFF T2 stat rows at +3, 13 at +2): Scene OFF's StatsChangeAnimation SE is playanimation's exec + 4. After the
+// OFF body (Pausex20 .. playanimation) the command starts on exec + 1 (SE = command age 3); a secondary effect's (BattleScript_StatDown / StatUp) starts on exec (age 4).
+const STATS_CHANGE_SCENE_OFF_AFTER_BODY_AGE_SHIFT = 3;
+const STATS_CHANGE_SCENE_OFF_SECONDARY_AGE_SHIFT = 2;
 
 /**
  * aud248: the presented stats-change command and its age (rows since the animation's rel 0, after the IsBattleSEPlaying gate; the same age as the
@@ -1765,6 +1769,7 @@ const STATS_CHANGE_AFTER_STAT_BODY_AGE_SHIFT = 1;
  */
 export function statsChangeSourceAge(
   state: BattleResolutionPresentationState,
+  sceneOffShift = false,
 ): Readonly<{ battler: 0 | 1; argument: number; age: number; direction: "up" | "down" }> | null {
   const command = state.segments[state.segmentIndex]?.commands[state.commandIndex];
   if (command === undefined || command.type !== "stats-change") return null;
@@ -1779,7 +1784,10 @@ export function statsChangeSourceAge(
     ? (previous.animation !== undefined && bodySLeadRuleApplies(previous.animation.moveId) ? 0
       : previous.animation !== undefined && bodyLse2RuleApplies(previous.animation.moveId) ? STATS_CHANGE_AFTER_LSE2_BODY_AGE_SHIFT : STATS_CHANGE_AFTER_BODY_AGE_SHIFT)
     : afterStatBody ? STATS_CHANGE_AFTER_STAT_BODY_AGE_SHIFT : 0;
-  const age = state.lifecycle.phaseElapsed - (command.timing.seGateFrames ?? 0) + afterBodyLead;
+  const rules = state.segments[state.segmentIndex]!.beforeRules;
+  const sceneOff = sceneOffShift && rules !== null && rules !== undefined && (rules.rulesContext.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0;
+  const offShift = !sceneOff ? 0 : previous?.type === "move-animation" ? STATS_CHANGE_SCENE_OFF_AFTER_BODY_AGE_SHIFT : STATS_CHANGE_SCENE_OFF_SECONDARY_AGE_SHIFT;
+  const age = state.lifecycle.phaseElapsed - (command.timing.seGateFrames ?? 0) + afterBodyLead + offShift;
   if (age < 0 || fieldBattler(currentCommandField(state), command.battler).substituteDoll === true) return null;
   // The pure General_StatsChange reducer's params (null for an argument it rejects: the ROM plays nothing); read here so the sound
   // emitter stays outside the animation boundary (tests/animation/animationBoundaryRatchet.test.ts).
