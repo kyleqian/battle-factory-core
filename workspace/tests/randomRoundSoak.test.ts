@@ -706,7 +706,10 @@ describe("random round soak driver (green milestone pin)", () => {
     // commits Baton Pass on the merged tree (0 commits each). Re-scanned full-policy seeds 0..39 (tools/soak/batonPassSearch.ts --seeds 0:40 --parallel 4,
     // same options): candidates 4, 8, 10, 11, 13, 16, 27, 36, 39, all OK with no openpartyscreen / machine-barrier error. Seed 4 is the lowest
     // (Baton Pass commits 1, first commit 78369, halt 78671 on AIPOM in battleIndex 0, three Lobby new challenges; the halt is 1,329 frames inside the budget).
-    const result = runSeed(4, {
+    // stc1 (Scene OFF confusion self-hit: its print's first glyph 5 script rows later, +2 rows to the hit; ROM seeds 7295 / 7682; the exploring presses land on new phases):
+    // seed 4 no longer commits Baton Pass. Re-scanned full-policy seeds 0..39 (tools/soak/batonPassSearch.ts --seeds 0:40 --parallel 8, same options): candidates 11, 13, 27, 36, 39,
+    // all OK with no openpartyscreen / machine-barrier error. Seed 11 is the lowest (Baton Pass commits 3, first commit 46848, halt 47063 on AIPOM in battleIndex 0, two Lobby new challenges). Pin 4 -> 11.
+    const result = runSeed(11, {
       maxFrames: 80_000,
       renderEvery: 0,
       coverage: observer as never,
@@ -1105,7 +1108,8 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // msg2): frames only, 58758 -> 58763; same battle 3 / depth 2 / turn 19 / roundLost. With RELEASE_TO_MOVEEND_ROWS.STRINGID_PKMNWASDRAGGEDOUT
       // back at 5 the old pin passes again (on msg2's own base the same tail moved 58793 -> 58798); seed 0 is unmoved.
       // merge of the box's 2026-11-20 run with the Mac's 11-21 fixes: frames only, 64365 (box) / 58763 (Mac) -> 60582; same battle 3 / depth 2 / turn 19 / roundLost on all three.
-      frames: 60582,
+      // stc1 (Scene OFF confusion self-hit +7 rows to the hit, ROM 204 / 199 after the commit): frames only, 60582 -> 60525; same battle 3 / depth 2 / turn 19 / roundLost.
+      frames: 60525,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 2,

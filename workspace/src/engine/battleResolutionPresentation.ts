@@ -1059,6 +1059,15 @@ const MESSAGE_TIMING = Object.freeze({ minimumFrames: 24, holdFrames: 0 } as con
 /** `B_WAIT_TIME_LONG` (`reference/pokeemerald/include/constants/battle.h:324`). */
 export const WAITMESSAGE_LONG_HOLD_FRAMES = 64;
 /**
+ * stc1 (docs/aud251-s11-scoreboard-refresh.md "stc1"): BattleScript_DoSelfConfusionDmg (battle_scripts_1.s:3796-3804) runs status2animation,
+ * jumpifbyte, cancelmultiturnmoves, adjustnormaldamage2 and printstring (5 rows) between the "is confused!" wait and the first glyph of
+ * "It hurt itself in its confusion!"; the engine typed from the first of them (now the message's `leadFrames`). ROM seeds 7295 (decision 4) / 7682 (decision 2), Scene OFF:
+ * the first glyph comes 5 rows later and the print's effectivenesssound (SE 13) 7 rows later than the engine's, so the message holds 2 more rows.
+ */
+const SELF_CONFUSION_HIT_MESSAGE_ID = "STRINGID_ITHURTCONFUSION";
+const SELF_CONFUSION_OFF_PRE_PRINT_ROWS = 5;
+const SELF_CONFUSION_OFF_HIT_MESSAGE_TIMING = Object.freeze({ minimumFrames: 0, holdFrames: WAITMESSAGE_LONG_HOLD_FRAMES + 2 } as const);
+/**
  * Route-scoped `STRINGID_USEDMOVE` hold for the ButItFailed/no-anim path
  * (`pause B_WAIT_TIME_SHORT` = 32 + ~6 dispatch steps, measured 38 =
  * 1076-1113 in `docs/battle-message-pacing-ground-truth.md` §1/§3.4).
@@ -5507,6 +5516,7 @@ export function projectBattleResolutionCommands(
           }));
         }
       }
+      const selfConfusionOff = payload.messageId === SELF_CONFUSION_HIT_MESSAGE_ID && (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0;
       const prePrintPause = anchorlessPrePrintPauseFrames(event);
       if (prePrintPause !== null) {
         commands.push(Object.freeze({
@@ -5538,6 +5548,7 @@ export function projectBattleResolutionCommands(
           { hp: liveHp[1], maxHP: currentField.opponent.maxHP },
         ),
         advance: "automatic",
+        ...(selfConfusionOff ? { leadFrames: SELF_CONFUSION_OFF_PRE_PRINT_ROWS } : {}),
         ...(payload.messageId === "STRINGID_TARGETFAINTED"
           || payload.messageId === "STRINGID_ATTACKERFAINTED"
           ? { faintBattler: lastFaintBattler! }
@@ -5560,7 +5571,9 @@ export function projectBattleResolutionCommands(
             : payload.messageId === "STRINGID_SWITCHINMON"
               ? SWITCH_IN_MESSAGE_TIMING
               : (() => {
-                const base = messageTimingFromSourceProvenance(event, sceneOnMoveAnimationSeen, (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0)
+                const base = selfConfusionOff
+                  ? SELF_CONFUSION_OFF_HIT_MESSAGE_TIMING
+                  : messageTimingFromSourceProvenance(event, sceneOnMoveAnimationSeen, (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0)
                   ?? (WAITMESSAGE_LONG_MESSAGE_IDS.has(payload.messageId) || payload.messageId === SUBSTITUTE_FADED_MESSAGE_ID
                   ? WAITMESSAGE_LONG_TIMING
                   : MESSAGE_TIMING);
