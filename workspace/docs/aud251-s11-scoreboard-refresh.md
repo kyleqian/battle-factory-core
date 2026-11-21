@@ -2164,3 +2164,31 @@ Every charge-turn SE is on the ROM frame (14 labs-sides, 0 residual). Foe-charge
 **Tests.** `npm run typecheck` exit 0; `npm run test:gate` 360 files / 2,835 tests green; `npm run build` exit 0; the 346 `tests/` files importing `battleResolutionPresentation` / `liveMoveAnimation` plus `tests/aud2*`, `tests/chg*`, `tests/animation/live*`, `tests/randomRoundSoak*`: green except (i) the 2 `tests/animation/liveAnchorMoveAdapters.test.ts` Metal Claw failures (red at base, not mine; `tests/stc1SceneOffStatChangeSe.test.ts` was not in the set), and (ii) `tests/aud261MoveAnimSounds.test.ts` "aud261-razorwind-player" unleash offset (pin 4, now -11: moved away from the ROM, left red, the Razor Wind player residual above). Re-pins toward the ROM: `tests/aud242oMoveAnimSounds.test.ts` dive-player delta -7 -> 0 (ROM SE 162 / 233 at 51 / 109); `tests/aud261MoveAnimSounds.test.ts` Razor Wind charge offsets -10 -> 0 (ROM SE 42 / 83) and the opponent unleash 14 -> -1 (ROM SE 1104 / 1108 / 1112 / 1131). No `randomRoundSoak` pin moved.
 
 **Papercuts.** `hcr3mCmp.py` reads `<seed>-on.*` only (Scene OFF windows need the files copied under that name); `hcr3mProbe.py --from` must be below the decision's commit frame (the first run used 6560 > 6364 and the window had no ROM rows until the first change), ~10 min; `run-mgba-probe.py` refuses an existing output path.
+
+### chg3 (2026-11-21): the player-charger attack turn follows the ROM (Scene ON sound / print timing only)
+
+chg2 left the Razor Wind PLAYER unleash pin (`tests/aud261MoveAnimSounds.test.ts`) red (4 -> -11). chg3 labbed the player attack turn of all seven two-turn bodies (13 labs, engine vs the chg2 ROM captures; `chg2-{razorwind,skyattack,solarbeam,fly,dive,bounce}-{player,opponent}-on`, `bdt1-dig-player-on`; evidence `.integration/evidence/chg3/{before,exp6}`).
+
+**Two rules.** (1) A player-charger's second turn has no press: the locked unleash print waits the ROM's `6 + u` less `TWO_TURN_PLAYER_NO_PRESS_ROWS` = 10 (the engine's message command for a no-press player turn starts at turn-end + 22, the ROM's MoveEnd + 19 / 20, 3 - 4 rows after the effect-script row; with the press term's +7 the lead was uniformly ~10 rows long once the chain before it was exact). (2) After the charge print the ROM's chain to the next action is E - 2 rows longer than the presented one (E = the opener's `instructionExecution`: Sky 6, Fly 7, Solar 9, Dive 9, Dig 10, Bounce 10; the gap-print class, Razor Wind, already carries it before its glyph). The rows are carried (`chargeChainCarry`) to the next STRINGID_USEDMOVE print: onto its hold (after its glyph) when the other side acts, onto its lead when the charger itself does. A hold on the charge print or a lead on the foe's print moved the foe's used glyph +7 / +8 off `tests/chg161ChargeTurnPrint.test.ts`' off108 pins (exact 0 there); carrying it after the glyph keeps those pins at `[0, 4, 0]` and still lands the foe's SEs (the off108 probe and the bdt1 trace measure the foe print's glyph and command rows differently by about E - 2; the SE rows, which T2 scores, follow bdt1).
+
+**Lab table (player attack turn, ENG - ROM per SE; before -> after).**
+
+| Move | before | after |
+|---|---|---|
+| Razor Wind | +11 (13/16 +10) | +1 (13/16 0) |
+| Sky Attack (seed 4) | +6 (13/16 +3) | 0 (13/16 -3) |
+| Solar Beam | +3 | 0 |
+| Fly | +5 (13/16 +3) | 0 (13/16 -2) |
+| Dive | +3 (13/16 +1) | 0 (13/16 -2) |
+| Bounce (seed 5) | +2 | 0 (13 -2) |
+| Dig | +2 (13/16 +1) | 0 (13/16 -1) |
+
+The foe-acts-between SEs: Razor +1 -> +1, Sky -4 -> +1, Solar -6 -> +1, Bounce -17 -> -9; the opponent-charger labs' attack turns went +1 / 0 (Solar 0), 13/16 -1 .. -3. Aud261 pin: Razor Wind player `[-64, 4]` -> `[-64, -1]` (opponent `63, -1`).
+
+**Residuals.** Bounce's foe action between the turns is still -9; its faint SE 16 is +77 (a different cause, out of scope); Sky 13/16 -3; Skull Bash has no lab; the Sky player lab shows extra engine SEs after the ROM window ends (a probe-window artifact).
+
+**T2** (`rescoreAll.sh` over `.integration/evidence/t2n` into `.integration/evidence/chg3/t2-after`, `soundScoreboard.py`; base = chg2 after): **ON TOTAL exact 2,715 -> 2,727, offset 3,162 -> 3,150, mass 19,196 -> 19,125 (-71), missing 0 / extra 0**; OFF unchanged (671 exact, mass 2,547, 0 / 0).
+
+**Census 0..199** (`lsd194Census.sh`, `LSD194_SHARDS="0 1"`, JOBS 2, SPLIT 2, `26dbd479f` vs `ada6a6cba`): `rst197CensusDelta.py --digest` eventsDigest + error identical 200 / 200 on ON (40 battles changed command timing, 0 type-sequence changes) and 200 / 200 on OFF (0 changed). No gameplay / RNG change.
+
+**Tests.** `aud261MoveAnimSounds` (44) + `aud242oMoveAnimSounds` (4) green; the 281 files of `tests/chg*`, `tests/aud2*`, `tests/randomRoundSoak*` and every `tests/` file importing `battleResolutionPresentation` green except the two known-red `tests/animation/liveAnchorMoveAdapters.test.ts` cases (not from this change); `npm run typecheck` exit 0; `npm run test:gate` 360 files / 2,835 tests green; `npm run build` exit 0. `tests/chg161ChargeTurnPrint.test.ts` keeps its `[0, 4, 0]` pins. The one re-pin is Razor Wind's player unleash 4 -> -1 (toward the ROM). New lab `tools/battle-lab/chg3-solarbeam-tackle-player-on.json` (Solar Beam player vs a Tackle foe; ROM foe print row 258 vs the engine's 259 after the fix, 252 before).

@@ -190,7 +190,7 @@ describe("Razor Wind (aud261)", () => {
   });
   // lse4: the unleash body presents its lead 5 (gap-print class), so the player's unleash offset falls 9 -> 4 (the opponent's 14 does not move: the opponent lab's unleash SE clock is not measured here, open); the charge turn's -10 is the sound clock, unchanged.
 // chg2: the charge turn's sound clock follows the opener's kernel execution (Razor Wind E = 6: ROM SE frames 42 / 83, ours exact, -10 -> 0) and the locked unleash turn's print waits the ROM's press + 6 + u (opponent 14 -> -1, ROM frames 1104 / 1108 / 1112 / 1131). The player pin stayed 4 (chg2 moved it to -11).
-// chg3: the player-charger charge turn ends on the ROM (every two-turn move gap-print, charge-body tail + E - 6) and its locked unleash print drops the 10 rows the engine's no-press turn start has over the ROM's effect-script row: player -11 -> -1 (ROM frames 587 / 591 / 595 / 614).
+// chg3: the player-charger charge turn's E - 2 chain rows are carried to the next used print and its locked unleash print drops the 10 rows the engine's no-press turn start has over the ROM's effect-script row: player -11 -> -1 (ROM frames 587 / 591 / 595 / 614).
 // hpf3: the player's unleash offset 1 -> 9: the opponent's hit on the player (ROM bar 13 rows, rise 496; ours hp 491, bar + tail 7) now ends the turn at the ROM's length minus 5 where the 28-row floor had it 4 too long
 // (ROM bar rise -> the continuation turn's first exec 49 vs ours 44; neither was exact: the turn-end command's own 8 rows are the open remainder, hpf3 docs).
   for (const [side, pan, unleashOffset] of [["player", -64, -1], ["opponent", 63, -1]] as const) {
