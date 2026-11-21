@@ -1039,7 +1039,11 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // sct1 (docs/sct1-scouting-next-opponent.md: each scouting page takes A from its own last character + 3, and the pages are the next
       // opponent's, so their lengths and the exploring presses after them move): 61504 / turn 22 -> 58793 / turn 19; same battle 3 /
       // depth 2 / roundLost. With the old fixed [72, 74, 72] accept delays (and the new text) the old pin passes again; seed 0 is unmoved.
-      frames: 58793,
+      // msg2 (docs/msg2-roar-wish-messages.md: Roar / Whirlwind's dragged-out release -> moveendall is 4 rows, the box clears 1 row earlier;
+      // the exploring presses after it land 1 row earlier): frames only, 58793 -> 58798; same battle 3 / depth 2 / turn 19 / roundLost.
+      // With RELEASE_TO_MOVEEND_ROWS.STRINGID_PKMNWASDRAGGEDOUT back at 5 the old pin passes again (undoing the WISH name, the WISH
+      // pause or the dragged-in entry-script hold instead leaves it at 58798); seed 0 is unmoved.
+      frames: 58798,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 2,
