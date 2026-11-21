@@ -1531,10 +1531,20 @@ function sourcePauseUsedMoveHoldFrames(
  * label: BattleScript_SafeguardEnds = `pause B_WAIT_TIME_SHORT` 32 rows, then the print (psn4, docs/aud249-general-anim-sounds.md,
  * seeds 3738 / 499 ROM replays). The switch-in ability prints (Drizzle, Trace, Sand Stream, Drought, Intimidate) sit behind the
  * ability pop-up and are unmeasured, so they are not listed.
+ * msg2: BattleScript_WishButFullHp (battle_scripts_1.s:3601-3606: WISH print, `waitmessage B_WAIT_TIME_LONG`, `pause
+ * B_WAIT_TIME_SHORT`, then "X's HP is full!"), an end-turn script too: its pause was not presented (the HP-full print came 66 rows
+ * after the wish print's last glyph; the ROM's comes 100 rows after, fcm1 catcher, 7 / 7 rounds in both scenes).
  */
-export const ANCHORLESS_PRE_PRINT_PAUSE_LABELS = Object.freeze(["BattleScript_SafeguardEnds"] as const);
-/** pau3: ROM-measured frames the end-turn script start adds before its pause (SafeguardEnds: the print is 10 frames later than the pause alone, Scene OFF and ON, pau3-safeguard-{off,on}). */
-const ANCHORLESS_PRE_PRINT_LEAD_FRAMES: Readonly<Record<string, number>> = Object.freeze({ BattleScript_SafeguardEnds: 10 });
+export const ANCHORLESS_PRE_PRINT_PAUSE_LABELS = Object.freeze(["BattleScript_SafeguardEnds", "BattleScript_WishButFullHp"] as const);
+/**
+ * pau3: ROM-measured frames the end-turn script start adds before its pause (SafeguardEnds: the print is 10 frames later than the pause
+ * alone, Scene OFF and ON, pau3-safeguard-{off,on}). msg2: WishButFullHp's pause follows the previous print's own wait inside the
+ * same script, so only the pause and printstring rows are added: 32 + 2 = 34 (the 100 - 66 rows above).
+ */
+const ANCHORLESS_PRE_PRINT_LEAD_FRAMES: Readonly<Record<string, number>> = Object.freeze({
+  BattleScript_SafeguardEnds: 10,
+  BattleScript_WishButFullHp: 2,
+});
 const WAIT_TIME_FRAMES: Readonly<Record<string, number>> = Object.freeze({ B_WAIT_TIME_SHORT: 32, B_WAIT_TIME_LONG: 64 });
 /** The source `pause`'s length when the print at `messageIndex` is the first print of a listed anchor-less script; else null. */
 export function anchorlessPrePrintPauseFrames(event: BattleKernelSemanticEvent): number | null {
@@ -2443,9 +2453,14 @@ const TURN_END_TIMING = Object.freeze({ minimumFrames: 8 } as const);
  * script's `moveendall`, which the 8-row turn-end follows: the printer's release (resume on press + 3) plus the instructions the
  * script still runs, one row each.  Dragged out: 2 (press + 5); Substitute damaged: 7 (press + 10); Substitute faded: the instructions
  * after the 64-row `waitmessage` hold (4) + the 5 before it.  Only a print directly before the turn-end (the fade case has its own lead).
+ * msg2: those counts start at the probe's press row P, but the engine's release row is P + 1 (the first advance that holds the
+ * press): from it, dragged out's `moveendall` is 4 rows on.  ROM pictures agree: after the press the box clears 14 rows later
+ * (fcm1 catcher, 33 / 33 Roar / Whirlwind prints before the turn-end, both scenes), the engine's cleared at 15 (btn2's open
+ * "1 row late, 516 vs 515 on roar").  Substitute damaged / faded have the same count origin; left as measured (one catcher case,
+ * Substitute damaged at 20 vs the ROM's 19, docs/msg2-roar-wish-messages.md).
  */
 export const RELEASE_TO_MOVEEND_ROWS: Readonly<Record<string, number>> = Object.freeze({
-  STRINGID_PKMNWASDRAGGEDOUT: 5,
+  STRINGID_PKMNWASDRAGGEDOUT: 4,
   STRINGID_SUBSTITUTEDAMAGED: 10,
   STRINGID_PKMNSUBSTITUTEFADED: 9,
 });
@@ -4419,17 +4434,18 @@ function messageLines(
   // ISSUES #72 batch 6 (docs/issue72-reachability-triage.md): the plain-idiom
   // tail continued from STRINGID_PKMNSXCUREDYPROBLEM.
   if (messageId === "STRINGID_PKMNWISHCAMETRUE") {
-    // BattleScript_WishComesTrue/WishButFullHp: Cmd_trywish's own heal-effect
-    // state PREPARE_MON_NICK_WITH_PREFIX_BUFFERs the Wish target's own name
-    // into {B_BUFF1} -- runDoFieldEndTurnEffects's own selectorRoles.target
-    // write plus enterTickBattlerContext's generic attacker reassignment both
-    // land on the same (no-switch-in-between) battler in this engine's scope.
-    if (actionSnapshot === null) {
-      throw new Error(`battle resolution ${messageId} message has no action snapshot`);
+    // BattleScript_WishComesTrue/WishButFullHp: Cmd_trywish's heal-effect state
+    // PREPARE_MON_NICK_WITH_PREFIX_BUFFERs gWishFutureKnock.wishMonId[target]
+    // into {B_BUFF1} (battle_script_commands.c:9309): the party member that
+    // made the wish, with the slot's side prefix -- not the battler now in the
+    // slot (msg2: fcm1 s89-on-wc battle 9 "Foe ILLUMISE's WISH" with DRAGONAIR
+    // in). Resolved by prepareMessage from rules.party, like Beat Up's member.
+    if (event.payload.substitutions.length === 0) {
+      throw new Error(`battle resolution ${messageId} message has no wisher substitution`);
     }
-    const battler = singlesBattler(actionSnapshot.attacker, `${messageId} action snapshot`);
+    const wisherName = event.payload.substitutions[0]!;
     return resolveBattleStringLines(messageId, {
-      B_BUFF1: nameWithPrefixResolver(field, battler),
+      B_BUFF1: () => wisherName,
     });
   }
   if (messageId === "STRINGID_PKMNUSEDSAFEGUARD") {
@@ -6048,6 +6064,7 @@ export function projectBattleResolutionCommands(
       commands[index] = Object.freeze({ ...command, timing: Object.freeze({ minimumFrames: rows }) });
     }
   }
+  applyDraggedOutEntryScriptLead(events, commands, (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) === 0);
   const entryScriptEndsSegment = applyMidBattleEntryScriptBlocks(events, commands);
   // snd145: an opponent FAINT REPLACEMENT that ends the turn holds its settled send-in through the source's post-`switchinanim`
   // turn-end work (`switchineffects`, the rest of `BattleScript_HandleFaintedMon`, `BattleTurnPassed`) before the action prompt.
@@ -6811,6 +6828,67 @@ const ENTRY_SCRIPT_TRAILING_ROWS: Readonly<Record<string, number>> = Object.free
   BattleScript_IntimidateActivatesLoop: 4,
   BattleScript_TraceActivates: 0,
 });
+/**
+ * msg2 (docs/msg2-roar-wish-messages.md): the rows from a "dragged out!" release to the dragged-in battler's entry script's own
+ * start. Fitted on the ROM: the hold after the release is the script's lead + 9 in all three catcher cases (Scene OFF; Intimidate
+ * lead 41 -> 50, Trace lead 33 -> 42).
+ */
+export const DRAGGED_OUT_ENTRY_SCRIPT_RELEASE_ROWS = 9;
+/**
+ * msg2: Roar / Whirlwind's drag-in (BattleScript_TrainerBattleForceOut, battle_scripts_1.s:3334-3341: switchinanim, the "dragged
+ * out!" print, switchineffects, then BattleScript_MoveEnd) reaches the dragged-in battler's entry script (Intimidate / Trace) only
+ * after the press: the kernel emits moveend's two sprite-visibility receipts first, then the script, whose first event's
+ * `instructionExecution` is its leading rows (the pause and the loop set-up), as in pau5. pau5's block needs the send-in directly
+ * before the script, so here the script had no lead: "X's INTIMIDATE cuts ..." printed 51 rows and "X TRACED ..." 42 rows after the
+ * press too early (fcm1 catcher: s36-off-ws, s89-off-ws, s118-off-wc). A hold of lead + DRAGGED_OUT_ENTRY_SCRIPT_RELEASE_ROWS goes
+ * before the script (the released print and its frozen cursor stay up, as on the ROM), and the stat row lasts up to the
+ * STATS_CHANGE animation as in pau5. The script's closing rows are left as they were (ROM within 2 rows: Intimidate's turn-end 2
+ * later, Trace's 2 earlier).
+ */
+function applyDraggedOutEntryScriptLead(
+  events: readonly BattleKernelSemanticEvent[],
+  commands: BattleResolutionPresentationCommand[],
+  sceneOn: boolean,
+): void {
+  const inScript = (event: BattleKernelSemanticEvent): boolean =>
+    event.provenance !== undefined && event.provenance.sourceLabel in ENTRY_SCRIPT_TRAILING_ROWS;
+  const first = events.findIndex(inScript);
+  if (first < 0) return;
+  const script = events.filter((event) => inScript(event) && event.provenance!.sourceLabel === events[first]!.provenance!.sourceLabel);
+  const sequences = new Set(script.map((event) => event.sequence));
+  const execution = (sequence: number): number | undefined => script.find((event) => event.sequence === sequence)?.provenance?.instructionExecution;
+  const start = commands.findIndex((command) => "eventSequence" in command && sequences.has(command.eventSequence));
+  if (start < 1) return;
+  let gate = start - 1;
+  while (gate > 0 && commands[gate]!.type === "sprite-visibility") gate -= 1;
+  const printed = commands[gate];
+  if (printed?.type !== "message" || printed.promptGate !== true || commands[gate - 1]?.type !== "switch-in") return;
+  const payload = events.find((event) => event.sequence === printed.eventSequence)?.payload;
+  if (payload?.kind !== "message" || payload.messageId !== "STRINGID_PKMNWASDRAGGEDOUT") return;
+  const firstCommand = commands[start] as { eventSequence: number };
+  const lead = execution(firstCommand.eventSequence);
+  if (lead === undefined) return;
+  for (let index = start; index + 1 < commands.length; index += 1) {
+    const command = commands[index]!;
+    if (!("eventSequence" in command) || !sequences.has(command.eventSequence)) break;
+    const following = commands[index + 1]!;
+    if (command.type === "stat" && following.type === "stats-change") {
+      const from = execution(command.eventSequence);
+      const to = execution(following.eventSequence);
+      if (from !== undefined && to !== undefined && to - from > command.timing.minimumFrames) {
+        commands[index] = Object.freeze({ ...command, timing: Object.freeze({ ...command.timing, minimumFrames: to - from }) });
+      }
+    }
+  }
+  const switchIn = commands[gate - 1] as Extract<BattleResolutionPresentationCommand, { type: "switch-in" }>;
+  commands.splice(start, 0, Object.freeze({
+    type: "move-animation",
+    ...(sceneOn ? { actionTransition: true as const } : {}),
+    eventSequence: firstCommand.eventSequence,
+    battler: switchIn.battler,
+    timing: Object.freeze({ minimumFrames: lead + DRAGGED_OUT_ENTRY_SCRIPT_RELEASE_ROWS }),
+  }));
+}
 /**
  * pau5 (docs/pau1-script-pauses.md "pau5"): a mid-battle switch-in whose ability runs an entry script (Intimidate / Trace; a faint
  * replacement, a voluntary switch or the opponent's replacement). The script's rows count from its own start exactly like the

@@ -18,15 +18,17 @@ const turnEndRowsAfter = (seed: number, scene: "on" | "off", messageId: string, 
 };
 
 describe("btn2: release-to-moveendall rows (ROM, both scenes)", () => {
-  it("pins the measured table (dragged out 5, Substitute damaged 10, Substitute faded 9 after its hold)", () => {
+  // msg2: dragged out counts from the engine's release row (the probe's press row + 1): 4 (ROM pictures: the box clears 14 rows after
+  // the press, fcm1 catcher 33 / 33; docs/msg2-roar-wish-messages.md).
+  it("pins the measured table (dragged out 4, Substitute damaged 10, Substitute faded 9 after its hold)", () => {
     expect(RELEASE_TO_MOVEEND_ROWS).toEqual({
-      STRINGID_PKMNWASDRAGGEDOUT: 5, STRINGID_SUBSTITUTEDAMAGED: 10, STRINGID_PKMNSUBSTITUTEFADED: 9,
+      STRINGID_PKMNWASDRAGGEDOUT: 4, STRINGID_SUBSTITUTEDAMAGED: 10, STRINGID_PKMNSUBSTITUTEFADED: 9,
     });
   });
 
   for (const scene of ["off", "on"] as const) {
-    it(`Roar's dragged-out print (seed 95, Scene ${scene.toUpperCase()}) is followed by an 8 + 5 row turn-end`, () => {
-      expect(turnEndRowsAfter(95, scene, "STRINGID_PKMNWASDRAGGEDOUT", 0)).toBe(13);
+    it(`Roar's dragged-out print (seed 95, Scene ${scene.toUpperCase()}) is followed by an 8 + 4 row turn-end`, () => {
+      expect(turnEndRowsAfter(95, scene, "STRINGID_PKMNWASDRAGGEDOUT", 0)).toBe(12);
     });
 
   }
@@ -35,8 +37,8 @@ describe("btn2: release-to-moveendall rows (ROM, both scenes)", () => {
     commands: [{ type: "message", eventSequence: 7, promptGate, advance: "button", lines: ["x"], timing: { minimumFrames: 0, holdFrames: 0 } }, { type: "sprite-visibility" }, { type: "sprite-visibility" }] as any[],
     events: [{ sequence: 7, payload: { kind: "message", messageId } }] as any[],
   });
-  it("the table rows extend the turn-end only for a gated print directly before it (Substitute damaged 18, faded 17, dragged out 13)", () => {
-    for (const [id, minimumFrames] of [["STRINGID_SUBSTITUTEDAMAGED", 18], ["STRINGID_PKMNSUBSTITUTEFADED", 17], ["STRINGID_PKMNWASDRAGGEDOUT", 13]] as const) {
+  it("the table rows extend the turn-end only for a gated print directly before it (Substitute damaged 18, faded 17, dragged out 12)", () => {
+    for (const [id, minimumFrames] of [["STRINGID_SUBSTITUTEDAMAGED", 18], ["STRINGID_PKMNSUBSTITUTEFADED", 17], ["STRINGID_PKMNWASDRAGGEDOUT", 12]] as const) {
       const { commands, events } = printed(id, true);
       expect(turnEndTimingAfterRelease(commands, events)).toEqual({ minimumFrames });
       expect(turnEndTimingAfterRelease(printed(id, false).commands, events)).toEqual({ minimumFrames: 8 });

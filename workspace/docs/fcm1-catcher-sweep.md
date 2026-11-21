@@ -18,7 +18,7 @@ with pictures, frames kept for `peek.py`; `traces/` with each trace's battle tex
   followed to their end; 5 stop in the Lobby (finding 8), 2 at the Factory Head (open item 1), 1 on a catcher gap.
 - **Findings** (all display or sound; the battle rules agree, checked for finding 1 by reading the engine state), most visible first:
   1. Battle start: the foe's WHITE HERB after an INTIMIDATE is not shown (the herb is used: its message and animation are missing).
-  2. "{X} was dragged out!" (ROAR) is cut off half printed and does not wait for a press.
+  2. "{X} was dragged out!" (ROAR) is cut off half printed and does not wait for a press. **Corrected (msg2):** it prints and waits like the ROM; see finding 2.
   3. "{X}'s WISH came true!" names the Pokemon now in battle, not the one that made the wish.
   4. "{X} fainted!" stays on screen after the press, until the next message.
   5. WILL-O-WISP plays no sound (Scene ON).
@@ -93,6 +93,8 @@ item 1; the catcher gap below).
   with the arrow. Ours prints "MAGNETON was drag", clears the box and opens "What will MAGNETON do?".
 - **Where:** s186-on-ws battle 20 (LAIRON's ROAR): ours 275,260-275,350, ROM 289,180-289,360 (still waiting at 289,360).
   Contact sheet: `.integration/evidence/fcm1/curated/s186-roar.png`.
+- **Correction (msg2, `docs/msg2-roar-wish-messages.md`):** not a defect. Ours prints the whole line and waits for the press as the ROM does;
+  the contact sheet's 30-frame step caught ours mid-typing (275,290) and after the test player's A 4 frames past the arrow (275,320).
 
 ### 3. WISH names the wrong Pokemon
 

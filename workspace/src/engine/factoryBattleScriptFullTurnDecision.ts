@@ -870,6 +870,19 @@ function externalPorts(): BattleScriptStatusRulesExternalPorts {
         : (FACTORY_ITEM_NAME_BY_ID.get(item) ?? `ITEM_${item}`);
       const buff1 = itemName(rules.battleTextBuff1Item);
       const buff2 = itemName(rules.battleTextBuff2Item);
+      // PREPARE_MON_NICK_WITH_PREFIX_BUFFER(gBattleTextBuff1, battler, partyIndex) as B_BUFF_MON_NICK_WITH_PREFIX expands it
+      // (battle_message.c ExpandBattleTextBuffPlaceholders): the battler's side picks the prefix and the party, the party index the
+      // member, which need not be the battler now in the slot.
+      const monNickWithPrefix = (): string[] => {
+        const nick = rules.battleTextBuff1MonNick;
+        if (nick === null) return [];
+        const side = rules.battlers[nick.battler].side === 0 ? "player" : "opponent";
+        return [resolveBattleNameWithPrefix({
+          side,
+          isTrainerBattle: true,
+          nickname: battleCommandSpeciesDisplayName(rules.party[side][nick.partyIndex]!.species),
+        })];
+      };
       const substitutions = operand.expression === "STRINGID_PKMNSITEMCUREDPROBLEM"
         ? (rules.battleTextBuff1Status === null ? [] : [rules.battleTextBuff1Status])
         // ISSUES #72 batch 1: same battleTextBuff1Status source as the item
@@ -1287,22 +1300,16 @@ function externalPorts(): BattleScriptStatusRulesExternalPorts {
                                                                       // here (full `rules.party` access), not via
                                                                       // `field` at print time.
                                                                       : operand.expression === "STRINGID_PKMNATTACK"
-                                                                        ? (rules.battleTextBuff1MonNick === null
-                                                                          ? []
-                                                                          : [resolveBattleNameWithPrefix({
-                                                                              side: rules.battlers[rules.battleTextBuff1MonNick.battler].side === 0
-                                                                                ? "player"
-                                                                                : "opponent",
-                                                                              isTrainerBattle: true,
-                                                                              nickname: battleCommandSpeciesDisplayName(
-                                                                                rules.party[
-                                                                                  rules.battlers[rules.battleTextBuff1MonNick.battler].side === 0
-                                                                                    ? "player"
-                                                                                    : "opponent"
-                                                                                ][rules.battleTextBuff1MonNick.partyIndex]!.species,
-                                                                              ),
-                                                                            })])
-                                                                        : [];
+                                                                        ? monNickWithPrefix()
+                                                                        // msg2: BattleScript_WishComesTrue / WishButFullHp's
+                                                                        // {B_BUFF1} -- Cmd_trywish 1 buffers the WISHER
+                                                                        // (gWishFutureKnock.wishMonId[gBattlerTarget], set when
+                                                                        // the wish was made, battle_script_commands.c:9300,9309),
+                                                                        // not the battler now in the slot (a switch or a faint
+                                                                        // replacement in between).
+                                                                        : operand.expression === "STRINGID_PKMNWISHCAMETRUE"
+                                                                          ? monNickWithPrefix()
+                                                                          : [];
       return Object.freeze({
         kind: "message" as const,
         messageId: operand.expression,

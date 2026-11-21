@@ -59,7 +59,8 @@ describe("pau3: LONG pause before the result print (ROM windows: used -> result 
 
 describe("pau3: SafeguardEnds' pre-print row is the pause plus the measured end-turn lead", () => {
   it("anchorless row = 32 + 10 for SafeguardEnds only", () => {
-    expect(ANCHORLESS_PRE_PRINT_PAUSE_LABELS).toEqual(["BattleScript_SafeguardEnds"]);
+    // msg2 added BattleScript_WishButFullHp (32 + 2, tests/msg2RoarWishMessages.test.ts); SafeguardEnds is unchanged.
+    expect(ANCHORLESS_PRE_PRINT_PAUSE_LABELS).toEqual(["BattleScript_SafeguardEnds", "BattleScript_WishButFullHp"]);
     const program = loadBattleScriptProgram();
     const start = program.labelsAtProgramCounter.findIndex((labels) => labels.includes("BattleScript_SafeguardEnds"));
     const event = (sourceLabel: string, programCounter: number) => ({ provenance: { sourceLabel, programCounter } }) as never;
