@@ -6,6 +6,8 @@
 //     personalities read back, battle RNG aligned on the ROM's gRandomTurnNumber, i.e. the ROM's gRngValue before the opponent's pre-menu AI draws; aud243c) and played with the census policy; writes the per-frame inputs (run-length encoded, frame 1 = the
 //     first step after the action menu appeared) and the sound rows relative to that frame.
 //   compare: ... compare --seed=N --scene=on|off --engine=engine.json --rom=timeline.json [--out=F]  (aud243c) engine states (hp, rng, last moves) found in order in the ROM timeline.
+//   replay --romdrive=drive.json (drv1): the message-dismiss A presses of the census driver follow the ROM driver's A frames (the `drive.segments` of the lab --drive output of the same
+//     seed; romDecisionDriver.py pulses A once every 17 frames), not every even frame. Without it the cadence is the old one (the ROM-frozen fixtures and tests replay without it).
 //   replay / native take --frame-budget=N (default 200000 engine frames) for very long battles.
 //   native: ... native --seed=N --scene=on|off --out=engine.json  the census orchestrator itself (no ROM), same output shape: the drift check against the census row's sound column.
 //   replay --render=LO:HI --render-dir=DIR (ais2): also writes the engine's 240x160 frame PNGs for replay frames LO..HI (engine-NNNNN.png), for pixel compares against ROM captures.
@@ -113,6 +115,18 @@ const streak = stage !== null ? stage.challengeNum * 7 + stage.battleNum
   : challengeOverride !== null ? challengeOverride * 7 + ((seed * 11) % 7) : (seed * 11) % 49;
 // parity-mac: very long battles (PP stall into Struggle on both sides) pass the default; --frame-budget=N raises it for one run.
 const frameBudget = Number(arg("frame-budget") ?? 200000);
+// drv1: the ROM driver's A frames (drive-numbered: 0 = the first advance after the action menu appeared), the drive's length and its decision anchors (romDecisionDriver.py `anchors`).
+// --romdrive-clock=segment (default) maps an engine frame to the ROM frame at the same distance from the latest committed decision's commit (T2 compares per decision segment, so the
+// engine's accumulated drift from the ROM must not shift the pulse phase); =absolute uses the drive frame number as is (measured in docs/aud251-s11-scoreboard-refresh.md "drv1").
+const romDriveArg = arg("romdrive") ?? process.env.ROM_REPLAY_ROMDRIVE;
+const romDriveClock = (arg("romdrive-clock") ?? "segment") as "segment" | "absolute";
+if (romDriveClock !== "segment" && romDriveClock !== "absolute") throw new Error("--romdrive-clock must be segment or absolute");
+const romA: { frames: Set<number>; length: number; anchors: { index: number; menuOpenFrame: number; commitFrame: number }[] } | null = romDriveArg === undefined ? null : (() => {
+  const drive = JSON.parse(readFileSync(romDriveArg, "utf8")).drive;
+  const frames = new Set<number>(); let k = 0;
+  for (const seg of drive.segments as Segment[]) { if (seg.buttons.includes("A")) for (let i = 0; i < seg.frames; i += 1) frames.add(k + i); k += seg.frames; }
+  return { frames, length: k, anchors: drive.anchors };
+})();
 // parity-mac: the player's Factory symbols for `request` / `native` (GetPlayerSymbolCountForFacility, frontier_util.c:1657-1698). 0 = the census config: streak 20 is the
 // silver Noland battle. 1 = streak 41 is the gold one (the lab sets the silver symbol itself for a challenge-5 factoryBrain request). `replay` reads the tier from the setup.
 // The environment variable ROM_REPLAY_SYMBOLS gives the same through an unchanged chain script (tools/audio/romDriveSeed.sh).
@@ -391,6 +405,19 @@ function play(initial: any, record: boolean, patchRng: number | null = null, pla
     const s = state.battleForcedPartySelect;
     return s && s.sendOutElapsed === null && s.elapsed >= PARTY_LIST_INPUT_ELAPSED ? s : null;
   }
+  // drv1: does the ROM driver hold A on the frame this engine step corresponds to?
+  const dismissPress = () => {
+    if (romA === null || frame0 === null) return frame % 2 === 0;
+    const k = frame - frame0;
+    if (romDriveClock === "absolute") return k < romA.length ? romA.frames.has(k) : frame % 2 === 0;
+    let ci = -1;
+    for (let i = decisions.length - 1; i >= 0; i -= 1) if (decisions[i]!.commitFrame !== null) { ci = i; break; }
+    const rom = ci < 0 ? undefined : romA.anchors.find((a) => a.index === ci);
+    if (rom === undefined) return frame % 2 === 0;
+    const r = rom.commitFrame + (k - (decisions[ci]!.commitFrame! - frame0));
+    const end = romA.anchors.find((a) => a.index === ci + 1)?.menuOpenFrame ?? romA.length;
+    return r >= rom.commitFrame && r < end ? romA.frames.has(r) : frame % 2 === 0;
+  };
   const until = (p: () => boolean) => {
     while (!ended && !p()) {
       const s = forcedSelector();
@@ -407,8 +434,9 @@ function play(initial: any, record: boolean, patchRng: number | null = null, pla
         pulse(s.message !== null ? "A" : (!s.submenuOpen && (typeof s.cursor === "number" ? s.cursor !== target : (s.cursor as string) !== "magby")) ? "DOWN" : "A");
         continue;
       }
+      // drv1: with a ROM drive, a message waiting for A is dismissed on the frames the ROM driver pressed A (outside the ROM's own segment: every even frame, as before).
       step((state.battleStartIntro && frame % 16 === 0)
-        || (state.battleResolutionPresentation?.lifecycle.phase === "awaiting-message-dismiss" && frame % 2 === 0) ? ["A"] : []);
+        || (state.battleResolutionPresentation?.lifecycle.phase === "awaiting-message-dismiss" && dismissPress()) ? ["A"] : []);
     }
   };
   try {

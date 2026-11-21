@@ -1834,3 +1834,42 @@ Length of the animation (`A1 - A0`): 119 / 193 / 193 / 245 / 220 / 152 / 213 / 2
 | ais2 seed 2741 ON window +2 (`tests/ais2AiSwitchFrames.test.ts`, `romFrameOffset` 55) | The window is exact at commit + 16 on both sides, and the AI-switch turn is ROM-exact through the switch-in within the +1 text lag: no command inside the turn is late. | none | The +2 is two 1-frame hcr2 holds in earlier turns (u = 3: decision 1 the foe's Thunder Wave, decision 4 the foe's Double Team; `usedMovePrintLeadAdjust` holds `u - 2` rows). They move the engine's absolute commit frame from 3808 to 3810, which is why the pin's `romFrameOffset` went 57 -> 55. Decision 5's own first print is the `ActionSwitch` message, which gets no hold. | Not a window fix: the offset is the hold's downstream absorption (hcr2d). Landing Thunder Wave's lead (above) changes decision 1's turn by +9 rows, so `romFrameOffset` must be re-measured after it. |
 
 Papercuts: PAPERCUT: the generic lab stage (`labBackedStage`) supports only Rattata pairs with default friendship, so the aud242 template labs had to be regenerated with `AUD242_FRIENDSHIP=0` and the Ghost Curse lab could not run on the engine, ~15 min; PAPERCUT: Sing / Grasswhistle (55%) hit in the ROM but missed in the engine at the lab's seed 1, so the lab seed had to be scanned (2, 4, 5 hit on both), ~8 min; PAPERCUT: `run-mgba-probe.py` refuses an existing output path, so a re-probe needs a fresh file name, ~3 min; PAPERCUT: reading a whole `*.rom.json` into the session flooded the context, ~5 min (pipe through `cut` / `head`).
+
+## drv1 (2026-11-21): the engine census driver presses A on the ROM driver's A frames (tools only; `src/` untouched)
+
+**Change.** `soundCensusRomReplay.ts replay --romdrive=DRIVE.json` (or `ROM_REPLAY_ROMDRIVE`): the engine's `awaiting-message-dismiss` press (was: A on every even frame) now follows the A frames of the ROM drive (`drive.segments` of the `lab --drive` output, 0 = the first advance after the action menu). Without the flag nothing changes (the ROM-frozen fixtures / tests replay without it). `tools/audio/aud249Rescore.sh` passes it (the drive file is already one of the files it copies; `AUD249_NO_ROMDRIVE=1` restores the old cadence). A fresh `aud248RunSeed.sh` chain runs its engine pass BEFORE the ROM drive exists, so its `engine.json` still has the old cadence: run `aud249Rescore.sh` after it. Decisions do not depend on the cadence.
+Clock (`--romdrive-clock=segment|absolute`, default `segment`): a press at engine frame k in the resolution of decision i uses the ROM A frame `romCommit_i + (k - engineCommit_i)`, kept inside the ROM's segment (before decision i+1's `menuOpenFrame`; outside it, or before the first commit, the old even-frame rule). Reason: T2 compares per decision segment, and the engine's drift from the ROM at decision i (a few frames, accumulated over earlier segments) otherwise moves the engine's ready time onto another pulse (below).
+
+**Check against the 24 t2n OFF drive files (and the 25 ON).** A-frame gaps in the drives: OFF 22,141 of 24,467 are exactly 17 (ON 26,702 of 28,669); the rest are menu presses (2 .. 14). `PULSE_PERIOD = 16` + release = 17 holds on every file. Seed 648 faint (OFF): ROM A at 512; the engine's A is 512 now (the stale t2n `engine.json` of the 1st t2n run had 552; the current-tree even-frame baseline about 511). ROM SE 16 464, SE 114 540; engine 468 / 541 now, 468 / 537 on the even-frame baseline.
+
+**Absolute clock is the wrong clock (measured).** Drive-numbered frames as they are: OFF mass 3,537 -> 3,517, exact 584 -> 582; faint -> party-summary offset median -7 -> +3.5 (the engine's own drift of a few frames puts its ready time on the next / previous pulse: the 17-frame cliff both ways). Segment-relative clock (the default, below) is the one that measures the engine.
+
+**T2 (all 24 OFF / 25 ON seeds, `aud249Rescore.sh` over `.integration/evidence/t2n`, `soundScoreboard.py`; missing / extra 0 / 0 in both scenes, before and after).** Baseline re-measured on this tree (c6117abdc + docs): ON 26,640 mass / 2,348 exact (the assigned 26,673 / 2,362 is not reproduced: 33 mass / 14 exact lower here; OFF 3,537 / 584 is), OFF 3,537 / 584.
+
+| family (mass / exact) | OFF before | OFF after | ON before | ON after |
+| --- | --- | --- | --- | --- |
+| move-animation SE | 0 / 0 | 0 / 0 | 20,173 / 1,996 | 19,895 / 2,006 |
+| stat-change SE | 414 / 2 | 403 / 2 | 412 / 27 | 410 / 27 |
+| cry | 614 / 92 | 517 / 97 | 1,372 / 28 | 1,231 / 31 |
+| battle-controller SE | 2,491 / 490 | 2,225 / 500 | 4,579 / 296 | 4,235 / 301 |
+| bgm | 18 / 0 | 19 / 1 | 104 / 1 | 69 / 2 |
+| TOTAL | **3,537 / 584** | **3,164 / 600** (-373, -10.5 %) | **26,640 / 2,348** | **25,840 / 2,367** (-800, -3.0 %) |
+
+Matched-row delta medians (engine - ROM): OFF battle-controller 0 / p10 -9 -> -7 / p90 0 -> 0; OFF cry p10 -9 -> -6; ON battle-controller p10 -16 -> -16 (unchanged), ON cry p10 -15 -> -14.
+
+**Faint -> party-summary rows (SE 16 -> SE 114 within one segment, interval engine - ROM, rows paired in order, both intervals <= 110; evidence `.integration/evidence/drv1/fsc.py`):**
+
+| | n | median | sum of abs | exact | histogram (offset: rows) |
+| --- | --- | --- | --- | --- | --- |
+| OFF before | 30 | -7 | 196 | 1 | -13:2 -12:1 -11:3 -10:1 -9:5 -8:1 -7:3 -6:1 -5:2 -4:2 -3:4 -2:1 -1:2 0:1 1:1 |
+| OFF after | 30 | -0.5 | 123 | 4 | -13:1 -4:2 -3:3 -2:4 -1:5 0:4 1:2 3:3 5:1 6:1 13:1 15:3 |
+| ON before | 31 | -7 | 252 | 1 | -23:1 -16:1 -15:1 -14:1 -12:1 -11:2 -10:3 -9:3 -8:2 -7:3 -6:2 -5:1 -4:2 -3:1 -1:2 0:1 3:1 5:1 8:1 10:1 |
+| ON after | 31 | 0 | 188 | 1 | -23:1 -17:1 -13:1 -12:1 -7:1 -6:1 -5:2 -3:2 -2:2 -1:3 0:1 1:1 2:3 3:4 4:1 6:1 8:2 10:1 13:1 19:1 |
+
+The -8 bias is gone (OFF median -7 -> -0.5, 15 of 30 rows within +-2 now against 5). The positive tail (+13 / +15 x3 OFF; seeds 1028, 319, 3738, 5063) is a cliff, not cadence: in 3738 the ROM's pulse A is at 16706 (SE 16 + 38) and the engine's ready lands 1 .. 3 frames after it, so it waits for the next pulse (16723): the engine's SE 16 -> ready is 1 .. 3 frames longer than the ROM's on those rows (the typing / printer-start terms of fsc2m section 4 item 2 are the suspects). With the cadence removed these rows are now visible as an engine row; fixing it flips them by 17 frames each (about 4 x 15 = -60 of the remaining OFF mass).
+
+**Why the gain (-373 OFF, -800 ON) is below the fsc2m estimate (-600 .. -900 OFF).** The estimate assumed the engine is ready on the frame the ROM is; after the cadence change the faint rows are +-2 around 0, but the other terms the old -8 was hiding (AI choice 0 .. 4, the cliff rows above, `\p` pieces whose ROM-ready is later than the engine's) are now visible and do not shrink. The other A-waits the engine crosses (`\p` / `\l` pieces, terminal win / loss) are covered by the same press path and moved with it (battle-controller exact +10 OFF, +5 ON); the forced party-menu messages (`forcedSelector`, `pulse("A")` 3-frame idiom) and the no-moves message still use the engine's own cadence (not touched; the ROM drive's `party` block pulses are `pulse()` too).
+
+**Gates.** No `src/` change; `npm run build` exit 0; `npm run test:gate` 360 files / 2,835 tests green; the 9 test files importing `soundCensusRomReplay` (ais1 / ais2 / ais3, aud252 x2, aud253, aud254, parityMacRoundReplayFixtures, pic3DrawnFieldCheck): 41 / 41 (they replay without `--romdrive`). `npm test` not run, as assigned.
+
+**Next (not done).** (1) The engine ready-time cliff rows (4 OFF, ~5 ON) are the next measurable engine term; (2) a ROM-clocked cadence for the forced party-menu messages; (3) the AI-choice term (fsc2m item 3). PAPERCUT: `aud249Rescore.sh` over 49 seeds takes about 5 minutes and a foreground command over 2 minutes is moved to the background by the harness (the t2n rescore needed a per-seed loop plus a wait), ~10 minutes lost; a `rescoreAll.sh` wrapper (the `.integration/evidence/drv1/rescore-all.sh` of this step) would help.
