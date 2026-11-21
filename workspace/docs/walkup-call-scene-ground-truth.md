@@ -122,6 +122,15 @@ eyeballing the coarser original box-level table instead of a per-frame
 typewriter probe. The corrected rows above replace it; no other row in this
 document was affected (the 829–849 and 903–949 boundaries were already
 correct).
+
+**Correction (2026-11-21, sct1, `docs/sct1-scouting-next-opponent.md`):** the
+829–849 row's `waitse` is not instant: it holds the script until
+SE_POKENAV_CALL has played. The same scenario's lab sound log
+(`tools/audio/fixtures/brain-heal-setup-window.json`) has MUS_HEAL at 634 and
+SE_POKENAV_CALL at 797, so the heal dismiss was at 632 and the box clear at
+829 is MUS_HEAL + 195 (the call + 32), as in the frame catcher's two Head
+runs. The compare trace's heal press moved from 661 to 632 with the engine's
+wait (`CALL_SCENE_POKENAV_CALL_WAIT`); the picture compare stays 131/131.
 | 950–1000 | 01 | Typewriter: `Text_UnderstoodSirWillDo` — **PNG-verified** fully typed at 1000 | "…Uh-huh? What?! …Whoa!\nUnderstood, sir! Will do!" |
 | 1001–1036 | 01 | Held | same, fully typed |
 | 1037–1084 | 02 | `Movement_AttendantReturnToPlayer` (walk_right ×3, face_down) — unique every frame | (movement only) |

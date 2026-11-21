@@ -362,15 +362,24 @@ export const POSTWIN_BRAIN_CANT_TELL_INPUT_READY_DELAY =
 const CALL_SCENE_BOX_REOPEN_LAG: readonly [number, number] = [3, 4];
 
 /**
- * Extra tick every call-scene box inherits relative to the ordinary route's
- * own post-heal schedule: the brain branch runs one script command pair the
- * ordinary branch does not (`playse SE_POKENAV_CALL; waitse`, the JSON's own
- * event right after `frontier_getbrainstatus`) before its first `message`.
- * MEASURED +1 on fixture 01 (oracle: heal text still up at 828, box clears
- * empty at 829, first glyph 830, fully typed 894 -- the app's own
- * `POSTWIN_NEXT_*` schedule lands each of those one tick early).
+ * sct1: frames `waitse` holds the script after `playse SE_POKENAV_CALL` (pre-battle room scripts.inc:63-64): `WaitForSoundEffectFinish`
+ * (scrcmd.c:910-922) waits while `IsSEPlaying` (sound.c:606-613) sees the call's player busy (MUSIC_PLAYER_SE1, song_table.inc:272; two
+ * tracks of 24 ticks at tempo 136, se_pokenav_call.s, about 27 frames). MEASURED in three ROM recordings: the heal box clears to the call's
+ * first box at MUS_HEAL + 195 (SE_POKENAV_CALL + 32), against MUS_HEAL + 165 before every ordinary prompt of the same runs: the fcr2 Head
+ * run (fanfare 258,746, call 258,909, clear 258,941), sct1's seed 9 Scene ON Head run (289,306 / 289,469 / 289,501) and the walk-up
+ * fixture 01 with its own lab sound log (tools/audio/fixtures/brain-heal-setup-window.json: fanfare 634, call 797; box clear 829 in the
+ * pictures, first glyph 830, fully typed 894). The +1 this branch had before (the bare `playse` / `waitse` pair) was fitted to fixture 01
+ * with the heal press of its compare trace 28 frames late (oracle 661 for the lab's 633), which hid this wait.
  */
-const CALL_SCENE_BRAIN_BRANCH_LAG = 1;
+export const CALL_SCENE_POKENAV_CALL_WAIT = 29;
+
+/**
+ * Extra ticks every call-scene box inherits relative to the ordinary route's own post-heal schedule: the brain branch runs one script
+ * command pair the ordinary branch does not (`playse SE_POKENAV_CALL; waitse`, the JSON's own event right after `frontier_getbrainstatus`)
+ * before its first `message`: one tick for the pair, plus `waitse`'s wait for the call to end (`CALL_SCENE_POKENAV_CALL_WAIT`). The heal
+ * text stays up until then (the ROM's box clears at MUS_HEAL + 195, its first glyph at + 196).
+ */
+const CALL_SCENE_BRAIN_BRANCH_LAG = 1 + CALL_SCENE_POKENAV_CALL_WAIT;
 export { CALL_SCENE_BRAIN_BRANCH_LAG };
 
 /**
@@ -421,7 +430,8 @@ function callSceneIsLaterPromptArrival(page: 2 | 3 | 4 | 5): boolean {
  * Per-box first-glyph delay, relative to the box's own edge.
  * - Box 1's edge is `healDismissElapsed`, so it reuses the ordinary route's
  *   own post-heal `POSTWIN_NEXT_TEXT_FIRST_DELAY` plus the brain branch's
- *   own extra `playse/waitse` tick (`CALL_SCENE_BRAIN_BRANCH_LAG`).
+ *   own `playse/waitse` ticks (`CALL_SCENE_BRAIN_BRANCH_LAG`: the pair and the
+ *   wait for SE_POKENAV_CALL to end).
  * - Boxes 2/3 arrive after a `closemessage` + `applymovement`, so their own
  *   window is reopened from scratch: the first glyph lands exactly one tick
  *   after the box frame itself reappears (`CALL_SCENE_BOX_REOPEN_LAG`),
@@ -1402,6 +1412,15 @@ export function callSceneBoxHidden(state: PostwinState): boolean {
  * message's last page) instead records `callSceneDismissElapsed`, starting
  * `AskReadyForHead`'s own prompt clock.
  */
+/**
+ * sct1: the press that ends a call-scene box stopped on a `\p` page break (boxes 3 and 4, `CALL_SCENE_BOX_PROMPT_PAGE`) plays SE_SELECT:
+ * `TextPrinterWaitWithDownArrow` (text.c:865-882) takes it; the `$`-terminated boxes end in the script's `waitbuttonpress`, which plays
+ * nothing. ROM: SE_SELECT on both page turns of the boss's message in the fcr2 and sct1 Head runs (e.g. 289,773 and 289,836).
+ */
+export function postwinCallSceneAcceptPlaysSelect(state: PostwinState): boolean {
+  return state.callScenePage !== 0 && CALL_SCENE_BOX_PROMPT_PAGE[state.callScenePage - 1] === true;
+}
+
 export function acceptPostwinCallScenePage(state: PostwinState): PostwinState {
   if (
     !state.frontierBrain ||

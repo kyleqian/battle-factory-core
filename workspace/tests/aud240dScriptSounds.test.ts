@@ -116,6 +116,7 @@ describe("script sounds match the ROM (aud240d)", () => {
       appRoute: "generated-orchestrator";
       battleScene?: "on" | "off";
       appStage: { id: string; frame: number };
+      oracleBattleLab: { preCheckpointFrameOffset: number };
       segments: Array<{ frames: number; buttons?: string[] }>;
     };
     const ours = collectWindow({
@@ -123,9 +124,16 @@ describe("script sounds match the ROM (aud240d)", () => {
       trace: { route: trace.appRoute, battleScene: trace.battleScene, appStage: trace.appStage, segments: trace.segments },
     }).events;
     const oursFanfare = ours.find((e) => e.kind === "fanfare")!;
-    expect(ours.map((e) => `${e.kind}:${e.id}`)).toEqual(["stop:469", "fanfare:368", "continue:469", "se:263"]);
+    // sct1: the boss message's two `\p` page turns play SE_SELECT (TextPrinterWaitWithDownArrow); the lab log has them too (1169, 1303).
+    expect(ours.map((e) => `${e.kind}:${e.id}`)).toEqual(["stop:469", "fanfare:368", "continue:469", "se:263", "se:5", "se:5"]);
     expect(ours.find((e) => e.kind === "continue")!.frame - oursFanfare.frame).toBe(160);
     expect(ours.find((e) => e.id === 263)!.frame - oursFanfare.frame).toBe(163);
+    // sct1: the trace's heal press is the lab's own (oracle 632, so the fanfare, the continue and the call land on the log's 634 / 794 /
+    // 797); its first call box still clears on the fixture's picture frame 829 because `waitse` waits for the call to end
+    // (CALL_SCENE_POKENAV_CALL_WAIT). The press used to be 28 frames late (661), which hid that wait.
+    const offset = trace.oracleBattleLab.preCheckpointFrameOffset;
+    expect([oursFanfare.frame, ours.find((e) => e.kind === "continue")!.frame, ours.find((e) => e.id === 263)!.frame].map((f) => f + offset))
+      .toEqual([fanfare!.frame, continuation!.frame, call!.frame]);
   });
 
   for (const name of ["heal-window", "postwin-record-window", "loss-terminal-window", "seventh-win-window"]) {

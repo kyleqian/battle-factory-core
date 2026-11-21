@@ -29,6 +29,10 @@ import {
   postwinDialogueInputReady,
   postwinDialogueVisibleChars,
   postwinScoutingInputReadyDelay,
+  advancePostwin,
+  postwinCallSceneInputReady,
+  postwinCallSceneVisibleChars,
+  CALL_SCENE_POKENAV_CALL_WAIT,
   type PostwinState,
 } from "../src/engine/postwin.ts";
 import { MUS_HEAL, POKENAV_CALL_AFTER_HEAL_FANFARE, SE_POKENAV_CALL } from "../src/engine/screenSounds.ts";
@@ -219,6 +223,28 @@ describe("sct1: before the Factory Head, the call scene from the battle number",
     expect(call).toHaveLength(1);
     expect(call[0]!.frame - fanfare[0]!.frame).toBe(POKENAV_CALL_AFTER_HEAL_FANFARE);
     expect(POKENAV_CALL_AFTER_HEAL_FANFARE).toBe(163);
+    // `waitse` holds the script until the call has played: the first box's first character at MUS_HEAL + 196 (ROM, three recordings;
+    // every ordinary prompt's at + 166), not + 167.
+    const firstGlyph = steps.find((step) => step.after.postwin!.callScenePage === 1 && postwinCallSceneVisibleChars(step.after.postwin!) === 1)!;
+    expect(firstGlyph.after.frame - fanfare[0]!.frame).toBe(196);
+    expect(CALL_SCENE_POKENAV_CALL_WAIT).toBe(29);
+    // The boss message's two `\p` page turns (boxes 3 -> 4, 4 -> 5) play SE_SELECT (TextPrinterWaitWithDownArrow), the other boxes none.
+    const selects = steps.filter((step) => step.events.some((event) => event.kind === "se" && event.id === 5));
+    const turns = selects.filter((step) => step.before.postwin!.callScenePage !== 0 && step.before.postwin!.dialoguePage === 0
+      && step.before.postwin!.continuationCursorPos === null);
+    // B takes a call box as A does (MSGBOX_DEFAULT's WaitForAorBPress; TextPrinterWaitWithDownArrow takes A | B).
+    for (const page of [1, 3] as const) {
+      // the tick that took box `page`'s A, pressed with B instead
+      const ready = steps.find((step) => step.before.postwin!.callScenePage === page && step.before.postwin!.callScenePendingElapsed === null
+        && step.after.postwin!.callScenePendingElapsed !== null)!.before;
+      expect(postwinCallSceneInputReady(ready.postwin!) || postwinCallSceneInputReady(advancePostwin(ready.postwin!))).toBe(true);
+      const { result, events: bEvents } = collectSoundTick(ready.frame + 1, () => tick(ready, B));
+      expect(result.postwin!.callScenePendingElapsed, `box ${page} on B`).not.toBeNull();
+      expect(bEvents.some((event) => event.kind === "se" && event.id === 5)).toBe(page === 3);
+    }
+    // (on the press itself; the next page follows a tick later, CALL_SCENE_PAGE_TRANSITION_DELAY)
+    expect(turns.map((step) => step.before.postwin!.callScenePage)).toEqual([3, 4]);
+    for (const step of turns) expect(step.after.postwin!.callScenePendingElapsed).toBe(step.after.postwin!.elapsed + 1);
 
     // GO ON rolls nothing (AskSwapBeforeHead, scripts.inc:370-376); the Head is rolled when the swap offer is answered.
     const goOn = steps.find((step) => step.before.postwin!.dialoguePage === 0 && step.after.postwin!.dialoguePage === 1)!;
