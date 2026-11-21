@@ -283,8 +283,8 @@ Gameplay / flow changes: rsw1 / rsw2 (the swap-return room: black hold, fade, "T
 everything else is presentation / sound timing with census eventsDigest identical both scenes. Final engine `c6117abdc`, ENGINE_BUILD `eb-3c2651248c642b97`.
 - **Item 0 (sound):** T2 on the final engine (`.integration/evidence/t2final`, `soundScoreboard.py`): ON mass 35,592 -> 26,673, exact 1,007 -> 2,362; OFF 5,437 -> 3,537, exact 126 -> 584; 0 / 0.
   Landed: the used-move first glyph at commit + 7 + u in both scenes (hcr1b / hcr2, pixel-exact labs), scoped sound leads (hcr1c, hcr2b / hcr2c), the ON wake-up head (gsp2b), OFF invisible-target
-  hit + hit-all box (fsc1), OFF two-turn moves (chg1), 10 missing SE recordings (snd3). **Next:** (1) fsc2m's census-driver A pulse (17-frame cadence like the ROM driver), then the AI-choice term;
-  (2) the 7 Scene ON residuals hcr2d named (per-body intervals, per-print u; ISSUES #219); (3) unaudited ON body leads (L < 4); (4) lead1m B4 / B5 / B6. Lesson: after merging two timing branches,
+  hit + hit-all box (fsc1), OFF two-turn moves (chg1), 10 missing SE recordings (snd3). **Next:** (1) land hcr3m's per-command fixes for the 7 Scene ON residuals and b4m's B4 leads (same doc; re-score with drv1's
+  `--romdrive` replay, now the `aud249Rescore.sh` default: T2 OFF 3,164 / ON 25,840), then fsc2m's AI-choice term; (2) per-print u in Scene ON (ISSUES #219); (3) unaudited ON body leads (L < 4); (4) lead1m B4 / B5 / B6. Lesson: after merging two timing branches,
   re-scan the soak pins on the merged tree before the full suite.
 - **Item 0b (Lobby):** lbw9 landed the save wait / wrap; #221 open.
 - **Item 0d (battle rules):** run-start replay 44 / 44 + 110 / 110; luck day 5: R058 / R096 promoted (85 / 110); wind-down replay on `c6117abdc` 44 / 44 + 110 / 110. Still hunted with 0 hits:

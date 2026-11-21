@@ -34,7 +34,13 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   16,327 / 0; `9a12931d7` 8 failed (fixed by hcr1c); `99fca080c` 16,345 / 0; `0a63934b2` 95 failed (hcr2 alone; fixed by hcr2b / hcr2c); `4fc84e424` 16,362 / 0; `350a094a8` 16,370 / 0;
   `40e172bd9` 1 failed (test-side, `17fb498e3`); `40fb8a8bd` 3 failed (chg1 leak into Scene ON, gated in `c6117abdc`). **Wind-down replay** on `c6117abdc`: pool **44 / 44** (1,441 states),
   stages **110 / 110** (`docs/replay-ledger.md`). `play:random --minutes 10 --scene both --lobby-new-challenge`: ON 37 battles / 11 swaps, OFF 61 / 20; **0 page / console errors, 0 overlays**.
-- **Next** (ranked): (1) the census driver's A pulse (fsc2m: match the ROM driver's 17-frame cadence, then the AI-choice term 6 / +2) and re-score T2 OFF; (2) Scene ON per-body interval
+- **After the gates (tools / docs only, engine unchanged):** drv1: the engine replay presses A on the ROM driver's frames (`soundCensusRomReplay.ts --romdrive`, default in
+  `aud249Rescore.sh`): T2 OFF 3,537 -> **3,164**, ON 26,640 -> **25,840** (faint -> party-summary median -7 -> -0.5; the +13 / +15 rows are a real engine term: ready 1-3 frames after the
+  ROM's pulse). hcr3m: the 7 Scene ON residuals traced to commands (Icy Wind hit hp keeps the 28-row floor vs ROM 17; recoil hp floor + 7 unpresented rows; second-mover lead L + 1; Rollout /
+  Ice Ball hp = damage + 8 on the ROM). b4m: ROM leads of the 12 B4 bodies (Thunder Wave / Stun Spore / Glare 9 ... Curse 4); the kernel's own lead already equals them; ais2's ON +2 is two
+  pixel-correct holds in earlier turns (the re-pin stands).
+- **Next** (ranked): (1) land hcr3m (hp floors after a hit / recoil, Rollout / Ice Ball hp = damage + 8, second-mover lead) and b4m (B4 ids into `BODY_LEAD_RULE`, tails, status SE offset +10 -> +3),
+  re-scoring with drv1's ROM-cadence replay; then the AI-choice term (fsc2m: 6, +2 with no super-effective candidate); (2) Scene ON per-body interval
   re-derivation for the 7 hcr2 residuals (ISSUES #219: Haze / Seismic Toss second mover, rollout5 / iceball5 later turns, aud252 end rows, ais2 ON window; Icy Wind hit -> stat SE 89 vs 77) and the
   per-print u in Scene ON; (3) the unaudited bodies' Scene ON lead (L < 4: Present 0, Memento 8, Double Team 2) and Curse -3 / Toss -1; (4) lead1m B4 C bodies, B5 adapter windows, multi-hit
   hits 2+; (5) small: chg1 Dive player unleash +1, the hcr2 labs' foe pose at the print end, #227 Mimic edge, #225 LOGO_WIGGLE / LOGO_WAVE, #223 remainder. Run the FULL suite before folding any
