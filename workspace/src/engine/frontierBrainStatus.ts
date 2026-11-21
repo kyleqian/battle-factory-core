@@ -64,3 +64,27 @@ export function getFactoryFrontierBrainStatus(
       return "not-ready";
   }
 }
+
+/** The symbol tier a Frontier Brain battle's own data is read with: index 0 (Silver) or 1 (Gold) of the source's per-symbol tables. */
+export type FrontierBrainSymbolTier = "silver" | "gold";
+
+/**
+ * hdl1 (docs/hdl1-head-lines-bike-sprite.md): `GetFronterBrainSymbol` (the source's spelling, `frontier_util.c:2587-2604`) from the
+ * battle's own status. With 0 or 1 symbols it is the symbol count (the battle is SILVER or GOLD); with both symbols it is 0 at streak 21
+ * (STREAK) and 1 at 42 and every 21 after (STREAK_LONG), the same win streak + 1 tests `getFactoryFrontierBrainStatus` makes. Neither
+ * input changes during the battle (the battle room's script writes them after it: `IncrementWinStreak` at
+ * `BattleFrontier_BattleFactoryBattleRoom/scripts.inc:92-99`, `frontier_givesymbol` at `:139, :165`), so the status picked at battle start
+ * gives the tier read when the end-of-battle line is printed (`CopyFrontierBrainText`, `frontier_util.c:2607-2631`).
+ */
+export function frontierBrainSymbolTier(
+  status: Exclude<FrontierBrainStatus, "not-ready">,
+): FrontierBrainSymbolTier {
+  switch (status) {
+    case "silver":
+    case "streak":
+      return "silver";
+    case "gold":
+    case "streak-long":
+      return "gold";
+  }
+}

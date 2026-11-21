@@ -8,6 +8,11 @@ import frontierTrainersData from "../data/gen/battle-frontier-trainers.json" wit
 import facilityClassLookupsData from "../data/gen/facility-class-lookups.json" with { type: "json" };
 import { TRAINER_FRONTIER_BRAIN } from "./factoryAiMaskSelection.ts";
 import { expandRomGlyphCodes } from "./font.ts";
+import {
+  frontierBrainSymbolTier,
+  type FrontierBrainStatus,
+  type FrontierBrainSymbolTier,
+} from "./frontierBrainStatus.ts";
 
 type EasyChatWord = Readonly<{
   source: string;
@@ -96,31 +101,77 @@ export function formatFactoryEasyChatSpeech(
  * - gender: `IsFrontierBrainFemale()` (`frontier_util.c:2483-2487`) reads
  *   `sFrontierBrainObjEventGfx[FRONTIER_FACILITY_FACTORY][1]` = `FALSE`
  *   (`frontier_util.c:674`) -- male.
- * Noland carries no Easy Chat speech rows (that table is exclusive to the
- * ordinary corpus); the empty speech tuples reflect genuinely absent source
- * data, not an omission.
+ * - end-of-battle lines (hdl1, docs/hdl1-head-lines-bike-sprite.md): `CopyFrontierTrainerText` (`frontier_util.c:1695-1774`) sends
+ *   `TRAINER_FRONTIER_BRAIN` to `CopyFrontierBrainText` (`:2607-2631`) instead of the Easy Chat rows, which copies
+ *   `sFrontierBrainPlayerLostTexts` / `sFrontierBrainPlayerWonTexts` (`:774-785`) at the symbol tier `GetFronterBrainSymbol` gives
+ *   (`:2587-2604`, `frontierBrainSymbolTier`): `gText_NolandWonSilver` / `gText_NolandDefeatSilver` at Silver (battle 21),
+ *   `gText_NolandWonGold` / `gText_NolandDefeatGold` at Gold (battle 42 and every 21 after), `data/text/frontier_brain.inc:30-44`.
+ *   "Won" is Noland's line when he wins, so it is `speechWin` (`STRINGID_TRAINER1WINTEXT`, the player lost) and "Defeat" is
+ *   `speechLose` (`STRINGID_TRAINER1LOSETEXT`, the player won), the same fields the ordinary corpus's `speechWin` / `speechLose` fill.
+ *   Each line is the source string split at its `\n`; `BufferStringBattle` adds the `PAUSE_UNTIL_PRESS` after it (`battle_message.c:
+ *   2741-2748`) for every trainer alike. The apostrophe is charmap.txt's B4 glyph (`'` and `’` both, :87-88), carried as `’` as
+ *   `displayEasyChatWord` does. Until hdl1 these were empty tuples under a comment calling them absent source data; the Head then
+ *   slid in over an empty box (docs/fcr2-catcher-round2.md finding 2).
+ * - `speechBefore` stays empty: `CopyFrontierTrainerText(FRONTIER_BEFORE_TEXT)` would also copy the player-lost line for the brain, but
+ *   the Factory never asks for it (`BattleOpponent` goes to `BattleNoland` before `palace_getopponentintro`,
+ *   `BattleFrontier_BattleFactoryBattleRoom/scripts.inc:74-76`; his speech is the walk-up script's), and `battleRoomQuote` never reads it.
  */
-const FRONTIER_BRAIN_PRESENTATION: FactoryTrainerPresentation = Object.freeze({
-  trainerId: TRAINER_FRONTIER_BRAIN,
-  trainerSourceId: "TRAINER_NOLAND",
-  name: "NOLAND",
-  facilityClassId: -1,
-  facilityClass: "N/A",
-  trainerClassId: 0x3e,
-  trainerClass: "TRAINER_CLASS_FACTORY_HEAD",
-  className: "FACTORY HEAD",
-  trainerPicIndex: 86,
-  trainerPic: "TRAINER_PIC_FACTORY_HEAD_NOLAND",
-  gender: "male",
-  speechBefore: Object.freeze(["", ""]) as readonly [string, string],
-  speechWin: Object.freeze(["", ""]) as readonly [string, string],
-  speechLose: Object.freeze(["", ""]) as readonly [string, string],
+const NOLAND_END_OF_BATTLE_LINES: Readonly<Record<
+  FrontierBrainSymbolTier,
+  Readonly<{ speechWin: readonly [string, string]; speechLose: readonly [string, string] }>
+>> = Object.freeze({
+  silver: Object.freeze({
+    // gText_NolandWonSilver (frontier_brain.inc:31-33) / gText_NolandDefeatSilver (:35-37).
+    speechWin: Object.freeze(["Way to work!", "That was a good lesson, eh?"] as const),
+    speechLose: Object.freeze(["Good job!", "You know what you’re doing!"] as const),
+  }),
+  gold: Object.freeze({
+    // gText_NolandWonGold (:39-41) / gText_NolandDefeatGold (:43-44, one line).
+    speechWin: Object.freeze(["Hey, hey, hey!", "You’re finished already?"] as const),
+    speechLose: Object.freeze(["What happened here?", ""] as const),
+  }),
 });
+
+function frontierBrainPresentation(tier: FrontierBrainSymbolTier): FactoryTrainerPresentation {
+  return Object.freeze({
+    trainerId: TRAINER_FRONTIER_BRAIN,
+    trainerSourceId: "TRAINER_NOLAND",
+    name: "NOLAND",
+    facilityClassId: -1,
+    facilityClass: "N/A",
+    trainerClassId: 0x3e,
+    trainerClass: "TRAINER_CLASS_FACTORY_HEAD",
+    className: "FACTORY HEAD",
+    trainerPicIndex: 86,
+    trainerPic: "TRAINER_PIC_FACTORY_HEAD_NOLAND",
+    gender: "male",
+    speechBefore: Object.freeze(["", ""]) as readonly [string, string],
+    speechWin: NOLAND_END_OF_BATTLE_LINES[tier].speechWin,
+    speechLose: NOLAND_END_OF_BATTLE_LINES[tier].speechLose,
+  });
+}
+
+const FRONTIER_BRAIN_PRESENTATIONS: Readonly<Record<FrontierBrainSymbolTier, FactoryTrainerPresentation>> = Object.freeze({
+  silver: frontierBrainPresentation("silver"),
+  gold: frontierBrainPresentation("gold"),
+});
+
+/**
+ * The Factory Head's presentation for one Head battle's status (its symbol tier picks his end-of-battle lines). The trainer id alone
+ * carries no tier (the ROM reads it from the save's symbols and streak), so `getFactoryTrainerPresentation(TRAINER_FRONTIER_BRAIN)`
+ * without a status gives the Silver tier, battle 21's; a round's opponent passes its own status (`factoryTrainerPresentationForOpponent`).
+ */
+export function getFrontierBrainPresentation(
+  status: Exclude<FrontierBrainStatus, "not-ready">,
+): FactoryTrainerPresentation {
+  return FRONTIER_BRAIN_PRESENTATIONS[frontierBrainSymbolTier(status)];
+}
 
 export function getFactoryTrainerPresentation(
   trainerId: number,
+  frontierBrainStatus: Exclude<FrontierBrainStatus, "not-ready"> = "silver",
 ): FactoryTrainerPresentation {
-  if (trainerId === TRAINER_FRONTIER_BRAIN) return FRONTIER_BRAIN_PRESENTATION;
+  if (trainerId === TRAINER_FRONTIER_BRAIN) return getFrontierBrainPresentation(frontierBrainStatus);
   const trainer = TRAINERS[trainerId];
   if (trainer === undefined || trainer.id !== trainerId) {
     throw new Error(`missing Battle Frontier trainer ${trainerId}`);
@@ -169,12 +220,24 @@ export function getFactoryTrainerPresentationByName(
  * return null rather than being mistaken for generated semantic state.
  */
 export function factoryTrainerPresentationForOpponent(
-  opponent: Readonly<{ id: string; trainerName: string }> | undefined,
+  opponent: Readonly<{
+    id: string;
+    trainerName: string;
+    frontierBrain?: Readonly<{ status: Exclude<FrontierBrainStatus, "not-ready"> }>;
+  }> | undefined,
 ): FactoryTrainerPresentation | null {
   if (opponent === undefined) return null;
   const match = /^factory-trainer-(\d+)$/.exec(opponent.id);
   if (match === null) return null;
-  const presentation = getFactoryTrainerPresentation(Number(match[1]));
+  const trainerId = Number(match[1]);
+  // hdl1: the Head's lines follow his battle's symbol tier, so a generated Head opponent must carry its status (generatedOpponent,
+  // factoryRoundBattleOrchestrator.ts, always sets it); an ordinary trainer must not.
+  if ((trainerId === TRAINER_FRONTIER_BRAIN) !== (opponent.frontierBrain !== undefined)) {
+    throw new Error(
+      `generated trainer identity mismatch: ${opponent.id} ${opponent.frontierBrain === undefined ? "has no" : "has a"} Frontier Brain status`,
+    );
+  }
+  const presentation = getFactoryTrainerPresentation(trainerId, opponent.frontierBrain?.status);
   if (presentation.name !== opponent.trainerName) {
     throw new Error(
       `generated trainer identity mismatch: ${opponent.id} is ${presentation.name}, got ${opponent.trainerName}`,

@@ -39,8 +39,10 @@ describe("Frontier Brain (Noland) presentation identity", () => {
       trainerPic: "TRAINER_PIC_FACTORY_HEAD_NOLAND",
       gender: "male",
       speechBefore: ["", ""],
-      speechWin: ["", ""],
-      speechLose: ["", ""],
+      // hdl1: the Silver tier's end-of-battle lines (gText_NolandWonSilver / gText_NolandDefeatSilver, frontier_brain.inc:31-37);
+      // tests/hdl1HeadEndOfBattleLines.test.ts pins both tiers against the source.
+      speechWin: ["Way to work!", "That was a good lesson, eh?"],
+      speechLose: ["Good job!", "You know what you’re doing!"],
     });
   });
 
