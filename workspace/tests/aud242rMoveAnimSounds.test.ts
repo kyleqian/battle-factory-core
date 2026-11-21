@@ -52,13 +52,13 @@ function ourEvents(rom: Fixture): SoundEvent[] {
   return events;
 }
 
-// deltas = ROM frame - our frame per row (aud242r, section 22). Moonlight -4 (status-move class; Heal Bell was -4 too, 0 since lead4 presents its script lead ahead of the body), Curse +1 (Ghost-type CurseGhost body), Spike Cannon +9 (multi-hit class, section 3), Eruption +2 (idle-lead class); inter-row gaps are exact.
+// deltas = ROM frame - our frame per row (aud242r, section 22). Moonlight -4 (status-move class; Heal Bell was -4 too, 0 since lead4 presents its script lead ahead of the body), Curse 0 (+1 before b4l; Curse (id 174) is a c-lead body, its ROM lead is presented), Spike Cannon +9 (multi-hit class, section 3), Eruption +2 (idle-lead class); inter-row gaps are exact.
 const SPECS: Array<{ name: string; ids: number[]; deltas: number[] }> = [
   { name: "healbell-player", ids: [195, 228, 102], deltas: [0, 0, 0, 0, 0] },
   { name: "spikecannon-player", ids: [160, 166], deltas: [9, 9, 9, 9, 9, 9] },
   { name: "eruption-player", ids: [178, 131], deltas: Array(14).fill(0) },
   { name: "moonlight-player", ids: [211, 179], deltas: [-4, -4] },
-  { name: "curse-player", ids: [170, 121], deltas: [1, 1, 1, 1] },
+  { name: "curse-player", ids: [170, 121], deltas: [0, 0, 0, 0] },
 ];
 
 describe("move-animation SEs of the aud242r lifetimes", () => {
