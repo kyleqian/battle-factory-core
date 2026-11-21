@@ -25,8 +25,10 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Found, not fixed:** the room's opponent-setup RNG draws are the canonical trace's fixed nature-loop counts (rsw2; parked #55 class, noted there); fsc2m: the OFF faint -> party-summary
   offset is mostly the ROM driver's 17-frame A pulse (census-driver fix next run).
 - **Cleanup:** cln10 (soak `--help` / interrupt summary, `soundScoreboard.py` guard + mass column, census `--digest` / WORKTREE arm, compare `--summary` diff runs, generic lab-backed compare
-  stage); branch prune (lib-v2-mac + this run's worker branches).
-- **Lapses:** fsc2m (side lane) committed its docs / tools commit into the main tree, not its worktree (brief named main-tree evidence paths; content kept); two supervisor merge resolutions
+  stage); cln11 (after the gates: the generic lab stage builds any `overrides.parties` lab from the engine's stat code, `tools/compare/labMon.ts`; `appStage.rngSeed` takes the ROM's
+  gRngValue at the first menu, since the ROM makes ~1,600 Random() calls before it: chg1-bounce-foe 442 -> 663 / 671); branch prune (lib-v2-mac + this run's worker branches).
+- **Lapses:** a branch glob deleted the two kept 2026-10-26 branches; restored at their tips (`worker/integration-20261026-213055` = `ce83513bb`, `-223044` = `fbc7df1db`). Merging b4m /
+  hcr3m tools broke the `iss215ToolPixelInstall` ratchet (not in test:gate); found by cln11, fixed. fsc2m (side lane) committed its docs / tools commit into the main tree, not its worktree (brief named main-tree evidence paths; content kept); two supervisor merge resolutions
   in `tools/compare/appTrace.ts` / soak pins needed fix-ups (typecheck caught a truncated function; the chg1 + hcr2 merge leaked chg1 into Scene ON, caught by the full suite, gated).
 - **Gates (final engine `c6117abdc`):** vanilla 0:20 OFF **20 / 20**, ON **20 / 20**; 0:60 default / winning / winning-swap **60 / 60** each; varied-RNG winning carry 0 / 14 / 28 + winning-swap
   carry 0 **100 / 100** each (0 crash / 0 hang everywhere; the OFF gates ran on `f1a8c2881`, whose Scene OFF path is identical to `c6117abdc`; vanilla ON re-run on `c6117abdc`). Full suite on

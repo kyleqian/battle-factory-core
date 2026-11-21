@@ -2089,4 +2089,4 @@ delta tool (now `rst197CensusDelta.py --digest`, plus a WORKTREE arm for uncommi
 - **A side-lane worker committed into the main tree** (fsc2m) because its brief named main-tree evidence paths; briefs should give worktree-relative paths or say "copy, then work in your tree".
 - **`play:random` in a pinned worktree needs `.integration/browser` linked** (playwright lives there; ~5 min, known from dl3 / dl4).
 - Workers keep hitting the 10-minute tool cap on soaks (vanilla 0:20 ~24 min, winning 0:60 ~50 min) and on typecheck / build (~5 min each, auto-backgrounded at 120 s).
-
+- **`tests/iss215ToolPixelInstall.test.ts` is not in `test:gate`**: a tools-only step that adds an engine-driving tool without `monPicPixelsInstall.ts` passes the gate and breaks the full suite (b4m / hcr3m, found by cln11). Add it to the gate list.
