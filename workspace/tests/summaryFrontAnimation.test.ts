@@ -74,14 +74,15 @@ describe("summary front-animation presentation", () => {
   it("runs MAGBY's frame program on its independent source clock with the OAM boundary lag", () => {
     const at = (clock: number) =>
       summaryFrontSpritePresentation("MAGBY", clock, false);
-    expect(at(4)).toMatchObject({ animationStarted: false, frame: 0, affine: null });
-    expect(at(5)).toMatchObject({ animationStarted: true, frame: 0, affine: null });
-    expect(at(7).affine).toEqual({ xScale: 256, yScale: 256 });
+    expect(at(4)).toMatchObject({ animationStarted: false, frame: 0, matrix: null });
+    expect(at(5)).toMatchObject({ animationStarted: true, frame: 0, matrix: null });
+    // HandleStartAffineAnim's first picture: BeginAffineAnim's sMonAffineAnims[1] (the flipped identity), sfa2.
+    expect(at(7).matrix).toEqual([-256, 0, 0, 256]);
     expect(at(20).frame).toBe(0);
     expect(at(21).frame).toBe(1);
     expect(at(36).frame).toBe(0);
     expect(at(55)).toMatchObject({ motionFinished: false });
-    expect(at(56)).toMatchObject({ motionFinished: true, affine: null });
+    expect(at(56)).toMatchObject({ motionFinished: true, matrix: null });
     expect(at(96).frame).toBe(0);
   });
 
@@ -94,7 +95,8 @@ describe("summary front-animation presentation", () => {
       }
       let elapsed = 0;
       for (const command of entry.spriteFrameProgram) {
-        const clock = SUMMARY_INITIAL_MON_ANIMATION_START + entry.delay + elapsed + 1;
+        // PokemonSummaryDoMonAnimation starts the frame program at dispatch, before any motion delay (sfa2 ROM receipts).
+        const clock = SUMMARY_INITIAL_MON_ANIMATION_START + elapsed + 1;
         expect(summaryFrontSpritePresentation(species, clock, false).frame).toBe(
           command.frame,
         );
@@ -106,7 +108,7 @@ describe("summary front-animation presentation", () => {
   it("keeps each source motion finite and releases every affine matrix", () => {
     for (const species of ["ONIX", "MAGBY", "VOLBEAT", "ELECTRIKE", "SPINDA", "SWABLU"]) {
       expect(summaryFrontSpritePresentation(species, 500, false)).toMatchObject({
-        affine: null,
+        matrix: null,
         motionFinished: true,
       });
     }
