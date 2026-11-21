@@ -343,7 +343,7 @@ export function emitGeneralAnimSounds(after: BattleResolutionPresentationState |
     // rnc1: General_Rain's script row 0 is the command's row RAIN_CONTINUES_SCRIPT_START_ROWS (the playanimation row; RAM-read rows,
     // docs/rnc1-rain-continues.md), so SE_M_RAIN_DANCE (script row 3) plays at command row 5 as on the ROM; it was 7 rows late.
     // sst1: General_Sandstorm's sounds run on the body's own clock (the art's: weatherContinuesBodyEffect draws script row `age`); on the
-    // move-body sound clock SE_M_SANDSTORM played 8 rows after the ROM's (frame catcher, 16 end turns: 7 frames before the first sand
+    // move-body sound clock SE_M_SANDSTORM played 8 rows after the ROM's (frame catcher, 15 end turns: 7 frames before the first sand
     // picture on the ROM, 1 after on ours, the pictures frame for frame the ROM's). Sun / Hail keep it (not in the sweep).
     const scriptRow = command.animation === "RAIN_CONTINUES" ? elapsed - RAIN_CONTINUES_SCRIPT_START_ROWS
       : command.animation === "SANDSTORM_CONTINUES" ? age : age - WEATHER_SCRIPT_AGE;

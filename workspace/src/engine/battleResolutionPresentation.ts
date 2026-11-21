@@ -295,7 +295,7 @@ export function weatherContinuesCommandFrames(animation: WeatherContinuesAnimati
  * runs `setbyte`, then per battler in turn order `copyarraywithindex`, `weatherdamage`, `jumpifword` and, for a battler the sandstorm
  * does not hurt, BattleScript_DamagingWeatherLoopIncrement's three commands, before the first "{X} is buffeted by the sandstorm!" print.
  * The ROM runs one script command a frame, so the rows from the body's last picture to that print's first glyph are those instructions
- * + 5 (frame catcher, 16 Scene ON end turns: 10 rows when the first battler in turn order is hurt, 5 instructions; 16 when it is not,
+ * + 5 (frame catcher, 15 Scene ON end turns: 10 rows when the first battler in turn order is hurt, 5 instructions; 16 when it is not,
  * 11). The command's tail is those instructions (the kernel's instructionExecution counts; ours had 3, 8 rows to the glyph); without
  * a "buffeted" print in the script run (neither battler hurt) it keeps WEATHER_CONTINUES_LAUNCH_TAIL_ROWS. Hail runs the same script but
  * is not in the sweep (hit1 measured its damage SE 4 late with the old tail): unchanged.

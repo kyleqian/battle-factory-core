@@ -1,0 +1,101 @@
+# tri1: each battle transition hands over to the battle intro at its own frame (2026-11-21)
+
+Found by the frame catcher's new timing report (tdr1, `docs/tdr1-catcher-timing-report.md`): the gap MUS_VS_TRAINER -> SE_BALL_TRAY_ENTER
+was off in 27 of 28 battles, by -31 to +15 frames, 439 frames in all. Branch `claude/elastic-northcutt-5cbc37` from master `f09378446`.
+Evidence (not in git): `.integration/evidence/tdr1/` (`base/` before, `tri1/` with this fix alone, `after/` with tri1 + wtl1 + sst1).
+
+## In short
+
+The battle music (MUS_VS_TRAINER) starts with the screen transition. On the ROM each of the 12 Frontier transitions takes its own time
+before the battle intro starts, the same in every battle of a round. Ours took CIRCLES_MEET's time in a round's first battle and
+ASYMMETRIC_SPIRAL_IN_SEQ's in the later ones, whatever transition played: those were the two transitions the room was first measured
+on. In battles 2+ the transition pictures also showed 3 frames late against the music. Now the room runs the transition's clock from
+the music, as the Factory Head's room already did, and hands over at each transition's own frame.
+
+## ROM
+
+### Source
+
+- `src/battle_setup.c:2096-2099` (`DoSpecialTrainerBattle`'s Frontier case): `GetSpecialBattleTransition` draws the transition,
+  `PlayMapChosenOrBattleBGM` starts the battle BGM and `BattleTransition_StartOnField` starts the transition on the same frame.
+- `src/battle_transition.c` / `battle_transition_frontier.c`: each transition runs its own task length; `Task_BattleStart` installs
+  `CB2_InitBattle` when the task is done. So the frames from the BGM to the battle intro depend on the transition, not on the battle.
+- The engine already has these per-transition ends for the brain room (`brainBattleIntroHandoffTe`, trn225), measured with the BGM as
+  the clock's anchor.
+
+### Measured (frame catcher, 6 fresh traces, 28 battles, both scenes)
+
+From MUS_VS_TRAINER, in frames (`intro.py` / `black.py`, scratch scripts over the catcher's frame stores):
+
+| transition | battles | first picture change | screen black | battle intro's first picture | SE_BALL_TRAY_ENTER | ours before (battle 1 / later) |
+|---|---|---|---|---|---|---|
+| SQUARES | 1 | 2 | 141 | 180 | 333 | 359 / 374 |
+| CIRCLES_SYMMETRIC_SPIRAL | 7 | 2 | 146 | 190 | 343 | 359 / 374 |
+| LOGO_WIGGLE | 3 | 2 | 157 | 195 | 348 | 359 / 374 |
+| CIRCLES_CROSS | 1 | 2 | 152 | 196 | 349 | 359 / 374 |
+| CIRCLES_MEET | 4 | 2 | 162 | 206 | 359 | 359 / 374 |
+| CIRCLES_CROSS_IN_SEQ | 3 | 2 | 165 | 209 | 362 | 359 / 374 |
+| LOGO_WAVE | 3 | 2 | 168 | 213 | 366 | 360 / 375 |
+| CIRCLES_MEET_IN_SEQ | 2 | 2 | 170 | 214 | 367 | 359 / 374 |
+| SQUARES_SCROLL | 2 | 2 | 178 | 219 | 372 | 359 / 374 |
+| CIRCLES_ASYMMETRIC_SPIRAL_IN_SEQ | 1 | 2 | 178 | 221 | 374 | 359 / 374 |
+| CIRCLES_SYMMETRIC_SPIRAL_IN_SEQ | 1 | 2 | 178 | 221 | 374 | 359 / 374 |
+
+Every ROM row is the same in the round's first battle and in later ones. The battle intro's first picture comes 35 frames after the
+handoff on both sides (36 after LOGO_WAVE, whose retained black callback the engine already models), and SE_BALL_TRAY_ENTER 153 frames
+after that picture on both sides. So the handoff is the only difference: ours came at 171 frames after the BGM in battle 1 (CIRCLES_MEET's)
+and 186 in battles 2+ (ASYMMETRIC_SPIRAL_IN_SEQ's).
+
+The battle's random numbers follow the same clock on the ROM: its RNG at the first action menu is the transition draw's post-state
+advanced 160 (SQUARES) to 200 (the IN_SEQ spirals) times, about 15 more than the BGM -> handoff frames, per transition (`rngdiff2.py` over
+the catcher's "battle rng" set-up rows). The engine's battle RNG is not derived from the draw (the catcher writes the engine's value into
+the ROM each battle), so that is not changed here (see Open).
+
+## Change
+
+`src/engine/battleRoom.ts`, `src/engine/core.ts` (presentation timing):
+
+- `ordinaryBattleTransitionTe`: the ordinary room's transition clock is the settled elapsed less the draw frame
+  (`ordinaryTransitionDrawElapsed`: 26 in the round's first battle, 23 later; the BGM plays there) plus the transition's start te (23 for
+  ASYMMETRIC_SPIRAL_IN_SEQ, 26 for the rest, the clocks their constants were measured on). It drives the transition overlay and the room's
+  fade. It is unchanged for the two pairs the room was measured on; in battles 2+ every other transition now shows 3 frames earlier.
+- `ORDINARY_INTRO_HANDOFF_AFTER_BGM` / `ordinaryBattleIntroHandoffElapsed`: the handoff to the battle intro at the draw frame + the
+  transition's frames from the table above less 35 (LOGO_WAVE 36). LOGO_WIGGLE (not drawn yet; the room's fallback picture stands in)
+  has its own 160. These equal the brain room's `brainBattleIntroHandoffTe` less the start te for every transition the sweep and trn225
+  both cover, except the two IN_SEQ spirals (1 frame earlier here) and LOGO_WAVE (5 earlier; trn225 left LOGO_WAVE's brain handoff on the
+  ordinary room's old value). Both core.ts handoffs (the round's first battle, later battles) use it; `BATTLE_SCENE_HANDOFF_ELAPSED` is gone.
+
+No kernel event, battle RNG or outcome moves. The overworld per-frame RNG runs through the transition until the battle starts, so it
+now advances the ROM's count per transition, and a later battle can draw another transition than before (seed 3 Scene ON's battle 7:
+CIRCLES_CROSS_IN_SEQ before, SQUARES_SCROLL after). The test player's presses follow the new timing, so fresh traces are other rounds.
+
+## Catcher, before / after
+
+Six traces made with makeTrace on this branch (seeds 3, 44, 100 Scene ON `winning-coverage`; 5 and 2 Scene OFF `winning-swap`; 8 Scene OFF
+`full`), remade after the fix (the old ones' presses no longer meet the menus).
+
+| | before (`base/`, 28 battles) | after tri1 (`tri1/`, 30 battles) |
+|---|---|---|
+| MUS_VS_TRAINER -> SE_BALL_TRAY_ENTER equal to the ROM | 1 of 28 (off -31 .. +15) | 30 of 30 |
+| MUS_VS_TRAINER -> the battle intro's first picture equal | 1 of 28 | 30 of 30 |
+| the transition's first change and black start equal | 3 of 28 (battles 2+: both 3 late) | 24 of 30 |
+| this gap in the ranked list | 2nd, 439 frames | gone |
+
+The 6 transitions still off are pictures of transitions trn225 left open: LOGO_WAVE starts 6 frames late (3 battles), LOGO_WIGGLE (not
+drawn) goes black 3 frames late (2), SQUARES_SCROLL went black 2 frames late in one battle (its direction / BGM-lag case, trn225).
+
+## Tests
+
+`tests/tri1TransitionIntroHandoff.test.ts` (6): the clock starts at the transition's start te on the BGM frame in both rooms; the two
+measured pairs keep 197 / 209 (and the no-transition fallbacks); every transition's handoff equals the ROM's frames above, the same in
+battle 1 and later; agreement with the brain table where both are measured; ordinary play (the soak's player, seed 3 Scene ON and seed 2
+Scene OFF, 4 battles each): MUS_VS_TRAINER -> SE_BALL_TRAY_ENTER is the ROM's value for each battle's transition.
+
+## Open
+
+- **The battle RNG at the first turn** does not follow the transition: on the ROM it is the transition draw advanced by the VBlanks of the
+  transition and the battle start (160 to 200 per transition, measured above); the engine's comes from the facility's RNG plan. The
+  catcher hides this by writing the engine's value into the ROM. A gameplay / RNG question for its own step.
+- From the trainer's speech to the BGM ("SE_EXIT -> MUS_VS_TRAINER") the ROM is 3-5 frames later in most later battles. It crosses the
+  speech's press, which makes no sound (`waitbuttonpress`), so the timing report cannot split it; not looked into.
+- LOGO_WAVE's and LOGO_WIGGLE's pictures (trn225 open).

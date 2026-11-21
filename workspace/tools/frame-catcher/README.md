@@ -18,8 +18,9 @@ tools/frame-catcher/run.sh OUTDIR TRACE.json [TRACE.json ...]
   | tar -x -C DIR` and link `node_modules` into `DIR/workspace`). Default: this workspace.
 - `JOBS=N` battles at a time (default 3; each ROM run is one Python process). `KEEP=1` keeps the frame stores (needed by `peek.py`).
 - `CATCHER_WATCH=1` also logs, on each change after a ROM frame, `gAnimScriptActive`, `gAnimVisualTaskCount`, the SE1 / SE2 player
-  status and `gBattlescriptCurrInstr` to `rom/watch.json` (hit1, `docs/hit1-move-hit-timing.md`: when a move's script falls and its SEs end).
-- Writes `OUTDIR/<trace name>/report.md` (ranked differences with ROM | ours | diff pictures), `findings.json`, `images/`, and
+  status, `gBattlescriptCurrInstr`, `gBattleMainFunc` and `gBattleControllerExecFlags` to `rom/watch.json` (hit1,
+  `docs/hit1-move-hit-timing.md`: when a move's script falls and its SEs end; tdr1: where a battle's end spends its frames).
+- Writes `OUTDIR/<trace name>/report.md` (the sound timing, then ranked differences with ROM | ours | diff pictures), `findings.json`, `images/`, and
   `OUTDIR/summary.md` over all traces. Without `KEEP=1` only the differing frames stay on disk.
 
 Make traces to run (the soak's seeded test player plays a fresh challenge; `full` explores menus, switches and cancels,
@@ -105,6 +106,21 @@ round takes about 2 minutes. Five traces at once (`JOBS=5`) take as long as the 
    log keeps only calls that changed the m4a RAM and ours logs every call, so before comparing: a press's sound on the first frame of the
    menu it opened counts for the menu that took the press, the same sound twice on one frame counts once, and a volume change to the
    volume the music has and a cry stop after the cry is over are left out (docs/snd2-catcher-sounds.md).
+
+4. `timing.py` (tdr1, `docs/tdr1-catcher-timing-report.md`) measures how far each sound drifts from the ROM's; compare.py runs it on
+   every run, report.md gets "Sound timing", findings.json `soundTiming`, the console line and summary.md the headline and a ranked list.
+   - Per stretch, the k-th time a sound plays on our side is paired with its k-th time on the ROM: SEs, cries and music starts (BGM,
+     fanfares). Pans, ducks, stops, fades and SE_SELECT (the presses' own sound) are left out.
+   - A sound's gap is its drift (ROM minus ours, from the stretch start) less the drift of the paired sound before it, so one late sound
+     counts once. Gaps are keyed "previous sound -> sound" ("menu <kind> -> sound" for a stretch's first).
+   - A text box press between two sounds (its SE_SELECT, text.c:865-900) splits a gap. After the press the drift is the game's. Up to the
+     press it is the driver's when the ROM took the same press of ours (the driver replays our presses at our offsets: `pressReplays` in
+     rom/timeline.json says which press of ours each ROM press is), and the game's ("via another press") when the ROM took a later or an
+     earlier one (its box was ready later or earlier than ours; measured only to the presses' spacing).
+   - Not seen: presses that make no sound (a field script's `waitbuttonpress`, walking). Held A does not speed up battle text at the oracle
+     save's FAST speed (AddTextPrinter, text.c:281-301), so held presses do not move prints.
+   - `python3 tools/frame-catcher/timing.py RUNDIR` prints the report of a finished run (also one made before tdr1: its presses count as
+     the driver's, "unknown").
 
 The Lobby attendant's CHALLENGE / INFO / EXIT and level multichoices and its YES/NOs are menus once drawn (the game's own
 `attendantAcceptsInput`); on the ROM the save dialog's YES/NO is `SaveGameTask` with `SaveConfirmInputCallback` /

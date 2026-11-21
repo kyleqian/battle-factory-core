@@ -1,4 +1,4 @@
-// sst1 (docs/sst1-sandstorm-continues.md): the end-turn sandstorm, Scene ON. ROM (frame catcher, 16 end turns in two runs), from the first
+// sst1 (docs/sst1-sandstorm-continues.md): the end-turn sandstorm, Scene ON. ROM (frame catcher, 15 end turns in two runs), from the first
 // glyph of "The sandstorm rages.": SE_M_SANDSTORM at +88 (ours +96), the sand pictures +95..+248 on both sides, and the first glyph of
 // "{X} is buffeted by the sandstorm!" at +258 when the first battler in turn order is hurt and +264 when it is not (ours +256 always):
 // BattleScript_DamagingWeatherContinues runs one script command a frame, and an unhurt battler adds LoopIncrement's three commands and the

@@ -583,8 +583,9 @@ def write_report(run, out, names):
     L = [f"# Frame catcher: {out['title']}", "",
          f"Engine {out['engineFrames']} frames, ROM {out['romFrames']} frames, {out['stretches']} stretches (menu to menu): "
          f"**{out['content']} with content differences**, {out['timing']} timing only, {out['identical']} identical. "
-         f"ROM driver: {out['driver']['anchors'][0]} of {out['driver']['anchors'][1]} menus followed (stop: {out['driver']['stop']}).", "",
-         f"## Picture differences ({len(major)}, plus {len(minor)} of at most {MINOR_PIXELS} pixels)", "",
+         f"ROM driver: {out['driver']['anchors'][0]} of {out['driver']['anchors'][1]} menus followed (stop: {out['driver']['stop']}).", ""]
+    L += timing.report_lines(out["soundTiming"])  # tdr1: how far the sounds drift, before the long picture list
+    L += [f"## Picture differences ({len(major)}, plus {len(minor)} of at most {MINOR_PIXELS} pixels)", "",
          "Ranked by size x frames. \"ours only\": pixels ours shows that the ROM never shows near that point; \"ROM only\": the reverse "
          "(for example a fade ours skips). Frames are engine frames for ours, ROM frames for the ROM.", ""]
     for d in major:
@@ -606,8 +607,7 @@ def write_report(run, out, names):
     for s in sd:
         what = "the ROM plays, ours does not" if s["direction"] == "missing" else "ours plays, the ROM does not"
         L.append(f"| {what} | {sound_name(names, s['kind'], s['id'])} | {s['at']} | {s['count']} | {', '.join(map(str, s['stretches'][:12]))}{' ...' if len(s['stretches']) > 12 else ''} | {s['first']} |")
-    L += [""] + timing.report_lines(out["soundTiming"])
-    L += ["## Stretches", "", "| stretch | where | starts at | engine frames | ROM frames | pictures | sounds |", "|---|---|---|---|---|---|---|"]
+    L += ["", "## Stretches", "", "| stretch | where | starts at | engine frames | ROM frames | pictures | sounds |", "|---|---|---|---|---|---|---|"]
     for s in out["list"]:
         L.append(f"| {s['index']} | {s['where']} | {s['startsAt'] or s['surface']} | {s['engine'][0]}-{s['engine'][1]} | {s['rom'][0]}-{s['rom'][1]} | "
                  f"{s['pictures']['class']} | {s['sounds']['class']} |")
