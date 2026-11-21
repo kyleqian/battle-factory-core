@@ -122,6 +122,8 @@ export type BattleMessageTiming =
  */
 export type BattleMoveAnimationTiming = Readonly<{
   minimumFrames: number; seGateFrames?: number; scriptLeadFrames?: number; bodyLeadFrames?: number; scriptTailRows?: number;
+  /** bdt1: rows the body's sound clock (liveMoveSourceAge) runs ahead of its presented rows; sound only, never the command's duration. */
+  soundAgeLeadFrames?: number;
 }>;
 export type BattleHitAnimationTiming = Readonly<{
   minimumFrames: 35 | typeof HIT_ANIMATION_INVISIBLE_FRAMES;
@@ -2088,6 +2090,31 @@ function moveAnimationScriptLeadTiming(
   return {};
 }
 
+/**
+ * bdt1 (Scene ON): a Dig attack turn is a locked continuation with no move menu, so the engine's first command is the print. The ROM runs the
+ * effect script first: EffectSemiInvulnerable -> SecondTurnSemiInvulnerable -> TryHit -> HitFromAtkString, its `printstring` row at
+ * press + 6 + u (u = 11, the kernel execution count of the print; ROM labs bdt1-dig-{player,opponent}-on: 1043 press -> 1060 printstring ex2,
+ * the glyphs release 1081 -> `attackanimation` 1087, A0 1089). The rows are typed as the message's scroll lead, so the print and the body's
+ * sounds start where the ROM's do.
+ */
+const MOVE_DIG = 91;
+const DIG_SECOND_TURN_PRINT_LEAD_ROWS = 17;
+function digSecondTurnPrintLead(event: BattleKernelSemanticEvent, hitMarker: number, currentMove: number | undefined): { leadFrames: number } | null {
+  if (currentMove !== MOVE_DIG || (hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0) return null;
+  if (event.payload.kind !== "message" || event.payload.messageId !== "STRINGID_USEDMOVE"
+    || event.provenance?.sourceLabel !== "BattleScript_HitFromAtkString") return null;
+  return { leadFrames: DIG_SECOND_TURN_PRINT_LEAD_ROWS };
+}
+/**
+ * bdt1 (Scene ON): Dig's charge-turn body (BattleScriptFirstChargingTurn, no body lead) plays its first SE 6 rows after the ROM does on the generic
+ * sound clock (SE 175 at 66 / 100 / 134 / 168 / 202 against the ROM's 60 / 94 / 128 / 162 / 196 on both bdt1-dig-{player,opponent}-on labs; 10 T2
+ * windows, 4 seeds): the ROM releases the used print and reaches `gAnimScriptActive` 4 rows apart (R -> A0 = 4) where the clock assumes 10. The
+ * command's duration is already exact (the next print lands on A1), so only the sound clock moves.
+ */
+const DIG_CHARGE_TURN_SOUND_LEAD_ROWS = 6;
+function digChargeTurnSoundLead(event: BattleKernelSemanticEvent, moveId: number): { soundAgeLeadFrames?: number } {
+  return moveId === MOVE_DIG && event.provenance?.sourceLabel === CHARGE_TURN_SCRIPT ? { soundAgeLeadFrames: DIG_CHARGE_TURN_SOUND_LEAD_ROWS } : {};
+}
 const SCRIPT_TAIL_BETWEEN_OPCODES: ReadonlySet<string> = new Set(["B_SCR_OP_WAITANIMATION", "B_SCR_OP_SETBYTE", "B_SCR_OP_SETGRAPHICALSTATCHANGEVALUES"]);
 // lse4: the first-charging-turn script (orword HITMARKER_CHARGING, setbyte, seteffectprimary, copyarray) between the animation and its print.
 const CHARGE_TURN_BETWEEN_OPCODES: ReadonlySet<string> = new Set([...SCRIPT_TAIL_BETWEEN_OPCODES, "B_SCR_OP_ORWORD", "B_SCR_OP_SETEFFECTPRIMARY", "B_SCR_OP_COPYARRAY"]);
@@ -5549,6 +5576,7 @@ export function projectBattleResolutionCommands(
         ),
         advance: "automatic",
         ...(selfConfusionOff ? { leadFrames: SELF_CONFUSION_OFF_PRE_PRINT_ROWS } : {}),
+        ...(digSecondTurnPrintLead(event, beforeRules.hitMarker, actionSnapshot?.currentMove) ?? {}),
         ...(payload.messageId === "STRINGID_TARGETFAINTED"
           || payload.messageId === "STRINGID_ATTACKERFAINTED"
           ? { faintBattler: lastFaintBattler! }
@@ -5748,6 +5776,7 @@ export function projectBattleResolutionCommands(
           timing: Object.freeze({
             minimumFrames: SCENE_OFF_MOVE_PAUSE_FRAMES, ...moveAnimationSeGateTiming(events, index), ...moveAnimationScriptLeadTiming(events, index, presentedSinceUsedAtAttack, animation.moveId),
             ...moveAnimationScriptTailTiming(events, index, usedMoveInstructionExecution, presentedSinceUsedAtAttack, animation.moveId),
+            ...digChargeTurnSoundLead(event, animation.moveId),
           }),
         }));
         continue;

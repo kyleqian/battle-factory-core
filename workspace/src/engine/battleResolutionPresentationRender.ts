@@ -1700,10 +1700,10 @@ export function liveMoveSourceAge(
   let precedingStatRows = 0;
   for (let c = state.commandIndex - 1; c >= 0 && segment!.commands[c]!.type === "stat"; c -= 1) precedingStatRows += battleResolutionCommandDuration(segment!.commands[c]!, field);
   const soundShift = lse2BodySoundAgeShift(command.animation.moveId, presentedBodyLead(command, field), precedingStatRows);
-  const age = state.lifecycle.phaseElapsed - seGate - pre - soundShift;
+  const age = state.lifecycle.phaseElapsed - seGate - pre - soundShift + (command.timing.soundAgeLeadFrames ?? 0);
   // aud260: the age of the command's last presenting row (the command completes when phaseElapsed + 1 >= its duration), for the sound-only tail past the window.
   const duration = battleResolutionCommandDuration(withoutBodyLead(command), field, liveMoveTimingBodyOf(state.liveMoveSpriteOrderInput), state.liveMoveBattlerX2Input?.moveUse);
-  const lastAge = duration - 1 - seGate - pre - soundShift;
+  const lastAge = duration - 1 - seGate - pre - soundShift + (command.timing.soundAgeLeadFrames ?? 0);
   // snd3: Sing's geometry-derived ROM body (gAnimScriptActive rise .. first inactive row, liveSingBodyRows), read only by the quiet-BGM restore row.
   const request = command.animation;
   const singBodyRows = (): number | null => liveSingBodyRows(request, field);
