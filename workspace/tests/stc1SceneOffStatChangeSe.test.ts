@@ -14,6 +14,8 @@ const { APP_STAGES, labBackedStage } = (await import(/* @vite-ignore */ appTrace
   labBackedStage: (file: string, state: Engine) => Engine;
 };
 
+type HpResolution = { segments: ReadonlyArray<{ commands: ReadonlyArray<{ type: string; from?: number; to?: number }> }>; segmentIndex: number; commandIndex: number };
+
 function statSeFrame(lab: string): { frame: number; id: number; drop: number | null } {
   const request = JSON.parse(readFileSync(new URL(`../tools/battle-lab/${lab}.json`, import.meta.url), "utf8")) as { trace: { segments: Array<{ frames: number }> } };
   let state: Engine = createInitialState({ appRoute: "generated-orchestrator", battleScene: "off" });
@@ -24,7 +26,7 @@ function statSeFrame(lab: string): { frame: number; id: number; drop: number | n
     if (advance.frame > total) break;
     const result = collectSoundTick(state.frame + 1, () => tick(state, advance.buttons));
     state = result.result;
-    const resolution = (state as { factoryRoundBattleOrchestrator?: { battleResolutionPresentation?: { segments: Array<{ commands: Array<{ type: string; from?: number; to?: number }> }>; segmentIndex: number; commandIndex: number } } }).factoryRoundBattleOrchestrator?.battleResolutionPresentation;
+    const resolution = (state as unknown as { factoryRoundBattleOrchestrator?: { battleResolutionPresentation?: HpResolution } }).factoryRoundBattleOrchestrator?.battleResolutionPresentation;
     const command = resolution?.segments[resolution.segmentIndex]?.commands[resolution.commandIndex];
     if (drop === null && command?.type === "hp") drop = command.from! - command.to!;
     const stat = result.events.find((e) => e.kind === "se" && (e.id === 239 || e.id === 245) && e.frame > 25);
