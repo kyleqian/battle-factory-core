@@ -101,7 +101,7 @@ seed no longer plays; `rnc1` was re-recorded on the ROM, and the `flow1` case's 
 - `tests/fop1CensusRound.test.ts` (7): the census seed's battle.
 - `npm run typecheck` uses `flock`, which this Mac lacks; its command (`NODE_OPTIONS=--max-old-space-size=8192 tsc -b`) is clean.
 - `npm run test:gate`: 360 files, 2,832 tests pass.
-- Full `npm test` (before the doc and the last test-comment edit): 1,910 files pass, 44 skipped; 16,425 tests pass, 243 skipped, 0 failed
+- Full `npm test` on the branch tip `807648ecf`: 1,910 files pass, 44 skipped; 16,425 tests pass, 243 skipped, 0 failed
   (baseline on `9a28a00fb`: 1,908 / 16,401, 0 failed; after the fix alone: 107 files / 322 tests failed, then the census helper and the
   re-pins above).
 - `python3 -m unittest tools/test_frame_catcher.py`: 32 tests OK.
