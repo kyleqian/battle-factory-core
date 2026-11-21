@@ -1058,7 +1058,11 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // depth 2 / roundLost. With the old fixed [72, 74, 72] accept delays (and the new text) the old pin passes again; seed 0 is unmoved.
       // lbb1 (see seed 0): frames only, 58793 -> 58758; decision notes identical to 6817b6a8c's once the press-stream notes (the party
       // wander and forced-menu DOWN rolls) are set aside; same battle 3 / depth 2 / turn 19 / roundLost.
-      frames: 58758,
+      // msg2 (docs/msg2-roar-wish-messages.md: Roar / Whirlwind's dragged-out release -> moveendall is 4 rows, the box clears 1 row
+      // earlier, so the exploring presses after it land 1 row earlier), measured on the combined tree (trial-fix-20261121 e12015ff1 +
+      // msg2): frames only, 58758 -> 58763; same battle 3 / depth 2 / turn 19 / roundLost. With RELEASE_TO_MOVEEND_ROWS.STRINGID_PKMNWASDRAGGEDOUT
+      // back at 5 the old pin passes again (on msg2's own base the same tail moved 58793 -> 58798); seed 0 is unmoved.
+      frames: 58763,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 2,
