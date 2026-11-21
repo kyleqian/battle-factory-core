@@ -34,13 +34,13 @@ describe("pic9: the ROM's hp thresholds", () => {
   });
 });
 
-describe("pic9: every switch line on the real route follows the foe's HP (full-policy soak seeds 0 and 1)", () => {
+describe("pic9: every switch line on the real route follows the foe's HP (full-policy soak seeds 0 to 2)", () => {
   it("come-back lines read the foe's HP drop since the last switch-in, send-in lines its current HP", () => {
     const returnLine = ["that’s enough! Come back!", "come back!", "OK! Come back!", "good! Come back!"];
     const sendInLine = (name: string) => [`Go! ${name}!`, `Do it! ${name}!`, `Go for it, ${name}!`, `Your foe’s weak! Get ’em, ${name}!`];
     const seenScales = { back: new Set<number>(), in: new Set<number>() };
     let switches = 0;
-    for (const seed of [0, 1]) {
+    for (const seed of [0, 1, 2]) {
       const seen = new Set<unknown>();
       runSeed(seed, {
         policy: "full", renderEvery: 1, maxFrames: 120_000, stopAtFirstRoundDecision: true,
@@ -74,6 +74,8 @@ describe("pic9: every switch line on the real route follows the foe's HP (full-p
     expect(switches).toBeGreaterThan(5);
     // flow1 (the move menu opens on the first move after a switch-in) moved the exploring games: they now also reach scale 1
     // ("<MON>, come back!"); every line above still follows Cmd_hpthresholds2. Was [0, 2, 3].
+    // sct1 (docs/sct1-scouting-next-opponent.md: the scouting pages take A from their own last character + 3, so seed 1's exploring game
+    // is a new trajectory, see randomRoundSoak.test.ts): seeds 0 and 1 reach [0, 2, 3] again; seed 2 reaches scale 1, so the seeds are 0..2.
     expect([...seenScales.back].sort()).toEqual([0, 1, 2, 3]);
     expect([...seenScales.in].sort()).toEqual([0, 1, 2, 3]);
   }, 180_000);

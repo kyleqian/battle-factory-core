@@ -1036,12 +1036,15 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // other moves, so a new trajectory: 60400 / turn 19 -> 61456 / turn 22; same battle 3 / depth 2 / roundLost. The cursor fix alone moves
       // it (with it undone the old pin passes; the recall fix alone leaves it). Seed 0 is unmoved.
       // lrc1 (the loss tail runs the opponent's animated recall, see seed 0): frames only, 61456 -> 61504; same battle 3 / depth 2 / turn 22 / roundLost.
-      frames: 61504,
+      // sct1 (docs/sct1-scouting-next-opponent.md: each scouting page takes A from its own last character + 3, and the pages are the next
+      // opponent's, so their lengths and the exploring presses after them move): 61504 / turn 22 -> 58793 / turn 19; same battle 3 /
+      // depth 2 / roundLost. With the old fixed [72, 74, 72] accept delays (and the new text) the old pin passes again; seed 0 is unmoved.
+      frames: 58793,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 2,
       battle: 3,
-      turn: 22,
+      turn: 19,
     });
   });
 
