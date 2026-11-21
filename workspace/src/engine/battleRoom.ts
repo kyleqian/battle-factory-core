@@ -999,8 +999,7 @@ export function brainBattleTransitionTe(state: BattleRoomState): number {
  * The transition clock the brain room hands over to the battle intro at: twenty frames after the circle transition's fade to black starts
  * (the fade ends after eleven, the transition task ends, Task_StartBattleAfterTransition installs CB2_InitBattle six frames later). ROM
  * (silver, CIRCLES_MEET_IN_SEQ): fade from transition clock 185, black from 196, CB2_InitBattle at 202, the battle intro's first frame 35
- * frames after this handoff, as the engine's intro draws it. LOGO_WAVE keeps the ordinary path's BATTLE_2_SCENE_HANDOFF_ELAPSED (no
- * brain run measured it).
+ * frames after this handoff, as the engine's intro draws it. LOGO_WAVE hands over at 209 on its own clock (start 32, ROM-measured, trn226).
  */
 export const BRAIN_BATTLE_START_AFTER_EXIT_FADE = 20;
 export function brainBattleIntroHandoffTe(state: BattleRoomState): number {
