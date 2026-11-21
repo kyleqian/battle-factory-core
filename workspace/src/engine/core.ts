@@ -566,6 +566,7 @@ import {
   postwinContinuationMenuVisibleDelay,
   createPostwinStateFromOpponentRentalRecords,
   createPostwinStateFromRound,
+  withPostwinUpcomingOpponentScouting,
   POSTWIN_BATTLE_ROOM_FADE_OUT_AGE,
   POSTWIN_BATTLE_ROOM_FIRST_AGE,
   POSTWIN_COUNTER_ROOM_FIRST_AGE,
@@ -612,6 +613,7 @@ import {
   postwinRightThisWayInputReady,
   postwinRngSteps,
   acceptPostwinCallScenePage,
+  postwinCallSceneAcceptPlaysSelect,
   CALL_SCENE_BRAIN_BRANCH_LAG,
   callSceneAttendantVisual,
   callSceneBoxHidden,
@@ -719,6 +721,7 @@ import {
   factoryHeardBrainSpeech,
   factoryRoundBattleOpponentIdleRest,
   factoryRoundBattleResolutionForRender,
+  factoryRoundNextBattleBrainStatus,
   markFactoryBrainSpeechHeard,
   preGenerateFactoryRoundNextOpponent,
   type FactoryRoundBattleOrchestratorState,
@@ -1218,6 +1221,8 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
               generatedRound,
               // contain213: a presentation throw in the frozen scene degrades it (presentationContainment.ts "field").
               containedBattleResolutionRenderView(preAdvanceResolution, "postwin frozen scene"),
+              // sct1: the Factory Head's call scene is chosen from the next battle's number, as `frontier_getbrainstatus`.
+              factoryRoundNextBattleBrainStatus(factoryRoundBattleOrchestrator) !== "not-ready",
             )
           : generatedCommandType === "roundLost"
               || generatedCommandType === "roundCompleted"
@@ -1858,14 +1863,19 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
     } else if (
       // Walk-up build step A: the brain route's call-scene boxes (phone SE,
       // attendant walk-away/return, 3-page boss message) - each advances on
-      // A the same way the ordinary route's own scouting pages 1-3 do.
+      // a press the same way the ordinary route's own scouting pages 1-3 do.
+      // sct1: A or B (MSGBOX_DEFAULT's waitbuttonpress is WaitForAorBPress;
+      // a `\p` page waits in TextPrinterWaitWithDownArrow, A | B, and plays
+      // SE_SELECT, text.c:865-882).
       nextPostwin.frontierBrain &&
       nextPostwin.callScenePage !== 0 &&
       nextPostwin.callSceneDismissElapsed === null &&
       postwinCallSceneInputReady(nextPostwin) &&
-      newKeys.has("A")
+      (newKeys.has("A") || newKeys.has("B"))
     ) {
+      const beforeCallScenePage = nextPostwin;
       nextPostwin = acceptPostwinCallScenePage(nextPostwin);
+      if (nextPostwin !== beforeCallScenePage && postwinCallSceneAcceptPlaysSelect(beforeCallScenePage)) playSelectSe();
     } else if (
       nextPostwin.swapDeclineElapsed !== null &&
       nextPostwin.rightThisWayDismissElapsed === null &&
@@ -1950,6 +1960,13 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
           factoryRoundBattleOrchestrator = preGenerateFactoryRoundNextOpponent(
             factoryRoundBattleOrchestrator,
           );
+          // sct1: `factory_getopponentmontype` / `factory_getopponentstyle` read the opponent just rolled (scripts.inc:139-142), so
+          // the scouting pages are that opponent's, not the trainer just beaten. No opponent is rolled before the Factory Head
+          // (AskSwapBeforeHead), whose route shows "I can't tell you anything about the FACTORY HEAD." instead.
+          const upcoming = factoryRoundBattleOrchestrator.pendingNextOpponent;
+          if (upcoming !== null && !nextPostwin.frontierBrain) {
+            nextPostwin = withPostwinUpcomingOpponentScouting(nextPostwin, upcoming.generation.opponents);
+          }
         }
       }
     }
@@ -3492,9 +3509,9 @@ function renderPostwinState(state: EngineState): Uint8Array {
     drawMessageBoxFrame(fb);
     const healDismiss = postwin.healDismissElapsed;
     // The brain branch's own extra `playse SE_POKENAV_CALL; waitse` pair
-    // (CALL_SCENE_BRAIN_BRANCH_LAG) pushes its box clear one tick past the
-    // ordinary route's: MEASURED on fixture 01 (oracle still shows the heal
-    // text at 828 and only clears to an empty box at 829).
+    // (CALL_SCENE_BRAIN_BRANCH_LAG) pushes its box clear past the ordinary
+    // route's: one tick for the pair and the call's own length (sct1, ROM:
+    // MUS_HEAL + 195 against + 165; fixture 01 clears at 829).
     const beforeContinuation =
       healDismiss === null ||
       age < healDismiss + POSTWIN_NEXT_BOX_CLEAR_DELAY

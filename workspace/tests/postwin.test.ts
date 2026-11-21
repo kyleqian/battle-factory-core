@@ -148,6 +148,7 @@ import {
   POSTWIN_BRAIN_CANT_TELL_TEXT_TOTAL,
   POSTWIN_BRAIN_CANT_TELL_INPUT_READY_DELAY,
   POSTWIN_SCOUTING_LINES,
+  POSTWIN_SCOUTING_LINES_BEFORE_ROLL,
   type PostwinState,
 } from "../src/engine/postwin.ts";
 import walkupScript from "../src/data/gen/factory-brain-walkup-script.json" with { type: "json" };
@@ -328,9 +329,9 @@ describe("S8 Battle-1 postwin transition", () => {
     const state = createPostwinStateFromRound(
       round,
       {} as unknown as BattleResolutionPresentationRenderView,
+      false,
     );
     const opponentSetIds = generated.opponents.map(({ setId }) => setId);
-    const commentary = getFactoryOpponentCommentary(generated.party);
 
     expect(opponentSetIds).not.toEqual(POSTWIN_OPPONENT_RENTAL_IDS);
     expect(state).toMatchObject({
@@ -341,10 +342,8 @@ describe("S8 Battle-1 postwin transition", () => {
       playerPartyHp: [11, 22, 33],
       healedPlayerPartyHp: terminalPlayerParty.map(({ maxHp }) => maxHp),
     });
-    expect(state.scoutingLines.slice(1, 3)).toEqual([
-      commentary.favoriteTypeLines,
-      commentary.battleStyleLines,
-    ]);
+    // sct1: the next opponent is rolled at the GO ON answer, so the pages are not the beaten trainer's: not filled yet.
+    expect(state.scoutingLines).toEqual(POSTWIN_SCOUTING_LINES_BEFORE_ROLL);
 
     let advanced = state;
     while (advanced.elapsed < POSTWIN_OPPONENT_RENTALS_WRITE_AGE) {
@@ -1502,7 +1501,7 @@ describe("pmn238: the next-match prompt follows the battle number (AskReadyForRe
 });
 
 describe("Walk-up build step A, Brief 1: postwin.ts brain call-scene + AskReadyForHead (docs/walkup-step-a-design.md)", () => {
-  function brainRoundOpponent(frontierBrain: boolean) {
+  function brainRoundOpponent(frontierBrain: boolean, upcomingFrontierBrain = frontierBrain) {
     const generated = generateFactoryOpponent({
       rngValue: 3,
       factoryWinStreak: 20,
@@ -1546,12 +1545,15 @@ describe("Walk-up build step A, Brief 1: postwin.ts brain call-scene + AskReadyF
     return createPostwinStateFromRound(
       round,
       {} as unknown as BattleResolutionPresentationRenderView,
+      upcomingFrontierBrain,
     );
   }
 
-  it("createPostwinStateFromRound sets frontierBrain from the UPCOMING opponent's frontierBrain field alone (§2.2), status tier not needed", () => {
-    expect(brainRoundOpponent(true).frontierBrain).toBe(true);
-    expect(brainRoundOpponent(false).frontierBrain).toBe(false);
+  it("createPostwinStateFromRound takes the call scene from the NEXT battle's brain status (sct1), never from the trainer just beaten", () => {
+    expect(brainRoundOpponent(false, true).frontierBrain).toBe(true);
+    expect(brainRoundOpponent(false, false).frontierBrain).toBe(false);
+    // The beaten opponent's own marker does not select it (it used to: never set after a played battle 20).
+    expect(brainRoundOpponent(true, false).frontierBrain).toBe(false);
   });
 
   it("pins CALL_SCENE_BOX_TEXTS/AskReadyForHead prompt text against the JSON verbatim, never retyped", () => {
