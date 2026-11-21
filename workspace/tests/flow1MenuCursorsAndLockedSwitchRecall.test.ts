@@ -311,7 +311,9 @@ describe("flow1: whole challenges of the frame catcher's seeds", () => {
     // continuation of the Dig charge's resolution). The frame catcher over this seed's trace (makeTrace --seed 135 --scene off --policy
     // full --battles 2, docs/fop1-first-opponent-order.md) shows the ROM print the same two lines with PUPITAR hidden, same sounds.
     // Seed 163 (the merge re-pin above): ONIX -> GROWLITHE while battle 1's PUPITAR is underground (ONIX's Dragonbreath missed it first).
-    // Engine-only: no frame catcher run over seed 163's trace yet.
+    // The frame catcher over its trace (makeTrace --seed 163 --scene off --policy full --battles 2; 89 / 89 menus, 0 sound differences in the
+    // run) shows the ROM print "ONIX, come back!", the recall, "Go! GROWLITHE!" and "Foe PUPITAR used DIG!" with PUPITAR hidden, as ours
+    // (engine 4100-4300, ROM 4371-4571); that stretch has the same 12 sound events (timing shifts -7 .. +2 frames).
     const underground = recalls.filter((r) => r.continuation);
     expect(underground.map((r) => r.lines.slice(0, 2))).toEqual([["ONIX, come back!", "Go! GROWLITHE!"]]);
   });
