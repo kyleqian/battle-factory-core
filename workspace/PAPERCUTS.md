@@ -13,7 +13,7 @@ history.
 - **`npm run typecheck` covers only `src/` + `tests/`; `tools/compare/appTrace.ts` is checked only by `npm run build` (`tsc -b`) or a test importing it.** A supervisor
   merge-conflict resolution in appTrace.ts (f047ca4f5: duplicate imports / keys) passed typecheck and broke build until lbw7 fixed it (~15 min). After a merge touching
   `tools/`, run `npm run build`, not only typecheck.
-- **Soak `--seeds 0:20` (~22-45 min) cannot finish in one 10-min tool call**; workers chunk it by hand (mem2 ~25, kno3, pau2). `npm run soak -- --help` starts a real soak.
+- **Soak `--seeds 0:20` (~22-45 min) cannot finish in one 10-min tool call**; workers chunk it by hand (mem2 ~25, kno3, pau2).
 - **`LSD194_SPLIT=3` does not divide a 100-seed shard** (mem2, kno3): briefs should say SPLIT=4.
 - `prehunt.py` prints per-cover results as a raw dict with newlines in the keys (luck5); no PIL / numpy for image analysis (lbw7 used node + pngjs, ~10 min).
 - `appStage` frame semantics (frame 0 vs a mid-trace stage frame) undocumented (lbw7 ~10 min).
@@ -23,7 +23,7 @@ history.
   workers hit the shared typecheck flock (~8 min waits).
 - **Brief tail contradicts the step rule** ("npm test green" vs "do NOT run npm test"): several workers lost minutes; luck5 / luck6 ran full `npm test` shards anyway (luck6 hit its cap inside one).
 - **The census tool scored a sound clock that starts past age 0 as declined** (`lsd194Census.ts`, fixed by c1k `2f88532bd`): census arms made before it show 876 phantom T1 rows (Calm Mind / Cosmic Power / Encore).
-- `soundScoreboard.py` runs `main()` on import (t2r copied its constants); `pfr185Probe.py` / `pfr185Run.py` deleted by cln237 had to be recovered from git (bal1); `.integration/browser` missing in worktrees (dl3 / dl4 symlinked it).
+- `pfr185Probe.py` / `pfr185Run.py` deleted by cln237 had to be recovered from git (bal1); `.integration/browser` missing in worktrees (dl3 / dl4 symlinked it).
 
 ## Worker friction, 2026-11-16 run
 
@@ -2076,3 +2076,17 @@ current app stage should be rejected before replay.
 - **The T2 sound scoreboard does not fit a 10-minute tool call above 2 seeds** (lse4, t2n): run it under `nohup` with a per-seed result file.
 - **`prehunt.py` swallows a failed lab request's stderr and reuses a stale `su.json`**, and a stage file's `level` is ignored by the engine rebuild unless the new guard throws (rrh5).
 - **A run's own sed slip bloated `docs/aud251-s11-scoreboard-refresh.md` to 62 MB** (`b0e4cf53d`, 2026-11-19, text repeated at every character; t2n restored it): check `git diff --stat` size on doc edits made by scripts.
+
+## 2026-11-21 run (CAX31 supervisor + workers)
+
+Fixed by cln10 (`docs/cln10-tooling-papercuts.md`): soak `--help` and the interrupted-soak summary, `soundScoreboard.py`'s import guard and mass column, the census header naming a missing
+delta tool (now `rst197CensusDelta.py --digest`, plus a WORKTREE arm for uncommitted trees), compare `--summary` showing only the tail, new lab traces needing an `APP_STAGES` edit
+(generic `appStage: {id: "lab"}` for Rattata-pair labs).
+- **Two timing branches re-pin the same soak / lbrd pins against different bases** (rsw1 / hcr1b / gsp2b / fsc1 / chg1 / hcr2 all moved `tests/randomRoundSoak.test.ts`): every merge needed a
+  pin re-scan worker (pin2, pin3, ~40 min each) and a full suite. Hits: 6.
+- **Supervisor conflict resolution in `tools/compare/appTrace.ts` stage registries** (two branches appending a `*Stages()` function at the same spot): a scripted "keep both" truncated a
+  function once (typecheck TS1005, ~10 min + a killed suite). Resolve these by hand, then `npm run typecheck`.
+- **A side-lane worker committed into the main tree** (fsc2m) because its brief named main-tree evidence paths; briefs should give worktree-relative paths or say "copy, then work in your tree".
+- **`play:random` in a pinned worktree needs `.integration/browser` linked** (playwright lives there; ~5 min, known from dl3 / dl4).
+- Workers keep hitting the 10-minute tool cap on soaks (vanilla 0:20 ~24 min, winning 0:60 ~50 min) and on typecheck / build (~5 min each, auto-backgrounded at 120 s).
+
