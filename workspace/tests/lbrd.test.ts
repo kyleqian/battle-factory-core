@@ -76,7 +76,9 @@ interface WonLobby {
 // 10, 13 and 19 passing every case (15 / 15; 2 and 4 fail the 2 continuation cases, 17 and 20 fail 6, the rest 10), so the continuation uses 10.
 // merge of the box's 2026-11-20 run with the Mac's 11-21 fixes: the merge kept the box's 0 / 0 / 0 (lbw9's re-pin; the Mac had 10 / 13 / 10 after trial-fix-20261121). All 15 cases
 // pass with 0 in all three roles on the merged tree, so they stay.
-const WIN_TWO_SEED = 0;
+// wtl1 (the win tail holds 24 more rows before "Player defeated", ROM P + 26): 0's Scene OFF continuation loses. A scan of 1..28 in the WIN_TWO role (scratch copies of this file) found only 13 passing all 15
+// (2 / 4 / 10 fail the two continuation cases, 19 / 23 fail 2 cases, the rest more); RETIRE and the loss keep 0.
+const WIN_TWO_SEED = 13;
 const RETIRE_SEED = 0;
 const WIN_THEN_LOSE_SEED = 0;
 

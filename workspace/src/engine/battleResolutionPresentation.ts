@@ -1414,6 +1414,38 @@ const SCENE_ON_ACTION_TRANSITION_NEXT_PRINT = "STRINGID_PKMNWOKEUP";
 const IN_LOVE_TRANSITION_PRINT = "STRINGID_PKMNINLOVE";
 const IN_LOVE_TRANSITION_ROWS = -2;
 
+/**
+ * wtl1 (ROM labs aud241c-win-{off,on}; P = the press on the foe's last "fainted!", Q = P + 2 the controller's completion): the win tail's script
+ * rows draw nothing. 5 rows from Q to the first MoveEnd receipt (BattleScript_MoveEnd's setbyte, moveend; its receipts are exec 126/127 = P + 5 / P + 6),
+ * then 19 from the second receipt to BattleScript_FrontierTrainerBattleWon's printstring (HandleAction_TryFinish / HandleFaintedMonActions:
+ * BattleScript_HandleFaintedMon's checkteamslost, ActionFinished, HandleEndTurn_BattleWon, jumpifnotbattletype / jumpifbattletype): the
+ * "Player defeated" printstring executes at P + 25, its first glyph at P + 26 in both scenes.
+ */
+export const WIN_TAIL_PRE_RECEIPT_ROWS = 5;
+export const WIN_TAIL_POST_RECEIPT_ROWS = 19;
+
+/** wtl1: the win-tail hold rows around a MoveEnd receipt run that ends in STRINGID_PLAYERDEFEATEDTRAINER1 (null for any other receipt). */
+function winTailHoldRows(events: readonly BattleKernelSemanticEvent[], receiptIndex: number): Readonly<{ before: number; after: number }> | null {
+  const isReceipt = (event: BattleKernelSemanticEvent | undefined) =>
+    event !== undefined && event.payload.kind === "set-battler-sprite-visibility" && event.provenance?.opcodeName === "B_SCR_OP_MOVEEND";
+  let end = receiptIndex;
+  while (isReceipt(events[end + 1])) end += 1;
+  const next = events[end + 1];
+  if (next === undefined || next.payload.kind !== "message" || next.payload.messageId !== "STRINGID_PLAYERDEFEATEDTRAINER1") return null;
+  return Object.freeze({
+    before: isReceipt(events[receiptIndex - 1]) ? 0 : WIN_TAIL_PRE_RECEIPT_ROWS,
+    after: end === receiptIndex ? WIN_TAIL_POST_RECEIPT_ROWS : 0,
+  });
+}
+
+/**
+ * wtl1 (ROM labs wtl1-rain-{growl,player}-{off,on}): the turn-end weather print (BattleScript_RainContinuesOrEnds, printfromtable at +0, u = 1) after
+ * the last action's MoveEnd. The ROM runs MoveEnd's remaining cases and HandleEndTurn / DoFieldEndTurnEffects before it: its printstring
+ * executes 10 rows after MoveEnd's first row (stat fall 425 -> 435, hit 323 -> 333), 3 rows later than the next action's USEDMOVE chain (n + 6 + u).
+ */
+const END_TURN_WEATHER_PRINT_SCRIPT = "BattleScript_RainContinuesOrEnds";
+const END_TURN_WEATHER_PRINT_EXTRA_ROWS = 1;
+
 const ACTION_TRANSITION_WAIT_ROWS: Readonly<Record<string, number>> = Object.freeze({ B_WAIT_TIME_LONG: WAITMESSAGE_LONG_HOLD_FRAMES });
 
 /**
@@ -1442,6 +1474,7 @@ function actionTransitionPauseFrames(
   let statusFramesAfter = 0;
   let usedIsPreMove = false;
   let inLoveRows = 0;
+  let endTurnRows = 0;
   for (let index = receiptIndex + 1; index < events.length; index += 1) {
     const event = events[index]!;
     const next = event.provenance?.instructionExecution;
@@ -1457,12 +1490,14 @@ function actionTransitionPauseFrames(
       statusFramesAfter += frames;
       continue;
     }
+    const endTurnWeather = event.payload.kind === "message" && event.provenance?.sourceLabel === END_TURN_WEATHER_PRINT_SCRIPT;
     if (
       next >= e1 || event.payload.kind !== "message"
-      || !(ACTION_TRANSITION_NEXT_PRINTS.has(event.payload.messageId) || (sceneOn && event.payload.messageId === SCENE_ON_ACTION_TRANSITION_NEXT_PRINT))
+      || !(endTurnWeather || ACTION_TRANSITION_NEXT_PRINTS.has(event.payload.messageId) || (sceneOn && event.payload.messageId === SCENE_ON_ACTION_TRANSITION_NEXT_PRINT))
     ) return null;
+    if (endTurnWeather) endTurnRows = END_TURN_WEATHER_PRINT_EXTRA_ROWS;
     used = next;
-    usedIsPreMove = event.payload.messageId !== "STRINGID_USEDMOVE";
+    usedIsPreMove = !endTurnWeather && event.payload.messageId !== "STRINGID_USEDMOVE";
     if (event.payload.messageId === IN_LOVE_TRANSITION_PRINT) inLoveRows = IN_LOVE_TRANSITION_ROWS;
     break;
   }
@@ -1513,7 +1548,7 @@ function actionTransitionPauseFrames(
   }
   // sta3 (aud242g dreameater, ROM): before a pre-move print the status icon's second controller row (production presents one frame) is one more row.
   const iconSecondRow = anchor.payload.kind === "status-icon-update" && usedIsPreMove ? 1 : 0;
-  const frames = e1 - anchorExecution - 1 + ACTION_TRANSITION_ROWS + used - presented - statusFramesAfter + iconSecondRow + inLoveRows;
+  const frames = e1 - anchorExecution - 1 + ACTION_TRANSITION_ROWS + used - presented - statusFramesAfter + iconSecondRow + inLoveRows + endTurnRows;
   return frames > 0 ? { frames, rowsToReceipt: e1 - anchorExecution - 1 - presented } : null;
 }
 
@@ -6121,7 +6156,8 @@ export function projectBattleResolutionCommands(
       // chg1: a Scene OFF semi-invulnerable hide (Dig / Fly / Bounce / Dive MoveEnd receipt) is drawn on the receipt's own row, not at the
       // end of the action transition: the pause splits into the rows to the receipt and the transition rows after it.
       const hideAtReceipt = transition !== null && sceneOffNoAnimations && payload.invisible;
-      const pauseBefore = transition === null ? 0
+      const winTail = event.provenance?.opcodeName === "B_SCR_OP_MOVEEND" ? winTailHoldRows(events, index) : null;
+      const pauseBefore = winTail !== null ? winTail.before : transition === null ? 0
         : hideAtReceipt ? Math.min(transition.frames, Math.max(0, transition.rowsToReceipt + SCENE_OFF_SEMI_INVULNERABLE_HIDE_LEAD))
           : transition.frames;
       const pause = (minimumFrames: number) => Object.freeze({
@@ -6155,6 +6191,7 @@ export function projectBattleResolutionCommands(
           || event.provenance?.opcodeName === "B_SCR_OP_RETURNTOBALL",
       }));
       if (transition !== null && hideAtReceipt && transition.frames - pauseBefore > 0) commands.push(pause(transition.frames - pauseBefore));
+      if (winTail !== null && winTail.after > 0) commands.push(pause(winTail.after));
       continue;
     }
     if (payload.kind === "faint-animation") {

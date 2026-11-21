@@ -455,7 +455,8 @@ describe("random round soak driver (green milestone pin)", () => {
       // merge of the box's 2026-11-20 run with the Mac's 11-21 fixes (box f5274b48a: hcr1 / hcr1b / fsc1 / chg1 ...; Mac ea3220630: wbh1 / fnt1 / lrc1 ...): frames + render calls,
       // 43_557 (box) / 43_323 (Mac) -> 43_500, renderCalls 3_066 / 3_043 -> 3_043; same battle 7, turn 3, end state, diagnostics; both runs identical.
       // fch1 (the AI faint replacement choice costs 0..4 extra script frames, GetMostSuitableMonToSwitchInto work model; the aud241b stage's opponent bench is now Seismic Toss x4 as in the ROM labs): render calls only (a one-frame trajectory shift), 3_043 -> 3_042; frames 43_500, battle 7, turn 3, end state, diagnostics unchanged. A trajectory pin, not a ROM frame.
-      frames: 43_500,
+      // wtl1 (the win tail's 24 draw-nothing rows before "Player defeated", ROM P + 26; seven wins): frames + render calls, 43_500 -> 43_638, renderCalls 3_042 -> 3_059; same battle 7, turn 3, end state, diagnostics. A trajectory pin, not a ROM frame.
+      frames: 43_638,
       battle: 7,
       turn: 3,
       diagnostics: {
@@ -467,7 +468,7 @@ describe("random round soak driver (green milestone pin)", () => {
         terminalOutcome: "roundWon",
         terminalRecordMenuInputReadyReached: true,
         terminalRecordChoice: "no",
-        renderCalls: 3_042,
+        renderCalls: 3_059,
       },
     });
     expect(second).toEqual(first);
@@ -1060,11 +1061,13 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // frames only against the box, 67929 -> 67984; same battle 3 / depth 2 / turn 20 / roundLost.
       // gsp3 (the end-of-turn poison / burn tick's print -> launch rows 95 / 98 as the ROM, gsp3-{toxic,willowisp}-player-on rows 1576 -> 1671 / 1547 -> 1645;
       // the exploring presses land on new phases): 67984 / turn 20 -> 68529 / turn 21; same battle 3 / depth 2 / OK / roundLost.
-      frames: 68529,
+      // wtl1 (the win tail's 24 draw-nothing rows before "Player defeated"; the exploring presses land on new phases): 68529 / battle 3 / depth 2 / turn 21 -> 75721 / battle 4 / depth 3 / turn 21; still OK / roundLost.
+      // wtl1 item 2 (the turn-end weather print's 10 rows after MoveEnd, ROM rain labs: stat fall 425 -> 435, hit 323 -> 333): frames only, 75721 -> 75618; same battle 4 / depth 3 / turn 21 / roundLost. A trajectory pin, not a ROM frame.
+      frames: 75618,
       outcome: "OK",
       endState: "roundLost",
-      maxBattleDepth: 2,
-      battle: 3,
+      maxBattleDepth: 3,
+      battle: 4,
       turn: 21,
     });
     expect(runSeed(1, options)).toMatchObject({
@@ -1724,7 +1727,9 @@ describe("ISSUES #104 (driver): continuous-play outcome semantics retuned -- OK 
     // fop1 (a new challenge's first opponent is rolled in the ROM's order, so round 2's first trainer moves): seed 19 now carries 7;
     // re-scanned seeds 0..49 under the same options (--seeds 0:50 --parallel 4): seeds 13, 14 and 23 chain two round wins (carry 14), so the lowest (13) is pinned.
     // merge of the box's 2026-11-20 run with the Mac's 11-21 fixes: the merge kept the box's 19 (after fsc1); it chains two round wins on the merged tree (this test passes), so it stays.
-    const result = runSeed(19, {
+    // wtl1 (the win tail holds 24 more rows before "Player defeated", ROM P + 26): seed 19 now carries 7; re-scanned seeds 0..49 under the same options (--seeds 0:50 --parallel 4):
+    // seeds 0, 10, 13, 17, 40, 47 and 49 chain two round wins (carry 14), so the lowest (0) is pinned.
+    const result = runSeed(0, {
       policy: "winning",
       maxRounds: 3,
       renderEvery: 0,

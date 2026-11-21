@@ -87,7 +87,7 @@ export function victoryBgmAnchor(
     const start = segment.commands.findIndex((command) => messageIdOf(segment, command) === PLAYER_DEFEATED_MESSAGE_ID);
     if (start < 0) continue;
     if ((segment.afterRules.rulesContext.battleOutcome & B_OUTCOME_MASK) !== B_OUTCOME_WON) return null;
-    // Walk back from the print, across segment starts, over the sprite-visibility receipts.
+    // Walk back from the print, across segment starts, over the sprite-visibility receipts and the win tail's draw-nothing holds (wtl1).
     let s = segmentIndex;
     let c = start - 1;
     while (s >= from) {
@@ -97,7 +97,8 @@ export function victoryBgmAnchor(
         continue;
       }
       const command = segments[s]!.commands[c]!;
-      if (command.type !== "sprite-visibility") {
+      const winTailRow = command.type === "sprite-visibility" || (command.type === "move-animation" && !command.animation);
+      if (!winTailRow) {
         const delay = command.type !== "message"
           ? VICTORY_BGM_AFTER_CONTROLLER_COMMAND
           : command.advance === "button" ? VICTORY_BGM_AFTER_FAINT_DISMISS : VICTORY_BGM_AFTER_AUTOMATIC_MESSAGE;

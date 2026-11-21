@@ -34,13 +34,13 @@ describe("pic9: the ROM's hp thresholds", () => {
   });
 });
 
-describe("pic9: every switch line on the real route follows the foe's HP (full-policy soak seeds 0, 1 and 4)", () => {
+describe("pic9: every switch line on the real route follows the foe's HP (full-policy soak seeds 6 and 9)", () => {
   it("come-back lines read the foe's HP drop since the last switch-in, send-in lines its current HP", () => {
     const returnLine = ["that’s enough! Come back!", "come back!", "OK! Come back!", "good! Come back!"];
     const sendInLine = (name: string) => [`Go! ${name}!`, `Do it! ${name}!`, `Go for it, ${name}!`, `Your foe’s weak! Get ’em, ${name}!`];
     const seenScales = { back: new Set<number>(), in: new Set<number>() };
     let switches = 0;
-    for (const seed of [0, 1, 4]) {
+    for (const seed of [6, 9]) {
       const seen = new Set<unknown>();
       runSeed(seed, {
         policy: "full", renderEvery: 1, maxFrames: 120_000, stopAtFirstRoundDecision: true,
@@ -80,6 +80,8 @@ describe("pic9: every switch line on the real route follows the foe's HP (full-p
     // is a new trajectory, see randomRoundSoak.test.ts): seeds 0 and 1 reach [0, 2, 3] again; seed 2 reaches scale 1, so the seeds are 0..2.
     // merge of the box's 2026-11-20 run with the Mac's 11-21 fixes: the merge kept the box's seeds 0, 1 and 4 (hcr1b's re-pin; the Mac had 0..2 after sct1). On the merged tree they
     // reach every come-back and send-in scale, so they stay.
+    // wtl1 (the win tail's 24 draw-nothing rows move the exploring games): seeds 0, 1 and 4 reach back [0, 2, 3]. A per-seed scan of 0..10 found seed 9 (back 0 2 3, in 0 1 2 3) and seed 6 (back 0 1 3, in 0 1 2)
+    // together reach every scale, so they are the seeds.
     expect([...seenScales.back].sort()).toEqual([0, 1, 2, 3]);
     expect([...seenScales.in].sort()).toEqual([0, 1, 2, 3]);
   }, 180_000);

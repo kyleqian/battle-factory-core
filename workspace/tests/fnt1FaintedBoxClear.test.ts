@@ -201,10 +201,10 @@ for (const scene of ["off", "on"] as const) {
 
 describe("fnt1: the last faint of a battle and the win text (census, Scene OFF)", () => {
   it("won (seed 0): the foe's last box, k 0, is blank until \"Player defeated\" prints", () => {
-    const { rows } = playFaintBox(0, "off", lastFoeFaint, 1, 20);
+    const { rows } = playFaintBox(0, "off", lastFoeFaint, 1, 40);
     expect(rows[1]!.box).toBe("text");
     const next = rows.findIndex((r, d) => d > 1 && r.box === "typing");
-    expect(next).toBeGreaterThan(1);
+    expect(next).toBe(27); // the press is row 1; the ROM's first glyph is P + 26 (wtl1, aud241c-win labs)
     expect(rows.slice(2, next).every((r) => r.box === "blank")).toBe(true);
   });
 
