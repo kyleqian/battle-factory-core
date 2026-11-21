@@ -445,7 +445,8 @@ describe("random round soak driver (green milestone pin)", () => {
       // hcr1 (the Scene OFF first used-move print at commit + 6 + u, docs/aud251-s11-scoreboard-refresh.md): frames + render calls, 43_334 -> 43_411, renderCalls 3_044 -> 3_043; same battle 7, turn 3, end state, diagnostics.
       // hcr1b (the Scene OFF first used-move glyph at commit + 7 + u, pixel-exact): frames + render calls, 43_411 -> 43_559, renderCalls 3_043 -> 3_056; same battle 7, turn 3, end state, diagnostics.
       // fsc1 (the Scene OFF invisible-target hit completes in 2 frames; the hit-all loop's EMPTYSTRING3 box is timed by kernel rows): frames + render calls, 43_559 -> 43_550, renderCalls 3_056 -> 3_054; same battle 7, turn 3, end state, diagnostics.
-      frames: 43_550,
+      // chg1 (the Scene OFF two-turn move timing: charge box lead, hide split, miss tail, locked continuations): frames + render calls, 43_550 -> 43_557, renderCalls 3_054 -> 3_066; same battle 7, turn 3, end state, diagnostics.
+      frames: 43_557,
       battle: 7,
       turn: 3,
       diagnostics: {
@@ -457,7 +458,7 @@ describe("random round soak driver (green milestone pin)", () => {
         terminalOutcome: "roundWon",
         terminalRecordMenuInputReadyReached: true,
         terminalRecordChoice: "no",
-        renderCalls: 3_054,
+        renderCalls: 3_066,
       },
     });
     expect(second).toEqual(first);
@@ -685,7 +686,11 @@ describe("random round soak driver (green milestone pin)", () => {
     // fsc1 (the Scene OFF invisible-target hit completes in 2 frames, the hit-all loop's EMPTYSTRING3 box is timed by kernel rows: shifts the soak's press phases): seed 3 no longer commits Baton Pass
     // (0 commits). Re-scanned full-policy seeds 0..29 (tools/soak/batonPassSearch.ts --seeds 0:30 --parallel 3, same options): candidates 6, 27, 28. Seed 6 is the lowest (Baton Pass commits 6,
     // first commit 47503, halt 47543 on MAWILE in battleIndex 0, one Lobby new challenge). Pin 3 -> 6.
-    const result = runSeed(6, {
+    // chg1 (the Scene OFF two-turn move timing: charge box lead, hide split, miss tail, locked continuations; the exploring presses land on new phases):
+    // seed 6 no longer commits Baton Pass (0 commits, battle 4 turn 8 at 80,000 frames). Re-scanned full-policy seeds 0..39 (tools/soak/batonPassSearch.ts
+    // --seeds 0:40 --parallel 3, same options; ~48 s): candidates 28, 33, 37, all OK with no openpartyscreen / machine-barrier error. Seed 28 is the lowest
+    // (Baton Pass commits 4, first commit 57044, halt 57248 on MAWILE in battleIndex 1, one Lobby new challenge). Pin 6 -> 28.
+    const result = runSeed(28, {
       maxFrames: 80_000,
       renderEvery: 0,
       coverage: observer as never,
@@ -1011,12 +1016,14 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // same battle 1 / depth 0 / roundLost.
       // hcr1 (the Scene OFF used-move print lead u - 3): frames only, 22844 -> 22840; same battle 1 / depth 0 / turn 30 / roundLost.
       // hcr1b (the used-move glyph at commit + 7 + u): frames only, 22840 -> 22858; same battle 1 / depth 0 / turn 30 / roundLost.
-      frames: 22858,
+      // chg1 (the Scene OFF two-turn move timing; the exploring presses land on new phases, a new trajectory as at fsw235): 22858 / battle 1 / depth 0 / turn 30
+      // -> 67929 / battle 3 / depth 2 / turn 20; still OK / roundLost (no errorMessage; the scan above has 40 full-policy seeds OK).
+      frames: 67929,
       outcome: "OK",
       endState: "roundLost",
-      maxBattleDepth: 0,
-      battle: 1,
-      turn: 30,
+      maxBattleDepth: 2,
+      battle: 3,
+      turn: 20,
     });
     expect(runSeed(1, options)).toMatchObject({
       // msg175: 26878 -> 26810 (shorter used prints); trn178 (the Scene OFF action-transition pause): 26810 -> 27058; same battle / turn / end state.
@@ -1053,7 +1060,8 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // hcr1 (the Scene OFF used-move print lead u - 3; the exploring presses land on new phases): 61456 / turn 22 -> 60534 / turn 19; same battle 3 / depth 2 / roundLost.
       // hcr1b (the used-move glyph at commit + 7 + u): frames only, 60534 -> 64227; same turn 19, battle 3 / depth 2 / roundLost.
       // merge of rsw1 + hcr1b + gsp2b (pin2): frames only, 64227 -> 64299; same turn 19, battle 3 / depth 2 / roundLost.
-      frames: 64299,
+      // chg1 (the Scene OFF two-turn move timing): frames only, 64299 -> 64365; same battle 3 / depth 2 / turn 19 / roundLost.
+      frames: 64365,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 2,
