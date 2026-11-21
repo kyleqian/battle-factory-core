@@ -68,11 +68,9 @@ interface Spec {
 //  - Psybeam +2: the per-move body offset the live adapters were aligned with differs from the script start by a constant; named, not fitted (aud242b/c).
 //  - lead4 (B3): status moves (Agility, Swords Dance) were -4 before their script lead was presented ahead of the body (the sound clock moves by counter lead - 7); now frame-exact.
 //  - Psybeam 104..151 id 200 = SE_M_PSYBEAM2 from SoundTask_LoopSEAdjustPanning (createsoundtask): aud242c emits them, frame-exact at the same +2.
-//  - a later move body of the same round (Tackle 139 after Agility; Seismic Toss 214/131 after Swords Dance): Seismic Toss's opening SE 238 sits after
-//    a background fade (aud242c resolves it): it now emits, +1 frame short of the ROM (rowDelta; the LoadMoveBg / LoadDefaultBg overrun class, ISSUES #198).
-//    Tackle has no adapter (the static field); mvs1 (docs/mvs1-called-move-sounds.md) plays its SE on the ROM script clock (lead 5 + 4 rows after the
-//    command start): 24 rows after the used print's last glyph on both sides (ROM 367 -> 391, ours 365 -> 389). The print itself is 2 rows early here
-//    (oracle capture: ROM glyphs 345..367, ours 343..365), hence rowDelta +2.
+//  - a later move body of the same round (Tackle 139 after Agility; Seismic Toss 214/131 after Swords Dance): declined bodies
+//    (liveMoveAnimationDuration null) never emit. Seismic Toss's opening SE 238 sits after a background fade (aud242c resolves it): it now
+//    emits, +1 frame short of the ROM (rowDelta; the LoadMoveBg / LoadDefaultBg overrun class, ISSUES #198).
 const SPECS: Record<string, Spec> = {
   "slam-player": { delta: 0 },
   "razorleaf-player": { delta: 0 },
@@ -80,7 +78,7 @@ const SPECS: Record<string, Spec> = {
   "slash-opponent": { delta: 0 },
   "ember-player": { delta: 2 },
   "psybeam-player": { delta: 2 },
-  "agility-player": { delta: 0, rowDelta: { "389:139:-63": 2 } },
+  "agility-player": { delta: 0, romOnly: ["391:139:-63"] },
   "swordsdance-opponent": { delta: 0, rowDelta: { "406:238:0": 1, "526:214:63": 1, "544:131:63": 1 } },
 };
 
