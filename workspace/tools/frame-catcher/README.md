@@ -105,10 +105,13 @@ The Lobby attendant's CHALLENGE / INFO / EXIT and level multichoices and its YES
 `attendantAcceptsInput`); on the ROM the save dialog's YES/NO is `SaveGameTask` with `SaveConfirmInputCallback` /
 `SaveOverwriteInputCallback`. The engine side prints the oracle save's player name (MEMORY), as `tools/compare/harnessPlayerName.ts` does.
 
-Menus that open only after a printed question: the after-battle RECORD / RETIRE question and the Lobby's "record your last match?"
-after a round are menus from the frame their YES/NO box is drawn (the game's own `postwinQuestionWindowVisible` /
-`factoryTerminalRecordMenuDrawn`, handed to `engineMenus.mjs` by `engineRun.mjs`), as on the ROM, where `message` + `waitmessage` come
-before `multichoicedefault`. The plan starts at the mount frame (frame 0), so a press on the round's very first frame is replayed.
+Menus that open only after a printed question: the Lobby's "record your last match?" after a round is a menu from the frame its YES/NO
+box is drawn (the game's own `factoryTerminalRecordMenuDrawn`, handed to `engineMenus.mjs` by `engineRun.mjs`), as on the ROM, where
+`message` + `waitmessage` come before `multichoicedefault`. The after-battle RECORD / RETIRE question and the GO ON menu asked again
+after it (NO, B, or "battle was recorded") are menus from the frame their text is fully printed (`postwinQuestionVisibleChars` /
+`POSTWIN_QUESTION_TEXT_TOTAL`, `postwinQuestionReprintSettled`; lbb1, `docs/lbb1-lobby-b-press.md`): the game draws those two windows
+and takes their input on the same frame, so a press on that frame left no frame on which the menu waited, and the ROM's menu was
+unplanned (fcm1 s89-off-ws). The plan starts at the mount frame (frame 0), so a press on the round's very first frame is replayed.
 
 When a sprite is in a different place on the two sides, check a frame after it has stopped moving: during a walk the two sides pass
 through the same tiles at different moments (the first look at Kyle's Tuber picked a ROM frame mid-walk and missed the one-tile offset).
