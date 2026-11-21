@@ -108,7 +108,7 @@ describe("oam1 production hardware-OAM provider: MOVE_WILL_O_WISP", () => {
     const on = generatedCommandAnimationReplay(82, "on", [1], 7);
     const off = generatedCommandAnimationReplay(82, "off", [1], 7);
     const bodies = on.animations.filter(a => a.moveId === 261 && a.attacker === 0);
-    expect(bodies.map(b => b.ages.length)).toEqual([214 + iu120Extra(261)]);
+    expect(bodies.map(b => b.ages.length)).toEqual([214 + iu120Extra(261) + hpd4BodyRows(261)]);
     expect(bodies[0]!.ages).toEqual(iu120Ages(261, 214));
     expect(bodies[0]!.adapterActive.every(Boolean)).toBe(true);
     expect(on.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");

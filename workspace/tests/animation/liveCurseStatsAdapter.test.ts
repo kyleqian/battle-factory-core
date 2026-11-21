@@ -16,7 +16,7 @@ import {
 import speciesStats from "../../src/data/gen/species-stats.json" with { type: "json" };
 import { generatedCommandAnimationReplay } from "../../tools/integration/generatedCommandAnimationReplay.ts";
 import { liveView, type Fixture } from "../../tools/integration/liveAdapterFramebuffer.ts";
-import { iu120Ages, iu120Extra } from "../helpers/iu120Rows.ts";
+import { hpd4BodyRows, iu120Ages, iu120Extra } from "../helpers/iu120Rows.ts";
 
 // curse-live (docs/next-adapters-prep23.md s1.3/s3): the non-Ghost MOVE_CURSE body from the source model
 // (src/animation/curseModel.ts) and the production provider (liveOamMoves.ts liveCurseStatsInputs). Dense framebuffer proofs:
@@ -117,7 +117,7 @@ describe("curse-live: MOVE_CURSE live adapter (174)", () => {
       const off = generatedCommandAnimationReplay(seed, "off", [slot], streak);
       expect(on.requests[0]).toMatchObject({ moveId: 174, attacker: 0, turn: 1 });
       const bodies = on.animations.filter(a => a.moveId === 174 && a.attacker === 0);
-      expect(bodies.map(b => b.ages.length)).toEqual([176 + iu120Extra(174)]);
+      expect(bodies.map(b => b.ages.length)).toEqual([176 + iu120Extra(174) + hpd4BodyRows(174)]);
       expect(bodies[0]!.ages).toEqual(iu120Ages(174, 176));
       expect(bodies[0]!.adapterActive.every(Boolean)).toBe(true);
       expect(on.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");
