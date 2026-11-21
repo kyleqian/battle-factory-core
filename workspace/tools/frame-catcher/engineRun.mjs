@@ -98,7 +98,8 @@ function noteRound(st, f) {
     playerTrainerId: orch.config.playerTrainerId >>> 0,
     selectedRentalIndexes: orch.config.rentals?.selectedRentalIndexes ?? null,
     factoryWinStreak: orch.config.factoryWinStreak ?? null,
-    // the deal's cursors: before GenerateInitialRentalMons, after the six set ids, after the six personalities (the first opponent's roll)
+    // the deal's cursors: before GenerateInitialRentalMons, after the six set ids (the first opponent's roll, fop1), after the six
+    // personalities (the end of the deal; an engine before fop1 rolled the first opponent here)
     dealRngBefore: deal?.rngValueBefore ?? null, selectionRngValue: gen.selectionRngValue >>> 0, rentalRngAfter: gen.rngValue >>> 0,
   });
 }

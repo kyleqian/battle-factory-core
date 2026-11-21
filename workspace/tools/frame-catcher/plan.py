@@ -397,6 +397,17 @@ def deal_opponent_check(rom_trainer, rom_sets, first):
     return rom == engine, rom, engine
 
 
+def deal_own_order_check(rom_order, first, rom_rng_at_entry, engine_rng):
+    """fop1 (docs/fop1-first-opponent-order.md): what the ROM's own order rolls (probe_deal_opponent: the deal with only the engine's
+    deal cursor written; `rom_order`: {"trainer", "sets"} or None) against the engine's first opponent, and whether the ROM reached
+    GenerateOpponentMons at the cursor the engine rolled him from. {"romOwnOrderSame", "romCursorIsEngines"}; None where unknown."""
+    same = None
+    if rom_order is not None and first is not None:
+        same = [rom_order["trainer"], list(rom_order["sets"])] == [first["trainerId"], list(first["opponentSetIds"])]
+    cursor = None if rom_rng_at_entry is None or engine_rng is None else rom_rng_at_entry == engine_rng
+    return {"romOwnOrderSame": same, "romCursorIsEngines": cursor}
+
+
 def brain_trap_wanted(brain, enemy_now, frame):
     """The Factory Head's party trap (romRun.brain_traps): armed on the first frame whose fast run changed gEnemyParty's first record
     (FillFactoryTrainerParty zeroes it, then FillFactoryBrainParty builds the three), kept armed until it fires. Returns (arm now?, armed?).
