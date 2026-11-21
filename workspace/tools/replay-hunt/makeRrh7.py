@@ -47,6 +47,16 @@ D["R059"] = design("R059", ("R059-ai-perish-switch-charged-attacker", "Challenge
     [four(ELECTABUZZ, CHARGE, bulk=True), four(RAICHU, CHARGE, bulk=True), four(ELECTRODE, CHARGE, bulk=True)],
     [{"move": 0}], cover=[RULES["R059"]["pieces"][0]["cover"]])
 
+CHARM, MEMENTO, OVERHEAT = 204, 262, 315
+D["R039a"] = design("R039", ("R039a-ai-memento-target-at-min-attack", "Challenge 7, trainer 200, hand-built Mechanic Lab parties. The AI's Blissey / Chansey / Tropius know Charm x3 and Memento and the player's Snorlax only Splashes: three Charms (or Mementos) put the player's Attack at -6 and AI_CBM_Memento (battle_ai_scripts.s:483) scores the next Memento -10."),
+    [mon(SNORLAX, [SPLASH] * 4, bulk=True), four(MACHAMP, SPLASH, bulk=True), four(HERACROSS, SPLASH, bulk=True)],
+    [mon(BLISSEY, [CHARM, CHARM, CHARM, MEMENTO], bulk=True), mon(CHANSEY, [CHARM, CHARM, CHARM, MEMENTO], bulk=True), mon(TROPIUS, [CHARM, CHARM, CHARM, MEMENTO], bulk=True)],
+    [{"move": 0}], cover=[RULES["R039"]["pieces"][0]["cover"]])
+D["R039b"] = design("R039", ("R039b-ai-memento-target-at-min-sp-atk", "Challenge 7, trainer 200, hand-built Mechanic Lab parties. The player's Snorlax Overheats three or four times (Sp. Atk -2 each) into the AI's bulky Blissey / Chansey / Tropius (Memento + Splash): with Sp. Atk at -6 and Attack above -6, AI_CBM_Memento (battle_ai_scripts.s:484) scores Memento -8."),
+    [mon(SNORLAX, [OVERHEAT, BODYSLAM, BODYSLAM, BODYSLAM], special=True), four(MACHAMP, BODYSLAM), four(HERACROSS, BODYSLAM)],
+    [mon(BLISSEY, [MEMENTO, SPLASH, SPLASH, SPLASH], bulk=True), mon(CHANSEY, [MEMENTO, SPLASH, SPLASH, SPLASH], bulk=True), mon(TROPIUS, [MEMENTO, SPLASH, SPLASH, SPLASH], bulk=True)],
+    [{"move": 0}, {"move": 0}, {"move": 0}, {"move": 0}], cover=[RULES["R039"]["pieces"][1]["cover"]])
+
 out = Path(sys.argv[1] if len(sys.argv) > 1 else ROOT / ".integration/evidence/rrh7/designs")
 out.mkdir(parents=True, exist_ok=True)
 for rule, d in D.items():
