@@ -1,6 +1,6 @@
 # msg2: ROAR's "dragged out!" and WISH's "came true!" (fcm1 findings 2 and 3, 2026-11-21)
 
-Branch `fix/roar-wish-messages` (from `trial-fix-20261121`). Presentation only: the battle rules and RNG do not change; the one
+Branch `fix/roar-wish-messages` (from `trial-fix-20261121` 6817b6a8c; `trial-fix-20261121` e12015ff1 merged in, with fnt1, wbh1, hdt1, lbb1). Presentation only: the battle rules and RNG do not change; the one
 kernel-event change is the WISH message's new `{B_BUFF1}` substitution (the wisher's name). Evidence (not in git):
 `.integration/evidence/fix-roar-wish/` (traces, catcher runs, the census scan); the ROM frames below are the fcm1 catcher runs
 (`.integration/evidence/fcm1/final/<run>/`, ROM side = the real ROM in mGBA). Frame numbers: "ours" engine frames, "ROM" ROM frames
@@ -79,12 +79,15 @@ What does differ, measured on those 35 prints, plus the drag-ins followed by an 
    redraw row the copy carries the cleared window, so the box is blank from the next frame; on any other row the old text and the
    frozen arrow stay until the turn end clears the box. ROM: s186-on-ws b20 CAMERUPT (press 291,811 = L+1, box blank 291,812, no arrow
    ever shown) and s118-on-wc b4 ANORITH (press 55,715 = L+1, blank 55,716); the other 33 presses (L+2 to L+257, none on a redraw
-   row) left the box 14 rows. Change: the orchestrator records the released gate's cursor for any `\p` gate release (also a press
-   1 or 2 rows after the last glyph, before ours drew the cursor; it now keeps the ROM's arrow there), with `boxCleared` when
-   `releasedGateClearsBox` (`battleResolutionPresentation.ts`: age + 2 a multiple of 9, the gate a `\p`); the render blanks the box
-   from the row after the press. This is the printer's rule, so it covers every `\p` gate print (Substitute damaged / faded, the
-   `MoveUsedIs*` family), not only ROAR; `\l` and PAUSE_UNTIL_PRESS are excluded (the scroll clears the arrow itself; no arrow).
-   The redraw rows after the first (9, 18, ... rows on) follow the source; no catcher press landed on one.
+   row) left the box 14 rows. **Implemented once, by fnt1** (`docs/fnt1-fainted-box-clear.md`, merged into `trial-fix-20261121`
+   with the same rule from the same source lines and 1,502 ROM "fainted!" boxes): `promptClear` on a button piece whose string ends on
+   `\p` (the faint ids, "Player defeated", and a gated string's last page: dragged out, Substitute damaged / faded, the `MoveUsedIs*`
+   family), the press taken from the first wait frame G + 1, `releasedWaitCursorOnPress` / `promptClearPressBlanksBox` (wait frame
+   % 9 == 0), the blank from the next frame. msg2 first had its own version (`releasedGateClearsBox`, a `boxCleared` flag); on the
+   merge it was dropped. It covered one case fnt1's does not: a mid-string `\p` page (Trick / Switcheroo with both items, the first
+   page). There the ROM prints the next page from the next frame, so the cleared box never shows; nothing was kept for it. The
+   dragged-out checks (`tests/msg2RoarWishMessages.test.ts`) now run on fnt1's code: a press on G is not taken, the arrow from G + 2
+   with a new phase every 9 frames, a blank box after presses on wait frames 0, 9, 18 and the frozen arrow otherwise.
 3. **A dragged-in Intimidate / Trace starts its script after the press.** The kernel runs `BattleScript_MoveEnd` (its two
    sprite-visibility receipts) and then the entry script, whose first event's `instructionExecution` is its leading rows
    (`BattleScript_PauseIntimidateActivates` / `BattleScript_TraceActivates`, `battle_scripts_1.s:4022-4024`, `:3971-3973`: `pause

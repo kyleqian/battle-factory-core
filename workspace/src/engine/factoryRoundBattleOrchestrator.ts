@@ -107,8 +107,6 @@ import {
   appendBattleResolutionContinuation,
   createBattleResolutionPresentation,
   hasRetainedLockedActionReceipt,
-  messageCommandTypedRows,
-  releasedGateClearsBox,
   type BattleResolutionPresentationCommand,
   type BattleResolutionLockedActionIdentity,
   type BattleResolutionPresentationState,
@@ -130,6 +128,7 @@ import {
   isBattleResolutionButtonMessageReady,
   isBattleResolutionCommandComplete,
   playerFaintReplacementSendOutTimingOfSegment,
+  releasedWaitCursorOnPress,
 } from "./battleResolutionPresentationRender.ts";
 import {
   advancePartySelect,
@@ -2301,28 +2300,6 @@ function withResolutionLifecycle(
   });
 }
 
-/**
- * btn2: a released button message keeps its frozen wait cursor (age = the cursor age of the row before the press); msg2: a `\p`
- * gate released on a row where the ROM redraws its arrow blanks the box instead (`releasedGateClearsBox`).
- */
-function releasedWithWaitCursor(
-  released: BattleResolutionPresentationState,
-  resolution: BattleResolutionPresentationState,
-  segment: BattleResolutionPresentationState["segments"][number],
-  command: Extract<BattleResolutionPresentationCommand, { type: "message" }>,
-): BattleResolutionPresentationState {
-  const age = resolution.lifecycle.phaseElapsed - messageCommandTypedRows(command) - 1;
-  return Object.freeze({
-    ...released,
-    releasedWaitCursor: Object.freeze({
-      segmentIndex: resolution.segmentIndex,
-      commandIndex: resolution.commandIndex,
-      age,
-      ...(releasedGateClearsBox(segment, resolution.commandIndex, age) ? { boxCleared: true as const } : {}),
-    }),
-  });
-}
-
 function completedResolutionPhase(
   resolution: BattleResolutionPresentationState,
 ): "next-command-handoff" | "terminal-handoff" {
@@ -3079,10 +3056,37 @@ function containedPrepareResolutionPalette(
   }
 }
 
+/**
+ * fnt1 (docs/fnt1-fainted-box-clear.md): a `\p` box released on a down-arrow redraw frame still shows its print on the release
+ * frame; the cleared window reaches the screen at that frame's VBlank, so the box is blank from the next frame on.
+ */
+function settleReleasedPromptClear(state: FactoryRoundBattleOrchestratorState): FactoryRoundBattleOrchestratorState {
+  const resolution = state.battleResolutionPresentation;
+  const released = resolution?.releasedWaitCursor;
+  if (!resolution || released?.clear !== "pending") return state;
+  return Object.freeze({
+    ...state,
+    battleResolutionPresentation: Object.freeze({
+      ...resolution,
+      releasedWaitCursor: Object.freeze({ ...released, clear: "done" as const }),
+    }),
+  });
+}
+
+/** btn2 / fnt1: the released state of a button message pressed on this tick, with its frozen-cursor (or box clear) record. */
+function withReleasedWaitCursor(
+  before: BattleResolutionPresentationState,
+  released: BattleResolutionPresentationState,
+): BattleResolutionPresentationState {
+  const record = releasedWaitCursorOnPress(before);
+  return record === null ? released : Object.freeze({ ...released, releasedWaitCursor: record });
+}
+
 function advanceFactoryRoundBattleResolutionCore(
-  state: FactoryRoundBattleOrchestratorState,
+  stateBeforeSettle: FactoryRoundBattleOrchestratorState,
   newKeys: ReadonlySet<GbaButton> = new Set(),
 ): FactoryRoundBattleOrchestratorState {
+  const state = settleReleasedPromptClear(stateBeforeSettle);
   const resolution = state.battleResolutionPresentation;
   const boundaries = state.battlePresentationBoundaries;
   if (resolution === null || boundaries === null) {
@@ -3123,17 +3127,13 @@ function advanceFactoryRoundBattleResolutionCore(
         const completion = reachedSegmentEnd
           ? completedResolutionUpdate(state, resolution)
           : null;
-        const released = withResolutionLifecycle(
+        // fnt1: a press before the awaiting phase (from the printer's first wait frame) freezes / clears the box as in it.
+        const nextResolution = withReleasedWaitCursor(resolution, withResolutionLifecycle(
           resolution,
           nextCommandIndex,
           completion?.phase ?? "presenting",
           0,
-        );
-        // msg2: a gate released before its cursor shows (1 or 2 rows after the last glyph) keeps the ROM's frozen arrow or, on the
-        // arrow's first redraw row, blanks the box (releasedGateClearsBox).
-        const nextResolution = command.promptGate === true && !command.noCursor
-          ? releasedWithWaitCursor(released, resolution, segment, command)
-          : released;
+        ));
         return Object.freeze({
           ...state,
           battleResolutionPresentation: nextResolution,
@@ -3146,13 +3146,15 @@ function advanceFactoryRoundBattleResolutionCore(
         });
       }
       if (isBattleResolutionButtonMessageReady(resolution)) {
+        // fnt1: the wait keeps counting through the hand-off (it used to repeat one row here, so the arrow's first phase
+        // lasted 10 frames; the ROM redraws it every 9: G + 2, G + 11, ...).
         return Object.freeze({
           ...state,
           battleResolutionPresentation: withResolutionLifecycle(
             resolution,
             resolution.commandIndex,
             "awaiting-message-dismiss",
-            resolution.lifecycle.phaseElapsed,
+            resolution.lifecycle.phaseElapsed + 1,
           ),
         });
       }
@@ -3213,9 +3215,7 @@ function advanceFactoryRoundBattleResolutionCore(
       completion?.phase ?? "presenting",
       0,
     );
-    const nextResolution = command.type === "message" && !command.noCursor
-      ? releasedWithWaitCursor(released, resolution, segment, command)
-      : released;
+    const nextResolution = withReleasedWaitCursor(resolution, released);
     return Object.freeze({
       ...state,
       battleResolutionPresentation: nextResolution,

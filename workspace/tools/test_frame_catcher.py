@@ -323,6 +323,50 @@ class RoundTest(unittest.TestCase):
         self.assertEqual(fc.brain_trap_wanted(b, b"\x07" * 8, 12), (False, False))
         self.assertEqual(fc.brain_trap_wanted(None, None, 1), (False, False))
 
+    def test_the_factory_head_build_is_held_until_fillfactorybrainparty_returns(self):
+        # hdt1: fcm1 s222-on-wc trapped the entry at ROM frame 274565; 21 frames later (the old fixed window) the second Pokemon was
+        # still being built (party species [345, None, 0]) and the third was then built from a stream the VBlank had moved on
+        self.assertIsNone(fc.brain_build_state(None, 1))
+        b = {"armedAt": 274564, "fired": None, "enemyBefore": b""}
+        self.assertIsNone(fc.brain_build_state(b, 274565))
+        b["fired"] = {"frame": 274565}
+        for f in (274565, 274586, 274587, 274600):
+            self.assertEqual(fc.brain_build_state(b, f), "building")
+        b["returned"] = None
+        self.assertEqual(fc.brain_build_state(b, 274599), "building")
+        self.assertEqual(fc.brain_build_state(b, 274565 + fc.BRAIN_BUILD_TIMEOUT + 1), "timeout")
+        b["returned"] = {"frame": 274598}
+        self.assertEqual(fc.brain_build_state(b, 274599), "returned")
+        self.assertEqual(fc.brain_build_state(b, 274565 + fc.BRAIN_BUILD_TIMEOUT + 1), "returned")
+
+    def test_the_factory_head_build_draws_against_the_engine_stream(self):
+        eng = 3381404268  # fcm1 s222-on-wc: the engine's cursor for the Head's first set draw
+        stream = [eng]
+        for _ in range(8):
+            stream.append(fc.lcg(stream[-1]))
+        # the build's own draws read the engine's stream back to back; each VBlankIntr draw reads the same value and is undone
+        held = [[1, "GetFactoryMonId", stream[0]], [1, "CreateMonWithEVSpreadNatureOTID", stream[1]], [2, "vblank", stream[2]],
+                [2, "CreateMonWithEVSpreadNatureOTID", stream[2]], [2, "CreateMonWithEVSpreadNatureOTID", stream[3]], [3, "vblank", stream[4]],
+                [3, "GetFactoryMonId", stream[4]]]
+        self.assertEqual(fc.brain_build_draws(held, eng), {
+            "buildDraws": 5, "vblankDraws": 2, "callers": {"GetFactoryMonId": 2, "CreateMonWithEVSpreadNatureOTID": 3, "vblank": 2},
+            "chainIsEngines": True, "firstBreak": None})
+        # a VBlank draw not undone (the old window had ended): the next build draw skips one value of the stream
+        moved = held[:5] + [[3, "GetFactoryMonId", stream[5]]]
+        got = fc.brain_build_draws(moved, eng)
+        self.assertEqual((got["chainIsEngines"], got["firstBreak"]), (False, 4))
+        # the ROM's own cursor at the entry (no trap): the first draw already differs
+        self.assertEqual(fc.brain_build_draws([[1, "GetFactoryMonId", 292533852]], eng)["firstBreak"], 0)
+        self.assertFalse(fc.brain_build_draws([], eng)["chainIsEngines"])
+        self.assertIsNone(fc.brain_build_draws([], None)["chainIsEngines"])
+
+    def test_the_factory_head_refuses_the_players_three_and_the_beaten_trainers_three(self):
+        # fcm1 s222-on-wc: battle 20's trainer had sets 270, 329, 362; the player starts the Head battle with 354, 325, 303
+        battles = {19: {"opponentSetIds": [270, 329, 362]}, 20: {"playerParty": [{"setId": 354}, {"setId": 325}, {"setId": 303}], "opponentSetIds": [359, 343, 305]}}
+        self.assertEqual(fc.brain_engine_rentals(battles, 20), [354, 325, 303, 270, 329, 362])
+        self.assertIsNone(fc.brain_engine_rentals(battles, 19))
+        self.assertIsNone(fc.brain_engine_rentals({20: {"playerParty": None}, 19: {"opponentSetIds": []}}, 20))
+
     def test_deal_opponent_check(self):
         first = {"trainerId": 83, "opponentSetIds": [215, 258, 190]}
         self.assertEqual(fc.deal_opponent_check(83, [215, 258, 190], first), (True, [83, [215, 258, 190]], [83, [215, 258, 190]]))
@@ -366,6 +410,84 @@ console.log(JSON.stringify({ out, noModule: em.attendantMenuOf(st, null) }));
         self.assertEqual(got["out"], ["ask:field.multichoice:0", "level:field.multichoice:0", "saveQuestion:field.yesno:0", "saveInfo:field.yesno:0",
                                       "overwrite:field.yesno:0"])
         self.assertIsNone(got["noModule"])
+
+    REASK_SCRIPT = """
+const pw = await import(%r);
+const em = await import(%r);
+em.setQuestionWindowVisible(pw.postwinQuestionWindowVisible);
+const route = process.argv.at(-1);
+// The postwin's own order (core.ts): advancePostwin, then this tick's press. The test player presses at the first frame each
+// box or menu takes it: the heal message, DOWN to RECORD (or three times to RETIRE), A, then the question's answer (A on NO, B, or
+// UP + A on YES and A on "battle was recorded"), then A on the GO ON menu asked again, on its first frame.
+function run(settled) {
+  em.setQuestionTextSettled(settled ? (s) => pw.postwinQuestionVisibleChars(s) >= pw.POSTWIN_QUESTION_TEXT_TOTAL[s.question.kind] : null);
+  em.setReaskTextSettled(settled ? pw.postwinQuestionReprintSettled : null);
+  let s = pw.createPostwinState();
+  const menus = [[0, null, null]], buttons = [];
+  let last = null, downs = route === "retire" ? 3 : 1, answered = false, up = route === "yes";
+  for (let f = 1; f < 2000; f += 1) {
+    let n = pw.advancePostwin(s), b = "";
+    if (n.healDismissElapsed === null) {
+      if (pw.postwinHealInputReady(n.elapsed)) { b = "A"; n = pw.acceptPostwinHealDismiss(n); }
+    } else if (n.question && n.questionDismissElapsed === null && n.questionYesElapsed === null) {
+      if (n.elapsed >= pw.postwinQuestionInputReadyAge(n)) {
+        if (up) { b = "UP"; n = pw.movePostwinQuestionCursor(n, -1); up = false; }
+        else if (route === "b") { b = "B"; n = pw.acceptPostwinQuestionDismiss(n); answered = true; }
+        else { b = "A"; n = n.questionCursorPos === 0 ? pw.acceptPostwinQuestionYes(n) : pw.acceptPostwinQuestionDismiss(n); answered = true; }
+      }
+    } else if (n.question && n.questionYesElapsed !== null && n.recordedMessageDismissElapsed === null) {
+      if (pw.postwinRecordedInputReady(n)) { b = "A"; n = pw.acceptPostwinRecordedMessageDismiss(n); }
+    } else if (!n.question && pw.postwinContinuationInputReady(n) && n.dialoguePage === 0) {
+      if (downs > 0 && !answered) { b = "DOWN"; n = pw.movePostwinContinuationCursor(n, 1); downs -= 1; }
+      else { b = "A"; n = pw.acceptPostwinContinuation(n); }
+    }
+    s = n;
+    buttons.push([f, b]);
+    const m = em.menuOf({ postwin: s });
+    const key = m === null ? null : `${m.kind}|${m.sig}`;
+    if (key !== last) { menus.push([f, m && m.kind, m && m.sig]); last = key; }
+    if (s.dialoguePage === 1) return { frames: f + 5, menus, buttons, goOnFrame: s.continuationConfirmElapsed !== null ? f : null };
+  }
+  return null;
+}
+console.log(JSON.stringify({ fixed: run(true), old: run(false) }));
+"""
+
+    def reask_run(self, route):
+        import json
+        import subprocess
+        ws = Path(__file__).resolve().parents[1]
+        script = self.REASK_SCRIPT % (str(ws / "src/engine/postwin.ts"), str(ws / "tools/frame-catcher/engineMenus.mjs"))
+        r = subprocess.run(["node", "--experimental-strip-types", "--no-warnings", "--input-type=module", "-e", script, route],
+                           capture_output=True, text=True, cwd=ws)
+        self.assertEqual(r.returncode, 0, r.stderr)
+        return json.loads(r.stdout.strip().splitlines()[-1])
+
+    def test_the_question_and_the_go_on_menu_asked_again_are_menus_before_their_first_press(self):
+        # fcm1 open item 2 (s89-off-ws): RECORD -> NO, then A on the first frame the GO ON menu asked again takes input. The game draws
+        # that menu (and the question's YES/NO) on the frame it takes input, so a press on that frame left no frame with the menu waiting:
+        # no anchor, and the ROM's menu was unplanned. Since lbb1 each is a menu from the frame its text is fully printed; here every
+        # press comes on the first frame the game takes it, for NO, B, YES ("battle was recorded", then the 3-entry menu) and RETIRE -> NO.
+        answers = {"no": [("A", True)], "b": [("B", True)], "yes": [("UP", False), ("A", True)], "retire": [("A", True)]}
+        for route, answer in answers.items():
+            with self.subTest(route=route):
+                got = self.reask_run(route)
+                fixed, old = got["fixed"], got["old"]
+                self.assertIsNotNone(fixed["goOnFrame"])
+                p = fc.Plan({"frames": fixed["frames"], "menus": fixed["menus"], "buttons": fixed["buttons"]})
+                kinds = [(a["kind"], a["sig"]) for a in p.anchors]
+                self.assertEqual(kinds, [("field.multichoice", "0"), ("field.multichoice", "q1"), ("field.multichoice", "0")])
+                question, reask = p.anchors[1], p.anchors[2]
+                self.assertEqual([(e["buttons"], e["leaves"]) for e in question["effects"]], answer)
+                self.assertGreater(question["effects"][-1]["offset"], 0)
+                self.assertEqual([(e["buttons"], e["leaves"]) for e in reask["effects"]], [("A", True)])
+                self.assertEqual(reask["effects"][0]["engineFrame"], fixed["goOnFrame"])
+                self.assertGreater(reask["effects"][0]["offset"], 0)
+                # without the game's predicates (an older build) the menu asked again had no anchor, nor the question when its first press
+                # left it (on YES the first press is UP, which keeps the question: its anchor starts there, without the UP)
+                old_plan = fc.Plan({"frames": old["frames"], "menus": old["menus"], "buttons": old["buttons"]})
+                self.assertEqual([(a["kind"], a["sig"]) for a in old_plan.anchors],
+                                 [("field.multichoice", "0")] + ([("field.multichoice", "q0")] if route == "yes" else []))
 
 
 class MonRecordTest(unittest.TestCase):

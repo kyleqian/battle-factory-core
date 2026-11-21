@@ -442,7 +442,13 @@ describe("random round soak driver (green milestone pin)", () => {
       // 43_437 -> 43_336, renderCalls 3_045 -> 3_042; same battle 7, turn 3, end state, diagnostics.
       // pic8 (the forced party menu's clock starts at the faint message's dismiss edge, 2 frames earlier per forced switch; ROM lab
       // pic7-player-faint-send-in-on): frames + render calls, 43_336 -> 43_334, renderCalls 3_042 -> 3_044; same battle 7, turn 3, end state, diagnostics.
-      frames: 43_334,
+      // wbh1 (docs/wbh1-battle-start-white-herb.md): a later battle-start entry script starts on its own kernel rows after the previous one's
+      // pop (2 frames earlier than pau4's ENTRY_SCRIPT_GAP_ROWS; this seed has a two-script battle start, not a White Herb: with the old
+      // gap restored the pin holds): render calls only, 3_044 -> 3_043; frames 43_334, battle 7, turn 3, end state, diagnostics unchanged.
+      // fnt1 (docs/fnt1-fainted-box-clear.md: a "fainted!" / "Player defeated" box takes the press from the row after its last glyph, 2 rows
+      // earlier, as the ROM's `\p` wait): frames only, 43_334 -> 43_323; same battle 7, turn 3, end state, diagnostics, render calls. With the
+      // accept edge alone undone (isBattleResolutionButtonMessageAcceptable's promptClear lead) the old pin passes again.
+      frames: 43_323,
       battle: 7,
       turn: 3,
       diagnostics: {
@@ -454,7 +460,7 @@ describe("random round soak driver (green milestone pin)", () => {
         terminalOutcome: "roundWon",
         terminalRecordMenuInputReadyReached: true,
         terminalRecordChoice: "no",
-        renderCalls: 3_044,
+        renderCalls: 3_043,
       },
     });
     expect(second).toEqual(first);
@@ -797,7 +803,12 @@ describe("ISSUES #99 (soak driver swap-offer misroute) — swap offer answered b
     // Seed 0 is the lowest that is inside 32,000 with a wide margin, so the window is kept.)
     // lbr-g (#221 E1-E3, the Lobby cursor is the ROM's): seed 0 no longer reaches a swap offer inside 32,000 frames; scan of vanilla seeds 0..6
     // under the same window: 1, 2, 3 reach offers (all "NO", no swap screen), so the lowest (1) is pinned.
-    runSeed(1, {
+    // lbb1 (docs/lbb1-lobby-b-press.md: the Lobby terminal's pages and farewell take B, which the driver presses there at 12%, so the
+    // Lobby's length and with it the next challenge's deal move): seed 1's first offer is now at 50,093. Scan of vanilla seeds 0..11
+    // (80,000 frames): all 12 reach one, every offer "NO", no swap screen; first-offer frames 0: 23,816, 1: 50,093, 2: 21,726,
+    // 3: 17,933, 4: 32,470, 5: 17,041, 6: 21,019, 7: 19,422, 8: 22,150, 9: 44,215, 10: 20,581, 11: 22,262. Seed 0 is the lowest
+    // inside 32,000, so it is pinned again and the window kept.
+    runSeed(0, {
       policy: "vanilla",
       maxFrames: 32_000,
       renderEvery: 0,
@@ -998,12 +1009,18 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // pic9 (the switch lines follow the foe's HP; new print lengths move the exploring presses): 19042 / turn 23 -> 22844 / turn 30;
       // same battle 1 / depth 0 / roundLost.
       // lrc1 (the loss tail's opponent recall plays the ROM's animated return to ball, its recall receipt holds to the trainer slide and the slide's printstring is 3 rows later: the win text prints 67 frames later): frames only, 22844 -> 22897; same battle 1 / depth 0 / turn 30 / roundLost.
-      frames: 22897,
+      // fnt1 (docs/fnt1-fainted-box-clear.md: the "fainted!" box takes the press 2 rows earlier, from the row after its last glyph; the exploring
+      // presses land on new phases, a new trajectory as at fsw235): 22897 / battle 1 / depth 0 / turn 30 -> 39277 / battle 2 / depth 1 / turn 22;
+      // still roundLost. With the accept edge undone (isBattleResolutionButtonMessageAcceptable's promptClear lead) the old pin passes again.
+      // lbb1 (the boxes of the Lobby terminal, the postwin and the rooms take B as A; the exploring policy presses B there): frames only,
+      // 22897 -> 22843; decision notes identical to 6817b6a8c's (press-stream notes aside); same battle 1 / depth 0 / turn 30 / roundLost.
+      // trial-fix-20261121 (fnt1 + lbb1 together): frames only, 39277 -> 39259; same battle 2 / depth 1 / turn 22 / roundLost.
+      frames: 39259,
       outcome: "OK",
       endState: "roundLost",
-      maxBattleDepth: 0,
-      battle: 1,
-      turn: 30,
+      maxBattleDepth: 1,
+      battle: 2,
+      turn: 22,
     });
     expect(runSeed(1, options)).toMatchObject({
       // msg175: 26878 -> 26810 (shorter used prints); trn178 (the Scene OFF action-transition pause): 26810 -> 27058; same battle / turn / end state.
@@ -1039,11 +1056,9 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // sct1 (docs/sct1-scouting-next-opponent.md: each scouting page takes A from its own last character + 3, and the pages are the next
       // opponent's, so their lengths and the exploring presses after them move): 61504 / turn 22 -> 58793 / turn 19; same battle 3 /
       // depth 2 / roundLost. With the old fixed [72, 74, 72] accept delays (and the new text) the old pin passes again; seed 0 is unmoved.
-      // msg2 (docs/msg2-roar-wish-messages.md: Roar / Whirlwind's dragged-out release -> moveendall is 4 rows, the box clears 1 row earlier;
-      // the exploring presses after it land 1 row earlier): frames only, 58793 -> 58798; same battle 3 / depth 2 / turn 19 / roundLost.
-      // With RELEASE_TO_MOVEEND_ROWS.STRINGID_PKMNWASDRAGGEDOUT back at 5 the old pin passes again (undoing the WISH name, the WISH
-      // pause or the dragged-in entry-script hold instead leaves it at 58798); seed 0 is unmoved.
-      frames: 58798,
+      // lbb1 (see seed 0): frames only, 58793 -> 58758; decision notes identical to 6817b6a8c's once the press-stream notes (the party
+      // wander and forced-menu DOWN rolls) are set aside; same battle 3 / depth 2 / turn 19 / roundLost.
+      frames: 58758,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 2,
@@ -1084,7 +1099,9 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // merge of the box's 2026-11-18 run with the Mac's fixes 44-51: frames only, 9228 -> 9209; same end state.
       // pic8 (the forced party menu's clock starts at the faint message's dismiss edge: 2 frames earlier per forced switch, ROM lab pic7): frames only, 9209 -> 9205; same end state.
       // lrc1 (the loss tail's opponent recall plays the ROM's animated return to ball, its recall receipt holds to the trainer slide and the slide's printstring is 3 rows later: the win text prints 67 frames later): frames only, 9205 -> 9319; same battle 1 / turn 16 / end state (the terminal presses land on new phases after the longer tail).
-      frames: 9319,
+      // lbb1 (the loss terminal's pages and farewell take B as A; the driver's terminal presses are 12% B): frames only, 9319 -> 9300;
+      // decision notes identical to 6817b6a8c's; same battle 1 / turn 16 / end state. Seed 1 is unmoved.
+      frames: 9300,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 0,

@@ -1310,8 +1310,10 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
   }
 
   if (state.prebattleEntry) {
-    emitPrebattleEntrySounds(state.prebattleEntry, newKeys.has("A")); // snd1, write-only
-    const advance = advancePrebattleEntry(state.prebattleEntry, { a: newKeys.has("A") });
+    // lbb1: the briefing's messages are MSGBOX_DEFAULT and their `\p` waits TextPrinterWaitWithDownArrow: A or B (scripts.inc:38, :208).
+    const briefingPress = newKeys.has("A") || newKeys.has("B");
+    emitPrebattleEntrySounds(state.prebattleEntry, briefingPress); // snd1, write-only
+    const advance = advancePrebattleEntry(state.prebattleEntry, { press: briefingPress });
     let entryNext: EngineState = state;
     if (advance.state !== null && advance.state.phase === "draftFadeIn") {
       // The draft screen runs under its own fade-in (input ignored); the entry owns the frame counter and RNG as usual.
@@ -1732,8 +1734,9 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
         );
       }
     } else if (battleRoom) {
-      // The brain room's boxes take A or B (WaitForAorBPress, TextPrinterWaitWithDownArrow); the ordinary opponent's box keeps its A gate.
-      const roomPress = newKeys.has("A") || (battleRoom.frontierBrainWalkup === true && newKeys.has("B"));
+      // Every box of the room takes A or B (WaitForAorBPress, TextPrinterWaitWithDownArrow): the brain room's, and (lbb1) the ordinary
+      // opponent's intro, `msgbox gStringVar4, MSGBOX_DEFAULT` (battle room scripts.inc:78).
+      const roomPress = newKeys.has("A") || newKeys.has("B");
       if (battleRoomQuoteInputReady(battleRoom) && roomPress) {
         const prevBattleRoom = battleRoom;
         if (brainSpeechAcceptPlaysSelect(prevBattleRoom)) playSelectSe();
@@ -1855,7 +1858,8 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
       }
     } else if (
       nextPostwin.healDismissElapsed === null &&
-      newKeys.has("A")
+      // lbb1: "Let us restore your POKéMON!" is MSGBOX_DEFAULT (pre-battle room scripts.inc:57): waitbuttonpress = WaitForAorBPress.
+      (newKeys.has("A") || newKeys.has("B"))
     ) {
       const healPostwin = nextPostwin;
       nextPostwin = acceptPostwinHealDismiss(nextPostwin);
@@ -1913,6 +1917,12 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
           playSelectSe();
           if (nextPostwin.questionYesElapsed !== null && nextPostwin.question?.kind === "record") schedulePostwinRecordYesSave();
         }
+      } else if (newKeys.has("B")) {
+        // lbb1: `multichoicedefault 20, 8, MULTI_YESNO, 1, FALSE` does not ignore B (pre-battle room scripts.inc:111, :131): B is
+        // MULTI_B_PRESSED wherever the cursor is, which the script sends to AskReadyForOpponent like NO (:115, :135), on the frame A
+        // would be taken, with one SE_SELECT (Task_HandleMultichoiceInput, script_menu.c:178-184).
+        nextPostwin = acceptPostwinQuestionDismiss(nextPostwin);
+        if (nextPostwin !== beforeQuestion) playSelectSe();
       }
     } else if (
       nextPostwin.question !== null &&
@@ -1920,7 +1930,8 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
       nextPostwin.recordedMessageDismissElapsed === null &&
       nextPostwin.question.kind === "record" &&
       postwinRecordedInputReady(nextPostwin) &&
-      newKeys.has("A")
+      // lbb1: "{PLAYER}'s battle was recorded" is MSGBOX_DEFAULT (BattleTowerLobby scripts.inc:136): A or B (WaitForAorBPress).
+      (newKeys.has("A") || newKeys.has("B"))
     ) {
       // RECORD-YES recorded-message hold: the dismiss-A resolves it back to
       // the continuation menu (the re-ask, which drops RECORD per §7a).
@@ -2753,7 +2764,8 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
     // "idle" -> "messageClosing" gate: created directly (not via
     // advanceBattleRoom) so this same tick already reflects it - see
     // battleRoom.ts's §8.3 doc for the close-latency derivation.
-    if (battleRoomQuoteInputReady(battleRoom) && newKeys.has("A")) {
+    // lbb1: the opponent's intro is `msgbox gStringVar4, MSGBOX_DEFAULT` (battle room scripts.inc:78): A or B (WaitForAorBPress).
+    if (battleRoomQuoteInputReady(battleRoom) && (newKeys.has("A") || newKeys.has("B"))) {
       battleRoom = { ...battleRoom, phase: "msgboxClosing", elapsed: 0 };
     } else {
       battleRoom = advanceBattleRoom(battleRoom);
@@ -2907,7 +2919,8 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
     // directly (not via advancePrebattleRoom) so this same tick already
     // reflects it, matching every other same-tick-state-creation site in
     // this file (e.g. the "wasAccepting" branch below).
-    if (prebattleRoom.phase === "idle" && newKeys.has("A")) {
+    // lbb1: "Right this way, please!" is MSGBOX_DEFAULT (pre-battle room scripts.inc:44): A or B (WaitForAorBPress), as on the later walks.
+    if (prebattleRoom.phase === "idle" && (newKeys.has("A") || newKeys.has("B"))) {
       prebattleRoom = { phase: "messageClosing", elapsed: 0 };
     } else {
       prebattleRoom = advancePrebattleRoom(prebattleRoom);

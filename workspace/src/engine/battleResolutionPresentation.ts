@@ -224,6 +224,13 @@ export function itemKnockoffCommandFrames(battler: 0 | 1, seGate: number): numbe
 export const HELD_ITEM_EFFECT_RESTART_LEAD_FRAMES = 15;
 export const HELD_ITEM_EFFECT_CONTINUE_LEAD_FRAMES = 9;
 /**
+ * wbh1 (docs/wbh1-battle-start-white-herb.md): the battle-start entry phase (factoryBattleStartEntry.ts) times a script's rows from the
+ * kernel, so its held-item command starts on the `playanimation` row itself (BattleScript_WhiteHerbRet, ROM labs wbh1-*-on: the anim's
+ * first gAnimScriptActive row) and the print's first glyph follows 213 rows later (211 animation rows, the controller's completion,
+ * printstring), on either side. hie3's script frame 0 (HELD_ITEM_EFFECT_COMMAND_FRAMES before the print) is the row before it.
+ */
+export const HELD_ITEM_EFFECT_ENTRY_LEAD_FRAMES = -1;
+/**
  * A cure berry's script continues from the move's own `set-battler-status-data` receipt, whose `status` command (off121 / the 32-frame
  * default) already presents the frames up to the animation in both scenes (Scene OFF: the 35 executions; Scene ON: the 32 default),
  * so the held-item command presents the rest. Scene ON only: the ROM spends one frame more than the other continuations (224 vs 223);
@@ -518,6 +525,13 @@ export type BattleResolutionPresentationCommand =
        * terminal ids whose button messages end the segment.  Such a piece never suppresses the segment's `turn-end`.
        */
       promptGate?: true;
+      /**
+       * fnt1 (docs/fnt1-fainted-box-clear.md): this button piece ends its string on `\p` (CHAR_PROMPT_CLEAR, nothing printed
+       * after it): "{X} fainted!", "Player defeated ...!", a gated string's last page.  The press is taken from the printer's
+       * first wait frame (as every `promptGate` piece), and the press clears the box when it lands on a down-arrow redraw frame
+       * (`promptClearPressBlanksBox`).
+       */
+      promptClear?: true;
       /** btn1: glyphs of `lines` already on screen when the piece starts (the line a `\l` scroll keeps). Absent = 0. */
       startChars?: number;
       /** btn1: rows before the piece's first glyph (the `\l` scroll). Absent = 0. */
@@ -902,12 +916,13 @@ export type BattleResolutionOpponentTrainer = Readonly<{
 export type BattleResolutionPresentationState = Readonly<{
   /**
    * btn2 (ROM, both scenes): a button gate's release freezes the wait cursor at its last phase; the box keeps the print and the frozen
-   * cursor until the next print or the box's clear.  The released message's command index + the cursor age at the press.
-   * msg2: `boxCleared` -- the press landed on a row where the ROM's `\p` wait redraws the arrow (`releasedGateClearsBox`), so the
-   * cleared window reaches the screen: the box is blank from the next row.  The age can be -2 / -1 (a press 1 / 2 rows after the
-   * last glyph, before the engine's cursor shows).
+   * cursor until the next print or the box's clear.  The released message's command index + the cursor age shown on the release
+   * frame (fnt1: the phase the printer drew on the frame before the press; < 0 = no arrow drawn yet).
+   * fnt1 (docs/fnt1-fainted-box-clear.md): `clear` is set when a `promptClear` piece was released on a down-arrow redraw frame:
+   * the box still shows the print on the release frame ("pending") and is blank from the next frame ("done", set by the
+   * orchestrator's next tick) until the next print.
    */
-  releasedWaitCursor?: Readonly<{ segmentIndex: number; commandIndex: number; age: number; boxCleared?: true }>;
+  releasedWaitCursor?: Readonly<{ segmentIndex: number; commandIndex: number; age: number; clear?: "pending" | "done" }>;
   /**
    * Presentation-only Scene ON semi-invulnerable hide carried in from the display ledger at this resolution's start
    * (a live Fly/Bounce charge body in an earlier turn; battleResolutionPresentationRender.ts
@@ -2530,10 +2545,13 @@ export const PROMPT_SCROLL_ROWS = 5;
  * and terminal-seam ids are unchanged: their button message ends the segment (no `turn-end`).
  */
 export function promptGatedMessageCommands(base: MessageCommand, messageId: string): readonly MessageCommand[] {
-  if (messageId === "STRINGID_TARGETFAINTED" || messageId === "STRINGID_ATTACKERFAINTED" || TERMINAL_SEAM_BUTTON_MESSAGE_IDS.has(messageId)) {
-    return [Object.freeze({ ...base, advance: "button" as const })];
-  }
   const gates = battleStringPromptGates(messageId);
+  if (messageId === "STRINGID_TARGETFAINTED" || messageId === "STRINGID_ATTACKERFAINTED" || TERMINAL_SEAM_BUTTON_MESSAGE_IDS.has(messageId)) {
+    // fnt1: "{X} fainted!\p" / "Player defeated ...!\p" end on a `\p`; the two quote ids wait on PAUSE_UNTIL_PRESS (no gate here).
+    const last = gates[gates.length - 1];
+    const promptClear = !base.noCursor && last?.kind === "clear" && last.afterLines >= base.lines.length;
+    return [Object.freeze({ ...base, advance: "button" as const, ...(promptClear ? { promptClear: true as const } : {}) })];
+  }
   if (gates.length === 0) return [base];
   const lines = base.lines;
   const chars = (window: readonly string[]) => battleStringPrintableLength(window);
@@ -2556,6 +2574,10 @@ export function promptGatedMessageCommands(base: MessageCommand, messageId: stri
     }));
     start = end;
     previous = gate.kind;
+  }
+  if (start >= lines.length && previous === "clear" && pieces.length > 0) {
+    // fnt1: the string's last marker is a `\p` with nothing after it: its last page is a `promptClear` piece.
+    pieces[pieces.length - 1] = Object.freeze({ ...pieces[pieces.length - 1]!, promptClear: true as const });
   }
   if (start < lines.length) {
     const kept = previous === "scroll" ? 1 : 0;
@@ -2580,35 +2602,6 @@ export function promptGatedMessageCommands(base: MessageCommand, messageId: stri
     }));
   }
   return pieces;
-}
-/** msg2: rows between the ROM's down-arrow redraws (TextPrinterDrawDownArrow, text.c: `downArrowDelay = 8` after each draw). */
-export const DOWN_ARROW_REDRAW_ROWS = 9;
-/**
- * msg2 (docs/msg2-roar-wish-messages.md): whether a press releasing the gated piece `commandIndex` of `segment`, with the cursor age
- * of the row before the press (`age`, as `releasedWaitCursor` records it), blanks the box.  A `\p` waits in RENDER_STATE_CLEAR
- * (text.c:1171-1179): each row TextPrinterWaitWithDownArrow first redraws the arrow when its delay has run out (the first wait row,
- * then every 9th: `CopyWindowToVram`) and then, on a new A / B, `FillWindowPixelBuffer`s the window without copying it.  So a
- * press on a redraw row sends the cleared window to the screen at once (blank from the next row); on any other row the old text and
- * arrow stay until the next print or box clear.  The first wait row is the first row a press is accepted (age -2 here); ROM: fcm1
- * catcher, a press there blanked the box on the next frame in 2 / 2 Roar prints, a press elsewhere left it 14 rows in 33 / 33.
- * `\l` (the scroll clears the arrow itself) and PAUSE_UNTIL_PRESS (no arrow) never do this.
- */
-export function releasedGateClearsBox(
-  segment: Readonly<{ commands: readonly BattleResolutionPresentationCommand[]; events: readonly BattleKernelSemanticEvent[] }>,
-  commandIndex: number,
-  age: number,
-): boolean {
-  const command = segment.commands[commandIndex];
-  if (command?.type !== "message" || command.promptGate !== true || command.advance !== "button") return false;
-  if (age < -2 || (age + 2) % DOWN_ARROW_REDRAW_ROWS !== 0) return false;
-  const payload = segment.events.find((event) => event.sequence === command.eventSequence)?.payload;
-  if (payload?.kind !== "message") return false;
-  let piece = 0;
-  for (let index = 0; index < commandIndex; index += 1) {
-    const other = segment.commands[index]!;
-    if (other.type === "message" && other.eventSequence === command.eventSequence && other.promptGate === true && other.advance === "button") piece += 1;
-  }
-  return battleStringPromptGates(payload.messageId)[piece]?.kind === "clear";
 }
 /**
  * Only 2 of the 3 button ids above are wait-cursor-less -- this is NOT

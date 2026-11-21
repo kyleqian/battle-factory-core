@@ -36,7 +36,7 @@ export function emitLobbyAttendantSounds(before: FactoryLobbyAttendantState, aft
     const cursor = before.pendingCursor ?? before.cursor;
     if (input.up || input.down) {
       // Menu_ProcessInputNoWrap / ...ClearOnChoose (menu.c): SE_SELECT only when the cursor moves. Three entries do not wrap
-      // (script_menu.c:143-146 InitMultichoiceCheckWrap), so a press at an end is silent in the ROM (ours wraps the cursor; see the doc).
+      // (script_menu.c:143-146 InitMultichoiceCheckWrap), so a press at an end is silent (and, since lbb1, leaves our cursor too).
       const next = cursor + (input.down ? 1 : -1);
       if (next >= 0 && next < ATTENDANT_MENU_ITEMS[def.menu].length) playSelectSe();
       return;
@@ -65,9 +65,9 @@ export function emitLobbyAttendantSounds(before: FactoryLobbyAttendantState, aft
   else if (before.screen === "saved" && input.a) playSelectSe();
 }
 
-/** The pre-battle room briefing: an accepted A on a `\p` page plays SE_SELECT (text.c); the message ends (waitbuttonpress) are silent. */
-export function emitPrebattleEntrySounds(before: PrebattleEntryState, a: boolean): void {
-  if (!a || !briefingAcceptsInput(before)) return;
+/** The pre-battle room briefing: an accepted A or B on a `\p` page plays SE_SELECT (text.c); the message ends (waitbuttonpress) are silent. */
+export function emitPrebattleEntrySounds(before: PrebattleEntryState, press: boolean): void {
+  if (!press || !briefingAcceptsInput(before)) return;
   const page = before.messages![before.message]![before.page]!;
   if (page.end === "p") playSelectSe();
 }

@@ -22,6 +22,20 @@ let terminalRecordMenuDrawn = null;
 export function setQuestionWindowVisible(fn) { questionWindowVisible = fn; }
 export function setTerminalRecordMenuDrawn(fn) { terminalRecordMenuDrawn = fn; }
 
+// lbb1: the game draws the question's YES/NO window and takes its input on one frame (POSTWIN_QUESTION_WINDOW_DELAYS is both), and
+// so does the GO ON menu asked again after the question is answered NO or B, or after "battle was recorded" (scripts.inc:111-119,
+// 131-135: back to AskReadyForOpponent, which prints "The Nth match is next!" again with `message` + `waitmessage`, then opens the
+// `multichoice`; postwin.ts keeps the answered question until that menu takes input). A press on that first frame left no frame on which
+// the menu waited, so the plan had no anchor and the ROM's menu was unplanned: fcm1 s89-off-ws stopped there (RECORD -> NO, ours 137,134,
+// the ROM's menu 144,776). On the ROM both open when `waitmessage` returns, Task_HandleMultichoiceInput taking input a few frames later
+// (sProcessInputDelay, script_menu.c:129). So both are menus from the frame their text is fully printed (the game's own
+// postwinQuestionVisibleChars / POSTWIN_QUESTION_TEXT_TOTAL and postwinQuestionReprintSettled, passed by engineRun.mjs); the menu asked
+// again opens on GO ON (advancePostwin's re-ask, as the ROM's). Without them (an older build) as before.
+let questionTextSettled = null;
+let reaskTextSettled = null;
+export function setQuestionTextSettled(fn) { questionTextSettled = fn; }
+export function setReaskTextSettled(fn) { reaskTextSettled = fn; }
+
 // The Lobby attendant's menus between two rounds (fcr2, factoryLobbyAttendant.ts): "take the challenge?" CHALLENGE / INFO / EXIT and the
 // level choice are the ROM's `multichoice` (Task_HandleMultichoiceInput, BattleFrontier_BattleFactoryLobby/scripts.inc:125, 134); "I need
 // to save the game. Is that okay?" is MSGBOX_YESNO (Task_HandleYesNoInput, :138); the save dialog's "Would you like to save the game?" and
@@ -79,9 +93,10 @@ export function menuOf(st) {
   const pw = st.postwin;
   if (pw) {
     if (pw.question && pw.questionYesElapsed === null && pw.questionDismissElapsed === null) {
-      if (questionWindowVisible && !questionWindowVisible(pw)) return null;
+      if (questionTextSettled ? !questionTextSettled(pw) : questionWindowVisible && !questionWindowVisible(pw)) return null;
       return { kind: "field.multichoice", sig: `q${pw.questionCursorPos}` };
     }
+    if (pw.question && pw.dialoguePage === 0 && reaskTextSettled && reaskTextSettled(pw)) return { kind: "field.multichoice", sig: "0" };
     if (pw.dialoguePage === 0 && pw.continuationCursorPos !== null && pw.continuationConfirmElapsed === null && !pw.question) {
       return { kind: "field.multichoice", sig: String(pw.continuationCursorPos) };
     }

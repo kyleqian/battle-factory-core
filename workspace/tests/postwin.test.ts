@@ -1327,14 +1327,15 @@ describe("S8 Battle-1 postwin transition", () => {
         ...flagState,
         disableRecordBattle: false as const,
       })).toBe(4);
-      // Cursor traversal wraps over the 3 entries (GO ON -> REST -> RETIRE ->
-      // GO ON), not the 4-option ring.
+      // Cursor traversal runs over the 3 entries (GO ON -> REST -> RETIRE),
+      // not the 4-option ring, and stops at RETIRE: three entries do not wrap
+      // (script_menu.c:143-146, Menu_ProcessInputNoWrap; lbb1).
       const moved = movePostwinContinuationCursor(flagState, 1);
       expect(moved.continuationCursorPos).toBe(1);
       const onRetire = movePostwinContinuationCursor({ ...moved, elapsed: moved.elapsed + 1 }, 1);
       expect(onRetire.continuationCursorPos).toBe(2);
-      const wrapped = movePostwinContinuationCursor({ ...onRetire, elapsed: onRetire.elapsed + 1 }, 1);
-      expect(wrapped.continuationCursorPos).toBe(0);
+      const held = movePostwinContinuationCursor({ ...onRetire, elapsed: onRetire.elapsed + 1 }, 1);
+      expect(held.continuationCursorPos).toBe(2);
       // In the 3-option variant, RETIRE is the last entry and routes to the
       // retire question; REST (1) stays A-guarded.
       expect(acceptPostwinContinuation(onRetire).question?.kind).toBe("retire");

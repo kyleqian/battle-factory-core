@@ -419,3 +419,56 @@ def brain_trap_wanted(brain, enemy_now, frame):
             return False, False
         return True, True
     return False, True
+
+
+# FillFactoryBrainParty runs for about 30 ROM frames: each Pokemon's set and personality draws fall in one frame, then building it takes
+# about 10 frames (hdt1's Random() logs: 28 to 31 frames from the entry to the return; the ROM receipts
+# tools/probe/receipts/noland-brain-party-{silver,gold}.json, fillEntry -> fillReturn: 28 and 26). The trap holds the VBlank undo from
+# the function's entry until its return (docs/hdt1-factory-head-team.md); this is only a guard for a return never seen.
+BRAIN_BUILD_TIMEOUT = 300
+
+
+def brain_build_state(brain, frame, timeout=BRAIN_BUILD_TIMEOUT):
+    """Where the Factory Head's party build is (romRun.brain_traps): None before FillFactoryBrainParty's entry was trapped, "building"
+    from its entry until its return address is reached, "returned" after that, "timeout" when it has not returned `timeout` frames after
+    the entry. The overworld VBlank's Random() is undone over the whole "building" stretch. Before hdt1 the undo (and the party record)
+    stopped 20 frames after the entry, in the middle of the build, and the Head's later Pokemon were built from a shifted stream.
+    `brain`: {"fired": None | {"frame"}, "returned": None | {"frame"}}."""
+    if brain is None or brain.get("fired") is None:
+        return None
+    if brain.get("returned") is not None:
+        return "returned"
+    if frame - brain["fired"]["frame"] > timeout:
+        return "timeout"
+    return "building"
+
+
+def brain_build_draws(draws, engine_rng):
+    """The Random() calls logged while the Head's party was built (romRun.brain_traps; each [frame, caller, gRngValue before the call],
+    caller "vblank" for VBlankIntr's own draw, which the trap undoes) against the engine's stream: the build's own draws (every other
+    caller) must start at the engine's cursor and follow one another back to back, as the engine draws the Head's three
+    (generateFactoryBrainOpponent). Returns {"buildDraws", "vblankDraws", "callers", "chainIsEngines", "firstBreak"}; firstBreak is the
+    index (among the build's own draws) of the first one that is not the next value of the engine's stream, or None."""
+    callers, build, vblank = {}, 0, 0
+    want, first_break = engine_rng, None
+    for _frame, caller, before in draws:
+        callers[caller] = callers.get(caller, 0) + 1
+        if caller == "vblank":
+            vblank += 1
+            continue
+        if first_break is None and before != want:
+            first_break = build
+        want = lcg(before)
+        build += 1
+    return {"buildDraws": build, "vblankDraws": vblank, "callers": callers,
+            "chainIsEngines": None if engine_rng is None else (first_break is None and build > 0), "firstBreak": first_break}
+
+
+def brain_engine_rentals(battles, g):
+    """The six set ids the engine's Head party build refuses (nextSavedRentalRecords at the swap's resolution, docs/parity-mac/
+    brain-party-after-swap.md): the player's three as the Head battle starts them and the beaten trainer's three (battle g - 1). On the
+    ROM these are frontier.rentalMons[0..5] at FillFactoryBrainParty (battle_factory.c:786-792). None when the engine run lacks them."""
+    head, beaten = battles.get(g), battles.get(g - 1)
+    if head is None or beaten is None or not head.get("playerParty"):
+        return None
+    return [m["setId"] for m in head["playerParty"]] + list(beaten["opponentSetIds"])

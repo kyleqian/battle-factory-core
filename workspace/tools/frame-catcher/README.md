@@ -79,7 +79,10 @@ round takes about 2 minutes. Five traces at once (`JOBS=5`) take as long as the 
      whether the ROM reached `GenerateOpponentMons` at the engine's first-opponent cursor (`romCursorIsEngines`); since fop1
      (`docs/fop1-first-opponent-order.md`) both are true.
      The Factory Head's party (`FillFactoryBrainParty`, at battle start) is trapped with the engine's cursor, the overworld VBlank's
-     `Random()` undone while it is built.
+     `Random()` undone from the function's entry until it returns (about 30 frames; before hdt1 only for 20 frames,
+     `docs/hdt1-factory-head-team.md`). Every `Random()` of the build is logged with its caller in `rom/head-build-<g>.json`, and the
+     set-up list's "Factory Head party" says whether the build's own draws were the engine's stream back to back (`chainIsEngines`)
+     and whether `frontier.rentalMons` held the engine's six (`rentalsSame`).
 
    Then the ROM is driven by the engine's choices. Every menu where the engine waited for the player is an anchor: when the ROM opens
    the same kind of menu, the engine's presses there are made again at the same frame offset from the menu's first frame, each
@@ -105,10 +108,13 @@ The Lobby attendant's CHALLENGE / INFO / EXIT and level multichoices and its YES
 `attendantAcceptsInput`); on the ROM the save dialog's YES/NO is `SaveGameTask` with `SaveConfirmInputCallback` /
 `SaveOverwriteInputCallback`. The engine side prints the oracle save's player name (MEMORY), as `tools/compare/harnessPlayerName.ts` does.
 
-Menus that open only after a printed question: the after-battle RECORD / RETIRE question and the Lobby's "record your last match?"
-after a round are menus from the frame their YES/NO box is drawn (the game's own `postwinQuestionWindowVisible` /
-`factoryTerminalRecordMenuDrawn`, handed to `engineMenus.mjs` by `engineRun.mjs`), as on the ROM, where `message` + `waitmessage` come
-before `multichoicedefault`. The plan starts at the mount frame (frame 0), so a press on the round's very first frame is replayed.
+Menus that open only after a printed question: the Lobby's "record your last match?" after a round is a menu from the frame its YES/NO
+box is drawn (the game's own `factoryTerminalRecordMenuDrawn`, handed to `engineMenus.mjs` by `engineRun.mjs`), as on the ROM, where
+`message` + `waitmessage` come before `multichoicedefault`. The after-battle RECORD / RETIRE question and the GO ON menu asked again
+after it (NO, B, or "battle was recorded") are menus from the frame their text is fully printed (`postwinQuestionVisibleChars` /
+`POSTWIN_QUESTION_TEXT_TOTAL`, `postwinQuestionReprintSettled`; lbb1, `docs/lbb1-lobby-b-press.md`): the game draws those two windows
+and takes their input on the same frame, so a press on that frame left no frame on which the menu waited, and the ROM's menu was
+unplanned (fcm1 s89-off-ws). The plan starts at the mount frame (frame 0), so a press on the round's very first frame is replayed.
 
 When a sprite is in a different place on the two sides, check a frame after it has stopped moving: during a walk the two sides pass
 through the same tiles at different moments (the first look at Kyle's Tuber picked a ROM frame mid-walk and missed the one-tile offset).
