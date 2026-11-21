@@ -2,7 +2,11 @@
 # lsd194 census (docs/lsd194-scene-on-tails.md; recipe of sub183Census.sh): lsd194Census.ts over seeds 0..999 in 100-seed shards on a git-archive copy of each <tree-ish>, several (tree-ish, scene) arms through one job pool capped at
 # LSD194_CENSUS_JOBS (default 4; the task caps it at 6). The same lsd194Census.ts is copied into every tree.
 #   sh tools/integration/lsd194Census.sh <fresh-root> <tree-ish>:<on|off>...    # arm dirs <root>/<scene>-<short sha>/r<i>.jsonl
-# Compare two arms with `python3 tools/integration/lsd194CensusDelta.py <base-arm> <final-arm> [out.json]`.
+# Compare two arms of the same scene with `python3 tools/integration/rst197CensusDelta.py --digest <base-arm> <final-arm>` (one line: eventsDigest / error / command identity, byte-identical shards; exit 1 on any difference)
+# or, without --digest, the changed-command histogram. (There is no lsd194CensusDelta.py.)
+# The tree-ish `WORKTREE` (cln10) measures the UNCOMMITTED working tree: src/ tools/ package.json tsconfig.json (tracked and untracked-not-ignored) are snapshotted into a throwaway tree object through a temporary index
+# (the real index and HEAD are not touched), arm dir <root>/<scene>-wt-<short tree sha>. The tree sha is kept in <root>/worktree.tree so a resume re-uses it; rm that file to re-snapshot after further edits.
+#   sh tools/integration/lsd194Census.sh /tmp/cen WORKTREE:off HEAD:off
 set -eu
 T=tools/integration
 ROOT=$1; shift
@@ -12,9 +16,25 @@ ROOT=$1; shift
 # LSD194_SHARDS="0 1 2" runs only those 100-seed shards (default all ten); re-invoke with the same root to resume (LSD194_FINAL=1 on the last call removes the trees).
 SHARDS=${LSD194_SHARDS:-0 1 2 3 4 5 6 7 8 9}
 mkdir -p "$ROOT"; ROOT=$(cd "$ROOT" && pwd); WS=$PWD
+# resolve <tree-ish>: WORKTREE becomes a tree object of the working tree (cached in $ROOT/worktree.tree); anything else is returned unchanged.
+resolve() {
+  [ "$1" = WORKTREE ] || { echo "$1"; return; }
+  if [ ! -s "$ROOT/worktree.tree" ]; then
+    TOP=$(git rev-parse --show-toplevel); IDX=$(mktemp)
+    cp "$(git rev-parse --git-path index)" "$IDX"
+    GIT_INDEX_FILE=$IDX git -C "$TOP" add -A -- workspace/src workspace/tools workspace/package.json workspace/tsconfig.json
+    GIT_INDEX_FILE=$IDX git -C "$TOP" write-tree > "$ROOT/worktree.tree"; rm -f "$IDX"
+  fi
+  cat "$ROOT/worktree.tree"
+}
+# outdir <arm>: <root>/<scene>-<short sha>, or <scene>-wt-<short tree sha> for WORKTREE.
+outdir() {
+  R=$(resolve "${1%:*}"); S=${1##*:}
+  if [ "${1%:*}" = WORKTREE ]; then echo "$ROOT/$S-wt-$(git rev-parse --short "$R")"; else echo "$ROOT/$S-$(git rev-parse --short "$R")"; fi
+}
 : > "$ROOT/jobs"
 for arm in "$@"; do
-  REV=${arm%:*}; SCENE=${arm##*:}; OUT="$ROOT/$SCENE-$(git rev-parse --short "$REV")"
+  REV=$(resolve "${arm%:*}"); SCENE=${arm##*:}; OUT=$(outdir "$arm")
   if [ ! -d "$OUT/tree" ]; then
     mkdir -p "$OUT/tree"
     git -C "$(git rev-parse --show-toplevel)" archive --format=tar "$REV" workspace/src workspace/tools workspace/package.json \
@@ -39,7 +59,7 @@ export SPLIT SEEDS
   --out="$0/r$1.p$3.jsonl" > "$0/r$1.p$3.log" 2>&1 || echo "FAIL $0 r$1 p$3"' < "$ROOT/jobs"
 MISSING=0
 for arm in "$@"; do
-  REV=${arm%:*}; SCENE=${arm##*:}; OUT="$ROOT/$SCENE-$(git rev-parse --short "$REV")"
+  SCENE=${arm##*:}; OUT=$(outdir "$arm")
   for i in $SHARDS; do
     [ -s "$OUT/r$i.jsonl" ] && continue
     ok=1; for j in $(seq 0 $((SPLIT - 1))); do [ -s "$OUT/r$i.p$j.jsonl" ] || ok=0; done
@@ -53,7 +73,7 @@ done
 if [ "$MISSING" != 0 ]; then echo "INCOMPLETE: $MISSING shard(s) unmerged; trees kept; re-invoke with the same root/LSD194_SPLIT/LSD194_SHARD_SEEDS to resume" >&2; exit 1; fi
 if [ "${LSD194_FINAL:-0}" = 1 ]; then
   for arm in "$@"; do
-    REV=${arm%:*}; SCENE=${arm##*:}; OUT="$ROOT/$SCENE-$(git rev-parse --short "$REV")"
+    OUT=$(outdir "$arm")
     rm "$OUT/tree/node_modules"; rm -rf "$OUT/tree"
   done
   echo done > "$ROOT/DONE"
