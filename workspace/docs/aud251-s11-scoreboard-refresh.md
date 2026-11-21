@@ -1916,3 +1916,71 @@ move-animation SE family ON: 2,005 -> 2,110 exact, mass 19,810 -> 17,571. Status
 **Gates.** `npm run typecheck` ok; `npm run test:gate` 360 files / 2,835 tests; the 228 files importing `battleResolutionPresentation.ts` / `tickSounds.ts` plus `aud2*` and `randomRoundSoak*` (3 batches: 77 / 79 / 72 files, 710 / 770 / 581 tests) green; `npm run build` ok. Full `npm test` not run (brief).
 
 **Residuals.** Wish (273) lead-only: SE rows 0 / 8, hp floors / Rollout / second-mover lead (hcr3m), AI choice (fsc2m) and non-B4 body leads are out of scope. The Scene OFF timing is unchanged. PAPERCUT: a concurrent side-lane session committed my uncommitted `moveAnimSounds.ts` edit (5cb0b6acd) in the shared tree, so stage by file name, never `git add -A`.
+
+## t2k (2026-11-21): the remaining S11 sound-timing mass re-ranked on tree 5fbac1476 (measurement only; no `src/` / `tests/` change)
+
+**Method.** All 25 ON + 24 OFF t2n seeds rescored with `aud249Rescore.sh` (drv1's `--romdrive` A cadence) over `.integration/evidence/t2n`, then `soundScoreboard.py OUT --per-seed --out OUT/score.json` (both scenes; ON at the 8012 oracle's ROM files). Every scored row is attributed with `t2Attribute.py`'s alignment plus the ROM `gCurrentMove` from `tl.json` (body / `gen:<se>`), the controller SE, cry, stat, bgm; OFF rows also carry the engine command type (`--cmdtrace=1`). A "step" is the offset change between consecutive matched rows of a segment (the first row steps from 0): it separates where an offset is *introduced* from where it is only *inherited*. Evidence (git-ignored): `.integration/evidence/t2k/` (`t2/` rescored sets + `score.json` + `scoreboard.txt`, `p/` and `po/` ROM probes, `attr-{on,off}.json`, `gain-{on,off}.json`, `final.py` = the disjoint item table below).
+
+### 1. Rescore (missing / extra 0 / 0 in both scenes)
+
+| family (mass / exact) | OFF drv1 | OFF now | ON drv1 | ON now |
+| --- | --- | --- | --- | --- |
+| move-animation SE | 0 / 0 | 0 / 0 | 19,895 / 2,006 | 19,810 / 2,005 |
+| stat-change SE | 403 / 2 | 403 / 2 | 410 / 27 | 410 / 27 |
+| cry | 517 / 97 | 517 / 97 | 1,231 / 31 | 1,227 / 31 |
+| battle-controller SE | 2,225 / 500 | 2,225 / 500 | 4,235 / 301 | 4,231 / 301 |
+| bgm | 19 / 1 | 19 / 1 | 69 / 2 | 69 / 2 |
+| TOTAL | **3,164 / 600** | **3,164 / 600** | **25,840 / 2,367** | **25,747 / 2,366** |
+
+OFF is identical to drv1. ON is 93 mass / 1 exact lower than drv1's 25,840 / 2,367 (-85 move-animation, -4 cry, -4 controller); the master moved from drv1's tree to 5fbac1476 (the mvs1 x hcr1b and box-merge re-pin commits), not bisected.
+
+### 2. Attribution (row mass; classes sum to TOTAL)
+
+| class | ON rows / mass / exact | OFF rows / mass / exact |
+| --- | --- | --- |
+| body (move running at the row) | 3,899 / 13,024 / 1,974 | n/a (no body rows in OFF) |
+| gen (gCurrentMove 0) | 912 / 6,786 / 31 | n/a |
+| controller hit SE 12 / 13 / 14 | 475 / 2,378 / 260 | 548 / 1,361 / 368 |
+| controller faint / send-in 15 / 16 / 114 | 283 / 1,853 / 41 | 284 / 864 / 132 |
+| cry | 202 / 1,227 / 31 | 192 / 517 / 97 |
+| stat | 101 / 410 / 27 | 105 / 403 / 2 |
+| bgm | 5 / 69 / 2 | 4 / 19 / 1 |
+
+**Shape (window = seed x segment x cause; mass):** ON constant 17,878 (1,374 windows), one-off >= 20 4,253 (108), varies (growing / tail) 3,616 (122), exact 681. OFF constant 2,487 (477), one-off 522 (17), varies 155 (14). Constant dominates: most mass is an offset introduced once and *inherited* by the later rows of the segment, so the cost of a lead is its row count, not its size.
+
+**Top bodies ON (mass):** Dig 736, Ice Beam 686, Drill Peck 594 (one window: s1914 seg21, -66 x 9 rows), Rock Slide 518, Magical Leaf 490, Rest 468, Ancient Power 383, Psychic 373, Double-Edge 363, Blizzard 351, Aerial Ace 346 (+ 205 inherited, s3738), Double Team 324, Struggle 310. Metal Claw's 745 is the rows after its body in s3738. **B4 bodies (being landed, not proposed): 863 = Thunder Wave 243, Confuse Ray 196, Curse 188, Stun Spore 134, Brick Break 88, Sleep Powder 14** (Sing / Grasswhistle / Lovely Kiss / Will-O-Wisp / Glare have no ON mass rows in these seeds).
+
+**Where offsets are introduced (steps):** segment-entry first rows (Dig +6 charge turn x10, Rest -2 x17 / +9 x6, ball-open -3 / -7, Ice Beam / Solar Beam first windows), body tails (Metal Claw -14), OFF stat +3 (x60), OFF first hit after the hit animation (-7 x18, -3 x10, -4 x7), and single windows (s1914 Drill Peck -66, s3738 Aerial Ace -39 / -79, s8108 Confusion -65 x2).
+
+### 3. Ranked top 8 (rows assigned disjointly in this order; the B4 line and the remainder make the sum-check)
+
+| rank | item | scenes | T2 mass now (ON / OFF) | breadth (ON census, of 1,000 battles) | direction | cost / risk | lands in | ROM window |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 | Metal Claw body tail: engine move-animation 14 frames short | ON | 745 / 0 | 99 commands in 38 battles | lengthen Metal Claw's tail by 14 (rows after the last body SE) | low: one table row; T2 sample is 6 windows of ONE seed, so re-measure with a second Metal Claw seed | `src/engine/battleResolutionPresentationRender.ts` body tail tables (`HPD4_BODY_TAIL_ROWS` / `LSE2_BODY_TAIL_ROWS` / `LIVE_MOVE_SCRIPT_TAIL_TRAIL_ROWS`, read by `battleResolutionCommandDuration`) | s3738 decision 4 (ROM commit 2436, engine 2420); also seg 1, 9, 17, 33, 41, 49 |
+| 2 | First hit SE after a hit-animation (self-confusion hit: message -> hit-animation gap 5 short) | OFF (ON shares the controller rows) | 1,207 / 662 | hit-animation 18,646 commands in 1,000 battles; OFF steps: -7 x18, -3 x10, -4 x7 of 71 | delay the hit-animation command (and its SE 13) by 5-7 frames after the confusion message | medium: the hit lead differs by cause (confusion self-hit vs woke-up chain), so land per cause; the ON half is mostly inherited drift | `src/engine/battleResolutionPresentation.ts` (segment builder of the message -> hit-animation chain; `BattleScript_DoSelfConfusionDmg`, `battleScriptActionAdmission.ts:3089`) | s7295 decision 4 (ROM 3333 / eng 3282); s7682 decision 2 (1160 / 1167) |
+| 3 | OFF stat SE +3 (SE 239 / 245) | OFF | 0 / 403 (ON stat median 0) | stats-change 3,688 commands in 828 battles; 60 of 100 OFF steps are exactly +3 | stats-change SE 3 frames earlier (SE age 6 -> ~4 after the command start, and the preceding move-animation 39 -> 37) | low: constant offset, one emitter; ON already has the `STATS_CHANGE_AFTER_*_AGE_SHIFT` family | `src/engine/moveAnimSounds.ts` `STATS_CHANGE_SE_AGE` / `emitStatsChangeSounds`, `battleResolutionPresentationRender.ts` `statsChangeSourceAge` (the generic age without a body shift is what OFF runs) | s2 decision 1 (ROM 369 / eng 373), frames 205-252 |
+| 4 | Aerial Ace s3738 -39 / -79 (twin in both scenes: the OFF rows have no body, so it is a controller / event gap, not a table) | ON + OFF | 551 / 160 | Aerial Ace 676 commands in 274 battles (one seed shows it) | engine plays the hit SE 39 frames before the ROM; unknown which ROM event waits | medium / unknown: unprobed, single seed; probe before any landing | to be found (hit SE 12 + SE after Dig in seg63) | s3738 decision 15 (seg31) ROM rf 6618; decision 27 (seg55) rf 11608; ON decision 31 rf 22049 (-79) |
+| 5 | Dig: charge-turn first SE +6, attack-turn tails (+9 / +11) | ON | 736 / 0 | 596 commands in 120 battles | shorten Dig's charge-turn lead by 6; trim the attack-turn tail | medium: two terms; the +6 first row repeats in 10 windows (4 seeds) | `battleResolutionPresentationRender.ts` live-move lead / tail tables for DIG | s8108 decision 11 (seg23) rf ~10424 (+9 / +11); s3738 seg71 / 79 / 87 |
+| 6 | Faint SE 16 + cry@faint | ON + OFF | 1,408 / 458 | faint 4,332 commands in 1,000 battles | scattered +-1 with a long negative tail (16@faint median -4, cry -2 ON) | high: mostly inherited drift; the -41 one-off in s3738 is its biggest window | faint / cry rows in `src/engine/tickSounds.ts` + `battleHitSounds.ts` | s3738 decision 27 (seg55) rf 11825 (cry) / 11891 (SE 16), -41 both scenes |
+| 7 | Rest: move-animation#4 -2 and status-animation +9 | ON | 468 / 0 | 462 commands in 149 battles | -2 lead on 17 windows, +9 on 6 | medium: two terms, non-B4 | `battleResolutionPresentationRender.ts` Rest status-animation lead | s6079 decision 7 (seg15) rf 6206 (-27 x 6 rows); 17 windows at -2 |
+| 8 | gen:148 poison tick (general animation) | ON | 1,104 / 0 | general-animation 7,506 commands in 864 battles | engine plays 25-30 frames early in two windows | medium: first row of each window, 3 seeds | general-animation command timing (`moveAnimSounds.ts` `emitGeneralAnimSounds`) | s165 decision 11 (seg23) rf 7437 (-30 x 6); decision 14 (seg29) rf 9882 (-25 x 6) |
+| | **Items 1-8** | | **6,219 / 1,683** | | | | | |
+| | B4 bodies (being landed) | ON | 863 / 0 | | | | | |
+| | remainder (items below; not chased) | | 18,665 / 1,481 | | | | | |
+| | **TOTAL** | | **25,747 / 3,164** | | | | | |
+
+Sum-check: ON 745 + 1,207 + 551 + 736 + 1,408 + 468 + 1,104 + 863 + 18,665 = 25,747; OFF 662 + 403 + 160 + 458 + 1,481 = 3,164 (ON items 1-8 = 6,219; OFF items 2-4 and 6 = 1,683). "T2 mass now" is the row mass of the item's class, not the saving: the counterfactual gain of removing the item's step is lower (Metal Claw 728, Aerial Ace 537, Drill Peck 660, OFF stat +3 only ~100-180, Dig ~600, Rest ~660 incl. neighbours). Runners-up not in the top 8: Drill Peck s1914 one-off 594 (the next best single window), gen:142 1,112 (s6912 / s319 -25 .. -17 windows), weather / general 219 / 127 / 242 1,001, Ice Beam first windows 686.
+
+### 4. The three ROM windows (hcr3mProbe + hcr3mCmp, frames from each side's own commit)
+
+1. **Metal Claw, s3738 decision 4.** ROM: Harden SE 120 at 47 / 77, Razor Wind SE 136 at 151 / 165, `HitFromAtkAnimation+0x1` at 201, SE 13 at 203. Engine: SE 120 at 47 / 75, SE 136 at 151 / 165, hit-animation cmd 0.2 at 190 with SE 13 at 189. Last body SE to the hit SE is 38 frames in the ROM, 24 in the engine: the differing command is `move-animation` cmd 0.1 (bodyLead 5), 14 frames short. Repeats in 6 windows of the seed.
+2. **Self-confusion hit, OFF s7295 decision 4 (and s7682 decision 2).** ROM `BattleScript_DoSelfConfusionDmg+0x0` at 104, `+0x7` ex2 at 107..139, SE 13 (SE_EFFECTIVE) at 204 (100 frames). Engine `message` cmd 0.1 at 102 -> `hit-animation` cmd 0.2 and SE 13 at 197 (95 frames): the engine's message-to-hit gap is 5 short (2 more from the message start skew = the -7). s7682: 97 -> 192 (95) vs 99 -> 199 (100). Not every -7 is a self-hit: s5063 decision 8 (Double-Edge after a wake-up) is 11 short in the `message` / `status-icon` pre-chain (engine cmd 0.0 at 9 -> move-animation cmd 0.4 at 116 vs ROM `EffectDoubleEdge` 6 -> attackstring end 124), then a 1-frame move-animation difference.
+3. **OFF stat +3, s2 decision 1 (Evasion up).** ROM: `StatUpAttackAnim` at 208 -> `StatUpPrintString` ex2 at 245 (37) -> SE 239 at 249 (exec + 4). Engine: `move-animation` cmd 0.7 at 207 (min 39) -> `stats-change` cmd 0.8 at 246 -> SE 239 at 252 (age 6). Both `move-animation` (39 vs 37) and the stats-change SE age (6 vs 4) are long: +2 and +1 against a 1-frame earlier start, +3 in total.
+
+### 5. What not to chase
+
+- **Held-item group gen:152 / 228 / 102 (3,160) and the 100-odd other bodies' scatter (10,125):** accumulated drift, with per-previous-body tails (Yawn +5, Rest -3, Cross Chop -12) that are items above; landing these directly moves nothing until the introducing rows (items 1-7) are fixed. Re-score after items 1-3 and re-rank.
+- ON hit SE @move-animation / message (846) and send-in / out chain + cry (1,571): inherited more than introduced; first-row rows already at 0 for 244 of 343.
+- Out of scope here, being landed by the parallel worker: the B4 bodies above.
+
+Not applied: no `src/` or `tests/` change; PROGRESS / ISSUES / ROADMAP untouched.
