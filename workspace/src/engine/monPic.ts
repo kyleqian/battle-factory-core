@@ -364,8 +364,16 @@ export function getMonPicVisual(state: MonPicState): MonPicVisual {
   }
 }
 
-/** Select_Task_HandleMenu's STATE_MENU_HANDLE_INPUT is only reached once the mon pic finishes opening. */
+/**
+ * Ticks before the end of an open table at which the menu's STATE_MENU_HANDLE_INPUT already takes keys (rmw1): the ROM took the first A of
+ * a mash on the draft menu 2 ticks before the table's OPEN_STEADY row (the row where the menu text first shows), the engine 2 ticks after
+ * (press 26 against 28 after the opening A, variant A; scans in docs/rmw1-room-walk-and-summary-fade.md). The pictures are unchanged.
+ */
+const MENU_INPUT_BEFORE_TABLE_END = 2;
+
+/** Select_Task_HandleMenu's STATE_MENU_HANDLE_INPUT is reached when the mon pic's menu text shows, 2 ticks before the opening table ends. */
 export function isMonPicInputReady(state: MonPicState): boolean {
+  if (state.phase === "opening") return state.elapsed >= openTableFor(state.variant).length - MENU_INPUT_BEFORE_TABLE_END;
   return state.phase === "open";
 }
 

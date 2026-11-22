@@ -781,5 +781,6 @@
   144,
   148
  ],
+ "appRoute": "generated-orchestrator",
  "oracleProfile": "battle-scene-on"
 }

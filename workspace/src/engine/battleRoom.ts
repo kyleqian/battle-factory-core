@@ -148,6 +148,8 @@ export interface BattleRoomState {
   symbolOpen?: number;
   symbolFanfare?: number;
   symbolStepDone?: boolean;
+  /** rmw1: 1 when the ordinary room's transition clock runs one frame ahead (see `alignOrdinaryTransitionClock`); set once at the box's press. */
+  transitionClockAhead?: 1;
 }
 
 /** core.ts creates this the tick prebattleRoom's "warpFade" phase reaches the fixed elapsed count matching trace tick 520 (see core.ts's handoff). */
@@ -398,11 +400,11 @@ export function battleRoomMsgboxClosingPhase(state: BattleRoomState): BattleRoom
  * - Noland's speech: see the speech section (acceptBrainSpeech).
  * - The ordinary opponent's box: the MSGBOX_CLOSE_TICKS close.
  */
-export function battleRoomAcceptedState(state: BattleRoomState): BattleRoomState {
+export function battleRoomAcceptedState(state: BattleRoomState, pressFrame?: number): BattleRoomState {
   if (state.phase === "brainSpeech") return acceptBrainSpeech(state);
   if (state.phase === "brainSymbol") return { ...acceptBrainSpeech({ ...state, phase: "brainSpeech" }), phase: "brainSymbol" };
   if (state.phase === "brainMsgboxIdle") return { ...state, phase: "brainMoving", elapsed: 0 };
-  return { ...state, phase: battleRoomMsgboxClosingPhase(state), elapsed: 0 };
+  return alignOrdinaryTransitionClock({ ...state, phase: battleRoomMsgboxClosingPhase(state), elapsed: 0 }, pressFrame);
 }
 
 /**
@@ -1042,10 +1044,25 @@ export function ordinaryTransitionDrawElapsed(state: BattleRoomState): number {
  * while its own draw picks another transition for battle 1 (ASYMMETRIC_SPIRAL_IN_SEQ): its fixtures pin the ROM's ticks.
  */
 export function ordinaryBattleTransitionTe(state: BattleRoomState, perTransition = true): number {
-  if (!perTransition) return state.elapsed;
+  if (!perTransition) return state.elapsed + (state.transitionClockAhead ?? 0);
   // trn226's LOGO_WAVE start te 32 (its flicker / main / handoff constants assume it) holds here too: with 26 its pictures came 6 frames
   // after the ROM's (tri1's catcher run, 3 battles).
-  return state.elapsed - ordinaryTransitionDrawElapsed(state) + transitionStartTeOf(ordinaryTransitionKind(state));
+  return state.elapsed - ordinaryTransitionDrawElapsed(state) + transitionStartTeOf(ordinaryTransitionKind(state)) + (state.transitionClockAhead ?? 0);
+}
+/** The transition's first picture shows this many frames after the BGM / transition draw (tri1: 2 on every transition). */
+const TRANSITION_FIRST_PICTURE_AFTER_BGM = 2;
+/**
+ * rmw1 (docs/rmw1-room-walk-and-summary-fade.md): the ROM's transition intro (the gray flash, Task_BattleTransition_Intro) takes its first
+ * step on an even VBlank count, so its first picture lands on an odd absolute frame: the first odd frame at or after the natural one
+ * (probed on the ROM at 10 press frames, battle-1 room, plus abs1's 4 and the canonical battle 2: its first picture is odd there too). The
+ * engine's constants were fitted on odd pictures; when the box's press puts the first picture (press + close + draw + 2) on an even frame
+ * the ROM's is the frame before, and so is everything the room draws from the transition clock. `pressFrame` is the frame the press
+ * registers on (1-based, as the traces number frames); without it (unit tests that never ran a frame) the clock is as before.
+ */
+export function alignOrdinaryTransitionClock(state: BattleRoomState, pressFrame?: number): BattleRoomState {
+  if (pressFrame === undefined || state.phase !== "msgboxClosing") return state;
+  const firstPicture = pressFrame + MSGBOX_CLOSE_TICKS + ordinaryTransitionDrawElapsed(state) + TRANSITION_FIRST_PICTURE_AFTER_BGM;
+  return firstPicture % 2 === 0 ? { ...state, transitionClockAhead: 1 } : state;
 }
 /**
  * Frames from the battle BGM (the transition draw) to the handoff into the battle intro (CB2_InitBattle; the intro's first picture shows

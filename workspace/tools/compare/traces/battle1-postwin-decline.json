@@ -815,5 +815,7 @@
     29900,
     30000,
     30031
-  ]
+  ],
+  "appRoute": "canonical-recorded",
+  "oracleProfile": "battle-scene-on"
 }
