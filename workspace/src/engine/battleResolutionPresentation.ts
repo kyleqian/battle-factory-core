@@ -2669,6 +2669,39 @@ const HP_HIT_EFFECT_OPCODES: ReadonlySet<string> = new Set(["B_SCR_OP_CRITMESSAG
 const HP_MESSAGE_OPCODES: ReadonlySet<string> = new Set(["B_SCR_OP_CRITMESSAGE", "B_SCR_OP_RESULTMESSAGE", "B_SCR_OP_PRINTSTRING", "B_SCR_OP_PRINTFROMTABLE"]);
 /** hpf2: a hit's bar then the turn end's first print (hail / sandstorm / poison): the ROM's bar -> print rise is the bar's rows + 17 = MoveEnd rows 7 + 2 sprite rows + 8. */
 const HP_END_TURN_PRINT_LEAD_ROWS = 8;
+/**
+ * hpb3: a Focus Band survival (`BattleScript_FocusBandActivates` right after the hit's `datahpupdate`; drv2 OFF s4235 d2, 8 -> 1): the ROM's bar is 7 rows,
+ * `datahpupdate` is bar + 2 after the bar row and the Focus Band script's first row 3 later, so the 28-row floor held the next command 15 rows late.
+ * The tail is the stat-next convention (the next command starts on the script's `playanimation` / Pausex20 row).
+ */
+const FOCUS_BAND_PC = BATTLE_SCRIPT_PROGRAM.labelEntries["BattleScript_FocusBandActivates"]!.programCounter;
+const FOCUS_BAND_SCRIPT_ROWS = 12;
+/**
+ * hpb3: a hit whose attacker's Shell Bell heals right after it (`BattleScript_ItemHealHP_Ret`; T2 ON s97 d11 / d12 / d13 and hie1-shellbell-on, ROM): `datahpupdate` is the bar + 2 after the bar row,
+ * the MoveEnd rows run, and the item's `playanimation` sits 11 executions after `datahpupdate` in every window (bars 20, 25 and 40): the animation starts bar + 13 after the bar row, with no 28-row floor
+ * (the floor was 8 rows early on a 25-row bar, 3 early on 20). The animation command follows the two MoveEnd sprite-visibility rows, so the tail is those executions - 1, less the 9 rows
+ * the engine's HELD_ITEM_EFFECT command leads its script row (its first SE is at command + 17, the ROM's at the script row + 8: hie3 / hie1-shellbell-on, a 40-row bar: ROM SE 766 = command 758 + 8).
+ */
+const HP_ITEM_ANIMATION_COMMAND_LEAD_ROWS = 9;
+const ITEM_HEAL_RET_PC = BATTLE_SCRIPT_PROGRAM.labelEntries["BattleScript_ItemHealHP_Ret"]!.programCounter;
+const ITEM_HEAL_RET_SCRIPT_ROWS = 10;
+function hpItemAnimationRows(events: readonly BattleKernelSemanticEvent[], index: number): number | null {
+  const event = events[index]!;
+  const hpExecution = event.provenance?.instructionExecution;
+  if (hpExecution === undefined || BATTLE_SCRIPT_PROGRAM.instructions[event.provenance?.programCounter ?? -1]?.opcodeName !== "B_SCR_OP_DATAHPUPDATE") return null;
+  const first = events[index + 1];
+  const second = events[index + 2];
+  const animation = events[index + 3];
+  const programCounter = animation?.provenance?.programCounter;
+  if (first?.provenance?.opcodeName !== "B_SCR_OP_MOVEEND" || second?.provenance?.opcodeName !== "B_SCR_OP_MOVEEND" || animation?.payload.kind !== "animation"
+    || programCounter === undefined || programCounter < ITEM_HEAL_RET_PC || programCounter >= ITEM_HEAL_RET_PC + ITEM_HEAL_RET_SCRIPT_ROWS) return null;
+  const execution = animation.provenance?.instructionExecution;
+  return execution === undefined || execution - hpExecution - 1 <= HP_ITEM_ANIMATION_COMMAND_LEAD_ROWS ? null : execution - hpExecution - 1 - HP_ITEM_ANIMATION_COMMAND_LEAD_ROWS;
+}
+function focusBandNext(events: readonly BattleKernelSemanticEvent[], index: number): boolean {
+  const programCounter = events[index + 1]?.provenance?.programCounter;
+  return programCounter !== undefined && programCounter >= FOCUS_BAND_PC && programCounter < FOCUS_BAND_PC + FOCUS_BAND_SCRIPT_ROWS;
+}
 function hpMessageLeadRows(events: readonly BattleKernelSemanticEvent[], index: number): number | null {
   const event = events[index]!;
   const programCounter = event.provenance?.programCounter;
@@ -2738,6 +2771,10 @@ interface HpLeadRows {
   readonly recoil: boolean;
   /** The `datahpupdate` of `BattleScript_AbsorbUpdateHp` (a drain's heal bar). */
   readonly drain: boolean;
+  /** The next kernel event is `BattleScript_FocusBandActivates` (hpb3). */
+  readonly focusBand: boolean;
+  /** hpb3: the rows from `datahpupdate` to a healing berry's `playanimation` after the MoveEnd rows, or null. */
+  readonly itemAnimationRows: number | null;
   /** HITMARKER_NO_ANIMATIONS (Scene OFF) when the hp command was projected. */
   readonly sceneOff: boolean;
 }
@@ -2791,13 +2828,14 @@ function applyHpHitTails(
     const endTurnPrint = hit && leads.moveEndRows !== null && rest[0]?.type === "sprite-visibility" && rest[1]?.type === "sprite-visibility" && rest[2]?.type === "message";
     const heal = command.to > command.from;
     const afterHp = previous?.type === "hp";
-    const printHold = next?.type === "message" && leads.messageRows !== null && ((hit && leads.hitEffectMessage) || heal || afterHp);
+    const printHold = next?.type === "message" && leads.messageRows !== null && ((hit && leads.hitEffectMessage) || heal || afterHp || leads.drain);
     if (!hit && !printHold && command.battler === 0) continue;
     const faint = hit && rest[0]?.type === "faint" && leads.faintNext;
-    const statNext = hit && rest[0]?.type === "stat";
+    const statNext = (hit && rest[0]?.type === "stat") || (hit && leads.focusBand);
+    const itemAnimation = hit && leads.itemAnimationRows !== null && rest[0]?.type === "sprite-visibility" && rest[1]?.type === "sprite-visibility" && rest[2]?.type === "general-animation";
     const tailFrames = statNext ? (leads.sceneOff ? HP_STAT_NEXT_TAIL_FRAMES_OFF : HP_STAT_NEXT_TAIL_FRAMES) : transition ? (leads.moveEndRows === null ? 0 : HP_DATAHPUPDATE_ROW_FRAMES)
       : endsTurn ? leads.moveEndRows ?? 0 : bars > 0 ? bars : endTurnPrint ? leads.moveEndRows! + HP_END_TURN_PRINT_LEAD_ROWS
-      : printHold ? leads.messageRows! : 0;
+      : itemAnimation ? leads.itemAnimationRows! : printHold ? leads.messageRows! : 0;
     if (faint) commands[index] = Object.freeze({ ...command, timing: Object.freeze({ minimumFrames: 0 }) });
     else if (tailFrames > 0) commands[index] = Object.freeze({ ...command, timing: Object.freeze({ minimumFrames: 0, tailFrames }) });
   }
@@ -6318,7 +6356,7 @@ export function projectBattleResolutionCommands(
       const messageRows = drainRole === null ? hpMessageLeadRows(events, index) : null;
       const faintNext = drainRole === null && hpFaintNext(events, index);
       const hitEffectMessage = HP_HIT_EFFECT_OPCODES.has(events[index + 1]?.provenance?.opcodeName ?? "") || hitAllLoopEmptyBoxTiming(events, index + 1) !== null;
-      hpLeadRows.set(health.eventSequence, { tick: hpTickKind(event), wrapSecondary: events[index + 1]?.provenance?.programCounter === WRAP_SECONDARY_PC, moveEndRows, messageRows, faintNext, hitEffectMessage, barExecution: health.instructionExecution, recoil: event.provenance?.programCounter === RECOIL_PC, drain: event.provenance?.programCounter === DRAIN_PC, sceneOff: (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0 });
+      hpLeadRows.set(health.eventSequence, { tick: hpTickKind(event), wrapSecondary: events[index + 1]?.provenance?.programCounter === WRAP_SECONDARY_PC, moveEndRows, messageRows, faintNext, hitEffectMessage, barExecution: health.instructionExecution, recoil: event.provenance?.programCounter === RECOIL_PC, drain: event.provenance?.programCounter === DRAIN_PC, focusBand: focusBandNext(events, index), itemAnimationRows: drainRole === null ? hpItemAnimationRows(events, index) : null, sceneOff: (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0 });
       commands.push(Object.freeze({
         type: "hp",
         eventSequence: health.eventSequence,
