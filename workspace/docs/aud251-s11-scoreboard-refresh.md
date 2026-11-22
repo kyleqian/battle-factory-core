@@ -2824,3 +2824,35 @@ Pins moved (each re-pinned after reading why):
 Ranking after hse2 (`hse1mSplit.py` / `hse1mTable.py`, OFF, 97 hit windows, owned mass 280): plain 61, Focus Punch 45, hit SE without used-print chain 35, two-turn 28, infatuation 28, Struggle after NoMovesLeft 27, confusion path 26, after miss 17, wake-up 13.
 
 Still open (not done here): the asleep / wake print head -15 after a hit; infatuation (-3 rows, 28); Focus Punch (45); two-turn second turn (28). Out of scope and untouched: Scene ON rules, move-animation min 42, hit-animation interval.
+
+## hie7: the segment after the player's forced send-in starts on the ROM row (integration lane, 2026-11-22)
+
+Cause (one, in two layers; no per-family offset). After a player faint send-in, the orchestrator's `presenting-switch-in` phase ends at `partySendOutBattleMenuReady`, i.e. the action prompt at B + D + 17 (B = 91 + name length). The ROM's script continues at B + D + 11 (item exec / next print), so every continuation started 6 frames late (hie6m / g180m / t68m). Separately, the held-item restart lead (15) and the Leech Seed drain age (`LEECH_SEED_DRAIN_SCRIPT_AGE` 7) model a controller launch lag that does not exist here (the controller is idle after the send-in): ROM exec -> SE is 8 for the item (150 + 8 against the command's 214 + 15 minimum) and 27 for the drain (34 in the labs).
+
+Fix:
+1. `playerFaintReplacementSendOutTimingOfSegment` (`battleResolutionPresentationRender.ts`): a segment that continues after the send-in with anything but the bare prompt (a lone `turn-end` and the pau5 entry-script case keep their own leads) gets `followingFrames` 6 (`PLAYER_FAINT_REPLACEMENT_SCRIPT_RESUME_LEAD_FRAMES`), so the next command starts at B + D + 11.
+2. The command built right after a player `BattleScript_FaintedMonSendOutNew` send-in (`battleResolutionPresentation.ts`, `playerSendInEnd`) carries the context: the held-item lead is `HELD_ITEM_EFFECT_AFTER_SEND_IN_LEAD_FRAMES` (0, against `HELD_ITEM_EFFECT_RESTART_LEAD_FRAMES` 15 elsewhere) and the Leech Seed drain command gets `afterPlayerSendIn: true`, which `moveAnimSounds.ts` reads as age 0 instead of 7. `LEECH_SEED_DRAIN_SCRIPT_AGE` stays 7 globally (it moved to the Render file only to avoid an import cycle; `moveAnimSounds` re-exports it). The chg4 charge-turn print regions are untouched.
+
+T2 (`rescoreAll.sh` + `soundScoreboard.py`, `.integration/evidence/hie7/t2-{base,after}`):
+
+| Scene | mass | exact / offset | missing / extra |
+|---|---|---|---|
+| ON before | 13,629 | 2,951 / 2,926 | 0 / 0 |
+| ON after | **12,942** (-687) | 2,994 / 2,883 | 0 / 0 |
+| OFF before | 1,588 | 776 / 357 | 0 / 0 |
+| OFF after | 1,588 (unchanged) | 776 / 357 | 0 / 0 |
+
+ON by family: move-animation SE 10,852 -> 10,165; stat-change 323, cry 643, battle-controller 1,759, bgm 52 unchanged. More than hie6m's expected -285: the start shift (-6 per resume), the item lead and the drain age all land in the same windows (start shift alone: `t2-s1`; start + the rest: `t2-s2` = final).
+
+ROM rows (`hie6mWin.py` on hie7 copies of the probes, `p-{base,after}`; `g180mProbe.sh`'s `hcr3mCmp.py` for s6912):
+- s5063 d45: engine HELD_ITEM_EFFECT command 284 -> 278 (min 229 -> 214; ROM item exec row 281), SE 152 now at 286 against ROM 289 (-3, carried from the earlier ball SE, not the item).
+- s2230 d6: engine item command 312 -> 306 = ROM exec row 306; SE 152 x3 / 228 / 102 at 314 / 346 / 378 / 410 / 482 = ROM, all exact (before: +21 each).
+- s6912 d2: drain command 239 -> 233 = ROM exec row 233 (BattleScript_LeechSeedTurnDrain+0x7); SE 180 at 260 (was 273), the eight SE 142 rows 278..320 step 6 and SE 179 at 373 all equal to ROM. The later hp / message / turn-end rows (451 / 481 / 485 / 596 against ROM 465 / ... ) are the end-turn print heads, out of scope.
+
+Labs (`labCompare.sh --scene on --reuse-rom`, `.integration/evidence/hie7/lab-*`): hie1-leftovers-on -1 (mass 5), hie1-sitrus-on 0, hie1-shellbell-on -1 (mass 5): unchanged; etp1-leechseed-on, aud250-leechseed-opponent-on, aud250-leechseed-player-on 25 / 25 exact, mass 0: unchanged.
+
+Census 0..199 (`lsd194Census.sh`, `LSD194_SHARDS="0 1"`, JOBS 2, SPLIT 2, fc2f7ce85 vs f8d68ea67; `.integration/evidence/hie7/census`, tree/ copies deleted): `rst197CensusDelta.py --digest` eventsDigest + error identical 200 / 200 on ON (9 battles changed command timing, 0 type-sequence changes) and 200 / 200 on OFF (0 changed). No gameplay / RNG change.
+
+Pins moved: `tests/randomRoundSoak.test.ts` seed 0 "full" frames 68,945 -> 68,927 (three post-send-in script resumes x 6; same battle 3 / depth 2 / turn 21 / roundLost; a trajectory pin, now matching the ROM exec rows s5063 d45 / s6912 d2 / s2230 d6 above). New `tests/hie7SendInResume.test.ts` pins the timing lead, the item lead 0 / 15 and the age 7.
+
+Caveats for the supervisor: the drain's renderer body start follows the same flag (21 -> 14 frames after the command start in this context, so the picture matches the sound); this is not pixel-measured, only the SE rows are ROM-measured. If a pixel capture says otherwise, `leechSeedDrainBodyStartAge` is the one place to change. Residual after hie7: s2741 d11 (mass 62, a message chain), the 5063 d45 -3 above, the end-turn print heads.
