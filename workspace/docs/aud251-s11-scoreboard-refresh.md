@@ -2466,3 +2466,79 @@ SUMMARY lines (after): `eqk1-expl-p.on: exact 12 / offset 0 / missing 0 / extra 
 **Census** (`lsd194Census.sh`, seeds 0..199, `LSD194_SHARDS="0 1"`, JOBS 2, SPLIT 2, 54ee65135 vs 886009d75; `.integration/evidence/mxp1/census`): `rst197CensusDelta.py --digest` eventsDigest + error identical 200 / 200 on ON (9 battles changed command timing, 0 type-sequence changes; Explosion hit command 32 -> 32 rows, hp 16 -> 18 rows) and 200 / 200 on OFF (8 battles; Explosion body 48 -> 43). T1 (`soundCensusDelta.py --t1`, ON): missing 0 / extra 0 on both arms; exact 54,127 -> 54,037: the 90 Explosion body SEs (9 battles x 10) moved to known-offset (Explosion +1 x 81, -79 x 9) because T1 reads the same table through the old 7-row clock (self-consistency, not ROM parity; the labs above are the ROM parity).
 
 **Re-pins toward the ROM** (ROM frame per pin): `aud262MoveAnimSounds` Magnitude first-SE offset 3 -> 0 (ROM 179 / 183); `livePrep10MoveAdapters` Magnitude windows 174 / 206 -> 175 / 207 (ROM A + 1, lab p9 A 174) and route body 177 -> 191; `livePrep2MoveAdapters` Explosion duration 212 -> 213 (ROM A 61..276 = 216, expl-p.on); `tests/helpers/iu120Rows.ts` Explosion tail [153, 9] (ROM `hitanimation` exec 287 = A end 277 + 10); `mem2InstantHpDrop` Scene OFF Explosion / Self-Destruct hp + body 54 -> 49 (ROM attackanimation 58 -> hitanimation exec 101); `apx215SubstituteDollApproximate` Explosion doll rows 219 -> 229 (window 213 + tail 9), non-static ratio 0.9 -> 0.89 (the tail holds the last picture: 206 / 229). New `tests/mxp1MagnitudeWindow.test.ts` pins the Magnitude body length. No pin was left red.
+
+## t2k3 (2026-11-22): the remaining S11 sound-timing mass re-ranked on the frozen tree 30cd3dfac (measurement only; no `src/` / `tests/` change)
+
+**Method** as t2k2 (drv1 `--romdrive` rescore of all 25 ON + 24 OFF t2n seeds with `aud249Rescore.sh`, then `soundScoreboard.py OUT --per-seed --out OUT/score.json`; rows attributed with `t2Attribute.py`'s alignment + ROM `gCurrentMove`; OFF rows carry the engine command from a second `--cmdtrace=1` replay; windows own the rows from one nonzero offset step to the next). Evidence (git-ignored, main tree): `.integration/evidence/t2k3/` (`t2/` rescored set + `score.json`, `c-off/` cmdtrace replays, `attr-{on,off}.json`, `agg.txt`, `shape2.txt`, `step.txt`, `gain.txt`, `own.py` = the ownership table below, `p/{on,off}/` ROM probes + `*.cmp.txt`).
+
+### 1. Rescore (missing / extra 0 / 0 in both scenes; the Mac merge introduced none)
+
+| family (mass / exact) | OFF t2k | OFF t2k2 | OFF now | ON t2k | ON t2k2 | ON now |
+| --- | --- | --- | --- | --- | --- | --- |
+| move-animation SE | 0 / 0 | 0 / 0 | 0 / 0 | 19,810 / 2,005 | 15,401 / 2,247 | 11,187 / 2,427 |
+| stat-change SE | 403 / 2 | 206 / 68 | 177 / 69 | 410 / 27 | 377 / 31 | 339 / 32 |
+| cry | 517 / 97 | 455 / 107 | 340 / 112 | 1,227 / 31 | 953 / 69 | 718 / 75 |
+| battle-controller SE | 2,225 / 500 | 1,960 / 524 | 1,504 / 543 | 4,231 / 301 | 3,166 / 382 | 2,139 / 399 |
+| bgm | 19 / 1 | 19 / 1 | 19 / 1 | 69 / 2 | 52 / 2 | 52 / 2 |
+| TOTAL | 3,164 / 600 | 2,640 / 700 | **2,040 / 725** | 25,747 / 2,366 | 19,949 / 2,731 | **14,435 / 2,935** |
+
+ON -5,514 mass vs t2k2 (-27.6%), +204 exact; OFF -600 (-22.7%), +25 exact. Against the run start: ON -11,312 (-43.9%), OFF -1,124 (-35.5%).
+
+### 2. Attribution (row mass; classes sum to TOTAL: ON 14,435, OFF 2,040)
+
+| class | ON rows / mass / exact | OFF rows / mass / exact |
+| --- | --- | --- |
+| body (move running at the row), incl. B4 | 3,899 / 7,202 / 2,289 | n/a |
+| of which B4 bodies (reported separately) | 108 / 274 / 7 (Confuse Ray 98, Stun Spore 56, Curse 41, Thunder Wave 40, Brick Break 22, Sleep Powder 14 by row mass) | n/a |
+| gen (gCurrentMove 0: status / general / held-item animations) | 912 / 3,985 / 138 | n/a |
+| controller hit SE 12 / 13 / 14 | 475 / 1,108 / 295 | 548 / 934 / 384 |
+| controller faint / send-in 15 / 16 / 114 | 283 / 1,031 / 104 | 284 / 570 / 159 |
+| cry | 202 / 718 / 75 | 192 / 340 / 112 |
+| stat | 101 / 339 / 32 | 105 / 177 / 69 |
+| bgm | 5 / 52 / 2 | 4 / 19 / 1 |
+
+**Shape** (window = seed x segment x cause; mass, windows). ON: body const 4,440 (311) / varies 1,354 (53) / one-off >= 20 1,137 (11); B4 const 237; gen const 3,502 (340) / one-off 387 (11) / varies 96; ctl-hit const 519 / varies 259 / one-off 330; ctl-chain const 666 / one-off 365; cry varies 348 / const 257 / one-off 113; stat const 279 / one-off 44. OFF: ctl-hit const 733 / one-off 169 / varies 32; ctl-chain const 570; cry const 340; stat const 155 / one-off 22. Constant offsets still dominate; the gen class (3,985) is the largest non-body bucket and its windows change sign (+21 .. -23) between contexts, so it is a per-context lead, not one constant.
+
+**Top causes ON (row mass):** gen:152 969 + gen:228 / 102 323 each (held-item group 1,615), gen:142 800, cry 718, controller SE 13 @? 680, Dig 589, gen:148 540, Rock Slide 514, Ice Beam 492, Psychic 379, Rest 259, Struggle 230, Double-Edge 226, Supersonic 216, Solar Beam 215, Safeguard 214. **OFF:** SE 13 @hit-animation 492 (95 rows, median -4, 7 exact), faint SE 16 / cry@faint 140 + 140, SE 13 @move-animation 135, stat 239 132, ball-open 15 @switch-in 114 / @switch-out 104 / @sprite-visibility 77, SE 114 @party-summary 93, SE 12 / 14 @message 63 + 63 (two one-offs). **Closed since t2k2 (no longer in the lists):** Metal Claw, Aerial Ace (71 left), Earthquake hit-all, Drill Peck s1914 (-66), Magnitude, Explosion; Recover / Soft-Boiled tails moved to +-13 first-row windows (item 4).
+
+**A-press cadence cliff.** Windows whose first step is +13 .. +18 (one A-cadence step of the ROM driver): ON 11 windows / 39 rows / 478 mass in 8 seeds; OFF 10 windows / 16 rows / 252 mass in 9 seeds. They overlap items 1, 2 and the OFF stat / bgm lines; s2 OFF decision 6 (below) shows the mechanism.
+
+### 3. Ranked top 8 (rows owned disjointly by window; items + lines + remainder = TOTAL)
+
+Breadth: the census (`rank1mCensus.ts`) was not re-run (kept light for the wind-down gates); command counts per 1,000 battles are t2k's: faint 4,332, hit-animation 18,646, general-animation 7,506 (864 battles), Dig 596 (120 battles).
+
+| rank | item | scenes | T2 mass now (ON / OFF) | direction | cost / risk | lands in | first ROM window (seed, decision, ROM frame) |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 | Faint / send-in chain: SE 114 (party-summary) 414 / 211, ball-open SE 15 519 / 364 (switch-in 110, switch-out 100, sprite-visibility 154), cry 597 / 0 (cry@faint) , faint SE 16 + cry 0 / 128, misc 0 / 18 | ON + OFF | 1,530 / 721 (2,251; 22-23 seeds, ~150 windows) | engine rows early / late by the A-press slip (+13 .. +17 cliff) and +-1..9 elsewhere; first-row steps are +17 / +15 (OFF party-summary x5) and -7 (OFF ball-open @sprite-visibility x5) | high: mixed cause; but the cliff term is one mechanism (fch1 term 2, fsc2m) | `src/engine/battleResolutionPresentation.ts`: the faint `message` command's ready frame (engine min 24 vs ROM A accepted 21 after the print start) and the harness A-press deferral | OFF s2 decision 6 (ROM 3933 / 4088 / 4104; mapped below), ON s310 decision 22 (seg45, rf 22842, +14), s4235 decision 9 (seg19, rf 6066, +13) |
+| 2 | Hit SE 12 / 13 / 14 lead (OFF: 13 @hit-animation 701 over 92 windows / 15 seeds, median -4, net step -302; @move-animation 236, @message 174 = two +63 one-offs) | ON + OFF | 1,075 / 1,111 (2,186) | engine hit SE early by 3 .. 14 after a used-print that is shorter than the ROM's (OFF) | medium: per-cause (recoil / Struggle chain -14, confusion self-hit -7, ordinary -3 / -4) | `battleResolutionPresentation.ts` the bodyless OFF used-print `move-animation` -> `hit-animation` interval (and `battleHitSounds.ts` for ON) | OFF s2230 decision 21 (seg43, ROM 12945, -14 x2), s6568 decisions 99 / 101 / 102 (rf 52126 / 53422 / 53900, -14 / -14 / -10 x2), ON s5063 decision 52 (rf 43275, -33 / -43 after Psychic) |
+| 3 | Held-item group gen:152 / 228 / 102 (Leftovers / berry): +21 after the send-in chain (3 windows, 300 mass), the rest signed scatter (-23 .. -7) after hits | ON | 1,510 / 0 (360 rows, 11 seeds, 72 windows) | the first SE of the chain after a send-in is 15 frames late (age 23 vs ROM 8) | low-medium for the +21 term (same constants t2k2 named; not landed: hie5 / itm1 did other held-item terms); the scatter is inherited | `src/engine/moveAnimSounds.ts` `emitGeneralAnimSounds` HELD_ITEM_EFFECT first-SE age, only in the post-faint context (end-turn Leftovers windows are already negative) | ON s2230 decision 6 (seg13, rf 8403, +21 x3), decision 8 (seg17, rf 9987); s5063 decision 45 (seg91, rf 37924, +18) |
+| 4 | gen:180 first row + the gen:142 / 202 chain it owns (restore-HP style animations) | ON | 980 / 0 (180 rows, 4 seeds, 18 windows; 10 exact) | first-row lead of mixed sign (+13 s6912 x2, -12 s310, -7 / -6 s648, +7 s310 x3) | medium: sign changes with context; probe the press phase before any table | `moveAnimSounds.ts` general-animation start + `battleResolutionPresentationRender.ts` restore-HP body tail (hie5's `HIE5_RESTORE_HP_BODY_TAIL_ROWS`) | ON s6912 decision 2 (seg5, rf 1844, +13 x10), s310 decision 16 (seg33, rf 17429, -12 x10) |
+| 5 | Dig (charge turn / attack tails) | ON | 615 / 0 (65 rows, 3 seeds, 13 windows, 0 exact) | -19 / -17 / -12 on the tails, +18 first row (s6) | medium: two terms; chg2 / bdt1 left it | `battleResolutionPresentationRender.ts` DIG lead / tail rows | ON s8108 decision 19 (seg39, rf 17762, -19 x5), s6 decision 2 (seg5, rf 2180, +18) |
+| 6 | gen:148 poison / status tick, first row | ON | 534 / 0 (114 rows, 3 seeds, 19 windows) | start lead of both signs (-12 .. +6), constant per window | medium: gsp3 closed the hold, not the lead | `moveAnimSounds.ts` `emitGeneralAnimSounds` status-tick arm | ON s499 decision 3 (seg7, rf 3856, -12 x6), s165 decision 22 (seg45, rf 15457, -9) |
+| 7 | Ice Beam first-mover windows | ON | 517 / 0 (51 rows, 4 seeds, 7 windows) | -21 / -13 / -6 on the first window of a body (11 rows each) | medium: single-body lead | `battleResolutionPresentationRender.ts` Ice Beam body lead | ON s2230 decision 20 (seg41, rf 18099, -21 x11), s830 decision 1 (seg3, rf 685, -13 x11) |
+| 8 | Rock Slide body | ON | 514 / 0 (122 rows, 6 seeds, 8 windows) | -13 / -10 / -9 and +5 over 20-row windows | medium: both signs | `battleResolutionPresentationRender.ts` Rock Slide body | ON s8612 decision 8 (seg17, rf 8016, -13 / -9 x20), s165 decision 18 (seg37, rf 12049, +5 x20) |
+| | **Items 1-8** | | **7,275 / 1,832** | | | | |
+| 9 | Supersonic / Safeguard (one window s5569 seg25 -34 x12 + -2) | ON | 454 / 0 | | | | s5569 decision 12 (rf 6516 / 6588) |
+| 10 | Psychic (s97 +24 / +25 x8; s5063 -43 x3) | ON | 296 / 0 | | | | s97 decision 11 (rf 11037) |
+| 11 | B4 bodies (reported separately) | ON | 274 / 0 | | | | |
+| 12 | Rest 263, gen:242 (s2741 +11 / +8 x10) 260, Solar Beam 253, Confusion s8108 -48 x2 217 | ON | 993 / 0 | | | | s2741 decision 11 (rf 10115); s830 decision 10 (Solar Beam rf 7904) |
+| 13 | stat SE 239 / 245 | ON + OFF | 249 / 184 | | | | OFF s4235 decision 2 (rf 1267, +17) |
+| 14 | OFF bgm 19, SE 90 5 | OFF | 0 / 24 | | | | |
+| R | remainder (about 80 bodies, each < 215, mostly inherited) | ON | 4,894 / 0 | | | | |
+| | **TOTAL** | | **14,435 / 2,040** | | | | |
+
+Sum-check: ON 1,530 + 1,075 + 1,510 + 980 + 615 + 534 + 517 + 514 (= 7,275) + 454 + 296 + 274 + 993 + 249 + 4,894 = 14,435; OFF 721 + 1,111 (= 1,832) + 184 + 24 = 2,040. "T2 mass now" is row mass, not saving (the counterfactual gain of one step is 30-60% of it: `gain.txt`; ON posgain total 12,483 over 1,021 steps).
+
+### 4. The top three ROM windows (hcr3mProbe + hcr3mCmp, frames from each side's own commit)
+
+1. **Chain: OFF s2 decision 6 (rf 3933, +17) is the A-press cadence, not the party-summary command.** ROM: the faint print starts at `FaintTarget+0xc` ex1 299, the A press (SE 5) lands at 320 (21 frames), SE 114 at `FaintedMonSendOutNew+0x2` ex2 502, SE 15 at 657. Engine: `status` cmd 0.6 at 299, **`message` cmd 0.7 (min 24)** at 300, SE 5 at 337, `party-summary` cmd 0.13 (lead 19, min 119) at 500, SE 114 at 519, SE 15 at 674. SE 5 -> SE 114 is 182 on both sides and SE 114 -> SE 15 155 on both: the party-summary lead is right. The whole +17 is the faint message becoming ready at 324 (min 24) when the ROM driver pressed A at 320, so the replay slips one cadence step (17 frames). Differing command: the faint-print `message` (ready 3+ frames late), the "fch1 term 2" of the t2k2 item 3, which that item mis-assigned to `opponentPartySummaryDrawTiming` (the lead 25 -> 19 since landed).
+2. **Hit SE: OFF s2230 decision 21 (Struggle, then Double-Edge recoil; ROM commit 12819, engine 12729).** ROM Struggle: `HitFromAtkString+0x1` ex1 at 63 -> SE 13 at 126 (63 frames: print, `HitFromCritCalc`, `Pausex20`, +2); engine: **`move-animation` cmd 0.1 (min 42)** at 70 -> `hit-animation` cmd 0.2 with SE 13 at 112 (42): 21 short, started 7 late = -14. Double-Edge: ROM print ex2 303 -> SE 13 373 (70); engine cmd 0.10 317 -> `hit-animation` cmd 0.11 359 (42): 28 short, 14 late = -14. Differing command: the bodyless OFF used-print `move-animation` (flat min 42) before `hit-animation`; the ROM interval is print + 63-70, and the cmd after the recoil `message` (cmd 0.9 -> 0.10: 28 vs ROM MoveEnd 289 -> print 303 = 14) starts 14 late. Only these two windows were opened; the common -3 / -4 OFF steps (68 of 95 rows) are not explained by them.
+3. **Held-item: ON s2230 decision 6 (rf 8403).** ROM `ItemHealHP_Ret+0x7` ex2 at 306 -> SE 152 at 314 / 346 / 378, SE 228 at 410, SE 102 at 482. Engine **general-animation cmd 2.4 (HELD_ITEM_EFFECT, min 229)** at 312, SE 152 at 335 / 367 / 399, 228 at 431, 102 at 503: the spacing is identical (32 / 32 / 72); the cmd starts 6 after the ROM exec and the first SE comes 23 after the cmd start instead of 8, so the group is +21. The numbers are those of t2k2 item 1 (ROM 306 / 314, engine 312 / 335): the proposal there is still open. The negative held-item windows (-23 s8108 seg89, -17 s310 seg7 / s1415 seg99, -14 s2230 seg11) follow hits or end-turn rows, so lowering the age globally would push them further negative; land it for the post-send-in context only.
+
+### 5. What not to chase
+
+- The 4,894 remainder (about 80 bodies, each < 215) is inherited drift plus single windows; re-rank after items 1-3.
+- Rows 13-14 and the OFF +63 one-offs (s319 decision 16 SE 12, s6568 decision 31 SE 14, both at the `message` command, 126 mass) are small; the +63 pair is worth one probe if a worker has spare time.
+- B4 bodies (274) are reported, not proposed.
+
+Not applied: no `src/` or `tests/` change; PROGRESS / ISSUES / ROADMAP untouched; no `.ts` added, so no typecheck / `npm test` / build run (the supervisor's wind-down gates cover the unchanged tree). The step text named both `.integration/evidence/t2k3/` and `t2k/`; t2k3 was used.
