@@ -42,3 +42,41 @@ describe("etp3: Scene ON end-turn Hail / Sun sounds", () => {
     }, 60000);
   }
 });
+
+// etp3 item 2: BattleScript_SideStatusWoreOff's print (STRINGID_PKMNSXWOREOFF) starts its first glyph on the ROM's frame in both scenes: the end-turn head
+// (printstring 10 rows after MoveEnd's first row, as the weather prints). ROM: labCompare.sh over etp3-lightscreenls6 / etp3-reflectls6 (the PRINTS row's ROM frame).
+const ROM_WORE_OFF_GLYPHS: Readonly<Record<string, number>> = {
+  "etp3-lightscreenls6-on": 4873,
+  "etp3-lightscreenls6-off": 4873,
+};
+
+function woreOffGlyphFrames(name: string): number[] {
+  const lab = JSON.parse(readFileSync(new URL(`../tools/battle-lab/${name}.json`, import.meta.url), "utf8"));
+  const scene: "on" | "off" = name.endsWith("-on") ? "on" : "off";
+  let state = labBackedStage(`${name}.json`, createInitialState({ appRoute: "generated-orchestrator", battleScene: scene }), undefined, scene);
+  const frames: number[] = [];
+  let last = "";
+  const total = lab.trace.segments.reduce((n: number, s: { frames: number }) => n + s.frames, 0);
+  for (const advance of traceAdvances(lab.trace.segments)) {
+    if (advance.frame > total) break;
+    state = tick(state, advance.buttons);
+    const resolution = state.factoryRoundBattleOrchestrator?.battleResolutionPresentation;
+    const segment = resolution?.segments?.[resolution.segmentIndex];
+    const command = segment?.commands?.[resolution.commandIndex];
+    const key = command === undefined || resolution.lifecycle?.phase !== "presenting" ? "" : `${resolution.segmentIndex}.${resolution.commandIndex}`;
+    if (key === last) continue;
+    last = key;
+    if (key === "" || command.type !== "message") continue;
+    const payload = segment.events.find((e: { sequence: number }) => e.sequence === command.eventSequence)?.payload as { messageId?: string } | undefined;
+    if (payload?.messageId === "STRINGID_PKMNSXWOREOFF") frames.push(state.frame + (command.leadFrames ?? 0));
+  }
+  return frames;
+}
+
+describe("etp3: side-status wore-off print head", () => {
+  for (const [name, rom] of Object.entries(ROM_WORE_OFF_GLYPHS)) {
+    it(`${name}: the turn-5 wore-off print's first glyph is the ROM's`, () => {
+      expect(woreOffGlyphFrames(name)).toEqual([rom]);
+    }, 60000);
+  }
+});

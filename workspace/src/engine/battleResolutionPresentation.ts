@@ -1496,6 +1496,7 @@ const END_TURN_PRINT_SCRIPTS: ReadonlySet<string> = new Set([
   "BattleScript_SandStormHailEnds",
   "BattleScript_SunlightContinues",
   "BattleScript_SunlightFaded",
+  "BattleScript_SideStatusWoreOff",
   "BattleScript_PoisonTurnDmg",
   "BattleScript_BurnTurnDmg",
   "BattleScript_CurseTurnDmg",
