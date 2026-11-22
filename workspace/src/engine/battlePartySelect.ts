@@ -489,7 +489,7 @@ export function battlePartySelectStateForForcedParty(
     outcome: null,
     elapsed: forced.elapsed,
     openElapsed: 0,
-    selectedSinceElapsed: -MON_ICON_CREATION_ELAPSED_OFFSET,
+    selectedSinceElapsed: MON_ICON_MENU_OPEN_SELECTED_SINCE,
     closeElapsed: null,
     ...(forced.sendOutElapsed !== null && forced.sendOutElapsed > 0 ? { sendOutConfirmed: true as const } : {}),
   });
@@ -609,7 +609,7 @@ export function createBattlePartySelectState(
     outcome: null,
     elapsed: 0,
     openElapsed: 0,
-    selectedSinceElapsed: -MON_ICON_CREATION_ELAPSED_OFFSET,
+    selectedSinceElapsed: MON_ICON_MENU_OPEN_SELECTED_SINCE,
     closeElapsed: null,
   });
 }
@@ -642,7 +642,7 @@ function menuAfterSummaryReturn(next: BattlePartySelectState, lastViewedSlot: nu
     submenuOpenElapsed: SUBMENU_OPEN_VISUAL_DELAY,
     actionCursor: 0,
     message: null,
-    selectedSinceElapsed: next.elapsed - MON_ICON_CREATION_ELAPSED_OFFSET,
+    selectedSinceElapsed: next.elapsed + MON_ICON_SUBMENU_SELECT_LEAD,
   });
 }
 
@@ -914,6 +914,10 @@ function drawSlot(
  * bouncing at the oracle's phase).
  */
 const MON_ICON_CREATION_ELAPSED_OFFSET = -45;
+/** The menu-open selection predates the first icon tick, so SpriteCB_BouncePartyMonIcon's first copy (y2 = -3) is not held (61 = the longest anim cycle). */
+const MON_ICON_MENU_OPEN_SELECTED_SINCE = -MON_ICON_CREATION_ELAPSED_OFFSET - 61;
+/** Submenu-open selection edge: the pre-bob1 encoding `elapsed + 30` (hold ~30 ticks), kept bit-identical for the sAnim_0 calibration. */
+const MON_ICON_SUBMENU_SELECT_LEAD = 30;
 
 /**
  * The oracle's mon-icon animation clock stalls by exactly 2 frames while the
