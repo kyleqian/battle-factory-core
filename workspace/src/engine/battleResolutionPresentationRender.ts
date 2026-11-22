@@ -117,6 +117,8 @@ export const BATTLE_RESOLUTION_LOCKED_CONTINUATION_HANDOFF_FRAMES = BATTLE_RESOL
  */
 /** The ROM's action prompt follows the forced player send-in's duration D by 17 frames (switchInTail.ts playerFaintReplacementSendOutTiming). */
 const PLAYER_FAINT_REPLACEMENT_PROMPT_TAIL_FRAMES = 17;
+/** hie7: a script that continues after the send-in (anything but the bare action prompt) resumes 6 frames before that prompt: item exec / next print at B + D + 11 against the prompt's B + D + 17 (hie6m, g180m, t68m). */
+const PLAYER_FAINT_REPLACEMENT_SCRIPT_RESUME_LEAD_FRAMES = 6;
 export function playerFaintReplacementSendOutTimingOfSegment(segment: BattleResolutionSegment): PartySendOutTiming | null {
   const index = segment.commands.findIndex((candidate) => candidate.type === "switch-in");
   const command = segment.commands[index];
@@ -133,7 +135,8 @@ export function playerFaintReplacementSendOutTimingOfSegment(segment: BattleReso
     // pau5: with an entry script after the send-in the span ends where the script's first row runs (release + the script's leading rows).
     followingFrames: command.entryScriptHoldFrames !== undefined
       ? PLAYER_FAINT_REPLACEMENT_PROMPT_TAIL_FRAMES - SWITCH_IN_WAITSTATE_HOLD_FRAMES - command.entryScriptHoldFrames + 1
-      : turnEnd?.type === "turn-end" ? turnEnd.timing.minimumFrames + BATTLE_RESOLUTION_NEXT_COMMAND_HANDOFF_FRAMES : 0,
+      : turnEnd?.type === "turn-end" ? turnEnd.timing.minimumFrames + BATTLE_RESOLUTION_NEXT_COMMAND_HANDOFF_FRAMES
+      : rest.length > 0 ? PLAYER_FAINT_REPLACEMENT_SCRIPT_RESUME_LEAD_FRAMES : 0,
     goTextChars: battleStringPrintableLength(message.lines),
   });
 }
@@ -1891,12 +1894,18 @@ function liveMoveUniversalRowAge(
 export const LEECH_SEED_DRAIN_ABSORB_MOVE_ID = 71;
 export const LEECH_SEED_DRAIN_BODY_START_AGE = 21;
 const LEECH_SEED_DRAIN_BODY_ROWS = 194;
+/** aud250: command age -> script row of General_LeechSeedDrain (ROM labs; moveAnimSounds re-exports it). */
+export const LEECH_SEED_DRAIN_SCRIPT_AGE = 7;
+/** hie7: the body starts with the script row 0, which runs LEECH_SEED_DRAIN_SCRIPT_AGE rows after the command start except right after the player's faint-replacement send-in (moveAnimSounds). */
+function leechSeedDrainBodyStartAge(command: Extract<BattleResolutionPresentationCommand, { type: "general-animation" }>): number {
+  return command.afterPlayerSendIn === true ? LEECH_SEED_DRAIN_BODY_START_AGE - LEECH_SEED_DRAIN_SCRIPT_AGE : LEECH_SEED_DRAIN_BODY_START_AGE;
+}
 
 function leechSeedDrainAbsorbEffect(
   command: Extract<BattleResolutionPresentationCommand, { type: "general-animation" }>,
   state: BattleResolutionPresentationState,
 ): BattleResolutionRenderEffect | null {
-  const age = state.lifecycle.phaseElapsed - LEECH_SEED_DRAIN_BODY_START_AGE;
+  const age = state.lifecycle.phaseElapsed - leechSeedDrainBodyStartAge(command);
   if (age < 0 || age >= LEECH_SEED_DRAIN_BODY_ROWS) return null;
   const owner = command.battler === 0 ? 1 : 0;
   const request: BattleMoveAnimationRequest = Object.freeze({
@@ -2892,7 +2901,7 @@ export function createBattleResolutionPresentationRenderView(
       // it the body has left the battlers at x2 0 (the general-animation effect, which draws nothing for this animation).
       const doll = fieldBattler(field, command.battler).substituteDoll === true;
       const body = doll ? null : leechSeedDrainAbsorbEffect(command, state);
-      effect = body ?? (doll || state.lifecycle.phaseElapsed < LEECH_SEED_DRAIN_BODY_START_AGE ? null : Object.freeze({
+      effect = body ?? (doll || state.lifecycle.phaseElapsed < leechSeedDrainBodyStartAge(command) ? null : Object.freeze({
         type: "general-animation", battler: command.battler, animation: command.animation, age: state.lifecycle.phaseElapsed - 1,
         ...(state.liveMoveBattlerX2Input === undefined ? {} : { battlerX2Input: state.liveMoveBattlerX2Input }),
       }));

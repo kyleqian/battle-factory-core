@@ -2859,3 +2859,146 @@ Tests: `tests/chg4ChargeTurnOpener.test.ts` (new; OFF Dig pause 18, OFF Solar Be
 The trial is net -74 ON but two of the five windows get worse because the miss tail and the unleash chain already contain the ROM's wait, so the rule needs a per-chain split (first print of a plain hit only), which is not "uniform over the windows checked" and was not landed. Next step for whoever picks it up: apply the walk only when the segment's first print is a plain hit (not `MoveMissed`, not a locked unleash), then re-lab s165 d11 and s310 d10 and re-run T2 ON (s830 -112, s8108 -121 are the available mass).
 
 Out of scope and untouched: the hie6m send-in lead, the Leech Seed drain, move-animation min 42 / hit-animation interval, the Open Level files.
+
+## hie7: the segment after the player's forced send-in starts on the ROM row (integration lane, 2026-11-22)
+
+Cause (one, in two layers; no per-family offset). After a player faint send-in, the orchestrator's `presenting-switch-in` phase ends at `partySendOutBattleMenuReady`, i.e. the action prompt at B + D + 17 (B = 91 + name length). The ROM's script continues at B + D + 11 (item exec / next print), so every continuation started 6 frames late (hie6m / g180m / t68m). Separately, the held-item restart lead (15) and the Leech Seed drain age (`LEECH_SEED_DRAIN_SCRIPT_AGE` 7) model a controller launch lag that does not exist here (the controller is idle after the send-in): ROM exec -> SE is 8 for the item (150 + 8 against the command's 214 + 15 minimum) and 27 for the drain (34 in the labs).
+
+Fix:
+1. `playerFaintReplacementSendOutTimingOfSegment` (`battleResolutionPresentationRender.ts`): a segment that continues after the send-in with anything but the bare prompt (a lone `turn-end` and the pau5 entry-script case keep their own leads) gets `followingFrames` 6 (`PLAYER_FAINT_REPLACEMENT_SCRIPT_RESUME_LEAD_FRAMES`), so the next command starts at B + D + 11.
+2. The command built right after a player `BattleScript_FaintedMonSendOutNew` send-in (`battleResolutionPresentation.ts`, `playerSendInEnd`) carries the context: the held-item lead is `HELD_ITEM_EFFECT_AFTER_SEND_IN_LEAD_FRAMES` (0, against `HELD_ITEM_EFFECT_RESTART_LEAD_FRAMES` 15 elsewhere) and the Leech Seed drain command gets `afterPlayerSendIn: true`, which `moveAnimSounds.ts` reads as age 0 instead of 7. `LEECH_SEED_DRAIN_SCRIPT_AGE` stays 7 globally (it moved to the Render file only to avoid an import cycle; `moveAnimSounds` re-exports it). The chg4 charge-turn print regions are untouched.
+
+T2 (`rescoreAll.sh` + `soundScoreboard.py`, `.integration/evidence/hie7/t2-{base,after}`):
+
+| Scene | mass | exact / offset | missing / extra |
+|---|---|---|---|
+| ON before | 13,629 | 2,951 / 2,926 | 0 / 0 |
+| ON after | **12,942** (-687) | 2,994 / 2,883 | 0 / 0 |
+| OFF before | 1,588 | 776 / 357 | 0 / 0 |
+| OFF after | 1,588 (unchanged) | 776 / 357 | 0 / 0 |
+
+ON by family: move-animation SE 10,852 -> 10,165; stat-change 323, cry 643, battle-controller 1,759, bgm 52 unchanged. More than hie6m's expected -285: the start shift (-6 per resume), the item lead and the drain age all land in the same windows (start shift alone: `t2-s1`; start + the rest: `t2-s2` = final).
+
+ROM rows (`hie6mWin.py` on hie7 copies of the probes, `p-{base,after}`; `g180mProbe.sh`'s `hcr3mCmp.py` for s6912):
+- s5063 d45: engine HELD_ITEM_EFFECT command 284 -> 278 (min 229 -> 214; ROM item exec row 281), SE 152 now at 286 against ROM 289 (-3, carried from the earlier ball SE, not the item).
+- s2230 d6: engine item command 312 -> 306 = ROM exec row 306; SE 152 x3 / 228 / 102 at 314 / 346 / 378 / 410 / 482 = ROM, all exact (before: +21 each).
+- s6912 d2: drain command 239 -> 233 = ROM exec row 233 (BattleScript_LeechSeedTurnDrain+0x7); SE 180 at 260 (was 273), the eight SE 142 rows 278..320 step 6 and SE 179 at 373 all equal to ROM. The later hp / message / turn-end rows (451 / 481 / 485 / 596 against ROM 465 / ... ) are the end-turn print heads, out of scope.
+
+Labs (`labCompare.sh --scene on --reuse-rom`, `.integration/evidence/hie7/lab-*`): hie1-leftovers-on -1 (mass 5), hie1-sitrus-on 0, hie1-shellbell-on -1 (mass 5): unchanged; etp1-leechseed-on, aud250-leechseed-opponent-on, aud250-leechseed-player-on 25 / 25 exact, mass 0: unchanged.
+
+Census 0..199 (`lsd194Census.sh`, `LSD194_SHARDS="0 1"`, JOBS 2, SPLIT 2, fc2f7ce85 vs f8d68ea67; `.integration/evidence/hie7/census`, tree/ copies deleted): `rst197CensusDelta.py --digest` eventsDigest + error identical 200 / 200 on ON (9 battles changed command timing, 0 type-sequence changes) and 200 / 200 on OFF (0 changed). No gameplay / RNG change.
+
+Pins moved: `tests/randomRoundSoak.test.ts` seed 0 "full" frames 68,945 -> 68,927 (three post-send-in script resumes x 6; same battle 3 / depth 2 / turn 21 / roundLost; a trajectory pin, now matching the ROM exec rows s5063 d45 / s6912 d2 / s2230 d6 above). New `tests/hie7SendInResume.test.ts` pins the timing lead, the item lead 0 / 15 and the age 7.
+
+Caveats for the supervisor: the drain's renderer body start follows the same flag (21 -> 14 frames after the command start in this context, so the picture matches the sound); this is not pixel-measured, only the SE rows are ROM-measured. If a pixel capture says otherwise, `leechSeedDrainBodyStartAge` is the one place to change. Residual after hie7: s2741 d11 (mass 62, a message chain), the 5063 d45 -3 above, the end-turn print heads.
+
+## t2k4 (2026-11-22): the remaining S11 sound-timing mass re-ranked on fold-a + hie7 (measurement only; no `src/` / `tests/` change)
+
+Tree: `8febdabd5` (fold-a = master + hit1 / tri1 / sst1 + hse2 + chg4 + hie7). Method as t2k3 (`rescoreAll.sh` per scene into `.integration/evidence/t2k4/t2`, `soundScoreboard.py --per-seed`, a second `--cmdtrace=1` replay of every seed (`c/`), `t2Attribute.py` alignment + ROM `gCurrentMove`, windows own the rows from one nonzero offset step to the next, `hcr3mProbe` / `hcr3mCmp` for the probed windows). The t2k3 analysis scripts are now committed, parameterised by `T2K4_DIR`, in `tools/integration/t2k4/` (`attr.py` -> `agg.py` / `shape2.py` / `step.py` / `gain.py` / `own.py`; new `win.py SCENE GROUP [N]` lists the owned windows of a group; `probe.sh SEED SCENE DECISION [SPAN]`). Evidence (git-ignored, main tree): `.integration/evidence/t2k4/` (`t2/`, `c/`, `attr-{on,off}.json`, `agg.txt`, `shape2.txt`, `step.txt`, `gain.txt`, `own.txt`, `own-full.txt`, `w-*.txt`, `p/{on,off}/` probes + `*.cmp.txt`). Decision index of a window = segment index // 2 (`si 11` = decision 5).
+
+### 1. T2 on this tree (missing / extra 0 / 0 in both scenes)
+
+| scene | mass | exact / offset | move-animation SE | stat | cry | battle-controller | bgm |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| ON (25 seeds) | **12,479** | 3,009 / 2,868 | 9,718 | 323 | 643 | 1,743 | 52 |
+| OFF (24 seeds) | **1,552** | 776 / 357 | 0 | 161 | 319 | 1,053 | 19 |
+
+Against the task's expectation (ON 12,942 / OFF 1,552): OFF is equal. ON is **-463 lower, exactly chg4's ON gain** (chg4 13,629 -> 13,166, hie7 measured 13,629 -> 12,942 on a base without chg4; 13,166 - 687 = 12,479). So the hie7 "after" figure did not include chg4; this tree has both. Against t2k3 (frozen 30cd3dfac): ON 14,435 -> 12,479 (-1,956, -13.6 %), exact 2,935 -> 3,009; OFF 2,040 -> 1,552 (-488, -23.9 %), exact 725 -> 776. The ON ranking classes sum to TOTAL: body 6,311 (incl. B4 274), gen 3,407, controller chain 904, controller hit 839, cry 643, stat 323, bgm 52; OFF: controller hit 631 + chain 729 + stat 168 + bgm 19 + SE 90 5 = 1,552 (OFF family table above splits it by sound kind).
+
+### 2. Ranked top 10 (rows owned disjointly by window; items + B4 + remainder = TOTAL)
+
+Recipe status: **M** = a measured recipe exists, **new** = first measured here, **inh** = inherited from the previous command, no rule of its own.
+
+| rank | item | scenes | mass ON / OFF | windows | rule of its own? | recipe status | files / lines a landing touches | expected mass |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 | Faint / send-in chain: SE 15 ball 500 / 392, SE 16 + cry@faint 465 / 126, SE 114 party-summary 363 / 211 | ON + OFF | 1,328 / 729 (2,057) | 127 / 89 | mostly inherited: ON 722 of 1,328 starts from a carried offset (hit -49 / -15 / -6 ...); the OFF cliff +13 .. +17 is 8 windows / 218 mass (3 / 40 in ON) = the harness A gate | cliff: **M** (fch2m: `soundCensusRomReplay.ts` `dismissAccept` default when `--romdrive`, OFF -199 / ON +83, not flipped); rest **new**: Earthquake KO (below) | tools only for the cliff; the KO drain in `battleResolutionPresentation*.ts` hp command | cliff OFF -200 (ON +83 until the hit-SE interval is fixed); KO window -70 |
+| 2 | Hit SE 12 / 13 / 14: ON 747 (178 windows, 640 carried), OFF 631 (114 windows, 602 from a clean offset) | ON + OFF | 747 / 631 (1,378) | 178 / 114 | OFF: yes, two of them: **Brick Break screen-break `move-animation` +63** (126, 2 windows, new, below) and the plain -3 / -4 / -9 / -13 steps (hit-animation 274, move-animation 193); ON: inherited (after Psychic 151, Confusion 115, Triple Kick 77, Struggle 52) | Brick Break **new**; OFF plain steps: **M** hse1m (+ hse2 landed three of its rows; Focus Punch 45, two-turn 28, infatuation 28 remain); ON weather tick -8: **M** hse1m ON (not landed) | `battleResolutionPresentation.ts` (the Brick Break used-print / screen-break `move-animation` min 112 -> 45; commands list in 5) | Brick Break -126 OFF; the rest per hse1m rows |
+| 3 | Held-item group gen:152 / 228 / 102 (Leftovers / berry) | ON | 1,210 / 0 (69 windows, 345 rows, 11 seeds, 25 exact) | 69 | no: the post-send-in +21 is landed (hie7: s2230 d6 exact); the rest is signed scatter after hits / end-turn (-14 after `hit-animation` x2 = 170, -9 after the SE-90 / stat rows x2 = 110, +1 after a -24 carried offset 115) | inherited; hie6m: 1,315 of the group is the preceding hit / print / status command | none of its own; move with items 2 and 4 | 0 on its own (collapses with the hit-SE and end-turn print heads) |
+| 4 | gen:180 chain (Leech Seed drain) and the gen:202 / 142 rows it owns | ON | 890 / 0 (17 windows, 10 exact) | 17 | partly: (a) s6912 d5 **+17 after Recover** (170): drain command 10 late (the Recover hp / message tail: hp cmd 477 vs ROM 458, message hold 88 vs 98) **plus the age 7** the drain keeps outside the send-in context (SE 180 at ROM exec + 27, engine command + 34); (b) s310 si33 -12 (120) end-turn print head; (c) s310 si27 / 29 / 31 -1 x10 each (210) carried +8 from the gen:202 row before | (a) **new** (the same lab-lag-7 / T2-lag-0 question as g180m 6, now with a measured context); (b) **M** g180m recipe 4 (`SideStatusWoreOff` / print-head hold 97 -> 92, not landed); (c) inherited | `moveAnimSounds.ts` drain age (`LEECH_SEED_DRAIN_SCRIPT_AGE` / the `afterPlayerSendIn` flag from hie7), `battleResolutionPresentationRender.ts` restore-HP tail rows | (a) -170, (b) -120, (c) -210 |
+| 5 | Ice Beam first-mover windows | ON | 517 / 0 (7 windows, 0 exact) | 7 | no: s2230 d20 -21 (231) is the census press gate (t68m recipe 4, fch2m class); s830 d1 -13 (156) is **chg4 item 3 narrowed** (continuation-segment first print, plain hit only); s830 d5 -6 (66) side-status print hold | all three **M** (t68m recipes 4 / 1 / 3) | tools; `usedMovePrintLeadU` (`battleResolutionPresentation.ts` ~7057) | -231 tools, -156 with chg4 item 3 narrowed (net -112 measured), -66 |
+| 6 | Rock Slide body | ON | 514 / 0 (8 windows, 122 rows) | 8 | no: inherited (s8612 -13 after Belly Drum 180, s165 +1 after a +4 hit-SE carry 100 ...) | inherited (t68m 3) | none | 0 on its own |
+| 7 | Recoil family: Double-Edge 245 + Struggle 235 | ON | 480 / 0 (24 windows) | 24 | Struggle: s2230 d21 -18 (90) and s7295 d8 -11 (55) from a clean start = the first-mover gate / OFF-style print lead; Double-Edge: carried -16 | Struggle first row: **new** (s2230 d21 is next to the d20 press gate: probe after the tools fix); Double-Edge inh | `battleResolutionPresentation.ts` (Struggle lead) | about -145 |
+| 8 | gen:148 poison / status tick, first row | ON | 462 / 0 (17 windows) | 17 | no: five inherited classes (t68m 1); the largest (s499 d3 -1 after a -11 carried, s165 d22 -9 after a foe `switch-in` tail 54) | **M** t68m item 6 (class C `switch-in` tail -9) | `battleResolutionPresentationRender.ts` `switch-in` tail | -54 (class C) |
+| 9 | Two-turn second family: Solar Beam 241 + Dig 196 | ON | 437 / 0 (18 windows) | 18 | partly: s97 d9 -13 x2 (91 + 26) first-charging-turn lead on a clean start (the chg4 print region is another case: this one is Solar Beam after a hit); s830 d10 +18 (24) after Giga Drain | **M** chg4 item 3 + hit1 Open "lead-body sound clock" do not cover the s97 -13 pair: **new** | `battleResolutionPresentation.ts` charge-turn print (`isChargeTurnOpener`) | -117 |
+| 10 | stat SE 239 / 245 / 23 / 24 | ON + OFF | 233 / 168 (401) | 53 / 34 | inherited (stat rows after a hit step) except OFF s4235 d2 +17 (the press gate) | tools (fch2m class) | none | OFF -39 |
+| | **Items 1-10** | | **6,818 / 1,528** | | | | | |
+| | B4 bodies (reported separately) | ON | 274 / 0 | | | | | |
+| R | remainder (about 100 bodies / groups, each < 220; also gen:242 200, Confusion 217, Focus Punch 219, Calm Mind 216, Double Team 210 ...; cry 52, bgm 51 / 19, SE 90 28 / 5) | ON + OFF | 5,387 / 24 | | | | | |
+| | **TOTAL** | | **12,479 / 1,552** | | | | | |
+
+Sum-check: ON 1,328 + 747 + 1,210 + 890 + 517 + 514 + 480 + 462 + 437 + 233 = 6,818; + 274 + 5,387 = 12,479. OFF 729 + 631 + 168 = 1,528; + 24 = 1,552. Counts are row mass, not saving (one step's gain is 30-60 % of it, `gain.txt`).
+
+**Which items have a measured recipe.** hse1m: the OFF hit-SE interval rows (partly landed by hse2) and the ON end-of-turn weather tick -8 (s8108 / s2741; gen:219 131 and gen:242 200 still carry it); g180m: item 4 print-head hold 97 -> 92 (s310 si33), item 5 weather age 8, the drain age (now partly hie7); t68m: recipes 1 (= chg4 item 3 narrowed, net -74 ON measured, -112 s830 + s8108 available), 3 (side-status hold) and 4 (press gate); hit1 Open: Future Sight's hit -14 and the hail damage SE +4 (neither owns a window above 30 mass on this tree: not worth a step now), the lead-body sound clock (touches Double Slap / Fury Swipes hit 1, no top window). **New this step:** Brick Break OFF +63 (rank 2), the Recover -> drain +17 context (rank 4a), the Earthquake KO hp drain (rank 1), s97 d9 Solar Beam -13 pair, Struggle first row after the press gate.
+
+### 3. The probed windows (ROM `hcr3mProbe` + engine `--cmdtrace`, frames from each side's commit)
+
+1. **OFF s6568 d31 (+63, SE 14 @`message`, rf 18207; the s319 d16 SE 12 window is the same move, Brick Break, +63).** ROM: Brick Break `BrickBreakAnim+0x0` 45, `Pausex20` 46, the wall-shattered print `+0x10` 82, `BrickBreakDoHit+0x0` 166, SE 14 168. Engine: `message` 0.0 at 10, **`move-animation` cmd 0.1 at 37 with min 112**, `message` cmd 0.2 at 149, `hit-animation` 0.3 at 232 with SE 14 at 231. The print -> hit interval is right (ROM 82 -> 166 = 84, engine 149 -> 232 = 83); the `move-animation` before it is 112 against the ROM's 45 -> 82 = 37 (+8 head): the engine gives the screen-breaking Brick Break the full OFF body min and then the message, the ROM prints at once. One rule of its own, two windows, +63 each (126 mass; exact: 63 -> 0). Where the 112 comes from was not found in the time (no Brick Break match in `battleResolutionPresentation.ts` beyond the c-lead table at 2245 / 6310; start with the OFF `move-animation` min for a `removelightscreenreflect` event).
+2. **ON s6912 d5 (+17, gen:180 after Recover, rf 4098).** ROM: Recover `BattleScript_EffectRestoreHp+0x16` print 458 / hp 94 at 521 / print `+0x1b` 522, `MoveEnd` 612, `LeechSeedTurnDrain+0x7` exec 621, SE 180 648, SE 142 x8 666 .. 708, SE 179 761. Engine: hp cmd 0.9 at 477, message 0.10 542 (min 0), sprite-visibility 630, `general-animation` LEECH_SEED_DRAIN cmd 0.12 at **631** (+10), SE 180 665 (+17), SE 142 683 .. (+17), SE 179 778 (+17). Two terms, both inherited from other rows: the restore-HP tail ends 10 late (hp 19 late, message hold 88 vs ROM 98), and the drain keeps its age 7 (ROM exec -> SE 180 = 27, engine command -> SE 180 = 34) because hie7's no-lag rule is flagged only after a player send-in. The ROM interval is the same in both contexts, so the age 7 is not a launch lag of the send-in path; the open lab-lag-7 / T2-lag-0 question of g180m 6 now has its second T2 context. Not landed.
+3. **ON s648 d0 (+34 / +35, cry@faint / SE 16, rf 738).** Earthquake hit-all KO of the foe: ROM SE 13 572, hp update exec 723 (hp 146 -> 0), `FaintTarget` 731, SE 16 798; engine SE 13 573, `hit-animation` 573 (min 35), **hp cmd 608 (146 -> 0)**, faint `message` 762 (+31), SE 16 833 (+35). SE 13 -> message is 150 on the ROM and 189 on the engine: the engine runs the hit blink (35) and then a 154-frame drain where the ROM's drain is 112 from the end of a 35-frame blink. Ordinary hits agree to a frame (s6912 d5: hp 137 -> next 228 = 91 vs ROM 90), so this is the long full-bar KO drain after a hit-all (Earthquake after a Dig turn of the foe), not the A press. Root cause (hit-all KO drain length vs `hp` command `min`) not found; one window, 70 mass; the other `cry:@faint` windows (s8108 d50 96, s6 d3 +23 46) are carried offsets or a Giga Drain KO.
+
+### 4. Windows that are not engine rules (harness / carried)
+
+- **Press gate (tools only), ON + OFF 321 + 218:** s2230 d20 Ice Beam -21 (231) and d21 Struggle -18 (90) = the census A gate; the OFF cliff +13 .. +17 (8 windows, 218); stat s4235 d2 +17. One tools change (fch2m recipe 1) takes about OFF -200 and shows the ON +83 (SE 16 early after the hit-SE interval).
+- **Carried offsets:** 640 of the 747 ON hit-SE mass and 722 of the 1,328 ON chain mass start with a nonzero previous offset; they move only when the preceding body / hit command is fixed.
+
+### 5. Engine commands behind the probed windows
+
+| window | ROM script rows | engine command | file |
+| --- | --- | --- | --- |
+| Brick Break OFF | `EffectBrickBreak+0x9`, `BrickBreakAnim+0x0` 45 / `+0x10` 82, `BrickBreakDoHit` 166 | `move-animation` min 112 -> `message` -> `hit-animation` | `battleResolutionPresentation.ts` (the OFF `move-animation` command build, 5911-6250) |
+| Recover -> drain ON | `EffectRestoreHp+0x16` / `+0x1b`, `MoveEnd`, `LeechSeedTurnDrain+0x7` | `hp` 0.9, `message` 0.10, `general-animation` LEECH_SEED_DRAIN 0.12 | `moveAnimSounds.ts` (drain age), `battleResolutionPresentationRender.ts` (hie7 `afterPlayerSendIn`, restore-HP tail rows) |
+| Earthquake KO ON | `DoHitAllWithUndergroundBonus+0x13`, `FaintTarget+0x0`, `+0x7` | `hit-animation` 0.7, `hp` 0.8 146 > 0, faint `message` 0.9 / `faint` 0.10 | `battleResolutionPresentation.ts` hp / hit-all tail |
+
+### 6. What not to chase
+
+- The 5,387 ON remainder (about 100 groups, each < 220) and the held-item scatter (1,210): inherited; fix the preceding commands.
+- ON hit-SE 640 and chain 722 carried mass: do not add per-family offsets; the rows follow when the hit / print head before them is fixed.
+- Rock Slide (514), gen:148 first row (462), Double-Edge (245): inherited from the previous move, no rule of their own (t68m).
+- The press-gate windows (321 + 218 + stat s4235): a tools decision (fch2m recipe 1), not engine work; land it once and re-rank (it shows the ON +83).
+- B4 bodies (274, reported), Future Sight's hit / hail damage SE (hit1 Open; no window over 30 mass here), gen:219 / gen:242 weather rows until the hse1m weather tick is done once.
+- A `LEECH_SEED_DRAIN_SCRIPT_AGE` global change (g180m 6: ON drain mass 1,028 -> 1,677): the drain age is context (send-in, after Recover), not a constant.
+
+Not applied: no `src/` or `tests/` change; PROGRESS / ISSUES / ROADMAP and acceptance / supervisor ledgers untouched; no `.ts` added (python / shell tools only), so no typecheck / `npm test` / build; the evidence replays are the gates.
+
+## drv2 (2026-11-22): the T2 replay presses where the ROM drive pressed; two harness gates removed (tools only; `src/` and `tests/` untouched)
+
+Scene OFF (:8014). Evidence (git-ignored, main tree): `.integration/evidence/drv2/` (`t2-base/` = fold-a tree before, `t2-after/` = dismiss-accept default, `t2-after2/` = + forced anchor fix, `score-{base,after,after2}.txt`, `attr2-{on,off}.json` + `delta2-{on,off}.txt` per-window before / after, `pr/p/` probes). ROM files = `t2n` (unchanged). New tools: `tools/audio/romForcedAnchorFix.py`, `tools/integration/drv2/delta.py ATTR.json DRIVEDIR SCENE` (per window the rows that got worse / better; build ATTR with `t2Attribute.py` once per rescore dir, the ROM drive of each).
+
+### 1. Tools changes
+
+1. **Dismiss-accept is the default with `--romdrive`** (`soundCensusRomReplay.ts`, fch2m recipe 1): the census driver presses a button message from its first acceptable frame, as the ROM pulse does. Opt out: `--dismiss-accept=0` / `ROM_REPLAY_DISMISS_ACCEPT=0` / `AUD249_DISMISS_ACCEPT=0` (the old awaiting-only gate; reproduces t2k4 exactly: ON 12,479 / OFF 1,552). Without `--romdrive` the gate is unchanged.
+2. **Forced-move ROM anchors move to the accepted press** (`aud249Rescore.sh` runs `romForcedAnchorFix.py` on the copied drive; `AUD249_FORCED_ANCHOR=0` keeps the driver's). `romDecisionDriver.py` closes a forced decision (Encore / Struggle, FIGHT commits) on its first A, but the ROM can still be in the previous end-of-turn script (s2230 d20: `DisabledNoMore` end2) and ignores that press; the 17-frame pulse is accepted later (SE 5). Engine and ROM segments both start at "the press taken", so the ROM segment was early by the gap and the whole window read engine-early. This is what t68m / t2k4 called the s2230 d20 / d21 "census press gate": it is **not an engine press** (delaying the engine's press cannot change a segment-relative offset), it is the ROM anchor. Moved anchors: ON s2230 d20 +19, d21 +13; OFF s2230 d20 +5, d21 +12 (every other forced anchor of the 49 seeds has its SE 5 on the commit frame, +0, and is untouched). The T2 files on disk are not rewritten (fix is applied on the rescore copy); `aud248RunSeed.sh` fresh ROM runs still write the driver's anchor.
+
+### 2. T2 (missing / extra 0 / 0 in both scenes, 49 seeds)
+
+| scene | mass base -> dismiss default -> + anchor fix | exact / offset base -> after | battle-controller | cry | bgm | stat |
+| --- | --- | --- | --- | --- | --- | --- |
+| ON (25) | 12,479 -> 12,494 -> **11,949** (-530, -4.2 %) | 3,009 / 2,868 -> 3,006 / 2,871 | 1,743 -> 1,692 | 643 -> 660 | 52 | 323 |
+| OFF (24) | 1,552 -> 1,353 -> **1,348** (-204, -13.1 %) | 776 / 357 -> 781 / 352 | 1,053 -> 922 | 319 -> 263 | 19 -> 2 | 161 |
+
+**New T2 baseline: ON 11,949 (3,006 / 2,871), OFF 1,348 (781 / 352).** The ON +83 of fch2m is +15 net here (hie7 / chg4 moved two of its three un-hidden windows): +51 in one window against -36 in four.
+
+### 3. The named windows (offset base -> after)
+
+| window | before | after | cause |
+| --- | --- | --- | --- |
+| ON s2230 d20 Ice Beam (17 rows, 323 mass) | -21 (SE 12 -22, Disable body -24) | **-2** | ROM anchor gate (item 2); the -2 left is the forced-commit constant of every forced window |
+| ON s2230 d21 Struggle / Encore (16 rows, 222 mass) | -18 / -16 / -15 / -14 | **-1 / +1 / +2 / +3** | same; +1 .. +3 is the carried Struggle hold of hse1m |
+| OFF s2230 d20 / d21 | -8 / 0 | -3 / 0 (d21's engine dismiss now lands on the ROM's real dismiss A: both sides moved 12, net 0) | same |
+| OFF stat s4235 d2 (SE 239 +17; ON the same chain +15 .. +19) | +17 | **+17, not a press gate** | an engine window, below |
+
+**s4235 d2 is an engine rule, not the A gate** (probe `pr/p/off/4235-d2.cmp.txt`): a Focus Band survive on the player's Pokemon. ROM: hp drain 115 -> 123 (8 frames, 8 -> 1 of 159), `FocusBandActivates` 127, `Pausex20`, print 162. Engine: `hp` cmd 0.3 at 115 with **min 28** (ends 143), Focus Band `move-animation` 0.4 min 40, `message` 0.5 at 183: the print is 21 late (ROM 47 after the hp start, engine 68), then -3 later, +17 at SE 239 (print 367 vs 385 = +18). The next engine step: the `hp` command's minimum for a small drain that leaves 1 HP (8 -> 1 of 159: 28 against the ROM's 8 + 4). Not landed.
+
+### 4. Windows that got worse (the three that fch2m un-hides; engine command probed with `tools/integration/t2k4/probe.sh`, frames from each side's commit)
+
+All three are the ROM pulse missing the box by 1 .. 6 frames while the engine, 3 .. 6 frames earlier upstream, is ready at the pulse and takes it: the SE 114 / SE 15 pair goes 0 -> -17.
+
+1. **OFF s97 d13 (+51: SE 114, SE 15, cry@faint 0 -> -17).** The engine's SE 13 -> SE 16 chain is 6 early from the second move's used print: ROM `BattleScript_ItemHealHP_Ret+0x1a` hp 301 -> `MoveEnd+0x6` 302 -> `EffectBurnHit` 307 -> print `HitFromAtkString+0x1` 313; engine `hp` 0.8 (Leftovers 47 > 49) at 302 -> `message` 0.9 at **308**: the used-print head after a held-item heal is 6 against the ROM's 12 (SE 13 378 vs 372, SE 16 538 vs 532). Engine command: the segment's `message` after the Leftovers `hp` command (hie5 / hie7 class: print head after a held-item heal in the next move's segment), `battleResolutionPresentation.ts`.
+2. **ON s3738 d57 (+51: SE 114, SE 15, cry 365 0 -> -17).** Poison tick KO: ROM SE 148 first row 622, engine `status-animation` PSN 0.12 at 617 (-5, spacing 14 both), `hp` 7 > 0 688, `faint` 698, SE 16 768 vs ROM 772 (-4). Engine command: the end-of-turn `message` 0.10 / 0.11 -> `status-animation` PSN head (t2k4 rank 8 / t68m item 6 class C, gen:148 first row).
+3. **OFF s6568 d104 (+17: SE 15 -3 -> -20).** Last Struggle turn; SE 16 exact (505), engine `switch-out` 0.16 at 543 -> SE 15 at 565, ROM SE 15 585 (80 after SE 16 against the engine's 60): the faint `message` 0.13 box is taken by the engine on the pulse the ROM did not take. Engine command: `message` 0.13 (faint box, `switch-out` follows); the engine is ready 1 .. 3 frames before the ROM's accept frame (not opened further).
+
+### 5. Gates
+
+- Census path unchanged: `lsd194Census.sh` seeds 0..19, `7b8861ed6` vs `HEAD`, both scenes: `rst197CensusDelta.py --digest` ON 20/20 identical (7,146 commands), OFF 20/20 identical (6,942), byte-identical shards (`soundCensusRomReplay.ts` is not imported by the census orchestrator).
+- The 11 `tests/` files that import `soundCensusRomReplay.ts` (`grep -l soundCensusRomReplay tests/*.test.ts`; they replay without `--romdrive`): 11 files / 46 tests pass (2 workers). `npm run typecheck` green.
+- Not run (assigned): the full `npm test` (two other workers share the machine) and `npm run build`; no `src/` or `tests/` change.

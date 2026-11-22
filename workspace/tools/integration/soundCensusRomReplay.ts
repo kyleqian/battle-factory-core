@@ -126,9 +126,11 @@ const frameBudget = Number(arg("frame-budget") ?? 200000);
 // engine's accumulated drift from the ROM must not shift the pulse phase); =absolute uses the drive frame number as is (measured in docs/aud251-s11-scoreboard-refresh.md "drv1").
 const romDriveArg = arg("romdrive") ?? process.env.ROM_REPLAY_ROMDRIVE;
 const romDriveClock = (arg("romdrive-clock") ?? "segment") as "segment" | "absolute";
-// fch2m: --dismiss-accept=1 also presses (the same ROM / even-frame cadence) while a button message is only ACCEPTABLE (isBattleResolutionButtonMessageAcceptable, 2 rows before the
-// awaiting phase for a `\p` box); default off: the census driver waits for `awaiting-message-dismiss` as before (the frozen fixtures / T2 baselines replay without it).
-const dismissAccept = arg("dismiss-accept") !== undefined && arg("dismiss-accept") !== "0";
+// fch2m / drv2: with a ROM drive the census driver also presses while a button message is only ACCEPTABLE (isBattleResolutionButtonMessageAcceptable, 2 rows before the awaiting
+// phase for a `\p` box), the frame the engine first takes an A, as the ROM driver's pulse does. --dismiss-accept=0 or ROM_REPLAY_DISMISS_ACCEPT=0 keeps the old awaiting-only gate
+// (drv1 / t2k4 baselines); without --romdrive the gate is the old one regardless (the frozen fixtures replay without it); --dismiss-accept=1 forces it on without a drive.
+const dismissAcceptArg = arg("dismiss-accept") ?? process.env.ROM_REPLAY_DISMISS_ACCEPT;
+const dismissAccept = dismissAcceptArg !== undefined ? dismissAcceptArg !== "0" : romDriveArg !== undefined;
 if (romDriveClock !== "segment" && romDriveClock !== "absolute") throw new Error("--romdrive-clock must be segment or absolute");
 const romA: { frames: Set<number>; length: number; anchors: { index: number; menuOpenFrame: number; commitFrame: number }[] } | null = romDriveArg === undefined ? null : (() => {
   const drive = JSON.parse(readFileSync(romDriveArg, "utf8")).drive;
