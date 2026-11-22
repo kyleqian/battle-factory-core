@@ -298,6 +298,10 @@ const B_WEATHER_RAIN = (1 << 0) | (1 << 1) | (1 << 2);
 const B_WEATHER_SANDSTORM = (1 << 3) | (1 << 4);
 const B_WEATHER_SUN = (1 << 5) | (1 << 6);
 const B_WEATHER_HAIL = 1 << 7;
+/** include/constants/battle.h:232-238: the PERMANENT halves (Drizzle / Sand Stream / Drought, AbilityBattleEffects ON_SWITCHIN). */
+const B_WEATHER_RAIN_PERMANENT = 1 << 2;
+const B_WEATHER_SANDSTORM_PERMANENT = 1 << 4;
+const B_WEATHER_SUN_PERMANENT = 1 << 6;
 
 /** battle_util.c:1181-1438 -- the field loop's own script labels this registration hosts (docs/screens-weather-ground-truth.md §3). */
 const SIDE_STATUS_WORE_OFF_LABEL = "BattleScript_SideStatusWoreOff";
@@ -1915,12 +1919,8 @@ const B_ANIM_HAIL_CONTINUES = 5;
  * (Rain deals no passive damage) -- just the shared decrement/chooser/
  * playanimation shape `docs/screens-weather-ground-truth.md` §1c/§5 already
  * confirmed adds zero new opcodes beyond the setter + this widened
- * PLAYANIMATION. `B_WEATHER_RAIN_PERMANENT` (Drizzle, KYOGRE-only) is not
- * checked here -- unreachable given this engine's setter only ever writes
- * the `_TEMPORARY` bit (docs/screens-weather-ground-truth.md §2), same
- * scope limit `runDamagingWeatherFieldCase` below already accepts for
- * Sandstorm's own PERMANENT bit (Tyranitar's Sand Stream switch-in trigger
- * is unwired).
+ * PLAYANIMATION. opl: a weather with its `_PERMANENT` bit (Drizzle: KYOGRE, not a Factory species) is never decremented and always
+ * continues (`if (!(gBattleWeather & B_WEATHER_RAIN_PERMANENT))`, :1343; the else branches pick B_MSG_RAIN_CONTINUES).
  */
 function runRainFieldCase(
   program: BattleScriptProgram,
@@ -1928,6 +1928,12 @@ function runRainFieldCase(
   state: MachineState,
 ): FieldCaseOutcome {
   const rc = state.rulesContext;
+  if ((rc.weather & B_WEATHER_RAIN_PERMANENT) !== 0) {
+    const continuing = Object.freeze({ ...rc, multistringChooser: B_MSG_RAIN_CONTINUES });
+    const run = runTickScript(program, handlers, state, continuing, rc.selectorRoles.attacker ?? 0, RAIN_CONTINUES_OR_ENDS_LABEL);
+    if (run.kind === "opcode-barrier") return run;
+    return Object.freeze({ kind: "fired", state: run.state });
+  }
   const nextTimer = rc.weatherTimer - 1;
   const battler = rc.selectorRoles.attacker ?? 0;
   if (nextTimer === 0) {
@@ -1947,8 +1953,8 @@ function runRainFieldCase(
  * picks between two entirely separate labels (`SunlightContinues`/
  * `SunlightFaded`) rather than one shared label branching on a chooser byte
  * -- neither script reads `cMULTISTRING_CHOOSER` at all (each is a single
- * fixed `printstring`). `B_WEATHER_SUN_PERMANENT` (Drought, GROUDON-only) is
- * out of scope for the same reason as Rain's PERMANENT bit above.
+ * fixed `printstring`). opl: `B_WEATHER_SUN_PERMANENT` (Drought: GROUDON, not a Factory species) skips the decrement and continues
+ * (`!(gBattleWeather & B_WEATHER_SUN_PERMANENT) && --weatherDuration == 0`, :1397).
  */
 function runSunFieldCase(
   program: BattleScriptProgram,
@@ -1956,9 +1962,10 @@ function runSunFieldCase(
   state: MachineState,
 ): FieldCaseOutcome {
   const rc = state.rulesContext;
-  const nextTimer = rc.weatherTimer - 1;
+  const permanent = (rc.weather & B_WEATHER_SUN_PERMANENT) !== 0;
+  const nextTimer = permanent ? rc.weatherTimer : rc.weatherTimer - 1;
   const battler = rc.selectorRoles.attacker ?? 0;
-  if (nextTimer === 0) {
+  if (!permanent && nextTimer === 0) {
     const ended = Object.freeze({ ...rc, weather: 0, weatherTimer: 0 });
     const run = runTickScript(program, handlers, state, ended, battler, SUNLIGHT_FADED_LABEL);
     if (run.kind === "opcode-barrier") return run;
@@ -1979,7 +1986,9 @@ function runSunFieldCase(
  * read the same chooser value. `weatherHasEffect`, both weather bits, and
  * the six-opcode per-battler damage loop live entirely in the already-
  * registered `battleScriptDamagingWeatherOpcode.ts` handlers; this only
- * hosts the C-side decrement/branch choice.
+ * hosts the C-side decrement/branch choice. opl: Sand Stream's sandstorm (TYRANITAR, Open Level sets 850-881) has
+ * `B_WEATHER_SANDSTORM_PERMANENT`: no decrement, it always continues (`!(gBattleWeather & B_WEATHER_SANDSTORM_PERMANENT) &&
+ * --weatherDuration == 0`, :1377). Hail has no permanent bit (:1414-1418).
  */
 function runDamagingWeatherFieldCase(
   program: BattleScriptProgram,
@@ -1987,10 +1996,12 @@ function runDamagingWeatherFieldCase(
   state: MachineState,
   animArg1: number,
   chooser: number,
+  permanentBit: number,
 ): FieldCaseOutcome {
   const rc = state.rulesContext;
-  const nextTimer = rc.weatherTimer - 1;
-  if (nextTimer === 0) {
+  const permanent = (rc.weather & permanentBit) !== 0;
+  const nextTimer = permanent ? rc.weatherTimer : rc.weatherTimer - 1;
+  if (!permanent && nextTimer === 0) {
     const ended = Object.freeze({ ...rc, weather: 0, weatherTimer: 0, multistringChooser: chooser });
     const run = runTickScript(program, handlers, state, ended, rc.selectorRoles.attacker ?? 0, SANDSTORM_HAIL_ENDS_LABEL);
     if (run.kind === "opcode-barrier") return run;
@@ -2129,7 +2140,7 @@ function runDoFieldEndTurnEffects(
     state = result.state;
     if (result.kind === "fired" && state.rulesContext.battleOutcome !== 0) return Object.freeze({ kind: "outcome-decided", state });
   } else if ((rc.weather & B_WEATHER_SANDSTORM) !== 0) {
-    const result = runDamagingWeatherFieldCase(program, handlers, state, B_ANIM_SANDSTORM_CONTINUES, B_MSG_SANDSTORM);
+    const result = runDamagingWeatherFieldCase(program, handlers, state, B_ANIM_SANDSTORM_CONTINUES, B_MSG_SANDSTORM, B_WEATHER_SANDSTORM_PERMANENT);
     if (result.kind === "opcode-barrier") return Object.freeze({ kind: "opcode-barrier", state: result.state, instruction: result.instruction });
     state = result.state;
     if (result.kind === "fired" && state.rulesContext.battleOutcome !== 0) return Object.freeze({ kind: "outcome-decided", state });
@@ -2139,7 +2150,7 @@ function runDoFieldEndTurnEffects(
     state = result.state;
     if (result.kind === "fired" && state.rulesContext.battleOutcome !== 0) return Object.freeze({ kind: "outcome-decided", state });
   } else if ((rc.weather & B_WEATHER_HAIL) !== 0) {
-    const result = runDamagingWeatherFieldCase(program, handlers, state, B_ANIM_HAIL_CONTINUES, B_MSG_HAIL);
+    const result = runDamagingWeatherFieldCase(program, handlers, state, B_ANIM_HAIL_CONTINUES, B_MSG_HAIL, 0);
     if (result.kind === "opcode-barrier") return Object.freeze({ kind: "opcode-barrier", state: result.state, instruction: result.instruction });
     state = result.state;
     if (result.kind === "fired" && state.rulesContext.battleOutcome !== 0) return Object.freeze({ kind: "outcome-decided", state });

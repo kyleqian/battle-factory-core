@@ -72,6 +72,10 @@ function nextPrintU(events: readonly any[], sequence: number): number | string {
 const arg = (name: string) => process.argv.find((a) => a.startsWith(`--${name}=`))?.slice(name.length + 3);
 const [from, to] = arg("seeds")!.split("..").map(Number);
 const scene = arg("scene") as "on" | "off";
+// opl: --level=open runs the same census battles at Open Level (the orchestrator's lvlMode and the deal's); absent = Level 50, unchanged.
+const level = arg("level") ?? "50";
+if (level !== "50" && level !== "open") throw new Error(`lsd194Census: bad --level=${level} (want 50|open)`);
+const openLevel = level === "open" ? { lvlMode: "open" as const } : {};
 const lines: string[] = [];
 for (let seed = from!; seed <= to!; seed += 1) {
   const commands: unknown[] = []; const events = createHash("sha256");
@@ -79,7 +83,8 @@ for (let seed = from!; seed <= to!; seed += 1) {
     id: `live-share-census-${seed}-${(seed * 11) % 49}`, battleScene: scene,
     factoryWinStreak: (seed * 11) % 49, playerTrainerId: 416049562,
     battleTowerLevel50WinStreak: 0, facilityState: { rentsCount: 0 },
-    ...censusDeal({ seed, factoryWinStreak: (seed * 11) % 49 }),
+    ...openLevel,
+    ...censusDeal({ seed, factoryWinStreak: (seed * 11) % 49, ...openLevel }),
   }));
   let rng = createPresentationRngSession();
   let frame = 0; let ended = false; let error: string | null = null;

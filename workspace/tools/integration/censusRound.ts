@@ -30,6 +30,8 @@ export type CensusDealInput = Readonly<{
   rentsCount?: number;
   playerTrainerId?: number;
   selectedRentalIndexes?: readonly [number, number, number];
+  /** opl: "open" = an Open Level census battle (src/engine/factoryLevelMode.ts); absent = Level 50 (unchanged). */
+  lvlMode?: "50" | "open";
 }>;
 
 /** The census seed's six rentals: `generateInitialFactoryRentals` from the seed (set ids, then personalities back to back). */
@@ -39,6 +41,7 @@ export function censusRentals(input: CensusDealInput): FactoryInitialRentalGener
     factoryWinStreak: input.factoryWinStreak ?? 0,
     rentsCount: input.rentsCount ?? 0,
     playerTrainerId: input.playerTrainerId ?? CENSUS_PLAYER_TRAINER_ID,
+    ...(input.lvlMode === "open" ? { lvlMode: "open" as const } : {}),
   });
 }
 

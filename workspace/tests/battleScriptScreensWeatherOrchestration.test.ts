@@ -571,6 +571,38 @@ describe(
     );
 
     it(
+      "opl: Sand Stream's sandstorm (TEMPORARY | PERMANENT, weatherTimer 0) never runs down: every end turn continues and damages "
+        + "(ENDTURN_SANDSTORM, battle_util.c:1377: the PERMANENT bit skips the decrement; before opl the timer went to -1 and threw)",
+      () => {
+        const B_WEATHER_SANDSTORM_PERMANENT = 1 << 4;
+        const sandStream = B_WEATHER_SANDSTORM_TEMPORARY | B_WEATHER_SANDSTORM_PERMANENT;
+        const rc = context({
+          battlers: [
+            battler({ side: 0, ability: 0, types: ["TYPE_ROCK", "TYPE_DARK"] }), // TYRANITAR, immune
+            battler({ side: 1, hp: 105, maxHP: 105, types: ["TYPE_GRASS", "TYPE_GRASS"], partyIndex: 0 }),
+            battler({ side: 0 }),
+            battler({ side: 1 }),
+          ],
+          party: { player: sixSlots(100), opponent: sixSlots(105) },
+          weather: sandStream,
+          weatherTimer: 0,
+        });
+        const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts());
+        let state = scratchState(rc);
+        let expectedHp = 105;
+        for (let turn = 0; turn < 8; turn += 1) {
+          const result = runBattleEndTurnOrchestration(program, handlers, state);
+          if (result.kind !== "next-turn") throw new Error("expected next-turn");
+          expect(result.state.rulesContext.weather).toBe(sandStream);
+          expect(result.state.rulesContext.weatherTimer).toBe(0);
+          expectedHp -= 6; // floor(105/16)
+          expect(result.state.rulesContext.battlers[1]!.hp).toBe(expectedHp);
+          state = result.state;
+        }
+      },
+    );
+
+    it(
       "Rain: set -> 4 continues ticks (weather bit stays set, chooser stays RAIN_CONTINUES) -> "
         + "expiry tick (weather clears, chooser RAIN_STOPPED) -> re-set succeeds "
         + "(F7, battle_util.c:1340-1373; weatherTimer 5->4->3->2->1->0)",
