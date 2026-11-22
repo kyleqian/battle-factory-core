@@ -2718,6 +2718,25 @@ function hpItemAnimationRows(events: readonly BattleKernelSemanticEvent[], index
   const execution = animation.provenance?.instructionExecution;
   return execution === undefined || execution - hpExecution - 1 <= HP_ITEM_ANIMATION_COMMAND_LEAD_ROWS ? null : execution - hpExecution - 1 - HP_ITEM_ANIMATION_COMMAND_LEAD_ROWS;
 }
+/**
+ * shb1 (Scene ON only; T2 s97 d11 / d12 / d13): the Shell Bell's `playanimation` is HandleBattleAnimation's IsBattleSEPlaying wait like the other gated requests
+ * (sgs134RequestSeGate): the hit's effectiveness SE (73 rows for SE 13) is still playing when the script row arrives if the bar was short. ROM: hit SE -> the item's
+ * script row is 49 fixed rows + the bar (d12 / d13: bar 20, SE 192, exec 261 = 69, the launch 4 rows late and the item's SEs +12 from the exec instead of +8; d11: bar 25, 74 rows,
+ * no wait; every lab: bars >= 40). Scene OFF has no animation script to wait: its `playanimation` row is bar + 13 with no gate (T2 OFF s97 d13, exec 146 = datahpupdate 135 + 11).
+ */
+const HP_ITEM_ANIMATION_SE_FIXED_ROWS = 49;
+function hpItemAnimationSeGate(events: readonly BattleKernelSemanticEvent[], index: number): number {
+  const hp = events[index]!.payload;
+  if (hp.kind !== "hp-change") return 0;
+  for (let i = index - 1; i >= 0; i -= 1) {
+    const payload = events[i]!.payload;
+    if (payload.kind === "play-se") {
+      return seg127StatusSeGateRows({ songId: payload.songId, seAgeRows: HP_ITEM_ANIMATION_SE_FIXED_ROWS + Math.abs(hp.from - hp.to) });
+    }
+    if (payload.kind === "message" || payload.kind === "status-animation" || (payload.kind === "animation" && payload.animationId !== "HIT_ANIMATION")) return 0;
+  }
+  return 0;
+}
 function focusBandNext(events: readonly BattleKernelSemanticEvent[], index: number): boolean {
   const programCounter = events[index + 1]?.provenance?.programCounter;
   return programCounter !== undefined && programCounter >= FOCUS_BAND_PC && programCounter < FOCUS_BAND_PC + FOCUS_BAND_SCRIPT_ROWS;
@@ -2795,6 +2814,7 @@ interface HpLeadRows {
   readonly focusBand: boolean;
   /** hpb3: the rows from `datahpupdate` to a healing berry's `playanimation` after the MoveEnd rows, or null. */
   readonly itemAnimationRows: number | null;
+  readonly itemAnimationSeGate: number;
   /** HITMARKER_NO_ANIMATIONS (Scene OFF) when the hp command was projected. */
   readonly sceneOff: boolean;
 }
@@ -2855,7 +2875,7 @@ function applyHpHitTails(
     const itemAnimation = hit && leads.itemAnimationRows !== null && rest[0]?.type === "sprite-visibility" && rest[1]?.type === "sprite-visibility" && rest[2]?.type === "general-animation";
     const tailFrames = statNext ? (leads.sceneOff ? HP_STAT_NEXT_TAIL_FRAMES_OFF : HP_STAT_NEXT_TAIL_FRAMES) : transition ? (leads.moveEndRows === null ? 0 : HP_DATAHPUPDATE_ROW_FRAMES)
       : endsTurn ? leads.moveEndRows ?? 0 : bars > 0 ? bars : endTurnPrint ? leads.moveEndRows! + HP_END_TURN_PRINT_LEAD_ROWS
-      : itemAnimation ? leads.itemAnimationRows! : printHold ? leads.messageRows! : 0;
+      : itemAnimation ? leads.itemAnimationRows! + (leads.sceneOff ? 0 : leads.itemAnimationSeGate) : printHold ? leads.messageRows! : 0;
     if (faint) commands[index] = Object.freeze({ ...command, timing: Object.freeze({ minimumFrames: 0 }) });
     else if (tailFrames > 0) commands[index] = Object.freeze({ ...command, timing: Object.freeze({ minimumFrames: 0, tailFrames }) });
   }
@@ -6376,7 +6396,7 @@ export function projectBattleResolutionCommands(
       const messageRows = drainRole === null ? hpMessageLeadRows(events, index) : null;
       const faintNext = drainRole === null && hpFaintNext(events, index);
       const hitEffectMessage = HP_HIT_EFFECT_OPCODES.has(events[index + 1]?.provenance?.opcodeName ?? "") || hitAllLoopEmptyBoxTiming(events, index + 1) !== null;
-      hpLeadRows.set(health.eventSequence, { tick: hpTickKind(event), wrapSecondary: events[index + 1]?.provenance?.programCounter === WRAP_SECONDARY_PC, moveEndRows, messageRows, faintNext, hitEffectMessage, barExecution: health.instructionExecution, recoil: event.provenance?.programCounter === RECOIL_PC, drain: event.provenance?.programCounter === DRAIN_PC, focusBand: focusBandNext(events, index), itemAnimationRows: drainRole === null ? hpItemAnimationRows(events, index) : null, sceneOff: (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0 });
+      hpLeadRows.set(health.eventSequence, { tick: hpTickKind(event), wrapSecondary: events[index + 1]?.provenance?.programCounter === WRAP_SECONDARY_PC, moveEndRows, messageRows, faintNext, hitEffectMessage, barExecution: health.instructionExecution, recoil: event.provenance?.programCounter === RECOIL_PC, drain: event.provenance?.programCounter === DRAIN_PC, focusBand: focusBandNext(events, index), itemAnimationRows: drainRole === null ? hpItemAnimationRows(events, index) : null, itemAnimationSeGate: drainRole === null ? hpItemAnimationSeGate(events, index) : 0, sceneOff: (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0 });
       commands.push(Object.freeze({
         type: "hp",
         eventSequence: health.eventSequence,

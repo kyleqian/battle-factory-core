@@ -6,16 +6,16 @@ import { createFactoryFullTurnBattleState, submitFactoryFullTurnDecision } from 
 import { projectBattleResolutionCommands } from "../src/engine/battleResolutionPresentation.ts";
 
 const SHELL_BELL = 219, SCRATCH = 10, DEFENSE_CURL = 111;
-const battler = (level: number, moveId: number, speed: number, hp: number, item = 0, maxHp = 201) => {
+const battler = (level: number, moveId: number, speed: number, hp: number, item = 0, maxHp = 201, defense = 100) => {
   const entry = speciesTypes.species[18]!;
-  return { species: 19, moveId, moves: [moveId, moveId, moveId, moveId], ability: 0, item, personality: 0, attack: 100, defense: 100, spAttack: 100,
+  return { species: 19, moveId, moves: [moveId, moveId, moveId, moveId], ability: 0, item, personality: 0, attack: 100, defense, spAttack: 100,
     spDefense: 100, speed, hp, maxHp, level, types: [entry.types[0], entry.types[1]] as const };
 };
 
-function production(o: { playerMove: number; foeMove: number; foeItem?: number; foeHp?: number; playerHp?: number; playerItem?: number }) {
+function production(o: { playerMove: number; foeMove: number; foeItem?: number; foeHp?: number; playerHp?: number; playerItem?: number; foeDefense?: number }) {
   const state = createFactoryFullTurnBattleState({
     requestId: 1, rngSeed: 305419897,
-    player: battler(50, o.playerMove, 120, o.playerHp ?? 201, o.playerItem ?? 0), trainer: battler(100, o.foeMove, 40, o.foeHp ?? 201, o.foeItem ?? 0),
+    player: battler(50, o.playerMove, 120, o.playerHp ?? 201, o.playerItem ?? 0), trainer: battler(100, o.foeMove, 40, o.foeHp ?? 201, o.foeItem ?? 0, 201, o.foeDefense ?? 100),
   } as never);
   const before = state.rules.rulesContext;
   const submit = (s: any, requestId: number, side: "player" | "trainer", foe: 0 | 1) => {
@@ -56,5 +56,14 @@ describe("hpb3: floor-free hp before a Shell Bell heal", () => {
     expect(commands[heal + 1].type).toBe("message");
     expect(commands[heal].timing.minimumFrames).toBe(0);
     expect(commands[heal].timing.tailFrames).toBe(14); // 3 + 1 + 6 + u, u = 4 (the used print's instructionExecution)
+  });
+
+  it("shb1: a short bar before the Shell Bell's animation waits out the hit's SE (IsBattleSEPlaying: 73 - 49 - bar rows)", () => {
+    const commands = production({ playerMove: SCRATCH, foeMove: SCRATCH, playerItem: SHELL_BELL, playerHp: 100, foeDefense: 125 });
+    const item = commands.findIndex((c) => c.type === "general-animation" && c.animation === "HELD_ITEM_EFFECT");
+    const hit = commands[item - 3];
+    expect(hit.type).toBe("hp");
+    expect(hit.from - hit.to).toBe(22);
+    expect(hit.timing.tailFrames).toBe(3); // 1 + (73 - (49 + 22))
   });
 });
