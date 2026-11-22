@@ -7147,7 +7147,7 @@ function usedMovePrintLeadU(state: BattleResolutionPresentationState, handoff: B
   if (handoff.forced !== undefined || handoff.focusPunchPrePass === true) return null;
   // chg1's continuation segment and charge-turn box were measured in Scene OFF only (pixel labs); Scene ON keeps hcr2's first-segment USEDMOVE rule.
   const sceneOff = sceneOffOf(state);
-  const segment = sceneOff ? state.segments[state.segmentIndex] : state.segments[0];
+  const segment = sceneOff || state.segmentIndex > 0 ? state.segments[state.segmentIndex] : state.segments[0];
   if (segment === undefined || state.sourceDecision.kind !== "use-move") return null;
   const first = segment.events[0];
   if (first === undefined || first.payload.kind !== "message") return null;
@@ -7485,6 +7485,19 @@ export function appendBattleResolutionContinuation(
 }
 
 /**
+ * bbk1 item 3 (chg4's narrowed rule): a Scene ON continuation after the opponent's locked action whose first print is the player's own plain hit
+ * (not the locked battler's unleash, no miss) runs the confirm walk as OFF's does: ROM Ice Beam printstring at commit + 12 (s830 d1).
+ */
+function sceneOnPlainHitContinuation(events: readonly BattleKernelSemanticEvent[], lockedAction: BattleResolutionLockedActionIdentity): boolean {
+  const first = events[0];
+  if (first === undefined || first.payload.kind !== "message" || first.payload.messageId !== "STRINGID_USEDMOVE") return false;
+  if (first.payload.actionSnapshot?.attacker === lockedAction.battler) return false;
+  if (events.some(({ payload }) => payload.kind === "message" && (payload.messageId === "STRINGID_ATTACKMISSED" || payload.messageId === "STRINGID_PKMNAVOIDEDATTACK"))) return false;
+  const nextUsed = events.findIndex((event, index) => index > 0 && event.payload.kind === "message" && event.payload.messageId === "STRINGID_USEDMOVE");
+  return events.slice(0, nextUsed < 0 ? events.length : nextUsed).some(({ payload }) => payload.kind === "hp-change" && payload.battler === 1 - first.payload.actionSnapshot!.attacker);
+}
+
+/**
  * chg1: the player's locked action (no command menu) unleashing in Scene OFF: the app's turn start stands for a first print on row
  * `TURN_START_PRINT_BASE_U` (as a wake-up print's), so a first print on a later row u waits u - 3 frames more (ROM probes, Dig / Fly / ...).
  */
@@ -7584,7 +7597,8 @@ export function appendBattleResolutionLockedActionContinuation(
   // segment now gets the recall receipts, the switch's own decision and the fresh switch's party-menu close hold + recall clock.
   const switching = input.sourceDecision?.kind === "switch";
   const sceneOffWalk = !switching && input.confirmHandoff !== undefined
-    && (resolution.pendingBattle.rules.rulesContext.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0;
+    && ((resolution.pendingBattle.rules.rulesContext.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0
+      || sceneOnPlainHitContinuation(transition.events, lockedAction));
   const segment = appendResolutionSegment(
     resolution,
     transition,
