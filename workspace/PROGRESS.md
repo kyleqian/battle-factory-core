@@ -5,6 +5,12 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 2026-11-22 — chg4 (worker, main/ts lane): first charging turn after another action is a transition print, T2 ON 13,629 -> 13,166, OFF 1,588 -> 1,552
+
+- **State:** master, no push; commit 2ba5774f4 (item 1) + docs. Gates: typecheck, test:gate 360 files, build green; 166 tests importing `battleResolutionPresentation` green; census 0..199 eventsDigest identical both scenes.
+- **Did:** (1) Dig / Fly / Solar Beam ... charge box after another action takes the action-transition pause (OFF +18 rows, ON -10 against it), labs `chg4-dig-lightscreen-{on,off}`; T2 ON exact 2,951 -> 2,966, OFF exact 776 (0 missing / 0 extra); g180m Sandstorm -> Dig extra -11 is the same rule (-19 -> -2), nothing separate. Soak pins re-scanned: Baton Pass 20 -> 24, winning carry 0 -> 19. (2) t68m recipe 1 NOT landed: the ON continuation-segment walk fixes s830 d1 / s8108 (-112 / -121) but worsens s165 d11 (+82, miss tail) and s310 d10 (+71, unleash chain), so it is not uniform.
+- **Next:** item 3 limited to a plain-hit first print (see the doc's chg4 section); re-lab s165 d11 / s310 d10 first.
+
 ## 2026-11-22 — hse2 (worker, main/ts lane): Scene OFF wake-up / confusion / Struggle heads, T2 OFF 1,819 -> 1,588 (ON unchanged)
 
 - **State:** master, no push; commits d84490954, 5be0a2c3b, f660ee691, soak re-pin, anchor-test fix, docs. Gates: test:gate 360 files green, typecheck, build.

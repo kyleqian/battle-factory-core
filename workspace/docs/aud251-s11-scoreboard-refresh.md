@@ -2824,3 +2824,38 @@ Pins moved (each re-pinned after reading why):
 Ranking after hse2 (`hse1mSplit.py` / `hse1mTable.py`, OFF, 97 hit windows, owned mass 280): plain 61, Focus Punch 45, hit SE without used-print chain 35, two-turn 28, infatuation 28, Struggle after NoMovesLeft 27, confusion path 26, after miss 17, wake-up 13.
 
 Still open (not done here): the asleep / wake print head -15 after a hit; infatuation (-3 rows, 28); Focus Punch (45); two-turn second turn (28). Out of scope and untouched: Scene ON rules, move-animation min 42, hit-animation interval.
+
+## chg4: first charging turn after another action (main/ts lane, 2026-11-22)
+
+Item 1 landed (commit 2ba5774f4); item 2 is explained by the same rule; item 3 is NOT landed (the rule is not uniform; finding below). Evidence (git-ignored): `.integration/evidence/chg4/` (`lab-*`, `t2-dig1`, `t2-seg`, `g180m-before` / `g180m-after`, `i3/`, `census/`).
+
+**Item 1: the first charging turn of Dig / Fly / Solar Beam / Dive / Bounce / Skull Bash / Razor Wind / Sky Attack after another action in the same turn is an action-transition print.** Labs `tools/battle-lab/chg4-dig-lightscreen-{on,off}.json` (faster foe Light Screen, the player's Dig; Factory moves, overrides.parties). ROM rows (Scene OFF): MoveEnd 197 -> EffectSemiInvulnerable 204 -> charge box 215; the engine had the box at 197 (+18 over the old 0). Scene ON's chain already carries 2 of the rows and its box opens 8 rows before the printstring row, so ON takes -10 (`CHARGE_TURN_OPENER_SCENE_ON_ROWS`); the second ON instance (turn 3, no inherited +2) is the T2-fitted -10 (-8 would break the T2 -8 windows). Implementation: `isChargeTurnOpener` joins the accepted next prints of `actionTransitionPauseFrames` (`battleResolutionPresentation.ts`); the turn-start case is untouched.
+
+| | before | after |
+|---|---|---|
+| T2 ON mass / exact / offset (0 missing, 0 extra) | 13,629 / 2,951 / 2,926 | 13,166 / 2,966 / 2,911 |
+| T2 OFF mass / exact / offset (0 missing, 0 extra) | 1,588 / 776 / 357 | 1,552 / 776 / 357 |
+| lab chg4-dig-lightscreen-on: SE 175, first / second Dig instance | -8 / -10 | 0 / -2 (SUMMARY mass 142 -> 30) |
+| lab chg4-dig-lightscreen-off: used box row (ROM 215) | 197 | 215 (SUMMARY mass 42 -> 6; the labCompare print aligner mis-pairs OFF Dig rows, -60 / -114 / -42 are aligner artefacts, `--rows` shows the dug print 257 = ROM 257) |
+| `g180mTwoTurn.py` summed window mass | 880 | 482 (the three s8108 Light Screen -8 windows gone) |
+
+**Item 2: Sandstorm -> Dig extra -11 (s8108 si39) needs no rule of its own.** It was -19 with the rows the transition now carries and is -2 after (mass 95 -> 10): the same carried rows, one rule. Nothing separate landed.
+
+Census (seeds 0..199, both scenes, `lsd194Census.sh` + `rst197CensusDelta.py`, fc2f7ce85 vs 2ba5774f4): eventsDigest identical 200/200 in both scenes (no gameplay / RNG change); 21 battles change command type sequence in each scene (the added transition pause). `tree/` copies deleted.
+
+Tests: `tests/chg4ChargeTurnOpener.test.ts` (new; OFF Dig pause 18, OFF Solar Beam 17, ON Dig 8; ROM rows 197 / 204 / 215 above). Pins moved: `tests/randomRoundSoak.test.ts` Baton Pass seed 20 -> 24 (scan candidates 24, 25, 27) and winning carry seed 0 -> 19 (carry 14 on 19, 37, 46); both because the new pause shifts the soak's press phases (no assertion changed). bdt1 / chg1 / chg2 / chg3 charge-turn pins, `tests/lbrd.test.ts`, the 166 test files importing `battleResolutionPresentation`, `npm run typecheck`, `npm run test:gate` (360 files) and `npm run build` are green.
+
+**Item 3 (t68m recipe 1, continuation segment lead): not landed, not uniform.** s830 d1 lab (`i3/on/830-d1.cmp.txt`): ROM Ice Beam printstring at commit + 12 (EffectFreezeHit +6, u = 6), engine first message at 0 (the Scene ON locked-action continuation segment is appended with no confirm walk, `appendBattleResolutionLockedActionContinuation`, `sceneOffWalk` is OFF-only, and `usedMovePrintLeadU` reads `segments[0]` in ON). Trial: run the same confirm walk in ON (`sceneOffWalk` without the hitMarker test) and read `segments[segmentIndex]` in `usedMovePrintLeadU`: s830 d1 becomes exact (message 13 = ROM 12 + 1, SE 183 at 71 = 71), but the other seeds that have such a segment disagree.
+
+| ON seed (first-row segments) | T2 mass before -> trial | Window |
+|---|---|---|
+| s830 | 487 -> 375 | d1: exact |
+| s8108 | 1,294 -> 1,173 | gains |
+| s165 | 876 -> 958 | d11: the player's Psybeam misses; the used print is exact (13 = ROM PrintMoveMissed + 1) but the foe's next Double Team SE lands +17 (was +4): the engine's miss tail after the print already carries a lead |
+| s310 | 936 -> 1,007 | d10: the foe's own unleash Solar Beam goes first; print exact (19 = 18 + 1) but its SE 201 112 vs ROM 95 (was -2): `twoTurnSecondPrintLead` / the unleash chain already carries the 17 |
+| s6 | 221 -> 227 | small |
+| total | ON 13,166 -> 13,092, OFF unchanged 1,552 | |
+
+The trial is net -74 ON but two of the five windows get worse because the miss tail and the unleash chain already contain the ROM's wait, so the rule needs a per-chain split (first print of a plain hit only), which is not "uniform over the windows checked" and was not landed. Next step for whoever picks it up: apply the walk only when the segment's first print is a plain hit (not `MoveMissed`, not a locked unleash), then re-lab s165 d11 and s310 d10 and re-run T2 ON (s830 -112, s8108 -121 are the available mass).
+
+Out of scope and untouched: the hie6m send-in lead, the Leech Seed drain, move-animation min 42 / hit-animation interval, the Open Level files.
