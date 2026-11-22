@@ -365,3 +365,49 @@ file specifically (`bootstrap_path=.../factory-pre-report.json`), not
 the shared server's default anchor — see its docstring and
 `oracle/report-preview-smoke-test.py` for the in-process usage pattern
 and full live verification.
+
+## Open Level profiles (`bootstrap/factory-open.json`, 2026-11-22)
+
+Two more profiles for the Open Level single challenge. They are not served
+by `server.py` (ports 8012 / 8014 keep the Level 50 files); in-process tools
+load them (`workspace/tools/openlevel/`).
+
+- `factory-open.json` (Battle Scene ON) is `factory.json`'s route with one
+  change, written by `bootstrap/make-factory-open.py`: segment 202 (frame
+  4424, the 100 idle frames between tap 5 = CHALLENGE and tap 6) becomes 80
+  idle + 6 frames DOWN + 14 idle. The length is the same, so tap 6 (frame
+  4524) lands on OPEN LEVEL in the LV. 50 / OPEN LEVEL / EXIT menu. Same
+  save, same 6910 + 60 frames. Re-run the script if `factory.json`'s
+  segments ever change.
+- `factory-open-battle-scene-off.json` `extends` it with the same zero-frame
+  OFF poke as `factory-battle-scene-off.json`.
+
+Measured 2026-11-22 (`workspace/tools/openlevel/bootCheck.py`, two fresh
+processes per profile, identical output; evidence in
+`workspace/.integration/evidence/opl1/boot/`). Frame numbers here are
+0-indexed (frame 5795 is the 5796th frame run; the older receipt
+`workspace/docs/anchor-draft-cursor-receipt.md` counts from 1 and calls the
+same frame 5796).
+
+| | Level 50 (`factory.json`, `-off`) | Open (`factory-open.json`, `-off`) |
+| --- | --- | --- |
+| canonical screen sha256 (both scenes) | `9c89c741…f297` (unchanged) | `9a1d50cd8697d0e507863c2b1f424ca65537837824d220a76fde028e5fd80c06` |
+| SaveBlock2 lvlMode | 0 | 1 |
+| winStreakActiveFlags | 0x100 | 0x200 (singles Open) |
+| rental set ids | 156, 149, 180, 153, 179, 181 | 406, 381, 466, 438, 382, 430 |
+| rental species | ONIX, MAGBY, BAYLEEF, BUTTERFREE, HAUNTER, QUILAVA | KANGASKHAN, LANTURN, METAGROSS, EXEGGUTOR, BRELOOM, NINETALES |
+| draft screen Pokemon | level 50, IVs 3 | level 100, IVs 3 |
+| battle 1 trainer, sets | 50; 188, 184, 135 | 63; 375, 454, 465 |
+| gRngValue at the anchor | `0xd2ddeec8` | `0x0d453854` |
+| `GenerateInitialRentalMons` entry | frame 5795, `0x08a74230`, sRandCount 5936 | frame 5795, `0x08a74230`, sRandCount 5936 (the same) |
+| its return | 5795, `0x45e3662d` (11 draws) | 5795, `0x963a569e` (6 draws) |
+| `GenerateOpponentMons` entry, return | 5795, `0x45e3662d` → `0xbb7b5340` | 5795, `0x963a569e` → `0x083d0062` |
+| `CreateFrontierFactorySelectableMons` entry | frame 6695, `0xc09c88a4` | frame 6695, `0xf87fe1e6` |
+| its return | frame 6747 (242 draws + 52 VBlank draws) | frame 6743 (164 draws + 48 VBlank draws) |
+| player position | (8, 8) map 26.32 | (8, 8) map 26.32 |
+
+The deal (rentals then opponent) runs inside one frame in both modes, with
+no VBlank draw inside it. The Open draws are `GetFactoryMonId(lvlMode 1,
+challengeNum 0, FALSE)` (trapped arguments); `GetNumPastRentalsRank` is
+called with (battleMode 0, lvlMode 1) and returns 0. The Open challenge is
+the ROM's own: nothing is written into RAM.

@@ -1,0 +1,17 @@
+{
+  "extends": "factory-open.json",
+  "version": 5,
+  "profile": "battle-scene-off",
+  "description": "Open Level rental-draft anchor, Battle Scene OFF: factory-open.json's save, inputs and settle frames, then the same zero-frame RAM poke as factory-battle-scene-off.json (Options > Battle Scene OFF) before the 60 settle frames. The draft anchor, rentals and RNG match factory-open.json; only battle presentation takes the real game's OFF branches. Pinned numbers: BOOTSTRAP.md, 'Open Level profiles'.",
+  "pokes": [
+    {
+      "symbol": "gSaveBlock2Ptr",
+      "deref": true,
+      "offset": 21,
+      "bytes": [
+        7
+      ],
+      "note": "SaveBlock2+0x15 options high byte: 0x03 -> 0x07 sets u16 bit 10 (optionsBattleSceneOff). Applied after the inherited scripted bootstrap with zero frames and zero RNG impact (as factory-battle-scene-off.json)."
+    }
+  ]
+}
