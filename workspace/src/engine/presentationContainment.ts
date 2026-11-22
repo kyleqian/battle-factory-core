@@ -37,7 +37,14 @@
 //
 // Contained errors are kept in a bounded module-level list (first CONTAINED_PRESENTATION_ERROR_LIMIT distinct errors, deduped
 // by command type + message) so headless callers (the soak, the bench ABI) and the browser session export can see them.
+//
+// Files that have not arrived are not errors. A battle picture (MonPicPending, dl3) passes every seam. An animation file
+// (AnimAssetPending, dl4) passes every seam while a render runs (fam1, docs/fam1-first-use-move-animations.md): core.ts render() runs
+// inside withPresentationRender, the throw reaches the browser loop (lib.ts drawOrHold), which holds the frame and draws it once the file
+// is in. It is never recorded and never degrades the command. On the tick no render runs and it stays contained: a throw out of
+// session.tick ends the browser game, and no tick reads a lazy animation file (tests/fam1FirstUseMoveAnimations.test.ts).
 
+import { AnimAssetPending } from "./animAssets.ts";
 import { MonPicPending } from "./monPicPending.ts";
 
 export type ContainedPresentationSite = "adapter" | "duration" | "draw" | "field" | "commands" | "order";
@@ -63,6 +70,24 @@ let distinct = 0;
 export type PresentationDegradation = 1 | 2;
 const degraded = new WeakMap<object, PresentationDegradation>();
 
+/** fam1: how many renders are running (withPresentationRender); > 0 inside core.ts render(). */
+let renderDepth = 0;
+
+/** fam1: runs one render. An animation file that has not arrived passes through containment inside it (see the module comment). */
+export function withPresentationRender<T>(draw: () => T): T {
+  renderDepth += 1;
+  try {
+    return draw();
+  } finally {
+    renderDepth -= 1;
+  }
+}
+
+/** fam1: whether a render is running (tools and tests tell a render-side read from a tick-side one). */
+export function presentationRenderRunning(): boolean {
+  return renderDepth > 0;
+}
+
 /** Records one contained error (deduped by command type + message); returns true when it was new. */
 export function recordContainedPresentationError(
   site: ContainedPresentationSite,
@@ -72,6 +97,9 @@ export function recordContainedPresentationError(
 ): boolean {
   // dl3: a picture that has not loaded yet is not a presentation error; the browser loop fetches it and retries the frame.
   if (error instanceof MonPicPending) throw error;
+  // fam1: nor is an animation file inside a render: the browser loop holds the frame until it arrives. Every caller records before it
+  // marks the command degraded, so a pending read never degrades one.
+  if (error instanceof AnimAssetPending && renderDepth > 0) throw error;
   const message = error instanceof Error ? `${error.name}: ${error.message}` : String(error);
   const key = `${commandType}|${message}`;
   if (seen.has(key)) return false;
