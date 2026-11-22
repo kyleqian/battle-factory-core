@@ -196,3 +196,28 @@ describe("opl2: what Open Level adds to the move corpus", () => {
     expect(topology.counts.openLevelFactoryReachableMoves).toBe(topology.counts.level50FactoryReachableMoves + 1);
   });
 });
+
+describe("opl2: the Open Level PreBattleRoom walk goes right", () => {
+  it("is the Level 50 walk mirrored (ROM-probed rows: originX 32 - x, guide x 224 - x), east pictures flipped, the same 80 ticks", async () => {
+    const { walkVisual, WALK_TICKS } = await import("../src/engine/prebattleRoom.ts");
+    let playerFlips = 0;
+    let guideFlips = 0;
+    for (let e = 0; e < WALK_TICKS; e += 1) {
+      const lv50 = walkVisual(e);
+      const open = walkVisual(e, false, true);
+      expect(open.originX).toBe(32 - lv50.originX);
+      expect(open.originY).toBe(lv50.originY);
+      expect(open.attendantX).toBe(224 - lv50.attendantX);
+      expect([open.attendantY, open.attendantVisible, open.playerFrame, open.attendantFrame])
+        .toEqual([lv50.attendantY, lv50.attendantVisible, lv50.playerFrame, lv50.attendantFrame]);
+      expect("playerHFlip" in lv50 || "attendantHFlip" in lv50).toBe(false);
+      if (open.playerHFlip) playerFlips += 1;
+      if (open.attendantHFlip) guideFlips += 1;
+      // the guide walks right in rows 0-31, the player in rows 16-47 (walk_up first)
+      expect(open.attendantHFlip === true).toBe(e < 32);
+      expect(open.playerHFlip === true).toBe(e >= 16 && e < 48);
+    }
+    expect([playerFlips, guideFlips]).toEqual([32, 32]);
+    expect(walkVisual(200, false, true)).toEqual(walkVisual(WALK_TICKS - 1, false, true));
+  });
+});

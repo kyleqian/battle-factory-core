@@ -94,6 +94,7 @@ import {
   visiblePrintedChars,
   EXIT_TO_ROOM_BLACK_HOLD_TICKS,
   WARP_FADE_FROZEN_VISUAL,
+  OPEN_LEVEL_WARP_FADE_FROZEN_VISUAL,
   WARP_FADE_OUT,
   walkVisual,
   type PrebattleRoomState,
@@ -3542,21 +3543,26 @@ function renderPrebattleRoomState(state: EngineState): Uint8Array {
     renderPrebattleRoomScene(fb, bgFadeY(ticks, FADE_IN), objFadeY(ticks, FADE_IN));
     return fb;
   }
+  // opl: the Open Level walk goes right (EventScript_WalkToBattleRoomLvOpen); the challenge's level is the carry's.
+  const openLevelWalk = state.factoryCarry.lvlMode === "open";
   if (p.phase === "walking") {
-    const v = walkVisual(p.elapsed, returningFromBattle);
+    const v = walkVisual(p.elapsed, returningFromBattle, openLevelWalk);
     const fb = createFramebuffer();
     renderPrebattleRoomWalkScene(
       fb,
       { x: v.originX, y: v.originY },
       v.playerFrame,
-      { x: v.attendantX, y: v.attendantY, frameIndex: v.attendantFrame, visible: v.attendantVisible },
+      { x: v.attendantX, y: v.attendantY, frameIndex: v.attendantFrame, visible: v.attendantVisible, hFlip: v.attendantHFlip === true },
+      0,
+      0,
+      v.playerHFlip === true,
     );
     return fb;
   }
   if (p.phase === "warpFade") {
     // WARP_FADE_FROZEN_VISUAL: the walk's own final position, held fixed
     // while BeginNormalPaletteFade darkens the screen (prebattleRoom.ts doc).
-    const v = WARP_FADE_FROZEN_VISUAL;
+    const v = openLevelWalk ? OPEN_LEVEL_WARP_FADE_FROZEN_VISUAL : WARP_FADE_FROZEN_VISUAL;
     const ticks = p.elapsed + 1;
     const bgY = bgFadeY(ticks, WARP_FADE_OUT);
     const objY = objFadeY(ticks, WARP_FADE_OUT);
@@ -3565,9 +3571,10 @@ function renderPrebattleRoomState(state: EngineState): Uint8Array {
       fb,
       { x: v.originX, y: v.originY },
       v.playerFrame,
-      { x: v.attendantX, y: v.attendantY, frameIndex: v.attendantFrame, visible: v.attendantVisible },
+      { x: v.attendantX, y: v.attendantY, frameIndex: v.attendantFrame, visible: v.attendantVisible, hFlip: v.attendantHFlip === true },
       bgY,
       objY,
+      v.playerHFlip === true,
     );
     return fb;
   }

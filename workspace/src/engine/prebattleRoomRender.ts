@@ -214,6 +214,8 @@ export function renderPrebattleRoomWalkScene(
   attendant: { x: number; y: number; frameIndex: number; visible: boolean; hFlip?: boolean },
   bgFadeY = 0,
   objFadeY = 0,
+  /** opl: the player's east-facing picture (the Open Level walk); default false. */
+  playerHFlip = false,
 ): void {
   drawRoomTiles(fb, origin, bgFadeY);
   if (attendant.visible) {
@@ -226,7 +228,7 @@ export function renderPrebattleRoomWalkScene(
       attendant.hFlip ?? false,
     );
   }
-  drawNpcFrame(fb, roomNpcs.player, playerFrameIndex, PLAYER_POS, objFadeY);
+  drawNpcFrame(fb, roomNpcs.player, playerFrameIndex, PLAYER_POS, objFadeY, playerHFlip);
 }
 
 /**

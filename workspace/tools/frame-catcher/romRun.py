@@ -28,10 +28,15 @@ from mons import POKEMON_SIZE, STAT_ORDER, ability_num, decrypt_mon, encrypt_mon
 
 REF = (WORKSPACE / "reference/pokeemerald").resolve()
 PROFILES = {"on": "factory.json", "off": "factory-battle-scene-off.json"}
+# opl (docs/opl1-open-level-rom.md): an Open Level engine run (facts.level "open") plays on the ROM's own Open Level route: the canonical input
+# route with OPEN LEVEL picked at the attendant (oracle/bootstrap/factory-open*.json), so lvlMode is the ROM's own and the walk is the Open one.
+OPEN_PROFILES = {"on": "factory-open.json", "off": "factory-open-battle-scene-off.json"}
 
 # SaveBlock2 (include/global.h struct BattleFrontier offsets; oracle/battle_lab.py uses the same)
 SB2_TRAINER_ID, SB2_LVL_MODE, SB2_BATTLE_NUM, SB2_TRAINER_IDS = 0x0A, 0xCA9, 0xCB2, 0xCB4
 SB2_TOWER_STREAK, SB2_FACTORY_STREAK, SB2_FACTORY_RENTS, SB2_RENTAL_MONS = 0xCE0, 0xDE2, 0xDF2, 0xE70
+# opl: factoryWinStreaks[0][1] / factoryRentsCount[0][1], the singles Open Level slots (u16 arrays [battleMode][lvlMode], include/global.h)
+SB2_FACTORY_STREAK_OPEN, SB2_FACTORY_RENTS_OPEN = SB2_FACTORY_STREAK + 2, SB2_FACTORY_RENTS + 2
 RENTAL_MON_SIZE, TASK_SIZE, TASK_COUNT = 12, 40, 16
 # struct FactorySelectScreen / FactorySwapScreen fields (battle_factory_screen.c:102-159; tools/audio/romRoundDriver.py has the same)
 SELECT_MENU_CURSOR, SELECT_CURSOR, SELECT_YESNO_CURSOR = 0, 3, 7
@@ -285,8 +290,9 @@ class SoundLog:
 
 
 class Rom:
-    def __init__(self, profile):
-        self.o = EmeraldOracle(REF / "pokeemerald.gba", REF / "pokeemerald.map", HARNESS / "oracle/bootstrap" / PROFILES[profile])
+    def __init__(self, profile, level="50"):
+        boot = (OPEN_PROFILES if level == "open" else PROFILES)[profile]
+        self.o = EmeraldOracle(REF / "pokeemerald.gba", REF / "pokeemerald.map", HARNESS / "oracle/bootstrap" / boot)
         nm, map_text = nm_table(), (REF / "pokeemerald.map").read_text()
         self.f = resolve(nm, map_text, FUNCS, (".text",))
         self.d = resolve(nm, map_text, DATA, (".bss", "ewram_data", ".data", "COMMON"))
@@ -375,9 +381,10 @@ def run(engine_dir, out_dir, profile, max_frames):
     eng = json.loads((Path(engine_dir) / "timeline.json").read_text())
     out = Path(out_dir)
     out.mkdir(parents=True, exist_ok=True)
-    rom = Rom(profile)
-    o, s = rom.o, rom.s
     facts = eng["facts"]
+    level = facts.get("level") or "50"
+    rom = Rom(profile, level)
+    o, s = rom.o, rom.s
     # battles by g = round * 7 + battle index (engineRun.mjs; an older engine run has round 1 only, keyed by its battle index)
     battles = {b.get("g", b["battleIndex"]): b for b in facts["battles"]}
     rounds = facts.get("rounds") or []
@@ -392,8 +399,17 @@ def run(engine_dir, out_dir, profile, max_frames):
     rom_tid = struct.unpack("<I", rom.read(save2 + SB2_TRAINER_ID, 4))[0]
     if facts.get("playerTrainerId") is not None and rom_tid != facts["playerTrainerId"]:
         staging.append({"what": "playerTrainerId differs", "rom": rom_tid, "engine": facts["playerTrainerId"]})
-    o.write_u8(save2 + SB2_LVL_MODE, rom.u8(save2 + SB2_LVL_MODE) & ~0x3)
-    for off in (SB2_BATTLE_NUM, SB2_FACTORY_STREAK, SB2_TOWER_STREAK, SB2_FACTORY_RENTS):
+    if level == "open":
+        # opl: the Open Level route's own lvlMode (1) stays; the Open Level slots are the fresh challenge's (the route's factory_init zeroed them)
+        lvl_byte = rom.u8(save2 + SB2_LVL_MODE)
+        staging.append({"what": "open level", "lvlMode": lvl_byte & 0x3, "streak": rom.u16(save2 + SB2_FACTORY_STREAK_OPEN), "rents": rom.u16(save2 + SB2_FACTORY_RENTS_OPEN)})
+        if lvl_byte & 0x3 != 1:
+            raise SystemExit("romRun: the Open Level bootstrap's lvlMode is not Open Level")
+        slots = (SB2_BATTLE_NUM, SB2_FACTORY_STREAK_OPEN, SB2_TOWER_STREAK, SB2_FACTORY_RENTS_OPEN)
+    else:
+        o.write_u8(save2 + SB2_LVL_MODE, rom.u8(save2 + SB2_LVL_MODE) & ~0x3)
+        slots = (SB2_BATTLE_NUM, SB2_FACTORY_STREAK, SB2_TOWER_STREAK, SB2_FACTORY_RENTS)
+    for off in slots:
         o.write_u16(save2 + off, 0)
     for i, r in enumerate(facts["rentals"]):
         base = save2 + SB2_RENTAL_MONS + i * RENTAL_MON_SIZE
@@ -923,6 +939,13 @@ def patch_select_mons(rom, rentals, staging):
         info = species_info(rom, species)
         before, ot_before = struct.unpack_from("<II", raw, 0)
         ot_id = r.get("otId", ot_before)
+        if r.get("stats") is not None:
+            # opl: the ROM's own build before the patch (the nature is the set's, so the stats do not depend on the ROM's personality):
+            # level, experience and [maxHP, attack, defense, speed, spAttack, spDefense] against the engine's (engineRun.mjs rentalStats)
+            lg0, ok0 = decrypt_mon(raw)
+            own = {"level": raw[84], "experience": struct.unpack_from("<I", lg0[0], 4)[0] if ok0 else None, "hp": list(struct.unpack_from("<6H", raw, 88))}
+            rec["ownBuild"] = [own, r["stats"]]
+            rec["sameOwnBuild"] = own == r["stats"]
         try:
             new = with_personality(raw, r["personality"], ot_id, info["twoAbilities"])
         except ValueError as err:
@@ -979,6 +1002,10 @@ def patch_enemy_party(rom, want, staging, frame):
         if not ok:
             staging.append({"what": "enemy party member unreadable", "index": i, "frame": frame})
             continue
+        # opl: the ROM's own build before the patch: level, experience and stats (the nature is the set's, so they do not depend on the
+        # ROM's personality) against the engine's
+        own = [raw[84], struct.unpack_from("<I", logical[0], 4)[0], list(struct.unpack_from("<6H", raw, 88))]
+        eng_own = [mem["level"], mem["experience"], [mem["maxHP"], mem["attack"], mem["defense"], mem["speed"], mem["spAttack"], mem["spDefense"]]]
         misc = bytearray(logical[3])
         iv_word = struct.unpack_from("<I", misc, 4)[0]
         ivs = mem["ivs"]
@@ -992,7 +1019,8 @@ def patch_enemy_party(rom, want, staging, frame):
         struct.pack_into("<7H", rec, 86, mem["hp"], mem["maxHP"], mem["attack"], mem["defense"], mem["speed"], mem["spAttack"], mem["spDefense"])
         rom.write(base, rec)
         staging.append({"what": "enemy party member", "index": i, "frame": frame, "species": mem["species"], "personality": [before, op["personality"]],
-                        "otId": [ot_id, op.get("otId", ot_id)], "ivs": [rom_ivs, eng_ivs], "sameIvs": rom_ivs == eng_ivs})
+                        "otId": [ot_id, op.get("otId", ot_id)], "ivs": [rom_ivs, eng_ivs], "sameIvs": rom_ivs == eng_ivs,
+                        "ownBuild": [own, eng_own], "sameOwnBuild": own == eng_own})
 
 
 def main():

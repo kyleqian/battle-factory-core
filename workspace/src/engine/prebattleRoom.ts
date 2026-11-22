@@ -236,6 +236,97 @@ const WALK_STEPS: readonly (readonly [number, number, number, number, number, nu
   [-16, 8, 112, 56, 1, 1, 1],
 ];
 
+/**
+ * opl (docs/opl1-open-level-rom.md "Walk"): the Open Level walk, BattleFrontier_BattleFactoryPreBattleRoom_EventScript_WalkToBattleRoomLvOpen
+ * (scripts.inc:46-48, 382-385): the player walk_up, walk_right x2, walk_up x2 and the guide walk_right x2, walk_up x2, set_invisible, the
+ * mirror of the Level 50 moves. RAM-probed per frame on the Open Level route (tools/openlevel/firstBattle.py, both scenes identical): the
+ * same 80 ticks and timing as Level 50; the rows are WALK_STEPS mirrored (originX 32 - x, attendant screen x 224 - x) plus the two
+ * hFlip columns [..., playerHFlip, attendantHFlip]: east is the west pictures flipped (the guide walks right in rows 0-31, the player
+ * in rows 16-47). The probe's own rule reproduces WALK_STEPS exactly (all 80 rows) from the Level 50 route.
+ */
+const OPEN_LEVEL_WALK_STEPS: readonly (readonly [number, number, number, number, number, number, number, number, number])[] = [
+  [16, 55, 113, 41, 0, 5, 7, 0, 1],
+  [16, 54, 114, 42, 0, 5, 7, 0, 1],
+  [16, 53, 115, 43, 0, 5, 7, 0, 1],
+  [16, 52, 116, 44, 0, 5, 7, 0, 1],
+  [16, 51, 117, 45, 0, 5, 7, 0, 1],
+  [16, 50, 118, 46, 0, 5, 7, 0, 1],
+  [16, 49, 119, 47, 0, 5, 7, 0, 1],
+  [16, 48, 120, 48, 0, 5, 7, 0, 1],
+  [16, 47, 121, 49, 0, 1, 2, 0, 1],
+  [16, 46, 122, 50, 0, 1, 2, 0, 1],
+  [16, 45, 123, 51, 0, 1, 2, 0, 1],
+  [16, 44, 124, 52, 0, 1, 2, 0, 1],
+  [16, 43, 125, 53, 0, 1, 2, 0, 1],
+  [16, 42, 126, 54, 0, 1, 2, 0, 1],
+  [16, 41, 127, 55, 0, 1, 2, 0, 1],
+  [16, 40, 128, 56, 0, 1, 2, 0, 1],
+  [17, 40, 128, 56, 0, 8, 8, 1, 1],
+  [18, 40, 128, 56, 0, 8, 8, 1, 1],
+  [19, 40, 128, 56, 0, 8, 8, 1, 1],
+  [20, 40, 128, 56, 0, 8, 8, 1, 1],
+  [21, 40, 128, 56, 0, 8, 8, 1, 1],
+  [22, 40, 128, 56, 0, 8, 8, 1, 1],
+  [23, 40, 128, 56, 0, 8, 8, 1, 1],
+  [24, 40, 128, 56, 0, 8, 8, 1, 1],
+  [25, 40, 128, 56, 0, 2, 2, 1, 1],
+  [26, 40, 128, 56, 0, 2, 2, 1, 1],
+  [27, 40, 128, 56, 0, 2, 2, 1, 1],
+  [28, 40, 128, 56, 0, 2, 2, 1, 1],
+  [29, 40, 128, 56, 0, 2, 2, 1, 1],
+  [30, 40, 128, 56, 0, 2, 2, 1, 1],
+  [31, 40, 128, 56, 0, 2, 2, 1, 1],
+  [32, 40, 128, 56, 0, 2, 2, 1, 1],
+  [33, 40, 127, 55, 0, 7, 5, 1, 0],
+  [34, 40, 126, 54, 0, 7, 5, 1, 0],
+  [35, 40, 125, 53, 0, 7, 5, 1, 0],
+  [36, 40, 124, 52, 0, 7, 5, 1, 0],
+  [37, 40, 123, 51, 0, 7, 5, 1, 0],
+  [38, 40, 122, 50, 0, 7, 5, 1, 0],
+  [39, 40, 121, 49, 0, 7, 5, 1, 0],
+  [40, 40, 120, 48, 0, 7, 5, 1, 0],
+  [41, 40, 119, 47, 0, 2, 1, 1, 0],
+  [42, 40, 118, 46, 0, 2, 1, 1, 0],
+  [43, 40, 117, 45, 0, 2, 1, 1, 0],
+  [44, 40, 116, 44, 0, 2, 1, 1, 0],
+  [45, 40, 115, 43, 0, 2, 1, 1, 0],
+  [46, 40, 114, 42, 0, 2, 1, 1, 0],
+  [47, 40, 113, 41, 0, 2, 1, 1, 0],
+  [48, 40, 112, 40, 0, 2, 1, 1, 0],
+  [48, 39, 112, 40, 0, 6, 6, 0, 0],
+  [48, 38, 112, 40, 0, 6, 6, 0, 0],
+  [48, 37, 112, 40, 0, 6, 6, 0, 0],
+  [48, 36, 112, 40, 0, 6, 6, 0, 0],
+  [48, 35, 112, 40, 0, 6, 6, 0, 0],
+  [48, 34, 112, 40, 0, 6, 6, 0, 0],
+  [48, 33, 112, 40, 0, 6, 6, 0, 0],
+  [48, 32, 112, 40, 0, 6, 6, 0, 0],
+  [48, 31, 112, 40, 0, 1, 1, 0, 0],
+  [48, 30, 112, 40, 0, 1, 1, 0, 0],
+  [48, 29, 112, 40, 0, 1, 1, 0, 0],
+  [48, 28, 112, 40, 0, 1, 1, 0, 0],
+  [48, 27, 112, 40, 0, 1, 1, 0, 0],
+  [48, 26, 112, 40, 0, 1, 1, 0, 0],
+  [48, 25, 112, 40, 0, 1, 1, 0, 0],
+  [48, 24, 112, 40, 0, 1, 1, 0, 0],
+  [48, 23, 112, 41, 1, 5, 1, 0, 0],
+  [48, 22, 112, 42, 1, 5, 1, 0, 0],
+  [48, 21, 112, 43, 1, 5, 1, 0, 0],
+  [48, 20, 112, 44, 1, 5, 1, 0, 0],
+  [48, 19, 112, 45, 1, 5, 1, 0, 0],
+  [48, 18, 112, 46, 1, 5, 1, 0, 0],
+  [48, 17, 112, 47, 1, 5, 1, 0, 0],
+  [48, 16, 112, 48, 1, 5, 1, 0, 0],
+  [48, 15, 112, 49, 1, 1, 1, 0, 0],
+  [48, 14, 112, 50, 1, 1, 1, 0, 0],
+  [48, 13, 112, 51, 1, 1, 1, 0, 0],
+  [48, 12, 112, 52, 1, 1, 1, 0, 0],
+  [48, 11, 112, 53, 1, 1, 1, 0, 0],
+  [48, 10, 112, 54, 1, 1, 1, 0, 0],
+  [48, 9, 112, 55, 1, 1, 1, 0, 0],
+  [48, 8, 112, 56, 1, 1, 1, 0, 0],
+];
+
 export const WALK_TICKS = WALK_STEPS.length;
 
 export interface WalkVisual {
@@ -246,20 +337,33 @@ export interface WalkVisual {
   attendantVisible: boolean;
   playerFrame: number;
   attendantFrame: number;
+  /** opl: an east-facing picture (the west one flipped, the Open Level walk); absent = not flipped. */
+  playerHFlip?: boolean;
+  attendantHFlip?: boolean;
 }
 
-function stepToVisual(row: readonly [number, number, number, number, number, number, number]): WalkVisual {
-  const [originX, originY, attendantX, attendantY, attendantInvisible, playerFrame, attendantFrame] = row;
-  return { originX, originY, attendantX, attendantY, attendantVisible: attendantInvisible === 0, playerFrame, attendantFrame };
+function stepToVisual(row: readonly number[]): WalkVisual {
+  const [originX, originY, attendantX, attendantY, attendantInvisible, playerFrame, attendantFrame, playerHFlip, attendantHFlip] = row as
+    [number, number, number, number, number, number, number, number?, number?];
+  return {
+    originX, originY, attendantX, attendantY, attendantVisible: attendantInvisible === 0, playerFrame, attendantFrame,
+    ...(playerHFlip === 1 ? { playerHFlip: true } : {}),
+    ...(attendantHFlip === 1 ? { attendantHFlip: true } : {}),
+  };
 }
 
-/** WALK_STEPS[elapsed], clamped to the last (frozen) row - "warpFade" reads the same clamp implicitly via WALK_TICKS-1. */
+/**
+ * WALK_STEPS[elapsed] (OPEN_LEVEL_WALK_STEPS for an Open Level challenge), clamped to the last (frozen) row - "warpFade" reads the same
+ * clamp implicitly via WALK_TICKS-1.
+ */
 export function walkVisual(
   elapsed: number,
   attendantAlternateLead = false,
+  openLevel = false,
 ): WalkVisual {
+  const steps = openLevel ? OPEN_LEVEL_WALK_STEPS : WALK_STEPS;
   const visual = stepToVisual(
-    WALK_STEPS[Math.min(elapsed, WALK_STEPS.length - 1)]!,
+    steps[Math.min(elapsed, steps.length - 1)]!,
   );
   if (!attendantAlternateLead) return visual;
   // Re-entering after battle recreates the field objects with the
@@ -276,6 +380,9 @@ export function walkVisual(
 
 /** The walk's frozen final position (data/maps/.../scripts.inc:50's shared `waitmovement 0` settling) - "warpFade" renders this unchanged under the fade. */
 export const WARP_FADE_FROZEN_VISUAL: WalkVisual = stepToVisual(WALK_STEPS[WALK_STEPS.length - 1]!);
+/** opl: the Open Level walk's frozen final position. */
+export const OPEN_LEVEL_WARP_FADE_FROZEN_VISUAL: WalkVisual = stepToVisual(OPEN_LEVEL_WALK_STEPS[OPEN_LEVEL_WALK_STEPS.length - 1]!);
+if (OPEN_LEVEL_WALK_STEPS.length !== WALK_STEPS.length) throw new Error("the Open Level walk has the Level 50 walk's 80 ticks (ROM-probed)");
 
 export { WARP_FADE_OUT };
 
