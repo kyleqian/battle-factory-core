@@ -462,7 +462,9 @@ describe("random round soak driver (green milestone pin)", () => {
       // state, diagnostics. A trajectory pin, not a ROM frame.
       // hse2 (Scene OFF wake-up hold / icon, the confusion print's 71-frame hold before the used print, the OFF Struggle dismiss hold 9 -> 8): frames unchanged (43_693), renderCalls 3_052 -> 3_054; same battle 7, turn 3, end state, diagnostics. A trajectory pin, not a ROM frame.
       // hpb3 (a Focus Band survival's hit bar is floor-free, ROM bar + datahpupdate + 3 rows, drv2 OFF s4235 d2): frames + render calls, 43_693 -> 43_698, renderCalls 3_054 -> 3_060; same battle 7, turn 3, end state, diagnostics. A trajectory pin, not a ROM frame.
-      frames: 43_698,
+      // swt1 (the opponent faint replacement / AI send-in's next print: ROM FaintedMonSendOutNew+0x10 release -> next label +11 -> glyph +12, the command used to start at +3):
+      // frames 43_698 -> 43_712, renderCalls 3_060 -> 3_058; same battle 7, turn 3, end state, outcome.
+      frames: 43_712,
       battle: 7,
       turn: 3,
       diagnostics: {
@@ -474,7 +476,7 @@ describe("random round soak driver (green milestone pin)", () => {
         terminalOutcome: "roundWon",
         terminalRecordMenuInputReadyReached: true,
         terminalRecordChoice: "no",
-        renderCalls: 3_060,
+        renderCalls: 3_058,
       },
     });
     expect(second).toEqual(first);
@@ -735,7 +737,10 @@ describe("random round soak driver (green milestone pin)", () => {
     // --seeds 0:40, same options): candidates 24, 25, 27. Seed 24 is the lowest. Pin 20 -> 24.
     // rmw1 (the draft menu takes its first mash A 2 ticks before the mon pic table ends, as the ROM; the exploring presses land on new phases): seed 24 no longer commits
     // Baton Pass. Re-scanned full-policy seeds 0..39 (tools/soak/batonPassSearch.ts --seeds 0:40 --parallel 2, same options): candidates 12, 14, 25. Seed 12 is the lowest (Baton Pass commits 3, first commit 67261, halt 67300 on AIPOM in battleIndex 0, two Lobby new challenges). Pin 24 -> 12.
-    const result = runSeed(12, {
+    // swt1 (an opponent faint replacement / AI send-in's next print is 9 frames later, ROM FaintedMonSendOutNew+0x10 release -> next print +12; the exploring presses land on new phases): seed 12 no longer commits
+    // Baton Pass. Re-scanned full-policy seeds 0..39 (tools/soak/batonPassSearch.ts --seeds 0:40 --parallel 2, same options): candidates 5, 14, 25. Seed 5 is the lowest (Baton Pass commits 3, first commit 76136,
+    // halt 76176 on LEDIAN in battleIndex 0, three Lobby new challenges). Pin 12 -> 5.
+    const result = runSeed(5, {
       maxFrames: 80_000,
       renderEvery: 0,
       coverage: observer as never,
@@ -1105,7 +1110,8 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // supervisor merge of bbk1 + etp3 + abs1 + hpb3 (measured on the merged tree): hpb3 does not move the 40485 / battle 2 / turn 24 trajectory.
       // rmw1 (the draft menu takes its first mash A 2 ticks before the mon pic table ends, as the ROM): frames only, 40485 -> 40479; same battle 2 / depth 1 / turn 24 / roundLost.
       // supervisor merge of rmw1 with master (bbk1 / etp3 / abs1 / hpb3), measured on the merged tree: 40479 / battle 2 / depth 1 / turn 24 (rmw1's value).
-      frames: 40479,
+      // swt1 (the opponent faint replacement / AI send-in's next print at ROM release +12, was +3: FaintedMonSendOutNew+0x10 -> FaintedMonEnd +5 -> PoisonTurnDmg +11): frames only, 40479 -> 40489; same battle 2 / depth 1 / turn 24 / roundLost.
+      frames: 40489,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 1,
