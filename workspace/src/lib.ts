@@ -16,6 +16,7 @@ import type { FactoryAudioState, FactoryEvent, FactoryGame, FactoryGameOptions, 
 import type { AudioPlayer, AudioStats } from "./audio/player.ts";
 import { initialMusicEvents } from "./audio/initialMusic.ts";
 import { MusicTracker } from "./audio/musicTracker.ts";
+import { BattleSoundNeeds } from "./audio/battleSoundNeeds.ts";
 import { collectSoundTick, type SoundEvent } from "./audio/soundEvents.ts";
 import { ENGINE_BUILD, FactorySession } from "./factorySession.ts";
 import { normalizeButtons, type GbaButton } from "./input.ts";
@@ -224,6 +225,16 @@ export function mountFactoryGameInternal(options: MountInternalOptions): Factory
     },
   };
   session.attachSoundSink(audioSink);
+  // fsn1: the coming battle's sounds (both parties' cries and move SEs, a called move's), read from the state after each tick and handed to
+  // the player to fetch ahead of their first use. One way, like the sink: the player never answers.
+  const battleSounds = new BattleSoundNeeds();
+  function prefetchBattleSounds(): void {
+    try {
+      if (battleSounds.update(session.state) && audio) audio.prefetch(battleSounds.current!);
+    } catch (error) {
+      console.warn("pokebench audio: the battle sound prefetch failed; sounds load on first use", error);
+    }
+  }
   function loadAudio(): void {
     if (audio || audioLoading || audioFailed || destroyed) return;
     audioLoading = true;
@@ -233,6 +244,7 @@ export function mountFactoryGameInternal(options: MountInternalOptions): Factory
         if (destroyed) return;
         audio = createAudioPlayer({ enabled: audioWanted.enabled, volume: audioWanted.volume, baseUrl: options.audio?.baseUrl });
         if (!resuming) audio.restore(music.events(), session.frame);
+        if (battleSounds.current) audio.prefetch(battleSounds.current);
       },
       (error: unknown) => {
         audioLoading = false;
@@ -352,6 +364,7 @@ export function mountFactoryGameInternal(options: MountInternalOptions): Factory
     session.preloadTrace(resuming.segments);
     resuming = null;
     audio?.restore(music.events(), session.frame);
+    prefetchBattleSounds();
     return true;
   }
 
@@ -396,6 +409,7 @@ export function mountFactoryGameInternal(options: MountInternalOptions): Factory
         crash(error);
         return;
       }
+      prefetchBattleSounds();
       accumulator -= FRAME_MS;
       // A tick that put new species on screen (the round's parties, the swap candidates) starts their fetch here, before the next tick.
       if (!picturesReady()) return hold(time);
@@ -476,12 +490,14 @@ export function mountFactoryGameInternal(options: MountInternalOptions): Factory
           for (const event of session.tick(buttons)) emit(event);
         }
       }
+      prefetchBattleSounds();
       drawOrHold();
     },
     reset() {
       session = new FactorySession(sessionOptions);
       session.attachSoundSink(audioSink);
       music.reset();
+      battleSounds.reset();
       audio?.restore(music.events(), session.frame);
       held.clear();
       latched.clear();

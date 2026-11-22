@@ -26,8 +26,8 @@ export const STATS_CHANGE_SE_AGE = 7;
  * (edge + 4, three frames before the banner's first frame) is command age 3 (ROM lab sta6m-intimp-off: SE 245 at app frame 732, command 729).
  */
 export const ENTRY_STATS_CHANGE_SE_AGE = 3;
-const SE_M_STAT_INCREASE = 239;
-const SE_M_STAT_DECREASE = 245;
+export const SE_M_STAT_INCREASE = 239;
+export const SE_M_STAT_DECREASE = 245;
 const SOUND_PAN_ATTACKER_VALUE = -64;
 
 /**
@@ -311,7 +311,7 @@ export const TURN_TRAP_STOP: Readonly<Partial<Record<TurnTrapBranch, Readonly<{ 
  * Script frame 0 = the command's first frame + (minimumFrames - HELD_ITEM_EFFECT_COMMAND_FRAMES): the same drift-free epoch as the drawn animation (hie2b), so
  * a restart (229) starts it 15 frames in, a continuation (223) 9, a cure berry (192, its 32-frame `status` command netted out) 22 frames BEFORE the command.
  */
-const HELD_ITEM_EFFECT_LATER_SE_OPS: readonly TimedOp[] = [
+export const HELD_ITEM_EFFECT_LATER_SE_OPS: readonly TimedOp[] = [
   { op: "playsewithpan", frame: 40, id: 152, pan: -64 }, { op: "playsewithpan", frame: 72, id: 152, pan: -64 },
   { op: "playsewithpan", frame: 104, id: 228, pan: -64 }, { op: "playsewithpan", frame: 176, id: 102, pan: -64 },
 ];

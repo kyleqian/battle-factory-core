@@ -138,7 +138,8 @@ so loudness is linear in `vol`. Cries were recorded at volume 120 (`CRY_VOLUME`,
 5 files, `stats.prefetched`). Every other file is fetched on first use, once; the decode cache is kept. A first use waits for its fetch,
 so it can start late (`late` counts it; the music/SE is not played retroactively beyond the existing late rule). Browser check, 1800 frames
 (`audioCheck.mjs --frames 1800`): **186 requests (186 ogg, 186 fetches/decoded) before, 14 after** (14 fetches, 14 decoded, 5 prefetched,
-37 sources); `late` 3 -> 9 for the first uses.
+37 sources); `late` 3 -> 9 for the first uses. **fsn1** (docs/fsn1-first-use-sounds.md): a battle's own sounds are now fetched ahead
+(`AudioPlayer.prefetch`, from the parties lib.ts reads), and a short sound up to 0.25 s late plays whole from its start.
 
 Tests: `tests/aud245bAudioFollowups.test.ts` (19: restore positions, after loops, ended events, fanfare, fade/replace, muted then enabled,
 events after the live frame ignored; the tracker; pan splice / no-op / SE3 / pan while loading; cry volume; prefetch set, first-use fetch

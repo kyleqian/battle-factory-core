@@ -2,6 +2,8 @@
 // references src/assets/gen/audio (tests/aud244aAudioManifest.test.ts); lib.ts reaches it only through `import("./audio/player.ts")`.
 import manifestJson from "../assets/gen/audio/manifest.json";
 import songPlayersJson from "../assets/gen/audio/song-players.json";
+import battleSoundsJson from "../assets/gen/battle-sounds.json";
+import type { BattleSoundTable } from "./battleSoundNeeds.ts";
 
 export interface PlayerSound {
   readonly file: string;
@@ -37,6 +39,8 @@ export interface PlayerSongPlayers {
 export interface PlayerAssets {
   readonly manifest: PlayerManifest;
   readonly songPlayers: PlayerSongPlayers;
+  /** fsn1: what a battle can play, for the battle prefetch (absent: the prefetch fetches the cries and the music only). */
+  readonly battleSounds?: BattleSoundTable;
   /** Bundled URL of `path` (`bgm-469.ogg`, `aac/bgm-469.m4a`); undefined when the build does not carry it. */
   urlFor(path: string): string | undefined;
 }
@@ -48,5 +52,6 @@ for (const [key, url] of Object.entries(urls)) byPath.set(key.slice("../assets/g
 export const bundledAssets: PlayerAssets = {
   manifest: manifestJson as unknown as PlayerManifest,
   songPlayers: songPlayersJson as unknown as PlayerSongPlayers,
+  battleSounds: battleSoundsJson as unknown as BattleSoundTable,
   urlFor: (path) => byPath.get(path),
 };

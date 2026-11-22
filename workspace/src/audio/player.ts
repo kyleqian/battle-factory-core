@@ -3,6 +3,7 @@
 // read by the engine, and lib.ts loads this module only through a dynamic import() when `options.audio` is given or `setAudio` is called.
 // Model + ROM citations: docs/aud245-audio-player.md.
 import type { SoundEvent } from "./soundEvents.ts";
+import type { BattleSe, BattleSoundRequest } from "./battleSoundNeeds.ts";
 import { bundledAssets, type PlayerAssets, type PlayerSound } from "./playerAssets.ts";
 
 /** GBA video clock: 280896 cycles/frame at 2^24 Hz. */
@@ -28,10 +29,22 @@ export const SE_STOP_LAG_S = 1 / FRAME_HZ;
 export const SE_STOP_RELEASE_S = 1 / FRAME_HZ;
 /** The default cut ramp of a stopped voice (BGM / cry replacement, mute). */
 const CUT_RAMP_S = 0.003;
-/** Files fetched once audio is live so the first sounds are not late; everything else is fetched on first use. */
+/** Files fetched once audio is live so the first sounds are not late; a battle's own sounds follow its `prefetch` request, the rest load on first use. */
 const PREFETCH_BGM = [469];
 // snd1: plus the battle-start burst (the ball tray: 14 SEs in one second, five files) so the first battle's tray is not lost to first-use loads.
 const PREFETCH_SE = [5, 32, 9, 15, 114, 115, 116];
+/** Parallel prefetch fetches. */
+const PREFETCH_WORKERS = 4;
+/**
+ * fsn1 (docs/fsn1-first-use-sounds.md): a short sound whose file arrives at most this late plays whole from its start, that much late,
+ * instead of joining where it would be by then (which cut its attack or, for a short one, dropped it). 0.25 s (15 frames) is the slack the
+ * clock already treats as on time (`timeFor` keeps its anchor while an event lands up to latency + 0.25 s ahead), it stays inside the
+ * window in which a sound still reads as belonging to its picture (the hit, the stat arrows), and it covers a normal cold fetch + decode of
+ * a 5-15 KB file. A later arrival keeps the catch-up rule: a sound that much late no longer goes with its picture.
+ */
+export const LATE_FROM_START_S = 0.25;
+/** fsn1: the "short" sounds of that rule: one-shot SEs and cries up to 2 s (90% of the SE recordings, 98% of the cries). Longer ones, the looping SEs, fanfares and BGM keep the catch-up rule (their stop / restore events are timed to the picture). */
+export const LATE_FROM_START_MAX_LENGTH_S = 2;
 
 export type AudioState = "off" | "loading" | "suspended" | "running" | "closed" | "unsupported";
 
@@ -55,6 +68,12 @@ export interface AudioStats {
   cryFallbacks: number;
   /** Voices that started late because their file was still loading. */
   late: number;
+  /** fsn1: of those, short sounds played whole from their start, at most LATE_FROM_START_S late. */
+  lateDelayed: number;
+  /** fsn1: of those, voices joined part-way (the catch-up rule: long sounds, music, or a file later than the bound). */
+  lateClipped: number;
+  /** fsn1: of those, voices already over when their file arrived (never heard). */
+  lateLost: number;
   fetches: number;
   decoded: number;
   /** Files that fell back from Ogg to AAC after a decode failure. */
@@ -63,8 +82,12 @@ export interface AudioStats {
   duckRestores: number;
   /** Events replayed by `restore` (music state of a fast-forward or of a late start), not played as sounds. */
   restored: number;
-  /** Files fetched by the start-up prefetch (a subset of `fetches`). */
+  /** Files fetched ahead of their first use: the start-up set and the battle prefetch (a subset of `fetches`). */
   prefetched: number;
+  /** fsn1: of those, files the battle prefetch (`prefetch`) asked for. */
+  battlePrefetched: number;
+  /** fsn1: battle requests received. */
+  battleRequests: number;
 }
 
 export interface AudioContextLike {
@@ -142,6 +165,12 @@ export interface AudioPlayer {
    * position it has reached. Events after `liveFrame` are ignored.
    */
   restore(events: readonly SoundEvent[], liveFrame: number): void;
+  /**
+   * fsn1: fetch the coming battle's sounds ahead of their first use (the parties' cries and move SEs, the common battle SEs, the battle
+   * music). One way: the request comes from the session's state, nothing goes back. A muted player keeps the latest request and fetches
+   * it once audio is live; files already loaded or queued are not fetched again.
+   */
+  prefetch(request: BattleSoundRequest): void;
   /** Runs the lookahead scheduler / duck fallback once (the interval timer calls it). */
   pump(): void;
   destroy(): void;
@@ -237,6 +266,12 @@ class Player implements AudioPlayer {
   private destroyed = false;
   private prefetched = false;
   private restoring = false;
+  /** Prefetch queue (files not yet loading) and the workers draining it. */
+  private readonly queue: string[] = [];
+  private workers = 0;
+  /** fsn1: the latest battle request, and the one whose files were queued. */
+  private battleRequest: BattleSoundRequest | null = null;
+  private battleQueued: BattleSoundRequest | null = null;
   private readonly counters: AudioStats = {
     state: "off",
     enabled: false,
@@ -249,12 +284,17 @@ class Player implements AudioPlayer {
     missing: 0,
     cryFallbacks: 0,
     late: 0,
+    lateDelayed: 0,
+    lateClipped: 0,
+    lateLost: 0,
     fetches: 0,
     decoded: 0,
     fallbacks: 0,
     duckRestores: 0,
     restored: 0,
     prefetched: 0,
+    battlePrefetched: 0,
+    battleRequests: 0,
   };
   private readonly onGesture = (): void => {
     if (this.enabled) this.activate();
@@ -392,6 +432,13 @@ class Player implements AudioPlayer {
     if (this.audible()) for (const voice of this.voices.values()) if (!voice.dead && voice.paused === null && voice.end > anchor && voice.sources.length === 0) this.realize(voice, anchor);
   }
 
+  prefetch(request: BattleSoundRequest): void {
+    if (this.destroyed) return;
+    this.counters.battleRequests += 1;
+    this.battleRequest = request;
+    if (this.audible()) this.prefetchAhead();
+  }
+
   private handle(event: SoundEvent, t: number): void {
     switch (event.kind) {
       case "se":
@@ -509,27 +556,91 @@ class Player implements AudioPlayer {
       const sounding = voice.end === Number.POSITIVE_INFINITY || (voice.slot === "BGM" && voice.end > now);
       if (!voice.dead && voice.paused === null && sounding && voice.sources.length === 0) this.realize(voice, now);
     }
-    this.prefetch();
+    this.prefetchAhead();
   }
 
-  /** Only the Lobby / draft BGM and the common UI SEs are fetched ahead (once audio is live); every other file waits for its first use. */
-  private prefetch(): void {
-    if (this.prefetched) return;
-    this.prefetched = true;
-    const files = new Set<string>();
-    const { sounds } = this.assets.manifest;
-    for (const [key, sound] of Object.entries(sounds)) {
-      const [kind, id] = key.split(":");
-      if ((kind === "bgm" && PREFETCH_BGM.includes(Number(id))) || (kind === "se" && PREFETCH_SE.includes(Number(id)))) files.add(sound.file);
+  /**
+   * Once audio is live: the Lobby / draft BGM and the common UI SEs, then the latest battle request's files (fsn1). Every other file waits
+   * for its first use.
+   */
+  private prefetchAhead(): void {
+    if (!this.prefetched) {
+      this.prefetched = true;
+      const files = new Set<string>();
+      const { sounds } = this.assets.manifest;
+      for (const [key, sound] of Object.entries(sounds)) {
+        const [kind, id] = key.split(":");
+        if ((kind === "bgm" && PREFETCH_BGM.includes(Number(id))) || (kind === "se" && PREFETCH_SE.includes(Number(id)))) files.add(sound.file);
+      }
+      this.enqueue(files, false);
     }
-    const queue = [...files].filter((file) => !this.loaded.has(file));
-    const worker = async (): Promise<void> => {
-      for (let file = queue.shift(); file !== undefined && !this.destroyed; file = queue.shift()) {
+    const request = this.battleRequest;
+    if (request !== null && request !== this.battleQueued) {
+      this.battleQueued = request;
+      this.enqueue(this.battleFiles(request), true);
+    }
+  }
+
+  private enqueue(files: Iterable<string>, battle: boolean): void {
+    for (const file of files) {
+      if (this.loaded.has(file) || this.queue.includes(file)) continue;
+      this.queue.push(file);
+      if (battle) this.counters.battlePrefetched += 1;
+    }
+    while (this.workers < PREFETCH_WORKERS && this.queue.length > 0) {
+      this.workers += 1;
+      void this.drain();
+    }
+  }
+
+  private async drain(): Promise<void> {
+    try {
+      for (let file = this.queue.shift(); file !== undefined && !this.destroyed; file = this.queue.shift()) {
+        if (this.loaded.has(file)) continue;
         this.counters.prefetched += 1;
         await this.load(file);
       }
+    } finally {
+      this.workers -= 1;
+    }
+  }
+
+  /**
+   * fsn1: the files a battle request names, in the order the battle needs them: the send-out cries, the parties' move SEs (each side's own
+   * pans; under Battle Scene OFF only the moves that animate there) and cry-task cries, the abilities' bodies, a called move's SEs (either
+   * side), the common battle SEs, and the battle music last (the largest file). Each SE resolves to the recording `startSong` would play.
+   */
+  private battleFiles(request: BattleSoundRequest): string[] {
+    const table = this.assets.battleSounds;
+    const { sounds } = this.assets.manifest;
+    const files = new Set<string>();
+    const cry = (species: number, mode: string): void => {
+      const sound = sounds[`cry:${species}:${mode}`];
+      if (sound) files.add(sound.file);
     };
-    for (let i = 0; i < 4; i += 1) void worker();
+    const ses = (list: readonly BattleSe[] | undefined): void => {
+      for (const [id, pan] of list ?? []) {
+        const sound = this.sfxSound(id, pan);
+        if (sound) files.add(sound.file);
+      }
+    };
+    const on = request.scene === "on";
+    for (const mon of request.mons) cry(mon.species, "NORMAL");
+    if (table !== undefined) {
+      for (const mon of request.mons) {
+        for (const move of mon.moves) {
+          if (on || table.bothScenes.includes(move)) ses(table.moves[move]?.[mon.side]);
+          if (on) for (const mode of table.cryTasks[move] ?? []) cry(mon.species, mode);
+        }
+        ses(table.abilities[mon.ability]?.[mon.side]);
+      }
+      if (on) for (const move of request.calledMoves) for (const side of [0, 1] as const) ses(table.moves[move]?.[side]);
+      ses(table.common);
+      if (on) ses(table.commonSceneOn);
+    }
+    const bgm = sounds[`bgm:${request.bgm}`];
+    if (bgm) files.add(bgm.file);
+    return [...files];
   }
 
   /** Mute: cut every audible source but keep the logical state (the BGM resumes in place when audio is switched back on). */
@@ -780,7 +891,7 @@ class Player implements AudioPlayer {
     };
     this.voices.set(spec.slot, voice);
     this.counters.started[spec.kind] = (this.counters.started[spec.kind] ?? 0) + 1;
-    if (this.audible()) this.realize(voice, spec.t);
+    if (this.audible()) this.realize(voice, spec.t, true);
     return voice;
   }
 
@@ -840,8 +951,11 @@ class Player implements AudioPlayer {
     voice.out.gain.linearRampToValueAtTime(fade.to, this.c(fade.t + fade.dur));
   }
 
-  /** Build the audible sources for `voice` as it should sound from wall time `t` (loading the file first if needed). */
-  private realize(voice: Voice, t: number): void {
+  /**
+   * Build the audible sources for `voice` as it should sound from wall time `t` (loading the file first if needed). `start`: this is the
+   * voice's own start (not a resume, a restore or audio coming on), so a short sound whose file is a little late plays from its start.
+   */
+  private realize(voice: Voice, t: number, start = false): void {
     const file = voice.sound.file;
     const ready = this.ready.get(file);
     if (ready) {
@@ -851,8 +965,32 @@ class Player implements AudioPlayer {
     void this.load(file).then((loaded) => {
       if (!loaded || voice.dead || this.destroyed || !this.audible() || voice.sources.length > 0 || voice.paused !== null) return;
       this.counters.late += 1;
-      this.play(voice, loaded, this.clock() + 0.005);
+      const at = this.clock() + 0.005;
+      this.lateStart(voice, at, start);
+      this.play(voice, loaded, at);
     });
+  }
+
+  /**
+   * fsn1: a voice whose file arrived at wall time `at`. Arrived before its onset: it plays on time. A short one-shot (SE or cry up to
+   * LATE_FROM_START_MAX_LENGTH_S) at most LATE_FROM_START_S late moves whole to `at` (its start, end and the m4a player's busy time all
+   * shift), so `play` starts it from file position 0. Anything else keeps the catch-up rule: `play` joins where it would be by then, or
+   * drops it when it is over.
+   */
+  private lateStart(voice: Voice, at: number, start: boolean): void {
+    const late = at - voice.t0;
+    if (late <= 0) return;
+    const { sound } = voice;
+    const short = (voice.kind === "se" || voice.kind === "cry") && sound.loops !== true && sound.lengthSamples / sound.sampleRate <= LATE_FROM_START_MAX_LENGTH_S;
+    if (start && short && late <= LATE_FROM_START_S) {
+      voice.t0 += late;
+      voice.end += late;
+      this.counters.lateDelayed += 1;
+    } else if (at >= voice.end) {
+      this.counters.lateLost += 1;
+    } else {
+      this.counters.lateClipped += 1;
+    }
   }
 
   private play(voice: Voice, loaded: Loaded, requested: number): void {
