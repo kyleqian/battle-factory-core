@@ -66,7 +66,7 @@ describe("attacker-doll swap cells (prep40)", () => {
     const framed: [number, number, number, number, ("player" | "opponent")[]][] = [
       [89, 208, 208, 0, ["player", "opponent"]], [94, 140, 145, -5, ["player"]], [188, 165, 169, -4, ["player", "opponent"]],
       [53, 192, 210, -15, ["player", "opponent"]], [92, 219, 231, -7, ["player", "opponent"]], [44, 31, 41, -10, ["player", "opponent"]],
-      [7, 101, 102, 0, ["player", "opponent"]], [153, 212, 217, -4, ["player", "opponent"]],
+      [7, 101, 102, 0, ["player", "opponent"]], [153, 213, 217, -4, ["player", "opponent"]], // mxp1: Explosion window 212 -> 213 (ROM A length 216 - 3)
       // land82 (doll81)
       [142, 152, 153, 0, ["player", "opponent"]], [320, 225, 221, 0, ["player", "opponent"]], // ctl95: opponent widened
       // doll90: Double Team (self-target), the doll-free controls' calibrated shift -1
