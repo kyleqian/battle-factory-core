@@ -74,6 +74,16 @@ No kernel event, battle RNG or outcome moves. The overworld per-frame RNG runs t
 now advances the ROM's count per transition, and a later battle can draw another transition than before (seed 3 Scene ON's battle 7:
 CIRCLES_CROSS_IN_SEQ before, SQUARES_SCROLL after). The test player's presses follow the new timing, so fresh traces are other rounds.
 
+## Merge with the box's night run (2026-11-22)
+
+The box's trn226 (`docs/trn225-frontier-transitions.md`, ISSUES #225) drew LOGO_WIGGLE from source and started LOGO_WAVE's clock at te 32
+(its flicker / main / handoff constants assume it), both in the Noland room; it left the ordinary room open. In the merge:
+- the ordinary room takes trn226's start te per kind (`transitionStartTeOf`, shared with the brain room): LOGO_WAVE 32. That is this doc's
+  "LOGO_WAVE starts 6 frames late"; its handoff stays 177 frames after the BGM, which is trn226's 209 on te 32;
+- LOGO_WIGGLE is now drawn by trn226's renderer in the ordinary room too (the fallback picture is gone). Its handoff stays this branch's
+  ordinary-room 160 frames after the BGM (the ROM's VS -> ball tray 348 in 3 catcher battles); trn226's Noland-room labs give the wiggle's
+  end + 3, one frame later. The two IN_SEQ spirals differ from the brain table by the same frame. Not resolved here.
+
 ## Catcher, before / after
 
 Six traces made with makeTrace on this branch (seeds 3, 44, 100 Scene ON `winning-coverage`; 5 and 2 Scene OFF `winning-swap`; 8 Scene OFF
@@ -115,4 +125,4 @@ Re-pinned, each because the drawn transition now sets the intro's frame:
   catcher hides this by writing the engine's value into the ROM. A gameplay / RNG question for its own step.
 - From the trainer's speech to the BGM ("SE_EXIT -> MUS_VS_TRAINER") the ROM is 3-5 frames later in most later battles. It crosses the
   speech's press, which makes no sound (`waitbuttonpress`), so the timing report cannot split it; not looked into.
-- LOGO_WAVE's and LOGO_WIGGLE's pictures (trn225 open).
+- LOGO_WIGGLE's handoff: 160 here (ordinary room, catcher) against trn226's 161 (Noland room, labs); see the merge section.

@@ -13,26 +13,22 @@ defects are all authorized in the finish-up mission (`docs/factory-finish-scope.
 gameplay / RNG when proved against source; use main-lane ownership and gameplay gates. Historical presentation-only
 exclusions are superseded. Unrelated expansions stay parked.
 
-## #227 — SELECT move swap: Mimic edge (msw1, 2026-11-20)
-
-SELECT move switching is ported (msw1, `docs/msw1-select-move-swap.md`; ROM `HandleMoveSwitching`). Open: a swap combined with Mimic writing the party in the same battle can
-lose the swap record (`moveOrder` on the rental records); not staged on the ROM.
-
 ## #225 — Frontier battle transitions: open remainder (Kyle, 2026-11-19: low priority)
 
-Six of the seven undrawn transitions are drawn from source and ROM-checked in both scenes (`docs/trn225-frontier-transitions.md`); the Noland
-room recordings that drew one are compared to the battle intro. Open:
-- LOGO_WIGGLE (id 29) is still drawn as CIRCLES_MEET (163 bad frames of 1,290 on the lab probe).
-- LOGO_WAVE (id 30) has an older mismatch (217 bad frames; its handoff is 209 on the ROM's clock).
-- The ordinary trainer's room runs the new pictures on the engine's existing per-kind clock and handoff (`src/engine/core.ts`): unmeasured, no
-  ordinary-room ROM harness; changing the handoff could move the RNG advance.
+All twelve transitions are drawn from source and ROM-checked in both scenes (`docs/trn225-frontier-transitions.md`, trn226 for LOGO_WIGGLE and
+LOGO_WAVE); the Noland room recordings that drew one are compared to the battle intro. Open:
+- The ordinary trainer's room: tri1 (`docs/tri1-transition-intro-handoff.md`, the Mac's frame catcher) measured it and gave it a per-kind clock
+  from the BGM and per-kind handoffs (ROM VS -> ball tray in 30 / 30 battles); since the merge LOGO_WAVE starts there at trn226's te 32 too.
+  Open: LOGO_WIGGLE hands off at the ordinary room's measured 160 frames after the BGM, one frame before trn226's Noland-room value; the
+  battle RNG at the first turn does not follow the transition's frames (the engine seeds it from the facility's plan); the engine's
+  battle-1 draw for the canonical inputs differs from the canonical recording's (tri1 Open).
 - SQUARES_SCROLL's direction depends on the BGM lag after the draw (0 or 1 frame), unknown to the engine; production assumes 0.
 
 ## #223 — Battle messages ending in `\p` / `\l`: open remainder (2026-11-19; btn2 2026-11-20)
 
 Landed by btn1 + btn2 (`docs/subp1m-battle-text-pause.md` sections 6 / 7): every template-derived `\p` / `\l` / `PAUSE_UNTIL_PRESS` gate waits for a new A or B in both scenes; the Substitute fade lead (11 rows) and box, the release-to-moveendall rows, the frozen cursor, the accept edge (ROM: print + glyph count) and the Static scroll (5 rows) / Trick clear (0 rows) are ROM-measured. Open:
 - The `\l` scroll of the ability-blocking strings (`PROMPT_SCROLL_ROWS = 5`, measured on Static only) has no ROM window; the intermediate scroll images (rows P+1..P+5) are not compared (no Static / Trick compare stage).
-- The box clear after a release is 1 row late in the app (subhit 521 vs 520, roar 516 vs 515); the release rows apply only to a gated print directly before the turn-end (a mid-turn FADED follow-up is unmeasured).
+- The release rows apply only to a gated print directly before the turn-end (a mid-turn FADED follow-up is unmeasured); the roar lab's menu is 1 row before the ROM's (521 vs 522; the catcher runs say 6 or 7, `docs/subp1m-battle-text-pause.md` section 8).
 - For the website: these messages now need the player's A / B (`docs/library-package.md`, "Battle messages that wait for A or B").
 
 ## #221 — Lobby RNG cursor: harness / unmeasured routes (lbw1 / lbw2 / lbw3, 2026-11-15)
@@ -82,8 +78,7 @@ Hydro Pump / Cosmic Power / Calm Mind / Encore / Hypnosis / Blizzard, ROM hp com
 - **2026-11-20/21 run (docs/aud251-s11-scoreboard-refresh.md "hcr1b" .. "fsc2m"):** landed the used-move first glyph at commit + 7 + u in both scenes (hcr1b OFF, hcr2 ON; pixel-exact on
   28 + 28 labs), the scoped sound leads (hcr1c OFF 1 tick; hcr2b / hcr2c ON per emitter, 7 - L for audited bodies), the Scene ON wake-up head (gsp2b), the OFF invisible-target hit and
   hit-all box (fsc1), the OFF two-turn moves (chg1). Open, named in the tests: Scene ON Haze / Seismic Toss second mover +1, rollout5 turns 4/5 and iceball5 turns 5/6 (-2 .. -5), ais2
-  seed 2741 ON window +2 engine frames (same ROM md5s), aud252 seeds 1914 / 2230 end rows +3 / +4: hcr2d showed master's values were fitted to the old fixed first print; closing them needs
-  per-body interval re-derivation (Icy Wind hit -> stat SE 89 vs ROM 77), not a lead. Also: the ON hold / lead take the first print's u only; Curse -3 / Seismic Toss -1 off the 7 - L
+  seed 2741 ON window +2 engine frames (same ROM md5s), aud252 seeds 1914 / 2230: hcr3 closed the Icy Wind stat tail (stat SE / select SE ROM-exact), the recoil hp rows and the faint SE lag clip (faint / select rows -2 / 0 and 0 / -4); the item chain stays open (starts 6 rows before the ROM `playanimation`, now -8 / -6; a +6 lead made T2 worse, the ROM's first-SE offset is 19 vs 13 rows by seed; docs hcr3). rollout5 / iceball5 are lab damage-roll drift, not an hp-duration law (hcr3 step 1: the hp command is already D + 8). Also: the ON hold / lead take the first print's u only; Curse -3 / Seismic Toss -1 off the 7 - L
   rule; unaudited bodies (L < 4) on min(u - 2, 2); the hcr2 labs' app-only foe pose change at the print end (410 px); held-item restart lead trims made T2 worse (gsp2b sweep); no ON lab
   stays in step past a wake-up (lab foe wakes turn 2 on the ROM, 3 in the app: lab staging); fsc1 c1 is OFF only (the ON ROM keeps the blink, fly-gust-on); chg1 Dive player unleash first
   print +1, the miss tail +1 rule only on semi-invulnerable turns. **fsc2m:** the OFF faint -> party-summary offset (median -8) is mostly the drivers' A cadence (ROM driver pulses A every

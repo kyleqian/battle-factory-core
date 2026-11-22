@@ -9,6 +9,7 @@ import {
   BATTLE_2_SCENE_HANDOFF_ELAPSED,
   BATTLE_TRANSITION_START_TE,
   INITIAL_BATTLE_2_ROOM_STATE,
+  LOGO_WAVE_TRANSITION_START_TE,
   ORDINARY_INTRO_HANDOFF_AFTER_BGM,
   brainBattleIntroHandoffTe,
   ordinaryBattleIntroHandoffElapsed,
@@ -16,6 +17,7 @@ import {
   ordinaryTransitionDrawElapsed,
   type BattleRoomState,
 } from "../src/engine/battleRoom.ts";
+import { logoWiggleIntroHandoffTe } from "../src/engine/battleTransitionLogoWiggle.ts";
 import { FactorySession } from "../src/factorySession.ts";
 import { ActionLog, RandomPlayer, Rng } from "../tools/soak/randomRoundSoakDriver.ts";
 
@@ -34,9 +36,9 @@ describe("tri1: the ordinary room's transition clock and intro handoff", () => {
       const draw = ordinaryTransitionDrawElapsed(room(encounter));
       expect(draw).toBe(encounter === "first" ? 26 : 23);
       for (const [kind, id] of Object.entries(ID)) {
-        // LOGO_WIGGLE is not drawn: the room's fallback picture stands in (CIRCLES_MEET in battle 1, ASYMMETRIC_SPIRAL_IN_SEQ after), on its clock
-        const drawn = kind === "logoWiggle" ? (encounter === "first" ? "circlesMeet" : "asymmetricSpiralInSeq") : kind;
-        const start = drawn === "asymmetricSpiralInSeq" ? ASYMMETRIC_SPIRAL_IN_SEQ_TRANSITION_START_TE : BATTLE_TRANSITION_START_TE;
+        // LOGO_WAVE starts at trn226's te 32 (its constants assume it), ASYMMETRIC_SPIRAL_IN_SEQ at 23, the rest (LOGO_WIGGLE, drawn by trn226) at 26
+        const start = kind === "logoWave" ? LOGO_WAVE_TRANSITION_START_TE
+          : kind === "asymmetricSpiralInSeq" ? ASYMMETRIC_SPIRAL_IN_SEQ_TRANSITION_START_TE : BATTLE_TRANSITION_START_TE;
         expect(ordinaryBattleTransitionTe(room(encounter, id, draw))).toBe(start);
       }
     }
@@ -76,7 +78,12 @@ describe("tri1: the ordinary room's transition clock and intro handoff", () => {
       const brain = brainBattleIntroHandoffTe({ transitionPresentation: { transitionId: ID[kind] } } as BattleRoomState);
       expect(ORDINARY_INTRO_HANDOFF_AFTER_BGM[kind], kind).toBe(brain - BATTLE_TRANSITION_START_TE);
     }
-    // the two IN_SEQ spirals hand off one frame earlier here than the brain table's end; LOGO_WAVE five
+    // LOGO_WAVE: trn226's 209 on its start te 32
+    expect(brainBattleIntroHandoffTe({ transitionPresentation: { transitionId: ID.logoWave } } as BattleRoomState) - LOGO_WAVE_TRANSITION_START_TE)
+      .toBe(ORDINARY_INTRO_HANDOFF_AFTER_BGM.logoWave);
+    // the two IN_SEQ spirals and LOGO_WIGGLE hand off one frame earlier here than the brain table's end (LOGO_WIGGLE: trn226's Noland-room
+    // labs give the wiggle's end + 3; tri1's ordinary-room catcher runs the ROM's VS -> tray 348, 3 battles)
+    expect(logoWiggleIntroHandoffTe() - BATTLE_TRANSITION_START_TE).toBe(ORDINARY_INTRO_HANDOFF_AFTER_BGM.logoWiggle + 1);
     expect(brainBattleIntroHandoffTe({ transitionPresentation: { transitionId: ID.asymmetricSpiralInSeq } } as BattleRoomState)
       - ASYMMETRIC_SPIRAL_IN_SEQ_TRANSITION_START_TE).toBe(ORDINARY_INTRO_HANDOFF_AFTER_BGM.asymmetricSpiralInSeq + 1);
     expect(brainBattleIntroHandoffTe({ transitionPresentation: { transitionId: ID.symmetricSpiralInSeq } } as BattleRoomState)

@@ -65,9 +65,10 @@ describe("trn178: the Scene OFF action-transition pause", () => {
   });
 
   it("control: no USEDMOVE next (end-of-turn poison print, the second action's MoveEnd) and Wish add nothing", () => {
-    // Toxic turn: the foe's Tackle is followed by the poison end-of-turn print, not a used print: one pause only (the first action's).
+    // Toxic turn: the foe's Tackle is followed by the poison end-of-turn print, not a used print: the first action's pause (16), then
+    // etp1 (bf7ede0b8, docs/fnt1-fainted-box-clear.md "etp1"): the end-turn tick print takes the ROM's end-turn rows (15), ROM labs gsp3-toxic / etp1 exact.
     const toxic = trn176Production("PRIMEAPE", MOVE.TOXIC, "ONIX", MOVE.TACKLE, true, "off");
-    expect(transitionPauses(toxic.rows)).toEqual([16]);
+    expect(transitionPauses(toxic.rows)).toEqual([16, 15]);
     expect(toxic.rows.at(-4)!.type).toBe("sprite-visibility");
     // Wish: the anchor is the used print itself; only msg175's pause (49 = 40 + 7 + 4 - 2, now 1 + ACTION_TRANSITION_ROWS) precedes
     // the MoveEnd receipt, unchanged.
@@ -78,7 +79,8 @@ describe("trn178: the Scene OFF action-transition pause", () => {
   it("Scene ON presents the same pause (trn181): Bulk Up 12, Scratch 13, Rest 15, Toxic 16; the residual is the anchor-end error", () => {
     for (const [move, species, pause] of [[MOVE.BULK_UP, "PRIMEAPE", 12], [MOVE.SCRATCH, "PRIMEAPE", 13], [MOVE.REST, "SNORLAX", 15], [MOVE.TOXIC, "PRIMEAPE", 16]] as const) {
       const rows = trn176Production(species, move, "ONIX", MOVE.TACKLE, species === "PRIMEAPE", "on").rows;
-      expect([move, transitionPauses(rows)]).toEqual([move, [pause]]);
+      // etp1: Toxic's turn also ends on the poison tick print, which takes the end-turn rows (15) in both scenes.
+      expect([move, transitionPauses(rows)]).toEqual([move, move === MOVE.TOXIC ? [pause, 15] : [pause]]);
     }
     const on = ["off108-bulk-up-ply-primeape-onix", "off108-sand-attack-ply-primeape-snorlax", "off108-protect-ply-primeape-onix",
       "off108-rest-ply-snorlax-onix"].map((name) => evaluate(name, "on").residual);

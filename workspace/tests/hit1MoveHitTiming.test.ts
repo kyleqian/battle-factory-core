@@ -92,7 +92,7 @@ describe("hit1: liveMoveEndSeWaitRows is the ROM's missing tail, move by move", 
     ["Thunder Punch", 9, 22, 21, 0], ["Twineedle", 41, 17, 16, 0], ["Supersonic", 48, 21, 13, 7], ["Ember", 52, 3, 2, 0],
     ["Growth", 74, 20, 19, 0], ["Razor Leaf", 75, 20, 19, 0], ["Recover", 105, 15, 4, 10], ["Sludge", 124, 6, 5, 0],
     ["Hyper Fang", 158, 2, 1, 0], ["Reversal", 179, 1, 0, 0], ["Milk Drink", 208, 17, 3, 13], ["Dynamic Punch", 223, 46, 26, 19],
-    ["Metal Claw", 232, 14, 13, 0], ["Synthesis", 235, 10, 5, 4], ["Blaze Kick", 299, 9, 8, 0], ["Poison Tail", 342, 4, 3, 0], ["Covet", 343, 21, 20, 0],
+    ["Synthesis", 235, 10, 5, 4], ["Blaze Kick", 299, 9, 8, 0], ["Poison Tail", 342, 4, 3, 0], ["Covet", 343, 21, 20, 0],
   ] as const)("%s: %i rows = trail %i + 1 + unpresented lead %i", (_name, id, rows, trail, unpresented) => {
     expect(rows).toBe(trail + 1 + unpresented);
     for (const attacker of [0, 1] as const) expect(liveMoveEndSeWaitRows(req(id, attacker), field)).toBe(rows);

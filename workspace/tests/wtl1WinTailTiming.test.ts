@@ -2,19 +2,20 @@
 // after the last "fainted!" press P the script runs moveend, the exp script and the fainted-mon checks, HandleEndTurn_BattleWon plays the
 // victory BGM at P + 21 / 22, and "Player defeated ...!" shows its first glyph 4 frames after the BGM (P + 25 / 26; ours was P + 2). After
 // the press P2 on it, trainerslidein is dispatched at P2 + 4, the slide's 48 callbacks end at P2 + 52 and the lose text's first glyph
-// shows at P2 + 55 (ours 38).
+// shows at P2 + 55 (ours 38). Since the merge with the box's night run, "Player defeated" is the box's wtl1 (the draw-nothing rows around the
+// MoveEnd receipts, WIN_TAIL_PRE_RECEIPT_ROWS / WIN_TAIL_POST_RECEIPT_ROWS, ROM labs aud241c-win: P + 26); the slide's wait is this branch's.
 import { describe, expect, it } from "vitest";
 import {
   LOSS_TRAINER_SLIDE_PRINT_GAP_FRAMES,
-  WIN_BGM_AFTER_ANCHOR_ROWS,
-  WIN_PRINT_AFTER_BGM_ROWS,
+  WIN_TAIL_POST_RECEIPT_ROWS,
+  WIN_TAIL_PRE_RECEIPT_ROWS,
   WIN_TAIL_TRAINER_SLIDE_LEAD_FRAMES,
 } from "../src/engine/battleResolutionPresentation.ts";
 import {
   createBattleResolutionPresentationRenderView,
   isBattleResolutionButtonMessageAcceptable,
 } from "../src/engine/battleResolutionPresentationRender.ts";
-import { VICTORY_BGM_AFTER_AUTOMATIC_MESSAGE, VICTORY_BGM_AFTER_CONTROLLER_COMMAND, VICTORY_BGM_AFTER_FAINT_DISMISS } from "../src/engine/battleEndSounds.ts";
+import { VICTORY_BGM_AFTER_FAINT_DISMISS } from "../src/engine/battleEndSounds.ts";
 import { currentMessage, playCensusBattleUntil } from "./helpers/btn1Battle";
 
 type Row = { message: string | null; chars: number; arrow: number | null; slideX2: number | null };
@@ -60,18 +61,16 @@ function winTail(seed: number, scene: "on" | "off", faintK: number, defeatedK = 
 }
 
 describe("wtl1: the win tail's waits", () => {
-  it("the print's delays are lha1's victory BGM delays + 4; the slide's lead 14, its print gap the loss tail's 3", () => {
-    expect(WIN_BGM_AFTER_ANCHOR_ROWS).toEqual({
-      button: VICTORY_BGM_AFTER_FAINT_DISMISS, automatic: VICTORY_BGM_AFTER_AUTOMATIC_MESSAGE, controller: VICTORY_BGM_AFTER_CONTROLLER_COMMAND,
-    });
-    expect(WIN_PRINT_AFTER_BGM_ROWS).toBe(4);
+  it("the box's win-tail holds (5 / 19); the slide's lead 14, its print gap the loss tail's 3", () => {
+    expect([WIN_TAIL_PRE_RECEIPT_ROWS, WIN_TAIL_POST_RECEIPT_ROWS]).toEqual([5, 19]);
     expect(WIN_TAIL_TRAINER_SLIDE_LEAD_FRAMES + 38 + LOSS_TRAINER_SLIDE_PRINT_GAP_FRAMES).toBe(55);
   });
 
   for (const [seed, scene] of [[0, "off"], [10, "on"]] as const) {
     it(`seed ${seed} Scene ${scene.toUpperCase()}: "Player defeated" at P + 26 (BGM + 4), the lose text at P2 + 55, the slide from P2 + 14`, () => {
       const t = winTail(seed, scene, 4);
-      expect(t.defeatedGlyph).toBe(VICTORY_BGM_AFTER_FAINT_DISMISS + WIN_PRINT_AFTER_BGM_ROWS);
+      // the catcher's ROM: the victory BGM (lha1's 22 after the press) + 4
+      expect(t.defeatedGlyph).toBe(VICTORY_BGM_AFTER_FAINT_DISMISS + 4);
       // until then the released "fainted!" box stays, its arrow frozen (a press off a redraw frame, fnt1)
       expect(t.rows.slice(1, t.defeatedGlyph).every((r) => r.message === "previous" && r.arrow !== null)).toBe(true);
       expect(t.loseGlyph - t.defeatedPress).toBe(55);

@@ -92,6 +92,43 @@ than our 22 (wtl1 "Open"), so its "Player defeated" box is ready a frame sooner,
 waits for the test player's next press. The rest of the list is the same gaps as before at sizes of the same order (the rounds played
 differ); SE_EXIT -> MUS_HEAL, which follows the win tail, fell from 135 frames to 28.
 
+## Merged with the box's night run (`merged/`, 2026-11-22)
+
+The box's run (cax31/master `3507c89b2`, 151 commits) merged into this branch. Where both sides fixed the same ROM behaviour the merge
+keeps one implementation, the box's:
+- **"Player defeated"**: the box's wtl1 (`60336f6e7`, holds around the MoveEnd receipts, P + 26) in place of this branch's
+  `withWinPrintHold` (BGM + 4, the same frame). The slide's wait before the lose text (P2 + 55) is this branch's alone and stays.
+- **The sandstorm's "buffeted" print**: the box's etp1 (`33bdace6d`, a lead on the print) in place of sst1's tail on the animation (the
+  same instruction count). sst1's sound clock stays (the box did not touch it).
+- **Metal Claw**: the box's bdt1 window (154 rows, `c8faea1e3`) in place of hit1's Cmd_end wait rows for it (14; the same ROM rows). On
+  the merged tree hit1's rule already added 0 for it; Metal Claw is now named in its "window models the wait" set.
+- **Transitions**: tri1 keeps the ordinary room (the box lists it as open, ISSUES #225); it now takes trn226's LOGO_WAVE start te (32)
+  and trn226's LOGO_WIGGLE drawing.
+
+The six traces made again on the merged tree (the test player's rounds change with any timing change: 28 battles), every menu followed:
+
+| | e7ea2caf8 (`after/`, 25 battles) | merged (`merged/`, 28 battles) |
+|---|---|---|
+| gaps | 2,813 | 3,000 |
+| within 1 frame | 81.2% | 83.1% |
+| off by 6+ | 8.0% | 6.7% |
+| the game's part: within 1 / off 6+ | 78.5% / 7.5% | 81.5% / 6.1% |
+| the game's frames off per 7 battles | 1,045 | 782 |
+
+The three fixes on the merged tree, ROM against ours:
+- **"Player defeated"**: 4 frames after the victory music on both sides in 21 of 22 wins (the music 22 frames after the press on ours,
+  20-22 on the ROM). The 22nd (t8off) is a win by an end-of-turn poison KO: no MoveEnd receipts, so neither side's rule reaches it and
+  ours prints about 24 frames early (the box's wtl1 doc lists that path as not measured). The lose text is P2 + 55 in 22 of 22.
+- **Music -> ball tray**: equal in 28 of 28 battles, every transition the sweep drew (LOGO_WIGGLE 5 times at 348, LOGO_WAVE once at 366).
+- **Sandstorm**: SE_M_SANDSTORM at +88 on both sides in 6 of 6 turns; the buffeted print's first glyph on the ROM's frame. During etp1's
+  lead rows our box is blank, where the ROM keeps "The sandstorm rages." until the glyph (2 or 8 frames a turn, pictures only: the
+  renderer blanks the box in any print's lead rows).
+
+Re-pinned in the merge, trajectories only (no ROM frame), each with its own scanner: `randomRoundSoak` (the milestone 43,693 / 3,052
+render calls; M-B "full" seed 0 68,945 / battle 3 / turn 21, seed 1 57,651; "vanilla" 9,336 / 9,315; the #89 Baton Pass pin 16 from
+`batonPassSearch.ts --seeds 0:40`: candidates 16, 20, 25, 27, 35), `lbrd` (a scan of 0..23 in all three roles: only 10 passes all 15),
+`sst1` (seed 44's round now has 5 sandstorm turns, all on the ROM's frames). The ROM-anchored pins of both sides pass unchanged.
+
 ## Re-pins (the three fixes together)
 
 The soak's test player presses on its own clock, so any timing change re-rolls its rounds (as fnt1 and chg1 did):

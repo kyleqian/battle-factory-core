@@ -14,11 +14,18 @@ export const OPPONENT_SUMMARY_FADE_FRAMES = 16;
 /** Frames from the hide command's start to the first blended frame (script command -> controller task -> first display). */
 export const OPPONENT_SUMMARY_FADE_DELAY_FRAMES = 2;
 
+/**
+ * fnt2 (fnt2-shellbell-ko lab, ROM `FaintedMonSendOutNew` / SE 114 at the heal's `datahpupdate` + 20 + choice extra; seed 2 res6 +23): a Shell Bell heal's hp command (bar + 1 + 3 tail rows) runs
+ * between the faint print and the draw. The heal returns into `MoveEnd` past its first rows, so the lead from the heal's `datahpupdate` is 3 rows shorter than from a faint print's end, and the
+ * hp command's own 3 tail rows already run those script rows: 6 rows off the lead.
+ */
+export const OPPONENT_SUMMARY_SHELL_BELL_LEAD_FRAMES = 6;
+
 export type OpponentPartySummaryTiming = Readonly<{ minimumFrames: number; leadFrames: number }>;
 
 /** The opponent draw command's duration: the optional script lead, then the controller hold to the next print's first glyph. */
-export function opponentPartySummaryDrawTiming(afterFaint: boolean, voluntarySwitch = false): OpponentPartySummaryTiming {
-  const leadFrames = afterFaint ? OPPONENT_SUMMARY_FAINT_LEAD_FRAMES : 0;
+export function opponentPartySummaryDrawTiming(afterFaint: boolean, voluntarySwitch = false, choiceExtraFrames = 0, afterShellBellHeal = false): OpponentPartySummaryTiming {
+  const leadFrames = afterFaint ? OPPONENT_SUMMARY_FAINT_LEAD_FRAMES + choiceExtraFrames - (afterShellBellHeal ? OPPONENT_SUMMARY_SHELL_BELL_LEAD_FRAMES : 0) : 0;
   const switchOrder = voluntarySwitch ? OPPONENT_SUMMARY_SWITCH_ORDER_FRAMES : 0;
   return Object.freeze({ minimumFrames: leadFrames + OPPONENT_SUMMARY_HOLD_FRAMES + switchOrder, leadFrames });
 }

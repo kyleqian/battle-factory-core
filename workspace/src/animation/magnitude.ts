@@ -136,6 +136,11 @@ function sourceAtAge(age: number, branch: MagnitudeBranch, firstInactiveAge: num
   };
 }
 
+/** The body's first inactive age: the HorizontalShake's decay (offset floor(power / 10) + 3, 8 rows per step) plus the 100-row shake lead. */
+export function magnitudeFirstInactiveAge(movePower: number): number {
+  return 100 + 8 * (magnitudeInitialOffset(movePower) - 1) + 2;
+}
+
 /** Complete source-relative Magnitude body through its first inactive row. */
 export function magnitudeAtAge(age: number, inputs: Readonly<MagnitudeLiveInputs>): MagnitudeFrame {
   assertInputs(inputs);
@@ -146,9 +151,7 @@ export function magnitudeAtAge(age: number, inputs: Readonly<MagnitudeLiveInputs
     50,
     inputs.initialPlatformX,
   );
-  const initialOffset = magnitudeInitialOffset(inputs.movePower);
-  const shakeInactiveAge = 100 + 8 * (initialOffset - 1) + 1;
-  const firstInactiveAge = shakeInactiveAge + 1;
+  const firstInactiveAge = magnitudeFirstInactiveAge(inputs.movePower);
   const source = sourceAtAge(age, branch, firstInactiveAge);
   const palette = branch === "intense"
     ? earthquakePaletteAtAge(age)

@@ -12,7 +12,7 @@ import {
   RAIN_CONTINUES_SCRIPT_START_ROWS,
   STA5_STATUS_BODY_TAIL_ROWS,
   lse2BodySoundAgeShift,
-  bodyHitTailRuleApplies, bodyGapPrintRuleApplies, LSE4_WINDOW_SHORT_ROWS, bodyLeadTailCompositionApplies, bodyStatusTailRuleApplies, bodyLse2RuleApplies, bodySLeadRuleApplies,
+  bodyHitTailRuleApplies, bodyGapPrintRuleApplies, LSE4_WINDOW_SHORT_ROWS, C_LEAD_WINDOW_ADJUST, bodyCLeadRuleApplies, bodyLeadTailCompositionApplies, bodyStatusTailRuleApplies, bodyLse2RuleApplies, bodySLeadRuleApplies,
   bodyLeadRuleApplies,
 } from "./battleResolutionPresentation.ts";
 import { animScriptSeStopRow, cmdEndSeWaitRows } from "./animEndSeWait.ts";
@@ -1586,7 +1586,9 @@ const NO_UNIVERSAL_ROWS = Object.freeze({ pre: 0, post: 0 });
  * lead-only), the lse4 window-short bodies, and the bodies whose window models the wait itself (Sing, Solar Beam, Self-Destruct,
  * Transform).
  */
-const CMD_END_SE_WAIT_MODELED_MOVE_IDS: ReadonlySet<number> = new Set([47, 76, 120, LIVE_TRANSFORM_MOVE_ID]);
+// Metal Claw (232): the box's bdt1 window (154 = the 140-row source body + the ROM script's 14 held rows, ROM labs bdt1-metalclaw-*-on)
+// is the same Cmd_end wait hit1 measured (14 rows); the tdr1 merge keeps bdt1's.
+const CMD_END_SE_WAIT_MODELED_MOVE_IDS: ReadonlySet<number> = new Set([47, 76, 120, 232, LIVE_TRANSFORM_MOVE_ID]);
 export function cmdEndSeWaitRuleApplies(request: BattleMoveAnimationRequest): boolean {
   const id = request.moveId;
   return request.turnTrapBody !== true && request.generalRain !== true && !CMD_END_SE_WAIT_MODELED_MOVE_IDS.has(id)
@@ -1665,15 +1667,20 @@ const HPD4_BODY_TAIL_ROWS: ReadonlyMap<number, number> = new Map([[49, 3], [82, 
 // controller runs 10 rows after the window (the explosion script's own instructions, ROM gap 10), so the tail is 9 (3 + 4 + 123 + 9 = A -> H 139 + pre).
 // lse2: rows after a lead-first lse2 body (on top of its script tail where it has one) that put the next command on the ROM row (R -> H = lead + 3 + len + 4 less the window the body presents).
 const LSE2_BODY_TAIL_ROWS: ReadonlyMap<number, number> = new Map([[322, 3], [347, 3], [59, 2], [227, 10]]);
-const LIVE_MOVE_LEADLESS_TAIL_ROWS: ReadonlyMap<number, number> = new Map([[120, 9]]);
+// hie5: a restore-HP body (Recover / Soft-Boiled / Milk Drink / Moonlight) keeps the script's animation clear after the body's last visible row: the ROM runs
+// `healthbarupdate` (EffectRestoreHp+0x16) 25 / 10 / 27 / 8 rows after the engine's `hp` command (labs aud242k-recover-player-on, aud242r-softboiled-player-on,
+// aud261-milkdrink-player-on, aud242r-moonlight-player-on: every later SE of the lab went from -23 / -5 / -25 / -8 to the body's own +2 / +5 / +2 / +4).
+const HIE5_RESTORE_HP_BODY_TAIL_ROWS: ReadonlyMap<number, number> = new Map([[105, 25], [135, 10], [208, 27], [236, 8]]);
+const LIVE_MOVE_LEADLESS_TAIL_ROWS: ReadonlyMap<number, number> = new Map([[120, 9], [153, 9], ...HIE5_RESTORE_HP_BODY_TAIL_ROWS]);
 // hpd8: the shape-A bodies' tail is whatever the 3 pre + 3 post rows of the ROM span (lead + 3 + len + 4) leave over: 6 - pre - post (T 1 / 3 / 6 in hpd7).
 const HPD8_SHAPE_A_ROWS_AROUND_BODY = 6;
 export function liveMoveHitTailRows(command: Extract<BattleResolutionPresentationCommand, { type: "move-animation" }>, field: BattleResolutionDisplayedField): number {
   const request = command.animation;
   if (request === undefined) return 0;
   if ((command.timing.bodyLeadFrames ?? 0) === 0) return liveSubstituteSwapApplies(request, field) === true ? 0 : LIVE_MOVE_LEADLESS_TAIL_ROWS.get(request.moveId) ?? 0;
-  const table = HPD4_BODY_TAIL_ROWS.get(request.moveId) ?? STA5_STATUS_BODY_TAIL_ROWS.get(request.moveId) ?? LSE2_BODY_TAIL_ROWS.get(request.moveId);
+  const table = HIE5_RESTORE_HP_BODY_TAIL_ROWS.get(request.moveId) ?? HPD4_BODY_TAIL_ROWS.get(request.moveId) ?? STA5_STATUS_BODY_TAIL_ROWS.get(request.moveId) ?? LSE2_BODY_TAIL_ROWS.get(request.moveId);
   if (table !== undefined) return table;
+  if (bodyCLeadRuleApplies(request.moveId)) return liveSubstituteSwapApplies(request, field) === true ? 0 : C_LEAD_WINDOW_ADJUST.get(request.moveId) ?? 0;
   const gapPrint = bodyGapPrintRuleApplies(request.moveId);
   if (!(bodyHitTailRuleApplies(request.moveId) || gapPrint) || liveSubstituteSwapApplies(request, field) === true) return 0;
   const rows = liveMoveUniversalRows(request, field);
@@ -1758,10 +1765,10 @@ export function liveMoveSourceAge(
   let precedingStatRows = 0;
   for (let c = state.commandIndex - 1; c >= 0 && segment!.commands[c]!.type === "stat"; c -= 1) precedingStatRows += battleResolutionCommandDuration(segment!.commands[c]!, field);
   const soundShift = lse2BodySoundAgeShift(command.animation.moveId, presentedBodyLead(command, field), precedingStatRows);
-  const age = state.lifecycle.phaseElapsed - seGate - pre - soundShift;
+  const age = state.lifecycle.phaseElapsed - seGate - pre - soundShift + (command.timing.soundAgeLeadFrames ?? 0);
   // aud260: the age of the command's last presenting row (the command completes when phaseElapsed + 1 >= its duration), for the sound-only tail past the window.
   const duration = battleResolutionCommandDuration(withoutBodyLead(command), field, liveMoveTimingBodyOf(state.liveMoveSpriteOrderInput), state.liveMoveBattlerX2Input?.moveUse);
-  const lastAge = duration - 1 - seGate - pre - soundShift;
+  const lastAge = duration - 1 - seGate - pre - soundShift + (command.timing.soundAgeLeadFrames ?? 0);
   // snd3: Sing's geometry-derived ROM body (gAnimScriptActive rise .. first inactive row, liveSingBodyRows), read only by the quiet-BGM restore row.
   const request = command.animation;
   const singBodyRows = (): number | null => liveSingBodyRows(request, field);
@@ -1816,6 +1823,10 @@ const STATS_CHANGE_AFTER_LSE2_BODY_AGE_SHIFT = 3;
 // sta5: after a Flatter / Swagger body (lead + tail landed) and its 2-row `stat` command the `stats-change` command starts 2 rows (the not yet landed
 // pre-print rows) before the ROM's `playanimation`, whose SE is exec + 4: the generic age (calibrated on the old, earlier start) is shifted by 1.
 const STATS_CHANGE_AFTER_STAT_BODY_AGE_SHIFT = 1;
+// stc1 (ROM labs stc1-* / hcr1b-*-off, 61 of 105 OFF T2 stat rows at +3, 13 at +2): Scene OFF's StatsChangeAnimation SE is playanimation's exec + 4. After the
+// OFF body (Pausex20 .. playanimation) the command starts on exec + 1 (SE = command age 3); a secondary effect's (BattleScript_StatDown / StatUp) starts on exec (age 4).
+const STATS_CHANGE_SCENE_OFF_AFTER_BODY_AGE_SHIFT = 3;
+const STATS_CHANGE_SCENE_OFF_SECONDARY_AGE_SHIFT = 2;
 
 /**
  * aud248: the presented stats-change command and its age (rows since the animation's rel 0, after the IsBattleSEPlaying gate; the same age as the
@@ -1823,6 +1834,7 @@ const STATS_CHANGE_AFTER_STAT_BODY_AGE_SHIFT = 1;
  */
 export function statsChangeSourceAge(
   state: BattleResolutionPresentationState,
+  sceneOffShift = false,
 ): Readonly<{ battler: 0 | 1; argument: number; age: number; direction: "up" | "down" }> | null {
   const command = state.segments[state.segmentIndex]?.commands[state.commandIndex];
   if (command === undefined || command.type !== "stats-change") return null;
@@ -1837,7 +1849,10 @@ export function statsChangeSourceAge(
     ? (previous.animation !== undefined && bodySLeadRuleApplies(previous.animation.moveId) ? 0
       : previous.animation !== undefined && bodyLse2RuleApplies(previous.animation.moveId) ? STATS_CHANGE_AFTER_LSE2_BODY_AGE_SHIFT : STATS_CHANGE_AFTER_BODY_AGE_SHIFT)
     : afterStatBody ? STATS_CHANGE_AFTER_STAT_BODY_AGE_SHIFT : 0;
-  const age = state.lifecycle.phaseElapsed - (command.timing.seGateFrames ?? 0) + afterBodyLead;
+  const rules = state.segments[state.segmentIndex]!.beforeRules;
+  const sceneOff = sceneOffShift && rules !== null && rules !== undefined && (rules.rulesContext.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0;
+  const offShift = !sceneOff ? 0 : previous?.type === "move-animation" ? STATS_CHANGE_SCENE_OFF_AFTER_BODY_AGE_SHIFT : STATS_CHANGE_SCENE_OFF_SECONDARY_AGE_SHIFT;
+  const age = state.lifecycle.phaseElapsed - (command.timing.seGateFrames ?? 0) + afterBodyLead + offShift;
   if (age < 0 || fieldBattler(currentCommandField(state), command.battler).substituteDoll === true) return null;
   // The pure General_StatsChange reducer's params (null for an argument it rejects: the ROM plays nothing); read here so the sound
   // emitter stays outside the animation boundary (tests/animation/animationBoundaryRatchet.test.ts).
@@ -2031,8 +2046,7 @@ export function battleResolutionCommandDuration(
     case "sprite-visibility":
       return command.type === "switch-in"
         ? command.timing.minimumFrames + (command.settleHoldFrames ?? 0) + (command.entryScriptHoldFrames ?? 0)
-        // wtl1: the win print's hold on the last moveend receipt (withWinPrintHold).
-        : command.timing.minimumFrames + (command.type === "sprite-visibility" ? command.holdFrames ?? 0 : 0);
+        : command.timing.minimumFrames;
     case "party-summary":
       return command.timing?.minimumFrames ?? 1;
     case "turn-end":
@@ -2107,7 +2121,6 @@ function substituteFadeClearsBox(segment: BattleResolutionSegment): boolean {
 export function battleResolutionCommandFallbackDuration(command: BattleResolutionPresentationCommand): number {
   if (command.type === "move-animation") return Math.max(1, (command.timing.seGateFrames ?? 0) + command.timing.minimumFrames);
   if (command.type === "trainer-slide") return (command.timing.leadFrames ?? 0) + command.timing.minimumFrames + (command.timing.holdFrames ?? 0);
-  if (command.type === "sprite-visibility") return command.timing.minimumFrames + (command.holdFrames ?? 0);
   const timing = (command as { timing?: { minimumFrames?: number } }).timing;
   return Math.max(1, timing?.minimumFrames ?? 1);
 }
@@ -3232,6 +3245,11 @@ export function createBattleResolutionPresentationRenderView(
         && state.sourceDecision.kind === "switch"
         && state.lifecycle.phaseElapsed
           >= command.timing.minimumFrames - 2
+      )
+      || (
+        command?.type === "turn-end"
+        && command.timing.blankTailFrames !== undefined
+        && state.lifecycle.phaseElapsed >= command.timing.minimumFrames - command.timing.blankTailFrames
       )
         ? "blank"
         : "message",

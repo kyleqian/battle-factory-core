@@ -5,6 +5,49 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 2026-11-22 — CAX31 daily run (supervisor, Opus 5.5, 2026-11-21 13:30 -> 2026-11-22 05:30 UTC): wind-down: sound timing ON -44 % / OFF -36 %, "Player defeated" / end-turn prints on the ROM rows, 14 more rare rules, two Frontier transitions
+
+- **State:** master clean, no push. **No DEFERRED items.** Final engine `30cd3dfac` (later commits: tests / docs / tools). **ENGINE_BUILD `eb-99fc9734e67828a5`** (dist-lib of `30cd3dfac`;
+  tell the website). Evidence `.integration/validation/sv-20261121/`; briefs + supervisor ledger `.integration/briefs/` (`supervisor-notes.txt`).
+- **Website (Mac):** no API change (`challenge-request` / `start`, `ready`, input unchanged). **Play changes (older recorded games replay on their own build only):** "Player defeated" takes its
+  first A 24 frames later (wtl1); end-turn prints (weather, poison / burn / Future Sight / Wish / Ingrain ticks, after "was dragged out!") open on the ROM's rows (wtl1 / etp1); a super-effective drain
+  KO prints "fainted!" 6 frames later, a Shell Bell KO's party summary 6 earlier (fnt2); every move-timing change below shifts later presses. No new audio files.
+- **Sound (S11, T2 25 ON + 24 OFF, drv1 cadence, `tools/audio/rescoreAll.sh` + `soundScoreboard.py`, t2k -> t2k3):** 0 missing / 0 extra throughout; **ON 25,747 -> 14,435 (-44 %), exact 2,366 -> 2,935;
+  OFF 3,164 -> 2,040 (-36 %), exact 600 -> 725.** Landed (sections of `docs/aud251-s11-scoreboard-refresh.md` unless named): b4l / b4l2 (11 B4 bodies present the kernel lead + per-id window; Ghost Curse
+  ROM-checked), stc1 / stc2 (OFF stat SE; hp -> stat = bar + 8 both scenes; OFF confusion self-hit), hcr3 (stat-next / recoil hp rows, faint SE clip), bdt1 (Metal Claw window 154, Dig, Rest), gsp3 (asleep
+  turn, poison / burn tick, infatuation), fch1 (AI replacement choice 0..4 frames, D4 faithful timing), chg2 / chg3 (two-turn moves; Aerial Ace's impossible stat change), hie5 (held item after print-ended
+  scripts, restore-HP tails), eqk1 (Earthquake hit-all transition, Pausex20 before "doesn't affect", Magnitude OFF), itm1 (held item after a faint waits for SE_FAINT), mxp1 (Explosion / Self-Destruct /
+  Magnitude ON), wtl1 / etp1 / etp2 / fnt2 (`docs/fnt1-fainted-box-clear.md`). Census eventsDigest identical on every fold (0..199 both scenes; hcr3 0..999): no battle-rule change this run.
+- **Presentation:** trn226 (#225): LOGO_WIGGLE drawn from source, LOGO_WAVE starts at te 32: 0 bad frames of ~1,300 both scenes (Noland room only). msw2: #227 closed (ROM = engine after SELECT + Mimic,
+  pinned), #223 Substitute box clear on the ROM row.
+- **Gameplay coverage (item 0d):** run start: luck day 6 0 hits; ROM replay on `5fbac1476` **44 / 44** (1,289 states) + **110 / 110** stages. rrh6 + rrh7: 14 rare rules hand-staged, ROM-matched:
+  **85 -> 99 / 110**. No wind-down replay (no rule change; handoff item 0d).
+- **Cleanup:** cln12 / cln13 (`tools/integration/labCompare.sh`: ROM probe + engine + aligned SE / first-glyph table, cross-run ROM reuse; `tools/battle-lab/README.md` "Lab compare"); branch / worktree
+  prune as steps folded; disk: 28 census `tree/` dirs and 47 stale `/tmp` scratch entries + two closed 11-13 oracle logs (62 GB) removed (`.integration/evidence/TREES-PRUNED-20261121b.txt`, `TMP-PRUNED-20261121.txt`).
+- **Decision (reversible):** hcr3's aud252 item rows moved away (+4 -> -8 / -6) while the faint / select rows went exact: accepted as a #219 residual; itm1 then closed it (-2 / 0).
+- **Lapses:** rrh6 (side) ran git in the main tree (8 commits on master; a `commit -a` swept b4l's WIP `moveAnimSounds.ts` into a stage-file commit; content correct, kept). A supervisor `cd` failure merged fnt2
+  straight into master while msw2 ran there (no conflict, kept) and deleted the merged 11-20 `fold-b` branch (restored at `0a63934b2`). Disk reached 99 % at 20:10. The master chain on `5819467ba` lost its build to OOM (re-run green later).
+- **Gates (final engine `30cd3dfac`):** vanilla 0:20 OFF **20 / 20**, ON **20 / 20**; 0:60 default / winning / winning-swap **60 / 60** each; varied-RNG winning carry 0 / 14 / 28 + winning-swap carry 0
+  **100 / 100** each (0 crash / 0 hang). Full suite on `30cd3dfac` **16,711 passed / 3 failed**, all test-side (mxp1's Explosion window 212 -> 213, etp1's poison end-turn rows; fixed in `bcde22ba2`, 11 / 11);
+  typecheck / build / build:lib 0. **Final tip** (tools / docs after the gates): full suite **16,715 passed / 1 failed** (the iss215 ratchet: nrv1's new tool lacked the pixel installer; fixed in `8e37b066d`,
+  24 / 24 with the lab-folder tests), build 0. Mid-run full suites: `0a6b92a55` 16,671 / 0; `14f3e5a44` 16,671 / 0; `2aa2d69e1` 16,671 / 0; `62ebcc5b3` 16,680 / 0; earlier `9e5a45dbc` 11 failed (b4l pins, b4l2),
+  `22c58649b` 5 (stc2), `5819467ba` 2 (lbrd trajectory). `play:random --minutes 10 --scene both --lobby-new-challenge`: ON 28 battles / 12 swaps, OFF 59 / 22; **0 page / console errors, 0 overlays**.
+- **After the gates (tools / docs only, engine unchanged; sections of `docs/aud251-s11-scoreboard-refresh.md`):** t2k3 (the ranking above); fch2m: the faint-chain "cliff" is the census driver's
+  A gate (3-frame dead zone), opt-in `soundCensusRomReplay.ts --dismiss-accept=1` / `AUD249_DISMISS_ACCEPT=1`: OFF 2,040 -> 1,841, ON +83 (three upstream windows it un-hides); hse1m: t2k3 item 2 was
+  misattributed: OFF hit-SE mass = Struggle's no-moves box (driver; now follows the ROM drive's A frames by default, OFF T2 baseline 2,040 -> **1,819**) + the OFF wake-up print hold / icon (Scene ON-only
+  rules today) + the OFF confusion head (-4 rows); hie6m: the held-item +21 class is the foe's Leftovers after the player's forced send-in (start +6, then the 15-frame restart lead); g180m: t2k3 item 4 is
+  the Leech Seed drain (post-send-in +13, end-turn print heads / holds) and Sun's unreceipted age, item 5 is Dig's charge-turn print after a previous move (-8 .. -19); nrv1: trn226 did not change the Head
+  battle's RNG (40 / 40 identical) — but on the Noland-room recordings the engine's RNG at the Head battle start never equals the ROM's (Noland's lead differs 40 / 40), against the Mac catcher's "the Head's
+  team is the engine's" (hdt1); hdt2m (`docs/hdt1-factory-head-team.md` "hdt2m"): both are right: the engine's Head-team rule is the ROM's (fed the ROM's own cursor, the lead matches 20 / 20; 2nd / 3rd 17 / 20 with 8-13 VBlank
+  draws between builds), the difference is the RNG input stream (the room's per-VBlank cursor, the parked #55 distribution class), not a missing draw; t68m: t2k3 items 6-8 are mostly inherited offsets (poison tick first row after
+  the preceding command; Rock Slide's own interval exact), one press gate (Ice Beam s2230) and the Scene ON continuation-segment lead after a charge turn (`usedMovePrintLeadU`). wkl1m: two Scene OFF wake-up labs (`tools/battle-lab/wkl1m-wakeup-*-off.json`, Rest) for hse1m's rule (Spore labs desync on
+  sleep length: the lab-RNG class, the ROM replay matched 44 / 44 real battles). Each doc has a landing recipe.
+- **Next:** (1) land hse1m's OFF wake-up hold / confusion head and g180m's Dig charge-turn
+  print (recipes in the doc), then fch2m's dismiss-accept default (with hse1m's hit-SE windows it un-hides); (2) hie6m's send-in Leftovers start / lead; (3) Leech Seed drain rows (g180m, etp2 labs); (4) t2k3's
+  poison first row / Ice Beam first window / Rock Slide; also the Wrap print after the hit, Magnitude power-roll labs, #225 ordinary room. Re-scan the soak / lbrd trajectory pins after every timing merge.
+
+---
+
 ## 2026-11-21 — CAX31 daily run (supervisor, Opus 5.5, 2026-11-20 13:30 -> 2026-11-21 05:30 UTC): wind-down: sound timing ON -25 % / OFF -35 %, swap-return room, SELECT move swap, Lobby save wait, used-move print timing both scenes
 
 - **State:** master clean, no workers, no worktrees; no push. **No DEFERRED items.** Final engine tree `c6117abdc` (later commits are tools / tests / docs; full suite on the tip
@@ -82,37 +125,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   commands before the print: EffectHit 4, secondary hits 6, Struggle / recoil 8, Earthquake / status 2); a probe cut OFF hit-row |offset| 2,255 -> 1,458 (-35 %), all rows -23 %, exact rows 126 -> 560 (land in
   `advanceBattleResolutionConfirmHandoff`; Scene ON: hcr2m, the rule holds there too (417 / 418 turns) but moving the print alone gains only -6 %: land OFF first, find the ON constant on one u 2 / u 4 turn); (3) faint / send-in chain (fsc1m, same doc "fsc1m", OFF s648: 45 % of its mass is engine rows: the faint-message -> party-summary interval (median -8 on 118 rows; ROM AI choice 6..10 frames), the hit blink played on an invisible (Dig) target (+25..+32), Earthquake's EMPTYSTRING3 box held 24 vs ~5 frames; the first-print lead 16 %, the driver anchor 6 %: land with hcr1m); (4) lead1m B6 charge turns (Dig / Solar Beam / Fly), B4 C bodies,
   B5 adapter windows; (5) Recycle's heal-animation start (lse4), LOGO_WIGGLE / LOGO_WAVE (#225), #223 remainder (box clear 1 row late). Run the FULL suite before folding any timing change.
-
----
-
-## 2026-11-19 — CAX31 daily run (supervisor, Opus 5.5, 2026-11-18 13:30 -> 2026-11-19 05:30 UTC): wind-down: sound timing (hp lengths, script leads, pauses), Knock Off, Lobby exact, lighter download
-
-- **State:** master clean, no workers, no worktrees; no push. **No DEFERRED items.** Final engine tree `26ed71da7` (= `f9cdc9c47`'s src; later commits are tests / docs). ENGINE_BUILD
-  `eb-f174716c006360f8` -> **`eb-b3ecf44f29f55d03`** (dist-lib of `f9cdc9c47`; tell the website). Evidence `.integration/validation/sv-20261118/`; per-step briefs `.integration/briefs/`.
-- **Website (Mac):** one ADDITIVE option, `FactoryGameOptions.spriteBase?: string` (dl3 / dl4, `docs/library-package.md`): battle pictures and move-animation assets now load as small files
-  (`dist-lib/sprites/*.txt`, `sprites/anim/*.txt`); a bundler (Vite / Rollup / webpack 5) emits them by itself, an unbundled host serves `dist-lib/sprites/` next to the chunks or passes `spriteBase`.
-  First-battle download ~2,112 -> **~1,541 KiB** brotli-11; the loop holds (no tick, no draw) while a needed file is in flight, so replays are untouched. `challenge-request` / `start` / `ready` /
-  input unchanged; no new audio files. On screen: Knock Off's bag animation; hp bars, status plays and ~30 move bodies follow the ROM's timing; the Lobby after a forfeit / retire / record menu is ROM-exact.
-- **Sound / timing (S11 frame alignment, ISSUES #219):** T2 ON 25 seeds and OFF 24 seeds stay **0 missing / 0 extra**; offset mass ON -15 % (t2r, mid-run), OFF -25 % (t2o). Landed: pau2 / pau3
-  (script pauses; KOFail OFF 415 -> 558 / 620), mem2 (0x7FFF instant HP drop), kno3 (Knock Off: ON 32 -> 145 / 256), hpd8 (16 shape-A bodies: Aerial Ace 276 -> 771 / 1023), liv2 (7 long `live` windows:
-  Earthquake 280 -> 667), sta5 (first status play: Toxic SE exact, Spore 368 -> 746), lse2 (Leech Seed body -29 -> 0, Hypnosis 174 -> 670 / 780), hpf1 / hpf2 (ROM hp command lengths instead of the
-  28-row floor; OFF offset mass -1,280 alone), hpf3 (9 pins those moved: 6 toward the ROM; Absorb / Revenge / Razor Wind / Recycle now show their own body leads: lse3 measured them), ais4
-  (faint-replacement send-in on the AI timeline: obr251 OFF 6 -> 91, ON 6 -> 178 / 306), ctl1 (controller emitters exact vs their anchors), bal1 (T2 switch anchor fixed in the driver).
-- **Lobby (#221):** lbw7 / lbw8: lbra-forfeit-off / lbra-retire-off / retire-yes-lobby-freeroam-off and all 8 lbrb-* traces ROM-exact (NPCs resume at the script's releaseall; retire save +6 ticks measured).
-- **Gameplay (item 0d):** nightly replay on `8516a6da1`: pool **44 / 44** (1,427 states), staged **83 / 83**. No battle-rule change this run (every fold census eventsDigest identical both scenes),
-  so no wind-down permanent-list drive. Rare rules **61 -> 66 / 110** (R035 day hunt; luck5 R073; luck6 R051 / R052 / R053, each re-driven to a full ROM match; 16 new Metronome designs for the day job).
-- **Gates (final engine):** vanilla 0:20 OFF **20 / 20**, ON **20 / 20**; 0:60 default / winning / winning-swap **60 / 60** each; varied-RNG winning carry 0 / 14 / 28 + winning-swap carry 0 **100 / 100** each.
-  Full suite on `f9cdc9c47` (3 workers, beside the soaks): **16,005 passed, 0 failed**; build / build:lib 0. `play:random --minutes 10 --scene both --lobby-new-challenge`: ON 28 battles / 14 swaps,
-  OFF 65 / 23; **0 page / console errors, 0 overlays**. Mid-run full suites: 15,937 / 15,963 / 15,970 / 15,988 / 15,997 all 0 failed; 70b797e28 and 4839b5b80 had 15 / 9 hp-pin failures (hpf1 / hpf2,
-  bisected; fixed by hpf2 / hpf3). Disk 64 % -> 47 % (31 census `tree/` dirs, `.integration/evidence/TREES-PRUNED-20261119.txt`). Log backup not run (`rclone` not installed).
-- **Census 0..999 both scenes (c1k, `docs/aud251-s11-scoreboard-refresh.md` "c1k", on `93dc3201d` = the final engine):** eventsDigest identical to aud263 on 998 / 1000 seeds per scene; 796 / 995
-  (the frame-budget seeds) are the same battle cut later (hpd8 / hpf2 timing). T1 **0 / 0 / 0** both scenes after a census-tool fix (`lsd194Census.ts` scored lse2's shifted sound clock as declined:
-  older census arms show 876 phantom rows on Calm Mind / Cosmic Power / Encore). Scene ON static-field commands: 1 (pre-existing: Ice Ball, seed 950, `unattributed-gate-301`).
-- **Measured for the next run (docs only, after the gates):** pau4m: Intimidate / Trace switch-in prints are NOT presented (Trace ~142, Intimidate ~247 frames missing at battle start, both scenes);
-  hpf4m: ROM hp lengths for every shape still on the floor (landing order in the doc); sta6m: sta5 step 2 applies in Scene OFF too (7 rows); phy1m: every Factory body is live in play, but 63.6 % of body commands lack the audited lead (+6 .. +14 rows).
-- **Also measured:** subp1m (ISSUES #223): Substitute damaged / faded, Roar "dragged out", the Disable / Taunt / Torment / Imprison "can't use" texts, Trick both-items and Static wait for an A / B press
-  in the ROM (no auto-advance in a Factory battle); our engine moves on after 24 rows. ice950m: the last static Scene ON command (seed 950 Ice Ball) is an unattributed sprite-order gate; one-line fix in the doc.
-- **Next** (ranked by rank1m, `docs/rank1m-next-run-impact.md`: pau4m 251 / 1000 battles +31.5k frames, #223 192 battles, lead1m B1 393 ON battles, hpf4m T1 38): (0) present the switch-in
-  ability prints (pau4m); (00) #223 button-wait messages (tell the website: play changes); land hpf4m T1-S1 and sta6m; (1) land lse3 (`docs/hpd1-hp-hold.md` "lse3": Absorb / Mega Drain / Counter / Revenge / Recycle / Razor Wind, Wish's generic action-transition rows) and the rule-based lead for the unaudited bodies (phy1m; design + batches `docs/lead1m-rule-lead-design.md`); (2) hp shapes still on the 28-row floor (ticks, weather damage, confusion self-hit, Substitute: ROM labs first); (3) sta5 step 3 (patch kept; decouple the sound clock)
-  and sta5 step 2's Scene OFF ROM check; (4) shape C bodies, multi-hit; (5) #222 player send-in residuals. Run the FULL suite before folding any hp / timing change (test:gate missed hpf1's 15).
-  Luck-hunt summary + nightly replay at run start; prune census trees.

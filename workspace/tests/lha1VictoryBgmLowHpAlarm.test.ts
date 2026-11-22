@@ -76,8 +76,8 @@ const cases: readonly Case[] = [
   { stage: "lha1-red-win", anchorLeft: (rows) => framesOf(rows, "se", SE_SELECT).find((frame) => frame > framesOf(rows, "se", SE_FAINT).at(-1)!)!, delay: 22 },
   // SHELL BELL: the heal's HP bar is the last command (BattleScript_ItemHealHP_Ret ends with healthbarupdate / datahpupdate).
   { stage: "lha1-shellbell-win", anchorLeft: (rows) => firstAt(rows, PLAYER_DEFEATED), delay: 14 },
-  // ROUGH SKIN: "hurt" with its waitmessage is the last command; moveend's two sprite-visibility receipts follow it.
-  { stage: "lha1-roughskin-win", anchorLeft: (rows) => firstAt(rows, "sprite-visibility", firstAt(rows, "message:Foe RATTATA’s ROUGH SKIN")), delay: 19 },
+  // ROUGH SKIN: "hurt" with its waitmessage is the last command; the win tail's draw-nothing hold (wtl1) and moveend's two receipts follow it.
+  { stage: "lha1-roughskin-win", anchorLeft: (rows) => firstAt(rows, "move-animation", firstAt(rows, "message:Foe RATTATA’s ROUGH SKIN")), delay: 19 },
 ];
 
 describe("lha1: the victory BGM after the winning turn's last command, and no low-HP alarm after it", () => {

@@ -61,8 +61,10 @@ describe("live prep10 move adapters", () => {
     for (const id of [222, 179, 220, 350, 13]) expect(LIVE_MOVE_OPPONENT_SHADOW_ROW[id]).toBe(0);
     expect(LIVE_MOVE_OPPONENT_SHADOW_ROW[209]).toBeUndefined();
     for (const a of [0, 1] as const) {
-      expect(liveMoveAnimationDuration(request(222, a, { power: 70 }))).toBe(174);
-      expect(liveMoveAnimationDuration(request(222, a, { power: 110 }))).toBe(206);
+      // mxp1: the window is the ROM's gAnimScriptActive length + 1, 118 + 8 * floor(power / 10) (+ 1): 175 at 70, 207 at 110, 143 at 30.
+      expect(liveMoveAnimationDuration(request(222, a, { power: 70 }))).toBe(175);
+      expect(liveMoveAnimationDuration(request(222, a, { power: 110 }))).toBe(207);
+      expect(liveMoveAnimationDuration(request(222, a, { power: 30 }))).toBe(143);
       expect(liveMoveAnimationDuration(request(179, a, { power: 20 }))).toBe(173);
       expect(liveMoveAnimationDuration(request(220, a))).toBe(81);
       expect(liveMoveAnimationDuration(request(350, a, { turn: 2, multihit: 1 }))).toBe(89);
@@ -134,7 +136,7 @@ describe("live prep10 move adapters", () => {
 
   // route = ordinary-input replay (seed / move slot pressed per turn / streak, tools/integration/prep10Routes.ts seeds).
   const routes: { move: string; id: number; seed: number; moves: (0 | 1 | 2 | 3)[]; streak: number; bodies: number[]; power?: number }[] = [
-    { move: "MAGNITUDE", id: 222, seed: 182, moves: [0], streak: 0, bodies: [174], power: 70 },
+    { move: "MAGNITUDE", id: 222, seed: 182, moves: [0], streak: 0, bodies: [191], power: 70 },
     { move: "REVERSAL", id: 179, seed: 3, moves: [1], streak: 28, bodies: [173], power: 20 },
     { move: "REVERSAL (second body, 40)", id: 179, seed: 367, moves: [1], streak: 14, bodies: [173], power: 40 },
     { move: "PAIN_SPLIT", id: 220, seed: 178, moves: [0], streak: 21, bodies: [81] },
@@ -146,9 +148,9 @@ describe("live prep10 move adapters", () => {
     const on = generatedCommandAnimationReplay(r.seed, "on", r.moves, r.streak);
     const off = generatedCommandAnimationReplay(r.seed, "off", r.moves, r.streak);
     const bodies = on.animations.filter(a => a.moveId === r.id && a.attacker === 0);
-    // lse4: Razor Wind's charge turn presents lead 1 + tail 4 (gap-print class), its unleash lead 5 + tail 4; the helper default is the unleash.
+    // mxp1: Magnitude's 191 rows are its 175-row window + lead 10 + shape-A tail 6 (ROM lab mxp1-mag-p9, exact). lse4: Razor Wind's charge turn presents lead 1 + tail 4 (gap-print class), its unleash lead 5 + tail 4; the helper default is the unleash.
     // hit1: + Cmd_end's IsSEPlaying rows (Reversal 1, Rock Blast 1 per hit, Spark 9: its SE_M_THUNDERBOLT2 at script row 87 ends on row 123).
-    expect(bodies.map(b => b.ages.length)).toEqual(r.bodies.map((n, i) => n + iu120Extra(r.id) + hit1SeWaitRows(r.id) + (r.id === 13 && i === 0 ? 5 : hpd4BodyRows(r.id))));
+    expect(bodies.map(b => b.ages.length)).toEqual(r.bodies.map((n, i) => r.id === 222 ? n : n + iu120Extra(r.id) + hit1SeWaitRows(r.id) + (r.id === 13 && i === 0 ? 5 : hpd4BodyRows(r.id))));
     for (const body of bodies) {
       expect(body.ages).toEqual(Array.from({ length: body.ages.length }, (_, age) => age));
       expect(body.adapterActive.every(Boolean)).toBe(true);

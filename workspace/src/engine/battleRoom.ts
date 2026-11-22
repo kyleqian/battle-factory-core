@@ -69,6 +69,7 @@ import { FADE_IN } from "./paletteFade.ts";
 import type { FactoryTrainerPresentation } from "./factoryTrainerPresentation.ts";
 import { frontierCircleExitFadeStartTe, frontierTransitionRenderKind, isSquaresKind, type FrontierTransitionPresentation, type FrontierTransitionRenderKind } from "./battleTransition.ts";
 import { squaresIntroHandoffTe } from "./battleTransitionSquares.ts";
+import { logoWiggleIntroHandoffTe } from "./battleTransitionLogoWiggle.ts";
 import type { BattleOpponent } from "./battleScenario.ts";
 import walkupScript from "../data/gen/factory-brain-walkup-script.json" with { type: "json" };
 
@@ -982,9 +983,15 @@ export const BRAIN_BATTLE_TRANSITION_START_ELAPSED = 32;
  */
 export const BATTLE_TRANSITION_START_TE = 26;
 export const ASYMMETRIC_SPIRAL_IN_SEQ_TRANSITION_START_TE = 23;
-function transitionStartTe(state: BattleRoomState): number {
-  const kind = frontierTransitionRenderKind(state.transitionPresentation, "circlesMeet");
+/** LOGO_WAVE's constants (flicker te 34, main te 84, handoff 209) put the task's creation at te 32: the ROM's flicker starts two frames after it (trn226). */
+export const LOGO_WAVE_TRANSITION_START_TE = 32;
+/** The transition clock's te on the BGM frame, per kind (the brain room and, since the tdr1 merge, the ordinary room: ordinaryBattleTransitionTe). */
+function transitionStartTeOf(kind: FrontierTransitionRenderKind): number {
+  if (kind === "logoWave") return LOGO_WAVE_TRANSITION_START_TE;
   return kind === "asymmetricSpiralInSeq" ? ASYMMETRIC_SPIRAL_IN_SEQ_TRANSITION_START_TE : BATTLE_TRANSITION_START_TE;
+}
+function transitionStartTe(state: BattleRoomState): number {
+  return transitionStartTeOf(frontierTransitionRenderKind(state.transitionPresentation, "circlesMeet"));
 }
 /** The brain path's transition clock on a brainSpeechSettled frame (negative before the transition starts). */
 export function brainBattleTransitionTe(state: BattleRoomState): number {
@@ -995,14 +1002,14 @@ export function brainBattleTransitionTe(state: BattleRoomState): number {
  * The transition clock the brain room hands over to the battle intro at: twenty frames after the circle transition's fade to black starts
  * (the fade ends after eleven, the transition task ends, Task_StartBattleAfterTransition installs CB2_InitBattle six frames later). ROM
  * (silver, CIRCLES_MEET_IN_SEQ): fade from transition clock 185, black from 196, CB2_InitBattle at 202, the battle intro's first frame 35
- * frames after this handoff, as the engine's intro draws it. LOGO_WAVE keeps the ordinary path's BATTLE_2_SCENE_HANDOFF_ELAPSED (no
- * brain run measured it).
+ * frames after this handoff, as the engine's intro draws it. LOGO_WAVE hands over at 209 on its own clock (start 32, ROM-measured, trn226).
  */
 export const BRAIN_BATTLE_START_AFTER_EXIT_FADE = 20;
 export function brainBattleIntroHandoffTe(state: BattleRoomState): number {
   const kind = frontierTransitionRenderKind(state.transitionPresentation, "circlesMeet");
   if (kind === "logoWave") return BATTLE_2_SCENE_HANDOFF_ELAPSED;
   if (isSquaresKind(kind)) return squaresIntroHandoffTe(kind);
+  if (kind === "logoWiggle") return logoWiggleIntroHandoffTe();
   return frontierCircleExitFadeStartTe(kind) + BRAIN_BATTLE_START_AFTER_EXIT_FADE;
 }
 
@@ -1027,16 +1034,17 @@ export function ordinaryTransitionDrawElapsed(state: BattleRoomState): number {
  */
 export function ordinaryBattleTransitionTe(state: BattleRoomState, perTransition = true): number {
   if (!perTransition) return state.elapsed;
-  const startTe = ordinaryTransitionKind(state) === "asymmetricSpiralInSeq" ? ASYMMETRIC_SPIRAL_IN_SEQ_TRANSITION_START_TE : BATTLE_TRANSITION_START_TE;
-  return state.elapsed - ordinaryTransitionDrawElapsed(state) + startTe;
+  // trn226's LOGO_WAVE start te 32 (its flicker / main / handoff constants assume it) holds here too: with 26 its pictures came 6 frames
+  // after the ROM's (tri1's catcher run, 3 battles).
+  return state.elapsed - ordinaryTransitionDrawElapsed(state) + transitionStartTeOf(ordinaryTransitionKind(state));
 }
 /**
  * Frames from the battle BGM (the transition draw) to the handoff into the battle intro (CB2_InitBattle; the intro's first picture shows
  * 35 frames later, 36 after LOGO_WAVE's retained black callback), per transition. Measured with the frame catcher on 28 ordinary battles
  * (tri1: MUS_VS_TRAINER -> the intro's first picture and -> SE_BALL_TRAY_ENTER, which comes 153 frames after that picture on the ROM;
  * the same value in the round's first battle and in later ones). They agree with brainBattleIntroHandoffTe's per-transition ends less the
- * start te for SQUARES, SQUARES_SCROLL and the circle families but the two IN_SEQ spirals (one frame earlier here). LOGO_WIGGLE (not drawn,
- * CIRCLES_MEET's picture stands in) and LOGO_WAVE are the ROM's own values. ASYMMETRIC_SPIRAL (not in the first sweep) takes
+ * start te for SQUARES, SQUARES_SCROLL and the circle families but the two IN_SEQ spirals and LOGO_WIGGLE (one frame earlier here than
+ * trn226's logoWiggleIntroHandoffTe, measured in the Noland room). LOGO_WAVE equals trn226's 209 on its start te 32. ASYMMETRIC_SPIRAL (not in the first sweep) takes
  * SYMMETRIC_SPIRAL's, as in brainBattleIntroHandoffTe; the catcher's run after tri1 has it twice, both on the ROM's frames. Before tri1 every transition handed off after CIRCLES_MEET's 171 in the round's first battle and
  * ASYMMETRIC_SPIRAL_IN_SEQ's 186 in the later ones: up to 31 frames late (SYMMETRIC_SPIRAL in battles 2+).
  */
@@ -1045,6 +1053,7 @@ export const ORDINARY_INTRO_HANDOFF_AFTER_BGM: Readonly<Record<FrontierTransitio
   symmetricSpiral: 155,
   asymmetricSpiral: 155,
   circlesCross: 161,
+  logoWiggle: 160,
   circlesMeet: 171,
   circlesCrossInSeq: 174,
   logoWave: 177,
@@ -1053,18 +1062,12 @@ export const ORDINARY_INTRO_HANDOFF_AFTER_BGM: Readonly<Record<FrontierTransitio
   asymmetricSpiralInSeq: 186,
   symmetricSpiralInSeq: 186,
 };
-/** LOGO_WIGGLE (transition id 29) is drawn as CIRCLES_MEET (trn225 open) but hands off at its own ROM-measured frame. */
-const LOGO_WIGGLE_TRANSITION_ID = 29;
-const LOGO_WIGGLE_INTRO_HANDOFF_AFTER_BGM = 160;
 /** CIRCLES_MEET's handoff in the round's first battle (trace tick 1040, battleScene.ts's TICK0): the canonical route's battle 1. */
 const CANONICAL_BATTLE_1_SCENE_HANDOFF_ELAPSED = 197;
 /** The settled elapsed at which the ordinary room hands over to the battle intro (tri1; `perTransition` as ordinaryBattleTransitionTe). */
 export function ordinaryBattleIntroHandoffElapsed(state: BattleRoomState, perTransition = true): number {
   if (!perTransition) return state.encounter === "jenson" ? BATTLE_2_SCENE_HANDOFF_ELAPSED : CANONICAL_BATTLE_1_SCENE_HANDOFF_ELAPSED;
-  const afterBgm = state.transitionPresentation?.transitionId === LOGO_WIGGLE_TRANSITION_ID
-    ? LOGO_WIGGLE_INTRO_HANDOFF_AFTER_BGM
-    : ORDINARY_INTRO_HANDOFF_AFTER_BGM[ordinaryTransitionKind(state)];
-  return ordinaryTransitionDrawElapsed(state) + afterBgm;
+  return ordinaryTransitionDrawElapsed(state) + ORDINARY_INTRO_HANDOFF_AFTER_BGM[ordinaryTransitionKind(state)];
 }
 
 /** Frames from the movement settling ("brainSettled" elapsed 0) to the first message's empty box. */

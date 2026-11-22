@@ -29,7 +29,7 @@ const cases = [
     route: { seed: 12, slot: 2, streak: 7 } },
   { id: 334, move: "IRON_DEFENSE", fixture: "iron-defense-%s-clamperl-%s-onix", anchor: "attackerSpriteCenter", duration: 101, effectAge: 50,
     route: { seed: 7, slot: 2, streak: 0 } },
-  { id: 232, move: "METAL_CLAW", fixture: "metal-claw-%s-charmander-%s-onix", anchor: "attackerSpriteCenter", duration: 140, effectAge: 110,
+  { id: 232, move: "METAL_CLAW", fixture: "metal-claw-%s-charmander-%s-onix", anchor: "attackerSpriteCenter", duration: 154, effectAge: 110, // bdt1: the source body is 140 rows, the ROM script holds 14 more (gAnimScriptActive 157)
     route: { seed: 130, slot: 0, streak: 0 } },
 ] as const;
 

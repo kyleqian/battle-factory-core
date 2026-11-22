@@ -454,10 +454,13 @@ describe("random round soak driver (green milestone pin)", () => {
       // accept edge alone undone (isBattleResolutionButtonMessageAcceptable's promptClear lead) the old pin passes again.
       // merge of the box's 2026-11-20 run with the Mac's 11-21 fixes (box f5274b48a: hcr1 / hcr1b / fsc1 / chg1 ...; Mac ea3220630: wbh1 / fnt1 / lrc1 ...): frames + render calls,
       // 43_557 (box) / 43_323 (Mac) -> 43_500, renderCalls 3_066 / 3_043 -> 3_043; same battle 7, turn 3, end state, diagnostics; both runs identical.
-      // tdr1 (tri1: the battle intro at each transition's own frame; wtl1: the win tail waits for the victory BGM and the slide's dispatch;
-      // sst1: the end-turn sandstorm's tail): frames + render calls, 43_500 -> 43_633, renderCalls 3_043 -> 3_063; same battle 7, turn 3,
-      // end state, diagnostics.
-      frames: 43_633,
+      // fch1 (the AI faint replacement choice costs 0..4 extra script frames, GetMostSuitableMonToSwitchInto work model; the aud241b stage's opponent bench is now Seismic Toss x4 as in the ROM labs): render calls only (a one-frame trajectory shift), 3_043 -> 3_042; frames 43_500, battle 7, turn 3, end state, diagnostics unchanged. A trajectory pin, not a ROM frame.
+      // wtl1 (the win tail's 24 draw-nothing rows before "Player defeated", ROM P + 26; seven wins): frames + render calls, 43_500 -> 43_638, renderCalls 3_042 -> 3_059; same battle 7, turn 3, end state, diagnostics. A trajectory pin, not a ROM frame.
+      // etp1 (end-turn prints take the ROM end-turn rows, both scenes; labs docs/etp1-end-turn-prints.md): frames + render calls, 43_638 -> 43_732, renderCalls 3_059 -> 3_055; same battle 7, turn 3, end state, diagnostics. A trajectory pin, not a ROM frame.
+      // merge of the box's night run with the Mac's tdr1 (tri1: the battle intro at each transition's own frame; wtl1: the win tail's slide
+      // wait; sst1: the sandstorm sound): frames + render calls, 43_732 -> 43_693, renderCalls 3_055 -> 3_052; same battle 7, turn 3, end
+      // state, diagnostics. A trajectory pin, not a ROM frame.
+      frames: 43_693,
       battle: 7,
       turn: 3,
       diagnostics: {
@@ -469,7 +472,7 @@ describe("random round soak driver (green milestone pin)", () => {
         terminalOutcome: "roundWon",
         terminalRecordMenuInputReadyReached: true,
         terminalRecordChoice: "no",
-        renderCalls: 3_063,
+        renderCalls: 3_052,
       },
     });
     expect(second).toEqual(first);
@@ -709,11 +712,20 @@ describe("random round soak driver (green milestone pin)", () => {
     // commits Baton Pass on the merged tree (0 commits each). Re-scanned full-policy seeds 0..39 (tools/soak/batonPassSearch.ts --seeds 0:40 --parallel 4,
     // same options): candidates 4, 8, 10, 11, 13, 16, 27, 36, 39, all OK with no openpartyscreen / machine-barrier error. Seed 4 is the lowest
     // (Baton Pass commits 1, first commit 78369, halt 78671 on AIPOM in battleIndex 0, three Lobby new challenges; the halt is 1,329 frames inside the budget).
-    // tdr1 (tri1 / wtl1 / sst1: the battle intro, the win tail and the sandstorm tail on the ROM's frames; the exploring presses land on new
-    // phases): seed 4 no longer commits Baton Pass. Re-scanned full-policy seeds 0..39 (tools/soak/batonPassSearch.ts --seeds 0:40 --parallel 8,
-    // same options): candidates 2, 5, 8, 10, 24, 27, 28, 33, 36, 39. Seed 2 is the lowest (Baton Pass commits 2, first commit 51366, halt 51405
-    // on AIPOM in battleIndex 0, three Lobby new challenges). Pin 4 -> 2.
-    const result = runSeed(2, {
+    // stc1 (Scene OFF confusion self-hit: its print's first glyph 5 script rows later, +2 rows to the hit; ROM seeds 7295 / 7682; the exploring presses land on new phases):
+    // seed 4 no longer commits Baton Pass. Re-scanned full-policy seeds 0..39 (tools/soak/batonPassSearch.ts --seeds 0:40 --parallel 8, same options): candidates 11, 13, 27, 36, 39,
+    // all OK with no openpartyscreen / machine-barrier error. Seed 11 is the lowest (Baton Pass commits 3, first commit 46848, halt 47063 on AIPOM in battleIndex 0, two Lobby new challenges). Pin 4 -> 11.
+    // hcr3 (Icy Wind's hp keeps the stat command's 4-row tail instead of the 28-row floor, Double-Edge's recoil hp / print follow the ROM rows, and the faint SE clips its hpd4 compensation at 0; the exploring presses land on new phases): seed 4 no longer commits Baton Pass.
+    // Re-scanned full-policy seeds 0..39 (tools/soak/batonPassSearch.ts --seeds 0:40 --parallel 4, same options): candidates 8, 10, 11, 13, 16, 27, 36, 39, all OK. Seed 8 is the lowest.
+    // merge stc1 + hcr3 (fold-a): re-scanned seeds 0..39 on the combined tree (batonPassSearch.ts --seeds 0:40 --parallel 4): candidates 11, 13, 27, 36, 39 (stc1's set). Pin 11.
+    // etp1 (end-turn prints take the ROM end-turn rows, Roar / Whirlwind's dragged-out press; the exploring presses land on new phases): seed 11 no longer commits Baton Pass.
+    // Re-scanned full-policy seeds 0..39 (tools/soak/batonPassSearch.ts --seeds 0:40 --parallel 4, same options): candidates 5, 16, 20, 24, 25. Seed 5 is the lowest
+    // (Baton Pass commits 1, first commit 69217, halt 69257 on MAWILE in battleIndex 0, two Lobby new challenges). Pin 11 -> 5.
+    // merge of the box's night run with the Mac's tdr1 (tri1 / wtl1 / sst1; the exploring presses land on new phases): seed 5 no longer commits
+    // Baton Pass. Re-scanned full-policy seeds 0..39 (tools/soak/batonPassSearch.ts --seeds 0:40 --parallel 6, same options): candidates 16,
+    // 20, 25, 27, 35. Seed 16 is the lowest (Baton Pass commits 1, first commit 66442, halt 66482 on LEDIAN in battleIndex 0, two Lobby new
+    // challenges). Pin 5 -> 16.
+    const result = runSeed(16, {
       maxFrames: 80_000,
       renderEvery: 0,
       coverage: observer as never,
@@ -1058,14 +1070,20 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // trial-fix-20261121 (fnt1 + lbb1 together): frames only, 39277 -> 39259; same battle 2 / depth 1 / turn 22 / roundLost.
       // merge of the box's 2026-11-20 run with the Mac's 11-21 fixes: the box's chg1 trajectory (67929 / battle 3 / depth 2 / turn 20; the Mac had 39259 / battle 2 / depth 1 / turn 22):
       // frames only against the box, 67929 -> 67984; same battle 3 / depth 2 / turn 20 / roundLost.
-      // tdr1 (tri1 / wtl1 / sst1: the battle intro, the win tail and the sandstorm tail on the ROM's frames; the exploring presses land on new
-      // phases, a new trajectory as at fsw235): 67984 / battle 3 / depth 2 / turn 20 -> 143541 / battle 6 / depth 5 / turn 25; still OK / roundLost.
-      frames: 143541,
+      // gsp3 (the end-of-turn poison / burn tick's print -> launch rows 95 / 98 as the ROM, gsp3-{toxic,willowisp}-player-on rows 1576 -> 1671 / 1547 -> 1645;
+      // the exploring presses land on new phases): 67984 / turn 20 -> 68529 / turn 21; same battle 3 / depth 2 / OK / roundLost.
+      // wtl1 (the win tail's 24 draw-nothing rows before "Player defeated"; the exploring presses land on new phases): 68529 / battle 3 / depth 2 / turn 21 -> 75721 / battle 4 / depth 3 / turn 21; still OK / roundLost.
+      // wtl1 item 2 (the turn-end weather print's 10 rows after MoveEnd, ROM rain labs: stat fall 425 -> 435, hit 323 -> 333): frames only, 75721 -> 75618; same battle 4 / depth 3 / turn 21 / roundLost. A trajectory pin, not a ROM frame.
+      // etp1 (end-turn prints take the ROM end-turn rows; the exploring presses land on new phases): 75618 / battle 4 / depth 3 / turn 21 -> 57508 / battle 3 / depth 2 / turn 12; roundLost. A trajectory pin, not a ROM frame.
+      // merge of etp1 / etp2 with this run's fold (eqk1, chg2 / chg3, hie5, fnt2, trn226, msw2): 57508 (etp1) -> 94125 / battle 4 / depth 3 / turn 18; roundLost.
+      // merge with the Mac's tdr1 (tri1 / wtl1 / sst1; the exploring presses land on new phases): 94125 / battle 4 / depth 3 / turn 18 ->
+      // 68945 / battle 3 / depth 2 / turn 21; still OK / roundLost. A trajectory pin, not a ROM frame.
+      frames: 68945,
       outcome: "OK",
       endState: "roundLost",
-      maxBattleDepth: 5,
-      battle: 6,
-      turn: 25,
+      maxBattleDepth: 2,
+      battle: 3,
+      turn: 21,
     });
     expect(runSeed(1, options)).toMatchObject({
       // msg175: 26878 -> 26810 (shorter used prints); trn178 (the Scene OFF action-transition pause): 26810 -> 27058; same battle / turn / end state.
@@ -1114,8 +1132,15 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // msg2): frames only, 58758 -> 58763; same battle 3 / depth 2 / turn 19 / roundLost. With RELEASE_TO_MOVEEND_ROWS.STRINGID_PKMNWASDRAGGEDOUT
       // back at 5 the old pin passes again (on msg2's own base the same tail moved 58793 -> 58798); seed 0 is unmoved.
       // merge of the box's 2026-11-20 run with the Mac's 11-21 fixes: frames only, 64365 (box) / 58763 (Mac) -> 60582; same battle 3 / depth 2 / turn 19 / roundLost on all three.
-      // tdr1 (tri1 / wtl1 / sst1, see seed 0): 60582 / turn 19 -> 57584 / turn 15; same battle 3 / depth 2 / roundLost.
-      frames: 57584,
+      // stc1 (Scene OFF confusion self-hit +7 rows to the hit, ROM 204 / 199 after the commit): frames only, 60582 -> 60525; same battle 3 / depth 2 / turn 19 / roundLost.
+      // hcr3 (Icy Wind's hp keeps the stat command's 4-row tail, Double-Edge's recoil hp / print follow the ROM rows, the faint SE clips its hpd4 compensation at 0): frames only, 60582 -> 58672; same battle 3 / depth 2 / turn 19 / roundLost.
+      // merge stc1 + hcr3 (fold-a): frames only, 60525 (stc1) / 58672 (hcr3) -> 58579; same battle / depth / turn / end state.
+      // gsp3 (the end-of-turn poison / burn tick's print -> launch rows 95 / 98 as the ROM, gsp3-{toxic,willowisp}-player-on): frames only, 58579 -> 58583; same battle 3 / depth 2 / turn 19 / roundLost.
+      // fnt2 (a super-effective / crit drain's heal bar waits the ROM's 6 script rows after the print; lab fnt2-absorb-se ROM SE 16 580, both scenes): frames only, 58583 -> 58615; same battle 3 / depth 2 / turn 19 / roundLost.
+      // etp1 (end-turn prints take the ROM end-turn rows; the exploring presses land on new phases): 58583 / turn 19 -> 57984 / turn 15; same battle 3 / depth 2 / roundLost. A trajectory pin, not a ROM frame.
+      // merge of etp1 / etp2 with this run's fold: frames only, 58615 (fnt2) / 57984 (etp1) -> 57984; same battle 3 / depth 2 / turn 15 / roundLost.
+      // merge with the Mac's tdr1 (tri1 / wtl1 / sst1): frames only, 57984 -> 57651; same battle 3 / depth 2 / turn 15 / roundLost.
+      frames: 57651,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 2,
@@ -1158,7 +1183,8 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // lrc1 (the loss tail's opponent recall plays the ROM's animated return to ball, its recall receipt holds to the trainer slide and the slide's printstring is 3 rows later: the win text prints 67 frames later): frames only, 9205 -> 9319; same battle 1 / turn 16 / end state (the terminal presses land on new phases after the longer tail).
       // lbb1 (the loss terminal's pages and farewell take B as A; the driver's terminal presses are 12% B): frames only, 9319 -> 9300;
       // decision notes identical to 6817b6a8c's; same battle 1 / turn 16 / end state. Seed 1 is unmoved.
-      // tdr1 (tri1: the battle intro at its transition's own frame): frames only, 9300 -> 9336; same battle 1 / turn 16 / end state.
+      // merge with the Mac's tdr1 (tri1: the battle intro at the drawn transition's own frame): frames only, 9300 -> 9336; same battle 1 /
+      // turn 16 / end state.
       frames: 9336,
       outcome: "OK",
       endState: "roundLost",
@@ -1186,7 +1212,7 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // hpf1: frames only, 9271 -> 9404; same end state.
       // pic8 (the forced party menu's clock starts at the faint message's dismiss edge, ROM lab pic7): frames only, 9404 -> 9400; same end state.
       // lrc1 (see seed 0): frames only, 9400 -> 9350 (the random terminal presses after the 67-frame-longer loss tail answer the record prompt sooner); same battle 1 / turn 16 / end state.
-      // tdr1 (tri1, see seed 0): frames only, 9350 -> 9315; same battle 1 / turn 16 / end state.
+      // merge with the Mac's tdr1 (tri1, see seed 0): frames only, 9350 -> 9315; same battle 1 / turn 16 / end state.
       frames: 9315,
       outcome: "OK",
       endState: "roundLost",
@@ -1723,7 +1749,9 @@ describe("ISSUES #104 (driver): continuous-play outcome semantics retuned -- OK 
     // fop1 (a new challenge's first opponent is rolled in the ROM's order, so round 2's first trainer moves): seed 19 now carries 7;
     // re-scanned seeds 0..49 under the same options (--seeds 0:50 --parallel 4): seeds 13, 14 and 23 chain two round wins (carry 14), so the lowest (13) is pinned.
     // merge of the box's 2026-11-20 run with the Mac's 11-21 fixes: the merge kept the box's 19 (after fsc1); it chains two round wins on the merged tree (this test passes), so it stays.
-    const result = runSeed(19, {
+    // wtl1 (the win tail holds 24 more rows before "Player defeated", ROM P + 26): seed 19 now carries 7; re-scanned seeds 0..49 under the same options (--seeds 0:50 --parallel 4):
+    // seeds 0, 10, 13, 17, 40, 47 and 49 chain two round wins (carry 14), so the lowest (0) is pinned.
+    const result = runSeed(0, {
       policy: "winning",
       maxRounds: 3,
       renderEvery: 0,

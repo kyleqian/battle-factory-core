@@ -1,0 +1,243 @@
+{
+ "name": "R081-memento-target-at-minimum",
+ "rules": [
+  "R081"
+ ],
+ "why": "Challenge 7, trainer 200, hand-built Mechanic Lab parties. The player's Blissey Charms Arcanine three times (Attack -6) while Arcanine's only move is Overheat (Sp. Atk -2 per use, -6 after three), then uses Memento: Cmd_trymemento fails against a target at minimum Attack and Sp. Atk (battle_script_commands.c:9074-9080).",
+ "seed": 91000,
+ "challengeNum": 7,
+ "battleNum": 0,
+ "trainerId": 200,
+ "playerSetIds": [
+  429,
+  404,
+  735
+ ],
+ "opponentSetIds": [
+  813,
+  716,
+  721
+ ],
+ "parties": {
+  "player": [
+   {
+    "species": 242,
+    "level": 50,
+    "nature": 0,
+    "ivs": {
+     "hp": 31,
+     "attack": 31,
+     "defense": 31,
+     "speed": 31,
+     "spAttack": 31,
+     "spDefense": 31
+    },
+    "evs": {
+     "hp": 255,
+     "attack": 255,
+     "defense": 0,
+     "speed": 0,
+     "spAttack": 0,
+     "spDefense": 0
+    },
+    "moves": [
+     204,
+     262,
+     150,
+     150
+    ],
+    "item": 0,
+    "abilitySlot": 0,
+    "friendship": 0
+   },
+   {
+    "species": 214,
+    "level": 50,
+    "nature": 0,
+    "ivs": {
+     "hp": 31,
+     "attack": 31,
+     "defense": 31,
+     "speed": 31,
+     "spAttack": 31,
+     "spDefense": 31
+    },
+    "evs": {
+     "hp": 255,
+     "attack": 255,
+     "defense": 0,
+     "speed": 0,
+     "spAttack": 0,
+     "spDefense": 0
+    },
+    "moves": [
+     157,
+     157,
+     157,
+     157
+    ],
+    "item": 0,
+    "abilitySlot": 0,
+    "friendship": 0
+   },
+   {
+    "species": 68,
+    "level": 50,
+    "nature": 0,
+    "ivs": {
+     "hp": 31,
+     "attack": 31,
+     "defense": 31,
+     "speed": 31,
+     "spAttack": 31,
+     "spDefense": 31
+    },
+    "evs": {
+     "hp": 255,
+     "attack": 255,
+     "defense": 0,
+     "speed": 0,
+     "spAttack": 0,
+     "spDefense": 0
+    },
+    "moves": [
+     157,
+     157,
+     157,
+     157
+    ],
+    "item": 0,
+    "abilitySlot": 0,
+    "friendship": 0
+   }
+  ],
+  "opponent": [
+   {
+    "species": 59,
+    "level": 50,
+    "nature": 0,
+    "ivs": {
+     "hp": 31,
+     "attack": 31,
+     "defense": 31,
+     "speed": 31,
+     "spAttack": 31,
+     "spDefense": 31
+    },
+    "evs": {
+     "hp": 255,
+     "attack": 0,
+     "defense": 0,
+     "speed": 0,
+     "spAttack": 255,
+     "spDefense": 0
+    },
+    "moves": [
+     315,
+     315,
+     315,
+     315
+    ],
+    "item": 0,
+    "abilitySlot": 0,
+    "friendship": 0
+   },
+   {
+    "species": 126,
+    "level": 50,
+    "nature": 0,
+    "ivs": {
+     "hp": 31,
+     "attack": 31,
+     "defense": 31,
+     "speed": 31,
+     "spAttack": 31,
+     "spDefense": 31
+    },
+    "evs": {
+     "hp": 255,
+     "attack": 0,
+     "defense": 0,
+     "speed": 0,
+     "spAttack": 255,
+     "spDefense": 0
+    },
+    "moves": [
+     315,
+     315,
+     315,
+     315
+    ],
+    "item": 0,
+    "abilitySlot": 0,
+    "friendship": 0
+   },
+   {
+    "species": 38,
+    "level": 50,
+    "nature": 0,
+    "ivs": {
+     "hp": 31,
+     "attack": 31,
+     "defense": 31,
+     "speed": 31,
+     "spAttack": 31,
+     "spDefense": 31
+    },
+    "evs": {
+     "hp": 255,
+     "attack": 0,
+     "defense": 0,
+     "speed": 0,
+     "spAttack": 255,
+     "spDefense": 0
+    },
+    "moves": [
+     315,
+     315,
+     315,
+     315
+    ],
+    "item": 0,
+    "abilitySlot": 0,
+    "friendship": 0
+   }
+  ]
+ },
+ "script": {
+  "actions": [
+   {
+    "move": 0
+   },
+   {
+    "move": 0
+   },
+   {
+    "move": 0
+   },
+   {
+    "move": 1
+   }
+  ],
+  "then": "census"
+ },
+ "expect": [],
+ "cover": [
+  {
+   "file": "src/engine/battleScriptTrymementoOpcode.ts",
+   "text": "&& targetSta",
+   "at": 0
+  },
+  {
+   "file": "src/engine/battleScriptTrymementoOpcode.ts",
+   "text": "&& rules.mis",
+   "at": 0
+  },
+  {
+   "file": "src/engine/battleScriptTrymementoOpcode.ts",
+   "text": "{\n      cons",
+   "at": 0
+  }
+ ],
+ "coverAny": false
+}

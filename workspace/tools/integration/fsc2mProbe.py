@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# NOTE: for battle labs in tools/battle-lab/ use tools/integration/labCompare.sh (ROM probe + engine + aligned SE table in one run); this one handles the scripted A-press policy probes (fsc2mRun.sh).
 """fsc2m: per-frame ROM probe of a battle lab with a scripted A-press policy after the move commit (hpd2Probe + text printer state).
 
 usage: fsc2mProbe.py <scenario.json> <on|off> <output.json> <policy> [maxFrames]

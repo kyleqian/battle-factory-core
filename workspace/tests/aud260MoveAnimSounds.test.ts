@@ -48,7 +48,7 @@ describe("Brick Break turn 2 (aud260)", () => {
   });
   it("aud260-brickbreak-player: ROM-minus-ours is one constant over turn 2's four rows", () => {
     const rom = fixture("aud260-brickbreak-player");
-    expect(expectConstantOffset(rom, [122, 123, 198], 4)).toBe(2);
+    expect(expectConstantOffset(rom, [122, 123, 198], 4)).toBe(0);
   });
 });
 
@@ -62,7 +62,7 @@ describe("Glare (aud260)", () => {
   });
   it("aud260-glare-player: ids, pans and the 107-frame gap equal the ROM's, offset constant", () => {
     const rom = fixture("aud260-glare-player");
-    expect(expectConstantOffset(rom, [200, 192], 2)).toBe(2);
+    expect(expectConstantOffset(rom, [200, 192], 2)).toBe(0);
     const romRows = rom.events.filter((e) => e.kind === "se" && [200, 192].includes(e.id as number));
     expect(romRows[1]!.frame - romRows[0]!.frame).toBe(107);
   });

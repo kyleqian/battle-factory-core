@@ -76,13 +76,22 @@ interface WonLobby {
 // 10, 13 and 19 passing every case (15 / 15; 2 and 4 fail the 2 continuation cases, 17 and 20 fail 6, the rest 10), so the continuation uses 10.
 // merge of the box's 2026-11-20 run with the Mac's 11-21 fixes: the merge kept the box's 0 / 0 / 0 (lbw9's re-pin; the Mac had 10 / 13 / 10 after trial-fix-20261121). All 15 cases
 // pass with 0 in all three roles on the merged tree, so they stay.
-// tdr1 (tri1 / wtl1 / sst1: the battle intro at each transition's own frame, the win tail's waits and the sandstorm tail; every soak trajectory shifts): 0 lost
-// the Scene OFF continuation and the challenge-2 loss case. A scan of 0..20 with the seed in all three roles (scratch copies of this file) found none
-// passing every case: 13 fails only the retire, 19 only the challenge-2 loss, 2 / 10 / 17 only the two continuation cases, 0 and 4 three, the rest 6 to 12.
-// So the continuation uses 13, the retire and the loss 2.
-const WIN_TWO_SEED = 13;
-const RETIRE_SEED = 2;
-const WIN_THEN_LOSE_SEED = 2;
+// wtl1 (the win tail holds 24 more rows before "Player defeated", ROM P + 26): 0's Scene OFF continuation loses. A scan of 1..28 in the WIN_TWO role (scratch copies of this file) found only 13 passing all 15
+// (2 / 4 / 10 fail the two continuation cases, 19 / 23 fail 2 cases, the rest more); RETIRE and the loss keep 0.
+// merge of this run's eqk1 (the Earthquake hit-all transition, the Pausex20 before "It doesn't affect", Magnitude) with chg2 / chg3 / hie5: 13's Scene OFF
+// continuation loses. A scan of 0..23 in the WIN_TWO role (scratch copies of this file) found 2 and 17 passing all 15 (0 / 4 / 10 / 13 / 19 / 23 fail the two
+// continuation cases, 14 / 18 fail 6, the rest 10); RETIRE and the loss keep 0.
+// etp1 (33bdace6d, end-turn weather prints take the end-turn rows; the soak player's presses land on new phases): 13's Scene OFF continuation loses. A scan of 0..16 in the WIN_TWO role (scratch copies of this file)
+// found only 4 passing all 15 (0 / 2 / 10 fail the two continuation cases, 14 fails 6, the rest 10); RETIRE and the loss keep 0. etp2 found it (the base c114f4410 passes with 13).
+// merge of etp1 / etp2 (end-turn prints on the ROM rows) with this run's fold: 2's Scene OFF continuation loses. A scan of 0..23 in the WIN_TWO role (scratch
+// copies of this file) found 4 and 19 passing all 15 (0 / 2 / 10 / 13 / 23 fail the two continuation cases, 14 / 17 / 18 fail 6, the rest 10); RETIRE and the loss keep 0.
+// merge of the box's night run with the Mac's tdr1 (tri1 / wtl1 / sst1: the battle intro at each transition's own frame, the win tail's
+// slide wait, the sandstorm sound): 4 fails the two Scene OFF continuation cases, 0 the challenge-2 loss. A scan of 0..23 with the seed in all
+// three roles (scratch copies of this file) found only 10 passing all 15 (23 all but the loss; 2 / 4 / 13 / 14 / 19 the two continuation
+// cases, 0 those and the loss, 17 those and the retire, the rest 12). So all three roles use 10.
+const WIN_TWO_SEED = 10;
+const RETIRE_SEED = 10;
+const WIN_THEN_LOSE_SEED = 10;
 
 function newPlayer(seed: number): RandomPlayer {
   const player = new RandomPlayer(new Rng(seed), new ActionLog(false), "winning");

@@ -49,7 +49,7 @@ describe("Magnitude (aud262)", () => {
       const romRows = rom.events.filter((e) => e.kind === "se" && e.id === 214).slice(0, 10);
       expect(romRows.map((e) => e.frame - romRows[0]!.frame)).toEqual([0, 8, 17, 26, 35, 44, 53, 62, 71, 80]);
       expect(romRows.every((e) => e.pan === pan)).toBe(true);
-      expect(expectConstantOffset(rom, [214], 10, "first")).toBe(3);
+      expect(expectConstantOffset(rom, [214], 10, "first")).toBe(0); // mxp1: the body lead (10 rows) is presented, the first SE is on the ROM frame (was 3 early)
     });
   }
 });

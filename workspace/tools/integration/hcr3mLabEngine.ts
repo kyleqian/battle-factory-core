@@ -1,3 +1,4 @@
+// NOTE: for battle labs in tools/battle-lab/ use tools/integration/labCompare.sh (ROM probe + engine + aligned SE table in one run); this one handles sound-fixture labs.
 // hcr3m: the engine's presentation commands and SE rows of a sound-fixture lab (tools/audio/fixtures/<name>.json), for hcr3mLab.py next to the ROM script trace.
 //   node --experimental-strip-types --no-warnings tools/integration/hcr3mLabEngine.ts <fixture-name> <out.json>
 import "../../src/engine/monPicPixelsInstall.ts";

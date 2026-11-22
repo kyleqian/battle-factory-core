@@ -51,12 +51,19 @@ the BGM -> "Player defeated"'s first glyph 4 in 22 of 22; P2 -> the lose text's 
 after P, the lose text 38 after P2. The picture of the slide is the same on both sides from its first visible pixel on; ours started it
 16 frames earlier.
 
+## Merge with the box's night run (2026-11-22)
+
+The box fixed the same "Player defeated" gap the same night (its own wtl1, `60336f6e7`, `docs/fnt1-fainted-box-clear.md` "wtl1"): draw-nothing
+rows around the MoveEnd receipts (5 before, 19 after, from its `aud241c-win` labs), the first glyph at P + 26 in both scenes. That is the
+same frame as this branch's BGM + 4, so the merge keeps the box's rule and drops this branch's `withWinPrintHold` (both together would have
+printed 24 frames late). The trainer slide's wait (below, the second item) is this branch's alone and stays.
+
 ## Change
 
 Presentation timing only (`src/engine/battleResolutionPresentation.ts`, `battleResolutionPresentationRender.ts`):
 
-- `withWinPrintHold`: the last moveend receipt (a one-row sprite-visibility command) before the win print holds `holdFrames` rows, so the
-  print's first glyph lands `WIN_PRINT_AFTER_BGM_ROWS` (4) after the victory BGM. The BGM's own delay is lha1's (`VICTORY_BGM_AFTER_*`,
+- (Replaced in the merge by the box's `winTailHoldRows`, see above.) `withWinPrintHold`: the last moveend receipt (a one-row sprite-visibility
+  command) before the win print held `holdFrames` rows, so the print's first glyph landed `WIN_PRINT_AFTER_BGM_ROWS` (4) after the victory BGM. The BGM's own delay is lha1's (`VICTORY_BGM_AFTER_*`,
   `battleEndSounds.ts`: 22 after a button box, 19 after an automatic message, 14 after another controller command; restated as
   `WIN_BGM_AFTER_ANCHOR_ROWS`, pinned equal by the test). During the hold the released "fainted!" box stays as fnt1 draws it, frozen or
   blank, as on the ROM.
@@ -78,7 +85,7 @@ press as before, so it moves with it.
 
 ## Tests
 
-`tests/wtl1WinTailTiming.test.ts` (4): the constants (lha1's delays, 14 + 38 + 3 = 55); census seed 0 Scene OFF and seed 10 Scene ON
+`tests/wtl1WinTailTiming.test.ts` (4): the constants (the box's holds 5 / 19 since the merge; 14 + 38 + 3 = 55); census seed 0 Scene OFF and seed 10 Scene ON
 (a faint press off a redraw frame): "Player defeated" at P + 26 with the frozen "fainted!" box until then, the lose text at P2 + 55, the
 slide off screen through the lead, at x2 74 on its first move and settled at P2 + 52; seed 0 with the press on a redraw frame (k 0): the
 box blank through the wait. fnt1's tests pass unchanged.
@@ -87,5 +94,7 @@ box blank through the wait. fnt1's tests pass unchanged.
 
 - The ROM's victory BGM comes 21 frames after the press more often than 22 (13 vs 8 of 22; lha1 has 22), so ours is a frame late in about
   half of the wins, and "Player defeated" with it. The 21 / 22 comes from the fainted-mon checks (P + 20 or 21), not looked into.
+- A win by an end-of-turn KO (poison, weather): no MoveEnd receipts before "Player defeated", so the box's rule leaves it at P + 2; the merged
+  catcher run has one (t8off, poison): ours about 24 frames early, the ROM's music 20 frames after the press and the print 4 after it.
 - Two-opponent and Frontier Brain win tails (`BattleScript_FrontierTrainerBattleWon_TwoDefeated`, the Head's MUS_VICTORY_GYM_LEADER)
   use the same hold; only the ordinary win is measured.

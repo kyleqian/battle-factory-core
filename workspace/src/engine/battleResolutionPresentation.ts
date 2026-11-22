@@ -4,6 +4,7 @@ import type { LiveMoveSpriteAllocatorInput, LiveMoveSpriteOrderInput } from "./l
 import type { LiveBattlerX2History, LiveMoveBattlerX2Input } from "./liveBattlerX2History.ts";
 import { battleMoveAnimationRequest, type BattleMoveAnimationRequest } from "./battleMoveAnimation.ts";
 import { opponentPartySummaryDrawTiming } from "./midBattleOpponentPartySummaryTiming.ts";
+import { aiReplacementChoiceWork, speciesTypesOf } from "./battleScriptOpenPartyScreenOpcode.ts";
 import {
   NO_MOVES_BOUNCE_STOP_AFTER,
   NO_MOVES_DISMISS_HOLD_FRAMES,
@@ -31,6 +32,7 @@ import type {
   BattleScriptSemanticEventPayload,
 } from "./battleScriptEvents.ts";
 import type { BattleScriptRulesContext } from "./battleScriptRulesContext.ts";
+import { aiReplacementChoiceExtraFrames, type BattleAiSwitchIntoWork } from "./battleAiSwitchInto.ts";
 import type { BattleScriptSelectionRejection } from "./battleScriptActionAdmission.ts";
 import {
   type BattleStringPromptGate,
@@ -58,7 +60,7 @@ import {
 } from "./battleResolutionPresentationRender.ts";
 import { SEND_IN_TAIL_CASTFORM } from "../data/sendInTail.ts";
 import { CASTFORM_CHANGE_COMMAND_FRAMES, CASTFORM_CHANGE_WEATHER_LOOP_FRAMES } from "./liveTransform.ts";
-import { BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS, BATTLE_SCRIPT_STATUS3_SEMI_INVULNERABLE } from "./battleScriptSourceConstants.ts";
+import { BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS, BATTLE_SCRIPT_STATUS2_MASKS, BATTLE_SCRIPT_STATUS3_SEMI_INVULNERABLE } from "./battleScriptSourceConstants.ts";
 import { spriteOrderStatusAnimationName } from "./spriteOrderEventTransform.ts";
 import { seg127StatusSeGateFromEvents, seg127StatusSeGateRows } from "./seg127StatusSeGate.ts";
 import {
@@ -122,6 +124,8 @@ export type BattleMessageTiming =
  */
 export type BattleMoveAnimationTiming = Readonly<{
   minimumFrames: number; seGateFrames?: number; scriptLeadFrames?: number; bodyLeadFrames?: number; scriptTailRows?: number;
+  /** bdt1: rows the body's sound clock (liveMoveSourceAge) runs ahead of its presented rows; sound only, never the command's duration. */
+  soundAgeLeadFrames?: number;
 }>;
 export type BattleHitAnimationTiming = Readonly<{
   minimumFrames: 35 | typeof HIT_ANIMATION_INVISIBLE_FRAMES;
@@ -290,29 +294,6 @@ export function weatherContinuesCommandFrames(animation: WeatherContinuesAnimati
   if (animation === "RAIN_CONTINUES") return RAIN_CONTINUES_COMMAND_FRAMES;
   return WEATHER_CONTINUES_LAUNCH_LEAD_ROWS + WEATHER_CONTINUES_BODY_ROWS[animation] + WEATHER_CONTINUES_LAUNCH_TAIL_ROWS;
 }
-/**
- * sst1 (docs/sst1-sandstorm-continues.md): after General_Sandstorm, BattleScript_DamagingWeatherContinues (battle_scripts_1.s:3200-3224)
- * runs `setbyte`, then per battler in turn order `copyarraywithindex`, `weatherdamage`, `jumpifword` and, for a battler the sandstorm
- * does not hurt, BattleScript_DamagingWeatherLoopIncrement's three commands, before the first "{X} is buffeted by the sandstorm!" print.
- * The ROM runs one script command a frame, so the rows from the body's last picture to that print's first glyph are those instructions
- * + 5 (frame catcher, 15 Scene ON end turns: 10 rows when the first battler in turn order is hurt, 5 instructions; 16 when it is not,
- * 11). The command's tail is those instructions (the kernel's instructionExecution counts; ours had 3, 8 rows to the glyph); without
- * a "buffeted" print in the script run (neither battler hurt) it keeps WEATHER_CONTINUES_LAUNCH_TAIL_ROWS. Hail runs the same script but
- * is not in the sweep (hit1 measured its damage SE 4 late with the old tail): unchanged.
- */
-const SANDSTORM_BUFFETED_MESSAGE_ID = "STRINGID_PKMNBUFFETEDBYSANDSTORM";
-export function sandstormContinuesTailRows(events: readonly BattleKernelSemanticEvent[], index: number): number {
-  const animation = events[index]!;
-  const start = animation.provenance?.instructionExecution;
-  for (let next = index + 1; next < events.length; next += 1) {
-    const payload = events[next]!.payload;
-    if (payload.kind !== "message") continue;
-    const end = events[next]!.provenance?.instructionExecution;
-    if (payload.messageId !== SANDSTORM_BUFFETED_MESSAGE_ID || start === undefined || end === undefined || end <= start) break;
-    return end - start;
-  }
-  return WEATHER_CONTINUES_LAUNCH_TAIL_ROWS;
-}
 export const FOCUS_PUNCH_SETUP_BEHIND_SUBSTITUTE_COMMAND_FRAMES = 3;
 const CASTFORM_CHANGE_SUBSTITUTE = 1 << 7;
 /**
@@ -343,6 +324,26 @@ const SYNTHESIZED_AI_SWITCH_DISPATCHER = "synthesized-ai-switch";
  * 2 later), so the whole send-in runs 2 frames late (`sendInVisualDelay`) and the command is 2 longer.
  */
 const AI_SWITCH_SEND_IN_LEAD_FRAMES = 2;
+
+/**
+ * fch1: the opponent's faint replacement choice work (`GetMostSuitableMonToSwitchInto`, run by `OpponentHandleChoosePokemon` inside the script's
+ * `openpartyscreen`) for the FaintedMonSendOutNew replacement that follows event `index`, or null when none follows. The bench is the segment's
+ * starting party minus the fainted slot (`switch.fromPartyIndex`); the opposing mon is the player's displayed battler.
+ */
+function faintReplacementChoiceWork(
+  beforeRules: BattleScriptRulesContext,
+  currentField: BattleResolutionDisplayedField,
+  events: readonly BattleKernelSemanticEvent[],
+  index: number,
+): BattleAiSwitchIntoWork | null {
+  const next = events.slice(index + 1).find(({ payload }) => payload.kind === "switch");
+  if (next === undefined || next.payload.kind !== "switch" || next.payload.side !== "opponent") return null;
+  if (next.provenance?.sourceLabel !== "BattleScript_FaintedMonSendOutNew") return null;
+  const player = beforeRules.battlers[0]!;
+  const types = player.partyIndex === currentField.player.partyIndex ? player.types : speciesTypesOf(currentField.player.species);
+  if (types === null) return null;
+  return aiReplacementChoiceWork(beforeRules, next.payload.fromPartyIndex, { types, ability: player.ability, status2: player.status2 });
+}
 
 /**
  * fpo187 (docs/fpo187-focus-punch-on-prepass-row.md, ont193): Scene ON only, the pre-pass `playanimation` launch
@@ -538,7 +539,8 @@ export type BattleSpriteVisibilityTiming = Readonly<{
   minimumFrames: 1 | typeof FORCED_RETURN_TO_BALL_SEND_IN_GAP_FRAMES | typeof SCENE_OFF_BATON_PASS_RETURN_TO_BALL_PRINT_GAP_FRAMES
     | typeof LOSS_RECALL_TRAINER_SLIDE_GAP_FRAMES;
 }>;
-export type BattleTurnEndTiming = Readonly<{ minimumFrames: number }>;
+/** `blankTailFrames`: the last rows of the turn-end draw the cleared box (the release tail's box clear, msw2). */
+export type BattleTurnEndTiming = Readonly<{ minimumFrames: number; blankTailFrames?: number }>;
 /**
  * `holdFrames`: rows after the slide settles before the next command (lrc1: the loss tail's printstring, LOSS_TRAINER_SLIDE_PRINT_GAP_FRAMES).
  * `leadFrames`: rows before the slide's el 0, the sprite still off screen (wtl1: the win tail, WIN_TAIL_TRAINER_SLIDE_LEAD_FRAMES).
@@ -744,8 +746,6 @@ export type BattleResolutionPresentationCommand =
        */
       recall: boolean;
       timing: BattleSpriteVisibilityTiming;
-      /** wtl1: rows after the receipt before the next command (the win print's hold, withWinPrintHold). Absent = 0. */
-      holdFrames?: number;
     }>
   | Readonly<{
       type: "turn-end";
@@ -1091,6 +1091,15 @@ const MESSAGE_TIMING = Object.freeze({ minimumFrames: 24, holdFrames: 0 } as con
 /** `B_WAIT_TIME_LONG` (`reference/pokeemerald/include/constants/battle.h:324`). */
 export const WAITMESSAGE_LONG_HOLD_FRAMES = 64;
 /**
+ * stc1 (docs/aud251-s11-scoreboard-refresh.md "stc1"): BattleScript_DoSelfConfusionDmg (battle_scripts_1.s:3796-3804) runs status2animation,
+ * jumpifbyte, cancelmultiturnmoves, adjustnormaldamage2 and printstring (5 rows) between the "is confused!" wait and the first glyph of
+ * "It hurt itself in its confusion!"; the engine typed from the first of them (now the message's `leadFrames`). ROM seeds 7295 (decision 4) / 7682 (decision 2), Scene OFF:
+ * the first glyph comes 5 rows later and the print's effectivenesssound (SE 13) 7 rows later than the engine's, so the message holds 2 more rows.
+ */
+const SELF_CONFUSION_HIT_MESSAGE_ID = "STRINGID_ITHURTCONFUSION";
+const SELF_CONFUSION_OFF_PRE_PRINT_ROWS = 5;
+const SELF_CONFUSION_OFF_HIT_MESSAGE_TIMING = Object.freeze({ minimumFrames: 0, holdFrames: WAITMESSAGE_LONG_HOLD_FRAMES + 2 } as const);
+/**
  * Route-scoped `STRINGID_USEDMOVE` hold for the ButItFailed/no-anim path
  * (`pause B_WAIT_TIME_SHORT` = 32 + ~6 dispatch steps, measured 38 =
  * 1076-1113 in `docs/battle-message-pacing-ground-truth.md` §1/§3.4).
@@ -1218,6 +1227,15 @@ const PRE_MOVE_STATUS_ANIMATION_TIMING = Object.freeze({
  */
 export const MOVE_INFLICTED_STATUS_ANIMATION_LEAD_ROWS = 6;
 export const MOVE_INFLICTED_STATUS_SCENE_OFF_LEAD_ROWS = MOVE_INFLICTED_STATUS_ANIMATION_LEAD_ROWS + 1;
+/**
+ * gsp3 (ROM labs gsp3-{toxic,willowisp}-{player,foe}-on, T2 windows): the end-of-turn poison / burn tick (BattleScript_PoisonTurnDmg /
+ * BurnTurnDmg) reaches its `statusanimation` row 2 rows (poison) / 3 rows (burn: the `goto BattleScript_DoStatusTurnDmg` is one more row)
+ * after the print's waitmessage, not the pre-move cadence's 3 / 0 (ROM print -> DoStatusTurnDmg row 95 / 98 against the engine's 96 / 95).
+ */
+const END_TURN_STATUS_DAMAGE_LEAD_ROWS: Readonly<Record<string, number>> = Object.freeze({
+  BattleScript_PoisonTurnDmg: 2,
+  BattleScript_BurnTurnDmg: 3,
+});
 const MOVE_INFLICTED_STATUS_SCENE_OFF_TIMING = Object.freeze({
   minimumFrames: 0,
   holdFrames: WAITMESSAGE_LONG_HOLD_FRAMES + MOVE_INFLICTED_STATUS_SCENE_OFF_LEAD_ROWS,
@@ -1258,6 +1276,8 @@ function messageTimingFromSourceProvenance(
     && following.operands.length === 1
     && following.operands[0]!.expression === "B_WAIT_TIME_LONG"
   ) {
+    const tickLead = END_TURN_STATUS_DAMAGE_LEAD_ROWS[event.provenance?.sourceLabel ?? ""];
+    if (tickLead !== undefined) return Object.freeze({ minimumFrames: 0, holdFrames: WAITMESSAGE_LONG_HOLD_FRAMES + tickLead });
     const launch = BATTLE_SCRIPT_PROGRAM.instructions[programCounter + 2]?.opcodeName;
     if (launch === "B_SCR_OP_STATUS2ANIMATION" || launch === "B_SCR_OP_STATUSANIMATION") return PRE_MOVE_STATUS_ANIMATION_TIMING;
     if (!isMoveInflictedStatusLaunch(programCounter)) return WAITMESSAGE_LONG_TIMING;
@@ -1323,6 +1343,7 @@ function hitTargetSpriteInvisible(
 }
 /** BattleScript_Pausex20's `pause B_WAIT_TIME_SHORT`. */
 const SCENE_OFF_MOVE_PAUSE_FRAMES = 32;
+const EXPLOSION_OFF_BODY_ROWS = 1;
 
 /**
  * off108 (ISSUES #167, docs/off108-scene-off-pauses.md): Scene OFF runs
@@ -1392,9 +1413,114 @@ const SCENE_OFF_SEMI_INVULNERABLE_HIDE_LEAD = 2;
  * sta3 (docs/aud249-general-anim-sounds.md): the next action's first print after the MoveEnd receipts. STRINGID_PKMNISCONFUSED is
  * BattleScript_MoveUsedIsConfused's first instruction (attackcanceler jumps there: u = 2), ROM-measured as the same E + 1 + d + n + 6 + u.
  */
-const ACTION_TRANSITION_NEXT_PRINTS: ReadonlySet<string> = new Set(["STRINGID_USEDMOVE", "STRINGID_PKMNISCONFUSED", "STRINGID_PKMNFASTASLEEP"]);
+const ACTION_TRANSITION_NEXT_PRINTS: ReadonlySet<string> = new Set(["STRINGID_USEDMOVE", "STRINGID_PKMNISCONFUSED", "STRINGID_PKMNFASTASLEEP", "STRINGID_PKMNINLOVE"]);
 /** gsp2: the wake-up print is a transition print in Scene ON only (Scene OFF output is unchanged). */
 const SCENE_ON_ACTION_TRANSITION_NEXT_PRINT = "STRINGID_PKMNWOKEUP";
+/**
+ * gsp3 (ROM labs gsp3-attract-{player,foe}-on): "X is in love with Y!" (BattleScript_MoveUsedIsInLove, reached from attackcanceler by a `call`) is a transition
+ * print too, 2 rows earlier than the trn176 count: MoveEnd 583 -> print row 592 (ROM) against the rule's 594.
+ */
+const IN_LOVE_TRANSITION_PRINT = "STRINGID_PKMNINLOVE";
+const IN_LOVE_TRANSITION_ROWS = -2;
+
+/**
+ * wtl1 (ROM labs aud241c-win-{off,on}; P = the press on the foe's last "fainted!", Q = P + 2 the controller's completion): the win tail's script
+ * rows draw nothing. 5 rows from Q to the first MoveEnd receipt (BattleScript_MoveEnd's setbyte, moveend; its receipts are exec 126/127 = P + 5 / P + 6),
+ * then 19 from the second receipt to BattleScript_FrontierTrainerBattleWon's printstring (HandleAction_TryFinish / HandleFaintedMonActions:
+ * BattleScript_HandleFaintedMon's checkteamslost, ActionFinished, HandleEndTurn_BattleWon, jumpifnotbattletype / jumpifbattletype): the
+ * "Player defeated" printstring executes at P + 25, its first glyph at P + 26 in both scenes.
+ */
+export const WIN_TAIL_PRE_RECEIPT_ROWS = 5;
+export const WIN_TAIL_POST_RECEIPT_ROWS = 19;
+
+/** wtl1: the win-tail hold rows around a MoveEnd receipt run that ends in STRINGID_PLAYERDEFEATEDTRAINER1 (null for any other receipt). */
+function winTailHoldRows(events: readonly BattleKernelSemanticEvent[], receiptIndex: number): Readonly<{ before: number; after: number }> | null {
+  const isReceipt = (event: BattleKernelSemanticEvent | undefined) =>
+    event !== undefined && event.payload.kind === "set-battler-sprite-visibility" && event.provenance?.opcodeName === "B_SCR_OP_MOVEEND";
+  let end = receiptIndex;
+  while (isReceipt(events[end + 1])) end += 1;
+  const next = events[end + 1];
+  if (next === undefined || next.payload.kind !== "message" || next.payload.messageId !== "STRINGID_PLAYERDEFEATEDTRAINER1") return null;
+  return Object.freeze({
+    before: isReceipt(events[receiptIndex - 1]) ? 0 : WIN_TAIL_PRE_RECEIPT_ROWS,
+    after: end === receiptIndex ? WIN_TAIL_POST_RECEIPT_ROWS : 0,
+  });
+}
+
+/**
+ * wtl1 (ROM labs wtl1-rain-{growl,player}-{off,on}): the turn-end weather print (BattleScript_RainContinuesOrEnds, printfromtable at +0, u = 1) after
+ * the last action's MoveEnd. The ROM runs MoveEnd's remaining cases and HandleEndTurn / DoFieldEndTurnEffects before it: its printstring
+ * executes 10 rows after MoveEnd's first row (stat fall 425 -> 435, hit 323 -> 333), 3 rows later than the next action's USEDMOVE chain (n + 6 + u).
+ */
+const END_TURN_PRINT_SCRIPTS: ReadonlySet<string> = new Set([
+  "BattleScript_RainContinuesOrEnds",
+  "BattleScript_DamagingWeatherContinues",
+  "BattleScript_SandStormHailEnds",
+  "BattleScript_SunlightContinues",
+  "BattleScript_SunlightFaded",
+  "BattleScript_PoisonTurnDmg",
+  "BattleScript_BurnTurnDmg",
+  "BattleScript_CurseTurnDmg",
+  "BattleScript_MonTookFutureAttack",
+]);
+const END_TURN_WEATHER_PRINT_EXTRA_ROWS = 1;
+
+/**
+ * etp1 (ROM labs etp1-{sandstorm,hail}{,5}-{off,on}): the rows from the end of the previous end-turn step to the damage print of
+ * BattleScript_DamagingWeatherLoop's first / second pass. Every script instruction between two waits costs one row.
+ * After "The sandstorm rages" / "The hail continues" (`waitmessage B_WAIT_TIME_LONG`, kernel E = print + 64): playanimation_var (a no-op row in
+ * Scene OFF), setbyte, copyarraywithindex, weatherdamage, jumpifword, printfromtable, then the first glyph one row after: k + 1 with k = instructions
+ * from E to the printfromtable (Scene OFF: command ends on E, 7 rows late). Scene ON: the General_Sandstorm / General_Hail command already ends
+ * WEATHER_CONTINUES_LAUNCH_TAIL_ROWS after its last row, so only the instructions past that tail are added (+2). After the pass's `healthbarupdate`
+ * / `datahpupdate` command the second pass's print comes 3 rows later than the command's end (both scenes).
+ */
+const DAMAGING_WEATHER_LOOP_SCRIPT = "BattleScript_DamagingWeatherLoop";
+const DAMAGING_WEATHER_LOOP_AFTER_HP_ROWS = 3;
+// Wish's heal print after its hp command (ROM lab etp1-wish: +5 rows, both scenes). Perish Song's counts are left as before: the etp1-perish lab agrees with a label +1 / second-battler +5 rule, but seed 2741's ROM pictures (ais2) do not.
+const WISH_SCRIPT = "BattleScript_WishComesTrue";
+const END_TURN_NEXT_SCRIPT_ROWS = 5;
+/**
+ * etp1 (labs etp1-{roar,whirlwind}-{on,off}; ROM press P = the A that dismisses "was dragged out!"; s222-on-wc, s94-on-wc, docs/msg2): the turn's
+ * first end-turn print (the MoveEnd receipts only in between) starts its first glyph on P + 15 (the printer's release, BattleScript_TrainerBattleForceOut's
+ * tail, MoveEnd and DoBattlerEndTurnEffects' rows); the receipts' frames put it on P + 2: 13 rows more, both scenes.
+ */
+const DRAGGED_OUT_END_TURN_PRINT_ROWS = 13;
+function endTurnPrintFollowsDraggedOut(events: readonly BattleKernelSemanticEvent[], index: number): boolean {
+  for (let back = index - 1; back >= 0; back -= 1) {
+    const previous = events[back]!;
+    if (previous.payload.kind === "set-battler-sprite-visibility" && previous.provenance?.opcodeName === "B_SCR_OP_MOVEEND") continue;
+    return previous.payload.kind === "message" && previous.payload.messageId === "STRINGID_PKMNWASDRAGGEDOUT";
+  }
+  return false;
+}
+
+function endTurnChainLeadRows(events: readonly BattleKernelSemanticEvent[], index: number, sceneOn: boolean): number {
+  const event = events[index]!;
+  const executed = event.provenance?.instructionExecution;
+  if (event.payload.kind !== "message" || executed === undefined) return 0;
+  const label = event.provenance?.sourceLabel;
+  if (label === WISH_SCRIPT) {
+    const previous = events[index - 1];
+    return previous?.payload.kind === "hp-change" && previous.provenance?.sourceLabel === label && event.payload.messageId === "STRINGID_PKMNREGAINEDHEALTH"
+      ? END_TURN_NEXT_SCRIPT_ROWS : 0;
+  }
+  if (END_TURN_PRINT_SCRIPTS.has(label ?? "") && label !== DAMAGING_WEATHER_LOOP_SCRIPT && endTurnPrintFollowsDraggedOut(events, index)) return DRAGGED_OUT_END_TURN_PRINT_ROWS;
+  if (label !== DAMAGING_WEATHER_LOOP_SCRIPT) return 0;
+  for (let back = index - 1; back >= 0; back -= 1) {
+    const previous = events[back]!;
+    const previousExecution = previous.provenance?.instructionExecution;
+    if (previousExecution === undefined) return 0;
+    if (previous.payload.kind === "hp-change") return DAMAGING_WEATHER_LOOP_AFTER_HP_ROWS;
+    if (previous.payload.kind === "animation" && weatherContinuesAnimationOf(previous.payload) !== null) {
+      if (sceneOn) return Math.max(0, executed - previousExecution - WEATHER_CONTINUES_LAUNCH_TAIL_ROWS);
+      continue;
+    }
+    if (previous.payload.kind === "message") {
+      return executed - (previousExecution + WAITMESSAGE_LONG_HOLD_FRAMES) + 1;
+    }
+  }
+  return 0;
+}
 
 const ACTION_TRANSITION_WAIT_ROWS: Readonly<Record<string, number>> = Object.freeze({ B_WAIT_TIME_LONG: WAITMESSAGE_LONG_HOLD_FRAMES });
 
@@ -1423,6 +1549,8 @@ function actionTransitionPauseFrames(
   let used: number | null = null;
   let statusFramesAfter = 0;
   let usedIsPreMove = false;
+  let inLoveRows = 0;
+  let endTurnRows = 0;
   for (let index = receiptIndex + 1; index < events.length; index += 1) {
     const event = events[index]!;
     const next = event.provenance?.instructionExecution;
@@ -1438,12 +1566,15 @@ function actionTransitionPauseFrames(
       statusFramesAfter += frames;
       continue;
     }
+    const endTurnWeather = event.payload.kind === "message" && END_TURN_PRINT_SCRIPTS.has(event.provenance?.sourceLabel ?? "");
     if (
       next >= e1 || event.payload.kind !== "message"
-      || !(ACTION_TRANSITION_NEXT_PRINTS.has(event.payload.messageId) || (sceneOn && event.payload.messageId === SCENE_ON_ACTION_TRANSITION_NEXT_PRINT))
+      || !(endTurnWeather || ACTION_TRANSITION_NEXT_PRINTS.has(event.payload.messageId) || (sceneOn && event.payload.messageId === SCENE_ON_ACTION_TRANSITION_NEXT_PRINT))
     ) return null;
+    if (endTurnWeather) endTurnRows = END_TURN_WEATHER_PRINT_EXTRA_ROWS;
     used = next;
-    usedIsPreMove = event.payload.messageId !== "STRINGID_USEDMOVE";
+    usedIsPreMove = !endTurnWeather && event.payload.messageId !== "STRINGID_USEDMOVE";
+    if (event.payload.messageId === IN_LOVE_TRANSITION_PRINT) inLoveRows = IN_LOVE_TRANSITION_ROWS;
     break;
   }
   if (used === null) return null;
@@ -1459,6 +1590,10 @@ function actionTransitionPauseFrames(
       anchor = event;
       break;
     }
+    if (kind === "status-animation") {
+      anchor = event;
+      break;
+    }
     // lse4: a lead-class Scene ON body that prints nothing after its animation (Wish): the release row is the animation's own, one row after its execution.
     if (kind === "animation" && event.payload.animationId === "MOVE_ANIMATION") {
       const presentedBody = commands.find((command) => command.type === "move-animation" && command.eventSequence === event.sequence);
@@ -1469,15 +1604,20 @@ function actionTransitionPauseFrames(
   }
   if (anchor === null) return null;
   let anchorExecution = anchor.provenance!.instructionExecution;
-  if (anchor.payload.kind === "animation") anchorExecution += 1;
+  if (anchor.payload.kind === "animation" || anchor.payload.kind === "status-animation") anchorExecution += 1;
   if (anchor.payload.kind === "message") {
-    if (anchor.payload.messageId === "STRINGID_USEDMOVE" || anchor.payload.messageId === "STRINGID_EMPTYSTRING3") return null;
-    const following = BATTLE_SCRIPT_PROGRAM.instructions[anchor.provenance!.programCounter + 1];
-    const wait = following?.opcodeName === "B_SCR_OP_WAITMESSAGE"
-      ? ACTION_TRANSITION_WAIT_ROWS[following.operands[0]?.expression ?? ""]
-      : undefined;
-    if (wait === undefined) return null;
-    anchorExecution += wait;
+    if (anchor.payload.messageId === "STRINGID_USEDMOVE") return null;
+    if (anchor.payload.messageId === "STRINGID_EMPTYSTRING3") {
+      if (hitAllLoopEmptyBoxTiming(events, events.indexOf(anchor)) === null || events[receiptIndex - 1] !== anchor) return null;
+      anchorExecution = e1;
+    } else {
+      const following = BATTLE_SCRIPT_PROGRAM.instructions[anchor.provenance!.programCounter + 1];
+      const wait = following?.opcodeName === "B_SCR_OP_WAITMESSAGE"
+        ? ACTION_TRANSITION_WAIT_ROWS[following.operands[0]?.expression ?? ""]
+        : undefined;
+      if (wait === undefined) return null;
+      anchorExecution += wait;
+    }
   }
   let presented = 0;
   for (let index = commands.length - 1; index >= 0; index -= 1) {
@@ -1489,7 +1629,7 @@ function actionTransitionPauseFrames(
   }
   // sta3 (aud242g dreameater, ROM): before a pre-move print the status icon's second controller row (production presents one frame) is one more row.
   const iconSecondRow = anchor.payload.kind === "status-icon-update" && usedIsPreMove ? 1 : 0;
-  const frames = e1 - anchorExecution - 1 + ACTION_TRANSITION_ROWS + used - presented - statusFramesAfter + iconSecondRow;
+  const frames = e1 - anchorExecution - 1 + ACTION_TRANSITION_ROWS + used - presented - statusFramesAfter + iconSecondRow + inLoveRows + endTurnRows;
   return frames > 0 ? { frames, rowsToReceipt: e1 - anchorExecution - 1 - presented } : null;
 }
 
@@ -1606,6 +1746,7 @@ const NO_EFFECT_ATTACKANIMATION_HOLD_PCS: ReadonlySet<number> = new Set(
  * attack string (the PP receipt is silent) and the source puts that pause
  * within the three straight-line instructions before it.
  */
+const STAT_DOWN_PRINT_LABEL = "BattleScript_StatDownPrintString";
 function sourcePauseUsedMoveHoldFrames(
   events: readonly BattleKernelSemanticEvent[],
   usedIndex: number,
@@ -1618,9 +1759,13 @@ function sourcePauseUsedMoveHoldFrames(
     const next = candidate.provenance?.instructionExecution;
     if (next === undefined || next < execution) return null;
     execution = next;
-    if (candidate.payload.kind === "set-battler-pp-data") continue;
+    if (candidate.payload.kind === "set-battler-pp-data" || candidate.payload.kind === "stat-stage-change") continue;
     if (candidate.payload.kind !== "message") return null;
     const programCounter = candidate.provenance!.programCounter;
+    // chg2 (s3738 Aerial Ace -39 / -79): a stat change that cannot happen (BattleScript_EffectStatDown: `pause B_WAIT_TIME_SHORT; goto BattleScript_StatDownPrintString`) reaches
+    // its print through a goto, which the straight-line look-back below stops at; a print at that label with no animation receipt before it is the pause path (ROM: used print
+    // -> "won't go lower" print 61 rows, the pause's 32 + 6 dispatch steps after the 23-row print).
+    if (candidate.provenance?.sourceLabel === STAT_DOWN_PRINT_LABEL) return next - used + 1;
     for (let back = 1; back <= 3 && programCounter - back >= 0; back += 1) {
       const instruction = BATTLE_SCRIPT_PROGRAM.instructions[programCounter - back];
       if (
@@ -1638,6 +1783,16 @@ function sourcePauseUsedMoveHoldFrames(
       // pushes BattleScript_Pausex20 in BOTH scenes (battle_script_commands.c:
       // 1793-1797): the failed set* / protect-like / stockpile / setseeded print.
       if (NO_EFFECT_ATTACKANIMATION_HOLD_PCS.has(programCounter - back)) return next - used + 1;
+    }
+    // eqk1 (s1914 seg21, labs eqk1-eq-imm / eqk1-tackle-imm): a damaging move's `resultmessage` ("It doesn't affect X!") reached with no
+    // animation receipt took the same NO_EFFECT branch (Pausex20 in both scenes) at the `attackanimation` 9 instructions back, behind
+    // waitanimation .. datahpupdate .. critmessage .. waitmessage that run without a receipt: the print comes one row per execution later.
+    if (candidate.provenance!.opcodeName === "B_SCR_OP_RESULTMESSAGE" && candidate.payload.messageId === "STRINGID_ITDOESNTAFFECT") {
+      for (let back = 1; back <= 12 && programCounter - back >= 0; back += 1) {
+        const opcode = BATTLE_SCRIPT_PROGRAM.instructions[programCounter - back]?.opcodeName;
+        if (opcode === "B_SCR_OP_ATTACKANIMATION") return next - used + 1;
+        if (opcode === undefined || opcode === "B_SCR_OP_GOTO" || opcode === "B_SCR_OP_END" || opcode === "B_SCR_OP_RETURN") break;
+      }
     }
     return null;
   }
@@ -1688,6 +1843,28 @@ function heldItemEffectExecutionsAndLead(
   return previous === null || execution < previous
     ? { executions: execution, lead: HELD_ITEM_EFFECT_RESTART_LEAD_FRAMES }
     : { executions: execution - previous, lead: HELD_ITEM_EFFECT_CONTINUE_LEAD_FRAMES };
+}
+/**
+ * hie5 (ROM labs hie5-{yawn,curse,swordsdance}-foe-on): an item script that restarts after a move script whose last print is followed by MoveEnd
+ * (`printstring`, `waitmessage`, T more script rows, MoveEnd; Yawn / Curse / Swords Dance T = 1, Recoil T = 3) starts its animation at MoveEnd + 11 rows,
+ * so the controller lead is HELD_ITEM_EFFECT_AFTER_PRINT_LEAD_FRAMES + T (the engine's command starts 2 frames after the print's wait ends). The 15-row
+ * restart lead fitted a hit's tail (hp update, no print). T is the kernel's execution count from the print to MoveEnd less the waitmessage's frames + 2.
+ * Null when the event before the animation is not a print followed by MoveEnd receipts. Scene ON only (the caller).
+ */
+export const HELD_ITEM_EFFECT_AFTER_PRINT_LEAD_FRAMES = 9;
+function heldItemEffectAfterPrintLead(events: readonly BattleKernelSemanticEvent[], index: number): number | null {
+  let print = index - 1;
+  while (print >= 0 && events[print]!.provenance?.sourceLabel === "BattleScript_MoveEnd") print -= 1;
+  if (print < 0 || print === index - 1 || events[print]!.payload.kind !== "message") return null;
+  const programCounter = events[print]!.provenance?.programCounter;
+  const printExecution = events[print]!.provenance?.instructionExecution;
+  const moveEndExecution = events[print + 1]!.provenance?.instructionExecution;
+  if (programCounter === undefined || printExecution === undefined || moveEndExecution === undefined) return null;
+  const wait = BATTLE_SCRIPT_PROGRAM.instructions[programCounter + 1];
+  if (wait?.opcodeName !== "B_SCR_OP_WAITMESSAGE") return null;
+  const waitFrames = WAIT_TIME_FRAMES[wait.operands[0]?.expression ?? ""];
+  if (waitFrames === undefined) return null;
+  return HELD_ITEM_EFFECT_AFTER_PRINT_LEAD_FRAMES + moveEndExecution - printExecution - waitFrames - 2;
 }
 /**
  * hie1: Scene OFF's presented hold for an item print whose source is `playanimation ..., B_ANIM_HELD_ITEM_EFFECT` right before it
@@ -2004,7 +2181,8 @@ const LEAD4_S_LEAD_MOVE_IDS: ReadonlySet<number> = new Set([
 /**
  * lse4 (docs/hpd1-hp-hold.md lse3 table): Revenge 279 and Absorb 71 join the shape-A class (lead 5, gap 4). Absorb's accepted window is 2 rows short of the ROM's len + 1 (`LSE4_WINDOW_SHORT_ROWS`).
  */
-const LSE4_SHAPE_A_MOVE_IDS: ReadonlySet<number> = new Set([279, 71]);
+const MAGNITUDE_MOVE_ID = 222;
+const LSE4_SHAPE_A_MOVE_IDS: ReadonlySet<number> = new Set([279, 71, 222]);
 /**
  * hit1 (docs/hit1-move-hit-timing.md): Thunder Punch, lead1m's class B body (counter lead 5 = the ROM's, gap 4, s = +32: "fix the adapter window
  * first"). Its window is now the ROM's: the 10 idle lead rows (idle94) + 104 body rows + Cmd_end's 22 SE-wait rows = len 135 + 1 (liveMoveEndSeWaitRows),
@@ -2020,6 +2198,15 @@ const LSE4_GAP_PRINT_MOVE_IDS: ReadonlySet<number> = new Set([278, 13]);
 const LSE4_LEAD_ONLY_MOVE_IDS: ReadonlySet<number> = new Set([273]);
 /** lse4: rows the accepted adapter window is short of the ROM's `len + 1` (`s`): Absorb (script runs 2 rows past the window), Razor Wind (len = live, both turns). Added to the rows after the body. */
 export const LSE4_WINDOW_SHORT_ROWS: ReadonlyMap<number, number> = new Map([[71, 2], [13, 1]]);
+/**
+ * b4l "c-lead" (docs/aud251-s11-scoreboard-refresh.md b4m / b4l): the B4 status / hit bodies whose kernel lead (the instruction rows from the used print's release to `attackanimation`,
+ * ROM L = A0 - R - 3: 9 / 9 / 7 / 7 / 7 / 7 / 4 / 6 / 8 / 9 / 7) is presented in front of the body, with the lead-only class's tail plus a per-id window adjust: the rows after the body the
+ * ROM's next command (the status animation, stat, or hit animation) is off by once the lead is in (`C_LEAD_WINDOW_ADJUST`, ROM next command - engine next command). Thunder Wave 86, Stun Spore 78,
+ * Sleep Powder 79, Sing 47, Grasswhistle 320, Confuse Ray 109, Curse 174, Lovely Kiss 142, Will-O-Wisp 261, Glare 137, Brick Break 280.
+ */
+export const C_LEAD_WINDOW_ADJUST: ReadonlyMap<number, number> = new Map([[47, 3], [142, 3], [280, 3], [261, 2], [137, 2], [109, 2], [174, 4], [320, -2], [86, 0], [78, 0], [79, 0]]);
+/** The lead a c-lead body's sound table was fitted on when it is not the generic 7 (Confuse Ray's table was fitted on its own L = 6 lab, so its SEs already sit on the ROM frames). */
+const C_LEAD_SOUND_CLOCK_LEADS: ReadonlyMap<number, number> = new Map([[109, 6]]);
 /** The lead the S bodies' sound clock was calibrated on (the generic move-body clock, AGE_TO_SOUND_ROWS = 7). */
 const LEAD4_SOUND_CLOCK_LEAD = 7;
 /** Per-body clock leads (ROM minus ours on the 7 clock: Smokescreen / Scary Face / Metal Sound -2, Sweet Scent -3 in the aud242 fixtures; Double Team, 98 of 190 T2 SEs, +2 before the shift is -4): their SEs sit closer to the print release. */
@@ -2029,6 +2216,7 @@ export function lse2BodySoundAgeShift(moveId: number, bodyLeadFrames: number | u
   if ((bodyLeadFrames ?? 0) <= 0) return 0;
   const calibrated = LSE2_SOUND_CLOCK_LEADS.get(moveId);
   if (calibrated !== undefined) return bodyLeadFrames! - calibrated;
+  if (C_LEAD_WINDOW_ADJUST.has(moveId)) return bodyLeadFrames! - (C_LEAD_SOUND_CLOCK_LEADS.get(moveId) ?? LEAD4_SOUND_CLOCK_LEAD);
   return LEAD4_S_LEAD_MOVE_IDS.has(moveId) ? bodyLeadFrames! + precedingRows - (LEAD4_SOUND_CLOCK_LEADS.get(moveId) ?? LEAD4_SOUND_CLOCK_LEAD) : 0;
 }
 /**
@@ -2037,7 +2225,7 @@ export function lse2BodySoundAgeShift(moveId: number, bodyLeadFrames: number | u
  * (`liveMoveHitTailRows`); "status-tail": the sta5 script-tail table; "lse2": the lse2 lead-first status bodies; "lead-table": the hpd4 bodies with explicit tails.
  * Every consumer asks one of the predicates below instead of testing its own id set, so a batch widens one class.
  */
-export type BodyLeadRule = "lead-table" | "shape-a" | "status-tail" | "lse2" | "s-lead" | "gap-print" | "lead-only";
+export type BodyLeadRule = "lead-table" | "shape-a" | "status-tail" | "lse2" | "s-lead" | "gap-print" | "lead-only" | "c-lead";
 const BODY_LEAD_RULE: ReadonlyMap<number, BodyLeadRule> = new Map<number, BodyLeadRule>([
   ...HPD4_BODY_LEAD_MOVE_IDS.map((id): [number, BodyLeadRule] => [id, "lead-table"]),
   ...[...HPD8_SHAPE_A_MOVE_IDS, ...LEAD2_SHAPE_A_MOVE_IDS, ...LEAD3_SHAPE_A_MOVE_IDS, ...LSE4_SHAPE_A_MOVE_IDS, ...HIT1_SHAPE_A_MOVE_IDS].map((id): [number, BodyLeadRule] => [id, "shape-a"]),
@@ -2046,6 +2234,7 @@ const BODY_LEAD_RULE: ReadonlyMap<number, BodyLeadRule> = new Map<number, BodyLe
   ...[...LEAD4_S_LEAD_MOVE_IDS].map((id): [number, BodyLeadRule] => [id, "s-lead"]),
   ...[...LSE4_GAP_PRINT_MOVE_IDS].map((id): [number, BodyLeadRule] => [id, "gap-print"]),
   ...[...LSE4_LEAD_ONLY_MOVE_IDS].map((id): [number, BodyLeadRule] => [id, "lead-only"]),
+  ...[...C_LEAD_WINDOW_ADJUST.keys()].map((id): [number, BodyLeadRule] => [id, "c-lead"]),
 ]);
 /** The body's lead is presented as `bodyLeadFrames` (not carried in `scriptTailRows`). */
 export function bodyLeadRuleApplies(moveId: number): boolean {
@@ -2058,10 +2247,13 @@ export function bodyHitTailRuleApplies(moveId: number): boolean {
 /** The lead-first body keeps the audited hit-tail / status-tail composition (the render effect's age hold). */
 export function bodyLeadTailCompositionApplies(moveId: number): boolean {
   const rule = BODY_LEAD_RULE.get(moveId);
-  return rule === "shape-a" || rule === "status-tail" || rule === "s-lead" || rule === "gap-print";
+  return rule === "shape-a" || rule === "status-tail" || rule === "s-lead" || rule === "gap-print" || rule === "c-lead";
 }
 export function bodyGapPrintRuleApplies(moveId: number): boolean {
   return BODY_LEAD_RULE.get(moveId) === "gap-print";
+}
+export function bodyCLeadRuleApplies(moveId: number): boolean {
+  return BODY_LEAD_RULE.get(moveId) === "c-lead";
 }
 export function bodyLeadOnlyRuleApplies(moveId: number): boolean {
   return BODY_LEAD_RULE.get(moveId) === "lead-only";
@@ -2096,6 +2288,13 @@ function moveAnimationScriptLeadTiming(
       const waitLead = animation - (used + 1);
       return waitLead > 0 ? { scriptLeadFrames: waitLead } : {};
     }
+    if (moveId === MAGNITUDE_MOVE_ID) {
+      // mxp1: the body's script lead is counted from the Magnitude print's waitmessage (ROM: goto .. attackanimation 10 rows, A at +13 from the command).
+      const magnitudePrint = events.slice(i + 1, index).find((e) => e.payload.kind === "message" && e.payload.messageId === "STRINGID_MAGNITUDESTRENGTH");
+      if (magnitudePrint === undefined) return {};
+      const magnitudeLead = animation - (instructionExecutionOf(magnitudePrint) + 1 + WAITMESSAGE_LONG_HOLD_FRAMES);
+      return magnitudeLead > 0 ? { bodyLeadFrames: magnitudeLead } : {};
+    }
     if (presentedSinceUsed === null || !bodyLeadRuleApplies(moveId) || (events[index]!.provenance?.sourceLabel === CHARGE_TURN_SCRIPT && !bodyGapPrintRuleApplies(moveId))) return {};
     const lead = animation - (used + 1) - presentedSinceUsed;
     return lead > 0 ? { bodyLeadFrames: lead } : {};
@@ -2103,6 +2302,91 @@ function moveAnimationScriptLeadTiming(
   return {};
 }
 
+/**
+ * bdt1 / chg2 (Scene ON): the attack turn of a two-turn move is a locked continuation with no move menu, so the engine's first command is the print. The ROM
+ * runs the effect script first (EffectSemiInvulnerable -> SecondTurnSemiInvulnerable -> TryHit -> HitFromAtkString, or EffectSolarBeam / EffectRazorWind /
+ * EffectSkyAttack -> TwoTurnMovesSecondTurn -> HitFromAccCheck), its `printstring` row at press + 6 + u (u = the print's kernel execution count: Dig / Fly /
+ * Bounce / Dive 11, Solar Beam 12, Razor Wind 9; ROM labs bdt1-dig-{player,opponent}-on: 1043 press -> 1060 printstring ex2, the glyphs release 1081 ->
+ * `attackanimation` 1087, A0 1089). The rows are typed as the message's scroll lead, so the print and the body's sounds start where the ROM's do. A one-turn use
+ * (Solar Beam in sun) has no STATUS2_MULTIPLETURNS at the action's start and keeps its menu press.
+ * chg3: a player-charger's turn has no press and its command starts 10 rows later than the ROM's effect-script row (turn-end command + 22 against the ROM's
+ * MoveEnd + 19 / 20, with the charge turn now ending on the ROM): the player lead is 6 + u - 10 (chg2-{fly,dive,solarbeam,razorwind,skyattack,bounce}-player-on and
+ * bdt1-dig-player-on, attack-turn SEs +10 .. +11 before, 0 .. -2 after).
+ */
+const TWO_TURN_MOVES: ReadonlySet<number> = new Set([13, 19, 76, 91, 130, 143, 291, 340]);
+const TWO_TURN_SECOND_PRINT_PRESS_ROWS = 6;
+const TWO_TURN_PLAYER_NO_PRESS_ROWS = 10;
+function twoTurnSecondPrintLead(
+  event: BattleKernelSemanticEvent,
+  beforeRules: BattleScriptRulesContext,
+  actionSnapshot: BattleScriptActionMessageSnapshot | null | undefined,
+): { leadFrames: number } | null {
+  const currentMove = actionSnapshot?.currentMove;
+  if (currentMove === undefined || !TWO_TURN_MOVES.has(currentMove) || (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0) return null;
+  if (event.payload.kind !== "message" || event.payload.messageId !== "STRINGID_USEDMOVE"
+    || (event.provenance?.sourceLabel !== "BattleScript_HitFromAtkString" && event.provenance?.sourceLabel !== "BattleScript_HitFromAccCheck")) return null;
+  if ((beforeRules.battlers[actionSnapshot!.attacker]!.status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_MULTIPLETURNS) === 0) return null;
+  return { leadFrames: TWO_TURN_SECOND_PRINT_PRESS_ROWS - (actionSnapshot!.attacker === 0 ? TWO_TURN_PLAYER_NO_PRESS_ROWS : 0) + event.provenance.instructionExecution };
+}
+/**
+ * chg2 (Scene ON; generalizes bdt1's Dig value): a charge-turn body (BattleScriptFirstChargingTurn) plays its sounds on the ROM's own script rows, but the
+ * generic sound clock assumes the used print's release reaches `gAnimScriptActive` (A0) 10 rows later (R -> A0 = 10). The presented box command always starts at
+ * the same row while the ROM reaches the charge script's opener (STRINGID_EMPTYSTRING3, kernel instruction execution E) E rows after the effect script's first
+ * row, so R -> A0 = E - 6: bdt1-dig / chg2-{fly,bounce,dive,solarbeam,razorwind,skyattack}-{player,opponent}-on, ROM first SE exactly (E 10 / 7 / 10 / 9 / 9 / 6 / 6
+ * -> R -> A0 4 / 1 / 4 / 3 / 3 / 0 / 0 on the ROM). The sound clock moves by 10 - (E - 6) rows; the command's duration and pixels are untouched (the Fly
+ * charge turn's pixels match the ROM at the present duration, a 3-row earlier body made it worse).
+ */
+const CHARGE_TURN_SOUND_LEAD_BASE_ROWS = 16;
+/**
+ * chg3 (Scene ON): after the charge print the ROM's chain to the next action is E - 2 rows longer than the presented one (opener execution E: the next action's SEs
+ * were 4 .. 8 rows early on chg2-{fly,dive,solarbeam,skyattack,bounce}-{player,opponent}-on and bdt1-dig-player-on; E - 2 = 4 + (E - 6), the ROM's A0 lies E - 6 rows
+ * after the command start and the release -> next row gap is 4 more). The charge print's glyph row is exact (chg161), so the rows are the print's hold. Razor Wind
+ * (gap-print class) already carries them before its glyph.
+ */
+const CHARGE_TURN_CHAIN_BASE_ROWS = 2;
+function chargeTurnOpenerExecution(events: readonly BattleKernelSemanticEvent[], index: number): number | null {
+  for (let i = index - 1; i >= 0; i -= 1) {
+    const candidate = events[i]!;
+    if (candidate.provenance?.sourceLabel !== CHARGE_TURN_SCRIPT) return null;
+    if (candidate.payload.kind === "message" && candidate.payload.messageId === "STRINGID_EMPTYSTRING3") {
+      const before = events[i - 1];
+      if (before !== undefined && instructionExecutionOf(before) < instructionExecutionOf(candidate)) return null;
+      return instructionExecutionOf(candidate);
+    }
+  }
+  return null;
+}
+function chargeTurnChainRows(events: readonly BattleKernelSemanticEvent[], index: number, moveId: number | undefined): number {
+  if (moveId === undefined || !TWO_TURN_MOVES.has(moveId) || bodyGapPrintRuleApplies(moveId)) return 0;
+  const opener = chargeTurnOpenerExecution(events, index);
+  return opener === null ? 0 : Math.max(0, opener - CHARGE_TURN_CHAIN_BASE_ROWS);
+}
+function chargeTurnSoundLead(events: readonly BattleKernelSemanticEvent[], index: number): { soundAgeLeadFrames?: number } {
+  if (events[index]!.provenance?.sourceLabel !== CHARGE_TURN_SCRIPT) return {};
+  for (let i = index - 1; i >= 0; i -= 1) {
+    const candidate = events[i]!;
+    if (candidate.provenance?.sourceLabel !== CHARGE_TURN_SCRIPT) return {};
+    if (candidate.payload.kind === "message" && candidate.payload.messageId === "STRINGID_EMPTYSTRING3") {
+      // A charger that woke up / thawed first (s2230 Bounce, E = 79) reaches the opener after a detour presented as its own commands: E is no longer the rows to the animation.
+      const before = events[i - 1];
+      if (before !== undefined && instructionExecutionOf(before) < instructionExecutionOf(candidate)) return {};
+      return { soundAgeLeadFrames: CHARGE_TURN_SOUND_LEAD_BASE_ROWS - instructionExecutionOf(candidate) };
+    }
+  }
+  return {};
+}
+/**
+ * bdt1 (Scene ON): Rest's body (move 156: its SE_M_SNORE) plays 2 rows before the ROM on the generic sound clock (ROM A0 + 1 = 1200 against 1198 on the
+ * bdt1-rest-player-on lab; 17 T2 windows, every one -2). The body's own rows are not short: the clock's 7-row calibration meets Rest's script lead of 9
+ * (A0 - R - 3), so the clock runs 2 rows late (soundAgeLeadFrames -2).
+ */
+const MOVE_REST = 156;
+const REST_SOUND_LEAD_ROWS = -2;
+const REST_HEAL_PRINT_TAIL_ROWS = 10;
+function bdt1BodySoundLead(events: readonly BattleKernelSemanticEvent[], index: number, moveId: number): { soundAgeLeadFrames?: number } {
+  if (events[index]!.provenance?.sourceLabel === CHARGE_TURN_SCRIPT) return chargeTurnSoundLead(events, index);
+  return moveId === MOVE_REST ? { soundAgeLeadFrames: REST_SOUND_LEAD_ROWS } : {};
+}
 const SCRIPT_TAIL_BETWEEN_OPCODES: ReadonlySet<string> = new Set(["B_SCR_OP_WAITANIMATION", "B_SCR_OP_SETBYTE", "B_SCR_OP_SETGRAPHICALSTATCHANGEVALUES"]);
 // lse4: the first-charging-turn script (orword HITMARKER_CHARGING, setbyte, seteffectprimary, copyarray) between the animation and its print.
 const CHARGE_TURN_BETWEEN_OPCODES: ReadonlySet<string> = new Set([...SCRIPT_TAIL_BETWEEN_OPCODES, "B_SCR_OP_ORWORD", "B_SCR_OP_SETEFFECTPRIMARY", "B_SCR_OP_COPYARRAY"]);
@@ -2276,6 +2560,14 @@ const SHELL_BELL_TURN_END_TIMING = Object.freeze({ minimumFrames: 9 } as const);
  * Rest window's foe-Tackle-on-player anchor moves -3 -> -14 without the floor) has no ROM window yet: it keeps the legacy 28-frame floor.
  */
 const HP_DATAHPUPDATE_ROW_FRAMES = 1;
+/** hcr3: a hit whose secondary effect is a stat change (Icy Wind, seed 1914, ROM): bar 12, then `datahpupdate` .. `BattleScript_StatDown`'s playanimation 6 rows; the stat command takes the last 2 (no 28-row floor). */
+const HP_STAT_NEXT_TAIL_FRAMES = 4;
+/**
+ * stc2: the ROM's hp -> stat interval is scene-free (stc1-icywind-{foe,plr} / stc1-rocktomb-foe labs, both scenes: the hp row to `datahpupdate`'s change is the bar's drop + 2, then 6 rows to
+ * BattleScript_StatDown's `playanimation`, = drop + 8; the stat SE is that exec + 4). Scene OFF's stats-change command starts ON the exec (stc1 secondary shift 2, SE age 4), which is
+ * hp (bar + 1) + tail + the 2-row stat command = bar + 8 at tail 5. Scene ON's command keeps the hcr3 tail 4 (measured exact on aud252 seed 1914 with its own age convention).
+ */
+const HP_STAT_NEXT_TAIL_FRAMES_OFF = 5;
 /** The rows between this `datahpupdate` and the next event when that is a MoveEnd receipt (d), or null. */
 function hpMoveEndLeadRows(events: readonly BattleKernelSemanticEvent[], index: number): number | null {
   const event = events[index]!;
@@ -2373,6 +2665,19 @@ const WRAP_SECONDARY_TAIL_FRAMES = 7;
 const TURN_DAMAGE_PC = datahpupdatePcAfter("BattleScript_DoTurnDmg");
 const WEATHER_DAMAGE_PC = datahpupdatePcAfter("BattleScript_DamagingWeatherLoop");
 /** hpf5 T2: `BattleScript_MoveEffectWrap`'s `printfromtable` is the wrap hit's secondary message (E + 7 after the hit's bar, E 7..16 by move). */
+/**
+ * hcr3: `BattleScript_DoRecoil` after the hit's effectiveness / crit print (aud252 seed 2230, Double-Edge, ROM): the print's `waitmessage` ends 7 script rows before the recoil bar
+ * (`MoveEffectRecoil`, `DoRecoil`'s `orword`; the print's box stays up), and the bar's `healthbarupdate` -> the recoil print is E + 1 rows (E = bar + 1; messageRows - 1), with no 28-row floor.
+ */
+const RECOIL_PC = datahpupdatePcAfter("BattleScript_DoRecoil");
+const HP_RECOIL_LEAD_ROWS = 7;
+/**
+ * fnt2 (ROM lab fnt2-absorb-se, both KO seeds 830 s2 / s6, 1415 s53): the drain's heal bar (`BattleScript_AbsorbUpdateHp`'s `healthbarupdate; datahpupdate`) after the hit's
+ * effectiveness / crit print. The print's `waitmessage` ends and the script runs `resultmessage` 's tail `negativedamage; orword; jumpifability; setbyte; goto` + the
+ * `healthbarupdate` row before the bar: 6 rows the print's box stays up (the recoil's 7 above, same shape). A neutral hit has no print and the target bar's `bars` tail already holds them.
+ */
+const DRAIN_PC = datahpupdatePcAfter("BattleScript_AbsorbUpdateHp");
+const HP_DRAIN_LEAD_ROWS = 6;
 const WRAP_SECONDARY_PC = BATTLE_SCRIPT_PROGRAM.labelEntries["BattleScript_MoveEffectWrap"]!.programCounter;
 type HpTick = "turn-damage" | "weather";
 function hpTickKind(event: BattleKernelSemanticEvent): HpTick | null {
@@ -2388,6 +2693,12 @@ interface HpLeadRows {
   readonly hitEffectMessage: boolean;
   /** The `healthbarupdate` instruction's execution (the bar's own row). */
   readonly barExecution: number | undefined;
+  /** The `datahpupdate` of `BattleScript_DoRecoil` (a recoil bar). */
+  readonly recoil: boolean;
+  /** The `datahpupdate` of `BattleScript_AbsorbUpdateHp` (a drain's heal bar). */
+  readonly drain: boolean;
+  /** HITMARKER_NO_ANIMATIONS (Scene OFF) when the hp command was projected. */
+  readonly sceneOff: boolean;
 }
 /** Applies the hpd1 / hpf1 tail to the plain hp commands of a finished command list (see hpMoveEndLeadRows, hpMessageLeadRows). */
 function applyHpHitTails(
@@ -2415,6 +2726,15 @@ function applyHpHitTails(
       commands[index] = Object.freeze({ ...command, timing: Object.freeze({ minimumFrames: 0, tailFrames }) });
       continue;
     }
+    const recoilPrevious = commands[index - 1];
+    if (leads.recoil && leads.messageRows !== null && rest[0]?.type === "message" && recoilPrevious?.type === "message") {
+      commands[index - 1] = Object.freeze({ ...recoilPrevious, timing: Object.freeze({ ...recoilPrevious.timing, holdFrames: recoilPrevious.timing.holdFrames + HP_RECOIL_LEAD_ROWS }) });
+      commands[index] = Object.freeze({ ...command, timing: Object.freeze({ minimumFrames: 0, tailFrames: leads.messageRows - 1 }) });
+      continue;
+    }
+    if (leads.drain && recoilPrevious?.type === "message") {
+      commands[index - 1] = Object.freeze({ ...recoilPrevious, timing: Object.freeze({ ...recoilPrevious.timing, holdFrames: recoilPrevious.timing.holdFrames + HP_DRAIN_LEAD_ROWS }) });
+    }
     if (leads.wrapSecondary && rest[0]?.type === "message") {
       commands[index] = Object.freeze({ ...command, timing: Object.freeze({ minimumFrames: 0, tailFrames: WRAP_SECONDARY_TAIL_FRAMES }) });
       continue;
@@ -2433,7 +2753,8 @@ function applyHpHitTails(
     const printHold = next?.type === "message" && leads.messageRows !== null && ((hit && leads.hitEffectMessage) || heal || afterHp);
     if (!hit && !printHold && command.battler === 0) continue;
     const faint = hit && rest[0]?.type === "faint" && leads.faintNext;
-    const tailFrames = transition ? (leads.moveEndRows === null ? 0 : HP_DATAHPUPDATE_ROW_FRAMES)
+    const statNext = hit && rest[0]?.type === "stat";
+    const tailFrames = statNext ? (leads.sceneOff ? HP_STAT_NEXT_TAIL_FRAMES_OFF : HP_STAT_NEXT_TAIL_FRAMES) : transition ? (leads.moveEndRows === null ? 0 : HP_DATAHPUPDATE_ROW_FRAMES)
       : endsTurn ? leads.moveEndRows ?? 0 : bars > 0 ? bars : endTurnPrint ? leads.moveEndRows! + HP_END_TURN_PRINT_LEAD_ROWS
       : printHold ? leads.messageRows! : 0;
     if (faint) commands[index] = Object.freeze({ ...command, timing: Object.freeze({ minimumFrames: 0 }) });
@@ -2640,68 +2961,19 @@ const LOSS_RECALL_SWITCH_OUT = Object.freeze({
 const LOSS_TAIL_TRAINER_SLIDE_TIMING = Object.freeze({ minimumFrames: 38, holdFrames: LOSS_TRAINER_SLIDE_PRINT_GAP_FRAMES } as const);
 /**
  * wtl1 (docs/wtl1-win-tail-timing.md): the win tail, `BattleScript_FrontierTrainerBattleWon` (battle_scripts_1.s:3027-3048).
- * - WIN_PRINT_AFTER_BGM_ROWS: `HandleEndTurn_BattleWon` (battle_main.c:4960-4982) plays the victory BGM and points the script at the win
- *   script; its `printstring STRINGID_PLAYERDEFEATEDTRAINER1` shows its first glyph 4 frames later (frame catcher, 22 of 22 wins on the
- *   ROM, both scenes). Ours printed it on the row after the two moveend receipts, 2 rows after the last "fainted!" press: 24 rows before
- *   the ROM. The rows go on the last receipt before the print (`holdFrames`), where the released "fainted!" box stays on screen, frozen or
- *   blank, as on the ROM (fnt1).
+ * - "Player defeated ...!" itself is the box's wtl1 (WIN_TAIL_PRE_RECEIPT_ROWS / WIN_TAIL_POST_RECEIPT_ROWS, winTailHoldRows): P + 26, which
+ *   is also the frame catcher's victory BGM + 4.
  * - WIN_TAIL_TRAINER_SLIDE_LEAD_FRAMES: from the press on "Player defeated ...!" to the slide model's el 0 (the printer's release, the
  *   controller's completion, `trainerslidein`'s dispatch, and the slide sprite's off-screen rows, as the loss tail's
  *   LOSS_RECALL_TRAINER_SLIDE_GAP_FRAMES). Then the 38 rows of the slide and the 3 rows to the lose text's first glyph
  *   (LOSS_TRAINER_SLIDE_PRINT_GAP_FRAMES; `waitstate`, the printer). ROM: the press to the lose text's first glyph 55 frames in 22 of 22
  *   wins; ours 38 before.
  */
-export const WIN_PRINT_AFTER_BGM_ROWS = 4;
 export const WIN_TAIL_TRAINER_SLIDE_LEAD_FRAMES = 14;
 export const WIN_TAIL_SCRIPT_LABEL = "BattleScript_FrontierTrainerBattleWon_LoseTexts";
 const WIN_TAIL_TRAINER_SLIDE_TIMING = Object.freeze({
   minimumFrames: 38, leadFrames: WIN_TAIL_TRAINER_SLIDE_LEAD_FRAMES, holdFrames: LOSS_TRAINER_SLIDE_PRINT_GAP_FRAMES,
 } as const);
-/**
- * wtl1: lha1's victory BGM delays (battleEndSounds.ts VICTORY_BGM_AFTER_*, rows from leaving the turn's last command before the win print
- * to PlayBGM), restated here so the presentation does not import the sound module; tests/wtl1WinTailTiming.test.ts pins them equal.
- */
-export const WIN_BGM_AFTER_ANCHOR_ROWS = Object.freeze({ button: 22, automatic: 19, controller: 14 } as const);
-const PLAYER_DEFEATED_TRAINER1 = "STRINGID_PLAYERDEFEATEDTRAINER1";
-/**
- * wtl1: the hold on the last moveend receipt before the win print, so its first glyph shows WIN_PRINT_AFTER_BGM_ROWS after the victory BGM.
- * The anchor is lha1's (victoryBgmAnchor): the last command before the print that is not a one-row sprite-visibility receipt. The receipts'
- * own rows count towards the delay. Null when the print has no receipt before it in the segment (none seen; the print stays as it was).
- */
-function winPrintHold(
-  commands: readonly BattleResolutionPresentationCommand[],
-  events: readonly BattleKernelSemanticEvent[],
-): Readonly<{ receiptIndex: number; holdFrames: number }> | null {
-  const print = commands.findIndex((command) => command.type === "message"
-    && events.find((event) => event.sequence === command.eventSequence)?.payload.kind === "message"
-    && (events.find((event) => event.sequence === command.eventSequence)!.payload as { messageId?: string }).messageId === PLAYER_DEFEATED_TRAINER1);
-  if (print < 1 || commands[print - 1]!.type !== "sprite-visibility") return null;
-  let index = print - 1;
-  let receiptRows = 0;
-  while (index >= 0 && commands[index]!.type === "sprite-visibility") {
-    const receipt = commands[index] as Extract<BattleResolutionPresentationCommand, { type: "sprite-visibility" }>;
-    receiptRows += receipt.timing.minimumFrames;
-    index -= 1;
-  }
-  const anchor = commands[index];
-  if (anchor === undefined) return null;
-  const delay = anchor.type !== "message"
-    ? WIN_BGM_AFTER_ANCHOR_ROWS.controller
-    : anchor.advance === "button" ? WIN_BGM_AFTER_ANCHOR_ROWS.button : WIN_BGM_AFTER_ANCHOR_ROWS.automatic;
-  const holdFrames = delay + WIN_PRINT_AFTER_BGM_ROWS - receiptRows;
-  return holdFrames > 0 ? Object.freeze({ receiptIndex: print - 1, holdFrames }) : null;
-}
-/** wtl1: `commands` with the win print's hold (winPrintHold) on its last receipt. */
-export function withWinPrintHold(
-  commands: readonly BattleResolutionPresentationCommand[],
-  events: readonly BattleKernelSemanticEvent[],
-): readonly BattleResolutionPresentationCommand[] {
-  const hold = winPrintHold(commands, events);
-  if (hold === null) return commands;
-  return commands.map((command, index) => index === hold.receiptIndex
-    ? Object.freeze({ ...(command as Extract<BattleResolutionPresentationCommand, { type: "sprite-visibility" }>), holdFrames: hold.holdFrames })
-    : command);
-}
 /** The `switch-out` command's recall clock (lrc1 `leadFrames`): negative while the battler still waits at rest for the dispatch. */
 export function switchOutRecallElapsed(
   command: Extract<BattleResolutionPresentationCommand, { type: "switch-out" }>,
@@ -2716,12 +2988,12 @@ const TURN_END_TIMING = Object.freeze({ minimumFrames: 8 } as const);
  * script's `moveendall`, which the 8-row turn-end follows: the printer's release (resume on press + 3) plus the instructions the
  * script still runs, one row each.  Dragged out: 2 (press + 5); Substitute damaged: 7 (press + 10); Substitute faded: the instructions
  * after the 64-row `waitmessage` hold (4) + the 5 before it.  Only a print directly before the turn-end (the fade case has its own lead).
- * msg2: those counts start at the probe's press row P, but the engine's release row is P + 1 (the first advance that holds the
- * press): from it, dragged out's `moveendall` is 4 rows on.  ROM pictures agree: after the press the box clears 14 rows later
- * (fcm1 catcher, 33 / 33 Roar / Whirlwind prints before the turn-end, both scenes), the engine's cleared at 15 (btn2's open
- * "1 row late, 516 vs 515 on roar").  Substitute damaged / faded have the same count origin; left as measured (one catcher case,
- * Substitute damaged at 20 vs the ROM's 19, docs/msg2-roar-wish-messages.md).
+ * msw2: after a Substitute release the ROM clears the box one row before the totals below end (subhit lab 520 of a turn-end ending 521 and a
+ * menu on 527, faded 883 / 884 / 890, both scenes), so those two keep their totals and draw the last `RELEASE_TAIL_BLANK_ROWS` row cleared.
+ * Dragged out stays msg2's 4 (ROM catcher: clear press + 14 in 33 / 33, menu press + 20 in 20 of 35; the lab's 7-row gap before the menu is 5 to 8
+ * across catcher runs, so the roar lab's menu stays 1 row early).
  */
+export const RELEASE_TAIL_BLANK_ROWS = 1;
 export const RELEASE_TO_MOVEEND_ROWS: Readonly<Record<string, number>> = Object.freeze({
   STRINGID_PKMNWASDRAGGEDOUT: 4,
   STRINGID_SUBSTITUTEDAMAGED: 10,
@@ -2758,8 +3030,13 @@ export function turnEndTimingAfterRelease(
   const printed = commands[index];
   if (printed?.type !== "message" || printed.promptGate !== true) return TURN_END_TIMING;
   const payload = events.find((event) => event.sequence === printed.eventSequence)?.payload;
-  const rows = payload?.kind === "message" ? RELEASE_TO_MOVEEND_ROWS[payload.messageId] : undefined;
-  return rows === undefined ? TURN_END_TIMING : Object.freeze({ minimumFrames: TURN_END_TIMING.minimumFrames + rows });
+  const messageId = payload?.kind === "message" ? payload.messageId : undefined;
+  const rows = messageId === undefined ? undefined : RELEASE_TO_MOVEEND_ROWS[messageId];
+  return rows === undefined ? TURN_END_TIMING
+    : Object.freeze({
+      minimumFrames: TURN_END_TIMING.minimumFrames + rows,
+      ...(messageId === "STRINGID_PKMNWASDRAGGEDOUT" ? {} : { blankTailFrames: RELEASE_TAIL_BLANK_ROWS }),
+    });
 }
 /**
  * ISSUES #73 rung B correction (2026-08-04): the prior port (53, from
@@ -5493,6 +5770,7 @@ export function projectBattleResolutionCommands(
   let lastFaintBattler: 0 | 1 | null = null;
   let pendingStatusMessageBattler: 0 | 1 | null = null;
   let lastMoveAttacker: 0 | 1 | null = null;
+  let lastUsedCurrentMove: number | null = null;
   // Target of the latest Scene ON MOVE_ANIMATION receipt (Scene OFF has none): its `returntoball` is the forced removal.
   let sceneOnMoveTarget: 0 | 1 | null = null;
   // sta5 step 2 holds are Scene ON rows (the launch follows a Scene ON MOVE_ANIMATION receipt; Scene OFF has none and keeps its commands).
@@ -5506,6 +5784,7 @@ export function projectBattleResolutionCommands(
   ] as [number, number];
   let usedMoveInstructionExecution: number | null = null;
   // off108: the opener print's event index and the command count after it.
+  let chargeChainCarry: { rows: number; attacker: number | undefined } | null = null;
   let pauseOpenerIndex: number | null = null;
   let pauseOpenerCommands = 0;
   let pauseOpenerFrames = 0;
@@ -5546,6 +5825,7 @@ export function projectBattleResolutionCommands(
     if (payload.kind === "message") {
       sourceLabelOf(event);
       const actionSnapshot = payload.actionSnapshot ?? null;
+      if (actionSnapshot !== null) lastUsedCurrentMove = actionSnapshot.currentMove;
       if (actionSnapshot !== null) {
         // The full-turn receipt is frozen at Cmd_printstring time. Keeping
         // this current message's source owner also makes generic subsequent
@@ -5595,6 +5875,7 @@ export function projectBattleResolutionCommands(
           }));
         }
       }
+      const selfConfusionOff = payload.messageId === SELF_CONFUSION_HIT_MESSAGE_ID && (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0;
       const prePrintPause = anchorlessPrePrintPauseFrames(event);
       if (prePrintPause !== null) {
         commands.push(Object.freeze({
@@ -5605,6 +5886,14 @@ export function projectBattleResolutionCommands(
           timing: Object.freeze({ minimumFrames: prePrintPause }),
         }));
       }
+      if (event.provenance?.sourceLabel === CHARGE_TURN_SCRIPT && (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) === 0) {
+        const rows = chargeTurnChainRows(events, index, actionSnapshot?.currentMove);
+        if (rows > 0) chargeChainCarry = { rows, attacker: actionSnapshot?.attacker };
+      }
+      const carriedRows = payload.messageId === "STRINGID_USEDMOVE" ? chargeChainCarry : null;
+      if (carriedRows !== null) chargeChainCarry = null;
+      const carryAfterGlyph = carriedRows !== null && carriedRows.attacker !== actionSnapshot?.attacker ? carriedRows.rows : 0;
+      const carryBeforeGlyph = carriedRows !== null && carryAfterGlyph === 0 ? carriedRows.rows : 0;
       commands.push(...promptGatedMessageCommands(Object.freeze({
         type: "message",
         eventSequence: event.sequence,
@@ -5626,6 +5915,11 @@ export function projectBattleResolutionCommands(
           { hp: liveHp[1], maxHP: currentField.opponent.maxHP },
         ),
         advance: "automatic",
+        ...(selfConfusionOff ? { leadFrames: SELF_CONFUSION_OFF_PRE_PRINT_ROWS } : {}),
+        ...(twoTurnSecondPrintLead(event, beforeRules, actionSnapshot) ?? {}),
+        ...(carryBeforeGlyph > 0 ? { leadFrames: (twoTurnSecondPrintLead(event, beforeRules, actionSnapshot)?.leadFrames ?? 0) + carryBeforeGlyph } : {}),
+        ...(endTurnChainLeadRows(events, index, (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) === 0) > 0
+          ? { leadFrames: endTurnChainLeadRows(events, index, (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) === 0) } : {}),
         ...(payload.messageId === "STRINGID_TARGETFAINTED"
           || payload.messageId === "STRINGID_ATTACKERFAINTED"
           ? { faintBattler: lastFaintBattler! }
@@ -5639,20 +5933,26 @@ export function projectBattleResolutionCommands(
         timing: payload.messageId === "STRINGID_USEDMOVE"
           ? Object.freeze({
             minimumFrames: 0,
-            holdFrames: usedMessageHoldFrames > 0
+            holdFrames: (usedMessageHoldFrames > 0
               ? usedMessageHoldFrames
-              : sourcePauseUsedMoveHoldFrames(events, index) ?? 0,
+              : sourcePauseUsedMoveHoldFrames(events, index) ?? 0) + carryAfterGlyph,
           })
           : payload.messageId === "STRINGID_RETURNMON"
             ? RETURN_MON_TIMING
             : payload.messageId === "STRINGID_SWITCHINMON"
               ? SWITCH_IN_MESSAGE_TIMING
               : (() => {
-                const base = messageTimingFromSourceProvenance(event, sceneOnMoveAnimationSeen, (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0)
+                const base = selfConfusionOff
+                  ? SELF_CONFUSION_OFF_HIT_MESSAGE_TIMING
+                  : messageTimingFromSourceProvenance(event, sceneOnMoveAnimationSeen, (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0)
                   ?? (WAITMESSAGE_LONG_MESSAGE_IDS.has(payload.messageId) || payload.messageId === SUBSTITUTE_FADED_MESSAGE_ID
                   ? WAITMESSAGE_LONG_TIMING
                   : MESSAGE_TIMING);
                 const timing = focusPunchPrePassMessageTiming(events, index, base) ?? chargeTurnEmptyBoxTiming(events, index) ?? hitAllLoopEmptyBoxTiming(events, index) ?? base;
+                if (event.provenance?.sourceLabel === "BattleScript_PresentHealTarget" && actionSnapshot?.currentMove === MOVE_REST
+                  && (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) === 0) {
+                  return Object.freeze({ minimumFrames: timing.minimumFrames, holdFrames: timing.holdFrames + REST_HEAL_PRINT_TAIL_ROWS });
+                }
                 return payload.messageId === "STRINGID_PKMNKNOCKEDOFF"
                   ? Object.freeze({ minimumFrames: timing.minimumFrames, holdFrames: timing.holdFrames + ITEM_KNOCKOFF_PRINT_TAIL_ROWS })
                   : timing;
@@ -5696,12 +5996,8 @@ export function projectBattleResolutionCommands(
             battler: 0,
             animation: weather,
             animated: true,
-            // sst1: the sandstorm's tail is the script's instructions to the first "buffeted" print (sandstormContinuesTailRows).
-            timing: Object.freeze({
-              minimumFrames: weather === "SANDSTORM_CONTINUES"
-                ? weatherContinuesCommandFrames(weather) - WEATHER_CONTINUES_LAUNCH_TAIL_ROWS + sandstormContinuesTailRows(events, index)
-                : weatherContinuesCommandFrames(weather),
-            }),
+            // sst1's "buffeted" rows are etp1's print lead (damagingWeatherLoopLeadRows), not this command's tail.
+            timing: Object.freeze({ minimumFrames: weatherContinuesCommandFrames(weather) }),
           }));
         }
         continue;
@@ -5769,7 +6065,8 @@ export function projectBattleResolutionCommands(
         payload.battler ?? -1,
         "held-item effect animation",
       );
-      const { lead } = heldItemEffectExecutionsAndLead(events, index);
+      const { lead: baseLead } = heldItemEffectExecutionsAndLead(events, index);
+      const lead = baseLead === HELD_ITEM_EFFECT_RESTART_LEAD_FRAMES ? heldItemEffectAfterPrintLead(events, index) ?? baseLead : baseLead;
       heldItemEffects.push({
         at: commands.length, battler: pendingHeldItemEffectBattler, sequence: event.sequence,
         frames: HELD_ITEM_EFFECT_COMMAND_FRAMES + lead,
@@ -5830,6 +6127,7 @@ export function projectBattleResolutionCommands(
           timing: Object.freeze({
             minimumFrames: SCENE_OFF_MOVE_PAUSE_FRAMES, ...moveAnimationSeGateTiming(events, index), ...moveAnimationScriptLeadTiming(events, index, presentedSinceUsedAtAttack, animation.moveId),
             ...moveAnimationScriptTailTiming(events, index, usedMoveInstructionExecution, presentedSinceUsedAtAttack, animation.moveId),
+            ...bdt1BodySoundLead(events, index, animation.moveId),
           }),
         }));
         continue;
@@ -5860,12 +6158,21 @@ export function projectBattleResolutionCommands(
       // that source pause below, so exclude those callback executions before
       // applying the same attack-string-to-hit formula used by the controller
       // MOVE_ANIMATION receipt.
+      // eqk1: Magnitude's pause SHORT, print and `waitmessage B_WAIT_TIME_LONG` (used print -> print + 64 rows) are presented by the message commands (ROM first SE was +36 OFF otherwise).
+      const magnitudePrint = events[index - 1];
+      const magnitudeWaitRows = magnitudePrint?.payload.kind === "message" && magnitudePrint.payload.messageId === "STRINGID_MAGNITUDESTRENGTH"
+        ? instructionExecutionOf(magnitudePrint) - usedMoveInstructionExecution + WAITMESSAGE_LONG_HOLD_FRAMES
+        : 0;
       const executedPauseCallbacks =
         payload.animationId === "SCENE_OFF_ATTACK_PAUSE"
-          ? SCENE_OFF_MOVE_PAUSE_FRAMES + 1
+          ? SCENE_OFF_MOVE_PAUSE_FRAMES + 1 + magnitudeWaitRows
           : 0;
-      const interveningInstructions =
-        hitExecution - usedMoveInstructionExecution - executedPauseCallbacks;
+      // mxp1: Self-Destruct / Explosion run `tryexplosion; setatkhptozero; waitstate` before the animation; the user's `hp` command presents those rows, so the
+      // body spans only the animation instruction to the hit (ROM labs eqk1-{expl,sd}-{p,f}-off: attackanimation -> hitanimation 43 rows, was 48).
+      const explosionFamily = payload.animationId === "SCENE_OFF_ATTACK_PAUSE" && (lastUsedCurrentMove === 120 || lastUsedCurrentMove === 153);
+      const interveningInstructions = explosionFamily
+        ? hitExecution - instructionExecutionOf(event) - executedPauseCallbacks + EXPLOSION_OFF_BODY_ROWS
+        : hitExecution - usedMoveInstructionExecution - executedPauseCallbacks;
       if (interveningInstructions <= 0) {
         throw new Error("battle resolution move/hit provenance is not ordered");
       }
@@ -5944,7 +6251,7 @@ export function projectBattleResolutionCommands(
       const messageRows = drainRole === null ? hpMessageLeadRows(events, index) : null;
       const faintNext = drainRole === null && hpFaintNext(events, index);
       const hitEffectMessage = HP_HIT_EFFECT_OPCODES.has(events[index + 1]?.provenance?.opcodeName ?? "") || hitAllLoopEmptyBoxTiming(events, index + 1) !== null;
-      hpLeadRows.set(health.eventSequence, { tick: hpTickKind(event), wrapSecondary: events[index + 1]?.provenance?.programCounter === WRAP_SECONDARY_PC, moveEndRows, messageRows, faintNext, hitEffectMessage, barExecution: health.instructionExecution });
+      hpLeadRows.set(health.eventSequence, { tick: hpTickKind(event), wrapSecondary: events[index + 1]?.provenance?.programCounter === WRAP_SECONDARY_PC, moveEndRows, messageRows, faintNext, hitEffectMessage, barExecution: health.instructionExecution, recoil: event.provenance?.programCounter === RECOIL_PC, drain: event.provenance?.programCounter === DRAIN_PC, sceneOff: (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0 });
       commands.push(Object.freeze({
         type: "hp",
         eventSequence: health.eventSequence,
@@ -6091,7 +6398,8 @@ export function projectBattleResolutionCommands(
       // chg1: a Scene OFF semi-invulnerable hide (Dig / Fly / Bounce / Dive MoveEnd receipt) is drawn on the receipt's own row, not at the
       // end of the action transition: the pause splits into the rows to the receipt and the transition rows after it.
       const hideAtReceipt = transition !== null && sceneOffNoAnimations && payload.invisible;
-      const pauseBefore = transition === null ? 0
+      const winTail = event.provenance?.opcodeName === "B_SCR_OP_MOVEEND" ? winTailHoldRows(events, index) : null;
+      const pauseBefore = winTail !== null ? winTail.before : transition === null ? 0
         : hideAtReceipt ? Math.min(transition.frames, Math.max(0, transition.rowsToReceipt + SCENE_OFF_SEMI_INVULNERABLE_HIDE_LEAD))
           : transition.frames;
       const pause = (minimumFrames: number) => Object.freeze({
@@ -6125,6 +6433,7 @@ export function projectBattleResolutionCommands(
           || event.provenance?.opcodeName === "B_SCR_OP_RETURNTOBALL",
       }));
       if (transition !== null && hideAtReceipt && transition.frames - pauseBefore > 0) commands.push(pause(transition.frames - pauseBefore));
+      if (winTail !== null && winTail.after > 0) commands.push(pause(winTail.after));
       continue;
     }
     if (payload.kind === "faint-animation") {
@@ -6187,7 +6496,10 @@ export function projectBattleResolutionCommands(
         timing: payload.kind === "draw-party-status-summary"
           ? battler === 0
             ? PARTY_SUMMARY_DRAW_TIMING
-            : opponentPartySummaryDrawTiming(lastFaintBattler === 1, event.provenance?.sourceLabel === "BattleScript_DoSwitchOut")
+            : opponentPartySummaryDrawTiming(lastFaintBattler === 1, event.provenance?.sourceLabel === "BattleScript_DoSwitchOut", (() => {
+              const work = lastFaintBattler === 1 ? faintReplacementChoiceWork(beforeRules, currentField, events, index) : null;
+              return work === null ? 0 : aiReplacementChoiceExtraFrames(work);
+            })(), commands[commands.length - 1]?.type === "hp" && commands[commands.length - 1]!.timing === SHELL_BELL_HP_TIMING)
           : undefined,
       }));
       continue;
@@ -6326,7 +6638,7 @@ export function projectBattleResolutionCommands(
               type: "general-animation" as const, eventSequence: heldItem.sequence, battler: heldItem.battler,
               animation: heldItem.animation,
               ...(heldItem.trapMove === undefined ? {} : { trapMove: heldItem.trapMove }),
-              timing: Object.freeze({
+              timing: (heldItem.animation === "HELD_ITEM_EFFECT" ? (t: Record<string, number>) => t : Object.freeze)({
                 minimumFrames: heldItem.frames - presented + (presented > 0 ? HELD_ITEM_EFFECT_AFTER_STATUS_EXTRA_FRAMES : 0),
                 ...(heldItem.seGate === undefined ? {} : { seGateFrames: heldItem.seGate }),
               }),
@@ -6393,11 +6705,10 @@ export function projectBattleResolutionCommands(
   }
   const finalCommand = commands[commands.length - 1];
   if (entryScriptEndsSegment === 0 && finalCommand?.type === "turn-end") {
-    commands[commands.length - 1] = Object.freeze({ ...finalCommand, timing: Object.freeze({ minimumFrames: finalCommand.timing.minimumFrames - ENTRY_SCRIPT_PLAYER_TURN_END_TRIM_FRAMES }) });
+    commands[commands.length - 1] = Object.freeze({ ...finalCommand, timing: Object.freeze({ ...finalCommand.timing, minimumFrames: finalCommand.timing.minimumFrames - ENTRY_SCRIPT_PLAYER_TURN_END_TRIM_FRAMES }) });
   }
   applyHpHitTails(commands, hpLeadRows);
-  // wtl1: the win print waits for HandleEndTurn_BattleWon's victory BGM (withWinPrintHold).
-  return Object.freeze(withWinPrintHold(commands, events));
+  return Object.freeze(commands);
 }
 
 /**
@@ -6775,6 +7086,19 @@ function usedMovePrintLeadU(state: BattleResolutionPresentationState, handoff: B
   const u = first.provenance?.instructionExecution;
   return u === undefined || u < USED_MOVE_LEAD_MIN_U || u > USED_MOVE_LEAD_MAX_U ? null : u;
 }
+/**
+ * gsp3 (ROM lab bdt1-rest3-player-on, Scene ON; T2 windows): a plain `use-move` turn whose first action is asleep (the sleep counter's status write, then
+ * BattleScript_MoveUsedIsAsleep's "is fast asleep!" print) prints on the attackcanceler's row + 1: ROM label row 2072 against the engine's 2075, so the
+ * statusanimation / SE 197 and the next action ran 3 rows late. attackcanceler jumps out before the dispatch / accuracy rows the walk holds
+ * (`action-dispatch`, `attack-canceler`, `accuracy-check`), so the walk ends at `before-turn`.
+ */
+function turnOpensWithAsleepPrint(state: BattleResolutionPresentationState): boolean {
+  if (state.sourceDecision?.kind !== "use-move") return false;
+  const events = state.segments[0]?.events;
+  if (events === undefined) return false;
+  const first = events.find((event) => event.payload.kind !== "set-battler-status-data");
+  return first?.payload.kind === "message" && first.payload.messageId === "STRINGID_PKMNFASTASLEEP";
+}
 function sceneOffOf(state: BattleResolutionPresentationState): boolean {
   return ((state.segments[0]?.beforeRules.rulesContext.hitMarker ?? 0) & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0;
 }
@@ -6797,6 +7121,8 @@ export function usedMoveBodySoundLeadOf(state: BattleResolutionPresentationState
   const command = commands[state.commandIndex];
   if (command?.type !== "move-animation" || command.animation === undefined) return base;
   const lead = command.timing.bodyLeadFrames ?? 0;
+  // b4l: a c-lead body presents its lead for real, so the sound clock follows it (`lse2BodySoundAgeShift`, L - 7) and the 7 - L tick lead is dropped.
+  if (C_LEAD_WINDOW_ADJUST.has(command.animation.moveId)) return 0;
   if (lead < PLAIN_BODY_SOUND_LEAD_MIN_L || lse2BodySoundAgeShift(command.animation.moveId, lead) !== 0) return base;
   return MOVE_BODY_SOUND_CLOCK_LEAD - lead;
 }
@@ -6898,7 +7224,9 @@ export function advanceBattleResolutionConfirmHandoff(
   }
   const nextStage = handoff.focusPunchPrePass === true && handoff.stage === "stop-bounce-request"
     ? null
-    : CONFIRM_HANDOFF_NEXT[handoff.stage];
+    : handoff.stage === "before-turn" && handoff.forced === undefined && turnOpensWithAsleepPrint(state)
+      ? null
+      : CONFIRM_HANDOFF_NEXT[handoff.stage];
   if (nextStage === null) {
     const printU = usedMovePrintLeadU(state, handoff);
     const lead = printU === null ? { hit: 0, script: 0, anim: 0 } : usedMoveSoundLeadsOf(state, printU);

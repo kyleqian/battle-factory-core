@@ -21,10 +21,11 @@ export const IU120_NO_PRE_ROW_SIDES: ReadonlyMap<number, number> = new Map([
  * production's end) + 1, plus the lead rows production does not present (Supersonic 7, Recover 10, Milk Drink 13, Dynamic Punch 19,
  * Synthesis 4), or the frame catcher's CATCHER_WATCH windows (Thunder Punch 135 rows, Twineedle 63, Metal Claw 157, Sludge 111, Ember 69,
  * Fire Punch 101 from the activation to gAnimScriptActive's fall). The rows after the body show the field (every script command has run).
+ * Metal Claw (14) left the table in the tdr1 merge: the box's bdt1 window (154) models the same wait.
  */
 export const HIT1_CMD_END_SE_WAIT_ROWS: ReadonlyMap<number | string, number> = new Map<number | string, number>([
   [7, 1], [9, 22], [16, 44], [41, 17], [48, 21], [52, 3], [64, 14], [74, 20], [75, 20], [105, 15], [124, 6], [158, 2], [176, 3], [179, 1],
-  [190, 1], [200, 1], [206, 13], [208, 17], [209, 9], [223, 46], [225, 1], [232, 14], [235, 10], [299, 9], [316, 63], [342, 4], [343, 21],
+  [190, 1], [200, 1], [206, 13], [208, 17], [209, 9], [223, 46], [225, 1], [235, 10], [299, 9], [316, 63], [342, 4], [343, 21],
   [350, 1], [143, 1], ["143@180", 0],
 ]);
 export function hit1SeWaitRows(id: number, _side: Iu120Side = "player", duration?: number): number {
@@ -91,6 +92,11 @@ const S_LEAD_RULE_IDS: ReadonlySet<number> = new Set([
   104, 182, 113, 240, 184, 108, 201, 204, 219, 266, 28, 241, 213, 97, 334, 230, 151, 133, 258, 14, 203, 197, 349, 254, 215, 107, 281, 180, 288, 195, 115, 103,
   277, 178, 43, 39, 148, 106, 275, 112, 321, 259, 319, 271, 339, 294, 272, 50, 269, 116,
 ]);
+// b4l c-lead (test-side copy of production's C_LEAD_WINDOW_ADJUST + the kernel lead L = A0 - R - 3, ROM-measured by b4m / b4l): the lead rows are presented in front of the body, the window adjust
+// (ROM next command - engine next command) after it. Thunder Wave 86 / Stun Spore 78 / Sleep Powder 79 (9 / 9 / 7, +0), Sing 47 (7, +3), Grasswhistle 320 (7, -2), Confuse Ray 109 (6, +2),
+// Curse 174 (4, +4; its Ghost branch 6 / +4: ROM A1 430 -> first command 433 is the engine's 433), Lovely Kiss 142 (7, +3), Will-O-Wisp 261 (8, +2), Glare 137 (9, +2), Brick Break 280 (7, +3).
+const C_LEAD_RULE_IDS: ReadonlySet<number> = new Set([86, 78, 79, 47, 320, 109, 174, 142, 261, 137, 280]);
+const cLead = (lead: number, tail: number): Iu120BodyRule => ({ defaultLead: lead, tail });
 const IU120_BODY_RULES: ReadonlyMap<number, Iu120BodyRule> = new Map<number, Iu120BodyRule>([
   // hpd4 lead-table bodies (explicit tails)
   [49, { lead: 9, tail: 3 }], [82, { lead: 9, tail: 26 }], [111, { lead: 3, tail: 3 }], [205, { lead: 10, tail: 3 }], [301, { lead: 10, tail: 3 }], [69, { lead: 6, tail: 1 }],
@@ -104,10 +110,12 @@ const IU120_BODY_RULES: ReadonlyMap<number, Iu120BodyRule> = new Map<number, Iu1
   [279, shapeA(279)], [71, { defaultLead: 5, tail: 5 }], [278, { defaultLead: 2, tail: 2 }], [13, { defaultLead: 5, tail: 4 }], [273, { defaultLead: 2, tail: 0 }],
   // lse2 hit tail table wins over the shape-A formula (Blizzard: 2)
   [59, { ...shapeA(59), tail: 2 }],
+  // b4l c-lead
+  [86, cLead(9, 0)], [78, cLead(9, 0)], [79, cLead(7, 0)], [47, cLead(7, 3)], [320, cLead(7, 0)], [109, cLead(6, 2)], [174, cLead(4, 4)], [142, cLead(7, 3)], [261, cLead(8, 2)], [137, cLead(9, 2)], [280, cLead(7, 3)],
 ]);
 export const HPD4_BODY_LEAD_ROWS: ReadonlyMap<number, number> = new Map([...IU120_BODY_RULES].filter(([, r]) => r.lead !== undefined).map(([id, r]): [number, number] => [id, r.lead!]));
-// liv2: Self-Destruct has no body lead (its hp command carries it) but a 9-row hit tail after the live window; the age holds the last body row there.
-const LIVE_MOVE_LEADLESS_TAIL_ROWS: ReadonlyMap<number, number> = new Map([[120, 9]]);
+// liv2 / mxp1: Self-Destruct and Explosion have no body lead (their hp command carries it) but a 9-row hit tail after the live window; the age holds the last body row there.
+const LIVE_MOVE_LEADLESS_TAIL_ROWS: ReadonlyMap<number, number> = new Map([[120, 9], [153, 9], [105, 25], [135, 10], [208, 27], [236, 8]]);
 // sta5: ids whose age holds the last body row through the tail (test-side copy of production's STA5 status-tail class).
 const STA5_STATUS_TAIL_IDS: ReadonlySet<number> = new Set([260, 207, 147, 92, 95]);
 function hpd4BodyTail(id: number, side: Iu120Side, duration?: number): number {
@@ -136,7 +144,7 @@ export function iu120EffectAges(id: number, duration: number, side: Iu120Side = 
   const hold = iu120Pre(id, side) + (LAND97_LEAD_ROWS.get(id) ?? 0);
   const bodyLead = lead ?? defaultBodyLead(id);
   const tail = bodyLead === 0 ? LIVE_MOVE_LEADLESS_TAIL_ROWS.get(id) ?? 0 : hpd4BodyTail(id, side, duration);
-  const held = iu120Post(id, side, duration) + ont193ScriptTail(id) > 0 || LIVE_MOVE_LEADLESS_TAIL_ROWS.has(id) || STA5_STATUS_TAIL_IDS.has(id)
+  const held = iu120Post(id, side, duration) + ont193ScriptTail(id) > 0 || LIVE_MOVE_LEADLESS_TAIL_ROWS.has(id) || STA5_STATUS_TAIL_IDS.has(id) || C_LEAD_RULE_IDS.has(id)
     || (IU120_BODY_RULES.get(id)?.tail === "shape-a" && bodyLead > 0); // production's holdHitTail: a shape-A hit tail holds the last body row
   const scriptTail = ont193ScriptTail(id) - (S_LEAD_RULE_IDS.has(id) ? bodyLead : 0);
   // hit1: Cmd_end's SE-wait rows hold the last body age (the scene draws the field there: `afterScript`).

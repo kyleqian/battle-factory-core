@@ -17,6 +17,8 @@ Seeds unchanged: ON 21 (`2 6 165 499 830 1028 1415 1914 2230 2741 3158 3738 4235
 (`2 165 499 830 1028 1415 1914 2230 2741 3158 3738 4235 4686 5063 5569 6079 6568 6912 7295 7682`). **All 41 still align to battle end** (every engine state
 matched, drive stop = outcome, 0 chain FAIL), so no seed needed replacing from the pool rule.
 
+Per-lab ROM vs engine timing (the b4m / bdt1 / gsp3 labs): `tools/integration/labCompare.sh LAB.json...` (cln12; `tools/battle-lab/README.md` "Lab compare"), not the per-step `b4mRun.sh` / `bdt1Run.sh` / `gsp3Cmp.py` copies.
+
 ## Family table, before (aud248 Part 1) vs now
 
 Rows: matched `exact` (same offset from the segment start) / `offset` (matched, different offset) / ROM-only `missing` / engine-only `extra`.
@@ -1873,3 +1875,914 @@ The -8 bias is gone (OFF median -7 -> -0.5, 15 of 30 rows within +-2 now against
 **Gates.** No `src/` change; `npm run build` exit 0; `npm run test:gate` 360 files / 2,835 tests green; the 9 test files importing `soundCensusRomReplay` (ais1 / ais2 / ais3, aud252 x2, aud253, aud254, parityMacRoundReplayFixtures, pic3DrawnFieldCheck): 41 / 41 (they replay without `--romdrive`). `npm test` not run, as assigned.
 
 **Next (not done).** (1) The engine ready-time cliff rows (4 OFF, ~5 ON) are the next measurable engine term; (2) a ROM-clocked cadence for the forced party-menu messages; (3) the AI-choice term (fsc2m item 3). PAPERCUT: `aud249Rescore.sh` over 49 seeds takes about 5 minutes and a foreground command over 2 minutes is moved to the background by the harness (the t2n rescore needed a per-seed loop plus a wait), ~10 minutes lost; a `rescoreAll.sh` wrapper (the `.integration/evidence/drv1/rescore-all.sh` of this step) would help.
+
+## b4l (2026-11-21): the B4 "C" bodies land (c-lead), the status-animation SE offset re-fitted to the ROM (S11, ISSUES #219)
+
+Scene ON only. Scene OFF is untouched (T2 OFF byte-identical: 600 exact / 533 offset / mass 3,164, missing / extra 0 / 0; census OFF arm byte-identical shards 2 / 2).
+
+**Changes (`src/` 3 files, +37 / -9).**
+1. `BodyLeadRule` `c-lead` for ids 86 78 79 47 320 109 174 142 261 137 280 (Wish 273 stays `lead-only`): `bodyLeadFrames` = the kernel lead (ROM L = A0 - R - 3), the `tail-composition` of lse4 kept, and a per-id window adjust added after the body through `liveMoveHitTailRows` (`C_LEAD_WINDOW_ADJUST`: 47 / 142 / 280 +3, 261 / 137 / 109 +2, 174 +4, 320 -2, 86 / 78 / 79 0; the b4m table, re-derived on the ROM below). A substitute-swap move takes no adjust (same exemption as the lse4 window rows).
+2. The hcr2c sound lead 7 - L (`usedMoveBodySoundLeadOf`) is 0 for these ids, and the sound clock follows the presented lead for real: `lse2BodySoundAgeShift` = L - 7 (the sound table is calibrated at lead 7). Confuse Ray (109) was fitted on its own L = 6 lab, so its clock lead is 6 (`C_LEAD_SOUND_CLOCK_LEADS`); with 7 it went 1 early on all 25 rows.
+3. Status-animation SE offset (`statusAnimationScriptAge`, moveAnimSounds.ts): the ROM's script age is **0** after a c-lead body (the +10 offset was +7 late there and hid an early command) and 0 everywhere for Sleep / Confusion (`STATUS_ANIMATION_AUDITED_BODY_SCRIPT_AGE`); Poison / Burn / Paralysis keep 7 outside a B4 body (T2 variants A / B / C were scored per id; C kept: every id that improved did so on a ROM row, no id got worse; no pin was fitted).
+
+**ROM re-derivation.** `b4mRun.sh` on the 14 labs: the ROM's next-command frame equals the engine's for every body with the b4m adjust table, so the table is unchanged; the ROM wins and there is no difference to report. Ghost Curse (`b4m-curseghost-player-on`) runs on the generic lab stage: ROM R 49 / A0 58 / A1 430 (L 6), the engine's first command after the body (hp, 433) is the ROM's 433; its second row (message 486 vs ROM 488) is 2 early, not pinned.
+
+**b4m labs, ROM-exact SEs of the lab (before -> after; matched rows are unchanged).**
+
+| Lab | before | after | Lab | before | after |
+|---|---|---|---|---|---|
+| b4m-thunderwave | 0 / 7 | 6 / 7 | aud242n-confuseray-player | 14 / 25 | 25 / 25 |
+| b4m-stunspore | 0 / 8 | 7 / 8 | aud242n-confuseray-opponent | 14 / 25 | 25 / 25 |
+| b4m-sleeppowder | 8 / 8 | 8 / 8 | aud242r-curse-player | 0 / 4 | 4 / 4 |
+| b4m-sing-s2 | 1 / 3 | 3 / 3 | aud260-brickbreak-player | 0 / 11 | 9 / 11 |
+| b4m-grasswhistle-s2 | 1 / 3 | 3 / 3 | aud260-glare-player | 0 / 4 | 3 / 4 |
+| aud242k-lovelykiss-player | 2 / 4 | 4 / 4 | aud260-willowisp-player | 18 / 23 | 19 / 23 |
+| aud242k-wish-player (lead-only, out of scope) | 0 / 8 | 0 / 8 | | | |
+
+Per-body r (ROM next - engine next) is 0 for all 11 bodies. Left over (not analysed further): Thunder Wave 1 row, Stun Spore 1, Glare 1, Brick Break 2 (frames 1369 / 1570, -2 / -7), Will-O-Wisp 4 (frames 499 / 619 / 637 / 690, all -4).
+
+**T2 rescore** (25 ON + 24 OFF seeds over `.integration/evidence/t2n`, `tools/audio/rescoreAll.sh` into `.integration/evidence/b4l/t2-{base,after}`, `soundScoreboard.py`):
+
+| | exact | offset | missing | extra | mass |
+|---|---|---|---|---|---|
+| ON before | 2,366 | 3,511 | 0 | 0 | 25,747 |
+| ON after | **2,476** | 3,401 | 0 | 0 | **23,423** (-9.0 %) |
+| OFF before = after | 600 | 533 | 0 | 0 | 3,164 |
+
+move-animation SE family ON: 2,005 -> 2,110 exact, mass 19,810 -> 17,571. Status SEs after the body: SE 197 -39 %, SE 176 -45 %, SE 212 -73 % of their mass, none worse.
+
+**Census 0..199 both scenes** (`lsd194Census.sh`, base 5fbac1476 vs HEAD d652fc667, JOBS 2, SPLIT 2): `rst197CensusDelta.py --digest` eventsDigest + error identical 200 / 200 on ON (122 battles have changed presentation commands, 0 type-sequence changes) and 200 / 200 on OFF (byte-identical). No gameplay / RNG change. T1 (`soundCensusDelta.py --t1`): ON exact 53,965 -> 54,127, known-offset 197 -> 35 (Will-O-Wisp +1 x162 gone; left: Substitute -7 x33, Transform -5 x2, both non-B4), missing 0, extra 0, unclassified 13 -> 13 (unchanged); OFF identical on both arms (0 exact, 35 extra, 13 unclassified; the OFF arm is not what T1 scores, cause not examined).
+
+**Pins re-pinned toward the ROM** (commit d652fc667): ais2 ON window 3826..4076 / romFrameOffset 55 -> 3835..4085 / 46 (same ROM frames, the engine 9 later; md5 match 0 bad at the +9 shift); hie3 cheri command start 740 -> 749, drift 11 -> 2; aud260 Brick Break / Glare constant offset 2 -> 0; aud242r Curse deltas +1 -> 0. No pin moved away from the ROM; none left red.
+
+**Gates.** `npm run typecheck` ok; `npm run test:gate` 360 files / 2,835 tests; the 228 files importing `battleResolutionPresentation.ts` / `tickSounds.ts` plus `aud2*` and `randomRoundSoak*` (3 batches: 77 / 79 / 72 files, 710 / 770 / 581 tests) green; `npm run build` ok. Full `npm test` not run (brief).
+
+**Residuals.** Wish (273) lead-only: SE rows 0 / 8, hp floors / Rollout / second-mover lead (hcr3m), AI choice (fsc2m) and non-B4 body leads are out of scope. The Scene OFF timing is unchanged. PAPERCUT: a concurrent side-lane session committed my uncommitted `moveAnimSounds.ts` edit (5cb0b6acd) in the shared tree, so stage by file name, never `git add -A`.
+
+## t2k (2026-11-21): the remaining S11 sound-timing mass re-ranked on tree 5fbac1476 (measurement only; no `src/` / `tests/` change)
+
+**Method.** All 25 ON + 24 OFF t2n seeds rescored with `aud249Rescore.sh` (drv1's `--romdrive` A cadence) over `.integration/evidence/t2n`, then `soundScoreboard.py OUT --per-seed --out OUT/score.json` (both scenes; ON at the 8012 oracle's ROM files). Every scored row is attributed with `t2Attribute.py`'s alignment plus the ROM `gCurrentMove` from `tl.json` (body / `gen:<se>`), the controller SE, cry, stat, bgm; OFF rows also carry the engine command type (`--cmdtrace=1`). A "step" is the offset change between consecutive matched rows of a segment (the first row steps from 0): it separates where an offset is *introduced* from where it is only *inherited*. Evidence (git-ignored): `.integration/evidence/t2k/` (`t2/` rescored sets + `score.json` + `scoreboard.txt`, `p/` and `po/` ROM probes, `attr-{on,off}.json`, `gain-{on,off}.json`, `final.py` = the disjoint item table below).
+
+### 1. Rescore (missing / extra 0 / 0 in both scenes)
+
+| family (mass / exact) | OFF drv1 | OFF now | ON drv1 | ON now |
+| --- | --- | --- | --- | --- |
+| move-animation SE | 0 / 0 | 0 / 0 | 19,895 / 2,006 | 19,810 / 2,005 |
+| stat-change SE | 403 / 2 | 403 / 2 | 410 / 27 | 410 / 27 |
+| cry | 517 / 97 | 517 / 97 | 1,231 / 31 | 1,227 / 31 |
+| battle-controller SE | 2,225 / 500 | 2,225 / 500 | 4,235 / 301 | 4,231 / 301 |
+| bgm | 19 / 1 | 19 / 1 | 69 / 2 | 69 / 2 |
+| TOTAL | **3,164 / 600** | **3,164 / 600** | **25,840 / 2,367** | **25,747 / 2,366** |
+
+OFF is identical to drv1. ON is 93 mass / 1 exact lower than drv1's 25,840 / 2,367 (-85 move-animation, -4 cry, -4 controller); the master moved from drv1's tree to 5fbac1476 (the mvs1 x hcr1b and box-merge re-pin commits), not bisected.
+
+### 2. Attribution (row mass; classes sum to TOTAL)
+
+| class | ON rows / mass / exact | OFF rows / mass / exact |
+| --- | --- | --- |
+| body (move running at the row) | 3,899 / 13,024 / 1,974 | n/a (no body rows in OFF) |
+| gen (gCurrentMove 0) | 912 / 6,786 / 31 | n/a |
+| controller hit SE 12 / 13 / 14 | 475 / 2,378 / 260 | 548 / 1,361 / 368 |
+| controller faint / send-in 15 / 16 / 114 | 283 / 1,853 / 41 | 284 / 864 / 132 |
+| cry | 202 / 1,227 / 31 | 192 / 517 / 97 |
+| stat | 101 / 410 / 27 | 105 / 403 / 2 |
+| bgm | 5 / 69 / 2 | 4 / 19 / 1 |
+
+**Shape (window = seed x segment x cause; mass):** ON constant 17,878 (1,374 windows), one-off >= 20 4,253 (108), varies (growing / tail) 3,616 (122), exact 681. OFF constant 2,487 (477), one-off 522 (17), varies 155 (14). Constant dominates: most mass is an offset introduced once and *inherited* by the later rows of the segment, so the cost of a lead is its row count, not its size.
+
+**Top bodies ON (mass):** Dig 736, Ice Beam 686, Drill Peck 594 (one window: s1914 seg21, -66 x 9 rows), Rock Slide 518, Magical Leaf 490, Rest 468, Ancient Power 383, Psychic 373, Double-Edge 363, Blizzard 351, Aerial Ace 346 (+ 205 inherited, s3738), Double Team 324, Struggle 310. Metal Claw's 745 is the rows after its body in s3738. **B4 bodies (being landed, not proposed): 863 = Thunder Wave 243, Confuse Ray 196, Curse 188, Stun Spore 134, Brick Break 88, Sleep Powder 14** (Sing / Grasswhistle / Lovely Kiss / Will-O-Wisp / Glare have no ON mass rows in these seeds).
+
+**Where offsets are introduced (steps):** segment-entry first rows (Dig +6 charge turn x10, Rest -2 x17 / +9 x6, ball-open -3 / -7, Ice Beam / Solar Beam first windows), body tails (Metal Claw -14), OFF stat +3 (x60), OFF first hit after the hit animation (-7 x18, -3 x10, -4 x7), and single windows (s1914 Drill Peck -66, s3738 Aerial Ace -39 / -79, s8108 Confusion -65 x2).
+
+### 3. Ranked top 8 (rows assigned disjointly in this order; the B4 line and the remainder make the sum-check)
+
+| rank | item | scenes | T2 mass now (ON / OFF) | breadth (ON census, of 1,000 battles) | direction | cost / risk | lands in | ROM window |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 | Metal Claw body tail: engine move-animation 14 frames short | ON | 745 / 0 | 99 commands in 38 battles | lengthen Metal Claw's tail by 14 (rows after the last body SE) | low: one table row; T2 sample is 6 windows of ONE seed, so re-measure with a second Metal Claw seed | `src/engine/battleResolutionPresentationRender.ts` body tail tables (`HPD4_BODY_TAIL_ROWS` / `LSE2_BODY_TAIL_ROWS` / `LIVE_MOVE_SCRIPT_TAIL_TRAIL_ROWS`, read by `battleResolutionCommandDuration`) | s3738 decision 4 (ROM commit 2436, engine 2420); also seg 1, 9, 17, 33, 41, 49 |
+| 2 | First hit SE after a hit-animation (self-confusion hit: message -> hit-animation gap 5 short) | OFF (ON shares the controller rows) | 1,207 / 662 | hit-animation 18,646 commands in 1,000 battles; OFF steps: -7 x18, -3 x10, -4 x7 of 71 | delay the hit-animation command (and its SE 13) by 5-7 frames after the confusion message | medium: the hit lead differs by cause (confusion self-hit vs woke-up chain), so land per cause; the ON half is mostly inherited drift | `src/engine/battleResolutionPresentation.ts` (segment builder of the message -> hit-animation chain; `BattleScript_DoSelfConfusionDmg`, `battleScriptActionAdmission.ts:3089`) | s7295 decision 4 (ROM 3333 / eng 3282); s7682 decision 2 (1160 / 1167) |
+| 3 | OFF stat SE +3 (SE 239 / 245) | OFF | 0 / 403 (ON stat median 0) | stats-change 3,688 commands in 828 battles; 60 of 100 OFF steps are exactly +3 | stats-change SE 3 frames earlier (SE age 6 -> ~4 after the command start, and the preceding move-animation 39 -> 37) | low: constant offset, one emitter; ON already has the `STATS_CHANGE_AFTER_*_AGE_SHIFT` family | `src/engine/moveAnimSounds.ts` `STATS_CHANGE_SE_AGE` / `emitStatsChangeSounds`, `battleResolutionPresentationRender.ts` `statsChangeSourceAge` (the generic age without a body shift is what OFF runs) | s2 decision 1 (ROM 369 / eng 373), frames 205-252 |
+| 4 | Aerial Ace s3738 -39 / -79 (twin in both scenes: the OFF rows have no body, so it is a controller / event gap, not a table) | ON + OFF | 551 / 160 | Aerial Ace 676 commands in 274 battles (one seed shows it) | engine plays the hit SE 39 frames before the ROM; unknown which ROM event waits | medium / unknown: unprobed, single seed; probe before any landing | to be found (hit SE 12 + SE after Dig in seg63) | s3738 decision 15 (seg31) ROM rf 6618; decision 27 (seg55) rf 11608; ON decision 31 rf 22049 (-79) |
+| 5 | Dig: charge-turn first SE +6, attack-turn tails (+9 / +11) | ON | 736 / 0 | 596 commands in 120 battles | shorten Dig's charge-turn lead by 6; trim the attack-turn tail | medium: two terms; the +6 first row repeats in 10 windows (4 seeds) | `battleResolutionPresentationRender.ts` live-move lead / tail tables for DIG | s8108 decision 11 (seg23) rf ~10424 (+9 / +11); s3738 seg71 / 79 / 87 |
+| 6 | Faint SE 16 + cry@faint | ON + OFF | 1,408 / 458 | faint 4,332 commands in 1,000 battles | scattered +-1 with a long negative tail (16@faint median -4, cry -2 ON) | high: mostly inherited drift; the -41 one-off in s3738 is its biggest window | faint / cry rows in `src/engine/tickSounds.ts` + `battleHitSounds.ts` | s3738 decision 27 (seg55) rf 11825 (cry) / 11891 (SE 16), -41 both scenes |
+| 7 | Rest: move-animation#4 -2 and status-animation +9 | ON | 468 / 0 | 462 commands in 149 battles | -2 lead on 17 windows, +9 on 6 | medium: two terms, non-B4 | `battleResolutionPresentationRender.ts` Rest status-animation lead | s6079 decision 7 (seg15) rf 6206 (-27 x 6 rows); 17 windows at -2 |
+| 8 | gen:148 poison tick (general animation) | ON | 1,104 / 0 | general-animation 7,506 commands in 864 battles | engine plays 25-30 frames early in two windows | medium: first row of each window, 3 seeds | general-animation command timing (`moveAnimSounds.ts` `emitGeneralAnimSounds`) | s165 decision 11 (seg23) rf 7437 (-30 x 6); decision 14 (seg29) rf 9882 (-25 x 6) |
+| | **Items 1-8** | | **6,219 / 1,683** | | | | | |
+| | B4 bodies (being landed) | ON | 863 / 0 | | | | | |
+| | remainder (items below; not chased) | | 18,665 / 1,481 | | | | | |
+| | **TOTAL** | | **25,747 / 3,164** | | | | | |
+
+Sum-check: ON 745 + 1,207 + 551 + 736 + 1,408 + 468 + 1,104 + 863 + 18,665 = 25,747; OFF 662 + 403 + 160 + 458 + 1,481 = 3,164 (ON items 1-8 = 6,219; OFF items 2-4 and 6 = 1,683). "T2 mass now" is the row mass of the item's class, not the saving: the counterfactual gain of removing the item's step is lower (Metal Claw 728, Aerial Ace 537, Drill Peck 660, OFF stat +3 only ~100-180, Dig ~600, Rest ~660 incl. neighbours). Runners-up not in the top 8: Drill Peck s1914 one-off 594 (the next best single window), gen:142 1,112 (s6912 / s319 -25 .. -17 windows), weather / general 219 / 127 / 242 1,001, Ice Beam first windows 686.
+
+### 4. The three ROM windows (hcr3mProbe + hcr3mCmp, frames from each side's own commit)
+
+1. **Metal Claw, s3738 decision 4.** ROM: Harden SE 120 at 47 / 77, Razor Wind SE 136 at 151 / 165, `HitFromAtkAnimation+0x1` at 201, SE 13 at 203. Engine: SE 120 at 47 / 75, SE 136 at 151 / 165, hit-animation cmd 0.2 at 190 with SE 13 at 189. Last body SE to the hit SE is 38 frames in the ROM, 24 in the engine: the differing command is `move-animation` cmd 0.1 (bodyLead 5), 14 frames short. Repeats in 6 windows of the seed.
+2. **Self-confusion hit, OFF s7295 decision 4 (and s7682 decision 2).** ROM `BattleScript_DoSelfConfusionDmg+0x0` at 104, `+0x7` ex2 at 107..139, SE 13 (SE_EFFECTIVE) at 204 (100 frames). Engine `message` cmd 0.1 at 102 -> `hit-animation` cmd 0.2 and SE 13 at 197 (95 frames): the engine's message-to-hit gap is 5 short (2 more from the message start skew = the -7). s7682: 97 -> 192 (95) vs 99 -> 199 (100). Not every -7 is a self-hit: s5063 decision 8 (Double-Edge after a wake-up) is 11 short in the `message` / `status-icon` pre-chain (engine cmd 0.0 at 9 -> move-animation cmd 0.4 at 116 vs ROM `EffectDoubleEdge` 6 -> attackstring end 124), then a 1-frame move-animation difference.
+3. **OFF stat +3, s2 decision 1 (Evasion up).** ROM: `StatUpAttackAnim` at 208 -> `StatUpPrintString` ex2 at 245 (37) -> SE 239 at 249 (exec + 4). Engine: `move-animation` cmd 0.7 at 207 (min 39) -> `stats-change` cmd 0.8 at 246 -> SE 239 at 252 (age 6). Both `move-animation` (39 vs 37) and the stats-change SE age (6 vs 4) are long: +2 and +1 against a 1-frame earlier start, +3 in total.
+
+### 5. What not to chase
+
+- **Held-item group gen:152 / 228 / 102 (3,160) and the 100-odd other bodies' scatter (10,125):** accumulated drift, with per-previous-body tails (Yawn +5, Rest -3, Cross Chop -12) that are items above; landing these directly moves nothing until the introducing rows (items 1-7) are fixed. Re-score after items 1-3 and re-rank.
+- ON hit SE @move-animation / message (846) and send-in / out chain + cry (1,571): inherited more than introduced; first-row rows already at 0 for 244 of 343.
+- Out of scope here, being landed by the parallel worker: the B4 bodies above.
+
+Not applied: no `src/` or `tests/` change; PROGRESS / ISSUES / ROADMAP untouched.
+
+## stc1 (2026-11-21): Scene OFF stat-change SE and the confusion self-hit gap (presentation / sound timing only)
+
+Base 5cb0b6acd (b4l landed on it, so the ON baseline is 24,399 mass / 2,465 exact, not t2k's 25,747 / 2,366). Part 1 = e34ecca44, Part 2 = 6eda1a86f. Gameplay, RNG, damage, turn order and facility state are untouched.
+
+**Part 1: stat-change SE, Scene OFF (t2k item 3).** The ROM plays the stat SE at the stats-change `playanimation` exec + 4. The engine's command starts at exec + 1 after the OFF body (`attackanimation` -> `BattleScript_Pausex20` -> `waitanimation` -> `setgraphicalstatchangevalues` -> `playanimation`), so the SE age was 3 frames late (engine start + 6 vs ROM start + 3); after a secondary effect's hit chain it was 2 late (start + 4 vs ROM start + 2). `statsChangeSourceAge` (battleResolutionPresentationRender.ts) now takes `STATS_CHANGE_SCENE_OFF_AFTER_BODY_AGE_SHIFT = 3` / `STATS_CHANGE_SCENE_OFF_SECONDARY_AGE_SHIFT = 2` when the segment's hitMarker has HITMARKER_NO_ANIMATIONS; the entry-phase (battle-start Intimidate) explicit age and every Scene ON age are unchanged. Up and down, move-caused and secondary-effect, both sides (tests/stc1SceneOffStatChangeSe.test.ts, labs tools/battle-lab/stc1-*-off.json + hcr1b-*):
+
+| path (lab) | ROM SE frame | engine before | engine after |
+| --- | --- | --- | --- |
+| Harden, up, foe (hcr1b-harden-foe-off) | 99 | 102 | 99 |
+| Swords Dance, up, foe (stc1-swordsdance-foe-off) | 105 | 108 | 105 |
+| Growl, down, foe (hcr1b-growl-foe-off) | 100 | 103 | 100 |
+| Growl, down, player (hcr1b-growl-plr-off) | 96 | 99 | 96 |
+| Icy Wind secondary Speed drop, foe (stc1-icywind-foe-off) | 210 | 212 | 210 |
+| Rock Tomb secondary, foe (stc1-rocktomb-foe-off) | 246 | 250 (+4) | 248 (+2) |
+| Icy Wind secondary, player (stc1-icywind-plr-off) | 214 | 208 (-6) | 206 (-8) |
+
+The last two rows keep a residual that is not the SE age: the hit chain's hp rows start the stats-change command off the ROM's exec (hcr3m hp floors, out of scope). The 3 and 2 frame rules are exact wherever the command start is. The "37 vs 39" of the t2k note is not a wrong move-animation length: the engine's command starts at exec + 1, so the error was the SE age alone.
+
+**Part 2: the self-confusion hit gap (t2k item 2).** ROM `BattleScript_DoSelfConfusionDmg` (battle_scripts_1.s:3801-3817) runs `status2animation` (3799, from `BattleScript_MoveUsedIsConfused`), `jumpifbyte` (3800), `cancelmultiturnmoves` (3802), `adjustnormaldamage2` (3803) and `printstring STRINGID_ITHURTCONFUSION` (3804) before the first glyph (5 script rows after the "is confused!" wait ends); `waitmessage B_WAIT_TIME_LONG`, then `effectivenesssound` (SE 13) and `hitanimation`. The engine started typing the ITHURTCONFUSION message on the row after the wait, so its hit / SE 13 came 7 rows early (ROM from the decision's commit, Scene OFF: seed 7295 decision 4 = 204 vs 197; seed 7682 decision 2 = 199 vs 192). Landed Scene OFF only: the message gets `leadFrames = 5` (the five rows, first glyph moves 5 later) and a 66-row hold (`SELF_CONFUSION_OFF_HIT_MESSAGE_TIMING`, 64 + 2; the 2 rows are the typed-to-wait term the ROM spends and the engine did not), `SELF_CONFUSION_*` in battleResolutionPresentation.ts. **Scene ON is not changed:** ON seed 7295 decision 4 already plays SE 13 on the ROM's frame (ROM 304, engine 304; the ON self-hit sits behind the 100-row `status2animation` command, which is a different interval), so the OFF rule must not move it. The s5063 Double-Edge-after-wake-up case is untouched.
+
+| path | ROM SE 13 (from commit) | engine before | engine after |
+| --- | --- | --- | --- |
+| OFF seed 7295 decision 4 | 204 | 197 | 204 |
+| OFF seed 7682 decision 2 | 199 | 192 | 199 |
+| ON seed 7295 decision 4 | 304 | 304 | 304 |
+
+Pin: tests/stc1SelfConfusionHit.test.ts (fixture tests/fixtures/stc1-selfconfusion-off.json: the two seeds' setups + the ROM frames).
+
+**T2 rescore** (`RESCORE_SCENES=off|on tools/audio/rescoreAll.sh OUT .integration/evidence/t2n`, `soundScoreboard.py`; 0 missing / 0 extra before and after in every family). Scene OFF, 24 aligned seeds, mass 3,164 -> 2,873 (exact 600 -> 667, offset 533 -> 466):
+
+| family (OFF) | exact before -> after | offset before -> after | mass before -> after |
+| --- | --- | --- | --- |
+| stat-change SE | 2 -> 65 | 103 -> 40 | 403 -> 244 |
+| cry | 97 -> 97 | 95 -> 95 | 517 -> 496 |
+| battle-controller SE | 500 -> 504 | 332 -> 328 | 2,225 -> 2,114 |
+| bgm | 1 -> 1 | 3 -> 3 | 19 -> 19 |
+| TOTAL | 600 -> 667 | 533 -> 466 | 3,164 -> 2,873 |
+
+The stat-change matched-row delta (engine - ROM, relative to the segment start) went median +3 / p10 -4 / p90 +3 to median 0 / p10 -7 / p90 0; the p10 is the hp-floor residual above (and SE 90, +7, unrelated). The cry / battle-controller gain comes with Part 2 (the segments after a self-hit start 7 rows later); it is not attributed row by row. Scene ON, 25 aligned seeds: 24,399 mass / 2,465 exact / 3,412 offset, byte-identical before and after (every ON family, delta table and top-differing rows identical). Evidence (git-ignored): .integration/evidence/stc1/t2-before, t2-after.
+
+**No gameplay / RNG change.** `tools/integration/lsd194Census.sh` seeds 0..199 (`LSD194_SHARDS="0 1"`), 5cb0b6acd vs 6eda1a86f: `rst197CensusDelta.py --digest` Scene OFF "eventsDigest+error identical 200/200, type-sequence changes 0", 145 battles identical / 55 changed commands (all `message, message, hit-animation` +7 on the self-hit); Scene ON "identical 200/200, type-sequence changes 0, 200 battles identical / 0 changed, byte-identical shards 2/2".
+
+**Tests.** `npm run typecheck` exit 0; `npm run test:gate` 360 files / 2,835 tests green; `npm run build` exit 0. The 232 test files that import the changed files (grep -l battleResolutionPresentation / battleResolutionPresentationRender / moveAnimSounds) + `tests/aud2*.test.ts` + `tests/randomRoundSoak*.test.ts` + the two new stc1 files: all green except five failures that are red on the pre-stc1 base 5cb0b6acd too (not touched, reported): aud260MoveAnimSounds brickbreak-player and glare-player, aud242rMoveAnimSounds curse-player (b4l's ON B4 body pins), ais2AiSwitchFrames seed 2741 Scene ON, hie3HeldItemSounds hie3-cheri-on. Pins moved by this step, all toward the ROM or trajectory-only: tests/randomRoundSoak.test.ts "(c) leaves full byte-identical" seed 1 frames 60,582 -> 60,525 (frames only; same battle 3 / depth 2 / turn 19 / roundLost; the exploring presses land on new phases after the +7 self-hit rows) and the ISSUES #89 Baton Pass pin seed 4 -> 11 (seed 4 no longer commits Baton Pass; re-scanned seeds 0..39 with batonPassSearch.ts, candidates 11, 13, 27, 36, 39). No other randomRoundSoak* pin moved. sa125 / sag130 ("unanchored < total / 5") went red with the first Part 2 shape (a separate hold command before the print changed the OFF command shape against ON); the `leadFrames` form keeps the shape and both are green with unchanged counts.
+
+**Residuals / next.** Rock Tomb +2 and Icy Wind player -8 (hp-row command start, hcr3m), SE 90 +7. The ON self-hit's `status2animation` SE 176 sits 6 rows after the ROM's (engine 112 vs ROM 106 from the commit, seed 7295): a separate, ON-only term, not measured further here.
+
+## hcr3 (2026-11-21): stat-next hp tail, recoil hp rows, faint SE lag clip (Scene ON; OFF follows where the rule is scene-free)
+
+Commit `88369e3d7` on top of `006eab809` (src: `battleResolutionPresentation.ts`, `battleHitSounds.ts`). Steps 1 and 3 landed nothing; step 2 landed the safe subset; the item-chain rows stay open.
+
+**Step 1, hp bar law: no engine bug, nothing landed.** The engine's hit `hp` command already lasts exactly D + 8 (`max(minimumFrames, barFrames + 1) + tail`, bar 1 HP / frame for maxHP >= 48). The rollout5 / iceball5 drift comes from the lab engines rolling a different damage D than the ROM (rollout turn 2: engine 16 vs ROM 14; iceball 23 / 41 / 82 vs ROM 20 / 40 / 89, RNG not synchronised) plus hcr2c's stale-u +1. aud242o / aud242q are therefore unchanged (rollout5 [0, 0, 0, -2, -3], iceball5 [0 x 6, -3, -3, -5, -5]); they close only with an RNG-synchronised lab, not a duration change. The Scene OFF check was not run for the same reason (no law to port).
+
+**Step 2 (landed).**
+- hp of a hit followed by a `stat` command (Icy Wind, seed 1914): `HP_STAT_NEXT_TAIL_FRAMES = 4` (ROM: bar 12, then `datahpupdate` .. `BattleScript_StatDown`'s playanimation 6 rows, the stat command takes the last 2; no 28-row floor). The stat SE and the select SE are ROM-exact on 1914.
+- recoil hp (Double-Edge, seed 2230): `HpLeadRows.recoil` (the hp event's PC is `BattleScript_DoRecoil`'s datahpupdate), `HP_RECOIL_LEAD_ROWS = 7` on the previous message (the unpresented `MoveEffectRecoil` / `DoRecoil` orword rows), bar -> recoil print = E + 1 rows (hp tail = `messageRows - 1`). Recoil hp / print frames 342 / 353, ROM-exact in the romdrive cadence.
+- faint SE: `lag = max(0, sceneLag - moveBodyExtraRows)` (battleHitSounds.ts:85): earlier bodies' extra rows are already in the command start, so the hpd4 compensation must not go negative.
+
+| pin | ROM | before | after |
+|---|---|---|---|
+| aud252 1914 faint SE / select SE | 0 / 0 | +3 / +12 | **-2 / 0** |
+| aud252 1914 item chain (5 SEs + SE_BALL_OPEN) | 0 | +4 x 6 | **-8 x 6 (moved away; test pin left at +4, RED)** |
+| aud252 2230 faint SE / select SE | 0 / 0 | +10 / +6 | **0 / -4** |
+| aud252 2230 item chain | 0 | +4 x 5, +3 | **-6 x 5, -7 (moved away; test pin left, RED)** |
+| aud242o rollout5 turnDeltas | 0 | [0, 0, 0, -2, -3] | unchanged (damage-roll difference) |
+| aud242q iceball5 deltas | 0 | [0 x 6, -3, -3, -5, -5] | unchanged |
+| aud242b / aud258 Haze second mover | 0 | 3 | unchanged (see step 3) |
+| ais2 2741 | 0 | not measured | not measured (out of reach) |
+
+**Item chain, open.** After the faint script the general-animation starts 6 rows before the ROM `playanimation` (ROM `FaintTarget+0xc` -> `MoveEnd+0` -> `ItemHealHP_Ret+0` -> `+0x7`: 1035 -> 1041 on 1914, 560 -> 566 on 2230); the engine's message, hp and `SE_BALL_OPEN` that follow are 6 early with it. A +6 lead on the preceding `sprite-visibility` (Scene ON, faint before it) brought the lab pins to 1914 [-2 x 6] / 2230 [0 x 5, -1], but T2 mass 22,835 -> 22,889 (1914 -66, seeds 2 / 97 / 2230 +80 / +30 / +10): the first SE offset after `playanimation` is 19 rows on 1914 and 13 on 2230 in the ROM (engine fixed 11), and seeds 2 / 97 have chains the 6 rows over-shift. Not landed; needs the ROM rule that makes the SE offset 19 vs 13 (script-entry dependent).
+
+**Step 3, second mover: not landed.** Experiment: +1 on `bodyLeadFrames` for any body after an earlier `STRINGID_USEDMOVE` in the segment. aud258 Haze 3 -> 2 (toward the ROM, not 0), but aud242a-swordsdance-opponent 0 -> -1 (a second mover whose L is already right) and aud242b's own rows re-key. A per-body rule would be a new body lead (out of scope). The two pins stay at 3.
+
+**Seen but not changed.** Seed 648 ON regressed +7 mass (550 -> 557); every other of the 25 seeds improved or held.
+
+**T2** (`rescoreAll.sh` over `.integration/evidence/t2n`, `soundScoreboard.py`; `.integration/evidence/hcr3/t2-{base,after}`; 0 missing / 0 extra):
+
+| scene | exact before | exact after | offset | mass before | mass after |
+|---|---|---|---|---|---|
+| ON (25 seeds) | 2,476 | **2,541** | 3,401 -> 3,336 | 23,423 | **22,835** (-2.5 %) |
+| OFF (24 seeds) | 600 | 600 | 533 -> 533 | 3,164 | **3,056** (-3.4 %) |
+
+**Census** (`lsd194Census.sh`, base `006eab809` vs `88369e3d7`, seeds 0..999, JOBS 6, SPLIT 2): Scene ON eventsDigest + error identical 1000 / 1000, 0 type-sequence changes (306 battles with changed command timing). Scene OFF identical 999 / 1000 (305 battles with changed timing): seed 796 differs, a `frame budget` error in both arms, so the digest depends on where the budget cut the run (outside 0..199; 0..199 identical). T1 (`soundCensusDelta.py --t1`, ON): move table exact 270,049, known-offset 152, missing 0, extra 0, unclassified 77 = base; non-move missing 0 -> 4, all one HELD_ITEM_EFFECT command (seed 995, command 3323 of 3330) cut by the same `frame budget` error. No gameplay / RNG change.
+
+**Re-pins** (named in each file): `randomRoundSoak.test.ts` seed 1 frames 60582 -> 58672 (frames only; same battle 3 / depth 2 / turn 19 / roundLost; Icy Wind hits no longer pay the 28-row floor); ISSUES #89 Baton Pass pin seed 4 -> 8 (`tools/soak/batonPassSearch.ts --seeds 0:40 --parallel 4`: candidates 8, 10, 11, 13, 16, 27, 36, 39; seed 8 commits 3, first 25185, halt 25492 on MAWILE). `aud252LossBallOpen.test.ts`: faint / select rows re-pinned toward the ROM, item rows left at the old pin and red (moved away).
+
+**Gates.** `npm run typecheck` ok; `npm run test:gate` 360 files / 2,835 tests; the 207 files importing `battleResolutionPresentation` / `battleHitSounds` plus `aud2*` and `randomRoundSoak*` (3 batches): green except the two `aud252LossBallOpen` item-row pins above; `npm run build` ok. Full `npm test` not run (assignment).
+
+## b4l2 (2026-11-21): the c-lead pins follow the ROM (tests only), Ghost Curse re-measured
+
+No `src/` change; Scene ON presentation is as b4l landed it, so no T2 rescore (the b4l numbers stand). The supervisor's full suite on fold-a had 11 failures in 8 files, all on the 11 c-lead bodies of b4l (ids 86 78 79 47 320 109 174 142 261 137 280): their body rows gained the kernel lead L (hold rows at age 0 in front of the body) plus the per-id window adjust after it (`C_LEAD_WINDOW_ADJUST`), so lengths grew by L + adjust (Thunder Wave +9, Glare +11, Will-O-Wisp +10, Curse +8, Lovely Kiss +10, Confuse Ray +8).
+
+**Verdict: every new value is the ROM presentation (b4m table, re-derived by b4l with `b4mRun.sh` on the 14 labs: the ROM's next-command frame equals the engine's with L + adjust), so the tests move, not the code.**
+
+**Tests.** `tests/helpers/iu120Rows.ts` gets a test-side copy of the c-lead class (`C_LEAD_RULE_IDS`; L / adjust per id as `defaultLead` / `tail`, same convention as the lead-only / lse2 entries: `hpd4BodyRows` adds `lead + tail`, `iu120Ages` and `iu120EffectAges` follow, the effect age holds the last body row through the tail as the render effect does). The five tests that hard-coded a length now add `hpd4BodyRows(id)` to their base (liveCurseStatsAdapter 174, liveOam1MoveAdapters 261, playableAnimationLifecycle 109); liveAnchor3 / liveNext5 / liveProfile (Lovely Kiss effect ages) / playableAnimationIntegration go through `iu120Ages` / `iu120EffectAges` and needed only the helper. Their invariants (adapter active every age, ON/OFF rules / RNG / boundary parity, prompt reached) are untouched.
+
+**Ghost Curse (apx222 374 -> 384).** `b4mRun.sh` on `b4m-curseghost-player-on` (ROM): R 49 / A0 58 / A1 430, L 6; the ROM's next command after A1 is `DoGhostCurse+0x2c` at 433 (+3). Engine: the hp command at 433 (age0 51 + 382; non-Ghost Curse: age0 49 + 187 = 236 = the ROM's, the same constant 7 between the engine's age0 and the ROM's A0 in both branches). So the Ghost branch (L 6 + adjust 4 = +10 rows) lands on the ROM's next command exactly and 384 is the ROM value; the b4l note stands (the second row, message 486 vs ROM 488, is 2 early, not pinned). The ROM's second command after A1 (`DoGhostCurse+0x31`, 488) is a message row; no further Ghost-specific adjust was fitted. The apx222 pin is `374 + hpd4BodyRows(174, 6)` (rows of the approximate body + the Ghost lead 6 + adjust 4).
+
+**Verification** (all foreground): the 8 failing files 136 / 136; the 311 files that import battleResolutionPresentation / battleResolutionPresentationRender / moveAnimSounds, `tests/animation/live*`, `playableAnimation*`, `apx2*`, `aud2*`, `randomRoundSoak*` 3,087 / 3,087 green (this includes the b4l ON pins aud260 / aud242r that the stc1 note listed red on its base); `npm run typecheck` exit 0; `npm run test:gate` 360 files / 2,835 tests; `npm run build` exit 0. Evidence: `.integration/evidence/b4l2/` (worktree, git-ignored: `ghost/*.rom.json`, `*.eng.json`, logs).
+
+## bdt1 (2026-11-21): Metal Claw, Dig and Rest bodies landed from ROM labs (Scene ON presentation / sound timing only; S11, ISSUES #219)
+
+Scene ON only; Scene OFF untouched. Method: per-body battle labs (`tools/battle-lab/bdt1-*.json`, a Rattata pair, the player and then the foe using the move; Dig / Rest are two-turn traces A, 18, A, 1000, A, 18, A, 800) probed with `tools/integration/bdt1Run.sh OUTDIR FRAMES lab` (new: `hcr3mProbe.py` ROM script rows + `soundEventProbe.py lab` ROM SEs + `b4mEngine.ts` engine commands / SEs, merged by `bdt1Table.py`; `ENGINE_ONLY=1` reruns the engine side over the cached ROM files). Evidence (ignored): `.integration/evidence/bdt1/` (`labs0/`, `t2-base`, `t2-after`, `cen/`). Diff = ENG - ROM frame.
+
+**1. Metal Claw (t2k item 1), commit c8faea1e3.** The shortfall reproduces on a second, independent window, on both sides: the adapter window `liveMoveAnimationDuration` case 232 was 140 (the source body through its final row) while the ROM script holds 14 more rows (`gAnimScriptActive` 157 = idle 4 + 154 - 1), so the hit SE / next command came 14 early. Fixed at the source: `case 232: return 154`. Lab, foe: SE 13 215 vs ROM 229 (-14) and SE 16 374 vs 389 (-15) -> exact (0 / 0), next command (hit-animation) exact; player lab: SE 13 and the next command exact. Residuals: the body's second SE 120 -2 (ROM gap 30, the table waits 28); the player lab's ROM StatUp SE 239 / SE 16 order (stat chain, out of scope).
+
+**2. Dig (t2k item 5), commit dbcc6a1c5.** Two differing commands, both found from the labs (player and foe agree):
+- *Charge turn* (`BattleScriptFirstChargingTurn`): the duration is already exact (the next print lands on the ROM's A1) but SE 175 x5 is +6 late (66 / 100 / 134 / 168 / 202 vs ROM 60 / 94 / 128 / 162 / 196, both labs): the ROM's used-print release to `gAnimScriptActive` is 4 rows (R -> A0 = 4), the generic sound clock assumes 10. New sound-only timing field `soundAgeLeadFrames` (`BattleMoveAnimationTiming`, read by `liveMoveSourceAge`, never the duration): Dig charge turn 6. -> exact x5 on both labs.
+- *Attack turn* (a locked continuation, no move menu): the engine's first command is the used print at the press, the ROM runs EffectSemiInvulnerable -> SecondTurnSemiInvulnerable -> TryHit -> HitFromAtkString first (press 1043 -> `printstring` row 1060 = press + 6 + u, u = 11 = the kernel `instructionExecution` of the print). The print's message `leadFrames` is now 17 (6 + 11) for a Scene ON Dig `BattleScript_HitFromAtkString` USEDMOVE. Player lab SE 141 570 vs 585 (-15), SE 13 607 vs 623 (-16), (SE 16 783 not measured before) -> SE 141 +2, SE 13 +1, SE 16 783 exact; foe lab SE 141 1105 vs 1121 (-16), SE 13 1142 vs 1159 (-17), SE 16 1301 vs 1319 (-18) -> +1 / 0 / -1 (hp command 1194 vs ROM 1193, +1). 16 rows put SE 141 exact but SE 13 -1 / SE 16 -2 / hp exact (sum 3 vs 2 at 17): 17 is the ROM-derived value.
+- The t2k "attack-turn tails +9 / +11" are not Dig's tail: in `.integration/evidence/t2k` the +9 rows are the confusion status-animation SE 176 (SE_M_DIZZY_PUNCH) and the +11 are SE 175 of a charge turn that follows the Sandstorm + confusion chain in s8108 decision 11 (a carried offset: the chain's own SE 176 is +2 there); the clean Dig attack-turn rows were -15 / -23 / -24 (SE 141, seeds 3738 / 6), the engine-early print above. Residual: player-lab SE 141 +2 / SE 13 +1 (foe +1 / 0); the player lab's send-in SE 15 after the faint is -10 (faint chain, out of scope).
+
+**3. Rest (t2k item 7), commit 732ef62a7.**
+- *Body SE*: SE 197 (SE_M_SNORE) 1198 vs ROM 1200 (-2; T2: 17 windows, all -2): the clock's 7-row calibration meets Rest's script lead 9, so `soundAgeLeadFrames` -2 for move 156 -> exact (player 1200, foe 1208).
+- *Next action*: the foe's Seismic Toss after a successful Rest was -10 on every SE (238 1487 vs 1497, 214 1607 / 1617, 131 1625 / 1635, 13 1678 / 1688). Cause: the engine's Rest tail ends exactly on the ROM's MoveEnd row (1416 both) but the next action's used print is `EffectLevelDamage+0x9` ex2 at 1426 (MoveEnd + 10; the failed-Rest turn hides the same 10 rows in a misplaced 11-row pause), so the heal print (`BattleScript_PresentHealTarget`, move 156) takes `holdFrames` + 10 -> next action exact on both labs (238 1497 / 1505, 214, 131, 13 all +0).
+- *Not landed (named):* (a) the asleep turn (`bdt1-rest3-*` labs): SLP status-animation SE 197 2167 vs ROM 2164 (+3, the shared PRE_MOVE_STATUS_ANIMATION_TIMING hold 67 vs the ROM's 64 + a 1-2 row late head) and the next action -7 (the same MoveEnd + 10 rows, 2259 -> 2269): this is the generic asleep script (`BattleScript_MoveUsedIsAsleep`), not Rest's body, shared with every sleeper; the T2 "status-animation +9" (seed 1415 SE 212 x3 at 17 spacing, six windows) is SE_M_CHARM (Attract's infatuation animation) and precedes Rest's SE in its windows, so it is not a Rest row either; (b) the T2 -27 on s6079 decision 7 is a carried offset (the same decision's other rows).
+
+**T2 rescore** (`rescoreAll.sh` over `.integration/evidence/t2n` into `bdt1/t2-{base,after}`, base = 9e5a45dbc, after = 732ef62a7; `soundScoreboard.py`): Scene ON TOTAL mass 23,423 -> 21,692, exact 2,476 -> 2,601, offset 3,401 -> 3,276, missing 0 / extra 0 (both). Scene OFF 667 exact / 466 offset / mass 2,873 unchanged, missing 0 / extra 0, all 192 OFF result files byte-identical (`cmp`).
+
+**Census 0..199 both scenes** (`lsd194Census.sh`, `LSD194_SHARDS="0 1"`, JOBS 2, SPLIT 2, 9e5a45dbc vs 732ef62a7): `rst197CensusDelta.py --digest` ON eventsDigest + error identical 200 / 200 (54 battles have changed presentation commands, 0 type-sequence changes), OFF identical 200 / 200 and byte-identical shards 2 / 2. T1 (`soundCensusDelta.py --t1`) ON identical on both arms: exact 54,127, known-offset 35 (Substitute -7 x33, Transform -5 x2), missing 0, extra 0, unclassified 13. No gameplay / RNG change.
+
+**Tests.** `npm run typecheck` exit 0; `npm run test:gate` 360 files / 2,835 tests green; `npm run build` exit 0; the 256 files that import `battleResolutionPresentation` / `liveMoveAnimation` plus `tests/aud2*.test.ts` and `tests/randomRoundSoak*.test.ts` (grep -l, three batches): 255 files green, 1 red: `tests/playableAnimationIntegration.test.ts` "renders both opponent damaging and no-hit moves ..." (Shadow Punch 325 / 109 ages, 274 vs 266 rows) - red on the base 9e5a45dbc too (checked by restoring the three `src/engine` files to the base), not touched by this step. No pin was re-pinned and none moved away from the ROM. The full `npm test` was not run (the assignment forbids it).
+
+**Residuals / next.** Metal Claw SE 120 #2 -2; Dig attack turn player +2 / +1, foe +1 / -1; the asleep-turn hold (+3) and the MoveEnd + 10 gap after the sleep animation (-7), shared by every sleeper (a status-script step, not a body); SE 212 Attract infatuation +9 (its own step); the Dig charge-turn sound lead and Rest's -2 are per-move constants (Fly / Bounce / Solar Beam charge turns were not measured here).
+
+## gsp3 (2026-11-21): general status animations that run with no move: poison / burn tick, asleep turn, infatuation (Scene ON presentation / sound timing; S11, ISSUES #219)
+
+Scene ON sound / presentation timing only; no gameplay or RNG change. Scene OFF changed only where the OFF ROM shows the same rows (checked with OFF labs). Method: `tools/integration/gsp3MakeLabs.py` builds 8 status labs (`tools/battle-lab/gsp3-{toxic,willowisp,sleeppowder,attract}-{player,foe}-on.json`; unequal levels, Seismic Toss for the other side); ROM rows / SEs through `bdt1Run.sh` (`hcr3mProbe.py` + `soundEventProbe.py`), engine through `b4mEngine.ts`, aligned and printed (ENG - ROM per SE and per script label) by `tools/integration/gsp3Cmp.py`. OFF labs are the same files with `battle-scene-off` (`gsp3-{toxic,willowisp}-player-off`, `bdt1-rest3-player-off`, `gsp3-attract-foe-off`), ROM via `run-mgba-probe.py ... hcr3mProbe.py --profile off`. `gsp3-sleeppowder-player-on` diverged structurally between ROM and engine (RNG / turn structure), so the asleep turn is measured on the bdt1 `rest3` labs.
+
+**1. Poison / burn tick, commit dc9d7decc.** The b4l / s165 premise (a missing ~7-row lead) was wrong; two things were off, both found from the labs: the tick print's hold (`BattleScript_PoisonTurnDmg` 3 -> 2 rows, `BattleScript_BurnTurnDmg` 0 -> 3 rows, `END_TURN_STATUS_DAMAGE_LEAD_ROWS`, both scenes), and the SE age (a tick animation outside a B4 body used the generic Poison / Burn age 7; the ROM plays it at the launch row, age 0, selected by the command's `sourceLabel` `BattleScript_DoStatusTurnDmg`). Labs, ENG - ROM: toxic-player SE 148 +8 -> +0 on turns 2 / 3; willowisp-player SE 144 +4 -> +0 on turns 2 / 3; the foe labs agree. OFF: the ROM DoTurnDmg rows 2504 / 2478 now equal the engine's hp command.
+
+**2. Asleep turn, commit 4839373ba.** The first action after the asleep print is no longer walked through the confirm handoff's before-turn -> action-dispatch stages (`turnOpensWithAsleepPrint`): the print lands on the attackcanceler row + 1, and the action transition after the sleep animation is anchored on the status animation (`actionTransitionPauseFrames` takes a `status-animation` as the anchor). `bdt1-rest3-player-on`: SE 197 +3 -> +0; the next action's SEs (238 / 214 / 131 / 13) -7 -> +0; the print row 2075 -> 2072 (ROM 2072). OFF (`bdt1-rest3-player-off`): print 2072 (ROM 2072).
+
+**3. Infatuation, commit 0cdc2e4dc.** `STRINGID_PKMNINLOVE` is an action-transition print (`IN_LOVE_TRANSITION_ROWS` -2), and the INFATUATION (like SLP / CONFUSION) status animation plays its SE at age 0. `gsp3-attract-foe-on`: SE 212 at 697 / 714 / 731 -1 -> +0 (+9 was the pre-change reading); `gsp3-attract-foe-off`: print 188 / 1202 (ROM 188 / 1202, was 180 / 1194).
+
+**Labs summary (ENG - ROM, frames, before -> after).** SE 148 +8 -> 0, SE 144 +4 -> 0, SE 197 +3 -> 0, next action -7 -> 0, SE 212 -1 (+9 intermediate) -> 0.
+
+**T2 rescore** (`rescoreAll.sh` over `.integration/evidence/t2n`, `soundScoreboard.py`, base 22c58649b, after 0cdc2e4dc; evidence `.integration/evidence/gsp3/t2-{base,after}`, `score-{base,after}.json`): Scene ON (25 seeds) TOTAL exact 2,667 -> 2,701, offset 3,210 -> 3,176, mass 21,104 -> 20,063, missing 0 / extra 0 (both). Per family mass: move-animation SE 16,256 -> 15,443, stat-change 390 -> 376, cry 1,015 -> 977, battle-controller 3,391 -> 3,215, bgm 52 -> 52. Scene OFF (24 seeds) exact 667 -> 669, offset 466 -> 464, mass 2,767 -> 2,703, missing 0 / extra 0.
+
+**Census 0..199 both scenes** (`lsd194Census.sh`, `LSD194_SHARDS="0 1"`, JOBS 2, SPLIT 2, 22c58649b vs 0cdc2e4dc; arms in `.integration/evidence/gsp3/census`): `rst197CensusDelta.py --digest` eventsDigest + error identical 200 / 200 on ON and on OFF (no gameplay / RNG change). Command timing: ON 33 battles changed (39 with a command-type-sequence change), OFF 40 battles changed (15 with a type-sequence change); every type-sequence change is one inserted Scene-ON-style `move-animation` action-transition pause before a used print (ON 107 after a status-animation, 44 after a message, 8 after an hp command; OFF 45 after a message, 8 after an hp command: the infatuation / asleep transitions the OFF labs show in the ROM). T1 (`soundCensusDelta.py --t1`, ON) identical on both arms: exact 54,127, known-offset 35 (Substitute -7 x33, Transform -5 x2), missing 0, extra 0, unclassified 13; the "action-transition pause" command count 2,913 -> 3,072 (+159).
+
+**Tests.** `npm run typecheck` exit 0; `npm run test:gate` 360 files / 2,835 tests green; `npm run build` exit 0; every `tests/` file importing `battleResolutionPresentation` / `moveAnimSounds`, `tests/aud2*`, `tests/sta*`, `tests/animation/live*`, `tests/randomRoundSoak*` (312 files): all green except the 2 `tests/animation/liveAnchorMoveAdapters.test.ts` Metal Claw failures ("expected 154 to be 140"), which are red at the base 22c58649b too (bdt1's Metal Claw 140 -> 154, not re-pinned; verified by reverting `src` and re-running). There are no `tests/gsp*.test.ts` files. Re-pins (toward the ROM, ROM frame in the commit messages): `tests/randomRoundSoak.test.ts` seed 0 "full" frames 68529 / turn 21 and seed 2 frames 58583 (trajectory re-pins, the sleeping / in-love turns of those seeds moved to the ROM rows).
+
+**Residuals.** (a) The turn-1 tick SEs carry a constant -4 from the previous action: the foe's Seismic Toss hit SEs after a Toxic / Will-O-Wisp body are -4 (the status-body tail, b4l). (b) The Toxic / Will-O-Wisp / Attract move-body SEs (227 / 148) are about -3 (body, not touched). (c) The "immobilized by love" print after the infatuation animation is 1 row early (ON ROM label 792 vs engine 791, OFF 1305 vs 1304). (d) OFF asleep turn: the first action after the sleep animation is about +4 late in OFF (print row exact). (e) `gsp3-attract-player-on` ROM / engine RNG diverge (the aligned SEs 697 / 2325 are +0).
+
+## fch1 (2026-11-21): the AI faint-replacement choice costs 0..4 script frames (term 1 landed; terms 2 and 3 measured, not landed)
+
+Commit `966063f8d` on top of `d2c0f88f5` (src: `battleAiSwitchInto.ts`, `battleScriptOpenPartyScreenOpcode.ts`, `midBattleOpponentPartySummaryTiming.ts`, `battleResolutionPresentation.ts`; tools: `appTrace.ts`, `fch1LabEngine.ts`). Presentation timing only: the choice itself (which mon) is untouched, the work model only counts what the real scorer port reads.
+
+**Term 1 (landed). ROM rule.** TryChoose -> SendOut is 6 script frames plus the CPU time `GetMostSuitableMonToSwitchInto` (`battle_ai_switch_items.c:629`) burns inside one script frame. The ROM extra, probed on 32 (reads, frames) pairs of the Scene OFF labs (`.integration/evidence/fch1/rom-choice.json`), is 0..4 (ROM range 6..10) and tracks the scorer's move reads: `extra = round(0.16 * moveReads - 0.3)`, floored at 0 (21 / 32 exact, sum of |error| 13, max |error| 2; pinned by `tests/fch1AiChoiceTiming.test.ts`). A pass-1 hit on the first read (a super-effective move on the first candidate) costs 0, the damage fallback pass (Splash forces it) costs +2. The extra is the lead of the opponent party-status-summary draw (`opponentPartySummaryDrawTiming(afterFaint, voluntarySwitch, choiceExtraFrames)`: lead 23 + extra).
+
+ROM vs engine, SE 16 / SE 114 / SE 15 (ROM frames; before -> after is engine minus ROM), six fsc2m Scene OFF labs on the ROM probe's button schedule:
+
+| lab | ROM 16 / 114 / 15 | before | after |
+|---|---|---|---|
+| ai-nose-normal | 252 / 315 / 470 | 0, -2, -12 | **0, 0, -10** |
+| ai-nose-mixed | 252 / 315 / 471 | 0, -2, -12 | **0, 0, -10** |
+| ai-four-moves | 252 / 315 / 471 | 0, -2, -12 | **0, 0, -10** |
+| ai-se-first | 252 / 314 / 470 | 0, -1, -11 | **0, 0, -10** |
+| ai-same-se | 252 / 313 / 468 | 0, 0, -10 | **0, 0, -10** |
+| n7-rattata | 252 / 313 / 468 | 0, 0, -10 | **0, 0, -10** |
+
+SE 114 is ROM-exact on all six (the SE 15 -10 is the same in every lab and unchanged by this term: a separate offset after the send-out, not part of the choice). The T2 seeds move with it (SE 16 -> 114 interval, ROM / engine before -> after): 165 res18 70 / 66 -> 68, 1914 res11 83 / 81 -> 83, 2741 res9 82 / 81 -> 82, 3158 res5 76 / 74 -> 76, 5569 res18 72 / 71 -> 72, 2230 res11 79 / 76 -> 78. Rows with a ready-time cliff (term 2) get 2 later, as expected (1028 res10 83 -> 85, 3738 res38 81 -> 83).
+
+T2 (`rescoreAll.sh` over `.integration/evidence/t2n`, `.integration/evidence/fch1/t2-{base,after}`, `soundScoreboard.py`; 0 missing / 0 extra everywhere):
+
+| scene | exact before | exact after | offset | mass before | mass after |
+|---|---|---|---|---|---|
+| ON (25 seeds) | 2,541 | **2,571** | 3,336 -> 3,306 | 22,835 | **22,721** (-0.5 %) |
+| OFF (24 seeds) | 667 | **695** | 466 -> 438 | 2,767 | **2,710** (-2.1 %) |
+
+Census (`lsd194Census.sh`, `d2c0f88f5` vs `966063f8d`, seeds 0..199, JOBS 6, SPLIT 2, `.integration/evidence/fch1/census`): eventsDigest + error identical 200 / 200 in both scenes, 0 type-sequence changes (commands changed in 148 / 200 battles per scene, timing only). T1 (`soundCensusDelta.py --t1`) identical to base: ON exact 54,127, known-offset 35 (Substitute -7 x 33, Transform -5 x 2), missing 0, extra 0, unclassified 13; OFF reads the same 35 Substitute / Transform rows as extra and 13 unclassified in both arms (no new row). The chosen mon is unchanged (digest identical).
+
+**Term 2 (drv1 ready-time cliff): measured, not landed.** The ROM message-ready is `SE16 + 2*steps + 4 + T + 1` (steps = 8 - floor(front-pic yOffset / 8); T = name chars + 12 for `Foe ` + `fainted!`; Rattata starts at 16, Mew / Abra 18, Blastoise / Feraligatr 20; A is accepted on the driver's 17-frame pulse). The engine matches this formula exactly in the labs for seven species (the n4 Abra, n9 Blastoise, n10 Feraligatr labs are copied into `tools/battle-lab/`; `tools/integration/fch1ReadySweep.ts` sweeps the species), so the foe-prefix typing length and the printer start are NOT the differing command: both agree with the ROM in the labs. In situ the engine is ready 1..3 frames later than the ROM. Measured by shifting the census driver's A press (temporary `FCH1_SHIFT`, reverted): the pulse is accepted only when shifted earlier by 3738 res38: 2, 1028 res10: 3, 319 res18: 1, 5063 res47: 2 (with the shift, 3738 collapses to 68 / ROM 66+2, 5063 to 69 / ROM 69, 1028 to 71 / ROM 70, 319 to 71 / ROM 70 + 1). The foe species and preceding messages differ per seed (Nidoking none, Venusaur ONEHITKO, Togetic CRITICALHIT), the segment-start `fieldArt` is not the cause (tested), and SE16 -> awaiting-message-dismiss start is 32..43 across the rows. The remaining candidate is the faint command's `leadFrames` (`faintScriptPreCryFrames`) or the message lead after the sink in the in-situ chain, which the labs (one fixed prefix) cannot show. Not found in the time box, so nothing landed; the four rows stay at +13..+17 (`fsc-a1.txt`: 1028 res10 +15, 3738 res38 +17, 5063 res47 +15, 319 res18 not in the printed set).
+
+**Term 3 (hcr3 item chain): not investigated.** No time was left in the 150-minute cap after terms 1 and 2 and the acceptance runs, so the ROM rule behind first-SE offset 19 (1914) vs 13 (2230) is still open exactly as hcr3 left it; the aud252 item-row pins stay red at +4 (moved away in hcr3, not touched here).
+
+**Tests / pins.** `tests/randomRoundSoak.test.ts` seed 21 `renderCalls` 3,043 -> 3,042 (re-pinned, fch1 comment line; frames pins unchanged). New `tests/fch1AiChoiceTiming.test.ts`: the cost-model pin (>= 21 / 32 exact, total |error| <= 13, max |error| <= 2) and the six lab SE 114 ROM frames (313 / 313 / 314 / 315 / 315 / 315). The trainer bench of `aud241bStage` now uses a Seismic Toss Rattata (Splash would force the damage fallback and add 2); that fixed obr251 / ais4 / aud242j. `tests/stc1*.test.ts` has 3 failures that are present at HEAD before this step (checked with `git stash`), not touched.
+
+PAPERCUT: `npm run typecheck` / `test:gate` queue behind other worktrees' `tsc` flock (`/tmp/pokebench-typecheck.lock`), ~10 min idle wait with no output, ~10.
+
+## stc2 (2026-11-21): hcr3's stat-next hp tail vs stc1's Scene OFF stat timing; Metal Claw test pin (presentation / sound timing only)
+
+Base fold-a 22c58649b had five red tests: three `stc1SceneOffStatChangeSe` rows (Icy Wind foe SE 214 vs ROM 210, Rock Tomb +6, Icy Wind player -4) and two `liveAnchorMoveAdapters` Metal Claw rows (140 -> 154). Gameplay, RNG and Scene ON presentation are untouched.
+
+**The ROM interval is scene-free.** ROM labs `stc1-icywind-foe`, `stc1-icywind-plr`, `stc1-rocktomb-foe` (Scene OFF = the committed labs, Scene ON = the same labs with `profile` battle-scene-on and a 700-frame tail), `hcr3mProbe.py` + `soundEventProbe.py lab`; hp row = the `HitFromAtkAnimation+0x8` exec, frames from the lab start:
+
+| lab (drop = hp change) | hp row | hp changes | StatDown+0x7 exec (`playanimation`) | stat SE | hp row -> exec | SE - exec |
+| --- | --- | --- | --- | --- | --- | --- |
+| icywind-foe OFF (105 -> 43, 62) | 136 | 200 | 206 | 210 | 70 = drop + 8 | 4 |
+| icywind-foe ON | 392 | 456 | 462 | 466 | 70 = drop + 8 | 4 |
+| icywind-plr OFF (105 -> 35, 70) | 132 | 204 | 210 | 214 | 78 = drop + 8 | 4 |
+| icywind-plr ON | 388 | 460 | 466 | 470 | 78 = drop + 8 | 4 |
+| rocktomb-foe OFF (105 -> 8, 97) | 137 | 236 | 242 | 246 | 105 = drop + 8 | 4 |
+| rocktomb-foe ON | 280 | 379 | 385 | 389 | 105 = drop + 8 | 4 |
+
+The bar is `drop + 2` rows, then 6 rows to the stat script's `playanimation`; the SE is that exec + 4. The engine's three labs do not roll the ROM's damage (RNG not synchronised in the lab stage: engine drops 67 / 67 / 104 vs ROM 62 / 70 / 97), so the old "exact" icywind-foe row (stc1) was the +5 damage difference cancelling the hcr3-less 5-row tail shortfall by coincidence; the player row (-8) and Rock Tomb (+2) were the same shortfall minus / plus their own damage difference. In the engine the stats-change command starts at hp (bar + 1) + tail + the 2-row `stat` command, and stc1's Scene OFF secondary age (shift 2, SE at command age 4) wants it ON the exec: tail 5. hcr3's tail 4 stays for Scene ON (ROM-exact on aud252 seed 1914 with Scene ON's own stat age; T2 ON is byte-identical).
+
+**Landed.** `HP_STAT_NEXT_TAIL_FRAMES_OFF = 5` (battleResolutionPresentation.ts; `HpLeadRows.sceneOff` = HITMARKER_NO_ANIMATIONS), Scene ON keeps `HP_STAT_NEXT_TAIL_FRAMES = 4`.
+
+| path | ROM | fold-a | stc2 |
+| --- | --- | --- | --- |
+| stc1 icywind-foe OFF, engine SE - ROM | engine drop - 62 = +5 | +4 | +5 |
+| stc1 icywind-plr OFF | engine drop - 70 = -3 | -4 | -3 |
+| stc1 rocktomb-foe OFF | engine drop - 97 = +7 | +6 | +7 |
+
+i.e. exactly the damage difference on every row (a 1-frame step each). `tests/stc1SceneOffStatChangeSe.test.ts`: the three secondary rows are now pinned as `SE - ROM frame == engine hp drop - ROM drop` (the engine drop is read from the presented hp command), the four move-caused rows stay exact (99 / 105 / 100 / 96). `tests/aud252LossBallOpen.test.ts` (Scene ON) is unchanged and green.
+
+**Metal Claw.** `tests/animation/liveAnchorMoveAdapters.test.ts`: `duration: 140 -> 154` (bdt1: the source body is 140 rows, the ROM script holds 14 more; the ages go through `iu120Ages(row.id, row.duration)`, so the ages follow). No src change.
+
+**T2** (`RESCORE_SCENES=off|on tools/audio/rescoreAll.sh OUT .integration/evidence/t2n`, `soundScoreboard.py`; `.integration/evidence/stc2/t2-{base,after}`; 0 missing / 0 extra everywhere). Scene OFF, 24 aligned seeds: exact 667 -> 670, offset 466 -> 463, mass 2,767 -> 2,761; stat-change SE exact 65 -> 68 / offset 40 -> 37 / mass 217 -> 214 (three -1 rows exact; tails 4 -> 5 beat 4 and 6: tail 6 left stat at 65 / 40); cry 480 -> 479, battle-controller 2,051 -> 2,049. Scene ON, 25 aligned seeds: totals, deltas and per-id deltas identical (2,667 exact / 3,210 offset / 21,104 mass).
+
+**Census** (`lsd194Census.sh`, seeds 0..199, `LSD194_SHARDS="0 1"`, 22c58649b vs HEAD, `rst197CensusDelta.py --digest`): Scene OFF eventsDigest + error identical 200 / 200, type-sequence changes 0, 145 battles identical / 55 changed (the only changed commands: the `hp` after a hit followed by `stat`, +1 frame); Scene ON identical 200 / 200, 0 changed, byte-identical shards 2 / 2.
+
+**Tests** (all foreground): the 311 files that import battleResolutionPresentation / `aud2*` / `stc1*` / `randomRoundSoak*` / `animation/live*` / `playableAnimation*` / `apx2*` 3,087 / 3,087 green with no trajectory pin moved (`randomRoundSoak*` unchanged: seed 1 frames, the #89 Baton Pass seed 8); `tests/aud252*` green; `npm run typecheck` ok; `npm run test:gate` 360 files / 2,835 tests; `npm run build` ok. Full `npm test` not run (assignment).
+
+**Residuals.** Scene ON's tail 4 vs the ROM law bar + 8: ON's command start is 1 row before the exec with its own stat age (not re-derived; ROM-exact on seed 1914). The T2 OFF stat rows still at -1 (12) / -3..-22 are not secondary-after-hit rows by this law (move-caused after-body and item chains; not measured here). Evidence (git-ignored): `.integration/evidence/stc2/` (`labs/` ROM rows + SEs for both scenes, `t2-base`, `t2-after`, `cen`).
+
+## t2k2 (2026-11-21): the remaining S11 sound-timing mass re-ranked on the current tree (measurement only; no `src/` / `tests/` change)
+
+**Method** as t2k (drv1 `--romdrive` rescore of all 25 ON + 24 OFF t2n seeds, `aud249Rescore.sh`, then `soundScoreboard.py OUT --per-seed --out OUT/score.json`; every row attributed with `t2Attribute.py`'s alignment + ROM `gCurrentMove` + the engine `--cmdtrace=1` commands). Disjoint "windows" own rows from one nonzero offset step to the next, so the item table sums exactly. Evidence (git-ignored): `.integration/evidence/t2k2/` (`t2/` sets + `score.json` + `scoreboard.txt`, `p/` ROM probes + `d-{on,off}` cmp dirs, `attr-{on,off}.json`, `final2.txt` = the item table, `agg.txt`, `shape2.txt`, `gain.txt`).
+
+### 1. Rescore (missing / extra 0 / 0 in both scenes)
+
+| family (mass / exact) | OFF t2k | OFF now | ON t2k | ON now |
+| --- | --- | --- | --- | --- |
+| move-animation SE | 0 / 0 | 0 / 0 | 19,810 / 2,005 | 15,401 / 2,247 |
+| stat-change SE | 403 / 2 | 206 / 68 | 410 / 27 | 377 / 31 |
+| cry | 517 / 97 | 455 / 107 | 1,227 / 31 | 953 / 69 |
+| battle-controller SE | 2,225 / 500 | 1,960 / 524 | 4,231 / 301 | 3,166 / 382 |
+| bgm | 19 / 1 | 19 / 1 | 69 / 2 | 52 / 2 |
+| TOTAL | 3,164 / 600 | **2,640 / 700** | 25,747 / 2,366 | **19,949 / 2,731** |
+
+ON -5,798 mass (-22.5%), +365 exact; OFF -524 (-16.6%), +100 exact. The stc2 section's own last numbers were ON 21,104 / 2,667 and OFF 2,761 / 670 (its base); what landed since (hcr3, bdt1, gsp3, fch1) is -1,155 ON / -121 OFF more. 0 missing / 0 extra, so no new finding on row counts.
+
+### 2. Attribution (row mass; classes sum to TOTAL)
+
+| class | ON rows / mass / exact | OFF rows / mass / exact |
+| --- | --- | --- |
+| body (move running at the row), excl. B4 | ~3,790 / 8,927 / ~2,185 | n/a (no body rows in OFF) |
+| B4 bodies (reported separately) | 111 / 298 / 7 | n/a |
+| gen (gCurrentMove 0: status / general animations) | 912 / 6,176 / 32 | n/a |
+| controller hit SE 12 / 13 / 14 | 475 / 1,797 / 284 | 548 / 1,215 / 338 |
+| controller faint / send-in 15 / 16 / 114 | 283 / 1,369 / 98 | 244 / 745 / 152 |
+| cry | 202 / 953 / 69 | 192 / 455 / 107 |
+| stat | 101 / 377 / 31 | 105 / 206 / 66 |
+| bgm | 5 / 52 / 2 | 4 / 19 / 1 |
+
+**Shape** (window = seed x segment x cause), ON mass: body const 5,168 / one-off 2,248 / varies 1,514; gen const 4,613 / one-off 1,402 / varies 161; ctl-hit const 700 / one-off 899 / varies 198; ctl-chain const 807 / one-off 562; cry const 628 / one-off 325; stat const 337. OFF: ctl-hit const 812 / one-off 294 / varies 109; ctl-chain const 637 / one-off 108; cry const 391 / one-off 64; stat const 184 / one-off 22. Constant offsets still dominate (a lead is paid once per row inherited), but the t2k gen term is now ~6.2k, not 6.8k, and the gen class is the largest non-body bucket. The gen causes are, ON: gen:152 1,533 + 228 / 102 1,022 (the held-item group, one chain), gen:148 1,362, gen:142 944, gen:219 262, 242 / 127 ~436.
+
+### 3. Ranked top 8 (rows assigned disjointly; items 1-8 + the lower lines + remainder = TOTAL)
+
+Breadth is t2k's census (not re-run; command counts per 1,000 battles: general-animation 7,506 in 864 battles, faint 4,332, hit-animation 18,646, Earthquake / Struggle are rare, <1% of battles).
+
+| rank | item | scenes | T2 mass now (ON / OFF) | breadth | direction | cost / risk | lands in | ROM window |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 | Held-item effect group (Leftovers / berry heal gen:152 -> 228 -> 102): first SE ~21 frames late | ON | 2,360 / 0 (440 rows, 10 seeds, 88 windows; 5 exact) | general-animation 7,506 cmds / 864 battles (held items a subset) | pull the HELD_ITEM_EFFECT general-animation SE age from 23 to 8 after the cmd start (cmd starts 6 after the ROM exec), so the group's inherited offset goes away | low-medium: one lead + one age; both constants exist (`HELD_ITEM_EFFECT_RESTART_LEAD_FRAMES` 15 / `CONTINUE_LEAD_FRAMES` 9), 10 seeds to re-verify | `src/engine/moveAnimSounds.ts` `emitGeneralAnimSounds` (HELD_ITEM_EFFECT age) + `battleResolutionPresentation.ts` general-animation lead | s2230 decision 6 (ROM 8089 / eng 8030): `ItemHealHP_Ret+0x7` ex2 at 306, SE 152 at 314; engine cmd 2.4 at 312, SE 152 at 335 |
+| 2 | Other general animations after a body (gen:142 / 180 / 202 / 144, 242, 127 ...): the command starts ~25 short | ON | 1,713 / 0 (254 rows, 11 seeds, 47 windows) | as above | lengthen the interval between the previous body's last command and the general-animation command by the ROM's `EffectRestoreHp` -> animation gap (Recover -25 / Soft-Boiled -10 .. -17) | medium: per-previous-body tails (Recover, Soft-Boiled) | `battleResolutionPresentationRender.ts` post-body tail tables + `moveAnimSounds.ts` general-animation start | s6912 decision 5 (ROM 3450 / eng 3446): Recover `EffectRestoreHp+0x2` ex1 at 244; engine `move-animation` cmd 0.8 for 105 at 266 is where the -25 starts |
+| 3 | Faint -> party-summary / switch chain (SE 114 / 15, cry): chain lead 23-25 vs ROM ~2 on the same-turn faint, plus ball-open timing | ON + OFF | 926 / 516 (114 rows ON, 88 rows OFF; 24 / 22 seeds, 52 + 45 windows) | faint 4,332 cmds / 1,000 battles: the widest breadth of any item | cut the `party-summary` cmd lead (23 + extra) to the ROM's SE at script exec + 0 for the after-faint, no-choice case; the OFF side has the same 23 | medium: `opponentPartySummaryDrawTiming(afterFaint, voluntarySwitch, choiceExtraFrames)` has 3 callers; fch1 touched only the extra term; re-run the OFF ball-open (SE 15) rows after | `src/engine/battleResolutionPresentation.ts` `opponentPartySummaryDrawTiming` / the party-summary segment builder | s2 OFF decision 6 (ROM 3431 / eng 3249): `FaintedMonSendOutNew+0x2` ex2 at 502 with SE 114 at 502; engine party-summary cmd 0.13 (lead=25) at 500, SE 114 at 525 |
+| 4 | gen:148 poison / status tick, first row | ON | 1,354 / 0 (110 rows, 3 seeds, 18 windows; 0 exact) | general-animation: 3 seeds | the engine tick SE is 25-31 frames early; unprobed beyond t2k's note | medium: three seeds, gsp3 closed the burn / poison hold but not this animation | `moveAnimSounds.ts` `emitGeneralAnimSounds` status-tick arm | s165 decision 11 (seg23) rf 7437 (-31 x 6); s499 decision 13 |
+| 5 | ON single windows >= 20 (Aerial Ace -50, Confusion -48, Supersonic -34, Psychic +24, Rock Slide -9 x 20, ...) | ON | 1,287 / 0 (130 rows, 12 seeds, 38 windows) | per move, not general | each its own one-off; chase only if a body recurs across seeds (Supersonic / Safeguard share s5569 seg25, -34) | high: composite, no common cause | per body, `battleResolutionPresentationRender.ts` | s5569 decision 12 (seg25) rf 6516 (-34 x 12 rows); s97 decision 11 (seg23) rf 11037 (+24 / +25 x 8) |
+| 6 | Earthquake hit-all: ~11 rows after the body are not presented, the next mover starts 10 frames early | ON + OFF | 957 / 140 (91 + 13 rows, 7 / 6 seeds, 13 + 11 windows; 0 exact) | EARTHQUAKE is one move, rare in battles but appears in 7 of 25 seeds | lengthen the hit-all segment tail by 9-15 frames (`cmd 0.4 -> next` after the SE 13) | **low**: one move, a clean step (-9 .. -15), cause confirmed in the ROM; the clearest single cause in this list | `src/engine/battleResolutionPresentationRender.ts` hit-all body tail (Earthquake / Surf-style hit-all) | s97 decision 14 (ROM 14519 / eng 14228): ROM `DoHitAllWithUndergroundBonus+0xc` ex0 at 260, `+0x10` ex1 at 263; engine hit-animation cmd 0.2 at 263, hp cmd 0.3 at 298; the body SE 234 at 53 matches |
+| 7 | Drill Peck s1914 seg21: one window -66 x 9 rows | ON | 660 / 0 (10 rows, 1 seed) | 1 seed | unknown: a one-off of the t2k 594 window; probe first | unknown: single seed | to find (`probe` s1914 decision 10) | s1914 decision 10 (seg21) rf 7758, -66 |
+| 8 | Struggle hit SE / body | ON + OFF | 276 / 305 (61 + 51 rows, 3 / 4 seeds, 18 + 31 windows) | Struggle only when out of PP | Struggle's recoil + body: -3 median | medium: both scenes, 31 OFF windows | `battleResolutionPresentation.ts` Struggle presentation | s7295 OFF decision 8; ON s499 |
+| | **Items 1-8** | | **9,533 / 961** | | | | | |
+| 9 | Ice Beam first-mover windows (below the cut) | ON | 545 / 0 | | | | | s830 decision 1; s2230 decision 20 (-21 x 11) |
+| 10 | OFF hit SE 13 @hit-animation (Double-Edge -7, Focus Punch -3) | OFF | 0 / 242 | | | | | s5063 decision 8; s7682 decision 2 |
+| 11 | weather gen:219 (s8108) | ON | 262 / 0 | | | | | s8108 |
+| 12 | faint SE 16 / cry (wtl1 overlaps) | ON + OFF | 668 / 186 | | | | | wtl1 in flight |
+| X | chg2 (in flight; not proposed) | ON + OFF | 1,001 / 247 | | | | | |
+| B | B4 bodies (being landed; reported separately) | ON | 298 / 0 | | | | | |
+| R | remainder | | 7,642 / 1,004 | | | | | |
+| | **TOTAL** | | **19,949 / 2,640** | | | | | |
+
+Sum-check: ON 2,360 + 1,713 + 926 + 1,354 + 1,287 + 957 + 660 + 276 (= 9,533) + 545 + 262 + 668 + 1,001 + 298 + 7,642 = 19,949; OFF 516 + 140 + 305 (= 961) + 242 + 186 + 247 + 1,004 = 2,640. The B4 mass is 295 in the body-shape table and 298 here (the item split by window); "T2 mass now" is row mass, not saving (the counterfactual gain of the step alone is 30-60% of it: `gain.txt`).
+
+### 4. The top three ROM windows (hcr3mProbe + hcr3mCmp)
+
+1. **Held-item group, s2230 decision 6.** ROM: `BattleScript_ItemHealHP_Ret+0x7` ex2 at 306, SE 152 at 314 / 346 / 378, SE 228 at 410. Engine: general-animation **cmd 2.4** (HELD_ITEM_EFFECT, min 229) at 312, SE 152 at 335 / 367 / 399. The cmd starts 6 after the ROM exec (right) but the first SE comes 23 frames after the cmd start instead of 8, so every row of the chain is +21 and the offset is inherited by the 228 / 102 rows (2,360 across 10 seeds). Differing command: the general-animation cmd's SE age, not the command start.
+2. **General animation after a body, s6912 decision 5.** ROM `HitFromAtkAnimation+0xa` at 228 -> `MoveEnd` 234 -> `EffectRestoreHp+0x0` 242 (Recover, mv105). Engine: move-animation cmd 0.4 at 228, sprite-visibility 243 / 244, message cmd 0.7 at 245, **move-animation cmd 0.8 for 105 at 266**; the engine's Recover animation SE row arrives ~25 frames before the ROM's (gen:180, med -25). The differing command is the move-animation / general-animation start after the message cmd 0.7: the ROM waits for the exec flag at `EffectRestoreHp+0x2`, the engine does not.
+3. **After-faint party summary, s2 OFF decision 6.** ROM: `FaintedMonSendOutNew+0x2` ex2 at 502 with SE 114 at 502, SE 15 later. Engine: **`party-summary` cmd 0.13, lead=25, min=125** at 500, SE 114 at 525 = +23. Differing command: `party-summary`'s lead (23 + extra) against the ROM's 2. The same chain on ON (s2230 dec 6 after the held-item chain, s97 dec 14 ball open at 429 / 433) shows the SE 15 only -4.
+
+### 5. What not to chase
+
+- chg2's bodies and wtl1's faint prints: excluded as instructed (X 1,001 / 247; item 12 668 / 186 overlaps wtl1).
+- The 7,642 / 1,004 remainder is inherited drift plus ~650 / 130 windows of < 20 frames each; re-rank after items 1-3, 6.
+- B4 bodies: 298 mass, being landed; no proposal here.
+
+Not applied: no `src/` or `tests/` change; PROGRESS / ISSUES / ROADMAP untouched.
+
+## chg2 (2026-11-21): two-turn move family, Scene ON sound / print timing; Aerial Ace s3738 named and landed
+
+Base `ad09bdf9d`. Scope: ISSUES #219, S11 frame alignment; no gameplay / RNG change (census below). Item 1: Fly 19, Bounce 340, Dive 291, Solar Beam 76, Razor Wind 13, Sky Attack 143 on both sides, Scene ON; item 2: Aerial Ace s3738 -39 / -79.
+
+**Labs.** `tools/integration/chg2MakeLabs.py` writes `tools/battle-lab/chg2-<move>-{player,opponent}-on.json` (the bdt1 Dig labs with move 91 replaced), `chg2Trace.py` the compare traces (`tools/compare/traces/chg2-<lab>.json`); ROM rows / SEs / engine commands through `tools/integration/bdt1Run.sh OUT FRAMES lab` (`ENGINE_ONLY=1 SPAN=0:0` re-measures the engine only). `b4mEngine.ts` gained `ENGINE_RNG_SEED` (the engine kernel RNG start value of a lab; the ROM lab keeps seed 1): Bounce player 5 and Sky Attack player 4 are the first seeds whose accuracy rolls agree with the ROM (at the default seed the engine's Bounce / Sky Attack missed and the attack turn had no SEs). Evidence (ignored): `.integration/evidence/chg2/{labs0,labs-base,t2-base,t2-after,census,s3738off}`.
+
+**Rule 1: charge-turn sound lead from the opener's kernel execution** (`chargeTurnSoundLead`, `8fff17edb`; bdt1's Dig +6 generalized). The generic sound clock assumes R -> A0 = 10 rows after the used print's release (Dig). On the ROM, R -> A0 = E - 6, where E is the kernel `instructionExecution` of the charge opener (`STRINGID_EMPTYSTRING3`, label `BattleScriptFirstChargingTurn`); the engine clock therefore moves by 16 - E rows (`CHARGE_TURN_SOUND_LEAD_BASE_ROWS = 16`). E on these labs: Dig 10, Fly 7, Bounce 10, Dive 9, Solar Beam 9, Razor Wind 6, Sky Attack 6; the value is read from the kernel event, not tabled. The command duration and the body pixels are untouched (a 3-row earlier Fly body was measured and made the pixels worse). Guard (`713d684c8`): when the opener continues an earlier script run (the preceding event has a lower execution count: the charger woke up / thawed first, s2230 Bounce E = 79) there is no lead; without the guard T2 ON lost SE 203 (missing 1).
+
+**Rule 2: locked second-turn used print waits press + 6 + u** (`twoTurnSecondPrintLead`, `b1d59791a`; bdt1's Dig constant 17 generalized to the ids 13 / 19 / 76 / 91 / 130 / 143 / 291 / 340 with STATUS2_MULTIPLETURNS, `BattleScript_HitFromAtkString` and `HitFromAccCheck`). ROM: print row = press + 6 + u, u = the print's kernel `instructionExecution` (Dig u = 11 -> 17, the old constant). A foe-charger's second turn needs the player's menu press (SE 5 at 1023 / 1043); a player-charger's second turn auto-continues with no press.
+
+**Dig rules hold** (item 1): the charge-turn R -> A0 lead (Dig E = 10, 0 change) and the attack-turn used print typed after the effect-script rows (17 = 6 + 11) both fall out of rules 1 / 2 unchanged; `bdt1-dig-player-on` identical before / after (175 x5 +0, 141 +2, 13 / 16 +1).
+
+**Labs, ENG - ROM per SE (frames), before -> after** (before = base `ad09bdf9d` source on the same ROM files):
+
+| Lab | Charge SEs | Attack-turn SEs |
+|---|---|---|
+| Fly foe / player | 158: +9 -> 0 / +9 -> 0 | foe 135 / 136: -16 -> +1, 13 / 16: -18 -> -1; player 135 / 136: -12 -> +5, 13 / 16: -14 -> +3 |
+| Dive foe / player | 162 / 233: +7 -> 0 / +7 -> 0 | foe 178 / 216: -16 -> +1, 13 / 16: -18 -> -1; player 178 / 216: -14 -> +3, 13 / 16: -16 -> +1 |
+| Solar Beam foe / player | 140: +7 -> 0 / +7 -> 0 | foe 201 / 13 / 16: -18 -> 0; player: -15 -> +3 |
+| Razor Wind foe / player | 132 / 133: +10 -> 0 / +10 -> 0 | foe 160 x3 / 136: -14 -> +1, 13 / 16: -15 -> 0; player 160 x3 / 136: -4 -> **+11**, 13 / 16: -5 -> **+10** |
+| Sky Attack foe / player (seed 4) | 239 x8: +10 -> 0 / +10 -> 0 | foe 238 / 141: -16 -> +1, 13 / 16: -20 -> -3; player 238 / 141: -11 -> +6, 13 / 16: -14 -> +3 |
+| Bounce foe / player (seed 5) | 203: +6 -> 0 / +6 -> 0 | foe: no attack-turn SEs in the ROM window; player 203: +6 -> 0, 193 / 141: -16 -> +2, 13: -18 -> 0 (the faint SE 16 +61 -> +79 is the faint chain, out of scope) |
+
+Every charge-turn SE is on the ROM frame (14 labs-sides, 0 residual). Foe-charger attack turns are within +-3 of the ROM (were -14 .. -20, the print the engine did not wait for). Player-charger attack turns carry +2 .. +6 (Dig +2 / +1; Razor Wind +10 / +11).
+
+**Not landed (measured, rejected).** A signed charge-turn duration adjustment E - 10 (the player-charger attack-turn residual equals the charge-turn body's error: Fly +5 -> +2, Dive +3 -> +2) moves the SEs of the other side's action between the two turns the wrong way on three moves (Razor Wind +1 -> -3, Sky Attack -4 -> -8, Solar Beam -6 -> -7), so the charge body's end error is per body (`liveMoveAnimation.ts` turn-0 windows: 19 43, 340 64, 76, 13 45, 143, 291), not an E rule. Left: (a) the other side's action SEs between the charge and the attack turn: Solar Beam -6, Razor Wind +1, Sky Attack -4, Bounce -17 (Bounce player 238 / 214 / 131 / 13 at 623 .. 814, ENG 606 .. 797), unchanged; (b) player-charger attack turn +2 .. +6 (the charge body's end), Razor Wind player +10 / +11 (before: -4 / -5; one lead for every move overshoots here: the base engine's Razor Wind player gap was already within 4); (c) Skull Bash not measured (0 Factory uses). Pixels: the Fly charge turn matches the ROM (S11 compare); the attack-turn pixels were not re-compared.
+
+**Item 2: Aerial Ace s3738 -39 / -79 is not an Aerial Ace interval.** Windows: Scene OFF decision 15 (ROM commit 6364, engine 6283) and decision 27 (ROM 11354, engine 11130), opened with `hcr3mProbe.py` / `hcr3mCmp.py` (OFF files copied as `-on`) and the engine `soundCensusRomReplay.ts --cmdtrace=1`. Both windows: the player's String Shot (move 184, `BattleScript_EffectStatDown`) against a foe whose Speed cannot fall, then the foe's Aerial Ace (SE 12). The can't-change path is `pause B_WAIT_TIME_SHORT; goto BattleScript_StatDownPrintString`. ROM: String Shot used print at row 12, "won't go lower" print at 73 (61 rows later); engine: message -> message 22 rows. Everything after is 38 .. 39 early: Aerial Ace used print ROM row 185 vs engine 147, SE 12 ROM 254 vs engine 215. The engine command whose interval differs is the used-print `message` command's hold (`holdFrames` via `sourcePauseUsedMoveHoldFrames`, off108): it looks back from the print for a `pause B_WAIT_TIME_SHORT`, stopped at the `goto`, and the `stat-stage-change` receipt ended its scan. `713d684c8`: that receipt is skipped and a print at `BattleScript_StatDownPrintString` is the pause path (hold = executions + 1 = 38, the Splash hold value). Result: SE 12 is on ROM frame 254 in both windows (the engine's decision-27 commit moved 11130 -> 11208, 2 x 39). It is a general rule for every stat change that cannot happen, in both scenes, not an Aerial Ace one.
+
+**T2** (`tools/audio/rescoreAll.sh`, 25 ON + 24 OFF t2n seeds, `soundScoreboard.py`; base = the base source file swapped in on the same ROM files): **ON TOTAL exact 2,701 -> 2,715, offset 3,176 -> 3,162, mass 20,063 -> 19,196 (-867), missing 0 / extra 0** (move-animation SE 15,443 -> 14,909, battle-controller 3,215 -> 2,941, cry 977 -> 918); **OFF exact 669 -> 671, offset 464 -> 462, mass 2,703 -> 2,547 (-156), missing 0 / extra 0** (battle-controller 1,999 -> 1,882, cry 474 -> 435; the s3738 Aerial Ace -42 x 2 and the faint -44 x 2 rows are the stat-print interval above). A first "after" ON run had missing 1 (s2230 Bounce SE 203: the woke-up charge, E = 79); the guard in rule 1 removed it.
+
+**Census 0..199** (`lsd194Census.sh`, `LSD194_SHARDS="0 1"`, `ad09bdf9d` vs `713d684c8`): `rst197CensusDelta.py --digest` eventsDigest + error identical 200 / 200 on ON (37 battles changed command timing, 0 type-sequence changes) and 200 / 200 on OFF (8 battles changed). No gameplay / RNG change. T1 (`soundCensusDelta.py --t1`, ON) identical on both arms: exact 54,127, known-offset 35, missing 0, extra 0, unclassified 13.
+
+**Tests.** `npm run typecheck` exit 0; `npm run test:gate` 360 files / 2,835 tests green; `npm run build` exit 0; the 346 `tests/` files importing `battleResolutionPresentation` / `liveMoveAnimation` plus `tests/aud2*`, `tests/chg*`, `tests/animation/live*`, `tests/randomRoundSoak*`: green except (i) the 2 `tests/animation/liveAnchorMoveAdapters.test.ts` Metal Claw failures (red at base, not mine; `tests/stc1SceneOffStatChangeSe.test.ts` was not in the set), and (ii) `tests/aud261MoveAnimSounds.test.ts` "aud261-razorwind-player" unleash offset (pin 4, now -11: moved away from the ROM, left red, the Razor Wind player residual above). Re-pins toward the ROM: `tests/aud242oMoveAnimSounds.test.ts` dive-player delta -7 -> 0 (ROM SE 162 / 233 at 51 / 109); `tests/aud261MoveAnimSounds.test.ts` Razor Wind charge offsets -10 -> 0 (ROM SE 42 / 83) and the opponent unleash 14 -> -1 (ROM SE 1104 / 1108 / 1112 / 1131). No `randomRoundSoak` pin moved.
+
+**Papercuts.** `hcr3mCmp.py` reads `<seed>-on.*` only (Scene OFF windows need the files copied under that name); `hcr3mProbe.py --from` must be below the decision's commit frame (the first run used 6560 > 6364 and the window had no ROM rows until the first change), ~10 min; `run-mgba-probe.py` refuses an existing output path.
+
+### chg3 (2026-11-21): the player-charger attack turn follows the ROM (Scene ON sound / print timing only)
+
+chg2 left the Razor Wind PLAYER unleash pin (`tests/aud261MoveAnimSounds.test.ts`) red (4 -> -11). chg3 labbed the player attack turn of all seven two-turn bodies (13 labs, engine vs the chg2 ROM captures; `chg2-{razorwind,skyattack,solarbeam,fly,dive,bounce}-{player,opponent}-on`, `bdt1-dig-player-on`; evidence `.integration/evidence/chg3/{before,exp6}`).
+
+**Two rules.** (1) A player-charger's second turn has no press: the locked unleash print waits the ROM's `6 + u` less `TWO_TURN_PLAYER_NO_PRESS_ROWS` = 10 (the engine's message command for a no-press player turn starts at turn-end + 22, the ROM's MoveEnd + 19 / 20, 3 - 4 rows after the effect-script row; with the press term's +7 the lead was uniformly ~10 rows long once the chain before it was exact). (2) After the charge print the ROM's chain to the next action is E - 2 rows longer than the presented one (E = the opener's `instructionExecution`: Sky 6, Fly 7, Solar 9, Dive 9, Dig 10, Bounce 10; the gap-print class, Razor Wind, already carries it before its glyph). The rows are carried (`chargeChainCarry`) to the next STRINGID_USEDMOVE print: onto its hold (after its glyph) when the other side acts, onto its lead when the charger itself does. A hold on the charge print or a lead on the foe's print moved the foe's used glyph +7 / +8 off `tests/chg161ChargeTurnPrint.test.ts`' off108 pins (exact 0 there); carrying it after the glyph keeps those pins at `[0, 4, 0]` and still lands the foe's SEs (the off108 probe and the bdt1 trace measure the foe print's glyph and command rows differently by about E - 2; the SE rows, which T2 scores, follow bdt1).
+
+**Lab table (player attack turn, ENG - ROM per SE; before -> after).**
+
+| Move | before | after |
+|---|---|---|
+| Razor Wind | +11 (13/16 +10) | +1 (13/16 0) |
+| Sky Attack (seed 4) | +6 (13/16 +3) | 0 (13/16 -3) |
+| Solar Beam | +3 | 0 |
+| Fly | +5 (13/16 +3) | 0 (13/16 -2) |
+| Dive | +3 (13/16 +1) | 0 (13/16 -2) |
+| Bounce (seed 5) | +2 | 0 (13 -2) |
+| Dig | +2 (13/16 +1) | 0 (13/16 -1) |
+
+The foe-acts-between SEs: Razor +1 -> +1, Sky -4 -> +1, Solar -6 -> +1, Bounce -17 -> -9; the opponent-charger labs' attack turns went +1 / 0 (Solar 0), 13/16 -1 .. -3. Aud261 pin: Razor Wind player `[-64, 4]` -> `[-64, -1]` (opponent `63, -1`).
+
+**Residuals.** Bounce's foe action between the turns is still -9; its faint SE 16 is +77 (a different cause, out of scope); Sky 13/16 -3; Skull Bash has no lab; the Sky player lab shows extra engine SEs after the ROM window ends (a probe-window artifact).
+
+**T2** (`rescoreAll.sh` over `.integration/evidence/t2n` into `.integration/evidence/chg3/t2-after`, `soundScoreboard.py`; base = chg2 after): **ON TOTAL exact 2,715 -> 2,727, offset 3,162 -> 3,150, mass 19,196 -> 19,125 (-71), missing 0 / extra 0**; OFF unchanged (671 exact, mass 2,547, 0 / 0).
+
+**Census 0..199** (`lsd194Census.sh`, `LSD194_SHARDS="0 1"`, JOBS 2, SPLIT 2, `26dbd479f` vs `ada6a6cba`): `rst197CensusDelta.py --digest` eventsDigest + error identical 200 / 200 on ON (40 battles changed command timing, 0 type-sequence changes) and 200 / 200 on OFF (0 changed). No gameplay / RNG change.
+
+**Tests.** `aud261MoveAnimSounds` (44) + `aud242oMoveAnimSounds` (4) green; the 281 files of `tests/chg*`, `tests/aud2*`, `tests/randomRoundSoak*` and every `tests/` file importing `battleResolutionPresentation` green except the two known-red `tests/animation/liveAnchorMoveAdapters.test.ts` cases (not from this change); `npm run typecheck` exit 0; `npm run test:gate` 360 files / 2,835 tests green; `npm run build` exit 0. `tests/chg161ChargeTurnPrint.test.ts` keeps its `[0, 4, 0]` pins. The one re-pin is Razor Wind's player unleash 4 -> -1 (toward the ROM). New lab `tools/battle-lab/chg3-solarbeam-tackle-player-on.json` (Solar Beam player vs a Tackle foe; ROM foe print row 258 vs the engine's 259 after the fix, 252 before).
+
+## hie5: held-item effect after a print-ended script, restore-HP body tails (t2k2 items 1 and 2)
+
+**Item 1 premise corrected.** The hie3 held-item SE clock (SE 152 at script frames 8 / 40 / 72, 228 at 104, 102 at 176) is exact: hie1-leftovers-on -1, hie1-sitrus-on / hie2-sitrus-opp-on 0, Double-Edge lab -1. t2k2's "SE age 23 vs 8" is the command's *start*: after a print-ended status script the engine started the held-item command 5-6 rows after the ROM. ROM: item SE = print end + T + 19 (T = script rows between the print's `waitmessage` and `MoveEnd`: Yawn 1, Curse 1, StatUpPrintString 1, DoRecoil 3); engine: print end + 25. New labs (`tools/integration/hie5MakeLabs.py`, foe Rattata + Leftovers vs Seismic Toss, trace A,18,A,1500): `hie5-{yawn,curse,detect,doubleedge,bubblebeam,swordsdance}-foe-on` (Detect has no heal; Bubble Beam diverges from the ROM by RNG, unused).
+
+**Rule** (`heldItemEffectAfterPrintLead`, Scene ON only; the shared `heldItemEffectExecutionsAndLead` that Scene OFF reads is untouched): a restart held-item event whose previous non-MoveEnd event is a print followed by `waitmessage` gets lead 9 + T (T from the kernel's instruction executions: MoveEnd - print - waitmessage frames - 2) instead of 15. Not per item.
+
+| Lab (foe Leftovers) | held-item SE ENG-ROM before -> after |
+|---|---|
+| hie5-yawn-foe-on | +5 / +6 -> 0 |
+| hie5-curse-foe-on | +6 -> +1 |
+| hie5-swordsdance-foe-on | +5 -> 0 |
+| hie5-doubleedge-foe-on (recoil, T = 3) | -1 -> -4 (mass 5 -> 20; the engine's recoil message ends ~3 rows early upstream, so the ROM-correct lead exposes it) |
+| hie1-leftovers-on, hie1-shellbell-on | -1 unchanged (mass 5) |
+| hie1-sitrus-on, hie2-sitrus-opp-on | 0 unchanged |
+| hie1-cheri-on (cure berry, status command) | -2 unchanged |
+
+Not fixed (reported): the held-item command after a status animation (+4 / +6), after a hit animation (mixed -9 .. +4), and after the faint send-in (cry / sprite-visibility, +21, three groups: faint chain, out of scope).
+
+**Item 2.** The Recover lab (aud242k-recover-player-on) shows the engine's body fine at its start (+2) but the `hp` command 23 rows before the ROM's `healthbarupdate` (EffectRestoreHp+0x16): the ROM's animation script stays active 186 rows from the +0xa exec, the engine's body ends on its last visible row (169). The sub-swap pins (`substituteSwapAttdollCells`) prove the 169-row body is ROM-right, so the durations stay and `HIE5_RESTORE_HP_BODY_TAIL_ROWS` (`battleResolutionPresentationRender.ts`) holds the last row: Recover 25, Soft-Boiled 10, Milk Drink 27, Moonlight 8. Labs, later SEs ENG-ROM before -> after: aud242k-recover-player-on -23 -> +2 (mass 100 -> 16), aud242r-softboiled-player-on -5 -> +5 (35 -> 35, the SE step now uniform), aud242r-moonlight-player-on -4 -> +4 (24 -> 24, uniform), aud261-milkdrink-player-on / -opponent-on -25 -> +2 (110 -> 18). Remaining uniform +2 / +5 / +4 / +2 is the front of the body (command start after the message), not touched. Morning Sun / Synthesis / Slack Off have no body duration case (no live body), so no tail; the Synthesis lab misses the ROM's SE 139 (unrelated).
+
+**T2** (`RESCORE_SCENES=on|off tools/audio/rescoreAll.sh OUT .integration/evidence/t2n`, `soundScoreboard.py`; `.integration/evidence/hie5/t2-{base,after,after2}`; 0 missing / 0 extra everywhere; base = c440fdf4b, after = item 1, after2 = items 1 + 2): Scene ON TOTAL exact / mass 2,731 / 19,949 -> 2,801 / 19,628 (item 1) -> 2,811 / 19,358 (items 1 + 2); move-animation SE 15,401 -> 14,781, stat-change 377 -> 381, cry 953 -> 958, battle-controller 3,166 -> 3,186 (the held-item and recover rows moved other families' attributed windows by a few frames). Scene OFF 700 exact / 2,640 mass unchanged. The 1,713 mass t2k2 booked for item 2 did not reproduce on the labs beyond the 270 above (its rows are mostly the +2 / +5 front and per-seed print-chain offsets).
+
+**Census** (`lsd194Census.sh`, seeds 0..199 both scenes, `LSD194_SHARDS="0 1"`, JOBS 2, SPLIT 2, c440fdf4b vs HEAD; `.integration/evidence/hie5/census`): `rst197CensusDelta.py --digest` eventsDigest + error identical 200 / 200 on ON and OFF (no gameplay / RNG change); ON 129 battles identical / 71 changed commands (timing only, type-sequence changes 0), OFF 200 / 0 byte-identical. `soundCensusDelta.py --t1`: ON exact 54,127 both arms, missing 0 / extra 0; OFF extra 35 (Substitute 33, Transform 2) identical in both arms.
+
+**Tests.** typecheck, `test:gate` (360 files), every `tests/` importer of `battleResolutionPresentation` / `liveMoveAnimation`, aud2* / hie* / lse* / animation live* / randomRoundSoak*, `npm run build` green. No pin moved for item 1. Item 2 moved only the `iu120Rows.ts` mirror of `LIVE_MOVE_LEADLESS_TAIL_ROWS` (the held-row ages of the Milk Drink / Moonlight ordinary-route pins, ROM: the 25 / 10 / 27 / 8 rows above); no trajectory pin was re-pinned.
+
+## eqk1: Earthquake hit-all tail, forced Struggle, s1914 Drill Peck window (2026-11-21)
+
+Main/ts lane, Battle Scene OFF oracle; presentation timing only, no gameplay / RNG change. Labs: `tools/integration/eqk1Labs.py` writes `tools/battle-lab/eqk1-*.json` (Earthquake / Magnitude / Explosion / Selfdestruct x player / foe = 8, plus `eqk1-struggle`, `eqk1-eq-imm`, `eqk1-tackle-imm`); `tools/integration/labCompare.sh --scene both`. Evidence `.integration/evidence/eqk1/` (git-ignored).
+
+### Causes landed (all `battleResolutionPresentation.ts`)
+
+1. **Hit-all tail (item 1).** The next mover's action transition returned null for the hit-all loop's `printstring STRINGID_EMPTYSTRING3` box (`BattleScript_DoHitAllWithUndergroundBonus`), so the next used-move box / SE started 8 frames early in both scenes. The box now anchors the transition at the loop's last execution (e1): `P = e1 - E - 1 + 6 + u - presented` with `E = e1`, i.e. `P = 5 + u` (ROM eq-p / eq-imm: next mover 8 rows after the box; 9 after a no-effect hit). Earthquake player: ON 56 -> 0, OFF 16 -> 0.
+2. **No-effect damaging move, Scene ON (item 3 cause).** `Cmd_attackanimation`'s `MOVE_RESULT_NO_EFFECT` branch pushes `BattleScript_Pausex20` in both scenes. Scene OFF already presents it (`SCENE_OFF_ATTACK_PAUSE`); Scene ON emits no kernel event, so its ~53 rows were missing before "It doesn't affect". `sourcePauseUsedMoveHoldFrames` now holds the used-move box through them when a `RESULTMESSAGE` `STRINGID_ITDOESNTAFFECT` follows an `attackanimation` (ROM: eq-imm ON first message hold 55). eq-imm ON 570 -> 20, tackle-imm ON 63 -> 14.
+3. **Magnitude, Scene OFF.** Magnitude's `pause B_WAIT_TIME_SHORT; printstring MAGNITUDESTRENGTH; waitmessage B_WAIT_TIME_LONG` rows (used print -> print + 64) are presented by the message commands but were counted again in the `SCENE_OFF_ATTACK_PAUSE` move command (first SE +100). They are now subtracted (move min 147 -> 47, first SE exact). mag-p OFF 292 -> 8, mag-f 200 -> 8.
+
+### Lab compare, before -> after (exact / offset / missing / extra, mass)
+
+| lab | scene | before | after |
+|---|---|---|---|
+| eqk1-eq-p | ON | 2 / 7 / 0 / 0, 56 | 9 / 0 / 0 / 0, **0** |
+| eqk1-eq-p | OFF | 1 / 2 / 0 / 0, 16 | 3 / 0 / 0 / 0, **0** |
+| eqk1-eq-f | ON | 2 / 5 / 0 / 0, 55 | 2 / 5 / 0 / 0, 15 |
+| eqk1-eq-f | OFF | 1 / 1 / 0 / 0, 11 | 1 / 1 / 0 / 0, 3 |
+| eqk1-eq-imm | ON | 0 / 10 / 0 / 0, 570 | 0 / 10 / 0 / 0, 20 |
+| eqk1-eq-imm | OFF | 0 / 1 / 0 / 0, 2 | 0 / 1 / 0 / 0, 2 |
+| eqk1-tackle-imm | ON | 0 / 1 / 1 / 0, 63 | 0 / 1 / 1 / 0, 14 |
+| eqk1-tackle-imm | OFF | 1 / 0 / 0 / 0, 0 | 1 / 0 / 0 / 0, 0 |
+| eqk1-mag-p | OFF | 0 / 3 / 0 / 0, 292 | 1 / 2 / 0 / 0, 8 |
+| eqk1-mag-f | OFF | 0 / 2 / 0 / 0, 200 | 1 / 1 / 0 / 0, 8 |
+| eqk1-mag-p | ON | 0 / 18 / 0 / 0, 53 | 0 / 18 / 0 / 0, **81** (regression, below) |
+| eqk1-mag-f | ON | 0 / 16 / 0 / 0, 49 | 0 / 16 / 0 / 0, **89** (regression, below) |
+| eqk1-expl-p / -f, eqk1-sd-p / -f | both | unchanged (ON 76-84, OFF 8-10) | unchanged |
+| eqk1-struggle | OFF / ON | 0 / 1 / 0 / 0, 1 / 0 / 11 / 3 / 0, 466 | unchanged |
+
+### Item 2: Struggle (276 ON / 305 OFF)
+
+A forced player Struggle (`eqk1-struggle`, after `BattleScript_NoMovesLeft`) is within +-1 of the ROM in both scenes (OFF +1; ON body -1 / hit +1): there is no Struggle-specific command that differs. EFFECT_RECOIL goes through `BattleScript_EffectHit`, the same rows as a plain hit plus the recoil `hp` command already pinned by hcr3. The T2 s7295 OFF decision 8 window is a Struggle that follows the player's no-effect Earthquake: its -3 is the hit-all / no-effect transition fixed above, not Struggle. A forced **foe** Struggle lab could not be built (the foe never reached Struggle in the ROM window: the player's `NoMovesLeft` ran first); the foe shares the player's commands, so no separate error is expected. The ON `eqk1-struggle` missing 3 / mass 466 is the Splash body SE (167) the engine does not present on the player's turn 1 (a Splash gap, not Struggle).
+
+### Item 3: Drill Peck s1914 single window (660 ON, -66 x 9)
+
+Cause (hcr3mProbe.py + hcr3mCmp.py, seg 21): the player's Earthquake hits a Flying foe ("It doesn't affect ..."), then the foe uses Drill Peck. In Scene ON the NO_EFFECT `Pausex20` rows were unpresented before "It doesn't affect", and the hit-all transition (item 1) was also missing, which made the whole Drill Peck body ~66 early (9 SE rows). General rule (2 above), landed. eq-imm ON Drill Peck body -57 -> -2.
+
+### T2 rescore (25 ON + 24 OFF seeds, drv1 cadence; base `fad9fdfc6`)
+
+| scene | mass before -> after | exact before -> after | missing / extra |
+|---|---|---|---|
+| ON | 19,862 -> 17,764 (-10.6 %) | 2,737 -> 2,780 | 0 / 0 |
+| OFF | 2,640 -> 2,483 (-5.9 %) | 700 -> 707 | 0 / 0 |
+
+(The Magnitude change moved neither scene: no T2 seed plays Magnitude.)
+
+### Census and tests
+
+- census (200 battles, both scenes, base `fad9fdfc6`): eventsDigest + error identical 200 / 200; T1 missing 0 / extra 0 (ON exact 54,127 / known-offset 35; OFF extra 35 / unclassified 13, as the base). 38 type-sequence changes per scene are the new presented commands; command stream changed on 32 ON battles, 0 OFF battles in the fold before the Magnitude commit, OFF digest / T1 re-run at the final HEAD identical.
+- tests: `npm run typecheck` 0; `npm run test:gate` 360 files / 2,835 tests; importers + aud2* + fsc* + animation/live* + randomRoundSoak* + `tests/eqk1HitAllTail.test.ts` 307 files / 3,058 tests; `npm run build` green. New `tests/eqk1HitAllTail.test.ts` pins eq-p next mover 8 rows after the box (both scenes), eq-imm ON hold 55 / next mover 9, Magnitude OFF move min 47. No re-pins; no pins left red. The full `npm test` is the supervisor's.
+
+### Residuals (not landed)
+
+- **Magnitude Scene ON (regression, named).** The hit-all transition is now ROM-correct, but Magnitude's own ON move body is 12 frames too long between the last body SE (-3) and the hit SE (+9; mv222 body tail), which the old 8-row-short transition was hiding: next mover -2 -> +6 (mag-p), mass 53 -> 81 / 49 -> 89. Fix belongs in the mv222 body-length model, not in the transition; not part of eqk1's scope. Net ON mass over all labs and T2 is still down.
+- eq-f (foe Earthquake): ON 15 / OFF 3, the hp-drain phase and the lab's damage roll.
+- Explosion / Selfdestruct (they use `BattleScript_ExplosionLoop`, no EMPTYSTRING3 box): pre-hit +5 OFF / +7 ON body, faint-chain offsets, unchanged.
+- Splash body SE (167) missing in ON on the player's turn 1 (eqk1-struggle ON missing 3); Tackle body SE 139 missing in ON (tackle-imm missing 1). (cln13, supervisor note: not a lab artifact and not a production gap: Tackle 33 / Pound 1 / Scratch 10 / Splash 150 have no live body adapter, `liveMoveAnimationDurationCaseMissing`, so no body SE; their sets sit below the Level-50 Factory ranges (rentals start at FRONTIER_MON_GRIMER, battle_factory.c), so only hand-built labs reach them. Use Factory moves in labs.)
+- Foe forced-Struggle lab not buildable (see item 2).
+
+## itm1: the held-item animation after a faint waits for SE_FAINT (hcr3 "item chain", #219 named residual)
+
+**ROM rule (not hie5's T).** `OpponentHandleBattleAnimation` / `PlayerHandleBattleAnimation` hold a general animation while `IsBattleSEPlaying` (battle_controller_opponent.c:1992; the controller's soundTimer force-stops a still-playing SE after 30 polls). After a faint, `playanimation HELD_ITEM_EFFECT` therefore starts no earlier than SE_FAINT + 53 rows, and the first item SE (152) is the animation start + 8. aud252 ROM rows: SE16 -> SE152 is **61 in both seeds** (1914: select +34, 2230: select +40), so the 19 vs 13 rows after the select SE is `max(select + 19, SE16 + 61)` with a different A-press time per seed, not a script / T difference: the PC rows are identical in both seeds (select + 8 = `BattleScript_ItemHealHP_Ret+0x7`), `gAnimScriptActive` rises +11 (1914) / +5 (2230) after that exec and the animation lasts 211 rows in both. The same fit holds on 5 other T2 faint -> select -> 152 chains.
+
+**Engine.** `src/engine/heldItemFaintSeGate.ts` (`applyHeldItemFaintSeGate`, called where the faint's button message is dismissed, both A-press sites of `factoryRoundBattleOrchestrator.ts`): when only `status` / `sprite-visibility` commands lie between the faint's message and a Scene ON held-item animation, the animation command's `minimumFrames` gets `clamp(51 - age - lead, 0, 29)` extra rows (age = rows since SE_FAINT, `faintSeOffsetRows` in `battleHitSounds.ts`; 51 = 53 less the engine's 2-row convention, calibrated on both seeds). The gate is dynamic (it depends on the press time), and a rebuilt plan breaks the identity guards of the next-command handoff / retained resolution (a first version that replaced the segments changed 29 / 200 ON battles), so the held-item command's `timing` is planned unfrozen (`battleResolutionPresentation.ts`) and written in place with `baseMinimumFrames` kept beside it (idempotent, a pure function of the dismissal row).
+
+**aud252 (pins in `tests/aud252LossBallOpen.test.ts`).** 1914 `[-2,0,-8x6]` -> `[-2,0,-2x6]` (the -2 is the faint's own, the item chain is now relative to it exact); 2230 `[0,-4,-6x5,-7]` -> `[0,-4,0x5,-1]`.
+
+**T2 (`.integration/evidence/itm1/t2-{base,after}`, ROM-driven rescore of `t2n`).** ON TOTAL mass 15,676 -> **15,600**, exact 2,918 -> **2,923**, 0 missing / 0 extra; OFF unchanged (mass 2,186, exact 721). **Census 0..199** (`lsd194Census.sh`, `LSD194_SHARDS="0 1"`, JOBS 2, SPLIT 2, `8fef84655` vs `05f0557f8`): `rst197CensusDelta.py --digest` eventsDigest + error identical 200 / 200 in ON (200 battles / 0 changed commands) and OFF (byte-identical shards 2 / 2); `soundCensusDelta.py` ON: 29 / 200 seeds move frames only (same sequence), `--t1` exact 54,127 on both arms. No gameplay / RNG change.
+
+**Residual.** The faint SE itself is -2 on 1914 (unchanged); the item chain's last row (SE_BALL_OPEN, loss path) is -1 on 2230. Trees deleted.
+
+## mxp1: Magnitude Scene ON body, Explosion / Self-Destruct sounds
+
+**Magnitude (222), Scene ON.** The live window was the power-70 constant (174); the ROM's `gAnimScriptActive` is `118 + 8 * floor(power / 10)` rows (142 at power 30, 158 at 50, 174 at 70, 190 at 90, 206 at 110, 238 at 150: the HorizontalShake's decay). The window is now `magnitudeFirstInactiveAge(power) + 1` (`src/animation/magnitude.ts`, `liveMoveAnimation.ts`); the body joins the shape-A class (`LSE4_SHAPE_A_MOVE_IDS`) with a 10-row lead presented after the `STRINGID_MAGNITUDESTRENGTH` print's `waitmessage` (the kernel counter includes the 64-row hold: lead = A - (print + 1 + 64)). The first SE is on the ROM frame (`aud262` first-SE offset 3 -> 0).
+
+**Explosion (153) / Self-Destruct (120).** Differing commands (ROM `eqk1-{expl,sd}-{p,f}`, both scenes): ON the body SE clock carried the generic 7-row controller lag although the window already starts on the ROM's `gAnimScriptActive` rise (A + 4 = the frame-3 op); the hit command (A end + 10 = `hitanimation` exec) was on the ROM row for Self-Destruct but its SE (`effectivenesssound`, the row before) was scheduled +6 / +7 after it; the faint SE kept the 7-row lag; Explosion's window was 212 (older accepted 76..287) against A 216 - 3 = 213 and it had no 9-row hit tail (hit command 10 rows early). OFF the body was `1 + (hit - used) + 32` = 48 rows but the user's `hp` command already presents `tryexplosion; setatkhptozero; waitstate` (ROM attackanimation 58 -> hitanimation exec 101 = 43). Rules: `NO_SOUND_LAG_MOVE_IDS` {120, 153} (moveAnimSounds), the hit SE scheduled from the body command at its duration (battleHitSounds `EXPLOSION_FAMILY_MOVE_IDS`), no lag on the faint SE and +2 rows for the user's own faint (the second `tryfaintmon`), window 213 + `LIVE_MOVE_LEADLESS_TAIL_ROWS` [153, 9], OFF body `hit - attackanimation + 1`.
+
+**Labs** (`labCompare.sh --scene both`, `.integration/evidence/mxp1/{x1,final}`):
+
+| lab | before | after |
+|---|---|---|
+| eqk1-mag-p.on | exact 0 / offset 18, mass 81 | exact 10 / offset 8, mass 284 (power-roll mismatch below) |
+| eqk1-mag-f.on | exact 0 / offset 16, mass 89 | exact 10 / offset 6, mass 136 (same) |
+| eqk1-mag-p.off / -f.off | mass 8 / 8 | mass 8 / 8 (damage difference, not presentation) |
+| mxp1-mag-p5.on / .off (new, power 30) | - | exact 18 / 0, mass 0 / exact 3 / 0, mass 0 |
+| mxp1-mag-p9.on / .off (new, power 70) | - | exact 18 / 0, mass 0 / exact 3 / 0, mass 0 |
+| eqk1-expl-p.on / .off | exact 0 / offset 12, mass 78 / offset 2, mass 8 | exact 12, mass 0 / exact 1 offset 1, mass 2 |
+| eqk1-expl-f.on / .off | exact 0 / offset 12, mass 76 / offset 2, mass 10 | exact 12, mass 0 / exact 2, mass 0 |
+| eqk1-sd-p.on / .off | exact 0 / offset 12, mass 82 / offset 2, mass 8 | exact 12, mass 0 / exact 1 offset 1, mass 2 |
+| eqk1-sd-f.on / .off | exact 0 / offset 12, mass 84 / offset 2, mass 10 | exact 12, mass 0 / exact 2, mass 0 |
+
+SUMMARY lines (after): `eqk1-expl-p.on: exact 12 / offset 0 / missing 0 / extra 0, mass 0`, `eqk1-expl-f.on: ... mass 0`, `eqk1-sd-p.on: ... mass 0`, `eqk1-sd-f.on: ... mass 0`, `eqk1-expl-p.off: exact 1 / offset 1 / missing 0 / extra 0, mass 2`, `eqk1-sd-p.off: ... mass 2`, `mxp1-mag-p5.on / p9.on: exact 18 / offset 0 / missing 0 / extra 0, mass 0`.
+
+**Residuals.** (1) The eqk1-mag-p/f labs stay inexact: ROM and engine roll different Magnitude powers in those labs (ROM 50, the engine's lab RNG 90 / 70), so the engine's window is the power-90 / 70 one: hit offsets +32 / +16 = the window difference. The mxp1 labs pick seeds (5, 9) where both agree and are exact. No seed in 2..25 matched the foe lab's ROM roll. (2) The OFF user faint SE after Explosion / Self-Destruct (player attacker) is 2 rows early (ROM 328 / 327): the +2 for the second `tryfaintmon` is applied in Scene ON only (the OFF move-animation command carries no move id there).
+
+**T2** (`RESCORE_SCENES=on|off tools/audio/rescoreAll.sh OUT .integration/evidence/t2n`, `soundScoreboard.py`; `.integration/evidence/mxp1/t2-{base,after}`; base = `src/` of 54ee65135 swapped in): Scene ON 25 seeds TOTAL exact 2,918 / offset 2,959 / mass 15,676, Scene OFF 24 seeds exact 721 / offset 412 / mass 2,186, identical base and after (no t2n seed uses Magnitude, Explosion or Self-Destruct), 0 missing / 0 extra on both.
+
+**Census** (`lsd194Census.sh`, seeds 0..199, `LSD194_SHARDS="0 1"`, JOBS 2, SPLIT 2, 54ee65135 vs 886009d75; `.integration/evidence/mxp1/census`): `rst197CensusDelta.py --digest` eventsDigest + error identical 200 / 200 on ON (9 battles changed command timing, 0 type-sequence changes; Explosion hit command 32 -> 32 rows, hp 16 -> 18 rows) and 200 / 200 on OFF (8 battles; Explosion body 48 -> 43). T1 (`soundCensusDelta.py --t1`, ON): missing 0 / extra 0 on both arms; exact 54,127 -> 54,037: the 90 Explosion body SEs (9 battles x 10) moved to known-offset (Explosion +1 x 81, -79 x 9) because T1 reads the same table through the old 7-row clock (self-consistency, not ROM parity; the labs above are the ROM parity).
+
+**Re-pins toward the ROM** (ROM frame per pin): `aud262MoveAnimSounds` Magnitude first-SE offset 3 -> 0 (ROM 179 / 183); `livePrep10MoveAdapters` Magnitude windows 174 / 206 -> 175 / 207 (ROM A + 1, lab p9 A 174) and route body 177 -> 191; `livePrep2MoveAdapters` Explosion duration 212 -> 213 (ROM A 61..276 = 216, expl-p.on); `tests/helpers/iu120Rows.ts` Explosion tail [153, 9] (ROM `hitanimation` exec 287 = A end 277 + 10); `mem2InstantHpDrop` Scene OFF Explosion / Self-Destruct hp + body 54 -> 49 (ROM attackanimation 58 -> hitanimation exec 101); `apx215SubstituteDollApproximate` Explosion doll rows 219 -> 229 (window 213 + tail 9), non-static ratio 0.9 -> 0.89 (the tail holds the last picture: 206 / 229). New `tests/mxp1MagnitudeWindow.test.ts` pins the Magnitude body length. No pin was left red.
+
+## t2k3 (2026-11-22): the remaining S11 sound-timing mass re-ranked on the frozen tree 30cd3dfac (measurement only; no `src/` / `tests/` change)
+
+**Method** as t2k2 (drv1 `--romdrive` rescore of all 25 ON + 24 OFF t2n seeds with `aud249Rescore.sh`, then `soundScoreboard.py OUT --per-seed --out OUT/score.json`; rows attributed with `t2Attribute.py`'s alignment + ROM `gCurrentMove`; OFF rows carry the engine command from a second `--cmdtrace=1` replay; windows own the rows from one nonzero offset step to the next). Evidence (git-ignored, main tree): `.integration/evidence/t2k3/` (`t2/` rescored set + `score.json`, `c-off/` cmdtrace replays, `attr-{on,off}.json`, `agg.txt`, `shape2.txt`, `step.txt`, `gain.txt`, `own.py` = the ownership table below, `p/{on,off}/` ROM probes + `*.cmp.txt`).
+
+### 1. Rescore (missing / extra 0 / 0 in both scenes; the Mac merge introduced none)
+
+| family (mass / exact) | OFF t2k | OFF t2k2 | OFF now | ON t2k | ON t2k2 | ON now |
+| --- | --- | --- | --- | --- | --- | --- |
+| move-animation SE | 0 / 0 | 0 / 0 | 0 / 0 | 19,810 / 2,005 | 15,401 / 2,247 | 11,187 / 2,427 |
+| stat-change SE | 403 / 2 | 206 / 68 | 177 / 69 | 410 / 27 | 377 / 31 | 339 / 32 |
+| cry | 517 / 97 | 455 / 107 | 340 / 112 | 1,227 / 31 | 953 / 69 | 718 / 75 |
+| battle-controller SE | 2,225 / 500 | 1,960 / 524 | 1,504 / 543 | 4,231 / 301 | 3,166 / 382 | 2,139 / 399 |
+| bgm | 19 / 1 | 19 / 1 | 19 / 1 | 69 / 2 | 52 / 2 | 52 / 2 |
+| TOTAL | 3,164 / 600 | 2,640 / 700 | **2,040 / 725** | 25,747 / 2,366 | 19,949 / 2,731 | **14,435 / 2,935** |
+
+ON -5,514 mass vs t2k2 (-27.6%), +204 exact; OFF -600 (-22.7%), +25 exact. Against the run start: ON -11,312 (-43.9%), OFF -1,124 (-35.5%).
+
+### 2. Attribution (row mass; classes sum to TOTAL: ON 14,435, OFF 2,040)
+
+| class | ON rows / mass / exact | OFF rows / mass / exact |
+| --- | --- | --- |
+| body (move running at the row), incl. B4 | 3,899 / 7,202 / 2,289 | n/a |
+| of which B4 bodies (reported separately) | 108 / 274 / 7 (Confuse Ray 98, Stun Spore 56, Curse 41, Thunder Wave 40, Brick Break 22, Sleep Powder 14 by row mass) | n/a |
+| gen (gCurrentMove 0: status / general / held-item animations) | 912 / 3,985 / 138 | n/a |
+| controller hit SE 12 / 13 / 14 | 475 / 1,108 / 295 | 548 / 934 / 384 |
+| controller faint / send-in 15 / 16 / 114 | 283 / 1,031 / 104 | 284 / 570 / 159 |
+| cry | 202 / 718 / 75 | 192 / 340 / 112 |
+| stat | 101 / 339 / 32 | 105 / 177 / 69 |
+| bgm | 5 / 52 / 2 | 4 / 19 / 1 |
+
+**Shape** (window = seed x segment x cause; mass, windows). ON: body const 4,440 (311) / varies 1,354 (53) / one-off >= 20 1,137 (11); B4 const 237; gen const 3,502 (340) / one-off 387 (11) / varies 96; ctl-hit const 519 / varies 259 / one-off 330; ctl-chain const 666 / one-off 365; cry varies 348 / const 257 / one-off 113; stat const 279 / one-off 44. OFF: ctl-hit const 733 / one-off 169 / varies 32; ctl-chain const 570; cry const 340; stat const 155 / one-off 22. Constant offsets still dominate; the gen class (3,985) is the largest non-body bucket and its windows change sign (+21 .. -23) between contexts, so it is a per-context lead, not one constant.
+
+**Top causes ON (row mass):** gen:152 969 + gen:228 / 102 323 each (held-item group 1,615), gen:142 800, cry 718, controller SE 13 @? 680, Dig 589, gen:148 540, Rock Slide 514, Ice Beam 492, Psychic 379, Rest 259, Struggle 230, Double-Edge 226, Supersonic 216, Solar Beam 215, Safeguard 214. **OFF:** SE 13 @hit-animation 492 (95 rows, median -4, 7 exact), faint SE 16 / cry@faint 140 + 140, SE 13 @move-animation 135, stat 239 132, ball-open 15 @switch-in 114 / @switch-out 104 / @sprite-visibility 77, SE 114 @party-summary 93, SE 12 / 14 @message 63 + 63 (two one-offs). **Closed since t2k2 (no longer in the lists):** Metal Claw, Aerial Ace (71 left), Earthquake hit-all, Drill Peck s1914 (-66), Magnitude, Explosion; Recover / Soft-Boiled tails moved to +-13 first-row windows (item 4).
+
+**A-press cadence cliff.** Windows whose first step is +13 .. +18 (one A-cadence step of the ROM driver): ON 11 windows / 39 rows / 478 mass in 8 seeds; OFF 10 windows / 16 rows / 252 mass in 9 seeds. They overlap items 1, 2 and the OFF stat / bgm lines; s2 OFF decision 6 (below) shows the mechanism.
+
+### 3. Ranked top 8 (rows owned disjointly by window; items + lines + remainder = TOTAL)
+
+Breadth: the census (`rank1mCensus.ts`) was not re-run (kept light for the wind-down gates); command counts per 1,000 battles are t2k's: faint 4,332, hit-animation 18,646, general-animation 7,506 (864 battles), Dig 596 (120 battles).
+
+| rank | item | scenes | T2 mass now (ON / OFF) | direction | cost / risk | lands in | first ROM window (seed, decision, ROM frame) |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 | Faint / send-in chain: SE 114 (party-summary) 414 / 211, ball-open SE 15 519 / 364 (switch-in 110, switch-out 100, sprite-visibility 154), cry 597 / 0 (cry@faint) , faint SE 16 + cry 0 / 128, misc 0 / 18 | ON + OFF | 1,530 / 721 (2,251; 22-23 seeds, ~150 windows) | engine rows early / late by the A-press slip (+13 .. +17 cliff) and +-1..9 elsewhere; first-row steps are +17 / +15 (OFF party-summary x5) and -7 (OFF ball-open @sprite-visibility x5) | high: mixed cause; but the cliff term is one mechanism (fch1 term 2, fsc2m) | `src/engine/battleResolutionPresentation.ts`: the faint `message` command's ready frame (engine min 24 vs ROM A accepted 21 after the print start) and the harness A-press deferral | OFF s2 decision 6 (ROM 3933 / 4088 / 4104; mapped below), ON s310 decision 22 (seg45, rf 22842, +14), s4235 decision 9 (seg19, rf 6066, +13) |
+| 2 | Hit SE 12 / 13 / 14 lead (OFF: 13 @hit-animation 701 over 92 windows / 15 seeds, median -4, net step -302; @move-animation 236, @message 174 = two +63 one-offs) | ON + OFF | 1,075 / 1,111 (2,186) | engine hit SE early by 3 .. 14 after a used-print that is shorter than the ROM's (OFF) | medium: per-cause (recoil / Struggle chain -14, confusion self-hit -7, ordinary -3 / -4) | `battleResolutionPresentation.ts` the bodyless OFF used-print `move-animation` -> `hit-animation` interval (and `battleHitSounds.ts` for ON) | OFF s2230 decision 21 (seg43, ROM 12945, -14 x2), s6568 decisions 99 / 101 / 102 (rf 52126 / 53422 / 53900, -14 / -14 / -10 x2), ON s5063 decision 52 (rf 43275, -33 / -43 after Psychic) |
+| 3 | Held-item group gen:152 / 228 / 102 (Leftovers / berry): +21 after the send-in chain (3 windows, 300 mass), the rest signed scatter (-23 .. -7) after hits | ON | 1,510 / 0 (360 rows, 11 seeds, 72 windows) | the first SE of the chain after a send-in is 15 frames late (age 23 vs ROM 8) | low-medium for the +21 term (same constants t2k2 named; not landed: hie5 / itm1 did other held-item terms); the scatter is inherited | `src/engine/moveAnimSounds.ts` `emitGeneralAnimSounds` HELD_ITEM_EFFECT first-SE age, only in the post-faint context (end-turn Leftovers windows are already negative) | ON s2230 decision 6 (seg13, rf 8403, +21 x3), decision 8 (seg17, rf 9987); s5063 decision 45 (seg91, rf 37924, +18) |
+| 4 | gen:180 first row + the gen:142 / 202 chain it owns (restore-HP style animations) | ON | 980 / 0 (180 rows, 4 seeds, 18 windows; 10 exact) | first-row lead of mixed sign (+13 s6912 x2, -12 s310, -7 / -6 s648, +7 s310 x3) | medium: sign changes with context; probe the press phase before any table | `moveAnimSounds.ts` general-animation start + `battleResolutionPresentationRender.ts` restore-HP body tail (hie5's `HIE5_RESTORE_HP_BODY_TAIL_ROWS`) | ON s6912 decision 2 (seg5, rf 1844, +13 x10), s310 decision 16 (seg33, rf 17429, -12 x10) |
+| 5 | Dig (charge turn / attack tails) | ON | 615 / 0 (65 rows, 3 seeds, 13 windows, 0 exact) | -19 / -17 / -12 on the tails, +18 first row (s6) | medium: two terms; chg2 / bdt1 left it | `battleResolutionPresentationRender.ts` DIG lead / tail rows | ON s8108 decision 19 (seg39, rf 17762, -19 x5), s6 decision 2 (seg5, rf 2180, +18) |
+| 6 | gen:148 poison / status tick, first row | ON | 534 / 0 (114 rows, 3 seeds, 19 windows) | start lead of both signs (-12 .. +6), constant per window | medium: gsp3 closed the hold, not the lead | `moveAnimSounds.ts` `emitGeneralAnimSounds` status-tick arm | ON s499 decision 3 (seg7, rf 3856, -12 x6), s165 decision 22 (seg45, rf 15457, -9) |
+| 7 | Ice Beam first-mover windows | ON | 517 / 0 (51 rows, 4 seeds, 7 windows) | -21 / -13 / -6 on the first window of a body (11 rows each) | medium: single-body lead | `battleResolutionPresentationRender.ts` Ice Beam body lead | ON s2230 decision 20 (seg41, rf 18099, -21 x11), s830 decision 1 (seg3, rf 685, -13 x11) |
+| 8 | Rock Slide body | ON | 514 / 0 (122 rows, 6 seeds, 8 windows) | -13 / -10 / -9 and +5 over 20-row windows | medium: both signs | `battleResolutionPresentationRender.ts` Rock Slide body | ON s8612 decision 8 (seg17, rf 8016, -13 / -9 x20), s165 decision 18 (seg37, rf 12049, +5 x20) |
+| | **Items 1-8** | | **7,275 / 1,832** | | | | |
+| 9 | Supersonic / Safeguard (one window s5569 seg25 -34 x12 + -2) | ON | 454 / 0 | | | | s5569 decision 12 (rf 6516 / 6588) |
+| 10 | Psychic (s97 +24 / +25 x8; s5063 -43 x3) | ON | 296 / 0 | | | | s97 decision 11 (rf 11037) |
+| 11 | B4 bodies (reported separately) | ON | 274 / 0 | | | | |
+| 12 | Rest 263, gen:242 (s2741 +11 / +8 x10) 260, Solar Beam 253, Confusion s8108 -48 x2 217 | ON | 993 / 0 | | | | s2741 decision 11 (rf 10115); s830 decision 10 (Solar Beam rf 7904) |
+| 13 | stat SE 239 / 245 | ON + OFF | 249 / 184 | | | | OFF s4235 decision 2 (rf 1267, +17) |
+| 14 | OFF bgm 19, SE 90 5 | OFF | 0 / 24 | | | | |
+| R | remainder (about 80 bodies, each < 215, mostly inherited) | ON | 4,894 / 0 | | | | |
+| | **TOTAL** | | **14,435 / 2,040** | | | | |
+
+Sum-check: ON 1,530 + 1,075 + 1,510 + 980 + 615 + 534 + 517 + 514 (= 7,275) + 454 + 296 + 274 + 993 + 249 + 4,894 = 14,435; OFF 721 + 1,111 (= 1,832) + 184 + 24 = 2,040. "T2 mass now" is row mass, not saving (the counterfactual gain of one step is 30-60% of it: `gain.txt`; ON posgain total 12,483 over 1,021 steps).
+
+### 4. The top three ROM windows (hcr3mProbe + hcr3mCmp, frames from each side's own commit)
+
+1. **Chain: OFF s2 decision 6 (rf 3933, +17) is the A-press cadence, not the party-summary command.** ROM: the faint print starts at `FaintTarget+0xc` ex1 299, the A press (SE 5) lands at 320 (21 frames), SE 114 at `FaintedMonSendOutNew+0x2` ex2 502, SE 15 at 657. Engine: `status` cmd 0.6 at 299, **`message` cmd 0.7 (min 24)** at 300, SE 5 at 337, `party-summary` cmd 0.13 (lead 19, min 119) at 500, SE 114 at 519, SE 15 at 674. SE 5 -> SE 114 is 182 on both sides and SE 114 -> SE 15 155 on both: the party-summary lead is right. The whole +17 is the faint message becoming ready at 324 (min 24) when the ROM driver pressed A at 320, so the replay slips one cadence step (17 frames). Differing command: the faint-print `message` (ready 3+ frames late), the "fch1 term 2" of the t2k2 item 3, which that item mis-assigned to `opponentPartySummaryDrawTiming` (the lead 25 -> 19 since landed).
+2. **Hit SE: OFF s2230 decision 21 (Struggle, then Double-Edge recoil; ROM commit 12819, engine 12729).** ROM Struggle: `HitFromAtkString+0x1` ex1 at 63 -> SE 13 at 126 (63 frames: print, `HitFromCritCalc`, `Pausex20`, +2); engine: **`move-animation` cmd 0.1 (min 42)** at 70 -> `hit-animation` cmd 0.2 with SE 13 at 112 (42): 21 short, started 7 late = -14. Double-Edge: ROM print ex2 303 -> SE 13 373 (70); engine cmd 0.10 317 -> `hit-animation` cmd 0.11 359 (42): 28 short, 14 late = -14. Differing command: the bodyless OFF used-print `move-animation` (flat min 42) before `hit-animation`; the ROM interval is print + 63-70, and the cmd after the recoil `message` (cmd 0.9 -> 0.10: 28 vs ROM MoveEnd 289 -> print 303 = 14) starts 14 late. Only these two windows were opened; the common -3 / -4 OFF steps (68 of 95 rows) are not explained by them.
+3. **Held-item: ON s2230 decision 6 (rf 8403).** ROM `ItemHealHP_Ret+0x7` ex2 at 306 -> SE 152 at 314 / 346 / 378, SE 228 at 410, SE 102 at 482. Engine **general-animation cmd 2.4 (HELD_ITEM_EFFECT, min 229)** at 312, SE 152 at 335 / 367 / 399, 228 at 431, 102 at 503: the spacing is identical (32 / 32 / 72); the cmd starts 6 after the ROM exec and the first SE comes 23 after the cmd start instead of 8, so the group is +21. The numbers are those of t2k2 item 1 (ROM 306 / 314, engine 312 / 335): the proposal there is still open. The negative held-item windows (-23 s8108 seg89, -17 s310 seg7 / s1415 seg99, -14 s2230 seg11) follow hits or end-turn rows, so lowering the age globally would push them further negative; land it for the post-send-in context only.
+
+### 5. What not to chase
+
+- The 4,894 remainder (about 80 bodies, each < 215) is inherited drift plus single windows; re-rank after items 1-3.
+- Rows 13-14 and the OFF +63 one-offs (s319 decision 16 SE 12, s6568 decision 31 SE 14, both at the `message` command, 126 mass) are small; the +63 pair is worth one probe if a worker has spare time.
+- B4 bodies (274) are reported, not proposed.
+
+Not applied: no `src/` or `tests/` change; PROGRESS / ISSUES / ROADMAP untouched; no `.ts` added, so no typecheck / `npm test` / build run (the supervisor's wind-down gates cover the unchanged tree). The step text named both `.integration/evidence/t2k3/` and `t2k/`; t2k3 was used.
+
+## fch2m (2026-11-22): the faint / send-in "cliff" is the census driver's A gate, not an engine command (tools only; `src/` and `tests/` untouched)
+
+Scene OFF (:8014). Evidence (git-ignored, main tree): `.integration/evidence/fch2m/` (`p/` baseline ROM probes + engine `--cmdtrace` for the 5 windows, `pa/` the same engine replays with the new press, `t2-base/` / `t2-acc/` + `score-{base,acc}.txt` = the 49-seed T2 rescore on this tree without / with it, `probe.sh`, `rescoreAll.sh`). New tools: `tools/integration/fch2mWin.py` (one faint window: ROM SE 16 / printer start / state 2 / pulse A / SE 114 next to the engine's `message` command, A and SE 114 in two runs); `soundCensusRomReplay.ts replay --dismiss-accept=1` and `AUD249_DISMISS_ACCEPT=1` for `aud249Rescore.sh` (opt-in; default behaviour unchanged, the baseline rescore reproduces t2k3's ON 14,435 / 2,935 and OFF 2,040 / 725 exactly).
+
+### 1. Result: the differing "command" is the harness press gate
+
+The engine's faint `message` is ready on the same frame as the ROM's in all five windows. t2k3 item 1 / fch1 term 2 read the `message` command's `min=24` as its ready time; that field is not used for a button message (`isBattleResolutionCommandComplete` hands a button message to `isBattleResolutionButtonMessageReady`, `battleResolutionPresentationRender.ts:2018-2023`). What gates it is the typed rows: a `\p`-ended faint box (`promptClear`) **accepts** an A from `phaseElapsed >= typedRows + 1 - GATE_ACCEPT_LEAD_ROWS` (`:2102-2113`, taken in the `presenting` branch at `factoryRoundBattleOrchestrator.ts:3170-3180`; the tick that reads it is message start S + T, T = glyph count = name chars + 12) and only **enters** `awaiting-message-dismiss` at `typedRows + 1` (`:3200-3210`). The census driver presses only in the awaiting phase (`soundCensusRomReplay.ts:442` at HEAD), so its first press is S + T + 3 (decided on the frame before the tick, after the phase flips): a 3-frame dead zone after the engine already accepts. The ROM driver's pulse is a fixed 17-frame cadence, so with probability 3 / 17 the pulse lands in S + T .. S + T + 2, is not taken, and the engine waits the next pulse: +17 (or +15 after the AI-choice extra). That is the whole "ready 1 .. 3 frames late in situ" of fch1 (its shift experiment: 2, 3, 1, 2 = 3 minus the pulse's distance past the accept frame) and why 5 of 32 OFF faints show the cliff (3 / 17 x 32 = 5.6).
+
+### 2. The five windows (frames from each side's own commit; `fch2mWin.py`)
+
+| window | ROM SE 16 -> printer start / T (state 2) / pulse A / SE 114 | engine SE 16 -> `message` cmd (ROM start + 1, flat in all 5) / accept frame S + T | pulse - accept | engine A, baseline -> SE 114 (vs ROM) | engine A with the press -> SE 114 (vs ROM) |
+| --- | --- | --- | --- | --- | --- |
+| s2 d6 | 281 -> 299 (+18) / 19 (318) / 320 / 502 | 300 (min 24) / 319 | +1 | 337 (pulse + 17) -> 519 (**+17**) | 320 -> 502 (0), SE 15 0 |
+| s3738 d38 | 303 -> 321 (+18) / 19 (340) / 342 / 369 | 322 / 341 | +1 | 359 -> 386 (**+17**) | 342 -> 369 (0), SE 15 -1 |
+| s1028 d10 | 397 -> 417 (+20) / 20 (437) / 438 / 467 | 418 / 438 | 0 | 455 -> 482 (**+15**) | 438 -> 465 (-2) |
+| s319 d18 | 386 -> 406 (+20) / 20 (426) / 429 / 456 | 407 / 427 | +2 | 446 -> 473 (**+17**) | 429 -> 456 (0), SE 15 0 |
+| s5063 d47 | 535 -> 555 (+20) / 20 (575) / 577 / 604 | 556 / 576 | +1 | 594 -> 619 (**+15**) | 577 -> 602 (-2), SE 15 -3 |
+
+Per-command intervals agree everywhere before the press: SE 16 on the same frame (+0), faint `status` 1 row then `message` at ROM start + 1, typing = T glyphs both sides (19 / 20 for a 7 / 8-character name). A -> SE 114 with the press: 27 / 27 on s3738 and s319, 182 / 182 on s2 (a held-item heal chain, `ItemHealHP_Ret`, sits between the faint and the send-in; both sides run it), but 29 vs 27 on s1028 and 27 vs 25 on s5063: the engine is 2 short there, the AI-choice term of fch1 (a residual of that choice, not the cliff). Nothing is wrong in the faint print, the faint SE / sprite-drop rows or the hp drain (all five SE 16 exact), and no earlier hold carries into it.
+
+**Why the labs match and the windows do not.** `fch1ReadySweep.ts` and the fsc2m `ready` policy press A on every frame, so they measure the accept frame; the census replay presses on the ROM pulse cadence and only once the phase says "awaiting". A lab has one pulse phase chosen by the A policy; in situ the pulse phase is whatever the run carried, and 3 of the 17 phases fall in the dead zone. The species / foe name, the sprite drop (SE 16 -> start 18 / 20) and the preceding message do not matter (all 5 windows have accept = ROM ready + 1).
+
+### 3. Measured on the whole T2 (49 seeds, this tree, `AUD249_DISMISS_ACCEPT=1`, 0 missing / 0 extra both)
+
+| | mass base -> press | exact base -> press | battle-controller | cry | bgm |
+| --- | --- | --- | --- | --- | --- |
+| OFF (24) | 2,040 -> **1,841** (-199, -9.8 %) | 725 -> 730 | 1,504 -> 1,378 | 340 -> 284 | 19 -> 2 |
+| ON (25) | 14,435 -> 14,518 (+83, +0.6 %) | 2,935 -> 2,929 | 2,139 -> 2,188 | 718 -> 752 | 52 |
+
+Faint -> SE 114 rows (ROM and engine both have the pair): OFF 32 rows, sum |error| 93 -> 33, exact 17 -> 19: the five windows above fix (+17 / +15 -> 0 / -2) and one flips (**s97 d13** 0 -> -17). ON 33 rows: no cliff row at the baseline; two flip (**s3738 d57** and **s5569 d18**, 0 -> -17, +51 mass each). The flips are the cliff the other way: in those windows the engine's SE 16 is 3 .. 6 frames earlier than the ROM's, so with the press the engine is ready before the ROM's pulse accepts and the ROM waits one more pulse; the baseline's exact SE 114 was the two errors cancelling. Opened: s97 d13 (OFF): engine `message` -> SE 13 41 frames (cmd 0.10 `move-animation` min 42, started 331) vs ROM print 313 -> SE 13 378 (65): the item-2 hit-SE interval of t2k3 (SE 13 -6, SE 16 -6, then the faint chain). The other six per-seed deltas: OFF s648 +17 (a non-faint button message; not opened), s499 -9, s5569 -9, s830 bgm -17, ON s310 -11, s1415 -9, s3158 -7, s4235 -9, s5063 +17 (controller; not opened).
+
+### 4. Landing recipe (tools only; not flipped here)
+
+1. `tools/integration/soundCensusRomReplay.ts`: make `dismissAccept` default true when `--romdrive` is given (`arg("dismiss-accept") !== "0"`), keep it off without a drive; `aud249Rescore.sh` / `aud248RunSeed.sh` then need nothing. The rule is the engine's own: press when `isBattleResolutionButtonMessageAcceptable` (the first row the engine takes an A), not 3 frames later. Pins it moves: none in `tests/` (the nine `soundCensusRomReplay` importers replay without `--romdrive`; not run here); `src/` none. It moves every T2 baseline: record OFF 1,841 / ON 14,518 as the new reference (OFF: the 5 windows -232, other gates -35 = s499 / s5569 / s830 bgm, flips +51 s97 and +17 s648; ON: -36 over s310 / s1415 / s3158 / s4235, flips +119 = s3738 d57 + s5569 d18 + s5063 +17).
+2. Decide the ON +83 first: it is three windows whose cause is upstream (SE 16 early by 3 .. 6 after an OFF / ON hit-SE interval, t2k3 item 2 and the faint SE lag clip), so landing the press makes them visible rather than creating them; land it with item 2, or accept +83 ON for -199 OFF.
+3. No engine row remains in the cliff: after the press the faint chain in the five windows is 0 / 0 / -2 / 0 / -2 at SE 114 (the -2 pair is fch1 term 1's AI-choice extra, `aiReplacementChoiceExtraFrames`, 2 early on those two choices; the next small engine term). t2k3 item 1's 2,251 mass is therefore mostly NOT this cliff: the cliff is 5 OFF windows (5 x 15 .. 17 rows of offset, about -232 mass); the +-1 .. 9 remainder of item 1 (ball-open @sprite-visibility -7 x5, party-summary lead) is untouched and needs its own windows.
+
+Gates: `npm run typecheck` only (a `.ts` tool changed); no `npm test` / build (assigned); `src/`, `tests/`, PROGRESS / ISSUES / ROADMAP untouched.
+
+## hie6m (2026-11-22): t2k3 item 3 (held-item group gen:152 / 228 / 102) — one class is a lead error, the scatter is inherited (measurement only; `src/` and `tests/` untouched)
+
+Scene ON (:8012). Evidence (git-ignored, main tree): `.integration/evidence/hie6m/` (`chains.json` = every 5-SE held-item chain in the t2k3 ON replays with its first-SE offset, mass, `min=` and the 4 engine commands before it; `p/` = hcr3mProbe ROM probes + engine `--cmdtrace` + `hcr3mCmp` windows for s5063 d45, s1415 d47 / d49, s8108 d44, s310 d2 / d3 / d4, s2230 d6; `c-on/` = the `--cmdtrace=1` replays), worktree `.integration/evidence/hie6m/lab{1..4}`. Tools: `tools/integration/hie6mWin.py` (rows around a window), `hie6mMakeLab.py` (writes `tools/battle-lab/hie6m-sendin-leftovers-on.json`, see section 4).
+
+### 1. Result
+
+The held-item command's own interval is right: ROM exec -> SE 152 = 8, and the engine's command start -> SE 152 = lead + 8 (restart lead 15 -> 23) with the 15 fitted by hie1 on hit / end-turn tails, where the Leftovers / Sitrus / Shell Bell labs are -1 / 0 / -1. Only **one context** puts the command at the wrong place because of the lead: the end-turn Leftovers heal that **follows the player's own faint replacement** (party screen -> send-in), 3 windows, 300 mass, +21 / +21 / +18 on all five SEs. Everything else in the group (the signed scatter -23 .. -7) is the preceding hit / print / status command being early, not the item command.
+
+### 2. Classes (94 chains, 1,615 mass in my count; t2k3 attributed 1,510 to the group, the 105 difference was not chased)
+
+Class = what precedes the item animation (the last retained commands in `chains.json`, plus the ROM label). `mass` = sum |off| over the chain's 5 SEs; `|off|>2` = windows, mass.
+
+| class | windows | mass | signed first-SE sum | \|off\|>2 (mass) | ROM interval | engine interval | differing command | source |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| **send-in** (foe b1 end-turn Leftovers after the player's faint replacement; `status`, `message`, 2 x `sprite-visibility`, then `min=229`) | 3 (s2230 segment 13 +21, s2230 segment 17 +21, s5063 segment 91 = d45 +18; s2230 d6 was opened as the ROM window for one of the s2230 pair) | 300 | +60 | 3 (300) | ball SE 15 -> item exec 133 (s5063: 148 -> 281); exec -> SE 152 = 8 | ball SE 15 -> command start 139 (145 -> 284); start -> SE 152 = 23 (284 -> 307) | the held-item command **start**: the retained segment starts 6 frames later (relative to SE 15, constant in both windows) than the ROM's `playanimation` exec, then the 15-frame restart lead is added on top; SE 152 = ball offset + 6 + 15 (s2230 0 + 21, s5063 -3 + 18) | `battleResolutionPresentation.ts:6037` (`lead` of the `HELD_ITEM_EFFECT` command), the send-in phase in `partySelect.ts` (`PartySendOutTiming`) |
+| print-ended (`message`, 2 x sprite): end-turn Leftovers, Focus Punch / Yawn-type prints | 53 | 635 | -119 | 9 (440): -23, -17, -17, -9, -5, -5, -4 x 3 | exact where opened (s8108 d44 print -> SE 152 interval 106 / 106) | same | **not the held-item command**: s8108 d44 (-23) the hit SE 14 is already -24 before the print; s310 d3 and s1415 d49 (-17) the Focus Punch print is 16 early. 44 of the 53 are within +-2 | t2k3 item 2 (hit SE / hit -> print), `hcr3mCmp` 8108 d44, 310 d3, 1415 d49 |
+| hit (`hp`, 2 x sprite): Sitrus / Shell Bell / Leftovers right after a hit's hp update | 10 | 195 | -39 | 4 (160): -11, -11, -7, -3 | ROM b0-defender hit animation -> hp 36 | engine 28 | **not the held-item command**: hp (and with it the item) starts 10 early on a b0 defender (s1415 d47, s310 d2: -11); the lead error left over is about -1 | `hcr3mCmp` 1415 d47, 310 d2 |
+| stat (`stat` / `stats-change`, `message`, sprite) | 14 | 145 | -9 | 2 (75): -10, -5 | not opened | | no engine command named (12 of 14 within +-2) | `chains.json` |
+| status-animation | 3 | 110 | +8 | 3 (110): -7, +7, +8 | s310 d4: lead about 7 after a sleep status animation (ROM) | restart lead 15 | **mixed**, one window opened: the 15 is 8 too long after a status animation, the other two (+7 / +8, -7) are not explained by it | `hcr3mCmp` 310 d4 |
+| other (`message, status-icon`, `message, message`, ...) | 11 | 230 | -28 | 7 (195): -8, -7, -6, -5, -4, +4, +5 | not opened | | none named | `chains.json` |
+
+Windows by `min=` (229 = restart + 15, 224 / 225 / 226 = the hie5 after-print lead): the send-in windows are the only +18 .. +21 ones, all with `min=229`; the +4 .. +8 positives elsewhere are status-animation / `general-animation, message, status-icon`.
+
+### 3. Why the send-in start is 6 late (and why the lead then double-counts)
+
+ROM (s5063 d45, frames from the decision commit): `FaintedMonSendOutNew` ball SE 15 at 148, script end 268, `FaintedMonEnd` 273, `ItemHealHP_End2` 279, `ItemHealHP_Ret+0x7` exec 281 (playanimation), SE 152 at 289, 321, 353, SE 228 385, SE 102 457. The ball -> exec distance is 133. The engine runs the send-in as an orchestrator phase, not plan commands, and the next retained segment starts with the held-item command: ball SE 145, command 1.4 at 284 (139 later), SE 152 307 (`min=229` = 214 + 15). The 15-row lead exists because a hit's tail has the item script's own rows before the animation (hie1); here the segment already starts 6 late after the send-in phase, so the lead is surplus. s2230 d6: ROM exec 306, SE 152 314; engine command 312, SE 152 335 (ball offset 0), i.e. +6 start +15 lead.
+
+### 4. Lab
+
+- `labCompare.sh --scene on` on `hie6m-sendin-leftovers-on` (AI-replacement variant: foe lv 5 lead faints to a lv 50 player, the foe's replacement then Leftovers): SE 15 -10, SE 152 -5, mass 35, +5 relative to the ball SE. This is the foe's `switch-in` command (`switchInTail.ts`), **not** the T2 class; it does not reproduce the +21.
+- Player-faint-replacement variant (`hie6mMakeLab.py`, now the committed file: lead lv 12 Quick Attack, foe lv 50 Leftovers + Seismic Toss, party screen by DOWN / A / A as `pic7-player-faint-send-in-on`): **ROM only**. The engine refuses it (`partySelect.ts:236`: the party screen checks `playerParty[i].maxHp` against the rental record's 165; `pic7-player-faint-send-in-on` fails identically), so any lab with override parties and a player forced switch has no engine side. ROM: SE 15 at 968, SE 152 at 1043 (interval 75, against 133 / 141 in the T2 windows), so the lab's send-in is not the T2 flow either; it is kept as the ROM capture (`lab3/`) and not used for numbers.
+- The hie1 labs (end-turn Leftovers, Sitrus, Shell Bell after a hit) stay -1 / 0 / -1 (hie5), consistent with the table: the lead is right in those contexts.
+- So the send-in class rests on the two T2 ROM windows (s2230 d6, s5063 d45) plus the third chain in `chains.json`, all three from real replays; no lab reproduces it.
+
+### 5. Landing recipe (not flipped here)
+
+1. `src/engine/battleResolutionPresentation.ts:6037` (`lead` / `frames` of the `HELD_ITEM_EFFECT` command, `heldItemEffectExecutionsAndLead` near 1830): when the retained segment's first command is the item animation and the previous phase was a player forced-switch send-in, use a lead of **-6** (`frames` 208) instead of the restart 15. The segment context has to come from the orchestrator (`factoryRoundBattleOrchestrator` / `partySelect.ts` send-in phase): the plan builder sees only the kernel events, which are the same as for any end-turn restart. Alternative with the same effect: shorten the send-in phase's tail by 21 frames in `PartySendOutTiming`, but that moves the ball-SE-relative cry / "Go!" rows, so prefer the lead.
+2. Rule: the send-in phase already ends 6 after the ROM exec (relative to SE 15), so the command's lead is the rest of that, `-6`, not the 15 fitted on hit tails. New constant beside `HELD_ITEM_EFFECT_RESTART_LEAD_FRAMES`; leave 15 / 9 untouched.
+3. Pins that will move: `tests/hie1HeldItemEffect.test.ts` pins the constants `[214, 15, 9]` (unchanged if the new lead is a separate constant); the pins carrying `minimumFrames: 229` (or the SE 152 / 228 / 102 frames) after a player faint send-in in `tests/factoryRoundBattleOrchestrator.test.ts` and `tests/battleEndTurnOrchestration.test.ts` move by -21; I did not run or read these.
+4. Expected T2 change (ON, 25 seeds): the 3 windows go +21 / +21 / +18 -> 0 / 0 / -3 (the -3 is s5063's ball SE, an earlier term), ON mass -300 + 15 = about **-285** of 14,435 (-2.0 %); OFF unchanged (item animation is Scene ON). Fixing it will not remove the rest of the held-item group: 1,315 of the 1,615 is hit / print / status inheritance, handled by t2k3 item 2 and the b0-defender hit-animation -> hp interval (28 vs 36).
+5. Verification when landing: rerun `hie6mWin.py 5063 45 270 300` and `2230 6` (SE 152 at +0 / -3), then `labCompare.sh` on `hie1-leftovers-on` / sitrus / shellbell (must stay -1 / 0 / -1).
+
+Gates: no `.ts` added, only `.py` and a lab json, so no typecheck; `npm test` / build **not run** (the step overrides the generic line); `src/`, `tests/`, PROGRESS / ISSUES / ROADMAP untouched.
+
+## hse1m (2026-11-22): the engine command behind t2k3 item 2 (hit SE 12 / 13 / 14 after a used print) -- it is not the OFF used-print `move-animation`
+
+Post-freeze measurement; `src/` and `tests/` untouched. Tools: `tools/integration/hse1mSplit.py` (per hit-SE window: ROM script path from the `hcr3mProbe` rows, ROM used-print start / release, engine `message` -> `move-animation` -> `hit-animation` frames, commit-relative; `--ctx` adds the ROM labels before the print) and `hse1mTable.py` (ownership windows as t2k3 `own.py`, classed by the ROM labels before the print; a third argument adds the "after" mass of a re-scored attr file); `soundCensusRomReplay.ts` (tools change, below). Evidence: `.integration/evidence/hse1m/` (`split.json`, `table-off.txt`, `table-on.txt`, `p/off/*-full.*` 15 OFF seeds, `p/on/*-full.*` 24 ON seeds, `p/cmp/*.txt` windows, `lab/`).
+
+### 1. Correction of t2k3 item 2
+
+t2k3 read the 92 OFF windows as "engine flat 42-frame `move-animation` is 21-28 frames short". Decomposed on the 106 OFF hit rows that have a ROM used-print chain: ROM print release -> SE 41 (`HitFromCritCalc`, `Pausex20`, +2) against the engine's `move-animation` 42 (+1); the used print itself is 24 / 25 (engine / ROM, -1); **print start -> SE is exact (+-1) in every decomposed window**. The step lives between the previous event (commit, MoveEnd, an earlier print) and the used-print start: the script rows or the A press that sit in front of the print. 97 windows own 701 of the OFF mass; they split by the ROM labels in front of the print (the first three are the cause table; ROM / engine intervals are print / press start to the used print, then to SE 13):
+
+| Cause (OFF windows / rows / mass / median step) | ROM interval | Engine interval | Differing command | Source |
+|---|---|---|---|---|
+| **Struggle after `NoMovesLeft`**: 23 / 43 / 289 / -7 (s6568, s7682, s2230, s7295) | s7682 d91: no-moves print 2..40, A accepted +38 (ROM driver pulse: A frames -1, 3, 20, 37, 54 ...), used print +55, SE 13 +118 | dismiss +31 (the census presses the no-moves box on its own even-frame cadence), used print +49, SE 13 +112: -6 (-2 .. -14 over the windows: where the 17-frame pulse falls) | not a presentation command: the census driver's `no-moves-message` dismiss press | `soundCensusRomReplay.ts` `pulse("A")` after `NO_MOVES_MESSAGE_HOLD_AT` (drv1 left it on the engine cadence) |
+| **Wake-up print** (`MoveUsedWokeUp`): 10 / 13 / 91 / -7 (s5063 x5, s7682) | s5063 d40: wake print 12 -> `updatestatusicon` 94 (82) -> `HitFromAtkCanceler`, `AccCheck`, `AtkString` -> used print 99 (icon + 5) -> release 124 (25) -> SE 13 165 (41) | message 11 -> `status-icon` 91 (80) -> used `message` 92 (+1) -> `move-animation` 116 (24) -> SE 13 158 (42): -2 -4 -1 +1 = -6 (the window's -7: 1 frame unattributed) | wake-up `message` hold 80 (ROM 82) and `status-icon` 1 frame (ROM icon -> next print = exec delta + 1 = 5) | `battleResolutionPresentation.ts:1265` (`!sceneOff &&` before `WAKE_UP_MESSAGE_TIMING`) and `:6310-6314` (`wakeUpIconTiming` only when NO_ANIMATIONS is clear); the gsp2 rules (:1951-2000) were measured on Scene ON only |
+| **Confusion head** (`MoveUsedIsConfused[NoMore]`): 7 / 15 / 77 / -6 (s7295, s499, s648, s830) | s7295 d5: print row 11 -> used print 108 (97), release 141 (33), SE 13 182; s499 d11: 105 - 11 = 94; lab `hpf4m-confuse-off` print 1323 -> used print 1417 (94) | s7295 9 -> 102 (93); s499 9 -> 99 (90); lab 1323 -> 1413 (90): **-4** at the used print, then print -1, `move-animation` +1 | confusion `message` hold: `PRE_MOVE_STATUS_ANIMATION_TIMING` (64 + 3 rows) is right for Scene ON (the launch is a real `status2animation`); OFF skips the launch and runs `return`, `HitFromAtkCanceler`, `AccCheck`, `AtkString` (rows 101-104) before the print | `battleResolutionPresentation.ts:1204-1210` + `:1272-1276` (no scene branch), cf. `MOVE_INFLICTED_STATUS_SCENE_OFF_LEAD_ROWS` (sta6m: the same +4) |
+| Plain (previous `MoveEnd` / end-turn / item rows): 21 / 25 / 64 / -1 | | | no single command; steps -1 .. -10, carried offsets | not ranked |
+| Two-turn / semi-invulnerable second turn 4 / 7 / 48; Focus Punch 9 / 14 / 46 (+-5); infatuation 6 / 12 / 33 (-3); hit SE with no used-print chain (hit-all, parse miss) 13 / 14 / 31; after a miss 4 / 6 / 22 | | | not opened | |
+
+Struggle is not a Factory move: its lab is `enc276-struggle-off` (a PP-out Splash party); the confusion lab uses Confuse Ray (Factory). `labCompare.sh --scene off` results (`lab/summary.txt`): `enc276-struggle-off`: the used print first glyph exact (464 / 464), SE 13 +1 (526 / 527); `hpf4m-confuse-off`: confuse print exact (1323), used print ROM 1417 against engine 1413 (-4), the later rows of that lab desync (counts differ), so only the first confusion turn is read. A clean OFF wake-up lab was not obtained (`gsp3-sleeppowder-player-on` run OFF and a new Double-Edge / Sleep Powder OFF lab both desync on the lab's ON-timed presses and the engine / ROM sleep turns); the wake-up window above is the ROM census window s5063 d40, repeated with the same -7 in s5063 si 17 / 25 / 49 / 57 / 65 / 73 / 81 and s7682 d47.
+
+### 2. Tools change landed (measured): the no-moves dismiss follows the ROM drive
+
+`soundCensusRomReplay.ts`: after `NO_MOVES_MESSAGE_HOLD_AT` the engine's `no-moves-message` is dismissed on the ROM driver's A frame (`dismissPress()`, drv1's segment clock) instead of `pulse("A")`; without `--romdrive`, or with `ROM_REPLAY_NOMOVES_EVEN=1`, it is the old cadence. `npm run typecheck` green. Re-score of the 24 OFF seeds (`aud249Rescore.sh`, same ROM files; baseline = the same tree with `ROM_REPLAY_NOMOVES_EVEN=1`, which reproduces t2k3's 2,040 / 725 / 408):
+
+- **OFF T2 mass 2,040 -> 1,819 (-221)**, exact 725 / offset 408 / missing 0 / extra 0 unchanged: the 23 Struggle windows' 289 -> 67; every s7682 / s6568 / s2230 Struggle SE 13 row goes from -2 .. -14 to **+1** (s7682 d91 now: engine SE 5 38 (ROM 38), used print 56 (ROM 55), SE 13 119 (118)). The +1 is left in the engine: dismiss -> used print is 18 frames against the ROM's 17 (census), SE 13 +1 also in `enc276-struggle-off` (lab, whose presses are the lab's own) -- the Struggle forced-handoff hold, `battleResolutionPresentation.ts` ~7163, `tests/enc276ForcedTurnNoMenu.test.ts`. Two rows (s5063 / s7295) that the first classing put here are wake-up / confusion windows and are unchanged.
+- ON: 14,435 -> 14,451 (+16): the three ON Struggle windows are not the same cause (their step is +2 and the s2230 window carries -17 from the animation rows); one frame moved. Kept: OFF -221 against ON +16.
+
+### 3. ON split (24 seeds probed, `table-on.txt`; ON hit-SE windows 92 / owned mass 727 / step mass 301)
+
+The Struggle / wake-up / confusion windows are already within +-2 in ON (gsp2 / sta3 land them); the ON hit-SE offset comes from other commands: **the end-of-turn weather tick** (`DamagingWeatherLoop`, s8108 / s2741: 12 windows, step -8 each; s8108 d20: ROM `playanimation` row 459 / SE 219 +3 -> damage print 637 = 178, engine `general-animation` (SANDSTORM_CONTINUES min 172) 413 -> `message` 585 with the SE at +12; engine print -> SE 13 116 against ROM 109) and **`EffectParalyzeHit`** (s5063 si 105 -33, s6079 si 7 / 15 -11: ROM release -> SE 146 / 136, engine 110 / 121 = the secondary-effect animation rows), plus 33 plain windows (459 mass, median step -1: carried offsets). The ON arm needs its own recipe (not opened further here).
+
+### 4. Landing recipe for the next run (OFF; one `src/engine/battleResolutionPresentation.ts` change per row, each by the rows above)
+
+1. **Wake-up (largest after the tools fix, 91 mass):** drop the Scene gates at `:1265` (`!sceneOff &&`) and `:6310-6314`; the OFF wake-up message holds `WAITMESSAGE_LONG_HOLD_FRAMES + 2` and the icon lasts `wakeUpStatusIconFrames` (exec delta + 1), as ON. Rows: print -> icon 82, icon -> print 5 (ROM s5063 d40). Pins it will move: OFF wake-up pins in `tests/factoryBattleScriptWakeUpFullTurn.test.ts`, `tests/battleScriptAttackCancelerAsleep.test.ts`, `tests/off121StatusCommand.test.ts` (grep only, not run). Expected: -6 of -7 per window, OFF T2 mass about -75 (91 -> ~15), exact about +10.
+2. **Confusion head (77 mass):** in OFF, when the next command after the confusion print is the used print (`BattleScript_MoveUsedIsConfusedRet` -> `HitFromAtkCanceler` ...), hold `WAITMESSAGE_LONG_HOLD_FRAMES + PRE_MOVE_STATUS_ANIMATION_LEAD_ROWS + 4` (the skipped `status2animation` leaves the `return` + three script rows: ROM print row 11 -> used print 108 / 105 / lab 1417). Pins: `tests/sta3PreMoveStatusTiming.test.ts`, `tests/confusedAdmissionPresentation.test.ts` (OFF rows). Expected: -4 of -6, OFF mass about -45; ON unchanged (gate by NO_ANIMATIONS).
+3. **Struggle +1:** shorten the forced-handoff hold before the used print by 1 (dismiss -> print 17), `tests/enc276ForcedTurnNoMenu.test.ts`; 43 rows, +43 exact, mass -43. Then re-run `hse1mSplit.py` / `hse1mTable.py` on the new engine to rank infatuation (-3), Focus Punch, two-turn.
+4. Do not touch the `move-animation` min 42 / `hit-animation` (their interval is exact) and do not land t2k3's "21-28 short" proposal.
+
+### 5. wkl1m (2026-11-22): the clean Scene OFF wake-up lab pair (labs and docs only; `src/` and `tests/` untouched)
+
+Labs: `tools/battle-lab/wkl1m-wakeup-player-off.json` (the player's Snorlax L50 sleeps) and `wkl1m-wakeup-foe-off.json` (the foe's Snorlax sleeps; the name says which side wakes, the reverse of the gsp3 "user" naming). Parties: Snorlax L50 with Rest (156) in all four slots against Rattata L50 with Seismic Toss (69) in all four; Snorlax is slower, so Seismic Toss (fixed 50) lands first each turn; four turns of `A`, 18 idle, `A`, 700 idle (the last idle 900). Run: `labCompare.sh --scene off --out .integration/evidence/wkl1m/run wkl1m-wakeup-player-off wkl1m-wakeup-foe-off` (tables: `run/*.table.txt`, git-ignored).
+
+**Why Rest, not Spore.** A Spore lab (`Rattata L50` Spore x4 against a Seismic Toss L12 foe, seeds 1-6, 3-7 turns) is not usable: the sleep length is a roll, and the engine's and the ROM's differ for the same lab seed. ROM wakes the foe in turn 2 (seeds 1 / 3 / 5) or turn 4 (seed 2); the engine one turn later each time (turn 3 for odd seeds, 5 for even), so the ROM foe is awake and re-slept by the next Spore while the engine foe is still asleep (rows desync from the wake turn on: SUMMARY mass 707 = the engine's wake-up attack matched with the ROM's earlier one). That engine-vs-ROM sleep-length roll is its own open question (not a timing rule; untouched). Rest has a fixed length (Snorlax asleep turns 2 and 3, wakes in turn 4 in the ROM and in the engine) and no accuracy roll, so both labs reach the same wake-up turn; the only press-timing care is that the last idle outlasts the long wake + Rest turn (a fifth turn's `A` fell inside the ROM's turn 4 end in the first 5-turn trace).
+
+**Result (`labCompare.sh --scene off`).**
+
+- `wkl1m-wakeup-player-off.off`: `PRINTS exact 7 / offset 6 / missing 4 / extra 0, mass 105 (first glyph: ROM 17 / ENG 13)`; `SUMMARY exact 4 / offset 0 / missing 0 / extra 0, mass 0 (ROM 4 / ENG 4 se)`.
+- `wkl1m-wakeup-foe-off.off`: the same two lines, identical numbers.
+- The four SEs (the four Seismic Toss hit SE 13) are exact +0 in both, so the wake-up window is entered with no carried offset; the 4 "missing" prints are ROM-only `MoveEnd+0x9` rows (the ROM prints the next message row where the engine has none).
+
+Wake-up window (turn 4; ENG - ROM, frames; player lab / foe lab are the same except the battler side; wake print exec `MoveUsedWokeUp+0xe`):
+
+| Row | ROM | ENG | ENG - ROM |
+|---|---|---|---|
+| wake-up print first glyph (player lab / foe lab) | 2374 / 2370 | 2359 / 2355 | **-15** |
+| status icon clear (ROM `MoveUsedWokeUp+0x13` updatestatusicon exec; ENG `status-icon` command) | 2455 | 2439 | **-16** |
+| next used print first glyph (`EffectRest+0x2`, the woken Snorlax's Rest) | 2460 | 2440 | **-20** |
+
+The -15 at the wake print is not the wake-up rule: the same -15 is on the `MoveUsedIsAsleep` print of turns 2 and 3 (ROM 929 / 1651, ENG 914 / 1636, both labs) with the Seismic Toss hit SE exact in front of them, so it is the engine's asleep / wake print head after a hit (a separate step). The wake-up rule is the two deltas *inside* the window, and the lab reads exactly hse1m's: print -> icon is **81** ROM glyph-to-icon (82 from the print exec 2373 to the updatestatusicon exec 2455) against the engine's **80** (-1 glyph basis, -2 on hse1m's exec basis), and icon -> next print is **5** ROM (updatestatusicon exec 2455 -> `EffectRest+0x2` exec 2459, glyph 2460) against the engine's **1** (-4). Wake print -> next print is 86 ROM / 81 ENG = -5; the step goes -15 -> -16 -> -20. So the Scene ON rules are what OFF needs: `WAITMESSAGE_LONG_HOLD_FRAMES + 2` for the message and `wakeUpStatusIconFrames` (exec delta + 1) for the icon (`battleResolutionPresentation.ts:1265`, `:6310-6314`), after which the three rows should read -15 / -15 / -15 (next print -20 -> -15); anything left on top is the asleep / wake print head (-15). The row after the next used print (Rest `status` / heal prints, -20) carries the same -5 and moves with it.
+
+**Landing check for the next run:** after the `:1265` / `:6310-6314` change run `labCompare.sh --scene off wkl1m-wakeup-player-off wkl1m-wakeup-foe-off` (about 40 s for both); the wake print row stays -15, the icon row goes -16 -> -15 and the used-print row -20 -> -15; all four SEs must stay +0 and SUMMARY mass 0. Pins to re-check by the recipe above (`tests/factoryBattleScriptWakeUpFullTurn.test.ts`, `tests/battleScriptAttackCancelerAsleep.test.ts`, `tests/off121StatusCommand.test.ts`) were not run.
+
+## g180m (2026-11-22): the engine commands behind t2k3 items 4 and 5 (gen:180 / 142 / 202 chain, Dig)
+
+Post-freeze measurement; `src/` and `tests/` untouched. Tools: `tools/integration/g180mProbe.sh` (probe + `hcr3mCmp` for one seed / decision; `SUB=<dir>` keeps one `rom.json` per decision), `g180mClass.py gen|dig` (window first rows with the five engine commands before them), `g180mTwoTurn.py` (first-turn windows of two-turn moves with the previous ROM cause). Evidence: `.integration/evidence/g180m/` (`p/*/*.cmp.txt`, `c-on/` cmdtraces, `lab/leech.txt`).
+
+### 1. Correction of t2k3 item 4: it is the Leech Seed drain, not a restore-HP body
+
+gen:180 / 142 / 179 are the three SE ids of `BattleScript_LeechSeedTurnDrain` (`general-animation LEECH_SEED_DRAIN`: SE 180 `SE_M_ABSORB`, then 142 `SE_M_CRABHAMMER` / 179), gen:202 is `SUN_CONTINUES`. ON: 207 drain rows, mass 1,028, 22 exact; engine SE = command start + 34 (`LEECH_SEED_DRAIN_SCRIPT_AGE = 7`, `moveAnimSounds.ts:573, 688-690`; command min 218 = `LEECH_SEED_DRAIN_PRE_ROWS` 8 + exec + 207).
+
+| Window class (first row) | ROM interval | Engine interval | Differing command | Source |
+|---|---|---|---|---|
+| **Post send-in**: s6912 d2 (+13 x2, 5 windows' rows ~260 mass) | send-in script -> `LeechSeedTurnDrain+0x7` exec 233, SE 180 260 (+27) | `general-animation` starts 239 (+6 against the ROM exec), SE 273 | the drain command itself starts 6 rows after the ROM exec (the hie6m send-in constant: the retained segment starts 6 late) and the age adds 7: 6 + 7 = **+13** | `p/on/6912-d2.cmp.txt`; `battleResolutionPresentation.ts` drain command, `moveAnimSounds.ts:688` |
+| **After end-turn weather / side-status prints**: s310 d16 (-12), s648 d6 (-6 / -7) | `SideStatusWoreOff`, weather print, then drain | `turn-end` / `message` heads 9 rows (ROM 7-8), holds 97 / 88 against ROM 92 / 83 (-5 each) | the `message` commands before the drain (not the drain): the print head and hold shortfall accumulate before the drain starts | `p/on/310-d16.cmp.txt`, `p/o648d6/` |
+| **After a b0 hit**: s648 d10 (-2 .. -6) | `MoveEnd` 548 -> drain exec 558, SE 585 | `hp` b0 (floor 28) 428 -> drain 556 -> SE 590 | `hp` interval: engine floor 28 rows, the ROM bar length depends on the damage | `p/o648d10/` |
+| `SUN_CONTINUES` (gen:202): s310 d12 (+10, +7 x3) | weather `playanimation` exec -> SE 202 | first SE at command start + `WEATHER_SCRIPT_AGE` 8 | the age 8 for Sun / Sandstorm / Hail has no weather-window receipt (Rain is pinned by rnc1) | `p/on12/`, `battleResolutionPresentation.ts:249-295`, `moveAnimSounds.ts:654-662` |
+| Exact / single-row (s319 0 / -2, s648 +5, others) | | | not opened | |
+
+Labs (`labCompare.sh`, ON): `aud250-leechseed-player-on`, `aud250-leechseed-opponent-on`, `etp1-leechseed-on` are **exact (every SE +0, mass 0)** including the drain (SE 180 / 142). So the drain's own interval is right when it follows an ordinary hit-and-end-turn; the T2 windows are context chains. Open: in the labs ROM exec -> anim lag is 7, in T2 it is 0 (SE 180 = exec + 27 with the anim script active on the exec row); an `IsBattleSEPlaying` gate is the hypothesis, unconfirmed. A global age change fails: -7 turns drain mass 1,028 into 1,677 (exact 30), -6 1,570, -5 1,463.
+
+### 2. Item 5: the Dig windows are a charge-turn start gap after a previous move
+
+13 ON Dig-first windows, mass 615. 488 (79%) of it is **a charge turn that follows another move in the same turn** (first-turn Dig after Light Screen x3 -8, Rock Slide -10, Follow Me -10, stat -11 / -14, Sandstorm -19); the same Dig after turn start (`prev start`, 10 windows) is exact. Solar Beam / Fly show the same sign (-10, -13, -14, -18). Ordinary moves after Sandstorm / Rain / Hail are exact (Facade, Blizzard, Bulk Up, Light Screen +0), so it is a charge-turn rule, not the weather chain.
+
+ROM s8108 d6 (Light Screen -> Dig): `MoveEnd` 229 -> `EffectSemiInvulnerable` 236 (7) -> `FirstChargingTurn+0x6` exec 249 (+13) -> SE 175 269 (+20). Engine: `sprite-visibility` 230, used `message` (min 8) 231 = `MoveEnd` + 2, `move-animation` 239, SE 261: **-8**. After turn start the engine puts the same `message` at `EffectSemi` + 3 (s648 d0: message 9, `EffectSemi` 6, exec 19, SE 39 +0), i.e. the used print of a first charge turn starts 8 rows earlier after a previous move than it does after the turn start. s8108 d19 (Sandstorm -> Dig): `WeatherFormChanges` 293 -> `Loop` 294 -> `MoveEnd` 302 -> `EffectSemi` 309 (16 rows after the form-change row), the engine places the used `message` at 293 (the command after `sprite-visibility` 292): -8 plus **-11** more = **-19** (that extra -11 is not explained: ordinary moves after Sandstorm are exact). s6 d1 (Snore asleep -> Dig): -13 = -8 + -5.
+
+| Window class | Step | Mass | Reading |
+|---|---|---|---|
+| After Light Screen (s8108 si13 / 29 / 45) | -8 | 144 | pure charge-turn gap |
+| After Rock Slide / Follow Me (s6 si3, s3738 si63) | -10 | 115 | -8 + -2 |
+| After stat change (s3738 si95, s8108 si51) | -14 / -11 | 115 | -8 + the stat chain |
+| After Sandstorm (s8108 si39) | -19 | 114 | -8 + -11 |
+| Dig after Dig, Sandstorm second-turn, Brick Break (+18) | +9 / -5 / +2 / +18 | 127 | carried offsets, not opened |
+
+### 3. Landing recipe for the next run
+
+1. **Charge-turn used print after a previous move (item 5, ~490 mass ON): `battleResolutionPresentation.ts`, the `STRINGID_USEDMOVE` message of a `CHARGE_TURN_SCRIPT` event (`chargeChainCarry` / `twoTurnSecondPrintLead`, ~5859-5892)**: when a previous action chain precedes the first charge turn in the same turn, delay the used print by 8 rows (the ROM `MoveEnd` -> `EffectSemi` 7 + the 3 the turn-start context already carries), keep the turn-start case (`prev start`) untouched. Pins it will move: bdt1 / chg2 / chg3 Dig and Solar Beam labs only if they contain a previous move in the same turn (their turn-start windows are exact and must stay so). Expected T2: ON Dig -8 x3 windows exact, -10 / -11 / -14 / -19 windows reduce by 8 per window row (~ -250 mass); Solar Beam / Fly after a move likewise. Verify: `labCompare.sh` on a Light Screen -> Dig lab (new, Factory moves), then `g180mTwoTurn.py`.
+2. **Sandstorm -> Dig extra -11**: measure the `WeatherFormChanges` loop (`MoveWeatherChange+0xf` -> `MoveEnd` 9 rows) against the engine's `message` min 8 after the weather `sprite-visibility`; likely the same carried rows the ordinary-move path absorbs. Expected: s8108 si39 -19 -> -8 -> 0 with rule 1.
+3. **Post send-in drain (item 4, s6912 ~260 mass)**: the drain after a player forced-switch send-in starts 6 late (hie6m), so subtract the 6 + 7 age only in that context: `moveAnimSounds.ts:688` age 7 -> 0 when the command was reached from a send-in, or fix the segment start once (hie6m item). Pins: the leech send-in pins in `tests/`; expected s6912 +13 x2 -> 0.
+4. **End-turn print head / hold before the drain (s310 d16 -12, s648 d6 -6)**: `turn-end` / `message` head 9 -> 7 rows and the weather / side-status print hold 97 -> 92, 88 -> 83 (ROM `SideStatusWoreOff`). Pins: end-turn pins (`tests/endTurn*`). Expected -12 -> 0, -6 -> 0.
+5. **`SUN_CONTINUES` / Sandstorm / Hail age 8**: lab a multi-turn Sunny Day (Factory move) before changing `WEATHER_SCRIPT_AGE`; the first SE is +7 .. +10 in T2.
+6. Do not change `LEECH_SEED_DRAIN_SCRIPT_AGE` globally (-7 raises T2 drain mass 1,028 -> 1,677); the labs are exact at 7. Resolve the lab-lag-7 / T2-lag-0 question first (one cmp of s6912 d2 against `etp1-leechseed-on`).
+
+Gates: no `.ts` added (python / shell only), so no typecheck; `npm test` not run (the step overrides the generic line); `src/`, `tests/`, PROGRESS / ISSUES / ROADMAP and the acceptance / supervisor ledgers untouched.
+
+## t68m (2026-11-22): the engine commands behind t2k3 items 6, 7 and 8 (gen:148 tick, Ice Beam, Rock Slide) -- none of the three is a rule of its own (measurement only; `src/` and `tests/` untouched)
+
+Tools: `tools/integration/t68mWin.py` (windows of one cause with the previous row's cause / offset and, with `--cmd DIR`, the engine cmds before the first row) and `t68mPress.py` (per window, last ROM SE 5 -> row vs last engine SE 5 -> row; second arg `cmd` names the owning engine cmd). Frozen input: t2k3 `attr-on.json`; ROM windows from the hse1m full probes, `hcr3mCmp.py` on the frozen T2 request. Evidence (git-ignored): `.integration/evidence/t68m/` (`win-*.txt`, `press-*.txt`, `<seed>-d<n>.cmp.txt`).
+
+**Result.** In all three items the *interval of the item's own command is exact* (ROM = engine): poison tick message -> status animation 95 = 95; Ice Beam press -> SE 67-73 identical; Rock Slide s97 55 = 55. The offset on the first row is whatever precedes the item. There is no per-item constant to change.
+
+### 1. Item 6: gen:148 poison / status tick first row (ON 534, 19 windows, -12 .. +6) is five inherited classes
+
+| Class | Mass | Windows | What precedes (ROM vs engine) | Command |
+|---|---|---|---|---|
+| A. offset inherited from the previous row (same sign, same size) | 222 | 9 | the previous row already carries the offset; the tick adds 0 | not a tick |
+| B. first command after a player send-in, +6 | 72 | n/c | the retained segment after a player send-in starts 6 late (hie6m constant) | send-in -> next segment start |
+| C. after a foe replacement `switch-in` tail, -9 | 54 | 1 | engine `switch-in` tail 9 shorter than the ROM `SwitchInEnd` hold | `switch-in` tail |
+| D. after a side-status / Encore message chain, -4 / -5 | 84 | n/c | the g180m item 4 family (`DisabledNoMore` / `SideStatusWoreOff` print hold ~5 short) | message hold |
+| E. after a body tail: Knock Off +5, miss -3, Block -8 | 102 | n/c | the previous move's own end (`KnockedOff` / `MoveEnd` tail), not the tick | previous body |
+| Sum | 534 | 19 (A 9, C 1; B / D / E split not counted) | | |
+
+Source rows: tick message -> `BattleScript_PoisonTurnDmg` -> `DoStatusTurnDmg` status animation 95 frames on both sides; the first-row error equals the previous row's error in A, so fixing B / C / D / E moves A with it (the 222 collapses only when the 3 inherited roots are fixed).
+
+### 2. Item 7: Ice Beam first-mover windows (ON 517; -21 / -13 / -6) are a harness gate, a continuation segment and a print hold
+
+| Window | Step | Mass | Cause | ROM vs engine |
+|---|---|---|---|---|
+| s2230 d20 si41 | -21 | 231 | **harness press gate, not an engine rule**: the ROM is still in the `DisabledNoMore` end2 tail and accepts the census retry press at +19, the engine accepts at 0 | press -> SE 5: ROM 19 later; press -> SE 67..73 equal |
+| s830 d1 si3 | -13 | 156 | engine continuation segment (`seg 1`, lead 0) after the opponent's first charging turn; the ROM waits 12 before the used print | engine commit -> first message 0 vs ROM 12 |
+| s830 si11 | -6 | 66 | the confusion-ended print (`MoveUsedIsConfusedNoMore`) hold ~5 short | message hold 5 |
+| s6079 si1 | -4 | 56 | not opened to the end (s6079 d0: engine commit 9, ROM 7; first message 9 vs ROM `EffectEarthquake` 6; the prior row is `ctl-hit:13` off +0) | |
+| s830 si19, s2230 si31 | -3 / -3 | 6 | single rows | |
+| s8612 si33 | +2 | 2 | after Rest | |
+| Sum | | 517 | 231 + 156 + 66 + 56 + 6 + 2 | |
+
+Only 2 decisions in 24 seeds are the gate (s2230 d20, d21; d21 probably owns the Struggle -17 of t2k3). It is a `soundCensusRomReplay` / driver artefact: the fix is the census press gate (accept the A press only on the ROM's accepted frame), never `src/`.
+
+### 3. Item 8: Rock Slide body (ON 514; -13 / -10 / -9 and +5) is inherited from the previous move
+
+| Window | Step | Mass | Cause |
+|---|---|---|---|
+| s8612 si17 | -13 | 180 | first row off -9 after Belly Drum (prev off +4): -13 is the step, the Belly Drum tail is +4 on the ROM side |
+| s165 si37 | +1 (off +5) | 100 | inherited: prev `ctl-hit:13` row already +4 |
+| s165 si45 | -5 | 60 | prev `stat:245` off +2 (not opened) |
+| s165 si49 | -3 | 40 | prev `ctl-hit:13` off +1 (not opened) |
+| s310 si43, s1914 si23 | -3 / -3 | 120 | segment start, the engine's 9 .. 13 commit -> first message vs ROM 12 |
+| s2741 si5, s6 si3 | -10 / -3 | 14 | after Perish Song / segment start |
+| Sum | | 514 | 180 + 100 + 60 + 40 + 120 + 14 |
+
+Rock Slide's own interval is exact (s97 55 = 55): the item is not a Rock Slide rule.
+
+### 4. Landing recipes for the next run
+
+1. **Used-print lead of a continuation segment after an opponent's first charging turn (s830 d1, -13, 156 mass, item 7): `battleResolutionPresentation.ts` `usedMovePrintLeadU` (~7057).** In Scene ON the hold reads `state.segments[0]`, and its comment says continuation segments were measured in Scene OFF only; the ROM waits 12 before the used print, the engine `seg 1` (lead 0) waits 0. Rule: when the print belongs to a continuation segment (`segmentIndex >= 1`, no commit of its own) hold the OFF `lockedTurnPrintLead` base (`TURN_START_PRINT_BASE_U`, ~7390) instead of 0. Pins: the Scene ON continuation / charge pins in `tests/` (`usedMovePrintLead*`, charge-turn pins around `chargeChainCarry`). Expected T2: item 7 -156 mass (s830 d1) and possibly the s165 / s6 / s830 / s8108 first-row mixes (not uniform: lab one cmp per seed first). **Not resolved**: whether the lead-0 `seg 1` rule is uniform.
+2. **Send-in -> next segment +6 (class B of item 6, 72 mass)**: the hie6m constant (see its recipe); do it once, it moves item 3 and item 6.
+3. **Side-status / Encore message hold ~5 short (class D, 84; item 7 s830 si11, 66)**: the g180m item 4 recipe (`SideStatusWoreOff` / `DisabledNoMore` hold 97 -> 92); `MoveUsedIsConfusedNoMore` shows the same shape. Pins: the end-turn side-status print pins.
+4. **s2230 d20 (-21, 231 mass) and Struggle -17**: census press gate in `soundCensusRomReplay.ts` / `tools`, not an engine change (fch2m class). After fixing, expect item 7 -231 and, if d21 is the same gate, the item's Struggle row.
+5. **Engine commit -> first message 9 .. 13 vs ROM 12** is unexplained (it makes the ±3 rows of item 8 and s6079 item 7); open s6079 d0 (`6079-d0.cmp.txt`: engine commit 9 / ROM 7, engine first message 9, ROM `BattleScript_EffectEarthquake` 6) before any change.
+6. **Do not add a poison tick, Ice Beam or Rock Slide rule**: the three are inherited; the only direct engine moves of this step are 1, 2 and 3.
+
+Gates: no `.ts` added (python only), so no typecheck; `npm test` / build not run (docs / tools step); `src/`, `tests/`, PROGRESS / ISSUES / ROADMAP and the acceptance / supervisor ledgers untouched.

@@ -164,7 +164,25 @@ Tests: `tests/btn2ReleaseTail.test.ts` (table pin, Roar seed 95 live turn-end 13
 
 ### Open
 
-- The box clear after a release is 1 row late in the app (521 vs 520 on subhit, 516 vs 515 on roar).
+- The roar lab's action menu is 1 row before the ROM's (521 vs 522; msw2 below).
 - The release rows apply only when the gated print is directly before the turn-end; a mid-turn follow-up (FADED then more actions) is unmeasured.
 - The Substitute-damaged print starts 1 row before the ROM's in the app (the hit-animation length, out of scope); the Roar compare differs for switch reasons.
 - No compare stage with a Static foe or a Trick pair exists (the intermediate 4-px scroll images, rows 501-505, are not compared).
+
+## 8. msw2: the box clear after a release (2026-11-21, ISSUES #223)
+
+Measured on the compare labs over rows 495:560 (and 840:905 for subfade), the rows where the box region (y >= 112) changes, ROM vs app, both scenes:
+
+| lab | what changes | ROM | app before | app after |
+|---|---|---|---|---|
+| `subp1m-subhit-{off,on}` | the Substitute-damaged text clears | 520 | 521 | 520 |
+| `subp1m-subhit` | the action menu draws | 527 | 527 | 527 |
+| `subp1m-subfade` (FADED release) | the faded text clears / the menu | 883 / 890 | 884 / 890 | 883 / 890 |
+| `subp1m-roar-{off,on}` | the dragged-out text clears / the menu | 515 / 522 | 515 / 521 | 515 / 521 |
+
+- Roar's clear was already on 515 (msg2 took `PKMNWASDRAGGEDOUT` from 5 to 4 rows). The "516 vs 515" in the old note was stale. What is left on roar is the menu one row early, left as is: the ROM catcher runs (msg2, 35 prints) show the menu at press + 20 in 20 and press + 21 in 14, so the 7-row gap the lab shows is 5 to 8 across runs and the lab's fixed 7 is not the rule.
+- The rule: after a Substitute release the ROM clears the box on the row before the turn-end ends (subhit 520 of 18 rows from 503; subfade 883 of 17 rows from 866), then the handoff runs its 6 rows to the menu. The engine had drawn the print until the handoff. `BattleTurnEndTiming.blankTailFrames` (`RELEASE_TAIL_BLANK_ROWS` = 1) draws the turn-end's last row as the cleared box; the totals (`RELEASE_TO_MOVEEND_ROWS` 10 / 9, 18 / 17 rows) and the menu rows are unchanged. Dragged out keeps msg2's 4 rows and no blank tail.
+- Match (subp1m-subhit, rows 495:560): OFF 35 -> 36 of 66, ON 33 -> 34. subfade 840:905: 60 -> 61 of 66 (both scenes). roar and the subfade 495:560 window are unchanged (the remaining diffs there are the frozen-cursor phase and, in Scene OFF, the fade-start clear at 501 vs the ROM's 502, both older).
+- Census (lsd194Census, base dd69505a0 -> 54ee65135, seeds 0..199, both scenes): eventsDigest and error identical in 200 / 200 per scene, commands identical (61381 OFF, 62965 ON); the change is a draw-only row, no kernel event, RNG, outcome, row count or sound moved.
+- Pin: `tests/btn2ReleaseTail.test.ts` (the faded print of seed 124, both scenes: the render's `bottom` is blank exactly on turn-end row 16 of 17; the timing pins carry `blankTailFrames`).
+- Open: the Substitute-damaged print itself before a turn-end (no census seed reaches one; every damaged print leads into the fade) is pinned only by the subhit lab; a mid-turn follow-up after a release is still unmeasured.

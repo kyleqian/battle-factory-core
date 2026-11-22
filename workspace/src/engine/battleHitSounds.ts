@@ -25,6 +25,8 @@ import type {
 
 /** Ticks the Scene ON oracle trails the engine's presentation clock for the controller-side sounds (the same lag in every window). */
 const SCENE_ON_LAG = 7;
+const EXPLOSION_USER_FAINT_EXTRA_ROWS = 2;
+const EXPLOSION_FAMILY_MOVE_IDS: ReadonlySet<number> = new Set([120, 153]);
 /** CRY_MODE_FAINT cry pan (battle_gfx_sfx_util.c: -25 player / +25 opponent). */
 const FAINT_CRY_PAN_PLAYER = -25;
 const FAINT_CRY_PAN_OPPONENT = 25;
@@ -40,6 +42,12 @@ const SET_MON_DATA_AFTER_HEALTHBAR_DONE = 1;
  * gActiveBattler = gBattlerTarget, which DoFieldEndTurnEffects (battle_util.c:1186-1191) has set to the first present battler (the player), so both ticks pan to the player.
  */
 const DAMAGING_WEATHER_LOOP_SCRIPT = "BattleScript_DamagingWeatherLoop";
+/**
+ * etp2 (ROM labs etp1-hail-{on,off}, aud252 fixture): after the damage print's `waitmessage` the ROM runs orword, effectivenesssound, hitanimation; the SE is the row
+ * before the hit (ON 988 / 1136, OFF 514 / 662). Our hit command starts 3 rows earlier than the ROM's hitanimation row (986 / 1134, OFF 512 / 660), so the SE is
+ * 3 ticks after our command start tick (the etp1Engine frame + 2) in both scenes, not the controller lag (ON 7 less the lead rows, which put it 4-6 rows late once the etp1 print leads moved the loop).
+ */
+const WEATHER_LOOP_HIT_SE_AFTER_COMMAND_ROWS = 3;
 
 function currentCommand(
   resolution: BattleResolutionPresentationState | null,
@@ -82,10 +90,16 @@ export function emitBattleHitSounds(
   const { command, segment } = now;
   // hpd4: a move body's script lead and hit tail are presented rows the ROM-calibrated controller sounds (SCENE_ON_LAG) already carry; a sound anchored to
   // a later command start subtracts them, and one that would then precede its anchor is scheduled from the earlier command (hit SE, HP bar).
-  const lag = sceneLag(segment) - (after === null ? 0 : moveBodyExtraRows(after, false));
+  const lag = Math.max(0, sceneLag(segment) - (after === null ? 0 : moveBodyExtraRows(after, false)));
   if (command.type === "move-animation") {
     const next = segment.commands[segment.commands.indexOf(command) + 1];
     const duration = after === null ? null : presentedMoveDurationOnSoundClock(after);
+    if (next !== undefined && next.type === "hit-animation" && duration !== null && (command.timing.bodyLeadFrames ?? 0) === 0 && EXPLOSION_FAMILY_MOVE_IDS.has(command.animation?.moveId ?? -1)) {
+      // mxp1: the leadless Self-Destruct / Explosion body presents the hit command on the ROM's `hitanimation` row (A end + 10); its SE is `effectivenesssound`'s, the row before.
+      const explosionSong = effectivenessSong(segment, next.eventSequence);
+      if (explosionSong !== null) scheduleAfter(Math.max(0, duration), () => playPannedSe(explosionSong.song, next.battler === 0 ? SE_PAN_PLAYER : SE_PAN_OPPONENT));
+      return;
+    }
     if (next === undefined || next.type !== "hit-animation" || duration === null || (command.timing.bodyLeadFrames ?? 0) === 0) return;
     const song = effectivenessSong(segment, next.eventSequence);
     if (song === null) return;
@@ -114,6 +128,7 @@ export function emitBattleHitSounds(
   if (command.type === "hit-animation") {
     const previous = segment.commands[segment.commands.indexOf(command) - 1];
     if (previous?.type === "move-animation" && (previous.timing.bodyLeadFrames ?? 0) > 0) return;
+    if (previous?.type === "move-animation" && EXPLOSION_FAMILY_MOVE_IDS.has(previous.animation?.moveId ?? -1) && sceneLag(segment) > 0) return;
     const song = effectivenessSong(segment, command.eventSequence);
     if (song !== null) {
       const panBattler = song.weatherLoop ? 0 : command.battler;
@@ -121,15 +136,20 @@ export function emitBattleHitSounds(
       // tail rows of the resolution's earlier lead bodies (another move, or a multi-hit's first hit) are already in this command's start:
       // subtracting them (moveBodyExtraRows) put the SE that many rows early (frame catcher: Petal Dance / Spark / Brick Break after a
       // lead body 8 / 9 early, Double Slap / Fury Swipes hits 2+ 7 to 9 early). A hit after a general animation (Future Sight's hit,
-      // the end-turn hail / sandstorm loop) keeps the old anchor: its own offset is not ROM-exact either way (open in the doc).
+      // the end-turn hail / sandstorm loop: etp2's constant) keeps its own anchor.
       const anchor = previous?.type === "move-animation" ? sceneLag(segment) : lag;
-      scheduleAfter(Math.max(0, anchor), () => playPannedSe(song.song, panBattler === 0 ? SE_PAN_PLAYER : SE_PAN_OPPONENT));
+      // etp2: the end-turn weather loop's hit SE is 3 ticks after its hit command in both scenes.
+      scheduleAfter(song.weatherLoop ? WEATHER_LOOP_HIT_SE_AFTER_COMMAND_ROWS : Math.max(0, anchor), () => playPannedSe(song.song, panBattler === 0 ? SE_PAN_PLAYER : SE_PAN_OPPONENT));
     }
     return;
   }
   if (command.type !== "faint") return;
   const lead = command.timing.leadFrames;
   if (lead === undefined) return;
+  // mxp1: after a leadless Self-Destruct / Explosion body (ON) the presented hit / hp / message rows are on the ROM's rows, so the faint SE carries no controller lag
+  // (ROM labs eqk1-{expl,sd}-{p,f}-on: target faint +7, user faint +5 with it); the user's own faint (the script's second tryfaintmon) is 2 rows later still.
+  const explosionBody = segment.commands.find((c) => c.type === "move-animation" && c.animation !== undefined && EXPLOSION_FAMILY_MOVE_IDS.has(c.animation.moveId));
+  const faintLag = explosionBody?.type === "move-animation" && sceneLag(segment) > 0 ? (explosionBody.battler === command.battler ? EXPLOSION_USER_FAINT_EXTRA_ROWS : 0) : lag;
   // snd2: {Player,Opponent}HandleFaintingCry cry the party mon at gBattlerPartyIndexes[battler] (battle_controller_player.c /
   // battle_controller_opponent.c): the mon on the field at the faint. segment.field is the field the segment opened with, so a mon
   // sent in earlier in the same segment and knocked out there cried as the one it replaced (frame catcher, seed 3: "Go! PHANPY!" ...
@@ -137,11 +157,19 @@ export function emitBattleHitSounds(
   const field = after === null ? segment.field : currentCommandField(after);
   const side = command.battler === 0 ? field.player : field.opponent;
   const pan = command.battler === 0 ? FAINT_CRY_PAN_PLAYER : FAINT_CRY_PAN_OPPONENT;
-  scheduleAfter(Math.max(0, lead - FAINT_CRY_BEFORE_SE + FAINT_SOUND_OFFSET + lag), () => playFaintCry(bgm, side.species, pan));
-  scheduleAfter(Math.max(0, lead + FAINT_SOUND_OFFSET + lag), () => {
+  scheduleAfter(Math.max(0, lead - FAINT_CRY_BEFORE_SE + FAINT_SOUND_OFFSET + faintLag), () => playFaintCry(bgm, side.species, pan));
+  scheduleAfter(Math.max(0, lead + FAINT_SOUND_OFFSET + faintLag), () => {
     if (command.battler === 0) handleLowHpMusicChange(0, field.player.maxHP);
     playPannedSe(SE_FAINT, command.battler === 0 ? SE_PAN_PLAYER : SE_PAN_OPPONENT);
   });
+}
+
+/** Ticks from the faint command's first tick to its SE_FAINT (the schedule above); null when the current command is not a faint with a lead. */
+export function faintSeOffsetRows(state: BattleResolutionPresentationState): number | null {
+  const segment = state.segments[state.segmentIndex];
+  const command = segment?.commands[state.commandIndex];
+  if (segment === undefined || command?.type !== "faint" || command.timing.leadFrames === undefined) return null;
+  return Math.max(0, command.timing.leadFrames + FAINT_SOUND_OFFSET + Math.max(0, sceneLag(segment) - moveBodyExtraRows(state, false)));
 }
 
 function sceneLag(segment: BattleResolutionSegment): number {

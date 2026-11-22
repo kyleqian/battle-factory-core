@@ -15,13 +15,16 @@ describe("trn181: the action-transition pause in Scene ON", () => {
     for (const [species, move, first, p] of [["PRIMEAPE", MOVE.BULK_UP, true, 12], ["PRIMEAPE", MOVE.SAND_ATTACK, true, 12],
       ["PRIMEAPE", MOVE.PROTECT, true, 12], ["PRIMEAPE", MOVE.SCRATCH, true, 13], ["PRIMEAPE", MOVE.DOUBLE_EDGE, true, 14],
       ["SNORLAX", MOVE.REST, false, 15], ["PRIMEAPE", MOVE.TOXIC, true, 16]] as const) {
-      expect([move, pauses(prod(species, move, "on", first).rows)]).toEqual([move, [p]]);
-      expect([move, pauses(prod(species, move, "off", first).rows)]).toEqual([move, [p]]);
+      // etp1 (ROM labs etp1-{toxic3,willowisp3}-{on,off}, tick prints on turns 2-3 exact): Toxic's poison tick is a turn-end print, so the wtl1 pause (15)
+      // before the turn's MoveEnd receipts now also leads into it: a second pause after the used-print pause.
+      const expected = move === MOVE.TOXIC ? [p, 15] : [p];
+      expect([move, pauses(prod(species, move, "on", first).rows)]).toEqual([move, expected]);
+      expect([move, pauses(prod(species, move, "off", first).rows)]).toEqual([move, expected]);
     }
   });
 
   it("controls: no USEDMOVE next adds nothing; Wish keeps msg175's pause; Thunder Wave (next action opens elsewhere) is skipped", () => {
-    expect(pauses(prod("PRIMEAPE", MOVE.TOXIC, "on").rows)).toEqual([16]);
+    expect(pauses(prod("PRIMEAPE", MOVE.TOXIC, "on").rows)).toEqual([16, 15]);
     // Wish: the anchor was the used print itself (no transition pause); lse4 anchors a lead-class body on its own animation row (x + 1): lead 2 before the body (276) and the pause (12 here, 11 on the aud242k lab) before the receipt.
     expect(prod("PRIMEAPE", MOVE.WISH, "on").rows.slice(0, 4).map((row) => [row.type, row.frames])).toEqual([["message", 18], ["move-animation", 276], ["move-animation", 12], ["sprite-visibility", 1]]);
     expect(pauses(prod("PRIMEAPE", MOVE.WISH, "off").rows)).toEqual([49]);

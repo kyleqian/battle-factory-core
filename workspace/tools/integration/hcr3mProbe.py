@@ -4,7 +4,8 @@
 usage: python3 tools/run-mgba-probe.py OUT.json -- python3 tools/integration/hcr3mProbe.py OUT.json FROZEN.json [--profile on|off] [--from N]
 
 One row per frame (from frame N on) where gBattlescriptCurrInstr / gBattleControllerExecFlags / gAnimScriptActive / gBattleMainFunc /
-gBattleCommunication[0] / the two active HPs / gCurrentMove changed: [frame, ptr, exec, anim, main, comm0, hp0, hp1, move, 0x400 TextPrinter active].
+gBattleCommunication[0] / the two active HPs / gCurrentMove / the message printer changed: [frame, ptr, exec, anim, main, comm0, hp0, hp1, move, tp].
+tp = sTextPrinters[0] (the battle message window's printer; a static, so its address comes from the ELF symbol table) `active | state << 8`; its rising edge is the frame the print starts (labCompare.py print rows).
 Frame k = the k-th advance of the frozen trace = the sound probe's frame k (soundEventProbe lab --drive). Symbols: `names` maps each ROM script
 address that occurs to the nearest preceding ELF symbol + offset (arm-none-eabi-nm), so rows read as BattleScript_X+0x2c."""
 import bisect
@@ -29,6 +30,11 @@ def symbol_table():
     return [a for a, _ in pairs], [n for _, n in pairs]
 
 
+def text_printer_address():
+    out = subprocess.run(["arm-none-eabi-nm", str(REF / "pokeemerald.elf")], capture_output=True, text=True, check=True).stdout
+    return next(int(a, 16) for a, _t, n in (line.split() for line in out.splitlines() if len(line.split()) == 3) if n == "sTextPrinters")
+
+
 def main():
     out, req_path, rest = Path(sys.argv[1]), sys.argv[2], sys.argv[3:]
     profile, bootstrap = PROFILES[rest[rest.index("--profile") + 1] if "--profile" in rest else "on"]
@@ -42,10 +48,11 @@ def main():
     sym = oracle.symbols
     mons = sym["gBattleMons"]
     u8, u16, u32 = oracle.read_u8, oracle.read_u16, oracle.read_u32
+    printer = text_printer_address()  # struct TextPrinter: active at 0x1B, state at 0x1C (include/text.h)
 
     def read():
         return (u32(sym["gBattlescriptCurrInstr"]), u32(sym["gBattleControllerExecFlags"]), u8(sym["gAnimScriptActive"]), u32(sym["gBattleMainFunc"]),
-                u8(sym["gBattleCommunication"]), u16(mons + 0x28), u16(mons + 0x58 + 0x28), u16(sym["gCurrentMove"]), u8(sym["sTextPrinters"]) if "sTextPrinters" in sym else 0)
+                u8(sym["gBattleCommunication"]), u16(mons + 0x28), u16(mons + 0x58 + 0x28), u16(sym["gCurrentMove"]), u8(printer + 0x1B) | u8(printer + 0x1C) << 8)
 
     rows, last, frame = [], None, 0
     for seg in request["trace"]["segments"]:

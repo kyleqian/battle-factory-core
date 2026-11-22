@@ -161,12 +161,7 @@ describe("wth236: end-turn weather animations", () => {
       expect(sceneOn.weatherEvents).toBeGreaterThan(0);
       expect(sceneOn.weather.length).toBe(sceneOn.weatherEvents);
       for (const command of sceneOn.weather) {
-        // sst1 (docs/sst1-sandstorm-continues.md): the sandstorm's tail is the script's instructions to the first "buffeted" print, 5 when
-        // the first battler in turn order is hurt (census seed 1's end turns), 11 when it is not; the other weathers keep the 3-row tail.
-        const minimumFrames = animation === "SANDSTORM_CONTINUES"
-          ? weatherContinuesCommandFrames(animation) - WEATHER_CONTINUES_LAUNCH_TAIL_ROWS + 5
-          : weatherContinuesCommandFrames(animation);
-        expect(command).toEqual({ animation, animated: true, minimumFrames, battler: 0 });
+        expect(command).toEqual({ animation, animated: true, minimumFrames: weatherContinuesCommandFrames(animation), battler: 0 });
       }
       // rnc1: General_Rain is its own script (script row = command row - 2, rainDance.ts generalRainAtAge); the others are the move body.
       expect(sceneOn.bodyEffect).toEqual(animation === "RAIN_CONTINUES"

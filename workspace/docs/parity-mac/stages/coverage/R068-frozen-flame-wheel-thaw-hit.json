@@ -1,0 +1,280 @@
+{
+ "name": "R068-frozen-flame-wheel-thaw-hit",
+ "rules": [
+  "R068"
+ ],
+ "why": "Challenge 7, trainer 200, hand-built Mechanic Lab parties. A Growlithe whose only move is Flame Wheel resists the Ice Beams of Water / Ice foes (10 percent freeze each); when it is frozen the 1-in-5 thaw roll fails and Flame Wheel (EFFECT_THAW_HIT) is let through (battle_util.c:2059-2070).",
+ "seed": 92000,
+ "challengeNum": 7,
+ "battleNum": 0,
+ "trainerId": 200,
+ "playerSetIds": [
+  429,
+  404,
+  735
+ ],
+ "opponentSetIds": [
+  813,
+  716,
+  721
+ ],
+ "parties": {
+  "player": [
+   {
+    "species": 58,
+    "level": 50,
+    "nature": 0,
+    "ivs": {
+     "hp": 31,
+     "attack": 31,
+     "defense": 31,
+     "speed": 31,
+     "spAttack": 31,
+     "spDefense": 31
+    },
+    "evs": {
+     "hp": 255,
+     "attack": 255,
+     "defense": 0,
+     "speed": 0,
+     "spAttack": 0,
+     "spDefense": 0
+    },
+    "moves": [
+     172,
+     172,
+     172,
+     172
+    ],
+    "item": 0,
+    "abilitySlot": 0,
+    "friendship": 0
+   },
+   {
+    "species": 156,
+    "level": 50,
+    "nature": 0,
+    "ivs": {
+     "hp": 31,
+     "attack": 31,
+     "defense": 31,
+     "speed": 31,
+     "spAttack": 31,
+     "spDefense": 31
+    },
+    "evs": {
+     "hp": 255,
+     "attack": 255,
+     "defense": 0,
+     "speed": 0,
+     "spAttack": 0,
+     "spDefense": 0
+    },
+    "moves": [
+     172,
+     172,
+     172,
+     172
+    ],
+    "item": 0,
+    "abilitySlot": 0,
+    "friendship": 0
+   },
+   {
+    "species": 38,
+    "level": 50,
+    "nature": 0,
+    "ivs": {
+     "hp": 31,
+     "attack": 31,
+     "defense": 31,
+     "speed": 31,
+     "spAttack": 31,
+     "spDefense": 31
+    },
+    "evs": {
+     "hp": 255,
+     "attack": 255,
+     "defense": 0,
+     "speed": 0,
+     "spAttack": 0,
+     "spDefense": 0
+    },
+    "moves": [
+     172,
+     172,
+     172,
+     172
+    ],
+    "item": 0,
+    "abilitySlot": 0,
+    "friendship": 0
+   }
+  ],
+  "opponent": [
+   {
+    "species": 91,
+    "level": 50,
+    "nature": 0,
+    "ivs": {
+     "hp": 31,
+     "attack": 31,
+     "defense": 31,
+     "speed": 31,
+     "spAttack": 31,
+     "spDefense": 31
+    },
+    "evs": {
+     "hp": 255,
+     "attack": 0,
+     "defense": 0,
+     "speed": 0,
+     "spAttack": 255,
+     "spDefense": 0
+    },
+    "moves": [
+     58,
+     58,
+     58,
+     58
+    ],
+    "item": 0,
+    "abilitySlot": 0,
+    "friendship": 0
+   },
+   {
+    "species": 131,
+    "level": 50,
+    "nature": 0,
+    "ivs": {
+     "hp": 31,
+     "attack": 31,
+     "defense": 31,
+     "speed": 31,
+     "spAttack": 31,
+     "spDefense": 31
+    },
+    "evs": {
+     "hp": 255,
+     "attack": 0,
+     "defense": 0,
+     "speed": 0,
+     "spAttack": 255,
+     "spDefense": 0
+    },
+    "moves": [
+     58,
+     58,
+     58,
+     58
+    ],
+    "item": 0,
+    "abilitySlot": 0,
+    "friendship": 0
+   },
+   {
+    "species": 343,
+    "level": 50,
+    "nature": 0,
+    "ivs": {
+     "hp": 31,
+     "attack": 31,
+     "defense": 31,
+     "speed": 31,
+     "spAttack": 31,
+     "spDefense": 31
+    },
+    "evs": {
+     "hp": 255,
+     "attack": 0,
+     "defense": 0,
+     "speed": 0,
+     "spAttack": 255,
+     "spDefense": 0
+    },
+    "moves": [
+     58,
+     58,
+     58,
+     58
+    ],
+    "item": 0,
+    "abilitySlot": 0,
+    "friendship": 0
+   }
+  ]
+ },
+ "script": {
+  "actions": [],
+  "then": "census"
+ },
+ "expect": [],
+ "cover": [
+  {
+   "file": "src/engine/battleScriptActionAdmission.ts",
+   "text": "{\n        reason = \"thaw",
+   "at": 0
+  },
+  {
+   "file": "src/engine/battleScriptActionAdmission.ts",
+   "text": "&& isThawHit",
+   "at": 0
+  },
+  {
+   "file": "src/engine/battleScriptActionAdmission.ts",
+   "text": "? (\n      sourceBattler.status1\n",
+   "at": 0
+  },
+  {
+   "file": "src/engine/battleScriptActionAdmission.ts",
+   "text": ": Object.freeze({ ...sourceBattler, status1:",
+   "at": 0
+  },
+  {
+   "file": "src/engine/battleScriptActionAdmission.ts",
+   "text": ": Object.freeze(rulesContext.battlers.map((candidate, index) =>\n      index === attacker ? nextBattler : candidate\n    )) as unknown as BattleScriptRulesContext[\"battlers\"];\n  const trackerAfter = BATTLE_SCRIPT_ATTACK_CANCELER_PHASES.CANCELER_E",
+   "at": 0
+  },
+  {
+   "file": "src/engine/battleScriptActionAdmission.ts",
+   "text": "(candidate, index) =>\n      index === attacker ? nextBattler : candidate\n    )) as unknown as BattleScriptRulesContext[\"battlers\"];\n  const trackerAfter = BATTLE_SCRIPT_ATTACK_CANCELER_PHASES.CANCELER_END",
+   "at": 0
+  },
+  {
+   "file": "src/engine/battleScriptActionAdmission.ts",
+   "text": "? 1\n      : ",
+   "at": 0
+  },
+  {
+   "file": "src/engine/battleScriptActionAdmission.ts",
+   "text": ": defrostedByMove\n      ? \"d",
+   "at": 0
+  },
+  {
+   "file": "src/engine/battleScriptActionAdmission.ts",
+   "text": "? 2 as const",
+   "at": 0
+  },
+  {
+   "file": "src/engine/battleScriptActionAdmission.ts",
+   "text": "? Object.freeze({\n      kind: \"handoff\",\n      sourceProgramCounter: sourcePc,\n      targetLabel: \"BattleScript_MoveUsedUnfr",
+   "at": 0
+  },
+  {
+   "file": "src/engine/battleScriptActionAdmission.ts",
+   "text": "? Object.freeze({\n      kind: \"p",
+   "at": 0
+  },
+  {
+   "file": "src/engine/battleScriptActionAdmission.ts",
+   "text": "? Object.freeze({\n        kind: \"set",
+   "at": 0
+  },
+  {
+   "file": "src/engine/battleScriptActionAdmission.ts",
+   "text": "? Object.freeze({\n        kind: \"fro",
+   "at": 0
+  }
+ ],
+ "coverAny": false
+}

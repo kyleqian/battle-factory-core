@@ -42,11 +42,21 @@ brewed!" 7 frames after the body, in all 3 cases.) The kernel's events carry eac
 `playanimation_var` to the buffeted `printfromtable` 5 instructions when the first battler is hurt, 11 when it is not; the ROM's rows from
 the body's last picture to the print's first glyph are those + 5 in every turn.
 
+## Merge with the box's night run (2026-11-22)
+
+The box's etp1 (`33bdace6d`, `docs/etp1-end-turn-prints.md`, labs `etp1-{sandstorm,hail}{,5}-{off,on}`) puts the same "buffeted" print on the
+same rows for Sandstorm and Hail in both scenes: a lead on the print (`damagingWeatherLoopLeadRows`) of the same instruction count past the
+3-row tail. Both together would have counted those rows twice, so the merge keeps etp1's rule and drops `sandstormContinuesTailRows` (the
+command keeps its 3-row tail). The sound (General_Sandstorm on the body's own clock) is this branch's alone and stays; the box's etp2 sets
+the hit SE after the print (3 ticks after the hit command). On the merged tree seed 44 Scene ON still gives the ROM's +88 / +264 / +258.
+One picture difference came with it: during etp1's lead rows our box is blank, where the ROM (and sst1's tail) kept "The sandstorm
+rages." on screen until the buffeted glyph (2 or 8 frames a turn; the renderer blanks the box in every print's lead rows).
+
 ## Change
 
 Presentation and sound timing (`src/engine/battleResolutionPresentation.ts`, `src/engine/moveAnimSounds.ts`), Sandstorm only:
 
-- `sandstormContinuesTailRows`: the SANDSTORM_CONTINUES command's tail after the body is the kernel's instruction count from the
+- (Replaced in the merge by the box's etp1, see above.) `sandstormContinuesTailRows`: the SANDSTORM_CONTINUES command's tail after the body is the kernel's instruction count from the
   animation to the first "buffeted" print (5 or 11; it was `WEATHER_CONTINUES_LAUNCH_TAIL_ROWS`, 3, taken from Focus Punch's set-up,
   whose next command is the print itself). Without a buffeted print in the run (neither battler hurt) the tail stays 3.
 - General_Sandstorm's sound ops run on the body's own clock (script row = body age, as the art), not the move-body sound clock's 8 rows
@@ -64,14 +74,14 @@ No kernel event, RNG draw or outcome moves.
 
 ## Tests
 
-- `tests/sst1SandstormContinues.test.ts` (2): the tail rule on hand-made events (5, 11, no print -> 3); ordinary play, seed 44 Scene ON
-  (the soak's test player, the catcher's t44on): six end turns, SE_M_SANDSTORM at +88, the buffeted print at +264, +264 (PUPITAR, unhurt,
-  moved first), then +258 x 4.
-- `tests/wth236WeatherContinues.test.ts`: the SANDSTORM_CONTINUES command of census seed 1 is now 174 rows (tail 5), was 172.
+- `tests/sst1SandstormContinues.test.ts` (1 since the merge; the tail-rule test went with the rule): ordinary play, seed 44 Scene ON (the
+  soak's test player, the catcher's t44on): five end turns on the merged tree (six before), SE_M_SANDSTORM at +88, the buffeted print at
+  +264, +264 (PUPITAR, unhurt, moved first), then +258 x 3.
+- `tests/wth236WeatherContinues.test.ts`: back to the box's (the command's 3-row tail).
 
 ## Open
 
-- **Hail** runs the same script and the same body clock, so it likely has both faults, but no hail turn is in the sweep, and hit1
-  measured its damage SE 4 frames late with the old tail. **Sun** (General_Sun, the Sunny Day body) has the same sound clock; its script
+- **Hail** runs the same script and the same body clock: etp1 put its print on the ROM's rows; its sound clock (General_Hail 8 rows after the
+  body, as Sandstorm's was) is not measured. **Sun** (General_Sun, the Sunny Day body) has the same sound clock; its script
   has no print after the animation. Both unchanged until measured.
 - The hit sound after the buffeted print: ROM 103 frames after its first glyph; ours 101-102, or 108 in one case (not looked into).
