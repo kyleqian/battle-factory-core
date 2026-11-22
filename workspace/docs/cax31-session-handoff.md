@@ -322,7 +322,7 @@ No battle-rule change this run: every fold kept census eventsDigest identical (0
   **Next (after the post-gate measurements fch2m / hse1m / hie6m / g180m, same doc; T2 OFF baseline is now 1,819 with hse1m's tool default):** (1) land hse1m's OFF wake-up hold / icon (the Scene ON-only rules,
   `battleResolutionPresentation.ts:1265`, `:6310-6314`) and confusion head (-4 rows), and g180m's Dig / two-turn charge-turn used print after a previous move (MoveEnd + 10); then flip fch2m's `--dismiss-accept`
   default together with the hit-SE windows it un-hides; (2) hie6m's foe Leftovers after the player's forced send-in (start +6 and the 15-frame restart lead); (3) the Leech Seed drain (g180m: post-send-in age,
-  end-turn print heads / holds; etp2 labs); (4) t2k3 poison tick first row, Ice Beam first window, Rock Slide; Wrap print after the hit; Magnitude power-roll labs; Scene OFF self-KO faint SE (-2).
+  end-turn print heads / holds; etp2 labs); (4) t68m: the Scene ON continuation segment after a foe's charge turn (`usedMovePrintLeadU`, ROM waits 12), the confusion-ended print hold (~5 short), the engine's 9..13-frame commit -> first message vs the ROM's 12; Wrap print after the hit; Magnitude power-roll labs; Scene OFF self-KO faint SE (-2).
 - **Item 0b (Lobby):** no change (#221 open).
 - **Item 0d (battle rules):** luck day 6 0 hits (R040 R063 R110). rrh6 + rrh7: 14 rare rules hand-staged and ROM-matched, **85 -> 99 / 110** (`docs/parity-mac/rule-coverage.md`). **Checked at wind-down:**
   nrv1 (`docs/trn225-frontier-transitions.md` "nrv1") found the engine's RNG at the Head battle start never equal to the ROM's on the Noland-room recordings (Noland's lead differs 40 / 40; the ROM takes
