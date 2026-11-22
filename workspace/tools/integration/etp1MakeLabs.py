@@ -51,7 +51,12 @@ S = {
     "roar": (19, 50, [201, 46], 0, 19, 12, [69], 0, [0, 2]),
     "whirlwind": (19, 50, [201, 18], 0, 19, 12, [69], 0, [0, 2]),
     "spore": (19, 50, [147], 0, 19, 12, [69], 0, [0]),
+    # etp3: a Sandshrew (immune) user moves first, so the first damaging-weather pass is skipped; screens expiring on turn 5
+    "sandstormu3": (27, 50, [201], 0, 19, 12, [69], 0, [0] * 3),
+    "lightscreen6": (19, 50, [113], 0, 19, 12, [69], 0, [0] * 6),
+    "reflect6": (19, 50, [115], 0, 19, 12, [69], 0, [0] * 6),
 }
+ETP3 = {"sandstormu3", "lightscreen6", "reflect6"}
 want = sys.argv[1:] or list(S)
 for name in want:
     us, ul, um, ui, ts, tl, tm, ti, slots = S[name]
@@ -71,5 +76,5 @@ for name in want:
             else:
                 seg += [{"frames": 2, "buttons": ["A"]}, {"frames": 1100, "buttons": []}]
         lab["trace"]["segments"] = seg
-        json.dump(lab, open(LAB / f"etp1-{name}-{scene}.json", "w"))
-    print("etp1-" + name)
+        json.dump(lab, open(LAB / f"{'etp3' if name in ETP3 else 'etp1'}-{name}-{scene}.json", "w"))
+    print(("etp3-" if name in ETP3 else "etp1-") + name)
