@@ -1336,6 +1336,7 @@ function hitTargetSpriteInvisible(
 }
 /** BattleScript_Pausex20's `pause B_WAIT_TIME_SHORT`. */
 const SCENE_OFF_MOVE_PAUSE_FRAMES = 32;
+const EXPLOSION_OFF_BODY_ROWS = 1;
 
 /**
  * off108 (ISSUES #167, docs/off108-scene-off-pauses.md): Scene OFF runs
@@ -5674,6 +5675,7 @@ export function projectBattleResolutionCommands(
   let lastFaintBattler: 0 | 1 | null = null;
   let pendingStatusMessageBattler: 0 | 1 | null = null;
   let lastMoveAttacker: 0 | 1 | null = null;
+  let lastUsedCurrentMove: number | null = null;
   // Target of the latest Scene ON MOVE_ANIMATION receipt (Scene OFF has none): its `returntoball` is the forced removal.
   let sceneOnMoveTarget: 0 | 1 | null = null;
   // sta5 step 2 holds are Scene ON rows (the launch follows a Scene ON MOVE_ANIMATION receipt; Scene OFF has none and keeps its commands).
@@ -5728,6 +5730,7 @@ export function projectBattleResolutionCommands(
     if (payload.kind === "message") {
       sourceLabelOf(event);
       const actionSnapshot = payload.actionSnapshot ?? null;
+      if (actionSnapshot !== null) lastUsedCurrentMove = actionSnapshot.currentMove;
       if (actionSnapshot !== null) {
         // The full-turn receipt is frozen at Cmd_printstring time. Keeping
         // this current message's source owner also makes generic subsequent
@@ -6064,8 +6067,12 @@ export function projectBattleResolutionCommands(
         payload.animationId === "SCENE_OFF_ATTACK_PAUSE"
           ? SCENE_OFF_MOVE_PAUSE_FRAMES + 1 + magnitudeWaitRows
           : 0;
-      const interveningInstructions =
-        hitExecution - usedMoveInstructionExecution - executedPauseCallbacks;
+      // mxp1: Self-Destruct / Explosion run `tryexplosion; setatkhptozero; waitstate` before the animation; the user's `hp` command presents those rows, so the
+      // body spans only the animation instruction to the hit (ROM labs eqk1-{expl,sd}-{p,f}-off: attackanimation -> hitanimation 43 rows, was 48).
+      const explosionFamily = payload.animationId === "SCENE_OFF_ATTACK_PAUSE" && (lastUsedCurrentMove === 120 || lastUsedCurrentMove === 153);
+      const interveningInstructions = explosionFamily
+        ? hitExecution - instructionExecutionOf(event) - executedPauseCallbacks + EXPLOSION_OFF_BODY_ROWS
+        : hitExecution - usedMoveInstructionExecution - executedPauseCallbacks;
       if (interveningInstructions <= 0) {
         throw new Error("battle resolution move/hit provenance is not ordered");
       }

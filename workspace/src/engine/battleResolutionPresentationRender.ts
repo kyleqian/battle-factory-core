@@ -1610,7 +1610,7 @@ const LSE2_BODY_TAIL_ROWS: ReadonlyMap<number, number> = new Map([[322, 3], [347
 // `healthbarupdate` (EffectRestoreHp+0x16) 25 / 10 / 27 / 8 rows after the engine's `hp` command (labs aud242k-recover-player-on, aud242r-softboiled-player-on,
 // aud261-milkdrink-player-on, aud242r-moonlight-player-on: every later SE of the lab went from -23 / -5 / -25 / -8 to the body's own +2 / +5 / +2 / +4).
 const HIE5_RESTORE_HP_BODY_TAIL_ROWS: ReadonlyMap<number, number> = new Map([[105, 25], [135, 10], [208, 27], [236, 8]]);
-const LIVE_MOVE_LEADLESS_TAIL_ROWS: ReadonlyMap<number, number> = new Map([[120, 9], ...HIE5_RESTORE_HP_BODY_TAIL_ROWS]);
+const LIVE_MOVE_LEADLESS_TAIL_ROWS: ReadonlyMap<number, number> = new Map([[120, 9], [153, 9], ...HIE5_RESTORE_HP_BODY_TAIL_ROWS]);
 // hpd8: the shape-A bodies' tail is whatever the 3 pre + 3 post rows of the ROM span (lead + 3 + len + 4) leave over: 6 - pre - post (T 1 / 3 / 6 in hpd7).
 const HPD8_SHAPE_A_ROWS_AROUND_BODY = 6;
 export function liveMoveHitTailRows(command: Extract<BattleResolutionPresentationCommand, { type: "move-animation" }>, field: BattleResolutionDisplayedField): number {

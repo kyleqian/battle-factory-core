@@ -1554,7 +1554,7 @@ function liveMoveAnimationDurationOf(
     case 8: return 184; // Ice Punch script activation..first inactive row (staged 1966..2149 / 2339..2522); HP/text/freeze/Sitrus rows are queue commands.
     case 225: return 83; // Dragon Breath: 85 rows 395..479 / 449..533 starting at presentation age -2.
     case 248: return 114; // Future Sight turn-1 accepted window (77..190 / 81..194).
-    case 153: return 212; // Explosion accepted window (76..287 / 80..291).
+    case 153: return 213; // Explosion: ROM A length 216 (mxp1 labs, 61..276 / 65..280) - 3, as Self-Destruct (126 -> 123); was the older accepted 212.
     case 347: return CALM_MIND_CLEANUP_AGE + 1;
     // Faithful-random adapters (liveMovePresentationRng.ts; not LIVE_MOVE_ANIMATION_IDS). Windows start at activation.
     case 24: return DOUBLE_KICK_FRAME_COUNT; // Double Kick per-hit body (227..262 both orientations).

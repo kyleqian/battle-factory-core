@@ -25,6 +25,8 @@ import type {
 
 /** Ticks the Scene ON oracle trails the engine's presentation clock for the controller-side sounds (the same lag in every window). */
 const SCENE_ON_LAG = 7;
+const EXPLOSION_USER_FAINT_EXTRA_ROWS = 2;
+const EXPLOSION_FAMILY_MOVE_IDS: ReadonlySet<number> = new Set([120, 153]);
 /** CRY_MODE_FAINT cry pan (battle_gfx_sfx_util.c: -25 player / +25 opponent). */
 const FAINT_CRY_PAN_PLAYER = -25;
 const FAINT_CRY_PAN_OPPONENT = 25;
@@ -86,6 +88,12 @@ export function emitBattleHitSounds(
   if (command.type === "move-animation") {
     const next = segment.commands[segment.commands.indexOf(command) + 1];
     const duration = after === null ? null : presentedMoveDurationOnSoundClock(after);
+    if (next !== undefined && next.type === "hit-animation" && duration !== null && (command.timing.bodyLeadFrames ?? 0) === 0 && EXPLOSION_FAMILY_MOVE_IDS.has(command.animation?.moveId ?? -1)) {
+      // mxp1: the leadless Self-Destruct / Explosion body presents the hit command on the ROM's `hitanimation` row (A end + 10); its SE is `effectivenesssound`'s, the row before.
+      const explosionSong = effectivenessSong(segment, next.eventSequence);
+      if (explosionSong !== null) scheduleAfter(Math.max(0, duration), () => playPannedSe(explosionSong.song, next.battler === 0 ? SE_PAN_PLAYER : SE_PAN_OPPONENT));
+      return;
+    }
     if (next === undefined || next.type !== "hit-animation" || duration === null || (command.timing.bodyLeadFrames ?? 0) === 0) return;
     const song = effectivenessSong(segment, next.eventSequence);
     if (song === null) return;
@@ -114,6 +122,7 @@ export function emitBattleHitSounds(
   if (command.type === "hit-animation") {
     const previous = segment.commands[segment.commands.indexOf(command) - 1];
     if (previous?.type === "move-animation" && (previous.timing.bodyLeadFrames ?? 0) > 0) return;
+    if (previous?.type === "move-animation" && EXPLOSION_FAMILY_MOVE_IDS.has(previous.animation?.moveId ?? -1) && sceneLag(segment) > 0) return;
     const song = effectivenessSong(segment, command.eventSequence);
     if (song !== null) {
       const panBattler = song.weatherLoop ? 0 : command.battler;
@@ -124,6 +133,10 @@ export function emitBattleHitSounds(
   if (command.type !== "faint") return;
   const lead = command.timing.leadFrames;
   if (lead === undefined) return;
+  // mxp1: after a leadless Self-Destruct / Explosion body (ON) the presented hit / hp / message rows are on the ROM's rows, so the faint SE carries no controller lag
+  // (ROM labs eqk1-{expl,sd}-{p,f}-on: target faint +7, user faint +5 with it); the user's own faint (the script's second tryfaintmon) is 2 rows later still.
+  const explosionBody = segment.commands.find((c) => c.type === "move-animation" && c.animation !== undefined && EXPLOSION_FAMILY_MOVE_IDS.has(c.animation.moveId));
+  const faintLag = explosionBody?.type === "move-animation" && sceneLag(segment) > 0 ? (explosionBody.battler === command.battler ? EXPLOSION_USER_FAINT_EXTRA_ROWS : 0) : lag;
   // snd2: {Player,Opponent}HandleFaintingCry cry the party mon at gBattlerPartyIndexes[battler] (battle_controller_player.c /
   // battle_controller_opponent.c): the mon on the field at the faint. segment.field is the field the segment opened with, so a mon
   // sent in earlier in the same segment and knocked out there cried as the one it replaced (frame catcher, seed 3: "Go! PHANPY!" ...
@@ -131,8 +144,8 @@ export function emitBattleHitSounds(
   const field = after === null ? segment.field : currentCommandField(after);
   const side = command.battler === 0 ? field.player : field.opponent;
   const pan = command.battler === 0 ? FAINT_CRY_PAN_PLAYER : FAINT_CRY_PAN_OPPONENT;
-  scheduleAfter(Math.max(0, lead - FAINT_CRY_BEFORE_SE + FAINT_SOUND_OFFSET + lag), () => playFaintCry(bgm, side.species, pan));
-  scheduleAfter(Math.max(0, lead + FAINT_SOUND_OFFSET + lag), () => {
+  scheduleAfter(Math.max(0, lead - FAINT_CRY_BEFORE_SE + FAINT_SOUND_OFFSET + faintLag), () => playFaintCry(bgm, side.species, pan));
+  scheduleAfter(Math.max(0, lead + FAINT_SOUND_OFFSET + faintLag), () => {
     if (command.battler === 0) handleLowHpMusicChange(0, field.player.maxHP);
     playPannedSe(SE_FAINT, command.battler === 0 ? SE_PAN_PLAYER : SE_PAN_OPPONENT);
   });
