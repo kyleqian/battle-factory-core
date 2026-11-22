@@ -11,8 +11,9 @@ import { traceAdvances } from "../tools/compare/traceReplay.ts";
 interface FixtureEvent { frame: number; kind: string; id: number | null; pan: number | null; noop?: boolean }
 interface Fixture { frames: number; events: FixtureEvent[]; trace: { route: "generated-orchestrator" | "canonical-recorded"; appStage?: { id: string; frame: number }; segments: Array<{ frames: number; buttons?: string[] }> } }
 const appTracePath = "../tools/compare/appTrace.ts";
-const { APP_STAGES } = (await import(/* @vite-ignore */ appTracePath)) as {
+const { APP_STAGES, labBackedStage } = (await import(/* @vite-ignore */ appTracePath)) as {
   APP_STAGES: Record<string, (state: ReturnType<typeof createInitialState>) => ReturnType<typeof createInitialState>>;
+  labBackedStage: (scenario: string, state: ReturnType<typeof createInitialState>) => ReturnType<typeof createInitialState>;
 };
 
 const CONFUSION = 176;
@@ -20,7 +21,10 @@ const load = (name: string): Fixture => JSON.parse(readFileSync(new URL(`../tool
 
 function ourEvents(rom: Fixture, scene: "on" | "off"): SoundEvent[] {
   let state = createInitialState({ appRoute: rom.trace.route, battleScene: scene });
-  if (rom.trace.appStage !== undefined && rom.trace.appStage.frame === 0) state = APP_STAGES[rom.trace.appStage.id]!(state);
+  if (rom.trace.appStage !== undefined && rom.trace.appStage.frame === 0) {
+    const stage = APP_STAGES[rom.trace.appStage.id];
+    state = stage !== undefined ? stage(state) : labBackedStage(`${rom.trace.appStage.id}.json`, state);
+  }
   const events: SoundEvent[] = [];
   for (const advance of traceAdvances(rom.trace.segments)) {
     if (advance.frame > rom.frames) break;
@@ -94,5 +98,13 @@ describe("General / Status animation sound table (aud249)", () => {
     expect(theirs.map((e) => e.frame)).toEqual([296, 310, 324, 338, 352, 366]);
     expect(ours.map((e) => `${e.id}:${e.pan}`)).toEqual(theirs.map((e) => `${e.id}:${e.pan}`));
     expect(ours.map((e) => e.frame)).toEqual(theirs.map((e) => e.frame));
+  });
+  // hit2: General_Hail plays on the body's own clock like General_Sandstorm (sst1); on the move-body clock its ten SE 242 rows were all 8 late (lab etp1-hail-on, ROM frames 767 + 9n).
+  it("hit2-hail-on: the end-turn Hail's ten SE 242 rows are the ROM's (767 + 9n), exact (was +8)", () => {
+    const rom = load("hit2-hail-on");
+    const theirs = rom.events.filter((e) => e.noop !== true && e.kind === "se" && e.id === 242 && e.frame >= 700);
+    const ours = ourEvents(rom, "on").filter((e) => e.kind === "se" && e.id === 242 && e.frame >= 700);
+    expect(theirs.map((e) => e.frame)).toEqual([767, 776, 785, 794, 803, 812, 821, 830, 839, 848]);
+    expect(ours.map((e) => `${e.frame}:${e.pan}`)).toEqual(theirs.map((e) => `${e.frame}:${e.pan}`));
   });
 });
