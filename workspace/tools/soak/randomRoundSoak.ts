@@ -61,6 +61,9 @@
 //                      natural chaining almost never reaches. N must be a
 //                      multiple of 7 in 0..49 (rejected otherwise); 0 or
 //                      omitted is byte-identical to today.
+//   --level L          opl: 50 (default, unchanged) | open: every seed plays an Open Level challenge (level-100 rentals and foes,
+//                      the Open Level set rows, the Lobby's OPEN LEVEL chosen for the next challenge; src/engine/factoryLevelMode.ts),
+//                      from a generated draft (with or without --start-carry / --vary-rng)
 //   --vary-rng         opt-in: advance the boot RNG cursor by the seed (one
 //                      LCG step per seed unit) before generating the
 //                      start-carry draft, so every seed opens on different
@@ -155,7 +158,7 @@ const USAGE = `usage: npm run soak -- [options]   (full option notes: header of 
   --scene on|off|both        Battle Scene mode (absent = Scene OFF, untagged)
   --max-frames N  --stall-frames N  --max-rounds N  --render-every N
   --first-round | --milestone   stop at the first round decision / first action menu
-  --start-carry N  --vary-rng  --no-lobby-new-challenge  --no-summary-explore
+  --start-carry N  --vary-rng  --no-lobby-new-challenge  --no-summary-explore  --level 50|open
   --parallel N               N child processes over contiguous seed slices
   --json PATH  --coverage-json PATH  --verbose
   -h, --help                 print this and exit 0
@@ -533,6 +536,12 @@ async function main(): Promise<void> {
   const stallFrames = stallFramesFlag !== null ? Number(stallFramesFlag) : DEFAULT_STALL_FRAMES;
   const maxRoundsFlag = getFlag("--max-rounds");
   const maxRounds = maxRoundsFlag !== null ? Number(maxRoundsFlag) : undefined;
+  const levelFlag = getFlag("--level") ?? "50";
+  if (levelFlag !== "50" && levelFlag !== "open") {
+    console.error(`bad --level: ${levelFlag} (want 50|open)`);
+    process.exit(2);
+  }
+  const lvlMode = levelFlag as "50" | "open";
   const startCarryFlag = getFlag("--start-carry");
   const startCarry = startCarryFlag !== null ? Number(startCarryFlag) : 0;
   try {
@@ -582,10 +591,10 @@ async function main(): Promise<void> {
   const optionsFor = (sceneName: SoakScene | null): Partial<RunOptions> => ({
     ...baseOptions,
     ...(sceneName !== null ? { scene: sceneName } : {}),
-    ...(startCarry !== 0 || varyRng
+    ...(startCarry !== 0 || varyRng || lvlMode === "open"
       ? {
         stateFactory: (seed: number) =>
-          createStartCarryState(startCarry, varyRng ? seed : 0, sceneName ?? "off"),
+          createStartCarryState(startCarry, varyRng ? seed : 0, sceneName ?? "off", lvlMode),
       }
       : {}),
   });

@@ -28,6 +28,7 @@ const maxFrame = Number(opt("--max-frame", Infinity));
 globalThis.__POKEBENCH_PLAYER_NAME__ = process.env.POKEBENCH_HARNESS_PLAYER_NAME ?? "MEMORY";
 const { FactorySession } = await import(`${GAME}/src/factorySession.ts`);
 const { render } = await import(`${GAME}/src/engine/core.ts`);
+const { createFactoryCorpusPartyMember } = await import(`${GAME}/src/engine/factoryCorpusParty.ts`);
 const { installBundledMonPicPixels } = await import(`${GAME}/src/engine/monPicPixelsInstall.ts`);
 installBundledMonPicPixels();
 const { menuOf, surfaceOf, setQuestionWindowVisible, setQuestionTextSettled, setReaskTextSettled, setTerminalRecordMenuDrawn, setAttendantModule } =
@@ -50,6 +51,8 @@ const c = trace.challenge;
 const session = new FactorySession({
   battleScene: c.battleScene, gameplaySeed: c.gameplaySeed, presentationSeed: c.presentationSeed,
   start: c.start, frontier: c.frontier, challengeRequest: "hold",
+  // opl: an Open Level trace (makeTrace.mjs --level open); absent = Level 50
+  ...(c.level === "open" ? { level: "open" } : {}),
 });
 let pending = [];
 session.attachSoundSink({ push: (e) => pending.push(e) });
@@ -80,16 +83,22 @@ let lastMenu = null; let lastSurface = null; let lastButtons = null;
   menus.push([0, m0 === null ? null : m0.kind, m0 === null ? null : m0.sig]);
   lastMenu = m0 === null ? null : `${m0.kind}|${m0.sig}`;
 }
-const battles = []; const facts = { rentals: null, frontier: c.frontier ?? null, battleScene: c.battleScene, transitions: {}, rounds: [], deals: [] };
+const battles = []; const facts = { rentals: null, frontier: c.frontier ?? null, battleScene: c.battleScene, level: c.level ?? "50", transitions: {}, rounds: [], deals: [] };
 // Rounds (fcr2): a challenge that wins its 7 battles goes back to the Lobby, and the attendant's new challenge deals round 2's draft
 // (prebattleEntry.ts, the deal at the end of the PreBattleRoom walk). Each round's orchestrator brings its own initialRentalGeneration;
 // `battles` are keyed by `g` = round * 7 + battleIndex (the ROM side counts rounds by curChallengeBattleNum going back to 0).
 let lastGeneration = null; let lastPending = null;
+// opl: each rental as the select screen builds it (level, experience, HP and stats in the ROM's order: maxHP, attack, defense, speed,
+// spAttack, spDefense), for romRun's check of the ROM's own build (the ROM keeps its stats; only the personality is patched).
+function rentalStats(r) {
+  const m = createFactoryCorpusPartyMember(r);
+  return { level: m.level, experience: m.experience, hp: [m.maxHP, m.attack, m.defense, m.speed, m.spAttack, m.spDefense] };
+}
 function noteRound(st, f) {
   const pend = st.pendingGeneratedRound;
   if (pend && pend !== lastPending) {
     facts.deals.push({ frame: f, rngValueBefore: pend.rngValueBefore >>> 0, factoryWinStreak: pend.carry.factoryWinStreak, rentsCount: pend.carry.rentsCount,
-      symbols: pend.carry.factorySymbolsCount ?? null, prebattleEntry: !!st.prebattleEntry });
+      symbols: pend.carry.factorySymbolsCount ?? null, prebattleEntry: !!st.prebattleEntry, level: pend.carry.lvlMode ?? "50" });
   }
   lastPending = pend ?? lastPending;
   const orch = st.factoryRoundBattleOrchestrator;
@@ -99,7 +108,7 @@ function noteRound(st, f) {
   const deal = facts.deals.at(-1) ?? null;
   facts.rounds.push({
     round: facts.rounds.length, firstOrchestratorFrame: f,
-    rentals: gen.rentals.map((r) => ({ setId: r.setId, personality: r.personality >>> 0, fixedIv: r.fixedIv, abilitySlot: r.abilitySlot, otId: r.otId >>> 0, species: r.speciesName })),
+    rentals: gen.rentals.map((r) => ({ setId: r.setId, personality: r.personality >>> 0, fixedIv: r.fixedIv, abilitySlot: r.abilitySlot, otId: r.otId >>> 0, species: r.speciesName, level: r.level ?? 50, stats: rentalStats(r) })),
     playerTrainerId: orch.config.playerTrainerId >>> 0,
     selectedRentalIndexes: orch.config.rentals?.selectedRentalIndexes ?? null,
     factoryWinStreak: orch.config.factoryWinStreak ?? null,
@@ -117,7 +126,7 @@ function noteFacts(st, f) {
   const orch = st.factoryRoundBattleOrchestrator;
   if (!orch) return;
   if (facts.rentals === null && orch.initialRentalGeneration) {
-    facts.rentals = orch.initialRentalGeneration.rentals.map((r) => ({ setId: r.setId, personality: r.personality >>> 0, fixedIv: r.fixedIv, abilitySlot: r.abilitySlot, otId: r.otId >>> 0, species: r.speciesName }));
+    facts.rentals = orch.initialRentalGeneration.rentals.map((r) => ({ setId: r.setId, personality: r.personality >>> 0, fixedIv: r.fixedIv, abilitySlot: r.abilitySlot, otId: r.otId >>> 0, species: r.speciesName, level: r.level ?? 50, stats: rentalStats(r) }));
     facts.playerTrainerId = orch.config.playerTrainerId >>> 0;
     facts.selectedRentalIndexes = orch.config.rentals?.selectedRentalIndexes ?? null;
   }

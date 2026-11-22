@@ -124,6 +124,7 @@ export function buildBriefingMessages(
     factoryWinStreak: carry.factoryWinStreak,
     playerTrainerId: carry.playerTrainerId,
     battleTowerLevel50WinStreak: ANCHOR_FACTORY_METADATA.battleTowerLevel50WinStreak,
+    ...(carry.lvlMode === "open" ? { lvlMode: "open" as const } : {}),
     factorySymbolsCount: carry.factorySymbolsCount,
     facilityState: { rentsCount: carry.rentsCount },
     rentals: { type: "generateInitial", selectedRentalIndexes: [0, 1, 2] },

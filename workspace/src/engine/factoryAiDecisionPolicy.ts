@@ -15,6 +15,7 @@ import {
 import {
   FACTORY_BATTLE_MODE_SINGLES,
   FACTORY_LEVEL_MODE_50,
+  FACTORY_LEVEL_MODE_OPEN,
   selectFactoryAiMask,
   type FactoryAiMaskSelectionInput,
   type FactoryAiMaskSelectionReceipt,
@@ -218,11 +219,11 @@ function viewAt(value: unknown): FactoryAiMaskZeroView {
     ),
   }) as FactoryAiMaskSelectionInput;
   if (
-    factoryInput.levelMode !== FACTORY_LEVEL_MODE_50
+    (factoryInput.levelMode !== FACTORY_LEVEL_MODE_50 && factoryInput.levelMode !== FACTORY_LEVEL_MODE_OPEN)
     || factoryInput.battleMode !== FACTORY_BATTLE_MODE_SINGLES
   ) {
     throw new Error(
-      "Factory AI mask-0 policy supports only Level-50 Factory singles",
+      "Factory AI mask-0 policy supports only Level 50 / Open Level Factory singles",
     );
   }
 
@@ -808,10 +809,10 @@ function scoredViewAt(value: unknown): FactoryAiScoredView {
     ),
   }) as FactoryAiMaskSelectionInput;
   if (
-    factoryInput.levelMode !== FACTORY_LEVEL_MODE_50
+    (factoryInput.levelMode !== FACTORY_LEVEL_MODE_50 && factoryInput.levelMode !== FACTORY_LEVEL_MODE_OPEN)
     || factoryInput.battleMode !== FACTORY_BATTLE_MODE_SINGLES
   ) {
-    throw new Error("Factory AI scored policy supports only Level-50 Factory singles");
+    throw new Error("Factory AI scored policy supports only Level 50 / Open Level Factory singles");
   }
   if (!Array.isArray(view.moves) || view.moves.length !== MAX_MON_MOVES) {
     return fail("Factory AI scored view.moves", "be a four-slot tuple");

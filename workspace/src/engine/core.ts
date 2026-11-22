@@ -692,7 +692,7 @@ import {
 } from "./factoryTerminalPresentation.ts";
 import {
   advanceFactoryCarry,
-  carryForNewChallengeAfterLobby,
+  carryForChallengeLevel,
   createInitialFactoryCarry,
   generateFactoryChallengeDraft,
   type FactoryCarry,
@@ -973,6 +973,12 @@ export interface EngineState {
   lobbySkip?: true;
   /** rc1: the black hold that replaces the Lobby (`lobbySkip` only); absent / null everywhere else. */
   resultHold?: ResultHoldState | null;
+  /**
+   * opl: the Open Level option is on (`FactorySessionOptions.level`): the Lobby attendant's OPEN LEVEL can be chosen. Absent = the Level 50-only
+   * game (A on OPEN LEVEL does nothing), so its states are exactly what they were before the option. The challenge's own level is the
+   * carry's (`factoryCarry.lvlMode`).
+   */
+  openLevel?: true;
 }
 
 /**
@@ -991,6 +997,8 @@ export interface InitialEngineStateOptions {
   readonly presentationRngPolicy?: PresentationRngPolicyId;
   /** rc1: "skip" = black result holds instead of the Lobby after a round (resultHold.ts); absent / "walk" = the ROM's Lobby. */
   readonly lobby?: "walk" | "skip";
+  /** opl: the Open Level option (`EngineState.openLevel`). */
+  readonly openLevel?: boolean;
 }
 
 type FactoryTerminalCommand =
@@ -1206,6 +1214,7 @@ export function createInitialState(
     pendingGeneratedRound: null,
     presentationRng: createPresentationRngSession(options.presentationSeed, options.presentationRngPolicy),
     ...(options.lobby === "skip" ? { lobbySkip: true as const } : {}),
+    ...(options.openLevel === true ? { openLevel: true as const } : {}),
   };
 }
 
@@ -1474,7 +1483,9 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
         return enterPrebattleEntry(
           state,
           keyRepeat,
-          state.lobbyStreakKept ? state.factoryCarry : carryForNewChallengeAfterLobby(state.factoryCarry),
+          // opl: the level chosen at the attendant (LV. 50 when absent) and that level's win-streak-active flag (lobbyStreakKept is the
+          // current level's: a won round keeps it, a lost or retired one clears it).
+          carryForChallengeLevel(state.factoryCarry, attendant.chosenLevel ?? "50", state.lobbyStreakKept),
           rngValue,
         );
       }
@@ -1507,7 +1518,7 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
         ...state,
         frame: state.frame + 1,
         keyRepeat,
-        lobbyAttendant: createFactoryLobbyAttendantState(state.frame),
+        lobbyAttendant: createFactoryLobbyAttendantState(state.frame, { openLevel: state.openLevel === true }),
         lobbyNpcs: lockedNpcs.npcs,
         rngMode: "vblank",
         rngValue: lockedNpcs.rngValue,
@@ -4142,6 +4153,7 @@ function createPendingRoundOrchestrator(
     factoryWinStreak: pending.carry.factoryWinStreak,
     playerTrainerId: pending.carry.playerTrainerId,
     battleTowerLevel50WinStreak: ANCHOR_FACTORY_METADATA.battleTowerLevel50WinStreak,
+    ...(pending.carry.lvlMode === "open" ? { lvlMode: "open" as const } : {}),
     factorySymbolsCount: pending.carry.factorySymbolsCount,
     facilityState: {
       rentsCount: pending.carry.rentsCount,

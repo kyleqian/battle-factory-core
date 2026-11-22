@@ -37,6 +37,7 @@ import {
 import {
   type FactoryCorpusPartyInstance,
 } from "./factoryCorpusParty.ts";
+import { factoryRecordLevelField, type FactoryLvlMode } from "./factoryLevelMode.ts";
 import { natureFromPersonality, randomU16 } from "./opponentGen.ts";
 
 const SELECTABLE_MONS_COUNT = 6;
@@ -91,7 +92,7 @@ type RentalRange = Readonly<{ start: number; end: number }>;
 type FixedIvRow = Readonly<{ regular: number; lastBattle: number }>;
 type FactoryRoundPolicy = Readonly<{
   rentalSelection: {
-    ranges: { level50: readonly RentalRange[] };
+    ranges: { level50: readonly RentalRange[]; open: readonly RentalRange[] };
     rentalRankThresholds: readonly number[];
     maximumRentalRank: number;
     fixedIvs: readonly FixedIvRow[];
@@ -185,6 +186,12 @@ export type FactoryInitialRentalGenerationInput = Readonly<{
    * When absent, construction starts at selectionRngValue.
    */
   constructionRngValue?: number;
+  /**
+   * `frontier.lvlMode` (src/engine/factoryLevelMode.ts). Absent = Level 50. Open Level draws from the Open Level rows of
+   * `sInitialRentalMonRanges` (battle_factory.c:181-189, `GetFactoryMonId`'s `adder` 8, :834-837) and its records carry `level: 100`
+   * (CreateFrontierFactorySelectableMons builds them at FRONTIER_MAX_LEVEL_OPEN, battle_factory_screen.c:1749-1752).
+   */
+  lvlMode?: FactoryLvlMode;
 }>;
 
 function requireU32(value: number, field: string): number {
@@ -225,11 +232,25 @@ export function getLevel50FactoryRentalRange(
   challengeNum: number,
   useBetterRange: boolean,
 ): RentalRange {
+  return getFactoryRentalRange(challengeNum, useBetterRange, "50");
+}
+
+/**
+ * `GetFactoryMonId`'s range for either level mode: the same row arithmetic over the Level 50 rows (`adder` 0) or the Open Level rows
+ * (`adder` 8, battle_factory.c:834-837): Open Level challenges 0..3 use 372-467, 468-563, 564-659, 660-755 and challenge 4 and later
+ * 372-881 (:181-189); the better range is the next row, and challenge 7 and later is pinned to row 7.
+ */
+export function getFactoryRentalRange(
+  challengeNum: number,
+  useBetterRange: boolean,
+  lvlMode: FactoryLvlMode | undefined,
+): RentalRange {
   requireNonnegativeInteger(challengeNum, "challengeNum");
   const rangeIndex = challengeNum < 7
     ? challengeNum + (useBetterRange ? 1 : 0)
     : 7;
-  const sourceRange = POLICY.rentalSelection.ranges.level50[rangeIndex]!;
+  const rows = lvlMode === "open" ? POLICY.rentalSelection.ranges.open : POLICY.rentalSelection.ranges.level50;
+  const sourceRange = rows[rangeIndex]!;
   return Object.freeze({ start: sourceRange.start, end: sourceRange.end });
 }
 
@@ -325,7 +346,7 @@ export function generateInitialFactoryRentals(
   while (selected.length !== SELECTABLE_MONS_COUNT) {
     const rentalIndex = selected.length;
     const betterRange = rentalIndex < rentalRank;
-    const range = getLevel50FactoryRentalRange(challengeNum, betterRange);
+    const range = getFactoryRentalRange(challengeNum, betterRange, input.lvlMode);
     const drawPosition = ledger.length;
     const rngBefore = rngValue;
     const draw = randomU16(rngValue);
@@ -494,6 +515,7 @@ export function generateInitialFactoryRentals(
       ivs,
       abilitySlot: abilitySlotForPersonality(selection.speciesName, personality),
       otId,
+      ...factoryRecordLevelField(input.lvlMode),
       speciesName: selection.speciesName,
       itemId: selection.itemId,
       nature: targetNature,

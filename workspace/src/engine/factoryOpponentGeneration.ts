@@ -1,5 +1,5 @@
 /**
- * Pure Level-50 Battle Factory opponent selection and construction.
+ * Pure Battle Factory opponent selection and construction (Level 50, and Open Level with `lvlMode: "open"`).
  *
  * Source order is intentionally represented one Random() call at a time:
  *
@@ -38,9 +38,10 @@ import {
 } from "./factoryTrainerSchedule.ts";
 import {
   battleScriptIvsFromRandomWords,
-  getLevel50FactoryRentalRange,
+  getFactoryRentalRange,
   USE_RANDOM_IVS,
 } from "./factoryRentalGeneration.ts";
+import { factoryRecordLevelField, type FactoryLvlMode } from "./factoryLevelMode.ts";
 import { natureFromPersonality, randomU16 } from "./opponentGen.ts";
 
 const FRONTIER_PARTY_SIZE = 3;
@@ -153,6 +154,12 @@ export type FactoryOpponentGenerationInput = Readonly<{
    * battle presentation can separate set selection from construction.
    */
   constructionRngValue?: number;
+  /**
+   * `frontier.lvlMode` (src/engine/factoryLevelMode.ts). Absent = Level 50. Open Level draws its set ids from the Open Level rows
+   * (`GetFactoryMonId(lvlMode, ...)`, battle_factory.c:333), skips the Level 50 high-tier guard (:349-351, `lvlMode == FRONTIER_LVL_50`)
+   * and builds the three at level 100 (`GetFrontierEnemyMonLevel`, battle_tower.c:3247-3265: the party's highest level, the rentals').
+   */
+  lvlMode?: FactoryLvlMode;
 }>;
 
 export type FactoryOpponentGenerationResult = Readonly<{
@@ -197,6 +204,8 @@ export type FactoryAdoptedOpponentScheduleInput = Readonly<{
   selectionDrawLedger: readonly FactoryOpponentDrawLedgerEntry[];
   /** Live source cursors immediately before each mon's personality loop. */
   constructionRngValues: readonly [number, number, number];
+  /** As `FactoryOpponentGenerationInput.lvlMode`. */
+  lvlMode?: FactoryLvlMode;
 }>;
 
 function requireU32(value: number, field: string): number {
@@ -427,6 +436,7 @@ export function adoptFactoryOpponentSchedule(
       ivs: rolled.ivs,
       abilitySlot: (personality & 1) as 0 | 1,
       otId,
+      ...factoryRecordLevelField(input.lvlMode),
     };
     const member = createFactoryCorpusPartyMember(instance);
     opponents.push(Object.freeze({
@@ -508,7 +518,7 @@ export function generateFactoryOpponent(
     itemId: number;
     selectionDrawPosition: number;
   }> = [];
-  const range = getLevel50FactoryRentalRange(challengeNum, false);
+  const range = getFactoryRentalRange(challengeNum, false, input.lvlMode);
   while (selected.length !== FRONTIER_PARTY_SIZE) {
     const opponentIndex = selected.length;
     const position = ledger.length;
@@ -529,8 +539,8 @@ export function generateFactoryOpponent(
       outcome = "unown"; // battle_factory.c:336-338
     } else if (savedRentalSpecies.has(candidate.species)) {
       outcome = "saved-rental-species"; // battle_factory.c:340-347
-    } else if (setId > POLICY.rentalSelection.highTierLastIndex) {
-      // This guard is source-real (`:349-351`) but unreachable for valid
+    } else if (input.lvlMode !== "open" && setId > POLICY.rentalSelection.highTierLastIndex) {
+      // This guard is source-real (`:349-351`, Level 50 only) but unreachable for valid
       // Level-50 GetFactoryMonId ranges, whose maximum is the same 849.
       outcome = "level50-high-tier";
     } else if (selected.some((existing) => existing.speciesName === candidate.species)) {
@@ -630,6 +640,7 @@ export function generateFactoryOpponent(
       // adapter collapses this to slot 0 for single-ability species.
       abilitySlot: (personality & 1) as 0 | 1,
       otId,
+      ...factoryRecordLevelField(input.lvlMode),
     };
     const member = createFactoryCorpusPartyMember(instance);
     opponents.push(Object.freeze({

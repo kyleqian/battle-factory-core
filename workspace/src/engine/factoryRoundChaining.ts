@@ -18,6 +18,7 @@ import {
   type DraftScreenState,
 } from "./factoryDraftScreen.ts";
 import { ANCHOR_FACTORY_METADATA } from "./factoryAnchorSession.ts";
+import type { FactoryLvlMode } from "./factoryLevelMode.ts";
 import type { FactoryInitialRentalGenerationResult } from "./factoryRentalGeneration.ts";
 import { generateFactoryRoundDeal } from "./factoryRoundBattleOrchestrator.ts";
 
@@ -26,6 +27,15 @@ const MAX_STREAK = factoryEndingPolicy.constants.maxStreak;
 const MAX_BATTLE_POINTS = factoryEndingPolicy.constants.maxBattlePoints;
 
 export type FactoryHeardBrainSpeech = Readonly<{ silver: boolean; gold: boolean }>;
+
+/**
+ * opl: one level's saved Factory slots (singles): `factoryWinStreaks[0][lvlMode]`, `factoryRentsCount[0][lvlMode]` and that level's
+ * win-streak-active flag (`winStreakActiveFlags & sWinStreakFlags[0][lvlMode]`, battle_factory.c:145-155). The flag is set when a challenge
+ * of that level starts (`factory_set FACTORY_DATA_WIN_STREAK_ACTIVE, TRUE`, BattleFactoryLobby scripts.inc:146) and cleared only by a lost
+ * (or retired) challenge of that level (LostChallenge, :65-75); a won round keeps it. An inactive level's streak and rents are zeroed by
+ * the next `factory_init` of that level (InitFactoryChallenge, battle_factory.c:208-212), so an inactive slot is kept here as 0 / 0.
+ */
+export type FactoryLevelSlot = Readonly<{ factoryWinStreak: number; rentsCount: number; active: boolean }>;
 
 export type FactoryCarry = Readonly<{
   /** `GetCurrentFacilityWinStreak()` entering the next round. */
@@ -42,7 +52,45 @@ export type FactoryCarry = Readonly<{
    * a lost challenge, like the symbols. Absent = neither heard (a fresh save).
    */
   heardBrainSpeech?: FactoryHeardBrainSpeech;
+  /**
+   * opl: `frontier.lvlMode` of the challenge this carry feeds (src/engine/factoryLevelMode.ts); `factoryWinStreak` and `rentsCount` above
+   * are that level's slots. Absent = Level 50 (a Level 50-only carry keeps its old shape).
+   */
+  lvlMode?: "open";
+  /**
+   * opl: the other level's slots (`FactoryLevelSlot`). The symbols, the heard-speech bits and the Battle Points are shared by both levels
+   * (flags and one total in the save); the streak and rents are per level. Absent = 0 / 0, inactive (a fresh save).
+   */
+  otherLevel?: FactoryLevelSlot;
 }>;
+
+/** The carry's level mode ("50" when absent). */
+export function factoryCarryLvlMode(carry: FactoryCarry): FactoryLvlMode {
+  return carry.lvlMode === "open" ? "open" : "50";
+}
+
+/**
+ * opl: the carry a new challenge of `chosen` level starts with (the attendant's level choice, then `factory_init`, BattleFactoryLobby
+ * scripts.inc:131-146 / battle_factory.c:198-216). `currentActive` is the carry's own level's win-streak-active flag (true after a won
+ * round, false after a lost or retired one). The chosen level's slots continue when its flag is set and are zeroed when it is not; the level
+ * left behind keeps its slots and flag. Level 50 to Level 50 is the old behaviour (`carryForNewChallengeAfterLobby` when inactive).
+ */
+export function carryForChallengeLevel(carry: FactoryCarry, chosen: FactoryLvlMode, currentActive: boolean): FactoryCarry {
+  if (chosen === factoryCarryLvlMode(carry)) return currentActive ? carry : carryForNewChallengeAfterLobby(carry);
+  const incoming = carry.otherLevel?.active === true ? carry.otherLevel : null;
+  const { lvlMode: _lvlMode, otherLevel: _otherLevel, ...shared } = carry;
+  return Object.freeze({
+    ...shared,
+    factoryWinStreak: incoming?.factoryWinStreak ?? 0,
+    rentsCount: incoming?.rentsCount ?? 0,
+    ...(chosen === "open" ? { lvlMode: "open" as const } : {}),
+    otherLevel: Object.freeze({
+      factoryWinStreak: currentActive ? carry.factoryWinStreak : 0,
+      rentsCount: currentActive ? carry.rentsCount : 0,
+      active: currentActive,
+    }),
+  });
+}
 
 /**
  * What a save keeps of the Factory (singles, Level 50) from one challenge to the next, whatever the streak: the symbol count
@@ -70,7 +118,11 @@ export function validateFactoryFrontierRecord(record: FactoryFrontierRecord): Fa
   return Object.freeze({ symbols, heardBrainSpeech: Object.freeze({ silver: heardBrainSpeech.silver, gold: heardBrainSpeech.gold }) });
 }
 
-export function createInitialFactoryCarry(playerTrainerId: number, frontier?: FactoryFrontierRecord): FactoryCarry {
+export function createInitialFactoryCarry(
+  playerTrainerId: number,
+  frontier?: FactoryFrontierRecord,
+  lvlMode: FactoryLvlMode = "50",
+): FactoryCarry {
   const record = frontier === undefined ? null : validateFactoryFrontierRecord(frontier);
   return Object.freeze({
     factoryWinStreak: 0,
@@ -79,6 +131,7 @@ export function createInitialFactoryCarry(playerTrainerId: number, frontier?: Fa
     rentsCount: 0,
     playerTrainerId,
     ...(record === null ? {} : { heardBrainSpeech: record.heardBrainSpeech }),
+    ...(lvlMode === "open" ? { lvlMode: "open" as const } : {}),
   });
 }
 
@@ -130,6 +183,9 @@ export function advanceFactoryCarry(
     rentsCount: roundWon ? rentsCountAfterRound : 0,
     playerTrainerId: carry.playerTrainerId,
     ...(heardBrainSpeech === undefined ? {} : { heardBrainSpeech }),
+    // opl: the level and the other level's slots are untouched by a round of this level.
+    ...(carry.lvlMode === undefined ? {} : { lvlMode: carry.lvlMode }),
+    ...(carry.otherLevel === undefined ? {} : { otherLevel: carry.otherLevel }),
   });
 }
 
@@ -178,6 +234,7 @@ export function generateFactoryChallengeDraft(
     playerTrainerId: carry.playerTrainerId,
     factorySymbolsCount: carry.factorySymbolsCount,
     battleTowerLevel50WinStreak: ANCHOR_FACTORY_METADATA.battleTowerLevel50WinStreak,
+    ...(carry.lvlMode === "open" ? { lvlMode: "open" as const } : {}),
   });
   return Object.freeze({
     generation,

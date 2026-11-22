@@ -7,7 +7,8 @@
 //     INFO      -> the 7-page explanation, back to the question
 //     EXIT / B  -> "We look forward to your next visit." -> free roam
 //     CHALLENGE -> "Which level ...?" + LV. 50 / OPEN LEVEL / EXIT
-//       Open Level: shown, NOT selectable (deliberate divergence, like REST)
+//       Open Level: selectable only with the engine's Open Level option on
+//                   (opl); otherwise shown, NOT selectable (like REST)
 //       EXIT / B  -> the farewell
 //       LV. 50    -> "Before you begin your challenge, I need to save the
 //                    game. Is that okay?" YES/NO (NO / B = the farewell)
@@ -235,6 +236,16 @@ export interface FactoryLobbyAttendantState {
   readonly done: "freeRoam" | "draft" | null;
   /** lbr-c: the ROM save dialog has begun (its window drew its first frame). Stays set for the rest of the conversation. */
   readonly saveDialogStarted: boolean;
+  /**
+   * opl: OPEN LEVEL can be chosen (the engine's Open Level option, `FactorySessionOptions.level` / `openLevel`). Absent = A on OPEN LEVEL
+   * does nothing (the Level 50-only game, as before).
+   */
+  readonly openLevel?: true;
+  /**
+   * opl: the level the player chose at "Which level do you wish to challenge?" (`frontier_set FRONTIER_DATA_LVL_MODE, VAR_RESULT`,
+   * BattleFactoryLobby scripts.inc:136); absent = LV. 50. Read by core when the conversation hands over to the new challenge.
+   */
+  readonly chosenLevel?: "open";
 }
 
 export interface AttendantInput {
@@ -295,8 +306,12 @@ function startScreen(
   });
 }
 
-export function createFactoryLobbyAttendantState(startFrame: number): FactoryLobbyAttendantState {
+export function createFactoryLobbyAttendantState(
+  startFrame: number,
+  options: Readonly<{ openLevel?: boolean }> = {},
+): FactoryLobbyAttendantState {
   return Object.freeze({
+    ...(options.openLevel === true ? { openLevel: true as const } : {}),
     startFrame,
     phase: "talk",
     screen: "welcome",
@@ -383,10 +398,14 @@ function menuChoice(state: FactoryLobbyAttendantState, def: AttendantScreenDef, 
       if (b || state.cursor === 2) return decide("farewell");
       if (state.cursor === 0) return decide("level");
       return decide("explain");
-    case "level":
+    case "level": {
       if (b || state.cursor === 2) return decide("farewell");
-      if (state.cursor === 1) return state; // Open Level: not modelled, A is a no-op
+      if (state.cursor === 1 && state.openLevel !== true) return state; // Open Level off (the Level 50-only game): A is a no-op
+      // frontier_set FRONTIER_DATA_LVL_MODE, VAR_RESULT, then the save question either way (scripts.inc:131-141).
+      const { chosenLevel: _previous, ...rest } = state;
+      state = Object.freeze(state.cursor === 1 ? { ...rest, chosenLevel: "open" as const } : rest);
       return decide("saveQuestion");
+    }
     case "saveQuestion":
       if (b || state.cursor === 1) return decide("farewell");
       return decide("saveInfo");

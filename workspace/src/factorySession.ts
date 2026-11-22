@@ -29,6 +29,7 @@
 import { createInitialState, tick, type EngineState } from "./engine/core.ts";
 import { ANCHOR_FACTORY_METADATA } from "./engine/factoryAnchorSession.ts";
 import { createFactoryLobbyAttendantState } from "./engine/factoryLobbyAttendant.ts";
+import { requireFactoryLvlMode, type FactoryLvlMode } from "./engine/factoryLevelMode.ts";
 import { createFactoryLobbyFreeRoamState } from "./engine/factoryLobbyFreeRoam.ts";
 import {
   createInitialFactoryCarry, factoryFrontierRecordOf, generateFactoryChallengeDraft, mergeFactoryHeardBrainSpeech, validateFactoryFrontierRecord,
@@ -77,7 +78,24 @@ export interface FactorySessionOptions {
   readonly frontier?: FactoryFrontierRecord | undefined;
   /** rc1: "skip" = black result holds instead of the Lobby after a round (`FactoryLobbyMode`); absent / "walk" = the ROM's Lobby. */
   readonly lobby?: FactoryLobbyMode | undefined;
+  /**
+   * opl (not exposed to players yet): the level of the challenge this mount starts, "50" (default) or "open" (src/engine/factoryLevelMode.ts).
+   * An Open Level "draft" start without `gameplaySeed` deals from `OPEN_LEVEL_DEFAULT_DEAL_RNG_VALUE`, the cursor the ROM's own route enters
+   * GenerateInitialRentalMons with (no recorded Open Level anchor exists). "after-save" starts the Open Level challenge whose save was made.
+   */
+  readonly level?: FactoryLvlMode | undefined;
+  /**
+   * opl: the Lobby attendant's OPEN LEVEL can be chosen for a later challenge in this mount. Absent = true for an Open Level mount, false
+   * for a Level 50 one (A on OPEN LEVEL does nothing, as before).
+   */
+  readonly openLevel?: boolean | undefined;
 }
+
+/**
+ * opl: the gRngValue at GenerateInitialRentalMons' entry on the ROM's own route to the draft (frame 5796 of oracle/bootstrap/factory.json,
+ * docs/anchor-draft-cursor-receipt.md section 3); the Open Level route (factory-open.json) differs only by a cursor press before it.
+ */
+export const OPEN_LEVEL_DEFAULT_DEAL_RNG_VALUE = 0x08a74230;
 
 /**
  * The challenge's first state. Without a gameplay seed this is exactly the
@@ -87,23 +105,30 @@ export interface FactorySessionOptions {
  * `createStartCarryState`), with the value itself instead of a walk.
  */
 export function createChallengeState(options: FactorySessionOptions): EngineState {
+  const level = requireFactoryLvlMode(options.level, "level");
+  const openLevel = options.openLevel ?? level === "open";
+  if (typeof openLevel !== "boolean") throw new Error(`openLevel must be a boolean, got ${String(openLevel)}`);
+  if (level === "open" && !openLevel) throw new Error("an Open Level challenge needs openLevel (it cannot be false)");
   const base = createInitialState({
     battleScene: options.battleScene,
     ...(options.presentationSeed !== undefined ? { presentationSeed: options.presentationSeed } : {}),
     ...(options.presentationRngPolicy !== undefined ? { presentationRngPolicy: options.presentationRngPolicy } : {}),
     ...(options.lobby === "skip" ? { lobby: "skip" as const } : {}),
+    ...(openLevel ? { openLevel: true } : {}),
   });
   const frontier = options.frontier === undefined ? undefined : validateFactoryFrontierRecord(options.frontier);
-  if (options.start === "after-save") return createAfterSaveState(base, options.gameplaySeed, frontier);
-  // The anchor draft: its round takes the record from the carry (core.ts createFactoryAnchorSession call).
-  if (options.gameplaySeed === undefined) {
+  if (options.start === "after-save") return createAfterSaveState(base, options.gameplaySeed, frontier, level);
+  // The anchor draft: its round takes the record from the carry (core.ts createFactoryAnchorSession call). Open Level has no recorded
+  // anchor: its draft is dealt from the ROM route's deal cursor (OPEN_LEVEL_DEFAULT_DEAL_RNG_VALUE).
+  if (options.gameplaySeed === undefined && level === "50") {
     return frontier === undefined ? base : { ...base, factoryCarry: createInitialFactoryCarry(ANCHOR_FACTORY_METADATA.playerTrainerId, frontier) };
   }
-  if (!Number.isInteger(options.gameplaySeed) || options.gameplaySeed < 0 || options.gameplaySeed > 0xffffffff) {
-    throw new Error(`gameplaySeed must be a u32, got ${options.gameplaySeed}`);
+  const seed = options.gameplaySeed ?? OPEN_LEVEL_DEFAULT_DEAL_RNG_VALUE;
+  if (!Number.isInteger(seed) || seed < 0 || seed > 0xffffffff) {
+    throw new Error(`gameplaySeed must be a u32, got ${seed}`);
   }
-  const bootRngValue = options.gameplaySeed >>> 0;
-  const carry = createInitialFactoryCarry(ANCHOR_FACTORY_METADATA.playerTrainerId, frontier);
+  const bootRngValue = seed >>> 0;
+  const carry = createInitialFactoryCarry(ANCHOR_FACTORY_METADATA.playerTrainerId, frontier, level);
   const { generation, draftScreen } = generateFactoryChallengeDraft(carry, bootRngValue);
   return {
     ...base,
@@ -114,18 +139,31 @@ export function createChallengeState(options: FactorySessionOptions): EngineStat
   };
 }
 
-function createAfterSaveState(base: EngineState, gameplaySeed: number | undefined, frontier: FactoryFrontierRecord | undefined): EngineState {
+function createAfterSaveState(
+  base: EngineState,
+  gameplaySeed: number | undefined,
+  frontier: FactoryFrontierRecord | undefined,
+  level: FactoryLvlMode,
+): EngineState {
   if (gameplaySeed !== undefined && (!Number.isInteger(gameplaySeed) || gameplaySeed < 0 || gameplaySeed > 0xffffffff)) {
     throw new Error(`gameplaySeed must be a u32, got ${gameplaySeed}`);
   }
-  const attendant = createFactoryLobbyAttendantState(0);
+  const attendant = createFactoryLobbyAttendantState(0, { openLevel: base.openLevel === true });
   return {
     ...base,
     lobbyFreeRoam: createFactoryLobbyFreeRoamState(),
-    lobbyAttendant: Object.freeze({ ...attendant, screen: "step" as const, page: 0, age: 0, lead: null }),
+    // opl: the save was made for this level (the attendant's level choice came before it).
+    lobbyAttendant: Object.freeze({
+      ...attendant,
+      screen: "step" as const,
+      page: 0,
+      age: 0,
+      lead: null,
+      ...(level === "open" ? { chosenLevel: "open" as const } : {}),
+    }),
     rngMode: "vblank",
     rngValue: (gameplaySeed ?? base.rngValue) >>> 0,
-    factoryCarry: createInitialFactoryCarry(ANCHOR_FACTORY_METADATA.playerTrainerId, frontier),
+    factoryCarry: createInitialFactoryCarry(ANCHOR_FACTORY_METADATA.playerTrainerId, frontier, level),
   };
 }
 

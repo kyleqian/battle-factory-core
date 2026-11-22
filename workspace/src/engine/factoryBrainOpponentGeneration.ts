@@ -43,9 +43,10 @@ import {
 } from "./factoryCorpusParty.ts";
 import {
   battleScriptIvsFromRandomWords,
-  getLevel50FactoryRentalRange,
+  getFactoryRentalRange,
   USE_RANDOM_IVS,
 } from "./factoryRentalGeneration.ts";
+import { factoryRecordLevelField, type FactoryLvlMode } from "./factoryLevelMode.ts";
 import { natureFromPersonality, randomU16 } from "./opponentGen.ts";
 
 const FRONTIER_PARTY_SIZE = 3;
@@ -132,6 +133,11 @@ export type FactoryBrainOpponentGenerationInput = Readonly<{
   playerRentalSetIds: readonly number[];
   /** `T1_READ_32(playerTrainerId)`, used as the opponent OT id (`:775`). */
   playerTrainerId: number;
+  /**
+   * `frontier.lvlMode` (src/engine/factoryLevelMode.ts). Absent = Level 50. Open Level: the Open Level rows (`GetFactoryMonId(lvlMode,
+   * ...)`, :779), no high-tier guard (`monLevel == FRONTIER_MAX_LEVEL_50`, :783) and level-100 members (`SetFacilityPtrsGetLevel`, :773).
+   */
+  lvlMode?: FactoryLvlMode;
 }>;
 
 export type FactoryBrainOpponentGenerationResult = Readonly<{
@@ -232,11 +238,12 @@ function brainSetSelectionOutcome(
   playerRentalSetIds: ReadonlySet<number>,
   chosenSpeciesNames: readonly string[],
   chosenItemIds: readonly number[],
+  lvlMode: FactoryLvlMode | undefined,
 ): "accepted" | FactoryBrainOpponentSetRejection {
   if (candidate.species === "SPECIES_UNOWN") {
     return "unown"; // battle_factory.c:781-782
   }
-  if (setId > POLICY.rentalSelection.highTierLastIndex) {
+  if (lvlMode !== "open" && setId > POLICY.rentalSelection.highTierLastIndex) {
     // Source-real (`:783-784`) but unreachable: every valid Level-50
     // GetFactoryMonId range tops out at or below 849 (proven in
     // tests/factoryBrainOpponentGeneration.test.ts, matching the sibling
@@ -280,6 +287,7 @@ function constructBrainMember(
   otId: number,
   opponentIndex: number,
   selectionDrawPosition: number,
+  lvlMode: FactoryLvlMode | undefined,
 ): { readonly record: FactoryBrainOpponentRecord; readonly rngValue: number } {
   let rngValue = startRngValue;
   const setId = candidate.index;
@@ -374,6 +382,7 @@ function constructBrainMember(
     // adapter collapses this to slot 0 for single-ability species.
     abilitySlot: (personality & 1) as 0 | 1,
     otId,
+    ...factoryRecordLevelField(lvlMode),
   };
   const member = createFactoryCorpusPartyMember(instance);
   return {
@@ -440,7 +449,7 @@ export function generateFactoryBrainOpponent(
   // argument is the >= USE_RANDOM_IVS overread row, each member still rolls
   // its OWN spread (CreateBoxMon runs per mon).
   const fixedIvArgument = getLevel50FactoryBrainFixedIv(challengeNum);
-  const range = getLevel50FactoryRentalRange(challengeNum, false);
+  const range = getFactoryRentalRange(challengeNum, false, input.lvlMode);
 
   const ledger: FactoryBrainOpponentDrawLedgerEntry[] = [];
   const opponents: FactoryBrainOpponentRecord[] = [];
@@ -457,7 +466,7 @@ export function generateFactoryBrainOpponent(
     const candidate = setRow(setId, "generated set id");
     const itemId = heldItemIdOf(candidate);
     const outcome = brainSetSelectionOutcome(
-      setId, candidate, itemId, playerRentalSetIds, chosenSpeciesNames, chosenItemIds,
+      setId, candidate, itemId, playerRentalSetIds, chosenSpeciesNames, chosenItemIds, input.lvlMode,
     );
 
     ledger.push({
@@ -479,7 +488,7 @@ export function generateFactoryBrainOpponent(
     chosenSpeciesNames.push(candidate.species);
     chosenItemIds.push(itemId);
     const constructed = constructBrainMember(
-      ledger, rngValue, candidate, itemId, fixedIvArgument, otId, opponentIndex, position,
+      ledger, rngValue, candidate, itemId, fixedIvArgument, otId, opponentIndex, position, input.lvlMode,
     );
     rngValue = constructed.rngValue;
     opponents.push(constructed.record);
@@ -495,6 +504,8 @@ export type FactoryBrainAdoptedOpponentScheduleInput = Readonly<{
   playerRentalSetIds: readonly number[];
   /** As `FactoryBrainOpponentGenerationInput.playerTrainerId`. */
   playerTrainerId: number;
+  /** As `FactoryBrainOpponentGenerationInput.lvlMode`. */
+  lvlMode?: FactoryLvlMode;
   /** The three sets `FillFactoryBrainParty` accepted, in party order. */
   setIds: readonly [number, number, number];
   /**
@@ -533,7 +544,7 @@ export function adoptFactoryBrainOpponentSchedule(
   const otId = requireU32(input.playerTrainerId, "playerTrainerId");
   const playerRentalSetIds = requirePlayerRentalSetIds(input.playerRentalSetIds);
   const fixedIvArgument = getLevel50FactoryBrainFixedIv(challengeNum);
-  const range = getLevel50FactoryRentalRange(challengeNum, false);
+  const range = getFactoryRentalRange(challengeNum, false, input.lvlMode);
   if (input.setIds.length !== FRONTIER_PARTY_SIZE || input.constructionRngValues.length !== FRONTIER_PARTY_SIZE) {
     throw new Error(`an adopted Brain schedule needs exactly ${FRONTIER_PARTY_SIZE} set ids and construction cursors`);
   }
@@ -555,7 +566,7 @@ export function adoptFactoryBrainOpponentSchedule(
     }
     const itemId = heldItemIdOf(candidate);
     const outcome = brainSetSelectionOutcome(
-      setId, candidate, itemId, playerRentalSetIds, chosenSpeciesNames, chosenItemIds,
+      setId, candidate, itemId, playerRentalSetIds, chosenSpeciesNames, chosenItemIds, input.lvlMode,
     );
     if (outcome !== "accepted") {
       throw new Error(`adopted Brain set ${setId} (member ${opponentIndex}) is one the source rules reject: ${outcome}`);
@@ -565,7 +576,7 @@ export function adoptFactoryBrainOpponentSchedule(
     const constructed = constructBrainMember(
       ledger,
       requireU32(input.constructionRngValues[opponentIndex]!, `constructionRngValues[${opponentIndex}]`),
-      candidate, itemId, fixedIvArgument, otId, opponentIndex, -1,
+      candidate, itemId, fixedIvArgument, otId, opponentIndex, -1, input.lvlMode,
     );
     rngValue = constructed.rngValue;
     opponents.push(constructed.record);

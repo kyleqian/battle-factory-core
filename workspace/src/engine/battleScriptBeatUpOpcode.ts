@@ -32,18 +32,19 @@ const SPECIES_BY_ID = new Map(
   (speciesStatsData.species as readonly SpeciesRow[]).map((row) => [row.id, row]),
 );
 
-/**
- * Stage 10's legal Battle Factory mission is Level 50 only. Bench level is
- * therefore exactly 50 here; an Open-level expansion must replace this bound
- * with the selected party member's source level.
- */
+/** The Level 50 Factory's party level, the default when a caller gives none (every Level 50 participant is level 50). */
 const FACTORY_LEVEL_50_PARTY_MEMBER_LEVEL = 50;
 
+/**
+ * One Beat Up hit (`Cmd_trydobeatup`, battle_script_commands.c:8986-8994): the member's level is its own
+ * `GetMonData(&party[i], MON_DATA_LEVEL)` (:8990), 100 for an Open Level party.
+ */
 export function calculateBeatUpMemberDamage(
   memberSpecies: number,
   targetSpecies: number,
   power: number,
   helpingHand: boolean,
+  memberLevel: number = FACTORY_LEVEL_50_PARTY_MEMBER_LEVEL,
 ): number {
   const member = SPECIES_BY_ID.get(memberSpecies);
   const target = SPECIES_BY_ID.get(targetSpecies);
@@ -55,7 +56,7 @@ export function calculateBeatUpMemberDamage(
 
   // Exact source ordering/truncation. There are deliberately no /256 scales.
   let damage = member.baseAttack * power;
-  damage *= Math.trunc((FACTORY_LEVEL_50_PARTY_MEMBER_LEVEL * 2) / 5) + 2;
+  damage *= Math.trunc((memberLevel * 2) / 5) + 2;
   damage = Math.trunc(damage / target.baseDefense);
   damage = Math.trunc(damage / 50) + 2;
   if (helpingHand) damage = Math.trunc((damage * 15) / 10);
@@ -110,6 +111,7 @@ function createHandler(
           rules.battlers[target].species,
           rules.currentMovePower,
           rules.battlers[attacker].helpingHand === 1,
+          member.level,
         );
         return transitionBattleScriptCommand(
           context,

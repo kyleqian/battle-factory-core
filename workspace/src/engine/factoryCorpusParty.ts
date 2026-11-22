@@ -30,8 +30,8 @@ import {
 import { getMonGender, type MonGender } from "./monGender.ts";
 import { natureFromPersonality } from "./opponentGen.ts";
 import { calculateMaxHp, calculateOtherStat, type NatureModifier } from "./stats.ts";
+import { FACTORY_LEVEL_50, FACTORY_LEVEL_OPEN } from "./factoryLevelMode.ts";
 
-const FACTORY_LEVEL_50 = 50;
 const MAX_TOTAL_EVS = 510;
 const SHINY_ODDS = 8;
 
@@ -152,6 +152,11 @@ export type FactoryCorpusPartyInstance = Readonly<{
    * writes the party mon (battle_controller_player.c:714-735) and the Factory party is not rebuilt between battles.
    */
   moveOrder?: readonly [number, number, number, number];
+  /**
+   * The level the record is built at: absent = 50 (`FRONTIER_MAX_LEVEL_50`); Open Level records carry 100 (`FRONTIER_MAX_LEVEL_OPEN`,
+   * src/engine/factoryLevelMode.ts). It sets the experience, the stats and the level, as `CreateMonWithEVSpreadNatureOTID`'s `level`.
+   */
+  level?: number;
 }>;
 
 /**
@@ -265,6 +270,10 @@ export function createFactoryCorpusPartyMember(
     );
   }
   const ivs = instance.ivs ?? uniformBattleScriptIvs(instance.fixedIv);
+  const level = instance.level ?? FACTORY_LEVEL_50;
+  if (level !== FACTORY_LEVEL_50 && level !== FACTORY_LEVEL_OPEN) {
+    throw new Error(`Factory record level must be ${FACTORY_LEVEL_50} or ${FACTORY_LEVEL_OPEN}, got ${String(instance.level)}`);
+  }
   const evs = deriveEvs(set);
   const setMoves = factoryFacilitySetMoveIds(instance.setId).map(setMonMoveAvoidReturn);
   const moveOrder = instance.moveOrder;
@@ -296,24 +305,24 @@ export function createFactoryCorpusPartyMember(
   if (ability === undefined) throw new Error(`Species ${species.name} has unknown ability ${abilityName}`);
 
   const growthRate = EXP_DATA.speciesGrowthRate[species.name];
-  const experience = growthRate === undefined ? undefined : EXP_DATA.growthRates[growthRate]?.[FACTORY_LEVEL_50];
-  if (experience === undefined) throw new Error(`Species ${species.name} has no Level-50 experience entry`);
+  const experience = growthRate === undefined ? undefined : EXP_DATA.growthRates[growthRate]?.[level];
+  if (experience === undefined) throw new Error(`Species ${species.name} has no level-${level} experience entry`);
 
-  const maxHP = calculateMaxHp(species.id, species.baseHp, ivs.hp, evs.hp, FACTORY_LEVEL_50);
+  const maxHP = calculateMaxHp(species.id, species.baseHp, ivs.hp, evs.hp, level);
   const attack = calculateOtherStat(
-    species.baseAttack, ivs.attack, evs.attack, FACTORY_LEVEL_50, setNature.attack,
+    species.baseAttack, ivs.attack, evs.attack, level, setNature.attack,
   );
   const defense = calculateOtherStat(
-    species.baseDefense, ivs.defense, evs.defense, FACTORY_LEVEL_50, setNature.defense,
+    species.baseDefense, ivs.defense, evs.defense, level, setNature.defense,
   );
   const speed = calculateOtherStat(
-    species.baseSpeed, ivs.speed, evs.speed, FACTORY_LEVEL_50, setNature.speed,
+    species.baseSpeed, ivs.speed, evs.speed, level, setNature.speed,
   );
   const spAttack = calculateOtherStat(
-    species.baseSpAttack, ivs.spAttack, evs.spAttack, FACTORY_LEVEL_50, setNature.spAttack,
+    species.baseSpAttack, ivs.spAttack, evs.spAttack, level, setNature.spAttack,
   );
   const spDefense = calculateOtherStat(
-    species.baseSpDefense, ivs.spDefense, evs.spDefense, FACTORY_LEVEL_50, setNature.spDefense,
+    species.baseSpDefense, ivs.spDefense, evs.spDefense, level, setNature.spDefense,
   );
 
   return Object.freeze({
@@ -328,7 +337,7 @@ export function createFactoryCorpusPartyMember(
     ivs,
     personality,
     experience,
-    level: FACTORY_LEVEL_50,
+    level,
     friendship: 0,
     maxHP,
     attack,

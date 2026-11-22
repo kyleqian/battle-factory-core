@@ -286,8 +286,7 @@ describe("source-faithful minimal Factory AI mask-0 decision policy", () => {
     ["mask 1", { factory: { ...view.factory, factoryWinStreak: 14 } }, /mask 1/],
     ["mask 7", { factory: { ...view.factory, factoryWinStreak: 28 } }, /mask 7/],
     ["Frontier Brain", { factory: { ...view.factory, trainerOpponentId: 1022 } }, /frontierBrain/],
-    ["Tent mask 0", { factory: { ...view.factory, levelMode: 2 } }, /Level-50/],
-    ["Open Level", { factory: { ...view.factory, levelMode: 1 } }, /Level-50/],
+    ["Tent mask 0", { factory: { ...view.factory, levelMode: 2 } }, /Level 50 \/ Open Level Factory singles/],
     ["doubles", { factory: { ...view.factory, battleMode: 1 } }, /singles/],
   ] as const)("rejects unsupported %s views", (_name, changes, message) => {
     expect(() =>
@@ -297,6 +296,14 @@ describe("source-faithful minimal Factory AI mask-0 decision policy", () => {
           ...changes,
         } as FactoryAiMaskZeroView,
       })).toThrow(message);
+  });
+
+  it("opl: an Open Level view decides as the Level 50 one (GetAiScriptsInBattleFactory has no Open Level branch, battle_factory.c:889-911)", () => {
+    const level50 = choose();
+    const open = choose({ view: { ...view, factory: { ...view.factory, levelMode: 1 } } as FactoryAiMaskZeroView });
+    expect(open.trace.maskSelection.inputs.levelMode).toBe(1);
+    expect({ ...open, trace: { ...open.trace, maskSelection: null } }).toEqual({ ...level50, trace: { ...level50.trace, maskSelection: null } });
+    expect(open.trace.maskSelection.branch).toEqual(level50.trace.maskSelection.branch);
   });
 
   it("rejects unsupported requests and malformed views, RNG, and top-level inputs", () => {

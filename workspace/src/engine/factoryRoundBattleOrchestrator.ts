@@ -1,3 +1,4 @@
+import type { FactoryLvlMode } from "./factoryLevelMode.ts";
 import { recordContainedPresentationError } from "./presentationContainment.ts";
 import {
   createLiveMovePaletteHost, invalidateLiveMovePaletteHost, prepareLiveMovePalette,
@@ -373,6 +374,11 @@ export type FactoryRoundBattleOrchestratorConfig = Readonly<{
   factoryWinStreak: number;
   playerTrainerId: number;
   battleTowerLevel50WinStreak: number;
+  /**
+   * `frontier.lvlMode` of this challenge (src/engine/factoryLevelMode.ts). Absent = Level 50. Open Level: every generated rental,
+   * opponent and Frontier Brain party comes from the Open Level set rows, without the Level 50 high-tier guard, built at level 100.
+   */
+  lvlMode?: FactoryLvlMode;
   /**
    * `GetPlayerSymbolCountForFacility(FRONTIER_FACILITY_FACTORY)`, consumed by
    * `getFactoryFrontierBrainStatus` to decide whether an upcoming battle is
@@ -943,6 +949,7 @@ function generateOpponentFor(
       factoryWinStreak,
       playerRentalSetIds: savedRentalRecords.map((record) => record.setId),
       playerTrainerId: config.playerTrainerId,
+      ...(config.lvlMode === "open" ? { lvlMode: config.lvlMode } : {}),
     });
     return scheduledBrainOpponent(brainStatus, generation, storedTrainerIds);
   }
@@ -954,6 +961,7 @@ function generateOpponentFor(
     savedRentalSetIds: savedRentalRecords.map((record) => record.setId),
     playerTrainerId: config.playerTrainerId,
     battleTowerLevel50WinStreak: config.battleTowerLevel50WinStreak,
+    ...(config.lvlMode === "open" ? { lvlMode: config.lvlMode } : {}),
   });
   return Object.freeze({
     kind: "ordinary",
@@ -966,7 +974,7 @@ function generateOpponentFor(
 /** The config fields an opponent roll reads (generateOpponentFor). */
 export type FactoryOpponentRollConfig = Pick<
   FactoryRoundBattleOrchestratorConfig,
-  "factoryWinStreak" | "factorySymbolsCount" | "playerTrainerId" | "battleTowerLevel50WinStreak"
+  "factoryWinStreak" | "factorySymbolsCount" | "playerTrainerId" | "battleTowerLevel50WinStreak" | "lvlMode"
 >;
 
 export type FactoryRoundDealInput = FactoryOpponentRollConfig & Readonly<{
@@ -1013,6 +1021,7 @@ export function generateFactoryRoundDeal(input: FactoryRoundDealInput): FactoryR
     factoryWinStreak: input.factoryWinStreak,
     rentsCount: input.rentsCount,
     playerTrainerId: input.playerTrainerId,
+    ...(input.lvlMode === "open" ? { lvlMode: input.lvlMode } : {}),
   };
   // The set ids alone (GenerateOpponentMons reads rentalMons' set ids, never a personality); these personalities are not the deal's.
   const ids = generateInitialFactoryRentals(rentalInput);
@@ -1154,6 +1163,7 @@ export function createFactoryRoundBattleOrchestrator(
       factoryWinStreak: config.factoryWinStreak,
       rentsCount: config.facilityState.rentsCount,
       playerTrainerId: config.playerTrainerId,
+      ...(config.lvlMode === "open" ? { lvlMode: config.lvlMode } : {}),
     };
     if (adopted === undefined && adoptedBrain === undefined) {
       const deal = generateFactoryRoundDeal({
@@ -1944,6 +1954,7 @@ function driveTrainerBoundary(
       {
         factoryWinStreak: state.config.factoryWinStreak + state.round.rules.battleIndex,
         trainerOpponentId: state.opponentGenerations.at(-1)!.trainerId,
+        ...(state.config.lvlMode === "open" ? { levelMode: 1 as const } : {}),
       },
       reduceFactoryFullTurnDecision,
     );

@@ -128,6 +128,12 @@ export type FactoryAiChallengePolicy = Readonly<{
   factoryWinStreak: number;
   trainerOpponentId: number;
   /**
+   * `frontier.lvlMode` as the source number (FRONTIER_LVL_50 0, FRONTIER_LVL_OPEN 1); absent = Level 50. `GetAiScriptsInBattleFactory`
+   * (battle_factory.c:889-911) has no Open Level branch: the mode only selects which streak slot the challenge number is read from,
+   * and `factoryWinStreak` is already that slot's streak.
+   */
+  levelMode?: 0 | 1;
+  /**
    * Source `gBattleResults.battleTurnCounter`, read by `AI_CV_Swagger`
    * after its Psych Up/target-ATK gate (doc §33) and by `AI_CV_Conversion`.
    * An explicit override for fixtures; when absent the live driver reads
@@ -355,7 +361,7 @@ export function createFactoryAiViewFromLiveRules(input: Readonly<{
   const attacker = input.rulesContext.battlers[1];
   const target = input.rulesContext.battlers[0];
   const factory: FactoryAiMaskSelectionInput = Object.freeze({
-    levelMode: FACTORY_LEVEL_MODE_50,
+    levelMode: input.challenge.levelMode ?? FACTORY_LEVEL_MODE_50,
     battleMode: FACTORY_BATTLE_MODE_SINGLES,
     factoryWinStreak: input.challenge.factoryWinStreak,
     trainerOpponentId: input.challenge.trainerOpponentId,

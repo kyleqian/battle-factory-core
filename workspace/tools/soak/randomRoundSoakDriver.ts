@@ -44,6 +44,7 @@ import {
 } from "../../src/engine/core.ts";
 import type { GbaButton } from "../../src/input.ts";
 import { isFactoryLobbyFacingSinglesAttendant } from "../../src/engine/factoryLobbyFreeRoam.ts";
+import { attendantAcceptsInput } from "../../src/engine/factoryLobbyAttendant.ts";
 import {
   MENU_OPTION_RENT,
   MENU_OPTION_SUMMARY,
@@ -1724,9 +1725,20 @@ export class RandomPlayer {
     if (state.lobbyFreeRoam) {
       // lbra/lbrb/lbr-d1: every loss / forfeit / retire / 7-win ends in the Lobby; A at the attendant opens the ROM conversation, and
       // tapping A through it (CHALLENGE, LV. 50, YES, save) starts the next challenge (terminal only with `newChallengeFromLobby: false`).
-      return this.newChallengeFromLobby && (state.lobbyAttendant !== null || isFactoryLobbyFacingSinglesAttendant(state.lobbyFreeRoam))
-        ? this.pressAdvance(state, "lobby attendant A", false)
-        : NO_BUTTONS;
+      if (!(this.newChallengeFromLobby && (state.lobbyAttendant !== null || isFactoryLobbyFacingSinglesAttendant(state.lobbyFreeRoam)))) {
+        return NO_BUTTONS;
+      }
+      // opl: at "Which level?" an Open Level challenge's player moves the cursor to OPEN LEVEL first (the carry's level: the next
+      // challenge stays at the level played), then A as for every other page.
+      const attendant = state.lobbyAttendant;
+      if (
+        state.factoryCarry.lvlMode === "open" && attendant !== null && attendant.screen === "level"
+        && attendantAcceptsInput(attendant) && (attendant.pendingCursor ?? attendant.cursor) === 0
+      ) {
+        this.note(state, "lobby attendant: DOWN to OPEN LEVEL");
+        return this.press("DOWN", 22);
+      }
+      return this.pressAdvance(state, "lobby attendant A", false);
     }
     if (state.factoryTerminal) return this.onTerminal(state);
     if (state.postwin) return this.onPostwin(state);
@@ -2795,12 +2807,14 @@ export function createStartCarryState(
   startCarry: number,
   rngWalk = 0,
   scene: SoakScene = "off",
+  /** opl: "open" = an Open Level challenge (src/engine/factoryLevelMode.ts) with the Lobby's OPEN LEVEL pickable; absent = Level 50 (unchanged). */
+  lvlMode: "50" | "open" = "50",
 ): EngineState {
   validateStartCarry(startCarry);
   if (!Number.isInteger(rngWalk) || rngWalk < 0) {
     throw new Error(`bad rngWalk: ${rngWalk} (want a non-negative integer)`);
   }
-  if (startCarry === 0 && rngWalk === 0) return createInitialState({ battleScene: scene });
+  if (startCarry === 0 && rngWalk === 0 && lvlMode === "50") return createInitialState({ battleScene: scene });
   let bootRngValue = ANCHOR_RNG_VALUE;
   for (let step = 0; step < rngWalk; step += 1) bootRngValue = advanceRngValue(bootRngValue);
   const carry: FactoryCarry = Object.freeze({
@@ -2809,10 +2823,11 @@ export function createStartCarryState(
     battlePoints: 0,
     rentsCount: 0,
     playerTrainerId: ANCHOR_FACTORY_METADATA.playerTrainerId,
+    ...(lvlMode === "open" ? { lvlMode: "open" as const } : {}),
   });
   const { generation, draftScreen } = generateFactoryChallengeDraft(carry, bootRngValue);
   return {
-    ...createInitialState({ battleScene: scene }),
+    ...createInitialState({ battleScene: scene, ...(lvlMode === "open" ? { openLevel: true } : {}) }),
     draftScreen,
     rngValue: generation.rngValue,
     factoryCarry: carry,

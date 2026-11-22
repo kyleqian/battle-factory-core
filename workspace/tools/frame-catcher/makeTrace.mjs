@@ -4,6 +4,7 @@
 //
 //   node --experimental-strip-types --no-warnings tools/frame-catcher/makeTrace.mjs OUT.json --seed N [--scene on|off]
 //        [--policy full|winning|winning-swap|vanilla|coverage-fight] [--battles B] [--lobby-tail N] [--max-frames N] [--game GAME_WORKSPACE]
+//        [--level 50|open]
 //
 // Stops after B battles have ended (default 2), at the end of the challenge, or at --max-frames (default 60000). With --lobby-tail N,
 // a trace whose B-th battle ends a round (7, 14, ...) stops N frames after the Lobby's free roam starts (the attendant's "record your
@@ -25,13 +26,16 @@ const battlesWanted = Number(opt("--battles", "2"));
 const maxFrames = Number(opt("--max-frames", "60000"));
 const lobbyTail = args.includes("--lobby-tail") ? Number(opt("--lobby-tail", "120")) : null;
 const GAME = path.resolve(opt("--game", path.resolve(here, "../..")));
+// opl: --level open plays an Open Level challenge (the trace's challenge.level; the ROM side starts from the Open Level route).
+const level = opt("--level", "50");
+if (level !== "50" && level !== "open") throw new Error(`makeTrace: bad --level ${level} (want 50|open)`);
 
 const { FactorySession } = await import(`${GAME}/src/factorySession.ts`);
 const { RandomPlayer, Rng, ActionLog } = await import(`${GAME}/tools/soak/randomRoundSoakDriver.ts`);
 await import(`${GAME}/src/engine/monPicPixelsInstall.ts`);
 
 const mix = (x) => { x = Math.imul(x ^ (x >>> 16), 0x45d9f3b) >>> 0; x = Math.imul(x ^ (x >>> 16), 0x45d9f3b) >>> 0; return (x ^ (x >>> 16)) >>> 0; };
-const challenge = { battleScene: scene, gameplaySeed: mix(seed * 2 + 1), presentationSeed: mix(seed * 2 + 2), start: "draft" };
+const challenge = { battleScene: scene, gameplaySeed: mix(seed * 2 + 1), presentationSeed: mix(seed * 2 + 2), start: "draft", ...(level === "open" ? { level } : {}) };
 const session = new FactorySession({ ...challenge, challengeRequest: "hold" });
 const player = new RandomPlayer(new Rng(seed), new ActionLog(false), policy);
 const segments = [];
