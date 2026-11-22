@@ -1609,6 +1609,8 @@ function actionTransitionPauseFrames(
       statusFramesAfter += frames;
       continue;
     }
+    // sbm1: Solar Beam in sun runs SolarBeamOnFirstTurn's `ppreduce` (no draw) before its used print.
+    if (next < e1 && event.payload.kind === "set-battler-pp-data" && used === null) continue;
     const endTurnWeather = event.payload.kind === "message" && END_TURN_PRINT_SCRIPTS.has(event.provenance?.sourceLabel ?? "");
     if (
       next >= e1 || event.payload.kind !== "message"
@@ -7240,7 +7242,8 @@ function usedMovePrintLeadU(state: BattleResolutionPresentationState, handoff: B
   const sceneOff = sceneOffOf(state);
   const segment = sceneOff || state.segmentIndex > 0 ? state.segments[state.segmentIndex] : state.segments[0];
   if (segment === undefined || state.sourceDecision.kind !== "use-move") return null;
-  const first = segment.events[0];
+  // sbm1: Solar Beam in sun runs SolarBeamOnFirstTurn's `ppreduce` before the used print (kernel u = 16), so the print is the first message, not the first event.
+  const first = segment.events.find((event) => event.payload.kind !== "set-battler-pp-data");
   if (first === undefined || first.payload.kind !== "message") return null;
   const chargeBox = sceneOff && first.payload.messageId === "STRINGID_EMPTYSTRING3" && first.provenance?.sourceLabel === CHARGE_TURN_SCRIPT;
   if (first.payload.messageId !== "STRINGID_USEDMOVE" && !chargeBox) return null;
