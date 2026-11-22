@@ -1090,6 +1090,9 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // bbk1 (Brick Break through a screen: the OFF move body ends at the wall print and the print holds +3, ROM labs bbk1-brickbreak-{lightscreen,reflect}-off
       // used 208 -> wall print 278 -> SE 363; with the wall-print code switched off this pin passes again): the exploring presses land on new phases,
       // a new trajectory as at fsw235: 68927 / battle 3 / depth 2 / turn 21 -> 40465 / battle 2 / depth 1 / turn 24; still OK / roundLost. A trajectory pin, not a ROM frame.
+      // etp3 item 2 (BattleScript_SideStatusWoreOff's print takes the end-turn head, 10 rows after MoveEnd's first row, ROM labs etp3-lightscreenls6-{on,off}: MoveEnd 4862 -> printstring 4872): frames only,
+      // 68927 -> 68949; same battle 3 / depth 2 / turn 21 / roundLost. A trajectory pin, not a ROM frame.
+      // supervisor merge of bbk1 + etp3: the bbk1 trajectory (40465 / battle 2 / turn 24) is unchanged by etp3's wore-off head (checked on the merged tree).
       frames: 40465,
       outcome: "OK",
       endState: "roundLost",
