@@ -18,7 +18,7 @@ def checks(run):
     eng = json.loads((Path(run) / "engine" / "timeline.json").read_text())
     st = tl["staging"]
     c = {"rentals built": [0, 0], "rental IVs": [0, 0], "deal set ids": [0, 0], "deal first opponent": [0, 0], "deal carry": [0, 0],
-         "select screen set ids": [0, 0], "trainer rolls (ROM's own roll)": [0, 0], "foe IVs": [0, 0], "foe built": [0, 0],
+         "deal: other level's slots and both win-streak flags": [0, 0], "deal: symbols and heard speech": [0, 0], "select screen set ids": [0, 0], "trainer rolls (ROM's own roll)": [0, 0], "foe IVs": [0, 0], "foe built": [0, 0],
          "foe party at battle start": [0, 0], "player party at battle start": [0, 0], "transition": [0, 0], "Factory Head party": [0, 0]}
     bad = []
 
@@ -37,6 +37,10 @@ def checks(run):
             tick("deal set ids", x["same"], x)
             if "sameCarry" in x:
                 tick("deal carry", x["sameCarry"], x)
+            if "sameRecord" in x:
+                tick("deal: symbols and heard speech", x["sameRecord"], x)
+            if "sameOtherLevel" in x:
+                tick("deal: other level's slots and both win-streak flags", x["sameOtherLevel"], x)
         elif w == "deal: first opponent":
             tick("deal first opponent", x["same"], x)
         elif w == "select screen":

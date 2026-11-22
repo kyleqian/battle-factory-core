@@ -443,7 +443,8 @@ def main():
         e1, r1 = (bounds[k + 1][0], bounds[k + 1][1]) if k + 1 < len(bounds) else (e_end, r_end)
         if e1 <= e0 or r1 <= r0:
             continue
-        if k == 0:
+        # (opl: an after-save start has no staging: its first stretch, the Lobby to the first draft menu, is compared like any other)
+        if k == 0 and rom.tl.get("start", "draft") != "after-save":
             pic, eps = {"class": "skipped", "note": "the ROM's select screen fade-in after the draft staging"}, []
             snd = {"class": "skipped"}
         else:

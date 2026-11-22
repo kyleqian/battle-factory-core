@@ -161,10 +161,8 @@ Every run ended on its frame budget. Before them, a quick check on the first eng
 
 ## Not checked
 
-- A real Lobby switch between levels (an Open round, then LV. 50 at the attendant, or the reverse): the engine's per-level carry is
-  tested from the source rule (`tests/opl2OpenLevelEngine.test.ts`) but no ROM run picks the other level.
-- Symbols or heard speech staged on the ROM: the catcher's Noland runs start from a fresh record (silver at battle 21); the gold Noland
-  is in the battle replay (the lab stages its symbol) but not in a catcher run.
+Closed in `docs/opl5-open-level-more-runs.md` (2026-11-22): switching levels at the Lobby both ways, a gold-Noland run, the after-save
+start at Open, all on the ROM and all the same. Still not checked:
+
 - Open Level round replay in the replay tool (round chaining): the catcher covers rounds instead.
-- The "after-save" start at Open Level (engine supported; no ROM snapshot of the Open Lobby after the save).
 - The nightly box replay drives no Open battles yet.
