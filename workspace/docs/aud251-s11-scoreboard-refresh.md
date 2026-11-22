@@ -2959,3 +2959,46 @@ Sum-check: ON 1,328 + 747 + 1,210 + 890 + 517 + 514 + 480 + 462 + 437 + 233 = 6,
 - A `LEECH_SEED_DRAIN_SCRIPT_AGE` global change (g180m 6: ON drain mass 1,028 -> 1,677): the drain age is context (send-in, after Recover), not a constant.
 
 Not applied: no `src/` or `tests/` change; PROGRESS / ISSUES / ROADMAP and acceptance / supervisor ledgers untouched; no `.ts` added (python / shell tools only), so no typecheck / `npm test` / build; the evidence replays are the gates.
+
+## drv2 (2026-11-22): the T2 replay presses where the ROM drive pressed; two harness gates removed (tools only; `src/` and `tests/` untouched)
+
+Scene OFF (:8014). Evidence (git-ignored, main tree): `.integration/evidence/drv2/` (`t2-base/` = fold-a tree before, `t2-after/` = dismiss-accept default, `t2-after2/` = + forced anchor fix, `score-{base,after,after2}.txt`, `attr2-{on,off}.json` + `delta2-{on,off}.txt` per-window before / after, `pr/p/` probes). ROM files = `t2n` (unchanged). New tools: `tools/audio/romForcedAnchorFix.py`, `tools/integration/drv2/delta.py ATTR.json DRIVEDIR SCENE` (per window the rows that got worse / better; build ATTR with `t2Attribute.py` once per rescore dir, the ROM drive of each).
+
+### 1. Tools changes
+
+1. **Dismiss-accept is the default with `--romdrive`** (`soundCensusRomReplay.ts`, fch2m recipe 1): the census driver presses a button message from its first acceptable frame, as the ROM pulse does. Opt out: `--dismiss-accept=0` / `ROM_REPLAY_DISMISS_ACCEPT=0` / `AUD249_DISMISS_ACCEPT=0` (the old awaiting-only gate; reproduces t2k4 exactly: ON 12,479 / OFF 1,552). Without `--romdrive` the gate is unchanged.
+2. **Forced-move ROM anchors move to the accepted press** (`aud249Rescore.sh` runs `romForcedAnchorFix.py` on the copied drive; `AUD249_FORCED_ANCHOR=0` keeps the driver's). `romDecisionDriver.py` closes a forced decision (Encore / Struggle, FIGHT commits) on its first A, but the ROM can still be in the previous end-of-turn script (s2230 d20: `DisabledNoMore` end2) and ignores that press; the 17-frame pulse is accepted later (SE 5). Engine and ROM segments both start at "the press taken", so the ROM segment was early by the gap and the whole window read engine-early. This is what t68m / t2k4 called the s2230 d20 / d21 "census press gate": it is **not an engine press** (delaying the engine's press cannot change a segment-relative offset), it is the ROM anchor. Moved anchors: ON s2230 d20 +19, d21 +13; OFF s2230 d20 +5, d21 +12 (every other forced anchor of the 49 seeds has its SE 5 on the commit frame, +0, and is untouched). The T2 files on disk are not rewritten (fix is applied on the rescore copy); `aud248RunSeed.sh` fresh ROM runs still write the driver's anchor.
+
+### 2. T2 (missing / extra 0 / 0 in both scenes, 49 seeds)
+
+| scene | mass base -> dismiss default -> + anchor fix | exact / offset base -> after | battle-controller | cry | bgm | stat |
+| --- | --- | --- | --- | --- | --- | --- |
+| ON (25) | 12,479 -> 12,494 -> **11,949** (-530, -4.2 %) | 3,009 / 2,868 -> 3,006 / 2,871 | 1,743 -> 1,692 | 643 -> 660 | 52 | 323 |
+| OFF (24) | 1,552 -> 1,353 -> **1,348** (-204, -13.1 %) | 776 / 357 -> 781 / 352 | 1,053 -> 922 | 319 -> 263 | 19 -> 2 | 161 |
+
+**New T2 baseline: ON 11,949 (3,006 / 2,871), OFF 1,348 (781 / 352).** The ON +83 of fch2m is +15 net here (hie7 / chg4 moved two of its three un-hidden windows): +51 in one window against -36 in four.
+
+### 3. The named windows (offset base -> after)
+
+| window | before | after | cause |
+| --- | --- | --- | --- |
+| ON s2230 d20 Ice Beam (17 rows, 323 mass) | -21 (SE 12 -22, Disable body -24) | **-2** | ROM anchor gate (item 2); the -2 left is the forced-commit constant of every forced window |
+| ON s2230 d21 Struggle / Encore (16 rows, 222 mass) | -18 / -16 / -15 / -14 | **-1 / +1 / +2 / +3** | same; +1 .. +3 is the carried Struggle hold of hse1m |
+| OFF s2230 d20 / d21 | -8 / 0 | -3 / 0 (d21's engine dismiss now lands on the ROM's real dismiss A: both sides moved 12, net 0) | same |
+| OFF stat s4235 d2 (SE 239 +17; ON the same chain +15 .. +19) | +17 | **+17, not a press gate** | an engine window, below |
+
+**s4235 d2 is an engine rule, not the A gate** (probe `pr/p/off/4235-d2.cmp.txt`): a Focus Band survive on the player's Pokemon. ROM: hp drain 115 -> 123 (8 frames, 8 -> 1 of 159), `FocusBandActivates` 127, `Pausex20`, print 162. Engine: `hp` cmd 0.3 at 115 with **min 28** (ends 143), Focus Band `move-animation` 0.4 min 40, `message` 0.5 at 183: the print is 21 late (ROM 47 after the hp start, engine 68), then -3 later, +17 at SE 239 (print 367 vs 385 = +18). The next engine step: the `hp` command's minimum for a small drain that leaves 1 HP (8 -> 1 of 159: 28 against the ROM's 8 + 4). Not landed.
+
+### 4. Windows that got worse (the three that fch2m un-hides; engine command probed with `tools/integration/t2k4/probe.sh`, frames from each side's commit)
+
+All three are the ROM pulse missing the box by 1 .. 6 frames while the engine, 3 .. 6 frames earlier upstream, is ready at the pulse and takes it: the SE 114 / SE 15 pair goes 0 -> -17.
+
+1. **OFF s97 d13 (+51: SE 114, SE 15, cry@faint 0 -> -17).** The engine's SE 13 -> SE 16 chain is 6 early from the second move's used print: ROM `BattleScript_ItemHealHP_Ret+0x1a` hp 301 -> `MoveEnd+0x6` 302 -> `EffectBurnHit` 307 -> print `HitFromAtkString+0x1` 313; engine `hp` 0.8 (Leftovers 47 > 49) at 302 -> `message` 0.9 at **308**: the used-print head after a held-item heal is 6 against the ROM's 12 (SE 13 378 vs 372, SE 16 538 vs 532). Engine command: the segment's `message` after the Leftovers `hp` command (hie5 / hie7 class: print head after a held-item heal in the next move's segment), `battleResolutionPresentation.ts`.
+2. **ON s3738 d57 (+51: SE 114, SE 15, cry 365 0 -> -17).** Poison tick KO: ROM SE 148 first row 622, engine `status-animation` PSN 0.12 at 617 (-5, spacing 14 both), `hp` 7 > 0 688, `faint` 698, SE 16 768 vs ROM 772 (-4). Engine command: the end-of-turn `message` 0.10 / 0.11 -> `status-animation` PSN head (t2k4 rank 8 / t68m item 6 class C, gen:148 first row).
+3. **OFF s6568 d104 (+17: SE 15 -3 -> -20).** Last Struggle turn; SE 16 exact (505), engine `switch-out` 0.16 at 543 -> SE 15 at 565, ROM SE 15 585 (80 after SE 16 against the engine's 60): the faint `message` 0.13 box is taken by the engine on the pulse the ROM did not take. Engine command: `message` 0.13 (faint box, `switch-out` follows); the engine is ready 1 .. 3 frames before the ROM's accept frame (not opened further).
+
+### 5. Gates
+
+- Census path unchanged: `lsd194Census.sh` seeds 0..19, `7b8861ed6` vs `HEAD`, both scenes: `rst197CensusDelta.py --digest` ON 20/20 identical (7,146 commands), OFF 20/20 identical (6,942), byte-identical shards (`soundCensusRomReplay.ts` is not imported by the census orchestrator).
+- The 11 `tests/` files that import `soundCensusRomReplay.ts` (`grep -l soundCensusRomReplay tests/*.test.ts`; they replay without `--romdrive`): 11 files / 46 tests pass (2 workers). `npm run typecheck` green.
+- Not run (assigned): the full `npm test` (two other workers share the machine) and `npm run build`; no `src/` or `tests/` change.
