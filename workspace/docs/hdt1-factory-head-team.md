@@ -125,12 +125,13 @@ at the ROM's own GO ON menu, which the engine reproduces except for the gameplay
 the stage use) the ROM's recorded `gRngValue` at the frame the build starts (silver frame 1018, gold 657: the first non-one-step-per-frame frame after the room's last
 input, entry cursor = the previous frame's value stepped once) and compares with the ROM's `enemyParty`:
 
-- **Lead species: 20 / 20 equal** (15 silver, 3 gold, and the five Scene ON recordings; with the entry one step on, in every one of them; no other
-  start frame matches across the board). The ROM's first Pokemon is exactly what the engine's rule draws from the ROM's cursor.
+- **Lead species: 20 / 20 equal** (12 silver Scene OFF, 3 gold, 5 Scene ON; at the build frame with the entry one step on, in every one of them; the other
+  off-LCG frames give only scattered chance hits). The ROM's first Pokemon is exactly what the engine's rule draws from the ROM's cursor.
 - Second and third Pokemon: with the draws back to back (what the engine does) they differ, as expected: the ROM takes one VBlank `Random()` per frame
   between one Pokemon's build and the next set draw (hdt1: 9-12 frames each). Inserting m VBlank steps after the first Pokemon and m' after the second
-  and re-drawing, the ROM's second and third species are reproduced in 18 of 20 recordings, with m in 3-12 and m' in 7-14 (the unique solutions sit at 8-13 =
-  hdt1's measured 9-12 build frames; 2 recordings, s18 / s10, have none in 0-24: my skip model ignores the duplicate / item exclusion against the earlier pick, not chased).
+  and re-drawing, the ROM's second and third species are reproduced in 17 of 20 recordings (some with more than one solution), the unique solutions at
+  m 8-12 and m' 7-13, which is hdt1's measured 9-12 build frames; 3 recordings (s18 Scene OFF and ON, s10) have none in 0-24: my skip model ignores the duplicate /
+  item exclusion against the earlier pick; not chased).
 - That is the whole of nrv1's "269-679 extra LCG steps": ~10 VBlank draws between builds, the transition draw (`battle_tower.c:2099`), and the room's frames
   before the entry - none of them a rule the engine misses, all of them the ROM's frame-timing RNG.
 
