@@ -890,5 +890,7 @@
     29500,
     29600,
     29601
-  ]
+  ],
+  "appRoute": "canonical-recorded",
+  "oracleProfile": "battle-scene-on"
 }

@@ -119,6 +119,7 @@ import {
   battleRoomAcceptedState,
   battleRoomJustFinishedBrainPersonalitySpeech,
   battleRoomQuoteInputReady,
+  alignOrdinaryTransitionClock,
   battleRoomStateForOpponent,
   brainBattleIntroHandoffTe,
   BRAIN_SYMBOL_SCENE_AGE,
@@ -1903,7 +1904,7 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
       if (battleRoomQuoteInputReady(battleRoom) && roomPress) {
         const prevBattleRoom = battleRoom;
         if (brainSpeechAcceptPlaysSelect(prevBattleRoom)) playSelectSe();
-        battleRoom = battleRoomAcceptedState(battleRoom);
+        battleRoom = battleRoomAcceptedState(battleRoom, state.frame + 1);
         // Walk-up build steps B2/B3: the JSON's own frontier_set
         // FRONTIER_DATA_HEARD_BRAIN_SPEECH moment - fires once, between the
         // personality speech's last box and the always-shown close/cry box
@@ -2938,7 +2939,7 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
     // battleRoom.ts's §8.3 doc for the close-latency derivation.
     // lbb1: the opponent's intro is `msgbox gStringVar4, MSGBOX_DEFAULT` (battle room scripts.inc:78): A or B (WaitForAorBPress).
     if (battleRoomQuoteInputReady(battleRoom) && (newKeys.has("A") || newKeys.has("B"))) {
-      battleRoom = { ...battleRoom, phase: "msgboxClosing", elapsed: 0 };
+      battleRoom = alignOrdinaryTransitionClock({ ...battleRoom, phase: "msgboxClosing", elapsed: 0 }, state.frame + 1);
     } else {
       battleRoom = advanceBattleRoom(battleRoom);
       const extraRngSteps = opponentSetupExtraRngSteps(battleRoom);

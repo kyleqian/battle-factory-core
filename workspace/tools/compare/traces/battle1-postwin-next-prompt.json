@@ -938,5 +938,7 @@
     26007,
     26008,
     26009
-  ]
+  ],
+  "appRoute": "canonical-recorded",
+  "oracleProfile": "battle-scene-on"
 }
