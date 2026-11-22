@@ -5,6 +5,12 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 2026-11-22 — shb1 (worker, main/ts lane): Shell Bell heal -> next used print (both scenes) and the Scene ON item-animation SE gate; T2 ON 11,531 -> 10,811, OFF 1,186 -> 1,039
+
+- **State:** master, no push; commits 625729d46 (used print after the heal: tail 3 + 1 + 6 + u), 7722ce273 (ON gate 73 - (49 + bar) on the Shell Bell animation) + docs. Labs shb1-holder-first-{player,foe} 60 / 20, 50 / 10 -> 0; census 0..199 eventsDigest identical; hie* / hpb3* / lbrd / randomRoundSoak* green, typecheck, test:gate 360 files / 2,838 tests, build green (not the 185 files importing battleResolutionPresentation.ts one by one; the named 16 + the gate).
+- **Did:** the foe-battler +12 vs +8 was an IsBattleSEPlaying wait (hit SE 73 rows, bar 20), not a foe rule; the 10-row early print was the missing action-transition pause (no MoveEnd receipt after the heal).
+- **Next:** OFF s97 d13 item stand-in 45 vs ROM 35 rows (now ~7 late); the gate constant 49 rests on 3 windows; s97 ON res11 carries +25 from before the heal.
+
 ## 2026-11-22 — bob1 (worker, main/ts lane): healthbox/battler bob after the party menu and party-icon bob phase (both scenes); OFF cancel lab 246 -> 276 / 300, hp lab 977 -> 1029 / 1100
 
 - **State:** master, no push; commits 51365b7b4, a7f526b7b, 45c61dbf9, a184ec3e4 + docs. typecheck, test:gate 360 files / 2,838 tests, build green; 350 importing/pin test files green (no re-pins); census 0..199 eventsDigest identical both scenes; canonical party traces 200/200, 200/200, 115/115, 142/142 unchanged.
