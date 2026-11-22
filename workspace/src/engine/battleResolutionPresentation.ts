@@ -1452,8 +1452,8 @@ const CHARGE_TURN_OPENER_SCENE_ON_ROWS = -10;
 function isChargeTurnOpener(event: BattleKernelSemanticEvent): boolean {
   return event.payload.kind === "message" && event.payload.messageId === "STRINGID_EMPTYSTRING3" && event.provenance?.sourceLabel === CHARGE_TURN_SCRIPT;
 }
-/** gsp2: the wake-up print is a transition print in Scene ON only (Scene OFF output is unchanged). */
-const SCENE_ON_ACTION_TRANSITION_NEXT_PRINT = "STRINGID_PKMNWOKEUP";
+/** gsp2: the wake-up print is a transition print (Scene ON; bbk1: Scene OFF too, ROM labs wkl1m-wakeup-{player,foe}-off MoveEnd -> print +15 the engine had no pause for). */
+const WAKE_UP_ACTION_TRANSITION_NEXT_PRINT = "STRINGID_PKMNWOKEUP";
 /**
  * gsp3 (ROM labs gsp3-attract-{player,foe}-on): "X is in love with Y!" (BattleScript_MoveUsedIsInLove, reached from attackcanceler by a `call`) is a transition
  * print too, 2 rows earlier than the trn176 count: MoveEnd 583 -> print row 592 (ROM) against the rule's 594.
@@ -1599,7 +1599,7 @@ function actionTransitionPauseFrames(
     }
     if (next < e1 && event.payload.kind === "set-battler-status-data" && used === null) {
       // sta3: the sleep counter's status write inside the next action's attackcanceler draws nothing; its 1-frame command is presented after the pause.
-      const frames = sceneOnStatusFrames(events, index);
+      const frames = sceneOn ? sceneOnStatusFrames(events, index) : sceneOffStatusFrames(events, index, null, 0);
       if (frames === null) return null;
       statusFramesAfter += frames;
       continue;
@@ -1607,7 +1607,7 @@ function actionTransitionPauseFrames(
     const endTurnWeather = event.payload.kind === "message" && END_TURN_PRINT_SCRIPTS.has(event.provenance?.sourceLabel ?? "");
     if (
       next >= e1 || event.payload.kind !== "message"
-      || !(endTurnWeather || ACTION_TRANSITION_NEXT_PRINTS.has(event.payload.messageId) || (sceneOn && event.payload.messageId === SCENE_ON_ACTION_TRANSITION_NEXT_PRINT)
+      || !(endTurnWeather || ACTION_TRANSITION_NEXT_PRINTS.has(event.payload.messageId) || event.payload.messageId === WAKE_UP_ACTION_TRANSITION_NEXT_PRINT
         || isChargeTurnOpener(event))
     ) return null;
     if (endTurnWeather) endTurnRows = END_TURN_WEATHER_PRINT_EXTRA_ROWS;
