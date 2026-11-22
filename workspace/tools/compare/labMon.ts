@@ -174,8 +174,8 @@ export function buildLabMon(mon: LabMon, ctx: LabMonContext): LabBuiltMon {
 }
 
 // The fields the hand-written Rattata-era stages approximate (personality 150, friendship 0, PP 20, Run Away on every species, a Splash bench of two Rattata) and the generic stage
-// takes from the lab. `labStageEquivalenceView` strips them (and keeps only party slot 0 of each side) so a generic stage can be compared `toEqual` with a hand-written one.
-const APPROXIMATED_BY_HAND_STAGES = new Set(["personality", "friendship", "pp", "currentPP", "ability"]);
+// takes from the lab (plus the lab-only `forcedPartyLabParty`, lsf2). `labStageEquivalenceView` strips them (and keeps only party slot 0 of each side) so a generic stage can be compared `toEqual` with a hand-written one.
+const APPROXIMATED_BY_HAND_STAGES = new Set(["personality", "friendship", "pp", "currentPP", "ability", "forcedPartyLabParty"]);
 export function labStageEquivalenceView(value: unknown): unknown {
   if (Array.isArray(value)) return value.map((v) => labStageEquivalenceView(v));
   if (typeof value !== "object" || value === null) return value;
