@@ -7,7 +7,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ## 2026-11-22 — ekd1 (worker, main/ts lane): hit on a hidden Dig/Fly/Dive target skips the blink in Scene ON and on KO; T2 ON 10,580 -> 10,418 (s648 only)
 
-- **State:** master, no push; commit 2a907fec7 (+ docs). Lab ekd1-dig-eqko-on ON 41 -> 8; 32 existing lab-scene runs mass 646 -> 646; census 0..199 eventsDigest identical both scenes (ON s81 Sky Uppercut on a Fly user 35 -> 2 rows, intended); fsc1/eqk1/etp/hie7/hpb3/lbrd/Leech Seed pins/randomRoundSoak* green, typecheck green.
+- **State:** master, no push; commit 2a907fec7 (+ docs). Lab ekd1-dig-eqko-on ON 41 -> 8; 32 existing lab-scene runs mass 646 -> 646; census 0..199 eventsDigest identical both scenes (ON s81 Sky Uppercut on a Fly user 35 -> 2 rows, intended); fsc1/eqk1/etp/hie7/hpb3/lbrd/Leech Seed pins/randomRoundSoak* green, typecheck green, test:gate 360 files / 2,839 tests, build green.
 - **Did:** KO clears status3 and the ON path never used the 2-row hidden hit step; items 2 (Leech Seed drain start: ROM hp start -> exec = bar + 17, launch lag 7 short bar / 0 long bar, no rule landed) and 3 (OFF s6568 d104) not landed, see the ekd1 section of docs/aud251-s11-scoreboard-refresh.md.
 - **Next:** Recover -> drain lab to fix (command start, launch lag) from the bar length; tests/aud245bLibRestore.test.ts fails on baseline too (BGM 695 vs 701).
 
