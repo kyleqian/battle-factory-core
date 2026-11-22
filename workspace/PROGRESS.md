@@ -5,6 +5,14 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 2026-11-22 — sep1 (worker, main/ts lane): Scene ON Leech Seed drain follows the IsBattleSEPlaying gate (hit SE end) and runs 7 + 2 rows after a print; T2 ON 10,051 -> 9,939, OFF 861 unchanged
+
+- **State:** master, no push; commits 219676c82 (hit -> drain tail 15 + SE-gated launch lag), 985f3464b (pin), 17354087d (drain after a print +2, new lab etp3-recoverls4). Labs: etp1-leechseedc-on ON mass 80 -> 0, every other Leech Seed / hie1 / shb1 lab unchanged; census 0..199 eventsDigest identical both scenes (ON sound rows only); typecheck, test:gate 360 files / 2,839 tests, build green; 158 importing test files + soak + lbrd green, no re-pin.
+- **Did:** one gate (battle SE 13 = 73 rows from se-song-rows.json) explains shb1's 73 - (49 + bar) (49 = 36 SE -> hp start + 13 hp start -> exec, not a fit) and the long-bar Leech Seed lag 0; Recover -> drain +17 is the Recover body's +19 (hp -> regained-health print) minus a 2-row early drain, not a gate term. See the sep1 section of docs/aud251-s11-scoreboard-refresh.md.
+- **Next:** Recover body hp -> "regained health" print +19 (etp3-recoverls4-on); the drain body pixels keep age 21 (lsd198 receipt vs the 7 + 2 SE rows, not re-measured); Scene OFF drain command +9 (not touched).
+
+---
+
 ## 2026-11-22 — ekd1 (worker, main/ts lane): hit on a hidden Dig/Fly/Dive target skips the blink in Scene ON and on KO; T2 ON 10,580 -> 10,418 (s648 only)
 
 - **State:** master, no push; commit 2a907fec7 (+ docs). Lab ekd1-dig-eqko-on ON 41 -> 8; 32 existing lab-scene runs mass 646 -> 646; census 0..199 eventsDigest identical both scenes (ON s81 Sky Uppercut on a Fly user 35 -> 2 rows, intended); fsc1/eqk1/etp/hie7/hpb3/lbrd/Leech Seed pins/randomRoundSoak* green, typecheck green, test:gate 360 files / 2,839 tests, build green.

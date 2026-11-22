@@ -3199,3 +3199,28 @@ Presentation only: no battle-rule, damage or RNG change. Evidence: `.integration
 **Census** 0..199 (base `9754cddbf` vs `6516aaefb`): eventsDigest and error identical 200 / 200 in both scenes; ON 8 battles with changed presentation commands (63,514 commands), OFF 0 changed. The `tree/` copies are deleted.
 
 **Tests:** every tests/ file importing `battleResolutionPresentation.ts`, `tests/chg*`, `bbk1*`, `sta3*`, `randomRoundSoak*`, `lbrd` (177 files): all pass except `tests/postwin.test.ts` ("rejects the early JENSON quote edge", `transitionClockAhead: 1`), which fails identically on base `9754cddbf` (rmw1's room transition clock; not this step). No trajectory pin moved. `npm run typecheck`, `npm run test:gate` (360 files / 2,839 tests) and `npm run build` pass.
+
+## sep1 (Scene ON presentation / sound timing, S11 #219 item 0): one IsBattleSEPlaying gate for shb1's Shell Bell and ekd1's Leech Seed drain
+
+Presentation only: no battle-rule, damage or RNG change. Tree: `f34f17740` + `219676c82` / `985f3464b` / `17354087d`. Evidence (git-ignored): `.integration/evidence/sep1/` (`lab-base`, `lab-final`, `t2-{base,final}`, `t2-*-score.{json,txt}`).
+
+**Hypothesis (confirmed for hit -> drain).** The ROM polls `IsBattleSEPlaying` (battle_gfx_sfx_util.c:554, up to 29 polls) before every `HandleBattleAnimation` / `HandleMoveAnimation` / `HandleStatusAnimation`; `Cmd_end` drains a script's own SEs, so the only SE still playing at a later request is the effectiveness SE (12 = 18 rows, 13 = 73, 14 = 88; `se-song-rows.json`). The animation therefore starts at max(script row, end of that SE). Modelled once with `seg127StatusSeGateRows` (the sgs134 / kno3 / shb1 machinery):
+- shb1: `49 + bar` is structural: hit SE -> hp start 36 + hp start -> exec 13 + bar rows. No value changed.
+- Leech Seed after a hit: ROM hp start -> drain exec is bar rows + 1 + 17; the engine hp command ran `max(28, bar + 2)` and put the drain 15 rows early on a long bar. Now hp -> drain tail 15 (Scene ON, hit-preceded, animated drain, not after a send-in) and the drain's launch lag = the gate: short bar (SE end 670 > exec 663) 7, long bar (SE end 677 < exec 708) 0. `launchLagFrames` on the drain command carries it to `moveAnimSounds` / the body start.
+
+**Labs (Scene ON SE mass, before -> after):** `etp1-leechseedc-on` 80 -> 0; `etp1-leechseed-on`, `etp1-leechseed2-on`, `aud250-leechseed-{player,opponent}-on`, `lse1-leechseed-player-on`, `shb1-holder-first-{player,foe}`, `hie1-sitrus-on`, `hie1-shellbell-on` 0 -> 0; `hie1-leftovers-on` 5 -> 5 (turn-end heal, no hit SE: untouched). Scene OFF labs unchanged (the OFF hit tail is not touched: the same +15 there put OFF s648's battle-controller SE 11 -> 16 because the OFF drain command carries its own +9, ROM `Pausex20` row to the seeded healthbarupdate 35 vs 44).
+
+**Recover / Light Screen -> drain: not a gate term.** New lab `etp3-recoverls4-{on,off}` (foe Recover x4 while seeded; `etp1MakeLabs.py recoverls4`). ROM: Recover animation end -> `MoveEnd` 1672 -> drain exec 1681 = anim start 1681 (lag 0, no SE pending). Engine turn 2: Recover `hp` -> "regained health" print **+19** (1599 vs 1580), drain SE +17: the drain is **2 rows early against the print** (same -2 on `etp3-lightscreenls6-on` turns 1-3). So s6912 d5 +17 = Recover body +19 - 2. Landed the -2: SE rows of a drain reached from a print run 7 + 2 after the command start (`LEECH_SEED_DRAIN_AFTER_PRINT_EXTRA_AGE`); the body pixels keep 7 (the lsd198 dense receipt is a recorded fixture, the +2 there is not re-measured). Labs: `etp3-lightscreenls6-on` exact 22 -> 32 / mass 112 -> 112 (the first-turn Light Screen print's own +2 stays), `etp3-recoverls4-on` exact 11 -> 21, mass 554 -> 594 (the +19 Recover body now shows on the drain rows too).
+
+**T2** (25 ON / 24 OFF seeds, ROM-driven; `rescoreAll.sh` + `soundScoreboard.py`; 0 missing / 0 extra):
+
+| Scene | Mass base -> hit gate -> + drain after a print | Exact / offset (base -> final) |
+| --- | --- | --- |
+| ON | 10,051 -> 10,019 -> 9,939 | 3,158 / 2,719 -> 3,218 / 2,659 |
+| OFF | 861 -> 861 | 839 / 294 unchanged |
+
+**Census** 0..199 (`f34f17740` vs `17354087d`): eventsDigest and error identical 200 / 200 both scenes, 0 changed presentation commands (ON 63,514, OFF 62,209); only ON `sound` rows differ. Trees deleted.
+
+**Tests:** new `tests/sep1HitSeedDrainGate.test.ts` (short bar SE 180 / 179 on ROM 697 / 810, long bar 735 / 848, Light Screen turns 2 / 3 on ROM 1533 / 2655; the long-bar pin fails on the old code at 727). All 158 files importing the changed files, `hie*`, `hpb3*`, `etp*`, `hit1*`, `randomRoundSoak*`, `lbrd`, the Leech Seed pins (aud250, lsd194, lsd198, lsd199, hie7, liveSpriteOrderHost, spriteOrderEventTransform): green, no pin moved. `npm run typecheck`, `npm run test:gate` (360 files / 2,839 tests) and `npm run build` green.
+
+**Terms left:** (1) Recover `hp` -> "regained health" print +19 in `etp3-recoverls4-on` (not the gate); (2) Scene OFF Leech Seed drain command +9 constant (ROM 35 vs engine 44 from the `Pausex20` row to the seeded healthbarupdate; +9 on aud250 x2, etp1-leechseed, lse1, 18 on etp1-leechseed2): needs its own ROM measurement before the OFF hit tail can follow; (3) the drain body pixels (age 21) against the +2 SE rows; (4) the SE gate's SE lengths come from `se-song-rows.json` (hit SE 13 = 73 rows) while the older SEG127 table holds the status-SE rows: same data, not unified.
