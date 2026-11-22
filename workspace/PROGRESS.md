@@ -5,11 +5,11 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 2026-11-22 — hit2 (worker, main/ts lane): Hail continues SEs on the body clock (T2 ON 13,166 -> 13,086); monbg-wait item not uniform, not landed
+## 2026-11-22 — hit2 (worker, main/ts lane): Hail + Future Sight hit sounds on the ROM rows (T2 ON 13,166 -> 13,068); monbg-wait item not uniform, not landed
 
-- **State:** master, no push; commit ed6c88257 (Hail clock) + docs to follow. In progress: Future Sight hit (item 2), final gates.
-- **Did:** (1) item 1 traced, not landed: the ROM's monbg clear is a constant +5 rows after the last visual task (Water Gun, Ice Beam, Ice Punch, Crabhammer, Pay Day, Acid, Dizzy Punch: I - c0 = 5), but whether our window already includes it is a hand-fitted constant per body, so a script-derived rule would break the exact ones. (2) Hail: General_Hail's ten SE 242 rows were +8, now exact (labs etp1-hail-on, etp2-hail-on; T2 ON exact 2,966 -> 2,976).
-- **Next:** Future Sight hit -14, then the lead-body sound clock only if time is left.
+- **State:** master, no push; commits ed6c88257 (Hail clock), 765a42d76 (Future Sight sounds), e520240fe (typecheck narrowing + docs). Gates: typecheck, test:gate 360 files / 2,835 tests, build green; aud249 / wsh1 / hit1 / lbrd / randomRoundSoak* green; census 0..199 eventsDigest identical both scenes.
+- **Did:** (1) item 1 traced, not landed: the ROM's monbg clear is a constant +5 rows after the last visual task (I - c0 = 5 on 7 bodies), but whether our window already includes it is a hand-fitted constant per body, so a script-derived rule would break the exact ones. (2) Hail: General_Hail's ten SE 242 rows were +8, now exact (etp1 / etp2-hail-on; the "+4 damage SE" is not reproduced, left). Future Sight hit: anim SEs -6 -> 0, hit SE +7 -> 0, faint cry / SE +7 -> 0 (lab etp1-futuresight-on, engine seed 2, mass 54 -> 22, rest is the cast turn). T2 ON mass 13,166 -> 13,086 -> 13,068, exact 2,966 -> 2,976; OFF 1,552 / 776 unchanged; 0 missing / 0 extra. (3) lead-body clock not reproduced on today's labs, unchanged. Pin moved: wsh1-fs-on SEs 3 / 41 / 50 -> 9 / 47 / 56 (ROM rows 2868 / 2906 / 2915 vs rise 2865 + 6). Doc: `docs/hit1-move-hit-timing.md` "hit2".
+- **Next:** Future Sight cast turn (SE +5, prints -3); per-adapter last-visual-row derivation for the monbg tail bodies.
 
 ## 2026-11-22 — chg4 (worker, main/ts lane): first charging turn after another action is a transition print, T2 ON 13,629 -> 13,166, OFF 1,588 -> 1,552
 
