@@ -84,7 +84,8 @@ A stage may carry `parties: { player: [3 members], opponent: [3 members] }`, han
 Each member is the lab's full record (species, level, nature, ivs, evs, moves, ppUps, item, abilitySlot, friendship, gender, personality). The engine replay
 (`applyStageParties` in `tools/integration/soundCensusRomReplay.ts`) rebuilds the members as Factory-row-shaped records, so:
 
-- `level` must be 50 (the replay throws for any other level; the engine rebuilds every member at Level 50).
+- `level` must be the battle's level: 50, or 100 for a stage with `lvlMode: "open"` (opl3, `docs/opl3-open-level-rom-replay.md`).
+  A player member may be 50 or 100 either way (the player above or below the foes); the foes are rebuilt at the battle's level.
 - EVs must be the engine split: `floor(510 / n)` on each of the n flagged stats, 0 elsewhere (otherwise it throws).
 - `item` must be in the Frontier held-item table.
 - An opponent without a `personality` gets a cursor-reachable one with the right nature, ability slot (low bit) and gender (looked up by species id from `species-stats.json`).
