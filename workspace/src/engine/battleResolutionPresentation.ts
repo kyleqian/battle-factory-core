@@ -3003,6 +3003,7 @@ export const SWITCH_IN_WAITSTATE_HOLD_FRAMES = 11;
  * frames, so the switch-in holds 11 more frames: menu exact, the blank one frame late.
  */
 export const OPPONENT_FAINT_REPLACEMENT_TURN_END_FRAMES = 11;
+export const OPPONENT_SEND_IN_NEXT_PRINT_FRAMES = 9;
 /**
  * snd145 (ISSUES #146 remainder): in Scene ON the opponent's send-in tail is species-keyed (the healthbox slide waits for the front
  * animation, the next printstring for the controller end; src/engine/switchInTail.ts), so its controller span is the species' whole
@@ -6850,6 +6851,15 @@ export function projectBattleResolutionCommands(
       settleHoldFrames: (last.settleHoldFrames ?? 0) + OPPONENT_FAINT_REPLACEMENT_TURN_END_FRAMES,
     });
   }
+  // swt1: after an opponent faint replacement / AI switch the script's next print (the poison / burn tick, the weather line, the move's
+  // "used" text) sits 12 rows after the `waitstate` release (`FaintedMonSendOutNew+0x10` -> `FaintedMonEnd` +5 -> next label +11 -> glyph +12);
+  // the next command otherwise starts 3 rows after it.
+  commands.forEach((command, index) => {
+    if (command.type === "switch-in" && command.battler === 1 && command.aiSwitch === true && command.entryScriptHoldFrames === undefined
+      && index + 1 < commands.length && commands[index + 1]!.type !== "turn-end") {
+      commands[index] = Object.freeze({ ...command, settleHoldFrames: (command.settleHoldFrames ?? 0) + OPPONENT_SEND_IN_NEXT_PRINT_FRAMES });
+    }
+  });
   if (!commands.some(
     (command) => command.type === "message" && command.advance === "button" && command.promptGate !== true,
   )) {
