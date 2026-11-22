@@ -99,3 +99,50 @@ used the remade copies); seed 9 and seed 2 were remade on their own builds, the 
 - The content stretches left in the Head battles were not traced. The one looked at (seed 9, SUDOWOODO's SELFDESTRUCT against the Head's
   GOLBAT, both faint) shows the same pictures and messages on both sides, a few dozen frames apart.
 - The log's caller names come from the linker map, which has no static functions (`GetFactoryMonId` shows as `FillFactoryBrainParty`).
+
+## hdt2m: is the Head's team in ordinary play the ROM's? (post-freeze measurement, tools / docs only; 2026-11-22)
+
+Two readings disagreed: nrv1 (20 Noland-room ROM recordings: the engine's lead differs in 40 / 40 runs, the ROM takes 269-679 extra LCG steps in the
+build) against the catcher (the Head's team came out the engine's on real rounds). **Both are right; they measure different things.** Short answer: **(a)
+for the team rule, with one stated limit** - the engine's `FillFactoryBrainParty` port is the ROM's (the same function of the same RNG stream), so there is
+no missing-draw bug in the rule path (`battle_factory.c:759-826`); but in ordinary play the engine does not feed it the ROM's RNG, so for the same inputs the
+engine's Head team is not the ROM's, by design (#55 distribution parity; `docs/parity-mac/noland-room-scenes.md` non-goal). That is a different seed, not a wrong team.
+
+### What each harness feeds ROM and engine
+
+| | ROM | engine's Head party | consequence |
+|---|---|---|---|
+| nrv1 recordings (`tools/audio/romFrontierTransition.py`, `nolandSceneEngine.ts` `nolandAskReadyStage`) | `lab.prepare` writes `gRngValue = seed`, runs the draft and the walk-up (hundreds of VBlank draws), and records from the open GO ON menu (`rngStart` = the cursor there); the lab's own rentals (`rental_plan.candidates`), nobody patches the ROM party; at battle start the ROM's `FillFactoryBrainParty` reads its live per-VBlank `gRngValue` | staged at the same menu, but the round controller starts at `rngValue: rom.rngStart` and plays six synthetic wins; the Head's team is drawn from that gameplay stream (`scheduledBrainOpponent`, `factoryRoundBattleOrchestrator.ts:860-882`), never from the room's cursor | the two streams are unrelated values: lead differs in 40 / 40 (a harness comparison of unrelated seeds, not a rule difference) |
+| catcher (`tools/frame-catcher/romRun.py` `brain_traps`) | the engine drives the whole round; at `FillFactoryBrainParty`'s entry the trap writes the engine's cursor into `gRngValue` and (since hdt1) undoes the VBlank draws to the function's return | the same stream | the ROM runs its own build on the engine's stream: teams match (hdt1: 5 of 5 Head battles after the undo) |
+
+So the catcher proves the *rule*; the recordings show that the *RNG input* differs. Neither shows that the recordings' start state is "wrong": they start
+at the ROM's own GO ON menu, which the engine reproduces except for the gameplay RNG lineage.
+
+### Decisive check: the engine's generator on the ROM's own cursor
+
+`tools/integration/hdt2mRomCursorHeadTeam.ts ROM.json...` (run from `workspace/`; the 20 nrv1 recordings in `.integration/evidence/nrv1/`) feeds
+`generateFactoryBrainOpponent` (`src/engine/factoryBrainOpponentGeneration.ts`, the six rental set ids 267-272, gold 564-566 + 270-272, as the lab and
+the stage use) the ROM's recorded `gRngValue` at the frame the build starts (silver frame 1018, gold 657: the first non-one-step-per-frame frame after the room's last
+input, entry cursor = the previous frame's value stepped once) and compares with the ROM's `enemyParty`:
+
+- **Lead species: 20 / 20 equal** (15 silver, 3 gold, and the five Scene ON recordings; with the entry one step on, in every one of them; no other
+  start frame matches across the board). The ROM's first Pokemon is exactly what the engine's rule draws from the ROM's cursor.
+- Second and third Pokemon: with the draws back to back (what the engine does) they differ, as expected: the ROM takes one VBlank `Random()` per frame
+  between one Pokemon's build and the next set draw (hdt1: 9-12 frames each). Inserting m VBlank steps after the first Pokemon and m' after the second
+  and re-drawing, the ROM's second and third species are reproduced in 18 of 20 recordings, with m in 3-12 and m' in 7-14 (the unique solutions sit at 8-13 =
+  hdt1's measured 9-12 build frames; 2 recordings, s18 / s10, have none in 0-24: my skip model ignores the duplicate / item exclusion against the earlier pick, not chased).
+- That is the whole of nrv1's "269-679 extra LCG steps": ~10 VBlank draws between builds, the transition draw (`battle_tower.c:2099`), and the room's frames
+  before the entry - none of them a rule the engine misses, all of them the ROM's frame-timing RNG.
+
+### Verdict
+
+(a) **The engine's Head team is the ROM's rule on a different RNG stream.** The party build (set range, the six excluded `rentalMons`, species and item
+checks, the nature loop, no IV draws at fixed IV 15) is the ROM's, shown twice: hdt1 (ROM build draws = the engine's, same cursor) and here (the engine's rule on the ROM's own
+cursor gives the ROM's lead 20 / 20). In ordinary play the ROM's input to the build is the room's per-frame cursor, which depends on the exact frame count of the
+player's inputs and the VBlank draws interleaved with the build; the engine's input is its round stream. The same player inputs therefore give a different Head team
+on the two, with the same distribution. nrv1's 40 / 40 mismatch is that, not a missing draw. If a future step wants identical teams for identical inputs, the room's cursor
+would have to become the Head's RNG: model the room's one-step-per-frame cursor into the party build and the per-VBlank draw between each Pokemon's build (about 9-12 each)
+- the #55 item, not a fix of the build.
+
+Not verified here: the exact entry cursor is the previous recorded frame stepped once (a frame-granularity recording; the match of 20 / 20 leads is the evidence); the
+two exclusion cases above; no catcher round was rerun (the ROM party RAM was not read at battle start; hdt1's tables carry that).
