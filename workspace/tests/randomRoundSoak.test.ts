@@ -1087,12 +1087,15 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // 68945 / battle 3 / depth 2 / turn 21; still OK / roundLost. A trajectory pin, not a ROM frame.
       // hie7 (the segment after the player's forced send-in resumes 6 frames before the action prompt, ROM s5063 d45 / s6912 d2 exec row): frames only,
       // 68945 -> 68927 (three post-send-in script resumes x 6); same battle 3 / depth 2 / turn 21 / roundLost. A trajectory pin, not a ROM frame.
-      frames: 68927,
+      // bbk1 (Brick Break through a screen: the OFF move body ends at the wall print and the print holds +3, ROM labs bbk1-brickbreak-{lightscreen,reflect}-off
+      // used 208 -> wall print 278 -> SE 363; with the wall-print code switched off this pin passes again): the exploring presses land on new phases,
+      // a new trajectory as at fsw235: 68927 / battle 3 / depth 2 / turn 21 -> 40465 / battle 2 / depth 1 / turn 24; still OK / roundLost. A trajectory pin, not a ROM frame.
+      frames: 40465,
       outcome: "OK",
       endState: "roundLost",
-      maxBattleDepth: 2,
-      battle: 3,
-      turn: 21,
+      maxBattleDepth: 1,
+      battle: 2,
+      turn: 24,
     });
     expect(runSeed(1, options)).toMatchObject({
       // msg175: 26878 -> 26810 (shorter used prints); trn178 (the Scene OFF action-transition pause): 26810 -> 27058; same battle / turn / end state.
