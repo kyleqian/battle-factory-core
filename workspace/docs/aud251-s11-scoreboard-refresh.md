@@ -2716,11 +2716,11 @@ Tools: `tools/integration/t68mWin.py` (windows of one cause with the previous ro
 | Class | Mass | Windows | What precedes (ROM vs engine) | Command |
 |---|---|---|---|---|
 | A. offset inherited from the previous row (same sign, same size) | 222 | 9 | the previous row already carries the offset; the tick adds 0 | not a tick |
-| B. first command after a player send-in, +6 | 72 | 2 | the retained segment after a player send-in starts 6 late (hie6m constant) | send-in -> next segment start |
+| B. first command after a player send-in, +6 | 72 | n/c | the retained segment after a player send-in starts 6 late (hie6m constant) | send-in -> next segment start |
 | C. after a foe replacement `switch-in` tail, -9 | 54 | 1 | engine `switch-in` tail 9 shorter than the ROM `SwitchInEnd` hold | `switch-in` tail |
-| D. after a side-status / Encore message chain, -4 / -5 | 84 | 3 | the g180m item 4 family (`DisabledNoMore` / `SideStatusWoreOff` print hold ~5 short) | message hold |
-| E. after a body tail: Knock Off +5, miss -3, Block -8 | 102 | 4 | the previous move's own end (`KnockedOff` / `MoveEnd` tail), not the tick | previous body |
-| Sum | 534 | 19 | | |
+| D. after a side-status / Encore message chain, -4 / -5 | 84 | n/c | the g180m item 4 family (`DisabledNoMore` / `SideStatusWoreOff` print hold ~5 short) | message hold |
+| E. after a body tail: Knock Off +5, miss -3, Block -8 | 102 | n/c | the previous move's own end (`KnockedOff` / `MoveEnd` tail), not the tick | previous body |
+| Sum | 534 | 19 (A 9, C 1; B / D / E split not counted) | | |
 
 Source rows: tick message -> `BattleScript_PoisonTurnDmg` -> `DoStatusTurnDmg` status animation 95 frames on both sides; the first-row error equals the previous row's error in A, so fixing B / C / D / E moves A with it (the 222 collapses only when the 3 inherited roots are fixed).
 
@@ -2731,7 +2731,10 @@ Source rows: tick message -> `BattleScript_PoisonTurnDmg` -> `DoStatusTurnDmg` s
 | s2230 d20 si41 | -21 | 231 | **harness press gate, not an engine rule**: the ROM is still in the `DisabledNoMore` end2 tail and accepts the census retry press at +19, the engine accepts at 0 | press -> SE 5: ROM 19 later; press -> SE 67..73 equal |
 | s830 d1 si3 | -13 | 156 | engine continuation segment (`seg 1`, lead 0) after the opponent's first charging turn; the ROM waits 12 before the used print | engine commit -> first message 0 vs ROM 12 |
 | s830 si11 | -6 | 66 | the confusion-ended print (`MoveUsedIsConfusedNoMore`) hold ~5 short | message hold 5 |
-| s6079 si1 -4, two -3 rows | -4 / -3 | 64 | not opened (s6079 d0: the engine commit is 9 and the ROM's 7; the used print is 9..13 on the engine vs a fixed 12 on the ROM) | |
+| s6079 si1 | -4 | 56 | not opened to the end (s6079 d0: engine commit 9, ROM 7; first message 9 vs ROM `EffectEarthquake` 6; the prior row is `ctl-hit:13` off +0) | |
+| s830 si19, s2230 si31 | -3 / -3 | 6 | single rows | |
+| s8612 si33 | +2 | 2 | after Rest | |
+| Sum | | 517 | 231 + 156 + 66 + 56 + 6 + 2 | |
 
 Only 2 decisions in 24 seeds are the gate (s2230 d20, d21; d21 probably owns the Struggle -17 of t2k3). It is a `soundCensusRomReplay` / driver artefact: the fix is the census press gate (accept the A press only on the ROM's accepted frame), never `src/`.
 
@@ -2739,10 +2742,13 @@ Only 2 decisions in 24 seeds are the gate (s2230 d20, d21; d21 probably owns the
 
 | Window | Step | Mass | Cause |
 |---|---|---|---|
-| s8612 d8 si? | -13 | 163 | inherited from the Belly Drum body before it (same -13 on the Belly Drum tail row) |
-| s165 d1 | +5 | 140 | inherited from Knock Off (`KnockedOff` +5, the same as item 6 class E) |
-| s310 / s1914 | -3 / -3 | 106 | the engine's 9 .. 13 commit -> first message phase noise vs the ROM's fixed 12 |
-| -10 / -9 rest | | 105 | carried offsets, not opened |
+| s8612 si17 | -13 | 180 | first row off -9 after Belly Drum (prev off +4): -13 is the step, the Belly Drum tail is +4 on the ROM side |
+| s165 si37 | +1 (off +5) | 100 | inherited: prev `ctl-hit:13` row already +4 |
+| s165 si45 | -5 | 60 | prev `stat:245` off +2 (not opened) |
+| s165 si49 | -3 | 40 | prev `ctl-hit:13` off +1 (not opened) |
+| s310 si43, s1914 si23 | -3 / -3 | 120 | segment start, the engine's 9 .. 13 commit -> first message vs ROM 12 |
+| s2741 si5, s6 si3 | -10 / -3 | 14 | after Perish Song / segment start |
+| Sum | | 514 | 180 + 100 + 60 + 40 + 120 + 14 |
 
 Rock Slide's own interval is exact (s97 55 = 55): the item is not a Rock Slide rule.
 
