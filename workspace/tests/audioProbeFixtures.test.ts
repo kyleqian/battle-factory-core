@@ -305,6 +305,8 @@ describe("audio probe fixtures", () => {
       "hie3-shellbell-on.json",
       "hie3-sitrus-on.json",
       "hie3-sitrus-opp-on.json",
+      "hit2-futuresight-on.json",
+      "hit2-hail-on.json",
       "intro-canonical-window.json",
       "intro-magneton-off-window.json",
       "intro-magneton-on-window.json",
