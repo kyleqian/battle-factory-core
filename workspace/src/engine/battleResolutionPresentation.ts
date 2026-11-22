@@ -2926,11 +2926,12 @@ export function turnEndTimingAfterRelease(
   const printed = commands[index];
   if (printed?.type !== "message" || printed.promptGate !== true) return TURN_END_TIMING;
   const payload = events.find((event) => event.sequence === printed.eventSequence)?.payload;
-  const rows = payload?.kind === "message" ? RELEASE_TO_MOVEEND_ROWS[payload.messageId] : undefined;
+  const messageId = payload?.kind === "message" ? payload.messageId : undefined;
+  const rows = messageId === undefined ? undefined : RELEASE_TO_MOVEEND_ROWS[messageId];
   return rows === undefined ? TURN_END_TIMING
     : Object.freeze({
       minimumFrames: TURN_END_TIMING.minimumFrames + rows,
-      ...(payload.messageId === "STRINGID_PKMNWASDRAGGEDOUT" ? {} : { blankTailFrames: RELEASE_TAIL_BLANK_ROWS }),
+      ...(messageId === "STRINGID_PKMNWASDRAGGEDOUT" ? {} : { blankTailFrames: RELEASE_TAIL_BLANK_ROWS }),
     });
 }
 /**
