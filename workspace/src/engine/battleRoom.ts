@@ -311,10 +311,8 @@ export function advanceBattleRoom(state: BattleRoomState): BattleRoomState {
     case "msgboxIdle":
       // MSGBOX_DEFAULT blocks on player A - core.ts detects the press and
       // starts "msgboxClosing" directly (see that section's doc); this case
-      // only covers ticks with no press yet, holding byte-identical.
-      return state.encounter === "jenson"
-        ? { ...state, elapsed: state.elapsed + 1 }
-        : state;
+      // only counts the idle ticks the press gate (battleRoomQuoteInputReady) reads.
+      return { ...state, elapsed: state.elapsed + 1 };
     case "msgboxClosing": {
       const elapsed = state.elapsed + 1;
       if (elapsed >= MSGBOX_CLOSE_TICKS) return { ...state, phase: "settled", elapsed: 0 };
@@ -366,13 +364,24 @@ export function advanceBattleRoom(state: BattleRoomState): BattleRoomState {
  */
 export const BRAIN_MSGBOX_ACCEPT_ELAPSED = 2;
 
+/**
+ * abs1: the opponent's intro box takes its first press three frames after the last character (waitmessage, then waitbuttonpress). ROM,
+ * the first opponent's box on the canonical route: last character 738, A at 738..740 not taken, A at 741 taken; the engine's idle
+ * elapsed counts from the last character's frame and its press frame reads the pre-state, so the gate is 3
+ * (tools/integration/abs1TextBursts.py; docs/abs1-ab-text-speedup.md).
+ */
+export const MSGBOX_ACCEPT_ELAPSED = 3;
+
+/** The second battle's opponent box keeps its earlier measured gate (not re-measured by abs1). */
+export const JENSON_MSGBOX_ACCEPT_ELAPSED = 2;
+
 /** Can a press (A or B: WaitForAorBPress, TextPrinterWaitWithDownArrow) be taken on this frame's pre-state? */
 export function battleRoomQuoteInputReady(state: BattleRoomState): boolean {
   if (state.phase === "brainMsgboxIdle") return state.elapsed >= BRAIN_MSGBOX_ACCEPT_ELAPSED;
   if (state.phase === "brainSpeech") return brainSpeechAcceptReady(state);
   if (state.phase === "brainSymbol") return brainSymbolAcceptReady(state);
   if (state.phase !== "msgboxIdle") return false;
-  return state.encounter !== "jenson" || state.elapsed >= 2;
+  return state.elapsed >= (state.encounter === "jenson" ? JENSON_MSGBOX_ACCEPT_ELAPSED : MSGBOX_ACCEPT_ELAPSED);
 }
 
 /** The phase `battleRoomQuoteInputReady`'s press gate transitions to for the ordinary box (core.ts's msgbox-close idiom). */

@@ -89,7 +89,10 @@ interface WonLobby {
 // slide wait, the sandstorm sound): 4 fails the two Scene OFF continuation cases, 0 the challenge-2 loss. A scan of 0..23 with the seed in all
 // three roles (scratch copies of this file) found only 10 passing all 15 (23 all but the loss; 2 / 4 / 13 / 14 / 19 the two continuation
 // cases, 0 those and the loss, 17 those and the retire, the rest 12). So all three roles use 10.
-const WIN_TWO_SEED = 10;
+// abs1 (the Lobby attendant's `\p` pages take a press from the last glyph's frame and its end pages two frames after, as the ROM does; the soak player's presses and the
+// Lobby cursor of every new challenge move): 10's Scene OFF continuation loses. A scan of 0..23 (minus 10) in the WIN_TWO role (scratch copies of this file) found 14 and 19
+// passing all 15 (0 / 2 / 4 / 13 fail the two continuation cases, 23 fails 1, the rest 10); RETIRE and the loss keep 10.
+const WIN_TWO_SEED = 14;
 const RETIRE_SEED = 10;
 const WIN_THEN_LOSE_SEED = 10;
 
