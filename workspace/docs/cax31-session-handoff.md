@@ -1,4 +1,4 @@
-# CAX31 session handoff — 2026-10-26 (finish plan; state updated 2026-11-21)
+# CAX31 session handoff — 2026-10-26 (finish plan; state updated 2026-11-22)
 
 The user approved `docs/finish-plan.md` on 2026-10-26 and restarted the
 running CAX31 session on it. Run on CAX31's `master` at
@@ -312,7 +312,27 @@ this run** (step A), and step B only as a measured proposal.
 This repo is the **game core library**; the website repo (Mac) owns login, streaks, menus, the on-screen pad and hosting —
 never brief those here. One worker at a time; each run folds the next audio step(s) plus at least one cleanup step.
 
-**Status at the 2026-11-21 wind-down (daily run 2026-11-20 13:30 -> 05:30; PROGRESS top entry has the gates):** no Mac fold (the Mac merge `43669b6f1` was on master at start).
+**Status at the 2026-11-22 wind-down (daily run 2026-11-21 13:30 -> 05:30; PROGRESS top entry has the gates):** run start on the Mac merge `5fbac1476` (fop1 etc.); replay 44 / 44 + 110 / 110 there.
+No battle-rule change this run: every fold kept census eventsDigest identical (0..199 both scenes; hcr3 0..999). Final engine `30cd3dfac`.
+- **Item 0 (sound): T2 (25 ON + 24 OFF, drv1 cadence; `tools/audio/rescoreAll.sh` + `soundScoreboard.py`) ON 25,747 -> 14,435 (-44 %, exact 2,366 -> 2,935), OFF 3,164 -> 2,040 (-36 %, exact 600 -> 725), 0 / 0.**
+  Landed (sections of `docs/aud251-s11-scoreboard-refresh.md` unless named): b4l / b4l2 (c-lead B4 bodies), stc1 / stc2 (OFF stat SE; hp -> stat = bar + 8 both scenes; confusion self-hit), hcr3 (stat-next / recoil hp rows),
+  bdt1 (Metal Claw, Dig, Rest), gsp3 (asleep turn, poison / burn tick, infatuation), fch1 (AI replacement choice timing), chg2 / chg3 (two-turn moves; Aerial Ace impossible stat change), hie5 (held item after
+  print-ended scripts, restore-HP tails), eqk1 (Earthquake hit-all transition, Pausex20 before "doesn't affect", Magnitude OFF), itm1 (held item after a faint waits for SE_FAINT), mxp1 (Explosion / Self-Destruct /
+  Magnitude ON), wtl1 / etp1 / etp2 / fnt2 (`docs/fnt1-fainted-box-clear.md`: win tail before "Player defeated", end-turn print family, dragged-out press, drain-KO print, Shell Bell summary lead).
+  **Next, ranked by t2k3 (same doc, section 3):** (1) faint / send-in chain (SE 114 / 15 / cry; 2,251 both scenes; the faint message is ready 3+ frames after the ROM's A pulse, fch1 term 2 still open); (2) hit SE 12 / 13 / 14
+  lead after a used print (OFF s2230 decision 21: the flat 42-frame move-animation before hit-animation is 21-28 short of the ROM's print + crit + Pausex20); (3) held-item group after a send-in (+21: first SE 23 after
+  the general-animation start vs ROM 8); (4) gen:180 restore-HP chain first row; (5) Dig tails; (6) poison tick first row; (7) Ice Beam first window; (8) Rock Slide body. Also open: Leech Seed sap (OFF +9 / ON +2, etp2 labs
+  committed), Wrap print after the hit (ON -8 / -7), Magnitude power-roll labs, Scene OFF self-KO faint SE after Explosion (-2).
+- **Item 0b (Lobby):** no change (#221 open).
+- **Item 0d (battle rules):** luck day 6 0 hits (R040 R063 R110). rrh6 + rrh7: 14 rare rules hand-staged and ROM-matched, **85 -> 99 / 110** (`docs/parity-mac/rule-coverage.md`).
+- **#225:** trn226 drew LOGO_WIGGLE and fixed LOGO_WAVE (0 bad frames both scenes, Noland room only); open: the ordinary room's handoff (unmeasured), SQUARES_SCROLL BGM lag. Not checked: a Brain battle's
+  RNG after the now-shorter Noland-room transition (a catcher round through the Head would show it). **#227** closed (msw2: the ROM keeps the same move order as the engine after SELECT + Mimic; pinned).
+- **Tools:** `tools/integration/labCompare.sh` (cln12 / cln13: ROM probe + engine + aligned SE and first-glyph table, cross-run ROM reuse; `tools/battle-lab/README.md` "Lab compare"). Tackle / Pound / Scratch /
+  Splash have no live body adapter (no body SE): lab-only moves (sets below the Lv50 ranges); use Factory moves in labs.
+- **Lessons:** worktree workers ran git in the main tree (rrh6; PAPERCUTS) — briefs now say "work only in your worktree"; the box filled its disk (census `tree/` arms 3.6 GB each, /tmp scratch 62 GB): prune both
+  during the run; lbrd / soak trajectory pins move on almost every timing merge: re-scan them on the merged tree (scratch copies with the seed swapped, 24 seeds in ~2 min at 3 workers).
+
+**Previous status (2026-11-21 wind-down):** (daily run 2026-11-20 13:30 -> 05:30; PROGRESS top entry has the gates):** no Mac fold (the Mac merge `43669b6f1` was on master at start).
 Gameplay / flow changes: rsw1 / rsw2 (the swap-return room: black hold, fade, "Thank you!" A wait; RNG per frame), msw1 (SELECT move swap, #227), lbw9 (Lobby save wait, no menu wrap, #228);
 everything else is presentation / sound timing with census eventsDigest identical both scenes. Final engine `c6117abdc`, ENGINE_BUILD `eb-3c2651248c642b97`.
 - **Item 0 (sound):** T2 on the final engine (`.integration/evidence/t2final`, `soundScoreboard.py`): ON mass 35,592 -> 26,673, exact 1,007 -> 2,362; OFF 5,437 -> 3,537, exact 126 -> 584; 0 / 0.
@@ -325,21 +345,6 @@ everything else is presentation / sound timing with census eventsDigest identica
   R040 R063 R110.
 - **Cleanup:** cln10 (dev-loop tooling), branch prune.
 
-**Previous status (2026-11-20 wind-down):**  (daily run 2026-11-19 13:30 -> 05:30; PROGRESS top entry has the gates):** no Mac fold (the Mac merge `d75ddd3b0` was already on master at start).
-One engine rule change (shd1: Shedinja max HP 1, census 0..999 both scenes 0 changed); everything else is presentation / sound timing with census eventsDigest identical both scenes on every fold.
-- **Item 0 (sound): event parity holds; frame alignment ON -36 %, OFF -11 %** (t2n on `29688b8cd`, `docs/aud251-s11-scoreboard-refresh.md` "t2n": 25 ON + 24 OFF seeds, 0 missing / 0 extra; ON mass
-  55,711 -> 35,592, exact rows 479 -> 1,007). Landed: lead2 / lead3 / lead4 (lead1m B0-B3, `docs/lead1m-rule-lead-design.md`), lse4 (`docs/hpd1-hp-hold.md`), hpf5 (hpf4m T1-T4 / S1, sta6m), pau4 / pau5
-  (Intimidate / Trace entry scripts, `docs/pau1-script-pauses.md`), btn1 / btn2 (#223 button waits, `docs/subp1m-battle-text-pause.md` 6-7), bgm1 (Brain song 471, #224 closed), ice2 (last static ON command).
-  **Next, ranked by t2n section 5:** (1) general / status-animation spacing (25 % of ON mass): gsp1m (`docs/aud251-s11-scoreboard-refresh.md` "gsp1m") found the wake-up `status` command on the 32-frame `STATUS_TIMING` default (ROM +9..12, ours +41; a 6-frame probe: -11 % matched offset on 25 ON seeds); measure the ROM head per preceding command, then land it, then the held-item restart lead / infatuation tail / Curse;
-  (2) the hit-controller rows SE 13 / 12 / 14 (OFF 41 %): hcr1m ("hcr1m" in the same doc) found the first used-move print at a fixed commit + 9 vs the ROM's commit + 6 + u (u = script commands before the print); a probe: OFF hit-row offset -35 %, all rows -23 %, exact 126 -> 560; land in `advanceBattleResolutionConfirmHandoff`, Scene ON: hcr2m (same doc) shows the rule holds but the print alone gains only -6 % there, so land OFF first; (3) faint / send-in chain (fsc1m, same doc "fsc1m", OFF s648: 45 % of its mass is engine rows: the faint-message -> party-summary interval (median -8 on 118 rows; ROM AI choice 6..10 frames), the hit blink played on an invisible (Dig) target (+25..+32), Earthquake's EMPTYSTRING3 box held 24 vs ~5 frames; the first-print lead 16 %, the driver anchor 6 %: land with hcr1m); (4) lead1m B6 (Dig / Solar Beam / Fly charge turns, multi-hit 2+), B4 C bodies (Confuse Ray, Thunder Wave, Curse, Stun Spore), B5 adapter windows (Toxic, Hypnosis,
-  Frustration, Double Team -80); (5) small: Recycle's heal animation (lse4), #223 remainder, #225 LOGO_WIGGLE / LOGO_WAVE. Do not chase the landed shape-A next-command spread (t2n "What not to chase").
-  **Lesson (again):** timing changes move pins outside test:gate (lead2: sgl138 / aud252 / aud248; ice2: liveIceBallAdapter): run the FULL suite before folding; never merge into the main tree while a
-  main-tree worker runs (one merge hit "Unable to write index" today).
-- **Item 0b (Lobby):** unchanged this run (#221 open).
-- **Item 0d (battle rules):** run-start replay on `0d2973b40`: 44 / 44, stages 94 / 94. Luck day 4: 7 / 7 promoted; rrh5 + shd1: rare rules **66 -> 83 / 110** (R057 counted; set 21 is lab-only).
-  Read `.integration/evidence/luck-hunt/<day>/summary.json` at run start (7 designs still open with 0 hits: R040 R058 R063 R078 R082 R096 R110).
-- **Cleanup:** cln9: 5 scratch files; 109 one-off scripts kept (tracked receipts name / hash them; decision recorded in `docs/cln9-oneoff-scripts.md`, reversible). The 62 MB aud251 doc (sed slip in
-  `b0e4cf53d`) is restored to 177 KB; the blob stays in history (no rewrite).
 **Website:** the live site runs **`eb-c26961a07ff6b07b`** (your `49287331f`, the 2026-11-15 wind-down build; deployed 2026-11-15 ~13:30 UTC on Kyle's
 word, "Yes, update it"). The site adopted the lazy sprites and sound (a sound switch, off by default), and (same day, Kyle: "Yes, build it")
 **`challenge-request` + `start: "after-save"`**: after a loss / retire the game runs on in the Lobby, the player asks the attendant, and the site opens
