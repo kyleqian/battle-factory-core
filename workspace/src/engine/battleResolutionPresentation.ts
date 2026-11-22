@@ -2106,7 +2106,8 @@ const LEAD4_S_LEAD_MOVE_IDS: ReadonlySet<number> = new Set([
 /**
  * lse4 (docs/hpd1-hp-hold.md lse3 table): Revenge 279 and Absorb 71 join the shape-A class (lead 5, gap 4). Absorb's accepted window is 2 rows short of the ROM's len + 1 (`LSE4_WINDOW_SHORT_ROWS`).
  */
-const LSE4_SHAPE_A_MOVE_IDS: ReadonlySet<number> = new Set([279, 71]);
+const MAGNITUDE_MOVE_ID = 222;
+const LSE4_SHAPE_A_MOVE_IDS: ReadonlySet<number> = new Set([279, 71, 222]);
 /**
  * lse4 "gap-print": the lead is the kernel counter, the rows after the body are `T = 2 + gap - pre - post + s` with the ROM gap of the next command: a print (`printfromtable` / `printstring`) is
  * Delta + 1 (Recycle 3, the Razor Wind charge turn 7), any other next command is shape A (gap 4). Recycle 278, Razor Wind 13 (both turns).
@@ -2205,6 +2206,13 @@ function moveAnimationScriptLeadTiming(
     if (BATTLE_SCRIPT_PROGRAM.instructions[programCounter + 1]?.opcodeName === "B_SCR_OP_WAITSTATE") {
       const waitLead = animation - (used + 1);
       return waitLead > 0 ? { scriptLeadFrames: waitLead } : {};
+    }
+    if (moveId === MAGNITUDE_MOVE_ID) {
+      // mxp1: the body's script lead is counted from the Magnitude print's waitmessage (ROM: goto .. attackanimation 10 rows, A at +13 from the command).
+      const magnitudePrint = events.slice(i + 1, index).find((e) => e.payload.kind === "message" && e.payload.messageId === "STRINGID_MAGNITUDESTRENGTH");
+      if (magnitudePrint === undefined) return {};
+      const magnitudeLead = animation - (instructionExecutionOf(magnitudePrint) + 1 + WAITMESSAGE_LONG_HOLD_FRAMES);
+      return magnitudeLead > 0 ? { bodyLeadFrames: magnitudeLead } : {};
     }
     if (presentedSinceUsed === null || !bodyLeadRuleApplies(moveId) || (events[index]!.provenance?.sourceLabel === CHARGE_TURN_SCRIPT && !bodyGapPrintRuleApplies(moveId))) return {};
     const lead = animation - (used + 1) - presentedSinceUsed;
@@ -2926,11 +2934,12 @@ export function turnEndTimingAfterRelease(
   const printed = commands[index];
   if (printed?.type !== "message" || printed.promptGate !== true) return TURN_END_TIMING;
   const payload = events.find((event) => event.sequence === printed.eventSequence)?.payload;
-  const rows = payload?.kind === "message" ? RELEASE_TO_MOVEEND_ROWS[payload.messageId] : undefined;
+  const releasedMessageId = payload?.kind === "message" ? payload.messageId : undefined;
+  const rows = releasedMessageId === undefined ? undefined : RELEASE_TO_MOVEEND_ROWS[releasedMessageId];
   return rows === undefined ? TURN_END_TIMING
     : Object.freeze({
       minimumFrames: TURN_END_TIMING.minimumFrames + rows,
-      ...(payload.messageId === "STRINGID_PKMNWASDRAGGEDOUT" ? {} : { blankTailFrames: RELEASE_TAIL_BLANK_ROWS }),
+      ...(releasedMessageId === "STRINGID_PKMNWASDRAGGEDOUT" ? {} : { blankTailFrames: RELEASE_TAIL_BLANK_ROWS }),
     });
 }
 /**

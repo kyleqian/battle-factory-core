@@ -15,6 +15,7 @@ import type {
 } from "../animation/sceneOnPresentation.ts";
 import { GROVYLE_TO_ONIX_ROCK_SLIDE_PROFILE } from "../animation/sceneOnPresentation.ts";
 import { wavyMusicNotesGeometryAtAge } from "../animation/sing.ts";
+import { magnitudeFirstInactiveAge } from "../animation/magnitude.ts";
 import { ADP1_MOVE_BODY, APPROX_SCRIPT_MOVE_BODY, approxScriptDuration } from "../animation/approxScript.ts";
 import { PRESENT_DAMAGE_FRAME_COUNT, PRESENT_HEAL_FRAME_COUNT } from "../animation/present.ts";
 import { SOLAR_BEAM_SETUP_FIRST_INACTIVE_AGE } from "../animation/solarBeam.ts";
@@ -1513,8 +1514,8 @@ function liveMoveAnimationDurationOf(
     case 157: return 138;
     case 129: return request.attacker === 1 ? 80 : 78; // Swift 73..152 / 69..146 (prep8 s2.2): activation..script end.
     case 271: return 225; // Trick 70..294 / 66..290.
-    // Magnitude 411..585 (power 70, 174 frames) / 191..397 (power 110, 206 frames): the reducer's first inactive age.
-    case 222: return request.power > 99 ? 206 : request.power >= 10 && request.power <= 99 ? 174 : null;
+    // Magnitude 411..585 (power 70, 174 frames) / 191..397 (power 110, 206 frames): the reducer's first inactive age, 118 + 8 * floor(power / 10) (mxp1: the ROM's gAnimScriptActive length, 158 at power 50).
+    case 222: return request.power >= 10 ? magnitudeFirstInactiveAge(request.power) + 1 : null;
     // Razor Wind: setup 45 frames (195..240 / 192..237), unleash 72 (553..625 / 661..733); gAnimMoveTurn bit 0 selects the body.
     // Spark 79..193 / 83..197 (activation + 9, row -9: no #142 shadow row), both attackers (spark62); the script runs 2 rows past the window.
     case 209: return 115;
