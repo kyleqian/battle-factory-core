@@ -2704,3 +2704,55 @@ ROM s8108 d6 (Light Screen -> Dig): `MoveEnd` 229 -> `EffectSemiInvulnerable` 23
 6. Do not change `LEECH_SEED_DRAIN_SCRIPT_AGE` globally (-7 raises T2 drain mass 1,028 -> 1,677); the labs are exact at 7. Resolve the lab-lag-7 / T2-lag-0 question first (one cmp of s6912 d2 against `etp1-leechseed-on`).
 
 Gates: no `.ts` added (python / shell only), so no typecheck; `npm test` not run (the step overrides the generic line); `src/`, `tests/`, PROGRESS / ISSUES / ROADMAP and the acceptance / supervisor ledgers untouched.
+
+## t68m (2026-11-22): the engine commands behind t2k3 items 6, 7 and 8 (gen:148 tick, Ice Beam, Rock Slide) -- none of the three is a rule of its own (measurement only; `src/` and `tests/` untouched)
+
+Tools: `tools/integration/t68mWin.py` (windows of one cause with the previous row's cause / offset and, with `--cmd DIR`, the engine cmds before the first row) and `t68mPress.py` (per window, last ROM SE 5 -> row vs last engine SE 5 -> row; second arg `cmd` names the owning engine cmd). Frozen input: t2k3 `attr-on.json`; ROM windows from the hse1m full probes, `hcr3mCmp.py` on the frozen T2 request. Evidence (git-ignored): `.integration/evidence/t68m/` (`win-*.txt`, `press-*.txt`, `<seed>-d<n>.cmp.txt`).
+
+**Result.** In all three items the *interval of the item's own command is exact* (ROM = engine): poison tick message -> status animation 95 = 95; Ice Beam press -> SE 67-73 identical; Rock Slide s97 55 = 55. The offset on the first row is whatever precedes the item. There is no per-item constant to change.
+
+### 1. Item 6: gen:148 poison / status tick first row (ON 534, 19 windows, -12 .. +6) is five inherited classes
+
+| Class | Mass | Windows | What precedes (ROM vs engine) | Command |
+|---|---|---|---|---|
+| A. offset inherited from the previous row (same sign, same size) | 222 | 9 | the previous row already carries the offset; the tick adds 0 | not a tick |
+| B. first command after a player send-in, +6 | 72 | 2 | the retained segment after a player send-in starts 6 late (hie6m constant) | send-in -> next segment start |
+| C. after a foe replacement `switch-in` tail, -9 | 54 | 1 | engine `switch-in` tail 9 shorter than the ROM `SwitchInEnd` hold | `switch-in` tail |
+| D. after a side-status / Encore message chain, -4 / -5 | 84 | 3 | the g180m item 4 family (`DisabledNoMore` / `SideStatusWoreOff` print hold ~5 short) | message hold |
+| E. after a body tail: Knock Off +5, miss -3, Block -8 | 102 | 4 | the previous move's own end (`KnockedOff` / `MoveEnd` tail), not the tick | previous body |
+| Sum | 534 | 19 | | |
+
+Source rows: tick message -> `BattleScript_PoisonTurnDmg` -> `DoStatusTurnDmg` status animation 95 frames on both sides; the first-row error equals the previous row's error in A, so fixing B / C / D / E moves A with it (the 222 collapses only when the 3 inherited roots are fixed).
+
+### 2. Item 7: Ice Beam first-mover windows (ON 517; -21 / -13 / -6) are a harness gate, a continuation segment and a print hold
+
+| Window | Step | Mass | Cause | ROM vs engine |
+|---|---|---|---|---|
+| s2230 d20 si41 | -21 | 231 | **harness press gate, not an engine rule**: the ROM is still in the `DisabledNoMore` end2 tail and accepts the census retry press at +19, the engine accepts at 0 | press -> SE 5: ROM 19 later; press -> SE 67..73 equal |
+| s830 d1 si3 | -13 | 156 | engine continuation segment (`seg 1`, lead 0) after the opponent's first charging turn; the ROM waits 12 before the used print | engine commit -> first message 0 vs ROM 12 |
+| s830 si11 | -6 | 66 | the confusion-ended print (`MoveUsedIsConfusedNoMore`) hold ~5 short | message hold 5 |
+| s6079 si1 -4, two -3 rows | -4 / -3 | 64 | not opened (s6079 d0: the engine commit is 9 and the ROM's 7; the used print is 9..13 on the engine vs a fixed 12 on the ROM) | |
+
+Only 2 decisions in 24 seeds are the gate (s2230 d20, d21; d21 probably owns the Struggle -17 of t2k3). It is a `soundCensusRomReplay` / driver artefact: the fix is the census press gate (accept the A press only on the ROM's accepted frame), never `src/`.
+
+### 3. Item 8: Rock Slide body (ON 514; -13 / -10 / -9 and +5) is inherited from the previous move
+
+| Window | Step | Mass | Cause |
+|---|---|---|---|
+| s8612 d8 si? | -13 | 163 | inherited from the Belly Drum body before it (same -13 on the Belly Drum tail row) |
+| s165 d1 | +5 | 140 | inherited from Knock Off (`KnockedOff` +5, the same as item 6 class E) |
+| s310 / s1914 | -3 / -3 | 106 | the engine's 9 .. 13 commit -> first message phase noise vs the ROM's fixed 12 |
+| -10 / -9 rest | | 105 | carried offsets, not opened |
+
+Rock Slide's own interval is exact (s97 55 = 55): the item is not a Rock Slide rule.
+
+### 4. Landing recipes for the next run
+
+1. **Used-print lead of a continuation segment after an opponent's first charging turn (s830 d1, -13, 156 mass, item 7): `battleResolutionPresentation.ts` `usedMovePrintLeadU` (~7057).** In Scene ON the hold reads `state.segments[0]`, and its comment says continuation segments were measured in Scene OFF only; the ROM waits 12 before the used print, the engine `seg 1` (lead 0) waits 0. Rule: when the print belongs to a continuation segment (`segmentIndex >= 1`, no commit of its own) hold the OFF `lockedTurnPrintLead` base (`TURN_START_PRINT_BASE_U`, ~7390) instead of 0. Pins: the Scene ON continuation / charge pins in `tests/` (`usedMovePrintLead*`, charge-turn pins around `chargeChainCarry`). Expected T2: item 7 -156 mass (s830 d1) and possibly the s165 / s6 / s830 / s8108 first-row mixes (not uniform: lab one cmp per seed first). **Not resolved**: whether the lead-0 `seg 1` rule is uniform.
+2. **Send-in -> next segment +6 (class B of item 6, 72 mass)**: the hie6m constant (see its recipe); do it once, it moves item 3 and item 6.
+3. **Side-status / Encore message hold ~5 short (class D, 84; item 7 s830 si11, 66)**: the g180m item 4 recipe (`SideStatusWoreOff` / `DisabledNoMore` hold 97 -> 92); `MoveUsedIsConfusedNoMore` shows the same shape. Pins: the end-turn side-status print pins.
+4. **s2230 d20 (-21, 231 mass) and Struggle -17**: census press gate in `soundCensusRomReplay.ts` / `tools`, not an engine change (fch2m class). After fixing, expect item 7 -231 and, if d21 is the same gate, the item's Struggle row.
+5. **Engine commit -> first message 9 .. 13 vs ROM 12** is unexplained (it makes the ±3 rows of item 8 and s6079 item 7); open s6079 d0 (`6079-d0.cmp.txt`: engine commit 9 / ROM 7, engine first message 9, ROM `BattleScript_EffectEarthquake` 6) before any change.
+6. **Do not add a poison tick, Ice Beam or Rock Slide rule**: the three are inherited; the only direct engine moves of this step are 1, 2 and 3.
+
+Gates: no `.ts` added (python only), so no typecheck; `npm test` / build not run (docs / tools step); `src/`, `tests/`, PROGRESS / ISSUES / ROADMAP and the acceptance / supervisor ledgers untouched.
