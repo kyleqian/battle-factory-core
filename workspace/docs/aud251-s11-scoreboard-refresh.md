@@ -2542,3 +2542,42 @@ Sum-check: ON 1,530 + 1,075 + 1,510 + 980 + 615 + 534 + 517 + 514 (= 7,275) + 45
 - B4 bodies (274) are reported, not proposed.
 
 Not applied: no `src/` or `tests/` change; PROGRESS / ISSUES / ROADMAP untouched; no `.ts` added, so no typecheck / `npm test` / build run (the supervisor's wind-down gates cover the unchanged tree). The step text named both `.integration/evidence/t2k3/` and `t2k/`; t2k3 was used.
+
+## fch2m (2026-11-22): the faint / send-in "cliff" is the census driver's A gate, not an engine command (tools only; `src/` and `tests/` untouched)
+
+Scene OFF (:8014). Evidence (git-ignored, main tree): `.integration/evidence/fch2m/` (`p/` baseline ROM probes + engine `--cmdtrace` for the 5 windows, `pa/` the same engine replays with the new press, `t2-base/` / `t2-acc/` + `score-{base,acc}.txt` = the 49-seed T2 rescore on this tree without / with it, `probe.sh`, `rescoreAll.sh`). New tools: `tools/integration/fch2mWin.py` (one faint window: ROM SE 16 / printer start / state 2 / pulse A / SE 114 next to the engine's `message` command, A and SE 114 in two runs); `soundCensusRomReplay.ts replay --dismiss-accept=1` and `AUD249_DISMISS_ACCEPT=1` for `aud249Rescore.sh` (opt-in; default behaviour unchanged, the baseline rescore reproduces t2k3's ON 14,435 / 2,935 and OFF 2,040 / 725 exactly).
+
+### 1. Result: the differing "command" is the harness press gate
+
+The engine's faint `message` is ready on the same frame as the ROM's in all five windows. t2k3 item 1 / fch1 term 2 read the `message` command's `min=24` as its ready time; that field is not used for a button message (`isBattleResolutionCommandComplete` hands a button message to `isBattleResolutionButtonMessageReady`, `battleResolutionPresentationRender.ts:2018-2023`). What gates it is the typed rows: a `\p`-ended faint box (`promptClear`) **accepts** an A from `phaseElapsed >= typedRows + 1 - GATE_ACCEPT_LEAD_ROWS` (`:2102-2113`, taken in the `presenting` branch at `factoryRoundBattleOrchestrator.ts:3170-3180`; the tick that reads it is message start S + T, T = glyph count = name chars + 12) and only **enters** `awaiting-message-dismiss` at `typedRows + 1` (`:3200-3210`). The census driver presses only in the awaiting phase (`soundCensusRomReplay.ts:442` at HEAD), so its first press is S + T + 3 (decided on the frame before the tick, after the phase flips): a 3-frame dead zone after the engine already accepts. The ROM driver's pulse is a fixed 17-frame cadence, so with probability 3 / 17 the pulse lands in S + T .. S + T + 2, is not taken, and the engine waits the next pulse: +17 (or +15 after the AI-choice extra). That is the whole "ready 1 .. 3 frames late in situ" of fch1 (its shift experiment: 2, 3, 1, 2 = 3 minus the pulse's distance past the accept frame) and why 5 of 32 OFF faints show the cliff (3 / 17 x 32 = 5.6).
+
+### 2. The five windows (frames from each side's own commit; `fch2mWin.py`)
+
+| window | ROM SE 16 -> printer start / T (state 2) / pulse A / SE 114 | engine SE 16 -> `message` cmd (ROM start + 1, flat in all 5) / accept frame S + T | pulse - accept | engine A, baseline -> SE 114 (vs ROM) | engine A with the press -> SE 114 (vs ROM) |
+| --- | --- | --- | --- | --- | --- |
+| s2 d6 | 281 -> 299 (+18) / 19 (318) / 320 / 502 | 300 (min 24) / 319 | +1 | 337 (pulse + 17) -> 519 (**+17**) | 320 -> 502 (0), SE 15 0 |
+| s3738 d38 | 303 -> 321 (+18) / 19 (340) / 342 / 369 | 322 / 341 | +1 | 359 -> 386 (**+17**) | 342 -> 369 (0), SE 15 -1 |
+| s1028 d10 | 397 -> 417 (+20) / 20 (437) / 438 / 467 | 418 / 438 | 0 | 455 -> 482 (**+15**) | 438 -> 465 (-2) |
+| s319 d18 | 386 -> 406 (+20) / 20 (426) / 429 / 456 | 407 / 427 | +2 | 446 -> 473 (**+17**) | 429 -> 456 (0), SE 15 0 |
+| s5063 d47 | 535 -> 555 (+20) / 20 (575) / 577 / 604 | 556 / 576 | +1 | 594 -> 619 (**+15**) | 577 -> 602 (-2), SE 15 -3 |
+
+Per-command intervals agree everywhere before the press: SE 16 on the same frame (+0), faint `status` 1 row then `message` at ROM start + 1, typing = T glyphs both sides (19 / 20 for a 7 / 8-character name). A -> SE 114 with the press: 27 / 27 on s3738 and s319, 182 / 182 on s2 (a held-item heal chain, `ItemHealHP_Ret`, sits between the faint and the send-in; both sides run it), but 29 vs 27 on s1028 and 27 vs 25 on s5063: the engine is 2 short there, the AI-choice term of fch1 (a residual of that choice, not the cliff). Nothing is wrong in the faint print, the faint SE / sprite-drop rows or the hp drain (all five SE 16 exact), and no earlier hold carries into it.
+
+**Why the labs match and the windows do not.** `fch1ReadySweep.ts` and the fsc2m `ready` policy press A on every frame, so they measure the accept frame; the census replay presses on the ROM pulse cadence and only once the phase says "awaiting". A lab has one pulse phase chosen by the A policy; in situ the pulse phase is whatever the run carried, and 3 of the 17 phases fall in the dead zone. The species / foe name, the sprite drop (SE 16 -> start 18 / 20) and the preceding message do not matter (all 5 windows have accept = ROM ready + 1).
+
+### 3. Measured on the whole T2 (49 seeds, this tree, `AUD249_DISMISS_ACCEPT=1`, 0 missing / 0 extra both)
+
+| | mass base -> press | exact base -> press | battle-controller | cry | bgm |
+| --- | --- | --- | --- | --- | --- |
+| OFF (24) | 2,040 -> **1,841** (-199, -9.8 %) | 725 -> 730 | 1,504 -> 1,378 | 340 -> 284 | 19 -> 2 |
+| ON (25) | 14,435 -> 14,518 (+83, +0.6 %) | 2,935 -> 2,929 | 2,139 -> 2,188 | 718 -> 752 | 52 |
+
+Faint -> SE 114 rows (ROM and engine both have the pair): OFF 32 rows, sum |error| 93 -> 33, exact 17 -> 19: the five windows above fix (+17 / +15 -> 0 / -2) and one flips (**s97 d13** 0 -> -17). ON 33 rows: no cliff row at the baseline; two flip (**s3738 d57** and **s5569 d18**, 0 -> -17, +51 mass each). The flips are the cliff the other way: in those windows the engine's SE 16 is 3 .. 6 frames earlier than the ROM's, so with the press the engine is ready before the ROM's pulse accepts and the ROM waits one more pulse; the baseline's exact SE 114 was the two errors cancelling. Opened: s97 d13 (OFF): engine `message` -> SE 13 41 frames (cmd 0.10 `move-animation` min 42, started 331) vs ROM print 313 -> SE 13 378 (65): the item-2 hit-SE interval of t2k3 (SE 13 -6, SE 16 -6, then the faint chain). The other six per-seed deltas: OFF s648 +17 (a non-faint button message; not opened), s499 -9, s5569 -9, s830 bgm -17, ON s310 -11, s1415 -9, s3158 -7, s4235 -9, s5063 +17 (controller; not opened).
+
+### 4. Landing recipe (tools only; not flipped here)
+
+1. `tools/integration/soundCensusRomReplay.ts`: make `dismissAccept` default true when `--romdrive` is given (`arg("dismiss-accept") !== "0"`), keep it off without a drive; `aud249Rescore.sh` / `aud248RunSeed.sh` then need nothing. The rule is the engine's own: press when `isBattleResolutionButtonMessageAcceptable` (the first row the engine takes an A), not 3 frames later. Pins it moves: none in `tests/` (the nine `soundCensusRomReplay` importers replay without `--romdrive`; not run here); `src/` none. It moves every T2 baseline: record OFF 1,841 / ON 14,518 as the new reference (OFF: the 5 windows -232, other gates -35 = s499 / s5569 / s830 bgm, flips +51 s97 and +17 s648; ON: -36 over s310 / s1415 / s3158 / s4235, flips +119 = s3738 d57 + s5569 d18 + s5063 +17).
+2. Decide the ON +83 first: it is three windows whose cause is upstream (SE 16 early by 3 .. 6 after an OFF / ON hit-SE interval, t2k3 item 2 and the faint SE lag clip), so landing the press makes them visible rather than creating them; land it with item 2, or accept +83 ON for -199 OFF.
+3. No engine row remains in the cliff: after the press the faint chain in the five windows is 0 / 0 / -2 / 0 / -2 at SE 114 (the -2 pair is fch1 term 1's AI-choice extra, `aiReplacementChoiceExtraFrames`, 2 early on those two choices; the next small engine term). t2k3 item 1's 2,251 mass is therefore mostly NOT this cliff: the cliff is 5 OFF windows (5 x 15 .. 17 rows of offset, about -232 mass); the +-1 .. 9 remainder of item 1 (ball-open @sprite-visibility -7 x5, party-summary lead) is untouched and needs its own windows.
+
+Gates: `npm run typecheck` only (a `.ts` tool changed); no `npm test` / build (assigned); `src/`, `tests/`, PROGRESS / ISSUES / ROADMAP untouched.
