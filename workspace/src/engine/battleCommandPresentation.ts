@@ -1016,12 +1016,12 @@ export function returnBattleCommandPartySelection(
     : withLifecycle(state, "submitting", 0, { pendingDecision: decision });
 }
 
-/** Returns a cancelled voluntary selector to its same request and cursor. */
+/** Returns a cancelled voluntary selector to its same request and cursor; ReshowBattleScreenAfterMenu (ResetSpriteData + ClearSpritesHealthboxAnimData) restarts the bounce from age 0. */
 export function cancelBattleCommandPartySelection(
   state: BattleCommandPresentationState,
 ): BattleCommandPresentationState {
   return state.lifecycle.phase === "party-handoff"
-    ? withLifecycle(state, "action-menu", 0)
+    ? withLifecycle(state, "action-menu", 0, { idleBounceElapsed: 0 })
     : state;
 }
 
