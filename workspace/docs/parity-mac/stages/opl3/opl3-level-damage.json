@@ -1,0 +1,72 @@
+{
+ "name": "opl3-level-damage",
+ "lvlMode": "open",
+ "rules": [
+  "Cmd_dmgtolevel"
+ ],
+ "why": "Open Level challenge 0. The player's Dusclops (378) uses Seismic Toss and Xatu (385) Night Shade (both slot 1): EFFECT_LEVEL_DAMAGE, damage = the user's level, 100 here (Cmd_dmgtolevel, battle_script_commands.c:7926-7930). Opponents have no Normal or Ghost type.",
+ "seed": 30001,
+ "challengeNum": 0,
+ "battleNum": 0,
+ "trainerId": 50,
+ "playerSetIds": [
+  378,
+  385,
+  448
+ ],
+ "opponentSetIds": [
+  444,
+  402,
+  452
+ ],
+ "script": {
+  "actions": [
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 1
+   },
+   {
+    "prefer": 1
+   }
+  ],
+  "then": "census"
+ },
+ "expect": [
+  "move:EFFECT_LEVEL_DAMAGE"
+ ]
+}
