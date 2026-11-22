@@ -64,6 +64,7 @@ import { CASTFORM_CHANGE_COMMAND_FRAMES, CASTFORM_CHANGE_WEATHER_LOOP_FRAMES } f
 import { BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS, BATTLE_SCRIPT_STATUS2_MASKS, BATTLE_SCRIPT_STATUS3_SEMI_INVULNERABLE } from "./battleScriptSourceConstants.ts";
 import { spriteOrderStatusAnimationName } from "./spriteOrderEventTransform.ts";
 import { seg127StatusSeGateFromEvents, seg127StatusSeGateRows } from "./seg127StatusSeGate.ts";
+import { battleHealthBarAnimationFrames } from "./healthboxAssembly.ts";
 import {
   opponentSwitchInDuration, opponentSwitchInHealthboxSlideElapsed, opponentSwitchInVisualDelay,
   sceneOffOpponentSwitchInDuration, sceneOffOpponentSwitchInHealthboxSlideElapsed, sceneOffOpponentSwitchInLagElapsed,
@@ -825,8 +826,12 @@ export type BattleResolutionPresentationCommand =
        * the held-item restart lead 15) does not apply: ROM exec -> SE is 27 here, 34 in the labs (g180m s6912 d2).
        */
       afterPlayerSendIn?: true;
-      /** kno3: an ITEM_KNOCKOFF's IsBattleSEPlaying rows before the launch (sgs134RequestSeGate); absent = 0. */
-      timing: Readonly<{ minimumFrames: number; seGateFrames?: number }>;
+      /**
+       * kno3: an ITEM_KNOCKOFF's IsBattleSEPlaying rows before the launch (sgs134RequestSeGate); absent = 0.
+       * sep1: a LEECH_SEED_DRAIN after a hit (Scene ON): launchLagFrames = the rows from the script's exec row to the animation's first row, the hit SE's
+       * IsBattleSEPlaying wait (hitSeDrainLaunchLag); absent = the legacy lag (7, or 0 right after the player's send-in).
+       */
+      timing: Readonly<{ minimumFrames: number; seGateFrames?: number; launchLagFrames?: number }>;
     }>
   | Readonly<{
       /** `Cmd_trainerslidein`/`Cmd_trainerslideout` -- generic across any trainer/outcome, see `TRAINER_SLIDE_TIMING`. */
@@ -2737,17 +2742,38 @@ function hpItemAnimationRows(events: readonly BattleKernelSemanticEvent[], index
  * no wait; every lab: bars >= 40). Scene OFF has no animation script to wait: its `playanimation` row is bar + 13 with no gate (T2 OFF s97 d13, exec 146 = datahpupdate 135 + 11).
  */
 const HP_ITEM_ANIMATION_SE_FIXED_ROWS = 49;
+/**
+ * sep1: the battle SE a controller request would still wait on (HandleBattleAnimation / HandleMoveAnimation / HandleStatusAnimation poll IsBattleSEPlaying): the
+ * song of the last `play-se` before events[index] when nothing between starts an animation script (Cmd_end drains its own SEs) or prints (a print's 64-row
+ * waitmessage outlasts every effectiveness SE). A hit's HIT_ANIMATION receipt does not end it. Null: nothing playing.
+ */
+function pendingBattleSeSong(events: readonly BattleKernelSemanticEvent[], index: number): number | null {
+  for (let i = index - 1; i >= 0; i -= 1) {
+    const payload = events[i]!.payload;
+    if (payload.kind === "play-se") return payload.songId;
+    if (payload.kind === "message" || payload.kind === "status-animation" || (payload.kind === "animation" && payload.animationId !== "HIT_ANIMATION")) return null;
+  }
+  return null;
+}
 function hpItemAnimationSeGate(events: readonly BattleKernelSemanticEvent[], index: number): number {
   const hp = events[index]!.payload;
   if (hp.kind !== "hp-change") return 0;
-  for (let i = index - 1; i >= 0; i -= 1) {
-    const payload = events[i]!.payload;
-    if (payload.kind === "play-se") {
-      return seg127StatusSeGateRows({ songId: payload.songId, seAgeRows: HP_ITEM_ANIMATION_SE_FIXED_ROWS + Math.abs(hp.from - hp.to) });
-    }
-    if (payload.kind === "message" || payload.kind === "status-animation" || (payload.kind === "animation" && payload.animationId !== "HIT_ANIMATION")) return 0;
-  }
-  return 0;
+  const songId = pendingBattleSeSong(events, index);
+  return songId === null ? 0 : seg127StatusSeGateRows({ songId, seAgeRows: HP_ITEM_ANIMATION_SE_FIXED_ROWS + Math.abs(hp.from - hp.to) });
+}
+/**
+ * sep1: the turn-end Leech Seed drain's `playanimation` is the same IsBattleSEPlaying wait (etp1-leechseed-on / -leechseedc-on, ROM): hit SE 13 at 597 / 604, the
+ * script's exec row (BattleScript_LeechSeedTurnDrain+0x7) at 663 / 708 = hit hp start + (bar + 1) + 17, the animation's first row at 670 / 708 = max(exec, SE + 73).
+ * The launch lag of 7 rows the labs fitted is the short bar's remainder of the SE (73 - 66), 0 on the long bar. SE -> hp start is the hit animation's rows + 1;
+ * after the bar the script runs 17 rows (HIT_TO_SEED_DRAIN_TAIL_ROWS beyond the bar's own + the two MoveEnd sprite-visibility rows) to the exec row.
+ */
+const HIT_TO_SEED_DRAIN_TAIL_ROWS = 15;
+const SEED_DRAIN_PRESENTED_ROWS_BEFORE_EXEC = 2;
+/** The lag the drain command's minimumFrames was fitted with (battleResolutionPresentationRender.ts LEECH_SEED_DRAIN_SCRIPT_AGE; a test pins them equal). */
+const LEECH_SEED_DRAIN_LEGACY_LAG = 7;
+function hitSeDrainLaunchLag(songId: number | null, hitAnimationRows: number, barRows: number): number | null {
+  if (songId === null) return null;
+  return seg127StatusSeGateRows({ songId, seAgeRows: 1 + hitAnimationRows + barRows + HIT_TO_SEED_DRAIN_TAIL_ROWS + SEED_DRAIN_PRESENTED_ROWS_BEFORE_EXEC });
 }
 function focusBandNext(events: readonly BattleKernelSemanticEvent[], index: number): boolean {
   const programCounter = events[index + 1]?.provenance?.programCounter;
@@ -2827,6 +2853,9 @@ interface HpLeadRows {
   /** hpb3: the rows from `datahpupdate` to a healing berry's `playanimation` after the MoveEnd rows, or null. */
   readonly itemAnimationRows: number | null;
   readonly itemAnimationSeGate: number;
+  /** sep1: the battle SE still playing when the hit's bar starts, and the bar's rows (battleHealthBarAnimationFrames + 1). */
+  readonly pendingSeSong: number | null;
+  readonly barRows: number;
   /** HITMARKER_NO_ANIMATIONS (Scene OFF) when the hp command was projected. */
   readonly sceneOff: boolean;
 }
@@ -2867,6 +2896,17 @@ function applyHpHitTails(
     }
     if (leads.wrapSecondary && rest[0]?.type === "message") {
       commands[index] = Object.freeze({ ...command, timing: Object.freeze({ minimumFrames: 0, tailFrames: WRAP_SECONDARY_TAIL_FRAMES }) });
+      continue;
+    }
+    const seedDrain = rest[2];
+    if (recoilPrevious?.type === "hit-animation" && recoilPrevious.battler === command.battler && rest[0]?.type === "sprite-visibility" && rest[1]?.type === "sprite-visibility"
+      && seedDrain?.type === "general-animation" && seedDrain.animation === "LEECH_SEED_DRAIN" && seedDrain.afterPlayerSendIn !== true && leads.moveEndRows !== null && !leads.sceneOff) {
+      commands[index] = Object.freeze({ ...command, timing: Object.freeze({ minimumFrames: 0, tailFrames: HIT_TO_SEED_DRAIN_TAIL_ROWS }) });
+      const lag = hitSeDrainLaunchLag(leads.pendingSeSong, recoilPrevious.timing.minimumFrames, leads.barRows);
+      if (lag !== null && seedDrain.animated === true) {
+        const at = commands.indexOf(seedDrain);
+        commands[at] = Object.freeze({ ...seedDrain, timing: Object.freeze({ minimumFrames: seedDrain.timing.minimumFrames - LEECH_SEED_DRAIN_LEGACY_LAG + lag, launchLagFrames: lag }) });
+      }
       continue;
     }
     const transition = rest[0]?.type === "move-animation" && rest[1]?.type === "sprite-visibility";
@@ -5903,6 +5943,7 @@ export function projectBattleResolutionCommands(
   const pendingHealth = new Map<0 | 1, { eventSequence: number; healthValue: number; instructionExecution: number | undefined }>();
   const hpLeadRows = new Map<number, HpLeadRows>();
   let leechDrainAnimated = false;
+  const seedDrainInSegment = events.some((e) => e.provenance?.programCounter === LEECH_SEED_DRAIN_SEEDED_PC && e.payload.kind === "hp-change");
   const pendingSwitch = new Map<
     0 | 1,
     { eventSequence: number; fromPartyIndex: BattlePartyIndex; toPartyIndex: BattlePartyIndex }
@@ -6408,7 +6449,7 @@ export function projectBattleResolutionCommands(
       const messageRows = drainRole === null ? hpMessageLeadRows(events, index) : null;
       const faintNext = drainRole === null && hpFaintNext(events, index);
       const hitEffectMessage = HP_HIT_EFFECT_OPCODES.has(events[index + 1]?.provenance?.opcodeName ?? "") || hitAllLoopEmptyBoxTiming(events, index + 1) !== null;
-      hpLeadRows.set(health.eventSequence, { tick: hpTickKind(event), wrapSecondary: events[index + 1]?.provenance?.programCounter === WRAP_SECONDARY_PC, moveEndRows, messageRows, faintNext, hitEffectMessage, barExecution: health.instructionExecution, recoil: event.provenance?.programCounter === RECOIL_PC, drain: event.provenance?.programCounter === DRAIN_PC, focusBand: focusBandNext(events, index), itemAnimationRows: drainRole === null ? hpItemAnimationRows(events, index) : null, itemAnimationSeGate: drainRole === null ? hpItemAnimationSeGate(events, index) : 0, sceneOff: (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0 });
+      hpLeadRows.set(health.eventSequence, { tick: hpTickKind(event), wrapSecondary: events[index + 1]?.provenance?.programCounter === WRAP_SECONDARY_PC, moveEndRows, messageRows, faintNext, hitEffectMessage, barExecution: health.instructionExecution, recoil: event.provenance?.programCounter === RECOIL_PC, drain: event.provenance?.programCounter === DRAIN_PC, focusBand: focusBandNext(events, index), itemAnimationRows: drainRole === null ? hpItemAnimationRows(events, index) : null, itemAnimationSeGate: drainRole === null ? hpItemAnimationSeGate(events, index) : 0, pendingSeSong: drainRole === null ? pendingBattleSeSong(events, index) : null, barRows: seedDrainInSegment ? battleHealthBarAnimationFrames({ maxHp: (battler === 0 ? currentField.player : currentField.opponent).maxHP, from: payload.from, to: payload.to }) + 1 : 0, sceneOff: (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0 });
       commands.push(Object.freeze({
         type: "hp",
         eventSequence: health.eventSequence,

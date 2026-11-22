@@ -10,7 +10,7 @@ import { CRY_ECHO_END_FRAMES, CRY_ECHO_START_FRAMES, CRY_HIGH_PITCH_FRAMES, CRY_
 import { factoryBattleBgm } from "./battleStartSounds.ts";
 import { BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS } from "./battleScriptSourceConstants.ts";
 import type { BattleResolutionPresentationState } from "./battleResolutionPresentation.ts";
-import { LEECH_SEED_DRAIN_SCRIPT_AGE, liveMoveSourceAge, moveAnimationScriptStartRow, statsChangeSourceAge } from "./battleResolutionPresentationRender.ts";
+import { LEECH_SEED_DRAIN_SCRIPT_AGE, leechSeedDrainLaunchLag, liveMoveSourceAge, moveAnimationScriptStartRow, statsChangeSourceAge } from "./battleResolutionPresentationRender.ts";
 import { bodyCLeadRuleApplies, bodyStatusTailRuleApplies, FOCUS_PUNCH_SETUP_BEHIND_SUBSTITUTE_COMMAND_FRAMES, HELD_ITEM_EFFECT_COMMAND_FRAMES, RAIN_CONTINUES_SCRIPT_START_ROWS, WEATHER_CONTINUES_LAUNCH_LEAD_ROWS, isWeatherContinuesAnimation, type BattleStatusAnimationName, type WeatherContinuesAnimation } from "./battleResolutionPresentation.ts";
 
 /** Body age of the script's first command (script frame 0). */
@@ -400,7 +400,7 @@ export function emitGeneralAnimSounds(after: BattleResolutionPresentationState |
         if (stop !== undefined && elapsed === stop.age + TURN_TRAP_SCRIPT_AGE) emitSound({ kind: "stop", id: stop.id, pan: null, player: stop.player });
       } else if (command.animation === "LEECH_SEED_DRAIN" && command.animated === true) {
         // command.battler is the seeded (drained) battler = the animation's target; the seeder is the attacker.
-        emitOpsAt(generalVariant("General_LeechSeedDrain", command.battler === 0 ? 1 : 0), { attackerSide: other, targetSide: side }, elapsed - (command.afterPlayerSendIn === true ? 0 : LEECH_SEED_DRAIN_SCRIPT_AGE), true);
+        emitOpsAt(generalVariant("General_LeechSeedDrain", command.battler === 0 ? 1 : 0), { attackerSide: other, targetSide: side }, elapsed - leechSeedDrainLaunchLag(command), true);
       }
     }
   }

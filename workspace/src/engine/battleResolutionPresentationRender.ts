@@ -1897,7 +1897,11 @@ const LEECH_SEED_DRAIN_BODY_ROWS = 194;
 export const LEECH_SEED_DRAIN_SCRIPT_AGE = 7;
 /** hie7: the body starts with the script row 0, which runs LEECH_SEED_DRAIN_SCRIPT_AGE rows after the command start except right after the player's faint-replacement send-in (moveAnimSounds). */
 function leechSeedDrainBodyStartAge(command: Extract<BattleResolutionPresentationCommand, { type: "general-animation" }>): number {
-  return command.afterPlayerSendIn === true ? LEECH_SEED_DRAIN_BODY_START_AGE - LEECH_SEED_DRAIN_SCRIPT_AGE : LEECH_SEED_DRAIN_BODY_START_AGE;
+  return LEECH_SEED_DRAIN_BODY_START_AGE - LEECH_SEED_DRAIN_SCRIPT_AGE + leechSeedDrainLaunchLag(command);
+}
+/** sep1: rows from the command start to the script's first row: the hit SE's wait when the builder measured it, else the legacy 7 (0 after the player's send-in). */
+export function leechSeedDrainLaunchLag(command: Extract<BattleResolutionPresentationCommand, { type: "general-animation" }>): number {
+  return command.timing.launchLagFrames ?? (command.afterPlayerSendIn === true ? 0 : LEECH_SEED_DRAIN_SCRIPT_AGE);
 }
 
 function leechSeedDrainAbsorbEffect(
