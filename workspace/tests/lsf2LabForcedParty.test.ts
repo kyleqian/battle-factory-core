@@ -63,7 +63,7 @@ describe("lab stage hands its built party to the forced party menu", () => {
     let state = labBackedStage(LAB, initial());
     let select = state.factoryRoundBattleOrchestrator!.battleForcedPartySelect;
     for (let frame = 0; frame < 4000 && select === null; frame += 1) {
-      state = tick(state, frame % 12 === 0 ? ["A"] : []);
+      state = tick(state, new Set(frame % 12 === 0 ? ["A" as const] : []));
       select = state.factoryRoundBattleOrchestrator!.battleForcedPartySelect;
     }
     expect(select).not.toBeNull();
