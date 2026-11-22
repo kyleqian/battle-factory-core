@@ -38,7 +38,7 @@ FUNCS = {
     "GetFactoryMonId": None, "GetNumPastRentalsRank": None, "GetRandomScaledFrontierTrainerId": None,
     "CreateFrontierFactorySelectableMons": None, "FillFactoryTrainerParty": None, "FillFactoryFrontierTrainerParty": None,
     "CreateMonWithEVSpreadNatureOTID": None, "Random": None, "VBlankIntr": None,
-    "HandleInputChooseAction": "src/battle_controller_player.o", "BattleMainCB2": None,
+    "HandleInputChooseAction": "src/battle_controller_player.o", "BattleMainCB2": None, "GetHighestLevelInPlayerParty": None,
 }
 DATA = {"sFactorySelectScreen": None, "sRandCount": None}
 
