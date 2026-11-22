@@ -1605,9 +1605,15 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
     // walkable-lobby overworld (factoryLobbyFreeRoam.ts); until then the
     // terminal presentation still owns the screen.
     const freeRoamBoxGoneAge = factoryTerminalDeclineBoxGoneAge(factoryTerminal);
+    // lbf1: the ROM's player takes the d-pad on the releaseall frame itself (a DOWN tapped on the dismiss's frame + 2 turns it, ROM vs
+    // app on lbf1-r2), the frame the box's last row clears; the hand-off tick therefore steps the walkable Lobby with this tick's input.
     const lobbyFreeRoam =
       freeRoamBoxGoneAge !== null && factoryTerminal.age >= freeRoamBoxGoneAge
-        ? state.lobbyFreeRoam ?? createFactoryLobbyFreeRoamState()
+        ? state.lobbyFreeRoam ??
+          advanceFactoryLobbyFreeRoam(createFactoryLobbyFreeRoamState(), {
+            heldDirs: lobbyHeldDirections(buttons),
+            npcs: lobbyNpcTilesForPlayer(state.lobbyNpcs),
+          })
         : state.lobbyFreeRoam;
     // The Lobby result script runs once at Lobby entry. LostChallenge (Lobby scripts.inc:65-75) clears the
     // win-streak-active flag: the lost challenge's symbols / BP stay, the streak and rents are zero. WonChallenge
