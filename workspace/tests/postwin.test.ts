@@ -899,7 +899,8 @@ describe("S8 Battle-1 postwin transition", () => {
         ...base,
         battleRoom: { ...INITIAL_BATTLE_2_ROOM_STATE, phase: "msgboxIdle", elapsed },
       }, new Set(["A"]));
-      expect(accepted.battleRoom).toEqual({
+      // rmw1: the close state may carry transitionClockAhead (the ROM's odd first-flash frame), so match the pinned fields only.
+      expect(accepted.battleRoom).toMatchObject({
         ...INITIAL_BATTLE_2_ROOM_STATE,
         phase: "msgboxClosing",
         elapsed: 0,
