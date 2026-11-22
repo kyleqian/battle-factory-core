@@ -43,7 +43,7 @@ resolved: it needs a dense capture of the A-close exit, and the B-close exits th
 The trace is a canonical ROM recording but declared no `appRoute`, so the compare replayed the engine on the default generated-orchestrator
 route, a different game, and every capture mismatched wholesale (the repo's known "0/N" misdiagnosis). abs1's engine change could not move it
 because the wrong route never reaches the room in the recorded state. It is a trace fault, not an engine fault: with `"appRoute":
-"canonical-recorded"` and `"oracleProfile": "battle-scene-on"` the same trace is 199/199 on both the pre-rmw1 and the rmw1 engine. The same
+"canonical-recorded"` and `"oracleProfile": "battle-scene-on"` the same trace is 199/199 on the rmw1 engine (decline, the one of the five also run on fold-d's engine, is 72/73 on both, so the route field alone makes the difference). The same
 fix for next-prompt / scout-a / scout-b / decline; `tests/compareTraceAppRoute.test.ts`'s legacy allowlist loses those five. abs1-draft-mash-a-on
 also had no `appRoute` (the ratchet test caught it): `"generated-orchestrator"`, the default it was already replaying on.
 
