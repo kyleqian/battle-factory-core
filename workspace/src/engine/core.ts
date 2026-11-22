@@ -755,6 +755,7 @@ import {
 } from "./factoryAnchorSession.ts";
 import { CANONICAL_DESTIN_PRESENTATION, type FactoryTrainerPresentation } from "./factoryTrainerPresentation.ts";
 import { withLiveRender } from "./drawRecord.ts";
+import { withPresentationRender } from "./presentationContainment.ts";
 import { createFactoryRentalPresentation, type FactoryRentalPresentation } from "./factoryRentalPresentation.ts";
 import {
   containedBattleResolutionRenderView,
@@ -4637,6 +4638,11 @@ function renderPrebattleEntryState(state: EngineState): Uint8Array {
 }
 
 export function render(state: EngineState): Uint8Array {
+  // fam1 (presentationContainment.ts): an animation file read before it arrived leaves this render for the browser loop's hold.
+  return withPresentationRender(() => renderState(state));
+}
+
+function renderState(state: EngineState): Uint8Array {
   // rc1: a result hold is black (the host draws its card over it).
   if (state.resultHold) return blackFrame();
   // pic3: a generated Factory round (an orchestrator, or a pending generated round before its first battle) draws only from its live
