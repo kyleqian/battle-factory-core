@@ -411,3 +411,12 @@ no VBlank draw inside it. The Open draws are `GetFactoryMonId(lvlMode 1,
 challengeNum 0, FALSE)` (trapped arguments); `GetNumPastRentalsRank` is
 called with (battleMode 0, lvlMode 1) and returns 0. The Open challenge is
 the ROM's own: nothing is written into RAM.
+
+### Open Level after-save profiles (opl5)
+
+`factory-open-after-save.json` and `factory-open-after-save-battle-scene-off.json` (written by `make-factory-open-after-save.py`):
+`factory-open.json`'s route cut after 5,310 frames, no settle frames. The screen shows "Please step this way." at its first glyph,
+the state the engine's `start: "after-save"` Open Level mount stands for (its frame 0): the text box rows (y 112-159) are identical
+to the engine's frame by frame; the rest differs only by the Lobby's wandering NPCs, whose RNG the engine does not follow. The save
+prompts are done (lvlMode 1, factory_init, the Open Level win-streak-active flag 0x200); gRngValue 0xfd76c447 (4252487367), the
+engine's `gameplaySeed` for that start. Used by the frame catcher (`tools/frame-catcher/romRun.py`) for an after-save trace.
