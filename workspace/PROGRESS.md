@@ -29,7 +29,8 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   straight into master while msw2 ran there (no conflict, kept) and deleted the merged 11-20 `fold-b` branch (restored at `0a63934b2`). Disk reached 99 % at 20:10. The master chain on `5819467ba` lost its build to OOM (re-run green later).
 - **Gates (final engine `30cd3dfac`):** vanilla 0:20 OFF **20 / 20**, ON **20 / 20**; 0:60 default / winning / winning-swap **60 / 60** each; varied-RNG winning carry 0 / 14 / 28 + winning-swap carry 0
   **100 / 100** each (0 crash / 0 hang). Full suite on `30cd3dfac` **16,711 passed / 3 failed**, all test-side (mxp1's Explosion window 212 -> 213, etp1's poison end-turn rows; fixed in `bcde22ba2`, 11 / 11);
-  typecheck / build / build:lib 0. Mid-run full suites: `0a6b92a55` 16,671 / 0; `14f3e5a44` 16,671 / 0; `2aa2d69e1` 16,671 / 0; `62ebcc5b3` 16,680 / 0; earlier `9e5a45dbc` 11 failed (b4l pins, b4l2),
+  typecheck / build / build:lib 0. **Final tip** (tools / docs after the gates): full suite **16,715 passed / 1 failed** (the iss215 ratchet: nrv1's new tool lacked the pixel installer; fixed in `8e37b066d`,
+  24 / 24 with the lab-folder tests), build 0. Mid-run full suites: `0a6b92a55` 16,671 / 0; `14f3e5a44` 16,671 / 0; `2aa2d69e1` 16,671 / 0; `62ebcc5b3` 16,680 / 0; earlier `9e5a45dbc` 11 failed (b4l pins, b4l2),
   `22c58649b` 5 (stc2), `5819467ba` 2 (lbrd trajectory). `play:random --minutes 10 --scene both --lobby-new-challenge`: ON 28 battles / 12 swaps, OFF 59 / 22; **0 page / console errors, 0 overlays**.
 - **After the gates (tools / docs only, engine unchanged; sections of `docs/aud251-s11-scoreboard-refresh.md`):** t2k3 (the ranking above); fch2m: the faint-chain "cliff" is the census driver's
   A gate (3-frame dead zone), opt-in `soundCensusRomReplay.ts --dismiss-accept=1` / `AUD249_DISMISS_ACCEPT=1`: OFF 2,040 -> 1,841, ON +83 (three upstream windows it un-hides); hse1m: t2k3 item 2 was
@@ -39,7 +40,8 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   battle's RNG (40 / 40 identical) — but on the Noland-room recordings the engine's RNG at the Head battle start never equals the ROM's (Noland's lead differs 40 / 40), against the Mac catcher's "the Head's
   team is the engine's" (hdt1); hdt2m (`docs/hdt1-factory-head-team.md` "hdt2m"): both are right: the engine's Head-team rule is the ROM's (fed the ROM's own cursor, the lead matches 20 / 20; 2nd / 3rd 17 / 20 with 8-13 VBlank
   draws between builds), the difference is the RNG input stream (the room's per-VBlank cursor, the parked #55 distribution class), not a missing draw; t68m: t2k3 items 6-8 are mostly inherited offsets (poison tick first row after
-  the preceding command; Rock Slide's own interval exact), one press gate (Ice Beam s2230) and the Scene ON continuation-segment lead after a charge turn (`usedMovePrintLeadU`). Each doc has a landing recipe.
+  the preceding command; Rock Slide's own interval exact), one press gate (Ice Beam s2230) and the Scene ON continuation-segment lead after a charge turn (`usedMovePrintLeadU`). wkl1m: two Scene OFF wake-up labs (`tools/battle-lab/wkl1m-wakeup-*-off.json`, Rest) for hse1m's rule (Spore labs desync on
+  sleep length: the lab-RNG class, the ROM replay matched 44 / 44 real battles). Each doc has a landing recipe.
 - **Next:** (1) land hse1m's OFF wake-up hold / confusion head and g180m's Dig charge-turn
   print (recipes in the doc), then fch2m's dismiss-accept default (with hse1m's hit-SE windows it un-hides); (2) hie6m's send-in Leftovers start / lead; (3) Leech Seed drain rows (g180m, etp2 labs); (4) t2k3's
   poison first row / Ice Beam first window / Rock Slide; also the Wrap print after the hit, Magnitude power-roll labs, #225 ordinary room. Re-scan the soak / lbrd trajectory pins after every timing merge.
