@@ -1082,7 +1082,9 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // merge of etp1 / etp2 with this run's fold (eqk1, chg2 / chg3, hie5, fnt2, trn226, msw2): 57508 (etp1) -> 94125 / battle 4 / depth 3 / turn 18; roundLost.
       // merge with the Mac's tdr1 (tri1 / wtl1 / sst1; the exploring presses land on new phases): 94125 / battle 4 / depth 3 / turn 18 ->
       // 68945 / battle 3 / depth 2 / turn 21; still OK / roundLost. A trajectory pin, not a ROM frame.
-      frames: 68945,
+      // hie7 (the segment after the player's forced send-in resumes 6 frames before the action prompt, ROM s5063 d45 / s6912 d2 exec row): frames only,
+      // 68945 -> 68927 (three post-send-in script resumes x 6); same battle 3 / depth 2 / turn 21 / roundLost. A trajectory pin, not a ROM frame.
+      frames: 68927,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 2,
