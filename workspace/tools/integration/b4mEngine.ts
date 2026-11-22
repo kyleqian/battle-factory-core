@@ -24,7 +24,7 @@ const { APP_STAGES, labBackedStage } = (await import("../compare/appTrace.ts")) 
 let state: any = createInitialState({ appRoute: "generated-orchestrator", battleScene: scene });
 const ownScene = scene === (lab.profile === "battle-scene-on" ? "on" : "off");
 state = APP_STAGES[name] !== undefined && ownScene ? APP_STAGES[name](state)
-  : labBackedStage(`${name}.json`, state, process.env.ENGINE_RNG_SEED === undefined ? undefined : Number(process.env.ENGINE_RNG_SEED), scene);
+  : labBackedStage(`${name}.json`, state, process.env.ENGINE_RNG_SEED === undefined ? undefined : Number(process.env.ENGINE_RNG_SEED), scene, true);
 const cmds: unknown[][] = []; const se: unknown[][] = []; const sounds: unknown[][] = []; const noBody: number[][] = []; let last = "";
 let age0: number | null = null;
 const frames = lab.trace.segments.reduce((n: number, s: any) => n + s.frames, 0);
