@@ -21,7 +21,7 @@ A = lambda n=2: {"frames": n, "buttons": ["A"]}
 I = lambda n: {"frames": n, "buttons": []}
 TURN = [A(), I(18), A()]  # open Fight, pick slot 0 (all four slots are the same move)
 # case: (player party, foe party, trace after the first turn's selection; each turn = TURN + the idle/press list)
-BELLY_DRUM = 187
+BELLY_DRUM, GROWL = 187, 45
 # The player's lead is a full-HP Rattata L20 (HP 48): turn 1 Belly Drum (-24), then Splash; the foe's seed (-6 a turn) / Toxic (-3, -6, -9, -12) knocks it
 # out at the end of turn 4.  (No Substitute: a faint behind a substitute plays the substitute-to-mon animation first.)  Foe: Rattata L49, one move in all four slots.
 def mon2(species, level, moves):
@@ -31,7 +31,7 @@ def mon2(species, level, moves):
 
 
 def plr():
-    return [mon2(RATTATA, 20, [BELLY_DRUM, SPLASH, SPLASH, SPLASH])] + [mon(RATTATA, 50, SPLASH)] * 2
+    return [mon2(RATTATA, 20, [BELLY_DRUM, GROWL, GROWL, GROWL])] + [mon(RATTATA, 50, SPLASH)] * 2
 
 
 def foe(move, level=49):
@@ -51,8 +51,8 @@ CASES = {
     "poison-hold": (plr(), foe(TOXIC), four_turns([I(1500)])),
     "poison-spam": (plr(), foe(TOXIC), four_turns(SPAM)),
     # Perish Song by the player (the foe's AI may switch): the count prints 3..1 at the end of turns 1-3 and 0 (the lead faints) at the end of turn 4
-    "perish-hold": ([mon(RATTATA, 50, PERISH), mon(RATTATA, 50, SPLASH), mon(RATTATA, 50, SPLASH)], foe(SPLASH, 50), (TURN + [I(1100)]) * 3 + TURN + [I(1800)]),
-    "perish-spam": ([mon(RATTATA, 50, PERISH), mon(RATTATA, 50, SPLASH), mon(RATTATA, 50, SPLASH)], foe(SPLASH, 50), (TURN + [I(1100)]) * 3 + TURN + SPAM),
+    "perish-hold": ([mon(RATTATA, 50, PERISH), mon(RATTATA, 50, SPLASH), mon(RATTATA, 50, SPLASH)], foe(SPLASH, 40), (TURN + [I(1100)]) * 3 + TURN + [I(1800)]),
+    "perish-spam": ([mon(RATTATA, 50, PERISH), mon(RATTATA, 50, SPLASH), mon(RATTATA, 50, SPLASH)], foe(SPLASH, 40), (TURN + [I(1100)]) * 3 + TURN + SPAM),
 }
 want = sys.argv[1:] or list(CASES)
 for name in want:
