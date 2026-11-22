@@ -44,8 +44,8 @@ describe("lbf1: free control returns on the releaseall frame (dismiss A + 2)", (
       expect(at(4).lobbyFreeRoam!.turnTarget).toBe("south");
       expect(at(4).lobbyFreeRoam!.facing === "south" || at(4).lobbyFreeRoam!.turnRemaining > 0).toBe(true);
 
-      const early = tick(at(0), ["DOWN"]);
-      const early2 = tick(early, []);
+      const early = tick(at(0), new Set(["DOWN"]));
+      const early2 = tick(early, new Set());
       expect(early.lobbyFreeRoam).toBeFalsy();
       expect(early2.lobbyFreeRoam?.pendingDir ?? null).toBeNull();
     });
