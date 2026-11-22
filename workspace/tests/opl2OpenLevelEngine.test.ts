@@ -234,3 +234,17 @@ describe("opl2: startStreak (tools only)", () => {
     expect(() => new FactorySession({ battleScene: "off", level: "open", startStreak: 15 })).toThrow(/multiple of 7/);
   });
 });
+
+describe("opl2: Noland reads the level's streak and the shared symbols (GetFrontierBrainStatus, frontier_util.c:1656-1690, :1820-1821)", () => {
+  it("a Level 50 silver symbol makes Open Level's battle 21 an ordinary trainer and battle 42 the gold Noland", async () => {
+    const { getFactoryFrontierBrainStatus } = await import("../src/engine/frontierBrainStatus.ts");
+    const lv50 = Object.freeze({ ...createInitialFactoryCarry(7), factoryWinStreak: 21, factorySymbolsCount: 1 as const });
+    const open = carryForChallengeLevel(lv50, "open", true);
+    expect(open).toMatchObject({ lvlMode: "open", factoryWinStreak: 0, factorySymbolsCount: 1 });
+    const at = (streakBeforeBattle: number, symbols: 0 | 1 | 2) =>
+      getFactoryFrontierBrainStatus({ battleMode: "singles", winStreak: streakBeforeBattle, symbolsCount: symbols });
+    expect(at(20, open.factorySymbolsCount)).toBe("not-ready");
+    expect(at(41, open.factorySymbolsCount)).not.toBe("not-ready");
+    expect(at(20, 0)).not.toBe("not-ready");
+  });
+});
