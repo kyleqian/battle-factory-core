@@ -6523,7 +6523,7 @@ export function projectBattleResolutionCommands(
               type: "general-animation" as const, eventSequence: heldItem.sequence, battler: heldItem.battler,
               animation: heldItem.animation,
               ...(heldItem.trapMove === undefined ? {} : { trapMove: heldItem.trapMove }),
-              timing: Object.freeze({
+              timing: (heldItem.animation === "HELD_ITEM_EFFECT" ? (t: Record<string, number>) => t : Object.freeze)({
                 minimumFrames: heldItem.frames - presented + (presented > 0 ? HELD_ITEM_EFFECT_AFTER_STATUS_EXTRA_FRAMES : 0),
                 ...(heldItem.seGate === undefined ? {} : { seGateFrames: heldItem.seGate }),
               }),

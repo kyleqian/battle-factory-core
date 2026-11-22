@@ -36,7 +36,7 @@ import {
 } from "./liveSpriteOrderHost.ts";
 import { liveMoveGeometrySpriteOrderPlanText } from "./liveMoveAnimation.ts";
 import { liveMovePresentationRngBodyKey } from "./liveMovePresentationRng.ts";
-import { withHeldItemFaintSeGate } from "./heldItemFaintSeGate.ts";
+import { applyHeldItemFaintSeGate } from "./heldItemFaintSeGate.ts";
 import {
   advanceLiveBattlerX2Host, applyLiveBattlerX2Event, createLiveBattlerX2Host, invalidateLiveBattlerX2Host,
   liveBattlerX2EventsOf, liveMoveBattlerX2Input, liveMoveBattlerX2InputForBody, liveStaleMovePowerTaintedBy, LIVE_BATTLER_X2_IDLE,
@@ -3172,7 +3172,7 @@ function advanceFactoryRoundBattleResolutionCore(
       && isBattleResolutionButtonMessageAcceptable(resolution)
     ) {
       if (newKeys.has("A") || newKeys.has("B")) {
-        const gatedResolution = withHeldItemFaintSeGate(resolution, resolution.lifecycle.phaseElapsed);
+        applyHeldItemFaintSeGate(resolution, resolution.lifecycle.phaseElapsed);
         const nextCommandIndex = resolution.commandIndex + 1;
         const reachedSegmentEnd = nextCommandIndex >= segment.commands.length;
         const completion = reachedSegmentEnd
@@ -3180,7 +3180,7 @@ function advanceFactoryRoundBattleResolutionCore(
           : null;
         // fnt1: a press before the awaiting phase (from the printer's first wait frame) freezes / clears the box as in it.
         const nextResolution = withReleasedWaitCursor(resolution, withResolutionLifecycle(
-          gatedResolution,
+          resolution,
           nextCommandIndex,
           completion?.phase ?? "presenting",
           0,
@@ -3260,8 +3260,9 @@ function advanceFactoryRoundBattleResolutionCore(
     const completion = reachedSegmentEnd
       ? completedResolutionUpdate(state, resolution)
       : null;
+    applyHeldItemFaintSeGate(resolution, resolution.lifecycle.phaseElapsed);
     const released = withResolutionLifecycle(
-      withHeldItemFaintSeGate(resolution, resolution.lifecycle.phaseElapsed),
+      resolution,
       nextCommandIndex,
       completion?.phase ?? "presenting",
       0,

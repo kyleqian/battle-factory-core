@@ -15,14 +15,16 @@ function isGatePassthrough(command: BattleResolutionPresentationCommand): boolea
 
 /**
  * Called when the faint's button message is dismissed (`messageElapsed` = its rows so far): when only status / sprite-visibility commands lie between
- * the faint and a Scene ON held-item animation, the animation command gets the rows SE_FAINT still has to play, as extra lead.
+ * the faint and a Scene ON held-item animation, the animation command's `minimumFrames` becomes its planned value + the rows SE_FAINT still has to play.
+ * The command's timing object is the one mutable object in a plan (planned unfrozen, `baseMinimumFrames` kept beside it): the next-command handoff and
+ * the retained-resolution guards compare segment / command identity, so the plan cannot be rebuilt; the write is a pure function of the dismissal row.
  */
-export function withHeldItemFaintSeGate(state: BattleResolutionPresentationState, messageElapsed: number): BattleResolutionPresentationState {
+export function applyHeldItemFaintSeGate(state: BattleResolutionPresentationState, messageElapsed: number): void {
   const segment = state.segments[state.segmentIndex];
-  if (segment === undefined) return state;
+  if (segment === undefined) return;
   const commands = segment.commands;
   const messageIndex = state.commandIndex;
-  if (commands[messageIndex]?.type !== "message") return state;
+  if (commands[messageIndex]?.type !== "message") return;
   let heldIndex = messageIndex + 1;
   let afterMessage = 0;
   while (commands[heldIndex] !== undefined && isGatePassthrough(commands[heldIndex]!)) {
@@ -30,7 +32,12 @@ export function withHeldItemFaintSeGate(state: BattleResolutionPresentationState
     heldIndex += 1;
   }
   const held = commands[heldIndex];
-  if (held?.type !== "general-animation" || held.animation !== "HELD_ITEM_EFFECT" || held.timing.minimumFrames < HELD_ITEM_EFFECT_COMMAND_FRAMES) return state;
+  if (held?.type !== "general-animation" || held.animation !== "HELD_ITEM_EFFECT" || Object.isFrozen(held.timing)) return;
+  const timing = held.timing as { minimumFrames: number; baseMinimumFrames?: number };
+  const base = timing.baseMinimumFrames ?? timing.minimumFrames;
+  timing.baseMinimumFrames = base;
+  timing.minimumFrames = base;
+  if (base < HELD_ITEM_EFFECT_COMMAND_FRAMES) return;
   let faintIndex = messageIndex - 1;
   let beforeMessage = 0;
   while (faintIndex >= 0 && isGatePassthrough(commands[faintIndex]!)) {
@@ -38,15 +45,10 @@ export function withHeldItemFaintSeGate(state: BattleResolutionPresentationState
     faintIndex -= 1;
   }
   const faint = commands[faintIndex];
-  if (faint?.type !== "faint") return state;
+  if (faint?.type !== "faint") return;
   const seOffset = faintSeOffsetRows({ ...state, commandIndex: faintIndex });
-  if (seOffset === null) return state;
+  if (seOffset === null) return;
   const age = battleResolutionCommandFallbackDuration(faint) - seOffset + beforeMessage + messageElapsed + afterMessage;
-  const lead = held.timing.minimumFrames - HELD_ITEM_EFFECT_COMMAND_FRAMES;
-  const gate = Math.max(0, Math.min(SE_GATE_CAP, FAINT_SE_ROWS - age - lead));
-  if (gate === 0) return state;
-  const gated = Object.freeze({ ...held, timing: Object.freeze({ ...held.timing, minimumFrames: held.timing.minimumFrames + gate }) });
-  const nextCommands = Object.freeze(commands.map((command, index) => (index === heldIndex ? gated : command)));
-  const nextSegments = Object.freeze(state.segments.map((candidate, index) => (index === state.segmentIndex ? Object.freeze({ ...candidate, commands: nextCommands }) : candidate)));
-  return Object.freeze({ ...state, segments: nextSegments });
+  const lead = base - HELD_ITEM_EFFECT_COMMAND_FRAMES;
+  timing.minimumFrames = base + Math.max(0, Math.min(SE_GATE_CAP, FAINT_SE_ROWS - age - lead));
 }
