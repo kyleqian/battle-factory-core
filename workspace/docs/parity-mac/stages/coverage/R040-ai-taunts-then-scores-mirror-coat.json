@@ -1,0 +1,231 @@
+{
+ "name": "R040-ai-taunts-then-scores-mirror-coat",
+ "rules": [
+  "R040"
+ ],
+ "why": "Challenge 7, trainer 200, hand-built Mechanic Lab parties (luck7). Each AI Pokemon (Clefable, Chansey, Wigglytuff) knows Taunt x3 and Mirror Coat, no Counter: it picks Taunt on most turns, and the turn after, the player's Machamp is still taunted (timer 2, one turn-end tick) when AI_CV_MirrorCoat scores the Mirror Coat slot (battle_ai_scripts.s:2132 / :2144, the `if_target_not_taunted` gates, then the random +1). Machamp Splashes on turn 0 (so the first branch, a status last move, and later turns' attack last moves reach the two gates), then Brick Breaks (physical: a Mirror Coat user cannot hurt it, a Normal-type foe takes 2x). Metronome -> Taunt (the old design, 1 call in ~330) reaches the same gate; here the AI's own Taunt does.",
+ "seed": 940000,
+ "challengeNum": 7,
+ "battleNum": 0,
+ "trainerId": 200,
+ "playerSetIds": [
+  429,
+  404,
+  735
+ ],
+ "opponentSetIds": [
+  813,
+  716,
+  721
+ ],
+ "parties": {
+  "player": [
+   {
+    "species": 68,
+    "level": 50,
+    "nature": 0,
+    "ivs": {
+     "hp": 31,
+     "attack": 31,
+     "defense": 31,
+     "speed": 31,
+     "spAttack": 31,
+     "spDefense": 31
+    },
+    "evs": {
+     "hp": 255,
+     "attack": 255,
+     "defense": 0,
+     "speed": 0,
+     "spAttack": 0,
+     "spDefense": 0
+    },
+    "moves": [
+     150,
+     280,
+     280,
+     280
+    ],
+    "item": 0,
+    "abilitySlot": 0,
+    "friendship": 0
+   },
+   {
+    "species": 214,
+    "level": 50,
+    "nature": 0,
+    "ivs": {
+     "hp": 31,
+     "attack": 31,
+     "defense": 31,
+     "speed": 31,
+     "spAttack": 31,
+     "spDefense": 31
+    },
+    "evs": {
+     "hp": 255,
+     "attack": 255,
+     "defense": 0,
+     "speed": 0,
+     "spAttack": 0,
+     "spDefense": 0
+    },
+    "moves": [
+     280,
+     280,
+     280,
+     280
+    ],
+    "item": 0,
+    "abilitySlot": 0,
+    "friendship": 0
+   },
+   {
+    "species": 143,
+    "level": 50,
+    "nature": 0,
+    "ivs": {
+     "hp": 31,
+     "attack": 31,
+     "defense": 31,
+     "speed": 31,
+     "spAttack": 31,
+     "spDefense": 31
+    },
+    "evs": {
+     "hp": 255,
+     "attack": 255,
+     "defense": 0,
+     "speed": 0,
+     "spAttack": 0,
+     "spDefense": 0
+    },
+    "moves": [
+     280,
+     280,
+     280,
+     280
+    ],
+    "item": 0,
+    "abilitySlot": 0,
+    "friendship": 0
+   }
+  ],
+  "opponent": [
+   {
+    "species": 36,
+    "level": 50,
+    "nature": 0,
+    "ivs": {
+     "hp": 31,
+     "attack": 31,
+     "defense": 31,
+     "speed": 31,
+     "spAttack": 31,
+     "spDefense": 31
+    },
+    "evs": {
+     "hp": 255,
+     "attack": 255,
+     "defense": 0,
+     "speed": 0,
+     "spAttack": 0,
+     "spDefense": 0
+    },
+    "moves": [
+     269,
+     269,
+     269,
+     243
+    ],
+    "item": 0,
+    "abilitySlot": 0,
+    "friendship": 0
+   },
+   {
+    "species": 113,
+    "level": 50,
+    "nature": 0,
+    "ivs": {
+     "hp": 31,
+     "attack": 31,
+     "defense": 31,
+     "speed": 31,
+     "spAttack": 31,
+     "spDefense": 31
+    },
+    "evs": {
+     "hp": 255,
+     "attack": 255,
+     "defense": 0,
+     "speed": 0,
+     "spAttack": 0,
+     "spDefense": 0
+    },
+    "moves": [
+     269,
+     269,
+     269,
+     243
+    ],
+    "item": 0,
+    "abilitySlot": 0,
+    "friendship": 0
+   },
+   {
+    "species": 40,
+    "level": 50,
+    "nature": 0,
+    "ivs": {
+     "hp": 31,
+     "attack": 31,
+     "defense": 31,
+     "speed": 31,
+     "spAttack": 31,
+     "spDefense": 31
+    },
+    "evs": {
+     "hp": 255,
+     "attack": 255,
+     "defense": 0,
+     "speed": 0,
+     "spAttack": 0,
+     "spDefense": 0
+    },
+    "moves": [
+     269,
+     269,
+     269,
+     243
+    ],
+    "item": 0,
+    "abilitySlot": 0,
+    "friendship": 0
+   }
+  ]
+ },
+ "script": {
+  "actions": [
+   {
+    "move": 0
+   }
+  ],
+  "then": "census"
+ },
+ "expect": [],
+ "cover": [
+  {
+   "file": "src/engine/factoryAiCheckViability.ts",
+   "text": "{\n      roll(\"mi",
+   "at": 0
+  },
+  {
+   "file": "src/engine/factoryAiCheckViability.ts",
+   "text": "{\n    roll(\"mirror-coat-roll-5\",",
+   "at": 0
+  }
+ ],
+ "coverAny": true,
+ "chance": 0.8,
+ "seeds": 200
+}

@@ -76,3 +76,6 @@ covered designs ends at once with no seed).
 - `makeRrh7.py` writes the rrh7 designs (`python3 tools/replay-hunt/makeRrh7.py [OUTDIR]`; markers read from `rule-coverage-c-rules.json`): R049 R059 R090 R104 R039a R039b R095 R106, all hand-built Mechanic Lab `parties` with a scripted player. All are promoted (`stages/coverage/`), so the luck hunter does not hunt them.
 - Lab limits met: an EV list must be an even split of 510 over the flagged stats (255 + 255 for two); PP is the move's base PP; an AI party with Drought (Groudon) makes the first-menu RNG unmatchable (`no draw count gives the ROM's gRandomTurnNumber`).
 
+## luck7 changes
+
+- `makeLuck7.py` writes the luck7 designs for R040 and R110 (`python3 tools/replay-hunt/makeLuck7.py [OUTDIR]`): hand-built Mechanic Lab `parties` with a scripted player, at 36 / 40 and 40 / 40 marker hits (the Factory-set designs they replace: 0 / 40). Both are promoted (`stages/coverage/`), so the hunter skips them. R063's design is retired (class (b), see `rule-coverage.md` "luck7"). No change to `luckHunt.sh`, `prehunt.py` or the seed rule.
