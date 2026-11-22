@@ -3116,3 +3116,20 @@ Sum-check: ON 1,048 + 1,210 + 565 + 760 + 514 + 456 + 450 + 443 + 213 + 372 + 33
 - B4 bodies (274), Future Sight / hail damage SE (hit2 landed it), `HP_TIMING.minimumFrames` -> 0 globally (hpb3: +621).
 
 Not applied: no `src/` or `tests/` change; PROGRESS / ISSUES / ROADMAP untouched; tools are python / shell only; `npm test` / `npm run typecheck` / `npm run build` not run (assigned: other workers share the machine; no `.ts` touched).
+
+## fsi1: the player faint-replacement ball SE follows the printed Go! string
+
+Cause: t2k5 rank 9 (SE 15 after a forced player send-in, -3 x13 / -7 x6 windows) was not name length. `STRINGID_SWITCHINMON` picks one of four strings by `gBattleStruct->hpScale` (`hpthresholds` from the foe's HP%: >69% "Go! X!", >39% "Do it! X!", >9% "Go for it, X!", else "Your foe's weak!\nGet 'em, X!"). FAST text prints one glyph a frame and the ball spawns when the print ends, so from the SEND OUT confirm: print starts at 83, ball B = 86 + printable glyphs, SE 15 (SE_BALL_OPEN) at 133 + glyphs (49 frames after the print end). The old model 91 + name length is the "Go!" row only (glyphs = name + 5); "Do it!" is name + 8 (+3), "Go for it," name + 12 (+7), and "Your foe's weak!" / "Get 'em, X!" name + 26 (+21; no window in T2, see caveat). `CHAR_NEWLINE` returns `RENDER_REPEAT` (text.c:968-971, one frame loop), so a line break costs no frame, as `battleStringPrintableLength` counts.
+
+Change (presentation / sound timing only, no rule / damage / RNG): `playerFaintReplacementSendOutTiming` (`switchInTail.ts`) takes `goTextChars` (already passed from the segment's message lines) and drops `nameLength`: `ball = 86 + goTextChars`. One rule for both scenes, no per-species table. `soundCensusRomReplay.ts` cmdtrace rows now carry the incoming name and a `party-sendout` row (tool only).
+
+| T2 (`rescoreAll.sh` + `soundScoreboard.py`, both scenes, 0 missing / 0 extra) | mass before -> after | exact | offset |
+| --- | --- | --- | --- |
+| ON | 11,531 -> 11,300 (-231) | 3,059 -> 3,120 | 2,818 -> 2,757 |
+| OFF | 1,186 -> 1,008 (-178) | 784 -> 830 | 349 -> 303 |
+
+- The 19 windows (-7 x6, -3 x13) are 0; all 47 send-in SE 15 windows per scene are at offset 0. ON by family: cry 639 -> 549, battle-controller 1,678 -> 1,582, move-animation SE 8,859 -> 8,814, stat 303 unchanged. OFF: cry 262 -> 176, battle-controller 776 -> 684, stat 146 unchanged.
+- Census seeds 0..199: eventsDigest + error identical 200/200 in both scenes (63,514 ON / 62,209 OFF commands, 0 changed; the engine commands carry the same timing fields, the digest does not read the new clock). Trees deleted.
+- Tests: pfr192 fixtures (all "Go!") unchanged and green; new pfr192 pin for the three single-line strings (ball 86 + glyphs, SE clock 133 + glyphs, both scenes). One trajectory pin moved: `randomRoundSoak.test.ts` (c) "full" seed 1, frames 57626 -> 57623 (battle 3 / depth 2 / turn 15 / roundLost unchanged; the seed sends in HAUNTER "Your foe's weak!" +21 and BUTTERFREE "Go for it," +7, the exploring presses land on other phases; the ROM row it now matches is the T2 SE 15 rel = 133 + glyphs). Every other pin in the send-in, replacement, soak, lbrd and replay files is unmoved.
+- Labs: the labCompare engine stage cannot stage a forced player faint replacement (every faint lab uses `overrides.parties.player`, which the engine's party menu rejects against the default rental records: "playerParty[0] max HP 18 does not match rental record max HP 165"; set-id labs have no stage; legacy `overrides.battlers` are rejected). `snd2-switchin-faint-*` is a voluntary switch (same rows before / after). The T2 windows are the real ROM send-ins (names of 4 .. 10 letters, all four strings but the last).
+- Caveat: no ROM window with the hpScale-3 two-line string; its +21 comes from the glyph count and the text.c line-break rule, not a measured SE.

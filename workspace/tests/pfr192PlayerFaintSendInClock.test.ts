@@ -96,7 +96,7 @@ describe("pfr192: keyed player faint-replacement send-in clock vs the ROM", () =
     expect(switchInTiming(1, 16, false, "PIDGEY")).toMatchObject({ minimumFrames: expect.any(Number) });
   });
 
-  it("real generated routes: the orchestrator's first action-menu frame from the SEND OUT confirm is 86 + Go! glyphs (= 91 + name for "Go!") + D + 17 (YANMA OFF 227 / ON 270)", () => {
+  it("real generated routes: the orchestrator's first action-menu frame from the SEND OUT confirm is 86 + Go! glyphs (= 91 + name for Go!) + D + 17 (YANMA OFF 227 / ON 270)", () => {
     for (const [scene, expected] of [["off", 227], ["on", 270]] as const) {
       let confirm: number | null = null; let menu: number | null = null; let fainted = false; let segTiming: ReturnType<typeof playerFaintReplacementSendOutTimingOfSegment> = null;
       try {
