@@ -178,12 +178,16 @@ const nativeOrchestrator = () => beginFactoryRoundBattleStartIntro(createFactory
 
 // The ROM party mon (battle_lab._party_mon) -> the engine record fields; the IV spread must be the uniform one the engine models.
 // opl3: the ROM must have built the member at this battle's level (Open Level: 100); the record then carries `level` (absent at Level 50, the old shape).
-function romRecord(mon: any) {
+// `level` is another Factory level (50 / 100) only for a stage's hand-built player member (stagePlayerLevel): the unequal-level stagings (OHKO, Beat Up).
+function romRecord(mon: any, level: number = monLevel) {
   const ivs = Object.values(mon.ivs) as number[];
   if (ivs.some((v) => v !== ivs[0])) throw new Error(`non-uniform ROM IVs ${JSON.stringify(mon.ivs)}`);
-  if (lvlMode === "open" ? mon.level !== monLevel : (mon.level !== undefined && mon.level !== monLevel)) throw new Error(`the ROM built species ${mon.species} at level ${mon.level}; this replay is ${lvlMode === "open" ? "Open Level" : "Level 50"} (level ${monLevel})`);
-  return { personality: mon.personality >>> 0, fixedIv: ivs[0]!, abilitySlot: mon.abilitySlot as 0 | 1, otId: mon.otId >>> 0, ...levelRecordField };
+  if (lvlMode === "open" || level !== monLevel ? mon.level !== level : (mon.level !== undefined && mon.level !== level)) throw new Error(`the ROM built species ${mon.species} at level ${mon.level}; the replay expects level ${level} (${lvlMode === "open" ? "Open Level" : "Level 50"})`);
+  return { personality: mon.personality >>> 0, fixedIv: ivs[0]!, abilitySlot: mon.abilitySlot as 0 | 1, otId: mon.otId >>> 0, ...factoryRecordLevelField(level === 100 ? "open" : "50") };
 }
+// opl3: the level of a stage's hand-built player member (stage `parties.player[i].level`, 50 or 100); else the battle's level. The engine builds a record at
+// either Factory level (factoryCorpusParty.ts), so the player's side can stand at the other level than the foes'; the foes are built at the battle's level.
+const stagePlayerLevel = (i: number): number => stage?.parties?.player?.[i]?.level ?? monLevel;
 
 // The two Random() words the ROM's personality loop spent on `personality`: the cursor c with top16(lcg(c)) = low and top16(lcg(lcg(c))) = high.
 function constructionCursor(personality: number): number {
@@ -284,7 +288,7 @@ function adoptedOrchestrator(setup: any, freshBattleRngValue: number) {
   if (setup.descriptor.mode === "factoryBrain") return brainOrchestrator(setup, freshBattleRngValue);
   const { descriptor, snapshot } = setup;
   const player = snapshot.parties.player as any[]; const opponent = snapshot.parties.opponent as any[];
-  const playerRecords = descriptor.player.map((p: any, i: number) => ({ setId: p.setId, ...romRecord(player[i]) }));
+  const playerRecords = descriptor.player.map((p: any, i: number) => ({ setId: p.setId, ...romRecord(player[i], stagePlayerLevel(i)) }));
   const fillers = descriptor.rentalFillers.map((f: any) => {
     const nature = natureByName.get((frontierMonsData as any).entries[f.setId].nature)!;
     const input = { setId: f.setId, personality: nature, fixedIv: playerRecords[0].fixedIv, abilitySlot: 0 as const, otId: playerRecords[0].otId, ...levelRecordField };
@@ -566,7 +570,10 @@ function applyStageParties(st: any): void {
       const row = rows[ids[i]]; if (row === undefined) throw new Error(`stage parties.${side}[${i}]: no set id ${ids[i]}`);
       const itemRow = itemRows.find((r: any) => r.itemId === (p.item ?? 0));
       if (itemRow === undefined) throw new Error(`stage parties.${side}[${i}]: item ${p.item} is not in the Frontier held-item table`);
-      if ((p.level ?? monLevel) !== monLevel) throw new Error(`stage parties.${side}[${i}]: the engine rebuilds every member at level ${monLevel}`);
+      // opl3: a player member may stand at either Factory level (stagePlayerLevel); the foes are rebuilt at the battle's level.
+      if (side === "player" ? ![50, 100].includes(p.level ?? monLevel) : (p.level ?? monLevel) !== monLevel) {
+        throw new Error(`stage parties.${side}[${i}]: the engine rebuilds ${side === "player" ? "a player member at level 50 or 100" : `every foe at level ${monLevel}`}`);
+      }
       const evs = p.evs ?? {}; const flagged = Object.keys(flagOf).filter((k) => (evs[k] ?? 0) > 0);
       if (flagged.length === 0) throw new Error(`stage parties.${side}[${i}]: evs must name at least one stat`);
       const per = Math.floor(510 / flagged.length);
