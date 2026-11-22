@@ -1170,7 +1170,10 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // hpb3 (the floor-free Focus Band / no-change drain heal hp holds): frames only, 57651 -> 57626; same battle 3 / depth 2 / turn 15 / roundLost. A trajectory pin, not a ROM frame.
       // rmw1 (the draft menu takes its first mash A 2 ticks before the mon pic table ends, as the ROM): frames only, 57651 -> 57650; same battle / depth / turn / roundLost.
       // supervisor merge of rmw1 (57651 -> 57650) with hpb3 (57651 -> 57626), measured on the merged tree: 57625; same battle 3 / depth 2 / turn 15 / roundLost.
-      frames: 57625,
+      // fsi1 (the player faint-replacement ball spawn follows the Go! print's glyph count, 86 + chars, not 91 + nickname; seed 1 sends in HAUNTER "Your foe's weak!\nGet 'em, HAUNTER!" (+21) and BUTTERFREE "Go for it, BUTTERFREE!" (+7); the exploring presses land on other phases, net -3): frames only, 57626 -> 57623;
+      // same battle 3 / depth 2 / turn 15 / roundLost. Matches the T2 send-in SE 15 rows (ROM rel 133 + glyphs, 47 windows per scene all at offset 0). A trajectory pin, not a ROM frame.
+      // supervisor merge of fsi1 with master + rmw1, measured on the merged tree: 57622; same battle 3 / depth 2 / turn 15 / roundLost.
+      frames: 57622,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 2,
@@ -1216,7 +1219,8 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // merge with the Mac's tdr1 (tri1: the battle intro at the drawn transition's own frame): frames only, 9300 -> 9336; same battle 1 /
       // turn 16 / end state.
       // rmw1 (the draft menu takes its first mash A 2 ticks before the mon pic table ends, as the ROM): frames only, 9336 -> 9294; same battle 1 / turn 16 / end state.
-      frames: 9294,
+      // supervisor merge of rmw1 with fsi1 (the Go! print ball spawn), measured on the merged tree: 9294 -> 9292; same battle 1 / turn 16 / end state.
+      frames: 9292,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 0,
