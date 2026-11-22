@@ -68,9 +68,13 @@ Kyle plans to make this repo public with its full history (no rewrite, no licens
 
 - **Where these came from:** Kyle's live battle of 11-21 on the website, compared with the ROM by the frame catcher
   (`tools/frame-catcher/`). Kyle approved all three fixes on 11-21. Each doc has the ROM evidence and the tests.
-  - **Delivered as master `fe9b51517` plus this handoff commit.** That is `32c233e62` (the Mac fixes below and your night run
-    `3507c89b2`, merged by hand) plus Open Level's first part. On the delivery tree, `tsc -b` is clean and the full suite
-    passes: 1,946 files, 16,852 tests, 0 failed (44 files skipped, as on master).
+  - **Delivered as branch `box-merge-20261122`:**
+    - master `fe9b51517`: `32c233e62` (the Mac fixes below and your night run `3507c89b2`, merged by hand) plus Open Level's
+      first part;
+    - then merge `4aa473749`: Open Level's ROM checks (opl5) and the oracle clock pin (rtc1);
+    - then this handoff.
+    - On the delivery tree, `tsc -b` is clean and the full suite passes: 1,946 files, 16,852 tests, 0 failed (44 files skipped,
+      as on master).
 - **hit1, move-hit timing** (`docs/hit1-move-hit-timing.md`, `src/engine/animEndSeWait.ts`):
   - The ROM's `Cmd_end` (battle_anim.c:476-524) waits up to 90 frames while a move's sound is still playing (`IsSEPlaying`).
     The effectiveness SE, the hit blink and the HP drain all wait for that end.
@@ -149,6 +153,9 @@ Kyle plans to make this repo public with its full history (no rewrite, no licens
     - Checked: the Level 50 census is byte-identical to `32c233e62`, and the full suite passes.
     - Evidence: `docs/opl1`..`opl4-*.md` (15 Open challenges and 121 battles against the ROM's RAM; 165 whole Open battles
       replayed; 620 Open soak runs with 0 crashes).
+  - **Also in this delivery (opl5, `docs/opl5-open-level-more-runs.md`):** these all match the ROM, over 97 more battles:
+    switching levels at the Lobby both ways, a gold Noland run, and the after-save start at Open (new snapshot
+    `oracle/bootstrap/factory-open-after-save*.json`). Tools only, no engine change.
   - **New for item 0d's nightly replay (Kyle, 11-22: "nightly replay should do some open battles"):** from this run on, also drive
     these at Open Level, scene OFF:
     - 6 census seeds drawn by the same generator as the pool seeds, with `REPLAY_LEVEL=open`. Give one of them `CHALLENGE` 7
@@ -164,8 +171,15 @@ Kyle plans to make this repo public with its full history (no rewrite, no licens
       argument).
     - Once a day, a start time inside a ~30-second window makes the game's daily update spend extra random draws, so the ROM
       plays another battle. This hits Level 50 too: the bulk run's nine seeds in a row, 4777..4812.
-    - The Mac will pin a fixed start time and re-check the Level 50 pins. Until that lands, keep driving a 0-matched battle
-      again.
+    - **Fixed in this delivery (rtc1, `docs/rtc1-oracle-clock.md`):** `oracle/emerald_core.py` now starts the clock at a fixed
+      local time (`RTC_START`, 12:00), so it is the same on every host and in every time zone.
+    - Checked on the Mac:
+      - c7 seed 26 gives the normal battle at every faked host time.
+      - Every bootstrap's frame-0 picture and `gRngValue` are unchanged.
+      - The last ledger line's 44 battles plus all 125 stages match: 169 / 169, no re-drive.
+      - The catcher's Level 50 findings are identical.
+    - **Restart the oracle servers (:8012 / :8014) at run start** so they pick it up.
+    - A battle that matches 0 states should not happen any more. If one does, record it in PROGRESS with the process start time.
   - To avoid another double fix like the two wtl1s, leave these alone unless your step needs them, and keep any change
     small and named in PROGRESS: the Lobby level menu (`factoryLobbyAttendant.ts`), rental / opponent / Noland
     generation (`factoryRentalGeneration.ts`, `factoryOpponentGeneration.ts`, `factoryBrainOpponentGeneration.ts`),
