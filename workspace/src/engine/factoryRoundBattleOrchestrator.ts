@@ -136,6 +136,7 @@ import {
 import {
   advancePartySelect,
   createPartySelectStateFromForcedSwitch,
+  type PartySelectLabParty,
   partySendOutBattleMenuReady,
   submitPartySelectBattleDecision,
   type PartySelectState,
@@ -569,6 +570,11 @@ export type FactoryRoundBattleOrchestratorState = Readonly<{
   /** The fresh kernel's Intimidate / Trace entry-script runs, kept for the entry-script presentation. */
   battleStartEntryScripts: readonly FactoryBattleStartEntryScript[];
   battle: BattleState<FactoryFullTurnDecisionRules> | null;
+  /**
+   * lsf2: the lab compare stage's three player mons (tools/compare/appTrace.ts labBackedStageOptions), for sets no rental record can express.
+   * Absent in every production state; when present the forced party menu reads its rows' identity from it instead of the records.
+   */
+  forcedPartyLabParty?: PartySelectLabParty;
   /** Request-owned player command UI, replaced at each command boundary. */
   battleCommandPresentation: BattleCommandPresentationState | null;
   /** Submitted command lifecycle, retained until its visible resolution ends. */
@@ -2633,6 +2639,7 @@ function createForcedPartySelect(
     forcedPartyForResolution(state, resolution),
     state.partyOrder,
     resolution.pendingBattle.rules.rulesContext.party.player,
+    state.forcedPartyLabParty ?? null,
   );
   const sinceDismiss = framesSinceFaintMessageDismiss(resolution);
   return sinceDismiss === 0 ? selector : Object.freeze({ ...selector, elapsed: sinceDismiss });
