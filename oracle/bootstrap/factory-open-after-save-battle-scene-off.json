@@ -1,0 +1,17 @@
+{
+  "extends": "factory-open-after-save.json",
+  "version": 5,
+  "profile": "battle-scene-off",
+  "description": "Open Level after-save snapshot: factory-open.json's route cut after 5310 frames, \"Please step this way.\" at its first glyph (the engine's start: \"after-save\" frame 0). No settle frames. gRngValue 0xfd76c447. Battle Scene OFF (the same poke as factory-battle-scene-off.json, zero frames).",
+  "pokes": [
+    {
+      "symbol": "gSaveBlock2Ptr",
+      "deref": true,
+      "offset": 21,
+      "bytes": [
+        7
+      ],
+      "note": "SaveBlock2+0x15 options high byte: 0x03 -> 0x07 sets u16 bit 10 (optionsBattleSceneOff). Applied after the inherited scripted bootstrap with zero frames and zero RNG impact."
+    }
+  ]
+}

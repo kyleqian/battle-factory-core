@@ -1,0 +1,1074 @@
+{
+  "version": 5,
+  "profile": "battle-scene-on",
+  "lvlMode": "open",
+  "start": "after-save",
+  "description": "Open Level after-save snapshot: factory-open.json's route cut after 5310 frames, \"Please step this way.\" at its first glyph (the engine's start: \"after-save\" frame 0). No settle frames. gRngValue 0xfd76c447.",
+  "save": "factory.sav",
+  "segments": [
+    {
+      "frames": 800,
+      "buttons": []
+    },
+    {
+      "frames": 5,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 55,
+      "buttons": []
+    },
+    {
+      "frames": 5,
+      "buttons": [
+        "START"
+      ]
+    },
+    {
+      "frames": 55,
+      "buttons": []
+    },
+    {
+      "frames": 5,
+      "buttons": [
+        "START"
+      ]
+    },
+    {
+      "frames": 90,
+      "buttons": []
+    },
+    {
+      "frames": 5,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 300,
+      "buttons": []
+    },
+    {
+      "frames": 60,
+      "buttons": []
+    },
+    {
+      "frames": 4,
+      "buttons": [
+        "DOWN"
+      ]
+    },
+    {
+      "frames": 16,
+      "buttons": []
+    },
+    {
+      "frames": 8,
+      "buttons": [
+        "DOWN"
+      ]
+    },
+    {
+      "frames": 16,
+      "buttons": []
+    },
+    {
+      "frames": 8,
+      "buttons": [
+        "DOWN"
+      ]
+    },
+    {
+      "frames": 16,
+      "buttons": []
+    },
+    {
+      "frames": 8,
+      "buttons": [
+        "DOWN"
+      ]
+    },
+    {
+      "frames": 16,
+      "buttons": []
+    },
+    {
+      "frames": 8,
+      "buttons": [
+        "DOWN"
+      ]
+    },
+    {
+      "frames": 16,
+      "buttons": []
+    },
+    {
+      "frames": 8,
+      "buttons": [
+        "DOWN"
+      ]
+    },
+    {
+      "frames": 16,
+      "buttons": []
+    },
+    {
+      "frames": 4,
+      "buttons": [
+        "LEFT"
+      ]
+    },
+    {
+      "frames": 16,
+      "buttons": []
+    },
+    {
+      "frames": 8,
+      "buttons": [
+        "LEFT"
+      ]
+    },
+    {
+      "frames": 16,
+      "buttons": []
+    },
+    {
+      "frames": 8,
+      "buttons": [
+        "LEFT"
+      ]
+    },
+    {
+      "frames": 16,
+      "buttons": []
+    },
+    {
+      "frames": 8,
+      "buttons": [
+        "LEFT"
+      ]
+    },
+    {
+      "frames": 16,
+      "buttons": []
+    },
+    {
+      "frames": 8,
+      "buttons": [
+        "DOWN"
+      ]
+    },
+    {
+      "frames": 200,
+      "buttons": []
+    },
+    {
+      "frames": 4,
+      "buttons": [
+        "LEFT"
+      ]
+    },
+    {
+      "frames": 16,
+      "buttons": []
+    },
+    {
+      "frames": 8,
+      "buttons": [
+        "LEFT"
+      ]
+    },
+    {
+      "frames": 16,
+      "buttons": []
+    },
+    {
+      "frames": 8,
+      "buttons": [
+        "LEFT"
+      ]
+    },
+    {
+      "frames": 16,
+      "buttons": []
+    },
+    {
+      "frames": 8,
+      "buttons": [
+        "LEFT"
+      ]
+    },
+    {
+      "frames": 16,
+      "buttons": []
+    },
+    {
+      "frames": 8,
+      "buttons": [
+        "LEFT"
+      ]
+    },
+    {
+      "frames": 16,
+      "buttons": []
+    },
+    {
+      "frames": 8,
+      "buttons": [
+        "LEFT"
+      ]
+    },
+    {
+      "frames": 16,
+      "buttons": []
+    },
+    {
+      "frames": 8,
+      "buttons": [
+        "LEFT"
+      ]
+    },
+    {
+      "frames": 16,
+      "buttons": []
+    },
+    {
+      "frames": 8,
+      "buttons": [
+        "LEFT"
+      ]
+    },
+    {
+      "frames": 16,
+      "buttons": []
+    },
+    {
+      "frames": 8,
+      "buttons": [
+        "LEFT"
+      ]
+    },
+    {
+      "frames": 16,
+      "buttons": []
+    },
+    {
+      "frames": 8,
+      "buttons": [
+        "LEFT"
+      ]
+    },
+    {
+      "frames": 16,
+      "buttons": []
+    },
+    {
+      "frames": 8,
+      "buttons": [
+        "LEFT"
+      ]
+    },
+    {
+      "frames": 16,
+      "buttons": []
+    },
+    {
+      "frames": 8,
+      "buttons": [
+        "LEFT"
+      ]
+    },
+    {
+      "frames": 16,
+      "buttons": []
+    },
+    {
+      "frames": 8,
+      "buttons": [
+        "LEFT"
+      ]
+    },
+    {
+      "frames": 16,
+      "buttons": []
+    },
+    {
+      "frames": 8,
+      "buttons": [
+        "LEFT"
+      ]
+    },
+    {
+      "frames": 16,
+      "buttons": []
+    },
+    {
+      "frames": 4,
+      "buttons": [
+        "UP"
+      ]
+    },
+    {
+      "frames": 16,
+      "buttons": []
+    },
+    {
+      "frames": 8,
+      "buttons": [
+        "UP"
+      ]
+    },
+    {
+      "frames": 16,
+      "buttons": []
+    },
+    {
+      "frames": 4,
+      "buttons": [
+        "LEFT"
+      ]
+    },
+    {
+      "frames": 16,
+      "buttons": []
+    },
+    {
+      "frames": 8,
+      "buttons": [
+        "LEFT"
+      ]
+    },
+    {
+      "frames": 16,
+      "buttons": []
+    },
+    {
+      "frames": 4,
+      "buttons": [
+        "UP"
+      ]
+    },
+    {
+      "frames": 16,
+      "buttons": []
+    },
+    {
+      "frames": 8,
+      "buttons": [
+        "UP"
+      ]
+    },
+    {
+      "frames": 16,
+      "buttons": []
+    },
+    {
+      "frames": 4,
+      "buttons": [
+        "LEFT"
+      ]
+    },
+    {
+      "frames": 16,
+      "buttons": []
+    },
+    {
+      "frames": 8,
+      "buttons": [
+        "LEFT"
+      ]
+    },
+    {
+      "frames": 16,
+      "buttons": []
+    },
+    {
+      "frames": 8,
+      "buttons": [
+        "LEFT"
+      ]
+    },
+    {
+      "frames": 16,
+      "buttons": []
+    },
+    {
+      "frames": 8,
+      "buttons": [
+        "LEFT"
+      ]
+    },
+    {
+      "frames": 16,
+      "buttons": []
+    },
+    {
+      "frames": 8,
+      "buttons": [
+        "LEFT"
+      ]
+    },
+    {
+      "frames": 16,
+      "buttons": []
+    },
+    {
+      "frames": 8,
+      "buttons": [
+        "LEFT"
+      ]
+    },
+    {
+      "frames": 16,
+      "buttons": []
+    },
+    {
+      "frames": 8,
+      "buttons": [
+        "LEFT"
+      ]
+    },
+    {
+      "frames": 16,
+      "buttons": []
+    },
+    {
+      "frames": 8,
+      "buttons": [
+        "LEFT"
+      ]
+    },
+    {
+      "frames": 16,
+      "buttons": []
+    },
+    {
+      "frames": 8,
+      "buttons": [
+        "LEFT"
+      ]
+    },
+    {
+      "frames": 16,
+      "buttons": []
+    },
+    {
+      "frames": 8,
+      "buttons": [
+        "LEFT"
+      ]
+    },
+    {
+      "frames": 16,
+      "buttons": []
+    },
+    {
+      "frames": 8,
+      "buttons": [
+        "LEFT"
+      ]
+    },
+    {
+      "frames": 16,
+      "buttons": []
+    },
+    {
+      "frames": 8,
+      "buttons": [
+        "LEFT"
+      ]
+    },
+    {
+      "frames": 16,
+      "buttons": []
+    },
+    {
+      "frames": 8,
+      "buttons": [
+        "LEFT"
+      ]
+    },
+    {
+      "frames": 16,
+      "buttons": []
+    },
+    {
+      "frames": 8,
+      "buttons": [
+        "LEFT"
+      ]
+    },
+    {
+      "frames": 16,
+      "buttons": []
+    },
+    {
+      "frames": 8,
+      "buttons": [
+        "LEFT"
+      ]
+    },
+    {
+      "frames": 16,
+      "buttons": []
+    },
+    {
+      "frames": 8,
+      "buttons": [
+        "LEFT"
+      ]
+    },
+    {
+      "frames": 16,
+      "buttons": []
+    },
+    {
+      "frames": 8,
+      "buttons": [
+        "LEFT"
+      ]
+    },
+    {
+      "frames": 16,
+      "buttons": []
+    },
+    {
+      "frames": 4,
+      "buttons": [
+        "UP"
+      ]
+    },
+    {
+      "frames": 16,
+      "buttons": []
+    },
+    {
+      "frames": 8,
+      "buttons": [
+        "UP"
+      ]
+    },
+    {
+      "frames": 16,
+      "buttons": []
+    },
+    {
+      "frames": 4,
+      "buttons": [
+        "LEFT"
+      ]
+    },
+    {
+      "frames": 16,
+      "buttons": []
+    },
+    {
+      "frames": 8,
+      "buttons": [
+        "LEFT"
+      ]
+    },
+    {
+      "frames": 16,
+      "buttons": []
+    },
+    {
+      "frames": 8,
+      "buttons": [
+        "LEFT"
+      ]
+    },
+    {
+      "frames": 16,
+      "buttons": []
+    },
+    {
+      "frames": 8,
+      "buttons": [
+        "LEFT"
+      ]
+    },
+    {
+      "frames": 16,
+      "buttons": []
+    },
+    {
+      "frames": 8,
+      "buttons": [
+        "LEFT"
+      ]
+    },
+    {
+      "frames": 16,
+      "buttons": []
+    },
+    {
+      "frames": 8,
+      "buttons": [
+        "LEFT"
+      ]
+    },
+    {
+      "frames": 16,
+      "buttons": []
+    },
+    {
+      "frames": 8,
+      "buttons": [
+        "LEFT"
+      ]
+    },
+    {
+      "frames": 16,
+      "buttons": []
+    },
+    {
+      "frames": 8,
+      "buttons": [
+        "LEFT"
+      ]
+    },
+    {
+      "frames": 16,
+      "buttons": []
+    },
+    {
+      "frames": 8,
+      "buttons": [
+        "LEFT"
+      ]
+    },
+    {
+      "frames": 16,
+      "buttons": []
+    },
+    {
+      "frames": 8,
+      "buttons": [
+        "LEFT"
+      ]
+    },
+    {
+      "frames": 16,
+      "buttons": []
+    },
+    {
+      "frames": 8,
+      "buttons": [
+        "LEFT"
+      ]
+    },
+    {
+      "frames": 16,
+      "buttons": []
+    },
+    {
+      "frames": 8,
+      "buttons": [
+        "LEFT"
+      ]
+    },
+    {
+      "frames": 16,
+      "buttons": []
+    },
+    {
+      "frames": 8,
+      "buttons": [
+        "LEFT"
+      ]
+    },
+    {
+      "frames": 16,
+      "buttons": []
+    },
+    {
+      "frames": 8,
+      "buttons": [
+        "LEFT"
+      ]
+    },
+    {
+      "frames": 16,
+      "buttons": []
+    },
+    {
+      "frames": 8,
+      "buttons": [
+        "LEFT"
+      ]
+    },
+    {
+      "frames": 16,
+      "buttons": []
+    },
+    {
+      "frames": 8,
+      "buttons": [
+        "LEFT"
+      ]
+    },
+    {
+      "frames": 16,
+      "buttons": []
+    },
+    {
+      "frames": 8,
+      "buttons": [
+        "LEFT"
+      ]
+    },
+    {
+      "frames": 16,
+      "buttons": []
+    },
+    {
+      "frames": 8,
+      "buttons": [
+        "LEFT"
+      ]
+    },
+    {
+      "frames": 16,
+      "buttons": []
+    },
+    {
+      "frames": 8,
+      "buttons": [
+        "LEFT"
+      ]
+    },
+    {
+      "frames": 16,
+      "buttons": []
+    },
+    {
+      "frames": 4,
+      "buttons": [
+        "UP"
+      ]
+    },
+    {
+      "frames": 16,
+      "buttons": []
+    },
+    {
+      "frames": 8,
+      "buttons": [
+        "UP"
+      ]
+    },
+    {
+      "frames": 16,
+      "buttons": []
+    },
+    {
+      "frames": 8,
+      "buttons": [
+        "UP"
+      ]
+    },
+    {
+      "frames": 16,
+      "buttons": []
+    },
+    {
+      "frames": 8,
+      "buttons": [
+        "UP"
+      ]
+    },
+    {
+      "frames": 16,
+      "buttons": []
+    },
+    {
+      "frames": 8,
+      "buttons": [
+        "UP"
+      ]
+    },
+    {
+      "frames": 16,
+      "buttons": []
+    },
+    {
+      "frames": 8,
+      "buttons": [
+        "UP"
+      ]
+    },
+    {
+      "frames": 16,
+      "buttons": []
+    },
+    {
+      "frames": 8,
+      "buttons": [
+        "UP"
+      ]
+    },
+    {
+      "frames": 16,
+      "buttons": []
+    },
+    {
+      "frames": 8,
+      "buttons": [
+        "UP"
+      ]
+    },
+    {
+      "frames": 16,
+      "buttons": []
+    },
+    {
+      "frames": 8,
+      "buttons": [
+        "UP"
+      ]
+    },
+    {
+      "frames": 16,
+      "buttons": []
+    },
+    {
+      "frames": 8,
+      "buttons": [
+        "UP"
+      ]
+    },
+    {
+      "frames": 16,
+      "buttons": []
+    },
+    {
+      "frames": 8,
+      "buttons": [
+        "UP"
+      ]
+    },
+    {
+      "frames": 16,
+      "buttons": []
+    },
+    {
+      "frames": 8,
+      "buttons": [
+        "UP"
+      ]
+    },
+    {
+      "frames": 250,
+      "buttons": []
+    },
+    {
+      "frames": 8,
+      "buttons": [
+        "UP"
+      ]
+    },
+    {
+      "frames": 16,
+      "buttons": []
+    },
+    {
+      "frames": 8,
+      "buttons": [
+        "UP"
+      ]
+    },
+    {
+      "frames": 16,
+      "buttons": []
+    },
+    {
+      "frames": 8,
+      "buttons": [
+        "UP"
+      ]
+    },
+    {
+      "frames": 16,
+      "buttons": []
+    },
+    {
+      "frames": 4,
+      "buttons": [
+        "LEFT"
+      ]
+    },
+    {
+      "frames": 16,
+      "buttons": []
+    },
+    {
+      "frames": 8,
+      "buttons": [
+        "LEFT"
+      ]
+    },
+    {
+      "frames": 16,
+      "buttons": []
+    },
+    {
+      "frames": 8,
+      "buttons": [
+        "LEFT"
+      ]
+    },
+    {
+      "frames": 16,
+      "buttons": []
+    },
+    {
+      "frames": 8,
+      "buttons": [
+        "LEFT"
+      ]
+    },
+    {
+      "frames": 16,
+      "buttons": []
+    },
+    {
+      "frames": 8,
+      "buttons": [
+        "LEFT"
+      ]
+    },
+    {
+      "frames": 16,
+      "buttons": []
+    },
+    {
+      "frames": 8,
+      "buttons": [
+        "LEFT"
+      ]
+    },
+    {
+      "frames": 16,
+      "buttons": []
+    },
+    {
+      "frames": 4,
+      "buttons": [
+        "UP"
+      ]
+    },
+    {
+      "frames": 16,
+      "buttons": []
+    },
+    {
+      "frames": 60,
+      "buttons": []
+    },
+    {
+      "frames": 6,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 100,
+      "buttons": []
+    },
+    {
+      "frames": 6,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 100,
+      "buttons": []
+    },
+    {
+      "frames": 6,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 100,
+      "buttons": []
+    },
+    {
+      "frames": 6,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 100,
+      "buttons": []
+    },
+    {
+      "frames": 6,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 80,
+      "buttons": []
+    },
+    {
+      "frames": 6,
+      "buttons": [
+        "DOWN"
+      ]
+    },
+    {
+      "frames": 14,
+      "buttons": []
+    },
+    {
+      "frames": 6,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 100,
+      "buttons": []
+    },
+    {
+      "frames": 6,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 120,
+      "buttons": []
+    },
+    {
+      "frames": 6,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 120,
+      "buttons": []
+    },
+    {
+      "frames": 6,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "frames": 422,
+      "buttons": []
+    }
+  ],
+  "pokes": [],
+  "settleFrames": 0
+}

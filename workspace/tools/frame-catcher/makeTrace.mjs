@@ -4,7 +4,7 @@
 //
 //   node --experimental-strip-types --no-warnings tools/frame-catcher/makeTrace.mjs OUT.json --seed N [--scene on|off]
 //        [--policy full|winning|winning-swap|vanilla|coverage-fight] [--battles B] [--lobby-tail N] [--max-frames N] [--game GAME_WORKSPACE]
-//        [--level 50|open] [--start-streak N]
+//        [--level 50|open] [--start-streak N] [--lobby-levels open,50,...] [--symbols 1|2] [--start after-save] [--gameplay-seed N]
 //
 // Stops after B battles have ended (default 2), at the end of the challenge, or at --max-frames (default 60000). With --lobby-tail N,
 // a trace whose B-th battle ends a round (7, 14, ...) stops N frames after the Lobby's free roam starts (the attendant's "record your
@@ -31,15 +31,28 @@ const level = opt("--level", "50");
 if (level !== "50" && level !== "open") throw new Error(`makeTrace: bad --level ${level} (want 50|open)`);
 // opl: --start-streak N starts with an active win streak of N (a multiple of 7) for the level (FactorySessionOptions.startStreak)
 const startStreak = Number(opt("--start-streak", "0"));
+// opl: --lobby-levels open,50,... = the level chosen at each new challenge from the Lobby (the test player's lobbyLevels); a Level 50
+// mount then needs OPEN LEVEL pickable (FactorySessionOptions.openLevel, written to the trace's challenge)
+const lobbyLevels = opt("--lobby-levels", null)?.split(",") ?? null;
+if (lobbyLevels && lobbyLevels.some((l) => l !== "50" && l !== "open")) throw new Error(`makeTrace: bad --lobby-levels ${lobbyLevels}`);
+const openLevel = lobbyLevels?.includes("open") && level !== "open" ? true : undefined;
+// opl: --symbols N (1 or 2) starts with the save's Factory record: N symbols, the speeches a save with them has heard (FactoryFrontierRecord)
+const symbols = Number(opt("--symbols", "0"));
+const frontier = symbols ? { symbols, heardBrainSpeech: { silver: symbols >= 1, gold: symbols === 2 } } : undefined;
 
 const { FactorySession } = await import(`${GAME}/src/factorySession.ts`);
 const { RandomPlayer, Rng, ActionLog } = await import(`${GAME}/tools/soak/randomRoundSoakDriver.ts`);
 await import(`${GAME}/src/engine/monPicPixelsInstall.ts`);
 
 const mix = (x) => { x = Math.imul(x ^ (x >>> 16), 0x45d9f3b) >>> 0; x = Math.imul(x ^ (x >>> 16), 0x45d9f3b) >>> 0; return (x ^ (x >>> 16)) >>> 0; };
-const challenge = { battleScene: scene, gameplaySeed: mix(seed * 2 + 1), presentationSeed: mix(seed * 2 + 2), start: "draft", ...(level === "open" ? { level } : {}), ...(startStreak ? { startStreak } : {}) };
+// opl: --start after-save (Open Level: the ROM side starts from oracle/bootstrap/factory-open-after-save*.json); --gameplay-seed N replaces the
+// seed's own gameplay seed (for after-save at Open, the snapshot's gRngValue 4252487367 is the Lobby cursor on frame 0)
+const start = opt("--start", "draft");
+const gameplaySeed = args.includes("--gameplay-seed") ? Number(opt("--gameplay-seed", "0")) >>> 0 : mix(seed * 2 + 1);
+const challenge = { battleScene: scene, gameplaySeed, presentationSeed: mix(seed * 2 + 2), start, ...(level === "open" ? { level } : {}), ...(startStreak ? { startStreak } : {}), ...(openLevel ? { openLevel } : {}), ...(frontier ? { frontier } : {}) };
 const session = new FactorySession({ ...challenge, challengeRequest: "hold" });
 const player = new RandomPlayer(new Rng(seed), new ActionLog(false), policy);
+if (lobbyLevels) player.lobbyLevels = lobbyLevels;
 const segments = [];
 const lines = [];
 let prevRes = null, prevKey = null, battlesEnded = 0, wasPostwin = false, stop = "max-frames";

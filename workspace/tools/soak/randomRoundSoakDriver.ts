@@ -1571,6 +1571,12 @@ type DraftPlan = {
 export class RandomPlayer {
   /** nch231 / lbra: in the free-roam Lobby press A at the singles attendant, starting the next challenge. */
   public newChallengeFromLobby = true;
+  /**
+   * opl: the level to choose at "Which level?" for each new challenge started from the Lobby, in order ("50" / "open"); past the end
+   * (or null, the default) the carry's own level. Lets a trace switch levels between rounds (an Open round, then LV. 50, ...).
+   */
+  public lobbyLevels: readonly ("50" | "open")[] | null = null;
+  private levelChoices = 0;
   /** Opt-in (goal play with the lobby option): chance the continuation menu picks RETIRE (and answers YES). null = the normal rolls. */
   public retireRate: number | null = null;
   /** frf250b: null (every soak policy) answers the forfeit prompt NO; a rate makes that share of action menus pick RUN and answer YES. Tests only. */
@@ -1728,15 +1734,21 @@ export class RandomPlayer {
       if (!(this.newChallengeFromLobby && (state.lobbyAttendant !== null || isFactoryLobbyFacingSinglesAttendant(state.lobbyFreeRoam)))) {
         return NO_BUTTONS;
       }
-      // opl: at "Which level?" an Open Level challenge's player moves the cursor to OPEN LEVEL first (the carry's level: the next
-      // challenge stays at the level played), then A as for every other page.
+      // opl: at "Which level?" the player moves the cursor to the level wanted (`lobbyLevels`, else the carry's: the next challenge
+      // stays at the level played), then A as for every other page.
       const attendant = state.lobbyAttendant;
-      if (
-        state.factoryCarry.lvlMode === "open" && attendant !== null && attendant.screen === "level"
-        && attendantAcceptsInput(attendant) && (attendant.pendingCursor ?? attendant.cursor) === 0
-      ) {
-        this.note(state, "lobby attendant: DOWN to OPEN LEVEL");
-        return this.press("DOWN", 22);
+      if (attendant !== null && attendant.screen === "level" && attendantAcceptsInput(attendant)) {
+        const wanted = this.lobbyLevels?.[this.levelChoices] ?? (state.factoryCarry.lvlMode === "open" ? "open" : "50");
+        const cursor = attendant.pendingCursor ?? attendant.cursor;
+        if (wanted === "open" && cursor === 0) {
+          this.note(state, "lobby attendant: DOWN to OPEN LEVEL");
+          return this.press("DOWN", 22);
+        }
+        if (wanted === "50" && cursor === 1) {
+          this.note(state, "lobby attendant: UP to LV. 50");
+          return this.press("UP", 22);
+        }
+        if (attendant.pendingCursor === undefined) this.levelChoices += 1;
       }
       return this.pressAdvance(state, "lobby attendant A", false);
     }

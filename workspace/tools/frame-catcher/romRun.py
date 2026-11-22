@@ -31,12 +31,22 @@ PROFILES = {"on": "factory.json", "off": "factory-battle-scene-off.json"}
 # opl (docs/opl1-open-level-rom.md): an Open Level engine run (facts.level "open") plays on the ROM's own Open Level route: the canonical input
 # route with OPEN LEVEL picked at the attendant (oracle/bootstrap/factory-open*.json), so lvlMode is the ROM's own and the walk is the Open one.
 OPEN_PROFILES = {"on": "factory-open.json", "off": "factory-open-battle-scene-off.json"}
+# opl: the Open Level route cut at the engine's `start: "after-save"` frame 0 ("Please step this way." at its first glyph,
+# oracle/bootstrap/make-factory-open-after-save.py): the ROM plays the door walk, the PreBattleRoom and the deal itself
+OPEN_AFTER_SAVE_PROFILES = {"on": "factory-open-after-save.json", "off": "factory-open-after-save-battle-scene-off.json"}
 
 # SaveBlock2 (include/global.h struct BattleFrontier offsets; oracle/battle_lab.py uses the same)
 SB2_TRAINER_ID, SB2_LVL_MODE, SB2_BATTLE_NUM, SB2_TRAINER_IDS = 0x0A, 0xCA9, 0xCB2, 0xCB4
 SB2_TOWER_STREAK, SB2_FACTORY_STREAK, SB2_FACTORY_RENTS, SB2_RENTAL_MONS = 0xCE0, 0xDE2, 0xDF2, 0xE70
 # opl: factoryWinStreaks[0][1] / factoryRentsCount[0][1], the singles Open Level slots (u16 arrays [battleMode][lvlMode], include/global.h)
 SB2_FACTORY_STREAK_OPEN, SB2_FACTORY_RENTS_OPEN = SB2_FACTORY_STREAK + 2, SB2_FACTORY_RENTS + 2
+# winStreakActiveFlags (include/global.h 0xCDC): STREAK_FACTORY_SINGLES_50 / _OPEN (include/constants/frontier_util.h:56-57)
+SB2_WIN_STREAK_ACTIVE_FLAGS, STREAK_FACTORY_SINGLES = 0xCDC, (1 << 8, 1 << 9)
+# opl: the save's Factory record (FactoryFrontierRecord): the symbol flags (SaveBlock1 flags, include/constants/flags.h FLAG_SYS_FACTORY_SILVER /
+# GOLD; oracle/battle_lab.py uses the same) and the heard-speech bits (frontier.battledBrainFlags at SaveBlock2 0xD00, sBattledBrainBitFlags
+# [FRONTIER_FACILITY_FACTORY] = {1 << 8, 1 << 9}, frontier_util.c:596-605)
+SB1_FLAGS, FLAG_SYS_FACTORY_SILVER, FLAG_SYS_FACTORY_GOLD = 0x1270, 0x8CC, 0x8CD
+SB2_BATTLED_BRAIN_FLAGS, FACTORY_HEARD_SPEECH = 0xD00, (1 << 8, 1 << 9)
 RENTAL_MON_SIZE, TASK_SIZE, TASK_COUNT = 12, 40, 16
 # struct FactorySelectScreen / FactorySwapScreen fields (battle_factory_screen.c:102-159; tools/audio/romRoundDriver.py has the same)
 SELECT_MENU_CURSOR, SELECT_CURSOR, SELECT_YESNO_CURSOR = 0, 3, 7
@@ -290,8 +300,10 @@ class SoundLog:
 
 
 class Rom:
-    def __init__(self, profile, level="50"):
-        boot = (OPEN_PROFILES if level == "open" else PROFILES)[profile]
+    def __init__(self, profile, level="50", start="draft"):
+        if start == "after-save" and level != "open":
+            raise SystemExit("romRun: an after-save start is staged at Open Level only (no Level 50 after-save snapshot)")
+        boot = (OPEN_AFTER_SAVE_PROFILES if start == "after-save" else OPEN_PROFILES if level == "open" else PROFILES)[profile]
         self.o = EmeraldOracle(REF / "pokeemerald.gba", REF / "pokeemerald.map", HARNESS / "oracle/bootstrap" / boot)
         nm, map_text = nm_table(), (REF / "pokeemerald.map").read_text()
         self.f = resolve(nm, map_text, FUNCS, (".text",))
@@ -383,7 +395,8 @@ def run(engine_dir, out_dir, profile, max_frames):
     out.mkdir(parents=True, exist_ok=True)
     facts = eng["facts"]
     level = facts.get("level") or "50"
-    rom = Rom(profile, level)
+    start = facts.get("start") or "draft"
+    rom = Rom(profile, level, start)
     o, s = rom.o, rom.s
     # battles by g = round * 7 + battle index (engineRun.mjs; an older engine run has round 1 only, keyed by its battle index)
     battles = {b.get("g", b["battleIndex"]): b for b in facts["battles"]}
@@ -393,67 +406,88 @@ def run(engine_dir, out_dir, profile, max_frames):
     def note(what, **kw):
         log.append({"frame": o.frame, "what": what, **kw})
 
-    # ---- staging at the draft (the lab's own writes, oracle/battle_lab.py prepare, with the engine's rental records) ----
-    o.new_session()
-    save2 = rom.save2()
-    rom_tid = struct.unpack("<I", rom.read(save2 + SB2_TRAINER_ID, 4))[0]
-    if facts.get("playerTrainerId") is not None and rom_tid != facts["playerTrainerId"]:
-        staging.append({"what": "playerTrainerId differs", "rom": rom_tid, "engine": facts["playerTrainerId"]})
-    if level == "open":
-        # opl: the Open Level route's own lvlMode (1) stays; the Open Level slots are the fresh challenge's (the route's factory_init zeroed them)
-        lvl_byte = rom.u8(save2 + SB2_LVL_MODE)
-        staging.append({"what": "open level", "lvlMode": lvl_byte & 0x3, "streak": rom.u16(save2 + SB2_FACTORY_STREAK_OPEN), "rents": rom.u16(save2 + SB2_FACTORY_RENTS_OPEN)})
-        if lvl_byte & 0x3 != 1:
-            raise SystemExit("romRun: the Open Level bootstrap's lvlMode is not Open Level")
-        slots = (SB2_BATTLE_NUM, SB2_FACTORY_STREAK_OPEN, SB2_TOWER_STREAK, SB2_FACTORY_RENTS_OPEN)
+    if start == "after-save":
+        # opl: the after-save snapshot is the engine's frame 0 (nothing is written: lvlMode, factory_init and the win-streak flag are the
+        # ROM's own Lobby script's); the first deal is the ROM's own from the engine's cursor (deal_traps, round 0) like every later one
+        o.new_session()
+        sv = rom.save2()
+        staging.append({"what": "after-save start", "level": level, "lvlMode": rom.u8(sv + SB2_LVL_MODE) & 0x3, "rng": rom.u32(s["gRngValue"]),
+                        "streaks": [rom.u16(sv + SB2_FACTORY_STREAK), rom.u16(sv + SB2_FACTORY_STREAK_OPEN)],
+                        "activeFlags": hex(rom.u32(sv + SB2_WIN_STREAK_ACTIVE_FLAGS))})
     else:
-        o.write_u8(save2 + SB2_LVL_MODE, rom.u8(save2 + SB2_LVL_MODE) & ~0x3)
-        slots = (SB2_BATTLE_NUM, SB2_FACTORY_STREAK, SB2_TOWER_STREAK, SB2_FACTORY_RENTS)
-    for off in slots:
-        o.write_u16(save2 + off, 0)
-    if facts.get("startStreak"):
-        # opl: the engine run's start streak (FactorySessionOptions.startStreak): the level's factoryWinStreaks slot as a save with that active
-        # streak holds it after factory_init (the route set the win-streak-active flag); the re-entered select screen reads it for its IVs
-        o.write_u16(save2 + slots[1], facts["startStreak"])
-        staging.append({"what": "start streak", "level": level, "streak": facts["startStreak"]})
-    for i, r in enumerate(facts["rentals"]):
-        base = save2 + SB2_RENTAL_MONS + i * RENTAL_MON_SIZE
-        o.write_u16(base, r["setId"])
-        o.write_u32(base + 4, r["personality"])
-        o.write_u8(base + 8, r["fixedIv"])
-        o.write_u8(base + 9, r["abilitySlot"])
-    b0 = battles[0]
-    for i, set_id in enumerate(b0["opponentSetIds"]):
-        o.write_u16(s["gFrontierTempParty"] + i * 2, set_id)
-    o.write_u16(s["gTrainerBattleOpponent_A"], b0["trainerId"])
-    o.write_u16(save2 + SB2_TRAINER_IDS, b0["trainerId"])
-    o.write_u32(s["gMain"] + 4, s["DoBattleFactorySelectScreen"] | 1)
-    staging.append({"what": "draft", "rentals": [r["setId"] for r in facts["rentals"]], "trainer": b0["trainerId"], "sets": b0["opponentSetIds"]})
+        # ---- staging at the draft (the lab's own writes, oracle/battle_lab.py prepare, with the engine's rental records) ----
+        o.new_session()
+        save2 = rom.save2()
+        rom_tid = struct.unpack("<I", rom.read(save2 + SB2_TRAINER_ID, 4))[0]
+        if facts.get("playerTrainerId") is not None and rom_tid != facts["playerTrainerId"]:
+            staging.append({"what": "playerTrainerId differs", "rom": rom_tid, "engine": facts["playerTrainerId"]})
+        if level == "open":
+            # opl: the Open Level route's own lvlMode (1) stays; the Open Level slots are the fresh challenge's (the route's factory_init zeroed them)
+            lvl_byte = rom.u8(save2 + SB2_LVL_MODE)
+            staging.append({"what": "open level", "lvlMode": lvl_byte & 0x3, "streak": rom.u16(save2 + SB2_FACTORY_STREAK_OPEN), "rents": rom.u16(save2 + SB2_FACTORY_RENTS_OPEN)})
+            if lvl_byte & 0x3 != 1:
+                raise SystemExit("romRun: the Open Level bootstrap's lvlMode is not Open Level")
+            slots = (SB2_BATTLE_NUM, SB2_FACTORY_STREAK_OPEN, SB2_TOWER_STREAK, SB2_FACTORY_RENTS_OPEN)
+        else:
+            o.write_u8(save2 + SB2_LVL_MODE, rom.u8(save2 + SB2_LVL_MODE) & ~0x3)
+            slots = (SB2_BATTLE_NUM, SB2_FACTORY_STREAK, SB2_TOWER_STREAK, SB2_FACTORY_RENTS)
+        for off in slots:
+            o.write_u16(save2 + off, 0)
+        fr = facts.get("frontier")
+        if fr and (fr.get("symbols") or any((fr.get("heardBrainSpeech") or {}).values())):
+            # opl: the engine run's start record on the ROM: the symbol flags and the heard-speech bits, as a save that holds them has them
+            save1 = rom.u32(s["gSaveBlock1Ptr"])
+            for flag, on in ((FLAG_SYS_FACTORY_SILVER, fr["symbols"] >= 1), (FLAG_SYS_FACTORY_GOLD, fr["symbols"] == 2)):
+                a = save1 + SB1_FLAGS + (flag >> 3)
+                o.write_u8(a, (rom.u8(a) | (1 << (flag & 7))) if on else (rom.u8(a) & ~(1 << (flag & 7))))
+            heard = fr.get("heardBrainSpeech") or {}
+            bits = rom.u16(save2 + SB2_BATTLED_BRAIN_FLAGS) & ~(FACTORY_HEARD_SPEECH[0] | FACTORY_HEARD_SPEECH[1])
+            bits |= (FACTORY_HEARD_SPEECH[0] if heard.get("silver") else 0) | (FACTORY_HEARD_SPEECH[1] if heard.get("gold") else 0)
+            o.write_u16(save2 + SB2_BATTLED_BRAIN_FLAGS, bits)
+            staging.append({"what": "frontier record", "symbols": fr["symbols"], "heardBrainSpeech": heard, "battledBrainFlags": bits})
+        if facts.get("startStreak"):
+            # opl: the engine run's start streak (FactorySessionOptions.startStreak): the level's factoryWinStreaks slot as a save with that active
+            # streak holds it after factory_init (the route set the win-streak-active flag); the re-entered select screen reads it for its IVs
+            o.write_u16(save2 + slots[1], facts["startStreak"])
+            staging.append({"what": "start streak", "level": level, "streak": facts["startStreak"]})
+        for i, r in enumerate(facts["rentals"]):
+            base = save2 + SB2_RENTAL_MONS + i * RENTAL_MON_SIZE
+            o.write_u16(base, r["setId"])
+            o.write_u32(base + 4, r["personality"])
+            o.write_u8(base + 8, r["fixedIv"])
+            o.write_u8(base + 9, r["abilitySlot"])
+        b0 = battles[0]
+        for i, set_id in enumerate(b0["opponentSetIds"]):
+            o.write_u16(s["gFrontierTempParty"] + i * 2, set_id)
+        o.write_u16(s["gTrainerBattleOpponent_A"], b0["trainerId"])
+        o.write_u16(save2 + SB2_TRAINER_IDS, b0["trainerId"])
+        o.write_u32(s["gMain"] + 4, s["DoBattleFactorySelectScreen"] | 1)
+        staging.append({"what": "draft", "rentals": [r["setId"] for r in facts["rentals"]], "trainer": b0["trainerId"], "sets": b0["opponentSetIds"]})
 
-    # The engine's draft mount starts on a settled draft screen; the ROM re-enters the select screen (its fade-in is not compared): frame 0 of the
-    # ROM recording is the first frame the new screen's cursor task runs.
-    # The recording starts on the frame the ROM shows the engine's first picture (the settled draft screen), else once the cursor task
-    # runs and the fade-in is over (300 frames).
-    eng_idx = json.loads((Path(engine_dir) / "frames.idx.json").read_text())
-    first_pic = eng_idx[struct.unpack_from("<I", (Path(engine_dir) / "perframe.u32").read_bytes(), 0)[0]][0]
-    lead, ready_at, same = 0, None, False
-    while True:
-        o.advance([])
-        lead += 1
-        sel = rom.u32(rom.d["sFactorySelectScreen"])
-        if ready_at is None and lead > 8 and sel and rom.f["Select_Task_HandleChooseMons"] in rom.live_tasks():
-            ready_at = lead
-            # The six are built by one call (Select_InitMonsData in CB2_InitSelectScreen's case 5) that can run over many frames (53 for the
-            # anchor draft, ISSUES.md), and the cursor task is created in case 10, after it returned: none is half made now.
-            patch_select_mons(rom, facts["rentals"], staging)
-        if ready_at is not None and hashlib.sha1(o.screen_rgb()).hexdigest() == first_pic:
-            same = True
-            break
-        if ready_at is not None and lead - ready_at > 300:
-            break
-        if lead > 2000:
-            raise SystemExit("romRun: the select screen did not come back after the draft staging")
-    staging.append({"what": "select screen re-entered", "leadFrames": lead, "inputFrom": ready_at, "sameFirstPicture": same})
+        # The engine's draft mount starts on a settled draft screen; the ROM re-enters the select screen (its fade-in is not compared): frame 0 of the
+        # ROM recording is the first frame the new screen's cursor task runs.
+        # The recording starts on the frame the ROM shows the engine's first picture (the settled draft screen), else once the cursor task
+        # runs and the fade-in is over (300 frames).
+        eng_idx = json.loads((Path(engine_dir) / "frames.idx.json").read_text())
+        first_pic = eng_idx[struct.unpack_from("<I", (Path(engine_dir) / "perframe.u32").read_bytes(), 0)[0]][0]
+        lead, ready_at, same = 0, None, False
+        while True:
+            o.advance([])
+            lead += 1
+            sel = rom.u32(rom.d["sFactorySelectScreen"])
+            if ready_at is None and lead > 8 and sel and rom.f["Select_Task_HandleChooseMons"] in rom.live_tasks():
+                ready_at = lead
+                # The six are built by one call (Select_InitMonsData in CB2_InitSelectScreen's case 5) that can run over many frames (53 for the
+                # anchor draft, ISSUES.md), and the cursor task is created in case 10, after it returned: none is half made now.
+                patch_select_mons(rom, facts["rentals"], staging)
+            if ready_at is not None and hashlib.sha1(o.screen_rgb()).hexdigest() == first_pic:
+                same = True
+                break
+            if ready_at is not None and lead - ready_at > 300:
+                break
+            if lead > 2000:
+                raise SystemExit("romRun: the select screen did not come back after the draft staging")
+        staging.append({"what": "select screen re-entered", "leadFrames": lead, "inputFrom": ready_at, "sameFirstPicture": same})
     o.frame = 0
     store = FrameStore(out)
     sound = SoundLog(o)
@@ -466,7 +500,7 @@ def run(engine_dir, out_dir, profile, max_frames):
     # (factory_init, at the save before the challenge) sets curChallengeBattleNum back to 0: the round counter steps there. The deal of round
     # r >= 1 (PreBattleRoom EnterRoom: factory_generaterentalmons, factory_generateopponentmons) is trapped (deal_traps), and the new select
     # screen's six get the engine's personalities as in round 1.
-    rounds_seen, select_patched, deals = RoundCounter(), {0}, {}
+    rounds_seen, select_patched, deals = RoundCounter(), (set() if start == "after-save" else {0}), {}
     brains, brains_done = {}, set()
     transitions = {int(k): v for k, v in (facts.get("transitions") or {}).items()}
     transitions["forced"] = set()
@@ -504,7 +538,7 @@ def run(engine_dir, out_dir, profile, max_frames):
             o.write_u32(s["gRngValue"], roll["value"])
         live_before = transition_task_live(rom) is not None
         deal = None
-        if rom_round >= 1 and rom_round < len(rounds):
+        if rom_round >= (0 if start == "after-save" else 1) and rom_round < len(rounds):
             deal = deals.setdefault(rom_round, {"round": rom_round, "want": rounds[rom_round], "first": battles.get(rom_round * 7), "rentals": None, "opponent": None, "armedAt": None,
                                                 "engineDeal": engine_deal_for(facts, rounds[rom_round])})
             deal["idsBefore"] = rom.rental_ids()
@@ -647,7 +681,7 @@ def run(engine_dir, out_dir, profile, max_frames):
         if f % 5000 == 0:
             print(f"rom: frame {f}, anchor {driver.ai}/{len(plan.anchors)}, {time.time() - t0:.0f} s", flush=True)
     store.close()
-    result = {"side": "rom", "profile": profile, "frames": o.frame, "engineFrames": eng["frames"], "seconds": round(time.time() - t0, 1),
+    result = {"side": "rom", "profile": profile, "start": start, "frames": o.frame, "engineFrames": eng["frames"], "seconds": round(time.time() - t0, 1),
               "sound": {"fast": sound.fast, "restepped": sound.restepped}, "staging": staging, "driverLog": log,
               "anchorsMatched": driver.ai, "anchorsTotal": len(plan.anchors), "anchorBinds": driver.binds, "stop": driver.stop_reason,
               "steerFrames": driver.steer_frames, "pressReplays": driver.replays, "actionMenuStates": action_states, "rounds": rom_round + 1, "battleNumberBlips": len(rounds_seen.blips),
@@ -713,6 +747,15 @@ def transition_traps(rom, battles, transitions, bn, staging, live_before, armed=
     return {rom.f["Random"] + 2: at_random}
 
 
+def rom_frontier_record(rom):
+    """The save's Factory record as the ROM holds it: the symbol count (FLAG_SYS_FACTORY_SILVER / GOLD) and the heard-speech bits."""
+    save1, save2 = rom.u32(rom.s["gSaveBlock1Ptr"]), rom.save2()
+    flag = lambda f: bool(rom.u8(save1 + SB1_FLAGS + (f >> 3)) & (1 << (f & 7)))
+    bits = rom.u16(save2 + SB2_BATTLED_BRAIN_FLAGS)
+    return {"symbols": int(flag(FLAG_SYS_FACTORY_SILVER)) + int(flag(FLAG_SYS_FACTORY_GOLD)),
+            "heardBrainSpeech": {"silver": bool(bits & FACTORY_HEARD_SPEECH[0]), "gold": bool(bits & FACTORY_HEARD_SPEECH[1])}}
+
+
 def engine_deal_for(facts, round_want):
     """The engine's deal record (engineRun.mjs facts.deals: level, streak, rents) whose cursor is this round's deal cursor."""
     want = round_want.get("dealRngBefore")
@@ -750,7 +793,9 @@ def deal_traps(rom, deal, frame):
             deal["rentals"] = {"frame": frame, "romRng": rom.u32(s["gRngValue"]), "engineRng": want["dealRngBefore"],
                                "romLvlMode": rom.u8(sv2 + SB2_LVL_MODE) & 0x3,
                                "romStreaks": [rom.u16(sv2 + SB2_FACTORY_STREAK), rom.u16(sv2 + SB2_FACTORY_STREAK_OPEN)],
-                               "romRents": [rom.u16(sv2 + SB2_FACTORY_RENTS), rom.u16(sv2 + SB2_FACTORY_RENTS_OPEN)]}
+                               "romRents": [rom.u16(sv2 + SB2_FACTORY_RENTS), rom.u16(sv2 + SB2_FACTORY_RENTS_OPEN)],
+                               "romActive": [bool(rom.u32(sv2 + SB2_WIN_STREAK_ACTIVE_FLAGS) & b) for b in STREAK_FACTORY_SINGLES],
+                               "romRecord": rom_frontier_record(rom)}
             o.write_u32(s["gRngValue"], want["dealRngBefore"])
         out[rom.f["GenerateInitialRentalMons"] + 2] = at_rentals
     value = (first or {}).get("rollRngBefore")
@@ -884,7 +929,20 @@ def finish_deal(rom, deal, staging, frame, sound=None):
             rom_slots = {"level": "open" if lv == 1 else "50", "streak": deal["rentals"]["romStreaks"][lv], "rents": deal["rentals"]["romRents"][lv]}
             eng_slots = {"level": eng_deal.get("level", "50"), "streak": eng_deal["factoryWinStreak"], "rents": eng_deal["rentsCount"]}
             rec.update(carry=[rom_slots, eng_slots], sameCarry=rom_slots == eng_slots,
-                       romSlots={"streaks": deal["rentals"]["romStreaks"], "rents": deal["rentals"]["romRents"]})
+                       romSlots={"streaks": deal["rentals"]["romStreaks"], "rents": deal["rentals"]["romRents"], "active": deal["rentals"].get("romActive")})
+            if deal["rentals"].get("romActive") is not None:
+                # opl: both levels' win-streak-active flags, and the other level's slots while it is active (an inactive level's stored
+                # streak is zeroed by its next factory_init, so the engine keeps 0 / 0 for it), against the engine's carry
+                act = deal["rentals"]["romActive"]
+                other = eng_deal.get("otherLevel") or {"factoryWinStreak": 0, "rentsCount": 0, "active": False}
+                rom_other = {"active": act[1 - lv], **({"streak": deal["rentals"]["romStreaks"][1 - lv], "rents": deal["rentals"]["romRents"][1 - lv]} if act[1 - lv] else {})}
+                eng_other = {"active": bool(other["active"]), **({"streak": other["factoryWinStreak"], "rents": other["rentsCount"]} if other["active"] else {})}
+                rec.update(otherLevel=[rom_other, eng_other], currentActive=act[lv], sameOtherLevel=rom_other == eng_other and act[lv])
+            if deal["rentals"].get("romRecord") is not None and eng_deal.get("symbols") is not None:
+                # opl: the symbols and heard-speech bits the save holds at this deal, against the engine's carry (shared by both levels)
+                heard = eng_deal.get("heardBrainSpeech") or {"silver": False, "gold": False}
+                eng_rec = {"symbols": eng_deal["symbols"], "heardBrainSpeech": {"silver": bool(heard.get("silver")), "gold": bool(heard.get("gold"))}}
+                rec.update(record=[deal["rentals"]["romRecord"], eng_rec], sameRecord=deal["rentals"]["romRecord"] == eng_rec)
         staging.append(rec)
         if sound is not None and deal["want"].get("dealRngBefore") is not None and deal["first"] is not None:
             deal["romOrder"] = probe_deal_opponent(rom, sound, deal)
