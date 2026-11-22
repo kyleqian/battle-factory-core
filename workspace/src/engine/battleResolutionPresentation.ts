@@ -1444,8 +1444,75 @@ function winTailHoldRows(events: readonly BattleKernelSemanticEvent[], receiptIn
  * the last action's MoveEnd. The ROM runs MoveEnd's remaining cases and HandleEndTurn / DoFieldEndTurnEffects before it: its printstring
  * executes 10 rows after MoveEnd's first row (stat fall 425 -> 435, hit 323 -> 333), 3 rows later than the next action's USEDMOVE chain (n + 6 + u).
  */
-const END_TURN_WEATHER_PRINT_SCRIPT = "BattleScript_RainContinuesOrEnds";
+const END_TURN_PRINT_SCRIPTS: ReadonlySet<string> = new Set([
+  "BattleScript_RainContinuesOrEnds",
+  "BattleScript_DamagingWeatherContinues",
+  "BattleScript_SandStormHailEnds",
+  "BattleScript_SunlightContinues",
+  "BattleScript_SunlightFaded",
+  "BattleScript_PoisonTurnDmg",
+  "BattleScript_BurnTurnDmg",
+  "BattleScript_CurseTurnDmg",
+  "BattleScript_MonTookFutureAttack",
+]);
 const END_TURN_WEATHER_PRINT_EXTRA_ROWS = 1;
+
+/**
+ * etp1 (ROM labs etp1-{sandstorm,hail}{,5}-{off,on}): the rows from the end of the previous end-turn step to the damage print of
+ * BattleScript_DamagingWeatherLoop's first / second pass. Every script instruction between two waits costs one row.
+ * After "The sandstorm rages" / "The hail continues" (`waitmessage B_WAIT_TIME_LONG`, kernel E = print + 64): playanimation_var (a no-op row in
+ * Scene OFF), setbyte, copyarraywithindex, weatherdamage, jumpifword, printfromtable, then the first glyph one row after: k + 1 with k = instructions
+ * from E to the printfromtable (Scene OFF: command ends on E, 7 rows late). Scene ON: the General_Sandstorm / General_Hail command already ends
+ * WEATHER_CONTINUES_LAUNCH_TAIL_ROWS after its last row, so only the instructions past that tail are added (+2). After the pass's `healthbarupdate`
+ * / `datahpupdate` command the second pass's print comes 3 rows later than the command's end (both scenes).
+ */
+const DAMAGING_WEATHER_LOOP_SCRIPT = "BattleScript_DamagingWeatherLoop";
+const DAMAGING_WEATHER_LOOP_AFTER_HP_ROWS = 3;
+// Wish's heal print after its hp command (ROM lab etp1-wish: +5 rows, both scenes). Perish Song's counts are left as before: the etp1-perish lab agrees with a label +1 / second-battler +5 rule, but seed 2741's ROM pictures (ais2) do not.
+const WISH_SCRIPT = "BattleScript_WishComesTrue";
+const END_TURN_NEXT_SCRIPT_ROWS = 5;
+/**
+ * etp1 (labs etp1-{roar,whirlwind}-{on,off}; ROM press P = the A that dismisses "was dragged out!"; s222-on-wc, s94-on-wc, docs/msg2): the turn's
+ * first end-turn print (the MoveEnd receipts only in between) starts its first glyph on P + 15 (the printer's release, BattleScript_TrainerBattleForceOut's
+ * tail, MoveEnd and DoBattlerEndTurnEffects' rows); the receipts' frames put it on P + 2: 13 rows more, both scenes.
+ */
+const DRAGGED_OUT_END_TURN_PRINT_ROWS = 13;
+function endTurnPrintFollowsDraggedOut(events: readonly BattleKernelSemanticEvent[], index: number): boolean {
+  for (let back = index - 1; back >= 0; back -= 1) {
+    const previous = events[back]!;
+    if (previous.payload.kind === "set-battler-sprite-visibility" && previous.provenance?.opcodeName === "B_SCR_OP_MOVEEND") continue;
+    return previous.payload.kind === "message" && previous.payload.messageId === "STRINGID_PKMNWASDRAGGEDOUT";
+  }
+  return false;
+}
+
+function endTurnChainLeadRows(events: readonly BattleKernelSemanticEvent[], index: number, sceneOn: boolean): number {
+  const event = events[index]!;
+  const executed = event.provenance?.instructionExecution;
+  if (event.payload.kind !== "message" || executed === undefined) return 0;
+  const label = event.provenance?.sourceLabel;
+  if (label === WISH_SCRIPT) {
+    const previous = events[index - 1];
+    return previous?.payload.kind === "hp-change" && previous.provenance?.sourceLabel === label && event.payload.messageId === "STRINGID_PKMNREGAINEDHEALTH"
+      ? END_TURN_NEXT_SCRIPT_ROWS : 0;
+  }
+  if (END_TURN_PRINT_SCRIPTS.has(label ?? "") && label !== DAMAGING_WEATHER_LOOP_SCRIPT && endTurnPrintFollowsDraggedOut(events, index)) return DRAGGED_OUT_END_TURN_PRINT_ROWS;
+  if (label !== DAMAGING_WEATHER_LOOP_SCRIPT) return 0;
+  for (let back = index - 1; back >= 0; back -= 1) {
+    const previous = events[back]!;
+    const previousExecution = previous.provenance?.instructionExecution;
+    if (previousExecution === undefined) return 0;
+    if (previous.payload.kind === "hp-change") return DAMAGING_WEATHER_LOOP_AFTER_HP_ROWS;
+    if (previous.payload.kind === "animation" && weatherContinuesAnimationOf(previous.payload) !== null) {
+      if (sceneOn) return Math.max(0, executed - previousExecution - WEATHER_CONTINUES_LAUNCH_TAIL_ROWS);
+      continue;
+    }
+    if (previous.payload.kind === "message") {
+      return executed - (previousExecution + WAITMESSAGE_LONG_HOLD_FRAMES) + 1;
+    }
+  }
+  return 0;
+}
 
 const ACTION_TRANSITION_WAIT_ROWS: Readonly<Record<string, number>> = Object.freeze({ B_WAIT_TIME_LONG: WAITMESSAGE_LONG_HOLD_FRAMES });
 
@@ -1491,7 +1558,7 @@ function actionTransitionPauseFrames(
       statusFramesAfter += frames;
       continue;
     }
-    const endTurnWeather = event.payload.kind === "message" && event.provenance?.sourceLabel === END_TURN_WEATHER_PRINT_SCRIPT;
+    const endTurnWeather = event.payload.kind === "message" && END_TURN_PRINT_SCRIPTS.has(event.provenance?.sourceLabel ?? "");
     if (
       next >= e1 || event.payload.kind !== "message"
       || !(endTurnWeather || ACTION_TRANSITION_NEXT_PRINTS.has(event.payload.messageId) || (sceneOn && event.payload.messageId === SCENE_ON_ACTION_TRANSITION_NEXT_PRINT))
@@ -5812,6 +5879,8 @@ export function projectBattleResolutionCommands(
         ...(selfConfusionOff ? { leadFrames: SELF_CONFUSION_OFF_PRE_PRINT_ROWS } : {}),
         ...(twoTurnSecondPrintLead(event, beforeRules, actionSnapshot) ?? {}),
         ...(carryBeforeGlyph > 0 ? { leadFrames: (twoTurnSecondPrintLead(event, beforeRules, actionSnapshot)?.leadFrames ?? 0) + carryBeforeGlyph } : {}),
+        ...(endTurnChainLeadRows(events, index, (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) === 0) > 0
+          ? { leadFrames: endTurnChainLeadRows(events, index, (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) === 0) } : {}),
         ...(payload.messageId === "STRINGID_TARGETFAINTED"
           || payload.messageId === "STRINGID_ATTACKERFAINTED"
           ? { faintBattler: lastFaintBattler! }

@@ -64,7 +64,10 @@ describe("hpf2: hp -> print / hp -> hp, no 28-frame floor", () => {
     const list = hps(commands);
     const hit = list.find((c) => c.battler === 0)!;
     const rest = commands.slice(commands.indexOf(hit) + 1);
-    expect(rest.slice(0, 3).map((c) => c.type)).toEqual(["sprite-visibility", "sprite-visibility", "message"]);
-    expect(hit.timing).toEqual({ minimumFrames: 0, tailFrames: 15 });
+    // etp1 (ROM labs etp1-{sandstorm,hail}-{off,on}: first glyph of the 'continues' print 334 / 329 OFF, 661 / 646 ON, both exact): the wtl1 pause (15 frames)
+    // between the hit's tail (1) and the MoveEnd receipts now leads into the first end-turn print: the bar -> print rise is bar rows + 18.
+    expect(rest.slice(0, 4).map((c) => c.type)).toEqual(["move-animation", "sprite-visibility", "sprite-visibility", "message"]);
+    expect(rest[0].timing).toEqual({ minimumFrames: 15 });
+    expect(hit.timing).toEqual({ minimumFrames: 0, tailFrames: 1 });
   });
 });

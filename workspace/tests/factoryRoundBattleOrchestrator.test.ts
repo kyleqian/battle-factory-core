@@ -1122,6 +1122,9 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
       { receipt: "set-battler-sprite-visibility", label: "BattleScript_MoveEnd", beforeLoop: true, live: false, frames: 21 },
       // MOVE_HARDEN: Pausex20 -> STATS_CHANGE (lead 1), less its 2-frame `stat` command presented before the attack receipt
       { receipt: "SCENE_OFF_ATTACK_PAUSE", label: "BattleScript_StatUpAttackAnim", beforeLoop: true, live: false, frames: 39 },
+      // etp1 (labs etp1-{sandstorm,hail}-off, ROM first glyph of the 'continues' print 334 / 329): the wtl1 pause before MOVE_HARDEN's MoveEnd
+      // receipts now also leads into the damaging-weather 'continues' print (wtl1's rain rule, +1 row on the first end-turn print).
+      { receipt: "set-battler-sprite-visibility", label: "BattleScript_MoveEnd", beforeLoop: true, live: false, frames: 10 },
     ]);
   });
   it.each([
