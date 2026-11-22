@@ -1100,6 +1100,25 @@ const SELF_CONFUSION_HIT_MESSAGE_ID = "STRINGID_ITHURTCONFUSION";
 const SELF_CONFUSION_OFF_PRE_PRINT_ROWS = 5;
 const SELF_CONFUSION_OFF_HIT_MESSAGE_TIMING = Object.freeze({ minimumFrames: 0, holdFrames: WAITMESSAGE_LONG_HOLD_FRAMES + 2 } as const);
 /**
+ * hse2 (docs/aud251-s11-scoreboard-refresh.md "hse2"; ROM lab hpf4m-confuse-off print 1323 -> used print 1417 = 94, T2 s7295 d5 97 / s499 d11 94):
+ * a confusion that does not hurt skips `status2animation` in Scene OFF, so after the wait the script runs `jumpifbyte`, `goto`, `return` and the
+ * used move's `HitFromAtkCanceler` / `AccCheck` / `AtkString` rows before the used print: 64 + the 3 launch rows + 4.
+ */
+const CONFUSION_HEAD_SCRIPT = "BattleScript_MoveUsedIsConfused";
+const CONFUSION_OFF_USED_PRINT_EXTRA_ROWS = 4;
+const CONFUSION_OFF_USED_PRINT_TIMING = Object.freeze({
+  minimumFrames: 0,
+  holdFrames: WAITMESSAGE_LONG_HOLD_FRAMES + 3 + CONFUSION_OFF_USED_PRINT_EXTRA_ROWS,
+} as const);
+function confusionOffLeadsToUsedPrint(events: readonly BattleKernelSemanticEvent[], index: number): boolean {
+  if (events[index]!.provenance?.sourceLabel !== CONFUSION_HEAD_SCRIPT) return false;
+  for (let next = index + 1; next < events.length; next += 1) {
+    const payload = events[next]!.payload;
+    if (payload.kind === "message") return payload.messageId === "STRINGID_USEDMOVE";
+  }
+  return false;
+}
+/**
  * Route-scoped `STRINGID_USEDMOVE` hold for the ButItFailed/no-anim path
  * (`pause B_WAIT_TIME_SHORT` = 32 + ~6 dispatch steps, measured 38 =
  * 1076-1113 in `docs/battle-message-pacing-ground-truth.md` §1/§3.4).
@@ -5944,6 +5963,9 @@ export function projectBattleResolutionCommands(
               : (() => {
                 const base = selfConfusionOff
                   ? SELF_CONFUSION_OFF_HIT_MESSAGE_TIMING
+                  : payload.messageId === "STRINGID_PKMNISCONFUSED" && (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0
+                    && confusionOffLeadsToUsedPrint(events, index)
+                  ? CONFUSION_OFF_USED_PRINT_TIMING
                   : messageTimingFromSourceProvenance(event, sceneOnMoveAnimationSeen, (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0)
                   ?? (WAITMESSAGE_LONG_MESSAGE_IDS.has(payload.messageId) || payload.messageId === SUBSTITUTE_FADED_MESSAGE_ID
                   ? WAITMESSAGE_LONG_TIMING
