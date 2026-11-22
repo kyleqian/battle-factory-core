@@ -105,10 +105,11 @@ Note on the baseline: master `62ebcc5b3` already contains trn226 (`c29634f3c` / 
 ### Why (source and engine)
 
 - ROM: gRngValue after the room's last input (silver: frame 1016, the box is gone on 1018) takes one step per VBlank (171..219 frames to CB2_InitBattle) plus
-  the non-VBlank draws of DoNolandBattle: FillFactoryBrainParty (the three sets' personality loops, ~100..800 steps) and GetSpecialBattleTransition's one
-  (battle_tower.c:2096-2099). The ROM's draws from frame 1017 to CB2_InitBattle are 269..1,040 LCG steps, of which only 171..219 are VBlanks.
+  the non-VBlank draws of the Head's setup: FillFactoryBrainParty (battle_factory.c:759, called from battle_tower.c:1857) and GetSpecialBattleTransition
+  (battle_tower.c:2099). Measured: from the frame before the cursors first differ to CB2_InitBattle the ROM takes 269..679 LCG steps in the 15 recordings that
+  diverge at 1018 (up to 1,040 in the earlier-diverging ones, which start counting sooner), against 171..219 frames of the whole input-to-init span.
 - Engine: the room's per-frame cursor (`state.rngValue`, one VBlank step per frame) matches the ROM's up to the frame the party build starts (first divergence
-  frame 1018 in 17 of the 20 recordings, the box-gone frame; the other three diverge earlier, 288 / 288 / 657, identical before and after). From there the
+  frame 1018 in 15 of the 20 recordings, the box-gone frame; the other five diverge earlier, 288 x3 and 657 x2 (silver s31 off/on, gold s13, gold s25 / s18), identical before and after, not investigated). From there the
   engine does not follow the ROM: Noland's team and the transition are drawn from the round controller's gameplay stream (`scheduledBrainOpponent`,
   `factoryRoundBattleOrchestrator.ts:860-882`: "the two independent RNG systems", the design forbids wiring them), and the battle is created from
   `state.round.rules.rngValue` (`startCurrentBattle`, `rngSeed`) plus `preCommandRngCalls`, never from the room's cursor. So the frame count cannot reach the
@@ -122,8 +123,7 @@ Tool: `tools/integration/nrv1RngAtBattleStart.ts ROM.json...` (JSON lines). ROM 
 --sound` (now also records `enemyParty`, Noland's three species at CB2_InitBattle), the silver (challenge 2) lab walk-up with the silver-first fixture's presses,
 and challenge 5 (gold) with the gold-first presses. The engine is staged at the same GO ON menu and ticked with the ROM's presses twice: `forced` (the ROM's
 transition id and pause, `nolandSceneEngine.ts`' harness) and `free` (`driveEngine(..., { follow: false })`: the engine's own pause and transition draw). Evidence:
-`.integration/evidence/nrv1/` (`rom-*.json`, `before/`, `after/`, `base-tree/` = `git archive 5819467ba`). The first fresh ROM recording was checked against
-trn226's (`rom-off-29`): identical frame by frame (sha and gRngValue). Scene OFF and ON recordings (ids 29, 30, 32, 36, 41) have identical init frame and
+`.integration/evidence/nrv1/` (`rom-*.json`, `before/`, `after/`, `base-tree/` = `git archive 5819467ba`). Scene OFF and ON recordings (ids 29, 30, 32, 36, 41) have identical init frame and
 gRngValue at init, and identical engine results.
 
 Per transition id (silver, seed in brackets; "frames" = last room input (1016) to CB2_InitBattle; engine = frames from the same input to its hand-over, forced
@@ -157,12 +157,12 @@ What differs between before and after, over all 20 recordings x 2 modes: the han
 
 - gRngValue at the battle start never equals the ROM's, before or after trn226 (0 of 40 runs): ROM at CB2_InitBattle is the table's third column; the engine's
   battle seed / creation value are the table's last column and the creation values (e.g. id 29: 2835076606 vs ROM 3356037855). Equality would need the
-  party-build draws (269..1,040 non-frame steps) modelled in the room's cursor, which the engine does not do (it draws the team from its own stream).
+  party-build draws (the extra LCG steps beyond one per frame) modelled in the room's cursor, which the engine does not do (it draws the team from its own stream).
 - The first RNG-dependent outcome that differs is Noland's team, fixed before the battle starts: the ROM's three species vs the engine's differ in 40 of 40 runs
   (all leads differ; e.g. seed 25: ROM 348 / 159 / 127, engine 8 / 148 / 127), so every later outcome (send-outs, the AI's choices, damage rolls) is the engine's
   own. The transition id the engine draws is likewise its own (free runs: the ROM's id was reproduced in 1 of 20).
 - trn226 therefore did not turn a match into a mismatch: before it the Head's battle RNG was already independent of the room frames; the visible effect is only
-  that ids 29 / 30 now take as long as the ROM's (+3 for every id, a constant: BeginBattleIntro's black callbacks, `GENERATED_BATTLE_INTRO_ROOM_HANDOFF_DELAY`).
-- Residual (not a regression, not new): the engine's pause before the transition is fixed at 32 frames (the ROM's party build takes 26..37), so in `free` runs
+  that ids 29 / 30 now take as long as the ROM's (+3 for every id, a constant measured over all 20 forced runs; cf. `GENERATED_BATTLE_INTRO_ROOM_HANDOFF_DELAY`).
+- Residual (not a regression, not new): the engine's pause before the transition is fixed at 32 frames (a fixed constant, `BRAIN_BATTLE_TRANSITION_START_ELAPSED`; the ROM's equivalent is not measured here), so in `free` runs
   the engine's frames from the last input to the hand-over differ from the ROM's by the id it drew plus that pause; making the Head battle's RNG equal to
   the ROM's would be a separate feature (model FillFactoryBrainParty's draws and the VBlank steps in the room cursor and seed the battle from it).
