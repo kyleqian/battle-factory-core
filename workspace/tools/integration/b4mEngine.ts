@@ -42,7 +42,7 @@ for (const advance of traceAdvances(lab.trace.segments)) {
   if (key !== last) {
     last = key;
     age0 = null;
-    if (key !== "") cmds.push([state.frame, res.segmentIndex, res.commandIndex, cmd.type, cmd.battler ?? null, cmd.animation?.moveId ?? cmd.animation ?? null, cmd.timing ?? null, null]);
+    if (key !== "") cmds.push([state.frame, res.segmentIndex, res.commandIndex, cmd.type, cmd.battler ?? null, cmd.animation?.moveId ?? cmd.animation ?? null, cmd.type === "message" && cmd.leadFrames ? { ...cmd.timing, msgLead: cmd.leadFrames } : cmd.timing ?? null, null]);
     if (key !== "" && cmd.type === "move-animation" && cmd.animation !== undefined && liveMoveAnimationDurationCaseMissing(cmd.animation, currentCommandField(res))) noBody.push([state.frame, cmd.animation.moveId]);
   }
   if (key !== "" && cmd.type === "move-animation" && age0 === null) {

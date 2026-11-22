@@ -404,7 +404,7 @@ function play(initial: any, record: boolean, patchRng: number | null = null, pla
       if (key !== cmdTrace.last) {
         cmdTrace.last = key;
         if (sendIn !== undefined) cmdTrace.rows.push([frame, res.segmentIndex, res.commandIndex, "party-sendout", 0, null, null, null, null, null, null, null, null, sendIn.incoming?.name ?? null, seg.commands.find((c: any) => c.type === "message")?.lines ?? null]);
-        else if (cmd !== undefined && key !== "") cmdTrace.rows.push([frame, res.segmentIndex, res.commandIndex, cmd.type, cmd.battler ?? null, cmd.from ?? null, cmd.to ?? null, cmd.timing?.leadFrames ?? null, cmd.timing?.bodyLeadFrames ?? null, cmd.animation ?? null, cmd.timing?.minimumFrames ?? null, cmd.before ?? null, cmd.after ?? null, cmd.incoming?.name ?? null]);
+        else if (cmd !== undefined && key !== "") cmdTrace.rows.push([frame, res.segmentIndex, res.commandIndex, cmd.type, cmd.battler ?? null, cmd.from ?? null, cmd.to ?? null, cmd.timing?.leadFrames ?? cmd.leadFrames ?? null, cmd.timing?.bodyLeadFrames ?? null, cmd.animation ?? null, cmd.timing?.minimumFrames ?? null, cmd.before ?? null, cmd.after ?? null, cmd.incoming?.name ?? null]);
       }
     }
     if (frame0 !== null && state.battle) {

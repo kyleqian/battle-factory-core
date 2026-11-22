@@ -1519,7 +1519,7 @@ const END_TURN_WEATHER_PRINT_EXTRA_ROWS = 1;
  */
 const DAMAGING_WEATHER_LOOP_SCRIPT = "BattleScript_DamagingWeatherLoop";
 const DAMAGING_WEATHER_LOOP_AFTER_HP_ROWS = 3;
-// Wish's heal print after its hp command (ROM lab etp1-wish: +5 rows, both scenes). Perish Song's counts are left as before: the etp1-perish lab agrees with a label +1 / second-battler +5 rule, but seed 2741's ROM pictures (ais2) do not.
+// Wish's heal print after its hp command (ROM lab etp1-wish: +5 rows, both scenes). Perish Song's count prints: `perishCountChainLeadRows` (pso1).
 const WISH_SCRIPT = "BattleScript_WishComesTrue";
 const END_TURN_NEXT_SCRIPT_ROWS = 5;
 /**
@@ -1537,11 +1537,42 @@ function endTurnPrintFollowsDraggedOut(events: readonly BattleKernelSemanticEven
   return false;
 }
 
+/**
+ * pso1 (ROM labs etk1-perish-*, Scene OFF rows, hcr3mProbe): the rows from the previous script's release to the Perish Song count print's first
+ * glyph that the engine does not present. After a move's last print (the Splash "But nothing happened!" lab): release 368 -> MoveEnd -> PerishSongCountGoesDown+0x3 ex1 378 -> glyph 379
+ * (10 rows more than the engine's one MoveEnd receipt row; seed 2741's ROM rows after a paralysis print 5 more, after "But it failed!" 12 more). After the Perish Song cast's own print (`waitmessage 64`; PerishSongLoop x4 batters, MoveEnd, the end-turn step): release
+ * +0x10 3857 -> PerishSongTakesLife+0x3 3874 -> glyph 3875 (17 rows more). The second battler's count print follows the first's `waitmessage` by end2, the turn-effect
+ * battler increment and the next iteration: 475 -> 479 (5 rows more).
+ */
+const PERISH_AFTER_MOVE_PRINT_ROWS = 10;
+const PERISH_AFTER_CAST_PRINT_ROWS = 17;
+const PERISH_SECOND_BATTLER_ROWS = 5;
+const PERISH_AFTER_PARALYSIS_PRINT_ROWS = 5;
+const PERISH_AFTER_BUT_IT_FAILED_ROWS = 12;
+function perishCountChainLeadRows(events: readonly BattleKernelSemanticEvent[], index: number): number {
+  const event = events[index]!;
+  const label = event.provenance?.sourceLabel;
+  if (event.payload.kind !== "message" || (label !== "BattleScript_PerishSongCountGoesDown" && label !== "BattleScript_PerishSongTakesLife")) return 0;
+  for (let back = index - 1; back >= 0; back -= 1) {
+    const previous = events[back]!;
+    if (previous.payload.kind === "set-battler-sprite-visibility" && previous.provenance?.opcodeName === "B_SCR_OP_MOVEEND") continue;
+    if (previous.payload.kind !== "message") return 0;
+    const previousLabel = previous.provenance?.sourceLabel;
+    if (previousLabel === "BattleScript_PerishSongCountGoesDown" || previousLabel === "BattleScript_PerishSongTakesLife") return PERISH_SECOND_BATTLER_ROWS;
+    if (previous.payload.messageId === "STRINGID_FAINTINTHREE") return PERISH_AFTER_CAST_PRINT_ROWS;
+    if (previous.payload.messageId === "STRINGID_PKMNISPARALYZED") return PERISH_AFTER_PARALYSIS_PRINT_ROWS;
+    return previous.payload.messageId === "STRINGID_BUTITFAILED" ? PERISH_AFTER_BUT_IT_FAILED_ROWS : PERISH_AFTER_MOVE_PRINT_ROWS;
+  }
+  return 0;
+}
+
 function endTurnChainLeadRows(events: readonly BattleKernelSemanticEvent[], index: number, sceneOn: boolean): number {
   const event = events[index]!;
   const executed = event.provenance?.instructionExecution;
   if (event.payload.kind !== "message" || executed === undefined) return 0;
   const label = event.provenance?.sourceLabel;
+  const perishLead = perishCountChainLeadRows(events, index);
+  if (perishLead > 0) return perishLead;
   if (label === WISH_SCRIPT) {
     const previous = events[index - 1];
     return previous?.payload.kind === "hp-change" && previous.provenance?.sourceLabel === label && event.payload.messageId === "STRINGID_PKMNREGAINEDHEALTH"
