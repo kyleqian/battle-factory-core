@@ -729,7 +729,10 @@ describe("random round soak driver (green milestone pin)", () => {
     // hse2 (Scene OFF wake-up message / icon rule, the confusion print's 71-frame hold before the used print, the OFF Struggle dismiss hold 9 -> 8; the exploring presses land on new
     // phases): seed 16 no longer commits Baton Pass. Re-scanned full-policy seeds 0..39 (tools/soak/batonPassSearch.ts --seeds 0:40 --parallel 2, same options): candidates 20, 25, 27.
     // Seed 20 is the lowest (Baton Pass commits 2, first commit 37966, halt 38178 on MAWILE in battleIndex 0, three Lobby new challenges). Pin 16 -> 20.
-    const result = runSeed(20, {
+    // chg4 (the first charging turn of Dig / Fly / Solar Beam ... after another action in the same turn is an action-transition print: Scene OFF +18 rows, Scene ON +8 over the old placement,
+    // ROM labs chg4-dig-lightscreen-{on,off}; the exploring presses land on new phases): seed 20 no longer commits Baton Pass. Re-scanned full-policy seeds 0..39 (tools/soak/batonPassSearch.ts
+    // --seeds 0:40, same options): candidates 24, 25, 27. Seed 24 is the lowest. Pin 20 -> 24.
+    const result = runSeed(24, {
       maxFrames: 80_000,
       renderEvery: 0,
       coverage: observer as never,
@@ -1755,7 +1758,9 @@ describe("ISSUES #104 (driver): continuous-play outcome semantics retuned -- OK 
     // merge of the box's 2026-11-20 run with the Mac's 11-21 fixes: the merge kept the box's 19 (after fsc1); it chains two round wins on the merged tree (this test passes), so it stays.
     // wtl1 (the win tail holds 24 more rows before "Player defeated", ROM P + 26): seed 19 now carries 7; re-scanned seeds 0..49 under the same options (--seeds 0:50 --parallel 4):
     // seeds 0, 10, 13, 17, 40, 47 and 49 chain two round wins (carry 14), so the lowest (0) is pinned.
-    const result = runSeed(0, {
+    // chg4 (the first charging turn after another action is an action-transition print, ROM labs chg4-dig-lightscreen-{on,off}; the soak's press phases move): seed 0 now carries 7;
+    // re-scanned seeds 0..49 under the same options (--seeds 0:50): seeds 19, 37 and 46 chain two round wins (carry 14), so the lowest (19) is pinned.
+    const result = runSeed(19, {
       policy: "winning",
       maxRounds: 3,
       renderEvery: 0,

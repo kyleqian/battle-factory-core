@@ -1434,6 +1434,16 @@ const SCENE_OFF_SEMI_INVULNERABLE_HIDE_LEAD = 2;
  * BattleScript_MoveUsedIsConfused's first instruction (attackcanceler jumps there: u = 2), ROM-measured as the same E + 1 + d + n + 6 + u.
  */
 const ACTION_TRANSITION_NEXT_PRINTS: ReadonlySet<string> = new Set(["STRINGID_USEDMOVE", "STRINGID_PKMNISCONFUSED", "STRINGID_PKMNFASTASLEEP", "STRINGID_PKMNINLOVE"]);
+/**
+ * chg4 (ROM labs chg4-dig-lightscreen-{on,off}; docs/aud251-s11-scoreboard-refresh.md "chg4"): the first charging turn of Dig / Fly / Solar Beam ... that follows another
+ * action in the same turn is a transition print too. Its empty box (BattleScriptFirstChargingTurn's STRINGID_EMPTYSTRING3, u = its execution) is placed as the used print:
+ * Scene OFF opens it on the ROM's `printstring` row + 1 (MoveEnd 197 -> EffectSemi 204 -> box 215: +18 over the old 0). Scene ON's box opens 8 rows before the
+ * printstring row (the box is the 8-row release wait, turn start: box 30 for printstring 37 / 38) and the ON chain already carries 2 of the rows: -10.
+ */
+const CHARGE_TURN_OPENER_SCENE_ON_ROWS = -10;
+function isChargeTurnOpener(event: BattleKernelSemanticEvent): boolean {
+  return event.payload.kind === "message" && event.payload.messageId === "STRINGID_EMPTYSTRING3" && event.provenance?.sourceLabel === CHARGE_TURN_SCRIPT;
+}
 /** gsp2: the wake-up print is a transition print in Scene ON only (Scene OFF output is unchanged). */
 const SCENE_ON_ACTION_TRANSITION_NEXT_PRINT = "STRINGID_PKMNWOKEUP";
 /**
@@ -1589,9 +1599,11 @@ function actionTransitionPauseFrames(
     const endTurnWeather = event.payload.kind === "message" && END_TURN_PRINT_SCRIPTS.has(event.provenance?.sourceLabel ?? "");
     if (
       next >= e1 || event.payload.kind !== "message"
-      || !(endTurnWeather || ACTION_TRANSITION_NEXT_PRINTS.has(event.payload.messageId) || (sceneOn && event.payload.messageId === SCENE_ON_ACTION_TRANSITION_NEXT_PRINT))
+      || !(endTurnWeather || ACTION_TRANSITION_NEXT_PRINTS.has(event.payload.messageId) || (sceneOn && event.payload.messageId === SCENE_ON_ACTION_TRANSITION_NEXT_PRINT)
+        || isChargeTurnOpener(event))
     ) return null;
     if (endTurnWeather) endTurnRows = END_TURN_WEATHER_PRINT_EXTRA_ROWS;
+    if (sceneOn && isChargeTurnOpener(event)) endTurnRows = CHARGE_TURN_OPENER_SCENE_ON_ROWS;
     used = next;
     usedIsPreMove = !endTurnWeather && event.payload.messageId !== "STRINGID_USEDMOVE";
     if (event.payload.messageId === IN_LOVE_TRANSITION_PRINT) inLoveRows = IN_LOVE_TRANSITION_ROWS;
