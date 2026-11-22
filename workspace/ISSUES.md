@@ -245,13 +245,12 @@ ret218 hands RETIRE-YES to the loss terminal (no more hang). `retire-yes-lobby-f
 unknown); (b) the wandering lobby NPC's schedule depends on `gRngValue` history keyed to the loss run's ticks (frames 8033-8193).
 The terminal-arrival branch of `renderPostwinRetireWarp` (core.ts) is probably dead now. Timing class: long tail.
 
-## #188 — Summary front animation: 137 species approximate-static motion; QUILAVA replacement one render late (finish plan, sfa214 2026-10-27)
+## #188 — Summary front animation: start-frame lag and UNOWN letter (finish plan, sfa214 2026-10-27; (a) FIXED by the Mac's sfa2 2026-11-22)
 
-sfa214 made the draft Summary screen crash-free for every Factory species. Open, non-crash residuals:
-(a) 137 / 376 species (42 `pokemon_animation.c` motion types) play the frame program only, no source motion
-(`summaryFrontAnimation.ts` `motionClaim`); (b) `summary-info-quilava-v-stretch` (mon-change replacement sprite)
-48 / 91 vs the Scene OFF oracle: the whole replacement animation shows one render later in the ROM; the initial-sprite
-trace is 108 / 121 (2-8 px affine-edge residual on 13 frames). Anchor Summary traces stay exact. Timing class: long tail.
+sfa2 (`docs/sfa2-summary-front-animations.md`) ported all 62 motion types; the sprite state matches the ROM probe for all 376
+Factory species, 377 / 378 stretches pixel-exact. Open, non-crash residuals: (a) the ROM's mon change sometimes starts the animation
+one or two frames later (a CPU-load lag frame), so `summary-info-quilava-v-stretch` stays 48 / 91 vs the Scene OFF oracle while ours is
+exact relative to its own dispatch; (b) UNOWN always draws letter A. Timing class: long tail.
 
 ## #168 — remainder: FRZ frozen-turn timing phase (S10A; #168 otherwise DONE 2026-10-13)
 
