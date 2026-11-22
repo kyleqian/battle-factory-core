@@ -3180,3 +3180,48 @@ Presentation only: no battle-rule, damage or RNG change. Evidence: `.integration
 **Census** 0..199 (base `9754cddbf` vs `6516aaefb`): eventsDigest and error identical 200 / 200 in both scenes; ON 8 battles with changed presentation commands (63,514 commands), OFF 0 changed. The `tree/` copies are deleted.
 
 **Tests:** every tests/ file importing `battleResolutionPresentation.ts`, `tests/chg*`, `bbk1*`, `sta3*`, `randomRoundSoak*`, `lbrd` (177 files): all pass except `tests/postwin.test.ts` ("rejects the early JENSON quote edge", `transitionClockAhead: 1`), which fails identically on base `9754cddbf` (rmw1's room transition clock; not this step). No trajectory pin moved. `npm run typecheck`, `npm run test:gate` (360 files / 2,839 tests) and `npm run build` pass.
+
+## sbm1 (Scene ON / OFF presentation timing: Solar Beam in sun, four ClearMonBg tail windows)
+
+Tree: fold-f `8b38fd60a` + item 1 `54a275c14` + item 2 `ce76321bc` (presentation / sound timing only; no rule, damage or RNG change). Evidence (git-ignored, main tree): `.integration/evidence/sbm1/` (`lab-{base,after}-*`, `lab2-{base,after}-*`, `t2-{base,item1,item2}`, `census/`). New labs: `tools/battle-lab/sbm1-sun-{next,same}-player-{on,off}.json` (Sunny Day by the faster side, Solar Beam the next turn / the same turn; unequal levels, Seismic Toss foe).
+
+### Item 1: Solar Beam in sun (committed)
+
+Cause (not the two-turn rule): in sun `SolarBeamOnFirstTurn` runs `ppreduce` (kernel `set-battler-pp-data`, u = 7) BEFORE the used print (USEDMOVE, u = 16), so the print is the first message but not the first event. `usedMovePrintLeadU` (the print lead u - 2) and `actionTransitionPauseFrames` (the E + 1 + d + n + 6 + u transition) both looked at the first event only and fell back to the plain lead, so the used print, the body and everything after sat 33 rows early. Both now skip a leading `set-battler-pp-data`. Same shape: Substitute (`ppreduce` before `attackstring`).
+
+| Lab (mass ENG-ROM) | before -> after |
+| --- | --- |
+| sbm1-sun-next-player-on | 126 -> 36 (print exact; SE 13 exact; SE 201 -1; the rest is the foe's next print -7) |
+| sbm1-sun-same-player-on | 101 -> 2 (print 347 exact; SE 201 / second print -1) |
+| sbm1-sun-next-player-off | 33 -> 7 (Solar Beam hit exact; the foe's next print -7) |
+| sbm1-sun-same-player-off | 33 -> 0 |
+
+Prints line: next ON/OFF 56 -> 14, same ON/OFF 100 -> 1. Pins moved (`tests/mvs1CalledMoveSounds.test.ts`, Substitute labs, the same ppreduce order): OFF player / opp SEs -1 / 40 / 65 -> 0 / 41 / 66 = the ROM rows; ON player drawn first shrink row 63 -> 64 = the ROM's 64 (its SEs stay -1: the hcr2c tick lead min(u - 2, 2) = 2 where the ROM needs 1, the same -1 as the Solar Beam SE 201); ON opp unchanged. New pin `tests/sbm1SunSolarBeam.test.ts` (SE 201 417 / ROM 418, hit SE 615 exact, OFF hit SE 281 exact).
+
+Open: (1) the foe's action after a sun Solar Beam hit is 7 rows early in both scenes (ROM after the hit: `MoveEnd+0x0` 1286, `+0x6` 1287, `+0x9` 1290..1293, `EffectLevelDamage+0x0` 1294, print 1297 + 1 in the OFF lab; cause not found: the MoveEnd rows after a charging-flag turn, or an `actionTransition` shape; the earlier "-13 and 70 + 70 carried" for s97 is probably this family); (2) the SE 201 -1 (hcr2c lead min(u - 2, 2), a family fix, not a per-move number). Side effect: the transition pause now exists before a Substitute / sun Solar Beam action, so census shows an extra short `move-animation` hold (11 / 18 / 29 frames) in 9 battles (command type sequence changed, eventsDigest not).
+
+### Item 2: the four ClearMonBg tail windows (committed)
+
+The ROM script of Water Gun, Acid, Dizzy Punch and Pay Day ends `waitforvisualfinish; clearmonbg; (blendoff;) end`, with no wait after the clear: clearmonbg runs on the row the visual count reads 0 and creates `Task_ClearMonBg`, whose first run does nothing and whose second destroys the monbg tasks `Cmd_end` waits for (battle_anim.c:852-883), so gAnimScriptActive falls 5 rows after that row (hit2 endProbe, every such move I - c0 = 5). One helper, `clearMonBgTailWindow` (`liveMoveAnimation.ts`), adds those 5 rows to the four windows (51, 55, 146, 6 via `approxScriptDuration`); Crabhammer / Ice Beam / Ice Punch already end after the clear and are not touched.
+
+| Lab (Scene ON mass) | before -> after | effectiveness SE (ROM) |
+| --- | --- | --- |
+| mechanic-water-gun-player-horsea-opponent-onix | 12 -> 2 | SE 14 196 -> 201 (202) |
+| mechanic-acid-player-ekans-opponent-onix | 24 -> 14 | SE 12 209 -> 214 (214 exact) |
+| mechanic-dizzy-punch-player-spinda-opponent-onix | 23 -> 13 | SE 12 161 -> 166 (166 exact) |
+| aud262-payday-player-on | 35 -> 25 | SE 13 145 -> 150 (151) |
+
+What is left in those labs is not the tail: Acid / Dizzy Punch's foe Confusion-hit `mv33` has no body adapter (-14 / -13, missing SE 139), Pay Day's coin message is -31 (its own print path), Dizzy Punch's following prints +1. Water Gun and Pay Day stay -1: their windows already ended one row before Acid's / Dizzy Punch's relative to the ROM's count-0 row; closing it is a per-move fit, not done. Pins: `tests/sbm1ClearMonBgTail.test.ts` (the four SE frames), `tests/apx222LastStaticClassesApproximate.test.ts` Pay Day window 85 -> 90 (aud262-payday-player-on SE 13 145 -> 150, ROM 151).
+
+### Acceptance
+
+**T2** (25 ON / 24 OFF seeds, 0 missing / 0 extra throughout):
+
+| Scene | Mass base -> item 1 -> item 2 | Exact / offset (base -> final) |
+| --- | --- | --- |
+| ON | 10,213 -> 9,960 -> 9,960 | 3,158 / 2,719 -> 3,170 / 2,707 |
+| OFF | 861 -> 822 -> 822 | 839 / 294 -> 842 / 291 |
+
+Item 2 does not move T2 (none of the 49 seeds plays those four moves). **Census** 0..199 (`8b38fd60a` vs `ce76321bc`): eventsDigest and error identical 200 / 200 in both scenes; ON 17 battles with changed commands + 9 type-sequence (the hold above), OFF 0 changed + 9 type-sequence. `tree/` copies deleted.
+
+**Tests:** every tests/ file importing `battleResolutionPresentation.ts` (163) or `liveMoveAnimation.ts` (59), `tests/chg*`, `bbk1*`, `cfs1*`, `hit1*`, `randomRoundSoak*`, `lbrd`, and the files naming WATER_GUN / ACID / DIZZY_PUNCH / PAY_DAY pass after two pin moves (`mvs1CalledMoveSounds`, `apx222LastStaticClassesApproximate`, both above); no randomRoundSoak trajectory pin moved. `npm run typecheck`, `npm run test:gate` (360 files / 2,839 tests) and `npm run build` pass.
