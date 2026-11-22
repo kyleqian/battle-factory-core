@@ -4,7 +4,7 @@
 //
 //   node --experimental-strip-types --no-warnings tools/frame-catcher/makeTrace.mjs OUT.json --seed N [--scene on|off]
 //        [--policy full|winning|winning-swap|vanilla|coverage-fight] [--battles B] [--lobby-tail N] [--max-frames N] [--game GAME_WORKSPACE]
-//        [--level 50|open]
+//        [--level 50|open] [--start-streak N]
 //
 // Stops after B battles have ended (default 2), at the end of the challenge, or at --max-frames (default 60000). With --lobby-tail N,
 // a trace whose B-th battle ends a round (7, 14, ...) stops N frames after the Lobby's free roam starts (the attendant's "record your
@@ -29,13 +29,15 @@ const GAME = path.resolve(opt("--game", path.resolve(here, "../..")));
 // opl: --level open plays an Open Level challenge (the trace's challenge.level; the ROM side starts from the Open Level route).
 const level = opt("--level", "50");
 if (level !== "50" && level !== "open") throw new Error(`makeTrace: bad --level ${level} (want 50|open)`);
+// opl: --start-streak N starts with an active win streak of N (a multiple of 7) for the level (FactorySessionOptions.startStreak)
+const startStreak = Number(opt("--start-streak", "0"));
 
 const { FactorySession } = await import(`${GAME}/src/factorySession.ts`);
 const { RandomPlayer, Rng, ActionLog } = await import(`${GAME}/tools/soak/randomRoundSoakDriver.ts`);
 await import(`${GAME}/src/engine/monPicPixelsInstall.ts`);
 
 const mix = (x) => { x = Math.imul(x ^ (x >>> 16), 0x45d9f3b) >>> 0; x = Math.imul(x ^ (x >>> 16), 0x45d9f3b) >>> 0; return (x ^ (x >>> 16)) >>> 0; };
-const challenge = { battleScene: scene, gameplaySeed: mix(seed * 2 + 1), presentationSeed: mix(seed * 2 + 2), start: "draft", ...(level === "open" ? { level } : {}) };
+const challenge = { battleScene: scene, gameplaySeed: mix(seed * 2 + 1), presentationSeed: mix(seed * 2 + 2), start: "draft", ...(level === "open" ? { level } : {}), ...(startStreak ? { startStreak } : {}) };
 const session = new FactorySession({ ...challenge, challengeRequest: "hold" });
 const player = new RandomPlayer(new Rng(seed), new ActionLog(false), policy);
 const segments = [];

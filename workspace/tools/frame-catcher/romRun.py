@@ -411,6 +411,11 @@ def run(engine_dir, out_dir, profile, max_frames):
         slots = (SB2_BATTLE_NUM, SB2_FACTORY_STREAK, SB2_TOWER_STREAK, SB2_FACTORY_RENTS)
     for off in slots:
         o.write_u16(save2 + off, 0)
+    if facts.get("startStreak"):
+        # opl: the engine run's start streak (FactorySessionOptions.startStreak): the level's factoryWinStreaks slot as a save with that active
+        # streak holds it after factory_init (the route set the win-streak-active flag); the re-entered select screen reads it for its IVs
+        o.write_u16(save2 + slots[1], facts["startStreak"])
+        staging.append({"what": "start streak", "level": level, "streak": facts["startStreak"]})
     for i, r in enumerate(facts["rentals"]):
         base = save2 + SB2_RENTAL_MONS + i * RENTAL_MON_SIZE
         o.write_u16(base, r["setId"])
@@ -500,7 +505,8 @@ def run(engine_dir, out_dir, profile, max_frames):
         live_before = transition_task_live(rom) is not None
         deal = None
         if rom_round >= 1 and rom_round < len(rounds):
-            deal = deals.setdefault(rom_round, {"round": rom_round, "want": rounds[rom_round], "first": battles.get(rom_round * 7), "rentals": None, "opponent": None, "armedAt": None})
+            deal = deals.setdefault(rom_round, {"round": rom_round, "want": rounds[rom_round], "first": battles.get(rom_round * 7), "rentals": None, "opponent": None, "armedAt": None,
+                                                "engineDeal": engine_deal_for(facts, rounds[rom_round])})
             deal["idsBefore"] = rom.rental_ids()
 
         brain = None
@@ -707,6 +713,15 @@ def transition_traps(rom, battles, transitions, bn, staging, live_before, armed=
     return {rom.f["Random"] + 2: at_random}
 
 
+def engine_deal_for(facts, round_want):
+    """The engine's deal record (engineRun.mjs facts.deals: level, streak, rents) whose cursor is this round's deal cursor."""
+    want = round_want.get("dealRngBefore")
+    for d in facts.get("deals") or []:
+        if want is not None and d.get("rngValueBefore") == want:
+            return d
+    return None
+
+
 def deal_traps(rom, deal, frame):
     """Round r >= 1's deal (PreBattleRoom EnterRoom, scripts.inc:30-31): factory_generaterentalmons then factory_generateopponentmons, one
     script run at the end of the walk (prebattleEntry.ts, the deal tick). When a frame's fast run changed rentalMons' set ids, it is stepped
@@ -729,7 +744,13 @@ def deal_traps(rom, deal, frame):
         def at_rentals():
             if deal["rentals"] is not None:
                 return
-            deal["rentals"] = {"frame": frame, "romRng": rom.u32(s["gRngValue"]), "engineRng": want["dealRngBefore"]}
+            sv2 = rom.save2()
+            # opl: the ROM's own frontier slots the deal reads (lvlMode, factoryWinStreaks[0][*], factoryRentsCount[0][*]) against the
+            # engine's carry for this deal (engineRun.mjs facts.deals: the level and that level's streak and rents)
+            deal["rentals"] = {"frame": frame, "romRng": rom.u32(s["gRngValue"]), "engineRng": want["dealRngBefore"],
+                               "romLvlMode": rom.u8(sv2 + SB2_LVL_MODE) & 0x3,
+                               "romStreaks": [rom.u16(sv2 + SB2_FACTORY_STREAK), rom.u16(sv2 + SB2_FACTORY_STREAK_OPEN)],
+                               "romRents": [rom.u16(sv2 + SB2_FACTORY_RENTS), rom.u16(sv2 + SB2_FACTORY_RENTS_OPEN)]}
             o.write_u32(s["gRngValue"], want["dealRngBefore"])
         out[rom.f["GenerateInitialRentalMons"] + 2] = at_rentals
     value = (first or {}).get("rollRngBefore")
@@ -854,8 +875,17 @@ def finish_deal(rom, deal, staging, frame, sound=None):
         deal["idsChecked"] = True
         ids = rom.rental_ids()
         want_ids = [r["setId"] for r in deal["want"]["rentals"]]
-        staging.append({"what": "deal: rentals", "round": deal["round"] + 1, "frame": frame, "romRngAtEntry": deal["rentals"]["romRng"],
-                        "engineRng": deal["rentals"]["engineRng"], "rom": ids, "engine": want_ids, "same": ids == want_ids})
+        rec = {"what": "deal: rentals", "round": deal["round"] + 1, "frame": frame, "romRngAtEntry": deal["rentals"]["romRng"],
+               "engineRng": deal["rentals"]["engineRng"], "rom": ids, "engine": want_ids, "same": ids == want_ids}
+        eng_deal = deal.get("engineDeal")
+        if eng_deal is not None and "romLvlMode" in deal["rentals"]:
+            # opl: the level and that level's streak and rent count the ROM's deal read, against the engine's carry
+            lv = deal["rentals"]["romLvlMode"]
+            rom_slots = {"level": "open" if lv == 1 else "50", "streak": deal["rentals"]["romStreaks"][lv], "rents": deal["rentals"]["romRents"][lv]}
+            eng_slots = {"level": eng_deal.get("level", "50"), "streak": eng_deal["factoryWinStreak"], "rents": eng_deal["rentsCount"]}
+            rec.update(carry=[rom_slots, eng_slots], sameCarry=rom_slots == eng_slots,
+                       romSlots={"streaks": deal["rentals"]["romStreaks"], "rents": deal["rentals"]["romRents"]})
+        staging.append(rec)
         if sound is not None and deal["want"].get("dealRngBefore") is not None and deal["first"] is not None:
             deal["romOrder"] = probe_deal_opponent(rom, sound, deal)
     if deal["opponent"] is not None and "oppChecked" not in deal and not deal["opponent"].get("missed"):

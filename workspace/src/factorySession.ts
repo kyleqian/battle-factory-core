@@ -89,6 +89,13 @@ export interface FactorySessionOptions {
    * for a Level 50 one (A on OPEN LEVEL does nothing, as before).
    */
   readonly openLevel?: boolean | undefined;
+  /**
+   * opl (tools and tests only, not for players): a "draft" start whose save already holds this active win streak for the challenge's
+   * level (a multiple of 7, 0..49: the round after that many wins), so later challenge numbers (their IVs, ranges, AI, Noland at battle
+   * 21 / 42) can be played without the rounds before them. Needs `gameplaySeed` at Level 50 (the recorded anchor is streak 0). The
+   * frame catcher writes the same slot on the ROM (tools/frame-catcher/romRun.py). Absent = 0.
+   */
+  readonly startStreak?: number | undefined;
 }
 
 /**
@@ -117,6 +124,12 @@ export function createChallengeState(options: FactorySessionOptions): EngineStat
     ...(openLevel ? { openLevel: true } : {}),
   });
   const frontier = options.frontier === undefined ? undefined : validateFactoryFrontierRecord(options.frontier);
+  const startStreak = options.startStreak ?? 0;
+  if (!Number.isInteger(startStreak) || startStreak < 0 || startStreak > 49 || startStreak % 7 !== 0) {
+    throw new Error(`startStreak must be a multiple of 7 in 0..49, got ${String(options.startStreak)}`);
+  }
+  if (startStreak !== 0 && options.start === "after-save") throw new Error("startStreak is for a \"draft\" start");
+  if (startStreak !== 0 && options.gameplaySeed === undefined && level === "50") throw new Error("startStreak at Level 50 needs a gameplaySeed");
   if (options.start === "after-save") return createAfterSaveState(base, options.gameplaySeed, frontier, level);
   // The anchor draft: its round takes the record from the carry (core.ts createFactoryAnchorSession call). Open Level has no recorded
   // anchor: its draft is dealt from the ROM route's deal cursor (OPEN_LEVEL_DEFAULT_DEAL_RNG_VALUE).
@@ -128,7 +141,8 @@ export function createChallengeState(options: FactorySessionOptions): EngineStat
     throw new Error(`gameplaySeed must be a u32, got ${seed}`);
   }
   const bootRngValue = seed >>> 0;
-  const carry = createInitialFactoryCarry(ANCHOR_FACTORY_METADATA.playerTrainerId, frontier, level);
+  const fresh = createInitialFactoryCarry(ANCHOR_FACTORY_METADATA.playerTrainerId, frontier, level);
+  const carry = startStreak === 0 ? fresh : Object.freeze({ ...fresh, factoryWinStreak: startStreak });
   const { generation, draftScreen } = generateFactoryChallengeDraft(carry, bootRngValue);
   return {
     ...base,

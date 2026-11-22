@@ -221,3 +221,16 @@ describe("opl2: the Open Level PreBattleRoom walk goes right", () => {
     expect(walkVisual(200, false, true)).toEqual(walkVisual(WALK_TICKS - 1, false, true));
   });
 });
+
+describe("opl2: startStreak (tools only)", () => {
+  it("starts the challenge with that active streak for its level: challenge 2's IVs (9), Noland at battle 7 of the round", async () => {
+    const { getFactoryFrontierBrainStatus } = await import("../src/engine/frontierBrainStatus.ts");
+    const session = new FactorySession({ battleScene: "off", level: "open", startStreak: 14 });
+    expect(session.state.factoryCarry).toMatchObject({ lvlMode: "open", factoryWinStreak: 14 });
+    expect(session.state.draftScreen.rentals.map((r) => r.source.fixedIv)).toEqual([9, 9, 9, 9, 9, 9]);
+    expect(session.state.draftScreen.rentals.map((r) => r.level)).toEqual([100, 100, 100, 100, 100, 100]);
+    expect(getFactoryFrontierBrainStatus({ battleMode: "singles", winStreak: 14 + 6, symbolsCount: 0 })).not.toBe("not-ready");
+    expect(() => new FactorySession({ battleScene: "off", startStreak: 14 })).toThrow(/gameplaySeed/);
+    expect(() => new FactorySession({ battleScene: "off", level: "open", startStreak: 15 })).toThrow(/multiple of 7/);
+  });
+});

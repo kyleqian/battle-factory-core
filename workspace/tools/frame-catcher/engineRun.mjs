@@ -53,6 +53,7 @@ const session = new FactorySession({
   start: c.start, frontier: c.frontier, challengeRequest: "hold",
   // opl: an Open Level trace (makeTrace.mjs --level open); absent = Level 50
   ...(c.level === "open" ? { level: "open" } : {}),
+  ...(c.startStreak ? { startStreak: c.startStreak } : {}),
 });
 let pending = [];
 session.attachSoundSink({ push: (e) => pending.push(e) });
@@ -83,7 +84,7 @@ let lastMenu = null; let lastSurface = null; let lastButtons = null;
   menus.push([0, m0 === null ? null : m0.kind, m0 === null ? null : m0.sig]);
   lastMenu = m0 === null ? null : `${m0.kind}|${m0.sig}`;
 }
-const battles = []; const facts = { rentals: null, frontier: c.frontier ?? null, battleScene: c.battleScene, level: c.level ?? "50", transitions: {}, rounds: [], deals: [] };
+const battles = []; const facts = { rentals: null, frontier: c.frontier ?? null, battleScene: c.battleScene, level: c.level ?? "50", startStreak: c.startStreak ?? 0, transitions: {}, rounds: [], deals: [] };
 // Rounds (fcr2): a challenge that wins its 7 battles goes back to the Lobby, and the attendant's new challenge deals round 2's draft
 // (prebattleEntry.ts, the deal at the end of the PreBattleRoom walk). Each round's orchestrator brings its own initialRentalGeneration;
 // `battles` are keyed by `g` = round * 7 + battleIndex (the ROM side counts rounds by curChallengeBattleNum going back to 0).
