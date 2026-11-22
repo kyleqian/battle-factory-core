@@ -183,15 +183,16 @@ export function sceneOnPlayerForcedSwitchInDuration(species: number, personality
 /**
  * pfr192 (ISSUES #146 remainder; docs/pfr185-player-faint-replacement-send-in.md, docs/pfr192-player-faint-replacement-production.md):
  * the PLAYER faint-replacement send-in, counted from the SEND OUT confirm. The ROM chain is the forced-player one: the ball spawns at
- * B = 91 + length(nickname), the controller idles at B + D - 2, the next print is at B + D + 10 (CASTFORM + 11) and the action prompt
+ * B = 86 + the "Go!" print's glyph count (fsi1: one glyph per frame; "Go! X!" = length(nickname) + 5, "Do it! X!" +3, "Go for it, X!" +7:
+ * STRINGID_SWITCHINMON follows the foe's HP scale), the controller idles at B + D - 2, the next print is at B + D + 10 (CASTFORM + 11) and the action prompt
  * at B + D + 17, with D the forced duration above (`sceneOn` picks Scene ON's back-animation bound).  The healthbox slide is ball-relative
  * (B + 65, CASTFORM + 1) in both scenes.  `followingFrames` = the turn-end + next-command-handoff frames production runs after the span
  * (they sit inside the ROM's B + D + 17), so the span ends that much earlier.
  */
 export function playerFaintReplacementSendOutTiming(input: Readonly<{
-  species: number; nameLength: number; personality: number; sceneOn: boolean; followingFrames: number; goTextChars: number;
+  species: number; personality: number; sceneOn: boolean; followingFrames: number; goTextChars: number;
 }>): PartySendOutTiming {
-  const ball = 91 + input.nameLength;
+  const ball = SCENE_OFF_PLAYER_SEND_IN_PRINT_START_TO_BALL_BASE + input.goTextChars;
   const duration = input.sceneOn
     ? sceneOnPlayerForcedSwitchInDuration(input.species, input.personality)
     : sceneOffPlayerForcedSwitchInDuration(input.species);
@@ -205,3 +206,5 @@ export function playerFaintReplacementSendOutTiming(input: Readonly<{
   });
 }
 const MAGBY_SEND_IN_BALL_SPAWN = 96;
+/** fsi1: the ball spawns 86 frames after the confirm plus one frame per printed glyph (print starts at 83, ends 3 + chars later; "Go! MAGBY!" = 10 -> 96). */
+const SCENE_OFF_PLAYER_SEND_IN_PRINT_START_TO_BALL_BASE = 86;

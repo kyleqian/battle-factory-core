@@ -129,7 +129,6 @@ export function playerFaintReplacementSendOutTimingOfSegment(segment: BattleReso
   const turnEnd = rest.length === 1 && rest[0]!.type === "turn-end" ? rest[0] : undefined;
   return playerFaintReplacementSendOutTiming({
     species: command.incoming.species,
-    nameLength: command.incoming.name.length,
     personality: command.incoming.personality ?? 0,
     sceneOn: (segment.beforeRules.rulesContext.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) === 0,
     // pau5: with an entry script after the send-in the span ends where the script's first row runs (release + the script's leading rows).

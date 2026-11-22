@@ -18,7 +18,7 @@ const timingOf = (id: string, scene: "on" | "off", following = 14) => {
   const r = rom.find((row) => row.id === id && row.scene === scene)!;
   const e = edge.get(`${id}-${scene}`)!;
   const t = playerFaintReplacementSendOutTiming({
-    species: r.case.species, nameLength: e.ballFromConfirm - 91, personality: r.case.nature ?? 6, sceneOn: scene === "on", followingFrames: following, goTextChars: 10,
+    species: r.case.species, personality: r.case.nature ?? 6, sceneOn: scene === "on", followingFrames: following, goTextChars: e.ballFromConfirm - 86,
   });
   return { t, e, r };
 };
