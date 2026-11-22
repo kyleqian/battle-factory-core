@@ -460,6 +460,7 @@ describe("random round soak driver (green milestone pin)", () => {
       // merge of the box's night run with the Mac's tdr1 (tri1: the battle intro at each transition's own frame; wtl1: the win tail's slide
       // wait; sst1: the sandstorm sound): frames + render calls, 43_732 -> 43_693, renderCalls 3_055 -> 3_052; same battle 7, turn 3, end
       // state, diagnostics. A trajectory pin, not a ROM frame.
+      // hse2 (Scene OFF wake-up hold / icon, the confusion print's 71-frame hold before the used print, the OFF Struggle dismiss hold 9 -> 8): frames unchanged (43_693), renderCalls 3_052 -> 3_054; same battle 7, turn 3, end state, diagnostics. A trajectory pin, not a ROM frame.
       frames: 43_693,
       battle: 7,
       turn: 3,
@@ -472,7 +473,7 @@ describe("random round soak driver (green milestone pin)", () => {
         terminalOutcome: "roundWon",
         terminalRecordMenuInputReadyReached: true,
         terminalRecordChoice: "no",
-        renderCalls: 3_052,
+        renderCalls: 3_054,
       },
     });
     expect(second).toEqual(first);
@@ -725,7 +726,10 @@ describe("random round soak driver (green milestone pin)", () => {
     // Baton Pass. Re-scanned full-policy seeds 0..39 (tools/soak/batonPassSearch.ts --seeds 0:40 --parallel 6, same options): candidates 16,
     // 20, 25, 27, 35. Seed 16 is the lowest (Baton Pass commits 1, first commit 66442, halt 66482 on LEDIAN in battleIndex 0, two Lobby new
     // challenges). Pin 5 -> 16.
-    const result = runSeed(16, {
+    // hse2 (Scene OFF wake-up message / icon rule, the confusion print's 71-frame hold before the used print, the OFF Struggle dismiss hold 9 -> 8; the exploring presses land on new
+    // phases): seed 16 no longer commits Baton Pass. Re-scanned full-policy seeds 0..39 (tools/soak/batonPassSearch.ts --seeds 0:40 --parallel 2, same options): candidates 20, 25, 27.
+    // Seed 20 is the lowest (Baton Pass commits 2, first commit 37966, halt 38178 on MAWILE in battleIndex 0, three Lobby new challenges). Pin 16 -> 20.
+    const result = runSeed(20, {
       maxFrames: 80_000,
       renderEvery: 0,
       coverage: observer as never,
