@@ -1341,15 +1341,16 @@ const STATUS3_UNDERGROUND = 1 << 7;
 const STATUS3_UNDERWATER = 1 << 18;
 const STATUS3_SEMI_INVULNERABLE = STATUS3_ON_AIR | STATUS3_UNDERGROUND | STATUS3_UNDERWATER;
 
+/** ekd1: the hit that KOs a semi-invulnerable target clears its status3 before the segment ends; the charge turn's Fly / Dig / Dive / Bounce print still says it was hidden. */
+const SEMI_INVULNERABLE_CHARGE_MESSAGES = new Set(["STRINGID_PKMNFLEWHIGH", "STRINGID_PKMNDUGHOLE", "STRINGID_PKMNHIDUNDERWATER", "STRINGID_PKMNSPRANGUP"]);
+
 /**
- * Scene OFF only: the Scene ON ROM windows (fsc1-fly-gust-on: ROM bar starts 358, Gust animation end 312, no hit blink visible because the sprite is
- * hidden) keep the full 35-row hit step, 24 rows from the skip's prediction; the Scene ON rule is unmeasured, so it stays at the legacy timing.
- *
- * fsc1: is the HIT_ANIMATION target's sprite invisible when the controller runs? The sprite is hidden from a semi-invulnerable charge
+ * fsc1 / ekd1 (both scenes): is the HIT_ANIMATION target's sprite invisible when the controller runs? The sprite is hidden from a semi-invulnerable charge
  * turn's end (Scene OFF: MOVEEND_ATTACKER_INVISIBLE, an explicit sprite-visibility receipt; Scene ON: the Dig / Fly / Dive animation)
  * until MOVEEND_ATTACKER_VISIBLE / MOVEEND_TARGET_VISIBLE, which is the span STATUS3_SEMI_INVULNERABLE is set. So: invisible at the
  * segment start when the status is set then, switched by this segment's visibility receipts, and hidden once the battler's own charge
- * script (a charge-turn animation / PP receipt on it) ran earlier in the segment and the status stands at the segment's end.
+ * script (a charge-turn animation / PP receipt on it) ran earlier in the segment and the status stands at the segment's end, or the hit KOs it.
+ * Scene ON measured on fsc1-fly-gust-on (datahpupdate 3 rows after the effectiveness SE) and ekd1-dig-eqko-on (s648 d0, Earthquake KO of a Dig user).
  */
 function hitTargetSpriteInvisible(
   events: readonly BattleKernelSemanticEvent[],
@@ -1359,7 +1360,10 @@ function hitTargetSpriteInvisible(
   battler: 0 | 1,
 ): boolean {
   let invisible = (beforeRules.battlers[battler]!.status3 & STATUS3_SEMI_INVULNERABLE) !== 0;
-  const newlyHidden = !invisible && (afterRules.battlers[battler]!.status3 & STATUS3_SEMI_INVULNERABLE) !== 0;
+  const newlyHidden = !invisible && ((afterRules.battlers[battler]!.status3 & STATUS3_SEMI_INVULNERABLE) !== 0
+    || (events.slice(index + 1).some((event) => event.payload.kind === "play-faint-cry" && event.payload.battler === battler)
+      && events.slice(0, index).some((event) => event.provenance?.sourceLabel === CHARGE_TURN_SCRIPT && event.payload.kind === "message"
+        && SEMI_INVULNERABLE_CHARGE_MESSAGES.has(event.payload.messageId) && event.payload.actionSnapshot?.attacker === battler)));
   for (let before = 0; before < index; before += 1) {
     const payload = events[before]!.payload;
     if (payload.kind === "set-battler-sprite-visibility" && payload.battler === battler) {
@@ -6352,7 +6356,7 @@ export function projectBattleResolutionCommands(
         type: "hit-animation",
         eventSequence: event.sequence,
         battler: hitBattler,
-        timing: (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0 && hitTargetSpriteInvisible(events, index, beforeRules, afterRules, hitBattler) ? HIT_ANIMATION_INVISIBLE_TIMING : HIT_ANIMATION_TIMING,
+        timing: hitTargetSpriteInvisible(events, index, beforeRules, afterRules, hitBattler) ? HIT_ANIMATION_INVISIBLE_TIMING : HIT_ANIMATION_TIMING,
       }));
       continue;
     }
