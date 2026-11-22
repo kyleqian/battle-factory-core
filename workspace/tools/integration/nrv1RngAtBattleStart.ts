@@ -8,6 +8,7 @@
 // input, the engine's hand-over frame (the room is gone, the battle intro installed = CB2_InitBattle on the ROM), the cursor then, the battle's
 // seed (the round controller's gameplay RNG) and the engine's own transition id. Run it from a tree's workspace/ (the imports are relative), so
 // the same file measures a pre-change tree copied under .integration.
+import "../../src/engine/monPicPixelsInstall.ts";
 import { readFileSync } from "node:fs";
 import frontierMonsData from "../../src/data/gen/battle-frontier-mons.json" with { type: "json" };
 import { driveEngine, type RomRecording } from "./nolandSceneEngine.ts";
