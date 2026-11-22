@@ -130,8 +130,11 @@ export function emitBattleHitSounds(
     // hit2 (lab etp1-futuresight-on): BattleScript_DoFutureAttackHit's effectivenesssound is the row before the hitanimation row (ROM 3030, hit command 3031 on both sides),
     // the animation command's last row; the hit command's own anchor (the controller lag) put it 7 rows late.
     const next = segment.commands[segment.commands.indexOf(command) + 1];
-    const song = next?.type === "hit-animation" ? effectivenessSong(segment, next.eventSequence) : null;
-    if (song !== null) scheduleAfter(FUTURE_SIGHT_HIT_COMMAND_FRAMES, () => playPannedSe(song.song, next!.battler === 0 ? SE_PAN_PLAYER : SE_PAN_OPPONENT));
+    if (next?.type === "hit-animation") {
+      const song = effectivenessSong(segment, next.eventSequence);
+      const pan = next.battler === 0 ? SE_PAN_PLAYER : SE_PAN_OPPONENT;
+      if (song !== null) scheduleAfter(FUTURE_SIGHT_HIT_COMMAND_FRAMES, () => playPannedSe(song.song, pan));
+    }
     return;
   }
   if (command.type === "hit-animation") {
