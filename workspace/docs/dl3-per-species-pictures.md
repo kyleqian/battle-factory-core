@@ -89,6 +89,9 @@ the same, headless `animation-assets` 6.8 KiB as before).
   of an asset that has not arrived starts its fetch, records the miss and throws `AnimAssetPending`; `presentationContainment` rethrows it like
   `MonPicPending`. Safety net: `drawFrame` in the mount loop discards the frame when the store recorded a miss even if a renderer `catch{}`
   swallowed the throw (render is pure), so a half-drawn frame can never reach the canvas.
+  **Correction (fam1, `docs/fam1-first-use-move-animations.md`):** containment did not rethrow it until fam1; the draw seam recorded it and
+  degraded the command, so the first use of a move whose file was not prefetched drew the static field (the 2026-11-22 playtest's Whirlpool
+  and Spark). It now passes every seam while `core.ts render()` runs, and stays contained on the tick.
 - `src/engine/animAssetNeeds.ts` + `src/assets/gen/anim-asset-moves.json`: `neededAnimAssets(state, table, has)` names the files a frame may
   read, from the numeric move ids the round controller's parties carry (party move lists, known when the parties are built, before the Battle
   Room walk and fade) and every `moveId` / `calledMove` / `currentMove` / `chosenMove` in the presentation and staged turn. The mount loop
@@ -105,6 +108,9 @@ the same, headless `animation-assets` 6.8 KiB as before).
   read it without any of its own moves. Over 45 recorded battles (12 seeds, coverage-fight and full policies): 0 of 278 reads of a lazy asset
   were not predicted by the battle's moves. A move the soaks never played is covered by its name; anything the scan misses is caught by the
   store (a read of a pending asset holds the loop on it), so a gap in the table is a short hold, never a wrong frame.
+  **Superseded (fam1):** the name rule missed files a move borrows (Whirlpool reads water-orb, Spark reads dynamicPunch's hit splat); 39
+  Factory moves had a gap. The table is now recorded per move (`animAssetNeeds.ts moves` + `stage`, `docs/fam1-first-use-move-animations.md`)
+  and `tests/fam1MoveAnimationReads*.test.ts` checks every Factory move.
 
 **Called moves (Metronome, Mimic, Sleep Talk, Assist, Mirror Move...): fetch-on-call, no always-loaded set.** Always loading every move a
 called move could pick would be all 163 files again (Metronome alone can call ~all of them). The called move is named in the presentation
