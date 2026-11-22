@@ -305,7 +305,10 @@ describe("sa125: production routes (census seeds, Scene ON vs OFF, same gameplay
         const wakeUp = x.events[at].provenance?.opcodeName === "B_SCR_OP_ATTACKCANCELER" && print === "STRINGID_PKMNWOKEUP";
         const wakeUpExec = wakeUp ? x.events[at + 1].provenance.instructionExecution : 0;
         const wakeUpRows = wakeUp ? wakeUpExec - x.events[at].provenance.instructionExecution : 0;
-        const want = faintClear ? 1 : animated ? offStatus[k].timing.minimumFrames : wakeUp ? (at === 0 ? Math.max(0, wakeUpExec - 3) : wakeUpRows) : 32;
+        // ftp1: attackcanceler's natural thaw (`BattleScript_MoveUsedUnfroze`: printfromtable one row after the write, no pre-hold) lasts the rows to the print (ROM s97 d11: print row 10 = the engine's, SE 184 exact).
+        const thaw = x.events[at].provenance?.opcodeName === "B_SCR_OP_ATTACKCANCELER" && (print === "STRINGID_PKMNWASDEFROSTED2" || print === "STRINGID_PKMNWASDEFROSTEDBY");
+        const thawRows = thaw ? x.events[at + 1].provenance.instructionExecution - x.events[at].provenance.instructionExecution : 0;
+        const want = faintClear ? 1 : animated ? offStatus[k].timing.minimumFrames : wakeUp ? (at === 0 ? Math.max(0, wakeUpExec - 3) : wakeUpRows) : thaw ? thawRows : 32;
         if (wakeUp) wakeUps.push(`${at === 0 ? `head u${wakeUpExec}` : `mid ${wakeUpRows}`}->${x.c.timing.minimumFrames}`);
         expect(x.c.timing.minimumFrames, `seed ${seed} status ${k} ${print}`).toBe(want);
         if (faintClear) faintClears += 1;
@@ -321,6 +324,7 @@ describe("sa125: production routes (census seeds, Scene ON vs OFF, same gameplay
     expect(t["STRINGID_PKMNFASTASLEEP|true"]).toEqual(["32->1"]);
     expect(t["STRINGID_TARGETFAINTED|false"]).toEqual(["32->1"]); // rep203: fnt201's cleareffectsonfaint row (was 32->32)
     expect(t["STRINGID_PKMNWENTTOSLEEP|false"]).toEqual(["32->32"]);
+    expect(t["STRINGID_PKMNWASDEFROSTED2|false"]).toEqual(["32->1"]); // ftp1: the natural thaw (was 32->32)
     // gsp2: the table was 32->32 for every wake-up; now the rule's frames (head: u - 3; mid-turn: the rows to the print).
     expect([...new Set(wakeUps)].sort()).toEqual(["head u3->0", "head u6->3", "head u8->5", "mid 2->2"]);
   });

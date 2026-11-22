@@ -1297,7 +1297,7 @@ function messageTimingFromSourceProvenance(
 ): BattleMessageTiming | null {
   const programCounter = event.provenance?.programCounter;
   if (programCounter === undefined || programCounter < 0) return null;
-  if (event.provenance?.sourceLabel === WAKE_UP_SCRIPT) return WAKE_UP_MESSAGE_TIMING;
+  if (event.provenance?.sourceLabel === WAKE_UP_SCRIPT || event.provenance?.sourceLabel === THAW_SCRIPT) return WAKE_UP_MESSAGE_TIMING;
   const following = BATTLE_SCRIPT_PROGRAM.instructions[programCounter + 1];
   if (
     following?.opcodeName === "B_SCR_OP_WAITMESSAGE"
@@ -2015,6 +2015,8 @@ function sceneOffStatusFrames(
  * draws nothing in Scene ON (no status animation follows).
  */
 const WAKE_UP_SCRIPT = "BattleScript_MoveUsedWokeUp";
+/** ftp1: `BattleScript_MoveUsedUnfroze` is the wake-up script without the `bicword`: print, `waitmessage B_WAIT_TIME_LONG`, `updatestatusicon`, `return` (ROM print -> icon 91 = the wake-up's hold + 2). */
+const THAW_SCRIPT = "BattleScript_MoveUsedUnfroze";
 /** The wake-up print's instructionExecution when `events[statusIndex]` is attackcanceler's sleep-clearing status write, else null. */
 function wakeUpPrintExecution(events: readonly BattleKernelSemanticEvent[], statusIndex: number): number | null {
   const status = events[statusIndex]!;
@@ -2049,7 +2051,7 @@ const WAKE_UP_MESSAGE_TIMING = Object.freeze({
  */
 function wakeUpStatusIconFrames(events: readonly BattleKernelSemanticEvent[], iconIndex: number): number | null {
   const icon = events[iconIndex]!;
-  if (icon.provenance?.sourceLabel !== WAKE_UP_SCRIPT || icon.payload.kind !== "status-icon-update") return null;
+  if ((icon.provenance?.sourceLabel !== WAKE_UP_SCRIPT && icon.provenance?.sourceLabel !== THAW_SCRIPT) || icon.payload.kind !== "status-icon-update") return null;
   const next = events[iconIndex + 1];
   const from = icon.provenance.instructionExecution;
   const to = next?.provenance?.instructionExecution;
@@ -2057,6 +2059,23 @@ function wakeUpStatusIconFrames(events: readonly BattleKernelSemanticEvent[], ic
   return to - from + 1;
 }
 
+/**
+ * ftp1: attackcanceler's natural thaw (the status write, then `BattleScript_MoveUsedUnfroze` = printfromtable, waitmessage,
+ * updatestatusicon with no pre-hold and no status animation) prints one row after the write in both scenes (off121: thaw 1), so the
+ * Scene ON status command lasts delta(print) - delta(status) instead of the 32-frame status pause. Returns the thaw print's
+ * instructionExecution, else null.
+ */
+function thawPrintExecution(events: readonly BattleKernelSemanticEvent[], statusIndex: number): number | null {
+  const status = events[statusIndex]!;
+  if (status.payload.kind !== "set-battler-status-data" || status.provenance?.opcodeName !== "B_SCR_OP_ATTACKCANCELER") return null;
+  for (let index = statusIndex + 1; index < events.length; index += 1) {
+    const payload = events[index]!.payload;
+    if (payload.kind === "set-battler-pp-data" || payload.kind === "play-se") continue;
+    if (payload.kind !== "message" || (payload.messageId !== "STRINGID_PKMNWASDEFROSTED2" && payload.messageId !== "STRINGID_PKMNWASDEFROSTEDBY")) return null;
+    return events[index]!.provenance?.instructionExecution ?? null;
+  }
+  return null;
+}
 /**
  * sa125 SA3 (docs/sa125-status-animation-command.md): in Scene ON a status-data receipt whose battler's statusanimation runs
  * in the same execution -- right before the print (move / ability infliction: status, statusanimation, print) or right
@@ -2072,6 +2091,8 @@ function sceneOnStatusFrames(events: readonly BattleKernelSemanticEvent[], statu
   const battler = statusEvent.payload.battler;
   const wakeUpPrint = wakeUpPrintExecution(events, statusIndex);
   if (wakeUpPrint !== null) return wakeUpPrint - status;
+  const thawPrint = thawPrintExecution(events, statusIndex);
+  if (thawPrint !== null) return thawPrint - status;
   let print: number | null = null;
   let animated = false;
   let execution = status;
