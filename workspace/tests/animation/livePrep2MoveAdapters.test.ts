@@ -26,7 +26,7 @@ const cases = [
   { id: 248, move: "FUTURE_SIGHT", duration: 114, shadow: false, alt: ["ABSOL", "ONIX"], route: { seed: 11, slot: 2 as const, streak: 0 } },
   // S10A Substitute: the former route 17/35 FORRETRESS hits the opponent's Substitute doll (164:1->1 first), so the shared gate
   // declines it (asserted below); 35/35 STEELIX is the first live candidate of r3ProfileRouteSearch.ts 153 8 1 4000 (stall allowed).
-  { id: 153, move: "EXPLOSION", duration: 212, shadow: false, alt: ["FORRETRESS", "ONIX"], route: { seed: 35, slot: 3 as const, streak: 35 } },
+  { id: 153, move: "EXPLOSION", duration: 213, shadow: false, alt: ["FORRETRESS", "ONIX"], route: { seed: 35, slot: 3 as const, streak: 35 } },
 ];
 
 function displayed(player: string, opponent: string): BattleResolutionDisplayedField {
@@ -143,7 +143,7 @@ describe("live prep2 move adapters", () => {
     const on = generatedCommandAnimationReplay(r.seed, "on", [r.slot], r.streak, true);
     const off = generatedCommandAnimationReplay(r.seed, "off", [r.slot], r.streak, true);
     const body = on.animations.find(a => a.moveId === 153 && a.attacker === 0);
-    expect(body?.ages).toEqual(iu120Ages(153, 212));
+    expect(body?.ages).toEqual(iu120Ages(153, 213));
     expect(body?.adapterActive.every(Boolean)).toBe(true);
     // setatkhptozero (battle_scripts_1.s:380) precedes attackanimation: the displayed field already shows HP 0.
     const hpZero = on.semanticEvents.some(e => JSON.stringify(e.event).includes("hp-change"));
