@@ -70,6 +70,9 @@ def checks(run):
 def main():
     total = {}
     for run in sys.argv[1:]:
+        if not (Path(run) / "rom" / "timeline.json").is_file() or not (Path(run) / "engine" / "timeline.json").is_file():
+            print(f"{Path(run).name}: not finished (no rom/timeline.json yet)")
+            continue
         r = checks(run)
         print(f"{r['run']}: level {r['level']}{' streak ' + str(r['startStreak']) if r['startStreak'] else ''}, {r['rounds']} round(s), "
               f"{r['battles']} battles, menus followed {r['anchors']}, stop {r['stop']}, frames ours / ROM {r['frames'][0]} / {r['frames'][1]}")
