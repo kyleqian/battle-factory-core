@@ -127,8 +127,7 @@ rental records and threw `playerParty[0] max HP N does not match rental record m
 hand-written `APP_STAGES` entry) the records are used and the species / max HP check stays. `factoryCorpusParty.ts` is not touched. The summary screen still reads the records' presentation (it is not part of any lab trace). Measured:
 pic7-player-faint-send-in-{on,off}, playerfaint-slot2-sunnyday and etk1-leech-hold-{on,off} run to the end in both scenes; the forced send-in ball SE 15 reads ROM = ENG exactly (pic7 ON 906 / 906, OFF 906 / 906; slot2-sunnyday ON 735 / 735).
 The two print rows left `missing` per replacement (`BattleScript_FaintedMonSendOutNew+0xb` "Go! X!" at ROM 845, `BattleScript_FaintedMonEnd+0x0`) are not message commands in the engine: the Go! glyphs are drawn by the party send-out
-(`partySendOutGoTextVisibleChars`), so a faint-replacement lab always shows `PRINTS ... missing 2`; read the SE 15 row (fsi1's rule: ROM rel 133 + Go! glyphs) instead. A lab whose faint happens at different frames in OFF than the A-press
-script assumes (playerfaint-slot2-sunnyday OFF) stops after the faint message in both ROM and engine; that is the lab's input timing, not the seam.
+(`partySendOutGoTextVisibleChars`), so a faint-replacement lab always shows `PRINTS ... missing 2`; read the SE 15 row (fsi1's rule: ROM rel 133 + Go! glyphs) instead. playerfaint-slot2-sunnyday in OFF reads 2 / 2 SEs and ends after the faint message in both ROM and engine (cause not investigated: the lab is an ON-timed script; not the seam).
 
 Lab design tips (each cost a re-run before):
 - **No stale files.** `run-mgba-probe.py` refuses an existing output path, so a re-probe needs a fresh name; `labCompare.sh` always writes a fresh run dir and, with an existing `--out`,
