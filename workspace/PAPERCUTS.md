@@ -2101,9 +2101,6 @@ delta tool (now `rst197CensusDelta.py --digest`, plus a WORKTREE arm for uncommi
 
 ## 2026-11-22 run (CAX31 supervisor + workers)
 
-- **The engine lab stage cannot run past a player faint replacement** ("playerParty[0] max HP N does not match rental record max HP M"): etk1 ~15 min, fsi1 (labs skipped), lsf1 ~25 min. lsf1
-  proved it is not fixable from the stage side: the labs use levels / sets no `FactoryRentalRecord` can express (records carry set id + IVs only; level 50 / 100). Needs a `src/` seam: the forced-switch
-  party state built from the lab's `LabBuiltMon` (`createPartySelectStateFromForcedSwitch` / orchestrator), production path unchanged.
 - **The soak / lbrd trajectory pins move on every timing merge** (hpb3, bbk1, etp3, abs1, rmw1, fsi1 all re-pinned `tests/randomRoundSoak.test.ts` seed 0 / seed 1 "full" or vanilla; every supervisor fold
   needed a measured re-pin). Bump of the 2026-11-21 entry; the measured-on-merged-tree method (keep both comments, run, read Received) costs ~5 min per fold.
 - **`npm run typecheck` waits on the shared `/tmp/pokebench-typecheck.lock`** behind another worker's `tsc` and hits the 600 s tool limit (hit2 ~15 min); briefs now say "900 s timeout". Bump.
