@@ -101,6 +101,13 @@ Found on the way (not an Open Level rule, not fixed): the occasional "re-drive o
 (`oracle/emerald_core.py` starts the emulated clock at the process start time; a process started in a ~30-second window each day draws
 another random value at the first menu). Pinning the clock would change every Level 50 tool run, so it is left for a decision.
 
+Long battles: Open census seed 208 Scene OFF (challenge 4; SUICUNE against DRAGONITE, both at Double Team +6, then both on Struggle)
+runs 250,400 frames, past the census tool's 200,000-frame budget, so `lsd194Census.ts` reports "frame budget" for it. Driven whole on
+the ROM with the long caps (`REPLAY_FRAME_BUDGET=6000000 REPLAY_DRIVE_FRAMES=2500000`): the battle ends on both sides (the player loses,
+outcome 2) after 367 decisions (365 moves, 2 send-ins); every state matches (377 / 377, the wide compare 367 / 367, 0 differences); the
+ROM's drive ends at the outcome after 253,698 frames. A real stall the ROM plays the same way, not an engine loop
+(`.integration/evidence/opl5/s208/`).
+
 ## Soak gates (crash / hang, frozen tree 5cc539e1e, `--level open`)
 
 The Level 50 gate set, every run `--level open`, on a frozen copy of 5cc539e1e (the later engine commits are the Open walk's
