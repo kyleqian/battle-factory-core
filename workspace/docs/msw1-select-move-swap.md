@@ -57,9 +57,19 @@ No library API change. SELECT already exists in `GbaButton` / `GBA_BUTTONS`, `no
 
 ## Known edge cases
 
-- A swap combined with Mimic (or other `REQUEST_MOVES_PP` party writes) in the same battle: the party write replaces the swapped order, so the swap record can be lost. The port keeps `moveOrder` only when the terminal party's moves are a permutation of the set's moves.
+- A swap combined with Mimic in the same battle is exact (msw2, below): Mimic never writes the party. Sketch is the only `REQUEST_MOVES_PP_BATTLE` party write and no Factory rental has it. The port still keeps `moveOrder` only when the terminal party's moves are a permutation of the set's moves.
 - Not in scope: test-player policies pressing SELECT, the Lobby, other menus.
 
 ## Gates
 
 Census 0..99 (`lsd194Census.sh`, `LSD194_CENSUS_JOBS=3 LSD194_SPLIT=4`, base 687c474a0 vs this branch, `rst197CensusDelta.py`): Scene OFF 100/100 identical (30813 commands), Scene ON 100/100 identical (31593 commands), bad 0 (the census never presses SELECT). Vanilla soak 0:20 OFF 20/20 (budget). Re-pin: `docs/gate6-coverage-manifest.{json,md}` regenerated (the new test references `BATTLE_SCRIPT_STATUS2_TRANSFORMED`).
+
+## msw2: SELECT swap + Mimic on the ROM (ISSUES #227, closed; 2026-11-21)
+
+The earlier worry (a Mimic party write replacing the swapped order and losing `moveOrder`) is not what the ROM does; the engine already agreed, so no engine change.
+
+- ROM (`.integration/evidence/msw2/romSwapMimic.py`, a `mechanicLab` with `overrides.parties`, both scenes identical): lead MACHAMP [MIMIC, CROSS CHOP, SPLASH, SING] vs three MAGIKARP with TACKLE. SELECT swaps 0<->1, MIMIC (cursor on slot 1) copies TACKLE, SELECT swaps 1<->3, the battle is won. After the first swap battler and party are [CC, MIMIC, SPLASH, SING]. After MIMIC the battler is [CC, TACKLE, SPLASH, SING] with `mimickedMoves` 0b0010 and the party is still [CC, MIMIC, SPLASH, SING] (party pp[1] 9). After the second swap the battler is [CC, SING, SPLASH, TACKLE] (mimicked 0b1000) and the party [CC, SING, SPLASH, MIMIC] (pp[3] 9).
+- Why: `Cmd_mimicattackcopy` writes `gBattleMons` only (and the mimicked bit). The party write `REQUEST_MOVES_PP_BATTLE` belongs to `Cmd_copymovepermanently` (Sketch), which a Factory mon cannot have (no rental has it; Mimic and Metronome cannot be Sketched in).
+- Engine before -> after: identical (battler, party, PP, mimicked bit after every step). `moveOrder` in the records after the win is the swap permutation ([1,0,3,2] in the test), the next battle starts with the party's order and no Mimic copy.
+- Pin: `tests/msw2MimicSwapPersistence.test.ts` (set 43 lead, seed 0: swap 0<->1, Wish, Mimic, swap 2<->3, win; and Mimic without a swap leaves every `moveOrder` unset).
+- Not modelled: a paused challenge resumed on the ROM rebuilds the party from `rentalMons` (`factory_setparties` on ResumeChallenge), which drops the swap order. The engine has no paused-challenge resume.

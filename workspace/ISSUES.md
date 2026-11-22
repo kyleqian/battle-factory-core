@@ -13,11 +13,6 @@ defects are all authorized in the finish-up mission (`docs/factory-finish-scope.
 gameplay / RNG when proved against source; use main-lane ownership and gameplay gates. Historical presentation-only
 exclusions are superseded. Unrelated expansions stay parked.
 
-## #227 — SELECT move swap: Mimic edge (msw1, 2026-11-20)
-
-SELECT move switching is ported (msw1, `docs/msw1-select-move-swap.md`; ROM `HandleMoveSwitching`). Open: a swap combined with Mimic writing the party in the same battle can
-lose the swap record (`moveOrder` on the rental records); not staged on the ROM.
-
 ## #225 — Frontier battle transitions: open remainder (Kyle, 2026-11-19: low priority)
 
 All twelve transitions are drawn from source and ROM-checked in both scenes (`docs/trn225-frontier-transitions.md`, trn226 for LOGO_WIGGLE and
@@ -30,7 +25,7 @@ LOGO_WAVE); the Noland room recordings that drew one are compared to the battle 
 
 Landed by btn1 + btn2 (`docs/subp1m-battle-text-pause.md` sections 6 / 7): every template-derived `\p` / `\l` / `PAUSE_UNTIL_PRESS` gate waits for a new A or B in both scenes; the Substitute fade lead (11 rows) and box, the release-to-moveendall rows, the frozen cursor, the accept edge (ROM: print + glyph count) and the Static scroll (5 rows) / Trick clear (0 rows) are ROM-measured. Open:
 - The `\l` scroll of the ability-blocking strings (`PROMPT_SCROLL_ROWS = 5`, measured on Static only) has no ROM window; the intermediate scroll images (rows P+1..P+5) are not compared (no Static / Trick compare stage).
-- The box clear after a release is 1 row late in the app (subhit 521 vs 520, roar 516 vs 515); the release rows apply only to a gated print directly before the turn-end (a mid-turn FADED follow-up is unmeasured).
+- The release rows apply only to a gated print directly before the turn-end (a mid-turn FADED follow-up is unmeasured); the roar lab's menu is 1 row before the ROM's (521 vs 522; the catcher runs say 6 or 7, `docs/subp1m-battle-text-pause.md` section 8).
 - For the website: these messages now need the player's A / B (`docs/library-package.md`, "Battle messages that wait for A or B").
 
 ## #221 — Lobby RNG cursor: harness / unmeasured routes (lbw1 / lbw2 / lbw3, 2026-11-15)
