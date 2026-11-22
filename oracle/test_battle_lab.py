@@ -22,6 +22,12 @@ from battle_lab import (
     SELECT_CONFIRM_ACCEPT,
     SELECT_CONFIRM_TO_ACTION_MENU,
     SB2_FACTORY_RENTS_SINGLES_50,
+    SB2_FACTORY_RENTS_SINGLES_OPEN,
+    SB2_FACTORY_WIN_STREAK_SINGLES_50,
+    SB2_FACTORY_WIN_STREAK_SINGLES_OPEN,
+    SB2_FRONTIER_BATTLE_NUM,
+    SB2_FRONTIER_LVL_MODE,
+    SB2_TOWER_WIN_STREAK_SINGLES_50,
     SELECT_TO_ACTION_MENU,
     SUBSTRUCT_POSITIONS,
     WALKUP_MAX_ACKS,
@@ -1322,6 +1328,114 @@ class SaveOffsetTests(unittest.TestCase):
         }
         self.assertIn(0xDF2, words)
         self.assertEqual(SB2_FACTORY_RENTS_SINGLES_50, 0xDF2)
+
+
+class OpenLevelTests(unittest.TestCase):
+    """opl3: `level: 100` stages an Open Level battle (frontier.lvlMode 1)."""
+
+    def setUp(self):
+        self.oracle = FakeOracle()
+        for set_id in range(110, 882):
+            base = self.oracle.symbols["gBattleFrontierMons"] + set_id * 16
+            self.oracle.write_u16(base, set_id + 1000)
+            for slot in range(4):
+                self.oracle.write_u16(base + 2 + slot * 2, set_id + slot)
+            self.oracle.write_u8(base + 10, 0)
+            self.oracle.write_u8(base + 11, 0x3F)
+            self.oracle.write_u8(base + 12, set_id % 25)
+        self.lab = BattleLab(self.oracle, "battle-scene-off")
+        self.oracle.symbols["gSaveBlock2Ptr"] = 0x20000
+        self.oracle.symbols["gSaveBlock1Ptr"] = 0x20004
+        self.oracle.write_u32(0x20000, 0x30000)
+        self.oracle.write_u32(0x20004, 0x40000)
+
+    def open_request(self, **changes) -> dict:
+        return request(**{"level": 100, "playerSetIds": [372, 373, 374], "opponentSetIds": [375, 376, 377], **changes})
+
+    def plan(self, value: dict):
+        normalized = validate_request(value, "battle-scene-off")
+        player = [self.lab.catalog.mon(i) for i in normalized["playerSetIds"]]
+        opponent = [self.lab.catalog.mon(i) for i in normalized["opponentSetIds"]]
+        return normalized, self.lab._validate_and_plan(normalized, player, opponent)
+
+    def test_level_is_50_or_100(self):
+        self.assertEqual(validate_request(request(), "battle-scene-off")["level"], 50)
+        self.assertEqual(validate_request(self.open_request(), "battle-scene-off")["level"], 100)
+        for level in (49, 51, 99, 101, True):
+            with self.subTest(level=level), self.assertRaises(ValueError):
+                validate_request(request(level=level), "battle-scene-off")
+
+    def test_open_level_accepts_high_tier_sets_level_50_refuses(self):
+        value = validate_request(
+            self.open_request(challengeNum=4, playerSetIds=[850, 860, 881], opponentSetIds=[372, 600, 870]),
+            "battle-scene-off",
+        )
+        self.assertEqual(value["playerSetIds"], (850, 860, 881))
+        with self.assertRaisesRegex(ValueError, "playerSetIds"):
+            validate_request(request(challengeNum=7, playerSetIds=[850, 372, 373]), "battle-scene-off")
+        with self.assertRaisesRegex(ValueError, "playerSetIds"):
+            validate_request(self.open_request(playerSetIds=[882, 372, 373]), "battle-scene-off")
+
+    def test_open_level_opponents_use_the_open_rows(self):
+        # battle_factory.c:181-189: Open challenge 0 is 372..467, challenge 4+ is 372..881.
+        self.plan(self.open_request())
+        with self.assertRaisesRegex(ValueError, "Open Level challenge 0 range 372..467"):
+            self.plan(self.open_request(opponentSetIds=[375, 376, 468]))
+        with self.assertRaisesRegex(ValueError, "Level-50 challenge 0 range 110..199"):
+            self.plan(request(opponentSetIds=[113, 114, 372]))
+        self.plan(self.open_request(challengeNum=4, trainerId=150, opponentSetIds=[375, 700, 881]))
+
+    def test_open_level_rentals_fill_from_the_open_rows(self):
+        _, plan = self.plan(self.open_request())
+        self.assertEqual(plan.selected_positions, (0, 1, 2))
+        self.assertTrue(all(372 <= mon.set_id <= 467 for mon in plan.candidates))
+        with self.assertRaisesRegex(ValueError, "cannot be assigned"):
+            self.plan(self.open_request(playerSetIds=[110, 372, 373], opponentSetIds=[375, 376, 377]))
+        # Rental rank 1 at Open challenge 3: position 0 draws from the next Open row (372..881, GetFactoryMonId adder 8 + 4).
+        _, ranked = self.plan(self.open_request(challengeNum=3, trainerId=130, rentalSwapCount=15,
+                                                playerSetIds=[870, 660, 661], opponentSetIds=[662, 663, 664]))
+        self.assertEqual(ranked.selected_positions, (0, 1, 2))
+        self.assertEqual(ranked.candidates[0].set_id, 870)
+
+    def test_open_level_writes_lvl_mode_and_the_open_slots(self):
+        save2 = 0x30000
+        self.oracle.write_u8(save2 + SB2_FRONTIER_LVL_MODE, 0xF2)
+        self.oracle.write_u16(save2 + SB2_FACTORY_WIN_STREAK_SINGLES_50, 0x1111)
+        self.oracle.write_u16(save2 + SB2_FACTORY_RENTS_SINGLES_50, 0x2222)
+        value = validate_request(
+            self.open_request(challengeNum=3, battleNum=2, trainerId=130, rentalSwapCount=17,
+                              playerSetIds=[660, 661, 662], opponentSetIds=[663, 664, 665]),
+            "battle-scene-off",
+        )
+        self.assertEqual(self.lab._stage_frontier_save(value), (save2, 23))
+        self.assertEqual(self.oracle.read_u8(save2 + SB2_FRONTIER_LVL_MODE), 0xF1)
+        self.assertEqual(self.oracle.read_u16(save2 + SB2_FACTORY_WIN_STREAK_SINGLES_OPEN), 23)
+        self.assertEqual(self.oracle.read_u16(save2 + SB2_FACTORY_RENTS_SINGLES_OPEN), 17)
+        # The Level 50 slots stay as they were; the Tower streak the stock bug reads is the Level 50 one either way.
+        self.assertEqual(self.oracle.read_u16(save2 + SB2_FACTORY_WIN_STREAK_SINGLES_50), 0x1111)
+        self.assertEqual(self.oracle.read_u16(save2 + SB2_FACTORY_RENTS_SINGLES_50), 0x2222)
+        self.assertEqual(self.oracle.read_u16(save2 + SB2_TOWER_WIN_STREAK_SINGLES_50), 23)
+        self.assertEqual(self.oracle.read_u16(save2 + SB2_FRONTIER_BATTLE_NUM), 2)
+
+    def test_level_50_staging_writes_are_unchanged(self):
+        save2 = 0x30000
+        self.oracle.write_u8(save2 + SB2_FRONTIER_LVL_MODE, 0xF1)
+        self.oracle.write_u16(save2 + SB2_FACTORY_WIN_STREAK_SINGLES_OPEN, 0x3333)
+        self.oracle.write_u16(save2 + SB2_FACTORY_RENTS_SINGLES_OPEN, 0x4444)
+        value = validate_request(request(challengeNum=1, battleNum=3, trainerId=90, rentalSwapCount=5,
+                                         playerSetIds=[162, 163, 164], opponentSetIds=[165, 166, 167]),
+                                 "battle-scene-off")
+        self.assertEqual(self.lab._stage_frontier_save(value), (save2, 10))
+        self.assertEqual(self.oracle.read_u8(save2 + SB2_FRONTIER_LVL_MODE), 0xF0)
+        self.assertEqual(self.oracle.read_u16(save2 + SB2_FACTORY_WIN_STREAK_SINGLES_50), 10)
+        self.assertEqual(self.oracle.read_u16(save2 + SB2_FACTORY_RENTS_SINGLES_50), 5)
+        self.assertEqual(self.oracle.read_u16(save2 + SB2_FACTORY_WIN_STREAK_SINGLES_OPEN), 0x3333)
+        self.assertEqual(self.oracle.read_u16(save2 + SB2_FACTORY_RENTS_SINGLES_OPEN), 0x4444)
+
+    def test_open_slots_follow_the_save_block_array_layout(self):
+        # factoryWinStreaks[2][2] at 0xDE2 and factoryRentsCount[2][2] at 0xDF2 (u16, [battleMode][lvlMode]): singles Open is +2.
+        self.assertEqual(SB2_FACTORY_WIN_STREAK_SINGLES_OPEN, SB2_FACTORY_WIN_STREAK_SINGLES_50 + 2)
+        self.assertEqual(SB2_FACTORY_RENTS_SINGLES_OPEN, SB2_FACTORY_RENTS_SINGLES_50 + 2)
 
 
 if __name__ == "__main__":

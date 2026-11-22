@@ -44,6 +44,18 @@ TRAINER_FRONTIER_BRAIN = 1022
 # real Noland encounters: silver (challenge 2) and gold (challenge 5).
 FACTORY_BRAIN_FIXED_IVS = {2: 15, 5: 31}
 LEVEL_50_MAX_SET_ID = 849
+# Open Level (frontier.lvlMode FRONTIER_LVL_OPEN = 1): every set row up to
+# NUM_FRONTIER_MONS - 1 (include/constants/battle_frontier_mons.h:897) is
+# dealable, the high-tier rows 850..881 included (no Level 50 guard,
+# battle_factory.c:350). The ROM builds the rentals and the battle party at
+# FRONTIER_MAX_LEVEL_OPEN = 100 (battle_factory_screen.c:1749-1752,
+# battle_factory.c:422-425) and the opponents at GetFrontierEnemyMonLevel
+# (battle_tower.c:3247-3265: the party's highest level, at least 60), so a
+# request names the level the ROM will build: 50 or 100.
+LEVEL_50 = 50
+LEVEL_OPEN = 100
+OPEN_MAX_SET_ID = 881
+FRONTIER_LVL_OPEN = 1
 ITEMS_COUNT = 377
 ABILITIES_COUNT = 78
 SPECIES_COUNT = 412
@@ -118,6 +130,14 @@ SB2_FACTORY_WIN_STREAK_SINGLES_50 = 0xDE2
 # The header's "0xDF6" comment is wrong: 0xDF6 is [1][0], the doubles
 # count (the ROM writes the singles Level 50 count at 0xDF2 in play).
 SB2_FACTORY_RENTS_SINGLES_50 = 0xDF2
+# The Open Level singles slots, factoryWinStreaks[0][1] and
+# factoryRentsCount[0][1]: the second u16 of each [battleMode][lvlMode] row
+# (include/global.h:423-425, FRONTIER_LVL_MODE_COUNT = 2). Inferred from the
+# array layout; the lab checks them on the ROM by what the select screen
+# builds (CreateFrontierFactorySelectableMons reads both through lvlMode,
+# battle_factory_screen.c:1743-1762).
+SB2_FACTORY_WIN_STREAK_SINGLES_OPEN = 0xDE4
+SB2_FACTORY_RENTS_SINGLES_OPEN = 0xDF4
 SB2_RENTAL_MONS = 0xE70
 
 # --- Frontier-Brain walk-up staging (`factoryBrain` + `walkup: true`) -------
@@ -223,7 +243,43 @@ LEVEL_50_SET_RANGES = (
     (660, 755),
     (372, 849),
 )
+# sInitialRentalMonRanges' Open Level rows (battle_factory.c:181-189), which
+# GetFactoryMonId reads with adder 8 (:834-837).
+OPEN_SET_RANGES = (
+    (372, 467),
+    (468, 563),
+    (564, 659),
+    (660, 755),
+    (372, 881),
+    (372, 881),
+    (372, 881),
+    (372, 881),
+)
 RENTAL_RANK_THRESHOLDS = (15, 22, 29, 36, 43)
+
+
+def set_ranges_for_level(level: int) -> tuple[tuple[int, int], ...]:
+    return OPEN_SET_RANGES if level == LEVEL_OPEN else LEVEL_50_SET_RANGES
+
+
+def max_set_id_for_level(level: int) -> int:
+    return OPEN_MAX_SET_ID if level == LEVEL_OPEN else LEVEL_50_MAX_SET_ID
+
+
+def factory_streak_offset(level: int) -> int:
+    return (
+        SB2_FACTORY_WIN_STREAK_SINGLES_OPEN
+        if level == LEVEL_OPEN
+        else SB2_FACTORY_WIN_STREAK_SINGLES_50
+    )
+
+
+def factory_rents_offset(level: int) -> int:
+    return (
+        SB2_FACTORY_RENTS_SINGLES_OPEN
+        if level == LEVEL_OPEN
+        else SB2_FACTORY_RENTS_SINGLES_50
+    )
 
 # This is the canonical, deliberately generous Scene-OFF route from the
 # rental selection screen to the first action menu.  It selects slots 0, 1,
@@ -495,8 +551,10 @@ def validate_request(value: object, profile: str) -> dict:
         raise ValueError(
             f"profile {requested_profile!r} does not match this oracle service ({profile!r})"
         )
-    level = _integer(value.get("level", 50), "level", 50, 50)
-    max_set_id = LEVEL_50_MAX_SET_ID
+    level = _integer(value.get("level", LEVEL_50), "level", LEVEL_50, LEVEL_OPEN)
+    if level not in (LEVEL_50, LEVEL_OPEN):
+        raise ValueError("level must be 50 (Level 50) or 100 (Open Level)")
+    max_set_id = max_set_id_for_level(level)
     walkup = value.get("walkup", False)
     if not isinstance(walkup, bool):
         raise ValueError("walkup must be a boolean")
@@ -715,42 +773,8 @@ class BattleLab:
         capture_pre_checkpoint()
 
         walkup = request["walkup"]
-        save2 = self.oracle.read_u32(self.oracle.symbols["gSaveBlock2Ptr"])
+        save2, current_streak = self._stage_frontier_save(request)
         challenge_index = min(request["challengeNum"], 7)
-        lvl_mode_clear = 0x3 | (SB2_DISABLE_RECORD_BATTLE_BIT if walkup else 0)
-        self.oracle.write_u8(
-            save2 + SB2_FRONTIER_LVL_MODE,
-            self.oracle.read_u8(save2 + SB2_FRONTIER_LVL_MODE) & ~lvl_mode_clear,
-        )
-        current_streak = request["challengeNum"] * 7 + request["battleNum"]
-        # The walk-up stages the state right after the *previous* battle's
-        # win: the redirected post-win fragment then performs the ROM's own
-        # streak and battle-number increments to the final values.
-        self.oracle.write_u16(
-            save2 + SB2_FRONTIER_BATTLE_NUM,
-            request["battleNum"] - 1 if walkup else request["battleNum"],
-        )
-        self.oracle.write_u16(
-            save2 + SB2_FACTORY_WIN_STREAK_SINGLES_50,
-            current_streak - 1 if walkup else current_streak,
-        )
-        # The stock Emerald bug reads the Tower streak for opponent IVs.
-        # Nothing on the walk-up path increments it, so it is staged at the
-        # final value in both stagings and the eventual battle state matches
-        # the plain factoryBrain staging exactly.
-        self.oracle.write_u16(
-            save2 + SB2_TOWER_WIN_STREAK_SINGLES_50,
-            current_streak,
-        )
-        if request["mode"] == "factoryBrain" and request["challengeNum"] == 5:
-            # Gold is only reachable with the silver symbol earned;
-            # GetFrontierBrainStatus otherwise reads NOT_READY at streak 41
-            # and the ROM stages an ordinary trainer instead of gold Noland.
-            self._set_factory_symbol_flag(FLAG_SYS_FACTORY_SILVER)
-        self.oracle.write_u16(
-            save2 + SB2_FACTORY_RENTS_SINGLES_50,
-            request["rentalSwapCount"],
-        )
 
         for index, mon in enumerate(rental_plan.candidates):
             self.oracle.write_u16(
@@ -832,7 +856,7 @@ class BattleLab:
                 save2_after + SB2_FRONTIER_BATTLE_NUM
             )
             streak_after = self.oracle.read_u16(
-                save2_after + SB2_FACTORY_WIN_STREAK_SINGLES_50
+                save2_after + factory_streak_offset(request["level"])
             )
             if battle_num_after != request["battleNum"] or streak_after != current_streak:
                 raise RuntimeError(
@@ -1599,17 +1623,20 @@ class BattleLab:
                 self._rental_rank(request["rentalSwapCount"]),
                 player,
                 opponent,
+                set_ranges_for_level(request["level"]),
             )
         if request["mode"] == "factoryLegal":
             rental_rank = self._rental_rank(request["rentalSwapCount"])
             for mon in player:
                 if mon.species == SPECIES_UNOWN:
                     raise ValueError(f"player set {mon.set_id} is Unown, which Factory forbids")
-            low, high = LEVEL_50_SET_RANGES[challenge]
+            ranges = set_ranges_for_level(request["level"])
+            low, high = ranges[challenge]
+            level_name = "Open Level" if request["level"] == LEVEL_OPEN else "Level-50"
             for mon in opponent:
                 if not low <= mon.set_id <= high:
                     raise ValueError(
-                        f"opponent set {mon.set_id} is outside Level-50 challenge "
+                        f"opponent set {mon.set_id} is outside {level_name} challenge "
                         f"{request['challengeNum']} range {low}..{high}"
                     )
                 if mon.species == SPECIES_UNOWN:
@@ -1630,7 +1657,7 @@ class BattleLab:
                 raise ValueError(
                     f"opponent species overlap the rental pool: {sorted(repeated)}"
                 )
-            return self._plan_rentals(challenge, rental_rank, player, opponent)
+            return self._plan_rentals(challenge, rental_rank, player, opponent, ranges)
 
         # mechanicLab still needs a legal source route. It may replace the
         # complete parties before battle initialization or use the legacy
@@ -1653,13 +1680,14 @@ class BattleLab:
         rental_rank: int,
         player: list[FacilityMon],
         opponent: list[FacilityMon],
+        ranges: tuple[tuple[int, int], ...] = LEVEL_50_SET_RANGES,
     ) -> RentalPlan:
         selected_positions = next(
             (
                 positions
                 for positions in permutations(range(6), 3)
                 if all(
-                    self._set_in_position(mon.set_id, challenge, rental_rank, position)
+                    self._set_in_position(mon.set_id, challenge, rental_rank, position, ranges)
                     for mon, position in zip(player, positions)
                 )
             ),
@@ -1682,7 +1710,7 @@ class BattleLab:
                 return True
             if candidates[position] is not None:
                 return fill(position + 1)
-            low, high = self._rental_position_range(challenge, rental_rank, position)
+            low, high = self._rental_position_range(challenge, rental_rank, position, ranges)
             for set_id in range(low, high + 1):
                 mon = self.catalog.mon(set_id)
                 if mon.species == SPECIES_UNOWN or mon.species in used_species:
@@ -1723,10 +1751,11 @@ class BattleLab:
         challenge: int,
         rental_rank: int,
         position: int,
+        ranges: tuple[tuple[int, int], ...] = LEVEL_50_SET_RANGES,
     ) -> tuple[int, int]:
         if position < rental_rank and challenge < 7:
-            return LEVEL_50_SET_RANGES[challenge + 1]
-        return LEVEL_50_SET_RANGES[challenge]
+            return ranges[challenge + 1]
+        return ranges[challenge]
 
     @classmethod
     def _set_in_position(
@@ -1735,8 +1764,9 @@ class BattleLab:
         challenge: int,
         rental_rank: int,
         position: int,
+        ranges: tuple[tuple[int, int], ...] = LEVEL_50_SET_RANGES,
     ) -> bool:
-        low, high = cls._rental_position_range(challenge, rental_rank, position)
+        low, high = cls._rental_position_range(challenge, rental_rank, position, ranges)
         return low <= set_id <= high
 
     def _apply_overrides(self, overrides: dict) -> None:
@@ -1950,6 +1980,54 @@ class BattleLab:
                 "draft waitstate; refusing to redirect it"
             )
         self.oracle.write_u32(ctx + SCRIPT_CTX_SCRIPT_PTR, target)
+
+    def _stage_frontier_save(self, request: dict) -> tuple[int, int]:
+        """Write the challenge's SaveBlock2 / SaveBlock1 inputs (level mode,
+        battle number, streak, Tower streak, symbols, rent count); return the
+        SaveBlock2 pointer and the staged current streak."""
+        walkup = request["walkup"]
+        save2 = self.oracle.read_u32(self.oracle.symbols["gSaveBlock2Ptr"])
+        lvl_mode_clear = 0x3 | (SB2_DISABLE_RECORD_BATTLE_BIT if walkup else 0)
+        # lvlMode (bits 0-1): FRONTIER_LVL_50 = 0 (cleared, as before) or
+        # FRONTIER_LVL_OPEN = 1 for a level-100 request.
+        lvl_mode_set = FRONTIER_LVL_OPEN if request["level"] == LEVEL_OPEN else 0
+        self.oracle.write_u8(
+            save2 + SB2_FRONTIER_LVL_MODE,
+            (self.oracle.read_u8(save2 + SB2_FRONTIER_LVL_MODE) & ~lvl_mode_clear)
+            | lvl_mode_set,
+        )
+        current_streak = request["challengeNum"] * 7 + request["battleNum"]
+        # The walk-up stages the state right after the *previous* battle's
+        # win: the redirected post-win fragment then performs the ROM's own
+        # streak and battle-number increments to the final values.
+        self.oracle.write_u16(
+            save2 + SB2_FRONTIER_BATTLE_NUM,
+            request["battleNum"] - 1 if walkup else request["battleNum"],
+        )
+        self.oracle.write_u16(
+            save2 + factory_streak_offset(request["level"]),
+            current_streak - 1 if walkup else current_streak,
+        )
+        # The stock Emerald bug reads the Tower streak for opponent IVs, and
+        # always its Level 50 slot, at Open Level too
+        # (towerWinStreaks[battleMode][FRONTIER_LVL_50], battle_tower.c:1840-1842).
+        # Nothing on the walk-up path increments it, so it is staged at the
+        # final value in both stagings and the eventual battle state matches
+        # the plain factoryBrain staging exactly.
+        self.oracle.write_u16(
+            save2 + SB2_TOWER_WIN_STREAK_SINGLES_50,
+            current_streak,
+        )
+        if request["mode"] == "factoryBrain" and request["challengeNum"] == 5:
+            # Gold is only reachable with the silver symbol earned;
+            # GetFrontierBrainStatus otherwise reads NOT_READY at streak 41
+            # and the ROM stages an ordinary trainer instead of gold Noland.
+            self._set_factory_symbol_flag(FLAG_SYS_FACTORY_SILVER)
+        self.oracle.write_u16(
+            save2 + factory_rents_offset(request["level"]),
+            request["rentalSwapCount"],
+        )
+        return save2, current_streak
 
     def _set_factory_symbol_flag(self, flag: int) -> None:
         save1 = self.oracle.read_u32(self.oracle.symbols["gSaveBlock1Ptr"])
