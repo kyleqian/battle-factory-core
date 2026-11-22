@@ -2098,3 +2098,20 @@ delta tool (now `rst197CensusDelta.py --digest`, plus a WORKTREE arm for uncommi
 - **`play:random` in a pinned worktree needs `.integration/browser` linked** (playwright lives there; ~5 min, known from dl3 / dl4).
 - Workers keep hitting the 10-minute tool cap on soaks (vanilla 0:20 ~24 min, winning 0:60 ~50 min) and on typecheck / build (~5 min each, auto-backgrounded at 120 s).
 - **`tests/iss215ToolPixelInstall.test.ts` is not in `test:gate`**: a tools-only step that adds an engine-driving tool without `monPicPixelsInstall.ts` passes the gate and breaks the full suite (b4m / hcr3m, found by cln11). Add it to the gate list.
+
+## 2026-11-22 run (CAX31 supervisor + workers)
+
+- **The engine lab stage cannot run past a player faint replacement** ("playerParty[0] max HP N does not match rental record max HP M"): etk1 ~15 min, fsi1 (labs skipped), lsf1 ~25 min. lsf1
+  proved it is not fixable from the stage side: the labs use levels / sets no `FactoryRentalRecord` can express (records carry set id + IVs only; level 50 / 100). Needs a `src/` seam: the forced-switch
+  party state built from the lab's `LabBuiltMon` (`createPartySelectStateFromForcedSwitch` / orchestrator), production path unchanged.
+- **The soak / lbrd trajectory pins move on every timing merge** (hpb3, bbk1, etp3, abs1, rmw1, fsi1 all re-pinned `tests/randomRoundSoak.test.ts` seed 0 / seed 1 "full" or vanilla; every supervisor fold
+  needed a measured re-pin). Bump of the 2026-11-21 entry; the measured-on-merged-tree method (keep both comments, run, read Received) costs ~5 min per fold.
+- **`npm run typecheck` waits on the shared `/tmp/pokebench-typecheck.lock`** behind another worker's `tsc` and hits the 600 s tool limit (hit2 ~15 min); briefs now say "900 s timeout". Bump.
+- **Two `tsc -b` / full-suite forks at once took the box to 213 MB free** (rmw1 typecheck 5.9 GB + the supervisor's mid-run full suite, 20:04); swap absorbed it. Keep one typecheck at a time beside a full suite.
+- **Supervisor `cd` into a worktree that failed to create** (a `fold-b` branch already existed: the kept 11-20 branch `0a63934b2`): the next `git merge` ran against the main tree (it refused on a worker's
+  dirty file; nothing changed). Use a fresh fold name and test `-d` before `cd`.
+- **`labCompare.sh --scene both` on a `-on` lab runs OFF on the same lab** and reports 0 SEs (OFF plays no body SEs); easy to misread (etp3).
+- **A canonical trace without `appRoute` compares 0/N wholesale** and the warning is easy to miss (rmw1 ~15 min: five `battle1-postwin-*` traces were 0/199 for that reason only).
+- **The frame catcher's `compare.py` / `peek.py` need numpy** (run under `/srv/pokebench/vendor/mgba-venv/bin/python`; the error does not say so; lbf1 ~10 min).
+- **`labCompare`'s print aligner mis-pairs rows when prints differ** (hit2 ~10 min); `run-mgba-probe.py` refuses stale outputs and logs (delete both first; hit2 ~5 min).
+- **Probe fixtures recorded in hybrid mode fail `tests/audioProbeFixtures.test.ts`** (expects step mode + a fixed list; hit2's two fixtures, not in the gate; supervisor re-recorded them in step mode).
