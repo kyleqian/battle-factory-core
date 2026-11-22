@@ -27,7 +27,8 @@ describe("apx222: one staged command per class / new body draws non-static rows,
     ["no-adapter: Odor Sleuth 316 by the player (Move_ODOR_SLEUTH)", 705, 316, 0, "approx:no-adapter", 153],
     ["no-adapter: False Swipe 206 by the player (Move_FALSE_SWIPE)", 705, 206, 0, "approx:no-adapter", 97],
     ["no-adapter: Gust 16 by the player (Move_GUST)", 197, 16, 0, "approx:no-adapter", 136],
-    ["no-adapter: Pay Day 6 by the player (Move_PAY_DAY)", 923, 6, 0, "approx:no-adapter", 85],
+    // sbm1: Pay Day 85 -> 90 (+ the 5 rows of Task_ClearMonBg after its last picture; aud262-payday-player-on effectiveness SE 145 -> 150, ROM 151).
+    ["no-adapter: Pay Day 6 by the player (Move_PAY_DAY)", 923, 6, 0, "approx:no-adapter", 90],
     ["no-adapter: Barrage 140 by the opponent (Move_BARRAGE)", 803, 140, 1, "approx:no-adapter", 71],
     ["no-adapter: Conversion 2 176 by the opponent (Move_CONVERSION_2)", 736, 176, 1, "approx:no-adapter", 181],
   ] as [string, number, number, number, string, number][])("%s", (_name, seed, moveId, attacker, code, rows) => {

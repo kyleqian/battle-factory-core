@@ -47,10 +47,11 @@ describe("sst1: ordinary play (seed 44, Scene ON: PUPITAR's and ONIX's sandstorm
   it("SE_M_SANDSTORM 88 frames after the first print, the buffeted print at 258 or 264 by turn order, as on the ROM", () => {
     // the merge with the box's run re-rolled the test player's round (a trajectory, not a ROM frame): 5 sandstorm end turns, was 6
     const turns = sandstormTurns(44, 6);
-    expect(turns.length).toBe(5);
+    // swt1 (the opponent faint replacement's next print 9 frames later, ROM release +12; the soak player's round shifts): 6 sandstorm end turns again within the 120000-frame cap; the per-turn ROM values are unchanged
+    expect(turns.length).toBe(6);
     expect(turns.every((t) => t.se === 88)).toBe(true);
     expect(turns.every((t) => t.buffeted === 258 || t.buffeted === 264)).toBe(true);
     // both cases occur: PUPITAR (unhurt) moved first in the first two turns, YANMA / ELEKID (hurt) first after
-    expect(turns.map((t) => t.buffeted)).toEqual([264, 264, 258, 258, 258]);
+    expect(turns.map((t) => t.buffeted)).toEqual([264, 264, 258, 258, 258, 258]);
   }, 120000);
 });
