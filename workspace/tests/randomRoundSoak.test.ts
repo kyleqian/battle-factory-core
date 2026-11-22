@@ -1087,7 +1087,9 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // 68945 / battle 3 / depth 2 / turn 21; still OK / roundLost. A trajectory pin, not a ROM frame.
       // hie7 (the segment after the player's forced send-in resumes 6 frames before the action prompt, ROM s5063 d45 / s6912 d2 exec row): frames only,
       // 68945 -> 68927 (three post-send-in script resumes x 6); same battle 3 / depth 2 / turn 21 / roundLost. A trajectory pin, not a ROM frame.
-      frames: 68927,
+      // etp3 item 2 (BattleScript_SideStatusWoreOff's print takes the end-turn head, 10 rows after MoveEnd's first row, ROM labs etp3-lightscreenls6-{on,off}: MoveEnd 4862 -> printstring 4872): frames only,
+      // 68927 -> 68949; same battle 3 / depth 2 / turn 21 / roundLost. A trajectory pin, not a ROM frame.
+      frames: 68949,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 2,

@@ -275,8 +275,6 @@ function statusAnimationScriptAge(state: BattleResolutionPresentationState, name
   // Poison / Burn / Paralysis outside a B4 body keep the 10 (the same change moved them away from the ROM: SE 148 +216, 119 +43, 144 +24).
   return name === "SLP" || name === "CONFUSION" || name === "INFATUATION" ? STATUS_ANIMATION_AUDITED_BODY_SCRIPT_AGE : STATUS_ANIMATION_SCRIPT_AGE;
 }
-/** Weather-continues body age -> script row: the move-body clock (FIRST_COMMAND_AGE + AGE_TO_SOUND_ROWS). */
-const WEATHER_SCRIPT_AGE = FIRST_COMMAND_AGE + AGE_TO_SOUND_ROWS;
 
 /** aud250: command age -> script row of the General_* commands (ROM windows: focus punch x2 sides, leech seed drain x2 sides, castform rain-opp in both scenes). */
 export const FOCUS_PUNCH_SETUP_SCRIPT_AGE = 5;
@@ -370,9 +368,9 @@ export function emitGeneralAnimSounds(after: BattleResolutionPresentationState |
     // docs/rnc1-rain-continues.md), so SE_M_RAIN_DANCE (script row 3) plays at command row 5 as on the ROM; it was 7 rows late.
     // sst1: General_Sandstorm's sounds run on the body's own clock (the art's: weatherContinuesBodyEffect draws script row `age`); on the
     // move-body sound clock SE_M_SANDSTORM played 8 rows after the ROM's (frame catcher, 15 end turns: 7 frames before the first sand
-    // picture on the ROM, 1 after on ours, the pictures frame for frame the ROM's). hit2: Hail's General_Hail is the same script and the same clock (labs etp1-hail-on / etp2-hail-on: its 10 SEs were +8). Sun keeps the move-body clock (not in the sweep).
-    const scriptRow = command.animation === "RAIN_CONTINUES" ? elapsed - RAIN_CONTINUES_SCRIPT_START_ROWS
-      : command.animation === "SANDSTORM_CONTINUES" || command.animation === "HAIL_CONTINUES" ? age : age - WEATHER_SCRIPT_AGE;
+    // picture on the ROM, 1 after on ours, the pictures frame for frame the ROM's). hit2 / etp3: Sun and Hail the same (labs etp1-{sun5,hail5}-on: every
+    // SE_M_SUNNY_DAY / SE_M_HAIL row was exactly 8 rows late on the move-body clock, ROM SE = the script row on the body's own clock).
+    const scriptRow = command.animation === "RAIN_CONTINUES" ? elapsed - RAIN_CONTINUES_SCRIPT_START_ROWS : age;
     emitOpsAt(generalVariant(WEATHER_LABELS[command.animation], command.battler), {
       attackerSide: command.battler === 0 ? "player" : "opponent", targetSide: command.battler === 0 ? "opponent" : "player",
     }, scriptRow, true);
