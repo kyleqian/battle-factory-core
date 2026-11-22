@@ -12,7 +12,8 @@
 // drain) are recorded under the move that causes them, with the request flags production gives them. `undrawn` lists the requests with a
 // live body of which no row drew (the recording cannot see those). The other general animations a move causes (Wish's heal, Knock Off's
 // item, Focus Punch's tightening...) are not move bodies: the staged battles of animAssetNeeds.ts `stage` record them through the real
-// game. Needs the full tables installed (import monPicPixelsInstall.ts first).
+// game. Draws over the full tables (monPicPixelsInstall.ts installs the pictures and every animation file).
+import "../../src/engine/monPicPixelsInstall.ts";
 import movesData from "../../src/data/gen/moves.json" with { type: "json" };
 import frontierMonsData from "../../src/data/gen/battle-frontier-mons.json" with { type: "json" };
 import roundPolicyData from "../../src/data/gen/factory-round-policy.json" with { type: "json" };
