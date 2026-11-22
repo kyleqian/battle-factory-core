@@ -343,7 +343,10 @@ export function attendantAcceptsInput(state: FactoryLobbyAttendantState): boolea
   const typed = attendantLastGlyphAge(state.screen, state.page);
   if (def.menu !== null && state.page === last) return state.age >= (attendantMenuAppearAge(state.screen) ?? Infinity);
   if (def.autoHold !== null || state.screen === "saved") return false;
-  return state.age > typed;
+  // abs1 (ROM scans, docs/abs1-ab-text-speedup.md): a `\p` / `\l` wait takes A / B from the last glyph's own frame; a message's end
+  // (waitmessage, waitbuttonpress) from two frames after it.
+  const pageEnd = def.pages[state.page]!.end;
+  return pageEnd === "p" || pageEnd === "l" ? state.age >= typed : state.age > typed + 1;
 }
 
 /** Tick of the post-choice lead at which the old page clears; a YES/NO declined to the farewell clears one frame later. */
