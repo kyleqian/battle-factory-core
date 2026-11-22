@@ -9,6 +9,7 @@ import speciesStatsData from "../../src/data/gen/species-stats.json" with { type
 import speciesTypesData from "../../src/data/gen/species-types.json" with { type: "json" };
 import type { BattleScriptPartyMemberInput } from "../../src/engine/battleScriptRulesContext.ts";
 import type { FactoryFullTurnBattlerConfig } from "../../src/engine/factoryBattleScriptFullTurnDecision.ts";
+import type { PartySelectLabMember } from "../../src/engine/partySelect.ts";
 import { calculateMaxHp, calculateOtherStat, type NatureModifier } from "../../src/engine/stats.ts";
 
 export const LAB_STAT_NAMES = ["hp", "attack", "defense", "speed", "spAttack", "spDefense"] as const;
@@ -46,6 +47,8 @@ export interface LabBuiltMon {
   readonly member: BattleScriptPartyMemberInput;
   readonly personality: number;
   readonly maxHp: number;
+  /** lsf2: the party-menu identity of this mon (a forced selector reads it instead of a rental record). */
+  readonly partyMember: PartySelectLabMember;
 }
 
 type SpeciesRow = { id: number; name: string; baseHp: number; baseAttack: number; baseDefense: number; baseSpeed: number; baseSpAttack: number; baseSpDefense: number; abilities: readonly [string, string]; genderRatio: number };
@@ -158,7 +161,16 @@ export function buildLabMon(mon: LabMon, ctx: LabMonContext): LabBuiltMon {
     moves,
     pp,
   });
-  return { config, member, personality, maxHp };
+  const partyMember: PartySelectLabMember = Object.freeze({
+    species: species.id,
+    speciesName: species.name,
+    level,
+    personality,
+    abilitySlot,
+    friendship,
+    item,
+  });
+  return { config, member, personality, maxHp, partyMember };
 }
 
 // The fields the hand-written Rattata-era stages approximate (personality 150, friendship 0, PP 20, Run Away on every species, a Splash bench of two Rattata) and the generic stage
