@@ -273,21 +273,6 @@ export const PARTY_SELECT_OPEN_TOTAL_FRAMES =
   + PARTY_SELECT_OPEN_BLACK_HOLD_FRAMES
   + PARTY_SELECT_OPEN_MENU_FADE_FRAMES;
 
-/**
- * ISSUES #80 Class B (`docs/fade-layer-forensics.md` §9 RAM probe): the
- * player healthbox sprite's real `y2` steps 0→1 at oracle frame 770
- * (`openElapsed 7`), so from there it is drawn one row lower. Applied as a
- * +1px draw-origin offset on the open field-fade-out's settled scene.
- */
-export const PARTY_SELECT_OPEN_HEALTHBOX_Y2_START = 7;
-/**
- * ISSUES #80 Class B (`docs/fade-layer-forensics.md` §9 RAM probe): the
- * player back sprite's real `y2` steps 1→0 at oracle frame 779
- * (`openElapsed 16`), so from there it is drawn one row higher. Applied as a
- * −1px draw-origin offset on the open field-fade-out's settled scene.
- */
-export const PARTY_SELECT_OPEN_BACK_SPRITE_Y2_START = 16;
-
 export function battlePartySelectOpenPhase(
   openElapsed: number,
 ): BattlePartySelectOpenPhase {

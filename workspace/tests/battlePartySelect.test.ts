@@ -6,11 +6,9 @@ import {
   PARTY_SELECT_CLOSE_MENU_FADE_FRAMES,
   PARTY_SELECT_CLOSE_MENU_FRAMES,
   PARTY_SELECT_CLOSE_TOTAL_FRAMES,
-  PARTY_SELECT_OPEN_BACK_SPRITE_Y2_START,
   PARTY_SELECT_OPEN_BLACK_HOLD_FRAMES,
   PARTY_SELECT_OPEN_BRIGHT_HOLD_FRAMES,
   PARTY_SELECT_OPEN_FIELD_FADE_FRAMES,
-  PARTY_SELECT_OPEN_HEALTHBOX_Y2_START,
   PARTY_SELECT_OPEN_MENU_FADE_FRAMES,
   PARTY_SELECT_OPEN_TOTAL_FRAMES,
   advanceBattlePartySelect,
@@ -447,14 +445,12 @@ describe("voluntary battle party selector", () => {
     expect(renderAt(6)).toEqual({ bg: [189, 189, 189], obj: [132, 49, 0] });
   });
 
-  it("draws the player healthbox one row lower from openElapsed 7 and the player back sprite one row higher from openElapsed 16 (ISSUES #80 Class B)", () => {
-    // docs/fade-layer-forensics.md §9 (RAM probe): the healthbox sprite's real
-    // `y2` steps 0→1 at oracle frame 770 (openElapsed 7) and the back sprite's
-    // real `y2` steps 1→0 at frame 779 (openElapsed 16). Both are draw-origin
-    // offsets gated on `openElapsed` inside the open scene draw, so each
-    // sprite's own edges/bevel/slanted corner move with it. Rendered at the
-    // settled (unfaded) scene: the shifted render's content at row Y+1 (healthbox)
-    // / row Y-1 (back sprite) equals the unshifted render's content at row Y.
+  it("keeps the healthbox / back-sprite bounce running through the open window (bob1; replaces the ISSUES #80 Class B fixed offsets)", () => {
+    // ReshowBattleScreenAfterMenu is only on the return path: while the party
+    // menu opens the battle's bounce sprites keep stepping, so the open-window
+    // scene at `openElapsed` is the action menu `openElapsed` bounce ticks later
+    // (flw252-bob1-cancel-off frames 41..58 match byte for byte; the old fixture
+    // fit "healthbox +1 from 7, back sprite -1 from 16" is this same clock).
     const { request, rulesContext } = liveSelectorParts();
     const presentation = createBattleCommandPresentation(request, rulesContext);
     const actionMenu = Object.freeze({
@@ -464,28 +460,19 @@ describe("voluntary battle party selector", () => {
         phaseElapsed: presentation.lifecycle.phaseElapsed,
       }),
     });
-    const renderAt = (openElapsed: number): Uint8Array => {
+    const render = (state: typeof actionMenu, openElapsed?: number): Uint8Array => {
       const fb = createFramebuffer();
-      renderGeneratedBattleCommandPresentation(fb, actionMenu, "all", openElapsed);
+      renderGeneratedBattleCommandPresentation(fb, state, "all", openElapsed);
       return fb;
     };
-    const px = (fb: Uint8Array, x: number, y: number): readonly [number, number, number] => {
-      const i = (y * 240 + x) * 4;
-      return [fb[i]!, fb[i + 1]!, fb[i + 2]!] as const;
-    };
-    expect(PARTY_SELECT_OPEN_HEALTHBOX_Y2_START).toBe(7);
-    expect(PARTY_SELECT_OPEN_BACK_SPRITE_Y2_START).toBe(16);
-    // Healthbox top-frame row: at openElapsed 6 it sits at row 74; at 7 it is
-    // drawn one row lower -- row 74 shows the floor above it and row 75 shows
-    // the frame row 74 had.
-    expect(px(renderAt(6), 139, 74)).toEqual([123, 148, 132]);
-    expect(px(renderAt(7), 139, 75)).toEqual([123, 148, 132]);
-    expect(px(renderAt(7), 139, 74)).not.toEqual([123, 148, 132]);
-    // Back sprite ear tip: at openElapsed 15 the sprite's first body row is at
-    // 59; at 16 it is drawn one row higher -- the ear-tip pixel now sits at 58.
-    expect(px(renderAt(15), 86, 58)).toEqual([247, 247, 255]);
-    expect(px(renderAt(16), 86, 58)).not.toEqual([247, 247, 255]);
-    expect(px(renderAt(16), 86, 58)).toEqual(px(renderAt(15), 86, 59));
+    const distinct = new Set<string>();
+    for (let e = 0; e <= 60; e += 1) {
+      const open = render(actionMenu, e);
+      const advanced = render({ ...actionMenu, idleBounceElapsed: actionMenu.idleBounceElapsed + e });
+      expect(Buffer.from(open).equals(Buffer.from(advanced))).toBe(true);
+      distinct.add(Buffer.from(open).toString("base64"));
+    }
+    expect(distinct.size).toBeGreaterThan(1);
   });
 
   it("increments openElapsed alongside elapsed and renders a field-fade-out open frame black-free when assets are absent (ISSUES #80 open remainder (b))", () => {
