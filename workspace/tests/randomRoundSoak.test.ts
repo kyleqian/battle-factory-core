@@ -733,7 +733,9 @@ describe("random round soak driver (green milestone pin)", () => {
     // chg4 (the first charging turn of Dig / Fly / Solar Beam ... after another action in the same turn is an action-transition print: Scene OFF +18 rows, Scene ON +8 over the old placement,
     // ROM labs chg4-dig-lightscreen-{on,off}; the exploring presses land on new phases): seed 20 no longer commits Baton Pass. Re-scanned full-policy seeds 0..39 (tools/soak/batonPassSearch.ts
     // --seeds 0:40, same options): candidates 24, 25, 27. Seed 24 is the lowest. Pin 20 -> 24.
-    const result = runSeed(24, {
+    // rmw1 (the draft menu takes its first mash A 2 ticks before the mon pic table ends, as the ROM; the exploring presses land on new phases): seed 24 no longer commits
+    // Baton Pass. Re-scanned full-policy seeds 0..39 (tools/soak/batonPassSearch.ts --seeds 0:40 --parallel 2, same options): candidates 12, 14, 25. Seed 12 is the lowest (Baton Pass commits 3, first commit 67261, halt 67300 on AIPOM in battleIndex 0, two Lobby new challenges). Pin 24 -> 12.
+    const result = runSeed(12, {
       maxFrames: 80_000,
       renderEvery: 0,
       coverage: observer as never,
@@ -1101,7 +1103,9 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // hpb3 (a drain heal that changes nothing now holds its print by the ROM's datahpupdate -> print rows instead of the 28-row floor, T2 ON s6 d3 bar row 521 / print row 525; the exploring presses land on new phases):
       // 68927 / battle 3 / depth 2 / turn 21 -> 94213 / battle 4 / depth 3 / turn 18; still OK / roundLost. A trajectory pin, not a ROM frame.
       // supervisor merge of bbk1 + etp3 + abs1 + hpb3 (measured on the merged tree): hpb3 does not move the 40485 / battle 2 / turn 24 trajectory.
-      frames: 40485,
+      // rmw1 (the draft menu takes its first mash A 2 ticks before the mon pic table ends, as the ROM): frames only, 40485 -> 40479; same battle 2 / depth 1 / turn 24 / roundLost.
+      // supervisor merge of rmw1 with master (bbk1 / etp3 / abs1 / hpb3), measured on the merged tree: 40479 / battle 2 / depth 1 / turn 24 (rmw1's value).
+      frames: 40479,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 1,
@@ -1164,7 +1168,12 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // merge of etp1 / etp2 with this run's fold: frames only, 58615 (fnt2) / 57984 (etp1) -> 57984; same battle 3 / depth 2 / turn 15 / roundLost.
       // merge with the Mac's tdr1 (tri1 / wtl1 / sst1): frames only, 57984 -> 57651; same battle 3 / depth 2 / turn 15 / roundLost.
       // hpb3 (the floor-free Focus Band / no-change drain heal hp holds): frames only, 57651 -> 57626; same battle 3 / depth 2 / turn 15 / roundLost. A trajectory pin, not a ROM frame.
-      frames: 57626,
+      // rmw1 (the draft menu takes its first mash A 2 ticks before the mon pic table ends, as the ROM): frames only, 57651 -> 57650; same battle / depth / turn / roundLost.
+      // supervisor merge of rmw1 (57651 -> 57650) with hpb3 (57651 -> 57626), measured on the merged tree: 57625; same battle 3 / depth 2 / turn 15 / roundLost.
+      // fsi1 (the player faint-replacement ball spawn follows the Go! print's glyph count, 86 + chars, not 91 + nickname; seed 1 sends in HAUNTER "Your foe's weak!\nGet 'em, HAUNTER!" (+21) and BUTTERFREE "Go for it, BUTTERFREE!" (+7); the exploring presses land on other phases, net -3): frames only, 57626 -> 57623;
+      // same battle 3 / depth 2 / turn 15 / roundLost. Matches the T2 send-in SE 15 rows (ROM rel 133 + glyphs, 47 windows per scene all at offset 0). A trajectory pin, not a ROM frame.
+      // supervisor merge of fsi1 with master + rmw1, measured on the merged tree: 57622; same battle 3 / depth 2 / turn 15 / roundLost.
+      frames: 57622,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 2,
@@ -1209,7 +1218,9 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // decision notes identical to 6817b6a8c's; same battle 1 / turn 16 / end state. Seed 1 is unmoved.
       // merge with the Mac's tdr1 (tri1: the battle intro at the drawn transition's own frame): frames only, 9300 -> 9336; same battle 1 /
       // turn 16 / end state.
-      frames: 9336,
+      // rmw1 (the draft menu takes its first mash A 2 ticks before the mon pic table ends, as the ROM): frames only, 9336 -> 9294; same battle 1 / turn 16 / end state.
+      // supervisor merge of rmw1 with fsi1 (the Go! print ball spawn), measured on the merged tree: 9294 -> 9292; same battle 1 / turn 16 / end state.
+      frames: 9292,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 0,
@@ -1237,7 +1248,8 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // pic8 (the forced party menu's clock starts at the faint message's dismiss edge, ROM lab pic7): frames only, 9404 -> 9400; same end state.
       // lrc1 (see seed 0): frames only, 9400 -> 9350 (the random terminal presses after the 67-frame-longer loss tail answer the record prompt sooner); same battle 1 / turn 16 / end state.
       // merge with the Mac's tdr1 (tri1, see seed 0): frames only, 9350 -> 9315; same battle 1 / turn 16 / end state.
-      frames: 9315,
+      // rmw1 (the draft menu takes its first mash A 2 ticks before the mon pic table ends, as the ROM): frames only, 9315 -> 9344; same battle / turn / end state.
+      frames: 9344,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 0,

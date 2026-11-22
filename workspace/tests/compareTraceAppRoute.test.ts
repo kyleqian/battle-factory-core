@@ -20,11 +20,6 @@ const VALID_APP_ROUTES = new Set(["generated-orchestrator", "canonical-recorded"
 // gain the field or are retired — never add to this list.
 const LEGACY_TRACES_WITHOUT_APP_ROUTE = new Set([
   "anchor.json",
-  "battle1-postwin-decline.json",
-  "battle1-postwin-heal.json",
-  "battle1-postwin-next-prompt.json",
-  "battle1-postwin-scout-a.json",
-  "battle1-postwin-scout-b.json",
   "confirm-decline.json",
   "confirm-flow.json",
   "draft-cursor.json",

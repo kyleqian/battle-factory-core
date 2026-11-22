@@ -39,7 +39,18 @@ describe("monPic: closed/open steady states", () => {
     expect(advanceMonPic(open)).toEqual(open);
   });
 
-  it("isMonPicInputReady is true only once fully open", () => {
+  it("isMonPicInputReady (rmw1) turns true 2 ticks before the opening table ends, not before", () => {
+    const len = (() => { let s = openMonPic(false, false); let n = 0; while (s.phase === "opening") { s = advanceMonPic(s); n++; } return n; })();
+    let s = openMonPic(false, false);
+    for (let tick = 0; tick < len; tick++) {
+      expect(isMonPicInputReady(s)).toBe(tick >= len - 2);
+      s = advanceMonPic(s);
+    }
+    expect(s.phase).toBe("open");
+    expect(isMonPicInputReady(s)).toBe(true);
+  });
+
+  it("isMonPicInputReady is true only once (nearly) fully open", () => {
     expect(isMonPicInputReady(INITIAL_MON_PIC_STATE)).toBe(false);
     expect(isMonPicInputReady(openMonPic(false, false))).toBe(false);
     expect(isMonPicInputReady({ phase: "open", elapsed: 0, variant: "A", blended: false })).toBe(true);
