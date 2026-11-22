@@ -109,7 +109,7 @@ const moveTopology = moves.map((move, id) => {
 });
 
 const inventory = JSON.parse(readFileSync(join(RUN_ROOT, "src", "data", "gen", "factory-animation-inventory.json"), "utf8")) as {
-  tiers: { level50: { moves: InventoryMove[] } };
+  tiers: { level50: { moves: InventoryMove[] }; openOnly: { moves: InventoryMove[] } };
 };
 const level50Moves = inventory.tiers.level50.moves;
 const level50MoveIds = new Set(level50Moves.map((move) => move.id));
@@ -126,6 +126,19 @@ const level50FactoryReachableEffects = effects
         frontierMonCount: move.frontierMonCount,
         speciesCount: move.speciesCount,
       })),
+  }))
+  .filter((family) => family.moves.length > 0);
+// opl: the Open Level Factory's moves are the Level 50 ones plus the `openOnly` tier (sets 372-881, the inventory's openOnly role:
+// MOVE_OUTRAGE alone at the pinned decomp). Rows carry id / move / effect only: the inventory's set counts are per tier (Level 50: sets
+// 0-849), not counts over the Open Level pools (372-881).
+const openLevelMoves = [...level50Moves, ...inventory.tiers.openOnly.moves].sort((a, b) => a.id - b.id);
+if (new Set(openLevelMoves.map((move) => move.id)).size !== openLevelMoves.length) throw new Error("Open Level Factory inventory repeats a move id");
+const openLevelFactoryReachableEffects = effects
+  .map((effect) => ({
+    ...effect,
+    moves: openLevelMoves
+      .filter((move) => move.effect === effect.effect)
+      .map((move) => ({ id: move.id, move: move.move, effect: move.effect })),
   }))
   .filter((family) => family.moves.length > 0);
 
@@ -148,11 +161,14 @@ const topology = {
     moves: moveTopology.length,
     level50FactoryReachableMoves: level50Moves.length,
     level50FactoryReachableEffectFamilies: level50FactoryReachableEffects.length,
+    openLevelFactoryReachableMoves: openLevelMoves.length,
+    openLevelFactoryReachableEffectFamilies: openLevelFactoryReachableEffects.length,
   },
   effects,
   opcodes,
   moves: moveTopology,
   level50FactoryReachableEffects,
+  openLevelFactoryReachableEffects,
 };
 
 mkdirSync(DATA_GEN, { recursive: true });

@@ -177,3 +177,22 @@ describe("opl2: Beat Up reads the member's own level", () => {
     expect(calculateBeatUpMemberDamage(215, 169, 10, false, 100)).toBe(Math.trunc(Math.trunc(95 * 10 * 42 / 80) / 50) + 2);
   });
 });
+
+describe("opl2: what Open Level adds to the move corpus", () => {
+  it("the Open Level reachable moves are Level 50's plus OUTRAGE, in the EFFECT_RAMPAGE family Level 50 already reaches (THRASH, PETAL DANCE)", async () => {
+    const topology = (await import("../src/data/gen/battle-script-topology.json", { with: { type: "json" } })).default as unknown as {
+      counts: Record<string, number>;
+      level50FactoryReachableEffects: { effect: string; moves: { move: string }[] }[];
+      openLevelFactoryReachableEffects: { effect: string; moves: { move: string }[] }[];
+    };
+    const moves = (families: { moves: { move: string }[] }[]) => new Set(families.flatMap((f) => f.moves.map((m) => m.move)));
+    const level50 = moves(topology.level50FactoryReachableEffects);
+    const open = moves(topology.openLevelFactoryReachableEffects);
+    expect([...open].filter((m) => !level50.has(m))).toEqual(["MOVE_OUTRAGE"]);
+    expect([...level50].every((m) => open.has(m))).toBe(true);
+    expect(topology.openLevelFactoryReachableEffects.map((f) => f.effect)).toEqual(topology.level50FactoryReachableEffects.map((f) => f.effect));
+    expect(topology.openLevelFactoryReachableEffects.find((f) => f.effect === "EFFECT_RAMPAGE")!.moves.map((m) => m.move))
+      .toEqual(["MOVE_THRASH", "MOVE_PETAL_DANCE", "MOVE_OUTRAGE"]);
+    expect(topology.counts.openLevelFactoryReachableMoves).toBe(topology.counts.level50FactoryReachableMoves + 1);
+  });
+});

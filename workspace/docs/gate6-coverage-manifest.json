@@ -93193,12 +93193,12 @@
         "id": "state:SIDE_STATUS_WORE_OFF_LABEL",
         "label": "SIDE_STATUS_WORE_OFF_LABEL",
         "family": "side-state",
-        "sourceLine": 303,
+        "sourceLine": 307,
         "status": "tier1-covered",
         "evidence": [
           {
             "path": "src/engine/battleEndTurnOrchestration.ts",
-            "locator": "line:303",
+            "locator": "line:307",
             "kind": "source-state-symbol"
           },
           {
