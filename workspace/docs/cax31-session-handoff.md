@@ -319,12 +319,14 @@ No battle-rule change this run: every fold kept census eventsDigest identical (0
   bdt1 (Metal Claw, Dig, Rest), gsp3 (asleep turn, poison / burn tick, infatuation), fch1 (AI replacement choice timing), chg2 / chg3 (two-turn moves; Aerial Ace impossible stat change), hie5 (held item after
   print-ended scripts, restore-HP tails), eqk1 (Earthquake hit-all transition, Pausex20 before "doesn't affect", Magnitude OFF), itm1 (held item after a faint waits for SE_FAINT), mxp1 (Explosion / Self-Destruct /
   Magnitude ON), wtl1 / etp1 / etp2 / fnt2 (`docs/fnt1-fainted-box-clear.md`: win tail before "Player defeated", end-turn print family, dragged-out press, drain-KO print, Shell Bell summary lead).
-  **Next, ranked by t2k3 (same doc, section 3):** (1) faint / send-in chain (SE 114 / 15 / cry; 2,251 both scenes; the faint message is ready 3+ frames after the ROM's A pulse, fch1 term 2 still open); (2) hit SE 12 / 13 / 14
-  lead after a used print (OFF s2230 decision 21: the flat 42-frame move-animation before hit-animation is 21-28 short of the ROM's print + crit + Pausex20); (3) held-item group after a send-in (+21: first SE 23 after
-  the general-animation start vs ROM 8); (4) gen:180 restore-HP chain first row; (5) Dig tails; (6) poison tick first row; (7) Ice Beam first window; (8) Rock Slide body. Also open: Leech Seed sap (OFF +9 / ON +2, etp2 labs
-  committed), Wrap print after the hit (ON -8 / -7), Magnitude power-roll labs, Scene OFF self-KO faint SE after Explosion (-2).
+  **Next (after the post-gate measurements fch2m / hse1m / hie6m / g180m, same doc; T2 OFF baseline is now 1,819 with hse1m's tool default):** (1) land hse1m's OFF wake-up hold / icon (the Scene ON-only rules,
+  `battleResolutionPresentation.ts:1265`, `:6310-6314`) and confusion head (-4 rows), and g180m's Dig / two-turn charge-turn used print after a previous move (MoveEnd + 10); then flip fch2m's `--dismiss-accept`
+  default together with the hit-SE windows it un-hides; (2) hie6m's foe Leftovers after the player's forced send-in (start +6 and the 15-frame restart lead); (3) the Leech Seed drain (g180m: post-send-in age,
+  end-turn print heads / holds; etp2 labs); (4) t2k3 poison tick first row, Ice Beam first window, Rock Slide; Wrap print after the hit; Magnitude power-roll labs; Scene OFF self-KO faint SE (-2).
 - **Item 0b (Lobby):** no change (#221 open).
-- **Item 0d (battle rules):** luck day 6 0 hits (R040 R063 R110). rrh6 + rrh7: 14 rare rules hand-staged and ROM-matched, **85 -> 99 / 110** (`docs/parity-mac/rule-coverage.md`).
+- **Item 0d (battle rules):** luck day 6 0 hits (R040 R063 R110). rrh6 + rrh7: 14 rare rules hand-staged and ROM-matched, **85 -> 99 / 110** (`docs/parity-mac/rule-coverage.md`). **Check first next run:**
+  nrv1 (`docs/trn225-frontier-transitions.md` "nrv1") found the engine's RNG at the Head battle start never equal to the ROM's on the Noland-room recordings (Noland's lead differs 40 / 40; the ROM takes
+  269-679 extra LCG steps in the party build / transition draw), against the Mac catcher's "the Head's team is the engine's" (`docs/hdt1-factory-head-team.md`); hdt2m (same doc, if it landed) checks which.
 - **#225:** trn226 drew LOGO_WIGGLE and fixed LOGO_WAVE (0 bad frames both scenes, Noland room only); open: the ordinary room's handoff (unmeasured), SQUARES_SCROLL BGM lag. Not checked: a Brain battle's
   RNG after the now-shorter Noland-room transition (a catcher round through the Head would show it). **#227** closed (msw2: the ROM keeps the same move order as the engine after SELECT + Mimic; pinned).
 - **Tools:** `tools/integration/labCompare.sh` (cln12 / cln13: ROM probe + engine + aligned SE and first-glyph table, cross-run ROM reuse; `tools/battle-lab/README.md` "Lab compare"). Tackle / Pound / Scratch /

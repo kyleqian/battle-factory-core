@@ -31,9 +31,16 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   **100 / 100** each (0 crash / 0 hang). Full suite on `30cd3dfac` **16,711 passed / 3 failed**, all test-side (mxp1's Explosion window 212 -> 213, etp1's poison end-turn rows; fixed in `bcde22ba2`, 11 / 11);
   typecheck / build / build:lib 0. Mid-run full suites: `0a6b92a55` 16,671 / 0; `14f3e5a44` 16,671 / 0; `2aa2d69e1` 16,671 / 0; `62ebcc5b3` 16,680 / 0; earlier `9e5a45dbc` 11 failed (b4l pins, b4l2),
   `22c58649b` 5 (stc2), `5819467ba` 2 (lbrd trajectory). `play:random --minutes 10 --scene both --lobby-new-challenge`: ON 28 battles / 12 swaps, OFF 59 / 22; **0 page / console errors, 0 overlays**.
-- **Next** (ranked by t2k3, same doc section 3): (1) faint / send-in chain (SE 114 / 15 / cry, 2,251 both scenes; fch2m measures it post-freeze); (2) hit SE 12 / 13 / 14 lead after a used print (OFF s2230:
-  the flat 42-frame used print vs the ROM's print + crit + Pausex20; hse1m measures it); (3) held-item group after a send-in (+21); (4) gen:180 restore-HP chain; (5) Dig tails; (6) poison tick first row; (7) Ice
-  Beam first window; (8) Rock Slide. Also: Leech Seed sap (etp2 labs), Wrap print after the hit, a Brain-battle RNG check after the shorter Noland-room transition (trn226; unverified), #225 ordinary room.
+- **After the gates (tools / docs only, engine unchanged; sections of `docs/aud251-s11-scoreboard-refresh.md`):** t2k3 (the ranking above); fch2m: the faint-chain "cliff" is the census driver's
+  A gate (3-frame dead zone), opt-in `soundCensusRomReplay.ts --dismiss-accept=1` / `AUD249_DISMISS_ACCEPT=1`: OFF 2,040 -> 1,841, ON +83 (three upstream windows it un-hides); hse1m: t2k3 item 2 was
+  misattributed: OFF hit-SE mass = Struggle's no-moves box (driver; now follows the ROM drive's A frames by default, OFF T2 baseline 2,040 -> **1,819**) + the OFF wake-up print hold / icon (Scene ON-only
+  rules today) + the OFF confusion head (-4 rows); hie6m: the held-item +21 class is the foe's Leftovers after the player's forced send-in (start +6, then the 15-frame restart lead); g180m: t2k3 item 4 is
+  the Leech Seed drain (post-send-in +13, end-turn print heads / holds) and Sun's unreceipted age, item 5 is Dig's charge-turn print after a previous move (-8 .. -19); nrv1: trn226 did not change the Head
+  battle's RNG (40 / 40 identical) — but on the Noland-room recordings the engine's RNG at the Head battle start never equals the ROM's (Noland's lead differs 40 / 40), against the Mac catcher's "the Head's
+  team is the engine's" (hdt1); hdt2m (running at wind-down; doc `docs/hdt1-factory-head-team.md` if it landed) checks which is right. Each doc has a landing recipe.
+- **Next:** (0) resolve the Head-team evidence conflict first (hdt2m / nrv1; a real mismatch is a gameplay bug and outranks sound); (1) land hse1m's OFF wake-up hold / confusion head and g180m's Dig charge-turn
+  print (recipes in the doc), then fch2m's dismiss-accept default (with hse1m's hit-SE windows it un-hides); (2) hie6m's send-in Leftovers start / lead; (3) Leech Seed drain rows (g180m, etp2 labs); (4) t2k3's
+  poison first row / Ice Beam first window / Rock Slide; also the Wrap print after the hit, Magnitude power-roll labs, #225 ordinary room. Re-scan the soak / lbrd trajectory pins after every timing merge.
 
 ---
 
