@@ -5,6 +5,12 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 2026-11-22 — bob1 (worker, main/ts lane): healthbox/battler bob after the party menu and party-icon bob phase (both scenes); OFF cancel lab 246 -> 276 / 300, hp lab 977 -> 1029 / 1100
+
+- **State:** master, no push; commits 51365b7b4, a7f526b7b, 45c61dbf9, a184ec3e4 + docs. typecheck, test:gate 360 files / 2,838 tests, build green; 350 importing/pin test files green (no re-pins); census 0..199 eventsDigest identical both scenes; canonical party traces 200/200, 200/200, 115/115, 142/142 unchanged.
+- **Did:** cancel restarts the bounce at age 0 (ReshowBattleScreenAfterMenu); the open window keeps bouncing (Class B fixed offsets removed); party icons use sAnim_0..4 by HP level (cycles 15/19/31/47/61), creation tick = open fade-in start, no y2 hold at menu-open selection. docs/bob1-bob-phases.md.
+- **Next:** the ROM party-open black hold is 1 frame longer in the lab (flw252-party-fade-on 261/340, cause unproven); yellow / forced-menu icon phase unverified; stage bounceAge frames 31/38.
+
 ## 2026-11-22 — bbk1 (worker, main/ts lane): Brick Break through a screen (OFF), OFF asleep print head, chg4 item 3 narrowed; T2 ON 11,911 -> 11,750, OFF 1,348 -> 1,203
 
 - **State:** master, no push; commits a5d7e4d7b (Brick Break), 092b01639 (asleep head), 8accfc5b0 (ON plain-hit continuation), eaf6c115b (soak re-pin), typecheck fix on top. typecheck, test:gate 360 files, build green; 183 importing test files green; census 0..199 eventsDigest identical both scenes.
