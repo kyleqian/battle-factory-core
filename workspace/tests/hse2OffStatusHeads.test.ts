@@ -1,6 +1,6 @@
 // hse2: the Scene OFF wake-up message / icon rule and the confusion head, pinned on the ROM labs (docs/aud251-s11-scoreboard-refresh.md "hse2").
 // ROM rows (labCompare.sh --scene off, .integration/evidence/hse2/lab-base): wkl1m-wakeup-player-off wake print glyph 2374 -> updatestatusicon 2455 -> next used print glyph 2460
-// (the engine, -15 on the print head, now matches the print -> next print gap 86 and the 4-frame icon -> print command interval); the confusion hold is 64 + 3 + 4 when the used print follows.
+// (the engine, -15 on the print head, now matches the print -> next print gap 86 and the 4-frame icon -> print command interval); the confusion hold is 64 + 3 + 4 when the used print follows. enc276-struggle-off: SE 13 ROM 526 (engine was 527 with the shared 9-frame no-moves dismiss hold).
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { createInitialState, tick } from "../src/engine/core.ts";
@@ -51,5 +51,10 @@ describe("hse2: Scene OFF wake-up and confusion heads", () => {
     const holds = rows.filter((r) => r.type === "message" && [67, 71].includes(r.hold!)).map((r) => ({ frame: r.frame, hold: r.hold }));
     expect(holds).toContainEqual({ frame: 1323, hold: 67 });
     expect(holds).toContainEqual({ frame: 3396, hold: 71 });
+  });
+
+  it("enc276-struggle-off: the dismiss -> used print hold is one frame shorter in Scene OFF, so the hit animation (SE 13) starts on the ROM's frame 526", () => {
+    const rows = commandRows("enc276-struggle-off");
+    expect(rows.find((r) => r.type === "hit-animation" && r.frame > 400)?.frame).toBe(526);
   });
 });
