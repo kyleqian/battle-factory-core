@@ -128,7 +128,7 @@ def run_battle(rom, outdir, profile):
     def entry(name, on_entry=None):
         def cb():
             lr = rom.reg(14)
-            rec = {"fn": name, "at": "entry", "frame": rom.frameno, "rng": hex(rom.rng())}
+            rec = {"fn": name, "at": "entry", "frame": rom.frameno, "rng": hex(rom.rng()), "caller": rom.caller(lr)}
             if on_entry:
                 rec.update(on_entry())
             build["events"].append(rec)
@@ -149,6 +149,7 @@ def run_battle(rom, outdir, profile):
     traps[rom.f["FillFactoryTrainerParty"] + 2] = entry("FillFactoryTrainerParty")
     traps[rom.f["CreateMonWithEVSpreadNatureOTID"] + 2] = entry("CreateMonWithEVSpreadNatureOTID", create_args)
     traps[rom.f["GetHighestLevelInPlayerParty"] + 2] = entry("GetHighestLevelInPlayerParty")
+    traps[rom.f["GetFrontierEnemyMonLevel"] + 2] = entry("GetFrontierEnemyMonLevel")
 
     t = 0
     base = rom.frameno
