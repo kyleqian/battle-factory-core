@@ -3493,6 +3493,22 @@ function instructionExecutionOf(event: BattleKernelSemanticEvent): number {
  * execution boundary. Pairing across it claimed a hit that had "executed"
  * before its own move-use receipt -- ISSUES #95's fatal negative span.
  */
+/**
+ * bbk1: Scene OFF Brick Break through a screen (labs bbk1-brickbreak-{lightscreen,reflect}-off, ROM rows used print 208 -> `BrickBreakAnim+0x10` print 278 -> SE 14 363):
+ * the body ends one row after the print's execution (print = used + 70), and typecalc2 / effectivenesssound / hitanimation run 3 rows after the print's waitmessage hold (print -> SE 85).
+ */
+const BRICK_BREAK_WALL_PRINT_BODY_ROWS = 1;
+const BRICK_BREAK_WALL_PRINT_TAIL_ROWS = 3;
+
+/** bbk1: Brick Break through a screen runs `printstring STRINGID_THEWALLSHATTERED` between attackanimation and hitanimation; the message command presents that print and its waitmessage, so the body ends at the print (ROM BrickBreakAnim+0x0 -> +0x10). */
+function brickBreakWallShatteredPrint(
+  events: readonly BattleKernelSemanticEvent[],
+  moveIndex: number,
+): BattleKernelSemanticEvent | null {
+  const next = events[moveIndex + 1];
+  return next !== undefined && next.payload.kind === "message" && next.payload.messageId === "STRINGID_THEWALLSHATTERED" ? next : null;
+}
+
 function nextHitAnimation(
   events: readonly BattleKernelSemanticEvent[],
   moveIndex: number,
@@ -5993,6 +6009,9 @@ export function projectBattleResolutionCommands(
                   ? WAITMESSAGE_LONG_TIMING
                   : MESSAGE_TIMING);
                 const timing = focusPunchPrePassMessageTiming(events, index, base) ?? chargeTurnEmptyBoxTiming(events, index) ?? hitAllLoopEmptyBoxTiming(events, index) ?? base;
+                if (payload.messageId === "STRINGID_THEWALLSHATTERED") {
+                  return Object.freeze({ minimumFrames: timing.minimumFrames, holdFrames: timing.holdFrames + BRICK_BREAK_WALL_PRINT_TAIL_ROWS });
+                }
                 if (event.provenance?.sourceLabel === "BattleScript_PresentHealTarget" && actionSnapshot?.currentMove === MOVE_REST
                   && (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) === 0) {
                   return Object.freeze({ minimumFrames: timing.minimumFrames, holdFrames: timing.holdFrames + REST_HEAL_PRINT_TAIL_ROWS });
@@ -6215,9 +6234,10 @@ export function projectBattleResolutionCommands(
       // mxp1: Self-Destruct / Explosion run `tryexplosion; setatkhptozero; waitstate` before the animation; the user's `hp` command presents those rows, so the
       // body spans only the animation instruction to the hit (ROM labs eqk1-{expl,sd}-{p,f}-off: attackanimation -> hitanimation 43 rows, was 48).
       const explosionFamily = payload.animationId === "SCENE_OFF_ATTACK_PAUSE" && (lastUsedCurrentMove === 120 || lastUsedCurrentMove === 153);
+      const wallShatteredPrint = brickBreakWallShatteredPrint(events, index);
       const interveningInstructions = explosionFamily
         ? hitExecution - instructionExecutionOf(event) - executedPauseCallbacks + EXPLOSION_OFF_BODY_ROWS
-        : hitExecution - usedMoveInstructionExecution - executedPauseCallbacks;
+        : (wallShatteredPrint === null ? hitExecution : instructionExecutionOf(wallShatteredPrint) + BRICK_BREAK_WALL_PRINT_BODY_ROWS) - usedMoveInstructionExecution - executedPauseCallbacks;
       if (interveningInstructions <= 0) {
         throw new Error("battle resolution move/hit provenance is not ordered");
       }
