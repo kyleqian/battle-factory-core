@@ -230,6 +230,8 @@ export function itemKnockoffCommandFrames(battler: 0 | 1, seGate: number): numbe
 }
 export const HELD_ITEM_EFFECT_RESTART_LEAD_FRAMES = 15;
 export const HELD_ITEM_EFFECT_CONTINUE_LEAD_FRAMES = 9;
+/** hie7: the item animation directly after the player's faint-replacement send-in starts on the script's exec row (ROM s2230 d6, s5063 d45: exec -> SE 152 = 8). */
+export const HELD_ITEM_EFFECT_AFTER_SEND_IN_LEAD_FRAMES = 0;
 /**
  * wbh1 (docs/wbh1-battle-start-white-herb.md): the battle-start entry phase (factoryBattleStartEntry.ts) times a script's rows from the
  * kernel, so its held-item command starts on the `playanimation` row itself (BattleScript_WhiteHerbRet, ROM labs wbh1-*-on: the anim's
@@ -817,6 +819,12 @@ export type BattleResolutionPresentationCommand =
        * plays); the render draws it as Move_ABSORB's body (battleResolutionPresentationRender.ts leechSeedDrainAbsorbEffect).
        */
       animated?: true;
+      /**
+       * hie7: the command directly follows the player's faint-replacement send-in (BattleScript_FaintedMonSendOutNew). The send-in span already ends where
+       * the ROM script's exec row runs, and the controller is idle, so the launch lag the labs and hit tails fit (LEECH_SEED_DRAIN_SCRIPT_AGE 7,
+       * the held-item restart lead 15) does not apply: ROM exec -> SE is 27 here, 34 in the labs (g180m s6912 d2).
+       */
+      afterPlayerSendIn?: true;
       /** kno3: an ITEM_KNOCKOFF's IsBattleSEPlaying rows before the launch (sgs134RequestSeGate); absent = 0. */
       timing: Readonly<{ minimumFrames: number; seGateFrames?: number }>;
     }>
@@ -5824,6 +5832,7 @@ export function projectBattleResolutionCommands(
   const liveHp: [number, number] = [field.player.hp, field.opponent.hp];
   const substituteFades: { at: number; battler: 0 | 1; sequence: number }[] = [];
   const statsChanges: { at: number; battler: 0 | 1; sequence: number; argument: number; frames: number; seGate: number }[] = [];
+  let playerSendInEnd = -1;
   const heldItemEffects: { at: number; battler: 0 | 1; sequence: number; frames: number; afterStatus: boolean; seGate?: number; trapMove?: number; animation: "HELD_ITEM_EFFECT" | "WISH_HEAL" | "FUTURE_SIGHT_HIT" | "FOCUS_BAND" | "ITEM_KNOCKOFF" | "INGRAIN_HEAL" | "TURN_TRAP" }[] = [];
 
   for (let index = 0; index < events.length; index += 1) {
@@ -6089,7 +6098,8 @@ export function projectBattleResolutionCommands(
         "held-item effect animation",
       );
       const { lead: baseLead } = heldItemEffectExecutionsAndLead(events, index);
-      const lead = baseLead === HELD_ITEM_EFFECT_RESTART_LEAD_FRAMES ? heldItemEffectAfterPrintLead(events, index) ?? baseLead : baseLead;
+      const lead = commands.length === playerSendInEnd ? HELD_ITEM_EFFECT_AFTER_SEND_IN_LEAD_FRAMES
+        : baseLead === HELD_ITEM_EFFECT_RESTART_LEAD_FRAMES ? heldItemEffectAfterPrintLead(events, index) ?? baseLead : baseLead;
       heldItemEffects.push({
         at: commands.length, battler: pendingHeldItemEffectBattler, sequence: event.sequence,
         frames: HELD_ITEM_EFFECT_COMMAND_FRAMES + lead,
@@ -6263,6 +6273,7 @@ export function projectBattleResolutionCommands(
           battler,
           animation: "LEECH_SEED_DRAIN",
           ...(leechDrainAnimated ? { animated: true as const } : {}),
+          ...(commands.length === playerSendInEnd ? { afterPlayerSendIn: true as const } : {}),
           timing: Object.freeze({
             minimumFrames: LEECH_SEED_DRAIN_PRE_ROWS + health.instructionExecution!
               + (leechDrainAnimated ? LEECH_SEED_DRAIN_ANIMATION_ROWS - 1 : 0),
@@ -6620,6 +6631,7 @@ export function projectBattleResolutionCommands(
         healthboxSlideElapsed: (sendIn.healthboxSlideElapsed ?? 0) + aiSwitchLead,
         ...(sendIn.sendInLagElapsed === undefined ? {} : { sendInLagElapsed: sendIn.sendInLagElapsed + aiSwitchLead }),
       }));
+      if (battler === 0 && sendInLabel === "BattleScript_FaintedMonSendOutNew") playerSendInEnd = commands.length;
     }
   }
   if (pendingHealth.size !== 0) {
