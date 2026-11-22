@@ -9,6 +9,7 @@ import {
   PARTY_SENDOUT_DEFAULT_TIMING,
 } from "../src/engine/partySelect";
 import { playerFaintReplacementSendOutTiming, sceneOffPlayerForcedSwitchInDuration, sceneOnPlayerForcedSwitchInDuration } from "../src/engine/switchInTail";
+import { battleStringPrintableLength } from "../src/engine/battleStringResolver";
 import { playerFaintReplacementSendOutTimingOfSegment } from "../src/engine/battleResolutionPresentationRender";
 
 const dir = "tools/integration/fixtures/pfr185";
@@ -68,6 +69,18 @@ describe("pfr192: keyed player faint-replacement send-in clock vs the ROM", () =
     expect(t.readyAt).toBe(311);
   });
 
+  it("fsi1: the ball spawn is 86 + the printed glyph count of the HP-scale Go! string (Go! +5, Do it! +3, Go for it, +7 around the nickname); the SE 15 clock is 133 + glyphs", () => {
+    const strings: [string, number][] = [["Go! WIGGLYTUFF!", 15], ["Do it! WIGGLYTUFF!", 18], ["Go for it, WIGGLYTUFF!", 22], ["Go! MINUN!", 10], ["Do it! MINUN!", 13], ["Go for it, MINUN!", 17]];
+    for (const [text, chars] of strings) {
+      expect(battleStringPrintableLength([text])).toBe(chars);
+      for (const sceneOn of [false, true]) {
+        const t = playerFaintReplacementSendOutTiming({ species: 129, personality: 6, sceneOn, followingFrames: 14, goTextChars: chars });
+        expect(t.ballShift).toBe(86 + chars - 96);
+        expect(143 + t.ballShift).toBe(133 + chars);
+      }
+    }
+  });
+
   it("the default timing is still the canonical MAGBY constants (turn-15..17 trace paths do not pass a timing)", () => {
     expect(PARTY_SENDOUT_DEFAULT_TIMING).toMatchObject({ ballShift: 0, releaseExtra: 0, readyAt: PARTY_SENDOUT_ACTION_MENU_START, blankStart: PARTY_SENDOUT_BLANK_MESSAGE_START, goTextChars: 10 });
     expect([PARTY_SENDOUT_BLANK_MESSAGE_START, PARTY_SENDOUT_ACTION_MENU_START]).toEqual([305, 311]);
@@ -83,7 +96,7 @@ describe("pfr192: keyed player faint-replacement send-in clock vs the ROM", () =
     expect(switchInTiming(1, 16, false, "PIDGEY")).toMatchObject({ minimumFrames: expect.any(Number) });
   });
 
-  it("real generated routes: the orchestrator's first action-menu frame from the SEND OUT confirm is 91 + name + D + 17 (YANMA OFF 227 / ON 270)", () => {
+  it("real generated routes: the orchestrator's first action-menu frame from the SEND OUT confirm is 86 + Go! glyphs (= 91 + name for "Go!") + D + 17 (YANMA OFF 227 / ON 270)", () => {
     for (const [scene, expected] of [["off", 227], ["on", 270]] as const) {
       let confirm: number | null = null; let menu: number | null = null; let fainted = false; let segTiming: ReturnType<typeof playerFaintReplacementSendOutTimingOfSegment> = null;
       try {

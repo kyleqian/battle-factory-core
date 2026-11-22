@@ -1164,7 +1164,9 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // merge of etp1 / etp2 with this run's fold: frames only, 58615 (fnt2) / 57984 (etp1) -> 57984; same battle 3 / depth 2 / turn 15 / roundLost.
       // merge with the Mac's tdr1 (tri1 / wtl1 / sst1): frames only, 57984 -> 57651; same battle 3 / depth 2 / turn 15 / roundLost.
       // hpb3 (the floor-free Focus Band / no-change drain heal hp holds): frames only, 57651 -> 57626; same battle 3 / depth 2 / turn 15 / roundLost. A trajectory pin, not a ROM frame.
-      frames: 57626,
+      // fsi1 (the player faint-replacement ball spawn follows the Go! print's glyph count, 86 + chars, not 91 + nickname; seed 1 sends in HAUNTER "Your foe's weak!\nGet 'em, HAUNTER!" (+21) and BUTTERFREE "Go for it, BUTTERFREE!" (+7); the exploring presses land on other phases, net -3): frames only, 57626 -> 57623;
+      // same battle 3 / depth 2 / turn 15 / roundLost. Matches the T2 send-in SE 15 rows (ROM rel 133 + glyphs, 47 windows per scene all at offset 0). A trajectory pin, not a ROM frame.
+      frames: 57623,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 2,
