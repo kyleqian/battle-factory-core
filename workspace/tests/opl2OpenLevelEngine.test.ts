@@ -148,6 +148,24 @@ describe("opl2: the Lobby's OPEN LEVEL", () => {
     expect(s.screen).toBe("saveQuestion");
     expect(s.chosenLevel).toBe("open");
   });
+
+  it("A on OPEN LEVEL plays the menu's SE_SELECT with the option on, nothing with it off (the Open catcher runs heard it on the ROM)", async () => {
+    const { collectSoundTick } = await import("../src/audio/soundEvents.ts");
+    const { emitLobbyAttendantSounds } = await import("../src/engine/lobbySounds.ts");
+    const { SE_SELECT } = await import("../src/engine/screenSounds.ts");
+    const idle = { a: false, b: false, up: false, down: false };
+    for (const openLevel of [true, false]) {
+      let s = atLevelMenu(createFactoryLobbyAttendantState(0, { openLevel }));
+      s = advanceFactoryLobbyAttendant(s, { ...idle, down: true });
+      s = advanceFactoryLobbyAttendant(s, idle);
+      const before = s;
+      const { events } = collectSoundTick(1, () => {
+        const after = advanceFactoryLobbyAttendant(before, { ...idle, a: true });
+        emitLobbyAttendantSounds(before, after, { ...idle, a: true });
+      });
+      expect(events.filter((e) => e.kind === "se" && e.id === SE_SELECT).length).toBe(openLevel ? 1 : 0);
+    }
+  });
 });
 
 describe("opl2: the session option", () => {

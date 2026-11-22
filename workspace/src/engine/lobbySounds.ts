@@ -31,7 +31,9 @@ export function emitLobbyAttendantSounds(before: FactoryLobbyAttendantState, aft
   if (def.menu !== null && before.page === def.pages.length - 1) {
     const cursor = before.pendingCursor ?? before.cursor;
     if (input.a) {
-      if (before.screen === "level" && cursor === 1) return; // Open Level: A is a no-op here (deliberate divergence), so nothing plays
+      // Open Level off (the Level 50-only game): A on OPEN LEVEL is a no-op, so nothing plays; with the option on it is a choice (opl: the
+      // menu's own SE_SELECT, as for LV. 50; the Open Level catcher runs heard it on the ROM)
+      if (before.screen === "level" && cursor === 1 && before.openLevel !== true) return;
       playSelectSe(); // the menu's own A (APressMuted FALSE)
       // MSGBOX_YESNO's Task_HandleYesNoInput (script_menu.c) plays one more on NO; the save dialog's own YES/NO (start_menu.c) does not.
       if (before.screen === "saveQuestion" && cursor === 1) playSelectSe();
