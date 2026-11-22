@@ -497,7 +497,7 @@ function play(initial: any, record: boolean, patchRng: number | null = null, pla
         pulse("A");
         if (phase() === "no-moves-message") {
           until(() => (state.battleCommandPresentation?.lifecycle.phaseElapsed ?? NO_MOVES_MESSAGE_HOLD_AT) >= NO_MOVES_MESSAGE_HOLD_AT);
-          pulse("A");
+          if (romA !== null && process.env.ROM_REPLAY_NOMOVES_EVEN === undefined) { until(() => dismissPress()); step(["A"]); } else pulse("A");
         }
         until(() => !state.battleCommandPresentation);
         until(() => phase() === "action-menu");
