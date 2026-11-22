@@ -5,6 +5,12 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 2026-11-22 — bbk1 (worker, main/ts lane): Brick Break through a screen (OFF), OFF asleep print head, chg4 item 3 narrowed; T2 ON 11,911 -> 11,750, OFF 1,348 -> 1,203
+
+- **State:** master, no push; commits a5d7e4d7b (Brick Break), 092b01639 (asleep head), 8accfc5b0 (ON plain-hit continuation), eaf6c115b (soak re-pin), typecheck fix on top. typecheck, test:gate 360 files, build green; 183 importing test files green; census 0..199 eventsDigest identical both scenes.
+- **Did:** OFF Brick Break through Light Screen / Reflect exact (body 46, wall print 86; SE mass 126 -> 0); OFF asleep print -15 -> 0 (wkl1m labs); ON continuation after the foe's charge holds the OFF confirm-walk lead for a plain damaging hit (s830 487 -> 357, s165 / s310 unchanged). Re-pin: randomRoundSoak seed 0 full (named in the test). Section "bbk1" in docs/aud251-s11-scoreboard-refresh.md.
+- **Next:** Brick Break ON residuals (body +1, own SE +1); tests/audioProbeFixtures.test.ts has 3 pre-existing failures (hit2 fixtures), not in the gate.
+
 ## 2026-11-22 — hit2 (worker, main/ts lane): Hail + Future Sight hit sounds on the ROM rows (T2 ON 13,166 -> 13,068); monbg-wait item not uniform, not landed
 
 - **State:** master, no push; commits ed6c88257 (Hail clock), 765a42d76 (Future Sight sounds), e520240fe (typecheck narrowing + docs). Gates: typecheck, test:gate 360 files / 2,835 tests, build green; aud249 / wsh1 / hit1 / lbrd / randomRoundSoak* green; census 0..199 eventsDigest identical both scenes.
