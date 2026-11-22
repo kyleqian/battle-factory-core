@@ -21,6 +21,9 @@
 //   Wide compare (parity-mac fourth pass, docs/parity-mac/wide-compare.md): `replay` writes `wide`, one state per decision (both active Pokemon: statuses, stat stages,
 //     moves, PP, item, ability, types, the disable-struct counters; both parties; both sides' screens and Spikes; weather; Wish / Future Sight), and `finalWide`.
 //     `compare --drive=drive.json` checks them against the ROM's states at the same decisions (soundEventProbe.py lab --drive writes `drive.wide`).
+//   Open Level (opl3, docs/opl3-open-level-rom-replay.md): --level=open (or the environment variable ROM_REPLAY_LEVEL=open) on `request` / `replay` / `compare` /
+//     `native`: the census battle of the seed at Open Level (the deal and the orchestrator's lvlMode, as lsd194Census.ts --level=open), a `level: 100` lab request
+//     (the lab stages frontier.lvlMode 1 and the ROM builds both parties at 100), and the engine battle rebuilt from the ROM at level 100. Absent = Level 50, unchanged.
 import { censusDeal, censusRentals } from "./censusRound.ts";
 import "../../src/engine/monPicPixelsInstall.ts";
 import { writeFileSync, readFileSync } from "node:fs";
@@ -37,7 +40,8 @@ import { adoptFactoryBrainOpponentSchedule } from "../../src/engine/factoryBrain
 import { getFactoryFrontierBrainStatus } from "../../src/engine/frontierBrainStatus.ts";
 import { advanceFactoryCarry, carryForNewChallengeAfterLobby, validateFactoryFrontierRecord, type FactoryCarry } from "../../src/engine/factoryRoundChaining.ts";
 import { generateFactoryOpponent } from "../../src/engine/factoryOpponentGeneration.ts";
-import { battleScriptIvsFromRandomWords, getLevel50FactoryRentalRange } from "../../src/engine/factoryRentalGeneration.ts";
+import { battleScriptIvsFromRandomWords, getFactoryRentalRange } from "../../src/engine/factoryRentalGeneration.ts";
+import { factoryMonLevel, factoryRecordLevelField, requireFactoryLvlMode } from "../../src/engine/factoryLevelMode.ts";
 import { battlerMoveSelectionIsForced } from "../../src/engine/factoryBattleScriptFullTurnDecision.ts";
 import { createFactoryCorpusPartyMember } from "../../src/engine/factoryCorpusParty.ts";
 import { NO_MOVES_MESSAGE_HOLD_AT } from "../../src/engine/battleCommandPresentation.ts";
@@ -147,6 +151,13 @@ const startHeard = heardArg === "" ? { silver: false, gold: false }
 // parity-mac fourth pass: the test player (romReplayPlayers.ts). The census player is the default, so every older chain and list keeps its battles.
 const policy = (stage !== null ? "script" : arg("policy") ?? process.env.ROM_REPLAY_POLICY ?? "census") as PlayerPolicyName | "script";
 if (policy !== "script" && !PLAYER_POLICIES.includes(policy)) throw new Error(`--policy / ROM_REPLAY_POLICY must be one of ${PLAYER_POLICIES.join(", ")}`);
+// opl3: the level mode. --level=open / ROM_REPLAY_LEVEL=open (a stage file may name `lvlMode: "open"`); absent or "50" = Level 50, every older list unchanged.
+const lvlMode = requireFactoryLvlMode(stage?.lvlMode ?? (arg("level") ?? (process.env.ROM_REPLAY_LEVEL || undefined)), "--level / ROM_REPLAY_LEVEL");
+const openLevel = lvlMode === "open" ? { lvlMode: "open" as const } : {};
+// The level the ROM builds every Factory Pokemon of this battle at (src/engine/factoryLevelMode.ts) and the lab request's `level`.
+const monLevel = factoryMonLevel(lvlMode);
+const levelRecordField = factoryRecordLevelField(lvlMode);
+if (lvlMode === "open" && (mode === "round" || mode === "round-compare")) throw new Error("the round replay is Level 50 only (opl3 drives single Open Level battles)");
 
 // The lab stages the Tower streak at challengeNum * 7 (the stock bug reads it for opponent IVs); the census engine uses 0. Equal for challengeNum 0 (streak < 7).
 const towerStreak = Math.floor(streak / 7) * 7;
@@ -156,19 +167,22 @@ const natureByName = new Map(naturesData.natures.map((row) => [row.name, row.ind
 const heldItemByTableId = new Map<number, number>((frontierHeldItemsData as any).entries.map((row: any) => [row.itemTableId, row.itemId]));
 
 // The census battle of the seed (fop1: censusRound.ts, the battle the census seed has always had; a chained round below is the game's own deal).
-const nativeRentals = () => censusRentals({ seed, factoryWinStreak: streak });
+const nativeRentals = () => censusRentals({ seed, factoryWinStreak: streak, ...openLevel });
 const nativeOrchestrator = () => beginFactoryRoundBattleStartIntro(createFactoryRoundBattleOrchestrator({
   id: `live-share-census-${seed}-${streak}`, battleScene: scene,
   factoryWinStreak: streak, playerTrainerId: 416049562, factorySymbolsCount: symbols,
   battleTowerLevel50WinStreak: 0, facilityState: { rentsCount: 0 },
-  ...censusDeal({ seed, factoryWinStreak: streak }),
+  ...openLevel,
+  ...censusDeal({ seed, factoryWinStreak: streak, ...openLevel }),
 }));
 
 // The ROM party mon (battle_lab._party_mon) -> the engine record fields; the IV spread must be the uniform one the engine models.
+// opl3: the ROM must have built the member at this battle's level (Open Level: 100); the record then carries `level` (absent at Level 50, the old shape).
 function romRecord(mon: any) {
   const ivs = Object.values(mon.ivs) as number[];
   if (ivs.some((v) => v !== ivs[0])) throw new Error(`non-uniform ROM IVs ${JSON.stringify(mon.ivs)}`);
-  return { personality: mon.personality >>> 0, fixedIv: ivs[0]!, abilitySlot: mon.abilitySlot as 0 | 1, otId: mon.otId >>> 0 };
+  if (lvlMode === "open" ? mon.level !== monLevel : (mon.level !== undefined && mon.level !== monLevel)) throw new Error(`the ROM built species ${mon.species} at level ${mon.level}; this replay is ${lvlMode === "open" ? "Open Level" : "Level 50"} (level ${monLevel})`);
+  return { personality: mon.personality >>> 0, fixedIv: ivs[0]!, abilitySlot: mon.abilitySlot as 0 | 1, otId: mon.otId >>> 0, ...levelRecordField };
 }
 
 // The two Random() words the ROM's personality loop spent on `personality`: the cursor c with top16(lcg(c)) = low and top16(lcg(lcg(c))) = high.
@@ -188,7 +202,7 @@ const MOVE_RETURN = 216; const MOVE_FRUSTRATION = 218;
 const moveIdByName = new Map<string, number>((movesData as any).moves.map((m: any) => [m.move, m.id]));
 const speciesIdByName = new Map<string, number>((speciesNamesData as any).species.map((r: any, i: number) => [r.species, i]));
 function brainSetId(mon: any, challengeNum: number): number {
-  const range = getLevel50FactoryRentalRange(challengeNum, false); const rows = (frontierMonsData as any).entries as any[]; const hits: number[] = [];
+  const range = getFactoryRentalRange(challengeNum, false, lvlMode); const rows = (frontierMonsData as any).entries as any[]; const hits: number[] = [];
   for (let id = range.start; id <= range.end; id += 1) {
     const row = rows[id];
     const moves = (row.moves as string[]).map((name) => { const m = name === "MOVE_NONE" ? 0 : moveIdByName.get(name); if (m === undefined) throw new Error(`unknown move ${name}`); return m === MOVE_RETURN ? MOVE_FRUSTRATION : m; });
@@ -236,7 +250,7 @@ function brainOrchestrator(setup: any, freshBattleRngValue: number) {
   const playerRecords = descriptor.player.map((p: any, i: number) => ({ setId: p.setId, ...romRecord(player[i]) }));
   const fillers = descriptor.rentalFillers.map((f: any) => {
     const nature = natureByName.get((frontierMonsData as any).entries[f.setId].nature)!;
-    const input = { setId: f.setId, personality: nature, fixedIv: playerRecords[0].fixedIv, abilitySlot: 0 as const, otId: playerRecords[0].otId };
+    const input = { setId: f.setId, personality: nature, fixedIv: playerRecords[0].fixedIv, abilitySlot: 0 as const, otId: playerRecords[0].otId, ...levelRecordField };
     return Object.freeze({ ...input, abilitySlot: createFactoryCorpusPartyMember(input).abilitySlot });
   });
   const player3 = playerRecords.map((r: any) => Object.freeze({ ...r, abilitySlot: createFactoryCorpusPartyMember(r).abilitySlot })) as any;
@@ -245,14 +259,14 @@ function brainOrchestrator(setup: any, freshBattleRngValue: number) {
   // The dice taken from the ROM: which three sets, and each member's personality (as the cursor of its accepted Random32 pair). The ROM's roll is not one clean
   // cursor: VBlankIntr's Random() (main.c:365-366) lands between FillFactoryBrainParty's draws (8 and 10 such draws between the members of ROM seed 1209).
   const generation = adoptFactoryBrainOpponentSchedule({
-    factoryWinStreak: brainStreak, playerRentalSetIds: saved.map((r: any) => r.setId), playerTrainerId,
+    factoryWinStreak: brainStreak, playerRentalSetIds: saved.map((r: any) => r.setId), playerTrainerId, ...openLevel,
     setIds: opponent.slice(0, 3).map((m) => brainSetId(m, descriptor.challengeNum)) as [number, number, number],
     constructionRngValues: opponent.slice(0, 3).map((m) => constructionCursor(m.personality >>> 0)) as [number, number, number],
   });
   // The lab sets the silver symbol for a challenge-5 request and none for challenge 2 (oracle/battle_lab.py prepare).
   const state = createFactoryRoundBattleOrchestrator({
     id: `rom-replay-${seed}`, rngValue: 0, battleScene: scene, factoryWinStreak: brainStreak, factorySymbolsCount: descriptor.challengeNum === 5 ? 1 : 0,
-    playerTrainerId, battleTowerLevel50WinStreak: brainStreak, facilityState: { rentsCount: 0 },
+    playerTrainerId, battleTowerLevel50WinStreak: brainStreak, facilityState: { rentsCount: 0 }, ...openLevel,
     rentals: { type: "currentRecords", playerRentalRecords: player3, savedRentalRecords: saved as any },
     adoptedInitialBrainOpponent: { generation, freshBattleRngValue, preCommandRngCalls: 0 },
   });
@@ -273,7 +287,7 @@ function adoptedOrchestrator(setup: any, freshBattleRngValue: number) {
   const playerRecords = descriptor.player.map((p: any, i: number) => ({ setId: p.setId, ...romRecord(player[i]) }));
   const fillers = descriptor.rentalFillers.map((f: any) => {
     const nature = natureByName.get((frontierMonsData as any).entries[f.setId].nature)!;
-    const input = { setId: f.setId, personality: nature, fixedIv: playerRecords[0].fixedIv, abilitySlot: 0 as const, otId: playerRecords[0].otId };
+    const input = { setId: f.setId, personality: nature, fixedIv: playerRecords[0].fixedIv, abilitySlot: 0 as const, otId: playerRecords[0].otId, ...levelRecordField };
     return Object.freeze({ ...input, abilitySlot: createFactoryCorpusPartyMember(input).abilitySlot });
   });
   const rec = (r: any) => Object.freeze({ ...r, abilitySlot: createFactoryCorpusPartyMember(r).abilitySlot });
@@ -284,11 +298,12 @@ function adoptedOrchestrator(setup: any, freshBattleRngValue: number) {
     ledger.push({ position: ledger.length, rngBefore, rngAfter: rng, randomU16: rng >>> 16, battleIndex: 0, ...extra });
   };
   draw({ phase: "trainer-selection", purpose: "trainer-candidate", attempt: 1, trainerId: descriptor.trainerId, trainerOutcome: "accepted" });
-  setIds.forEach((id, opponentIndex) => draw({ phase: "set-selection", purpose: "set-candidate", opponentIndex, range: { start: 110, end: 199 }, candidateSetId: id, selectionOutcome: "accepted" }));
+  const setRange = lvlMode === "open" ? getFactoryRentalRange(Math.floor(streak / 7), false, lvlMode) : { start: 110, end: 199 };
+  setIds.forEach((id, opponentIndex) => draw({ phase: "set-selection", purpose: "set-candidate", opponentIndex, range: { start: setRange.start, end: setRange.end }, candidateSetId: id, selectionOutcome: "accepted" }));
   const generation = adoptFactoryOpponentSchedule({
     factoryWinStreak: streak, battleIndex: 0, storedTrainerIds: [], savedRentalSetIds: [...player3.map((r: any) => r.setId), ...fillers.map((r: any) => r.setId)],
     playerTrainerId: playerRecords[0].otId, battleTowerLevel50WinStreak: towerStreak, trainerId: descriptor.trainerId, setIds, selectionDrawLedger: ledger,
-    constructionRngValues: opponent.slice(0, 3).map((m) => constructionCursor(m.personality >>> 0)) as [number, number, number],
+    constructionRngValues: opponent.slice(0, 3).map((m) => constructionCursor(m.personality >>> 0)) as [number, number, number], ...openLevel,
   });
   generation.opponents.forEach((o, i) => {
     const r = romRecord(opponent[i]);
@@ -297,7 +312,7 @@ function adoptedOrchestrator(setup: any, freshBattleRngValue: number) {
     }
   });
   return beginFactoryRoundBattleStartIntro(createFactoryRoundBattleOrchestrator({
-    id: `rom-replay-${seed}`, rngValue: 0, battleScene: scene, factoryWinStreak: streak, playerTrainerId: playerRecords[0].otId,
+    id: `rom-replay-${seed}`, rngValue: 0, battleScene: scene, factoryWinStreak: streak, playerTrainerId: playerRecords[0].otId, ...openLevel,
     // Round replay: the symbols the round driver stages (romRoundDriver.py --symbols); they decide whether battle 7 is Noland's. A single replay
     // keeps the default (its battle 1 is ordinary here).
     ...(roundReplay ? { factorySymbolsCount: symbols } : {}),
@@ -533,7 +548,7 @@ const rel = (r: ReturnType<typeof play>, v: number | null | undefined) => (v ===
 const result = (r: ReturnType<typeof play>, extra: object = {}) => ({
   ...(r.turnEvents.length ? { turnEvents: r.turnEvents } : {}),
   decisions: r.decisions.map((d) => ({ ...d, menuOpenFrame: rel(r, d.menuOpenFrame), fightMenuFrame: rel(r, d.fightMenuFrame), commitFrame: rel(r, d.commitFrame) })),
-  seed, scene, policy, playerStats: r.playerStats, wide: r.wide, finalWide: r.finalWide, battleOutcome: r.battleOutcome,
+  seed, scene, policy, ...openLevel, playerStats: r.playerStats, wide: r.wide, finalWide: r.finalWide, battleOutcome: r.battleOutcome,
   error: r.error, frame0: r.frame0, actionMenuRng: r.actionMenuRng, randomTurnNumber: r.randomTurnNumber, frames: r.frames,
   sound: r.sound.map((e) => [(e[0] as number) - (r.frame0 ?? 0), ...e.slice(1)]), inputs: r.inputs, timeline: r.timeline, ...(r.cmdTrace === null ? {} : { cmds: r.cmdTrace.rows.map((c) => [(c[0] as number) - (r.frame0 ?? 0), ...c.slice(1)]) }), ...extra,
 });
@@ -551,7 +566,7 @@ function applyStageParties(st: any): void {
       const row = rows[ids[i]]; if (row === undefined) throw new Error(`stage parties.${side}[${i}]: no set id ${ids[i]}`);
       const itemRow = itemRows.find((r: any) => r.itemId === (p.item ?? 0));
       if (itemRow === undefined) throw new Error(`stage parties.${side}[${i}]: item ${p.item} is not in the Frontier held-item table`);
-      if ((p.level ?? 50) !== 50) throw new Error(`stage parties.${side}[${i}]: the engine rebuilds every member at level 50`);
+      if ((p.level ?? monLevel) !== monLevel) throw new Error(`stage parties.${side}[${i}]: the engine rebuilds every member at level ${monLevel}`);
       const evs = p.evs ?? {}; const flagged = Object.keys(flagOf).filter((k) => (evs[k] ?? 0) > 0);
       if (flagged.length === 0) throw new Error(`stage parties.${side}[${i}]: evs must name at least one stat`);
       const per = Math.floor(510 / flagged.length);
@@ -580,7 +595,7 @@ if (mode === "request" && stage !== null) {
   // A staged battle: the request is the stage file's own sets and trainer. `mode: "factoryBrain"` (challengeNum 2 or 5, battleNum 6) stages Noland:
   // the player's sets are chosen, his party is rolled by the ROM from the seed.
   const stagedCommon = {
-    schemaVersion: 1, profile: scene === "on" ? "battle-scene-on" : "battle-scene-off", level: 50, challengeNum: stage.challengeNum, rentalSwapCount: 0,
+    schemaVersion: 1, profile: scene === "on" ? "battle-scene-on" : "battle-scene-off", level: monLevel, challengeNum: stage.challengeNum, rentalSwapCount: 0,
     replay: { policy: "script", stage: stage.name }, playerSetIds: stage.playerSetIds, seed,
     trace: { segments: [{ frames: 1, buttons: [] }], captureFrames: [0] },
   };
@@ -604,7 +619,7 @@ if (mode === "request" && stage !== null) {
     : pickSelectable(nativeSix).map((x: any) => x.setId);
   void rentals;
   // `replay` is this tool's own note (the test player and the census seed); soundEventProbe.py / romStateTimeline.py drop it before the lab validates the request.
-  const common = { schemaVersion: 1, profile: scene === "on" ? "battle-scene-on" : "battle-scene-off", level: 50, challengeNum: Math.floor(streak / 7), rentalSwapCount: 0, replay: { policy, censusSeed: seed, symbols, ...(challengeOverride !== null ? { challenge: challengeOverride } : {}) } };
+  const common = { schemaVersion: 1, profile: scene === "on" ? "battle-scene-on" : "battle-scene-off", level: monLevel, challengeNum: Math.floor(streak / 7), rentalSwapCount: 0, replay: { policy, censusSeed: seed, symbols, ...(challengeOverride !== null ? { challenge: challengeOverride } : {}), ...openLevel } };
   // parity-mac: Noland. The lab's factoryBrain mode takes no trainer / battle number / opponent sets (challenge 2 = silver, 5 = gold, always battle 7).
   writeFileSync(arg("out")!, JSON.stringify(g.kind === "frontier-brain" ? {
     ...common, mode: "factoryBrain", playerSetIds, seed,
@@ -626,6 +641,7 @@ if (mode === "request" && stage !== null) {
   // first action menu, pick FIGHT + slot 0 and play turn 1 before the snapshot (ROM seed 3623: the "setup" is turn 2, Graveler at 26 HP). The engine side
   // starts at turn 1, so such a staging cannot be replayed: fail here instead of reporting a mismatch at engine state 0.
   refuseStagingThatPlayedATurn(setup);
+  if ((setup.descriptor.level ?? 50) !== monLevel) throw new Error(`the lab staged level ${setup.descriptor.level}; this replay is level ${monLevel} (--level / ROM_REPLAY_LEVEL)`);
   const { attempt, chosen, candidates, target, turnNumber } = alignedPlay((fresh) => adoptedOrchestrator(setup, fresh), setup, seed);
   writeFileSync(arg("out")!, JSON.stringify(result(attempt, {
     romRngAtActionMenu: target, romRandomTurnNumber: turnNumber, romOpponentReply: setup.opponentReply ?? null,
@@ -644,7 +660,8 @@ if (mode === "request" && stage !== null) {
   const engine = JSON.parse(readFileSync(arg("engine")!, "utf8"));
   const drive = arg("drive") === undefined ? null : JSON.parse(readFileSync(arg("drive")!, "utf8")).drive;
   const rom = (arg("rom") === undefined ? drive.timeline : JSON.parse(readFileSync(arg("rom")!, "utf8")).rows) as number[][];
-  const out = { seed, scene, ...compareBattle(engine, drive, rom) };
+  if ((engine.lvlMode ?? "50") !== lvlMode) throw new Error(`the engine replay is ${engine.lvlMode === "open" ? "Open Level" : "Level 50"}; compare was asked for ${lvlMode === "open" ? "Open Level" : "Level 50"} (--level / ROM_REPLAY_LEVEL)`);
+  const out = { seed, scene, ...openLevel, ...compareBattle(engine, drive, rom) };
   console.log(JSON.stringify(out)); if (arg("out")) writeFileSync(arg("out")!, JSON.stringify(out));
 } else if (mode === "scan") {
   const setup = JSON.parse(readFileSync(arg("setup")!, "utf8")); const target = setup.snapshot.rngValue >>> 0;
