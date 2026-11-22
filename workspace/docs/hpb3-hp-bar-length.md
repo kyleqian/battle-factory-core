@@ -51,6 +51,8 @@ Census 0..199, both scenes (`lsd194Census.sh` WORKTREE vs HEAD, `rst197CensusDel
 
 `tests/hie3HeldItemSounds.test.ts` hie3-shellbell-on: commandStart 748 -> 749 and lab drift 1 -> 0. ROM row: `hie3-shellbell-on` first SE 766 = engine command 749 + 17; the engine's first SE now lands on the ROM frame (drift 0).
 
+`tests/randomRoundSoak.test.ts` trajectory pins (exploring policy; bisected with the three shapes switched off one at a time, base e90e8a94f passes all 64): seed 0 frames 68927 -> 94213, battle 3 -> 4, depth 2 -> 3, turn 21 -> 18 (the no-change drain heal's print hold, ROM s6 d3 rows 521 / 525; the exploring presses land on new phases); seed 1 frames only 57651 -> 57626; seven-win seed 21 frames 43693 -> 43698, renderCalls 3054 -> 3060 (Focus Band hit bar, ROM drv2 s4235 d2). Trajectory pins, not ROM frames; the Shell Bell shape moves none of them.
+
 ## Gates
 
 `tests/hpb3HpBarLength.test.ts` (Tier 1): the Shell Bell hit's hp is floor-free with tail 1 and followed by the two sprite-visibility rows. Focus Band and the no-change drain heal are covered by T2 only (the Focus Band needs a 10 % roll).

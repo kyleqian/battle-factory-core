@@ -461,7 +461,8 @@ describe("random round soak driver (green milestone pin)", () => {
       // wait; sst1: the sandstorm sound): frames + render calls, 43_732 -> 43_693, renderCalls 3_055 -> 3_052; same battle 7, turn 3, end
       // state, diagnostics. A trajectory pin, not a ROM frame.
       // hse2 (Scene OFF wake-up hold / icon, the confusion print's 71-frame hold before the used print, the OFF Struggle dismiss hold 9 -> 8): frames unchanged (43_693), renderCalls 3_052 -> 3_054; same battle 7, turn 3, end state, diagnostics. A trajectory pin, not a ROM frame.
-      frames: 43_693,
+      // hpb3 (a Focus Band survival's hit bar is floor-free, ROM bar + datahpupdate + 3 rows, drv2 OFF s4235 d2): frames + render calls, 43_693 -> 43_698, renderCalls 3_054 -> 3_060; same battle 7, turn 3, end state, diagnostics. A trajectory pin, not a ROM frame.
+      frames: 43_698,
       battle: 7,
       turn: 3,
       diagnostics: {
@@ -473,7 +474,7 @@ describe("random round soak driver (green milestone pin)", () => {
         terminalOutcome: "roundWon",
         terminalRecordMenuInputReadyReached: true,
         terminalRecordChoice: "no",
-        renderCalls: 3_054,
+        renderCalls: 3_060,
       },
     });
     expect(second).toEqual(first);
@@ -1087,12 +1088,14 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // 68945 / battle 3 / depth 2 / turn 21; still OK / roundLost. A trajectory pin, not a ROM frame.
       // hie7 (the segment after the player's forced send-in resumes 6 frames before the action prompt, ROM s5063 d45 / s6912 d2 exec row): frames only,
       // 68945 -> 68927 (three post-send-in script resumes x 6); same battle 3 / depth 2 / turn 21 / roundLost. A trajectory pin, not a ROM frame.
-      frames: 68927,
+      // hpb3 (a drain heal that changes nothing now holds its print by the ROM's datahpupdate -> print rows instead of the 28-row floor, T2 ON s6 d3 bar row 521 / print row 525; the exploring presses land on new phases):
+      // 68927 / battle 3 / depth 2 / turn 21 -> 94213 / battle 4 / depth 3 / turn 18; still OK / roundLost. A trajectory pin, not a ROM frame.
+      frames: 94213,
       outcome: "OK",
       endState: "roundLost",
-      maxBattleDepth: 2,
-      battle: 3,
-      turn: 21,
+      maxBattleDepth: 3,
+      battle: 4,
+      turn: 18,
     });
     expect(runSeed(1, options)).toMatchObject({
       // msg175: 26878 -> 26810 (shorter used prints); trn178 (the Scene OFF action-transition pause): 26810 -> 27058; same battle / turn / end state.
@@ -1149,7 +1152,8 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // etp1 (end-turn prints take the ROM end-turn rows; the exploring presses land on new phases): 58583 / turn 19 -> 57984 / turn 15; same battle 3 / depth 2 / roundLost. A trajectory pin, not a ROM frame.
       // merge of etp1 / etp2 with this run's fold: frames only, 58615 (fnt2) / 57984 (etp1) -> 57984; same battle 3 / depth 2 / turn 15 / roundLost.
       // merge with the Mac's tdr1 (tri1 / wtl1 / sst1): frames only, 57984 -> 57651; same battle 3 / depth 2 / turn 15 / roundLost.
-      frames: 57651,
+      // hpb3 (the floor-free Focus Band / no-change drain heal hp holds): frames only, 57651 -> 57626; same battle 3 / depth 2 / turn 15 / roundLost. A trajectory pin, not a ROM frame.
+      frames: 57626,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 2,
