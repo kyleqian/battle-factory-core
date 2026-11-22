@@ -5,6 +5,12 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 2026-11-22 — hit2 (worker, main/ts lane): Hail continues SEs on the body clock (T2 ON 13,166 -> 13,086); monbg-wait item not uniform, not landed
+
+- **State:** master, no push; commit ed6c88257 (Hail clock) + docs to follow. In progress: Future Sight hit (item 2), final gates.
+- **Did:** (1) item 1 traced, not landed: the ROM's monbg clear is a constant +5 rows after the last visual task (Water Gun, Ice Beam, Ice Punch, Crabhammer, Pay Day, Acid, Dizzy Punch: I - c0 = 5), but whether our window already includes it is a hand-fitted constant per body, so a script-derived rule would break the exact ones. (2) Hail: General_Hail's ten SE 242 rows were +8, now exact (labs etp1-hail-on, etp2-hail-on; T2 ON exact 2,966 -> 2,976).
+- **Next:** Future Sight hit -14, then the lead-body sound clock only if time is left.
+
 ## 2026-11-22 — chg4 (worker, main/ts lane): first charging turn after another action is a transition print, T2 ON 13,629 -> 13,166, OFF 1,588 -> 1,552
 
 - **State:** master, no push; commit 2ba5774f4 (item 1) + docs. Gates: typecheck, test:gate 360 files, build green; 166 tests importing `battleResolutionPresentation` green; census 0..199 eventsDigest identical both scenes.
