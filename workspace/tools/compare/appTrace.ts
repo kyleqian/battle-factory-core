@@ -30,6 +30,7 @@ import {
 import frontierMonsData from "../../src/data/gen/battle-frontier-mons.json" with { type: "json" };
 import naturesData from "../../src/data/gen/natures.json" with { type: "json" };
 import { readFileSync } from "node:fs";
+import type { PartySelectLabParty } from "../../src/engine/partySelect.ts";
 import { buildLabMon, type LabMon } from "./labMon.ts";
 import { createFactoryCorpusPartyMember } from "../../src/engine/factoryCorpusParty.ts";
 import {
@@ -1370,6 +1371,8 @@ type MidBattleSwitchStageOptions = Readonly<{
   playerBenchNone?: boolean;
   /** Stage the 21st battle of the run: the Silver Factory Head round (`currentOpponent.frontierBrain`). */
   frontierBrain?: boolean;
+  /** lsf2: the lab's three player mons for the forced party menu (a lab's levels / sets are not expressible as rental records). */
+  forcedPartyLabParty?: PartySelectLabParty;
   /** aud259: both staged battlers start with isFirstTurn 1 (a fresh battle's first selection), as the ROM lab's Fake Out needs. */
   firstTurn?: boolean;
 }>;
@@ -1501,6 +1504,7 @@ function midBattleSwitchStage(
     battlePresentationBoundaries: boundaries,
     aiHistory: createFactoryAiBattleHistory(staged.rules.rulesContext),
     usedMessageHoldFrames: options.laterTurnsUsedMessageHoldFrames ?? usedMessageHold,
+    ...(options.forcedPartyLabParty === undefined ? {} : { forcedPartyLabParty: options.forcedPartyLabParty }),
   });
   return {
     ...state,
@@ -2882,6 +2886,7 @@ export function labBackedStageOptions(json: LabScenario, lab: string): { options
       trainer: opponent[0]!.config,
       trainerBenchHp: [opponent[1]!.maxHp, opponent[2]!.maxHp],
       trainerBench: bench(opponent),
+      forcedPartyLabParty: [player[0]!.partyMember, player[1]!.partyMember, player[2]!.partyMember],
       usedMessageHoldFrames: 0,
       sceneOffNoAnimations: scene === "off",
     },

@@ -35,7 +35,7 @@ import {
   type BattlePartyActionCursor,
   type BattlePartySummaryMons,
 } from "./battlePartySummary.ts";
-import { createFactoryCorpusPartyMember } from "./factoryCorpusParty.ts";
+import { createFactoryCorpusPartyMember, type FactoryCorpusPartyMemberState } from "./factoryCorpusParty.ts";
 import type { LiveBattleMemberView } from "./factoryRentalPresentation.ts";
 import type { SummaryScreenState } from "./summaryScreen.ts";
 import { movePartyMenuCursor, partyMenuDirection, type PartyMenuCursor, type PartyMenuRightColumn } from "./partyMenuCursor.ts";
@@ -189,6 +189,17 @@ export const CANONICAL_FORCED_SWITCH_PARTY = Object.freeze(
   }),
 ) as unknown as BattleParty;
 
+/**
+ * lsf2: the identity fields a party-menu row reads from a `FactoryCorpusPartyMemberState`. A lab (tools/compare/labMon.ts) builds its
+ * three mons directly (levels, EVs and sets no rental record can express) and hands them to a forced selector in place of the records;
+ * the record path keeps its species / max HP check.
+ */
+export type PartySelectLabMember = Pick<
+  FactoryCorpusPartyMemberState,
+  "species" | "speciesName" | "level" | "personality" | "abilitySlot" | "friendship" | "item"
+>;
+export type PartySelectLabParty = readonly [PartySelectLabMember, PartySelectLabMember, PartySelectLabMember];
+
 function partySpeciesName(species: string): string {
   return species.replace(/^SPECIES_/, "");
 }
@@ -208,6 +219,8 @@ export function createPartySelectStateFromForcedSwitch(
    * takes HP / status from `playerParty` and the record's own moves, PP and item.
    */
   liveParty: readonly BattleScriptPartyMemberState[] | null = null,
+  /** lsf2: when given, the rows' identity comes from these members, not from the records (whose species / max HP check is then skipped). */
+  labParty: PartySelectLabParty | null = null,
 ): PartySelectState {
   const request = createBattleForcedSwitchRequest(requestInput);
   if (request.side !== "player") {
@@ -223,18 +236,22 @@ export function createPartySelectStateFromForcedSwitch(
   const legalIndexes = new Set(request.legalPartyIndexes);
   const rawParty = playerRentalRecords.map((record, index): PartySelectMember => {
     const partyIndex = index as 0 | 1 | 2;
-    const corpusMember = createFactoryCorpusPartyMember(record);
+    const lab = labParty?.[partyIndex];
+    const corpusMember = lab ?? createFactoryCorpusPartyMember(record);
     const battleMember = playerParty[partyIndex]!;
     const species = partySpeciesName(corpusMember.speciesName);
-    if (partySpeciesName(battleMember.species) !== species) {
-      throw new Error(
-        `playerParty[${partyIndex}] species ${battleMember.species} does not match rental record species ${species}`,
-      );
-    }
-    if (battleMember.maxHp !== corpusMember.maxHP) {
-      throw new Error(
-        `playerParty[${partyIndex}] max HP ${battleMember.maxHp} does not match rental record max HP ${corpusMember.maxHP}`,
-      );
+    if (lab === undefined) {
+      const recordMember = corpusMember as FactoryCorpusPartyMemberState;
+      if (partySpeciesName(battleMember.species) !== species) {
+        throw new Error(
+          `playerParty[${partyIndex}] species ${battleMember.species} does not match rental record species ${species}`,
+        );
+      }
+      if (battleMember.maxHp !== recordMember.maxHP) {
+        throw new Error(
+          `playerParty[${partyIndex}] max HP ${battleMember.maxHp} does not match rental record max HP ${recordMember.maxHP}`,
+        );
+      }
     }
     return Object.freeze({
       partyIndex,

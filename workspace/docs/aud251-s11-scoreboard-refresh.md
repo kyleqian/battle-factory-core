@@ -3172,3 +3172,30 @@ Tree: `2a907fec7` (one src commit on `da8e7b61b`). Evidence (git-ignored): `.int
 - Not settled: what the 7 is (the controller still busy for 7 rows after a short bar's datahpupdate, 0 after a long one), and no Recover / Light Screen lab was run, so no rule was landed. Next: a lab Recover -> drain (foe Recover x4, player Leech Seed x4, Rattata lvl 12 foe), read ROM `anim start` against exec, then set (command start, lag) from the bar length; `etp1-leechseed-on` / `-2-on` / aud250 labs must stay exact, `etp1-leechseedc-on` and `etp3-lightscreenls6-on` (+3 drain after the head fix) are the movers.
 
 **Item 3 (not started): OFF s6568 d104 faint box -20 (drv2 4.3).** Out of time before the probe; nothing measured.
+
+## cfs1 (Scene ON presentation / sound timing, S11 #219 item 0)
+
+Presentation only: no battle-rule, damage or RNG change. Evidence: `.integration/evidence/cfs1/` (git-ignored; `t2-{base,item10,item10b}`, `score-*`, `lab-*`, `census/`).
+
+| Item | Result | Commit |
+| --- | --- | --- |
+| 10 Confusion after a Dig unleash (s8108 d41 / d44 / d50, -48 / -32 / -48) | landed | `b8ffef15f` |
+| 10b Sweet Kiss -> Confusion | landed for Sweet Kiss; Supersonic not landed | `6516aaefb` |
+| 7 Solar Beam lead (s97 d7 / d9, -13 x2) | not landed | - |
+
+**Item 10.** The foe in those windows is a Lunatone: the Dig unleash is a `MOVE_RESULT_MISSED` Levitate print ("makes Ground moves miss with LEVITATE!"), not a damaging hit. `Cmd_attackanimation` takes the NO_EFFECT branch (`BattleScript_Pausex20`, 32 rows) for MISSED as for DOESNT_AFFECT_FOE, so the used print is held 69 rows before the miss print (ROM 1061 -> 1130). `sourcePauseUsedMoveHoldFrames` (eqk1) already did this for `STRINGID_ITDOESNTAFFECT`; it now also takes `STRINGID_PKMNMAKESGROUNDMISS` and `STRINGID_AVOIDEDDAMAGE` (Wonder Guard). Only Levitate is lab-verified (`cfs1-digconf-levitate-{on,off}`); Wonder Guard is source-equivalent. Lab `cfs1-digconf-levitate-on`: SE 184 -48 -> +1, mass 97 -> 1, the OFF twin is exact before and after; the immune and hit controls (`cfs1-digconf-immune-on`, `cfs1-digconf-hit-on`) are unchanged. Test: `tests/cfs1DigLevitate.test.ts`.
+
+**Item 10b.** The -9 is the gap from the last body SE to the Confusion status animation. Confuse Ray (109) is in the b4l c-lead body class (`C_LEAD_WINDOW_ADJUST`) and exact; Sweet Kiss (186) was not and was 2 rows early; it is now in the class with adjust 2. Labs `mechanic-sweet-kiss-player-luvdisc-opponent-onix` 128 -> 20 and `...opponent-luvdisc-player-onix` 155 -> 47 (every Confusion SE -2 -> +0; the rest is the final hit, not touched). Test: `tests/cfs1SweetKiss.test.ts`. Supersonic (48) was tried in the same class with the same adjust: it moved the s5569 d12 Confusion animation 15 rows the wrong way (T2 ON mass +164 over the base, s5569 +208), and its two labs have no body SE to calibrate on, so it stays out. s5569 d12's -9 therefore remains.
+
+**Item 7.** s97 d7 / d9 are not a charging turn: the sun makes Solar Beam single-turn (`EffectSolarBeam` -> `SolarBeamOnFirstTurn` -> `TwoTurnMovesSecondTurn` -> `HitFromAtkString`). The engine starts the used print at ROM row 9 (`SolarBeamOnFirstTurn+0`) while the ROM print is at row 22, and the body SE is -13 from that. No sun Solar Beam lab exists, so the 13 rows cannot be separated from the chg4 / bbk1 charge-turn rules without one; next step is a lab (Sunny Day turn, then Solar Beam) and the ROM rows of `EffectSolarBeam` .. `HitFromAtkString+0x1`.
+
+**T2** (25 ON / 24 OFF seeds, ROM-driven; 0 missing / 0 extra throughout):
+
+| Scene | Mass base -> item 10 -> item 10b | Exact / offset (base -> final) |
+| --- | --- | --- |
+| ON | 11,531 -> 11,208 -> 11,164 | 3,059 / 2,818 -> 3,061 / 2,816 |
+| OFF | 1,186 -> 1,186 -> 1,186 | 784 / 349 unchanged |
+
+**Census** 0..199 (base `9754cddbf` vs `6516aaefb`): eventsDigest and error identical 200 / 200 in both scenes; ON 8 battles with changed presentation commands (63,514 commands), OFF 0 changed. The `tree/` copies are deleted.
+
+**Tests:** every tests/ file importing `battleResolutionPresentation.ts`, `tests/chg*`, `bbk1*`, `sta3*`, `randomRoundSoak*`, `lbrd` (177 files): all pass except `tests/postwin.test.ts` ("rejects the early JENSON quote edge", `transitionClockAhead: 1`), which fails identically on base `9754cddbf` (rmw1's room transition clock; not this step). No trajectory pin moved. `npm run typecheck`, `npm run test:gate` (360 files / 2,839 tests) and `npm run build` pass.
