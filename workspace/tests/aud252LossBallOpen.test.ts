@@ -29,7 +29,9 @@ const fixture = JSON.parse(readFileSync(new URL("./fixtures/aud252-loss-itemeffe
 // seeds 2 / 97 / 2230 +80 / +30 / +10), docs/aud251-s11-scoreboard-refresh.md "hcr3".
 // Supervisor decision (2026-11-21, reversible): the hcr3 values are pinned as a named residual (ISSUES #219 "item chain after a faint"): the faint / select
 // rows are ROM-exact or closer, T2 ON mass fell 23,423 -> 22,835, and the item rows' remaining -8 / -6 is the general-animation start the next step measures.
-const DELTAS: Record<string, number[]> = { "1914": [-2, 0, -8, -8, -8, -8, -8, -8], "2230": [0, -4, -6, -6, -6, -6, -6, -7] };
+// itm1 (2026-11-22): the ROM rule is IsBattleSEPlaying in Opponent/PlayerHandleBattleAnimation: the held-item General animation after a faint waits for SE_FAINT
+// (first item SE = SE_FAINT + 61 in both seeds, not a T difference). heldItemFaintSeGate.ts: 1914 -8 -> -2 (the faint's own -2), 2230 -6 -> 0 (last row -1).
+const DELTAS: Record<string, number[]> = { "1914": [-2, 0, -2, -2, -2, -2, -2, -2], "2230": [0, -4, 0, 0, 0, 0, 0, -1] };
 const script = new URL("../tools/integration/soundCensusRomReplay.ts", import.meta.url).pathname;
 
 function engineRows(seed: string, scene: string, setup: unknown): Row[] {

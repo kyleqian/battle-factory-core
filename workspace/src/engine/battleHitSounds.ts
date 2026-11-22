@@ -138,6 +138,14 @@ export function emitBattleHitSounds(
   });
 }
 
+/** Ticks from the faint command's first tick to its SE_FAINT (the schedule above); null when the current command is not a faint with a lead. */
+export function faintSeOffsetRows(state: BattleResolutionPresentationState): number | null {
+  const segment = state.segments[state.segmentIndex];
+  const command = segment?.commands[state.commandIndex];
+  if (segment === undefined || command?.type !== "faint" || command.timing.leadFrames === undefined) return null;
+  return Math.max(0, command.timing.leadFrames + FAINT_SOUND_OFFSET + Math.max(0, sceneLag(segment) - moveBodyExtraRows(state, false)));
+}
+
 function sceneLag(segment: BattleResolutionSegment): number {
   return (segment.beforeRules.rulesContext.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) === 0 ? SCENE_ON_LAG : 0;
 }
