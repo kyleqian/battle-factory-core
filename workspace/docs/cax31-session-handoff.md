@@ -64,6 +64,128 @@ Kyle plans to make this repo public with its full history (no rewrite, no licens
 - Once the repo is public, everything committed is published at the next push. Keep secrets, server addresses and
   personal paths out of commits, as before.
 
+## From the Mac, 2026-11-22 (top layer): move-hit timing, info-card animations, result cards, sound timing, Open Level
+
+- **Where these came from:** Kyle's live battle of 11-21 on the website, compared with the ROM by the frame catcher
+  (`tools/frame-catcher/`). Kyle approved all three fixes on 11-21. Each doc has the ROM evidence and the tests.
+  - **Delivered as master `fe9b51517` plus this handoff commit.** That is `32c233e62` (the Mac fixes below and your night run
+    `3507c89b2`, merged by hand) plus Open Level's first part. On the delivery tree, `tsc -b` is clean and the full suite
+    passes: 1,946 files, 16,852 tests, 0 failed (44 files skipped, as on master).
+- **hit1, move-hit timing** (`docs/hit1-move-hit-timing.md`, `src/engine/animEndSeWait.ts`):
+  - The ROM's `Cmd_end` (battle_anim.c:476-524) waits up to 90 frames while a move's sound is still playing (`IsSEPlaying`).
+    The effectiveness SE, the hit blink and the HP drain all wait for that end.
+  - The engine now models this wait for every live move animation, from the new `src/data/gen/se-song-rows.json`
+    (extractor `tools/extract/extract-se-song-rows.ts`). Before, it covered only Rain Dance, stat change, Sing and Charm.
+  - THUNDER PUNCH: the effectiveness SE now plays 85 frames after the punch (ROM 86, 33 of 33 hits); before, 52.
+  - A second bug: after an earlier sound lead, a later move's effectiveness SE played 7-9 frames early. Fixed.
+  - Still open: FUTURE SIGHT is 14 frames late, hail 4 frames late, and a +6 group (WATER GUN, ACID, CRABHAMMER,
+    DIZZY PUNCH). POUND and STRENGTH are not yet measured.
+- **sfa2, info-card (summary) front animations** (`docs/sfa2-summary-front-animations.md`):
+  - All 62 motion types are ported from `pokemon_animation.c`, checked against a ROM probe over all 376 Factory species
+    (`tools/probe/sfa2-summary-front-anim-rom.py`). sfa214 (10-27) used a static stand-in for 137 species.
+  - Still open: the ROM's start lag varies by 1-2 frames, and UNOWN always draws letter A.
+- **rc1, result holds** (`docs/rc1-result-holds.md`, `src/engine/resultHold.ts`): a new library option, `lobby: "walk" | "skip"`.
+  - The default is "walk", which is unchanged: soak, census and the catcher do not move.
+  - Under "skip" (the website's new challenges), the game holds a black frame instead of warping to the Lobby:
+    - after a loss, forfeit or retire ("end");
+    - after a 7-win round, following Noland's symbol scene ("round"). A or START after 30 frames applies the carry
+      (+7 streak, symbols, BP) and deals the next round's draft.
+  - This is not ROM behaviour, by design (Kyle, 11-21: a result card instead of the Lobby walk for new players).
+- **tdr1, the frame catcher's timing report** (`docs/tdr1-catcher-timing-report.md`, `tools/frame-catcher/timing.py`):
+  - Every catcher run now measures how far its sounds drift from the ROM's and ranks the gaps that lose the most frames
+    (report.md near the top, the console line, summary.md). Before, a "timing" stretch was never measured.
+  - A gap that spans a text box press is split at the press. If the ROM took the same press, the drift up to it is the
+    driver's, not the game's. romRun.py now logs which of our presses each ROM press replays.
+  - Baseline on 6 fresh traces (28 battles): 79.3% of sound gaps within 1 frame, 9.9% off by 6+; after the three fixes
+    below (25 battles): 81.2% and 8.0%. Game frames off per 7 battles: 1,419 -> 1,045.
+- **Three timing fixes found with it, each checked against the ROM:**
+  - wtl1, after every win (`docs/wtl1-win-tail-timing.md`): "Player defeated" printed 24 frames early and the trainer
+    slid in 17 early. Both now wait for the victory BGM and the slide's dispatch as on the ROM (22 of 22 wins).
+  - tri1, battle intro (`docs/tri1-transition-intro-handoff.md`): every transition handed over to the battle intro after
+    one of two fixed lengths. Each now hands over at its own ROM frame (`ORDINARY_INTRO_HANDOFF_AFTER_BGM` in battleRoom.ts),
+    and the transition's clock runs from the battle BGM. Music -> ball tray matches in 30 of 30 battles (was -31 to +15).
+  - sst1, end-of-turn sandstorm (`docs/sst1-sandstorm-continues.md`): SE_M_SANDSTORM 8 frames late, and "X is buffeted"
+    2 or 8 frames early by turn order. Both are on the ROM's frames now.
+- **Your night run (3507c89b2) is merged in 32c233e62 by hand, because it fixed some of the same things.** Where both
+  sides fixed the same ROM behaviour, your version stays:
+  - "Player defeated": your wtl1 (WIN_TAIL_PRE/POST_RECEIPT_ROWS) stays. The Mac's wtl1 hold (withWinPrintHold) is
+    removed; both landed on P + 26. The Mac's trainer-slide lead after the press (WIN_TAIL_TRAINER_SLIDE_LEAD_FRAMES 14,
+    lose text 55 frames after the press, 22 of 22 wins) is Mac-only and stays. Note: two docs now say "wtl1"
+    (yours in `fnt1-fainted-box-clear.md`, the Mac's `wtl1-win-tail-timing.md`).
+  - Sandstorm "is buffeted": your etp1 print lead stays and sst1's command tail is removed. sst1's sandstorm SE
+    (8 frames sooner) is Mac-only and stays.
+  - Metal Claw: your bdt1 window (154) stays. hit1's Cmd_end SE wait skips move 232, since it is the same 14 rows.
+  - Transitions: tri1 times the ordinary room's handoff per transition (#225's ordinary room), and now uses trn226's
+    LOGO_WAVE start te 32 and LOGO_WIGGLE drawing there too.
+  - Catcher on the merged tree (6 fresh traces, 28 battles): 83.1% of sound gaps within 1 frame, 6.7% off by 6+, 782 game
+    frames off per 7 battles (e7ea2caf8 alone: 81.2%, 8.0%, 1,045). Music -> ball tray 28 of 28.
+  - Open: a win by an end-of-turn KO (poison) still prints "Player defeated" ~24 frames early (neither rule covers
+    it); our box blanks 2-8 frames before the sandstorm text while the ROM keeps "The sandstorm rages."; LOGO_WIGGLE
+    hands over at BGM + 160 in the ordinary room vs trn226's 161 (Noland room).
+- **Still open from tdr1:**
+  - The Speed Boost gap, the SHIFT recall and the punch moves. The ROM's victory BGM sometimes starts 1 frame sooner.
+  - Hail and sun likely share sandstorm's faults; they were not in the sweep.
+  - The ROM's battle RNG depends on how long the transition runs; ours does not.
+  - The canonical recorded route draws ASYMMETRIC_SPIRAL_IN_SEQ for battle 1 where the ROM drew CIRCLES_MEET. That route
+    keeps the old fixed clock (`perTransition` false) so its fixtures still match.
+  - Not game bugs: the ball tray after a foe faints is 0-4 frames later on the ROM (its AI's CPU time picking the next
+    Pokemon), and the "fainted!" print is 3-6 frames early (fnt1, already open).
+- **Luck hunt, three designs stuck (Mac, 11-22):** the day hunt found 16 rare battles from 11-17 to 11-20, all ROM-matched.
+  On 11-21 and 11-22 its three open designs (R040 clefable-taunt-mirror-coat-replacement, R063 chansey-metronome-transform-
+  ends-disable, R110 roar-drags-wounded-onto-spikes) got 0 marker hits in about 5,900 seeds. Rework them so less luck is
+  needed: hand-set more of the situation, more tries per battle, or a shared battle (luck5's coverAny). Use `PREHUNT_CALLS=1`
+  to estimate each design's chance per seed first. Until they change, the day hunt spends its hours on them for nothing.
+- **Open Level is being built ON THE MAC, not here (Kyle, 11-22: "can we get started on making sure open levels work
+  ... I want you to be able to play through different rounds and have it match what the actual ROM would produce").**
+  Kyle split the two machines: the Mac takes Open Level, and this box keeps sound timing (item 0) as its headline, plus the
+  luck-hunt rework above.
+  - Do not start Open Level work here. The Mac lane's branch merges into master at its checkpoints, and you fold master at
+    run start as usual.
+  - **Its first part is in this delivery (master `fe9b51517`, Kyle's OK 11-22):**
+    - The engine option `level: "open"` is for tools only. The website stays at Level 50 until Kyle decides.
+    - New: the Open bootstrap profiles (`oracle/bootstrap/factory-open*.json`), the Open ROM tools (`tools/openlevel/`), and
+      `REPLAY_LEVEL=open` in `romReplayWide.sh`.
+    - Fixed: Sand Stream's permanent sandstorm no longer runs down (Level 50 can't reach it).
+    - Checked: the Level 50 census is byte-identical to `32c233e62`, and the full suite passes.
+    - Evidence: `docs/opl1`..`opl4-*.md` (15 Open challenges and 121 battles against the ROM's RAM; 165 whole Open battles
+      replayed; 620 Open soak runs with 0 crashes).
+  - **New for item 0d's nightly replay (Kyle, 11-22: "nightly replay should do some open battles"):** from this run on, also drive
+    these at Open Level, scene OFF:
+    - 6 census seeds drawn by the same generator as the pool seeds, with `REPLAY_LEVEL=open`. Give one of them `CHALLENGE` 7
+      (sets 372..881, full AI).
+    - 1 gold Noland (`SYMBOLS` 1, a seed with seed % 49 == 26).
+    - The 7 stages in `docs/parity-mac/stages/opl3/` (`--stage`; each stage names its own level).
+    - Put them on their own line in `docs/replay-ledger.md`.
+    - Level 100 battles last longer. If a battle stops on the engine frame budget or the ROM drive cap with every state so far
+      matching, it is a Struggle stall, not a mismatch: drive it again with `REPLAY_FRAME_BUDGET=6000000
+      REPLAY_DRIVE_FRAMES=2500000` (Open seed 208 runs 365 turns and matches the ROM to the end).
+  - **The "drive again once" flake's cause is found** (`docs/opl3-open-level-rom-replay.md`, "c7 seeds 22, 26, 27"):
+    - The emulated clock starts at the process's start time (`oracle/emerald_core.py`, `use_simulated_time()` with no
+      argument).
+    - Once a day, a start time inside a ~30-second window makes the game's daily update spend extra random draws, so the ROM
+      plays another battle. This hits Level 50 too: the bulk run's nine seeds in a row, 4777..4812.
+    - The Mac will pin a fixed start time and re-check the Level 50 pins. Until that lands, keep driving a 0-matched battle
+      again.
+  - To avoid another double fix like the two wtl1s, leave these alone unless your step needs them, and keep any change
+    small and named in PROGRESS: the Lobby level menu (`factoryLobbyAttendant.ts`), rental / opponent / Noland
+    generation (`factoryRentalGeneration.ts`, `factoryOpponentGeneration.ts`, `factoryBrainOpponentGeneration.ts`),
+    `factoryCorpusParty.ts`, `factoryRoundChaining.ts`, `factoryAiDecisionPolicy.ts`, `prebattleRoom.ts`,
+    `factoryAnchorSession.ts`, `oracle/battle_lab.py` and the oracle bootstrap, and the ROM drivers' level handling
+    (`soundCensusRomReplay.ts`, `romRoundDriver.py`, `romNolandScene.py`, the frame catcher's `romRun.py`).
+  - Lv50 must stay unchanged: the Mac lane checks census eventsDigest at Lv50 before each merge.
+  - Two timing finds from the Mac's Open Level catcher runs belong to YOUR sound-timing lane, since neither rule reads the level
+    (details in `docs/opl4-open-level-proof.md`, "Found, not fixed"):
+    - A player's Pokemon knocked out at the end of the turn by Leech Seed or Perish Song: the ROM waits for the press on
+      "X fainted!"; ours waits on the message before it and shows "fainted!" for only a few frames. Seen at Open in o14on (DODRIO)
+      and o5off (SLAKING). This goes with fnt1's end-turn knock-out timing.
+    - The Lobby after a lost challenge: after "record your last BATTLE FACTORY match?" NO, the ROM's farewell box closes earlier
+      than ours, so presses made during our text walk the ROM's player away from the attendant. Measure the farewell's first-glyph
+      frame on both sides (see `docs/lbb1-lobby-b-press.md`).
+- **For your tools:** fixed-frame traces recorded before hit1 and tri1 drift on this build, because every move
+  animation's end and every battle intro move. Make fresh traces with makeTrace.
+- The website runs **eb-aeaa423d18bf34fe** (master 32c233e62 = the Mac's fixes above + your night run 3507c89b2) since
+  11-22 08:53 UTC (Worker 3abe2d2d). Open challenges on older builds (eb-12ab, eb-c3f7, eb-01c1, eb-f174) finish on their own build.
+
 ## From the Mac, 2026-11-21 (top layer): the frame catcher over whole challenges, and sixteen fixes
 
 - **The frame catcher** (`tools/frame-catcher/`, README) now follows whole challenges in both scenes: round 1 (fcs1,
