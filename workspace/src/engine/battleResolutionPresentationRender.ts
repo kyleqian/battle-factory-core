@@ -1897,11 +1897,13 @@ const LEECH_SEED_DRAIN_BODY_ROWS = 194;
 export const LEECH_SEED_DRAIN_SCRIPT_AGE = 7;
 /** hie7: the body starts with the script row 0, which runs LEECH_SEED_DRAIN_SCRIPT_AGE rows after the command start except right after the player's faint-replacement send-in (moveAnimSounds). */
 function leechSeedDrainBodyStartAge(command: Extract<BattleResolutionPresentationCommand, { type: "general-animation" }>): number {
-  return LEECH_SEED_DRAIN_BODY_START_AGE - LEECH_SEED_DRAIN_SCRIPT_AGE + leechSeedDrainLaunchLag(command);
+  return LEECH_SEED_DRAIN_BODY_START_AGE - LEECH_SEED_DRAIN_SCRIPT_AGE + (command.timing.launchLagFrames ?? (command.afterPlayerSendIn === true ? 0 : LEECH_SEED_DRAIN_SCRIPT_AGE));
 }
-/** sep1: rows from the command start to the script's first row: the hit SE's wait when the builder measured it, else the legacy 7 (0 after the player's send-in). */
+/** sep1: SE rows of a drain reached from a print (Recover, Light Screen wore off) run 2 rows later than the legacy 7 (etp3-recoverls4 / lightscreenls6 ROM: SE 180 -2 against the print on every turn); the body pixels keep 7 (lsd198 dense receipt, not re-measured). */
+const LEECH_SEED_DRAIN_AFTER_PRINT_EXTRA_AGE = 2;
+/** sep1: rows from the command start to the script's first row: the hit SE's wait when the builder measured it, else 7 + 2 (0 after the player's send-in). */
 export function leechSeedDrainLaunchLag(command: Extract<BattleResolutionPresentationCommand, { type: "general-animation" }>): number {
-  return command.timing.launchLagFrames ?? (command.afterPlayerSendIn === true ? 0 : LEECH_SEED_DRAIN_SCRIPT_AGE);
+  return command.timing.launchLagFrames ?? (command.afterPlayerSendIn === true ? 0 : LEECH_SEED_DRAIN_SCRIPT_AGE + LEECH_SEED_DRAIN_AFTER_PRINT_EXTRA_AGE);
 }
 
 function leechSeedDrainAbsorbEffect(

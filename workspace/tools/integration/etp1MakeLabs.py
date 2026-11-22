@@ -58,8 +58,10 @@ S = {
     # a foe's Leech Seed drain follows the side-status wear-off print in the same end turn
     "lightscreenls6": (19, 50, [113], 0, 19, 12, [73], 0, [0] * 6),
     "reflectls6": (19, 50, [115], 0, 19, 12, [73], 0, [0] * 6),
+    # sep1: the foe's Recover (it is seeded, so damaged) followed by the end-turn drain
+    "recoverls4": (19, 50, [73], 0, 19, 12, [105], 0, [0] * 4),
 }
-ETP3 = {"sandstormu3", "lightscreen6", "reflect6", "lightscreenls6", "reflectls6"}
+ETP3 = {"sandstormu3", "lightscreen6", "reflect6", "lightscreenls6", "reflectls6", "recoverls4"}
 want = sys.argv[1:] or list(S)
 for name in want:
     us, ul, um, ui, ts, tl, tm, ti, slots = S[name]
