@@ -2786,3 +2786,41 @@ Rock Slide's own interval is exact (s97 55 = 55): the item is not a Rock Slide r
 6. **Do not add a poison tick, Ice Beam or Rock Slide rule**: the three are inherited; the only direct engine moves of this step are 1, 2 and 3.
 
 Gates: no `.ts` added (python only), so no typecheck; `npm test` / build not run (docs / tools step); `src/`, `tests/`, PROGRESS / ISSUES / ROADMAP and the acceptance / supervisor ledgers untouched.
+
+## hse2: Scene OFF wake-up / confusion / Struggle heads (main/ts lane, 2026-11-22)
+
+Three OFF presentation items, each its own commit, measured with `tools/audio/rescoreAll.sh` (OFF, then ON) on the same 24 OFF + 25 ON seeds. Evidence: `.integration/evidence/hse2/` (`t2-base`, `t2-i1..i3`, `lab-*`, `census/`, `table-off-new.txt`, `split-new.json`, `baton-scan.jsonl`; git-ignored).
+
+| Step | Commit | T2 OFF mass | exact / offset | missing / extra |
+|---|---|---|---|---|
+| base (3dd105fbc) | | 1,819 | 725 / 408 | 0 / 0 |
+| 1 wake-up: OFF uses the ON message hold and icon rule | d84490954 | 1,675 | 732 / 401 | 0 / 0 |
+| 2 confusion head: OFF hold = 64 + 3 + 4 | 5be0a2c3b | 1,629 | 736 / 397 | 0 / 0 |
+| 3 Struggle forced handoff 1 frame shorter (OFF only) | f660ee691 | **1,588** | **776 / 357** | 0 / 0 |
+
+Scene ON did not move: 13,629 mass, 2,951 exact / 2,926 offset, 0 missing / 0 extra, before and after.
+
+Labs (`labCompare.sh --scene off`, PRINTS mass; SUMMARY = sound rows):
+
+| Lab | before | after |
+|---|---|---|
+| wkl1m-wakeup-player-off | 105 | 90 |
+| wkl1m-wakeup-foe-off | 105 | 90 |
+| hpf4m-confuse-off | 514 | 506 |
+| enc276-struggle-off | 53 (SE exact 0 / offset 1) | 55 (SE exact 1 / offset 0) |
+
+enc276: the hit-animation SE now lands on ROM frame 526; the used print row moves 1 frame the other way (PRINTS mass +2), which the SE row is worth more than. hpf4m-confuse-off's own 1323 turn is a self-hit turn and keeps 67; the rule applies to the non-hurt turns (frame 3396: 71).
+
+Findings worth keeping:
+- Item 3 first tried the shared hold (`NO_MOVES_DISMISS_HOLD_FRAMES` 9 -> 8): Scene ON moved +16 (13,629 -> 13,645), so it is OFF-only (`NO_MOVES_DISMISS_HOLD_OFF_FRAMES`, `forced.holdTotal`); ON's 9 is untouched.
+- ROM rows behind the numbers: wake print -> status icon 82 (player) / 86 (foe), icon -> next print 4, confusion print -> used print 94 (ON 90). Pinned in `tests/hse2OffStatusHeads.test.ts`.
+
+Census (seeds 0..199, both scenes, `lsd194Census.sh` + `rst197CensusDelta.py`, 3dd105fbc vs f660ee691): eventsDigest identical in both scenes, so no gameplay / RNG change.
+
+Pins moved (each re-pinned after reading why):
+- `tests/randomRoundSoak.test.ts`: seed-21 render calls 3,052 -> 3,054 (the OFF holds above); Baton Pass seed 16 -> 20 (the old seed's trajectory moved; `tools/soak/batonPassSearch.ts` candidates 20, 25, 27).
+- `tests/sa125StatusAnimationCommand.test.ts`, `tests/sag130StatusSeGate.test.ts`: the ON-vs-OFF span comparison reads the OFF confusion print (hold 71) at the ON hold 67, since those tests check the status animation / SE gate, not the item 2 head (it left 46 / 34 unanchored spans against a limit of 34).
+
+Ranking after hse2 (`hse1mSplit.py` / `hse1mTable.py`, OFF, 97 hit windows, owned mass 280): plain 61, Focus Punch 45, hit SE without used-print chain 35, two-turn 28, infatuation 28, Struggle after NoMovesLeft 27, confusion path 26, after miss 17, wake-up 13.
+
+Still open (not done here): the asleep / wake print head -15 after a hit; infatuation (-3 rows, 28); Focus Punch (45); two-turn second turn (28). Out of scope and untouched: Scene ON rules, move-animation min 42, hit-animation interval.

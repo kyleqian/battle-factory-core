@@ -5,6 +5,14 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 2026-11-22 — hse2 (worker, main/ts lane): Scene OFF wake-up / confusion / Struggle heads, T2 OFF 1,819 -> 1,588 (ON unchanged)
+
+- **State:** master, no push; commits d84490954, 5be0a2c3b, f660ee691, soak re-pin, anchor-test fix, docs. Gates: test:gate 360 files green, typecheck, build.
+- **Did:** (1) OFF wake-up uses the ON message hold and icon rule; (2) OFF confusion print before the used print holds 64 + 3 + 4; (3) OFF-only Struggle forced handoff 1 frame shorter (shared hold moved ON +16, so not shared). T2 OFF exact 725 -> 776, 0 missing / 0 extra; ON 13,629 / 2,951 identical. Census 0..199 eventsDigest identical both scenes. Numbers and pins: `docs/aud251-s11-scoreboard-refresh.md` "hse2".
+- **Next:** asleep / wake print head -15 after a hit, infatuation -3, Focus Punch, two-turn second turn (hse1m ranking in the doc).
+- **Notes:** pins moved: randomRoundSoak render calls 3,052 -> 3,054, Baton Pass seed 16 -> 20; sa125 / sag130 read the OFF confusion print at the ON hold. The task said not to touch PROGRESS.md but also to keep its top entry current; only this entry was added.
+
+
 ## 2026-11-22 — CAX31 daily run (supervisor, Opus 5.5, 2026-11-21 13:30 -> 2026-11-22 05:30 UTC): wind-down: sound timing ON -44 % / OFF -36 %, "Player defeated" / end-turn prints on the ROM rows, 14 more rare rules, two Frontier transitions
 
 - **State:** master clean, no push. **No DEFERRED items.** Final engine `30cd3dfac` (later commits: tests / docs / tools). **ENGINE_BUILD `eb-99fc9734e67828a5`** (dist-lib of `30cd3dfac`;
