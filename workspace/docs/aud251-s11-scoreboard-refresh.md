@@ -2662,6 +2662,30 @@ The Struggle / wake-up / confusion windows are already within +-2 in ON (gsp2 / 
 3. **Struggle +1:** shorten the forced-handoff hold before the used print by 1 (dismiss -> print 17), `tests/enc276ForcedTurnNoMenu.test.ts`; 43 rows, +43 exact, mass -43. Then re-run `hse1mSplit.py` / `hse1mTable.py` on the new engine to rank infatuation (-3), Focus Punch, two-turn.
 4. Do not touch the `move-animation` min 42 / `hit-animation` (their interval is exact) and do not land t2k3's "21-28 short" proposal.
 
+### 5. wkl1m (2026-11-22): the clean Scene OFF wake-up lab pair (labs and docs only; `src/` and `tests/` untouched)
+
+Labs: `tools/battle-lab/wkl1m-wakeup-player-off.json` (the player's Snorlax L50 sleeps) and `wkl1m-wakeup-foe-off.json` (the foe's Snorlax sleeps; the name says which side wakes, the reverse of the gsp3 "user" naming). Parties: Snorlax L50 with Rest (156) in all four slots against Rattata L50 with Seismic Toss (69) in all four; Snorlax is slower, so Seismic Toss (fixed 50) lands first each turn; four turns of `A`, 18 idle, `A`, 700 idle (the last idle 900). Run: `labCompare.sh --scene off --out .integration/evidence/wkl1m/run wkl1m-wakeup-player-off wkl1m-wakeup-foe-off` (tables: `run/*.table.txt`, git-ignored).
+
+**Why Rest, not Spore.** A Spore lab (`Rattata L50` Spore x4 against a Seismic Toss L12 foe, seeds 1-6, 3-7 turns) is not usable: the sleep length is a roll, and the engine's and the ROM's differ for the same lab seed. ROM wakes the foe in turn 2 (seeds 1 / 3 / 5) or turn 4 (seed 2); the engine one turn later each time (turn 3 for odd seeds, 5 for even), so the ROM foe is awake and re-slept by the next Spore while the engine foe is still asleep (rows desync from the wake turn on: SUMMARY mass 707 = the engine's wake-up attack matched with the ROM's earlier one). That engine-vs-ROM sleep-length roll is its own open question (not a timing rule; untouched). Rest has a fixed length (Snorlax asleep turns 2 and 3, wakes in turn 4 in the ROM and in the engine) and no accuracy roll, so both labs reach the same wake-up turn; the only press-timing care is that the last idle outlasts the long wake + Rest turn (a fifth turn's `A` fell inside the ROM's turn 4 end in the first 5-turn trace).
+
+**Result (`labCompare.sh --scene off`).**
+
+- `wkl1m-wakeup-player-off.off`: `PRINTS exact 7 / offset 6 / missing 4 / extra 0, mass 105 (first glyph: ROM 17 / ENG 13)`; `SUMMARY exact 4 / offset 0 / missing 0 / extra 0, mass 0 (ROM 4 / ENG 4 se)`.
+- `wkl1m-wakeup-foe-off.off`: the same two lines, identical numbers.
+- The four SEs (the four Seismic Toss hit SE 13) are exact +0 in both, so the wake-up window is entered with no carried offset; the 4 "missing" prints are ROM-only `MoveEnd+0x9` rows (the ROM prints the next message row where the engine has none).
+
+Wake-up window (turn 4; ENG - ROM, frames; player lab / foe lab are the same except the battler side; wake print exec `MoveUsedWokeUp+0xe`):
+
+| Row | ROM | ENG | ENG - ROM |
+|---|---|---|---|
+| wake-up print first glyph (player lab / foe lab) | 2374 / 2370 | 2359 / 2355 | **-15** |
+| status icon clear (ROM `MoveUsedWokeUp+0x13` updatestatusicon exec; ENG `status-icon` command) | 2455 | 2439 | **-16** |
+| next used print first glyph (`EffectRest+0x2`, the woken Snorlax's Rest) | 2460 | 2440 | **-20** |
+
+The -15 at the wake print is not the wake-up rule: the same -15 is on the `MoveUsedIsAsleep` print of turns 2 and 3 (ROM 929 / 1651, ENG 914 / 1636, both labs) with the Seismic Toss hit SE exact in front of them, so it is the engine's asleep / wake print head after a hit (a separate step). The wake-up rule is the two deltas *inside* the window, and the lab reads exactly hse1m's: print -> icon is **81** ROM glyph-to-icon (82 from the print exec 2373 to the updatestatusicon exec 2455) against the engine's **80** (-1 glyph basis, -2 on hse1m's exec basis), and icon -> next print is **5** ROM (updatestatusicon exec 2455 -> `EffectRest+0x2` exec 2459, glyph 2460) against the engine's **1** (-4). Wake print -> next print is 86 ROM / 81 ENG = -5; the step goes -15 -> -16 -> -20. So the Scene ON rules are what OFF needs: `WAITMESSAGE_LONG_HOLD_FRAMES + 2` for the message and `wakeUpStatusIconFrames` (exec delta + 1) for the icon (`battleResolutionPresentation.ts:1265`, `:6310-6314`), after which the three rows should read -15 / -15 / -15 (next print -20 -> -15); anything left on top is the asleep / wake print head (-15). The row after the next used print (Rest `status` / heal prints, -20) carries the same -5 and moves with it.
+
+**Landing check for the next run:** after the `:1265` / `:6310-6314` change run `labCompare.sh --scene off wkl1m-wakeup-player-off wkl1m-wakeup-foe-off` (about 40 s for both); the wake print row stays -15, the icon row goes -16 -> -15 and the used-print row -20 -> -15; all four SEs must stay +0 and SUMMARY mass 0. Pins to re-check by the recipe above (`tests/factoryBattleScriptWakeUpFullTurn.test.ts`, `tests/battleScriptAttackCancelerAsleep.test.ts`, `tests/off121StatusCommand.test.ts`) were not run.
+
 ## g180m (2026-11-22): the engine commands behind t2k3 items 4 and 5 (gen:180 / 142 / 202 chain, Dig)
 
 Post-freeze measurement; `src/` and `tests/` untouched. Tools: `tools/integration/g180mProbe.sh` (probe + `hcr3mCmp` for one seed / decision; `SUB=<dir>` keeps one `rom.json` per decision), `g180mClass.py gen|dig` (window first rows with the five engine commands before them), `g180mTwoTurn.py` (first-turn windows of two-turn moves with the previous ROM cause). Evidence: `.integration/evidence/g180m/` (`p/*/*.cmp.txt`, `c-on/` cmdtraces, `lab/leech.txt`).
