@@ -487,6 +487,12 @@ const MOVE_WILL_O_WISP = 261;
  * body is drawn on the ROM's rows: SE_M_ATTRACT 2 rows before the first shrink row on the ROM, 5 after on ours), Transform's 5 late and Will-O-Wisp's 1 early.
  */
 const SCRIPT_START_CLOCK_MOVE_IDS: ReadonlySet<number> = new Set([MOVE_TRANSFORM, MOVE_SUBSTITUTE, MOVE_WILL_O_WISP]);
+/**
+ * mxp1: Self-Destruct / Explosion present the ROM's gAnimScriptActive rise as body age 0 (window = A, no lead), so script row 0 is age 1 and the
+ * table's frame is the SE row with no controller lag (ROM labs eqk1-{expl,sd}-{p,f}: the first SE is A + 4 = age 4 for the frame-3 op; the generic
+ * 7-row lag put every body SE 7 rows late).
+ */
+const NO_SOUND_LAG_MOVE_IDS: ReadonlySet<number> = new Set([120, 153]);
 
 /** Called once per collected tick with the round's resolution presentation after the tick; emits the ops whose frame is this tick's. */
 export function emitMoveAnimSounds(after: BattleResolutionPresentationState | null, frontierBrain = false): void {
@@ -504,13 +510,14 @@ export function emitMoveAnimSounds(after: BattleResolutionPresentationState | nu
     attackerSide: request.attacker === 0 ? "player" : "opponent",
     targetSide: request.target === 0 ? "player" : "opponent",
   } as const;
-  const genericRow = age - FIRST_COMMAND_AGE - AGE_TO_SOUND_ROWS;
+  const soundLag = NO_SOUND_LAG_MOVE_IDS.has(request.moveId) ? 0 : AGE_TO_SOUND_ROWS;
+  const genericRow = age - FIRST_COMMAND_AGE - soundLag;
   const start = SCRIPT_START_CLOCK_MOVE_IDS.has(request.moveId) ? moveAnimationScriptStartRow(segment, command.eventSequence) : null;
   const scriptRow = start === null ? genericRow : after.lifecycle.phaseElapsed - (command.timing.seGateFrames ?? 0) - start;
   const ops = variantOf(request.moveId, request.turn, request.attacker === 0 ? 0 : 1, { picY: source.picOffsetY, topY: source.topY, rolloutCounter: request.rolloutCounter, damage: request.damage, attackerElevation: source.attackerElevation, attackerHpQuarter: source.attackerHpQuarter });
   emitQuietBgmRows(request.moveId, source.singBodyRows, scriptRow, frontierBrain);
   emitOpsAt(ops, context, scriptRow);
-  if (scriptRow === 0) scheduleMoveAnimationTail(ops, context, lastAge - FIRST_COMMAND_AGE - AGE_TO_SOUND_ROWS + scriptRow - genericRow);
+  if (scriptRow === 0) scheduleMoveAnimationTail(ops, context, lastAge - FIRST_COMMAND_AGE - soundLag + scriptRow - genericRow);
   emitCryTaskRows(request.moveId, source.attackerSpecies, context.attackerSide, scriptRow, frontierBrain);
 }
 

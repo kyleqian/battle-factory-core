@@ -1336,6 +1336,7 @@ function hitTargetSpriteInvisible(
 }
 /** BattleScript_Pausex20's `pause B_WAIT_TIME_SHORT`. */
 const SCENE_OFF_MOVE_PAUSE_FRAMES = 32;
+const EXPLOSION_OFF_BODY_ROWS = 1;
 
 /**
  * off108 (ISSUES #167, docs/off108-scene-off-pauses.md): Scene OFF runs
@@ -2173,7 +2174,8 @@ const LEAD4_S_LEAD_MOVE_IDS: ReadonlySet<number> = new Set([
 /**
  * lse4 (docs/hpd1-hp-hold.md lse3 table): Revenge 279 and Absorb 71 join the shape-A class (lead 5, gap 4). Absorb's accepted window is 2 rows short of the ROM's len + 1 (`LSE4_WINDOW_SHORT_ROWS`).
  */
-const LSE4_SHAPE_A_MOVE_IDS: ReadonlySet<number> = new Set([279, 71]);
+const MAGNITUDE_MOVE_ID = 222;
+const LSE4_SHAPE_A_MOVE_IDS: ReadonlySet<number> = new Set([279, 71, 222]);
 /**
  * lse4 "gap-print": the lead is the kernel counter, the rows after the body are `T = 2 + gap - pre - post + s` with the ROM gap of the next command: a print (`printfromtable` / `printstring`) is
  * Delta + 1 (Recycle 3, the Razor Wind charge turn 7), any other next command is shape A (gap 4). Recycle 278, Razor Wind 13 (both turns).
@@ -2272,6 +2274,13 @@ function moveAnimationScriptLeadTiming(
     if (BATTLE_SCRIPT_PROGRAM.instructions[programCounter + 1]?.opcodeName === "B_SCR_OP_WAITSTATE") {
       const waitLead = animation - (used + 1);
       return waitLead > 0 ? { scriptLeadFrames: waitLead } : {};
+    }
+    if (moveId === MAGNITUDE_MOVE_ID) {
+      // mxp1: the body's script lead is counted from the Magnitude print's waitmessage (ROM: goto .. attackanimation 10 rows, A at +13 from the command).
+      const magnitudePrint = events.slice(i + 1, index).find((e) => e.payload.kind === "message" && e.payload.messageId === "STRINGID_MAGNITUDESTRENGTH");
+      if (magnitudePrint === undefined) return {};
+      const magnitudeLead = animation - (instructionExecutionOf(magnitudePrint) + 1 + WAITMESSAGE_LONG_HOLD_FRAMES);
+      return magnitudeLead > 0 ? { bodyLeadFrames: magnitudeLead } : {};
     }
     if (presentedSinceUsed === null || !bodyLeadRuleApplies(moveId) || (events[index]!.provenance?.sourceLabel === CHARGE_TURN_SCRIPT && !bodyGapPrintRuleApplies(moveId))) return {};
     const lead = animation - (used + 1) - presentedSinceUsed;
@@ -5733,6 +5742,7 @@ export function projectBattleResolutionCommands(
   let lastFaintBattler: 0 | 1 | null = null;
   let pendingStatusMessageBattler: 0 | 1 | null = null;
   let lastMoveAttacker: 0 | 1 | null = null;
+  let lastUsedCurrentMove: number | null = null;
   // Target of the latest Scene ON MOVE_ANIMATION receipt (Scene OFF has none): its `returntoball` is the forced removal.
   let sceneOnMoveTarget: 0 | 1 | null = null;
   // sta5 step 2 holds are Scene ON rows (the launch follows a Scene ON MOVE_ANIMATION receipt; Scene OFF has none and keeps its commands).
@@ -5787,6 +5797,7 @@ export function projectBattleResolutionCommands(
     if (payload.kind === "message") {
       sourceLabelOf(event);
       const actionSnapshot = payload.actionSnapshot ?? null;
+      if (actionSnapshot !== null) lastUsedCurrentMove = actionSnapshot.currentMove;
       if (actionSnapshot !== null) {
         // The full-turn receipt is frozen at Cmd_printstring time. Keeping
         // this current message's source owner also makes generic subsequent
@@ -6125,8 +6136,12 @@ export function projectBattleResolutionCommands(
         payload.animationId === "SCENE_OFF_ATTACK_PAUSE"
           ? SCENE_OFF_MOVE_PAUSE_FRAMES + 1 + magnitudeWaitRows
           : 0;
-      const interveningInstructions =
-        hitExecution - usedMoveInstructionExecution - executedPauseCallbacks;
+      // mxp1: Self-Destruct / Explosion run `tryexplosion; setatkhptozero; waitstate` before the animation; the user's `hp` command presents those rows, so the
+      // body spans only the animation instruction to the hit (ROM labs eqk1-{expl,sd}-{p,f}-off: attackanimation -> hitanimation 43 rows, was 48).
+      const explosionFamily = payload.animationId === "SCENE_OFF_ATTACK_PAUSE" && (lastUsedCurrentMove === 120 || lastUsedCurrentMove === 153);
+      const interveningInstructions = explosionFamily
+        ? hitExecution - instructionExecutionOf(event) - executedPauseCallbacks + EXPLOSION_OFF_BODY_ROWS
+        : hitExecution - usedMoveInstructionExecution - executedPauseCallbacks;
       if (interveningInstructions <= 0) {
         throw new Error("battle resolution move/hit provenance is not ordered");
       }

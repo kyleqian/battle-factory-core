@@ -61,7 +61,8 @@ describe("apx215: approximate substitute-doll", () => {
 
   it.each([
     // census seed 17: FORRETRESS (player) Explosion at JYNX's doll (defender doll, no proven Explosion defender cell).
-    ["Explosion 153 player at a defender doll (census seed 17)", 17, 153, 0, 219],
+    ["Explosion 153 player at a defender doll (census seed 17)", 17, 153, 0, 229],
+    // mxp1: 219 -> 229 = window 212 -> 213 (ROM A 216) + the 9-row hit tail (ROM hitanimation exec = A end + 10).
     // census seed 587: CRADILY (opponent) Solar Beam fire turn from behind its doll (swap composite around the body).
     ["Solar Beam 76 opponent fire turn from behind the doll (census seed 587)", 587, 76, 1, 285],
     // liv2: 241 -> 285 = the unleash body 160 -> 199 live rows (the ROM window's 39-row SE wait; no idle head under a doll) + the shape-A lead 5.
@@ -71,7 +72,7 @@ describe("apx215: approximate substitute-doll", () => {
     expect(first.code).toBe("approx:substitute-doll");
     expect(first.rows).toBe(rows);
     // The static hold would equal renderBattleResolutionSceneOffView on every row; the approximate body differs on almost all of them.
-    expect(first.nonStaticRows).toBeGreaterThan(rows * 0.9);
+    expect(first.nonStaticRows).toBeGreaterThan(rows * 0.89); // mxp1: Explosion's 9-row hit tail holds the last picture (206 of 229)
     const again = apx215SubstituteDollStrip(seed, moveId, attacker)!;
     expect(again.rows).toBe(first.rows);
     expect(again.nonStaticRows).toBe(first.nonStaticRows);

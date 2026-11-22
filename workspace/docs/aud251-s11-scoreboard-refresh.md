@@ -2436,3 +2436,33 @@ Cause (hcr3mProbe.py + hcr3mCmp.py, seg 21): the player's Earthquake hits a Flyi
 **T2 (`.integration/evidence/itm1/t2-{base,after}`, ROM-driven rescore of `t2n`).** ON TOTAL mass 15,676 -> **15,600**, exact 2,918 -> **2,923**, 0 missing / 0 extra; OFF unchanged (mass 2,186, exact 721). **Census 0..199** (`lsd194Census.sh`, `LSD194_SHARDS="0 1"`, JOBS 2, SPLIT 2, `8fef84655` vs `05f0557f8`): `rst197CensusDelta.py --digest` eventsDigest + error identical 200 / 200 in ON (200 battles / 0 changed commands) and OFF (byte-identical shards 2 / 2); `soundCensusDelta.py` ON: 29 / 200 seeds move frames only (same sequence), `--t1` exact 54,127 on both arms. No gameplay / RNG change.
 
 **Residual.** The faint SE itself is -2 on 1914 (unchanged); the item chain's last row (SE_BALL_OPEN, loss path) is -1 on 2230. Trees deleted.
+
+## mxp1: Magnitude Scene ON body, Explosion / Self-Destruct sounds
+
+**Magnitude (222), Scene ON.** The live window was the power-70 constant (174); the ROM's `gAnimScriptActive` is `118 + 8 * floor(power / 10)` rows (142 at power 30, 158 at 50, 174 at 70, 190 at 90, 206 at 110, 238 at 150: the HorizontalShake's decay). The window is now `magnitudeFirstInactiveAge(power) + 1` (`src/animation/magnitude.ts`, `liveMoveAnimation.ts`); the body joins the shape-A class (`LSE4_SHAPE_A_MOVE_IDS`) with a 10-row lead presented after the `STRINGID_MAGNITUDESTRENGTH` print's `waitmessage` (the kernel counter includes the 64-row hold: lead = A - (print + 1 + 64)). The first SE is on the ROM frame (`aud262` first-SE offset 3 -> 0).
+
+**Explosion (153) / Self-Destruct (120).** Differing commands (ROM `eqk1-{expl,sd}-{p,f}`, both scenes): ON the body SE clock carried the generic 7-row controller lag although the window already starts on the ROM's `gAnimScriptActive` rise (A + 4 = the frame-3 op); the hit command (A end + 10 = `hitanimation` exec) was on the ROM row for Self-Destruct but its SE (`effectivenesssound`, the row before) was scheduled +6 / +7 after it; the faint SE kept the 7-row lag; Explosion's window was 212 (older accepted 76..287) against A 216 - 3 = 213 and it had no 9-row hit tail (hit command 10 rows early). OFF the body was `1 + (hit - used) + 32` = 48 rows but the user's `hp` command already presents `tryexplosion; setatkhptozero; waitstate` (ROM attackanimation 58 -> hitanimation exec 101 = 43). Rules: `NO_SOUND_LAG_MOVE_IDS` {120, 153} (moveAnimSounds), the hit SE scheduled from the body command at its duration (battleHitSounds `EXPLOSION_FAMILY_MOVE_IDS`), no lag on the faint SE and +2 rows for the user's own faint (the second `tryfaintmon`), window 213 + `LIVE_MOVE_LEADLESS_TAIL_ROWS` [153, 9], OFF body `hit - attackanimation + 1`.
+
+**Labs** (`labCompare.sh --scene both`, `.integration/evidence/mxp1/{x1,final}`):
+
+| lab | before | after |
+|---|---|---|
+| eqk1-mag-p.on | exact 0 / offset 18, mass 81 | exact 10 / offset 8, mass 284 (power-roll mismatch below) |
+| eqk1-mag-f.on | exact 0 / offset 16, mass 89 | exact 10 / offset 6, mass 136 (same) |
+| eqk1-mag-p.off / -f.off | mass 8 / 8 | mass 8 / 8 (damage difference, not presentation) |
+| mxp1-mag-p5.on / .off (new, power 30) | - | exact 18 / 0, mass 0 / exact 3 / 0, mass 0 |
+| mxp1-mag-p9.on / .off (new, power 70) | - | exact 18 / 0, mass 0 / exact 3 / 0, mass 0 |
+| eqk1-expl-p.on / .off | exact 0 / offset 12, mass 78 / offset 2, mass 8 | exact 12, mass 0 / exact 1 offset 1, mass 2 |
+| eqk1-expl-f.on / .off | exact 0 / offset 12, mass 76 / offset 2, mass 10 | exact 12, mass 0 / exact 2, mass 0 |
+| eqk1-sd-p.on / .off | exact 0 / offset 12, mass 82 / offset 2, mass 8 | exact 12, mass 0 / exact 1 offset 1, mass 2 |
+| eqk1-sd-f.on / .off | exact 0 / offset 12, mass 84 / offset 2, mass 10 | exact 12, mass 0 / exact 2, mass 0 |
+
+SUMMARY lines (after): `eqk1-expl-p.on: exact 12 / offset 0 / missing 0 / extra 0, mass 0`, `eqk1-expl-f.on: ... mass 0`, `eqk1-sd-p.on: ... mass 0`, `eqk1-sd-f.on: ... mass 0`, `eqk1-expl-p.off: exact 1 / offset 1 / missing 0 / extra 0, mass 2`, `eqk1-sd-p.off: ... mass 2`, `mxp1-mag-p5.on / p9.on: exact 18 / offset 0 / missing 0 / extra 0, mass 0`.
+
+**Residuals.** (1) The eqk1-mag-p/f labs stay inexact: ROM and engine roll different Magnitude powers in those labs (ROM 50, the engine's lab RNG 90 / 70), so the engine's window is the power-90 / 70 one: hit offsets +32 / +16 = the window difference. The mxp1 labs pick seeds (5, 9) where both agree and are exact. No seed in 2..25 matched the foe lab's ROM roll. (2) The OFF user faint SE after Explosion / Self-Destruct (player attacker) is 2 rows early (ROM 328 / 327): the +2 for the second `tryfaintmon` is applied in Scene ON only (the OFF move-animation command carries no move id there).
+
+**T2** (`RESCORE_SCENES=on|off tools/audio/rescoreAll.sh OUT .integration/evidence/t2n`, `soundScoreboard.py`; `.integration/evidence/mxp1/t2-{base,after}`; base = `src/` of 54ee65135 swapped in): Scene ON 25 seeds TOTAL exact 2,918 / offset 2,959 / mass 15,676, Scene OFF 24 seeds exact 721 / offset 412 / mass 2,186, identical base and after (no t2n seed uses Magnitude, Explosion or Self-Destruct), 0 missing / 0 extra on both.
+
+**Census** (`lsd194Census.sh`, seeds 0..199, `LSD194_SHARDS="0 1"`, JOBS 2, SPLIT 2, 54ee65135 vs 886009d75; `.integration/evidence/mxp1/census`): `rst197CensusDelta.py --digest` eventsDigest + error identical 200 / 200 on ON (9 battles changed command timing, 0 type-sequence changes; Explosion hit command 32 -> 32 rows, hp 16 -> 18 rows) and 200 / 200 on OFF (8 battles; Explosion body 48 -> 43). T1 (`soundCensusDelta.py --t1`, ON): missing 0 / extra 0 on both arms; exact 54,127 -> 54,037: the 90 Explosion body SEs (9 battles x 10) moved to known-offset (Explosion +1 x 81, -79 x 9) because T1 reads the same table through the old 7-row clock (self-consistency, not ROM parity; the labs above are the ROM parity).
+
+**Re-pins toward the ROM** (ROM frame per pin): `aud262MoveAnimSounds` Magnitude first-SE offset 3 -> 0 (ROM 179 / 183); `livePrep10MoveAdapters` Magnitude windows 174 / 206 -> 175 / 207 (ROM A + 1, lab p9 A 174) and route body 177 -> 191; `livePrep2MoveAdapters` Explosion duration 212 -> 213 (ROM A 61..276 = 216, expl-p.on); `tests/helpers/iu120Rows.ts` Explosion tail [153, 9] (ROM `hitanimation` exec 287 = A end 277 + 10); `mem2InstantHpDrop` Scene OFF Explosion / Self-Destruct hp + body 54 -> 49 (ROM attackanimation 58 -> hitanimation exec 101); `apx215SubstituteDollApproximate` Explosion doll rows 219 -> 229 (window 213 + tail 9), non-static ratio 0.9 -> 0.89 (the tail holds the last picture: 206 / 229). New `tests/mxp1MagnitudeWindow.test.ts` pins the Magnitude body length. No pin was left red.
