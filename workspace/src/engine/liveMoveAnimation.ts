@@ -1204,6 +1204,18 @@ export function liveMoveAnimationDurationCaseMissing(request: BattleMoveAnimatio
   return noCase.hit;
 }
 
+/**
+ * sbm1: a script that ends `waitforvisualfinish; clearmonbg; (blendoff;) end` keeps gAnimScriptActive up until Cmd_end sees the monbg tasks gone:
+ * clearmonbg (executed on the row the visual count reads 0) creates Task_ClearMonBg, whose first run does nothing (`data[1] != 1`) and whose second
+ * destroys sMonAnimTaskIdArray (battle_anim.c:852-883), so the script ends 5 rows after that row (hit2 endProbe.py, every such move: I - c0 = 5). The
+ * windows of these bodies end on the last picture, before the row the count reads 0 (Water Gun, Acid, Dizzy Punch, Pay Day); bodies whose window
+ * already ends after clearmonbg (Crabhammer, Ice Beam, Ice Punch) do not use this.
+ */
+const CLEAR_MON_BG_TAIL_ROWS = 5;
+function clearMonBgTailWindow(lastPictureWindow: number): number {
+  return lastPictureWindow + CLEAR_MON_BG_TAIL_ROWS;
+}
+
 function liveMoveAnimationDurationOf(
   request: BattleMoveAnimationRequest, field: BattleResolutionDisplayedField | undefined, bodyClass: LiveMoveTimingBody,
   moveUse: number | undefined,
@@ -1283,8 +1295,8 @@ function liveMoveAnimationDurationOf(
     case 47: return request.attacker === 0 ? 245 : 248;
     case 48: return 51; // First Supersonic ring through the final inactive row.
     case 49: return 52; // Sonic Boom source body through the final inactive row.
-    case 51: return 131; // Acid source body through its final row.
-    case 55: return 111; // Water Gun source body through its final row.
+    case 51: return clearMonBgTailWindow(131); // Acid source body through its last picture row.
+    case 55: return clearMonBgTailWindow(111); // Water Gun source body through its last picture row.
     case 65: return 91; // Drill Peck's full BowMon/impact/cleanup body.
     case 66: return 124; // Submission source body through monbg cleanup.
     case 67: return 33; // Low Kick source body through first inactive row.
@@ -1415,7 +1427,7 @@ function liveMoveAnimationDurationOf(
     case 133: return 216; // Amnesia accepted window (source script through first inactive row).
     case 135: return 272; // Soft-Boiled accepted window (first inactive row 271).
     case 298: return 169; // Teeter Dance accepted window (firstInactiveAge 168).
-    case 146: return 69; // Dizzy Punch accepted window; script tail 5 rows uncovered.
+    case 146: return clearMonBgTailWindow(69); // Dizzy Punch accepted window through its last picture row.
     case 184: return 190; // Scary Face accepted window (79..268); script tail 14 rows uncovered.
     case 137: return 213; // Glare accepted window (GLARE_SOURCE_FRAME_COUNT).
     case 57: case 330: return SURF_WAVE_FRAME_COUNT; // Surf / Muddy Water accepted window (144 rows).
@@ -1659,7 +1671,8 @@ function liveMoveAnimationDurationOf(
         : willOWispTimeline("opponent", opponent, player).cleanup + 1;
     }
     // apx222 (approximate, "no-adapter"): the script-built bodies of src/animation/approxScript.ts; liveMovePlayback.ts classifies them.
-    case 64: case 316: case 206: case 16: case 6: case 140: case 176:
+    case 6: return clearMonBgTailWindow(approxScriptDuration(APPROX_SCRIPT_MOVE_BODY[6]!));
+    case 64: case 316: case 206: case 16: case 140: case 176:
       return approxScriptDuration(APPROX_SCRIPT_MOVE_BODY[request.moveId]!);
     // adp1: the ROM-accepted script bodies of approxScript.ts (ADP1_MOVE_BODY): Withdraw.
     case 110: case 249: return approxScriptDuration(ADP1_MOVE_BODY[request.moveId]!);
