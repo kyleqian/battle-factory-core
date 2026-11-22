@@ -13,9 +13,10 @@ Every number here was measured on the Mac on branch `claude/open-level-a323ec`; 
 - **Generation over many seeds:** the ROM generation lab (`tools/openlevel/romGenLab.py`) against the engine
   (`tools/openlevel/genLabCompare.ts`): 3,000 / 3,000 deals and opponent rolls and 240 / 240 full draft builds (1,440 Pokemon)
   identical, both levels, challenges 0 to 10.
-- **Battles:** whole-battle ROM replay at level 100: see "Battles" below. Census at Open, 200 seeds x 2 scenes: 0 errors (after one
+- **Battles:** whole-battle ROM replay at level 100: 165 / 165 battles (3,299 states) match, incl. Noland and 7 staged
+  level-dependent rules. Census at Open, 200 seeds x 2 scenes: 0 errors (after one
   rule fix: Sand Stream's permanent sandstorm).
-- **Crash / hang soak gates at Open** (the Level 50 set, `--level open`): see "Soak gates".
+- **Crash / hang soak gates at Open** (the Level 50 set, `--level open`): 620 runs, 0 crash, 0 hang.
 - **Level 50 unchanged:** census 0..199 both scenes byte-identical to master; catcher findings identical to master's.
 
 ## Real runs (frame catcher, `tools/frame-catcher/`, `tools/openlevel/catcherChecks.py`)
@@ -102,7 +103,22 @@ another random value at the first menu). Pinning the clock would change every Le
 
 ## Soak gates (crash / hang, frozen tree 5cc539e1e, `--level open`)
 
-GATES
+The Level 50 gate set, every run `--level open`, on a frozen copy of 5cc539e1e (the later engine commits are the Open walk's
+pictures, one Lobby sound and the tools-only start streak). **620 runs: 0 crash, 0 hang.**
+
+| gate | OK / runs | deepest carry |
+|---|---|---|
+| vanilla 0:20 Scene OFF | 20 / 20 | |
+| vanilla 0:20 Scene ON | 20 / 20 | |
+| default (full) 0:60 | 60 / 60 | |
+| winning 0:60 | 60 / 60 | |
+| winning-swap 0:60 | 60 / 60 | |
+| varied RNG, winning, carry 0 (0:100) | 100 / 100 | 28 (challenge 4 reached in 1) |
+| varied RNG, winning, carry 14 | 100 / 100 | 28 |
+| varied RNG, winning, carry 28 | 100 / 100 | 35 (challenge 5 in all 100) |
+| varied RNG, winning-swap, carry 0 | 100 / 100 | 21 |
+
+Every run ended on its frame budget. Before them, a quick check on the first engine commit: 24 / 24 (winning-swap, both scenes).
 
 ## Level 50 baseline and Level 50 unchanged
 
@@ -112,7 +128,7 @@ GATES
 - Level 50 unchanged: census 0..199 both scenes on 98ea58f5e against master 32c233e62: eventsDigest and error identical 200 / 200,
   0 changed commands, byte-identical shards; the catcher's findings on two Level 50 traces identical to master's (driver and engine of
   this branch); the engine side identical to master frame for frame on four Level 50 traces (pictures, sounds, menus, digest). Full suite
-  on 92b96f11d: 1,945 files / 16,849 tests passed, 0 failed (44 files skipped, as on master).
+  on 9e9aa854c (all merged): 1,946 files / 16,852 tests passed, 0 failed (44 files skipped, as on master); typecheck clean.
 
 ## Found and fixed
 
