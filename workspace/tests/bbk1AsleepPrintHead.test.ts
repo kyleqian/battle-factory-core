@@ -34,7 +34,7 @@ describe("bbk1: Scene OFF asleep print head", () => {
   for (const [lab, first, second] of [["wkl1m-wakeup-player-off", 929, 1651], ["wkl1m-wakeup-foe-off", 925, 1647]] as const) {
     it(`${lab}: the first two asleep prints start on the ROM frames ${first} and ${second}`, () => {
       const rows = commandRows(lab);
-      const asleep = rows.filter((r) => r.type === "message" && r.frame > 900 && r.frame < 1700 && [first, second].includes(r.frame));
+      const asleep = rows.filter((r) => r.type === "message" && r.frame > 900 && r.frame < 1700 && ([first, second] as number[]).includes(r.frame));
       expect(asleep.map((r) => r.frame)).toEqual([first, second]);
     });
   }

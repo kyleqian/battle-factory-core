@@ -7491,10 +7491,11 @@ export function appendBattleResolutionContinuation(
 function sceneOnPlainHitContinuation(events: readonly BattleKernelSemanticEvent[], lockedAction: BattleResolutionLockedActionIdentity): boolean {
   const first = events[0];
   if (first === undefined || first.payload.kind !== "message" || first.payload.messageId !== "STRINGID_USEDMOVE") return false;
-  if (first.payload.actionSnapshot?.attacker === lockedAction.battler) return false;
+  const attacker = first.payload.actionSnapshot?.attacker;
+  if (attacker === undefined || attacker === lockedAction.battler) return false;
   if (events.some(({ payload }) => payload.kind === "message" && (payload.messageId === "STRINGID_ATTACKMISSED" || payload.messageId === "STRINGID_PKMNAVOIDEDATTACK"))) return false;
   const nextUsed = events.findIndex((event, index) => index > 0 && event.payload.kind === "message" && event.payload.messageId === "STRINGID_USEDMOVE");
-  return events.slice(0, nextUsed < 0 ? events.length : nextUsed).some(({ payload }) => payload.kind === "hp-change" && payload.battler === 1 - first.payload.actionSnapshot!.attacker);
+  return events.slice(0, nextUsed < 0 ? events.length : nextUsed).some(({ payload }) => payload.kind === "hp-change" && payload.battler === 1 - attacker);
 }
 
 /**
