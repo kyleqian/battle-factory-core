@@ -30,6 +30,7 @@ import {
   advanceFactoryRoundPresentation, chooseFactoryRoundSwap, completeFactoryRoundPresentation, preGenerateFactoryRoundNextOpponent,
   factoryHeardBrainSpeech, markFactoryBrainSpeechHeard,
 } from "../../src/engine/factoryRoundBattleOrchestrator.ts";
+import { isBattleResolutionButtonMessageAcceptable } from "../../src/engine/battleResolutionPresentationRender.ts";
 import { battleRoomStateForOpponent } from "../../src/engine/battleRoom.ts";
 import { adoptFactoryOpponentSchedule } from "../../src/engine/factoryOpponentGeneration.ts";
 import { adoptFactoryBrainOpponentSchedule } from "../../src/engine/factoryBrainOpponentGeneration.ts";
@@ -121,6 +122,9 @@ const frameBudget = Number(arg("frame-budget") ?? 200000);
 // engine's accumulated drift from the ROM must not shift the pulse phase); =absolute uses the drive frame number as is (measured in docs/aud251-s11-scoreboard-refresh.md "drv1").
 const romDriveArg = arg("romdrive") ?? process.env.ROM_REPLAY_ROMDRIVE;
 const romDriveClock = (arg("romdrive-clock") ?? "segment") as "segment" | "absolute";
+// fch2m: --dismiss-accept=1 also presses (the same ROM / even-frame cadence) while a button message is only ACCEPTABLE (isBattleResolutionButtonMessageAcceptable, 2 rows before the
+// awaiting phase for a `\p` box); default off: the census driver waits for `awaiting-message-dismiss` as before (the frozen fixtures / T2 baselines replay without it).
+const dismissAccept = arg("dismiss-accept") !== undefined && arg("dismiss-accept") !== "0";
 if (romDriveClock !== "segment" && romDriveClock !== "absolute") throw new Error("--romdrive-clock must be segment or absolute");
 const romA: { frames: Set<number>; length: number; anchors: { index: number; menuOpenFrame: number; commitFrame: number }[] } | null = romDriveArg === undefined ? null : (() => {
   const drive = JSON.parse(readFileSync(romDriveArg, "utf8")).drive;
@@ -439,7 +443,9 @@ function play(initial: any, record: boolean, patchRng: number | null = null, pla
       }
       // drv1: with a ROM drive, a message waiting for A is dismissed on the frames the ROM driver pressed A (outside the ROM's own segment: every even frame, as before).
       step((state.battleStartIntro && frame % 16 === 0)
-        || (state.battleResolutionPresentation?.lifecycle.phase === "awaiting-message-dismiss" && dismissPress()) ? ["A"] : []);
+        || ((state.battleResolutionPresentation?.lifecycle.phase === "awaiting-message-dismiss"
+          || (dismissAccept && state.battleResolutionPresentation !== null && state.battleResolutionPresentation.lifecycle.phase === "presenting" && isBattleResolutionButtonMessageAcceptable(state.battleResolutionPresentation)))
+          && dismissPress()) ? ["A"] : []);
     }
   };
   try {

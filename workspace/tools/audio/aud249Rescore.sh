@@ -7,5 +7,7 @@ F=$1; D=$2; S=$3; SC=$4; mkdir -p "$D"
 for k in req setup drive frozen tl snd; do cp "$F/$S-$SC.$k.json" "$D/$S-$SC.$k.json"; done
 NODE="node --experimental-strip-types --no-warnings tools/integration/soundCensusRomReplay.ts"
 RD=(--romdrive="$D/$S-$SC.drive.json"); [ -n "${AUD249_NO_ROMDRIVE:-}" ] && RD=()
+# fch2m: AUD249_DISMISS_ACCEPT=1 also presses A while a button message is already acceptable (default: only in awaiting-message-dismiss).
+[ -n "${AUD249_DISMISS_ACCEPT:-}" ] && RD+=(--dismiss-accept=1)
 $NODE replay --seed="$S" --scene="$SC" --setup="$D/$S-$SC.setup.json" "${RD[@]}" --out="$D/$S-$SC.engine.json"
 $NODE compare --seed="$S" --scene="$SC" --engine="$D/$S-$SC.engine.json" --rom="$D/$S-$SC.tl.json" --out="$D/$S-$SC.cmp.json" > /dev/null
