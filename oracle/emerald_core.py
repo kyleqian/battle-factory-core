@@ -13,6 +13,7 @@ snapshot. Determinism notes:
 
 from __future__ import annotations
 
+import datetime
 import hashlib
 import io
 import json
@@ -33,6 +34,15 @@ from PIL import Image as PILImage  # noqa: E402
 from symbols import load_symbols  # noqa: E402
 
 GBA_BUTTONS = ("A", "B", "SELECT", "START", "RIGHT", "LEFT", "UP", "DOWN", "R", "L")
+
+# rtc1 (workspace/docs/rtc1-oracle-clock.md): the emulated real-time clock's start, the same for every process and host. Before rtc1 the
+# clock started at libmgba-py's default, `datetime.datetime.now()` evaluated once when `mgba.core` was imported (the process start), and
+# libmgba turns the clock into the game's time of day with the host's `localtime`. Once a day, a process started in a window of about 30
+# seconds (11:39:55..11:40:20 local on the Mac) got a ROM whose once-a-day update fell inside the run and drew other Random() values (the
+# replay's "re-drive once" flake: workspace/docs/opl3-open-level-rom-replay.md). A naive (local) wall time gives the game the same clock on
+# every host, whatever its time zone; 12:00:00 is outside the window, on the path every run outside it took, with the next day's
+# rollover 23 h 40 min of emulated time later, longer than any tool run.
+RTC_START = datetime.datetime(2026, 11, 22, 12, 0, 0)
 
 
 def load_bootstrap_spec(path: Path, seen: set[Path] | None = None) -> dict:
@@ -70,7 +80,7 @@ class EmeraldOracle:
         self.screen = mgba.image.Image(self.width, self.height)
         self.core.set_video_buffer(self.screen)
         if self.core.rtc is not None:
-            self.core.rtc.use_simulated_time()
+            self.core.rtc.use_simulated_time(RTC_START)
 
         self.symbols = load_symbols(self.map_path, cache_path=_HERE / ".symbols-cache.json")
         self.bootstrap = load_bootstrap_spec(self.bootstrap_path)
