@@ -2661,3 +2661,46 @@ The Struggle / wake-up / confusion windows are already within +-2 in ON (gsp2 / 
 2. **Confusion head (77 mass):** in OFF, when the next command after the confusion print is the used print (`BattleScript_MoveUsedIsConfusedRet` -> `HitFromAtkCanceler` ...), hold `WAITMESSAGE_LONG_HOLD_FRAMES + PRE_MOVE_STATUS_ANIMATION_LEAD_ROWS + 4` (the skipped `status2animation` leaves the `return` + three script rows: ROM print row 11 -> used print 108 / 105 / lab 1417). Pins: `tests/sta3PreMoveStatusTiming.test.ts`, `tests/confusedAdmissionPresentation.test.ts` (OFF rows). Expected: -4 of -6, OFF mass about -45; ON unchanged (gate by NO_ANIMATIONS).
 3. **Struggle +1:** shorten the forced-handoff hold before the used print by 1 (dismiss -> print 17), `tests/enc276ForcedTurnNoMenu.test.ts`; 43 rows, +43 exact, mass -43. Then re-run `hse1mSplit.py` / `hse1mTable.py` on the new engine to rank infatuation (-3), Focus Punch, two-turn.
 4. Do not touch the `move-animation` min 42 / `hit-animation` (their interval is exact) and do not land t2k3's "21-28 short" proposal.
+
+## g180m (2026-11-22): the engine commands behind t2k3 items 4 and 5 (gen:180 / 142 / 202 chain, Dig)
+
+Post-freeze measurement; `src/` and `tests/` untouched. Tools: `tools/integration/g180mProbe.sh` (probe + `hcr3mCmp` for one seed / decision; `SUB=<dir>` keeps one `rom.json` per decision), `g180mClass.py gen|dig` (window first rows with the five engine commands before them), `g180mTwoTurn.py` (first-turn windows of two-turn moves with the previous ROM cause). Evidence: `.integration/evidence/g180m/` (`p/*/*.cmp.txt`, `c-on/` cmdtraces, `lab/leech.txt`).
+
+### 1. Correction of t2k3 item 4: it is the Leech Seed drain, not a restore-HP body
+
+gen:180 / 142 / 179 are the three SE ids of `BattleScript_LeechSeedTurnDrain` (`general-animation LEECH_SEED_DRAIN`: SE 180 `SE_M_ABSORB`, then 142 `SE_M_CRABHAMMER` / 179), gen:202 is `SUN_CONTINUES`. ON: 207 drain rows, mass 1,028, 22 exact; engine SE = command start + 34 (`LEECH_SEED_DRAIN_SCRIPT_AGE = 7`, `moveAnimSounds.ts:573, 688-690`; command min 218 = `LEECH_SEED_DRAIN_PRE_ROWS` 8 + exec + 207).
+
+| Window class (first row) | ROM interval | Engine interval | Differing command | Source |
+|---|---|---|---|---|
+| **Post send-in**: s6912 d2 (+13 x2, 5 windows' rows ~260 mass) | send-in script -> `LeechSeedTurnDrain+0x7` exec 233, SE 180 260 (+27) | `general-animation` starts 239 (+6 against the ROM exec), SE 273 | the drain command itself starts 6 rows after the ROM exec (the hie6m send-in constant: the retained segment starts 6 late) and the age adds 7: 6 + 7 = **+13** | `p/on/6912-d2.cmp.txt`; `battleResolutionPresentation.ts` drain command, `moveAnimSounds.ts:688` |
+| **After end-turn weather / side-status prints**: s310 d16 (-12), s648 d6 (-6 / -7) | `SideStatusWoreOff`, weather print, then drain | `turn-end` / `message` heads 9 rows (ROM 7-8), holds 97 / 88 against ROM 92 / 83 (-5 each) | the `message` commands before the drain (not the drain): the print head and hold shortfall accumulate before the drain starts | `p/on/310-d16.cmp.txt`, `p/o648d6/` |
+| **After a b0 hit**: s648 d10 (-2 .. -6) | `MoveEnd` 548 -> drain exec 558, SE 585 | `hp` b0 (floor 28) 428 -> drain 556 -> SE 590 | `hp` interval: engine floor 28 rows, the ROM bar length depends on the damage | `p/o648d10/` |
+| `SUN_CONTINUES` (gen:202): s310 d12 (+10, +7 x3) | weather `playanimation` exec -> SE 202 | first SE at command start + `WEATHER_SCRIPT_AGE` 8 | the age 8 for Sun / Sandstorm / Hail has no weather-window receipt (Rain is pinned by rnc1) | `p/on12/`, `battleResolutionPresentation.ts:249-295`, `moveAnimSounds.ts:654-662` |
+| Exact / single-row (s319 0 / -2, s648 +5, others) | | | not opened | |
+
+Labs (`labCompare.sh`, ON): `aud250-leechseed-player-on`, `aud250-leechseed-opponent-on`, `etp1-leechseed-on` are **exact (every SE +0, mass 0)** including the drain (SE 180 / 142). So the drain's own interval is right when it follows an ordinary hit-and-end-turn; the T2 windows are context chains. Open: in the labs ROM exec -> anim lag is 7, in T2 it is 0 (SE 180 = exec + 27 with the anim script active on the exec row); an `IsBattleSEPlaying` gate is the hypothesis, unconfirmed. A global age change fails: -7 turns drain mass 1,028 into 1,677 (exact 30), -6 1,570, -5 1,463.
+
+### 2. Item 5: the Dig windows are a charge-turn start gap after a previous move
+
+13 ON Dig-first windows, mass 615. 488 (79%) of it is **a charge turn that follows another move in the same turn** (first-turn Dig after Light Screen x3 -8, Rock Slide -10, Follow Me -10, stat -11 / -14, Sandstorm -19); the same Dig after turn start (`prev start`, 10 windows) is exact. Solar Beam / Fly show the same sign (-10, -13, -14, -18). Ordinary moves after Sandstorm / Rain / Hail are exact (Facade, Blizzard, Bulk Up, Light Screen +0), so it is a charge-turn rule, not the weather chain.
+
+ROM s8108 d6 (Light Screen -> Dig): `MoveEnd` 229 -> `EffectSemiInvulnerable` 236 (7) -> `FirstChargingTurn+0x6` exec 249 (+13) -> SE 175 269 (+20). Engine: `sprite-visibility` 230, used `message` (min 8) 231 = `MoveEnd` + 2, `move-animation` 239, SE 261: **-8**. After turn start the engine puts the same `message` at `EffectSemi` + 3 (s648 d0: message 9, `EffectSemi` 6, exec 19, SE 39 +0), i.e. the used print of a first charge turn starts 8 rows earlier after a previous move than it does after the turn start. s8108 d19 (Sandstorm -> Dig): `WeatherFormChanges` 293 -> `Loop` 294 -> `MoveEnd` 302 -> `EffectSemi` 309 (16 rows after the form-change row), the engine places the used `message` at 293 (the command after `sprite-visibility` 292): -8 plus **-11** more = **-19** (that extra -11 is not explained: ordinary moves after Sandstorm are exact). s6 d1 (Snore asleep -> Dig): -13 = -8 + -5.
+
+| Window class | Step | Mass | Reading |
+|---|---|---|---|
+| After Light Screen (s8108 si13 / 29 / 45) | -8 | 144 | pure charge-turn gap |
+| After Rock Slide / Follow Me (s6 si3, s3738 si63) | -10 | 115 | -8 + -2 |
+| After stat change (s3738 si95, s8108 si51) | -14 / -11 | 115 | -8 + the stat chain |
+| After Sandstorm (s8108 si39) | -19 | 114 | -8 + -11 |
+| Dig after Dig, Sandstorm second-turn, Brick Break (+18) | +9 / -5 / +2 / +18 | 127 | carried offsets, not opened |
+
+### 3. Landing recipe for the next run
+
+1. **Charge-turn used print after a previous move (item 5, ~490 mass ON): `battleResolutionPresentation.ts`, the `STRINGID_USEDMOVE` message of a `CHARGE_TURN_SCRIPT` event (`chargeChainCarry` / `twoTurnSecondPrintLead`, ~5859-5892)**: when a previous action chain precedes the first charge turn in the same turn, delay the used print by 8 rows (the ROM `MoveEnd` -> `EffectSemi` 7 + the 3 the turn-start context already carries), keep the turn-start case (`prev start`) untouched. Pins it will move: bdt1 / chg2 / chg3 Dig and Solar Beam labs only if they contain a previous move in the same turn (their turn-start windows are exact and must stay so). Expected T2: ON Dig -8 x3 windows exact, -10 / -11 / -14 / -19 windows reduce by 8 per window row (~ -250 mass); Solar Beam / Fly after a move likewise. Verify: `labCompare.sh` on a Light Screen -> Dig lab (new, Factory moves), then `g180mTwoTurn.py`.
+2. **Sandstorm -> Dig extra -11**: measure the `WeatherFormChanges` loop (`MoveWeatherChange+0xf` -> `MoveEnd` 9 rows) against the engine's `message` min 8 after the weather `sprite-visibility`; likely the same carried rows the ordinary-move path absorbs. Expected: s8108 si39 -19 -> -8 -> 0 with rule 1.
+3. **Post send-in drain (item 4, s6912 ~260 mass)**: the drain after a player forced-switch send-in starts 6 late (hie6m), so subtract the 6 + 7 age only in that context: `moveAnimSounds.ts:688` age 7 -> 0 when the command was reached from a send-in, or fix the segment start once (hie6m item). Pins: the leech send-in pins in `tests/`; expected s6912 +13 x2 -> 0.
+4. **End-turn print head / hold before the drain (s310 d16 -12, s648 d6 -6)**: `turn-end` / `message` head 9 -> 7 rows and the weather / side-status print hold 97 -> 92, 88 -> 83 (ROM `SideStatusWoreOff`). Pins: end-turn pins (`tests/endTurn*`). Expected -12 -> 0, -6 -> 0.
+5. **`SUN_CONTINUES` / Sandstorm / Hail age 8**: lab a multi-turn Sunny Day (Factory move) before changing `WEATHER_SCRIPT_AGE`; the first SE is +7 .. +10 in T2.
+6. Do not change `LEECH_SEED_DRAIN_SCRIPT_AGE` globally (-7 raises T2 drain mass 1,028 -> 1,677); the labs are exact at 7. Resolve the lab-lag-7 / T2-lag-0 question first (one cmp of s6912 d2 against `etp1-leechseed-on`).
+
+Gates: no `.ts` added (python / shell only), so no typecheck; `npm test` not run (the step overrides the generic line); `src/`, `tests/`, PROGRESS / ISSUES / ROADMAP and the acceptance / supervisor ledgers untouched.
