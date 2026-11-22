@@ -1,0 +1,60 @@
+{
+ "name": "opl3-ohko-equal",
+ "lvlMode": "open",
+ "rules": [
+  "Cmd_tryKO"
+ ],
+ "why": "Open Level challenge 4. The player's Lapras (822) and Walrein (644) use Sheer Cold (slot 0) at level 100 against level 100: chance = accuracy 30 + (100 - 100) (Cmd_tryKO, battle_script_commands.c:7522-7527). No foe has Sturdy.",
+ "seed": 30005,
+ "challengeNum": 4,
+ "battleNum": 0,
+ "trainerId": 150,
+ "playerSetIds": [
+  822,
+  644,
+  564
+ ],
+ "opponentSetIds": [
+  595,
+  626,
+  739
+ ],
+ "script": {
+  "actions": [
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   }
+  ],
+  "then": "census"
+ },
+ "expect": [
+  "move:EFFECT_OHKO"
+ ]
+}

@@ -1,0 +1,230 @@
+{
+ "name": "opl3-ohko-user-above",
+ "rules": [
+  "Cmd_tryKO"
+ ],
+ "why": "Level 50 challenge 7, hand-built parties. The player's level-100 Lapras uses Sheer Cold on level-50 foes: chance = 30 + (100 - 50) = 80 (Cmd_tryKO). Unequal levels cannot happen in a real Factory battle; this checks the level term.",
+ "seed": 30007,
+ "challengeNum": 7,
+ "battleNum": 0,
+ "trainerId": 200,
+ "playerSetIds": [
+  429,
+  404,
+  735
+ ],
+ "opponentSetIds": [
+  813,
+  716,
+  721
+ ],
+ "parties": {
+  "player": [
+   {
+    "species": 131,
+    "level": 100,
+    "nature": 0,
+    "ivs": {
+     "hp": 31,
+     "attack": 31,
+     "defense": 31,
+     "speed": 31,
+     "spAttack": 31,
+     "spDefense": 31
+    },
+    "evs": {
+     "hp": 255,
+     "attack": 255,
+     "defense": 0,
+     "speed": 0,
+     "spAttack": 0,
+     "spDefense": 0
+    },
+    "moves": [
+     329,
+     329,
+     70,
+     70
+    ],
+    "item": 0,
+    "abilitySlot": 0,
+    "friendship": 0
+   },
+   {
+    "species": 143,
+    "level": 50,
+    "nature": 0,
+    "ivs": {
+     "hp": 31,
+     "attack": 31,
+     "defense": 31,
+     "speed": 31,
+     "spAttack": 31,
+     "spDefense": 31
+    },
+    "evs": {
+     "hp": 255,
+     "attack": 255,
+     "defense": 0,
+     "speed": 0,
+     "spAttack": 0,
+     "spDefense": 0
+    },
+    "moves": [
+     70,
+     70,
+     70,
+     70
+    ],
+    "item": 0,
+    "abilitySlot": 0,
+    "friendship": 0
+   },
+   {
+    "species": 129,
+    "level": 50,
+    "nature": 0,
+    "ivs": {
+     "hp": 31,
+     "attack": 31,
+     "defense": 31,
+     "speed": 31,
+     "spAttack": 31,
+     "spDefense": 31
+    },
+    "evs": {
+     "hp": 255,
+     "attack": 0,
+     "defense": 0,
+     "speed": 0,
+     "spAttack": 0,
+     "spDefense": 255
+    },
+    "moves": [
+     150,
+     150,
+     150,
+     150
+    ],
+    "item": 0,
+    "abilitySlot": 0,
+    "friendship": 0
+   }
+  ],
+  "opponent": [
+   {
+    "species": 242,
+    "level": 50,
+    "nature": 0,
+    "ivs": {
+     "hp": 31,
+     "attack": 31,
+     "defense": 31,
+     "speed": 31,
+     "spAttack": 31,
+     "spDefense": 31
+    },
+    "evs": {
+     "hp": 255,
+     "attack": 0,
+     "defense": 0,
+     "speed": 0,
+     "spAttack": 0,
+     "spDefense": 255
+    },
+    "moves": [
+     150,
+     150,
+     150,
+     150
+    ],
+    "item": 0,
+    "abilitySlot": 0,
+    "friendship": 0
+   },
+   {
+    "species": 113,
+    "level": 50,
+    "nature": 0,
+    "ivs": {
+     "hp": 31,
+     "attack": 31,
+     "defense": 31,
+     "speed": 31,
+     "spAttack": 31,
+     "spDefense": 31
+    },
+    "evs": {
+     "hp": 255,
+     "attack": 0,
+     "defense": 0,
+     "speed": 0,
+     "spAttack": 0,
+     "spDefense": 255
+    },
+    "moves": [
+     150,
+     150,
+     150,
+     150
+    ],
+    "item": 0,
+    "abilitySlot": 0,
+    "friendship": 0
+   },
+   {
+    "species": 10,
+    "level": 50,
+    "nature": 0,
+    "ivs": {
+     "hp": 31,
+     "attack": 31,
+     "defense": 31,
+     "speed": 31,
+     "spAttack": 31,
+     "spDefense": 31
+    },
+    "evs": {
+     "hp": 255,
+     "attack": 0,
+     "defense": 0,
+     "speed": 0,
+     "spAttack": 0,
+     "spDefense": 255
+    },
+    "moves": [
+     150,
+     150,
+     150,
+     150
+    ],
+    "item": 0,
+    "abilitySlot": 0,
+    "friendship": 0
+   }
+  ]
+ },
+ "script": {
+  "actions": [
+   {
+    "move": 0
+   },
+   {
+    "move": 0
+   },
+   {
+    "move": 0
+   },
+   {
+    "move": 0
+   },
+   {
+    "move": 0
+   }
+  ],
+  "then": "census"
+ },
+ "expect": [
+  "move:EFFECT_OHKO"
+ ]
+}

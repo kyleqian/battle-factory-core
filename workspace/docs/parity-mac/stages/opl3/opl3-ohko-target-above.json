@@ -1,0 +1,229 @@
+{
+ "name": "opl3-ohko-target-above",
+ "lvlMode": "open",
+ "rules": [
+  "Cmd_tryKO"
+ ],
+ "why": "Open Level challenge 7, hand-built parties. The player's level-50 Lapras uses Sheer Cold on level-100 foes: Random() % 100 is still drawn, then the level clause fails and the game prints the 'unaffected' line (B_MSG_KO_UNAFFECTED, battle_script_commands.c:7522-7570). Unequal levels cannot happen in a real Factory battle; this checks the rule's level clause.",
+ "seed": 30006,
+ "challengeNum": 7,
+ "battleNum": 0,
+ "trainerId": 200,
+ "playerSetIds": [
+  429,
+  404,
+  735
+ ],
+ "opponentSetIds": [
+  813,
+  716,
+  721
+ ],
+ "parties": {
+  "player": [
+   {
+    "species": 131,
+    "level": 50,
+    "nature": 0,
+    "ivs": {
+     "hp": 31,
+     "attack": 31,
+     "defense": 31,
+     "speed": 31,
+     "spAttack": 31,
+     "spDefense": 31
+    },
+    "evs": {
+     "hp": 255,
+     "attack": 255,
+     "defense": 0,
+     "speed": 0,
+     "spAttack": 0,
+     "spDefense": 0
+    },
+    "moves": [
+     329,
+     329,
+     70,
+     70
+    ],
+    "item": 0,
+    "abilitySlot": 0,
+    "friendship": 0
+   },
+   {
+    "species": 143,
+    "level": 100,
+    "nature": 0,
+    "ivs": {
+     "hp": 31,
+     "attack": 31,
+     "defense": 31,
+     "speed": 31,
+     "spAttack": 31,
+     "spDefense": 31
+    },
+    "evs": {
+     "hp": 255,
+     "attack": 255,
+     "defense": 0,
+     "speed": 0,
+     "spAttack": 0,
+     "spDefense": 0
+    },
+    "moves": [
+     70,
+     70,
+     70,
+     70
+    ],
+    "item": 0,
+    "abilitySlot": 0,
+    "friendship": 0
+   },
+   {
+    "species": 129,
+    "level": 100,
+    "nature": 0,
+    "ivs": {
+     "hp": 31,
+     "attack": 31,
+     "defense": 31,
+     "speed": 31,
+     "spAttack": 31,
+     "spDefense": 31
+    },
+    "evs": {
+     "hp": 255,
+     "attack": 0,
+     "defense": 0,
+     "speed": 0,
+     "spAttack": 0,
+     "spDefense": 255
+    },
+    "moves": [
+     150,
+     150,
+     150,
+     150
+    ],
+    "item": 0,
+    "abilitySlot": 0,
+    "friendship": 0
+   }
+  ],
+  "opponent": [
+   {
+    "species": 242,
+    "level": 100,
+    "nature": 0,
+    "ivs": {
+     "hp": 31,
+     "attack": 31,
+     "defense": 31,
+     "speed": 31,
+     "spAttack": 31,
+     "spDefense": 31
+    },
+    "evs": {
+     "hp": 255,
+     "attack": 0,
+     "defense": 0,
+     "speed": 0,
+     "spAttack": 0,
+     "spDefense": 255
+    },
+    "moves": [
+     150,
+     150,
+     150,
+     150
+    ],
+    "item": 0,
+    "abilitySlot": 0,
+    "friendship": 0
+   },
+   {
+    "species": 113,
+    "level": 100,
+    "nature": 0,
+    "ivs": {
+     "hp": 31,
+     "attack": 31,
+     "defense": 31,
+     "speed": 31,
+     "spAttack": 31,
+     "spDefense": 31
+    },
+    "evs": {
+     "hp": 255,
+     "attack": 0,
+     "defense": 0,
+     "speed": 0,
+     "spAttack": 0,
+     "spDefense": 255
+    },
+    "moves": [
+     150,
+     150,
+     150,
+     150
+    ],
+    "item": 0,
+    "abilitySlot": 0,
+    "friendship": 0
+   },
+   {
+    "species": 10,
+    "level": 100,
+    "nature": 0,
+    "ivs": {
+     "hp": 31,
+     "attack": 31,
+     "defense": 31,
+     "speed": 31,
+     "spAttack": 31,
+     "spDefense": 31
+    },
+    "evs": {
+     "hp": 255,
+     "attack": 0,
+     "defense": 0,
+     "speed": 0,
+     "spAttack": 0,
+     "spDefense": 255
+    },
+    "moves": [
+     150,
+     150,
+     150,
+     150
+    ],
+    "item": 0,
+    "abilitySlot": 0,
+    "friendship": 0
+   }
+  ]
+ },
+ "script": {
+  "actions": [
+   {
+    "move": 0
+   },
+   {
+    "move": 0
+   },
+   {
+    "move": 0
+   },
+   {
+    "move": 0
+   },
+   {
+    "move": 0
+   }
+  ],
+  "then": "census"
+ },
+ "expect": []
+}

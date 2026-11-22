@@ -25,6 +25,8 @@ def summarize(prefix, battle_id, symbols):
     out = {
         "id": battle_id, "seed": e["seed"], "scene": e["scene"], "policy": e.get("policy", "census"), "symbols": int(symbols),
         "challengeNum": request.get("challengeNum"), "mode": request.get("mode"),
+        # opl3: an Open Level battle (the lab request's level 100) says so; a Level 50 summary keeps its old shape.
+        **({"level": request["level"]} if request.get("level") == 100 else {}),
         "engineError": e["error"], "engineDecisions": len(decisions), "playerStats": e.get("playerStats"),
         "voluntarySwitches": sum(1 for x in decisions if x.get("voluntary")), "probes": sum(1 for x in decisions if x["kind"].endswith("-refused")),
         "drive": {**{k: dr[k] for k in ("stop", "frames", "decisionsConsumed", "decisionsTotal", "outcome")}, "errorReason": reason},

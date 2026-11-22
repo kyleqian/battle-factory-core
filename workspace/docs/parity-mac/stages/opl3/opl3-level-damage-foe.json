@@ -1,0 +1,29 @@
+{
+ "name": "opl3-level-damage-foe",
+ "lvlMode": "open",
+ "rules": [
+  "Cmd_dmgtolevel"
+ ],
+ "why": "Open Level challenge 1. The opponent's Blissey (558) has Seismic Toss (slot 0); the trainer AI picks it at level-100 numbers and the damage is 100. The player has no Ghost type.",
+ "seed": 30002,
+ "challengeNum": 1,
+ "battleNum": 0,
+ "trainerId": 100,
+ "playerSetIds": [
+  548,
+  470,
+  489
+ ],
+ "opponentSetIds": [
+  558,
+  546,
+  475
+ ],
+ "script": {
+  "actions": [],
+  "then": "census"
+ },
+ "expect": [
+  "move:EFFECT_LEVEL_DAMAGE"
+ ]
+}

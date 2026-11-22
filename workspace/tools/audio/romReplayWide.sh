@@ -8,8 +8,10 @@
 #   CHALLENGE (optional, or ROM_REPLAY_CHALLENGE): the game's 0-based challenge number for this battle (7 = the eighth challenge, sets 372..849). Unset = the
 #   census mapping (seed * 11) % 49, which only reaches challenges 1 to 7. The ID gets -cN.
 #   REPLAY_SCENE=on|off (default off).  REPLAY_KEEP=1 keeps every file of a matching battle (default: request, setup and summary only).
+#   REPLAY_LEVEL=50|open (default 50; opl3, docs/opl3-open-level-rom-replay.md): open = the census battle at Open Level (level-100 parties from the Open
+#   Level sets; the lab stages frontier.lvlMode 1). The ID gets -open. A staged battle names its level in the stage file (`lvlMode`), not here.
 #   REPLAY_FRAME_BUDGET / REPLAY_DRIVE_FRAMES: engine frame budget / ROM frame cap for very long battles.
-# Writes OUTDIR/ID.summary.json (ID = SEED-POLICY, with -gold for SYMBOLS 1 and -on for Scene ON) and appends "ID rc=N" to OUTDIR/done.txt.
+# Writes OUTDIR/ID.summary.json (ID = SEED-POLICY, with -gold for SYMBOLS 1, -cN, -open for REPLAY_LEVEL=open and -on for Scene ON) and appends "ID rc=N" to OUTDIR/done.txt.
 # A matching battle also leaves OUTDIR/ID.facts.json.gz (decisions, wide states, per-turn events): the input of the tally (tools/audio/romReplayTally.py).
 # rc: 11 request, 12 ROM setup, 13 engine replay, 14 ROM drive, 16 compare, 17 summary.
 set -uo pipefail
@@ -17,7 +19,7 @@ SC=${REPLAY_SCENE:-off}
 D=${REPLAY_OUT:?set REPLAY_OUT to an absolute output directory}; mkdir -p "$D"
 if [ "${1:-}" = --stage ]; then
   # A staged battle (docs/parity-mac/staged-battles.md): --stage FILE.json. The ID is the stage's name; the player is the stage's written script.
-  STAGE=$2; P=script; G=0; unset ROM_REPLAY_CHALLENGE
+  STAGE=$2; P=script; G=0; unset ROM_REPLAY_CHALLENGE ROM_REPLAY_LEVEL
   S=$(python3 -c "import json,sys; print(json.load(open(sys.argv[1]))['seed'])" "$STAGE") || exit 2
   ID=$(python3 -c "import json,sys; print('stage-' + json.load(open(sys.argv[1]))['name'])" "$STAGE") || exit 2
   WHICH="--stage=$STAGE"
@@ -25,8 +27,10 @@ else
   STAGE=; S=$1; P=${2:-census}; G=${3:-0}; C=${4:-${ROM_REPLAY_CHALLENGE:-}}
   ID="$S-$P"; [ "$G" = 1 ] && ID="$ID-gold"
   [ -n "$C" ] && ID="$ID-c$C"
+  LV=${REPLAY_LEVEL:-50}
+  case "$LV" in 50) ;; open) ID="$ID-open" ;; *) echo "REPLAY_LEVEL must be 50 or open, got $LV" >&2; exit 2 ;; esac
   WHICH="--seed=$S"
-  export ROM_REPLAY_CHALLENGE=$C
+  export ROM_REPLAY_CHALLENGE=$C ROM_REPLAY_LEVEL=$LV
 fi
 [ "$SC" = on ] && ID="$ID-on"
 T="$D/$ID"
