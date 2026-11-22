@@ -46,4 +46,15 @@ describe("hpb3: floor-free hp before a Shell Bell heal", () => {
     expect(hit.timing.tailFrames).toBe(1);
     expect(commands[index - 2].type).toBe("sprite-visibility");
   });
+
+  it("shb1: a Shell Bell heal followed by the next action's used print holds 3 + 1 + 6 + u rows (no MoveEnd receipt to count from)", () => {
+    const commands = production({ playerMove: SCRATCH, foeMove: SCRATCH, playerItem: SHELL_BELL, playerHp: 100 });
+    const item = commands.findIndex((c) => c.type === "general-animation" && c.animation === "HELD_ITEM_EFFECT");
+    expect(item).toBeGreaterThan(0);
+    const heal = commands.findIndex((c, i) => i > item && c.type === "hp");
+    expect(heal).toBeGreaterThan(item);
+    expect(commands[heal + 1].type).toBe("message");
+    expect(commands[heal].timing.minimumFrames).toBe(0);
+    expect(commands[heal].timing.tailFrames).toBe(14); // 3 + 1 + 6 + u, u = 4 (the used print's instructionExecution)
+  });
 });

@@ -2559,7 +2559,27 @@ function hpPrintTailTiming(event: BattleKernelSemanticEvent, events?: readonly B
     ? SUBSTITUTE_COST_HP_TIMING
     : at(0) === "B_SCR_OP_DATAHPUPDATE" && at(-1) === "B_SCR_OP_HEALTHBARUPDATE" && at(-2) === "B_SCR_OP_ORWORD"
       && at(-3) === "B_SCR_OP_WAITMESSAGE" && at(-4) === "B_SCR_OP_PRINTSTRING"
-      ? (at(1) === "B_SCR_OP_RETURN" && events !== undefined && index !== undefined && healContinuesMoveScript(events, index) ? SHELL_BELL_HP_TIMING : ITEM_HEAL_HP_TIMING) : HP_TIMING;
+      ? (at(1) === "B_SCR_OP_RETURN" && events !== undefined && index !== undefined && healContinuesMoveScript(events, index)
+        ? (shellBellNextUsedPrint(events, index) ?? SHELL_BELL_HP_TIMING) : ITEM_HEAL_HP_TIMING) : HP_TIMING;
+}
+const shellBellNextUsedTimings = new Map<number, BattleHpTiming>();
+/**
+ * shb1: the Shell Bell heal's `datahpupdate; return` falls into the first action's MoveEnd and straight into the next action's used print with no MoveEnd
+ * sprite-visibility receipt (so actionTransitionPauseFrames has no row to count from). Same rows as trn176's E + 1 + d + n + 6 + u with d = 1 (`return`) and
+ * the receipts absent: the heal's hp command holds bar + 1 + 3 (SHELL_BELL_HP_TIMING) + 1 + ACTION_TRANSITION_ROWS + u.
+ */
+function shellBellNextUsedPrint(events: readonly BattleKernelSemanticEvent[], hpChangeIndex: number): BattleHpTiming | null {
+  const next = events[hpChangeIndex + 1];
+  const heal = events[hpChangeIndex]!.provenance?.instructionExecution;
+  const used = next?.provenance?.instructionExecution;
+  if (next === undefined || next.payload.kind !== "message" || next.payload.messageId !== "STRINGID_USEDMOVE" || used === undefined || heal === undefined || used >= heal) return null;
+  const tail = SHELL_BELL_HP_TIMING.tailFrames + 1 + ACTION_TRANSITION_ROWS + used;
+  let timing = shellBellNextUsedTimings.get(tail);
+  if (timing === undefined) {
+    timing = Object.freeze({ minimumFrames: 0, tailFrames: tail } as const);
+    shellBellNextUsedTimings.set(tail, timing);
+  }
+  return timing;
 }
 /** hie4: the heal's script (its `playanimation` event on Scene ON, else its print) runs in the same script run as the event before it (its execution count did not restart). */
 function healContinuesMoveScript(events: readonly BattleKernelSemanticEvent[], hpChangeIndex: number): boolean {
