@@ -52,6 +52,7 @@ def main():
     init_cb2 = nm["CB2_InitBattle"][0] & ~1
     gtasks = oracle.symbols["gTasks"]
     frames, t0, t_end, init_frame, tid, bgm_frame, n_events = [], None, None, None, None, None, 0
+    enemy_party = None
     ring = []
     rng0 = oracle.read_u32(oracle.symbols["gRngValue"])
     frames.append({"f": 0, "sha": sc.sha(), "rng": rng0})
@@ -90,6 +91,8 @@ def main():
                 t_end = f
             if init_frame is None and sc.cb2() == init_cb2:
                 init_frame = f
+                # Noland's party as CB2_InitBattle will see it (nrv1): species of the three members, the first RNG-dependent thing the battle shows
+                enemy_party = [sep.read_party_member(oracle, oracle.symbols["gEnemyParty"] + i * 100)["species"] for i in range(3)]
             if init_frame is not None and f >= init_frame + tail:
                 break
         if f > last_press + 600:
@@ -104,7 +107,7 @@ def main():
         frames[bgm_frame].setdefault("sounds", []).append({"frame": bgm_frame, "kind": "bgm", "id": 471})
     result = {"schema": "rom-frontier-transition/v1", "seed": seed, "scene": scene, "challenge": challenge, "transitionId": tid, "t0": t0,
               "gateK": 6, "win": False, "recordStart": record, "rngStart": rng0,
-              "bgmFrame": bgm_frame, "taskEnd": t_end, "initBattleFrame": init_frame, "lastPress": last_press, "frames": frames, "seconds": round(time.time() - t_start, 1)}
+              "bgmFrame": bgm_frame, "taskEnd": t_end, "initBattleFrame": init_frame, "enemyParty": enemy_party, "lastPress": last_press, "frames": frames, "seconds": round(time.time() - t_start, 1)}
     out.write_text(json.dumps(result, separators=(",", ":")))
 
 

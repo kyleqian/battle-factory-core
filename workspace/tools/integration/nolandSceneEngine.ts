@@ -329,7 +329,14 @@ export function sceneStartFrame(rom: RomRecording, start: SceneStart): number {
   return start === "menu" ? 0 : romBattleExitFrame(rom)! - WIN_STAGE_LEAD;
 }
 
-export function driveEngine(rom: RomRecording, frames: number, gates: boolean, dump?: { dir: string; from: number; to: number }, start: SceneStart = "menu"): EngineRow[] {
+/** `observe` sees the state after every tick; `follow` false leaves the engine's own pause and transition draw alone (nrv1: the real route). */
+export interface DriveOptions {
+  observe?: (f: number, state: EngineState) => void;
+  follow?: boolean;
+}
+
+export function driveEngine(rom: RomRecording, frames: number, gates: boolean, dump?: { dir: string; from: number; to: number }, start: SceneStart = "menu", options: DriveOptions = {}): EngineRow[] {
+  const follow = options.follow ?? true;
   let state = start === "menu" ? nolandAskReadyStage(rom) : nolandWinReturnStage(rom);
   const offset = sceneStartFrame(rom, start);
   const romTransition = romTransitionTableIndex(rom);
@@ -367,7 +374,7 @@ export function driveEngine(rom: RomRecording, frames: number, gates: boolean, d
     state = ticked.result;
     // The pause before the battle transition is the ROM's party build (it varies with Noland's team); the frames after it are compared with
     // the engine's transition started on the ROM's frame (`pauses` keeps both).
-    if (state.battleRoom?.phase === "brainSpeechSettled") {
+    if (follow && state.battleRoom?.phase === "brainSpeechSettled") {
       if (settledFrom === null) {
         settledFrom = f;
         if (romBgm !== null) pauses.rom = romBgm - f;
@@ -378,7 +385,9 @@ export function driveEngine(rom: RomRecording, frames: number, gates: boolean, d
       }
     }
     const room = state.battleRoom;
-    if (room?.frontierBrainWalkup && room.transitionPresentation !== undefined && romTransition !== null
+    if (!follow) {
+      // the engine's own draw stays
+    } else if (room?.frontierBrainWalkup && room.transitionPresentation !== undefined && romTransition !== null
       && room.transitionPresentation.tableIndex !== romTransition) {
       engineTransitions.push({ tableIndex: room.transitionPresentation.tableIndex, name: room.transitionPresentation.transitionName });
       state = { ...state, battleRoom: { ...room, transitionPresentation: frontierTransitionPresentationForTableIndex(romTransition, romDrawRng(rom)) } };
@@ -392,6 +401,7 @@ export function driveEngine(rom: RomRecording, frames: number, gates: boolean, d
       ...(press.length ? { press } : {}), ...(late !== undefined ? { late } : {}), sounds: [...ticked.events], where: whereOf(state),
     });
     prevRng = state.rngValue;
+    options.observe?.(f, state);
   }
   return rows;
 }
