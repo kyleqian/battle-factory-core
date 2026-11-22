@@ -78,7 +78,9 @@ interface WonLobby {
 // pass with 0 in all three roles on the merged tree, so they stay.
 // wtl1 (the win tail holds 24 more rows before "Player defeated", ROM P + 26): 0's Scene OFF continuation loses. A scan of 1..28 in the WIN_TWO role (scratch copies of this file) found only 13 passing all 15
 // (2 / 4 / 10 fail the two continuation cases, 19 / 23 fail 2 cases, the rest more); RETIRE and the loss keep 0.
-const WIN_TWO_SEED = 13;
+// etp1 (33bdace6d, end-turn weather prints take the end-turn rows; the soak player's presses land on new phases): 13's Scene OFF continuation loses. A scan of 0..16 in the WIN_TWO role (scratch copies of this file)
+// found only 4 passing all 15 (0 / 2 / 10 fail the two continuation cases, 14 fails 6, the rest 10); RETIRE and the loss keep 0. etp2 found it (the base c114f4410 passes with 13).
+const WIN_TWO_SEED = 4;
 const RETIRE_SEED = 0;
 const WIN_THEN_LOSE_SEED = 0;
 
