@@ -284,7 +284,8 @@ export const LEECH_SEED_DRAIN_SCRIPT_AGE = 7;
 export const CASTFORM_CHANGE_SCRIPT_AGE = 5;
 /** wsh1: command age -> script frame of General_WishHeal / General_FutureSightHit / General_FocusBand (calibrated on the T2 ROM rows, docs/wsh1-general-anim-commands.md). */
 export const WISH_HEAL_SCRIPT_AGE = 6;
-export const FUTURE_SIGHT_HIT_SCRIPT_AGE = 0;
+/** hit2: the ROM's gAnimScriptActive rises 6 rows after the command (lab etp1-futuresight-on: rise 2865, command 2859; the first SE is script row 3, 2868), as Wish's 6. */
+export const FUTURE_SIGHT_HIT_SCRIPT_AGE = 6;
 export const FOCUS_BAND_SCRIPT_AGE = 0;
 /**
  * ing1 (docs/fcp1-frame-catcher-pictures.md): command age -> script frame of General_IngrainHeal. ROM (soundEventProbe lab on

@@ -17,6 +17,7 @@ import { animSoundPan2, emitSound } from "../audio/soundEvents.ts";
 import { battleResolutionCommandDuration, currentCommandField, liveMoveSourceAge, moveBodyExtraRows, presentedMoveDurationOnSoundClock } from "./battleResolutionPresentationRender.ts";
 import type { BattleKernelSemanticEvent } from "./battleDecisionBoundary.ts";
 import { BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS } from "./battleScriptSourceConstants.ts";
+import { FUTURE_SIGHT_HIT_COMMAND_FRAMES } from "./battleResolutionPresentation.ts";
 import type {
   BattleResolutionPresentationCommand,
   BattleResolutionPresentationState,
@@ -125,8 +126,17 @@ export function emitBattleHitSounds(
     scheduleAfter(Math.max(0, end + SET_MON_DATA_AFTER_HEALTHBAR_DONE), () => handleLowHpMusicChange(to, maxHp));
     return;
   }
+  if (command.type === "general-animation" && command.animation === "FUTURE_SIGHT_HIT" && sceneLag(segment) > 0) {
+    // hit2 (lab etp1-futuresight-on): BattleScript_DoFutureAttackHit's effectivenesssound is the row before the hitanimation row (ROM 3030, hit command 3031 on both sides),
+    // the animation command's last row; the hit command's own anchor (the controller lag) put it 7 rows late.
+    const next = segment.commands[segment.commands.indexOf(command) + 1];
+    const song = next?.type === "hit-animation" ? effectivenessSong(segment, next.eventSequence) : null;
+    if (song !== null) scheduleAfter(FUTURE_SIGHT_HIT_COMMAND_FRAMES, () => playPannedSe(song.song, next!.battler === 0 ? SE_PAN_PLAYER : SE_PAN_OPPONENT));
+    return;
+  }
   if (command.type === "hit-animation") {
     const previous = segment.commands[segment.commands.indexOf(command) - 1];
+    if (previous?.type === "general-animation" && previous.animation === "FUTURE_SIGHT_HIT" && sceneLag(segment) > 0) return;
     if (previous?.type === "move-animation" && (previous.timing.bodyLeadFrames ?? 0) > 0) return;
     if (previous?.type === "move-animation" && EXPLOSION_FAMILY_MOVE_IDS.has(previous.animation?.moveId ?? -1) && sceneLag(segment) > 0) return;
     const song = effectivenessSong(segment, command.eventSequence);
@@ -149,7 +159,8 @@ export function emitBattleHitSounds(
   // mxp1: after a leadless Self-Destruct / Explosion body (ON) the presented hit / hp / message rows are on the ROM's rows, so the faint SE carries no controller lag
   // (ROM labs eqk1-{expl,sd}-{p,f}-on: target faint +7, user faint +5 with it); the user's own faint (the script's second tryfaintmon) is 2 rows later still.
   const explosionBody = segment.commands.find((c) => c.type === "move-animation" && c.animation !== undefined && EXPLOSION_FAMILY_MOVE_IDS.has(c.animation.moveId));
-  const faintLag = explosionBody?.type === "move-animation" && sceneLag(segment) > 0 ? (explosionBody.battler === command.battler ? EXPLOSION_USER_FAINT_EXTRA_ROWS : 0) : lag;
+  const faintLag = followsFutureSightHit(segment, command) ? 0
+    : explosionBody?.type === "move-animation" && sceneLag(segment) > 0 ? (explosionBody.battler === command.battler ? EXPLOSION_USER_FAINT_EXTRA_ROWS : 0) : lag;
   // snd2: {Player,Opponent}HandleFaintingCry cry the party mon at gBattlerPartyIndexes[battler] (battle_controller_player.c /
   // battle_controller_opponent.c): the mon on the field at the faint. segment.field is the field the segment opened with, so a mon
   // sent in earlier in the same segment and knocked out there cried as the one it replaced (frame catcher, seed 3: "Go! PHANPY!" ...
@@ -169,7 +180,21 @@ export function faintSeOffsetRows(state: BattleResolutionPresentationState): num
   const segment = state.segments[state.segmentIndex];
   const command = segment?.commands[state.commandIndex];
   if (segment === undefined || command?.type !== "faint" || command.timing.leadFrames === undefined) return null;
-  return Math.max(0, command.timing.leadFrames + FAINT_SOUND_OFFSET + Math.max(0, sceneLag(segment) - moveBodyExtraRows(state, false)));
+  return Math.max(0, command.timing.leadFrames + FAINT_SOUND_OFFSET + (followsFutureSightHit(segment, command) ? 0 : Math.max(0, sceneLag(segment) - moveBodyExtraRows(state, false))));
+}
+
+/**
+ * hit2 (lab etp1-futuresight-on, ROM 3187 vs ours 3194): the faint after the Scene ON Future Sight hit (BattleScript_DoFutureAttackHit, 3 script rows shorter than
+ * BattleScript_HitFromAtk's tail) carries no controller lag: the faint SE is the ROM's lead + 2 rows after the faint command.
+ */
+function followsFutureSightHit(segment: BattleResolutionSegment, faint: BattleResolutionPresentationCommand): boolean {
+  if (sceneLag(segment) === 0) return false;
+  for (let at = segment.commands.indexOf(faint) - 1; at > 0; at -= 1) {
+    if (segment.commands[at]!.type !== "hit-animation") continue;
+    const before = segment.commands[at - 1]!;
+    return before.type === "general-animation" && before.animation === "FUTURE_SIGHT_HIT";
+  }
+  return false;
 }
 
 function sceneLag(segment: BattleResolutionSegment): number {

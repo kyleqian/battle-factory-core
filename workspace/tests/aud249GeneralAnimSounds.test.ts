@@ -13,17 +13,17 @@ interface Fixture { frames: number; events: FixtureEvent[]; trace: { route: "gen
 const appTracePath = "../tools/compare/appTrace.ts";
 const { APP_STAGES, labBackedStage } = (await import(/* @vite-ignore */ appTracePath)) as {
   APP_STAGES: Record<string, (state: ReturnType<typeof createInitialState>) => ReturnType<typeof createInitialState>>;
-  labBackedStage: (scenario: string, state: ReturnType<typeof createInitialState>) => ReturnType<typeof createInitialState>;
+  labBackedStage: (scenario: string, state: ReturnType<typeof createInitialState>, rngSeed?: number) => ReturnType<typeof createInitialState>;
 };
 
 const CONFUSION = 176;
 const load = (name: string): Fixture => JSON.parse(readFileSync(new URL(`../tools/audio/fixtures/${name}.json`, import.meta.url), "utf8")) as Fixture;
 
-function ourEvents(rom: Fixture, scene: "on" | "off"): SoundEvent[] {
+function ourEvents(rom: Fixture, scene: "on" | "off", rngSeed?: number): SoundEvent[] {
   let state = createInitialState({ appRoute: rom.trace.route, battleScene: scene });
   if (rom.trace.appStage !== undefined && rom.trace.appStage.frame === 0) {
     const stage = APP_STAGES[rom.trace.appStage.id];
-    state = stage !== undefined ? stage(state) : labBackedStage(`${rom.trace.appStage.id}.json`, state);
+    state = stage !== undefined ? stage(state) : labBackedStage(`${rom.trace.appStage.id}.json`, state, rngSeed);
   }
   const events: SoundEvent[] = [];
   for (const advance of traceAdvances(rom.trace.segments)) {
@@ -106,5 +106,14 @@ describe("General / Status animation sound table (aud249)", () => {
     const ours = ourEvents(rom, "on").filter((e) => e.kind === "se" && e.id === 242 && e.frame >= 700);
     expect(theirs.map((e) => e.frame)).toEqual([767, 776, 785, 794, 803, 812, 821, 830, 839, 848]);
     expect(ours.map((e) => `${e.frame}:${e.pan}`)).toEqual(theirs.map((e) => `${e.frame}:${e.pan}`));
+  });
+  // hit2: the delayed Future Sight hit (lab etp1-futuresight-on, engine RNG seed 2 so the hit lands as on the ROM): General_FutureSightHit's SEs (were -6), the hit's effectiveness SE (was +7), the faint cry and SE (were +7).
+  it("hit2-futuresight-on: Future Sight's animation SEs, hit SE and the target's faint cry / SE are the ROM's rows", () => {
+    const rom = load("hit2-futuresight-on");
+    const key = (e: { frame: number; kind: string; id: number | null; pan: number | null }) => `${e.frame}:${e.kind}:${e.id}:${e.pan}`;
+    const pick = (events: Fixture["events"]) => events.filter((e) => e.noop !== true && e.frame >= 2860 && ((e.kind === "se" && [189, 184, 13, 16].includes(e.id ?? -1)) || (e.kind === "cry" && e.frame < 3300)));
+    const theirs = pick(rom.events);
+    expect(theirs.map((e) => `${e.frame}:${e.id}`)).toEqual(["2868:189", "2906:184", "2915:184", "3030:13", "3121:19", "3187:16"]);
+    expect(pick(ourEvents(rom, "on", 2) as unknown as Fixture["events"]).map(key)).toEqual(theirs.map(key));
   });
 });
