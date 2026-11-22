@@ -1269,7 +1269,7 @@ function messageTimingFromSourceProvenance(
 ): BattleMessageTiming | null {
   const programCounter = event.provenance?.programCounter;
   if (programCounter === undefined || programCounter < 0) return null;
-  if (!sceneOff && event.provenance?.sourceLabel === WAKE_UP_SCRIPT) return WAKE_UP_MESSAGE_TIMING;
+  if (event.provenance?.sourceLabel === WAKE_UP_SCRIPT) return WAKE_UP_MESSAGE_TIMING;
   const following = BATTLE_SCRIPT_PROGRAM.instructions[programCounter + 1];
   if (
     following?.opcodeName === "B_SCR_OP_WAITMESSAGE"
@@ -6340,9 +6340,7 @@ export function projectBattleResolutionCommands(
         battler: singlesBattler(payload.battler, "status icon update"),
         status1: payload.status1,
         status2: payload.status2,
-        timing: (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) === 0
-          ? wakeUpIconTiming(events, index) ?? STATUS_ICON_TIMING
-          : STATUS_ICON_TIMING,
+        timing: wakeUpIconTiming(events, index) ?? STATUS_ICON_TIMING,
       }));
       continue;
     }
