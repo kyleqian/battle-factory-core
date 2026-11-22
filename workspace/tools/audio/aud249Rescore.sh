@@ -5,6 +5,8 @@
 set -euo pipefail
 F=$1; D=$2; S=$3; SC=$4; mkdir -p "$D"
 for k in req setup drive frozen tl snd; do cp "$F/$S-$SC.$k.json" "$D/$S-$SC.$k.json"; done
+# drv2: a forced-move anchor the ROM driver closed on a press the ROM ignored is moved to the press it accepted (romForcedAnchorFix.py); AUD249_FORCED_ANCHOR=0 keeps the driver's anchors.
+[ "${AUD249_FORCED_ANCHOR:-}" = 0 ] || python3 tools/audio/romForcedAnchorFix.py "$F/$S-$SC.drive.json" "$F/$S-$SC.snd.json" "$D/$S-$SC.drive.json" 2>"$D/$S-$SC.anchorfix.log"
 NODE="node --experimental-strip-types --no-warnings tools/integration/soundCensusRomReplay.ts"
 RD=(--romdrive="$D/$S-$SC.drive.json"); [ -n "${AUD249_NO_ROMDRIVE:-}" ] && RD=()
 # drv2: with the ROM drive the replay also presses A while a button message is already acceptable (fch2m); AUD249_DISMISS_ACCEPT=0 restores the awaiting-only gate (drv1 / t2k4 baselines).
