@@ -37,8 +37,9 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   rules today) + the OFF confusion head (-4 rows); hie6m: the held-item +21 class is the foe's Leftovers after the player's forced send-in (start +6, then the 15-frame restart lead); g180m: t2k3 item 4 is
   the Leech Seed drain (post-send-in +13, end-turn print heads / holds) and Sun's unreceipted age, item 5 is Dig's charge-turn print after a previous move (-8 .. -19); nrv1: trn226 did not change the Head
   battle's RNG (40 / 40 identical) — but on the Noland-room recordings the engine's RNG at the Head battle start never equals the ROM's (Noland's lead differs 40 / 40), against the Mac catcher's "the Head's
-  team is the engine's" (hdt1); hdt2m (running at wind-down; doc `docs/hdt1-factory-head-team.md` if it landed) checks which is right. Each doc has a landing recipe.
-- **Next:** (0) resolve the Head-team evidence conflict first (hdt2m / nrv1; a real mismatch is a gameplay bug and outranks sound); (1) land hse1m's OFF wake-up hold / confusion head and g180m's Dig charge-turn
+  team is the engine's" (hdt1); hdt2m (`docs/hdt1-factory-head-team.md` "hdt2m"): both are right: the engine's Head-team rule is the ROM's (fed the ROM's own cursor, the lead matches 20 / 20; 2nd / 3rd 17 / 20 with 8-13 VBlank
+  draws between builds), the difference is the RNG input stream (the room's per-VBlank cursor, the parked #55 distribution class), not a missing draw. Each doc has a landing recipe.
+- **Next:** (1) land hse1m's OFF wake-up hold / confusion head and g180m's Dig charge-turn
   print (recipes in the doc), then fch2m's dismiss-accept default (with hse1m's hit-SE windows it un-hides); (2) hie6m's send-in Leftovers start / lead; (3) Leech Seed drain rows (g180m, etp2 labs); (4) t2k3's
   poison first row / Ice Beam first window / Rock Slide; also the Wrap print after the hit, Magnitude power-roll labs, #225 ordinary room. Re-scan the soak / lbrd trajectory pins after every timing merge.
 

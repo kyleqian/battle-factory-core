@@ -324,9 +324,10 @@ No battle-rule change this run: every fold kept census eventsDigest identical (0
   default together with the hit-SE windows it un-hides; (2) hie6m's foe Leftovers after the player's forced send-in (start +6 and the 15-frame restart lead); (3) the Leech Seed drain (g180m: post-send-in age,
   end-turn print heads / holds; etp2 labs); (4) t2k3 poison tick first row, Ice Beam first window, Rock Slide; Wrap print after the hit; Magnitude power-roll labs; Scene OFF self-KO faint SE (-2).
 - **Item 0b (Lobby):** no change (#221 open).
-- **Item 0d (battle rules):** luck day 6 0 hits (R040 R063 R110). rrh6 + rrh7: 14 rare rules hand-staged and ROM-matched, **85 -> 99 / 110** (`docs/parity-mac/rule-coverage.md`). **Check first next run:**
+- **Item 0d (battle rules):** luck day 6 0 hits (R040 R063 R110). rrh6 + rrh7: 14 rare rules hand-staged and ROM-matched, **85 -> 99 / 110** (`docs/parity-mac/rule-coverage.md`). **Checked at wind-down:**
   nrv1 (`docs/trn225-frontier-transitions.md` "nrv1") found the engine's RNG at the Head battle start never equal to the ROM's on the Noland-room recordings (Noland's lead differs 40 / 40; the ROM takes
-  269-679 extra LCG steps in the party build / transition draw), against the Mac catcher's "the Head's team is the engine's" (`docs/hdt1-factory-head-team.md`); hdt2m (same doc, if it landed) checks which.
+  269-679 extra LCG steps in the party build / transition draw), against the Mac catcher's "the Head's team is the engine's" (`docs/hdt1-factory-head-team.md`); hdt2m (same doc) settled it: the rule is the ROM's (ROM cursor in -> the ROM's lead 20 / 20), the stream differs (room VBlank
+  cursor + 8-13 VBlank draws between builds: parked #55 class); no gameplay fix is due unless #55 is reopened.
 - **#225:** trn226 drew LOGO_WIGGLE and fixed LOGO_WAVE (0 bad frames both scenes, Noland room only); open: the ordinary room's handoff (unmeasured), SQUARES_SCROLL BGM lag. Not checked: a Brain battle's
   RNG after the now-shorter Noland-room transition (a catcher round through the Head would show it). **#227** closed (msw2: the ROM keeps the same move order as the engine after SELECT + Mimic; pinned).
 - **Tools:** `tools/integration/labCompare.sh` (cln12 / cln13: ROM probe + engine + aligned SE and first-glyph table, cross-run ROM reuse; `tools/battle-lab/README.md` "Lab compare"). Tackle / Pound / Scratch /
