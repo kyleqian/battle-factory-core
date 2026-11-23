@@ -1577,6 +1577,10 @@ const LIVE_MOVE_SCRIPT_TAIL_TRAIL_ROWS: ReadonlyMap<number, number> = new Map([
 // (stl109 / sdl119, incl. its doll cells) keeps 0 / 0.
 const LIVE_MOVE_UNMEASURED_UNIVERSAL_ROW_IDS: ReadonlySet<number> = new Set([165]);
 const NO_UNIVERSAL_ROWS = Object.freeze({ pre: 0, post: 0 });
+// rsl1: the damaging bodies (Flamethrower, Rock Slide, Faint Attack, Spark, Dynamic Punch) in the no-pre list: the ROM reaches attackanimation 3 frames
+// before gAnimScriptActive rises here too (labs: every first SE was 3 rows early with the pre rows dropped), so the SOUND clock keeps the pre rows even
+// where the pixel adapter does not present them (the 3 rows stay folded into the hit tail). The masked status / heal bodies measure exact without them.
+const LIVE_MOVE_SOUND_PRE_ROW_IDS: ReadonlySet<number> = new Set([53, 157, 185, 209, 223]);
 
 /**
  * hit1 (docs/hit1-move-hit-timing.md, src/engine/animEndSeWait.ts): the rows Cmd_end's IsSEPlaying wait keeps a live body active after
@@ -1762,7 +1766,9 @@ export function liveMoveSourceAge(
   const field = currentCommandField(state);
   if (liveMoveAnimationDuration(command.animation, field) === null) return null;
   const seGate = (command.timing.seGateFrames ?? 0) + (command.timing.scriptLeadFrames ?? 0);
-  const pre = liveMoveUniversalRows(command.animation, field).pre;
+  const universalRows = liveMoveUniversalRows(command.animation, field);
+  const pre = universalRows.pre === 0 && LIVE_MOVE_SOUND_PRE_ROW_IDS.has(command.animation.moveId) && !LIVE_MOVE_UNMEASURED_UNIVERSAL_ROW_IDS.has(command.animation.moveId)
+    && liveSubstituteSwapApplies(command.animation, field) !== true ? LIVE_MOVE_PRE_ROWS : universalRows.pre;
   // lse2: a body whose lead is presented in front of it keeps the sound clock of the ROM script rows (the clock is the pre-lead one, shifted by the lead's difference to its 7-row calibration).
   let precedingStatRows = 0;
   for (let c = state.commandIndex - 1; c >= 0 && segment!.commands[c]!.type === "stat"; c -= 1) precedingStatRows += battleResolutionCommandDuration(segment!.commands[c]!, field);

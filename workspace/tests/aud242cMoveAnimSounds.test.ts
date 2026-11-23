@@ -80,13 +80,12 @@ const FADE_SPECS: Record<string, Spec> = {
 };
 
 // Every row of a window is shifted by the same named per-move offset (ISSUES #198: the ROM script start vs the live adapter's body clock; the
-// shape, ids, pans and the relative frames are exact): Flamethrower is a moves-with-unknown-idle-lead body (LIVE_MOVE_NO_PRE_ROW_SIDES) at +5 on
-// both sides, the status bodies Metal Sound / Sweet Scent sit before the generic clock (-2 / -3, aud242a's -4 class), Icy Wind's opening SE is +2.
+// shape, ids, pans and the relative frames are exact): Flamethrower is a moves-with-unknown-idle-lead body (LIVE_MOVE_NO_PRE_ROW_SIDES); rsl1 gave its sound clock the ROM's 3 pre rows (+3 -> 0, both sides), the status bodies Metal Sound / Sweet Scent sit before the generic clock (-2 / -3, aud242a's -4 class), Icy Wind's opening SE is +2.
 // The later gated rows (Icy Wind's panse after sprite waits; the next move's SEs) are the ROM-only part. Metal Sound is cut at ROM frame 121: the ROM
 // loses two wall-clock frames there (121 / 122 have no pan call, a VBlank overrun like the BG load lag; its rows after 111 are noop calls anyway).
 const PAN_SPECS: Record<string, Spec> = {
-  "flamethrower-opponent": { delta: 3 },
-  "flamethrower-player": { delta: 3 },
+  "flamethrower-opponent": { delta: 0 },
+  "flamethrower-player": { delta: 0 },
   "metalsound-opponent": { delta: -2, romOnlyFrom: 121 },
   "sweetscent-player": { delta: -1, romOnlyFrom: 400 },
   "icywind-opponent": { delta: 0, romOnlyFrom: 100 },
