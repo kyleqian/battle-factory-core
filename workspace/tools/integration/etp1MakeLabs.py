@@ -73,8 +73,14 @@ S = {
     "moonlightls2": (19, 50, [73], 0, 19, 12, [236], 0, [0] * 2),
     "softboiledls2": (19, 50, [73], 0, 19, 12, [135], 0, [0] * 2),
     "milkdrinkls2": (19, 50, [73], 0, 19, 12, [208], 0, [0] * 2),
+    # fkt1: a 1-HP Shedinja foe is KOed by the first end-turn tick (drain / poison / sandstorm; "first" = Lv100 so the foe is first in the turn order), then replaced
+    "kols": (19, 50, [73], 0, 303, 5, [33], 0, [0]),
+    "kotoxic": (19, 50, [92], 0, 303, 5, [33], 0, [0]),
+    "kosand": (19, 50, [201], 0, 303, 5, [33], 0, [0]),
+    "kosandfirst": (19, 50, [201], 0, 303, 100, [33], 0, [0]),
 }
 ETP3 = {"sandstormu3", "lightscreen6", "reflect6", "lightscreenls6", "reflectls6", "recoverls4", "sunls3", "haills3", "sandls3", "foesendls2", "slackoffls2", "morningsunls2", "synthesisls2", "moonlightls2", "softboiledls2", "milkdrinkls2"}
+FKT1 = {"kols", "kotoxic", "kosand", "kosandfirst"}
 want = sys.argv[1:] or list(S)
 for name in want:
     us, ul, um, ui, ts, tl, tm, ti, slots = S[name]
@@ -93,11 +99,11 @@ for name in want:
                 seg += [{"frames": 2, "buttons": ["A"]}, {"frames": 700, "buttons": []}, {"frames": 2, "buttons": ["A"]}, {"frames": 1100, "buttons": []}]
             else:
                 seg += [{"frames": 2, "buttons": ["A"]}, {"frames": 1100, "buttons": []}]
-        if name == "foesendls2":  # the KO turn: the faint box waits for A presses (swt1-foe-faint-poison's tail)
+        if name == "foesendls2" or name in FKT1:  # the KO turn: the faint box waits for A presses (swt1-foe-faint-poison's tail)
             seg[-1]["frames"] = 400
             for _ in range(6):
                 seg += [{"frames": 2, "buttons": ["A"]}, {"frames": 120, "buttons": []}]
             seg += [{"frames": 1200, "buttons": []}]
         lab["trace"]["segments"] = seg
-        json.dump(lab, open(LAB / f"{'etp3' if name in ETP3 else 'etp1'}-{name}-{scene}.json", "w"))
-    print(("etp3-" if name in ETP3 else "etp1-") + name)
+        json.dump(lab, open(LAB / f"{'fkt1' if name in FKT1 else 'etp3' if name in ETP3 else 'etp1'}-{name}-{scene}.json", "w"))
+    print(("fkt1-" if name in FKT1 else "etp3-" if name in ETP3 else "etp1-") + name)
