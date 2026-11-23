@@ -2793,8 +2793,13 @@ export function createBattleResolutionPresentationRenderView(
       waitCursor = releasedBox;
     }
     if (command.type === "message" && !(releasedBox === "cleared" && isReleasedHoldPiece(command, state))) {
-      latestMessage = command.lines;
-      visibleCharacters = messageCommandVisibleCharacters(command, state.lifecycle.phaseElapsed);
+      // sbx1: the ROM's printstring fills the box and draws the first glyph on the same row, so the previous text stays on screen through
+      // the lead rows before it (the script rows between the last wait and the print).
+      const typedCharacters = messageCommandVisibleCharacters(command, state.lifecycle.phaseElapsed);
+      if (typedCharacters > 0 || latestMessage === null) {
+        latestMessage = command.lines;
+        visibleCharacters = typedCharacters;
+      }
       if (
         command.advance === "button"
         && !command.noCursor
