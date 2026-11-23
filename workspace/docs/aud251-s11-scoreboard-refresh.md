@@ -3410,3 +3410,33 @@ Scene ON `etk1-perish-*`: the lab's Splash body is three animation loops the eng
 - **Census** 0..199 (`HEAD` vs `ab905ee33`, `lsd194Census.sh` + `rst197CensusDelta.py --digest`): eventsDigest and error identical 200 / 200 in both scenes; 9 battles with changed presentation commands in each scene (ON 63,530 / OFF 62,225 commands), no type-sequence change. The `tree/` copies are deleted.
 - **Tests**: 264 files (every tests/ file importing `battleResolutionPresentation`, `appTrace`, `b4mEngine`, `labCompare`, `soundCensusRomReplay`, plus `ais*`, `fnt*`, `randomRoundSoak*`, `lbrd`, `etp1*`, `aud252*`; there is no `tests/etk1*`) pass, one exception that predates pso1: `tests/aud252LossBallOpen.test.ts` seed 2230 (engine minus ROM `[0, -3, 0 x5, -1]` vs the pinned `-4`; identical failure with the pre-pso1 presentation file swapped in, so it comes from fold-g, one frame toward the ROM; not re-pinned here). Moved pin: `ais2` (above). New `tests/pso1PerishCountPrints.test.ts` (4 Tier-1 tests: Scene OFF count first glyphs = the ROM's 379 / 480 / 1460 / 1561 / 2582 / 2683 / 3875, Scene ON count gaps = 101 / 128; each fails on the pre-pso1 source).
 - `npm run typecheck` clean; `npm run test:gate` / `npm run build`: see the final report.
+
+## ohs1: Scene OFF pre-move status prints without a launch (ConfusedNoMore, InLove)
+
+Side lane, presentation timing only (Scene OFF; no rule / damage / RNG change). S11 #219 item 0: re-rank the OFF hit-SE windows, probe the largest clean-start class, land a rule only if it is one rule over the windows checked.
+
+**Re-rank** (`hse1mSplit.py` / `hse1mTable.py` on the hse1m ROM captures, T2 OFF base 842 exact / 291 offset, mass 786; 94 hit-SE windows, owned mass 225; evidence `.integration/evidence/ohs1/table-base.txt`):
+
+| Class | Windows | Mass | Note |
+|---|---|---|---|
+| plain (previous `MoveEnd`, end-turn, item / status rows) | 21 | 47 | heterogeneous, seed 97 d23 -7 alone is 7 |
+| Focus Punch | 9 | 45 | seed 1415, up to +5 |
+| `MoveUsedIsInLove` path | 6 | 28 | -3 on the largest |
+| Struggle after `NoMovesLeft` | 23 | 27 | one window -9 (seed 7295 d17) |
+| `MoveUsedIsConfused[NoMore]` path | 7 | 26 | -7 / -2 |
+| hit SE with no used-print chain | 12 | 20 | |
+| after a missed / failed action | 4 | 17 | |
+| `MoveUsedWokeUp` | 10 | 13 | -1 each |
+
+**Probe** (the -9 pair first: s7295 d8 and s6568 d29, `probe.sh` + `attr.py` + `stepclass.py`; cmp tables under `.integration/evidence/ohs1/p/off/`). The differing rows are the same in both: `BattleScript_MoveUsedIsConfusedNoMore` / `BattleScript_MoveUsedIsInLove` are `printstring; waitmessage B_WAIT_TIME_LONG (64); [status2animation]; return`; Scene OFF skips the `status2animation` launch, and the used move's `HitFromAtkCanceler` / `AccCheck` / `AtkString` rows then run before the used print. hse2 had already landed this for `MoveUsedIsConfused` (64 + 3 + 4); the two sibling heads were keyed on neither the label nor the OFF hold. ROM rows: ConfusedNoMore s7295 d8 wait release 53 -> `HitFromAtkCanceler` 118 -> used print 121 (64 + 5); InLove s6568 d29 print 9 -> 46 -> used print 115 (64 + 3 + 3). Also s7295 d19 / s6568 d21 / s7682 d4 (same shape).
+
+**Rule** (`preMoveOffUsedPrintTiming`, `battleResolutionPresentation.ts`): in Scene OFF (`BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS`), a message whose source label is `MoveUsedIsConfused` / `MoveUsedIsConfusedNoMore` / `MoveUsedIsInLove` and whose next message is `STRINGID_USEDMOVE` holds 64 + 3 + 4 / 64 + 5 / 64 + 3 + 3 (minimum 0). Any other follower (the self-hit, the can't-attack print) keeps the old hold; Scene ON is not touched.
+
+**Labs** (`labCompare.sh --scene off`, before -> after): `gsp3-attract-foe-off` prints 17 -> 17 (summary 0), `gate6-r10-attract-off` 0 -> 0, `hpf4m-confuse-off` prints 503 -> 493 (summary 1424 unchanged, desynced lab), `hpf4m-confuse-off-s3` 273 -> 273 (no ConfusedNoMore + used print in it). `mechanic-attract-in-love-pass-off` is not supported by labCompare (legacy `overrides.battlers`). No battle lab has an in-love print followed by a used print, so that hold is pinned by T2 only.
+
+- **T2** (`rescoreAll.sh` into `.integration/evidence/ohs1/t2-{base,after}`, both scenes, `soundScoreboard.py`): OFF exact / offset 842 / 291 -> 848 / 285, mass 786 -> 733, 0 missing / 0 extra; ON 3,237 / 2,640 mass 9,441 unchanged, 0 / 0.
+- **Census** 0..199 (`HEAD` vs `HEAD~1`, `lsd194Census.sh` + `rst197CensusDelta.py --digest`): eventsDigest and error identical 200 / 200 in both scenes; ON 0 changed commands, OFF 52 battles with changed presentation commands (62,225 commands). `tree/` copies deleted.
+- **Tests**: every tests/ file importing `battleResolutionPresentation` (about 220 files), `hse2*`, `bbk1*`, `randomRoundSoak*`, `lbrd`. Moved pins, each read first: `randomRoundSoak` "full" seed 0 frames 40489 -> 40494 and seed 1 57622 -> 57634 (frames only, same battle / turn / end state; the +5 is the ConfusedNoMore hold, ROM s7295 d8), `lbrd` WIN_THEN_LOSE_SEED 10 -> 0 (10's challenge-2 loss no longer plays out; scan 0..15 found 0 / 2 / 4 passing, the other two roles unchanged), `sa125` "each status-animation command sits at its receipt" (`confusionOffHold` also reads the OFF NoMore / InLove holds at the ON hold, as hse2 did for the confusion print). New `tests/ohs1PreMoveOffHeads.test.ts` pins the NoMore 64 + 5 on `hpf4m-confuse-off` (the hse2 67 / 71 holds unchanged). `tests/animation/liveAnchorMoveAdapters.test.ts` (3) and `liveNext5MoveAdapters.test.ts` (2) fail on `HEAD~1` as well (not ohs1).
+- `npm run typecheck` clean; `npm run test:gate` 360 files / 2,839 tests pass; `npm run build` ok.
+
+**Not landed (findings).** Remaining OFF window mass is the segment-start head: the ROM's first print after the A press depends on the rows from the effect entry to `EffectHit` (`AllStatsUpHit` / `PoisonHit` 2 rows, Recoil / Struggle 4), the engine uses a constant +9, and the per-move constants are heterogeneous and partly driver anchors. Struggle s7295 d8 -4 and s7295 d5 / d7 -2 are this (engine A + 9 vs ROM A + 11 / 13). s7682 d103 (Struggle after a Poison Hit status animation, -9) is one window. Focus Punch (45) and the plain class (47) have no single owner row. Not one rule over the windows checked, so no change.
