@@ -31,7 +31,9 @@ function sandstormTurns(seed: number, turns: number): Array<{ se: number | null;
       const payload = segment!.events.find((e) => e.sequence === command.eventSequence)?.payload as { messageId?: string } | undefined;
       id = payload?.messageId ?? null;
     }
-    const glyph = resolution !== null && (createBattleResolutionPresentationRenderView(resolution).message?.visibleCharacters ?? 0) >= 1;
+    // sbx1: during a print's lead rows the box still shows the previous message, so a glyph is the command's own text with characters on screen
+    const shown = resolution === null ? null : createBattleResolutionPresentationRenderView(resolution).message;
+    const glyph = shown !== null && command?.type === "message" && shown.lines === command.lines && shown.visibleCharacters >= 1;
     if (id === "STRINGID_SANDSTORMRAGES" && lastId !== id && glyph) rages = frame;
     if (id === "STRINGID_PKMNBUFFETEDBYSANDSTORM" && lastId !== id && glyph && rages !== null) {
       out.push({ se: se === null ? null : se - rages, buffeted: frame - rages });
