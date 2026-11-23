@@ -11,7 +11,7 @@
       --ignore-ids drops those SE ids from both sides (default 5 = the menu select, input-driven, as soundScoreboard.py; "" keeps everything).
       --span A:B limits the printed rows and the tally to rows whose ROM frame (ENG frame for engine-only rows) is in A..B; --rows adds the merged script / command timeline.
       Print rows (kind "print", also tallied on a PRINTS line, not in SUMMARY; --no-prints hides both): the first glyph of every battle message. ROM = the frame sTextPrinters[0] (hcr3mProbe.py tp) goes
-      inactive -> active, + 1 (the printstring row; the first glyph is drawn the next frame, hcr1b); ENG = the start frame of a `message` command. Ordered minimum-|ENG - ROM| alignment, a skip costs 120."""
+      inactive -> active, + 1 (the printstring row; the first glyph is drawn the next frame, hcr1b); ENG = the start frame of a `message` command + its `leadFrames` (pso1: the rows before its first glyph). Ordered minimum-|ENG - ROM| alignment, a skip costs 120."""
 import bisect
 import hashlib
 import json
@@ -167,7 +167,7 @@ def main():
     prints_line = None
     if "--no-prints" not in rest:
         rp = rom_prints(rom)
-        ep = [(c[0], f"{c[1]}.{c[2]} message") for c in eng["cmds"] if c[3] == "message"]
+        ep = [(c[0] + ((c[6] or {}).get("msgLead", 0)), f"{c[1]}.{c[2]} message") for c in eng["cmds"] if c[3] == "message"]
         if rp is None:
             out.append((-10**9, "  print: no sTextPrinters data in this ROM capture (probed before cln13; re-probe without --reuse-rom)"))
         else:
