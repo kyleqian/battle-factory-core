@@ -64,6 +64,43 @@ Kyle plans to make this repo public with its full history (no rewrite, no licens
 - Once the repo is public, everything committed is published at the next push. Keep secrets, server addresses and
   personal paths out of commits, as before.
 
+## From the Mac, 2026-11-23 (top layer): first-use move animations and sounds on the website
+
+- **Where these came from:** Kyle's live play on the website on 11-22 (build `eb-aeaa423d18bf34fe`). These were the problems:
+  - The first hit of WHIRLPOOL and a SPARK were not animated.
+  - The first BITE sounded faint, because its attack was cut.
+  - The Salac Berry sparkle (SE_SHINY) was silent.
+  - All four happened in the browser only: the headless engine and the frame catcher matched the ROM picture for picture. The site's
+    `contained-error` events named the two animations (`AnimAssetPending water-orb`, `dynamicPunch`).
+  - Kyle approved both fixes on 11-22. They are on Mac master `2f69f51b2`. The website has run them since 11-22 ~19:05 UTC (build
+    `eb-bc9f337e6d54769f`).
+  - **Delivered as branch `box-merge-20261123`:** Mac master `2f69f51b2`, then your 11-22 night run (cax31/master) merged, then this
+    handoff.
+    - Merge commit `8dea83294` (your `195b47e29`). On it: `tsc -b` clean; full suite 1,972 files / 17,246 tests passed, 1 failed:
+      `tests/animation/helpingHandEvidence.test.ts`, whose ROM probe hit its 60 s timeout while the Mac was loaded (the suite took
+      28 min); it passes alone in 7 s. `battleSoundTable.ts --check`: current.
+- **fam1, first-use move animations** (`docs/fam1-first-use-move-animations.md`):
+  - `presentationContainment.ts` `withPresentationRender()` (wrapped around `render()` in core.ts) rethrows `AnimAssetPending` inside a
+    render. The loop then holds the frame until the file arrives (the dl3/dl4 hold), as for `MonPicPending`. Before, the error was
+    contained, the command degraded, and the animation was dropped. Seams on the tick still contain it.
+  - `src/assets/gen/anim-asset-moves.json` (the prefetch table) is rebuilt from per-move recordings
+    (`tools/bundle/animAssetMoveReads.ts`, `tools/bundle/animAssetNeeds.ts build`). It has 175 entries: 45 Factory moves gained files,
+    WHIRLPOOL and SPARK among them. Over 42 soak and 277 staged battles, no read was missed.
+  - Still open: Open Level TYRANITAR's Sand Stream. Its sandstorm file comes from the ability, not a move, so the first sandstorm holds
+    briefly while it loads. It is not dropped.
+- **fsn1, first-use sounds** (`docs/fsn1-first-use-sounds.md`):
+  - Each battle's sounds are fetched during the walk-in and the intro. This uses `src/audio/battleSoundNeeds.ts` with
+    `src/assets/gen/battle-sounds.json`, which maps a move to its SEs and is made by `tools/bundle/battleSoundTable.ts --write`
+    (`--check` compares).
+  - `src/audio/player.ts` plays a late file from its start, a little delayed, if it is a one-shot SE or cry of at most 2 s and at
+    most 0.25 s late. Before, it started mid-sound. Counters: `lateDelayed`, `lateClipped`, `lateLost`.
+  - First battle: about 1.3 MB more sound up front. Later battles: about 100-150 KB each.
+- **What this means for you:**
+  - Headless output is unchanged: census seeds 200..209 are identical, and soak, census and catcher pins do not move.
+  - If you change a move animation script or the move-to-SE wiring (`moveAnimSounds.ts`), run
+    `tools/bundle/battleSoundTable.ts --check` and `tests/fam1*.test.ts`.
+  - Keep the containment rule: `AnimAssetPending` is rethrown only inside renders.
+
 ## From the Mac, 2026-11-22 (top layer): move-hit timing, info-card animations, result cards, sound timing, Open Level
 
 - **Where these came from:** Kyle's live battle of 11-21 on the website, compared with the ROM by the frame catcher
