@@ -68,6 +68,15 @@ S = {
     "sandls3": (19, 50, [73], 0, 19, 12, [201], 0, [0] * 3),
     # ldw1: the foe is KOed on turn 2 and replaced; the seeded player's drain follows the foe's send-in
     "foesendls2": (19, 50, [106, 69], 0, 19, 12, [73], 0, [0, 1]),
+    # ldw2: the same with an immune battler (Sandshrew / Snorunt): p = the seeding player immune, f = the seeded foe immune, b = both
+    "sandls3p": (27, 50, [73], 0, 19, 12, [201], 0, [0] * 3),
+    "sandls3f": (19, 50, [73], 0, 27, 12, [201], 0, [0] * 3),
+    "sandls3b": (27, 50, [73], 0, 27, 12, [201], 0, [0] * 3),
+    # a long weather bar (Chansey): the hit SE has ended before the script's exec row, so only the undamaged trailing iteration (6 rows) is left
+    "sandls3fc": (113, 50, [73], 0, 27, 12, [201], 0, [0] * 3),
+    "haills3p": (346, 50, [73], 0, 19, 12, [258], 0, [0] * 3),
+    "haills3f": (19, 50, [73], 0, 346, 12, [258], 0, [0] * 3),
+    "haills3b": (346, 50, [73], 0, 346, 12, [258], 0, [0] * 3),
     "morningsunls2": (19, 50, [73], 0, 19, 12, [234], 0, [0] * 2),
     "synthesisls2": (19, 50, [73], 0, 19, 12, [235], 0, [0] * 2),
     "moonlightls2": (19, 50, [73], 0, 19, 12, [236], 0, [0] * 2),
@@ -79,7 +88,7 @@ S = {
     "kosand": (19, 50, [201], 0, 303, 5, [33], 0, [0]),
     "kosandfirst": (74, 50, [201], 0, 303, 100, [150], 0, [0]),
 }
-ETP3 = {"sandstormu3", "lightscreen6", "reflect6", "lightscreenls6", "reflectls6", "recoverls4", "sunls3", "haills3", "sandls3", "foesendls2", "slackoffls2", "morningsunls2", "synthesisls2", "moonlightls2", "softboiledls2", "milkdrinkls2"}
+ETP3 = {"sandstormu3", "lightscreen6", "reflect6", "lightscreenls6", "reflectls6", "recoverls4", "sunls3", "haills3", "sandls3", "foesendls2", "sandls3p", "sandls3f", "sandls3b", "sandls3fc", "haills3p", "haills3f", "haills3b", "slackoffls2", "morningsunls2", "synthesisls2", "moonlightls2", "softboiledls2", "milkdrinkls2"}
 FKT1 = {"kols", "kotoxic", "kosand", "kosandfirst"}
 want = sys.argv[1:] or list(S)
 for name in want:

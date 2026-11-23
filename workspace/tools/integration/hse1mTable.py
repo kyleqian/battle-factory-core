@@ -40,9 +40,7 @@ def classify(w):
         return None
     d = split.get((w["seed"], w["si"], f["rf"]))
     if d is None or "ctxRom" not in d:
-        return "hit SE, no used-print chain (hit-all / multi-turn / parse miss)" if f["ecmd"] == "hit-animation" else None
-    if f["ecmd"] != "hit-animation":
-        return None
+        return "hit SE, no used-print chain (hit-all / multi-turn / parse miss)"
     c = d["ctxRom"]
     marks = (("NoMovesLeft", "S"), ("MoveUsedIsConfused", "C"), ("DoSelfConfusionDmg", "C"), ("MoveUsedWokeUp", "W"), ("MoveUsedIsInLove", "L"), ("EffectFocusPunch", "F"),
              ("TwoTurnMovesSecondTurn", "T"), ("SecondTurnSemiInvulnerable", "T"), ("MoveMissed", "M"), ("ButItFailed", "M"), ("MonMadeMoveUseless", "M"))
