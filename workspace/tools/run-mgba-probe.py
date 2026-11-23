@@ -184,6 +184,11 @@ def main() -> int:
             "(default: auto-detect vendor/mgba-venv)"
         ),
     )
+    parser.add_argument(
+        "--force",
+        action="store_true",
+        help="delete an existing OUTPUT before launching instead of refusing it",
+    )
     parser.add_argument("output", type=Path, help="JSON file the probe will write")
     parser.add_argument(
         "command",
@@ -210,11 +215,16 @@ def main() -> int:
 
     output: Path = args.output
     if output.exists():
-        print(
-            f"run-mgba-probe: refusing stale output path: {output}",
-            file=sys.stderr,
-        )
-        return 2
+        if not args.force:
+            print(
+                f"run-mgba-probe: refusing stale output path: {output} "
+                "(an existing output could be mistaken for this run's result; "
+                "delete it or pass --force to overwrite)",
+                file=sys.stderr,
+            )
+            return 2
+        output.unlink()
+        print(f"run-mgba-probe: --force: removed existing output {output}", file=sys.stderr)
     output.parent.mkdir(parents=True, exist_ok=True)
 
     log_path: Path = args.log or output.with_name(f"{output.name}.log")
