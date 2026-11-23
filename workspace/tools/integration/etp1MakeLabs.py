@@ -82,6 +82,12 @@ S = {
     "reflectwisp5": (19, 50, [115], 0, 19, 12, [261], 0, [0] * 5),
     "safeguardtox5": (19, 50, [219, 92], 0, 113, 50, [106], 0, [0, 1, 0, 0, 0]),
     "safeguardwisp5": (19, 50, [219, 261], 0, 113, 50, [106], 0, [0, 1, 0, 0, 0]),
+    # ptc2: the foe's Reflect wears off (end of turn 5) before the weather the player set on turn 1 ends / ticks; "ls" = the player also seeds the foe on turn 2 (the drain follows)
+    "reflectsun5": (19, 50, [241], 0, 19, 12, [115], 0, [0] * 5),
+    "reflectsunls5": (19, 50, [241, 73], 0, 19, 12, [115], 0, [0, 1, 0, 0, 0]),
+    "reflectrain5": (19, 50, [240], 0, 19, 12, [115], 0, [0] * 5),
+    "reflectsand5": (19, 50, [201], 0, 19, 12, [115], 0, [0] * 5),
+    "reflectsandls5": (19, 50, [201, 73], 0, 19, 12, [115], 0, [0, 1, 0, 0, 0]),
     "morningsunls2": (19, 50, [73], 0, 19, 12, [234], 0, [0] * 2),
     "synthesisls2": (19, 50, [73], 0, 19, 12, [235], 0, [0] * 2),
     "moonlightls2": (19, 50, [73], 0, 19, 12, [236], 0, [0] * 2),
@@ -93,7 +99,7 @@ S = {
     "kosand": (19, 50, [201], 0, 303, 5, [33], 0, [0]),
     "kosandfirst": (74, 50, [201], 0, 303, 100, [150], 0, [0]),
 }
-ETP3 = {"reflecttox5", "reflectwisp5", "safeguardtox5", "safeguardwisp5", "sandstormu3", "lightscreen6", "reflect6", "lightscreenls6", "reflectls6", "recoverls4", "sunls3", "haills3", "sandls3", "foesendls2", "sandls3p", "sandls3f", "sandls3b", "sandls3fc", "haills3p", "haills3f", "haills3b", "slackoffls2", "morningsunls2", "synthesisls2", "moonlightls2", "softboiledls2", "milkdrinkls2"}
+ETP3 = {"reflectsun5", "reflectsunls5", "reflectrain5", "reflectsand5", "reflectsandls5", "reflecttox5", "reflectwisp5", "safeguardtox5", "safeguardwisp5", "sandstormu3", "lightscreen6", "reflect6", "lightscreenls6", "reflectls6", "recoverls4", "sunls3", "haills3", "sandls3", "foesendls2", "sandls3p", "sandls3f", "sandls3b", "sandls3fc", "haills3p", "haills3f", "haills3b", "slackoffls2", "morningsunls2", "synthesisls2", "moonlightls2", "softboiledls2", "milkdrinkls2"}
 FKT1 = {"kols", "kotoxic", "kosand", "kosandfirst"}
 want = sys.argv[1:] or list(S)
 for name in want:

@@ -1590,7 +1590,7 @@ function endTurnPrintFollowsDraggedOut(events: readonly BattleKernelSemanticEven
  * state's script entry. Same 5 as the s310 d16 wore-off -> SunlightFaded leg (97 vs 92).
  */
 const END_TURN_PRINT_AFTER_PRINT_ROWS = 5;
-const END_TURN_PRINT_AFTER_PRINT_LABELS: ReadonlySet<string> = new Set(["BattleScript_PoisonTurnDmg", "BattleScript_BurnTurnDmg"]);
+const END_TURN_PRINT_AFTER_PRINT_LABELS: ReadonlySet<string> = new Set([...END_TURN_PRINT_SCRIPTS].filter((l) => l !== "BattleScript_DamagingWeatherLoop"));
 const END_TURN_PRINT_PREVIOUS_SCRIPTS: ReadonlySet<string> = new Set([...END_TURN_PRINT_SCRIPTS, "BattleScript_SafeguardEnds"]);
 function endTurnPrintFollowsEndTurnPrint(events: readonly BattleKernelSemanticEvent[], index: number): boolean {
   const previous = events[index - 1];
@@ -6604,6 +6604,8 @@ export function projectBattleResolutionCommands(
           || (drainPrevious?.type === "switch-in" && drainPrevious.battler === 1));
         const idleLoopRows = afterIdleController && drainPrevious?.type === "general-animation" && DAMAGING_WEATHER_CONTINUES.has(drainPrevious.animation)
           ? WEATHER_LOOP_UNDAMAGED_ITERATION_ROWS * (singlesBattlerCount - 1) + WEATHER_LOOP_END_TO_DRAIN_EXEC_ROWS : 0;
+        const afterChainedEndTurnPrint = !afterIdleController && leechDrainAnimated && drainPrevious?.type === "message"
+          && drainPrevious.leadFrames === END_TURN_PRINT_AFTER_PRINT_ROWS;
         const drainMinimumFrames = LEECH_SEED_DRAIN_PRE_ROWS + health.instructionExecution!
           + (leechDrainAnimated ? LEECH_SEED_DRAIN_ANIMATION_ROWS - 1 : 0);
         commands.push(Object.freeze({
@@ -6615,7 +6617,9 @@ export function projectBattleResolutionCommands(
           ...(commands.length === playerSendInEnd ? { afterPlayerSendIn: true as const } : {}),
           timing: Object.freeze(afterIdleController
             ? { minimumFrames: drainMinimumFrames - LEECH_SEED_DRAIN_IDLE_CONTROLLER_EARLY_ROWS + idleLoopRows, launchLagFrames: idleLoopRows }
-            : { minimumFrames: drainMinimumFrames }),
+            : afterChainedEndTurnPrint
+              ? { minimumFrames: drainMinimumFrames - END_TURN_PRINT_AFTER_PRINT_ROWS, launchLagFrames: LEECH_SEED_DRAIN_LEGACY_LAG + 2 - END_TURN_PRINT_AFTER_PRINT_ROWS }
+              : { minimumFrames: drainMinimumFrames }),
         }));
       }
       leechDrainAnimated = false;

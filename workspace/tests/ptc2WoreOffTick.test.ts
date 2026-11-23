@@ -18,8 +18,8 @@ const { labBackedStage } = (await import(/* @vite-ignore */ appTracePath)) as {
   labBackedStage: (file: string, state: ReturnType<typeof createInitialState>, frame: undefined, scene: "on" | "off") => any;
 };
 
-// [wore-off / ends print first glyph, tick print first glyph] of the last end turn (the lab ends there)
-const ROM_LAST_TWO_GLYPHS: Readonly<Record<string, readonly [number, number]>> = {
+// last first glyphs of each lab (the lab ends in the turn-5 end turn); the weather / drain labs follow below
+const ROM_LAST_TWO_GLYPHS: Readonly<Record<string, readonly number[]>> = {
   "etp3-reflecttox5-on": [4863, 4955],
   "etp3-reflecttox5-off": [4863, 4955],
   "etp3-reflectwisp5-on": [4834, 4926],
@@ -28,6 +28,19 @@ const ROM_LAST_TWO_GLYPHS: Readonly<Record<string, readonly [number, number]>> =
   "etp3-safeguardtox5-off": [5603, 5720],
   "etp3-safeguardwisp5-on": [5645, 5762],
   "etp3-safeguardwisp5-off": [5574, 5691],
+  // wore-off -> weather print (SunlightFaded / rain / sandstorm lines): 5 rows after the wore-off print's end, like the tick (ptc2 item 2); [SideStatusWoreOff, weather print, last print]
+  "etp3-reflectsun5-on": [4741, 4830, 4921],
+  "etp3-reflectsun5-off": [4741, 4830, 4921],
+  "etp3-reflectrain5-on": [4741, 4830, 4921],
+  "etp3-reflectrain5-off": [4741, 4830, 4921],
+  "etp3-reflectsand5-on": [4741, 4830, 4921],
+  "etp3-reflectsand5-off": [4741, 4830, 4921],
+  // ... and the Leech Seed drain after it keeps the ROM clock (drain SEs 180 / 179 at 5688 / 5801 in the ON lab, tests/ldw2WeatherLoopSeedDrain.test.ts): SideStatusWoreOff, SunlightFaded, drained print
+  "etp3-reflectsunls5-on": [5483, 5574, 5890],
+  "etp3-reflectsandls5-on": [4619, 4774, 5186],
+};
+const ROM_LAST_TWO_GLYPHS_OFF_PREFIX: Readonly<Record<string, readonly number[]>> = {
+  "etp3-reflectsunls5-off": [5483, 5574],
 };
 
 function firstGlyphFrames(name: string): number[] {
@@ -53,7 +66,12 @@ function firstGlyphFrames(name: string): number[] {
 describe("ptc2: wore-off print -> poison / burn tick print (ROM labs)", () => {
   for (const [name, pins] of Object.entries(ROM_LAST_TWO_GLYPHS)) {
     it(`${name}: wore-off and tick first glyphs equal the ROM's ${pins.join(" / ")}`, () => {
-      expect(firstGlyphFrames(name).slice(-2)).toEqual([...pins]);
+      expect(firstGlyphFrames(name).slice(-pins.length)).toEqual([...pins]);
+    });
+  }
+  for (const [name, pins] of Object.entries(ROM_LAST_TWO_GLYPHS_OFF_PREFIX)) {
+    it(`${name}: wore-off and weather first glyphs equal the ROM's ${pins.join(" / ")}`, () => {
+      expect(firstGlyphFrames(name).slice(-pins.length - 1, -1)).toEqual([...pins]);
     });
   }
 });
