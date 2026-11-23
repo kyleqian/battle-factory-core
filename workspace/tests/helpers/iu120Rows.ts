@@ -21,12 +21,13 @@ export const IU120_NO_PRE_ROW_SIDES: ReadonlyMap<number, number> = new Map([
  * production's end) + 1, plus the lead rows production does not present (Supersonic 7, Recover 10, Milk Drink 13, Dynamic Punch 19,
  * Synthesis 4), or the frame catcher's CATCHER_WATCH windows (Thunder Punch 135 rows, Twineedle 63, Metal Claw 157, Sludge 111, Ember 69,
  * Fire Punch 101 from the activation to gAnimScriptActive's fall). The rows after the body show the field (every script command has run).
+ * kse1: Scary Face (184@190: 12 of the 14 rows are body ages; the S-body lead shift takes 2 of them) 14 = SE_M_STRING_SHOT2's song (row 146 + 1 + 60) end 207 minus its 190-row window + idle 4 - 1 (the ROM's gAnimScriptActive length, 207 rows).
  * Metal Claw (14) left the table in the tdr1 merge: the box's bdt1 window (154) models the same wait.
  */
 export const HIT1_CMD_END_SE_WAIT_ROWS: ReadonlyMap<number | string, number> = new Map<number | string, number>([
   [7, 1], [9, 22], [16, 44], [41, 17], [48, 21], [52, 3], [64, 14], [74, 20], [75, 20], [105, 15], [124, 6], [158, 2], [176, 3], [179, 1],
-  [190, 1], [200, 1], [206, 13], [208, 17], [209, 9], [223, 46], [225, 1], [235, 10], [299, 9], [316, 63], [342, 4], [343, 21],
-  [350, 1], [143, 1], ["143@180", 0],
+  [184, 14], [190, 1], [200, 1], [206, 13], [208, 17], [209, 9], [223, 46], [225, 1], [235, 10], [299, 9], [316, 63], [342, 4], [343, 21],
+  [350, 1], [143, 1], ["143@180", 0], ["184@190", 12],
 ]);
 export function hit1SeWaitRows(id: number, _side: Iu120Side = "player", duration?: number): number {
   return (duration === undefined ? undefined : HIT1_CMD_END_SE_WAIT_ROWS.get(`${id}@${duration}`)) ?? HIT1_CMD_END_SE_WAIT_ROWS.get(id) ?? 0;
