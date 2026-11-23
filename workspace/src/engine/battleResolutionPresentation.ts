@@ -2016,6 +2016,36 @@ function futureSightHitPlayanimationBefore(programCounter: number | undefined): 
   return BATTLE_SCRIPT_PROGRAM.instructions[programCounter - 1]?.opcodeName === "B_SCR_OP_EFFECTIVENESSSOUND"
     && BATTLE_SCRIPT_PROGRAM.instructions[programCounter - 2]?.operands.some((operand) => operand.expression === "B_ANIM_DOOM_DESIRE_HIT") === true;
 }
+/**
+ * sbx3 (docs/sbx1-end-turn-box-clear.md "sbx3"): Scene OFF's Rain / Sun continues. `BattleScript_RainContinuesOrEnds` /
+ * `BattleScript_SunlightContinues` end with `playanimation BS_ATTACKER, B_ANIM_RAIN_CONTINUES / B_ANIM_SUN_CONTINUES` then `end2`.
+ * Cmd_playanimation (battle_script_commands.c:4005-4050) tests HITMARKER_NO_ANIMATIONS before its weather branch, so Scene OFF pushes a
+ * return and runs BattleScript_Pausex20 (`pause B_WAIT_TIME_SHORT` = 32 rows + `return`) with the print's text still on screen, and
+ * nothing else is presented (no animation command, wth236). The print's hold therefore runs on by the pause's rows, and the box clear,
+ * the action menu and the input-ready row follow it. ROM-measured on etp1-sun-off / etp1-rain5-off (sbx2, dense): Sun 30 rows past
+ * where the engine ended the text (ours text to 433, menu 440; ROM 463 / 470); Rain 31, one more than Sun for the
+ * `jumpifbyte B_MSG_RAIN_STOPPED` row between the wait and the `playanimation`. Sandstorm / Hail use `playanimation_var`, which has no
+ * pause (`+= 10` skip): those turns already match and are not touched. "The rain stopped." jumps over the `playanimation` and has no hold.
+ */
+export const WEATHER_CONTINUES_OFF_PAUSE_ROWS = 30;
+const WEATHER_CONTINUES_PRINT_IDS = new Set(["STRINGID_SUNLIGHTSTRONG", "STRINGID_RAINCONTINUES", "STRINGID_DOWNPOURCONTINUES"]);
+const WEATHER_CONTINUES_PLAYANIMATION_IDS = new Set(["B_ANIM_RAIN_CONTINUES", "B_ANIM_SUN_CONTINUES"]);
+function weatherContinuesOffPauseRows(event: BattleKernelSemanticEvent): number {
+  const payload = event.payload;
+  if (payload.kind !== "message") return 0;
+  if (!WEATHER_CONTINUES_PRINT_IDS.has(payload.messageId)) return 0;
+  const programCounter = event.provenance?.programCounter;
+  if (programCounter === undefined) return 0;
+  let at = programCounter + 1;
+  let skipped = 0;
+  while (BATTLE_SCRIPT_PROGRAM.instructions[at]?.opcodeName === "B_SCR_OP_WAITMESSAGE" || BATTLE_SCRIPT_PROGRAM.instructions[at]?.opcodeName === "B_SCR_OP_JUMPIFBYTE") {
+    if (BATTLE_SCRIPT_PROGRAM.instructions[at]!.opcodeName === "B_SCR_OP_JUMPIFBYTE") skipped += 1;
+    at += 1;
+  }
+  const instruction = BATTLE_SCRIPT_PROGRAM.instructions[at];
+  if (instruction?.opcodeName !== "B_SCR_OP_PLAYANIMATION" || !instruction.operands.some((operand) => WEATHER_CONTINUES_PLAYANIMATION_IDS.has(operand.expression))) return 0;
+  return WEATHER_CONTINUES_OFF_PAUSE_ROWS + skipped;
+}
 /** trp1: the animType operand of the `playanimation` right before the print at `messageIndex` (null when the print does not follow one). */
 function playanimationBeforePrint(events: readonly BattleKernelSemanticEvent[], messageIndex: number): string | null {
   const programCounter = events[messageIndex]!.provenance?.programCounter;
@@ -6298,6 +6328,10 @@ export function projectBattleResolutionCommands(
                 if (event.provenance?.sourceLabel === "BattleScript_PresentHealTarget" && actionSnapshot?.currentMove === MOVE_REST
                   && (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) === 0) {
                   return Object.freeze({ minimumFrames: timing.minimumFrames, holdFrames: timing.holdFrames + REST_HEAL_PRINT_TAIL_ROWS });
+                }
+                if ((beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0) {
+                  const weatherPause = weatherContinuesOffPauseRows(event);
+                  if (weatherPause > 0) return Object.freeze({ minimumFrames: timing.minimumFrames, holdFrames: timing.holdFrames + weatherPause });
                 }
                 return payload.messageId === "STRINGID_PKMNKNOCKEDOFF"
                   ? Object.freeze({ minimumFrames: timing.minimumFrames, holdFrames: timing.holdFrames + ITEM_KNOCKOFF_PRINT_TAIL_ROWS })
