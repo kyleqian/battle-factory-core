@@ -2915,6 +2915,8 @@ const TICK_HP_TIMING = Object.freeze({ minimumFrames: 0 } as const);
 const TICK_FAINT_TAIL_FRAMES = 2;
 const WEATHER_TICK_MESSAGE_TAIL_FRAMES = 10;
 const WEATHER_TICK_LAST_TAIL_FRAMES = 4;
+/** ldw2: the weather hit's effectiveness SE (Cmd_effectivenesssound) plays this many rows after its hit-animation command starts (ROM etp3-sandls3-on: command 1158, SE 13 at 1160). */
+const WEATHER_HIT_SE_AFTER_COMMAND_ROWS = 2;
 const WRAP_SECONDARY_TAIL_FRAMES = 7;
 const TURN_DAMAGE_PC = datahpupdatePcAfter("BattleScript_DoTurnDmg");
 const WEATHER_DAMAGE_PC = datahpupdatePcAfter("BattleScript_DamagingWeatherLoop");
@@ -2986,6 +2988,18 @@ function applyHpHitTails(
     if (leads.tick === "weather") {
       const tailFrames = rest[0]?.type === "message" ? WEATHER_TICK_MESSAGE_TAIL_FRAMES : WEATHER_TICK_LAST_TAIL_FRAMES;
       commands[index] = Object.freeze({ ...command, timing: Object.freeze({ minimumFrames: 0, tailFrames }) });
+      const weatherDrain = rest[0];
+      const weatherHit = commands[index - 1];
+      if (weatherDrain?.type === "general-animation" && weatherDrain.animation === "LEECH_SEED_DRAIN" && weatherDrain.animated === true && weatherDrain.afterPlayerSendIn !== true
+        && weatherHit?.type === "hit-animation" && weatherHit.battler === command.battler && leads.barRows > 0) {
+        const gate = seg127StatusSeGateRows({
+          songId: leads.pendingSeSong,
+          seAgeRows: weatherHit.timing.minimumFrames - WEATHER_HIT_SE_AFTER_COMMAND_ROWS + leads.barRows + tailFrames + LEECH_SEED_DRAIN_LEGACY_LAG + 2,
+        });
+        const at = commands.indexOf(weatherDrain);
+        const lag = (weatherDrain.timing.launchLagFrames ?? LEECH_SEED_DRAIN_LEGACY_LAG + 2) + gate;
+        commands[at] = Object.freeze({ ...weatherDrain, timing: Object.freeze({ minimumFrames: weatherDrain.timing.minimumFrames + gate, launchLagFrames: lag }) });
+      }
       continue;
     }
     const recoilPrevious = commands[index - 1];
