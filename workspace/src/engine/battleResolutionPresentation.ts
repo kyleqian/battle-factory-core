@@ -1681,6 +1681,13 @@ function endTurnChainLeadRows(events: readonly BattleKernelSemanticEvent[], inde
   return 0;
 }
 
+/**
+ * ohr2 (Scene OFF; ROM T2 s830 / s1415 / s2230 / s5063 / s6079 / s7682, 14 turn-opening asleep windows): the next action's first used print after a
+ * turn-opening "is fast asleep!" print (print -> MoveEnd receipt -> HitFromAtkString / StatUpAfterAtkCanceler printstring) is 3 rows earlier than the
+ * rule's count (ROM print 8 -> next print 111 / 108 / 113 for u = 6 / 3 / 8 against the engine's 114 / 111 / 116): the asleep script's `statusanimation`
+ * row is skipped in Scene OFF.
+ */
+const ASLEEP_ANCHOR_SCENE_OFF_ROWS = -3;
 const ACTION_TRANSITION_WAIT_ROWS: Readonly<Record<string, number>> = Object.freeze({ B_WAIT_TIME_LONG: WAITMESSAGE_LONG_HOLD_FRAMES });
 
 /**
@@ -1767,6 +1774,7 @@ function actionTransitionPauseFrames(
   }
   if (anchor === null) return null;
   let anchorExecution = anchor.provenance!.instructionExecution;
+  let anchorRows = 0;
   if (anchor.payload.kind === "animation" || anchor.payload.kind === "status-animation") anchorExecution += 1;
   if (anchor.payload.kind === "message") {
     if (anchor.payload.messageId === "STRINGID_USEDMOVE") return null;
@@ -1780,6 +1788,7 @@ function actionTransitionPauseFrames(
         : undefined;
       if (wait === undefined) return null;
       anchorExecution += wait;
+      if (!sceneOn && anchor.payload.messageId === "STRINGID_PKMNFASTASLEEP") anchorRows = ASLEEP_ANCHOR_SCENE_OFF_ROWS;
     }
   }
   let presented = 0;
@@ -1792,7 +1801,7 @@ function actionTransitionPauseFrames(
   }
   // sta3 (aud242g dreameater, ROM): before a pre-move print the status icon's second controller row (production presents one frame) is one more row.
   const iconSecondRow = anchor.payload.kind === "status-icon-update" && usedIsPreMove ? 1 : 0;
-  const frames = e1 - anchorExecution - 1 + ACTION_TRANSITION_ROWS + used - presented - statusFramesAfter + iconSecondRow + inLoveRows + endTurnRows;
+  const frames = e1 - anchorExecution - 1 + ACTION_TRANSITION_ROWS + used - presented - statusFramesAfter + iconSecondRow + inLoveRows + endTurnRows + anchorRows;
   return frames > 0 ? { frames, rowsToReceipt: e1 - anchorExecution - 1 - presented } : null;
 }
 
@@ -6764,11 +6773,13 @@ export function projectBattleResolutionCommands(
       const battler = singlesBattler(payload.battler, "status change");
       pendingStatusMessageBattler = battler;
       // fnt201: BattleScript_Faint* `cleareffectsonfaint` -> `printstring` is one instruction row in both scenes (no animation).
-      const sceneOffStatus = (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0
-        || event.provenance?.opcodeName === "B_SCR_OP_CLEAREFFECTSONFAINT"
-        ? sceneOffStatusFrames(events, index, pauseOpenerIndex, commands.length - pauseOpenerCommands)
-        : index === 0 && wakeUpPrintExecution(events, index) !== null
-          ? Math.max(0, wakeUpPrintExecution(events, index)! - TURN_START_PRINT_BASE_U)
+      // ohr2: a turn-opening wake-up's print is the ROM row 6 + u in both scenes (OFF s5063 / s7682 / s1415: 9 / 10 / 12 for u = 3 / 4 / 6).
+      const openingWakeUpPrint = index === 0 ? wakeUpPrintExecution(events, index) : null;
+      const sceneOffStatus = openingWakeUpPrint !== null
+        ? Math.max(0, openingWakeUpPrint - TURN_START_PRINT_BASE_U)
+        : (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0
+          || event.provenance?.opcodeName === "B_SCR_OP_CLEAREFFECTSONFAINT"
+          ? sceneOffStatusFrames(events, index, pauseOpenerIndex, commands.length - pauseOpenerCommands)
           : sceneOnStatusFrames(events, index);
       commands.push(Object.freeze({
         type: "status",
@@ -7590,6 +7601,17 @@ function turnOpensWithAsleepPrint(state: BattleResolutionPresentationState): boo
   const first = events.find((event) => event.payload.kind !== "set-battler-status-data");
   return first?.payload.kind === "message" && first.payload.messageId === "STRINGID_PKMNFASTASLEEP";
 }
+/**
+ * ohr2 (Scene OFF; ROM T2 s830 / s1415 / s2230 / s5063 / s6079 / s7682): the asleep print `BattleScript_MoveUsedIsAsleep` is the `printstring` row at
+ * commit + 6 + u, u = its instructionExecution (attackcanceler is the effect script's row u - 1: 2 / 3 / 5 after Earthquake / Hit / SpeedDownHit, ROM print
+ * rows 8 / 9 / 11). The walk's `before-turn` end puts the status command + print on row 7 for every u, so the print waits u - 1 rows.
+ */
+function turnOpensWithAsleepPrintHold(state: BattleResolutionPresentationState): number {
+  if (!sceneOffOf(state) || !turnOpensWithAsleepPrint(state)) return 0;
+  const first = state.segments[0]!.events.find((event) => event.payload.kind !== "set-battler-status-data");
+  const u = first?.provenance?.instructionExecution;
+  return u === undefined || u < USED_MOVE_LEAD_MIN_U || u > USED_MOVE_LEAD_MAX_U ? 0 : u - 1;
+}
 function sceneOffOf(state: BattleResolutionPresentationState): boolean {
   return ((state.segments[0]?.beforeRules.rulesContext.hitMarker ?? 0) & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0;
 }
@@ -7704,6 +7726,17 @@ export function advanceBattleResolutionConfirmHandoff(
   }
   if (handoff.stage === "action-dispatch") {
     const hold = handoff.usedMoveLeadHold ?? Math.max(0, usedMovePrintLeadAdjust(state, handoff));
+    if (hold > 0) {
+      return Object.freeze({
+        ...state,
+        lifecycle: Object.freeze({ phase: "confirm-handoff" as const, phaseElapsed: 0 }),
+        confirmHandoff: Object.freeze({ ...handoff, usedMoveLeadHold: hold - 1 }),
+        fadeTick: state.fadeTick + 1,
+      });
+    }
+  }
+  if (handoff.stage === "before-turn" && handoff.forced === undefined && handoff.focusPunchPrePass !== true) {
+    const hold = handoff.usedMoveLeadHold ?? turnOpensWithAsleepPrintHold(state);
     if (hold > 0) {
       return Object.freeze({
         ...state,
