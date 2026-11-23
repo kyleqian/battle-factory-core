@@ -5,6 +5,14 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 2026-11-23 — rcv1 (worker, main/ts lane): restore-HP body tails re-fit to the ROM print row (ON); Scene OFF hit -> Leech Seed drain 35 rows
+
+- **State:** master, no push; ac70e23a3 (Recover 6 / Soft-Boiled 5 / Milk Drink 6 / Moonlight 4 tails; print +19 / +5 / +21 / +4 -> 0), e66ff81e6 (Synthesis 7, six etp3-*ls2 labs), 492d78b67 (OFF drain: hit hp tail 15 + drain 35; OFF Leech Seed labs +9 / -6 -> 0). T2 ON 9,441 -> 9,241, OFF 786 -> 782; census 0..199 eventsDigest identical both scenes; typecheck, test:gate 2,839, build green.
+- **Did:** the +19 was the restore body's tail overshoot, not the hp -> print hold; OFF drain is 35 rows from Pausex20 after a hit and the OFF hit hp command needed the ON 15-row tail for long bars. See the rcv1 section of docs/aud251-s11-scoreboard-refresh.md.
+- **Next:** Slack Off (print -91) / Morning Sun (+94) have no live body adapter; faint box press-ready frame (OFF s6568 d104) needs a one-frame ROM press scan; 5 pre-existing failures in liveNext5MoveAdapters / liveAnchorMoveAdapters.
+
+---
+
 ## 2026-11-22 — sep1 (worker, main/ts lane): Scene ON Leech Seed drain follows the IsBattleSEPlaying gate (hit SE end) and runs 7 + 2 rows after a print; T2 ON 10,051 -> 9,939, OFF 861 unchanged
 
 - **State:** master, no push; commits 219676c82 (hit -> drain tail 15 + SE-gated launch lag), 985f3464b (pin), 17354087d (drain after a print +2, new lab etp3-recoverls4). Labs: etp1-leechseedc-on ON mass 80 -> 0, every other Leech Seed / hie1 / shb1 lab unchanged; census 0..199 eventsDigest identical both scenes (ON sound rows only); typecheck, test:gate 360 files / 2,839 tests, build green; 158 importing test files + soak + lbrd green, no re-pin.
