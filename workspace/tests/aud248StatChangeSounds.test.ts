@@ -38,13 +38,14 @@ function ourStatSes(rom: Fixture, scene: "on" | "off"): SoundEvent[] {
 // ROM frame minus our frame, per fixture window (null = we emit no stat SE there). The stat-change command starts after the move body, whose
 // presentation length is not yet ROM-exact in these windows (the clock K = STATS_CHANGE_SE_AGE is exact in the ROM-aligned census seeds, docs/aud248-s11-scoreboard.md);
 // the metalclaw / steelwing / silverwind / ancientpower rows come from a move's secondary effect that our presentation does not run as a stats-change command (named gap).
+// ztl1: the S-lead bodies' stat SE age shift (+2: the stats-change command starts 2 rows later than the generic age assumed): agility / swordsdance / metalsound / sweetscent / scaryface / smokescreen -2 -> 0 (ROM rows: the aud242 lab fixtures' StatChangeAnimation SEs).
 // A list: one residual per stat SE row (the aud242o five-turn Rollout window and the aud242q five-turn Ice Ball window, whose turn starts drift, docs/aud242-move-anim-sounds.md sections 19.2 and 21.2).
 const RESIDUAL: Record<string, number | number[] | null> = {
-  "aud242a-agility-player.json": -2, "aud242a-swordsdance-opponent.json": -2, "aud242c-cosmicpower-player.json": 0, "aud242c-flatter-player.json": 0,
-  "aud242c-metalsound-opponent.json": -2, "aud242c-superpower-player.json": 10, "aud242c-sweetscent-player.json": -2, "aud242d-calmmind-player.json": 0,
+  "aud242a-agility-player.json": 0, "aud242a-swordsdance-opponent.json": 0, "aud242c-cosmicpower-player.json": 0, "aud242c-flatter-player.json": 0,
+  "aud242c-metalsound-opponent.json": 0, "aud242c-superpower-player.json": 10, "aud242c-sweetscent-player.json": 0, "aud242d-calmmind-player.json": 0,
   "aud242d-metalclaw-player.json": null, "aud242d-steelwing-player.json": null, "aud242e-overheat-player.json": 7, /* lfx1: Overheat joined the lead3 shape-A class (lead 5 + tail 3 = +8): ROM 393, ours 376 -> 384 */ "aud242f-growth-player.json": -2, /* hit1: Growth's body now ends with Cmd_end's SE_M_TAKE_DOWN wait (+20, idle94 trail 19 + 1) and the trail -1 post / script-tail rows: ROM 148, ours 125 -> 150, the -2 of the other stat bodies (hcr2b) */ "aud242f-swagger-player.json": 0,
   "aud242j-silverwind-player.json": null,
-  "aud242k-ancientpower-player.json": null, "aud242o-rollout5-player.json": [0, 0, 0, -2, -3], "aud242k-scaryface-player.json": -2, /* kse1: the body ends with its SE_M_STRING_SHOT2 wait (+14, ROM 278, ours 280) */ "aud242k-smokescreen-player.json": -2,
+  "aud242k-ancientpower-player.json": null, "aud242o-rollout5-player.json": [0, 0, 0, -2, -3], "aud242k-scaryface-player.json": 0, /* kse1: the body ends with its SE_M_STRING_SHOT2 wait (+14, ROM 278, ours 280) */ "aud242k-smokescreen-player.json": 0,
   "aud242p-flatter-player.json": 0, /* sta5: Flatter / Swagger 5 / 6 -> 0 (body lead + tail landed) */ "aud242q-iceball5-player.json": [0, 0, 0, -3, -5], // hpd5: Ice Ball audited (was 0 / 13 / 25 / 34 / 44 after hpd4, 2 / 7 / 16 / 34 / 57 before; rows 4-5 are the ROM damage rolls 40 / 89 vs the kernel 41 / 82); hpd2: -8 per chained turn (was 2 / 15 / 32 / 58 / 89); hpd4: rollout5 2/8/15/27/48 -> 0/0/0/-2/-3, iceball5 2/7/16/34/57 -> 0/13/25/34/44 (rows 2-3 away, same unaudited Ice Ball body as aud242q)
 };
 

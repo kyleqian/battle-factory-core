@@ -4027,3 +4027,37 @@ Evidence (git-ignored): `.integration/evidence/pmc1/` (`t2-{base,A,C,after}-on`,
 - Wish's window is 1 row short of the ROM (next print -1 after the lab), left because the adapter duration is a pixel-pinned accepted window.
 - Thunderbolt's -1 after the third SE 118 (about 24 T2 mass) has no source row yet.
 - The `BODY_SOUND_LEAD_ROWS` leads are calibrated on one lab side per move (player); an opponent-side lab would confirm them (T2 has both sides in the windows and none got worse).
+
+## ztl1 (2026-11-23): Scene ON zero-tail bodies re-measured; four more S-lead bodies; the stat SE after an S-lead body (T2 ON 7176 -> 7076, OFF 627 unchanged)
+
+Evidence (git-ignored): `.integration/evidence/ztl1/` (`t2-{base,after2}`, `score-*.{txt,json}`, `lab-*` labCompare dirs, `census/`). Commits: `1b9bb9e15` (mechanism 1), `7d2ce220a` (mechanism 2). Labs: `tools/battle-lab/ztl1-*-player-on.json` (tl204's PRIMEAPE vs ONIX, ONIX all Tackle, seed 11, one lab per Factory move that tl204 / the ont193 list left at 0 frames); ROM = `labCompare.sh --scene on` (direct mGBA, per-frame script rows) against `data/battle_anim_scripts.s` and `BattleScript_Effect*`.
+
+**Old tl204 number vs now.** The #167 numbers were stale: tl205 and kse1 had already landed the trail -1 tails. `used -> print` residual (engine - ROM), `Delta` = script tail rows:
+
+| Move | tl204 (old) | tl205 / kse1 | ztl1 re-measured | ROM tail rows | Result |
+|---|---|---|---|---|---|
+| Double Team 104, Rain Dance 240, Sunny Day 241, Hail 258, Leech Seed 73 | -5 / -5 / -6 / -6 / -39 | 0 | 0 | 5 / 4 / 4 / 4 / 4 | landed (tl205) |
+| Scary Face 184 | -19 | 0 (kse1) | 0 | 5 | landed (kse1) |
+| Light Screen 113 | -4 | +2 | +2 | 4 | carried: the live body window is 2 rows longer than the ROM's (`Move_LIGHT_SCREEN` 89 vs 91), pixel-pinned |
+| Calm Mind 347 | -10 | -1 | -1 | 5 | carried: the post-arrow stat is 1 row short (lse2 body) |
+| Charm 204 | -6 | -1 | 0 | 5 | landed: trail 0 (ztl1 1): `used -> print` 217 -> 218 = ROM; labs `ztl1-charm` 1 -> 0, `mechanic-charm-*` SE 245 -1 -> 0 |
+| Fake Tears 313 | -1 | -1 | -1 | 6 | carried: the body window is 4 rows longer than the ROM's (182 vs 178); a true 5-row tail would be +4 (lab SE 245 +6) |
+| Spikes 191 | - (0 frames) | - | 0 | 5 | landed: S-lead, clock lead 6, trail 0; lab 44 -> 14 (the rest is the foe's Tackle with no body adapter) |
+| Foresight 193 | - | - | 0 | 6 | landed: S-lead, clock lead 6, trail -1; lab 24 -> 0 |
+| Destiny Bond 194 | - | - | 0 | 6 | landed: S-lead, trail -1; lab 32 -> 16 (SEs 2 and 3 stay -1, a body-internal gap) |
+| Feather Dance 297 | - | - | 0 | 6 | landed: S-lead, trail 0; lab 8 -> 0 |
+| Psych Up 244 | - | - | 0 (exact first mover) | 6 | held out: lab 74 -> 14 with S-lead + trail -1, but as a second mover in T2 seed 7295 its SEs go -4 -> -9 (+55 mass), so net T2 was -45 with it and -100 without |
+| Cosmic Power 322 | - | - | -1 | - | carried: same post-arrow stat row as Calm Mind (lab mass 15) |
+| Future Sight 248, Razor Wind 13 | - | - | - | - | carried: pmc1's Future Sight (lab 16, the rest is the later Seismic Toss); Razor Wind's second turn is the charge-turn issue (#167 (d)) |
+| Camouflage, Charge, Conversion, Doom Desire, Growl, Kinesis, Lock-On, Meditate, Mind Reader, Mist, Mud Sport, Sharpen, String Shot, Transform, Water Sport, Withdraw | - | - | - | - | carried: none is a Factory L50 move with a live adapter (`factory-animation-inventory.json`), so no body exists to tail; labs measured and not committed |
+
+**Item 2 (the stat-change SE +2 after a status body): source-derived, landed.** `statsChangeSourceAge` gave an S-lead body the generic age, but the stats-change command after an S-lead body starts 2 rows later than that age assumed (ROM: `playanimation` exec + 4). `STATS_CHANGE_AFTER_S_LEAD_BODY_AGE_SHIFT = 2`: labs `aud242k-smokescreen` 2 -> 0, `aud242k-scaryface` SE 245 +2 -> 0, `aud242a-swordsdance` 2 -> 0, `aud242a-agility` 16 -> 14 (the body SEs keep the missing SE), `aud242b-metalsound` 10 -> 8, `aud242b-sweetscent` 3 -> 1; pins `aud248StatChangeSounds` -2 -> 0 for those six. T2 stat-change SE mass 221 -> 162.
+
+**Numbers.** T2 ON (25 seeds): mass 7176 -> 7076 (-100), exact 3464 -> 3490, offset 2413 -> 2387, 0 missing / 0 extra; stat-change SE 221 -> 162, move-animation SE 5676 -> 5641. T2 OFF (24 seeds): 627 -> 627, exact 872 / offset 261 unchanged (byte-identical engine rows). Census seeds 0..199: Scene OFF byte-identical (200 / 200 identical battles), Scene ON eventsDigest + error identical 200 / 200, no type-sequence change; 23 battles change command timing only (Charm, Foresight, Destiny Bond, Feather Dance, Spikes frames); the tree copies were deleted.
+
+**#167 lines.** The first bullet (Scene ON zero-tail live bodies, Double Team .. Scary Face) is closed for Double Team, Rain Dance, Sunny Day, Hail, Leech Seed, Scary Face, Charm (residual 0), Spikes, Foresight, Destiny Bond, Feather Dance; open: Light Screen +2 and Calm Mind / Cosmic Power -1 (body-window rows), Fake Tears (-1, body window +4), Psych Up (second-mover offset). S11 #219's "stat SE +2 after status bodies" line is closed.
+
+**Left.**
+- Psych Up: add 244 to `LEAD4_S_LEAD_MOVE_IDS` / `LIVE_MOVE_SCRIPT_TAIL_TRAIL_ROWS` once the body lead of a second-mover Psych Up (T2 seed 7295, lead about 2) is measured: the S-lead clock formula assumes the first-mover lead of the lab.
+- Light Screen / Fake Tears body windows, Calm Mind / Cosmic Power post-arrow stat row: adapter-window corrections, pixel-pinned.
+- Destiny Bond's body-internal -1 on SEs 2 and 3, and the foe Tackle's missing live body (`ENG has no live body adapter for mv33`) in every lab's tail.
