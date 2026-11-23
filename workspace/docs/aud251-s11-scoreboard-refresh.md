@@ -3840,3 +3840,20 @@ Sum-check: ON 645 + 800 + 439 + 480 + 418 + 324 + 213 + 278 + 260 + 180 = 4,037;
 - A global Leech Seed drain lag or `HP_TIMING.minimumFrames` -> 0 (hpb3: +621); a "4 vs 4 + 6" change for other commands after a weather tick (one T2 window: D only).
 
 Not applied: no `src/` or `tests/` change; PROGRESS / ISSUES / ROADMAP / PAPERCUTS untouched (the step forbids editing them); the one new tool is python only (`winitem.py`); `npm test` / `npm run typecheck` / `npm run build` not run (the step forbids them with other workers' runs in flight; no `.ts` / test touched).
+
+## ptc1: end-of-turn poison / toxic tick start (S11 #219 item 0; t2k8 landing 1 = item B)
+
+Base `6b6053243`, commit `2979d78d5` (`battleResolutionPresentation.ts` only). Presentation timing only: no event / rule / RNG change.
+
+**Rule landed.** The `PoisonTurnDmg` / `BurnTurnDmg` first glyph runs 5 rows after the previous end-turn print (a wore-off print such as Reflect / Light Screen / Mist / Safeguard ends, i.e. the `END_TURN_PRINT_SCRIPTS` labels plus `BattleScript_SafeguardEnds`). The engine started it 5 rows short (ROM 117 / 97 / 117 vs engine 112 / 92 / 112 in the three wore-off windows s499 d20, s3738 d60 and the Safeguard one). `endTurnChainLeadRows` now returns `END_TURN_PRINT_AFTER_PRINT_ROWS = 5` for those two labels when `endTurnPrintFollowsEndTurnPrint` holds. The dependent legs of the same windows move with it: SE 148 -5 x18 -> x12, cry@faint -4 x12 -> x0 (the KO-after-tick cry@faint -4 shares this cause in the wore-off windows). The gsp3 print -> statusanimation rows are unchanged (labs identical).
+
+**Not landed (term left).** The after-MoveEnd tick windows (s499 d19 after a miss, s3738 d59 after "But it failed", s499 d13 after a Confusion self-hit, s499 d2 after a stat-up) are carried offsets: the previous miss / fail print is ~3 rows early and the previous hit / stat SE is -4 / -6, while the tick's own deficit is ~-1. No clean rule; the lab shape (tick after a hit) is exact through the hp tail. So the "3-5 rows early in six windows" is two causes: one clean (landed) and one carried from the previous command (not a rule).
+Also open: weather print after a wore-off (SunlightFaded 97 vs 92) and the Leech Seed drain after it. Applying the +5 to all `END_TURN_PRINT_SCRIPTS` labels regressed one Leech Seed drain animation (SE 142 / 179 / 180: 0 -> +5, 10 rows; the drain gate was compensated by ldw / etp3), so the rule is restricted to the Poison / Burn tick labels. Burn is in the label set by analogy; no T2 wore-off -> burn window exists, so it is unverified. Leftovers / Ingrain / Wish / Leech Seed tick windows are unaffected (labs and T2 windows unchanged).
+
+**Numbers.**
+- Labs (`labCompare.sh`): gsp3-{toxic,willowisp}-{player,foe}-on, etp1 / etp2 poison / burn, fkt1-kotoxic-on, hpf4m-faintpoison-on: identical before -> after on all 11 (OFF poison labs too).
+- T2 ON: mass 8,013 -> 7,884 (-129; expected -130..-200 was the upper bound if the carried windows had fallen out too), exact 3,373 -> 3,382, 0 missing / 0 extra. T2 OFF: 639 -> 633, exact unchanged, 0 / 0.
+- Census 0..199 both scenes: eventsDigest + error identical 200/200 (ON and OFF), type-sequence changes 0 (ON 7 battles with changed commands, OFF 9). tree/ copies deleted.
+- Tests: 15 files (gsp / etp / fkt1 / off121StatusCommand and the importers of the changed constants; no `END_TURN_STATUS_DAMAGE_LEAD_ROWS` / `HP_END_TURN_PRINT_LEAD_ROWS` pin moved), `randomRoundSoak*` 9 files / 120 tests, `lbrd`: green, no re-pin. `npm run typecheck`, `npm run test:gate` (360 files / 2,839 tests), `npm run build`: green. No new test: no ROM-probed lab for wore-off -> poison exists yet (a Reflect / Safeguard + poison lab would pin it).
+
+Evidence: `.integration/evidence/ptc1/` (`lab-base-on`, `lab-after-on`, `t2-after*`, `score-after-{on,off}.*`, `p1/`, `cen/`).
