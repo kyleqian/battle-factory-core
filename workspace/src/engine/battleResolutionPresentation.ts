@@ -2726,6 +2726,10 @@ function hpPrintTailTiming(event: BattleKernelSemanticEvent, events?: readonly B
   const programCounter = event.provenance?.programCounter;
   if (programCounter === undefined) return HP_TIMING;
   const at = (offset: number) => BATTLE_SCRIPT_PROGRAM.instructions[programCounter + offset]?.opcodeName;
+  if (at(0) === "B_SCR_OP_DATAHPUPDATE" && at(-1) === "B_SCR_OP_HEALTHBARUPDATE") {
+    if (at(-2) === "B_SCR_OP_ORWORD" && at(-3) === "B_SCR_OP_WAITANIMATION" && at(-4) === "B_SCR_OP_ATTACKANIMATION" && at(1) === "B_SCR_OP_COPYARRAY") return PAIN_SPLIT_ATTACKER_HP_TIMING;
+    if (at(-2) === "B_SCR_OP_COPYARRAY" && at(-3) === "B_SCR_OP_DATAHPUPDATE" && at(1) === "B_SCR_OP_PRINTSTRING") return PAIN_SPLIT_TARGET_HP_TIMING;
+  }
   return at(0) === "B_SCR_OP_DATAHPUPDATE" && at(1) === "B_SCR_OP_PRINTFROMTABLE" && at(-1) === "B_SCR_OP_HEALTHBARUPDATE"
     && at(-2) === "B_SCR_OP_WAITANIMATION" && at(-3) === "B_SCR_OP_ATTACKANIMATION"
     ? SUBSTITUTE_COST_HP_TIMING
@@ -2734,6 +2738,9 @@ function hpPrintTailTiming(event: BattleKernelSemanticEvent, events?: readonly B
       ? (at(1) === "B_SCR_OP_RETURN" && events !== undefined && index !== undefined && healContinuesMoveScript(events, index)
         ? (shellBellNextUsedPrint(events, index) ?? SHELL_BELL_HP_TIMING) : ITEM_HEAL_HP_TIMING) : HP_TIMING;
 }
+/** swi1: BattleScript_EffectPainSplit's two `healthbarupdate; datahpupdate` runs, ROM exec rows (aud261 labs, s648 d10): the attacker's bar holds bar + 1 + 3 rows to the target's bar, the target's (0 bar) 1 + 6 rows to the printstring's first glyph; no 28 floor. */
+const PAIN_SPLIT_ATTACKER_HP_TIMING = Object.freeze({ minimumFrames: 0, tailFrames: 3 } as const);
+const PAIN_SPLIT_TARGET_HP_TIMING = Object.freeze({ minimumFrames: 0, tailFrames: 6 } as const);
 const shellBellNextUsedTimings = new Map<number, BattleHpTiming>();
 /**
  * shb1: the Shell Bell heal's `datahpupdate; return` falls into the first action's MoveEnd and straight into the next action's used print with no MoveEnd
