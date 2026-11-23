@@ -2110,5 +2110,5 @@ delta tool (now `rst197CensusDelta.py --digest`, plus a WORKTREE arm for uncommi
 - **`labCompare.sh --scene both` on a `-on` lab runs OFF on the same lab** and reports 0 SEs (OFF plays no body SEs); easy to misread (etp3).
 - **A canonical trace without `appRoute` compares 0/N wholesale** and the warning is easy to miss (rmw1 ~15 min: five `battle1-postwin-*` traces were 0/199 for that reason only).
 - **The frame catcher's `compare.py` / `peek.py` need numpy** (run under `/srv/pokebench/vendor/mgba-venv/bin/python`; the error does not say so; lbf1 ~10 min).
-- **`labCompare`'s print aligner mis-pairs rows when prints differ** (hit2 ~10 min); `run-mgba-probe.py` refuses stale outputs and logs (delete both first; hit2 ~5 min).
+- **`labCompare`'s print aligner mis-pairs rows when prints differ** (hit2 ~10 min). (`run-mgba-probe.py --force`, `t2k4/probe.sh --force` / `cmd.sh` worktree paths and the scoreboard's empty-scene table: fixed by cln14.)
 - **Probe fixtures recorded in hybrid mode fail `tests/audioProbeFixtures.test.ts`** (expects step mode + a fixed list; hit2's two fixtures, not in the gate; supervisor re-recorded them in step mode).
