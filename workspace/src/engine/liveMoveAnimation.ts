@@ -1520,7 +1520,7 @@ function liveMoveAnimationDurationOf(
     // windows start 35/31 (AA) and 37/33 (QA) rows earlier with idle body rows owned by the queue's `message` command.
     case 332: return 50; // Aerial Ace: activation..first inactive row (81..130 / 77..126); the later hit/HP/text rows are queue commands.
     case 98: return 33; // Quick Attack (83..115 / 79..111).
-    case 313: return 87; // Fake Tears 80..166 / 76..162: the first displayed row is one after activation (row -1, no shadow row), 83 script + 4 clear rows.
+    case 313: return 84; // bwf1: Fake Tears = 83 ROM script rows (A active) + the first inactive row; was 87 (4 clear rows) before the S-lead / trail -1 rule.
     // Sleep Talk accepted windows start at activation and end at the first inactive script row (1356..1541 / 4570..4758).
     case 214: return request.attacker === 0 ? 186 : 189;
     // Rock Slide: activation..first inactive script row (1967..2104); the 37 later accepted rows are the target hit flash
