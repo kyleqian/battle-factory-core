@@ -2595,14 +2595,17 @@ function chargeTurnSoundLead(events: readonly BattleKernelSemanticEvent[], index
  */
 const MOVE_REST = 156;
 const REST_SOUND_LEAD_ROWS = -2;
-/** pmc1: Wish (273) is the opposite case: its script starts 2 rows after the release (L = 2; the clock's 7-row calibration runs 5 rows late: aud242k-wish-player-on, SE_M_REFLECT 91 / 96, every Wish SE +5; T2 one window x 4 SEs +5). */
-const MOVE_WISH = 273;
-const WISH_SOUND_LEAD_ROWS = 5;
+/**
+ * pmc1: the opposite case, bodies whose script lead L is shorter than the clock's 7 (soundAgeLeadFrames = 7 - L; every SE of the body late by the same rows in the ROM labs and T2):
+ * Wish 273 +5 (aud242k-wish-player-on, SE_M_REFLECT 91 / 96), Future Sight 248 +5 (etp1-futuresight-on), Soft Boiled 135 +5 (aud242r-softboiled-player-on),
+ * Belly Drum 187 +4 (species-audit-golem-prep5-belly-drum-player), Mean Look 212 +3 (species-audit-golbat-prep4-mean-look-player), Swagger 207 +3 (aud242f-swagger-player-on).
+ */
+const BODY_SOUND_LEAD_ROWS: ReadonlyMap<number, number> = new Map([[273, 5], [248, 5], [135, 5], [187, 4], [212, 3], [207, 3]]);
 const REST_HEAL_PRINT_TAIL_ROWS = 10;
 function bdt1BodySoundLead(events: readonly BattleKernelSemanticEvent[], index: number, moveId: number): { soundAgeLeadFrames?: number } {
   if (events[index]!.provenance?.sourceLabel === CHARGE_TURN_SCRIPT) return chargeTurnSoundLead(events, index);
-  if (moveId === MOVE_REST) return { soundAgeLeadFrames: REST_SOUND_LEAD_ROWS };
-  return moveId === MOVE_WISH ? { soundAgeLeadFrames: WISH_SOUND_LEAD_ROWS } : {};
+  const lead = moveId === MOVE_REST ? REST_SOUND_LEAD_ROWS : BODY_SOUND_LEAD_ROWS.get(moveId);
+  return lead === undefined ? {} : { soundAgeLeadFrames: lead };
 }
 const SCRIPT_TAIL_BETWEEN_OPCODES: ReadonlySet<string> = new Set(["B_SCR_OP_WAITANIMATION", "B_SCR_OP_SETBYTE", "B_SCR_OP_SETGRAPHICALSTATCHANGEVALUES"]);
 // lse4: the first-charging-turn script (orword HITMARKER_CHARGING, setbyte, seteffectprimary, copyarray) between the animation and its print.
