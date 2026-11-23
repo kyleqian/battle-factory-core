@@ -1112,6 +1112,12 @@ export const WAITMESSAGE_LONG_HOLD_FRAMES = 64;
  */
 const SELF_CONFUSION_HIT_MESSAGE_ID = "STRINGID_ITHURTCONFUSION";
 const SELF_CONFUSION_OFF_PRE_PRINT_ROWS = 5;
+/**
+ * ftp1 item 4: BattleScript_EffectFocusPunch's printstring (STRINGID_PKMNLOSTFOCUS) starts its first glyph 16 rows after the engine's
+ * command start (s310 d3, after a not-very-effective print: ROM +0xa print at 560 against 544; the held-item SE 152 -17 -> -1).
+ */
+const FOCUS_PUNCH_LOST_FOCUS_SCRIPT = "BattleScript_EffectFocusPunch";
+const FOCUS_PUNCH_LOST_FOCUS_PRE_PRINT_ROWS = 16;
 const SELF_CONFUSION_OFF_HIT_MESSAGE_TIMING = Object.freeze({ minimumFrames: 0, holdFrames: WAITMESSAGE_LONG_HOLD_FRAMES + 2 } as const);
 /**
  * hse2 (docs/aud251-s11-scoreboard-refresh.md "hse2"; ROM lab hpf4m-confuse-off print 1323 -> used print 1417 = 94, T2 s7295 d5 97 / s499 d11 94):
@@ -1302,7 +1308,7 @@ function messageTimingFromSourceProvenance(
 ): BattleMessageTiming | null {
   const programCounter = event.provenance?.programCounter;
   if (programCounter === undefined || programCounter < 0) return null;
-  if (event.provenance?.sourceLabel === WAKE_UP_SCRIPT) return WAKE_UP_MESSAGE_TIMING;
+  if (event.provenance?.sourceLabel === WAKE_UP_SCRIPT || event.provenance?.sourceLabel === THAW_SCRIPT) return WAKE_UP_MESSAGE_TIMING;
   const following = BATTLE_SCRIPT_PROGRAM.instructions[programCounter + 1];
   if (
     following?.opcodeName === "B_SCR_OP_WAITMESSAGE"
@@ -1524,7 +1530,7 @@ const END_TURN_WEATHER_PRINT_EXTRA_ROWS = 1;
  */
 const DAMAGING_WEATHER_LOOP_SCRIPT = "BattleScript_DamagingWeatherLoop";
 const DAMAGING_WEATHER_LOOP_AFTER_HP_ROWS = 3;
-// Wish's heal print after its hp command (ROM lab etp1-wish: +5 rows, both scenes). Perish Song's counts are left as before: the etp1-perish lab agrees with a label +1 / second-battler +5 rule, but seed 2741's ROM pictures (ais2) do not.
+// Wish's heal print after its hp command (ROM lab etp1-wish: +5 rows, both scenes). Perish Song's count prints: `perishCountChainLeadRows` (pso1).
 const WISH_SCRIPT = "BattleScript_WishComesTrue";
 const END_TURN_NEXT_SCRIPT_ROWS = 5;
 /**
@@ -1542,11 +1548,42 @@ function endTurnPrintFollowsDraggedOut(events: readonly BattleKernelSemanticEven
   return false;
 }
 
+/**
+ * pso1 (ROM labs etk1-perish-*, Scene OFF rows, hcr3mProbe): the rows from the previous script's release to the Perish Song count print's first
+ * glyph that the engine does not present. After a move's last print (the Splash "But nothing happened!" lab): release 368 -> MoveEnd -> PerishSongCountGoesDown+0x3 ex1 378 -> glyph 379
+ * (10 rows more than the engine's one MoveEnd receipt row; seed 2741's ROM rows after a paralysis print 5 more, after "But it failed!" 12 more). After the Perish Song cast's own print (`waitmessage 64`; PerishSongLoop x4 batters, MoveEnd, the end-turn step): release
+ * +0x10 3857 -> PerishSongTakesLife+0x3 3874 -> glyph 3875 (17 rows more). The second battler's count print follows the first's `waitmessage` by end2, the turn-effect
+ * battler increment and the next iteration: 475 -> 479 (5 rows more).
+ */
+const PERISH_AFTER_MOVE_PRINT_ROWS = 10;
+const PERISH_AFTER_CAST_PRINT_ROWS = 17;
+const PERISH_SECOND_BATTLER_ROWS = 5;
+const PERISH_AFTER_PARALYSIS_PRINT_ROWS = 5;
+const PERISH_AFTER_BUT_IT_FAILED_ROWS = 12;
+function perishCountChainLeadRows(events: readonly BattleKernelSemanticEvent[], index: number): number {
+  const event = events[index]!;
+  const label = event.provenance?.sourceLabel;
+  if (event.payload.kind !== "message" || (label !== "BattleScript_PerishSongCountGoesDown" && label !== "BattleScript_PerishSongTakesLife")) return 0;
+  for (let back = index - 1; back >= 0; back -= 1) {
+    const previous = events[back]!;
+    if (previous.payload.kind === "set-battler-sprite-visibility" && previous.provenance?.opcodeName === "B_SCR_OP_MOVEEND") continue;
+    if (previous.payload.kind !== "message") return 0;
+    const previousLabel = previous.provenance?.sourceLabel;
+    if (previousLabel === "BattleScript_PerishSongCountGoesDown" || previousLabel === "BattleScript_PerishSongTakesLife") return PERISH_SECOND_BATTLER_ROWS;
+    if (previous.payload.messageId === "STRINGID_FAINTINTHREE") return PERISH_AFTER_CAST_PRINT_ROWS;
+    if (previous.payload.messageId === "STRINGID_PKMNISPARALYZED") return PERISH_AFTER_PARALYSIS_PRINT_ROWS;
+    return previous.payload.messageId === "STRINGID_BUTITFAILED" ? PERISH_AFTER_BUT_IT_FAILED_ROWS : PERISH_AFTER_MOVE_PRINT_ROWS;
+  }
+  return 0;
+}
+
 function endTurnChainLeadRows(events: readonly BattleKernelSemanticEvent[], index: number, sceneOn: boolean): number {
   const event = events[index]!;
   const executed = event.provenance?.instructionExecution;
   if (event.payload.kind !== "message" || executed === undefined) return 0;
   const label = event.provenance?.sourceLabel;
+  const perishLead = perishCountChainLeadRows(events, index);
+  if (perishLead > 0) return perishLead;
   if (label === WISH_SCRIPT) {
     const previous = events[index - 1];
     return previous?.payload.kind === "hp-change" && previous.provenance?.sourceLabel === label && event.payload.messageId === "STRINGID_PKMNREGAINEDHEALTH"
@@ -2020,6 +2057,8 @@ function sceneOffStatusFrames(
  * draws nothing in Scene ON (no status animation follows).
  */
 const WAKE_UP_SCRIPT = "BattleScript_MoveUsedWokeUp";
+/** ftp1: `BattleScript_MoveUsedUnfroze` is the wake-up script without the `bicword`: print, `waitmessage B_WAIT_TIME_LONG`, `updatestatusicon`, `return` (ROM print -> icon 91 = the wake-up's hold + 2). */
+const THAW_SCRIPT = "BattleScript_MoveUsedUnfroze";
 /** The wake-up print's instructionExecution when `events[statusIndex]` is attackcanceler's sleep-clearing status write, else null. */
 function wakeUpPrintExecution(events: readonly BattleKernelSemanticEvent[], statusIndex: number): number | null {
   const status = events[statusIndex]!;
@@ -2054,7 +2093,7 @@ const WAKE_UP_MESSAGE_TIMING = Object.freeze({
  */
 function wakeUpStatusIconFrames(events: readonly BattleKernelSemanticEvent[], iconIndex: number): number | null {
   const icon = events[iconIndex]!;
-  if (icon.provenance?.sourceLabel !== WAKE_UP_SCRIPT || icon.payload.kind !== "status-icon-update") return null;
+  if ((icon.provenance?.sourceLabel !== WAKE_UP_SCRIPT && icon.provenance?.sourceLabel !== THAW_SCRIPT) || icon.payload.kind !== "status-icon-update") return null;
   const next = events[iconIndex + 1];
   const from = icon.provenance.instructionExecution;
   const to = next?.provenance?.instructionExecution;
@@ -2062,6 +2101,23 @@ function wakeUpStatusIconFrames(events: readonly BattleKernelSemanticEvent[], ic
   return to - from + 1;
 }
 
+/**
+ * ftp1: attackcanceler's natural thaw (the status write, then `BattleScript_MoveUsedUnfroze` = printfromtable, waitmessage,
+ * updatestatusicon with no pre-hold and no status animation) prints one row after the write in both scenes (off121: thaw 1), so the
+ * Scene ON status command lasts delta(print) - delta(status) instead of the 32-frame status pause. Returns the thaw print's
+ * instructionExecution, else null.
+ */
+function thawPrintExecution(events: readonly BattleKernelSemanticEvent[], statusIndex: number): number | null {
+  const status = events[statusIndex]!;
+  if (status.payload.kind !== "set-battler-status-data" || status.provenance?.opcodeName !== "B_SCR_OP_ATTACKCANCELER") return null;
+  for (let index = statusIndex + 1; index < events.length; index += 1) {
+    const payload = events[index]!.payload;
+    if (payload.kind === "set-battler-pp-data" || payload.kind === "play-se") continue;
+    if (payload.kind !== "message" || (payload.messageId !== "STRINGID_PKMNWASDEFROSTED2" && payload.messageId !== "STRINGID_PKMNWASDEFROSTEDBY")) return null;
+    return events[index]!.provenance?.instructionExecution ?? null;
+  }
+  return null;
+}
 /**
  * sa125 SA3 (docs/sa125-status-animation-command.md): in Scene ON a status-data receipt whose battler's statusanimation runs
  * in the same execution -- right before the print (move / ability infliction: status, statusanimation, print) or right
@@ -2077,6 +2133,8 @@ function sceneOnStatusFrames(events: readonly BattleKernelSemanticEvent[], statu
   const battler = statusEvent.payload.battler;
   const wakeUpPrint = wakeUpPrintExecution(events, statusIndex);
   if (wakeUpPrint !== null) return wakeUpPrint - status;
+  const thawPrint = thawPrintExecution(events, statusIndex);
+  if (thawPrint !== null) return thawPrint - status;
   let print: number | null = null;
   let animated = false;
   let execution = status;
@@ -2376,17 +2434,29 @@ function moveAnimationScriptLeadTiming(
 const TWO_TURN_MOVES: ReadonlySet<number> = new Set([13, 19, 76, 91, 130, 143, 291, 340]);
 const TWO_TURN_SECOND_PRINT_PRESS_ROWS = 6;
 const TWO_TURN_PLAYER_NO_PRESS_ROWS = 10;
+/**
+ * ftp1 (s8108 d12 gen:219 +48 once cfs1's Levitate hold landed): a second-turn used print right after the "snapped out of its confusion" print
+ * (`BattleScript_MoveUsedIsConfusedNoMore`, a separate presented command with its own hold) carries that script's wait rows in its instruction
+ * execution (3 -> 78), which the lead above would count again (lead 84 against the ROM's 35: used glyph row 285 = ROM 285 after the change, the
+ * Levitate print and the weather tick -1). The rows past the confusion print's execution that the lead does not owe are measured at 46 (one window).
+ */
+const CONFUSION_ENDED_SCRIPT = "BattleScript_MoveUsedIsConfusedNoMore";
+const TWO_TURN_AFTER_CONFUSION_PRINT_ROWS = 46;
 function twoTurnSecondPrintLead(
   event: BattleKernelSemanticEvent,
   beforeRules: BattleScriptRulesContext,
   actionSnapshot: BattleScriptActionMessageSnapshot | null | undefined,
+  previous?: BattleKernelSemanticEvent,
 ): { leadFrames: number } | null {
   const currentMove = actionSnapshot?.currentMove;
   if (currentMove === undefined || !TWO_TURN_MOVES.has(currentMove) || (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0) return null;
   if (event.payload.kind !== "message" || event.payload.messageId !== "STRINGID_USEDMOVE"
     || (event.provenance?.sourceLabel !== "BattleScript_HitFromAtkString" && event.provenance?.sourceLabel !== "BattleScript_HitFromAccCheck")) return null;
   if ((beforeRules.battlers[actionSnapshot!.attacker]!.status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_MULTIPLETURNS) === 0) return null;
-  return { leadFrames: TWO_TURN_SECOND_PRINT_PRESS_ROWS - (actionSnapshot!.attacker === 0 ? TWO_TURN_PLAYER_NO_PRESS_ROWS : 0) + event.provenance.instructionExecution };
+  const exec = event.provenance.instructionExecution;
+  const afterConfusionPrint = previous?.payload.kind === "message" && previous.provenance?.sourceLabel === CONFUSION_ENDED_SCRIPT && previous.provenance.instructionExecution !== undefined
+    ? previous.provenance.instructionExecution + TWO_TURN_AFTER_CONFUSION_PRINT_ROWS : 0;
+  return { leadFrames: TWO_TURN_SECOND_PRINT_PRESS_ROWS - (actionSnapshot!.attacker === 0 ? TWO_TURN_PLAYER_NO_PRESS_ROWS : 0) + exec - afterConfusionPrint };
 }
 /**
  * chg2 (Scene ON; generalizes bdt1's Dig value): a charge-turn body (BattleScriptFirstChargingTurn) plays its sounds on the ROM's own script rows, but the
@@ -6116,8 +6186,9 @@ export function projectBattleResolutionCommands(
         ),
         advance: "automatic",
         ...(selfConfusionOff ? { leadFrames: SELF_CONFUSION_OFF_PRE_PRINT_ROWS } : {}),
-        ...(twoTurnSecondPrintLead(event, beforeRules, actionSnapshot) ?? {}),
-        ...(carryBeforeGlyph > 0 ? { leadFrames: (twoTurnSecondPrintLead(event, beforeRules, actionSnapshot)?.leadFrames ?? 0) + carryBeforeGlyph } : {}),
+        ...(event.provenance?.sourceLabel === FOCUS_PUNCH_LOST_FOCUS_SCRIPT ? { leadFrames: FOCUS_PUNCH_LOST_FOCUS_PRE_PRINT_ROWS } : {}),
+        ...(twoTurnSecondPrintLead(event, beforeRules, actionSnapshot, events[index - 1]) ?? {}),
+        ...(carryBeforeGlyph > 0 ? { leadFrames: (twoTurnSecondPrintLead(event, beforeRules, actionSnapshot, events[index - 1])?.leadFrames ?? 0) + carryBeforeGlyph } : {}),
         ...(endTurnChainLeadRows(events, index, (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) === 0) > 0
           ? { leadFrames: endTurnChainLeadRows(events, index, (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) === 0) } : {}),
         ...(payload.messageId === "STRINGID_TARGETFAINTED"

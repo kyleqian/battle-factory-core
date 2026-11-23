@@ -24,7 +24,7 @@ const { APP_STAGES, labBackedStage } = (await import("../compare/appTrace.ts")) 
 let state: any = createInitialState({ appRoute: "generated-orchestrator", battleScene: scene });
 const ownScene = scene === (lab.profile === "battle-scene-on" ? "on" : "off");
 state = APP_STAGES[name] !== undefined && ownScene ? APP_STAGES[name](state)
-  : labBackedStage(`${name}.json`, state, process.env.ENGINE_RNG_SEED === undefined ? undefined : Number(process.env.ENGINE_RNG_SEED), scene);
+  : labBackedStage(`${name}.json`, state, process.env.ENGINE_RNG_SEED === undefined ? undefined : Number(process.env.ENGINE_RNG_SEED), scene, true);
 const cmds: unknown[][] = []; const se: unknown[][] = []; const sounds: unknown[][] = []; const noBody: number[][] = []; let last = "";
 let age0: number | null = null;
 const frames = lab.trace.segments.reduce((n: number, s: any) => n + s.frames, 0);
@@ -42,7 +42,7 @@ for (const advance of traceAdvances(lab.trace.segments)) {
   if (key !== last) {
     last = key;
     age0 = null;
-    if (key !== "") cmds.push([state.frame, res.segmentIndex, res.commandIndex, cmd.type, cmd.battler ?? null, cmd.animation?.moveId ?? cmd.animation ?? null, cmd.timing ?? null, null]);
+    if (key !== "") cmds.push([state.frame, res.segmentIndex, res.commandIndex, cmd.type, cmd.battler ?? null, cmd.animation?.moveId ?? cmd.animation ?? null, cmd.type === "message" && cmd.leadFrames ? { ...cmd.timing, msgLead: cmd.leadFrames } : cmd.timing ?? null, null]);
     if (key !== "" && cmd.type === "move-animation" && cmd.animation !== undefined && liveMoveAnimationDurationCaseMissing(cmd.animation, currentCommandField(res))) noBody.push([state.frame, cmd.animation.moveId]);
   }
   if (key !== "" && cmd.type === "move-animation" && age0 === null) {

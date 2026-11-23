@@ -3388,3 +3388,61 @@ T2 ON: mass 9,441 -> 9,241, exact 3,237 -> 3,248 (0 missing / 0 extra); the Synt
 
 **Census 0..199** (`lsd194Census.sh` + `rst197CensusDelta.py --digest`, base `44c9243ba`): eventsDigest + error identical 200 / 200 in both scenes. OFF: 0 changed commands. ON: 29 battles changed, all the restore-HP `hp` command minimumFrames (Recover -19, Soft-Boiled -5, Milk Drink -6, Moonlight -4, Synthesis +7) after a `move-animation` / `message`.
 **Tests:** the 233 test files importing the changed files (+ `iu120Rows`), `tests/hpb3*`, `sep1*`, `lsd19*`, `fnt*`, `lbrd`, `randomRoundSoak*`: green except 5 failures that fail identically on the pre-rcv1 baseline (`tests/animation/liveNext5MoveAdapters.test.ts` x2, `liveAnchorMoveAdapters.test.ts` x3; unrelated, not touched). No pin moved. `npm run typecheck`, `npm run test:gate` (360 files / 2,839 tests) and `npm run build` green.
+
+## pso1 (print holds: the foe send-in box, Perish Song's count prints)
+
+Tree: fold-g (master + sbm1 + swt1) + three commits (`ab905ee33` lab stage, the Perish rule + ais2 re-pin, the Tier-1 pin). Presentation / sound timing only: no battle rule, damage or RNG change. Evidence: `.integration/evidence/pso1/` (`lab-*`, `t2-{base,after}`, `census/`, `2741-*`).
+
+**Item 1 (a lab artifact, not an engine rule): the swt1 lab's "sent out RATTATA!" box is 25 frames in the engine and 36 in the ROM because the two sides name different trainers.** The lab's trace says `trainerId` 110 (BLACK BELT SHIZUKA); the engine's staged orchestrator draws its own opponent (LADY ZOE), so the box text is a different length ("LADY ZOE sent out RATTATA!" vs "BLACK BELT SHIZUKA sent out RATTATA!" wraps onto a second line). The engine already prints the ROM's length for the same text: with the staged opponent set to the lab's trainer the switch-in SE and the next print land on the ROM rows. Not reachable in ordinary play (a factory battle's opponent is the one it names), so nothing in `src/` changes. Tooling: `appTrace.ts` `labBackedStage(..., romTrainer)` (opt-in, `withOpponentTrainerId`; only `b4mEngine.ts` passes it, so `tests/cln11GenericLabStage.test.ts` and every other appTrace user keep the old stage). `swt1-foe-faint-poison` before -> after (`labCompare.sh --scene both --frames 4200`): ON SE mass 2,486 -> 2,416, prints 386 -> 376; OFF SE mass 10 -> 0 (6 / 6 exact), prints 169 -> 159. The remaining print mass is the lab's other offsets (ON poison-tick SEs, not the send-in).
+
+**Item 2 (landed): Perish Song's count prints start the rows the ROM spends before them.** ROM rows (`hcr3mProbe.py` over `etk1-perish-*` / `etp1-perish-*`, Scene OFF; first glyph = the frame `sTextPrinters[0]` goes active + 1). The engine presented one `MoveEnd` receipt row between the previous print's release and the count print; the ROM runs the whole `MoveEnd` / `PerishSongCountGoesDown` / end-turn walk:
+
+| Count print follows | ROM rows release -> glyph | engine lacked | source |
+|---|---|---|---|
+| a move's last print (Splash "But nothing happened!" lab) | release 368 -> `MoveEnd` -> `PerishSongCountGoesDown+0x3` ex1 378 -> glyph 379 | 10 | `etk1-perish-*` labs (OFF exact) |
+| the cast's print (`STRINGID_FAINTINTHREE`, `waitmessage 64`; `PerishSongLoop` x4, `MoveEnd`, the end-turn step) | release +0x10 3857 -> `PerishSongTakesLife+0x3` 3874 -> glyph 3875 | 17 (the etk1 "-46 / -47" gap) | `etk1-perish-*` labs |
+| the first count (second battler: `end2`, the turn-effect battler increment, next iteration) | 475 -> 479 | 5 | labs, and seed 2741 (every second count) |
+| a paralysis print (`MoveUsedIsParalyzed`) | seed 2741 ROM glyphs 1181, 2545 | 5 | seed 2741 ROM rows, not the lab |
+| "But it failed!" | seed 2741 ROM glyph 2439 | 12 | seed 2741 ROM rows, not the lab |
+
+The rule is `perishCountChainLeadRows` (`battleResolutionPresentation.ts`), a `leadFrames` on a message whose source label is `BattleScript_PerishSongCountGoesDown` / `PerishSongTakesLife`; the previous message picks the row count (Splash-type / missed 10, paralysis 5, But it failed 12, the cast 17, another count 5). Any other predecessor (hp / animation: the Seismic Toss labs) keeps its own existing lead. The two seed-2741 values differ from the lab's 10 because the engine's own rows after those two prints differ from after Splash's; they are the seed-2741 glyph errors of the old engine (ROM glyph - engine start, Scene OFF: 3 / 8 / 10 / 5 / 12 / 5 in the three Perish turns), not lab-measured. `labCompare.py` / `b4mEngine.ts` now carry the message `leadFrames` (`msgLead`), so the lab tables show the first glyph, not the command start (the old tables could not show any lead on a message).
+
+Labs before -> after (`labCompare.sh`, prints mass of the message first glyphs / SE mass; the ROM captures are shared between base and after):
+
+| Lab | prints | SE |
+|---|---|---|
+| `etk1-perish-hold-off` / `spam-off` (OFF) | 111 -> 2 (exact 16 / 8 -> 23 / 1) | 18 -> 1 |
+| `etp1-perish-off` (OFF) | 57 -> 8 | 18 -> 1 |
+| `etp1-perish-on` (ON) | 61 -> 12 | 15 -> 8 |
+| `etk1-perish-hold-on` / `spam-on` (ON) | 76 -> 45 (table pairing artifact, below) | 15 -> 8 |
+
+Scene ON `etk1-perish-*`: the lab's Splash body is three animation loops the engine does not present (`ENG has no live body adapter for mv150`), so the ROM's Splash print is at 596 and the engine's at 504, and `labCompare.py` pairs the prints one row off (the engine's extra 504 print against the ROM's 596, then every count against the previous ROM print). The count prints themselves are a constant 92 frames early (600 vs 692, 701 vs 793) and their gap is the ROM's (101; before the rule they were 102 / 107 early: 10 and 5 rows off), the cast -> takes-life gap is 128 = ROM. Residuals: the Seismic Toss labs' count after the hp tail is 1 early (ROM 360, engine 359; both counts, both scenes: the hp tail path, not the Perish rule), the FaintAttacker print -2 / -3 (not Perish).
+
+**ais2 seed 2741 windows re-pinned, same ROM frames.** The windows are keyed by engine frame, and the Perish counts in seed 2741 (the turns before the AI switch) now start the rows the ROM spends, so the window is later in engine time. The fixture md5 list matches the engine render at a shift of exactly 42 (OFF, 288 / 288 frames) and 37 (ON, 251 / 251): `romFrameOffset` 38 -> -4 and 46 -> 9, `lo` / `hi` 2747 / 3034 -> 2789 / 3076 and 3835 / 4085 -> 3872 / 4122, md5s unchanged (the hpd1 precedent). The new OFF offset is the one at the start of the battle (ROM glyph - engine message start -2 .. -5 over the first prints), i.e. the engine is now in step with the ROM at the window where it was 40 frames early. etp1 withdrew its rule because the ais2 windows moved 258 / 219; that rule (label +1) was a different, one-row-per-print rule and I could not reproduce those numbers: the md5 search over shifts -10..120 finds the pinned frames at exactly 42 / 37 with this one. Not isolated: seed 2741 has an engine -20 on the `MoveUsedIsParalyzed` print after the cast (ROM 131 rows after the cast's print, engine 111) and each Perish turn's tail (last count -> next turn's first print: engine 8 / 9 / 6 rows longer than the ROM's 27 / 30 / 29); they cancel against the leads to within 2 frames at the window (the ROM-axis offset at the window is -4 = the start-of-battle value).
+
+- **T2** (`rescoreAll.sh` into `.integration/evidence/pso1/t2-{base,after}`, 25 ON / 24 OFF seeds; 0 missing / 0 extra both): ON exact / offset 3,177 / 2,700, mass 9,513 -> 9,513; OFF 842 / 291, mass 786 -> 786. Identical (the sound rows are on the ROM-driven cadence: only seeds 2741 ON / OFF's engine.json differ, in presentation command frames, not in sound rows). Not worse.
+- **Census** 0..199 (`HEAD` vs `ab905ee33`, `lsd194Census.sh` + `rst197CensusDelta.py --digest`): eventsDigest and error identical 200 / 200 in both scenes; 9 battles with changed presentation commands in each scene (ON 63,530 / OFF 62,225 commands), no type-sequence change. The `tree/` copies are deleted.
+- **Tests**: 264 files (every tests/ file importing `battleResolutionPresentation`, `appTrace`, `b4mEngine`, `labCompare`, `soundCensusRomReplay`, plus `ais*`, `fnt*`, `randomRoundSoak*`, `lbrd`, `etp1*`, `aud252*`; there is no `tests/etk1*`) pass, one exception that predates pso1: `tests/aud252LossBallOpen.test.ts` seed 2230 (engine minus ROM `[0, -3, 0 x5, -1]` vs the pinned `-4`; identical failure with the pre-pso1 presentation file swapped in, so it comes from fold-g, one frame toward the ROM; not re-pinned here). Moved pin: `ais2` (above). New `tests/pso1PerishCountPrints.test.ts` (4 Tier-1 tests: Scene OFF count first glyphs = the ROM's 379 / 480 / 1460 / 1561 / 2582 / 2683 / 3875, Scene ON count gaps = 101 / 128; each fails on the pre-pso1 source).
+- `npm run typecheck` clean; `npm run test:gate` / `npm run build`: see the final report.
+
+## ftp1: thaw, confusion-then-two-turn, hail, Focus Punch (integration lane, Scene ON presentation only)
+
+Four items from the t2k6 ranking, each its own commit; no rule, damage or RNG change (eventsDigest identical on seeds 0..199, both scenes). Baseline re-measured on fold-g 251840769: ON 9,513 / OFF 786 (the 9,798 / 822 in the t2k6 text was stale).
+
+| item | commit | rule | ROM row it now matches | ON mass | OFF mass |
+| --- | --- | --- | --- | --- | --- |
+| base | 251840769 | | | 9,513 (3,177 exact / 2,700 offset) | 786 (842 / 291) |
+| 1 Psychic natural thaw (s97 d11) | 278b16e2b | `BattleScript_MoveUsedUnfroze` prints one row after the status write (`thawPrintExecution`); thaw message and icon use the wake-up script timing | s97 d11 print row; off121's OFF thaw command is 1 frame | 9,226 | 776 |
+| 2 cfs1 regression (s8108 d12 gen:219) | 6439b89d5 | the two-turn second-turn used print no longer re-counts the confusion-ended script's wait rows (`TWO_TURN_AFTER_CONFUSION_PRINT_ROWS` = 46) | s8108 d12 (+48 -> -1) | 9,132 | 776 |
+| 3 hail after foe-faint replacement (s2741 d9) | none | none needed | s2741 d9 hail SE 242 is -2 since swt1's +9 next-print fix (was -11); the print head is exact (860 vs ROM 860 / 861); d12 (no send-in) is -4 | | |
+| 4 Focus Punch lost-focus print (s310 d3) | fb2ad56fc | `BattleScript_EffectFocusPunch` print starts 16 rows after the command start (`FOCUS_PUNCH_LOST_FOCUS_PRE_PRINT_ROWS`) | `EffectFocusPunch+0xa` print at 560 (engine 544); held-item SE 152 688 vs 687 (was -17), SE 228 / 102 -1 | 8,956 (3,180 / 2,697) | 776 (842 / 291) |
+
+0 missing / 0 extra at every stage, both scenes. ON -557 (-5.9%), OFF -10.
+
+Corrections to the t2k6 text:
+- s8108 d12 was not cfs1's Levitate hold. The cause was the two-turn used-print lead (84 vs 35) re-counting the confusion print's wait rows; cfs1's lab pin (184 -> 1359) is untouched.
+- Focus Punch: the held-item "exec -> SE age 18 vs 8" is not a separate rule. The ENG command start is not the ROM exec row; with the print head moved the SE lands -1 with no `hpItemAnimationRows` change.
+
+Checks: labs (29: cfs1-digconf-*, etp3-*, hie1-*, shb1-holder-first-*, swt1-foe-faint-poison, sbm1-*; labCompare --scene auto) before == after, 29 labs / mass 2,807 both. Census seeds 0..199: eventsDigest + error identical 200/200 in both scenes; 9 changed-command battles per scene (the thaw status 32 -> 1 and its print leads, the lost-focus lead). Tests: 140 files (every importer of `battleResolutionPresentation`, cfs1*, swt1*, hie7*, lbrd, randomRoundSoak*) pass; `sa125StatusAnimationCommand` SA3 pin moved (thaw status 32 -> 1, ROM s97 d11 / off121). typecheck, `test:gate` (360 files / 2,839 tests), build pass.
+
+Open: no Tier-1 pin for item 2's confusion-then-two-turn lead or for the lost-focus lead (only the T2 windows s8108 d12 / s310 d3); the ON sleep status-animation SE after a held-item heal (s310 d3 SE 197 -9) is the next Focus Punch-family row; s1415 d49 / d47 were not re-probed (no ROM probe on disk).
