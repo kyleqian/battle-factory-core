@@ -1,0 +1,279 @@
+{
+ "appRoute": "generated-orchestrator",
+ "oracleProfile": "battle-scene-on",
+ "appStage": {
+  "id": "lab",
+  "frame": 0,
+  "opponentTrainerId": 222
+ },
+ "oracleBattleLab": {
+  "scenario": "../../battle-lab/ais5-ai-only-on.json"
+ },
+ "segments": [
+  {
+   "frames": 1,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 1,
+   "buttons": []
+  },
+  {
+   "frames": 1,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 1,
+   "buttons": []
+  },
+  {
+   "frames": 1,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 1,
+   "buttons": []
+  },
+  {
+   "frames": 1,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 1,
+   "buttons": []
+  },
+  {
+   "frames": 1,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 950,
+   "buttons": []
+  },
+  {
+   "frames": 1,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 1,
+   "buttons": []
+  },
+  {
+   "frames": 1,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 1,
+   "buttons": []
+  },
+  {
+   "frames": 1,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 1,
+   "buttons": []
+  },
+  {
+   "frames": 1,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 1,
+   "buttons": []
+  },
+  {
+   "frames": 1,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 1,
+   "buttons": []
+  },
+  {
+   "frames": 1,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 1,
+   "buttons": []
+  },
+  {
+   "frames": 1,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 1,
+   "buttons": []
+  },
+  {
+   "frames": 1,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 1000,
+   "buttons": []
+  },
+  {
+   "frames": 1,
+   "buttons": [
+    "DOWN"
+   ]
+  },
+  {
+   "frames": 1,
+   "buttons": []
+  },
+  {
+   "frames": 1,
+   "buttons": [
+    "DOWN"
+   ]
+  },
+  {
+   "frames": 1,
+   "buttons": []
+  },
+  {
+   "frames": 1,
+   "buttons": [
+    "DOWN"
+   ]
+  },
+  {
+   "frames": 1,
+   "buttons": []
+  },
+  {
+   "frames": 1,
+   "buttons": [
+    "DOWN"
+   ]
+  },
+  {
+   "frames": 38,
+   "buttons": []
+  },
+  {
+   "frames": 1,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 1,
+   "buttons": []
+  },
+  {
+   "frames": 1,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 1,
+   "buttons": []
+  },
+  {
+   "frames": 1,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 1,
+   "buttons": []
+  },
+  {
+   "frames": 1,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 118,
+   "buttons": []
+  },
+  {
+   "frames": 1,
+   "buttons": [
+    "RIGHT"
+   ]
+  },
+  {
+   "frames": 38,
+   "buttons": []
+  },
+  {
+   "frames": 1,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 38,
+   "buttons": []
+  },
+  {
+   "frames": 1,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 1000,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 18,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 1300,
+   "buttons": []
+  }
+ ],
+ "captureFrames": [
+  1500,
+  2500,
+  3000
+ ]
+}

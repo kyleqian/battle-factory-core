@@ -93,8 +93,8 @@ describe("ordinary playable animation queue", () => {
       const off = generatedCommandAnimationReplay(seed, "off", slots);
       const body = on.animations.filter(animation => animation.moveId === 113);
       expect(body).toHaveLength(1);
-      expect(body[0]!.ages).toEqual(iu120Ages(113, 88));
-      expect(body[0]!.adapterActive).toEqual(Array(88 + iu120Extra(113) + ont193ScriptTail(113)).fill(exact));
+      expect(body[0]!.ages).toEqual(iu120Ages(113, 86));
+      expect(body[0]!.adapterActive).toEqual(Array(86 + iu120Extra(113) + ont193ScriptTail(113)).fill(exact));
       const lsCommand = on.commands.find(row => row.type === "move-animation"
         && (row.command as { animation?: { moveId: number } }).animation?.moveId === 113)!;
       expect(lsCommand.spriteInputHistoryKnown === true).toBe(exact);

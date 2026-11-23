@@ -38,9 +38,9 @@ describe("sep1: hit -> Leech Seed drain follows the IsBattleSEPlaying gate (Scen
     expect(drainSeFrames("etp1-leechseedc-on")).toMatchObject({ first180: 735, last179: 848 });
   });
   // A drain reached from a print (here the Light Screen wore-off print) runs 7 + 2 rows after its command start: turns 2 / 3 land on the ROM's SE 180 rows
-  // 1533 / 2655 (were -2); turn 1 keeps the +2 the earlier Light Screen print already carries (ROM 590).
-  it("drain after a print (etp3-lightscreenls6-on): SE 180 on the ROM rows 1533 / 2655 on turns 2 / 3 (turn 1 590 + 2)", () => {
-    expect(drainSeFrames("etp3-lightscreenls6-on").all180.slice(0, 3)).toEqual([592, 1533, 2655]);
+  // 1533 / 2655 (were -2); bwf1: the Light Screen window is the ROM's, so turn 1 is the ROM 590 too (was +2).
+  it("drain after a print (etp3-lightscreenls6-on): SE 180 on the ROM rows 1533 / 2655 on turns 2 / 3 (turn 1 590)", () => {
+    expect(drainSeFrames("etp3-lightscreenls6-on").all180.slice(0, 3)).toEqual([590, 1533, 2655]);
   });
 });
 

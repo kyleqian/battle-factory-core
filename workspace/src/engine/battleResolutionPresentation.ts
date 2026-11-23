@@ -1224,6 +1224,14 @@ const RETURN_MON_TIMING = Object.freeze({
  */
 const SWITCH_IN_MESSAGE_TIMING = Object.freeze({ minimumFrames: 13, holdFrames: 0 } as const);
 /**
+ * ais5: the player's voluntary "Go! X!" (BattleScript_DoSwitchOut's printstring) holds the next controller commands until the printer is done, so the
+ * send-in's ball-open SE is 54 + nickname length rows after the print's first row (12 species, both scenes, ROM labs ais5-sp*): glyphs + 1 rows to the
+ * `switch-in` dispatch, no 13-row floor (13 fit only a 12-glyph string).
+ */
+function voluntaryPlayerSwitchInMessageTiming(lines: readonly string[]): Readonly<{ minimumFrames: number; holdFrames: number }> {
+  return Object.freeze({ minimumFrames: battleStringPrintableLength(lines) + 1, holdFrames: 0 });
+}
+/**
  * ISSUES #78 slice 4: the player's draw-party-status-summary + getswitched
  * hold (real 1119-1125, 7 frames) before the "Go!" printstring at 1125.
  */
@@ -2385,11 +2393,11 @@ const LSE2_SOUND_CLOCK_LEADS: ReadonlyMap<number, number> = new Map([[73, 7], [3
  * lead4 (B3, docs/lead1m-rule-lead-design.md): the "S" status / stat bodies (Double Team, Protect, Light Screen, Rain Dance, Agility, Swords Dance, ...) whose script lead
  * (ROM `exec` rise -> `gAnimScriptActive`) is put in front of the body instead of after it. The row total is unchanged (the new script tail is the old one less the lead, the lead is
  * added in front), so only the body position and its sound clock move by `lead`. Only ids whose tail is presented (a post-row side, or a `LIVE_MOVE_SCRIPT_TAIL_TRAIL_ROWS` entry) are in:
- * for the others the lead would add frames. Held out (no presented tail): Growth 74, Recycle 278, Fake Tears 313, 248, 244, 285, 144, 110. ztl1 added Spikes 191, Foresight 193, Destiny Bond 194 and Feather Dance 297 (labs ztl1-*-player-on; Psych Up 244 is exact in its first-mover lab but 5 rows early as a second mover in T2 seed 7295, so it stays out).
+ * for the others the lead would add frames. Held out (no presented tail): Growth 74, Recycle 278, 248, 244, 285, 144, 110. bwf1 added Fake Tears 313 (window 87 -> 84, idle lead row became the presented lead). ztl1 added Spikes 191, Foresight 193, Destiny Bond 194 and Feather Dance 297 (labs ztl1-*-player-on; Psych Up 244 is exact in its first-mover lab but 5 rows early as a second mover in T2 seed 7295, so it stays out).
  */
 const LEAD4_S_LEAD_MOVE_IDS: ReadonlySet<number> = new Set([
   104, 182, 113, 240, 184, 108, 201, 204, 219, 266, 28, 241, 213, 97, 334, 230, 151, 133, 258, 14, 203, 197, 349, 254, 215, 107, 281, 180, 288, 195, 115, 103,
-  277, 178, 43, 39, 148, 106, 275, 112, 321, 259, 319, 271, 339, 294, 272, 50, 269, 116, 191, 193, 194, 297,
+  277, 178, 43, 39, 148, 106, 275, 112, 321, 259, 319, 271, 339, 294, 272, 50, 269, 116, 191, 193, 194, 297, 313,
 ]);
 /**
  * lse4 (docs/hpd1-hp-hold.md lse3 table): Revenge 279 and Absorb 71 join the shape-A class (lead 5, gap 4). Absorb's accepted window is 2 rows short of the ROM's len + 1 (`LSE4_WINDOW_SHORT_ROWS`).
@@ -6323,26 +6331,27 @@ export function projectBattleResolutionCommands(
       if (carriedRows !== null) chargeChainCarry = null;
       const carryAfterGlyph = carriedRows !== null && carriedRows.attacker !== actionSnapshot?.attacker ? carriedRows.rows : 0;
       const carryBeforeGlyph = carriedRows !== null && carryAfterGlyph === 0 ? carriedRows.rows : 0;
+      const messageLinesNow = messageLines(
+        event,
+        index,
+        events,
+        currentField,
+        switchInBattler,
+        switchInIncoming,
+        lastStatChange,
+        lastFaintBattler,
+        pendingStatusMessageBattler,
+        lastMoveAttacker,
+        pendingHeldItemEffectBattler,
+        heldItems,
+        actionSnapshot,
+        opponentTrainer,
+        { hp: liveHp[1], maxHP: currentField.opponent.maxHP },
+      );
       commands.push(...promptGatedMessageCommands(Object.freeze({
         type: "message",
         eventSequence: event.sequence,
-        lines: messageLines(
-          event,
-          index,
-          events,
-          currentField,
-          switchInBattler,
-          switchInIncoming,
-          lastStatChange,
-          lastFaintBattler,
-          pendingStatusMessageBattler,
-          lastMoveAttacker,
-          pendingHeldItemEffectBattler,
-          heldItems,
-          actionSnapshot,
-          opponentTrainer,
-          { hp: liveHp[1], maxHP: currentField.opponent.maxHP },
-        ),
+        lines: messageLinesNow,
         advance: "automatic",
         ...(selfConfusionOff ? { leadFrames: SELF_CONFUSION_OFF_PRE_PRINT_ROWS } : {}),
         ...(event.provenance?.sourceLabel === FOCUS_PUNCH_LOST_FOCUS_SCRIPT ? { leadFrames: FOCUS_PUNCH_LOST_FOCUS_PRE_PRINT_ROWS } : {}),
@@ -6370,7 +6379,9 @@ export function projectBattleResolutionCommands(
           : payload.messageId === "STRINGID_RETURNMON"
             ? RETURN_MON_TIMING
             : payload.messageId === "STRINGID_SWITCHINMON"
-              ? SWITCH_IN_MESSAGE_TIMING
+              ? switchInBattler === 0 && event.provenance?.sourceLabel === "BattleScript_DoSwitchOut"
+                ? voluntaryPlayerSwitchInMessageTiming(messageLinesNow)
+                : SWITCH_IN_MESSAGE_TIMING
               : (() => {
                 const base = selfConfusionOff
                   ? SELF_CONFUSION_OFF_HIT_MESSAGE_TIMING
