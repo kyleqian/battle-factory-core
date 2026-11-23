@@ -3749,3 +3749,94 @@ Evidence (git-ignored): `.integration/evidence/ldw2/` (`lab-base` / `lab-a1` / `
 **s648 d10 / d12 (ldw1's two other drains): not landed.** Neither goes through the weather loop: d10 is a Pain Split tail (engine start 2 rows before exec) and d12 a Confuse Ray tail (13 rows early); the cause there is the previous command's modelled length, not a pending SE or a loop iteration, so this rule does not touch them. (Not re-probed here.)
 
 **Left.** The same two terms (a pending SE after a weather tick; 6 rows per undamaged loop iteration) are not applied to the other commands that follow a weather tick (a turn-end / next end-turn effect after a first battler's tick with an undamaged second battler is still the engine's 4-row tail against the ROM's 4 + 6; aic1m's weather-KO tail is the same iteration count). The weather-continues command's own length with both battlers immune was only checked for its drain successor.
+
+## t2k8 (2026-11-23): the remaining S11 sound-timing mass re-ranked after ldw1 / rsl1 / ohr1 / ldw2 / fkt1 (measurement only; no `src/` / `tests/` change)
+
+Tree: master `60eb8f347` (landed since t2k7's `74e01547a` base: ldw1, rsl1, ohr1, ldw2, fkt1, cln15 (tools cleanup)). The T2 replay was re-run on this tree: `rescoreAll.sh` into `.integration/evidence/t2k8/t2` (49 seeds, 25 ON / 24 OFF, ROM files = `t2n`), split per scene with symlink dirs `t2-on` / `t2-off` (`soundScoreboard.py` refuses a mixed dir), then the t2k6 / t2k7 chain: `cmd.sh` (`T2K4_DIR`, `SEEDS_DIR` absolute) -> `attr.py` -> `agg.py` / `rank6.py` / `remainder7.py` / `topwin.py` / `probe.sh`. New tool in `tools/integration/t2k4/`: `winitem.py SCENE [N]` (the N largest owned windows per `rank6.py` item: seed / decision / step / carried offset / rows / mass / cause / move / previous row's cause; `CTX=1` groups each item's windows by the previous row's cause). Evidence (git-ignored): `.integration/evidence/t2k8/` (`t2`, `t2-{on,off}`, `c/`, `attr-{on,off}.json`, `agg.txt`, `rank.txt`, `remainder.txt`, `topwin-*.txt`, `winitem-{on,off}.txt`, `score-{on,off}.{txt,json}`, `p/on/` 11 probes + `*.cmp.txt`).
+
+### 1. T2 on this tree (missing / extra 0 / 0 in both scenes)
+
+| scene | mass | exact / offset | move-animation SE | stat | cry | battle-controller | bgm |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| ON (25 seeds) | **8,013** (t2k7 8,684) | 3,373 / 2,504 (3,251 / 2,626) | 6,360 (6,981) | 257 (253) | 311 (331) | 1,082 (1,116) | 3 (3) |
+| OFF (24 seeds) | **639** (t2k7 719) | 872 / 261 (849 / 284) | 0 (0) | 91 (97) | 103 (115) | 443 (505) | 2 (2) |
+
+ON per family, exact / offset: move-animation SE 2,785 / 2,026, stat 32 / 69, cry 104 / 98, battle-controller 450 / 308, bgm 2 / 3. OFF: stat 72 / 33, cry 147 / 45, battle-controller 651 / 181, bgm 2 / 2. ON by class (`agg.py`, t2k7 in brackets): body 4,277 (4,558), gen 2,083 (2,423), ctl-hit 556 (556), ctl-chain 526 (560), cry 311, stat 257, bgm 3. OFF has only ctl / cry / stat / bgm mass; its largest window is 27 (s7295 d8 Struggle hit SE +2 x3 after a Struggle body -11 carry), then 21 (s97 d13 Fire Blast hit SE +7 x3) and s6568 d104 -20.
+
+**Drop since t2k7 (ON -671, -7.7 %; OFF -80, -11.1 %), per landed step.** The steps' own figures reconcile with the measured drop to the row:
+
+| step | ON | OFF |
+| --- | --- | --- |
+| ldw1 (Leech Seed drain lag 0 after a weather tick) + ldw2 (SE gate on the drain launch) | -340 | 0 |
+| rsl1 (sound-clock pre rows; Rock Slide first SE) | -281 | 0 |
+| fkt1 A / B (faintLag 0 after a tick; weather-KO tray 4 + 6n) | -50 | 0 |
+| ohr1 (OFF head prints commit + 6 + u) | 0 | -80 |
+| cln15 (tools) | 0 | 0 |
+| **sum = measured vs t2k7** | **-671** (8,684 -> 8,013) | **-80** (719 -> 639) |
+
+By family the ON drop is move-animation SE -621, battle-controller -34, cry -20, stat +4 (the stat +4 is re-ownership of rows after fkt1 A: gen:148 and one stat window moved their start, not a regression); OFF is battle-controller -62, cry -12, stat -6. One apparent regression is a re-ownership too: gen:148 402 -> 418 (+16) is the rows after the fkt1 A faint (tick KO windows that now start from an offset of 0 own their own rows).
+
+### 2. Ranked top 10 (rows owned disjointly by window, `rank6.py`; items + B4 + weather + Psychic + remainder = TOTAL)
+
+**M** = a measured recipe exists (t2k7 or an open term of the ldw1 / rsl1 / ohr1 / ldw2 / fkt1 sections), **new** = first measured here (section 3), **inh** = inherited from the previous command. "clean" = windows that start from a previous offset of 0 (`rank.txt`).
+
+| rank | item | mass ON / OFF (sum) | windows ON / OFF | rule of its own? | recipe status | files / lines a landing touches | expected mass |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 | Faint / send-in chain: SE 15 / 16 / 114, cry@faint | 645 / 254 (899) | 97 / 62 | mostly inherited / harness (clean 170 ON / 156 OFF). Own: **s165 d18 SE 114 +9 after the Knock Off print chain** (51; carried from the Knock Off hit tail, rank 6 / probe 2) and the **KO-after-poison-tick cry@faint -4** (s499 d20, s3738 d57: ON 2 rows and OFF 8 + 8) | probe 2 **new** (A), probe 1 **new** (B tail). Not engine: s6079 d3 -15 / s3738 d57 -13 SE 114 legs are the fsl1m pulse flip (108), OFF s6568 d104 -20 harness press pulse | see ranks 5 / 6 | -50 .. -100 ON, -16 OFF |
+| 2 | Held-item group gen:152 / 228 / 102 (outside Focus Punch) | 800 / 0 | 61 / 0 | no: each window is the previous command's step (clean 190). Own: **s2 d10 +10 after a Rain tick** (50, probe 4); s8108 d44 (115 = carried -23 after the Triple Kick chain, probe 3: not an item rule) | probe 4 **new** (D); s1415 d18 +6 after gen:197 item heal (30): **M** handoff (2); the rest inh | `battleResolutionPresentation.ts` `hpItemAnimationRows`; shb1 `hpItemAnimationSeGate` (drop the pending-SE gate when the previous command is a weather `general-animation`: ldw1 / ldw2's term) | -50 .. -80 |
+| 3 | Hit SE 12 / 13 / 14 | 439 / 282 (721) | 161 / 92 | OFF: yes, plain clean steps (clean 255 of 282; largest 27 / 21); ON: Triple Kick -3 per kick (s8108 d43 / d31 / d44, 61), Faint Attack +1 over 25 rows (s165 d24), Knock Off SE 13 +4 (A); the rest carried (clean 104 of 439) | OFF **M** hse1m rows + hit2 item 1 (traced, not landed); Triple Kick / Faint Attack new, unprobed alone | `battleResolutionPresentation.ts` hit-animation lead; `battleHitSounds.ts` 140-155 (the `hit-animation` SE `anchor`) | OFF -150 .. -250; ON -60 |
+| 4 | Focus Punch segments (SE 171, lost-focus print, item rows after) | 480 / 0 | 22 / 0 | partly: the SE 90 pair (s310 d2 / s1415 d47 -9 after the SE 90 chain, 110) and s1415 d50 -2 (91) | **M** handoff (2) (Focus Punch row next after the SE 90 chain; sleep status-animation SE 197 after an item heal) and ftp1 open (constant 16); s310 d4 / d5 +5 (75) inherited | `battleResolutionPresentation.ts` `FOCUS_PUNCH_LOST_FOCUS_PRE_PRINT_ROWS`; `hpItemAnimationRows` | -110 .. -200 |
+| 5 | gen:148 poison / status tick | 418 / 0 | 16 / 0 | **yes** (probe 1): the end-of-turn poison / toxic tick chain (message -> status-animation -> SE 148 -> hp) starts 3-5 rows early in 6 windows | **new** (B) | `battleResolutionPresentation.ts` `END_TURN_STATUS_DAMAGE_LEAD_ROWS` 1296 (the gsp3 print -> statusanimation rows are right: keep them), the end-turn print lead (`HP_END_TURN_PRINT_LEAD_ROWS` 2816 / ~3079, `END_TURN_PRINT_SCRIPTS` 1529); `battleHitSounds.ts` 207 (`BattleScript_DoTurnDmg` SE anchor) | -130 .. -200 |
+| 6 | Rock Slide body | 324 / 0 | 5 / 0 | **yes** (probe 2): s165 d18 +8 over 23 rows (184) = the Knock Off hit tail +4 carried + step +4; s8612 d8 -10 over 21 rows (126) after Belly Drum | A **new**; s8612 d8 **M** (rsl1 left: the -6 print leg after a self-target stat move) | Knock Off per-move hit time in the move-animation script table (`moveAnimSounds.ts` / `animSoundOps.ts`; no Knock Off (282) constant exists in `battleHitSounds.ts` / `moveAnimSounds.ts`, so the first place to look is the generic script length) | -90 (A) .. -180 |
+| 7 | stat SE 239 / 245 / 23 / 24 | 213 / 98 (311) | 53 / 33 | **Scary Face (184) SE 245 -12 .. -14 in 4 windows** (s499 d9, s3738 d3 / d7 / d11, 46); the rest inherited (OFF clean 90 of 98) | **new** (E: probe 5, tail of the Scary Face script 10-12 rows short) | Scary Face's script total in the move-animation table (`animSoundOps.ts` / `moveAnimSounds.ts`) | -46 |
+| 8 | Confusion + Supersonic | 278 / 0 | 7 / 0 | Supersonic s5569 d12 -9 after itself (143); Confusion s8108 d8 -7 (72) and d44 -32 (48, after the Triple Kick chain) | Supersonic **M** swt1 item 2 / cfs1 (needs a lab pair); Confusion d44 carried (C), d8 inh | `battleResolutionPresentation.ts` status-animation head | -143 (with the lab pair) |
+| 9 | Two-turn second family (Dig, Solar Beam) | 260 / 0 | 17 / 0 | partly: s8108 d11 Dig +9 (55), Solar Beam +17 / +18 x3 windows (59, rows 1-2) | **M** t2k4 9 (`isChargeTurnOpener`); the Solar Beam rows are new and unprobed | `battleResolutionPresentation.ts` `isChargeTurnOpener` | -50 .. -117 |
+| 10 | gen:180 Leech Seed drain | 180 / 0 | 8 / 0 | the two drains ldw1 left: s648 d10 +3 over 10 rows (70, after Pain Split) and d12 -5 (50, after Confuse Ray); s319 d15 .. d18 (+4 / -2 / -1 / -1, 50) | **M** ldw1 "left" (the previous command's modelled length), ldw2 | `battleResolutionPresentation.ts` Pain Split / Confuse Ray tails; Leech Seed drain ~6537 | -120 |
+| | **Items 1-10** | **4,037 / 634 (4,671)** | | | | | |
+| | B4 bodies (reported separately) | 265 / 0 | 32 / 0 | | | | |
+| 11 | Weather tick: Sandstorm gen:219 / Hail gen:242 | 121 / 0 | 11 / 0 | s2741 d12 hail -7 (48); the rest carried | inh | none | 0 |
+| 12 | Psychic natural thaw + Shell Bell rows | 23 / 0 | 5 / 0 | landed (ftp1) | done | | 0 |
+| R | remainder (395 / 4 windows) | 3,567 / 5 | | segment-start per-move constants (section 4) | | | |
+| | **TOTAL** | **8,013 / 639** | | | | | |
+
+Sum-check: ON 645 + 800 + 439 + 480 + 418 + 324 + 213 + 278 + 260 + 180 = 4,037; + 265 (B4) + 121 + 23 + 3,567 = 8,013 (`rank.txt`). OFF 254 + 282 + 98 = 634; + 5 = 639. Counts are row mass, not saving; the "expected" column is the part a rule of its own can remove (A and the Rock Slide s165 d18 window overlap: count it once).
+
+**Moved against t2k7** (same classes): faint chain 973 -> 899 (fkt1), Leech Seed 520 -> 180 (ldw1 / ldw2), Rock Slide 514 -> 324 (rsl1), hit SE 801 -> 721 (OFF 359 -> 282, ohr1), gen:148 402 -> 418 (re-ownership), remainder 3,651 -> 3,567, stat 314 -> 311, weather 119 -> 121. Unchanged to the row: held-item group 800, Focus Punch 480, Confusion + Supersonic 278, two-turn 260, B4 265, Psychic 23.
+
+**Which items have a measured recipe.** M: rank 3 OFF (hse1m + hit2 item 1), rank 4 (handoff 2 + ftp1 open), rank 6 s8612 (rsl1 left), rank 8 Supersonic (swt1 / cfs1), rank 9 (t2k4 9), rank 10 (ldw1 left), rank 2 s1415 d18 (gen:197). **New this step (probed):** B (rank 5 + rank 1's tick-KO tail), A (rank 6 / 1 / 3), D (rank 2), E (rank 7); C (Triple Kick, ranks 2 / 3 / 8) is measured but has no recipe-ready rule. Open terms of earlier sections with no T2 mass here: the kols / kosand upstream tick chain "19-21 rows short" does not rank (s310 d17 drain KO is exact, only two poison KOs at -4: that is B at T2 scale); "other commands after a weather tick 4 vs 4 + 6": one T2 window (s2 d10 after Rain, which has no per-battler loop), i.e. D.
+
+**Recommended landing order** (largest certain saving per rule): (1) B, the poison tick chain lead (-130 .. -200 ON with a clean start in 172 of 418; the `gsp3-{toxic,willowisp}-{player,foe}-on` labs pin the print -> statusanimation rows, which stay; only where the chain starts after the previous command changes); (2) rank 3 OFF hit-SE rows (hit2 item 1, -150 .. -250); (3) the SE 90 pair + Focus Punch (-110, handoff 2); (4) A, the Knock Off hit tail (-60 .. -100, 4 of 4 T2 segments); (5) D and E (-50 / -46, one case each).
+
+### 3. The probed windows (ROM `hcr3mProbe` + engine `--cmdtrace`, frames from each side's commit; `probe.sh`)
+
+1. **B: the end-of-turn poison / toxic tick chain, s499 d20 (-4), d13, d2, s3738 d57 (-4) / d59 (-3) / d60 (-5) (rank 5; also rank 1's KO tail).** ROM: `BattleScript_DoTurnDmg+0x0` ex0 then SE 148 (`SE_M_TOXIC`) at commit -35 / -36, `DoTurnDmg+0xb` ex2, hp, `DoTurnDmgEnd` rows, the next command at commit + 6. The engine's status chain (`message` -> `status-animation` -> SE 148 -> `hp` -> `turn-end` min 8) starts 3-5 rows before the ROM's equivalent in all six windows; the hp row and everything after is exact again (the cmp windows of d60 / d20 show SE 5 and the next print on the ROM's rows). A Safeguard-ends -> tick leg is ROM 117 against engine 112 (-5). Five of the six are clean (previous offset 0), so this is the rule of the command itself and not a carry. It is also the rows behind the OFF `cry@faint` -4 windows after a poison KO (s499 d20, s3738 d57; not probed in OFF). The kols / kosand "19-21 rows short" is the same chain seen from the lab. Expected -130 .. -200 ON (gen:148 418 + the SE 16 leg after a tick KO).
+2. **A: Knock Off (282) hit tail, s165 d18 (rank 6; also ranks 1 and 3).** ROM: `EffectKnockOff` +6 from the commit, `HitFromAtkAnimation+0x1` ex2 45, SE 122 / SE 139 at 60 / 70 (engine exact on both), `+0x1` ex0 97, **SE 13 at 99**; engine SE 13 at **103** (+4), `hit-animation` cmd at 104; hp 139 (engine). The Rock Slide that follows carries it: +8 over 23 rows (184) = this +4 and a step +4. The same +4 on SE 13 / 12 relative to the move's own SE 122 / 139 appears in 4 of 4 T2 Knock Off segments, and the SE 114 +9 window after it (s165 d18, 51). Expected -60 .. -100 over the windows it owns (mixed sign: the Knock Off segments' neighbours are some of the clean windows; verify with a lab).
+3. **C: Triple Kick (167) multi-hit chain, s8108 d44 / d43 / d31 (345 seg mass; no recipe-ready rule).** Kick 1: ROM `DoTripleKickAttack+0x2e` ex2 59 -> SE 123 at 71, SE 13 at 100; engine SE 123 59 (-12), SE 13 85 (-15). Kick 2: ROM SE 123 185, engine 196 (+11), SE 13 +8. The Confusion print that follows is 23 rows early (SE 184 -24) and the d44 held-item rows (115) and stat (20) are carried -23. The sound clock's exec offsets differ per kick, so a per-move constant does not fit; not landed, not a rule for the item rows.
+4. **D: held-item animation after a Rain tick, s2 d10 (+10, 50; rank 2).** ROM: `RainContinuesOrEndsEnd` ex0 -9 -> `EffectFlinchHit` +6 -> hit -> `MoveEnd` 155 -> `ItemHealHP_Ret+0x0` 159 -> SE 8; engine `general-animation HELD_ITEM_EFFECT` cmd 151 with the pending-SE gate (cmd -> SE 23) that applies after a hit but, as in ldw1 / ldw2, not after a weather tick (nothing pending). One window.
+5. **E: Scary Face (184) tail, s3738 d3 (rank 7).** ROM SE 130 (`SE_M_STRING_SHOT2`) 188 -> anim exec end 249 -> print 252 -> SE 245 at 256; engine SE 130 190 (+2) -> `stats-change` cmd 239 (the script ends 10 rows early) -> SE 245 244: -12 (-14 in the other three windows). A per-move constant (tail of the Scary Face script), 46 mass.
+
+### 4. Windows that are not engine rules (harness / carried)
+
+- The 3,567 ON remainder is the long tail of per-move first-row constants (`remainder7.py`): Rest 196 (18 windows), Yawn 190, Wish 164, Ice Beam 152, Struggle 150, Double-Edge 138, Double Team 100, Surf 92 (23 windows), Bubble Beam 83, Torment 80 (one window, s165 d9), Thunderbolt 75, Ancient Power 73, Agility 70 ... each below 200, many one-window or the drv2 forced-commit anchor. Struggle s7295 d8 -11 / OFF +2 x3 is the ohr1-left head.
+- OFF is a tail (largest window 27); s6568 d104 -20 is the harness's 17-frame press pulse (sep1 item 3 / fsl1m); the SE 114 legs s6079 d3 -15 and s3738 d57 -13 are fsl1m pulse flips on a carried offset.
+- Carried offsets: ON hit-SE / chain / held-item windows start from a nonzero previous offset in most rows (clean 104 of 439 hit SE, 170 of 645 chain, 190 of 800 held-item).
+
+### 5. Engine commands behind the probed windows
+
+| window | ROM script rows | engine command | file |
+| --- | --- | --- | --- |
+| poison / toxic end-turn tick | `DoTurnDmg+0x0` ex0 / SE 148 at commit -35 | `message` -> `status-animation` -> `hp` -> `turn-end` (starts 3-5 rows early) | `battleResolutionPresentation.ts` 1296, 1529, 2816; `battleHitSounds.ts` 207 |
+| Knock Off hit | `HitFromAtkAnimation+0x1` ex0 97 -> SE 13 at 99 | `move-animation` (bodyLead 5) -> `hit-animation` SE 13 at 103 | per-move row of the move-animation script table (`moveAnimSounds.ts` / `animSoundOps.ts`); `battleHitSounds.ts` 140-155 |
+| Triple Kick | `DoTripleKickAttack+0x2e` ex2 -> SE 123 at +12 | `move-animation` turn 0 / 1 per kick | none (no rule) |
+| held item after Rain | `RainContinuesOrEndsEnd` -> `ItemHealHP_Ret+0x0` -> SE 8 | `general-animation` `HELD_ITEM_EFFECT` after a weather tick | `hpItemAnimationRows` / shb1 `hpItemAnimationSeGate` |
+| Scary Face tail | last SE 130 188 -> exec end 249 -> SE 245 256 | `move-animation` -> `stats-change` (10 rows early) | `moveAnimSounds.ts` / `animSoundOps.ts` |
+
+### 6. What not to chase
+
+- The 3,567 ON remainder (395 windows) and the per-move segment-start constants (Rest, Yawn, Wish, Ice Beam, Struggle, Double-Edge, ...): each is below 200 and most are one-window or the forced-commit anchor.
+- Triple Kick (C): the exec offsets differ per kick; the d44 held-item / stat / Confusion rows are carried and fall out of any fix upstream; no per-move constant fits.
+- The SE 114 legs (s6079 d3, s3738 d57) and OFF s6568 d104: fsl1m pulse flips / the harness press, not the print's length.
+- ON hit-SE and chain carried mass (no per-family offsets); stat SE outside Scary Face (inherited); the held-item scatter outside D and the SE 90 pair; weather (121, carried); Psychic (done); B4 (265).
+- A global Leech Seed drain lag or `HP_TIMING.minimumFrames` -> 0 (hpb3: +621); a "4 vs 4 + 6" change for other commands after a weather tick (one T2 window: D only).
+
+Not applied: no `src/` or `tests/` change; PROGRESS / ISSUES / ROADMAP / PAPERCUTS untouched (the step forbids editing them); the one new tool is python only (`winitem.py`); `npm test` / `npm run typecheck` / `npm run build` not run (the step forbids them with other workers' runs in flight; no `.ts` / test touched).
