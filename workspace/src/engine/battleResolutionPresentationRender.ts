@@ -1669,10 +1669,10 @@ const HPD4_BODY_TAIL_ROWS: ReadonlyMap<number, number> = new Map([[49, 3], [82, 
 // controller runs 10 rows after the window (the explosion script's own instructions, ROM gap 10), so the tail is 9 (3 + 4 + 123 + 9 = A -> H 139 + pre).
 // lse2: rows after a lead-first lse2 body (on top of its script tail where it has one) that put the next command on the ROM row (R -> H = lead + 3 + len + 4 less the window the body presents).
 const LSE2_BODY_TAIL_ROWS: ReadonlyMap<number, number> = new Map([[322, 3], [347, 3], [59, 2], [227, 10]]);
-// hie5: a restore-HP body (Recover / Soft-Boiled / Milk Drink / Moonlight) keeps the script's animation clear after the body's last visible row: the ROM runs
-// `healthbarupdate` (EffectRestoreHp+0x16) 25 / 10 / 27 / 8 rows after the engine's `hp` command (labs aud242k-recover-player-on, aud242r-softboiled-player-on,
-// aud261-milkdrink-player-on, aud242r-moonlight-player-on: every later SE of the lab went from -23 / -5 / -25 / -8 to the body's own +2 / +5 / +2 / +4).
-const HIE5_RESTORE_HP_BODY_TAIL_ROWS: ReadonlyMap<number, number> = new Map([[105, 25], [135, 10], [208, 27], [236, 8]]);
+// hie5 / rcv1: a restore-HP body (Recover / Soft-Boiled / Milk Drink / Moonlight) holds the script's animation clear after the body's last visible row so the `hp` command starts on the ROM's
+// `healthbarupdate` (EffectRestoreHp+0x16) row. rcv1 re-fit against the ROM print rows (labs aud242k-recover, aud242r-softboiled / -moonlight, aud261-milkdrink, etp3-recoverls4: the "regained
+// health" print was +19 / +5 / +4 / +21 with hie5's 25 / 10 / 8 / 27, now +0 with 6 / 5 / 4 / 6).
+const HIE5_RESTORE_HP_BODY_TAIL_ROWS: ReadonlyMap<number, number> = new Map([[105, 6], [135, 5], [208, 6], [236, 4]]);
 const LIVE_MOVE_LEADLESS_TAIL_ROWS: ReadonlyMap<number, number> = new Map([[120, 9], [153, 9], ...HIE5_RESTORE_HP_BODY_TAIL_ROWS]);
 // hpd8: the shape-A bodies' tail is whatever the 3 pre + 3 post rows of the ROM span (lead + 3 + len + 4) leave over: 6 - pre - post (T 1 / 3 / 6 in hpd7).
 const HPD8_SHAPE_A_ROWS_AROUND_BODY = 6;
