@@ -23,7 +23,7 @@ const cases = [
   { id: 219, move: "SAFEGUARD", duration: [71, 71], shadow: 0, alt: ["WOBBUFFET", "ONIX"], route: { seed: 59, move: 2 as const, streak: 0 } },
   { id: 230, move: "SWEET_SCENT", duration: [175, 175], shadow: 0, alt: ["VICTREEBEL", "ONIX"], route: { seed: 31, move: 3 as const, streak: 0 } },
   { id: 120, move: "SELF_DESTRUCT", duration: [123, 123], shadow: undefined, alt: ["FORRETRESS", "ONIX"], route: { seed: 56, move: 3 as const, streak: 14 } },
-  { id: 282, move: "KNOCK_OFF", duration: [48, 48], shadow: undefined, alt: ["SABLEYE", "ONIX"], route: { seed: 15, move: 2 as const, streak: 7 } },
+  { id: 282, move: "KNOCK_OFF", duration: [44, 44], shadow: undefined, alt: ["SABLEYE", "ONIX"], route: { seed: 15, move: 2 as const, streak: 7 } },
   // Faint Attack: faithful timing (fa185, liveMoveTimingPolicy.ts 185): the player side renders the no-restore-lag phase (liv2: 226 rows = the ROM window 225 + 1).
   { id: 185, move: "FAINT_ATTACK", duration: [226, 227], shadow: undefined, alt: ["MURKROW", "ONIX"], route: { seed: 0, move: 1 as const, streak: 7 } },
 ];
