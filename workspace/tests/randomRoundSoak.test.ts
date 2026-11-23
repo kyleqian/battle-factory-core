@@ -1182,7 +1182,8 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // supervisor merge of fsi1 with master + rmw1, measured on the merged tree: 57622; same battle 3 / depth 2 / turn 15 / roundLost.
       // ohs1 (Scene OFF ConfusedNoMore / InLove pre-move prints hold 64 + 5 / 64 + 6 before the used print, T2 OFF s7295 d8 / s6568 d29): frames only, 57622 -> 57634; same battle / depth / turn / end state (the diff shows only frames).
       // ohr1 (Scene OFF pre-move head prints start on commit + 6 + u + 1 as the used print does, and the self-hit print's lead 5 -> 3; T2 OFF s499 d23 / s7295 d11 / d15 / d17 / s830 d11): frames only, 57634 -> 57658; same battle 3 / depth 2 / turn 15 / roundLost.
-      frames: 57658,
+      // ais5 (the player's voluntary "Go! X!" print holds glyphs + 1 rows instead of max(13, glyphs) + 1, ROM labs ais5-sp*: ball-open SE = print + 54 + nickname length): frames only, 57658 -> 57662; same battle 3 / depth 2 / turn 15 / roundLost.
+      frames: 57662,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 2,

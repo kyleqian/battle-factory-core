@@ -1210,6 +1210,14 @@ const RETURN_MON_TIMING = Object.freeze({
  */
 const SWITCH_IN_MESSAGE_TIMING = Object.freeze({ minimumFrames: 13, holdFrames: 0 } as const);
 /**
+ * ais5: the player's voluntary "Go! X!" (BattleScript_DoSwitchOut's printstring) holds the next controller commands until the printer is done, so the
+ * send-in's ball-open SE is 54 + nickname length rows after the print's first row (12 species, both scenes, ROM labs ais5-sp*): glyphs + 1 rows to the
+ * `switch-in` dispatch, no 13-row floor (13 fit only a 12-glyph string).
+ */
+function voluntaryPlayerSwitchInMessageTiming(lines: readonly string[]): Readonly<{ minimumFrames: number; holdFrames: number }> {
+  return Object.freeze({ minimumFrames: battleStringPrintableLength(lines) + 1, holdFrames: 0 });
+}
+/**
  * ISSUES #78 slice 4: the player's draw-party-status-summary + getswitched
  * hold (real 1119-1125, 7 frames) before the "Go!" printstring at 1125.
  */
@@ -6307,26 +6315,27 @@ export function projectBattleResolutionCommands(
       if (carriedRows !== null) chargeChainCarry = null;
       const carryAfterGlyph = carriedRows !== null && carriedRows.attacker !== actionSnapshot?.attacker ? carriedRows.rows : 0;
       const carryBeforeGlyph = carriedRows !== null && carryAfterGlyph === 0 ? carriedRows.rows : 0;
+      const messageLinesNow = messageLines(
+        event,
+        index,
+        events,
+        currentField,
+        switchInBattler,
+        switchInIncoming,
+        lastStatChange,
+        lastFaintBattler,
+        pendingStatusMessageBattler,
+        lastMoveAttacker,
+        pendingHeldItemEffectBattler,
+        heldItems,
+        actionSnapshot,
+        opponentTrainer,
+        { hp: liveHp[1], maxHP: currentField.opponent.maxHP },
+      );
       commands.push(...promptGatedMessageCommands(Object.freeze({
         type: "message",
         eventSequence: event.sequence,
-        lines: messageLines(
-          event,
-          index,
-          events,
-          currentField,
-          switchInBattler,
-          switchInIncoming,
-          lastStatChange,
-          lastFaintBattler,
-          pendingStatusMessageBattler,
-          lastMoveAttacker,
-          pendingHeldItemEffectBattler,
-          heldItems,
-          actionSnapshot,
-          opponentTrainer,
-          { hp: liveHp[1], maxHP: currentField.opponent.maxHP },
-        ),
+        lines: messageLinesNow,
         advance: "automatic",
         ...(selfConfusionOff ? { leadFrames: SELF_CONFUSION_OFF_PRE_PRINT_ROWS } : {}),
         ...(event.provenance?.sourceLabel === FOCUS_PUNCH_LOST_FOCUS_SCRIPT ? { leadFrames: FOCUS_PUNCH_LOST_FOCUS_PRE_PRINT_ROWS } : {}),
@@ -6354,7 +6363,9 @@ export function projectBattleResolutionCommands(
           : payload.messageId === "STRINGID_RETURNMON"
             ? RETURN_MON_TIMING
             : payload.messageId === "STRINGID_SWITCHINMON"
-              ? SWITCH_IN_MESSAGE_TIMING
+              ? switchInBattler === 0 && event.provenance?.sourceLabel === "BattleScript_DoSwitchOut"
+                ? voluntaryPlayerSwitchInMessageTiming(messageLinesNow)
+                : SWITCH_IN_MESSAGE_TIMING
               : (() => {
                 const base = selfConfusionOff
                   ? SELF_CONFUSION_OFF_HIT_MESSAGE_TIMING

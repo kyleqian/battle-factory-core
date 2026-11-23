@@ -171,3 +171,49 @@ the carry-14 winning seed 4 -> 2 (scan 0..10); `lbrd` seeds 17 -> 4 (scan 1..12 
 - Player side (item 5) not changed. Scene OFF `pmo239-switch-0-to-2-reopen-off` (frames 1140-1400): exact through the recall (1181); from 1182 the player send-in (ball, emerge, fade, particles) is exactly 1 frame late (shift +1 gives 0 px for 1182-1243), the healthbox slide 1245-1266 also 1 late, the next message at ROM 1294 / app 1296. The older RATTATA switch (`mid-battle-switch-dense-a-off`) shows no shift (k0 best; the residual is a static 676 px sprite difference, a harness species / gender issue), so the 1-frame start is
   one observation on PIDGEY / MACHOP and not proven species-independent: a source change needs a second species. Scene ON player send-in (frames 238-250) has no ON lab / trace yet.
 - A same-turn player voluntary switch + AI switch (item 3) was not started.
+
+## ais5: the player's voluntary send-in print (species dependent), the same-turn player + AI switch (presentation only)
+
+Closes ISSUES #222 items (3) and (5). Both scenes; no battle rule / RNG / event change (census `eventsDigest` identical).
+
+### Method
+
+Labs in `tools/battle-lab/ais5-*.json` (`mechanicLab.overrides.parties`, the `mechanic-factory-ai-switch-receipt-c2-perish-off` setup: Misdreavus AI, Perish Song sentinel, so the AI switches to Jolteon at turn 4; the player's bench varies per lab).
+Turn 3 is a player voluntary switch alone, turn 4 a player voluntary switch plus the AI's Perish switch (`ais5-both-switch-*`), or the AI switch alone (`ais5-ai-only-*`). Scene ON needs its own input timeline (the Perish Song animation is ~270 frames longer, so the menu opens later: segments 9 / 25 / 47 waits 950 / 1000 / 1000).
+`tools/integration/labCompare.sh` (ROM SE rows + first-glyph print rows vs the engine) and `npm run compare` windows of 250 frames (traces `tools/compare/traces/ais5-*.json`, appStage `lab`, `opponentTrainerId` 222).
+
+### (3) Same-turn player + AI switch: already on separate clocks
+
+ROM order (both scenes, all labs): player `ActionSwitch` print, recall SE 15, tray / "Go!" print, send-in SE 15; then the AI's `ActionSwitch` print, recall SE 15, tray SE 114, "sent out" print, send-in SE 15 (`DoSwitchOut` runs once per battler, the AI's after the player's, the AI's recall starts the print row after the player's send-in message).
+The engine already ran each side from its own source-derived clock: the AI recall / tray / send-in intervals are identical in `ais5-both-switch-*` and `ais5-ai-only-*`, in both scenes, and the order and every row's script label match. The only same-turn effect was the player's send-in offset carried into the AI rows (item 5 below); nothing separate to land for (3). Pin: `tests/ais5SameTurnSwitch.test.ts`.
+
+### (5) The player send-in: ROM "Go! X!" print start + 54 + nickname length (not 1 frame late, species dependent)
+
+The player's `BattleScript_DoSwitchOut` `hidepartystatussummary` / `switchinanim` wait for the "Go! X!" text printer, so the ball-open SE (15) is the print's first-glyph frame + 54 + nickname length (12 species / turns, lengths 4..10):
+
+| species (nickname) | len | ROM print -> SE 15 | species | len | ROM print -> SE 15 |
+| --- | ---: | ---: | --- | ---: | ---: |
+| Onix | 4 | 58 | Pidgey / Machop / Meowth / Weedle / Gengar | 6 | 60 |
+| Rattata / Pikachu | 7 | 61 | Graveler | 8 | 62 |
+| Charizard / Bulbasaur | 9 | 63 | Wigglytuff | 10 | 64 |
+
+The engine used `max(13, glyphs) + 1` command rows then the shared 47-row ball-open elapsed (13 fit the 12-glyph RATTATA string only), so the engine's send-in SE was late by +1 / +2 / +3 for 6 / 5 / 4 letters (the 13 floor held the message too long), exact at 7 letters, and 1 early for 8+ letters (the pmo239 PIDGEY / MACHOP 1-frame offset is the 6-letter case).
+Rule landed (`voluntaryPlayerSwitchInMessageTiming`, battler 0 + `BattleScript_DoSwitchOut` provenance): the "Go! X!" message holds glyphs + 1 rows with no floor. Every player send-in SE row is now +0 across the 12 species / turns in Scene OFF, and in Scene ON (`ais5-both-switch-on`, `ais5-sp19-6-on`, `ais5-sp75-40-on`: 2349 / 2447 / 3628 / 3726 etc.); the rows after it carry the same shift.
+Forced replacements (`plr162`) and the opponent's lines are untouched (other provenance).
+
+### Numbers
+
+- labCompare SUMMARY before -> after (exact / offset / mass of 7 SE rows; ON rows are the first 9 of 15): OFF `ais5-both-switch` 3/4/4 -> 6/1/1, `ais5-ai-only` 3/2/2 -> 4/1/1, `sp19-6` 3/4/5 -> 6/1/1, `sp75-40` 2/5/6 -> 6/1/1, `sp1-52` 3/4/4 -> 6/1/1, `sp25-95` 3/4/11 -> 6/1/1, `sp13-94` 3/4/4 -> 6/1/1; ON `both-switch` 4/5/5 -> 6/3/3, `sp19-6` 3/6/7 -> 6/3/3, `sp75-40` 2/7/8 -> 7/2/2, `ai-only` 4/3/3 -> 4/3/3 (missing 6-9 = the Jolteon / Perish attack animations, unchanged).
+- `npm run compare` matched frames before -> after (250-frame windows): OFF both-switch 1480:1729 91 -> 138, 2500:2749 119 -> 159, 2750:2999 189 -> 165; ai-only 2190:2439 176 -> 176, 2440:2689 90 -> 90; ON both-switch 2290:2539 92 -> 209, 3570:3819 102 -> 208, 3820:4069 207 -> 144; ai-only 2290:2539 92 -> 209, 3250:3499 169 -> 169, 3500:3749 21 -> 21; `pmo239-switch-0-to-2-reopen-off` 3 / 3 and `pmo239-reopen-identity-control-off` 1 / 1 both before and after (their capture frames do not include the send-in).
+- `compare:differential` vs the base (`abs1-tackle-mash-a-off`, `abs1-tackle-hold-a-on`, `battle2-action-menu-dense`): 547 captures byte-identical.
+- Census 0..199, both scenes (`lsd194Census.sh` + `rst197CensusDelta.py`): `eventsDigest` + error identical 200 / 200 each scene, 0 changed commands (62,225 OFF / 63,530 ON): the random-round AI never makes a voluntary player switch.
+- T2 (`rescoreAll.sh`, `t2-{base,after}`): OFF 24 seeds and ON 25 seeds identical before and after (OFF exact 872 / offset 261 / mass 627, ON 3464 / 2413 / 7136, 0 missing / 0 extra); no T2 seed has a voluntary player switch, so the labs are the measure.
+- Pins: `randomRoundSoak` M-B (c) "full" seed 1 frames 57658 -> 57662 (same battle 3 / depth 2 / turn 15 / roundLost; four voluntary player switches whose "Go! X!" is now glyphs + 1 rows instead of max(13, glyphs) + 1). New `tests/ais5SameTurnSwitch.test.ts`: the player recall / send-in SE rows equal the ROM in 7 labs (4 OFF, 3 ON).
+- Play change: an input-ready move. After a voluntary player switch the next command (the opponent's move / the action menu) starts 1 frame later for nicknames of 8+ letters (glyphs 13+), the same for 7 letters (RATTATA, 12 glyphs), and 1 / 2 / 3 frames earlier for 6 / 5 / 4 letters.
+
+### Residuals / open
+
+- **The AI tray -> "sent out" print is 101 or 102 frames in the ROM.** Perish-sentinel labs: 102 in 12 of 14 observations (all Scene OFF labs, ON `both-switch` / `ai-only` / `sp19-6`); 101 in `mechanic-factory-ai-switch-receipt-b-off`, `ais5-sp75-40-on` and the ais2 seed 2741 (both scenes). The engine keeps 101 (ais2, `OPPONENT_SUMMARY_SWITCH_ORDER_FRAMES`), so the AI's print and send-in SE are -1 in the 12; with the player rows now exact this shows in `compare` (OFF 2750:2999 189 -> 165, ON 3820:4069 207 -> 144 matched frames: before, the carried player +1 cancelled it). Not a species or scene rule (sp75-40 is 102 OFF, 101 ON); looks like a one-frame ROM lag inside the 100-frame tray hold. No source rule found, left at 101.
+- `mechanic-factory-ai-switch-receipt-b-off` (AI switch at turn 1) is a flat -20 frames (print ROM 412 / engine 392): the AI switch decision's command time, a different path, untouched.
+- The player recall effect pixels (anchor / particle origin) still differ for non-RATTATA species even in a plain turn-3 switch (ais2 / ais3 fixture constants); not touched.
+- Still open from #222: (2) the Pursuit / Focus Punch AI switches, and the Scene OFF `\p` clear after the faint text.
