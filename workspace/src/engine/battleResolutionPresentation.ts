@@ -1585,6 +1585,20 @@ function endTurnPrintFollowsDraggedOut(events: readonly BattleKernelSemanticEven
 }
 
 /**
+ * ptc1 (T2 ON s499 d20, s3738 d57 / d60: SideStatusWoreOff -> BattleScript_PoisonTurnDmg print, ROM `printstring` row to `printstring` row 117 / 97 / 117, engine 112 / 92 / 112): an end-turn print that directly
+ * follows another end-turn print (`printfromtable; waitmessage B_WAIT_TIME_LONG; end2`) starts 5 rows after the engine's `waitmessage` hold ends: end2, the end-turn state machine's return and the next
+ * state's script entry. Same 5 as the s310 d16 wore-off -> SunlightFaded leg (97 vs 92).
+ */
+const END_TURN_PRINT_AFTER_PRINT_ROWS = 5;
+const END_TURN_PRINT_AFTER_PRINT_LABELS: ReadonlySet<string> = new Set(["BattleScript_PoisonTurnDmg", "BattleScript_BurnTurnDmg"]);
+const END_TURN_PRINT_PREVIOUS_SCRIPTS: ReadonlySet<string> = new Set([...END_TURN_PRINT_SCRIPTS, "BattleScript_SafeguardEnds"]);
+function endTurnPrintFollowsEndTurnPrint(events: readonly BattleKernelSemanticEvent[], index: number): boolean {
+  const previous = events[index - 1];
+  return previous?.payload.kind === "message" && previous.provenance?.sourceLabel !== undefined
+    && previous.provenance.sourceLabel !== DAMAGING_WEATHER_LOOP_SCRIPT && END_TURN_PRINT_PREVIOUS_SCRIPTS.has(previous.provenance.sourceLabel);
+}
+
+/**
  * pso1 (ROM labs etk1-perish-*, Scene OFF rows, hcr3mProbe): the rows from the previous script's release to the Perish Song count print's first
  * glyph that the engine does not present. After a move's last print (the Splash "But nothing happened!" lab): release 368 -> MoveEnd -> PerishSongCountGoesDown+0x3 ex1 378 -> glyph 379
  * (10 rows more than the engine's one MoveEnd receipt row; seed 2741's ROM rows after a paralysis print 5 more, after "But it failed!" 12 more). After the Perish Song cast's own print (`waitmessage 64`; PerishSongLoop x4 batters, MoveEnd, the end-turn step): release
@@ -1626,6 +1640,7 @@ function endTurnChainLeadRows(events: readonly BattleKernelSemanticEvent[], inde
       ? END_TURN_NEXT_SCRIPT_ROWS : 0;
   }
   if (END_TURN_PRINT_SCRIPTS.has(label ?? "") && label !== DAMAGING_WEATHER_LOOP_SCRIPT && endTurnPrintFollowsDraggedOut(events, index)) return DRAGGED_OUT_END_TURN_PRINT_ROWS;
+  if (END_TURN_PRINT_AFTER_PRINT_LABELS.has(label ?? "") && endTurnPrintFollowsEndTurnPrint(events, index)) return END_TURN_PRINT_AFTER_PRINT_ROWS;
   if (label !== DAMAGING_WEATHER_LOOP_SCRIPT) return 0;
   for (let back = index - 1; back >= 0; back -= 1) {
     const previous = events[back]!;
