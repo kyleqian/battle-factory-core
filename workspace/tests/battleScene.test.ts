@@ -1907,8 +1907,8 @@ describe("turn5FaintDismissCursorTick (docs/turn5-resolve-ab-pools-diagnosis.md 
 });
 
 describe("S7 slice L (docs/faint-switch-notes.md §9's own follow-up, RAM-probed this session): the switch-in icon-bar re-trigger", () => {
-  it("TURN5_OPPONENT_ICON_STATES: only GROVYLE's own former slot (index 5) flips Full -> Statused, oracle-pixel-confirmed (docs §9's own correction)", () => {
-    expect(TURN5_OPPONENT_ICON_STATES).toEqual(["Empty", "Empty", "Empty", "Full", "Full", "Statused"]);
+  it("TURN5_OPPONENT_ICON_STATES: only GROVYLE's own former slot (index 5) flips Full -> Fainted, oracle-pixel-confirmed (docs §9's own correction)", () => {
+    expect(TURN5_OPPONENT_ICON_STATES).toEqual(["Empty", "Empty", "Empty", "Full", "Full", "Fainted"]);
   });
 
   it("turn5IconBarEva: the tick-6727 transient RAM-pinned this session (switchin-iconbar-transient.json) - flat (unblended) through the render tick right before the fade, then a 1-unit/tick ramp 16->0 over RAM ticks 6725-6741, clamped at 0 through the destroy tick", () => {

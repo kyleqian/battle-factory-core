@@ -264,7 +264,7 @@ export const TURN5_ICONBAR_FADE_START_TICK = 6725;
 
 export const TURN5_ICONBAR_DESTROY_TICK = 6742;
 
-export const TURN5_OPPONENT_ICON_STATES: readonly string[] = ["Empty", "Empty", "Empty", "Full", "Full", "Statused"];
+export const TURN5_OPPONENT_ICON_STATES: readonly string[] = ["Empty", "Empty", "Empty", "Full", "Full", "Fainted"];
 
 export const TURN13_ICONBAR_CREATE_AFTER_DISMISS = 26;
 
@@ -272,7 +272,7 @@ export const TURN13_ICONBAR_FADE_START_AFTER_DISMISS = 162;
 
 export const TURN13_ICONBAR_DESTROY_AFTER_DISMISS = 179;
 
-export const TURN13_OPPONENT_ICON_STATES: readonly string[] = ["Empty", "Empty", "Empty", "Statused", "Full", "Statused"];
+export const TURN13_OPPONENT_ICON_STATES: readonly string[] = ["Empty", "Empty", "Empty", "Fainted", "Full", "Fainted"];
 
 export const SWITCHIN_SENTOUT_LINE1 = "BUG CATCHER DESTIN sent";
 
@@ -1301,7 +1301,7 @@ export function turn5FaintedCursorYOffset(t: number, start: number): number {
 
 
 
-/** GROVYLE's own former slot (index 5) flips `"Full"` -> `"Statused"` (docs §9's own pixel correction) - the other 5 slots are unchanged from `ballIcons`' own opponent-side array. */
+/** GROVYLE's own former slot (index 5) flips `"Full"` -> `"Fainted"` (docs §9's own pixel correction) - the other 5 slots are unchanged from `ballIcons`' own opponent-side array. */
 
 
 export function turn5IconBarEva(t: number, fadeStartTick: number = TURN5_ICONBAR_FADE_START_TICK): number | null {
@@ -3349,7 +3349,7 @@ export function turn5KickoffBounceTickFromLatest(
  * turn 5's own constants, every pre-existing call site unaffected) let
  * MURKROW's own switch-in re-trigger this exact mechanism at a new anchor
  * with a new per-slot states array (Pidgeotto's own former slot also
- * flips to `"Statused"` now) - oracle-pixel-bisected new anchors: first
+ * flips to `"Fainted"` now) - oracle-pixel-bisected new anchors: first
  * visible slide pixel at render 16848 (`createTick+1`, the SAME "+1"
  * relationship turn 5's own `TURN5_ICONBAR_CREATE_TICK`/6588 pin
  * establishes) puts `createTick=16847`; first visible fade-blend pixel at

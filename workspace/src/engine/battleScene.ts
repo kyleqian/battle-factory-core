@@ -10747,7 +10747,7 @@ export const turn5FaintedCursorX = lazyValue(() => LINE2_ORIGIN.x + measureText(
 
 
 
-/** Pidgeotto's own former slot (index 3, DESTIN's SECOND fainted mon) flips `"Full"` -> `"Statused"` - oracle-pixel-confirmed (0-diff tile match against `battle-interface-ball-display.json`'s own 4 states at the settled tick 16900) directly against `TURN5_OPPONENT_ICON_STATES`: index 3 flips, index 4 (MURKROW, freshly sent out) stays `"Full"`, index 5 (GROVYLE) stays `"Statused"` unchanged from turn 5. */
+/** Pidgeotto's own former slot (index 3, DESTIN's SECOND fainted mon) flips `"Full"` -> `"Fainted"` (the label was "Statused" while the sheet was named in enum order; obr2 renamed the tiles to the ROM offsets) - oracle-pixel-confirmed (0-diff tile match against `battle-interface-ball-display.json`'s own 4 states at the settled tick 16900) directly against `TURN5_OPPONENT_ICON_STATES`: index 3 flips, index 4 (MURKROW, freshly sent out) stays `"Full"`, index 5 (GROVYLE) stays `"Statused"` unchanged from turn 5. */
 
 
 /**
