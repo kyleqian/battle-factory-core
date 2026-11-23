@@ -1111,7 +1111,7 @@ export const WAITMESSAGE_LONG_HOLD_FRAMES = 64;
  * the first glyph comes 5 rows later and the print's effectivenesssound (SE 13) 7 rows later than the engine's, so the message holds 2 more rows.
  */
 const SELF_CONFUSION_HIT_MESSAGE_ID = "STRINGID_ITHURTCONFUSION";
-const SELF_CONFUSION_OFF_PRE_PRINT_ROWS = 5;
+const SELF_CONFUSION_OFF_PRE_PRINT_ROWS = 3;
 /**
  * ftp1 item 4: BattleScript_EffectFocusPunch's printstring (STRINGID_PKMNLOSTFOCUS) starts its first glyph 16 rows after the engine's
  * command start (s310 d3, after a not-very-effective print: ROM +0xa print at 560 against 544; the held-item SE 152 -17 -> -1).
@@ -7399,6 +7399,13 @@ const USED_MOVE_SOUND_LEAD = 1;
 const USED_MOVE_ANIM_SOUND_LEAD_SCENE_ON = 2;
 const PLAIN_BODY_SOUND_LEAD_MIN_L = 4;
 const MOVE_BODY_SOUND_CLOCK_LEAD = 7;
+/**
+ * ohr1 (Scene OFF; ROM s499 d23 / s7295 / s830, the hse1m "pre-move head" windows): the pre-move head prints that attackcanceler jumps to
+ * (MoveUsedIsConfused / ConfusedNoMore / InLove, kernel u = 2 .. 5) are `printstring` rows at commit + 6 + u like the used print, so
+ * a head after a longer effect entry (SpeedDownHit u = 6, plain print row 12; confusion u = 5, ROM print row 11) starts u - 2 frames after the
+ * stage walk's commit + 9, not on it. Asleep (walk ends on `before-turn`) and the wake-up (status command first) keep their own rules.
+ */
+const OFF_HEAD_PRINT_LABELS: ReadonlySet<string> = new Set([CONFUSION_HEAD_SCRIPT, CONFUSION_NO_MORE_HEAD_SCRIPT, IN_LOVE_HEAD_SCRIPT]);
 function usedMovePrintLeadU(state: BattleResolutionPresentationState, handoff: BattleResolutionConfirmHandoff): number | null {
   if (handoff.forced !== undefined || handoff.focusPunchPrePass === true) return null;
   // chg1's continuation segment and charge-turn box were measured in Scene OFF only (pixel labs); Scene ON keeps hcr2's first-segment USEDMOVE rule.
@@ -7409,7 +7416,8 @@ function usedMovePrintLeadU(state: BattleResolutionPresentationState, handoff: B
   const first = segment.events.find((event) => event.payload.kind !== "set-battler-pp-data");
   if (first === undefined || first.payload.kind !== "message") return null;
   const chargeBox = sceneOff && first.payload.messageId === "STRINGID_EMPTYSTRING3" && first.provenance?.sourceLabel === CHARGE_TURN_SCRIPT;
-  if (first.payload.messageId !== "STRINGID_USEDMOVE" && !chargeBox) return null;
+  const head = sceneOff && OFF_HEAD_PRINT_LABELS.has(first.provenance?.sourceLabel ?? "");
+  if (first.payload.messageId !== "STRINGID_USEDMOVE" && !chargeBox && !head) return null;
   const u = first.provenance?.instructionExecution;
   return u === undefined || u < USED_MOVE_LEAD_MIN_U || u > USED_MOVE_LEAD_MAX_U ? null : u;
 }
