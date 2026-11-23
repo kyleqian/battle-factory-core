@@ -2515,8 +2515,14 @@ function moveAnimationScriptLeadTiming(
  * bdt1-dig-player-on, attack-turn SEs +10 .. +11 before, 0 .. -2 after).
  */
 const TWO_TURN_MOVES: ReadonlySet<number> = new Set([13, 19, 76, 91, 130, 143, 291, 340]);
+const MOVE_SOLAR_BEAM = 76;
 const TWO_TURN_SECOND_PRINT_PRESS_ROWS = 6;
 const TWO_TURN_PLAYER_NO_PRESS_ROWS = 10;
+function lastEventBeforeMoveEnd(events: readonly BattleKernelSemanticEvent[], index: number): BattleKernelSemanticEvent | undefined {
+  let i = index - 1;
+  while (i >= 0 && events[i]!.provenance?.sourceLabel === "BattleScript_MoveEnd") i -= 1;
+  return events[i];
+}
 /**
  * ftp1 (s8108 d12 gen:219 +48 once cfs1's Levitate hold landed): a second-turn used print right after the "snapped out of its confusion" print
  * (`BattleScript_MoveUsedIsConfusedNoMore`, a separate presented command with its own hold) carries that script's wait rows in its instruction
@@ -2530,6 +2536,7 @@ function twoTurnSecondPrintLead(
   beforeRules: BattleScriptRulesContext,
   actionSnapshot: BattleScriptActionMessageSnapshot | null | undefined,
   previous?: BattleKernelSemanticEvent,
+  beforeMoveEnd?: BattleKernelSemanticEvent,
 ): { leadFrames: number } | null {
   const currentMove = actionSnapshot?.currentMove;
   if (currentMove === undefined || !TWO_TURN_MOVES.has(currentMove) || (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0) return null;
@@ -2537,6 +2544,9 @@ function twoTurnSecondPrintLead(
     || (event.provenance?.sourceLabel !== "BattleScript_HitFromAtkString" && event.provenance?.sourceLabel !== "BattleScript_HitFromAccCheck")) return null;
   if ((beforeRules.battlers[actionSnapshot!.attacker]!.status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_MULTIPLETURNS) === 0) return null;
   const exec = event.provenance.instructionExecution;
+  // ttf1: after another action whose hit script ended on its result message (super effective / critical, BattleScript_HitFromAtkAnimation) the transition already puts the print on its ROM row; the press lead would count the effect-script rows twice (s830 d1 / d10 +17 / +12 -> -1 / -6, ttf1-solarbeam-slowfoe-supereff-on +11 -> -7). A neutral hit has no such message and keeps the lead (ttf1-solarbeam-slowfoe-tackle-on).
+  if (currentMove === MOVE_SOLAR_BEAM && previous?.provenance?.sourceLabel === "BattleScript_MoveEnd"
+    && beforeMoveEnd?.payload.kind === "message" && beforeMoveEnd.provenance?.sourceLabel === "BattleScript_HitFromAtkAnimation") return null;
   const afterConfusionPrint = previous?.payload.kind === "message" && previous.provenance?.sourceLabel === CONFUSION_ENDED_SCRIPT && previous.provenance.instructionExecution !== undefined
     ? previous.provenance.instructionExecution + TWO_TURN_AFTER_CONFUSION_PRINT_ROWS : 0;
   return { leadFrames: TWO_TURN_SECOND_PRINT_PRESS_ROWS - (actionSnapshot!.attacker === 0 ? TWO_TURN_PLAYER_NO_PRESS_ROWS : 0) + exec - afterConfusionPrint };
@@ -6311,8 +6321,8 @@ export function projectBattleResolutionCommands(
         advance: "automatic",
         ...(selfConfusionOff ? { leadFrames: SELF_CONFUSION_OFF_PRE_PRINT_ROWS } : {}),
         ...(event.provenance?.sourceLabel === FOCUS_PUNCH_LOST_FOCUS_SCRIPT ? { leadFrames: FOCUS_PUNCH_LOST_FOCUS_PRE_PRINT_ROWS } : {}),
-        ...(twoTurnSecondPrintLead(event, beforeRules, actionSnapshot, events[index - 1]) ?? {}),
-        ...(carryBeforeGlyph > 0 ? { leadFrames: (twoTurnSecondPrintLead(event, beforeRules, actionSnapshot, events[index - 1])?.leadFrames ?? 0) + carryBeforeGlyph } : {}),
+        ...(twoTurnSecondPrintLead(event, beforeRules, actionSnapshot, events[index - 1], lastEventBeforeMoveEnd(events, index)) ?? {}),
+        ...(carryBeforeGlyph > 0 ? { leadFrames: (twoTurnSecondPrintLead(event, beforeRules, actionSnapshot, events[index - 1], lastEventBeforeMoveEnd(events, index))?.leadFrames ?? 0) + carryBeforeGlyph } : {}),
         ...(endTurnChainLeadRows(events, index, (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) === 0) > 0
           ? { leadFrames: endTurnChainLeadRows(events, index, (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) === 0) } : {}),
         ...(payload.messageId === "STRINGID_TARGETFAINTED"
