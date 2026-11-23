@@ -77,7 +77,7 @@ S = {
     "kols": (19, 50, [73], 0, 303, 5, [33], 0, [0]),
     "kotoxic": (19, 50, [92], 0, 303, 5, [33], 0, [0]),
     "kosand": (19, 50, [201], 0, 303, 5, [33], 0, [0]),
-    "kosandfirst": (19, 50, [201], 0, 303, 100, [33], 0, [0]),
+    "kosandfirst": (74, 50, [201], 0, 303, 100, [150], 0, [0]),
 }
 ETP3 = {"sandstormu3", "lightscreen6", "reflect6", "lightscreenls6", "reflectls6", "recoverls4", "sunls3", "haills3", "sandls3", "foesendls2", "slackoffls2", "morningsunls2", "synthesisls2", "moonlightls2", "softboiledls2", "milkdrinkls2"}
 FKT1 = {"kols", "kotoxic", "kosand", "kosandfirst"}
@@ -100,7 +100,7 @@ for name in want:
             else:
                 seg += [{"frames": 2, "buttons": ["A"]}, {"frames": 1100, "buttons": []}]
         if name == "foesendls2" or name in FKT1:  # the KO turn: the faint box waits for A presses (swt1-foe-faint-poison's tail)
-            seg[-1]["frames"] = 400
+            seg[-1]["frames"] = (650 if scene == "on" else 900) if name in ("kosand", "kosandfirst") else 400
             for _ in range(6):
                 seg += [{"frames": 2, "buttons": ["A"]}, {"frames": 120, "buttons": []}]
             seg += [{"frames": 1200, "buttons": []}]

@@ -3,7 +3,7 @@ import type { LiveMovePaletteInput } from "./liveMoveAnimationPalette.ts";
 import type { LiveMoveSpriteAllocatorInput, LiveMoveSpriteOrderInput } from "./liveMoveSpriteAllocator.ts";
 import type { LiveBattlerX2History, LiveMoveBattlerX2Input } from "./liveBattlerX2History.ts";
 import { battleMoveAnimationRequest, type BattleMoveAnimationRequest } from "./battleMoveAnimation.ts";
-import { opponentPartySummaryDrawTiming } from "./midBattleOpponentPartySummaryTiming.ts";
+import { opponentPartySummaryDrawTiming, weatherTailFrames } from "./midBattleOpponentPartySummaryTiming.ts";
 import { aiReplacementChoiceWork, speciesTypesOf } from "./battleScriptOpenPartyScreenOpcode.ts";
 import {
   NO_MOVES_BOUNCE_STOP_AFTER,
@@ -1551,6 +1551,21 @@ const END_TURN_WEATHER_PRINT_EXTRA_ROWS = 1;
  */
 const DAMAGING_WEATHER_LOOP_SCRIPT = "BattleScript_DamagingWeatherLoop";
 const DAMAGING_WEATHER_LOOP_AFTER_HP_ROWS = 3;
+/** fkt1: rows the weather loop still runs after a foe's weather-KO faint (null cause or a later weather hit in the loop: no tail). Turn order is gBattlerByTurnOrder (singles: 2 slots). */
+function weatherKoTailRows(events: readonly BattleKernelSemanticEvent[], index: number, afterRules: BattleScriptRulesContext): number {
+  let faintAt = -1;
+  for (let at = index - 1; at >= 0; at -= 1) if (events[at]!.payload.kind === "faint-animation") { faintAt = at; break; }
+  if (faintAt < 0) return 0;
+  let cause: BattleKernelSemanticEvent | null = null;
+  for (let at = faintAt - 1; at >= 0; at -= 1) if (events[at]!.payload.kind === "hp-change") { cause = events[at]!; break; }
+  if (cause === null || cause.provenance?.sourceLabel !== DAMAGING_WEATHER_LOOP_SCRIPT) return 0;
+  for (let at = faintAt + 1; at < index; at += 1) {
+    const event = events[at]!;
+    if (event.payload.kind === "hp-change" && event.provenance?.sourceLabel === DAMAGING_WEATHER_LOOP_SCRIPT) return 0;
+  }
+  const slot = afterRules.battlerByTurnOrder.slice(0, 2).indexOf(1);
+  return slot < 0 ? 0 : weatherTailFrames(1 - slot);
+}
 // Wish's heal print after its hp command (ROM lab etp1-wish: +5 rows, both scenes). Perish Song's count prints: `perishCountChainLeadRows` (pso1).
 const WISH_SCRIPT = "BattleScript_WishComesTrue";
 const END_TURN_NEXT_SCRIPT_ROWS = 5;
@@ -6810,7 +6825,7 @@ export function projectBattleResolutionCommands(
             : opponentPartySummaryDrawTiming(lastFaintBattler === 1, event.provenance?.sourceLabel === "BattleScript_DoSwitchOut", (() => {
               const work = lastFaintBattler === 1 ? faintReplacementChoiceWork(beforeRules, currentField, events, index) : null;
               return work === null ? 0 : aiReplacementChoiceExtraFrames(work);
-            })(), commands[commands.length - 1]?.type === "hp" && commands[commands.length - 1]!.timing === SHELL_BELL_HP_TIMING)
+            })(), commands[commands.length - 1]?.type === "hp" && commands[commands.length - 1]!.timing === SHELL_BELL_HP_TIMING, lastFaintBattler === 1 ? weatherKoTailRows(events, index, afterRules) : 0)
           : undefined,
       }));
       continue;
