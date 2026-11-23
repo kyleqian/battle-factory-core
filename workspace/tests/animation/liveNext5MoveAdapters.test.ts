@@ -20,7 +20,7 @@ const cases = [
   { id: 184, move: "SCARY_FACE", duration: 190, shadow: false, route: { seed: 14, slot: 3 as const, streak: 0 } },
   { id: 137, move: "GLARE", duration: 213, shadow: true, route: { seed: 1, slot: 1 as const, streak: 7 } },
   { id: 298, move: "TEETER_DANCE", duration: 169, shadow: true, route: { seed: 49, slot: 1 as const, streak: 0 } },
-  { id: 146, move: "DIZZY_PUNCH", duration: 69, shadow: false, route: { seed: 49, slot: 0 as const, streak: 0 } },
+  { id: 146, move: "DIZZY_PUNCH", duration: 74, /* sbm1: Task_ClearMonBg holds the body 5 rows after the last picture (ROM clearmonbg; end) */ shadow: false, route: { seed: 49, slot: 0 as const, streak: 0 } },
   { id: 135, move: "SOFT_BOILED", duration: 272, shadow: true, route: null },
 ];
 
