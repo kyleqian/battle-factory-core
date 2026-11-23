@@ -81,7 +81,7 @@ describe("lsbz ordinary routes", () => {
     return { ...v.rules, rulesContext: { ...rc, hitMarker: rc.hitMarker & ~0x80 } };
   };
   it.each([
-    ["LIGHT_SCREEN 81/9 PILOSWINE (opponent)", 113, 81, 9, 0 as const, 88],
+    ["LIGHT_SCREEN 81/9 PILOSWINE (opponent)", 113, 81, 9, 0 as const, 86], // bwf1: 88 -> 86 (the ROM window),
     ["BLIZZARD 87/26 WALREIN -> JYNX (opponent, impact 198)", 59, 87, 26, 0 as const, 362],
   ])("route %s: body live on every age, following prompt reached, Scene ON/OFF parity", (_name, id, seed, streak, slot, ages) => {
     const on = generatedCommandAnimationReplay(seed, "on", [slot], streak);
