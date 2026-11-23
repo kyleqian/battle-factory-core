@@ -124,7 +124,8 @@ describe("effectiveness, faint and low-HP sounds match the ROM (aud241b)", () =>
       "115:se:14:63", "294:duck:476:null", "294:cry:19:25", "322:duck:476:null", "360:se:16:63",
     ]);
     expect(played(off.events).map((e) => e.frame)).toEqual([97, 276, 276, 304, 342]);
-    expect(frameDeltas("super-effective-window")).toEqual([1, 1, 1, 1, 1]);
+    // 2026-11-23 (hsw1 / mhs1 shape-A hit timing): the hit SE is on the ROM frame now (+1 -> 0); the hp -> print -> faint chain after it stays +1.
+    expect(frameDeltas("super-effective-window")).toEqual([0, 1, 1, 1, 1]);
     expect(frameDeltas("super-effective-off-window")).toEqual([0, 0, 0, 0, 0]);
   });
 
