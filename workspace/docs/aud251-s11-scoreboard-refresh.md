@@ -4121,3 +4121,34 @@ Base `0352b3197` (fold-20261123e). Presentation and sound timing only: no battle
 **Carried.** The opponent-side Light Screen compare keeps its pre-existing pixel differences (26 / 121 matched, unchanged by this step). Light Screen mechanic labs include an upstream no-adapter Tackle offset (-14 / -20), so the opponent lab `tools/battle-lab/bwf1-lightscreen-opponent-on.json` was used.
 
 **Gates.** Targeted tests (name and id greps over `tests/`, `tests/animation/*` for these bodies, `tl204*`, `aud242*`, `aud248*`, `fam1*`, `randomRoundSoak*`, `lbrd`) green; `battleSoundTable.ts --check` current; `npm run typecheck` clean.
+
+## ohr2: Scene OFF wake-up and asleep head prints on ROM row 6 + u (2026-11-23)
+
+Branch `worker/side-20261123-225125`, base fold-20261123g (`07dd75359`), rule commit `811de59c8`. Scene OFF only; one source file, `src/engine/battleResolutionPresentation.ts`.
+
+**Source rows (ROM per-frame probes, 15 OFF seeds, `p/*-full.rom.json`).** The first print of a turn-opening head is `commit + 6 + u`, u = the printstring's `instructionExecution` (attackcanceler is the effect script's row u - 1).
+
+| head | u | ROM print row | engine before | engine now |
+|---|---|---|---|---|
+| `MoveUsedWokeUp` (seven T2 windows, 13 mass) | 3 / 4 / 6 | 9 / 10 / 12 | fixed 11 | 6 + u |
+| `MoveUsedIsAsleep` (14 windows; ohr1 table -1 / -2 / -4) | 2 / 3 / 5 | 8 / 9 / 11 | fixed 7 | 6 + u |
+
+The ohr1 note that the asleep head is "the same u cause" holds. The wkl1m -15 asleep / wake print after a hit is **not** this cause: bbk1 already fixed it (wkl1m-wakeup-{player,foe}-off are at 0 mass before and after).
+
+**Rule (three coupled pieces, all Scene OFF).**
+1. Turn-opening wake-up: the status command lasts `u - TURN_START_PRINT_BASE_U` (the same `u - 3` rule gsp2 gave Scene ON), so the print lands on 6 + u. Only `index === 0` actions (the turn-opening one) take it; mid-turn wakes keep `sceneOffStatusFrames`.
+2. Turn-opening asleep: `turnOpensWithAsleepPrintHold` holds the `before-turn` confirm-handoff stage `u - 1` rows (reusing `usedMoveLeadHold`), so the print lands on 6 + u.
+3. `ASLEEP_ANCHOR_SCENE_OFF_ROWS = -3`: once the asleep print moved to its ROM row, the next action's first print was uniformly 3 rows late (ROM print -> next print 103 against the engine's 106; the asleep script's `statusanimation` row is skipped in Scene OFF). The old early print masked it; the hold alone raised T2 OFF mass 627 -> 669, with the -3 it is 597.
+
+**Acceptance.**
+- Labs (`labCompare.sh --scene off`, before -> after): wkl1m-wakeup-player-off 0 -> 0 mass, wkl1m-wakeup-foe-off 0 -> 0, hpf4m-confuse-off 1422 -> 1422, enc276-struggle-off 0 -> 0, pau3-rest-off 0 -> 0, etp1-spore-off 0 -> 0, bdt1-rest3-player-off SE mass 2 (1 offset) -> 0 (3 / 3 exact), print mass 3 -> 2. attack-canceler-asleep-off has no engine SE rows (ROM capture only).
+- T2 OFF (24 seeds, `RESCORE_SCENES=off tools/audio/rescoreAll.sh`, `soundScoreboard.py`): mass 627 -> 597, exact 872 -> 897, offset 261 -> 236, missing 0 / extra 0. battle-controller SE 437 -> 410, stat-change SE 91 -> 85, cry 97 -> 100 (the s2230 d5 term below). All 14 turn-opening asleep windows now print on ROM 8 / 9 / 11 with the next print equal to the ROM, except s830 d10. T2 ON not re-run (commands identical, below).
+- Census 0..199 (`lsd194Census.sh` 07dd75359 vs 811de59c8, `rst197CensusDelta.py --digest`): eventsDigest and error identical 200 / 200 in both scenes; Scene ON 200 / 200 battles command-identical (63530 commands); Scene OFF 172 identical, 28 changed (all asleep / wake-up turns: the move-animation / message pause 3 rows shorter, status 0 -> `-2` / `-3` rows). `tree/` copies deleted.
+- Tests: `tests/ohr1*.test.ts`, `hse2*`, `factoryBattleScriptWakeUpFullTurn`, `battleScriptAttackCancelerAsleep`, `off121StatusCommand`, `randomRoundSoak*`, `lbrd` (15 files, 168 tests) green with no pin moved. `npm run typecheck` clean, `npm run test:gate` 360 files / 2839 tests green, `npm run build` green.
+
+**Scene ON.** The ON wake-up head already has this rule (gsp2: `u - 3`), so edit 1 is ON-neutral by construction. The asleep hold and -3 are OFF-gated: no ON ROM probe of the asleep head was taken here, so ON is left alone (no T2 / lab proof). Open: an ON asleep-head probe (same 15-seed method on the ON t2n seeds) would show whether ON has a head term.
+
+**Carried (not this rule).**
+- 5 OFF wake-up windows at u = 3 stay +1: a 0-frame status command still takes one frame.
+- s830 d10: the engine move (Giga Drain) differs from the ROM's (a u = 5 entry); a harness desync, not a rule.
+- s2230 d5: after a Bounce first charging turn the post-miss chain has a separate +6 term that the old 6-early wake print hid; it now shows in cry mass (+3).
