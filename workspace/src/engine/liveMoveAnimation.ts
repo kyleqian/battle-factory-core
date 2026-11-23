@@ -1503,7 +1503,9 @@ function liveMoveAnimationDurationOf(
     // Knock Off: 59 rows (70..128 / 74..132) at accepted presentation age -11 (ageOffset -11): reducer age 0 = frame 81/85 =
     // activation + 6 (prep6 s2.4), so live age 0 is the reducer's age 0 and the activation is live age -6 (no #142 row).
     // The window ends 4 frames after the script end (124/128); duration = rows + ageOffset (the Dragon Breath convention).
-    case 282: return 48;
+    // kse1: the ROM's gAnimScriptActive is high 49 rows (labs out2-knockoff{,rev}-on: 68 -> 117), the shape-A window (idle 6 + live) is len + 1 = 50, so the live body is 44:
+    // the 4 rows past the script end (reducer ages 44..47) repeat the settled age-35 frame (the slides end at 35). The hit / print after it were +4 in 4 of 4 T2 segments.
+    case 282: return 44;
     // Faint Attack: 221 rows with the restore lag (2344..2564 accepted player attacker), reducer ages 0..220 (faintAttack.ts
     // LAST_ANIMATION_OWNED_AGE); the window starts 4 frames after the script activation (row -4, no #142 shadow row). Both attacker sides
     // (prep6 s0 player; S10A sides opponent). Faithful timing (fa185): the policy's per-side restore lag (player none: 220 rows, the

@@ -1595,10 +1595,13 @@ const LIVE_MOVE_SOUND_PRE_ROW_IDS: ReadonlySet<number> = new Set([53, 157, 185, 
 // Metal Claw (232): the box's bdt1 window (154 = the 140-row source body + the ROM script's 14 held rows, ROM labs bdt1-metalclaw-*-on)
 // is the same Cmd_end wait hit1 measured (14 rows); the tdr1 merge keeps bdt1's.
 const CMD_END_SE_WAIT_MODELED_MOVE_IDS: ReadonlySet<number> = new Set([47, 76, 120, 232, LIVE_TRANSFORM_MOVE_ID]);
+// kse1: Scary Face (184), a lead4 S body, keeps its ROM-measured script tail but not the Cmd_end wait: its script ends on SE_M_STRING_SHOT2's song (row 146 + 1 + 60 = 207 =
+// the ROM's gAnimScriptActive length, labs aud242k-scaryface-player-on / mechanic-scary-face-*), 14 rows past the 190-row window (idle 4 + live 190 = 194), so the SE 245 / print after it was -12 / -14.
+const CMD_END_SE_WAIT_S_BODY_MOVE_IDS: ReadonlySet<number> = new Set([184]);
 export function cmdEndSeWaitRuleApplies(request: BattleMoveAnimationRequest): boolean {
   const id = request.moveId;
   return request.turnTrapBody !== true && request.generalRain !== true && !CMD_END_SE_WAIT_MODELED_MOVE_IDS.has(id)
-    && (!bodyLeadRuleApplies(id) || bodyHitTailRuleApplies(id)) && !LSE4_WINDOW_SHORT_ROWS.has(id);
+    && (!bodyLeadRuleApplies(id) || bodyHitTailRuleApplies(id) || CMD_END_SE_WAIT_S_BODY_MOVE_IDS.has(id)) && !LSE4_WINDOW_SHORT_ROWS.has(id);
 }
 // The duration is read many times per row (moveBodyExtraRows walks every command): cached per (request, field, body class, use).
 const END_SE_WAIT_CACHE = new WeakMap<BattleMoveAnimationRequest, WeakMap<BattleResolutionDisplayedField, Map<string, number>>>();

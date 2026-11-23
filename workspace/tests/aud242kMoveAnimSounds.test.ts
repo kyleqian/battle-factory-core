@@ -58,7 +58,7 @@ const SPECS: Array<{ name: string; ids: number[]; delta: number; rows: number }>
   { name: "firepunch-player", ids: [144, 147], delta: 0, rows: 2 },
   { name: "yawn-player", ids: [237, 232], delta: 0, rows: 3 },
   { name: "smokescreen-player", ids: [135, 159], delta: -2, rows: 2 },
-  { name: "scaryface-player", ids: [189, 192, 130], delta: -2, rows: 3 },
+  { name: "scaryface-player", ids: [189, 192, 130], delta: 0, rows: 3 /* kse1: sound-clock lead 5 -> 7 (labs aud242k-scaryface-player-on / mechanic-scary-face-*: SE 189 / 192 / 130 on the ROM rows) */ },
   { name: "wish-player", ids: [207, 195], delta: -5, rows: 4 },
   { name: "safeguard-player", ids: [225, 102], delta: 0, rows: 2 },
   { name: "lovelykiss-player", ids: [200, 226], delta: 0, rows: 2 },

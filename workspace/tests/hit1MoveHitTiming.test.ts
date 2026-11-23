@@ -99,11 +99,16 @@ describe("hit1: liveMoveEndSeWaitRows is the ROM's missing tail, move by move", 
   });
 
   it("0 where the rows after the window are ROM-measured another way, or the window models the wait itself", () => {
-    // Dragon Rage (lead-table: its tuned 26-row tail holds the wait), Toxic (status-tail), Scary Face (s-lead script tail), Sing
+    // Dragon Rage (lead-table: its tuned 26-row tail holds the wait), Toxic (status-tail), Sing
     // (liveSingBodyRows runs to the 90-row cap), Solar Beam (its unleash idle rows), Absorb (lse4 window-short rows), Self-Destruct.
-    for (const id of [82, 92, 184, 47, 76, 71, 120]) {
+    for (const id of [82, 92, 47, 76, 71, 120]) {
       expect(cmdEndSeWaitRuleApplies(req(id, 0)), `move ${id}`).toBe(false);
       expect(liveMoveEndSeWaitRows(req(id, 0), field), `move ${id}`).toBe(0);
+    }
+    // kse1: Scary Face (an s-lead body) waits for SE_M_STRING_SHOT2: ends row 207 = the ROM's gAnimScriptActive length (labs aud242k-scaryface-player-on, mechanic-scary-face-*), window idle 4 + live 190
+    for (const attacker of [0, 1] as const) {
+      expect(cmdEndSeWaitRuleApplies(req(184, attacker))).toBe(true);
+      expect(liveMoveEndSeWaitRows(req(184, attacker), field)).toBe(14);
     }
     // a body whose SEs end inside its window: Karate Chop, Bite
     expect(liveMoveEndSeWaitRows(req(2, 0), field)).toBe(0);

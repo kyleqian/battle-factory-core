@@ -54,7 +54,7 @@ describe("land97 idle lead rows", () => {
         expect(liveMoveAnimationDuration(req(id, side), plain)).toBe(d);
         expect(liveMoveIdleLeadRows(req(id, side), plain)).toBe(n);
         // iu120: + the universal pre / post rows around the lead + body (tests/iu120UniversalRows.test.ts).
-        expect(battleResolutionCommandDuration(command(req(id, side)), plain)).toBe(d + n + iu120Extra(id, side === 0 ? "player" : "opponent"));
+        expect(battleResolutionCommandDuration(command(req(id, side)), plain)).toBe(d + n + iu120Extra(id, side === 0 ? "player" : "opponent") + (id === 184 ? 14 : 0)); // kse1: + Scary Face's Cmd_end SE_M_STRING_SHOT2 wait
       }
     }
   });

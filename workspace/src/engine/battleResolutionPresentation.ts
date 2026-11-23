@@ -2410,8 +2410,8 @@ export const C_LEAD_WINDOW_ADJUST: ReadonlyMap<number, number> = new Map([[47, 3
 const C_LEAD_SOUND_CLOCK_LEADS: ReadonlyMap<number, number> = new Map([[109, 6]]);
 /** The lead the S bodies' sound clock was calibrated on (the generic move-body clock, AGE_TO_SOUND_ROWS = 7). */
 const LEAD4_SOUND_CLOCK_LEAD = 7;
-/** Per-body clock leads (ROM minus ours on the 7 clock: Smokescreen / Scary Face / Metal Sound -2, Sweet Scent -3 in the aud242 fixtures; Double Team, 98 of 190 T2 SEs, +2 before the shift is -4): their SEs sit closer to the print release. */
-const LEAD4_SOUND_CLOCK_LEADS: ReadonlyMap<number, number> = new Map([[108, 5], [184, 5], [319, 5], [230, 6], [104, 5]]);
+/** Per-body clock leads (ROM minus ours on the 7 clock: Smokescreen / Metal Sound -2 (Scary Face: kse1, 184 = the 7 clock after its SE-wait window, labs exact), Sweet Scent -3 in the aud242 fixtures; Double Team, 98 of 190 T2 SEs, +2 before the shift is -4): their SEs sit closer to the print release. */
+const LEAD4_SOUND_CLOCK_LEADS: ReadonlyMap<number, number> = new Map([[108, 5], [184, 7], [319, 5], [230, 6], [104, 5]]);
 /** `precedingRows`: the rows of the `stat` commands presented between the used print and the body (the S bodies' counter lead is those plus `bodyLeadFrames`). */
 export function lse2BodySoundAgeShift(moveId: number, bodyLeadFrames: number | undefined, precedingRows = 0): number {
   if ((bodyLeadFrames ?? 0) <= 0) return 0;
@@ -2937,6 +2937,13 @@ const LEECH_SEED_DRAIN_LEGACY_LAG = 7;
  */
 const LEECH_SEED_DRAIN_IDLE_CONTROLLER_EARLY_ROWS = 9;
 const DAMAGING_WEATHER_CONTINUES: ReadonlySet<string> = new Set(["SANDSTORM_CONTINUES", "HAIL_CONTINUES"]);
+/**
+ * kse1: a held item's animation right after a Rain / Sun tick (the non-damaging weathers; T2 ON s2 d10 +10, kse1-rainleftovers-on +9 on every SE and the print): the weather
+ * script's Cmd_end drained its own SE, so the controller is idle when the item's `playanimation` arrives and launches on the script's exec row, 9 rows before the
+ * restart lead's launch (the same idle-controller start as ldw1's drain). Sun's is 9 + 5: its command (SUN_CONTINUES, 1 + 158 + 3) ends 5 rows later than the ROM's idle point
+ * (kse1-sunleftovers-on: item SEs and print +14 with the Rain's 9, exact with 14 in both turns).
+ */
+const HELD_ITEM_EFFECT_IDLE_CONTROLLER_EARLY_ROWS: ReadonlyMap<string, number> = new Map([["RAIN_CONTINUES", 9], ["SUN_CONTINUES", 14]]);
 const singlesBattlerCount = 2;
 function hitSeDrainLaunchLag(songId: number | null, hitAnimationRows: number, barRows: number): number | null {
   if (songId === null) return null;
@@ -6464,7 +6471,11 @@ export function projectBattleResolutionCommands(
         "held-item effect animation",
       );
       const { lead: baseLead } = heldItemEffectExecutionsAndLead(events, index);
+      const weatherPrevious = commands[commands.length - 1];
+      const idleWeatherEarlyRows = (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) === 0 && weatherPrevious?.type === "general-animation"
+        ? HELD_ITEM_EFFECT_IDLE_CONTROLLER_EARLY_ROWS.get(weatherPrevious.animation) : undefined;
       const lead = commands.length === playerSendInEnd ? HELD_ITEM_EFFECT_AFTER_SEND_IN_LEAD_FRAMES
+        : idleWeatherEarlyRows !== undefined && baseLead === HELD_ITEM_EFFECT_RESTART_LEAD_FRAMES ? baseLead - idleWeatherEarlyRows
         : baseLead === HELD_ITEM_EFFECT_RESTART_LEAD_FRAMES ? heldItemEffectAfterPrintLead(events, index) ?? baseLead : baseLead;
       heldItemEffects.push({
         at: commands.length, battler: pendingHeldItemEffectBattler, sequence: event.sequence,
