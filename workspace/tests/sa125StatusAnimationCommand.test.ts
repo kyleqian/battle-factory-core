@@ -133,8 +133,11 @@ function anchors(seed: number): { anchors: Anchor[]; unanchored: number; offAnim
   const on = battleSegments(seed, "on").flatMap((s) => s.commands.map((c: any) => ({ c, events: s.events })));
   // hse2 item 2: the Scene OFF confusion print before the used print holds 64 + 3 + 4 (ROM print -> used print 94 vs ON 90, hpf4m-confuse-off,
   // tests/hse2OffStatusHeads.test.ts); this test is about the status animation alone, so read that print at the ON hold.
-  const confusionOffHold = (c: any, events: any[]) => c.type === "message" && c.timing?.holdFrames === 71
-    && events.find((e: any) => e.sequence === c.eventSequence)?.payload.messageId === "STRINGID_PKMNISCONFUSED"
+  // ohs1: the same for the Scene OFF ConfusedNoMore (64 + 5) / InLove (64 + 3 + 3) prints before the used print (T2 OFF s7295 d8 / s6568 d29).
+  const confusionOffHold = (c: any, events: any[]) => c.type === "message"
+    && ((c.timing?.holdFrames === 71 && events.find((e: any) => e.sequence === c.eventSequence)?.payload.messageId === "STRINGID_PKMNISCONFUSED")
+      || (c.timing?.holdFrames === 69 && events.find((e: any) => e.sequence === c.eventSequence)?.payload.messageId === "STRINGID_PKMNCONFUSEDNOMORE")
+      || (c.timing?.holdFrames === 70 && events.find((e: any) => e.sequence === c.eventSequence)?.payload.messageId === "STRINGID_PKMNINLOVE"))
     ? { ...c, timing: { ...c.timing, holdFrames: 67 } } : c;
   const off = battleSegments(seed, "off").flatMap((s) => s.commands.map((c: any) => ({ c: confusionOffHold(c, s.events), events: s.events })));
   const messages = (l: typeof on) => l.filter((x) => x.c.type === "message").map((x) => x.c.messageId);
