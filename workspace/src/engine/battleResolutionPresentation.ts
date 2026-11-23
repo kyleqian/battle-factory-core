@@ -2770,6 +2770,8 @@ function hpItemAnimationSeGate(events: readonly BattleKernelSemanticEvent[], ind
  * after the bar the script runs 17 rows (HIT_TO_SEED_DRAIN_TAIL_ROWS beyond the bar's own + the two MoveEnd sprite-visibility rows) to the exec row.
  */
 const HIT_TO_SEED_DRAIN_TAIL_ROWS = 15;
+/** rcv1: Scene OFF, a drain after a hit: the ROM's Pausex20 -> seeded healthbarupdate runs 35 rows, the print-preceded 36 (44 = 8 + 36 fits the latter). */
+const OFF_HIT_SEED_DRAIN_EARLY_ROWS = 9;
 const SEED_DRAIN_PRESENTED_ROWS_BEFORE_EXEC = 2;
 /** The lag the drain command's minimumFrames was fitted with (battleResolutionPresentationRender.ts LEECH_SEED_DRAIN_SCRIPT_AGE; a test pins them equal). */
 const LEECH_SEED_DRAIN_LEGACY_LAG = 7;
@@ -2910,6 +2912,12 @@ function applyHpHitTails(
         commands[at] = Object.freeze({ ...seedDrain, timing: Object.freeze({ minimumFrames: seedDrain.timing.minimumFrames - LEECH_SEED_DRAIN_LEGACY_LAG + lag, launchLagFrames: lag }) });
       }
       continue;
+    }
+    if (leads.sceneOff && recoilPrevious?.type === "hit-animation" && recoilPrevious.battler === command.battler && rest[0]?.type === "sprite-visibility" && rest[1]?.type === "sprite-visibility"
+      && seedDrain?.type === "general-animation" && seedDrain.animation === "LEECH_SEED_DRAIN" && seedDrain.afterPlayerSendIn !== true && seedDrain.animated !== true) {
+      commands[index] = Object.freeze({ ...command, timing: Object.freeze({ minimumFrames: 0, tailFrames: HIT_TO_SEED_DRAIN_TAIL_ROWS }) });
+      const at = commands.indexOf(seedDrain);
+      commands[at] = Object.freeze({ ...seedDrain, timing: Object.freeze({ minimumFrames: seedDrain.timing.minimumFrames - OFF_HIT_SEED_DRAIN_EARLY_ROWS }) });
     }
     const transition = rest[0]?.type === "move-animation" && rest[1]?.type === "sprite-visibility";
     const endsTurn = rest.length > 0 && rest.every((c) => c.type === "sprite-visibility" || c.type === "turn-end");
