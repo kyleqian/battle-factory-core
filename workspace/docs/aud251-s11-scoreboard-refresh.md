@@ -3730,3 +3730,26 @@ Evidence (git-ignored): `.integration/evidence/ldw2/` (`lab-base` / `lab-a1` / `
 **s648 d10 / d12 (ldw1's two other drains): not landed.** Neither goes through the weather loop: d10 is a Pain Split tail (engine start 2 rows before exec) and d12 a Confuse Ray tail (13 rows early); the cause there is the previous command's modelled length, not a pending SE or a loop iteration, so this rule does not touch them. (Not re-probed here.)
 
 **Left.** The same two terms (a pending SE after a weather tick; 6 rows per undamaged loop iteration) are not applied to the other commands that follow a weather tick (a turn-end / next end-turn effect after a first battler's tick with an undamaged second battler is still the engine's 4-row tail against the ROM's 4 + 6; aic1m's weather-KO tail is the same iteration count). The weather-continues command's own length with both battlers immune was only checked for its drain successor.
+
+## fpf1 (2026-11-23): Focus Punch's strike body gets the counter lead, so the hit / hp / held-item chain after it is on the ROM clock
+
+Evidence (git-ignored): `.integration/evidence/fpf1/` (`t2-{base-on,a1,a2,a3}` + `score-*.txt`, `p/on/310-d2*` / `1415-d47` / `1415-d49` / `310-d3` probes, `lab-fp-{base,a1}`, `census/`).
+
+**Cause (source).** s310 d2 / s1415 d47: after the red-HP hit the engine's SE 90 is on the ROM row (-2) but the SE 152 chain of the held-item animation is 9 rows early (-9). The item animation starts on the ROM's hp row, and the engine's hp / hit commands sat ~6-9 rows ahead of the ROM because Focus Punch (264) was the one strike body without a body lead (`BODY_LEAD_RULE` skipped it as unaudited): the ROM prints "used" (`HitFromAtkString+0x1` ex2), then the animation kernel's counter lead (5 rows, as Thunder Punch's class B body) runs before the first body row, and the hit SE schedules from the body end. It is not an `IsBattleSEPlaying` gate: SE 90 does not gate the item animation in these rows (the ROM SE 152 is SE 13 + 63 + bar rows, the same as lab hie1-leftovers-on).
+
+**Rule (`src/engine/battleResolutionPresentation.ts`, commit `6d153054a`).** `HIT1_SHAPE_A_MOVE_IDS` = {9, 264}: Focus Punch is shape A (counter lead 5 in front of the body, hit tail). The post-hit command clock moves +6 rows.
+
+**Numbers.**
+- s310 d2 SE 152 chain **-9 -> -5** (3 rows: ROM 904 / 936 / 968, engine 899 / 931 / 963); s1415 d47 the same shape (-9 -> -5). The hit SE 13 goes -2 -> -3 (it now schedules from the body end); body SEs unchanged (-2); SE 90 unchanged (-2).
+- Labs (`labCompare.sh --scene on`, mass before -> after): aud250-focuspunch-opponent-on 12 -> 12, aud250-focuspunch-player-on 12 -> 12, mechanic-focus-punch-opponent-breloom-player-starmie 5 -> 4, mechanic-focus-punch-player-breloom-opponent-starmie 4 -> 5; hie1-leftovers-on 5, hie1-sitrus-on 0, hie1-shellbell-on 0 (unchanged, no Focus Punch).
+- T2 ON (25 seeds, `rescoreAll.sh`, ROM files t2n): **8,063 -> 7,968 (-95)**, exact / offset 3,365 / 2,512 -> 3,370 / 2,507, 0 missing / 0 extra. Move-animation SE 6,360 -> 6,262, battle-controller SE 1,116 -> 1,119 (+3, the hit SE 13), stat-change 253, cry 331, bgm 3 unchanged. T2 OFF not re-run (the rule is Scene ON presentation only; the census OFF arm is byte-identical).
+- Census 0..199 both scenes (`lsd194Census.sh`, `c15514b47` vs `6d153054a`, `rst197CensusDelta.py --digest`): eventsDigest + error identical 200 / 200 in both; ON 194 battles identical / 6 changed commands (63,530 commands, timing fields only, type sequences 0 changed), OFF 200 / 0 (62,225 commands), byte-identical shards 2 / 2; tree copies deleted.
+- Tests: 15 files / 222 tests (battleResolutionPresentation, aud261MoveAnimSounds, aud250GeneralAnimSounds, fpc180 / fpp150 / fps147 Focus Punch, focusPunchOracleEvidence, hit1*, hie1-4 / hie7, hpd1, lbrd) all green, no pin moved. `npm run typecheck` clean, `npm run test:gate` 360 files / 2,839 tests green, `npm run build` ok at `6d153054a` (tree `5ba16a164`).
+
+**Lost focus 16: not landed.** `FOCUS_PUNCH_LOST_FOCUS_PRE_PRINT_ROWS` stays 16 (no source row found for it; the ROM's `EffectFocusPunch+0x0` is 12 rows after the engine message, `+0xa` ex2 4 rows later, and the item SE 152 of s1415 d49 is -1). With the new lead the fit moves: T2 ON mass 7,968 at 16, **7,957 at 17**, 7,966 at 18. It is a refit of a fitted constant, not a source rule, so it was not landed; 17 is the measured plateau if a source row is found.
+
+**Left.**
+- The SE 152 chain after Focus Punch's strike is still -5 (SE 13 -3, SE 90 -2, body -2): the lead is the ROM's counter lead, the remaining rows are the body SEs' own -2 plus the item animation's start lead (restart 15 vs continue 9).
+- s310 d3: the sleep status-animation SE 197 after the item heal stays -9 (ROM SE 1025 = `ItemHealHP_Ret+0x18` ex1 start + 20; the engine plays it at the status-animation command + 3). No source row explaining the +9 was found in the time; nothing landed.
+- s1415 d50 was not probed.
+- No per-family offsets for carried mass (t2k7 section 6).
