@@ -15,6 +15,7 @@ import { prepareLiveMoveSpriteOrder, type LiveMoveSpriteOrderInput } from "../..
 import { knownEntrySpriteOrderState } from "../../src/engine/spriteOrderProvider.ts";
 import { generatedCommandAnimationReplay } from "../../tools/integration/generatedCommandAnimationReplay.ts";
 import { hit1SeWaitRows, hpd4BodyRows, iu120Extra } from "../helpers/iu120Rows.ts";
+import { LAND97_LEAD_ROWS } from "../helpers/land97LeadAges.ts";
 
 // docs/next-adapters-prep10.md: Magnitude (222), Reversal (179), Pain Split (220), Rock Blast (350), Razor Wind (13),
 // Spark (209; both attackers since spark62). The dense framebuffer proofs are tools/integration/fixtures/prep10-live/*.json
@@ -71,8 +72,8 @@ describe("live prep10 move adapters", () => {
       expect(liveMoveAnimationDuration(request(13, a, { turn: 0 }))).toBe(45);
       expect(liveMoveAnimationDuration(request(13, a, { turn: 1 }))).toBe(72);
     }
-    expect(liveMoveAnimationDuration(request(209, 0))).toBe(115);
-    expect(liveMoveAnimationDuration(request(209, 1))).toBe(115); // spark62
+    expect(liveMoveAnimationDuration(request(209, 0))).toBe(117);
+    expect(liveMoveAnimationDuration(request(209, 1))).toBe(117); // spark62; bwf2: ROM A 125 = idle lead 9 + 117 - 1
     // A Magnitude request that never saw a damagecalc carries the static table power 1: no adapter, no invented body.
     expect(liveMoveAnimationDuration(request(222, 0, { power: 1 }))).toBeNull();
   });
@@ -142,15 +143,15 @@ describe("live prep10 move adapters", () => {
     { move: "PAIN_SPLIT", id: 220, seed: 178, moves: [0], streak: 21, bodies: [81] },
     { move: "ROCK_BLAST", id: 350, seed: 68, moves: [0], streak: 0, bodies: [89, 89, 89] },
     { move: "RAZOR_WIND", id: 13, seed: 131, moves: [2], streak: 0, bodies: [45, 72] },
-    { move: "SPARK", id: 209, seed: 17, moves: [0], streak: 0, bodies: [115] },
+    { move: "SPARK", id: 209, seed: 17, moves: [0], streak: 0, bodies: [117] },
   ];
   it.each(routes)("completes ordinary $move and preserves ON/OFF rules and RNG", r => {
     const on = generatedCommandAnimationReplay(r.seed, "on", r.moves, r.streak);
     const off = generatedCommandAnimationReplay(r.seed, "off", r.moves, r.streak);
     const bodies = on.animations.filter(a => a.moveId === r.id && a.attacker === 0);
     // mxp1: Magnitude's 191 rows are its 175-row window + lead 10 + shape-A tail 6 (ROM lab mxp1-mag-p9, exact). lse4: Razor Wind's charge turn presents lead 1 + tail 4 (gap-print class), its unleash lead 5 + tail 4; the helper default is the unleash.
-    // hit1: + Cmd_end's IsSEPlaying rows (Reversal 1, Rock Blast 1 per hit, Spark 9: its SE_M_THUNDERBOLT2 at script row 87 ends on row 123).
-    expect(bodies.map(b => b.ages.length)).toEqual(r.bodies.map((n, i) => r.id === 222 ? n : n + iu120Extra(r.id) + hit1SeWaitRows(r.id) + (r.id === 13 && i === 0 ? 5 : hpd4BodyRows(r.id))));
+    // hit1: + Cmd_end's IsSEPlaying rows (Reversal 1, Rock Blast 1 per hit, Spark 9 until bwf2: its SE_M_THUNDERBOLT2 at script row 87 ends on row 123, inside the 117-row window + idle lead 9 now, so 0; bwf2: Spark is shape A with idle lead 9).
+    expect(bodies.map(b => b.ages.length)).toEqual(r.bodies.map((n, i) => r.id === 222 ? n : n + iu120Extra(r.id) + (LAND97_LEAD_ROWS.get(r.id) ?? 0) + hit1SeWaitRows(r.id) + (r.id === 13 && i === 0 ? 5 : hpd4BodyRows(r.id))));
     for (const body of bodies) {
       expect(body.ages).toEqual(Array.from({ length: body.ages.length }, (_, age) => age));
       expect(body.adapterActive.every(Boolean)).toBe(true);

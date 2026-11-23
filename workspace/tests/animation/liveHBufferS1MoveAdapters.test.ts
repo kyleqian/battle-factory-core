@@ -24,7 +24,7 @@ const cases = [
   { id: 275, move: "INGRAIN", duration: 164, shadow: 0, alt: ["LILEEP", "ONIX"], route: { seed: 26, move: 2 as const, streak: 0 } },
   { id: 35, move: "WRAP", duration: 38, shadow: 0, alt: ["OMANYTE", "ONIX"], route: { seed: 67, move: 3 as const, streak: 0 } },
   { id: 20, move: "BIND", duration: 45, shadow: 2, alt: ["ARBOK", "ONIX"], route: { seed: 138, move: 1 as const, streak: 0 } },
-  { id: 225, move: "DRAGON_BREATH", duration: 83, shadow: undefined, alt: ["DRATINI", "ONIX"], route: { seed: 136, move: 2 as const, streak: 0 } },
+  { id: 225, move: "DRAGON_BREATH", duration: 87, shadow: undefined, alt: ["DRATINI", "ONIX"], route: { seed: 136, move: 2 as const, streak: 0 } },
 ];
 
 function displayed(player: string, opponent: string): BattleResolutionDisplayedField {

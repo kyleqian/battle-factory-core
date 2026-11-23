@@ -1518,7 +1518,7 @@ const LIVE_MOVE_IDLE_LEAD_ROWS: ReadonlyMap<number, number> = new Map([
   // hit1: Thunder Punch 10 (idle94's table measured it, but its template scenario had no body; the frame catcher's ROM runs show the 10
   // rows as the field before the body, the same picture as production's age-0 frame: docs/hit1-move-hit-timing.md).
   [9, 10],
-  [41, 10], [44, 10], [51, 7], [52, 4], [55, 10], [71, 10], [74, 1], [75, 13], [82, 7], [92, 7], [93, 5], [94, 5], [106, 1], [120, 4],
+  [41, 10], [44, 10], [51, 7], [209, 9], [52, 4], [55, 10], [71, 10], [74, 1], [75, 13], [82, 7], [92, 7], [93, 5], [94, 5], [106, 1], [120, 4],
   [53, 18], [124, 4], [136, 1], [146, 13], [153, 4], [158, 4], [184, 4], [188, 4], [204, 4], [207, 7], [225, 6], [232, 4], [247, 5], [248, 5],
   [269, 10], [282, 6], [294, 1], [299, 10], [305, 7], [325, 8], [334, 1], [337, 6], [339, 4], [342, 7], [343, 1], [347, 3],
 ]);
@@ -1549,7 +1549,7 @@ const LIVE_MOVE_POST_ROWS = 2;
 // Sides whose pre rows are NOT proven to be the age-0 frame: idle lead N != 0 outside idle94's 40 static-lead moves, or N unknown.
 // hit1: Thunder Punch (9) left the list with its static lead (LIVE_MOVE_IDLE_LEAD_ROWS).
 const LIVE_MOVE_NO_PRE_ROW_SIDES: ReadonlyMap<number, number> = new Map([
-  [20, 3], [48, 3], [53, 3], [104, 3], [105, 3], [157, 1], [185, 3], [208, 3], [209, 3], [223, 3], [227, 3], [235, 3],
+  [20, 3], [48, 3], [53, 3], [104, 3], [105, 3], [157, 1], [185, 3], [208, 3], [223, 3], [227, 3], [235, 3],
 ]);
 // Sides whose trail is -1 (production's last row is the ROM's first inactive row): the post rows repeat it.
 const LIVE_MOVE_POST_ROW_SIDES: ReadonlyMap<number, number> = new Map([

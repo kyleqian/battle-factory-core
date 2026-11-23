@@ -2401,7 +2401,7 @@ const HIT1_SHAPE_A_MOVE_IDS: ReadonlySet<number> = new Set([9, 264]);
 // the one-hit bodies whose live window is the ROM's gAnimScriptActive length + 6 (labs hsw1-*-pfirst-on, bht1-*: window - A = 6) and whose hit SE was +1 / hp start -6
 // = the shape-A signature (lead 5 in front + hit tail 1 close it exactly).
 // Then Night Shade (101), Superpower (276), Luster Purge (295), Mist Ball (296), Silver Wind (318), Signal Beam (324): hp start -7..-9 -> 0 / -1 (Luster Purge, Signal Beam keep -1: their body is 1 row short of A + 1). Spark / Dragon Breath stay out: bodies 10 rows short of the ROM.
-const HSW1_SHAPE_A_MOVE_IDS: ReadonlySet<number> = new Set([2, 5, 11, 16, 88, 265, 302, 341, 342, 343, 101, 276, 295, 296, 318, 324]);
+const HSW1_SHAPE_A_MOVE_IDS: ReadonlySet<number> = new Set([2, 5, 11, 16, 88, 265, 302, 341, 342, 343, 101, 276, 295, 296, 318, 324, 209, 225]);
 /**
  * lse4 "gap-print": the lead is the kernel counter, the rows after the body are `T = 2 + gap - pre - post + s` with the ROM gap of the next command: a print (`printfromtable` / `printstring`) is
  * Delta + 1 (Recycle 3, the Razor Wind charge turn 7), any other next command is shape A (gap 4). Recycle 278, Razor Wind 13 (both turns).

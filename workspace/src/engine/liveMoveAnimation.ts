@@ -1531,8 +1531,8 @@ function liveMoveAnimationDurationOf(
     // Magnitude 411..585 (power 70, 174 frames) / 191..397 (power 110, 206 frames): the reducer's first inactive age, 118 + 8 * floor(power / 10) (mxp1: the ROM's gAnimScriptActive length, 158 at power 50).
     case 222: return request.power >= 10 ? magnitudeFirstInactiveAge(request.power) + 1 : null;
     // Razor Wind: setup 45 frames (195..240 / 192..237), unleash 72 (553..625 / 661..733); gAnimMoveTurn bit 0 selects the body.
-    // Spark 79..193 / 83..197 (activation + 9, row -9: no #142 shadow row), both attackers (spark62); the script runs 2 rows past the window.
-    case 209: return 115;
+    // Spark 79..193 / 83..197 (activation + 9, row -9: no #142 shadow row), both attackers (spark62).
+    case 209: return 117; // bwf2: window 115 + the 2 rows the script runs past it (ROM A 125 = idle 9 + 117 - 1; idle lead 9).
     case 13: return (request.turn & 1) === 0 ? 45 : 72;
     case 350: return 89; // Rock Blast per-hit body: activation..ROCK_BLAST_FIRST_INACTIVE_AGE (84/266/448 + 89 each).
     case 220: return 81; // Pain Split 445 / 446 .. +80 (81 accepted rows; the live window ends at the script's last active row).
@@ -1566,7 +1566,7 @@ function liveMoveAnimationDurationOf(
     case 126: return 197; // Fire Blast (1147..1343 / 215..411): window start = activation, window end = script end.
     case 7: return 101; // Fire Punch body A..first inactive (prep22 s0.1/A.1: identical across burn / no-burn / faint, both sides); Status_Burn is a later body.
     case 8: return 184; // Ice Punch script activation..first inactive row (staged 1966..2149 / 2339..2522); HP/text/freeze/Sitrus rows are queue commands.
-    case 225: return 83; // Dragon Breath: 85 rows 395..479 / 449..533 starting at presentation age -2.
+    case 225: return 87; // Dragon Breath (bwf2, shape A): ROM A 66..158 (93 rows) = idle lead 6 + 87 - 1 (+ the hit tail); was 83.
     case 248: return 114; // Future Sight turn-1 accepted window (77..190 / 81..194).
     case 153: return 213; // Explosion: ROM A length 216 (mxp1 labs, 61..276 / 65..280) - 3, as Self-Destruct (126 -> 123); was the older accepted 212.
     case 347: return CALM_MIND_CLEANUP_AGE + 1;
