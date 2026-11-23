@@ -4061,3 +4061,24 @@ Evidence (git-ignored): `.integration/evidence/ztl1/` (`t2-{base,after2}`, `scor
 - Psych Up: add 244 to `LEAD4_S_LEAD_MOVE_IDS` / `LIVE_MOVE_SCRIPT_TAIL_TRAIL_ROWS` once the body lead of a second-mover Psych Up (T2 seed 7295, lead about 2) is measured: the S-lead clock formula assumes the first-mover lead of the lab.
 - Light Screen / Fake Tears body windows, Calm Mind / Cosmic Power post-arrow stat row: adapter-window corrections, pixel-pinned.
 - Destiny Bond's body-internal -1 on SEs 2 and 3, and the foe Tackle's missing live body (`ENG has no live body adapter for mv33`) in every lab's tail.
+
+## bwf1: Battle Scene ON status-body windows (Fake Tears, Light Screen, Calm Mind, Cosmic Power; Psych Up held out)
+
+Base `0352b3197` (fold-20261123e). Presentation and sound timing only: no battle-rule, damage or RNG change.
+
+| Move | Change | Evidence before -> after |
+|---|---|---|
+| Fake Tears 313 | window 87 -> 84 (the ROM's 83 script rows + the first inactive row); S-lead class (`LEAD4_S_LEAD_MOVE_IDS`), trail -1 (`LIVE_MOVE_SCRIPT_TAIL_TRAIL_ROWS`), the idle-lead row `[313, 1]` removed | `npm run compare` 114 -> 201 of 201 frames; labs: SE 167 x4 / 245 / print exact in both orientations; tl204 residual 0 |
+| Light Screen 113 | window 88 -> 86 (A rows 85 + the first inactive row) | compare 100 -> 126 of 126; labs print / SE +2 -> 0 in both orientations; tl204 residual 0 |
+| Calm Mind 347, Cosmic Power 322 | stats-change starts on the ROM row: `LSE2_BODY_TAIL_ROWS` 3 -> 4, `STATS_CHANGE_AFTER_LSE2_BODY_AGE_SHIFT` 4 | compare 212 -> 311 of 311 (Calm Mind), 366 -> 466 of 466 (Cosmic Power); post-arrow prints -1 -> 0; tl204 residual 0 |
+| Psych Up 244 | **held out** (see below) | unchanged |
+
+**Psych Up.** As a first mover the S-lead + trail -1 shape is exact in the lab, but T2 seed 7295 got worse (mass 301 -> 356) with it, so it was reverted. Cause: a confusion status animation precedes the second mover in that seed, and every body after it is about 5 rows early in the base too (SE 171 / 177 / 13 / 16 at -5); Psych Up moved -4 -> -9. That is a post-confusion second-mover offset, not the Psych Up window. About -4 beyond the -5 context is unexplained; the clean second-mover lab `prep16-hist-psychup-player-after-swordsdance` is -2 with the change. Next: measure the post-confusion offset first, then add 244 to the S-lead / trail tables.
+
+**Numbers.** T2 ON (25 seeds, `rescoreAll.sh` + `soundScoreboard.py`): mass 7036 -> 6953 (-83), exact 3490 -> 3548, offset 2387 -> 2329, 0 missing / 0 extra (the 7076 above is the earlier ztl1 refresh; this worker's base run is 7036). T2 OFF (24 seeds): 627 / 872 exact / 261 offset, unchanged. Differential (`compare:differential`, Charm / Foresight / Spikes traces, vs `0352b3197`): byte-identical 738 / 738. Census seeds 0..199 (`lsd194Census.sh`, `rst197CensusDelta.py --digest`): eventsDigest + error identical 200 / 200 in both scenes, 0 type-sequence changes; Scene OFF byte-identical (200 / 200 battles, shards 2 / 2); Scene ON changes 48 battles, `sound` fields only, all on Fake Tears, Light Screen, Calm Mind and Cosmic Power; the tree copies were deleted.
+
+**Pins that moved.** `tests/tl204ZeroTailRows.test.ts` (Fake Tears 209 / tail 5 / 4 frames / body 178, Light Screen 121 / body 89, Calm Mind 220, residuals 0), `tests/helpers/iu120Rows.ts` (313 S-lead, tail 5; 322 / 347 lse2 tail 4), `tests/helpers/land97LeadAges.ts` + `tests/land97IdleLeadRows.test.ts` (42 -> 41 lead ids), `livePrep7MoveAdapters` (Fake Tears 84), `playableAnimationIntegration` and `liveLsbzTiming` (Light Screen 88 -> 86), `apx222` (97 -> 95), `sep1HitSeedDrainGate` (drain SE turn 1 592 -> ROM 590).
+
+**Carried.** The opponent-side Light Screen compare keeps its pre-existing pixel differences (26 / 121 matched, unchanged by this step). Light Screen mechanic labs include an upstream no-adapter Tackle offset (-14 / -20), so the opponent lab `tools/battle-lab/bwf1-lightscreen-opponent-on.json` was used.
+
+**Gates.** Targeted tests (name and id greps over `tests/`, `tests/animation/*` for these bodies, `tl204*`, `aud242*`, `aud248*`, `fam1*`, `randomRoundSoak*`, `lbrd`) green; `battleSoundTable.ts --check` current; `npm run typecheck` clean.
