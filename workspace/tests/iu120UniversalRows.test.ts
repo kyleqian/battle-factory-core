@@ -167,8 +167,8 @@ describe("iu120 routes: pre rows == base row 0, body rows unchanged, post rows =
     expect(check("base-b154-339-player", "idle94RouteRender.ts", 154, 339, "player", 2, 2)).toMatchObject({ P: 3, T: 2, rows: 117 });
   }, 120000);
 
-  it("Karate Chop (battle 268, player; P 3, N 0, T 2): 49 -> 54 rows", () => {
-    expect(check("base-b268-2-player", "idle94RouteRender.ts", 268, 2, "player")).toMatchObject({ P: 3, T: 2, rows: 54 });
+  it("Karate Chop (battle 268, player; P 3, N 0, T 2): 49 -> 54 rows, + hsw1's shape-A lead 5 in front and hit tail 1 (6 - 3 - 2) = 60 (bht1 labs: the hit / hp chain on the ROM rows)", () => {
+    expect(check("base-b268-2-player", "idle94RouteRender.ts", 268, 2, "player", 1, 5)).toMatchObject({ P: 3, T: 2, rows: 60 });
   }, 120000);
 
   it("shp116 composition (battle 38, opponent CROBAT Bite into an elevated field; P 3, N 10): the pre rows keep the row-0 shadow", () => {
