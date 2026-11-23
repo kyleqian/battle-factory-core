@@ -26,7 +26,8 @@ describe("apx222: one staged command per class / new body draws non-static rows,
     // aip262: the Peck 64 row (census seed 51) left: seed 51 is a changed seed and no unchanged census seed 0..999 carries an opponent Peck.
     ["no-adapter: Odor Sleuth 316 by the player (Move_ODOR_SLEUTH)", 705, 316, 0, "approx:no-adapter", 153],
     ["no-adapter: False Swipe 206 by the player (Move_FALSE_SWIPE)", 705, 206, 0, "approx:no-adapter", 97],
-    ["no-adapter: Gust 16 by the player (Move_GUST)", 197, 16, 0, "approx:no-adapter", 136],
+    // hsw1 (2026-11-23): Gust joined shape A (counter lead 5 + hit tail): 136 -> 142 rows, hp start = ROM healthbarupdate (hsw1 lab).
+    ["no-adapter: Gust 16 by the player (Move_GUST)", 197, 16, 0, "approx:no-adapter", 142],
     // sbm1: Pay Day 85 -> 90 (+ the 5 rows of Task_ClearMonBg after its last picture; aud262-payday-player-on effectiveness SE 145 -> 150, ROM 151).
     ["no-adapter: Pay Day 6 by the player (Move_PAY_DAY)", 923, 6, 0, "approx:no-adapter", 90],
     ["no-adapter: Barrage 140 by the opponent (Move_BARRAGE)", 803, 140, 1, "approx:no-adapter", 71],
