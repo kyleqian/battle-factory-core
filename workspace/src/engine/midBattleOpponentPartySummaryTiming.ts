@@ -7,15 +7,6 @@ export const OPPONENT_SUMMARY_HOLD_FRAMES = 100;
 export const OPPONENT_SUMMARY_FAINT_LEAD_FRAMES = 23;
 /** BattleScript_DoSwitchOut's `switchhandleorder BS_ATTACKER, 1` between drawpartystatussummary and getswitchedmondata: one more script frame after the draw. */
 export const OPPONENT_SUMMARY_SWITCH_ORDER_FRAMES = 1;
-/**
- * ait1 (D4 faithful timing, docs/ais1-ai-switch-withdraw.md "ait1", docs/faithful-timing.md): the ROM's controller skips one main-loop iteration right after a
- * voluntary AI switch's tray draw in most observations (`EndDrawPartyStatusSummary`'s partyStatusDelayTimer reads 0 on two consecutive frames; no source branch,
- * a VBlank overrun of the tray-creating iteration), so tray draw -> "sent out" print is 102 frames, not the source's 101; the tray slide starts one frame later too.
- * Dominant measured phase: 15 of 24 observations have the lag frame (the ais5 Perish labs 12 of 14, real-play ROM chains 3 of 10; a tie would pick no lag).
- */
-export const OPPONENT_SUMMARY_SWITCH_TRAY_LAG_FRAMES = 1;
-/** Banked measurements of the voluntary AI switch tray lag frame (event = the stall at draw + 1), all sources together. */
-export const OPPONENT_SUMMARY_SWITCH_TRAY_LAG_MEASURED = Object.freeze({ event: 15, noEvent: 9 });
 /** SpriteCB_StatusSummaryBar_Enter: x2 -95 .. 0 in 5-px steps. */
 export const OPPONENT_SUMMARY_SLIDE_FRAMES = 20;
 /** Task_HidePartyStatusSummary_DuringBattle: tBlend 16 -> 0, one step per frame. */
@@ -42,13 +33,11 @@ export function weatherTailFrames(battlersAfterFaintedInTurnOrder: number): numb
   return OPPONENT_SUMMARY_WEATHER_TAIL_BASE_FRAMES + OPPONENT_SUMMARY_WEATHER_TAIL_ITERATION_FRAMES * battlersAfterFaintedInTurnOrder;
 }
 
-export type OpponentPartySummaryTiming = Readonly<{ minimumFrames: number; leadFrames: number; lagFrames?: number }>;
+export type OpponentPartySummaryTiming = Readonly<{ minimumFrames: number; leadFrames: number }>;
 
 /** The opponent draw command's duration: the optional script lead, then the controller hold to the next print's first glyph. */
 export function opponentPartySummaryDrawTiming(afterFaint: boolean, voluntarySwitch = false, choiceExtraFrames = 0, afterShellBellHeal = false, weatherTailRows = 0): OpponentPartySummaryTiming {
   const leadFrames = afterFaint ? OPPONENT_SUMMARY_FAINT_LEAD_FRAMES + choiceExtraFrames + weatherTailRows - (afterShellBellHeal ? OPPONENT_SUMMARY_SHELL_BELL_LEAD_FRAMES : 0) : 0;
   const switchOrder = voluntarySwitch ? OPPONENT_SUMMARY_SWITCH_ORDER_FRAMES : 0;
-  const lagFrames = voluntarySwitch ? OPPONENT_SUMMARY_SWITCH_TRAY_LAG_FRAMES : 0;
-  const minimumFrames = leadFrames + OPPONENT_SUMMARY_HOLD_FRAMES + switchOrder + lagFrames;
-  return Object.freeze(lagFrames === 0 ? { minimumFrames, leadFrames } : { minimumFrames, leadFrames, lagFrames });
+  return Object.freeze({ minimumFrames: leadFrames + OPPONENT_SUMMARY_HOLD_FRAMES + switchOrder, leadFrames });
 }

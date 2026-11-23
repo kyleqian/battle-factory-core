@@ -682,7 +682,7 @@ export type BattleResolutionPresentationCommand =
        * "Go!" printstring (1119-1125) is 7 frames. Absent on every other
        * (non-voluntary-switch) path, where the default 1-frame receipt stands.
        */
-      timing?: Readonly<{ minimumFrames: number; leadFrames?: number; lagFrames?: number }>;
+      timing?: Readonly<{ minimumFrames: number; leadFrames?: number }>;
     }>
   | Readonly<{
       type: "switch-in";

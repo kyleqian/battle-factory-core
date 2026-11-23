@@ -14,9 +14,6 @@ type SceneFixture = { romFrameOffset: number; lo: number; hi: number; setup: unk
 const fixture = JSON.parse(readFileSync(new URL("./fixtures/ais2-ai-switch-rom-frames.json", import.meta.url), "utf8")) as { scenes: Record<"off" | "on", SceneFixture> };
 const script = new URL("../tools/integration/soundCensusRomReplay.ts", import.meta.url).pathname;
 
-const LAG_FROM = { off: 2857, on: 3941 };
-const BAD_COUNT = { off: 108, on: 94 };
-
 describe("AI mid-battle switch frames (ais2)", () => {
   for (const scene of ["off", "on"] as const) {
     it(`seed 2741 Scene ${scene.toUpperCase()}: the withdraw, return-to-ball, recall ball effect, opponent tray and send-in ball are the ROM's frames`, { timeout: 180_000 }, () => {
@@ -29,13 +26,8 @@ describe("AI mid-battle switch frames (ais2)", () => {
       for (let f = w.lo; f <= w.hi; f += 1) {
         ours.push(createHash("md5").update(PNG.sync.read(readFileSync(join(dir, "eng", `engine-${String(f).padStart(5, "0")}.png`))).data).digest("hex"));
       }
-      // ait1: seed 2741 is one of the 101-frame trays (a 9-of-24 minority); the engine now ships the dominant 102 as faithful timing, so from the tray's
-      // first lagged frame the engine is the ROM one frame late (the first 11 frames, the slide-in, match no shifted frame) and the frames before it are exact.
-      const lagFrom = LAG_FROM[scene] - w.lo;
-      const bad = ours.flatMap((h, i) => (h === w.md5[i] ? [] : [i]));
-      expect(bad.filter((i) => i < lagFrom).map((i) => w.lo + i)).toEqual([]);
-      expect(bad.filter((i) => i >= lagFrom + 11 && ours[i] !== w.md5[i - 1]).map((i) => w.lo + i)).toEqual([]);
-      expect(bad.length).toBe(BAD_COUNT[scene]);
+      const bad = ours.flatMap((h, i) => (h === w.md5[i] ? [] : [w.lo + i]));
+      expect(bad).toEqual([]);
     });
   }
 
@@ -66,7 +58,7 @@ describe("AI mid-battle switch frames (ais2)", () => {
 
   it("an AI switch's opponent tray draw is one switchhandleorder frame longer than a faint replacement's", () => {
     expect(opponentPartySummaryDrawTiming(false)).toEqual({ minimumFrames: 100, leadFrames: 0 });
-    expect(opponentPartySummaryDrawTiming(false, true)).toEqual({ minimumFrames: 102, leadFrames: 0, lagFrames: 1 });
-    expect(opponentPartySummaryDrawTiming(true, true)).toEqual({ minimumFrames: 125, leadFrames: 23, lagFrames: 1 });
+    expect(opponentPartySummaryDrawTiming(false, true)).toEqual({ minimumFrames: 101, leadFrames: 0 });
+    expect(opponentPartySummaryDrawTiming(true, true)).toEqual({ minimumFrames: 124, leadFrames: 23 });
   });
 });

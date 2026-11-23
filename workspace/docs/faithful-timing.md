@@ -55,7 +55,6 @@ same unchanged claims. Independently prove the resulting production integration.
 | Ghost Curse | `../tools/integration/fixtures/curse-live/ghost-p1-vcount.json`: palette transfer at scanline 17/9. |
 | Pursuit, Hidden Power | `later-bodies-curse-oam.md`, `live-species-audit-5.md`, `live-species-audit-3.md`: optional tail lag in some later bodies/species. |
 | Sheer Cold, Hyper Voice (#151) | `issue151-diagnosis.md`: Sheer Cold fade differs for 16–17 rows (~17k pixels/row); Hyper Voice palette band differs on one row (up to ~3.8k pixels). |
-| AI switch tray hold (ait1) | `ais1-ai-switch-withdraw.md` "ait1": the voluntary AI switch's tray draw -> "sent out" print is 102 frames in 15 of 24 ROM observations (the controller skips one main-loop iteration after the tray-creating one; no source branch), 101 in 9. Shipped 102 (`OPPONENT_SUMMARY_SWITCH_TRAY_LAG_FRAMES`, tray slide one frame later). Faint replacements never stall. |
 
 ## Finish the current campaign
 
