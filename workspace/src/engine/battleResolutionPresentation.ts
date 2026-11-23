@@ -1161,6 +1161,21 @@ const IN_LOVE_OFF_USED_PRINT_TIMING = Object.freeze({
   minimumFrames: 0,
   holdFrames: WAITMESSAGE_LONG_HOLD_FRAMES + 3 + 3,
 } as const);
+/**
+ * cfa1 (ROM labs cfa1-conf-{psychic,psychup}-s{1,2,3}-on, T2 s7295): Scene ON, a confusion that does not hurt (BattleScript_MoveUsedIsConfused's
+ * `status2animation; jumpifbyte; return`) leaves the controller on the row the engine's command ends, then the script runs `jumpifbyte`, `return`, the
+ * re-entered attackcanceler's rows and `attackstring` (5 script rows, ROM 733..737) before the used print's first glyph: the used print and every body
+ * after it were 5 rows early (lab Psychic print -5, SE 184 / 13 -5). A hurt confusion (BattleScript_DoSelfConfusionDmg) is not this case.
+ */
+export const PRE_MOVE_CONFUSION_TO_USED_PRINT_ROWS = 5;
+function preMoveConfusionToUsedPrintRows(events: readonly BattleKernelSemanticEvent[], index: number): number {
+  if (events[index]!.provenance?.sourceLabel !== CONFUSION_HEAD_SCRIPT) return 0;
+  for (let next = index + 1; next < events.length; next += 1) {
+    const payload = events[next]!.payload;
+    if (payload.kind === "message") return payload.messageId === "STRINGID_USEDMOVE" || payload.messageId === SELF_CONFUSION_HIT_MESSAGE_ID ? PRE_MOVE_CONFUSION_TO_USED_PRINT_ROWS : 0;
+  }
+  return 0;
+}
 function preMoveOffUsedPrintTiming(events: readonly BattleKernelSemanticEvent[], index: number): BattleMessageTiming | null {
   const label = events[index]!.provenance?.sourceLabel;
   const timing = label === CONFUSION_HEAD_SCRIPT ? CONFUSION_OFF_USED_PRINT_TIMING
@@ -6790,7 +6805,8 @@ export function projectBattleResolutionCommands(
           battler: singlesBattler(payload.battler, "status animation"),
           animation,
           timing: Object.freeze({
-            minimumFrames: seGate + STATUS_ANIMATION_ADDED_ROWS[animation], ...(seGate > 0 ? { seGateFrames: seGate } : {}),
+            minimumFrames: seGate + STATUS_ANIMATION_ADDED_ROWS[animation] + preMoveConfusionToUsedPrintRows(events, index),
+            ...(seGate > 0 ? { seGateFrames: seGate } : {}),
           }),
         }));
       }
