@@ -19,6 +19,7 @@ const byMove = new Map(Object.values(rom).map((r) => [r.move as string, r]));
 // bwf1: Fake Tears (313) is an S-lead body with trail -1: its live window is the ROM's A rows + the first inactive row (84 = FAKE_TEARS_SCRIPT_END_AGE 83 + 1, was 87 with 3 more idle rows), the idle-lead row became the presented lead (1), and its tail is 5 - 1 rows:
 // production body rows 182 -> 178 (= the ROM's), tail frames 0 -> 4, used -> print 208 -> 209 = the ROM row (residual -1 -> 0); the lab ztl1-faketears-player-on SEs 167 x4 +4 -> 0, SE 245 +1 -> 0, print 254 -> 255 = ROM; npm run compare 114 / 201 -> 201 / 201.
 // bwf1: Light Screen (113) live window 88 -> 86 (the ROM's A rows + the first inactive row; the pixels through the last body row were already exact, lab lead4-lightscreen-player-on print +2 -> 0, SE 238 / 214 / 131 / 13 +2 -> 0; npm run compare 100 / 126 -> 126 / 126): production body rows 91 -> 89 (= the ROM's), used -> print 123 -> 121 = the ROM row (residual +2 -> 0).
+// bwf1: Calm Mind (347) / Cosmic Power (322): the lse2 tail 3 -> 4 and STATS_CHANGE_AFTER_LSE2_BODY_AGE_SHIFT 3 -> 4 start the stats-change command on the ROM's A rise + 1 (the glow phase was 2 frames early before: lab lse1-calmmind-player-on SEs unchanged, prints -1 -> 0; npm run compare 212 / 311 -> 311 / 311, Cosmic Power 366 / 466 -> 466 / 466): used -> print 219 -> 220 = the ROM row (residual -1 -> 0).
 // used -> print = first glyph of "<MON> used <MOVE>!" to the first glyph of the print that follows the body (ROM) / message start (production).
 // print -> next = that print (chain end) to the foe's "used TACKLE!". Production columns are what the code produces today.
 const PINS: Record<string, {
@@ -29,7 +30,7 @@ const PINS: Record<string, {
   "rain-dance": { romUsedToPrint: 219, productionUsedToPrint: 219, romPrintToNext: 105, productionPrintToNext: 105, tailRows: 4, tailFrames: 3, pre: 3, romScriptRows: 5, productionStatRows: 0, romWindowRows: 190, productionBodyRows: 190, residualAfterHypothesis: 0, residualBefore: -5 },
   "scary-face": { romUsedToPrint: 333, productionUsedToPrint: 333, romPrintToNext: 107, productionPrintToNext: 107, tailRows: 5, tailFrames: 2, pre: 3, romScriptRows: 7, productionStatRows: 2, romWindowRows: 302, productionBodyRows: 304, residualAfterHypothesis: 2, residualBefore: -19 },
   "light-screen": { romUsedToPrint: 121, productionUsedToPrint: 121, romPrintToNext: 111, productionPrintToNext: 111, tailRows: 4, tailFrames: 3, pre: 3, romScriptRows: 6, productionStatRows: 0, romWindowRows: 89, productionBodyRows: 89, residualAfterHypothesis: 0, residualBefore: -4 },
-  "calm-mind": { romUsedToPrint: 220, productionUsedToPrint: 219, romPrintToNext: 100, productionPrintToNext: 100, tailRows: 5, tailFrames: 4, pre: 3, romScriptRows: 9, productionStatRows: 2, romWindowRows: 188, productionBodyRows: 185, residualAfterHypothesis: -1, residualBefore: -10 },
+  "calm-mind": { romUsedToPrint: 220, productionUsedToPrint: 220, romPrintToNext: 100, productionPrintToNext: 100, tailRows: 5, tailFrames: 4, pre: 3, romScriptRows: 9, productionStatRows: 2, romWindowRows: 188, productionBodyRows: 185, residualAfterHypothesis: 0, residualBefore: -10 },
   "sunny-day": { romUsedToPrint: 190, productionUsedToPrint: 190, romPrintToNext: 110, productionPrintToNext: 110, tailRows: 4, tailFrames: 3, pre: 3, romScriptRows: 6, productionStatRows: 0, romWindowRows: 161, productionBodyRows: 161, residualAfterHypothesis: 0, residualBefore: -6 },
   "charm": { romUsedToPrint: 218, productionUsedToPrint: 218, romPrintToNext: 108, productionPrintToNext: 108, tailRows: 5, tailFrames: 5, pre: 3, romScriptRows: 7, productionStatRows: 2, romWindowRows: 192, productionBodyRows: 191, residualAfterHypothesis: -1, residualBefore: -6 },
   "fake-tears": { romUsedToPrint: 209, productionUsedToPrint: 209, romPrintToNext: 109, productionPrintToNext: 109, tailRows: 5, tailFrames: 4, pre: 3, romScriptRows: 7, productionStatRows: 2, romWindowRows: 178, productionBodyRows: 178, residualAfterHypothesis: 0, residualBefore: -1 },
@@ -97,7 +98,7 @@ describe("tl204: Scene ON zero-tail no-hit moves, ROM rows vs production (residu
       if (move !== "scary-face" && move !== "charm") expect(row.accounting.residualAfterHypothesis).toBe(row.usedToPrint.residual);
     }
     // the remaining non-zero residuals are the body-window lengths (data/battle_anim_scripts.s), not tail rules
-    for (const [move, residual] of [["light-screen", 0], ["charm", 0], ["fake-tears", 0], ["calm-mind", -1], ["scary-face", 0]] as const) {
+    for (const [move, residual] of [["light-screen", 0], ["charm", 0], ["fake-tears", 0], ["calm-mind", 0], ["scary-face", 0]] as const) {
       expect([move, compareCase(byMove.get(move)!).row.usedToPrint.residual]).toEqual([move, residual]);
     }
   });

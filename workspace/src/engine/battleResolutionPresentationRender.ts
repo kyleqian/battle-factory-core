@@ -1675,7 +1675,8 @@ const HPD4_BODY_TAIL_ROWS: ReadonlyMap<number, number> = new Map([[49, 3], [82, 
 // liv2: Self-Destruct's presented `hp` command already carries the script lead (the window starts at S + pre, ROM A), so it has no body lead; its hit
 // controller runs 10 rows after the window (the explosion script's own instructions, ROM gap 10), so the tail is 9 (3 + 4 + 123 + 9 = A -> H 139 + pre).
 // lse2: rows after a lead-first lse2 body (on top of its script tail where it has one) that put the next command on the ROM row (R -> H = lead + 3 + len + 4 less the window the body presents).
-const LSE2_BODY_TAIL_ROWS: ReadonlyMap<number, number> = new Map([[322, 3], [347, 3], [59, 2], [227, 10]]);
+// bwf1: Cosmic Power 322 / Calm Mind 347 tail 3 -> 4 (with STATS_CHANGE_AFTER_LSE2_BODY_AGE_SHIFT 4): the stats-change command starts on the ROM A rise + 1, the glow phase the ROM's.
+const LSE2_BODY_TAIL_ROWS: ReadonlyMap<number, number> = new Map([[322, 4], [347, 4], [59, 2], [227, 10]]);
 // hie5 / rcv1: a restore-HP body (Recover / Soft-Boiled / Milk Drink / Moonlight) holds the script's animation clear after the body's last visible row so the `hp` command starts on the ROM's
 // `healthbarupdate` (EffectRestoreHp+0x16) row. rcv1 re-fit against the ROM print rows (labs aud242k-recover, aud242r-softboiled / -moonlight, aud261-milkdrink, etp3-recoverls4: the "regained
 // health" print was +19 / +5 / +4 / +21 with hie5's 25 / 10 / 8 / 27, now +0 with 6 / 5 / 4 / 6).
@@ -1829,8 +1830,8 @@ export function moveAnimationScriptStartRow(segment: BattleResolutionPresentatio
 
 
 const STATS_CHANGE_AFTER_BODY_AGE_SHIFT = 4;
-// lse2: after a lead-first lse2 body (Cosmic Power, Calm Mind) the stat SE sits 1 row later than the generic shift's (ROM - ours +1 in both labs).
-const STATS_CHANGE_AFTER_LSE2_BODY_AGE_SHIFT = 3;
+// lse2 / bwf1: after a lead-first lse2 body (Cosmic Power, Calm Mind) the stats-change command starts 1 row after the generic one (tail 4), so the age shift matches the generic 4 and the SE stays on the ROM row.
+const STATS_CHANGE_AFTER_LSE2_BODY_AGE_SHIFT = 4;
 // ztl1: after an S-lead body the stat SE sat 2 rows after the ROM's (Smokescreen 245, Agility 239, Scary Face 245 in the aud242 labs): the command starts 2 rows later than the generic age assumed.
 const STATS_CHANGE_AFTER_S_LEAD_BODY_AGE_SHIFT = 2;
 // sta5: after a Flatter / Swagger body (lead + tail landed) and its 2-row `stat` command the `stats-change` command starts 2 rows (the not yet landed
