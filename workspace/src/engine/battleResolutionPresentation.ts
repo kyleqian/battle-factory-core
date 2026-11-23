@@ -453,7 +453,18 @@ function chargeTurnEmptyBoxTiming(
 }
 const CHARGE_TURN_SCRIPT = "BattleScriptFirstChargingTurn";
 const HIT_ALL_LOOP_KO_BOX_TIMING = Object.freeze({ minimumFrames: 1, holdFrames: 0 });
-const HIT_ALL_LOOP_SCRIPT = "BattleScript_DoHitAllWithUndergroundBonus";
+const HIT_ALL_LOOP_SCRIPTS: ReadonlySet<string> = new Set(["BattleScript_DoHitAllWithUndergroundBonus"]);
+const MULTI_HIT_LOOP_BOX_EXTRA_ROWS: ReadonlyMap<string, number> = new Map([["BattleScript_DoMultiHit", 8], ["BattleScript_DoTripleKickAttack", 7]]);
+/** mhs1: a DoMultiHit / DoTripleKickAttack box is followed by the loop's next attackanimation (not the PrintStrings tail) when another hit of the same script comes before any message. */
+function multiHitLoopContinues(events: readonly BattleKernelSemanticEvent[], index: number): boolean {
+  const label = events[index]?.provenance?.sourceLabel;
+  for (let i = index + 1; i < events.length; i += 1) {
+    const next = events[i]!;
+    if (next.payload.kind === "message") return false;
+    if (next.payload.kind === "animation") return next.provenance?.sourceLabel === label;
+  }
+  return false;
+}
 /**
  * fsc1 c2: the hit-all loop's `printstring STRINGID_EMPTYSTRING3; waitmessage 1` clears the box on one row and the script runs on, so the box
  * lasts one frame per interpreter execution to the next presented receipt (+1 for waitmessage 1's controller row), like the Focus Punch pre-pass box,
@@ -461,7 +472,10 @@ const HIT_ALL_LOOP_SCRIPT = "BattleScript_DoHitAllWithUndergroundBonus";
  */
 function hitAllLoopEmptyBoxTiming(events: readonly BattleKernelSemanticEvent[], index: number): BattleMessageTiming | null {
   const event = events[index];
-  if (event === undefined || event.provenance?.sourceLabel !== HIT_ALL_LOOP_SCRIPT || event.payload.kind !== "message"
+  const label = event?.provenance?.sourceLabel ?? "";
+  const extra = multiHitLoopContinues(events, index) ? MULTI_HIT_LOOP_BOX_EXTRA_ROWS.get(label) ?? 0 : 0;
+  if (extra === 0 && MULTI_HIT_LOOP_BOX_EXTRA_ROWS.has(label)) return null;
+  if (event === undefined || (!HIT_ALL_LOOP_SCRIPTS.has(label) && extra === 0) || event.payload.kind !== "message"
     || event.payload.messageId !== "STRINGID_EMPTYSTRING3") return null;
   const from = event.provenance.instructionExecution;
   const next = events[index + 1];
@@ -469,7 +483,7 @@ function hitAllLoopEmptyBoxTiming(events: readonly BattleKernelSemanticEvent[], 
   if (from === undefined || to === undefined || to <= from) return null;
   // A KO: the faint chain's own lead (faintScriptPreCryFrames) already presents the rows from the box to `playfaintcry`.
   if (next!.payload.kind === "play-faint-cry") return HIT_ALL_LOOP_KO_BOX_TIMING;
-  return Object.freeze({ minimumFrames: Math.max(1, to - from + 1), holdFrames: 0 });
+  return Object.freeze({ minimumFrames: Math.max(1, to - from + 1 + extra), holdFrames: 0 });
 }
 const CHARGE_TURN_EMPTY_BOX_ROW_TIMING = Object.freeze({ minimumFrames: 1, holdFrames: 0 });
 
@@ -2394,6 +2408,8 @@ const HIT1_SHAPE_A_MOVE_IDS: ReadonlySet<number> = new Set([9, 264]);
 // = the shape-A signature (lead 5 in front + hit tail 1 close it exactly).
 // Then Night Shade (101), Superpower (276), Luster Purge (295), Mist Ball (296), Silver Wind (318), Signal Beam (324): hp start -7..-9 -> 0 / -1 (Luster Purge, Signal Beam keep -1: their body is 1 row short of A + 1). Spark / Dragon Breath stay out: bodies 10 rows short of the ROM.
 const HSW1_SHAPE_A_MOVE_IDS: ReadonlySet<number> = new Set([2, 5, 11, 16, 88, 265, 302, 341, 342, 343, 101, 276, 295, 296, 318, 324]);
+// mhs1: Triple Kick (167), Bonemerang (155), Spike Cannon (131): hit 1 of the DoMultiHit / DoTripleKickAttack loops is shape A (labs mhs1-*-pfirst-on, aud242r spikecannon-player ROM trace). Twineedle (hit1 seed 363 regresses), Pin Missile, Rock Blast, Fury Attack, Bullet Seed, Icicle Spear stay out.
+const MHS1_SHAPE_A_MOVE_IDS: ReadonlySet<number> = new Set([167, 155, 131]);
 /**
  * lse4 "gap-print": the lead is the kernel counter, the rows after the body are `T = 2 + gap - pre - post + s` with the ROM gap of the next command: a print (`printfromtable` / `printstring`) is
  * Delta + 1 (Recycle 3, the Razor Wind charge turn 7), any other next command is shape A (gap 4). Recycle 278, Razor Wind 13 (both turns).
@@ -2434,7 +2450,7 @@ export function lse2BodySoundAgeShift(moveId: number, bodyLeadFrames: number | u
 export type BodyLeadRule = "lead-table" | "shape-a" | "status-tail" | "lse2" | "s-lead" | "gap-print" | "lead-only" | "c-lead";
 const BODY_LEAD_RULE: ReadonlyMap<number, BodyLeadRule> = new Map<number, BodyLeadRule>([
   ...HPD4_BODY_LEAD_MOVE_IDS.map((id): [number, BodyLeadRule] => [id, "lead-table"]),
-  ...[...HPD8_SHAPE_A_MOVE_IDS, ...LEAD2_SHAPE_A_MOVE_IDS, ...LEAD3_SHAPE_A_MOVE_IDS, ...LSE4_SHAPE_A_MOVE_IDS, ...HIT1_SHAPE_A_MOVE_IDS, ...HSW1_SHAPE_A_MOVE_IDS].map((id): [number, BodyLeadRule] => [id, "shape-a"]),
+  ...[...HPD8_SHAPE_A_MOVE_IDS, ...LEAD2_SHAPE_A_MOVE_IDS, ...LEAD3_SHAPE_A_MOVE_IDS, ...LSE4_SHAPE_A_MOVE_IDS, ...HIT1_SHAPE_A_MOVE_IDS, ...HSW1_SHAPE_A_MOVE_IDS, ...MHS1_SHAPE_A_MOVE_IDS].map((id): [number, BodyLeadRule] => [id, "shape-a"]),
   ...[...STA5_STATUS_BODY_TAIL_ROWS.keys()].map((id): [number, BodyLeadRule] => [id, "status-tail"]),
   ...[...LSE2_BODY_LEAD_MOVE_IDS].map((id): [number, BodyLeadRule] => [id, "lse2"]),
   ...[...LEAD4_S_LEAD_MOVE_IDS].map((id): [number, BodyLeadRule] => [id, "s-lead"]),
