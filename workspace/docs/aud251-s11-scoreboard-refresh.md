@@ -3642,3 +3642,22 @@ Evidence (git-ignored): `.integration/evidence/ldw1/` (`lab-base` / `lab-after` 
 - The ROM `healthbarupdate` hp-var wait differs by context (9 in labs, 20-23 in T2).
 
 **Pixel caveat.** `leechSeedDrainBodyStartAge` follows the lag (lag 0 -> body age 14 = exec + 14); only the SE rows were ROM-measured, no pixel capture. If one disagrees, that function is the single place to change.
+
+## fkt1 (2026-11-23): Scene ON faint after an end-turn tick carries no lag; a foe's weather-KO ball tray waits for the rest of the weather loop
+
+Evidence (git-ignored): `.integration/evidence/fkt1/` (`lab-*` labCompare runs, `t2-after` = A only, `t2-final` = A + B, `score-*.json`, `cen-a` / `cen-b` census, `test-files*.txt`). Presentation / sound timing only; no battle rule, damage, RNG or event order moved.
+
+**A (`battleHitSounds.ts`, `followsEndTurnTickDamage`).** In the ROM `FaintAttacker+0` -> SE_FAINT is 67 rows (`playfaintcry`, `pause 64`, `dofaintanimation`) and the faint box follows 19-20 rows after it, for every faint. `SCENE_ON_LAG = 7` stands for the hit chain's hit-animation -> hp rows that the engine presents shorter than the ROM's; a faint whose last `hp-change` came from `LeechSeedTurnDrain` / `LeechSeedTurnPrintAndUpdateHp` / `DoTurnDmg` / `DamagingWeatherLoop` has no hit body and no such deficit, so faintLag = 0 there (the lag stays after a hit: fnt2-hit-lv50-on 305 / 315 pinned).
+- Labs (new `fkt1-{kols,kotoxic,kosand}-{on,off}`: a 1-HP Shedinja foe KOed by drain / poison / sandstorm): SE16 -> faint print 14 -> 19 in the three (ROM 19-20). Lab-absolute SE16 got 7 rows EARLIER than the ROM in kols-on (mass 236 -> 243), kosand-on (91 -> 98) and hpf4m-faintpoison-on (3394 -> 3401): their drain / tick chain upstream of the faint is 19-21 rows short, the lag used to hide that; the interval is now ROM-exact. The other 26 pre-existing pin labs: mass identical before = after.
+- Tests: `tests/fkt1FaintAfterTick.test.ts` (kols 920 / 939, kotoxic 883 / 902, kosand 1123 / 1142; hit-lag-kept pin).
+
+**B (`midBattleOpponentPartySummaryTiming.ts`, `weatherTailFrames`, called from the party-summary builder via `weatherKoTailRows`).** A faint raised in `BattleScript_DamagingWeatherLoop` (`tryfaintmon` -> FaintAttacker) returns into the loop before the faint script's tail (HandleFaintedMon, ball tray) runs: `checkteamslost` (1 row) + the Increment block (`jumpifbyte gBattleOutcome`, `addbyte`, `jumpifbytenotequal`: 3 rows) = **4** rows, then one undamaged iteration per battler later in `gBattlerByTurnOrder` (`copyarraywithindex`, `weatherdamage`, `jumpifword` -> Increment: 6 rows). The brief said 3 + 6n; the ROM windows (s8108 k0 +10, k1 +4, labs below) give 4 + 6n, the `checkteamslost` row is the missing one. n = 1 - slot of the foe in `afterRules.battlerByTurnOrder`; no tail when a later weather hit follows the faint (the damaged second iteration is a different chain, within 1 row of the ROM: kosandfirst with a Rattata player).
+- Labs (SE 114, ROM window both scenes): `fkt1-kosand` (n = 0) ON 1307 -> 1311 (ROM 1311), OFF 947 -> 951 (ROM 951); `fkt1-kosandfirst` (Shedinja Lv100 foe first, Geodude player immune to sand, n = 1) ON 1186 -> 1196 (ROM 1196), OFF 948 -> 958 (ROM 958). Labs: 29 pre-existing pin labs identical after B.
+- T2 s8108 ON (`t2k4/fsl1m.py`, 5 -> 114 leg): k0 +10 -> 0, k1 +4 -> 0.
+- Player's faint after a weather KO: not landed (no ROM window: after the faint print the ROM rows are only input-driven SE 5 presses; the engine has no timing-bearing command there). Scene OFF: landed (same labs, ROM-exact).
+- Tests: `tests/fkt1WeatherKoTray.test.ts` (the four SE 114 frames above).
+
+**Numbers.**
+- T2 (`rescoreAll.sh`, 0 missing / 0 extra everywhere): ON 25 seeds mass 8,344 -> 8,332 (A) -> 8,294 (A + B); exact 3,281 -> 3,289, battle-controller mass 1,116 -> 1,082. OFF 24 seeds: 719 before and after (battle-controller 505), no OFF seed has a weather-KO tray.
+- Census 0..199 (`lsd194Census.sh` + `rst197CensusDelta.py --digest`, base 7d6b3ec01 vs the working tree): eventsDigest + error identical 200 / 200 in both scenes; ON 5 battles with changed commands, OFF 5 (timing only).
+- Tests: every tests/ importer of battleResolutionPresentation.ts / midBattleOpponentPartySummaryTiming.ts / battleHitSounds.ts plus fch* fnt* itm1* hie* eqk1* mxp1* randomRoundSoak* lbrd* (208 files) green; no pin moved.

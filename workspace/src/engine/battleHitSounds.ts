@@ -214,7 +214,7 @@ const END_TURN_TICK_DAMAGE_SCRIPTS: ReadonlySet<string> = new Set([
  * engine's faint command starts early and the lag carries the SE back to the ROM row; the end-turn tick chains (drain, poison, weather: no hit body of their own) have no such deficit, and the lag put the SE
  * 6 rows late against the faint print (SE16 -> print 14 against the ROM's 20). True when the damage that fainted the battler (the last hp-change before the faint animation) came from one of those scripts.
  */
-function followsEndTurnTickDamage(segment: BattleResolutionSegment, faint: BattleResolutionPresentationCommand): boolean {
+function followsEndTurnTickDamage(segment: BattleResolutionSegment, faint: Extract<BattleResolutionPresentationCommand, { type: "faint" }>): boolean {
   const index = segment.events.findIndex((event) => event.sequence === faint.eventSequence);
   for (let at = index - 1; at >= 0; at -= 1) {
     const event = segment.events[at]!;
