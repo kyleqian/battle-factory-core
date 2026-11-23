@@ -4027,3 +4027,25 @@ Evidence (git-ignored): `.integration/evidence/pmc1/` (`t2-{base,A,C,after}-on`,
 - Wish's window is 1 row short of the ROM (next print -1 after the lab), left because the adapter duration is a pixel-pinned accepted window.
 - Thunderbolt's -1 after the third SE 118 (about 24 T2 mass) has no source row yet.
 - The `BODY_SOUND_LEAD_ROWS` leads are calibrated on one lab side per move (player); an opponent-side lab would confirm them (T2 has both sides in the windows and none got worse).
+
+## hsw1 (2026-11-23): the post-hit clock of every damaging NONE-class move (T2 ON mass 7136 -> 6841)
+
+Evidence (git-ignored): `.integration/evidence/hsw1/` (`inv.json` move inventory, `tab.py` / `tab-sw.txt` per-lab table, `lab-kc-*` / `lab-sw` / `lab-g1` / `lab-g2` labCompare dirs, `t2-{base,after}`, `score-*`, `cen/` census). Method: of the 183 damaging Factory moves, `inv.ts` listed those in no body-lead class (`BODY_LEAD_RULE`: "NONE" keeps its script lead in the tail, so the hit animation / hp commands sit 6 rows early); 41 had a live body (Karate Chop from bht1 + 40 swept), each got a `hsw1-<move>-pfirst-on` lab (base `ttf1-solarbeam-slowfoe-tackle-on`, first action only) and `tab.py` read ROM gAnimScriptActive length A, the ROM hit SE (12 / 13 / 14) row and healthbarupdate start (second exec-2 run) against the engine's hit SE and hp command. The ROM A1 -> healthbarupdate is a constant 38 rows and the engine's hit -> hp a constant 35, so every offset below is the missing / extra post-hit lead, not a per-move constant.
+
+| Move (id) | Windows | ROM A / hp start, hit SE before | Class | After | Status |
+|---|---|---|---|---|---|
+| Karate Chop (2) | 4 labs | 48 / -6, +1 | shape-A | 0 / 0 | landed 63fab17df |
+| Mega Punch 5, Vice Grip 11, Gust 16, Rock Throw 88, Smelling Salt 265, Needle Arm 302, Mud Shot 341, Poison Tail 342, Covet 343 | 1 lab each | 159 / 41 / 130 / 86 / 120 / 107 / 144 / 197 / 135: all -6, +1 | shape-A | all 0 / 0 | landed 6e1345087 |
+| Night Shade 101, Mist Ball 296, Silver Wind 318, Superpower 276 | 1 lab each | -7 .. -8, 0 .. -1 | shape-A | 0 / 0 | landed fb435aa01 |
+| Luster Purge 295, Signal Beam 324 | 1 lab each | -9, -2 | shape-A | -1 / -1 | landed fb435aa01; the live body is 1 row short of A + 1, carried |
+| Spark 209 | 1 lab | -11, -4 | none | -2 / -2 with shape-A, lab mass 435 -> 460 | carried: body 10 rows short of the ROM (115 vs 125) |
+| Dragon Breath 225 | 1 lab | -9, -2 | none | -3 / -3 with shape-A, mass 456 | carried: body 10 rows short (83 vs 92) |
+| Scratch, Tackle, Strength, Waterfall, Bone Club, Poison Sting, Fury Attack, Bullet Seed, Icicle Spear, Leech Life, Twister, Return | 1 lab each | engine window 32 = the generic body with no live adapter | none | - | carried to pmc1 (per-move bodies); the offsets above -12 .. -215 are the missing body, not the lead |
+| Triple Kick, Twineedle, Pin Missile, Spike Cannon, Rock Blast, Bonemerang | 1 lab each | multi-hit: engine hit counts differ from the ROM's | none | - | carried (multi-hit structure, as pmc1's Triple Kick) |
+| Dynamic Punch, Frustration, Present, Zap Cannon, Hidden Power | 1 lab each | accuracy / friendship / power divergence, or no engine output | none | - | carried (unreliable rows from the engine RNG) |
+
+**Numbers.** T2 ON (25 seeds): mass 7136 -> 6841 (-295), exact 3464 -> 3480, offset 2413 -> 2397, 0 missing / 0 extra; move-animation SE 5636 -> 5390, battle-controller SE 1007 -> 984, stat-change SE 221 -> 195. Census seeds 0..199, both scenes: eventsDigest + error identical 200 / 200 (ON: 29 battles with changed command timing, OFF: 0). Labs (ON, mass): Karate Chop 21 -> 3 / 27 -> 4 / 18 -> 0; Mega Punch .. Covet 6 / 3 / 3 / 6 / 5 (see summary lines); Night Shade 22 -> 1, Mist Ball 47 -> 14, Silver Wind 28 -> 3, Superpower 79 -> 46, Luster Purge 52 -> 19, Signal Beam 35 -> 10.
+
+**Pins moved.** `tests/iu120UniversalRows.test.ts` Karate Chop route (54 -> 60 rows: lead 5 + tail 1; ROM healthbarupdate in the bht1 labs) and `tests/apx221PresentationGateApproximate.test.ts` Signal Beam 324 (148 -> 156 rows = the hsw1 Signal Beam lab's window, hp start -1 from the ROM healthbarupdate). `tests/helpers/iu120Rows.ts` `SHAPE_A_RULE_IDS` carries the new ids.
+
+**Left.** The carried bodies above (pmc1); Luster Purge / Signal Beam's 1-row body shortfall; Dragon Breath and Spark need their body windows (+10) before the class can apply; the stat-change SE after a status body stays with ztl1.
