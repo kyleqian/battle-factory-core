@@ -60,8 +60,15 @@ S = {
     "reflectls6": (19, 50, [115], 0, 19, 12, [73], 0, [0] * 6),
     # sep1: the foe's Recover (it is seeded, so damaged) followed by the end-turn drain
     "recoverls4": (19, 50, [73], 0, 19, 12, [105], 0, [0] * 4),
+    # rcv1: the foe's restore-HP move after the drain damaged it (turn 2): hp -> "regained health" print
+    "slackoffls2": (19, 50, [73], 0, 19, 12, [303], 0, [0] * 2),
+    "morningsunls2": (19, 50, [73], 0, 19, 12, [234], 0, [0] * 2),
+    "synthesisls2": (19, 50, [73], 0, 19, 12, [235], 0, [0] * 2),
+    "moonlightls2": (19, 50, [73], 0, 19, 12, [236], 0, [0] * 2),
+    "softboiledls2": (19, 50, [73], 0, 19, 12, [135], 0, [0] * 2),
+    "milkdrinkls2": (19, 50, [73], 0, 19, 12, [208], 0, [0] * 2),
 }
-ETP3 = {"sandstormu3", "lightscreen6", "reflect6", "lightscreenls6", "reflectls6", "recoverls4"}
+ETP3 = {"sandstormu3", "lightscreen6", "reflect6", "lightscreenls6", "reflectls6", "recoverls4", "slackoffls2", "morningsunls2", "synthesisls2", "moonlightls2", "softboiledls2", "milkdrinkls2"}
 want = sys.argv[1:] or list(S)
 for name in want:
     us, ul, um, ui, ts, tl, tm, ti, slots = S[name]
