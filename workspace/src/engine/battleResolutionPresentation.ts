@@ -2874,6 +2874,8 @@ const LEECH_SEED_DRAIN_LEGACY_LAG = 7;
  * the Sun / foe-send-in labs against the 238 of a command that starts 9 rows before its exec, etp3-recoverls4).
  */
 const LEECH_SEED_DRAIN_IDLE_CONTROLLER_EARLY_ROWS = 9;
+const DAMAGING_WEATHER_CONTINUES: ReadonlySet<string> = new Set(["SANDSTORM_CONTINUES", "HAIL_CONTINUES"]);
+const singlesBattlerCount = 2;
 function hitSeDrainLaunchLag(songId: number | null, hitAnimationRows: number, barRows: number): number | null {
   if (songId === null) return null;
   return seg127StatusSeGateRows({ songId, seAgeRows: 1 + hitAnimationRows + barRows + HIT_TO_SEED_DRAIN_TAIL_ROWS + SEED_DRAIN_PRESENTED_ROWS_BEFORE_EXEC });
@@ -2917,6 +2919,10 @@ const WEATHER_TICK_MESSAGE_TAIL_FRAMES = 10;
 const WEATHER_TICK_LAST_TAIL_FRAMES = 4;
 /** ldw2: the weather hit's effectiveness SE (Cmd_effectivenesssound) plays this many rows after its hit-animation command starts (ROM etp3-sandls3-on: command 1158, SE 13 at 1160). */
 const WEATHER_HIT_SE_AFTER_COMMAND_ROWS = 2;
+/** ldw2: BattleScript_DamagingWeatherLoop's undamaged iteration (weatherdamage -> 0, `jumpifword ... Increment`, then Increment -> Loop): 3 + 3 rows (ROM etp3-haills3b-on 875 -> 878 -> 881). */
+const WEATHER_LOOP_UNDAMAGED_ITERATION_ROWS = 6;
+/** ldw2: after the last iteration `Increment` -> `ContinuesEnd` 3, -> LeechSeedTurnDrain+0x0 4, -> +0x7 1 (ROM etp3-haills3b-on 881 -> 884 -> 888 -> 889). */
+const WEATHER_LOOP_END_TO_DRAIN_EXEC_ROWS = 8;
 const WRAP_SECONDARY_TAIL_FRAMES = 7;
 const TURN_DAMAGE_PC = datahpupdatePcAfter("BattleScript_DoTurnDmg");
 const WEATHER_DAMAGE_PC = datahpupdatePcAfter("BattleScript_DamagingWeatherLoop");
@@ -2961,6 +2967,8 @@ interface HpLeadRows {
   /** sep1: the battle SE still playing when the hit's bar starts, and the bar's rows (battleHealthBarAnimationFrames + 1). */
   readonly pendingSeSong: number | null;
   readonly barRows: number;
+  /** ldw2: a damaging-weather tick: the loop iterations after this battler's (each undamaged one runs 6 rows before the loop's end). */
+  readonly weatherIterationsAfter: number;
   /** HITMARKER_NO_ANIMATIONS (Scene OFF) when the hp command was projected. */
   readonly sceneOff: boolean;
 }
@@ -2992,13 +3000,17 @@ function applyHpHitTails(
       const weatherHit = commands[index - 1];
       if (weatherDrain?.type === "general-animation" && weatherDrain.animation === "LEECH_SEED_DRAIN" && weatherDrain.animated === true && weatherDrain.afterPlayerSendIn !== true
         && weatherHit?.type === "hit-animation" && weatherHit.battler === command.battler && leads.barRows > 0) {
+        const undamagedRows = WEATHER_LOOP_UNDAMAGED_ITERATION_ROWS * leads.weatherIterationsAfter;
         const gate = seg127StatusSeGateRows({
           songId: leads.pendingSeSong,
-          seAgeRows: weatherHit.timing.minimumFrames - WEATHER_HIT_SE_AFTER_COMMAND_ROWS + leads.barRows + tailFrames + LEECH_SEED_DRAIN_LEGACY_LAG + 2,
+          seAgeRows: weatherHit.timing.minimumFrames - WEATHER_HIT_SE_AFTER_COMMAND_ROWS + leads.barRows + tailFrames + LEECH_SEED_DRAIN_LEGACY_LAG + 2 + undamagedRows,
         });
         const at = commands.indexOf(weatherDrain);
-        const lag = (weatherDrain.timing.launchLagFrames ?? LEECH_SEED_DRAIN_LEGACY_LAG + 2) + gate;
-        commands[at] = Object.freeze({ ...weatherDrain, timing: Object.freeze({ minimumFrames: weatherDrain.timing.minimumFrames + gate, launchLagFrames: lag }) });
+        const extra = undamagedRows + gate;
+        commands[at] = Object.freeze({ ...weatherDrain, timing: Object.freeze({
+          minimumFrames: weatherDrain.timing.minimumFrames + extra,
+          launchLagFrames: (weatherDrain.timing.launchLagFrames ?? LEECH_SEED_DRAIN_LEGACY_LAG + 2) + extra,
+        }) });
       }
       continue;
     }
@@ -6559,6 +6571,8 @@ export function projectBattleResolutionCommands(
         const afterIdleController = leechDrainAnimated && (
           (drainPrevious?.type === "general-animation" && isWeatherContinuesAnimation(drainPrevious.animation))
           || (drainPrevious?.type === "switch-in" && drainPrevious.battler === 1));
+        const idleLoopRows = afterIdleController && drainPrevious?.type === "general-animation" && DAMAGING_WEATHER_CONTINUES.has(drainPrevious.animation)
+          ? WEATHER_LOOP_UNDAMAGED_ITERATION_ROWS * (singlesBattlerCount - 1) + WEATHER_LOOP_END_TO_DRAIN_EXEC_ROWS : 0;
         const drainMinimumFrames = LEECH_SEED_DRAIN_PRE_ROWS + health.instructionExecution!
           + (leechDrainAnimated ? LEECH_SEED_DRAIN_ANIMATION_ROWS - 1 : 0);
         commands.push(Object.freeze({
@@ -6569,7 +6583,7 @@ export function projectBattleResolutionCommands(
           ...(leechDrainAnimated ? { animated: true as const } : {}),
           ...(commands.length === playerSendInEnd ? { afterPlayerSendIn: true as const } : {}),
           timing: Object.freeze(afterIdleController
-            ? { minimumFrames: drainMinimumFrames - LEECH_SEED_DRAIN_IDLE_CONTROLLER_EARLY_ROWS, launchLagFrames: 0 }
+            ? { minimumFrames: drainMinimumFrames - LEECH_SEED_DRAIN_IDLE_CONTROLLER_EARLY_ROWS + idleLoopRows, launchLagFrames: idleLoopRows }
             : { minimumFrames: drainMinimumFrames }),
         }));
       }
@@ -6578,7 +6592,7 @@ export function projectBattleResolutionCommands(
       const messageRows = drainRole === null ? hpMessageLeadRows(events, index) : null;
       const faintNext = drainRole === null && hpFaintNext(events, index);
       const hitEffectMessage = HP_HIT_EFFECT_OPCODES.has(events[index + 1]?.provenance?.opcodeName ?? "") || hitAllLoopEmptyBoxTiming(events, index + 1) !== null;
-      hpLeadRows.set(health.eventSequence, { tick: hpTickKind(event), wrapSecondary: events[index + 1]?.provenance?.programCounter === WRAP_SECONDARY_PC, moveEndRows, messageRows, faintNext, hitEffectMessage, barExecution: health.instructionExecution, recoil: event.provenance?.programCounter === RECOIL_PC, drain: event.provenance?.programCounter === DRAIN_PC, focusBand: focusBandNext(events, index), itemAnimationRows: drainRole === null ? hpItemAnimationRows(events, index) : null, itemAnimationSeGate: drainRole === null ? hpItemAnimationSeGate(events, index) : 0, pendingSeSong: drainRole === null ? pendingBattleSeSong(events, index) : null, barRows: seedDrainInSegment ? battleHealthBarAnimationFrames({ maxHp: (battler === 0 ? currentField.player : currentField.opponent).maxHP, from: payload.from, to: payload.to }) + 1 : 0, sceneOff: (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0 });
+      hpLeadRows.set(health.eventSequence, { tick: hpTickKind(event), wrapSecondary: events[index + 1]?.provenance?.programCounter === WRAP_SECONDARY_PC, moveEndRows, messageRows, faintNext, hitEffectMessage, barExecution: health.instructionExecution, recoil: event.provenance?.programCounter === RECOIL_PC, drain: event.provenance?.programCounter === DRAIN_PC, focusBand: focusBandNext(events, index), itemAnimationRows: drainRole === null ? hpItemAnimationRows(events, index) : null, itemAnimationSeGate: drainRole === null ? hpItemAnimationSeGate(events, index) : 0, pendingSeSong: drainRole === null ? pendingBattleSeSong(events, index) : null, weatherIterationsAfter: hpTickKind(event) === "weather" ? Math.max(0, singlesBattlerCount - 1 - beforeRules.battlerByTurnOrder.indexOf(battler)) : 0, barRows: seedDrainInSegment ? battleHealthBarAnimationFrames({ maxHp: (battler === 0 ? currentField.player : currentField.opponent).maxHP, from: payload.from, to: payload.to }) + 1 : 0, sceneOff: (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0 });
       commands.push(Object.freeze({
         type: "hp",
         eventSequence: health.eventSequence,
