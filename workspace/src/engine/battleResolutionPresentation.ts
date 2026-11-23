@@ -2595,10 +2595,14 @@ function chargeTurnSoundLead(events: readonly BattleKernelSemanticEvent[], index
  */
 const MOVE_REST = 156;
 const REST_SOUND_LEAD_ROWS = -2;
+/** pmc1: Wish (273) is the opposite case: its script starts 2 rows after the release (L = 2; the clock's 7-row calibration runs 5 rows late: aud242k-wish-player-on, SE_M_REFLECT 91 / 96, every Wish SE +5; T2 one window x 4 SEs +5). */
+const MOVE_WISH = 273;
+const WISH_SOUND_LEAD_ROWS = 5;
 const REST_HEAL_PRINT_TAIL_ROWS = 10;
 function bdt1BodySoundLead(events: readonly BattleKernelSemanticEvent[], index: number, moveId: number): { soundAgeLeadFrames?: number } {
   if (events[index]!.provenance?.sourceLabel === CHARGE_TURN_SCRIPT) return chargeTurnSoundLead(events, index);
-  return moveId === MOVE_REST ? { soundAgeLeadFrames: REST_SOUND_LEAD_ROWS } : {};
+  if (moveId === MOVE_REST) return { soundAgeLeadFrames: REST_SOUND_LEAD_ROWS };
+  return moveId === MOVE_WISH ? { soundAgeLeadFrames: WISH_SOUND_LEAD_ROWS } : {};
 }
 const SCRIPT_TAIL_BETWEEN_OPCODES: ReadonlySet<string> = new Set(["B_SCR_OP_WAITANIMATION", "B_SCR_OP_SETBYTE", "B_SCR_OP_SETGRAPHICALSTATCHANGEVALUES"]);
 // lse4: the first-charging-turn script (orword HITMARKER_CHARGING, setbyte, seteffectprimary, copyarray) between the animation and its print.
