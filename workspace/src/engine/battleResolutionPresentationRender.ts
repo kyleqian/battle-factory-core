@@ -2481,7 +2481,7 @@ export function withLiveCastformForms(
   return next;
 }
 
-type OpponentSummaryAge = Readonly<{ states: readonly import("./battleResolutionPresentation.ts").PartyBallState[]; lead: number; sinceDraw: number; sinceHide: number | null }>;
+type OpponentSummaryAge = Readonly<{ states: readonly import("./battleResolutionPresentation.ts").PartyBallState[]; lead: number; lag: number; sinceDraw: number; sinceHide: number | null }>;
 
 /** obr251: the drawn opponent summary with its ages at the current frame; kept past its hide command until the fade-out ends. */
 function opponentSummaryView(
@@ -2492,7 +2492,7 @@ function opponentSummaryView(
   if (summary === null) return shown;
   const fadeAge = summary.sinceHide === null ? null : summary.sinceHide + elapsed;
   if (fadeAge !== null && fadeAge >= OPPONENT_SUMMARY_FADE_DELAY_FRAMES + OPPONENT_SUMMARY_FADE_FRAMES) return null;
-  return Object.freeze({ battler: 1, states: summary.states, createAge: summary.sinceDraw + elapsed - summary.lead, fadeAge });
+  return Object.freeze({ battler: 1, states: summary.states, createAge: summary.sinceDraw + elapsed - summary.lead - summary.lag, fadeAge });
 }
 
 /** btn2: the automatic hold piece (`waitmessage` after a trailing gate) that keeps the released print on screen. */
@@ -2744,6 +2744,7 @@ export function createBattleResolutionPresentationRenderView(
         summary = Object.freeze({
           states: completed.states,
           lead: completed.timing?.leadFrames ?? 0,
+          lag: completed.timing?.lagFrames ?? 0,
           sinceDraw: battleResolutionCommandDuration(completed, field),
           sinceHide: null,
         });
@@ -3027,7 +3028,7 @@ export function createBattleResolutionPresentationRenderView(
         ? Object.freeze({ battler: command.battler, states: command.states, createAge: 0, fadeAge: null })
         : null;
       if (command.battler !== 0 && command.visible) {
-        summary = Object.freeze({ states: command.states, lead: command.timing?.leadFrames ?? 0, sinceDraw: 0, sinceHide: null });
+        summary = Object.freeze({ states: command.states, lead: command.timing?.leadFrames ?? 0, lag: command.timing?.lagFrames ?? 0, sinceDraw: 0, sinceHide: null });
       } else if (summary !== null && summary.sinceHide === null) {
         summary = Object.freeze({ ...summary, sinceHide: 0 });
       }
