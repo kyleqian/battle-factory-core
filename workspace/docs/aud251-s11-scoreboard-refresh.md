@@ -3909,3 +3909,32 @@ Evidence (git-ignored): `.integration/evidence/kse1/` (`t2-{base,A,E,E7,D}-on`, 
 - s165 d18: Knock Off's SE 13 is exact, and the following Rock Slide moved +8 -> +4 (SE 131 x20, 13, 322, 16) with the 114 / 15 / 47 rows after it exact; the remaining +4 is Rock Slide's own body, not probed here.
 - s2 d10 keeps +1 on the item chain; the `136` cries (-2) and SE 15 / 125 (-7) before it are the send-in terms of other steps.
 - Sun's +5 (the SUN_CONTINUES command length against the ROM's idle point) is folded into the item's 14; a Sun lab on the tick's own command length would remove the fit.
+
+## pmc1 (2026-11-23): per-move script rows against the engine's sound clock (T2 ON mass 7447 -> 7176)
+
+Evidence (git-ignored): `.integration/evidence/pmc1/` (`t2-{base,A,C,after}-on`, `t2-{base,after}-off`, `score-*.{txt,json}`, `lab-*` labCompare dirs, `b/` and `b2/` = `t2k4` attribution before / after, `census/`). Commits: A `07c94d95a`, B `f989f1996`, C `de0df67f1`, D `5df6c5069`. Method: for each remainder move of t2k8 section 4, the ROM script rows (`data/battle_anim_scripts.s`: pre rows, first SE row, wait rows, `Cmd_end` waits) against the live window and the sound clock (`labCompare.sh --scene on`, then `t2k4/attr.py` windows on the 25 ON seeds). The segment-start `body:X` label is the ROM's `gCurrentMove`, so a window whose first SE belongs to another command (Rest / Bulk Up / Amnesia / Earthquake: SE 197 sleep and SE 212 Charm rows) is not that move's constant.
+
+| Move | ROM rows vs engine | Result |
+|---|---|---|
+| Surf 57 | `SE_M_SURF` at script row 29 (after `delay 24`), the table's model gives 26; window and hit SE exact | A: `SOUND_EXTRA_LAG_ROWS` {57: 3}; lab `hpd8-surf-player-on` 3 -> 0, T2 -57 |
+| Wish 273 | script lead L = 2 against the clock's 7 (SE_M_REFLECT ROM 91, engine 96; the four SEs all +5; the next print -1 is the window, untouched) | B: `BODY_SOUND_LEAD_ROWS` +5; lab `aud242k-wish-player-on` 24 -> 4 |
+| Future Sight 248 | same class, +5 (`etp1-futuresight-on` SE 189 / 184) | C: +5; lab 22 -> 12 (the rest is a later Seismic Toss, not this move) |
+| Soft Boiled 135 | +5 on all three SEs (`aud242r-softboiled-player-on`) | C: +5; lab 15 -> 0 |
+| Belly Drum 187 | +4 (`species-audit-golem-prep5-belly-drum-player`) | C: +4; lab 44 -> 20 (the remaining 20 is the lab's Tackle with no body adapter) |
+| Mean Look 212 | +3 (`species-audit-golbat-prep4-mean-look-player`) | C: +3; lab 39 -> 21 (same Tackle artefact) |
+| Swagger 207 | +3 on the five body SEs (`aud242f-swagger-player-on`) | C: +3; lab 15 -> 0 |
+| Smokescreen 108 | LEAD4 clock lead 5 -> 7 (SE 135 / 159 ROM 71 / 111; three T2 segment starts +2) | D: lab `aud242k-smokescreen-player-on` 6 -> 2 (the stat-change SE 245 is +2, see Left) |
+| Thunderbolt 85 | window exact; SE 215 and both SE 119 are -1 after the third SE 118 (ROM 112 -> 172 = 60 rows; script 11 + two blend waits of 13 + 22 = 59). Blend model symmetric (0 -> 13 and 13 -> 0), segment sprites are not counted by `gAnimVisualTaskCount` | carried: no script term found for the extra row, a trim would be a fit |
+| Torment 259, Agility 97 | labs exact (`aud258-torment-player-on`, `aud242a-agility-player-on` body SEs); the T2 -10 / -13 steps start at command 8 / 21 of a long segment, so they are inherited | carried |
+| Ice Beam, Ancient Power, Earthquake, Yawn, Double-Edge (lab 1 / 0), Rest, Amnesia, Bulk Up, Bubble Beam, Double Team | own SEs and windows right; remaining mass is +-1 / 2 noise or an inherited offset | carried |
+| Struggle | forced-commit anchor, skipped by the brief | - |
+| Triple Kick 167 | hit 1 -12 / hit 2 +11 (3 windows): the inter-hit gap is 23 rows long in the engine, a multi-hit structure issue, not a per-move constant | carried |
+| Stun Spore, Sandstorm | the -8 / -14 steps begin at command 7 / 6 of the segment, not at the first body | carried |
+
+**Numbers.** T2 ON (25 seeds): mass 7447 -> 7176 (-271), exact 3400 -> 3464, offset 2477 -> 2413, 0 missing / 0 extra; move-animation SE 5947 -> 5676, stat-change SE unchanged (221). Stepwise: A 7447 -> 7390, B + C 7390 -> 7184, D 7184 -> 7176. T2 OFF (24 seeds): 627 -> 627, exact 872, offset 261, 0 / 0. Census 0..199 both scenes (`lsd194Census.sh`, `bd3e25bd6` vs `5df6c5069`, `rst197CensusDelta.py --digest`): eventsDigest + error identical 200 / 200 each, type-sequence changes 0, 0 changed commands in OFF (byte-identical shards 2 / 2; ON differs in the `sound` fields only), tree copies deleted. Pins that moved: `tests/aud242kMoveAnimSounds.test.ts` wish-player delta -5 -> 0 (ROM 91 / 218 / 234 / 251) and smokescreen-player -2 -> 0 (ROM 71 / 111), `tests/aud242fMoveAnimSounds.test.ts` swagger-player -3 -> 0 (the five SE 193 / 194 rows).
+
+**Left.**
+- The stat-change SE after a status body (Smokescreen SE 245, Agility SE 239) is +2 in the labs: the stats-change command's own term, as for Scary Face in kse1.
+- Wish's window is 1 row short of the ROM (next print -1 after the lab), left because the adapter duration is a pixel-pinned accepted window.
+- Thunderbolt's -1 after the third SE 118 (about 24 T2 mass) has no source row yet.
+- The `BODY_SOUND_LEAD_ROWS` leads are calibrated on one lab side per move (player); an opponent-side lab would confirm them (T2 has both sides in the windows and none got worse).
