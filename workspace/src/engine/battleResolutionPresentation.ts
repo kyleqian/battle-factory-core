@@ -252,7 +252,8 @@ export const HELD_ITEM_EFFECT_AFTER_STATUS_EXTRA_FRAMES = 1;
  * (General_Sandstorm / General_Hail: `goto Move_SANDSTORM` / `Move_HAIL`) and BattleScript_RainContinuesOrEnds /
  * SunlightContinues' `playanimation BS_ATTACKER, B_ANIM_RAIN_CONTINUES / B_ANIM_SUN_CONTINUES` (General_Rain; General_Sun =
  * `goto Move_SUNNY_DAY`) play on every continuing turn in Scene ON. Cmd_playanimation(_var) tests HITMARKER_NO_ANIMATIONS before
- * its weather branch (battle_script_commands.c:4046-4076), so Scene OFF plays nothing and presents no command (the kernel's
+ * its weather branch (battle_script_commands.c:4046-4076), so Scene OFF plays nothing and presents no command, only the Rain / Sun
+ * Pausex20 hold on the print (sbx3, weatherContinuesOffPauseRows; the kernel's
  * WEATHER_VAR receipt stays in both scenes: the digest does not move). The ROM launches the animation on battler 0 (apx227: the
  * first non-absent battler, whatever the receipt's battler says). Sun / Sandstorm / Hail: the command's rows are the table-animation
  * launch structure fps147 measured for B_ANIM_FOCUS_PUNCH_SETUP (the script active from row X + 2, the next print's first glyph 3 rows
@@ -6368,7 +6369,8 @@ export function projectBattleResolutionCommands(
       const weather = weatherContinuesAnimationOf(payload);
       if (weather !== null) {
         // wth236: Scene ON draws the weather body (battleResolutionPresentationRender.ts weatherContinuesBodyEffect); Scene OFF
-        // skips the animation entirely (HITMARKER_NO_ANIMATIONS precedes the weather branch of Cmd_playanimation_var).
+        // skips the animation entirely (HITMARKER_NO_ANIMATIONS precedes the weather branch of Cmd_playanimation_var); Rain / Sun's
+        // Pausex20 is the print's hold (sbx3).
         if ((beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) === 0) {
           commands.push(Object.freeze({
             type: "general-animation",
