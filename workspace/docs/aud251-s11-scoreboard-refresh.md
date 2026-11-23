@@ -3476,3 +3476,92 @@ Side lane, presentation timing only (Scene OFF; no rule / damage / RNG change). 
 - `npm run typecheck` clean; `npm run test:gate` 360 files / 2,839 tests pass; `npm run build` ok.
 
 **Not landed (findings).** Remaining OFF window mass is the segment-start head: the ROM's first print after the A press depends on the rows from the effect entry to `EffectHit` (`AllStatsUpHit` / `PoisonHit` 2 rows, Recoil / Struggle 4), the engine uses a constant +9, and the per-move constants are heterogeneous and partly driver anchors. Struggle s7295 d8 -4 and s7295 d5 / d7 -2 are this (engine A + 9 vs ROM A + 11 / 13). s7682 d103 (Struggle after a Poison Hit status animation, -9) is one window. Focus Punch (45) and the plain class (47) have no single owner row. Not one rule over the windows checked, so no change.
+
+## t2k7 (2026-11-23): the remaining S11 sound-timing mass re-ranked on the run's final engine `74e01547a` + the soak driver fix (measurement only; no `src/` / `tests/` change)
+
+Tree: master at the 2026-11-23 wind-down (landed since t2k6's fold-g: swt1, sep1, rcv1, pso1, ftp1, ohs1, sbx1; hse2 / chg4 / hie7 / drv2 / hit2 / etp3 / bbk1 / hpb3 / shb1 / fsi1 / ekd1 / cfs1 / sbm1 were already in t2k6 or before). The T2 replay was not re-run: `.integration/evidence/t2final-20261123` (49 seeds, 25 ON / 24 OFF, `rescoreAll.sh`, ROM files = `t2n`) is linked as `t2` and re-scored with `soundScoreboard.py` per scene (symlink dirs `t2-on` / `t2-off`), the scores reproduce the run's final figures exactly. Then the t2k6 chain: `cmd.sh` (`T2K4_DIR`, `SEEDS_DIR` = absolute path of `t2n`) -> `attr.py` -> `agg.py` / `rank6.py` / `topwin.py` / `segstart.py` / `probe.sh`. New tool in `tools/integration/t2k4/`: `remainder7.py [N]` (the `rank6.py` remainder windows grouped by cause group, mass / windows / clean-start mass, ON and OFF). Evidence (git-ignored, main tree): `.integration/evidence/t2k7/` (`t2` -> `../t2final-20261123`, `t2-{on,off}`, `c/`, `attr-{on,off}.json`, `agg.txt`, `rank.txt`, `remainder.txt`, `topwin-{on,off}.txt`, `segstart-on.txt`, `score-{on,off}.{txt,json}`, `p/on/` probes + `*.cmp.txt`). Note: `cmd.sh` needs `SEEDS_DIR` absolute (its default is relative to `workspace/`, which a worktree session does not have).
+
+### 1. T2 on this tree (missing / extra 0 / 0 in both scenes)
+
+| scene | mass | exact / offset | move-animation SE | stat | cry | battle-controller | bgm |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| ON (25 seeds) | **8,684** (t2k6 9,798) | 3,251 / 2,626 (t2k6 3,170 / 2,707) | 6,981 (7,966) | 253 (274) | 331 (340) | 1,116 (1,215) | 3 (3) |
+| OFF (24 seeds) | **719** (t2k6 822) | 849 / 284 (t2k6 842 / 291) | 0 (0) | 97 (92) | 115 (135) | 505 (593) | 2 (2) |
+
+ON by class (`agg.py`): body 4,558 (3,899 rows, 2,386 exact), gen 2,423, ctl-chain 560, ctl-hit 556, cry 331, stat 253, bgm 3. OFF: ctl-hit 268, ctl-chain 237, cry 115, stat 97, bgm 2; no body / gen mass; the largest OFF window is 21 (s97 d13 Fire Blast hit SE +7 x3), s6568 d104 -20 (faint box) next.
+
+**Drop since t2k6 (ON -1,114, -11.4 %; OFF -103, -12.5 %), per landed step as its section gives it** (each section measured on its own base, so the sum is not exactly the measured drop):
+
+| step | ON | OFF |
+| --- | --- | --- |
+| swt1 (foe send-in -> next command +9) | -285 (10,213 -> 9,928) | -36 (861 -> 825) |
+| sep1 (hit -> Leech Seed drain gate) | -112 (10,051 -> 9,939) | 0 |
+| rcv1 (restore-HP body tails; OFF drain 35 rows) | -200 (9,441 -> 9,241) | no T2 number in the section (OFF rule only) |
+| pso1 (Perish Song count prints) | 0 | 0 |
+| ftp1 (Psychic thaw -287, two-turn print -94, hail 0, Focus Punch lost-focus -176) | -557 (9,513 -> 8,956) | -10 (786 -> 776) |
+| ohs1 (OFF NoMore / InLove -> used print) | 0 | -53 (786 -> 733) |
+| sbx1 (end-turn box clear) | 0 (byte-identical) | 0 |
+| **sum of the sections** | **-1,154** | **-99** |
+| **measured vs t2k6** | **-1,114** (9,798 -> 8,684) | **-103** (822 -> 719) |
+
+The residual (+40 ON, -4 OFF) is the bases: ftp1 found t2k6's own text stale (fold-g was 9,513 / 786, not 9,798 / 822), and the sections' chains overlap on different trees; no step is hiding a regression of size here. The one t2k6 hidden regression (s8108 d12 gen:219, +48) was fixed by ftp1 item 2.
+
+### 2. Ranked top 10 (rows owned disjointly by window, `rank6.py`; items + B4 + weather + Psychic + remainder = TOTAL)
+
+**M** = a measured recipe exists, **new** = first measured here, **inh** = inherited from the previous command (no rule of its own). "clean" = windows that start from a previous offset of 0 (`rank.txt`).
+
+| rank | item | mass ON / OFF (sum) | windows ON / OFF | rule of its own? | recipe status | files / lines a landing touches | expected mass |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 | Faint / send-in chain: SE 15 / 16 / 114, cry@faint | 721 / 252 (973) | 103 / 60 | mostly inherited (clean 184 ON / 152 OFF). Own: **the faint print -> party-summary SE 114 leg** (probe 3: ROM SE 16 -> SE 114 76-84 rows, engine 62-69; windows s6079 d3 -15, s3738 d57 -14, 159) and OFF s6568 d104 -20 | 114 leg **new** (probe 3); s6568 d104: **M** sep1 item 3 / handoff (1) (press-ready frame, one-frame press scan on an lsf2 lab) | `battleResolutionPresentation.ts` `faint` command lead 68 / `message` 24 / `party-summary` lead 24-25 (~6440-6540) | -110 ON (114 leg incl. its carried SE 15), -20 OFF |
+| 2 | Hit SE 12 / 13 / 14 | 442 / 359 (801) | 176 / 107 | OFF: yes, plain clean steps (clean 330 of 359; largest 21); ON: inherited (clean 77 of 442) | OFF **M** hse1m rows + hit2 item 1 (traced, not landed); ON inh | `battleResolutionPresentation.ts` hit-animation lead | OFF -150 .. -250 |
+| 3 | Held-item group gen:152 / 228 / 102 (outside Focus Punch segments) | 800 / 0 | 61 / 0 | no: each window is the previous hit / print / status command's step (clean 190). Two classes with a front: s310 d2 / s1415 d47 -9 after the SE 90 chain (110) and s8108 d44 +1 after the confusion self-hit (115, prev -24) | -9 after SE 90: **M** handoff (2) (Focus Punch family next row, sleep status-animation SE 197 after the item heal; ftp1 open); rest inh | `hpItemAnimationRows`, shb1 `hpItemAnimationSeGate` | -110; the rest 0 on its own |
+| 4 | gen:180 Leech Seed drain | 520 / 0 | 11 / 0 | **yes** (probe 1): the drain launch lag after a weather tick is 9, the ROM's is 0 (SE 180 = exec + 27); s310 d13 / d14 / d15 +9 x 10 rows (270), s319 d18 +8 after a switch-in cry (80) probably the same class (not probed), s648 d10 +3 / d12 -5 (120, other contexts) | **new** (probe 1); the sep1 / ekd1 lab-vs-T2 sign question is this: the lab context (drain after a hit) needs the +9, a drain after a weather tick or a send-in does not | `battleResolutionPresentation.ts` ~6537-6545 (drain command build: set `launchLagFrames: 0` when the previous command is a weather `general-animation`), `battleResolutionPresentationRender.ts` 1899-1907 (`leechSeedDrainBodyStartAge`, `leechSeedDrainLaunchLag`); the body pixels keep age 7 (sep1 term 3) | -270 .. -350 |
+| 5 | Rock Slide body | 514 / 0 | 8 / 0 | **yes** (probe 2, was "inherited" in t2k6): the first SE 131 is 3 rows early in the clean windows (s1914 d11: ROM exec 42 -> SE 51, engine cmd 36 -> SE 48; Flame Wheel is exact on the same command shape); s8612 d8 is -9 after Belly Drum (the same -3 plus the self-target print leg -6, 180) | **new** (probe 2) | the move-animation script row table for Rock Slide (`animSoundOps.ts` / `moveAnimSounds.ts` per-move first row; `moveAnimationScriptStartRow` 1806 gives the generic 4) | -180 (three clean 20-row windows) .. -400 |
+| 6 | Focus Punch segments (SE 171, lost-focus print, item rows after) | 480 / 0 | 22 / 0 | partly: ftp1 moved the print head; what is left is carried (clean 61); s1415 d50 -2 after gen:171 (91) | **M** ftp1 open terms (the constant 16 for one window; s1415 d47 / d49 not re-probed) | `battleResolutionPresentation.ts` `FOCUS_PUNCH_LOST_FOCUS_PRE_PRINT_ROWS` | -60 .. -150 |
+| 7 | gen:148 poison / status tick | 402 / 0 | 16 / 0 | no: s499 d3 / d5 carried -11 after stat SEs (72 + 42 + 30), s165 -9 after a switch-in cry | **M** t68m 6 class C (`switch-in` tail -9) | `battleResolutionPresentationRender.ts` `switch-in` tail | -54 |
+| 8 | stat SE 239 / 245 / 23 / 24 | 209 / 105 (314) | 53 / 33 | inherited (OFF clean 95 of 105: the -9 / -10 after a move-animation) | inh | none | 0 |
+| 9 | Confusion + Supersonic | 278 / 0 | 7 / 0 | Supersonic s5569 d12 -9 after itself (143); Confusion s8108 d8 -7 (72) and d44 -32 (48) after ctl-hit:13 | Supersonic **M** swt1 item 2 / cfs1 (needs a lab pair the SUPERSONIC adapter supports; handoff (3)); Confusion inh | `battleResolutionPresentation.ts` status-animation head | -143 (with the lab pair) |
+| 10 | Two-turn second family (Dig, Solar Beam) | 260 / 0 | 17 / 0 | partly (s97 -13 x2 first charging turn) | **M** t2k4 9 | `battleResolutionPresentation.ts` `isChargeTurnOpener` | -50 .. -117 |
+| | **Items 1-10** | **4,626 / 716 (5,342)** | | | | | |
+| 11 | Weather tick: Sandstorm gen:219 / Hail gen:242 | 119 / 0 | 11 / 0 | s2741 d12 hail -7 with no send-in (48), the rest carried (t2k6's 312 -> 119 after swt1 / ftp1) | inh | none | 0 |
+| 12 | Psychic natural thaw + Shell Bell rows | 23 / 0 | 5 / 0 | landed (ftp1 item 1: 287 -> 23) | done | | 0 |
+| | B4 bodies (reported separately) | 265 / 0 | 32 / 0 | | | | |
+| R | remainder (411 / 4 windows) | 3,651 / 3 | | segment-start per-move constants (below) | | | |
+| | **TOTAL** | **8,684 / 719** | | | | | |
+
+Sum-check: ON 721 + 442 + 800 + 520 + 514 + 480 + 402 + 209 + 278 + 260 = 4,626; + 119 + 23 + 265 + 3,651 = 8,684 (`rank.txt`). OFF 252 + 359 + 105 = 716; + 3 = 719. Counts are row mass, not saving; the "expected" column is the part a rule of its own can remove, not the owned sum.
+
+**Moved against t2k6** (same classes): Psychic 287 -> 23 (ftp1), Focus Punch 640 -> 480 (ftp1), weather 312 -> 119, held-item group 815 -> 800, Leech Seed 760 -> 520 (sep1 / rcv1 / ekd1), faint chain 1,019 -> 973, hit SE 901 -> 801 (OFF 436 -> 359), gen:148 456 -> 402, stat 308 -> 314 (OFF +6). **Unchanged to the row:** Rock Slide 514, Confusion + Supersonic 278, two-turn 260, B4 265 (274 -> 265).
+
+**Which items have a measured recipe.** M: rank 1 OFF s6568 (sep1 item 3), rank 2 OFF (hse1m + hit2 item 1), rank 3 SE 90 pair (handoff 2), rank 6 (ftp1 open), rank 7 (t68m 6 C), rank 9 Supersonic (swt1 item 2), rank 10 (t2k4 9). **New this step (probed):** rank 4 (drain launch lag after a weather tick), rank 5 (Rock Slide first SE +3), rank 1's SE 114 leg. Not new and not recipe-able: ranks 2 ON, 8, rest of 3.
+
+**Recommended landing order** (largest certain saving per rule): (1) rank 4, one `launchLagFrames: 0` case, -270+ with an existing seam and labs (`etp1-leechseed*-on`, `etp3-recoverls4-on`, `aud250-leechseed-*`, `hie1-*` must stay at their pins: the lab contexts are drain-after-hit / after-print, which this does not touch); (2) rank 5, a per-move constant checked against the Rock Slide windows (-180 certain); (3) rank 2 OFF hit-SE rows (hit2 item 1, -150 .. -250); (4) rank 1 SE 114 leg (-110, needs the faint-print length discriminator, below).
+
+### 3. The probed windows (ROM `hcr3mProbe` + engine `--cmdtrace`, frames from each side's commit; `probe.sh`; the three new ones)
+
+1. **s310 d13 (d14 / d15 identical), Leech Seed drain after the Sun tick (rank 4, 90 each).** ROM: `BattleScript_SunlightContinues+0xd` ex0 1017 -> `LeechSeedTurnDrain+0x0` 1020 -> `+0x7` ex2 (animation launch) 1021 -> SE 180 at **1048** (exec + 27), SE 142 x9 every 6 from 1066, SE 179 at 1161, `+0x12` ex2 1230, seeded hp / print 1250 / 1255. Engine: SE 202 (Sun) 879 exact; drain command start 1021 exact; SE 180 **1057** (command + 36 = 27 + `LEECH_SEED_DRAIN_SCRIPT_AGE` 7 + `LEECH_SEED_DRAIN_AFTER_PRINT_EXTRA_AGE` 2), SE 142 from 1075, SE 179 1170: every drain SE +9, and the hp commands (1239 / 1266) and prints are exact. So the weather-tick context behaves like the player-send-in one (hie7: ROM exec -> SE is 27 there too): launch lag 0, not 9. Engine command: the drain `general-animation` (`LEECH_SEED_DRAIN`) following a weather `general-animation` (`SUN_CONTINUES`). Expected -270 for the three windows (+ s319 d18 +8 after a switch-in cry, 80, unprobed).
+2. **s1914 d11 (clean) and s8612 d8 (after Belly Drum), Rock Slide (rank 5).** s1914 d11: ROM `EffectFlinchHit` -> `HitFromAtkString+0x1` ex1 12 -> ex0 36 -> anim exec `HitFromAtkAnimation+0x1` 42 -> first SE 131 **51**, then every 4 (20 rows); engine `message` 13, `move-animation` 36 (bodyLead 5), first SE **48**: constant -3 on all rows. The same command shape for Flame Wheel (s310 d13: exec 45 -> SE 51, engine 39 -> 51) is exact, so the engine's generic command -> first SE of 12 does not hold for Rock Slide: ROM anim exec -> first SE is 9 here against 6 for Flame Wheel. s8612 d8: after Belly Drum (ROM `MoveEnd` 367, Rock Slide `EffectHit` 376, `HitFromAtkString+0x1` ex1 380 -> ex0 406 -> exec 412) the first SE is ROM 421 vs engine 412 (-9 = the -3 plus a -6 print-to-animation leg after a self-target stat move; Belly Drum's own SEs are +4: 55 vs 51, carried). Expected -180 (three clean windows) up to -400.
+3. **s6079 d3 (Spark KO, foe faints; -15) and s3738 d57 (poison tick KO; -14), the faint -> party-summary SE 114 leg (rank 1).** s6079 d3: ROM `FaintTarget+0x7` ex2 366 -> SE 16 367 -> ex0 385 -> print `+0xc` ex1 387 -> ex0 424 -> `MoveEnd` 425 -> `GiveExp+0x0` 431 -> `HandleFaintedMon+0x0` 437 -> `FaintedMonTryChoose+0x6` ex2 441 -> SE 114 (`SE_BALL_TRAY_ENTER`) **451**; engine: `faint` 287 (lead 68, min 89) -> SE 16 363 -> `status` 376 -> `message` 377 (min 24) -> sprites 405 / 406 -> `party-summary` 407 (lead 25) -> SE 114 **432**: ROM SE 16 -> SE 114 is 84 rows, engine 69; s3738 d57 ROM 772 -> 848 = 76, engine 62 (SE 15 -17 after it). The same leg is exact in s165 d22 and s3738 d38, so the ROM length depends on something the engine takes as constant (the faint print's glyph count, the fsi1 per-glyph recipe, is the first suspect; not resolved here: the ROM probes in `p/on/` carry the print rows, the faint print text per window is the next measurement). Engine command: `faint` / `message` / `party-summary` lead (`battleResolutionPresentation.ts` ~6440-6540). Expected -110 ON.
+
+### 4. Windows that are not engine rules (harness / carried)
+
+- The 3,651 ON remainder is a long tail of per-move first-row constants (`remainder7.py`; `segstart.py` total 1,209 over 155 windows): Rest 196 (18 windows), Yawn 190, Wish 164, Ice Beam 152, Struggle 150, Double-Edge 138, Double Team 100, Surf 92 (23 windows, -3 x12 each), Torment 80 (one -9 window, s165 d9), Bubble Beam 79, Thunderbolt 75, Ancient Power 73, Agility 70 ... each below 200; many are the drv2 forced-commit anchor or one-window carries (clean-start mass 2,301 of 3,651, but spread over 411 windows).
+- OFF is a tail (largest window 21); the s6568 d104 -20 faint box is the harness's 17-frame press pulse spacing (sep1 item 3).
+- Carried offsets: ON hit-SE / chain windows start from a nonzero previous offset in most rows (clean 77 of 442 hit SE, 184 of 721 chain).
+
+### 5. Engine commands behind the probed windows
+
+| window | ROM script rows | engine command | file |
+| --- | --- | --- | --- |
+| Leech Seed drain after Sun | `SunlightContinues+0xd` -> `LeechSeedTurnDrain+0x7` ex2 -> SE 180 at exec + 27 | `general-animation` `LEECH_SEED_DRAIN` after `general-animation` `SUN_CONTINUES` (launch lag 9, ROM 0) | `battleResolutionPresentation.ts` ~6537, `battleResolutionPresentationRender.ts` 1899-1907 |
+| Rock Slide | `HitFromAtkAnimation+0x1` ex1 -> SE 131 at +9 | `move-animation` (bodyLead 5) -> script row of the first SE | `moveAnimSounds.ts` / `animSoundOps.ts` per-move row; `moveAnimationScriptStartRow` (`MOVE_SCRIPT_START_ROWS_AFTER_LEAD` 4) |
+| faint -> SE 114 | `FaintTarget+0xc` print -> `GiveExp` -> `FaintedMonTryChoose+0x6` ex2 -> SE 114 | `faint` (lead 68) / `message` (24) / `party-summary` (lead 24-25) | `battleResolutionPresentation.ts` ~6440-6540 |
+
+### 6. What not to chase
+
+- The 3,651 ON remainder (411 windows) and the segment-start per-move constants (Rest, Yawn, Wish, Ice Beam, Struggle, Double-Edge, ...): each is below 200 and most are one-window or the forced-commit anchor.
+- ON hit-SE and chain carried mass (no per-family offsets); the held-item scatter outside the SE 90 pair; stat SE (inherited); Rock Slide's s8612 -9 print leg until the -3 constant is in (it may close it).
+- A global `LEECH_SEED_DRAIN_SCRIPT_AGE` / `AFTER_PRINT_EXTRA_AGE` change: the lab (drain after a hit / print) and T2 (after a weather tick / send-in) disagree because the context differs; change the lag per context only (rank 4).
+- `HP_TIMING.minimumFrames` -> 0 globally (hpb3: +621), B4 bodies (265), Supersonic in the c-lead class (cfs1: +164 ON), the OFF tail (5-21 per window), weather (119, carried), Psychic (done).
+
+Not applied: no `src/` or `tests/` change; PROGRESS / ISSUES / ROADMAP and all ledgers untouched; the one new tool is python only; `npm test` / `npm run typecheck` / `npm run build` not run (the step forbids them; no `.ts` / test touched).
