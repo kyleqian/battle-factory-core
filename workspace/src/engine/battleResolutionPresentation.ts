@@ -1124,13 +1124,34 @@ const CONFUSION_OFF_USED_PRINT_TIMING = Object.freeze({
   minimumFrames: 0,
   holdFrames: WAITMESSAGE_LONG_HOLD_FRAMES + 3 + CONFUSION_OFF_USED_PRINT_EXTRA_ROWS,
 } as const);
-function confusionOffLeadsToUsedPrint(events: readonly BattleKernelSemanticEvent[], index: number): boolean {
-  if (events[index]!.provenance?.sourceLabel !== CONFUSION_HEAD_SCRIPT) return false;
+/**
+ * ohs1 (Scene OFF, ROM s7295 d8 / s7682 / s830 and s6568 d29 / d21 / s7682 d4): the other two pre-move prints that lead into the used print skip
+ * their launch, so the script's `return` and the used move's canceler rows are all that stand before it. MoveUsedIsConfusedNoMore
+ * (`printstring`, `waitmessage`, `return`; wait release 53 -> `HitFromAtkCanceler` 118 -> used print 121): 64 + 5. MoveUsedIsInLove
+ * (`printstring`, `waitmessage`, `status2animation`, `return`; print 9 -> 46, used print 115): the status launch's 3 rows (PRE_MOVE_STATUS_ANIMATION_LEAD_ROWS) + 3.
+ */
+const CONFUSION_NO_MORE_HEAD_SCRIPT = "BattleScript_MoveUsedIsConfusedNoMore";
+const IN_LOVE_HEAD_SCRIPT = "BattleScript_MoveUsedIsInLove";
+const CONFUSION_NO_MORE_OFF_USED_PRINT_TIMING = Object.freeze({
+  minimumFrames: 0,
+  holdFrames: WAITMESSAGE_LONG_HOLD_FRAMES + 5,
+} as const);
+const IN_LOVE_OFF_USED_PRINT_TIMING = Object.freeze({
+  minimumFrames: 0,
+  holdFrames: WAITMESSAGE_LONG_HOLD_FRAMES + 3 + 3,
+} as const);
+function preMoveOffUsedPrintTiming(events: readonly BattleKernelSemanticEvent[], index: number): BattleMessageTiming | null {
+  const label = events[index]!.provenance?.sourceLabel;
+  const timing = label === CONFUSION_HEAD_SCRIPT ? CONFUSION_OFF_USED_PRINT_TIMING
+    : label === CONFUSION_NO_MORE_HEAD_SCRIPT ? CONFUSION_NO_MORE_OFF_USED_PRINT_TIMING
+    : label === IN_LOVE_HEAD_SCRIPT ? IN_LOVE_OFF_USED_PRINT_TIMING
+    : null;
+  if (timing === null) return null;
   for (let next = index + 1; next < events.length; next += 1) {
     const payload = events[next]!.payload;
-    if (payload.kind === "message") return payload.messageId === "STRINGID_USEDMOVE";
+    if (payload.kind === "message") return payload.messageId === "STRINGID_USEDMOVE" ? timing : null;
   }
-  return false;
+  return null;
 }
 /**
  * Route-scoped `STRINGID_USEDMOVE` hold for the ButItFailed/no-anim path
@@ -6167,9 +6188,8 @@ export function projectBattleResolutionCommands(
               : (() => {
                 const base = selfConfusionOff
                   ? SELF_CONFUSION_OFF_HIT_MESSAGE_TIMING
-                  : payload.messageId === "STRINGID_PKMNISCONFUSED" && (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0
-                    && confusionOffLeadsToUsedPrint(events, index)
-                  ? CONFUSION_OFF_USED_PRINT_TIMING
+                  : (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0 && preMoveOffUsedPrintTiming(events, index) !== null
+                  ? preMoveOffUsedPrintTiming(events, index)!
                   : messageTimingFromSourceProvenance(event, sceneOnMoveAnimationSeen, (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0)
                   ?? (WAITMESSAGE_LONG_MESSAGE_IDS.has(payload.messageId) || payload.messageId === SUBSTITUTE_FADED_MESSAGE_ID
                   ? WAITMESSAGE_LONG_TIMING
