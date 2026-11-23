@@ -197,7 +197,7 @@ The player's `BattleScript_DoSwitchOut` `hidepartystatussummary` / `switchinanim
 | Rattata / Pikachu | 7 | 61 | Graveler | 8 | 62 |
 | Charizard / Bulbasaur | 9 | 63 | Wigglytuff | 10 | 64 |
 
-The engine used `max(13, glyphs) + 1` command rows then the shared 47-row ball-open elapsed (13 fit the 12-glyph RATTATA string only), so it was +1 for a 7-letter name and up to +5 either way across the table (the pmo239 PIDGEY / MACHOP 1-frame offset is the 6-letter case).
+The engine used `max(13, glyphs) + 1` command rows then the shared 47-row ball-open elapsed (13 fit the 12-glyph RATTATA string only), so the engine's send-in SE was late by +1 / +2 / +3 for 6 / 5 / 4 letters (the 13 floor held the message too long), exact at 7 letters, and 1 early for 8+ letters (the pmo239 PIDGEY / MACHOP 1-frame offset is the 6-letter case).
 Rule landed (`voluntaryPlayerSwitchInMessageTiming`, battler 0 + `BattleScript_DoSwitchOut` provenance): the "Go! X!" message holds glyphs + 1 rows with no floor. Every player send-in SE row is now +0 across the 12 species / turns in Scene OFF, and in Scene ON (`ais5-both-switch-on`, `ais5-sp19-6-on`, `ais5-sp75-40-on`: 2349 / 2447 / 3628 / 3726 etc.); the rows after it carry the same shift.
 Forced replacements (`plr162`) and the opponent's lines are untouched (other provenance).
 
@@ -209,7 +209,7 @@ Forced replacements (`plr162`) and the opponent's lines are untouched (other pro
 - Census 0..199, both scenes (`lsd194Census.sh` + `rst197CensusDelta.py`): `eventsDigest` + error identical 200 / 200 each scene, 0 changed commands (62,225 OFF / 63,530 ON): the random-round AI never makes a voluntary player switch.
 - T2 (`rescoreAll.sh`, `t2-{base,after}`): OFF 24 seeds and ON 25 seeds identical before and after (OFF exact 872 / offset 261 / mass 627, ON 3464 / 2413 / 7136, 0 missing / 0 extra); no T2 seed has a voluntary player switch, so the labs are the measure.
 - Pins: `randomRoundSoak` M-B (c) "full" seed 1 frames 57658 -> 57662 (same battle 3 / depth 2 / turn 15 / roundLost; four voluntary player switches whose "Go! X!" is now glyphs + 1 rows instead of max(13, glyphs) + 1). New `tests/ais5SameTurnSwitch.test.ts`: the player recall / send-in SE rows equal the ROM in 7 labs (4 OFF, 3 ON).
-- Play change: an input-ready move. After a voluntary player switch the next command (the opponent's move / the action menu) starts glyphs - 12 rows later than before: nicknames of 8+ letters +1 .. +3, 7 letters 0 (RATTATA), 6 or fewer -1 .. -3.
+- Play change: an input-ready move. After a voluntary player switch the next command (the opponent's move / the action menu) starts 1 frame later for nicknames of 8+ letters (glyphs 13+), the same for 7 letters (RATTATA, 12 glyphs), and 1 / 2 / 3 frames earlier for 6 / 5 / 4 letters.
 
 ### Residuals / open
 
