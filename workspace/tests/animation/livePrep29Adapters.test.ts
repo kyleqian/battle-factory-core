@@ -127,15 +127,16 @@ describe("live prep29 ordinary routes", () => {
   // route = generated rentals, party member 0 knows the move, one turn (tools/integration/r3ProfileRouteSearch.ts <id> 4 1 4000: first seeds ascending).
   // Outrage and Luster Purge: no generated rental route within seeds 0..3999 x streaks 0..42.
   it.each([
-    ["BONEMERANG 246/21 MAROWAK (both hits)", 155, 246, 21, 0 as const, 71, 2],
-    ["RAPID_SPIN 80/14 WARTORTLE", 229, 80, 14, 2 as const, 130, 1],
-  ])("route %s: bodies reached, adapter active every age, following prompt reached, Scene ON/OFF parity", (_name, id, seed, streak, slot, ages, hits) => {
+    // mhs1: Bonemerang is a shape-A body; hit 1 carries the kernel lead 16 (ROM lab mhs1-bonemerang-pfirst-on: hit SE exact), hit 2 has no lead (74 rows)
+    ["BONEMERANG 246/21 MAROWAK (both hits)", 155, 246, 21, 0 as const, 71, 2, [16, 0]],
+    ["RAPID_SPIN 80/14 WARTORTLE", 229, 80, 14, 2 as const, 130, 1, undefined],
+  ])("route %s: bodies reached, adapter active every age, following prompt reached, Scene ON/OFF parity", (_name, id, seed, streak, slot, ages, hits, leads) => {
     const on = generatedCommandAnimationReplay(seed, "on", [slot], streak);
     const off = generatedCommandAnimationReplay(seed, "off", [slot], streak);
     const bodies = on.animations.filter((a) => a.moveId === id && a.attacker === 0);
     expect(bodies).toHaveLength(hits);
-    for (const body of bodies) {
-      expect(body.ages).toEqual(iu120Ages(id, ages));
+    for (const [i, body] of bodies.entries()) {
+      expect(body.ages).toEqual(iu120Ages(id, ages, "player", leads?.[i]));
       expect(body.adapterActive.every(Boolean)).toBe(true);
     }
     parityOf(on, off);

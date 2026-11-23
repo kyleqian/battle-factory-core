@@ -477,7 +477,7 @@ function hitAllLoopEmptyBoxTiming(events: readonly BattleKernelSemanticEvent[], 
   if (extra === 0 && MULTI_HIT_LOOP_BOX_EXTRA_ROWS.has(label)) return null;
   if (event === undefined || (!HIT_ALL_LOOP_SCRIPTS.has(label) && extra === 0) || event.payload.kind !== "message"
     || event.payload.messageId !== "STRINGID_EMPTYSTRING3") return null;
-  const from = event.provenance.instructionExecution;
+  const from = event.provenance?.instructionExecution;
   const next = events[index + 1];
   const to = next?.provenance?.instructionExecution;
   if (from === undefined || to === undefined || to <= from) return null;

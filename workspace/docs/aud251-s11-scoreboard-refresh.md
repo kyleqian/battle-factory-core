@@ -4082,3 +4082,22 @@ Evidence (git-ignored): `.integration/evidence/ztl1/` (`t2-{base,after2}`, `scor
 - Psych Up: add 244 to `LEAD4_S_LEAD_MOVE_IDS` / `LIVE_MOVE_SCRIPT_TAIL_TRAIL_ROWS` once the body lead of a second-mover Psych Up (T2 seed 7295, lead about 2) is measured: the S-lead clock formula assumes the first-mover lead of the lab.
 - Light Screen / Fake Tears body windows, Calm Mind / Cosmic Power post-arrow stat row: adapter-window corrections, pixel-pinned.
 - Destiny Bond's body-internal -1 on SEs 2 and 3, and the foe Tackle's missing live body (`ENG has no live body adapter for mv33`) in every lab's tail.
+
+## mhs1 - multi-hit per-hit timing (Triple Kick, Bonemerang, Spike Cannon)
+
+Main/ts lane, Scene ON plus an OFF check, presentation timing only (no battle rule, damage, RNG, event order). Base d405ced42.
+
+ROM structure (labs `mhs1-*-pfirst-on`, rows from rom.json): per hit the attackanimation exec E, A (gAnimScriptActive) at E+2+g, hit blink at E+42+g, hp bar H rows, then hp end -> next exec 25 rows (DoMultiHit) / 27 (DoTripleKickAttack); hit start -> next exec = 60+H / 62+H.
+
+Two mechanisms (`src/engine/battleResolutionPresentation.ts`):
+1. `MHS1_SHAPE_A_MOVE_IDS` = Triple Kick 167, Bonemerang 155, Spike Cannon 131: hit 1 is a shape-A body (hit 1 SE / hit SE exact, was -10..-15). Spike Cannon's ROM fixture `aud242r spikecannon-player` now matches on all 6 rows (delta +9 -> 0).
+2. `hitAllLoopEmptyBoxTiming` also owns the non-final `BattleScript_DoMultiHit` / `DoTripleKickAttack` EMPTYSTRING3 box: `to - from + 1 + 8` (DoMultiHit) / `+ 7` (Triple Kick); the final hit keeps the 24-row box (PrintStrings tail).
+
+Numbers (labCompare, Scene ON mass base -> after): Triple Kick 149 -> 61, Bonemerang 112 -> 7 (6 exact), Twineedle 132 -> 134 (not shape A, see below). Scene OFF: Triple Kick 650 -> 510, Bonemerang 175 -> 155, Twineedle 206 -> 164. T2 (`rescoreAll.sh`, `soundScoreboard.py`): ON 6,735 -> 6,702 (exact 3,507 -> 3,513), OFF 627 -> 627 (872 exact), both 0 missing / 0 extra. Census 0..199 both scenes: eventsDigest + error identical 200 / 200 (30 battles change command timing per scene).
+
+Pins moved: `aud242rMoveAnimSounds` spikecannon-player deltas +9 -> 0 (ROM SE 160 row 98 = ours, all 6 rows); `randomRoundSoak` trajectory pins (not ROM frames): seed 21 frames 43,712 -> 43,655 / renderCalls 3,058 -> 3,054, seed 1 frames 57,658 -> 58,897 / turn 15 -> 19, Baton Pass seed 5 -> 14 (scan 0..39, candidates 14, 16, 19, 29). `tests/helpers/iu120Rows.ts` SHAPE_A_RULE_IDS += 167, 155, 131.
+
+Term left (nothing landed):
+* Twineedle (41): shape A makes lab hit 1 exact but `tests/hit1MoveHitTiming` seed 363 (play, ROM 56 on 30 / 30) then reads hit 1 SE -> effectiveness 65, so the lab-vs-play lead differs; needs that lead first.
+* Pin Missile 42, Rock Blast 350: the pfirst lab's ROM hit count differs from the engine's (Pin Missile ROM 13 / ENG 18 SE), no controlled hit count or ROM trace; Fury Attack, Bullet Seed, Icicle Spear have no live body (generic 32-row body); Beat Up is a separate effect, not examined.
+* Hits 2+ still 0..-11 rows (Triple Kick kick 3 -8 / -11, Bonemerang hit 2 -4 / -7): the engine's hit 2+ move-animation has no `bodyLeadFrames` (the lead is counted from the used print), so SE -> hit is 20 rows against the ROM's 30; the +8 / +7 box rows compensate it. The source-exact fix is a per-hit lead counted from the previous loop box's execution (`moveAnimationScriptLeadTiming`), which also makes the box rule `to - from + 1`.
