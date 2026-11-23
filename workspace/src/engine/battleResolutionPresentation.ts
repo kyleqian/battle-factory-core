@@ -2867,12 +2867,13 @@ const SEED_DRAIN_PRESENTED_ROWS_BEFORE_EXEC = 2;
 /** The lag the drain command's minimumFrames was fitted with (battleResolutionPresentationRender.ts LEECH_SEED_DRAIN_SCRIPT_AGE; a test pins them equal). */
 const LEECH_SEED_DRAIN_LEGACY_LAG = 7;
 /**
- * ldw1: a drain right after a weather-continues animation (Sun / Rain; the damaging weathers end in their own hp / print rows). The weather script's Cmd_end
- * drained its own SE, so IsBattleSEPlaying is false when the drain's playanimation runs and the controller is idle: the command starts on the script's exec row
- * (ROM SunlightContinues+0xd -> LeechSeedTurnDrain+0x7 ex2) instead of LEECH_SEED_DRAIN_LEGACY_LAG + 2 rows before it. launchLagFrames 0, and the command is
- * those 9 rows shorter (ROM exec -> drained print is 229 rows here and in the Recover lab, whose command starts 9 rows before its exec).
+ * ldw1: a drain right after a weather-continues animation (Sun / Rain; the damaging weathers end in their own hp / print rows) or the opponent's send-in.
+ * The previous script's Cmd_end drained its own SE, so IsBattleSEPlaying is false when the drain's playanimation runs and the controller is idle: the command
+ * starts on the script's exec row (ROM SunlightContinues+0xd -> LeechSeedTurnDrain+0x7 ex2; FaintedMonEnd+0x0 -> LeechSeedTurnDrain+0x0 -> +0x7 one row later) instead of
+ * LEECH_SEED_DRAIN_LEGACY_LAG + 2 rows before it. launchLagFrames 0, and the command is those 9 rows shorter (ROM exec -> "drained" print is 229 / 235 rows in
+ * the Sun / foe-send-in labs against the 238 of a command that starts 9 rows before its exec, etp3-recoverls4).
  */
-const LEECH_SEED_DRAIN_WEATHER_TICK_EARLY_ROWS = 9;
+const LEECH_SEED_DRAIN_IDLE_CONTROLLER_EARLY_ROWS = 9;
 function hitSeDrainLaunchLag(songId: number | null, hitAnimationRows: number, barRows: number): number | null {
   if (songId === null) return null;
   return seg127StatusSeGateRows({ songId, seAgeRows: 1 + hitAnimationRows + barRows + HIT_TO_SEED_DRAIN_TAIL_ROWS + SEED_DRAIN_PRESENTED_ROWS_BEFORE_EXEC });
@@ -6541,7 +6542,9 @@ export function projectBattleResolutionCommands(
       const drainRole = leechSeedDrainRole(events, index);
       if (drainRole === "seeded") {
         const drainPrevious = commands[commands.length - 1];
-        const afterWeatherTick = leechDrainAnimated && drainPrevious?.type === "general-animation" && isWeatherContinuesAnimation(drainPrevious.animation);
+        const afterIdleController = leechDrainAnimated && (
+          (drainPrevious?.type === "general-animation" && isWeatherContinuesAnimation(drainPrevious.animation))
+          || (drainPrevious?.type === "switch-in" && drainPrevious.battler === 1));
         const drainMinimumFrames = LEECH_SEED_DRAIN_PRE_ROWS + health.instructionExecution!
           + (leechDrainAnimated ? LEECH_SEED_DRAIN_ANIMATION_ROWS - 1 : 0);
         commands.push(Object.freeze({
@@ -6551,8 +6554,8 @@ export function projectBattleResolutionCommands(
           animation: "LEECH_SEED_DRAIN",
           ...(leechDrainAnimated ? { animated: true as const } : {}),
           ...(commands.length === playerSendInEnd ? { afterPlayerSendIn: true as const } : {}),
-          timing: Object.freeze(afterWeatherTick
-            ? { minimumFrames: drainMinimumFrames - LEECH_SEED_DRAIN_WEATHER_TICK_EARLY_ROWS, launchLagFrames: 0 }
+          timing: Object.freeze(afterIdleController
+            ? { minimumFrames: drainMinimumFrames - LEECH_SEED_DRAIN_IDLE_CONTROLLER_EARLY_ROWS, launchLagFrames: 0 }
             : { minimumFrames: drainMinimumFrames }),
         }));
       }
