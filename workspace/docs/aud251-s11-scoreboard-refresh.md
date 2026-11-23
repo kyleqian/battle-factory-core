@@ -3977,3 +3977,53 @@ Numbers: s648 ON d10 chain end +7 -> -3 (10 rows, the residual is the move-anima
 T2 (`rescoreAll.sh` -> `t2-{base,after}`): ON mass **7,447 -> 7,407 (-40)**, exact 3,400 -> 3,400, offset 2,477, 0 missing / 0 extra; OFF **627 -> 627** (unchanged, no Pain Split window), 872 exact / 261 offset, 0 / 0. Below the -50..-150 expectation: items 1 and 2 had no rule.
 
 **Gates.** Census 0..199 (`lsd194Census.sh`, WORKTREE vs `416604dfe`, SHARDS "0 1"): eventsDigest + error identical **200 / 200** in both scenes, 0 changed commands (63,530 ON / 62,225 OFF; the census has no Pain Split window), tree copies deleted. Tests: 84 files / 1,451 tests green (swt1*, hie*, hpb3*, cfs1*, sta*, randomRoundSoak*, lbrd, every file importing `battleResolutionPresentation`, painSplit / PAIN_SPLIT greps), no pin moved. `npm run typecheck` clean, `npm run test:gate` 360 files / 2,839 tests green, `npm run build` ok.
+## bht1 (2026-11-23): action -> next-action transition after a hit / status move (no rule landed; table)
+
+Evidence (git-ignored): `.integration/evidence/bht1/` (`lab-base1`, `lab-m1`, `lab-m2`, `lab-tt` runs and tables, `t2-base`, `resid.py` = the residual table below, `gen.py` = the lab generator). Question (ttf1's fold note): is the engine's transition from a neutral hit (hit script ends on the bare `hp` command, no result message) to the next action's used print 18-22 rows SHORT of the ROM's, with `twoTurnSecondPrintLead` (6 + exec) covering for it? **No: not a general shortfall, so no `src/` change.**
+
+**Method.** 8 new labs on the ttf1 lab shape, both speed orders (`bht1-{neutral,supereff,nve,status}-{pfirst,ofirst}-on`: Karate Chop vs Wartortle / Snorlax / Gloom, Growl first), 2 move labs (`bht1-mv-{slash,psychic}-pfirst-on`) and 2 two-turn labs (`bht1-{kc,slash}-solarbeam-slowfoe-on`). ROM rows (`hcr3mProbe`, table frame = probe row + 1): `BattleScript_HitFromAtkAnimation` +0x3 hitanimation, +0x6 healthbarupdate (hb), +0x8 datahpupdate (exec flag 2 for the bar run = F + 2 rows, F = `battleHealthBarAnimationFrames`), +0xa critmessage, +0xb / +0xf waitmessage, +0xe resultmessage, +0x12 seteffectwithchance, +0x13 tryfaintmon, the `MoveEnd` cases, then the next action's `HitFromAtkString+0x1` print. The lab engine's RNG is not the ROM's, so the engine's damage (and F) differs from the ROM's by a few rows; compare gaps after subtracting dF.
+
+| lab (first action -> next print) | hp start ENG-ROM | gap hb/hp -> next print ROM / ENG | dF | residual (gap diff - dF) |
+|---|---|---|---|---|
+| neutral KC, player first / opp first | -6 / -6 | 38 / 37 | -1 | 0 / 0 |
+| super effective KC, p / o | -6 / -6 | 45 / 44 | -1 | 0 / 0 |
+| not very effective KC, p / o | -6 / -6 | 15 / 15 | 0 | 0 / 0 |
+| Slash (neutral) | 0 | 54 / 52 | -2 | 0 |
+| Psychic | 0 | 64 / 61 | -3 | 0 |
+| KC -> Solar Beam second-turn print, lead dropped (message start; with the lead the glyph is 18 later) | -6 | 46 / 45 | -1 | 0 (glyph +11 with the lead) |
+| Slash -> Solar Beam second-turn print, lead dropped | 0 | 70 / 68 | -2 | 0 (glyph +16 with the lead) |
+
+- The hp command -> next used print / result message transition is **exact after neutral, super-effective and not-very-effective hits, in both speed orders** (residual 0 in all 8 + 4 windows). There is no 18-22 row shortfall to hide.
+- The offsets the labs do show come from the previous action's body: the hp start (hit animation + body) is -6 after Karate Chop, 0 after Slash / Psychic, about -21 after Tackle (no live body adapter: placeholder `minimumFrames` 32, no body SEs; SE 13 -14), and Growl's stat chain starts -27..-29 early (no Growl body adapter; ROM `StatDownDoAnim` A 59-111, print 115-191, MoveEnd 285-292, next print 297; the stat message -> next used print transition is exact). Those are pmc1's per-move animation script lengths.
+- So the Solar Beam second-turn lead (`twoTurnSecondPrintLead`, 18 rows here = 6 + exec 12) does **not** compensate a general transition error. After a modelled-body hit it is simply +11 (KC) / +16 (Slash) too late; after a Tackle / Growl first action it is "right" only because those previous bodies are 21-27 rows short. ttf1's three-window table (KC +11 / -7, Tackle -4 / -22, Growl -24 / -42) is that: -7 is the KC hp-start -6 and dF -1 (residual 0); -22 is Tackle's -21; -42 is Growl's.
+- Per the brief's "not general" branch nothing is landed; T2 ON stays at 7,447 (exact 3,400 / offset 2,477, 0 missing / 0 extra; `t2-base`), labs unchanged (no `src/` change; census, pin tests and typecheck not needed). Not a play change (no input-ready row moves).
+- Next (belongs to pmc1's per-move bodies, not a transition rule): once Tackle / Growl-class moves have a live body adapter, the two-turn press lead can drop after every hit-ended action (expected: the T2 +110 of ttf1's experiment, the Tackle / Growl-preceded windows, is the part that stays covered by missing bodies; the MoveMissed chain (s165 d11 Fly, engine message 12-14 early) and the Scary Face stat chain (s3738 res47) are separate known errors). The labs `bht1-kc-solarbeam-slowfoe-on` and `bht1-slash-solarbeam-slowfoe-on` are the ready check (second-turn print +11 / +16 now, 0 after).
+
+## pmc1 (2026-11-23): per-move script rows against the engine's sound clock (T2 ON mass 7447 -> 7176)
+
+Evidence (git-ignored): `.integration/evidence/pmc1/` (`t2-{base,A,C,after}-on`, `t2-{base,after}-off`, `score-*.{txt,json}`, `lab-*` labCompare dirs, `b/` and `b2/` = `t2k4` attribution before / after, `census/`). Commits: A `07c94d95a`, B `f989f1996`, C `de0df67f1`, D `5df6c5069`. Method: for each remainder move of t2k8 section 4, the ROM script rows (`data/battle_anim_scripts.s`: pre rows, first SE row, wait rows, `Cmd_end` waits) against the live window and the sound clock (`labCompare.sh --scene on`, then `t2k4/attr.py` windows on the 25 ON seeds). The segment-start `body:X` label is the ROM's `gCurrentMove`, so a window whose first SE belongs to another command (Rest / Bulk Up / Amnesia / Earthquake: SE 197 sleep and SE 212 Charm rows) is not that move's constant.
+
+| Move | ROM rows vs engine | Result |
+|---|---|---|
+| Surf 57 | `SE_M_SURF` at script row 29 (after `delay 24`), the table's model gives 26; window and hit SE exact | A: `SOUND_EXTRA_LAG_ROWS` {57: 3}; lab `hpd8-surf-player-on` 3 -> 0, T2 -57 |
+| Wish 273 | script lead L = 2 against the clock's 7 (SE_M_REFLECT ROM 91, engine 96; the four SEs all +5; the next print -1 is the window, untouched) | B: `BODY_SOUND_LEAD_ROWS` +5; lab `aud242k-wish-player-on` 24 -> 4 |
+| Future Sight 248 | same class, +5 (`etp1-futuresight-on` SE 189 / 184) | C: +5; lab 22 -> 12 (the rest is a later Seismic Toss, not this move) |
+| Soft Boiled 135 | +5 on all three SEs (`aud242r-softboiled-player-on`) | C: +5; lab 15 -> 0 |
+| Belly Drum 187 | +4 (`species-audit-golem-prep5-belly-drum-player`) | C: +4; lab 44 -> 20 (the remaining 20 is the lab's Tackle with no body adapter) |
+| Mean Look 212 | +3 (`species-audit-golbat-prep4-mean-look-player`) | C: +3; lab 39 -> 21 (same Tackle artefact) |
+| Swagger 207 | +3 on the five body SEs (`aud242f-swagger-player-on`) | C: +3; lab 15 -> 0 |
+| Smokescreen 108 | LEAD4 clock lead 5 -> 7 (SE 135 / 159 ROM 71 / 111; three T2 segment starts +2) | D: lab `aud242k-smokescreen-player-on` 6 -> 2 (the stat-change SE 245 is +2, see Left) |
+| Thunderbolt 85 | window exact; SE 215 and both SE 119 are -1 after the third SE 118 (ROM 112 -> 172 = 60 rows; script 11 + two blend waits of 13 + 22 = 59). Blend model symmetric (0 -> 13 and 13 -> 0), segment sprites are not counted by `gAnimVisualTaskCount` | carried: no script term found for the extra row, a trim would be a fit |
+| Torment 259, Agility 97 | labs exact (`aud258-torment-player-on`, `aud242a-agility-player-on` body SEs); the T2 -10 / -13 steps start at command 8 / 21 of a long segment, so they are inherited | carried |
+| Ice Beam, Ancient Power, Earthquake, Yawn, Double-Edge (lab 1 / 0), Rest, Amnesia, Bulk Up, Bubble Beam, Double Team | own SEs and windows right; remaining mass is +-1 / 2 noise or an inherited offset | carried |
+| Struggle | forced-commit anchor, skipped by the brief | - |
+| Triple Kick 167 | hit 1 -12 / hit 2 +11 (3 windows): the inter-hit gap is 23 rows long in the engine, a multi-hit structure issue, not a per-move constant | carried |
+| Stun Spore, Sandstorm | the -8 / -14 steps begin at command 7 / 6 of the segment, not at the first body | carried |
+
+**Numbers.** T2 ON (25 seeds): mass 7447 -> 7176 (-271), exact 3400 -> 3464, offset 2477 -> 2413, 0 missing / 0 extra; move-animation SE 5947 -> 5676, stat-change SE unchanged (221). Stepwise: A 7447 -> 7390, B + C 7390 -> 7184, D 7184 -> 7176. T2 OFF (24 seeds): 627 -> 627, exact 872, offset 261, 0 / 0. Census 0..199 both scenes (`lsd194Census.sh`, `bd3e25bd6` vs `5df6c5069`, `rst197CensusDelta.py --digest`): eventsDigest + error identical 200 / 200 each, type-sequence changes 0, 0 changed commands in OFF (byte-identical shards 2 / 2; ON differs in the `sound` fields only), tree copies deleted. Pins that moved: `tests/aud242kMoveAnimSounds.test.ts` wish-player delta -5 -> 0 (ROM 91 / 218 / 234 / 251) and smokescreen-player -2 -> 0 (ROM 71 / 111), `tests/aud242fMoveAnimSounds.test.ts` swagger-player -3 -> 0 (the five SE 193 / 194 rows).
+
+**Left.**
+- The stat-change SE after a status body (Smokescreen SE 245, Agility SE 239) is +2 in the labs: the stats-change command's own term, as for Scary Face in kse1.
+- Wish's window is 1 row short of the ROM (next print -1 after the lab), left because the adapter duration is a pixel-pinned accepted window.
+- Thunderbolt's -1 after the third SE 118 (about 24 T2 mass) has no source row yet.
+- The `BODY_SOUND_LEAD_ROWS` leads are calibrated on one lab side per move (player); an opponent-side lab would confirm them (T2 has both sides in the windows and none got worse).

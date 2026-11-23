@@ -2410,8 +2410,8 @@ export const C_LEAD_WINDOW_ADJUST: ReadonlyMap<number, number> = new Map([[47, 3
 const C_LEAD_SOUND_CLOCK_LEADS: ReadonlyMap<number, number> = new Map([[109, 6]]);
 /** The lead the S bodies' sound clock was calibrated on (the generic move-body clock, AGE_TO_SOUND_ROWS = 7). */
 const LEAD4_SOUND_CLOCK_LEAD = 7;
-/** Per-body clock leads (ROM minus ours on the 7 clock: Smokescreen / Metal Sound -2 (Scary Face: kse1, 184 = the 7 clock after its SE-wait window, labs exact), Sweet Scent -3 in the aud242 fixtures; Double Team, 98 of 190 T2 SEs, +2 before the shift is -4): their SEs sit closer to the print release. */
-const LEAD4_SOUND_CLOCK_LEADS: ReadonlyMap<number, number> = new Map([[108, 5], [184, 7], [319, 5], [230, 6], [104, 5]]);
+/** Per-body clock leads (ROM minus ours on the 7 clock: Smokescreen / Metal Sound -2 (Scary Face: kse1, 184 = the 7 clock after its SE-wait window, labs exact), Sweet Scent -3 in the aud242 fixtures; Double Team, 98 of 190 T2 SEs, +2 before the shift is -4): their SEs sit closer to the print release. pmc1: Smokescreen 5 -> 7 (lab aud242k-smokescreen-player-on SE 135 / 159 +2 -> 0, T2 3 windows +2). */
+const LEAD4_SOUND_CLOCK_LEADS: ReadonlyMap<number, number> = new Map([[108, 7], [184, 7], [319, 5], [230, 6], [104, 5]]);
 /** `precedingRows`: the rows of the `stat` commands presented between the used print and the body (the S bodies' counter lead is those plus `bodyLeadFrames`). */
 export function lse2BodySoundAgeShift(moveId: number, bodyLeadFrames: number | undefined, precedingRows = 0): number {
   if ((bodyLeadFrames ?? 0) <= 0) return 0;
@@ -2595,10 +2595,17 @@ function chargeTurnSoundLead(events: readonly BattleKernelSemanticEvent[], index
  */
 const MOVE_REST = 156;
 const REST_SOUND_LEAD_ROWS = -2;
+/**
+ * pmc1: the opposite case, bodies whose script lead L is shorter than the clock's 7 (soundAgeLeadFrames = 7 - L; every SE of the body late by the same rows in the ROM labs and T2):
+ * Wish 273 +5 (aud242k-wish-player-on, SE_M_REFLECT 91 / 96), Future Sight 248 +5 (etp1-futuresight-on), Soft Boiled 135 +5 (aud242r-softboiled-player-on),
+ * Belly Drum 187 +4 (species-audit-golem-prep5-belly-drum-player), Mean Look 212 +3 (species-audit-golbat-prep4-mean-look-player), Swagger 207 +3 (aud242f-swagger-player-on).
+ */
+const BODY_SOUND_LEAD_ROWS: ReadonlyMap<number, number> = new Map([[273, 5], [248, 5], [135, 5], [187, 4], [212, 3], [207, 3]]);
 const REST_HEAL_PRINT_TAIL_ROWS = 10;
 function bdt1BodySoundLead(events: readonly BattleKernelSemanticEvent[], index: number, moveId: number): { soundAgeLeadFrames?: number } {
   if (events[index]!.provenance?.sourceLabel === CHARGE_TURN_SCRIPT) return chargeTurnSoundLead(events, index);
-  return moveId === MOVE_REST ? { soundAgeLeadFrames: REST_SOUND_LEAD_ROWS } : {};
+  const lead = moveId === MOVE_REST ? REST_SOUND_LEAD_ROWS : BODY_SOUND_LEAD_ROWS.get(moveId);
+  return lead === undefined ? {} : { soundAgeLeadFrames: lead };
 }
 const SCRIPT_TAIL_BETWEEN_OPCODES: ReadonlySet<string> = new Set(["B_SCR_OP_WAITANIMATION", "B_SCR_OP_SETBYTE", "B_SCR_OP_SETGRAPHICALSTATCHANGEVALUES"]);
 // lse4: the first-charging-turn script (orword HITMARKER_CHARGING, setbyte, seteffectprimary, copyarray) between the animation and its print.
