@@ -70,7 +70,7 @@ const SPECS: Record<string, Spec> = {
   "headbutt-player": { delta: 0, romOnlyFrom: 120 },
   "icepunch-player": { delta: 0 },
   "icebeam-player": { delta: 0 },
-  "swagger-player": { delta: -3, romOnlyFrom: 300 },
+  "swagger-player": { delta: 0, romOnlyFrom: 300 }, // pmc1: Swagger sound lead 3 (the -3 residual was the clock; lab aud242f-swagger-player-on mass 15 -> 0)
   "hiddenpower-player": { delta: 0 },
   // aud242h: the second SE152 (after the blend_color_cycle wait) is emitted now and exact at the same -4.
   "growth-player": { delta: -4, romOnlyFrom: 300 },
