@@ -1832,6 +1832,8 @@ export function moveAnimationScriptStartRow(segment: BattleResolutionPresentatio
 const STATS_CHANGE_AFTER_BODY_AGE_SHIFT = 4;
 // lse2: after a lead-first lse2 body (Cosmic Power, Calm Mind) the stat SE sits 1 row later than the generic shift's (ROM - ours +1 in both labs).
 const STATS_CHANGE_AFTER_LSE2_BODY_AGE_SHIFT = 3;
+// ztl1: after an S-lead body the stat SE sat 2 rows after the ROM's (Smokescreen 245, Agility 239, Scary Face 245 in the aud242 labs): the command starts 2 rows later than the generic age assumed.
+const STATS_CHANGE_AFTER_S_LEAD_BODY_AGE_SHIFT = 2;
 // sta5: after a Flatter / Swagger body (lead + tail landed) and its 2-row `stat` command the `stats-change` command starts 2 rows (the not yet landed
 // pre-print rows) before the ROM's `playanimation`, whose SE is exec + 4: the generic age (calibrated on the old, earlier start) is shifted by 1.
 const STATS_CHANGE_AFTER_STAT_BODY_AGE_SHIFT = 1;
@@ -1858,7 +1860,7 @@ export function statsChangeSourceAge(
     && beforeStat.animation !== undefined && bodyStatusTailRuleApplies(beforeStat.animation.moveId);
   // lead4: an S body's lead moved in front of it and its tail shrank by the same rows, so the stats-change command starts where it did: the generic age is unchanged.
   const afterBodyLead = previous?.type === "move-animation" && (previous.timing.bodyLeadFrames ?? 0) > 0
-    ? (previous.animation !== undefined && bodySLeadRuleApplies(previous.animation.moveId) ? 0
+    ? (previous.animation !== undefined && bodySLeadRuleApplies(previous.animation.moveId) ? STATS_CHANGE_AFTER_S_LEAD_BODY_AGE_SHIFT
       : previous.animation !== undefined && bodyLse2RuleApplies(previous.animation.moveId) ? STATS_CHANGE_AFTER_LSE2_BODY_AGE_SHIFT : STATS_CHANGE_AFTER_BODY_AGE_SHIFT)
     : afterStatBody ? STATS_CHANGE_AFTER_STAT_BODY_AGE_SHIFT : 0;
   const rules = state.segments[state.segmentIndex]!.beforeRules;
