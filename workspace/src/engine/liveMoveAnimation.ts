@@ -1329,7 +1329,7 @@ function liveMoveAnimationDurationOf(
     // resource destruction. The following success printer starts next.
     case 112:
     case 277: return 76; // Defensive wall script through its first inactive cleanup row.
-    case 113: return 88;
+    case 113: return 86; // bwf1: Move_LIGHT_SCREEN A rows (85) + the first inactive row; was 88 (the extra 2 idle rows pushed the tail late).
     case 115: return 79; // Reflect script (activation..cleanup pointer row).
     case 182: return 123; // Protect script through its first inactive row.
     case 243: return 86; // Mirror Coat script (activation..cleanup pointer row).
