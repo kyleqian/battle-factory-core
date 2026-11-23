@@ -2379,11 +2379,11 @@ const LSE2_SOUND_CLOCK_LEADS: ReadonlyMap<number, number> = new Map([[73, 7], [3
  * lead4 (B3, docs/lead1m-rule-lead-design.md): the "S" status / stat bodies (Double Team, Protect, Light Screen, Rain Dance, Agility, Swords Dance, ...) whose script lead
  * (ROM `exec` rise -> `gAnimScriptActive`) is put in front of the body instead of after it. The row total is unchanged (the new script tail is the old one less the lead, the lead is
  * added in front), so only the body position and its sound clock move by `lead`. Only ids whose tail is presented (a post-row side, or a `LIVE_MOVE_SCRIPT_TAIL_TRAIL_ROWS` entry) are in:
- * for the others the lead would add frames. Held out (no presented tail): Growth 74, Recycle 278, Fake Tears 313, 248, 244, 285, 144, 110. ztl1 added Spikes 191, Foresight 193, Destiny Bond 194 and Feather Dance 297 (labs ztl1-*-player-on; Psych Up 244 is exact in its first-mover lab but 5 rows early as a second mover in T2 seed 7295, so it stays out).
+ * for the others the lead would add frames. Held out (no presented tail): Growth 74, Recycle 278, 248, 244, 285, 144, 110. bwf1 added Fake Tears 313 (window 87 -> 84, idle lead row became the presented lead). ztl1 added Spikes 191, Foresight 193, Destiny Bond 194 and Feather Dance 297 (labs ztl1-*-player-on; Psych Up 244 is exact in its first-mover lab but 5 rows early as a second mover in T2 seed 7295, so it stays out).
  */
 const LEAD4_S_LEAD_MOVE_IDS: ReadonlySet<number> = new Set([
   104, 182, 113, 240, 184, 108, 201, 204, 219, 266, 28, 241, 213, 97, 334, 230, 151, 133, 258, 14, 203, 197, 349, 254, 215, 107, 281, 180, 288, 195, 115, 103,
-  277, 178, 43, 39, 148, 106, 275, 112, 321, 259, 319, 271, 339, 294, 272, 50, 269, 116, 191, 193, 194, 297,
+  277, 178, 43, 39, 148, 106, 275, 112, 321, 259, 319, 271, 339, 294, 272, 50, 269, 116, 191, 193, 194, 297, 313,
 ]);
 /**
  * lse4 (docs/hpd1-hp-hold.md lse3 table): Revenge 279 and Absorb 71 join the shape-A class (lead 5, gap 4). Absorb's accepted window is 2 rows short of the ROM's len + 1 (`LSE4_WINDOW_SHORT_ROWS`).

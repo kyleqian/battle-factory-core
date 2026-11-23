@@ -1520,7 +1520,7 @@ const LIVE_MOVE_IDLE_LEAD_ROWS: ReadonlyMap<number, number> = new Map([
   [9, 10],
   [41, 10], [44, 10], [51, 7], [52, 4], [55, 10], [71, 10], [74, 1], [75, 13], [82, 7], [92, 7], [93, 5], [94, 5], [106, 1], [120, 4],
   [53, 18], [124, 4], [136, 1], [146, 13], [153, 4], [158, 4], [184, 4], [188, 4], [204, 4], [207, 7], [225, 6], [232, 4], [247, 5], [248, 5],
-  [269, 10], [282, 6], [294, 1], [299, 10], [305, 7], [313, 1], [325, 8], [334, 1], [337, 6], [339, 4], [342, 7], [343, 1], [347, 3],
+  [269, 10], [282, 6], [294, 1], [299, 10], [305, 7], [325, 8], [334, 1], [337, 6], [339, 4], [342, 7], [343, 1], [347, 3],
 ]);
 
 /**
@@ -1568,11 +1568,10 @@ const LIVE_MOVE_POST_ROW_SIDES: ReadonlyMap<number, number> = new Map([
 // run is P + N + D + 1 rows). A post-row side's trail is -1 by definition; any other body has no tail (null).
 // tl205 (docs/tl204-zero-tail-rows.md): the no-post-row bodies whose script tail tl204 measured against fresh ROM rows (Scene ON, twice fresh) have trail -1
 // (the ROM release row is the body's last row + 1: tail frames = scriptTailRows - 1): Double Team, Rain Dance, Sunny Day, Hail, Leech Seed, Light Screen,
-// Charm, Calm Mind, Scary Face. Fake Tears (313) is held out: its trail is -1 too, but its live body window is 4 rows longer than the ROM's (182 vs 178),
-// so the true 5-row tail would move its residual from -1 to +4 (worse); add 313 when the Move_FAKE_TEARS body is corrected.
+// Charm, Calm Mind, Scary Face. bwf1: Fake Tears 313 joins (trail -1) now that its live window is the ROM's (84 rows, was 87).
 // ztl1: Spikes 191 / Destiny Bond 194 (labs ztl1-spikes / destinybond), Foresight 193 and Feather Dance 297 join; Charm 204, Spikes 191 and Feather Dance 297 are trail 0 (their stats-change / print rows start one row later than the -1 trail's). The other zero-frame ont193 moves stay unknown (0 frames) until measured.
 const LIVE_MOVE_SCRIPT_TAIL_TRAIL_ROWS: ReadonlyMap<number, number> = new Map([
-  [28, 0], [104, -1], [240, -1], [241, -1], [258, -1], [73, -1], [113, -1], [204, 0], [347, -1], [184, -1], [191, 0], [193, -1], [194, -1], [297, 0],
+  [28, 0], [104, -1], [240, -1], [241, -1], [258, -1], [73, -1], [113, -1], [204, 0], [347, -1], [184, -1], [191, 0], [193, -1], [194, -1], [297, 0], [313, -1],
 ]);
 // iu120: bodies live only after idle98's evidence (base 3dd2b74b9) whose rows it never measured (lead / trail unknown): Struggle
 // (stl109 / sdl119, incl. its doll cells) keeps 0 / 0.
@@ -1676,7 +1675,8 @@ const HPD4_BODY_TAIL_ROWS: ReadonlyMap<number, number> = new Map([[49, 3], [82, 
 // liv2: Self-Destruct's presented `hp` command already carries the script lead (the window starts at S + pre, ROM A), so it has no body lead; its hit
 // controller runs 10 rows after the window (the explosion script's own instructions, ROM gap 10), so the tail is 9 (3 + 4 + 123 + 9 = A -> H 139 + pre).
 // lse2: rows after a lead-first lse2 body (on top of its script tail where it has one) that put the next command on the ROM row (R -> H = lead + 3 + len + 4 less the window the body presents).
-const LSE2_BODY_TAIL_ROWS: ReadonlyMap<number, number> = new Map([[322, 3], [347, 3], [59, 2], [227, 10]]);
+// bwf1: Cosmic Power 322 / Calm Mind 347 tail 3 -> 4 (with STATS_CHANGE_AFTER_LSE2_BODY_AGE_SHIFT 4): the stats-change command starts on the ROM A rise + 1, the glow phase the ROM's.
+const LSE2_BODY_TAIL_ROWS: ReadonlyMap<number, number> = new Map([[322, 4], [347, 4], [59, 2], [227, 10]]);
 // hie5 / rcv1: a restore-HP body (Recover / Soft-Boiled / Milk Drink / Moonlight) holds the script's animation clear after the body's last visible row so the `hp` command starts on the ROM's
 // `healthbarupdate` (EffectRestoreHp+0x16) row. rcv1 re-fit against the ROM print rows (labs aud242k-recover, aud242r-softboiled / -moonlight, aud261-milkdrink, etp3-recoverls4: the "regained
 // health" print was +19 / +5 / +4 / +21 with hie5's 25 / 10 / 8 / 27, now +0 with 6 / 5 / 4 / 6).
@@ -1830,8 +1830,8 @@ export function moveAnimationScriptStartRow(segment: BattleResolutionPresentatio
 
 
 const STATS_CHANGE_AFTER_BODY_AGE_SHIFT = 4;
-// lse2: after a lead-first lse2 body (Cosmic Power, Calm Mind) the stat SE sits 1 row later than the generic shift's (ROM - ours +1 in both labs).
-const STATS_CHANGE_AFTER_LSE2_BODY_AGE_SHIFT = 3;
+// lse2 / bwf1: after a lead-first lse2 body (Cosmic Power, Calm Mind) the stats-change command starts 1 row after the generic one (tail 4), so the age shift matches the generic 4 and the SE stays on the ROM row.
+const STATS_CHANGE_AFTER_LSE2_BODY_AGE_SHIFT = 4;
 // ztl1: after an S-lead body the stat SE sat 2 rows after the ROM's (Smokescreen 245, Agility 239, Scary Face 245 in the aud242 labs): the command starts 2 rows later than the generic age assumed.
 const STATS_CHANGE_AFTER_S_LEAD_BODY_AGE_SHIFT = 2;
 // sta5: after a Flatter / Swagger body (lead + tail landed) and its 2-row `stat` command the `stats-change` command starts 2 rows (the not yet landed

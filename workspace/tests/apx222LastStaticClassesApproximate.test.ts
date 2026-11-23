@@ -14,7 +14,7 @@ describe("apx222: one staged command per class / new body draws non-static rows,
     // parity-mac re-pin (docs/parity-mac/STATUS.md "Re-pins"): census battles 41 and 138 changed (AI draws / replacement fixes) and no
     // longer hold these commands; battle 50 (player Light Screen at a hidden opponent) and battle 133 (opponent Ghost Curse) do,
     // with the same row counts.
-    ["hidden-target: Light Screen 113 by the player at a hidden opponent", 50, 113, 0, "approx:hidden-target", 97],
+    ["hidden-target: Light Screen 113 by the player at a hidden opponent", 50, 113, 0, "approx:hidden-target", 95], // bwf1: 97 -> 95 (Light Screen window = the ROM's)
     ["hidden-target: Sky Uppercut 327 by the opponent at a hidden player", 81, 327, 1, "approx:hidden-target", 199],
     // turn-0: Curse's Ghost branch (CURSE_GHOST, Move_CURSE / CurseGhost): the black field, the nail's three scratches, the rising ghost
     // apx227: Ghost Curse is 21 rows longer (window fade-in, nail 4 ticks later, black held longer, 8-step restore).

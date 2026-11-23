@@ -26,8 +26,8 @@ const cases: { id: number; move: string; duration: Orders; shadow: number | unde
   { id: 332, move: "AERIAL_ACE", duration: [50, 50], shadow: 0, alt: ["CHARIZARD", "ONIX"], route: { seed: 3, move: 0, streak: 0 } },
   { id: 98, move: "QUICK_ATTACK", duration: [33, 33], shadow: 0, alt: ["RAICHU", "ONIX"], route: { seed: 3, move: 1, streak: 0 } },
   // Ice Punch has no accepted-species rental carrier: the ordinary route is the alternate-species Gengar route (prep7 s2.5).
-  // Fake Tears: row -1 (the first displayed row is one frame after activation): no shadow row; 83 script rows + 4 clear rows.
-  { id: 313, move: "FAKE_TEARS", duration: [87, 87], shadow: undefined, alt: ["PLUSLE", "ONIX"], route: { seed: 0, move: 0, streak: 14 } },
+  // Fake Tears: no shadow row; bwf1: the window is the ROM's 83 active script rows + the first inactive row (gAnimScriptActive 76..158, inactive 159 in lab ztl1-faketears-player-on) = 84, was 87 (3 more clear rows).
+  { id: 313, move: "FAKE_TEARS", duration: [84, 84], shadow: undefined, alt: ["PLUSLE", "ONIX"], route: { seed: 0, move: 0, streak: 14 } },
   // Sleep Talk needs a sleeping attacker: Seaking seed 3014 / streak 14 (prep7 s2.5): turn 1/2 the opponent plays Double Team and
   // Sleep Powder, the player's Sleep Talk (index 2) pressed three times fires on turn 3; the called move is an ordinary second request.
   { id: 214, move: "SLEEP_TALK", duration: [186, 189], shadow: 0, alt: ["WHISCASH", "ONIX"], route: { seed: 3014, move: 2, streak: 14, turns: 3, stall: true } },
