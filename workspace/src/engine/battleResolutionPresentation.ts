@@ -2389,8 +2389,10 @@ const LSE4_SHAPE_A_MOVE_IDS: ReadonlySet<number> = new Set([279, 71, 222]);
  */
 // fpf1: Focus Punch (264), counter lead 5 in front as for Thunder Punch (T2 s310 d2 / s1415 d47: the post-hit clock was 9 rows ahead of the ROM, SE 152 -9 -> -5).
 const HIT1_SHAPE_A_MOVE_IDS: ReadonlySet<number> = new Set([9, 264]);
-// hsw1: Karate Chop (2): ROM gAnimScriptActive 48 rows = the 49-row window (len + 1), kernel lead 8 as Slash; the hit / hp chain sat 6 rows early (bht1 labs, hp start -6).
-const HSW1_SHAPE_A_MOVE_IDS: ReadonlySet<number> = new Set([2]);
+// hsw1: Karate Chop (2), Mega Punch (5), Vice Grip (11), Gust (16), Rock Throw (88), Smelling Salt (265), Needle Arm (302), Mud Shot (341), Poison Tail (342), Covet (343):
+// the one-hit bodies whose live window is the ROM's gAnimScriptActive length + 6 (labs hsw1-*-pfirst-on, bht1-*: window - A = 6) and whose hit SE was +1 / hp start -6
+// = the shape-A signature (lead 5 in front + hit tail 1 close it exactly).
+const HSW1_SHAPE_A_MOVE_IDS: ReadonlySet<number> = new Set([2, 5, 11, 16, 88, 265, 302, 341, 342, 343]);
 /**
  * lse4 "gap-print": the lead is the kernel counter, the rows after the body are `T = 2 + gap - pre - post + s` with the ROM gap of the next command: a print (`printfromtable` / `printstring`) is
  * Delta + 1 (Recycle 3, the Razor Wind charge turn 7), any other next command is shape A (gap 4). Recycle 278, Razor Wind 13 (both turns).
