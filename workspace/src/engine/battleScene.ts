@@ -31219,6 +31219,8 @@ export function renderSceneOnMovePresentation(
     const onixIdle = playerToOpponent
       ? sceneOnBattlerFrontIdleRest(view.target)
       : { x2: 0, y2: 0 };
+    // bwf2: MoveBattlerSpriteToBG reads x2, so a live opponent attacker keeps its front idle rest (RATTATA +1) while it sits on the BG.
+    const attackerIdle = liveField && opponentToPlayer ? sceneOnBattlerFrontIdleRest(view.attacker) : { x2: 0, y2: 0 };
     drawTileBg(
       fb,
       battleBg.static.tileset,
@@ -31236,10 +31238,10 @@ export function renderSceneOnMovePresentation(
       opponent.palette,
       playerToOpponent
         ? view.target.geometry.spriteCorner.x + onixIdle.x2
-        : view.attacker.geometry.spriteCorner.x,
+        : view.attacker.geometry.spriteCorner.x + attackerIdle.x2,
       playerToOpponent
         ? view.target.geometry.spriteCorner.y + onixIdle.y2
-        : view.attacker.geometry.spriteCorner.y,
+        : view.attacker.geometry.spriteCorner.y + attackerIdle.y2,
     );
     if (displayed.wall && view.alpha && view.alpha.eva > 0) {
       const palette = lightScreenArt.greenLightWall.palette.slice();
