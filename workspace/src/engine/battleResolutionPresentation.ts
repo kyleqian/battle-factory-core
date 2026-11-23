@@ -2341,7 +2341,8 @@ const LSE4_SHAPE_A_MOVE_IDS: ReadonlySet<number> = new Set([279, 71, 222]);
  * first"). Its window is now the ROM's: the 10 idle lead rows (idle94) + 104 body rows + Cmd_end's 22 SE-wait rows = len 135 + 1 (liveMoveEndSeWaitRows),
  * so it is shape A: the lead in front, tail 6 - pre - post. ROM (frame catcher, t3 x 33): the body and the hit blink on the ROM's rows.
  */
-const HIT1_SHAPE_A_MOVE_IDS: ReadonlySet<number> = new Set([9]);
+// fpf1: Focus Punch (264), counter lead 5 in front as for Thunder Punch (T2 s310 d2 / s1415 d47: the post-hit clock was 9 rows ahead of the ROM, SE 152 -9 -> -5).
+const HIT1_SHAPE_A_MOVE_IDS: ReadonlySet<number> = new Set([9, 264]);
 /**
  * lse4 "gap-print": the lead is the kernel counter, the rows after the body are `T = 2 + gap - pre - post + s` with the ROM gap of the next command: a print (`printfromtable` / `printstring`) is
  * Delta + 1 (Recycle 3, the Razor Wind charge turn 7), any other next command is shape A (gap 4). Recycle 278, Razor Wind 13 (both turns).
