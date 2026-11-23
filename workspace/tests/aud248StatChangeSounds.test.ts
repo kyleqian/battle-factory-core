@@ -42,7 +42,8 @@ function ourStatSes(rom: Fixture, scene: "on" | "off"): SoundEvent[] {
 // A list: one residual per stat SE row (the aud242o five-turn Rollout window and the aud242q five-turn Ice Ball window, whose turn starts drift, docs/aud242-move-anim-sounds.md sections 19.2 and 21.2).
 const RESIDUAL: Record<string, number | number[] | null> = {
   "aud242a-agility-player.json": 0, "aud242a-swordsdance-opponent.json": 0, "aud242c-cosmicpower-player.json": 0, "aud242c-flatter-player.json": 0,
-  "aud242c-metalsound-opponent.json": 0, "aud242c-superpower-player.json": 10, "aud242c-sweetscent-player.json": 0, "aud242d-calmmind-player.json": 0,
+// hsw1 + ztl1 (2026-11-23): Superpower joins shape A (body lead) and the stat SE after it moves +2: residual 10 -> 2 (ROM 498, ours 496).
+  "aud242c-metalsound-opponent.json": 0, "aud242c-superpower-player.json": 2, "aud242c-sweetscent-player.json": 0, "aud242d-calmmind-player.json": 0,
   "aud242d-metalclaw-player.json": null, "aud242d-steelwing-player.json": null, "aud242e-overheat-player.json": 7, /* lfx1: Overheat joined the lead3 shape-A class (lead 5 + tail 3 = +8): ROM 393, ours 376 -> 384 */ "aud242f-growth-player.json": -2, /* hit1: Growth's body now ends with Cmd_end's SE_M_TAKE_DOWN wait (+20, idle94 trail 19 + 1) and the trail -1 post / script-tail rows: ROM 148, ours 125 -> 150, the -2 of the other stat bodies (hcr2b) */ "aud242f-swagger-player.json": 0,
   "aud242j-silverwind-player.json": null,
   "aud242k-ancientpower-player.json": null, "aud242o-rollout5-player.json": [0, 0, 0, -2, -3], "aud242k-scaryface-player.json": 0, /* kse1: the body ends with its SE_M_STRING_SHOT2 wait (+14, ROM 278, ours 280) */ "aud242k-smokescreen-player.json": 0,
