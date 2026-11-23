@@ -5,8 +5,8 @@
 //     `CreatePartyStatusSummarySprites` (src/battle_interface.c:1450-1657).
 //     Tile source: `gHealthboxElementsGfxTable[HEALTHBOX_GFX_STATUS_BALL]`
 //     (src/graphics.c:358-370), which is byte-identical to
-//     `ball_display.4bpp`/`.png` (4 states: Full/Empty/Fainted/Statused, per
-//     the `HEALTHBOX_GFX_STATUS_BALL*` enum, src/battle_interface.c:107-111).
+//     `ball_display.4bpp`/`.png` (4 states, tile order Full/Empty/Statused/Fainted: the
+//     `oam.tileNum += n` offsets of CreatePartyStatusSummarySprites, obr2).
 //     Palette: `sOamData_StatusSummaryBalls`'s sprite template uses
 //     `TAG_STATUS_SUMMARY_BALLS_PAL` -> `sStatusSummaryBallsSpritePal` ->
 //     `gBattleInterface_BallDisplayPal` (src/battle_interface.c:652,
@@ -73,9 +73,11 @@ function writeJson(path: string, data: unknown): void {
   const img = decodeIndexedPng(join(REF, "graphics", "battle_interface", "ball_display.png"));
   const { columns, rows, tiles } = sliceTiles(img);
   writeJson(join(ASSETS_GEN, "battle-interface-ball-display.json"), {
-    // 4 states, one 8x8 tile each, in gHealthboxElementsGfxTable's declared
-    // order (src/battle_interface.c:107-111): Full, Empty, Fainted, Statused.
-    states: ["Full", "Empty", "Fainted", "Statused"],
+    // 4 states, one 8x8 tile each, named by the tile offset CreatePartyStatusSummarySprites adds to the sprite
+    // (battle_interface.c:1546-1586): +0 healthy, +1 empty slot, +2 mon with a major status, +3 fainted mon.
+    // The HEALTHBOX_GFX_STATUS_BALL_FAINTED / _STATUSED enum names (c:107-111) are in the opposite order; the ROM
+    // picks by the offsets above (obr2: the faint-replacement tray's fainted ball is tile 3, oracle-exact).
+    states: ["Full", "Empty", "Statused", "Fainted"],
     tileset: { columns, rows, tiles: tiles.map((t) => [...t.pixels]) },
     palette: img.palette,
   });
