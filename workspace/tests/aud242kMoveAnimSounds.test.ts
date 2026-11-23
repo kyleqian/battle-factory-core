@@ -57,7 +57,7 @@ const SPECS: Array<{ name: string; ids: number[]; delta: number; rows: number }>
   { name: "ancientpower-player", ids: [171, 177], delta: 0, rows: 2 },
   { name: "firepunch-player", ids: [144, 147], delta: 0, rows: 2 },
   { name: "yawn-player", ids: [237, 232], delta: 0, rows: 3 },
-  { name: "smokescreen-player", ids: [135, 159], delta: -2, rows: 2 },
+  { name: "smokescreen-player", ids: [135, 159], delta: 0, rows: 2 /* pmc1: Smokescreen sound-clock lead 5 -> 7 (lab aud242k-smokescreen-player-on: SE 135 / 159 on the ROM rows 71 / 111) */ },
   { name: "scaryface-player", ids: [189, 192, 130], delta: 0, rows: 3 /* kse1: sound-clock lead 5 -> 7 (labs aud242k-scaryface-player-on / mechanic-scary-face-*: SE 189 / 192 / 130 on the ROM rows) */ },
   { name: "wish-player", ids: [207, 195], delta: 0, rows: 4 /* pmc1: Wish sound lead 7 - L (L = 2): SE_M_REFLECT 91, SE_M_HEAL_BELL 218 / 234 / 251 on the ROM rows */ },
   { name: "safeguard-player", ids: [225, 102], delta: 0, rows: 2 },

@@ -2410,8 +2410,8 @@ export const C_LEAD_WINDOW_ADJUST: ReadonlyMap<number, number> = new Map([[47, 3
 const C_LEAD_SOUND_CLOCK_LEADS: ReadonlyMap<number, number> = new Map([[109, 6]]);
 /** The lead the S bodies' sound clock was calibrated on (the generic move-body clock, AGE_TO_SOUND_ROWS = 7). */
 const LEAD4_SOUND_CLOCK_LEAD = 7;
-/** Per-body clock leads (ROM minus ours on the 7 clock: Smokescreen / Metal Sound -2 (Scary Face: kse1, 184 = the 7 clock after its SE-wait window, labs exact), Sweet Scent -3 in the aud242 fixtures; Double Team, 98 of 190 T2 SEs, +2 before the shift is -4): their SEs sit closer to the print release. */
-const LEAD4_SOUND_CLOCK_LEADS: ReadonlyMap<number, number> = new Map([[108, 5], [184, 7], [319, 5], [230, 6], [104, 5]]);
+/** Per-body clock leads (ROM minus ours on the 7 clock: Smokescreen / Metal Sound -2 (Scary Face: kse1, 184 = the 7 clock after its SE-wait window, labs exact), Sweet Scent -3 in the aud242 fixtures; Double Team, 98 of 190 T2 SEs, +2 before the shift is -4): their SEs sit closer to the print release. pmc1: Smokescreen 5 -> 7 (lab aud242k-smokescreen-player-on SE 135 / 159 +2 -> 0, T2 3 windows +2). */
+const LEAD4_SOUND_CLOCK_LEADS: ReadonlyMap<number, number> = new Map([[108, 7], [184, 7], [319, 5], [230, 6], [104, 5]]);
 /** `precedingRows`: the rows of the `stat` commands presented between the used print and the body (the S bodies' counter lead is those plus `bodyLeadFrames`). */
 export function lse2BodySoundAgeShift(moveId: number, bodyLeadFrames: number | undefined, precedingRows = 0): number {
   if ((bodyLeadFrames ?? 0) <= 0) return 0;
