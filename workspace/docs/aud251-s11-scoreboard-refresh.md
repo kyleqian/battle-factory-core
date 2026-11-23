@@ -3347,3 +3347,25 @@ Sum-check: ON 739 + 465 + 815 + 760 + 640 + 514 + 456 + 312 + 209 + 287 = 5,197;
 - `HP_TIMING.minimumFrames` -> 0 globally (hpb3: +621), B4 bodies (274), Supersonic in the c-lead class (cfs1: +164 ON), the OFF tail (5-27 per window).
 
 Not applied: no `src/` or `tests/` change; PROGRESS / ISSUES / ROADMAP and all ledgers untouched; tools are python only; `npm test` / `npm run typecheck` / `npm run build` not run (assigned; no `.ts` touched).
+
+## ftp1: thaw, confusion-then-two-turn, hail, Focus Punch (integration lane, Scene ON presentation only)
+
+Four items from the t2k6 ranking, each its own commit; no rule, damage or RNG change (eventsDigest identical on seeds 0..199, both scenes). Baseline re-measured on fold-g 251840769: ON 9,513 / OFF 786 (the 9,798 / 822 in the t2k6 text was stale).
+
+| item | commit | rule | ROM row it now matches | ON mass | OFF mass |
+| --- | --- | --- | --- | --- | --- |
+| base | 251840769 | | | 9,513 (3,177 exact / 2,700 offset) | 786 (842 / 291) |
+| 1 Psychic natural thaw (s97 d11) | 278b16e2b | `BattleScript_MoveUsedUnfroze` prints one row after the status write (`thawPrintExecution`); thaw message and icon use the wake-up script timing | s97 d11 print row; off121's OFF thaw command is 1 frame | 9,226 | 776 |
+| 2 cfs1 regression (s8108 d12 gen:219) | 6439b89d5 | the two-turn second-turn used print no longer re-counts the confusion-ended script's wait rows (`TWO_TURN_AFTER_CONFUSION_PRINT_ROWS` = 46) | s8108 d12 (+48 -> -1) | 9,132 | 776 |
+| 3 hail after foe-faint replacement (s2741 d9) | none | none needed | s2741 d9 hail SE 242 is -2 since swt1's +9 next-print fix (was -11); the print head is exact (860 vs ROM 860 / 861); d12 (no send-in) is -4 | | |
+| 4 Focus Punch lost-focus print (s310 d3) | fb2ad56fc | `BattleScript_EffectFocusPunch` print starts 16 rows after the command start (`FOCUS_PUNCH_LOST_FOCUS_PRE_PRINT_ROWS`) | `EffectFocusPunch+0xa` print at 560 (engine 544); held-item SE 152 688 vs 687 (was -17), SE 228 / 102 -1 | 8,956 (3,180 / 2,697) | 776 (842 / 291) |
+
+0 missing / 0 extra at every stage, both scenes. ON -557 (-5.9%), OFF -10.
+
+Corrections to the t2k6 text:
+- s8108 d12 was not cfs1's Levitate hold. The cause was the two-turn used-print lead (84 vs 35) re-counting the confusion print's wait rows; cfs1's lab pin (184 -> 1359) is untouched.
+- Focus Punch: the held-item "exec -> SE age 18 vs 8" is not a separate rule. The ENG command start is not the ROM exec row; with the print head moved the SE lands -1 with no `hpItemAnimationRows` change.
+
+Checks: labs (29: cfs1-digconf-*, etp3-*, hie1-*, shb1-holder-first-*, swt1-foe-faint-poison, sbm1-*; labCompare --scene auto) before == after, 29 labs / mass 2,807 both. Census seeds 0..199: eventsDigest + error identical 200/200 in both scenes; 9 changed-command battles per scene (the thaw status 32 -> 1 and its print leads, the lost-focus lead). Tests: 140 files (every importer of `battleResolutionPresentation`, cfs1*, swt1*, hie7*, lbrd, randomRoundSoak*) pass; `sa125StatusAnimationCommand` SA3 pin moved (thaw status 32 -> 1, ROM s97 d11 / off121). typecheck, `test:gate` (360 files / 2,839 tests), build pass.
+
+Open: no Tier-1 pin for item 2's confusion-then-two-turn lead or for the lost-focus lead (only the T2 windows s8108 d12 / s310 d3); the ON sleep status-animation SE after a held-item heal (s310 d3 SE 197 -9) is the next Focus Punch-family row; s1415 d49 / d47 were not re-probed (no ROM probe on disk).
