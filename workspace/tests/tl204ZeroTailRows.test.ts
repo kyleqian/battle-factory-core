@@ -15,6 +15,7 @@ const byMove = new Map(Object.values(rom).map((r) => [r.move as string, r]));
 // kse1: the body-window column (304) and the hypothesis column (2) count the SE wait's universal post 2 twice; the used -> print row (333) is the ROM's. Scary Face's body now ends with Cmd_end's SE_M_STRING_SHOT2 wait (+14 rows, post 2, tail frames 2): used -> print 319 -> 333 = the ROM row (residual -14 -> 0).
 // lead4 (B3): the S bodies (Double Team, Rain Dance, Scary Face, Light Screen, Sunny Day, Charm, Hail) present their script lead before the body, so their tailRows / tailFrames
 // pins are the old ones minus the lead (1 / 2 / 1 / 3 / 3 / 1 / 3 rows); every window residual and the used -> print / print -> next rows are unchanged.
+// ztl1: Charm is trail 0 (ROM script rows `BattleScript_EffectCharm` .. StatDownPrintString: its stats-change SE and print start one row after the -1 trail's): tail frames 4 -> 5, used -> print 217 -> 218 = the ROM row (residual -1 -> 0); labs ztl1-charm-player-on and mechanic-charm-*-on SE 245 -1 -> 0.
 // used -> print = first glyph of "<MON> used <MOVE>!" to the first glyph of the print that follows the body (ROM) / message start (production).
 // print -> next = that print (chain end) to the foe's "used TACKLE!". Production columns are what the code produces today.
 const PINS: Record<string, {
@@ -27,7 +28,7 @@ const PINS: Record<string, {
   "light-screen": { romUsedToPrint: 121, productionUsedToPrint: 123, romPrintToNext: 111, productionPrintToNext: 111, tailRows: 4, tailFrames: 3, pre: 3, romScriptRows: 6, productionStatRows: 0, romWindowRows: 89, productionBodyRows: 91, residualAfterHypothesis: 2, residualBefore: -4 },
   "calm-mind": { romUsedToPrint: 220, productionUsedToPrint: 219, romPrintToNext: 100, productionPrintToNext: 100, tailRows: 5, tailFrames: 4, pre: 3, romScriptRows: 9, productionStatRows: 2, romWindowRows: 188, productionBodyRows: 185, residualAfterHypothesis: -1, residualBefore: -10 },
   "sunny-day": { romUsedToPrint: 190, productionUsedToPrint: 190, romPrintToNext: 110, productionPrintToNext: 110, tailRows: 4, tailFrames: 3, pre: 3, romScriptRows: 6, productionStatRows: 0, romWindowRows: 161, productionBodyRows: 161, residualAfterHypothesis: 0, residualBefore: -6 },
-  "charm": { romUsedToPrint: 218, productionUsedToPrint: 217, romPrintToNext: 108, productionPrintToNext: 108, tailRows: 5, tailFrames: 4, pre: 3, romScriptRows: 7, productionStatRows: 2, romWindowRows: 192, productionBodyRows: 191, residualAfterHypothesis: -1, residualBefore: -6 },
+  "charm": { romUsedToPrint: 218, productionUsedToPrint: 218, romPrintToNext: 108, productionPrintToNext: 108, tailRows: 5, tailFrames: 5, pre: 3, romScriptRows: 7, productionStatRows: 2, romWindowRows: 192, productionBodyRows: 191, residualAfterHypothesis: -1, residualBefore: -6 },
   "fake-tears": { romUsedToPrint: 209, productionUsedToPrint: 208, romPrintToNext: 109, productionPrintToNext: 109, tailRows: 6, tailFrames: 0, pre: 3, romScriptRows: 7, productionStatRows: 2, romWindowRows: 178, productionBodyRows: 182, residualAfterHypothesis: 4, residualBefore: -1 },
   "leech-seed": { romUsedToPrint: 207, productionUsedToPrint: 207, romPrintToNext: 98, productionPrintToNext: 98, tailRows: 4, tailFrames: 3, pre: 3, romScriptRows: 39, productionStatRows: 0, romWindowRows: 144, productionBodyRows: 144, residualAfterHypothesis: 0, residualBefore: -39 },
   "hail": { romUsedToPrint: 185, productionUsedToPrint: 185, romPrintToNext: 105, productionPrintToNext: 105, tailRows: 4, tailFrames: 3, pre: 3, romScriptRows: 6, productionStatRows: 0, romWindowRows: 161, productionBodyRows: 161, residualAfterHypothesis: 0, residualBefore: -6 },
@@ -91,11 +92,11 @@ describe("tl204: Scene ON zero-tail no-hit moves, ROM rows vs production (residu
       expect([move, Math.abs(row.usedToPrint.residual)]).toEqual([move, Math.abs(pin.productionUsedToPrint - pin.romUsedToPrint)]);
       expect(Math.abs(row.usedToPrint.residual)).toBeLessThanOrEqual(Math.abs(pin.residualBefore));
       // Fake Tears is held out of the trail table (rule would give +4, worse than its -1): its tail stays 0 and the hypothesis column is the would-be value
-      if (move !== "fake-tears" && move !== "scary-face") expect(row.accounting.residualAfterHypothesis).toBe(row.usedToPrint.residual);
+      if (move !== "fake-tears" && move !== "scary-face" && move !== "charm") expect(row.accounting.residualAfterHypothesis).toBe(row.usedToPrint.residual);
     }
     expect(compareCase(byMove.get("fake-tears")!).row.accounting.residualAfterHypothesis).toBe(4);
     // the remaining non-zero residuals are the body-window lengths (data/battle_anim_scripts.s), not tail rules
-    for (const [move, residual] of [["light-screen", 2], ["charm", -1], ["fake-tears", -1], ["calm-mind", -1], ["scary-face", 0]] as const) {
+    for (const [move, residual] of [["light-screen", 2], ["charm", 0], ["fake-tears", -1], ["calm-mind", -1], ["scary-face", 0]] as const) {
       expect([move, compareCase(byMove.get(move)!).row.usedToPrint.residual]).toEqual([move, residual]);
     }
   });
