@@ -2891,6 +2891,13 @@ const LEECH_SEED_DRAIN_LEGACY_LAG = 7;
  */
 const LEECH_SEED_DRAIN_IDLE_CONTROLLER_EARLY_ROWS = 9;
 const DAMAGING_WEATHER_CONTINUES: ReadonlySet<string> = new Set(["SANDSTORM_CONTINUES", "HAIL_CONTINUES"]);
+/**
+ * kse1: a held item's animation right after a Rain / Sun tick (the non-damaging weathers; T2 ON s2 d10 +10, kse1-rainleftovers-on +9 on every SE and the print): the weather
+ * script's Cmd_end drained its own SE, so the controller is idle when the item's `playanimation` arrives and launches on the script's exec row, 9 rows before the
+ * restart lead's launch (the same idle-controller start as ldw1's drain). Sun's is 9 + 5: its command (SUN_CONTINUES, 1 + 158 + 3) ends 5 rows later than the ROM's idle point
+ * (kse1-sunleftovers-on: item SEs and print +14 with the Rain's 9, exact with 14 in both turns).
+ */
+const HELD_ITEM_EFFECT_IDLE_CONTROLLER_EARLY_ROWS: ReadonlyMap<string, number> = new Map([["RAIN_CONTINUES", 9], ["SUN_CONTINUES", 14]]);
 const singlesBattlerCount = 2;
 function hitSeDrainLaunchLag(songId: number | null, hitAnimationRows: number, barRows: number): number | null {
   if (songId === null) return null;
@@ -6413,7 +6420,11 @@ export function projectBattleResolutionCommands(
         "held-item effect animation",
       );
       const { lead: baseLead } = heldItemEffectExecutionsAndLead(events, index);
+      const weatherPrevious = commands[commands.length - 1];
+      const idleWeatherEarlyRows = (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) === 0 && weatherPrevious?.type === "general-animation"
+        ? HELD_ITEM_EFFECT_IDLE_CONTROLLER_EARLY_ROWS.get(weatherPrevious.animation) : undefined;
       const lead = commands.length === playerSendInEnd ? HELD_ITEM_EFFECT_AFTER_SEND_IN_LEAD_FRAMES
+        : idleWeatherEarlyRows !== undefined && baseLead === HELD_ITEM_EFFECT_RESTART_LEAD_FRAMES ? baseLead - idleWeatherEarlyRows
         : baseLead === HELD_ITEM_EFFECT_RESTART_LEAD_FRAMES ? heldItemEffectAfterPrintLead(events, index) ?? baseLead : baseLead;
       heldItemEffects.push({
         at: commands.length, battler: pendingHeldItemEffectBattler, sequence: event.sequence,
