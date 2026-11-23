@@ -9,6 +9,7 @@
 #   --out DIR: default .integration/evidence/labcmp/<timestamp>/; files are DIR/<lab>.<scene>.{rom,se,eng}.json (+ .table.txt, summary.txt). An existing file is replaced, never refused (run-mgba-probe.py refuses stale outputs).
 #   --reuse-rom: skip the ROM probes (engine-only re-run) when a capture of the same lab file + ROM build + probe scripts + --frames exists: DIR's own, else the newest in an earlier run
 #     (.integration/evidence/labcmp/*/, the main checkout's labcmp when run from a worktree, and every --rom-from DIR: a run dir or a dir of run dirs). The reused files are copied into DIR and the source is printed.
+#   The PRINTS / SUMMARY lines are in each DIR/<lab>.<scene>.table.txt and summary.txt; the console shows them once, in the closing "-- summary" block (not again under each table).
 #   --no-prints: hide the print first-glyph rows and the PRINTS line (default: shown; ROM sTextPrinters[0] vs the engine's message commands).
 set -uo pipefail
 cd "$(dirname "$0")/../.."
@@ -25,7 +26,7 @@ while [ $# -gt 0 ]; do
     --reuse-rom) REUSE=1; shift ;;
     --no-prints) NOPRINTS=1; shift ;;
     --rom-from) ROMFROM+=("$2"); shift 2 ;;
-    -h|--help) sed -n '2,16p' "$0"; exit 0 ;;
+    -h|--help) sed -n '2,17p' "$0"; exit 0 ;;
     -*) echo "labCompare: unknown option $1" >&2; exit 2 ;;
     *) LABS+=("$1"); shift ;;
   esac
@@ -70,7 +71,7 @@ for L in "${LABS[@]}"; do
     rm -f "$F.eng.json"
     node --experimental-strip-types --no-warnings tools/integration/b4mEngine.ts "$N" "$F.eng.json" --scene "$S" 2>&1 | grep -m3 Error
     [ -s "$F.eng.json" ] || { echo "labCompare: engine run failed: $K" >&2; FAIL=1; continue; }
-    python3 tools/integration/labCompare.py table "$OUT" "$K" --kinds "$KINDS" --ignore-ids "$IGNORE" ${SPAN:+--span "$SPAN"} ${ROWS:+--rows} ${NOPRINTS:+--no-prints} | tee "$F.table.txt" | cut -c1-300
+    python3 tools/integration/labCompare.py table "$OUT" "$K" --kinds "$KINDS" --ignore-ids "$IGNORE" ${SPAN:+--span "$SPAN"} ${ROWS:+--rows} ${NOPRINTS:+--no-prints} | tee "$F.table.txt" | grep -v '^\(PRINTS\|SUMMARY\)' | cut -c1-300
     grep '^\(PRINTS\|SUMMARY\)' "$F.table.txt" >> "$OUT/summary.txt"
   done
 done
