@@ -109,9 +109,9 @@ Hydro Pump / Cosmic Power / Calm Mind / Encore / Hypnosis / Blizzard, ROM hp com
 
 `docs/ais1-ai-switch-withdraw.md` (ais1 / ais2 / ais3): the AI withdraw, recall ball effect, species anchors (opponent front / player back y_offset), the 101-frame tray and the 2-frame-earlier AI send-in ball are done; seed 2741 is pixel-exact through the send-in in both scenes.
 ais4 (2026-11-18, same doc "ais4"): the opponent faint replacement runs the AI send-in timeline (obr251 OFF 6 -> 91, ON 6 -> 178 / 306; aud253 2741 SE 15 / cry exact). Still open: (2) Pursuit-interception
-and Focus-Punch-pre-pass AI switches unsynthesized / unprobed; (3) a same-turn player voluntary switch + AI switch uses the player's recall clock only; (5) player send-in 1 frame late in Scene OFF
-(`pmo239-switch-0-to-2-reopen-off`, one species pair) and no Scene ON lab for the player recall / send-in (238-250); the OFF `\p` box clear at A+1, the post-send-in clear (OFF 9 early, ON 1 late),
-the staged replacement's gender (harness).
+and Focus-Punch-pre-pass AI switches unsynthesized / unprobed; the OFF `\p` box clear at A+1, the post-send-in clear (OFF 9 early, ON 1 late),
+the staged replacement's gender (harness). ais5 (2026-11-23, same doc "ais5") closed (3) (each side already on its own clock; pinned in 7 labs) and (5) (player "Go! X!" print holds glyphs + 1 rows,
+ball-open SE = print + 54 + name length, 12 species). New: the AI tray -> "sent out" print is 102 frames in 12 / 14 ROM observations, 101 in the rest (engine 101; no source rule found).
 
 ## #214 — Leads from the Mac lane's 2026-11-12 passes (source-read only, no ROM seed)
 
