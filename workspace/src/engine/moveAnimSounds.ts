@@ -10,7 +10,7 @@ import { CRY_ECHO_END_FRAMES, CRY_ECHO_START_FRAMES, CRY_HIGH_PITCH_FRAMES, CRY_
 import { factoryBattleBgm } from "./battleStartSounds.ts";
 import { BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS } from "./battleScriptSourceConstants.ts";
 import type { BattleResolutionPresentationState } from "./battleResolutionPresentation.ts";
-import { liveMoveSourceAge, moveAnimationScriptStartRow, statsChangeSourceAge } from "./battleResolutionPresentationRender.ts";
+import { LEECH_SEED_DRAIN_SCRIPT_AGE, leechSeedDrainLaunchLag, liveMoveSourceAge, moveAnimationScriptStartRow, statsChangeSourceAge } from "./battleResolutionPresentationRender.ts";
 import { bodyCLeadRuleApplies, bodyStatusTailRuleApplies, FOCUS_PUNCH_SETUP_BEHIND_SUBSTITUTE_COMMAND_FRAMES, HELD_ITEM_EFFECT_COMMAND_FRAMES, RAIN_CONTINUES_SCRIPT_START_ROWS, WEATHER_CONTINUES_LAUNCH_LEAD_ROWS, isWeatherContinuesAnimation, type BattleStatusAnimationName, type WeatherContinuesAnimation } from "./battleResolutionPresentation.ts";
 
 /** Body age of the script's first command (script frame 0). */
@@ -275,16 +275,15 @@ function statusAnimationScriptAge(state: BattleResolutionPresentationState, name
   // Poison / Burn / Paralysis outside a B4 body keep the 10 (the same change moved them away from the ROM: SE 148 +216, 119 +43, 144 +24).
   return name === "SLP" || name === "CONFUSION" || name === "INFATUATION" ? STATUS_ANIMATION_AUDITED_BODY_SCRIPT_AGE : STATUS_ANIMATION_SCRIPT_AGE;
 }
-/** Weather-continues body age -> script row: the move-body clock (FIRST_COMMAND_AGE + AGE_TO_SOUND_ROWS). */
-const WEATHER_SCRIPT_AGE = FIRST_COMMAND_AGE + AGE_TO_SOUND_ROWS;
 
 /** aud250: command age -> script row of the General_* commands (ROM windows: focus punch x2 sides, leech seed drain x2 sides, castform rain-opp in both scenes). */
 export const FOCUS_PUNCH_SETUP_SCRIPT_AGE = 5;
-export const LEECH_SEED_DRAIN_SCRIPT_AGE = 7;
+export { LEECH_SEED_DRAIN_SCRIPT_AGE };
 export const CASTFORM_CHANGE_SCRIPT_AGE = 5;
 /** wsh1: command age -> script frame of General_WishHeal / General_FutureSightHit / General_FocusBand (calibrated on the T2 ROM rows, docs/wsh1-general-anim-commands.md). */
 export const WISH_HEAL_SCRIPT_AGE = 6;
-export const FUTURE_SIGHT_HIT_SCRIPT_AGE = 0;
+/** hit2: the ROM's gAnimScriptActive rises 6 rows after the command (lab etp1-futuresight-on: rise 2865, command 2859; the first SE is script row 3, 2868), as Wish's 6. */
+export const FUTURE_SIGHT_HIT_SCRIPT_AGE = 6;
 export const FOCUS_BAND_SCRIPT_AGE = 0;
 /**
  * ing1 (docs/fcp1-frame-catcher-pictures.md): command age -> script frame of General_IngrainHeal. ROM (soundEventProbe lab on
@@ -369,9 +368,9 @@ export function emitGeneralAnimSounds(after: BattleResolutionPresentationState |
     // docs/rnc1-rain-continues.md), so SE_M_RAIN_DANCE (script row 3) plays at command row 5 as on the ROM; it was 7 rows late.
     // sst1: General_Sandstorm's sounds run on the body's own clock (the art's: weatherContinuesBodyEffect draws script row `age`); on the
     // move-body sound clock SE_M_SANDSTORM played 8 rows after the ROM's (frame catcher, 15 end turns: 7 frames before the first sand
-    // picture on the ROM, 1 after on ours, the pictures frame for frame the ROM's). Sun / Hail keep it (not in the sweep).
-    const scriptRow = command.animation === "RAIN_CONTINUES" ? elapsed - RAIN_CONTINUES_SCRIPT_START_ROWS
-      : command.animation === "SANDSTORM_CONTINUES" ? age : age - WEATHER_SCRIPT_AGE;
+    // picture on the ROM, 1 after on ours, the pictures frame for frame the ROM's). hit2 / etp3: Sun and Hail the same (labs etp1-{sun5,hail5}-on: every
+    // SE_M_SUNNY_DAY / SE_M_HAIL row was exactly 8 rows late on the move-body clock, ROM SE = the script row on the body's own clock).
+    const scriptRow = command.animation === "RAIN_CONTINUES" ? elapsed - RAIN_CONTINUES_SCRIPT_START_ROWS : age;
     emitOpsAt(generalVariant(WEATHER_LABELS[command.animation], command.battler), {
       attackerSide: command.battler === 0 ? "player" : "opponent", targetSide: command.battler === 0 ? "opponent" : "player",
     }, scriptRow, true);
@@ -401,7 +400,7 @@ export function emitGeneralAnimSounds(after: BattleResolutionPresentationState |
         if (stop !== undefined && elapsed === stop.age + TURN_TRAP_SCRIPT_AGE) emitSound({ kind: "stop", id: stop.id, pan: null, player: stop.player });
       } else if (command.animation === "LEECH_SEED_DRAIN" && command.animated === true) {
         // command.battler is the seeded (drained) battler = the animation's target; the seeder is the attacker.
-        emitOpsAt(generalVariant("General_LeechSeedDrain", command.battler === 0 ? 1 : 0), { attackerSide: other, targetSide: side }, elapsed - LEECH_SEED_DRAIN_SCRIPT_AGE, true);
+        emitOpsAt(generalVariant("General_LeechSeedDrain", command.battler === 0 ? 1 : 0), { attackerSide: other, targetSide: side }, elapsed - leechSeedDrainLaunchLag(command), true);
       }
     }
   }

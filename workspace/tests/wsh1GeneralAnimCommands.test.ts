@@ -116,7 +116,8 @@ describe("wsh1 General_* SEs (Scene ON)", () => {
 
   it.each([
     ["wsh1-wish-on", "WISH_HEAL", [140, 179], [[140, 41], [179, 116]]],
-    ["wsh1-fs-on", "FUTURE_SIGHT_HIT", [189, 184], [[189, 3], [184, 41], [184, 50]]],
+    // hit2: ROM lab etp1-futuresight-on has the three SEs at command + 9 / 47 / 56 (2868 / 2906 / 2915 after the command at 2859); the wsh1 pin (3 / 41 / 50) was a +14-offset turn's compensation.
+    ["wsh1-fs-on", "FUTURE_SIGHT_HIT", [189, 184], [[189, 9], [184, 47], [184, 56]]],
     ["wsh1-fb-on", "FOCUS_BAND", [171], [[171, 0]]],
   ] as const)("%s: SE rows at command age", (id, animation, seIds, expected) => {
     const { start, rows } = seRows(id, animation, [...seIds]);

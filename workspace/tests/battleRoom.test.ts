@@ -8,6 +8,7 @@ import {
   ENTRY_SETTLE_ELAPSED,
   FADE_IN,
   INITIAL_BATTLE_ROOM_STATE,
+  MSGBOX_ACCEPT_ELAPSED,
   MSGBOX_APPEAR_ELAPSED,
   MSGBOX_CLOSE_TICKS,
   MSGBOX_LINE1,
@@ -266,10 +267,10 @@ describe("battleRoom.ts: advanceBattleRoom - entering -> msgboxIdle -> msgboxClo
     expect(state).toEqual({ phase: "msgboxIdle", elapsed: 0 });
   });
 
-  it("msgboxIdle holds state unchanged under advanceBattleRoom - core.ts's own A-press gate (tested below) is what transitions it out", () => {
+  it("msgboxIdle only counts its idle ticks under advanceBattleRoom (the press gate reads them) - core.ts's own A-press gate (tested below) is what transitions it out", () => {
     const state: BattleRoomState = { phase: "msgboxIdle", elapsed: 0 };
-    expect(advanceBattleRoom(state)).toBe(state);
-    expect(advanceBattleRoom(advanceBattleRoom(state))).toBe(state);
+    expect(advanceBattleRoom(state)).toEqual({ phase: "msgboxIdle", elapsed: 1 });
+    expect(advanceBattleRoom(advanceBattleRoom(state))).toEqual({ phase: "msgboxIdle", elapsed: 2 });
   });
 
   it("closes exactly MSGBOX_CLOSE_TICKS ticks after msgboxClosing starts, then holds 'settled' indefinitely (docs §8.3 close-latency derivation)", () => {
@@ -299,32 +300,33 @@ describe("core.ts wiring: msgboxIdle's A-press gate (S6 slice 2c - the only inpu
   it("starts the 4-tick close the exact tick A registers, once idle; vanishes after MSGBOX_CLOSE_TICKS and holds settled thereafter (reproduces battle1-intro.json's segment 29 press -> oracle tick 843, room-msgbox.json 142/142)", () => {
     let state: EngineState = {
       ...createInitialState({ appRoute: "canonical-recorded" }),
-      battleRoom: { phase: "msgboxIdle", elapsed: 0 },
+      battleRoom: { phase: "msgboxIdle", elapsed: MSGBOX_ACCEPT_ELAPSED },
     };
-    // No press yet - holds idle byte-identically.
+    // No press yet - the box stays idle (only its idle count moves).
     state = tick(state, new Set());
-    expect(state.battleRoom).toEqual({ phase: "msgboxIdle", elapsed: 0 });
+    expect(state.battleRoom).toEqual({ phase: "msgboxIdle", elapsed: MSGBOX_ACCEPT_ELAPSED + 1 });
 
     // A registers this tick (edge-triggered, keyRepeat.ts) - msgboxClosing
     // starts the SAME tick (matches the ground-truth trace's segment 29:
     // a 2-frame A hold, newKeys fires once on the first frame).
     state = tick(state, new Set(["A"]));
-    expect(state.battleRoom).toEqual({ phase: "msgboxClosing", elapsed: 0 });
+    // rmw1: the close may also carry transitionClockAhead (the press frame's parity; rmw1RoomTransitionClock.test.ts pins it).
+    expect(state.battleRoom).toMatchObject({ phase: "msgboxClosing", elapsed: 0 });
     expect(msgboxVisual(state.battleRoom!)).toEqual({ visible: true, chars: MSGBOX_PRINT_TICKS });
 
     // Held for the pulse's second frame - already registered, no re-trigger, just a normal advance.
     state = tick(state, new Set(["A"]));
-    expect(state.battleRoom).toEqual({ phase: "msgboxClosing", elapsed: 1 });
+    expect(state.battleRoom).toMatchObject({ phase: "msgboxClosing", elapsed: 1 });
 
     state = tick(state, new Set());
-    expect(state.battleRoom).toEqual({ phase: "msgboxClosing", elapsed: 2 });
+    expect(state.battleRoom).toMatchObject({ phase: "msgboxClosing", elapsed: 2 });
     state = tick(state, new Set());
-    expect(state.battleRoom).toEqual({ phase: "msgboxClosing", elapsed: 3 });
+    expect(state.battleRoom).toMatchObject({ phase: "msgboxClosing", elapsed: 3 });
     expect(msgboxVisual(state.battleRoom!)).toEqual({ visible: true, chars: MSGBOX_PRINT_TICKS });
 
     // 4th tick after the press - box vanishes (oracle tick 843, byte-identical to tick 717).
     state = tick(state, new Set());
-    expect(state.battleRoom).toEqual({ phase: "settled", elapsed: 0 });
+    expect(state.battleRoom).toMatchObject({ phase: "settled", elapsed: 0 });
     expect(msgboxVisual(state.battleRoom!)).toEqual({ visible: false, chars: 0 });
 
     // Holds settled indefinitely, reading no further input.

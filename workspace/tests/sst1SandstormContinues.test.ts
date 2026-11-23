@@ -31,7 +31,9 @@ function sandstormTurns(seed: number, turns: number): Array<{ se: number | null;
       const payload = segment!.events.find((e) => e.sequence === command.eventSequence)?.payload as { messageId?: string } | undefined;
       id = payload?.messageId ?? null;
     }
-    const glyph = resolution !== null && (createBattleResolutionPresentationRenderView(resolution).message?.visibleCharacters ?? 0) >= 1;
+    // sbx1: during a print's lead rows the box still shows the previous message, so a glyph is the command's own text with characters on screen
+    const shown = resolution === null ? null : createBattleResolutionPresentationRenderView(resolution).message;
+    const glyph = shown !== null && command?.type === "message" && shown.lines === command.lines && shown.visibleCharacters >= 1;
     if (id === "STRINGID_SANDSTORMRAGES" && lastId !== id && glyph) rages = frame;
     if (id === "STRINGID_PKMNBUFFETEDBYSANDSTORM" && lastId !== id && glyph && rages !== null) {
       out.push({ se: se === null ? null : se - rages, buffeted: frame - rages });
@@ -47,10 +49,11 @@ describe("sst1: ordinary play (seed 44, Scene ON: PUPITAR's and ONIX's sandstorm
   it("SE_M_SANDSTORM 88 frames after the first print, the buffeted print at 258 or 264 by turn order, as on the ROM", () => {
     // the merge with the box's run re-rolled the test player's round (a trajectory, not a ROM frame): 5 sandstorm end turns, was 6
     const turns = sandstormTurns(44, 6);
-    expect(turns.length).toBe(5);
+    // swt1 (the opponent faint replacement's next print 9 frames later, ROM release +12; the soak player's round shifts): 6 sandstorm end turns again within the 120000-frame cap; the per-turn ROM values are unchanged
+    expect(turns.length).toBe(6);
     expect(turns.every((t) => t.se === 88)).toBe(true);
     expect(turns.every((t) => t.buffeted === 258 || t.buffeted === 264)).toBe(true);
     // both cases occur: PUPITAR (unhurt) moved first in the first two turns, YANMA / ELEKID (hurt) first after
-    expect(turns.map((t) => t.buffeted)).toEqual([264, 264, 258, 258, 258]);
+    expect(turns.map((t) => t.buffeted)).toEqual([264, 264, 258, 258, 258, 258]);
   }, 120000);
 });

@@ -120,6 +120,15 @@ The fix is a live body adapter for the move (src/engine/liveMoveAnimation.ts `li
 The engine json keeps the commands under `cmds` (`[frame, segment, command, type, battler, move, timing, age0]`), the SEs under `se`, all sound kinds under `sounds`.
 Replaces the per-step copies `b4mRun.sh` / `bdt1Run.sh` / `gsp3Cmp.py` (kept: receipts reference them). Not covered: `hcr3mLab.py` / `hcr3mLabEngine.ts` (sound-fixture labs under `tools/audio/fixtures/`; copy the lab into this directory instead) and `fsc2mProbe.py` (a scripted A-press policy after the commit: the ready-time probes, `fsc2mRun.sh`).
 
+**Lab stage: player faint replacement (lsf2).** The engine lab stage (`labBackedStageOptions`, tools/compare/appTrace.ts) can now run past a player faint: before, the forced party menu rebuilt its three rows from
+rental records and threw `playerParty[0] max HP N does not match rental record max HP M` for any lab whose mons a record cannot express (Lv5 / Lv12 / Lv20 leads, set EVs). The seam is an optional last parameter
+`labParty` on `createPartySelectStateFromForcedSwitch` (src/engine/partySelect.ts, type `PartySelectLabParty`: species, speciesName, level, personality, abilitySlot, friendship, item, a `Pick` of `FactoryCorpusPartyMemberState`) and an optional
+`forcedPartyLabParty` on the orchestrator state (set only by the lab stage, from `LabBuiltMon.partyMember`). With it the rows take that identity and the kernel party's live HP / status; without it (every production state and every
+hand-written `APP_STAGES` entry) the records are used and the species / max HP check stays. `factoryCorpusParty.ts` is not touched. The summary screen still reads the records' presentation (it is not part of any lab trace). Measured:
+pic7-player-faint-send-in-{on,off}, playerfaint-slot2-sunnyday and etk1-leech-hold-{on,off} run to the end in both scenes; the forced send-in ball SE 15 reads ROM = ENG exactly (pic7 ON 906 / 906, OFF 906 / 906; slot2-sunnyday ON 735 / 735).
+The two print rows left `missing` per replacement (`BattleScript_FaintedMonSendOutNew+0xb` "Go! X!" at ROM 845, `BattleScript_FaintedMonEnd+0x0`) are not message commands in the engine: the Go! glyphs are drawn by the party send-out
+(`partySendOutGoTextVisibleChars`), so a faint-replacement lab always shows `PRINTS ... missing 2`; read the SE 15 row (fsi1's rule: ROM rel 133 + Go! glyphs) instead. playerfaint-slot2-sunnyday in OFF reads 2 / 2 SEs and ends after the faint message in both ROM and engine (cause not investigated: the lab is an ON-timed script; not the seam).
+
 Lab design tips (each cost a re-run before):
 - **No stale files.** `run-mgba-probe.py` refuses an existing output path, so a re-probe needs a fresh name; `labCompare.sh` always writes a fresh run dir and, with an existing `--out`,
   deletes its own outputs first. A ROM capture is reused only with `--reuse-rom`, and only while the fingerprint matches (`DIR/<lab>.<scene>.fp` = lab file sha : ROM build sha : `hcr3mProbe.py` + `soundEventProbe.py` sha : `--frames`).

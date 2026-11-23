@@ -126,9 +126,11 @@ const frameBudget = Number(arg("frame-budget") ?? 200000);
 // engine's accumulated drift from the ROM must not shift the pulse phase); =absolute uses the drive frame number as is (measured in docs/aud251-s11-scoreboard-refresh.md "drv1").
 const romDriveArg = arg("romdrive") ?? process.env.ROM_REPLAY_ROMDRIVE;
 const romDriveClock = (arg("romdrive-clock") ?? "segment") as "segment" | "absolute";
-// fch2m: --dismiss-accept=1 also presses (the same ROM / even-frame cadence) while a button message is only ACCEPTABLE (isBattleResolutionButtonMessageAcceptable, 2 rows before the
-// awaiting phase for a `\p` box); default off: the census driver waits for `awaiting-message-dismiss` as before (the frozen fixtures / T2 baselines replay without it).
-const dismissAccept = arg("dismiss-accept") !== undefined && arg("dismiss-accept") !== "0";
+// fch2m / drv2: with a ROM drive the census driver also presses while a button message is only ACCEPTABLE (isBattleResolutionButtonMessageAcceptable, 2 rows before the awaiting
+// phase for a `\p` box), the frame the engine first takes an A, as the ROM driver's pulse does. --dismiss-accept=0 or ROM_REPLAY_DISMISS_ACCEPT=0 keeps the old awaiting-only gate
+// (drv1 / t2k4 baselines); without --romdrive the gate is the old one regardless (the frozen fixtures replay without it); --dismiss-accept=1 forces it on without a drive.
+const dismissAcceptArg = arg("dismiss-accept") ?? process.env.ROM_REPLAY_DISMISS_ACCEPT;
+const dismissAccept = dismissAcceptArg !== undefined ? dismissAcceptArg !== "0" : romDriveArg !== undefined;
 if (romDriveClock !== "segment" && romDriveClock !== "absolute") throw new Error("--romdrive-clock must be segment or absolute");
 const romA: { frames: Set<number>; length: number; anchors: { index: number; menuOpenFrame: number; commitFrame: number }[] } | null = romDriveArg === undefined ? null : (() => {
   const drive = JSON.parse(readFileSync(romDriveArg, "utf8")).drive;
@@ -397,10 +399,12 @@ function play(initial: any, record: boolean, patchRng: number | null = null, pla
       // ctl1 (--cmdtrace): the engine's presentation command changes (frame, segment, command index, type, battler, hp from / to, lead) next to the sound rows.
       const res: any = state.battleResolutionPresentation;
       const seg = res?.segments?.[res.segmentIndex]; const cmd = seg?.commands?.[res.commandIndex];
-      const key = cmd === undefined || res.lifecycle?.phase !== "presenting" ? "" : `${res.segmentIndex}.${res.commandIndex}`;
+      const sendIn = res?.lifecycle?.phase === "presenting-switch-in" ? seg?.commands?.find((c: any) => c.type === "switch-in" && c.battler === 0) : undefined;
+      const key = sendIn !== undefined ? `si${res.segmentIndex}` : cmd === undefined || res.lifecycle?.phase !== "presenting" ? "" : `${res.segmentIndex}.${res.commandIndex}`;
       if (key !== cmdTrace.last) {
         cmdTrace.last = key;
-        if (cmd !== undefined && key !== "") cmdTrace.rows.push([frame, res.segmentIndex, res.commandIndex, cmd.type, cmd.battler ?? null, cmd.from ?? null, cmd.to ?? null, cmd.timing?.leadFrames ?? null, cmd.timing?.bodyLeadFrames ?? null, cmd.animation ?? null, cmd.timing?.minimumFrames ?? null, cmd.before ?? null, cmd.after ?? null]);
+        if (sendIn !== undefined) cmdTrace.rows.push([frame, res.segmentIndex, res.commandIndex, "party-sendout", 0, null, null, null, null, null, null, null, null, sendIn.incoming?.name ?? null, seg.commands.find((c: any) => c.type === "message")?.lines ?? null]);
+        else if (cmd !== undefined && key !== "") cmdTrace.rows.push([frame, res.segmentIndex, res.commandIndex, cmd.type, cmd.battler ?? null, cmd.from ?? null, cmd.to ?? null, cmd.timing?.leadFrames ?? cmd.leadFrames ?? null, cmd.timing?.bodyLeadFrames ?? null, cmd.animation ?? null, cmd.timing?.minimumFrames ?? null, cmd.before ?? null, cmd.after ?? null, cmd.incoming?.name ?? null]);
       }
     }
     if (frame0 !== null && state.battle) {

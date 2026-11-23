@@ -43,7 +43,7 @@ import {
   type EngineState,
 } from "../../src/engine/core.ts";
 import type { GbaButton } from "../../src/input.ts";
-import { isFactoryLobbyFacingSinglesAttendant } from "../../src/engine/factoryLobbyFreeRoam.ts";
+import { isFactoryLobbyFacingSinglesAttendant, isFactoryLobbyIdle, LOBBY_SPAWN_TILE, type FactoryLobbyFreeRoamState } from "../../src/engine/factoryLobbyFreeRoam.ts";
 import { attendantAcceptsInput } from "../../src/engine/factoryLobbyAttendant.ts";
 import {
   MENU_OPTION_RENT,
@@ -1428,6 +1428,16 @@ function errorOrigin(frames: string[]): string {
 
 const NO_BUTTONS: ReadonlySet<GbaButton> = new Set();
 
+/** lbf1: one press back toward the spawn tile (in front of the singles attendant), then UP to face it; nothing while a turn / step runs. */
+function lobbyReturnToAttendant(roam: FactoryLobbyFreeRoamState): ReadonlySet<GbaButton> {
+  if (!isFactoryLobbyIdle(roam)) return NO_BUTTONS;
+  if (roam.x < LOBBY_SPAWN_TILE.x) return new Set<GbaButton>(["RIGHT"]);
+  if (roam.x > LOBBY_SPAWN_TILE.x) return new Set<GbaButton>(["LEFT"]);
+  if (roam.y > LOBBY_SPAWN_TILE.y) return new Set<GbaButton>(["UP"]);
+  if (roam.y < LOBBY_SPAWN_TILE.y) return new Set<GbaButton>(["DOWN"]);
+  return new Set<GbaButton>(["UP"]);
+}
+
 /**
  * "full": arbitrary-but-legal play — every UI choice the real menus expose.
  * "vanilla": the plainest player — rent slots 0/1/2, always FIGHT with the
@@ -1732,6 +1742,9 @@ export class RandomPlayer {
       // lbra/lbrb/lbr-d1: every loss / forfeit / retire / 7-win ends in the Lobby; A at the attendant opens the ROM conversation, and
       // tapping A through it (CHALLENGE, LV. 50, YES, save) starts the next challenge (terminal only with `newChallengeFromLobby: false`).
       if (!(this.newChallengeFromLobby && (state.lobbyAttendant !== null || isFactoryLobbyFacingSinglesAttendant(state.lobbyFreeRoam)))) {
+        // lbf1: the walkable Lobby takes the d-pad on its hand-off frame (the ROM's releaseall frame), so a direction the player held
+        // through the farewell can turn or step it off the spawn tile; walk back and face the attendant instead of idling (HANG).
+        if (this.newChallengeFromLobby && state.lobbyAttendant === null) return lobbyReturnToAttendant(state.lobbyFreeRoam);
         return NO_BUTTONS;
       }
       // opl: at "Which level?" the player moves the cursor to the level wanted (`lobbyLevels`, else the carry's: the next challenge

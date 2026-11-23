@@ -334,9 +334,12 @@ describe("battle start sound rules (aud241a, Tier 1)", () => {
     const stop = events.find((e) => e.kind === "stop")!;
     expect([stop.id, bgm.id, stop.frame]).toEqual([469, 476, bgm.frame]);
     // tri1 (docs/tri1-transition-intro-handoff.md): the gap is the drawn transition's. The canonical trace's CIRCLES_MEET is 359; this
-    // game draws CIRCLES_ASYMMETRIC_SPIRAL, whose ROM gap is 343 (frame catcher, 2 battles; before tri1 every transition took 359 here).
-    expect(transitionId).toBe(36);
-    expect(events.find((e) => e.id === 114)!.frame - bgm.frame).toBe(343);
+    // game draws CIRCLES_CROSS (id 35), whose ROM gap is 349 (tri1's table; frame catcher, 2 battles; before tri1 every transition took 359 here). abs1: it was CIRCLES_ASYMMETRIC_SPIRAL (36, gap 343) until the opponent's intro box took its first press three frames after the last character
+    // like the ROM: the RandomPlayer's A then lands one VBlank-RNG step later, so the draw moved.
+    // rmw1: LOGO_WIGGLE (29, gap 348 = ORDINARY_INTRO_HANDOFF_AFTER_BGM 160 + 35 + 153, tri1's table) after the draft menu took its first
+    // mash A 2 ticks earlier like the ROM (monPic's menu-input gate): the RandomPlayer's presses, and so the room's per-frame RNG at the draw, moved.
+    expect(transitionId).toBe(29);
+    expect(events.find((e) => e.id === 114)!.frame - bgm.frame).toBe(348);
     // The RandomPlayer's own button presses move the intro clock by a tick mid-tray, so only the first nine tray events are pinned here.
     const ourTray = events.filter((e) => e.id === 114 || e.id === 115 || e.id === 116).slice(0, 9);
     const romTray = rom.filter((e) => e.id === 114 || e.id === 115 || e.id === 116).slice(0, 9);

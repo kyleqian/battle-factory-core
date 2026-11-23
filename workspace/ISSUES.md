@@ -83,6 +83,10 @@ Hydro Pump / Cosmic Power / Calm Mind / Encore / Hypnosis / Blizzard, ROM hp com
   stays in step past a wake-up (lab foe wakes turn 2 on the ROM, 3 in the app: lab staging); fsc1 c1 is OFF only (the ON ROM keeps the blink, fly-gust-on); chg1 Dive player unleash first
   print +1, the miss tail +1 rule only on semi-invulnerable turns. **fsc2m:** the OFF faint -> party-summary offset (median -8) is mostly the drivers' A cadence (ROM driver pulses A every
   17 frames, the census driver every 2): fix the census driver's pulse first, then the AI-choice term (6 frames, +2 with no super-effective candidate).
+- **2026-11-22/23 run (docs/aud251-s11-scoreboard-refresh.md "hse2" .. "pso1", t2k4 / t2k5 / t2k6 rankings):** T2 ON 13,629 -> 8,684, OFF 1,819 -> 719 (0 / 0; drv2's replay press /
+  anchor fix is part of it). Open (ranked in the handoff "Next work"): the OFF faint box's press-ready frame (s6568 d104), the Focus Punch family's next row (s310 d3 -9), Supersonic s5569 d12 -9 (no
+  supported lab pair), the end-turn last-print box blank (~30 frames, sbx1), the Leech Seed drain body pixels (age 21 vs SE 7 + 2), Slack Off / Morning Sun (no live body adapter), shb1's 49 / ftp1's 16
+  on few windows, Water Gun / Pay Day effectiveness SE -1 after the ClearMonBg tail (sbm1).
 - **Bodies measured, not landed (lse3, docs/hpd1-hp-hold.md "lse3"):** Absorb +10, Mega Drain +8, Counter +5, Revenge +8, Recycle +4, Razor Wind charge / unleash +8 / +9 (+ ~5 turn-end rows of a
   locked continuation), Pound / Scratch / Tackle (+13 / +12 / +21; phy1m: outsideFactory, reachable only through Metronome; every Factory body is live in play, but 63.6 % of body commands have no audited lead, +6 .. +14 rows: `docs/phy1m-nonlive-bodies.md`), Wish (+14: the generic action-transition rows that `actionTransitionPauseFrames` drops in Scene ON
   when the anchor is the used print). hpf3 re-pinned Absorb / Revenge / Recycle / Razor Wind windows that these bodies now dominate.
@@ -245,13 +249,12 @@ ret218 hands RETIRE-YES to the loss terminal (no more hang). `retire-yes-lobby-f
 unknown); (b) the wandering lobby NPC's schedule depends on `gRngValue` history keyed to the loss run's ticks (frames 8033-8193).
 The terminal-arrival branch of `renderPostwinRetireWarp` (core.ts) is probably dead now. Timing class: long tail.
 
-## #188 — Summary front animation: 137 species approximate-static motion; QUILAVA replacement one render late (finish plan, sfa214 2026-10-27)
+## #188 — Summary front animation: start-frame lag and UNOWN letter (finish plan, sfa214 2026-10-27; (a) FIXED by the Mac's sfa2 2026-11-22)
 
-sfa214 made the draft Summary screen crash-free for every Factory species. Open, non-crash residuals:
-(a) 137 / 376 species (42 `pokemon_animation.c` motion types) play the frame program only, no source motion
-(`summaryFrontAnimation.ts` `motionClaim`); (b) `summary-info-quilava-v-stretch` (mon-change replacement sprite)
-48 / 91 vs the Scene OFF oracle: the whole replacement animation shows one render later in the ROM; the initial-sprite
-trace is 108 / 121 (2-8 px affine-edge residual on 13 frames). Anchor Summary traces stay exact. Timing class: long tail.
+sfa2 (`docs/sfa2-summary-front-animations.md`) ported all 62 motion types; the sprite state matches the ROM probe for all 376
+Factory species, 377 / 378 stretches pixel-exact. Open, non-crash residuals: (a) the ROM's mon change sometimes starts the animation
+one or two frames later (a CPU-load lag frame), so `summary-info-quilava-v-stretch` stays 48 / 91 vs the Scene OFF oracle while ours is
+exact relative to its own dispatch; (b) UNOWN always draws letter A. Timing class: long tail.
 
 ## #168 — remainder: FRZ frozen-turn timing phase (S10A; #168 otherwise DONE 2026-10-13)
 

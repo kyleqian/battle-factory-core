@@ -12,6 +12,7 @@ import type { GbaButton } from "../src/input.ts";
 import type { FactoryRentalRecord } from "../src/engine/battleScenario.ts";
 import type { BattlePresentationCommand } from "../src/engine/battlePresentation.ts";
 import { createInitialState, tick, type EngineState } from "../src/engine/core.ts";
+import { MSGBOX_ACCEPT_ELAPSED } from "../src/engine/battleRoom.ts";
 import { createFactoryCorpusPartyMember } from "../src/engine/factoryCorpusParty.ts";
 import { createFactoryLobbyFreeRoamState } from "../src/engine/factoryLobbyFreeRoam.ts";
 import { beginFactoryRoundBattleStartIntro, createFactoryRoundBattleOrchestrator } from "../src/engine/factoryRoundBattleOrchestrator.ts";
@@ -237,7 +238,7 @@ describe("lbb1: the rooms' boxes take B on the frame A is taken", () => {
     const room = { ...createInitialState({ appRoute: "canonical-recorded" }), prebattleRoom: { phase: "idle" as const, elapsed: 0 } };
     expect(tick(room, B).prebattleRoom).toEqual({ phase: "messageClosing", elapsed: 0 });
     expect(tick(room, B).prebattleRoom).toEqual(tick(room, A).prebattleRoom);
-    const intro: EngineState = { ...createInitialState({ appRoute: "canonical-recorded" }), battleRoom: { phase: "msgboxIdle", elapsed: 0 } };
+    const intro: EngineState = { ...createInitialState({ appRoute: "canonical-recorded" }), battleRoom: { phase: "msgboxIdle", elapsed: MSGBOX_ACCEPT_ELAPSED } };
     expect(tick(intro, B).battleRoom).toEqual({ phase: "msgboxClosing", elapsed: 0 });
     // Not before the box takes input (as A).
     const entering: EngineState = { ...createInitialState({ appRoute: "canonical-recorded" }), battleRoom: { phase: "entering", elapsed: 0 } };

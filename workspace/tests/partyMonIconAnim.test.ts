@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   monIconElapsedAfterSubmenuStall,
+  monIconAnimForHp,
   monIconFrameAt,
   monIconSelectedY2,
 } from "../src/engine/battlePartySelect.ts";
@@ -106,5 +107,44 @@ describe("party-menu mon-icon animation cadence", () => {
     expect(stalled(935)).toBe(0);
     expect(stalled(937)).toBe(1);
     expect(stalled(945)).toBe(0);
+  });
+});
+
+// bob1: UpdateHPBar -> SetPartyHPBarSprite picks sAnim_0..4 by GetHPBarLevel
+// (FRAME durations 6/8/14/22/29, cycle 2d+3). ROM rows (flw252-bob1-hp-off, red
+// Rattata 5/105 in slot 0): toggles 990/1014/1037/1061/1084 = 24/23 ticks, a
+// 47-cycle; the fainted slot (forced switch) steps y2 every 30/31 ticks.
+function runLengths(values: readonly number[]): number[] {
+  const runs: number[] = [];
+  let run = 1;
+  for (let i = 1; i < values.length; i += 1) {
+    if (values[i] === values[i - 1]) run += 1;
+    else { runs.push(run); run = 1; }
+  }
+  return runs.slice(1);
+}
+
+describe("party-menu mon-icon animation by HP level (bob1)", () => {
+  it("maps HP to the sAnim index through GetHPBarLevel's 48-pixel fractions", () => {
+    expect(monIconAnimForHp(105, 105)).toBe(0);
+    expect(monIconAnimForHp(55, 105)).toBe(1);
+    expect(monIconAnimForHp(52, 105)).toBe(2);
+    expect(monIconAnimForHp(22, 105)).toBe(2);
+    expect(monIconAnimForHp(21, 105)).toBe(3);
+    expect(monIconAnimForHp(1, 105)).toBe(3);
+    expect(monIconAnimForHp(0, 105)).toBe(4);
+  });
+
+  it("runs the red anim on a 47-tick cycle: frame 0 for 23 ticks, frame 1 for 24", () => {
+    const frames = Array.from({ length: 200 }, (_, e) => monIconFrameAt(e, 3));
+    const runs = runLengths(frames);
+    expect(new Set(runs)).toEqual(new Set([23, 24]));
+    expect(runs[0]! + runs[1]!).toBe(47);
+  });
+
+  it("never changes the fainted icon's image but keeps stepping the selected y2 every 30/31 ticks", () => {
+    for (let e = 0; e < 200; e += 1) expect(monIconFrameAt(e, 4)).toBe(0);
+    const runs = runLengths(Array.from({ length: 300 }, (_, e) => monIconSelectedY2(e + 100, 0, 4)));
+    expect(new Set(runs.slice(0, -1))).toEqual(new Set([30, 31]));
   });
 });

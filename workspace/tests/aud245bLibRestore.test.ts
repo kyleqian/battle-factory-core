@@ -49,8 +49,9 @@ const flush = async (): Promise<void> => {
   for (let i = 0; i < 60; i += 1) await new Promise<void>((resolve) => setTimeout(resolve, 0));
 };
 
-// Seed 3, Scene OFF: BGM 476 starts at frame 701 and plays to the end of this window; the trace is the finished runs of 1600 frames.
-const BGM_FRAME = 701;
+// Seed 3, Scene OFF: BGM 476 starts at frame 695 and plays to the end of this window; the trace is the finished runs of 1600 frames.
+// A trajectory value of the random player's run: rmw1 (the draft menu takes its first A 2 ticks before the mon pic table ends, as the ROM) moved it 701 -> 695.
+const BGM_FRAME = 695;
 let trace: TraceSegment[] = [];
 let traceFrames = 0;
 let bgmEvents: SoundEvent[] = [];

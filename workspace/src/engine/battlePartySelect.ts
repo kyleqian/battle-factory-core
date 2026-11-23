@@ -273,21 +273,6 @@ export const PARTY_SELECT_OPEN_TOTAL_FRAMES =
   + PARTY_SELECT_OPEN_BLACK_HOLD_FRAMES
   + PARTY_SELECT_OPEN_MENU_FADE_FRAMES;
 
-/**
- * ISSUES #80 Class B (`docs/fade-layer-forensics.md` §9 RAM probe): the
- * player healthbox sprite's real `y2` steps 0→1 at oracle frame 770
- * (`openElapsed 7`), so from there it is drawn one row lower. Applied as a
- * +1px draw-origin offset on the open field-fade-out's settled scene.
- */
-export const PARTY_SELECT_OPEN_HEALTHBOX_Y2_START = 7;
-/**
- * ISSUES #80 Class B (`docs/fade-layer-forensics.md` §9 RAM probe): the
- * player back sprite's real `y2` steps 1→0 at oracle frame 779
- * (`openElapsed 16`), so from there it is drawn one row higher. Applied as a
- * −1px draw-origin offset on the open field-fade-out's settled scene.
- */
-export const PARTY_SELECT_OPEN_BACK_SPRITE_Y2_START = 16;
-
 export function battlePartySelectOpenPhase(
   openElapsed: number,
 ): BattlePartySelectOpenPhase {
@@ -489,7 +474,7 @@ export function battlePartySelectStateForForcedParty(
     outcome: null,
     elapsed: forced.elapsed,
     openElapsed: 0,
-    selectedSinceElapsed: -MON_ICON_CREATION_ELAPSED_OFFSET,
+    selectedSinceElapsed: MON_ICON_MENU_OPEN_SELECTED_SINCE,
     closeElapsed: null,
     ...(forced.sendOutElapsed !== null && forced.sendOutElapsed > 0 ? { sendOutConfirmed: true as const } : {}),
   });
@@ -609,7 +594,7 @@ export function createBattlePartySelectState(
     outcome: null,
     elapsed: 0,
     openElapsed: 0,
-    selectedSinceElapsed: -MON_ICON_CREATION_ELAPSED_OFFSET,
+    selectedSinceElapsed: MON_ICON_MENU_OPEN_SELECTED_SINCE,
     closeElapsed: null,
   });
 }
@@ -642,7 +627,7 @@ function menuAfterSummaryReturn(next: BattlePartySelectState, lastViewedSlot: nu
     submenuOpenElapsed: SUBMENU_OPEN_VISUAL_DELAY,
     actionCursor: 0,
     message: null,
-    selectedSinceElapsed: next.elapsed - MON_ICON_CREATION_ELAPSED_OFFSET,
+    selectedSinceElapsed: next.elapsed + MON_ICON_SUBMENU_SELECT_LEAD,
   });
 }
 
@@ -913,11 +898,11 @@ function drawSlot(
  * menu window (frame-905 acceptance: slot 0/2 byte-exact, selected slot 1
  * bouncing at the oracle's phase).
  */
-const MON_ICON_CREATION_ELAPSED_OFFSET = -30;
-const MON_ICON_FRAME_CYCLE = 15;
-/** First frame-1 copy at anim-clock tick 7; frame 0's first copy at 15. */
-const MON_ICON_FRAME1_FIRST_TICK = 7;
-const MON_ICON_FRAME1_TICKS = 8;
+const MON_ICON_CREATION_ELAPSED_OFFSET = -45;
+/** The menu-open selection predates the first icon tick, so SpriteCB_BouncePartyMonIcon's first copy (y2 = -3) is not held (61 = the longest anim cycle). */
+const MON_ICON_MENU_OPEN_SELECTED_SINCE = -MON_ICON_CREATION_ELAPSED_OFFSET - 61;
+/** Submenu-open selection edge: the pre-bob1 encoding `elapsed + 30` (hold ~30 ticks), kept bit-identical for the sAnim_0 calibration. */
+const MON_ICON_SUBMENU_SELECT_LEAD = 30;
 
 /**
  * The oracle's mon-icon animation clock stalls by exactly 2 frames while the
@@ -949,22 +934,50 @@ export function monIconElapsedAfterSubmenuStall(
  */
 export const DO_WHAT_WITH_MON_TAIL_CODES = [83, 84, 172] as const;
 
-/** sAnim_0 displayed frame at `elapsed` (frame 0 in [15+15k, 7+15(k+1))). */
-export function monIconFrameAt(elapsed: number): 0 | 1 {
-  const tick = elapsed + MON_ICON_CREATION_ELAPSED_OFFSET;
-  const r = ((tick - MON_ICON_FRAME1_FIRST_TICK) % MON_ICON_FRAME_CYCLE + MON_ICON_FRAME_CYCLE) % MON_ICON_FRAME_CYCLE;
-  return r < MON_ICON_FRAME1_TICKS ? 1 : 0;
+/**
+ * party_menu.c UpdateHPBar -> SetPartyHPBarSprite: the icon anim (sAnim_0..4,
+ * pokemon_icon.c:941-974) follows the HP bar level, FRAME duration d = 6 / 8 /
+ * 14 / 22 / 29 (full / green / yellow / red / fainted); a cycle is 2d+3 ticks,
+ * frame 0 shows d+1 and frame 1 d+2. sAnim_4 repeats frame 0 (image never
+ * changes; only the selected bounce's y2 keeps stepping).
+ */
+const MON_ICON_ANIM_DURATIONS = [6, 8, 14, 22, 29] as const;
+const MON_ICON_FAINTED_ANIM = 4;
+
+/** GetHPBarLevel (battle_interface.c:2527) mapped through UpdateHPBar to the sAnim index. */
+export function monIconAnimForHp(hp: number, maxHP: number): number {
+  if (hp === maxHP) return 0;
+  const fraction = Math.max(Math.trunc(hp * 48 / maxHP), hp > 0 ? 1 : 0);
+  if (fraction > 24) return 1;
+  if (fraction > 9) return 2;
+  return fraction > 0 ? 3 : MON_ICON_FAINTED_ANIM;
 }
 
-/** Next frame-copy tick strictly after `animClock`, in anim-clock terms. */
-function monIconNextFrameChange(animClock: number): number {
-  // Frame-1 copies at 7+15k, frame-0 copies at 15+15k.
-  const frame1 = MON_ICON_FRAME1_FIRST_TICK
-    + MON_ICON_FRAME_CYCLE
-      * (Math.floor((animClock - MON_ICON_FRAME1_FIRST_TICK) / MON_ICON_FRAME_CYCLE) + 1);
-  const frame0FirstTick = MON_ICON_FRAME1_FIRST_TICK + MON_ICON_FRAME_CYCLE - MON_ICON_FRAME1_TICKS;
-  const frame0 = frame0FirstTick
-    + MON_ICON_FRAME_CYCLE * (Math.floor((animClock - frame0FirstTick) / MON_ICON_FRAME_CYCLE) + 1);
+function monIconCycle(anim: number): number {
+  return 2 * MON_ICON_ANIM_DURATIONS[anim]! + 3;
+}
+
+/** Anim phase at `elapsed`: 0 while the cmd-0 frame runs, 1 while the cmd-1 frame runs. */
+function monIconPhaseAt(elapsed: number, anim: number): 0 | 1 {
+  const d = MON_ICON_ANIM_DURATIONS[anim]!;
+  const cycle = monIconCycle(anim);
+  const tick = elapsed + MON_ICON_CREATION_ELAPSED_OFFSET;
+  const r = ((tick - (d + 1)) % cycle + cycle) % cycle;
+  return r < d + 2 ? 1 : 0;
+}
+
+/** Displayed sprite frame at `elapsed` (sAnim_0 default; frame 0 in [15+15k, 7+15(k+1))). */
+export function monIconFrameAt(elapsed: number, anim = 0): 0 | 1 {
+  return anim === MON_ICON_FAINTED_ANIM ? 0 : monIconPhaseAt(elapsed, anim);
+}
+
+/** Next anim-cmd copy tick strictly after `animClock`, in anim-clock terms. */
+function monIconNextFrameChange(animClock: number, anim: number): number {
+  const d = MON_ICON_ANIM_DURATIONS[anim]!;
+  const cycle = monIconCycle(anim);
+  const frame1 = d + 1 + cycle * (Math.floor((animClock - (d + 1)) / cycle) + 1);
+  const frame0FirstTick = (d + 1) + cycle - (d + 2);
+  const frame0 = frame0FirstTick + cycle * (Math.floor((animClock - frame0FirstTick) / cycle) + 1);
   return Math.min(frame1, frame0);
 }
 
@@ -973,11 +986,11 @@ function monIconNextFrameChange(animClock: number): number {
  * frame change after selection, then sits at y2 = -3 while frame 0 shows and
  * y2 = +1 while frame 1 shows (animCmd = 1 flips to -3, animCmd = 2 to +1).
  */
-export function monIconSelectedY2(elapsed: number, selectedSinceElapsed: number): number {
+export function monIconSelectedY2(elapsed: number, selectedSinceElapsed: number, anim = 0): number {
   const animClock = elapsed + MON_ICON_CREATION_ELAPSED_OFFSET;
   const selectionClock = selectedSinceElapsed + MON_ICON_CREATION_ELAPSED_OFFSET;
-  if (animClock < monIconNextFrameChange(selectionClock)) return 0;
-  return monIconFrameAt(elapsed) === 0 ? -3 : 1;
+  if (animClock < monIconNextFrameChange(selectionClock, anim)) return 0;
+  return monIconPhaseAt(elapsed, anim) === 0 ? -3 : 1;
 }
 
 function drawIcon(fb: Uint8Array, row: BattlePartySelectRow, selected: boolean, elapsed: number, selectedSinceElapsed: number): void {
@@ -985,10 +998,11 @@ function drawIcon(fb: Uint8Array, row: BattlePartySelectRow, selected: boolean, 
   if (!icon) return fail(`missing icon catalog entry ${row.speciesKey}`);
   const centers = [{ x: 16, y: 40 }, { x: 104, y: 18 }, { x: 104, y: 42 }] as const;
   const center = centers[row.slot];
-  const sheet = monIconFrameAt(elapsed) === 0 ? icon.frame0 : icon.frame1;
+  const anim = monIconAnimForHp(row.hp, row.maxHP);
+  const sheet = monIconFrameAt(elapsed, anim) === 0 ? icon.frame0 : icon.frame1;
   const x2 = selected || row.slot === 0 ? 0 : -4;
   const y2 = selected
-    ? monIconSelectedY2(elapsed, selectedSinceElapsed)
+    ? monIconSelectedY2(elapsed, selectedSinceElapsed, anim)
     : row.slot === 0 ? -4 : 0;
   for (let ty = 0; ty < sheet.rows; ty += 1) for (let tx = 0; tx < sheet.columns; tx += 1) {
     const tile = sheet.tiles[ty * sheet.columns + tx]!;

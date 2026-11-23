@@ -89,9 +89,16 @@ interface WonLobby {
 // slide wait, the sandstorm sound): 4 fails the two Scene OFF continuation cases, 0 the challenge-2 loss. A scan of 0..23 with the seed in all
 // three roles (scratch copies of this file) found only 10 passing all 15 (23 all but the loss; 2 / 4 / 13 / 14 / 19 the two continuation
 // cases, 0 those and the loss, 17 those and the retire, the rest 12). So all three roles use 10.
-const WIN_TWO_SEED = 10;
+// abs1 (the Lobby attendant's `\p` pages take a press from the last glyph's frame and its end pages two frames after, as the ROM does; the soak player's presses and the
+// Lobby cursor of every new challenge move): 10's Scene OFF continuation loses. A scan of 0..23 (minus 10) in the WIN_TWO role (scratch copies of this file) found 14 and 19
+// passing all 15 (0 / 2 / 4 / 13 fail the two continuation cases, 23 fails 1, the rest 10); RETIRE and the loss keep 10.
+// swt1 (an opponent faint replacement / AI send-in's next print is 9 frames later, ROM FaintedMonSendOutNew+0x10 release -> next print +12; the soak player's presses land on new phases): 14's Scene OFF first round
+// loses (the six WIN_TWO-role cases fail; RETIRE and the loss keep 10). A scan of 0..5 in the WIN_TWO role (scratch copies of this file) found 0 passing all 15 (2 / 4 fail the two continuation cases, 1 / 3 / 5 fail 10).
+// ohs1 (Scene OFF pre-move ConfusedNoMore / InLove prints hold 64 + 5 / 64 + 6 before the used print: every OFF soak trajectory with such a print shifts frames): 10's challenge-2 loss case no longer plays out
+// (it never loses before the stop condition). A scan of 0..15 (minus 10) in the loss role (scratch copies of this file) found 0, 2 and 4 passing; the WIN_TWO and RETIRE roles still pass on 0 / 10, so only the loss role moves, to 0.
+const WIN_TWO_SEED = 0;
 const RETIRE_SEED = 10;
-const WIN_THEN_LOSE_SEED = 10;
+const WIN_THEN_LOSE_SEED = 0;
 
 function newPlayer(seed: number): RandomPlayer {
   const player = new RandomPlayer(new Rng(seed), new ActionLog(false), "winning");

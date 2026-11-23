@@ -192,3 +192,44 @@ as far as I can tell, but not chased.
   here, not changed.
 - The ROM detail that an SE started on the row Cmd_end runs reads as not playing (its status is 0 until the next VBlank tick; seen on
   Status_Poison's last loop) is not modelled; no move body in the rule set ends that way in the sweep.
+
+## hit2 (S11 #219 item 0 follow-up; Scene ON move-body end / sound timing, presentation only)
+
+Evidence: `.integration/evidence/hit2/` (labs `lab-base*`, `lab-fs*`, `lab-hail-after`, `lab-lead-base`; ROM end probe `probe/endProbe.py`; T2 `t2-{base,hail,fs}`; census `census/`).
+Baseline (HEAD 830e4e0ae) T2: ON mass 13,166 / exact 2,966, OFF 1,552 / 776, 0 missing / 0 extra.
+
+### 1. The "+6 / +7 tail" bodies: traced, not landed
+
+The ROM mechanic is one rule: after the last visual task of a script that used `monbg`, `Cmd_end` also waits for the monbg tasks, and `clearmonbg`
+(`Task_ClearMonBg`, battle_anim.c:852-883) destroys them 4 rows after the visual count reads 0, so gAnimScriptActive falls on **last-visual-count-0 row + 5**
+when the script has no SE wait and no commands after the clear (`endProbe.py`, per-frame ROM rows: Water Gun, Ice Beam, Ice Punch, Crabhammer, Pay Day,
+Acid, Dizzy Punch all have I - c0 = 5; Flamethrower 81 and Mach Punch 42 have restorebg / waitbgfadein tails after the clear).
+
+It cannot be ported as one script-derived rule: our windows (`liveMoveAnimationDuration`) are per-move fitted constants and the engine has no per-body "last
+visual row" (sprite lifetimes are in the adapters, not the scripts). Some windows already include the 5 rows (Crabhammer, Ice Beam, Ice Punch: exact), some end on the
+last picture (Water Gun -6, Acid -5, Dizzy Punch -5, Pay Day -6, Petal Dance -4). Adding the 5 rows uniformly would break the exact ones; telling the two kinds apart
+is a per-move table of fitted numbers, which this step excludes. Labs before (nothing changed): Water Gun mass 12, Acid 24, Dizzy Punch 23, Mach Punch 2,
+Faint Attack 6, Crabhammer 1. Next step if wanted: derive each adapter window's last visual row from its own sprite lifetimes (a per-adapter change, not a global rule).
+
+### 2. Future Sight's hit and the end-turn weather SEs
+
+- **Hail**: General_Hail's ten SE 242 rows were +8 on the move-body clock; Sandstorm's own clock (sst1) is the same script and now Hail's (`moveAnimSounds.ts`).
+  Labs etp1-hail-on 25/25 exact (mass 80 -> 0), etp2-hail-on likewise; pin `tests/aud249GeneralAnimSounds.test.ts` "hit2-hail-on" (fixture `tools/audio/fixtures/hit2-hail-on.json`).
+  The end-turn hail **damage SE** (13) was already exact in these labs (988 / 1136): the "+4" of the old census trace was not reproduced and is not changed.
+  Sun still on the move-body clock (not measured).
+- **Future Sight's hit** (lab etp1-futuresight-on, engine RNG seed 2 so the hit lands as on the ROM; ROM gAnimScriptActive rises 2865, falls 3027, effectiveness SE 3030,
+  hit command 3031, faint SE 3187; our command boundaries were already the ROM's):
+  General_FutureSightHit's three SEs -6 -> 0 (`FUTURE_SIGHT_HIT_SCRIPT_AGE` 0 -> 6, as Wish; the old 0 was a +14-offset turn's compensation, wsh1 pin 3 / 41 / 50 -> 9 / 47 / 56),
+  the hit's effectiveness SE +7 -> 0 (scheduled from the animation command, one row before the hit command, as every effectivenesssound), the target's faint cry and SE +7 -> 0
+  (no controller lag after a Future Sight hit: BattleScript_DoFutureAttackHit is 3 rows shorter than the HitFromAtk tail). Lab mass 54 -> 22 (the rest is the turn before:
+  SE +5 / prints -3, not this item). Pin: `tests/aud249GeneralAnimSounds.test.ts` "hit2-futuresight-on" (fixture `hit2-futuresight-on.json`). The old "hit blink 6 rows after the ROM's" is
+  not reproduced: the hit command start matched the ROM's hitanimation row, only the SEs were off.
+  Scene OFF unchanged (the rule is Scene ON only).
+- T2 (ON): 13,166 -> 13,086 (Hail) -> 13,068 (Future Sight), exact 2,966 -> 2,976, 0 missing / 0 extra. OFF 1,552 / 776 unchanged.
+- Census seeds 0..199 both scenes: eventsDigest + error identical 200 / 200 (`census/{on,off}.txt`).
+
+### 3. Lead-body sound clock: not reproduced
+
+On today's labs the two reported symptoms are not there: lead3-metalclaw-player-on has six of seven SEs exact and one (the second SE 120) 2 rows early, not a clock
+shift; lead3-furyswipes / cometpunch hit 1 have the SEs and the effectiveness SE on the ROM's rows (hits 2+ differ with the engine's RNG, not the clock). No
+lead-aware shift was added; reopen only with a lab that shows a whole-body offset.

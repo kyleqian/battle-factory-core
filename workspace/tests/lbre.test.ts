@@ -146,7 +146,10 @@ describe("lbr-e: briefing text for a continued streak", () => {
     // frames each; lbw9's save wait made it 952 -> 992, so the deal cursor moved), but fop1 deals the first opponent from that cursor in the ROM's order, so
     // 0x4ea349da now deals fresh a WATER trainer (546 frames) and kept a no-favourites one (554). Scan of 30 cursors (the Gen 3 LCG from 0x4ea349da): 9 give
     // equal frames; 0xca70e7db is the one where both runs deal the same briefing text (no clear favourites, free-spirited: 554 frames each).
-    const rng = 0xca70e7db;
+    // abs1: the attendant's `\p` pages now take a press from the last glyph's frame and the end pages from two frames after it (ROM scans), so the
+    // conversation (driven with a press every 6 frames) is shorter and the deal cursor moved again: 0xca70e7db now deals fresh 554 / kept 546. Scan of 40
+    // cursors from it (same LCG): 15 give equal frames; 0x17705e43 is the first with 554 frames each, as before.
+    const rng = 0x17705e43;
     const fresh = driveBriefing(enterEntry("off", 0, rng));
     const kept = driveBriefing(enterEntry("off", 7, rng));
     expect(kept.state.pendingGeneratedRound!.carry.factoryWinStreak).toBe(7);

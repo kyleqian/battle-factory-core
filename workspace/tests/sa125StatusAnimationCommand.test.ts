@@ -131,7 +131,15 @@ type Anchor = { animation: string; side: "player" | "opponent"; path: string; ga
  */
 function anchors(seed: number): { anchors: Anchor[]; unanchored: number; offAnimations: number } {
   const on = battleSegments(seed, "on").flatMap((s) => s.commands.map((c: any) => ({ c, events: s.events })));
-  const off = battleSegments(seed, "off").flatMap((s) => s.commands.map((c: any) => ({ c, events: s.events })));
+  // hse2 item 2: the Scene OFF confusion print before the used print holds 64 + 3 + 4 (ROM print -> used print 94 vs ON 90, hpf4m-confuse-off,
+  // tests/hse2OffStatusHeads.test.ts); this test is about the status animation alone, so read that print at the ON hold.
+  // ohs1: the same for the Scene OFF ConfusedNoMore (64 + 5) / InLove (64 + 3 + 3) prints before the used print (T2 OFF s7295 d8 / s6568 d29).
+  const confusionOffHold = (c: any, events: any[]) => c.type === "message"
+    && ((c.timing?.holdFrames === 71 && events.find((e: any) => e.sequence === c.eventSequence)?.payload.messageId === "STRINGID_PKMNISCONFUSED")
+      || (c.timing?.holdFrames === 69 && events.find((e: any) => e.sequence === c.eventSequence)?.payload.messageId === "STRINGID_PKMNCONFUSEDNOMORE")
+      || (c.timing?.holdFrames === 70 && events.find((e: any) => e.sequence === c.eventSequence)?.payload.messageId === "STRINGID_PKMNINLOVE"))
+    ? { ...c, timing: { ...c.timing, holdFrames: 67 } } : c;
+  const off = battleSegments(seed, "off").flatMap((s) => s.commands.map((c: any) => ({ c: confusionOffHold(c, s.events), events: s.events })));
   const messages = (l: typeof on) => l.filter((x) => x.c.type === "message").map((x) => x.c.messageId);
   expect(messages(on), `seed ${seed}: identical prints in both scenes`).toEqual(messages(off));
   const ordinal = (l: typeof on, i: number) => l.slice(0, i).filter((x) => x.c.type === l[i]!.c.type).length;
@@ -300,7 +308,10 @@ describe("sa125: production routes (census seeds, Scene ON vs OFF, same gameplay
         const wakeUp = x.events[at].provenance?.opcodeName === "B_SCR_OP_ATTACKCANCELER" && print === "STRINGID_PKMNWOKEUP";
         const wakeUpExec = wakeUp ? x.events[at + 1].provenance.instructionExecution : 0;
         const wakeUpRows = wakeUp ? wakeUpExec - x.events[at].provenance.instructionExecution : 0;
-        const want = faintClear ? 1 : animated ? offStatus[k].timing.minimumFrames : wakeUp ? (at === 0 ? Math.max(0, wakeUpExec - 3) : wakeUpRows) : 32;
+        // ftp1: attackcanceler's natural thaw (`BattleScript_MoveUsedUnfroze`: printfromtable one row after the write, no pre-hold) lasts the rows to the print (ROM s97 d11: print row 10 = the engine's, SE 184 exact).
+        const thaw = x.events[at].provenance?.opcodeName === "B_SCR_OP_ATTACKCANCELER" && (print === "STRINGID_PKMNWASDEFROSTED2" || print === "STRINGID_PKMNWASDEFROSTEDBY");
+        const thawRows = thaw ? x.events[at + 1].provenance.instructionExecution - x.events[at].provenance.instructionExecution : 0;
+        const want = faintClear ? 1 : animated ? offStatus[k].timing.minimumFrames : wakeUp ? (at === 0 ? Math.max(0, wakeUpExec - 3) : wakeUpRows) : thaw ? thawRows : 32;
         if (wakeUp) wakeUps.push(`${at === 0 ? `head u${wakeUpExec}` : `mid ${wakeUpRows}`}->${x.c.timing.minimumFrames}`);
         expect(x.c.timing.minimumFrames, `seed ${seed} status ${k} ${print}`).toBe(want);
         if (faintClear) faintClears += 1;
@@ -316,6 +327,7 @@ describe("sa125: production routes (census seeds, Scene ON vs OFF, same gameplay
     expect(t["STRINGID_PKMNFASTASLEEP|true"]).toEqual(["32->1"]);
     expect(t["STRINGID_TARGETFAINTED|false"]).toEqual(["32->1"]); // rep203: fnt201's cleareffectsonfaint row (was 32->32)
     expect(t["STRINGID_PKMNWENTTOSLEEP|false"]).toEqual(["32->32"]);
+    expect(t["STRINGID_PKMNWASDEFROSTED2|false"]).toEqual(["32->1"]); // ftp1: the natural thaw (was 32->32)
     // gsp2: the table was 32->32 for every wake-up; now the rule's frames (head: u - 3; mid-turn: the rows to the print).
     expect([...new Set(wakeUps)].sort()).toEqual(["head u3->0", "head u6->3", "head u8->5", "mid 2->2"]);
   });

@@ -31,7 +31,8 @@ const fixture = JSON.parse(readFileSync(new URL("./fixtures/aud252-loss-itemeffe
 // rows are ROM-exact or closer, T2 ON mass fell 23,423 -> 22,835, and the item rows' remaining -8 / -6 is the general-animation start the next step measures.
 // itm1 (2026-11-22): the ROM rule is IsBattleSEPlaying in Opponent/PlayerHandleBattleAnimation: the held-item General animation after a faint waits for SE_FAINT
 // (first item SE = SE_FAINT + 61 in both seeds, not a T difference). heldItemFaintSeGate.ts: 1914 -8 -> -2 (the faint's own -2), 2230 -6 -> 0 (last row -1).
-const DELTAS: Record<string, number[]> = { "1914": [-2, 0, -2, -2, -2, -2, -2, -2], "2230": [0, -4, 0, 0, 0, 0, 0, -1] };
+const DELTAS: Record<string, number[]> = { "1914": [-2, 0, -2, -2, -2, -2, -2, -2], "2230": [0, -3, 0, 0, 0, 0, 0, -1] };
+// 2026-11-22 run (supervisor, measured on master b355f434f): the seed-2230 select row moved -4 -> -3, toward the ROM; the other rows are unchanged.
 const script = new URL("../tools/integration/soundCensusRomReplay.ts", import.meta.url).pathname;
 
 function engineRows(seed: string, scene: string, setup: unknown): Row[] {

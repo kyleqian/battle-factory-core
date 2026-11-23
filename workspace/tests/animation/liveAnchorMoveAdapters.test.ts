@@ -17,13 +17,13 @@ import { generatedCommandAnimationReplay } from "../../tools/integration/generat
 import { iu120Ages } from "../helpers/iu120Rows.ts";
 
 const cases = [
-  { id: 51, move: "ACID", fixture: "acid-%s-ekans-%s-onix", anchor: "projectileOrigin", duration: 131, effectAge: 60,
+  { id: 51, move: "ACID", fixture: "acid-%s-ekans-%s-onix", anchor: "projectileOrigin", duration: 136, effectAge: 60, // sbm1: the ROM script ends waitforvisualfinish; clearmonbg; end, so Task_ClearMonBg holds the body 5 rows after the last picture (hit2 endProbe)
     route: { seed: 26, slot: 1, streak: 0 } },
   { id: 124, move: "SLUDGE", fixture: "sludge-%s-grimer-%s-onix", anchor: "projectileOrigin", duration: 102, effectAge: 50,
     route: { seed: 4, slot: 0, streak: 0 } },
   { id: 188, move: "SLUDGE_BOMB", fixture: "sludge-bomb-%s-weepinbell-%s-onix", anchor: "projectileOrigin", duration: 165, effectAge: 70,
     route: { seed: 8, slot: 2, streak: 14 } },
-  { id: 55, move: "WATER_GUN", fixture: "water-gun-%s-horsea-%s-onix", anchor: "projectileOrigin", duration: 111, effectAge: 50,
+  { id: 55, move: "WATER_GUN", fixture: "water-gun-%s-horsea-%s-onix", anchor: "projectileOrigin", duration: 116, effectAge: 50, // sbm1: the ROM script ends waitforvisualfinish; clearmonbg; end, so Task_ClearMonBg holds the body 5 rows after the last picture (hit2 endProbe)
     route: { seed: 91, slot: 1, streak: 0 } },
   { id: 106, move: "HARDEN", fixture: "harden-%s-relicanth-%s-onix", anchor: "attackerSpriteCenter", duration: 101, effectAge: 50,
     route: { seed: 12, slot: 2, streak: 7 } },

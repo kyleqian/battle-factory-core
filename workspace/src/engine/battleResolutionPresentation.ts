@@ -8,6 +8,7 @@ import { aiReplacementChoiceWork, speciesTypesOf } from "./battleScriptOpenParty
 import {
   NO_MOVES_BOUNCE_STOP_AFTER,
   NO_MOVES_DISMISS_HOLD_FRAMES,
+  NO_MOVES_DISMISS_HOLD_OFF_FRAMES,
   battleCommandFieldBattlerFromPartyMember,
   createBattleCommandDisplayedField,
   type BattleCommandFieldBattler,
@@ -63,6 +64,7 @@ import { CASTFORM_CHANGE_COMMAND_FRAMES, CASTFORM_CHANGE_WEATHER_LOOP_FRAMES } f
 import { BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS, BATTLE_SCRIPT_STATUS2_MASKS, BATTLE_SCRIPT_STATUS3_SEMI_INVULNERABLE } from "./battleScriptSourceConstants.ts";
 import { spriteOrderStatusAnimationName } from "./spriteOrderEventTransform.ts";
 import { seg127StatusSeGateFromEvents, seg127StatusSeGateRows } from "./seg127StatusSeGate.ts";
+import { battleHealthBarAnimationFrames } from "./healthboxAssembly.ts";
 import {
   opponentSwitchInDuration, opponentSwitchInHealthboxSlideElapsed, opponentSwitchInVisualDelay,
   sceneOffOpponentSwitchInDuration, sceneOffOpponentSwitchInHealthboxSlideElapsed, sceneOffOpponentSwitchInLagElapsed,
@@ -229,6 +231,8 @@ export function itemKnockoffCommandFrames(battler: 0 | 1, seGate: number): numbe
 }
 export const HELD_ITEM_EFFECT_RESTART_LEAD_FRAMES = 15;
 export const HELD_ITEM_EFFECT_CONTINUE_LEAD_FRAMES = 9;
+/** hie7: the item animation directly after the player's faint-replacement send-in starts on the script's exec row (ROM s2230 d6, s5063 d45: exec -> SE 152 = 8). */
+export const HELD_ITEM_EFFECT_AFTER_SEND_IN_LEAD_FRAMES = 0;
 /**
  * wbh1 (docs/wbh1-battle-start-white-herb.md): the battle-start entry phase (factoryBattleStartEntry.ts) times a script's rows from the
  * kernel, so its held-item command starts on the `playanimation` row itself (BattleScript_WhiteHerbRet, ROM labs wbh1-*-on: the anim's
@@ -816,8 +820,18 @@ export type BattleResolutionPresentationCommand =
        * plays); the render draws it as Move_ABSORB's body (battleResolutionPresentationRender.ts leechSeedDrainAbsorbEffect).
        */
       animated?: true;
-      /** kno3: an ITEM_KNOCKOFF's IsBattleSEPlaying rows before the launch (sgs134RequestSeGate); absent = 0. */
-      timing: Readonly<{ minimumFrames: number; seGateFrames?: number }>;
+      /**
+       * hie7: the command directly follows the player's faint-replacement send-in (BattleScript_FaintedMonSendOutNew). The send-in span already ends where
+       * the ROM script's exec row runs, and the controller is idle, so the launch lag the labs and hit tails fit (LEECH_SEED_DRAIN_SCRIPT_AGE 7,
+       * the held-item restart lead 15) does not apply: ROM exec -> SE is 27 here, 34 in the labs (g180m s6912 d2).
+       */
+      afterPlayerSendIn?: true;
+      /**
+       * kno3: an ITEM_KNOCKOFF's IsBattleSEPlaying rows before the launch (sgs134RequestSeGate); absent = 0.
+       * sep1: a LEECH_SEED_DRAIN after a hit (Scene ON): launchLagFrames = the rows from the script's exec row to the animation's first row, the hit SE's
+       * IsBattleSEPlaying wait (hitSeDrainLaunchLag); absent = the legacy lag (7, or 0 right after the player's send-in).
+       */
+      timing: Readonly<{ minimumFrames: number; seGateFrames?: number; launchLagFrames?: number }>;
     }>
   | Readonly<{
       /** `Cmd_trainerslidein`/`Cmd_trainerslideout` -- generic across any trainer/outcome, see `TRAINER_SLIDE_TIMING`. */
@@ -929,7 +943,7 @@ export type BattleResolutionConfirmHandoff = Readonly<{
    * enc276: the move was confirmed with no move menu (Encore, or a forced Struggle). Encore keeps the action menu up through the
    * handoff; Struggle keeps the dismissed "has no moves left!" box up, behind `holdRemaining` extra frames before the stage walk.
    */
-  forced?: Readonly<{ kind: "encore" } | { kind: "struggle"; holdRemaining: number; waitCursorAge: number }>;
+  forced?: Readonly<{ kind: "encore" } | { kind: "struggle"; holdRemaining: number; holdTotal: number; waitCursorAge: number }>;
   /**
    * fpp150: the turn opens with the Focus Punch pre-pass, whose empty box the ROM prints 3 rows after turn order (R4: 68 -> 71,
    * shown 72) where an action's first print lands 9 rows after it (36 -> 45, glyph 46). The handoff ends after
@@ -1098,7 +1112,53 @@ export const WAITMESSAGE_LONG_HOLD_FRAMES = 64;
  */
 const SELF_CONFUSION_HIT_MESSAGE_ID = "STRINGID_ITHURTCONFUSION";
 const SELF_CONFUSION_OFF_PRE_PRINT_ROWS = 5;
+/**
+ * ftp1 item 4: BattleScript_EffectFocusPunch's printstring (STRINGID_PKMNLOSTFOCUS) starts its first glyph 16 rows after the engine's
+ * command start (s310 d3, after a not-very-effective print: ROM +0xa print at 560 against 544; the held-item SE 152 -17 -> -1).
+ */
+const FOCUS_PUNCH_LOST_FOCUS_SCRIPT = "BattleScript_EffectFocusPunch";
+const FOCUS_PUNCH_LOST_FOCUS_PRE_PRINT_ROWS = 16;
 const SELF_CONFUSION_OFF_HIT_MESSAGE_TIMING = Object.freeze({ minimumFrames: 0, holdFrames: WAITMESSAGE_LONG_HOLD_FRAMES + 2 } as const);
+/**
+ * hse2 (docs/aud251-s11-scoreboard-refresh.md "hse2"; ROM lab hpf4m-confuse-off print 1323 -> used print 1417 = 94, T2 s7295 d5 97 / s499 d11 94):
+ * a confusion that does not hurt skips `status2animation` in Scene OFF, so after the wait the script runs `jumpifbyte`, `goto`, `return` and the
+ * used move's `HitFromAtkCanceler` / `AccCheck` / `AtkString` rows before the used print: 64 + the 3 launch rows + 4.
+ */
+const CONFUSION_HEAD_SCRIPT = "BattleScript_MoveUsedIsConfused";
+const CONFUSION_OFF_USED_PRINT_EXTRA_ROWS = 4;
+const CONFUSION_OFF_USED_PRINT_TIMING = Object.freeze({
+  minimumFrames: 0,
+  holdFrames: WAITMESSAGE_LONG_HOLD_FRAMES + 3 + CONFUSION_OFF_USED_PRINT_EXTRA_ROWS,
+} as const);
+/**
+ * ohs1 (Scene OFF, ROM s7295 d8 / s7682 / s830 and s6568 d29 / d21 / s7682 d4): the other two pre-move prints that lead into the used print skip
+ * their launch, so the script's `return` and the used move's canceler rows are all that stand before it. MoveUsedIsConfusedNoMore
+ * (`printstring`, `waitmessage`, `return`; wait release 53 -> `HitFromAtkCanceler` 118 -> used print 121): 64 + 5. MoveUsedIsInLove
+ * (`printstring`, `waitmessage`, `status2animation`, `return`; print 9 -> 46, used print 115): the status launch's 3 rows (PRE_MOVE_STATUS_ANIMATION_LEAD_ROWS) + 3.
+ */
+const CONFUSION_NO_MORE_HEAD_SCRIPT = "BattleScript_MoveUsedIsConfusedNoMore";
+const IN_LOVE_HEAD_SCRIPT = "BattleScript_MoveUsedIsInLove";
+const CONFUSION_NO_MORE_OFF_USED_PRINT_TIMING = Object.freeze({
+  minimumFrames: 0,
+  holdFrames: WAITMESSAGE_LONG_HOLD_FRAMES + 5,
+} as const);
+const IN_LOVE_OFF_USED_PRINT_TIMING = Object.freeze({
+  minimumFrames: 0,
+  holdFrames: WAITMESSAGE_LONG_HOLD_FRAMES + 3 + 3,
+} as const);
+function preMoveOffUsedPrintTiming(events: readonly BattleKernelSemanticEvent[], index: number): BattleMessageTiming | null {
+  const label = events[index]!.provenance?.sourceLabel;
+  const timing = label === CONFUSION_HEAD_SCRIPT ? CONFUSION_OFF_USED_PRINT_TIMING
+    : label === CONFUSION_NO_MORE_HEAD_SCRIPT ? CONFUSION_NO_MORE_OFF_USED_PRINT_TIMING
+    : label === IN_LOVE_HEAD_SCRIPT ? IN_LOVE_OFF_USED_PRINT_TIMING
+    : null;
+  if (timing === null) return null;
+  for (let next = index + 1; next < events.length; next += 1) {
+    const payload = events[next]!.payload;
+    if (payload.kind === "message") return payload.messageId === "STRINGID_USEDMOVE" ? timing : null;
+  }
+  return null;
+}
 /**
  * Route-scoped `STRINGID_USEDMOVE` hold for the ButItFailed/no-anim path
  * (`pause B_WAIT_TIME_SHORT` = 32 + ~6 dispatch steps, measured 38 =
@@ -1269,7 +1329,7 @@ function messageTimingFromSourceProvenance(
 ): BattleMessageTiming | null {
   const programCounter = event.provenance?.programCounter;
   if (programCounter === undefined || programCounter < 0) return null;
-  if (!sceneOff && event.provenance?.sourceLabel === WAKE_UP_SCRIPT) return WAKE_UP_MESSAGE_TIMING;
+  if (event.provenance?.sourceLabel === WAKE_UP_SCRIPT || event.provenance?.sourceLabel === THAW_SCRIPT) return WAKE_UP_MESSAGE_TIMING;
   const following = BATTLE_SCRIPT_PROGRAM.instructions[programCounter + 1];
   if (
     following?.opcodeName === "B_SCR_OP_WAITMESSAGE"
@@ -1313,15 +1373,16 @@ const STATUS3_UNDERGROUND = 1 << 7;
 const STATUS3_UNDERWATER = 1 << 18;
 const STATUS3_SEMI_INVULNERABLE = STATUS3_ON_AIR | STATUS3_UNDERGROUND | STATUS3_UNDERWATER;
 
+/** ekd1: the hit that KOs a semi-invulnerable target clears its status3 before the segment ends; the charge turn's Fly / Dig / Dive / Bounce print still says it was hidden. */
+const SEMI_INVULNERABLE_CHARGE_MESSAGES = new Set(["STRINGID_PKMNFLEWHIGH", "STRINGID_PKMNDUGHOLE", "STRINGID_PKMNHIDUNDERWATER", "STRINGID_PKMNSPRANGUP"]);
+
 /**
- * Scene OFF only: the Scene ON ROM windows (fsc1-fly-gust-on: ROM bar starts 358, Gust animation end 312, no hit blink visible because the sprite is
- * hidden) keep the full 35-row hit step, 24 rows from the skip's prediction; the Scene ON rule is unmeasured, so it stays at the legacy timing.
- *
- * fsc1: is the HIT_ANIMATION target's sprite invisible when the controller runs? The sprite is hidden from a semi-invulnerable charge
+ * fsc1 / ekd1 (both scenes): is the HIT_ANIMATION target's sprite invisible when the controller runs? The sprite is hidden from a semi-invulnerable charge
  * turn's end (Scene OFF: MOVEEND_ATTACKER_INVISIBLE, an explicit sprite-visibility receipt; Scene ON: the Dig / Fly / Dive animation)
  * until MOVEEND_ATTACKER_VISIBLE / MOVEEND_TARGET_VISIBLE, which is the span STATUS3_SEMI_INVULNERABLE is set. So: invisible at the
  * segment start when the status is set then, switched by this segment's visibility receipts, and hidden once the battler's own charge
- * script (a charge-turn animation / PP receipt on it) ran earlier in the segment and the status stands at the segment's end.
+ * script (a charge-turn animation / PP receipt on it) ran earlier in the segment and the status stands at the segment's end, or the hit KOs it.
+ * Scene ON measured on fsc1-fly-gust-on (datahpupdate 3 rows after the effectiveness SE) and ekd1-dig-eqko-on (s648 d0, Earthquake KO of a Dig user).
  */
 function hitTargetSpriteInvisible(
   events: readonly BattleKernelSemanticEvent[],
@@ -1331,7 +1392,10 @@ function hitTargetSpriteInvisible(
   battler: 0 | 1,
 ): boolean {
   let invisible = (beforeRules.battlers[battler]!.status3 & STATUS3_SEMI_INVULNERABLE) !== 0;
-  const newlyHidden = !invisible && (afterRules.battlers[battler]!.status3 & STATUS3_SEMI_INVULNERABLE) !== 0;
+  const newlyHidden = !invisible && ((afterRules.battlers[battler]!.status3 & STATUS3_SEMI_INVULNERABLE) !== 0
+    || (events.slice(index + 1).some((event) => event.payload.kind === "play-faint-cry" && event.payload.battler === battler)
+      && events.slice(0, index).some((event) => event.provenance?.sourceLabel === CHARGE_TURN_SCRIPT && event.payload.kind === "message"
+        && SEMI_INVULNERABLE_CHARGE_MESSAGES.has(event.payload.messageId) && event.payload.actionSnapshot?.attacker === battler)));
   for (let before = 0; before < index; before += 1) {
     const payload = events[before]!.payload;
     if (payload.kind === "set-battler-sprite-visibility" && payload.battler === battler) {
@@ -1414,8 +1478,18 @@ const SCENE_OFF_SEMI_INVULNERABLE_HIDE_LEAD = 2;
  * BattleScript_MoveUsedIsConfused's first instruction (attackcanceler jumps there: u = 2), ROM-measured as the same E + 1 + d + n + 6 + u.
  */
 const ACTION_TRANSITION_NEXT_PRINTS: ReadonlySet<string> = new Set(["STRINGID_USEDMOVE", "STRINGID_PKMNISCONFUSED", "STRINGID_PKMNFASTASLEEP", "STRINGID_PKMNINLOVE"]);
-/** gsp2: the wake-up print is a transition print in Scene ON only (Scene OFF output is unchanged). */
-const SCENE_ON_ACTION_TRANSITION_NEXT_PRINT = "STRINGID_PKMNWOKEUP";
+/**
+ * chg4 (ROM labs chg4-dig-lightscreen-{on,off}; docs/aud251-s11-scoreboard-refresh.md "chg4"): the first charging turn of Dig / Fly / Solar Beam ... that follows another
+ * action in the same turn is a transition print too. Its empty box (BattleScriptFirstChargingTurn's STRINGID_EMPTYSTRING3, u = its execution) is placed as the used print:
+ * Scene OFF opens it on the ROM's `printstring` row + 1 (MoveEnd 197 -> EffectSemi 204 -> box 215: +18 over the old 0). Scene ON's box opens 8 rows before the
+ * printstring row (the box is the 8-row release wait, turn start: box 30 for printstring 37 / 38) and the ON chain already carries 2 of the rows: -10.
+ */
+const CHARGE_TURN_OPENER_SCENE_ON_ROWS = -10;
+function isChargeTurnOpener(event: BattleKernelSemanticEvent): boolean {
+  return event.payload.kind === "message" && event.payload.messageId === "STRINGID_EMPTYSTRING3" && event.provenance?.sourceLabel === CHARGE_TURN_SCRIPT;
+}
+/** gsp2: the wake-up print is a transition print (Scene ON; bbk1: Scene OFF too, ROM labs wkl1m-wakeup-{player,foe}-off MoveEnd -> print +15 the engine had no pause for). */
+const WAKE_UP_ACTION_TRANSITION_NEXT_PRINT = "STRINGID_PKMNWOKEUP";
 /**
  * gsp3 (ROM labs gsp3-attract-{player,foe}-on): "X is in love with Y!" (BattleScript_MoveUsedIsInLove, reached from attackcanceler by a `call`) is a transition
  * print too, 2 rows earlier than the trn176 count: MoveEnd 583 -> print row 592 (ROM) against the rule's 594.
@@ -1458,6 +1532,7 @@ const END_TURN_PRINT_SCRIPTS: ReadonlySet<string> = new Set([
   "BattleScript_SandStormHailEnds",
   "BattleScript_SunlightContinues",
   "BattleScript_SunlightFaded",
+  "BattleScript_SideStatusWoreOff",
   "BattleScript_PoisonTurnDmg",
   "BattleScript_BurnTurnDmg",
   "BattleScript_CurseTurnDmg",
@@ -1476,7 +1551,7 @@ const END_TURN_WEATHER_PRINT_EXTRA_ROWS = 1;
  */
 const DAMAGING_WEATHER_LOOP_SCRIPT = "BattleScript_DamagingWeatherLoop";
 const DAMAGING_WEATHER_LOOP_AFTER_HP_ROWS = 3;
-// Wish's heal print after its hp command (ROM lab etp1-wish: +5 rows, both scenes). Perish Song's counts are left as before: the etp1-perish lab agrees with a label +1 / second-battler +5 rule, but seed 2741's ROM pictures (ais2) do not.
+// Wish's heal print after its hp command (ROM lab etp1-wish: +5 rows, both scenes). Perish Song's count prints: `perishCountChainLeadRows` (pso1).
 const WISH_SCRIPT = "BattleScript_WishComesTrue";
 const END_TURN_NEXT_SCRIPT_ROWS = 5;
 /**
@@ -1494,11 +1569,42 @@ function endTurnPrintFollowsDraggedOut(events: readonly BattleKernelSemanticEven
   return false;
 }
 
+/**
+ * pso1 (ROM labs etk1-perish-*, Scene OFF rows, hcr3mProbe): the rows from the previous script's release to the Perish Song count print's first
+ * glyph that the engine does not present. After a move's last print (the Splash "But nothing happened!" lab): release 368 -> MoveEnd -> PerishSongCountGoesDown+0x3 ex1 378 -> glyph 379
+ * (10 rows more than the engine's one MoveEnd receipt row; seed 2741's ROM rows after a paralysis print 5 more, after "But it failed!" 12 more). After the Perish Song cast's own print (`waitmessage 64`; PerishSongLoop x4 batters, MoveEnd, the end-turn step): release
+ * +0x10 3857 -> PerishSongTakesLife+0x3 3874 -> glyph 3875 (17 rows more). The second battler's count print follows the first's `waitmessage` by end2, the turn-effect
+ * battler increment and the next iteration: 475 -> 479 (5 rows more).
+ */
+const PERISH_AFTER_MOVE_PRINT_ROWS = 10;
+const PERISH_AFTER_CAST_PRINT_ROWS = 17;
+const PERISH_SECOND_BATTLER_ROWS = 5;
+const PERISH_AFTER_PARALYSIS_PRINT_ROWS = 5;
+const PERISH_AFTER_BUT_IT_FAILED_ROWS = 12;
+function perishCountChainLeadRows(events: readonly BattleKernelSemanticEvent[], index: number): number {
+  const event = events[index]!;
+  const label = event.provenance?.sourceLabel;
+  if (event.payload.kind !== "message" || (label !== "BattleScript_PerishSongCountGoesDown" && label !== "BattleScript_PerishSongTakesLife")) return 0;
+  for (let back = index - 1; back >= 0; back -= 1) {
+    const previous = events[back]!;
+    if (previous.payload.kind === "set-battler-sprite-visibility" && previous.provenance?.opcodeName === "B_SCR_OP_MOVEEND") continue;
+    if (previous.payload.kind !== "message") return 0;
+    const previousLabel = previous.provenance?.sourceLabel;
+    if (previousLabel === "BattleScript_PerishSongCountGoesDown" || previousLabel === "BattleScript_PerishSongTakesLife") return PERISH_SECOND_BATTLER_ROWS;
+    if (previous.payload.messageId === "STRINGID_FAINTINTHREE") return PERISH_AFTER_CAST_PRINT_ROWS;
+    if (previous.payload.messageId === "STRINGID_PKMNISPARALYZED") return PERISH_AFTER_PARALYSIS_PRINT_ROWS;
+    return previous.payload.messageId === "STRINGID_BUTITFAILED" ? PERISH_AFTER_BUT_IT_FAILED_ROWS : PERISH_AFTER_MOVE_PRINT_ROWS;
+  }
+  return 0;
+}
+
 function endTurnChainLeadRows(events: readonly BattleKernelSemanticEvent[], index: number, sceneOn: boolean): number {
   const event = events[index]!;
   const executed = event.provenance?.instructionExecution;
   if (event.payload.kind !== "message" || executed === undefined) return 0;
   const label = event.provenance?.sourceLabel;
+  const perishLead = perishCountChainLeadRows(events, index);
+  if (perishLead > 0) return perishLead;
   if (label === WISH_SCRIPT) {
     const previous = events[index - 1];
     return previous?.payload.kind === "hp-change" && previous.provenance?.sourceLabel === label && event.payload.messageId === "STRINGID_PKMNREGAINEDHEALTH"
@@ -1561,17 +1667,21 @@ function actionTransitionPauseFrames(
     }
     if (next < e1 && event.payload.kind === "set-battler-status-data" && used === null) {
       // sta3: the sleep counter's status write inside the next action's attackcanceler draws nothing; its 1-frame command is presented after the pause.
-      const frames = sceneOnStatusFrames(events, index);
+      const frames = sceneOn ? sceneOnStatusFrames(events, index) : sceneOffStatusFrames(events, index, null, 0);
       if (frames === null) return null;
       statusFramesAfter += frames;
       continue;
     }
+    // sbm1: Solar Beam in sun runs SolarBeamOnFirstTurn's `ppreduce` (no draw) before its used print.
+    if (next < e1 && event.payload.kind === "set-battler-pp-data" && used === null) continue;
     const endTurnWeather = event.payload.kind === "message" && END_TURN_PRINT_SCRIPTS.has(event.provenance?.sourceLabel ?? "");
     if (
       next >= e1 || event.payload.kind !== "message"
-      || !(endTurnWeather || ACTION_TRANSITION_NEXT_PRINTS.has(event.payload.messageId) || (sceneOn && event.payload.messageId === SCENE_ON_ACTION_TRANSITION_NEXT_PRINT))
+      || !(endTurnWeather || ACTION_TRANSITION_NEXT_PRINTS.has(event.payload.messageId) || event.payload.messageId === WAKE_UP_ACTION_TRANSITION_NEXT_PRINT
+        || isChargeTurnOpener(event))
     ) return null;
     if (endTurnWeather) endTurnRows = END_TURN_WEATHER_PRINT_EXTRA_ROWS;
+    if (sceneOn && isChargeTurnOpener(event)) endTurnRows = CHARGE_TURN_OPENER_SCENE_ON_ROWS;
     used = next;
     usedIsPreMove = !endTurnWeather && event.payload.messageId !== "STRINGID_USEDMOVE";
     if (event.payload.messageId === IN_LOVE_TRANSITION_PRINT) inLoveRows = IN_LOVE_TRANSITION_ROWS;
@@ -1787,7 +1897,14 @@ function sourcePauseUsedMoveHoldFrames(
     // eqk1 (s1914 seg21, labs eqk1-eq-imm / eqk1-tackle-imm): a damaging move's `resultmessage` ("It doesn't affect X!") reached with no
     // animation receipt took the same NO_EFFECT branch (Pausex20 in both scenes) at the `attackanimation` 9 instructions back, behind
     // waitanimation .. datahpupdate .. critmessage .. waitmessage that run without a receipt: the print comes one row per execution later.
-    if (candidate.provenance!.opcodeName === "B_SCR_OP_RESULTMESSAGE" && candidate.payload.messageId === "STRINGID_ITDOESNTAFFECT") {
+    // cfs1 (s8108 d41 / d44 / d50, labs cfs1-digconf-levitate-{on,off}): Levitate / Wonder Guard's miss print (MOVE_RESULT_MISSED, also in
+    // MOVE_RESULT_NO_EFFECT) reaches the same Pausex20: used print -> "makes Ground moves miss" 69 rows (Dig unleash, ROM 1061 -> 1130), as ITDOESNTAFFECT.
+    if (
+      candidate.provenance!.opcodeName === "B_SCR_OP_RESULTMESSAGE"
+      && (candidate.payload.messageId === "STRINGID_ITDOESNTAFFECT"
+        || candidate.payload.messageId === "STRINGID_PKMNMAKESGROUNDMISS"
+        || candidate.payload.messageId === "STRINGID_AVOIDEDDAMAGE")
+    ) {
       for (let back = 1; back <= 12 && programCounter - back >= 0; back += 1) {
         const opcode = BATTLE_SCRIPT_PROGRAM.instructions[programCounter - back]?.opcodeName;
         if (opcode === "B_SCR_OP_ATTACKANIMATION") return next - used + 1;
@@ -1961,6 +2078,8 @@ function sceneOffStatusFrames(
  * draws nothing in Scene ON (no status animation follows).
  */
 const WAKE_UP_SCRIPT = "BattleScript_MoveUsedWokeUp";
+/** ftp1: `BattleScript_MoveUsedUnfroze` is the wake-up script without the `bicword`: print, `waitmessage B_WAIT_TIME_LONG`, `updatestatusicon`, `return` (ROM print -> icon 91 = the wake-up's hold + 2). */
+const THAW_SCRIPT = "BattleScript_MoveUsedUnfroze";
 /** The wake-up print's instructionExecution when `events[statusIndex]` is attackcanceler's sleep-clearing status write, else null. */
 function wakeUpPrintExecution(events: readonly BattleKernelSemanticEvent[], statusIndex: number): number | null {
   const status = events[statusIndex]!;
@@ -1995,7 +2114,7 @@ const WAKE_UP_MESSAGE_TIMING = Object.freeze({
  */
 function wakeUpStatusIconFrames(events: readonly BattleKernelSemanticEvent[], iconIndex: number): number | null {
   const icon = events[iconIndex]!;
-  if (icon.provenance?.sourceLabel !== WAKE_UP_SCRIPT || icon.payload.kind !== "status-icon-update") return null;
+  if ((icon.provenance?.sourceLabel !== WAKE_UP_SCRIPT && icon.provenance?.sourceLabel !== THAW_SCRIPT) || icon.payload.kind !== "status-icon-update") return null;
   const next = events[iconIndex + 1];
   const from = icon.provenance.instructionExecution;
   const to = next?.provenance?.instructionExecution;
@@ -2003,6 +2122,23 @@ function wakeUpStatusIconFrames(events: readonly BattleKernelSemanticEvent[], ic
   return to - from + 1;
 }
 
+/**
+ * ftp1: attackcanceler's natural thaw (the status write, then `BattleScript_MoveUsedUnfroze` = printfromtable, waitmessage,
+ * updatestatusicon with no pre-hold and no status animation) prints one row after the write in both scenes (off121: thaw 1), so the
+ * Scene ON status command lasts delta(print) - delta(status) instead of the 32-frame status pause. Returns the thaw print's
+ * instructionExecution, else null.
+ */
+function thawPrintExecution(events: readonly BattleKernelSemanticEvent[], statusIndex: number): number | null {
+  const status = events[statusIndex]!;
+  if (status.payload.kind !== "set-battler-status-data" || status.provenance?.opcodeName !== "B_SCR_OP_ATTACKCANCELER") return null;
+  for (let index = statusIndex + 1; index < events.length; index += 1) {
+    const payload = events[index]!.payload;
+    if (payload.kind === "set-battler-pp-data" || payload.kind === "play-se") continue;
+    if (payload.kind !== "message" || (payload.messageId !== "STRINGID_PKMNWASDEFROSTED2" && payload.messageId !== "STRINGID_PKMNWASDEFROSTEDBY")) return null;
+    return events[index]!.provenance?.instructionExecution ?? null;
+  }
+  return null;
+}
 /**
  * sa125 SA3 (docs/sa125-status-animation-command.md): in Scene ON a status-data receipt whose battler's statusanimation runs
  * in the same execution -- right before the print (move / ability infliction: status, statusanimation, print) or right
@@ -2018,6 +2154,8 @@ function sceneOnStatusFrames(events: readonly BattleKernelSemanticEvent[], statu
   const battler = statusEvent.payload.battler;
   const wakeUpPrint = wakeUpPrintExecution(events, statusIndex);
   if (wakeUpPrint !== null) return wakeUpPrint - status;
+  const thawPrint = thawPrintExecution(events, statusIndex);
+  if (thawPrint !== null) return thawPrint - status;
   let print: number | null = null;
   let animated = false;
   let execution = status;
@@ -2202,9 +2340,10 @@ export const LSE4_WINDOW_SHORT_ROWS: ReadonlyMap<number, number> = new Map([[71,
  * b4l "c-lead" (docs/aud251-s11-scoreboard-refresh.md b4m / b4l): the B4 status / hit bodies whose kernel lead (the instruction rows from the used print's release to `attackanimation`,
  * ROM L = A0 - R - 3: 9 / 9 / 7 / 7 / 7 / 7 / 4 / 6 / 8 / 9 / 7) is presented in front of the body, with the lead-only class's tail plus a per-id window adjust: the rows after the body the
  * ROM's next command (the status animation, stat, or hit animation) is off by once the lead is in (`C_LEAD_WINDOW_ADJUST`, ROM next command - engine next command). Thunder Wave 86, Stun Spore 78,
- * Sleep Powder 79, Sing 47, Grasswhistle 320, Confuse Ray 109, Curse 174, Lovely Kiss 142, Will-O-Wisp 261, Glare 137, Brick Break 280.
+ * Sleep Powder 79, Sing 47, Grasswhistle 320, Confuse Ray 109, Curse 174, Lovely Kiss 142, Will-O-Wisp 261, Glare 137, Brick Break 280, Sweet Kiss 186 (cfs1: window adjust 2,
+ * labs mechanic-sweet-kiss-{player,opponent}-luvdisc-*: every Confusion SE -2 -> +0; Supersonic 48 was tried and moved s5569 d12 15 rows the wrong way (T2 mass +208), so it stays out).
  */
-export const C_LEAD_WINDOW_ADJUST: ReadonlyMap<number, number> = new Map([[47, 3], [142, 3], [280, 3], [261, 2], [137, 2], [109, 2], [174, 4], [320, -2], [86, 0], [78, 0], [79, 0]]);
+export const C_LEAD_WINDOW_ADJUST: ReadonlyMap<number, number> = new Map([[47, 3], [142, 3], [280, 3], [186, 2], [261, 2], [137, 2], [109, 2], [174, 4], [320, -2], [86, 0], [78, 0], [79, 0]]);
 /** The lead a c-lead body's sound table was fitted on when it is not the generic 7 (Confuse Ray's table was fitted on its own L = 6 lab, so its SEs already sit on the ROM frames). */
 const C_LEAD_SOUND_CLOCK_LEADS: ReadonlyMap<number, number> = new Map([[109, 6]]);
 /** The lead the S bodies' sound clock was calibrated on (the generic move-body clock, AGE_TO_SOUND_ROWS = 7). */
@@ -2316,17 +2455,29 @@ function moveAnimationScriptLeadTiming(
 const TWO_TURN_MOVES: ReadonlySet<number> = new Set([13, 19, 76, 91, 130, 143, 291, 340]);
 const TWO_TURN_SECOND_PRINT_PRESS_ROWS = 6;
 const TWO_TURN_PLAYER_NO_PRESS_ROWS = 10;
+/**
+ * ftp1 (s8108 d12 gen:219 +48 once cfs1's Levitate hold landed): a second-turn used print right after the "snapped out of its confusion" print
+ * (`BattleScript_MoveUsedIsConfusedNoMore`, a separate presented command with its own hold) carries that script's wait rows in its instruction
+ * execution (3 -> 78), which the lead above would count again (lead 84 against the ROM's 35: used glyph row 285 = ROM 285 after the change, the
+ * Levitate print and the weather tick -1). The rows past the confusion print's execution that the lead does not owe are measured at 46 (one window).
+ */
+const CONFUSION_ENDED_SCRIPT = "BattleScript_MoveUsedIsConfusedNoMore";
+const TWO_TURN_AFTER_CONFUSION_PRINT_ROWS = 46;
 function twoTurnSecondPrintLead(
   event: BattleKernelSemanticEvent,
   beforeRules: BattleScriptRulesContext,
   actionSnapshot: BattleScriptActionMessageSnapshot | null | undefined,
+  previous?: BattleKernelSemanticEvent,
 ): { leadFrames: number } | null {
   const currentMove = actionSnapshot?.currentMove;
   if (currentMove === undefined || !TWO_TURN_MOVES.has(currentMove) || (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0) return null;
   if (event.payload.kind !== "message" || event.payload.messageId !== "STRINGID_USEDMOVE"
     || (event.provenance?.sourceLabel !== "BattleScript_HitFromAtkString" && event.provenance?.sourceLabel !== "BattleScript_HitFromAccCheck")) return null;
   if ((beforeRules.battlers[actionSnapshot!.attacker]!.status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_MULTIPLETURNS) === 0) return null;
-  return { leadFrames: TWO_TURN_SECOND_PRINT_PRESS_ROWS - (actionSnapshot!.attacker === 0 ? TWO_TURN_PLAYER_NO_PRESS_ROWS : 0) + event.provenance.instructionExecution };
+  const exec = event.provenance.instructionExecution;
+  const afterConfusionPrint = previous?.payload.kind === "message" && previous.provenance?.sourceLabel === CONFUSION_ENDED_SCRIPT && previous.provenance.instructionExecution !== undefined
+    ? previous.provenance.instructionExecution + TWO_TURN_AFTER_CONFUSION_PRINT_ROWS : 0;
+  return { leadFrames: TWO_TURN_SECOND_PRINT_PRESS_ROWS - (actionSnapshot!.attacker === 0 ? TWO_TURN_PLAYER_NO_PRESS_ROWS : 0) + exec - afterConfusionPrint };
 }
 /**
  * chg2 (Scene ON; generalizes bdt1's Dig value): a charge-turn body (BattleScriptFirstChargingTurn) plays its sounds on the ROM's own script rows, but the
@@ -2518,7 +2669,27 @@ function hpPrintTailTiming(event: BattleKernelSemanticEvent, events?: readonly B
     ? SUBSTITUTE_COST_HP_TIMING
     : at(0) === "B_SCR_OP_DATAHPUPDATE" && at(-1) === "B_SCR_OP_HEALTHBARUPDATE" && at(-2) === "B_SCR_OP_ORWORD"
       && at(-3) === "B_SCR_OP_WAITMESSAGE" && at(-4) === "B_SCR_OP_PRINTSTRING"
-      ? (at(1) === "B_SCR_OP_RETURN" && events !== undefined && index !== undefined && healContinuesMoveScript(events, index) ? SHELL_BELL_HP_TIMING : ITEM_HEAL_HP_TIMING) : HP_TIMING;
+      ? (at(1) === "B_SCR_OP_RETURN" && events !== undefined && index !== undefined && healContinuesMoveScript(events, index)
+        ? (shellBellNextUsedPrint(events, index) ?? SHELL_BELL_HP_TIMING) : ITEM_HEAL_HP_TIMING) : HP_TIMING;
+}
+const shellBellNextUsedTimings = new Map<number, BattleHpTiming>();
+/**
+ * shb1: the Shell Bell heal's `datahpupdate; return` falls into the first action's MoveEnd and straight into the next action's used print with no MoveEnd
+ * sprite-visibility receipt (so actionTransitionPauseFrames has no row to count from). Same rows as trn176's E + 1 + d + n + 6 + u with d = 1 (`return`) and
+ * the receipts absent: the heal's hp command holds bar + 1 + 3 (SHELL_BELL_HP_TIMING) + 1 + ACTION_TRANSITION_ROWS + u.
+ */
+function shellBellNextUsedPrint(events: readonly BattleKernelSemanticEvent[], hpChangeIndex: number): BattleHpTiming | null {
+  const next = events[hpChangeIndex + 1];
+  const heal = events[hpChangeIndex]!.provenance?.instructionExecution;
+  const used = next?.provenance?.instructionExecution;
+  if (next === undefined || next.payload.kind !== "message" || next.payload.messageId !== "STRINGID_USEDMOVE" || used === undefined || heal === undefined || used >= heal) return null;
+  const tail = SHELL_BELL_HP_TIMING.tailFrames + 1 + ACTION_TRANSITION_ROWS + used;
+  let timing = shellBellNextUsedTimings.get(tail);
+  if (timing === undefined) {
+    timing = Object.freeze({ minimumFrames: 0, tailFrames: tail } as const);
+    shellBellNextUsedTimings.set(tail, timing);
+  }
+  return timing;
 }
 /** hie4: the heal's script (its `playanimation` event on Scene ON, else its print) runs in the same script run as the event before it (its execution count did not restart). */
 function healContinuesMoveScript(events: readonly BattleKernelSemanticEvent[], hpChangeIndex: number): boolean {
@@ -2628,6 +2799,81 @@ const HP_HIT_EFFECT_OPCODES: ReadonlySet<string> = new Set(["B_SCR_OP_CRITMESSAG
 const HP_MESSAGE_OPCODES: ReadonlySet<string> = new Set(["B_SCR_OP_CRITMESSAGE", "B_SCR_OP_RESULTMESSAGE", "B_SCR_OP_PRINTSTRING", "B_SCR_OP_PRINTFROMTABLE"]);
 /** hpf2: a hit's bar then the turn end's first print (hail / sandstorm / poison): the ROM's bar -> print rise is the bar's rows + 17 = MoveEnd rows 7 + 2 sprite rows + 8. */
 const HP_END_TURN_PRINT_LEAD_ROWS = 8;
+/**
+ * hpb3: a Focus Band survival (`BattleScript_FocusBandActivates` right after the hit's `datahpupdate`; drv2 OFF s4235 d2, 8 -> 1): the ROM's bar is 7 rows,
+ * `datahpupdate` is bar + 2 after the bar row and the Focus Band script's first row 3 later, so the 28-row floor held the next command 15 rows late.
+ * The tail is the stat-next convention (the next command starts on the script's `playanimation` / Pausex20 row).
+ */
+const FOCUS_BAND_PC = BATTLE_SCRIPT_PROGRAM.labelEntries["BattleScript_FocusBandActivates"]!.programCounter;
+const FOCUS_BAND_SCRIPT_ROWS = 12;
+/**
+ * hpb3: a hit whose attacker's Shell Bell heals right after it (`BattleScript_ItemHealHP_Ret`; T2 ON s97 d11 / d12 / d13 and hie1-shellbell-on, ROM): `datahpupdate` is the bar + 2 after the bar row,
+ * the MoveEnd rows run, and the item's `playanimation` sits 11 executions after `datahpupdate` in every window (bars 20, 25 and 40): the animation starts bar + 13 after the bar row, with no 28-row floor
+ * (the floor was 8 rows early on a 25-row bar, 3 early on 20). The animation command follows the two MoveEnd sprite-visibility rows, so the tail is those executions - 1, less the 9 rows
+ * the engine's HELD_ITEM_EFFECT command leads its script row (its first SE is at command + 17, the ROM's at the script row + 8: hie3 / hie1-shellbell-on, a 40-row bar: ROM SE 766 = command 758 + 8).
+ */
+const HP_ITEM_ANIMATION_COMMAND_LEAD_ROWS = 9;
+const ITEM_HEAL_RET_PC = BATTLE_SCRIPT_PROGRAM.labelEntries["BattleScript_ItemHealHP_Ret"]!.programCounter;
+const ITEM_HEAL_RET_SCRIPT_ROWS = 10;
+function hpItemAnimationRows(events: readonly BattleKernelSemanticEvent[], index: number): number | null {
+  const event = events[index]!;
+  const hpExecution = event.provenance?.instructionExecution;
+  if (hpExecution === undefined || BATTLE_SCRIPT_PROGRAM.instructions[event.provenance?.programCounter ?? -1]?.opcodeName !== "B_SCR_OP_DATAHPUPDATE") return null;
+  const first = events[index + 1];
+  const second = events[index + 2];
+  const animation = events[index + 3];
+  const programCounter = animation?.provenance?.programCounter;
+  if (first?.provenance?.opcodeName !== "B_SCR_OP_MOVEEND" || second?.provenance?.opcodeName !== "B_SCR_OP_MOVEEND" || animation?.payload.kind !== "animation"
+    || programCounter === undefined || programCounter < ITEM_HEAL_RET_PC || programCounter >= ITEM_HEAL_RET_PC + ITEM_HEAL_RET_SCRIPT_ROWS) return null;
+  const execution = animation.provenance?.instructionExecution;
+  return execution === undefined || execution - hpExecution - 1 <= HP_ITEM_ANIMATION_COMMAND_LEAD_ROWS ? null : execution - hpExecution - 1 - HP_ITEM_ANIMATION_COMMAND_LEAD_ROWS;
+}
+/**
+ * shb1 (Scene ON only; T2 s97 d11 / d12 / d13): the Shell Bell's `playanimation` is HandleBattleAnimation's IsBattleSEPlaying wait like the other gated requests
+ * (sgs134RequestSeGate): the hit's effectiveness SE (73 rows for SE 13) is still playing when the script row arrives if the bar was short. ROM: hit SE -> the item's
+ * script row is 49 fixed rows + the bar (d12 / d13: bar 20, SE 192, exec 261 = 69, the launch 4 rows late and the item's SEs +12 from the exec instead of +8; d11: bar 25, 74 rows,
+ * no wait; every lab: bars >= 40). Scene OFF has no animation script to wait: its `playanimation` row is bar + 13 with no gate (T2 OFF s97 d13, exec 146 = datahpupdate 135 + 11).
+ */
+const HP_ITEM_ANIMATION_SE_FIXED_ROWS = 49;
+/**
+ * sep1: the battle SE a controller request would still wait on (HandleBattleAnimation / HandleMoveAnimation / HandleStatusAnimation poll IsBattleSEPlaying): the
+ * song of the last `play-se` before events[index] when nothing between starts an animation script (Cmd_end drains its own SEs) or prints (a print's 64-row
+ * waitmessage outlasts every effectiveness SE). A hit's HIT_ANIMATION receipt does not end it. Null: nothing playing.
+ */
+function pendingBattleSeSong(events: readonly BattleKernelSemanticEvent[], index: number): number | null {
+  for (let i = index - 1; i >= 0; i -= 1) {
+    const payload = events[i]!.payload;
+    if (payload.kind === "play-se") return payload.songId;
+    if (payload.kind === "message" || payload.kind === "status-animation" || (payload.kind === "animation" && payload.animationId !== "HIT_ANIMATION")) return null;
+  }
+  return null;
+}
+function hpItemAnimationSeGate(events: readonly BattleKernelSemanticEvent[], index: number): number {
+  const hp = events[index]!.payload;
+  if (hp.kind !== "hp-change") return 0;
+  const songId = pendingBattleSeSong(events, index);
+  return songId === null ? 0 : seg127StatusSeGateRows({ songId, seAgeRows: HP_ITEM_ANIMATION_SE_FIXED_ROWS + Math.abs(hp.from - hp.to) });
+}
+/**
+ * sep1: the turn-end Leech Seed drain's `playanimation` is the same IsBattleSEPlaying wait (etp1-leechseed-on / -leechseedc-on, ROM): hit SE 13 at 597 / 604, the
+ * script's exec row (BattleScript_LeechSeedTurnDrain+0x7) at 663 / 708 = hit hp start + (bar + 1) + 17, the animation's first row at 670 / 708 = max(exec, SE + 73).
+ * The launch lag of 7 rows the labs fitted is the short bar's remainder of the SE (73 - 66), 0 on the long bar. SE -> hp start is the hit animation's rows + 1;
+ * after the bar the script runs 17 rows (HIT_TO_SEED_DRAIN_TAIL_ROWS beyond the bar's own + the two MoveEnd sprite-visibility rows) to the exec row.
+ */
+const HIT_TO_SEED_DRAIN_TAIL_ROWS = 15;
+/** rcv1: Scene OFF, a drain after a hit: the ROM's Pausex20 -> seeded healthbarupdate runs 35 rows, the print-preceded 36 (44 = 8 + 36 fits the latter). */
+const OFF_HIT_SEED_DRAIN_EARLY_ROWS = 9;
+const SEED_DRAIN_PRESENTED_ROWS_BEFORE_EXEC = 2;
+/** The lag the drain command's minimumFrames was fitted with (battleResolutionPresentationRender.ts LEECH_SEED_DRAIN_SCRIPT_AGE; a test pins them equal). */
+const LEECH_SEED_DRAIN_LEGACY_LAG = 7;
+function hitSeDrainLaunchLag(songId: number | null, hitAnimationRows: number, barRows: number): number | null {
+  if (songId === null) return null;
+  return seg127StatusSeGateRows({ songId, seAgeRows: 1 + hitAnimationRows + barRows + HIT_TO_SEED_DRAIN_TAIL_ROWS + SEED_DRAIN_PRESENTED_ROWS_BEFORE_EXEC });
+}
+function focusBandNext(events: readonly BattleKernelSemanticEvent[], index: number): boolean {
+  const programCounter = events[index + 1]?.provenance?.programCounter;
+  return programCounter !== undefined && programCounter >= FOCUS_BAND_PC && programCounter < FOCUS_BAND_PC + FOCUS_BAND_SCRIPT_ROWS;
+}
 function hpMessageLeadRows(events: readonly BattleKernelSemanticEvent[], index: number): number | null {
   const event = events[index]!;
   const programCounter = event.provenance?.programCounter;
@@ -2697,6 +2943,14 @@ interface HpLeadRows {
   readonly recoil: boolean;
   /** The `datahpupdate` of `BattleScript_AbsorbUpdateHp` (a drain's heal bar). */
   readonly drain: boolean;
+  /** The next kernel event is `BattleScript_FocusBandActivates` (hpb3). */
+  readonly focusBand: boolean;
+  /** hpb3: the rows from `datahpupdate` to a healing berry's `playanimation` after the MoveEnd rows, or null. */
+  readonly itemAnimationRows: number | null;
+  readonly itemAnimationSeGate: number;
+  /** sep1: the battle SE still playing when the hit's bar starts, and the bar's rows (battleHealthBarAnimationFrames + 1). */
+  readonly pendingSeSong: number | null;
+  readonly barRows: number;
   /** HITMARKER_NO_ANIMATIONS (Scene OFF) when the hp command was projected. */
   readonly sceneOff: boolean;
 }
@@ -2739,6 +2993,23 @@ function applyHpHitTails(
       commands[index] = Object.freeze({ ...command, timing: Object.freeze({ minimumFrames: 0, tailFrames: WRAP_SECONDARY_TAIL_FRAMES }) });
       continue;
     }
+    const seedDrain = rest[2];
+    if (recoilPrevious?.type === "hit-animation" && recoilPrevious.battler === command.battler && rest[0]?.type === "sprite-visibility" && rest[1]?.type === "sprite-visibility"
+      && seedDrain?.type === "general-animation" && seedDrain.animation === "LEECH_SEED_DRAIN" && seedDrain.afterPlayerSendIn !== true && leads.moveEndRows !== null && !leads.sceneOff) {
+      commands[index] = Object.freeze({ ...command, timing: Object.freeze({ minimumFrames: 0, tailFrames: HIT_TO_SEED_DRAIN_TAIL_ROWS }) });
+      const lag = hitSeDrainLaunchLag(leads.pendingSeSong, recoilPrevious.timing.minimumFrames, leads.barRows);
+      if (lag !== null && seedDrain.animated === true) {
+        const at = commands.indexOf(seedDrain);
+        commands[at] = Object.freeze({ ...seedDrain, timing: Object.freeze({ minimumFrames: seedDrain.timing.minimumFrames - LEECH_SEED_DRAIN_LEGACY_LAG + lag, launchLagFrames: lag }) });
+      }
+      continue;
+    }
+    if (leads.sceneOff && recoilPrevious?.type === "hit-animation" && recoilPrevious.battler === command.battler && rest[0]?.type === "sprite-visibility" && rest[1]?.type === "sprite-visibility"
+      && seedDrain?.type === "general-animation" && seedDrain.animation === "LEECH_SEED_DRAIN" && seedDrain.afterPlayerSendIn !== true && seedDrain.animated !== true) {
+      commands[index] = Object.freeze({ ...command, timing: Object.freeze({ minimumFrames: 0, tailFrames: HIT_TO_SEED_DRAIN_TAIL_ROWS }) });
+      const at = commands.indexOf(seedDrain);
+      commands[at] = Object.freeze({ ...seedDrain, timing: Object.freeze({ minimumFrames: seedDrain.timing.minimumFrames - OFF_HIT_SEED_DRAIN_EARLY_ROWS }) });
+    }
     const transition = rest[0]?.type === "move-animation" && rest[1]?.type === "sprite-visibility";
     const endsTurn = rest.length > 0 && rest.every((c) => c.type === "sprite-visibility" || c.type === "turn-end");
     const previous = commands[index - 1];
@@ -2750,13 +3021,14 @@ function applyHpHitTails(
     const endTurnPrint = hit && leads.moveEndRows !== null && rest[0]?.type === "sprite-visibility" && rest[1]?.type === "sprite-visibility" && rest[2]?.type === "message";
     const heal = command.to > command.from;
     const afterHp = previous?.type === "hp";
-    const printHold = next?.type === "message" && leads.messageRows !== null && ((hit && leads.hitEffectMessage) || heal || afterHp);
+    const printHold = next?.type === "message" && leads.messageRows !== null && ((hit && leads.hitEffectMessage) || heal || afterHp || leads.drain);
     if (!hit && !printHold && command.battler === 0) continue;
     const faint = hit && rest[0]?.type === "faint" && leads.faintNext;
-    const statNext = hit && rest[0]?.type === "stat";
+    const statNext = (hit && rest[0]?.type === "stat") || (hit && leads.focusBand);
+    const itemAnimation = hit && leads.itemAnimationRows !== null && rest[0]?.type === "sprite-visibility" && rest[1]?.type === "sprite-visibility" && rest[2]?.type === "general-animation";
     const tailFrames = statNext ? (leads.sceneOff ? HP_STAT_NEXT_TAIL_FRAMES_OFF : HP_STAT_NEXT_TAIL_FRAMES) : transition ? (leads.moveEndRows === null ? 0 : HP_DATAHPUPDATE_ROW_FRAMES)
       : endsTurn ? leads.moveEndRows ?? 0 : bars > 0 ? bars : endTurnPrint ? leads.moveEndRows! + HP_END_TURN_PRINT_LEAD_ROWS
-      : printHold ? leads.messageRows! : 0;
+      : itemAnimation ? leads.itemAnimationRows! + (leads.sceneOff ? 0 : leads.itemAnimationSeGate) : printHold ? leads.messageRows! : 0;
     if (faint) commands[index] = Object.freeze({ ...command, timing: Object.freeze({ minimumFrames: 0 }) });
     else if (tailFrames > 0) commands[index] = Object.freeze({ ...command, timing: Object.freeze({ minimumFrames: 0, tailFrames }) });
   }
@@ -2870,6 +3142,7 @@ export const SWITCH_IN_WAITSTATE_HOLD_FRAMES = 11;
  * frames, so the switch-in holds 11 more frames: menu exact, the blank one frame late.
  */
 export const OPPONENT_FAINT_REPLACEMENT_TURN_END_FRAMES = 11;
+export const OPPONENT_SEND_IN_NEXT_PRINT_FRAMES = 9;
 /**
  * snd145 (ISSUES #146 remainder): in Scene ON the opponent's send-in tail is species-keyed (the healthbox slide waits for the front
  * animation, the next printstring for the controller end; src/engine/switchInTail.ts), so its controller span is the species' whole
@@ -3453,6 +3726,22 @@ function instructionExecutionOf(event: BattleKernelSemanticEvent): number {
  * execution boundary. Pairing across it claimed a hit that had "executed"
  * before its own move-use receipt -- ISSUES #95's fatal negative span.
  */
+/**
+ * bbk1: Scene OFF Brick Break through a screen (labs bbk1-brickbreak-{lightscreen,reflect}-off, ROM rows used print 208 -> `BrickBreakAnim+0x10` print 278 -> SE 14 363):
+ * the body ends one row after the print's execution (print = used + 70), and typecalc2 / effectivenesssound / hitanimation run 3 rows after the print's waitmessage hold (print -> SE 85).
+ */
+const BRICK_BREAK_WALL_PRINT_BODY_ROWS = 1;
+const BRICK_BREAK_WALL_PRINT_TAIL_ROWS = 3;
+
+/** bbk1: Brick Break through a screen runs `printstring STRINGID_THEWALLSHATTERED` between attackanimation and hitanimation; the message command presents that print and its waitmessage, so the body ends at the print (ROM BrickBreakAnim+0x0 -> +0x10). */
+function brickBreakWallShatteredPrint(
+  events: readonly BattleKernelSemanticEvent[],
+  moveIndex: number,
+): BattleKernelSemanticEvent | null {
+  const next = events[moveIndex + 1];
+  return next !== undefined && next.payload.kind === "message" && next.payload.messageId === "STRINGID_THEWALLSHATTERED" ? next : null;
+}
+
 function nextHitAnimation(
   events: readonly BattleKernelSemanticEvent[],
   moveIndex: number,
@@ -5756,6 +6045,7 @@ export function projectBattleResolutionCommands(
   const pendingHealth = new Map<0 | 1, { eventSequence: number; healthValue: number; instructionExecution: number | undefined }>();
   const hpLeadRows = new Map<number, HpLeadRows>();
   let leechDrainAnimated = false;
+  const seedDrainInSegment = events.some((e) => e.provenance?.programCounter === LEECH_SEED_DRAIN_SEEDED_PC && e.payload.kind === "hp-change");
   const pendingSwitch = new Map<
     0 | 1,
     { eventSequence: number; fromPartyIndex: BattlePartyIndex; toPartyIndex: BattlePartyIndex }
@@ -5804,6 +6094,7 @@ export function projectBattleResolutionCommands(
   const liveHp: [number, number] = [field.player.hp, field.opponent.hp];
   const substituteFades: { at: number; battler: 0 | 1; sequence: number }[] = [];
   const statsChanges: { at: number; battler: 0 | 1; sequence: number; argument: number; frames: number; seGate: number }[] = [];
+  let playerSendInEnd = -1;
   const heldItemEffects: { at: number; battler: 0 | 1; sequence: number; frames: number; afterStatus: boolean; seGate?: number; trapMove?: number; animation: "HELD_ITEM_EFFECT" | "WISH_HEAL" | "FUTURE_SIGHT_HIT" | "FOCUS_BAND" | "ITEM_KNOCKOFF" | "INGRAIN_HEAL" | "TURN_TRAP" }[] = [];
 
   for (let index = 0; index < events.length; index += 1) {
@@ -5916,8 +6207,9 @@ export function projectBattleResolutionCommands(
         ),
         advance: "automatic",
         ...(selfConfusionOff ? { leadFrames: SELF_CONFUSION_OFF_PRE_PRINT_ROWS } : {}),
-        ...(twoTurnSecondPrintLead(event, beforeRules, actionSnapshot) ?? {}),
-        ...(carryBeforeGlyph > 0 ? { leadFrames: (twoTurnSecondPrintLead(event, beforeRules, actionSnapshot)?.leadFrames ?? 0) + carryBeforeGlyph } : {}),
+        ...(event.provenance?.sourceLabel === FOCUS_PUNCH_LOST_FOCUS_SCRIPT ? { leadFrames: FOCUS_PUNCH_LOST_FOCUS_PRE_PRINT_ROWS } : {}),
+        ...(twoTurnSecondPrintLead(event, beforeRules, actionSnapshot, events[index - 1]) ?? {}),
+        ...(carryBeforeGlyph > 0 ? { leadFrames: (twoTurnSecondPrintLead(event, beforeRules, actionSnapshot, events[index - 1])?.leadFrames ?? 0) + carryBeforeGlyph } : {}),
         ...(endTurnChainLeadRows(events, index, (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) === 0) > 0
           ? { leadFrames: endTurnChainLeadRows(events, index, (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) === 0) } : {}),
         ...(payload.messageId === "STRINGID_TARGETFAINTED"
@@ -5944,11 +6236,16 @@ export function projectBattleResolutionCommands(
               : (() => {
                 const base = selfConfusionOff
                   ? SELF_CONFUSION_OFF_HIT_MESSAGE_TIMING
+                  : (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0 && preMoveOffUsedPrintTiming(events, index) !== null
+                  ? preMoveOffUsedPrintTiming(events, index)!
                   : messageTimingFromSourceProvenance(event, sceneOnMoveAnimationSeen, (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0)
                   ?? (WAITMESSAGE_LONG_MESSAGE_IDS.has(payload.messageId) || payload.messageId === SUBSTITUTE_FADED_MESSAGE_ID
                   ? WAITMESSAGE_LONG_TIMING
                   : MESSAGE_TIMING);
                 const timing = focusPunchPrePassMessageTiming(events, index, base) ?? chargeTurnEmptyBoxTiming(events, index) ?? hitAllLoopEmptyBoxTiming(events, index) ?? base;
+                if (payload.messageId === "STRINGID_THEWALLSHATTERED") {
+                  return Object.freeze({ minimumFrames: timing.minimumFrames, holdFrames: timing.holdFrames + BRICK_BREAK_WALL_PRINT_TAIL_ROWS });
+                }
                 if (event.provenance?.sourceLabel === "BattleScript_PresentHealTarget" && actionSnapshot?.currentMove === MOVE_REST
                   && (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) === 0) {
                   return Object.freeze({ minimumFrames: timing.minimumFrames, holdFrames: timing.holdFrames + REST_HEAL_PRINT_TAIL_ROWS });
@@ -6066,7 +6363,8 @@ export function projectBattleResolutionCommands(
         "held-item effect animation",
       );
       const { lead: baseLead } = heldItemEffectExecutionsAndLead(events, index);
-      const lead = baseLead === HELD_ITEM_EFFECT_RESTART_LEAD_FRAMES ? heldItemEffectAfterPrintLead(events, index) ?? baseLead : baseLead;
+      const lead = commands.length === playerSendInEnd ? HELD_ITEM_EFFECT_AFTER_SEND_IN_LEAD_FRAMES
+        : baseLead === HELD_ITEM_EFFECT_RESTART_LEAD_FRAMES ? heldItemEffectAfterPrintLead(events, index) ?? baseLead : baseLead;
       heldItemEffects.push({
         at: commands.length, battler: pendingHeldItemEffectBattler, sequence: event.sequence,
         frames: HELD_ITEM_EFFECT_COMMAND_FRAMES + lead,
@@ -6170,9 +6468,10 @@ export function projectBattleResolutionCommands(
       // mxp1: Self-Destruct / Explosion run `tryexplosion; setatkhptozero; waitstate` before the animation; the user's `hp` command presents those rows, so the
       // body spans only the animation instruction to the hit (ROM labs eqk1-{expl,sd}-{p,f}-off: attackanimation -> hitanimation 43 rows, was 48).
       const explosionFamily = payload.animationId === "SCENE_OFF_ATTACK_PAUSE" && (lastUsedCurrentMove === 120 || lastUsedCurrentMove === 153);
+      const wallShatteredPrint = brickBreakWallShatteredPrint(events, index);
       const interveningInstructions = explosionFamily
         ? hitExecution - instructionExecutionOf(event) - executedPauseCallbacks + EXPLOSION_OFF_BODY_ROWS
-        : hitExecution - usedMoveInstructionExecution - executedPauseCallbacks;
+        : (wallShatteredPrint === null ? hitExecution : instructionExecutionOf(wallShatteredPrint) + BRICK_BREAK_WALL_PRINT_BODY_ROWS) - usedMoveInstructionExecution - executedPauseCallbacks;
       if (interveningInstructions <= 0) {
         throw new Error("battle resolution move/hit provenance is not ordered");
       }
@@ -6208,7 +6507,7 @@ export function projectBattleResolutionCommands(
         type: "hit-animation",
         eventSequence: event.sequence,
         battler: hitBattler,
-        timing: (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0 && hitTargetSpriteInvisible(events, index, beforeRules, afterRules, hitBattler) ? HIT_ANIMATION_INVISIBLE_TIMING : HIT_ANIMATION_TIMING,
+        timing: hitTargetSpriteInvisible(events, index, beforeRules, afterRules, hitBattler) ? HIT_ANIMATION_INVISIBLE_TIMING : HIT_ANIMATION_TIMING,
       }));
       continue;
     }
@@ -6240,6 +6539,7 @@ export function projectBattleResolutionCommands(
           battler,
           animation: "LEECH_SEED_DRAIN",
           ...(leechDrainAnimated ? { animated: true as const } : {}),
+          ...(commands.length === playerSendInEnd ? { afterPlayerSendIn: true as const } : {}),
           timing: Object.freeze({
             minimumFrames: LEECH_SEED_DRAIN_PRE_ROWS + health.instructionExecution!
               + (leechDrainAnimated ? LEECH_SEED_DRAIN_ANIMATION_ROWS - 1 : 0),
@@ -6251,7 +6551,7 @@ export function projectBattleResolutionCommands(
       const messageRows = drainRole === null ? hpMessageLeadRows(events, index) : null;
       const faintNext = drainRole === null && hpFaintNext(events, index);
       const hitEffectMessage = HP_HIT_EFFECT_OPCODES.has(events[index + 1]?.provenance?.opcodeName ?? "") || hitAllLoopEmptyBoxTiming(events, index + 1) !== null;
-      hpLeadRows.set(health.eventSequence, { tick: hpTickKind(event), wrapSecondary: events[index + 1]?.provenance?.programCounter === WRAP_SECONDARY_PC, moveEndRows, messageRows, faintNext, hitEffectMessage, barExecution: health.instructionExecution, recoil: event.provenance?.programCounter === RECOIL_PC, drain: event.provenance?.programCounter === DRAIN_PC, sceneOff: (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0 });
+      hpLeadRows.set(health.eventSequence, { tick: hpTickKind(event), wrapSecondary: events[index + 1]?.provenance?.programCounter === WRAP_SECONDARY_PC, moveEndRows, messageRows, faintNext, hitEffectMessage, barExecution: health.instructionExecution, recoil: event.provenance?.programCounter === RECOIL_PC, drain: event.provenance?.programCounter === DRAIN_PC, focusBand: focusBandNext(events, index), itemAnimationRows: drainRole === null ? hpItemAnimationRows(events, index) : null, itemAnimationSeGate: drainRole === null ? hpItemAnimationSeGate(events, index) : 0, pendingSeSong: drainRole === null ? pendingBattleSeSong(events, index) : null, barRows: seedDrainInSegment ? battleHealthBarAnimationFrames({ maxHp: (battler === 0 ? currentField.player : currentField.opponent).maxHP, from: payload.from, to: payload.to }) + 1 : 0, sceneOff: (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0 });
       commands.push(Object.freeze({
         type: "hp",
         eventSequence: health.eventSequence,
@@ -6340,9 +6640,7 @@ export function projectBattleResolutionCommands(
         battler: singlesBattler(payload.battler, "status icon update"),
         status1: payload.status1,
         status2: payload.status2,
-        timing: (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) === 0
-          ? wakeUpIconTiming(events, index) ?? STATUS_ICON_TIMING
-          : STATUS_ICON_TIMING,
+        timing: wakeUpIconTiming(events, index) ?? STATUS_ICON_TIMING,
       }));
       continue;
     }
@@ -6599,6 +6897,7 @@ export function projectBattleResolutionCommands(
         healthboxSlideElapsed: (sendIn.healthboxSlideElapsed ?? 0) + aiSwitchLead,
         ...(sendIn.sendInLagElapsed === undefined ? {} : { sendInLagElapsed: sendIn.sendInLagElapsed + aiSwitchLead }),
       }));
+      if (battler === 0 && sendInLabel === "BattleScript_FaintedMonSendOutNew") playerSendInEnd = commands.length;
     }
   }
   if (pendingHealth.size !== 0) {
@@ -6692,6 +6991,15 @@ export function projectBattleResolutionCommands(
       settleHoldFrames: (last.settleHoldFrames ?? 0) + OPPONENT_FAINT_REPLACEMENT_TURN_END_FRAMES,
     });
   }
+  // swt1: after an opponent faint replacement / AI switch the script's next print (the poison / burn tick, the weather line, the move's
+  // "used" text) sits 12 rows after the `waitstate` release (`FaintedMonSendOutNew+0x10` -> `FaintedMonEnd` +5 -> next label +11 -> glyph +12);
+  // the next command otherwise starts 3 rows after it.
+  commands.forEach((command, index) => {
+    if (command.type === "switch-in" && command.battler === 1 && command.aiSwitch === true && command.entryScriptHoldFrames === undefined
+      && index + 1 < commands.length && commands[index + 1]!.type !== "turn-end") {
+      commands[index] = Object.freeze({ ...command, settleHoldFrames: (command.settleHoldFrames ?? 0) + OPPONENT_SEND_IN_NEXT_PRINT_FRAMES });
+    }
+  });
   if (!commands.some(
     (command) => command.type === "message" && command.advance === "button" && command.promptGate !== true,
   )) {
@@ -6897,7 +7205,12 @@ export function createBattleResolutionPresentation(
           ...(input.confirmHandoff!.forced === "encore"
             ? { forced: Object.freeze({ kind: "encore" as const }) }
             : input.confirmHandoff!.forced === "struggle"
-              ? { forced: Object.freeze({ kind: "struggle" as const, holdRemaining: NO_MOVES_DISMISS_HOLD_FRAMES, waitCursorAge: input.confirmHandoff!.forcedWaitCursorAge ?? 0 }) }
+              ? {
+                forced: (() => {
+                  const holdTotal = (input.beforeRules.rulesContext.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0 ? NO_MOVES_DISMISS_HOLD_OFF_FRAMES : NO_MOVES_DISMISS_HOLD_FRAMES;
+                  return Object.freeze({ kind: "struggle" as const, holdRemaining: holdTotal, holdTotal, waitCursorAge: input.confirmHandoff!.forcedWaitCursorAge ?? 0 });
+                })(),
+              }
               : {}),
           ...(battleResolutionOpensWithFocusPunchPrePass(events) ? { focusPunchPrePass: true as const } : {}),
         }),
@@ -7077,9 +7390,10 @@ function usedMovePrintLeadU(state: BattleResolutionPresentationState, handoff: B
   if (handoff.forced !== undefined || handoff.focusPunchPrePass === true) return null;
   // chg1's continuation segment and charge-turn box were measured in Scene OFF only (pixel labs); Scene ON keeps hcr2's first-segment USEDMOVE rule.
   const sceneOff = sceneOffOf(state);
-  const segment = sceneOff ? state.segments[state.segmentIndex] : state.segments[0];
+  const segment = sceneOff || state.segmentIndex > 0 ? state.segments[state.segmentIndex] : state.segments[0];
   if (segment === undefined || state.sourceDecision.kind !== "use-move") return null;
-  const first = segment.events[0];
+  // sbm1: Solar Beam in sun runs SolarBeamOnFirstTurn's `ppreduce` before the used print (kernel u = 16), so the print is the first message, not the first event.
+  const first = segment.events.find((event) => event.payload.kind !== "set-battler-pp-data");
   if (first === undefined || first.payload.kind !== "message") return null;
   const chargeBox = sceneOff && first.payload.messageId === "STRINGID_EMPTYSTRING3" && first.provenance?.sourceLabel === CHARGE_TURN_SCRIPT;
   if (first.payload.messageId !== "STRINGID_USEDMOVE" && !chargeBox) return null;
@@ -7204,8 +7518,8 @@ export function advanceBattleResolutionConfirmHandoff(
       }),
       confirmHandoff: Object.freeze({
         ...handoff,
-        bounceReset: handoff.bounceReset || NO_MOVES_DISMISS_HOLD_FRAMES - (handoff.forced.holdRemaining - 1) >= NO_MOVES_BOUNCE_STOP_AFTER,
-        forced: Object.freeze({ kind: "struggle" as const, holdRemaining: handoff.forced.holdRemaining - 1, waitCursorAge: handoff.forced.waitCursorAge }),
+        bounceReset: handoff.bounceReset || handoff.forced.holdTotal - (handoff.forced.holdRemaining - 1) >= NO_MOVES_BOUNCE_STOP_AFTER,
+        forced: Object.freeze({ kind: "struggle" as const, holdRemaining: handoff.forced.holdRemaining - 1, holdTotal: handoff.forced.holdTotal, waitCursorAge: handoff.forced.waitCursorAge }),
         idleBounceElapsed: handoff.idleBounceElapsed + 1,
       }),
       fadeTick: state.fadeTick + 1,
@@ -7415,6 +7729,20 @@ export function appendBattleResolutionContinuation(
 }
 
 /**
+ * bbk1 item 3 (chg4's narrowed rule): a Scene ON continuation after the opponent's locked action whose first print is the player's own plain hit
+ * (not the locked battler's unleash, no miss) runs the confirm walk as OFF's does: ROM Ice Beam printstring at commit + 12 (s830 d1).
+ */
+function sceneOnPlainHitContinuation(events: readonly BattleKernelSemanticEvent[], lockedAction: BattleResolutionLockedActionIdentity): boolean {
+  const first = events[0];
+  if (first === undefined || first.payload.kind !== "message" || first.payload.messageId !== "STRINGID_USEDMOVE") return false;
+  const attacker = first.payload.actionSnapshot?.attacker;
+  if (attacker === undefined || attacker === lockedAction.battler) return false;
+  if (events.some(({ payload }) => payload.kind === "message" && (payload.messageId === "STRINGID_ATTACKMISSED" || payload.messageId === "STRINGID_PKMNAVOIDEDATTACK"))) return false;
+  const nextUsed = events.findIndex((event, index) => index > 0 && event.payload.kind === "message" && event.payload.messageId === "STRINGID_USEDMOVE");
+  return events.slice(0, nextUsed < 0 ? events.length : nextUsed).some(({ payload }) => payload.kind === "hp-change" && payload.battler === 1 - attacker);
+}
+
+/**
  * chg1: the player's locked action (no command menu) unleashing in Scene OFF: the app's turn start stands for a first print on row
  * `TURN_START_PRINT_BASE_U` (as a wake-up print's), so a first print on a later row u waits u - 3 frames more (ROM probes, Dig / Fly / ...).
  */
@@ -7514,7 +7842,8 @@ export function appendBattleResolutionLockedActionContinuation(
   // segment now gets the recall receipts, the switch's own decision and the fresh switch's party-menu close hold + recall clock.
   const switching = input.sourceDecision?.kind === "switch";
   const sceneOffWalk = !switching && input.confirmHandoff !== undefined
-    && (resolution.pendingBattle.rules.rulesContext.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0;
+    && ((resolution.pendingBattle.rules.rulesContext.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0
+      || sceneOnPlainHitContinuation(transition.events, lockedAction));
   const segment = appendResolutionSegment(
     resolution,
     transition,

@@ -1,0 +1,258 @@
+{
+ "name": "R110-roar-drags-shedinja-onto-spikes",
+ "rules": [
+  "R110"
+ ],
+ "why": "Challenge 7, trainer 200, hand-built Mechanic Lab parties (luck7). Each AI Pokemon (Skarmory, Jolteon, Gengar: all faster than the player's) knows Spikes and Roar x3: Spikes on turn 0 (Spikes scores 100, Roar -3), then Roar every turn (Spikes -10 once up, AI_CBM_Spikes). The player's Pokemon all use Whirlwind (priority -6, the same as Roar, so the faster AI is the first mover and the player the second): the lead Snorlax, bench Shedinja (1 HP) and Machamp. Each Roar drags a random bench Pokemon in, and when it is Shedinja the Spikes faint it with Machamp or Snorlax left: the AI's action stops at the player's forced replacement (reduceFactoryFullTurnDecision, pendingSecondAction). After the script the census player attacks with Flamethrower (the AI never attacks).",
+ "seed": 0,
+ "challengeNum": 7,
+ "battleNum": 0,
+ "trainerId": 200,
+ "playerSetIds": [
+  429,
+  404,
+  735
+ ],
+ "opponentSetIds": [
+  813,
+  716,
+  721
+ ],
+ "parties": {
+  "player": [
+   {
+    "species": 143,
+    "level": 50,
+    "nature": 0,
+    "ivs": {
+     "hp": 31,
+     "attack": 31,
+     "defense": 31,
+     "speed": 31,
+     "spAttack": 31,
+     "spDefense": 31
+    },
+    "evs": {
+     "hp": 255,
+     "attack": 0,
+     "defense": 0,
+     "speed": 0,
+     "spAttack": 255,
+     "spDefense": 0
+    },
+    "moves": [
+     18,
+     53,
+     53,
+     53
+    ],
+    "item": 0,
+    "abilitySlot": 0,
+    "friendship": 0
+   },
+   {
+    "species": 303,
+    "level": 50,
+    "nature": 0,
+    "ivs": {
+     "hp": 31,
+     "attack": 31,
+     "defense": 31,
+     "speed": 31,
+     "spAttack": 31,
+     "spDefense": 31
+    },
+    "evs": {
+     "hp": 255,
+     "attack": 0,
+     "defense": 0,
+     "speed": 0,
+     "spAttack": 255,
+     "spDefense": 0
+    },
+    "moves": [
+     18,
+     53,
+     53,
+     53
+    ],
+    "item": 0,
+    "abilitySlot": 0,
+    "friendship": 0
+   },
+   {
+    "species": 68,
+    "level": 50,
+    "nature": 0,
+    "ivs": {
+     "hp": 31,
+     "attack": 31,
+     "defense": 31,
+     "speed": 31,
+     "spAttack": 31,
+     "spDefense": 31
+    },
+    "evs": {
+     "hp": 255,
+     "attack": 0,
+     "defense": 0,
+     "speed": 0,
+     "spAttack": 255,
+     "spDefense": 0
+    },
+    "moves": [
+     18,
+     53,
+     53,
+     53
+    ],
+    "item": 0,
+    "abilitySlot": 0,
+    "friendship": 0
+   }
+  ],
+  "opponent": [
+   {
+    "species": 227,
+    "level": 50,
+    "nature": 0,
+    "ivs": {
+     "hp": 31,
+     "attack": 31,
+     "defense": 31,
+     "speed": 31,
+     "spAttack": 31,
+     "spDefense": 31
+    },
+    "evs": {
+     "hp": 255,
+     "attack": 255,
+     "defense": 0,
+     "speed": 0,
+     "spAttack": 0,
+     "spDefense": 0
+    },
+    "moves": [
+     191,
+     46,
+     46,
+     46
+    ],
+    "item": 0,
+    "abilitySlot": 0,
+    "friendship": 0
+   },
+   {
+    "species": 135,
+    "level": 50,
+    "nature": 0,
+    "ivs": {
+     "hp": 31,
+     "attack": 31,
+     "defense": 31,
+     "speed": 31,
+     "spAttack": 31,
+     "spDefense": 31
+    },
+    "evs": {
+     "hp": 255,
+     "attack": 255,
+     "defense": 0,
+     "speed": 0,
+     "spAttack": 0,
+     "spDefense": 0
+    },
+    "moves": [
+     191,
+     46,
+     46,
+     46
+    ],
+    "item": 0,
+    "abilitySlot": 0,
+    "friendship": 0
+   },
+   {
+    "species": 94,
+    "level": 50,
+    "nature": 0,
+    "ivs": {
+     "hp": 31,
+     "attack": 31,
+     "defense": 31,
+     "speed": 31,
+     "spAttack": 31,
+     "spDefense": 31
+    },
+    "evs": {
+     "hp": 255,
+     "attack": 255,
+     "defense": 0,
+     "speed": 0,
+     "spAttack": 0,
+     "spDefense": 0
+    },
+    "moves": [
+     191,
+     46,
+     46,
+     46
+    ],
+    "item": 0,
+    "abilitySlot": 0,
+    "friendship": 0
+   }
+  ]
+ },
+ "script": {
+  "actions": [
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   },
+   {
+    "prefer": 0
+   }
+  ],
+  "then": "census"
+ },
+ "expect": [],
+ "cover": [
+  {
+   "file": "src/engine/factoryBattleScriptFullTurnDecision.ts",
+   "text": "? playerForcedStruggle : trainerForcedStruggle,\n        ",
+   "at": 0
+  },
+  {
+   "file": "src/engine/factoryBattleScriptFullTurnDecision.ts",
+   "text": "? playerRetargets : trainerRetargets,\n      ",
+   "at": 0
+  }
+ ],
+ "coverAny": true,
+ "chance": 0.9,
+ "seeds": 200
+}

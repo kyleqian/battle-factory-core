@@ -92,7 +92,8 @@ def main(argv):
         ID_DELTAS.clear()
         tot = {f: {"exact": 0, "offset": 0, "missing": 0, "extra": 0, "mass": 0} for f in FAMILIES}
         seeds, per_seed, miss_ids = [], {}, {}
-        for eng_p in sorted(d.glob(f"*-{scene}.engine.json"), key=lambda p: int(p.name.split("-")[0])):
+        eng_files = sorted(d.glob(f"*-{scene}.engine.json"), key=lambda p: int(p.name.split("-")[0]))
+        for eng_p in eng_files:
             stem = eng_p.name[: -len(".engine.json")]
             seed = int(stem.split("-")[0])
             try:
@@ -115,8 +116,11 @@ def main(argv):
                 miss_ids[key] = miss_ids.get(key, 0) + 1
         deltas = {f: {"n": len(v), "median": sorted(v)[len(v) // 2], "p10": sorted(v)[len(v) // 10], "p90": sorted(v)[(len(v) * 9) // 10]} for f, v in DELTAS.items() if v}
         id_deltas = {str(k): sorted(v) for k, v in sorted(ID_DELTAS.items())}
-        result[scene] = {"idDeltas": id_deltas, "deltas": deltas, "seeds": seeds, "totals": tot, "idRows": dict(sorted(miss_ids.items(), key=lambda kv: -kv[1])), "perSeed": per_seed}
+        result[scene] = {"noSeeds": not eng_files, "idDeltas": id_deltas, "deltas": deltas, "seeds": seeds, "totals": tot, "idRows": dict(sorted(miss_ids.items(), key=lambda kv: -kv[1])), "perSeed": per_seed}
     for scene, r in result.items():
+        if r["noSeeds"]:
+            print(f"== Scene {scene.upper()}: no {scene} seeds (no *-{scene}.engine.json in {d})")
+            continue
         print(f"== Scene {scene.upper()}: {len(r['seeds'])} aligned seeds {r['seeds']}")
         print(f"{'family':24}{'exact':>8}{'offset':>8}{'missing':>9}{'extra':>7}{'mass':>9}")
         for f in FAMILIES:

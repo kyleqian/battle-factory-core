@@ -119,6 +119,7 @@ import {
   battleRoomAcceptedState,
   battleRoomJustFinishedBrainPersonalitySpeech,
   battleRoomQuoteInputReady,
+  alignOrdinaryTransitionClock,
   battleRoomStateForOpponent,
   brainBattleIntroHandoffTe,
   BRAIN_SYMBOL_SCENE_AGE,
@@ -1606,9 +1607,15 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
     // walkable-lobby overworld (factoryLobbyFreeRoam.ts); until then the
     // terminal presentation still owns the screen.
     const freeRoamBoxGoneAge = factoryTerminalDeclineBoxGoneAge(factoryTerminal);
+    // lbf1: the ROM's player takes the d-pad on the releaseall frame itself (a DOWN tapped on the dismiss's frame + 2 turns it, ROM vs
+    // app on lbf1-r2), the frame the box's last row clears; the hand-off tick therefore steps the walkable Lobby with this tick's input.
     const lobbyFreeRoam =
       freeRoamBoxGoneAge !== null && factoryTerminal.age >= freeRoamBoxGoneAge
-        ? state.lobbyFreeRoam ?? createFactoryLobbyFreeRoamState()
+        ? state.lobbyFreeRoam ??
+          advanceFactoryLobbyFreeRoam(createFactoryLobbyFreeRoamState(), {
+            heldDirs: lobbyHeldDirections(buttons),
+            npcs: lobbyNpcTilesForPlayer(state.lobbyNpcs),
+          })
         : state.lobbyFreeRoam;
     // The Lobby result script runs once at Lobby entry. LostChallenge (Lobby scripts.inc:65-75) clears the
     // win-streak-active flag: the lost challenge's symbols / BP stay, the streak and rents are zero. WonChallenge
@@ -1898,7 +1905,7 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
       if (battleRoomQuoteInputReady(battleRoom) && roomPress) {
         const prevBattleRoom = battleRoom;
         if (brainSpeechAcceptPlaysSelect(prevBattleRoom)) playSelectSe();
-        battleRoom = battleRoomAcceptedState(battleRoom);
+        battleRoom = battleRoomAcceptedState(battleRoom, state.frame + 1);
         // Walk-up build steps B2/B3: the JSON's own frontier_set
         // FRONTIER_DATA_HEARD_BRAIN_SPEECH moment - fires once, between the
         // personality speech's last box and the always-shown close/cry box
@@ -2933,7 +2940,7 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
     // battleRoom.ts's §8.3 doc for the close-latency derivation.
     // lbb1: the opponent's intro is `msgbox gStringVar4, MSGBOX_DEFAULT` (battle room scripts.inc:78): A or B (WaitForAorBPress).
     if (battleRoomQuoteInputReady(battleRoom) && (newKeys.has("A") || newKeys.has("B"))) {
-      battleRoom = { ...battleRoom, phase: "msgboxClosing", elapsed: 0 };
+      battleRoom = alignOrdinaryTransitionClock({ ...battleRoom, phase: "msgboxClosing", elapsed: 0 }, state.frame + 1);
     } else {
       battleRoom = advanceBattleRoom(battleRoom);
       const extraRngSteps = opponentSetupExtraRngSteps(battleRoom);

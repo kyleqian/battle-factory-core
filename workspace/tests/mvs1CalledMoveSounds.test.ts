@@ -125,13 +125,15 @@ describe("ROM labs: ours equals the ROM's SE rows", () => {
         const lab = ourLab(rom);
         const ours = seRows(lab.events, ids);
         expect(rowsOf(ours)).toEqual(rowsOf(romRows));
-        // BattleScript_EffectSubstitute runs `ppreduce` before `attackstring`: the ROM's used print and body come one row later than this stage's
-        // (ROM player-on oracle capture: last glyph 53, first shrink row 64; ours 52, 63), so the whole stretch is one row early here.
-        expect(ours.map((e) => e.frame - romRows[0]!.frame)).toEqual([-1, 40, 65]);
+        // BattleScript_EffectSubstitute runs `ppreduce` before `attackstring`. sbm1: the used-print lead and the action transition now skip that
+        // `ppreduce` event (as for Solar Beam in sun), so the ROM's used print and body are no longer one row later than this stage's: Scene OFF's SEs
+        // are on the ROM rows (0, 41, 66; they were -1 / 40 / 65), and Scene ON's drawn shrink is on the ROM's first shrink row (64; ours was 63).
+        // Scene ON's SEs stay the one row early of the hcr2c tick lead (min(u - 2, 2) = 2 where the ROM needs 1), the sbm1 SE 201 residual.
+        expect(ours.map((e) => e.frame - romRows[0]!.frame)).toEqual(scene === "on" ? [-1, 40, 65] : [0, 41, 66]);
         if (side === "player") {
           // The drawn body: the player's battler first changes 2 rows after SE_M_ATTRACT (the ROM: SE 62, shrink 64).
           const firstShrink = [...lab.playerAreaChanged].filter((f) => f > ours[0]!.frame - 10).sort((a, b) => a - b)[0];
-          expect(firstShrink! - ours[0]!.frame).toBe(2);
+          expect(firstShrink! - ours[0]!.frame).toBe(scene === "on" ? 3 : 2);
         }
       });
     }

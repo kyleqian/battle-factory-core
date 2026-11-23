@@ -374,6 +374,8 @@ export const FORFEIT_MESSAGE_TEXT = `${FORFEIT_MESSAGE_PLAYER_NAME} forfeited th
 export const NO_MOVES_MESSAGE_FIRST_GLYPH_AT = 3;
 export const NO_MOVES_MESSAGE_HOLD_AT = 29;
 export const NO_MOVES_DISMISS_HOLD_FRAMES = 9;
+/** hse2: Scene OFF reaches the used-move print 17 frames after the dismissing press in the ROM drive (T2 s7682 / s6568 / s2230), one before the 18 the shared hold gave. */
+export const NO_MOVES_DISMISS_HOLD_OFF_FRAMES = NO_MOVES_DISMISS_HOLD_FRAMES - 1;
 /** The idle sprite bounce stops this many frames into the dismiss hold (ROM: press + 7, well before the used-move message). */
 export const NO_MOVES_BOUNCE_STOP_AFTER = 6;
 
@@ -1014,12 +1016,12 @@ export function returnBattleCommandPartySelection(
     : withLifecycle(state, "submitting", 0, { pendingDecision: decision });
 }
 
-/** Returns a cancelled voluntary selector to its same request and cursor. */
+/** Returns a cancelled voluntary selector to its same request and cursor; ReshowBattleScreenAfterMenu (ResetSpriteData + ClearSpritesHealthboxAnimData) restarts the bounce from age 0. */
 export function cancelBattleCommandPartySelection(
   state: BattleCommandPresentationState,
 ): BattleCommandPresentationState {
   return state.lifecycle.phase === "party-handoff"
-    ? withLifecycle(state, "action-menu", 0)
+    ? withLifecycle(state, "action-menu", 0, { idleBounceElapsed: 0 })
     : state;
 }
 
