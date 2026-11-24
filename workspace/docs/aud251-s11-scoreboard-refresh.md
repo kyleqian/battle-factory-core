@@ -5671,7 +5671,7 @@ Commits `199ceddef` (ON) and `4ed0d87bb` (OFF); no push. Evidence (git-ignored):
 
 ### 4. What is left
 - Psychic s2 / s3 (16) and Psych Up s2 / s3 (23) stay at the 269-phase +1: pre-cfx1 they read 6 / 17 only because the engine sat 1 row early. A way to read the phase from state (none found) would be needed.
-- Growl lab (new, not landed): the stat-down SE 245 is -25 and the print -29 after the used print (separate: the stat-down body of a confused second mover); Swords Dance lab: the SE 191 / 239 are +2 after the used print (the stat-up body rows). Neither is a head term.
+- (sdb1: the Defense Curl +2 of kst1 is LANDED by sdb1, the Growl / Swords Dance terms are analysed in the sdb1 section below.) Growl lab (new, not landed): the stat-down SE 245 is -25 and the print -29 after the used print (separate: the stat-down body of a confused second mover); Swords Dance lab: the SE 191 / 239 are +2 after the used print (the stat-up body rows). Neither is a head term.
 
 
 ## sdb1 (2026-11-24, side lane, Scene ON first, OFF checked): cre1's stat-move body terms - Defense Curl / Growth body SE lead 4 (LANDED); Growl is a cry-wait body (lab-only, not landed); Swords Dance / Harden / T2 stat offsets are context terms
@@ -5685,10 +5685,10 @@ Commit `b0c539c20` (master `e071d1be4` -> `b0c539c20`); no push. Evidence (git-i
 - What stays: the 2-6 mass left in the DC labs is the stat SE's own drift (239 is its own per-use offset, not the body's).
 
 ### 2. Growl / Tail Whip / Leer / Screech / String Shot (not landed, lab-only)
-- The offset exists without a confusion head: hcr2-growl-foe-on has SE 245 at -27 and its print at -29 (cre1's -25 / -29 is the same body). Cause: the engine runs the generic 32-row placeholder body (Growl is not a live adapter, so it emits nothing); the ROM body is `BattleAnimTask_...` cry tasks (`SoundTask_PlayDoubleCry` / `SoundTask_WaitForCry`) that wait for the user's cry twice, so the body length depends on the **species cry length**.
+- The offset exists without a confusion head: hcr2-growl-foe-on has SE 245 at -27 and its print at -29 (cre1's -25 / -29 is the same body). Cause: the engine runs the generic 32-row placeholder body (Growl is not a live adapter, so it emits nothing); the ROM body is the cry tasks (`SoundTask_PlayDoubleCry` / `SoundTask_WaitForCry`, `Move_GROWL`) that wait for the user's cry twice, so the body length depends on the **species cry length**.
 - ROM fit on four species (hcr2 foe, new labs `tools/battle-lab/sdb1-growl-{pikachu,pidgey,alakazam}-foe-on.json`): cry 1 = A0 + 4, cry 2 = cry 1 + D1 + 1, A1 = A0 + max(52, 7 + D1 + D2) with D the cry-mode task frames (`genCryModeFrames.py`). Examples: Pidgey cry at 65 / 77 then SE 245 at 121; Alakazam cry at 65 / 83, A1 176, SE 245 at 184.
 - Not landed because it needs a live adapter with a species-aware duration and double-cry emission (a `cryTaskRows` GROWL mode plus new `cryModeFrames.ts` modes). Growl-family moves never appear in T2 matched rows (ON), so no T2 gain is possible; a tried `genCryModeFrames.py` / `cryModeFrames.ts` edit was reverted. Recipe is above.
-- Tail Whip / Leer / Screech / String Shot: not built as labs (same placeholder-body cause for the first two; Screech and String Shot have their own sound tasks).
+- Tail Whip / Leer / Screech / String Shot: no labs built and their scripts not read (not checked whether they share the cause).
 
 ### 3. Left unresolved (context terms, no source-derivable rule)
 - Swords Dance +1 / +2 (cre1): the ROM command -> SE gap is a stable 11 rows; the engine gives 11 / 12 / 13 in three labs with an identical command structure, and the 191 offset equals the 239 offset, i.e. per-use whole-body start lag in the engine scheduling, not a body term.
