@@ -51,8 +51,10 @@ frame, so its A is rejected. The fresh A at **29760** enters
 | 29822 | fade is visibly/state-wise inactive only after input sampling; B here is rejected |
 | 29823 | first accepted summary B starts close fade |
 | 29845 | normal summary close invokes `CB2_InitSwapScreen`, with `gLastViewedMonIndex=0` |
-| 29864 | player popup reconstructed: `Swap_Task_HandleMenu` state 3, ONIX cursor 0, menu cursor 0 (`SUMMARY`) |
-| 29884 | first fresh popup input: DOWN moves menu cursor `SUMMARY -> SWAP`; DOWN at 29883 is rejected during return fade |
+| 29864 | player popup reconstructed: `Swap_Task_HandleMenu` state 3, ONIX cursor 0, menu cursor 0 (`SUMMARY`); `paletteFadeActive` still TRUE |
+| 29865 | first tick the rebuilt popup takes input (B+42), inside the return fade-in (see the correction below) |
+| 29883 | DOWN (B+60) is taken: the dump shows menu cursor 1 (`SWAP`) on that tick, fade still active |
+| 29884 | DOWN (B+61, the `first-picker-input` scenario) is taken too; the fade is no longer active |
 
 `CB2_InitSwapScreen` intentionally rebuilds screen resources, calls
 `Swap_ShowSummaryMonSprite`, then clears `fromSummaryScreen` while drawing the
@@ -66,8 +68,21 @@ The player party remains ONIX/MAGBY/BAYLEEF with personalities
 party/rental mutation, or selection RNG operation occurs. `gRngValue` changes
 only through normal VBlank/sprite activity: `0x9d0287e2` at accepted open,
 `0x65a2eb17` at summary handoff, `0x247d935c` at accepted close,
-`0xfdc5d1fa` at the swap callback return, and `0x59ab124b` at the returned
-popup's first input-ready tick.
+`0xfdc5d1fa` at the swap callback return, and `0x59ab124b` at tick 29884.
+
+**Correction (srt1, 2026-11-24, `docs/srt1-swap-summary-return-input.md`).** This
+checkpoint said the returned popup's first input was 29884 (B+61) and that a
+DOWN at 29883 (B+60) "is rejected during return fade". Its own
+`picker-down-too-early` dump shows the opposite: menu cursor 1 on tick 29883
+(re-run in `.integration/evidence/swi1/oldprobe/`). It probed only B+60 and
+B+61. `Swap_Task_HandleMenu` is in `STATE_MENU_HANDLE_INPUT` from 29864 (B+41,
+fade still active), and that state checks only `monPicAnimating`, which
+`HideMonPic` cleared when the summary opened (`battle_factory_screen.c`
+:2601-2603, :4112-4118). So the rebuilt popup takes A / B / UP / DOWN from B+42
+(29865), during the palette fade-in. srt1's press sweep on the ROM measures +42
+for all four (Scene ON, seed 28), and the engine matches it since srt1.
+(The compact handoff `src/data/gen/battle1-swap-summary-return-boundaries.json`
+named above is no longer in the tree.)
 
 ## Source contract
 

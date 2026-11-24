@@ -269,10 +269,11 @@ export interface SummarySoundContext {
   readonly monFor: (slot: number) => SummarySoundMon | undefined;
 }
 
-/** SpriteCB_Pokemon's first PlayMonCry after the entry fade settles. */
-export function scheduleSummaryOpenCry(context: SummarySoundContext, slot: number): void {
+/** SpriteCB_Pokemon's first PlayMonCry after the entry fade settles; `elapsed`: frames of the open already behind (srt1: a swap-screen
+ * SUMMARY taken inside the summary return's fade-in opens on the timeline of an earlier A). */
+export function scheduleSummaryOpenCry(context: SummarySoundContext, slot: number, elapsed = 0): void {
   scheduleAfter(
-    SUMMARY_OPEN_CRY_DELAY,
+    SUMMARY_OPEN_CRY_DELAY - elapsed,
     () => {
       const mon = context.monFor(slot);
       if (mon !== undefined) playCry(context.bgm, mon);

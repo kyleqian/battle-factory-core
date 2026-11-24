@@ -666,7 +666,9 @@ import {
   factorySwapQuitExitObjFadeY,
   factorySwapPlayerOptionBallTile,
   factorySwapSummaryReturnBallTile,
+  factorySwapSummaryReturnFadeTicks,
   factorySwapSummaryReshowShown,
+  FACTORY_SWAP_SUMMARY_IN_FADE_POPUP_LAST_ELAPSED,
   handleFactorySwapPresentationInput,
   submitFactorySwapRoundDecision,
   type FactorySwapPresentationState,
@@ -1818,7 +1820,10 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
               returnTarget: "factorySwap",
             },
           );
-          scheduleSummaryOpenCry(factorySwapSummarySoundContext(state), summaryScreen.selectedSlot);
+          // srt1: an A inside the summary return's fade-in opens the summary on the timeline of an A at the fade-in's start
+          // (factorySwapSummaryOpensInReturnFade): its phaseElapsed starts there, so the summary screen and its cry catch up.
+          for (let i = 0; i < nextFactorySwap.phaseElapsed; i += 1) summaryScreen = advanceSummaryScreen(summaryScreen);
+          scheduleSummaryOpenCry(factorySwapSummarySoundContext(state), summaryScreen.selectedSlot, nextFactorySwap.phaseElapsed);
         }
       }
       return {
@@ -4331,12 +4336,13 @@ function renderWithoutFactoryTerminal(state: EngineState): Uint8Array {
           speciesRenderCoeff: swap.speciesNameFade.renderCoeff,
           bgFadeY: bgY,
           objFadeY: objY,
-          // A settled OpenMonPic/Swap_ShowSummaryMonSprite composition.
+          // A settled OpenMonPic/Swap_ShowSummaryMonSprite composition (srt1: the rebuilt popup's on its summary B's clock, which
+          // the handover to playerOptions at +41 does not reset; its highlight shows from +43).
           phaseElapsed:
-            swap.controller.phase === "summaryFade"
+            swap.controller.phase === "summaryFade" && !swap.summaryOpenedInReturnFade
               ? 58 + swap.phaseElapsed
-              : swap.controller.phase === "summaryReturn"
-                ? 58 + Math.max(0, swap.phaseElapsed - 42)
+              : swap.controller.phase === "summaryReturn" || summaryReshow
+                ? 58 + Math.min(1, Math.max(0, (swap.summaryReturnClock ?? 0) - 42))
                 : 59,
           selectedBallIndex: swap.selectedBallIndex,
           selectedBallTile:
@@ -4346,6 +4352,16 @@ function renderWithoutFactoryTerminal(state: EngineState): Uint8Array {
               : factorySwapPlayerOptionBallTile(swap.selectedBallClock),
           summaryReshowOtId,
         });
+      // srt1: a SUMMARY taken inside the summary return's fade-in: the popup goes on fading in until the swap screen is torn down
+      // (STATE_SUMMARY_CLEAN at +61, drawn to +62); the summary's own frames follow from the next one.
+      if (
+        swap.controller.phase === "summaryFade" &&
+        swap.summaryOpenedInReturnFade &&
+        swap.phaseElapsed <= FACTORY_SWAP_SUMMARY_IN_FADE_POPUP_LAST_ELAPSED
+      ) {
+        const ticks = factorySwapSummaryReturnFadeTicks(swap.summaryReturnClock ?? 0);
+        return ticks === null ? renderPopup(0, 0) : renderPopup(bgFadeY(ticks, FADE_IN), objFadeY(ticks, FADE_IN));
+      }
       const summary = state.summaryScreen;
       const transition = summary.transition;
       const summaryMonAnimClock = summary.monAnimClock ?? summary.openElapsed + 1;
@@ -4395,6 +4411,9 @@ function renderWithoutFactoryTerminal(state: EngineState): Uint8Array {
             animateSwitchedMon,
           );
     }
+    // srt1: the rebuilt popup closed (B / RECHOOSE / SWAP) inside the summary return's fade-in: the fade goes on under the close.
+    const returnFadeTicks =
+      summaryReshow && swap.summaryReturnClock != null ? factorySwapSummaryReturnFadeTicks(swap.summaryReturnClock) : null;
     const exiting =
       swap.controller.phase === "acceptExit" ||
       swap.controller.phase === "quitExit" ||
@@ -4415,13 +4434,13 @@ function renderWithoutFactoryTerminal(state: EngineState): Uint8Array {
             swap.controller.result === "keptParty"
           ? factorySwapQuitExitBgFadeY(swap.phaseElapsed)
           : factorySwapAcceptExitBgFadeY(swap.phaseElapsed)
-        : bgFadeY(fadeLocal, FADE_IN),
+        : bgFadeY(returnFadeTicks ?? fadeLocal, FADE_IN),
       objFadeY: exiting
         ? swap.controller.phase === "quitExit" ||
             swap.controller.result === "keptParty"
           ? factorySwapQuitExitObjFadeY(swap.phaseElapsed)
           : factorySwapAcceptExitObjFadeY(swap.phaseElapsed)
-        : objFadeY(fadeLocal, FADE_IN),
+        : objFadeY(returnFadeTicks ?? fadeLocal, FADE_IN),
       phaseElapsed: swap.phaseElapsed,
       selectedBallIndex: swap.selectedBallIndex,
       selectedBallTile:

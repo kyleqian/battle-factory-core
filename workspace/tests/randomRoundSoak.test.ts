@@ -1115,7 +1115,11 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // swi1 swap popup (docs/swi1-swap-popup-input-timing.md: a swap-screen popup opened after a summary waits for its OpenMonPic, input at +58
       // instead of +1; the exploring policy's presses there land later), measured on the trial merge: 40494 -> 40651; same battle 2 /
       // depth 1 / turn 24 / roundLost. A trajectory pin, not a ROM frame.
-      frames: 40651,
+      // srt1 (docs/srt1-swap-summary-return-input.md: the popup rebuilt after a swap-screen summary takes input from the summary's close
+      // +42 instead of +61, as on the ROM; the exploring policy's next press after its first summary close (A at 22668), a LEFT the popup
+      // ignores, lands at 22727 instead of 22730), measured on the trial merge: frames only, 40651 -> 40615 (decision notes identical
+      // without frames); same battle 2 / depth 1 / turn 24 / roundLost. A trajectory pin, not a ROM frame.
+      frames: 40615,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 1,
@@ -1185,7 +1189,9 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // supervisor merge of fsi1 with master + rmw1, measured on the merged tree: 57622; same battle 3 / depth 2 / turn 15 / roundLost.
       // ohs1 (Scene OFF ConfusedNoMore / InLove pre-move prints hold 64 + 5 / 64 + 6 before the used print, T2 OFF s7295 d8 / s6568 d29): frames only, 57622 -> 57634; same battle / depth / turn / end state (the diff shows only frames).
       // swi1 swap popup (see seed 0), measured on the trial merge: 57634 -> 57776; same battle 3 / depth 2 / turn 15 / roundLost.
-      frames: 57776,
+      // srt1 (see seed 0; its first summary closes with A at 20047, the next press, LEFT, lands at 20106 instead of 20109), measured on the
+      // trial merge: 57776 -> 57761; same battle 3 / depth 2 / turn 15 / roundLost.
+      frames: 57761,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 2,
