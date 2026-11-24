@@ -137,8 +137,9 @@ function anchors(seed: number): { anchors: Anchor[]; unanchored: number; offAnim
   const confusionOffHold = (c: any, events: any[]) => c.type === "message"
     && (((c.timing?.holdFrames === 71 || c.timing?.holdFrames === 67) && events.find((e: any) => e.sequence === c.eventSequence)?.payload.messageId === "STRINGID_PKMNISCONFUSED")
       || (c.timing?.holdFrames === 69 && events.find((e: any) => e.sequence === c.eventSequence)?.payload.messageId === "STRINGID_PKMNCONFUSEDNOMORE")
-      || (c.timing?.holdFrames === 70 && events.find((e: any) => e.sequence === c.eventSequence)?.payload.messageId === "STRINGID_PKMNINLOVE"))
-    ? { ...c, timing: { ...c.timing, holdFrames: c.timing.holdFrames === 71 || c.timing.holdFrames === 67 ? 66 : 67 } } : c;
+      || ((c.timing?.holdFrames === 70 || c.timing?.holdFrames === 67) && events.find((e: any) => e.sequence === c.eventSequence)?.payload.messageId === "STRINGID_PKMNINLOVE"))
+    ? { ...c, timing: { ...c.timing, holdFrames: events.find((e: any) => e.sequence === c.eventSequence)?.payload.messageId === "STRINGID_PKMNINLOVE" ? 65
+      : c.timing.holdFrames === 71 || c.timing.holdFrames === 67 ? 66 : 67 } } : c;
   const off = battleSegments(seed, "off").flatMap((s) => s.commands.map((c: any) => ({ c: confusionOffHold(c, s.events), events: s.events })));
   const messages = (l: typeof on) => l.filter((x) => x.c.type === "message").map((x) => x.c.messageId);
   expect(messages(on), `seed ${seed}: identical prints in both scenes`).toEqual(messages(off));
@@ -205,7 +206,9 @@ const SEEDS = [7, 11, 12, 18, 19, 20, 49, 60, 76, 87, 101];
 // Only when the next message is the used / self-hit print (the engine's condition), so on this path the extra is 0, 4 or 6.
 const cfa1PreMoveConfusionRows = (a: { animation: string; path: string; length: number; gate: number }): number => {
   const extra = a.length - a.gate - ROWS[a.animation]!;
-  return a.animation === "CONFUSION" && a.path === "STRINGID_PKMNISCONFUSED" && (extra === 4 || extra === 6) ? extra : 0;
+  // pmk1: the Scene ON "is in love" head holds 64 + 1 (OFF read at 65 above) and its command carries the 4 rows before the used print.
+  return (a.animation === "CONFUSION" && a.path === "STRINGID_PKMNISCONFUSED" && (extra === 4 || extra === 6) ? extra : 0)
+    || (a.animation === "INFATUATION" && a.path === "STRINGID_PKMNINLOVE" && extra === 4 ? extra : 0);
 };
 // tnl1 (ROM labs gsp3-toxic / b4m-thunderwave, docs/aud251-s11-scoreboard-refresh.md "tnm1" 1.C): a move-inflicted PSN / BRN / PRZ (BattleScript_MoveEffect{Poison,Toxic,Burn,Paralysis}) holds its animation 2 rows longer, the ROM's print row (369 vs 367).
 const tnl1MoveInflictedRows = (a: { animation: string; path: string; length: number; gate: number }): number =>

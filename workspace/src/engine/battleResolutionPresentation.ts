@@ -1223,8 +1223,22 @@ const IN_LOVE_OFF_USED_PRINT_TIMING = Object.freeze({
  * after it were 5 rows early (lab Psychic print -5, SE 184 / 13 -5). A hurt confusion (BattleScript_DoSelfConfusionDmg) is not this case.
  */
 export const PRE_MOVE_CONFUSION_TO_USED_PRINT_ROWS = 6;
+/**
+ * pmk1 (Scene ON; ROM labs pmk1-inlove-eq-foe-on / pmk1s-eq-s6 / s7: the infatuated attacker's Earthquake, print and every SE after it 4 rows early; T2 s1415 d7 .. d33
+ * Rest / Bulk Up / Earthquake -4 after the three SE 212): the InLove head's `status2animation` (BattleScript_MoveUsedIsInLove) leaves the controller on its release row, then
+ * `return` and the re-entered attackcanceler rows run before the used print, 4 more than the 97 + 3 the animation command holds.
+ */
+export const PRE_MOVE_IN_LOVE_TO_USED_PRINT_ROWS = 4;
 function preMoveConfusionToUsedPrintRows(events: readonly BattleKernelSemanticEvent[], index: number): number {
-  if (events[index]!.provenance?.sourceLabel !== CONFUSION_HEAD_SCRIPT) return 0;
+  const label = events[index]!.provenance?.sourceLabel;
+  if (label === IN_LOVE_HEAD_SCRIPT) {
+    for (let next = index + 1; next < events.length; next += 1) {
+      const payload = events[next]!.payload;
+      if (payload.kind === "message") return payload.messageId === "STRINGID_USEDMOVE" ? PRE_MOVE_IN_LOVE_TO_USED_PRINT_ROWS : 0;
+    }
+    return 0;
+  }
+  if (label !== CONFUSION_HEAD_SCRIPT) return 0;
   for (let next = index + 1; next < events.length; next += 1) {
     const payload = events[next]!.payload;
     if (payload.kind === "message") return payload.messageId === "STRINGID_USEDMOVE" ? PRE_MOVE_CONFUSION_TO_USED_PRINT_ROWS : payload.messageId === SELF_CONFUSION_HIT_MESSAGE_ID ? PRE_MOVE_CONFUSION_TO_USED_PRINT_ROWS - 2 : 0;
@@ -1380,6 +1394,15 @@ const PRE_MOVE_CONFUSION_STATUS_ANIMATION_TIMING = Object.freeze({
   holdFrames: WAITMESSAGE_LONG_HOLD_FRAMES + PRE_MOVE_CONFUSION_STATUS_ANIMATION_LEAD_ROWS,
 } as const);
 /**
+ * pmk1 (T2 s1415 first-mover "is in love" heads, Scene ON only): the engine's head print -> status-animation gap was 102 rows where the ROM
+ * `MoveUsedIsInLove` needs 100, so every SE after it carried +2; the head wait ends 2 rows earlier than sta3's asleep-fitted 3.
+ */
+export const PRE_MOVE_IN_LOVE_STATUS_ANIMATION_LEAD_ROWS = 1;
+const PRE_MOVE_IN_LOVE_STATUS_ANIMATION_TIMING = Object.freeze({
+  minimumFrames: 0,
+  holdFrames: WAITMESSAGE_LONG_HOLD_FRAMES + PRE_MOVE_IN_LOVE_STATUS_ANIMATION_LEAD_ROWS,
+} as const);
+/**
  * sta5 step 2 (docs/aud249-general-anim-sounds.md, ROM windows aud242b Flatter / aud242f Swagger): a stat print whose script goes on to
  * inflict a status move effect (`printfromtable; waitmessage LONG; jumpifability; jumpifsideaffecting; setmoveeffect; seteffectprimary`,
  * which runs `chosenstatus2animation`) reaches the launch 6 rows after the message ends: waitmessage's completing row, the four script
@@ -1471,6 +1494,7 @@ function messageTimingFromSourceProvenance(
     if (tickLead !== undefined) return Object.freeze({ minimumFrames: 0, holdFrames: WAITMESSAGE_LONG_HOLD_FRAMES + tickLead });
     const launch = BATTLE_SCRIPT_PROGRAM.instructions[programCounter + 2]?.opcodeName;
     if (launch === "B_SCR_OP_STATUS2ANIMATION" || launch === "B_SCR_OP_STATUSANIMATION") {
+      if (!sceneOff && event.provenance?.sourceLabel === IN_LOVE_HEAD_SCRIPT) return PRE_MOVE_IN_LOVE_STATUS_ANIMATION_TIMING;
       return !sceneOff && event.provenance?.sourceLabel === CONFUSION_HEAD_SCRIPT ? PRE_MOVE_CONFUSION_STATUS_ANIMATION_TIMING : PRE_MOVE_STATUS_ANIMATION_TIMING;
     }
     if (MOVE_INFLICTED_STATUS_ICON_SCRIPTS.has(event.provenance?.sourceLabel ?? "")) {
@@ -1662,6 +1686,8 @@ const WAKE_UP_ACTION_TRANSITION_NEXT_PRINT = "STRINGID_PKMNWOKEUP";
  */
 const IN_LOVE_TRANSITION_PRINT = "STRINGID_PKMNINLOVE";
 const IN_LOVE_TRANSITION_ROWS = -2;
+/** pmk1 (T2 s1415 second-mover heads, Scene ON only; Scene OFF keeps gsp3's -2): the ON print lands on the ROM's glyph row with 0. */
+const IN_LOVE_TRANSITION_SCENE_ON_ROWS = 0;
 
 /**
  * wtl1 (ROM labs aud241c-win-{off,on}; P = the press on the foe's last "fainted!", Q = P + 2 the controller's completion): the win tail's script
@@ -1887,7 +1913,7 @@ function actionTransitionPauseFrames(
     if (sceneOn && isChargeTurnOpener(event)) endTurnRows = CHARGE_TURN_OPENER_SCENE_ON_ROWS;
     used = next;
     usedIsPreMove = !endTurnWeather && event.payload.messageId !== "STRINGID_USEDMOVE";
-    if (event.payload.messageId === IN_LOVE_TRANSITION_PRINT) inLoveRows = IN_LOVE_TRANSITION_ROWS;
+    if (event.payload.messageId === IN_LOVE_TRANSITION_PRINT) inLoveRows = sceneOn ? IN_LOVE_TRANSITION_SCENE_ON_ROWS : IN_LOVE_TRANSITION_ROWS;
     break;
   }
   if (used === null) return null;
