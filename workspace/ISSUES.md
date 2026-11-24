@@ -87,6 +87,9 @@ Hydro Pump / Cosmic Power / Calm Mind / Encore / Hypnosis / Blizzard, ROM hp com
   anchor fix is part of it). Open (ranked in the handoff "Next work"): the OFF faint box's press-ready frame (s6568 d104), the Focus Punch family's next row (s310 d3 -9), Supersonic s5569 d12 -9 (no
   supported lab pair), the end-turn last-print box blank (~30 frames, sbx1), the Leech Seed drain body pixels (age 21 vs SE 7 + 2), Slack Off / Morning Sun (no live body adapter), shb1's 49 / ftp1's 16
   on few windows, Water Gun / Pay Day effectiveness SE -1 after the ClearMonBg tail (sbm1).
+- **2026-11-23/24 run** (`docs/aud251-s11-scoreboard-refresh.md` "ldw1" .. "bwf2", rankings "t2k8" / "t2k9"): T2 ON 8,684 -> 6,186, OFF 719 -> 597 (0 / 0). Open, ranked in t2k9 / the handoff
+  "Next work": the battle-end loss recall SE 15 -4, OFF hit-SE rows, the Toxic next-action gap, Rest -> Chesto +6, Rock Slide after Belly Drum -6, Dig after Dig / confusion, Supersonic tail,
+  Twineedle / Pin Missile / Rock Blast, Luster Purge / Signal Beam 1 row; the T2 OFF s6568 d104 -20 is the replay tool's press mapping (fbp1, Mac-owned file).
 - **Bodies measured, not landed (lse3, docs/hpd1-hp-hold.md "lse3"):** Absorb +10, Mega Drain +8, Counter +5, Revenge +8, Recycle +4, Razor Wind charge / unleash +8 / +9 (+ ~5 turn-end rows of a
   locked continuation), Pound / Scratch / Tackle (+13 / +12 / +21; phy1m: outsideFactory, reachable only through Metronome; every Factory body is live in play, but 63.6 % of body commands have no audited lead, +6 .. +14 rows: `docs/phy1m-nonlive-bodies.md`), Wish (+14: the generic action-transition rows that `actionTransitionPauseFrames` drops in Scene ON
   when the anchor is the used print). hpf3 re-pinned Absorb / Revenge / Recycle / Razor Wind windows that these bodies now dominate.
@@ -259,9 +262,8 @@ windows (the next message one frame late); cause named, not proven.
 
 Landed pieces (Rest, stat-stage-change-next class, Wish, the action transition in both scenes, Scene ON tails, faints, Rest /
 Bulk Up second stat) are in the archive entry and git. Still open:
-- **Scene ON zero-tail live bodies** (tl204, `docs/tl204-zero-tail-rows.md`): next print early by Double Team -5, Rain Dance -5,
-  Sunny Day / Hail -6, Leech Seed -39, Light Screen -4, Charm -6, Fake Tears -1, Calm Mind -10, Scary Face -19 (tl205 was to
-  implement the script-row tail on a branch). 24 further moves carry a 0-frame tail pending a ROM scenario (ont193).
+- **Scene ON zero-tail live bodies:** closed by tl205 / kse1 / ztl1 / bwf1 (2026-11-23, `docs/aud251-s11-scoreboard-refresh.md` "ztl1" table, "bwf1") except Psych Up 244 as a
+  second mover (T2 s7295: every body after a confusion animation was ~5 rows early, cfa1 landed that; Psych Up's own -4 is unexplained; held out).
 - **Named residuals:** Toxic's upstream -19 (status body before the message), Snore +10, Toxic -2, Curse +2 / -4 (re-measure after
   the floor drop), msg175's Rest-route Tackle HP anchor -3 ON / +18 OFF, Roar OFF +17, Baton Pass OFF -66.
 - **Unmeasured:** switches, end of turn and pre-move prints after the anchor.
