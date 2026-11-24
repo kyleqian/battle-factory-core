@@ -1485,6 +1485,20 @@ function messageTimingFromSourceProvenance(
   return null;
 }
 /**
+ * mem1 / crs1 (docs/aud251-s11-scoreboard-refresh.md; both scenes: `BattleScript_HitFromAtkAnimation` runs the same commands, battle_scripts_1.s:253-268):
+ * `critmessage` / `waitmessage LONG` / `resultmessage` / `waitmessage LONG`. After the crit print's 64-row wait the ROM spends one row on the `resultmessage` command
+ * and one on the new print's wait row before the result's first glyph: crit `+0xb` ex1 -> result `+0xf` ex1 = 16 + 65 = 81 rows in all 7 ROM windows (s1914 d2, labs
+ * crs1-{slash,chop}-*: 6 windows, 81 each), the engine's crit message lasted L + 64 = 79.
+ */
+export const CRIT_TO_RESULT_MESSAGE_HANDOFF_ROWS = 2;
+function critMessageBeforeResultMessage(events: readonly BattleKernelSemanticEvent[], index: number): boolean {
+  const event = events[index]!;
+  if (event.payload.kind !== "message" || event.payload.messageId !== "STRINGID_CRITICALHIT" || event.provenance?.sourceLabel !== "BattleScript_HitFromAtkAnimation") return false;
+  const next = events[index + 1];
+  return next?.payload.kind === "message" && next.provenance?.sourceLabel === "BattleScript_HitFromAtkAnimation"
+    && (next.payload.messageId === "STRINGID_SUPEREFFECTIVE" || next.payload.messageId === "STRINGID_NOTVERYEFFECTIVE");
+}
+/**
  * Scene-OFF hit controller lifetime:
  * setup, 32 blink callbacks, completion, and waitstate release.
  * battle_controller_opponent.c:1804-1816,440-456;
@@ -6607,7 +6621,9 @@ export function projectBattleResolutionCommands(
                   ?? (WAITMESSAGE_LONG_MESSAGE_IDS.has(payload.messageId) || payload.messageId === SUBSTITUTE_FADED_MESSAGE_ID
                   ? WAITMESSAGE_LONG_TIMING
                   : MESSAGE_TIMING);
-                const timing = focusPunchPrePassMessageTiming(events, index, base) ?? chargeTurnEmptyBoxTiming(events, index) ?? hitAllLoopEmptyBoxTiming(events, index) ?? base;
+                const critHandoff = critMessageBeforeResultMessage(events, index) ? CRIT_TO_RESULT_MESSAGE_HANDOFF_ROWS : 0;
+                const timing = focusPunchPrePassMessageTiming(events, index, base) ?? chargeTurnEmptyBoxTiming(events, index) ?? hitAllLoopEmptyBoxTiming(events, index)
+                  ?? (critHandoff > 0 ? Object.freeze({ minimumFrames: base.minimumFrames, holdFrames: base.holdFrames + critHandoff }) : base);
                 if (payload.messageId === "STRINGID_THEWALLSHATTERED") {
                   return Object.freeze({ minimumFrames: timing.minimumFrames, holdFrames: timing.holdFrames + BRICK_BREAK_WALL_PRINT_TAIL_ROWS });
                 }
