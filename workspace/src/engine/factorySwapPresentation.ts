@@ -1060,6 +1060,19 @@ export function beginFactorySwapSummaryReturn(
   };
 }
 
+/**
+ * swp1: true while the swap screen's popup pic is still the one CB2_InitSwapScreen rebuilt after a summary visit
+ * (Swap_ShowSummaryMonSprite, battle_factory_screen.c:4075-4097, from CB2_InitSwapScreen state 6, :3356-3362), not one a later A on a
+ * ball opened. `returnedFromSummary` stays set for the rest of the screen (the controller's post-summary input timing reads it), so it
+ * cannot say this alone. The summary return clears `selectedBallClock`, and only entering the popup from the picker (OpenMonPic in
+ * Swap_Task_HandleMenu STATE_MENU_INIT, :2589-2593) sets it again. The rebuilt popup is shown in playerOptions and closed by B /
+ * RECHOOSE / SWAP (CloseMonPic, :2609-2619, :3989-4013); in the closing phases this says that the closing pic is that one. Read by the
+ * renderer only.
+ */
+export function factorySwapSummaryReshowShown(state: FactorySwapPresentationState): boolean {
+  return state.returnedFromSummary && state.selectedBallClock === null;
+}
+
 /** Fresh Swap_InitAllSprites callback epoch during CB2_InitSwapScreen. */
 export function factorySwapSummaryReturnBallTile(
   closeElapsed: number,
