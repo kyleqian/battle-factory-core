@@ -4315,6 +4315,8 @@ Not applied: no `src/` or `tests/` change; PROGRESS / ISSUES / ROADMAP / PAPERCU
 
 ## cfm1 - the pre-move confusion path in both scenes: the sa125 identity holds on the ROM; cfa1's +5 is engine bookkeeping
 
+**Test half NOT landed by lrl1** - dropping the normalisation and the exception fails (numbers in the lrl1 section).
+
 Main/ts lane, measurement only (no `src/` / `tests/` change; the engine is `c22d60e57`). Question: sa125 / sag130 assert ON - OFF = the controller rows (100 for CONFUSION), cfa1 measured that Scene ON needs 5 more on
 `BattleScript_MoveUsedIsConfused` (`printstring`, `waitmessage`, `status2animation`, `jumpifbyte`, `return`, then the used move's `attackcanceler` / `accuracycheck` / `attackstring`) and the tests carry
 `cfa1PreMoveConfusionRows` as a named exception. Method: `tools/integration/labCompare.sh --scene both` (ROM `hcr3mProbe.py` rows, per-frame `gBattlescriptCurrInstr` / exec flags / `gAnimScriptActive` / `sTextPrinters[0]`;
@@ -4385,6 +4387,8 @@ the lab stage's RNG phase for the roll, not a scene rule (T2 and the census read
 
 Not applied: no `src/` or `tests/` change; PROGRESS / ISSUES / ROADMAP / PAPERCUTS untouched; `npm test` / `typecheck` / `build` not run (the step forbids them; only `tools/integration/cfm1Chain.py`, three lab files and this doc). The T2 effect of the split constant is predicted, not measured.
 ## lrm1 (2026-11-24): the loss-recall SE 15 -4 settled with a lab pair (measurement only; labs + doc, no `src/` / `tests/` change)
+
+**LANDED by lrl1 (`bc9cbcfad`)** - see the lrl1 section at the end of this file.
 
 Engine frozen at `c22d60e57`. New labs (the loss lab's party flow, but the player's last Pokémon is KO'd by the **foe's move** instead of its own Explosion): `tools/battle-lab/lrm1-loss-targetfaint-off.json` (Scene OFF) and `-on.json` (Scene ON, idle gaps doubled as `aud241c-loss-expl-on`). Staging: `loss-terminal-explosion-dusclops-off.json` with the player's three mons = ONIX / SHUCKLE / ONIX Lv3 (Splash x4) and the foe's three DUSCLOPS (Shadow Ball x4, the Factory AI has one legal move), seed 305419896, fixed-frame trace (A intro x3; per turn A, A, wait, A on the "fainted!" box, DOWN x1 / x2 to the next mon in the forced party menu, A, A); `battleOutcome` 2 at the end in both scenes. (The third mon is ONIX, not the Lv3 MURKROW first tried: Shadow Ball is resisted by a Dark type and the engine's not-very-effective chain is a different window.) Runs: `labCompare.sh --rows lrm1-loss-targetfaint-off lrm1-loss-targetfaint-on` (47 s, both scenes; evidence `/tmp`, not kept), `labCompare.sh --rows aud241c-loss-expl-on loss-terminal-explosion-dusclops-off` for the Explosion baseline (`aud241c-loss-off.json`'s engine side derails in labCompare, use the DUSCLOPS file), and `probe.sh 1028 off 16 -40:1000` (T2 end-of-turn faint, `T2K4_DIR` = a worktree dir whose `t2` links to `t2k9/t2-off`).
 
@@ -4999,6 +5003,8 @@ Measurement only: no `src/` / `tests/` change, no lab file added, PROGRESS / ISS
 
 ## ecm1 (2026-11-24): the ConfusedNoMore -> next print step (t2k9 item E s830 d5 -6, lcm1 s7295 d8 103 vs 108) is two terms, both already landed for Scene OFF; the Scene ON recipe (measurement only; doc only, no `src/` / `tests/` change)
 
+**LANDED by lrl1 (`2681af30d`)** - see the lrl1 section at the end of this file.
+
 Engine frozen at `c22d60e57`. Probes (`nice -n 10`, `T2K4_DIR` = a dir whose `t2` links to `t2k9/t2-on` / `t2-off`): `probe.sh 830 on 5 -40:900` (19 s) and `probe.sh 830 off 5 -40:500` for the Scene OFF reference; s7295 d8 ON is lcm1's capture (`.integration/evidence/lcm1/p/on/7295-d8.cmp.txt`, reread, not recaptured). Evidence: `.integration/evidence/ecm1/p/on/830-d5.cmp.txt`, `.integration/evidence/ecm1off/p/off/830-d5.cmp.txt` (git-ignored).
 
 ### Answer in one paragraph
@@ -5261,3 +5267,31 @@ So the -2 is not a one-window artifact: it holds on resisted and super-effective
 - Land it with the ihm1 check from mem1: run `ihm1/all.sh` on the scratch edit; predicted effect on s1914 d2 is item chain -3 -> -1, and every T2 crit -> result window moves 2 rows. The new labs (`crs1-slash-s{4,5,8,11,12}-off`, `crs1-chop-s6-off` have the ROM crit; `crs1-slash-s{2,5,13}-off`, `crs1-chop-s{2,5,11}-off` have the engine crit) are the regression set: after the edit the engine crit windows should read 81, which labCompare shows as the result print -2 -> 0 against the ROM windows of the same lab geometry.
 - Side finding (not investigated, not part of this term): the ROM and engine do not crit on the same seed in these labs (ROM slash crits on seeds 4 / 5 / 8 / 11 / 12, engine on 2 / 5 / 13; ROM chop on 6, engine on 2 / 5 / 11), so a per-seed same-window ROM / ENG pair does not exist here; the comparison above is by lab geometry. Slash seed 5 even crits on the ROM in turn 2 and in the engine in turn 3. The crit-roll RNG alignment in labs is a separate question from message timing.
 - Nothing changed in `src/`, `tests/`, PROGRESS / ISSUES / ROADMAP / PAPERCUTS; npm test / typecheck / build were not run, as the step's prohibitions say (they override the brief's closing "tests and build green" line).
+
+## lrl1 (2026-11-24): lrm1 + ecm1 landed (ts lane, both scenes); cfm1's test half fails as written and is not landed
+
+Two commits on `a952017d5` (engine base `c22d60e57`), presentation / sound timing only; census eventsDigest identical.
+
+### lrm1 (`bc9cbcfad`, `src/engine/battleResolutionPresentation.ts`, `battleEndSounds.ts` comment)
+
+- `LOSS_RECALL_LEAD_FRAMES` 20 -> **24** (target faint and end-of-turn faint). The loss `switch-out` command now picks its lead from the faint chain (`lossRecallSwitchOut`): **24** default; **22** `LOSS_RECALL_EXPLOSION_LEAD_FRAMES` when the faint is `BattleScript_FaintAttacker` after a `B_SCR_OP_TRYEXPLOSION` (Explosion / Self-Destruct); **20** `LOSS_RECALL_ITEM_CHAIN_LEAD_FRAMES` when an `animation` event sits between the faint and the recall (held-item chain, aud252: s1914 d13 / s2230 d23 stay put).
+- The Explosion lead moved from the effective 20 to 22 (the doc recipe's 22): the Explosion labs went -2 -> 0.
+- Labs (SE 15 = SE_BALL_OPEN, ENG - ROM): `lrm1-loss-targetfaint-{off,on}` -4 -> **0**, `loss-terminal-explosion-dusclops-off` -2 -> **0**, `aud241c-loss-expl-on` -2 -> **0** (evidence `.integration/evidence/lrl1/lab-lrm1/`).
+- T2 (`rescoreAll.sh` + `soundScoreboard.py`; base = the final-engine `t2final-20261124`, src unchanged since `c22d60e57`): **ON 6,186 -> 6,118 (-68; exact 3,598 -> 3,610), OFF 597 -> 537 (-60; exact 897 -> 911)**, 0 missing / 0 extra in both (recipe expected -124; got -128).
+- Pins re-read and moved: `tests/lrc1LossRecall.test.ts` A -> SE_BALL_OPEN 24 -> **28** (ROM A -> SE 15 on a target faint, labs `lrm1-loss-targetfaint-*`, 3157 -> 3185 / 5957 -> 5985); `tests/aud241cBattleEndSounds.test.ts` loss `describeWindow` deltas `[0,0,4,0,0,0,0,0]` (that stage is a Seismic Toss **target** faint, ROM A + 28, while its ROM fixtures are the player's Explosion at A + 24; the Explosion path is pinned by the labs, not this stage).
+
+### ecm1 (`2681af30d`)
+
+- Scene ON ConfusedNoMore -> next print: the message after `BattleScript_PrintConfusedNoMore`'s head gets the OFF `u - 2` action-dispatch hold (`usedMovePrintLeadU(..., forHold = true)` with the NoMore label) and `CONFUSION_NO_MORE_OFF_USED_PRINT_TIMING` (hold 64 + 5 = 69) in ON as well. Only the NoMore label: the confusion head and InLove in ON are untouched (unmeasured).
+- T2 ON on top of lrm1 (25 seeds): **6,118 -> 5,895 (-223; exact 3,610 -> 3,614)**, 0 missing / 0 extra; s8108 d12 (Dig after ConfusedNoMore, flagged for re-probe) -9. OFF unchanged by this edit. Lrl1 total: **ON 6,186 -> 5,895 (-291), OFF 597 -> 537 (-60)**.
+- Pin: `tests/ohs1PreMoveOffHeads.test.ts` `commandRows(name, scene)` + an ON message with hold 69 in `hpf4m-confuse-on` (ROM: ConfusedNoMore print -> used print 64 + 5, as OFF `hpf4m-confuse-off`).
+
+### cfm1 (test half): not landed
+
+Dropping the OFF-hold normalisation (71 -> 67 for STRINGID_PKMNISCONFUSED, and the now-redundant 69 -> 67 for ConfusedNoMore) and `cfa1PreMoveConfusionRows` from `tests/sa125StatusAnimationCommand.test.ts` and `tests/sag130StatusSeGate.test.ts` fails both: sa125 seed 7 CONFUSION `a.length` **105, expected 100**; sag130 seed 3 #3 CONFUSION **105, expected 100** (the first failing assertion of each, `a.length`; the `ON - OFF` assertion after it was not reached). So the ON status-animation command's own length carries cfa1's `PRE_MOVE_CONFUSION_TO_USED_PRINT_ROWS = 5` on the pre-move path, not only the tests' OFF normalisation; per the brief, no `src/` change for it and both tests were restored unchanged. The source identity (100) vs the ROM probe (100 from `return` on, cfm1) still needs the engine's 5 rows moved to where the ROM has them (print -> used print, the chp1 recipe re-deriving cfa1's 5), which is a src change for a later step.
+
+### Acceptance
+
+- Census 0..199 both scenes, `a952017d5` vs HEAD: eventsDigest + error identical **200 / 200 ON and OFF**, type-sequence changes 0 (ON 119 / OFF 104 battles have changed commands). Evidence `.integration/evidence/lrl1/census` (tree copies deleted).
+- Tests: all 259 test files importing `battleResolutionPresentation` / `battleEndSounds` plus `randomRoundSoak*` and `lbrd`: 259 / 259 files green (2,413 tests); `test:gate` 360 files / 2,839 tests green; `typecheck` 0; `build` 0. No residual SELF-DESTRUCT / EXPLOSION / LOSS_RECALL / NoMore pins found beyond the ones re-pinned above.
+- Left: cfm1's source-side move (above); the ON confusion head / InLove holds; ssl1 / mhl1 moves untouched.

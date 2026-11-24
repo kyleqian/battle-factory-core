@@ -5,6 +5,15 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 2026-11-24 — lrl1 (worker, ts lane, both scenes): lrm1 + ecm1 landed (T2 ON 6,186 -> 5,895, OFF 597 -> 537); cfm1 test half fails, not landed
+
+- **State:** master, two commits `bc9cbcfad` (lrm1) and `2681af30d` (ecm1) + this docs / PROGRESS commit; no push. Gates: census 0..199 both scenes eventsDigest identical 200 / 200; 259 importer test files green, `test:gate` 360 files / 2,839 tests, typecheck, build all 0.
+- **Did:** lrm1: loss recall lead 20 -> 24 (target / end-of-turn faint), Explosion 22, held-item chain 20; labs SE 15 -4 / -2 -> 0 (4 labs); T2 ON -68, OFF -60. ecm1: Scene ON ConfusedNoMore head `u - 2` hold + 64 + 5 hold; T2 ON -223 more, 0 missing / 0 extra. Pins re-read and re-pinned: lrc1 (A -> SE 28), aud241c (target-faint stage `[0,0,4,...]`), ohs1 (ON hold 69). **Play change (named):** a lost battle's recall / lose text land 4 frames later on a target faint (ROM-faithful), and the next action after a Scene ON ConfusedNoMore shifts the same way.
+- **cfm1 test half FAILED, not landed:** dropping the 71 -> 67 normalisation + `cfa1PreMoveConfusionRows` gives sa125 s7 CONFUSION length 105 (expected 100), sag130 s3 #3 105 (expected 100); tests restored, no `src/` change.
+- **Next:** cfm1 source side (the ON status animation's 5 pre-move rows vs the ROM's print -> used print, with chp1's recipe); ON confusion head / InLove holds. Details: `docs/aud251-s11-scoreboard-refresh.md` "lrl1".
+
+---
+
 ## 2026-11-24 — CAX31 daily run (supervisor, Opus 5.5, 2026-11-23 13:30 -> 2026-11-24 05:30 UTC): wind-down: sound timing ON -29 % / OFF -17 % (T2 8,684 -> 6,186 / 719 -> 597), eight status / damaging animations frame-exact, OFF Sun / Rain pause, player "Go!" send-in
 
 - **State:** master clean, no push. **No DEFERRED items.** Final engine `c22d60e57` (later commits: tests / docs / tools). **ENGINE_BUILD `eb-98540cad897c0482`** (dist-lib of `c22d60e57`; tell the website).
