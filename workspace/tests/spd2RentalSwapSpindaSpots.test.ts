@@ -10,8 +10,8 @@
 // the 64x64 picture, the pixels drawn in palette[c + 4] where the plain picture has colour c in 1..3, measured from the ROM frame
 // alone (every other opaque pixel of the picture was the plain colour, offset 0, 0). Kyle's draft: ROM frame 901 (personality
 // 1984593932); seed 10's draft: ROM 280 (cursor), 466 (after the summary), 732 (chosen); seed 28's swaps: ROM 13123 (the enemy's
-// SPINDA), 26591 (the same mon as the player's), 26835 (after its summary: OT id 416049562's spots), and battle 1's Fly body at ROM 3334
-// (region hash below, opponent SPINDA at rest).
+// SPINDA), 26591 (the same mon as the player's), 26835 (after its summary: OT id 416049562's spots), and battle 1's FAINT ATTACK body (the
+// opponent SPINDA attacking) at ROM 3334 (region hash below, the sprite at rest).
 import { createHash } from "node:crypto";
 import { describe, expect, it } from "vitest";
 import "../src/engine/monPicPixelsInstall.ts";
@@ -37,8 +37,8 @@ const ROM_SPOTS: Readonly<Record<number, Readonly<Record<number, bigint>>>> = {
   [SEED28]: r({ 9: 0x380000n, 10: 0x180000fc0000n, 11: 0x1c00011e0000n, 12: 0xc0002ee0000n, 13: 0x360001f60000n, 14: 0x3a0005b60000n, 15: 0x1a0005a40000n, 16: 0x1b00066c0000n, 17: 0x30003d80000n, 18: 0x70003300000n, 19: 0x10000600000n, 20: 0x800000n, 25: 0x1c0000000n, 26: 0x3e0000000n, 27: 0x7e0000000n, 28: 0x7803e0000000n, 29: 0x7c03e0000000n, 30: 0x7c03e0000000n, 31: 0x7c07f0000000n, 32: 0x7c03e0000000n, 33: 0x3e0180000000n, 34: 0x3e0000000000n, 35: 0x1c0000000000n, 36: 0x80000000000n }),
   [PLAYER_TRAINER_ID]: r({ 8: 0x400000n, 9: 0x1e00001f00000n, 10: 0x3f80003f80000n, 11: 0x7fc0003180000n, 12: 0x78c0006ec0000n, 13: 0xf760005f40000n, 14: 0xef8000db40000n, 15: 0xeb8000da40000n, 16: 0x6b8000e680000n, 17: 0x690001fd80000n, 18: 0x140000f300000n, 19: 0x3004000000n, 20: 0x17800000000n, 21: 0x3fc00000000n, 22: 0x3fc00000000n, 23: 0x1fc00000000n, 24: 0x3fc00000000n, 25: 0x3fc00000000n, 26: 0x10800000000n, 27: 0xf000000000n, 29: 0x60000000n, 30: 0xe8000000n, 31: 0x1f0000000n, 32: 0x1fc000000n, 33: 0x19c000000n, 34: 0x1fc000000n, 35: 0xc000000n, 36: 0x18000000n, 37: 0x30000000n }),
 };
-/** sha256 of the RGB888 pixels of (136,0)-(216,72) on ROM frame 3334: battle 1's Fly body, the target SPINDA (SEED28) at rest. */
-const ROM_FLY_BODY_REGION_SHA256 = "7a6c65e6845492255b330f97e5c979de695da6c8bced3f6d2cbb8c7b8909c064";
+/** sha256 of the RGB888 pixels of (136,0)-(216,72) on ROM frame 3334: battle 1's FAINT ATTACK body by the opponent SPINDA (SEED28). */
+const ROM_BODY_REGION_SHA256 = "7a6c65e6845492255b330f97e5c979de695da6c8bced3f6d2cbb8c7b8909c064";
 
 type Tiles = Readonly<{ columns: number; tiles: readonly (readonly number[])[] }>;
 const plain = () => frontPixels("SPINDA")!.tileset as Tiles;
@@ -155,7 +155,7 @@ describe("spd2: SPINDA's spots on the rental and swap screens, as on the ROM", (
     });
   });
 
-  it("seed 28's battle 1: a Scene ON move body (Fly) draws the opponent SPINDA with its spots, frame for frame as the ROM", () => {
+  it("seed 28's battle 1: a Scene ON move body (its FAINT ATTACK) draws the opponent SPINDA with its spots, frame for frame as the ROM", () => {
     replay(traces.swapSeed28, [3140], (_frame, state) => {
       const fb = render(state);
       expect(spotRows(fb, 144, 16)).toEqual(ROM_SPOTS[SEED28]);
@@ -166,7 +166,7 @@ describe("spd2: SPINDA's spots on the rental and swap screens, as on the ROM", (
           rgb.set([fb[o]!, fb[o + 1]!, fb[o + 2]!], (y * 80 + x) * 3);
         }
       }
-      expect(createHash("sha256").update(rgb).digest("hex")).toBe(ROM_FLY_BODY_REGION_SHA256);
+      expect(createHash("sha256").update(rgb).digest("hex")).toBe(ROM_BODY_REGION_SHA256);
     });
   });
 });
