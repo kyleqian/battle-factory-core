@@ -5,6 +5,15 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 2026-11-24 — snr1 (worker, ts lane, Scene ON first, OFF checked): Roar / Whirlwind drag send-in landed (T2 ON 4,477 -> 4,391, OFF 475 unchanged); party summary after a faint and the class 3 Leech Seed carry are recipes
+
+- **State:** master, commit `043f34932` (+ this docs / PROGRESS commit); no push. Gates: census 0..199 both scenes eventsDigest identical 200 / 200 (ON 21 battles change commands, OFF 0); 244 importer / soak / lbrd / ROAR-WHIRLWIND test files green with no re-pin; `npm run typecheck`, `npm run test:gate` (360 files), `npm run build` green. Full `npm test` not run (worker rule); test:gate + importer tests is the substitute.
+- **Did:** class 8 grouped by path. Roar (46) / Whirlwind (18) forced switch (Scene ON): the engine's animation body ended 6 rows before the ROM's A1 row; `[18, 6], [46, 6]` in `LIVE_MOVE_LEADLESS_TAIL_ROWS` (`battleResolutionPresentationRender.ts`). Drag labs SE mass 19 / 16 / 16 / 12 / 16 -> 7 / 4 / 8 / 4 / 4; T2 ON cry 200 -> 160, battle-controller 591 -> 545. Party summary after a faint: measured negative (identical AI-choice work features need 0..4 frames; no constant). Class 3: the Leech Seed tick is exact behind a miss, and 3 rows late behind a successful Confuse Ray (s648 d12) and Pain Split (s648 d10): the ROM reaches `BattleScript_MoveEnd` 3 rows later; a message-tail map is needed.
+- **Next:** class 3 message tail (3 rows after the last message of Confuse Ray success / Pain Split; with cre1 for the Confuse Ray entry term), switch-out SE 15 after a faint, OFF switch-in rows, ON s2 d6 / d12, s165 d17 status 148 -6 (not probed).
+- **Notes:** section "snr1" at the end of `docs/aud251-s11-scoreboard-refresh.md`; evidence under `.integration/evidence/snr1/` (git-ignored). s6568 d104 left alone (harness press pulse).
+
+---
+
 ## 2026-11-24 — pmk1 (worker, ts lane, Scene ON first): the move after an "is in love" head landed (T2 ON 5,116 -> 4,918, OFF 475 unchanged); other class-1 rows are not constants
 
 - **State:** master, commit `033137706` (+ this docs / PROGRESS commit); no push. Gates: census 0..199 both scenes eventsDigest identical 200 / 200 (ON 18 battles change commands, OFF 0); 209 importer / soak / lbrd test files green after re-pinning sa125 / sag130 / sub157 (each read from Received, named in the doc); `test:gate` 360 files / 2,839 tests; typecheck; build (see below). `battleSoundTable --check` / fam1 not needed (no script or moveAnimSounds change).

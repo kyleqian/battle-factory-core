@@ -5478,7 +5478,7 @@ Matches the supervisor's figures minus tnl1 (ON 5,526 − 404, OFF 537 − 8).
 | 5 | 03 hit SE 12 / 13 / 14 | 256 / 118 (77) | 244 / 66 (218) | OFF: segment start 103, after hit SE 100; ON: after a move body 248 | ON mostly ±1 carried (D4); OFF own | hit-SE tail after the body | D4 for ±1; OFF has hse1m (M) and Bounce +6 (bcm1) |
 | 6 | 04 Focus Punch setup / lost-focus / item rows | 317 / 23 (65) | 0 | s1415 d50 −2 (52), s310 d4 / d5 +5 (40 / 35) | inherited | Focus Punch rows | ftp1 refit (M) |
 | 7 | 01a faint chain (SE 16, cry@faint) | 260 / 47 (72) | 90 / 19 (32) | after hit SE; cry@faint +1 clean ×26 | cry@faint +1 is a possible own rule; the rest inherited | cry-at-faint delay | no recipe; one lab (faint cry) |
-| 8 | 01b send-in / recall / party summary (SE 15 / 114) | 205 / 49 (103) | 100 / 33 (66) | s6568 d104 −16 / −20 (harness press pulse) | own + harness | send-in rows | s6568 is a harness artifact; the rest needs a lab |
+| 8 | 01b send-in / recall / party summary (SE 15 / 114) | 205 / 49 (103) | 100 / 33 (66) | s6568 d104 −16 / −20 (harness press pulse) | own + harness | send-in rows | s6568 is a harness artifact; the Roar / Whirlwind drag group is LANDED by snr1 (below); the party-summary-after-faint group is a measured negative (snr1) |
 | 9 | 07b status-application body (B4) | 96 / 28 (77) | 0 | status bodies | own | B4 body rows | lrm1 / stm1 style recipe per move |
 | 10 | 08 stat SE 239 / 245 | 58 / 23 (44) | 90 / 31 (84) | stat rows | own | stat-change SE rows | D4 jitter |
 | – | 09 SE 90 / hp | 18 / 15 | 3 / 2 | – | – | – | noise |
@@ -5643,3 +5643,39 @@ Commits `621144966` (confusion) and `cd6047bac` (Psych Up helpers); no push. Evi
 - The cfa1 Confuse Ray / Psych Up labs rose by a uniform +1 per window: the Confuse Ray entry term (EffectConfuse +0x2e -> status animation, ex1 vs ex2) was cancelled by the old -1 / -2 error and now shows. Not fixed here (the lab regression 92 -> 123 is that term; T2 ON improved 174).
 - Psych Up's own print after the S-lead body (+1 in psychup s1) and s2 +5 in T2 ON.
 - cfm1: the sa125 / sag130 cfa1 exception stays.
+
+## snr1 (2026-11-24, ts lane, Scene ON first, OFF checked): Roar / Whirlwind drag send-in LANDED (class 8 group b); party-summary-after-faint is a measured negative; the class 3 Leech Seed tick carry is a recipe (S11, ISSUES #219)
+
+Base `8a26355b3`; commit `043f34932`. Presentation / sound timing only (no rule, damage, RNG or event-order change).
+
+### 1. Class 8 (send-in / recall), grouped by path (T2 base, 25 ON / 24 OFF seeds)
+
+| Path | Scene | Finding |
+|---|---|---|
+| Roar / Whirlwind drag (`BattleScript_SuccessForceOut` -> `TrainerBattleForceOut`) | ON (~105 mass) | The chain after the animation is exact (body end -> SE 15 is 27 rows); the engine's body end is 6 rows earlier than the ROM's animation end (A1 row, then `waitanimation`). **LANDED**: `[18, 6], [46, 6]` in `LIVE_MOVE_LEADLESS_TAIL_ROWS` (`battleResolutionPresentationRender.ts`). |
+| Opponent party summary after a faint (lead 23 + AI-choice cost, hold 100) | both (~50 mass each) | Not a rule: the fch1 CPU-cost model (`aiReplacementChoiceExtraFrames = round(0.16 * moveReads - 0.3)`) is the only variable, and identical work features (logged `faintReplacementChoiceWork`) give a needed extra of 0..4 frames. No feature separates them, so no refit; left as measured jitter. |
+| Single-row switch-out SE 15 after a faint (+-1..+-9) | both | Not examined to a rule (varies by sign, e.g. s3738 d62 ON -6, s1914 d13 OFF +9, s2230 d23 OFF +8; the carries come from the preceding faint / HP chain). |
+| OFF switch-in rows after the party summary (-1..-3) | OFF | Not examined (small, mixed sign). |
+| s2 d6 / d12 ON party summary -4 without a preceding faint SE | ON | Not examined. |
+| s6568 d104 | OFF | Left alone (harness press pulse, Mac-owned tool). |
+
+**Drag labs** (`labCompare.sh --reuse-rom --kinds se,cry`, SE mass ROM vs engine, before -> after): etp1-whirlwind-on 19 -> 7, etp1-roar-on 16 -> 4, cry1-roar-pidgey-opp-on 16 -> 8, cry1-roar-pidgey-player-on 12 -> 4, cry1-roar-jynx-player-on 16 -> 4 (0 missing / 0 extra). The remaining -1 is a uniform body offset (the whole SE run is -1, tail exact).
+
+**T2** (`rescoreAll.sh` over `.integration/evidence/t2n` into `.integration/evidence/snr1/t2-{base,after}`, `soundScoreboard.py`, 0 missing / 0 extra): Scene ON TOTAL mass 4,477 -> 4,391 (cry 200 -> 160, battle-controller SE 591 -> 545, move-animation SE 3,570 and the rest unchanged); Scene OFF 475 unchanged (all families identical).
+
+**Census** 0..199 (`lsd194Census.sh` WORKTREE vs HEAD, `rst197CensusDelta.py --digest`): eventsDigest + error identical 200 / 200 both scenes; ON 21 battles change commands (the drags), OFF 0 changed (byte-identical shards 2 / 2).
+
+**Tests:** 244 test files (every tests/ file referencing `battleResolutionPresentation*`, `randomRoundSoak*`, `lbrd`, and every file naming WHIRLWIND / ROAR / move ids 18 / 46) green in three 2-worker runs, no re-pin needed. `npm run typecheck`, `npm run test:gate`, `npm run build` recorded in PROGRESS.md (the full `npm test` is not run by workers; test:gate plus the importer tests is the accepted substitute).
+
+### 2. Class 3 (end-of-turn tick carries): measured recipe, not landed
+
+s648 d12 (-3 at the tick), s648 d10 (-3), s165 d17 (status-animation 148, -6; not probed). Probed with `probe.sh 648 on 12|10|11 -40:2000` (ROM `hcr3mProbe` + engine cmdtrace, evidence under `.integration/evidence/snr1/k/p/on/`):
+
+- The Leech Seed tick (`BattleScript_LeechSeedTurnDrain`, general-animation LEECH_SEED_DRAIN) is exact when it follows a miss path (s648 d11: ROM `BattleScript_MoveEnd` 416, engine hold-end sprite-visibility 415, tick start 417, SE 180 453 / 453).
+- Behind a **successful Confuse Ray** (d12: ROM `BattleScript_EffectConfuse+0x36` 677 -> `MoveEnd` 680 -> `LeechSeedTurnDrain+0x7` 690 -> SE 180 at 717; engine sprite-visibility 676 / 677, tick 678, SE 714) and behind **Pain Split** (d10: ROM `MoveEnd` 548, drain+0x7 558, engine tick 546, SE 180 582 engine) the ROM reaches `BattleScript_MoveEnd` 3 frames later than in the exact case, while everything after it (`MoveEnd` -> drain+0 is 9 rows, +0x7 one row, then 27 rows to the SE) is the same. So the carry is a 3-row tail at the end of the Confuse Ray (`EffectConfuse` return -> resultmessage -> waitmessage -> goto) and Pain Split final message, not a Leech Seed term.
+- Needed mechanism: a 3-frame hold after the last message hold of those two script ends (a message-tail map; the existing `LIVE_MOVE_*_TAIL_ROWS` maps only extend move-animation bodies). It must be checked against every command that follows a Confuse Ray / Pain Split (not only the Leech Seed tick) with a lab per following command; Confuse Ray's entry term is cre1's, so this is left to that step.
+
+### 3. What is left
+
+Party-summary-after-faint (~50 mass per scene, needs a better AI-choice CPU-cost model, not a constant), switch-out SE 15 after a faint, OFF switch-in rows, ON s2 d6 / d12, the class 3 message tail above (and s165 d17 status 148 -6, not probed).
+
