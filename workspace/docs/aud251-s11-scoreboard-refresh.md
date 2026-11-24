@@ -4996,3 +4996,59 @@ All arithmetic from the legs above, none of it landed or simulated; t2k9's "anot
 ### 6. State and verification
 
 Measurement only: no `src/` / `tests/` change, no lab file added, PROGRESS / ISSUES / ROADMAP / PAPERCUTS and the Factory ledgers untouched; `npm test` / `typecheck` / `build` not run (the step forbids them). Ran: two `probe.sh` captures (mGBA, `nice -n 10`), reads of `attr-on.json`, the two `drive.json` and `eng-cmd.json`. Diff: this section only.
+
+## ecm1 (2026-11-24): the ConfusedNoMore -> next print step (t2k9 item E s830 d5 -6, lcm1 s7295 d8 103 vs 108) is two terms, both already landed for Scene OFF; the Scene ON recipe (measurement only; doc only, no `src/` / `tests/` change)
+
+Engine frozen at `c22d60e57`. Probes (`nice -n 10`, `T2K4_DIR` = a dir whose `t2` links to `t2k9/t2-on` / `t2-off`): `probe.sh 830 on 5 -40:900` (19 s) and `probe.sh 830 off 5 -40:500` for the Scene OFF reference; s7295 d8 ON is lcm1's capture (`.integration/evidence/lcm1/p/on/7295-d8.cmp.txt`, reread, not recaptured). Evidence: `.integration/evidence/ecm1/p/on/830-d5.cmp.txt`, `.integration/evidence/ecm1off/p/off/830-d5.cmp.txt` (git-ignored).
+
+### Answer in one paragraph
+
+The "+5 / +6 constant" is not one constant. **(1) First print, -(u - 2):** the head print starts `u - 2` rows early in Scene ON (s830 d5 -2, s7295 d8 -4); ohr1's head rule moves it in Scene OFF only (`usedMovePrintLeadU` `head = sceneOff && ...`, `battleResolutionPresentation.ts:7654`). **(2) Print -> used print, -5:** ROM wait release -> used print is 64 + 4 rows (`return`, `HitFromAtkCanceler`, `AccCheck`, `AtkString`); the engine holds 64 in Scene ON, while ohs1's `CONFUSION_NO_MORE_OFF_USED_PRINT_TIMING` (64 + 5, line 1193) is gated on `BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS` (line ~6463). The script has no `status2animation`, so nothing differs between the scenes (the cfa1 +5 `PRE_MOVE_CONFUSION_TO_USED_PRINT_ROWS` rides on the *confusion* head's status-animation command and never sees NoMore). The sum is -7 (s830 d5 SE 183 reads -6: the move-animation SE is +1 late against this print, see section 3). Same two terms, both windows, exact: s830 -2 + -5, s7295 -4 + -5.
+
+### 1. Rows (frames from each side's commit; ROM = script row of the `+0x3` waitmessage, engine = `message` start)
+
+| | s830 d5 ON (Freeze Hit -> Ice Beam, u = 4) | s7295 d8 ON (AllStatsUpHit -> Struggle, u = 6) | s830 d5 OFF (reference, exact) |
+| --- | --- | --- | --- |
+| ROM `EffectHit` / `HitFromAtkCanceler` / `ConfusedNoMore+0x0` / `+0x3` | 8 / 9 / 10 / 11 | -- / -- / 12 / 13 | 8 / 9 / 10 / 11 |
+| engine first `message` | 9 (**-2**) | 9 (**-4**) | 12 (OFF convention +1) |
+| ROM wait release (`+0x3` ex0) | 47 (L = 36) | 53 (L = 40) | 47 |
+| ROM `HitFromAtkCanceler` / `AccCheck` / `AtkString+0x0` / `+0x1` (used print) | 112 / 113 / 114 / 115 | -- / -- / -- / 121 | 112 / 113 / 114 / 115 |
+| engine used `message` | 108 | 112 | 116 |
+| first print -> used print, ROM / engine | 104 / 99 (**-5**) | 108 / 103 (**-5**) | 104 / 104 (0) |
+| used print -> hit SE (SE 14 / SE 13), ROM / engine | 238 / 238 (0) | 151 / 151 (0) | 0 |
+| used print -> first body SE, ROM / engine | 59 (SE 183) / 60 (**+1**) | 47 (SE 162) / 45 (**-2**) | exact |
+| T2 window rows (`attr-on.json`) | 11 x -6 (SE 183 x4, SE 137 x7) = 66; SE 14 -7 and the next move's SE 237 / 232 / 237 x -8 are carried | 5 x -11, SE 13 / cry / SE 16 -9 x3, SE 15 -21 = 103 | |
+
+So everything after the pair is shifted by exactly -7 (s830) / -9 (s7295) and the hit SE is exact against the used print in both: the shift is all in the two terms. The body SE offsets *relative to the print* (+1 Ice Beam, -2 Struggle) are the moves' own body leads, not E: s7295's -11 = -9 (E) + -2 (Struggle), s830's -6 = -7 + 1 (Ice Beam).
+
+### 2. Recipe (not landed; files / lines)
+
+1. **Hold (`battleResolutionPresentation.ts` ~6463-6465, the `base` of the message timing):** apply `preMoveOffUsedPrintTiming` for the `BattleScript_MoveUsedIsConfusedNoMore` label in both scenes (`holdFrames = WAITMESSAGE_LONG_HOLD_FRAMES + 5`, min 0). Do NOT widen the other two labels: the Scene ON confusion head carries cfa1's +5 on its status animation, and the ON in-love print was never probed. -5 on every row after the used print start; exact in both windows.
+2. **First print lead (`usedMovePrintLeadU` ~7654, `usedMovePrintLeadAdjust` ~7710 -> the `action-dispatch` hold ~7796):** let `head` (`OFF_HEAD_PRINT_LABELS`) apply the `u - 2` hold in Scene ON as well. **Only for the hold:** the call at ~7823 that stamps `usedMoveSoundLead` / `usedMoveScriptSoundLead` / `usedMoveAnimSoundLead` and (ON only) `usedMovePrintU` (~7836) must keep `head = sceneOff`, or the head turn picks up the plain turn's hit lead 1 / anim lead `min(u - 2, 2)` and the hit SE (exact against the print today) reads -1. Implementation sketch: give `usedMovePrintLeadU` a `forHold` flag, or split the head gate out of it. Check `segments[0]` vs `segments[segmentIndex]` (line ~7650) is the same segment for the head turn (it is for both windows: the head is the first message of segment 0).
+3. Both together -7 .. -9 on every row after the head print; a charge / second-turn path (below) is not covered.
+
+### 3. Expected mass (arithmetic from the rows above; not simulated)
+
+| window | now | after 1 + 2 | note |
+| --- | --- | --- | --- |
+| s830 d5 si 11 (11 rows) | 66 | **11** (SE 183 / 137 +1: Ice Beam's body SE sits 1 late against this print; an `usedMoveAnimSoundLead` of 1 for head turns would zero it, but it is Ice Beam's number, do not land it from one window) | |
+| s830 d5 carried: SE 14 -7, next move's three -8 | 31 | 3 (SE 14 0, three -1) | the same -7 |
+| s7295 d8 si 17 (9 rows) | 103 | **14 without lrm1** (5 x SE 162 -2 = 10, SE 15 -4), **10 with lrm1's lead 24** | SE 13 / cry / SE 16 -> 0; the box lands on the ROM tap (box start ROM 528 = engine 519 + 9, taps 543 / 560, takes 560: SE 5 exact), so the -17 cliff of lcm1 section 2 clears and SE 15 reads lrm1's -4 only |
+| total T2 | 200 | about 38 (-162; -166 with lrm1) | other ConfusedNoMore ON windows, if any, are in addition (see below) |
+
+lcm1's earlier estimate for s7295 (103 -> ~34, "+6") assumed one constant with the body at -5; the measured split puts the body at -2 and the window at 10 - 14. The two windows are **one rule on two seeds**: same -5, and u - 2 = 2 / 4.
+
+### 4. Interaction with lrm1
+
+None before the faint. The step is upstream of the box: it moves the box start by +9 in s7295 d8 (the engine's box then starts on ROM's row 528, inside the tap cliff of lcm1 section 2), so SE 5 goes -17 -> 0 and `switch-out` / SE 15 -21 -> -4 (-> 0 with lrm1's `LOSS_RECALL_LEAD_FRAMES` 20 -> 24). **Land lrm1 first (so the -4 is not read as a leftover), E second**; if E lands alone, SE 15 shows -4 in s7295 d8 and nothing else changes.
+
+### 5. Not covered / what not to chase
+
+- **s8108 d12 (Dig second turn, `BattleScript_SecondTurnSemiInvulnerable` -> `ConfusedNoMore` -> `SemiInvulnerableTryHit`)** has a ConfusedNoMore in Scene ON too (ROM 170 / 171, release 210, `HitFromAtkString` 284 / 285) but a different shape (the used print follows `SemiInvulnerableTryHit` after a 75-row gap, the engine's `message` 1.4 at 250 against ROM 285); the hold in step 1 would touch it. Re-probe it (`probe.sh 8108 on 12 -40:1600`) before landing; it is the Dig / charge family (stm1 item 2), not this rule.
+- Scene OFF: no change needed (ohr1 + ohs1 are exact: s830 d5 OFF first print 12 / used print 116 against ROM 11 / 115, gap 104 = 104; the 64 + 5 / u - 2 are already in OFF).
+- InLove ON (`BattleScript_MoveUsedIsInLove`, adds `status2animation`): not probed here; do not copy the NoMore constant to it.
+- A single "+5 / +6" confusion-cure -> next-print constant in `usedMovePrintLeadU` (the t2k8 / t2k9 wording): it would apply -5 to the used print only and leave the head's u - 2, so s7295 d8 would stay -4 on every row.
+
+### 6. State and verification
+
+Measurement only: no `src/` / `tests/` change, no lab, PROGRESS / ISSUES / ROADMAP / PAPERCUTS untouched; `npm test` / `typecheck` / `build` not run (the step forbids them). Ran two `probe.sh` captures (ON and OFF, `nice -n 10`) and read `attr-on.json`. Diff: this section only.
