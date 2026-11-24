@@ -4434,3 +4434,109 @@ ROM: `FirstChargingTurn+0` (row R), A0 at R + 7, SE 175 at R + 25, `+0x26 ex1` (
 - Only labs and this section are committed. Evidence (git-ignored): `.integration/evidence/stm1/{lab1,lab3,lab4,p/on}`; the scratch copy that carried the three edits above lived in `/tmp` and was not kept (the diff is the three one-line edits in the recipe).
 - `probe.sh` keeps one ROM capture per seed (`--force` needed for the second decision of a seed): a papercut for sequential windows on the same seed.
 - Not applied: no `src/` / `tests/` change; PROGRESS / ISSUES / ROADMAP / PAPERCUTS untouched; `npm test` / `npm run typecheck` / `npm run build` not run (the step forbids them with the gates frozen on c22d60e57; nothing in `src/` or `tests/` was touched).
+
+## mhm1 (2026-11-24): Twineedle / Pin Missile / Rock Blast — why the lab hit counts differ, Scene ON labs that agree, per-hit rows, and the landing recipe (measurement only; labs + doc, no `src/` / `tests/` change)
+
+Engine frozen at c22d60e57. Everything below was measured in a hardlinked scratch tree under `/tmp/mhm1/scratch` (the recipe edits and some debug prints lived only there); the worktree has the 8 labs and this section.
+
+### 1. Why the lab hit counts differ
+
+ROM `Cmd_setmultihitcounter` (`reference/pokeemerald/src/battle_script_commands.c:7139`): `Random() & 3`; if the result is > 1 the count is `(Random() & 3) + 2`, else 2. So 2 hits 3/8, 3 hits 3/8, 4 hits 1/8, 5 hits 1/8 (Twineedle always 2). The count is one draw sequence away from the seed on each side, and the two sides do not start at the same RNG state:
+
+- ROM lab: `seed` is written to `gRngValue` **before** the intro, the dialogue and the battle script, so `Random()` has advanced an unknown (but deterministic) number of steps by the time the multi-hit counter rolls. Accuracy, damage roll, crit, effect and the foe's choice all draw before it.
+- Engine: the kernel starts at `json.seed` itself (`labBackedStage`), and draws in its own order. `ENGINE_RNG_SEED` overrides the engine seed only.
+
+So one lab seed gives two unrelated counts. The count has to be searched per move: a ROM `soundEventProbe` per seed (about 10 s each) and the engine side (`engsearch`), then keep a seed where both land on the same count. The hit count is read as the number of the move's body SE (Pin Missile 143 / 166; Rock Blast 193) before the first foe action; 1 = miss. Pin Missile's total SE count is 3 + 5 x hits (+3 for the foe's Karate Chop).
+
+### 2. Seed -> count table (`mhs1-<move>-pfirst-on` with only `seed` changed)
+
+| seed | ROM Pin Missile (count / nSE) | ROM Rock Blast | engine (both moves) |
+|---|---|---|---|
+| 1 | 2 / 13 | 2 / 9 | 3 |
+| 2 | 2 / 13 | miss | 2 |
+| 3 | 5 / 25 | 5 / 15 | 3 |
+| 4 | 2 / 13 | 2 / 9 | 5 |
+| 5 | 2 / 13 | 2 / 9 | 2 |
+| 6 | 3 / 18 | 3 / 12 | miss |
+| 7 | 3 / 19 | 3 / 13 | miss |
+| 8 | 3 / 19 | 3 / 13 | miss |
+| 9 | 3 / 19 | 3 / 13 | miss |
+| 10 | miss | miss | 4 |
+| 11 | miss | miss | 2 |
+| 12 | 5 / 25 | 5 / 15 | 3 |
+| 13 | 2 / 13 | 2 / 9 | 2 |
+| 14 | 3 / 18 | 3 / 12 | 2 |
+| 15 | 2 / 13 | 2 / 9 | 3 |
+| 16 | 4 / 24 | 4 / 16 | 3 |
+| 17 | 4 / 23 | 4 / 15 | 2 |
+| 18 | miss | miss | 3 |
+| 19 | 3 / 18 | 3 / 12 | 5 |
+| 20 | 5 / 25 | 5 / 15 | 2 |
+| 21 | 4 / 23 | 4 / 15 | 3 |
+| 22 | miss | miss | 2 |
+| 23 | 4 / 24 | 4 / 16 | 2 |
+| 24 | 3 / 18 | 3 / 12 | 3 |
+| 25 | 3 / 18 | 3 / 12 | 4 |
+| 26 | 3 / 18 | 3 / 12 | 2 |
+| 27 | 2 / 14 | 2 / 10 | 3 |
+| 28 | 5 / 25 | 5 / 15 | 2 |
+| 29 | 3 / 18 | 3 / 12 | 3 |
+| 30 | 2 / 14 | 2 / 10 | 3 |
+
+Further ROM Pin Missile probes (seed -> count): 32 1, 34 3, 40 3, 44 3, 47 5, 49 4, 53 3, 55 2, 59 1, 62 3, 64 3, 68 2, 70 3, 74 3, 77 3, 79 2, 89 2, 91 3, 92 2, 94 3, 98 3, 104 3, 107 3, 113 1, 119 1, 134 3, 149 2, 164 3, 177 2, 179 1, 183 3, 194 1, 198 2, 200 5, 209 2, 213 4, 215 2, 224 3, 228 3, 230 4, 243 5, 258 2, 273 2, 288 2, 303 3, 309 3. The engine sweep over 31..310 puts 4 / 5 hits on 32, 34, 40, 44, 47, 49, ...
+
+**Seeds where ROM and engine agree** (the labs):
+
+| count | Pin Missile | Rock Blast |
+|---|---|---|
+| 2 | 2 (also 5, 13) | 13 (also 5) |
+| 3 | 29 | 29 |
+| 4 | 213 (also 230) | 230 (213 reads 24 SE on the engine vs 23 on the ROM, so not used) |
+| 5 | 47 | 47 |
+
+Twineedle is always 2 hits and needs no seed search (`mhs1-twineedle-pfirst-on`, 134 mass at HEAD).
+
+Labs committed (copies of `mhs1-<move>-pfirst-on.json`, only `seed` changed): `mhm1-pinmissile-s{2,29,213,47}-on`, `mhm1-rockblast-s{13,29,230,47}-on`. Caveats: the two **s47 labs are not clean** (ROM-only rows of about +80 per hit, a crit or message divergence between the two RNGs: Pin Missile s47 mass 2915, Rock Blast s47 1923); Pin Missile s213 has an engine-only paralysis status animation (SE 119) at the end, which is RNG noise, not timing. Use s2 / s29 / s213 and s13 / s29 / s230 as the scoreboard.
+
+### 3. Per-hit rows (HEAD, then the recipe)
+
+At HEAD (no shape A for 41 / 42 / 350) hit 1 is **-9** (Pin Missile / Rock Blast) and **-10** (Twineedle) against the ROM, and each later hit drifts about -5 more: -9 / -14 / -19 / -24 for 4 hits. The hit SE moves with the hit. Mass at HEAD: Pin Missile s2 127, s29 213, s213 345; Rock Blast s13 69, s29 135, s230 240; Twineedle 134.
+
+Recipe measured in the scratch tree:
+
+| step | Pin Missile s2 / s29 / s213 | Rock Blast s13 / s29 / s230 | Twineedle |
+|---|---|---|---|
+| HEAD | 127 / 213 / 345 | 69 / 135 / 240 | 134 |
+| + 41 / 42 / 350 in `MHS1_SHAPE_A_MOVE_IDS` (trim 5) | 16 / 51 / 84 | 15 / 42 / 51 | 11 |
+| + `BattleScript_DoMultiHit` trim 5 -> 7 | **0 / 9 / 6** | **3 / 12 / 9** | (hit 2 of Twineedle: see below) |
+
+- Hit 1 (the used-print lead) is exact (+0) on every lab once shape A is on; it is the whole -9 / -10.
+- Hits 2+ (`multiHitLoopHitLead` = box rows - trim): with the existing trim 5 the per-hit step drifts +2 per hit for Pin Missile (+0, +2, +4, +6) and +1..+3 for Rock Blast; with trim 7 all hits are +0 to +-1. **Bonemerang was fitted with 5**, so 7 cannot be a table-wide change: the trim has to be per move (42 / 350 / 41 -> 7, 155 / 131 / Triple Kick keep 5 and 8), or Bonemerang is re-measured. Bonemerang / Triple Kick ROM files were not captured in this run, so this was not verified on them.
+- The DoMultiHit 25-row box (the +8 / +7 count) becomes `to - from + 1` automatically once the move is shape A (no constant needed).
+- Residual: the final tail (last hit SE -> `PrintStrings` print). ROM tail = **57 + damage of the last hit** (Pin Missile 63 / 64 / 65 for damage 6 / 7 / 8; Rock Blast 69 / 70 for 12 / 13); the engine's is +0..+3 off (65 / 66 / 66 / 70 / 71 / 72). It follows the damage, so it is not a lead; not isolated (engine damage roll / HP-bar rows). `PrintStrings` -> the foe's used-move print is 95 on both sides.
+
+### 4. Twineedle seed 363: play 65 vs lab 56
+
+`tests/hit1MoveHitTiming.test.ts` `play()` measures the SE emission frame from its own loop `frame` and ignores `e.frame`. `collectSoundTick` stamps `e.frame = frame - lead` (`setSoundTickLead`); `usedMoveBodySoundLeadOf` (`battleResolutionPresentation.ts:7691-7709`) returns `MOVE_BODY_SOUND_CLOCK_LEAD (7) - lead` for a plain body with `lead >= PLAIN_BODY_SOUND_LEAD_MIN_L (4)` and `lse2BodySoundAgeShift(...) === 0`. With lead 15 that is -8: the **stamped** frame is 8 later than the tick that actually emitted the SE.
+
+- The ROM-stamped labs (labCompare, T2) read the stamp, so they are exact: SE 160 at row 81, hit SE at 137, a 56-row gap.
+- In play the audible SE is emitted at age 0 + 17 regardless of the lead (5880) while the hit moves +9 with the lead; SE 160 -> effectiveness reads 5880 -> 5945 = 65 against the ROM's 56. Without shape A it is 5880 -> 5936 = 56 (that is why the test currently passes and why it fails with the recipe).
+- Lab and play have the same `usedMovePrintU` 4, `animLead` 2, `bodyLeadFrames` 15 (hit 1) / 12 (hit 2) and the same sound age. The difference is only the stamp vs the emission tick.
+- The test already names the same issue for Fury Swipes ("plays 9 rows early on the pre-lead sound clock") and it applies to the landed Triple Kick / Bonemerang / Spike Cannon shape-A bodies: stamped T2 reads exact, the audio in play is early by `lead - 7`.
+
+Fix experiment (scratch only): have `lse2BodySoundAgeShift` return `bodyLeadFrames - S0` for the shape-A multi-hit ids, as `LSE2_SOUND_CLOCK_LEADS` / `C_LEAD_SOUND_CLOCK_LEADS` do (`usedMoveBodySoundLeadOf` then returns `base`). S0 = 7: play SE 5888, effectiveness gap 57; lab SE stamp 79 (-2 vs ROM 81). S0 = 5: play SE 5890, gap **55** (the same +-1 class as Thunder Punch's 85 vs 86); the lab with the hook applied to all hits (including hits 2+, whose lead is already trimmed) got worse than the trim-7 run (Pin Missile s2 8, s29 21, s213 22; Rock Blast s13 7, s29 18, s230 9; Twineedle 5): the hits 2+ SEs sit +1 in that run (SE 143 / 166 all +1, hit SE 13 exact). So the play fix needs hit 1 and hits 2+ treated separately and was **not landed**. Until then the seed 363 test expects [56, 56] only without shape A for 41, or [55 or 57, ...] with the S0 shift on hit 1 only.
+
+### 5. Landing recipe (per move)
+
+1. `src/engine/battleResolutionPresentation.ts:2481` `MHS1_SHAPE_A_MOVE_IDS`: add **41, 42, 350** (`new Set([167, 155, 131, 42, 350, 41])`). Feeds line 2522 (`"shape-a"` rule), line 474 and `multiHitLoopHitLead` (2562-2566).
+2. `:463` `MULTI_HIT_LOOP_LEAD_TRIM_ROWS`: `BattleScript_DoMultiHit` 5 -> 7 **for 42 / 350 (and 41)**, 5 stays for Bonemerang 155 and Triple Kick 8. This needs a per-move trim (the map is keyed by the label only; `multiHitLoopHitLead` has `moveId` at line 2562).
+3. `tests/helpers/iu120Rows.ts:90` `SHAPE_A_RULE_IDS`: add 41, 42, 350 (it mirrors the engine set; 167, 155, 131 are already in it).
+4. `tests/hit1MoveHitTiming.test.ts:188` (seed 363, expects [56, 56]): with the recipe in play it reads 65 until the play sound-clock shift above is landed; either land both together (hit-1-only shift S0 = 5 on 41) or move the test to the stamped frame.
+5. Not changed: `PLAIN_BODY_SOUND_LEAD_MIN_L` (7635) and `MOVE_BODY_SOUND_CLOCK_LEAD` (7636).
+
+**Expected mass** (labs measured, T2 not run): Pin Missile s2 127 -> 0, s29 213 -> 9, s213 345 -> 6; Rock Blast s13 69 -> 3, s29 135 -> 12, s230 240 -> 9; Twineedle 134 -> 11 (the ROM-only paralysis rows stay missing). The T2 gain on these three moves was read earlier as about Pin Missile 2045 and Rock Blast 1392 (t2k9 / mhs1 estimates) -> about 15 and 24 by the lab ratio; the replay tools were not run in this step, so that figure is an estimate.
+
+### Notes
+
+- Evidence (git-ignored): `/tmp/mhm1/{base,run1..run4,labs,scratch}`; the scratch edits are the two recipe lines plus debug-only prints (`MHM1_DBG`, `MHM1_SOUNDSHIFT`), not for landing.
+- Not applied: no `src/` / `tests/` change; PROGRESS / ISSUES / ROADMAP / PAPERCUTS untouched; `npm test` / typecheck / build not run (the step forbids them).
