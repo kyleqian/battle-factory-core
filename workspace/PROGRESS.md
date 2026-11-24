@@ -5,6 +5,16 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 2026-11-24 — fpl1 (worker, ts lane, Scene ON first): fpm1 + chp1 + ssm1 Psych Up chain landed (T2 ON 5,895 -> 5,835, OFF 537 unchanged)
+
+- **State:** master, three commits `537d1ba7f` (fpm1) `8b9cc0b49` (chp1) `51a5d3d23` (ssm1 chain) + this docs / PROGRESS commit; no push. Gates: census 0..199 both scenes eventsDigest identical 200 / 200; ~208 importer test files + randomRoundSoak* + lbrd + fam1* green, `battleSoundTable.ts --check` current, `test:gate` 360 files / 2,839 tests, typecheck, build all 0.
+- **Did:** fpm1: Focus Punch lost-focus print lead 17 after a printed hit message, 7 after an hp command (T2 ON -11). chp1 (Scene ON): confusion head holds 66, used print rows 6, self-hit print 104; labs psychic 4 / 12 / 12 -> 10 / 6 / 6, psychup 55 / 78 / 78 -> 61 / 72 / 72; T2 ON +17 alone. ssm1 chain: self-confusion hit 36 rows, SE +2, bar +2, Psych Up S-lead + trail; psychup labs -> 6 / 17 / 17, T2 ON -66. Re-pinned: sa125 / sag130 (OFF read at 66, exception accepts 4 | 6), sta3 (66, -1), sst1 (5 turns, trajectory).
+- **cfm1 again not possible:** the 6 / 4 rows still sit inside the ON status command (length 106 / 104), so the sa125 / sag130 exception stays.
+- **Next:** the labs' second-mover confusion head (head print -2 / -1, SE 176 -1); s499 d13 / d14 +1 .. +3; move cfa1's rows out of the status command; ssl1 / mhl1. Details: `docs/aud251-s11-scoreboard-refresh.md` "fpl1".
+- **Notes:** `npm test` (full) was not run: the worker rules forbid it, `test:gate` was. Play change (Scene ON only, ROM-faithful): confusion head / used / self-hit print and the self-hit blink / bar timing.
+
+---
+
 ## 2026-11-24 — lrl1 (worker, ts lane, both scenes): lrm1 + ecm1 landed (T2 ON 6,186 -> 5,895, OFF 597 -> 537); cfm1 test half fails, not landed
 
 - **State:** master, two commits `bc9cbcfad` (lrm1) and `2681af30d` (ecm1) + this docs / PROGRESS commit; no push. Gates: census 0..199 both scenes eventsDigest identical 200 / 200; 259 importer test files green, `test:gate` 360 files / 2,839 tests, typecheck, build all 0.

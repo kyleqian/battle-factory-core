@@ -4642,6 +4642,8 @@ Engine frozen at `c22d60e57`. Nothing under `src/` or `tests/` changed; PROGRESS
 c22d60e57 untouched. Measurement only. The step brief's "keep PROGRESS.md current" and "npm test / build green" were overridden by its own "do not edit PROGRESS.md / never run npm test, typecheck, build".
 ## ssm1 (2026-11-24): Supersonic (48) rows named and a verified recipe; Psych Up (244) second mover named, recipe measured but held
 
+**Section 2 (Psych Up second-mover chain + 244 S-lead / trail) LANDED by fpl1 (`51a5d3d23`); the Supersonic recipe (section 1) is ssl1's and is not landed here.**
+
 Integration lane, Scene ON, measurement only (docs / labs / tools). Engine frozen at c22d60e57 (HEAD parent 89cc84e32). No `src/` or `tests/` change; every engine edit below was a scratch edit, run, and reverted (the two patches are kept in `tools/integration/ssm1/`). New tool: `tools/integration/ssm1Probe.py` (per-frame ROM battle-animation-script trace: `sBattleAnimScriptPtr`, `sAnimFramesToWait`, `gAnimScriptActive`, visual / sound task counts, exec flags, sprite callbacks, task funcs; `python3 tools/run-mgba-probe.py OUT.json -- python3 tools/integration/ssm1Probe.py OUT.json LAB.json [--profile on|off]`). Helpers: `tools/integration/ssm1/{try.sh,t2.sh,all.sh,rows.py}` (engine-only lab re-run on cached ROM files, per-seed / all-seed T2 rescore on the current `src`, per-window matched-row deltas). Evidence (git-ignored): `.integration/evidence/ssm1/`.
 
 ### 1. Supersonic (ttf1 item 2): every row named; recipe verified (two constants)
@@ -5114,6 +5116,8 @@ Not a clean compare: SUMMARY exact 11 / offset 11 / missing 5 / extra 4, mass 14
 
 ## fpm1 (2026-11-24, measurement only): the lost-focus print row is a rule, not a constant (17 after a printed hit message, 7 after an hp command)
 
+**LANDED by fpl1 (`537d1ba7f`).**
+
 No `src/` or `tests/` change (the engine stays at c22d60e57). Evidence: the fpf1 probes `.integration/evidence/fpf1/p/on/{310-d3,1415-d49,1415-d47,310-d2.base}.cmp.txt` (main tree, git-ignored), plus labCompare runs of `aud250-focuspunch-player-on`, `aud250-focuspunch-opponent-on` (Scene ON) and `mechanic-focus-punch-damaged-off` (Scene OFF) into `/tmp/fpm1` (not kept; the numbers are below). One temporary edit of the constant (16 -> 7) was run engine-only on the three labs and reverted (`git checkout`, tree clean).
 
 **Source rows (`BattleScript_EffectFocusPunch`, battle_scripts_1.s:2260).** `attackcanceler`, `jumpifnodamage BattleScript_HitFromAccCheck`, `ppreduce`, `printstring STRINGID_PKMNLOSTFOCUS`, `waitmessage B_WAIT_TIME_LONG`, `goto BattleScript_MoveEnd`. The lost-focus path is taken when `gProtectStructs[attacker].physicalDmg || specialDmg` (`Cmd_jumpifnodamage`, battle_script_commands.c:9148); `Cmd_attackcanceler` (:915) finishes in one row on this path (no Protect / Snatch / Magic Coat / disobedience). There is no `attackstring`, no `waitstate`, no pause before the print. Each command is one row (`RunBattleScriptCommands_PopCallbacksStack`, battle_main.c:5251, one command per frame while `gBattleControllerExecFlags == 0`).
@@ -5155,6 +5159,8 @@ PRINTS mass for each lab 17 -> 8 (the rest is the generic -4 of plain prints, un
 **Recipe (for an engine step; not landed).** In `battleResolutionPresentation.ts` the lead for `BattleScript_EffectFocusPunch` messages should depend on the previous presentation command: `17` when the previous command before the sprite-visibility pair is a `message`, `7` when it is an `hp` command (the fpf1 refit plateau 17 at 7,957 vs 7,968 is this first case, consistent with the glyph being the ex row + 1: the T2 SE chains move by +1 and nothing else). For a non-damaged-then-charging prologue (7 rows instead of 8, s1415 d49 Bounce path, no lost focus) the print is not a lost-focus print and the lead does not apply. Acceptance: labs above exact (ENG - ROM 0) with the hp rule, T2 ON 7,968 -> about 7,957, eventsDigest unchanged. Open: the engine's `MoveEnd`-relative start for the message and hp cases differs by 10 rows (-4 vs +6); the 17 / 7 pair absorbs it for this print only, other first rows of a next action after an hp command vs a message may carry the same 10-row spread (not measured here).
 
 ## chp1 (2026-11-24): the confusion head's SE 176 spread (+1 .. +4 on T2 s499, -1 on s7295) is three stacked terms, not a phase; recipe named, not landed
+
+**LANDED by fpl1 (`8b9cc0b49`), edit L restricted to the confusion head, Scene ON only; H and D as named; cfa1's used-print rows re-derived to 6.**
 
 Scene ON, measurement only (docs / tools). Engine frozen at c22d60e57; every engine edit below was a scratch edit of `src/engine/battleResolutionPresentation.ts`, run, and reverted (`git status` clean; the edit script is `tools/integration/chp1/scratch.py`). Probes: `probe.sh 499 on 13` and `probe.sh --force 499 on 5` (one ROM capture from d5 runs to the battle's end, so every later window reads from it) with `T2K4_DIR=.integration/evidence/chp1 T2K4_T2_DIR=.integration/evidence/t2final-20261124`; s7295 d4 is ssm1's capture (reread). `tools/integration/chp1/rows.py SEED` prints one line per confusion status animation (ROM `MoveUsedIsConfused` rows, ENG message / status starts, SE 176); `labs.sh TAG` re-runs cfa1's six confusion labs engine-only on cached ROM files. Evidence (git-ignored): `.integration/evidence/chp1/`.
 
@@ -5295,3 +5301,40 @@ Dropping the OFF-hold normalisation (71 -> 67 for STRINGID_PKMNISCONFUSED, and t
 - Census 0..199 both scenes, `a952017d5` vs HEAD: eventsDigest + error identical **200 / 200 ON and OFF**, type-sequence changes 0 (ON 119 / OFF 104 battles have changed commands). Evidence `.integration/evidence/lrl1/census` (tree copies deleted).
 - Tests: all 259 test files importing `battleResolutionPresentation` / `battleEndSounds` plus `randomRoundSoak*` and `lbrd`: 259 / 259 files green (2,413 tests); `test:gate` 360 files / 2,839 tests green; `typecheck` 0; `build` 0. No residual SELF-DESTRUCT / EXPLOSION / LOSS_RECALL / NoMore pins found beyond the ones re-pinned above.
 - Left: cfm1's source-side move (above); the ON confusion head / InLove holds; ssl1 / mhl1 moves untouched.
+
+## fpl1 (2026-11-24, ts lane, Scene ON first, OFF checked): fpm1 + chp1 + ssm1 Psych Up chain landed (T2 ON 5,895 -> 5,835, OFF 537 unchanged)
+
+Three commits on master, no push: `537d1ba7f` (fpm1), `8b9cc0b49` (chp1), `51a5d3d23` (ssm1 chain). Presentation / sound timing only: census 0..199 eventsDigest + error identical 200 / 200 in both scenes after each of chp1 and ssm1 (OFF: 200 / 200 battles command-identical; ON: 66 / 58 battles with changed command timing). Evidence (git-ignored): `.integration/evidence/fpl1/`.
+
+### What landed
+
+- **fpm1** (`FOCUS_PUNCH_LOST_FOCUS_AFTER_MESSAGE_ROWS` 17 / `_AFTER_HP_ROWS` 7, `focusPunchLostFocusPrePrintRows`): the lost-focus print lead is 17 after a printed hit message and 7 after an hp command. Focus Punch labs: print +9 -> 0 on the hp-preceded case (fpm1 section table), T2 ON 5,895 -> 5,884 (-11).
+- **chp1** (Scene ON only): the "is confused!" head holds 64 + 2 = 66 (`PRE_MOVE_CONFUSION_STATUS_ANIMATION_LEAD_ROWS` 2, ROM tp end -> `+0xc` ex2 = 66 in the seven T2 s499 / s7295 windows; the asleep head keeps sta3's 3, Scene OFF keeps 64 + 3), the confusion head shares the ConfusedNoMore `u - 2` print lead rule (`usedMovePrintLeadU`), `PRE_MOVE_CONFUSION_TO_USED_PRINT_ROWS` 5 -> 6 (used print) and 4 for the self-hit print (ROM `DoSelfConfusionDmg` 104, was 105). cfa1's six labs (summary mass, before -> after): psychic s1 / s2 / s3 4 / 12 / 12 -> 10 / 6 / 6, psychup 55 / 78 / 78 -> 61 / 72 / 72. T2 ON alone 5,884 -> 5,901 (+17): s7295 d4 / d5's self-hit chain is ssm1's term below. The six labs' head is a second mover after the infliction print, whose head print / SE 176 (-1) is not part of this rule.
+- **ssm1 Psych Up chain** (Scene ON only): the self-confusion `hit-animation` is 36 rows (`SELF_CONFUSION_HIT_ANIMATION_TIMING`), its SE 13 is 2 rows after the command start (`battleHitSounds.ts`), the bar after it holds 2 more rows (`SELF_CONFUSION_HP_TAIL_EXTRA_ROWS`); Psych Up 244 joins `LEAD4_S_LEAD_MOVE_IDS` and the -1 trail table. Labs: cfa1 psychup 61 / 72 / 72 -> 6 / 17 / 17, psychic unchanged (10 / 6 / 6), `ztl1-psychup-player-on` 14 and `prep16-hist-psychup-player-after-swordsdance` 30 unchanged. T2 ON 5,901 -> 5,835 (-66: s7295 168 -> 141, s8108 515 -> 480, s165 -6, s6 -5, s2 -2; s499 +6, s5569 +3).
+
+### T2 (rescoreAll + soundScoreboard, mass; 0 missing / 0 extra throughout)
+
+| Step | ON | OFF |
+| --- | --- | --- |
+| start (ecm1, `2681af30d`) | 5,895 | 537 |
+| fpm1 | 5,884 | 537 |
+| chp1 | 5,901 | 537 |
+| ssm1 chain | **5,835** | **537** |
+
+### Pins moved (each read from Received)
+
+- `sa125StatusAnimationCommand` / `sag130StatusSeGate`: the OFF confusion head is read at the ON 66 (was 67); the cfa1 exception now accepts extra 4 (self-hit) or 6 (used print), `ON - OFF = gate + controller rows + extra` unchanged. cfm1's drop of the exception was tried again and **not possible**: the 6 / 4 rows are still inside the ON status command (ON command length 106 / 104 vs 100 without them), so the exception stays.
+- `sta3PreMoveStatusTiming`: aud242f swagger confusion window: message hold 66 and status start - message start = launch - print - 1 (ROM print 630 -> launch 720 = 90, engine 89 + the same 1-row plain-print convention as hcr2); the asleep window (aud242g, 93) keeps 3.
+- `sst1SandstormContinues` (seed-44 trajectory, not a ROM frame): 5 sandstorm end turns inside the 120000-frame cap (was 6); per-turn ROM values unchanged (SE +88, print 264 / 264 / 258 / 258 / 258).
+
+### Named play changes (ROM-faithful, Scene ON only)
+
+The "is confused!" head and the used / self-hit print after it are 1 .. 2 rows earlier / later as above; the self-confusion hit blink and its bar hold are 1 and 2 rows longer, Psych Up's body sounds shift by the S-lead. Older recorded games replay on their own build.
+
+### What is left
+
+- The labs' second-mover confusion head (after an infliction print): head print -2 / -1 and SE 176 -1 (psychup labs still 6 / 17 / 17, psychic 10 / 6 / 6).
+- s499 d13 / d14 and s5569 are the only seeds that moved up (+6 / +3): the head's remaining +1 .. +3 after a tail that is not a head term.
+- cfm1: the exception in sa125 / sag130 stays until the ON command no longer carries the 6 / 4 rows (they belong in the head hold / print lead).
+- ssl1 (Supersonic / Belly Drum) and mhl1 (multi-hit) untouched.
+
