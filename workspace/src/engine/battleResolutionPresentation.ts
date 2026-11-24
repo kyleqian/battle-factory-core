@@ -1227,6 +1227,19 @@ export const PRE_MOVE_CONFUSION_TO_USED_PRINT_ROWS = 6;
  * `return` and the re-entered attackcanceler rows run before the used print, 4 more than the 97 + 3 the animation command holds.
  */
 export const PRE_MOVE_IN_LOVE_TO_USED_PRINT_ROWS = 4;
+/**
+ * cre1 (ROM labs cfa1-conf-psychup-s1-on, cre1-conf-growl-s1-on, cre1-conf-swordsdance-s1-on: used print exact; the s2 / s3 +1 left is the Confuse Ray CPU phase): the script rows between the re-entered `attackcanceler` and the
+ * `attackstring` whose print is the used print. PRE_MOVE_CONFUSION_TO_USED_PRINT_ROWS was fitted on a hit move (`HitFromAtkCanceler: attackcanceler; accuracycheck` -> gap 1);
+ * BattleScript_EffectPsychUp (`attackcanceler; attackstring`, gap 0) reaches its print one row sooner (ROM last SE 176 -> print 32, Psychic's 33).
+ */
+function attackStringCancelerGapRows(usedMessage: BattleKernelSemanticEvent): number {
+  const programCounter = usedMessage.provenance?.programCounter;
+  if (programCounter === undefined || programCounter < 0) return 1;
+  for (let back = 1; back <= 4 && programCounter - back >= 0; back += 1) {
+    if (BATTLE_SCRIPT_PROGRAM.instructions[programCounter - back]!.opcodeName === "B_SCR_OP_ATTACKCANCELER") return back - 1;
+  }
+  return 1;
+}
 function preMoveConfusionToUsedPrintRows(events: readonly BattleKernelSemanticEvent[], index: number): number {
   const label = events[index]!.provenance?.sourceLabel;
   if (label === IN_LOVE_HEAD_SCRIPT) {
@@ -1239,7 +1252,7 @@ function preMoveConfusionToUsedPrintRows(events: readonly BattleKernelSemanticEv
   if (label !== CONFUSION_HEAD_SCRIPT) return 0;
   for (let next = index + 1; next < events.length; next += 1) {
     const payload = events[next]!.payload;
-    if (payload.kind === "message") return payload.messageId === "STRINGID_USEDMOVE" ? PRE_MOVE_CONFUSION_TO_USED_PRINT_ROWS : payload.messageId === SELF_CONFUSION_HIT_MESSAGE_ID ? PRE_MOVE_CONFUSION_TO_USED_PRINT_ROWS - 2 : 0;
+    if (payload.kind === "message") return payload.messageId === "STRINGID_USEDMOVE" ? PRE_MOVE_CONFUSION_TO_USED_PRINT_ROWS + attackStringCancelerGapRows(events[next]!) - 1 : payload.messageId === SELF_CONFUSION_HIT_MESSAGE_ID ? PRE_MOVE_CONFUSION_TO_USED_PRINT_ROWS - 2 : 0;
   }
   return 0;
 }
