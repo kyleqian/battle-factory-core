@@ -455,6 +455,33 @@ const CHARGE_TURN_SCRIPT = "BattleScriptFirstChargingTurn";
 const HIT_ALL_LOOP_KO_BOX_TIMING = Object.freeze({ minimumFrames: 1, holdFrames: 0 });
 const HIT_ALL_LOOP_SCRIPTS: ReadonlySet<string> = new Set(["BattleScript_DoHitAllWithUndergroundBonus"]);
 const MULTI_HIT_LOOP_BOX_EXTRA_ROWS: ReadonlyMap<string, number> = new Map([["BattleScript_DoMultiHit", 8], ["BattleScript_DoTripleKickAttack", 7]]);
+/**
+ * cfa1 (mhs1 term): a shape-A multi-hit move (MHS1_SHAPE_A_MOVE_IDS) presents hits 2+ like hit 1: the script rows from the previous loop box's printstring to the hit's
+ * attackanimation (ROM 20 DoMultiHit / 22 DoTripleKickAttack) lead the body, less the rows the box and sprite receipts already present (trim, fitted on labs mhs1-{triplekick,bonemerang}-pfirst-on:
+ * hit 2+ SEs exact), and the box is `to - from + 1` (no extra rows). The final hit's box lasts to the PrintStrings print's execution (+1): the script's own rows to `PrintStrings`, 14 / 15 for a completed loop and 52 on a missed last hit (pause B_WAIT_TIME_SHORT).
+ */
+const MULTI_HIT_LOOP_LEAD_TRIM_ROWS: ReadonlyMap<string, number> = new Map([["BattleScript_DoMultiHit", 5], ["BattleScript_DoTripleKickAttack", 8]]);
+function multiHitLoopMoveId(events: readonly BattleKernelSemanticEvent[], index: number): number | null {
+  for (let i = index - 1; i >= 0; i -= 1) {
+    const payload = events[i]!.payload;
+    if (payload.kind === "animation" && payload.animationId === "MOVE_ANIMATION") return battleMoveAnimationRequest(singlesBattler(payload.battler ?? -1, "multi-hit loop"), payload.target, payload.arguments).moveId;
+  }
+  return null;
+}
+/** mhs1: the loop's own shape-A move (the labs' moves); every other DoMultiHit move keeps the +8 / +7 box rows and the 24-row final box. */
+function multiHitLoopShapeA(events: readonly BattleKernelSemanticEvent[], index: number): boolean {
+  const moveId = multiHitLoopMoveId(events, index);
+  return moveId !== null && MHS1_SHAPE_A_MOVE_IDS.has(moveId);
+}
+/** The previous message of the same loop script is its own EMPTYSTRING3 box: this box closes hit 2+ (a one-hit loop's box keeps the 24-row text minimum: T2 s8108's Triple Kick that ended after kick 1). */
+function multiHitLoopAfterBox(events: readonly BattleKernelSemanticEvent[], index: number): boolean {
+  const label = events[index]?.provenance?.sourceLabel;
+  for (let i = index - 1; i >= 0; i -= 1) {
+    if (events[i]!.payload.kind !== "message") continue;
+    return events[i]!.provenance?.sourceLabel === label && (events[i]!.payload as { messageId?: string }).messageId === "STRINGID_EMPTYSTRING3";
+  }
+  return false;
+}
 /** mhs1: a DoMultiHit / DoTripleKickAttack box is followed by the loop's next attackanimation (not the PrintStrings tail) when another hit of the same script comes before any message. */
 function multiHitLoopContinues(events: readonly BattleKernelSemanticEvent[], index: number): boolean {
   const label = events[index]?.provenance?.sourceLabel;
@@ -473,9 +500,13 @@ function multiHitLoopContinues(events: readonly BattleKernelSemanticEvent[], ind
 function hitAllLoopEmptyBoxTiming(events: readonly BattleKernelSemanticEvent[], index: number): BattleMessageTiming | null {
   const event = events[index];
   const label = event?.provenance?.sourceLabel ?? "";
-  const extra = multiHitLoopContinues(events, index) ? MULTI_HIT_LOOP_BOX_EXTRA_ROWS.get(label) ?? 0 : 0;
-  if (extra === 0 && MULTI_HIT_LOOP_BOX_EXTRA_ROWS.has(label)) return null;
-  if (event === undefined || (!HIT_ALL_LOOP_SCRIPTS.has(label) && extra === 0) || event.payload.kind !== "message"
+  const loopBox = MULTI_HIT_LOOP_BOX_EXTRA_ROWS.has(label);
+  const continues = loopBox && multiHitLoopContinues(events, index);
+  const shapeA = loopBox && event?.payload.kind === "message" && event.payload.messageId === "STRINGID_EMPTYSTRING3" && multiHitLoopShapeA(events, index)
+    && (continues || multiHitLoopAfterBox(events, index));
+  const extra = !continues ? 0 : shapeA ? 0 : MULTI_HIT_LOOP_BOX_EXTRA_ROWS.get(label)!;
+  if (loopBox && !continues && !shapeA) return null;
+  if (event === undefined || (!HIT_ALL_LOOP_SCRIPTS.has(label) && !loopBox) || event.payload.kind !== "message"
     || event.payload.messageId !== "STRINGID_EMPTYSTRING3") return null;
   const from = event.provenance?.instructionExecution;
   const next = events[index + 1];
@@ -483,6 +514,12 @@ function hitAllLoopEmptyBoxTiming(events: readonly BattleKernelSemanticEvent[], 
   if (from === undefined || to === undefined || to <= from) return null;
   // A KO: the faint chain's own lead (faintScriptPreCryFrames) already presents the rows from the box to `playfaintcry`.
   if (next!.payload.kind === "play-faint-cry") return HIT_ALL_LOOP_KO_BOX_TIMING;
+  if (shapeA && !continues) {
+    const print = events.slice(index + 1).find((e) => e.payload.kind === "message");
+    const printExecution = print?.provenance?.instructionExecution;
+    if (print?.provenance?.sourceLabel !== label.replace("DoTripleKickAttack", "TripleKickPrintStrings").replace("DoMultiHit", "MultiHitPrintStrings") || printExecution === undefined || printExecution <= from) return null;
+    return Object.freeze({ minimumFrames: printExecution - from + 1, holdFrames: 0 });
+  }
   return Object.freeze({ minimumFrames: Math.max(1, to - from + 1 + extra), holdFrames: 0 });
 }
 const CHARGE_TURN_EMPTY_BOX_ROW_TIMING = Object.freeze({ minimumFrames: 1, holdFrames: 0 });
@@ -2513,6 +2550,19 @@ export function bodyLse2RuleApplies(moveId: number): boolean {
   return BODY_LEAD_RULE.get(moveId) === "lse2";
 }
 
+/** cfa1: the per-hit lead of hits 2+ of a shape-A loop move (see MULTI_HIT_LOOP_LEAD_TRIM_ROWS); 0 for hit 1 (the used-print lead below) and every other move. */
+function multiHitLoopHitLead(events: readonly BattleKernelSemanticEvent[], index: number, moveId: number): number {
+  const label = events[index]!.provenance?.sourceLabel;
+  const trim = label === undefined ? undefined : MULTI_HIT_LOOP_LEAD_TRIM_ROWS.get(label);
+  if (trim === undefined || !MHS1_SHAPE_A_MOVE_IDS.has(moveId)) return 0;
+  for (let i = index - 1; i >= 0; i -= 1) {
+    const payload = events[i]!.payload;
+    if (payload.kind !== "message") continue;
+    if (payload.messageId !== "STRINGID_EMPTYSTRING3" || events[i]!.provenance?.sourceLabel !== label) return 0;
+    return Math.max(0, instructionExecutionOf(events[index]!) - (instructionExecutionOf(events[i]!) + 1) - trim);
+  }
+  return 0;
+}
 function moveAnimationScriptLeadTiming(
   events: readonly BattleKernelSemanticEvent[],
   index: number,
@@ -2520,6 +2570,8 @@ function moveAnimationScriptLeadTiming(
   moveId: number,
 ): { scriptLeadFrames?: number; bodyLeadFrames?: number } {
   const animation = instructionExecutionOf(events[index]!);
+  const loopLead = multiHitLoopHitLead(events, index, moveId);
+  if (loopLead > 0) return { bodyLeadFrames: loopLead };
   for (let i = index - 1; i >= 0; i -= 1) {
     const candidate = events[i]!;
     const payload = candidate.payload;
