@@ -5147,3 +5147,57 @@ Needed lead = 13 - (command start - `MoveEnd`) = **17 after a hit message, 7 aft
 PRINTS mass for each lab 17 -> 8 (the rest is the generic -4 of plain prints, unchanged); SE summary of the three labs unchanged (3 / 12 / 12), the item rows were not part of these labs. T2 windows: s310 d3 and s1415 d49 are the only lost-focus windows in the 49-seed set and both follow a printed hit message, so the constant has no T2 witness for the hp-preceded case; this is why no T2 scoring caught it. Scene ON and OFF follow the same rows (the OFF lab is +9 at 16 and exact at 7).
 
 **Recipe (for an engine step; not landed).** In `battleResolutionPresentation.ts` the lead for `BattleScript_EffectFocusPunch` messages should depend on the previous presentation command: `17` when the previous command before the sprite-visibility pair is a `message`, `7` when it is an `hp` command (the fpf1 refit plateau 17 at 7,957 vs 7,968 is this first case, consistent with the glyph being the ex row + 1: the T2 SE chains move by +1 and nothing else). For a non-damaged-then-charging prologue (7 rows instead of 8, s1415 d49 Bounce path, no lost focus) the print is not a lost-focus print and the lead does not apply. Acceptance: labs above exact (ENG - ROM 0) with the hp rule, T2 ON 7,968 -> about 7,957, eventsDigest unchanged. Open: the engine's `MoveEnd`-relative start for the message and hp cases differs by 10 rows (-4 vs +6); the 17 / 7 pair absorbs it for this print only, other first rows of a next action after an hp command vs a message may carry the same 10-row spread (not measured here).
+
+## chp1 (2026-11-24): the confusion head's SE 176 spread (+1 .. +4 on T2 s499, -1 on s7295) is three stacked terms, not a phase; recipe named, not landed
+
+Scene ON, measurement only (docs / tools). Engine frozen at c22d60e57; every engine edit below was a scratch edit of `src/engine/battleResolutionPresentation.ts`, run, and reverted (`git status` clean; the edit script is `tools/integration/chp1/scratch.py`). Probes: `probe.sh 499 on 13` and `probe.sh --force 499 on 5` (one ROM capture from d5 runs to the battle's end, so every later window reads from it) with `T2K4_DIR=.integration/evidence/chp1 T2K4_T2_DIR=.integration/evidence/t2final-20261124`; s7295 d4 is ssm1's capture (reread). `tools/integration/chp1/rows.py SEED` prints one line per confusion status animation (ROM `MoveUsedIsConfused` rows, ENG message / status starts, SE 176); `labs.sh TAG` re-runs cfa1's six confusion labs engine-only on cached ROM files. Evidence (git-ignored): `.integration/evidence/chp1/`.
+
+### Answer
+
+**No single phase term.** SE 176 = status command start + 3 on both sides (ROM `MoveUsedIsConfused+0xc` ex2 -> SE 3 rows later in all 7 windows; engine status command -> SE 3), so the SE 176 offset is exactly the status command start offset, and that is a sum of two independent terms:
+
+`ENG status start - ROM +0xc ex2 = D1 (head print start) + D2 (+1, constant)`, then the self-hit print has a third, D3 (+1).
+
+| window (Scene ON) | ROM tp edge = `+0x3` ex2 / `+0xc` ex2 / SE 176 | ENG message / status / SE | D1 | D2 | SE 176 |
+| --- | --- | --- | --- | --- | --- |
+| s499 d7 (first mover, Toxic entry) | 8 / 96 / 99 | 9 / 98 / 101 | +1 | +1 | +2 |
+| s499 d8 (same) | 8 / 96 / 99 | 9 / 98 / 101 | +1 | +1 | +2 |
+| s499 d11 (first mover, SpeedDownHit entry, u = 5) | 11 / 100 / 103 | 9 / 99 / 102 | -2 | +1 | -1 |
+| s499 d13 (second mover, after a Low Kick hp bar) | 186 / 275 / 278 | 187 / 277 / 280 | +1 | +1 | +2 |
+| s499 d14 (second mover, after Knock Off's item print) | 401 / 490 / 493 | 404 / 494 / 497 | **+3** | +1 | **+4** |
+| s499 d16 (second mover, after a Safeguard print) | 218 / 307 / 310 | 219 / 309 / 312 | +1 | +1 | +2 |
+| s7295 d4 (first mover, AllStatsUpHit entry, u = 5) | 11 / 103 / 106 | 9 / 102 / 105 | -2 | +1 | -1 |
+
+(d6 / d10 on s499 are the status-infliction animations of Confuse Ray / Swagger, `MoveEffectConfusion`, min 100: not heads.) The ROM text printer is active 22 .. 27 rows by name length and tp end -> `+0xc` ex2 is 66 in all seven; the engine's message -> status is 89 .. 93, always ROM + 1.
+
+- **D2 = +1 (constant, 7 / 7): `PRE_MOVE_STATUS_ANIMATION_LEAD_ROWS` = 3** (`battleResolutionPresentation.ts:1350`; the `message` hold is glyphs + 64 + 3, `PRE_MOVE_STATUS_ANIMATION_TIMING` 1351, applied by `messageTimingFromSourceProvenance` 1417 to the head's `printstring; waitmessage LONG; status2animation`). The ROM spends tp end + 66 = 64 + 2 (waitmessage completing row, the launch row); sta3's 3 was fitted against a different start convention. It is also what makes the self-hit print read +3 late on s499 d13 (ssm1's "hold +1").
+- **D1, first mover (u-dependent):** the engine's head message sits on the stage walk's commit + 9 for every effect entry; the ROM's tp edge is commit + 6 + u + 1 (Toxic entry 8, Hit / SpeedDownHit / AllStatsUpHit entries 11): ohr1's / ecm1's term 1, `u - 2` rows early in Scene ON (`usedMovePrintLeadU` `head = sceneOff && ...`, line ~7660). Scene OFF already holds it; in ON the hold is missing, so u = 5 heads read -2 and the +1 plain-print convention heads (u = 2) read +1.
+- **D1, second mover: not a constant, it is the previous action's tail.** ROM `MoveEnd+0x0` -> head print edge is 10 after an hp bar (d13), 9 after a print (d16) and 10 after Knock Off's 2nd print (d14); the engine's `move-animation` (MoveEnd) + 1-2 `sprite-visibility` commands are 17 from the bar end / 11 + 2 / 10 + 1, i.e. +1, +1 and **+3**. The +3 on d14 is the Knock Off item-print tail (ROM `KnockedOff+0xa` ex0 325 -> `HitFromAtkAnimation+0x13` 390 = 65, `MoveEnd` 391, `EffectLowKick` 399 = 8 after, then +0x0 400 / print 401; engine `move-animation` min 11 + the two 1-row commands = 13 vs 10): a Knock Off -> next-action term, not confusion; the labs' second-mover heads (after a confusion infliction print) read -2 / -1 on their own. These are the existing "previous command tail" classes (ihm1 / bcm1 / kse1), not a head rule.
+- **D3 = +1 (self-hit print only):** status start -> `DoSelfConfusionDmg+0x7` print is ROM **104** (`+0xc` ex2 -> ex0 100, then `jumpifbyte`, `cancelmultiturnmoves`, `adjustnormaldamage2`, `printstring`) in s499 d13 / d14 / d16 and s7295 d4 (275 -> 379, 490 -> 594, 103 -> 207), the engine's status command is 105 = `PRE_MOVE_CONFUSION_TO_USED_PRINT_ROWS` 5 (`preMoveConfusionToUsedPrintRows`, line 1212, which returns 5 for the self-hit message as well as for the used print). cfa1's 5 is fitted on the Psychic used print (ROM 105 = 100 + 5); the self-hit path is one script row shorter. This is the "its 105 vs 104" of ssm1 section 2.
+
+### Scratch measurements (engine edits reverted; T2 ON mass, `ssm1/t2.sh`; `rows.py` per window)
+
+Edits: **L** `PRE_MOVE_STATUS_ANIMATION_LEAD_ROWS` 3 -> 2; **H** the head's `u - 2` hold also in Scene ON (`usedMovePrintLeadU(..., forHold)` only for the hold, the sound-lead stamp at line ~7823 untouched, ecm1's edit 2); **D** self-hit print 4 instead of 5.
+
+| tree | s499 | s7295 | SE 176 rows (ENG - ROM) |
+| --- | --- | --- | --- |
+| HEAD | 317 | 228 | s499 d7 / d8 / d13 / d16 +2, d11 -1, d14 +4; s7295 d4 / d5 / d7 -1 |
+| L | 291 | 243 | d7 / d8 / d13 / d16 +1, d11 -2, d14 +3; s7295 -2 (worse: u = 5 heads lose the +1 that was hiding the missing hold) |
+| L + H | 291 | 226 | u = 5 heads **+1** (d11, s7295 d4 / d5 / d7), the others +1, d14 +3 |
+| L + H + D | **288** | **214** | same SE 176 rows; self-hit chain rows 1 earlier (d13 SE 13 -1, SE 148 -2, SE 90 -3: the chain edits of ssm1 section 2 are then needed) |
+
+So with L + H every confusion head's SE 176 is **+1** (the plain-print convention) except the second movers after a tail that is not a head term (d14 +3); the spread +1 .. +4 / -1 is gone. T2 ON s499 + s7295: 545 -> 502 (-43). All 25 seeds were **not** re-scored with the three edits (the background run that was meant to give the all-seed base used the time; `ssm1/all.sh chp1base` ran only on HEAD) and the status-inflicting labs get **worse** with L: cfa1's six labs (HEAD -> L / L + H / L + H + D, summary mass) psychic s1 / s2 / s3 4 / 12 / 12 -> 14 / 10 / 10 (same in all three), psychup s1 / s2 / s3 55 / 78 / 78 -> 50 / 61 / 61. The labs' head is a second mover after a confusion-infliction print (head print -2 / -1 in HEAD, the H hold does not apply), so their used prints read -1 / 0 at HEAD only because D1 (-2 / -1) and D2 (+1) cancel; with L the used print is -2 / -1. cfa1's `PRE_MOVE_CONFUSION_TO_USED_PRINT_ROWS` 5 for the used print was fitted on exactly those labs, so it must be re-derived together with L (the labs say 6 after L + a second-mover head start of 0).
+
+### Recipe (not landed; engine frozen)
+
+1. `PRE_MOVE_STATUS_ANIMATION_LEAD_ROWS` 3 -> 2 **for the confusion head and the asleep head only if their windows agree** (the same constant serves `MoveUsedIsAsleep`; sta3's asleep windows were not re-measured here).
+2. ecm1's edit 2: the head's `u - 2` hold in Scene ON (hold only, not the sound-lead stamp).
+3. Self-hit print: `PRE_MOVE_CONFUSION_TO_USED_PRINT_ROWS - 1` for `STRINGID_ITHURTCONFUSION` (D3).
+4. Then the ssm1 chain recipe (hit SE 2 rows after its command, hit minimum 36, hp tail +2) and the Psych Up S-lead + trail; with 1 - 3 in place the s499 d13 / d14 "+3 late" that made the chain lose +36 is gone, which is what ssm1 asked for.
+5. Re-derive cfa1's used-print 5 on the six labs together with 1 (labs read +1 mass after 1 alone) before landing, and re-run all 25 ON seeds + Scene OFF unchanged (the head hold is Scene OFF's already).
+
+### Not done / caveats
+
+- The all-seed T2 total with 1 - 3 was not measured (time); only s499 and s7295 (-43 together) and the six labs (mixed). The chain + S-lead + trail on top was not re-run on this base.
+- The d14 +3 (Knock Off tail -> head) has one window.
+- No ROM-side explanation of why the printer's `ex2` row equals the text-printer edge was needed (the two coincide in all 6 s499 windows, `tp` column of `hcr3mProbe`).
