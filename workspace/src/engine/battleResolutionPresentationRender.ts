@@ -1571,7 +1571,7 @@ const LIVE_MOVE_POST_ROW_SIDES: ReadonlyMap<number, number> = new Map([
 // Charm, Calm Mind, Scary Face. bwf1: Fake Tears 313 joins (trail -1) now that its live window is the ROM's (84 rows, was 87).
 // ztl1: Spikes 191 / Destiny Bond 194 (labs ztl1-spikes / destinybond), Foresight 193 and Feather Dance 297 join; Charm 204, Spikes 191 and Feather Dance 297 are trail 0 (their stats-change / print rows start one row later than the -1 trail's). The other zero-frame ont193 moves stay unknown (0 frames) until measured.
 const LIVE_MOVE_SCRIPT_TAIL_TRAIL_ROWS: ReadonlyMap<number, number> = new Map([
-  [28, 0], [104, -1], [240, -1], [241, -1], [258, -1], [73, -1], [113, -1], [204, 0], [347, -1], [184, -1], [191, 0], [193, -1], [194, -1], [297, 0], [313, -1],
+  [28, 0], [104, -1], [240, -1], [241, -1], [258, -1], [73, -1], [113, -1], [204, 0], [347, -1], [184, -1], [191, 0], [193, -1], [194, -1], [297, 0], [313, -1], [244, -1],
 ]);
 // iu120: bodies live only after idle98's evidence (base 3dd2b74b9) whose rows it never measured (lead / trail unknown): Struggle
 // (stl109 / sdl119, incl. its doll cells) keeps 0 / 0.

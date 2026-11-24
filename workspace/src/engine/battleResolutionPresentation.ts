@@ -130,8 +130,10 @@ export type BattleMoveAnimationTiming = Readonly<{
   soundAgeLeadFrames?: number;
 }>;
 export type BattleHitAnimationTiming = Readonly<{
-  minimumFrames: 35 | typeof HIT_ANIMATION_INVISIBLE_FRAMES;
+  minimumFrames: 35 | typeof SELF_CONFUSION_HIT_ANIMATION_FRAMES | typeof HIT_ANIMATION_INVISIBLE_FRAMES;
   firstDisplayedAge: 1;
+  /** fpl1 / ssm1: the Scene ON self-confusion hit (BattleScript_DoSelfConfusionDmg): see SELF_CONFUSION_HIT_ANIMATION_TIMING. */
+  selfConfusion?: true;
   /** fsc1: the target's sprite is invisible (semi-invulnerable): the controller completes at once, nothing is drawn. */
   invisibleTarget?: true;
 }>;
@@ -1164,6 +1166,12 @@ export const WAITMESSAGE_LONG_HOLD_FRAMES = 64;
  */
 const SELF_CONFUSION_HIT_MESSAGE_ID = "STRINGID_ITHURTCONFUSION";
 const SELF_CONFUSION_OFF_PRE_PRINT_ROWS = 3;
+function selfConfusionHitPrinted(commands: readonly BattleResolutionPresentationCommand[], events: readonly BattleKernelSemanticEvent[]): boolean {
+  const last = commands[commands.length - 1];
+  if (last?.type !== "message") return false;
+  const payload = events.find((e) => e.sequence === last.eventSequence)?.payload;
+  return payload?.kind === "message" && payload.messageId === SELF_CONFUSION_HIT_MESSAGE_ID;
+}
 /**
  * ftp1 item 4 / fpl1 (docs/aud251-s11-scoreboard-refresh.md "fpm1"): BattleScript_EffectFocusPunch's printstring (STRINGID_PKMNLOSTFOCUS) starts its
  * first glyph 13 rows after the ROM's previous MoveEnd (generic 8-row action prologue + attackcanceler, jumpifnodamage, ppreduce, printstring, waitmessage,
@@ -1462,6 +1470,19 @@ const HIT_ANIMATION_INVISIBLE_TIMING = Object.freeze({
   firstDisplayedAge: 1,
   invisibleTarget: true,
 } as const);
+/**
+ * fpl1 (ssm1 section 2, T2 s7295 d4, ROM `BattleScript_DoSelfConfusionDmg`): Scene ON, the self-confusion hit is the printed "It hurt itself in its confusion!" followed by
+ * a hit blink that starts 3 rows before the engine's generic hit command would show it (no `effectivenesssound` / `hitanimation` / `waitstate` rows after the print's
+ * `waitmessage`): the command is one row longer (36, the ROM's 33-row blink + the controller's setup) and the hit SE sits 2 rows after the command start
+ * (battleHitSounds.ts), the bar after it holds 2 rows more (SELF_CONFUSION_HP_TAIL_EXTRA_ROWS: ROM bar end 412, not 410).
+ */
+export const SELF_CONFUSION_HIT_ANIMATION_FRAMES = 36;
+const SELF_CONFUSION_HIT_ANIMATION_TIMING = Object.freeze({
+  minimumFrames: SELF_CONFUSION_HIT_ANIMATION_FRAMES,
+  firstDisplayedAge: 1,
+  selfConfusion: true,
+} as const);
+const SELF_CONFUSION_HP_TAIL_EXTRA_ROWS = 2;
 const STATUS3_ON_AIR = 1 << 6;
 const STATUS3_UNDERGROUND = 1 << 7;
 const STATUS3_UNDERWATER = 1 << 18;
@@ -2477,7 +2498,7 @@ const LSE2_SOUND_CLOCK_LEADS: ReadonlyMap<number, number> = new Map([[73, 7], [3
  */
 const LEAD4_S_LEAD_MOVE_IDS: ReadonlySet<number> = new Set([
   104, 182, 113, 240, 184, 108, 201, 204, 219, 266, 28, 241, 213, 97, 334, 230, 151, 133, 258, 14, 203, 197, 349, 254, 215, 107, 281, 180, 288, 195, 115, 103,
-  277, 178, 43, 39, 148, 106, 275, 112, 321, 259, 319, 271, 339, 294, 272, 50, 269, 116, 191, 193, 194, 297, 313,
+  277, 178, 43, 39, 148, 106, 275, 112, 321, 259, 319, 271, 339, 294, 272, 50, 269, 116, 191, 193, 194, 297, 313, 244,
 ]);
 /**
  * lse4 (docs/hpd1-hp-hold.md lse3 table): Revenge 279 and Absorb 71 join the shape-A class (lead 5, gap 4). Absorb's accepted window is 2 rows short of the ROM's len + 1 (`LSE4_WINDOW_SHORT_ROWS`).
@@ -3270,8 +3291,10 @@ function applyHpHitTails(
     const tailFrames = statNext ? (leads.sceneOff ? HP_STAT_NEXT_TAIL_FRAMES_OFF : HP_STAT_NEXT_TAIL_FRAMES) : transition ? (leads.moveEndRows === null ? 0 : HP_DATAHPUPDATE_ROW_FRAMES)
       : endsTurn ? leads.moveEndRows ?? 0 : bars > 0 ? bars : endTurnPrint ? leads.moveEndRows! + HP_END_TURN_PRINT_LEAD_ROWS
       : itemAnimation ? leads.itemAnimationRows! + (leads.sceneOff ? 0 : leads.itemAnimationSeGate) : printHold ? leads.messageRows! : 0;
+    const selfConfusionHit = hit && previous.timing.selfConfusion === true;
+    const heldTailFrames = tailFrames + (selfConfusionHit ? SELF_CONFUSION_HP_TAIL_EXTRA_ROWS : 0);
     if (faint) commands[index] = Object.freeze({ ...command, timing: Object.freeze({ minimumFrames: 0 }) });
-    else if (tailFrames > 0) commands[index] = Object.freeze({ ...command, timing: Object.freeze({ minimumFrames: 0, tailFrames }) });
+    else if (heldTailFrames > 0) commands[index] = Object.freeze({ ...command, timing: Object.freeze({ minimumFrames: 0, tailFrames: heldTailFrames }) });
   }
 }
 /**
@@ -6783,7 +6806,8 @@ export function projectBattleResolutionCommands(
         type: "hit-animation",
         eventSequence: event.sequence,
         battler: hitBattler,
-        timing: hitTargetSpriteInvisible(events, index, beforeRules, afterRules, hitBattler) ? HIT_ANIMATION_INVISIBLE_TIMING : HIT_ANIMATION_TIMING,
+        timing: hitTargetSpriteInvisible(events, index, beforeRules, afterRules, hitBattler) ? HIT_ANIMATION_INVISIBLE_TIMING
+          : selfConfusionHitPrinted(commands, events) && (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) === 0 ? SELF_CONFUSION_HIT_ANIMATION_TIMING : HIT_ANIMATION_TIMING,
       }));
       continue;
     }

@@ -49,6 +49,8 @@ const DAMAGING_WEATHER_LOOP_SCRIPT = "BattleScript_DamagingWeatherLoop";
  * 3 ticks after our command start tick (the etp1Engine frame + 2) in both scenes, not the controller lag (ON 7 less the lead rows, which put it 4-6 rows late once the etp1 print leads moved the loop).
  */
 const WEATHER_LOOP_HIT_SE_AFTER_COMMAND_ROWS = 3;
+/** fpl1 (ssm1): the Scene ON self-confusion hit command starts 3 rows before the ROM's hitanimation, its effectivenesssound one row before it. */
+const SELF_CONFUSION_HIT_SE_AFTER_COMMAND_ROWS = 2;
 
 function currentCommand(
   resolution: BattleResolutionPresentationState | null,
@@ -152,7 +154,7 @@ export function emitBattleHitSounds(
       // the end-turn hail / sandstorm loop: etp2's constant) keeps its own anchor.
       const anchor = previous?.type === "move-animation" ? sceneLag(segment) : lag;
       // etp2: the end-turn weather loop's hit SE is 3 ticks after its hit command in both scenes.
-      scheduleAfter(song.weatherLoop ? WEATHER_LOOP_HIT_SE_AFTER_COMMAND_ROWS : Math.max(0, anchor), () => playPannedSe(song.song, panBattler === 0 ? SE_PAN_PLAYER : SE_PAN_OPPONENT));
+      scheduleAfter(song.weatherLoop ? WEATHER_LOOP_HIT_SE_AFTER_COMMAND_ROWS : command.timing.selfConfusion === true ? SELF_CONFUSION_HIT_SE_AFTER_COMMAND_ROWS : Math.max(0, anchor), () => playPannedSe(song.song, panBattler === 0 ? SE_PAN_PLAYER : SE_PAN_OPPONENT));
     }
     return;
   }
