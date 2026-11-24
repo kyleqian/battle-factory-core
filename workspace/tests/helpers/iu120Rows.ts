@@ -87,9 +87,9 @@ export function ont193ScriptTail(id: number): number {
  */
 interface Iu120BodyRule { readonly lead?: number; readonly defaultLead?: number; readonly tail: number | "shape-a" }
 // lead2 B1: Double Kick 24 (hit 1) 16, Icy Wind 196, Water Pulse 352, Facade 263, Mega Kick 25, Counter 68 (4), Comet Punch 4 / Doubleslap 3 (hit 1: 15), Mega Drain 72.
-const SHAPE_A_RULE_IDS: readonly number[] = [9, 2, 5, 11, 16, 88, 265, 302, 341, 342, 343, 101, 276, 295, 296, 318, 324, 24, 196, 352, 263, 25, 68, 4, 72, 3, 332, 94, 85, 38, 98, 34, 246, 202, 58, 57, 91, 165, 157, 61, 126, 345, 53, 76, 44, 188, 89, 185, 56, 59, 247, 317, 60, 242, 282, 8, 29, 21, 175, 232, 163, 189, 7, 154, 67, 210, 149, 32, 337, 315, 124, 51, 93, 52, 224, 290, 129, 231, 309, 306, 238, 211, 138, 161, 55, 348, 228, 314, 183, 87, 65, 62, 23, 323, 179, 172, 136, 75, 36, 326, 229, 152, 351, 327, 310, 299, 284, 190, 162, 158, 146, 122, 66, 330, 325, 257, 123, 27, 305, 304, 245, 167, 155, 131, 209, 225];
+const SHAPE_A_RULE_IDS: readonly number[] = [9, 2, 5, 11, 16, 88, 265, 302, 341, 342, 343, 101, 276, 295, 296, 318, 324, 24, 196, 352, 263, 25, 68, 4, 72, 3, 332, 94, 85, 38, 98, 34, 246, 202, 58, 57, 91, 165, 157, 61, 126, 345, 53, 76, 44, 188, 89, 185, 56, 59, 247, 317, 60, 242, 282, 8, 29, 21, 175, 232, 163, 189, 7, 154, 67, 210, 149, 32, 337, 315, 124, 51, 93, 52, 224, 290, 129, 231, 309, 306, 238, 211, 138, 161, 55, 348, 228, 314, 183, 87, 65, 62, 23, 323, 179, 172, 136, 75, 36, 326, 229, 152, 351, 327, 310, 299, 284, 190, 162, 158, 146, 122, 66, 330, 325, 257, 123, 27, 305, 304, 245, 167, 155, 131, 209, 225, 41, 42, 350];
 // lead3 B2 (the trailing ids): the measured bodies Shadow Ball .. Fire Punch (lead 5), Fury Swipes 154 / Low Kick 67 / Fury Cutter 210 / Psywave 149 / Horn Drill 32 (leads below), then the predicted counter-5 A? bodies.
-const SHAPE_A_LEADS: ReadonlyMap<number, number> = new Map([[89, 11], [24, 16], [4, 15], [3, 15], [68, 4], [154, 15], [67, 8], [210, 9], [149, 6], [32, 7]]);
+const SHAPE_A_LEADS: ReadonlyMap<number, number> = new Map([[89, 11], [24, 16], [4, 15], [3, 15], [68, 4], [154, 15], [67, 8], [210, 9], [149, 6], [32, 7], [41, 15], [42, 15], [350, 15]]);
 const shapeA = (id: number): Iu120BodyRule => ({ lead: SHAPE_A_LEADS.get(id) ?? 5, defaultLead: id === 91 || id === 76 ? undefined : SHAPE_A_LEADS.get(id) ?? 5, tail: "shape-a" });
 // lead4 B3: the S status bodies (test-side copy of production's LEAD4_S_LEAD_MOVE_IDS): the script lead (passed by the caller) is presented before the body, and the script tail ONT193_SCRIPT_TAIL_FRAMES
 // holds (lead included) shrinks by it: the row total is unchanged, so `hpd4BodyRows` adds nothing for them.
@@ -123,10 +123,12 @@ export const HPD4_BODY_LEAD_ROWS: ReadonlyMap<number, number> = new Map([...IU12
 const LIVE_MOVE_LEADLESS_TAIL_ROWS: ReadonlyMap<number, number> = new Map([[120, 9], [153, 9], [105, 6], [135, 5], [208, 6], [236, 4], [235, 7]]);
 // sta5: ids whose age holds the last body row through the tail (test-side copy of production's STA5 status-tail class).
 const STA5_STATUS_TAIL_IDS: ReadonlySet<number> = new Set([260, 207, 147, 92, 95]);
+// lpm1 / mhl1 (test-side copy of production's LSE4_WINDOW_SHORT_ROWS for the shape-A ids): Luster Purge 295 / Signal Beam 324 are one row short of the ROM's A + 1 (hit SE 401 / 213, hp row 249).
+const SHAPE_A_WINDOW_SHORT_ROWS: ReadonlyMap<number, number> = new Map([[295, 1], [324, 1]]);
 function hpd4BodyTail(id: number, side: Iu120Side, duration?: number): number {
   const tail = IU120_BODY_RULES.get(id)?.tail;
   if (tail === undefined) return 0;
-  return tail === "shape-a" ? Math.max(0, 6 - iu120Pre(id, side) - iu120Post(id, side, duration)) : tail;
+  return tail === "shape-a" ? Math.max(0, 6 - iu120Pre(id, side) - iu120Post(id, side, duration)) + (SHAPE_A_WINDOW_SHORT_ROWS.get(id) ?? 0) : tail;
 }
 const defaultBodyLead = (id: number): number => IU120_BODY_RULES.get(id)?.defaultLead ?? 0;
 /** The rows an audited body's lead and hit tail add; 0 unless the caller passes the body's lead (Ice Ball: 10 on turn 1, 9 after; the others HPD4_BODY_LEAD_ROWS). */
