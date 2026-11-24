@@ -2246,15 +2246,20 @@ function playanimationBeforePrint(events: readonly BattleKernelSemanticEvent[], 
 /**
  * ihm1 (docs/aud251-s11-scoreboard-refresh.md "ihm1"): in Scene OFF the continue lead (9) is fitted on hp-preceded item chains. After a
  * hit-effectiveness message (`BattleScript_HitFromAtkAnimation`) the ROM's gap to `MoveEnd+0x0` is 2 rows, not 7, so the lead is 4 (Shell Bell
- * s2 d2 / lab ihm1-sbell-nve-off, ROM MoveEnd+0x0 = message wait end + 91). A KO / "fainted!" message keeps 9 (s2 res6 / res12).
+ * s2 d2 / lab ihm1-sbell-nve-off, ROM MoveEnd+0x0 = message wait end + 91). bcm1 extends it to the `BattleScript_MoveMissed` print (Leftovers after a Bounce miss: lab ROM `ItemHealHP_Ret+0xa` 1113 = MoveEnd+0x0 1068 + 45, T2 s2230 d5).
+ * A KO / "fainted!" message keeps 9 (s2 res6 / res12).
  */
 export const HELD_ITEM_AFTER_MESSAGE_LEAD_DELTA = 5;
-const HELD_ITEM_LEAD_DELTA_MESSAGE_LABELS: readonly string[] = ["BattleScript_HitFromAtkAnimation"];
-function itemHealAfterResultMessage(events: readonly BattleKernelSemanticEvent[], messageIndex: number): boolean {
+/** The message's script label -> the lead the item chain starts from there (a hit message continues the chain: 9; a miss message restarts it: 15). */
+const HELD_ITEM_LEAD_DELTA_MESSAGE_LEADS: Readonly<Record<string, number>> = {
+  BattleScript_HitFromAtkAnimation: HELD_ITEM_EFFECT_CONTINUE_LEAD_FRAMES,
+  BattleScript_MoveMissed: HELD_ITEM_EFFECT_RESTART_LEAD_FRAMES,
+};
+function itemHealAfterResultMessage(events: readonly BattleKernelSemanticEvent[], messageIndex: number, lead: number): boolean {
   let before = messageIndex - 1;
   while (before >= 0 && events[before]!.provenance?.sourceLabel === "BattleScript_MoveEnd") before -= 1;
   if (before < 0 || before === messageIndex - 1 || events[before]!.payload.kind !== "message") return false;
-  return HELD_ITEM_LEAD_DELTA_MESSAGE_LABELS.includes(events[before]!.provenance?.sourceLabel ?? "");
+  return HELD_ITEM_LEAD_DELTA_MESSAGE_LEADS[events[before]!.provenance?.sourceLabel ?? ""] === lead;
 }
 function heldItemEffectOffHoldFrames(
   events: readonly BattleKernelSemanticEvent[],
@@ -2271,7 +2276,7 @@ function heldItemEffectOffHoldFrames(
   if (instruction.operands.some((operand) => operand.expression === "B_ANIM_ITEM_KNOCKOFF")) return ITEM_KNOCKOFF_OFF_HOLD_FRAMES;
   const { executions, lead } = heldItemEffectExecutionsAndLead(events, messageIndex);
   const leadFrames = instruction.operands.map((operand) => WSH1_OFF_HOLD_LEAD[operand.expression]).find((value) => value !== undefined) ?? lead;
-  return (executionsPresented ? 0 : executions) + leadFrames - (lead === HELD_ITEM_EFFECT_CONTINUE_LEAD_FRAMES && itemHealAfterResultMessage(events, messageIndex) ? HELD_ITEM_AFTER_MESSAGE_LEAD_DELTA : 0);
+  return (executionsPresented ? 0 : executions) + leadFrames - (itemHealAfterResultMessage(events, messageIndex, lead) ? HELD_ITEM_AFTER_MESSAGE_LEAD_DELTA : 0);
 }
 /**
  * off121 (docs/off121-status-command.md): in Scene OFF `Cmd_statusanimation` is skipped (HITMARKER_NO_ANIMATIONS,
