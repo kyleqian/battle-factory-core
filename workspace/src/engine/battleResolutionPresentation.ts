@@ -6483,7 +6483,8 @@ export function projectBattleResolutionCommands(
               : (() => {
                 const base = selfConfusionOff
                   ? SELF_CONFUSION_OFF_HIT_MESSAGE_TIMING
-                  : (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0 && preMoveOffUsedPrintTiming(events, index) !== null
+                  : ((beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0 || event.provenance?.sourceLabel === CONFUSION_NO_MORE_HEAD_SCRIPT)
+                    && preMoveOffUsedPrintTiming(events, index) !== null
                   ? preMoveOffUsedPrintTiming(events, index)!
                   : messageTimingFromSourceProvenance(event, sceneOnMoveAnimationSeen, (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0)
                   ?? (WAITMESSAGE_LONG_MESSAGE_IDS.has(payload.messageId) || payload.messageId === SUBSTITUTE_FADED_MESSAGE_ID
@@ -7666,7 +7667,7 @@ const MOVE_BODY_SOUND_CLOCK_LEAD = 7;
  * stage walk's commit + 9, not on it. Asleep (walk ends on `before-turn`) and the wake-up (status command first) keep their own rules.
  */
 const OFF_HEAD_PRINT_LABELS: ReadonlySet<string> = new Set([CONFUSION_HEAD_SCRIPT, CONFUSION_NO_MORE_HEAD_SCRIPT, IN_LOVE_HEAD_SCRIPT]);
-function usedMovePrintLeadU(state: BattleResolutionPresentationState, handoff: BattleResolutionConfirmHandoff): number | null {
+function usedMovePrintLeadU(state: BattleResolutionPresentationState, handoff: BattleResolutionConfirmHandoff, forHold = false): number | null {
   if (handoff.forced !== undefined || handoff.focusPunchPrePass === true) return null;
   // chg1's continuation segment and charge-turn box were measured in Scene OFF only (pixel labs); Scene ON keeps hcr2's first-segment USEDMOVE rule.
   const sceneOff = sceneOffOf(state);
@@ -7676,7 +7677,9 @@ function usedMovePrintLeadU(state: BattleResolutionPresentationState, handoff: B
   const first = segment.events.find((event) => event.payload.kind !== "set-battler-pp-data");
   if (first === undefined || first.payload.kind !== "message") return null;
   const chargeBox = sceneOff && first.payload.messageId === "STRINGID_EMPTYSTRING3" && first.provenance?.sourceLabel === CHARGE_TURN_SCRIPT;
-  const head = sceneOff && OFF_HEAD_PRINT_LABELS.has(first.provenance?.sourceLabel ?? "");
+  // ecm1: Scene ON's ConfusedNoMore head waits the same u - 2 (the hold only: the sound leads and `usedMovePrintU` keep the plain turn's rule).
+  const headLabel = first.provenance?.sourceLabel ?? "";
+  const head = sceneOff ? OFF_HEAD_PRINT_LABELS.has(headLabel) : forHold && headLabel === CONFUSION_NO_MORE_HEAD_SCRIPT;
   if (first.payload.messageId !== "STRINGID_USEDMOVE" && !chargeBox && !head) return null;
   const u = first.provenance?.instructionExecution;
   return u === undefined || u < USED_MOVE_LEAD_MIN_U || u > USED_MOVE_LEAD_MAX_U ? null : u;
@@ -7733,7 +7736,7 @@ export function usedMoveBodySoundLeadOf(state: BattleResolutionPresentationState
   return MOVE_BODY_SOUND_CLOCK_LEAD - lead;
 }
 function usedMovePrintLeadAdjust(state: BattleResolutionPresentationState, handoff: BattleResolutionConfirmHandoff): number {
-  const u = usedMovePrintLeadU(state, handoff);
+  const u = usedMovePrintLeadU(state, handoff, true);
   return u === null ? 0 : u - 2;
 }
 

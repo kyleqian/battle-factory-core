@@ -9,10 +9,10 @@ const appTracePath = "../tools/compare/appTrace.ts";
 const { APP_STAGES, labBackedStage } = (await import(/* @vite-ignore */ appTracePath)) as any;
 
 interface Row { frame: number; segment: number; index: number; type: string; hold: number | undefined; minimum: number | undefined }
-function commandRows(name: string): Row[] {
+function commandRows(name: string, scene: "on" | "off" = "off"): Row[] {
   const lab = JSON.parse(readFileSync(new URL(`../tools/battle-lab/${name}.json`, import.meta.url), "utf8"));
-  let state: any = createInitialState({ appRoute: "generated-orchestrator", battleScene: "off" });
-  state = APP_STAGES[name] !== undefined ? APP_STAGES[name](state) : labBackedStage(`${name}.json`, state, undefined, "off");
+  let state: any = createInitialState({ appRoute: "generated-orchestrator", battleScene: scene });
+  state = APP_STAGES[name] !== undefined ? APP_STAGES[name](state) : labBackedStage(`${name}.json`, state, undefined, scene);
   const frames = lab.trace.segments.reduce((n: number, s: any) => n + s.frames, 0);
   const rows: Row[] = [];
   let last = "";
@@ -35,5 +35,14 @@ describe("ohs1: Scene OFF ConfusedNoMore pre-move print hold", () => {
     expect(holds).toContain(69);
     expect(holds).toContain(67);
     expect(holds).toContain(71);
+  });
+});
+
+// ecm1: the same script has no status2animation, so Scene ON waits the same 64 + 5 before the used print (ROM s830 d5 / s7295 d8: wait release ->
+// HitFromAtkString 64 + 4 rows; the engine's 64 was 5 rows short in both windows). The ON confusion head (67) and self-hit (66) keep cfa1's rule.
+describe("ecm1: Scene ON ConfusedNoMore pre-move print hold", () => {
+  it("hpf4m-confuse-on: the confusion-ended print holds 64 + 5 before the used print", () => {
+    const rows = commandRows("hpf4m-confuse-on", "on").filter((r) => r.type === "message");
+    expect(rows.find((r) => r.segment === 0 && r.index === 0 && r.hold === 69)).toBeDefined();
   });
 });
