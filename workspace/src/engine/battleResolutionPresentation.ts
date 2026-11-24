@@ -2477,7 +2477,7 @@ const HIT1_SHAPE_A_MOVE_IDS: ReadonlySet<number> = new Set([9, 264]);
 // hsw1: Karate Chop (2), Mega Punch (5), Vice Grip (11), Gust (16), Rock Throw (88), Smelling Salt (265), Needle Arm (302), Mud Shot (341), Poison Tail (342), Covet (343):
 // the one-hit bodies whose live window is the ROM's gAnimScriptActive length + 6 (labs hsw1-*-pfirst-on, bht1-*: window - A = 6) and whose hit SE was +1 / hp start -6
 // = the shape-A signature (lead 5 in front + hit tail 1 close it exactly).
-// Then Night Shade (101), Superpower (276), Luster Purge (295), Mist Ball (296), Silver Wind (318), Signal Beam (324): hp start -7..-9 -> 0 / -1 (Luster Purge, Signal Beam keep -1: their body is 1 row short of A + 1). bwf2: Spark (209) / Dragon Breath (225) joined once their bodies were fixed to the ROM length (windows 117 / 87).
+// Then Night Shade (101), Superpower (276), Luster Purge (295), Mist Ball (296), Silver Wind (318), Signal Beam (324): hp start -7..-9 -> 0 / -1 (Luster Purge, Signal Beam were -1: their body is 1 row short of A + 1, now carried as 1 short row in LSE4_WINDOW_SHORT_ROWS: lpm1 / mhl1). bwf2: Spark (209) / Dragon Breath (225) joined once their bodies were fixed to the ROM length (windows 117 / 87).
 const HSW1_SHAPE_A_MOVE_IDS: ReadonlySet<number> = new Set([2, 5, 11, 16, 88, 265, 302, 341, 342, 343, 101, 276, 295, 296, 318, 324, 209, 225]);
 // mhs1: Triple Kick (167), Bonemerang (155), Spike Cannon (131): hit 1 of the DoMultiHit / DoTripleKickAttack loops is shape A (labs mhs1-*-pfirst-on, aud242r spikecannon-player ROM trace). mhl1 (mhm1): Twineedle (41), Pin Missile (42), Rock Blast (350) joined (labs mhm1-*-pfirst-on, trim 7). Fury Attack, Bullet Seed, Icicle Spear stay out.
 const MHS1_SHAPE_A_MOVE_IDS: ReadonlySet<number> = new Set([167, 155, 131, 42, 350, 41]);
@@ -2488,7 +2488,7 @@ const MHS1_SHAPE_A_MOVE_IDS: ReadonlySet<number> = new Set([167, 155, 131, 42, 3
 const LSE4_GAP_PRINT_MOVE_IDS: ReadonlySet<number> = new Set([278, 13]);
 /** lse4 "lead-only": a body with no visible print after it (the ROM's gap is the generic action transition, played by `actionTransitionPauseFrames`): Wish 273. */
 const LSE4_LEAD_ONLY_MOVE_IDS: ReadonlySet<number> = new Set([273]);
-/** lse4: rows the accepted adapter window is short of the ROM's `len + 1` (`s`): Absorb (script runs 2 rows past the window), Razor Wind (len = live, both turns). Added to the rows after the body. */
+/** lse4: rows the accepted adapter window is short of the ROM's `len + 1` (`s`): Absorb (script runs 2 rows past the window), Razor Wind (len = live, both turns), Luster Purge 295 and Signal Beam 324 (lpm1: one row short of A + 1). Added to the rows after the body. */
 export const LSE4_WINDOW_SHORT_ROWS: ReadonlyMap<number, number> = new Map([[71, 2], [13, 1], [295, 1], [324, 1]]);
 /**
  * b4l "c-lead" (docs/aud251-s11-scoreboard-refresh.md b4m / b4l): the B4 status / hit bodies whose kernel lead (the instruction rows from the used print's release to `attackanimation`,
