@@ -4763,3 +4763,236 @@ Run Scene OFF (lc6): `chg1-bounce-foe-off`, `chg1-fly-foe-off`, `chg1-dig-foe-of
 ### 4. State
 
 No `src/` or `tests/` change in the commit (scratch edits reverted with `git checkout`). PROGRESS / ISSUES / ROADMAP / PAPERCUTS not edited and npm test / typecheck / build not run, as the step's prohibitions say (they override the brief's closing "tests green, PROGRESS updated" line).
+## lpm1 (2026-11-24): Luster Purge / Signal Beam hp start, Thunderbolt SE -1, Scary Face stat SE
+
+Scene ON, measurement only (docs / labs / tools). Base: HEAD 413954b05 (tree acc83dc92), engine frozen at c22d60e57. Every number below was measured in a scratch copy of that tree with the edits applied (`.integration/scratch/lpm1tree`, git-ignored; evidence `.integration/evidence/lpm1/`, `.integration/evidence/ssm1/all-lpm1base` / `all-lpm1fix`). The two landings (items 1 and 2) are captured as one unified diff, `tools/integration/lpm1/lpm1-landing.patch` (`git apply --check` passes on this tree); item 3 has no rule. Labs: the existing `hsw1-lusterpurge-pfirst-on`, `hsw1-signalbeam-pfirst-on`, `aud262-lusterpurge-{player,opponent}-on`, `mechanic-luster-purge-*`, `mechanic-signal-beam-*`, `aud242b-thunderbolt-player-on`, `mechanic-thunderbolt-*`, `aud242k-scaryface-player-on`, `mechanic-scary-face-*` (no new lab json was needed). ROM rows: `tools/integration/ssm1Probe.py` (per-frame script trace) and `tools/integration/t2k4/probe.sh` windows.
+
+### 1. Luster Purge (295) / Signal Beam (324): hp start -1 -> LSE4_WINDOW_SHORT_ROWS
+
+- ROM: Signal Beam body A = rows 66..211 (145 rows), hit SE 213, healthbarupdate hp row 249. Luster Purge A = 67..399 (332 rows), hit SE 401.
+- Engine (before): hit SE 212 / 400, hp 248: the shape-A window (lead 5, gap 4, tail `6 - pre - post`) is one row short of A + 1 for these two bodies, the same shortfall `LSE4_WINDOW_SHORT_ROWS` already carries for 71 (2) and 13 (1).
+- **Landing recipe (1 edit):** `src/engine/battleResolutionPresentation.ts:2490`: `new Map([[71, 2], [13, 1]])` -> `new Map([[71, 2], [13, 1], [295, 1], [324, 1]])`; update the comment at ~2478 ("keep -1") to say they now carry 1 short row. The mechanism is the existing one: `liveMoveHitTailRows` adds `windowShort` to the tail (`battleResolutionPresentationRender.ts:1687-1702`) and `cmdEndSeWaitRuleApplies` (`:1604`) already excludes ids in the map.
+- Result: hit SE 213 / 401 and hp 249 on the ROM row in the Luster Purge / Signal Beam labs, both seats.
+- Pin that moves: `tests/apx221PresentationGateApproximate.test.ts:33` (Signal Beam 324 window 156 -> 157); check the Luster Purge pins around `tests/aud262MoveAnimSounds.test.ts` and any hsw1 window pin for 295 (window +1).
+
+### 2. Thunderbolt (85): SE 215 and both SE 119 -1 -> a wall-clock lag, not a script row
+
+- ROM (labs `aud242b-thunderbolt-player-on`, `mechanic-thunderbolt-*`): the third SE 118 at row 112, blend #1 123, blend #2 136, `delay 20` at 149, then `+0x143` at 171 and `+0x149` / SE 215 at 172. The engine had SE 215 at 171. SE 119 ROM 239 / 258 (player lab), 252 / 271 and 256 / 275 (mechanic labs), each -1 in the engine. The span of the ROM script from SE 118 #3 to SE 215 is 11 + 13 + 13 + 23 = 60 rows against 59 in the engine.
+- Why pmc1 found no script row: there is none. The 9-sprite `createsprite gThunderboltOrbSpriteTemplate` burst overruns one VBlank on hardware (same class as METALLIC_SHINE_LOAD_LAG / the Scary Face lags in the extractor's wall-clock `lags` list), so every later row of the sound table is one wall-clock frame late.
+- **Landing recipe (extractor + regenerated JSON):** `tools/extract/extract-anim-sound-timing.ts` ~line 1664, in the `if (isCreation(op))` block after the MetallicShine lag line:
+  `if (op === "createsprite" && args[0] === "gThunderboltOrbSpriteTemplate" && frame !== null) lags.push({ after: frame - 0.5, frames: 1 });`
+  then regenerate `src/data/gen/anim-sound-timing.json` (3 Thunderbolt SE ops shift +1: SE 215 and the two SE 119; nothing else in the file changes).
+- Result: Thunderbolt labs exact on SE 215 / 119 (window already exact).
+
+### 3. Scary Face SE 245 / the stats-change command: no rule
+
+- Scary Face's own SE 245 is already exact in the three labs (`aud242k-scaryface-player-on`, `mechanic-scary-face-*`): the kse1 "Left" is stale. The t2k9 rank-9 rows (13 ON rows, s5569 d7 -11) are not Scary Face's own term.
+- The stat SE rows that are off in T2 belong to Intimidate / secondary-effect stat drops (Rock Tomb) and the post-Smokescreen drop. ROM: SE 245 = the `playanimation` exec rise + 4 (`BattleScript_StatDown+0x7`, `BattleScript_IntimidateActivatesLoop+0x3d`). Engine: `statsChangeSourceAge` (`battleResolutionPresentationRender.ts:1849`) puts the SE at command age `STATS_CHANGE_SE_AGE` 7 with per-path shifts; the residual splits in two classes:
+  - the command starts on the ROM exec row and the SE is +1 (s2741 d7: cmd 412 / ROM 416 / ENG 417; s4686 d1: cmd 295 / ROM 299 / ENG 300; s165 Rock Tomb: ROM 695 / ENG 696);
+  - the command itself starts late versus the exec (s1914 d11: ROM exec 870, SE 874; the engine command starts at 874 so the SE is 879, +5; s8108 d30: ENG 1533 vs ROM 1527, +6) or the SE is early (s499 d5 after Smokescreen: ENG 589 vs ROM 590, -1).
+- Scratch test of the obvious rule (+1 age shift for a stat SE whose previous command is `stat` and not after a move-animation body): T2 ON exact 3623 -> 3621, mass 6158 -> 6159, stat-change SE exact 59 -> 57. Not a rule; reverted. The +5 / +6 rows are a command-start phase (Intimidate after a faint send-in), not an SE age.
+
+### Combined measure and expected mass
+
+Items 1 + 2 together in the scratch tree, T2 ON (25 seeds, `tools/integration/ssm1/all.sh`): exact 3598 -> 3623, offset 2279 -> 2254, mass 6186 -> 6158 (-28), missing / extra 0 / 0. OFF not re-run (neither edit touches a Scene OFF row: no move-animation SE there). Per-edit attribution (Thunderbolt only vs Luster / Signal only) was not run.
+
+### What not to chase
+
+- A Thunderbolt script term: the rows are exact up to the orb burst; the +1 is a VBlank lag.
+- A global stats-change SE age shift (see the item 3 test: -2 exact), and the Scary Face SE itself.
+- The Intimidate +5 / +6 rows via the SE age: they are the command's start versus the exec row (post-faint send-in entry), a phase rule for the stats-change command.
+
+### State and verification
+
+No `src/` or `tests/` change (`git diff --stat HEAD -- src tests` empty; scratch edits live in the git-ignored scratch tree only); PROGRESS / ISSUES / ROADMAP / PAPERCUTS / ANIMATION_PROGRESS / ANIMATION_COVERAGE and supervisor ledgers untouched; `npm test` / typecheck / build not run (docs / tools step, ANIMATION_VERIFICATION.md: diff and ledger checks). Code under test: tree acc83dc92 (HEAD 413954b05, last `src` commit c22d60e57) plus the landing patch. Not landed: the numbers are Scene ON labs and T2 rows.
+
+## mhm1 (2026-11-24): Twineedle / Pin Missile / Rock Blast — why the lab hit counts differ, Scene ON labs that agree, per-hit rows, and the landing recipe (measurement only; labs + doc, no `src/` / `tests/` change)
+
+Engine frozen at c22d60e57. Everything below was measured in a hardlinked scratch tree under `/tmp/mhm1/scratch` (the recipe edits and some debug prints lived only there); the worktree has the 8 labs and this section.
+
+### 1. Why the lab hit counts differ
+
+ROM `Cmd_setmultihitcounter` (`reference/pokeemerald/src/battle_script_commands.c:7139`): `Random() & 3`; if the result is > 1 the count is `(Random() & 3) + 2`, else 2. So 2 hits 3/8, 3 hits 3/8, 4 hits 1/8, 5 hits 1/8 (Twineedle always 2). The count is one draw sequence away from the seed on each side, and the two sides do not start at the same RNG state:
+
+- ROM lab: `seed` is written to `gRngValue` **before** the intro, the dialogue and the battle script, so `Random()` has advanced an unknown (but deterministic) number of steps by the time the multi-hit counter rolls. Accuracy, damage roll, crit, effect and the foe's choice all draw before it.
+- Engine: the kernel starts at `json.seed` itself (`labBackedStage`), and draws in its own order. `ENGINE_RNG_SEED` overrides the engine seed only.
+
+So one lab seed gives two unrelated counts. The count has to be searched per move: a ROM `soundEventProbe` per seed (about 10 s each) and the engine side (`engsearch`), then keep a seed where both land on the same count. The hit count is read as the number of the move's body SE (Pin Missile 143 / 166; Rock Blast 193) before the first foe action; 1 = miss. Pin Missile's total SE count is 3 + 5 x hits (+3 for the foe's Karate Chop).
+
+### 2. Seed -> count table (`mhs1-<move>-pfirst-on` with only `seed` changed)
+
+| seed | ROM Pin Missile (count / nSE) | ROM Rock Blast | engine (both moves) |
+|---|---|---|---|
+| 1 | 2 / 13 | 2 / 9 | 3 |
+| 2 | 2 / 13 | miss | 2 |
+| 3 | 5 / 25 | 5 / 15 | 3 |
+| 4 | 2 / 13 | 2 / 9 | 5 |
+| 5 | 2 / 13 | 2 / 9 | 2 |
+| 6 | 3 / 18 | 3 / 12 | miss |
+| 7 | 3 / 19 | 3 / 13 | miss |
+| 8 | 3 / 19 | 3 / 13 | miss |
+| 9 | 3 / 19 | 3 / 13 | miss |
+| 10 | miss | miss | 4 |
+| 11 | miss | miss | 2 |
+| 12 | 5 / 25 | 5 / 15 | 3 |
+| 13 | 2 / 13 | 2 / 9 | 2 |
+| 14 | 3 / 18 | 3 / 12 | 2 |
+| 15 | 2 / 13 | 2 / 9 | 3 |
+| 16 | 4 / 24 | 4 / 16 | 3 |
+| 17 | 4 / 23 | 4 / 15 | 2 |
+| 18 | miss | miss | 3 |
+| 19 | 3 / 18 | 3 / 12 | 5 |
+| 20 | 5 / 25 | 5 / 15 | 2 |
+| 21 | 4 / 23 | 4 / 15 | 3 |
+| 22 | miss | miss | 2 |
+| 23 | 4 / 24 | 4 / 16 | 2 |
+| 24 | 3 / 18 | 3 / 12 | 3 |
+| 25 | 3 / 18 | 3 / 12 | 4 |
+| 26 | 3 / 18 | 3 / 12 | 2 |
+| 27 | 2 / 14 | 2 / 10 | 3 |
+| 28 | 5 / 25 | 5 / 15 | 2 |
+| 29 | 3 / 18 | 3 / 12 | 3 |
+| 30 | 2 / 14 | 2 / 10 | 3 |
+
+Further ROM Pin Missile probes (seed -> count): 32 1, 34 3, 40 3, 44 3, 47 5, 49 4, 53 3, 55 2, 59 1, 62 3, 64 3, 68 2, 70 3, 74 3, 77 3, 79 2, 89 2, 91 3, 92 2, 94 3, 98 3, 104 3, 107 3, 113 1, 119 1, 134 3, 149 2, 164 3, 177 2, 179 1, 183 3, 194 1, 198 2, 200 5, 209 2, 213 4, 215 2, 224 3, 228 3, 230 4, 243 5, 258 2, 273 2, 288 2, 303 3, 309 3. The engine sweep over 31..310 puts 4 / 5 hits on 32, 34, 40, 44, 47, 49, ...
+
+**Seeds where ROM and engine agree** (the labs):
+
+| count | Pin Missile | Rock Blast |
+|---|---|---|
+| 2 | 2 (also 5, 13) | 13 (also 5) |
+| 3 | 29 | 29 |
+| 4 | 213 (also 230) | 230 (213 reads 24 SE on the engine vs 23 on the ROM, so not used) |
+| 5 | 47 | 47 |
+
+Twineedle is always 2 hits and needs no seed search (`mhs1-twineedle-pfirst-on`, 134 mass at HEAD).
+
+Labs committed (copies of `mhs1-<move>-pfirst-on.json`, only `seed` changed): `mhm1-pinmissile-s{2,29,213,47}-on`, `mhm1-rockblast-s{13,29,230,47}-on`. Caveats: the two **s47 labs are not clean** (ROM-only rows of about +80 per hit, a crit or message divergence between the two RNGs: Pin Missile s47 mass 2915, Rock Blast s47 1923); Pin Missile s213 has an engine-only paralysis status animation (SE 119) at the end, which is RNG noise, not timing. Use s2 / s29 / s213 and s13 / s29 / s230 as the scoreboard.
+
+### 3. Per-hit rows (HEAD, then the recipe)
+
+At HEAD (no shape A for 41 / 42 / 350) hit 1 is **-9** (Pin Missile / Rock Blast) and **-10** (Twineedle) against the ROM, and each later hit drifts about -5 more: -9 / -14 / -19 / -24 for 4 hits. The hit SE moves with the hit. Mass at HEAD: Pin Missile s2 127, s29 213, s213 345; Rock Blast s13 69, s29 135, s230 240; Twineedle 134.
+
+Recipe measured in the scratch tree:
+
+| step | Pin Missile s2 / s29 / s213 | Rock Blast s13 / s29 / s230 | Twineedle |
+|---|---|---|---|
+| HEAD | 127 / 213 / 345 | 69 / 135 / 240 | 134 |
+| + 41 / 42 / 350 in `MHS1_SHAPE_A_MOVE_IDS` (trim 5) | 16 / 51 / 84 | 15 / 42 / 51 | 11 |
+| + `BattleScript_DoMultiHit` trim 5 -> 7 | **0 / 9 / 6** | **3 / 12 / 9** | (hit 2 of Twineedle: see below) |
+
+- Hit 1 (the used-print lead) is exact (+0) on every lab once shape A is on; it is the whole -9 / -10.
+- Hits 2+ (`multiHitLoopHitLead` = box rows - trim): with the existing trim 5 the per-hit step drifts +2 per hit for Pin Missile (+0, +2, +4, +6) and +1..+3 for Rock Blast; with trim 7 all hits are +0 to +-1. **Bonemerang was fitted with 5**, so 7 cannot be a table-wide change: the trim has to be per move (42 / 350 / 41 -> 7, 155 / 131 / Triple Kick keep 5 and 8), or Bonemerang is re-measured. Bonemerang / Triple Kick ROM files were not captured in this run, so this was not verified on them.
+- The DoMultiHit 25-row box (the +8 / +7 count) becomes `to - from + 1` automatically once the move is shape A (no constant needed).
+- Residual: the final tail (last hit SE -> `PrintStrings` print). ROM tail = **57 + damage of the last hit** (Pin Missile 63 / 64 / 65 for damage 6 / 7 / 8; Rock Blast 69 / 70 for 12 / 13); the engine's is +0..+3 off (65 / 66 / 66 / 70 / 71 / 72). It follows the damage, so it is not a lead; not isolated (engine damage roll / HP-bar rows). `PrintStrings` -> the foe's used-move print is 95 on both sides.
+
+### 4. Twineedle seed 363: play 65 vs lab 56
+
+`tests/hit1MoveHitTiming.test.ts` `play()` measures the SE emission frame from its own loop `frame` and ignores `e.frame`. `collectSoundTick` stamps `e.frame = frame - lead` (`setSoundTickLead`); `usedMoveBodySoundLeadOf` (`battleResolutionPresentation.ts:7691-7709`) returns `MOVE_BODY_SOUND_CLOCK_LEAD (7) - lead` for a plain body with `lead >= PLAIN_BODY_SOUND_LEAD_MIN_L (4)` and `lse2BodySoundAgeShift(...) === 0`. With lead 15 that is -8: the **stamped** frame is 8 later than the tick that actually emitted the SE.
+
+- The ROM-stamped labs (labCompare, T2) read the stamp, so they are exact: SE 160 at row 81, hit SE at 137, a 56-row gap.
+- In play the audible SE is emitted at age 0 + 17 regardless of the lead (5880) while the hit moves +9 with the lead; SE 160 -> effectiveness reads 5880 -> 5945 = 65 against the ROM's 56. Without shape A it is 5880 -> 5936 = 56 (that is why the test currently passes and why it fails with the recipe).
+- Lab and play have the same `usedMovePrintU` 4, `animLead` 2, `bodyLeadFrames` 15 (hit 1) / 12 (hit 2) and the same sound age. The difference is only the stamp vs the emission tick.
+- The test already names the same issue for Fury Swipes ("plays 9 rows early on the pre-lead sound clock") and it applies to the landed Triple Kick / Bonemerang / Spike Cannon shape-A bodies: stamped T2 reads exact, the audio in play is early by `lead - 7`.
+
+Fix experiment (scratch only): have `lse2BodySoundAgeShift` return `bodyLeadFrames - S0` for the shape-A multi-hit ids, as `LSE2_SOUND_CLOCK_LEADS` / `C_LEAD_SOUND_CLOCK_LEADS` do (`usedMoveBodySoundLeadOf` then returns `base`). S0 = 7: play SE 5888, effectiveness gap 57; lab SE stamp 79 (-2 vs ROM 81). S0 = 5: play SE 5890, gap **55** (the same +-1 class as Thunder Punch's 85 vs 86); the lab with the hook applied to all hits (including hits 2+, whose lead is already trimmed) got worse than the trim-7 run (Pin Missile s2 8, s29 21, s213 22; Rock Blast s13 7, s29 18, s230 9; Twineedle 5): the hits 2+ SEs sit +1 in that run (SE 143 / 166 all +1, hit SE 13 exact). So the play fix needs hit 1 and hits 2+ treated separately and was **not landed**. Until then the seed 363 test expects [56, 56] only without shape A for 41, or [55 or 57, ...] with the S0 shift on hit 1 only.
+
+### 5. Landing recipe (per move)
+
+1. `src/engine/battleResolutionPresentation.ts:2481` `MHS1_SHAPE_A_MOVE_IDS`: add **41, 42, 350** (`new Set([167, 155, 131, 42, 350, 41])`). Feeds line 2522 (`"shape-a"` rule), line 474 and `multiHitLoopHitLead` (2562-2566).
+2. `:463` `MULTI_HIT_LOOP_LEAD_TRIM_ROWS`: `BattleScript_DoMultiHit` 5 -> 7 **for 42 / 350 (and 41)**, 5 stays for Bonemerang 155 and Triple Kick 8. This needs a per-move trim (the map is keyed by the label only; `multiHitLoopHitLead` has `moveId` at line 2562).
+3. `tests/helpers/iu120Rows.ts:90` `SHAPE_A_RULE_IDS`: add 41, 42, 350 (it mirrors the engine set; 167, 155, 131 are already in it).
+4. `tests/hit1MoveHitTiming.test.ts:188` (seed 363, expects [56, 56]): with the recipe in play it reads 65 until the play sound-clock shift above is landed; either land both together (hit-1-only shift S0 = 5 on 41) or move the test to the stamped frame.
+5. Not changed: `PLAIN_BODY_SOUND_LEAD_MIN_L` (7635) and `MOVE_BODY_SOUND_CLOCK_LEAD` (7636).
+
+**Expected mass** (labs measured, T2 not run): Pin Missile s2 127 -> 0, s29 213 -> 9, s213 345 -> 6; Rock Blast s13 69 -> 3, s29 135 -> 12, s230 240 -> 9; Twineedle 134 -> 11 (the ROM-only paralysis rows stay missing). The T2 gain on these three moves was read earlier as about Pin Missile 2045 and Rock Blast 1392 (t2k9 / mhs1 estimates) -> about 15 and 24 by the lab ratio; the replay tools were not run in this step, so that figure is an estimate.
+
+### Notes
+
+- Evidence (git-ignored): `/tmp/mhm1/{base,run1..run4,labs,scratch}`; the scratch edits are the two recipe lines plus debug-only prints (`MHM1_DBG`, `MHM1_SOUNDSHIFT`), not for landing.
+- Not applied: no `src/` / `tests/` change; PROGRESS / ISSUES / ROADMAP / PAPERCUTS untouched; `npm test` / typecheck / build not run (the step forbids them).
+## lcm1 (2026-11-24): the two -21 loss-recall windows (s3738 d62, s7295 d8) decomposed; lrm1's lead change makes both better (measurement only; doc only, no `src/` / `tests/` change)
+
+Engine frozen at `c22d60e57` (worktree HEAD `22c925954`, tree `0516e701bf68`). Both windows probed with `tools/integration/t2k4/probe.sh SEED on DECISION -40:900` (ROM `hcr3mProbe` on the Scene ON oracle + engine `--cmdtrace=1`; `T2K4_DIR` = a worktree dir whose `t2` links to `t2k9/t2-on`; 45 s + 18 s; `cmp.txt` in `.integration/evidence/lcm1/p/on/`, git-ignored). Engine commit / ROM commit: s3738 42560 / 42414, s7295 6706 / 6782. No lab built (the probe is the ROM side; the lrm1 labs already cover the SE 15 leg).
+
+### Answer in one paragraph
+
+The -21 is not one "other chain". It is three stacked terms, identical in shape in both windows: **(1) an upstream offset carried into the faint** (s3738 -11, s7295 -9 at SE 16; different causes, section 1), **(2) one 17-row press-pulse step on the "fainted!" box** (SE 5 -17 in both: the engine dismisses the box on the pulse before the ROM's, section 2), **(3) lrm1's -4** (`LOSS_RECALL_LEAD_FRAMES` 20 -> 24). -11 - 6 - 4 = -21 and -9 - 8 - 4 = -21 (SE 16 offset, SE 16 -> SE 5 gap short by 6 / 8, lrm1). **lrm1's lead change is strictly better here: SE 15 -21 -> -17 in both windows (T2 mass 55 -> 51 and 103 -> 99, -8); nothing before the `switch-out` command moves.** The remaining -17 is the pulse step plus the carried term; it is not another lead.
+
+### 1. The rows, ROM script row against engine command (frames from each side's commit; `cmp.txt`)
+
+**s3738 d62** (foe Uproar 253 KOs the player's mon; Scene ON; T2 window mass 55 over 7 rows, all non-zero):
+
+| leg | ROM row | ROM | engine cmd / SE | engine | engine - ROM |
+| --- | --- | --- | --- | --- | --- |
+| print | `EffectUproar+0xf` ex2 (wait) | 10 | `message` | 9 | -1 |
+| body SE 241 x3 | `HitFromAtkAnimation+0x1` ex2 | 56 / 74 / 92 | `move-animation` SE | 53 / 71 / 89 | **-3** (T2 rows) |
+| hit SE 13 | `+0x1` ex0 -> SE 13 | 121 | `hit-animation` +7 | 118 | -3 |
+| hp bar | `HitFromAtkAnimation+0x8` ex1 (30-row drain) | 157 -> 188 | `hp` 29 -> 0, min 28 | 146 -> 174 | -11 .. -14 (drain 31 rows vs the 28 floor) |
+| secondary print | `MoveEffectUproar+0x3` ex2 (print + wait 30) | 194 | `message` (min 0) | 176 | **-18** |
+| faint | `FaintTarget+0x0` | 290 | `faint` lead 68 | 269 | **-21** |
+| cry / SE 16 | SE_FAINT | 291 (cry) / 357 | cry / SE 16 (lead 68 + 2 + `SCENE_ON_LAG` 7) | 346 | **-11** (T2 rows) |
+| box | `FaintTarget+0xc` ex2 | 374 | `status` 355 / `message` min 24 356 | 356 | -18 |
+| A on the box | SE 5 | 402 | SE 5 | 385 | **-17** |
+| loss recall | `GiveExp+0` 411, SE 15 | 430 | `switch-out` 387 (lead 20), SE 15 | 409 | **-21** (T2 row) |
+
+**s7295 d8** (foe Struggle 165 after `ConfusedNoMore`, recoil, KO; Scene ON; window mass 103 over 9 rows):
+
+| leg | ROM row | ROM | engine cmd / SE | engine | engine - ROM |
+| --- | --- | --- | --- | --- | --- |
+| confusion cure print | `ConfusedNoMore+0x3` ex2 (40 rows) | 13 | `message` | 9 | -4 |
+| Struggle print | `HitFromAtkString+0x1` ex2 | 121 | `message` | 112 | **-9** |
+| body SE 162 x4 / SE 141 | `HitFromAtkAnimation+0x1` ex2 | 168 / 180 / 193 / 206 / 234 | `move-animation` (`bodyLead 5`) SE | 157 / 169 / 182 / 195 / 223 | **-11** (5 T2 rows) |
+| hit SE 13 | | 272 | `hit-animation` | 263 | -9 |
+| hp bar target / recoil | `+0x8` ex1 308 / `DoRecoil+0xb` ex2 336, `+0xd` 342 | 308 / 342 | `hp` b0 / `hp` b1 41 -> 37 | 298 / 326 | -10 / -16 |
+| recoil print | `DoRecoil+0x10` ex2 (34 rows, then 65 idle) | 343 | `message` | 334 | -9 |
+| faint | `FaintTarget+0x0` (`RecoilEnd` 442, `+0x13` 443) | 444 | `faint` lead 69 | 431 | **-13** |
+| cry / SE 16 | | 445 (cry -9) / 511 | | 502 | **-9** |
+| box | `FaintTarget+0xc` ex2 | 528 | `status` 518 / `message` 519 | 519 | -9 |
+| A on the box | SE 5 | 561 | SE 5 | 544 | **-17** |
+| loss recall | `GiveExp+0` 570, SE 15 | 589 | `switch-out` 546, SE 15 | 568 | **-21** |
+
+What the legs say:
+
+- **s7295 is the confusion-cure family (t2k9 item E, s830 d5 Ice Beam -6), not a loss-recall chain.** The `ConfusedNoMore` print -> next move's print is 103 engine rows against the ROM's 108 (`ConfusedNoMore+0x3` 13 -> `HitFromAtkString+0x1` 121), then the body is -11; the hit (-9), the recoil chain (net +0: hp -16 .. print -9, +2 recovered) and the faint (-13 cmd, SE 16 -9) only carry it. The 4-row first print (-4) is the Struggle `NoMovesLeft` start (ROM `EffectRecoil+0` 6, `ConfusedNoMore+0` 12; the same forced-commit anchor family as the "Struggle 150 / 9 windows" remainder item of t2k9 section 4: s7295 d8 -11 over 5 rows = 55 is these SE 162 rows). Landing E (`usedMovePrintLeadU` ~7057, the confusion cure print -> next print constant, +5 / +6) moves every row after it.
+- **s3738 is its own Uproar KO chain**, no shared rule with s7295. After the hit SE (-3) the engine loses 8 more rows before the faint: the `hit-animation` -> `hp` start (the engine's SE 13 is the cmd + 7 `SCENE_ON_LAG`, the `hp` start is cmd + 35; the ROM's drain starts 36 after SE 13, engine 28: the lag the faint SE 16 already compensates), the 29/60 drain (ROM 31 rows, engine floor 28), `HitFromAtkAnimation+0xa` -> the secondary print (`MoveEffectUproar+0x0`: ROM +6, engine +2, plain hit -> print is +3 in s4686), and the print -> `FaintTarget` stretch (ROM 96 from the print row, engine 93). A plain hit -> faint T2 window has SE 16 at 0 .. +2 with the same lag, so these are the Uproar KO's own -11 (cry and SE 16 -11). One window in the 25 ON seeds; not a rule on its own.
+- **The faint SE is lag-compensated, which is why SE 16 hides most of the upstream deficit**: SE 16 = `faint` cmd + lead + 2 + `lag` (7 minus `moveBodyExtraRows`, `battleHitSounds.ts:28`, `:92`, `:166-178`): s3738 +77 (lag 7), s7295 +71 (lag ~2: `bodyLead 5` takes 5 of the 7), OFF s4686 +69 (lag 0). Both windows' faint cmd is early by far more than the lag (-21 / -13), hence -11 / -9 remain at SE 16.
+
+### 2. The step between SE 16 and SE 5 (the part that made it -17, not -11 / -9)
+
+The ROM's SE 5 is the harness press: the drive replays 1-row A taps on a 17-row grid anchored at each commit (`drive.segments`: ROM A at commit +10, +27, ... in s3738, +16, +33, ... in s7295; both sides use the same grid relative to their own commit). The box (`FaintTarget+0xc` wait / engine `message` min 24) accepts the first tap that comes after box start + 24:
+
+| window | box start ROM / engine | + 24 | taps (ROM-relative = engine-relative) | engine takes | ROM takes |
+| --- | --- | --- | --- | --- | --- |
+| s3738 d62 | 374 / 356 | 398 / 380 | 367, **384**, 401 | 384 (SE 5 385) | 401 (SE 5 402) |
+| s7295 d8 | 528 / 519 | 552 / 543 | 526, **543**, 560 | 543 (SE 5 544) | 560 (SE 5 561) |
+
+So the box start -18 / -9 shows as **-17 (one tap) on SE 5 and on SE 15 behind it**, and it is a cliff, not a ramp: **the engine's box has to move only +5 (s3738) or +1 (s7295) rows later to take the ROM's tap**, after which SE 5 is exact and SE 15 reads only lrm1's -4. In the other loss windows SE 15 reads a clean -4 (attr), which means the box takes the ROM's tap there (inferred from the clean -4; only s4686 OFF was probed for SE 5, exact at 388). Conversely any partial upstream fix that moves the box by less than that leaves the -17; an overshoot of the other side (a box later than the ROM's by more than the ROM's tap slack) would produce +17, so the upstream terms should be landed whole or not at all.
+
+### 3. lrm1's lead change on these two windows
+
+| | now | lrm1 only (lead 24) | lrm1 + the box takes the ROM tap (section 2) |
+| --- | --- | --- | --- |
+| s3738 d62 SE 15 / window mass | -21 / 55 | **-17 / 51** | 0 / 34 (SE 16 and cry -11 remain, the 4 body rows -3) |
+| s7295 d8 SE 15 / window mass | -21 / 103 | **-17 / 99** | 0 / 82 (the 4 SE 162 + SE 141 -11, SE 13 -9, cry / SE 16 -9 remain) |
+
+Better in both; no row regresses (only `switch-out` and the tail behind it move; `LOSS_RECALL_TRAINER_SLIDE_GAP_FRAMES` stays; the T2 drive stops at the outcome, so there is no ROM row behind SE 15 to disagree with). The two -21 rows were excluded from lrm1's expected -124, so lrm1 gains **-8** here in addition (-132 in all).
+
+### 4. Recipe for what is left (files / lines / rows / expected mass)
+
+All arithmetic from the legs above, none of it landed or simulated; t2k9's "another chain" is closed as: **one E-family window and one Uproar-KO window, no shared rule.**
+
+1. **s7295 d8 (E family + Struggle start), -82 .. -90 incl. the SE 15 step.** `battleResolutionPresentation.ts` `usedMovePrintLeadU` ~7057 and the confusion-cure -> next-print gap (+5 / +6, the same constant as s830 d5's -6; ROM `ConfusedNoMore+0x3` 13 -> `HitFromAtkString+0x1` 121 = 108 rows against the engine's 103; the first print's -4 is the `NoMovesLeft` start: ROM `EffectRecoil+0` 6 vs engine `message` 9, a separate per-move constant for Struggle if wanted). With +6 here the body and hit rows go to -5 / -3, the faint -3, the box +6 (>= the +1 the tap cliff needs), so SE 5 and SE 15 follow to exact (with lrm1's lead). Expected for the window: 103 -> ~34 (body 5 x -5 = 25, SE 13 -3, cry / SE 16 -3 -3). **Landing order: lrm1's lead first (-4), then E; land E with the s830 d5 window (-60 .. -66) so one constant is checked on two windows.**
+2. **s3738 d62 (Uproar KO), -21 -> 0 on SE 15 once the box is >= +5, cry / SE 16 -11 remain.** Rows: ROM `HitFromAtkAnimation+0xa` 188 -> `MoveEffectUproar+0x0` 193 -> `+0x3` ex2 194 (print +6 against the engine's +2), print -> `FaintTarget+0` 96 rows (engine 93), drain 31 rows (engine floor 28). Files: `battleResolutionPresentation.ts` `hpLeadRows` ~6799 (`messageRows`, `moveEndRows`, `barRows`) for the KO + secondary-effect print, and `battleHitSounds.ts:166-178` `faintLag` (a KO whose chain carries a secondary-effect print has more presented rows, as `followsFutureSightHit` / `followsEndTurnTickDamage` do for theirs). Expected: -34 .. -55 for the window; **one window, so measure a second Uproar / secondary-print KO before landing** (a lab: Uproar or a status secondary effect that prints after a KOing hit, Scene ON).
+3. **The tap cliff is not a rule**: do not add a constant to the box or to SE 15 for it (+17 on every window whose box is already within the tap). It resolves itself when 1 and 2 land.
+
+### 5. What not to chase
+
+- A bigger `LOSS_RECALL_LEAD_FRAMES` or a second SE 15 constant for -21 (it would add the 17-row cliff to the wrong side and turn the -17 into +4 .. +21 elsewhere).
+- Gating the loss recall on "preceded by an uproar / recoil chain": the lead is the same; the offset comes from upstream rows.
+- SE 5: it is the harness press (no `attr` row), not a sound the engine should be calibrated to.
+- The lrm1 note that the labs' last turn has an engine-only 64-row `message` before the faint: this probe's two windows show no such row (`message` 176 -> `faint` 269 is the Uproar print + hold, ROM 96 rows).
+
+### 6. State and verification
+
+Measurement only: no `src/` / `tests/` change, no lab file added, PROGRESS / ISSUES / ROADMAP / PAPERCUTS and the Factory ledgers untouched; `npm test` / `typecheck` / `build` not run (the step forbids them). Ran: two `probe.sh` captures (mGBA, `nice -n 10`), reads of `attr-on.json`, the two `drive.json` and `eng-cmd.json`. Diff: this section only.
