@@ -1265,7 +1265,11 @@ function preMoveOffUsedPrintTiming(events: readonly BattleKernelSemanticEvent[],
   if (timing === null) return null;
   for (let next = index + 1; next < events.length; next += 1) {
     const payload = events[next]!.payload;
-    if (payload.kind === "message") return payload.messageId === "STRINGID_USEDMOVE" ? timing : null;
+    if (payload.kind === "message") {
+      if (payload.messageId !== "STRINGID_USEDMOVE") return null;
+      const gap = label === CONFUSION_HEAD_SCRIPT ? attackStringCancelerGapRows(events[next]!) - 1 : 0;
+      return gap === 0 ? timing : Object.freeze({ minimumFrames: timing.minimumFrames, holdFrames: timing.holdFrames + gap });
+    }
   }
   return null;
 }

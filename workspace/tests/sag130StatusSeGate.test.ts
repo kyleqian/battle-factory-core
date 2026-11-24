@@ -139,7 +139,8 @@ function anchors(seed: number): { anchors: Anchor[]; unanchored: number; offAnim
   // hse2 item 2: the Scene OFF confusion print before the used print holds 64 + 3 + 4 (ROM print -> used print 94 vs ON 90, hpf4m-confuse-off,
   // tests/hse2OffStatusHeads.test.ts); this test is about the status-SE gate alone, so read that print at the ON hold (cfx1: 64 + 1).
   // pmk1: the Scene OFF "is in love" head (64 + 3 + 3) is read at the ON head hold 64 + 1 as well.
-  const confusionOffHold = (c: any, events: any[]) => c.type === "message" && (c.timing?.holdFrames === 71 || c.timing?.holdFrames === 67)
+  // cre1: the OFF used print also holds the used move's attackcanceler -> attackstring gap (71 + gap - 1 = 70 / 71 / 72), read at 65 too.
+  const confusionOffHold = (c: any, events: any[]) => c.type === "message" && (c.timing?.holdFrames === 71 || c.timing?.holdFrames === 67 || c.timing?.holdFrames === 70 || c.timing?.holdFrames === 72)
     && events.find((e: any) => e.sequence === c.eventSequence)?.payload.messageId === "STRINGID_PKMNISCONFUSED"
     ? { ...c, timing: { ...c.timing, holdFrames: 65 } }
     : c.type === "message" && (c.timing?.holdFrames === 70 || c.timing?.holdFrames === 67) && events.find((e: any) => e.sequence === c.eventSequence)?.payload.messageId === "STRINGID_PKMNINLOVE"
