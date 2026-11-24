@@ -487,11 +487,15 @@ describe("live Factory swap presentation adapter", () => {
     expect(state.summaryCallback).toBe("CloseSummaryScreen");
     state = advance(state, 1);
     expect(state.summaryCallback).toBe("CB2_InitSwapScreen");
-    state = advance(state, 19);
+    state = advance(state, 18);
+    expect(state.controller.phase).toBe("summaryReturn");
+    state = advance(state, 1);
     expect(state.summaryCallback).toBe("Swap_Task_HandleMenu");
     expect(factorySwapSummaryReturnBallTile(state.summaryReturnClock!)).toBe(16);
 
-    state = advance(state, 19);
+    // srt1: Swap_Task_HandleMenu reaches STATE_MENU_HANDLE_INPUT at the summary B's +41 (the ROM's), inside CB2_InitSwapScreen's
+    // palette fade-in, so the rebuilt popup is playerOptions from there and takes input from +42 (before srt1: +60, then +61).
+    expect(state.summaryReturnClock).toBe(41);
     expect(state).toMatchObject({
       phaseElapsed: 0,
       returnedFromSummary: true,
@@ -508,6 +512,7 @@ describe("live Factory swap presentation adapter", () => {
     expect(handleFactorySwapPresentationInput(state, "DOWN")).toBe(state);
 
     state = advance(state, 1);
+    expect(state.summaryReturnClock).toBe(42);
     expect(state.controller.inputReady).toBe(true);
     state = handleFactorySwapPresentationInput(state, "DOWN");
     expect(state.controller).toMatchObject({

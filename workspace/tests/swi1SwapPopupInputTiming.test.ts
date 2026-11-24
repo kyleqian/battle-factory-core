@@ -7,13 +7,13 @@
 // ROM numbers (the frame catcher's ROM driver with a press sweep, .integration/evidence/swi1/romsweep.py, seed 28 Scene ON, the
 // `reopendown` trace): from the A that opens a popup (P), a one-frame A, B or DOWN at P+k is taken from k = 58 on, ignored before, for
 // the screen's first popup and for a popup opened after a summary visit alike (A at +1 is the opening A still held, on both sides). The
-// popup rebuilt after the summary takes input from the summary B's +42 on the ROM; the engine takes it from +61 (handover +60, then +1):
-// a difference this change keeps (the doc's "Seen, not fixed"), pinned below as the engine's so that a change to it is deliberate.
+// popup rebuilt after the summary takes input from the summary B's +42 on the ROM; swi1 kept the engine's +61 ("Seen, not fixed"), srt1
+// (docs/srt1-swap-summary-return-input.md) made it the ROM's +42.
 //
 // Driven by state, not frame numbers: seed 28, Scene ON, the soak's RandomPlayer ("winning-swap") outside the swap screen and a scripted
 // swap screen (makeSwi1.mjs `reopendown`'s prefix): slot 1 (SEALEO), its SUMMARY, back, B closes the rebuilt popup, A opens slot 1 again.
 // At each press the test branches the engine state: the press, k - 1 empty frames, then a one-frame A / B / DOWN at +k, against the same
-// frame without it. Fails on the base 1c0d55b82 (the popup after the summary takes input from +1).
+// frame without it. Fails on 1c0d55b82 (the popup after the summary takes input from +1) and on bcacf9026 (the rebuilt popup from +61).
 import { beforeAll, describe, expect, it } from "vitest";
 import "../src/engine/monPicPixelsInstall.ts";
 import { tick, type EngineState } from "../src/engine/core.ts";
@@ -23,8 +23,8 @@ import { ActionLog, RandomPlayer, Rng } from "../tools/soak/randomRoundSoakDrive
 
 /** The ROM's first frame a fresh popup (OpenMonPic) takes A / B / DOWN, from the A that opened it. */
 const ROM_FRESH_POPUP_FIRST_INPUT = 58;
-/** The engine's first frame the popup rebuilt after a summary takes input, from the summary's B (the ROM's: +42). */
-const ENGINE_REBUILT_POPUP_FIRST_INPUT = 61;
+/** The ROM's first frame the popup rebuilt after a summary takes input, from the summary's B (srt1; the engine's before srt1: +61). */
+const ROM_REBUILT_POPUP_FIRST_INPUT = 42;
 
 const NONE: ReadonlySet<GbaButton> = new Set();
 type Press = "A" | "B" | "DOWN";
@@ -119,10 +119,8 @@ describe("swi1: the swap screen's popup takes input when the ROM's does", () => 
     for (const x of ["A", "B", "DOWN"] as const) expect(takenAt(state, press, x, 75), x).toEqual(from(ROM_FRESH_POPUP_FIRST_INPUT, 75));
   });
 
-  it("the popup rebuilt after the summary needs no OpenMonPic: input one frame after the handover (summary B +61)", () => {
+  it("the popup rebuilt after the summary needs no OpenMonPic: input from the summary B's +42, inside the fade-in, as on the ROM", () => {
     const { state, press } = found.get("summary B")!;
-    for (const x of ["A", "B", "DOWN"] as const) expect(takenAt(state, press, x, 90), x).toEqual(from(ENGINE_REBUILT_POPUP_FIRST_INPUT, 90));
+    for (const x of ["A", "B", "DOWN"] as const) expect(takenAt(state, press, x, 90), x).toEqual(from(ROM_REBUILT_POPUP_FIRST_INPUT, 90));
   });
-
-  it.todo("the popup rebuilt after the summary takes input from the summary B's +42 as on the ROM (the doc's \"Seen, not fixed\")");
 });

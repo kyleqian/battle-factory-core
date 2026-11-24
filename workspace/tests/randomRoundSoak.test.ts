@@ -1081,7 +1081,11 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // swi1 (docs/swi1-swap-popup-input-timing.md: a swap-screen popup opened after a summary waits for its OpenMonPic, input at +58
       // instead of +1; this game's first such popup is at 22899, its RIGHT lands at 22958 instead of 22905, and the presses after the swap
       // screen land on new phases): 68945 -> 69545; same battle 3 / depth 2 / turn 21 / roundLost. A trajectory pin, not a ROM frame.
-      frames: 69545,
+      // srt1 (docs/srt1-swap-summary-return-input.md: the popup rebuilt after a swap-screen summary takes input from the summary's close
+      // +42 instead of +61, as on the ROM; this game closes its first summary with A at 22627, and the exploring policy's next press there,
+      // a LEFT the popup ignores on both trees, lands at 22686 instead of 22689, so the presses after it land on new phases):
+      // 69545 -> 69074; same battle 3 / depth 2 / turn 21 / roundLost. A trajectory pin, not a ROM frame.
+      frames: 69074,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 2,
@@ -1145,7 +1149,9 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // merge with the Mac's tdr1 (tri1 / wtl1 / sst1): frames only, 57984 -> 57651; same battle 3 / depth 2 / turn 15 / roundLost.
       // swi1 (see seed 0; the first post-summary popup is at 43452, its A lands at 43511 instead of 43467): 57651 -> 57793; same battle 3 /
       // depth 2 / turn 15 / roundLost.
-      frames: 57793,
+      // srt1 (see seed 0; its first summary closes with A at 20037, the next press, LEFT, lands at 20096 instead of 20099): 57793 -> 57778;
+      // same battle 3 / depth 2 / turn 15 / roundLost.
+      frames: 57778,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 2,

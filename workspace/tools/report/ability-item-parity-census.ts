@@ -419,7 +419,7 @@ const EXPECTED_RECOVERED_STRING_SITES = [
   "src/engine/factoryAiCheckViability.ts:8585 ABILITY_NONE",
   "src/engine/factoryAiTryToFaint.ts:171 ABILITY_LEVITATE",
   "src/engine/factoryAiTryToFaint.ts:200 ABILITY_LEVITATE",
-  "src/engine/factorySwapPresentation.ts:130 ABILITY_NONE",
+  "src/engine/factorySwapPresentation.ts:132 ABILITY_NONE",
 ].sort();
 check(
   JSON.stringify(recoveredStringSites.sort()) === JSON.stringify(EXPECTED_RECOVERED_STRING_SITES),

@@ -30,7 +30,7 @@ import {
   deactivateSpeciesNameFade,
   type SpeciesNameFadeState,
 } from "./speciesNameFade.ts";
-import { bgFadeY, objFadeY } from "./paletteFade.ts";
+import { bgFadeY, FADE_IN_TICKS, objFadeY } from "./paletteFade.ts";
 import {
   advanceBallAnim,
   ballAnimTile,
@@ -90,6 +90,8 @@ export interface FactorySwapPresentationState {
   readonly loadedDisplaySpecies?: string | null;
   /** Age since accepted summary B; rebuilt ball callbacks start at +41. */
   readonly summaryReturnClock?: number | null;
+  /** srt1: this summaryFade's A came while the summary return's fade-in still ran (factorySwapSummaryOpensInReturnFade). */
+  readonly summaryOpenedInReturnFade?: boolean;
 }
 
 export interface FactorySwapBallCycleVisual {
@@ -277,6 +279,19 @@ export const FACTORY_SWAP_PHASE_READY_DELAYS: Readonly<
   // first physical A/B edge observed by state 1.
   duplicateSpecies: 24,
 };
+
+/**
+ * srt1: the summary return's clocks (`summaryReturnClock`, 0 = the accepted summary B), measured on the ROM
+ * (docs/srt1-swap-summary-return-input.md). CB2_InitSwapScreen state 14 starts the fade-in, BeginNormalPaletteFade(PALETTES_ALL, 0,
+ * 16, 0, RGB_BLACK), at +38 (battle_factory_screen.c:3402-3418); state 15 installs Swap_Task_HandleMenu at STATE_MENU_INIT (+39,
+ * :3420-3433), which skips OpenMonPic (fromSummaryScreen, :2589-2593), shows the options (+40) and reaches STATE_MENU_HANDLE_INPUT at
+ * +41. That state checks only `monPicAnimating`, which HideMonPic cleared when the summary opened (:2601-2603, :4112-4118), so A / B /
+ * UP / DOWN are taken from +42, inside the fade-in. The fade's `active` clears in UpdatePaletteFade at +61, before RunTasks
+ * (Swap_CB2, :2334-2341), so a task sees it done from +61.
+ */
+export const FACTORY_SWAP_SUMMARY_RETURN_FADE_IN_BEGIN = 38;
+export const FACTORY_SWAP_SUMMARY_RETURN_MENU_INPUT_STATE = 41;
+export const FACTORY_SWAP_SUMMARY_RETURN_FADE_IN_DONE = 61;
 
 function factorySwapSpeciesName(speciesName: string): string {
   return speciesName.replace(/^SPECIES_/, "");
@@ -491,7 +506,9 @@ function advanceFactorySwapPresentationClocks(
   if (controller.phase === "summaryReturn") {
     if (phaseElapsed === 22) summaryCallback = "CB2_InitSwapScreen";
     if (phaseElapsed === 41) summaryCallback = "Swap_Task_HandleMenu";
-    if (phaseElapsed >= 60) {
+    // srt1: the rebuilt popup is Swap_Task_HandleMenu's from STATE_MENU_HANDLE_INPUT (+41), inside the fade-in, which the summary
+    // screen's return transition still draws (core.ts); before srt1 the handover waited for the fade's end (+60).
+    if (phaseElapsed >= FACTORY_SWAP_SUMMARY_RETURN_MENU_INPUT_STATE) {
       controller = {
         ...controller,
         phase: "playerOptions",
@@ -770,13 +787,14 @@ function advanceFactorySwapPresentationClocks(
     returnedFromDuplicate,
     summaryReturnClock,
     loadedDisplaySpecies,
+    ...(state.summaryOpenedInReturnFade ? { summaryOpenedInReturnFade: true } : {}),
   };
   const delay = readyDelay(advanced);
   // swi1: only the popup CB2_InitSwapScreen rebuilt after a summary skips OpenMonPic (Swap_Task_HandleMenu STATE_MENU_INIT,
   // battle_factory_screen.c:2589-2593) and takes input one frame after the handover. Swap_ShowMenuOptions clears
   // fromSummaryScreen (:3706-3707), so a popup a later A on a ball opens waits for OpenMonPic (STATE_MENU_SHOW_OPTIONS,
-  // :2594-2600) like the screen's first one. `returnedFromSummary` alone stays set for the rest of the screen. (The rebuilt popup's
-  // own first input is the summary B's +61 here, +42 on the ROM: docs/swi1-swap-popup-input-timing.md, "Seen, not fixed".)
+  // :2594-2600) like the screen's first one. `returnedFromSummary` alone stays set for the rest of the screen. (srt1: the handover is
+  // at the summary B's +41, so the rebuilt popup takes input from +42, as on the ROM.)
   const effectiveDelay =
     controller.phase === "playerOptions" && factorySwapSummaryReshowShown(advanced)
       ? 1
@@ -1062,8 +1080,43 @@ export function beginFactorySwapSummaryReturn(
     phaseElapsed: 0,
     summaryCallback: "CloseSummaryScreen",
     summaryReturnClock: 0,
+    summaryOpenedInReturnFade: false,
   };
 }
+
+/**
+ * srt1: would an A on SUMMARY now open the summary inside the summary return's fade-in? Only on the rebuilt popup, and only while the
+ * fade runs when Swap_Task_OpenSummaryScreen's STATE_SUMMARY_FADE does, the frame after the A (battle_factory_screen.c:2382-2385):
+ * its BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK) then returns FALSE and does nothing (palette.c:161-164), and
+ * STATE_SUMMARY_CLEAN waits for `!gPaletteFade.active` (:2386-2398), i.e. for the fade-in's end (+61). ROM (A at +42..+59): the
+ * popup goes on fading in until the swap screen is torn down, and the summary opens exactly as after an A at +38 (the fade-in's
+ * start; the two fades are equally long): its first input and its cry at +101, whatever the A's frame. An A at +60 fades out as
+ * usual (summary input at A+63).
+ */
+export function factorySwapSummaryOpensInReturnFade(state: FactorySwapPresentationState): boolean {
+  return (
+    factorySwapSummaryReshowShown(state) &&
+    state.summaryReturnClock != null &&
+    state.summaryReturnClock + 1 < FACTORY_SWAP_SUMMARY_RETURN_FADE_IN_DONE
+  );
+}
+
+const FACTORY_SWAP_SUMMARY_RETURN_FIRST_FADE_FRAME = 42;
+/**
+ * srt1: the summary-return fade-in's step on the rebuilt swap screen at `summaryReturnClock`, for bgFadeY / objFadeY(..., FADE_IN),
+ * or null once it has settled: the summary screen's return transition draws its first fade frame at +42 (summaryScreen.ts, the
+ * 25-frame black hold after EXIT_FADE_OUT_TICKS) and settles FADE_IN_TICKS later. Used where that transition no longer draws the
+ * screen: a close (B / RECHOOSE / SWAP) or a SUMMARY taken inside the fade.
+ */
+export function factorySwapSummaryReturnFadeTicks(summaryReturnClock: number): number | null {
+  const ticks = Math.max(0, summaryReturnClock - FACTORY_SWAP_SUMMARY_RETURN_FIRST_FADE_FRAME);
+  return ticks <= FADE_IN_TICKS ? ticks : null;
+}
+
+/** srt1: the last summaryFade frame (phaseElapsed, on the A-at-+38 timeline) of a summary opened inside the fade that still shows the
+ * popup: STATE_SUMMARY_CLEAN destroys its sprites at +61 and CB2_InitSummaryScreen clears the screen from +62, drawn from +63. */
+export const FACTORY_SWAP_SUMMARY_IN_FADE_POPUP_LAST_ELAPSED =
+  FACTORY_SWAP_SUMMARY_RETURN_FADE_IN_DONE + 1 - FACTORY_SWAP_SUMMARY_RETURN_FADE_IN_BEGIN;
 
 /**
  * swp1: true while the swap screen's popup pic is still the one CB2_InitSwapScreen rebuilt after a summary visit
@@ -1120,11 +1173,18 @@ export function handleFactorySwapPresentationInput(
     enteredPlayerOptions || leftPicker
       ? deactivateSpeciesNameFade(state.speciesNameFade)
       : state.speciesNameFade;
+  const openedInReturnFade =
+    controller.phase === "summaryFade" &&
+    state.controller.phase === "playerOptions" &&
+    factorySwapSummaryOpensInReturnFade(state);
   return {
     ...state,
     controller,
     phaseElapsed:
-      controller.phase === state.controller.phase ? state.phaseElapsed : 0,
+      openedInReturnFade
+        ? state.summaryReturnClock! - FACTORY_SWAP_SUMMARY_RETURN_FADE_IN_BEGIN
+        : controller.phase === state.controller.phase ? state.phaseElapsed : 0,
+    ...(openedInReturnFade ? { summaryOpenedInReturnFade: true } : {}),
     selectedBallClock: enteredPlayerOptions ? 0 : state.selectedBallClock,
     selectedBallIndex: enteredPlayerOptions
       ? state.controller.cursor as 0 | 1 | 2
