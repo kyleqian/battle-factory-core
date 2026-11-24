@@ -465,7 +465,8 @@ describe("random round soak driver (green milestone pin)", () => {
       // swt1 (the opponent faint replacement / AI send-in's next print: ROM FaintedMonSendOutNew+0x10 release -> next label +11 -> glyph +12, the command used to start at +3):
       // frames 43_698 -> 43_712, renderCalls 3_060 -> 3_058; same battle 7, turn 3, end state, outcome.
       // mhs1 (Triple Kick / Bonemerang / Spike Cannon hit 1 shape A + the DoMultiHit / DoTripleKickAttack loop boxes at the ROM's 25 / 27 rows; the strong-route policy reads presentation state): frames 43_712 -> 43_655, renderCalls 3_058 -> 3_054; same battle 7, turn 3, end state, outcome. A trajectory pin, not a ROM frame.
-      frames: 43_655,
+      // kst1 (the Knock Off print tail removed, ITEM_KNOCKOFF_PRINT_TAIL_ROWS 4 -> 0: the next mover's used print is ROM-exact, labs out2-knockoffrev-on; the strong-route policy reads presentation state): frames 43_655 -> 43_695, renderCalls 3_054 -> 3_056; same battle 7, turn 3, end state, outcome. A trajectory pin, not a ROM frame.
+      frames: 43_695,
       battle: 7,
       turn: 3,
       diagnostics: {
@@ -477,7 +478,7 @@ describe("random round soak driver (green milestone pin)", () => {
         terminalOutcome: "roundWon",
         terminalRecordMenuInputReadyReached: true,
         terminalRecordChoice: "no",
-        renderCalls: 3_054,
+        renderCalls: 3_056,
       },
     });
     expect(second).toEqual(first);
