@@ -4731,6 +4731,8 @@ No `src/` or `tests/` change (`git diff --stat HEAD -- src tests` empty after ev
 
 ## ihm1: Shell Bell hp -> heal -> next print (Scene OFF) and the Bounce post-miss +6
 
+**LANDED by ihl1** (commit `7bd12062e`; edit A the hit hp floor / edit B the CONTINUE lead 5 after an effectiveness message; Scene OFF).
+
 Measurement only. Labs `tools/battle-lab/ihm1-sbell-{hp,nve}-off.json`, the ROM / engine row merge `tools/integration/ihm1LabRows.py RUNDIR LAB.SCENE [LO:HI]`, and rescore helpers `tools/integration/ihm1/{all.sh,perseed.sh,rows.py}`. The exact scratch diff of the recipe is `docs/ihm1-landing.patch` (apply with `git apply -p2` from `workspace/`, or by hand: two edits in `src/engine/battleResolutionPresentation.ts`).
 
 ### 1. MoveEnd held-item heal: what the +2 / +5 / +7 spread depends on
@@ -5062,6 +5064,8 @@ None before the faint. The step is upstream of the box: it moves the box start b
 Measurement only: no `src/` / `tests/` change, no lab, PROGRESS / ISSUES / ROADMAP / PAPERCUTS untouched; `npm test` / `typecheck` / `build` not run (the step forbids them). Ran two `probe.sh` captures (ON and OFF, `nice -n 10`) and read `attr-on.json`. Diff: this section only.
 ## bcm1 (2026-11-24): the combined Bounce + Leftovers lab: the Scene OFF post-miss +6 reproduces; two terms, the larger is the item-heal chain's lead after a MoveMissed message
 
+**Term A (item-heal lead after a MoveMissed message 15 - 5) LANDED by ihl1** (commit `cd4f184c1`); term B (turn end -> second-turn print 31 vs 26) NOT landed, see "ihl1".
+
 Measurement only (docs / labs). Engine frozen at `c22d60e57`; nothing under `src/` or `tests/` changed; PROGRESS / ISSUES / ROADMAP / PAPERCUTS untouched; `npm test` / typecheck / build not run (the step forbids them). Labs: `tools/battle-lab/bcm1-bounce-leftovers-plr-off.json` (Scene OFF) and `bcm1-bounce-leftovers-plr-on.json` (same parties, the ON-timed trace). Evidence (git-ignored): `.integration/evidence/bcm1/run{3,4,5,6}/` (run4 = both labs, run5 = the `--rows` timeline of the OFF lab, run6 = the no-heal reference `chg1-bounce-plr-off`).
 
 ### 1. The lab (ihm1 item 2's recipe, built)
@@ -5216,6 +5220,8 @@ So with L + H every confusion head's SE 176 is **+1** (the plain-print conventio
 
 ## mem1 (2026-11-24): s1914 d2's message -> `MoveEnd` -3 / -4 behind ihm1 item 1 (Scene OFF)
 
+**LANDED by ihl1** (commit `55969d64a`, with crs1: one row per script command after waitmessage + one row of print wait = +2).
+
 Measurement only (docs; no `src/` / `tests/` change, engine frozen at c22d60e57). Probe: `T2K4_DIR=.integration/evidence/ihm1/mem1 T2K4_T2_DIR=.integration/evidence/ihm1/all-base24 tools/integration/t2k4/probe.sh --force 1914 off 2` (the s1914 d2 Shell Bell window of the ihm1 table; engine commit 1024, ROM commit 1074), cross-read against `... probe.sh --force 2 off 2` (s2 d2, the window edit B was fitted on) and the crit-only windows `swt1/p/on/{1028-d15,2230-d11}.cmp.txt`. Rows are frames from the commit; evidence is git-ignored under `.integration/evidence/ihm1/mem1/p/off/{1914,2}-d2.cmp.txt`.
 
 ### Result: a source-backed term, not a Shell Bell rule: "the engine's message command is `L + 64`; the ROM adds one row per script command run after `waitmessage`, and one row of print wait"
@@ -5244,6 +5250,8 @@ Net at the chain start: s2 d2 ENG `move-animation` = ROM `MoveEnd+0x0` (0); s191
 - Nothing changed in `src/`, `tests/`, PROGRESS / ISSUES / ROADMAP / PAPERCUTS; npm test / typecheck / build were not run, as the step's prohibitions say (they override the brief's closing "tests and build green" line).
 
 ## crs1 (2026-11-24): a second (and sixth) crit -> result window: the ROM is 81 every time, the engine 79 every time (Scene OFF)
+
+**LANDED by ihl1** (commit `55969d64a`, same term as mem1; both scenes).
 
 Measurement only (docs / lab / tool; no `src/` / `tests/` change, engine frozen at c22d60e57). Tool: `tools/integration/crs1Lab.py KIND SEED` writes `tools/battle-lab/crs1-<kind>-s<seed>-off.json` (Scene OFF, level 50, no items, mechanicLab `overrides.parties`; the foe has Seismic Toss in all four slots so its move has no RNG; three turns of A, A). Kinds: `slash` = Snorlax Slash (163) vs Onix, resisted -> "It's not very effective!"; `chop` = Machamp Cross Chop (238) vs Snorlax, weak -> "It's super effective!". Run: `nice -n 10 tools/integration/labCompare.sh --scene off --out .integration/evidence/crs1/<run> --rows crs1-<kind>-s<seed>-off` (evidence is git-ignored; ~13 s per lab). Seed search: engine-only (`b4mEngine.ts`, 3 s) and ROM (labCompare), seeds 1-24 / 1-13 slash and 1-12 chop; a window is an `hp` b1 followed by two `message` commands (engine) or `HitFromAtkAnimation+0xb` followed by `+0xf` (ROM).
 
@@ -5427,3 +5435,19 @@ C -316 (ON) / -8 (OFF), B -88 (ON, the tnm1 estimate was -114) / 0 (OFF: no Rest
 **Verification.** All test files importing `battleResolutionPresentation.ts` plus `randomRoundSoak*`, `lbrd`, and the files naming the status / berry rows: 476 files green; `npm run typecheck` clean, `npm run test:gate` 360 files / 2839 tests green, `npm run build` green.
 
 **Left.** (a) The Toxic lab's tick SE +1 (known tick term) and Thunder Wave print "ROM 4 / ENG 3". (b) The Sleep Powder shape (`MoveEffectSleep` falls through to the icon; 4088 on the player lab is the missing multi-row move body, not this rule). (c) The Scene OFF berry print +5 after Rest (`status` 35 + `move-animation` 9). (d) hie3-cheri's first SE +2 (739 vs 737), the cure berry after Thunder Wave: the berry epoch there (Cheri after a move-inflicted status) is a separate term from the Rest -> Chesto one.
+
+## ihl1 (2026-11-24): ihm1 + mem1 / crs1 + bcm1 term A landed (Scene OFF T2 529 -> 475); bcm1 term B not landed
+
+All in `src/engine/battleResolutionPresentation.ts`, one commit per mechanism, Scene OFF unless named.
+
+- **ihm1** (`7bd12062e`): the Shell Bell heal after an effectiveness message: the hit's hp command has no floor (edit A, `applyHpHitTails` + `hpItemAnimationRows` accept the message as the animation slot) and the item-heal chain's CONTINUE lead is 5 shorter (`HELD_ITEM_AFTER_MESSAGE_LEAD_DELTA`, edit B). T2 OFF 529 -> 506; lab `ihm1-sbell-nve-off` SE mass 12 -> 2.
+- **mem1 / crs1** (`55969d64a`): a crit message followed by a result message (SUPEREFFECTIVE / NOTVERYEFFECTIVE, same script label) holds 64 + `CRIT_TO_RESULT_MESSAGE_HANDOFF_ROWS` (2) = 81 rows between the two prints, both scenes (ROM windows crs1-chop-s6 / crs1-slash-s4 / s1914 d2: OFF 382 -> 463, ON 440 -> 521). T2 OFF 506 -> 492, ON 5,122 -> 5,116. Pinned by `tests/ihl1MessageHandoff.test.ts` (ihm1 print rows 964 / 1094 / 1218; crs1-chop-s5-off crit -> result 81 in OFF and ON).
+- **bcm1 term A** (`cd4f184c1`): the ihm1 edit B keyed per label to the expected lead: after a `BattleScript_MoveMissed` message the item chain is a RESTART (lead 15), so 15 - 5 = 10 (the ROM's 4 where the CONTINUE lead is 9). Lab `bcm1-bounce-leftovers-plr-off` Leftovers heal print +6 -> +1, SE mass 173 -> 168. T2 OFF 492 -> 475.
+
+**Totals.** T2 OFF 529 -> 475 (exact 912 -> 919, 0 missing / 0 extra); T2 ON 5,122 -> 5,116 (exact 3,741 -> 3,754, 0 missing / 0 extra; the only ON change is crs1). Census 0..199, both scenes, eventsDigest + error identical 200 / 200 (type-sequence changes 0; OFF 89 / ON 47 battles with changed command timing). Labs (OFF, SE mass): ihm1-sbell-nve 12 -> 2; bcm1-bounce-leftovers 173 -> 168; the other 16 labs unchanged. 208 test files (`battleResolutionPresentation` importers + `randomRoundSoak*` + `lbrd`) green with no pin moved; typecheck, `test:gate` (360 files), `build` green.
+
+**Play change (ROM-faithful, named).** The print after an effectiveness message / MoveMissed message that precedes a held-item heal (Scene OFF) comes 5 rows earlier; the crit -> result message gap is 81 rows instead of 79 (both scenes). No rule, damage, RNG or event-order change.
+
+**Not landed: bcm1 term B** (turn end -> the locked-continuation second-turn print 31 vs 26 after an end-turn item heal). It needs three coupled edits: the hp -> `ItemHealHP_End2+0x5` tail +2, the turn-end tail +2, and the orchestrator's `BATTLE_RESOLUTION_LOCKED_CONTINUATION_HANDOFF_FRAMES` (render.ts:111, used at factoryRoundBattleOrchestrator.ts ~3500) -5 only when the previous segment ended on an item-heal hp. The net measurable gain is one print row on one lab (T3 +2 -> +1) and s2230 d5; T1 heal chains are hidden by input. Not worth a cross-file gate in the orchestrator.
+
+**Left.** bcm1 term B (above); the crs1 labs' print masses are noise (the ROM and the engine crit on different seeds in the labs, compare by the 81-row geometry); the Scene ON lab `bcm1-bounce-leftovers-plr-on` was not re-measured for term A (the delta is Scene OFF only).

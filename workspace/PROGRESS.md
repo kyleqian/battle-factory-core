@@ -5,6 +5,16 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 2026-11-24 — ihl1 (worker, ts lane, Scene OFF first): ihm1 + mem1 / crs1 + bcm1 term A landed (T2 OFF 529 -> 475, ON 5,122 -> 5,116); bcm1 term B not landed
+
+- **State:** master, three commits `7bd12062e` (ihm1) `55969d64a` (mem1 / crs1 + `tests/ihl1MessageHandoff.test.ts`) `cd4f184c1` (bcm1 A) + this docs / PROGRESS commit; no push. Gates: census 0..199 both scenes eventsDigest identical 200 / 200; 208 importer + `randomRoundSoak*` + `lbrd` test files green, no pin moved; typecheck, `test:gate` (360 files), `build` green.
+- **Did:** ihm1 Shell Bell heal after an effectiveness message (hit hp floor 0, CONTINUE lead -5): T2 OFF -23, lab ihm1-sbell-nve SE mass 12 -> 2. mem1 / crs1 crit -> result message 81 rows (both scenes): OFF -14, ON -6. bcm1 A item-heal RESTART lead -5 after a MoveMissed message: OFF -17, lab bcm1-bounce-leftovers heal print +6 -> +1.
+- **Not landed:** bcm1 term B (turn end -> second-turn print 31 vs 26 after an end-turn item heal): needs hp / turn-end tail +2 each and a -5 in the orchestrator's locked-continuation handoff; net gain one print row, so left in the doc.
+- **Next:** bcm1 B only if a larger count of locked-continuation-after-heal windows turns up; the crs1 labs need a seed where the ROM and engine crit together. Details: `docs/aud251-s11-scoreboard-refresh.md` "ihl1".
+- **Notes:** `npm test` (full) not run (worker rules), `test:gate` was. Play change (ROM-faithful): print after an effectiveness / MoveMissed message before a held-item heal 5 rows earlier (OFF); crit -> result message gap 81 rows (both scenes).
+
+---
+
 ## 2026-11-24 — fpl1 (worker, ts lane, Scene ON first): fpm1 + chp1 + ssm1 Psych Up chain landed (T2 ON 5,895 -> 5,835, OFF 537 unchanged)
 
 - **State:** master, three commits `537d1ba7f` (fpm1) `8b9cc0b49` (chp1) `51a5d3d23` (ssm1 chain) + this docs / PROGRESS commit; no push. Gates: census 0..199 both scenes eventsDigest identical 200 / 200; ~208 importer test files + randomRoundSoak* + lbrd + fam1* green, `battleSoundTable.ts --check` current, `test:gate` 360 files / 2,839 tests, typecheck, build all 0.
