@@ -10,7 +10,7 @@ import {
 } from "../../src/engine/liveMoveAnimation.ts";
 import speciesStats from "../../src/data/gen/species-stats.json" with { type: "json" };
 import { generatedCommandAnimationReplay } from "../../tools/integration/generatedCommandAnimationReplay.ts";
-import { iu120Extra } from "../helpers/iu120Rows.ts";
+import { hpd4BodyRows, iu120Extra } from "../helpers/iu120Rows.ts";
 const lastIndex = <T>(items: readonly T[], predicate: (item: T) => boolean): number => {
   for (let i = items.length - 1; i >= 0; i -= 1) if (predicate(items[i]!)) return i;
   return -1;
@@ -114,7 +114,8 @@ describe("live Fly / Bounce adapters", () => {
     });
     const off = generatedCommandAnimationReplay(r.seed, "off", [r.slot], r.streak);
     const bodies = on.animations.filter(a => a.moveId === r.id && a.attacker === 0);
-    expect(bodies.map(b => b.ages.length)).toEqual(r.rows.map(n => n + iu120Extra(r.id)));
+    // mmc1: Fly's strike body (turn 1) is shape A: its lead + hit tail rows (hpd4BodyRows) follow the body; the charge turn keeps its rows.
+    expect(bodies.map(b => b.ages.length)).toEqual(r.rows.map((n, turn) => n + iu120Extra(r.id) + (turn === 1 ? hpd4BodyRows(r.id) : 0)));
     for (const body of bodies) {
       expect(body.ages).toEqual(Array.from({ length: body.ages.length }, (_, age) => age));
       expect(body.adapterActive.every(Boolean)).toBe(true);
