@@ -78,7 +78,7 @@ export interface FactorySwapPresentationState {
   readonly summaryMode: "SUMMARY_MODE_NORMAL" | null;
   readonly summaryCurMonIndex: 0 | 1 | 2 | null;
   readonly summaryMaxMonIndex: 2 | null;
-  /** True after CB2_InitSwapScreen rebuilt the originating popup. */
+  /** True after CB2_InitSwapScreen rebuilt the popup, for the rest of the screen (the rebuilt one: factorySwapSummaryReshowShown). */
   readonly returnedFromSummary: boolean;
   /** The duplicate-error task rebuilt the enemy picker on the prior frame. */
   readonly returnedFromDuplicate?: boolean;
@@ -772,8 +772,13 @@ function advanceFactorySwapPresentationClocks(
     loadedDisplaySpecies,
   };
   const delay = readyDelay(advanced);
+  // swi1: only the popup CB2_InitSwapScreen rebuilt after a summary skips OpenMonPic (Swap_Task_HandleMenu STATE_MENU_INIT,
+  // battle_factory_screen.c:2589-2593) and takes input one frame after the handover. Swap_ShowMenuOptions clears
+  // fromSummaryScreen (:3706-3707), so a popup a later A on a ball opens waits for OpenMonPic (STATE_MENU_SHOW_OPTIONS,
+  // :2594-2600) like the screen's first one. `returnedFromSummary` alone stays set for the rest of the screen. (The rebuilt popup's
+  // own first input is the summary B's +61 here, +42 on the ROM: docs/swi1-swap-popup-input-timing.md, "Seen, not fixed".)
   const effectiveDelay =
-    controller.phase === "playerOptions" && returnedFromSummary
+    controller.phase === "playerOptions" && factorySwapSummaryReshowShown(advanced)
       ? 1
       : controller.phase === "enemyPicker" && returnedFromDuplicate
         ? 1
@@ -1063,11 +1068,12 @@ export function beginFactorySwapSummaryReturn(
 /**
  * swp1: true while the swap screen's popup pic is still the one CB2_InitSwapScreen rebuilt after a summary visit
  * (Swap_ShowSummaryMonSprite, battle_factory_screen.c:4075-4097, from CB2_InitSwapScreen state 6, :3356-3362), not one a later A on a
- * ball opened. `returnedFromSummary` stays set for the rest of the screen (the controller's post-summary input timing reads it), so it
- * cannot say this alone. The summary return clears `selectedBallClock`, and only entering the popup from the picker (OpenMonPic in
- * Swap_Task_HandleMenu STATE_MENU_INIT, :2589-2593) sets it again. The rebuilt popup is shown in playerOptions and closed by B /
- * RECHOOSE / SWAP (CloseMonPic, :2609-2619, :3989-4013); in the closing phases this says that the closing pic is that one. Read by the
- * renderer only.
+ * ball opened. `returnedFromSummary` stays set for the rest of the screen, so it cannot say this alone. The summary return clears
+ * `selectedBallClock`, and only entering the popup from the picker (OpenMonPic in Swap_Task_HandleMenu STATE_MENU_INIT, :2589-2593)
+ * sets it again. The rebuilt popup is shown in playerOptions and closed by B / RECHOOSE / SWAP (CloseMonPic, :2609-2619, :3989-4013);
+ * in the closing phases this says that the closing pic is that one. Read by the renderer and, since swi1, by the popup's input timing
+ * (`advanceFactorySwapPresentationClocks`: the rebuilt popup takes input one frame after the handover, a later fresh popup waits for
+ * its OpenMonPic like the first one, as Swap_ShowMenuOptions has cleared `fromSummaryScreen`, :3706-3707).
  */
 export function factorySwapSummaryReshowShown(state: FactorySwapPresentationState): boolean {
   return state.returnedFromSummary && state.selectedBallClock === null;

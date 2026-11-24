@@ -1112,7 +1112,10 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // supervisor merge of rmw1 with master (bbk1 / etp3 / abs1 / hpb3), measured on the merged tree: 40479 / battle 2 / depth 1 / turn 24 (rmw1's value).
       // swt1 (the opponent faint replacement / AI send-in's next print at ROM release +12, was +3: FaintedMonSendOutNew+0x10 -> FaintedMonEnd +5 -> PoisonTurnDmg +11): frames only, 40479 -> 40489; same battle 2 / depth 1 / turn 24 / roundLost.
       // ohs1 (Scene OFF ConfusedNoMore / InLove pre-move prints hold 64 + 5 / 64 + 6 before the used print, T2 OFF s7295 d8 / s6568 d29): frames only, 40489 -> 40494; same battle 2 / depth 1 / turn 24 / roundLost.
-      frames: 40494,
+      // swi1 swap popup (docs/swi1-swap-popup-input-timing.md: a swap-screen popup opened after a summary waits for its OpenMonPic, input at +58
+      // instead of +1; the exploring policy's presses there land later), measured on the trial merge: 40494 -> 40651; same battle 2 /
+      // depth 1 / turn 24 / roundLost. A trajectory pin, not a ROM frame.
+      frames: 40651,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 1,
@@ -1181,7 +1184,8 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // same battle 3 / depth 2 / turn 15 / roundLost. Matches the T2 send-in SE 15 rows (ROM rel 133 + glyphs, 47 windows per scene all at offset 0). A trajectory pin, not a ROM frame.
       // supervisor merge of fsi1 with master + rmw1, measured on the merged tree: 57622; same battle 3 / depth 2 / turn 15 / roundLost.
       // ohs1 (Scene OFF ConfusedNoMore / InLove pre-move prints hold 64 + 5 / 64 + 6 before the used print, T2 OFF s7295 d8 / s6568 d29): frames only, 57622 -> 57634; same battle / depth / turn / end state (the diff shows only frames).
-      frames: 57634,
+      // swi1 swap popup (see seed 0), measured on the trial merge: 57634 -> 57776; same battle 3 / depth 2 / turn 15 / roundLost.
+      frames: 57776,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 2,
