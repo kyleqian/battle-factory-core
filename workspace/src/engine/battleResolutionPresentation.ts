@@ -2229,6 +2229,19 @@ function playanimationBeforePrint(events: readonly BattleKernelSemanticEvent[], 
   const instruction = BATTLE_SCRIPT_PROGRAM.instructions[programCounter - 1];
   return instruction?.opcodeName === "B_SCR_OP_PLAYANIMATION" ? instruction.operands[1]?.expression ?? null : null;
 }
+/**
+ * ihm1 (docs/aud251-s11-scoreboard-refresh.md "ihm1"): in Scene OFF the continue lead (9) is fitted on hp-preceded item chains. After a
+ * hit-effectiveness message (`BattleScript_HitFromAtkAnimation`) the ROM's gap to `MoveEnd+0x0` is 2 rows, not 7, so the lead is 4 (Shell Bell
+ * s2 d2 / lab ihm1-sbell-nve-off, ROM MoveEnd+0x0 = message wait end + 91). A KO / "fainted!" message keeps 9 (s2 res6 / res12).
+ */
+export const HELD_ITEM_AFTER_MESSAGE_LEAD_DELTA = 5;
+const HELD_ITEM_LEAD_DELTA_MESSAGE_LABELS: readonly string[] = ["BattleScript_HitFromAtkAnimation"];
+function itemHealAfterResultMessage(events: readonly BattleKernelSemanticEvent[], messageIndex: number): boolean {
+  let before = messageIndex - 1;
+  while (before >= 0 && events[before]!.provenance?.sourceLabel === "BattleScript_MoveEnd") before -= 1;
+  if (before < 0 || before === messageIndex - 1 || events[before]!.payload.kind !== "message") return false;
+  return HELD_ITEM_LEAD_DELTA_MESSAGE_LABELS.includes(events[before]!.provenance?.sourceLabel ?? "");
+}
 function heldItemEffectOffHoldFrames(
   events: readonly BattleKernelSemanticEvent[],
   messageIndex: number,
@@ -2244,7 +2257,7 @@ function heldItemEffectOffHoldFrames(
   if (instruction.operands.some((operand) => operand.expression === "B_ANIM_ITEM_KNOCKOFF")) return ITEM_KNOCKOFF_OFF_HOLD_FRAMES;
   const { executions, lead } = heldItemEffectExecutionsAndLead(events, messageIndex);
   const leadFrames = instruction.operands.map((operand) => WSH1_OFF_HOLD_LEAD[operand.expression]).find((value) => value !== undefined) ?? lead;
-  return (executionsPresented ? 0 : executions) + leadFrames;
+  return (executionsPresented ? 0 : executions) + leadFrames - (lead === HELD_ITEM_EFFECT_CONTINUE_LEAD_FRAMES && itemHealAfterResultMessage(events, messageIndex) ? HELD_ITEM_AFTER_MESSAGE_LEAD_DELTA : 0);
 }
 /**
  * off121 (docs/off121-status-command.md): in Scene OFF `Cmd_statusanimation` is skipped (HITMARKER_NO_ANIMATIONS,
@@ -3092,7 +3105,7 @@ function hpItemAnimationRows(events: readonly BattleKernelSemanticEvent[], index
   const second = events[index + 2];
   const animation = events[index + 3];
   const programCounter = animation?.provenance?.programCounter;
-  if (first?.provenance?.opcodeName !== "B_SCR_OP_MOVEEND" || second?.provenance?.opcodeName !== "B_SCR_OP_MOVEEND" || animation?.payload.kind !== "animation"
+  if (first?.provenance?.opcodeName !== "B_SCR_OP_MOVEEND" || second?.provenance?.opcodeName !== "B_SCR_OP_MOVEEND" || (animation?.payload.kind !== "animation" && animation?.payload.kind !== "message")
     || programCounter === undefined || programCounter < ITEM_HEAL_RET_PC || programCounter >= ITEM_HEAL_RET_PC + ITEM_HEAL_RET_SCRIPT_ROWS) return null;
   const execution = animation.provenance?.instructionExecution;
   return execution === undefined || execution - hpExecution - 1 <= HP_ITEM_ANIMATION_COMMAND_LEAD_ROWS ? null : execution - hpExecution - 1 - HP_ITEM_ANIMATION_COMMAND_LEAD_ROWS;
@@ -3336,6 +3349,10 @@ function applyHpHitTails(
     const faint = hit && rest[0]?.type === "faint" && leads.faintNext;
     const statNext = (hit && rest[0]?.type === "stat") || (hit && leads.focusBand);
     const itemAnimation = hit && leads.itemAnimationRows !== null && rest[0]?.type === "sprite-visibility" && rest[1]?.type === "sprite-visibility" && rest[2]?.type === "general-animation";
+    if (hit && leads.sceneOff && leads.itemAnimationRows !== null && rest[0]?.type === "sprite-visibility" && rest[1]?.type === "sprite-visibility" && rest[2]?.type === "move-animation") {
+      commands[index] = Object.freeze({ ...command, timing: Object.freeze({ minimumFrames: 0 }) });
+      continue;
+    }
     const tailFrames = statNext ? (leads.sceneOff ? HP_STAT_NEXT_TAIL_FRAMES_OFF : HP_STAT_NEXT_TAIL_FRAMES) : transition ? (leads.moveEndRows === null ? 0 : HP_DATAHPUPDATE_ROW_FRAMES)
       : endsTurn ? leads.moveEndRows ?? 0 : bars > 0 ? bars : endTurnPrint ? leads.moveEndRows! + HP_END_TURN_PRINT_LEAD_ROWS
       : itemAnimation ? leads.itemAnimationRows! + (leads.sceneOff ? 0 : leads.itemAnimationSeGate) : printHold ? leads.messageRows! : 0;
