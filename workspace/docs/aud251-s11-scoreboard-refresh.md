@@ -4496,3 +4496,58 @@ The berry run is short by +6 inside the segment and its tail is 12 short, so the
 ### 4. State and verification
 
 No `src/` or `tests/` change; the code under test is c22d60e57 / HEAD parent (the engine is untouched); PROGRESS / ISSUES / ROADMAP / PAPERCUTS and the Factory acceptance ledgers untouched; `npm test` / typecheck / build not run (docs-only step). A live adapter is not whole-playable exactness: the recipes are measured on labs and T2 rows, not landed.
+
+## ohm1 (2026-11-24): the AI voluntary-switch tray 101 / 102 tally, and the Scene OFF hit SE 12 / 13 / 14 mass re-ranked with probes (measurement only; tools + doc, no `src/` / `tests/` change)
+
+Engine frozen at `c22d60e57`. Nothing under `src/` or `tests/` changed; PROGRESS / ISSUES / ROADMAP / PAPERCUTS untouched; `npm test` / typecheck / build were not run (the step brief forbids it). Tools committed: `tools/audio/ohm1TrayTally.py` (sound-gap proxy), `tools/integration/ohm1TrayRun.sh` + `ohm1TrayTable.py` + `ohm1TrayObs.py` (ROM `partyStatusDelayTimer` probe per frozen trace and the per-observation table), `tools/integration/ohm1HitWindows.py` (stepping hit-SE windows per `hse1mTable.py` class). Evidence (git-ignored): `.integration/evidence/ohm1/` (`obs.txt` = the observation table, `trays-*.json`, `table-off.txt`, `windows.txt`, `split.json`), `.integration/evidence/ohm1k/p/off/` (Bounce and seed-97 probes).
+
+### 1. AI voluntary switch: tray -> "sent out" print, 101 or 102 frames
+
+**Method.** `ait1TrayProbe.py --all` on the ROM (mGBA) reads `partyStatusDelayTimer` every frame from the AI's switch decision `d`: the timer first reads 1 at `d+1` (the 101 tray) or `d+2` (the 102 tray). Only independent real-play observations count: T2 ROM files in both scenes (`t2final-20261124`: 310, 2741, 3738, 5063, 5569, 6079), the nightly replay drives (10 seeds, Scene OFF), and the ait1 drive seeds; the ON duplicate of a seed whose OFF run is the same trace (ait1 2741-on) is not counted twice. The `ohm1TrayTally.py` gap proxy (engine SE 114 -> next SE 15 / cry gap minus the ROM gap; 0 = 101, -1 = 102) matched the direct probe in every case checked.
+
+**Count (voluntary trays, the AI switching with a live mon): 20 observations, 101 in 14 (70%), 102 in 6 (30%).**
+
+| source | n | 101 | 102 | which 102 |
+|---|---|---|---|---|
+| T2 ROM (310 and 2741, ON and OFF) | 4 | 4 | 0 | |
+| nightly replay (OFF) | 11 | 7 (161, 1692, 311, 4671, 5493, 8149, 8461#13) | 4 | 6556 d2825, 7189 d896, 8276 d6037, 8461#6 d4332 |
+| ait1 drive | 5 | 3 (15-on, 28-on, 99-off) | 2 | 26-on d15926, 61-off d6146 |
+| **total** | **20** | **14** | **6** | |
+| per scene | OFF 15 / ON 5 | OFF 10 / ON 4 | OFF 5 / ON 1 | |
+
+(ait1's own notes list 26-off 102, 15-off 101, 28-off 101 too: 23 in total, 16 / 7; those three were not re-measured here.)
+
+**Does anything predict 102? One thing does: the player also switched that turn.** The AI tray is then reached after the player's send-in (the tray sits 213 .. 238 frames after the decision instead of 79 .. 121 on a move turn). That gives 102 in 4 of 5 (6556, 7189, 8276, 8461#6 = 102; 4671, offset 262 = 101). Move turns: 101 in 13 of 15; the two 102 exceptions are 26-on (offset 121) and 61-off (offset 83). Scene, species (334 and 312 each appear under both values), turn index and trace position do not predict. Party size was not tabulated.
+
+**Correction to ait1.** Faint-replacement trays also stall (ait1: "never stall"): 101 in 26, 102 in 5 (8461#18, T2 OFF 3738 k38, 5063 k47, 5569 k18, 6079 k3). The OFF sample is biased toward the -1 gap and T2 ON shows none, so this is a second, unexplained population; it is not part of the 20 above.
+
+**Recommendation: keep 101 as the default.** 70% / 30% over 20 observations, and the 102 is a VBlank-phase lag frame with no source rule (the timer script is identical on both sides of the split). The only candidate predictor, "AI voluntary switch in a turn where the player also switched -> 102", fits 4 of 5 but the n is small and it would only move the replay seeds (T2 has no such trays), so it is optional: land it as a one-line rule only if the replay-seed rows become a target. Do not add a 102 for faint replacements on this data.
+
+### 2. Scene OFF hit SE 12 / 13 / 14 on the final engine
+
+`hse1mSplit.py` / `hse1mTable.py` re-run on the c22d60e57 attribution (the T2 final set): the owned OFF mass is **254** (69 stepping windows, 228 clean) and reproduces the earlier table. Classes by mass:
+
+| class | windows | mass | note |
+|---|---|---|---|
+| plain (previous action's `MoveEnd`, end-turn, item / status rows) | 198 | 134 | steps -13 .. +7; top: s97 si27 +7 (21), s7682 si215 -13 (16), s6079 si1 -4 (12), s7295 si1 -1 (10) |
+| two-turn / semi-invulnerable second turn | 11 | 36 | s2230 si11 +6 (24), si3 +6 (6), s3738 si95 -3, s830 si21 +3 |
+| Focus Punch | 12 | 33 | +-2 / -3 steps, not probed |
+| after a missed / failed action | 26 | 16 | one -12 (s7682 si57) |
+| Struggle after `NoMovesLeft` | 68 | 16 | one -9 (s7682 si207) |
+| no used-print chain / infatuation / confusion / wake-up | | 19 | |
+
+**Probe A: Bounce second turn (s2230 d1 / d5, +6 and +6 over 4 rows; mass 30).** ROM (d5, frames from the commit): end-turn heal `ItemHealHP_End2+0x5` 580 (second pass 585 .. 588) -> `EffectSemiInvulnerable` 594 -> `SecondTurnSemiInvulnerable` 595 -> `SemiInvulnerableTryHit` 602 -> `HitFromAtkString` 605 -> **print row 606** -> SE 13 at 668. Engine: `turn-end` 581 -> `move-animation` (the second-turn lead hold, min 9) 603 -> `message` **612** -> SE 13 at 674. So the print is +6 and the SE carries it. The hold itself is right: ROM `EffectSemiInvulnerable` -> print is u = 11 on Dig / Fly (stm1 6-d1: 870 -> 881; ttf1 165-d11: 162 -> 173) and 12 on this Bounce row (594 -> 606), and the engine's hold is 8 (Dig) / 9 (Bounce), hold = u - 3 either way. The excess is in the chain before the hold: engine `turn-end` -> second-turn print is 31 rows here and also 31 on the Dig second turns that are exact (s3738 si79 / 87: `turn-end` 17192 -> `message` 17223), but those follow a failed move / `MoveEnd`, while this one follows an item heal (`hp` + `turn-end` after `ItemHealHP_End2`) and the ROM reaches the print in 26. Confound: both Bounce rows are a charger that woke up on its first turn (`MoveUsedWokeUp` detour, E = 79; `chargeTurnOpenerExecution` / `chargeTurnSoundLead` bail out for it) in the same seed, so "after an end-turn item heal" and "first turn was a wake-up" cannot be told apart on this data. Solar Beam after the same `hp` + `turn-end` (s310 si21) is exact, so the item heal alone is not enough.
+
+*Recipe (not landed).* In `src/engine/battleResolutionPresentation.ts` the lead is `twoTurnSecondPrintLead` (~2633, applied ~6434; `TWO_TURN_SECOND_PRINT_PRESS_ROWS` 6, `exec` = the print's kernel instruction execution): leave it alone, it matches u on every measured row. The 5 .. 6 rows to remove sit between the `turn-end` command and the hold's `move-animation` (22 here; the Dig rows are 22 / 23 and exact). Gate: semi-invulnerable second turn (moves 19, 91, 291, 340), previous commands `hp` -> `turn-end` from an end-of-turn item heal. Before landing, a lab separating the two causes is needed (Fly / Dig with Leftovers after an ordinary first turn, and Bounce after a wake-up without an item), both scenes: if the Leftovers lab is exact, the cause is the wake-up path and the fix belongs next to `chargeTurnOpenerExecution`'s bail-out. Expected gain: OFF -30 (s2230 d1 + d5 = 6 + 24), ON +13 on the same Bounce rows if the rule carries. Other two-turn windows (-3 / +3) are single rows, leave them.
+
+**Probe B: plain, `hp` -> used print (the largest plain window, s97 d13, +7, mass 21).** ROM: a held-item heal at `MoveEnd` (`ItemHealHP_Ret`, its own print) after the foe's hit (`MoveEnd+0x0` 142 -> `ItemHealHP_Ret` 146 -> print ex2 181 -> hp row 301 -> `MoveEnd+0x6` 302) -> `EffectBurnHit` 307 -> **print 313** -> SE 13 at 378. Engine: heal animation (`move-animation` min 45 from 144) -> heal `message` 189 (+8 against the ROM's 181) -> `hp` 302 (exact) -> `message` **321** (+8 against 313) -> SE 13 at 385 (+7). The heal print's hold is 7 rows short, which absorbs the animation's excess, and then the engine's `hp` -> next used print is 19 rows against the ROM's 12. s1914 si5 (+2, mass 6, `message` `hp` `message*`) and s2 si5 (+5, mass 5) have the same engine shape and are probed by shape only. The spread +2 / +5 / +7 says it is not a constant: a candidate is the heal size / HP-bar scroll (2 HP here), not checked. *Next probe, not landed:* s2 d2 (si5) and s1914 d2 (si5; si = 2d + 1 on these traces), tabulate the `hp` delta and the `hp` -> `message` gap against the ROM `MoveEnd+0x6` -> print gap; if the gap tracks the bar, the engine's trailing hold after a heal `hp` command is the term. Mass at stake: 32 (three windows). The other large plain windows (s7682 si215 -13 after a switch-in, s6079 si1 -4, s7295 si1 -1) are not probed here.
+
+### 3. What not to chase
+
+- A 102 default or a faint-replacement rule for the tray on this data (section 1).
+- A Bounce-only rule before the separating lab: the same chain on Dig / Fly with an item heal is unmeasured.
+- Focus Punch (33) and the 68 Struggle windows (16, one -9) are single-seed tails; the plain class is 134 spread over 16 seeds with no dominant window beyond the +7 above.
+
+### 4. State
+
+c22d60e57 untouched. Measurement only. The step brief's "keep PROGRESS.md current" and "npm test / build green" were overridden by its own "do not edit PROGRESS.md / never run npm test, typecheck, build".
