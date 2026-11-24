@@ -46,6 +46,8 @@ export interface ConfirmRevealState {
    * since the 3rd slot no longer resolves to a pick rank.
    */
   decliningSpecies?: readonly string[];
+  /** "closing" only: the same three's personalities, snapshotted with `decliningSpecies` (spd2: SPINDA's spots, chosenMonPersonalities). */
+  decliningPersonalities?: readonly number[];
   /**
    * "closing" only: the declined slot's own `BallAnimState`, snapshotted the
    * tick before decline (ISSUES #12 - the same window-blend the 6-ball grid
@@ -258,6 +260,7 @@ export function advanceConfirmReveal(state: ConfirmRevealState | null): ConfirmR
     phase: "closing",
     elapsed,
     decliningSpecies: state.decliningSpecies,
+    decliningPersonalities: state.decliningPersonalities,
     decliningBallAnim: state.decliningBallAnim,
     accepting: state.accepting,
     preCloseBallAnims: state.preCloseBallAnims,
@@ -273,6 +276,8 @@ export interface ConfirmRevealVisual {
   monsVisible: boolean;
   /** Non-null only during "closing"'s early hold (see ConfirmRevealState.decliningSpecies doc) - overrides chosenMonSpecies(state) for that window since live selectedIds no longer resolves the 3rd pick. */
   monsSpeciesOverride: readonly string[] | null;
+  /** The personalities parallel to `monsSpeciesOverride` (spd2), non-null in the same window. */
+  monsPersonalitiesOverride: readonly number[] | null;
   /** Non-null only during the same "closing" hold as `monsSpeciesOverride` (see ConfirmRevealState.decliningBallAnim doc) - overrides the declined slot's ball rendering in the window's background ball-grid layer, which otherwise reads the live (already-deselected) state. */
   decliningBallAnim: BallAnimState | null;
   /** Non-null only on "closing"'s accept-path elapsed 1 (see ConfirmRevealState.preCloseBallAnims doc) - overrides EVERY active slot's ball rendering in the window's background ball-grid layer with their pre-closing snapshot, for that one tick only. */
@@ -288,6 +293,7 @@ const HIDDEN_REVEAL: ConfirmRevealVisual = {
   window: null,
   monsVisible: false,
   monsSpeciesOverride: null,
+  monsPersonalitiesOverride: null,
   decliningBallAnim: null,
   ballAnimOverride: null,
   yesNoVisible: false,
@@ -386,6 +392,7 @@ export function getConfirmRevealVisual(state: ConfirmRevealState | null): Confir
     // vanish on schedule instead of one tick late.
     monsVisible: state.elapsed <= 2 && (accepting ? state.elapsed <= 1 : true),
     monsSpeciesOverride: state.elapsed <= 2 ? decliningSpecies : null,
+    monsPersonalitiesOverride: state.elapsed <= 2 ? state.decliningPersonalities ?? null : null,
     decliningBallAnim: state.elapsed <= 2 ? decliningBallAnim : null,
     // ISSUES #14: only accept's own elapsed 1 render needs the pre-closing
     // ball snapshot (see ConfirmRevealState.preCloseBallAnims doc) - by
