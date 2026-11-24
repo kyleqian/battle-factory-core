@@ -1165,11 +1165,19 @@ export const WAITMESSAGE_LONG_HOLD_FRAMES = 64;
 const SELF_CONFUSION_HIT_MESSAGE_ID = "STRINGID_ITHURTCONFUSION";
 const SELF_CONFUSION_OFF_PRE_PRINT_ROWS = 3;
 /**
- * ftp1 item 4: BattleScript_EffectFocusPunch's printstring (STRINGID_PKMNLOSTFOCUS) starts its first glyph 16 rows after the engine's
- * command start (s310 d3, after a not-very-effective print: ROM +0xa print at 560 against 544; the held-item SE 152 -17 -> -1).
+ * ftp1 item 4 / fpl1 (docs/aud251-s11-scoreboard-refresh.md "fpm1"): BattleScript_EffectFocusPunch's printstring (STRINGID_PKMNLOSTFOCUS) starts its
+ * first glyph 13 rows after the ROM's previous MoveEnd (generic 8-row action prologue + attackcanceler, jumpifnodamage, ppreduce, printstring, waitmessage,
+ * first glyph). The engine's command start is 4 rows before that MoveEnd after a printed hit message (s310 d3, s1415 d49) and 6 rows after it after an hp
+ * command (labs aud250-focuspunch-*-on, mechanic-focus-punch-damaged-off), so the lead is 17 / 7.
  */
 const FOCUS_PUNCH_LOST_FOCUS_SCRIPT = "BattleScript_EffectFocusPunch";
-const FOCUS_PUNCH_LOST_FOCUS_PRE_PRINT_ROWS = 16;
+const FOCUS_PUNCH_LOST_FOCUS_AFTER_MESSAGE_ROWS = 17;
+const FOCUS_PUNCH_LOST_FOCUS_AFTER_HP_ROWS = 7;
+function focusPunchLostFocusPrePrintRows(commands: readonly BattleResolutionPresentationCommand[]): number {
+  let index = commands.length - 1;
+  while (index >= 0 && commands[index]!.type === "sprite-visibility") index -= 1;
+  return commands[index]?.type === "hp" ? FOCUS_PUNCH_LOST_FOCUS_AFTER_HP_ROWS : FOCUS_PUNCH_LOST_FOCUS_AFTER_MESSAGE_ROWS;
+}
 const SELF_CONFUSION_OFF_HIT_MESSAGE_TIMING = Object.freeze({ minimumFrames: 0, holdFrames: WAITMESSAGE_LONG_HOLD_FRAMES + 2 } as const);
 /**
  * hse2 (docs/aud251-s11-scoreboard-refresh.md "hse2"; ROM lab hpf4m-confuse-off print 1323 -> used print 1417 = 94, T2 s7295 d5 97 / s499 d11 94):
@@ -6452,7 +6460,7 @@ export function projectBattleResolutionCommands(
         lines: messageLinesNow,
         advance: "automatic",
         ...(selfConfusionOff ? { leadFrames: SELF_CONFUSION_OFF_PRE_PRINT_ROWS } : {}),
-        ...(event.provenance?.sourceLabel === FOCUS_PUNCH_LOST_FOCUS_SCRIPT ? { leadFrames: FOCUS_PUNCH_LOST_FOCUS_PRE_PRINT_ROWS } : {}),
+        ...(event.provenance?.sourceLabel === FOCUS_PUNCH_LOST_FOCUS_SCRIPT ? { leadFrames: focusPunchLostFocusPrePrintRows(commands) } : {}),
         ...(twoTurnSecondPrintLead(event, beforeRules, actionSnapshot, events[index - 1]) ?? {}),
         ...(carryBeforeGlyph > 0 ? { leadFrames: (twoTurnSecondPrintLead(event, beforeRules, actionSnapshot, events[index - 1])?.leadFrames ?? 0) + carryBeforeGlyph } : {}),
         ...(endTurnChainLeadRows(events, index, (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) === 0) > 0
