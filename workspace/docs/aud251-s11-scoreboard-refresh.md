@@ -5555,3 +5555,59 @@ Edit 1 alone (used print +4): 5,094. Census 0..199, both scenes, WORKTREE vs HEA
 - **Charm** -9 (s5569 d7), **Sandstorm** -9 (s8108 d3), **Double Team** -3 (s1415 d47 after Focus Punch's lost-focus row, class 4), **Yawn** -4 / -7 (after gen:171 / Bounce): one window each, not constants.
 - After the fix, s1415's largest windows are the item / berry chain (SE 152 / 228), Focus Punch setup and end-turn ticks: classes 2 / 4 / 5, not class 1.
 - Struggle and Knock Off (kst1), faint-chain cry and Leech Seed rows (fcl1) were not touched.
+
+## kst1 (2026-11-24): the t2k10 recipes 3 (Knock Off print tail) and 1 (Struggle body SE lead) landed (Scene ON first, OFF checked; presentation / sound timing only)
+
+Base: master `bc621934d`. The t2k10 section itself lives on the t2k10 branch (`5e74360be`, not an ancestor of this branch), so the "LANDED by kst1" marks belong on its recipe 1 and recipe 3 headings when the supervisor folds both: **recipe 1 (Struggle) LANDED by kst1, recipe 3 (Knock Off print tail) LANDED by kst1; recipe 2 (Ice Beam) stays negative.** Evidence (git-ignored): `.integration/evidence/kst1/`. Two commits, one per mechanism.
+
+### 1. Knock Off print tail: `ITEM_KNOCKOFF_PRINT_TAIL_ROWS` 4 -> 0 (commit `3f8def5ba`; constant and its branch in the `STRINGID_PKMNKNOCKEDOFF` message timing deleted)
+
+ROM-script reason. `BattleScript_KnockedOff` (`data/battle_scripts_1.s:3643`) is `playanimation; printstring STRINGID_PKMNKNOCKEDOFF; waitmessage B_WAIT_TIME_LONG; return`; the rows after the waitmessage (`+0xc`, `return`, MoveEnd, MoveEnd+0x6, 6 rows) are the same ROM rows the generic mover-to-mover `move-animation` stub (10 .. 14 rows, out2 section B: "MoveEnd + the next canceler") already presents between a first mover's last message and the next command; kno3 added 4 of them again on the message (the two `sprite-visibility` commands present 2, the stub the rest), so the next mover's "used" print came 4 rows late. Lab proof (`out2-knockoffrev-on`: Knock Off then the player's Defense Curl): Knock Off print ROM 290 / engine 290 (exact), next "used" print ROM 410 / engine 414 before, 410 / 410 after (gap Knock Off print -> next print = 120 rows in the ROM). Scene OFF (`out2-knockoffrev-off`): the same gap is ROM 205 -> 325 = 120; engine 203 -> 327 (+4 over) before, 203 -> 323 (exact gap, the lab's constant -2 carried) after.
+
+| | before | after |
+|---|---:|---:|
+| labs (labCompare, mass; ROM probe re-used from t2k10) out2-knockoff-on / -off | 12 / 0 | 12 / 0 |
+| out2-knockoffrev-on / -off | 20 / 2 | **8** / 2 (the OFF SE 239 row +2 -> -2, same mass; PRINTS mass on: 8 -> 0, 4 / 4 exact) |
+| out2-knockoffnoitem-on / -off | 12 / 0 | 12 / 0 |
+| T2 ON (full, 0 missing / 0 extra) | 5,122, exact 3,741 | **4,978**, exact 3,764 (-144: s165 -92, s499 -52) |
+| T2 OFF | 529, exact 912 | 529, 912 (no Knock Off window in the OFF seeds) |
+
+Pins: `tests/kno3ItemKnockoff.test.ts` constants `[43, 94, 3, 35, 44, 4]` -> `[43, 94, 3, 35, 44]` (the tail is gone; the 35-row OFF hold and the command lengths are untouched). `tests/randomRoundSoak.test.ts` seed 21 "seven generated wins": frames 43,655 -> 43,695, renderCalls 3,054 -> 3,056 (a trajectory pin: the strong-route policy reads presentation state; Received read before re-pinning; same battle 7 / turn 3 / state / outcome). All 47 test files naming Knock Off / 282, the soaks and lbrd passed otherwise.
+
+### 2. Struggle (165) body SE lead: `[165, -2]` in `BODY_SOUND_LEAD_ROWS` (commit `d52d09dbc`)
+
+ROM-script reason. `Move_STRUGGLE` (`data/battle_anim_scripts.s:3045`) has no `delay` before its first sound: `loopsewithpan SE_M_HEADBUTT` (162, delay 12, count 4) runs on the script's first rows, then `playsewithpan SE_M_MEGA_KICK2`; the engine's generic body clock runs the SEs 2 rows early relative to the rest of the turn. There is a ROM lab after all (`aud242j-struggle-player-on`, forced Struggle with the player's moves out of PP; the t2k10 text said none exists): ROM print 36 -> SE 162 at 75, 87, 100, 113, SE 141 at 141, hit SE 13 at 179, faint SE 16 at 446. Engine before: print 30, SEs 68 / 80 / 93 / 106 / 134 (**-7**) while the hit SE 13 and faint SE 16 sit at **-5** (and the print at -6): the five body rows were 2 rows earlier than every later row of the same window. After: SEs 70 / 82 / 95 / 108 / 136 (**-5**), equal to the rows after them. Lab mass 45 -> 35. The T2 population agrees (the recipe's -3 -> -1 in s5063 d43).
+
+| | before | after |
+|---|---:|---:|
+| lab aud242j-struggle-player-on (mass) | 45 | **35** |
+| T2 ON | 4,978, exact 3,764 | **4,908**, exact 3,779 (-70, all in s5063; the other two recipe seeds 2230 / 7295 do not move on this tree) |
+| T2 OFF | 529 | 529 (unchanged; OFF has no body) |
+
+Pin: `tests/aud242jMoveAnimSounds.test.ts` struggle-player "5 rows at ROM = ours + 7" -> `+ 5` (ROM fixture rows 75 / 87 / 100 / 113 / 141 against ours 70 / 82 / 95 / 108 / 136; the same -5 as the hit SE 13 in that lab). `tests/stl109Struggle.test.ts` and the other 112 test files naming Struggle / 165 pass; moveAnimSounds.ts and the animation scripts are not touched, so the `battleSoundTable --check` was not needed (fam1 passes).
+
+### 3. Combined acceptance (master `bc621934d` -> `d52d09dbc`)
+
+- T2 ON 5,122 -> **4,908** (-214; exact 3,741 -> 3,779; 0 missing / 0 extra); T2 OFF 529 -> 529 (912 exact, 0 / 0). Per-seed ON: s165 -92, s499 -52, s5063 -70, nothing else moved.
+- Census 0..199 (`lsd194Census.sh` shards 0 1, base `bc621934d` vs `d52d09dbc`, `rst197CensusDelta.py --digest`): ON eventsDigest + error identical 200 / 200, type-sequence changes 0, 12 battles changed commands; OFF identical 200 / 200, 0 type changes, 12 battles changed commands: every changed command is a Knock Off `message` (the Struggle lead is a sound age, not a command), -4 rows, the removed tail. The `tree/` copies were deleted.
+- Tests: the Knock Off set (56 files incl. soaks and lbrd), the Struggle / 165 set (126 files incl. soaks, lbrd, fam1*), re-pinned as above; `npm run typecheck`, `npm run test:gate` (360 files / 2,839 tests), `npm run build` green. No full `npm test` (the lane rule).
+- **Left**: the Knock Off item animation's own `+2` ON rows after the Defense Curl print in `out2-knockoffrev-on` (SE 220 / 239 +2, mass 8: a Defense Curl body term, not the tail); Struggle's body is one seed in T2 ON, so its single constant rests mostly on the lab; Scene OFF's Knock Off lab keeps its constant -2 print offset (a lab-start term, shared by the Knock Off print itself).
+
+## fcl1 (2026-11-24): the faint chain after a lead body (t2k10 class 7, recipe A) LANDED by fcl1; the end-of-turn tick windows (class 3) have no own rule
+
+Scene ON first, Scene OFF as the control. Base master `bc621934d`; the t2k10 section (commit `5e74360be`, side branch) ranked the faint chain 260 ON / 90 OFF with candidate "cry at faint +1".
+
+**Diagnosis.** "+1" is not a fixed rule or jitter: it is hpd4's `lag = max(0, 7 - moveBodyExtraRows)` in `battleHitSounds.ts`. A first-use lead body whose lead / tail extra is 6 (Aerial Ace, Slash, Psychic, Facade, Leaf Blade, 35 T2 windows) left the faint cry and SE 16 one row late; extra >= 7 clamps to 0 and was already exact. ROM (the 40 one-hit-KO labs `tools/battle-lab/fcl1-<move>-<opp|plr>-<scene>.json`, built by `tools/integration/fcl1Labs.py`: 10 moves x foe / player KO x ON / OFF): hit SE -> faint cry is 94 rows for every move and the lag after a lead body is effectively 0 (BattleScript_FaintTarget: cry at +0x2, SE 16 at +0x7 = +66, print at +0xc).
+
+**Rule.** `faintControllerLag` (`src/engine/battleHitSounds.ts`, used by the faint schedule and `faintSeOffsetRows`): after a lead body (`moveBodyExtraRows` > 0) a faint whose chain is hit -> hp -> print -> faint carries no controller lag. A faint behind a second hp command (Double-Edge recoil, aud252 seed 2230: the ROM row still shows hpd4's lag, measured by the test) keeps the old lag. A first version without the hp condition took T2 ON only to 5,081 and moved aud252 seed 2230 to -1 on 8 rows; the final one is 5,073.
+
+**Numbers.**
+- Labs (`labCompare.sh --scene on --kinds se,cry`): fcl1 aerialace / facade / leafblade / psychic / slash x opp / plr mass 2 -> 0 (10 labs; gigadrain / icebeam / surf / rockslide / seismic were 0); aud241b-player / opponent-faint 0 -> 0; fkt1-kols 262, lrm1-loss-targetfaint 188, fnt2-absorb 22 / hit 42 / foeko 14 unchanged. The 20 `fcl1-*-off` labs are 0 (the rule is `sceneLag`-gated: Scene OFF is identical by construction).
+- T2 (`rescoreAll.sh`, `soundScoreboard.py`): ON mass 5,122 -> 5,073 (exact 3,741 -> 3,792, 0 missing / 0 extra); OFF 529 unchanged.
+- Census 0..199 both scenes: eventsDigest identical 200 / 200 (OFF byte-identical shards, ON differs only in sound timing). Tree copies deleted.
+- Pins moved: `tests/aud241bBattleSounds.test.ts` "super-effective-window" `[0, 1, 1, 1, 1]` -> `[0, 0, 0, 0, 0]` (cry / duck / SE 16 now on the ROM frames; the hit SE was already 0). No other pin moved: aud252LossBallOpen, aud242*, aud248, aud259, apx222, fam1*, hit1, mxp1, sta3, fnt*, eqk1, etp* all green. Not mine: `aud249GeneralAnimSounds` flatter-player / swagger-player fail on the base `bc621934d` too (confusion play second row, `1` vs `0`).
+- Play change: none named (presentation / sound timing only; the press gates are unchanged).
+
+**Left.**
+- The remaining class 7 mass is the faint windows with their own cause: hit chains with a recoil / drain hp before the faint (the hp-conditioned case above, ROM +1 by hpd4's lag still), send-in after the faint, and s6568 d104 (harness press pulse, Mac-owned tool, untouched).
+- **Class 3 (end-of-turn tick, s648 d12 Leech Seed -5 / s648 d10 -7 / s165 d17 gen:148 -8): no own rule.** Plain Leech Seed ticks are exact in every existing lab (etp1-leechseed / leechseed2 / leechseedc, aud250-leechseed-player / opponent, lse1-leechseed-player: mass 0 each), Toxic / poison ticks +1 .. +3 per turn (etp1-toxic 6, toxic3 18, poison 6, willowisp 1 / 3, the known tick term). The -5 / -7 / -8 windows therefore come from the command before the tick (Confuse Ray / Pain Split / the previous send-in, the t2k10 note), not from the tick. Next: a lab that puts the Leech Seed tick behind that exact previous command (ROM `gCurrentMove` of the window's seed 648 and 165 rows), then compare its first tick row; etk1-leech-hold / spam (1,025 mass, 6 missing) are a different (hold / spam) shape and not that lab.

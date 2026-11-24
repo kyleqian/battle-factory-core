@@ -224,8 +224,6 @@ export const ITEM_KNOCKOFF_ANIMATION_ROWS_PLAYER_TARGET = 94;
 export const ITEM_KNOCKOFF_SCRIPT_TAIL_ROWS = 3;
 /** The Scene OFF twin: `Cmd_playanimation` takes BattleScript_Pausex20 (35 rows from the instruction's row to the print, both sides; out2). */
 export const ITEM_KNOCKOFF_OFF_HOLD_FRAMES = 35;
-/** Script rows after the knocked-off print's waitmessage before MoveEnd's turn-end block (ROM: `+0xc`, `return`, MoveEnd, MoveEnd+0x6 = 6 rows; the sprite-visibility commands present 2). */
-export const ITEM_KNOCKOFF_PRINT_TAIL_ROWS = 4;
 /** The rows from the hit's effectivenesssound to the knocked-off controller launch's first poll, less the HP bar's rows (kno2: SE age at E = 43 + drain, +1 for the first poll; seg127 drain = |from - to|). */
 export const ITEM_KNOCKOFF_SE_FIXED_ROWS = 44;
 export function itemKnockoffCommandFrames(battler: 0 | 1, seGate: number): number {
@@ -2849,7 +2847,7 @@ const REST_SOUND_LEAD_ROWS = -2;
  * Wish 273 +5 (aud242k-wish-player-on, SE_M_REFLECT 91 / 96), Future Sight 248 +5 (etp1-futuresight-on), Soft Boiled 135 +5 (aud242r-softboiled-player-on),
  * Belly Drum 187 +4 (species-audit-golem-prep5-belly-drum-player), Mean Look 212 +3 (species-audit-golbat-prep4-mean-look-player), Swagger 207 +3 (aud242f-swagger-player-on).
  */
-const BODY_SOUND_LEAD_ROWS: ReadonlyMap<number, number> = new Map([[273, 5], [248, 5], [135, 5], [187, 4], [212, 3], [207, 3]]);
+const BODY_SOUND_LEAD_ROWS: ReadonlyMap<number, number> = new Map([[273, 5], [248, 5], [135, 5], [187, 4], [212, 3], [207, 3], [165, -2]]);
 const REST_HEAL_PRINT_TAIL_ROWS = 10;
 function bdt1BodySoundLead(events: readonly BattleKernelSemanticEvent[], index: number, moveId: number): { soundAgeLeadFrames?: number } {
   if (events[index]!.provenance?.sourceLabel === CHARGE_TURN_SCRIPT) return chargeTurnSoundLead(events, index);
@@ -6666,9 +6664,7 @@ export function projectBattleResolutionCommands(
                   const weatherPause = weatherContinuesOffPauseRows(event);
                   if (weatherPause > 0) return Object.freeze({ minimumFrames: timing.minimumFrames, holdFrames: timing.holdFrames + weatherPause });
                 }
-                return payload.messageId === "STRINGID_PKMNKNOCKEDOFF"
-                  ? Object.freeze({ minimumFrames: timing.minimumFrames, holdFrames: timing.holdFrames + ITEM_KNOCKOFF_PRINT_TAIL_ROWS })
-                  : timing;
+                return timing;
               })(),
       }), payload.messageId));
       if (payload.messageId === "STRINGID_USEDMOVE" || payload.messageId === "STRINGID_EMPTYSTRING3") {

@@ -165,7 +165,7 @@ export function emitBattleHitSounds(
   // (ROM labs eqk1-{expl,sd}-{p,f}-on: target faint +7, user faint +5 with it); the user's own faint (the script's second tryfaintmon) is 2 rows later still.
   const explosionBody = segment.commands.find((c) => c.type === "move-animation" && c.animation !== undefined && EXPLOSION_FAMILY_MOVE_IDS.has(c.animation.moveId));
   const faintLag = followsFutureSightHit(segment, command) || followsEndTurnTickDamage(segment, command) ? 0
-    : explosionBody?.type === "move-animation" && sceneLag(segment) > 0 ? (explosionBody.battler === command.battler ? EXPLOSION_USER_FAINT_EXTRA_ROWS : 0) : lag;
+    : explosionBody?.type === "move-animation" && sceneLag(segment) > 0 ? (explosionBody.battler === command.battler ? EXPLOSION_USER_FAINT_EXTRA_ROWS : 0) : faintControllerLag(segment, after, command);
   // snd2: {Player,Opponent}HandleFaintingCry cry the party mon at gBattlerPartyIndexes[battler] (battle_controller_player.c /
   // battle_controller_opponent.c): the mon on the field at the faint. segment.field is the field the segment opened with, so a mon
   // sent in earlier in the same segment and knocked out there cried as the one it replaced (frame catcher, seed 3: "Go! PHANPY!" ...
@@ -185,7 +185,19 @@ export function faintSeOffsetRows(state: BattleResolutionPresentationState): num
   const segment = state.segments[state.segmentIndex];
   const command = segment?.commands[state.commandIndex];
   if (segment === undefined || command?.type !== "faint" || command.timing.leadFrames === undefined) return null;
-  return Math.max(0, command.timing.leadFrames + FAINT_SOUND_OFFSET + (followsFutureSightHit(segment, command) || followsEndTurnTickDamage(segment, command) ? 0 : Math.max(0, sceneLag(segment) - moveBodyExtraRows(state, false))));
+  return Math.max(0, command.timing.leadFrames + FAINT_SOUND_OFFSET + (followsFutureSightHit(segment, command) || followsEndTurnTickDamage(segment, command) ? 0 : faintControllerLag(segment, state, command)));
+}
+
+/**
+ * fcl1 (ROM labs fcl1-{aerialace,slash,facade,leafblade,psychic}-*-on): after a lead body (`moveBodyExtraRows` > 0) the faint cry and SE_FAINT of a KO whose chain is hit -> hp -> print -> faint
+ * (BattleScript_FaintTarget straight after the hit's datahpupdate) sit at the ROM's rows with no controller lag (hit SE -> cry 94 rows in every lab); hpd4's `sceneLag - extra` left
+ * them 1 row late whenever the extra was 6. A faint behind a second hp command (Double-Edge's recoil, aud252 seed 2230) keeps hpd4's lag, which the ROM rows there still show.
+ */
+function faintControllerLag(segment: BattleResolutionSegment, after: BattleResolutionPresentationState | null, faint: BattleResolutionPresentationCommand): number {
+  const extra = after === null ? 0 : moveBodyExtraRows(after, false);
+  let hpRows = 0;
+  for (let at = segment.commands.indexOf(faint) - 1; at >= 0 && segment.commands[at]!.type !== "hit-animation"; at -= 1) if (segment.commands[at]!.type === "hp") hpRows += 1;
+  return extra > 0 && hpRows <= 1 ? 0 : Math.max(0, sceneLag(segment) - extra);
 }
 
 /**
