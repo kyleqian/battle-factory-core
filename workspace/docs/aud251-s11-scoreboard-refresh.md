@@ -4312,3 +4312,75 @@ Sum-check: ON 530 + 700 + 373 + 327 + 283 + 245 + 232 + 202 + 58 + 120 = 3,070; 
 **Recommended landing order** (largest certain saving per rule, most T2-exact windows first): (1) A, the loss-recall SE 15 (-125 .. -135, 26 windows in both scenes; first an lrc1 lab pair to settle the lab's +22 vs T2's +26); (2) hse1m + hit2 item 1 on OFF (-150 .. -230, M); (3) C, the Toxic next-action gap (-110 .. -150); (4) B, the Chesto chain after a sleep cure (-90); (5) s8612 d8 Rock Slide after a self-target stat move (-126, M) and the Focus Punch constant refit (-50..-60, M); (6) Supersonic with a lab pair (-78, M); (7) E, Ice Beam after `ConfusedNoMore` (-60). A + C + B alone are ~-340 of the 6,186 / 597.
 
 Not applied: no `src/` or `tests/` change; PROGRESS / ISSUES / ROADMAP / PAPERCUTS untouched (the step forbids editing them); no new tool (the t2k4 / t2k8 chain ran unchanged); `npm test` / `npm run typecheck` / `npm run build` not run (the step forbids them with the supervisor's soaks in flight; no `.ts` / test touched).
+
+## cfm1 - the pre-move confusion path in both scenes: the sa125 identity holds on the ROM; cfa1's +5 is engine bookkeeping
+
+Main/ts lane, measurement only (no `src/` / `tests/` change; the engine is `c22d60e57`). Question: sa125 / sag130 assert ON - OFF = the controller rows (100 for CONFUSION), cfa1 measured that Scene ON needs 5 more on
+`BattleScript_MoveUsedIsConfused` (`printstring`, `waitmessage`, `status2animation`, `jumpifbyte`, `return`, then the used move's `attackcanceler` / `accuracycheck` / `attackstring`) and the tests carry
+`cfa1PreMoveConfusionRows` as a named exception. Method: `tools/integration/labCompare.sh --scene both` (ROM `hcr3mProbe.py` rows, per-frame `gBattlescriptCurrInstr` / exec flags / `gAnimScriptActive` / `sTextPrinters[0]`;
+engine `b4mEngine.ts` commands) on the cfa1 / mechanic-confuse-ray labs and 3 new seeds, then `tools/integration/cfm1Chain.py RUN_DIR LAB...` (new: the chain rows ROM ON / OFF / ON - OFF and the engine commands around it).
+Evidence `.integration/evidence/cfm1/run{1,2,4}` (`*.table.txt`, `*.rom.json`, `*.eng.json`). Labs: `cfa1-conf-psychic-s{1,2,3}-on` (cfa1), `mechanic-confuse-ray-{opponent-chinchou-player-onix,player-chinchou-opponent-onix}`, `cfa1-conf-psychup-s{1,2}-on`, new
+`tools/battle-lab/cfm1-conf-psychic-s{4,6,11}-on.json` (the cfa1 Psychic lab at seeds 4 / 6 / 11; each runs in both scenes). Frames are absolute lab frames; "glyph" = the printstring's `sTextPrinters[0]` rising frame + 1 (labCompare's print row).
+
+**ROM rows, Psychic lab seed 1 (Scene ON / Scene OFF / ON - OFF), the same script and the same RNG outcome in both scenes (confusion does not hurt):**
+
+| row | ROM ON | ROM OFF | ON - OFF |
+| --- | --- | --- | --- |
+| `MoveUsedIsConfused+0x3` printstring (tp rising; glyph = +1) | 547 (548) | 208 (209) | 339 |
+| waitmessage release (exec flag 0) | 567 | 228 | 339 |
+| `+0x6` waitmessage end (64 frames after the release) | 631 | 292 | 339 |
+| `+0xc` `status2animation` (ON: exec 1, `gAnimScriptActive` 1) | 632 | 293 | 339 |
+| `gAnimScriptActive` -> 0 | 731 | - | - |
+| exec flags clear (the implicit `waitanimation` release) | 732 | - | - |
+| `BattleScript_MoveUsedIsConfusedRet` (`return`) | 733 | 294 | **439** |
+| `HitFromAtkCanceler` (attackcanceler) | 734 | 295 | 439 |
+| `HitFromAccCheck` / `HitFromAtkString+0` | 735 / 736 | 296 / 297 | 439 |
+| used printstring (tp rising; glyph = +1) | 737 (738) | 298 (299) | **439** |
+
+**True ON - OFF = exactly 100 on every row from the `return` on (and exactly 0 before the animation), the sa125 identity.** All 12 chains (Psychic s1-s4, s6, s11; Psych Up s1, s2; ray opponent / player; both a hurt and a
+not-hurt outcome) read 339 or 338 -> 439 or 438: the +-1 is the ROM's frame phase of the whole lab, not a row term (ON status2animation 632 in seeds 1 4 6 8 10 11 and the ray labs = phase A, 631 in seeds 2 3 5 7 9 = phase B; OFF is 293 in all).
+The hurt path (`BattleScript_DoSelfConfusionDmg`, ROM hurts in seeds 5, 6, 11 and the ray player lab) is the same: `status2animation` 641 / release 741 / `DoSelfConfusionDmg+0x0` 742 vs OFF 302 -> ON - OFF 439 at the row.
+**Scene OFF is not 5 rows early** (the "OFF early too" reading): the engine's OFF print and used print are exact in every lab (209 / 299, 217 / 304, 209 / 298 hurt; ROM glyph = ENG start).
+
+**Engine rows (c22d60e57), Psychic seed 1 / seed 2 and 3 / ray opponent:**
+
+| row | ROM ON glyph / row | ENG ON | ENG - ROM | ROM OFF | ENG OFF | ENG - ROM |
+| --- | --- | --- | --- | --- | --- | --- |
+| confusion print first glyph | 548 / 547 / 556 | 546 / 546 / 554 | -2 / -1 / -2 | 209 / 209 / 217 | 209 / 209 / 217 | 0 |
+| `status2animation` exec | 632 / 631 / 637 | 632 / 632 / 637 (command, 105 rows) | 0 / +1 / 0 | (293 / 293 / 298, no command) | - | - |
+| used print first glyph (printstring row) | 738 (737) / 737 (736) / 743 (742) | 737 / 737 / 742 | **-1 / 0 / -1** | 299 / 299 / 304 | 299 / 299 / 304 | 0 |
+| self-hit print first glyph (seeds 6, 11, ROM = ENG outcome) | 737 | 737 | **0** | 298 | 298 | 0 |
+
+Engine ON - OFF between the two prints: message start -> used message start is 191 (ON, 546 -> 737) vs 90 (OFF, 209 -> 299) = 101, ROM glyph -> glyph 190 vs 90 = 100. The engine's own pieces: ON print hold 67 (= 64 + 3 launch rows) and status-animation 105
+(= 100 + the 5 rows of `PRE_MOVE_CONFUSION_TO_USED_PRINT_ROWS`); OFF print hold 71 (= 64 + 3 + `CONFUSION_OFF_USED_PRINT_EXTRA_ROWS` 4).
+
+**Verdict: both, and the conflict is an artefact of the test's OFF normalisation, not of the ROM.**
+1. The identity is right on the ROM: ON - OFF = controller rows (100), on the not-hurt and the hurt path, in every lab. cfa1's "Scene ON needs +5 more" is not a ROM ON - OFF term.
+2. cfa1's +5 is right for the engine's ON command but for a different reason: the 5 script rows after the animation's flags-clear row (`return`, canceler, accuracycheck, attackstring and the printstring row; hurt path 4 rows) exist in both scenes. The engine's OFF
+   path already carries them inside the confusion print's hold (71 = 64 + 3 + 4; the used / self-hit print is exact), the engine's ON path did not (hold 67, then the 100-row command) until cfa1 put them on the status-animation command (105). Engine ON - OFF is then
+   (67 + 105) - 71 = 101 against the ROM's 100 (the 1 = below), not 105.
+3. The tests read 105 because `anchors()` (sa125 / sag130) deliberately normalises the OFF confusion print's hold 71 -> 67 ("this test is about the status animation alone", hse2): that strips the OFF's 4 tail rows from the OFF side only, so
+   `a.on - a.off` = 105 = 100 + 5 and the exception appears. Un-normalised, the engine pair is 101, within 1 of the ROM identity.
+4. cfa1's constant is not exact. With the engine's `status2animation` start exact (phase A: seeds 1, 4, ray opponent, hurt seeds 6 / 11) the not-hurt used print is **1 row early** (737 vs 738 on 3 of 3), the hurt self-hit print **exact** (737 / 737 on 2 of 2).
+   ROM script: not-hurt = release (+100) then 5 rows to the print's tp rising edge (glyph +6 from the release), hurt = 4 rows (glyph +5). So the 5-row constant is exactly right for the self-hit print and 1 short for the used print in phase A; in phase B (seeds 2, 3: ROM
+   `status2animation` 631, the engine's 632) the same 5 is exact for the used print and 1 late for the hurt print. The two are indistinguishable by phase (lab used-print error 5 rows: |1,0,0,1,1| = 3 rows; a 6-row used constant: |0,1,1,0,0| = 2 rows over seeds 1-4 + ray opponent), so cfa1's
+   single 5 was a fair fit; a split constant (used 6 / self-hit 5) is a possible refinement that only T2 can accept (below).
+5. Carried upstream, not part of this path: the engine ON's confusion print starts 2 rows before the ROM glyph (546 vs 548; the inflicted `MoveEffectConfusion+0xa` print too, 441 vs 443, and the Toxic / Sleep inflicted prints in the gsp3 labs: 371 / 373, 360 / 362): the engine
+   ends the status-animation command on the flags-clear row, the ROM printstring executes the next row and its glyph the one after (`+2` for the inflicted path, `+6` / `+5` for the pre-move used / self-hit print). The pre-move ON print hold (67) hides it: the print is 2 early and holds 2 too long
+   (ROM glyph -> `status2animation` is 84, hold 65), which is why `status2animation` is exact. Fixing the start (+2 on the status-animation -> print leads, all inflicted paths) needs the hold to drop by the same 2 and is a separate T2-gated step.
+6. After the print: hit-animation SE 13 on the hurt path is ENG -2 in Scene ON (833 / 831, s6 and s11; OFF exact 394 / 394) with the print exact: the term cfa1 named for the Psych Up chain (`DoSelfConfusionDmg+0xb` onward).
+
+**Lab caveat (not a timing term).** The engine's lab stage and the ROM disagree on whether the confusion hurts in 6 of the 12 chains (ROM hurts / engine does not: seeds 5, ray player; engine hurts / ROM does not: seeds 7-10): the engine ON and OFF agree with each other and the ROM ON and OFF agree with each other, so it is
+the lab stage's RNG phase for the roll, not a scene rule (T2 and the census read 0 missing / 0 extra). The timing tables above use only the chains where both agree (seeds 1-4, 6, 11, ray opponent); seeds 5, 7-10 were deleted.
+
+**Landing recipe for the next run (nothing in this step touches `src/` / `tests/`):**
+- **Engine: keep cfa1's rule as it is** (`PRE_MOVE_CONFUSION_TO_USED_PRINT_ROWS = 5`, `battleResolutionPresentation.ts` 1207, `preMoveConfusionToUsedPrintRows` -> the status-animation `minimumFrames` at 6871). It is exact on the self-hit print, within 1 row on the used print, OFF untouched; no row 5 -> 0 revert.
+- **Tests (sa125 / sag130, the 2 failures): change the test, not the engine.** In `anchors()` of both files, skip the hse2 normalisation `confusionOffHold` (71 -> 67) when the OFF confusion print is followed by the used / self-hit print
+  (CONFUSION|STRINGID_PKMNISCONFUSED, the same condition as `cfa1PreMoveConfusionRows`); then the ON - OFF expectation for that path is `gate + ROWS + 1` (engine 101 vs the ROM identity 100; document the 1 = the used print's glyph row, point 4) and the `a.length` expectation
+  stays `gate + ROWS + cfa1PreMoveConfusionRows` = 105. Equivalent shorter form: keep the normalisation and change the exception's comment to say the 5 is the OFF's normalised-away tail rows (4) + the used print's row, i.e. an engine bookkeeping term, not a ROM ON - OFF term; the `a.on - a.off` expectation stays gate + ROWS + 5.
+  Either way the test's ROM identity block (`ROM` receipts, `controllerRows` 100) is unchanged and right.
+- **Optional engine refinement (T2-gated, expected to be tiny):** a split constant, 6 for `STRINGID_USEDMOVE` after the confusion head and 5 for `SELF_CONFUSION_HIT_MESSAGE_ID`, at `preMoveConfusionToUsedPrintRows` (line 1212: return `PRE_MOVE_CONFUSION_TO_USED_PRINT_ROWS + 1` for the used print). Lab prediction: phase-A seeds (the engine's phase) used print -1 -> 0, phase-B seeds 0 -> +1, net -1 row over the 5 agreeing labs; accept only if
+  `rescoreAll.sh` + `soundScoreboard.py` ON (baseline 6,186 / exact 3,598) does not rise (the two used-print T2 windows are the confusion second-mover ones: s2, s6, s165, s499, s5569, s7295, s8108 moved at cfa1).
+- Do not chase the OFF side here (exact) or the ROM's +-1 lab phase (a D4 faithful-timing question, `docs/faithful-timing.md`).
+
+Not applied: no `src/` or `tests/` change; PROGRESS / ISSUES / ROADMAP / PAPERCUTS untouched; `npm test` / `typecheck` / `build` not run (the step forbids them; only `tools/integration/cfm1Chain.py`, three lab files and this doc). The T2 effect of the split constant is predicted, not measured.
