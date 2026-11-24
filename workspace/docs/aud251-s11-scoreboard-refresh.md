@@ -4337,7 +4337,7 @@ Evidence `.integration/evidence/cfm1/run{1,2,4}` (`*.table.txt`, `*.rom.json`, `
 | `HitFromAccCheck` / `HitFromAtkString+0` | 735 / 736 | 296 / 297 | 439 |
 | used printstring (tp rising; glyph = +1) | 737 (738) | 298 (299) | **439** |
 
-**True ON - OFF = exactly 100 on every row from the `return` on (and exactly 0 before the animation), the sa125 identity.** All 12 chains (Psychic s1-s4, s6, s11; Psych Up s1, s2; ray opponent / player; both a hurt and a
+**True ON - OFF = exactly 100 on every row from the `return` on (and exactly 0 before the animation), the sa125 identity.** All 15 chains run (Psychic s1-s11; Psych Up s1, s2; ray opponent / player; both a hurt and a
 not-hurt outcome) read 339 or 338 -> 439 or 438: the +-1 is the ROM's frame phase of the whole lab, not a row term (ON status2animation 632 in seeds 1 4 6 8 10 11 and the ray labs = phase A, 631 in seeds 2 3 5 7 9 = phase B; OFF is 293 in all).
 The hurt path (`BattleScript_DoSelfConfusionDmg`, ROM hurts in seeds 5, 6, 11 and the ray player lab) is the same: `status2animation` 641 / release 741 / `DoSelfConfusionDmg+0x0` 742 vs OFF 302 -> ON - OFF 439 at the row.
 **Scene OFF is not 5 rows early** (the "OFF early too" reading): the engine's OFF print and used print are exact in every lab (209 / 299, 217 / 304, 209 / 298 hurt; ROM glyph = ENG start).
@@ -4370,7 +4370,7 @@ Engine ON - OFF between the two prints: message start -> used message start is 1
    (ROM glyph -> `status2animation` is 84, hold 65), which is why `status2animation` is exact. Fixing the start (+2 on the status-animation -> print leads, all inflicted paths) needs the hold to drop by the same 2 and is a separate T2-gated step.
 6. After the print: hit-animation SE 13 on the hurt path is ENG -2 in Scene ON (833 / 831, s6 and s11; OFF exact 394 / 394) with the print exact: the term cfa1 named for the Psych Up chain (`DoSelfConfusionDmg+0xb` onward).
 
-**Lab caveat (not a timing term).** The engine's lab stage and the ROM disagree on whether the confusion hurts in 6 of the 12 chains (ROM hurts / engine does not: seeds 5, ray player; engine hurts / ROM does not: seeds 7-10): the engine ON and OFF agree with each other and the ROM ON and OFF agree with each other, so it is
+**Lab caveat (not a timing term).** The engine's lab stage and the ROM disagree on whether the confusion hurts in 6 of the 15 chains (ROM hurts / engine does not: seeds 5, ray player; engine hurts / ROM does not: seeds 7-10): the engine ON and OFF agree with each other and the ROM ON and OFF agree with each other, so it is
 the lab stage's RNG phase for the roll, not a scene rule (T2 and the census read 0 missing / 0 extra). The timing tables above use only the chains where both agree (seeds 1-4, 6, 11, ray opponent); seeds 5, 7-10 were deleted.
 
 **Landing recipe for the next run (nothing in this step touches `src/` / `tests/`):**
@@ -4380,7 +4380,7 @@ the lab stage's RNG phase for the roll, not a scene rule (T2 and the census read
   stays `gate + ROWS + cfa1PreMoveConfusionRows` = 105. Equivalent shorter form: keep the normalisation and change the exception's comment to say the 5 is the OFF's normalised-away tail rows (4) + the used print's row, i.e. an engine bookkeeping term, not a ROM ON - OFF term; the `a.on - a.off` expectation stays gate + ROWS + 5.
   Either way the test's ROM identity block (`ROM` receipts, `controllerRows` 100) is unchanged and right.
 - **Optional engine refinement (T2-gated, expected to be tiny):** a split constant, 6 for `STRINGID_USEDMOVE` after the confusion head and 5 for `SELF_CONFUSION_HIT_MESSAGE_ID`, at `preMoveConfusionToUsedPrintRows` (line 1212: return `PRE_MOVE_CONFUSION_TO_USED_PRINT_ROWS + 1` for the used print). Lab prediction: phase-A seeds (the engine's phase) used print -1 -> 0, phase-B seeds 0 -> +1, net -1 row over the 5 agreeing labs; accept only if
-  `rescoreAll.sh` + `soundScoreboard.py` ON (baseline 6,186 / exact 3,598) does not rise (the two used-print T2 windows are the confusion second-mover ones: s2, s6, s165, s499, s5569, s7295, s8108 moved at cfa1).
+  `rescoreAll.sh` + `soundScoreboard.py` ON (baseline 6,186 / exact 3,598) does not rise (cfa1's moved T2 seeds were 2, 6, 165, 499, 5569, 7295, 8108).
 - Do not chase the OFF side here (exact) or the ROM's +-1 lab phase (a D4 faithful-timing question, `docs/faithful-timing.md`).
 
 Not applied: no `src/` or `tests/` change; PROGRESS / ISSUES / ROADMAP / PAPERCUTS untouched; `npm test` / `typecheck` / `build` not run (the step forbids them; only `tools/integration/cfm1Chain.py`, three lab files and this doc). The T2 effect of the split constant is predicted, not measured.
