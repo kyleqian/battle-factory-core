@@ -4640,3 +4640,89 @@ Items 1 + 2 together in the scratch tree, T2 ON (25 seeds, `tools/integration/ss
 ### State and verification
 
 No `src/` or `tests/` change (`git diff --stat HEAD -- src tests` empty; scratch edits live in the git-ignored scratch tree only); PROGRESS / ISSUES / ROADMAP / PAPERCUTS / ANIMATION_PROGRESS / ANIMATION_COVERAGE and supervisor ledgers untouched; `npm test` / typecheck / build not run (docs / tools step, ANIMATION_VERIFICATION.md: diff and ledger checks). Code under test: tree acc83dc92 (HEAD 413954b05, last `src` commit c22d60e57) plus the landing patch. Not landed: the numbers are Scene ON labs and T2 rows.
+
+## lcm1 (2026-11-24): the two -21 loss-recall windows (s3738 d62, s7295 d8) decomposed; lrm1's lead change makes both better (measurement only; doc only, no `src/` / `tests/` change)
+
+Engine frozen at `c22d60e57` (worktree HEAD `22c925954`, tree `0516e701bf68`). Both windows probed with `tools/integration/t2k4/probe.sh SEED on DECISION -40:900` (ROM `hcr3mProbe` on the Scene ON oracle + engine `--cmdtrace=1`; `T2K4_DIR` = a worktree dir whose `t2` links to `t2k9/t2-on`; 45 s + 18 s; `cmp.txt` in `.integration/evidence/lcm1/p/on/`, git-ignored). Engine commit / ROM commit: s3738 42560 / 42414, s7295 6706 / 6782. No lab built (the probe is the ROM side; the lrm1 labs already cover the SE 15 leg).
+
+### Answer in one paragraph
+
+The -21 is not one "other chain". It is three stacked terms, identical in shape in both windows: **(1) an upstream offset carried into the faint** (s3738 -11, s7295 -9 at SE 16; different causes, section 1), **(2) one 17-row press-pulse step on the "fainted!" box** (SE 5 -17 in both: the engine dismisses the box on the pulse before the ROM's, section 2), **(3) lrm1's -4** (`LOSS_RECALL_LEAD_FRAMES` 20 -> 24). -11 - 6 - 4 = -21 and -9 - 8 - 4 = -21 (SE 16 offset, SE 16 -> SE 5 gap short by 6 / 8, lrm1). **lrm1's lead change is strictly better here: SE 15 -21 -> -17 in both windows (T2 mass 55 -> 51 and 103 -> 99, -8); nothing before the `switch-out` command moves.** The remaining -17 is the pulse step plus the carried term; it is not another lead.
+
+### 1. The rows, ROM script row against engine command (frames from each side's commit; `cmp.txt`)
+
+**s3738 d62** (foe Uproar 253 KOs the player's mon; Scene ON; T2 window mass 55 over 7 rows, all non-zero):
+
+| leg | ROM row | ROM | engine cmd / SE | engine | engine - ROM |
+| --- | --- | --- | --- | --- | --- |
+| print | `EffectUproar+0xf` ex2 (wait) | 10 | `message` | 9 | -1 |
+| body SE 241 x3 | `HitFromAtkAnimation+0x1` ex2 | 56 / 74 / 92 | `move-animation` SE | 53 / 71 / 89 | **-3** (T2 rows) |
+| hit SE 13 | `+0x1` ex0 -> SE 13 | 121 | `hit-animation` +7 | 118 | -3 |
+| hp bar | `HitFromAtkAnimation+0x8` ex1 (30-row drain) | 157 -> 188 | `hp` 29 -> 0, min 28 | 146 -> 174 | -11 .. -14 (drain 31 rows vs the 28 floor) |
+| secondary print | `MoveEffectUproar+0x3` ex2 (print + wait 30) | 194 | `message` (min 0) | 176 | **-18** |
+| faint | `FaintTarget+0x0` | 290 | `faint` lead 68 | 269 | **-21** |
+| cry / SE 16 | SE_FAINT | 291 (cry) / 357 | cry / SE 16 (lead 68 + 2 + `SCENE_ON_LAG` 7) | 346 | **-11** (T2 rows) |
+| box | `FaintTarget+0xc` ex2 | 374 | `status` 355 / `message` min 24 356 | 356 | -18 |
+| A on the box | SE 5 | 402 | SE 5 | 385 | **-17** |
+| loss recall | `GiveExp+0` 411, SE 15 | 430 | `switch-out` 387 (lead 20), SE 15 | 409 | **-21** (T2 row) |
+
+**s7295 d8** (foe Struggle 165 after `ConfusedNoMore`, recoil, KO; Scene ON; window mass 103 over 9 rows):
+
+| leg | ROM row | ROM | engine cmd / SE | engine | engine - ROM |
+| --- | --- | --- | --- | --- | --- |
+| confusion cure print | `ConfusedNoMore+0x3` ex2 (40 rows) | 13 | `message` | 9 | -4 |
+| Struggle print | `HitFromAtkString+0x1` ex2 | 121 | `message` | 112 | **-9** |
+| body SE 162 x4 / SE 141 | `HitFromAtkAnimation+0x1` ex2 | 168 / 180 / 193 / 206 / 234 | `move-animation` (`bodyLead 5`) SE | 157 / 169 / 182 / 195 / 223 | **-11** (5 T2 rows) |
+| hit SE 13 | | 272 | `hit-animation` | 263 | -9 |
+| hp bar target / recoil | `+0x8` ex1 308 / `DoRecoil+0xb` ex2 336, `+0xd` 342 | 308 / 342 | `hp` b0 / `hp` b1 41 -> 37 | 298 / 326 | -10 / -16 |
+| recoil print | `DoRecoil+0x10` ex2 (34 rows, then 65 idle) | 343 | `message` | 334 | -9 |
+| faint | `FaintTarget+0x0` (`RecoilEnd` 442, `+0x13` 443) | 444 | `faint` lead 69 | 431 | **-13** |
+| cry / SE 16 | | 445 (cry -9) / 511 | | 502 | **-9** |
+| box | `FaintTarget+0xc` ex2 | 528 | `status` 518 / `message` 519 | 519 | -9 |
+| A on the box | SE 5 | 561 | SE 5 | 544 | **-17** |
+| loss recall | `GiveExp+0` 570, SE 15 | 589 | `switch-out` 546, SE 15 | 568 | **-21** |
+
+What the legs say:
+
+- **s7295 is the confusion-cure family (t2k9 item E, s830 d5 Ice Beam -6), not a loss-recall chain.** The `ConfusedNoMore` print -> next move's print is 103 engine rows against the ROM's 108 (`ConfusedNoMore+0x3` 13 -> `HitFromAtkString+0x1` 121), then the body is -11; the hit (-9), the recoil chain (net +0: hp -16 .. print -9, +2 recovered) and the faint (-13 cmd, SE 16 -9) only carry it. The 4-row first print (-4) is the Struggle `NoMovesLeft` start (ROM `EffectRecoil+0` 6, `ConfusedNoMore+0` 12; the same forced-commit anchor family as the "Struggle 150 / 9 windows" remainder item of t2k9 section 4: s7295 d8 -11 over 5 rows = 55 is these SE 162 rows). Landing E (`usedMovePrintLeadU` ~7057, the confusion cure print -> next print constant, +5 / +6) moves every row after it.
+- **s3738 is its own Uproar KO chain**, no shared rule with s7295. After the hit SE (-3) the engine loses 8 more rows before the faint: the `hit-animation` -> `hp` start (the engine's SE 13 is the cmd + 7 `SCENE_ON_LAG`, the `hp` start is cmd + 35; the ROM's drain starts 36 after SE 13, engine 28: the lag the faint SE 16 already compensates), the 29/60 drain (ROM 31 rows, engine floor 28), `HitFromAtkAnimation+0xa` -> the secondary print (`MoveEffectUproar+0x0`: ROM +6, engine +2, plain hit -> print is +3 in s4686), and the print -> `FaintTarget` stretch (ROM 96 from the print row, engine 93). A plain hit -> faint T2 window has SE 16 at 0 .. +2 with the same lag, so these are the Uproar KO's own -11 (cry and SE 16 -11). One window in the 25 ON seeds; not a rule on its own.
+- **The faint SE is lag-compensated, which is why SE 16 hides most of the upstream deficit**: SE 16 = `faint` cmd + lead + 2 + `lag` (7 minus `moveBodyExtraRows`, `battleHitSounds.ts:28`, `:92`, `:166-178`): s3738 +77 (lag 7), s7295 +71 (lag ~2: `bodyLead 5` takes 5 of the 7), OFF s4686 +69 (lag 0). Both windows' faint cmd is early by far more than the lag (-21 / -13), hence -11 / -9 remain at SE 16.
+
+### 2. The step between SE 16 and SE 5 (the part that made it -17, not -11 / -9)
+
+The ROM's SE 5 is the harness press: the drive replays 1-row A taps on a 17-row grid anchored at each commit (`drive.segments`: ROM A at commit +10, +27, ... in s3738, +16, +33, ... in s7295; both sides use the same grid relative to their own commit). The box (`FaintTarget+0xc` wait / engine `message` min 24) accepts the first tap that comes after box start + 24:
+
+| window | box start ROM / engine | + 24 | taps (ROM-relative = engine-relative) | engine takes | ROM takes |
+| --- | --- | --- | --- | --- | --- |
+| s3738 d62 | 374 / 356 | 398 / 380 | 367, **384**, 401 | 384 (SE 5 385) | 401 (SE 5 402) |
+| s7295 d8 | 528 / 519 | 552 / 543 | 526, **543**, 560 | 543 (SE 5 544) | 560 (SE 5 561) |
+
+So the box start -18 / -9 shows as **-17 (one tap) on SE 5 and on SE 15 behind it**, and it is a cliff, not a ramp: **the engine's box has to move only +5 (s3738) or +1 (s7295) rows later to take the ROM's tap**, after which SE 5 is exact and SE 15 reads only lrm1's -4. In the other loss windows SE 15 reads a clean -4 (attr), which means the box takes the ROM's tap there (inferred from the clean -4; only s4686 OFF was probed for SE 5, exact at 388). Conversely any partial upstream fix that moves the box by less than that leaves the -17; an overshoot of the other side (a box later than the ROM's by more than the ROM's tap slack) would produce +17, so the upstream terms should be landed whole or not at all.
+
+### 3. lrm1's lead change on these two windows
+
+| | now | lrm1 only (lead 24) | lrm1 + the box takes the ROM tap (section 2) |
+| --- | --- | --- | --- |
+| s3738 d62 SE 15 / window mass | -21 / 55 | **-17 / 51** | 0 / 34 (SE 16 and cry -11 remain, the 4 body rows -3) |
+| s7295 d8 SE 15 / window mass | -21 / 103 | **-17 / 99** | 0 / 82 (the 4 SE 162 + SE 141 -11, SE 13 -9, cry / SE 16 -9 remain) |
+
+Better in both; no row regresses (only `switch-out` and the tail behind it move; `LOSS_RECALL_TRAINER_SLIDE_GAP_FRAMES` stays; the T2 drive stops at the outcome, so there is no ROM row behind SE 15 to disagree with). The two -21 rows were excluded from lrm1's expected -124, so lrm1 gains **-8** here in addition (-132 in all).
+
+### 4. Recipe for what is left (files / lines / rows / expected mass)
+
+All arithmetic from the legs above, none of it landed or simulated; t2k9's "another chain" is closed as: **one E-family window and one Uproar-KO window, no shared rule.**
+
+1. **s7295 d8 (E family + Struggle start), -82 .. -90 incl. the SE 15 step.** `battleResolutionPresentation.ts` `usedMovePrintLeadU` ~7057 and the confusion-cure -> next-print gap (+5 / +6, the same constant as s830 d5's -6; ROM `ConfusedNoMore+0x3` 13 -> `HitFromAtkString+0x1` 121 = 108 rows against the engine's 103; the first print's -4 is the `NoMovesLeft` start: ROM `EffectRecoil+0` 6 vs engine `message` 9, a separate per-move constant for Struggle if wanted). With +6 here the body and hit rows go to -5 / -3, the faint -3, the box +6 (>= the +1 the tap cliff needs), so SE 5 and SE 15 follow to exact (with lrm1's lead). Expected for the window: 103 -> ~34 (body 5 x -5 = 25, SE 13 -3, cry / SE 16 -3 -3). **Landing order: lrm1's lead first (-4), then E; land E with the s830 d5 window (-60 .. -66) so one constant is checked on two windows.**
+2. **s3738 d62 (Uproar KO), -21 -> 0 on SE 15 once the box is >= +5, cry / SE 16 -11 remain.** Rows: ROM `HitFromAtkAnimation+0xa` 188 -> `MoveEffectUproar+0x0` 193 -> `+0x3` ex2 194 (print +6 against the engine's +2), print -> `FaintTarget+0` 96 rows (engine 93), drain 31 rows (engine floor 28). Files: `battleResolutionPresentation.ts` `hpLeadRows` ~6799 (`messageRows`, `moveEndRows`, `barRows`) for the KO + secondary-effect print, and `battleHitSounds.ts:166-178` `faintLag` (a KO whose chain carries a secondary-effect print has more presented rows, as `followsFutureSightHit` / `followsEndTurnTickDamage` do for theirs). Expected: -34 .. -55 for the window; **one window, so measure a second Uproar / secondary-print KO before landing** (a lab: Uproar or a status secondary effect that prints after a KOing hit, Scene ON).
+3. **The tap cliff is not a rule**: do not add a constant to the box or to SE 15 for it (+17 on every window whose box is already within the tap). It resolves itself when 1 and 2 land.
+
+### 5. What not to chase
+
+- A bigger `LOSS_RECALL_LEAD_FRAMES` or a second SE 15 constant for -21 (it would add the 17-row cliff to the wrong side and turn the -17 into +4 .. +21 elsewhere).
+- Gating the loss recall on "preceded by an uproar / recoil chain": the lead is the same; the offset comes from upstream rows.
+- SE 5: it is the harness press (no `attr` row), not a sound the engine should be calibrated to.
+- The lrm1 note that the labs' last turn has an engine-only 64-row `message` before the faint: this probe's two windows show no such row (`message` 176 -> `faint` 269 is the Uproar print + hold, ROM 96 rows).
+
+### 6. State and verification
+
+Measurement only: no `src/` / `tests/` change, no lab file added, PROGRESS / ISSUES / ROADMAP / PAPERCUTS and the Factory ledgers untouched; `npm test` / `typecheck` / `build` not run (the step forbids them). Ran: two `probe.sh` captures (mGBA, `nice -n 10`), reads of `attr-on.json`, the two `drive.json` and `eng-cmd.json`. Diff: this section only.
