@@ -176,7 +176,7 @@ ENGINE_BUILD there `eb-6593d11cb0b0b714` (master's own `eb-cf7a9cb1d877618f`).
 
 ## Seen, not fixed
 
-- **The rebuilt popup takes input 19 frames late.** On the ROM it takes A / B / DOWN from the summary B's +42: `Swap_Task_HandleMenu`
+- **The rebuilt popup takes input 19 frames late** (fixed by srt1, `docs/srt1-swap-summary-return-input.md`). On the ROM it takes A / B / DOWN from the summary B's +42: `Swap_Task_HandleMenu`
   reaches `STATE_MENU_HANDLE_INPUT` at +41, during `CB2_InitSwapScreen`'s palette fade-in, and that state checks only `monPicAnimating`,
   which `HideMonPic` cleared when the summary opened (:4112-4118). The engine takes it from +61 (`summaryReturn` hands over at +60, then
   +1). `docs/factory-swap-summary-return-probe.md` says DOWN at B+60 (29883) is rejected "during return fade", but its own dump shows the

@@ -283,9 +283,9 @@ export const FACTORY_SWAP_PHASE_READY_DELAYS: Readonly<
 /**
  * srt1: the summary return's clocks (`summaryReturnClock`, 0 = the accepted summary B), measured on the ROM
  * (docs/srt1-swap-summary-return-input.md). CB2_InitSwapScreen state 14 starts the fade-in, BeginNormalPaletteFade(PALETTES_ALL, 0,
- * 16, 0, RGB_BLACK), at +38 (battle_factory_screen.c:3402-3418); state 15 installs Swap_Task_HandleMenu at STATE_MENU_INIT (+39,
- * :3420-3433), which skips OpenMonPic (fromSummaryScreen, :2589-2593), shows the options (+40) and reaches STATE_MENU_HANDLE_INPUT at
- * +41. That state checks only `monPicAnimating`, which HideMonPic cleared when the summary opened (:2601-2603, :4112-4118), so A / B /
+ * 16, 0, RGB_BLACK), at +38 (battle_factory_screen.c:3398-3415); state 15 installs Swap_Task_HandleMenu at STATE_MENU_INIT (+39,
+ * :3416-3433), which skips OpenMonPic (fromSummaryScreen, :2589-2593), shows the options (+40) and reaches STATE_MENU_HANDLE_INPUT at
+ * +41. That state checks only `monPicAnimating`, which HideMonPic cleared when the summary opened (:2601-2602, :4112-4118), so A / B /
  * UP / DOWN are taken from +42, inside the fade-in. The fade's `active` clears in UpdatePaletteFade at +61, before RunTasks
  * (Swap_CB2, :2334-2341), so a task sees it done from +61.
  */
