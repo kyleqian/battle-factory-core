@@ -68,8 +68,8 @@ describe("iu120 universal rows: P / T per class", () => {
     expect(rows(214, 1).post).toBe(2);
   });
 
-  it("the masks: 12 no-pre moves (idle98 s3.2: the leads land97 does not cover; hit1: Thunder Punch left), 131 post-row moves / 259 sides", () => {
-    expect(IU120_NO_PRE_ROW_SIDES.size).toBe(12);
+  it("the masks: 11 no-pre moves (idle98 s3.2: the leads land97 does not cover; hit1: Thunder Punch left), 131 post-row moves / 259 sides", () => {
+    expect(IU120_NO_PRE_ROW_SIDES.size).toBe(11);
     // liv2: Flamethrower (53) keeps no pre rows and carries its 18 measured idle rows instead (5 + 18 + 192 + 6 = the ROM's release-to-hit 221).
     for (const id of IU120_NO_PRE_ROW_SIDES.keys()) expect(LAND97_LEAD_ROWS.has(id), `move ${id}`).toBe(id === 53);
     expect(IU120_POST_ROW_SIDES.size).toBe(131);

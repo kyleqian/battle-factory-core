@@ -12,7 +12,7 @@ export const IU120_PRE_ROWS = 3;
 export const IU120_POST_ROWS = 2;
 // hit1: Thunder Punch (9) left the masks with its static 10-row lead (LAND97_LEAD_ROWS).
 export const IU120_NO_PRE_ROW_SIDES: ReadonlyMap<number, number> = new Map([
-  [20, 3], [48, 3], [53, 3], [104, 3], [105, 3], [157, 1], [185, 3], [208, 3], [209, 3], [223, 3], [227, 3], [235, 3],
+  [20, 3], [48, 3], [53, 3], [104, 3], [105, 3], [157, 1], [185, 3], [208, 3], [223, 3], [227, 3], [235, 3],
 ]);
 /**
  * hit1 (docs/hit1-move-hit-timing.md): the test-side copy of Cmd_end's IsSEPlaying rows (production: liveMoveEndSeWaitRows) of the ordinary
@@ -26,7 +26,7 @@ export const IU120_NO_PRE_ROW_SIDES: ReadonlyMap<number, number> = new Map([
  */
 export const HIT1_CMD_END_SE_WAIT_ROWS: ReadonlyMap<number | string, number> = new Map<number | string, number>([
   [7, 1], [9, 22], [16, 44], [41, 17], [48, 21], [52, 3], [64, 14], [74, 20], [75, 20], [105, 15], [124, 6], [158, 2], [176, 3], [179, 1],
-  [184, 14], [190, 1], [200, 1], [206, 13], [208, 17], [209, 9], [223, 46], [225, 1], [235, 10], [299, 9], [316, 63], [342, 4], [343, 21],
+  [184, 14], [190, 1], [200, 1], [206, 13], [208, 17], [223, 46], [235, 10], [299, 9], [316, 63], [342, 4], [343, 21],
   [350, 1], [143, 1], ["143@180", 0], ["184@190", 12],
 ]);
 export function hit1SeWaitRows(id: number, _side: Iu120Side = "player", duration?: number): number {
@@ -87,7 +87,7 @@ export function ont193ScriptTail(id: number): number {
  */
 interface Iu120BodyRule { readonly lead?: number; readonly defaultLead?: number; readonly tail: number | "shape-a" }
 // lead2 B1: Double Kick 24 (hit 1) 16, Icy Wind 196, Water Pulse 352, Facade 263, Mega Kick 25, Counter 68 (4), Comet Punch 4 / Doubleslap 3 (hit 1: 15), Mega Drain 72.
-const SHAPE_A_RULE_IDS: readonly number[] = [9, 2, 5, 11, 16, 88, 265, 302, 341, 342, 343, 101, 276, 295, 296, 318, 324, 24, 196, 352, 263, 25, 68, 4, 72, 3, 332, 94, 85, 38, 98, 34, 246, 202, 58, 57, 91, 165, 157, 61, 126, 345, 53, 76, 44, 188, 89, 185, 56, 59, 247, 317, 60, 242, 282, 8, 29, 21, 175, 232, 163, 189, 7, 154, 67, 210, 149, 32, 337, 315, 124, 51, 93, 52, 224, 290, 129, 231, 309, 306, 238, 211, 138, 161, 55, 348, 228, 314, 183, 87, 65, 62, 23, 323, 179, 172, 136, 75, 36, 326, 229, 152, 351, 327, 310, 299, 284, 190, 162, 158, 146, 122, 66, 330, 325, 257, 123, 27, 305, 304, 245, 167, 155, 131];
+const SHAPE_A_RULE_IDS: readonly number[] = [9, 2, 5, 11, 16, 88, 265, 302, 341, 342, 343, 101, 276, 295, 296, 318, 324, 24, 196, 352, 263, 25, 68, 4, 72, 3, 332, 94, 85, 38, 98, 34, 246, 202, 58, 57, 91, 165, 157, 61, 126, 345, 53, 76, 44, 188, 89, 185, 56, 59, 247, 317, 60, 242, 282, 8, 29, 21, 175, 232, 163, 189, 7, 154, 67, 210, 149, 32, 337, 315, 124, 51, 93, 52, 224, 290, 129, 231, 309, 306, 238, 211, 138, 161, 55, 348, 228, 314, 183, 87, 65, 62, 23, 323, 179, 172, 136, 75, 36, 326, 229, 152, 351, 327, 310, 299, 284, 190, 162, 158, 146, 122, 66, 330, 325, 257, 123, 27, 305, 304, 245, 167, 155, 131, 209, 225];
 // lead3 B2 (the trailing ids): the measured bodies Shadow Ball .. Fire Punch (lead 5), Fury Swipes 154 / Low Kick 67 / Fury Cutter 210 / Psywave 149 / Horn Drill 32 (leads below), then the predicted counter-5 A? bodies.
 const SHAPE_A_LEADS: ReadonlyMap<number, number> = new Map([[89, 11], [24, 16], [4, 15], [3, 15], [68, 4], [154, 15], [67, 8], [210, 9], [149, 6], [32, 7]]);
 const shapeA = (id: number): Iu120BodyRule => ({ lead: SHAPE_A_LEADS.get(id) ?? 5, defaultLead: id === 91 || id === 76 ? undefined : SHAPE_A_LEADS.get(id) ?? 5, tail: "shape-a" });

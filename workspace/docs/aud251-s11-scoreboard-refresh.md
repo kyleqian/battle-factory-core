@@ -4169,3 +4169,23 @@ The ohr1 note that the asleep head is "the same u cause" holds. The wkl1m -15 as
 - 5 OFF wake-up windows at u = 3 stay +1: a 0-frame status command still takes one frame.
 - s830 d10: the engine move (Giga Drain) differs from the ROM's (a u = 5 entry); a harness desync, not a rule.
 - s2230 d5: after a Bounce first charging turn the post-miss chain has a separate +6 term that the old 6-early wake print hid; it now shows in cry mass (+3).
+## bwf2: Spark / Dragon Breath live bodies and the opponent Light Screen pixels (Battle Scene ON)
+
+Base `f60c4e61d` (fold-20261123f + the apx222 Gust re-pin). Presentation and sound timing only: no battle-rule, damage or RNG change.
+
+| Move | Change | Evidence before -> after |
+|---|---|---|
+| Spark 209 | shape A (`HSW1_SHAPE_A_MOVE_IDS`), idle lead 9 (`LIVE_MOVE_IDLE_LEAD_ROWS`), window 115 -> 117, `[209, 3]` removed from `LIVE_MOVE_NO_PRE_ROW_SIDES` (ROM A 125 = idle 9 + 117 - 1) | `npm run compare` 15 -> 221 of 221 (player attacker), 221 of 221 (opponent attacker); lab hit SE 14 -4 -> 0, hit-animation @188 and hp @223 on the ROM rows (exec-2 188 / healthbarupdate 223) |
+| Dragon Breath 225 | shape A, window 83 -> 87 at idle lead 6 (ROM A 66..158 = 93 rows) | compare 36 -> 161 of 161 (player), 161 of 161 (opponent); lab hit SE 13 -2 -> 0, hit-animation @162 and hp @197 on the ROM rows |
+| Light Screen 113, opponent attacker | `battleScene.ts` Light Screen view draws a live opponent attacker at `spriteCorner + sceneOnBattlerFrontIdleRest` (MoveBattlerSpriteToBG reads x2; RATTATA rest +1); the staged EXEGGCUTE path had rest 0 | `bwf1-lightscreen-opponent-on` 26 -> 121 of 121 (the body was 1 px left for frames 59..153); the player compare stays 126 of 126 |
+| Luster Purge 295 / Signal Beam 324 | not touched (out of time) | unchanged |
+
+**Lead class.** Both are shape A by the hsw1 lab check (hp start = ROM `healthbarupdate`: Spark 223, Dragon Breath 197). Dragon Breath as a plain window (idle lead 11, window 90) is pixel-exact too but its hit SE sits +7 late, which is why it is shape A; shape A at idle lead 11 puts every pixel 5 rows late, so the lead stays 6 and the window is 87.
+
+**Lab residuals (unchanged by this step).** The paralysis RNG divergence (an extra SE 119 status animation in the engine, the later prints and the Tackle with no adapter) and Spark's SE 215 / 119 at -1. The lab `mass` figures grow (Spark 435 -> 464, Dragon Breath 437 -> 462) only because the engine's extra paralysis turn now starts later against fixed ROM rows (Tackle SE +143 -> +154 / +154); the Spark / Dragon Breath own rows went exact 3 -> 4 and 7 -> 8.
+
+**Pins that moved (each read at Received first).** `tests/helpers/iu120Rows.ts`: `[209, 3]` out of the no-pre mask (12 -> 11 ids, `tests/iu120UniversalRows.test.ts`), 209 and 225 added to `SHAPE_A_RULE_IDS`, `HIT1_CMD_END_SE_WAIT_ROWS` rows `[209, 9]` and `[225, 1]` removed (the Cmd_end SE wait is inside the longer windows: ROM Spark SE_M_THUNDERBOLT2 ends before row 126, Dragon Breath's before 93). `tests/helpers/land97LeadAges.ts` + `tests/land97IdleLeadRows.test.ts`: `[209, 9]`, 41 -> 42 ids. `tests/animation/livePrep10MoveAdapters.test.ts` (Spark 115 -> 117, route body 117 + land97 lead), `tests/animation/spark62SparkOpponent.test.ts` (115 -> 117), `tests/animation/liveHBufferS1MoveAdapters.test.ts` (Dragon Breath 83 -> 87).
+
+**Numbers.** T2 ON (25 seeds, `rescoreAll.sh` + `soundScoreboard.py`, base vs after in `.integration/evidence/bwf2/t2-{base,after}`): mass 6652 -> 6569 (-83; move-animation SE 5282 -> 5266, battle-controller SE 973 -> 927, cry 266 -> 245), exact 3565 -> 3569, offset 2312 -> 2308, 0 missing / 0 extra. Scene OFF is not re-scored: the census shows it byte-identical. Differential (`compare:differential`, Charm / Foresight / Spikes traces, vs `f60c4e61d`): byte-identical 738 / 738. Census seeds 0..199 (`lsd194Census.sh`, `rst197CensusDelta.py --digest`): eventsDigest + error identical 200 / 200 in both scenes, 0 type-sequence changes; Scene OFF byte-identical (200 / 200 battles, shards 2 / 2); Scene ON changes 35 battles, all on Spark / Dragon Breath move-animation commands (32 -> 32 frames window shifts of +9 / +11 rows); no tree copies left.
+
+**Gates.** `tests/animation/*` (925 files), `aud242*`, `fam1*`, `hit1*`, `iu120*`, `apx22*`, `land97*`, `tl204*`, `liveShadow*`, `lbrd`, `randomRoundSoak*`, and every non-animation test file mentioning Light Screen / Spark / Dragon Breath or `battleScene.ts` (140 files) green; `battleSoundTable.ts --check` current; `npm run typecheck` clean; `npm run test:gate` 360 files / 2839 tests green; `npm run build` ok.
