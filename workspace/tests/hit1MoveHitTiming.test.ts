@@ -193,6 +193,13 @@ describe("hit1: ordinary play (the soak's seeded player, Scene ON)", () => {
     expect(twineedle.map((h) => h.eff)).toEqual([56, 56]);
   }, 120000);
 
+  it("seed 2: Rock Blast's body SEs 193 -> 131 -> effectiveness 27 / 80 rows apart, the ROM lab's rows (mhm1-rockblast-s13-on: 83 / 110 / 163)", () => {
+    const SE_M_ROCK_BLAST = 193;
+    const rows = play(2, "coverage-fight", (r) => hits(r, SE_M_ROCK_BLAST, 131).some((h) => h.eff !== null), 20000);
+    // msc1: the shape-A multi-hit bodies emit their SEs on the sound clock moved by the presented lead (lead 15 - 6), so the audible gaps are the stamped ones
+    expect(hits(rows, SE_M_ROCK_BLAST, 131).slice(0, 1).map((h) => [h.second, h.eff])).toEqual([[27, 80]]);
+  }, 120000);
+
   it("seed 25: Fury Swipes hits 2-5 put the effectiveness SE 40 rows after SE_M_SCRATCH, as the ROM (ours was 33: the first hit's lead rows were subtracted)", () => {
     const SE_M_SCRATCH = 155;
     const scratchHits = (r: readonly Row[]) => {
