@@ -5485,7 +5485,7 @@ Matches the supervisor's figures minus tnl1 (ON 5,526 − 404, OFF 537 − 8).
 
 Total ON 5,122 / OFF 529 (classes sum exactly).
 
-Reading the table: class 1 is 44% of ON. Of its 2,237, the 1,358 mass in ±1 / ±2 windows is the D4 / VBlank-phase class, so it is not an engine rule. The 879 in mid and big windows is a set of per-move constants (Struggle −3, Ice Beam −4 in one seed only, Rock Slide +4 after Knock Off, Aerial Ace −13, Earthquake −8 ×3, Rest / Bulk Up ±2 in s1415) that need a lab pair per move. Classes 2 and 4 to 6 already have owners, so the open classes without a recipe are 1 (per move), 3, 7, 8.
+Reading the table: class 1 is 44% of ON. Of its 2,237, the 1,358 mass in ±1 / ±2 windows is the D4 / VBlank-phase class, so it is not an engine rule. The 879 in mid and big windows is a set of per-move constants (Struggle −3, Ice Beam −4 in one seed only, Rock Slide +4 after Knock Off, Aerial Ace −13, Earthquake −8 ×3, Rest / Bulk Up ±2 in s1415) that need a lab pair per move. **The s1415 Earthquake / Rest / Bulk Up terms LANDED by pmk1 (`033137706`): one mechanism (the move after an "is in love" head), not per-move constants; see the pmk1 section.** Classes 2 and 4 to 6 already have owners, so the open classes without a recipe are 1 (per move), 3, 7, 8.
 
 ### 3. Recipes
 
@@ -5518,3 +5518,40 @@ Reading the table: class 1 is 44% of ON. Of its 2,237, the 1,358 mass in ±1 / �
 - `tools/integration/t2k10/classes.py`: `T2K4_DIR=DIR python3 tools/integration/t2k10/classes.py both 4` (table above, plus per-class top windows and the previous-command breakdown).
 - `tools/integration/t2k10/scratchT2.sh OUTDIR SCENE [SEED...]`: seeds-only re-score with the current engine.
 - `tools/integration/t2k10/seeddiff.py BASE.json NEW.json SCENE`: per-seed mass diff of two `soundScoreboard.py --per-seed --out` runs.
+
+## pmk1 (2026-11-24, ts lane, Scene ON first, OFF checked): the move after an "is in love" head (t2k10 class 1, s1415) landed; the other class-1 per-move rows are not constants
+
+### What landed (`033137706`, `battleResolutionPresentation.ts`, Scene ON only)
+The s1415 Earthquake -8 x3, Rest -4 and Bulk Up -4 windows were not per-move constants. Every one is the first row after a `BattleScript_MoveUsedIsInLove` head, whatever the move. Three ROM-faithful terms:
+- **Used print after the head: +4 rows.** `PRE_MOVE_IN_LOVE_TO_USED_PRINT_ROWS = 4` in `preMoveConfusionToUsedPrintRows` (cfa1's analogue for the confusion head: the status animation command carries the script rows to the used print). The used print and every SE after it were 4 rows early.
+- **Head hold 64 + 1.** `PRE_MOVE_IN_LOVE_STATUS_ANIMATION_LEAD_ROWS = 1` (fpl1's analogue: confusion head 64 + 2). The engine's head print -> status-animation gap was 102, the ROM's is 100, so the first-mover head SEs were +2 and carried +2 down the segment. Scene OFF keeps 64 + 3.
+- **Second-mover print: `IN_LOVE_TRANSITION_SCENE_ON_ROWS = 0`** (was gsp3's -2, which Scene OFF keeps).
+
+### Labs (labCompare.sh --reuse-rom, SE mass HEAD -> pmk1; new labs in tools/battle-lab)
+| lab | before | after |
+|---|---|---|
+| pmk1-inlove-bulkup-first-on (player L100 Rattata Bulk Up x4, foe L12 Attract x4, seed 2; ROM 23 / ENG 23 SEs) | 29 (print mass 20) | 9 (print mass 0) |
+| pmk1-inlove-bulkup-second-on (seed 6) | 23 | 7 |
+| pmk1-inlove-bulkup-second2-on (seed 7) | 17 | 5 |
+The residual lab rows are the Bulk Up stat SE +2 and the Attract SE 227 -3 (not in-love terms), and the engine/ROM end-of-lab RNG divergence in the last segment of the two second-mover labs (known lab RNG advance issue; it is why only seeds 2 / 6 / 7 of the eight tried are kept). Labs for Earthquake / Rest as the move after the head did not reproduce on the ROM side (RNG), so Earthquake / Rest are covered by the T2 only.
+
+### T2 (rescoreAll + soundScoreboard, 0 missing / 0 extra throughout)
+| scene | before | after |
+|---|---|---|
+| ON | 3,754 exact / 2,123 offset, mass 5,116 | 3,855 exact / 2,022 offset, mass 4,918 (-198, s1415 only: 1,030 -> 832) |
+| OFF | mass 475 | 475 (seeddiff net 0) |
+Edit 1 alone (used print +4): 5,094. Census 0..199, both scenes, WORKTREE vs HEAD: eventsDigest + error identical 200 / 200; ON 18 battles change commands (in-love heads), OFF 0.
+
+### Pins moved (each read from Received)
+- `tests/sub157SceneOffSubstitute.test.ts`: the ON action-transition pause before an "is in love" head is 10 against OFF's 8 (ROM Scene ON glyph row 2 later; OFF's gsp3 -2 unchanged). The test now allows exactly +2 when the next action's first print is `STRINGID_PKMNINLOVE`.
+- `tests/sa125StatusAnimationCommand.test.ts`, `tests/sag130StatusSeGate.test.ts`: the OFF in-love head hold (67 or 70) is read at the ON hold 65 (was 67), and an INFATUATION command before the used print carries 4 extra rows (the sa125 / sag130 `cfa1PreMoveConfusionRows` rule). Unanchored (limit: a fifth of the anchors): sa125 64 -> 29 of 216, sag130 54 -> 18 of 204 once the in-love head hold is normalised.
+
+### Not landed (class 1 list, measured on the new T2; per-move rows by window)
+- **Aerial Ace -13** (s3738 d31 after Dig, s830 d4 +6): two windows with opposite signs, not a constant.
+- **Rock Slide** s6 d1 -3 (start), s165 d18 +4 (after Knock Off: kst1's tail), s2741 d2 -10 (after Perish Song): three causes.
+- **Ice Beam** -3 at start x2, -4 after a hit: the existing negative result (Recipe 2).
+- **Surf** +4 / +3 after a hit SE 12 (s319 d4, s1914 d2), **Bite** +4 after hit SE 12, **Low Kick** +3 after hit SE 12: hit-tail carries (class 3), 2 windows each at most.
+- **Rest** after a hit -3 (3 windows), status moves after a hit -2: D4 / hit-tail carries.
+- **Charm** -9 (s5569 d7), **Sandstorm** -9 (s8108 d3), **Double Team** -3 (s1415 d47 after Focus Punch's lost-focus row, class 4), **Yawn** -4 / -7 (after gen:171 / Bounce): one window each, not constants.
+- After the fix, s1415's largest windows are the item / berry chain (SE 152 / 228), Focus Punch setup and end-turn ticks: classes 2 / 4 / 5, not class 1.
+- Struggle and Knock Off (kst1), faint-chain cry and Leech Seed rows (fcl1) were not touched.
