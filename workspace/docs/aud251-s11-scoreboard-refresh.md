@@ -4434,3 +4434,166 @@ ROM: `FirstChargingTurn+0` (row R), A0 at R + 7, SE 175 at R + 25, `+0x26 ex1` (
 - Only labs and this section are committed. Evidence (git-ignored): `.integration/evidence/stm1/{lab1,lab3,lab4,p/on}`; the scratch copy that carried the three edits above lived in `/tmp` and was not kept (the diff is the three one-line edits in the recipe).
 - `probe.sh` keeps one ROM capture per seed (`--force` needed for the second decision of a seed): a papercut for sequential windows on the same seed.
 - Not applied: no `src/` / `tests/` change; PROGRESS / ISSUES / ROADMAP / PAPERCUTS untouched; `npm test` / `npm run typecheck` / `npm run build` not run (the step forbids them with the gates frozen on c22d60e57; nothing in `src/` or `tests/` was touched).
+## tnm1 (2026-11-24): the Toxic next-action gap (C) and the Rest -> Chesto chain (B) as ready recipes
+
+Measurement only (docs / labs): no `src/` or `tests/` change, engine frozen at c22d60e57 (ENGINE_BUILD `eb-98540cad897c0482`); the sources are t2k9 section 3.C / 3.B above. Tools: `tools/integration/labCompare.sh --scene on|off` (ROM `hcr3mProbe.py` + `soundEventProbe.py` against `b4mEngine.ts`), evidence under `.integration/evidence/tnm1/` (git-ignored: `toxic-base`, `ctl`, `ctloff`, `prz`, `offrows`, `chesto-base`, `chesto-off`, `t2p`). Print convention: ROM = first glyph (tp rise + 1), ENG = the `message` command's start, as labCompare prints it. Mass = sum of |ENG - ROM|.
+
+### 1. (C) Toxic next action: the cause is a status-infliction term, not a Toxic one
+
+**Lab.** `gsp3-toxic-{player,foe}-on` already is the lab (Toxic, then Seismic Toss, then the poison tick, 3 turns); no new Toxic lab file. labCompare `--scene on` (before): player SUMMARY exact 28 / offset 22, mass 46 (PRINTS exact 9 / offset 3, mass 10); foe exact 25 / offset 17, mass 44. It reproduces T2 s165 d14 exactly: the status animation chain (SE 148 x 6, `MoveEffectToxic+0x2`) is exact row by row, then everything after it is early.
+
+**ROM rows against engine commands (player ON, Toxic turn).**
+
+| row | ROM | ENG | ENG - ROM | engine command |
+| --- | --- | --- | --- | --- |
+| last SE 148 (`BattleScript_MoveEffectToxic+0x2`) | 366 | 366 | 0 | `status-animation PSN` @296 |
+| "was badly poisoned!" print (`MoveEffectToxic+0x5`) | 369 | 367 | **-2** | `message` @367 |
+| `updatestatusicon` (`UpdateEffectStatusIconRet+0x2`) | 463 | 460 | **-3** | `status-icon` @460 |
+| next print (`EffectLevelDamage+0x9`, Seismic Toss) | 482 | 478 | **-4** | `message` @478 |
+| everything after (hit SEs 238 / 214 / 131 / 13, tick print) | | | -4 carried | |
+
+The script is `statusanimation; printstring; waitmessage B_WAIT_TIME_LONG; goto UpdateEffectStatusIconRet` (`data/battle_scripts_1.s` 3916, 3873), and the gap is three additive terms, each measured on its own row:
+
+| term | what | scenes | rows | source row |
+| --- | --- | --- | --- | --- |
+| (c) | the status animation's controller rows before the print: the `status-animation` minimum is 2 short when the next instruction is the move-inflicted status print (print -2 -> 0) | ON only | +2 | print 369 vs 367 (OFF print is exact: 98 / 98) |
+| (a) | the print's hold: 64 -> 65 for the PSN / TOX / BRN / PRZ message that is followed by `goto BattleScript_UpdateEffectStatusIconRet` | both | +1 | icon -3 -> -1 -> 0 (ON), icon ENG 191 vs ROM 192 (OFF) |
+| (b) | `status-icon` -> the next used print | both | +1 | next print -4 -> 0 (ON), 209 vs 211 (OFF, after (a)) |
+
+ON total +4, OFF total +2 (OFF has no animation rows). Sleep Powder (ON lab) has a different shape (ENG message 360 vs print row 361, icon ENG 447 vs ROM 449): not claimed here; land (a) for PSN / TOX / BRN / PRZ only and re-measure SLP after (c) / (b) with `gsp3-sleeppowder-player-on`.
+
+**Same term in the other infliction scripts (controls, ON).** Will-O-Wisp (`gsp3-willowisp-player-on`): A1 321, ENG message 322 vs print 323, icon ENG 409 vs ROM 412, next 425 vs 429 = the same -1 / -3 / -4 shape. Thunder Wave / Stun Spore (PRZ, `b4m-thunderwave-player-on`, `b4m-stunspore-player-on`): A1 229, ENG message 230, icon ENG 344 vs ROM 347 = the same -3 icon. Sleep Powder: as above. OFF (`gsp3-toxic-player-off`, `gsp3-willowisp-player-off`): print exact, icon -1, next -2.
+
+**Exact landing recipe (engine command, constant, file, lines).**
+
+1. (c) `status-animation` (`battleResolutionPresentation.ts` 6864-6874, `minimumFrames: seGate + STATUS_ANIMATION_ADDED_ROWS[animation] + preMoveConfusionToUsedPrintRows(events, index)`): add `MOVE_INFLICTED_STATUS_ANIMATION_EXTRA_ROWS = 2` when the next receipt is the status print of a `BattleScript_MoveEffect{Toxic,Burn,Paralysis,Sleep}` script (the print's `launch`/source label, as `messageTimingFromSourceProvenance` 1400-1420 keys it). Do NOT change `STATUS_ANIMATION_ADDED_ROWS` (166-168: the pre-move / confusion / tick paths are exact at 71 / 39 / 97 / 100 and share it).
+2. (a) hold: in `messageTimingFromSourceProvenance` (1400-1420), the move-inflicted branch (`MOVE_INFLICTED_STATUS_ANIMATION_TIMING` 1378 ON, `MOVE_INFLICTED_STATUS_SCENE_OFF_TIMING` 1374 OFF) adds 1 to `holdFrames` for PSN / TOX / BRN / PRZ only, i.e. when `instructions[programCounter + 2]` is `GOTO BattleScript_UpdateEffectStatusIconRet`. Not SLP (the sleep print is followed by the sleep icon script; hold exact).
+3. (b) `status-icon` (6883-6891, `STATUS_ICON_TIMING` 3330 = 1 frame): the icon that follows a move-inflicted status print gets `minimumFrames: 2` (both scenes). Keep `wakeUpIconTiming` first; leave the tick's `END_TURN_STATUS_DAMAGE_LEAD_ROWS` (1370) untouched (the gsp3 poison / burn tick lead is carried: after the fix the tick print is exact and its SE 148 sits +1, which is the known tick term).
+4. Guards that must stay exact: `gsp3-toxic-*-off`, `gsp3-willowisp-*-off`, `gsp3-sleeppowder-*-on`, `b4m-thunderwave-*-on`, `b4m-stunspore-*-on`, the sa125 / sag130 pre-move confusion rows (the `preMoveConfusionToUsedPrintRows` term, cfm1's lane), and `tests/` rows that pin `MOVE_INFLICTED_STATUS_*` (not edited here).
+
+**Expected mass.** Labs (estimate, not landed): ON player 46 -> about 10 (the offset rows after the print move by +2 / +3 / +4; the tick SE +1 rows and the carried tick term remain), foe 44 -> about 10. T2: the Toxic windows (s165 d14 and its kin, -110 .. -150 each ON) are about -148 in total; the same term on Paralysis windows is about -92 more if the lab shape holds (inferred from `b4m-*` labs, not T2-probed). OFF about -6 total. The T2 ON next action at s165 d14: ENG status-icon 438 vs ROM `UpdateEffectStatusIconRet+0x2` 442 (-4), ENG message 455 vs `EffectConfuse+0x2` 458 (-3): the same terms.
+
+### 2. (B) Rest -> Chesto berry cure chain +6
+
+**Labs (new, committed).** `tools/battle-lab/tnm1-rest-chesto-player-on.json` and `tools/battle-lab/tnm1-rest-chesto-opponent-on.json`: copies of `bdt1-rest-player-on` with `overrides.parties.<side>[0].item = 134` (Chesto Berry); Lv50 Rest x4 against a Lv12 Seismic Toss mon, trace `[A2, 18, A2, 1000, A2, 18, A2, 800]` (Rest on a damaged mon, Chesto cures the Rest sleep). labCompare `--scene on` (before): both labs mass 36 (one row 0 -> the berry segment).
+
+**ROM rows against engine commands (player ON).**
+
+| row | ROM | ENG | ENG - ROM | engine command |
+| --- | --- | --- | --- | --- |
+| `MoveEnd+0x0` / sprite-visibility end | 1416 | 1416 | 0 | `sprite-visibility` @1415 -> `status` @1416 (min 32) |
+| `BerryCureSlpRet+0x0` (status receipt) / `+0x7` = A0 (animation starts) | 1419 / 1420 | `general-animation HELD_ITEM_EFFECT` @1448 (min 192) | | |
+| SE 152 first / 228 / 102 (`+0x7`) | 1428 / 1524 / 1596 | 1434 / 1530 / 1602 | +6 | script frame 0 = command start + (min - 214) = 1426 |
+| berry print (`BerryCureSlpRet+0xa`) | 1634 | 1640 | **+6** | `message` @1640 |
+| `+0xf` (A1 1631 ... `updatestatusicon`) / `MoveEnd+0x6` | 1744 / 1747 | `status-icon` @1749 | | |
+| next print (`EffectLevelDamage+0x9`) | 1756 | 1750 | **-6** | `message` @1750 (then SE 238 -6 ...) |
+
+The berry run is short by +6 inside the segment and its tail is 12 short, so the tail turns +6 into -6: the chain +6 of T2 s319 d24 (ENG SE 152 694 vs ROM 688; message 900 vs ROM 893 / 894; status-icon 1015 vs 1010) and the -6 / -3 following windows (s5063 d1, s8612 d11).
+
+**Cause and recipe (two coupled parts; land both or neither).**
+
+- Part 1, the berry's start (+6 -> 0). A cure berry after a status receipt presents `status` (32) then `general-animation`, whose command min is `heldItem.frames - presented + HELD_ITEM_EFFECT_AFTER_STATUS_EXTRA_FRAMES` (7181-7192; `HELD_ITEM_EFFECT_AFTER_STATUS_EXTRA_FRAMES` 249, CONTINUE lead 9 at 233, `HELD_ITEM_EFFECT_COMMAND_FRAMES` 214). The SE / drawn animation epoch is `command start + min - 214` = status start + 10 regardless of how `status` is cut, because `presented` follows the status command. The ROM epoch is `MoveEnd+0x0` + 4 (A0 1420 = `BerryCureSlpRet+0x7`, `MoveEnd+0x0` 1416). So the status command is cut to 26 (set in the `set-battler-status-data` branch, 6839-6858, for a status receipt whose source label is `BattleScript_BerryCureSlpRet` / the Rest -> berry path; `sceneOnStatusFrames` 2294 returns null for it today and leaves `STATUS_TIMING` 32 at 3321) while the general-animation min stays at the value 32 gave (192): subtract a fixed `HELD_ITEM_EFFECT_AFTER_STATUS_NOMINAL_PRESENTED = 32` rather than the status command's own minimum in the 7183 `presented` line. Result: SE 152 / 228 / 102 exact and the berry print exact (ENG 1634 = ROM 1634). The ordinary Cheri-after-hit berry (hie2 / hie3: status 32, epoch exact) must keep 32: key the cut on the Rest path (the status receipt is produced from `MoveEnd`'s berry check, not from the hit), and guard with `hie1-cheri-on` (ISSUES #220 lab).
+- Part 2, the berry print's tail (-6 -> 0 after part 1 it would be -12). ROM `waitmessage` -> `updatestatusicon` (+0xf) -> `MoveEnd+0x6` -> the next used print spends 12 more rows than ENG: +1 on the print's hold (the `message`'s `holdFrames`, `messageTimingFromSourceProvenance` 1400-1420 for the `BerryCure*Ret` print) and +11 between the `status-icon` (6883-6891, `STATUS_ICON_TIMING` 3330) and the next message (a berry-print icon min of 12 instead of 1). Part 2 alone makes the next action +6 (ENG 1750 + 12 against ROM 1756) and leaves the print +6; Part 1 alone makes the next action -12; the two together should make the print and the next action exact (the later hit SEs 238 / 214 / 131 / 13 follow the next action's offset). This is derived from the measured rows above, not landed: verify with the two labs after landing.
+- Source rows: ROM `MoveEnd+0x0` 1416, `BerryCureSlpRet+0x7` 1420, `+0xa` 1633 / glyph 1634, `+0xf` 1744, `MoveEnd+0x6` 1747, `EffectLevelDamage+0x0` 1752 / glyph 1756 (player ON lab; the opponent lab shows the same offsets).
+
+**OFF control (`tnm1-rest-chesto-*` with `--scene off`, `.integration/evidence/tnm1/chesto-off`).** Scene OFF has no animation rows: `status` 35 then `move-animation` 9 and the berry print is +5 off its ROM row; the same -12 tail follows. Not a T2 term (the OFF T2 windows have no Rest + Chesto), so land Part 2 in both scenes only if the OFF labs go to 0 with it; otherwise gate it ON.
+
+**Expected mass.** ON: -90 for the chain (s319 d24 = 90, ON), plus about -24 for the next-action windows (s5063 d1, s8612 d11: -6 + -6 rows each of mass 12), about -114 in total. Chain only (Part 1 + Part 2 on one lab without the T2 next-action windows) about -72. Lab: 36 -> about 0 for both Rest + Chesto labs (estimate: every offset row in the table above moves by the same -6 / +6 / +6 amounts).
+
+### 3. What not to chase
+
+- The Toxic term as a Toxic-only constant (it is shared by Will-O-Wisp / Paralysis / Sleep: land it once as the move-inflicted status print rule), and a change to `STATUS_ANIMATION_ADDED_ROWS` or `END_TURN_STATUS_DAMAGE_LEAD_ROWS` (both are exact for the paths that use them).
+- The ON - OFF source identity of the pre-move confusion +5 (cfm1) and the loss recall SE 15 (lrm1): other lanes, not touched here.
+- The lab's `PresentHealTarget+0x12` print -10 (a hold shape in the HP leg, absorbed by the time the berry status starts at 1416 = ROM `MoveEnd+0x0`).
+- Cutting the berry `status` command alone, with no tail (Part 1 without Part 2 turns the next action -6 into -12).
+
+### 4. State and verification
+
+No `src/` or `tests/` change; the code under test is c22d60e57 / HEAD parent (the engine is untouched); PROGRESS / ISSUES / ROADMAP / PAPERCUTS and the Factory acceptance ledgers untouched; `npm test` / typecheck / build not run (docs-only step). A live adapter is not whole-playable exactness: the recipes are measured on labs and T2 rows, not landed.
+
+## ssm1 (2026-11-24): Supersonic (48) rows named and a verified recipe; Psych Up (244) second mover named, recipe measured but held
+
+Integration lane, Scene ON, measurement only (docs / labs / tools). Engine frozen at c22d60e57 (HEAD parent 89cc84e32). No `src/` or `tests/` change; every engine edit below was a scratch edit, run, and reverted (the two patches are kept in `tools/integration/ssm1/`). New tool: `tools/integration/ssm1Probe.py` (per-frame ROM battle-animation-script trace: `sBattleAnimScriptPtr`, `sAnimFramesToWait`, `gAnimScriptActive`, visual / sound task counts, exec flags, sprite callbacks, task funcs; `python3 tools/run-mgba-probe.py OUT.json -- python3 tools/integration/ssm1Probe.py OUT.json LAB.json [--profile on|off]`). Helpers: `tools/integration/ssm1/{try.sh,t2.sh,all.sh,rows.py}` (engine-only lab re-run on cached ROM files, per-seed / all-seed T2 rescore on the current `src`, per-window matched-row deltas). Evidence (git-ignored): `.integration/evidence/ssm1/`.
+
+### 1. Supersonic (ttf1 item 2): every row named; recipe verified (two constants)
+
+**ROM per frame** (lab `ttf1-supersonic-opponent-magneton-player-mantine-on`, `ss1.json`; the player lab is identical shifted by its own phase). `Move_SUPERSONIC` (`data/battle_anim_scripts.s:623`): `loadspritegfx`, `monbg ANIM_ATK_PARTNER`, `splitbgprio_foes`, `setalpha 12, 8`, `createvisualtask AnimTask_ShakeMon2`, six x (`playsewithpan SE_M_SUPERSONIC`, `createsprite gSupersonicRingSpriteTemplate` duration 30, `delay 2`), `waitforvisualfinish`, `clearmonbg`, `blendoff`, `end`.
+
+| ROM row | What | Rows |
+| --- | --- | --- |
+| 70 | used print released (`EffectConfuse+0x2` ex0) | |
+| 71 .. 76 | `EffectConfuse+0x3 .. +0x2d` (the script rows between the print and `attackanimation`) | 7 (the body lead; the engine's counter lead is 6 + 1) |
+| 77 | `+0x2e` ex2: the animation launches | |
+| 77 -> 79 | `Move_SUPERSONIC+0x0` runs on 79, `gAnimScriptActive` (A) = 1 | **2** (launch gap) |
+| 79 .. 86 | `+0x0`, `+0x3` (`loadspritegfx`), `+0x5` (`monbg`; `Task_UpdateMonBg` from 83); first ring + `AnimTask_ShakeMon2_Step` created on 86, SE 184 first on 86 | 7 |
+| 86, 90, 94, 98, 102, 106 | the six rings (SE 184 every 4 rows: `delay 2` + the `playsewithpan` / `createsprite` rows) | |
+| 110 | last `delay` done; `Move_SUPERSONIC+0x39` = `waitforvisualfinish` (visual tasks 6 rings) | |
+| 116 .. 136 | the rings die every 4 rows (`DestroyAnimSprite` 116 / 120 / ... / 136): each ring lives 30 rows from its creation, so the last dies at 106 + 30 = 136 | 30 |
+| 137 | visual task count 0: `waitforvisualfinish` releases | 1 |
+| 138 | `+0x3d`: `clearmonbg` creates `Task_ClearMonBg` (gone on 141) | 1 |
+| 138 -> 141 | `Task_ClearMonBg` / `blendoff`; the script reaches `end` (`Cmd_end`) | 3 |
+| 141 -> 150 | `Cmd_end` (`battle_anim.c:476`): tasks done, then `IsSEPlaying` until the last ring's SE 184 (106) ends: 106 + 44 = 150, A = 0 | **9** |
+| 150 -> 155 | exec cleared 151, `MoveEffectConfusion` reached `+0x0` on 154 (`EffectConfuse+0x2f / +0x35` on 152 / 153), `+0x7` ex1 (the confusion status animation) on 155, A = 1; SE 176 first on 158 | **5** |
+
+So the whole presented command is 70 -> 155 = **85 rows** = 7 (print release -> exec) + 2 (launch gap) + 71 (A high 79 -> 150: 7 + 20 (the six ring SEs) + 30 (the last ring's life) + 1 + 1 + 3 + 9) + 5. The engine's c-lead command is the kernel lead 6 (+3: ROM L = A0 - R - 3, A0 = 79) + the SE-derived body window 48 (ends on ROM 127, 21 rows after the last SE) + the **28-row tail**, and those 28 rows are, from the ROM: **9** (the last ring's remaining flight, 127 -> 136) + **1** (136 -> 137, visual task count 0, `waitforvisualfinish` releases) + **1** (`clearmonbg`, 138) + **3** (`Task_ClearMonBg` -> `end`, 138 -> 141) + **9** (`Cmd_end`'s `IsSEPlaying`, 141 -> 150) + **5** (A = 0 -> the status animation's exec, 150 -> 155). None of them is the confusion animation's own lead: the confusion head starts on 155 (`Status_Confusion+0x3`, A = 1, `Task_DoStatusAnimation`) and its first SE is 3 rows later (158; ttf1's 4-row "launch gap" is that 155 -> 158). ttf1's "44 vs 31 after the last ring" is the same count: ROM last SE 106 -> A = 0 150 = 44 (the 44-row SE 184 song, `src/data/gen/se-song-rows.json`); the old engine command ended 31 rows after it.
+
+**Engine shape and cause.** HEAD's Supersonic is a plain generic move body: `70 -> 144` = lead 0 + 74 (body SE clock 7 after the print; the window ends 11 rows before the ROM's 155; first SE -2 and every confusion SE -11, the head prints -13). The c-lead class (`BODY_LEAD_RULE` "c-lead": `C_LEAD_WINDOW_ADJUST`, `battleResolutionPresentation.ts:2498`, with `C_LEAD_SOUND_CLOCK_LEADS` 2500 and `lse2BodySoundAgeShift` 2506) already presents the kernel counter lead in front (here 6) and takes the rows after the body from a per-id adjust. cfs1 (ttf1's note, `battleResolutionPresentation.ts:2496`) tried 48 with the generic constants (adjust 2, clock lead 7) and saw s5569 d12 15 rows worse; the derived pair is different.
+
+**Recipe (two constants, nothing else; patch `tools/integration/ssm1/supersonic-c-lead.patch`).**
+
+```
+battleResolutionPresentation.ts:2498  C_LEAD_WINDOW_ADJUST:         ... [86, 0], [78, 0], [79, 0], [48, 28]
+battleResolutionPresentation.ts:2500  C_LEAD_SOUND_CLOCK_LEADS:     new Map([[109, 6], [48, 4]])
+```
+
+Derivation: the status command must start on ROM 155 = 85 rows after the print release = 7 + 2 + `animScriptSeStopRow(ops of 48)` 71 (`src/engine/animEndSeWait.ts`, A high 79 -> 150, `.integration/evidence/ssm1/stop.ts`) + 5, i.e. the window the ROM spends from the last ring SE's song end; the status command's start moves 1:1 with the adjust constant (scratch runs e1 / e2 / e3) and 28 is the value that lands it on 155 (lab table below). The sound clock lead 4 puts the six SE 184 on 86 .. 106 (the generic 7 gives 3 rows late; the clock shift is `bodyLead` 6 - 4 = +2 on the 7 clock). Dependency: the adjust applies when the next command is the status animation. Supersonic's body only plays on a hit and a hit is always followed by the Confusion status animation, except when the target cannot be confused (Own Tempo, Safeguard, already confused, a substitute): those windows skip the animation, the 28 is untested there and the next command would sit 28 rows late. The two labs hit and confuse; whether any of the 25 T2 seeds has such a Supersonic window was not searched (the all-seed rescore shows no seed other than s5569 moving): add a `next command is a status-animation` guard if one turns up.
+
+**Verified (scratch, reverted).**
+
+| Check | Before | After |
+| --- | --- | --- |
+| lab `ttf1-supersonic-opponent-magneton-player-mantine-on` (`try.sh`, `labCompare.sh --scene on`) | mass 144 (SE 184 -2 x6, SE 176 -11 x6, prints -13) | **0** (18 / 18 SEs exact; the print mass 5 = first glyph ROM 5 / ENG 4 and the missing SE 139 / 12 hit rows of the lab's hit part, unchanged) |
+| lab `ttf1-supersonic-player-magneton-opponent-mantine-on` | 155 | **2** |
+| T2 ON s5569 (`t2.sh`) | 242 | **94** |
+| T2 ON, 25 seeds (`all.sh`, `soundScoreboard.py`) | 6,186 | **6,038 (-148)**, 0 missing / 0 extra, no other seed moved |
+
+The residual prints (-2, the lab's "ROM 5 / ENG 4" and the s5569 print rows) are tnm1's term (c): +2 rows on the status animation before a move-inflicted status print. Land them together; they are independent of this recipe (disjoint constants: `STATUS_ANIMATION_ADDED_ROWS`, `battleResolutionPresentation.ts:166` vs the Supersonic entries). Expected mass after landing: s5569 d12 94 left (the print rows and the s5569 non-Supersonic windows), about -148 on T2 ON; Scene OFF unaffected (the c-lead table is Scene ON only).
+
+### 2. Psych Up (244) as a second mover (T2 s7295 d4): the -4 named; recipe measured, held
+
+After cfa1 the confusion offset is gone: ROM 207 = ENG 207 (the self-hit print). HEAD's remaining s7295 d4 offsets (`rows.py`, `probe.sh 7295 on 4`, engine - ROM): SE 176 -1 x6, **SE 13 +5**, SE 200 +1 x10, SE 189 +1. With the cfa1 candidate (244 in `LEAD4_S_LEAD_MOVE_IDS` `battleResolutionPresentation.ts:2459` + `[244, -1]` in `LIVE_MOVE_SCRIPT_TAIL_TRAIL_ROWS` `battleResolutionPresentationRender.ts:1573`) SE 200 / 189 go to **-4** (+1 - 5: `bodyLead` 2, the S-lead clock shifts the SEs by `bodyLead - 7` = -5), s7295 mass 228 -> 261. The -4 is not the Psych Up body (the labs `cfa1-conf-psychup-s{1,2,3}-on`, `ztl1-psychup-player-on`, `prep16-hist-psychup-player-after-swordsdance` show the same `bodyLead` 2 exact with the S-lead: 0 / 23 / 23, 14, 30 unchanged from HEAD) but the **self-hit chain before it**, `BattleScript_DoSelfConfusionDmg` (`data/battle_scripts_1.s:3801`). ROM vs engine, one row each:
+
+| Step | ROM row | ENG row | Delta |
+| --- | --- | --- | --- |
+| self-hit print (`+0x7` ex2) / `message` | 207 | 207 | 0 |
+| print released (`+0x7` ex0) = glyphs 32 rows | 239 | 239 | 0 |
+| `waitmessage` 64 + `effectivenesssound` (SE 13) | SE 13 **304** | `hit-animation` command **302**, SE 13 at command + 7 (the controller lag) = **309** | cmd -2 / -3 (ROM `hitanimation` exec 305 = 3 rows after the 302), SE **+5** |
+| hit blink `+0xd` ex2 (305) -> ex0 | 305 -> 338 = 33 | min 35: 302 -> 337 | hp command **-1** |
+| `healthbarupdate` -> `datahpupdate` (`+0x19` ex2 341 -> ex0 412) | 341 -> 412 = 71 (74 from the print's release) | 72 | hp end **-3** (409 vs 412) |
+| `MoveEnd+0x0` 417, `EffectPsychUp+0x0` 424 | print glyphs 426 | transition rows 13 + 1: glyphs 423 | **-3** (the 14 rows after the bar end are exact: ROM 412 -> 426 = ENG 409 -> 423) |
+| `EffectPsychUp+0x2` ex0 (print end) | 448 | 444 | -4 (print 22 rows vs 21: -1 on top) |
+| first SE 200 / 189 (HEAD, no S-lead) | 460 / 595 | 461 / 596 | +1 (the S-lead -5 -> -4) |
+
+So the -4 of the S-lead variant = **-3 from the self-hit chain** (hit command start 3 early: the Scene ON self-hit has no `effectivenesssound` / `hitanimation` / `waitstate` rows after `waitmessage`; hit blink 35 vs 33 and bar 72 vs 74 are +2 / -2 against it) **-1** (the used print's 22 rows vs the engine's 21, the same -1 as the confusion head's SE 176 -1 in this window).
+
+**Chain recipe (scratch, `tools/integration/ssm1/psychup-selfhit-slead.patch`, together with the S-lead + trail above):**
+
+1. `battleHitSounds.ts:155`: the hit SE of a self-hit `hit-animation` (previous command = the `STRINGID_ITHURTCONFUSION` message, Scene ON) is 2 rows after its command start, not the controller lag 7 (the etp2 weather-loop rule's relative: the command starts 3 rows before the ROM's `hitanimation`, the SE is one row before it): SE 13 309 -> **304 = ROM**.
+2. `battleResolutionPresentation.ts` hit-animation push (~6741, `HIT_ANIMATION_TIMING` 1429): `minimumFrames` 36 for the Scene ON self-hit (35 + 1): the hp command starts on **338 = ROM**.
+3. `battleResolutionPresentation.ts` hp tail post-pass (3232-3262, `tailFrames`): +2 rows after a self-hit's bar: bar end 410 -> **412 = ROM**; the Psych Up print then starts on **426 = ROM** and SE 200 / 189 land on -1 (the print's 22 vs 21 and the SE 176 -1 of the same window: the confusion head phase).
+
+After 1 + 2 + 3 + S-lead + trail, s7295 d4: SE 13 0, SE 200 / 189 -1, the d4 rows are all -1 (SE 176 x6, SE 200 x10, SE 189), s7295 total 228 -> **223**.
+
+**Why it is held (T2 ON total).** `all.sh` over the 25 ON seeds: HEAD + Supersonic 6,038; + chain (1 + 2 + 3) only **6,231**; + chain + S-lead + trail **6,198** (against 6,186 at HEAD without Supersonic: **+12**). Seeds that move (mass, HEAD -> candidate): s7295 228 -> 223, s6 139 -> 134, s165 515 -> 513, s8108 542 -> 523, s2 215 -> 215, **s499 317 -> 353 (+36)**. s499 is the only loser, and for the reason that makes the chain right: s499 d13 / d14 (Low Kick / hurt itself in confusion) have the self-hit print **+3 late** (ENG 382 vs ROM 379: the confusion head's status command starts ROM 275 -> ENG 277, its hold +1, its 105 vs 104 +1) and the hit command exact only because the missing 3 rows cancel it: SE 13 +1 -> +2, the held-item SE 148 0 -> +3 x6 (d13) and +2 -> +5 x6 (d14), SE 90 -1 -> +2. s499 d7 / d16 improve (SE 13 +8 -> +3, +7 -> +2). The pre-print offset is the confusion head's phase (SE 176: s499 +1 / +2 / +4 over d6 .. d16, s7295 -1), not a constant; it belongs to the confusion-head term, not to Psych Up.
+
+**Expected mass and order.** Psych Up second mover in T2 = 11 rows / mass 11 (s7295 d4, SE 200 + 189) plus the SE 13 +5 row: landing the chain + S-lead + trail alone cannot make T2 better than about -5 (s7295) while s499 +36 stays; the T2 value is carried by the confusion head's start phase (SE 176, 6 rows x 14 windows on s499 alone) which has no rule yet. Order: (1) a confusion-head phase rule (the status command's start versus the preceding "is confused!" print hold: s499 d13 +2, s7295 d4 -1, ROM exec `MoveUsedIsConfused+0xc`), (2) then the chain recipe (this section, 3 edits, -3 / +5 rows), (3) then 244 S-lead + trail. Guards: first-mover Psych Up (labs `ztl1-psychup-player-on`, `prep16-hist-psychup-player-after-swordsdance`) and cfa1 labs stay at 14 / 30 / 0 / 23 / 23 with the S-lead (measured with the scratch applied: the chain code only touches a hit-animation after the `STRINGID_ITHURTCONFUSION` message, so the labs without a self-hit are untouched).
+
+### 3. What not to chase
+
+- Supersonic with the generic c-lead constants (adjust 2, clock lead 7: cfs1's try): the pair is 28 / 4.
+- A Psych Up S-lead without the self-hit chain (T2 +33 on s7295, cfa1's reading) and the chain without a confusion-head phase rule (s499 +36).
+- The ttf1 "unexplained rows after the last ring": they are the ring life (30), `waitforvisualfinish` 1, `clearmonbg` 1 + 3, and `Cmd_end`'s SE wait 9 (the 44-row SE 184 song), nothing in `TranslateAnimSpriteToTargetMonLocation`.
+
+### 4. State and verification
+
+No `src/` or `tests/` change (`git diff --stat HEAD -- src tests` empty after every scratch run: the scratch edits were reverted with `git checkout -- <files>`); PROGRESS / ISSUES / ROADMAP / PAPERCUTS / ANIMATION_PROGRESS / ANIMATION_COVERAGE and the supervisor / program ledgers untouched; `npm test` / typecheck / build not run (docs / labs / tools step, ANIMATION_VERIFICATION.md: diff and ledger checks). Code under test: engine c22d60e57 (last `src` commit, HEAD parent 89cc84e32; the scratch runs were that tree plus the two patches). A live adapter is not whole-playable arbitrary-history exactness: the numbers are Scene ON labs and T2 rows, not landed.

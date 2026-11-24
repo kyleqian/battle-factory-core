@@ -1,0 +1,76 @@
+diff --git a/workspace/src/engine/battleHitSounds.ts b/workspace/src/engine/battleHitSounds.ts
+index 815f05354..fb2cf717a 100644
+--- a/workspace/src/engine/battleHitSounds.ts
++++ b/workspace/src/engine/battleHitSounds.ts
+@@ -152,7 +152,7 @@ export function emitBattleHitSounds(
+       // the end-turn hail / sandstorm loop: etp2's constant) keeps its own anchor.
+       const anchor = previous?.type === "move-animation" ? sceneLag(segment) : lag;
+       // etp2: the end-turn weather loop's hit SE is 3 ticks after its hit command in both scenes.
+-      scheduleAfter(song.weatherLoop ? WEATHER_LOOP_HIT_SE_AFTER_COMMAND_ROWS : Math.max(0, anchor), () => playPannedSe(song.song, panBattler === 0 ? SE_PAN_PLAYER : SE_PAN_OPPONENT));
++      scheduleAfter(song.weatherLoop ? WEATHER_LOOP_HIT_SE_AFTER_COMMAND_ROWS : (command.timing as any).selfHit ? 2 : Math.max(0, anchor), () => playPannedSe(song.song, panBattler === 0 ? SE_PAN_PLAYER : SE_PAN_OPPONENT));
+     }
+     return;
+   }
+diff --git a/workspace/src/engine/battleResolutionPresentation.ts b/workspace/src/engine/battleResolutionPresentation.ts
+index d649053cf..3c55f2db5 100644
+--- a/workspace/src/engine/battleResolutionPresentation.ts
++++ b/workspace/src/engine/battleResolutionPresentation.ts
+@@ -1163,6 +1163,7 @@ export const WAITMESSAGE_LONG_HOLD_FRAMES = 64;
+  * the first glyph comes 5 rows later and the print's effectivenesssound (SE 13) 7 rows later than the engine's, so the message holds 2 more rows.
+  */
+ const SELF_CONFUSION_HIT_MESSAGE_ID = "STRINGID_ITHURTCONFUSION";
++const SCRATCH_SELF_SEQ = new Set<number>();
+ const SELF_CONFUSION_OFF_PRE_PRINT_ROWS = 3;
+ /**
+  * ftp1 item 4: BattleScript_EffectFocusPunch's printstring (STRINGID_PKMNLOSTFOCUS) starts its first glyph 16 rows after the engine's
+@@ -2458,7 +2459,7 @@ const LSE2_SOUND_CLOCK_LEADS: ReadonlyMap<number, number> = new Map([[73, 7], [3
+  */
+ const LEAD4_S_LEAD_MOVE_IDS: ReadonlySet<number> = new Set([
+   104, 182, 113, 240, 184, 108, 201, 204, 219, 266, 28, 241, 213, 97, 334, 230, 151, 133, 258, 14, 203, 197, 349, 254, 215, 107, 281, 180, 288, 195, 115, 103,
+-  277, 178, 43, 39, 148, 106, 275, 112, 321, 259, 319, 271, 339, 294, 272, 50, 269, 116, 191, 193, 194, 297, 313,
++  277, 178, 43, 39, 148, 106, 275, 112, 321, 259, 319, 271, 339, 294, 272, 50, 269, 116, 191, 193, 194, 297, 313, 244,
+ ]);
+ /**
+  * lse4 (docs/hpd1-hp-hold.md lse3 table): Revenge 279 and Absorb 71 join the shape-A class (lead 5, gap 4). Absorb's accepted window is 2 rows short of the ROM's len + 1 (`LSE4_WINDOW_SHORT_ROWS`).
+@@ -3251,8 +3252,9 @@ function applyHpHitTails(
+     const tailFrames = statNext ? (leads.sceneOff ? HP_STAT_NEXT_TAIL_FRAMES_OFF : HP_STAT_NEXT_TAIL_FRAMES) : transition ? (leads.moveEndRows === null ? 0 : HP_DATAHPUPDATE_ROW_FRAMES)
+       : endsTurn ? leads.moveEndRows ?? 0 : bars > 0 ? bars : endTurnPrint ? leads.moveEndRows! + HP_END_TURN_PRINT_LEAD_ROWS
+       : itemAnimation ? leads.itemAnimationRows! + (leads.sceneOff ? 0 : leads.itemAnimationSeGate) : printHold ? leads.messageRows! : 0;
++    const selfHitExtra = hit && (previous as any).timing.selfHit ? 2 : 0;
+     if (faint) commands[index] = Object.freeze({ ...command, timing: Object.freeze({ minimumFrames: 0 }) });
+-    else if (tailFrames > 0) commands[index] = Object.freeze({ ...command, timing: Object.freeze({ minimumFrames: 0, tailFrames }) });
++    else if (tailFrames + selfHitExtra > 0) commands[index] = Object.freeze({ ...command, timing: Object.freeze({ minimumFrames: 0, tailFrames: tailFrames + selfHitExtra }) });
+   }
+ }
+ /**
+@@ -6388,6 +6390,7 @@ export function projectBattleResolutionCommands(
+           }));
+         }
+       }
++      if (payload.messageId === SELF_CONFUSION_HIT_MESSAGE_ID) SCRATCH_SELF_SEQ.add(event.sequence);
+       const selfConfusionOff = payload.messageId === SELF_CONFUSION_HIT_MESSAGE_ID && (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0;
+       const prePrintPause = anchorlessPrePrintPauseFrames(event);
+       if (prePrintPause !== null) {
+@@ -6741,7 +6744,8 @@ export function projectBattleResolutionCommands(
+         type: "hit-animation",
+         eventSequence: event.sequence,
+         battler: hitBattler,
+-        timing: hitTargetSpriteInvisible(events, index, beforeRules, afterRules, hitBattler) ? HIT_ANIMATION_INVISIBLE_TIMING : HIT_ANIMATION_TIMING,
++        timing: hitTargetSpriteInvisible(events, index, beforeRules, afterRules, hitBattler) ? HIT_ANIMATION_INVISIBLE_TIMING
++          : (() => { const pm = commands[commands.length - 1] as any; return pm?.type === "message" && SCRATCH_SELF_SEQ.has(pm.eventSequence) && (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) === 0 ? Object.freeze({ minimumFrames: 36, firstDisplayedAge: 1, selfHit: 1 }) : HIT_ANIMATION_TIMING; })(),
+       }));
+       continue;
+     }
+diff --git a/workspace/src/engine/battleResolutionPresentationRender.ts b/workspace/src/engine/battleResolutionPresentationRender.ts
+index d925daf13..48f29c063 100644
+--- a/workspace/src/engine/battleResolutionPresentationRender.ts
++++ b/workspace/src/engine/battleResolutionPresentationRender.ts
+@@ -1571,7 +1571,7 @@ const LIVE_MOVE_POST_ROW_SIDES: ReadonlyMap<number, number> = new Map([
+ // Charm, Calm Mind, Scary Face. bwf1: Fake Tears 313 joins (trail -1) now that its live window is the ROM's (84 rows, was 87).
+ // ztl1: Spikes 191 / Destiny Bond 194 (labs ztl1-spikes / destinybond), Foresight 193 and Feather Dance 297 join; Charm 204, Spikes 191 and Feather Dance 297 are trail 0 (their stats-change / print rows start one row later than the -1 trail's). The other zero-frame ont193 moves stay unknown (0 frames) until measured.
+ const LIVE_MOVE_SCRIPT_TAIL_TRAIL_ROWS: ReadonlyMap<number, number> = new Map([
+-  [28, 0], [104, -1], [240, -1], [241, -1], [258, -1], [73, -1], [113, -1], [204, 0], [347, -1], [184, -1], [191, 0], [193, -1], [194, -1], [297, 0], [313, -1],
++  [28, 0], [104, -1], [240, -1], [241, -1], [258, -1], [73, -1], [113, -1], [204, 0], [347, -1], [184, -1], [191, 0], [193, -1], [194, -1], [297, 0], [313, -1], [244, -1],
+ ]);
+ // iu120: bodies live only after idle98's evidence (base 3dd2b74b9) whose rows it never measured (lead / trail unknown): Struggle
+ // (stl109 / sdl119, incl. its doll cells) keeps 0 / 0.
