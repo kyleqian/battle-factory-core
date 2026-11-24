@@ -4425,7 +4425,7 @@ Engine (`c22d60e57`, same labs): the `switch-out` command starts at A + 2 on a t
 - Not built: an end-of-turn lab pair. A Lv1 mon needs ~11 end-of-turn damage ticks per KO (burn / sandstorm / leech seed 1/8) or Toxic's 5 turns per mon; the T2 s1028 probe (OFF) gives the ROM chain instead. An ON end-of-turn probe (s1028 ON d16 has the same -4) is the first thing to run after landing.
 - Not applied: no `src/` / `tests/` change; PROGRESS / ISSUES / ROADMAP / PAPERCUTS untouched; `npm test` / `typecheck` / `build` not run (the step forbids them; two lab JSON files and this section only).
 
-## stm1 (2026-11-24): Belly Drum -> next action -6 landed as a verified patch recipe; Dig first turn decomposed (measurement only; labs + doc, no `src/` / `tests/` change)
+## stm1 (2026-11-24) — LANDED by ssl1: Belly Drum -> next action -6 landed as a verified patch recipe; Dig first turn decomposed (measurement only; labs + doc, no `src/` / `tests/` change)
 
 Engine frozen at `c22d60e57`. New labs (Scene ON, one Rattata L12 vs Rattata L50 per lab, `[move] x 4` sets, seed 1, trace A, 18 idle, A, 800 idle, generated from `rsl1-rockslide-player-on` by changing moves / levels): `tools/battle-lab/stm1-{bd,sd,bu,cm,ag,tackle}-rockslide-on.json` (the foe opens with Belly Drum 187 / Swords Dance 14 / Bulk Up 339 / Calm Mind 347 / Agility 97 / Tackle 33, the faster Lv50 side, then the player's Lv12 Rattata answers with Rock Slide 157) and `stm1-{bd,sd}-dig-on.json` (the same with the player's move = Dig 91). Commands: `tools/integration/labCompare.sh --scene on LAB`. ROM / engine rows below are frames from the first A.
 
@@ -4640,7 +4640,7 @@ Engine frozen at `c22d60e57`. Nothing under `src/` or `tests/` changed; PROGRESS
 ### 4. State
 
 c22d60e57 untouched. Measurement only. The step brief's "keep PROGRESS.md current" and "npm test / build green" were overridden by its own "do not edit PROGRESS.md / never run npm test, typecheck, build".
-## ssm1 (2026-11-24): Supersonic (48) rows named and a verified recipe; Psych Up (244) second mover named, recipe measured but held
+## ssm1 (2026-11-24) — LANDED by ssl1: Supersonic (48) rows named and a verified recipe; Psych Up (244) second mover named, recipe measured but held
 
 Integration lane, Scene ON, measurement only (docs / labs / tools). Engine frozen at c22d60e57 (HEAD parent 89cc84e32). No `src/` or `tests/` change; every engine edit below was a scratch edit, run, and reverted (the two patches are kept in `tools/integration/ssm1/`). New tool: `tools/integration/ssm1Probe.py` (per-frame ROM battle-animation-script trace: `sBattleAnimScriptPtr`, `sAnimFramesToWait`, `gAnimScriptActive`, visual / sound task counts, exec flags, sprite callbacks, task funcs; `python3 tools/run-mgba-probe.py OUT.json -- python3 tools/integration/ssm1Probe.py OUT.json LAB.json [--profile on|off]`). Helpers: `tools/integration/ssm1/{try.sh,t2.sh,all.sh,rows.py}` (engine-only lab re-run on cached ROM files, per-seed / all-seed T2 rescore on the current `src`, per-window matched-row deltas). Evidence (git-ignored): `.integration/evidence/ssm1/`.
 
@@ -5312,3 +5312,14 @@ Pins that moved: `tests/apx221PresentationGateApproximate` Signal Beam 324 windo
 
 **Left.** (a) Section 4's play sound clock for the shape-A multi-hit ids (hit 1 emission is `lead - 7` rows early in play; hits 2+ need separate handling). (b) The ROM tail after the last hit (57 + damage; engine +0..+3, follows the damage). (c) Thunderbolt mechanic labs' ROM-only rows (a foe action the engine stage does not play). (d) lpm1 item 3 (Scary Face / stat SE rows) has no rule.
 
+
+## ssl1 (2026-11-24): ssm1 Supersonic and stm1 Belly Drum recipes landed (S11 sound timing, ISSUES #219)
+
+Two commits, presentation / sound timing only. Census 0..199 on both scenes: eventsDigest and error identical 200/200 (tree copies deleted).
+
+- **ssm1 Supersonic (48)**: `C_LEAD_WINDOW_ADJUST` [48, 28] + `C_LEAD_SOUND_CLOCK_LEADS` [48, 4], so Supersonic is in the c-lead class (its Cmd_end SE-wait tail row is therefore 0). Guard: `BattleScript_EffectConfuse` checks Own Tempo / Substitute / already-confused before `attackanimation`, so those paths never play the animation and the engine emits no Supersonic move-animation command; the tail cannot apply (pinned by `tests/ssl1Supersonic.test.ts` with `tools/battle-lab/ssl1-supersonic-owntempo-on.json`). labCompare on the two ttf1 Supersonic labs: 144 / 150 -> 0 / 2 (the brief said 144 / 155; 150 is what the baseline measured). `psychup-selfhit-slead.patch` is NOT landed and stays held.
+- **stm1 Belly Drum (187)**: `hpPrintTailTiming` accepts PRINTSTRING as the follower (`datahpupdate`, print, preceded by `healthbarupdate` / `waitanimation` / `attackanimation`) with tail 3 on both scenes, plus `LIVE_MOVE_LEADLESS_TAIL_ROWS` [187, 3] (ON). stm1-bd-rockslide-on mass 126 -> 0 (ON), 3 -> 0 (OFF); stm1-bd-dig-on SE mass 40 -> 10; prep11-audit-golem-prep5-belly-drum-player 20 -> 14; mechanic-belly-drum-* 258 / 804 unchanged (player-lab prints 88 -> 82). The stm1 Dig d11 and SD-vs-Light-Screen items are untouched.
+- **Ghost Curse (named ROM-faithful play change)**: `BattleScript_DoGhostCurse` shares the pattern; it improves in all 6 ON labs and the OFF lab (print mass 12 / 3 / 9 -> 0), so it is not excluded. Census: 2 changed battles (seeds 40, 133, Dusclops Ghost Curse hp command floor 28 -> tail 3), events identical.
+- **T2** (`aud249Rescore.sh`): ON mass 6,186 -> 6,038 (Supersonic) -> 5,912 (both); ON exact 3,598 -> 3,616 -> 3,637; OFF mass / exact 597 / 897 unchanged. 0 missing / 0 extra.
+- **Pins moved**: `hit1MoveHitTiming` Supersonic row removed from the Cmd_end SE-wait table (c-lead now, ROM row = ttf1 Supersonic labs); `aud262MoveAnimSounds` presentheal-player constant offset 2 -> -4 (the fixture stages foe hp through the Belly Drum script, now on the ROM's print tail); `tests/helpers/iu120Rows.ts` mirrors (`C_LEAD_RULE_IDS` 48, `IU120_BODY_RULES` [48, cLead(6, 28)], `HIT1_CMD_END_SE_WAIT_ROWS` 48 removed, `LIVE_MOVE_LEADLESS_TAIL_ROWS` [187, 3]).
+- **Tests**: every importer of the changed files, `randomRoundSoak*`, `lbrd` and `npm run test:gate` (360 files / 2839 tests) green; typecheck and build green. Evidence: `.integration/evidence/ssl1/`.

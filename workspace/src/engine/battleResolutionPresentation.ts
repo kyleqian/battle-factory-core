@@ -2495,11 +2495,11 @@ export const LSE4_WINDOW_SHORT_ROWS: ReadonlyMap<number, number> = new Map([[71,
  * ROM L = A0 - R - 3: 9 / 9 / 7 / 7 / 7 / 7 / 4 / 6 / 8 / 9 / 7) is presented in front of the body, with the lead-only class's tail plus a per-id window adjust: the rows after the body the
  * ROM's next command (the status animation, stat, or hit animation) is off by once the lead is in (`C_LEAD_WINDOW_ADJUST`, ROM next command - engine next command). Thunder Wave 86, Stun Spore 78,
  * Sleep Powder 79, Sing 47, Grasswhistle 320, Confuse Ray 109, Curse 174, Lovely Kiss 142, Will-O-Wisp 261, Glare 137, Brick Break 280, Sweet Kiss 186 (cfs1: window adjust 2,
- * labs mechanic-sweet-kiss-{player,opponent}-luvdisc-*: every Confusion SE -2 -> +0; Supersonic 48 was tried and moved s5569 d12 15 rows the wrong way (T2 mass +208), so it stays out).
+ * labs mechanic-sweet-kiss-{player,opponent}-luvdisc-*: every Confusion SE -2 -> +0). ssl1: Supersonic 48 = adjust 28 + sound clock lead 4 (the rows from the last ring's SE to the ROM's status animation: ring life 30, Cmd_end's SE wait 9, ...; labs ttf1-supersonic-*-on; docs/aud251-s11-scoreboard-refresh.md ssm1).
  */
-export const C_LEAD_WINDOW_ADJUST: ReadonlyMap<number, number> = new Map([[47, 3], [142, 3], [280, 3], [186, 2], [261, 2], [137, 2], [109, 2], [174, 4], [320, -2], [86, 0], [78, 0], [79, 0]]);
+export const C_LEAD_WINDOW_ADJUST: ReadonlyMap<number, number> = new Map([[47, 3], [142, 3], [280, 3], [186, 2], [261, 2], [137, 2], [109, 2], [174, 4], [320, -2], [86, 0], [78, 0], [79, 0], [48, 28]]);
 /** The lead a c-lead body's sound table was fitted on when it is not the generic 7 (Confuse Ray's table was fitted on its own L = 6 lab, so its SEs already sit on the ROM frames). */
-const C_LEAD_SOUND_CLOCK_LEADS: ReadonlyMap<number, number> = new Map([[109, 6]]);
+const C_LEAD_SOUND_CLOCK_LEADS: ReadonlyMap<number, number> = new Map([[109, 6], [48, 4]]);
 /** The lead the S bodies' sound clock was calibrated on (the generic move-body clock, AGE_TO_SOUND_ROWS = 7). */
 const LEAD4_SOUND_CLOCK_LEAD = 7;
 /** Per-body clock leads (ROM minus ours on the 7 clock: Smokescreen / Metal Sound -2 (Scary Face: kse1, 184 = the 7 clock after its SE-wait window, labs exact), Sweet Scent -3 in the aud242 fixtures; Double Team, 98 of 190 T2 SEs, +2 before the shift is -4): their SEs sit closer to the print release. pmc1: Smokescreen 5 -> 7 (lab aud242k-smokescreen-player-on SE 135 / 159 +2 -> 0, T2 3 windows +2). */
@@ -2833,6 +2833,8 @@ function instantHpDropTiming(events: readonly BattleKernelSemanticEvent[], healt
  * rows (2 rows): 3 rows, 45 + 1 + 1 = G+97..G+143 then the glyph at G+144, both scenes, both sides (4 / 4 dense windows, 0 px).
  * Only the Substitute script is measured, so the rule requires its `attackanimation; waitanimation; healthbarupdate` lead-in (the
  * other `datahpupdate; printfromtable`, Leech Seed's turn-end drain, has no ROM window here).
+ * stm1 / ssl1: BattleScript_EffectBellyDrum's `attackanimation; waitanimation; healthbarupdate; datahpupdate; printstring` is the same controller flow with a printstring follower
+ * (lab stm1-bd-rockslide-on, both scenes: the print was 3 rows early, 231 vs 228).
  */
 const HP_PRINT_TAIL_FRAMES = 3;
 /** hpf5 S1 (hpf4m, both scenes): E 27 -> next exec +29, but cost bars E >= 28 are ROM-exact at tail 3 (sub183 dense windows, E 44 -> +47), so the tail stays 3 and only the 28 floor goes (a short bar was E 27 -> 31, now 30 = ROM + 1). */
@@ -2845,7 +2847,7 @@ function hpPrintTailTiming(event: BattleKernelSemanticEvent, events?: readonly B
     if (at(-2) === "B_SCR_OP_ORWORD" && at(-3) === "B_SCR_OP_WAITANIMATION" && at(-4) === "B_SCR_OP_ATTACKANIMATION" && at(1) === "B_SCR_OP_COPYARRAY") return PAIN_SPLIT_ATTACKER_HP_TIMING;
     if (at(-2) === "B_SCR_OP_COPYARRAY" && at(-3) === "B_SCR_OP_DATAHPUPDATE" && at(1) === "B_SCR_OP_PRINTSTRING") return PAIN_SPLIT_TARGET_HP_TIMING;
   }
-  return at(0) === "B_SCR_OP_DATAHPUPDATE" && at(1) === "B_SCR_OP_PRINTFROMTABLE" && at(-1) === "B_SCR_OP_HEALTHBARUPDATE"
+  return at(0) === "B_SCR_OP_DATAHPUPDATE" && (at(1) === "B_SCR_OP_PRINTFROMTABLE" || at(1) === "B_SCR_OP_PRINTSTRING") && at(-1) === "B_SCR_OP_HEALTHBARUPDATE"
     && at(-2) === "B_SCR_OP_WAITANIMATION" && at(-3) === "B_SCR_OP_ATTACKANIMATION"
     ? SUBSTITUTE_COST_HP_TIMING
     : at(0) === "B_SCR_OP_DATAHPUPDATE" && at(-1) === "B_SCR_OP_HEALTHBARUPDATE" && at(-2) === "B_SCR_OP_ORWORD"
