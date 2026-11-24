@@ -2254,6 +2254,20 @@ function heldItemEffectAfterPrintLead(events: readonly BattleKernelSemanticEvent
   return HELD_ITEM_EFFECT_AFTER_PRINT_LEAD_FRAMES + moveEndExecution - printExecution - waitFrames - 2;
 }
 /**
+ * fpr1 (lab fpr1-rest-leftovers-on; T2 s310 d4 / d5, s1415, s2230): an item script that restarts after `BattleScript_MoveUsedIsAsleep`'s SLP status
+ * animation (playanimation, then the 3-row jump to MoveEnd) begins its animation 5 rows earlier than the 15-row restart lead places it: the lab's
+ * ItemHealHP_Ret+0x7 SEs are ROM +16 from the engine command start, the engine +23. Scene ON only (the caller).
+ */
+export const HELD_ITEM_EFFECT_AFTER_ASLEEP_LEAD_FRAMES = 10;
+function heldItemEffectAfterAsleepLead(events: readonly BattleKernelSemanticEvent[], index: number): number | null {
+  let animation = index - 1;
+  while (animation >= 0 && events[animation]!.provenance?.sourceLabel === "BattleScript_MoveEnd") animation -= 1;
+  if (animation < 0 || animation === index - 1) return null;
+  const event = events[animation]!;
+  return event.payload.kind === "status-animation" && event.provenance?.sourceLabel === "BattleScript_MoveUsedIsAsleep"
+    ? HELD_ITEM_EFFECT_AFTER_ASLEEP_LEAD_FRAMES : null;
+}
+/**
  * hie1: Scene OFF's presented hold for an item print whose source is `playanimation ..., B_ANIM_HELD_ITEM_EFFECT` right before it
  * (battle_script_commands.c:4014-4018 -> BattleScript_Pausex20, `pause B_WAIT_TIME_SHORT` = 32 frames). Every instruction from the
  * previous receipt to the print runs once per frame (the pause's own blocked retries included), so the hold is that execution count
@@ -6854,7 +6868,7 @@ export function projectBattleResolutionCommands(
         ? HELD_ITEM_EFFECT_IDLE_CONTROLLER_EARLY_ROWS.get(weatherPrevious.animation) : undefined;
       const lead = commands.length === playerSendInEnd ? HELD_ITEM_EFFECT_AFTER_SEND_IN_LEAD_FRAMES
         : idleWeatherEarlyRows !== undefined && baseLead === HELD_ITEM_EFFECT_RESTART_LEAD_FRAMES ? baseLead - idleWeatherEarlyRows
-        : baseLead === HELD_ITEM_EFFECT_RESTART_LEAD_FRAMES ? heldItemEffectAfterPrintLead(events, index) ?? baseLead : baseLead;
+        : baseLead === HELD_ITEM_EFFECT_RESTART_LEAD_FRAMES ? heldItemEffectAfterPrintLead(events, index) ?? heldItemEffectAfterAsleepLead(events, index) ?? baseLead : baseLead;
       heldItemEffects.push({
         at: commands.length, battler: pendingHeldItemEffectBattler, sequence: event.sequence,
         frames: HELD_ITEM_EFFECT_COMMAND_FRAMES + lead,
