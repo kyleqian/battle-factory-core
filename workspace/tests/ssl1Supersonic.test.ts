@@ -23,7 +23,7 @@ function seFrames(name: string): Map<number, number[]> {
     if (advance.frame > total) break;
     const result = collectSoundTick(state.frame + 1, () => tick(state, advance.buttons));
     state = result.result;
-    for (const e of result.events) if (e.kind === "se") out.set(e.id, [...(out.get(e.id) ?? []), e.frame]);
+    for (const e of result.events) if (e.kind === "se" && e.id !== null && e.frame !== null) out.set(e.id, [...(out.get(e.id) ?? []), e.frame]);
   }
   return out;
 }
