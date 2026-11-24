@@ -158,3 +158,19 @@ twice (`fixtures/lsbz/blizzard-counters.json`) match the predicted shape on ever
 d4aTimingCheck twice fresh over 25 windows (`fixtures/lsbz/windows/blizzard-*`, + WEEZING -> BLASTOISE): 17 lag windows 0 px at impact +
 164 rows, the 8 no-lag windows only on impact + 141 .. + 156 (`alternatePhaseResidual.windows`). No count change. Receipt
 `tools/integration/fixtures/lsbz-live-receipt.json` `blizzard`; `tests/animation/liveLsbzBlizzard.test.ts`.
+
+## mhl1 / lpm1: Thunderbolt (85) orb-burst VBlank lag, sound table only (D4, no count change)
+
+Thunderbolt's `createsprite gThunderboltOrbSpriteTemplate` burst (9 sprites in one script step) overruns one VBlank on hardware, so every later row of the
+script is one wall-clock frame late: the third SE 118 at row 112 and blends are on the script rows, then `+0x143` at 171 and `+0x149` / SE 215 at 172 (the
+script's own rows put SE 215 at 171), and the later SE 119 rows are +1 (ROM 239 / 258 player lab; 252 / 271 and 256 / 275 mechanic labs). Same class as
+METALLIC_SHINE_LOAD_LAG / the Scary Face lags in the extractor's wall-clock `lags` list: CPU-load phase, not battle state (docs/aud251-s11-scoreboard-refresh.md "lpm1" item 2).
+
+- Policy (dominant measured phase): lag present. Measured in all 3 Thunderbolt labs (`aud242b-thunderbolt-player-on`, `mechanic-thunderbolt-player-delcatty-opponent-shuckle`,
+  `mechanic-thunderbolt-opponent-delcatty-player-shuckle`): SE 215 / SE 119 -1 in the engine in each; no lab without the lag was seen, so there is no alternate-phase tally.
+- Constant: one line in `tools/extract/extract-anim-sound-timing.ts` (`lags.push({ after: frame - 0.5, frames: 1 })` on the `gThunderboltOrbSpriteTemplate` createsprite), regenerated
+  into `src/data/gen/anim-sound-timing.json` (3 Thunderbolt SE ops +1; nothing else in the file changes; `extract-anim-sound-timing.ts` reproduces the committed JSON byte for byte).
+- Accounting: sound-table timing only. No live adapter, renderer or visual body changes, so the 276-body buckets (scoped exact / faithful random / faithful timing) do not move and
+  `docs/animation-integration-live-status.json` is untouched. Thunderbolt's presentation pictures are not claimed exact or reclassified by this entry; the claim is the engine's SE rows
+  against the ROM's in the three labs above (SE 215 / 119 exact after: lab `aud242b-thunderbolt-player-on` mass 4 -> 1, the remaining row is not Thunderbolt's).
+- Alternate-phase residual: a battle where the burst does not overrun would play SE 215 / 119 one row early (+-1, 3 SE rows per Thunderbolt); not observed.

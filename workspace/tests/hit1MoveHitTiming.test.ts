@@ -89,7 +89,7 @@ describe("hit1: the script's fall is the last SE's end (animScriptSeStopRow)", (
 describe("hit1: liveMoveEndSeWaitRows is the ROM's missing tail, move by move", () => {
   // [move, rows, idle94 ROM trail (first inactive row - production end), lead rows idle94 measured that production does not present]
   it.each([
-    ["Thunder Punch", 9, 22, 21, 0], ["Twineedle", 41, 17, 16, 0], ["Supersonic", 48, 21, 13, 7], ["Ember", 52, 3, 2, 0],
+    ["Thunder Punch", 9, 22, 21, 0], ["Twineedle", 41, 17, 16, 0], ["Ember", 52, 3, 2, 0],
     ["Growth", 74, 20, 19, 0], ["Razor Leaf", 75, 20, 19, 0], ["Recover", 105, 15, 4, 10], ["Sludge", 124, 6, 5, 0],
     ["Hyper Fang", 158, 2, 1, 0], ["Reversal", 179, 1, 0, 0], ["Milk Drink", 208, 17, 3, 13], ["Dynamic Punch", 223, 46, 26, 19],
     ["Synthesis", 235, 10, 5, 4], ["Blaze Kick", 299, 9, 8, 0], ["Poison Tail", 342, 4, 3, 0], ["Covet", 343, 21, 20, 0],
@@ -100,8 +100,9 @@ describe("hit1: liveMoveEndSeWaitRows is the ROM's missing tail, move by move", 
 
   it("0 where the rows after the window are ROM-measured another way, or the window models the wait itself", () => {
     // Dragon Rage (lead-table: its tuned 26-row tail holds the wait), Toxic (status-tail), Sing
-    // (liveSingBodyRows runs to the 90-row cap), Solar Beam (its unleash idle rows), Absorb (lse4 window-short rows), Self-Destruct.
-    for (const id of [82, 92, 47, 76, 71, 120]) {
+    // (liveSingBodyRows runs to the 90-row cap), Solar Beam (its unleash idle rows), Absorb (lse4 window-short rows), Self-Destruct, Supersonic (ssl1: c-lead adjust 28 =
+    // the last ring's 9 + 1 + 1 + 3 rows to `end`, Cmd_end's SE wait 9 and the 5 rows to the status animation: ROM labs ttf1-supersonic-*, A high 79 -> 150, status exec 155).
+    for (const id of [82, 92, 47, 76, 71, 120, 48]) {
       expect(cmdEndSeWaitRuleApplies(req(id, 0)), `move ${id}`).toBe(false);
       expect(liveMoveEndSeWaitRows(req(id, 0), field), `move ${id}`).toBe(0);
     }
@@ -188,7 +189,16 @@ describe("hit1: ordinary play (the soak's seeded player, Scene ON)", () => {
   it("seed 363: each Twineedle hit's effectiveness SE 56 rows after its SE_M_RAZOR_WIND2 (ROM 56 on 30 of 30; ours was 37)", () => {
     const rows = play(363, "coverage-fight", (r) => hits(r, SE_M_RAZOR_WIND2, SE_M_HORN_ATTACK).filter((h) => h.eff !== null).length >= 2, 12000);
     const twineedle = hits(rows, SE_M_RAZOR_WIND2, SE_M_HORN_ATTACK).slice(0, 2);
+    // mhl1 (mhm1) put Twineedle's hit on the ROM row (shape A; lab mhs1-twineedle-pfirst-on); msc1 moves its audible body SEs with the presented lead (`lse2BodySoundAgeShift`),
+    // so the play loop reads the ROM's 56 again on both hits (it read [65, 62] on the pre-lead sound clock; stamped T2 / lab rows were exact throughout).
     expect(twineedle.map((h) => h.eff)).toEqual([56, 56]);
+  }, 120000);
+
+  it("seed 2: Rock Blast's body SEs 193 -> 131 -> effectiveness 27 / 80 rows apart, the ROM lab's rows (mhm1-rockblast-s13-on: 83 / 110 / 163)", () => {
+    const SE_M_ROCK_BLAST = 193;
+    const rows = play(2, "coverage-fight", (r) => hits(r, SE_M_ROCK_BLAST, 131).some((h) => h.eff !== null), 20000);
+    // msc1: the shape-A multi-hit bodies emit their SEs on the sound clock moved by the presented lead (lead 15 - 6), so the audible gaps are the stamped ones
+    expect(hits(rows, SE_M_ROCK_BLAST, 131).slice(0, 1).map((h) => [h.second, h.eff])).toEqual([[27, 80]]);
   }, 120000);
 
   it("seed 25: Fury Swipes hits 2-5 put the effectiveness SE 40 rows after SE_M_SCRATCH, as the ROM (ours was 33: the first hit's lead rows were subtracted)", () => {

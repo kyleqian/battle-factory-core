@@ -463,6 +463,8 @@ const MULTI_HIT_LOOP_BOX_EXTRA_ROWS: ReadonlyMap<string, number> = new Map([["Ba
  * hit 2+ SEs exact), and the box is `to - from + 1` (no extra rows). The final hit's box lasts to the PrintStrings print's execution (+1): the script's own rows to `PrintStrings`, 14 / 15 for a completed loop and 52 on a missed last hit (pause B_WAIT_TIME_SHORT).
  */
 const MULTI_HIT_LOOP_LEAD_TRIM_ROWS: ReadonlyMap<string, number> = new Map([["BattleScript_DoMultiHit", 5], ["BattleScript_DoTripleKickAttack", 8]]);
+/** mhl1 (mhm1): Twineedle 41 / Pin Missile 42 / Rock Blast 350 hits 2+ fit trim 7 on the DoMultiHit loop (labs mhm1-*: per-hit step +0..+-1; trim 5 drifts +2 per hit); Bonemerang 155 keeps 5. */
+const MULTI_HIT_LOOP_LEAD_TRIM_7_MOVE_IDS: ReadonlySet<number> = new Set([41, 42, 350]);
 function multiHitLoopMoveId(events: readonly BattleKernelSemanticEvent[], index: number): number | null {
   for (let i = index - 1; i >= 0; i -= 1) {
     const payload = events[i]!.payload;
@@ -2515,10 +2517,17 @@ const HIT1_SHAPE_A_MOVE_IDS: ReadonlySet<number> = new Set([9, 264]);
 // hsw1: Karate Chop (2), Mega Punch (5), Vice Grip (11), Gust (16), Rock Throw (88), Smelling Salt (265), Needle Arm (302), Mud Shot (341), Poison Tail (342), Covet (343):
 // the one-hit bodies whose live window is the ROM's gAnimScriptActive length + 6 (labs hsw1-*-pfirst-on, bht1-*: window - A = 6) and whose hit SE was +1 / hp start -6
 // = the shape-A signature (lead 5 in front + hit tail 1 close it exactly).
-// Then Night Shade (101), Superpower (276), Luster Purge (295), Mist Ball (296), Silver Wind (318), Signal Beam (324): hp start -7..-9 -> 0 / -1 (Luster Purge, Signal Beam keep -1: their body is 1 row short of A + 1). bwf2: Spark (209) / Dragon Breath (225) joined once their bodies were fixed to the ROM length (windows 117 / 87).
+// Then Night Shade (101), Superpower (276), Luster Purge (295), Mist Ball (296), Silver Wind (318), Signal Beam (324): hp start -7..-9 -> 0 / -1 (Luster Purge, Signal Beam were -1: their body is 1 row short of A + 1, now carried as 1 short row in LSE4_WINDOW_SHORT_ROWS: lpm1 / mhl1). bwf2: Spark (209) / Dragon Breath (225) joined once their bodies were fixed to the ROM length (windows 117 / 87).
 const HSW1_SHAPE_A_MOVE_IDS: ReadonlySet<number> = new Set([2, 5, 11, 16, 88, 265, 302, 341, 342, 343, 101, 276, 295, 296, 318, 324, 209, 225]);
-// mhs1: Triple Kick (167), Bonemerang (155), Spike Cannon (131): hit 1 of the DoMultiHit / DoTripleKickAttack loops is shape A (labs mhs1-*-pfirst-on, aud242r spikecannon-player ROM trace). Twineedle (hit1 seed 363 regresses), Pin Missile, Rock Blast, Fury Attack, Bullet Seed, Icicle Spear stay out.
-const MHS1_SHAPE_A_MOVE_IDS: ReadonlySet<number> = new Set([167, 155, 131]);
+// mhs1: Triple Kick (167), Bonemerang (155), Spike Cannon (131): hit 1 of the DoMultiHit / DoTripleKickAttack loops is shape A (labs mhs1-*-pfirst-on, aud242r spikecannon-player ROM trace). mhl1 (mhm1): Twineedle (41), Pin Missile (42), Rock Blast (350) joined (labs mhm1-*-pfirst-on, trim 7). Fury Attack, Bullet Seed, Icicle Spear stay out.
+const MHS1_SHAPE_A_MOVE_IDS: ReadonlySet<number> = new Set([167, 155, 131, 42, 350, 41]);
+/**
+ * msc1: the shape-A multi-hit bodies (every hit) move their audible SEs with the presented lead: the table clock (calibrated on a 7-row lead) is shifted by `lead - 6`, so the SE is
+ * emitted 1 tick after its stamped ROM row, as the hit / effectiveness SE is (`MHS1_BODY_SOUND_TICK_LEAD`, `USED_MOVE_SOUND_LEAD`). Before, the stamp alone carried the `lead - 7` and play heard
+ * the SE `lead - 6` rows early against its hit (Twineedle seed 363: effectiveness 65 / 62 rows after SE 160, ROM 56 / 56).
+ */
+const MHS1_BODY_SOUND_CLOCK_LEAD = 6;
+const MHS1_BODY_SOUND_TICK_LEAD = 1;
 /**
  * lse4 "gap-print": the lead is the kernel counter, the rows after the body are `T = 2 + gap - pre - post + s` with the ROM gap of the next command: a print (`printfromtable` / `printstring`) is
  * Delta + 1 (Recycle 3, the Razor Wind charge turn 7), any other next command is shape A (gap 4). Recycle 278, Razor Wind 13 (both turns).
@@ -2526,18 +2535,18 @@ const MHS1_SHAPE_A_MOVE_IDS: ReadonlySet<number> = new Set([167, 155, 131]);
 const LSE4_GAP_PRINT_MOVE_IDS: ReadonlySet<number> = new Set([278, 13]);
 /** lse4 "lead-only": a body with no visible print after it (the ROM's gap is the generic action transition, played by `actionTransitionPauseFrames`): Wish 273. */
 const LSE4_LEAD_ONLY_MOVE_IDS: ReadonlySet<number> = new Set([273]);
-/** lse4: rows the accepted adapter window is short of the ROM's `len + 1` (`s`): Absorb (script runs 2 rows past the window), Razor Wind (len = live, both turns). Added to the rows after the body. */
-export const LSE4_WINDOW_SHORT_ROWS: ReadonlyMap<number, number> = new Map([[71, 2], [13, 1]]);
+/** lse4: rows the accepted adapter window is short of the ROM's `len + 1` (`s`): Absorb (script runs 2 rows past the window), Razor Wind (len = live, both turns), Luster Purge 295 and Signal Beam 324 (lpm1: one row short of A + 1). Added to the rows after the body. */
+export const LSE4_WINDOW_SHORT_ROWS: ReadonlyMap<number, number> = new Map([[71, 2], [13, 1], [295, 1], [324, 1]]);
 /**
  * b4l "c-lead" (docs/aud251-s11-scoreboard-refresh.md b4m / b4l): the B4 status / hit bodies whose kernel lead (the instruction rows from the used print's release to `attackanimation`,
  * ROM L = A0 - R - 3: 9 / 9 / 7 / 7 / 7 / 7 / 4 / 6 / 8 / 9 / 7) is presented in front of the body, with the lead-only class's tail plus a per-id window adjust: the rows after the body the
  * ROM's next command (the status animation, stat, or hit animation) is off by once the lead is in (`C_LEAD_WINDOW_ADJUST`, ROM next command - engine next command). Thunder Wave 86, Stun Spore 78,
  * Sleep Powder 79, Sing 47, Grasswhistle 320, Confuse Ray 109, Curse 174, Lovely Kiss 142, Will-O-Wisp 261, Glare 137, Brick Break 280, Sweet Kiss 186 (cfs1: window adjust 2,
- * labs mechanic-sweet-kiss-{player,opponent}-luvdisc-*: every Confusion SE -2 -> +0; Supersonic 48 was tried and moved s5569 d12 15 rows the wrong way (T2 mass +208), so it stays out).
+ * labs mechanic-sweet-kiss-{player,opponent}-luvdisc-*: every Confusion SE -2 -> +0). ssl1: Supersonic 48 = adjust 28 + sound clock lead 4 (the rows from the last ring's SE to the ROM's status animation: ring life 30, Cmd_end's SE wait 9, ...; labs ttf1-supersonic-*-on; docs/aud251-s11-scoreboard-refresh.md ssm1).
  */
-export const C_LEAD_WINDOW_ADJUST: ReadonlyMap<number, number> = new Map([[47, 3], [142, 3], [280, 3], [186, 2], [261, 2], [137, 2], [109, 2], [174, 4], [320, -2], [86, 0], [78, 0], [79, 0]]);
+export const C_LEAD_WINDOW_ADJUST: ReadonlyMap<number, number> = new Map([[47, 3], [142, 3], [280, 3], [186, 2], [261, 2], [137, 2], [109, 2], [174, 4], [320, -2], [86, 0], [78, 0], [79, 0], [48, 28]]);
 /** The lead a c-lead body's sound table was fitted on when it is not the generic 7 (Confuse Ray's table was fitted on its own L = 6 lab, so its SEs already sit on the ROM frames). */
-const C_LEAD_SOUND_CLOCK_LEADS: ReadonlyMap<number, number> = new Map([[109, 6]]);
+const C_LEAD_SOUND_CLOCK_LEADS: ReadonlyMap<number, number> = new Map([[109, 6], [48, 4]]);
 /** The lead the S bodies' sound clock was calibrated on (the generic move-body clock, AGE_TO_SOUND_ROWS = 7). */
 const LEAD4_SOUND_CLOCK_LEAD = 7;
 /** Per-body clock leads (ROM minus ours on the 7 clock: Smokescreen / Metal Sound -2 (Scary Face: kse1, 184 = the 7 clock after its SE-wait window, labs exact), Sweet Scent -3 in the aud242 fixtures; Double Team, 98 of 190 T2 SEs, +2 before the shift is -4): their SEs sit closer to the print release. pmc1: Smokescreen 5 -> 7 (lab aud242k-smokescreen-player-on SE 135 / 159 +2 -> 0, T2 3 windows +2). */
@@ -2548,6 +2557,7 @@ export function lse2BodySoundAgeShift(moveId: number, bodyLeadFrames: number | u
   const calibrated = LSE2_SOUND_CLOCK_LEADS.get(moveId);
   if (calibrated !== undefined) return bodyLeadFrames! - calibrated;
   if (C_LEAD_WINDOW_ADJUST.has(moveId)) return bodyLeadFrames! - (C_LEAD_SOUND_CLOCK_LEADS.get(moveId) ?? LEAD4_SOUND_CLOCK_LEAD);
+  if (MHS1_SHAPE_A_MOVE_IDS.has(moveId) && bodyLeadFrames! >= PLAIN_BODY_SOUND_LEAD_MIN_L) return bodyLeadFrames! - MHS1_BODY_SOUND_CLOCK_LEAD;
   return LEAD4_S_LEAD_MOVE_IDS.has(moveId) ? bodyLeadFrames! + precedingRows - (LEAD4_SOUND_CLOCK_LEADS.get(moveId) ?? LEAD4_SOUND_CLOCK_LEAD) : 0;
 }
 /**
@@ -2602,7 +2612,8 @@ export function bodyLse2RuleApplies(moveId: number): boolean {
 /** cfa1: the per-hit lead of hits 2+ of a shape-A loop move (see MULTI_HIT_LOOP_LEAD_TRIM_ROWS); 0 for hit 1 (the used-print lead below) and every other move. */
 function multiHitLoopHitLead(events: readonly BattleKernelSemanticEvent[], index: number, moveId: number): number {
   const label = events[index]!.provenance?.sourceLabel;
-  const trim = label === undefined ? undefined : MULTI_HIT_LOOP_LEAD_TRIM_ROWS.get(label);
+  const baseTrim = label === undefined ? undefined : MULTI_HIT_LOOP_LEAD_TRIM_ROWS.get(label);
+  const trim = baseTrim !== undefined && label === "BattleScript_DoMultiHit" && MULTI_HIT_LOOP_LEAD_TRIM_7_MOVE_IDS.has(moveId) ? 7 : baseTrim;
   if (trim === undefined || !MHS1_SHAPE_A_MOVE_IDS.has(moveId)) return 0;
   for (let i = index - 1; i >= 0; i -= 1) {
     const payload = events[i]!.payload;
@@ -2870,6 +2881,8 @@ function instantHpDropTiming(events: readonly BattleKernelSemanticEvent[], healt
  * rows (2 rows): 3 rows, 45 + 1 + 1 = G+97..G+143 then the glyph at G+144, both scenes, both sides (4 / 4 dense windows, 0 px).
  * Only the Substitute script is measured, so the rule requires its `attackanimation; waitanimation; healthbarupdate` lead-in (the
  * other `datahpupdate; printfromtable`, Leech Seed's turn-end drain, has no ROM window here).
+ * stm1 / ssl1: BattleScript_EffectBellyDrum's `attackanimation; waitanimation; healthbarupdate; datahpupdate; printstring` is the same controller flow with a printstring follower
+ * (lab stm1-bd-rockslide-on, both scenes: the print was 3 rows early, 231 vs 228).
  */
 const HP_PRINT_TAIL_FRAMES = 3;
 /** hpf5 S1 (hpf4m, both scenes): E 27 -> next exec +29, but cost bars E >= 28 are ROM-exact at tail 3 (sub183 dense windows, E 44 -> +47), so the tail stays 3 and only the 28 floor goes (a short bar was E 27 -> 31, now 30 = ROM + 1). */
@@ -2882,7 +2895,7 @@ function hpPrintTailTiming(event: BattleKernelSemanticEvent, events?: readonly B
     if (at(-2) === "B_SCR_OP_ORWORD" && at(-3) === "B_SCR_OP_WAITANIMATION" && at(-4) === "B_SCR_OP_ATTACKANIMATION" && at(1) === "B_SCR_OP_COPYARRAY") return PAIN_SPLIT_ATTACKER_HP_TIMING;
     if (at(-2) === "B_SCR_OP_COPYARRAY" && at(-3) === "B_SCR_OP_DATAHPUPDATE" && at(1) === "B_SCR_OP_PRINTSTRING") return PAIN_SPLIT_TARGET_HP_TIMING;
   }
-  return at(0) === "B_SCR_OP_DATAHPUPDATE" && at(1) === "B_SCR_OP_PRINTFROMTABLE" && at(-1) === "B_SCR_OP_HEALTHBARUPDATE"
+  return at(0) === "B_SCR_OP_DATAHPUPDATE" && (at(1) === "B_SCR_OP_PRINTFROMTABLE" || at(1) === "B_SCR_OP_PRINTSTRING") && at(-1) === "B_SCR_OP_HEALTHBARUPDATE"
     && at(-2) === "B_SCR_OP_WAITANIMATION" && at(-3) === "B_SCR_OP_ATTACKANIMATION"
     ? SUBSTITUTE_COST_HP_TIMING
     : at(0) === "B_SCR_OP_DATAHPUPDATE" && at(-1) === "B_SCR_OP_HEALTHBARUPDATE" && at(-2) === "B_SCR_OP_ORWORD"
@@ -7775,6 +7788,7 @@ export function usedMoveBodySoundLeadOf(state: BattleResolutionPresentationState
   const lead = command.timing.bodyLeadFrames ?? 0;
   // b4l: a c-lead body presents its lead for real, so the sound clock follows it (`lse2BodySoundAgeShift`, L - 7) and the 7 - L tick lead is dropped.
   if (C_LEAD_WINDOW_ADJUST.has(command.animation.moveId)) return 0;
+  if (lead >= PLAIN_BODY_SOUND_LEAD_MIN_L && MHS1_SHAPE_A_MOVE_IDS.has(command.animation.moveId)) return MHS1_BODY_SOUND_TICK_LEAD;
   if (lead < PLAIN_BODY_SOUND_LEAD_MIN_L || lse2BodySoundAgeShift(command.animation.moveId, lead) !== 0) return base;
   return MOVE_BODY_SOUND_CLOCK_LEAD - lead;
 }

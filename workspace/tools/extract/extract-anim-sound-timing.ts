@@ -1662,6 +1662,7 @@ function walk(bodyLabel: string, turn: number, attackerSide: number, pic: PicCon
       // AnimTask_MetallicShine decompresses its tilemap and image and loads a palette in the creating step (battle_anim_dark.c:866-870): a measured
       // VBlank overrun (METALLIC_SHINE_LOAD_LAG; Metal Claw and Steel Wing, aud242d), like BG_LOAD_LAG.
       if ((op === "metallic_shine" || (op === "createvisualtask" && args[0] === "AnimTask_MetallicShine")) && frame !== null) lags.push({ after: frame, frames: METALLIC_SHINE_LOAD_LAG });
+      if (op === "createsprite" && args[0] === "gThunderboltOrbSpriteTemplate" && frame !== null) lags.push({ after: frame - 0.5, frames: 1 });
       if (op === "createvisualtask" && args[0] === "AnimTask_ScaryFace" && frame !== null) {
         lags.push({ after: frame - 0.5, frames: SCARY_FACE_SAME_STEP_LAG });
         lags.push({ after: frame, frames: SCARY_FACE_LOAD_LAG - SCARY_FACE_SAME_STEP_LAG });

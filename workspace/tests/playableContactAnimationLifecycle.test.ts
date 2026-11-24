@@ -8,8 +8,10 @@ describe("ordinary contact animation command lifecycle", () => {
     const hits = replay.animations.filter(a => a.moveId === 41);
     expect(hits.map(a => a.opponent)).toEqual(["CACNEA", "CACNEA", "PONYTA", "PONYTA"]);
     // hit1: each hit's command also holds Cmd_end's SE_M_HORN_ATTACK wait (17 rows; ROM: 63 rows from the activation to the fall, every hit).
-    const rows = 37 + 10 + hit1SeWaitRows(41) + iu120Extra(41);
-    expect(hits.every(a => a.ages.length === rows && a.ages[0] === 0 && a.ages.at(-1) === rows - 1)).toBe(true);
+    // mhl1 (mhm1): Twineedle is a shape-A multi-hit body: hit 1 presents the used-print lead 15 + the hit tail (hpd4BodyRows), hit 2 the loop's lead 12 (labs mhs1-twineedle-pfirst-on: bodyLeadFrames 15 / 12).
+    const rows = [37 + 10 + hit1SeWaitRows(41) + iu120Extra(41) + hpd4BodyRows(41), 37 + 10 + hit1SeWaitRows(41) + iu120Extra(41) + hpd4BodyRows(41, 12)];
+    expect(rows).toEqual([85, 82]);
+    expect(hits.every((a, i) => a.ages.length === rows[i % 2]! && a.ages[0] === 0 && a.ages.at(-1) === rows[i % 2]! - 1)).toBe(true);
     expect(replay.requests.filter(r => r.moveId === 41).map(r => [r.turn, r.multihit])).toEqual([
       [0, 2], [1, 1], [0, 2], [1, 1],
     ]);

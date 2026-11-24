@@ -159,7 +159,7 @@ describe("Present (aud262)", () => {
     const rows = rom.events.filter((e) => e.noop !== true && e.kind === "se" && [167, 125, 228, 179].includes(e.id as number));
     expect(rows.map((e) => e.id)).toEqual([167, 125, 125, 125, 228, 179]);
     expect(rows.map((e) => e.frame - rows[0]!.frame)).toEqual([0, 16, 32, 54, 117, 194]);
-    expect(expectConstantOffset(rom, [167, 125, 228, 179], 6, "first")).toBe(2);
+    expect(expectConstantOffset(rom, [167, 125, 228, 179], 6, "first")).toBe(-4); // ssl1 (stm1): was 2. The staging foe's hp runs BattleScript_EffectBellyDrum's attackanimation..datahpupdate..printstring, whose ROM rows (labs stm1-bd-rockslide-on: hp 175 = animation end 172 + 3, print = bar end + 3) now add 3 + 3 rows before the Present SEs; the ROM fixture has no Belly Drum, so this is a staging artifact moving 6 rows
   });
 });
 
