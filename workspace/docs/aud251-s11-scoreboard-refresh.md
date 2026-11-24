@@ -4597,3 +4597,46 @@ After 1 + 2 + 3 + S-lead + trail, s7295 d4: SE 13 0, SE 200 / 189 -1, the d4 row
 ### 4. State and verification
 
 No `src/` or `tests/` change (`git diff --stat HEAD -- src tests` empty after every scratch run: the scratch edits were reverted with `git checkout -- <files>`); PROGRESS / ISSUES / ROADMAP / PAPERCUTS / ANIMATION_PROGRESS / ANIMATION_COVERAGE and the supervisor / program ledgers untouched; `npm test` / typecheck / build not run (docs / labs / tools step, ANIMATION_VERIFICATION.md: diff and ledger checks). Code under test: engine c22d60e57 (last `src` commit, HEAD parent 89cc84e32; the scratch runs were that tree plus the two patches). A live adapter is not whole-playable arbitrary-history exactness: the numbers are Scene ON labs and T2 rows, not landed.
+
+## lpm1 (2026-11-24): Luster Purge / Signal Beam hp start, Thunderbolt SE -1, Scary Face stat SE
+
+Scene ON, measurement only (docs / labs / tools). Base: HEAD 413954b05 (tree acc83dc92), engine frozen at c22d60e57. Every number below was measured in a scratch copy of that tree with the edits applied (`.integration/scratch/lpm1tree`, git-ignored; evidence `.integration/evidence/lpm1/`, `.integration/evidence/ssm1/all-lpm1base` / `all-lpm1fix`). The two landings (items 1 and 2) are captured as one unified diff, `tools/integration/lpm1/lpm1-landing.patch` (`git apply --check` passes on this tree); item 3 has no rule. Labs: the existing `hsw1-lusterpurge-pfirst-on`, `hsw1-signalbeam-pfirst-on`, `aud262-lusterpurge-{player,opponent}-on`, `mechanic-luster-purge-*`, `mechanic-signal-beam-*`, `aud242b-thunderbolt-player-on`, `mechanic-thunderbolt-*`, `aud242k-scaryface-player-on`, `mechanic-scary-face-*` (no new lab json was needed). ROM rows: `tools/integration/ssm1Probe.py` (per-frame script trace) and `tools/integration/t2k4/probe.sh` windows.
+
+### 1. Luster Purge (295) / Signal Beam (324): hp start -1 -> LSE4_WINDOW_SHORT_ROWS
+
+- ROM: Signal Beam body A = rows 66..211 (145 rows), hit SE 213, healthbarupdate hp row 249. Luster Purge A = 67..399 (332 rows), hit SE 401.
+- Engine (before): hit SE 212 / 400, hp 248: the shape-A window (lead 5, gap 4, tail `6 - pre - post`) is one row short of A + 1 for these two bodies, the same shortfall `LSE4_WINDOW_SHORT_ROWS` already carries for 71 (2) and 13 (1).
+- **Landing recipe (1 edit):** `src/engine/battleResolutionPresentation.ts:2490`: `new Map([[71, 2], [13, 1]])` -> `new Map([[71, 2], [13, 1], [295, 1], [324, 1]])`; update the comment at ~2478 ("keep -1") to say they now carry 1 short row. The mechanism is the existing one: `liveMoveHitTailRows` adds `windowShort` to the tail (`battleResolutionPresentationRender.ts:1687-1702`) and `cmdEndSeWaitRuleApplies` (`:1604`) already excludes ids in the map.
+- Result: hit SE 213 / 401 and hp 249 on the ROM row in the Luster Purge / Signal Beam labs, both seats.
+- Pin that moves: `tests/apx221PresentationGateApproximate.test.ts:33` (Signal Beam 324 window 156 -> 157); check the Luster Purge pins around `tests/aud262MoveAnimSounds.test.ts` and any hsw1 window pin for 295 (window +1).
+
+### 2. Thunderbolt (85): SE 215 and both SE 119 -1 -> a wall-clock lag, not a script row
+
+- ROM (labs `aud242b-thunderbolt-player-on`, `mechanic-thunderbolt-*`): the third SE 118 at row 112, blend #1 123, blend #2 136, `delay 20` at 149, then `+0x143` at 171 and `+0x149` / SE 215 at 172. The engine had SE 215 at 171. SE 119 ROM 239 / 258 (player lab), 252 / 271 and 256 / 275 (mechanic labs), each -1 in the engine. The span of the ROM script from SE 118 #3 to SE 215 is 11 + 13 + 13 + 23 = 60 rows against 59 in the engine.
+- Why pmc1 found no script row: there is none. The 9-sprite `createsprite gThunderboltOrbSpriteTemplate` burst overruns one VBlank on hardware (same class as METALLIC_SHINE_LOAD_LAG / the Scary Face lags in the extractor's wall-clock `lags` list), so every later row of the sound table is one wall-clock frame late.
+- **Landing recipe (extractor + regenerated JSON):** `tools/extract/extract-anim-sound-timing.ts` ~line 1664, in the `if (isCreation(op))` block after the MetallicShine lag line:
+  `if (op === "createsprite" && args[0] === "gThunderboltOrbSpriteTemplate" && frame !== null) lags.push({ after: frame - 0.5, frames: 1 });`
+  then regenerate `src/data/gen/anim-sound-timing.json` (3 Thunderbolt SE ops shift +1: SE 215 and the two SE 119; nothing else in the file changes).
+- Result: Thunderbolt labs exact on SE 215 / 119 (window already exact).
+
+### 3. Scary Face SE 245 / the stats-change command: no rule
+
+- Scary Face's own SE 245 is already exact in the three labs (`aud242k-scaryface-player-on`, `mechanic-scary-face-*`): the kse1 "Left" is stale. The t2k9 rank-9 rows (13 ON rows, s5569 d7 -11) are not Scary Face's own term.
+- The stat SE rows that are off in T2 belong to Intimidate / secondary-effect stat drops (Rock Tomb) and the post-Smokescreen drop. ROM: SE 245 = the `playanimation` exec rise + 4 (`BattleScript_StatDown+0x7`, `BattleScript_IntimidateActivatesLoop+0x3d`). Engine: `statsChangeSourceAge` (`battleResolutionPresentationRender.ts:1849`) puts the SE at command age `STATS_CHANGE_SE_AGE` 7 with per-path shifts; the residual splits in two classes:
+  - the command starts on the ROM exec row and the SE is +1 (s2741 d7: cmd 412 / ROM 416 / ENG 417; s4686 d1: cmd 295 / ROM 299 / ENG 300; s165 Rock Tomb: ROM 695 / ENG 696);
+  - the command itself starts late versus the exec (s1914 d11: ROM exec 870, SE 874; the engine command starts at 874 so the SE is 879, +5; s8108 d30: ENG 1533 vs ROM 1527, +6) or the SE is early (s499 d5 after Smokescreen: ENG 589 vs ROM 590, -1).
+- Scratch test of the obvious rule (+1 age shift for a stat SE whose previous command is `stat` and not after a move-animation body): T2 ON exact 3623 -> 3621, mass 6158 -> 6159, stat-change SE exact 59 -> 57. Not a rule; reverted. The +5 / +6 rows are a command-start phase (Intimidate after a faint send-in), not an SE age.
+
+### Combined measure and expected mass
+
+Items 1 + 2 together in the scratch tree, T2 ON (25 seeds, `tools/integration/ssm1/all.sh`): exact 3598 -> 3623, offset 2279 -> 2254, mass 6186 -> 6158 (-28), missing / extra 0 / 0. OFF not re-run (neither edit touches a Scene OFF row: no move-animation SE there). Per-edit attribution (Thunderbolt only vs Luster / Signal only) was not run.
+
+### What not to chase
+
+- A Thunderbolt script term: the rows are exact up to the orb burst; the +1 is a VBlank lag.
+- A global stats-change SE age shift (see the item 3 test: -2 exact), and the Scary Face SE itself.
+- The Intimidate +5 / +6 rows via the SE age: they are the command's start versus the exec row (post-faint send-in entry), a phase rule for the stats-change command.
+
+### State and verification
+
+No `src/` or `tests/` change (`git diff --stat HEAD -- src tests` empty; scratch edits live in the git-ignored scratch tree only); PROGRESS / ISSUES / ROADMAP / PAPERCUTS / ANIMATION_PROGRESS / ANIMATION_COVERAGE and supervisor ledgers untouched; `npm test` / typecheck / build not run (docs / tools step, ANIMATION_VERIFICATION.md: diff and ledger checks). Code under test: tree acc83dc92 (HEAD 413954b05, last `src` commit c22d60e57) plus the landing patch. Not landed: the numbers are Scene ON labs and T2 rows.
