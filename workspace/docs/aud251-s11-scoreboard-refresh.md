@@ -4384,3 +4384,115 @@ the lab stage's RNG phase for the roll, not a scene rule (T2 and the census read
 - Do not chase the OFF side here (exact) or the ROM's +-1 lab phase (a D4 faithful-timing question, `docs/faithful-timing.md`).
 
 Not applied: no `src/` or `tests/` change; PROGRESS / ISSUES / ROADMAP / PAPERCUTS untouched; `npm test` / `typecheck` / `build` not run (the step forbids them; only `tools/integration/cfm1Chain.py`, three lab files and this doc). The T2 effect of the split constant is predicted, not measured.
+## lrm1 (2026-11-24): the loss-recall SE 15 -4 settled with a lab pair (measurement only; labs + doc, no `src/` / `tests/` change)
+
+Engine frozen at `c22d60e57`. New labs (the loss lab's party flow, but the player's last Pokémon is KO'd by the **foe's move** instead of its own Explosion): `tools/battle-lab/lrm1-loss-targetfaint-off.json` (Scene OFF) and `-on.json` (Scene ON, idle gaps doubled as `aud241c-loss-expl-on`). Staging: `loss-terminal-explosion-dusclops-off.json` with the player's three mons = ONIX / SHUCKLE / ONIX Lv3 (Splash x4) and the foe's three DUSCLOPS (Shadow Ball x4, the Factory AI has one legal move), seed 305419896, fixed-frame trace (A intro x3; per turn A, A, wait, A on the "fainted!" box, DOWN x1 / x2 to the next mon in the forced party menu, A, A); `battleOutcome` 2 at the end in both scenes. (The third mon is ONIX, not the Lv3 MURKROW first tried: Shadow Ball is resisted by a Dark type and the engine's not-very-effective chain is a different window.) Runs: `labCompare.sh --rows lrm1-loss-targetfaint-off lrm1-loss-targetfaint-on` (47 s, both scenes; evidence `/tmp`, not kept), `labCompare.sh --rows aud241c-loss-expl-on loss-terminal-explosion-dusclops-off` for the Explosion baseline (`aud241c-loss-off.json`'s engine side derails in labCompare, use the DUSCLOPS file), and `probe.sh 1028 off 16 -40:1000` (T2 end-of-turn faint, `T2K4_DIR` = a worktree dir whose `t2` links to `t2k9/t2-off`).
+
+### Answer: the lab and T2 do not disagree about staging; they are three different script paths
+
+ROM, frames from the A on the last "fainted!" box (SE_SELECT 5) to `SE_BALL_OPEN` 15, and the rows in between (both scenes read the same offsets):
+
+| faint path (lab / window) | A | resume row (`FaintX+0xc ex0`) | GiveExp | `LocalBattleLost` | D (`...WinText+0x11 ex2`) | SE 15 | A -> SE 15 |
+|---|---|---|---|---|---|---|---|
+| attacker faint, Explosion (`loss-terminal-explosion-dusclops-off` OFF) | 2929 | 2931 (+2) | 2934 (+5) | 2947 (+18) | 2951 (+22) | 2953 | **24** |
+| same, ON (`aud241c-loss-expl-on`) | 5729 | 5731 | 5734 (+5) | 5747 | 5751 | 5753 | **24** |
+| **target faint, foe's move** (`lrm1-...-off`) | 3157 | 3159 (+2); `MoveEnd+0` 3160 | 3166 (**+9**) | 3179 (+22) | 3183 (+26) | 3185 | **28** |
+| same, ON (`lrm1-...-on`) | 5957 | 5959; `MoveEnd+0` 5960 | 5966 (+9) | 5979 | 5983 | 5985 | **28** |
+| **end-of-turn faint, burn** (T2 s1028 OFF d16, ROM probe) | 949 | 951 (+2); `DoTurnDmg+0x14` 952, `DoTurnDmgEnd+0` 953 | 956 (**+7**) | 971 | 973 | 975 | **26** |
+| T2 s4686 OFF d6 (target faint) | 388 | 390 | (`GiveExp` 397, +9) | | | 416 | **28** |
+
+The law, in all five chains: **`SE_BALL_OPEN` = `BattleScript_GiveExp+0` + 19** (D = GiveExp + 17, SE = D + 2), and GiveExp comes **A + 5** after the Explosion's `end` (`BattleScript_ExplosionMissed+0x1a`, `battle_scripts_1.s:409-416`), **A + 7** after the end-of-turn `DoTurnDmgEnd`, **A + 9** after `BattleScript_MoveEnd` (the `moveendall` rows, 6 frames to GiveExp against 2). The lrc1 / aud241c / aud252 lab is the Explosion path (A + 24); every T2 `switch-out` window of the -4 / -3 / -5 family (ON 16, OFF 17 rows) is a target faint (A + 28: a SE 13 / 14 / 12 hit and a `faint` right before) except s1028 d16, the end-of-turn path. Everything after D is identical in all paths (slide dispatch D + 35, win-text row D + 85 / 86), so the **whole loss tail** moves with D, not only the SE.
+
+Engine (`c22d60e57`, same labs): the `switch-out` command starts at A + 2 on a target faint (the two player `sprite-visibility` receipts sit between the A and the command, ROM resume row +2: right) and at A + 0 on an attacker / end-of-turn faint (the receipts come before the `faint` command); the SE is `lead 20 + 2` = 22 after the command start. So engine A -> SE 15 = **24 (target faint)** vs ROM 28 = **-4**, **22 (end-of-turn, s1028 OFF: cmd 949, SE 971)** vs ROM 26 = **-4**, **22 (Explosion)** vs ROM 24 = **-2** (labCompare reads -2 on the Explosion labs now; the pinned aud241c / aud252 stage reads 0 by its own cmd start, so that -2 is a labCompare convention to keep in mind, not a T2 row). The target-faint labs read **SE 15 -4 and the lose-text first glyph -4** in both scenes (OFF 3185 vs 3181, text 3269 vs 3265; ON 5985 vs 5981, 6069 vs 6065): the lab pair reproduces T2's -4 exactly. The engine's `recall` receipt (D + 32 vs the ROM's anim end D + 30) and `trainer-slide` (D + 45 vs the dispatch row D + 35) keep the constants lrc1 measured relative to D.
+
+### Landing recipe (supersedes 3.A's "keep the picture / slide at D")
+
+3.A proposed raising only the SE by 4 and shrinking `LOSS_RECALL_TRAINER_SLIDE_GAP_FRAMES` 13 by 4 to keep the slide where it is. **That is wrong**: the ROM's D, the recall picture, the slide and the lose text are all 4 frames later on a target faint (labs above: text -4 as well, slide offsets constant relative to D). Move D itself:
+
+1. `src/engine/battleResolutionPresentation.ts:3448` `LOSS_RECALL_LEAD_FRAMES` 20 -> **24** for the target-faint and end-of-turn paths. `LOSS_RECALL_SWITCH_OUT` (3452-3455) takes `minimumFrames` = lead + `RETURN_TO_BALL_SPAN_FRAMES` (32) and `leadFrames` from it, so `min` becomes 56 and the SE (`battleStartSounds.ts` `emitMidBattleSwitchSounds`, recall elapsed 2 + lead) follows; **leave `LOSS_RECALL_TRAINER_SLIDE_GAP_FRAMES` 13 and `LOSS_TRAINER_SLIDE_PRINT_GAP_FRAMES` 3 alone**. The projection is at 6933-6938 (`lossRecall`, `commands.push(... LOSS_RECALL_SWITCH_OUT)`); update the doc comment 3440-3442 ("command start + 22 = lead + 2" is the Explosion path only) and `battleEndSounds.ts:44` ("lead + 2 = 22").
+2. Explosion / Self-Destruct (the `FaintAttacker` then `ExplosionMissed` `end` path, ROM D = GiveExp + 17 at A + 22, engine command at A + 0) needs **lead 22**, not 24 (a flat 24 turns the Explosion labs from -2 to +2); the T2 mass is 0 there (no `BattleScript_EffectExplosion` window), so either give the loss `switch-out` a path-dependent lead (key: the faint event's script, `FaintAttacker` reached from `BattleScript_EffectExplosion` -> 22, else 24) or keep one lead 24 and re-pin the two aud241c labs; the first is smaller. Unmeasured paths (a recoil KO `DoRecoil`, Destiny Bond, Perish Song / Leech Seed / poison / weather end-of-turn faint): the end-of-turn law (A + 7 to GiveExp) came from one burn window (s1028), the others share `DoTurnDmgEnd`'s neighbours but were not probed.
+3. Keep out of the change: the item-effect windows (s1914 d13, s2230 d23: `switch-out` after the held-item `general-animation` chain, aud252; ON -2 / -1, OFF +4 / +3 now, they would become +2 / +3 and +8 / +7: that chain has its own lead), the ON -21 windows (s3738 d62, s7295 d8: the faint chain is -11 / -9 before it, carried), OFF s6568 d104 -20 (the harness's 17-frame press pulse). Condition for the new lead: the `switch-out` follows the faint box's `message` directly (no `general-animation` between).
+4. Expected T2 (`attr-{on,off}.json`, `switch-out` SE 15 rows): ON 12 x -4 + 2 x -5 + 2 x -3 = 64 -> 0 + 2 x 1 + 2 x 1 = **4 (-60)**; OFF 14 x -4 + 1 x -5 + 2 x -3 = 67 -> 3 (**-64**); no row is behind it in those windows (the T2 drive stops at `gBattleOutcome`). Total **-124** (t2k9 said -125 .. -135, the same size).
+5. Pins that must be checked by name when it lands: `tests/lrc1LossRecall.test.ts` (A + 24 and the dispatch B - 2 relative to the A, everything B-relative stays), `tests/aud252LossBallOpen.test.ts` (ON 1914 / 2230 item-effect, must not move), the aud241c loss windows (Explosion, lead 22), `tests/randomRoundSoak.test.ts` (frame pins move by +4 per lost battle, as lrc1's +67 did), `tests/factoryVoluntarySwitchSeam.test.ts`. Verification: `labCompare.sh --rows lrm1-loss-targetfaint-off lrm1-loss-targetfaint-on` must read SE 15 and the lose-text print `+0` (they read -4 / -4 now), and `loss-terminal-explosion-dusclops-off` / `aud241c-loss-expl-on` stay at their current -2 (22) or go to 0 with the Explosion lead; then one T2 run.
+
+### Lab notes
+
+- The labs' last turn has an engine-only 64-frame `message` between `hp` and `faint` (both scenes: OFF 2927, ON 5449), so the engine's SE 16 / the faint print read +76 .. +79 in the lab's final turn, and the first two KOs are exact (OFF +0, ON -2 / -3); the ROM has no such print. Not understood (a crit message the ROM did not roll, or a last-mon rule); it does not touch the SE 15 anchor, which is A-relative, and T2's foe KO chains (s4686, s3158) are exact to the row, so it is lab-specific. Worth one look if the labs are used for the faint chain.
+- Not built: an end-of-turn lab pair. A Lv1 mon needs ~11 end-of-turn damage ticks per KO (burn / sandstorm / leech seed 1/8) or Toxic's 5 turns per mon; the T2 s1028 probe (OFF) gives the ROM chain instead. An ON end-of-turn probe (s1028 ON d16 has the same -4) is the first thing to run after landing.
+- Not applied: no `src/` / `tests/` change; PROGRESS / ISSUES / ROADMAP / PAPERCUTS untouched; `npm test` / `typecheck` / `build` not run (the step forbids them; two lab JSON files and this section only).
+## tnm1 (2026-11-24): the Toxic next-action gap (C) and the Rest -> Chesto chain (B) as ready recipes
+
+Measurement only (docs / labs): no `src/` or `tests/` change, engine frozen at c22d60e57 (ENGINE_BUILD `eb-98540cad897c0482`); the sources are t2k9 section 3.C / 3.B above. Tools: `tools/integration/labCompare.sh --scene on|off` (ROM `hcr3mProbe.py` + `soundEventProbe.py` against `b4mEngine.ts`), evidence under `.integration/evidence/tnm1/` (git-ignored: `toxic-base`, `ctl`, `ctloff`, `prz`, `offrows`, `chesto-base`, `chesto-off`, `t2p`). Print convention: ROM = first glyph (tp rise + 1), ENG = the `message` command's start, as labCompare prints it. Mass = sum of |ENG - ROM|.
+
+### 1. (C) Toxic next action: the cause is a status-infliction term, not a Toxic one
+
+**Lab.** `gsp3-toxic-{player,foe}-on` already is the lab (Toxic, then Seismic Toss, then the poison tick, 3 turns); no new Toxic lab file. labCompare `--scene on` (before): player SUMMARY exact 28 / offset 22, mass 46 (PRINTS exact 9 / offset 3, mass 10); foe exact 25 / offset 17, mass 44. It reproduces T2 s165 d14 exactly: the status animation chain (SE 148 x 6, `MoveEffectToxic+0x2`) is exact row by row, then everything after it is early.
+
+**ROM rows against engine commands (player ON, Toxic turn).**
+
+| row | ROM | ENG | ENG - ROM | engine command |
+| --- | --- | --- | --- | --- |
+| last SE 148 (`BattleScript_MoveEffectToxic+0x2`) | 366 | 366 | 0 | `status-animation PSN` @296 |
+| "was badly poisoned!" print (`MoveEffectToxic+0x5`) | 369 | 367 | **-2** | `message` @367 |
+| `updatestatusicon` (`UpdateEffectStatusIconRet+0x2`) | 463 | 460 | **-3** | `status-icon` @460 |
+| next print (`EffectLevelDamage+0x9`, Seismic Toss) | 482 | 478 | **-4** | `message` @478 |
+| everything after (hit SEs 238 / 214 / 131 / 13, tick print) | | | -4 carried | |
+
+The script is `statusanimation; printstring; waitmessage B_WAIT_TIME_LONG; goto UpdateEffectStatusIconRet` (`data/battle_scripts_1.s` 3916, 3873), and the gap is three additive terms, each measured on its own row:
+
+| term | what | scenes | rows | source row |
+| --- | --- | --- | --- | --- |
+| (c) | the status animation's controller rows before the print: the `status-animation` minimum is 2 short when the next instruction is the move-inflicted status print (print -2 -> 0) | ON only | +2 | print 369 vs 367 (OFF print is exact: 98 / 98) |
+| (a) | the print's hold: 64 -> 65 for the PSN / TOX / BRN / PRZ message that is followed by `goto BattleScript_UpdateEffectStatusIconRet` | both | +1 | icon -3 -> -1 -> 0 (ON), icon ENG 191 vs ROM 192 (OFF) |
+| (b) | `status-icon` -> the next used print | both | +1 | next print -4 -> 0 (ON), 209 vs 211 (OFF, after (a)) |
+
+ON total +4, OFF total +2 (OFF has no animation rows). Sleep Powder (ON lab) has a different shape (ENG message 360 vs print row 361, icon ENG 447 vs ROM 449): not claimed here; land (a) for PSN / TOX / BRN / PRZ only and re-measure SLP after (c) / (b) with `gsp3-sleeppowder-player-on`.
+
+**Same term in the other infliction scripts (controls, ON).** Will-O-Wisp (`gsp3-willowisp-player-on`): A1 321, ENG message 322 vs print 323, icon ENG 409 vs ROM 412, next 425 vs 429 = the same -1 / -3 / -4 shape. Thunder Wave / Stun Spore (PRZ, `b4m-thunderwave-player-on`, `b4m-stunspore-player-on`): A1 229, ENG message 230, icon ENG 344 vs ROM 347 = the same -3 icon. Sleep Powder: as above. OFF (`gsp3-toxic-player-off`, `gsp3-willowisp-player-off`): print exact, icon -1, next -2.
+
+**Exact landing recipe (engine command, constant, file, lines).**
+
+1. (c) `status-animation` (`battleResolutionPresentation.ts` 6864-6874, `minimumFrames: seGate + STATUS_ANIMATION_ADDED_ROWS[animation] + preMoveConfusionToUsedPrintRows(events, index)`): add `MOVE_INFLICTED_STATUS_ANIMATION_EXTRA_ROWS = 2` when the next receipt is the status print of a `BattleScript_MoveEffect{Toxic,Burn,Paralysis,Sleep}` script (the print's `launch`/source label, as `messageTimingFromSourceProvenance` 1400-1420 keys it). Do NOT change `STATUS_ANIMATION_ADDED_ROWS` (166-168: the pre-move / confusion / tick paths are exact at 71 / 39 / 97 / 100 and share it).
+2. (a) hold: in `messageTimingFromSourceProvenance` (1400-1420), the move-inflicted branch (`MOVE_INFLICTED_STATUS_ANIMATION_TIMING` 1378 ON, `MOVE_INFLICTED_STATUS_SCENE_OFF_TIMING` 1374 OFF) adds 1 to `holdFrames` for PSN / TOX / BRN / PRZ only, i.e. when `instructions[programCounter + 2]` is `GOTO BattleScript_UpdateEffectStatusIconRet`. Not SLP (the sleep print is followed by the sleep icon script; hold exact).
+3. (b) `status-icon` (6883-6891, `STATUS_ICON_TIMING` 3330 = 1 frame): the icon that follows a move-inflicted status print gets `minimumFrames: 2` (both scenes). Keep `wakeUpIconTiming` first; leave the tick's `END_TURN_STATUS_DAMAGE_LEAD_ROWS` (1370) untouched (the gsp3 poison / burn tick lead is carried: after the fix the tick print is exact and its SE 148 sits +1, which is the known tick term).
+4. Guards that must stay exact: `gsp3-toxic-*-off`, `gsp3-willowisp-*-off`, `gsp3-sleeppowder-*-on`, `b4m-thunderwave-*-on`, `b4m-stunspore-*-on`, the sa125 / sag130 pre-move confusion rows (the `preMoveConfusionToUsedPrintRows` term, cfm1's lane), and `tests/` rows that pin `MOVE_INFLICTED_STATUS_*` (not edited here).
+
+**Expected mass.** Labs (estimate, not landed): ON player 46 -> about 10 (the offset rows after the print move by +2 / +3 / +4; the tick SE +1 rows and the carried tick term remain), foe 44 -> about 10. T2: the Toxic windows (s165 d14 and its kin, -110 .. -150 each ON) are about -148 in total; the same term on Paralysis windows is about -92 more if the lab shape holds (inferred from `b4m-*` labs, not T2-probed). OFF about -6 total. The T2 ON next action at s165 d14: ENG status-icon 438 vs ROM `UpdateEffectStatusIconRet+0x2` 442 (-4), ENG message 455 vs `EffectConfuse+0x2` 458 (-3): the same terms.
+
+### 2. (B) Rest -> Chesto berry cure chain +6
+
+**Labs (new, committed).** `tools/battle-lab/tnm1-rest-chesto-player-on.json` and `tools/battle-lab/tnm1-rest-chesto-opponent-on.json`: copies of `bdt1-rest-player-on` with `overrides.parties.<side>[0].item = 134` (Chesto Berry); Lv50 Rest x4 against a Lv12 Seismic Toss mon, trace `[A2, 18, A2, 1000, A2, 18, A2, 800]` (Rest on a damaged mon, Chesto cures the Rest sleep). labCompare `--scene on` (before): both labs mass 36 (one row 0 -> the berry segment).
+
+**ROM rows against engine commands (player ON).**
+
+| row | ROM | ENG | ENG - ROM | engine command |
+| --- | --- | --- | --- | --- |
+| `MoveEnd+0x0` / sprite-visibility end | 1416 | 1416 | 0 | `sprite-visibility` @1415 -> `status` @1416 (min 32) |
+| `BerryCureSlpRet+0x0` (status receipt) / `+0x7` = A0 (animation starts) | 1419 / 1420 | `general-animation HELD_ITEM_EFFECT` @1448 (min 192) | | |
+| SE 152 first / 228 / 102 (`+0x7`) | 1428 / 1524 / 1596 | 1434 / 1530 / 1602 | +6 | script frame 0 = command start + (min - 214) = 1426 |
+| berry print (`BerryCureSlpRet+0xa`) | 1634 | 1640 | **+6** | `message` @1640 |
+| `+0xf` (A1 1631 ... `updatestatusicon`) / `MoveEnd+0x6` | 1744 / 1747 | `status-icon` @1749 | | |
+| next print (`EffectLevelDamage+0x9`) | 1756 | 1750 | **-6** | `message` @1750 (then SE 238 -6 ...) |
+
+The berry run is short by +6 inside the segment and its tail is 12 short, so the tail turns +6 into -6: the chain +6 of T2 s319 d24 (ENG SE 152 694 vs ROM 688; message 900 vs ROM 893 / 894; status-icon 1015 vs 1010) and the -6 / -3 following windows (s5063 d1, s8612 d11).
+
+**Cause and recipe (two coupled parts; land both or neither).**
+
+- Part 1, the berry's start (+6 -> 0). A cure berry after a status receipt presents `status` (32) then `general-animation`, whose command min is `heldItem.frames - presented + HELD_ITEM_EFFECT_AFTER_STATUS_EXTRA_FRAMES` (7181-7192; `HELD_ITEM_EFFECT_AFTER_STATUS_EXTRA_FRAMES` 249, CONTINUE lead 9 at 233, `HELD_ITEM_EFFECT_COMMAND_FRAMES` 214). The SE / drawn animation epoch is `command start + min - 214` = status start + 10 regardless of how `status` is cut, because `presented` follows the status command. The ROM epoch is `MoveEnd+0x0` + 4 (A0 1420 = `BerryCureSlpRet+0x7`, `MoveEnd+0x0` 1416). So the status command is cut to 26 (set in the `set-battler-status-data` branch, 6839-6858, for a status receipt whose source label is `BattleScript_BerryCureSlpRet` / the Rest -> berry path; `sceneOnStatusFrames` 2294 returns null for it today and leaves `STATUS_TIMING` 32 at 3321) while the general-animation min stays at the value 32 gave (192): subtract a fixed `HELD_ITEM_EFFECT_AFTER_STATUS_NOMINAL_PRESENTED = 32` rather than the status command's own minimum in the 7183 `presented` line. Result: SE 152 / 228 / 102 exact and the berry print exact (ENG 1634 = ROM 1634). The ordinary Cheri-after-hit berry (hie2 / hie3: status 32, epoch exact) must keep 32: key the cut on the Rest path (the status receipt is produced from `MoveEnd`'s berry check, not from the hit), and guard with `hie1-cheri-on` (ISSUES #220 lab).
+- Part 2, the berry print's tail (-6 -> 0 after part 1 it would be -12). ROM `waitmessage` -> `updatestatusicon` (+0xf) -> `MoveEnd+0x6` -> the next used print spends 12 more rows than ENG: +1 on the print's hold (the `message`'s `holdFrames`, `messageTimingFromSourceProvenance` 1400-1420 for the `BerryCure*Ret` print) and +11 between the `status-icon` (6883-6891, `STATUS_ICON_TIMING` 3330) and the next message (a berry-print icon min of 12 instead of 1). Part 2 alone makes the next action +6 (ENG 1750 + 12 against ROM 1756) and leaves the print +6; Part 1 alone makes the next action -12; the two together should make the print and the next action exact (the later hit SEs 238 / 214 / 131 / 13 follow the next action's offset). This is derived from the measured rows above, not landed: verify with the two labs after landing.
+- Source rows: ROM `MoveEnd+0x0` 1416, `BerryCureSlpRet+0x7` 1420, `+0xa` 1633 / glyph 1634, `+0xf` 1744, `MoveEnd+0x6` 1747, `EffectLevelDamage+0x0` 1752 / glyph 1756 (player ON lab; the opponent lab shows the same offsets).
+
+**OFF control (`tnm1-rest-chesto-*` with `--scene off`, `.integration/evidence/tnm1/chesto-off`).** Scene OFF has no animation rows: `status` 35 then `move-animation` 9 and the berry print is +5 off its ROM row; the same -12 tail follows. Not a T2 term (the OFF T2 windows have no Rest + Chesto), so land Part 2 in both scenes only if the OFF labs go to 0 with it; otherwise gate it ON.
+
+**Expected mass.** ON: -90 for the chain (s319 d24 = 90, ON), plus about -24 for the next-action windows (s5063 d1, s8612 d11: -6 + -6 rows each of mass 12), about -114 in total. Chain only (Part 1 + Part 2 on one lab without the T2 next-action windows) about -72. Lab: 36 -> about 0 for both Rest + Chesto labs (estimate: every offset row in the table above moves by the same -6 / +6 / +6 amounts).
+
+### 3. What not to chase
+
+- The Toxic term as a Toxic-only constant (it is shared by Will-O-Wisp / Paralysis / Sleep: land it once as the move-inflicted status print rule), and a change to `STATUS_ANIMATION_ADDED_ROWS` or `END_TURN_STATUS_DAMAGE_LEAD_ROWS` (both are exact for the paths that use them).
+- The ON - OFF source identity of the pre-move confusion +5 (cfm1) and the loss recall SE 15 (lrm1): other lanes, not touched here.
+- The lab's `PresentHealTarget+0x12` print -10 (a hold shape in the HP leg, absorbed by the time the berry status starts at 1416 = ROM `MoveEnd+0x0`).
+- Cutting the berry `status` command alone, with no tail (Part 1 without Part 2 turns the next action -6 into -12).
+
+### 4. State and verification
+
+No `src/` or `tests/` change; the code under test is c22d60e57 / HEAD parent (the engine is untouched); PROGRESS / ISSUES / ROADMAP / PAPERCUTS and the Factory acceptance ledgers untouched; `npm test` / typecheck / build not run (docs-only step). A live adapter is not whole-playable exactness: the recipes are measured on labs and T2 rows, not landed.
