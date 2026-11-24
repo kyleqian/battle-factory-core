@@ -77,8 +77,8 @@ From the summary B. "Next input" is the probe: the first frame the next screen t
 |---|---|---|---|
 | DOWN / UP at +42, +50, +58 | cursor moves (UP wraps to RECHOOSE), SE_SELECT on the press frame, drawn inside the fade | ignored (no SE) | as the ROM |
 | B at +42..+60 (every k) | popup closes under the fade; picker takes input at B+56 | ignored (from +61: B+56) | B+56 at every k |
-| RECHOOSE (UP +42, A at +43 / +50 / +58 / +63) | closes; picker at A+56 | ignored | A+56 |
-| SWAP (DOWN +42, A at +43 / +50 / +55 / +58 / +60 / +63) | closes, party switch; enemy picker at A+134 | ignored (from +61: A+133) | A+133 at every k (see "Seen, not fixed": every SWAP is A+133 on the engine) |
+| RECHOOSE (UP +42, A at +43 / +50 / +58 / +63) | closes; picker at A+56 | UP ignored; the A too, or at +63 it opens SUMMARY | A+56 |
+| SWAP (DOWN +42, A at +43 / +50 / +55 / +58 / +60 / +63) | closes, party switch; enemy picker at A+134 | DOWN ignored; the A too, or at +63 it opens SUMMARY (a SWAP after the fade: A+133) | A+133 at every k (see "Seen, not fixed": every SWAP is A+133 on the engine) |
 | SUMMARY, A at +42..+59 (every k) | the popup goes on fading in, no fade-out; summary first input and its cry at **+101** whatever k | ignored | +101 at every k, cry +101 |
 | SUMMARY, A at +60 | ordinary fade-out (`BeginNormalPaletteFade` runs at +61, after the fade cleared): summary input and cry at A+63 = +123 | ignored | +123 |
 | SUMMARY, A at +61..+63 | A+63 | A+63 | A+63 |
@@ -129,12 +129,12 @@ The fixed tree's remaining "more" frames are swp1's known ones, also after the f
 - +2 of a close (512 px, x 88..151 y 40..87): the ROM's BG3 window is one contraction step ahead. B +57 (+59), SWAP +57 (+59), B +61,
   SWAP +62, RECHOOSE +62.
 
-A B or SWAP at +42..+50 has no "more" frame at all: the highlight and the window are still too dark there to differ. Without a press
-inside the window, the two engines' frames are byte-identical (`engvs.py`: none, B +61, SUMMARY +61, SWAP +62 and RECHOOSE +62: 0
+B +42, SWAP +43 and every in-fade SUMMARY have none. At +42 neither side draws the highlight yet (the rebuilt popup's shows from +43),
+and SWAP keeps it on its press frame (swp1). Without a press inside the window, the two engines' frames are byte-identical (`engvs.py`: none, B +61, SUMMARY +61, SWAP +62 and RECHOOSE +62: 0
 frames differ).
 
 Sounds (`sounds.py`, SE / cry / music starts): the fixed engine plays the ROM's in every case. That is SE_SELECT on each in-fade press
-and the summary cry at +101 / +123 / +124; the base plays neither. One logging artifact: where two presses come on consecutive frames
+and the summary cry at +101 / +123 / +124; for the presses inside the fade the base plays neither. One logging artifact: where two presses come on consecutive frames
 (DOWN +42 and A +43), the ROM log keeps one SE_SELECT. romRun's `SoundLog` drops a call that leaves the m4a RAM unchanged. The same
 happens with presses at +61 / +62 after the fade, on both trees.
 
@@ -187,8 +187,8 @@ presses from the summary B at 12619):
 
 Whole runs (picture differences / sound differences, base -> fixed): fadedown 129 / 0 -> 129 / 0, fadeb 148 / 3 -> 152 / 0, faderech
 143 / 3 -> 135 / 0, fadeswap 131 / 4 -> 139 / 0, fadesum 143 / 3 -> 122 / 0, Kyle 191 / 1 -> 186 / 1. The engine digests are equal on
-both trees (`ec5b67c6ce456252` for the five traces, `5235d173ebbdc70d` for Kyle). The base ignores the in-fade presses, so its later
-presses land on other screens; the round still ends the same.
+both trees (`ec5b67c6ce456252` for the five traces, `5235d173ebbdc70d` for Kyle): the base ignores the in-fade presses, and its
+battles still come out the same.
 
 The window from the summary B, engine frames 12619..12780, by `picmatch.py`'s method over the whole screen with the balls' row zeroed
 (`catchwin.py`, closest ROM frame within +-80 of the anchor-aligned guess):
@@ -233,8 +233,8 @@ tree, and that comes from its driver, not the game:
 | runs identical (digest and frames) | 36 | 38 |
 | same digest | 96 | 93 |
 
-The explorer's first press after closing a summary always comes at +59 (its press cooldown). On the fixed tree the popup takes it;
-on the base the press waits for +61. Every seed without such a press is identical on both trees (36 ON, 37 OFF), and so is one OFF seed
+In this soak the explorer's first press after closing a summary comes at +59 every time (816 of 816). On the fixed tree the popup
+takes it; on the base the press waits for +61. Every seed without such a press is identical on both trees (36 ON, 37 OFF), and so is one OFF seed
 with one.
 
 The digest differs in 11 runs: ON seeds 19, 39, 85, 92 and OFF 4, 39, 55, 61, 67, 71, 98 (`soakexplain.sh`, `soakexplain.txt`):
@@ -285,21 +285,22 @@ The digest differs in 11 runs: ON seeds 19, 39, 85, 92 and OFF 4, 39, 55, 61, 67
 Branch `srt1-swap-summary-return-input` (from bcacf9026):
 
 - `NODE_OPTIONS=--max-old-space-size=8192 npx tsc -b`: clean.
-- The swap-screen tests: every test file naming `factorySwap`, plus swp1, spd2, swi1, srt1 and randomRoundSoak, 14 files. All pass.
+- The swap-screen tests: every test file naming `factorySwap`, plus swp1, spd2, swi1, srt1 and randomRoundSoak, 14 files: all pass.
 - Full `npm test` on 068f77c07: 1,958 files passed, 44 skipped; 17,177 tests passed, 243 skipped, 0 failed. The next commit changes only
   a source comment's line references and docs; after it the srt1, swi1, factorySwapPresentation and census tests pass again (59 tests) and
   ENGINE_BUILD is unchanged.
 - ENGINE_BUILD `eb-175f3e18f45d40fb` (base `eb-0c82cb1217b6eb3a`). `npm run build:lib` was not run.
 
-Trial merge into core master 69b26a564 (a scratch worktree, `.integration/evidence/srt1/trial`, merge commit b68aebd2a; master not
-moved):
+Trial merge of 219e3929e (all of the code; the later commit is this doc's numbers) into core master 69b26a564 (a scratch worktree,
+`.integration/evidence/srt1/trial`, merge commit 86ee17f09; master not moved):
 
 - One conflict, `tests/randomRoundSoak.test.ts`: both sides moved the exploring soak's "full" pins. It is resolved to master's trajectory
   with this change measured on the merged tree: seed 0 40651 -> 40615 (battle 2 / depth 1 / turn 24), seed 1 57776 -> 57761 (battle 3 /
   depth 2 / turn 15), roundLost both. Seed 0's decision notes are identical without frames; its first moved note is the LEFT after the
   summary's A close, 22730 -> 22727.
 - `core.ts` and `factorySwapPresentation.ts` merged cleanly; the census line pin is right there too (:132).
-- `tsc -b`: TRIAL_TSC. Full `npm test`: TRIAL_SUITE.
+- `tsc -b`: clean. Full `npm test`: 1,978 files passed, 44 skipped; 17,270 tests passed, 243 skipped, 0 failed (srt1 and swi1 pass on
+  master's timing).
 - ENGINE_BUILD there `eb-4b56dd7d4f1fa327` (master's own `eb-6593d11cb0b0b714`).
 
 ## The select screen (rental draft): two older input-timing differences, causes found, not fixed
