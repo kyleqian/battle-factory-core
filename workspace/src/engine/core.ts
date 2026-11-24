@@ -665,6 +665,7 @@ import {
   factorySwapQuitExitObjFadeY,
   factorySwapPlayerOptionBallTile,
   factorySwapSummaryReturnBallTile,
+  factorySwapSummaryReshowShown,
   handleFactorySwapPresentationInput,
   submitFactorySwapRoundDecision,
   type FactorySwapPresentationState,
@@ -4282,10 +4283,13 @@ function renderWithoutFactoryTerminal(state: EngineState): Uint8Array {
     if (swap.elapsed < 44) return blackFrame();
     const ballTiles = factorySwapBallTiles(swap);
     const fadeLocal = swap.elapsed - 44;
+    // swp1: the popup CB2_InitSwapScreen rebuilds after a summary (Swap_ShowSummaryMonSprite) is on screen only until its CloseMonPic
+    // (B / RECHOOSE / SWAP); from then on the picker, the party switch and the enemy screen draw as after any popup.
+    const summaryReshow = factorySwapSummaryReshowShown(swap);
     if (
       swap.controller.phase === "summaryFade" ||
       swap.controller.phase === "summaryReturn" ||
-      swap.returnedFromSummary
+      (summaryReshow && swap.controller.phase === "playerOptions")
     ) {
       // pic5: the swap screen's SUMMARY shows the party being swapped from (Swap_ShowSummaryScreen: gPlayerParty), i.e. the
       // round's own rental records, not the opening draft's first three rentals.
@@ -4293,7 +4297,7 @@ function renderWithoutFactoryTerminal(state: EngineState): Uint8Array {
       // spd2: once the summary has closed, the popup's pic is Swap_ShowSummaryMonSprite's, built from gPlayerParty[cursorPos] with its
       // personality and OT id swapped (battle_factory_screen.c:4089-4093): SPINDA's spots come from the OT id.
       const summaryReshowOtId =
-        swap.controller.phase === "summaryReturn" || swap.returnedFromSummary
+        swap.controller.phase === "summaryReturn" || summaryReshow
           ? summaryRentals[Math.min(swap.controller.cursor, 2)]?.ot.id ?? null
           : null;
       const renderPopup = (bgY: number, objY: number): Uint8Array =>
@@ -4304,7 +4308,7 @@ function renderWithoutFactoryTerminal(state: EngineState): Uint8Array {
           },
           ballTiles:
             swap.controller.phase === "summaryReturn" ||
-              swap.returnedFromSummary
+              summaryReshow
               ? [
                   factorySwapSummaryReturnBallTile(
                     swap.summaryReturnClock ?? 0,
@@ -4419,6 +4423,15 @@ function renderWithoutFactoryTerminal(state: EngineState): Uint8Array {
           : factorySwapPlayerOptionBallTile(swap.selectedBallClock),
       loadedDisplaySpecies: swap.loadedDisplaySpecies,
       duplicateDisplayCopied: swap.returnedFromDuplicate ?? false,
+      // swp1 + spd2: the close of the summary-rebuilt popup (B / RECHOOSE / SWAP) starts from Swap_ShowSummaryMonSprite's pic, whose
+      // SPINDA spots come from the OT id; CloseMonPic frees it at once, so only the press frame's buffered OAM still shows it.
+      summaryReshowOtId:
+        summaryReshow &&
+          (swap.controller.phase === "playerPickerReturn" || swap.controller.phase === "enemySwitch")
+          ? factorySwapSummaryRentals(state)[
+              Math.min(swap.controller.playerMonId ?? swap.controller.cursor, 2)
+            ]?.ot.id ?? null
+          : null,
     });
   }
   if (state.swapReturn && state.swapReturn.guideElapsed === null && state.postwin) {

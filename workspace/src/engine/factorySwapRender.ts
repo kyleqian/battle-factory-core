@@ -322,11 +322,29 @@ function drawPkmnForSwapButton(
   }
 }
 
+/**
+ * swp1: Swap_Task_SwitchPartyScreen's `cursorPos` behind SWAP. The controller (factorySwap.ts) moves its cursor to the enemy screen's
+ * slot 0 on the SWAP press itself, but the ROM keeps `cursorPos` on the chosen mon (Swap_OptionSwap copies it to playerMonId,
+ * battle_factory_screen.c:3989-3996) until Swap_Task_SwitchPartyScreen state 3 erases the species window and calls
+ * Swap_InitActions(SWAP_ENEMY_SCREEN) (:3218-3225 -> :3961-3980), the reset factorySwapPresentation.ts makes at +84: up to then the
+ * closing pic, the species name (Swap_PrintMonSpeciesForTransition, state 0, :3204-3205) and the arrow are the chosen mon's. The
+ * category window is not reprinted until ScreenInfoTransitionIn state 7 (Swap_PrintMonCategory, :3167-3176), the step before the enemy
+ * picker is installed, so it keeps the chosen mon's category through the whole switch.
+ */
+export const FACTORY_SWAP_ENEMY_SWITCH_INIT_ACTIONS_ELAPSED = 84;
+
+function factorySwapRenderCursorState(state: FactorySwapState, phaseElapsed: number): FactorySwapState {
+  if (state.phase !== "enemySwitch" || state.playerMonId === null) return state;
+  const chosen = state.playerMonId;
+  if (phaseElapsed >= FACTORY_SWAP_ENEMY_SWITCH_INIT_ACTIONS_ELAPSED) return { ...state, infoCursor: chosen };
+  return { ...state, cursor: chosen, infoCursor: chosen, displayCursor: chosen, arrowCursor: chosen };
+}
+
 /** State-driven settled player/enemy picker composition. */
 export function renderFactorySwapPicker(view: FactorySwapRenderView): Uint8Array {
   const fb = createFramebuffer();
-  const { state } = view;
   const phaseElapsed = view.phaseElapsed ?? 0;
+  const state = factorySwapRenderCursorState(view.state, phaseElapsed);
   const enemy =
     state.phase === "enemyPicker" ||
     state.phase === "acceptPrompt" ||
