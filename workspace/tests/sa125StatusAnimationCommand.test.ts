@@ -132,13 +132,13 @@ type Anchor = { animation: string; side: "player" | "opponent"; path: string; ga
 function anchors(seed: number): { anchors: Anchor[]; unanchored: number; offAnimations: number } {
   const on = battleSegments(seed, "on").flatMap((s) => s.commands.map((c: any) => ({ c, events: s.events })));
   // hse2 item 2: the Scene OFF confusion print before the used print holds 64 + 3 + 4 (ROM print -> used print 94 vs ON 90, hpf4m-confuse-off,
-  // tests/hse2OffStatusHeads.test.ts); this test is about the status animation alone, so read that print at the ON hold.
+  // tests/hse2OffStatusHeads.test.ts); this test is about the status animation alone, so read that print at the ON hold (fpl1: 64 + 2 for the confusion head).
   // ohs1: the same for the Scene OFF ConfusedNoMore (64 + 5) / InLove (64 + 3 + 3) prints before the used print (T2 OFF s7295 d8 / s6568 d29).
   const confusionOffHold = (c: any, events: any[]) => c.type === "message"
-    && ((c.timing?.holdFrames === 71 && events.find((e: any) => e.sequence === c.eventSequence)?.payload.messageId === "STRINGID_PKMNISCONFUSED")
+    && (((c.timing?.holdFrames === 71 || c.timing?.holdFrames === 67) && events.find((e: any) => e.sequence === c.eventSequence)?.payload.messageId === "STRINGID_PKMNISCONFUSED")
       || (c.timing?.holdFrames === 69 && events.find((e: any) => e.sequence === c.eventSequence)?.payload.messageId === "STRINGID_PKMNCONFUSEDNOMORE")
       || (c.timing?.holdFrames === 70 && events.find((e: any) => e.sequence === c.eventSequence)?.payload.messageId === "STRINGID_PKMNINLOVE"))
-    ? { ...c, timing: { ...c.timing, holdFrames: 67 } } : c;
+    ? { ...c, timing: { ...c.timing, holdFrames: c.timing.holdFrames === 71 || c.timing.holdFrames === 67 ? 66 : 67 } } : c;
   const off = battleSegments(seed, "off").flatMap((s) => s.commands.map((c: any) => ({ c: confusionOffHold(c, s.events), events: s.events })));
   const messages = (l: typeof on) => l.filter((x) => x.c.type === "message").map((x) => x.c.messageId);
   expect(messages(on), `seed ${seed}: identical prints in both scenes`).toEqual(messages(off));
@@ -199,12 +199,14 @@ const SEEDS = [7, 11, 12, 18, 19, 20, 49, 60, 76, 87, 101];
 // cfa1 (2026-11-23): the pre-move "is confused!" status animation carries the 5 script rows before the used / self-hit
 // print (preMoveConfusionToUsedPrintRows). cfm1 (2026-11-24, ROM probe of 15 chains in both scenes, docs/aud251-s11-scoreboard-refresh.md
 // "cfm1") showed the ROM identity holds (ON - OFF = 100 from `return` on) and the engine is right (OFF exact, ON within 1 row):
-// the extra 5 here is this test's own normalisation of the OFF confusion hold (71 -> 67) applied to OFF only. Next run: drop
-// that normalisation on this path (cfm1 recipe) and this exception with it.
-// Only when the next message is the used / self-hit print (the engine's condition), so on this path the extra is 0 or 5 and
-// ON - OFF must carry the same extra.
-const cfa1PreMoveConfusionRows = (a: { animation: string; path: string; length: number; gate: number }): number =>
-  a.animation === "CONFUSION" && a.path === "STRINGID_PKMNISCONFUSED" && a.length - a.gate - ROWS[a.animation]! === 5 ? 5 : 0;
+// the extra here is this test's own normalisation of the OFF confusion hold applied to OFF only. fpl1 (chp1): the ON "is confused!" head
+// holds 64 + 2 (the ROM's tp end -> `+0xc` ex2 = 66, T2 s499 / s7295; OFF is read at the same 66 here), and the command carries 6 rows before the used
+// print (cfa1's 5 re-derived with the shorter head on the six cfa1 labs) or 4 before the self-hit print (ROM `DoSelfConfusionDmg` 104, not 105). Not dropped: the rows are still inside the ON command (docs/aud251 "fpl1").
+// Only when the next message is the used / self-hit print (the engine's condition), so on this path the extra is 0, 4 or 6.
+const cfa1PreMoveConfusionRows = (a: { animation: string; path: string; length: number; gate: number }): number => {
+  const extra = a.length - a.gate - ROWS[a.animation]!;
+  return a.animation === "CONFUSION" && a.path === "STRINGID_PKMNISCONFUSED" && (extra === 4 || extra === 6) ? extra : 0;
+};
 describe("sa125: the ROM receipts (sta123 rom-r1.json, 18 scenarios both sides)", () => {
   const all = Object.entries(ROM).flatMap(([stem, s]) => s.on.statusAnimations.map((a) => ({ stem, side: s.attackerSide, ...a })));
 

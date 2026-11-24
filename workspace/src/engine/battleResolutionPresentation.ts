@@ -1212,12 +1212,12 @@ const IN_LOVE_OFF_USED_PRINT_TIMING = Object.freeze({
  * re-entered attackcanceler's rows and `attackstring` (5 script rows, ROM 733..737) before the used print's first glyph: the used print and every body
  * after it were 5 rows early (lab Psychic print -5, SE 184 / 13 -5). A hurt confusion (BattleScript_DoSelfConfusionDmg) is not this case.
  */
-export const PRE_MOVE_CONFUSION_TO_USED_PRINT_ROWS = 5;
+export const PRE_MOVE_CONFUSION_TO_USED_PRINT_ROWS = 6;
 function preMoveConfusionToUsedPrintRows(events: readonly BattleKernelSemanticEvent[], index: number): number {
   if (events[index]!.provenance?.sourceLabel !== CONFUSION_HEAD_SCRIPT) return 0;
   for (let next = index + 1; next < events.length; next += 1) {
     const payload = events[next]!.payload;
-    if (payload.kind === "message") return payload.messageId === "STRINGID_USEDMOVE" || payload.messageId === SELF_CONFUSION_HIT_MESSAGE_ID ? PRE_MOVE_CONFUSION_TO_USED_PRINT_ROWS : 0;
+    if (payload.kind === "message") return payload.messageId === "STRINGID_USEDMOVE" ? PRE_MOVE_CONFUSION_TO_USED_PRINT_ROWS : payload.messageId === SELF_CONFUSION_HIT_MESSAGE_ID ? PRE_MOVE_CONFUSION_TO_USED_PRINT_ROWS - 2 : 0;
   }
   return 0;
 }
@@ -1361,6 +1361,15 @@ const PRE_MOVE_STATUS_ANIMATION_TIMING = Object.freeze({
   holdFrames: WAITMESSAGE_LONG_HOLD_FRAMES + PRE_MOVE_STATUS_ANIMATION_LEAD_ROWS,
 } as const);
 /**
+ * fpl1 (docs/aud251-s11-scoreboard-refresh.md "chp1"; T2 s499 / s7295 confusion heads, ROM `MoveUsedIsConfused` tp end -> `+0xc` ex2 = 66 = 64 + 2 in all seven
+ * windows; Scene ON only, Scene OFF's head hold stays 64 + 3): the ON confusion head's wait ends one row before sta3's asleep-fitted 3.
+ */
+export const PRE_MOVE_CONFUSION_STATUS_ANIMATION_LEAD_ROWS = 2;
+const PRE_MOVE_CONFUSION_STATUS_ANIMATION_TIMING = Object.freeze({
+  minimumFrames: 0,
+  holdFrames: WAITMESSAGE_LONG_HOLD_FRAMES + PRE_MOVE_CONFUSION_STATUS_ANIMATION_LEAD_ROWS,
+} as const);
+/**
  * sta5 step 2 (docs/aud249-general-anim-sounds.md, ROM windows aud242b Flatter / aud242f Swagger): a stat print whose script goes on to
  * inflict a status move effect (`printfromtable; waitmessage LONG; jumpifability; jumpifsideaffecting; setmoveeffect; seteffectprimary`,
  * which runs `chosenstatus2animation`) reaches the launch 6 rows after the message ends: waitmessage's completing row, the four script
@@ -1422,7 +1431,9 @@ function messageTimingFromSourceProvenance(
     const tickLead = END_TURN_STATUS_DAMAGE_LEAD_ROWS[event.provenance?.sourceLabel ?? ""];
     if (tickLead !== undefined) return Object.freeze({ minimumFrames: 0, holdFrames: WAITMESSAGE_LONG_HOLD_FRAMES + tickLead });
     const launch = BATTLE_SCRIPT_PROGRAM.instructions[programCounter + 2]?.opcodeName;
-    if (launch === "B_SCR_OP_STATUS2ANIMATION" || launch === "B_SCR_OP_STATUSANIMATION") return PRE_MOVE_STATUS_ANIMATION_TIMING;
+    if (launch === "B_SCR_OP_STATUS2ANIMATION" || launch === "B_SCR_OP_STATUSANIMATION") {
+      return !sceneOff && event.provenance?.sourceLabel === CONFUSION_HEAD_SCRIPT ? PRE_MOVE_CONFUSION_STATUS_ANIMATION_TIMING : PRE_MOVE_STATUS_ANIMATION_TIMING;
+    }
     if (!isMoveInflictedStatusLaunch(programCounter)) return WAITMESSAGE_LONG_TIMING;
     return sceneOff ? MOVE_INFLICTED_STATUS_SCENE_OFF_TIMING : sceneOnMoveAnimationSeen ? MOVE_INFLICTED_STATUS_ANIMATION_TIMING : WAITMESSAGE_LONG_TIMING;
   }
@@ -7687,7 +7698,7 @@ function usedMovePrintLeadU(state: BattleResolutionPresentationState, handoff: B
   const chargeBox = sceneOff && first.payload.messageId === "STRINGID_EMPTYSTRING3" && first.provenance?.sourceLabel === CHARGE_TURN_SCRIPT;
   // ecm1: Scene ON's ConfusedNoMore head waits the same u - 2 (the hold only: the sound leads and `usedMovePrintU` keep the plain turn's rule).
   const headLabel = first.provenance?.sourceLabel ?? "";
-  const head = sceneOff ? OFF_HEAD_PRINT_LABELS.has(headLabel) : forHold && headLabel === CONFUSION_NO_MORE_HEAD_SCRIPT;
+  const head = sceneOff ? OFF_HEAD_PRINT_LABELS.has(headLabel) : forHold && (headLabel === CONFUSION_NO_MORE_HEAD_SCRIPT || headLabel === CONFUSION_HEAD_SCRIPT);
   if (first.payload.messageId !== "STRINGID_USEDMOVE" && !chargeBox && !head) return null;
   const u = first.provenance?.instructionExecution;
   return u === undefined || u < USED_MOVE_LEAD_MIN_U || u > USED_MOVE_LEAD_MAX_U ? null : u;
