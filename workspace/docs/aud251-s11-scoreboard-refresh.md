@@ -5230,3 +5230,34 @@ Net at the chain start: s2 d2 ENG `move-animation` = ROM `MoveEnd+0x0` (0); s191
 - Term (source-backed, one window): when a `message` whose `sourceLabel` is `BattleScript_HitFromAtkAnimation` and whose id is the crit message (`STRINGID_CRITICALHIT`) is followed in the same command list by the result message (`STRINGID_SUPEREFFECTIVE` / `STRINGID_NOTVERYEFFECTIVE`), the crit message's hold is 64 + 2 instead of 64 (ROM 196 -> 277 = 81). It sits upstream of the item chain, so it is not specific to Shell Bell: it moves every crit -> result chain (the second print and everything after it), and landing it will move T2 seeds beyond s1914. Predicted effect on the ihm1 landing: s1914 d2's item chain goes from -3 to -1, so edit B's +3 regression on s1914 (19 -> 22) should mostly close, leaving the one-row ROM print jitter.
 - Not measured: this was one crit -> result ROM window in the whole evidence tree (the grep over `.integration/evidence/*/p/*/*-d*.cmp.txt` for `+0xb` ex0 followed by `+0xf` ex1/ex2 within 70 rows finds only this one), the term was not applied to a scratch tree, and the all-seed mass of landing it was not run. The ROM side (81 = 16 + 64 + 1) is source-accounted, so before landing re-measure with a second crit -> result window (a lab with a guaranteed crit followed by a super-effective or resisted hit, Scene OFF, no held item) and run `ihm1/all.sh` on the scratch edit; if no second window shows 81, treat it as "no rule" and accept s1914's +3.
 - Nothing changed in `src/`, `tests/`, PROGRESS / ISSUES / ROADMAP / PAPERCUTS; npm test / typecheck / build were not run, as the step's prohibitions say (they override the brief's closing "tests and build green" line).
+
+## crs1 (2026-11-24): a second (and sixth) crit -> result window: the ROM is 81 every time, the engine 79 every time (Scene OFF)
+
+Measurement only (docs / lab / tool; no `src/` / `tests/` change, engine frozen at c22d60e57). Tool: `tools/integration/crs1Lab.py KIND SEED` writes `tools/battle-lab/crs1-<kind>-s<seed>-off.json` (Scene OFF, level 50, no items, mechanicLab `overrides.parties`; the foe has Seismic Toss in all four slots so its move has no RNG; three turns of A, A). Kinds: `slash` = Snorlax Slash (163) vs Onix, resisted -> "It's not very effective!"; `chop` = Machamp Cross Chop (238) vs Snorlax, weak -> "It's super effective!". Run: `nice -n 10 tools/integration/labCompare.sh --scene off --out .integration/evidence/crs1/<run> --rows crs1-<kind>-s<seed>-off` (evidence is git-ignored; ~13 s per lab). Seed search: engine-only (`b4mEngine.ts`, 3 s) and ROM (labCompare), seeds 1-24 / 1-13 slash and 1-12 chop; a window is an `hp` b1 followed by two `message` commands (engine) or `HitFromAtkAnimation+0xb` followed by `+0xf` (ROM).
+
+### Result: the ROM crit -> result spacing is 81 rows in all 7 ROM windows (6 new + s1914 d2); the engine's is 79 in all 6 engine windows
+
+ROM rows, `+0xb` (`waitmessage` after `critmessage`) ex1 -> `+0xf` (`waitmessage` after `resultmessage`) ex1; the crit print ex1 -> ex0 is 16 rows, ex0 -> `+0xf` ex1 is 65 (64 hold + the `resultmessage` row):
+
+| window (ROM) | result text | `+0xb` ex1 | `+0xb` ex0 | `+0xf` ex1 | crit -> result | result print ex1 -> ex0 | ex0 -> `MoveEnd+0x0` |
+|---|---|---|---|---|---|---|---|
+| slash s4 turn 2 | not very effective | 852 | 868 | 933 | 81 | 25 (958) | 66 (1024) |
+| slash s5 turn 2 | not very effective | 850 | 866 | 931 | 81 | 25 (956) | 66 (1022) |
+| slash s11 turn 2 | not very effective | 848 | 864 | 929 | 81 | 25 (954) | 66 (1020) |
+| slash s8 turn 3 | not very effective | 1353 | 1369 | 1434 | 81 | 25 (1459) | n/a (capture ends) |
+| slash s12 turn 3 | not very effective | 1352 | 1368 | 1433 | 81 | 25 (1458) | n/a (capture ends) |
+| chop s6 turn 1 | super effective | 382 | 398 | 463 | 81 | 22 (485) | n/a |
+| s1914 d2 (mem1) | not very effective | 196 | 212 | 277 | 81 | 26 (303) | 66 (369) |
+
+The labCompare print rows say the same from the first glyph: slash s4 ROM crit print 853, result print 934 (81).
+
+Engine (same lab files, engine run; the `message` commands after the `hp` command): slash s2 849 -> 928, slash s5 1353 -> 1432, slash s13 852 -> 931, chop s2 / s5 / s11 383 -> 462: **79 each** (L 15 + 64). Chop s6's ROM crit print is at 383 and the engine's chop crit (seeds 2 / 5 / 11) is also at 383 (turn 1, same lab geometry), so the two sides line up on the crit and the result lands at ROM 464 vs ENG 462: -2.
+
+So the -2 is not a one-window artifact: it holds on resisted and super-effective results, in turns 1-3, for six different seeds on the ROM, and it is the same 16 + 65 as source accounting (mem1) predicts. The result print itself (ROM ex1 -> ex0 22 / 25 / 26 rows by text) and the 66-row tail to `MoveEnd` are as mem1 described, so the rule is only the one term: the crit message's hold is 64 + 2 when the next message in the list is a result message.
+
+### Verdict: the 81 holds -> the rule is ready to land
+
+- Term (ready): `message` for `STRINGID_CRITICALHIT` in `BattleScript_HitFromAtkAnimation` followed by a result message (`STRINGID_SUPEREFFECTIVE` / `STRINGID_NOTVERYEFFECTIVE`) holds 64 + 2 (ROM crit `+0xb` ex1 -> `+0xf` ex1 = 16 + 65 = 81 vs engine L + 64 = 79). Not item-specific; also applies to the no-item labs above. The crit message with no result message (neutral crit) is unchanged: its 68-row tail (mem1) is a different term.
+- Land it with the ihm1 check from mem1: run `ihm1/all.sh` on the scratch edit; predicted effect on s1914 d2 is item chain -3 -> -1, and every T2 crit -> result window moves 2 rows. The new labs (`crs1-slash-s{4,5,8,11,12}-off`, `crs1-chop-s6-off` have the ROM crit; `crs1-slash-s{2,5,13}-off`, `crs1-chop-s{2,5,11}-off` have the engine crit) are the regression set: after the edit the engine crit windows should read 81, which labCompare shows as the result print -2 -> 0 against the ROM windows of the same lab geometry.
+- Side finding (not investigated, not part of this term): the ROM and engine do not crit on the same seed in these labs (ROM slash crits on seeds 4 / 5 / 8 / 11 / 12, engine on 2 / 5 / 13; ROM chop on 6, engine on 2 / 5 / 11), so a per-seed same-window ROM / ENG pair does not exist here; the comparison above is by lab geometry. Slash seed 5 even crits on the ROM in turn 2 and in the engine in turn 3. The crit-roll RNG alignment in labs is a separate question from message timing.
+- Nothing changed in `src/`, `tests/`, PROGRESS / ISSUES / ROADMAP / PAPERCUTS; npm test / typecheck / build were not run, as the step's prohibitions say (they override the brief's closing "tests and build green" line).
