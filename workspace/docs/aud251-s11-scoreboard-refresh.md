@@ -4722,3 +4722,44 @@ After 1 + 2 + 3 + S-lead + trail, s7295 d4: SE 13 0, SE 200 / 189 -1, the d4 row
 ### 4. State and verification
 
 No `src/` or `tests/` change (`git diff --stat HEAD -- src tests` empty after every scratch run: the scratch edits were reverted with `git checkout -- <files>`); PROGRESS / ISSUES / ROADMAP / PAPERCUTS / ANIMATION_PROGRESS / ANIMATION_COVERAGE and the supervisor / program ledgers untouched; `npm test` / typecheck / build not run (docs / labs / tools step, ANIMATION_VERIFICATION.md: diff and ledger checks). Code under test: engine c22d60e57 (last `src` commit, HEAD parent 89cc84e32; the scratch runs were that tree plus the two patches). A live adapter is not whole-playable arbitrary-history exactness: the numbers are Scene ON labs and T2 rows, not landed.
+
+## ihm1: Shell Bell hp -> heal -> next print (Scene OFF) and the Bounce post-miss +6
+
+Measurement only. Labs `tools/battle-lab/ihm1-sbell-{hp,nve}-off.json`, the ROM / engine row merge `tools/integration/ihm1LabRows.py RUNDIR LAB.SCENE [LO:HI]`, and rescore helpers `tools/integration/ihm1/{all.sh,perseed.sh,rows.py}`. The exact scratch diff of the recipe is `docs/ihm1-landing.patch` (apply with `git apply -p2` from `workspace/`, or by hand: two edits in `src/engine/battleResolutionPresentation.ts`).
+
+### 1. MoveEnd held-item heal: what the +2 / +5 / +7 spread depends on
+
+It does not depend on heal size, bar length of the heal, or the item's own rows: the heal message -> next print chain is exact in every window (heal size and hpb3 `CalcNewBarValue` rows were checked). The spread is two terms ahead of the held-item print:
+
+| window | term | size |
+|---|---|---|
+| s97 d13 (+7) | The hit's `hp` command keeps `HP_TIMING = {minimumFrames: 28}` (28-row floor) while the ROM's bar is 21 rows, so hp -> `MoveEnd+0x0` is 28 - 21 = 7 rows long. The Scene OFF item-heal chain (hp, 2 sprite-visibility, `move-animation`) has no floor in the ROM. | +7 |
+| s2 d2 (+5), lab nve (+5/+6) | `HELD_ITEM_EFFECT_CONTINUE_LEAD_FRAMES = 9` is fitted on hp-preceded chains. After a hit-effectiveness message (`sourceLabel === "BattleScript_HitFromAtkAnimation"`) the ROM's gap to `MoveEnd+0x0` is 2 rows, not 7, so the lead is 4. | +5 |
+| s1914 d2 (+2 / +4) | Same lead term (+5) plus a different message -> `MoveEnd` term of -3/-4 (ENG message command is 88 rows, ROM 92) that is not part of this recipe. | +2 net |
+
+Exception already exact: Shell Bell after a KO / "fainted!" message (s2 res6 / res12); edit B must be restricted to `HitFromAtkAnimation` messages or s2 regresses (13 -> 38).
+The item is Shell Bell in all three windows; Leftovers (hie1 lab) and Sitrus were not separated here, the Leftovers lab is exact.
+
+### 2. Landing recipe (item 1)
+
+File `src/engine/battleResolutionPresentation.ts` (line numbers at c22d60e57):
+
+- Edit A, `hpItemAnimationRows` (~l.3010): accept `animation.payload.kind === "message"` as well as `"animation"`; in `applyHpHitTails` (~l.3254) add `offItemHeal` (`leads.sceneOff && leads.itemAnimationRows !== null`, next three commands sprite-visibility, sprite-visibility, `move-animation`) and set the hit `hp` timing to `{minimumFrames: 0}` instead of `HP_TIMING`'s 28, then `continue`. Source rows: `HitFromAtkAnimation+0x8/+0xa/+0xf`, `MoveEnd+0x0/+0x6`, `ItemHealHP_Ret+0x0/+0x7/+0xa/+0x18/+0x1a`, `Pausex20`.
+- Edit B, `heldItemEffectOffHoldFrames` (~l.2170): when `lead === HELD_ITEM_EFFECT_CONTINUE_LEAD_FRAMES (9)` and the previous non-MoveEnd event is a message whose `sourceLabel` is `BattleScript_HitFromAtkAnimation`, subtract 5 (lead 4). The scratch used `SCRATCH_AFTER_MESSAGE` from an env var; make it a named constant (`HELD_ITEM_AFTER_HIT_MESSAGE_LEAD_DELTA = 5`).
+
+Measured with the scratch edits on the current src:
+
+| scope | base | A | A + B |
+|---|---|---|---|
+| seeds 97 / 2 / 1914 / 2230 (T2 OFF mass) | 113 | 92 (s97 33 -> 12) | 90 (s2 13 -> 8, s1914 19 -> 22, s2230 unchanged 48) |
+| all 24 Scene OFF seeds, `ihm1/all.sh`, TOTAL mass | 597 | | 574 (-23, no other seed moved) |
+
+Labs: ihm1 hp lab stays exact; ihm1 nve lab +6 -> +1 (the +1 is the message's own first-glyph offset). Expected landing: T2 OFF 597 -> 574. Not covered: s1914's extra message -> `MoveEnd` -3/-4 (message command 88 rows vs ROM 92); landing B without it makes s1914 +3 worse, so land B with the s1914 term or accept it. One Scene ON check was not run (the `itemAnimation` branch for Scene ON is unchanged by A because `offItemHeal` requires `sceneOff`).
+
+### 3. Bounce post-miss +6 (s2230 d5)
+
+Run Scene OFF (lc6): `chg1-bounce-foe-off`, `chg1-fly-foe-off`, `chg1-dig-foe-off`, `wkl1m-wakeup-foe-off`, `hie1-leftovers-off`: all SE and prints exact (mass 0). So neither a charge turn alone, nor a wake-up alone, nor a Leftovers heal alone carries the +6; the term needs the combination (end-turn item heal -> next turn's Bounce opener). The separating lab (Fly/Dig user holding Leftovers, damaged beforehand, second turn Bounce / charge) was not built in the time cap: it needs a damaged holder, and the existing labs' Seismic Toss misses against the semi-invulnerable user, so no heal fires. Next worker: a lab where the opponent Bounce user takes damage on a non-charge turn 1 (a normal move first), then Leftovers heal, then Bounce; compare ROM `ItemHealHP_End2+0x5` -> print 26 rows against ENG `turn-end` -> `message` 31 rows (ohm1 reference: s2230 d5 580/606 vs 581/612). Until then the +6 is attributed to the item-heal predecessor chain (ENG 31 vs ROM 26 rows), not to the wake-up (ohm1's Dig second turns after a failed move / MoveEnd are exact at 31).
+
+### 4. State
+
+No `src/` or `tests/` change in the commit (scratch edits reverted with `git checkout`). PROGRESS / ISSUES / ROADMAP / PAPERCUTS not edited and npm test / typecheck / build not run, as the step's prohibitions say (they override the brief's closing "tests green, PROGRESS updated" line).
