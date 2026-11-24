@@ -120,6 +120,10 @@ The fix is a live body adapter for the move (src/engine/liveMoveAnimation.ts `li
 The engine json keeps the commands under `cmds` (`[frame, segment, command, type, battler, move, timing, age0]`), the SEs under `se`, all sound kinds under `sounds`.
 Replaces the per-step copies `b4mRun.sh` / `bdt1Run.sh` / `gsp3Cmp.py` (kept: receipts reference them). Not covered: `hcr3mLab.py` / `hcr3mLabEngine.ts` (sound-fixture labs under `tools/audio/fixtures/`; copy the lab into this directory instead) and `fsc2mProbe.py` (a scripted A-press policy after the commit: the ready-time probes, `fsc2mRun.sh`).
 
+**cln16 papercuts.** (1) The console shows each `PRINTS` / `SUMMARY` line once, in the closing `-- summary` block; the per-lab `.table.txt` keeps them too, and `summary.txt` is unchanged.
+(2) `--reuse-rom` no longer dies on an unreadable dir under the `--out` parent (e.g. `/tmp`): `labCompare.py find-rom` skips it.
+(3) `tools/audio/rescoreAll.sh [FROM_DIR]` and `tools/integration/t2k4/cmd.sh` (`SEEDS_DIR`) resolve a missing or relative evidence dir (default `.integration/evidence/t2n`) via `tools/integration/evidenceDir.sh`: cwd, this worktree's `workspace/`, then the main checkout's `workspace/`; none found = one line naming the paths tried, exit 2.
+
 **Lab stage: player faint replacement (lsf2).** The engine lab stage (`labBackedStageOptions`, tools/compare/appTrace.ts) can now run past a player faint: before, the forced party menu rebuilt its three rows from
 rental records and threw `playerParty[0] max HP N does not match rental record max HP M` for any lab whose mons a record cannot express (Lv5 / Lv12 / Lv20 leads, set EVs). The seam is an optional last parameter
 `labParty` on `createPartySelectStateFromForcedSwitch` (src/engine/partySelect.ts, type `PartySelectLabParty`: species, speciesName, level, personality, abilitySlot, friendship, item, a `Pick` of `FactoryCorpusPartyMemberState`) and an optional

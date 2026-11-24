@@ -41,8 +41,11 @@ def find_rom(key, fp, roots):
         root = Path(root)
         for d in [root, *(c for c in root.glob("*") if c.is_dir())] if root.is_dir() else []:
             f = d / f"{key}.fp"
-            if f.is_file() and f.read_text().strip() == fp and (d / f"{key}.rom.json").stat().st_size and (d / f"{key}.se.json").stat().st_size:
-                found.append((f.stat().st_mtime, d))
+            try:
+                if f.is_file() and f.read_text().strip() == fp and (d / f"{key}.rom.json").stat().st_size and (d / f"{key}.se.json").stat().st_size:
+                    found.append((f.stat().st_mtime, d))
+            except OSError:
+                continue
     return max(found)[1] if found else None
 
 
