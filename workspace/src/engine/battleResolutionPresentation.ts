@@ -2736,6 +2736,7 @@ function moveAnimationScriptLeadTiming(
  * bdt1-dig-player-on, attack-turn SEs +10 .. +11 before, 0 .. -2 after).
  */
 const TWO_TURN_MOVES: ReadonlySet<number> = new Set([13, 19, 76, 91, 130, 143, 291, 340]);
+const MOVE_SOLAR_BEAM = 76;
 const TWO_TURN_SECOND_PRINT_PRESS_ROWS = 6;
 const TWO_TURN_PLAYER_NO_PRESS_ROWS = 10;
 /**
@@ -2746,7 +2747,22 @@ const TWO_TURN_PLAYER_NO_PRESS_ROWS = 10;
  */
 const CONFUSION_ENDED_SCRIPT = "BattleScript_MoveUsedIsConfusedNoMore";
 const TWO_TURN_AFTER_CONFUSION_PRINT_ROWS = 46;
+function previousActionBodyIsPlaceholder(events: readonly BattleKernelSemanticEvent[], index: number): boolean {
+  let i = index - 1;
+  while (i >= 0 && events[i]!.provenance?.sourceLabel === "BattleScript_MoveEnd") i -= 1;
+  for (; i >= 0; i -= 1) {
+    const e = events[i]!;
+    if (e.provenance?.sourceLabel === "BattleScript_MoveEnd") return false;
+    const payload = e.payload;
+    if (payload.kind === "animation" && payload.animationId === "MOVE_ANIMATION") {
+      return !bodyLeadRuleApplies(battleMoveAnimationRequest(singlesBattler(payload.battler ?? -1, "two-turn previous body"), payload.target, payload.arguments).moveId);
+    }
+  }
+  return false;
+}
 function twoTurnSecondPrintLead(
+  events: readonly BattleKernelSemanticEvent[],
+  index: number,
   event: BattleKernelSemanticEvent,
   beforeRules: BattleScriptRulesContext,
   actionSnapshot: BattleScriptActionMessageSnapshot | null | undefined,
@@ -2758,6 +2774,8 @@ function twoTurnSecondPrintLead(
     || (event.provenance?.sourceLabel !== "BattleScript_HitFromAtkString" && event.provenance?.sourceLabel !== "BattleScript_HitFromAccCheck")) return null;
   if ((beforeRules.battlers[actionSnapshot!.attacker]!.status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_MULTIPLETURNS) === 0) return null;
   const exec = event.provenance.instructionExecution;
+  // ttb1: the press lead is a locked continuation's; after another action's MoveEnd the transition already carries the print's ROM row (bht1: residual 0 after KC / Slash / super effective / asleep). A placeholder previous body (Tackle / Growl, no adapter) is 21 .. 27 rows short and keeps the lead as cover.
+  if (currentMove === MOVE_SOLAR_BEAM && previous?.provenance?.sourceLabel === "BattleScript_MoveEnd" && !previousActionBodyIsPlaceholder(events, index)) return null;
   const afterConfusionPrint = previous?.payload.kind === "message" && previous.provenance?.sourceLabel === CONFUSION_ENDED_SCRIPT && previous.provenance.instructionExecution !== undefined
     ? previous.provenance.instructionExecution + TWO_TURN_AFTER_CONFUSION_PRINT_ROWS : 0;
   return { leadFrames: TWO_TURN_SECOND_PRINT_PRESS_ROWS - (actionSnapshot!.attacker === 0 ? TWO_TURN_PLAYER_NO_PRESS_ROWS : 0) + exec - afterConfusionPrint };
@@ -6595,8 +6613,8 @@ export function projectBattleResolutionCommands(
         advance: "automatic",
         ...(selfConfusionOff ? { leadFrames: SELF_CONFUSION_OFF_PRE_PRINT_ROWS } : {}),
         ...(event.provenance?.sourceLabel === FOCUS_PUNCH_LOST_FOCUS_SCRIPT ? { leadFrames: focusPunchLostFocusPrePrintRows(commands) } : {}),
-        ...(twoTurnSecondPrintLead(event, beforeRules, actionSnapshot, events[index - 1]) ?? {}),
-        ...(carryBeforeGlyph > 0 ? { leadFrames: (twoTurnSecondPrintLead(event, beforeRules, actionSnapshot, events[index - 1])?.leadFrames ?? 0) + carryBeforeGlyph } : {}),
+        ...(twoTurnSecondPrintLead(events, index, event, beforeRules, actionSnapshot, events[index - 1]) ?? {}),
+        ...(carryBeforeGlyph > 0 ? { leadFrames: (twoTurnSecondPrintLead(events, index, event, beforeRules, actionSnapshot, events[index - 1])?.leadFrames ?? 0) + carryBeforeGlyph } : {}),
         ...(endTurnChainLeadRows(events, index, (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) === 0) > 0
           ? { leadFrames: endTurnChainLeadRows(events, index, (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) === 0) } : {}),
         ...(payload.messageId === "STRINGID_TARGETFAINTED"
