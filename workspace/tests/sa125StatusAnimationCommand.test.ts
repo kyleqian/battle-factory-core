@@ -133,13 +133,14 @@ function anchors(seed: number): { anchors: Anchor[]; unanchored: number; offAnim
   const on = battleSegments(seed, "on").flatMap((s) => s.commands.map((c: any) => ({ c, events: s.events })));
   // hse2 item 2: the Scene OFF confusion print before the used print holds 64 + 3 + 4 (ROM print -> used print 94 vs ON 90, hpf4m-confuse-off,
   // tests/hse2OffStatusHeads.test.ts); this test is about the status animation alone, so read that print at the ON hold (cfx1: 64 + 1 for the confusion head).
+  // cre1: the OFF used print also holds the used move's attackcanceler -> attackstring gap (71 + gap - 1 = 70 / 71 / 72), read at the same 65.
   // ohs1: the same for the Scene OFF ConfusedNoMore (64 + 5) / InLove (64 + 3 + 3) prints before the used print (T2 OFF s7295 d8 / s6568 d29).
   const confusionOffHold = (c: any, events: any[]) => c.type === "message"
-    && (((c.timing?.holdFrames === 71 || c.timing?.holdFrames === 67) && events.find((e: any) => e.sequence === c.eventSequence)?.payload.messageId === "STRINGID_PKMNISCONFUSED")
+    && (((c.timing?.holdFrames === 71 || c.timing?.holdFrames === 67 || c.timing?.holdFrames === 70 || c.timing?.holdFrames === 72) && events.find((e: any) => e.sequence === c.eventSequence)?.payload.messageId === "STRINGID_PKMNISCONFUSED")
       || (c.timing?.holdFrames === 69 && events.find((e: any) => e.sequence === c.eventSequence)?.payload.messageId === "STRINGID_PKMNCONFUSEDNOMORE")
       || ((c.timing?.holdFrames === 70 || c.timing?.holdFrames === 67) && events.find((e: any) => e.sequence === c.eventSequence)?.payload.messageId === "STRINGID_PKMNINLOVE"))
     ? { ...c, timing: { ...c.timing, holdFrames: events.find((e: any) => e.sequence === c.eventSequence)?.payload.messageId === "STRINGID_PKMNINLOVE" ? 65
-      : c.timing.holdFrames === 71 || c.timing.holdFrames === 67 ? 65 : 67 } } : c;
+      : events.find((e: any) => e.sequence === c.eventSequence)?.payload.messageId === "STRINGID_PKMNISCONFUSED" ? 65 : 67 } } : c;
   const off = battleSegments(seed, "off").flatMap((s) => s.commands.map((c: any) => ({ c: confusionOffHold(c, s.events), events: s.events })));
   const messages = (l: typeof on) => l.filter((x) => x.c.type === "message").map((x) => x.c.messageId);
   expect(messages(on), `seed ${seed}: identical prints in both scenes`).toEqual(messages(off));
@@ -202,12 +203,12 @@ const SEEDS = [7, 11, 12, 18, 19, 20, 49, 60, 76, 87, 101];
 // "cfm1") showed the ROM identity holds (ON - OFF = 100 from `return` on) and the engine is right (OFF exact, ON within 1 row):
 // the extra here is this test's own normalisation of the OFF confusion hold applied to OFF only. fpl1 (chp1): the ON "is confused!" head
 // holds 64 + 1 (cfx1: 65; fpl1 had 64 + 2; OFF is read at the same 65 here), and the command carries 6 rows before the used
-// print (cfa1's 5 re-derived with the shorter head on the six cfa1 labs) or 4 before the self-hit print (ROM `DoSelfConfusionDmg` 104, not 105). Not dropped: the rows are still inside the ON command (docs/aud251 "fpl1").
+// print (cfa1's 5 re-derived with the shorter head on the six cfa1 labs), 5 / 7 when the used move has 0 / 2 script rows between its `attackcanceler` and `attackstring` (cre1: BattleScript_EffectPsychUp, EffectStatDown; ROM labs cfa1-conf-psychup-s1-on, cre1-conf-growl-s1-on), or 4 before the self-hit print (ROM `DoSelfConfusionDmg` 104, not 105). Not dropped: the rows are still inside the ON command (docs/aud251 "fpl1").
 // Only when the next message is the used / self-hit print (the engine's condition), so on this path the extra is 0, 4 or 6.
 const cfa1PreMoveConfusionRows = (a: { animation: string; path: string; length: number; gate: number }): number => {
   const extra = a.length - a.gate - ROWS[a.animation]!;
   // pmk1: the Scene ON "is in love" head holds 64 + 1 (OFF read at 65 above) and its command carries the 4 rows before the used print.
-  return (a.animation === "CONFUSION" && a.path === "STRINGID_PKMNISCONFUSED" && (extra === 4 || extra === 6) ? extra : 0)
+  return (a.animation === "CONFUSION" && a.path === "STRINGID_PKMNISCONFUSED" && (extra >= 4 && extra <= 7) ? extra : 0)
     || (a.animation === "INFATUATION" && a.path === "STRINGID_PKMNINLOVE" && extra === 4 ? extra : 0);
 };
 // tnl1 (ROM labs gsp3-toxic / b4m-thunderwave, docs/aud251-s11-scoreboard-refresh.md "tnm1" 1.C): a move-inflicted PSN / BRN / PRZ (BattleScript_MoveEffect{Poison,Toxic,Burn,Paralysis}) holds its animation 2 rows longer, the ROM's print row (369 vs 367).
