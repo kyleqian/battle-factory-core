@@ -2572,9 +2572,9 @@ const HPD4_BODY_LEAD_MOVE_IDS: readonly number[] = [49, 82, 111, 205, 301, 69];
  * hpd8: the "shape A" bodies of hpd7 / hpd7c (docs/hpd1-hp-hold.md): the accepted live window is the ROM's gAnimScriptActive length + 1, the ROM gap after it is 4.
  * Their lead is the kernel's instruction count (no table), and the rows after the body are 6 - pre - post (`liveMoveHitTailRows`). Aerial Ace, Psychic,
  * Thunderbolt, Double-Edge, Quick Attack, Body Slam, Ancient Power, Giga Drain, Ice Beam, Surf, Dig (the attack turn only: the charge turn is shape C),
- * Struggle, Rock Slide, Bubble Beam, Fire Blast, Magical Leaf.
+ * Struggle, Rock Slide, Bubble Beam, Fire Blast, Magical Leaf, Fly (mmc1: second turn, s165 d11).
  */
-const HPD8_SHAPE_A_MOVE_IDS: ReadonlySet<number> = new Set([332, 94, 85, 38, 98, 34, 246, 202, 58, 57, 91, 165, 157, 61, 126, 345, 53, 76, 44, 188, 89, 185, 56, 59]);
+const HPD8_SHAPE_A_MOVE_IDS: ReadonlySet<number> = new Set([332, 94, 85, 38, 98, 34, 246, 202, 58, 57, 91, 165, 157, 61, 126, 345, 53, 76, 44, 188, 89, 185, 56, 59, 19]);
 /**
  * sta5 (docs/aud249-general-anim-sounds.md): the move-inflicted status bodies of sta4 (Flatter 260, Swagger 207, Spore 147, Toxic 92): the rows after the
  * body that put the next command (`stat` / `status`, then the stat or status animation) on the ROM row, net of the 2-row `stat` / `status` command.
@@ -2790,10 +2790,10 @@ const TWO_TURN_PLAYER_NO_PRESS_ROWS = 10;
  * ftp1 (s8108 d12 gen:219 +48 once cfs1's Levitate hold landed): a second-turn used print right after the "snapped out of its confusion" print
  * (`BattleScript_MoveUsedIsConfusedNoMore`, a separate presented command with its own hold) carries that script's wait rows in its instruction
  * execution (3 -> 78), which the lead above would count again (lead 84 against the ROM's 35: used glyph row 285 = ROM 285 after the change, the
- * Levitate print and the weather tick -1). The rows past the confusion print's execution that the lead does not owe are measured at 46 (one window).
+ * Levitate print and the weather tick -1). The rows past the confusion print's execution that the lead does not owe are measured at 46 (one window); mmc1: 57 once a miss / status print before it runs the 11-row confirm walk (s8108 d12).
  */
 const CONFUSION_ENDED_SCRIPT = "BattleScript_MoveUsedIsConfusedNoMore";
-const TWO_TURN_AFTER_CONFUSION_PRINT_ROWS = 46;
+const TWO_TURN_AFTER_CONFUSION_PRINT_ROWS = 57;
 function previousActionBodyIsPlaceholder(events: readonly BattleKernelSemanticEvent[], index: number): boolean {
   let i = index - 1;
   while (i >= 0 && events[i]!.provenance?.sourceLabel === "BattleScript_MoveEnd") i -= 1;
@@ -2821,8 +2821,8 @@ function twoTurnSecondPrintLead(
     || (event.provenance?.sourceLabel !== "BattleScript_HitFromAtkString" && event.provenance?.sourceLabel !== "BattleScript_HitFromAccCheck")) return null;
   if ((beforeRules.battlers[actionSnapshot!.attacker]!.status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_MULTIPLETURNS) === 0) return null;
   const exec = event.provenance.instructionExecution;
-  // ttb1: the press lead is a locked continuation's; after another action's MoveEnd the transition already carries the print's ROM row (bht1: residual 0 after KC / Slash / super effective / asleep). A placeholder previous body (Tackle / Growl, no adapter) is 21 .. 27 rows short and keeps the lead as cover.
-  if (currentMove === MOVE_SOLAR_BEAM && previous?.provenance?.sourceLabel === "BattleScript_MoveEnd" && !previousActionBodyIsPlaceholder(events, index)) return null;
+  // ttb1 / mmc1: the press lead is a locked continuation's (mmc1: for the foe's Dig / Fly / Bounce too, once the miss / status continuation runs the confirm walk; the player's second turn keeps it, s3738 d47); after another action's MoveEnd the transition already carries the print's ROM row (bht1: residual 0 after KC / Slash / super effective / asleep). A placeholder previous body (Tackle / Growl, no adapter) is 21 .. 27 rows short and keeps the lead as cover.
+  if ((currentMove === MOVE_SOLAR_BEAM || actionSnapshot!.attacker === 1) && previous?.provenance?.sourceLabel === "BattleScript_MoveEnd" && !previousActionBodyIsPlaceholder(events, index)) return null;
   const afterConfusionPrint = previous?.payload.kind === "message" && previous.provenance?.sourceLabel === CONFUSION_ENDED_SCRIPT && previous.provenance.instructionExecution !== undefined
     ? previous.provenance.instructionExecution + TWO_TURN_AFTER_CONFUSION_PRINT_ROWS : 0;
   return { leadFrames: TWO_TURN_SECOND_PRINT_PRESS_ROWS - (actionSnapshot!.attacker === 0 ? TWO_TURN_PLAYER_NO_PRESS_ROWS : 0) + exec - afterConfusionPrint };
@@ -8249,17 +8249,15 @@ export function appendBattleResolutionContinuation(
 }
 
 /**
- * bbk1 item 3 (chg4's narrowed rule): a Scene ON continuation after the opponent's locked action whose first print is the player's own plain hit
- * (not the locked battler's unleash, no miss) runs the confirm walk as OFF's does: ROM Ice Beam printstring at commit + 12 (s830 d1).
+ * bbk1 item 3 (chg4's narrowed rule), widened by mmc1: a Scene ON continuation after the opponent's locked action whose first print is the other battler's
+ * own used print (not the locked battler's unleash) runs the confirm walk as OFF's does: ROM Ice Beam printstring at commit + 12 (s830 d1). mmc1: a miss
+ * ("But it missed!", `BattleScript_PrintMoveMissed`) or a status move (Sand-Attack, Follow Me) starts on the same row, 11 rows after the press (s3738 d47, ttb1 Dig / Fly labs).
  */
 function sceneOnPlainHitContinuation(events: readonly BattleKernelSemanticEvent[], lockedAction: BattleResolutionLockedActionIdentity): boolean {
   const first = events[0];
   if (first === undefined || first.payload.kind !== "message" || first.payload.messageId !== "STRINGID_USEDMOVE") return false;
   const attacker = first.payload.actionSnapshot?.attacker;
-  if (attacker === undefined || attacker === lockedAction.battler) return false;
-  if (events.some(({ payload }) => payload.kind === "message" && (payload.messageId === "STRINGID_ATTACKMISSED" || payload.messageId === "STRINGID_PKMNAVOIDEDATTACK"))) return false;
-  const nextUsed = events.findIndex((event, index) => index > 0 && event.payload.kind === "message" && event.payload.messageId === "STRINGID_USEDMOVE");
-  return events.slice(0, nextUsed < 0 ? events.length : nextUsed).some(({ payload }) => payload.kind === "hp-change" && payload.battler === 1 - attacker);
+  return attacker !== undefined && attacker !== lockedAction.battler;
 }
 
 /**
