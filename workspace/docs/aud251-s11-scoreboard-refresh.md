@@ -5476,7 +5476,7 @@ Matches the supervisor's figures minus tnl1 (ON 5,526 − 404, OFF 537 − 8).
 | 3 | 05 end-of-turn tick / status animation (gen:148 / 180) | 585 / 64 (306) | 0 | s648 d12 Leech Seed −5 (50), s165 d17 gen:148 −8 (36), s499 d1 +5 (30), s648 d10 −7 (30) | half own | tick tables (ldw1 leftovers) | no recipe, needs a lab (Leech Seed after Confuse Ray / Pain Split) |
 | 4 | 06 two-turn charge / second-turn body | 349 / 28 (154) | 0 | s8108 d11 Dig +9 (50), s8108 d8 (42), s6 d1 (30), s830 d10 Solar Beam +18 (24) | own | Dig / Solar Beam rows | stm1 item 2 (Dig); Solar Beam ttf1 reverted |
 | 5 | 03 hit SE 12 / 13 / 14 | 256 / 118 (77) | 244 / 66 (218) | OFF: segment start 103, after hit SE 100; ON: after a move body 248 | ON mostly ±1 carried (D4); OFF own | hit-SE tail after the body | D4 for ±1; OFF has hse1m (M) and Bounce +6 (bcm1) |
-| 6 | 04 Focus Punch setup / lost-focus / item rows | 317 / 23 (65) | 0 | s1415 d50 −2 (52), s310 d4 / d5 +5 (40 / 35) | inherited | Focus Punch rows | ftp1 refit (M) |
+| 6 | 04 Focus Punch setup / lost-focus / item rows | 317 / 23 (65) | 0 | s1415 d50 −2 (52), s310 d4 / d5 +5 (40 / 35) | inherited | Focus Punch rows | ftp1 refit (M) | <!-- fpr1: strike body SE -2 and the item chain after the asleep SLP animation LANDED by fpr1 (section at the end); s1415 d50 pre-pass -11 and the s1415 / s2230 item windows left -->
 | 7 | 01a faint chain (SE 16, cry@faint) | 260 / 47 (72) | 90 / 19 (32) | after hit SE; cry@faint +1 clean ×26 | cry@faint +1 is a possible own rule; the rest inherited | cry-at-faint delay | no recipe; one lab (faint cry) |
 | 8 | 01b send-in / recall / party summary (SE 15 / 114) | 205 / 49 (103) | 100 / 33 (66) | s6568 d104 −16 / −20 (harness press pulse) | own + harness | send-in rows | s6568 is a harness artifact; the Roar / Whirlwind drag group is LANDED by snr1 (below); the party-summary-after-faint group is a measured negative (snr1) |
 | 9 | 07b status-application body (B4) | 96 / 28 (77) | 0 | status bodies | own | B4 body rows | lrm1 / stm1 style recipe per move |
@@ -5762,3 +5762,34 @@ Commit `b0c539c20` (master `e071d1be4` -> `b0c539c20`); no push. Evidence (git-i
 - Census 0..199 (`lsd194Census.sh` shards 0 1, `rst197CensusDelta.py --digest`): eventsDigest + error identical 200 / 200 in ON and OFF, 0 type changes, 0 changed commands (ON shards differ byte-wise only in the timing field). tree/ copies deleted.
 - Tests: every tests/ file naming `BODY_SOUND_LEAD_ROWS` / `bodyLeadFrames` + all `aud242*`, `randomRoundSoak*`, `lbrd`, `fam1*` pass (one pin moved, above). `battleSoundTable.ts --check` not needed (no animation script or `moveAnimSounds.ts` change).
 - Play change named: Scene ON Defense Curl / Growth body SEs play 4 rows earlier (ROM-faithful); no battle rule / RNG / event-order change.
+
+## fpr1 (2026-11-24, side lane, Scene ON first, OFF checked): Focus Punch strike body SE lead (LANDED), item chain after the asleep SLP animation (LANDED, t2k10 class 6 s310 d4 / d5); the rest is carried or a menu-less forced-turn term
+
+Base: fold-20261124d (`1af980e6d`). Commits: `a4475a832` (264 body lead), `04e84697d` (asleep item lead). Evidence (git-ignored): `.integration/evidence/fpr1/` (`t2-{base,a1,b1}`, `lab-{base,a1,slp,slp2}`, `a/` probes of s1415 d38..d52 / s310 d2..d6). Re-measured windows by path: successful strike (pre-pass print, charge, body), lost focus after a hit / hp / status, second mover, behind Substitute.
+
+### 1. Focus Punch (264) strike body SE lead -2: LANDED by fpr1 (`BODY_SOUND_LEAD_ROWS` `[264, -2]`)
+- `Move_FOCUS_PUNCH` reaches its first `playsewithpan` after two `loadspritegfx`, `delay 1`, the IsContest / IsTargetPlayerSide task + jump pairs, `waitbgfadein`, monbg and `setalpha`; the four body SEs were 2 rows early on the clock in the `mechanic-focus-punch-*-on` labs and in T2 s1415 (every strike window -2). Same sign as the Struggle `[165, -2]` / Rest precedents.
+- Labs (ON, mass): fpc / mechanic focus-punch set 77 -> 53. T2 ON 4,340 -> 4,316 (s1415 -24). Pin: `tests/fpc180FocusPunchLive.test.ts` (new test, 264 `soundAgeLeadFrames` -2).
+
+### 2. Item chain after the asleep SLP status animation: LANDED by fpr1 (`HELD_ITEM_EFFECT_AFTER_ASLEEP_LEAD_FRAMES` 10, `heldItemEffectAfterAsleepLead`)
+- Not Focus Punch specific: s310 d4 / d5 are a Leftovers chain behind `BattleScript_MoveUsedIsAsleep` (status-animation SLP, 3-row jump to MoveEnd, then the item script restarts). New labs `tools/battle-lab/fpr1-rest-leftovers-{on,off}.json` (Rest, then the opponent's attack on a sleeping Leftovers holder) reproduce it generically.
+- ROM: `ItemHealHP_Ret+0x7` SEs sit 16 rows after the engine command start; the engine's 15-row restart lead put them 23 after, i.e. +5 (plus +2 carried from the SLP SE 197). Lead 15 -> 10 when the receipts before the item animation are the asleep status-animation + MoveEnd.
+- Lab fpr1-rest-leftovers-on ON mass 38 -> 13 (item SEs now +2, carried from SE 197 +2; OFF 0 -> 0). T2 ON 4,316 -> 4,266 (all of it s310, 236 -> 186). Pin: `tests/fpr1AsleepHeldItem.test.ts`.
+
+### 3. Acceptance (fold-20261124d -> `04e84697d`)
+| | before | after |
+|---|---:|---:|
+| T2 ON mass (exact) | 4,340 (4,059) | 4,266 (4,079) |
+| T2 OFF mass (exact) | 476 (921) | 476 (921) |
+| missing / extra | 0 / 0 | 0 / 0 (both scenes) |
+| labs (ON) focus-punch set / rest-leftovers | 77 / 38 | 53 / 13 |
+
+- Census 0..199 (`lsd194Census.sh` shards 0 1, `rst197CensusDelta.py --digest`): eventsDigest + error identical 200 / 200 in ON and OFF; OFF byte-identical 2 / 2, ON 7 of 200 battles changed in timing fields only (0 type changes). tree/ copies deleted.
+- Tests: all 141 files importing `battleResolutionPresentation.ts` + `randomRoundSoak*` + `lbrd` + the new files pass; no pin needed re-pinning. No animation script / `moveAnimSounds.ts` change, so `battleSoundTable.ts --check` / `fam1*` not needed.
+- Play change named: Scene ON Focus Punch strike body SEs play 2 rows later, and a Leftovers animation after an asleep turn starts 5 rows earlier (both ROM-faithful); no rule / RNG / event-order change.
+
+### 4. What is left (measured, not landed)
+- s1415 d50 second Focus Punch pre-pass SE 171 is -11: the turn is a forced (menu-less) one; the ROM has ~11 extra rows (foe AI choose-move rows 705 -> 713, then `BattleScript_FocusPunchSetUp` at 718), the engine's message -> SE gap is 11 in both cases. Needs a forced-turn lead for the pre-pass message in the same place as the Struggle forced-handoff hold (`tests/enc276ForcedTurnNoMenu.test.ts`); one window, not landed.
+- s1415 res1 / 11 / 15 / 18 and s2230 res2 item chains after the SLP animation did not move (their receipts before the item script differ from the lab's); the recipe above covers only the status-animation + MoveEnd shape. Re-probe those seeds' preceding events before widening it.
+- Scene OFF: the Leftovers print after the asleep turn is +8 in `fpr1-rest-leftovers-on.off` (print only, no SE, so T2 OFF cannot see it).
+- SE 90 -> item chain -3 / -4 (s310 d2, s1415 d47 / d48): mostly carried from fpf1's remaining -5; +-1 / +2 body windows after Rest / Yawn / Cross Chop are jitter / carried from the preceding command.
