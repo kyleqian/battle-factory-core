@@ -5640,8 +5640,8 @@ Commits `621144966` (confusion) and `cd6047bac` (Psych Up helpers); no push. Evi
 
 ### 4. What is left
 
-- The cfa1 Confuse Ray / Psych Up labs rose by a uniform +1 per window: the Confuse Ray entry term (EffectConfuse +0x2e -> status animation, ex1 vs ex2) was cancelled by the old -1 / -2 error and now shows. Not fixed here (the lab regression 92 -> 123 is that term; T2 ON improved 174).
-- Psych Up's own print after the S-lead body (+1 in psychup s1) and s2 +5 in T2 ON.
+- **(cre1: not a term; see the cre1 section.)** The cfa1 Confuse Ray / Psych Up labs rose by a uniform +1 per window: the Confuse Ray entry term (EffectConfuse +0x2e -> status animation, ex1 vs ex2) was cancelled by the old -1 / -2 error and now shows. Not fixed here (the lab regression 92 -> 123 is that term; T2 ON improved 174).
+- Psych Up's own print after the S-lead body (+1 in psychup s1) and s2 +5 in T2 ON. **LANDED by cre1** (the print is the used-print `attackcanceler -> attackstring` gap, not an S-lead term; T2 s499 -5).
 - cfm1: the sa125 / sag130 cfa1 exception stays.
 
 ## snr1 (2026-11-24, ts lane, Scene ON first, OFF checked): Roar / Whirlwind drag send-in LANDED (class 8 group b); party-summary-after-faint is a measured negative; the class 3 Leech Seed tick carry is a recipe (S11, ISSUES #219)
@@ -5678,4 +5678,33 @@ s648 d12 (-3 at the tick), s648 d10 (-3), s165 d17 (status-animation 148, -6; no
 ### 3. What is left
 
 Party-summary-after-faint (~50 mass per scene, needs a better AI-choice CPU-cost model, not a constant), switch-out SE 15 after a faint, OFF switch-in rows, ON s2 d6 / d12, the class 3 message tail above (and s165 d17 status 148 -6, not probed).
+
+## cre1 (2026-11-24, side lane, Scene ON first, OFF checked): cfx1's lab leftovers - the used print after a confusion head is a script-structure term (LANDED); the uniform +1 is the ROM's Confuse Ray CPU phase, not a term
+
+Commits `199ceddef` (ON) and `4ed0d87bb` (OFF); no push. Evidence (git-ignored): `.integration/evidence/cre1/` (`base`, `a1`, `labs`, `off`, `off2`, `t2-{base,after}`, `census`).
+
+### 1. Psych Up s1 (+1) and the Psych Up / Psychic labs' print term: LANDED (`attackStringCancelerGapRows`, `battleResolutionPresentation.ts`)
+- After the confusion head's `status2animation` the script runs `jumpifbyte`, `return`, the re-entered `attackcanceler`, **the rows between it and `attackstring`**, then the used print. cfa1's / fpl1's `PRE_MOVE_CONFUSION_TO_USED_PRINT_ROWS` 6 was fitted on a hit move (`HitFromAtkCanceler: attackcanceler; accuracycheck; HitFromAtkString: attackstring`, gap 1). `BattleScript_EffectPsychUp` is `attackcanceler; attackstring` (gap 0): the ROM prints 1 row sooner (last SE 176 -> print 32; Psychic 33). `BattleScript_EffectStatDown` is `attackcanceler; jumpifstatus2; accuracycheck; attackstring` (gap 2): 1 row later. The gap is read from the used message's `provenance.programCounter` (instructions back to `B_SCR_OP_ATTACKCANCELER`); rows = 6 + gap - 1. 86 of the ~130 effect scripts have gap 0 (all the status moves).
+- Verified on the ROM in three moves (new labs `tools/battle-lab/cre1-conf-{growl,swordsdance}-s1-on.json` = the cfa1 Psych Up s1 lab with the player's move replaced): used print ROM / ENG Psych Up 734 / 734 (was +1), Swords Dance 736 / 736 (EffectStatUpAfterAtkCanceler, gap 0), Growl 738 / 738 (gap 2). Scene OFF the same three are off by +1 / +1 / -1 at HEAD and exact after (`CONFUSION_OFF_USED_PRINT_TIMING` holdFrames + gap - 1; the OFF labs' prints: psychup s1 / s2, growl, swordsdance all exact).
+- **sa125 / sag130 cfa1 exception: kept.** The rows stay inside the ON status command (the command carries 4 / 5 / 6 / 7 rows before the used / self-hit print by the used move's gap); the test whitelist is now `extra` 4..7, and the OFF normalisation of the confusion head (hold 71 -> 65) accepts 70 / 72 as well.
+
+### 2. The uniform +1 on cfa1 s2 / s3: the ROM's Confuse Ray CPU phase (no constant can match it)
+- ROM timeline, `labCompare.py table --rows --span 225:350`: s1 Confuse Ray animation end 336 -> `MoveEffectConfusion+0x7` (status2animation) 341; s2 / s3 end 335 -> 340. The same SE 130 row (233) in all three, and **animation end -> status animation start is 5 rows in all**: the body itself is 270 rows (s1) vs 269 (s2 / s3). This is the d4tails "optional lag" of MOVE_CONFUSE_RAY (`liveMoveTimingPolicy.ts` 109: 270 rows in 11 of 14 measured bodies, 269 in 3; "the phase of a window is its uninstrumented ROM body length"; a CPU / VBlank overrun during the animation's background load, not a script row). The engine takes the 270 (event) phase, which s1 and the aud242f / aud242b swagger / flatter labs match exactly; s2 / s3 are the 269 phase, so every row after the head's status animation reads +1 (16 rows Psychic, 23 Psych Up; cfx1's "Confuse Ray entry term" is this). Before cfx1 the engine was 1 row early after the print, which matched the 269 phase and missed the 270 one (s1 10) - a coincidence, not the term.
+- The seed enters only through Random() values (variable-cost software divides), so the phase is not derivable from the script; I did not change the policy (majority 270 stays).
+
+### 3. Acceptance (master `8a26355b3` -> `4ed0d87bb`)
+| | before | after |
+|---|---:|---:|
+| labs (labCompare, ON): cfa1 psychic s1 / s2 / s3 | 0 / 16 / 16 | 0 / 16 / 16 (unchanged: no gap) |
+| cfa1 psychup s1 / s2 / s3 | 11 / 34 / 34 | **0** / 23 / 23 |
+| ztl1-psychup, aud242f-swagger, aud242b-flatter | 14, 0, 6 | 14, 0, 6 |
+| T2 ON mass (exact) | 4,477 (4,061) | **4,472** (4,061); s499 197 -> 192, no other seed moved |
+| T2 OFF mass (exact) | 475 (919) | **470** (923); s499 -3, s6568 -1, s7682 -1 |
+
+- 0 missing / 0 extra in both. Census 0..199 (`lsd194Census.sh` shards 0 1, `rst197CensusDelta.py --digest`): eventsDigest + error identical 200 / 200 in ON and OFF, 0 type changes; 30 battles change commands in each scene (a confusion head before a gap-0 / gap-2 move: -1 / +1 on the head's command, the OFF message hold).
+- Tests (every file naming psych up / confusion / sceneOff / ohs1 / aud24x / aud249 / livePrep16 / liveR2Gates / soak / lbrd / chp1 / fpl1 / ssm1 / cfx1: 158 files, 4,959 tests): the only failures were `sa125StatusAnimationCommand` / `sag130StatusSeGate` (whitelist, above); no trajectory pin moved. `npm run typecheck` green.
+
+### 4. What is left
+- Psychic s2 / s3 (16) and Psych Up s2 / s3 (23) stay at the 269-phase +1: pre-cfx1 they read 6 / 17 only because the engine sat 1 row early. A way to read the phase from state (none found) would be needed.
+- Growl lab (new, not landed): the stat-down SE 245 is -25 and the print -29 after the used print (separate: the stat-down body of a confused second mover); Swords Dance lab: the SE 191 / 239 are +2 after the used print (the stat-up body rows). Neither is a head term.
 
