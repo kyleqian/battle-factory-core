@@ -42,6 +42,8 @@ export const FRAME_HZ = 16_777_216 / 280_896;
 const FRAME_MS = 1000 / FRAME_HZ;
 /** Fast-forward work per animation frame while resuming, so the page stays responsive. */
 const RESUME_BUDGET_MS = 12;
+/** ffw1: the most game frames one display frame may tick (setSpeed). */
+const MAX_SPEED = 8;
 
 export interface MountInternalOptions extends FactoryGameOptions {
   /** Replay `resume` inline inside the mount call instead of across animation frames. */
@@ -130,6 +132,7 @@ export function mountFactoryGame(options: FactoryGameOptions): FactoryGame {
     trace: (fromSegment) => game.trace(fromSegment),
     setAudio: (enabled) => game.setAudio(enabled),
     getAudio: () => game.getAudio(),
+    setSpeed: (speed) => game.setSpeed(speed),
     destroy: () => game.destroy(),
   };
 }
@@ -209,6 +212,8 @@ export function mountFactoryGameInternal(options: MountInternalOptions): Factory
   let destroyed = false;
   let crashed = false;
   let readySent = false;
+  /** ffw1: game frames per display frame (setSpeed); above 1 nothing reaches the audio player, the music tracker still follows. */
+  let speed = 1;
   // aud245: the player is a separate chunk (src/audio/player.ts), imported only when audio is asked for. Its sink is write-only:
   // events go in, nothing comes back, and a session ticks identically with or without it.
   const audioWanted = { enabled: options.audio?.enabled ?? false, volume: Math.max(0, Math.min(1, options.audio?.volume ?? 1)) };
@@ -221,7 +226,7 @@ export function mountFactoryGameInternal(options: MountInternalOptions): Factory
   const audioSink = {
     push(event: SoundEvent): void {
       music.push(event);
-      audio?.push(event);
+      if (speed === 1) audio?.push(event);
     },
   };
   session.attachSoundSink(audioSink);
@@ -243,7 +248,7 @@ export function mountFactoryGameInternal(options: MountInternalOptions): Factory
         audioLoading = false;
         if (destroyed) return;
         audio = createAudioPlayer({ enabled: audioWanted.enabled, volume: audioWanted.volume, baseUrl: options.audio?.baseUrl });
-        if (!resuming) audio.restore(music.events(), session.frame);
+        if (!resuming) audio.restore(speed === 1 ? music.events() : [], session.frame);
         if (battleSounds.current) audio.prefetch(battleSounds.current);
       },
       (error: unknown) => {
@@ -363,7 +368,7 @@ export function mountFactoryGameInternal(options: MountInternalOptions): Factory
     }
     session.preloadTrace(resuming.segments);
     resuming = null;
-    audio?.restore(music.events(), session.frame);
+    audio?.restore(speed === 1 ? music.events() : [], session.frame);
     prefetchBattleSounds();
     return true;
   }
@@ -398,7 +403,7 @@ export function mountFactoryGameInternal(options: MountInternalOptions): Factory
       if (screen !== null) emit({ type: "result-screen", ...screen, frame: session.frame });
     }
     if (last === null) last = time;
-    accumulator = Math.min(accumulator + (time - last), FRAME_MS * 8);
+    accumulator = Math.min(accumulator + (time - last) * speed, FRAME_MS * 8 * speed);
     last = time;
     while (accumulator >= FRAME_MS) {
       // Crash containment lives HERE, not in the session: the bench advance()
@@ -481,6 +486,14 @@ export function mountFactoryGameInternal(options: MountInternalOptions): Factory
         volume: audioWanted.volume,
         state: audio ? audio.state() : audioFailed ? "unsupported" : audioLoading ? "loading" : "off",
       };
+    },
+    setSpeed(value) {
+      const next = Number.isFinite(value) ? Math.max(1, Math.min(MAX_SPEED, Math.round(value))) : 1;
+      if (next === speed) return;
+      const wasFast = speed > 1;
+      speed = next;
+      // Going fast silences what is playing; coming back brings the music to the live frame (as after a resume's fast-forward).
+      if (audio && !resuming && wasFast !== speed > 1) audio.restore(speed === 1 ? music.events() : [], session.frame);
     },
     audioStats: () => audio?.stats() ?? null,
     advance(segments) {
