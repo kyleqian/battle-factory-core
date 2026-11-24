@@ -1542,6 +1542,26 @@ function critMessageBeforeResultMessage(events: readonly BattleKernelSemanticEve
     && (next.payload.messageId === "STRINGID_SUPEREFFECTIVE" || next.payload.messageId === "STRINGID_NOTVERYEFFECTIVE");
 }
 /**
+ * mtl1 (docs/aud251-s11-scoreboard-refresh.md "mtl1", T2 s648 d12, labs mtl1-confray-leech-*): `BattleScript_EffectConfuse` runs `seteffectprimary` (-> `BattleScript_MoveEffectConfusion`:
+ * `chosenstatus2animation; printstring; waitmessage LONG; return`), then `resultmessage; waitmessage LONG; goto BattleScript_MoveEnd`. After the confusion print's 64-row wait the ROM
+ * spends one row per command until the `goto` (`return`, `resultmessage`, a `waitmessage` that has nothing left to wait for): 3 rows before MoveEnd, where every other
+ * `waitmessage; goto` message tail has none (ROM EffectConfuse+0x36 ex0 -> MoveEnd+0x0 = 3 rows; the engine's command list reached MoveEnd 3 rows early).
+ */
+function confuseResultMessageTailRows(events: readonly BattleKernelSemanticEvent[], index: number): number {
+  if (events[index]!.provenance?.sourceLabel !== MOVE_EFFECT_CONFUSION_SCRIPT) return 0;
+  for (let back = index - 1; back >= 0; back -= 1) {
+    const candidate = events[back]!;
+    if (candidate.payload.kind !== "animation" || candidate.provenance?.sourceLabel !== "BattleScript_EffectConfuse" || candidate.provenance.programCounter === undefined) continue;
+    const instructions = BATTLE_SCRIPT_PROGRAM.instructions;
+    let pc = candidate.provenance.programCounter;
+    while (instructions[pc]?.opcodeName !== "B_SCR_OP_SETEFFECTPRIMARY") pc += 1;
+    let rows = 1;
+    for (pc += 1; instructions[pc]!.opcodeName !== "B_SCR_OP_GOTO"; pc += 1) rows += 1;
+    return rows;
+  }
+  return 0;
+}
+/**
  * Scene-OFF hit controller lifetime:
  * setup, 32 blink callbacks, completion, and waitstate release.
  * battle_controller_opponent.c:1804-1816,440-456;
@@ -6700,6 +6720,8 @@ export function projectBattleResolutionCommands(
                 const critHandoff = critMessageBeforeResultMessage(events, index) ? CRIT_TO_RESULT_MESSAGE_HANDOFF_ROWS : 0;
                 const timing = focusPunchPrePassMessageTiming(events, index, base) ?? chargeTurnEmptyBoxTiming(events, index) ?? hitAllLoopEmptyBoxTiming(events, index)
                   ?? (critHandoff > 0 ? Object.freeze({ minimumFrames: base.minimumFrames, holdFrames: base.holdFrames + critHandoff }) : base);
+                const confuseTail = confuseResultMessageTailRows(events, index);
+                if (confuseTail > 0) return Object.freeze({ minimumFrames: timing.minimumFrames, holdFrames: timing.holdFrames + confuseTail });
                 if (payload.messageId === "STRINGID_THEWALLSHATTERED") {
                   return Object.freeze({ minimumFrames: timing.minimumFrames, holdFrames: timing.holdFrames + BRICK_BREAK_WALL_PRINT_TAIL_ROWS });
                 }
