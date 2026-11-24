@@ -1078,7 +1078,7 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // merge of etp1 / etp2 with this run's fold (eqk1, chg2 / chg3, hie5, fnt2, trn226, msw2): 57508 (etp1) -> 94125 / battle 4 / depth 3 / turn 18; roundLost.
       // merge with the Mac's tdr1 (tri1 / wtl1 / sst1; the exploring presses land on new phases): 94125 / battle 4 / depth 3 / turn 18 ->
       // 68945 / battle 3 / depth 2 / turn 21; still OK / roundLost. A trajectory pin, not a ROM frame.
-      // swt1 (docs/swt1-swap-popup-input-timing.md: a swap-screen popup opened after a summary waits for its OpenMonPic, input at +58
+      // swi1 (docs/swi1-swap-popup-input-timing.md: a swap-screen popup opened after a summary waits for its OpenMonPic, input at +58
       // instead of +1; this game's first such popup is at 22899, its RIGHT lands at 22958 instead of 22905, and the presses after the swap
       // screen land on new phases): 68945 -> 69545; same battle 3 / depth 2 / turn 21 / roundLost. A trajectory pin, not a ROM frame.
       frames: 69545,
@@ -1143,7 +1143,7 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // etp1 (end-turn prints take the ROM end-turn rows; the exploring presses land on new phases): 58583 / turn 19 -> 57984 / turn 15; same battle 3 / depth 2 / roundLost. A trajectory pin, not a ROM frame.
       // merge of etp1 / etp2 with this run's fold: frames only, 58615 (fnt2) / 57984 (etp1) -> 57984; same battle 3 / depth 2 / turn 15 / roundLost.
       // merge with the Mac's tdr1 (tri1 / wtl1 / sst1): frames only, 57984 -> 57651; same battle 3 / depth 2 / turn 15 / roundLost.
-      // swt1 (see seed 0; the first post-summary popup is at 43452, its A lands at 43511 instead of 43467): 57651 -> 57793; same battle 3 /
+      // swi1 (see seed 0; the first post-summary popup is at 43452, its A lands at 43511 instead of 43467): 57651 -> 57793; same battle 3 /
       // depth 2 / turn 15 / roundLost.
       frames: 57793,
       outcome: "OK",

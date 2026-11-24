@@ -1,17 +1,17 @@
-// swt1 (docs/swt1-swap-popup-input-timing.md): when the swap screen's SUMMARY/SWAP/RECHOOSE popup takes A / B / DOWN, as on the ROM.
+// swi1 (docs/swi1-swap-popup-input-timing.md): when the swap screen's SUMMARY/SWAP/RECHOOSE popup takes A / B / DOWN, as on the ROM.
 // After a SUMMARY visit the engine let every later popup of the same swap screen take input from +1: `returnedFromSummary` is never
 // cleared and the post-summary readiness read it. On the ROM only the popup CB2_InitSwapScreen rebuilds skips OpenMonPic
 // (Swap_Task_HandleMenu STATE_MENU_INIT, battle_factory_screen.c:2589-2593); Swap_ShowMenuOptions clears fromSummaryScreen (:3706-3707),
 // so a popup a later A on a ball opens waits for OpenMonPic in STATE_MENU_SHOW_OPTIONS (:2594-2600) like the screen's first one.
 //
-// ROM numbers (the frame catcher's ROM driver with a press sweep, .integration/evidence/swt1/romsweep.py, seed 28 Scene ON, the
+// ROM numbers (the frame catcher's ROM driver with a press sweep, .integration/evidence/swi1/romsweep.py, seed 28 Scene ON, the
 // `reopendown` trace): from the A that opens a popup (P), a one-frame A, B or DOWN at P+k is taken from k = 58 on, ignored before, for
 // the screen's first popup and for a popup opened after a summary visit alike (A at +1 is the opening A still held, on both sides). The
 // popup rebuilt after the summary takes input from the summary B's +42 on the ROM; the engine takes it from +61 (handover +60, then +1):
 // a difference this change keeps (the doc's "Seen, not fixed"), pinned below as the engine's so that a change to it is deliberate.
 //
 // Driven by state, not frame numbers: seed 28, Scene ON, the soak's RandomPlayer ("winning-swap") outside the swap screen and a scripted
-// swap screen (makeSwt1.mjs `reopendown`'s prefix): slot 1 (SEALEO), its SUMMARY, back, B closes the rebuilt popup, A opens slot 1 again.
+// swap screen (makeSwi1.mjs `reopendown`'s prefix): slot 1 (SEALEO), its SUMMARY, back, B closes the rebuilt popup, A opens slot 1 again.
 // At each press the test branches the engine state: the press, k - 1 empty frames, then a one-frame A / B / DOWN at +k, against the same
 // frame without it. Fails on the base 1c0d55b82 (the popup after the summary takes input from +1).
 import { beforeAll, describe, expect, it } from "vitest";
@@ -96,7 +96,7 @@ function takenAt(before: EngineState, press: GbaButton, x: Press, max: number): 
 
 const from = (first: number, max: number) => Array.from({ length: max - first + 1 }, (_, i) => first + i);
 
-describe("swt1: the swap screen's popup takes input when the ROM's does", () => {
+describe("swi1: the swap screen's popup takes input when the ROM's does", () => {
   let found: Map<string, { state: EngineState; press: GbaButton }>;
   beforeAll(() => {
     found = marks();

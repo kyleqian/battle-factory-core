@@ -772,11 +772,11 @@ function advanceFactorySwapPresentationClocks(
     loadedDisplaySpecies,
   };
   const delay = readyDelay(advanced);
-  // swt1: only the popup CB2_InitSwapScreen rebuilt after a summary skips OpenMonPic (Swap_Task_HandleMenu STATE_MENU_INIT,
+  // swi1: only the popup CB2_InitSwapScreen rebuilt after a summary skips OpenMonPic (Swap_Task_HandleMenu STATE_MENU_INIT,
   // battle_factory_screen.c:2589-2593) and takes input one frame after the handover. Swap_ShowMenuOptions clears
   // fromSummaryScreen (:3706-3707), so a popup a later A on a ball opens waits for OpenMonPic (STATE_MENU_SHOW_OPTIONS,
   // :2594-2600) like the screen's first one. `returnedFromSummary` alone stays set for the rest of the screen. (The rebuilt popup's
-  // own first input is the summary B's +61 here, +42 on the ROM: docs/swt1-swap-popup-input-timing.md, "Seen, not fixed".)
+  // own first input is the summary B's +61 here, +42 on the ROM: docs/swi1-swap-popup-input-timing.md, "Seen, not fixed".)
   const effectiveDelay =
     controller.phase === "playerOptions" && factorySwapSummaryReshowShown(advanced)
       ? 1
@@ -1071,7 +1071,7 @@ export function beginFactorySwapSummaryReturn(
  * ball opened. `returnedFromSummary` stays set for the rest of the screen, so it cannot say this alone. The summary return clears
  * `selectedBallClock`, and only entering the popup from the picker (OpenMonPic in Swap_Task_HandleMenu STATE_MENU_INIT, :2589-2593)
  * sets it again. The rebuilt popup is shown in playerOptions and closed by B / RECHOOSE / SWAP (CloseMonPic, :2609-2619, :3989-4013);
- * in the closing phases this says that the closing pic is that one. Read by the renderer and, since swt1, by the popup's input timing
+ * in the closing phases this says that the closing pic is that one. Read by the renderer and, since swi1, by the popup's input timing
  * (`advanceFactorySwapPresentationClocks`: the rebuilt popup takes input one frame after the handover, a later fresh popup waits for
  * its OpenMonPic like the first one, as Swap_ShowMenuOptions has cleared `fromSummaryScreen`, :3706-3707).
  */

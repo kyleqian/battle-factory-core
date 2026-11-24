@@ -1,8 +1,8 @@
-# swt1: a swap-screen popup opened after a summary waits for its OpenMonPic (2026-11-24)
+# swi1: a swap-screen popup opened after a summary waits for its OpenMonPic (2026-11-24)
 
 A gameplay-timing bug of the Battle Factory swap screen that swp1 found (`docs/swp1-swap-popup.md`, "Seen, not fixed"); Kyle approved the
 fix on 2026-11-24 ("Yes, fix it"). Base: 1c0d55b82, the game the site runs (build `eb-49f4aa3056b93403` = a866d9ddc + swp1).
-(Master also has an older, unrelated step called swt1, without a doc: 70f0d8b11 "the next command after an opponent faint replacement /
+(Named swi1, not swt1: master already has an older, unrelated step called swt1, without a doc: 70f0d8b11 "the next command after an opponent faint replacement /
 AI send-in starts 9 frames later", `tests/swt1OpponentSendInNextPrint.test.ts`.)
 
 **The bug.** After a SUMMARY visit on the swap screen, every later SUMMARY/SWAP/RECHOOSE popup opened from the picker on the same swap
@@ -41,20 +41,20 @@ ENGINE_BUILD (the headless gameplay graph's hash, `node --experimental-strip-typ
 
 The frame catcher's ROM side (`tools/frame-catcher/romRun.py`, mGBA in process) cannot answer "which press does the ROM take": its
 driver replays the engine's menu presses at the engine's offsets from the menu's first frame and repeats a press without effect, and an
-engine press without effect is never replayed. So the ROM is asked directly. `romsweep.py` (`.integration/evidence/swt1/`) runs the
+engine press without effect is never replayed. So the ROM is asked directly. `romsweep.py` (`.integration/evidence/swi1/`) runs the
 catcher's driver on an engine run of the trace and, at each popup-opening A and summary B the driver makes, branches from the saved
 state before it: that press alone (one frame), k - 1 empty frames, then a one-frame A / B / DOWN at +k. A press is "taken" when the
 live tasks (function and tState), the swap / select `menuCursorPos` and `cursorPos` or the main callback after its frame (or one frame
 later) differ from the same frames without it; the state is then restored and the driver goes on. `engsweep.mjs` does the same on the
 engine (`tick` on saved engine states). Seed 28, Scene ON (spd2's seed: swap 1 is SEALEO in slot 1).
 
-Traces (`makeSwt1.mjs`, makeSpinda.mjs plus modes; generated on the fixed engine): swap 1 opens slot 1, its SUMMARY, back, B closes the
+Traces (`makeSwi1.mjs`, makeSpinda.mjs plus modes; generated on the fixed engine): swap 1 opens slot 1, its SUMMARY, back, B closes the
 rebuilt popup, A opens slot 1 again (P), then:
 
-- `swt1-reopendown-s28`: DOWN at P+10, +30, +56 (inside the ROM's wait), DOWN +58, UP +70, B +80, then the picker and quit.
-- `swt1-reopenb-s28`: B at +20, B at +58.
-- `swt1-reopena-s28`: A at +20, A at +58 (SUMMARY), back, B closes that rebuilt popup, quit.
-- `swt1-draftreopen-s28` (the select screen, below).
+- `swi1-reopendown-s28`: DOWN at P+10, +30, +56 (inside the ROM's wait), DOWN +58, UP +70, B +80, then the picker and quit.
+- `swi1-reopenb-s28`: B at +20, B at +58.
+- `swi1-reopena-s28`: A at +20, A at +58 (SUMMARY), back, B closes that rebuilt popup, quit.
+- `swi1-draftreopen-s28` (the select screen, below).
 
 ### Sweep: the first k at which A / B / DOWN is taken (every k from 1 to 75 / 90; all later k are taken too)
 
@@ -117,7 +117,7 @@ The ROM's select screen has its own `fromSummaryScreen`: `Select_Task_HandleMenu
 reshown popup goes through `STATE_MENU_RESHOW` -> `STATE_MENU_REINIT`, which waits for the palette fade and clears it (:1651-1666), and
 `STATE_MENU_SHOW_OPTIONS` clears it too (:1595-1602). The engine has no such flag on the draft: the summary returns to the draft's menu
 with the pic already open, its input waits for the summary transition, and every popup a later A on a ball opens goes through
-`openMonPic` and `isMonPicInputReady` (`monPic.ts`), the same gate as the first popup. Measured (`swt1-draftreopen-s28`: slot 0, its
+`openMonPic` and `isMonPicInputReady` (`monPic.ts`), the same gate as the first popup. Measured (`swi1-draftreopen-s28`: slot 0, its
 SUMMARY, back, B closes the reshown popup, A on slot 0 again with DOWN at +5 and +15, then RENT, two more rentals, YES):
 
 | popup | ROM | engine (base = fixed) |
@@ -125,7 +125,7 @@ SUMMARY, back, B closes the reshown popup, A on slot 0 again with DOWN at +5 and
 | a popup opened from the cursor (the first, and three after the summary visit) | +25 | +27 |
 | the reshown popup (from the summary's B) | +57 | +53 |
 
-A popup after a summary visit waits as long as the first one on both sides, so nothing to fix for swt1. The two offsets are older,
+A popup after a summary visit waits as long as the first one on both sides, so nothing to fix for swi1. The two offsets are older,
 independent input-timing differences (below).
 
 ## Gameplay checks
@@ -144,7 +144,7 @@ independent input-timing differences (below).
 
 ## Tests
 
-- `tests/swt1SwapPopupInputTiming.test.ts` (new): plays seed 28 by state (the soak's RandomPlayer "winning-swap" outside the swap screen,
+- `tests/swi1SwapPopupInputTiming.test.ts` (new): plays seed 28 by state (the soak's RandomPlayer "winning-swap" outside the swap screen,
   the swap screen scripted as `reopendown`'s prefix), finds the three presses by state and branches the engine state per +k: the first
   popup and the popup after the summary take A / B / DOWN from +58 (the ROM's), the rebuilt popup from the summary B's +61 (the engine's;
   the ROM's +42 is an `it.todo`). 4 passed, 1 todo; on the base 1 fails (the popup after the summary: taken from +1).
@@ -157,17 +157,17 @@ independent input-timing differences (below).
 
 ## Gates
 
-Branch `swt1-swap-input-timing` (from 1c0d55b82):
+Branch `swi1-swap-input-timing` (from 1c0d55b82):
 
 - `NODE_OPTIONS=--max-old-space-size=8192 npx tsc -b`: clean.
-- The swap-screen tests (every test file naming `factorySwap`, plus swp1, spd2 and swt1): 13 files, 258 passed, 1 todo.
+- The swap-screen tests (every test file naming `factorySwap`, plus swp1, spd2 and swi1): 13 files, 258 passed, 1 todo.
 - Full `npm test` on b6b44123a: 1,957 files passed, 44 skipped; 17,169 tests passed, 243 skipped, 1 todo, 0 failed. (A first run on
   6696d3d8c had one failure: `tests/abilityItemParityCensus.test.ts`, because `tools/report/ability-item-parity-census.ts` pins a site
   of `factorySwapPresentation.ts` by line number, `:130 ABILITY_NONE`, and a longer doc comment above it had moved it to :134. The
   comment is one line again.)
 - ENGINE_BUILD `eb-0c82cb1217b6eb3a` (base `eb-49f4aa3056b93403`; `tools/build/engineBuildCheck.ts`). `npm run build:lib` was not run.
 
-Trial merge of b6b44123a into master a65235589 (a scratch worktree, `.integration/evidence/swt1/trial`, merge commit e5518651f; master
+Trial merge of b6b44123a into master a65235589 (a scratch worktree, `.integration/evidence/swi1/trial`, merge commit e5518651f; master
 not moved): one conflict, `tests/randomRoundSoak.test.ts`, where both sides moved the exploring soak's "full" pins; resolved to
 master's trajectory with this change, measured on the merged tree: seed 0 40494 -> 40651 (battle 2 / depth 1 / turn 24), seed 1
 57634 -> 57776 (battle 3 / depth 2 / turn 15), roundLost both. `factorySwapPresentation.ts` merged cleanly. `tsc -b` clean; full
@@ -180,7 +180,7 @@ ENGINE_BUILD there `eb-6593d11cb0b0b714` (master's own `eb-cf7a9cb1d877618f`).
   reaches `STATE_MENU_HANDLE_INPUT` at +41, during `CB2_InitSwapScreen`'s palette fade-in, and that state checks only `monPicAnimating`,
   which `HideMonPic` cleared when the summary opened (:4112-4118). The engine takes it from +61 (`summaryReturn` hands over at +60, then
   +1). `docs/factory-swap-summary-return-probe.md` says DOWN at B+60 (29883) is rejected "during return fade", but its own dump shows the
-  cursor moved on that frame (re-run in `.integration/evidence/swt1/oldprobe/`): that probe measured only +60 and +61. A fix would take
+  cursor moved on that frame (re-run in `.integration/evidence/swi1/oldprobe/`): that probe measured only +60 and +61. A fix would take
   input during the fade-in (`summaryReturn` +42..+60), and the renderer would then have to draw a cursor move, a B close, SUMMARY or SWAP
   inside the fade: a gameplay and picture change of its own, for a decision.
 - **The select screen**: a popup opened from the cursor takes input at +27 on the engine, +25 on the ROM; the popup reshown after a
@@ -189,9 +189,9 @@ ENGINE_BUILD there `eb-6593d11cb0b0b714` (master's own `eb-cf7a9cb1d877618f`).
 - The catcher's swap popup anchor starts at the A on our side and at `Swap_Task_HandleMenu`'s install on the ROM's (+34), so popup presses
   reach the ROM 34 frames late (above).
 
-## Evidence (`.integration/evidence/swt1/`, not in git)
+## Evidence (`.integration/evidence/swi1/`, not in git)
 
-`makeSwt1.mjs` and the traces (`swt1-*-s28.json`, `.log.txt`); `romsweep.py`, `engsweep.mjs`, `showsweep.py`, `literal.sh` and their
+`makeSwi1.mjs` and the traces (`swi1-*-s28.json`, `.log.txt`); `romsweep.py`, `engsweep.mjs`, `showsweep.py`, `literal.sh` and their
 outputs in `sweep/` (`rom-reopendown.json`, `rom-draftreopen.json`, `rom-literal-*.json` / `.npy`, `eng-*.json`) and `sweep-eng-*.json`;
 `litpics.py`; catcher runs `catch-base/`, `catch-fix/` (`KEEP=1`; base = `git archive 1c0d55b82` in `base-game/`); `engdiff.py`;
 `census/`; `soakcmp.mjs`, `soakexplain.mjs` / `.sh`, `soakreplay.mjs`, `soakpin.mjs`, `soakpindiff.mjs` and `soak/`; the old summary
