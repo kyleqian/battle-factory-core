@@ -2257,6 +2257,26 @@ function heldItemEffectAfterPrintLead(events: readonly BattleKernelSemanticEvent
   return HELD_ITEM_EFFECT_AFTER_PRINT_LEAD_FRAMES + moveEndExecution - printExecution - waitFrames - 2;
 }
 /**
+ * hic1 (lab hic1-yawn-leftovers-on; T2 ON s1415 d1 / d11 / d15 / d18, s2230 d2, s310 d3): the end-turn `BattleScript_YawnMakesAsleep` (`statusanimation; printstring;
+ * waitmessage LONG; updatestatusicon; waitstate; makevisible; end2`) is entered 8 rows after `BattleScript_MoveEnd`'s row (ROM MoveEnd+0x0 874 -> Yawn+0x0 882, SLP SE 886 =
+ * MoveEnd + 12; the engine's SLP command started on the MoveEnd row, SE at +4): the animation (and the print after it) starts that much later. Scene ON only (Scene OFF has no
+ * status-animation command). A real SE gate (the sandstorm path, seg127 `yawn`) already holds the animation and replaces the lead.
+ */
+export const YAWN_SLEEP_ANIMATION_LEAD_ROWS = 8;
+const YAWN_MAKES_ASLEEP_SCRIPT = "BattleScript_YawnMakesAsleep";
+function yawnSleepAnimationLeadRows(event: BattleKernelSemanticEvent): number {
+  return event.provenance?.sourceLabel === YAWN_MAKES_ASLEEP_SCRIPT ? YAWN_SLEEP_ANIMATION_LEAD_ROWS : 0;
+}
+/**
+ * hic1: the item script (Leftovers / Sitrus ...) that restarts right after `BattleScript_YawnMakesAsleep`'s `makevisible` begins its animation 6 rows earlier than the
+ * 15-row restart lead places it (T2 ON s1415 d11 / d15 / d18: item SEs +6 against the SLP SE; the lab's +8; ROM `end2` -> ItemHealHP_End2 5 rows, SEs at the Ret+0x7 row + 8).
+ * Scene ON only (the caller).
+ */
+export const HELD_ITEM_EFFECT_AFTER_YAWN_SLEEP_LEAD_FRAMES = 9;
+function heldItemEffectAfterYawnSleepLead(events: readonly BattleKernelSemanticEvent[], index: number): number | null {
+  return index > 0 && events[index - 1]!.provenance?.sourceLabel === YAWN_MAKES_ASLEEP_SCRIPT ? HELD_ITEM_EFFECT_AFTER_YAWN_SLEEP_LEAD_FRAMES : null;
+}
+/**
  * fpr1 (lab fpr1-rest-leftovers-on; T2 s310 d4 / d5, s1415, s2230): an item script that restarts after `BattleScript_MoveUsedIsAsleep`'s SLP status
  * animation (playanimation, then the 3-row jump to MoveEnd) begins its animation 5 rows earlier than the 15-row restart lead places it: the lab's
  * ItemHealHP_Ret+0x7 SEs are ROM +16 from the engine command start, the engine +23. Scene ON only (the caller).
@@ -6871,7 +6891,7 @@ export function projectBattleResolutionCommands(
         ? HELD_ITEM_EFFECT_IDLE_CONTROLLER_EARLY_ROWS.get(weatherPrevious.animation) : undefined;
       const lead = commands.length === playerSendInEnd ? HELD_ITEM_EFFECT_AFTER_SEND_IN_LEAD_FRAMES
         : idleWeatherEarlyRows !== undefined && baseLead === HELD_ITEM_EFFECT_RESTART_LEAD_FRAMES ? baseLead - idleWeatherEarlyRows
-        : baseLead === HELD_ITEM_EFFECT_RESTART_LEAD_FRAMES ? heldItemEffectAfterPrintLead(events, index) ?? heldItemEffectAfterAsleepLead(events, index) ?? baseLead : baseLead;
+        : baseLead === HELD_ITEM_EFFECT_RESTART_LEAD_FRAMES ? heldItemEffectAfterPrintLead(events, index) ?? heldItemEffectAfterAsleepLead(events, index) ?? heldItemEffectAfterYawnSleepLead(events, index) ?? baseLead : baseLead;
       heldItemEffects.push({
         at: commands.length, battler: pendingHeldItemEffectBattler, sequence: event.sequence,
         frames: HELD_ITEM_EFFECT_COMMAND_FRAMES + lead,
@@ -7138,7 +7158,8 @@ export function projectBattleResolutionCommands(
     if (payload.kind === "status-animation") {
       const animation = statusAnimationPresented(payload.isStatus2, payload.status);
       if (animation !== null) {
-        const seGate = statusAnimationSeGate(events, index);
+        const gate = statusAnimationSeGate(events, index);
+        const seGate = gate > 0 ? gate : yawnSleepAnimationLeadRows(event);
         commands.push(Object.freeze({
           type: "status-animation",
           eventSequence: event.sequence,
