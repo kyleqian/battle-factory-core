@@ -101,4 +101,13 @@ describe("fpc180 -- Focus Punch pre-pass edge routes", () => {
     const plain = card.events.map((e: any, i: number) => ({ ...e, sequence: i }));
     expect(hold(events)).toBe(hold(plain));
   });
+
+  it("fpr1: Focus Punch's strike body plays its SEs 2 rows later than the generic body clock (BODY_SOUND_LEAD_ROWS 264 = -2, Scene ON)", () => {
+    // ROM mechanic-focus-punch-*-on labs: SE 193 / 123 / 123 / 141 land +0 with the lead and -2 without it (Move_FOCUS_PUNCH: two loadspritegfx, delay 1, two IsContest / IsTargetPlayerSide task + jump pairs, waitbgfadein, monbg, setalpha before the first playsewithpan).
+    for (const name of ["fpc177-a-switch-on", "fpc177-b1-two-users-on"]) {
+      const strikes = results[name]!.commands.filter((c: any) => c.type === "move-animation" && c.animation?.moveId === 264) as any[];
+      expect(strikes).toHaveLength(1);
+      expect(strikes[0].timing.soundAgeLeadFrames).toBe(-2);
+    }
+  });
 });
