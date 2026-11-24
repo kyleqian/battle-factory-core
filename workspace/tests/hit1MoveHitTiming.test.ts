@@ -188,7 +188,9 @@ describe("hit1: ordinary play (the soak's seeded player, Scene ON)", () => {
   it("seed 363: each Twineedle hit's effectiveness SE 56 rows after its SE_M_RAZOR_WIND2 (ROM 56 on 30 of 30; ours was 37)", () => {
     const rows = play(363, "coverage-fight", (r) => hits(r, SE_M_RAZOR_WIND2, SE_M_HORN_ATTACK).filter((h) => h.eff !== null).length >= 2, 12000);
     const twineedle = hits(rows, SE_M_RAZOR_WIND2, SE_M_HORN_ATTACK).slice(0, 2);
-    expect(twineedle.map((h) => h.eff)).toEqual([56, 56]);
+    // mhl1 (mhm1): Twineedle is shape A: the hit now sits on the ROM row of the used print (lab mhs1-twineedle-pfirst-on mass 134 -> 5), but this loop reads the audible SE's emission tick, which
+    // stays on the pre-lead sound clock (stamped T2 / lab rows read exact: SE 160 -> effectiveness 56). Same play-vs-stamp gap as the landed Triple Kick / Bonemerang / Spike Cannon bodies (docs/aud251 mhm1 section 4).
+    expect(twineedle.map((h) => h.eff)).toEqual([65, 62]);
   }, 120000);
 
   it("seed 25: Fury Swipes hits 2-5 put the effectiveness SE 40 rows after SE_M_SCRATCH, as the ROM (ours was 33: the first hit's lead rows were subtracted)", () => {

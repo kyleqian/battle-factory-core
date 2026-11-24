@@ -149,9 +149,10 @@ describe("live prep10 move adapters", () => {
     const on = generatedCommandAnimationReplay(r.seed, "on", r.moves, r.streak);
     const off = generatedCommandAnimationReplay(r.seed, "off", r.moves, r.streak);
     const bodies = on.animations.filter(a => a.moveId === r.id && a.attacker === 0);
+    // mhl1 (mhm1): Rock Blast is shape A: hit 1 leads 15 rows, hits 2+ lead 12 (ROM labs mhm1-rockblast-s*-on, hit SEs exact).
     // mxp1: Magnitude's 191 rows are its 175-row window + lead 10 + shape-A tail 6 (ROM lab mxp1-mag-p9, exact). lse4: Razor Wind's charge turn presents lead 1 + tail 4 (gap-print class), its unleash lead 5 + tail 4; the helper default is the unleash.
     // hit1: + Cmd_end's IsSEPlaying rows (Reversal 1, Rock Blast 1 per hit, Spark 9 until bwf2: its SE_M_THUNDERBOLT2 at script row 87 ends on row 123, inside the 117-row window + idle lead 9 now, so 0; bwf2: Spark is shape A with idle lead 9).
-    expect(bodies.map(b => b.ages.length)).toEqual(r.bodies.map((n, i) => r.id === 222 ? n : n + iu120Extra(r.id) + (LAND97_LEAD_ROWS.get(r.id) ?? 0) + hit1SeWaitRows(r.id) + (r.id === 13 && i === 0 ? 5 : hpd4BodyRows(r.id))));
+    expect(bodies.map(b => b.ages.length)).toEqual(r.bodies.map((n, i) => r.id === 222 ? n : n + iu120Extra(r.id) + (LAND97_LEAD_ROWS.get(r.id) ?? 0) + hit1SeWaitRows(r.id) + (r.id === 13 && i === 0 ? 5 : hpd4BodyRows(r.id, r.id === 350 && i > 0 ? 12 : undefined))));
     for (const body of bodies) {
       expect(body.ages).toEqual(Array.from({ length: body.ages.length }, (_, age) => age));
       expect(body.adapterActive.every(Boolean)).toBe(true);

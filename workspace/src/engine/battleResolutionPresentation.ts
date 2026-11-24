@@ -461,6 +461,8 @@ const MULTI_HIT_LOOP_BOX_EXTRA_ROWS: ReadonlyMap<string, number> = new Map([["Ba
  * hit 2+ SEs exact), and the box is `to - from + 1` (no extra rows). The final hit's box lasts to the PrintStrings print's execution (+1): the script's own rows to `PrintStrings`, 14 / 15 for a completed loop and 52 on a missed last hit (pause B_WAIT_TIME_SHORT).
  */
 const MULTI_HIT_LOOP_LEAD_TRIM_ROWS: ReadonlyMap<string, number> = new Map([["BattleScript_DoMultiHit", 5], ["BattleScript_DoTripleKickAttack", 8]]);
+/** mhl1 (mhm1): Twineedle 41 / Pin Missile 42 / Rock Blast 350 hits 2+ fit trim 7 on the DoMultiHit loop (labs mhm1-*: per-hit step +0..+-1; trim 5 drifts +2 per hit); Bonemerang 155 keeps 5. */
+const MULTI_HIT_LOOP_LEAD_TRIM_7_MOVE_IDS: ReadonlySet<number> = new Set([41, 42, 350]);
 function multiHitLoopMoveId(events: readonly BattleKernelSemanticEvent[], index: number): number | null {
   for (let i = index - 1; i >= 0; i -= 1) {
     const payload = events[i]!.payload;
@@ -2477,8 +2479,8 @@ const HIT1_SHAPE_A_MOVE_IDS: ReadonlySet<number> = new Set([9, 264]);
 // = the shape-A signature (lead 5 in front + hit tail 1 close it exactly).
 // Then Night Shade (101), Superpower (276), Luster Purge (295), Mist Ball (296), Silver Wind (318), Signal Beam (324): hp start -7..-9 -> 0 / -1 (Luster Purge, Signal Beam keep -1: their body is 1 row short of A + 1). bwf2: Spark (209) / Dragon Breath (225) joined once their bodies were fixed to the ROM length (windows 117 / 87).
 const HSW1_SHAPE_A_MOVE_IDS: ReadonlySet<number> = new Set([2, 5, 11, 16, 88, 265, 302, 341, 342, 343, 101, 276, 295, 296, 318, 324, 209, 225]);
-// mhs1: Triple Kick (167), Bonemerang (155), Spike Cannon (131): hit 1 of the DoMultiHit / DoTripleKickAttack loops is shape A (labs mhs1-*-pfirst-on, aud242r spikecannon-player ROM trace). Twineedle (hit1 seed 363 regresses), Pin Missile, Rock Blast, Fury Attack, Bullet Seed, Icicle Spear stay out.
-const MHS1_SHAPE_A_MOVE_IDS: ReadonlySet<number> = new Set([167, 155, 131]);
+// mhs1: Triple Kick (167), Bonemerang (155), Spike Cannon (131): hit 1 of the DoMultiHit / DoTripleKickAttack loops is shape A (labs mhs1-*-pfirst-on, aud242r spikecannon-player ROM trace). mhl1 (mhm1): Twineedle (41), Pin Missile (42), Rock Blast (350) joined (labs mhm1-*-pfirst-on, trim 7). Fury Attack, Bullet Seed, Icicle Spear stay out.
+const MHS1_SHAPE_A_MOVE_IDS: ReadonlySet<number> = new Set([167, 155, 131, 42, 350, 41]);
 /**
  * lse4 "gap-print": the lead is the kernel counter, the rows after the body are `T = 2 + gap - pre - post + s` with the ROM gap of the next command: a print (`printfromtable` / `printstring`) is
  * Delta + 1 (Recycle 3, the Razor Wind charge turn 7), any other next command is shape A (gap 4). Recycle 278, Razor Wind 13 (both turns).
@@ -2562,7 +2564,8 @@ export function bodyLse2RuleApplies(moveId: number): boolean {
 /** cfa1: the per-hit lead of hits 2+ of a shape-A loop move (see MULTI_HIT_LOOP_LEAD_TRIM_ROWS); 0 for hit 1 (the used-print lead below) and every other move. */
 function multiHitLoopHitLead(events: readonly BattleKernelSemanticEvent[], index: number, moveId: number): number {
   const label = events[index]!.provenance?.sourceLabel;
-  const trim = label === undefined ? undefined : MULTI_HIT_LOOP_LEAD_TRIM_ROWS.get(label);
+  const baseTrim = label === undefined ? undefined : MULTI_HIT_LOOP_LEAD_TRIM_ROWS.get(label);
+  const trim = baseTrim !== undefined && label === "BattleScript_DoMultiHit" && MULTI_HIT_LOOP_LEAD_TRIM_7_MOVE_IDS.has(moveId) ? 7 : baseTrim;
   if (trim === undefined || !MHS1_SHAPE_A_MOVE_IDS.has(moveId)) return 0;
   for (let i = index - 1; i >= 0; i -= 1) {
     const payload = events[i]!.payload;
