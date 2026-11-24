@@ -4225,7 +4225,7 @@ ON per family, exact / offset: move-animation SE 2,946 / 1,865, stat 59 / 42, cr
 | sbx3, ais5 | no T2 figure in their sections (sbx3: OFF drain print measurement; ais5: player send-in print and labs, same-turn switch) | |
 | **sum of reported steps** | **-1,821** (measured -1,827) | **-36** (measured -42) |
 
-The ~6 / ~6 left over are re-ownership between the steps' separate base runs (each step re-based on the then-current tree), not a regression: no family or seed grew against t2k8 in the per-family table above. By family the ON drop is move-animation SE -1,354, battle-controller -256, stat -148, cry -69; OFF battle-controller -33, stat -6, cry -3, bgm 0 (moves of 1-2 row mass in the tail).
+The ~6 / ~6 left over are re-ownership between the steps' separate base runs (each step re-based on the then-current tree); every family in the table above is lower than at t2k8. By family the ON drop is move-animation SE -1,354, battle-controller -256, stat -148, cry -69; OFF battle-controller -33, stat -6, cry -3, bgm 0 (moves of 1-2 row mass in the tail).
 
 ### 2. Ranked top 10 (rows owned disjointly by window, `rank6.py`; items + B4 + weather + Psychic + remainder = TOTAL)
 
@@ -4252,7 +4252,7 @@ The ~6 / ~6 left over are re-ownership between the steps' separate base runs (ea
 
 Sum-check: ON 530 + 700 + 373 + 327 + 283 + 245 + 232 + 202 + 58 + 120 = 3,070; + 261 (B4) + 87 + 23 + 2,745 = 6,186 (`rank.txt`). OFF 246 + 254 + 92 = 592; + 5 = 597. The "expected" column is the part a rule of its own can remove; A / B / C and the Dig / Rock Slide windows do not overlap.
 
-**Moved against t2k8** (same classes): faint chain 899 -> 776, held-item group 800 -> 700, hit SE 721 -> 627, Focus Punch 480 -> 327, gen:148 418 -> 202, Rock Slide 324 -> 232, Confusion + Supersonic 278 -> 245, two-turn 260 -> 283 (+23: re-ownership after the Dig windows lost their carried start, not a regression: the family's own clean mass rose 129 vs 79), Leech Seed 180 -> 120, stat 311 -> 150, B4 265 -> 261, remainder 3,567 -> 2,745 (the t2k8 per-move constants Rest / Struggle / Ice Beam / Wish / Surf mostly landed in pmc1 / hsw1 / ztl1 / bwf1).
+**Moved against t2k8** (same classes): faint chain 899 -> 776, held-item group 800 -> 700, hit SE 721 -> 627, Focus Punch 480 -> 327, gen:148 418 -> 202, Rock Slide 324 -> 232, Confusion + Supersonic 278 -> 245, two-turn 260 -> 283 (+23: not re-attributed here to a step; no landed step touched the two-turn rows, so read it as re-ownership of rows between windows, as the t2k8 gen:148 +16), Leech Seed 180 -> 120, stat 311 -> 150, B4 265 -> 261, remainder 3,567 -> 2,745 (pmc1 / hsw1 / ztl1 / bwf1 / cfa1 took per-move constants out of it).
 
 **The open terms, with their present T2 mass** (`attr-*.json`, ROM move id):
 
