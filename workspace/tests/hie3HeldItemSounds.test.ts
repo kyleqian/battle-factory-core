@@ -38,12 +38,13 @@ function replay(rom: Fixture): { rows: string[]; commandStart: number } {
 const romRows = (rom: Fixture, drift: number) => rom.events.filter((e) => e.kind === "se" && e.id !== null && HELD_IDS.includes(e.id)).map((e) => `${e.id}@${e.frame - drift}(${e.pan})`);
 // hpb3: the berry hit's hp command is the ROM's rows to the item animation (bar 40: tail 1, not 0): hie3-shellbell-on starts 1 row later (748 -> 749) and its drift 1 -> 0 (the engine's first SE now lands on the ROM frame, 766).
 // ROM first SE frame (script frame 8), the lab's pre-segment drift (app ahead of the ROM), engine command start, pan. hpd4: the floor-free foe-hit hold starts the held-item command 1 row later in sitrus-opp / leftovers / cheri (drift 9 / 17 / 20 -> 8 / 16 / 19, toward the ROM). hpd5: Seismic Toss (the lab's attack) joins the audited leads (6-row lead, level-aware 220 / 227 / 231 body, 1-row tail), so the held-item command starts 7 rows later per Toss before it and the drift falls 9 / 8 / 17 / 16 / 19 -> 2 / 1 / 3 / 2 / 12. hpf1: the Seismic Toss on the player carries its ROM post-hp hold (tail rows, no floor), 1 row more before the held-item command in sitrus-on / shellbell-on: drift 2 / 3 -> 1 / 2. b4l: the c-lead Thunder Wave in the cheri lab presents its 9-row lead, the cure-berry command starts 9 rows later (740 -> 749), drift 11 -> 2 (ROM first SE 737, SE at 735 now vs 726).
+// tnl1: the move-inflicted PRZ print / icon rows (docs/aud251-s11-scoreboard-refresh.md tnm1 1.C) put the Thunder Wave cure berry's command 4 rows later (749 -> 753; the PRZ print is now ROM 606 exact, hie1-cheri-on): the berry's first SE is 2 rows LATE (739 vs ROM 737, drift 2 -> -2: the berry epoch after a status receipt, tnm1 B, is the next recipe's term).
 const SITES = [
   { name: "hie3-sitrus-on", first: 754, drift: 0, commandStart: 731, pan: -64 },
   { name: "hie3-sitrus-opp-on", first: 754, drift: 0, commandStart: 731, pan: 63 },
   { name: "hie3-shellbell-on", first: 766, drift: 0, commandStart: 749, pan: -64 },
   { name: "hie3-leftovers-on", first: 772, drift: 1, commandStart: 748, pan: -64 },
-  { name: "hie3-cheri-on", first: 737, drift: 2, commandStart: 749, pan: -64 },
+  { name: "hie3-cheri-on", first: 737, drift: -2, commandStart: 753, pan: -64 },
 ] as const;
 const SPACING: ReadonlyArray<readonly [number, number]> = [[152, 0], [152, 32], [152, 64], [228, 96], [102, 168]];
 

@@ -5,7 +5,7 @@ import { readFileSync } from "node:fs";
 import { createHash } from "node:crypto";
 import { describe, expect, it } from "vitest";
 import { createBattleResolutionPresentationRenderView } from "../src/engine/battleResolutionPresentationRender.ts";
-import { STATUS_ANIMATION_ADDED_ROWS } from "../src/engine/battleResolutionPresentation.ts";
+import { MOVE_INFLICTED_STATUS_ANIMATION_PRINT_EXTRA_ROWS, STATUS_ANIMATION_ADDED_ROWS } from "../src/engine/battleResolutionPresentation.ts";
 import { generatedCommandAnimationReplay } from "../tools/integration/generatedCommandAnimationReplay.ts";
 import { gaf140Window, GAF140_INFLICTED } from "../tools/integration/gaf140Compare.ts";
 
@@ -56,10 +56,11 @@ describe("gaf140: the status-animation effect's age skips the IsBattleSEPlaying 
     const gated = seen.filter((s) => s.gate !== undefined);
     expect(gated.length).toBe(1);
     expect(gated[0]!.gate).toBe(6);
-    expect(gated[0]!.frames).toBe(6 + STATUS_ANIMATION_ADDED_ROWS.PRZ);
+    // tnl1: this PRZ is move-inflicted (BattleScript_MoveEffectParalysis): +2 rows before the print (ROM 369 vs 367 on gsp3-toxic; docs/aud251-s11-scoreboard-refresh.md tnm1 1.C)
+    expect(gated[0]!.frames).toBe(6 + STATUS_ANIMATION_ADDED_ROWS.PRZ + MOVE_INFLICTED_STATUS_ANIMATION_PRINT_EXTRA_ROWS);
     for (const [a, age] of gated[0]!.ages) expect(age, `age ${a}`).toBe(a < 6 ? null : a - 6);
     for (const s of seen.filter((x) => x.gate === undefined)) {
-      expect(s.frames).toBe(STATUS_ANIMATION_ADDED_ROWS.PRZ);
+      expect([STATUS_ANIMATION_ADDED_ROWS.PRZ, STATUS_ANIMATION_ADDED_ROWS.PRZ + MOVE_INFLICTED_STATUS_ANIMATION_PRINT_EXTRA_ROWS]).toContain(s.frames);
       for (const [a, age] of s.ages) expect(age).toBe(a);
     }
   }, 120000);

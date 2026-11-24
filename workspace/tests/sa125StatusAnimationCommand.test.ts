@@ -207,6 +207,9 @@ const cfa1PreMoveConfusionRows = (a: { animation: string; path: string; length: 
   const extra = a.length - a.gate - ROWS[a.animation]!;
   return a.animation === "CONFUSION" && a.path === "STRINGID_PKMNISCONFUSED" && (extra === 4 || extra === 6) ? extra : 0;
 };
+// tnl1 (ROM labs gsp3-toxic / b4m-thunderwave, docs/aud251-s11-scoreboard-refresh.md "tnm1" 1.C): a move-inflicted PSN / BRN / PRZ (BattleScript_MoveEffect{Poison,Toxic,Burn,Paralysis}) holds its animation 2 rows longer, the ROM's print row (369 vs 367).
+const tnl1MoveInflictedRows = (a: { animation: string; path: string; length: number; gate: number }): number =>
+  a.path === "inflicted" && (a.animation === "PSN" || a.animation === "BRN" || a.animation === "PRZ") && a.length - a.gate - ROWS[a.animation]! === 2 ? 2 : 0;
 describe("sa125: the ROM receipts (sta123 rom-r1.json, 18 scenarios both sides)", () => {
   const all = Object.entries(ROM).flatMap(([stem, s]) => s.on.statusAnimations.map((a) => ({ stem, side: s.attackerSide, ...a })));
 
@@ -270,9 +273,9 @@ describe("sa125: production routes (census seeds, Scene ON vs OFF, same gameplay
       for (const a of list) {
         total += 1;
         expect(a.orderOk, `${seed} ${a.animation} ${a.path}`).toBe(true);
-        expect(a.length, `${seed} ${a.animation}`).toBe(a.gate + ROWS[a.animation]! + cfa1PreMoveConfusionRows(a));
+        expect(a.length, `${seed} ${a.animation}`).toBe(a.gate + ROWS[a.animation]! + cfa1PreMoveConfusionRows(a) + tnl1MoveInflictedRows(a));
         // ROM: ON next instruction - OFF next instruction (from the statusanimation row) = controllerRows = gate + active rows + 1.
-        expect(a.on - a.off, `${seed} ${a.animation} ${a.side} ${a.path}`).toBe(a.gate + ROWS[a.animation]! + cfa1PreMoveConfusionRows(a));
+        expect(a.on - a.off, `${seed} ${a.animation} ${a.side} ${a.path}`).toBe(a.gate + ROWS[a.animation]! + cfa1PreMoveConfusionRows(a) + tnl1MoveInflictedRows(a));
         if (a.gate > 0) expect(a.gateFlag, `${seed} ${a.animation}: a gate only after a damaging hit`).toBe(true);
         if (a.gateFlag) flagged += 1;
         if (a.gate > 0) gated += 1;
@@ -322,7 +325,9 @@ describe("sa125: production routes (census seeds, Scene ON vs OFF, same gameplay
         // ftp1: attackcanceler's natural thaw (`BattleScript_MoveUsedUnfroze`: printfromtable one row after the write, no pre-hold) lasts the rows to the print (ROM s97 d11: print row 10 = the engine's, SE 184 exact).
         const thaw = x.events[at].provenance?.opcodeName === "B_SCR_OP_ATTACKCANCELER" && (print === "STRINGID_PKMNWASDEFROSTED2" || print === "STRINGID_PKMNWASDEFROSTEDBY");
         const thawRows = thaw ? x.events[at + 1].provenance.instructionExecution - x.events[at].provenance.instructionExecution : 0;
-        const want = faintClear ? 1 : animated ? offStatus[k].timing.minimumFrames : wakeUp ? (at === 0 ? Math.max(0, wakeUpExec - 3) : wakeUpRows) : thaw ? thawRows : 32;
+        // tnl1 (tnm1 B): the MoveEnd status write of a Chesto Berry cure (BattleScript_BerryCureSlpRet's HELD_ITEM_EFFECT follows) lasts 26: ROM MoveEnd+0x0 -> the animation epoch (Rest lab 1416 -> A0 1420).
+        const berryCureSlp = following[0]?.payload.kind === "animation" && following[0].provenance?.sourceLabel === "BattleScript_BerryCureSlpRet";
+        const want = berryCureSlp ? 26 : faintClear ? 1 : animated ? offStatus[k].timing.minimumFrames : wakeUp ? (at === 0 ? Math.max(0, wakeUpExec - 3) : wakeUpRows) : thaw ? thawRows : 32;
         if (wakeUp) wakeUps.push(`${at === 0 ? `head u${wakeUpExec}` : `mid ${wakeUpRows}`}->${x.c.timing.minimumFrames}`);
         expect(x.c.timing.minimumFrames, `seed ${seed} status ${k} ${print}`).toBe(want);
         if (faintClear) faintClears += 1;

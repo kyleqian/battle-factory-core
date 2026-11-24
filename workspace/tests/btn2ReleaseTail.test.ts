@@ -1,7 +1,7 @@
 // btn2 (ISSUES #223; docs/subp1m-battle-text-pause.md "btn2"): the rows from a button gate's release to the script's `moveendall` (ROM
 // subp1m labs, both scenes), carried as extra turn-end rows after the print.  Fails without RELEASE_TO_MOVEEND_ROWS.
 import { describe, expect, it } from "vitest";
-import { PROMPT_SCROLL_ROWS, RELEASE_TAIL_BLANK_ROWS, RELEASE_TO_MOVEEND_ROWS, messageCommandTypedRows, turnEndTimingAfterRelease } from "../src/engine/battleResolutionPresentation";
+import { MOVE_INFLICTED_STATUS_PRINT_HOLD_EXTRA_ROWS, PROMPT_SCROLL_ROWS, RELEASE_TAIL_BLANK_ROWS, RELEASE_TO_MOVEEND_ROWS, messageCommandTypedRows, turnEndTimingAfterRelease } from "../src/engine/battleResolutionPresentation";
 import { createBattleResolutionPresentationRenderView, GATE_ACCEPT_LEAD_ROWS, isBattleResolutionButtonMessageAcceptable, isBattleResolutionButtonMessageReady } from "../src/engine/battleResolutionPresentationRender";
 import { currentMessage, playCensusBattleUntil, stopAtGatedMessage } from "./helpers/btn1Battle";
 
@@ -68,7 +68,8 @@ describe("btn2: Static's `\\l` scroll and Trick's `\\p` clear are the ROM's rows
     const { rest } = pieces(200, "STRINGID_PKMNWASPARALYZEDBY");
     expect(rest.leadFrames).toBe(5);
     expect(messageCommandTypedRows(rest) + 2).toBe(33 - 1);
-    expect(rest.timing.holdFrames).toBe(64);
+    // tnl1: the 64-row waitmessage + the `goto BattleScript_UpdateEffectStatusIconRet` row (MoveEffectParalysis+0xa): the hold is 65
+    expect(rest.timing.holdFrames).toBe(64 + MOVE_INFLICTED_STATUS_PRINT_HOLD_EXTRA_ROWS);
   });
   it("Trick: the second page starts with no clear delay and no kept text", () => {
     const { rest } = pieces(177, "STRINGID_PKMNOBTAINEDXYOBTAINEDZ");
