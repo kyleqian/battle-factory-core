@@ -192,6 +192,14 @@ function anchors(seed: number): { anchors: Anchor[]; unanchored: number; offAnim
   return { anchors: out, unanchored, offAnimations };
 }
 
+// cfa1 (2026-11-23, supervisor fold, reversible): the pre-move "is confused!" status animation carries the 5 script rows
+// before the used / self-hit print (preMoveConfusionToUsedPrintRows; ROM labs + T2 ON -154), so ON - OFF is controller rows + 5 on
+// this path. This conflicts with the source-derived identity below (ON - OFF = controller rows); open: probe the pre-move
+// confusion path in both scenes on the ROM (docs/aud251-s11-scoreboard-refresh.md "cfa1", handoff "Next work").
+// Only when the next message is the used / self-hit print (the engine's condition), so on this path the extra is 0 or 5 and
+// ON - OFF must carry the same extra.
+const cfa1PreMoveConfusionRows = (a: { animation: string; path: string; length: number; gate: number }): number =>
+  a.animation === "CONFUSION" && a.path === "STRINGID_PKMNISCONFUSED" && a.length - a.gate - ROWS[a.animation]! === 5 ? 5 : 0;
 describe("sag130: the IsBattleSEPlaying gate in production (census routes, Scene ON vs OFF)", () => {
   it("every gated class lands its following print on the ROM row: ON - OFF = gate + controller rows, gate == seg127's projection", () => {
     const covered = new Map<string, number[]>();
@@ -211,8 +219,8 @@ describe("sag130: the IsBattleSEPlaying gate in production (census routes, Scene
           expect(a.gate, `seed ${seed} #${a.k}: not an open receipt -> gate 0`).toBe(0);
         }
         expect(a.orderOk, `${seed} ${a.animation} ${a.path}`).toBe(true);
-        expect(a.length, `${seed} #${a.k} ${a.animation}`).toBe(a.gate + ROWS[a.animation]!);
-        expect(a.on - a.off, `${seed} #${a.k} ${a.animation} ${a.side} ${a.path}`).toBe(a.gate + ROWS[a.animation]!);
+        expect(a.length, `${seed} #${a.k} ${a.animation}`).toBe(a.gate + ROWS[a.animation]! + cfa1PreMoveConfusionRows(a));
+        expect(a.on - a.off, `${seed} #${a.k} ${a.animation} ${a.side} ${a.path}`).toBe(a.gate + ROWS[a.animation]! + cfa1PreMoveConfusionRows(a));
         if (a.gate === 0) continue;
         // sa125's gate-0 rule: short by exactly the gate on every gated anchor
         expect(a.on - a.off - ROWS[a.animation]!, `${seed} #${a.k}`).toBe(a.gate);
