@@ -2915,8 +2915,10 @@ const REST_SOUND_LEAD_ROWS = -2;
  * Belly Drum 187 +4 (species-audit-golem-prep5-belly-drum-player), Mean Look 212 +3 (species-audit-golbat-prep4-mean-look-player), Swagger 207 +3 (aud242f-swagger-player-on).
  * sdb1: the same shape for the stat bodies whose first SE is the script's first or second command (Defense Curl 111: `loadspritegfx; loopsewithpan SE_M_TRI_ATTACK`, Growth 74: `blend_color_cycle; playsewithpan SE_M_TAKE_DOWN`):
  * every body SE +4 in the ROM labs (aud242o-rollout5, hpd1-{sonicboom,dragonrage,a-toss90}, hpf1-{pc-dragonrage,pa-sonicboom}, out2-knockoffrev, hcr2-defensecurl-foe, aud242f-growth-player; later offsets there equal the stat SE's own).
+ * fpr1: the opposite sign for Focus Punch 264 (-2, like Struggle / Rest): `Move_FOCUS_PUNCH` reaches its first `playsewithpan` after two loadspritegfx, `delay 1`, the IsContest / IsTargetPlayerSide task + jump pairs, waitbgfadein, monbg and setalpha;
+ * the four body SEs are 2 rows early on the clock in the mechanic-focus-punch-*-on labs and T2 s1415 (every strike window -2).
  */
-const BODY_SOUND_LEAD_ROWS: ReadonlyMap<number, number> = new Map([[273, 5], [248, 5], [135, 5], [187, 4], [212, 3], [207, 3], [165, -2], [111, 4], [74, 4]]);
+const BODY_SOUND_LEAD_ROWS: ReadonlyMap<number, number> = new Map([[273, 5], [248, 5], [135, 5], [187, 4], [212, 3], [207, 3], [165, -2], [111, 4], [74, 4], [264, -2]]);
 const REST_HEAL_PRINT_TAIL_ROWS = 10;
 function bdt1BodySoundLead(events: readonly BattleKernelSemanticEvent[], index: number, moveId: number): { soundAgeLeadFrames?: number } {
   if (events[index]!.provenance?.sourceLabel === CHARGE_TURN_SCRIPT) return chargeTurnSoundLead(events, index);
