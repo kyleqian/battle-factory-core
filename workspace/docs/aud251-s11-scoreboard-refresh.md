@@ -5201,3 +5201,32 @@ So with L + H every confusion head's SE 176 is **+1** (the plain-print conventio
 - The all-seed T2 total with 1 - 3 was not measured (time); only s499 and s7295 (-43 together) and the six labs (mixed). The chain + S-lead + trail on top was not re-run on this base.
 - The d14 +3 (Knock Off tail -> head) has one window.
 - No ROM-side explanation of why the printer's `ex2` row equals the text-printer edge was needed (the two coincide in all 6 s499 windows, `tp` column of `hcr3mProbe`).
+
+## mem1 (2026-11-24): s1914 d2's message -> `MoveEnd` -3 / -4 behind ihm1 item 1 (Scene OFF)
+
+Measurement only (docs; no `src/` / `tests/` change, engine frozen at c22d60e57). Probe: `T2K4_DIR=.integration/evidence/ihm1/mem1 T2K4_T2_DIR=.integration/evidence/ihm1/all-base24 tools/integration/t2k4/probe.sh --force 1914 off 2` (the s1914 d2 Shell Bell window of the ihm1 table; engine commit 1024, ROM commit 1074), cross-read against `... probe.sh --force 2 off 2` (s2 d2, the window edit B was fitted on) and the crit-only windows `swt1/p/on/{1028-d15,2230-d11}.cmp.txt`. Rows are frames from the commit; evidence is git-ignored under `.integration/evidence/ihm1/mem1/p/off/{1914,2}-d2.cmp.txt`.
+
+### Result: a source-backed term, not a Shell Bell rule: "the engine's message command is `L + 64`; the ROM adds one row per script command run after `waitmessage`, and one row of print wait"
+
+ROM script (`reference/pokeemerald/data/battle_scripts_1.s:253-268`, `BattleScript_HitFromAtkAnimation`): `datahpupdate` (+0x8) -> `critmessage` (+0xa) -> `waitmessage B_WAIT_TIME_LONG` (+0xb) -> `resultmessage` (+0xe) -> `waitmessage B_WAIT_TIME_LONG` (+0xf) -> `seteffectwithchance` (+0x12) -> `tryfaintmon` (+0x13) -> `BattleScript_MoveEnd` (`moveendall`).
+
+s1914 d2 (ROM row vs ENG command start; the target Pokémon is not fainted, Shell Bell follows):
+
+| step | ROM rows | ENG commands |
+|---|---|---|
+| hp bar end -> crit print | `+0x8` ex0 194, `+0xa` 195, `+0xb` ex1 196 | `hp` 107 (exact start), `message` (crit, 0.4) 197 (+1) |
+| crit message | `+0xb` ex1 196 -> ex0 212 (16 = L 15 + 1), ex0 -> `+0xf` ex1 277 = 65 (64 + the `resultmessage` row); crit -> result 81 | 0.4 -> 0.5 276 = 79 (L 15 + 64): **-2** |
+| result message ("not very effective") | `+0xf` ex1 277 -> ex0 303 (26), ex0 -> `MoveEnd+0x0` 369 = 66 (64 + `seteffectwithchance` + `tryfaintmon`); 277 -> 369 = 92 | 0.5 276 -> sprite-visibility 364 = 88 (L 24 + 64), then 2 x sprite-visibility, `move-animation` at 366 vs ROM `MoveEnd+0x0` 369: **-3** at the item chain |
+
+So the -3 / -4 in the ihm1 table is two separate, countable pieces, and neither is in edits A / B:
+
+1. **Crit -> result handoff, -2 (the s1914-only part).** After a `critmessage` print the next print (`resultmessage`) starts L(crit) + 1 (print wait ex1 -> ex0) + 64 + 1 (the `resultmessage` command's own row) = 81 after the crit `waitmessage` row; the engine's crit `message` command lasts L + 64 = 79. Every non-crit result message is exact against this accounting (s2 d2: `+0xf` ex1 125, ENG message 126 = +1, the same +1 the crit message has at its own start: 196 vs 197), so the second message starts 2 rows early only when a crit message precedes it.
+2. **Result message -> `MoveEnd`, 3 rows in the ROM (print wait 1 + `seteffectwithchance` 1 + `tryfaintmon` 1), already absorbed by edit B.** s2 d2: ROM `+0xf` ex1 125 -> `MoveEnd+0x0` 216 = 91 vs ENG 126 -> `move-animation` 216 (88 + the 2 sprite-visibility rows) = exact at `MoveEnd`; that is the 4 the lead 9 -> 4 buys. The same 66-row tail (ex0 -> next label) is in the faint tail of the same window (ROM `+0xf` ex0 692 -> `FaintTarget+0x0` 758 = 66) and 68 after a crit message with no result print (ex0 -> `MoveEnd+0x0`: swt1 1028 d15 370 -> 438, 2230 d11 391 -> 459 = 64 + `resultmessage` + `waitmessage` + `seteffectwithchance` + `tryfaintmon`).
+
+Net at the chain start: s2 d2 ENG `move-animation` = ROM `MoveEnd+0x0` (0); s1914 d2 = -3 = -2 (crit -> result, term 1) + -1 (ROM result print 26 rows here vs 25 in the faint tail: one row of ROM jitter on the same text; not a rule).
+
+### Verdict
+
+- Term (source-backed, one window): when a `message` whose `sourceLabel` is `BattleScript_HitFromAtkAnimation` and whose id is the crit message (`STRINGID_CRITICALHIT`) is followed in the same command list by the result message (`STRINGID_SUPEREFFECTIVE` / `STRINGID_NOTVERYEFFECTIVE`), the crit message's hold is 64 + 2 instead of 64 (ROM 196 -> 277 = 81). It sits upstream of the item chain, so it is not specific to Shell Bell: it moves every crit -> result chain (the second print and everything after it), and landing it will move T2 seeds beyond s1914. Predicted effect on the ihm1 landing: s1914 d2's item chain goes from -3 to -1, so edit B's +3 regression on s1914 (19 -> 22) should mostly close, leaving the one-row ROM print jitter.
+- Not measured: this was one crit -> result ROM window in the whole evidence tree (the grep over `.integration/evidence/*/p/*/*-d*.cmp.txt` for `+0xb` ex0 followed by `+0xf` ex1/ex2 within 70 rows finds only this one), the term was not applied to a scratch tree, and the all-seed mass of landing it was not run. The ROM side (81 = 16 + 64 + 1) is source-accounted, so before landing re-measure with a second crit -> result window (a lab with a guaranteed crit followed by a super-effective or resisted hit, Scene OFF, no held item) and run `ihm1/all.sh` on the scratch edit; if no second window shows 81, treat it as "no rule" and accept s1914's +3.
+- Nothing changed in `src/`, `tests/`, PROGRESS / ISSUES / ROADMAP / PAPERCUTS; npm test / typecheck / build were not run, as the step's prohibitions say (they override the brief's closing "tests and build green" line).
