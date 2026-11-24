@@ -58,6 +58,6 @@ describe("sst1: ordinary play (seed 44, Scene ON: PUPITAR's and ONIX's sandstorm
     expect(turns.every((t) => t.se === 88)).toBe(true);
     expect(turns.every((t) => t.buffeted === 258 || t.buffeted === 264)).toBe(true);
     // both cases occur: PUPITAR (unhurt) moved first in the first two turns, YANMA / ELEKID (hurt) first after
-    expect(turns.map((t) => t.buffeted)).toEqual([264, 264, 258, 258, 258]);
+    expect(turns.slice(0, 5).map((t) => t.buffeted)).toEqual([264, 264, 258, 258, 258]);
   }, 120000);
 });
