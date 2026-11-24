@@ -5052,3 +5052,56 @@ None before the faint. The step is upstream of the box: it moves the box start b
 ### 6. State and verification
 
 Measurement only: no `src/` / `tests/` change, no lab, PROGRESS / ISSUES / ROADMAP / PAPERCUTS untouched; `npm test` / `typecheck` / `build` not run (the step forbids them). Ran two `probe.sh` captures (ON and OFF, `nice -n 10`) and read `attr-on.json`. Diff: this section only.
+## bcm1 (2026-11-24): the combined Bounce + Leftovers lab: the Scene OFF post-miss +6 reproduces; two terms, the larger is the item-heal chain's lead after a MoveMissed message
+
+Measurement only (docs / labs). Engine frozen at `c22d60e57`; nothing under `src/` or `tests/` changed; PROGRESS / ISSUES / ROADMAP / PAPERCUTS untouched; `npm test` / typecheck / build not run (the step forbids them). Labs: `tools/battle-lab/bcm1-bounce-leftovers-plr-off.json` (Scene OFF) and `bcm1-bounce-leftovers-plr-on.json` (same parties, the ON-timed trace). Evidence (git-ignored): `.integration/evidence/bcm1/run{3,4,5,6}/` (run4 = both labs, run5 = the `--rows` timeline of the OFF lab, run6 = the no-heal reference `chg1-bounce-plr-off`).
+
+### 1. The lab (ihm1 item 2's recipe, built)
+
+Player: Rattata Lv50 holding Leftovers (item 200), moves `[69 Seismic Toss, 340 Bounce, 69, 69]`; opponent Rattata Lv40, all four moves Seismic Toss (fixed damage, no RNG; the Lv50 player is faster). Trace: turn 1 `A, 18 idle, A` (slot 0, Seismic Toss), idle 700 (OFF) / 1200 (ON; an OFF-length idle presses A into the end-turn heal, and in OFF the ROM then opens the Bag: `ActionSelectionItemsCantBeUsed`); turn 2 `A, 18, RIGHT, 10, A` (slot 1, Bounce; the button name is upper case, `RIGHT`, `oracle/emerald_core.py` `GBA_BUTTONS`), idle 900 (turn 3 is Bounce's locked second turn, no input); then `A, 18, A, 1000`. Sequence: player ST (foe hurt) -> foe ST hits the player -> Leftovers heals at end of turn 1 -> player Bounce opener, the foe's Seismic Toss MISSES the airborne user -> Leftovers heals again at the end of turn 2 -> turn 3 Bounce strike. The first attempt used Splash as the turn-1 move: wrong (Splash's own message rows differ by 39, `-39` on every following row), and Seismic Toss on both sides keeps the foe alive until the strike.
+
+### 2. Scene OFF: the +6 reproduces (`labCompare.sh --out ...run4`, `--rows --span 970:1260` for the timeline)
+
+Prints (ROM `sTextPrinters[0]` first glyph vs ENG `message` command start), the part up to the Bounce second-turn print:
+
+| row | ROM | ENG | ENG - ROM |
+|---|---|---|---|
+| T1 player ST print / hit SE 13 / foe ST print / hit SE 13 | 31 / 98 / 204 / 275 | same | 0 |
+| T1 end-turn Leftovers print (`ItemHealHP_Ret+0xa`), after a HIT | 405 | 405 | **0** (the hit-preceded heal is exact, as hie1) |
+| T2 Bounce charge opener (`FirstChargingTurn+0x26`) / `PrintMoveMissed+0x1` / `MoveMissed+0x2` | 814 / 911 / 976 | 814 / 911 / 976 | 0 |
+| **T2 end-turn Leftovers print (`ItemHealHP_Ret+0xa`), after the MISS** | 1113 | 1119 | **+6** |
+| T3 Bounce strike print (`HitFromAtkString+0x1`) | 1258 | 1265 | **+7** |
+
+(The ROM has no separate print row for the T2 "used Bounce!" message that the engine's `0.0 message @772` has: an alignment extra, not an offset. The SE rows are exact: SE 13 / SE 152 chains match in T1.)
+
+So the Scene OFF Bounce post-miss +6 reproduces with a Leftovers holder: neither Leftovers alone (hie1), nor Bounce alone (chg1), nor a wake-up (wkl1m) carried it; heal after the miss, in the same turn the Bounce user is airborne, does. The +7 at the T3 print = the +6 of the heal print plus +1 net after the tail terms (section 3).
+
+### 3. Which engine command carries it: two terms, they nearly cancel on the T3 print
+
+ROM script rows (the `--rows` timeline) against the ENG commands, T2 end of turn onward:
+
+| step | ROM | ENG | ENG - ROM |
+|---|---|---|---|
+| MoveMissed message -> `MoveEnd+0x0` / ENG `sprite-visibility` | `MoveEnd+0x0` 1068 | cmd 0.9 @1067, cmd 0.10 `move-animation` @1068 | 0 |
+| MoveEnd -> Leftovers print | `ItemHealHP_End2+0x0` 1076, `Pausex20` 1078 .. 1111, `Ret+0x7` 1111, `Ret+0xa` 1112 (print glyph 1113): **45 rows** | cmd 0.10 `move-animation` `minimumFrames` **51**, then cmd 0.11 `message` @1119 | **+6** (term A) |
+| print -> hp bar | `Ret+0x18` 1223 (110 after the print) | cmd 0.12 `hp` 1227 (108 after) | -2 |
+| hp -> turn end | `End2+0x5` 1232 (9 after `+0x18`) | cmd 0.13 `turn-end` 1234 (7 after) | -2 |
+| turn end -> next turn's print | `End2+0x5` 1232 -> `EffectSemiInvulnerable+0x0` 1245 (13) -> `HitFromAtkString+0x0` 1256 -> print glyph 1258: **26** | `turn-end` 1234 -> cmd 1.0 `move-animation` (min 9) @1256 -> cmd 1.1 `message` 1265: **31** | **+5** (term B) |
+
+Totals: +6 - 2 - 2 + 5 = +7.
+
+- **Term A (+6, the heal print itself): the item-heal chain's `move-animation` after a `MoveMissed` message.** `heldItemEffectOffHoldFrames` (`src/engine/battleResolutionPresentation.ts` ~l.2155) returns `executions + lead`, with `heldItemEffectExecutionsAndLead` (~l.2072): the previous event is a continuation, so the lead is `HELD_ITEM_EFFECT_CONTINUE_LEAD_FRAMES = 9`. Measured min 51 = 42 executions + 9; the ROM wants 45. The exact same shape as ihm1's edit B (after a `HitFromAtkAnimation` message the lead is 4 not 9, -5): here the previous event is the `BattleScript_MoveMissed` message and the lead should be 3 (-6) in this lab and 4 (-5) at T2 s2230 d5 (below): the same -5 as ihm1's edit B, with one row of ROM jitter in the miss message -> `MoveEnd` hold (ihm1's nve lab also kept a +1 residual with -5). Landing: extend edit B's condition from `sourceLabel === "BattleScript_HitFromAtkAnimation"` to also `"BattleScript_MoveMissed"` with the same constant (`HELD_ITEM_AFTER_HIT_MESSAGE_LEAD_DELTA = 5`). This is lab-confirmed only for Leftovers after a Bounce-miss; not tried for Sitrus / a berry or a miss that is not Bounce's (a plain accuracy miss prints the same `MoveMissed` label).
+- **Term B (+5, the turn-end -> locked-continuation print): the `turn-end` command (min 8) + `BATTLE_RESOLUTION_LOCKED_CONTINUATION_HANDOFF_FRAMES` (`battleResolutionPresentationRender.ts` ~l.111) + the `move-animation` min 9 sum to 31 after a heal and also 31/32 without one; the ROM's turn end -> print is 26 after an item heal and 32 after plain MoveEnd.** Without the heal: `chg1-bounce-plr-off`: ROM `MoveEnd+0x0` 334 -> `EffectSemiInvulnerable+0x0` 353 (19) -> print 366 = 32; ENG `turn-end` 334 -> cmd 1.0 @357 -> `message` 366 = 32 (exact). After an end-turn item heal the ROM skips the 6 rows between `MoveEnd+0x0` and `BattleTurnPassed` (13 from `End2+0x5` to `EffectSemiInvulnerable+0x0`, not 19), the engine does not (turn end -> command 1.0 is 22 after a heal, 23 without). The rows live in the ENG `turn-end` -> next-segment handoff, not in cmd 1.0's own 9. A fix for B alone would be `turn-end` min 8 -> 3 after an `ItemHealHP_End2` hp, gated to a locked-continuation next turn (an action-menu next turn was not measured: the menu appears when the player presses, no lab observable).
+- **Net:** A + (-2) + (-2) + B = +1 (heal print -> T3 print: ROM 145, ENG 146). So the T3 print offset equals A's +6 plus a residual +1.
+- **T2 s2230 d5 confirms it (read from ohm1's existing probe, `.integration/evidence/ohm1k/p/off/2230-d5.cmp.txt`, main tree; not re-probed).** The window has the same shape: a Leftovers heal, then the Bounce user (woke up) is missed by the foe's mv246, then the Leftovers heal after the miss, then Bounce's second-turn strike. Rows (cmp frames, engine commit 4044 = ROM commit 4052): ENG `sprite-visibility` 405 / `move-animation` **min 51** @406 vs ROM `MoveEnd+0x0` 407 -> ROM `ItemHealHP_Ret+0xa` print exec 451 (glyph 452), ENG `message` 457: **+5** (term A; the lab has +6, the ROM's miss-message -> `MoveEnd` hold is 93 rows in the lab and 94 here, so the lab's term A is the same -5 / -6 pair, one row of jitter); ROM `Ret+0x18` 567 vs ENG `hp` 570 (+3, tail -2); ROM `End2+0x5` 580 vs ENG `turn-end` 581 (+1, tail -2); ROM `HitFromAtkString+0x1` print 606 vs ENG `message` 612 (**+6**: term B again, 26 vs 31, `turn-end` 581 -> cmd 1.0 `move-animation` min 9 @603 -> message 612). Chain: +5 -2 -2 +5 = +6. So the T2 +6 is the same two terms, A being the larger and B nearly cancelled by the tail; landing A alone (-5 in T2, -5 or -6 in the lab) leaves the T2 T3-print at +1 and the lab's at +1 / +2, and B must NOT be landed alone (it would overshoot to -4 / -5 against the unfixed A). If both A and B were landed the tail terms would also have to be re-fit (-2, -2).
+- **Recipe, ordered:** (1) extend ihm1's edit B condition (`heldItemEffectExecutionsAndLead` lead 9 -> 4, -5, after a `BattleScript_HitFromAtkAnimation` message) to a message with `sourceLabel === "BattleScript_MoveMissed"` (the miss print), with the same -5: T2 s2230 d5 +5 -> 0 at the heal print, the second-turn print +6 -> +1; the lab +6 -> +1 at the heal print, +7 -> +2. (2) Re-run `ihm1/all.sh` (24 OFF seeds) and the s2230 d5 / `bcm1-bounce-leftovers-plr-off` windows; if the +1 / +2 residual is to go, the tail (-2, -2) and B (+5) are the next terms and must land together. Not landed here (engine frozen).
+
+### 4. Scene ON (same lab file in the ON profile, `bcm1-bounce-leftovers-plr-on`)
+
+Not a clean compare: SUMMARY exact 11 / offset 11 / missing 5 / extra 4, mass 1455 (ROM 27 / ENG 26 SE), PRINTS exact 3 / offset 7. Pre-heal rows are the already-known ON charge-turn terms (the Bounce charge opener -8, the miss print -8, the T2 heal print **-12**, the T3 print **-20** vs the OFF +6 / +7); after the T3 print the ROM plays Bounce's body SE 193 / 141 (ENG has none, `mv340` body lead) and the engine's strike turn diverges (an extra `message`, the foe-KO order). So Scene ON carries a different sign and different terms (the ON heal chain is `general-animation`, not the OFF `move-animation` hold); term A is a Scene OFF term only (`heldItemEffectOffHoldFrames` is the OFF branch). Not diagnosed further.
+
+### 5. Caveats / not done
+
+- Turn 3 in both scenes diverges after the print (ENG `message` @1320 extra; ROM strike SE 13 @1318, faint SE 16 @1465, missing in ENG; ENG hit SE @1491 = +173): an RNG / KO-order divergence of the lab's Bounce strike against a foe already at ~half HP, not timing; do not read the lab past the T3 print (`--span 970:1260`).
+- The Scene OFF `PRINTS` line reads exact 6 / offset 4 / missing 1 / extra 2 and SUMMARY SE exact 2 / missing 3: only the span up to the T3 print is meaningful.
+- Two samples for the -5 / -6 question (lab, T2 s2230 d5) and only Leftovers after a Bounce-miss (T2: the foe's mv246 miss on a woken Bounce user); Sitrus / a berry, or a miss on a non-semi-invulnerable target, were not tried.
