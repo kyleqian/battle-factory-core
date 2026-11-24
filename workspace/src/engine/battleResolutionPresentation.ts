@@ -2864,6 +2864,36 @@ function previousActionBodyIsPlaceholder(events: readonly BattleKernelSemanticEv
   }
   return false;
 }
+/**
+ * dgt1 (Scene ON; chg4-dig-lightscreen-on, T2 s3738 d47): the PLAYER's first charging turn of Dig / Fly / Dive / Bounce / Skull Bash / Sky Attack after another action with a
+ * modelled body is 13 rows short from the charge print to the next action's used print (ROM: `BattleScriptFirstChargingTurn` animation end 468 -> print glyph 476 (the
+ * orword / setmoveeffect / seteffectprimary / copybyte / printfromtable rows, 10 with the chg4 opener's 2 early rows), glyph -> `FirstTurnSemiInvulnerable+0x5` 560 (84
+ * against the engine's 83), `MoveEnd` 562 -> the next turn's used print 585 (25 against 23)). The player's second-turn press lead (`twoTurnSecondPrintLead`) was cover for it;
+ * the rows now sit where the ROM has them (a lead before the glyph, the hold after it) and the second turn drops the lead like the foe's (mmc1).
+ */
+const CHARGE_TURN_PLAYER_AFTER_ACTION_LEAD_ROWS = 10;
+const CHARGE_TURN_PLAYER_AFTER_ACTION_HOLD_ROWS = 3;
+function playerChargeTailMove(moveId: number | undefined): boolean {
+  return moveId !== undefined && TWO_TURN_MOVES.has(moveId) && moveId !== MOVE_SOLAR_BEAM && !bodyGapPrintRuleApplies(moveId);
+}
+function playerChargePrintAfterModelledAction(
+  events: readonly BattleKernelSemanticEvent[],
+  index: number,
+  beforeRules: BattleScriptRulesContext,
+  actionSnapshot: BattleScriptActionMessageSnapshot | null | undefined,
+): boolean {
+  const event = events[index]!;
+  if (actionSnapshot?.attacker !== 0 || !playerChargeTailMove(actionSnapshot.currentMove) || (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0) return false;
+  if (event.provenance?.sourceLabel !== CHARGE_TURN_SCRIPT || event.payload.kind !== "message" || event.payload.messageId === "STRINGID_EMPTYSTRING3") return false;
+  for (let i = index - 1; i >= 0; i -= 1) {
+    const candidate = events[i]!;
+    if (candidate.provenance?.sourceLabel !== CHARGE_TURN_SCRIPT) return false;
+    if (candidate.payload.kind === "message" && candidate.payload.messageId === "STRINGID_EMPTYSTRING3") {
+      return events[i - 1]?.provenance?.sourceLabel === "BattleScript_MoveEnd" && !previousActionBodyIsPlaceholder(events, i);
+    }
+  }
+  return false;
+}
 function twoTurnSecondPrintLead(
   events: readonly BattleKernelSemanticEvent[],
   index: number,
@@ -2878,8 +2908,8 @@ function twoTurnSecondPrintLead(
     || (event.provenance?.sourceLabel !== "BattleScript_HitFromAtkString" && event.provenance?.sourceLabel !== "BattleScript_HitFromAccCheck")) return null;
   if ((beforeRules.battlers[actionSnapshot!.attacker]!.status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_MULTIPLETURNS) === 0) return null;
   const exec = event.provenance.instructionExecution;
-  // ttb1 / mmc1: the press lead is a locked continuation's (mmc1: for the foe's Dig / Fly / Bounce too, once the miss / status continuation runs the confirm walk; the player's second turn keeps it, s3738 d47); after another action's MoveEnd the transition already carries the print's ROM row (bht1: residual 0 after KC / Slash / super effective / asleep). A placeholder previous body (Tackle / Growl, no adapter) is 21 .. 27 rows short and keeps the lead as cover.
-  if ((currentMove === MOVE_SOLAR_BEAM || actionSnapshot!.attacker === 1) && previous?.provenance?.sourceLabel === "BattleScript_MoveEnd" && !previousActionBodyIsPlaceholder(events, index)) return null;
+  // ttb1 / mmc1: the press lead is a locked continuation's (mmc1: for the foe's Dig / Fly / Bounce too, once the miss / status continuation runs the confirm walk; dgt1: for the player's too, its charge tail now carrying the rows); after another action's MoveEnd the transition already carries the print's ROM row (bht1: residual 0 after KC / Slash / super effective / asleep). A placeholder previous body (Tackle / Growl, no adapter) is 21 .. 27 rows short and keeps the lead as cover.
+  if ((currentMove === MOVE_SOLAR_BEAM || actionSnapshot!.attacker === 1 || playerChargeTailMove(currentMove)) && previous?.provenance?.sourceLabel === "BattleScript_MoveEnd" && !previousActionBodyIsPlaceholder(events, index)) return null;
   const afterConfusionPrint = previous?.payload.kind === "message" && previous.provenance?.sourceLabel === CONFUSION_ENDED_SCRIPT && previous.provenance.instructionExecution !== undefined
     ? previous.provenance.instructionExecution + TWO_TURN_AFTER_CONFUSION_PRINT_ROWS : 0;
   return { leadFrames: TWO_TURN_SECOND_PRINT_PRESS_ROWS - (actionSnapshot!.attacker === 0 ? TWO_TURN_PLAYER_NO_PRESS_ROWS : 0) + exec - afterConfusionPrint };
@@ -6721,6 +6751,7 @@ export function projectBattleResolutionCommands(
         advance: "automatic",
         ...(selfConfusionOff ? { leadFrames: SELF_CONFUSION_OFF_PRE_PRINT_ROWS } : {}),
         ...(event.provenance?.sourceLabel === FOCUS_PUNCH_LOST_FOCUS_SCRIPT ? { leadFrames: focusPunchLostFocusPrePrintRows(commands) } : {}),
+        ...(playerChargePrintAfterModelledAction(events, index, beforeRules, actionSnapshot) ? { leadFrames: CHARGE_TURN_PLAYER_AFTER_ACTION_LEAD_ROWS } : {}),
         ...(twoTurnSecondPrintLead(events, index, event, beforeRules, actionSnapshot, events[index - 1]) ?? {}),
         ...(carryBeforeGlyph > 0 ? { leadFrames: (twoTurnSecondPrintLead(events, index, event, beforeRules, actionSnapshot, events[index - 1])?.leadFrames ?? 0) + carryBeforeGlyph } : {}),
         ...(endTurnChainLeadRows(events, index, (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) === 0) > 0
@@ -6769,6 +6800,9 @@ export function projectBattleResolutionCommands(
                 if (event.provenance?.sourceLabel === "BattleScript_PresentHealTarget" && actionSnapshot?.currentMove === MOVE_REST
                   && (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) === 0) {
                   return Object.freeze({ minimumFrames: timing.minimumFrames, holdFrames: timing.holdFrames + REST_HEAL_PRINT_TAIL_ROWS });
+                }
+                if (playerChargePrintAfterModelledAction(events, index, beforeRules, actionSnapshot)) {
+                  return Object.freeze({ minimumFrames: timing.minimumFrames, holdFrames: timing.holdFrames + CHARGE_TURN_PLAYER_AFTER_ACTION_HOLD_ROWS });
                 }
                 if ((beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0) {
                   const weatherPause = weatherContinuesOffPauseRows(event);
