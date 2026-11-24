@@ -132,6 +132,12 @@ export interface FactoryGame {
   /** Sound on / off at any time (a mute button). Switching on loads the audio player on first use; call it from a click. */
   setAudio(enabled: boolean): void;
   getAudio(): FactoryAudioState;
+  /**
+   * ffw1: play speed, game frames per display frame: 1 (normal) up to 8, rounded. Above 1 the loop ticks that many frames per
+   * frame and the game is silent; back at 1 the music picks up where the game is. Every tick, the trace and the events are the
+   * same at any speed: only the wall clock is shorter (a host that checks play time against real time must allow it).
+   */
+  setSpeed(speed: number): void;
   destroy(): void;
 }
 
