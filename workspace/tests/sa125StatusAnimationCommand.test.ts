@@ -196,10 +196,11 @@ function anchors(seed: number): { anchors: Anchor[]; unanchored: number; offAnim
 // check on an unrelated CONFUSION anchor, 139 vs 100: a presentation lead, not looked at here.)
 const SEEDS = [7, 11, 12, 18, 19, 20, 49, 60, 76, 87, 101];
 
-// cfa1 (2026-11-23, supervisor fold, reversible): the pre-move "is confused!" status animation carries the 5 script rows
-// before the used / self-hit print (preMoveConfusionToUsedPrintRows; ROM labs + T2 ON -154), so ON - OFF is controller rows + 5 on
-// this path. This conflicts with the source-derived identity below (ON - OFF = controller rows); open: probe the pre-move
-// confusion path in both scenes on the ROM (docs/aud251-s11-scoreboard-refresh.md "cfa1", handoff "Next work").
+// cfa1 (2026-11-23): the pre-move "is confused!" status animation carries the 5 script rows before the used / self-hit
+// print (preMoveConfusionToUsedPrintRows). cfm1 (2026-11-24, ROM probe of 15 chains in both scenes, docs/aud251-s11-scoreboard-refresh.md
+// "cfm1") showed the ROM identity holds (ON - OFF = 100 from `return` on) and the engine is right (OFF exact, ON within 1 row):
+// the extra 5 here is this test's own normalisation of the OFF confusion hold (71 -> 67) applied to OFF only. Next run: drop
+// that normalisation on this path (cfm1 recipe) and this exception with it.
 // Only when the next message is the used / self-hit print (the engine's condition), so on this path the extra is 0 or 5 and
 // ON - OFF must carry the same extra.
 const cfa1PreMoveConfusionRows = (a: { animation: string; path: string; length: number; gate: number }): number =>
