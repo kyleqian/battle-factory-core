@@ -5706,7 +5706,7 @@ Commits `199ceddef` (ON) and `4ed0d87bb` (OFF); no push. Evidence (git-ignored):
 
 ### 4. What is left
 - Psychic s2 / s3 (16) and Psych Up s2 / s3 (23) stay at the 269-phase +1: pre-cfx1 they read 6 / 17 only because the engine sat 1 row early. A way to read the phase from state (none found) would be needed.
-- Growl lab (new, not landed): the stat-down SE 245 is -25 and the print -29 after the used print (separate: the stat-down body of a confused second mover); Swords Dance lab: the SE 191 / 239 are +2 after the used print (the stat-up body rows). Neither is a head term.
+- (sdb1: the Defense Curl +2 of kst1 is LANDED by sdb1, the Growl / Swords Dance terms are analysed in the sdb1 section below.) Growl lab (new, not landed): the stat-down SE 245 is -25 and the print -29 after the used print (separate: the stat-down body of a confused second mover); Swords Dance lab: the SE 191 / 239 are +2 after the used print (the stat-up body rows). Neither is a head term.
 
 
 ## ttb1 (2026-11-24): the two-turn family's remaining S11 windows (t2k10 class 4) -- two mechanisms LANDED, the rest is a carried offset from the MoveMissed chain
@@ -5761,3 +5761,35 @@ Probe `probe.sh 165 on 17 -40:2000`: the previous command is **Mean Look** (move
 ### 5. What is left
 
 Leech Seed turn-1 body SE -1 (new labs, 11 mass each), Mean Look body -6 / -8 (s165 d17), the T2 OFF scene has no Pain Split / Confuse Ray tick window so OFF is unchanged. No other commands following a Confuse Ray were labelled besides the tick and the next-action message (the latter is covered by the T2 seeds named above).
+
+## sdb1 (2026-11-24, side lane, Scene ON first, OFF checked): cre1's stat-move body terms - Defense Curl / Growth body SE lead 4 (LANDED); Growl is a cry-wait body (lab-only, not landed); Swords Dance / Harden / T2 stat offsets are context terms
+
+Commit `b0c539c20` (master `e071d1be4` -> `b0c539c20`); no push. Evidence (git-ignored): `.integration/evidence/sdb1/` (`base-on`, `dc-{base,after}`, `after-on`, `growl-fit`, `t2-{base,after}`, `cen`).
+
+### 1. Defense Curl (111) / Growth (74) body SEs +4: LANDED by sdb1 (`BODY_SOUND_LEAD_ROWS`, `battleResolutionPresentation.ts`)
+- cre1 / kst1's "+2 on Defense Curl SEs in out2-knockoffrev" is the tail of a +4 lead that is present in every context: the ROM's first SE is the script's first (Defense Curl `loadspritegfx; loopsewithpan SE_M_TRI_ATTACK`) or second (Growth `blend_color_cycle; playsewithpan SE_M_TAKE_DOWN`) command, the same shape as Belly Drum / Mean Look / Swagger in the map. Per shape, not per move: no per-move tuning, the two ids join the existing map with lead 4.
+- Labs (ON, `labCompare.sh`, mass before -> after): aud242o-rollout5 196 -> 136, hpd1-sonicboom 14 -> 2, hpd1-a-toss90 10 -> 4, hpd1-dragonrage 14 -> 2, hpf1-pc-dragonrage 14 -> 2, hpf1-pa-sonicboom 18 -> 6, hcr2-defensecurl-foe 12 -> **0**, aud242f-growth-player 10 -> 2, out2-knockoffrev 8 -> 8 (the 4 DC SEs and the stat SE go +2 -> -2: that context is 2 rows late at the body start, so the lead overshoots by 2; mass-neutral). Sum over the nine 296 -> 162. The other 9 stat-move labs (Growl, Swords Dance, Agility, Smokescreen, ...) are unchanged.
+- Pin moved: `tests/aud242fMoveAnimSounds.test.ts` growth-player residual -4 -> 0 (ROM SE 152 at 58 / 90 in aud242f-growth-player-on).
+- What stays: the 2-6 mass left in the DC labs is the stat SE's own drift (239 is its own per-use offset, not the body's).
+
+### 2. Growl / Tail Whip / Leer / Screech / String Shot (not landed, lab-only)
+- The offset exists without a confusion head: hcr2-growl-foe-on has SE 245 at -27 and its print at -29 (cre1's -25 / -29 is the same body). Cause: the engine runs the generic 32-row placeholder body (Growl is not a live adapter, so it emits nothing); the ROM body is the cry tasks (`SoundTask_PlayDoubleCry` / `SoundTask_WaitForCry`, `Move_GROWL`) that wait for the user's cry twice, so the body length depends on the **species cry length**.
+- ROM fit on four species (hcr2 foe, new labs `tools/battle-lab/sdb1-growl-{pikachu,pidgey,alakazam}-foe-on.json`): cry 1 = A0 + 4, cry 2 = cry 1 + D1 + 1, A1 = A0 + max(52, 7 + D1 + D2) with D the cry-mode task frames (`genCryModeFrames.py`). Examples: Pidgey cry at 65 / 77 then SE 245 at 121; Alakazam cry at 65 / 83, A1 176, SE 245 at 184.
+- Not landed because it needs a live adapter with a species-aware duration and double-cry emission (a `cryTaskRows` GROWL mode plus new `cryModeFrames.ts` modes). Growl-family moves never appear in T2 matched rows (ON), so no T2 gain is possible; a tried `genCryModeFrames.py` / `cryModeFrames.ts` edit was reverted. Recipe is above.
+- Tail Whip / Leer / Screech / String Shot: no labs built and their scripts not read (not checked whether they share the cause).
+
+### 3. Left unresolved (context terms, no source-derivable rule)
+- Swords Dance +1 / +2 (cre1): the ROM command -> SE gap is a stable 11 rows; the engine gives 11 / 12 / 13 in three labs with an identical command structure, and the 191 offset equals the 239 offset, i.e. per-use whole-body start lag in the engine scheduling, not a body term.
+- Harden: second SE -2 (ROM spacing 30 for wait 28, engine 28): the `loopsewithpan` task spacing / mixer phase (Defense Curl wait 18 reads 18 / 19 in the ROM). Not landed: one lab.
+- T2 stat-move offsets: within-body offsets are zero; the rest are per-use start lag. No shape rule improves T2.
+
+### 4. Acceptance (master `e071d1be4` -> `b0c539c20`)
+| | before | after |
+|---|---:|---:|
+| T2 ON mass (exact) | 4,386 (4,061) | 4,386 (4,061); Defense Curl / Growth are not in T2 matched rows |
+| T2 OFF mass (exact) | 470 (923) | 470 (923); Scene OFF draws no bodies |
+| missing / extra | 0 / 0 | 0 / 0 (both scenes) |
+
+- Census 0..199 (`lsd194Census.sh` shards 0 1, `rst197CensusDelta.py --digest`): eventsDigest + error identical 200 / 200 in ON and OFF, 0 type changes, 0 changed commands (ON shards differ byte-wise only in the timing field). tree/ copies deleted.
+- Tests: every tests/ file naming `BODY_SOUND_LEAD_ROWS` / `bodyLeadFrames` + all `aud242*`, `randomRoundSoak*`, `lbrd`, `fam1*` pass (one pin moved, above). `battleSoundTable.ts --check` not needed (no animation script or `moveAnimSounds.ts` change).
+- Play change named: Scene ON Defense Curl / Growth body SEs play 4 rows earlier (ROM-faithful); no battle rule / RNG / event-order change.
