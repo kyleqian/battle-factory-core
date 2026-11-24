@@ -5427,3 +5427,70 @@ C -316 (ON) / -8 (OFF), B -88 (ON, the tnm1 estimate was -114) / 0 (OFF: no Rest
 **Verification.** All test files importing `battleResolutionPresentation.ts` plus `randomRoundSoak*`, `lbrd`, and the files naming the status / berry rows: 476 files green; `npm run typecheck` clean, `npm run test:gate` 360 files / 2839 tests green, `npm run build` green.
 
 **Left.** (a) The Toxic lab's tick SE +1 (known tick term) and Thunder Wave print "ROM 4 / ENG 3". (b) The Sleep Powder shape (`MoveEffectSleep` falls through to the icon; 4088 on the player lab is the missing multi-row move body, not this rule). (c) The Scene OFF berry print +5 after Rest (`status` 35 + `move-animation` 9). (d) hie3-cheri's first SE +2 (739 vs 737), the cure berry after Thunder Wave: the berry epoch there (Cheri after a move-inflicted status) is a separate term from the Rest -> Chesto one.
+
+## t2k10 — re-rank of the S11 sound-timing mass by mechanism class, three recipes for classes without one (measurement only; no src/ or tests/ change)
+
+Base: master `ea6261e2b` (tnl1 landed). Tools: `tools/integration/t2k10/` (`classes.py`, `scratchT2.sh`, `seeddiff.py`) on top of `tools/integration/t2k4/`. Evidence (git-ignored): `.integration/evidence/t2k10/`. The worktree has no `.integration`, so the T2 seeds came read-only from the main tree's t2n dir (via `evidenceDir.sh`); the engine replay and every output stayed in the worktree.
+
+### 1. T2 on this tree (rescoreAll.sh, both scenes)
+
+| Scene | mass | exact / offset | missing / extra | families |
+|---|---:|---:|---:|---|
+| ON | 5,122 | 3,741 / 2,136 | 0 / 0 | move-anim 4,136, controller 640, cry 238, stat 105, bgm 3 |
+| OFF | 529 | 912 / 221 | 0 / 0 | controller 342, cry 102, stat 83, bgm 2 |
+
+Matches the supervisor's figures minus tnl1 (ON 5,526 − 404, OFF 537 − 8).
+
+### 2. Ranking by mechanism class (`classes.py`; every owned window, one class each)
+
+"clean" = window starts from a zero previous offset (the class's own term); the rest is carried from an earlier window.
+
+| # | class | ON mass / win (clean) | OFF mass / win (clean) | carries it | own or inherited | likely engine site | status |
+|---|---|---:|---:|---|---|---|---|
+| 1 | 07a move body first row (per-move constant) | 2,237 / 280 (1,591) | 0 | prev = hit SE 825, move body 536, segment start 520, stat SE 176 | 1,358 is ±1 / ±2 jitter windows, own; 879 is mid/big per-move constants | `BODY_SOUND_LEAD_ROWS` (`battleResolutionPresentation.ts` ~2794), per-move rows in `moveAnimSounds.ts` | D4 / VBlank-phase for the ±1/±2 part (faithful-timing); recipe 1 (Struggle) and a negative result (Ice Beam, recipe 2) below; rest needs a lab per move |
+| 2 | 02 held-item / berry chain (SE 152 / 228 / 102) | 740 / 61 (160) | 0 | s1415 d1 +19 (85, ihl1 item-heal), s8108 d44 (60), s648 d6 (50, M handoff), s1415 d21 (40) | mostly inherited (580 carried) | held-item rows in the same file | ihl1 / tnl1 B being landed; do not re-measure |
+| 3 | 05 end-of-turn tick / status animation (gen:148 / 180) | 585 / 64 (306) | 0 | s648 d12 Leech Seed −5 (50), s165 d17 gen:148 −8 (36), s499 d1 +5 (30), s648 d10 −7 (30) | half own | tick tables (ldw1 leftovers) | no recipe, needs a lab (Leech Seed after Confuse Ray / Pain Split) |
+| 4 | 06 two-turn charge / second-turn body | 349 / 28 (154) | 0 | s8108 d11 Dig +9 (50), s8108 d8 (42), s6 d1 (30), s830 d10 Solar Beam +18 (24) | own | Dig / Solar Beam rows | stm1 item 2 (Dig); Solar Beam ttf1 reverted |
+| 5 | 03 hit SE 12 / 13 / 14 | 256 / 118 (77) | 244 / 66 (218) | OFF: segment start 103, after hit SE 100; ON: after a move body 248 | ON mostly ±1 carried (D4); OFF own | hit-SE tail after the body | D4 for ±1; OFF has hse1m (M) and Bounce +6 (bcm1) |
+| 6 | 04 Focus Punch setup / lost-focus / item rows | 317 / 23 (65) | 0 | s1415 d50 −2 (52), s310 d4 / d5 +5 (40 / 35) | inherited | Focus Punch rows | ftp1 refit (M) |
+| 7 | 01a faint chain (SE 16, cry@faint) | 260 / 47 (72) | 90 / 19 (32) | after hit SE; cry@faint +1 clean ×26 | cry@faint +1 is a possible own rule; the rest inherited | cry-at-faint delay | no recipe; one lab (faint cry) |
+| 8 | 01b send-in / recall / party summary (SE 15 / 114) | 205 / 49 (103) | 100 / 33 (66) | s6568 d104 −16 / −20 (harness press pulse) | own + harness | send-in rows | s6568 is a harness artifact; the rest needs a lab |
+| 9 | 07b status-application body (B4) | 96 / 28 (77) | 0 | status bodies | own | B4 body rows | lrm1 / stm1 style recipe per move |
+| 10 | 08 stat SE 239 / 245 | 58 / 23 (44) | 90 / 31 (84) | stat rows | own | stat-change SE rows | D4 jitter |
+| – | 09 SE 90 / hp | 18 / 15 | 3 / 2 | – | – | – | noise |
+
+Total ON 5,122 / OFF 529 (classes sum exactly).
+
+Reading the table: class 1 is 44% of ON. Of its 2,237, the 1,358 mass in ±1 / ±2 windows is the D4 / VBlank-phase class, so it is not an engine rule. The 879 in mid and big windows is a set of per-move constants (Struggle −3, Ice Beam −4 in one seed only, Rock Slide +4 after Knock Off, Aerial Ace −13, Earthquake −8 ×3, Rest / Bulk Up ±2 in s1415) that need a lab pair per move. Classes 2 and 4 to 6 already have owners, so the open classes without a recipe are 1 (per move), 3, 7, 8.
+
+### 3. Recipes
+
+**Recipe 1 — Struggle body SE −3 (class 1, ON 70 mass).**
+- Window: s5063 d43 and two more seeds (2230 / 7295). ROM `SE 162` first at 419 against engine 416, and all five body SEs sit −3 in s5063 d43.
+- Lab pair: not possible. Struggle needs every move unusable, which the lab harness cannot set up.
+- Scratch edit: `BODY_SOUND_LEAD_ROWS` gets `[165, -2]` (negative = later). T2 on seeds 2230 / 5063 / 7295: mass 823 → 753 (−70). With `-3` it was 758 (−65). The full 25-seed run was not done.
+- Landing: add `[165, -2]` to the map and run the full T2 ON to confirm. Patch: `r1-struggle.patch`.
+
+**Recipe 2 — Ice Beam −4: NEGATIVE result (class 1, s6079 d0).**
+- Window: s6079 d0 Ice Beam body, step −4, 56 mass.
+- Scratch edit: `[58, -4]` in `BODY_SOUND_LEAD_ROWS`. s6079 improves 182 → 138 (−44), but six other seeds (2230 / 5063 / 7295 / 165 / 3738 / 830) go from 1,689 to 1,953 (+264).
+- Conclusion: Ice Beam is not a constant, so s6079's −4 is a carried or position term. Do not land it. Patch: `r2-icebeam.patch`.
+- The s1415 d1 +19 window (85) was probed and is item heal (gen:102 after `BattleScript_ItemHealHP_End2`), so ihl1 owns it. Probe: `p/on/1415-d1.cmp.txt`.
+
+**Recipe 3 — Knock Off print tail (class 1 / 3, ON 144 mass).**
+- Window: Rock Slide s165 d18 (+4 / +5 after Knock Off, 92 mass), and s499 (52).
+- Site: `ITEM_KNOCKOFF_PRINT_TAIL_ROWS = 4` (`battleResolutionPresentation.ts:228`), applied as `holdFrames` of `STRINGID_PKMNKNOCKEDOFF` (~6606).
+- Scratch edit: set it to 0. T2 ON 5,122 → 4,978 (−144; s165 −92, s499 −52), OFF unchanged.
+- Lab pair (labCompare, ROM vs engine): `out2-knockoff-{on,off}` and `out2-knockoffrev-{on,off}`. Base: knockoff-on 12, knockoffrev-on 20, knockoff-off 0, knockoffrev-off 2. Patched: 12 / 8 / 0 / 2, so knockoffrev-on 20 → 8 and the other labs are unchanged. PRINTS rows are identical in both.
+- Landing: set the constant to 0 (or delete the tail), then check the `tests/kno3ItemKnockoff.test.ts` pin. Patch: `r3-knockoff-tail.patch`.
+
+### 4. Not applied / not chased
+- The ±1 / ±2 clean windows of class 1 and class 5 (D4 / VBlank phase; `docs/faithful-timing.md`).
+- ihm1 / mem1 / crs1 / bcm1 Scene OFF item-heal and crit (ihl1 is landing them).
+- s6568 d104 −16 / −20 (harness press pulse).
+- Nothing from recipes 1 to 3 is applied to `src/`; every scratch edit was reverted.
+
+### 5. Tools
+- `tools/integration/t2k10/classes.py`: `T2K4_DIR=DIR python3 tools/integration/t2k10/classes.py both 4` (table above, plus per-class top windows and the previous-command breakdown).
+- `tools/integration/t2k10/scratchT2.sh OUTDIR SCENE [SEED...]`: seeds-only re-score with the current engine.
+- `tools/integration/t2k10/seeddiff.py BASE.json NEW.json SCENE`: per-seed mass diff of two `soundScoreboard.py --per-seed --out` runs.
