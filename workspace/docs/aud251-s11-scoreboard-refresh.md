@@ -4513,7 +4513,7 @@ ROM: `FirstChargingTurn+0` (row R), A0 at R + 7, SE 175 at R + 25, `+0x26 ex1` (
 
 Measurement only (docs / labs): no `src/` or `tests/` change, engine frozen at c22d60e57 (ENGINE_BUILD `eb-98540cad897c0482`); the sources are t2k9 section 3.C / 3.B above. Tools: `tools/integration/labCompare.sh --scene on|off` (ROM `hcr3mProbe.py` + `soundEventProbe.py` against `b4mEngine.ts`), evidence under `.integration/evidence/tnm1/` (git-ignored: `toxic-base`, `ctl`, `ctloff`, `prz`, `offrows`, `chesto-base`, `chesto-off`, `t2p`). Print convention: ROM = first glyph (tp rise + 1), ENG = the `message` command's start, as labCompare prints it. Mass = sum of |ENG - ROM|.
 
-### 1. (C) Toxic next action: the cause is a status-infliction term, not a Toxic one
+### 1. (C) Toxic next action: the cause is a status-infliction term, not a Toxic one (LANDED by tnl1, commit bb5ba6889; see the tnl1 section at the end)
 
 **Lab.** `gsp3-toxic-{player,foe}-on` already is the lab (Toxic, then Seismic Toss, then the poison tick, 3 turns); no new Toxic lab file. labCompare `--scene on` (before): player SUMMARY exact 28 / offset 22, mass 46 (PRINTS exact 9 / offset 3, mass 10); foe exact 25 / offset 17, mass 44. It reproduces T2 s165 d14 exactly: the status animation chain (SE 148 x 6, `MoveEffectToxic+0x2`) is exact row by row, then everything after it is early.
 
@@ -4548,7 +4548,7 @@ ON total +4, OFF total +2 (OFF has no animation rows). Sleep Powder (ON lab) has
 
 **Expected mass.** Labs (estimate, not landed): ON player 46 -> about 10 (the offset rows after the print move by +2 / +3 / +4; the tick SE +1 rows and the carried tick term remain), foe 44 -> about 10. T2: the Toxic windows (s165 d14 and its kin, -110 .. -150 each ON) are about -148 in total; the same term on Paralysis windows is about -92 more if the lab shape holds (inferred from `b4m-*` labs, not T2-probed). OFF about -6 total. The T2 ON next action at s165 d14: ENG status-icon 438 vs ROM `UpdateEffectStatusIconRet+0x2` 442 (-4), ENG message 455 vs `EffectConfuse+0x2` 458 (-3): the same terms.
 
-### 2. (B) Rest -> Chesto berry cure chain +6
+### 2. (B) Rest -> Chesto berry cure chain +6 (LANDED by tnl1, commit b37a4d468; see the tnl1 section at the end)
 
 **Labs (new, committed).** `tools/battle-lab/tnm1-rest-chesto-player-on.json` and `tools/battle-lab/tnm1-rest-chesto-opponent-on.json`: copies of `bdt1-rest-player-on` with `overrides.parties.<side>[0].item = 134` (Chesto Berry); Lv50 Rest x4 against a Lv12 Seismic Toss mon, trace `[A2, 18, A2, 1000, A2, 18, A2, 800]` (Rest on a damaged mon, Chesto cures the Rest sleep). labCompare `--scene on` (before): both labs mass 36 (one row 0 -> the berry segment).
 
@@ -5312,3 +5312,45 @@ Pins that moved: `tests/apx221PresentationGateApproximate` Signal Beam 324 windo
 
 **Left.** (a) Section 4's play sound clock for the shape-A multi-hit ids (hit 1 emission is `lead - 7` rows early in play; hits 2+ need separate handling). (b) The ROM tail after the last hit (57 + damage; engine +0..+3, follows the damage). (c) Thunderbolt mechanic labs' ROM-only rows (a foe action the engine stage does not play). (d) lpm1 item 3 (Scary Face / stat SE rows) has no rule.
 
+## tnl1 (2026-11-24): the tnm1 recipes C (move-inflicted status next action) and B (Rest -> Chesto chain) landed (both scenes, presentation / sound timing only)
+
+Two commits, `src/engine/battleResolutionPresentation.ts` only (plus test pins); no battle rule / damage / RNG / event-order change (census 0..199 eventsDigest + error identical 200 / 200 in Scene ON and Scene OFF, base a0ca1c70e vs b37a4d468, `rst197CensusDelta.py --digest`). `STATUS_ANIMATION_ADDED_ROWS` is unchanged. fpl1 / msc1 were not touched.
+
+**C (bb5ba6889), ROM-faithful play change "move-inflicted PSN / TOX / BRN / PRZ next action".** Keyed on the print / status-animation / icon's script label (`BattleScript_MoveEffect{Poison,Toxic,Burn,Paralysis}`, `statusanimation; print; waitmessage LONG; goto BattleScript_UpdateEffectStatusIconRet`): status-animation +2 rows (Scene ON), print hold 64 -> 65, `status-icon` 1 -> 2 rows (ON and OFF). Sleep (`MoveEffectSleep` falls through to the icon: different shape) is not claimed. The tnm1 recipe pointed at the stat-print launch branch for the hold; that branch is for Flatter / Swagger, so the hold is keyed on the source label in `messageTimingFromSourceProvenance`.
+
+**B (b37a4d468), ROM-faithful play change "Chesto Berry cure after Rest".** Keyed on `BattleScript_BerryCureSlpRet` (the MoveEnd status write whose next event is that script's HELD_ITEM_EFFECT animation): the `status` command lasts 26 (was 32; ROM `MoveEnd+0x0` -> A0 is 4 rows) while the HELD_ITEM_EFFECT command keeps the 192 minimum the 32-row status gave (`HELD_ITEM_EFFECT_AFTER_STATUS_NOMINAL_PRESENTED` 32), the berry print holds 65, the `status-icon` after it 12 rows (ROM `+0xf` 1744 -> `MoveEnd+0x6` 1747 -> next print 1756). The Cheri-after-hit path (`BerryCurePrzRet`, status 32) is unchanged: hie1-cheri-on mass 10 before and after, hie3 pins unmoved by B.
+
+**Labs (labCompare, mass = sum |ENG - ROM|; base -> after C -> after B).**
+
+| lab | base | C | B |
+| --- | --- | --- | --- |
+| gsp3-toxic-player-on / foe-on | 46 / 44 | 18 / 12 | same |
+| gsp3-willowisp-player-on / foe-on | 21 / 25 | 3 / 3 | same |
+| gsp3-toxic-player-off / willowisp-player-off | 2 / 2 | 0 / 0 | same |
+| b4m-thunderwave / stunspore (print rows) | | ON print "ROM 4 / ENG 3" left | same |
+| gsp3-sleeppowder-player-on / foe-on | 4088 / 4 | unchanged (not claimed) | same |
+| fkt1-kotoxic-on | | 154 (later -20 = missing mv33 body) | same |
+| tnm1-rest-chesto-player-on / opponent-on (ON) | 36 / 36 | 36 / 36 | **0 / 0** |
+| tnm1-rest-chesto-player-on / opponent-on (OFF) | 7 / 7 | 7 / 7 | 5 / 5 |
+| hie1-cheri-on / hie1-cheri-off (ON) | 10 / 6 | 10 / 6 | 10 / 6 |
+
+Scene OFF Rest -> Chesto: berry print -> next print is exact (122 = 122) after Part 2; the berry print itself stays +5 (OFF `status` 35 + `move-animation` 9, a separate OFF term).
+
+**T2 (`rescoreAll.sh` + `soundScoreboard.py`, evidence `.integration/evidence/tnl1/t2-{base,c,b}`).**
+
+| scene | step | exact | offset | missing | extra | mass |
+| --- | --- | --- | --- | --- | --- | --- |
+| ON | base | 3639 | 2238 | 0 | 0 | 5867 |
+| ON | after C | 3687 | 2190 | 0 | 0 | 5551 |
+| ON | after B | 3703 | 2174 | 0 | 0 | 5463 |
+| OFF | base | 911 | 222 | 0 | 0 | 537 |
+| OFF | after C | 912 | 221 | 0 | 0 | 529 |
+| OFF | after B | 912 | 221 | 0 | 0 | 529 |
+
+C -316 (ON) / -8 (OFF), B -88 (ON, the tnm1 estimate was -114) / 0 (OFF: no Rest + Chesto window).
+
+**Moved pins (each names its ROM row).** sa125 / sag130 / gaf140 / factoryRoundBattleOrchestrator (Toxic / Paralysis print and status-animation rows; shared Taunt / Torment helper keeps hold 64) / btn1 / btn2 (Static print hold 64 + 1: `MoveEffectParalysis+0xa`) / fkt1 (`fkt1-kotoxic-on` SE 16 883 -> 887, box 902 -> 906, ROM print 369 / next print 484 exact) / hie3 (`hie3-cheri-on` commandStart 749 -> 753, drift 2 -> -2: the Thunder Wave print is ROM 606 exact, the cure berry's first SE is 739 vs ROM 737 because the berry epoch after a status receipt is the B term, not this one; equal lab mass) / ais2 md5 fixture (rows shifted, same md5s) / trn178 (Toxic icon 2 rows; off108 interior residual -2 -> 0) / sa125 SA3 (berry status 26). New pin: `tests/tnl1RestChestoChain.test.ts` (ROM MoveEnd+0x0 / print / next print rows of both Rest -> Chesto labs).
+
+**Verification.** All test files importing `battleResolutionPresentation.ts` plus `randomRoundSoak*`, `lbrd`, and the files naming the status / berry rows: 476 files green; `npm run typecheck` clean, `npm run test:gate` 360 files / 2839 tests green, `npm run build` green.
+
+**Left.** (a) The Toxic lab's tick SE +1 (known tick term) and Thunder Wave print "ROM 4 / ENG 3". (b) The Sleep Powder shape (`MoveEffectSleep` falls through to the icon; 4088 on the player lab is the missing multi-row move body, not this rule). (c) The Scene OFF berry print +5 after Rest (`status` 35 + `move-animation` 9). (d) hie3-cheri's first SE +2 (739 vs 737), the cure berry after Thunder Wave: the berry epoch there (Cheri after a move-inflicted status) is a separate term from the Rest -> Chesto one.
