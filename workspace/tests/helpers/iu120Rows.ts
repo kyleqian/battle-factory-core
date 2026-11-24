@@ -73,7 +73,9 @@ const ONT193_SCRIPT_TAIL_FRAMES: ReadonlyMap<number, number> = new Map(Object.en
   // ztl1: Spikes 191 / Foresight 193 / Destiny Bond 194 / Feather Dance 297 (S-lead bodies; Charm 204, Spikes and Feather Dance are trail 0).
   191: 5, 193: 5, 194: 5, 297: 6,
   // bwf1: Fake Tears 313 (S-lead, trail -1: scriptTailRows 6 - 1).
-  313: 5 }).map(([id, frames]) => [Number(id), frames]));
+  313: 5,
+  // cfx1 (fpl1 / ssm1 51a5d3d23): Psych Up 244 joins the S-lead moves with the -1 trail (6 - 1): lab ztl1-psychup-player-on, body command 187 rows = ROM print 251 exact.
+  244: 5 }).map(([id, frames]) => [Number(id), frames]));
 export function ont193ScriptTail(id: number): number {
   return ONT193_SCRIPT_TAIL_FRAMES.get(id) ?? 0;
 }
@@ -95,7 +97,7 @@ const shapeA = (id: number): Iu120BodyRule => ({ lead: SHAPE_A_LEADS.get(id) ?? 
 // holds (lead included) shrinks by it: the row total is unchanged, so `hpd4BodyRows` adds nothing for them.
 const S_LEAD_RULE_IDS: ReadonlySet<number> = new Set([
   104, 182, 113, 240, 184, 108, 201, 204, 219, 266, 28, 241, 213, 97, 334, 230, 151, 133, 258, 14, 203, 197, 349, 254, 215, 107, 281, 180, 288, 195, 115, 103,
-  277, 178, 43, 39, 148, 106, 275, 112, 321, 259, 319, 271, 339, 294, 272, 50, 269, 116, 191, 193, 194, 297, 313,
+  277, 178, 43, 39, 148, 106, 275, 112, 321, 259, 319, 271, 339, 294, 272, 50, 269, 116, 191, 193, 194, 297, 313, 244,
 ]);
 // b4l c-lead (test-side copy of production's C_LEAD_WINDOW_ADJUST + the kernel lead L = A0 - R - 3, ROM-measured by b4m / b4l): the lead rows are presented in front of the body, the window adjust
 // (ROM next command - engine next command) after it. Thunder Wave 86 / Stun Spore 78 / Sleep Powder 79 (9 / 9 / 7, +0), Sing 47 (7, +3), Grasswhistle 320 (7, -2), Confuse Ray 109 (6, +2),
